@@ -119,7 +119,7 @@ T_AthenaPoolViewVectorCnv<DV>::createTransient NO_SANITIZE_UNDEFINED (const Toke
   // for this function.
   for (const pool::Guid& guid : m_guids) {
     if( this->compareClassGuid(token,  guid ) ) {
-      std::unique_ptr<pers_t> v (this->template poolReadObject< pers_t >());
+      std::unique_ptr<pers_t> v (this->template poolReadObject< pers_t >(token));
       if (guid != m_guids.front()) {
         auto v2 = std::make_unique<pers_t> (*v);
         // Strictly superfluous, but allows suppressing the ubsan warning 
@@ -139,7 +139,7 @@ T_AthenaPoolViewVectorCnv<DV>::createTransient NO_SANITIZE_UNDEFINED (const Toke
 
   for (const pool::Guid& guid : m_guids2) {
     if( this->compareClassGuid(token,  guid ) ) {
-      std::unique_ptr<pers2_t> v (this->template poolReadObject< pers2_t >());
+      std::unique_ptr<pers2_t> v (this->template poolReadObject< pers2_t >(token));
       auto c = std::make_unique<ConstDataVector<trans_t> > (*v);
       // FIXME: To get rid of this @c const_cast, the converter interfaces
       // need to be changed to allow returning a const pointer

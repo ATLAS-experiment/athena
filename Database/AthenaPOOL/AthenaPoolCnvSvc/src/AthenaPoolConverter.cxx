@@ -22,7 +22,6 @@
 
 //__________________________________________________________________________
 AthenaPoolConverter::~AthenaPoolConverter() {
-   delete m_i_poolToken; m_i_poolToken = nullptr;
 }
 //__________________________________________________________________________
 StatusCode AthenaPoolConverter::initialize() {
@@ -82,7 +81,6 @@ StatusCode AthenaPoolConverter::createObj(IOpaqueAddress* pAddr, DataObject*& pO
    ATH_MSG_VERBOSE("createObj: " << tokAddr->getToken()->toString() << ", CTX=" << tokAddr->ipar()[0]
                    << ", auxStr=" << tokAddr->getToken()->auxString() );
    std::lock_guard<CallMutex> lock(m_conv_mut);
-   m_i_poolToken = tokAddr->getToken();
    try {
       std::string key = pAddr->par()[1];
       if (!PoolToDataObject(pObj, tokAddr->getToken(), key).isSuccess()) {
@@ -99,7 +97,6 @@ StatusCode AthenaPoolConverter::createObj(IOpaqueAddress* pAddr, DataObject*& pO
    if (ownTokAddr) {
       delete tokAddr; tokAddr = nullptr;
    }
-   m_i_poolToken = nullptr;
    if (pObj == nullptr) {
       return StatusCode::FAILURE;
    }
@@ -164,7 +161,6 @@ AthenaPoolConverter::AthenaPoolConverter(const CLID& myCLID, ISvcLocator* pSvcLo
   m_classDesc(),
   m_className(),
   m_classDescs(),
-  m_i_poolToken(nullptr),
   m_defContainerType(0) {
 }
 //__________________________________________________________________________

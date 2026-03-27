@@ -38,7 +38,7 @@ RecoTimingObj* RecoTimingObjCnv::createTransient(const Token* token)
   
   if ( compareClassGuid(token, p1_guid) )
     {
-      std::unique_ptr<RecoTimingObj_p1> persObj( poolReadObject<RecoTimingObj_p1>() );
+      std::unique_ptr<RecoTimingObj_p1> persObj( poolReadObject<RecoTimingObj_p1>(token) );
       RecoTimingObjCnv_p1 cnv;
       transObj = cnv.createTransient( persObj.get(), *m_msg );
     } else {

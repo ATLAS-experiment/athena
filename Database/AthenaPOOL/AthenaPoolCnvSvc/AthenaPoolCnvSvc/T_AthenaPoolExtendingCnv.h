@@ -42,12 +42,9 @@ protected:
   
   /// Read the persistent object from POOL
   /// @param token [IN] token of the object to read
-  virtual void 		readObjectFromPool( const std::string& token ) = 0 ;
+  virtual void 		readObjectFromPool( const Token* token ) override = 0 ;
   
 protected:
-  // redirect to the old API readObjectFromPool()
-  virtual void 		readObject( const std::string& token ) override { this->readObjectFromPool(token); }
-  
   /// Write the persistent object to POOL
   /// @param key [IN] StoreGate key (string) - placement hint to generate POOL container name
   virtual std::unique_ptr<const Token> writeObject(const std::string& key, const std::string& output) override;
@@ -64,17 +61,14 @@ protected:
   /// (true after the converter has been registered once already)
   virtual bool		needsCloning() const override { return m_originalExtendingCnv != 0; }
 
-  /// @copydoc T_AthenaPoolCustomCnv::setToken()
-  virtual void		setToken(const std::string& token) override;
-
   /// @copydoc T_AthenaPoolCustomCnv::poolReadObject()
   /// deprecated - use poolReadObject(TLPCnv)
   template <class P>
-  P* 	poolReadObject();
+  P* 	poolReadObject( const Token* token );
   
   /// @copydoc T_AthenaPoolCustomCnv::poolReadObject(TopLevelTPCnvBase&)
   template <class P>
-  void 	poolReadObject( TopLevelTPCnvBase& tlp_converter );
+  void 	poolReadObject( TopLevelTPCnvBase& tlp_converter, const Token* token );
 
    
 protected:

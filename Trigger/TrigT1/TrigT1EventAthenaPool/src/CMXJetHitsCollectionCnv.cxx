@@ -38,7 +38,7 @@ CMXJetHitsCollection * CMXJetHitsCollectionCnv::createTransient(const Token* tok
   if( compareClassGuid(token,  tlp1_guid ) )     
     {
      // using unique_ptr ensures deletion of the persistent object
-      std::unique_ptr< CMXJetHitsCollection_PERS > pers_ref( poolReadObject< CMXJetHitsCollection_PERS >() );
+      std::unique_ptr< CMXJetHitsCollection_PERS > pers_ref( poolReadObject< CMXJetHitsCollection_PERS >(token) );
       p_collection = m_TPConverter_tlp1.createTransient( pers_ref.get(), mlog );
       
     }else  throw std::runtime_error( "Unsupported persistent version of CMXJetHitsCollection" );

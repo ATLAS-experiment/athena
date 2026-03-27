@@ -39,20 +39,20 @@ TileDigitsContainer* TileDigitsContainerCnv::createTransient(const Token* token)
     static const pool::Guid   p0_guid("EB51ED70-5EC0-4F31-97D3-14453F77C88B");
 
     if( this->compareClassGuid(token, p3_guid)) {
-        std::unique_ptr< TileDigitsContainer_p3 >   cont( this->poolReadObject< TileDigitsContainer_p3 >() );
+        std::unique_ptr< TileDigitsContainer_p3 >   cont( this->poolReadObject< TileDigitsContainer_p3 >(token) );
         trans_cont = converter_p3.createTransient( cont.get(), mlog );
     }
     else if( this->compareClassGuid(token, p2_guid)) {
-        std::unique_ptr< TileDigitsContainer_p2 >   cont( this->poolReadObject< TileDigitsContainer_p2 >() );
+        std::unique_ptr< TileDigitsContainer_p2 >   cont( this->poolReadObject< TileDigitsContainer_p2 >(token) );
         trans_cont = converter_p2.createTransient( cont.get(), mlog );
     }
     else if( this->compareClassGuid(token, p1_guid)) {
-        std::unique_ptr< TileDigitsContainer_p1 >   cont( this->poolReadObject< TileDigitsContainer_p1 >() );
+        std::unique_ptr< TileDigitsContainer_p1 >   cont( this->poolReadObject< TileDigitsContainer_p1 >(token) );
         trans_cont = converter_p1.createTransient( cont.get(), mlog );
     }
     else if( this->compareClassGuid(token, p0_guid)) {
         // old version from before TP separation
-        TileDigitsCollectionVec* rdoV = this->poolReadObject<TileDigitsCollectionVec>();
+        TileDigitsCollectionVec* rdoV = this->poolReadObject<TileDigitsCollectionVec>(token);
 
         if (mlog.level()<=MSG::DEBUG)
           mlog << MSG::DEBUG << "Read IDC, size " << rdoV->size() << endmsg;

@@ -60,7 +60,7 @@ LayerMaterialMapCnv::createTransientWithKey (const Token* token, const std::stri
   MsgStream log (m_msgSvc, "LayerMaterialMapCnv: " + key);
 
   if( compareClassGuid(token,  tlp1_guid ) ) {
-    poolReadObject< Trk::LayerMaterialMap_tlp1 >( m_TPConverter_tlp1 );
+    poolReadObject< Trk::LayerMaterialMap_tlp1 >( m_TPConverter_tlp1, token );
     p_collection = m_TPConverter_tlp1.createTransient( log );
   }       
   return p_collection;

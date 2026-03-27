@@ -36,7 +36,7 @@ TrigOperationalInfo* TrigOperationalInfoCnv::createTransient(const Token* token)
   
   if( compareClassGuid(token, p1_guid) ) {
     
-    std::unique_ptr< TrigOperationalInfo_p1 >   col_vect( this->poolReadObject< TrigOperationalInfo_p1 >() );
+    std::unique_ptr< TrigOperationalInfo_p1 >   col_vect( this->poolReadObject< TrigOperationalInfo_p1 >(token) );
     trans_obj = m_TPConverter->createTransient( col_vect.get(), mlog );    
   } else {
     

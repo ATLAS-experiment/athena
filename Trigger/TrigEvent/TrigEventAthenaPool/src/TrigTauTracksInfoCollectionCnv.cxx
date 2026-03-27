@@ -30,13 +30,13 @@ TrigTauTracksInfoCollection * TrigTauTracksInfoCollectionCnv::createTransient(co
   static const pool::Guid p0_guid( "27E95E77-0D99-417D-83C7-7F1B8E6DE511" );
   
   if( compareClassGuid(token,  p2_guid ) ){
-         std::unique_ptr< TrigTauTracksInfoCollection_p2 > col_vect( poolReadObject< TrigTauTracksInfoCollection_p2 >() );
+         std::unique_ptr< TrigTauTracksInfoCollection_p2 > col_vect( poolReadObject< TrigTauTracksInfoCollection_p2 >(token) );
          return m_converter.createTransient( col_vect.get(), mlog ) ;
   } else if( compareClassGuid(token,  p1_guid ) ) {
-         std::unique_ptr< TrigTauTracksInfoCollection_tlp1 > col_vect( poolReadObject< TrigTauTracksInfoCollection_tlp1 >() );
+         std::unique_ptr< TrigTauTracksInfoCollection_tlp1 > col_vect( poolReadObject< TrigTauTracksInfoCollection_tlp1 >(token) );
          return m_converter_tlp1.createTransient( col_vect.get(), mlog );
   } else if( compareClassGuid(token,  p0_guid ) ){
-      return poolReadObject< TrigTauTracksInfoCollection >();
+      return poolReadObject< TrigTauTracksInfoCollection >(token);
   } else  throw std::runtime_error( "Unsupported persistent version of TrigTauTracksInfoCollection" );
   
 }//end of create transient method

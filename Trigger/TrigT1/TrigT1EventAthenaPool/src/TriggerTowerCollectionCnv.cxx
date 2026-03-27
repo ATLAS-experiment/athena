@@ -39,12 +39,12 @@ TriggerTowerCollection * TriggerTowerCollectionCnv::createTransient(const Token*
   if( compareClassGuid(token,  tlp1_guid ) )     
     {
      // using unique_ptr ensures deletion of the persistent object
-      std::unique_ptr< TriggerTowerCollection_PERS > pers_ref( poolReadObject< TriggerTowerCollection_PERS >() );
+      std::unique_ptr< TriggerTowerCollection_PERS > pers_ref( poolReadObject< TriggerTowerCollection_PERS >(token) );
       p_collection = m_TPConverter_tlp1.createTransient( pers_ref.get(), mlog );
       
     }else if( compareClassGuid(token,  p0_guid ) ){
 
-      p_collection = poolReadObject< TriggerTowerCollection >();
+      p_collection = poolReadObject< TriggerTowerCollection >(token);
     
     }else  throw std::runtime_error( "Unsupported persistent version of TriggerTowerCollection" );
      

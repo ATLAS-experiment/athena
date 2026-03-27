@@ -53,7 +53,7 @@ LArShape32MCCnv::createTransient(const Token* token)
     MsgStream log(msgSvc(), "LArShape32MCCnv" ); 
     if( compareClassGuid(token, p1_guid) ) {  
         // using unique_ptr ensures deletion of the persistent object
-        std::unique_ptr< LArShapeSubset_p1 > col_vect( poolReadObject< LArShapeSubset_p1 >() );
+        std::unique_ptr< LArShapeSubset_p1 > col_vect( poolReadObject< LArShapeSubset_p1 >(token) );
         //
         log << MSG::DEBUG << "Reading LArShapeSubset_p1" << endmsg; 
         return TPconverter.createTransientConst( col_vect.get(), log );
@@ -62,7 +62,7 @@ LArShape32MCCnv::createTransient(const Token* token)
         // subset from before TP separation
         log << MSG::DEBUG << "Reading LArShapeSubset (original)" << endmsg; 
 
-        std::unique_ptr< LArConditionsSubset<LArShapeP> > subset ( poolReadObject< LArConditionsSubset<LArShapeP> >() );
+        std::unique_ptr< LArConditionsSubset<LArShapeP> > subset ( poolReadObject< LArConditionsSubset<LArShapeP> >(token) );
         // Here we must convert from LArShapeP to LArShapeP1
         
         log << MSG::VERBOSE << "subset ptr " << subset.get() << endmsg; 

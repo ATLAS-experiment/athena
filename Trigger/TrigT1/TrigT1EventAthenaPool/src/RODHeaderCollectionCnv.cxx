@@ -38,7 +38,7 @@ RODHeaderCollection * RODHeaderCollectionCnv::createTransient(const Token* token
   if( compareClassGuid(token,  tlp1_guid ) )     
     {
      // using unique_ptr ensures deletion of the persistent object
-      std::unique_ptr< RODHeaderCollection_PERS > pers_ref( poolReadObject< RODHeaderCollection_PERS >() );
+      std::unique_ptr< RODHeaderCollection_PERS > pers_ref( poolReadObject< RODHeaderCollection_PERS >(token) );
       p_collection = m_TPConverter_tlp1.createTransient( pers_ref.get(), mlog );
    
     }else  throw std::runtime_error( "Unsupported persistent version of RODHeaderCollection" );

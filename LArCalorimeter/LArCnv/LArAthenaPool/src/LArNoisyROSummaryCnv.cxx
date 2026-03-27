@@ -39,32 +39,32 @@ LArNoisyROSummaryCnv::createTransient(const Token* token)
   static const pool::Guid   guid_p6("D2B7F48F-058E-47C9-902D-0A847F5E2194");
 
   if( compareClassGuid(token, guid_p6) ) {
-     std::unique_ptr<LArNoisyROSummary_p6> col_vect( poolReadObject<LArNoisyROSummary_p6>() );
+     std::unique_ptr<LArNoisyROSummary_p6> col_vect( poolReadObject<LArNoisyROSummary_p6>(token) );
      trans = m_converter.createTransient( col_vect.get(), msg() );
   }
   else if( compareClassGuid(token, guid_p5) ) {
      LArNoisyROSummaryCnv_p5   converter;
-     std::unique_ptr<LArNoisyROSummary_p5> col_vect( poolReadObject<LArNoisyROSummary_p5>() );
+     std::unique_ptr<LArNoisyROSummary_p5> col_vect( poolReadObject<LArNoisyROSummary_p5>(token) );
      trans = converter.createTransient( col_vect.get(), msg() );
   }
   else if( compareClassGuid(token, guid_p4) ) {
      LArNoisyROSummaryCnv_p4   converter;
-     std::unique_ptr<LArNoisyROSummary_p4> col_vect( poolReadObject<LArNoisyROSummary_p4>() );
+     std::unique_ptr<LArNoisyROSummary_p4> col_vect( poolReadObject<LArNoisyROSummary_p4>(token) );
      trans = converter.createTransient( col_vect.get(), msg() );
   }
   else if( compareClassGuid(token, guid_p3) ) {
       LArNoisyROSummaryCnv_p3   converter;
-      std::unique_ptr<LArNoisyROSummary_p3> col_vect( poolReadObject<LArNoisyROSummary_p3>() );
+      std::unique_ptr<LArNoisyROSummary_p3> col_vect( poolReadObject<LArNoisyROSummary_p3>(token) );
       trans = converter.createTransient( col_vect.get(), msg() );
   }
   else if( compareClassGuid(token, guid_p2) ) {
       LArNoisyROSummaryCnv_p2   converter;
-      std::unique_ptr<LArNoisyROSummary_p2> col_vect( poolReadObject<LArNoisyROSummary_p2>() );
+      std::unique_ptr<LArNoisyROSummary_p2> col_vect( poolReadObject<LArNoisyROSummary_p2>(token) );
       trans = converter.createTransient( col_vect.get(), msg() );
   }
   else if( compareClassGuid(token, guid_p1) ) {
       LArNoisyROSummaryCnv_p1   converter;
-      std::unique_ptr<LArNoisyROSummary_p1> col_vect( poolReadObject<LArNoisyROSummary_p1>() );
+      std::unique_ptr<LArNoisyROSummary_p1> col_vect( poolReadObject<LArNoisyROSummary_p1>(token) );
       trans = converter.createTransient( col_vect.get(), msg() );
   }
   else {

@@ -23,7 +23,7 @@ InDet::PixelGangedClusterAmbiguities* PixelGangedClusterAmbiguitiesCnv::createTr
 //     static const pool::Guid   p0_guid("380D8BB9-B34F-470F-92CC-06C3D60F7BE4");
     if( compareClassGuid(token, p1_guid) ) {
         // using unique_ptr ensures deletion of the persistent object
-        std::unique_ptr< InDet::PixelGangedClusterAmbiguities_p1 > col_vect( poolReadObject< InDet::PixelGangedClusterAmbiguities_p1 >() );
+        std::unique_ptr< InDet::PixelGangedClusterAmbiguities_p1 > col_vect( poolReadObject< InDet::PixelGangedClusterAmbiguities_p1 >(token) );
         ATH_MSG_DEBUG("Reading PixelGangedClusterAmbiguities_p1"); 
         return m_TPconverter.createTransient( col_vect.get(), msg() );
     }

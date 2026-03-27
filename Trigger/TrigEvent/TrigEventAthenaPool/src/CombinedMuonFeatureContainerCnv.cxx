@@ -37,30 +37,30 @@ CombinedMuonFeatureContainer * CombinedMuonFeatureContainerCnv::createTransient(
   
   //CombinedMuonFeatureContainer *p_collection = 0;
   if( compareClassGuid(token,  p4_guid ) ){
-         std::unique_ptr< CombinedMuonFeatureContainer_p4 > col_vect( poolReadObject< CombinedMuonFeatureContainer_p4 >() );
+         std::unique_ptr< CombinedMuonFeatureContainer_p4 > col_vect( poolReadObject< CombinedMuonFeatureContainer_p4 >(token) );
 	 //         std::cout << "Reading CMFC p2" << std::endl;
          return m_converter.createTransient( col_vect.get(), mlog ) ;
 
   }else if( compareClassGuid(token,  p3_guid ) ){
-         std::unique_ptr< CombinedMuonFeatureContainer_p3 > col_vect( poolReadObject< CombinedMuonFeatureContainer_p3 >() );
+         std::unique_ptr< CombinedMuonFeatureContainer_p3 > col_vect( poolReadObject< CombinedMuonFeatureContainer_p3 >(token) );
 	 //         std::cout << "Reading CMFC p2" << std::endl;
          return m_converter3.createTransient( col_vect.get(), mlog ) ;
 
   }else if( compareClassGuid(token,  p2_guid ) )
     {
-         std::unique_ptr< CombinedMuonFeatureContainer_p2 > col_vect( poolReadObject< CombinedMuonFeatureContainer_p2 >() );
+         std::unique_ptr< CombinedMuonFeatureContainer_p2 > col_vect( poolReadObject< CombinedMuonFeatureContainer_p2 >(token) );
 	 //         std::cout << "Reading CMFC p2" << std::endl;
          return m_converter2.createTransient( col_vect.get(), mlog ) ;
 
   }else if( compareClassGuid(token,  tlp1_guid ) )     
     {
-         std::unique_ptr< CombinedMuonFeatureContainer_tlp1 > col_vect( poolReadObject< CombinedMuonFeatureContainer_tlp1 >() );
+         std::unique_ptr< CombinedMuonFeatureContainer_tlp1 > col_vect( poolReadObject< CombinedMuonFeatureContainer_tlp1 >(token) );
 	 //  std::cout << "Reading CMFC tlp1" << std::endl;
          return m_converter1.createTransient( col_vect.get(), mlog );
       
     }else if( compareClassGuid(token,  p0_guid ) ){
       
-      return poolReadObject< CombinedMuonFeatureContainer >();
+      return poolReadObject< CombinedMuonFeatureContainer >(token);
       
     }else  throw std::runtime_error( "Unsupported persistent version of CombinedMuonFeatureContainer" );
   

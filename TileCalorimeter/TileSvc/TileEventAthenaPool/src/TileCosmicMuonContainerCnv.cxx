@@ -47,18 +47,18 @@ TileCosmicMuonContainer* TileCosmicMuonContainerCnv::createTransient(const Token
   if ( compareClassGuid(token, tr_guid) ) {
 
     // regular object from before the T/P separation
-    return poolReadObject<TileCosmicMuonContainer>();
+    return poolReadObject<TileCosmicMuonContainer>(token);
 
   } else if ( compareClassGuid(token, p1_guid) ) {
 
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<TileCosmicMuonContainer_p1> persObj( poolReadObject<TileCosmicMuonContainer_p1>() );
+    std::unique_ptr<TileCosmicMuonContainer_p1> persObj( poolReadObject<TileCosmicMuonContainer_p1>(token) );
     TileCosmicMuonContainerCnv_p1 cnv;
     transObj = cnv.createTransient( persObj.get(), msg );
   } else if ( compareClassGuid(token, p2_guid) ) {
 
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<TileCosmicMuonContainer_p2> persObj( poolReadObject<TileCosmicMuonContainer_p2>() );
+    std::unique_ptr<TileCosmicMuonContainer_p2> persObj( poolReadObject<TileCosmicMuonContainer_p2>(token) );
     TileCosmicMuonContainerCnv_p2 cnv;
     transObj = cnv.createTransient( persObj.get(), msg );
   } else {

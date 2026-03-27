@@ -47,15 +47,15 @@ TrackParticleTruthCollectionContainer* TrackParticleTruthCollectionContainerCnv:
   MsgStream log(msgSvc(), "TrackParticleTruthCollectionContainerCnv" );
   TrackParticleTruthCollectionContainer *p_collection = 0;
   if( compareClassGuid(token,  p3_guid ) ){
-      poolReadObject< TrackParticleTruthCollectionContainerPERS >(*m_converter_p3);
+      poolReadObject< TrackParticleTruthCollectionContainerPERS >(*m_converter_p3, token);
       p_collection = m_converter_p3->createTransient( log );
   }
   else if( compareClassGuid(token,  p2_guid ) ){
-      poolReadObject< TrackParticleTruthCollectionContainerPERS >(*m_converter_p2);
+      poolReadObject< TrackParticleTruthCollectionContainerPERS >(*m_converter_p2, token);
       p_collection = m_converter_p2->createTransient( log );
   }
   else if ( compareClassGuid(token,  p1_guid ) ){
-      poolReadObject< TrackParticleTruthCollectionContainerPERS >(*m_converter_p1);
+      poolReadObject< TrackParticleTruthCollectionContainerPERS >(*m_converter_p1, token);
       p_collection = m_converter_p1->createTransient( log );
   }
   else {

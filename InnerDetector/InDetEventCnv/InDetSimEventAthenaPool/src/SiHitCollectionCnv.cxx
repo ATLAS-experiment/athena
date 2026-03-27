@@ -34,24 +34,24 @@ SiHitCollection* SiHitCollectionCnv::createTransient(const Token* token) {
 
     SiHitCollection       *trans_cont(nullptr);
     if( this->compareClassGuid(token, p3_guid)) {
-      std::unique_ptr< SiHitCollection_p3 >   col_vect( this->poolReadObject< SiHitCollection_p3 >() );
+      std::unique_ptr< SiHitCollection_p3 >   col_vect( this->poolReadObject< SiHitCollection_p3 >(token) );
       trans_cont = converter_p3.createTransient( col_vect.get(), mlog );
     }
     else if( this->compareClassGuid(token, p1_guid)) {
-      std::unique_ptr< SiHitCollection_p1 >   col_vect( this->poolReadObject< SiHitCollection_p1 >() );
+      std::unique_ptr< SiHitCollection_p1 >   col_vect( this->poolReadObject< SiHitCollection_p1 >(token) );
       trans_cont = converter_p1.createTransient( col_vect.get(), mlog );
     }
     else if( this->compareClassGuid(token, p2_guid)) { // version p2
-      std::unique_ptr< SiHitCollection_p2 >   col_vect( this->poolReadObject< SiHitCollection_p2 >() );
+      std::unique_ptr< SiHitCollection_p2 >   col_vect( this->poolReadObject< SiHitCollection_p2 >(token) );
       trans_cont = converter_p2.createTransient( col_vect.get(), mlog );
     }
     else if( this->compareClassGuid(token, p4_guid)) { // version p4
-      std::unique_ptr< SiHitCollection_p4 >   col_vect( this->poolReadObject< SiHitCollection_p4 >() );
+      std::unique_ptr< SiHitCollection_p4 >   col_vect( this->poolReadObject< SiHitCollection_p4 >(token) );
       trans_cont = converter_p4.createTransient( col_vect.get(), mlog );
     }
     else if( this->compareClassGuid(token, old_guid)) {
       // old version from before TP separation, just return it
-      AthenaHitsVector<SiHit>* oldColl = this->poolReadObject< AthenaHitsVector<SiHit> >();
+      AthenaHitsVector<SiHit>* oldColl = this->poolReadObject< AthenaHitsVector<SiHit> >(token);
       size_t size = oldColl->size();
       trans_cont=new SiHitCollection("DefaultCollectionName",size);
       //do the copy

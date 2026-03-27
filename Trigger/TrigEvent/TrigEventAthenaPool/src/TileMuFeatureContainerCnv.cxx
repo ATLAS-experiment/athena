@@ -32,16 +32,16 @@ TileMuFeatureContainer * TileMuFeatureContainerCnv::createTransient(const Token*
   static const pool::Guid p0_guid( "8B428EC4-339C-4517-A047-C0F5F98B820B" );
   
   if( compareClassGuid(token,  p2_guid ) ){
-         std::unique_ptr< TileMuFeatureContainer_p2 > col_vect( poolReadObject< TileMuFeatureContainer_p2 >() );
+         std::unique_ptr< TileMuFeatureContainer_p2 > col_vect( poolReadObject< TileMuFeatureContainer_p2 >(token) );
          return m_converter.createTransient( col_vect.get(), mlog ) ;
 
     }else  if( compareClassGuid(token,  tlp1_guid ) ) {
-         std::unique_ptr< TileMuFeatureContainer_tlp1 > col_vect( poolReadObject< TileMuFeatureContainer_tlp1 >() );
+         std::unique_ptr< TileMuFeatureContainer_tlp1 > col_vect( poolReadObject< TileMuFeatureContainer_tlp1 >(token) );
          return m_converter1.createTransient( col_vect.get(), mlog );
       
     }else if( compareClassGuid(token,  p0_guid ) ){
       
-      return poolReadObject< TileMuFeatureContainer >();
+      return poolReadObject< TileMuFeatureContainer >(token);
       
     }else  throw std::runtime_error( "Unsupported persistent version of TileMuFeatureContainer" );
   

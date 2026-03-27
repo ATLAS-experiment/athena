@@ -84,13 +84,6 @@ protected:
    /// @param clid [IN] GUID to compare
    /// @return true if the type of the object about to be read matches the GUID
    virtual bool	compareClassGuid(const Token* token, const Guid &clid) const;
-   virtual bool	compareClassGuid(const std::string& token, const Guid &clid) const;
-
-   /// Set the token (in std::string representation) and classID for the object that will be read next.
-   /// Required by compareClassGuid() and poolReadObject().
-   /// Only extending converter needs to call this method explicitely
-   /// @param token [IN] token for the object to be read
-   virtual void setToken(const std::string& token);
 
 public:
    /// @return class ID.

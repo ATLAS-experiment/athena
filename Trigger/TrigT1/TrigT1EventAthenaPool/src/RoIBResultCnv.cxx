@@ -31,13 +31,13 @@ ROIB::RoIBResult* RoIBResultCnv::createTransient(const Token* token) {
 
    if( this->compareClassGuid(token,  p1_guid ) ) {
 
-      std::unique_ptr< RoIBResult_p1 > pers_ref( this->poolReadObject< RoIBResult_p1 >() );
+      std::unique_ptr< RoIBResult_p1 > pers_ref( this->poolReadObject< RoIBResult_p1 >(token) );
       MsgStream log( this->msgSvc(), "RoIBResultCnv" );
       return m_converter.createTransient( pers_ref.get(), log );
 
    } else if( this->compareClassGuid(token,  p0_guid ) ) {
 
-      return this->poolReadObject< ROIB::RoIBResult >();
+      return this->poolReadObject< ROIB::RoIBResult >(token);
 
    }
 

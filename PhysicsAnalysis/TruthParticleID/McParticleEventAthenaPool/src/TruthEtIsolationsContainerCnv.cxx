@@ -61,7 +61,7 @@ TruthEtIsolationsContainer* TruthEtIsolationsContainerCnv::createTransient(const
 
    if ( compareClassGuid(token, p1_guid) ) {
      
-     std::unique_ptr<TruthEtIsolationsContainer_p1> pers( poolReadObject<TruthEtIsolationsContainer_p1>() );
+     std::unique_ptr<TruthEtIsolationsContainer_p1> pers( poolReadObject<TruthEtIsolationsContainer_p1>(token) );
      TruthEtIsolationsContainerCnv_p1 cnv;
      trans = cnv.createTransient( pers.get(), msg );
 

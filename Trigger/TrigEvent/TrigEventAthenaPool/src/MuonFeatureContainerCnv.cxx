@@ -33,25 +33,25 @@ MuonFeatureContainer * MuonFeatureContainerCnv::createTransient(const Token* tok
   
   if( compareClassGuid(token,  tlp1_guid ) )     
   {
-         std::unique_ptr< MuonFeatureContainer_tlp1 > col_vect( poolReadObject< MuonFeatureContainer_tlp1 >() );
+         std::unique_ptr< MuonFeatureContainer_tlp1 > col_vect( poolReadObject< MuonFeatureContainer_tlp1 >(token) );
 	 //         std::cout << "Reading MFC p1" << std::endl;
          return m_converter1.createTransient( col_vect.get(), mlog ) ;
   }
   else if( compareClassGuid(token,  tlp2_guid ) )     
   {
-         std::unique_ptr< MuonFeatureContainer_tlp2 > col_vect( poolReadObject< MuonFeatureContainer_tlp2 >() );
+         std::unique_ptr< MuonFeatureContainer_tlp2 > col_vect( poolReadObject< MuonFeatureContainer_tlp2 >(token) );
 	 // std::cout << "Reading MFC p2" << std::endl;
          return m_converter2.createTransient( col_vect.get(), mlog ) ;
   }
   else if( compareClassGuid(token,  p3_guid ) )     
   {
-         std::unique_ptr< MuonFeatureContainer_p3 > col_vect( poolReadObject< MuonFeatureContainer_p3 >() );
+         std::unique_ptr< MuonFeatureContainer_p3 > col_vect( poolReadObject< MuonFeatureContainer_p3 >(token) );
 	 // std::cout << "Reading MFC p3" << std::endl;
          return m_converter.createTransient( col_vect.get(), mlog ) ;
   }
   else if( compareClassGuid(token,  p0_guid ) )
   {
-         return poolReadObject< MuonFeatureContainer >();
+         return poolReadObject< MuonFeatureContainer >(token);
   }
   else  throw std::runtime_error( "Unsupported persistent version of MuonFeatureContainer" );
   

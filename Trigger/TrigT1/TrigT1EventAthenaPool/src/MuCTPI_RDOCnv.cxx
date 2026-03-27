@@ -31,13 +31,13 @@ MuCTPI_RDO* MuCTPI_RDOCnv::createTransient(const Token* token) {
 
    if( this->compareClassGuid(token,  p1_guid ) ) {
 
-      std::unique_ptr< MuCTPI_RDO_p1 > pers_ref( this->poolReadObject< MuCTPI_RDO_p1 >() );
+      std::unique_ptr< MuCTPI_RDO_p1 > pers_ref( this->poolReadObject< MuCTPI_RDO_p1 >(token) );
       MsgStream log( this->msgSvc(), "MuCTPI_RDOCnv" );
       return m_converter.createTransient( pers_ref.get(), log );
 
    } else if( this->compareClassGuid(token,  p0_guid ) ) {
 
-      return this->poolReadObject< MuCTPI_RDO >();
+      return this->poolReadObject< MuCTPI_RDO >(token);
 
    }
 

@@ -35,18 +35,18 @@ TrigTrackCounts* TrigTrackCountsCnv::createTransient(const Token* token) {
   static const pool::Guid p0_guid("6277C97C-0EAA-4922-892E-E88C1FA01BA0");
   
   if(compareClassGuid(token, p2_guid)) {
-    std::unique_ptr< TrigTrackCounts_p2 > pers_ptr( poolReadObject< TrigTrackCounts_p2 >() );
+    std::unique_ptr< TrigTrackCounts_p2 > pers_ptr( poolReadObject< TrigTrackCounts_p2 >(token) );
     TrigTrackCountsCnv_p2 converter;
     return converter.createTransient( pers_ptr.get(), mlog );
   }
   else if(compareClassGuid(token, p1_guid)) {
-    std::unique_ptr< TrigTrackCounts_p1 > pers_ptr( poolReadObject< TrigTrackCounts_p1 >() );
+    std::unique_ptr< TrigTrackCounts_p1 > pers_ptr( poolReadObject< TrigTrackCounts_p1 >(token) );
     TrigTrackCountsCnv_p1 converter;
     return converter.createTransient( pers_ptr.get(), mlog );
   }
   else if(compareClassGuid(token, p0_guid)) {
     // old version from before TP separation, just return it
-    return this->poolReadObject<TrigTrackCounts>();
+    return this->poolReadObject<TrigTrackCounts>(token);
   }  
   else {
     throw std::runtime_error("Unsupported persistent version");

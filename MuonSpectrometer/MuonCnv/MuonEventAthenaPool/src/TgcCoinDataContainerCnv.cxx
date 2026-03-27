@@ -45,15 +45,15 @@ Muon::TgcCoinDataContainer* TgcCoinDataContainerCnv::createTransient(const Token
     static const pool::Guid   p3_guid("95BF89C7-1FFC-464F-A14D-742F9E874E56"); // with TgcCoinData_tlp3
     Muon::TgcCoinDataContainer* p_collection(nullptr);
     if( compareClassGuid(token, p3_guid) ) {
-        poolReadObject< TgcCoinDataContainer_PERS >( m_TPConverter_tlp3 );
+        poolReadObject< TgcCoinDataContainer_PERS >( m_TPConverter_tlp3, token );
         p_collection = m_TPConverter_tlp3.createTransient( msg() );
     }
     else if( compareClassGuid(token, p2_guid) ) {
-        poolReadObject< TgcCoinDataContainer_PERS >( m_TPConverter_tlp2 );
+        poolReadObject< TgcCoinDataContainer_PERS >( m_TPConverter_tlp2, token );
         p_collection = m_TPConverter_tlp2.createTransient( msg() );
     }
     else if( compareClassGuid(token, p1_guid) ) {
-        poolReadObject< Muon::TgcCoinDataContainer_tlp1 >( m_TPConverter_tlp1 );
+        poolReadObject< Muon::TgcCoinDataContainer_tlp1 >( m_TPConverter_tlp1, token );
         p_collection = m_TPConverter_tlp1.createTransient( msg() );
     }
     else if( compareClassGuid(token, p0_guid) ) {

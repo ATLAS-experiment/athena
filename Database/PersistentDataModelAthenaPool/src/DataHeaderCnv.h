@@ -43,8 +43,8 @@ public:
 
    virtual StatusCode DataObjectToPool(IOpaqueAddress* pAddr, DataObject* pObj) override;
 
-   std::unique_ptr<DataHeader_p5> poolReadObject_p5();
-   std::unique_ptr<DataHeader_p6> poolReadObject_p6();
+   std::unique_ptr<DataHeader_p5> poolReadObject_p5(const Token* token);
+   std::unique_ptr<DataHeader_p6> poolReadObject_p6(const Token* token);
 
    DataHeader_p6* createPersistent(DataHeader* transObj, DataHeaderForm_p6*) ;
    virtual DataHeader* createTransient(const Token* token) override;

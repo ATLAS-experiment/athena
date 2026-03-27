@@ -46,12 +46,12 @@ TrigT2Jet * TrigT2JetCnv::createTransient(const Token* token)
   TrigT2Jet *p_collection = 0;
   if( compareClassGuid(token,  tlp1_guid ) )     
     {
-      poolReadObject< TrigT2Jet_PERS >(*m_TPConverter);
+      poolReadObject< TrigT2Jet_PERS >(*m_TPConverter, token);
       p_collection = m_TPConverter->createTransient( m_log );
    
     }else if( compareClassGuid(token,  p0_guid ) ){
 
-      p_collection = poolReadObject< TrigT2Jet >();
+      p_collection = poolReadObject< TrigT2Jet >(token);
     
     }else  throw std::runtime_error( "Unsupported persistent version of TrigT2Jet" );
      

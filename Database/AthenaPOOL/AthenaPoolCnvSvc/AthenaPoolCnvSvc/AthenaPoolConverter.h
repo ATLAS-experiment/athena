@@ -120,8 +120,6 @@ protected: // data
    std::string           m_className;
    ClassMap              m_classDescs;
 
-   const Token*          m_i_poolToken;
-
    typedef std::mutex CallMutex;
    CallMutex m_conv_mut;
 

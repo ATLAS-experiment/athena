@@ -39,14 +39,14 @@ TileMuFeature* TileMuFeatureCnv::createTransient(const Token* token) {
 	// from "TrigEvent/TrigMuonEvent/TrigMuonEvent/selection.xml"
 
     if( compareClassGuid(token, p1_guid) ) {
-      std::unique_ptr< TileMuFeature_p1 > col_vect( poolReadObject< TileMuFeature_p1 >() );
+      std::unique_ptr< TileMuFeature_p1 > col_vect( poolReadObject< TileMuFeature_p1 >(token) );
       TileMuFeatureCnv_p1 converter;
       return converter.createTransient( col_vect.get(), mlog );
 
     }
     else if( compareClassGuid(token, p0_guid) ) {
       // old version from before TP separation, just return it
-      return this->poolReadObject<TileMuFeature>();
+      return this->poolReadObject<TileMuFeature>(token);
     }
     else {
       throw std::runtime_error("Unsupported persistent version");

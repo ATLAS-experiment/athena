@@ -24,12 +24,12 @@ ALFA_GloRecEvCollection* ALFA_GloRecEvCollectionCnv::createTransient(const Token
     static const pool::Guid p1_guid ("210D255A-F94F-4009-9A9B-2122597330D5");
     
     if( this->compareClassGuid(token, p1_guid)) {
-         std::unique_ptr< ALFA_GloRecEvCollection_p1 >   col_vect( this->poolReadObject< ALFA_GloRecEvCollection_p1 >() );
+         std::unique_ptr< ALFA_GloRecEvCollection_p1 >   col_vect( this->poolReadObject< ALFA_GloRecEvCollection_p1 >(token) );
         trans_cont = TPConverter_p1.createTransient( col_vect.get(), mlog );
     }
 //    else if( m_token.find("CLID=35722E01-C4E3-420E-8A7E-E375C5E7989D") != std::string::npos) {
         // old version from before TP separation, just return it
-//        trans_cont = this->poolReadObject<ALFA_DigitCollection>();
+//        trans_cont = this->poolReadObject<ALFA_DigitCollection>(token);
 //    }  
        else {
         throw std::runtime_error("Unsupported persistent version of Data container");

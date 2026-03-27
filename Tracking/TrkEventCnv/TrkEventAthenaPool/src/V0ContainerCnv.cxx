@@ -112,7 +112,7 @@ V0Container * V0ContainerCnv::createTransient(const Token* token)
      std::cout<<" m_fitQualities size:      "<< p_coll->m_fitQualities.size()<<std::endl;
      std::cout<<" m_hepSymMatrices size:    "<< p_coll->m_hepSymMatrices.size()<<std::endl; 
   */
-       poolReadObject< Trk::V0Container_tlp2 >(m_TPConverter);
+       poolReadObject< Trk::V0Container_tlp2 >(m_TPConverter, token);
        p_collection = m_TPConverter.createTransient( m_log );
 
     }else if( compareClassGuid(token,  p1_guid ) )     
@@ -142,12 +142,12 @@ V0Container * V0ContainerCnv::createTransient(const Token* token)
    std::cout<<" m_hepSymMatrices size:    "<< p_coll->m_hepSymMatrices.size()<<std::endl; 
 */
      V0ContainerCnv_tlp1 tpCnv;
-     poolReadObject< Trk::V0Container_tlp1 >(tpCnv);
+     poolReadObject< Trk::V0Container_tlp1 >(tpCnv, token);
      p_collection = tpCnv.createTransient( m_log );
   
   }else if( compareClassGuid(token,  p0_guid ) ){
   // std::cout << "V0ContainerCnv::createTransient: use old converter" << std::endl;  
-   p_collection = poolReadObject< V0Container >();
+   p_collection = poolReadObject< V0Container >(token);
    
   }else  throw std::runtime_error( "Unsupported persistent version of V0Container" );
     

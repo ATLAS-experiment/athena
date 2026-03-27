@@ -41,15 +41,15 @@ MMSimHitCollection* MMSimHitCollectionCnv::createTransient(const Token* token) {
     MMSimHitCollection* p_collection(nullptr);
     if( compareClassGuid(token, p3_guid) ) {
       ATH_MSG_DEBUG("createTransient(const Token* token): T/P version 3 detected");
-      std::unique_ptr< Muon::MMSimHitCollection_p3 >   col_vect( this->poolReadObject< Muon::MMSimHitCollection_p3 >() );
+      std::unique_ptr< Muon::MMSimHitCollection_p3 >   col_vect( this->poolReadObject< Muon::MMSimHitCollection_p3 >(token) );
       p_collection = m_TPConverter_p3.createTransient( col_vect.get(), log );
     } else if( compareClassGuid(token, p2_guid) ) {
       ATH_MSG_DEBUG("createTransient(const Token* token): T/P version 2 detected");
-      std::unique_ptr< Muon::MMSimHitCollection_p2 >   col_vect( this->poolReadObject< Muon::MMSimHitCollection_p2 >() );
+      std::unique_ptr< Muon::MMSimHitCollection_p2 >   col_vect( this->poolReadObject< Muon::MMSimHitCollection_p2 >(token) );
       p_collection = m_TPConverter_p2.createTransient( col_vect.get(), log );
     } else if( compareClassGuid(token, p1_guid) ) {
       ATH_MSG_DEBUG("createTransient(const Token* token): T/P version 1 detected");
-      std::unique_ptr< Muon::MMSimHitCollection_p1 >   col_vect( this->poolReadObject< Muon::MMSimHitCollection_p1 >() );
+      std::unique_ptr< Muon::MMSimHitCollection_p1 >   col_vect( this->poolReadObject< Muon::MMSimHitCollection_p1 >(token) );
       p_collection = m_TPConverter_p1.createTransient( col_vect.get(), log );
     }
   //----------------------------------------------------------------

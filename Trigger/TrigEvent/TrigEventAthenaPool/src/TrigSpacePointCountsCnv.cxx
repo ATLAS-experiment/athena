@@ -36,20 +36,20 @@ TrigSpacePointCounts* TrigSpacePointCountsCnv::createTransient(const Token* toke
   static const pool::Guid p0_guid("1BCAD9FD-DAFE-4E50-9A37-C75E822E6D02");
  
   if(compareClassGuid(token, p3_guid)) {
-    std::unique_ptr<TrigSpacePointCounts_p3 > pers_ptr( poolReadObject< TrigSpacePointCounts_p3 >() );
+    std::unique_ptr<TrigSpacePointCounts_p3 > pers_ptr( poolReadObject< TrigSpacePointCounts_p3 >(token) );
     return m_converter_p3.createTransient( pers_ptr.get(), mlog );
   } 
   if(compareClassGuid(token, p2_guid)) {
-    std::unique_ptr<TrigSpacePointCounts_p2 > pers_ptr( poolReadObject< TrigSpacePointCounts_p2 >() );
+    std::unique_ptr<TrigSpacePointCounts_p2 > pers_ptr( poolReadObject< TrigSpacePointCounts_p2 >(token) );
     return m_converter_p2.createTransient( pers_ptr.get(), mlog );
   } 
   if(compareClassGuid(token, p1_guid)) {
-    std::unique_ptr<TrigSpacePointCounts_p1 > pers_ptr( poolReadObject< TrigSpacePointCounts_p1 >() );
+    std::unique_ptr<TrigSpacePointCounts_p1 > pers_ptr( poolReadObject< TrigSpacePointCounts_p1 >(token) );
     return m_converter_p1.createTransient( pers_ptr.get(), mlog );
   }
   else if( compareClassGuid(token, p0_guid) ) {
     // old version from before TP separation, just return it
-    return this->poolReadObject<TrigSpacePointCounts>();
+    return this->poolReadObject<TrigSpacePointCounts>(token);
   }  
   else {
     throw std::runtime_error("Unsupported persistent version");

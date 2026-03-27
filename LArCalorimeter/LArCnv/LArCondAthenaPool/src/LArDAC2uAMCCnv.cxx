@@ -23,7 +23,7 @@ LArDAC2uAMCCnv::createTransient(const Token* token)
     // subset from before TP separation    
     MsgStream log(msgSvc(), "LArDAC2uAMCCnv" ); 
     log << MSG::DEBUG << "Reading LArDAC2uASubset (original)" << endmsg;     
-    std::unique_ptr< LArConditionsSubset<LArDAC2uAP> > subset ( poolReadObject< LArConditionsSubset<LArDAC2uAP> >() );
+    std::unique_ptr< LArConditionsSubset<LArDAC2uAP> > subset ( poolReadObject< LArConditionsSubset<LArDAC2uAP> >(token) );
     return (createTransient(subset.get()));
     
   } 

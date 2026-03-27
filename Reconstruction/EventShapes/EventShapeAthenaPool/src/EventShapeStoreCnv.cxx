@@ -24,7 +24,7 @@ EventShapeStore* EventShapeStoreCnv::createTransient(const Token* token)
     {
       EventShapeStoreCnv_p1   TPconverter;
       // using unique_ptr ensures deletion of the persistent object
-      std::unique_ptr<EventShapeStore_p1> shapestore( poolReadObject< EventShapeStore_p1 >() );
+      std::unique_ptr<EventShapeStore_p1> shapestore( poolReadObject< EventShapeStore_p1 >(token) );
       MsgStream report( msgSvc(), "EventShapeStoreCnv" );
       report << MSG::INFO << "Reading EventShapeStore_p1" << endmsg; 
       return TPconverter.createTransient( shapestore.get(), report );

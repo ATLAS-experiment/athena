@@ -74,7 +74,7 @@ protected:
       @return object read from POOL (by pointer)
    */
    template <class P>
-   P* poolReadObject();
+   P* poolReadObject(const Token* token);
 
    /** Read object of type P (plus all extending objects)
       using the indicated top-level TP converter.
@@ -83,7 +83,7 @@ protected:
       @param tlp_converter [IN] top-level TP converter to be used when reading
    */
    template <class P>
-   void poolReadObject(TopLevelTPCnvBase& tlp_converter);
+   void poolReadObject(TopLevelTPCnvBase& tlp_converter, const Token* token);
 
    /// Remember the POOL object to be written out (will be deleted after commit)
    /// @param obj [IN] persistent object

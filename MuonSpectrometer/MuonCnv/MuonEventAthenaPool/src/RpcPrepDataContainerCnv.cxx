@@ -56,11 +56,11 @@ Muon::RpcPrepDataContainer* RpcPrepDataContainerCnv::createTransient(const Token
     Muon::RpcPrepDataContainer* p_collection(nullptr);
     if( compareClassGuid(token, p3_guid) ) {
         if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(const Token* token): T/P version 3 detected"<<endmsg;
-        std::unique_ptr< Muon::RpcPrepDataContainer_p3 >  p_coll( poolReadObject< Muon::RpcPrepDataContainer_p3 >() );
+        std::unique_ptr< Muon::RpcPrepDataContainer_p3 >  p_coll( poolReadObject< Muon::RpcPrepDataContainer_p3 >(token) );
         p_collection = m_converter_p3.createTransient( p_coll.get(), log );
     } else if( compareClassGuid(token, p1_guid) ) {
       RpcPrepDataContainerCnv_tlp1 tpConvertor_p1;
-      std::unique_ptr< Muon::RpcPrepDataContainer_tlp1 > col_vect( poolReadObject< Muon::RpcPrepDataContainer_tlp1 >() );
+      std::unique_ptr< Muon::RpcPrepDataContainer_tlp1 > col_vect( poolReadObject< Muon::RpcPrepDataContainer_tlp1 >(token) );
       p_collection = m_TPConverter.createTransient( col_vect.get(), log );
       if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(const Token* token): T/P version 1 detected"<<endmsg;
     }
