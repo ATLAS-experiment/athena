@@ -188,10 +188,9 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
 
     Acts::Vector4 actsStart(pos.x(),pos.y(),pos.z(),0);
     Acts::Vector3 dir = nmom.normalized();
-    Acts::ParticleHypothesis hypothesis{Acts::makeAbsolutePdgParticle(static_cast<Acts::PdgParticle>(pdg)), 
-                                        mass, 
-                                        Acts::AnyCharge{static_cast<float>(charge)}};
-    m_actsParameterCache = Acts::GenericBoundTrackParameters<Acts::ParticleHypothesis>::create(
+    Acts::ParticleHypothesis hypothesis{Acts::makeAbsolutePdgParticle(static_cast<Acts::PdgParticle>(pdg)),
+                                        mass, static_cast<float>(charge)};
+    m_actsParameterCache = Acts::BoundTrackParameters::create(
         gctx.context(), surface, actsStart, dir, charge/(mom.mag()/1000), std::nullopt, hypothesis)
       .value();
   }
