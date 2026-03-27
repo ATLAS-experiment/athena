@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "ISF_FastCaloGpu/GeoRegion.h"
 #include "ISF_FastCaloGpu/GeoGpu_structs.h"
@@ -157,7 +157,7 @@ namespace CaloGpuGeneral_fnc {
 
   /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-  __DEVICE__ void CenterPositionCalculation_d( Hit& hit, const Chain0_Args args ) {
+  __DEVICE__ void CenterPositionCalculation_d( Hit& hit, const Chain0_Args & args ) {
 
     hit.setCenter_r( ( 1. - args.extrapWeight ) * args.extrapol_r_ent + args.extrapWeight * args.extrapol_r_ext );
     hit.setCenter_z( ( 1. - args.extrapWeight ) * args.extrapol_z_ent + args.extrapWeight * args.extrapol_z_ext );
@@ -167,7 +167,7 @@ namespace CaloGpuGeneral_fnc {
 
   /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-  __DEVICE__ void HistoLateralShapeParametrization_d( Hit& hit, unsigned long t, Chain0_Args args, bool reweight ) {
+  __DEVICE__ void HistoLateralShapeParametrization_d( Hit& hit, unsigned long t, Chain0_Args & args, bool reweight ) {
 
     // int     pdgId    = args.pdgId;
     float charge = args.charge;
@@ -237,7 +237,7 @@ namespace CaloGpuGeneral_fnc {
 
   /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-  __DEVICE__ void HitCellMapping_d( Hit& hit, unsigned long /*t*/, Chain0_Args args ) {
+  __DEVICE__ void HitCellMapping_d( Hit& hit, unsigned long /*t*/, Chain0_Args & args ) {
 
     long long cellele = getDDE( args.geo, args.cs, hit.eta(), hit.phi() );
 
@@ -248,7 +248,7 @@ namespace CaloGpuGeneral_fnc {
 
   /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-  __DEVICE__ void HitCellMappingWiggle_d( Hit& hit, Chain0_Args args, unsigned long t ) {
+  __DEVICE__ void HitCellMappingWiggle_d( Hit& hit, Chain0_Args & args, unsigned long t ) {
 
     int    nhist        = ( *( args.fhs ) ).nhist;
     float* bin_low_edge = ( *( args.fhs ) ).low_edge;

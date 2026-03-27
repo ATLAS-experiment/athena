@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
 #include <random>
 #include <vector>
 #include <algorithm>
@@ -20,7 +23,7 @@ float* Rand4Hits::genCPU( size_t num ) {
 
   auto RNG = [eng]( float low, float high ) {
     auto randomFunc = [distribution_  = std::uniform_real_distribution<float>( low, high ),
-                       random_engine_ = *eng]() mutable { return distribution_( random_engine_ ); };
+                       &random_engine_ = *eng]() mutable { return distribution_( random_engine_ ); };
     return randomFunc;
   };
 
