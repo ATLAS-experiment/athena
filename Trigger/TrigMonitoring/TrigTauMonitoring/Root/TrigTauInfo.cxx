@@ -57,13 +57,18 @@ void TrigTauInfo::parseTriggerString(bool remove_L1_phase1_thresholds)
     std::regex ditauomni_rgx("^ditauOmni(\\d)+Trk(\\d)+$");
     std::vector<std::regex*> all_regexes = {&tau_rgx, &elec_rgx, &muon_rgx, &gamma_rgx, &jet_rgx, &met_rgx, &l1_rgx, &ditauomni_rgx};
 
-    std::regex tau_type_rgx("^(ptonly|tracktwoMVA|tracktwoMVABDT|tracktwoLLP|trackLRT)$");
+    std::regex tau_type_rgx("^(ptonly|tracktwoMVA|tracktwoLLP|trackLRT)$");
     std::regex tau_ID_rgx("^(idperf|noperf|perfcore|perfiso|perf|veryloose.*|loose.*|medium.*|tight.*)$");
+    std::regex tau_HitZ_rgx("^(([\\dp]*mmX[\\dp]*mm)?HitZ.*)$");
+    std::regex tau_CHPreselID_rgx("^(idperfCHP|veryloose.*CHP.*|loose.*CHP.*|medium.*CHP.*|tight.*CHP.*)$");
 
     std::smatch match;
     std::regex_token_iterator<std::string::iterator> rend;
 
+    std::vector<bool> is_tau_probe_leg;
+
     // Check each leg
+    int hlt_leg_idx = -1;
     std::vector<std::string> leg;
     for(size_t i = 0; i < sections.size(); i++) {
         leg.push_back(sections[i]); // Attach to the current leg
@@ -71,6 +76,8 @@ void TrigTauInfo::parseTriggerString(bool remove_L1_phase1_thresholds)
         if(i == sections.size() - 1 || (std::any_of(all_regexes.begin(), all_regexes.end(), [&sections, i](const std::regex* rgx) { return std::regex_match(sections[i+1], *rgx); }))) {
             // Process the previous leg, which starts with the item, multiplicity, and threshold
             if(std::regex_match(leg[0], match, tau_rgx)) {
+                hlt_leg_idx++;
+
                 size_t multiplicity = match[1].str() == "" ? 1 : std::stoi(match[1].str());
                 unsigned int threshold = std::stoi(match[2].str());
                 
@@ -111,33 +118,88 @@ void TrigTauInfo::parseTriggerString(bool remove_L1_phase1_thresholds)
                 if(tau_id == "DS") tau_id = "DeepSet";
                 else if(tau_id == "GNT") tau_id = "GNTau";
 
+                // HitZ algorithm
+                itr = find_if(leg.begin(), leg.end(), [tau_HitZ_rgx](const std::string& s) { return std::regex_match(s, tau_HitZ_rgx); });
+                std::string tau_hitz = itr != leg.end() ? *itr : "";
+                std::string tau_hitz_alg = tau_hitz;
+                if(!tau_hitz_alg.empty()) {
+                    // Check if tau_hitz contains "mm", and if it does, extract the part after the last "mm"
+                    size_t pos = tau_hitz_alg.rfind("mm");
+                    if(pos != std::string::npos) {
+                        tau_hitz_alg = tau_hitz_alg.substr(pos + 2);
+                    }
+                }
+
+                // HLT Calo+Hits Presel Tau ID
+                itr = find_if(leg.begin(), leg.end(), [tau_CHPreselID_rgx](const std::string& s) { return std::regex_match(s, tau_CHPreselID_rgx); });
+                std::string tau_chpresel_id = itr != leg.end() ? *itr : "";
+                if(tau_chpresel_id.starts_with("veryloose")) tau_chpresel_id = tau_chpresel_id.substr(9);
+                else if(tau_chpresel_id.starts_with("loose")) tau_chpresel_id = tau_chpresel_id.substr(5);
+                else if(tau_chpresel_id.starts_with("medium")) tau_chpresel_id = tau_chpresel_id.substr(6);
+                else if(tau_chpresel_id.starts_with("tight")) tau_chpresel_id = tau_chpresel_id.substr(5);
+            
+                // The WP is a variation (e.g. "mediumvar2GNTauDev1")
+                if(tau_chpresel_id.starts_with("var")) {
+                    std::size_t i = 3; // Take out the "var" prefix
+                    
+                    // Now find the variation number
+                    while(i < tau_chpresel_id.size() && std::isdigit(static_cast<unsigned char>(tau_chpresel_id[i]))) i++;
+
+                    tau_chpresel_id = tau_chpresel_id.substr(i);
+                }
+
+                // TauJet container name suffix (base: HLT_TrigTauRecMerged_)
+                std::string tau_jet_container_sfx = type;
+                // Remove the tracktwo prefixes if they are present
+                if(type == "ptonly") tau_jet_container_sfx = "CaloMVAOnly";
+                else if(tau_jet_container_sfx.starts_with("tracktwo")) tau_jet_container_sfx = tau_jet_container_sfx.substr(8);
+                else if(tau_jet_container_sfx.starts_with("track")) tau_jet_container_sfx = tau_jet_container_sfx.substr(5);
+
+                // Check if the leg is a probe leg (to support bootstrapped tau triggers)
+                const bool is_probe_leg = std::find(leg.begin(), leg.end(), "probe") != leg.end();
+
                 for(size_t j = 0; j < multiplicity; j++) {
                     m_HLTThr.push_back(threshold);
                     m_HLTTauTypes.push_back(type);
                     m_HLTTauIDs.push_back(tau_id);
+                    m_HLTTauHitZSelections.push_back(tau_hitz);
+                    m_HLTTauHitZAlgs.push_back(tau_hitz_alg);
+                    m_HLTTauCHPreselIDs.push_back(tau_chpresel_id);
+
+                    m_HLTTauLegIndices.push_back(hlt_leg_idx);
+                    m_HLTTauLegContainerSfxs.push_back(tau_jet_container_sfx);
+
+                    is_tau_probe_leg.push_back(is_probe_leg);
                 }
             } else if(std::regex_match(leg[0], match, elec_rgx)) {
+                hlt_leg_idx++;
                 size_t multiplicity = match[1].str() == "" ? 1 : std::stoi(match[1].str());
                 unsigned int threshold = std::stoi(match[2].str());
                 for(size_t j = 0; j < multiplicity; j++) m_HLTElecThr.push_back(threshold);
             } else if(std::regex_match(leg[0], match, muon_rgx)) {
+                hlt_leg_idx++;
                 size_t multiplicity = match[1].str() == "" ? 1 : std::stoi(match[1].str());
                 unsigned int threshold = std::stoi(match[2].str());
                 for(size_t j = 0; j < multiplicity; j++) m_HLTMuonThr.push_back(threshold);
             } else if(std::regex_match(leg[0], match, gamma_rgx)) {
+                hlt_leg_idx++;
                 size_t multiplicity = match[1].str() == "" ? 1 : std::stoi(match[1].str());
                 unsigned int threshold = std::stoi(match[2].str());
                 for(size_t j = 0; j < multiplicity; j++) m_HLTGammaThr.push_back(threshold);
             } else if(std::regex_match(leg[0], match, jet_rgx)) {
+                hlt_leg_idx++;
                 size_t multiplicity = match[1].str() == "" ? 1 : std::stoi(match[1].str());
                 unsigned int threshold = std::stoi(match[2].str());
                 for(size_t j = 0; j < multiplicity; j++) m_HLTJetThr.push_back(threshold);
             } else if(std::regex_match(leg[0], match, met_rgx)) {
+                hlt_leg_idx++;
                 unsigned int threshold = std::stoi(match[2].str());
                 m_HLTMETThr.push_back(threshold);
             } else if(std::regex_match(leg[0], match, noalg_rgx)) {
+                hlt_leg_idx++;
                 m_isStreamer = true;
             } else if (std::regex_match(leg[0], match, ditauomni_rgx)) {
+                hlt_leg_idx++;
                 m_HLTBoostedDitauName.push_back(leg[0]);
             } else if(std::regex_match(leg[0], l1_rgx)){ // Treat the L1 items as a leg
                 for(size_t j = 0; j < leg.size(); j++) {
@@ -165,6 +227,45 @@ void TrigTauInfo::parseTriggerString(bool remove_L1_phase1_thresholds)
             leg = {};
         }
     }
+
+    // Support for HitZ bootstrapped tau triggers
+    // We have to check if we have both tag (non-probe) and probe di-tau legs with the same HLT threshold
+    std::map<float, std::pair<std::vector<size_t>, std::vector<size_t>>> tau_n_tag_probes;
+    for(size_t i = 0; i < m_HLTThr.size(); i++) {
+        if(tau_n_tag_probes.find(m_HLTThr.at(i)) == tau_n_tag_probes.end()) tau_n_tag_probes[m_HLTThr.at(i)] = {{}, {}};
+
+        if(is_tau_probe_leg.at(i)) tau_n_tag_probes[m_HLTThr.at(i)].second.push_back(i);
+        else tau_n_tag_probes[m_HLTThr.at(i)].first.push_back(i);
+    }
+    // Keep only the entries with equal number of tag and probe legs
+    for(auto it = tau_n_tag_probes.begin(); it != tau_n_tag_probes.end(); ) {
+        if(it->second.first.size() != it->second.second.size()) it = tau_n_tag_probes.erase(it);
+        else it++;
+    }
+    // If we have tag-probe pairs remaining, this is a bootstrapped trigger.
+    // Get the list of tag legs to remove:
+    std::vector<size_t> legs_to_remove;
+    for(const auto& [thr, n_tag_probe] : tau_n_tag_probes) {
+        legs_to_remove.insert(legs_to_remove.end(), n_tag_probe.first.begin(), n_tag_probe.first.end());
+    }
+    m_isBootstrappedTauTrigger = !legs_to_remove.empty();
+    // Sort them from last to first, so we can remove them without affecting the indices of the remaining legs to remove
+    std::sort(legs_to_remove.begin(), legs_to_remove.end(), std::greater<size_t>());
+    // Remove the tag legs
+    for(size_t i : legs_to_remove) {
+        m_HLTThr.erase(m_HLTThr.begin() + i);
+        m_HLTTauTypes.erase(m_HLTTauTypes.begin() + i);
+        m_HLTTauIDs.erase(m_HLTTauIDs.begin() + i);
+        m_HLTTauHitZSelections.erase(m_HLTTauHitZSelections.begin() + i);
+        m_HLTTauHitZAlgs.erase(m_HLTTauHitZAlgs.begin() + i);
+        m_HLTTauCHPreselIDs.erase(m_HLTTauCHPreselIDs.begin() + i);
+
+        m_HLTTauLegIndices.erase(m_HLTTauLegIndices.begin() + i);
+        m_HLTTauLegContainerSfxs.erase(m_HLTTauLegContainerSfxs.begin() + i);
+
+        is_tau_probe_leg.erase(is_tau_probe_leg.begin() + i);
+    }
+
 
     if(!m_L1Items.empty()) {
         // Build the full L1 string

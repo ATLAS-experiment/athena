@@ -2,9 +2,11 @@
 
 if [[ $# < 3 ]];
 then
-    echo "Syntax: $0 <time>  <Run> <LB> "
+    echo "Syntax: $0 <time>  <Run> <LB> [<HV and currents>]"
     echo " <time> = time in UTC at which the HV is stable at the new conditions (and HV mapping updated if needed) like \"2010-07-29:13:00:00\" "
     echo " <Run> <LB> = run/lumiblock to start IoV for UPD4 noise update (allows to backdate)"
+    echo " <HV and currents> (optional) = -V / -I argument(s) directly forwarded to LArCalib_HVCorrConfig"
+    echo "                                for example -V \" 123 2000\" -V \"124 1500\""
     exit
 fi
 
@@ -22,6 +24,8 @@ echo " "
 time=$1
 run=$2
 lb=$3
+shift 3
+# the next arguments are forwarded directly to LArCalib_HVCorrConfig
 
 summaryFile=noise_summary.txt
 
@@ -101,8 +105,8 @@ if [ $? -ne 0 ];  then
 fi
 
 echo "Running athena to compute new HV corrections"
-echo parameters are " $time $run $lb -g $globalTag "
-python -m LArCalibProcessing.LArCalib_HVCorrConfig $time $run $lb -g $globalTag > hv.log 2>&1
+echo parameters are " $time $run $lb -g $globalTag ""$@"  
+python -m LArCalibProcessing.LArCalib_HVCorrConfig $time $run $lb -g $globalTag "$@" > hv.log 2>&1
 #athena.py -c "date=\"${time}\";GlobalTag=\"${globalTag}\""  LArCalibProcessing/LArCalib_Example_HVCorr.py > hv.log 2>&1
 if [ $? -ne 0 ];  then
       echo "Athena reported an error ! Please check hv.log!"

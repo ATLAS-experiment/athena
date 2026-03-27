@@ -7,6 +7,8 @@
 #include "GaudiKernel/SystemOfUnits.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "AthAnalysisBaseComps/AthAnalysisHelper.h"
+#include "StoreGate/ReadDecorHandle.h"
+#include "StoreGate/WriteDecorHandle.h"
 
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"
 
@@ -26,6 +28,9 @@
 #include "xAODTau/TauTrackContainer.h"
 #include "xAODTau/TauTrackAuxContainer.h"
 
+#include "Math/Vector3D.h"
+#include "CxxUtils/phihelper.h"
+
 #include <iterator>
 #include <algorithm> //std::min
 #include <functional> //std::ref
@@ -42,11 +47,6 @@ TrigTauRecMerged::TrigTauRecMerged(const std::string& name, ISvcLocator* pSvcLoc
 StatusCode TrigTauRecMerged::initialize()
 {
     ATH_MSG_DEBUG("Initialize");
-
-    if(m_commonTools.begin() == m_commonTools.end()) {
-        ATH_MSG_ERROR("No tools given for this algorithm");
-        return StatusCode::FAILURE;
-    }
 
     for(const auto& tool : m_commonTools) ATH_CHECK(tool.retrieve());
     for(const auto& tool : m_commonToolsBeforeTF) ATH_CHECK(tool.retrieve());
@@ -68,8 +68,59 @@ StatusCode TrigTauRecMerged::initialize()
     ATH_CHECK(m_tauJetOutputKey.initialize());
     ATH_CHECK(m_tauTrackOutputKey.initialize());
 
+    // Hits decorations
+    if(!m_tauJetInputKey.empty() && !m_hitsInputDecorKey.empty()) {
+        // Initialize output decoration keys with the same names
+        // We manually copy the decorations because we want to make the scheduler aware of the hits dependencies
+        m_hitsOutputDecorKey = m_tauJetOutputKey.key() + "."
+            + (m_hitsOutputDecorKey.empty() ? m_hitsInputDecorKey.key() : m_hitsOutputDecorKey.key());
+        ATH_CHECK(m_hitsOutputDecorKey.initialize());
+
+        // Initialize input decorator keys
+        m_hitsInputDecorKey = m_tauJetInputKey.key() + "." + m_hitsInputDecorKey.key();
+        ATH_CHECK(m_hitsInputDecorKey.initialize());
+    }
+
+
+    // Propagate decorated quantities from the input to the output tau collection
+    if(!m_tauJetInputKey.empty() && !m_tauJetInputDecorKeysArray.empty()) {
+        for(auto& decor_key : m_tauJetInputDecorKeysArray) {
+            m_tauJetOutputDecorKeysArray.push_back(m_tauJetOutputKey.key() + "." + decor_key.key());
+            ATH_CHECK(m_tauJetOutputDecorKeysArray.back().initialize());
+
+            decor_key = m_tauJetInputKey.key() + "." + decor_key.key();
+            ATH_CHECK(decor_key.initialize());
+        }
+
+    } else if(m_tauJetInputKey.empty() && !m_tauJetInputDecorKeysArray.empty()) {
+        ATH_MSG_ERROR("Cannot specify input TauJet decoration keys without an input TauJet container key!");
+        return StatusCode::FAILURE;
+    }
+
+
+    // Determine the reconstruction mode
+    if(m_tauJetInputKey.empty() && !m_clustersInputKey.empty()) {
+        m_reco_mode = FromClusters;
+        ATH_MSG_INFO("Running in Calo reconstruction mode (from clusters)");
+    } else if(!m_tauJetInputKey.empty()) {
+        m_reco_mode = FromTauJet;
+        ATH_MSG_INFO("Running in Full reconstruction mode (from input TauJets + TauTracks)");
+    } else {
+        ATH_MSG_ERROR("Invalid configuration!");
+        return StatusCode::FAILURE;
+    }
+
+
+    // Set up the monitoring accessors
     for(const auto& [key, p] : m_monitoredIdScores) {
-        m_monitoredIdAccessors.emplace(
+        m_monitoredInferenceAccessors.emplace(
+            key,
+            std::make_pair(SG::ConstAccessor<float>(p.first), SG::ConstAccessor<float>(p.second))
+        );
+    }
+
+    for(const auto& [key, p] : m_monitoredHitZRegressions) {
+        m_monitoredInferenceAccessors.emplace(
             key,
             std::make_pair(SG::ConstAccessor<float>(p.first), SG::ConstAccessor<float>(p.second))
         );
@@ -174,6 +225,18 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
         monitoredIdVariables.emplace(key + "_TauJetScoreTrans_mp", Monitored::Scalar<float>(key + "_TauJetScoreTrans_mp", -1));
     }
 
+    // CaloHits monitored variables
+    auto n_hits             = Monitored::Scalar<int>("NHits", 0);
+    std::vector<float> hit_z, hit_dPhi;
+    auto mon_hit_z          = Monitored::Collection("hit_z", hit_z);
+    auto mon_hit_dPhi       = Monitored::Collection("hit_dPhi", hit_dPhi);
+
+    std::map<std::string, Monitored::Scalar<float>> monitoredHitZVariables;
+    for(const auto& [key, p] : m_monitoredHitZRegressions) {
+        monitoredHitZVariables.emplace(key + "_z0", Monitored::Scalar<float>(key + "_z0", -999));
+        monitoredHitZVariables.emplace(key + "_z0_sigma", Monitored::Scalar<float>(key + "_z0_sigma", -999));
+    }
+
     std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>> monVars = {
         std::ref(n_taus),
         std::ref(pT), std::ref(eta), std::ref(phi),
@@ -194,18 +257,23 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
         std::ref(n_all_tracks), std::ref(mon_track_pt_log), std::ref(mon_track_dEta), std::ref(mon_track_dPhi),
         std::ref(mon_track_d0_abs_log), std::ref(mon_track_z0sinthetaTJVA_abs_log),
         std::ref(mon_track_nPixelHitsPlusDeadSensors), std::ref(mon_track_nSCTHitsPlusDeadSensors),
-        std::ref(mon_track_errors)
+        std::ref(mon_track_errors),
+        std::ref(n_hits), std::ref(mon_hit_z), std::ref(mon_hit_dPhi)
     };
     for(auto& [key, var] : monitoredIdVariables) monVars.push_back(std::ref(var));
+    for(auto& [key, var] : monitoredHitZVariables) monVars.push_back(std::ref(var));
     auto monitorIt = Monitored::Group(m_monTool, monVars);
 
 
     ATH_MSG_DEBUG("Executing TrigTauRecMerged");
 
     //===============================================================================
-    // Main TauJet object:
+    // Main TauJet object and collections
     //===============================================================================
     xAOD::TauJet* tau = nullptr;
+
+    // We store the position of hits assigned to the tau for later monitoring
+    std::vector<ROOT::Math::XYZVector> tauHits;
 
 
     //===============================================================================
@@ -258,12 +326,12 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
     //===============================================================================
     // We now have two options for the TauJet reconstruction:
     //  1) Reconstruct the TauJet from scratch, using the bare calo-clusters (1st trigger step)
-    //  2) Fetch a preceding TauJet (and dummy TauTracks), and use them to seed the current reconstruction
+    //  2) Fetch a preceding TauJet (and [dummy] TauTracks), and use them to seed the current reconstruction
     
     //-------------------------------------------------------------------------------
     // Option 1: Calorimeter-only reconstruction from clusters (CaloMVA step)
     //-------------------------------------------------------------------------------
-    if(doCaloReconstruction()) {
+    if(m_reco_mode == Mode::FromClusters) {
         // Retrieve Calocluster container
         SG::ReadHandle<xAOD::CaloClusterContainer> CCContainerHandle = SG::makeHandle(m_clustersInputKey, ctx);
         ATH_CHECK(CCContainerHandle.isValid());
@@ -337,15 +405,59 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
     //-------------------------------------------------------------------------------
     // Option 2: Use input TauJet (and TauTracks) as seeds (non calo-only reco)
     //-------------------------------------------------------------------------------
-    if(!doCaloReconstruction()) {
+    else if(m_reco_mode == Mode::FromTauJet) {
         // Retrieve input TauJet container
-        if(!m_tauJetInputKey.key().empty()) {
-            SG::ReadHandle<xAOD::TauJetContainer> tauInputHandle(m_tauJetInputKey, ctx);
-            const xAOD::TauJetContainer* inputTauContainer = tauInputHandle.cptr();
-            ATH_MSG_DEBUG("Input TauJet Container size: " << inputTauContainer->size());
+        SG::ReadHandle<xAOD::TauJetContainer> tauInputHandle(m_tauJetInputKey, ctx);
+        const xAOD::TauJetContainer* inputTauContainer = tauInputHandle.cptr();
+        ATH_MSG_DEBUG("Input TauJet Container size: " << inputTauContainer->size());
 
-            // Copy the input TauJets to the output container
-            ATH_CHECK(deepCopy(outputTauHandle, inputTauContainer));
+        // Copy the input TauJets to the output container
+        ATH_CHECK(deepCopy(outputTauHandle, inputTauContainer));
+
+        // Copy associated hits
+        // Store associated hits for later monitoring
+        if(!m_hitsInputDecorKey.empty()) {
+            // Initialize hits decorators
+            SG::ReadDecorHandle<xAOD::TauJetContainer, std::vector<ElementLink<xAOD::TrackMeasurementValidationContainer>>> hitsInputDecorHandle(m_hitsInputDecorKey, ctx);
+            ATH_CHECK(hitsInputDecorHandle.isValid());
+            SG::WriteDecorHandle<xAOD::TauJetContainer, std::vector<ElementLink<xAOD::TrackMeasurementValidationContainer>>> hitsOutputDecorHandle(m_hitsOutputDecorKey, ctx);
+            ATH_CHECK(hitsOutputDecorHandle.isValid());
+
+            // We use ConstAccessors instead of ReadDecorHandles to read the hit positions
+            // because hits might come from different original containers if we're including
+            // both Pixel and Strips. It is ok, because the pre-processing pipeline required to
+            // attach the hit ELs to the TauJet includes calls to HitDecoratorAlg, so the
+            // decorations will always be there, no matter how the scheduler organizes the execution.
+            static const SG::AuxElement::ConstAccessor<float> x("HitsXRelToBeamspot");
+            static const SG::AuxElement::ConstAccessor<float> y("HitsYRelToBeamspot");
+            static const SG::AuxElement::ConstAccessor<float> z("HitsZRelToBeamspot");
+
+            for(size_t i = 0; i < inputTauContainer->size(); ++i) {
+                const xAOD::TauJet* inputTau = inputTauContainer->at(i);
+                const auto& inputHits = hitsInputDecorHandle(*inputTau);
+
+                for(const ElementLink<xAOD::TrackMeasurementValidationContainer>& el : inputHits) {
+                    if(el.isValid()) {
+                        tauHits.push_back(ROOT::Math::XYZVector(x(**el), y(**el), z(**el)));
+                    }
+                }
+
+                const xAOD::TauJet* outputTau = outputTauHandle->at(i);
+                hitsOutputDecorHandle(*outputTau) = inputHits;
+            }
+        }
+
+        
+        // Copy input TauJet decorations to output TauJets
+        for(size_t i = 0; i < m_tauJetInputDecorKeysArray.size(); ++i) {
+            SG::ReadDecorHandle<xAOD::TauJetContainer, float> inputDecorHandle(m_tauJetInputDecorKeysArray[i], ctx);
+            ATH_CHECK(inputDecorHandle.isValid());
+            SG::WriteDecorHandle<xAOD::TauJetContainer, float> outputDecorHandle(m_tauJetOutputDecorKeysArray[i], ctx);
+            ATH_CHECK(outputDecorHandle.isValid());
+
+            for(size_t j = 0; j < inputTauContainer->size(); ++j) {
+                outputDecorHandle(*outputTauHandle->at(j)) = inputDecorHandle(*inputTauContainer->at(j));
+            }
         }
 
         // Retrieve input TauTrack container
@@ -652,26 +764,51 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
         }
 
 
+        // Hits summary monitoring
+        if(!m_hitsInputDecorKey.empty()) {
+            n_hits = tauHits.size();
+            for(const ROOT::Math::XYZVector& hit : tauHits) {
+                hit_z.push_back(hit.z());
+                hit_dPhi.push_back(CxxUtils::wrapToPi(hit.phi() - tau->phi()));
+            }
+        }
+
+
         // TauID Score monitoring
-        for(const auto& [key, p] : m_monitoredIdAccessors) {
-            if(p.first.isAvailable(*tau)) {
+        for(const auto& [key, p] : m_monitoredIdScores) {
+            const auto& [score, scoreTrans] = m_monitoredInferenceAccessors.at(key);
+
+            if(score.isAvailable(*tau)) {
                 if(tau->nTracks() == 0) {
-                    monitoredIdVariables.at(key + "_TauJetScore_0p") = p.first(*tau);
+                    monitoredIdVariables.at(key + "_TauJetScore_0p") = score(*tau);
                 } else if(tau->nTracks() == 1) {
-                    monitoredIdVariables.at(key + "_TauJetScore_1p") = p.first(*tau);
+                    monitoredIdVariables.at(key + "_TauJetScore_1p") = score(*tau);
                 } else { // MP tau
-                    monitoredIdVariables.at(key + "_TauJetScore_mp") = p.first(*tau);
+                    monitoredIdVariables.at(key + "_TauJetScore_mp") = score(*tau);
                 }
             }
 
-            if(p.second.isAvailable(*tau)) {
+            if(scoreTrans.isAvailable(*tau)) {
                 if(tau->nTracks() == 0) {
-                    monitoredIdVariables.at(key + "_TauJetScoreTrans_0p") = p.second(*tau);
+                    monitoredIdVariables.at(key + "_TauJetScoreTrans_0p") = scoreTrans(*tau);
                 } else if(tau->nTracks() == 1) {
-                    monitoredIdVariables.at(key + "_TauJetScoreTrans_1p") = p.second(*tau);
+                    monitoredIdVariables.at(key + "_TauJetScoreTrans_1p") = scoreTrans(*tau);
                 } else { // MP tau
-                    monitoredIdVariables.at(key + "_TauJetScoreTrans_mp") = p.second(*tau);
+                    monitoredIdVariables.at(key + "_TauJetScoreTrans_mp") = scoreTrans(*tau);
                 }
+            }
+        }
+
+        
+        // HitZ inference monitoring
+        for(const auto& [key, p] : m_monitoredHitZRegressions) {
+            const auto& [z0, sigma] = m_monitoredInferenceAccessors.at(key);
+
+            if(z0.isAvailable(*tau)) {
+                monitoredHitZVariables.at(key + "_z0") = z0(*tau);
+            }
+            if(sigma.isAvailable(*tau)) {
+                monitoredHitZVariables.at(key + "_z0_sigma") = sigma(*tau);
             }
         }
 

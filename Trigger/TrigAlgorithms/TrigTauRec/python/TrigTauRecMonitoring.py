@@ -1,8 +1,9 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
+from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-def tauMonitoringCaloOnlyMVA(flags, name: str = 'CaloMVA', RoI_name: str = 'L1'):
+def tauMonitoringCaloOnlyMVA(flags: AthConfigFlags, name: str = 'CaloMVA', RoI_name: str = 'L1'):
     monTool = GenericMonitoringTool(flags, 'MonTool')
     monTool.HistPath = 'TrigTauRecMerged_CaloMVA'
 
@@ -17,15 +18,16 @@ def tauMonitoringCaloOnlyMVA(flags, name: str = 'CaloMVA', RoI_name: str = 'L1')
     monTool.defineHistogram('Pt, Phi', path='EXPERT', type='TH2F', title=name+' Tau E_{T} vs #phi; E_{T} [GeV]; #phi', xbins=100 , xmin=0, xmax=1000, ybins=100, ymin=-3.2, ymax=3.2)
 
     # RoI kinematics (from the step RoI)
-    monTool.defineHistogram('EtaRoI', path='EXPERT', type='TH1F', title=RoI_name+' RoI #eta; #eta; Entries', xbins=100, xmin=-2.6, xmax=2.6)
-    monTool.defineHistogram('PhiRoI', path='EXPERT', type='TH1F', title=RoI_name+' RoI #phi; #phi; Entries', xbins=100, xmin=-3.2, xmax=3.2)
-    monTool.defineHistogram('EtaRoI, PhiRoI', path='EXPERT', type='TH2F', title=RoI_name+' RoI #eta vs #phi; #eta; #phi', xbins=100, xmin=-2.6, xmax=2.6, ybins=100, ymin=-3.2, ymax=3.2)
+    if RoI_name:
+        monTool.defineHistogram('EtaRoI', path='EXPERT', type='TH1F', title=RoI_name+' RoI #eta; #eta; Entries', xbins=100, xmin=-2.6, xmax=2.6)
+        monTool.defineHistogram('PhiRoI', path='EXPERT', type='TH1F', title=RoI_name+' RoI #phi; #phi; Entries', xbins=100, xmin=-3.2, xmax=3.2)
+        monTool.defineHistogram('EtaRoI, PhiRoI', path='EXPERT', type='TH2F', title=RoI_name+' RoI #eta vs #phi; #eta; #phi', xbins=100, xmin=-2.6, xmax=2.6, ybins=100, ymin=-3.2, ymax=3.2)
 
-    monTool.defineHistogram('dEtaTau_RoI', path='EXPERT', type='TH1F', title=name+' #Delta#eta(Tau, '+RoI_name+' RoI); #Delta#eta(Tau, '+RoI_name+' RoI); Entries', xbins=100, xmin=-0.4, xmax=0.4)
-    monTool.defineHistogram('dPhiTau_RoI', path='EXPERT', type='TH1F', title=name+' #Delta#phi(Tau, '+RoI_name+' RoI); #Delta#phi(Tau, '+RoI_name+' RoI); Entries', xbins=100, xmin=-0.15, xmax=0.15)
-    monTool.defineHistogram('dEtaTau_RoI, dPhiTau_RoI', path='EXPERT', type='TH2F', title=name+' #Delta#eta(Tau, '+RoI_name+' RoI) vs #Delta#phi(Tau, '+RoI_name+' RoI); #Delta#eta(Tau, '+RoI_name+' RoI); #Delta#phi(Tau, '+RoI_name+' RoI)',
-                                                            xbins=100 , xmin=-0.4, xmax=0.4,
-                                                            ybins=100 , ymin=-0.15, ymax=0.15)
+        monTool.defineHistogram('dEtaTau_RoI', path='EXPERT', type='TH1F', title=name+' #Delta#eta(Tau, '+RoI_name+' RoI); #Delta#eta(Tau, '+RoI_name+' RoI); Entries', xbins=100, xmin=-0.4, xmax=0.4)
+        monTool.defineHistogram('dPhiTau_RoI', path='EXPERT', type='TH1F', title=name+' #Delta#phi(Tau, '+RoI_name+' RoI); #Delta#phi(Tau, '+RoI_name+' RoI); Entries', xbins=100, xmin=-0.15, xmax=0.15)
+        monTool.defineHistogram('dEtaTau_RoI, dPhiTau_RoI', path='EXPERT', type='TH2F', title=name+' #Delta#eta(Tau, '+RoI_name+' RoI) vs #Delta#phi(Tau, '+RoI_name+' RoI); #Delta#eta(Tau, '+RoI_name+' RoI); #Delta#phi(Tau, '+RoI_name+' RoI)',
+                                                                xbins=100 , xmin=-0.4, xmax=0.4,
+                                                                ybins=100 , ymin=-0.15, ymax=0.15)
 
     # TauJet reconstruction variables
     monTool.defineHistogram('mEflowApprox', path='EXPERT', type='TH1F', title=name+' TauJet Log10(max(mEflowApprox, 140)); Log10(max(mEflowApprox, 140)); Entries', xbins=50, xmin=0, xmax=5)
@@ -68,7 +70,38 @@ def tauMonitoringCaloOnlyMVA(flags, name: str = 'CaloMVA', RoI_name: str = 'L1')
     return monTool
 
 
-def tauMonitoringPrecision(flags, name: str = 'Precision', RoI_name: str = 'tauIso', tau_ids: list[str] = [], alg_name: str = ''):
+
+def tauMonitoringCaloHits(flags: AthConfigFlags, name: str, hitz_algs: list[str], tau_ids: list[str]):
+    monTool = tauMonitoringCaloOnlyMVA(flags, name, RoI_name='')
+    monTool.HistPath = f'TrigTauRecMerged_{name}'
+
+    # HitZ input variables
+    monTool.defineHistogram('pt_jetseed', path='EXPERT', type='TH1F', title=name+' TauJet p_{T}^{jet seed}; p_{T}^{jet seed} [GeV]; Entries', xbins=50, xmin=0, xmax=1000)
+    monTool.defineHistogram('eta_jetseed', path='EXPERT', type='TH1F', title=name+' TauJet #eta_{jet seed}; #eta_{jet seed}; Entries', xbins=50, xmin=-2.5, xmax=2.5)
+
+    # TauJet hits variables
+    monTool.defineHistogram('NHits', path='EXPERT', type='TH1F', title=name+' TauJet associated hits; N Hits; Entries', xbins=30, xmin=0, xmax=300)
+    monTool.defineHistogram('hit_z', path='EXPERT', type='TH1F', title=name+' TauJet associated hits z; Hit z; Entries', xbins=40, xmin=-200, xmax=200)
+    monTool.defineHistogram('hit_dPhi', path='EXPERT', type='TH1F', title=name+' TauJet #Delta#phi(Hit, Tau); #Delta#phi(Hit, Tau); Entries', xbins=50, xmin=-0.5, xmax=0.5)
+    # We could add more histograms here for the hit properties (e.g. hit layers, hit types, etc...), but given the
+    # large number of hits per TauJet (O(100)), this could lead to a non-negligible time overhead.
+
+    for hitz_alg in hitz_algs:
+        monTool.defineHistogram(f'{hitz_alg}_z0', path='EXPERT', type='TH1F', title=f'{name} TauJet {hitz_alg} regression z_{{0}}; z_{{0}} [mm]; Entries', xbins=60, xmin=-185, xmax=185)
+        monTool.defineHistogram(f'{hitz_alg}_z0_sigma', path='EXPERT', type='TH1F', title=f'{name} TauJet {hitz_alg} regression #sigma_{{z}}; #sigma_{{z}} [mm]; Entries', xbins=60, xmin=0, xmax=40)
+
+    for tau_id in tau_ids:
+        if getattr(flags.Trigger.Offline.Tau, tau_id).OutputDiscriminant == 1: xmax = 1
+        else: xmax = 5
+
+        monTool.defineHistogram(f'{tau_id}_TauJetScore;{tau_id}_TauJetScore_0p', path='EXPERT', type='TH1F', title=f'{name} TauJet {tau_id} Tau ID score; Score; Entries', xbins=100, xmin=0, xmax=xmax)
+        monTool.defineHistogram(f'{tau_id}_TauJetScoreTrans;{tau_id}_TauJetScoreTrans_0p', path='EXPERT', type='TH1F', title=f'{name} TauJet {tau_id} Tau ID transformed score; Transformed Signal Score; Entries', xbins=100, xmin=0, xmax=1)
+
+    return monTool
+
+
+
+def tauMonitoringPrecision(flags: AthConfigFlags, name: str = 'Precision', RoI_name: str = 'tauIso', tau_ids: list[str] = [], alg_name: str = ''):
     monTool = tauMonitoringCaloOnlyMVA(flags, name, RoI_name)
     monTool.HistPath = f'TrigTauRecMerged_{name}' + (f'_{alg_name}' if alg_name else '')
 
@@ -103,6 +136,11 @@ def tauMonitoringPrecision(flags, name: str = 'Precision', RoI_name: str = 'tauI
 
     labels = ['NoTrkCont', 'NoVtxCont']
     monTool.defineHistogram('track_errors', path='EXPERT', type='TH1F', title=name+' TauJet Tracking Errors; Error; Entries', xbins=2, xmin=-0.5, xmax=1.5, xlabels=labels)
+
+    # TauJet hits variables
+    monTool.defineHistogram('NHits', path='EXPERT', type='TH1F', title=name+' TauJet associated hits; N Hits; Entries', xbins=30, xmin=0, xmax=300)
+    monTool.defineHistogram('hit_z', path='EXPERT', type='TH1F', title=name+' TauJet associated hits z; Hit z; Entries', xbins=40, xmin=-200, xmax=200)
+    monTool.defineHistogram('hit_dPhi', path='EXPERT', type='TH1F', title=name+' TauJet #Delta#phi(Hit, Tau); #Delta#phi(Hit, Tau); Entries', xbins=50, xmin=-0.5, xmax=0.5)
 
     for tau_id in tau_ids:
         tau_id_flags = getattr(flags.Trigger.Offline.Tau, tau_id)

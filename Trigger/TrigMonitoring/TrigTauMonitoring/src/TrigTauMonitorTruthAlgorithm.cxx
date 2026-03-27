@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TruthUtils/HepMCHelpers.h"
@@ -140,7 +140,7 @@ StatusCode TrigTauMonitorTruthAlgorithm::processEvent(const EventContext& ctx) c
 	if( info.isHLTTandP() || info.isHLTDiTau()) continue;
 
         // Online taus
-        std::vector<const xAOD::TauJet*> hlt_taus = getOnlineTausAll(trigger, true);
+        std::vector<const xAOD::TauJet*> hlt_taus = getOnlineTausAll(trigger, true, info.isBootstrappedTauTrigger());
 
         if(!true_taus_1p.empty()) {
             if(m_do_variable_plots) fillTruthVars(hlt_taus, true_taus_1p, trigger, "1P");

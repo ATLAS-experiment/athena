@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaMonitoring.DQConfigFlags import DQDataType
@@ -35,21 +35,33 @@ class TrigTauMonAlgBuilder:
   #=============================================
   # TauID monitoring
   #=============================================
+  # For each output container suffix: f'HLT_TrigTauRecMerged_{sfx}'.
+  # See Trigger/TrigAlgorithms/TrigTauRec/python/TauRecConfig.py and
+  # Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Tau/TauConfigurationTools.py for more information.
   hlt_tauid_scores = {
-    'tracktwoMVA': {
+    'MVA': {
       'GNTauDev1': ('GNTauDev1_Score', 'GNTauDev1_ScoreSigTrans'),
       'GNTau': ('GNTau_Score', 'GNTau_ScoreSigTrans'),
       'DeepSet': ('RNNJetScore', 'RNNJetScoreSigTrans'),
     },
-    'tracktwoLLP': {
-      'RNNLLP': ('RNNJetScore', 'RNNJetScoreSigTrans'),
-    },
-    'trackLRT': {
+
+    'LLP': {
       'RNNLLP': ('RNNJetScore', 'RNNJetScoreSigTrans'),
     },
 
-    # Archive:
-    'tracktwoMVABDT': { 'RNN': ('RNNJetScore', 'RNNJetScoreSigTrans') }, # Deprecated
+    'LRT': {
+      'RNNLLP': ('RNNJetScore', 'RNNJetScoreSigTrans'),
+    },
+  }
+
+  # For each output container suffix: f'HLT_TrigTauRecMerged_{sfx}'.
+  hlt_hitz_variables = {
+    'MVA': {
+      'HitZ': ('HitZ_z0', 'HitZ_z0_sigma'),
+    },
+  }
+
+  hlt_calohits_presel_scores = {
   }
 
   offline_tauid_scores = {
@@ -278,6 +290,8 @@ class TrigTauMonAlgBuilder:
     self.mon_alg_single.DoTotalEfficiency = self.do_total_efficiency
     self.mon_alg_single.RequireOfflineTaus = self.require_offline_taus
     self.mon_alg_single.HLTTauIDScores = self.hlt_tauid_scores
+    self.mon_alg_single.HLTTauCaloHitsPreselIDScores = self.hlt_calohits_presel_scores
+    self.mon_alg_single.HLTTauHitZVars = self.hlt_hitz_variables
     self.mon_alg_single.OfflineTauIDScores = self.offline_tauid_scores
 
     self.logger.info('  |- Booking all histograms')
@@ -291,6 +305,7 @@ class TrigTauMonAlgBuilder:
         self.bookBasicVars(self.mon_alg_single, self.base_path, trigger, n_prong=p, online=True)
         self.bookIDScores(self.mon_alg_single, self.base_path, trigger, n_prong=p, online=True)
         self.bookIDInputScalar(self.mon_alg_single, self.base_path, trigger, n_prong=p, online=True)
+        self.bookHitZVars(self.mon_alg_single, self.base_path, trigger, n_prong=p)
       self.bookIDInputTrack(self.mon_alg_single, self.base_path, trigger, online=True)
       self.bookIDInputCluster(self.mon_alg_single, self.base_path, trigger, online=True)
 
@@ -309,6 +324,8 @@ class TrigTauMonAlgBuilder:
       self.mon_alg_single_no_offline.DoOfflineTausDistributions = False
       self.mon_alg_single_no_offline.DoEfficiencyPlots = False
       self.mon_alg_single_no_offline.HLTTauIDScores = self.hlt_tauid_scores
+      self.mon_alg_single_no_offline.HLTTauCaloHitsPreselIDScores = self.hlt_calohits_presel_scores
+      self.mon_alg_single_no_offline.HLTTauHitZVars = self.hlt_hitz_variables
 
       self.logger.info('  |- Booking all histograms')
       path = f'{self.base_path}/OnlineOnlyVars'
@@ -317,6 +334,7 @@ class TrigTauMonAlgBuilder:
           self.bookBasicVars(self.mon_alg_single_no_offline, path, trigger, n_prong=p, online=True)
           self.bookIDScores(self.mon_alg_single_no_offline, path, trigger, n_prong=p, online=True)
           self.bookIDInputScalar(self.mon_alg_single_no_offline, path, trigger, n_prong=p, online=True)
+          self.bookHitZVars(self.mon_alg_single_no_offline, path, trigger, n_prong=p)
         self.bookIDInputTrack(self.mon_alg_single_no_offline, path, trigger, online=True)
         self.bookIDInputCluster(self.mon_alg_single_no_offline, path, trigger, online=True)
 
@@ -326,6 +344,8 @@ class TrigTauMonAlgBuilder:
       self.mon_alg_single_gntau.DoTotalEfficiency = self.do_total_efficiency
       self.mon_alg_single_gntau.RequireOfflineTaus = self.require_offline_taus
       self.mon_alg_single_gntau.HLTTauIDScores = self.hlt_tauid_scores
+      self.mon_alg_single_gntau.HLTTauCaloHitsPreselIDScores = self.hlt_calohits_presel_scores
+      self.mon_alg_single_gntau.HLTTauHitZVars = self.hlt_hitz_variables
       self.mon_alg_single_gntau.OfflineTauIDScores = self.offline_tauid_scores
       self.mon_alg_single_gntau.OfflineTauID = 2
 
@@ -341,6 +361,7 @@ class TrigTauMonAlgBuilder:
           self.bookBasicVars(self.mon_alg_single_gntau, path, trigger, n_prong=p, online=True)
           self.bookIDScores(self.mon_alg_single_gntau, path, trigger, n_prong=p, online=True)
           self.bookIDInputScalar(self.mon_alg_single_gntau, path, trigger, n_prong=p, online=True)
+          self.bookHitZVars(self.mon_alg_single_gntau, path, trigger, n_prong=p)
         self.bookIDInputTrack(self.mon_alg_single_gntau, path, trigger, online=True)
         self.bookIDInputCluster(self.mon_alg_single_gntau, path, trigger, online=True)
 
@@ -584,17 +605,28 @@ class TrigTauMonAlgBuilder:
 
   def bookIDScores(self, mon_alg, base_path, trigger, n_prong, online):
     info = self.getTriggerInfo(trigger)
-    store_all = info.getHLTTauID() in ['idperf', 'perf']
     
     if online:
-      if info.getHLTTauType() not in self.hlt_tauid_scores: return
-      variables = {
-        tau_id: p
-        for tau_id, p in self.hlt_tauid_scores[info.getHLTTauType()].items()
-        if tau_id == info.getHLTTauID() or store_all
-      }
+      variables = {}
+      if info.getHLTTauLegContainerSfx() in self.hlt_tauid_scores:
+        store_all = info.getHLTTauID() in ['idperf', 'perf']
+        variables |= {
+          tau_id: p
+          for tau_id, p in self.hlt_tauid_scores[info.getHLTTauLegContainerSfx()].items()
+          if tau_id == info.getHLTTauID() or store_all
+        }
+      if info.getHLTTauLegContainerSfx() in self.hlt_calohits_presel_scores:
+        store_all = info.getHLTTauCaloHitsPreselectionID() in ['', 'idperfCHP']
+        variables |= {
+          tau_id: p
+          for tau_id, p in self.hlt_calohits_presel_scores[info.getHLTTauLegContainerSfx()].items()
+          if tau_id == info.getHLTTauCaloHitsPreselectionID() or store_all
+        }
+      
     else:
       variables = self.offline_tauid_scores
+    
+    if not variables: return
 
     type_str = 'HLT' if online else 'Offline'
     mon_group_name = f'{trigger}_{type_str}_IDScores_{n_prong}'
@@ -607,6 +639,23 @@ class TrigTauMonAlgBuilder:
 
       mon_group.defineHistogram(f'{tau_id}_TauIDScore', title=f'{type_str} {tau_id} TauID score; TauID score; Events', xbins=xbins, xmin=0, xmax=xmax, opt='kAlwaysCreate')
       mon_group.defineHistogram(f'{tau_id}_TauIDScoreSigTrans', title=f'{type_str} {tau_id} TauID score sig. transformed; TauID score sig. transformed; Events', xbins=xbins, xmin=0, xmax=1, opt='kAlwaysCreate')
+
+
+  def bookHitZVars(self, mon_alg, base_path, trigger, n_prong):
+    info = self.getTriggerInfo(trigger)
+    
+    if info.getHLTTauLegContainerSfx() not in self.hlt_hitz_variables: return
+    if not info.getHLTTauHitZAlg() and not info.getHLTTauCaloHitsPreselectionID(): return
+
+    mon_group_name = f'{trigger}_HLT_HitZ_{n_prong}'
+    mon_group_path = f'{base_path}/basicVars/{trigger}/HLT_{n_prong}'
+    mon_group = self.helper.addGroup(mon_alg, mon_group_name, mon_group_path)
+ 
+    for alg, (z0, z0_sigma) in self.hlt_hitz_variables[info.getHLTTauLegContainerSfx()].items():
+      mon_group.defineHistogram(f'{alg}_z0', title=f'{alg} z_{{0}}; z_{{0}} [mm]; Events', xbins=100, xmin=-185, xmax=185, opt='kAlwaysCreate')
+      mon_group.defineHistogram(f'{alg}_z0_sigma', title=f'{alg} #sigma_{{z_{{0}}}}; #sigma_{{z_{{0}}}} [mm]; Events', xbins=100, xmin=0, xmax=100, opt='kAlwaysCreate')
+      mon_group.defineHistogram(f'{alg}_z0_delta', title=f'{alg} z_{{0}} - z_{{#tau}}; z_{{0}} - z_{{#tau}} [mm]; Events', xbins=100, xmin=-185, xmax=185, opt='kAlwaysCreate')
+      mon_group.defineHistogram(f'{alg}_z0_delta_sig', title=f'{alg} (z_{{0}} - z_{{#tau}}) / #sigma_{{z_{{0}}}}; (z_{{0}} - z_{{#tau}}) / #sigma_{{z_{{0}}}}; Events', xbins=100, xmin=-10, xmax=10, opt='kAlwaysCreate')
 
 
   def bookBasicVars(self, mon_alg, base_path, trigger, n_prong, online):
