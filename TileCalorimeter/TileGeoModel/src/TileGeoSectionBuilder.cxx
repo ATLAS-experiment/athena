@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileGeoSectionBuilder.h"
@@ -3357,7 +3357,13 @@ void TileGeoSectionBuilder::calculateR(int detector,
     int last = 100*m_dbManager->TILBsection()+lastScin;
     if (m_dbManager->TILBcurscint() != 0) { // for cells C10 and D4 first/last should be different
       first = m_dbManager->TILBcurscint();
-      last = first + m_dbManager->TILBnscin()-1;
+      int n = m_dbManager->TILBnscin();
+      if ((first < 0) or (n < 0))[[unlikely]]{
+        //something went very wrong
+        (*m_log) << MSG::ERROR << "TileGeoSectionBuilder::calculateR: error return"<< endmsg;
+        return;
+      }
+      last = first + n -1;
     }
     if (addPlates) {
       if (cell == -1) { // adjust size for cell C10
