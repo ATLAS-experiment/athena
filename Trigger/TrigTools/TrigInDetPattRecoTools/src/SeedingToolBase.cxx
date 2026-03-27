@@ -162,6 +162,8 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
     float rb1 = B1.getMinBinRadius();
     
     const unsigned int lk1 = B1.m_layerKey;
+
+    const bool isBarrel1 = (lk1 / 10000) == 8;
     
     //prepare a sliding window for each bin2 in the group 
 
@@ -229,6 +231,8 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
         const TrigFTF_GNN_EtaBin& B2 = *slw.m_bin;
 
 	const unsigned int lk2 = B2.m_layerKey;
+
+	const bool isBarrel2 = (lk2 / 10000) == 8;
  
         float deltaPhi = slw.m_deltaPhi;
       
@@ -362,10 +366,31 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 	      TrigFTF_GNN_Edge* pS = &(edgeStorage.at(inEdgeIdx));
 	      
 	      if(pS->m_nNei >= N_SEG_CONNS) continue;
+
+	      const unsigned int lk3 = m_geo->getTrigFTF_GNN_LayerKeyByIndex(pS->m_n2->m_layer);
+
+	      const bool isBarrel3 = (lk3 / 10000) == 8;
 	      
-	      float tau_ratio = pS->m_p[0]*uat_2 - 1.0f;
+	      float abs_tau_ratio = std::abs(pS->m_p[0]*uat_2 - 1.0f);
+	      float add_tau_ratio_corr = 0;
 	      
-	      if(std::abs(tau_ratio) > cut_tau_ratio_max){//bad match
+	      if (m_useAdaptiveCuts) {
+
+		if (isBarrel1 && isBarrel2 && isBarrel3) {
+		  bool no_gap = ((lk3-lk2) == 1000) && ((lk2-lk1) == 1000);
+		  if(!no_gap) {
+		    add_tau_ratio_corr = m_tau_ratio_corr;//assume more scattering due to the layer in between
+		  }
+		}
+		else {
+		  bool mixed_triplet = isBarrel1 && isBarrel2 && !isBarrel3;
+		  if (mixed_triplet) {
+		    add_tau_ratio_corr = m_tau_ratio_corr;
+		  }
+		}
+	      }
+	      
+	      if(abs_tau_ratio > cut_tau_ratio_max + add_tau_ratio_corr){//bad match
 		continue;
 	      }
 	      
@@ -385,12 +410,12 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 	      }
 
 	      //final check: cuts on pT and d0
-
-	      if (lk1 >= 80000 && lk1 <= 82000 && lk2 >= 81000 && lk2 <= 84000) {//Pixel barrel
+	      
+	      if (isBarrel1 && isBarrel2 && isBarrel3) {//Pixel barrel
 
                 std::array<const GNN_Node*, 3> sps = {B1.m_vn[n1Idx], B2.m_vn[n2Idx], pS->m_n2};
 
-                if (!validate_triplet(sps, pt_scale)) continue;
+                if (!validate_triplet(sps, tripletPtMin, abs_tau_ratio, cut_tau_ratio_max) ) continue;
 		
               }
             
@@ -592,9 +617,9 @@ void SeedingToolBase::extractSeedsFromTheGraph(int maxLevel, int nEdges, int nHi
 
     float orig_seed_quality = -rs.m_J/orig_seed_size;
     
-    int seed_split_flag = (seed_eta < max_eta_for_seed_split) && (orig_seed_size <= 5) ? 1 : 0;
+    int seed_split_flag = (seed_eta < max_eta_for_seed_split) && (orig_seed_size > 3) && (orig_seed_size <= 5) ? 1 : 0;
 
-    if (seed_split_flag == 1) {//split the seed by dropping spacepoints
+    if (seed_split_flag) {//split the seed by dropping spacepoints
       
       std::array< std::array<const GNN_Node*, 3>, 3> triplets;//2 "drop-outs" and the original seed candidate
       
@@ -740,7 +765,7 @@ void SeedingToolBase::extractSeedsFromTheGraph(int maxLevel, int nEdges, int nHi
     std::array<std::size_t, 2> indices2drop = {0, seedSize / 2ul};//the first and the middle
 
     for(const auto& skipIdx : indices2drop) {
-        
+
       std::vector<unsigned int> new_seed;
 
       new_seed.reserve(seedSize-1);
@@ -749,13 +774,13 @@ void SeedingToolBase::extractSeedsFromTheGraph(int maxLevel, int nEdges, int nHi
           
 	if (k ==  skipIdx) continue;
           
-	new_seed.emplace_back(vN[k]->sp_idx());
-         
+	new_seed.emplace_back(vN[k]->sp_idx());         
       }
 
-      vOutputSeeds.emplace_back(std::get<0>(seed), new_seed);
-        
+      vOutputSeeds.emplace_back(std::get<0>(seed), new_seed);        
+
     }
+    
   }
   
 }
@@ -841,7 +866,7 @@ float SeedingToolBase::estimate_curvature(const std::array<const GNN_Node*, 3>& 
   
 }
 
-bool SeedingToolBase::validate_triplet(std::array<const GNN_Node*, 3>& sps, const float pt_scale) const {
+bool SeedingToolBase::validate_triplet(std::array<const GNN_Node*, 3>& sps, const float min_pT, const float tau_ratio, const float tau_ratio_cut) const {
   
   //conformal mapping with the center at the middle spacepoint
 
@@ -882,20 +907,26 @@ bool SeedingToolBase::validate_triplet(std::array<const GNN_Node*, 3>& sps, cons
 
   const float B = v[1] - A*u[1];
 
-  if (B != 0.0) {//straight-line track is OK
-  
-    const float R = std::sqrt(1 + A*A)/B; //signed radius in mm
-
-    const float pT = 0.3*R; //asssuming uniform 2T field
-
-    if (std::abs(pT) < pt_scale*m_minPt) return false;
-    
-  }
-    
   const float d0 = r0*(B*r0 - A);
 
   if (std::abs(d0) > m_d0_max) return false;
   
+  if (B != 0.0) {//straight-line track is OK
+  
+    const float R = std::sqrt(1 + A*A)/B; //signed radius in mm
+
+    const float pT = std::abs(0.3*R); //asssuming uniform 2T field
+
+    if (pT < min_pT) return false;
+
+    if (pT > 5*min_pT) {//relatively high-pT track
+
+      if (tau_ratio > 0.9*tau_ratio_cut) return false;
+
+    }
+    
+  }
+
   return true;
 
 }
