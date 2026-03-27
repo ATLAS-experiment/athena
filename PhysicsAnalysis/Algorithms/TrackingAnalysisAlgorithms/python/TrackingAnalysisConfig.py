@@ -99,21 +99,21 @@ class InDetTrackCalibrationConfig (ConfigBlock):
                     "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/REL22_REPRO_2016_1stPart.root",
                     "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/REL22_REPRO_2016_2ndPart.root",
                 ]
-                alg.biasingTool.runNumberBounds = [-1, 296938, 301912, 999999]
+                alg.biasingTool.runNumberBounds = [0, 296938, 301912, 999999]
             elif config.campaign() is Campaign.MC20d:
                 # 2017 recommendations (MC20d)
                 alg.biasingTool.calibFiles = [
                     "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/REL22_REPRO_2017_1stPart.root",
                     "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/REL22_REPRO_2017_2ndPart.root",
                 ]
-                alg.biasingTool.runNumberBounds = [-1, 334842, 999999]
+                alg.biasingTool.runNumberBounds = [0, 334842, 999999]
             elif config.campaign() is Campaign.MC20e:
                 # 2018 recommendations (MC20e)
                 alg.biasingTool.calibFiles = [
                     "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/REL22_REPRO_2018_1stPart.root",
                     "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/REL22_REPRO_2018_2ndPart.root",
                 ]
-                alg.biasingTool.runNumberBounds = [-1, 353000, 999999]
+                alg.biasingTool.runNumberBounds = [0, 353000, 999999]
             else:
                 raise ValueError ('No biasing recommendations found for campaign \"'
                                   + config.campaign().value + '\" in Run 2. '
