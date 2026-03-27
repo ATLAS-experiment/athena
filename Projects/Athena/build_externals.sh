@@ -14,7 +14,7 @@ ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=108
                         -DATLAS_GAUDI_SOURCE="URL;https://gitlab.cern.ch/atlas/Gaudi/-/archive/v40r3.001/Gaudi-v40r3.001.tar.gz;URL_MD5;86b44fe14086e2fa67b25a797c6bb165"
                         -DATLAS_ACTS_SOURCE="URL;https://github.com/acts-project/acts/releases/download/v46.0.0/acts-v46.0.0.tar.gz;URL_HASH;SHA256=285fb26ef2dfc553a8755fe1e3407fc1ea4642fcc15ceff58e70b412d64222e8"
                         -DATLAS_ACTS_USE_GNN=FALSE
-                        -DATLAS_GEOMODEL_SOURCE="URL;https://gitlab.cern.ch/GeoModelDev/GeoModel/-/archive/6.24.0/GeoModel-6.24.0.tar.bz2;URL_MD5;5d436565dd92671aa58cef737bbc2ab6"
+                        -DATLAS_GEOMODEL_SOURCE="URL;https://gitlab.cern.ch/GeoModelDev/GeoModel/-/archive/6.25.0/GeoModel-6.25.0.tar.bz2;URL_MD5;0aac19aea4159507f4a0c52151c028e9"
                         -DATLAS_GEANT4_USE_LTO=TRUE
                         -DATLAS_VECGEOM_USE_LTO=TRUE
                         -DATLAS_ONNXRUNTIME_USE_CUDA=TRUE
