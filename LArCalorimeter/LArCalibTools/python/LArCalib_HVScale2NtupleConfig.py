@@ -47,7 +47,7 @@ if __name__=="__main__":
 
     if len(sys.argv)<2:
         print("Usage:")
-        print("%s <time> <outputfile> <globaltag>" % sys.argv[0])
+        print("%s <time> <outputfile> <globaltag> [sqlitefile]" % sys.argv[0])
         sys.exit(-1)
     
 
@@ -88,6 +88,11 @@ if __name__=="__main__":
     if len(sys.argv)>3:
         flags.IOVDb.GlobalTag=sys.argv[3]
         
+    if len(sys.argv)>4:
+        print('Taking /LAR/ElecCalibFlat/HVScaleCorr from sqlite ',sys.argv[4])
+        flags.IOVDb.SqliteInput=sys.argv[4]
+        flags.IOVDb.SqliteFolders=("/LAR/ElecCalibFlat/HVScaleCorr",)
+
     flags.lock()
     cfg=MainEvgenServicesCfg(flags)
     cfg.merge(LArHVScaleCorr2NtupleCfg(flags))

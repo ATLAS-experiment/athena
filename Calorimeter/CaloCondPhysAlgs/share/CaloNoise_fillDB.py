@@ -181,11 +181,12 @@ try:
            log.info("---> wrong line length %d entries ", len(fields))
            continue
         pass   
-        systemId = int(fields[0])
-        hash     = int(fields[1]) - systemDict[systemId][1]
-        gain     = ROOT.CaloCondUtils.getDbCaloGain(int(fields[2]))
-        noiseA   = float(fields[3])
-        noiseB   = float(fields[4])
+        offId = int(fields[0])
+        systemId = int(fields[1])
+        hash     = int(fields[2]) - systemDict[systemId][1]
+        gain     = ROOT.CaloCondUtils.getDbCaloGain(int(fields[3]))
+        noiseA   = float(fields[4])
+        noiseB   = float(fields[5])
         flt = fltDict[systemId][1]
         if mu > 0 and dt > 0:
            # new normalization
@@ -194,6 +195,8 @@ try:
            else:
               noiseB /= math.sqrt(mu/29.*10.) 
         pass
+        if mu == 0:
+           noiseB = 0
         flt.setData(hash,gain,0,noiseA)
         flt.setData(hash,gain,1,noiseB)
         
