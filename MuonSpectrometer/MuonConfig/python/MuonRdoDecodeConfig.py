@@ -416,7 +416,8 @@ def MuonRDOtoPRDConvertorsCfg(flags):
         from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg 
         acc.merge(MuonSpacePointFormationCfg(flags))
 
-    if flags.Input.isMC:
+    from AthenaConfiguration.Enums import Format
+    if flags.Input.isMC and flags.Input.Format!=Format.BS:
         if not flags.Muon.usePhaseIIGeoSetup:
             acc.merge(MuonPRD_MultiTruthMakerCfg(flags))
         else:

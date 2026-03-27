@@ -68,6 +68,16 @@ def fromRunArgs(runArgs):
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamWriteCfg
     cfg.merge(ByteStreamWriteCfg(flags))
 
+    # Configure IOVDbMetaDataTool to serialize IOV metadata to ByteStream
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    from AthenaConfiguration.ComponentFactory import CompFactory
+    iovca = ComponentAccumulator()
+    iovDbTool = CompFactory.IOVDbMetaDataTool("IOVDbMetaDataTool")
+    iovDbTool.FoldersToSerializeToBSMetadata = ["/Digitization/Parameters"]
+    iovca.addPublicTool(iovDbTool)
+    cfg.merge(iovca)
+    log.info("Configured IOVDbMetaDataTool to serialize folders to ByteStream metadata: %s",
+             iovDbTool.FoldersToSerializeToBSMetadata)
 
     # Post-include
     processPostInclude(runArgs, flags, cfg)

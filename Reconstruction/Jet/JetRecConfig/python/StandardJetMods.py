@@ -25,6 +25,8 @@ from .JetDefinition import JetModifier
 from .Utilities import ldict
 from .StandardJetConstits import inputsFromContext
 
+from JetRecConfig.JetRecCommon import isMC
+
 stdJetModifiers = ldict()
 
 ########################################################################
@@ -76,12 +78,6 @@ except ModuleNotFoundError:
 # can assign the right name to the c++ tool.
 def _jetname(jetdef,modspec):
     return jetdef.fullname()
-
-def isMC(flags):
-    """A simple filter function for  testing if we're running in MC
-    returns (bool, str) where the str contains an explanation of why the bool is False.
-    (probably worth re-allocating somehere else)"""
-    return flags.Input.isMC or flags.Overlay.DataOverlay, "Input file is not MC"
 
 
 def _constitContainername(jetdef,modspec):

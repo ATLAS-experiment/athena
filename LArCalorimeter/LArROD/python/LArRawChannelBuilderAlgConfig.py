@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import LHCPeriod, ProductionStep
+from AthenaConfiguration.Enums import LHCPeriod, ProductionStep, Format
 from LArRecUtils.LArADC2MeVCondAlgConfig import LArADC2MeVCondAlgCfg
 from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBCfg
 from LArRecUtils.LArRecUtilsConfig import LArOFCCondAlgCfg
@@ -15,7 +15,7 @@ def LArRawChannelBuilderAlgCfg(flags, **kwargs):
     obj = "AthenaAttributeList"
     dspkey = 'Run2DSPThresholdsKey'
     from IOVDbSvc.IOVDbSvcConfig import addFolders
-    if flags.Input.isMC:
+    if flags.Input.isMC and flags.Input.Format != Format.BS:
         # need OFC configuration, which includes appropriate ElecCalibDb
         acc.merge(LArOFCCondAlgCfg(flags))
         kwargs.setdefault("LArRawChannelKey", "LArRawChannels")
