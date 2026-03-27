@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
 #include <iostream>
 #include "ISF_FastCaloGpu/GeoLoadGpu.h"
 
@@ -158,14 +161,14 @@ bool GeoLoadGpu::LoadGpu_cu() {
     if ( !SanityCheck() ) { return false; }
   }
 
-  Rg_Sample_Index* SampleIndex_g;
+  Rg_Sample_Index* SampleIndex_g{};
   if ( cudaSuccess != cudaMalloc( (void**)&SampleIndex_g, sizeof( Rg_Sample_Index ) * m_max_sample ) ) return false;
 
   // copy sample_index array  to gpu
   if ( cudaSuccess != cudaMemcpy( SampleIndex_g, m_sample_index_h, sizeof( Rg_Sample_Index ) * m_max_sample,
                                   cudaMemcpyHostToDevice ) ) {
     std::cout << "Error copy sample index " << std::endl;
-
+    cudaFree(SampleIndex_g);
     return false;
   }
 
@@ -173,14 +176,17 @@ bool GeoLoadGpu::LoadGpu_cu() {
   //  copy array to GPU
   //  save to regions m_cell_g ;
   for ( unsigned int ir = 0; ir < m_nregions; ++ir ) {
-    long long* ptr_g;
+    long long* ptr_g{};
     if ( cudaSuccess != cudaMalloc( (void**)&ptr_g, sizeof( long long ) * m_regions[ir].cell_grid_eta() *
-                                                        m_regions[ir].cell_grid_phi() ) )
+                                                        m_regions[ir].cell_grid_phi() ) ){
       return false;
+    }
     if ( cudaSuccess != cudaMemcpy( ptr_g, m_regions[ir].cell_grid(),
                                     sizeof( long long ) * m_regions[ir].cell_grid_eta() * m_regions[ir].cell_grid_phi(),
-                                    cudaMemcpyHostToDevice ) )
+                                    cudaMemcpyHostToDevice ) ){
+      cudaFree(ptr_g);
       return false;
+    }
     m_regions[ir].set_cell_grid_g( ptr_g );
     m_regions[ir].set_all_cells( m_cells_d ); // set this so all region instance know where the GPU cells are, before
   }
