@@ -19,31 +19,21 @@
 #include "GaudiKernel/ServiceHandle.h"
 
 // algorithm wrapper
-#include "IPPerformance/ETAlgorithm.h"
-
-class JetCalibrator : public ETAlgorithm
+#include "AthenaBaseComps/AthAlgorithm.h"
+class JetCalibrator : public AthAlgorithm
 {
   // put your configuration variables here as public variables.
   // that way they can be set directly from CINT and python.
 public:
-  bool m_DC14;
 
   // configuration variables
-  std::string m_inContainerName;
-  std::string m_outContainerName;
+  SG::ReadHandleKey<xAOD::JetContainer> m_inContainKey{this, "inContainKey", "AntiKt4EMTopoJets"};  
+  Gaudi::Property<std::string> m_outContainerName{this, "OutputContainer", "Jets_Calib"};
 
-  std::string m_jetAlgo;
-  std::string m_outputAlgo;
-  std::string m_calibConfigData;
-  std::string m_calibConfigFullSim;
-  std::string m_calibConfigAFII;
-  std::string m_calibConfig;
-  std::string m_calibSequence;
-  std::string m_calibSequenceData;
-  std::string m_calibArea;
+  Gaudi::Property<std::string> m_jetAlgo{this, "JetAlgorithm", "AntiKt4EMTopo"};
+  Gaudi::Property<std::string> m_outputAlgo{this, "OutputAlgo", "Jets_Calib_Algo"};
   std::string m_JESUncertConfig;
   std::string m_JESUncertMCType;
-  Gaudi::Property<std::string> m_configFileName{this, "configFileName", "", "config file name"};
   float m_systSigmaVal;
   std::string m_JESJERSyst;
   bool m_setAFII;
@@ -52,7 +42,7 @@ public:
 //  bool m_JERFullSys;
 //  bool m_JERApplyNominal;
 
-  std::string m_jetCleanCutLevel;
+  //std::string m_jetCleanCutLevel;
   bool m_saveAllCleanDecisions;
   bool m_jetCleanUgly;
   bool m_redoJVT;
@@ -63,14 +53,15 @@ public:
 
   // systematics
   bool m_runSysts;
+  std::string m_systName;
+  float       m_systVal;
+  std::vector<float> m_systValVector;
 
 private:
   int m_numEvent;         //!
   int m_numObject;        //!
 
-  //bool m_isMC;            //!
   Gaudi::Property<bool> m_isMC{this, "isMC", false, " whether the data is Monte Carlo"};
-  //bool m_isFullSim;       //!
   Gaudi::Property<bool> m_isFullSim{this,"isFullSim","false","whether the data is Full Simulation"};
   
     // obtain StoreGateSvc
@@ -103,8 +94,6 @@ private:
   // protected from being send from the submission node to the worker
   // node (done by the //!)
 public:
-  // Tree *myTree; //!
-  // TH1 *myHist; //!
 
   // this is a standard constructor
   JetCalibrator (const std::string& name,ISvcLocator* pSvcLocator=nullptr);

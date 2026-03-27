@@ -28,8 +28,6 @@
 // ROOT include(s):
 #include "TEnv.h"
 #include "TSystem.h"
-//#include "xAODMetaData/FileMetaData.h"
-//#include "xAODMetaData/FileMetaDataAuxInfo.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "EventInfo/TagInfo.h"
 using std::cout;
@@ -37,7 +35,7 @@ using std::endl;
 
 // this is needed to distribute the algorithm to the workers
 
- JetCalibrator :: JetCalibrator (const std::string& name,ISvcLocator* pSvcLocator) :ETAlgorithm(name,pSvcLocator),
+ JetCalibrator :: JetCalibrator (const std::string& name,ISvcLocator* pSvcLocator) :AthAlgorithm(name,pSvcLocator),
   m_runSysts(false)          // gets set later is syst applies to this tool
 {
   // Here you put any code for the base initialization of variables,
@@ -48,27 +46,6 @@ using std::endl;
   // initialize().
 
   Info("JetCalibrator()", "Calling constructor");
-
-
-  // read debug flag from .config file
-  m_debug                   = false;
-
-  m_sort                    = true;
-  // input container to be read from TEvent or TStore
-  m_inContainerName         = "";
-  // shallow copies are made with this output container name
-  m_outContainerName        = "";
-
-  // CONFIG parameters for JetCalibrationTool
-  m_jetAlgo                 = "";
-  m_outputAlgo              = "";
-
-  // when running data "_Insitu" is appended to this string
-  m_calibSequence           = "JetArea_Residual_Origin_EtaJES_GSC";
-  m_calibSequenceData       = "JetArea_Residual_Origin_EtaJES_GSC_Insitu";
-  m_calibConfigFullSim      = "JES_MC15Prerecommendation_April2015.config";
-  m_calibConfigAFII         = "JES_Prerecommendation2015_AFII_Apr2015.config";
-  m_calibConfigData         = "JES_MC15Prerecommendation_April2015.config";
 
   // CONFIG parameters for JetUncertaintiesTool
   m_JESUncertConfig         = "";
@@ -83,8 +60,6 @@ using std::endl;
 //  m_JERApplyNominal         = false;
 
   // CONFIG parameters for JetCleaningTool
-  m_jetCleanCutLevel        = "LooseBad";
-  m_saveAllCleanDecisions   = false;
   m_jetCleanUgly            = false;
   m_cleanParent             = false;
 
@@ -113,75 +88,16 @@ StatusCode JetCalibrator :: initialize ()
 
   // const xAOD::EventInfo* eventInfo(nullptr);
   // RETURN_CHECK("JetCalibrator::execute()", HelperFunctions::retrieve(eventInfo, m_eventInfoContainerName, m_event, m_store, m_verbose) ,"");
-  /*const xAOD::EventInfo* eventInfo = 0;
-  ANA_CHECK (evtStore()->retrieve (eventInfo, "EventInfo"));*/  //
-  //if( ! m_event->retrieve( eventInfo, m_eventInfoContainerName).isSuccess() ){
-  //  Error("initialize()", "Failed to retrieve event info collection. Exiting." );
-  //  return EL::StatusCode::FAILURE;
-  //} 
-  //m_isMC = ( eventInfo->eventType( xAOD::EventInfo::IS_SIMULATION ) );
   if( m_isMC ) Info("initialize()", "Running on MC sample.");
   else Info("initialize()", "Running on data sample.");
 
   if(!m_isMC){
      std::cout<<"Running on data" << std::endl;
    }
-  //configure()
-  setConfig(m_configFileName);
-  if ( !getConfig().empty() ) {
-
-    Info("configure()", "Configuring JetCalibrator Interface. User configuration read from : %s ", getConfig().c_str());
-
-    TEnv* config = new TEnv(getConfig(true).c_str());
-
-    // read debug flag from .config file
-    m_debug                   = config->GetValue("Debug" , m_debug);
-    m_sort                    = config->GetValue("Sort",            m_sort);
-    // input container to be read from TEvent or TStore
-    m_inContainerName         = config->GetValue("InputContainer",  m_inContainerName.c_str());
-    // shallow copies are made with this output container name
-    m_outContainerName        = config->GetValue("OutputContainer", m_outContainerName.c_str());
-
-    // CONFIG parameters for JetCalibrationTool
-    m_jetAlgo                 = config->GetValue("JetAlgorithm",    m_jetAlgo.c_str());
-    m_outputAlgo              = config->GetValue("OutputAlgo",      m_outputAlgo.c_str());
-
-    // when running data "_Insitu" is appended to this string
-    m_calibSequence           = config->GetValue("CalibSequence",           m_calibSequence.c_str());
-    m_calibSequenceData       = config->GetValue("CalibSequenceData",       m_calibSequenceData.c_str());
-    m_calibArea               = config->GetValue("CalibArea",       m_calibArea.c_str());
-    m_calibConfigFullSim      = config->GetValue("configNameFullSim",       m_calibConfigFullSim.c_str());
-    m_calibConfigAFII         = config->GetValue("configNameAFII",          m_calibConfigAFII.c_str());
-    m_calibConfigData         = config->GetValue("configNameData",          m_calibConfigData.c_str());
-
-    // CONFIG parameters for JetUncertaintiesTool
-    m_JESJERSyst             = config->GetValue("JESJERSyst", m_JESJERSyst.c_str());
-    m_systSigmaVal            = config->GetValue("systSigmaVal", m_systSigmaVal);
-    m_JESUncertConfig         = config->GetValue("JESUncertConfig", m_JESUncertConfig.c_str());
-    m_JESUncertMCType         = config->GetValue("JESUncertMCType", m_JESUncertMCType.c_str());
-    m_setAFII                 = config->GetValue("SetAFII",  m_setAFII);
-
-    // CONFIG parameters for JERSmearingTool
- //   m_JERUncertConfig         = config->GetValue("JERUncertConfig", m_JERUncertConfig.c_str());
- //   m_JERFullSys              = config->GetValue("JERFullSys",      m_JERFullSys);
- //   m_JERApplyNominal         = config->GetValue("JERApplyNominal", m_JERApplyNominal);
-
-    // CONFIG parameters for JetCleaningTool
-    m_jetCleanCutLevel        = config->GetValue("JetCleanCutLevel",        m_jetCleanCutLevel.c_str());
-    m_jetCleanUgly            = config->GetValue("JetCleanUgly",            m_jetCleanUgly );
-    m_saveAllCleanDecisions   = config->GetValue("SaveAllCleanDecisions",   m_saveAllCleanDecisions);
-    m_cleanParent             = config->GetValue("CleanParent",             m_cleanParent);
-
-    m_redoJVT                 = config->GetValue("RedoJVT",         m_redoJVT);
-
-    config->Print();
-
-    delete config; config = nullptr;
-  }
 
   // If there is no InputContainer we must stop
-  if ( m_inContainerName.empty() ) {
-    Error("configure()", "InputContainer is empty!");
+  if ( m_inContainKey.empty()) {
+    ATH_MSG_ERROR("InputContainer is empty!");
     return StatusCode::FAILURE;
   }
 
@@ -194,74 +110,19 @@ StatusCode JetCalibrator :: initialize ()
   m_outSCContainerName      = m_outContainerName + "ShallowCopy";
   m_outSCAuxContainerName   = m_outSCContainerName + "Aux."; // the period is very important!
 
-  if ( !getConfig().empty() )
-    Info("configure()", "JetCalibrator Interface succesfully configured! ");
-  //configure() end!
-
   m_numEvent      = 0;
-
-  // Configure jet calibrator
-  if ( !m_isMC ) m_calibSequence = m_calibSequenceData;
 
   //KB: Need to check if the following statement still applies in r22
   //Insitu should not be applied to the trimmed jets, per Jet/Etmiss recommendation
-  if ( !m_isMC && m_calibSequence.find("Insitu") == std::string::npos && m_inContainerName.find("AntiKt10LCTopoTrimmedPtFrac5SmallR20") == std::string::npos) m_calibSequence += "_Insitu";
+  //const std::string& containerName = m_inContainKey.key();
+  //if ( !m_isMC && m_calibSequence.find("Insitu") == std::string::npos && containerName.find("AntiKt10LCTopoTrimmedPtFrac5SmallR20") == std::string::npos) m_calibSequence += "_Insitu";
 
-  // Check that correct calibration sequence is used
-  if( m_isMC && m_calibSequence.find("Insitu") != std::string::npos){
-    Error("initialize()", "Attempting to use an Insitu calibration sequence on MC.  Exiting.");
-    return StatusCode::FAILURE;
-  }
-
-  if ( !m_isMC ) {
-    m_calibConfig = m_calibConfigData;
-  }else{
-    m_calibConfig = m_calibConfigFullSim;
-    // treat as fullsim by default
-    //m_isFullSim = true;
-    // Check simulation flavour for calibration config - cannot directly read metadata in xAOD otside of Athena!
-    //
-    // N.B. (Marco) : With SampleHandler, you can define sample metadata in job steering macro!
-    //                They will be passed to the EL:;Worker automatically and can be retrieved anywhere in the EL::Algorithm
-    //                I reasonably suppose everyone will use SH...
-    //
-
-    // KB: The following lines do not seem to work as it uses a custom variable "sim_flav" that is not accessible at run time.
-    //const std::string stringMeta = wk()->metaData()->castString("sim_flav"); // NB: needs to be defined as sample metadata in job steering macro. Should be either "AFII" or "FullSim"
-    //if ( m_setAFII ) {
-    //  Info("initialize()", "Setting simulation flavour to AFII according to config file. Please double check if this is really an AFII sample!");
-    //  m_isFullSim = false;
-    //}else if ( stringMeta.empty() ) {
-    //  Warning("initialize()", "Could not access simulation flavour from EL::Worker. Treating MC as FullSim by default!" );
-    //} else {
-    //  m_isFullSim = (stringMeta == "AFII") ? false : true;
-    //}
-
-    if ( !m_isFullSim ) {
-      m_calibConfig = m_calibConfigAFII;
-    }
-  }
-
-  // initialize jet calibration tool
-  std::string jcal_tool_name = std::string("JetCorrectionTool_") + m_name;
-  /*
-  m_jetCalibration = new JetCalibrationTool(jcal_tool_name.c_str(),
-      m_jetAlgo,
-      m_calibConfig,
-      m_calibSequence,
-      !m_isMC);
-  */
-  cout<<jcal_tool_name.c_str()<<endl;
-  cout<<m_jetAlgo<<endl;
-  cout<<m_calibConfig<<endl;
-  cout<<m_calibSequence<<endl;
-  cout<<m_calibArea<<endl;
   cout<<m_isMC<<endl;
   ANA_CHECK( m_jetCalibration.retrieve() );
 
   // initialize and configure the jet cleaning tool
   //------------------------------------------------
-  std::string jc_tool_name = std::string("JetCleaning_") + m_name;
+  std::string jc_tool_name = std::string("JetCleaning_") + std::string(name());
   ANA_CHECK(m_jetCleaning.retrieve());
   if (m_jetCleanUgly){
     ANA_CHECK(m_jetCleaning->setProperty( "DoUgly", true));
@@ -300,7 +161,7 @@ StatusCode JetCalibrator :: initialize ()
   if ( !m_JESUncertConfig.empty() && !m_systName.empty()  && m_systName != "None" ) {
     m_JESUncertConfig = gSystem->ExpandPathName( m_JESUncertConfig.c_str() );
     Info("initialize()","Initialize JES UNCERT with %s", m_JESUncertConfig.c_str());
-    std::string ju_tool_name = std::string("JESProvider_") + m_name;
+    std::string ju_tool_name = std::string("JESProvider_") + std::string(name());
     ANA_CHECK(m_JESUncertTool.retrieve());
     //m_JESUncertTool->msg().setLevel( MSG::ERROR ); // VERBOSE, INFO, DEBUG
     const CP::SystematicSet recSysts = m_JESUncertTool->recommendedSystematics();
@@ -384,19 +245,17 @@ StatusCode JetCalibrator :: finalize ()
 
 StatusCode JetCalibrator ::execute ()
 {
-  if ( m_debug ) { Info("execute()", "Applying Jet Calibration and Cleaning... "); }
-
+  const EventContext& ctx = Gaudi::Hive::currentContext();
   m_numEvent++;
 
-  // get the collection from TEvent or TStore
   // const xAOD::JetContainer* inJets(nullptr);
   // RETURN_CHECK("JetCalibrator::execute()", HelperFunctions::retrieve(inJets, m_inContainerName, m_event, m_store, m_verbose) ,"");
 
-  const xAOD::JetContainer* inJets = 0;
-  if ( !evtStore()->retrieve( inJets, m_inContainerName).isSuccess() ){ 
-    Error("execute()", "Failed to retrieve Input Jet container. Exiting." );
+  SG::ReadHandle<xAOD::JetContainer> inJets{m_inContainKey, ctx};
+  if (!inJets.isValid()) {
+    ATH_MSG_ERROR ("Couldn't retrieve xAOD::JetContainer with key: " << m_inContainKey.key() );
     return StatusCode::FAILURE;
-  } 
+  }
   // loop over available systematics - remember syst == "Nominal" --> baseline
   std::vector< std::string >* vecOutContainerNames = new std::vector< std::string >;
   //std::vector< int >
@@ -416,7 +275,7 @@ StatusCode JetCalibrator ::execute ()
 
 
     // create shallow copy;
-    std::pair< xAOD::JetContainer*, xAOD::ShallowAuxContainer* > calibJetsSC = xAOD::shallowCopyContainer( *inJets );
+    std::pair< xAOD::JetContainer*, xAOD::ShallowAuxContainer* > calibJetsSC = xAOD::shallowCopyContainer( *inJets.cptr() );
     ConstDataVector<xAOD::JetContainer>* calibJetsCDV = new ConstDataVector<xAOD::JetContainer>(SG::VIEW_ELEMENTS);
     calibJetsCDV->reserve( calibJetsSC.first->size() );
 
@@ -424,7 +283,7 @@ StatusCode JetCalibrator ::execute ()
     // In rel22: pass full jet container instead of correcting each jet in for-loop
     if( m_jetCalibration->applyCalibration( *(calibJetsSC.first) ) == StatusCode::FAILURE ){
       Error("execute()", "JetCalibration tool reported a CP::CorrectionCode::Error");
-      Error("execute()", "%s", m_name.c_str());
+      Error("execute()", "%s", name().c_str());
       return StatusCode::FAILURE;
     }//for jets
 
@@ -433,7 +292,6 @@ StatusCode JetCalibrator ::execute ()
 
       if ( thisSysType == 1 ){
         // JES/JER Uncertainty Systematic
-        if( m_debug ) { std::cout << "Configure JES for systematic variation : " << syst_it.name() << std::endl; }
         if ( m_JESUncertTool->applySystematicVariation(syst_it) != StatusCode::SUCCESS ) {
           Error("execute()", "Cannot configure JetUncertaintiesTool for systematic %s", m_systName.c_str());
           return StatusCode::FAILURE;
@@ -442,7 +300,7 @@ StatusCode JetCalibrator ::execute ()
           if ( m_runSysts ) {
             if ( m_JESUncertTool->applyCorrection( *jet_itr ) == CP::CorrectionCode::Error ) {
               Error("execute()", "JetUncertaintiesTool reported a CP::CorrectionCode::Error");
-              Error("execute()", "%s", m_name.c_str());
+              Error("execute()", "%s", name().c_str());
             }
           }
         }//for jets
@@ -485,7 +343,7 @@ StatusCode JetCalibrator ::execute ()
       }
     } //end cleaning decision
 
-    if ( !xAOD::setOriginalObjectLink(*inJets, *(calibJetsSC.first)) ) {
+    if ( !xAOD::setOriginalObjectLink(*inJets.cptr(), *(calibJetsSC.first)) ) {
       Error("execute()  ", "Failed to set original object links -- MET rebuilding cannot proceed.");
     }
 
@@ -502,12 +360,6 @@ StatusCode JetCalibrator ::execute ()
     for ( auto jet_itr : *(calibJetsSC.first) ) {
       calibJetsCDV->push_back( jet_itr );
     }
-
-    // can only sort the CDV - a bit no-no to sort the shallow copies
-    // if ( m_sort ) {
-    //   std::sort( calibJetsCDV->begin(), calibJetsCDV->end(), sort_pt );
-    // }
-
 
     // add shallow copy to StoreGate
     RETURN_CHECK( "JetCalibrator::execute()", m_storeGate->record( calibJetsSC.first, outSCContainerName), "Failed to record shallow copy container.");

@@ -19,7 +19,7 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 
 // Local include(s):
-#include "IPPerformance/ETAlgorithm.h"
+//#include "IPPerformance/ETAlgorithm.h"
 
 namespace TrigConf {
   class xAODConfigTool;
@@ -29,8 +29,8 @@ namespace Trig {
   class TrigDecisionTool;
 }
 
-class EventSelectorAlg : public ETAlgorithm
-//class EventSelectorAlg : public AthAlgorithm 
+//class EventSelectorAlg : public ETAlgorithm
+class EventSelectorAlg : public AthAlgorithm 
 {
   // put your configuration variables here as public variables.
   // that way they can be set directly from CINT and python.
@@ -38,27 +38,19 @@ public:
 
     // float cutValue;
     Gaudi::Property<bool> m_applyGRLCut{this, "applyGRLCut", false, "whether to apply the GRL Cut"};
-    Gaudi::Property<std::string> m_GRLxml {this, "GRLxml", "", "Path to GRL XML file"};
-    Gaudi::Property<std::string> m_GRLExcludeList{this, "GRLExcludeList", "", "the GRL Exclude List"};
+    Gaudi::Property<std::string> m_GRLxml {this, "GRLxml", "$IPPerformance_DIR/data/IPPerformance/data15_13TeV.periodAllYear_DetStatus-v89-pro21-02_Unknown_PHYS_StandardGRL_All_Good_25ns.xml", "Path to GRL XML file"};
     
     // Primary Vertex
-    std::string m_inVertexContName;
-    Gaudi::Property<bool> m_applyPrimaryVertexCut{this, "applyPrimaryVertexCut", false, "whether to apply the Primary Vertex Cut"};
-    int m_PVNTrack;
+    SG::ReadHandleKey<xAOD::VertexContainer> m_inVertexKey{this, "VetexKey", "PrimaryVertices"};
+    Gaudi::Property<bool> m_applyPrimaryVertexCut{this, "applyPrimaryVertexCut", true, "whether to apply the Primary Vertex Cut"};
+    Gaudi::Property<int> m_PVNTrack{this, "NTrackForPrimaryVertex", 3, "number of tracks required for a primary vertex"};
 
     // Event Cleaning
-    Gaudi::Property<bool> m_applyEventCleaningCut{this, "applyEventCleaningCut", false, "whether to apply event cleaning cut"};
+    Gaudi::Property<bool> m_applyEventCleaningCut{this, "applyEventCleaningCut", true, "whether to apply event cleaning cut"};
 
     // Trigger
-    std::string m_triggerSelection;
+    Gaudi::Property<std::string> m_triggerSelection{this, "Trigger", "HLT_j[0-9]*","list of triggers"};
     Gaudi::Property<bool> m_applyTriggerCut{this, "applyTriggerCut", false, "whether to apply trigger cut"};
-    Gaudi::Property<bool> m_testTrigger{this, "testTrigger", false, "whether to test trigger"};
-
-    //PU Reweighting
-    Gaudi::Property<bool> m_applyPUreweighting{this, "applyPUreweighting", false, "whether to apply PU reweighting"};
-    std::string m_lumiCalcFileNames;
-    std::string m_PRWFileNames;
-    Gaudi::Property<std::string> m_configFileName{this, "configFileName", "", "config file name"};
 
 
 private:
@@ -68,8 +60,6 @@ private:
     int m_eventCounter;     //!public:
 
     Gaudi::Property<bool> m_isMC{this, "isMC", false, " whether the data is Monte Carlo"};
-    Gaudi::Property<int> m_PU_default_channel{this, "PU_default_channel", 0, "PU default channel"};
-    Gaudi::Property<bool> m_debug{this,"debug",false,"whether debug"};
 
     //cutflow
     TH1D* m_cutflowHist = nullptr;    //!

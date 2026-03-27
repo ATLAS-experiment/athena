@@ -20,7 +20,7 @@ class IPhistos : public BaseHistos
   };
   void BookHistograms();
   void FillHistograms(double d0, double z0, double pt, double eta, double phi, int runN, double mu, double jetPt, 
-                      std::vector<float> weights, double bsWidth, double deltaR_trk12, std::vector<int> class_satisfied, float intLumi);
+                      std::vector<float> weights, double bsWidth, double deltaR_trk12, std::vector<int> class_satisfied);
   void BuildAxesMap();
 
   void SaveAdditionalHistos(bool saveAdditionalHistos) { m_saveAdditionalHistos = saveAdditionalHistos; };

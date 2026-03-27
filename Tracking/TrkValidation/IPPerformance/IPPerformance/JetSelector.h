@@ -9,33 +9,29 @@
 #include "TH1D.h"
 
 // algorithm wrapper
-#include "IPPerformance/ETAlgorithm.h"
 #include "JetSelectorTools/JetCleaningTool.h"
-
-class JetSelector : public ETAlgorithm
+#include "AthenaBaseComps/AthAlgorithm.h"
+#include "GaudiKernel/ITHistSvc.h"
+#include "GaudiKernel/ServiceHandle.h"
+class JetSelector : public AthAlgorithm
 {
   // put your configuration variables here as public variables.
   // that way they can be set directly from CINT and python.
 public:
-  bool m_debug;
 
   // configuration variables
-  std::string m_inJetContainerName;   // input container name
-  std::string m_outContainerName;  		// output container name
-  std::string m_jetScaleType;    			// Type of Scale Momementum
+  Gaudi::Property<std::string> m_outContainerName{this, "OutContainerName", "AntiKt4EMTopoJets_Selected", "Name of the output container"};
+  SG::ReadHandleKey<xAOD::JetContainer> m_jetKey{this, "JetsKey", "Jets_Calib"};
   std::string m_decor;           		  // The decoration key written to passing objects
-  std::string m_jetCleanCutLevel;  // Level of jet cleaning cut
-  Gaudi::Property<std::string> m_configFileName{this, "configFileName", "", "config file name"};
-  bool m_jetCleanUgly;			        // Whether or not to remove ugly jets
-  bool m_decorateSelectedObjects; 		// decorate selected objects? defaul passSel
-  bool m_createSelectedContainer; 		// fill using SG::VIEW_ELEMENTS to be light weight
-  bool m_cleanJets;               		// require cleanJet decoration to not be set and false
-  float m_pT_min;                 		// require pT > pt_max
-  float m_eta_max;                		// require eta < eta_max
-  float m_e_min;											// require e > e_min
-  bool m_doJVT;                   		// check JVT
-  float m_JVTCut;                 		// cut value
+  Gaudi::Property<bool> m_decorateSelectedObjects{this, "DecorateSelectedObjects", true, "Decorate selected objects (default: passSel)"};
+  Gaudi::Property<bool> m_createSelectedContainer{this, "CreateSelectedContainer", true, "Create selected container using SG::VIEW_ELEMENTS (lightweight)"};  
 
+  Gaudi::Property<bool>  m_cleanJets{this, "CleanJets", true};
+  Gaudi::Property<float> m_pT_min{this, "pTMin", 20e3};
+  Gaudi::Property<float> m_e_min{this, "eMin", 0.0};
+  Gaudi::Property<float> m_eta_max{this, "etaMax", 2.5};
+  Gaudi::Property<bool>  m_doJVT{this, "DoJVT", true};
+  Gaudi::Property<float> m_JVTCut{this, "JVTCut", 0.64};
 
 private:
 

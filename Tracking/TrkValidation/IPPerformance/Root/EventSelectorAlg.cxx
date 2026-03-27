@@ -32,30 +32,16 @@
 
 EventSelectorAlg ::EventSelectorAlg(const std::string& name,
                                     ISvcLocator* pSvcLocator)
-    : ETAlgorithm(name, pSvcLocator),
-      //: AthAlgorithm(name, pSvcLocator),
-      m_PU_default_channel(0),
+    //: ETAlgorithm(name, pSvcLocator),
+      : AthAlgorithm(name, pSvcLocator),
       m_cutflowHist(nullptr) 
 {
   Info("EventSelectorAlg()", "Calling constructor");
 
-  m_debug                  = false;                 // debug flag
-  m_applyGRLCut            = true;                  // apply GRL cut
-  m_applyPrimaryVertexCut  = true;                  // apply primary vertex cut
-  m_applyTriggerCut        = true;                  // apply trigger cuts flat
-  m_applyEventCleaningCut  = true;                  // apply Event Cleaning flag
-  m_applyPUreweighting     = false;                 // apply the pileup reweighting
-
-  m_triggerSelection       = "HLT_j[0-9]*";         // list of triggers
-  m_inVertexContName       = "PrimaryVertices";     // primary vertex container name
-  m_PVNTrack               = 3;                     // number of tracks required for a primary vertex
-  m_GRLExcludeList         = "";                    // exclude these runs (even if on GRL)
   m_GRLxml                 =
       "$ROOTCOREBIN/data/IPPerformance/data15_13TeV.periodAllYear_DetStatus-v73-pro19-08_DQDefects-00-01-02_PHYS_StandardGRL_All_Good_25ns.xml";  // data15_13TeV.periodAllYear_DetStatus-v71-pro19-06_DQDefects-00-01-02_PHYS_StandardGRL_All_Good_25ns_tolerable_IBLSTANDBY-DISABLE.xml";//data15_13TeV.periodAllYear_DetStatus-v63-pro18-01_DQDefects-00-01-02_PHYS_StandardGRL_All_Good.xml";
                                              // //https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/GoodRunListsForAnalysis
 
-  m_lumiCalcFileNames = "";  // do i need these?
-  m_PRWFileNames = "";       //
 
   // This is not necessary
 }
@@ -64,82 +50,14 @@ EventSelectorAlg ::~EventSelectorAlg() {}
 
 StatusCode EventSelectorAlg::initialize() {
  
-  // configure()!!!
-  Info("initialize()", "Initializing event selection ...");
-
-  setConfig(m_configFileName);
-
-  //TODO: use TEnv to config or just configure the variables in python script?
-  if (!getConfig().empty()) {
-    Info("configure()", "Configuing EventSelectorAlg Interface. User configuration read from : %s ", getConfig().c_str());
-
-    TEnv* config = new TEnv(getConfig(true).c_str());
-
-    // config variables
-    m_applyGRLCut                  = config->GetValue("ApplyGRLCut", m_applyGRLCut);
-    m_GRLxml                       = config->GetValue("GRL", m_GRLxml.value().c_str());
-    m_GRLExcludeList               = config->GetValue("GRLExclude", m_GRLExcludeList.value().c_str());
-    m_inVertexContName             = config->GetValue("VertexContainer", m_inVertexContName.c_str());
-    m_applyPrimaryVertexCut        = config->GetValue("ApplyPrimaryVertexCut", m_applyPrimaryVertexCut);
-    m_PVNTrack                     = config->GetValue("NTrackForPrimaryVertex", m_PVNTrack);
-    m_applyEventCleaningCut        = config->GetValue("ApplyEventCleaningCut", m_applyEventCleaningCut);
-    m_triggerSelection             = config->GetValue("Trigger", m_triggerSelection.c_str());
-    m_applyTriggerCut              = config->GetValue("ApplyTriggerCut", m_applyTriggerCut);
-    m_testTrigger                  = config->GetValue("testTrigger", m_testTrigger);
-    m_applyPUreweighting           = config->GetValue("ApplyPUreweighting", m_applyPUreweighting);
-    m_lumiCalcFileNames            = config->GetValue("LumiCalcFiles", m_lumiCalcFileNames.c_str());
-    m_PRWFileNames                 = config->GetValue("PRWFiles", m_PRWFileNames.c_str());
-    m_PU_default_channel           = config->GetValue("PUDefaultChannel", m_PU_default_channel);
-    m_debug                        = config->GetValue("Debug", m_debug);
-
-    if (!m_triggerSelection.empty())
-      Info("configure()", "Using Trigger %s",
-           m_triggerSelection.c_str());
-    if (!m_applyTriggerCut)
-      Info("configure()", "WILL NOT CUT ON TRIGGER AS YOU REQUESTED!");
-
-    if (m_applyPUreweighting) {
-      if (m_lumiCalcFileNames.size() == 0) {
-        Error("BasicEventSelection()",
-              "Pileup Reweighting is requested but no LumiCalc file is "
-              "specified. Exiting");
-        return StatusCode::FAILURE;
-      }
-      if (m_PRWFileNames.size() == 0) {
-        Error("BasicEventSelection()",
-              "Pileup Reweighting is requested but no PRW file is specified. "
-              "Exiting");
-        return StatusCode::FAILURE;
-      }
-    }
-
-    config->Print();
-    Info("configure()", "EventSelectorAlg Interface succesfully configured! ");
-
-    delete config;
-    config = nullptr;
-  }  // configure() end!!
- 
-
-  //TODO: the eventInfo can't be retrived in initialize()?
-  // evtStore()->retrieve (eventInfo, "EventInfo")
-  //  const xAOD::EventInfo* eventInfo = 0;
-  //  ATH_CHECK (evtStore()->retrieve (eventInfo, "EventInfo"));
-  //
-  //  Info("initialize()", "Checking if this is data or MC...");
-  //  m_isMC = eventInfo->eventType( xAOD::EventInfo::IS_SIMULATION );
-
-  if (m_debug) {
-    Info("initialize()", "Is MC? %i", static_cast<int>(m_isMC));
-  }
-
   //@TODO: use ATH logging
   Info("initialize()", "Setting up cutflow...");
-
+  ATH_CHECK( m_inVertexKey.initialize() );
   // write the cutflows to this file so algos downstream can pick up the pointer
-
+  ServiceHandle<ITHistSvc> histSvc("THistSvc","EventSelectorAlg");
+  ATH_CHECK( histSvc.retrieve() );
   m_cutflowHist = new TH1D("cutflow", "cutflow", 1, 1, 2);
-  ATH_CHECK( histSvc()->regHist("/MYSTREAM/cutflow",m_cutflowHist) );
+  ATH_CHECK( histSvc->regHist("/MYSTREAM/cutflow",m_cutflowHist) );
  
   m_cutflowHist->SetCanExtend(TH1::kAllAxes);
 
@@ -205,14 +123,15 @@ StatusCode EventSelectorAlg::finalize() {
 }
 
 StatusCode EventSelectorAlg::execute() {
+  
+  const EventContext& ctx = Gaudi::Hive::currentContext();
   const xAOD::EventInfo* eventInfo = 0;
   ATH_CHECK(evtStore()->retrieve(eventInfo, "EventInfo"));
   
   ++m_eventCounter;
-  const xAOD::VertexContainer* vertices = 0;
-  if (!evtStore()->retrieve(vertices, m_inVertexContName).isSuccess()) {
-    Error("execute()",
-          "Failed to retrieve Input Vertex container from event. Exiting.");
+  SG::ReadHandle<xAOD::VertexContainer> vertices{m_inVertexKey, ctx};
+  if (!vertices.isValid()) {
+    ATH_MSG_ERROR ("Failed to retrieve Input Vertex container from event. Exiting: " << m_inVertexKey.key() );
     return StatusCode::FAILURE;
   }
 
@@ -295,7 +214,7 @@ StatusCode EventSelectorAlg::execute() {
 
   //*****Primary Vertex****************
   if (m_applyPrimaryVertexCut) {
-    if (!passPrimaryVertexSelection(vertices, m_PVNTrack)) {
+    if (!passPrimaryVertexSelection(vertices.cptr(), m_PVNTrack)) {
       return StatusCode::SUCCESS;
     }
   }

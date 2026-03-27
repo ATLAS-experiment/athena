@@ -286,7 +286,7 @@ void IPhistos::BookHistograms()
   m_1D.push_back(m_h_count);
 } // End of BookHistograms()
 
-void IPhistos::FillHistograms(double d0, double z0, double pt, double eta, double phi, int runN, double mu, double jetPt, std::vector<float> weights, double bsWidth, double deltaR_trk12, std::vector<int> class_satisfied, float intLumi)
+void IPhistos::FillHistograms(double d0, double z0, double pt, double eta, double phi, int runN, double mu, double jetPt, std::vector<float> weights, double bsWidth, double deltaR_trk12, std::vector<int> class_satisfied)
 {
     
   for (int class_index = 0; class_index < int(class_satisfied.size()); class_index++){ // class_satisfied loop ends in the end

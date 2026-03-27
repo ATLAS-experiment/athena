@@ -1,6 +1,6 @@
 
 #include "IPPerformance/EventSelectorAlg.h"
-#include "IPPerformance/ETAlgorithm.h"
+
 #include "IPPerformance/ReturnCheck.h"
 #include "IPPerformance/IPNtupleDumper.h"
 #include "AthContainers/ConstDataVector.h"
@@ -23,26 +23,19 @@
 
 
 IPNtupleDumper::IPNtupleDumper(const std::string& name, ISvcLocator* pSvcLocator) 
-: ETAlgorithm(name, pSvcLocator)
+: AthAlgorithm(name, pSvcLocator)
 {
-  m_name = name;
+  //m_name = name;
   m_histOutput         = "IPNtupleDumper";
-  m_inJetContainer     = "AntiKt4EMTopoJets_Selected";
   //m_inJetContainer     = "AntiKt4TruthJets_Selected";
   m_TruthPtCut         = 500.;
   m_TruthEtaCut        = 2.5;
   m_TruthMatchProb     = 0.5;
   m_doTightTruthMatch  = true;
   m_doGhostAssociation = true;
-  m_inRecTrkContainer  = "InDetTrackParticles";
   m_vtxContainer       = "PrimaryVertices";
   derivationName     = ""; // MVGR: Due to a mismatch between the derivation name when using or not the CA (IDTIDE vs. IDTIDE1), the derivation name is now obtained automatically using the function "GetDerivationName" 
   m_deltaRCut          = 0.4;
-  m_applyDeltaRCut     = true;
-  m_skipPVfailures     = true;
-  m_TTVA_WP            = "Prompt_MaxWeight";
-  m_noTTVAonInput      = true;
-  m_debug              = false; 
   m_IPhistos           = nullptr;
 
 }
@@ -63,43 +56,22 @@ StatusCode IPNtupleDumper :: initialize ()
   // input events.
 
   Info("initialize()", "Initializing IPNtupleDumper..." );
-  setConfig(m_configFileName);  
-  Info("IPNtupleDumper::configure()", "Calling configure");
-  //https://its.cern.ch/jira/browse/ATLASG-809
-  xAOD::TFileAccessTracer::enableDataSubmission( false );
 
-  if (!getConfig().empty()) {
-    Info("configure()", "Configuring IPNtupleDumper interface. User configuration read from : %s ", getConfig().c_str());
-    TEnv* config         = new TEnv(getConfig(true).c_str());
-    m_inJetContainer     = config->GetValue("InputJetContainer", m_inJetContainer.c_str());
-    m_TruthPtCut         = config->GetValue("TruthPtCut", m_TruthPtCut);
-    m_TruthEtaCut        = config->GetValue("TruthEtaCut", m_TruthEtaCut);
-    m_TruthMatchProb     = config->GetValue("TruthMatchProb", m_TruthMatchProb);
-    m_doTightTruthMatch  = config->GetValue("doTightTruthMatch", m_doTightTruthMatch);
-    m_inRecTrkContainer  = config->GetValue("InputTrackContainer", m_inRecTrkContainer.c_str());
-    m_vtxContainer       = config->GetValue("InputVertexContainer", m_vtxContainer.c_str());
-    m_doGhostAssociation = config->GetValue("DoGhostAssociation", m_doGhostAssociation);
-    m_deltaRCut          = config->GetValue("DeltaRCut", m_deltaRCut);
-    m_applyDeltaRCut     = config->GetValue("applyDeltaRCut", m_applyDeltaRCut);
-    m_TTVA_WP            = config->GetValue("TTVA_WP", m_TTVA_WP.c_str());
-    m_noTTVAonInput      = config->GetValue("noTTVAonInput", m_noTTVAonInput);
-    m_debug              = config->GetValue("debug", m_debug);
-
-    config->Print();
-    delete config;
-  }
-
-  if (m_inJetContainer.empty()) {
+  if (m_jetKey.empty()) {
     Info("IPNtupleDumper::configure()","InputJetContainer is empty!");
     return StatusCode::FAILURE;
   }
-  Info("IPNtupleDumper::configure()","InputJetContainer: %s", m_inJetContainer.c_str());
+  Info("IPNtupleDumper::configure()","InputJetContainer: %s", m_jetKey.key());
+  ATH_CHECK( m_jetKey.initialize() );
+  ATH_CHECK( m_jetConstitScalePtKey.initialize() );
 
-  if (m_inRecTrkContainer.empty()) {
+
+  if (m_trackKey.empty()) {
     Info("IPNtupleDumper::configure()","InputTrackContainer is empty!");
     return StatusCode::FAILURE;
   }
-  Info("IPNtupleDumper::configure()","InputTrackContainer: %s", m_inRecTrkContainer.c_str());
+  Info("IPNtupleDumper::configure()","InputTrackContainer: %s", m_trackKey.key());
+  ATH_CHECK( m_trackKey.initialize() );
 
   if (m_vtxContainer.empty()) {
     Info("IPNtupleDumper::configure()","InputVertexContainer is empty!");
@@ -111,13 +83,7 @@ StatusCode IPNtupleDumper :: initialize ()
   //Track to vertex tool
   ANA_CHECK(m_trktovxtool.retrieve());
 
-  //LoosePrimary Track Selection
-  ANA_CHECK(m_LoosePrimary_selTool.retrieve());
-  m_trackselectionTools.push_back(m_LoosePrimary_selTool.get());
-  
-  //TightPrimary Track Selection
-  ANA_CHECK(m_TightPrimary_selTool.retrieve());
-  m_trackselectionTools.push_back(m_TightPrimary_selTool.get());
+  ATH_CHECK(m_trackselectionTools.retrieve());
   
   //TrackTruthHelper
   ANA_MSG_INFO("initialize(),Initialising TrackTruthHelpers...");
@@ -125,58 +91,37 @@ StatusCode IPNtupleDumper :: initialize ()
   ANA_MSG_INFO( "   eta cut: " << m_TruthEtaCut );
   ANA_MSG_INFO( "   truth matching probability: " << m_TruthMatchProb );
   m_truthhelper = new TrackTruthHelpers(m_TruthPtCut,m_TruthEtaCut,m_TruthMatchProb);
-
-  /*const xAOD::EventInfo* evtInfo = 0;
-  //if (!m_event->retrieve(evtInfo,"EventInfo").isSuccess()) {
-  if (!evtStore()->retrieve(evtInfo,"EventInfo").isSuccess()) {
-    Error("execute()","Failed to retrieve event info. Exiting.");
-    return StatusCode::FAILURE;
-  }
-  m_isMC = evtInfo->eventType( xAOD::EventInfo::IS_SIMULATION ); //it can modified in configFile.
-  runN   = evtInfo->runNumber();*/ //has been in execute()!
- 
   
-  ATH_CHECK(m_trigDecKey.initialize());
-  if(!m_isMC){ 
-    // trigger initialisation if running on data 
-    Info("initialize()", "Trigger");
-    ANA_CHECK(m_trigConfTool.retrieve());
-    ToolHandle< TrigConf::ITrigConfigTool > configHandle( m_trigConfTool.get() );
-    ANA_CHECK( m_trigDecTool.retrieve());
-    ANA_CHECK( m_trigDecTool->setProperty( "ConfigTool", configHandle ));
-    ANA_CHECK( m_trigDecTool->setProperty( "TrigDecisionKey", "xTrigDecision" ));
-    ANA_CHECK( m_trigDecTool->setProperty( "OutputLevel", MSG::ERROR));
-    //RETURN_CHECK("IPNtupleDumper::initialize()", m_trigDecTool->initialize(), "Failed to initialise TrigDecisionTool!");
-  }
-
-
-  if (!ipSaveHistosOnly) {
+  if(!m_isMC) ATH_CHECK( m_trigDecTool.retrieve());
+  ServiceHandle<ITHistSvc> histSvc ("THistSvc","IPNtupleDumper");
+  ATH_CHECK( histSvc.retrieve() );
+  if (!m_ipSaveHistosOnly) {
     t1 = new TTree("IPtree", "IPtree");
     SetBranches(t1);
-    ANA_CHECK( histSvc()->regTree("/MYSTREAM/IPtree",t1));
-
+    ANA_CHECK( histSvc->regTree("/MYSTREAM/IPtree",t1));
+    
     h_SumOfEventWeights = new TH1D("h_SumOfEventWeights", "", 2, 0.5, 1.5);
-    ANA_CHECK( histSvc()->regHist("/MYSTREAM/h_SumOfEventWeights",h_SumOfEventWeights));
+    ANA_CHECK( histSvc->regHist("/MYSTREAM/h_SumOfEventWeights",h_SumOfEventWeights));
   }
   else{ // Set up all the tools needed for IP studies
 
     Info("histInitialize()", "Initializing IPhistos class");
     m_IPhistos = std::make_unique<IPhistos>("default_");
-    Info("histInitialize()", "Saving additonal IP histograms? %s", std::to_string(ipSaveAdditionalHistos).c_str());
-    m_IPhistos->SaveAdditionalHistos(ipSaveAdditionalHistos);
+    Info("histInitialize()", "Saving additonal IP histograms? %s", std::to_string(m_ipSaveAdditionalHistos).c_str());
+    m_IPhistos->SaveAdditionalHistos(m_ipSaveAdditionalHistos);
     Info("histInitialize()", "Defining 3D histograms");
     m_IPhistos->Define3DHistos();
     for (const auto& histEntry : m_IPhistos->get3DHistos()) {
         const std::string& histName = histEntry.first;
         TH3D* hist = histEntry.second;
-	ANA_CHECK( histSvc()->regHist("/MYSTREAM/"+histName,hist));
+	ANA_CHECK( histSvc->regHist("/MYSTREAM/"+histName,hist));
     }
     Info("histInitialize()", "Defining 2D histograms");
     m_IPhistos->Define2DHistos();
     for (const auto& histEntry : m_IPhistos->get2DHistos()) {
         const std::string& histName = histEntry.first;
         TH2D* hist = histEntry.second;
-        ANA_CHECK( histSvc()->regHist("/MYSTREAM/"+histName,hist));
+        ANA_CHECK( histSvc->regHist("/MYSTREAM/"+histName,hist));
     }
 
     Info("histInitialize()", "Booking histograms");
@@ -184,7 +129,7 @@ StatusCode IPNtupleDumper :: initialize ()
     for(const auto& histvector : m_IPhistos->get1Dvector()) {
        for(const auto& hist: histvector) {
           const std::string& histName = hist->GetName();
-          ANA_CHECK( histSvc()->regHist("/MYSTREAM/"+histName,hist));
+          ANA_CHECK( histSvc->regHist("/MYSTREAM/"+histName,hist));
        }
     }
 
@@ -219,8 +164,9 @@ StatusCode IPNtupleDumper :: finalize ()
 
 }
 
-StatusCode IPNtupleDumper :: execute ()
+StatusCode IPNtupleDumper :: execute () 
 {
+  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   //Retrieve event Info
   const xAOD::EventInfo* evtInfo = 0;
@@ -231,7 +177,7 @@ StatusCode IPNtupleDumper :: execute ()
   
   // Check if we are running on MC
   m_isMC = evtInfo->eventType( xAOD::EventInfo::IS_SIMULATION );
-  if ( m_debug ) { Info("initialize()", "Is MC? %i", static_cast<int>(m_isMC) ); }
+  Info("initialize()", "Is MC? %i", static_cast<int>(m_isMC) );
 
   // Set event weight to MC event weight on MC
   if( m_isMC ) evtW = evtInfo->mcEventWeight();
@@ -262,16 +208,18 @@ StatusCode IPNtupleDumper :: execute ()
   }
   
   // Retrieve Jets
-  const xAOD::JetContainer* inJets_Selected = 0; 
-  if (!evtStore()->retrieve(inJets_Selected, m_inJetContainer).isSuccess()){ //retrieve the jets selected and calibrated
-    Error("execute()", "Failed to retrieve Selected Reconstructed Jets Container. Exiting.");
+  SG::ReadHandle<xAOD::JetContainer> inJets_Selected{m_jetKey, ctx};
+  if (!inJets_Selected.isValid()) {
+    ATH_MSG_ERROR ("Couldn't retrieve xAOD::Jet with key: " << m_jetKey.key() );
     return StatusCode::FAILURE;
   }
+  SG::ReadDecorHandle<xAOD::JetContainer, float> jet_constit_scale_pt{m_jetConstitScalePtKey, ctx};
+
   
   // Retrieve trackParticles
-  const xAOD::TrackParticleContainer* recoTracksSelected = 0;
-  if (!evtStore()->retrieve (recoTracksSelected, m_inRecTrkContainer).isSuccess() ) {
-    Error("execute()","Failed to retrieve track container. Exiting.");
+  SG::ReadHandle<xAOD::TrackParticleContainer> recoTracksSelected{m_trackKey, ctx};
+  if (!recoTracksSelected.isValid()) {
+    ATH_MSG_ERROR ("Couldn't retrieve xAOD::TrackParticles with key: " << m_trackKey.key() );
     return StatusCode::FAILURE;
   }
 
@@ -283,14 +231,14 @@ StatusCode IPNtupleDumper :: execute ()
   }
 
   // MVGR: Get the Derivation Name
-  derivationName = GetDerivationName(recoTracksSelected);
+  derivationName = GetDerivationName(recoTracksSelected.cptr());
   if (derivationName == ""){
     Error("execute()", "Could not find the derivation name from the output. Exiting.");
     return StatusCode::FAILURE;
   }
   
   // Check for the decorations. If not available exit. 
-  if (!CheckForAvailableDecorations(recoTracksSelected, derivationName)) {
+  if (!CheckForAvailableDecorations(recoTracksSelected.cptr(), derivationName)) {
     Error("execute()","IP decorations not available. Exiting.");
     return StatusCode::FAILURE;
   }
@@ -331,7 +279,7 @@ StatusCode IPNtupleDumper :: execute ()
 
       if (max_constit_mom*0.001 < 600){
         // Checking the triggers and applying prescale corrections
-        if(!ipHLTcorrection){
+        if(!m_ipHLTcorrection){
           factor_prescale = 20;
         }
         else{
@@ -372,9 +320,10 @@ StatusCode IPNtupleDumper :: execute ()
 	float jet_constit_scale_pt = mAcc_jet_constit_scale_pt(*jet);
         if (jet_constit_scale_pt > max_constit_mom) max_constit_mom = jet_constit_scale_pt;   
       }
+
       if (max_constit_mom*0.001 < 600){
         // Checking the triggers and applying prescale corrections
-        if(!ipHLTcorrection){
+        if(!m_ipHLTcorrection){
           factor_prescale = 20;
         }
         else{
@@ -420,7 +369,7 @@ StatusCode IPNtupleDumper :: execute ()
   // 5) Fill tree variables
   
   if (m_doGhostAssociation) {//m_doGhostAssociation=true
-    for (auto jet : *inJets_Selected) {
+    for (auto jet : *inJets_Selected.cptr()) {
       std::vector<const xAOD::TrackParticle*> jetTracks; 
       bool haveJetTracks = jet->getAssociatedObjects(xAOD::JetAttribute::GhostTrack, jetTracks);
       if (!haveJetTracks) {
@@ -429,7 +378,7 @@ StatusCode IPNtupleDumper :: execute ()
       }
       ntracks = jetTracks.size();
       for (auto *trk : jetTracks)
-        ProcessTrack(trk, jet, vtxContainer);
+        ProcessTrack_GhostAssoc(trk, jet, vtxContainer);
     }
   }
   else {
@@ -441,7 +390,7 @@ StatusCode IPNtupleDumper :: execute ()
     
     for (auto track : *recoTracksSelected) {  
       ntracks = recoTracksSelected->size();
-      ProcessTrack(track, inJets_Selected, vtxContainer);
+      ProcessTrack_DeltaR(track, inJets_Selected.cptr(), vtxContainer);
     }       
   } 
   
@@ -458,7 +407,7 @@ StatusCode IPNtupleDumper :: execute ()
   }
   // MVGR ==============
 
-  if (!ipSaveHistosOnly) {  
+  if (!m_ipSaveHistosOnly) {  
     t1->Fill();
     h_SumOfEventWeights->Fill(1.0, evtW);
   }
@@ -677,6 +626,7 @@ std::string IPNtupleDumper::GetDerivationName(const xAOD::TrackParticleContainer
 
 }
 
+
 void IPNtupleDumper::TrackToJetDeltaRAssociation(const xAOD::TrackParticle* trk, const xAOD::JetContainer* jets, float dRcut,float& deltaR, float& pT, float& Etajet, int &JVTjet) 
 {
 
@@ -727,7 +677,7 @@ void IPNtupleDumper::TrackToJetDeltaRAssociation(const xAOD::TrackParticle* trk,
 
 }
 
-bool IPNtupleDumper::ProcessTrack(const xAOD::TrackParticle* track, const  xAOD::JetContainer* jets, const xAOD::VertexContainer* vtxCont) 
+bool IPNtupleDumper::ProcessTrack_DeltaR(const xAOD::TrackParticle* track, const  xAOD::JetContainer* jets, const xAOD::VertexContainer* vtxCont) 
 {
 
   // Track to jet deltaR association => bit of duplicated code. Should move to some helpers.
@@ -741,11 +691,6 @@ bool IPNtupleDumper::ProcessTrack(const xAOD::TrackParticle* track, const  xAOD:
   if (!track )
     return false;
 
-  // Option to allow processing of samples without TTVA information
-  // Consider implementing track-vertex cut by hand as temporary fix
-  if( m_noTTVAonInput ) Warning("IPNtupleDumper::ProcessTrack", "Skipping TTVA for now.");
-  else{
-  
   // Check if track has at least one associated primary vertex
   bool hasMatch = false;
   bool hasMatchFirst = false;
@@ -763,40 +708,32 @@ bool IPNtupleDumper::ProcessTrack(const xAOD::TrackParticle* track, const  xAOD:
 
   // Remove tracks without associated vertices
   if( !hasMatch ) {
-    if( m_debug ) Warning("IPNtupleDumper::ProcessTrack", "No vertex found for track.");
+    Warning("IPNtupleDumper::ProcessTrack", "No vertex found for track.");
     return false;
   }
 
   // Remove tracks not associated to first primary vertex
   // KB: assume this is the vertex of the jet --> is there a way of checking this on the fly?
   if ( !(hasMatchFirst) ) {
-    if( m_debug ) Warning("IPNtupleDumper::ProcessTrack", "Track not associated to primary vertex.");
+    Warning("IPNtupleDumper::ProcessTrack", "Track not associated to primary vertex.");
     return false;
   }
-
-  } // End of m_noTTVAonInput
   
   // Associate tracks to jets and fill jet variables
   TrackToJetDeltaRAssociation(track, jets, m_deltaRCut, deltaR_trk_jet, pTjet, Etajet, JVTjet);
   
-  // deltaR_trk>0 only if the track is associated to a jet
-  if (m_applyDeltaRCut && deltaR_trk_jet < 0)
-    return false;
   FillTreeVariables(track, deltaR_trk_jet, pTjet, Etajet, JVTjet);
   
   return true;
 
 }
 
-bool IPNtupleDumper::ProcessTrack(const xAOD::TrackParticle* track, const xAOD::Jet* jet, const xAOD::VertexContainer* vtxCont) 
+bool IPNtupleDumper::ProcessTrack_GhostAssoc(const xAOD::TrackParticle* track, const xAOD::Jet* jet, const xAOD::VertexContainer* vtxCont) 
 {
   // Remove nullptrs
-  if (!track )
+  if (!track ) {
     return false;
-  // Option to allow processing of samples without TTVA information
-  // Consider implementing track-vertex cut by hand as temporary fix
-  if( m_noTTVAonInput ) Warning("IPNtupleDumper::ProcessTrack", "Skipping TTVA for now.");//"m_noTTVAonInput is false"
-  else{
+  }
 
     //Check if track has at least one associated primary vertex
     bool hasMatch = false;
@@ -813,22 +750,18 @@ bool IPNtupleDumper::ProcessTrack(const xAOD::TrackParticle* track, const xAOD::
     }
     // Remove tracks without associated vertices
     if( !hasMatch ) {
-      if( m_debug )  Warning("IPNtupleDumper::ProcessTrack", "No vertex found for track.");
+      Warning("IPNtupleDumper::ProcessTrack", "No vertex found for track.");
       return false;
     }
 
     // Remove tracks not associated to first primary vertex
     // KB: assume this is the vertex of the jet --> is there a way of checking this on the fly?
     if ( !(hasMatchFirst) ){
-      if( m_debug ) Warning("IPNtupleDumper::ProcessTrack", "Track not associated to primary vertex.");
+      Warning("IPNtupleDumper::ProcessTrack", "Track not associated to primary vertex.");
       return false;
     }
 
-  } // End of m_noTTVAonInput
-
   float deltaR_trk_jet = jet->p4().DeltaR(track->p4());
-  if (m_applyDeltaRCut && deltaR_trk_jet > m_deltaRCut) //"m_applyDeltaRCut is false"
-    return false;
   float pTjet  = jet->pt() *  0.001;
   float Etajet = jet->eta();
   int   JVTjet = PassJVTCut(jet);
@@ -839,7 +772,7 @@ bool IPNtupleDumper::ProcessTrack(const xAOD::TrackParticle* track, const xAOD::
 
 }
 
-void IPNtupleDumper::FillTreeVariables(const xAOD::TrackParticle* track,float deltaR_trk_jet,float pTjet,float Etajet,int JVTjet) 
+void IPNtupleDumper::FillTreeVariables(const xAOD::TrackParticle* track,float deltaR_trk_jet,float pTjet,float Etajet,bool JVTjet) 
 {
           
   uint8_t selBits = 0x0;
@@ -859,9 +792,6 @@ void IPNtupleDumper::FillTreeVariables(const xAOD::TrackParticle* track,float de
   float z0PVSigmaPV = mAcc_z0PVSigmaPV(*track);
  
   
-  if (m_skipPVfailures && (d0PV==999 || z0PV==999 || d0SigmaPV==999 || z0SigmaPV==999 || d0PVSigmaPV==999 || z0PVSigmaPV==999))
-    return;
-  
   for (unsigned int i_selTool = 0; i_selTool<m_trackselectionTools.size(); i_selTool++) {
     if (m_trackselectionTools[i_selTool]->accept(track))
       selBits |= 0x1<<i_selTool;
@@ -874,7 +804,6 @@ void IPNtupleDumper::FillTreeVariables(const xAOD::TrackParticle* track,float de
     
     const xAOD::TruthParticle* truth_p = nullptr;
     if (m_doTightTruthMatch){
-      if (m_debug) Info("IPNtupleDumper::FillTreeVariables", "Running tight truth matching.");
       truth_p = getAssociatedPrimaryTruth(track);
     }
     else truth_p = getTrackTruthLink(track);
@@ -1021,7 +950,7 @@ void IPNtupleDumper::FillTreeVariables(const xAOD::TrackParticle* track,float de
 // from: https://acode-browser2.usatlas.bnl.gov/lxr/source/r21/atlas/Reconstruction/MET/METUtilities/Root/METMaker.cxx
 // cuts from:
 // https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/BTaggingBenchmarksRelease21
-int IPNtupleDumper::PassJVTCut(const xAOD::Jet* jet) 
+bool IPNtupleDumper::PassJVTCut(const xAOD::Jet* jet) 
 {
   if (jet->pt() < 60000 && fabs(jet->eta() < 2.4)) {
     float jvt = -999;
@@ -1113,13 +1042,9 @@ StatusCode IPNtupleDumper::FillIPHistograms()
         }
       }
 
-	    float intLumi = -100.;
-      if (GetIntLumi(runN, intLumi) != StatusCode::SUCCESS)
-        return StatusCode::FAILURE;
-
       double bsWidth = (bsSigmax + bsSigmay) / 2.;
       m_IPhistos->FillHistograms(trk_d0.at(i) * 1000., (trk_z0.at(i) - pvz + bsz) * 1000, trk_pt.at(i) * 0.001, trk_eta.at(i), trk_phi.at(i),
-				                           runN, mu, jetPt.at(i), weights, bsWidth, deltaR_trk12, class_satisfied.at(i), intLumi);
+				                           runN, mu, jetPt.at(i), weights, bsWidth, deltaR_trk12, class_satisfied.at(i));
       
     } // jetpT selection
   
@@ -1169,54 +1094,3 @@ std::vector<int> IPNtupleDumper::Classify(unsigned int i)
 
 }
 
-StatusCode IPNtupleDumper::GetIntLumi(Int_t runN, float& int_lumi)
-{
-
-  const std::string fname = "/afs/cern.ch/work/x/xai/public/ATLAS/CTIDE/src/CTIDEefficiency/macros/IPanalysis_vRun3/util/runToLumi.txt";
-  std::ifstream inFile(fname);
-  if (!inFile) {
-    Error("GetIntLumi", "Unable to open x-section file");
-    return StatusCode::FAILURE; // terminate with error
-  }
-  
-  std::vector<std::string> lines;
-  std::string line;
-
-  int i=0;
-  while(!inFile.eof()){
-    getline(inFile, line);
-
-    if( !(line.length() == 0 || line[0] == '#') )
-      lines.push_back(line);
-    ++i;
-  }
-  inFile.close();
-
-  int found = -1, flag2= -1, dsid = runN; 
-  for(unsigned int k = 0; k < lines.size(); k++){
-    std::stringstream ll(lines[k]);
-    std::string substr;
-    int ind = 0;
-    while (ll >> substr){
-      //Run Number 
-      if (ind == 0){
-        if( std::stof(substr) == dsid ){
-          found = 1;
-        }
-      }
-      //Integrated Luminosity
-      if (ind == 5){
-	      if (found == 1){
-          flag2 = 1;
-	        int_lumi = std::stof(substr);
-        }
-      }
-      ind++;
-    }
-    if (flag2 == 1)
-      break;
-  }
-
-  return StatusCode::SUCCESS;
-
-}
