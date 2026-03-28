@@ -30,7 +30,7 @@ ActsTrackFindingAlg                                               INFO statistic
 | Initial param estimation failed   |          0 |          0 |
 | CKF tracks                        |      12034 |      12034 |
 | Rejected refined parameters       |          0 |          0 |
-| selected tracks                   |      10083 |      10083 |
+| selected tracks                   |      10143 |      10143 |
 | Stopped tracks reaching max holes |       3624 |       3624 |
 | Seeds with more than one branch   |          0 |          0 |
 | Tracks failing second CKF         |          4 |          4 |
@@ -38,6 +38,7 @@ ActsTrackFindingAlg                                               INFO statistic
 | Stopped tracks above max eta      |          0 |          0 |
 | Total shared hits                 |       1526 |       1526 |
 | Total forced measurements         |      93884 |      93884 |
+| resolved tracks                   |      10083 |      10083 |
 |-----------------------------------|------------|------------|
 ActsTrackFindingAlg                                               INFO Ratios
 |-------------------------------------------|------------|------------|
@@ -46,21 +47,23 @@ ActsTrackFindingAlg                                               INFO Ratios
 | failed / seeds                            |   0.200698 |   0.200698 |
 | duplication / seeds                       |   0.132857 |   0.132857 |
 | Rejected refined params / seeds           |          0 |          0 |
-| selected / CKF tracks                     |   0.837876 |   0.837876 |
-| selected tracks / used seeds              |   0.643952 |   0.643952 |
+| selected / CKF tracks                     |   0.842862 |   0.842862 |
+| selected tracks / used seeds              |   0.647784 |   0.647784 |
+| resolved / selected tracks                |   0.994085 |   0.994085 |
+| resolved tracks / used seeds              |   0.643952 |   0.643952 |
 | branched tracks / used seeds              |          0 |          0 |
 | no 2nd CKF / CKF tracks                   | 0.000332392 | 0.000332392 |
 | shared hits / CKF tracks                  |   0.126807 |   0.126807 |
 | forced measurements / used seeds          |    5.99591 |    5.99591 |
 |-------------------------------------------|------------|------------|
-| selected / CKF tracks            0.0- 0.5 |   0.793199 |   0.793199 |
-|                                  0.5- 1.0 |   0.823917 |   0.823917 |
-|                                  1.0- 1.5 |    0.80117 |    0.80117 |
-|                                  1.5- 2.0 |   0.733728 |   0.733728 |
-|                                  2.0- 2.5 |   0.889634 |   0.889634 |
-|                                  2.5- 3.0 |   0.890672 |   0.890672 |
-|                                  3.0- 3.5 |    0.90919 |    0.90919 |
-|                                  3.5-+inf |   0.794397 |   0.794397 |
+| resolved tracks / used seeds     0.0- 0.5 |    0.46348 |    0.46348 |
+|                                  0.5- 1.0 |   0.478404 |   0.478404 |
+|                                  1.0- 1.5 |   0.423275 |   0.423275 |
+|                                  1.5- 2.0 |   0.540473 |   0.540473 |
+|                                  2.0- 2.5 |    0.69642 |    0.69642 |
+|                                  2.5- 3.0 |   0.804712 |   0.804712 |
+|                                  3.0- 3.5 |   0.882166 |   0.882166 |
+|                                  3.5-+inf |   0.787282 |   0.787282 |
 |-------------------------------------------|------------|------------|
 ActsPrdAssociationAlg                                             INFO Prd Map statistics
 |-----------------------|------------|

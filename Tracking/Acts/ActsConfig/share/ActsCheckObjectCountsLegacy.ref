@@ -49,6 +49,7 @@ ActsLegacyTrackFindingAlg                                         INFO statistic
 | Stopped tracks above max eta      |          0 |          0 |          0 |
 | Total shared hits                 |      10016 |      12496 |      22512 |
 | Total forced measurements         |     196806 |      74706 |     271512 |
+| resolved tracks                   |          0 |          0 |          0 |
 |-----------------------------------|------------|------------|------------|
 ActsLegacyTrackFindingAlg                                         INFO Ratios
 |-------------------------------------------|------------|------------|------------|
@@ -59,19 +60,21 @@ ActsLegacyTrackFindingAlg                                         INFO Ratios
 | Rejected refined params / seeds           |          0 |          0 |          0 |
 | selected / CKF tracks                     |   0.745854 |   0.189031 |   0.645248 |
 | selected tracks / used seeds              |   0.149462 |  0.0440125 |   0.132641 |
+| resolved / selected tracks                |          0 |          0 |          0 |
+| resolved tracks / used seeds              |          0 |          0 |          0 |
 | branched tracks / used seeds              |          0 |          0 |          0 |
 | no 2nd CKF / CKF tracks                   | 0.000380344 |  0.0162125 | 0.00324088 |
 | shared hits / CKF tracks                  |   0.761905 |    4.31045 |    1.40305 |
 | forced measurements / used seeds          |          3 |          6 |    3.47856 |
 |-------------------------------------------|------------|------------|------------|
-| selected / CKF tracks            0.0- 0.5 |   0.896767 |   0.134831 |   0.777485 |
-|                                  0.5- 1.0 |   0.860577 |   0.171429 |   0.714394 |
-|                                  1.0- 1.5 |   0.721947 |   0.211027 |   0.567319 |
-|                                  1.5- 2.0 |   0.577534 |   0.211203 |   0.431243 |
-|                                  2.0- 2.5 |   0.772358 |   0.163835 |   0.565415 |
-|                                  2.5- 3.0 |   0.579759 |          0 |   0.579323 |
-|                                  3.0- 3.5 |   0.777207 |          0 |   0.777207 |
-|                                  3.5-+inf |   0.926864 |          0 |   0.926864 |
+| selected tracks / used seeds     0.0- 0.5 |   0.214517 |  0.0325203 |   0.186223 |
+|                                  0.5- 1.0 |   0.152678 |  0.0542373 |   0.139766 |
+|                                  1.0- 1.5 |    0.06829 |  0.0897332 |  0.0701779 |
+|                                  1.5- 2.0 |  0.0571878 |  0.0322129 |   0.049658 |
+|                                  2.0- 2.5 |   0.140629 |  0.0551245 |   0.121984 |
+|                                  2.5- 3.0 |   0.174499 |          0 |   0.174459 |
+|                                  3.0- 3.5 |    0.26844 |          0 |    0.26844 |
+|                                  3.5-+inf |   0.620877 |          0 |   0.620877 |
 |-------------------------------------------|------------|------------|------------|
 ActsLegacyAmbiguityResolutionAlg                                  INFO Ambiguity Resolution statistics
 |-------------------|------------|
@@ -126,6 +129,7 @@ ActsConversionTrackFindingAlg                                     INFO statistic
 | Stopped tracks above max eta      |          0 |          0 |
 | Total shared hits                 |          0 |          0 |
 | Total forced measurements         |          0 |          0 |
+| resolved tracks                   |          0 |          0 |
 |-----------------------------------|------------|------------|
 ActsConversionTrackFindingAlg                                     INFO Ratios
 |-------------------------------------------|------------|------------|
@@ -136,12 +140,14 @@ ActsConversionTrackFindingAlg                                     INFO Ratios
 | Rejected refined params / seeds           |          0 |          0 |
 | selected / CKF tracks                     |          0 |          0 |
 | selected tracks / used seeds              |          0 |          0 |
+| resolved / selected tracks                |          0 |          0 |
+| resolved tracks / used seeds              |          0 |          0 |
 | branched tracks / used seeds              |          0 |          0 |
 | no 2nd CKF / CKF tracks                   |          0 |          0 |
 | shared hits / CKF tracks                  |          0 |          0 |
 | forced measurements / used seeds          |          0 |          0 |
 |-------------------------------------------|------------|------------|
-| selected / CKF tracks            0.0- 0.5 |          0 |          0 |
+| selected tracks / used seeds     0.0- 0.5 |          0 |          0 |
 |                                  0.5- 1.0 |          0 |          0 |
 |                                  1.0- 1.5 |          0 |          0 |
 |                                  1.5- 2.0 |          0 |          0 |
@@ -208,6 +214,7 @@ ActsLargeRadiusTrackFindingAlg                                    INFO statistic
 | Stopped tracks above max eta      |          0 |          0 |
 | Total shared hits                 |       5340 |       5340 |
 | Total forced measurements         |          0 |          0 |
+| resolved tracks                   |          0 |          0 |
 |-----------------------------------|------------|------------|
 ActsLargeRadiusTrackFindingAlg                                    INFO Ratios
 |-------------------------------------------|------------|------------|
@@ -218,16 +225,18 @@ ActsLargeRadiusTrackFindingAlg                                    INFO Ratios
 | Rejected refined params / seeds           |   0.452765 |   0.452765 |
 | selected / CKF tracks                     |   0.336737 |   0.336737 |
 | selected tracks / used seeds              |  0.0236077 |  0.0236077 |
+| resolved / selected tracks                |          0 |          0 |
+| resolved tracks / used seeds              |          0 |          0 |
 | branched tracks / used seeds              |          0 |          0 |
 | no 2nd CKF / CKF tracks                   |   0.016013 |   0.016013 |
 | shared hits / CKF tracks                  |    1.23927 |    1.23927 |
 | forced measurements / used seeds          |          0 |          0 |
 |-------------------------------------------|------------|------------|
-| selected / CKF tracks            0.0- 0.5 |   0.414784 |   0.414784 |
-|                                  0.5- 1.0 |   0.617073 |   0.617073 |
-|                                  1.0- 1.5 |    0.28012 |    0.28012 |
-|                                  1.5- 2.0 |   0.288109 |   0.288109 |
-|                                  2.0- 2.5 |   0.329389 |   0.329389 |
+| selected tracks / used seeds     0.0- 0.5 |  0.0575499 |  0.0575499 |
+|                                  0.5- 1.0 |  0.0671266 |  0.0671266 |
+|                                  1.0- 1.5 |  0.0557331 |  0.0557331 |
+|                                  1.5- 2.0 |  0.0153438 |  0.0153438 |
+|                                  2.0- 2.5 |  0.0125253 |  0.0125253 |
 |                                  2.5- 3.0 |          0 |          0 |
 |                                  3.0- 3.5 |          0 |          0 |
 |                                  3.5-+inf |          0 |          0 |
@@ -300,6 +309,7 @@ ActsLowPtTrackFindingAlg                                          INFO statistic
 | Stopped tracks above max eta      |          0 |          0 |          0 |
 | Total shared hits                 |      25212 |       7357 |      32569 |
 | Total forced measurements         |          0 |          0 |          0 |
+| resolved tracks                   |          0 |          0 |          0 |
 |-----------------------------------|------------|------------|------------|
 ActsLowPtTrackFindingAlg                                          INFO Ratios
 |-------------------------------------------|------------|------------|------------|
@@ -310,19 +320,21 @@ ActsLowPtTrackFindingAlg                                          INFO Ratios
 | Rejected refined params / seeds           |          0 |          0 |          0 |
 | selected / CKF tracks                     |   0.593641 |   0.167544 |   0.550709 |
 | selected tracks / used seeds              |  0.0655019 |   0.025629 |  0.0625204 |
+| resolved / selected tracks                |          0 |          0 |          0 |
+| resolved tracks / used seeds              |          0 |          0 |          0 |
 | branched tracks / used seeds              |          0 |          0 |          0 |
 | no 2nd CKF / CKF tracks                   | 0.00039314 |  0.0517544 | 0.00556808 |
 | shared hits / CKF tracks                  |    1.23898 |    3.22675 |    1.43926 |
 | forced measurements / used seeds          |          0 |          0 |          0 |
 |-------------------------------------------|------------|------------|------------|
-| selected / CKF tracks            0.0- 0.5 |   0.948097 |   0.115254 |   0.827008 |
-|                                  0.5- 1.0 |   0.932203 |   0.228507 |   0.791591 |
-|                                  1.0- 1.5 |   0.653695 |   0.223547 |   0.563919 |
-|                                  1.5- 2.0 |       0.65 |      0.175 |   0.581737 |
-|                                  2.0- 2.5 |   0.558507 |  0.0333333 |   0.497622 |
-|                                  2.5- 3.0 |   0.360852 |          0 |   0.360679 |
-|                                  3.0- 3.5 |     0.4867 |          0 |     0.4867 |
-|                                  3.5-+inf |   0.492032 |          0 |   0.492032 |
+| selected tracks / used seeds     0.0- 0.5 |    0.17278 |  0.0241306 |   0.153607 |
+|                                  0.5- 1.0 |   0.112199 |  0.0634024 |    0.10743 |
+|                                  1.0- 1.5 |   0.051122 |    0.07724 |  0.0525934 |
+|                                  1.5- 2.0 |  0.0431954 |  0.0106289 |  0.0381429 |
+|                                  2.0- 2.5 |   0.058293 | 0.00632296 |  0.0547954 |
+|                                  2.5- 3.0 |  0.0504702 |          0 |  0.0504669 |
+|                                  3.0- 3.5 |  0.0716554 |          0 |  0.0716554 |
+|                                  3.5-+inf |   0.100611 |          0 |   0.100611 |
 |-------------------------------------------|------------|------------|------------|
 ActsLowPtAmbiguityResolutionAlg                                   INFO Ambiguity Resolution statistics
 |-------------------|------------|

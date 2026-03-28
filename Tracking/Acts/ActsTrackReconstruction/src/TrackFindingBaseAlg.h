@@ -172,6 +172,7 @@ namespace ActsTrk {
       kNStoppedTracksMaxEta,
       kNTotalSharedHits,
       kNForcedSeedMeasurements,
+      kNResolvedTracks,
       kNStat
     };
 
@@ -340,6 +341,7 @@ namespace ActsTrk {
     std::size_t computeStatSum(std::size_t seed_collection, EStat counter_i, const EventStats &stat) const;
 
     bool m_useAbsEtaForStat = false;
+    bool m_showResolvedStats = false;
     mutable std::mutex m_mutex ATLAS_THREAD_SAFE;
     mutable std::vector<std::array<std::size_t, kNStat>> m_stat ATLAS_THREAD_SAFE{};
   };
