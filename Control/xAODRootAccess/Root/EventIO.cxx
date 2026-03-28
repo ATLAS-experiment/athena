@@ -14,6 +14,7 @@
 
 // ROOT include(s).
 #include <TFile.h>
+#include <TTree.h>
 #include <TKey.h>
 
 // System include(s).
@@ -51,7 +52,19 @@ std::unique_ptr<Event> Event::createAndReadFrom(TFile& inFile) {
     return event;
   } else if (inFile.FindKey(EVENT_TREE_NAME) != nullptr) {
     // Create and set up a TEvent object
-    auto event = std::make_unique<TEvent>();
+    // Check if file is AOD, in which case kAthenaAccess must be used
+    auto eauxMode = TEvent::kClassAccess;
+    std::string sauxMode = "kClassAccess";
+    auto metaData = dynamic_cast<TTree*>(inFile.Get("MetaData"));
+    if (metaData) {
+      metaData->LoadTree(0);
+      if (metaData->GetBranch("StreamAOD")) {
+        eauxMode = TEvent::kAthenaAccess; 
+        sauxMode = "kAthenaAccess";
+      }
+    }
+    ANA_MSG_INFO("Using aux mode " << sauxMode << " for file " << inFile.GetName());
+    auto event = std::make_unique<TEvent>(eauxMode);
     if (event->readFrom(inFile).isFailure()) {
       ANA_MSG_ERROR("Could not read TTree from: " << inFile.GetName());
       return {};
