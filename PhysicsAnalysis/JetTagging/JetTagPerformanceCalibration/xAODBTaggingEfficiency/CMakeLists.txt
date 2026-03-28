@@ -142,7 +142,7 @@ if( XAOD_ANALYSIS )
   )
   atlas_add_test(
     ut_BTaggingEfficiencyToolTester
-    SCRIPT BTaggingEfficiencyToolTester ${FTAG_LATEST_CDI} GN2v01 Continuous
+    SCRIPT BTaggingEfficiencyToolTester ${FTAG_INPUT_XAOD} ${FTAG_LATEST_CDI} GN2v01 Continuous
     POST_EXEC_SCRIPT nopost.sh
   )
   atlas_add_test(

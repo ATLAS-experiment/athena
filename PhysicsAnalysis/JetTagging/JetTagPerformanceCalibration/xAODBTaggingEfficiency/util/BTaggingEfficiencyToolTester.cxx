@@ -3,6 +3,9 @@
 */
 #include <AsgTools/StandaloneToolHandle.h>
 #include "FTagAnalysisInterfaces/IBTaggingEfficiencyTool.h"
+#include "TFile.h"
+#include "CalibrationDataInterface/CDIReader.h"
+#include "xAODJet/JetContainer.h"
 
 // Define alias for the TEvent class 
 // which is not the same for AnalysisBase and AthAnalysis
@@ -10,9 +13,11 @@
 // Those lines are only included if using AnalysisBase
 #include "xAODRootAccess/Init.h"
 #include "xAODRootAccess/TEvent.h"
+using TEVENT = xAOD::TEvent;
 #else
 // Those lines are only included if using AthAnalysis
 #include "POOLRootAccess/TEvent.h"
+using TEVENT = POOL::TEvent;
 #endif
 
 #include <string>
@@ -30,13 +35,6 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
   // In principle you should NOT call this line for your regular code 
   ANA_CHECK_SET_TYPE (int);
 
-  const char* TEST_NAME = argv[0];
-  if (argc < 4) {
-    ANA_MSG_ERROR ( "No right inputs received!" );
-    ANA_MSG_ERROR ( "Usage: " << TEST_NAME << "[CDI path] [b-tagger name] [WP name]" );
-    return 1;
-  }
-
   // Important to do this first!
   #ifdef XAOD_STANDALONE
   // Those lines are only included if using AnalysisBase
@@ -46,12 +44,21 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
   POOL::Init();
   #endif
 
-  std::string CDIPath = argv[1];
-  std::string taggerName = argv[2];
-  std::string workingPointName = argv[3];
+  const char* TEST_NAME = argv[0];
+  if (argc < 5) {
+    ANA_MSG_ERROR ( "No right inputs received!" );
+    ANA_MSG_ERROR ( "Usage: " << TEST_NAME << "[DAOD] [CDI path] [b-tagger name] [WP name]" );
+    return 1;
+  }
+
+  std::string DAODpath   = argv[1];
+  std::string CDIPath    = argv[2];
+  std::string taggerName = argv[3];
+  std::string workingPointName = argv[4];
   std::string JetCollectionName = "AntiKt4EMPFlowJets";
   // select your efficiency map based on the DSID of your sample:
   unsigned int sample_dsid = 601229;
+
 
   asg::StandaloneToolHandle<IBTaggingEfficiencyTool> tool("BTaggingEfficiencyTool/BTagEffTest");
   StatusCode code1 = tool.setProperty("ScaleFactorFileName", CDIPath);
@@ -70,73 +77,59 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
   }
   ANA_MSG_INFO("Initialization of tool " << tool->name() << " finished.");
 
-  ANA_MSG_INFO( "-----------------------------------------------------");
-  const std::map<CP::SystematicVariation, std::vector<std::string> > allowed_variations = tool->listSystematics();
-  ANA_MSG_INFO("Allowed systematics variations for tool " << tool->name() << ":");
-  for (auto var : allowed_variations) {
-    ANA_MSG_INFO( std::setw(40) << std::left << var.first.name() << ":");
-    for (auto flv : var.second) ANA_MSG_INFO( " " << flv);
-  }
-  ANA_MSG_DEBUG( "-----------------------------------------------------");
-  
-
-  ANA_MSG_DEBUG( "Creating a jet");
-  xAOD::JetFourMom_t p4(50000.,0.7,0.3,1000.);
-  xAOD::Jet * jet = new xAOD::Jet();
-  jet->makePrivateStore();
-  ANA_MSG_DEBUG("Setting jet 4 momentum");
-  jet->setJetP4(p4);
-  ANA_MSG_DEBUG("Setting jet attribute");
-  jet->setAttribute("HadronConeExclTruthLabelID", 5);
-  jet->setAttribute(taggerName+"_pb", 5.);
-  jet->setAttribute(taggerName+"_pc", 5.);
-  jet->setAttribute(taggerName+"_pu", 5.);
-  jet->setAttribute(taggerName+"_ptau", 5.);
-  float sf=0;
-  float eff=0;
-  CorrectionCode result;
-  ANA_MSG_DEBUG( "Testing function calls without systematics...");
-
-  result = tool->getEfficiency(*jet,eff);
-  if( result!=CorrectionCode::Ok) { 
-    ANA_MSG_ERROR("b jet get efficiency failed!"); 
+  TEVENT event(TEVENT::kClassAccess);
+  gErrorIgnoreLevel = kError;
+  std::unique_ptr<TFile> root_file {TFile::Open(DAODpath.c_str(), "READ")};
+  if(!event.readFrom(root_file.get()).isSuccess()) {
+    ANA_MSG_ERROR ( "Accessing events in input file " << DAODpath.c_str() << "failed! " );
     return 1;
   } else {
-    ANA_MSG_DEBUG( "b jet get efficiency succeeded: " << eff );
-  }
-  result = tool->getScaleFactor(*jet,sf);
+    long long int imax = 5;
+    for(long long int i = 0; i < imax; i++){
+      ANA_MSG_DEBUG("Successfully opened file "<<DAODpath.c_str());
 
-  if( result!=CorrectionCode::Ok) { 
-    ANA_MSG_ERROR("b jet get scale factor failed"); 
-    return 1;
-  } else {
-    ANA_MSG_INFO( "b jet get scale factor succeeded: " << sf );
-  }
+        event.getEntry(i);
+      ANA_MSG_INFO("\n--- Reading Event: "<<i<<" ---");
 
-  ANA_MSG_DEBUG( "Testing function calls with systematics...");
-  CP::SystematicSet systs = tool->affectingSystematics();
-  for( CP::SystematicSet::const_iterator iter = systs.begin();
-       iter!=systs.end(); ++iter) {
-    CP::SystematicVariation var = *iter;
-    CP::SystematicSet set;
-    set.insert(var);
-    StatusCode sresult = tool->applySystematicVariation(set);
-    if( sresult !=StatusCode::SUCCESS) {
-      ANA_MSG_ERROR( var.name() << " apply systematic variation FAILED ");
-  }
-    result = tool->getScaleFactor(*jet,sf);
-    if( result!=CorrectionCode::Ok) {
-      ANA_MSG_ERROR( var.name() << " getScaleFactor FAILED");
-    } else {
-      ANA_MSG_DEBUG( var.name() << " " << sf);
+        // retrieve the "real jets" of the jet collection in question
+      const xAOD::JetContainer* jets = nullptr;
+      if (!event.retrieve(jets, JetCollectionName).isSuccess()){
+        ANA_MSG_ERROR ( "Retrieving jet collection " << JetCollectionName << " failed! " );
+        return 1;
+      }
+
+          int jet_index = 0;
+      for(const xAOD::Jet* jet : *jets){
+        // skip jet as any lower than this and you start seeing failed SF/Eff retrieval
+        if(jet->pt() < 20000 or std::abs(jet->eta()) > 2.4) continue;
+        int truthlabel = -999;
+        jet->getAttribute("HadronConeExclTruthLabelID",truthlabel);
+        ANA_MSG_INFO("--- Jet " << jet_index << " ---");
+        ANA_MSG_INFO("pt = " << jet->pt() << " eta = " << jet->eta() << " truthlabel = " << truthlabel);
+        // Storage for sf/eff values
+        float sf=0;
+        float eff=0;
+        CorrectionCode result;
+        ANA_MSG_DEBUG("Testing function calls without systematics...");
+        result = tool->getEfficiency(*jet,eff);
+        if(result!=CorrectionCode::Ok){
+          ANA_MSG_ERROR("Jet get efficiency failed");
+          return 1;
+        } else {
+          ANA_MSG_INFO("Jet Efficiency: " << eff);
+        }
+        result = tool->getScaleFactor(*jet,sf);
+        if( result!=CorrectionCode::Ok) {
+          ANA_MSG_ERROR("Jet get scale factor failed");
+          return 1;
+        } else {
+          ANA_MSG_INFO("Jet get scale factor succeeded: " << sf);
+        }
+        jet_index++;
+      }
     }
   }
-
-  // don't forget to switch back off the systematics...
-  CP::SystematicSet defaultSet;
-  StatusCode dummyResult = tool->applySystematicVariation(defaultSet);
-  if (dummyResult != StatusCode::SUCCESS)
-    ANA_MSG_ERROR( "problem disabling systematics setting!");
+  root_file->Close();
 
   return 0;
 }
