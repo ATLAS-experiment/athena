@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 /**
  * @file AthContainers/tools/supportsThinning.h
@@ -37,18 +37,19 @@ namespace SG {
  *
  * Returns @c true if @c T derives from either @c AuxVectorBase
  * or @c AuxElement and @c T::supportsThinning is @c true.
- * (The enable_if's are to avoid getting undefined symbol errors
- * when @c T is not an xAOD object.)
  */
 template <class T>
-inline constexpr bool is_xAODInterfaceObject_v =
-  std::is_base_of_v<SG::AuxVectorBase, T> || std::is_base_of_v<SG::AuxElement, T>;
-template <class T,
-          typename std::enable_if_t<is_xAODInterfaceObject_v<T> >* = nullptr>
-bool constexpr xAODInterfaceSupportingThinning () { return T::supportsThinning; }
-template <class T,
-          typename std::enable_if_t<!is_xAODInterfaceObject_v<T> >* = nullptr>
-bool constexpr xAODInterfaceSupportingThinning () { return false; }
+bool constexpr xAODInterfaceSupportingThinning () {
+
+  constexpr bool isxAODInterfaceObject =
+    std::derived_from<T, SG::AuxVectorBase> ||
+    std::derived_from<T, SG::AuxElement>;
+
+  if constexpr (isxAODInterfaceObject)
+    return T::supportsThinning;
+  else
+    return false;
+}
 
 
 /**
