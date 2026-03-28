@@ -14,6 +14,7 @@
 #include <sstream>
 #include <iostream>
 #include <cassert>
+#include <stdexcept>
 
 
 void test1()
@@ -144,10 +145,10 @@ void test1()
   assert (ss.str() == exp_print);
 }
 
-
+//coverity[UNCAUGHT_EXCEPT:FALSE]
 int main()
 {
   std::cout << "XMLCoreParser/XMLCoreNode_test\n";
-  test1();
+    test1(); 
   return 0;
 }
