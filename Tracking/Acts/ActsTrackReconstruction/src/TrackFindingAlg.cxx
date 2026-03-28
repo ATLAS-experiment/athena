@@ -121,6 +121,7 @@ namespace ActsTrk
         return StatusCode::FAILURE;
       }
 
+    if (m_ambiStrategy != 0u /* OUTSIDE_TF */) m_showResolvedStats = true;
     if (m_ambiStrategy == 1u /* END_OF_TF */) {
       Acts::GreedyAmbiguityResolution::Config cfg;
       cfg.maximumSharedHits = m_maximumSharedHits;
@@ -285,6 +286,8 @@ namespace ActsTrk
     };
 
     detail::SharedHitCounter sharedHits;
+    std::optional<std::vector<unsigned int>> trackCategories;
+    if (m_ambi) trackCategories.emplace();  // only needed if m_ambiStrategy == END_OF_TF
 
     // Perform the track finding for all initial parameters.
     for (std::size_t icontainer = 0; icontainer < seedContainers.size(); ++icontainer)
@@ -301,13 +304,13 @@ namespace ActsTrk
                              icontainer < m_seedLabels.size() ? m_seedLabels[icontainer].c_str() : m_seedContainerKeys[icontainer].key().c_str(),
                              event_stat,
                              m_storeDestinies ? destinies.at(icontainer).get() : nullptr,
-                             *pSurface.get()));
+                             *pSurface.get(),
+                             trackCategories));
       }
 
     ATH_MSG_DEBUG("    \\__ Created " << actsTracksContainer.size() << " tracks");
 
     mon_nTracks = actsTracksContainer.size();
-    copyStats(event_stat);
 
 
     // ================================================== //
@@ -338,6 +341,7 @@ namespace ActsTrk
     // handle the ambiguity    
     // we potentially need to short list the track candidates and make some copies
     if (not m_ambi) {
+      copyStats(event_stat);
       // no need to shortlist anything. just use the actsTracksContainer
       ATH_MSG_DEBUG("    \\__ Created " << actsTracksContainer.size() << " resolved tracks");
       ATH_CHECK( storeTrackCollectionToStoreGate( ctx,
@@ -372,8 +376,12 @@ namespace ActsTrk
 
     // shotlist
     for (auto iTrack : state.selectedTracks) {
+      int actsTrackIndex = state.trackTips.at(iTrack);
       auto destProxy = resolvedTracksContainer.makeTrack();
-      destProxy.copyFrom(actsTracksContainer.getTrack(state.trackTips.at(iTrack)));
+      destProxy.copyFrom(actsTracksContainer.getTrack(actsTrackIndex));
+
+      unsigned int category_i = trackCategories->at(actsTrackIndex);
+      ++event_stat[category_i][kNResolvedTracks];
 
       if (m_countSharedHits) {
         auto [nShared, nBadTrackMeasurements] = sharedHits_forFinalAmbi.computeSharedHits(destProxy, resolvedTracksContainer, measurementIndex);
@@ -383,6 +391,7 @@ namespace ActsTrk
     } // loop on tracks
 
     ATH_MSG_DEBUG("    \\__ Created " << resolvedTracksContainer.size() << " resolved tracks");
+    copyStats(event_stat);
 
     ATH_CHECK( storeTrackCollectionToStoreGate( ctx,
                                                 std::move(resolvedTrackBackend),
@@ -434,7 +443,8 @@ namespace ActsTrk
                               const char *seedType,
                               EventStats &event_stat,
                               std::vector<int>* destiny,
-                              const Acts::PerigeeSurface& pSurface) const
+                              const Acts::PerigeeSurface& pSurface,
+                              std::optional<std::vector<unsigned int>>& trackCategories) const
   {
     ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
 
@@ -611,7 +621,8 @@ namespace ActsTrk
                                 ntracks,
                                 iseed,
                                 category_i,
-                                seedType) );
+                                seedType,
+                                trackCategories) );
             ++nfirst;
             continue;
           }
@@ -650,7 +661,8 @@ namespace ActsTrk
                                 ntracks,
                                 iseed,
                                 category_i,
-                                seedType) );
+                                seedType,
+                                trackCategories) );
           }
 
           // need to add tracks here
@@ -689,7 +701,8 @@ namespace ActsTrk
                                 ntracks,
                                 iseed,
                                 category_i,
-                                seedType) );
+                                seedType,
+                                trackCategories) );
           } // loop on tracks
 
           // finish the stiching
@@ -937,7 +950,8 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
                                        std::size_t& ntracks,
                                        std::size_t iseed,
                                        std::size_t category_i,
-                                       const char *seedType) const
+                                       const char *seedType,
+                                       std::optional<std::vector<unsigned int>>& trackCategories) const
   {
 
     std::array<unsigned int, 4> expectedLayerPattern{};
@@ -1003,6 +1017,8 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
       return StatusCode::SUCCESS;
     }
 
+    ++event_stat[category_i][kNSelectedTracks];
+
     // Fill the track infos into the duplicate seed detector
     if (m_skipDuplicateSeeds) {
       storeSeedInfo(tracksContainerTemp, track, duplicateSeedDetector, measurementIndex);
@@ -1012,6 +1028,12 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
     actsDestProxy.copyFrom(track);  // make sure we copy track states!
 
     detail::ExpectedLayerPatternHelper::set(actsDestProxy, expectedLayerPattern);
+
+    auto setTrackCategory = [&]() {
+      if (!trackCategories) return;
+      if (!(actsDestProxy.index() < trackCategories->size())) trackCategories->resize(actsDestProxy.index()+1);
+      trackCategories->at(actsDestProxy.index()) = category_i;
+    };
 
     if (not m_countSharedHits) {
       return StatusCode::SUCCESS;
@@ -1030,7 +1052,8 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
     if (m_ambiStrategy == 2u) { // run the ambiguity during track selection
 
       if (actsDestProxy.nSharedHits() <= m_maximumSharedHits) {
-        ++event_stat[category_i][kNSelectedTracks];
+        setTrackCategory();
+        ++event_stat[category_i][kNResolvedTracks];
       }
       else { // track fails the shared hit selection
 
@@ -1058,9 +1081,9 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
         ATH_MSG_DEBUG("Track " << ntracks << " from " << seedType << " seed " << iseed << " failed shared hit selection");
       }
     }
-    else { // use ambi during selection
-      ++event_stat[category_i][kNSelectedTracks];
-
+    else {
+      // run ambi later
+      setTrackCategory();
       if (m_trackStatePrinter.isSet()) {
         m_trackStatePrinter->printTrack(detContext.geometry, actsTracksContainer, actsDestProxy, measurementIndex);
       }

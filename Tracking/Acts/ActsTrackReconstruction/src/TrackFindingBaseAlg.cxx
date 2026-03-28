@@ -564,6 +564,7 @@ namespace ActsTrk {
                                           std::make_pair(kNRejectedRefinedSeeds, "Rejected refined parameters"),
                                           std::make_pair(kNOutputTracks, "CKF tracks"),
                                           std::make_pair(kNSelectedTracks, "selected tracks"),
+                                          std::make_pair(kNResolvedTracks, "resolved tracks"),
                                           std::make_pair(kNStoppedTracksMaxHoles, "Stopped tracks reaching max holes"),
                                           std::make_pair(kMultipleBranches, "Seeds with more than one branch"),
                                           std::make_pair(kNoSecond, "Tracks failing second CKF"),
@@ -662,6 +663,8 @@ namespace ActsTrk {
                                                       TableUtils::defineSimpleRatio("Rejected refined params / seeds", kNRejectedRefinedSeeds, kNTotalSeeds),
                                                       TableUtils::defineSimpleRatio("selected / CKF tracks", kNSelectedTracks, kNOutputTracks),
                                                       TableUtils::defineSimpleRatio("selected tracks / used seeds", kNSelectedTracks, kNUsedSeeds),
+                                                      TableUtils::defineSimpleRatio("resolved / selected tracks", kNResolvedTracks, kNSelectedTracks),
+                                                      TableUtils::defineSimpleRatio("resolved tracks / used seeds", kNResolvedTracks, kNUsedSeeds),
                                                       TableUtils::defineSimpleRatio("branched tracks / used seeds", kMultipleBranches, kNUsedSeeds),
                                                       TableUtils::defineSimpleRatio("no 2nd CKF / CKF tracks", kNoSecond, kNOutputTracks),
                                                       TableUtils::defineSimpleRatio("shared hits / CKF tracks", kNTotalSharedHits, kNOutputTracks),
@@ -713,9 +716,9 @@ namespace ActsTrk {
                          .minLabelWidth(max_label_width)
                          .dumpFooter(false);
 
-        // also dump a table for final tracks over seeds (ratio_i==3) showing one row per eta bin
+        // also dump a table for final tracks over used seeds (ratio_i==6 or 4) showing one row per eta bin
         eta_labels.erase(eta_labels.end() - 1); // drop last line of table which shows again all eta bins summed.
-        constexpr std::size_t ratio_i = 3;
+        std::size_t ratio_i = m_showResolvedStats ? 6 : 4;
         table_out << makeTable(ratio,
                                ratio_i * ratio_stride,
                                ratio_eta_stride,
