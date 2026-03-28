@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -287,6 +287,15 @@ StatusCode TileCellBuilder::process (CaloCellContainer* theCellContainer,
   } else {
     
     ATH_MSG_DEBUG( "Container " << m_rawChannelContainerKey.key() << " with TileRawChannels found ");
+
+    // We use a data pool, so the container must be VIEW_ELEMENTS.
+    if (theCellContainer->ownPolicy() != SG::VIEW_ELEMENTS) {
+      if (!theCellContainer->empty()) {
+        ATH_MSG_ERROR("Non-empty owning cell container.");
+        return StatusCode::FAILURE;
+      }
+      theCellContainer->clear (SG::VIEW_ELEMENTS);
+    }
 
 
     VecParams params;

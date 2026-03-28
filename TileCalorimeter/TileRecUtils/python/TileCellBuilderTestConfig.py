@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
 #
 # File: TileRecUtils/share/TileCellBuilder_test.py
 # Author: sss
@@ -375,6 +375,7 @@ class PrepareDataAlg (Alg):
                     hwid = ROOT.HWIdentifier (addr)
                     chan = ROOT.TileRawChannel (hwid, *data)
                 coll.push_back (chan)
+                ROOT.SetOwnership (chan, False)
 
             if icoll in dspcolls:
                 thiscont = dspcont
@@ -428,7 +429,7 @@ class TestAlg (Alg):
     def execute (self):
         tool = getattr (self, self.prepAlg.tool)
 
-        ccc = ROOT.CaloCellContainer()
+        ccc = ROOT.CaloCellContainer(ROOT.SG.VIEW_ELEMENTS)
         if not tool.process (ccc, self.getContext()):
             return StatusCode.Failure
 
