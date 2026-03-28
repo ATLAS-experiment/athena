@@ -86,7 +86,7 @@ void test1()
   assert (elt3s[2]->get_attrib ("name") == "elt3c");
 }
 
-
+//coverity[UNCAUGHT_EXCEPT:FALSE]
 int main()
 {
   std::cout << "XMLCoreParser/parse1_test\n";
