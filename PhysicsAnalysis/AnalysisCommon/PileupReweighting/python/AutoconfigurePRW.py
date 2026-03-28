@@ -39,7 +39,7 @@ def getLumicalcFiles(campaign):
             'GoodRunsLists/data23_13p6TeV/20250321/ilumicalc_histograms_None_451587-456749_OflLumi-Run3-004.root'
         ],
         Campaign.MC23e: [
-            'GoodRunsLists/data24_13p6TeV/20260127/ilumicalc_histograms_None_497924-509849_OflLumi-Run3-006.root'
+            'GoodRunsLists/data24_13p6TeV/20260127/ilumicalc_histograms_None_473235-486706_OflLumi-Run3-008.root'
         ],
         Campaign.MC23g: [
             'GoodRunsLists/data25_13p6TeV/20260129/ilumicalc_histograms_None_497924-509849_OflLumi-Run3-006.root'
