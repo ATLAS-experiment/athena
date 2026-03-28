@@ -136,8 +136,18 @@ if( XAOD_ANALYSIS )
     POST_EXEC_SCRIPT nopost.sh
   )
   atlas_add_test(
-    ut_BTaggingEigenVectorRecompositionToolTester
-    SCRIPT BTaggingEigenVectorRecompositionToolTester ${FTAG_LATEST_CDI} GN2v01 Continuous
+    ut_BTaggingEigenVectorRecompositionToolTester_Loose
+    SCRIPT BTaggingEigenVectorRecompositionToolTester ${FTAG_LATEST_CDI} GN2v01 Continuous Loose
+    POST_EXEC_SCRIPT nopost.sh
+  )
+  atlas_add_test(
+    ut_BTaggingEigenVectorRecompositionToolTester_Medium
+    SCRIPT BTaggingEigenVectorRecompositionToolTester ${FTAG_LATEST_CDI} GN2v01 Continuous Medium
+    POST_EXEC_SCRIPT nopost.sh
+  )
+  atlas_add_test(
+    ut_BTaggingEigenVectorRecompositionToolTester_Tight
+    SCRIPT BTaggingEigenVectorRecompositionToolTester ${FTAG_LATEST_CDI} GN2v01 Continuous Tight
     POST_EXEC_SCRIPT nopost.sh
   )
   atlas_add_test(
