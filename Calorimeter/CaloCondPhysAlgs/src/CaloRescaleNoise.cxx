@@ -96,7 +96,7 @@ StatusCode CaloRescaleNoise::stop()
 
   FILE* fp = std::fopen("calonoise.txt","w");
   if (!fp) {
-    ATH_MSG_ERROR("Cannot open file calonoise.txt");
+    ATH_MSG_ERROR("Cannot open file calonoise.txt: " << strerror(errno));
     return StatusCode::FAILURE;
   }
 
