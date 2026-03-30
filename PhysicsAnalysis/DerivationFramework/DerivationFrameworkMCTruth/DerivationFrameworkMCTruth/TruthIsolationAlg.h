@@ -1,30 +1,29 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef DERIVATIONFRAMEWORK_TRUTHISOLATIONTOOL_H
-#define DERIVATIONFRAMEWORK_TRUTHISOLATIONTOOL_H
+#ifndef DERIVATIONFRAMEWORK_TRUTHISOLATIONALG_H
+#define DERIVATIONFRAMEWORK_TRUTHISOLATIONALG_H
 
 #include <string>
 
-#include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteDecorHandleKeyArray.h"
 #include "Gaudi/Property.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "DerivationFrameworkMCTruth/DecayGraphHelper.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "GaudiKernel/ToolHandle.h"
 
 namespace DerivationFramework {
 
-  class TruthIsolationTool : public extends<AthAlgTool, IAugmentationTool> {
+  class TruthIsolationAlg : public AthReentrantAlgorithm {
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override final;
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
 
   private:
     /// Parameter: input collection key
@@ -68,4 +67,4 @@ namespace DerivationFramework {
   };
 }
 
-#endif // DERIVATIONFRAMEWORK_TRUTHISOLATIONTOOL_H
+#endif // DERIVATIONFRAMEWORK_TRUTHISOLATIONALG_H

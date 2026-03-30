@@ -861,13 +861,13 @@ def EGammaCommonCfg(flags):
 
         # Decorate egammaTruthParticles with truth-particle-level etcone20,30,40
         from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import (
-            TruthIsolationToolCfg,
+            TruthIsolationCfg,
         )
 
-        TruthEgetIsolationTool = acc.getPrimaryAndMerge(
-            TruthIsolationToolCfg(
+        acc.merge(
+            TruthIsolationCfg(
                 flags,
-                name="TruthEgetIsolationTool",
+                name="TruthEgetIsolation",
                 isoParticlesKey="egammaTruthParticles",
                 allParticlesKey="TruthParticles",
                 particleIDsToCalculate=[-11, 11, 22],
@@ -877,13 +877,12 @@ def EGammaCommonCfg(flags):
                 ChargedParticlesOnly=False,
             )
         )
-        EGAugmentationTools.append(TruthEgetIsolationTool)
 
         # Decorate egammaTruthParticles with truth-particle-level ptcone20,30,40
-        TruthEgptIsolationTool = acc.getPrimaryAndMerge(
-            TruthIsolationToolCfg(
+        acc.merge(
+            TruthIsolationCfg(
                 flags,
-                name="TruthEgptIsolationTool",
+                name="TruthEgptIsolation",
                 isoParticlesKey="egammaTruthParticles",
                 allParticlesKey="TruthParticles",
                 particleIDsToCalculate=[-11, 11, 22],
@@ -892,7 +891,6 @@ def EGammaCommonCfg(flags):
                 ChargedParticlesOnly=True,
             )
         )
-        EGAugmentationTools.append(TruthEgptIsolationTool)
 
         # Compute the truth-particle-level energy density in the central eta region
         from EventShapeTools.EventDensityConfig import configEventDensityTool

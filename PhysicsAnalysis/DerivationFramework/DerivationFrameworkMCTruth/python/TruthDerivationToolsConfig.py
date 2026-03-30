@@ -170,17 +170,16 @@ def TruthDressingToolCfg(flags, name, **kwargs):
     return acc
 
 
-def TruthIsolationToolCfg(flags, name, **kwargs):
-    """Configure the truth isolation tool"""
+def TruthIsolationCfg(flags, name, **kwargs):
+    """Configure the truth isolation algorithm"""
     acc = ComponentAccumulator()
-    TruthIsolationTool = CompFactory.DerivationFramework.TruthIsolationTool
-    acc.addPublicTool(TruthIsolationTool(name = name, **kwargs),
-                      primary = True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.TruthIsolationAlg(
+        name = name, **kwargs))
     return acc
 
 
 def MuonTruthIsolationDecorAlgCfg(flags, name, **kwargs):
-    """Configure the MuonTruthIsolationTool"""
+    """Configure the MuonTruthIsolationDecorAlg"""
     acc = ComponentAccumulator()
     acc.addEventAlgo(CompFactory.DerivationFramework.MuonTruthIsolationDecorAlg(name = name, **kwargs),
                       primary = True)
@@ -289,10 +288,10 @@ def DFCommonTruthTauDressingToolCfg(flags):
                                 decoratePhotons = False)
 
 
-def DFCommonTruthElectronIsolationTool1Cfg(flags):
-    """Configure the electron isolation tool, cone=0.2"""
-    return TruthIsolationToolCfg(flags,
-                                 name                   = "DFCommonTruthElectronIsolationTool1",
+def DFCommonTruthElectronIsolation1Cfg(flags):
+    """Configure the electron isolation algorithm, cone=0.2"""
+    return TruthIsolationCfg(flags,
+                                 name                   = "DFCommonTruthElectronIsolation1",
                                  isoParticlesKey        = "TruthElectrons",
                                  allParticlesKey        = "TruthParticles",
                                  particleIDsToCalculate = [11],
@@ -301,10 +300,10 @@ def DFCommonTruthElectronIsolationTool1Cfg(flags):
                                  ChargedParticlesOnly   = False)
 
 
-def DFCommonTruthElectronIsolationTool2Cfg(flags):
-    """Configure the electron isolation tool, cone=0.3"""
-    return TruthIsolationToolCfg(flags,
-                                 name                   =  "DFCommonTruthElectronIsolationTool2",
+def DFCommonTruthElectronIsolation2Cfg(flags):
+    """Configure the electron isolation algorithm, cone=0.3"""
+    return TruthIsolationCfg(flags,
+                                 name                   =  "DFCommonTruthElectronIsolation2",
                                  isoParticlesKey        = "TruthElectrons",
                                  allParticlesKey        = "TruthParticles",
                                  particleIDsToCalculate = [11],
@@ -313,10 +312,10 @@ def DFCommonTruthElectronIsolationTool2Cfg(flags):
                                  ChargedParticlesOnly   = True)
 
 
-def DFCommonTruthMuonIsolationTool1Cfg(flags):
-    """Configure the muon isolation tool, cone=0.2"""
-    return TruthIsolationToolCfg(flags,
-                                 name                   = "DFCommonTruthMuonIsolationTool1",
+def DFCommonTruthMuonIsolation1Cfg(flags):
+    """Configure the muon isolation algorithm, cone=0.2"""
+    return TruthIsolationCfg(flags,
+                                 name                   = "DFCommonTruthMuonIsolation1",
                                  isoParticlesKey        = "TruthMuons",
                                  allParticlesKey        = "TruthParticles",
                                  particleIDsToCalculate = [13],
@@ -325,10 +324,10 @@ def DFCommonTruthMuonIsolationTool1Cfg(flags):
                                  ChargedParticlesOnly   = False)
 
 
-def DFCommonTruthMuonIsolationTool2Cfg(flags):
-    """Configure the muon isolation tool, cone=0.3"""
-    return TruthIsolationToolCfg(flags,
-                                 name                   = "DFCommonTruthMuonIsolationTool2",
+def DFCommonTruthMuonIsolation2Cfg(flags):
+    """Configure the muon isolation algorithm, cone=0.3"""
+    return TruthIsolationCfg(flags,
+                                 name                   = "DFCommonTruthMuonIsolation2",
                                  isoParticlesKey        = "TruthMuons",
                                  allParticlesKey        = "TruthParticles",
                                  particleIDsToCalculate = [13],
@@ -337,10 +336,10 @@ def DFCommonTruthMuonIsolationTool2Cfg(flags):
                                  ChargedParticlesOnly   = True)
 
 
-def DFCommonTruthPhotonIsolationTool1Cfg(flags):
-    """Configure the photon isolation tool, etcone"""
-    return TruthIsolationToolCfg(flags,
-                                 name                   = "DFCommonTruthPhotonIsolationTool1",
+def DFCommonTruthPhotonIsolation1Cfg(flags):
+    """Configure the photon isolation algorithm, etcone"""
+    return TruthIsolationCfg(flags,
+                                 name                   = "DFCommonTruthPhotonIsolation1",
                                  isoParticlesKey        = "TruthPhotons",
                                  allParticlesKey        = "TruthParticles",
                                  particleIDsToCalculate = [22],
@@ -349,10 +348,10 @@ def DFCommonTruthPhotonIsolationTool1Cfg(flags):
                                  ChargedParticlesOnly   = False)
 
 
-def DFCommonTruthPhotonIsolationTool2Cfg(flags):
-    """Configure the photon isolation tool, ptcone"""
-    return  TruthIsolationToolCfg(flags,
-                                  name                   = "DFCommonTruthPhotonIsolationTool2",
+def DFCommonTruthPhotonIsolation2Cfg(flags):
+    """Configure the photon isolation algorithm, ptcone"""
+    return  TruthIsolationCfg(flags,
+                                  name                   = "DFCommonTruthPhotonIsolation2",
                                   isoParticlesKey        = "TruthPhotons",
                                   allParticlesKey        = "TruthParticles",
                                   particleIDsToCalculate = [22],
@@ -361,10 +360,10 @@ def DFCommonTruthPhotonIsolationTool2Cfg(flags):
                                   ChargedParticlesOnly   = True)
 
 
-def DFCommonTruthPhotonIsolationTool3Cfg(flags):
-   """Configure the photon isolation tool, etcone=0.4"""
-   return  TruthIsolationToolCfg(flags,
-                                 name                   = "DFCommonTruthPhotonIsolationTool3",
+def DFCommonTruthPhotonIsolation3Cfg(flags):
+   """Configure the photon isolation algorithm, etcone=0.4"""
+   return  TruthIsolationCfg(flags,
+                                 name                   = "DFCommonTruthPhotonIsolation3",
                                  isoParticlesKey        = "TruthPhotons",
                                  allParticlesKey        = "TruthParticles",
                                  particleIDsToCalculate = [22],

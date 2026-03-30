@@ -120,21 +120,17 @@ def PreJetMCTruthAugmentationsCfg(flags, **kwargs):
     from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import ( DFCommonTruthElectronDressingToolCfg,
     DFCommonTruthMuonDressingToolCfg, DFCommonTruthMuonCfg, DFCommonTruthElectronCfg,
     DFCommonTruthPhotonSimCfg, DFCommonTruthNeutrinoCfg, DFCommonTruthBottomCfg, DFCommonTruthTopCfg,
-    DFCommonTruthBosonCfg, DFCommonTruthBSMCfg, DFCommonTruthForwardProtonCfg, DFCommonTruthElectronIsolationTool1Cfg,
-    DFCommonTruthElectronIsolationTool2Cfg, DFCommonTruthMuonIsolationTool1Cfg, DFCommonTruthMuonIsolationTool2Cfg,
-    DFCommonTruthPhotonIsolationTool1Cfg, DFCommonTruthPhotonIsolationTool2Cfg, DFCommonTruthPhotonIsolationTool3Cfg )
+    DFCommonTruthBosonCfg, DFCommonTruthBSMCfg, DFCommonTruthForwardProtonCfg, DFCommonTruthElectronIsolation1Cfg,
+    DFCommonTruthElectronIsolation2Cfg, DFCommonTruthMuonIsolation1Cfg, DFCommonTruthMuonIsolation2Cfg,
+    DFCommonTruthPhotonIsolation1Cfg, DFCommonTruthPhotonIsolation2Cfg, DFCommonTruthPhotonIsolation3Cfg )
 
-    # schedule the special truth building algorithms
+    # schedule the special truth building algorithms; note taus are handled separately below
     for item in [ DFCommonTruthMuonCfg, DFCommonTruthElectronCfg,
                   DFCommonTruthPhotonSimCfg, DFCommonTruthNeutrinoCfg, DFCommonTruthBottomCfg, DFCommonTruthTopCfg,
-                  DFCommonTruthBosonCfg, DFCommonTruthBSMCfg, DFCommonTruthForwardProtonCfg]:
+                  DFCommonTruthBosonCfg, DFCommonTruthBSMCfg, DFCommonTruthElectronIsolation1Cfg,
+                  DFCommonTruthElectronIsolation2Cfg, DFCommonTruthMuonIsolation1Cfg, DFCommonTruthMuonIsolation2Cfg,
+                  DFCommonTruthPhotonIsolation1Cfg, DFCommonTruthPhotonIsolation2Cfg, DFCommonTruthPhotonIsolation3Cfg, DFCommonTruthForwardProtonCfg]:
         acc.merge(item(flags))
-
-    # schedule the special truth building tools and add them to a common augmentation; note taus are handled separately below
-    for item in [ DFCommonTruthElectronIsolationTool1Cfg,
-    DFCommonTruthElectronIsolationTool2Cfg, DFCommonTruthMuonIsolationTool1Cfg, DFCommonTruthMuonIsolationTool2Cfg,
-    DFCommonTruthPhotonIsolationTool1Cfg, DFCommonTruthPhotonIsolationTool2Cfg, DFCommonTruthPhotonIsolationTool3Cfg]:
-        augmentationToolsList.append(acc.getPrimaryAndMerge(item(flags)))
 
     if 'decorationDressing' in kwargs:
         augmentationToolsList.append(acc.getPrimaryAndMerge(DFCommonTruthElectronDressingToolCfg(flags, decorationName = kwargs['decorationDressing'])))
