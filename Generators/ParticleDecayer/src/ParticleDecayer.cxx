@@ -235,6 +235,7 @@ ParticleDecayer::ParticleDecayer(const std::string& name, ISvcLocator* pSvcLocat
   declareProperty("ParticlePolarization",  m_particlePolarization = 0); //polarization of the dark photon (default 0 : isotropic decay, -1 : transverse, 1 : longitudinal)
   declareProperty("OppositePolarization",  m_oppositePolarization = false);//In case of LJType == 2 and opposite polarization for the two dark photons in the event
   declareProperty("ParticlePDGID",         m_particlePDGID = 700022); //new PDG ID of the dark photon (default 700022)
+  declareProperty("DecayOnlyStable",       m_decayOnlyStable = false); 
   declareProperty("DecayBRElectrons",      m_BRElectron = 1.); //BR of dark photon decay to electrons  
   declareProperty("DecayBRMuons",          m_BRMuon = 0.); //BR of dark photon decay to muons 
   declareProperty("DecayBRPions",          m_BRPion = 0.); //BR of dark photon decay to pions 
@@ -316,103 +317,119 @@ StatusCode ParticleDecayer::fillEvt(HepMC::GenEvent* event) {
   
   for ( auto  genpart : *event) { 
 
+     const bool hasRightPDG = (genpart->pdg_id() == m_particleID);
+     const bool isStable    = (genpart->status() == 1);
+     const bool hasEndVtx   = (genpart->end_vertex() != nullptr);
+
+     if (!hasRightPDG) {
+        continue;
+     }
+
+     if (m_decayOnlyStable) {
+        if (!isStable || hasEndVtx) {
+           ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- skip particle with PDG ID = "
+                         << genpart->pdg_id()
+                         << " status = " << genpart->status()
+                         << " end_vertex = " << (hasEndVtx ? "yes" : "no"));
+           continue;
+        }
+     }
+
      //////////////////////////////////////////////
      //    only one dark photon per LeptonJet    //
      //////////////////////////////////////////////
      if (m_LJType == 1) {
-        if (genpart->pdg_id()==m_particleID) { //if geantino assign the new mass and cross-check
-           ATH_MSG_DEBUG("ParticleDecayer::fillEvt: -- only one dark photon per LeptonJet");
-           ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- found MC particle with PDG ID = " << genpart->pdg_id());
-           ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- assign the new mass of the dark photon, m = " << m_particleMass);
+        ATH_MSG_DEBUG("ParticleDecayer::fillEvt: -- only one dark photon per LeptonJet");
+        ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- found MC particle with PDG ID = " << genpart->pdg_id());
+        ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- assign the new mass of the dark photon, m = " << m_particleMass);
 
-           //Change the mass of the parent particle ( set by user input + command )
-           //Changes the magnitude of the spatial part of the 4-momentum such that the new 4-momentum has the desired inv mass
-           CHECK( changeMass( genpart, m_particleMass ) ); 
+        //Change the mass of the parent particle ( set by user input + command )
+        //Changes the magnitude of the spatial part of the 4-momentum such that the new 4-momentum has the desired inv mass
+        CHECK( changeMass( genpart, m_particleMass ) ); 
 
-           //Add decay position to the event
-           CHECK( setDecayPosition( engine, genpart, event ) );
+        //Add decay position to the event
+        CHECK( setDecayPosition( engine, genpart, event ) );
 
-           //assign the new PDG_ID of the particle
-           ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- set the new PDG ID =  " << m_particlePDGID);
-           genpart->set_pdg_id(m_particlePDGID);  
+        //assign the new PDG_ID of the particle
+        ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- set the new PDG ID =  " << m_particlePDGID);
+        genpart->set_pdg_id(m_particlePDGID);  
            
-           //set the new status (decayed) of the particle
-           ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- set the new status = 2");
-           genpart->set_status(2); 
+        //set the new status (decayed) of the particle
+        ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- set the new status = 2");
+        genpart->set_status(2); 
            
-           //set the new momentum of the particle
-           ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- set the new momentum");
+        //set the new momentum of the particle
+        ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- set the new momentum");
            
-           ///*** Now allow the two-body decay of the particle
-           CHECK( DFTwoBodyDecay( engine, std::move(genpart), m_particlePolarization ) );
+        ///*** Now allow the two-body decay of the particle
+        CHECK( DFTwoBodyDecay( engine, std::move(genpart), m_particlePolarization ) );
 
-        }
      }else if (m_LJType == 2) {
         /////////////////////////////////////////////
         //      two dark photons per LeptonJet     //
         /////////////////////////////////////////////
-        if (genpart->pdg_id()==m_particleID) {
 
-           ATH_MSG_DEBUG("ParticleDecayer::fillEvt: -- two dark photons per LeptonJet");
-           ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- found MC particle with PDG ID = " << genpart->pdg_id());
-           ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- assign the new mass of the dark scalar, m = " << m_scalarMass);
+        ATH_MSG_DEBUG("ParticleDecayer::fillEvt: -- two dark photons per LeptonJet");
+        ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- found MC particle with PDG ID = " << genpart->pdg_id());
+        ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- assign the new mass of the dark scalar, m = " << m_scalarMass);
 
-           //Get the mass of the parent particle ( set by user input + command )
-           //Change the mass of the parent particle ( set by user input + command )
-           //Changes the magnitude of the spatial part of the 4-momentum such that the new 4-momentum has the desired inv mass
+        //Get the mass of the parent particle ( set by user input + command )
+        //Change the mass of the parent particle ( set by user input + command )
+        //Changes the magnitude of the spatial part of the 4-momentum such that the new 4-momentum has the desired inv mass
            CHECK( changeMass( genpart, m_scalarMass ) ); 
 
-           //set the new PDG_ID of the scalar
-           ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- set the new PDG ID =  " << m_scalarPDGID);
-           genpart->set_pdg_id(m_scalarPDGID);  
+        //set the new PDG_ID of the scalar
+        ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- set the new PDG ID =  " << m_scalarPDGID);
+        genpart->set_pdg_id(m_scalarPDGID);  
 
-           //set the new status (decayed) of the scalar
-           ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- set the new status = 2");
-           genpart->set_status(2); 
+        //set the new status (decayed) of the scalar
+        ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- set the new status = 2");
+        genpart->set_status(2); 
 
-           //set the decay vertex position of the scalar
-           //Create a HepMC vertex at the decay position of the scalar 
-           CHECK( setDecayPosition( engine, genpart, event, true ) );
+        //set the decay vertex position of the scalar
+        //Create a HepMC vertex at the decay position of the scalar 
+        CHECK( setDecayPosition( engine, genpart, event, true ) );
            
-           ///*** Now allow the two-body decay of the scalar
-           ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- allow the two-body decay of the dark scalar to dark photons...");
-           ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- dark photon has PDG ID = " << m_particlePDGID);
+        ///*** Now allow the two-body decay of the scalar
+        ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- allow the two-body decay of the dark scalar to dark photons...");
+        ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- dark photon has PDG ID = " << m_particlePDGID);
 
-           std::vector<CLHEP::HepLorentzVector> darkPhotonLVs; 
-           CHECK( getDecayProducts( engine, CLHEP::HepLorentzVector( genpart->momentum().px(), genpart->momentum().py(), genpart->momentum().pz(), genpart->momentum().e() ),
-                                    m_particleMass,
-                                    darkPhotonLVs) );
+        std::vector<CLHEP::HepLorentzVector> darkPhotonLVs; 
+        CHECK( getDecayProducts( engine, CLHEP::HepLorentzVector( genpart->momentum().px(), genpart->momentum().py(), genpart->momentum().pz(), genpart->momentum().e() ),
+                                 m_particleMass,
+                                 darkPhotonLVs) );
 
-           //add dark photon 1
-           auto v0=darkPhotonLVs.at(0).vect();
-           addParticle( genpart->end_vertex(), m_particlePDGID, HepMC::FourVector(v0.x(),v0.y(),v0.z(),0.0) , 2);
-           //add dark photon 2
-           auto v1=darkPhotonLVs.at(1).vect();
-           addParticle( genpart->end_vertex(), m_particlePDGID, HepMC::FourVector(v1.x(),v1.y(),v1.z(),0.0), 2);
+        //add dark photon 1
+        auto v0=darkPhotonLVs.at(0).vect();
+        addParticle( genpart->end_vertex(), m_particlePDGID, HepMC::FourVector(v0.x(),v0.y(),v0.z(),0.0) , 2);
+        //add dark photon 2
+        auto v1=darkPhotonLVs.at(1).vect();
+        addParticle( genpart->end_vertex(), m_particlePDGID, HepMC::FourVector(v1.x(),v1.y(),v1.z(),0.0), 2);
            
-           //lifetime handling of the dark photons
-           int polarizationSwitch = 1;
+        //lifetime handling of the dark photons
+        int polarizationSwitch = 1;
 #ifdef HEPMC3
-           auto pItBegin = genpart->end_vertex()->particles_out().end();
-           auto pItEnd = genpart->end_vertex()->particles_out().end();
+        const std::vector<HepMC::GenParticlePtr>& particlesOut = genpart->end_vertex()->particles_out();
+        std::vector<HepMC::GenParticlePtr>::const_iterator pItBegin = particlesOut.begin();
+        std::vector<HepMC::GenParticlePtr>::const_iterator pItEnd = particlesOut.end();
 #else
-           HepMC::GenVertex::particles_out_const_iterator pItBegin    = genpart->end_vertex()->particles_out_const_begin();
-           HepMC::GenVertex::particles_out_const_iterator pItEnd = genpart->end_vertex()->particles_out_const_end();
+        HepMC::GenVertex::particles_out_const_iterator pItBegin    = genpart->end_vertex()->particles_out_const_begin();
+        HepMC::GenVertex::particles_out_const_iterator pItEnd = genpart->end_vertex()->particles_out_const_end();
 #endif
-           for ( auto pIt=pItBegin ; pIt != pItEnd; ++pIt )
-              {
-                 //Add decay position to the event
-                 CHECK( setDecayPosition( engine, *pIt, event ) );
-                 //And perform two-body decay
-                 ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- Now allow the two-body decay of the dark photons");
-                 CHECK( DFTwoBodyDecay( engine, *pIt, polarizationSwitch*m_particlePolarization ) );
-                 if(m_oppositePolarization)
-                    {
-                       polarizationSwitch = -polarizationSwitch;
-                    }
-              }
+        for ( auto pIt=pItBegin ; pIt != pItEnd; ++pIt )
+           {
+               
+              //Add decay position to the event
+              CHECK( setDecayPosition( engine, *pIt, event ) );
+              //And perform two-body decay
+              ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- Now allow the two-body decay of the dark photons");
+              CHECK( DFTwoBodyDecay( engine, *pIt, polarizationSwitch*m_particlePolarization ) );
+              if(m_oppositePolarization)
+                 {
+                    polarizationSwitch = -polarizationSwitch;
+                 }
+           }
 
-        }
      }else
         {
            ATH_MSG_FATAL("LJType set to " << m_LJType );
