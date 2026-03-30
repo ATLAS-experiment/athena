@@ -1,10 +1,8 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <iostream>
-#include <fstream>
-#include <cstring>
+
 #include <dlfcn.h>
 
 #include <experimental/filesystem>
@@ -17,6 +15,9 @@
 
 #include <vector>
 #include <memory>
+#include <iostream>
+#include <fstream>
+#include <cstring>
 
 int main(int argc, char* argv[]) {
   if(argc < 4) {
@@ -97,7 +98,7 @@ int main(int argc, char* argv[]) {
   std::ofstream timeFile("results.csv");
   
   timeFile<<"nsp,nseeds,time"<<std::endl;
-  
+  //coverity[TAINTED_SCALAR]
   for(int iEvent=0;iEvent<nEvents;iEvent++) {
     
     const std::string& fileName = event_files[fileIdx];
