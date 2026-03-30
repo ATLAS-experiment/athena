@@ -1,4 +1,4 @@
-#include "DerivationFrameworkMCTruth/TruthDressingTool.h"
+#include "DerivationFrameworkMCTruth/TruthDressingAlg.h"
 #include "DerivationFrameworkMCTruth/TruthIsolationAlg.h"
 #include "DerivationFrameworkMCTruth/MenuTruthThinning.h"
 #include "DerivationFrameworkMCTruth/GenericTruthThinning.h"
@@ -37,7 +37,7 @@
 
 using namespace DerivationFramework;
 
-DECLARE_COMPONENT( TruthDressingTool )
+DECLARE_COMPONENT( TruthDressingAlg )
 DECLARE_COMPONENT( TruthIsolationAlg )
 DECLARE_COMPONENT( MenuTruthThinning )
 DECLARE_COMPONENT( GenericTruthThinning )

@@ -1,14 +1,13 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef DERIVATIONFRAMEWORK_TRUTHDRESSINGTOOL_H
-#define DERIVATIONFRAMEWORK_TRUTHDRESSINGTOOL_H
+#ifndef DERIVATIONFRAMEWORK_TRUTHDRESSINGALG_H
+#define DERIVATIONFRAMEWORK_TRUTHDRESSINGALG_H
 
 #include <string>
 
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "DerivationFrameworkMCTruth/DecayGraphHelper.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "Gaudi/Property.h"
@@ -19,13 +18,13 @@
 
 namespace DerivationFramework {
 
-  class TruthDressingTool : public extends<AthAlgTool, IAugmentationTool> {
+  class TruthDressingAlg : public AthReentrantAlgorithm {
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override final;
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
 
   private:
     /// ReadHandleKey input collection key
@@ -80,4 +79,4 @@ namespace DerivationFramework {
   };
 }
 
-#endif // DERIVATIONFRAMEWORK_TRUTHDRESSINGTool_H
+#endif // DERIVATIONFRAMEWORK_TRUTHDRESSINGALG_H

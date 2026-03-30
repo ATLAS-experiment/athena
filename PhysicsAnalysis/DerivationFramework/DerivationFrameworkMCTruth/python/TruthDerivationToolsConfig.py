@@ -161,12 +161,11 @@ def MuonTruthClassifierFallbackCfg(flags, name, **kwargs):
     return acc
 
 
-def TruthDressingToolCfg(flags, name, **kwargs):
-    """Configure the TruthDressingTool"""
+def TruthDressingCfg(flags, name, **kwargs):
+    """Configure the TruthDressingAlg"""
     acc = ComponentAccumulator()
-    TruthDressingTool = CompFactory.DerivationFramework.TruthDressingTool
-    acc.addPublicTool(TruthDressingTool( name = name, **kwargs),
-                      primary = True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.TruthDressingAlg(
+        name = name, **kwargs))
     return acc
 
 
@@ -255,10 +254,10 @@ def HadronOriginDecoratorCfg(flags, name, **kwargs):
 
 
 #add the 'decoration' tools for dressing and isolation
-def DFCommonTruthElectronDressingToolCfg(flags, decorationName = "dressedPhoton"):
+def DFCommonTruthElectronDressingCfg(flags, decorationName = "dressedPhoton"):
     """Configure the electron truth dressing tool"""
-    return TruthDressingToolCfg(flags,
-                                name                  = "DFCommonTruthElectronDressingTool",
+    return TruthDressingCfg(flags,
+                                name                  = "DFCommonTruthElectronDressingAlg",
                                 dressParticlesKey     = "TruthElectrons",
                                 usePhotonsFromHadrons = False,
                                 dressingConeSize      = 0.1,
@@ -266,10 +265,10 @@ def DFCommonTruthElectronDressingToolCfg(flags, decorationName = "dressedPhoton"
                                 decorationName        = decorationName+"_e")
 
 
-def DFCommonTruthMuonDressingToolCfg(flags, decorationName = "dressedPhoton"):
+def DFCommonTruthMuonDressingCfg(flags, decorationName = "dressedPhoton"):
     """Configure the muon truth dressing tool"""
-    return TruthDressingToolCfg(flags,
-                                name                  = "DFCommonTruthMuonDressingTool",
+    return TruthDressingCfg(flags,
+                                name                  = "DFCommonTruthMuonDressingAlg",
                                 dressParticlesKey     = "TruthMuons",
                                 usePhotonsFromHadrons = False,
                                 dressingConeSize      = 0.1,
@@ -277,10 +276,10 @@ def DFCommonTruthMuonDressingToolCfg(flags, decorationName = "dressedPhoton"):
                                 decorationName        = decorationName+"_mu")
 
 
-def DFCommonTruthTauDressingToolCfg(flags):
+def DFCommonTruthTauDressingCfg(flags):
     """Configure the tau truth dressing tool"""
-    return TruthDressingToolCfg(flags,
-                                name                  = "DFCommonTruthTauDressingTool",
+    return TruthDressingCfg(flags,
+                                name                  = "DFCommonTruthTauDressingAlg",
                                 dressParticlesKey     = "TruthTaus",
                                 usePhotonsFromHadrons = False,
                                 dressingConeSize      = 0.2, # Tau special

@@ -79,12 +79,12 @@ def PostTLAJetMCTruthAugmentationsCfg(flags, **kwargs):
     # truth tau matching needs truth jets, truth electrons and truth muons
     from DerivationFrameworkTau.TauTruthCommonConfig import TauTruthToolsCfg
     acc.merge(TauTruthToolsCfg(flags))
-    from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthTauDressingToolCfg
-    augmentationToolsList = [ acc.getPrimaryAndMerge(DFCommonTruthTauDressingToolCfg(flags)) ]
+    from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthTauDressingCfg
+    acc.merge(DFCommonTruthTauDressingCfg(flags))
 
-  
+
     from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthDressedWZQGLabelToolCfg
-    augmentationToolsList += [ acc.getPrimaryAndMerge(DFCommonTruthDressedWZQGLabelToolCfg(flags))]
+    augmentationToolsList = [ acc.getPrimaryAndMerge(DFCommonTruthDressedWZQGLabelToolCfg(flags))]
 
     # SUSY signal decorations
     from DerivationFrameworkSUSY.DecorateSUSYProcessConfig import IsSUSYSignalRun3
@@ -133,7 +133,7 @@ def AddStandardTLATruthContentsCfg(flags,
         acc.merge(PostTLAJetMCTruthAugmentationsCfg(flags, decorationDressing = decorationDressing))
     # Should photons that are dressed onto taus also be removed from truth jets?
     if includeTausInDressingPhotonRemoval:
-        acc.getPublicTool("DFCommonTruthTauDressingTool").decorationName=decorationDressing
+        acc.getEventAlgo("DFCommonTruthTauDressingAlg").decorationName=decorationDressing
 
     # Add back the navigation contect for the collections we want
     acc.merge(AddTruthCollectionNavigationDecorationsCfg(flags, ["TruthElectrons", "TruthMuons", "TruthPhotons", "TruthTaus", "TruthNeutrinos", "TruthBSM", "TruthBottom", "TruthTop", "TruthBoson"], prefix=prefix))

@@ -112,13 +112,11 @@ def PreJetMCTruthAugmentationsCfg(flags, **kwargs):
 
     acc = TruthClassificationAugmentationsCfg(flags)
 
-    augmentationToolsList = []
-
     # These augmentations do *not* require truth jets at all
     # If requested, add a decoration to photons that were used in the dressing
 
-    from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import ( DFCommonTruthElectronDressingToolCfg,
-    DFCommonTruthMuonDressingToolCfg, DFCommonTruthMuonCfg, DFCommonTruthElectronCfg,
+    from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import ( DFCommonTruthElectronDressingCfg,
+    DFCommonTruthMuonDressingCfg, DFCommonTruthMuonCfg, DFCommonTruthElectronCfg,
     DFCommonTruthPhotonSimCfg, DFCommonTruthNeutrinoCfg, DFCommonTruthBottomCfg, DFCommonTruthTopCfg,
     DFCommonTruthBosonCfg, DFCommonTruthBSMCfg, DFCommonTruthForwardProtonCfg, DFCommonTruthElectronIsolation1Cfg,
     DFCommonTruthElectronIsolation2Cfg, DFCommonTruthMuonIsolation1Cfg, DFCommonTruthMuonIsolation2Cfg,
@@ -133,13 +131,10 @@ def PreJetMCTruthAugmentationsCfg(flags, **kwargs):
         acc.merge(item(flags))
 
     if 'decorationDressing' in kwargs:
-        augmentationToolsList.append(acc.getPrimaryAndMerge(DFCommonTruthElectronDressingToolCfg(flags, decorationName = kwargs['decorationDressing'])))
-        augmentationToolsList.append(acc.getPrimaryAndMerge(DFCommonTruthMuonDressingToolCfg(flags, decorationName = kwargs['decorationDressing'])))
+        acc.merge(DFCommonTruthElectronDressingCfg(flags, decorationName = kwargs['decorationDressing']))
+        acc.merge(DFCommonTruthMuonDressingCfg(flags, decorationName = kwargs['decorationDressing']))
 
-    for i, tool in enumerate(augmentationToolsList):
-        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(name ="MCTruthCommonPreJetKernelNo{num}".format(num = i+1), AugmentationTools = [tool])) # TODO Migrate public tool to AthReentrantAlgorithm
-
-    return(acc)
+    return acc
 
 
 def PostJetMCTruthAugmentationsCfg(flags, **kwargs):
@@ -150,14 +145,14 @@ def PostJetMCTruthAugmentationsCfg(flags, **kwargs):
     # truth tau matching needs truth jets, truth electrons and truth muons
     from DerivationFrameworkTau.TauTruthCommonConfig import TauTruthToolsCfg
     acc.merge(TauTruthToolsCfg(flags))
-    from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthTauDressingToolCfg
-    augmentationToolsList = [ acc.getPrimaryAndMerge(DFCommonTruthTauDressingToolCfg(flags)) ]
+    from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthTauDressingCfg
+    acc.merge(DFCommonTruthTauDressingCfg(flags))
 
     #Save the post-shower HT and MET filter values that will make combining filtered samples easier (adds to the EventInfo)
     from DerivationFrameworkMCTruth.GenFilterToolConfig import GenFilterToolCfg
     # schedule the special truth building tools and add them to a common augmentation; note taus are handled separately below
     from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthDressedWZQGLabelToolCfg
-    augmentationToolsList += [ acc.addPublicTool(acc.popToolsAndMerge(GenFilterToolCfg(flags))),
+    augmentationToolsList = [ acc.addPublicTool(acc.popToolsAndMerge(GenFilterToolCfg(flags))),
                                acc.getPrimaryAndMerge(DFCommonTruthDressedWZQGLabelToolCfg(flags))]
 
     # SUSY signal decorations
@@ -202,7 +197,7 @@ def AddStandardTruthContentsCfg(flags,
     acc.merge(PostJetMCTruthAugmentationsCfg(flags))
     # Should photons that are dressed onto taus also be removed from truth jets?
     if includeTausInDressingPhotonRemoval:
-        acc.getPublicTool("DFCommonTruthTauDressingTool").decorationName=decorationDressing+"_tau"
+        acc.getEventAlgo("DFCommonTruthTauDressingAlg").decorationName=decorationDressing+"_tau"
 
     # Add back the navigation contect for the collections we want
     acc.merge(AddTruthCollectionNavigationDecorationsCfg(flags, navInputCollections, prefix=prefix))
