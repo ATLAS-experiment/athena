@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 // Local include(s).
 #include "xAODRootAccess/Event.h"
@@ -21,6 +21,9 @@
 #include <regex>
 #include <string>
 #include <vector>
+#include <memory>
+#include <set>
+#include <typeinfo>
 
 // Set up message printing functions for the static function(s).
 ANA_MSG_SOURCE(xAODEvent, "xAOD::Event")
@@ -57,7 +60,11 @@ std::unique_ptr<Event> Event::createAndReadFrom(TFile& inFile) {
     std::string sauxMode = "kClassAccess";
     auto metaData = dynamic_cast<TTree*>(inFile.Get("MetaData"));
     if (metaData) {
-      metaData->LoadTree(0);
+      auto rc = metaData->LoadTree(0);
+      if (rc < 0)[[unlikely]]{
+        ANA_MSG_ERROR("Error from LoadTree: "<< rc);
+        return {};
+      }
       if (metaData->GetBranch("StreamAOD")) {
         eauxMode = TEvent::kAthenaAccess; 
         sauxMode = "kAthenaAccess";
