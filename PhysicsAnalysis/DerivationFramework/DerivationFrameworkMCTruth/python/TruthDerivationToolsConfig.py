@@ -199,9 +199,8 @@ def TruthNavigationDecoratorCfg(flags, name, **kwargs):
     kwargs.setdefault("InputCollections", [])
     kwargs.setdefault("parentDecorKeys", [ key + ".parentLinks" for key in kwargs["InputCollections"] ])
     kwargs.setdefault("childDecorKeys", [ key + ".childLinks" for key in kwargs["InputCollections"] ])
-    TruthNavigationDecorator = CompFactory.DerivationFramework.TruthNavigationDecorator
-    acc.addPublicTool(TruthNavigationDecorator(name = name, **kwargs),
-                      primary = True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.TruthNavigationDecorator
+                     (name = name, **kwargs))
     return acc
 
 

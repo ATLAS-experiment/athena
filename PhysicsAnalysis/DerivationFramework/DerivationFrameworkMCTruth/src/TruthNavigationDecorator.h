@@ -1,13 +1,12 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_TRUTHNAVIGATIONDECORATOR_H
 #define DERIVATIONFRAMEWORK_TRUTHNAVIGATIONDECORATOR_H
 
 // Interface classes
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 // Handles
 #include "StoreGate/ReadHandleKeyArray.h"
@@ -25,13 +24,13 @@
 
 namespace DerivationFramework {
 
-  class TruthNavigationDecorator : public extends<AthAlgTool, IAugmentationTool> {
+  class TruthNavigationDecorator : public AthReentrantAlgorithm {
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override final;
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
 
   private:
     /// Parameter: input particle collections

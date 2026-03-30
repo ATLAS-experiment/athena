@@ -332,12 +332,9 @@ def AddTruthCollectionNavigationDecorationsCfg(flags, TruthCollections=[], prefi
     if len(TruthCollections) > 0:
         # Set up a tool to add the navigation decorations
         from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import TruthNavigationDecoratorCfg
-        DFCommonTruthNavigationDecorator = acc.getPrimaryAndMerge(TruthNavigationDecoratorCfg(flags,
-                                                                                              name             = prefix+'DFCommonTruthNavigationDecorator',
-                                                                                              InputCollections = TruthCollections))
-        CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-        acc.addEventAlgo(CommonAugmentation(prefix+"MCTruthNavigationDecoratorKernel",
-                                            AugmentationTools = [DFCommonTruthNavigationDecorator] )) # TODO Migrate public tool to AthReentrantAlgorithm
+        acc.merge(TruthNavigationDecoratorCfg(flags,
+                                              name             = prefix+"MCTruthNavigationDecoratorKernel",
+                                              InputCollections = TruthCollections))
     return acc
 
 

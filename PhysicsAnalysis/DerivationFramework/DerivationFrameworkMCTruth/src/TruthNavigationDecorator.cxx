@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -23,11 +23,9 @@ StatusCode DerivationFramework::TruthNavigationDecorator::initialize() {
 
 }
 
-// Function to do dressing, implements interface in IAugmentationTool
-StatusCode DerivationFramework::TruthNavigationDecorator::addBranches(const EventContext& ctx) const
+// Function to do dressing
+StatusCode DerivationFramework::TruthNavigationDecorator::execute(const EventContext& ctx) const
 {
-  // Event context
-
   // Retrieve the truth collections
   SG::ReadHandle<xAOD::TruthEventContainer> truthEvents(m_truthEventKey, ctx);
   if (!truthEvents.isValid()) {
