@@ -383,7 +383,7 @@ if flags.Trigger.enableL1CaloPhase1:
   if "doGlobal" in flags.Trigger.L1 and flags.Trigger.L1.doGlobal:
     # we will create a subsequence just for globalsim too
     cfg.addSequence(CompFactory.AthSequencer("L1GlobalSim",StopOverride=True),parentName="AthAlgSeq")
-    from GlobalSimulation.GlobalSimulation import GlobalSimulationCfg
+    from GlobalSimulation.GlobalSimulationConfig import GlobalSimulationCfg
     cfg.merge(GlobalSimulationCfg(flags),sequenceName="L1GlobalSim")
 
   if flags.Trigger.L1.doeFex:
