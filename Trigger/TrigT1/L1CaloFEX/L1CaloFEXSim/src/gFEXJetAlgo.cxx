@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXJetAlgo - JetFinder algorithm for gFEX
@@ -8,13 +8,14 @@
 //     email                : cecilia.tosciri@cern.ch
 //***************************************************************************
 
-#include <vector>
+
 
 #include "gFEXJetAlgo.h"
 #include "L1CaloFEXSim/gFEXJetTOB.h"
 #include "L1CaloFEXSim/gTowerContainer.h"
 #include "L1CaloFEXSim/gTower.h"
 
+#include <vector>
 namespace LVL1 {
 
   // default constructor for persistency
@@ -877,8 +878,10 @@ void gFEXJetAlgo::InternalPartialAB(const gTowersType & twrs, gTowersPartialSums
         }
         // now add rup1, rup2, rup3, rup4, ldn1, ldn2, ln3, ln4 -- use a loop instead of enumeratin in firmware  
         for(unsigned int rowOff = 1 ; rowOff < NUpDwnR[rcolumn][lcolumn]+1; rowOff++){
-          int rowModUp =  (irow + rowOff)%32;
-          int rowModDn =  (irow - rowOff + 32 )%32;
+          const int row = static_cast<int>(irow);
+          const int off = static_cast<int>(rowOff);
+          int rowModUp =  (row + off)%32;
+          int rowModDn =  (row - off + 32 )%32;
           // this is partial sum for the right half of the FPGA -- columns 2,3,4,5
           rps[irow][rcolumn] =  rps[irow][rcolumn] + twrs[rowModUp][lcolumn+2] + twrs[rowModDn][lcolumn+2];
         }
@@ -1013,8 +1016,8 @@ void gFEXJetAlgo::SaturateBlocks( gTowersType & gBlkSum, gTowersType sat, int fp
 
 void gFEXJetAlgo::gBlockAB(const gTowersType & twrs, gTowersType & gBlkSum, gTowersType & hasSeed, int seedThreshold) const {
 
-  int rows = twrs.size();
-  int cols = twrs[0].size();
+  const int rows = twrs.size();
+  const int cols = twrs[0].size();
   for( int irow = 0; irow < rows; irow++ ){
     for(int jcolumn = 0; jcolumn<cols; jcolumn++){
       // zero jet sum here
@@ -1032,7 +1035,8 @@ void gFEXJetAlgo::gBlockAB(const gTowersType & twrs, gTowersType & gBlkSum, gTow
         twrs[irow][jcolumn]   + twrs[krowUp][jcolumn]   + twrs[krowDn][jcolumn] +
         twrs[irow][jcolumn-1] + twrs[krowUp][jcolumn-1] + twrs[krowDn][jcolumn-1];
       } else{
-        // normal case
+        // normal case; jcolumn is not 11 so does not overrun
+        //coverity[OVERRUN:FALSE]
         gBlkSum[irow][jcolumn] =
         twrs[irow][jcolumn]   + twrs[krowUp][jcolumn]   + twrs[krowDn][jcolumn]   +
         twrs[irow][jcolumn-1] + twrs[krowUp][jcolumn-1] + twrs[krowDn][jcolumn-1] +
