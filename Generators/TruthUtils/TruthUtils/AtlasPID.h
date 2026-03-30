@@ -1042,6 +1042,11 @@ template<> inline int charge3(const DecodedPID& p) {
     if (!classified && isBaryon(pp)) { classified = true; nq = 3; }
     
   }
+  if (!classified && isExcited(p)) { //Excited/composite leptons/quarks
+    auto pp = p.shift(2);
+    auto ap = std::abs(pp.pid());
+    if (ap < TABLESIZE ) return pp.pid() > 0 ? triple_charge.at(ap) : -triple_charge.at(ap);
+  }
   if (!classified && isKK(p)) { // Kaluza-Klein particles
     auto pp = p.shift(2);
     auto ap = std::abs(pp.pid());
