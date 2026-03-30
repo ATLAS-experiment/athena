@@ -439,33 +439,25 @@ def AddMiniTruthCollectionLinksCfg(flags, **kwargs):
     kwargs.setdefault("doElectrons",True)
     kwargs.setdefault("doPhotons",True)
     kwargs.setdefault("doMuons",True)
-    aug_tools = []
-    from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import TruthLinkRepointToolCfg
+    from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import TruthLinkRepointAlgCfg
     if kwargs['doElectrons']:
-        electron_relink = acc.getPrimaryAndMerge(TruthLinkRepointToolCfg(
+        acc.merge(TruthLinkRepointAlgCfg(
             flags,
-            name="ElMiniCollectionTruthLinkTool",
+            name="ElMiniCollectionTruthLinkKernel",
             RecoCollection="Electrons",
             TargetCollections=["TruthMuons","TruthPhotons","TruthElectrons"]))
-        aug_tools += [ electron_relink ]
     if kwargs['doPhotons']:
-        photon_relink = acc.getPrimaryAndMerge(TruthLinkRepointToolCfg(
+        acc.merge(TruthLinkRepointAlgCfg(
             flags,
-            name="PhMiniCollectionTruthLinkTool",
+            name="PhMiniCollectionTruthLinkKernel",
             RecoCollection="Photons",
             TargetCollections=["TruthMuons","TruthPhotons","TruthElectrons"]))
-        aug_tools += [ photon_relink ]
     if kwargs['doMuons']:
-        muon_relink = acc.getPrimaryAndMerge(TruthLinkRepointToolCfg(
+        acc.merge(TruthLinkRepointAlgCfg(
             flags,
-            name="MuMiniCollectionTruthLinkTool",
+            name="MuMiniCollectionTruthLinkKernel",
             RecoCollection="Muons",
             TargetCollections=["TruthMuons","TruthPhotons","TruthElectrons"]))
-        aug_tools += [ muon_relink ]
-    for i, tool in enumerate(aug_tools):
-        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
-        "MiniCollectionTruthLinkKernelNo{num}".format(num=i+1),
-        AugmentationTools = [tool] )) # TODO Migrate public tool to AthReentrantAlgorithm
     return acc
 
 

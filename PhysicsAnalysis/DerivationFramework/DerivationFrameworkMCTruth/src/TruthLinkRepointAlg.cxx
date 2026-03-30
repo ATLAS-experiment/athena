@@ -1,16 +1,16 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
-// TruthLinkRepointTool.cxx
+// TruthLinkRepointAlg.cxx
 // Truth links on some objects point to the main truth particle
 // container, or to some other container that won't be saved in the
 // output derivation.  This re-points the links from the old
 // container to the new container (and serves as a chance to clean
 // up / harmonize the names of the decorations).
 
-#include "TruthLinkRepointTool.h"
+#include "TruthLinkRepointAlg.h"
 #include "xAODMuon/MuonContainer.h"
 #include "xAODEgamma/ElectronContainer.h"
 #include "xAODEgamma/PhotonContainer.h"
@@ -20,7 +20,7 @@
 
 #include "TruthUtils/MagicNumbers.h"
 
-StatusCode DerivationFramework::TruthLinkRepointTool::initialize(){
+StatusCode DerivationFramework::TruthLinkRepointAlg::initialize(){
   ATH_CHECK(m_recoKey.initialize());
   ATH_CHECK(m_targetKeys.initialize());
   ATH_CHECK(m_decorKey.initialize());
@@ -28,7 +28,7 @@ StatusCode DerivationFramework::TruthLinkRepointTool::initialize(){
 }
 
 // Function to do dressing, implements interface in IAugmentationTool
-StatusCode DerivationFramework::TruthLinkRepointTool::addBranches(const EventContext& ctx) const {
+StatusCode DerivationFramework::TruthLinkRepointAlg::execute(const EventContext& ctx) const {
   // Retrieve the truth collections
   std::vector<const xAOD::TruthParticleContainer*> targets{};
   targets.reserve(m_targetKeys.size());
@@ -66,7 +66,7 @@ StatusCode DerivationFramework::TruthLinkRepointTool::addBranches(const EventCon
 }
 
 // Find a match by unique ID in a different container
-int DerivationFramework::TruthLinkRepointTool::find_match(const xAOD::TruthParticle* p, const xAOD::TruthParticleContainer* c)
+int DerivationFramework::TruthLinkRepointAlg::find_match(const xAOD::TruthParticle* p, const xAOD::TruthParticleContainer* c)
 {
   // See if it's already gone
   if (!p) return -1;

@@ -392,12 +392,10 @@ def MenuTruthThinningCfg(flags, name, **kwargs):
 #==============================================================================
 # Truth links on some objects point to the main truth particle container.
 # This re-points the links from the old container to the new container
-def TruthLinkRepointToolCfg(flags, name, **kwargs):
-    """Configure the truth link repointing tool"""
+def TruthLinkRepointAlgCfg(flags, name, **kwargs):
+    """Configure the truth link repointing algorithm"""
     acc = ComponentAccumulator()
-    TruthLinkRepointTool = CompFactory.DerivationFramework.TruthLinkRepointTool
-    acc.addPublicTool(TruthLinkRepointTool(name, **kwargs),
-                      primary = True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.TruthLinkRepointAlg(name, **kwargs))
     return acc
 
 
