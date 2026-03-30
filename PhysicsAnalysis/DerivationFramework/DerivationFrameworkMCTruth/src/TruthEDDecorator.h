@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -13,8 +13,7 @@
 #define DerivationFrameworkMCTruth_TruthEDDecorator_H
 
 // Base classes
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 // Members
 #include "StoreGate/ReadHandleKey.h"
@@ -29,14 +28,14 @@
 
 namespace DerivationFramework {
 
-  class TruthEDDecorator : public extends<AthAlgTool, IAugmentationTool> {
+  class TruthEDDecorator : public AthReentrantAlgorithm {
 
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override final;
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
 
   private:
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey {this, "EventInfoName", "EventInfo", "EventInfo key"};

@@ -384,7 +384,7 @@ def DFCommonTruthEDDecoratorCfg(flags, name="DFCommonTruthEDDecorator", **kwargs
     kwargs.setdefault("EventShapeKeys", ["TruthIsoCentralEventShape","TruthIsoForwardEventShape"])
     suffix = kwargs.pop("DecorationSuffix", "_rho")
     kwargs.setdefault("EnergyDensityDecorKeys", [ x + suffix for x in kwargs["EventShapeKeys"] ])
-    acc.setPrivateTools(CompFactory.DerivationFramework.TruthEDDecorator(name, **kwargs))
+    acc.addEventAlgo(CompFactory.DerivationFramework.TruthEDDecorator(name, **kwargs))
     return acc
 
 
@@ -428,11 +428,7 @@ def AddTruthEnergyDensityCfg(flags):
     # Algorithms for the energy density - needed only if e/gamma hasn't set things up already
     acc.merge(DFCommonTruthCentralEDAlgCfg(flags))
     acc.merge(DFCommonTruthForwardEDAlgCfg(flags))
-
-    DFCommonTruthEDKernel = CompFactory.DerivationFramework.CommonAugmentation("DFCommonTruthEDKernel",
-                                                                               AugmentationTools =
-                                                                               [acc.addPublicTool(acc.popToolsAndMerge(DFCommonTruthEDDecoratorCfg(flags)))] ) # TODO Migrate public tool to AthReentrantAlgorithm
-    acc.addEventAlgo(DFCommonTruthEDKernel)
+    acc.merge(DFCommonTruthEDDecoratorCfg(flags, name = "DFCommonTruthEDKernel"))
     return acc
 
 
