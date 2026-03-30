@@ -242,9 +242,8 @@ def HadronOriginDecoratorCfg(flags, name, **kwargs):
     if "ToolName" not in kwargs:
         kwargs.setdefault("ToolName", acc.getPrimaryAndMerge(HadronOriginClassifierCfg(flags,
                                                                                        name="DFCommonHadronOriginClassifier")))
-    acc.addPublicTool(CompFactory.DerivationFramework.HadronOriginDecorator
-                      (name = name, **kwargs),
-                      primary = True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.HadronOriginDecorator
+                      (name = name, **kwargs))
     return acc
 
 
