@@ -71,10 +71,8 @@ std::vector<int> DerivationFramework::TruthCollectionMakerBase::updateMask(const
 }
 
 // Selection and collection creation
-StatusCode DerivationFramework::TruthCollectionMakerBase::addBranches(const EventContext& ctx) const
+StatusCode DerivationFramework::TruthCollectionMakerBase::execute(const EventContext& ctx) const
 {
-  // Event context for AthenaMT
-
   // Set up for some metadata handling
   // TODO: this isn't MT compliant. This information should go into the config level and avoid meta store
   static const bool is_sherpa = [this]() {
