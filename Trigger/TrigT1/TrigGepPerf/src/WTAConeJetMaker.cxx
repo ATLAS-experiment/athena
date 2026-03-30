@@ -1,8 +1,9 @@
 /*
- *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 #include "WTAConeJetMaker.h"
 #include "WTAConeParallelHelper.h"
+#include <iostream>
 
  
  std::vector<Gep::Jet> Gep::WTAConeJetMaker::makeJets(const std::vector<Gep::Cluster>& inTopoTowers) const
@@ -12,7 +13,7 @@
    const unsigned int inTopoTowersN = inTopoTowers.size();
    for(unsigned int i = 0; i < inTopoTowersN; i++)
    {
-    const auto TopoTower = inTopoTowers[i];
+    const auto & TopoTower = inTopoTowers[i];
     #ifndef FLOATING_POINT_SIMULATION
      WTATrigObj this_tower = fTower_to_iTower(TopoTower, i);
     #else
@@ -77,7 +78,7 @@
       thisjet.constituentsIndices.push_back(constituent.idx());
      }
 
-     GepJetList.push_back(thisjet);
+     GepJetList.push_back(std::move(thisjet));
    }
  
    return GepJetList;

@@ -12,7 +12,6 @@
 #include "WTAConeMaker.h" // WTAConeMaker is the core header
 #include "WTACone2PassMaker.h" // WTACone2PassMaker is the 2-Pass header
 
-#include <iostream>
 #include <string>
 #include <vector>
 #include <memory>
@@ -46,7 +45,6 @@
                 return std::make_unique<WTAConeMaker>();
             case TwoPass:
                 return std::make_unique<WTACone2PassMaker>();
-            std::cerr << "Invalid seed cleaning algorithm" << std::endl;
         }
         return nullptr;
     }
