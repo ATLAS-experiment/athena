@@ -1,9 +1,11 @@
 #!/bin/sh
 
 # art-include: main/Athena
-# art-description: DAOD building PHYS mc21_14TeV_
+# art-description: DAOD building PHYS mc23e
 # art-type: grid
 # art-memory: 4096
+# art-input: user.martindl.mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8514_s4369_r16083
+# art-input-nfiles: 1 
 # art-output: *.pool.root
 # art-output: checkFile*.txt
 # art-output: checkxAOD*.txt
@@ -11,11 +13,15 @@
 
 set -e
 
+if [[ -z ${ArtInFile} ]]; then
+    ArtInFile="root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/data-art/large-input/CampaignInputs/mc23/AOD/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8514_s4369_r16083/AOD.41608496._001231.pool.root.1"
+fi
+
 Derivation_tf.py \
---inputAODFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/AOD/ATLAS-P2-RUN4-04-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8481_s4494_r16436/AOD.44098360._000011.pool.root.1 \
+--inputAODFile ${ArtInFile} \
 --outputDAODFile art.pool.root \
 --formats PHYS \
---maxEvents -1 \
+--maxEvents 1000 \
 
 echo "art-result: $? reco"
 
