@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: ut_static_bunch_tool_test.cxx 749252 2016-05-24 09:30:51Z krasznaa $
@@ -50,6 +50,7 @@ int main() {
    SIMPLE_ASSERT( tool.bunchTrainSpacing() == 150 );
 
    // The bunch configuration used for MC15c:
+   //coverity[STACK_USE:FALSE]
    static const std::vector<  float > mc15cBunches = {  0.0, 0.0, 0.0,
       0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
       0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
