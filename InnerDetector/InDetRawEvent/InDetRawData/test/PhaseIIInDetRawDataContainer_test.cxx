@@ -960,7 +960,14 @@ int main(int argc, char **argv) {
    if (n_threads.empty()) {
       n_threads.push_back(1u);
    }
-
+   if (params.n_modules == 0){
+     std::cout <<"modules parameter cannot be zero!"<<std::endl;
+     return 1;
+   }
+   if ((params.n_columns == 0) or (params.n_rows == 0)){
+     std::cout <<"neither rows nor columns parameters can be zero!"<<std::endl;
+     return 1;
+   }
    EventList events = makeEvents(params.n_modules, params.n_rows, params.n_columns, params.n_events, params.n_event_indices,
                                  params.min_rois, params.max_rois,
                                  params.min_modules_per_roi, params.max_modules_per_roi,

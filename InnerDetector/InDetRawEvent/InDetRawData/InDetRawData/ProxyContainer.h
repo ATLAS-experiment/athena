@@ -479,6 +479,7 @@ struct ContainerProxy : ContainerProxyBase<Container, typename ElementProxy::ind
    /// The operation is undefined if there are no child elements.
    auto back() const
    { assert(this->size() > 0);
+     //coverity[INTEGER_OVERFLOW]
      std::size_t element_count = this->size()-1;
      return const_iterator::createElementProxy(this->cptr(), T_Derived::elementIndexAt(this->cptr(), this->m_index,element_count));
    }
