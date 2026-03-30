@@ -70,7 +70,7 @@ StatusCode SubjetBuilder::execute(DiTauCandidateData * data,
 
   // Jet and area definitions
   JetDefinition jd = JetDefinition(antikt_algorithm, m_Rsubjet);
-  AreaDefinition area_def(active_area_explicit_ghosts,GhostedAreaSpec(SelectorAbsRapMax(4.0)));
+  AreaDefinition area_def(active_area_explicit_ghosts,GhostedAreaSpec(SelectorAbsRapMax(m_maxEta)));
   ClusterSequenceArea cs(vpjClusters, jd, area_def); 
 
   // store (pt-sorted) subjets
