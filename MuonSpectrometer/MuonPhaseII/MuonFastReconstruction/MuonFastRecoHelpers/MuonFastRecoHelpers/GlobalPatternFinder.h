@@ -100,6 +100,10 @@ namespace MuonR4::FastReco{
                 const SpacePointBucket* bucket{nullptr};
                 /** @brief Pointer to the parent container */
                 const SpacePointContainer* container{nullptr};
+                /** @brief Station index */
+                StIndex station{};
+                /** @brief Logical layer number in the sector frame */
+                unsigned layerNum{};
                 /** @brief Global R */
                 double R{};
                 /** @brief Global Z */
@@ -110,7 +114,7 @@ namespace MuonR4::FastReco{
                 bool operator==(const HitPayload& other) const;
             };
             /** @brief Definition of the search tree class */
-            using SearchTree_t = Acts::KDTree<2, HitPayload, double, std::array, 10>;
+            using SearchTree_t = Acts::KDTree<2, HitPayload, double, std::array, 5>;
             /** @brief Type alias for a tree node, formed by a hit payload and its indexing coordinates */
             using TreeNode = std::pair<SearchTree_t::coordinate_t, HitPayload>;
             /** @brief Abrivation of the seed coordinates */
@@ -124,41 +128,36 @@ namespace MuonR4::FastReco{
             struct PatternState {
                 /** @brief Constructor taking the seed information 
                  *  @param seed: seed hit
-                 *  @param seedStation: station of the seed hit
                  *  @param sectorCoord: **expanded** sector coordinate
                  *  @param seedTheta: global theta of the seed */
                 PatternState(const HitPayload& seed,
-                             const StIndex seedStation,
                              const int sectorCoord,
                              const double seedTheta);
                 PatternState() = delete;
                 /** @brief Add a hit to the pattern and update the internal state
                  *  @param hit: hit to be added
-                 *  @param stationHit: station of the hit
-                 *  @param residual: residual of the hit */
-                void addHit(const HitPayload& hit, 
-                            const StIndex stationHit,
-                            const double residual);
+                 *  @param residual: residual of the hit
+                 *  @param accepWindow: acceptance window */
+                void addHit(const HitPayload& hit,
+                            const double residual,
+                            const double acceptWindow);
                 /** @brief Overwrite a hit in the pattern and update the internal state
                  *  @param oldHit: hit to be replaced
                  *  @param newHit: new hit to replace with
-                 *  @param station: station of the new hit
-                 *  @param newResidual: residual of the new hit */
+                 *  @param newResidual: residual of the new hit 
+                 *  @param accepWindow: acceptance window of the new hit */
                 void overWriteHit(const HitPayload& oldHit,
                                   const HitPayload& newHit,
-                                  const StIndex station,
-                                  const double newResidual);
-                using HitStationPair = std::pair<std::reference_wrapper<const HitPayload>, StIndex>;
-                /** @brief Get the nth last inserted hit and the associated station 
+                                  const double newResidual,
+                                  const double newAcceptWindow);
+                /** @brief Get the nth last inserted hit
                  *  @param n: the index of the hit to retrieve
-                 *  @return: the pair of the n-th last inserted hit and station */
-                HitStationPair getNthLastHit(const std::size_t n) const;
+                 *  @return: reference to the n-th last inserted hit */
+                const HitPayload& getNthLastHit(const std::size_t n) const;
                 /** @brief Check wheter a hit is present in the pattern
                  *  @param hit: hit to be checked
-                 *  @param station: station of the hit to be checked
                  *  @return: boolean indicating if the hit is in the pattern */
-                bool isInPattern(const HitPayload& hit,
-                                 const StIndex station) const;
+                bool isInPattern(const HitPayload& hit) const;
                 /** @brief Finalize the pattern and update its state */
                 void finalizePattern();
                 /** @brief Equal operator, it checks the hit-per-station map. It'svery expensive and in principle should be avoided */
@@ -181,6 +180,9 @@ namespace MuonR4::FastReco{
                 /** Total residual and last contribution to the residual (needed when replacing a hit) */
                 double totalResidual{0.};
                 double lastResidual{0.};
+                /** Sum of residual divided by acceptance window and last contribution to the acceptance window (needed when replacing a hit) */
+                double totalRes2AcceptWindow{0.};
+                double lastAccepWindow{0.};
                 /** Flag to indicate if the pattern is overlapping with another one, used during overlap removal */
                 bool isOverlap{false};
                 /** @brief Number of inserted hits during one of the two search stages (from seed outward and from seed inward) */
@@ -214,18 +216,14 @@ namespace MuonR4::FastReco{
             /** @brief Function testing pattern compatibility of a set of active patterns (patterns produced from the same seed hit) against one 
              *         test hit. At the end, activePatterns contains the surviving patterns.
              *  @param activePatterns: Vector of active patterns to be extended
-             *  @param testPair: TreeNode (Hit with its tree coordinates) corresponding to the hit to be tested 
-             *  @param testStation: Station index of the hit to be tested
+             *  @param test: Hit to be tested 
              *  @param seed: Seed hit information
              *  @param prevCandidate: Previous candidate hit information
-             *  @param prevCandidateStation: Station index of the previous candidate hit (used to check the layer ordering)
              *  @param visualInfo: Pointer to visual information for pattern visualization (nullptr if the VisualizationTool is disabled) */
             void extendPatterns(PatternStateVec& activePatterns,
                                 const HitPayload& test,
-                                const StIndex testStation,
                                 const HitPayload& seed,
                                 const HitPayload& prevCandidate,
-                                const StIndex prevCandidateStation,
                                 PatternHitVisualInfoVec* visualInfo = nullptr) const;
             /** @brief: Enum for the possible outcomes of the line compatibility test of one pattern against one test hit */        
             enum class CompatibilityResult : std::int8_t{
@@ -236,16 +234,20 @@ namespace MuonR4::FastReco{
                 /** @brief Test failed, discard the hit */
                 eRejectHit = -1,
             };
+            /** @brief : Small struct to encapsulate the checkLineCompatibility result */
+            struct LineCompatibilityResult {
+                CompatibilityResult result;
+                double residual;
+                double acceptanceWindow;
+            };
             /** @brief Method to check the line compatibility of a test hit with a given pattern.
              *  @param seed: seed hit information
              *  @param test: test hit information
-             *  @param testStation: station of the test hit
              *  @param pattern: pattern to be extended
              *  @return: a pair of the result of the test and the computed line residual for the test hit */
-            std::pair<CompatibilityResult, double> checkLineCompatibility(const HitPayload& seed,
-                                                                          const HitPayload& test,
-                                                                          const StIndex testStation,
-                                                                          const PatternState& pattern) const;                     
+            LineCompatibilityResult checkLineCompatibility(const HitPayload& seed,
+                                                           const HitPayload& test,
+                                                           const PatternState& pattern) const;                     
             /** @brief Method to check the phi compatibility of a test hit with a given pattern
              *  @param seed: seed hit information
              *  @param test: test hit information 
@@ -309,13 +311,9 @@ namespace MuonR4::FastReco{
             /** @brief Method to check the logical layer ordering of two hits.
              *  @param hit1: first hit
              *  @param hit2: second hit
-             *  @param station1: station index of the first hit
-             *  @param station2: station index of the second hit
              *  @return: the logical measurement layer ordering of the two hits */
             LayerOrdering checkLayerOrdering(const HitPayload& hit1,
-                                             const HitPayload& hit2,
-                                             const StIndex station1, 
-                                             const StIndex station2) const;
+                                             const HitPayload& hit2) const;
             /** @brief Helper function to add visual information of a given pattern (which is usually going to be destroyed) to the final container
              *  @param candidate: PatternState whome visual information is to be added
              *  @param status: Status of the pattern (e.g. successfull, failed or overlap)

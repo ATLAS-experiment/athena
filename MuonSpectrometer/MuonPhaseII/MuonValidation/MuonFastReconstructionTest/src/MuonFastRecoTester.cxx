@@ -9,7 +9,6 @@
 #include "MuonSpacePoint/SpacePointHelpers.h"
 #include "MuonStationIndex/MuonStationIndex.h"
 
-
 namespace MuonValR4 {
     using namespace MuonR4;
     using namespace MuonVal;
@@ -22,9 +21,12 @@ namespace MuonValR4 {
             std::size_t idx{0};
             for (const auto& [tp, truthHitSets] : truthHits) {
                 for (const simHitSet& truthHitSet : truthHitSets) {
-                    if (truthHitSet.count(hit)) return idx;
+                    if (truthHitSet.count(hit)) {
+                        if (tp) return idx;
+                        else return truthHits.size(); // Pileup muon
+                    }
                 }
-                ++idx;
+                if (tp) ++idx;
             }
         }
         return std::nullopt;
@@ -95,10 +97,10 @@ namespace MuonValR4 {
         //ATH_CHECK(SG::get(gctxPtr, m_geoCtxKey, ctx));
 
         const SpacePointContainer* spContainer {nullptr};
-        if (!m_spKey.empty()) ATH_CHECK(SG::get(spContainer, m_spKey, ctx));
+        ATH_CHECK(SG::get(spContainer, m_spKey, ctx));
             
         const SpacePointContainer* NSWspContainer {nullptr};
-        if (!m_NSWspKey.empty()) ATH_CHECK(SG::get(NSWspContainer, m_NSWspKey, ctx));
+        ATH_CHECK(SG::get(NSWspContainer, m_NSWspKey, ctx));
 
         const GlobalPatternContainer* globPatterns{nullptr};
         ATH_CHECK(SG::get(globPatterns, m_patternKey, ctx));
@@ -127,15 +129,12 @@ namespace MuonValR4 {
         return StatusCode::SUCCESS;
     }
     TruthParticleMap MuonFastRecoTester::fillTruthMap(const xAOD::MuonSegmentContainer* truthSegments) const {
+        if (!truthSegments) return TruthParticleMap{};
+
         TruthParticleMap truthMap{};
-        if (!truthSegments) return truthMap;
         for (const xAOD::MuonSegment* truth : *truthSegments) {
             if (!truth) continue;
             const xAOD::TruthParticle* tp = getTruthMatchedParticle(*truth);
-            if (!tp) {
-                ATH_MSG_WARNING("Truth segment with no matched truth particle.");
-                continue;
-            }
             truthMap[tp].push_back(getMatchingSimHits(*truth));
         }
         return truthMap;
@@ -144,22 +143,29 @@ namespace MuonValR4 {
                                            const xAOD::MuonSegmentContainer* truthSegments) {
         using enum eHitType;
         if (!m_isMC || truthHits.empty()) return;
+        int tpIdx{-1};
         for (const auto& [tp, _] : truthHits) {
+            // We skip pileup muons
+            if(!tp) continue;
+            
             m_gen_Eta.push_back(tp->eta());
             m_gen_Phi.push_back(tp->phi());
             m_gen_Pt.push_back(tp->pt());
             m_gen_Q.push_back(tp->charge());
-            HitCounts tpHitCount{};
+
+            ++tpIdx;
+            m_gen_nNonPrecSpacePointsPerStation[tpIdx].resize(Acts::toUnderlying(StIndex::StIndexMax));
+            m_gen_nPrecSpacePointsPerStation[tpIdx].resize(Acts::toUnderlying(StIndex::StIndexMax));
+            m_gen_nPhiSpacePointsPerStation[tpIdx].resize(Acts::toUnderlying(StIndex::StIndexMax));
+            
             for (const auto& segment : *truthSegments) {
                 if (!segment) continue;
                 if (getTruthMatchedParticle(*segment) != tp) continue;
-                tpHitCount[Acts::toUnderlying(ePrec)] += segment->nPrecisionHits();
-                tpHitCount[Acts::toUnderlying(eTriggerEta)] += segment->nTrigEtaLayers();
-                tpHitCount[Acts::toUnderlying(ePhi)] += segment->nPhiLayers();
+                const auto StIdx {Acts::toUnderlying(toStationIndex(segment->chamberIndex()))};
+                m_gen_nNonPrecSpacePointsPerStation[tpIdx][StIdx] += segment->nTrigEtaLayers();
+                m_gen_nPrecSpacePointsPerStation[tpIdx][StIdx] += segment->nPrecisionHits();
+                m_gen_nPhiSpacePointsPerStation[tpIdx][StIdx] += segment->nPhiLayers();
             }
-            m_gen_nNonPrecSpacePoints.push_back(tpHitCount[Acts::toUnderlying(eTriggerEta)]);
-            m_gen_nPrecSpacePoints.push_back(tpHitCount[Acts::toUnderlying(ePrec)]);
-            m_gen_nPhiSpacePoints.push_back(tpHitCount[Acts::toUnderlying(ePhi)]);
         }
     }
     void MuonFastRecoTester::fillSpacePointInfo(const MuonR4::SpacePointContainer* spc,
@@ -213,7 +219,7 @@ namespace MuonValR4 {
 
                     if (!m_isMC) continue;
                     if (const auto tpIdx {isTruthMatched(sp, truthHits)}; tpIdx.has_value()) {
-                        updateCounts(patHitCount.trueHitCounts, sp);
+                        updateCounts(tpIdx.value() < truthHits.size() ? patHitCount.trueHitCounts : patHitCount.pileupHitCounts, sp);
                         auto& matchedTPs = m_pat_MatchedToTruth[patternIdx];
                         if (std::ranges::find(matchedTPs, tpIdx.value()) == matchedTPs.end()) {
                             matchedTPs.push_back(tpIdx.value());
@@ -254,6 +260,7 @@ namespace MuonValR4 {
             m_pat_sector1.push_back(pattern->sector());
             m_pat_sector2.push_back(pattern->secondarySector());
             m_pat_residual.push_back(pattern->totalResidual());
+            m_pat_normalizedResidual.push_back(pattern->totalNormalizedResidual());
             m_pat_side.push_back(pattern->hitsInStation(stations.front()).front()->msSector()->side());
             m_pat_nStations.push_back(stations.size());
 
@@ -263,7 +270,12 @@ namespace MuonValR4 {
                 m_pat_nTruePrecSpacePoints.push_back(patHitCount.trueHitCounts[Acts::toUnderlying(ePrec)]);
                 m_pat_nTruePhiSpacePoints.push_back(patHitCount.trueHitCounts[Acts::toUnderlying(ePhi)]);
 
-                m_pat_nTruthparticles.push_back(m_pat_MatchedToTruth[patternIdx].size());
+                m_pat_nPileupNonPrecSpacePoints.push_back(patHitCount.pileupHitCounts[Acts::toUnderlying(eTriggerEta)]);
+                m_pat_nPileupPrecSpacePoints.push_back(patHitCount.pileupHitCounts[Acts::toUnderlying(ePrec)]);
+                m_pat_nPileupPhiSpacePoints.push_back(patHitCount.pileupHitCounts[Acts::toUnderlying(ePhi)]);
+
+                m_pat_nTruthparticles.push_back(std::ranges::count_if(m_pat_MatchedToTruth[patternIdx], 
+                    [&truthHits](unsigned char tpIdx){ return tpIdx < truthHits.size(); }));
             }
             patternIdx++;
         }
