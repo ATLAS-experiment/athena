@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOGPU_GeoLoadGpu_H
@@ -8,7 +8,6 @@
 // This header can be use both gcc and nvcc host part
 
 #include <map>
-#include <vector>
 
 #include "GeoGpu_structs.h"
 
