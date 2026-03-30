@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -65,10 +65,8 @@ StatusCode DerivationFramework::TruthDecayCollectionMaker::initialize()
 
 
 // Selection and collection creation
-StatusCode DerivationFramework::TruthDecayCollectionMaker::addBranches(const EventContext& ctx) const
+StatusCode DerivationFramework::TruthDecayCollectionMaker::execute(const EventContext& ctx) const
 {
-    // Event context for AthenaMT
-
     // Retrieve truth collections
     SG::ReadHandle<xAOD::TruthParticleContainer> truthParticles(m_particlesKey,ctx);
     if (!truthParticles.isValid()) {

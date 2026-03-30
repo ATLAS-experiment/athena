@@ -208,9 +208,8 @@ def TruthNavigationDecoratorCfg(flags, name, **kwargs):
 def TruthDecayCollectionMakerCfg(flags, name, **kwargs):
     """Configure the truth decay collection maker"""
     acc = ComponentAccumulator()
-    TruthDecayCollectionMaker = CompFactory.DerivationFramework.TruthDecayCollectionMaker
-    acc.addPublicTool(TruthDecayCollectionMaker(name = name, **kwargs),
-                      primary = True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.TruthDecayCollectionMaker(
+        name = name, **kwargs))
     return acc
 
 

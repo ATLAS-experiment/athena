@@ -216,16 +216,13 @@ def AddParentAndDownstreamParticlesCfg(flags,
     acc = ComponentAccumulator()
     collection_name=collection_prefix+'WithDecay' if collection_prefix is not None else 'Truth'+prefix+'WithDecay'
     # Set up a tool to keep the W/Z/H bosons and all downstream particles
-    collection_maker = acc.getPrimaryAndMerge(TruthDecayCollectionMakerCfg(flags,
-                                                                           name                 ='DFCommon'+prefix+'AndDecaysTool',
-                                                                           NewParticleKey = collection_name+'Particles',
-                                                                           NewVertexKey = collection_name+'Vertices',
-                                                                           PDGIDsToKeep         = parents,
-                                                                           Generations          = generations,
-                                                                           RejectHadronChildren = rejectHadronChildren))
-    CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-    kernel_name = 'MCTruthCommon'+prefix+'AndDecaysKernel'
-    acc.addEventAlgo(CommonAugmentation(kernel_name, AugmentationTools = [collection_maker] )) # TODO Migrate public tool to AthReentrantAlgorithm
+    acc.merge(TruthDecayCollectionMakerCfg(flags,
+                                           name                 = 'MCTruthCommon'+prefix+'AndDecaysKernel',
+                                           NewParticleKey = collection_name+'Particles',
+                                           NewVertexKey = collection_name+'Vertices',
+                                           PDGIDsToKeep         = parents,
+                                           Generations          = generations,
+                                           RejectHadronChildren = rejectHadronChildren))
     return acc
 
 # Next two don't seem to be used for anything...
@@ -305,17 +302,14 @@ def AddHFAndDownstreamParticlesCfg(flags, **kwargs):
     acc = TruthClassificationAugmentationsCfg(flags)
     # Set up a tool to keep b- and c-quarks and all downstream particles
     collection_name = kwargs['prefix']+"TruthHFWithDecay"
-    DFCommonHFAndDecaysTool = acc.getPrimaryAndMerge(TruthDecayCollectionMakerCfg(
+    acc.merge(TruthDecayCollectionMakerCfg(
         flags,
-        name=kwargs['prefix']+"DFCommonHFAndDecaysTool",
+        name=kwargs['prefix']+"MCTruthCommonHFAndDecaysKernel",
         NewParticleKey = collection_name+'Particles',
         NewVertexKey = collection_name+'Vertices',
         KeepBHadrons=kwargs['addB'],
         KeepCHadrons=kwargs['addC'],
         Generations=kwargs['generations']))
-    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
-        kwargs['prefix']+"MCTruthCommonHFAndDecaysKernel",
-        AugmentationTools = [DFCommonHFAndDecaysTool] )) # TODO Migrate public tool to AthReentrantAlgorithm
     return acc
 
 
@@ -350,22 +344,21 @@ def AddTruthCollectionNavigationDecorationsCfg(flags, TruthCollections=[], prefi
                                             AugmentationTools = [DFCommonTruthNavigationDecorator] )) # TODO Migrate public tool to AthReentrantAlgorithm
     return acc
 
+
 # Add BSM particles and their downstream particles (immediate and further decay products) in a special collection
 def AddBSMAndDownstreamParticlesCfg(flags, generations=-1):
     """Add BSM particles and their downstream particles in a special collection"""
     acc = ComponentAccumulator()
     # Set up a tool to keep the taus and all downstream particles
     collection_name = "TruthBSMWithDecay"
-    DFCommonBSMAndDecaysTool = acc.getPrimaryAndMerge(TruthDecayCollectionMakerCfg(flags,
-                                                                                   name              = "DFCommonBSMAndDecaysTool",
-                                                                                   NewParticleKey = collection_name+'Particles',
-                                                                                   NewVertexKey = collection_name+'Vertices',
-                                                                                   KeepBSM           = True,
-                                                                                   Generations       = generations))
-    CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-    acc.addEventAlgo(CommonAugmentation(name              = "MCTruthCommonBSMAndDecaysKernel",
-                                        AugmentationTools = [DFCommonBSMAndDecaysTool] )) # TODO Migrate public tool to AthReentrantAlgorithm
+    acc.merge(TruthDecayCollectionMakerCfg(flags,
+                                           name              = "MCTruthCommonBSMAndDecaysKernel",
+                                           NewParticleKey = collection_name+'Particles',
+                                           NewVertexKey = collection_name+'Vertices',
+                                           KeepBSM           = True,
+                                           Generations       = generations))
     return acc
+
 
 # Add a mini-collection for the born leptons
 def AddBornLeptonCollectionCfg(flags):
