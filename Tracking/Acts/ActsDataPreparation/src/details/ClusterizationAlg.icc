@@ -1,13 +1,17 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "xAODInDetMeasurement/ContainerAccessor.h"
 #include "ActsInterop/TableUtils.h"
 #include "AthAllocators/DataPool.h"
 
+namespace xAOD {
+   struct PixelClusterContainer;
+}
 namespace {
+   template <typename T>
+   concept has_moduleIndex = requires (T &&a) { a.m_moduleIndex; };
    template <typename T>
    concept has_nRDOs = requires (T &&a) { a.nRDOs(); };
 }
@@ -89,9 +93,11 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
   timer_processing.start();
 
   Cache_WriteHandle cacheHandle;
+  typename Cache::Handles<BaseClusterType>::IDCBackend *identifiable_cache=nullptr;
   if constexpr (useCache) {
     cacheHandle = Cache_WriteHandle(m_ClusterCache, ctx);
     auto updateHandle = Cache_BackendUpdateHandle(m_ClusterCacheBackend, ctx);
+    identifiable_cache = updateHandle.ptr();
     ATH_CHECK(updateHandle.isValid());
     ATH_CHECK(cacheHandle.record(std::make_unique<Cache_IDC>(updateHandle.ptr())));
     ATH_CHECK(cacheHandle.isValid());
@@ -111,7 +117,7 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
   std::vector<Cache_IDCLock> idclocks;
 
   Acts::Ccl::ClusteringData data;
-  
+
   // loop on ROIs
   std::size_t nClusters = 0ul;
   std::size_t nClusterRDOs = 0ul;
@@ -137,7 +143,9 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
 	auto tmp = cacheHandle->getWriteHandle(id);
 	Cache_IDCLock::Swap(cache_wh, tmp);
 	//check if already available
-	if(cache_wh.OnlineAndPresentInAnotherView()) continue;
+	if(cache_wh.OnlineAndPresentInAnotherView()) {
+           continue;
+        }
       }
 
       const InDetDD::SiDetectorElement* element = elements->getDetectorElement(id);
@@ -181,6 +189,7 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
   ATH_CHECK(clusterHandle.record( std::make_unique<ClusterContainer>(SG::VIEW_ELEMENTS, SG::ALWAYS_TRACK_INDICES),
 				  std::make_unique<ClusterAuxContainer>() ));
   ClusterContainer *clusterContainer = clusterHandle.ptr();
+  static_assert( !std::is_same_v<ClusterContainer, xAOD::PixelClusterContainer> || has_moduleIndex<ClusterContainer>);
 
   using xAODCluster_t = typename ClusterContainer::base_value_type;
   DataPool<xAODCluster_t> pool (nClusters);
@@ -188,6 +197,9 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
 
   std::any vars = m_clusteringTool->createAuxDataCache(*clusterHandle,nClusterRDOs);
 
+  if constexpr(has_moduleIndex<ClusterContainer>) {
+     clusterHandle->m_moduleIndex.m_range.resize(m_idHelper->wafer_hash_max());
+  }
   // Fill the collection to xAOD format, computing necessary quantities
   std::size_t xaodCounter = 0ul;
   typename ClusterContainer::iterator finalElement = clusterContainer->end();
@@ -200,13 +212,19 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
       ATH_MSG_ERROR("Inconsistent size of clusters");
       return StatusCode::FAILURE;
     }
-
     ATH_CHECK( m_clusteringTool->makeClusters(ctx,
 					      actsClusters,
 					      *element,
                                               xaodCounter,
                                               vars,
 					      itr) );
+    if constexpr(has_moduleIndex<ClusterContainer>) {
+       clusterHandle->m_moduleIndex.registerRange(element->identifyHash(),
+                                                  xaodCounter,
+                                                  xaodCounter +actsClusters.size(),
+                                                  clusterHandle->m_moduleIndex.containerIndex(*clusterHandle)
+                                                  );
+    }
     
     if constexpr (useCache) {
       // add to the cache

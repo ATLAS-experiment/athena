@@ -1,7 +1,6 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
 #include "TrkSurfaces/Surface.h"
 #include "InDetIdentifier/PixelID.h"
 #include "PixelReadoutGeometry/PixelModuleDesign.h"

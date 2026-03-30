@@ -1,11 +1,11 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 
 #include "xAODInDetMeasurement/PixelClusterAuxContainer.h"
+#include "xAODInDetMeasurement/PixelClusterAuxDataCacheCollection.h"
 
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "ActsInterop/TableUtils.h"
@@ -70,7 +70,8 @@ namespace ActsTrk {
     const xAOD::PixelClusterContainer *pixelClusters = inputPixelClusterContainer.cptr();
     ATH_MSG_DEBUG("Retrieved " << pixelClusters->size() << " clusters from container " << m_pixelClusterContainerKey.key());
     m_stat[kNClusters] += pixelClusters->size();
-    PixelClusterAuxDataCache<> cluster_aux_data_cache(*pixelClusters);
+    PixelClusterAuxDataCacheCollection cluster_aux_data_cache(*pixelClusters);
+
     auto pixelSpacePointContainer = SG::WriteHandle<xAOD::SpacePointContainer>( m_pixelSpacePointContainerKey, ctx );
     ATH_MSG_DEBUG( "--- Pixel Space Point Container `" << m_pixelSpacePointContainerKey.key() << "` created ..." );
     ATH_CHECK(pixelSpacePointContainer.record( std::make_unique<xAOD::SpacePointContainer>(),
@@ -107,52 +108,54 @@ namespace ActsTrk {
     pixelSpacePoints->push_new(pixelClusters->size(), [] () {return new xAOD::SpacePoint();});
 
     std::map<IdentifierHash, std::vector<std::pair<unsigned int, unsigned int>>> cache_ranges;
-    int groupStartIdx = 0;
-    std::optional<IdentifierHash> groupIdHash = std::nullopt;
 
     //when using the cache some clusters can be skipped, this results in discontinuous spacepoints (but the unpopulated SP still exists and is getting filled into the cache and the output container)
     //need to track the index of the spacepoints which are being inserted, so they are continuous and so that the output collection can be trimmed
     unsigned int spIdx = 0;
 
     using PixelClusterProxy_t = IPixelSpacePointFormationTool::PixelCluster_t;
-    for (PixelClusterProxy_t cluster_proxy : makePixelClusterAuxDataCacheProxy(cluster_aux_data_cache)) {
-      IdentifierHash idHash = cluster_proxy.identifierHash();
-      if constexpr(useCache){
-        //check if the idHash is already in the cache
-        if(cacheHandle->tryAddFromCache(idHash)) continue;
-      }
-
-      const InDetDD::SiDetectorElement* pixelElement = pixelElements->getDetectorElement(idHash);
-      if (pixelElement == nullptr) {
-        ATH_MSG_FATAL("Element pointer is nullptr");
-        return StatusCode::FAILURE;
-      }
-
-      //get the index of the output spacepoint, when not using the cache this should be equal to the cluster index
-      unsigned int thisSpIdx = spIdx++;
-
-      ATH_CHECK( m_spacePointMakerTool->producePixelSpacePoint(cluster_proxy,
-                                *pixelSpacePoints->at(thisSpIdx),
-                                *pixelElement ) );
-
-      if constexpr(useCache){
-        //check if the groupIdHash is defined if so and if it has changed then insert the range into the map
-        if(groupIdHash && ((*groupIdHash) != idHash)){
-          cache_ranges[(*groupIdHash)].emplace_back(groupStartIdx, thisSpIdx);
-          groupStartIdx = thisSpIdx;
-        }
-
-        groupIdHash = idHash;
+    using ModuleProxy_t = traits::ElementProxies< const PixelClusterAuxDataCacheCollection >::ModuleProxy<Utils::AccessPolicy::Const>;
+    static_assert(Utils::hasDifference<IndexWithSelection>);
+    static_assert(!std::is_integral_v<IndexWithSelection>);
+    using PixelClusterProxyAlt_t = PixelClusterAuxDataCache<Utils::AccessPolicy::Const>::PixelClusterProxy<Utils::AccessPolicy::Const>;
+    using ProxyAdapter_t = ClusterProxyAdapter<const PixelClusterAuxDataCache<Utils::AccessPolicy::Const>,
+                                               PixelClusterProxyAlt_t>;
+    static_assert( std::is_same_v<ProxyAdapter_t::ContainerPtr, const PixelClusterAuxDataCache<Utils::AccessPolicy::Const> *>);
+    static_assert(Utils::hasCreateProxy<ClusterProxyAdapter<const PixelClusterAuxDataCache<Utils::AccessPolicy::Const>,
+                                                            PixelClusterProxyAlt_t>,
+                                        const PixelClusterAuxDataCache<Utils::AccessPolicy::Const> *,
+                                        IndexWithSelection>);
+    static_assert(Utils::hasCreateProxy<ProxyAdapter_t,
+                                        const PixelClusterAuxDataCache<Utils::AccessPolicy::Const> *,
+                                        IndexWithSelection>);
+    static_assert(std::is_same_v<PixelClusterProxy_t, PixelClusterProxyAlt_t>);
+    for (ModuleProxy_t module_proxy : makePixelClusterAuxDataCacheCollectionProxy(cluster_aux_data_cache)) {
+      static_assert( std::is_same_v<decltype(module_proxy)::value_type, ProxyAdapter_t> );
+      if (!module_proxy.empty()) {
+         IdentifierHash idHash = module_proxy.identifyHash();
+         if constexpr(useCache){
+            //check if the idHash is already in the cache
+            if(cacheHandle->tryAddFromCache(idHash)) continue;
+         }
+         const InDetDD::SiDetectorElement* pixelElement = pixelElements->getDetectorElement(idHash);
+         if (pixelElement == nullptr) {
+            ATH_MSG_FATAL("Element pointer is nullptr");
+            return StatusCode::FAILURE;
+         }
+         unsigned int beginIdx = spIdx;
+         for (PixelClusterProxy_t cluster_proxy : module_proxy) {
+            //get the index of the output spacepoint, when not using the cache this should be equal to the cluster index
+            ATH_CHECK( m_spacePointMakerTool->producePixelSpacePoint(cluster_proxy,
+                                                                     *pixelSpacePoints->at(spIdx),
+                                                                     *pixelElement ) );
+            spIdx++;
+         }
+         if constexpr(useCache){
+            // @TODO change range such that the  end-index is not inclusive, like std ranges  ?
+            cache_ranges[idHash].emplace_back(beginIdx, spIdx);
+         }
       }
     }
-    
-    //handle final idHash
-    if constexpr(useCache){
-      if(groupIdHash){
-        cache_ranges[(*groupIdHash)].emplace_back(groupStartIdx, spIdx);
-      }
-    }
-
 
     //finally resize the output for the actual number of inserted spacepoints
     pixelSpacePoints->resize(spIdx);

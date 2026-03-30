@@ -34,7 +34,7 @@ StatusCode FPGATrackSim::FPGATrackSimReportingAlg::execute(const EventContext& c
             ATH_MSG_WARNING("SG key not available " << clusterContainer.key());
             continue;
         }
-        processxAODClusters<xAOD::PixelCluster>(clusterContainer);
+        processxAODClusters(clusterContainer);
     }
     // Process xAOD Strip Clusters
     std::vector<SG::ReadHandle<xAOD::StripClusterContainer>> xAODStripClusterContainers = m_xAODStripClusterContainerKeys.makeHandles(ctx);
@@ -44,7 +44,7 @@ StatusCode FPGATrackSim::FPGATrackSimReportingAlg::execute(const EventContext& c
             ATH_MSG_WARNING("SG key not available  " << clusterContainer.key());
             continue;
         }
-        processxAODClusters<xAOD::StripCluster>(clusterContainer);
+        processxAODClusters(clusterContainer);
     }
     // Process xAOD SpacePoints
     std::vector<SG::ReadHandle<xAOD::SpacePointContainer>> xAODSpacePointContainers = m_xAODSpacePointContainerKeys.makeHandles(ctx);
@@ -207,14 +207,14 @@ StatusCode FPGATrackSim::FPGATrackSimReportingAlg::finalize()
     return StatusCode::SUCCESS;
 }
 
-template <class XAOD_CLUSTER>
-void FPGATrackSim::FPGATrackSimReportingAlg::processxAODClusters(SG::ReadHandle<DataVector< XAOD_CLUSTER >>& clusterContainer) const
+template <class XAOD_CLUSTER_CONTAINER>
+void FPGATrackSim::FPGATrackSimReportingAlg::processxAODClusters(SG::ReadHandle<XAOD_CLUSTER_CONTAINER>& clusterContainer) const
 {
     if (m_printoutForEveryEvent) printxAODClusters(clusterContainer);
 }
 
-template <class XAOD_CLUSTER>
-void FPGATrackSim::FPGATrackSimReportingAlg::printxAODClusters(SG::ReadHandle<DataVector< XAOD_CLUSTER >>& clusterContainer) const
+template <class XAOD_CLUSTER_CONTAINER>
+void FPGATrackSim::FPGATrackSimReportingAlg::printxAODClusters(SG::ReadHandle<XAOD_CLUSTER_CONTAINER>& clusterContainer) const
 {
     std::string mainTable = "\n"
         "|=========================================================================================|\n"

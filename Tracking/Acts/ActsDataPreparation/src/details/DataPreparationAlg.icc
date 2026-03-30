@@ -1,9 +1,16 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
 #include "xAODInDetMeasurement/ContainerAccessor.h"
 #include "AthenaMonitoringKernel/MonitoredTimer.h"
+#include "CxxUtils/checker_macros.h"
+
+#ifndef ACTSTRK_DATAPREPARATION_CLUSTERIZATIONALG_H
+namespace {
+   template <typename T>
+   concept has_moduleIndex = requires (T &&a) { a.moduleIndex(); };
+}
+#endif
 
 namespace ActsTrk {
 
@@ -110,6 +117,66 @@ namespace ActsTrk {
     ATH_CHECK(detEleHandle.isValid());    
     const external_detector_element_collection_t* detElements = detEleHandle.cptr();
 
+    int nRejected = 0;
+    if constexpr(has_moduleIndex<external_collection_t>) {
+       // in addition to pushing back elements to the ConstDataVector
+       // also the moduleIndex needs to be built.
+       // So the access control of the CosntDataVector needs to be circumvented
+       // so that the ModuleIndex can be updated at the same as elements are pushed to
+       // the ConstDataVector.
+       input_collection_t *non_const_outputCollection ATLAS_THREAD_SAFE = const_cast<input_collection_t *>(outputCollection.asDataVector());
+       auto &outputCollection_moduleIndex = non_const_outputCollection->moduleIndex();
+
+       std::set<IdentifierHash> hashes;
+       ATH_CHECK( fetchIdHashes( ctx, hashes ) );
+       // Run on all the id hashes that overlap with the RoI
+       unsigned int n_elements_total=0u;
+       for (const IdentifierHash id : hashes) {
+          const PhaseII::DataRange &range(inputCollection->m_moduleIndex.range(id));
+          // If the requested idHash is not present move to the next one
+          // This should not happen for clusters, but may happen for strip space points
+          if (range.empty()) {
+             continue;
+          }
+          n_elements_total+=range.size(); // does not take element selection into account -> overallocation of selection index
+       }
+       m_stat[kNInputs] += n_elements_total;
+       outputCollection_moduleIndex.m_range.resize( inputCollection->moduleIndex().m_range.size());
+       outputCollection_moduleIndex.m_selection.reserve(n_elements_total);
+       outputCollection_moduleIndex.m_srcContainer = inputCollection->moduleIndex().m_srcContainer;
+       for (const IdentifierHash id : hashes) {
+          const PhaseII::DataRange &range(inputCollection->moduleIndex().range(id));
+          // If the requested idHash is not present move to the next one
+          // This should not happen for clusters, but may happen for strip space points
+          if (range.empty()) {
+             continue;
+          }
+          auto const &src_container = inputCollection->moduleIndex().container(range);
+          unsigned int begin_index = outputCollection_moduleIndex.m_selection.size();
+          for (unsigned int idx = range.beginIndex(); idx < range.endIndex(); ++idx) {
+             assert(idx < src_container.size());
+             const auto *element = src_container[idx];
+             if constexpr (not std::is_same<object_t, xAOD::SpacePoint >::value) {
+                if ( inputPrdMap and inputPrdMap->isUsed(element->identifier()) ) {
+                   ++nRejected;
+                   continue;
+                }
+             } else {
+                if ( inputPrdMap and inputPrdMap->isUsed(element->measurements()[0]->identifier()) ) {
+                   ++nRejected;
+                   continue;
+                }
+             }
+             outputCollection_moduleIndex.m_selection.push_back(element->index());
+             outputCollection.push_back(element);
+          }
+          outputCollection_moduleIndex.registerRange(id,
+                                                     begin_index,
+                                                     outputCollection_moduleIndex.m_selection.size(),
+                                                     range.containerIndex());
+       }
+    }
+    else {
     // Selection
     // For the time being we simply insert data given the idHash
     // Use the Container Accessor strategy
@@ -124,7 +191,6 @@ namespace ActsTrk {
     std::set<IdentifierHash> hashes;
     ATH_CHECK( fetchIdHashes( ctx, hashes ) );
 
-    int nRejected = 0;
     // Run on all the id hashes that overlap with the RoI
     for (const IdentifierHash id : hashes) {      
       // If the requested idHash is not present move to the next one
@@ -152,6 +218,7 @@ namespace ActsTrk {
 	  outputCollection.push_back(*firstElement);
 	}
       }
+    }
     }
     
     ATH_MSG_VERBOSE("Rejected: " << nRejected);
@@ -187,13 +254,85 @@ namespace ActsTrk {
     ATH_CHECK( fetchIdHashes( ctx, hashes ) );
 
     int nRejected = 0;
+    if constexpr(has_moduleIndex<external_collection_t>) {
+       // in addition to pushing back elements to the ConstDataVector
+       // also the moduleIndex needs to be built.
+       // So the access control of the CosntDataVector needs to be circumvented
+       // so that the ModuleIndex can be updated at the same as elements are pushed to
+       // the ConstDataVector.
+       input_collection_t *non_const_outputCollection ATLAS_THREAD_SAFE = const_cast<input_collection_t *>(outputCollection.asDataVector());
+       auto &outputCollection_moduleIndex = non_const_outputCollection->moduleIndex();
+
+       std::set<IdentifierHash> hashes;
+       ATH_CHECK( fetchIdHashes( ctx, hashes ) );
+       // Run on all the id hashes that overlap with the RoI
+       unsigned int n_elements_total=0u;
+       for (const IdentifierHash idHash : hashes) {
+          auto ce = cacheHandle->indexFindPtr(idHash);
+          if(ce == nullptr) continue;
+          if (!ce->container)  continue;
+          const input_collection_t *src_container=dynamic_cast<const input_collection_t *>(ce->container);
+          assert(src_container);
+          outputCollection_moduleIndex.m_range.resize( src_container->moduleIndex().m_range.size() );
+          break;
+       }
+       for (const IdentifierHash idHash : hashes) {
+          auto ce = cacheHandle->indexFindPtr(idHash);
+          if(ce == nullptr) continue;
+          assert( ce->ranges.size()==1ul);
+          const input_collection_t *src_container=nullptr;
+          unsigned int container_index = std::numeric_limits<unsigned int>::max();
+          for(auto rng: ce->ranges){
+             if(rng.first == rng.second) continue;
+             assert(ce->container);
+             if (ce->container != src_container) {
+                src_container=dynamic_cast<const input_collection_t *>(ce->container);
+                container_index = outputCollection_moduleIndex.containerIndex(*src_container);
+             }
+             assert(src_container);
+             outputCollection_moduleIndex.registerRange(idHash, rng.first, rng.second, container_index);
+             n_elements_total+=rng.second - rng.first; // does not take element selection into account -> overallocation of selection index
+          }
+       }
+       outputCollection_moduleIndex.m_selection.reserve(n_elements_total);
+       for (unsigned int id_hash=0u; id_hash < outputCollection_moduleIndex.m_range.size(); ++id_hash) {
+          PhaseII::DataRange &range = outputCollection_moduleIndex.m_range[id_hash];
+          if(range.empty()) continue;
+          auto const &src_container = outputCollection_moduleIndex.container(range);
+          unsigned int begin_index=outputCollection_moduleIndex.m_selection.size();
+          for (unsigned int element_index = range.beginIndex(); element_index < range.endIndex(); ++element_index) {
+             const auto *element = src_container[element_index];
+             // Check the measurement has not been used previously
+             if constexpr (not std::is_same<object_t, xAOD::SpacePoint >::value) {
+                if ( inputPrdMap and inputPrdMap->isUsed(element->identifier()) ) {
+                   ++nRejected;
+                   continue;
+                }
+             } else {
+                if ( inputPrdMap and inputPrdMap->isUsed(element->measurements()[0]->identifier()) ) {
+                   ++nRejected;
+                   continue;
+                }
+             }
+             assert( element->index() < src_container.size());
+             outputCollection_moduleIndex.m_selection.push_back(element->index());
+             outputCollection.push_back(element);
+          }
+          outputCollection_moduleIndex.registerRange(id_hash,
+                                                     begin_index,
+                                                     outputCollection_moduleIndex.m_selection.size(),
+                                                     range.containerIndex());
+       }
+    }
+    else {
+    unsigned int n_elements_total=0u;
     for(auto idHash: hashes) {
       //this function will wait if an item is not available
       auto ce = cacheHandle->indexFindPtr(idHash);
       if(ce == nullptr) continue;
       for(auto rng: ce->ranges){
         if(rng.first == rng.second) continue;
-	m_stat[kNInputs] += rng.second - rng.first;
+	n_elements_total += rng.second - rng.first;
         for(unsigned int i = rng.first; i < rng.second; i++){
 
 	  // Check the measurement has not been used previously
@@ -213,7 +352,8 @@ namespace ActsTrk {
         }
       }
     }
-    
+    m_stat[kNInputs]+=n_elements_total;
+    }
     ATH_MSG_VERBOSE("Rejected: " << nRejected);
     
     return StatusCode::SUCCESS;
