@@ -51,6 +51,7 @@ StatusCode FastReconstructionAlg::execute(const EventContext& ctx) const {
     for (const auto& key: m_inSpacePoints) {
         auto& spc = inSpacePoints.emplace_back(nullptr);
         ATH_CHECK(SG::get(spc, key, ctx));
+        ATH_MSG_DEBUG("Reading " << spc->size() << " SP buckets from collection: " << key);
     }
 
     const ActsTrk::GeometryContext* gctx{nullptr};
@@ -75,8 +76,8 @@ StatusCode FastReconstructionAlg::execute(const EventContext& ctx) const {
             writeHandle->push_back(std::make_unique<SpacePointBucket>(*bucket));
         }
 
-        ATH_MSG_VERBOSE("Written " << writeHandle->size()
-                        << " SpacePointBuckets into StoreGate with key "
+        ATH_MSG_DEBUG("Written " << writeHandle->size()
+                        << " SP Buckets into StoreGate with key "
                         << m_outSpacePoints.at(idx));
     }
 
@@ -86,7 +87,7 @@ StatusCode FastReconstructionAlg::execute(const EventContext& ctx) const {
     for (GlobalPattern& pat : patterns) {
         writeHandle->push_back(std::make_unique<GlobalPattern>(std::move(pat)));
     }
-    ATH_MSG_VERBOSE("Written "<<writeHandle->size()<<" GlobalPatterns into StoreGate.");
+    ATH_MSG_DEBUG("Written "<<writeHandle->size()<<" GlobalPatterns into StoreGate.");
     return StatusCode::SUCCESS;
 }
 

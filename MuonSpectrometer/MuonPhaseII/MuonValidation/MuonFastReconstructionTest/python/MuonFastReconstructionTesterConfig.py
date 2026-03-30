@@ -46,6 +46,10 @@ if __name__=="__main__":
                                             action='store_true')
     parser.add_argument("--runHoughTest", help="If set to true, the hough transform test is run on the output of the fast reco alg",
                                               default=False, action='store_true')
+    parser.add_argument("--runMSTrackTest", help="If set to true, the MS Track Finding test is run on the output of the fast reco alg",
+                                              default=False, action='store_true')
+    parser.add_argument("--useFastRecoSpacePoints", help="If set to true, we run the pattern recognition chain on the space points from the fast reco instead of spacepointMaker",
+                                              default=False, action='store_true')
     parser.add_argument("--vTune", help="If set to true, the code is profiled with VTune (With the proper command!)",
                                               default=False, action='store_true')
     parser.set_defaults(outRootFile="FastRecoTester.root")
@@ -66,35 +70,49 @@ if __name__=="__main__":
     if args.vTune:
         from PerfMonVTune.PerfMonVTuneConfig import VTuneProfilerServiceCfg
         cfg.merge(VTuneProfilerServiceCfg(flags))
-        
-    cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
-                                    outStream="MuonEtaHoughTransformTest"))
 
+    # Schedule data preparation and space point formation
     from MuonConfig.MuonDataPrepConfig import xAODUncalibMeasPrepCfg
     cfg.merge(xAODUncalibMeasPrepCfg(flags))
-    
     from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg 
     cfg.merge(MuonSpacePointFormationCfg(flags))
-
+    
+    # Schedule fast reconstruction alg & the Fast Reco Tester Alg
     from MuonFastRecoAlgs.MuonFastReconstructionConfig import MuonFastReconstructionAlgCfg, PatternRecognitionFromFastRecoCfg
     cfg.merge(MuonFastReconstructionAlgCfg(flags))
-
-    if args.runHoughTest:
-        cfg.merge(PatternRecognitionFromFastRecoCfg(flags))
-
-        from MuonPatternRecognitionTest.PatternTestConfig import MuonHoughTransformTesterCfg, PatternVisualizationToolCfg
-        cfg.merge(MuonHoughTransformTesterCfg(flags,  
-                                              name = "MuonHoughTransformTester", 
-                                              SpacePointKey = "MuonSpacePointsFastReco",
-                                              writeSpacePoints = False,
-                                              VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, CanvasLimits =0))))
-    else:
-        from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
-        cfg.merge(MuonPatternRecognitionCfg(flags))
-    
+    cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
+                              outStream="FastRecoTester"))
     cfg.merge(MuonFastRecoTesterCfg(flags, 
                                     name = "MuonFastRecoTester",
                                     writeSpacePoints = args.writeSpacePoints))
+
+    # Schedule the pattern recognition algs either on the space points from the fast reco or from the standard space point maker
+    if args.useFastRecoSpacePoints:
+        cfg.merge(PatternRecognitionFromFastRecoCfg(flags))
+    else:
+        from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
+        cfg.merge(MuonPatternRecognitionCfg(flags))
+
+    # If desired, schedule the hough transform test
+    if args.runHoughTest:
+        cfg.merge(setupHistSvcCfg(flags,outFile="HoughTransformTester.root",
+                                  outStream="MuonEtaHoughTransformTest"))
+        from MuonPatternRecognitionTest.PatternTestConfig import MuonHoughTransformTesterCfg, PatternVisualizationToolCfg
+        cfg.merge(MuonHoughTransformTesterCfg(flags,  
+                                              name = "MuonHoughTransformTester", 
+                                              SpacePointKey = "MuonSpacePointsFastReco" if args.useFastRecoSpacePoints else "MuonSpacePoints",
+                                              writeSpacePoints = False,
+                                              VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, CanvasLimits =0))))
+        
+    # If desired, schedule the MS Track Finding test
+    if args.runMSTrackTest:
+        cfg.merge(setupHistSvcCfg(flags,outFile="MsTrackTester.root",
+                                  outStream="MuonTrackTester"))
+        from MuonTrackFindingAlgs.TrackFindingConfig import MSTrackFinderAlgCfg
+        cfg.merge(MSTrackFinderAlgCfg(flags))
+        from MuonTrackFindingTest.MsTrackFindingTester import MsTrackTesterCfg
+        cfg.merge(MsTrackTesterCfg(flags, LegacyTrackKey="", LegacyMuonKey="", LegacySegmentKey=""))
+    
 
     if flags.Input.isMC:
         ## Keep them to manually exchange the map

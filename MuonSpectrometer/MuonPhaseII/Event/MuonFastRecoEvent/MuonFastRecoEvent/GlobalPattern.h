@@ -39,6 +39,8 @@ class GlobalPattern {
     void setNPhiHits(unsigned n) { m_nPhiHits = n; }
     /// @brief Total residual of the pattern from pattern finding
     void setTotalResidual(double res) { m_totalResidual = res; }
+    /// @brief Total normalized residual of the pattern from pattern finding
+    void setTotalNormalizedResidual(double res) { m_totalNormalizedResidual = res; }
     
 
     /// @brief Return the average global theta of the pattern
@@ -65,6 +67,8 @@ class GlobalPattern {
     unsigned nPhiHits() const { return m_nPhiHits; }
     /// @brief Return the total residual of the pattern from pattern finding
     double totalResidual() const { return m_totalResidual; }
+    /// @brief Return the total normalized residual of the pattern from pattern finding
+    double totalNormalizedResidual() const { return m_totalNormalizedResidual; }
     /// @brief Return the hits per station
     const HitCollection& hitsPerStation() const { return m_hitsInStation; }
 
@@ -93,6 +97,8 @@ class GlobalPattern {
     unsigned m_nPhiHits{0};
     /** Total residual of the pattern from pattern finding */
     double m_totalResidual{0.};
+    /** Total residual normalized to the acceptance window of the pattern from pattern finding */
+    double m_totalNormalizedResidual{0.};
 
     // The pattern can extend over two sectors in the overlap region
     int m_sector1{-1};

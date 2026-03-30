@@ -57,11 +57,11 @@ namespace MuonR4{
 
             /** ----------------- Configuration options for the global pattern finder ----------------- */
             /** @brief Size of theta window in radiants to search for comapatible hits with a pattern, tailored to the target pt cutoff */
-            DoubleProperty m_thetaSearchWindow {this, "ThetaWindowSearch", 0.033, "Size of the search window in theta to link hits to a pattern"};
+            DoubleProperty m_thetaSearchWindow {this, "ThetaWindowSearch", 0.04, "Size of the search window in theta to link hits to a pattern"};
             /** @brief Maximum number of missed candidate hits in different measurement layers during pattern building */
             UnsignedIntegerProperty m_maxMissedLayerHits {this, "MaxMissedLayerHits", 2, "Maximum number of missed candidate hits in different measurement layers during pattern building"};
             /** @brief Base radial compatibility window (in mm). This is the minimum allowed |R residual| between a test hit and the extrapolated line from the seed, evaluated at ΔZ = 0. */
-            DoubleProperty m_baseRWindow {this, "BaseRWindow", 25, "Minimum allowed |R residual| between a test hit and the extrapolated line from the seed, evaluated at ΔZ = 0"};
+            DoubleProperty m_baseRWindow {this, "BaseRWindow", 70, "Minimum allowed |R residual| between a test hit and the extrapolated line from the seed, evaluated at ΔZ = 0"};
             /** @brief Minumum difference in global Z between the seed and the pattern hit to be used to compute the pattern line */
             DoubleProperty m_minZDiff4Line {this, "MinZDiff4Line",10, "Minimum difference in global Z between the seed and the pattern hit to be used to compute the pattern line"};
             /** @brief Minumum difference in global R between the seed and the pattern hit to be used to compute the pattern line */

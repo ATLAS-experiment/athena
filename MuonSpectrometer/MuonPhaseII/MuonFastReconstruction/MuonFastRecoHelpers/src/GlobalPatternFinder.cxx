@@ -24,11 +24,11 @@ namespace {
         }
         const uint16_t tubeNum1 {static_cast<const xAOD::MdtDriftCircle*>(hit1.primaryMeasurement())->driftTube()};
         const uint16_t tubeNum2 {static_cast<const xAOD::MdtDriftCircle*>(hit2.primaryMeasurement())->driftTube()};
-        // We should not have two MDT hits in the same tube, or even worst we should not compare one hit with itself
+        /** To understand: in principle we should not have two MDT hits in the same tube... but this can happen 
+         *  now when running run4 digitization. Therefore, for now we don't throw when hit1==hit2 but we just reject
+         *  one of the two... to understand for future improvements */
         if(tubeNum1 == tubeNum2) {
-            std::ostringstream msg {"Trying to compare two hits from the same tube, likely the hits are in different layers."};
-            msg << "\n Hit1: "<<hit1<<", tube number: "<<tubeNum1<<"\n Hit2: "<<hit2<<", tube number: "<<tubeNum2;
-            throw std::runtime_error(msg.str());
+            return false;
         }; 
         return std::abs(tubeNum1-tubeNum2) < 2;
     }
@@ -93,7 +93,10 @@ GlobalPatternFinder::findPatterns(const ActsTrk::GeometryContext& gctx,
                 throw std::runtime_error("The space point container associated to the pattern is not present in the output bucket map.");
             }
             for (const SpacePointBucket* bucket : bucketVec) {
-                outBuckets[spc].push_back(bucket);
+                auto& outBucketVec = outBuckets[spc];
+                if (std::ranges::find(outBucketVec, bucket) == outBucketVec.end()) {
+                    outBucketVec.push_back(bucket);
+                }
             }
         }
     }
@@ -117,14 +120,17 @@ GlobalPatternFinder::findPatternsInEta(const SearchTree_t& orderedSpacepoints,
         for (const auto& [seedCoords, seed] : orderedSpacepoints) {
             const SpacePoint* seedHit {seed.hit};
             /** Check the seed is in the current seeding layer, measures eta and if seeding from MDT hits is enabled  */
-            const StIndex seedStation {m_cfg.idHelperSvc->stationIndex(seedHit->identify())};
-            const LayerIndex seedLayer {toLayerIndex(seedStation)};
+            const LayerIndex seedLayer {toLayerIndex(seed.station)};
             if (seedLayer != seedingLayer || !seedHit->measuresEta() || (seedHit->isStraw() && !m_cfg.seedFromMdt)) {
                 continue;
             }
-            /** check how many existing patterns contain this hit */
-            auto nExistingPatterns {std::ranges::count_if(patterns, [&seed, &seedStation](const PatternState& pattern){
-                return pattern.isInPattern(seed, seedStation);
+            /** check how many existing (and overlapping) patterns contain this hit */
+            auto nExistingPatterns {std::ranges::count_if(patterns, [&seed, &seedCoords, this](const PatternState& pattern){
+                if (std::abs(pattern.theta - seedCoords[thetaIdx]) > m_cfg.thetaSearchWindow ||
+                    pattern.sectorCoord != static_cast<int>(seedCoords[sectorIdx])) {
+                    return false;
+                }
+                return pattern.isInPattern(seed);
             })};
             if (nExistingPatterns >= m_cfg.maxSeedAttempts) {
                 ATH_MSG_DEBUG("The seed hit "<<*seedHit<<"\n coordinates "<<seedCoords<<" has already been used to build "<<nExistingPatterns<<" patterns, which is above the maximum number of attempts allowed to build a pattern from hits already used in existing patterns. Do not use it as seed for a new pattern.");
@@ -157,9 +163,7 @@ GlobalPatternFinder::findPatternsInEta(const SearchTree_t& orderedSpacepoints,
             std::ranges::sort(candidateHits, [this](const auto& c1, const auto& c2){
                 const HitPayload& hit1 {c1.second};
                 const HitPayload& hit2 {c2.second};
-                StIndex station1 {m_cfg.idHelperSvc->stationIndex(hit1.hit->identify())};
-                StIndex station2 {m_cfg.idHelperSvc->stationIndex(hit2.hit->identify())};
-                LayerOrdering ordering {checkLayerOrdering(hit1, hit2, station1, station2)};
+                LayerOrdering ordering {checkLayerOrdering(hit1, hit2)};
                 if (ordering == LayerOrdering::eSameLayer) {
                     /** If the two hits are in the same layer, sort them by local y coordinate. */
                     return hit1.hit->localPosition().y() < hit2.hit->localPosition().y();
@@ -171,28 +175,24 @@ GlobalPatternFinder::findPatternsInEta(const SearchTree_t& orderedSpacepoints,
             assert(seedItr != candidateHits.end());
             /** Initialize a pattern from the seed hit*/
             std::vector<PatternState> activePatterns{};
-            activePatterns.emplace_back(seed, seedStation, static_cast<int>(seedCoords[sectorIdx]), seedCoords[thetaIdx]);
+            activePatterns.emplace_back(seed, static_cast<int>(seedCoords[sectorIdx]), seedCoords[thetaIdx]);
             if (visualInfo) {
                 activePatterns.back().visualInfo = std::make_unique<PatternHitVisualInfo>(seedHit, seedCoords[thetaIdx] - thetaWindow, seedCoords[thetaIdx] + thetaWindow);
             }
 
             const HitPayload* prevCandidate {&seed};
-            StIndex prevCandidateStation {seedStation};
             /** Helper function to process a new candidate hit. During pattern building, we can have pattern branching when the initial pattern is compatible 
                 with multiple hits in the same layer. These patters will be stored in activePatterns. For each new hit, extendPatterns will try to extend every 
                 active pattern and remove the ones not meeting continuation criteria. */
             auto processNewHit = [&](const TreeNode& testPair){
                 const HitPayload& test {testPair.second};
-                const SpacePoint* testHit {testPair.second.hit};
                 /** Only-phi measurement will be treated later */
-                if (!testHit->measuresEta()) {
+                if (!test.hit->measuresEta()) {
                     return;
                 }
-                const StIndex testStation {m_cfg.idHelperSvc->stationIndex(testHit->identify())};
-                ATH_MSG_VERBOSE("** Check compatibility of hit "<<*testHit<<", coordinates "<<testPair.first << ". We start from " << activePatterns.size() << " active patterns.");
-                extendPatterns(activePatterns, test, testStation, seed, *prevCandidate, prevCandidateStation, visualInfo);
+                ATH_MSG_VERBOSE("** Check compatibility of hit "<<*test.hit<<", coordinates "<<testPair.first << ". We start from " << activePatterns.size() << " active patterns.");
+                extendPatterns(activePatterns, test, seed, *prevCandidate, visualInfo);
                 prevCandidate = &test;
-                prevCandidateStation = testStation;
             };
             /** Helper funtion insuring we have at the end one pattern for seed hit. If multiple survived at the end, we keep the best. */
             auto ensureOnePattern = [&activePatterns, &visualInfo, this]() {
@@ -233,10 +233,8 @@ GlobalPatternFinder::findPatternsInEta(const SearchTree_t& orderedSpacepoints,
 }
 void GlobalPatternFinder::extendPatterns(PatternStateVec& activePatterns,
                                          const HitPayload& test,
-                                         const StIndex testStation,
                                          const HitPayload& seed,
                                          const HitPayload& prevCandidate,
-                                         const StIndex prevCandidateStation,
                                          PatternHitVisualInfoVec* visualInfo) const {
     PatternStateVec nextPatterns{};
     nextPatterns.reserve(activePatterns.size()* 2);
@@ -254,19 +252,19 @@ void GlobalPatternFinder::extendPatterns(PatternStateVec& activePatterns,
         }
 
         /** Check angular compatibility of the test hit and the pattern */
-        auto [result, residual] = checkLineCompatibility(seed, test, testStation, pattern);
-        switch (result) {
+        LineCompatibilityResult compResult {checkLineCompatibility(seed, test, pattern)};
+        switch (compResult.result) {
             case CompatibilityResult::eAddHit: {
                 /** Add the test hit to the pattern */
-                pattern.addHit(test, testStation, residual);
+                pattern.addHit(test, compResult.residual, compResult.acceptanceWindow);
                 ATH_MSG_VERBOSE("Hit is compatible, add it to the pattern. Updated pattern: " << pattern);
                 break;
             }
             case CompatibilityResult::eBranchPattern: {
                 /** We branch only once, otherwise we would create duplicate patterns */
                 auto isNew = std::ranges::find_if(nextPatterns, [&test](const PatternState& p) {
-                        auto [hitRef, _] = p.getNthLastHit(1u);
-                        return hitRef.get() == test;
+                        const HitPayload& lastHit {p.getNthLastHit(1u)};
+                        return lastHit == test;
                     }) == nextPatterns.end();
                 if (!isNew) {
                     ATH_MSG_VERBOSE("Hit is compatible & in the same layer of the last added hit. The branched pattern is already in the list of next patterns. Do not add it again.");
@@ -274,9 +272,8 @@ void GlobalPatternFinder::extendPatterns(PatternStateVec& activePatterns,
                 }
                 /** Branch the pattern: we clone it and overwrite the existing hit with the test hit. Watch out, from now on lastPatHit will be the test hit */
                 PatternState newPattern {pattern};
-                const auto [lastHitRef, _] {pattern.getNthLastHit(1u)};
-                const HitPayload& lastPatHit {lastHitRef.get()};
-                newPattern.overWriteHit(lastPatHit, test, testStation, residual);
+                const HitPayload& lastPatHit {pattern.getNthLastHit(1u)};
+                newPattern.overWriteHit(lastPatHit, test, compResult.residual, compResult.acceptanceWindow);
                 ATH_MSG_VERBOSE("Hit is compatible & in the same layer of the last added hit. Branch the pattern, new pattern: " << newPattern);
                 /** Update visual information of the original pattern */
                 if (pattern.visualInfo) {
@@ -292,7 +289,7 @@ void GlobalPatternFinder::extendPatterns(PatternStateVec& activePatterns,
                 if (pattern.visualInfo) {
                     pattern.visualInfo->discardedHits.push_back(test.hit);
                 }
-                if (checkLayerOrdering(test, prevCandidate, testStation, prevCandidateStation) != LayerOrdering::eSameLayer){
+                if (checkLayerOrdering(test, prevCandidate) != LayerOrdering::eSameLayer){
                     pattern.nMissedLayerHits++;
                 }
                 break;
@@ -302,13 +299,12 @@ void GlobalPatternFinder::extendPatterns(PatternStateVec& activePatterns,
     }
     std::swap(activePatterns, nextPatterns);
 };
-std::pair<GlobalPatternFinder::CompatibilityResult, double> 
+GlobalPatternFinder::LineCompatibilityResult 
 GlobalPatternFinder::checkLineCompatibility(const HitPayload& seed,
                                             const HitPayload& test,
-                                            const StIndex testStation,
                                             const PatternState& pattern) const {
     if (!isPhiCompatible(test, seed, pattern)) {
-        return std::make_pair(CompatibilityResult::eRejectHit, 0.);
+        return LineCompatibilityResult{CompatibilityResult::eRejectHit, 0., 0.};
     }
     /** Here we can retrieve the beamspot if desired */
     const Amg::Vector3D beamSpot{Amg::Vector3D::Zero()};
@@ -328,52 +324,51 @@ GlobalPatternFinder::checkLineCompatibility(const HitPayload& seed,
             pattern.visualInfo->hitLineInfo[test.hit] = std::make_pair(lineSlope, acceptanceWindow);
         }
         if (testResidual < acceptanceWindow) {
-            return std::make_pair(isUnique ? CompatibilityResult::eAddHit : CompatibilityResult::eBranchPattern, testResidual);
+            return LineCompatibilityResult{isUnique ? CompatibilityResult::eAddHit : CompatibilityResult::eBranchPattern, testResidual, acceptanceWindow};
         }
-        return std::make_pair(CompatibilityResult::eRejectHit, 0.);
+        return LineCompatibilityResult{CompatibilityResult::eRejectHit, 0., 0.};
     };
 
     /** Fetch the last filled station and the last inserted hit */
-    const auto [lastHitRef, lastFilledSt] {pattern.getNthLastHit(1u)};
-    const HitPayload& lastInsertedHit {lastHitRef.get()};
-    ATH_MSG_VERBOSE("Last pat hit: " << *lastInsertedHit.hit << ", station: " << Muon::MuonStationIndex::stName(lastFilledSt));
+    const HitPayload& lastPatHit {pattern.getNthLastHit(1u)};
+    ATH_MSG_VERBOSE("Last pat hit: " << *lastPatHit.hit << ", station: " << Muon::MuonStationIndex::stName(lastPatHit.station));
     /** Check the layer ordering between the last inserted hit and the test hit */
-    const LayerOrdering orderingTest2Last {checkLayerOrdering(test, lastInsertedHit, testStation, lastFilledSt)};
+    const LayerOrdering orderingTest2Last {checkLayerOrdering(test, lastPatHit)};
 
     /** Check whether the test hit is in the same layer as the last hit in the pattern */
     if(orderingTest2Last == LayerOrdering::eSameLayer) {
         /** Check that the hits are not the same */
-        if (test == lastInsertedHit) {
+        if (test == lastPatHit) {
             ATH_MSG_VERBOSE("The test hit is the same as the last inserted hit. Do not add it to the pattern.");
-            return std::make_pair(CompatibilityResult::eRejectHit, 0.);
+            return LineCompatibilityResult{CompatibilityResult::eRejectHit, 0., 0.};
         }
         /** We add the test hit to the pattern if they are consecutive MDT hits */
-        if (areConsecutiveMdt(*test.hit, *lastInsertedHit.hit)) {
+        if (areConsecutiveMdt(*test.hit, *lastPatHit.hit)) {
             ATH_MSG_VERBOSE("The test hit is in the same layer of the last inserted one. They are consecutive MDT hits, so they are compatible.");
-            return std::make_pair(CompatibilityResult::eAddHit, 0.);
+            return LineCompatibilityResult{CompatibilityResult::eAddHit, 0., 0.};
         }
         /** If they are not consecutive MDT hits && we have no inserted hits yet (last hit = seed), we give priority to the seed and reject the test hit */
         if (pattern.nInsertedHits == 0) {
             ATH_MSG_VERBOSE("The test hit is in the same layer of the seed. They are not consecutive MDT hits, so they are not compatible.");
-            return std::make_pair(CompatibilityResult::eRejectHit, 0.);
+            return LineCompatibilityResult{CompatibilityResult::eRejectHit, 0., 0.};
         }
         /** If they are not consecutive MDT hits && we have inserted hits, we We draw a line using the seed and last hit being on a different layer 
          *  from the second-to-last inserted hit, and we check that the test hit residual is within the acceptance window. If we have no at least 2 
          *  inserted hits yet, we compute the line using the seed and the beamspot. */
         std::size_t n {2};
         while (n < pattern.nInsertedHits) {
-            auto [hit, st] {pattern.getNthLastHit(n)};
-            if (checkLayerOrdering(test, hit, testStation, st) != LayerOrdering::eSameLayer) {
-                return checkResidualInWindow(hit, false);
+            const HitPayload& nthHit {pattern.getNthLastHit(n)};
+            if (checkLayerOrdering(test, nthHit) != LayerOrdering::eSameLayer) {
+                return checkResidualInWindow(nthHit, false);
             }
             ++n;
         }
         /** Fallback when we have all the previously inserted hits on the same layer */
-        return checkResidualInWindow(pattern.getNthLastHit(n).first, false);
+        return checkResidualInWindow(pattern.getNthLastHit(n), false);
     }
     /** The new hit is in a new layer. We draw a line using the last inserted hit and the seed, and we check that the test hit residual is within the acceptance 
      *  window. If we have no inserted hits yet, we compute the line using the seed and the beamspot. */
-    return checkResidualInWindow(lastInsertedHit, true);
+    return checkResidualInWindow(lastPatHit, true);
 }
 bool GlobalPatternFinder::isPhiCompatible(const HitPayload& test,
                                           const HitPayload& seed, 
@@ -508,6 +503,7 @@ GlobalPattern GlobalPatternFinder::convertToPattern(const PatternState& cache) c
     pattern.setNEtaNonPrecisionHits(cache.nBendingTriggerHits);
     pattern.setNPhiHits(cache.nPhiHits);
     pattern.setTotalResidual(cache.totalResidual);
+    pattern.setTotalNormalizedResidual(cache.totalRes2AcceptWindow);
     return pattern;
 }
 
@@ -545,7 +541,7 @@ GlobalPatternFinder::constructTree(const ActsTrk::GeometryContext& gctx,
                 for (const auto proj : {SectorProjector::leftOverlap, SectorProjector::center, SectorProjector::rightOverlap}) {
                     /// Check whether the hit belongs to the left or right sector as well
                     const int projSector = MsTrackSeeder::ringSector(sector + Acts::toUnderlying(proj));
-                    const double phi {Acts::VectorHelpers::phi(globalPos)};
+                    const double phi {globalPos.phi()};
                     if (hit->measuresPhi() && proj != SectorProjector::center && 
                         !sectorMap.insideSector(projSector, phi)) {
                         ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" Hit @"<< *hit
@@ -553,7 +549,7 @@ GlobalPatternFinder::constructTree(const ActsTrk::GeometryContext& gctx,
                         continue;
                     }
                     std::array<double, 2> coords{};
-                    coords[Acts::toUnderlying(SeedCoords::eTheta)] = Acts::VectorHelpers::theta(globalPos);
+                    coords[Acts::toUnderlying(SeedCoords::eTheta)] = globalPos.theta();
 
                     /** Blow-up the number of sectors by a factor of 2. The even numbers represent the 
                     *  segments expressed @ the sector centre. The odd numbers represent the overlap region
@@ -562,7 +558,8 @@ GlobalPatternFinder::constructTree(const ActsTrk::GeometryContext& gctx,
                     ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" Add hit @"<< *hit 
                                             <<"\nwith global position "<<Amg::toString(globalPos) <<" and coordinates "<<coords<<" to the search tree");
                     rawData.emplace_back(std::move(coords), 
-                                         HitPayload{hit.get(), bucket, spc, globalPos.perp(), globalPos.z(), phi});
+                                         HitPayload{hit.get(), bucket, spc, m_cfg.idHelperSvc->stationIndex(hit->identify()),
+                                                        m_spSorter.sectorLayerNum(*hit),globalPos.perp(), globalPos.z(), phi});
                 }  
             }
         }
@@ -574,33 +571,31 @@ GlobalPatternFinder::constructTree(const ActsTrk::GeometryContext& gctx,
 
 GlobalPatternFinder::LayerOrdering
 GlobalPatternFinder::checkLayerOrdering(const HitPayload& hit1,
-                                        const HitPayload& hit2,
-                                        const StIndex station1, 
-                                        const StIndex station2) const {
+                                        const HitPayload& hit2) const {
     auto getLayerOrdering = [](const bool isLayer1Lower) {
         return isLayer1Lower ? LayerOrdering::eLowerLayer : LayerOrdering::eHigherLayer;
     };
     /** Hits in the same spectrometer sector */
     if (hit1.hit->msSector() == hit2.hit->msSector()) {
-        unsigned lay1 {m_spSorter.sectorLayerNum(*hit1.hit)};
-        unsigned lay2 {m_spSorter.sectorLayerNum(*hit2.hit)};
-        if (lay1 == lay2) {
+        if (hit1.layerNum == hit2.layerNum) {
             return LayerOrdering::eSameLayer;
         } else {
-            return getLayerOrdering(lay1 < lay2);
+            return getLayerOrdering(hit1.layerNum < hit2.layerNum);
         }
     }
+    StIndex st1 {hit1.station};
+    StIndex st2 {hit2.station};
     /** Hits in the same station and different sectors. We can have this case for hits in the overlap region of two adjacent sectors. */
-    if (station1 == station2) {
+    if (st1 == st2) {
         return getLayerOrdering(hit1.hit->msSector()->barrel() ? hit1.R < hit2.R : hit1.Z < hit2.Z);
     }
-    LayerIndex layer1 {toLayerIndex(station1)};
-    LayerIndex layer2 {toLayerIndex(station2)};
+    LayerIndex layer1 {toLayerIndex(st1)};
+    LayerIndex layer2 {toLayerIndex(st2)};
     if (layer1 == layer2) {
         /** Hit in different stations but same station layer. Expected to happen only for Inner and Middle*/
         if (layer1 == LayerIndex::Middle) {
             /** If both hits are in the middle layer, the one in the barrel comes first */
-            return getLayerOrdering(station1 == StIndex::BM);
+            return getLayerOrdering(st1 == StIndex::BM);
         } else if (layer1 == LayerIndex::Inner) {
             /** If both hits are in the inner layer, we use the global R, since in large sector BI comes first, while in small sector EI comes first. */
             return getLayerOrdering(hit1.R < hit2.R);
@@ -622,21 +617,21 @@ GlobalPatternFinder::checkLayerOrdering(const HitPayload& hit1,
     }
     /** If we have one hit in Extended (EE) layer and the other in the Middle layer, it depends if the latter is endcap or barrel */
     if (layer1 == LayerIndex::Extended) {
-        return getLayerOrdering(station2 == StIndex::EM);
+        return getLayerOrdering(st2 == StIndex::EM);
     }
-    return getLayerOrdering(station1 == StIndex::BM);
+    return getLayerOrdering(st1 == StIndex::BM);
 }
 
 GlobalPatternFinder::PatternState::PatternState(const HitPayload& seed,
-                                                   const StIndex seedStation,
-                                                   const int sectorCoord,
-                                                   const double seedTheta)
+                                                const int sectorCoord,
+                                                const double seedTheta)
         : sectorCoord{sectorCoord}, theta{seedTheta} {
-    addHit(seed, seedStation, 0.0);
+    addHit(seed, 0.0, 0.0);
 }
-void GlobalPatternFinder::PatternState::addHit(const HitPayload& hit, 
-                                                  const StIndex stationHit,
-                                                  const double residual) {
+void GlobalPatternFinder::PatternState::addHit(const HitPayload& hit,
+                                               const double residual,
+                                               const double acceptWindow) {
+    StIndex stationHit {hit.station}; 
     hitsPerStation[stationHit].push_back(hit);
     if (stations.empty() || stations.back() != stationHit) {
         stations.push_back(stationHit);
@@ -656,12 +651,20 @@ void GlobalPatternFinder::PatternState::addHit(const HitPayload& hit,
     /** Update the residual */
     totalResidual += residual;
     lastResidual = residual;
+    if (acceptWindow > 1e-3) {
+        totalRes2AcceptWindow += residual / acceptWindow;
+        lastAccepWindow = acceptWindow;
+    }
 }
 
 void GlobalPatternFinder::PatternState::overWriteHit(const HitPayload& oldHit,
-                                                        const HitPayload& newHit,
-                                                        const StIndex station,
-                                                        const double newResidual) {
+                                                     const HitPayload& newHit,
+                                                     const double newResidual,
+                                                     const double newAcceptWindow) {
+    if (oldHit.station != newHit.station) {
+        throw std::runtime_error(std::format("Trying to overwrite a hit in station {} with another one from station {}", stName(oldHit.station), stName(newHit.station)));
+        return;
+    }
     // We expect to overwrite hits of the same type (precision/trigger), since we only branch when we have
     // compatible hits in the same layer, except for sTGC hits, where we have pad and strips in the same layer
     if ((isPrecisionHit(*oldHit.hit) != isPrecisionHit(*newHit.hit) || 
@@ -672,7 +675,7 @@ void GlobalPatternFinder::PatternState::overWriteHit(const HitPayload& oldHit,
         throw std::runtime_error(ss.str());
         return;
     }
-    auto it = hitsPerStation.find(station);
+    auto it = hitsPerStation.find(oldHit.station);
     if (it == hitsPerStation.end()) {
         throw std::runtime_error("Trying to remove a hit from a station that is not in the pattern cache");
         return;
@@ -697,6 +700,8 @@ void GlobalPatternFinder::PatternState::overWriteHit(const HitPayload& oldHit,
     // Update the residual
     totalResidual += newResidual - lastResidual;
     lastResidual = newResidual;
+    totalRes2AcceptWindow += newResidual / newAcceptWindow - lastResidual / lastAccepWindow;
+    lastAccepWindow = newAcceptWindow;
 }
 void GlobalPatternFinder::PatternState::finalizePattern() {
     theta = 0.;
@@ -717,8 +722,8 @@ void GlobalPatternFinder::PatternState::finalizePattern() {
 }
 
 void GlobalPatternFinder::addVisualInfo(const PatternState& cache,
-                                           PatternHitVisualInfo::PatternStatus status,
-                                           PatternHitVisualInfoVec* visualInfo) const {
+                                        PatternHitVisualInfo::PatternStatus status,
+                                        PatternHitVisualInfoVec* visualInfo) const {
     if (!visualInfo) {
         return;
     }
@@ -737,30 +742,26 @@ void GlobalPatternFinder::addVisualInfo(const PatternState& cache,
     visualInfo->back().patternCopy = std::make_unique<GlobalPattern>(std::move(pattern));
     visualInfo->back().status = status;
 }
-GlobalPatternFinder::PatternState::HitStationPair
+const GlobalPatternFinder::HitPayload&
 GlobalPatternFinder::PatternState::getNthLastHit(const std::size_t n) const {
     if (n > nInsertedHits) {
         // If we have not yet inserted n hits, we return the seed hit
-        return std::make_pair(std::cref(hitsPerStation.at(stations.front()).front()), 
-                              stations.front());
+        return hitsPerStation.at(stations.front()).front();
     }
     std::size_t remaining {n};
     for (auto stIt = stations.rbegin(); stIt != stations.rend(); ++stIt) {
         const auto& hits {hitsPerStation.at(*stIt)};
         const size_t nHits  {hits.size()};
         if (remaining <= nHits) {
-            return std::make_pair(std::cref(hits.at(nHits - remaining)), 
-                                  *stIt);
+            return hits.at(nHits - remaining);
         }
         remaining -= nHits;
     }
     // Fall-back return, should not happen if the input n is consistent with nInsertedHits
-    return std::make_pair(std::cref(hitsPerStation.at(stations.front()).front()), 
-                          stations.front());
+    return hitsPerStation.at(stations.front()).front();
 }
-bool GlobalPatternFinder::PatternState::isInPattern(const HitPayload& hit,
-                                                       const StIndex station) const {
-    const auto seedStationIt {hitsPerStation.find(station)};
+bool GlobalPatternFinder::PatternState::isInPattern(const HitPayload& hit) const {
+    const auto seedStationIt {hitsPerStation.find(hit.station)};
     return seedStationIt != hitsPerStation.end() && 
            std::ranges::find(seedStationIt->second, hit) != seedStationIt->second.end();                                               
 }
@@ -772,7 +773,8 @@ bool GlobalPatternFinder::HitPayload::operator==(const HitPayload& other) const 
 }
 void GlobalPatternFinder::PatternState::print(std::ostream& ostr) const {
     ostr<<"Pattern state, Expanded Sector: "<<sectorCoord<<", Theta: "<<theta << ", Phi: "<<phi;
-    ostr<<", nPrecisionHits: "<<nPrecisionHits<<", nEtaNonPrecisionHits: "<<nBendingTriggerHits<<", nPhiHits: "<<nPhiHits<<", total residual: "<<totalResidual;
+    ostr<<", nPrecisionHits: "<<nPrecisionHits<<", nEtaNonPrecisionHits: "<<nBendingTriggerHits<<", nPhiHits: "<<nPhiHits;
+    ostr<<", totRes: "<<totalResidual << ", totNormResidual: "<<totalRes2AcceptWindow;
     ostr<<", Hit per station: \n";
     for (const auto& [station,hits] : hitsPerStation) {
         ostr<<"  Station "<<Muon::MuonStationIndex::stName(station)<<" has "<<hits.size()<<" hits\n";

@@ -28,8 +28,6 @@ namespace MuonValR4{
     virtual StatusCode initialize() override;
     virtual StatusCode execute() override;
     virtual StatusCode finalize() override;
-    
-    using TruthHitCol = std::unordered_set<const xAOD::MuonSimHit*>;
 
   private:
     enum class eHitType : std::uint8_t {
@@ -42,6 +40,7 @@ namespace MuonValR4{
     struct PatternHitCount {
         HitCounts hitCounts{};
         HitCounts trueHitCounts{};
+        HitCounts pileupHitCounts{};
         HitCounts allHitCounts{};
     };
     using simHitSet = std::unordered_set<const xAOD::MuonSimHit*>;
@@ -79,7 +78,7 @@ namespace MuonValR4{
                        const xAOD::MuonSegmentContainer* truthSegments);
                          
     // // output tree 
-    MuonVal::MuonTesterTree m_tree{"MuonFastRecoTest","MuonEtaHoughTransformTest"}; 
+    MuonVal::MuonTesterTree m_tree{"MuonFastRecoTest","FastRecoTester"}; 
 
     // Space points
     SG::ReadHandleKey<MuonR4::SpacePointContainer> m_spKey{this, "SpacePointKey", "MuonSpacePoints"};
@@ -118,13 +117,13 @@ namespace MuonValR4{
     MuonVal::VectorBranch<float>& m_gen_Eta{m_tree.newVector<float>("gen_Eta",-10.)};
     MuonVal::VectorBranch<float>& m_gen_Phi{m_tree.newVector<float>("gen_Phi",-10.)};
     MuonVal::VectorBranch<float>& m_gen_Pt{m_tree.newVector<float>("gen_Pt",-10.)}; 
-    
-    /// @brief Number of trigger eta measurements
-    MuonVal::VectorBranch<unsigned char>& m_gen_nNonPrecSpacePoints{m_tree.newVector<unsigned char>("gen_NNonPrecMeas",0)};
-    /// @brief Number of precision measurements
-    MuonVal::VectorBranch<unsigned char>& m_gen_nPrecSpacePoints{m_tree.newVector<unsigned char>("gen_NPrecMeas",0)};
-    /// @brief Number of phi measurements
-    MuonVal::VectorBranch<unsigned char>& m_gen_nPhiSpacePoints{m_tree.newVector<unsigned char>("gen_NPhiMeas",0)};
+
+    /// @brief Number of trigger eta measurements per station
+    MuonVal::MatrixBranch<unsigned char>& m_gen_nNonPrecSpacePointsPerStation{m_tree.newMatrix<unsigned char>("gen_NNonPrecMeasPerStation")};
+    /// @brief Number of precision measurements per station
+    MuonVal::MatrixBranch<unsigned char>& m_gen_nPrecSpacePointsPerStation{m_tree.newMatrix<unsigned char>("gen_NPrecMeasPerStation")};
+    /// @brief Number of phi measurements per station
+    MuonVal::MatrixBranch<unsigned char>& m_gen_nPhiSpacePointsPerStation{m_tree.newMatrix<unsigned char>("gen_NPhiMeasPerStation")};
 
     
   /// ====== Global Pattern block  =========== 
@@ -138,6 +137,8 @@ namespace MuonValR4{
     MuonVal::VectorBranch<uint16_t>& m_pat_sector2{m_tree.newVector<uint16_t>("pat_Sector2", 0)};
     /// pattern residual
     MuonVal::VectorBranch<float>& m_pat_residual{m_tree.newVector<float>("pat_Residual", 0.0)};
+    /// pattern normalized residual
+    MuonVal::VectorBranch<float>& m_pat_normalizedResidual{m_tree.newVector<float>("pat_NormalizedResidual", 0.0)};
     /// +1 for A-, -1 of C-side 
     MuonVal::VectorBranch<short>& m_pat_side{m_tree.newVector<short>("pat_Side", 0)};
     /// Number of stations
@@ -156,6 +157,13 @@ namespace MuonValR4{
     MuonVal::VectorBranch<unsigned char>& m_pat_nTruePrecSpacePoints{m_tree.newVector<unsigned char>("pat_NTruePrecMeas",0)};
     /// @brief Number of truth phi space points in the pattern
     MuonVal::VectorBranch<unsigned char>& m_pat_nTruePhiSpacePoints{m_tree.newVector<unsigned char>("pat_NTruePhiMeas",0)};
+
+    /// @brief Number of pileup trigger eta space points in the pattern
+    MuonVal::VectorBranch<unsigned char>& m_pat_nPileupNonPrecSpacePoints{m_tree.newVector<unsigned char>("pat_NPileupNonPrecMeas",0)};
+    /// @brief Number of pileup precision space points in the pattern
+    MuonVal::VectorBranch<unsigned char>& m_pat_nPileupPrecSpacePoints{m_tree.newVector<unsigned char>("pat_NPileupPrecMeas",0)};
+    /// @brief Number of pileup phi space points in the pattern
+    MuonVal::VectorBranch<unsigned char>& m_pat_nPileupPhiSpacePoints{m_tree.newVector<unsigned char>("pat_NPileupPhiMeas",0)};
 
     /// @brief Number of trigger eta space points in the buckets crossed by the pattern
     MuonVal::VectorBranch<unsigned char>& m_pat_nAllNonPrecSpacePoints{m_tree.newVector<unsigned char>("pat_NAllNonPrecMeas",0)};
