@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JGTowerMappingDataCondAlgBase.h"
@@ -143,30 +143,33 @@ namespace LVL1
       // We want 'next' and 'prev' to refer to increasing eta, not increasing |eta|
       // Increasing 'region' increases |eta| so in what follows we correct for this by
       // choosing whether we set nextEtaItr or prevEtaItr based on the sign of pos_neg
+      // by aliasing them appropriately
+      auto & etaIter1 = (pos_neg > 0) ? nextEtaItr : prevEtaItr;
+      auto & etaIter2 = (pos_neg > 0) ? prevEtaItr : nextEtaItr;
       if (iEta == etaMax)
       {
         // Check if the next region a) exists and b) has the right phi granularity
         auto itr = regionParams.find(region + 1);
         if (itr != regionParams.end() && std::get<0>(itr->second) == phiMax)
           // Set the next eta index to the next region and the eta_min index of that region (probably 0)
-          (pos_neg > 0 ? nextEtaItr : prevEtaItr) = towerGrid.find(std::make_tuple(pos_neg, region + 1, std::get<1>(itr->second), iPhi));
+          etaIter1 = towerGrid.find(std::make_tuple(pos_neg, region + 1, std::get<1>(itr->second), iPhi));
       }
       else
-        (pos_neg > 0 ? nextEtaItr : prevEtaItr) = towerGrid.find(std::make_tuple(pos_neg, region, iEta + 1, iPhi));
+        etaIter1 = towerGrid.find(std::make_tuple(pos_neg, region, iEta + 1, iPhi));
       if (iEta == etaMin)
       {
         if (region == 0)
-          (pos_neg > 0 ? prevEtaItr : nextEtaItr) = towerGrid.find(std::make_tuple(pos_neg * -1, region, iEta, iPhi));
+          etaIter2 = towerGrid.find(std::make_tuple(pos_neg * -1, region, iEta, iPhi));
         else
         {
           auto itr = regionParams.find(region - 1);
           if (itr != regionParams.end() && std::get<0>(itr->second) == phiMax)
             // Set the previous eta index to the previous region and the eta_max index of that region
-            (pos_neg > 0 ? prevEtaItr : nextEtaItr) = towerGrid.find(std::make_tuple(pos_neg, region - 1, std::get<2>(itr->second), iPhi));
+            etaIter2 = towerGrid.find(std::make_tuple(pos_neg, region - 1, std::get<2>(itr->second), iPhi));
         }
       }
       else
-        (pos_neg > 0 ? prevEtaItr : nextEtaItr) = towerGrid.find(std::make_tuple(pos_neg, region, iEta - 1, iPhi));
+        etaIter2 = towerGrid.find(std::make_tuple(pos_neg, region, iEta - 1, iPhi));
 
       std::vector<std::size_t> nextEtaTowers;
       std::vector<std::size_t> prevEtaTowers;
