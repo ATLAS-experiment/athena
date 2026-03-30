@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,8 +10,7 @@
 #define DERIVATIONFRAMEWORK_TRUTHBORNLEPTONCOLLECTIONMAKER_H
 
 // Base classes
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 // EDM includes for the particles we need
 #include "xAODTruth/TruthParticle.h"
 // R/W/D key handles
@@ -28,12 +27,12 @@ class StoreGateSvc;
 
 namespace DerivationFramework {
 
-  class TruthBornLeptonCollectionMaker : public extends<AthAlgTool, IAugmentationTool> {
+  class TruthBornLeptonCollectionMaker : public AthReentrantAlgorithm {
   public:
-    TruthBornLeptonCollectionMaker(const std::string& t, const std::string& n, const IInterface* p);
+    TruthBornLeptonCollectionMaker(const std::string &name,ISvcLocator *pSvcLocator);
     ~TruthBornLeptonCollectionMaker();
     StatusCode initialize();
-    virtual StatusCode addBranches(const EventContext& ctx) const;
+    virtual StatusCode execute(const EventContext& ctx) const;
 
   private:
     //!< Input particle collection key

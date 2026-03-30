@@ -215,9 +215,7 @@ def TruthDecayCollectionMakerCfg(flags, name, **kwargs):
 def TruthBornLeptonCollectionMakerCfg(flags, name, **kwargs):
     """Configure the truth Born lepton collection tool"""
     acc = ComponentAccumulator()
-    TruthBornLeptonCollectionMaker = CompFactory.DerivationFramework.TruthBornLeptonCollectionMaker
-    acc.addPublicTool(TruthBornLeptonCollectionMaker(name = name, **kwargs),
-                      primary = True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.TruthBornLeptonCollectionMaker(name = name, **kwargs))
     return acc
 
 

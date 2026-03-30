@@ -359,12 +359,11 @@ def AddBornLeptonCollectionCfg(flags):
     acc = ComponentAccumulator()
     # Set up a tool to keep the taus and all downstream particles
     from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import TruthBornLeptonCollectionMakerCfg
-    DFCommonBornLeptonCollTool = acc.getPrimaryAndMerge(TruthBornLeptonCollectionMakerCfg(flags,
-                                                                                          name              = "DFCommonBornLeptonCollTool",
-                                                                                          NewCollectionName ="BornLeptons"))
-    CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-    acc.addEventAlgo(CommonAugmentation("MCTruthCommonBornLeptonsKernel", AugmentationTools = [DFCommonBornLeptonCollTool] )) # TODO Migrate public tool to AthReentrantAlgorithm
+    acc.merge(TruthBornLeptonCollectionMakerCfg(flags,
+                                                name              = "MCTruthCommonBornLeptonsKernel",
+                                                NewCollectionName ="BornLeptons"))
     return acc
+
 
 def AddLargeRJetD2Cfg(flags):
     """Add large-R jet D2 variable"""
