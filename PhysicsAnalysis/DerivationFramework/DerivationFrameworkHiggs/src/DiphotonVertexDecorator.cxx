@@ -36,9 +36,9 @@ StatusCode DerivationFramework::DiphotonVertexDecorator::initialize()
 }
 
 
-StatusCode DerivationFramework::DiphotonVertexDecorator::addBranches(const EventContext& ctx) const
+StatusCode DerivationFramework::DiphotonVertexDecorator::execute(const EventContext& ctx) const
 {
-  ATH_MSG_DEBUG( "DiphotonVertexDecorator::AddingBranches" );
+  ATH_MSG_DEBUG( "DiphotonVertexDecorator::execute" );
 
   SG::ReadHandle<xAOD::VertexContainer> PV (m_primaryVertexKey, ctx);
 

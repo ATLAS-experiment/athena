@@ -300,12 +300,11 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
     from DerivationFrameworkEGamma.EGammaToolsConfig import PhotonVertexSelectionWrapperKernelCfg
     acc.merge(PhotonVertexSelectionWrapperKernelCfg(flags), sequenceName="HIGG9D1Sequence")
     from DerivationFrameworkHiggs.HIGG1D1CustomVertexConfig import DiphotonVertexDecoratorCfg
-    DiphotonVertexDecorator = acc.popToolsAndMerge(DiphotonVertexDecoratorCfg(
+    acc.merge(DiphotonVertexDecoratorCfg(
         flags,
+        name = "DiphotonVertexAugmentation",
         MinimumPhotonPt    = 4800.0,
-        DiphotonVertexName = "HIGG9D1_DiphotonPrimaryVertices"))
-    acc.addPublicTool(DiphotonVertexDecorator)
-    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(name = "DiphotonVertexAugmentation", AugmentationTools = [DiphotonVertexDecorator]), sequenceName="HIGG9D1Sequence") # TODO Migrate public tool to AthReentrantAlgorithm
+        DiphotonVertexName = "HIGG9D1_DiphotonPrimaryVertices"), sequenceName="HIGG9D1Sequence") # FIXME Check syntax
 
     #================
     # Thinning tools

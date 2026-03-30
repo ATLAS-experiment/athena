@@ -41,34 +41,24 @@ def ZeeVertexRefitterCfg(flags, name="ZeeVertexRefitKernel"):
         name, AugmentationTools=[ZeeVertexRefittingTool])) # TODO Migrate public tool to AthReentrantAlgorithm (Uses ExpressionParser)
     return acc
 
-def DiphotonVertexDecoratorCfg(flags, **kwargs):
+
+def DiphotonVertexDecoratorCfg(flags, name=" DiphotonVertexDecorator", **kwargs):
     acc = ComponentAccumulator()
     if "PhotonVertexSelectionTool" not in kwargs:
         from PhotonVertexSelection.PhotonVertexSelectionConfig import (
             PhotonVertexSelectionToolCfg)
         kwargs.setdefault("PhotonVertexSelectionTool", acc.popToolsAndMerge(
             PhotonVertexSelectionToolCfg(flags)))
-    acc.setPrivateTools(
+    acc.addEventAlgo(
         CompFactory.DerivationFramework.DiphotonVertexDecorator(**kwargs))
     return acc
 
-def DiPhotonVertexDecoratorKernelCfg(flags, name="DiphotonVertexKernel"):
-    """ Diphoton vertex decoration tool """
-
-    # Decorator creates a shallow copy of PrimaryVertices (HggPrimaryVertices) for diphoton events
-    # Must be created before the jetalg in the sequence as it is input to the modified PFlow jets
-
-    acc = ComponentAccumulator()
-    DiphotonVertexDecorator = acc.popToolsAndMerge(
-        DiphotonVertexDecoratorCfg(flags))
-    acc.addPublicTool(DiphotonVertexDecorator)
-    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
-        name,AugmentationTools=[DiphotonVertexDecorator])) # TODO Migrate public tool to AthReentrantAlgorithm
-    return acc
 
 def DiPhotonVertexCfg(flags):
     from DerivationFrameworkEGamma.EGammaToolsConfig import (
         PhotonVertexSelectionWrapperKernelCfg)
     acc = PhotonVertexSelectionWrapperKernelCfg(flags)
-    acc.merge(DiPhotonVertexDecoratorKernelCfg(flags))
+    # Decorator creates a shallow copy of PrimaryVertices (HggPrimaryVertices) for diphoton events
+    # Must be created before the jetalg in the sequence as it is input to the modified PFlow jets
+    acc.merge(DiphotonVertexDecoratorCfg(flags, name="DiphotonVertexKernel"))
     return acc
