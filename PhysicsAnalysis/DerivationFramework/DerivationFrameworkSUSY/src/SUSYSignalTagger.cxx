@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkSUSY/SUSYSignalTagger.h"
@@ -24,7 +24,7 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode SUSYSignalTagger::addBranches(const EventContext& ctx) const{
+  StatusCode SUSYSignalTagger::execute(const EventContext& ctx) const{
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoName, ctx);
     if (!eventInfo.isValid()) {
       ATH_MSG_ERROR("could not retrieve event info " <<m_eventInfoName);

@@ -91,13 +91,8 @@ def PostTLAJetMCTruthAugmentationsCfg(flags, **kwargs):
     from DerivationFrameworkSUSY.DecorateSUSYProcessConfig import IsSUSYSignalRun3
     if IsSUSYSignalRun3(flags):
         from DerivationFrameworkSUSY.DecorateSUSYProcessConfig import SUSYSignalTaggerCfg
-        augmentationToolsList = [acc.getPrimaryAndMerge(SUSYSignalTaggerCfg(flags, 'MCTruthCommon'))]
-        CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-        acc.addEventAlgo(CommonAugmentation(name              = "MCTruthCommonPostJetKernel",
-                                            AugmentationTools = augmentationToolsList)) # TODO Migrate public tool to AthReentrantAlgorithm
-
-    # add SoW of individual SUSY final states, relies on augmentation from DecorateSUSYProcess()
-    if IsSUSYSignalRun3(flags):
+        acc.merge(SUSYSignalTaggerCfg(flags, 'MCTruthCommon'))
+        # add SoW of individual SUSY final states, relies on augmentation from DecorateSUSYProcess()
         from DerivationFrameworkSUSY.SUSYWeightMetadataConfig import AddSUSYWeightsCfg
         acc.merge(AddSUSYWeightsCfg(flags))
 

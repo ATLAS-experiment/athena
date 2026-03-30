@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #==============================================================================
 # SUSY signal process augmentation
@@ -53,8 +53,7 @@ def SUSYSignalTaggerCfg(flags, derivationName):
     acc = ComponentAccumulator()
     if not IsSUSYSignalRun3(flags):
         print("SUSYSignalTaggerCfg WARNING: Trying to decorate, but sample is not SUSY signal?")
-    acc.addPublicTool(CompFactory.DerivationFramework.SUSYSignalTagger(name=derivationName + "SignalTagger",
+    acc.addEventAlgo(CompFactory.DerivationFramework.SUSYSignalTagger(name=derivationName + "SignalTagger",
                                                                        EventInfoName="EventInfo",
-                                                                       MCCollectionName="TruthParticles"),
-                      primary=True)
+                                                                       MCCollectionName="TruthParticles"))
     return acc
