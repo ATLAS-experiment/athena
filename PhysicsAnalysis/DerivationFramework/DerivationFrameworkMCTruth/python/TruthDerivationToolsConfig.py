@@ -140,8 +140,8 @@ def DFCommonTruthForwardProtonCfg(flags, name = "DFCommonTruthForwardProton", **
 def TruthD2DecoratorCfg(flags, name, **kwargs):
     """Configure the truth D2 decorator tool"""
     acc = ComponentAccumulator()
-    TruthD2Decorator = CompFactory.DerivationFramework.TruthD2Decorator
-    acc.addPublicTool(TruthD2Decorator(name, **kwargs), primary = True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.TruthD2Decorator(
+        name, **kwargs))
     return acc
 
 

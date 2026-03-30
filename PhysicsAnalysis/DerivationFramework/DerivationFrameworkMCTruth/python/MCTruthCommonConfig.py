@@ -370,12 +370,10 @@ def AddLargeRJetD2Cfg(flags):
     #Extra classifier for D2 variable
     acc = ComponentAccumulator()
     from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import TruthD2DecoratorCfg
-    theTruthD2Decorator = acc.getPrimaryAndMerge(TruthD2DecoratorCfg(flags,
-                                                                     name            = "TruthD2Decorator",
-                                                                     JetContainerKey = "AntiKt10TruthSoftDropBeta100Zcut10Jets",
-                                                                     DecorationName  = "D2"))
-    TruthD2DecoratorKernel = CompFactory.DerivationFramework.CommonAugmentation
-    acc.addEventAlgo(TruthD2DecoratorKernel("TRUTHD2Kernel", AugmentationTools = [theTruthD2Decorator] )) # TODO Migrate public tool to AthReentrantAlgorithm
+    acc.merge(TruthD2DecoratorCfg(flags,
+                                  name = "TRUTHD2Kernel",
+                                  JetContainerKey = "AntiKt10TruthSoftDropBeta100Zcut10Jets",
+                                  DecorationName  = "D2"))
     return acc
 
 
