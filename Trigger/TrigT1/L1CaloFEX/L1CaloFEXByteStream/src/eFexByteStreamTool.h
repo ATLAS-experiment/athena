@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -22,16 +22,18 @@
 
 #include "xAODTrigger/eFexEMRoIContainer.h"
 #include "xAODTrigger/eFexTauRoIContainer.h"
-
 #include "xAODTrigL1Calo/eFexTowerContainer.h"
 
-#include "bytestreamDecoder/L1CaloRdoEfexTob.h"
 #include "bytestreamDecoder/L1CaloBsDecoderRun3.h"
 
 #include "AthenaMonitoringKernel/Monitored.h"
 
 // Gaudi includes
 #include "Gaudi/Property.h"
+
+#include <cstdint>
+#include <vector>
+#include <memory>
 
 /** @class eFEXRoIByteStreamTool
  *  @brief Implementation of a tool for L1 RoI conversion from BS to xAOD and from xAOD to BS

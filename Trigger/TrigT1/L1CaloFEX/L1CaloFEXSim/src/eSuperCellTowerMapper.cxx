@@ -1,11 +1,12 @@
 /*
-    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "eSuperCellTowerMapper.h"
 #include "GaudiKernel/MsgStream.h"
 #include "AthenaKernel/errorcheck.h"
+#include <cmath> //std::round, etc
 
 // This is a class which is designed to receive in a list of supercells and a list of eTowers and match them together appropriately.
 
@@ -679,6 +680,7 @@ void eSuperCellTowerMapper::ConnectSuperCellToTower(std::unique_ptr<eTowerContai
       case CaloSampling::HEC1: { iCell = 11; break; }
       case CaloSampling::HEC2: { iCell = 12; break; }
       case CaloSampling::HEC3: { iCell = 13; break; }
+      //coverity[DEADCODE]
       default: {
         ATH_MSG_DEBUG("CaloSampling::HECX -> invalid sample for assigning iCell value! " << sample << " (Under investigation) ");
         break;
