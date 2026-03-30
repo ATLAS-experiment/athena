@@ -404,17 +404,6 @@ def TruthLinkRepointToolCfg(flags, name, **kwargs):
     return acc
 
 
-# Makes a small collection of 'primary' vertices, one per event
-# A bit like a collection of 'reconstructable' vertices
-def TruthPVCollectionMakerCfg(flags, name, **kwargs):
-    """Configure the truth PV collection maker tool"""
-    acc = ComponentAccumulator()
-    TruthPVCollectionMaker = CompFactory.DerivationFramework.TruthPVCollectionMaker
-    acc.addPublicTool(TruthPVCollectionMaker(name, **kwargs),
-                      primary = True)
-    return acc
-
-
 # Tool for thinning TruthParticles
 def GenericTruthThinningCfg(flags, name, **kwargs):
     """Configure the GenericTruthThinning tool"""

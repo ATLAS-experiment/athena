@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -31,7 +31,7 @@ StatusCode DerivationFramework::TruthPVCollectionMaker::initialize()
 
 
 // Selection and collection creation
-StatusCode DerivationFramework::TruthPVCollectionMaker::addBranches(const EventContext& ctx) const
+StatusCode DerivationFramework::TruthPVCollectionMaker::execute(const EventContext& ctx) const
 {
     // Retrieve truth collections
     SG::ReadHandle<xAOD::TruthEventContainer> importedTruthEvents{m_eventsKey, ctx};

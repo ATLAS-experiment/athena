@@ -314,18 +314,14 @@ def AddHFAndDownstreamParticlesCfg(flags, **kwargs):
 
 
 # Add a one-vertex-per event "primary vertex" container
-def AddPVCollectionCfg(flags):
+def AddPVCollectionCfg(flags, **kwargs):
     """Add a one-vertex-per event "primary vertex" container"""
     acc = ComponentAccumulator()
-    # Set up a tool to keep the primary vertices
-    from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import TruthPVCollectionMakerCfg
-    DFCommonTruthPVCollTool = acc.getPrimaryAndMerge(TruthPVCollectionMakerCfg(
-        flags,
-        name="DFCommonTruthPVCollTool",
-        NewCollectionName="TruthPrimaryVertices"))
-    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
-        "MCTruthCommonTruthPVCollKernel",
-        AugmentationTools = [DFCommonTruthPVCollTool] )) # TODO Migrate public tool to AthReentrantAlgorithm
+    kwargs.setdefault("NewCollectionName", "TruthPrimaryVertices")
+    # Makes a small collection of 'primary' vertices, one per event
+    # A bit like a collection of 'reconstructable' vertices
+    acc.addEventAlgo(CompFactory.DerivationFramework.TruthPVCollectionMaker
+                     (name = "MCTruthCommonTruthPVCollKernel", **kwargs))
     return acc
 
 

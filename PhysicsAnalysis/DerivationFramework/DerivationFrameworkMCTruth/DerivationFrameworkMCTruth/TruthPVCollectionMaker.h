@@ -1,13 +1,12 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_TRUTHPVCOLLECTIONMAKER_H
 #define DERIVATIONFRAMEWORK_TRUTHPVCOLLECTIONMAKER_H
 
 // Base classes
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "xAODTruth/TruthEventContainer.h"
 #include "xAODTruth/TruthVertexContainer.h"
 #include "StoreGate/WriteHandleKey.h"
@@ -15,13 +14,13 @@
 
 namespace DerivationFramework {
 
-  class TruthPVCollectionMaker : public extends<AthAlgTool, IAugmentationTool> {
+  class TruthPVCollectionMaker : public AthReentrantAlgorithm {
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override final;
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
 
   private:
     SG::ReadHandleKey<xAOD::TruthEventContainer> m_eventsKey{this, "EventsKey", "TruthEvents"}; //!< Input event collection (navigates to the vertices)
