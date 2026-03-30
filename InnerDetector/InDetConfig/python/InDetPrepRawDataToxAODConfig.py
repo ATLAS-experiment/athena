@@ -35,8 +35,8 @@ def InDetPixelPrepDataToxAODCfg(flags, name='InDetPixelPrepDataToxAOD', **kwargs
         from SiLorentzAngleTool.PixelLorentzAngleConfig import PixelLorentzAngleToolCfg
         kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(PixelLorentzAngleToolCfg(flags)))
 
-    kwargs.setdefault("UseTruthInfo", flags.InDet.doTruth)
-    if flags.InDet.doTruth:
+    useTruth = kwargs.setdefault("UseTruthInfo", flags.InDet.doTruth)
+    if useTruth:
         # need to decorate truth particles and clusters with same unique identified
         # which is the origin truth particle index
         acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
@@ -110,8 +110,8 @@ def ITkPixelPrepDataToxAODCfg(flags, name='ITkPixelPrepDataToxAOD', **kwargs):
         from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import ITkPixelLorentzAngleToolCfg
         kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkPixelLorentzAngleToolCfg(flags)))
 
-    kwargs.setdefault("UseTruthInfo", flags.ITk.doTruth)
-    if flags.ITk.doTruth:
+    useTruth = kwargs.setdefault("UseTruthInfo", flags.ITk.doTruth)
+    if useTruth:
         # need to decorate truth particles and clusters with same unique identified
         # which is the origin truth particle index
         acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
@@ -142,8 +142,8 @@ def ITkPixelPrepDataToxAOD_ExtraTruthCfg(flags, name='ITkPixelPrepDataToxAOD_Ext
 def InDetSCT_PrepDataToxAODCfg(flags, name='InDetSCTPrepDataToxAOD', **kwargs):
     from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
     acc = SCT_ReadoutGeometryCfg(flags)
-    kwargs.setdefault("UseTruthInfo", flags.InDet.doTruth)
-    if flags.InDet.doTruth:
+    useTruth = kwargs.setdefault("UseTruthInfo", flags.InDet.doTruth)
+    if useTruth:
         # need to decorate truth particles and clusters with same unique identified
         # which is the origin truth particle index
         acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
@@ -176,8 +176,8 @@ def ITkStripPrepDataToxAODCfg(flags, name='ITkStripPrepDataToxAOD', **kwargs):
     kwargs.setdefault("SctxAodContainer", "ITkStripMeasurements")
     kwargs.setdefault("SctxAodOffset", "ITkStripClustersOffsets")
     kwargs.setdefault("SCTDetEleCollKey", "ITkStripDetectorElementCollection")
-    kwargs.setdefault("UseTruthInfo", flags.ITk.doTruth)
-    if flags.ITk.doTruth:
+    useTruth = kwargs.setdefault("UseTruthInfo", flags.ITk.doTruth)
+    if useTruth:
         # need to decorate truth particles and clusters with same unique identified
         # which is the origin truth particle index
         acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
