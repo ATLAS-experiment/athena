@@ -33,19 +33,19 @@ atlas_add_test( ViewPerf_test
                 INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
                 LINK_LIBRARIES ${GTEST_LIBRARIES} AthViews AthenaKernel GaudiKernel StoreGateLib TestTools
                 PROPERTIES DISABLED TRUE  # build but don't run the performance test by default
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( ViewCollectionMerge_test
                 SOURCES test/ViewCollectionMerge_test.cxx
                 INCLUDE_DIRS ${GMOCK_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS}
                 LINK_LIBRARIES ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} AthContainers AthLinks AthViews AthenaBaseComps AthenaKernel CxxUtils GaudiKernel GoogleTestTools StoreGateLib TrigSteeringEvent
                 ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/test"
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( SimpleViews
                 SCRIPT test/SimpleViewExample.py --threads=1
                 PROPERTIES PASS_REGULAR_EXPRESSION "INFO view_test running with store view_9"
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( ViewScheduling
                 SCRIPT test/ViewScheduling.py --threads=1
@@ -53,7 +53,7 @@ atlas_add_test( ViewScheduling
 
 atlas_add_test( ViewInheritance
                 SCRIPT test/ViewInheritance.py --threads=1
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( ViewNestFail
                 SCRIPT test/ViewNest.py --threads=1
