@@ -198,7 +198,9 @@ namespace xAOD{
                 const auto& radialDesign = stripMeas->readoutElement()->stripLayout(stripMeas->layerHash());
                 const auto& wireDesign = wireMeas->readoutElement()->wireGangLayout(wireMeas->layerHash());            
             
-                const double dirDots = radialDesign.stripDir(stripMeas->channelNumber()).dot(wireDesign.stripNormal());
+                const Amg::Vector2D phiDir = radialDesign.stripDir(stripMeas->channelNumber());
+                const Amg::Vector2D& etaDir = wireDesign.stripNormal();
+                const double dirDots = phiDir.dot(etaDir);
                 /// Apply the stereo transform to the covariance
                 AmgSymMatrix(2) stereoTrf{AmgSymMatrix(2)::Identity()};
                 const double invDist = 1. / (1. - Acts::square(dirDots));
@@ -206,10 +208,17 @@ namespace xAOD{
                 stereoTrf(0, 1) = stereoTrf(1, 0) = -dirDots * invDist;
 
                 cmbPos = stereoTrf* Amg::Vector2D{
-                    combinedPrd->primaryStrip()->localPosition<1>()[0],
-                    combinedPrd->secondaryStrip()->localPosition<1>()[0]};
-                cmbCov (0, 0) = wireMeas->localCovariance<1>()(0,0);
-                cmbCov (1, 1) = stripMeas->localCovariance<1>()(0,0);
+                        combinedPrd->primaryStrip()->localPosition<1>()[0],
+                        combinedPrd->secondaryStrip()->localPosition<1>()[0]};
+
+                AmgSymMatrix(2) basisTrf{AmgSymMatrix(2)::Identity()};
+                basisTrf.row(0) = etaDir;
+                basisTrf.row(1) = phiDir;
+
+                stereoTrf = stereoTrf * basisTrf;
+                cmbCov(0, 0) = wireMeas->localCovariance<1>()(0,0);
+                cmbCov(1, 1) = stripMeas->localCovariance<1>()(0,0);
+                cmbCov = stereoTrf.transpose()* cmbCov * stereoTrf;
                 break;
             } case sTgcStripType: {
                 // combined sTGC Space points can be strip/wire, strip/pad or pad/wire combinations.
