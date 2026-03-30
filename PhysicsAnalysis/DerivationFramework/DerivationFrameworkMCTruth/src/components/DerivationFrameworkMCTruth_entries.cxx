@@ -27,7 +27,7 @@
 #include "src/TruthBornLeptonCollectionMaker.h"
 #include "src/TruthLinkRepointTool.h"
 #include "DerivationFrameworkMCTruth/TruthPVCollectionMaker.h"
-#include "src/GenFilterTool.h"
+#include "src/GenFilterAlg.h"
 #include "src/TruthEDDecorator.h"
 #include "src/TruthMetaDataWriter.h"
 #include "DerivationFrameworkMCTruth/ClassifyAndCalculateHFAugmentation.h"
@@ -66,7 +66,7 @@ DECLARE_COMPONENT( TruthQGDecorationAlg )
 DECLARE_COMPONENT( TruthBornLeptonCollectionMaker )
 DECLARE_COMPONENT( TruthLinkRepointTool )
 DECLARE_COMPONENT( TruthPVCollectionMaker )
-DECLARE_COMPONENT( GenFilterTool )
+DECLARE_COMPONENT( GenFilterAlg )
 DECLARE_COMPONENT( TruthEDDecorator )
 DECLARE_COMPONENT( TruthMetaDataWriter )
 DECLARE_COMPONENT( ClassifyAndCalculateHFAugmentation )

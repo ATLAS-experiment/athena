@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Class header file
-#include "GenFilterTool.h"
+#include "GenFilterAlg.h"
 
 // EDM includes
 #include "TruthUtils/MagicNumbers.h"
@@ -30,7 +30,7 @@ namespace DerivationFramework {
   }
 
 
-  bool GenFilterTool::isPrompt( const xAOD::TruthParticle* tp ) const
+  bool GenFilterAlg::isPrompt( const xAOD::TruthParticle* tp ) const
   {
     ParticleOrigin orig = m_classif->particleTruthClassifier( tp ).second;
     ATH_MSG_VERBOSE("Particle has origin " << orig);
@@ -60,7 +60,7 @@ namespace DerivationFramework {
     }
     return true;
   }
-  StatusCode GenFilterTool::initialize() {
+  StatusCode GenFilterAlg::initialize() {
     ATH_CHECK(m_eventInfoKey.initialize());
     ATH_CHECK(m_mcKey.initialize());
     ATH_CHECK(m_truthJetsKey.initialize());
@@ -73,8 +73,8 @@ namespace DerivationFramework {
     ATH_CHECK(m_mcReadDecor.initialize());
     return StatusCode::SUCCESS;
   }
-  StatusCode GenFilterTool::addBranches(const EventContext& ctx) const{
-    ATH_MSG_VERBOSE("GenFilterTool::addBranches(const EventContext& ctx)");
+  StatusCode GenFilterAlg::execute(const EventContext& ctx) const{
+    ATH_MSG_VERBOSE("GenFilterAlg::execute(const EventContext& ctx)");
     SG::ReadHandle<xAOD::EventInfo> eventInfo{m_eventInfoKey, ctx};
     if (!eventInfo.isValid()) {
       ATH_MSG_ERROR("could not retrieve event info " <<m_eventInfoKey.fullKey());
@@ -96,7 +96,7 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode GenFilterTool::getGenFiltVars(const EventContext& ctx, float& genFiltHT, float& genFiltHTinclNu, float& genFiltMET, float& genFiltPTZ, float& genFiltFatJ) const {
+  StatusCode GenFilterAlg::getGenFiltVars(const EventContext& ctx, float& genFiltHT, float& genFiltHTinclNu, float& genFiltMET, float& genFiltPTZ, float& genFiltFatJ) const {
     // Get jet container out
 
     SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int> mcParticleOrigin{m_mcReadDecor, ctx} ;

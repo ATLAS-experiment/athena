@@ -149,22 +149,21 @@ def PostJetMCTruthAugmentationsCfg(flags, **kwargs):
     acc.merge(DFCommonTruthTauDressingCfg(flags))
 
     #Save the post-shower HT and MET filter values that will make combining filtered samples easier (adds to the EventInfo)
-    from DerivationFrameworkMCTruth.GenFilterToolConfig import GenFilterToolCfg
+    from DerivationFrameworkMCTruth.GenFilterToolConfig import GenFilterAlgCfg
+    acc.merge(GenFilterAlgCfg(flags))
     # schedule the special truth building tools and add them to a common augmentation; note taus are handled separately below
     from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthDressedWZQGLabelCfg
-    augmentationToolsList = [ acc.addPublicTool(acc.popToolsAndMerge(GenFilterToolCfg(flags))) ]
     acc.merge(DFCommonTruthDressedWZQGLabelCfg(flags))
 
     # SUSY signal decorations
     from DerivationFrameworkSUSY.DecorateSUSYProcessConfig import IsSUSYSignalRun3
     if IsSUSYSignalRun3(flags):
         from DerivationFrameworkSUSY.DecorateSUSYProcessConfig import SUSYSignalTaggerCfg
-        augmentationToolsList += [ acc.getPrimaryAndMerge(SUSYSignalTaggerCfg(flags, 'MCTruthCommon')) ]
-
-    CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-    for i, tool in enumerate(augmentationToolsList):
-        acc.addEventAlgo(CommonAugmentation(name = "MCTruthCommonPostJetKernelNo{num}".format(num = i+1),
-                                        AugmentationTools = [tool])) # TODO Migrate public tool to AthReentrantAlgorithm
+        augmentationToolsList = [ acc.getPrimaryAndMerge(SUSYSignalTaggerCfg(flags, 'MCTruthCommon')) ]
+        CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
+        for i, tool in enumerate(augmentationToolsList):
+            acc.addEventAlgo(CommonAugmentation(name = "MCTruthCommonPostJetKernelNo{num}".format(num = i+1),
+                                                AugmentationTools = [tool])) # TODO Migrate public tool to AthReentrantAlgorithm
 
     # add SoW of individual SUSY final states, relies on augmentation from DecorateSUSYProcess()
     if IsSUSYSignalRun3(flags):

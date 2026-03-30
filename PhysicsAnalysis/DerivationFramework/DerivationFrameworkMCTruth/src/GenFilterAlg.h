@@ -1,20 +1,19 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
- * @file GenFilterTool.h
+ * @file GenFilterAlg.h
  * @author TJ Khoo
  * @date July 2015
  * @brief tool to decorate EventInfo with quantities needed to disentangle generator filtered samples
 */
 
-#ifndef DerivationFrameworkMCTruth_GenFilterTool_H
-#define DerivationFrameworkMCTruth_GenFilterTool_H
+#ifndef DerivationFrameworkMCTruth_GenFilterAlg_H
+#define DerivationFrameworkMCTruth_GenFilterAlg_H
 
 // Base classes
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
 // EDM include -- typedef, so has to be included
@@ -31,14 +30,14 @@ class IMCTruthClassifier;
 
 namespace DerivationFramework {
 
-  class GenFilterTool : public extends<AthAlgTool, IAugmentationTool> {
+  class GenFilterAlg : public AthReentrantAlgorithm {
 
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override final;
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
 
   private:
     StatusCode getGenFiltVars(const EventContext& ctx, float& genFiltHT, float& genFiltHTinclNu, float& genFiltMET, float& genFiltPTZ, float& genFiltFatJ) const;
