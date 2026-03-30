@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /* **********************************************************************\
@@ -42,6 +42,7 @@
 #include "xAODCore/tools/IOStats.h"
 #include "xAODCore/tools/ReadStats.h"
 #include "xAODCore/ShallowCopy.h"
+#include "AthContainers/CurrentContext.h"
 
 //JetCalibrationTool
 #include "JetCalibTools/JetCalibrationTool.h"
@@ -207,14 +208,10 @@ int main(int argc, char* argv[]){
     ANA_CHECK( event.retrieve( jets, jetColl + "Jets" ) );
 
     // Shallow copy 
-    auto jets_shallowCopy = xAOD::shallowCopyContainer( *jets );
+    auto jets_shallowCopy = xAOD::shallowCopyContainer( *jets, Gaudi::Hive::currentContext() );
 
     // Calibrate the shallow copy
-    ANA_CHECK( jetCalibrationTool.applyCalibration( *(jets_shallowCopy.first) ) );
-
-    delete jets_shallowCopy.first;
-    delete jets_shallowCopy.second;
-  
+    ANA_CHECK( jetCalibrationTool.applyCalibration( *jets_shallowCopy.first ) );
   }//END: Loop over events
 
   xAOD::IOStats::instance().stats().printSmartSlimmingBranchList();

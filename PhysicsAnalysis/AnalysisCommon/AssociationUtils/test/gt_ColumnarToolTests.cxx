@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -32,6 +32,7 @@
 #include <xAODMuon/MuonContainer.h>
 #include <xAODTau/TauJetContainer.h>
 #include <xAODCore/ShallowCopy.h>
+#include <AthContainers/CurrentContext.h>
 
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
@@ -127,10 +128,12 @@ namespace ORUtils
 
     virtual StatusCode copyRecord (EventStoreType& evtStore, const std::string& postfix) override
     {
-      auto [particles1Copy, aux1Copy] = xAOD::shallowCopyContainer (*m_particles1);
-      m_particles1 = particles1Copy;
-      ATH_CHECK (evtStore.record (particles1Copy, m_name1 + postfix));
-      ATH_CHECK (evtStore.record (aux1Copy, m_name1 + postfix + "Aux."));
+      const EventContext& ctx = Gaudi::Hive::currentContext();
+
+      auto [particles1Copy, aux1Copy] = xAOD::shallowCopyContainer (*m_particles1, ctx);
+      m_particles1 = particles1Copy.get();
+      ATH_CHECK (evtStore.record (std::move(particles1Copy), m_name1 + postfix));
+      ATH_CHECK (evtStore.record (std::move(aux1Copy), m_name1 + postfix + "Aux."));
       if constexpr (std::is_same_v<Container1,Container2>)
       {
         if (m_copy1)
@@ -139,10 +142,10 @@ namespace ORUtils
           return StatusCode::SUCCESS;
         }
       }
-      auto [particles2Copy, aux2Copy] = xAOD::shallowCopyContainer (*m_particles2);
-      m_particles2 = particles2Copy;
-      ATH_CHECK (evtStore.record (particles2Copy, m_name2 + postfix));
-      ATH_CHECK (evtStore.record (aux2Copy, m_name2 + postfix + "Aux."));
+      auto [particles2Copy, aux2Copy] = xAOD::shallowCopyContainer (*m_particles2, ctx);
+      m_particles2 = particles2Copy.get();
+      ATH_CHECK (evtStore.record (std::move(particles2Copy), m_name2 + postfix));
+      ATH_CHECK (evtStore.record (std::move(aux2Copy), m_name2 + postfix + "Aux."));
       return StatusCode::SUCCESS;
     }
 

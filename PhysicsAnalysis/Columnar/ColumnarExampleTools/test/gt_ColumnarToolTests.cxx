@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -27,6 +27,7 @@
 #include <xAODJet/JetContainer.h>
 #include <xAODEgamma/PhotonContainer.h>
 #include <xAODCore/ShallowCopy.h>
+#include <AthContainers/CurrentContext.h>
 
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
@@ -112,10 +113,10 @@ public:
 
   virtual StatusCode copyRecord (EventStoreType& evtStore, const std::string& postfix) override
   {
-    auto [jetsCopy, auxCopy] = xAOD::shallowCopyContainer (*m_jets);
-    m_jets = jetsCopy;
-    ANA_CHECK (evtStore.record (jetsCopy, m_name + postfix));
-    ANA_CHECK (evtStore.record (auxCopy, m_name + postfix + "Aux."));
+    auto [jetsCopy, auxCopy] = xAOD::shallowCopyContainer (*m_jets, Gaudi::Hive::currentContext());
+    m_jets = jetsCopy.get();
+    ANA_CHECK (evtStore.record (std::move(jetsCopy), m_name + postfix));
+    ANA_CHECK (evtStore.record (std::move(auxCopy), m_name + postfix + "Aux."));
     return StatusCode::SUCCESS;
   }
 
@@ -322,10 +323,10 @@ public:
 
   virtual StatusCode copyRecord (EventStoreType& evtStore, const std::string& postfix) override
   {
-    auto [jetsCopy, auxCopy] = xAOD::shallowCopyContainer (*m_jets);
-    m_jets = jetsCopy;
-    ATH_CHECK (evtStore.record (jetsCopy, m_name + postfix));
-    ATH_CHECK (evtStore.record (auxCopy, m_name + postfix + "Aux."));
+    auto [jetsCopy, auxCopy] = xAOD::shallowCopyContainer (*m_jets, Gaudi::Hive::currentContext());
+    m_jets = jetsCopy.get();
+    ATH_CHECK (evtStore.record (std::move(jetsCopy), m_name + postfix));
+    ATH_CHECK (evtStore.record (std::move(auxCopy), m_name + postfix + "Aux."));
     return StatusCode::SUCCESS;
   }
 
@@ -514,14 +515,16 @@ public:
 
   virtual StatusCode copyRecord (EventStoreType& evtStore, const std::string& postfix) override
   {
-    auto [electronsCopy, electronsAuxCopy] = xAOD::shallowCopyContainer (*m_electrons);
-    m_electrons = electronsCopy;
-    ANA_CHECK (evtStore.record (electronsCopy, m_electronName + postfix));
-    ANA_CHECK (evtStore.record (electronsAuxCopy, m_electronName + postfix + "Aux."));
-    auto [muonsCopy, muonsAuxCopy] = xAOD::shallowCopyContainer (*m_muons);
-    m_muons = muonsCopy;
-    ANA_CHECK (evtStore.record (muonsCopy, m_muonName + postfix));
-    ANA_CHECK (evtStore.record (muonsAuxCopy, m_muonName + postfix + "Aux."));
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+
+    auto [electronsCopy, electronsAuxCopy] = xAOD::shallowCopyContainer (*m_electrons, ctx);
+    m_electrons = electronsCopy.get();
+    ANA_CHECK (evtStore.record (std::move(electronsCopy), m_electronName + postfix));
+    ANA_CHECK (evtStore.record (std::move(electronsAuxCopy), m_electronName + postfix + "Aux."));
+    auto [muonsCopy, muonsAuxCopy] = xAOD::shallowCopyContainer (*m_muons, ctx);
+    m_muons = muonsCopy.get();
+    ANA_CHECK (evtStore.record (std::move(muonsCopy), m_muonName + postfix));
+    ANA_CHECK (evtStore.record (std::move(muonsAuxCopy), m_muonName + postfix + "Aux."));
     return StatusCode::SUCCESS;
   }
 

@@ -16,6 +16,7 @@
 #include <xAODBase/IParticleContainer.h>
 #include <xAODBase/IParticleHelpers.h>
 #include <xAODCore/ShallowCopy.h>
+#include <AthContainers/CurrentContext.h>
 
 #include <memory>
 #include <type_traits>
@@ -114,23 +115,25 @@ namespace CP
               // Postfix for the shallow-copy container of the origin container.
               static const char* const ORIGIN_POSTFIX = "_ShallowCopyOrigin";
               // Make a shallow copy of the origin container.
-              auto originCopy = xAOD::shallowCopyContainer( *originContainer );
+              auto originCopy = xAOD::shallowCopyContainer( *originContainer, Gaudi::Hive::currentContext() );
               if( ( ! originCopy.first ) || ( ! originCopy.second ) ) {
                  ANA_MSG_ERROR( "Failed to shallow copy the origin of a view "
                                 << "container, meant for: " << outputName );
                  return StatusCode::FAILURE;
               }
-              // ...and record it.
-              ANA_CHECK( store.record( originCopy.first,
-                                       outputName + ORIGIN_POSTFIX ) );
-              ANA_CHECK( store.record( originCopy.second,
-                                       outputName + ORIGIN_POSTFIX + "Aux." ) );
               // Make a view copy on top of it.
               auto viewCopy = std::make_unique< T >( SG::VIEW_ELEMENTS );
               auto viewCopyPtr = viewCopy.get();
               for( const auto* element : *inputObject ) {
                  viewCopy->push_back( originCopy.first->at( element->index() ) );
               }
+
+              // ...and record it.
+              ANA_CHECK( store.record( std::move(originCopy.first),
+                                       outputName + ORIGIN_POSTFIX ) );
+              ANA_CHECK( store.record( std::move(originCopy.second),
+                                       outputName + ORIGIN_POSTFIX + "Aux." ) );
+
               // Set the origin links on it. Note that
               // xAOD::setOriginalObjectLink's "container version" doesn't work
               // with view containers, we have to call this function one-by-one
@@ -142,7 +145,7 @@ namespace CP
                  }
               }
               // Finally, record the view container with the requested name.
-              ANA_CHECK( store.record( viewCopy.release(), outputName ) );
+              ANA_CHECK( store.record( std::move(viewCopy), outputName ) );
               // The copy is done.
               object = viewCopyPtr;
               return StatusCode::SUCCESS;
@@ -151,7 +154,7 @@ namespace CP
               // container, and that's that...
               auto viewCopy = std::make_unique< T >( SG::VIEW_ELEMENTS );
               auto viewCopyPtr = viewCopy.get();
-              ANA_CHECK( store.record( viewCopy.release(), outputName ) );
+              ANA_CHECK( store.record( std::move(viewCopy), outputName ) );
               // The copy is done.
               object = viewCopyPtr;
               return StatusCode::SUCCESS;
@@ -160,7 +163,7 @@ namespace CP
         } else {
 
            // We can just copy the container as is.
-           auto copy = xAOD::shallowCopyContainer( *inputObject );
+           auto copy = xAOD::shallowCopyContainer( *inputObject, Gaudi::Hive::currentContext() );
            if (!copy.first || !copy.second)
            {
               ANA_MSG_ERROR ("failed to shallow copy object: " << outputName);
@@ -172,9 +175,9 @@ namespace CP
               return StatusCode::FAILURE;
            }
 
-           ANA_CHECK (store.record (copy.second, auxName));
-           ANA_CHECK (store.record (copy.first, outputName));
-           object = copy.first;
+           object = copy.first.get();
+           ANA_CHECK (store.record (std::move(copy.second), auxName));
+           ANA_CHECK (store.record (std::move(copy.first), outputName));
            return StatusCode::SUCCESS;
         }
       }
@@ -227,26 +230,29 @@ namespace CP
                // Postfix for the shallow-copy container of the origin container.
                static const char* const ORIGIN_POSTFIX = "_ShallowCopyOrigin";
                // Make a shallow copy of the origin container.
-               auto originCopy = xAOD::shallowCopyContainer( *originContainer );
+               auto originCopy = xAOD::shallowCopyContainer( *originContainer, Gaudi::Hive::currentContext() );
                if( ( ! originCopy.first ) || ( ! originCopy.second ) ) {
                   ANA_MSG_ERROR( "Failed to shallow copy the origin of a view "
                                  << "container, meant for: " << outputName );
                   return StatusCode::FAILURE;
                }
-               // ...and record it.
-               ANA_CHECK( store.record( originCopy.first,
-                                        outputName + ORIGIN_POSTFIX ) );
-               ANA_CHECK( store.record( originCopy.second,
-                                        outputName + ORIGIN_POSTFIX +
-                                        "Aux." ) );
+
                // Make a view copy on top of it.
                auto viewCopy = std::make_unique< T >( SG::VIEW_ELEMENTS );
                auto viewCopyPtr = viewCopy.get();
                for( const auto* element : *inputObject ) {
                   viewCopy->push_back( originCopy.first->at( element->index() ) );
                }
+
+               // ...and record it.
+               ANA_CHECK( store.record( std::move(originCopy.first),
+                                        outputName + ORIGIN_POSTFIX ) );
+               ANA_CHECK( store.record( std::move(originCopy.second),
+                                        outputName + ORIGIN_POSTFIX +
+                                        "Aux." ) );
+
                // Finally, record the view container with the requested name.
-               ANA_CHECK( store.record( viewCopy.release(), outputName ) );
+               ANA_CHECK( store.record( std::move(viewCopy), outputName ) );
                // The copy is done.
                object = viewCopyPtr;
                return StatusCode::SUCCESS;
@@ -255,7 +261,7 @@ namespace CP
                // container, and that's that...
                auto viewCopy = std::make_unique< T >( SG::VIEW_ELEMENTS );
                auto viewCopyPtr = viewCopy.get();
-               ANA_CHECK( store.record( viewCopy.release(), outputName ) );
+               ANA_CHECK( store.record( std::move(viewCopy), outputName ) );
                // The copy is done.
                object = viewCopyPtr;
                return StatusCode::SUCCESS;
@@ -264,7 +270,7 @@ namespace CP
          } else {
 
             // We can just copy the container as is.
-            auto copy = xAOD::shallowCopyContainer( *inputObject );
+            auto copy = xAOD::shallowCopyContainer( *inputObject, Gaudi::Hive::currentContext() );
             if (!copy.first || !copy.second)
             {
                ANA_MSG_ERROR ("failed to shallow copy object: " << outputName);
@@ -272,9 +278,9 @@ namespace CP
                return StatusCode::FAILURE;
             }
 
-            ANA_CHECK (store.record (copy.second, auxName));
-            ANA_CHECK (store.record (copy.first, outputName));
-            object = copy.first;
+            object = copy.first.get();
+            ANA_CHECK (store.record (std::move(copy.second), auxName));
+            ANA_CHECK (store.record (std::move(copy.first), outputName));
             return StatusCode::SUCCESS;
          }
       }
@@ -301,7 +307,7 @@ namespace CP
           };
 
           // We can just copy the object as is.
-          auto copy = xAOD::shallowCopyObject( *inputObject );
+          auto copy = xAOD::shallowCopyObject( *inputObject, Gaudi::Hive::currentContext() );
           if (!copy.first || !copy.second)
           {
              ANA_MSG_ERROR ("failed to shallow copy object: " << outputName);
@@ -309,9 +315,9 @@ namespace CP
              return StatusCode::FAILURE;
           }
 
-          ANA_CHECK (store.record (copy.second, auxName));
-          ANA_CHECK (store.record (copy.first, outputName));
-          object = copy.first;
+          object = copy.first.get();
+          ANA_CHECK (store.record (std::move(copy.second), auxName));
+          ANA_CHECK (store.record (std::move(copy.first), outputName));
           return StatusCode::SUCCESS;
        }
     };
