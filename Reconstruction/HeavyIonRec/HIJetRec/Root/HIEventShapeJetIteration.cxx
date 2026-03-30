@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HIEventShapeJetIteration.h"
@@ -303,21 +303,20 @@ StatusCode HIEventShapeJetIteration::remodulate(xAOD::HIEventShapeContainer* out
 
 StatusCode HIEventShapeJetIteration::getShapes(const xAOD::HIEventShapeContainer*& input_shape, xAOD::HIEventShapeContainer*& output_shape, bool record) const
 {
-  SG::ReadHandle<xAOD::HIEventShapeContainer>  readHandleEvtShape ( m_inputEventShapeKey );
-  SG::WriteHandle<xAOD::HIEventShapeContainer> writeHandleEvtShape ( m_outputEventShapeKey );
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  SG::ReadHandle<xAOD::HIEventShapeContainer>  readHandleEvtShape ( m_inputEventShapeKey, ctx );
+  SG::WriteHandle<xAOD::HIEventShapeContainer> writeHandleEvtShape ( m_outputEventShapeKey, ctx );
 
   input_shape = readHandleEvtShape.ptr();
 
   if(m_shallowCopy)
   {
-    auto shape_copy=xAOD::shallowCopyContainer(*input_shape);
-    auto unique_first_copy = xAOD::prepareElementForShallowCopy(shape_copy.first);
-    auto unique_second_copy = xAOD::prepareElementForShallowCopy(shape_copy.second);
-    output_shape=shape_copy.first;
+    auto shape_copy=xAOD::shallowCopyContainer(*input_shape, ctx);
+    output_shape=shape_copy.first.get();
     if(record)
     {
       ATH_MSG_DEBUG( "Write Handle current key is : " <<  m_outputEventShapeKey.key() );
-      if(writeHandleEvtShape.record ( std::move(unique_first_copy), std::move(unique_second_copy)).isFailure() ){
+      if(writeHandleEvtShape.record ( std::move(shape_copy.first), std::move(shape_copy.second)).isFailure() ){
         ATH_MSG_ERROR("Unable to write Shallow Copy containers for event shape with key: " << m_outputEventShapeKey.key());
         return(StatusCode::FAILURE);
       }

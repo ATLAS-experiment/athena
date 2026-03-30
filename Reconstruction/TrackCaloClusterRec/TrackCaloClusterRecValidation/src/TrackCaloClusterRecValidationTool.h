@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRACKCALOCLUSTERREC_TRACKCALOCLUSTERRECVALIDATION_TRACKCALOCLUSTERRECVALIDATIONTOOL_H
 #define TRACKCALOCLUSTERREC_TRACKCALOCLUSTERRECVALIDATION_TRACKCALOCLUSTERRECVALIDATIONTOOL_H
@@ -57,7 +57,8 @@ private:
     bool                                  m_applyCalibration;
     
     /**Calibrate and record a shallow copy of a given jet container */
-    const xAOD::JetContainer* calibrateAndRecordShallowCopyJetCollection(const xAOD::JetContainer * jetContainer, const std::string& name);
+    const xAOD::JetContainer* calibrateAndRecordShallowCopyJetCollection(const xAOD::JetContainer * jetContainer, const std::string& name,
+                                                                         const EventContext& ctx);
     
     /// Get the matched jet
     const xAOD::Jet* ClusterMatched(const xAOD::Jet* jet, const xAOD::JetContainer* jets);
