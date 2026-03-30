@@ -4,7 +4,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// ClassifyAndCalculateHFAugmentation.h                                 //
+// ClassifyAndCalculateHFTool.h                                 //
 // Header file for class ClassifyAndCalculateHFTool                     //
 // Author: Adrian Berrocal Guardia <adrian.berrocal.guardia@cern.ch>    //
 //                                                                      //
