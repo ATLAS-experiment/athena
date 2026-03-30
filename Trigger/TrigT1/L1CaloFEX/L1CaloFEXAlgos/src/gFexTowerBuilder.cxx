@@ -69,6 +69,7 @@ namespace LVL1 {
             return StatusCode::FAILURE;
         }
 
+
         // WriteHandle for gFEX EDMs
         SG::WriteHandle<xAOD::gFexTowerContainer> gTowersContainer(m_gTowersWriteKey, ctx);
         ATH_CHECK( gTowersContainer.record(std::make_unique<xAOD::gFexTowerContainer>(),
@@ -86,7 +87,7 @@ namespace LVL1 {
 
         // building Scell ID pointers
         std::unordered_map<uint64_t, const CaloCell*> map_ScellID2ptr;
-	map_ScellID2ptr.reserve(ScellContainer->size());
+        map_ScellID2ptr.reserve(ScellContainer->size());
 
         for (const CaloCell* scell : *ScellContainer) {
             const uint64_t ID = scell->ID().get_compact();
@@ -95,7 +96,7 @@ namespace LVL1 {
 
         // building Tile ID pointers
         std::unordered_map<uint32_t, const xAOD::TriggerTower*> map_TileID2ptr;
-	map_TileID2ptr.reserve(triggerTowerContainer->size());
+        map_TileID2ptr.reserve(triggerTowerContainer->size());
 
         for (const xAOD::TriggerTower* tower : *triggerTowerContainer) {
             map_TileID2ptr[tower->coolId()] = tower;
@@ -145,12 +146,31 @@ namespace LVL1 {
                                                     << " not found in the CaloCellContainer, skipping");
                         continue;
                     }
+                    // working with "local" fiber number, iFiber
+                    unsigned int offset = (towerID > 20000) ? 20000 : (towerID > 10000 && towerID < 20000) ? 10000 : 0;
+                    unsigned int iFiber = (towerID - offset)/16;
+
+                    // Do not exceed maximum number of fibers for FPGA
+                    unsigned int maxFiberN =  (towerID > 20000) ? LVL1::gFEXPos::C_FIBERS : LVL1::gFEXPos::AB_FIBERS;
+                    if (iFiber >= maxFiberN) continue;
+
+                    int fiber_type  = (towerID < 10000) ? LVL1::gFEXPos::AMPD_NFI[iFiber] :
+                      (towerID > 10000 && towerID < 20000) ? LVL1::gFEXPos::BMPD_NFI[iFiber] :
+                      LVL1::gFEXPos::CMPD_NFI[iFiber];
+                      
+                    // Data Type: 3 is extended region ( HEC), 6 is 200MeV region only ( HEC), 11 is HEC - Had contribution
+                    int dataType = (towerID < 10000) ? LVL1::gFEXPos::AMPD_DTYP_ARR[fiber_type][towerID%16] :
+                      (towerID > 10000 && towerID < 20000) ? LVL1::gFEXPos::BMPD_DTYP_ARR[fiber_type][towerID%16] :
+                      LVL1::gFEXPos::CMPD_DTYP_ARR[fiber_type][towerID%16];
 
                     const CaloCell* scell = it_ScellID2ptr->second;
-                    int val = std::round(
-                            scell->energy() /
-                            (12.5 * std::cosh(scell->eta())));  // 12.5 is b.c. energy is in
-                    // units of 12.5 MeV per count
+                    int val = std::round(scell->energy() / (12.5 * std::cosh(scell->eta())));  // 12.5 b.c. energy units of 12.5 MeV per count
+                    if (!m_isDATA && m_applyTimingCut && !(scell->provenance()&0x200) && dataType != 11) {
+                        val = 0; // apply timing cut to MC (already present in Data)
+                    }
+                    else if (!m_isDATA && m_applyTimingCutAll && !(scell->provenance()&0x200)) {
+                        val = 0; // apply timing cut to MC (already present in Data)
+                    }
 
                     bool isMasked =
                             m_apply_masking ? ((scell)->provenance() & 0x80) : false;
@@ -160,9 +180,9 @@ namespace LVL1 {
 
                     invalid &= isInvalid;
                     masked &= isMasked;
-		    if (!isMasked) {
-		      gTower_sat |= isSaturated;
-		    }
+                    if (!isMasked) {
+                        gTower_sat |= isSaturated;
+                    }
 
                     if (isMasked) {
                         val = 0;
