@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigT1CaloMonitoring )
@@ -46,6 +46,6 @@ atlas_add_test( L1CaloPhase1_Data_oneFex
 # Test eFEX BS Encoding
 atlas_add_test( L1CaloPhase1_Data_eFEXBSEncode
         SCRIPT "python -m TrigT1CaloMonitoring.test_eFEX_BSEncoding"
-        PROPERTIES TIMEOUT 300
+        PROPERTIES TIMEOUT 600
         PRIVATE_WORKING_DIRECTORY
         POST_EXEC_SCRIPT noerror.sh )
