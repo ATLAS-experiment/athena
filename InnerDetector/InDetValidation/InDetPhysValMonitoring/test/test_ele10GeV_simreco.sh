@@ -12,7 +12,7 @@
 # art-output: *Analysis*.root
 # art-output: *.xml 
 # art-output: dcube*
-# art-output: art_core_1/*.root
+# art-output: art_core_0
 # art-html: dcube_shifter_last
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
