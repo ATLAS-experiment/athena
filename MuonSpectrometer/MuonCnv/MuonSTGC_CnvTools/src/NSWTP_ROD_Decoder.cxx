@@ -54,9 +54,11 @@ StatusCode NSWTP_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::
       ATH_MSG_DEBUG("NSW sTGC TP Common Decoder found only one elink in output but incosistent L1A version: something off with this fragment. Skipping.");
       return StatusCode::SUCCESS;
     }
-  } else if (nsw_trigger_decoder.get_elinks().size()!=3 && nsw_trigger_decoder.get_elinks().size()!=5) {
+  } else if (nsw_trigger_decoder.get_elinks().size()<3 || nsw_trigger_decoder.get_elinks().size()>5) {
     // this is a severe requirement: a single elink missing would imply the whole event is problematic 
-    ATH_MSG_DEBUG("NSW sTGC TP Common Decoder didn't give 3 or 5 elinks in output for: something off with this fragment. Skipping.");
+    // Note: multiple NSW sTGC TP firmware versions were released (in v03) over time that might be having different elink numbers
+    //       it's up to the downstream users to make sure a proper check is performed
+    ATH_MSG_DEBUG("NSW sTGC TP Common Decoder didn't give 3, 4 or 5 elinks in output for: something off with this fragment. Skipping.");
     return StatusCode::SUCCESS;
   }
 

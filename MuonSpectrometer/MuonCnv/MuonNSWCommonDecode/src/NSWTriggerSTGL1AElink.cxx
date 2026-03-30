@@ -209,6 +209,9 @@ Muon::nsw::NSWTriggerSTGL1AElink::DataHeader Muon::nsw::NSWTriggerSTGL1AElink::d
         case STGTPMMData::mm_stream_header:
            current_stream_head_nbits = STGTPMMData::size_v3;
            break;
+        case STGTPStrips::strip_stream_header:
+           current_stream_head_nbits = STGTPStrips::size_v3;
+           break;
         default:
            break;
   }
