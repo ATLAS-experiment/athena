@@ -41,9 +41,7 @@ namespace MuonR4{
         ATH_CHECK(m_parentSegKey.initialize());
         ATH_CHECK(m_combMeasKey.initialize());
         ATH_CHECK(m_prdStateKey.initialize());
-#ifdef ACTIVATE_LATER
         ATH_CHECK(m_auxMeasProv.initialize(m_writeKey.key(), m_convertBeamSpot));
-#endif
         return StatusCode::SUCCESS;
     }
     StatusCode xAODSegmentCnvAlg::execute(const EventContext& ctx) const {
@@ -70,9 +68,9 @@ namespace MuonR4{
         std::vector<PrdTuple_t> linkMap{};
 
         const xAOD::UncalibratedMeasurement* beamSpotMeas{};
-#ifdef ACTIVATE_LATER
+
         auto beamSpotMeasCreator = m_auxMeasProv.makeHandle(ctx, gctx->context());
-#endif
+
         /** @brief Decorate the prd links onto the output muon segment. Eta & phi measurements are absorbed converted
          *         into a CombinedMuonStrip which is a source link linke object carrying a link to both prds. In this way,
          *         only one track state is generated later in the track fit from the two measurements. 
@@ -109,7 +107,6 @@ namespace MuonR4{
                     if (!m_convertBeamSpot) {
                         continue;
                     }
-#ifdef ACTIVATE_LATER
                     // Up to now, there's no variety on the beamspot across the segments
                     if (!beamSpotMeas) {
                         if (!beamSpotMeasCreator.ok()) {
@@ -133,7 +130,6 @@ namespace MuonR4{
                         ATH_MSG_DEBUG("Created beamspot measurement "<<(*meas)<<", "
                                       <<surf->toString(gctx->context()));
                     }
-#endif
                     linkMap.emplace_back(beamSpotMeas, meas->fitState(), segIdx);
                     continue;
                 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONR4_MUONPATTERNEVENT_SEGMENT__H
@@ -17,8 +17,7 @@ namespace MuonR4{
     /// For now, just a plain storage for the dummy fit result, to test the 
     /// implementation of residuals 
     class Segment{
-        public: 
-            
+        public:
             /** @brief Calibrated space point type */
             using MeasType = std::unique_ptr<CalibratedSpacePoint>;
             using MeasVec = std::vector<MeasType>;

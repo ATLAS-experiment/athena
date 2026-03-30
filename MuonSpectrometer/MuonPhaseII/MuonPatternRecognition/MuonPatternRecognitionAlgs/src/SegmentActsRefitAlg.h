@@ -1,25 +1,37 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONPATTERNRECOGNITIONALGS_SEGMENTACTSREFITALG_H
 #define MUONPATTERNRECOGNITIONALGS_SEGMENTACTSREFITALG_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaKernel/IAthRNGSvc.h"
+#include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
 
-#include "MuonPatternEvent/MuonPatternContainer.h"
-#include "ActsGeometryInterfaces/IExtrapolationTool.h"
+
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "MuonRecToolInterfacesR4/ISegmentSelectionTool.h"
 #include "MuonRecToolInterfacesR4/ISpacePointCalibrator.h"
-#include "ActsToolInterfaces/IFitterTool.h"
+
 #include "xAODMuon/MuonSegmentContainer.h"
-#include "MuonIdHelpers/IMuonIdHelperSvc.h"
-#include "AthenaKernel/IAthRNGSvc.h"
+#include "MuonPatternEvent/MuonPatternContainer.h"
+
+#include "ActsEvent/TrackContainer.h"
 #include "ActsEvent/AuxiliaryMeasurementHandler.h"
+
+#include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
+#include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
+
+
+#include "Acts/Propagator/Navigator.hpp"
+#include "Acts/Propagator/Propagator.hpp"
+#include "Acts/Propagator/StraightLineStepper.hpp"
+#include "Acts/TrackFitting/GlobalChiSquareFitter.hpp"
 
 
 namespace CLHEP{
@@ -35,7 +47,24 @@ namespace MuonR4{
           using AthReentrantAlgorithm::AthReentrantAlgorithm;
           virtual StatusCode initialize() override final;
           virtual StatusCode execute(const EventContext& ctx) const override final;
+
+
+          /// Type erased track fitter function.
+          using Propagator_t = Acts::Propagator<Acts::StraightLineStepper, Acts::Navigator>;
+          using Fitter_t = Acts::Experimental::Gx2Fitter<Propagator_t, ActsTrk::MutableTrackStateBackend>;
+
+          /** @brief Abbrivation of the configuration to launch the fit  */
+          using Gx2FitterOptions_t = Acts::Experimental::Gx2FitterOptions<ActsTrk::MutableTrackStateBackend>;
+          /** @brief Abbrivation of the fitter extensions */
+          using Gx2FitterExtension_t = Acts::Experimental::Gx2FitterExtensions<ActsTrk::MutableTrackStateBackend>;
+
         private:
+            /** @brief Returns the entrance / exit portal surface of the tracking volume
+             *         associated with the measurement surface
+             * @param measurement: Reference to the measurement which portal is to be fetched
+             * @param entrance: Flag toggling whether the entrance or exit portal shall be returned */
+            const Acts::Surface* portalSurface(const xAOD::UncalibratedMeasurement* measurement,
+                                               bool entrance) const;
             /** @brief Smear the segment's position and direction by one sigma defined by the
              *         segment's covariance. Returns a tuple of smeared position & direction.
              *  @param gctx: Geometry context to fetch the alignment of the segment
@@ -57,8 +86,6 @@ namespace MuonR4{
             
             /** @brief IdHelperSvc to decode the Identifiers */
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-            /** @brief Track fitting tool */
-            ToolHandle<ActsTrk::IFitterTool> m_trackFitTool{this, "FittingTool", ""};
             /** @brief Tracking geometry tool */
             PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
             /** @brief Track extrapolation tool */
@@ -69,8 +96,6 @@ namespace MuonR4{
             ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc", ""};
             /** @brief Smear interval in terms of standard deviations */
             Gaudi::Property<double> m_smearRange{this, "SmearRange", 1.};
-            /** @brief Key to setup a surface container for the external constraints */
-            SG::WriteHandleKey<xAOD::TrackSurfaceContainer> m_surfKey{this, "SurfaceKey", "RefitSegmentSurf"};
             /// Handle to the space point calibrator
             ToolHandle<ISpacePointCalibrator> m_calibTool{this, "Calibrator", "" };
             /** @brief Dump the segment line in obj files */
@@ -79,6 +104,24 @@ namespace MuonR4{
             ActsTrk::AuxiliaryMeasurementHandler m_auxMeasProv{this};
             /** @brief Detector manager to access the spectrometer sector surfaces */
             const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
+
+            Gaudi::Property<bool> m_smearSegPars{this, "smearSegPars", true};
+            /** @brief Maximum number of propagation steps */
+            Gaudi::Property<unsigned> m_maxPropSteps{this,"maxPropagationSteps", 100000};
+            /** @brief Maximum number of target surfaces */
+            Gaudi::Property<unsigned> m_maxTargetSurfSkip{this, "maxTargetSurfSkip", 100000};
+            /** @brief Maximum number of iterations */
+            Gaudi::Property<unsigned> m_maxIter{this, "maxIter", 50};
+            /** @brief Free to bound Jacobian correction */
+            Gaudi::Property<bool> m_doJacobianCorr{this,"freeToBoundJacobian", true};
+
+            /** @brief Surface accessor delegate for xAOD::UncalibratedMeasurement objects */
+            ActsTrk::detail::xAODUncalibMeasSurfAcc m_surfAccessor{};
+            /** @brief Fitter setup */
+            Gx2FitterExtension_t m_fitExtension{};
+
+            std::unique_ptr<Fitter_t> m_fitter{};
+
 
 
     };

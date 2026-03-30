@@ -12,6 +12,7 @@
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/Surfaces/LineBounds.hpp"
 #include "Acts/Surfaces/PlaneSurface.hpp"
+#include "Acts/Definitions/Tolerance.hpp"
 
 #include "xAODMuonPrepData/UtilFunctions.h"
 #include "xAODMuonPrepData/TgcStrip.h"
@@ -30,6 +31,13 @@
 using namespace Acts::UnitLiterals;
 using namespace MuonR4::SegmentFit;
 using namespace Acts::detail::LineHelper;
+
+namespace{
+    using CovIdx = MuonR4::SpacePoint::CovIdx;
+
+    constexpr auto etaIdx = Acts::toUnderlying(CovIdx::etaCov);
+    constexpr auto phiIdx = Acts::toUnderlying(CovIdx::phiCov);
+}
 
 namespace MuonValR4{
     StatusCode SegmentExtpTest::initialize(){
@@ -78,15 +86,17 @@ namespace MuonValR4{
 
         SeedingAux::Config cfg{};
         cfg.parsToUse.clear();
+        cfg.calcAlongStrip = true;
         SeedingAux pullCalculator{cfg, makeActsAthenaLogger(this, "PullCalculator")};
 
         SeedingAux::Line_t line{};
+        SeedingAux::ChiSqWithDerivatives chiSqObj{};
+
 
         for (const xAOD::MuonSegment* segment : *segments) {
             const MuonR4::Segment* detSeg = MuonR4::detailedSegment(*segment);
 
             line.updateParameters(localSegmentPars(*segment));
-
 
             const MuonGMR4::SpectrometerSector* sector = m_detMgr->getSectorEnvelope(segment->chamberIndex(), 
                                                                                      segment->sector(), 
@@ -136,8 +146,8 @@ namespace MuonValR4{
                     if (!bounds.inside(lPos, Acts::BoundaryTolerance::AbsoluteEuclidean(-2._mm))){
                         ATH_MSG_WARNING("The position "<<Amg::toString(lPos)
                                 <<" is outside the trapezoid "<<bounds
-                                <<" "<<m_idHelperSvc->toString(sp->identify()));
-                            continue;
+                                <<" "<<(*meas));
+                        continue;
                     }
                     mPos = (toSurf * meas->localPosition()).block<2,1>(0,0);
                 } else if (targetSurf.type() == Acts::Surface::SurfaceType::Straw) {
@@ -155,14 +165,14 @@ namespace MuonValR4{
                     if (std::abs(closePos.z()) > lBounds.get(Acts::LineBounds::eHalfLengthZ) - 2._cm ||
                         closePos.perp() >lBounds.get(Acts::LineBounds::eR)  - 0.2_mm) {
                         ATH_MSG_WARNING("The line does not cross tube "
-                            <<m_idHelperSvc->toString(sp->identify())
+                            <<(*meas)
                             <<" "<<Amg::toString(lPos)<<" vs. "<<bounds<<".");
                         continue;
                     }
                 }
                 auto extpPars = extrapolate(startPars, *sp);
                 if (!extpPars.ok()) {
-                   ATH_MSG_FATAL("Failed to propagate to "<<(*meas)
+                   ATH_MSG_ERROR("Failed to propagate to "<<(*meas)
                                 <<",\n lPos: "<<Amg::toString(toSurf * meas->localPosition())
                                 <<", expected: "<<Amg::toString(lPos)<<", "<<targetSurf.bounds());
                    retCode = StatusCode::FAILURE;
@@ -174,45 +184,100 @@ namespace MuonValR4{
                                         Acts::ViewConfig{.color = {0, 0, 220}}, 6._cm); 
                 }
 
+                pullCalculator.updateSpatialResidual(line, *meas);
+                chiSqObj.reset();
+                pullCalculator.updateChiSq(chiSqObj, meas->covariance());
+
+                const double segChi2 = chiSqObj.chi2;
+                const double fastChi2Term = SeedingAux::chi2Term(line, *meas);
+
                 if (targetSurf.type() == Acts::Surface::SurfaceType::Plane) {
-                    ATH_MSG_DEBUG("Position on "<<m_idHelperSvc->toString(sp->identify()) 
+                    ATH_MSG_DEBUG("Position on "<<(*meas) 
                                 <<" plane "<<Amg::toString(lPos)<<" vs. "
                                 <<Amg::toString((*extpPars).localPosition()));
                     const Amg::Vector2D dPos = (*extpPars).localPosition() - lPos;
                     if (dPos.mag() > 0.1_mm) {
-                        ATH_MSG_FATAL("Too large deviation on "<<m_idHelperSvc->toString(sp->identify())
+                        ATH_MSG_ERROR("Too large deviation for "<<(*meas)
                                     <<", "<<Amg::toString(dPos));
                         retCode = StatusCode::FAILURE;
-                    }       
+                    }
+                    const Amg::Vector3D b1 = toSurf.linear()*(meas->measuresEta() ? meas->toNextSensor() : meas->sensorDirection());
+                    const Amg::Vector3D b2 = toSurf.linear()*(!meas->measuresEta() ? meas->toNextSensor() : meas->sensorDirection());
+                    const Amg::Vector2D lineRes = (pullCalculator.residual()[etaIdx] * b1 +
+                                                   pullCalculator.residual()[phiIdx] * b2).block<2,1>(0,0);
+
+                    const Amg::Vector2D surfRes = lPos - mPos;
+
+                    /// Calculate the chi2
+                    AmgSymMatrix(2) covMat{AmgSymMatrix(2)::Identity()};
+                    covMat(0,0) = 1./meas->covariance()[etaIdx];
+                    covMat(1,1) = 1./meas->covariance()[phiIdx];
+                    // Transform the covariance to take the stereo angles into account
+                    AmgSymMatrix(2) surfTrf{AmgSymMatrix(2)::Identity()};
+                    surfTrf.row(0) = b1.block<2,1>(0,0);
+                    surfTrf.row(1) = b2.block<2,1>(0,0);
+
+                    AmgSymMatrix(2) stereoTrf{AmgSymMatrix(2)::Identity()};
+                    const double dirDots = b1.dot(b2);
+                    const double invDist = 1. / (1. - Acts::square(dirDots));
+                    stereoTrf(0, 0) = stereoTrf(1, 1) = invDist;
+                    stereoTrf(0, 1) = stereoTrf(1, 0) = -dirDots * invDist;
+
+                    stereoTrf = stereoTrf * surfTrf;
+                    ATH_MSG_VERBOSE("Basis vectors b1: "<<Amg::toString(b1)<<", b2: "<<Amg::toString(b2)
+            <<", product: "<<dirDots<<", invdist: "<<invDist<<" -> trf: "<<Amg::toString(stereoTrf));
+
+                    covMat = stereoTrf.transpose() * covMat * stereoTrf;
+                
+                    const double matChi2 = surfRes.dot(covMat * surfRes);
+                
+                    ATH_MSG_DEBUG("Analyze plane residual residual for "<<m_idHelperSvc->toString(sp->identify())
+                    <<" / "<<targetSurf.geometryId()
+                    <<"\n --- measurement: "<<Amg::toString(mPos)<<", extraploated: "<<Amg::toString(lPos)
+                    <<" --> residual: "<<Amg::toString(surfRes)
+                    <<", projected: "<<Amg::toString(stereoTrf*surfRes)
+                    <<", chi2: "<<matChi2
+                    <<"\n --- line fitter - projected: "
+                    <<Amg::toString(pullCalculator.residual()) 
+                    <<", cartesian: "<<Amg::toString(lineRes)<<", chi2: "
+                    <<segChi2);
+
+                    const Amg::Vector2D dRes = (surfRes - lineRes);
+                    if (dRes.mag() > 0.1_mm) {
+                        ATH_MSG_ERROR("Surface and line residuals are too much apart for "
+                            <<(*meas)
+                            <<", difference: "<<Amg::toString(dPos));
+                        retCode = StatusCode::FAILURE;
+                    }
+                    const double dChi2 = std::abs(matChi2 - segChi2);
+                    if (dChi2 > 0.01) {
+                        ATH_MSG_ERROR("Too large deviation in chi2 calculation "<<
+                                    (*meas)<<" -- line fitter: "<<segChi2<<", matrix: "<<matChi2);
+                        retCode = StatusCode::FAILURE;
+                    }
+                    if (meas->dimension() == 2 && Acts::abs(segChi2 - fastChi2Term) > 1.e-3) {
+                        ATH_MSG_ERROR("The fast & full chi2 calculations from ACTS don't match for "
+                            <<(*meas)<<" - full: "<<segChi2<<", fast: "<<fastChi2Term);
+                        retCode = StatusCode::FAILURE;
+                    }
                 } else if (targetSurf.type() == Acts::Surface::SurfaceType::Straw) {
                     const double dist = lPos[0];
                     const double extDist = (*extpPars).parameters()[Acts::eBoundLoc0];
                     const double extLocZ = (*extpPars).parameters()[Acts::eBoundLoc1];
                     const double cov = meas->covariance()[Acts::toUnderlying(AxisDefs::etaCov)];
                     ATH_MSG_DEBUG("Distance on surface "<<m_idHelperSvc->toString(sp->identify())
-                                   <<" straight: "<<dist<<", extrapolated: "<<extDist
+                                <<" straight: "<<dist<<", extrapolated: "<<extDist
                                 <<"--> "<<(extDist - dist ) / std::sqrt(cov)
                                 <<", along the tube: "<<lPos[1]<<", extrapolated: "<<extLocZ);
                     if (std::abs(dist - extDist)  / std::sqrt(cov) > 0.05 ||
                         std::abs(lPos[1] - extLocZ) > 0.1_mm) {
-                        ATH_MSG_FATAL("Too large deviation on "<<m_idHelperSvc->toString(sp->identify())
-                                    <<", "<<Amg::toString(lPos)<<" vs. ("<<extDist<<", "<<extLocZ<<")"
+                        ATH_MSG_ERROR("Too large deviation on "<<(*meas)
+                                    <<",\n"<<Amg::toString(lPos)<<" vs. ("<<extDist<<", "<<extLocZ<<")"
                                     <<", deviate R: "<<(std::abs(dist -extDist)  / std::sqrt(cov))
                                     <<", deviate Z: "<<std::abs(lPos[1] - extLocZ));
                         retCode = StatusCode::FAILURE;
                     }
                 }
-
-                pullCalculator.updateSpatialResidual(line, *meas);
-                const Amg::Vector2D res = mPos - lPos;
-                AmgSymMatrix(2) cov{AmgSymMatrix(2)::Identity()};
-                cov(0,0) = 1./meas->covariance()[1];
-                cov(1,1) = 1./meas->covariance()[0];
-                ATH_MSG_DEBUG("Analyze residual for "<<m_idHelperSvc->toString(sp->identify())
-                <<" / "<<targetSurf.geometryId()<<" --- measurement: "<<Amg::toString(mPos)<<", extraploated: "
-                    <<Amg::toString(lPos)<<" --> residual: "<<Amg::toString(res)<<" vs. "
-                    <<Amg::toString(pullCalculator.residual())<<", chi2: "<<pullCalculator.chi2Term(line, *meas)
-                    <<" vs. "<<res.dot(cov*res));
             }
             if (m_drawEvent) {
                 visualHelper.write(std::format("ExtTpTest_{:}_{:}_{:}.obj", 
