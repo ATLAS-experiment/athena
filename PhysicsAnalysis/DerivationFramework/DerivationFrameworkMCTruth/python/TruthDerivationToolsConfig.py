@@ -185,12 +185,11 @@ def MuonTruthIsolationDecorAlgCfg(flags, name, **kwargs):
     return acc
 
 
-def TruthQGDecorationToolCfg(flags, name, **kwargs):
-    """Configure the quark/gluon decoration tool"""
+def TruthQGDecorationCfg(flags, name, **kwargs):
+    """Configure the quark/gluon decoration algorithm"""
     acc = ComponentAccumulator()
-    TruthQGDecorationTool = CompFactory.DerivationFramework.TruthQGDecorationTool
-    acc.addPublicTool(TruthQGDecorationTool(name = name, **kwargs),
-                      primary = True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.TruthQGDecorationTool(
+        name = name, **kwargs))
     return acc
 
 
@@ -372,11 +371,11 @@ def DFCommonTruthPhotonIsolation3Cfg(flags):
 
 
 # Quark/gluon decoration for jets
-def DFCommonTruthDressedWZQGLabelToolCfg(flags):
-    """Configure the QG decoration tool for AntiKt4TruthDressedWZJets"""
-    return TruthQGDecorationToolCfg(flags,
-                                    name          = "DFCommonTruthDressedWZQGLabelTool",
-                                    JetCollection = "AntiKt4TruthDressedWZJets")
+def DFCommonTruthDressedWZQGLabelCfg(flags):
+    """Configure the QG decoration algorithm for AntiKt4TruthDressedWZJets"""
+    return TruthQGDecorationCfg(flags,
+                                name          = "DFCommonTruthDressedWZQGLabel",
+                                JetCollection = "AntiKt4TruthDressedWZJets")
 
 #==============================================================================
 # Truth thinning

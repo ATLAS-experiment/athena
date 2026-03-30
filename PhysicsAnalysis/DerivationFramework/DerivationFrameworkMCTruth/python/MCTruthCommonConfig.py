@@ -151,9 +151,9 @@ def PostJetMCTruthAugmentationsCfg(flags, **kwargs):
     #Save the post-shower HT and MET filter values that will make combining filtered samples easier (adds to the EventInfo)
     from DerivationFrameworkMCTruth.GenFilterToolConfig import GenFilterToolCfg
     # schedule the special truth building tools and add them to a common augmentation; note taus are handled separately below
-    from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthDressedWZQGLabelToolCfg
-    augmentationToolsList = [ acc.addPublicTool(acc.popToolsAndMerge(GenFilterToolCfg(flags))),
-                               acc.getPrimaryAndMerge(DFCommonTruthDressedWZQGLabelToolCfg(flags))]
+    from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthDressedWZQGLabelCfg
+    augmentationToolsList = [ acc.addPublicTool(acc.popToolsAndMerge(GenFilterToolCfg(flags))) ]
+    acc.merge(DFCommonTruthDressedWZQGLabelCfg(flags))
 
     # SUSY signal decorations
     from DerivationFrameworkSUSY.DecorateSUSYProcessConfig import IsSUSYSignalRun3

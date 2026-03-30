@@ -71,6 +71,7 @@ def AddTLATruthJetsCfg(flags):
 
     return acc
 
+
 def PostTLAJetMCTruthAugmentationsCfg(flags, **kwargs):
 
     acc = ComponentAccumulator()
@@ -79,30 +80,29 @@ def PostTLAJetMCTruthAugmentationsCfg(flags, **kwargs):
     # truth tau matching needs truth jets, truth electrons and truth muons
     from DerivationFrameworkTau.TauTruthCommonConfig import TauTruthToolsCfg
     acc.merge(TauTruthToolsCfg(flags))
+
     from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthTauDressingCfg
     acc.merge(DFCommonTruthTauDressingCfg(flags))
 
-
-    from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthDressedWZQGLabelToolCfg
-    augmentationToolsList = [ acc.getPrimaryAndMerge(DFCommonTruthDressedWZQGLabelToolCfg(flags))]
+    from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthDressedWZQGLabelCfg
+    acc.merge(DFCommonTruthDressedWZQGLabelCfg(flags))
 
     # SUSY signal decorations
     from DerivationFrameworkSUSY.DecorateSUSYProcessConfig import IsSUSYSignalRun3
     if IsSUSYSignalRun3(flags):
         from DerivationFrameworkSUSY.DecorateSUSYProcessConfig import SUSYSignalTaggerCfg
-        augmentationToolsList += [acc.getPrimaryAndMerge(SUSYSignalTaggerCfg(flags, 'MCTruthCommon'))]
-
-    CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-    for i, tool in enumerate(augmentationToolsList):
-        acc.addEventAlgo(CommonAugmentation(name = f"MCTruthCommonPostJetKernel{i}",
-                                            AugmentationTools = [tool])) # TODO Migrate to N Algs in second pass
+        augmentationToolsList = [acc.getPrimaryAndMerge(SUSYSignalTaggerCfg(flags, 'MCTruthCommon'))]
+        CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
+        acc.addEventAlgo(CommonAugmentation(name              = "MCTruthCommonPostJetKernel",
+                                            AugmentationTools = augmentationToolsList)) # TODO Migrate public tool to AthReentrantAlgorithm
 
     # add SoW of individual SUSY final states, relies on augmentation from DecorateSUSYProcess()
     if IsSUSYSignalRun3(flags):
         from DerivationFrameworkSUSY.SUSYWeightMetadataConfig import AddSUSYWeightsCfg
         acc.merge(AddSUSYWeightsCfg(flags))
 
-    return(acc)
+    return acc
+
 
 # This adds the entirety of TRUTH3
 def AddStandardTLATruthContentsCfg(flags,

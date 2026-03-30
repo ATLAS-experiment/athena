@@ -23,7 +23,7 @@
 #include "DerivationFrameworkMCTruth/TruthDecayCollectionMaker.h"
 #include "src/TruthNavigationDecorator.h"
 #include "DerivationFrameworkMCTruth/TruthD2Decorator.h"
-#include "DerivationFrameworkMCTruth/TruthQGDecorationTool.h"
+#include "DerivationFrameworkMCTruth/TruthQGDecorationAlg.h"
 #include "src/TruthBornLeptonCollectionMaker.h"
 #include "src/TruthLinkRepointTool.h"
 #include "DerivationFrameworkMCTruth/TruthPVCollectionMaker.h"
@@ -62,7 +62,7 @@ DECLARE_COMPONENT( HadronOriginClassifier )
 DECLARE_COMPONENT( TruthDecayCollectionMaker )
 DECLARE_COMPONENT( TruthNavigationDecorator )
 DECLARE_COMPONENT( TruthD2Decorator )
-DECLARE_COMPONENT( TruthQGDecorationTool )
+DECLARE_COMPONENT( TruthQGDecorationAlg )
 DECLARE_COMPONENT( TruthBornLeptonCollectionMaker )
 DECLARE_COMPONENT( TruthLinkRepointTool )
 DECLARE_COMPONENT( TruthPVCollectionMaker )

@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
-// TruthQGDecorationTool.cxx
+// TruthQGDecorationAlg.cxx
 // Create a single decoration for flavor tagging of truth jets
 
-#include "DerivationFrameworkMCTruth/TruthQGDecorationTool.h"
+#include "DerivationFrameworkMCTruth/TruthQGDecorationAlg.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "AthContainers/ConstAccessor.h"
@@ -14,7 +14,7 @@
 #include <string>
 
 // Initialize
-StatusCode DerivationFramework::TruthQGDecorationTool::initialize() {
+StatusCode DerivationFramework::TruthQGDecorationAlg::initialize() {
 
   ATH_CHECK(m_jetsKey.initialize());
   ATH_CHECK(m_decOutput.initialize());
@@ -23,10 +23,8 @@ StatusCode DerivationFramework::TruthQGDecorationTool::initialize() {
 }
 
 // Function to do dressing, implements interface in IAugmentationTool
-StatusCode DerivationFramework::TruthQGDecorationTool::addBranches(const EventContext& ctx) const
+StatusCode DerivationFramework::TruthQGDecorationAlg::execute(const EventContext& ctx) const
 {
-  // Event context
-
   // Retrieve the jet container
   SG::ReadHandle<xAOD::JetContainer> inputJets(m_jetsKey, ctx);
   if (!inputJets.isValid()) {

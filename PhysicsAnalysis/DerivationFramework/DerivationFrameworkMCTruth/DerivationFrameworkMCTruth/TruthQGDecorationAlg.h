@@ -1,13 +1,11 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef DERIVATIONFRAMEWORK_TruthQGDecorationTool_H
-#define DERIVATIONFRAMEWORK_TruthQGDecorationTool_H
+#ifndef DERIVATIONFRAMEWORK_TRUTHQGDECORATIONALG_H
+#define DERIVATIONFRAMEWORK_TRUTHQGDECORATIONALG_H
 
-// Interface classes
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 // Read/decor handle keys
 #include "StoreGate/ReadHandleKey.h"
@@ -21,13 +19,13 @@
 
 namespace DerivationFramework {
 
-  class TruthQGDecorationTool : public extends<AthAlgTool, IAugmentationTool> {
+  class TruthQGDecorationAlg : public AthReentrantAlgorithm {
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     StatusCode initialize();
-    virtual StatusCode addBranches(const EventContext& ctx) const;
+    virtual StatusCode execute(const EventContext& ctx) const;
 
   private:
     /// input collection key
@@ -39,4 +37,4 @@ namespace DerivationFramework {
   };
 }
 
-#endif // DERIVATIONFRAMEWORK_TRUTHDRESSINGTool_H
+#endif // DERIVATIONFRAMEWORK_TRUTHQGDECORATIONALG_H
