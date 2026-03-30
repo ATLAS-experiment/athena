@@ -187,6 +187,7 @@ def getLArDTInfoForRun(run,quiet=False,connstring="COOLONL_LAR/CONDBR2"):
         mux.append(3)
 
     runDB.closeDatabase()
+    print("getLArDTInfoForRun: ",recipe,"/",recipePEB," : ",mux)
     sTypes, sLengths = parse_recipe(recipe,mux,mlog_LRF)
     print(sTypes, sLengths)
     sTypesPEB, sLengthsPEB = parse_recipe(recipePEB,mux,mlog_LRF)

@@ -159,17 +159,14 @@ TCS::MinDeltaPhiIncl2::process( const std::vector<TCS::TOBArray const *> & input
    // mindphi 
    unsigned int mindphi = *std::min_element(std::begin(p_DeltaPhiMin),std::end(p_DeltaPhiMin));
    bool firstphi = true;
-
-   // declare iterator for the tob with min dphi
-   //TCS::TOBArray::const_iterator tobmin1,tobmin2;  
+ 
       
    if (input.size() == 2) {
       TCS::TOBArray::const_iterator tobmin1 = input[0]->begin(); //initialised for outer loop
       TCS::TOBArray::const_iterator tobmin2 = input[1]->end();  //might never change, set to end
-      for( TOBArray::const_iterator tob1; 
+      for( TOBArray::const_iterator tob1 = input[0]->begin(); 
            tob1 != input[0]->end() && distance(input[0]->begin(), tob1) < p_NumberLeading1;
-           ++tob1)
-         {
+           ++tob1){
 
             if( parType_t((*tob1)->Et()) <= p_MinET1) continue; // ET cut
 

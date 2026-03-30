@@ -2,9 +2,9 @@
 
 tagList = [
            'LARConfigurationDSPThresholdFlatTemplates-Qt1sigma-samp1sigma',
-           'LARConfigurationDSPThresholdFlatTemplates-Qt1.5sigma-samp1.5sigma',
            'LARConfigurationDSPThresholdFlatTemplates-Qt2sigma-samp2sigma',
            'LARConfigurationDSPThresholdFlatTemplates-Qt3sigma-samp3sigma',
+           'LARConfigurationDSPThresholdFlatTemplates-Qt4sigma-samp4sigma',
            'LARConfigurationDSPThresholdFlatTemplates-Qt5sigma-samp5sigma',
            'LARConfigurationDSPThresholdFlatTemplates-Qt3sigmamuPileup-samp3sigmamuPileup',
            'LARConfigurationDSPThresholdFlatTemplates-Qt4sigmamuPileup-samp4sigmamuPileup',

@@ -47,8 +47,15 @@ StatusCode LArMinBias2Ntuple::stop() {
  NTuple::Item<float> minbias;
  NTuple::Item<float> minbias_av;
 
- SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey};
- const LArOnOffIdMapping* cabling=*cablingHdl;
+ const LArOnOffIdMapping* cabling=nullptr;
+ if(m_isSC){
+    SG::ReadCondHandle<LArOnOffIdMapping> cablingSCHdl{m_cablingSCKey};
+    cabling=*cablingSCHdl;
+ } else {
+    SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey};
+    cabling=*cablingHdl;
+ }
+
  if(!cabling) {
      ATH_MSG_WARNING( "Do not have cabling object LArOnOffIdMapping" );
      return StatusCode::FAILURE;

@@ -2024,7 +2024,7 @@ class TopoAlgoDef:
               "MaxET5" : 100, # eTau 1
               "MaxET6" :  14, # mu 1
               "MaxET7" :  48, # jXE 
-              "AnomalyScoreThresh" : [61440, 42908], # Preliminary values T=60, L=41.9, further calibration needed
+              "AnomalyScoreThresh" : [56628, 42908], # T=55.3, L=41.9
         }
         class d:
             pass

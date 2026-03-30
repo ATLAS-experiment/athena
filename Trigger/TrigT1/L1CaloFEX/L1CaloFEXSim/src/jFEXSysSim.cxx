@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -178,6 +178,7 @@ namespace LVL1 {
     tmp_jTowersColl_subset_ENDCAP_AND_EMB_AND_FCAL.reserve(1600);
 
     // let's try doing this with an array initially just containing tower IDs.
+    //coverity[STACK_USE]
     int tmp_jTowersIDs_subset_ENDCAP_AND_EMB_AND_FCAL [2*FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width];
 
     // zero the matrix out
@@ -756,6 +757,8 @@ namespace LVL1 {
     std::unordered_map<int,jTower> tmp_jTowersColl_subset_ENDCAP_AND_EMB_AND_FCAL_2;
 
     // let's try doing this with an array initially just containing tower IDs.
+    //uses 11520 bytes of stack space
+    //coverity[STACK_USE]
     int tmp_jTowersIDs_subset_ENDCAP_AND_EMB_AND_FCAL_2 [2*FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width];
 
     // zero the matrix out
