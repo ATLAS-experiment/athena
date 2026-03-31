@@ -39,7 +39,7 @@ atlas_add_test( test_athena_ntuple_dumper_multiple
 atlas_add_test( test_athena_ntuple_dumper_multiple_diffroot  # diff-root on the test above
                 SCRIPT acmd.py diff-root ../unitTestRun_test_athena_ntuple_dumper_multiple/d3pd.root ../unitTestRun_test_athena_ntuple_dumper_multiple/d3pd_2.root -t egamma
                 ENVIRONMENT ATLAS_REFERENCE_TAG=${_reftag}
-                POST_EXEC_SCRIPT nopost.sh
+                POST_EXEC_SCRIPT noerror.sh
                 PROPERTIES TIMEOUT 450
                 PRIVATE_WORKING_DIRECTORY
                 DEPENDS test_athena_ntuple_dumper_multiple )
@@ -70,24 +70,24 @@ atlas_add_test( test_athena_variable_shape1
                 SCRIPT test/test_athena_variable_shape1.sh
                 ENVIRONMENT ATLAS_REFERENCE_TAG=${_reftag}
                 PROPERTIES TIMEOUT 450
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( test_athena_variable_shape2
                 SCRIPT test/test_athena_variable_shape2.sh
                 ENVIRONMENT ATLAS_REFERENCE_TAG=${_reftag}
                 PROPERTIES TIMEOUT 450
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( test_athena_variable_shape3
                 SCRIPT test/test_athena_variable_shape3.sh
                 ENVIRONMENT ATLAS_REFERENCE_TAG=${_reftag}
                 PROPERTIES TIMEOUT 450
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( test_athena_variable_shape_merged
                 SCRIPT test_athena_variable_shape_merged.sh ${CMAKE_CURRENT_SOURCE_DIR}/test/ref.data.merged.ascii
                 ENVIRONMENT ATLAS_REFERENCE_TAG=${_reftag}
-                POST_EXEC_SCRIPT nopost.sh
+                POST_EXEC_SCRIPT noerror.sh
                 PROPERTIES TIMEOUT 450
                 DEPENDS test_athena_variable_shape1 test_athena_variable_shape2 test_athena_variable_shape3 )
 
