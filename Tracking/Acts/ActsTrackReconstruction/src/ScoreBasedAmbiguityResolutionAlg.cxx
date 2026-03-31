@@ -2,6 +2,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "ActsGeometry/ActsDetectorElement.h"
 #include "src/ScoreBasedAmbiguityResolutionAlg.h"
 
 // Athena

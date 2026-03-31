@@ -453,7 +453,7 @@ protected:
       Acts::Result<boost::container::small_vector< typename TrackStateProxy::IndexType, s_maxBranchesPerSurface> >
          result = boost::container::small_vector< typename TrackStateProxy::IndexType, s_maxBranchesPerSurface>{};
 
-      using iterator_t = decltype(measurement_range.begin());
+      using iterator_t = std::remove_cvref_t<decltype(measurement_range.begin())>;
       using container_value_t  = typename MeasurementSelectorTraits<derived_t>::template MeasurementContainerTraits<iterator_t>::value_type;
       using BaseElementType = std::remove_cv_t<std::remove_pointer_t< container_value_t > >;
       // get calibrator

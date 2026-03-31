@@ -43,6 +43,10 @@
 #include "src/detail/MeasurementIndex.h"
 #include "ActsGeometry/SurfaceOfMeasurementUtil.h"
 
+#include "src/detail/AuxDataCacheList.h"
+#include "xAODInDetMeasurement/PixelClusterAuxDataCache.h"
+//#include "xAODInDetMeasurement/StripClusterAuxDataCache.h"
+#include "src/detail/AuxDataCacheList.icc"
 // STL
 #include <initializer_list>
 #include <sstream>

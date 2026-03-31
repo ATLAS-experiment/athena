@@ -15,6 +15,10 @@ namespace ActsTrk {
 struct DetectorElementToActsGeometryIdMap;
 }
 
+namespace InDet {
+   class SiDetectorElementStatus;
+}
+
 namespace ActsTrk::detail {
 
   // Helper class to convert and store MeasurementContainer specializations to MeasurementRangeList
@@ -33,13 +37,13 @@ namespace ActsTrk::detail {
                         const MeasurementIndex *measurementIndex = nullptr);
     std::unique_ptr<MeasurementRangeListFlat> createMeasurementRangesForced(const ActsTrk::Seed &seed,
                                                                             const MeasurementIndex &measurementIndex) const;
-    MeasurementRange markSurfaceInsensitive(const Acts::GeometryIdentifier &identifier);
+     //    MeasurementRange markSurfaceInsensitive(const Acts::GeometryIdentifier &identifier);
+    void setDetectorElementStatus(const std::array< const InDet::SiDetectorElementStatus *,
+                                                   static_cast<unsigned int>(ActsTrk::DetectorType::UnDefined)+1u> &det_el_status_per_arr);
+     
 
     inline const MeasurementRangeList &measurementRanges() const;
-    inline std::size_t nMeasurements() const;
-    inline const std::vector<std::size_t> &measurementOffsets() const;
-    inline const xAOD::UncalibratedMeasurementContainer *container(std::size_t typeIndex) const;
-
+     
   private:
     struct MeasurementSurfaceIndex {
       Acts::GeometryIdentifier measurementSurfaceId;
@@ -47,21 +51,9 @@ namespace ActsTrk::detail {
       unsigned int sl_idx;
     };
 
-    template <typename MeasurementRangeList_t>
-    static MeasurementRange *addMeasurementToRange(MeasurementRangeList_t &measurementRanges,
-                                                  unsigned int typeIndex,
-                                                  unsigned int sl_idx,
-                                                  unsigned int sl_idx_end,
-                                                  const xAOD::UncalibratedMeasurement *measurement,
-                                                  Acts::GeometryIdentifier measurementSurfaceId);
-
-    std::vector<std::size_t> m_measurementOffsets;
-    // ActsTrk::detail::MeasurementRangeList is an std::unordered_map;
     MeasurementRangeList m_measurementRanges{};
-    std::vector<const xAOD::UncalibratedMeasurementContainer *> m_containers{};
-    std::vector<MeasurementSurfaceIndex> m_surfaceIndices;
-
-    std::size_t m_measurementsTotal{0ul};
+    std::array< const InDet::SiDetectorElementStatus *,
+                static_cast<unsigned int>(ActsTrk::DetectorType::UnDefined)+1u> m_detectorElementStatusPerDetectorType;
   };
 
 }  // namespace ActsTrk::detail
