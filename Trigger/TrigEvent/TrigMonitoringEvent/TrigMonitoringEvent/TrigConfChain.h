@@ -34,6 +34,10 @@ class TrigConfChain
  public:
   
   TrigConfChain() = default;
+  TrigConfChain(const TrigConfChain&) = default;
+  TrigConfChain(TrigConfChain&&) noexcept = default;
+  TrigConfChain& operator=(const TrigConfChain&) = default;	
+	TrigConfChain& operator=(TrigConfChain&&) noexcept = default;
   
   // Constructor for L2 and EF chains
   TrigConfChain(const std::string &chain_name,
@@ -51,6 +55,8 @@ class TrigConfChain
 		int               chain_counter,
 		unsigned int      chain_id,
 		float             prescale);
+		
+
 
   ~TrigConfChain() {} 
 
