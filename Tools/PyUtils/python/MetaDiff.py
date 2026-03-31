@@ -345,15 +345,20 @@ def meta_diff(
 
         if drop is not None:
             for drop_key in drop:
-                if not drop_key.startswith("metadata_items/"):
-                    continue
-
-                drop_key = drop_key[len("metadata_items/"):]
-
                 if not regex:
+                    if not drop_key.startswith("metadata_items/"):
+                        continue
+
+                    drop_key = drop_key[len("metadata_items/"):]
+
                     if key_str.startswith(drop_key):
                         return False
                 else:
+                    if not drop_key.pattern.startswith("metadata_items/"):
+                        continue
+
+                    drop_key = re.compile(drop_key.pattern[len("metadata_items/"):])
+
                     if drop_key.match(key_str):
                         return False
 
