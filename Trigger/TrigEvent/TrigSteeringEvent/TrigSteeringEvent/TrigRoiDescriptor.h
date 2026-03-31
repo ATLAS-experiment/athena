@@ -24,17 +24,9 @@
 #include <vector>
 #include <iosfwd>
 
-// can we leave this in for standalone running?
-// #ifndef XAOD_STANDALONE
-// #include "AthenaKernely/CLASS_DEF.h"
-// #include "GaudiKernel/MsgStream.h"
-
-#include "xAODCore/CLASS_DEF.h"
-
-// #endif
-
 #include "RoiDescriptor/RoiDescriptor.h"
 
+#include "xAODCore/CLASS_DEF.h"
 
 
 /**
@@ -153,14 +145,6 @@ std::string str( const TrigRoiDescriptor& d );                           //<! pr
 std::ostream& operator<<( std::ostream& m, const TrigRoiDescriptor& d ); //<! printing helper (wraps above)
 
 
-// can this be left in or should it be removed?
-// #ifndef XAOD_STANDALONE
 CLASS_DEF(TrigRoiDescriptor, 6455, 1)
-// #endif
-
-
 
 #endif // TRIGROIDESCRIPTOR_H
-
-
-// #endif //XAOD_ANALYSIS
