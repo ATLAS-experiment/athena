@@ -72,7 +72,7 @@ namespace CP
     SysReadDecorHandle<char> m_bTagSelectionDecoration {
       this, "bTagSelectionDecoration", "", "the decoration for offline jet matched to offline b-tag"};
 
-    Gaudi::Property<bool> m_offlineFixedCut {this, "offlineFixedCut", false, "whether offline b-tag WP is FixedCut"};
+    bool m_conditionalFixedCut;
 
   };
 }

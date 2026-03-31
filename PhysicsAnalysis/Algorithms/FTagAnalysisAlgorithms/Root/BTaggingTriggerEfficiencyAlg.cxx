@@ -34,6 +34,8 @@ namespace CP
     ANA_CHECK (m_offlineEfficiencyTool.retrieve());
     ANA_CHECK (m_triggerEfficiencyTool.retrieve());
     ANA_CHECK (m_conditionalEfficiencyTool.retrieve());
+
+    m_conditionalFixedCut = (m_conditionalEfficiencyTool->getOperatingPoint() == "Continuous");
     
     ANA_CHECK (m_jetHandle.initialize (m_systematicsList));
     ATH_CHECK (m_truthFlav.initialize(m_systematicsList, m_jetHandle));
@@ -42,7 +44,7 @@ namespace CP
     ANA_CHECK (m_scaleFactorDecoration.initialize (m_systematicsList, m_jetHandle));
     ANA_CHECK (m_matchingDecoration.initialize (m_systematicsList, m_jetHandle));
     ANA_CHECK (m_bTagMatchingDecoration.initialize (m_systematicsList, m_jetHandle));
-    if(m_offlineFixedCut)
+    if(m_conditionalFixedCut)
       ANA_CHECK (m_bTagSelectionDecoration.initialize (m_systematicsList, m_jetHandle));
 
     ANA_CHECK (m_systematicsList.addSystematics (*m_offlineEfficiencyTool));
@@ -93,7 +95,7 @@ namespace CP
 
             if(static_cast<bool>(m_matchingDecoration.get(*jet, sys))){
               if(static_cast<bool>(m_bTagMatchingDecoration.get(*jet,sys))){
-                if( !m_offlineFixedCut || static_cast<bool>(m_bTagSelectionDecoration.get(*jet,sys))){
+                if( !m_conditionalFixedCut || static_cast<bool>(m_bTagSelectionDecoration.get(*jet,sys))){
                   sf = condSF * trigSF;
                 } else {
                   float condEff_data = 0;
@@ -104,7 +106,7 @@ namespace CP
                 }
               }
               else{
-                if( !m_offlineFixedCut || static_cast<bool>(m_bTagSelectionDecoration.get(*jet,sys))){
+                if( !m_conditionalFixedCut || static_cast<bool>(m_bTagSelectionDecoration.get(*jet,sys))){
                   float trigEff_data = 0;
                   valid = m_triggerEfficiencyTool->getEfficiency(*jet, trigEff_data);
                   ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
