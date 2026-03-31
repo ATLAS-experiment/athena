@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -338,8 +338,8 @@ namespace Decoder {
         std::vector<uint32_t> getWords(const Id& id, int numSlices) {
             std::vector<uint32_t> out;
 
-            for(auto& [id,slice] : slices) {
-                auto sliceWords = slice.getWords(id);
+            for(auto& [thisId,slice] : slices) {
+                auto sliceWords = slice.getWords(thisId);
                 out.insert(out.end(), sliceWords.begin(), sliceWords.end());
             }
 

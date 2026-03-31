@@ -95,7 +95,7 @@ private:
     std::vector<std::string> m_HLTTauCHPreselIDs; // Tau Calo+Hits preselection ID for each tau leg
     std::vector<int> m_HLTTauLegIndices; // Original leg indices of the tau legs, used for bootstrapped triggers where we only want to retrieve probe taus.
     std::vector<std::string> m_HLTTauLegContainerSfxs; // Tau jet container suffixes for each tau leg eg. ("MVA", "LLP", "LRT", "MVA_HitZ", etc...)
-    bool m_isBootstrappedTauTrigger; // Whether this is a bootstrapped tau trigger (i.e. had originally both tag and probe tau legs with the same threshold, but we keep only the probe legs here)
+    bool m_isBootstrappedTauTrigger{}; // Whether this is a bootstrapped tau trigger (i.e. had originally both tag and probe tau legs with the same threshold, but we keep only the probe legs here)
 
     std::string m_L1Item; // full L1 trigger string (e.g. L1eTAU20, or L1eTAU80_2eTAU60)
     std::vector<std::string> m_L1Items; // full L1 trigger items

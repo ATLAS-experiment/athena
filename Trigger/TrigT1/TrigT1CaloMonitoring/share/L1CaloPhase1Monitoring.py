@@ -1,5 +1,5 @@
 #!/usr/bin/env athena
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ## Script for Running the L1Calo Athena Simulation and/or Monitoring for Phase1
 ## can be run offline on raw or POOL files (for rerunning simulation)
@@ -336,6 +336,9 @@ if flags.Common.isOnline or (flags.Input.Format != Format.POOL and not flags.Inp
   if flags.Trigger.L1.doeFex: decoderTools += [cfg.popToolsAndMerge(eFexByteStreamToolCfg(flags=flags,name='eFexBSDecoderTool',TOBs=flags.Trigger.L1.doeFex,xTOBs=flags.Trigger.L1.doeFex,decodeInputs=flags.Trigger.L1.doCaloInputs,multiSlice=True))]
   if flags.Trigger.L1.dojFex: decoderTools += [cfg.popToolsAndMerge(jFexRoiByteStreamToolCfg(flags=flags,name="jFexBSDecoderTool",writeBS=False))]
   if flags.Trigger.L1.dogFex: decoderTools += [cfg.popToolsAndMerge(gFexByteStreamToolCfg(flags=flags,name="gFexBSDecoderTool",writeBS=False))]
+  if flags.Trigger.L1.doTopo:
+    from L1TopoByteStream.L1TopoByteStreamConfig import L1TopoPhase1ByteStreamToolCfg
+    decoderTools += [cfg.popToolsAndMerge(L1TopoPhase1ByteStreamToolCfg(flags=flags,name="L1TopoBSDecoderTool",writeBS=False))]
 
   if flags.Trigger.L1.doMuon:
     from MuonConfig.MuonBytestreamDecodeConfig import RpcBytestreamDecodeCfg,TgcBytestreamDecodeCfg
@@ -656,7 +659,9 @@ for conf in args.postConfig:
     raise ValueError(f"postConfig {conf} had no effect ... typo? See list above of available components")
 
 from AthenaCommon.Include import include
-for inc in args.postInclude: include(inc)
+from AthenaCommon.Configurable import ConfigurableCABehavior
+with ConfigurableCABehavior():
+  for inc in args.postInclude: include(inc)
 
 if args.postHelp is not None:
   from collections import defaultdict

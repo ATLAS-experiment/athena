@@ -5,7 +5,7 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.MainServicesConfig import MainEvgenServicesCfg
 
-def HVCorrConfig(flags,outputName="hvcorr",runOut=0, lbOut=0, voltages=[], currents=[]):
+def HVCorrConfig(flags,outputName="hvcorr",runOut=0, lbOut=0, voltages=[], currents=[], isHI=False, hipatch=1.0):
 
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     result=LArGMCfg(flags)
@@ -24,7 +24,7 @@ def HVCorrConfig(flags,outputName="hvcorr",runOut=0, lbOut=0, voltages=[], curre
     result.merge(LArOnOffIdMappingSCCfg(flags))
     result.addEventAlgo(CompFactory.LArHVCorrToSCHVCorr(ContainerKey="NewLArHVScaleCorr",OutputKey="NewSCLArHVScaleCorr",
                                                         OutputFolder="/LAR/ElecCalibFlatSC/HVScaleCorrNew",
-                                                        IsHeavyIons=False,  PatchInHeavyIons=1.0,
+                                                        IsHeavyIons=isHI,  PatchInHeavyIons=hipatch,
                                                         PhysicsWeights="TrigT1CaloCalibUtils/HVcorrPhysicsWeights.txt"))
 
     #The LArHVCorrMaker creates a flat blob in a CondAttrListCollection
@@ -82,6 +82,11 @@ if __name__=="__main__":
                         help="use -V \"<ID> <HV>\" to set the voltage for this line instead of reading it from DCS")
     parser.add_argument('-I','--current',type=str, default=[], action='append', nargs=1,
                         help="use -I \"<ID> <current>\" to set the current for this line instead of reading it from DCS")
+    parser.add_argument('-s', '--sqlite',type=str,default="",help="name of sqlite file to be used instead of COOL")
+    parser.add_argument('--isHI', dest='hi', default=False, help='is for HI ?', action='store_true')
+
+    parser.add_argument('--patchHI',dest='patchhi',type=float, default=1.4,help="Ptching value for HI")
+                        
     args = parser.parse_args()
     try:
         ts=strptime(args.datestamp+'/UTC','%Y-%m-%d:%H:%M:%S/%Z')
@@ -131,7 +136,10 @@ if __name__=="__main__":
     ConfigFlags.Input.TimeStamps=[TimeStamp]
     ConfigFlags.Input.Files=[]
     ConfigFlags.IOVDb.DatabaseInstance="CONDBR2"
-    ConfigFlags.IOVDb.DBConnection="sqlite://;schema="+outputName+".sqlite;dbname=CONDBR2"
+    ConfigFlags.IOVDb.DBConnection="sqlite://;schema="+outputName+".db;dbname=CONDBR2"
+    if len(args.sqlite)>0:
+       ConfigFlags.IOVDb.SqliteInput=args.sqlite
+       ConfigFlags.IOVDb.SqliteFolders=("/LAR/ElecCalibFlat/HVScaleCorr",)
     ConfigFlags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
     ConfigFlags.Exec.OutputLevel=args.olevel
     ConfigFlags.lock()
@@ -139,7 +147,7 @@ if __name__=="__main__":
     #First LB not set by McEventSelectorCfg, set it here:
     cfg.getService("EventSelector").FirstLB=ConfigFlags.Input.LumiBlockNumbers[0]
     cfg.merge(HVCorrConfig(ConfigFlags, outputName, runOut=args.Run, lbOut=args.LB,
-                           voltages=args.voltage, currents=args.current))
+                           voltages=args.voltage, currents=args.current,isHI=args.hi,hipatch=args.patchhi))
     
     print("Start running...")
     import sys

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gSuperCellTowerMapper - supercells and Tile tower assignment to gTowers
@@ -226,6 +226,7 @@ int gSuperCellTowerMapper::FindAndConnectTower(std::unique_ptr<gTowerContainer> 
       case CaloSampling::EMB2: {
         break;
       }
+      //coverity[DEADCODE]
       default: {
         ATH_MSG_DEBUG("CaloSampling::EMBX -> invalid sample for assigning iCell value! " << sample << " (Under investigation) ");
         break;
