@@ -174,7 +174,7 @@ namespace CP
            if (!xAOD::setOriginalObjectLink (*inputObject, *copy.first)) {
               return StatusCode::FAILURE;
            }
-
+           //coverity[WRAPPER_ESCAPE]
            object = copy.first.get();
            ANA_CHECK (store.record (std::move(copy.second), auxName));
            ANA_CHECK (store.record (std::move(copy.first), outputName));
@@ -277,7 +277,8 @@ namespace CP
                ANA_MSG_ERROR ("likely shallow copying a view container");
                return StatusCode::FAILURE;
             }
-
+            //coverity warns about the bare pointer outliving the 'copy' object
+            //coverity[WRAPPER_ESCAPE]
             object = copy.first.get();
             ANA_CHECK (store.record (std::move(copy.second), auxName));
             ANA_CHECK (store.record (std::move(copy.first), outputName));
@@ -314,7 +315,7 @@ namespace CP
              ANA_MSG_ERROR ("likely shallow copying a view container");
              return StatusCode::FAILURE;
           }
-
+          //coverity[WRAPPER_ESCAPE]
           object = copy.first.get();
           ANA_CHECK (store.record (std::move(copy.second), auxName));
           ANA_CHECK (store.record (std::move(copy.first), outputName));
