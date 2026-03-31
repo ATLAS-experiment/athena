@@ -537,7 +537,30 @@ BkgElectronTriggers["Run3"] = [
     "HLT_e60_etcut_L1eEM26M",
     "HLT_e70_etcut_L1eEM26M",
     "HLT_e80_etcut_L1eEM26M",
-    "HLT_e100_etcut_L1eEM26M"
+    "HLT_e100_etcut_L1eEM26M",
+    # added in 2025
+    "HLT_e10_nopid_L1eEM9",
+    "HLT_e15_nopid_L1eEM9",
+    "HLT_e20_nopid_L1eEM18M",
+    "HLT_e25_nopid_L1eEM18M",
+    "HLT_e30_nopid_L1eEM18M",
+    "HLT_e40_nopid_L1eEM18M",
+    "HLT_e50_nopid_L1eEM26M",
+    "HLT_e60_nopid_L1eEM26M",
+    "HLT_e70_nopid_L1eEM26M",
+    "HLT_e80_nopid_L1eEM26M",
+    "HLT_e100_nopid_L1eEM26M",
+    "HLT_e120_nopid_L1eEM26M",
+    "HLT_e300_nopid_L1eEM26M",
+    # added in 2026
+    "HLT_e5_nopid_L1eTAU12",
+    "HLT_e10_nopid_L1eTAU20",
+    "HLT_e15_nopid_L1eTAU20",
+    "HLT_e15_nopid_L1eTAU30",
+    "HLT_e15_nopid_L1eTAU35",
+    "HLT_e20_nopid_L1eTAU35",
+    "HLT_e40_nopid_L1eTAU60",
+    "HLT_e50_nopid_L1eTAU70",
 ]
 
 BkgElectronTriggers["Run2"] = [
