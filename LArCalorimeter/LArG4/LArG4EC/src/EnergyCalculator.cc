@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // EnergyCalculator
@@ -38,6 +38,7 @@
 #include <cmath>
 #include <cassert>
 #include <string>
+#include <regex>
 
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "RDBAccessSvc/IRDBRecord.h"
@@ -652,14 +653,32 @@ G4bool EnergyCalculator::FindIdentifier_Default(
   G4AffineTransform transf;
 
   int profundis=pre_step_point->GetTouchable()->GetHistoryDepth();
-#if G4VERSION_NUMBER < 1100
-  if (preStepVolume->GetName().contains("Slice"))
-#else
-  if (G4StrUtil::contains(preStepVolume->GetName(),"Slice"))
-#endif
-        transf=pre_step_point->GetTouchable()->GetHistory()->GetTransform(profundis-1);
+
+  const G4String name = preStepVolume->GetName();
+
+  static const std::vector<std::pair<std::string, int>> patterns = {
+    {"Slice",     1},
+    {"Electrode", 2},
+    {"Absorber",  2},
+    {"Glue",      3},
+    {"Lead",      4}
+  };
+  
+  int offset = 0;
+  for (const auto& p : patterns) {
+	  // Regex: Slice[0-9]{2}, Electrode[0-9]{2}, ecc.
+	  std::regex re(p.first + R"(\d{2})");
+	  if (std::regex_search(name, re)) {
+		  offset = p.second;
+		  break;
+	  }
+  }
+
+  if (offset > 0) {
+	  transf = pre_step_point->GetTouchable()->GetHistory()->GetTransform(profundis - offset);
+  }  
   else
-        transf=pre_step_point->GetTouchable()->GetHistory()->GetTopTransform();
+	  transf=pre_step_point->GetTouchable()->GetHistory()->GetTopTransform();
 
   const G4AffineTransform transformation=transf;
 
@@ -678,6 +697,7 @@ G4bool EnergyCalculator::FindIdentifier_Default(
 
   G4int compartment = 0;
 
+  
   if(lwc()->GetisInner())
     {
       G4int ipad = G4int((eta - 2.5) / 0.1);
