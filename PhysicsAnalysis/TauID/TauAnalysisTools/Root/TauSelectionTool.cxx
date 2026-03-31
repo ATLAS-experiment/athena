@@ -35,16 +35,13 @@ TauSelectionTool::~TauSelectionTool()
 StatusCode TauSelectionTool::initialize()
 {
 
-  m_vPtRegion = m_vecPtRegion.value();	
   m_vAbsEtaRegion = m_vecAbsEtaRegion.value();
   m_vAbsCharges = m_vecAbsCharges.value(); 
   m_vNTracks = m_vecNTracks.value();
 
   bool bConfigViaConfigFile = !m_sConfigPath.empty();
   bool bConfigViaProperties = false;
-  if (!bConfigViaProperties and !m_vPtRegion.empty())         bConfigViaProperties = true;
   if (!bConfigViaProperties and !std::isnan(m_dPtMin.value()))         bConfigViaProperties = true;
-  if (!bConfigViaProperties and !std::isnan(m_dPtMax.value()))         bConfigViaProperties = true;
   if (!bConfigViaProperties and !m_vAbsEtaRegion.empty())     bConfigViaProperties = true;
   if (!bConfigViaProperties and !std::isnan(m_dAbsEtaMin.value())) bConfigViaProperties = true;
   if (!bConfigViaProperties and !std::isnan(m_dAbsEtaMax.value())) bConfigViaProperties = true;
@@ -100,23 +97,11 @@ StatusCode TauSelectionTool::initialize()
 
     for (const std::string& sCut : vCuts)
     {
-      if (sCut == "PtRegion")
-      {
-        iSelectionCuts = iSelectionCuts | CutPt;
-        if (m_vPtRegion.empty())
-           TauAnalysisTools::split(rEnv,"PtRegion", ';', m_vPtRegion);		
-      }
-      else if (sCut == "PtMin")
+      if (sCut == "PtMin")
       {
         iSelectionCuts = iSelectionCuts | CutPt;
         if (std::isnan(m_dPtMin.value()))
           m_dPtMin = rEnv.GetValue("PtMin",NAN);
-      }
-      else if (sCut == "PtMax")
-      {
-        iSelectionCuts = iSelectionCuts | CutPt;
-        if (std::isnan(m_dPtMax.value()))
-          m_dPtMax = rEnv.GetValue("PtMax",NAN);
       }
       else if (sCut == "AbsEtaRegion")
       {
@@ -259,7 +244,7 @@ StatusCode TauSelectionTool::initialize()
   m_cMap = { std::make_move_iterator( begin(elements) ), std::make_move_iterator( end(elements) ) };
   
   ATH_MSG_INFO( "Initializing TauSelectionTool" );
-  FillRegionVector(m_vPtRegion, m_dPtMin.value(), m_dPtMax.value());
+  FillRegionVector(m_vPtRegion, m_dPtMin.value(), NAN);
   FillRegionVector(m_vAbsEtaRegion, m_dAbsEtaMin.value(), m_dAbsEtaMax.value());
   FillRegionVector(m_vJetRNNSigTransRegion, m_dJetRNNSigTransMin.value(), NAN );
   FillRegionVector(m_vGNTauSigTransRegion, m_dGNTauSigTransMin.value(), NAN );

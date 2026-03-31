@@ -65,24 +65,12 @@ setup:
      - Type
      - Description
      - Note
-     
+    
    * - ``CutPt``
-     - ``PtRegion``
-     - ``std::vector<double>``
-     - accepting taus within pt regions (in GeV), each `odd` in the vector is a lower bound, each `even` is an upper bound
-     -
-     
-   * -
      - ``PtMin``
      - ``double``
      - accepting taus with a pt above a lower bound (in GeV)
      - if ``PtMin`` is configured, ``PtRegion`` configuration wont be considered
-
-   * -
-     - ``PtMax``
-     - ``double``
-     - accepting taus with a pt below an upper bound (in GeV)
-     - if ``PtMax`` is configured, ``PtRegion`` configuration wont be considered
 
    * - ``CutAbsEta``
      - ``AbsEtaRegion``
@@ -126,13 +114,13 @@ setup:
      - accepting taus with the given track multiplicity
      - if ``NTrack`` is configured, ``NTracks`` configuration wont be considered
 
-   * -
+   * - ``CutJetRNNScoreSigTrans``
      - ``JetRNNSigTransMin``
      - ``double``
      - accepting taus with a jet RNN score above a lower bound
      - ``JetRNNScoreSigTrans`` is a transformed RNN score and provides flat ID efficiencies with respect to pT and pile-up. 
 
-   * -
+   * - ``CutGNTauScoreSigTrans``
      - ``GNTauSigTransMin``
      - ``double``
      - accepting taus with a jet GNTau score above a lower bound
@@ -144,7 +132,7 @@ setup:
      - accepting taus passing the given working point
      -
 
-   * -
+   * - ``CutEleRNNScoreSigTrans``
      - ``EleRNNSigTransMin``
      - ``double``
      - accepting taus with a electron RNN score above a lower bound
