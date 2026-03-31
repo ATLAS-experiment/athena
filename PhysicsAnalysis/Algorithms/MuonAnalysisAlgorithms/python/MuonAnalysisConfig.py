@@ -169,9 +169,8 @@ class MuonIPCalibrationConfig (ConfigBlock) :
         self.addOption ('writeTrackD0Z0', False, type = bool,
             info=r"save the $d_0$ significance and $z_0\sin\theta$ variables.")
         self.addOption ('runTrackBiasing', False, type=bool,
-            info="EXPERIMENTAL: This enables the `InDetTrackBiasingTool`, for tracks "
-            "associated to muons. The tool does not have Run 3 recommendations yet.",
-            expertMode=True)
+            info="This enables the `InDetTrackBiasingTool`, for tracks "
+            "associated to muons")
 
     def instanceName (self) :
         return self.containerName + self.postfix

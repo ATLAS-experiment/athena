@@ -286,10 +286,8 @@ class ElectronIPCalibrationConfig (ConfigBlock) :
             info="a postfix to apply to decorations and algorithm names. Typically "
             "not needed here since the calibration is common to all electrons.")
         self.addOption ('runTrackBiasing', False, type=bool,
-            info="EXPERIMENTAL: This enables the `InDetTrackBiasingTool`, for "
-            "tracks associated to electrons. The tool does not have Run 3 "
-            "recommendations yet.",
-            expertMode=True)
+            info="This enables the `InDetTrackBiasingTool`, for "
+            "tracks associated to electrons")
         self.addOption ('writeTrackD0Z0', False, type = bool,
             info=r"save the $d_0$ significance and $z_0\sin\theta$ variables.")
 
