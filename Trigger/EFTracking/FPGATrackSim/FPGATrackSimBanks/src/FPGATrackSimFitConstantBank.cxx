@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #include <Eigen/StdVector>
 #include "FPGATrackSimBanks/FPGATrackSimFitConstantBank.h"
@@ -42,15 +42,18 @@ FPGATrackSimFitConstantBank::FPGATrackSimFitConstantBank(FPGATrackSimPlaneMap co
     readHeader(geocfile);
     ATH_MSG_INFO("Settings: m_ncoords="<<m_ncoords<<" m_npars="<<m_npars);
     // Read the sector constants
+    //coverity[TAINTED_SCALAR]
     readSectorInfo(geocfile);
     // Pre-calculate the majority logic elements
     if (m_missingPlane == -1)
+      //coverity[TAINTED_SCALAR]
       calculateMajority();
     
     if (sizeof(float) * CHAR_BIT != 32)
       ATH_MSG_WARNING("Floating points on this computer are not 32 bit. This may cause a problem for the hardware agreement. Be careful!");
     
     setIdealCoordFit(true);
+    //coverity[TAINTED_SCALAR]
     prepareInvFitConstants();
   }
 }
@@ -86,6 +89,8 @@ void FPGATrackSimFitConstantBank::readHeader(std::ifstream & geocfile)
   m_nconstr = m_ncoords - m_npars;
   
   // Allocate the block of pointer per sector
+  //m_nsectors should be checked to be sane
+  //coverity[TAINTED_SCALAR]
   m_sector_good.resize(m_nsectors);
   m_fit_pars.resize(m_nsectors, 5, m_ncoords);
   m_fit_const.resize(m_nsectors, 5);

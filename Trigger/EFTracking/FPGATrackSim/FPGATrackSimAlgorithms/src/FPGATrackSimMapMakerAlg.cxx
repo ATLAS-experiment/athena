@@ -303,7 +303,10 @@ StatusCode FPGATrackSimMapMakerAlg::writeSubrmap(std::vector<FPGATrackSimHit> co
         total_hits += etamod.second;
     }
     ATH_MSG_INFO("Found " << total_hits << " hits in the key layer, applying global trim factor of " << m_globalTrim << "%");
-
+    if (total_hits == 0)[[unlikely]]{
+      ATH_MSG_ERROR("FPGATrackSimMapMakerAlg::writeSubrmap: Failure due to zero total hits.");
+      return StatusCode::FAILURE;
+    }
     // Then, do the trim.
     for (auto const &etamod : m_key_etamods) {
         if (m_globalTrim == 0 || ((etamod.second / total_hits) >= m_globalTrim*0.01)) {

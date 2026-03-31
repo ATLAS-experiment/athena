@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimMatrixGenAlgo.cxx
@@ -728,9 +728,13 @@ StatusCode FPGATrackSimMatrixGenAlgo::fillAccumulatorByDropping(std::vector<std:
       
       // If this is a spacepoint, we must also convert the other hit.
       std::shared_ptr<const FPGATrackSimHit> originalHit;
-      unsigned other_layer = 0;
+      int other_layer = 0;
       if (sector_hits[layer] && sector_hits[layer]->getHitType() == HitType::spacepoint) {
          other_layer = (sector_hits[layer]->getPhysLayer() % 2 == 0) ? layer + 1 : layer - 1;
+         if(other_layer < 0)[[unlikely]]{
+           ATH_MSG_ERROR("FPGATrackSimMatrixGenAlgo::fillAccumulatorByDropping: layer index is negative.");
+           continue;
+         }
          originalHit = std::make_shared<FPGATrackSimHit>(sector_hits[other_layer]->getOriginalHit());
          modified_hits[other_layer] = std::move(originalHit);
       }

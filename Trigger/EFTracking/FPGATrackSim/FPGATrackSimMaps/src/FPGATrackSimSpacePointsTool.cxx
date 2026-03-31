@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
    */
 
 
@@ -261,6 +261,9 @@ bool FPGATrackSimSpacePointsTool::searchForMatch(FPGATrackSimHit& hit_in,std::ve
     return foundPair;
 }
 
+//hit_in and hit_out are suspiciously named and only passed by value;
+//we assume this is intentional and suppress the coverity warning
+//coverity[PASS_BY_VALUE]
 void FPGATrackSimSpacePointsTool::addSpacePoints(FPGATrackSimHit hit_in, FPGATrackSimHit hit_out ,FPGATrackSimTowerInputHeader &tower, std::vector<FPGATrackSimCluster> &spacepoints)
 {
     // Make a spacepoint
