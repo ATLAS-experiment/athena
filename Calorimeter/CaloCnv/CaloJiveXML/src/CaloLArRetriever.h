@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_CALOLARRETRIEVER_H
@@ -47,43 +47,40 @@ namespace JiveXML{
    *    - numCells: number of cells in each cluster
    *    - cells: identifier and adc counts of each cell 
    */
-  class CaloLArRetriever : virtual public IDataRetriever,
-                                   public AthAlgTool {
+  class CaloLArRetriever : public extends<AthAlgTool,IDataRetriever> {
     
     public:
-      
-      /// Standard Constructor
-      CaloLArRetriever(const std::string& type,const std::string& name,const IInterface* parent);
+      using base_class::base_class;
       
       /// Retrieve all the data
-      virtual StatusCode retrieve(ToolHandle<IFormatTool> &FormatTool); 
+      virtual StatusCode retrieve (ToolHandle<IFormatTool> &FormatTool) override;
       const DataMap getLArData(const CaloCellContainer* cellContainer);
 
       /// Return the name of the data type
-      virtual std::string dataTypeName() const { return "LAr"; };
-
+      virtual std::string dataTypeName() const override { return "LAr"; };
 	
       ///Default AthAlgTool methods
-      StatusCode initialize();
+      virtual StatusCode initialize() override;
 
     private:
       const CaloCell_ID*   m_calocell_id{};
-      SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
+      SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey
+	{this, "CablingKey", "LArOnOffIdMap", "SG Key of LArOnOffIdMapping object"};
     
       SG::ReadCondHandleKey<LArADC2MeV> m_adc2mevKey
-        { this, "ADC2MeVKey", "LArADC2MeV", "SG Key of the LArADC2MeV CDO" };
+        {this, "ADC2MeVKey", "LArADC2MeV", "SG Key of the LArADC2MeV CDO"};
 
       /// for properties
       SG::ReadHandleKey<CaloCellContainer> m_sgKey{this, "StoreGateKey", "AllCalo", "Name of the CaloCellContainer"};
-      double m_cellThreshold{};
-      int m_cellEnergyPrec{};
-      int m_cellTimePrec{};
-      bool m_lar{};
-      bool m_doLArCellDetails{};
-      bool m_cellConditionCut{};
-      std::vector<Identifier::value_type> m_LArChannelsToIgnoreM5;
-      bool m_doMaskLArChannelsM5{};
-      bool m_doBadLAr{};
+      Gaudi::Property<double> m_cellThreshold{this, "LArlCellThreshold", 50.};
+      Gaudi::Property<int> m_cellEnergyPrec{this, "CellEnergyPrec", 3};
+      Gaudi::Property<int> m_cellTimePrec{this, "CellTimePrec", 3};
+      Gaudi::Property<bool> m_lar{this, "RetrieveLAr", true};
+      Gaudi::Property<bool> m_doLArCellDetails{this, "DoLArCellDetails", false};
+      Gaudi::Property<bool> m_cellConditionCut{this, "CellConditionCut", false};
+      Gaudi::Property<std::vector<Identifier::value_type>> m_LArChannelsToIgnoreM5{this, "LArChannelsToIgnoreM5", {}};
+      Gaudi::Property<bool> m_doMaskLArChannelsM5{this, "DoMaskLArChannelsM5", false};
+      Gaudi::Property<bool> m_doBadLAr{this, "DoBadLAr", false};
   };
 }
 #endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloTileRetriever.h"
@@ -29,39 +29,7 @@ using Athena::Units::GeV;
 namespace JiveXML {
 
   /**
-   * This is the standard AthAlgTool constructor
-   * @param type   AlgTool type name
-   * @param name   AlgTool instance name
-   * @param parent AlgTools parent owning this tool
-   **/
-  CaloTileRetriever::CaloTileRetriever(const std::string& type,const std::string& name,const IInterface* parent):
-    AthAlgTool(type,name,parent),
-    m_calocell_id(nullptr)
-  {
-   //Only declare the interface
-   declareInterface<IDataRetriever>(this);
-
-   declareProperty("CellThreshold", m_cellThreshold = 50.);
-   declareProperty("RetrieveTILE" , m_tile = true);
-   declareProperty("DoTileDigit",   m_doTileDigit = false);
-   declareProperty("DoBadTile",     m_doBadTile = false);
-   declareProperty("DoTileCellDetails",  m_doTileCellDetails = false);
-   declareProperty("CellEnergyPrec", m_cellEnergyPrec = 3);
-   declareProperty("CellTimePrec", m_cellTimePrec = 3);
-
-   // TileDigitsContainer names: {"TileDigitsCnt","TileDigitsFlt"};
-   declareProperty("TileDigitsContainer" ,m_sgKeyTileDigits = "",
-        "Input collection to retrieve Tile digits, used when doTileDigit is True");
-
-   // TileRawChannelContainer names: {"TileRawChannelOpt2","TileRawChannelOpt","TileRawChannelFixed",
-   //                                 "TileRawChannelFitCool","TileRawChannelFit",
-   //                                 "TileRawChannelCnt","TileRawChannelFlt"};
-   declareProperty("TileRawChannelContainer" ,m_sgKeyTileRawChannel = "",
-        "Input collection to retrieve Tile raw channels, used when doTileCellDetails is True.");
-  }
-
-  /**
-   * Initialise the ToolSvc
+   * Initialise the Tool
    */
 
   StatusCode CaloTileRetriever::initialize() {

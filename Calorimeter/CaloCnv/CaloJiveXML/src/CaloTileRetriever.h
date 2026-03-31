@@ -1,12 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_CALOTILERETRIEVER_H
 #define JIVEXML_CALOTILERETRIEVER_H
-
-
-
 
 #include "TileConditions/TileCondToolTiming.h"
 #include "TileConditions/TileCondToolEmscale.h"
@@ -45,23 +42,20 @@ namespace JiveXML{
    *    - identifier and adc counts of each cell 
    *    - various pmt details
    */
-  class CaloTileRetriever : virtual public IDataRetriever,
-                                   public AthAlgTool {
+  class CaloTileRetriever : public extends<AthAlgTool,IDataRetriever> {
     
     public:
-      
-      /// Standard Constructor
-      CaloTileRetriever(const std::string& type,const std::string& name,const IInterface* parent);
+      using base_class::base_class;
       
       /// Retrieve all the data
-      virtual StatusCode retrieve(ToolHandle<IFormatTool> &FormatTool); 
+      virtual StatusCode retrieve(ToolHandle<IFormatTool> &FormatTool) override;
       const DataMap getCaloTileData(const CaloCellContainer* cellContainer);
 
       /// Return the name of the data type
-      virtual std::string dataTypeName() const { return "TileDigit"; };
+      virtual std::string dataTypeName() const override{ return "TileDigit"; };
 	
       ///Default AthAlgTool methods
-      StatusCode initialize();
+      virtual StatusCode initialize() override;
 
     private:
       ToolHandle<TileCondToolTiming> m_tileToolTiming{this,
@@ -74,18 +68,20 @@ namespace JiveXML{
           "TileBadChanTool", "TileBadChanTool", "Tile bad channel tool"};
 
       void calcTILELayerSub(Identifier&);
-      const CaloCell_ID*   m_calocell_id;
+      const CaloCell_ID*   m_calocell_id{};
     
       SG::ReadHandleKey<CaloCellContainer> m_sgKey{this, "StoreGateKey", "AllCalo", "Name of the CaloCellContainer"};
-      SG::ReadHandleKey<TileDigitsContainer> m_sgKeyTileDigits{this, "TileDigitsContainerKey", "", "Name of the TileDigitsContainer"};
-      SG::ReadHandleKey<TileRawChannelContainer> m_sgKeyTileRawChannel{this, "TileRawChannelContainerKey", "", "Name of the TileRawChannelContainer"};
-      double m_cellThreshold;
-      int m_cellEnergyPrec;
-      int m_cellTimePrec;
-      bool m_tile;
-      bool m_doTileDigit;
-      bool m_doTileCellDetails;
-      bool m_doBadTile;
+      SG::ReadHandleKey<TileDigitsContainer> m_sgKeyTileDigits{this, "TileDigitsContainer", "",
+	"Input collection to retrieve Tile digits, used when doTileDigit is True"};
+      SG::ReadHandleKey<TileRawChannelContainer> m_sgKeyTileRawChannel{this, "TileRawChannelContainer", "",
+	"Input collection to retrieve Tile raw channels, used when doTileCellDetails is True"};
+      Gaudi::Property<double> m_cellThreshold{this, "CellThreshold", 50.};
+      Gaudi::Property<int> m_cellEnergyPrec{this, "CellEnergyPrec", 3};
+      Gaudi::Property<int> m_cellTimePrec{this, "CellTimePrec", 3};
+      Gaudi::Property<bool> m_tile{this, "RetrieveTILE", true};
+      Gaudi::Property<bool> m_doTileDigit{this, "DoTileDigit", false};
+      Gaudi::Property<bool> m_doTileCellDetails{this, "DoTileCellDetails", false};
+      Gaudi::Property<bool> m_doBadTile{this, "DoBadTile", false};
 
       DataVect m_sub;
   };
