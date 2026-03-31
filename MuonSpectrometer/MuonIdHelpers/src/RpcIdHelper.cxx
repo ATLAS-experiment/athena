@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonIdHelpers/RpcIdHelper.h"
@@ -766,7 +766,6 @@ int RpcIdHelper::init_detectorElement_hashes() {
     m_st_BIL = stationNameIndex("BIL");
 
     // detector element hash
-    IdContext context = detectorElement_context();
     unsigned int nids = 0;
     std::set<Identifier> ids;
     for (unsigned int i = 0; i < m_full_detectorElement_range.size(); ++i) {
