@@ -1,12 +1,16 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <math.h>
+#include "TrigMufastHypoAlg.h"
 
 #include "AthLinks/ElementLink.h"
-#include "TrigMufastHypoAlg.h"
 #include "AthViews/ViewHelper.h"
+
+#include "TrigSteeringEvent/TrigRoiDescriptor.h"
+#include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
+
+#include <math.h>
 
 using namespace TrigCompositeUtils; 
 
