@@ -13,6 +13,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import LHCPeriod
 JETS = "AntiKt4EMPFlowJets"
 
 
@@ -247,13 +248,21 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
     # Register a public JetCalibrationTool with the same name as PHYSLITE's.
     # Both algorithms use PublicToolHandle, so Gaudi shares a single instance.
     # In co-production the CA deduplicates; standalone just has one copy.
+    # Calibration config differs between Run 2 and Run 3 — must match
+    # JetAnalysisConfig.py (JetCalibrationBlock) to share the tool.
+    if flags.GeoModel.Run is LHCPeriod.Run2:
+        calibConfigFile = "PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config"
+        calibArea = "00-04-82"
+    else:
+        calibConfigFile = ("AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_"
+                           "CalibConfig_ResPU_EtaJES_GSC_241208_InSitu.config")
+        calibArea = "00-04-83"
     calibTool = CompFactory.JetCalibrationTool(
         "JetCalibTool_AntiKt4EMPFlow",
         JetCollection="AntiKt4EMPFlow",
-        ConfigFile="AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_"
-                   "CalibConfig_ResPU_EtaJES_GSC_241208_InSitu.config",
+        ConfigFile=calibConfigFile,
         CalibSequence="JetArea_Residual_EtaJES_GSC",
-        CalibArea="00-04-83",
+        CalibArea=calibArea,
         IsData=False,
     )
     acc.addPublicTool(calibTool)
