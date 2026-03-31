@@ -114,7 +114,7 @@ check_lar_neighbour_timing(IdDictMgr& idd)
 
     /// Store in object the measured times
     Identifier channel_id;
-    IdContext channelContext = em_id.channel_context();
+    //IdContext channelContext = em_id.channel_context();
     startOfUserTime    = System::userTime( System::microSec );
     startOfKernelTime  = System::kernelTime   ( System::microSec );
     startOfElapsedTime = System::ellapsedTime ( System::microSec );
@@ -565,7 +565,7 @@ check_lar_neighbour_timing(IdDictMgr& idd)
     startOfElapsedTime = System::ellapsedTime ( System::microSec );
 
     size_type reg_hash_max = em_id.region_hash_max ();
-    IdContext regionContext = em_id.region_context();
+    //IdContext regionContext = em_id.region_context();
     
     nloops = 1000;
 
@@ -945,7 +945,6 @@ check_lar_timing(IdDictMgr& idd)
 	      << std::endl;
 
     // regions
-    IdContext regionContext = em_id.region_context();
     std::vector<Identifier>::const_iterator itId = em_id.reg_begin();
 //    std::vector<Identifier>::const_iterator itIdEnd = em_id.reg_end();
   
