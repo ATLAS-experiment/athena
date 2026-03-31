@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file PassThroughTool.cxx
@@ -501,6 +501,8 @@ StatusCode PassThroughTool::getInputClusterData(
     ATH_MSG_DEBUG("Making vector of pixel clusters...");
     for (unsigned long i = 0; i < N; i++)
     {
+        // Local variable cache uses 16096 bytes of stack space
+        //coverity[STACK_USE]
         EFTrackingTransient::PixelCluster cache;
         // Get the data from the input xAOD::PixelClusterContainer and set it to the
         // cache

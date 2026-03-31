@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackSimLayerStudyTool_H
 #define FPGATrackSimLayerStudyTool_H
@@ -186,9 +186,9 @@ class TH2D;
     //////////////////////////////////////////////////////////////////////
     // make and register histogram or vector of histograms in one line...
     template <typename HistType, typename... HistDef>
-    StatusCode makeAndRegHist(HistType *&ptr, HistDef... histargs)
+    StatusCode makeAndRegHist(HistType *&ptr, HistDef&&... histargs)
     {
-        ptr = new HistType(histargs...);
+        ptr = new HistType(std::forward<HistDef>(histargs)...);
         ATH_CHECK(m_tHistSvc->regHist(m_dir + ptr->GetName(), ptr));
         return StatusCode::SUCCESS;
     }
