@@ -3,47 +3,49 @@
 */
 #include "L0MuonInterface/RPCCandData.h"
 
+#include <iostream>
+
 namespace L0Muon
 {
-
-  RPCCandData::RPCCandData(uint16_t subdetectorId, uint16_t sectorId, uint16_t bcTag)
-      : ICandData(subdetectorId, sectorId, bcTag)
-
-  {
-    // Initialize the z positions and coincidence type
-    for (int i = 0; i < 4; ++i)
+    
+    RPCCandData::RPCCandData(uint16_t subdetectorId, uint16_t sectorId, uint16_t bcTag)
+        : ICandData(subdetectorId, sectorId, bcTag)
+          
     {
-      m_zPos[i] = 0xffff;
+        // Initialize the z positions and coincidence type
+        for (int i = 0; i < 4; ++i)
+        {
+            m_zPos[i] = 0xffff;
+        }
+        m_coinType = 0;
     }
-    m_coinType = 0;
-  }
-
-  void RPCCandData::setZPos(float zPos, int index)
-  {
-    if (index < 0 || index > 3)
+    
+    void RPCCandData::setZPos(float zPos, int index)
     {
-      return;
+        if (index < 0 || index > 3)
+        {
+            return;
+        }
+        /// convert z position to binary
+        m_zPos[index] = static_cast<uint16_t>(std::round((zPos+s_zPosRange)/(2.0f*s_zPosRange) * static_cast<float>(s_zPosBitRange)));
     }
-    /// convert z position to binary
-    m_zPos[index] = static_cast<uint16_t>(zPos / s_zPosRange * static_cast<float>(s_zPosBitRange));
-  }
-  void RPCCandData::setCoinType(uint8_t coinType)
-  {
-    /// convert the coincidence type to binary
-    m_coinType = static_cast<uint8_t>(coinType / s_coinTypeRange * static_cast<float>(s_coinTypeBitRange));
-  }
-
-  float RPCCandData::zPos(int index) const
-  {
-    if (index < 0 || index > 3)
+        void RPCCandData::setCoinType(uint8_t coinType)
+        {
+            /// convert the coincidence type to binary
+            m_coinType = static_cast<uint8_t>(coinType / s_coinTypeRange * static_cast<float>(s_coinTypeBitRange));
+        }
+    
+    float RPCCandData::zPos(int index) const
     {
-      return 0.0;
+        if (index < 0 || index > 3)
+        {
+            return 0.0;
+        }
+        return static_cast<float>(m_zPos[index])/static_cast<float>(s_zPosBitRange)*2.0*s_zPosRange - s_zPosRange;
     }
-    return static_cast<float>(m_zPos[index] / static_cast<float>(s_zPosBitRange * s_zPosRange));
-  }
-  uint8_t RPCCandData::coinType() const
-  {
-    return static_cast<uint8_t>(m_coinType / s_coinTypeRange * static_cast<float>(s_coinTypeBitRange));
-  }
-  
+    uint8_t RPCCandData::coinType() const
+    {
+        return static_cast<uint8_t>(m_coinType / s_coinTypeRange * static_cast<float>(s_coinTypeBitRange));
+    }
+    
 }
