@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // contact: jmaurer@cern.ch
@@ -8,7 +8,6 @@
 #define TRIGGLOBALEFFICIENCYCORRECTION_CALCULATOR_H 1
 
 #include <algorithm>
-#include <boost/container/flat_set.hpp>
 #include <functional>
 #include <map>
 
@@ -16,8 +15,9 @@
 #include "TrigGlobalEfficiencyCorrection/Efficiencies.h"
 #include "TrigGlobalEfficiencyCorrection/ImportData.h"
 #include "TrigGlobalEfficiencyCorrection/TrigGlobalEfficiencyCorrectionTool.h"
+#include "CxxUtils/flat_set.h"
 template <typename Key>
-using flat_set = boost::container::flat_set<Key>;
+using flat_set = CxxUtils::flat_set<Key>;
 
 namespace TrigGlobEffCorr {
 
