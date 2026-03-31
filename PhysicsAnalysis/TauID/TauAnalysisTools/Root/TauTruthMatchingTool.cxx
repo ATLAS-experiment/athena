@@ -170,9 +170,50 @@ TLorentzVector TauTruthMatchingTool::getTruthTauP4Invis(const xAOD::TruthParticl
   return vTLV;
 }
 
+//______________________________________________________________________________
 TauAnalysisTools::TruthMatchedParticleType TauTruthMatchingTool::getTruthParticleType(const xAOD::TauJet& xTau)
 {
   return TauAnalysisTools::getTruthParticleType(xTau);
+}
+
+//______________________________________________________________________________
+bool TauTruthMatchingTool::matchTruthLeptonicTauDecay(const xAOD::IParticle* p, const xAOD::TruthParticleContainer* truth_taus)
+{
+  // input check
+  if (p->type() != xAOD::Type::Muon && p->type() != xAOD::Type::Electron)
+     return false;
+
+  // loop over truth_tau container
+  for (auto truth_tau : *truth_taus) {
+     if (!truth_tau->isTau()) {
+        continue;
+     }
+     static const SG::ConstAccessor<char> accIsHadronicTau ("IsHadronicTau");
+     if( accIsHadronicTau(*truth_tau)){
+        continue;
+     }
+
+     static const SG::ConstAccessor<std::vector<int> > accDecayModeVector("DecayModeVector");
+     if (accDecayModeVector.isAvailable(*truth_tau))
+     { 
+        std::vector<int> vDecayMode = accDecayModeVector(*truth_tau); 	     
+        for (auto decayMode : vDecayMode) {
+           if (p->type() == xAOD::Type::Electron) {
+              if (fabs(decayMode) != 11)
+                 continue;
+           } else if (p->type() == xAOD::Type::Muon) {
+              if (fabs(decayMode) != 13)
+                 continue;
+           }
+           TLorentzVector vis = getTruthTauP4Vis(*truth_tau);
+	   if (vis.DeltaR(p->p4()) < 0.2) {
+              return true; 
+	   }
+        }
+     }
+  }
+  // matching not found
+  return false;
 }
 
 //______________________________________________________________________________
