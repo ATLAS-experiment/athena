@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_LARDIGITRETRIEVER_H
@@ -49,25 +49,23 @@ namespace JiveXML{
    *    - identifier and adc counts of each cell 
    *    - various pmt details
    */
-  class LArDigitRetriever : virtual public IDataRetriever,
-                                   public AthAlgTool {
+  class LArDigitRetriever : public extends<AthAlgTool,IDataRetriever> {
     
     public:
       
-      /// Standard Constructor
-      LArDigitRetriever(const std::string& type,const std::string& name,const IInterface* parent);
+      using base_class::base_class;
       
       /// Retrieve all the data
-      virtual StatusCode retrieve(ToolHandle<IFormatTool> &FormatTool); 
+      virtual StatusCode retrieve(ToolHandle<IFormatTool> &FormatTool) override;
       const DataMap getLArDigitData(const CaloCellContainer* cellContainer, 
                                     const std::string& datatype, 
                                     CaloCell_ID::SUBCALO calotype);
 
       /// Return the name of the data type
-      virtual std::string dataTypeName() const { return "LArDigit"; };
+      virtual std::string dataTypeName() const override { return "LArDigit"; };
 	
       ///Default AthAlgTool methods
-      StatusCode initialize();
+      virtual StatusCode initialize() override;
 
     private:
       void calcEMLayerSub(Identifier&);
@@ -81,25 +79,24 @@ namespace JiveXML{
       SG::ReadCondHandleKey<LArADC2MeV> m_adc2mevKey
         { this, "ADC2MeVKey", "LArADC2MeV", "SG Key of the LArADC2MeV CDO" };
 
-      const CaloCell_ID*   m_calocell_id;
+      const CaloCell_ID*   m_calocell_id{};
 
-      bool m_lar;
-      bool m_hec;
-      bool m_fcal;
-      bool m_doLArDigit;
-      bool m_doHECDigit;
-      bool m_doFCalDigit;
-      bool m_doDigit;
-      bool m_cellConditionCut;
-      bool m_inputdpd;
-      int m_cellEnergyPrec;
-      int m_cellTimePrec;
-      double m_cellThreshold;
-    
-      std::vector<Identifier::value_type> m_LArChannelsToIgnoreM5;
-      bool m_doMaskLArChannelsM5;
+      Gaudi::Property<bool> m_lar{this, "RetrieveLAr", true};
+      Gaudi::Property<bool> m_hec{this, "RetrieveHEC", true};
+      Gaudi::Property<bool> m_fcal{this, "RetrieveFCAL", true};
+      Gaudi::Property<bool> m_doLArDigit{this, "DoLArDigit", false};
+      Gaudi::Property<bool> m_doHECDigit{this, "DoHECDigit", false};
+      Gaudi::Property<bool> m_doFCalDigit{this, "DoFCalDigit", false};
+      Gaudi::Property<bool> m_cellConditionCut{this, "CellConditionCut", false};
+      Gaudi::Property<int> m_cellEnergyPrec{this, "CellEnergyPrec", 3};
+      Gaudi::Property<int> m_cellTimePrec{this, "CellTimePrec", 3};
+      Gaudi::Property<double> m_cellThreshold{this, "CellThreshold", 50.};
+      Gaudi::Property<std::vector<Identifier::value_type>> m_LArChannelsToIgnoreM5{this, "LArChannelsToIgnoreM5", {}};
+      Gaudi::Property<bool> m_doMaskLArChannelsM5{this, "DoMaskLArChannelsM5", false};
 
-      DataVect m_sub; 
+      bool m_doDigit{false};
+      bool m_inputdpd{false};
+      DataVect m_sub;
   };
 }
 #endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_CALOMBTSRETRIEVER_H
@@ -44,23 +44,20 @@ namespace JiveXML{
    *    - numCells: number of cells in each cluster
    *    - cells: identifier and adc counts of each cell 
    */
-  class CaloMBTSRetriever : virtual public IDataRetriever,
-                                   public AthAlgTool {
+  class CaloMBTSRetriever : public extends<AthAlgTool,IDataRetriever> {
     
     public:
-      
-      /// Standard Constructor
-      CaloMBTSRetriever(const std::string& type,const std::string& name,const IInterface* parent);
+      using base_class::base_class;
       
       /// Retrieve all the data
-      virtual StatusCode retrieve(ToolHandle<IFormatTool> &FormatTool); 
+      virtual StatusCode retrieve(ToolHandle<IFormatTool> &FormatTool) override;
       const DataMap getMBTSData(const TileCellContainer* tileMBTSCellContainer);
 
       /// Return the name of the data type
-      virtual std::string dataTypeName() const { return "MBTS"; };
+      virtual std::string dataTypeName() const override { return "MBTS"; };
 	
       ///Default AthAlgTool methods
-      StatusCode initialize();
+      virtual StatusCode initialize() override;
 
     private:
       ToolHandle<TileCondToolTiming> m_tileToolTiming{this,
@@ -69,16 +66,18 @@ namespace JiveXML{
       ToolHandle<TileCondToolEmscale> m_tileToolEmscale{this,
           "TileCondToolEmscale", "TileCondToolEmscale", "Tile EM scale calibration tool"};
 
-      const TileTBID*    m_tileTBID;
+      const TileTBID*    m_tileTBID{};
 
-      ///properties:
       SG::ReadHandleKey<TileCellContainer> m_sgKeyMBTS{this, "StoreGateKey", "MBTSContainer", "Name of the TileCellContainer"};
-      SG::ReadHandleKey<TileDigitsContainer> m_sgKeyTileDigits{this, "TileDigitsContainerKey", "", "Name of the TileDigitsContainer"};
-      SG::ReadHandleKey<TileRawChannelContainer> m_sgKeyTileRawChannel{this, "TileRawChannelContainerKey", "", "Name of the TileRawChannelContainer"};
-      double m_mbtsThreshold;
-      bool m_mbts;
-      bool m_mbtsdigit;
-      bool m_mbtsCellDetails;
+      SG::ReadHandleKey<TileDigitsContainer> m_sgKeyTileDigits{this, "TileDigitsContainer", ""
+	, "Input collection to retrieve Tile raw channels, used when DoMBTSCellDetails is True"};
+      SG::ReadHandleKey<TileRawChannelContainer> m_sgKeyTileRawChannel{this, "TileRawChannelContainer", ""
+	, "Input collection to retrieve Tile digits, used when doTileDigit is True"};
+
+      Gaudi::Property<double> m_mbtsThreshold{this, "MBTSThreshold", 0.05};
+      Gaudi::Property<bool> m_mbts{this, "RetrieveMBTS", true};
+      Gaudi::Property<bool> m_mbtsdigit{this, "DoMBTSDigits", false};
+      Gaudi::Property<bool> m_mbtsCellDetails{this, "DoMBTSCellDetails", false};
   };
 }
 #endif
