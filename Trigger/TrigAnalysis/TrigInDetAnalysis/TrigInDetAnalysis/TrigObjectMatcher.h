@@ -5,7 +5,7 @@
  **   @author  sutt
  **   @date    Fri 14 Sep 2018
  **
- **   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ **   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 #ifndef  TRIGOBJECTMATCHER_H
@@ -18,7 +18,7 @@
 #include "TrigInDetAnalysis/TrackSelector.h"
 #include "TrigInDetAnalysis/TrackTrigObject.h"
 
-
+//coverity[MISSING_MOVE_ASSIGNMENT]
 class TrigObjectMatcher {
 
 public:

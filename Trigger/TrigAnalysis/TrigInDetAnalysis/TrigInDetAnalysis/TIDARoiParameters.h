@@ -6,14 +6,14 @@
  **              for the TIDARoiDescriptor class
  **              
  **              This is needed, since the RoiDescriptor can contain a vector
- **              of RoiDescriptor* and I couldn;t work out how to have the root
+ **              of RoiDescriptor* and I couldn't work out how to have the root
  **              class persistify the members of the class, recursively
  **              within itself          
  **
  **     @author  mark sutton
  **     @date    Wed  4 Mar 2015 16:09:33 CET 
  **
- **     Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -39,6 +39,10 @@ public:
 
 
   TIDARoiParameters(const TIDARoiParameters& p ) = default;
+  TIDARoiParameters& operator=(const TIDARoiParameters&) = default;
+  
+  TIDARoiParameters(TIDARoiParameters&&) noexcept = default;
+  TIDARoiParameters& operator=(TIDARoiParameters&&) noexcept = default;
 
 
   virtual ~TIDARoiParameters();
