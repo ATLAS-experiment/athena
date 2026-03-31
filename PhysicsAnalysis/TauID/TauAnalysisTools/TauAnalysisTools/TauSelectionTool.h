@@ -138,7 +138,6 @@ private:
   // properties
   Gaudi::Property<int> m_iSelectionCuts{this, "SelectionCuts", NoCut}; 
   Gaudi::Property<float> m_dPtMin{this, "PtMin", NAN};
-  Gaudi::Property<float> m_dPtMax{this, "PtMax", NAN};
   Gaudi::Property<float> m_dAbsEtaMin{this, "AbsEtaMin", NAN};
   Gaudi::Property<float> m_dAbsEtaMax{this, "AbsEtaMax", NAN};
   Gaudi::Property<float> m_iAbsCharge{this, "AbsCharge", NAN}; 
@@ -151,7 +150,6 @@ private:
   Gaudi::Property<int> m_iEleIDVersion{this, "EleIDVersion", 1};
   Gaudi::Property<bool> m_bMuonOLR{this, "MuonOLR", false};
  
-  Gaudi::Property<std::vector<float>> m_vecPtRegion{this, "PtRegion", {}};  
   Gaudi::Property<std::vector<float>> m_vecAbsEtaRegion{this, "AbsEtaRegion",{}};
   Gaudi::Property<std::vector<int>> m_vecAbsCharges{this, "AbsCharges", {}};
   Gaudi::Property<std::vector<unsigned>> m_vecNTracks{this, "NTracks", {}};
