@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"
@@ -59,5 +59,4 @@ void TrigRoiDescriptorCnv_p1::transToPers(const TrigRoiDescriptor* transObj,
    persObj->m_l1Id         = transObj->l1Id()        ;          
    persObj->m_roiId        = transObj->roiId()       ;         
    persObj->m_roiWord      = transObj->roiWord()     ;       
-   //persObj->m_serialized   = transObj->m_serialized  ;
 }
