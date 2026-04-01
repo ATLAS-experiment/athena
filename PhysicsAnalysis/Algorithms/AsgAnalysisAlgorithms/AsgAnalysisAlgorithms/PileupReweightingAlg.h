@@ -54,26 +54,33 @@ namespace CP
 
     /// \brief the name of the original event info (this should usually be the same as eventiNfoHandle and EventInfo)
   private:
-    SG::ReadHandleKey<xAOD::EventInfo> m_baseEventInfoName {this, "baseEventInfo", "EventInfo",       "The name of the original event info. The non-systematic dependent decorations will be applied to this "
+    SG::ReadHandleKey<xAOD::EventInfo> m_baseEventInfoKey {this, "baseEventInfo", "EventInfo",
+      "The name of the original event info. The non-systematic dependent decorations will be applied to this "
       "object so it should be at least a base of the shallow copies read in by the 'eventInfo' handle. "
       "The default (and strongly recommended behaviour) is to leave all of these pointed at the central 'EventInfo' object!"};
+
+    /// \brief the decoration for the corrected average interactions per crossing
+  private:
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_correctedAverageMuDecorator
+    { this, "correctedAverageMuDecoration", m_baseEventInfoKey, "",
+        "the decoration for the corrected average interactions per crossing" };
 
     /// \brief the decoration for the corrected and scaled average interactions per crossing
   private:
     SG::WriteDecorHandleKey<xAOD::EventInfo> m_correctedScaledAverageMuDecorator
-    { this, "correctedScaledAverageMuDecoration", m_baseEventInfoName, "",
+    { this, "correctedScaledAverageMuDecoration", m_baseEventInfoKey, "",
         "the decoration for the corrected and scaled average interactions per crossing" };
 
     /// \brief the decoration for the corrected actual interactions per crossing
   private:
     SG::WriteDecorHandleKey<xAOD::EventInfo> m_correctedActualMuDecorator
-    { this, "correctedActualMuDecoration", m_baseEventInfoName, "",
+    { this, "correctedActualMuDecoration", m_baseEventInfoKey, "",
         "the decoration for the corrected actual interactions per crossing" };
 
     /// \brief the decoration for the corrected and scaled actual interactions per crossing
   private:
     SG::WriteDecorHandleKey<xAOD::EventInfo> m_correctedScaledActualMuDecorator
-    { this, "correctedScaledActualMuDecoration", m_baseEventInfoName, "",
+    { this, "correctedScaledActualMuDecoration", m_baseEventInfoKey, "",
         "the decoration for the corrected and scaled actual interactions per crossing" };
 
     /// \brief the helper for OutOfValidity results
@@ -81,15 +88,15 @@ namespace CP
     OutOfValidityHelper m_outOfValidity {this};
 
     SG::WriteDecorHandleKey<xAOD::EventInfo> m_decRRNKey
-    { this, "RandomRunNumberKey", m_baseEventInfoName, "RandomRunNumber",
+    { this, "RandomRunNumberKey", m_baseEventInfoKey, "RandomRunNumber",
         "Name for the RandomRunNumber decoration" };
 
     SG::WriteDecorHandleKey<xAOD::EventInfo> m_decRLBNKey
-    { this, "RandomLumiBlockNumberKey", m_baseEventInfoName, "RandomLumiBlockNumber",
+    { this, "RandomLumiBlockNumberKey", m_baseEventInfoKey, "RandomLumiBlockNumber",
         "Name for the RandomLumiBlockNumber decoration" }; // unsigned int
 
     SG::WriteDecorHandleKey<xAOD::EventInfo> m_decHashKey
-    { this, "PRWHashKey", m_baseEventInfoName, "PRWHash",
+    { this, "PRWHashKey", m_baseEventInfoKey, "PRWHash",
         "Name for the PRWHash decoration" };  // uint64_t
   };
 }
