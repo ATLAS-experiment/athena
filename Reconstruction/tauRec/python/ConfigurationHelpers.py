@@ -72,3 +72,14 @@ def GetEleRMSeedCollection(flags):
         AntiKt4LCTopo_EleRM.context = "EleRM"
         return AntiKt4LCTopo_EleRM
 
+# save only tau content in xAOD and ESD
+def tauSpecialContent(flags,cfg):
+    from OutputStreamAthenaPool.OutputStreamConfig import outputStreamName
+    StreamAOD = cfg.getEventAlgo(outputStreamName("AOD"))
+    newList = [x for x in StreamAOD.ItemList if "Tau" in x]
+    StreamAOD.ItemList = newList
+
+    StreamESD = cfg.getEventAlgo(outputStreamName("ESD"))
+    newList = [x for x in StreamESD.ItemList if "Tau" in x]
+    StreamESD.ItemList = newList
+
