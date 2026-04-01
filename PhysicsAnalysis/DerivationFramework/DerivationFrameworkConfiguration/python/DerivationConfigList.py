@@ -76,6 +76,7 @@ from DerivationFrameworkBPhys.BPHY22 import BPHY22Cfg
 from DerivationFrameworkBPhys.BPHY23 import BPHY23Cfg
 from DerivationFrameworkBPhys.BPHY24 import BPHY24Cfg
 from DerivationFrameworkBPhys.BPHY25 import BPHY25Cfg
+from DerivationFrameworkBPhys.BPHY26 import BPHY26Cfg
 from DerivationFrameworkBPhys.BPHY28 import BPHY28Cfg
 
 # STDM derivations
@@ -180,7 +181,7 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg','TE
            'BPHY6Cfg',
            'BPHY10Cfg', 'BPHY12Cfg', 'BPHY13Cfg', 'BPHY14Cfg', 'BPHY15Cfg',
            'BPHY16Cfg', 'BPHY18Cfg',
-           'BPHY21Cfg', 'BPHY22Cfg', 'BPHY23Cfg', 'BPHY24Cfg', 'BPHY25Cfg', 'BPHY28Cfg',
+           'BPHY21Cfg', 'BPHY22Cfg', 'BPHY23Cfg', 'BPHY24Cfg', 'BPHY25Cfg', 'BPHY26Cfg', 'BPHY28Cfg',
            'STDM6Cfg', 'STDM7Cfg','STDM13Cfg','STDM16Cfg','STDM17Cfg',
            'TCAL1Cfg', 'TCAL2Cfg',
            'EGAM1Cfg', 'EGAM2Cfg', 'EGAM3Cfg', 'EGAM4Cfg', 'EGAM5Cfg',
