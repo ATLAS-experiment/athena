@@ -8,7 +8,7 @@
  **   @date   Sun 22 Sep 2019 10:21:50 BST
  **
  **
- **   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 #include "MDT_RegSelCondAlg.h"
@@ -106,8 +106,6 @@ std::unique_ptr<RegSelSiLUT> MDT_RegSelCondAlg::createTable( const EventContext&
     int detid   = ( exp_id[2]<0 ? -1 : 1 );
     int layerid = exp_id[1]+1;
          
-    IdContext mdtChannelContext = helper->channel_context();
-
     // get the element corresponding to multilayer = 1
     const MuonGM::MdtReadoutElement* mdt1 = manager->getMdtReadoutElement(Id);
     if (mdt1 == nullptr) {
