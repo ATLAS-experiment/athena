@@ -26,6 +26,7 @@
 #include "xAODMuonPrepData/sTgcWireHit.h"
 #include "xAODMuonPrepData/CombinedMuonStrip.h" 
 
+#include "Acts/Surfaces/detail/LineHelper.hpp"
 
 namespace {
     template <class MeasType> const Acts::Surface& fetchSurface(const xAOD::UncalibratedMeasurement* meas) {
@@ -178,28 +179,54 @@ namespace xAOD{
     
     std::pair<Amg::Vector2D, AmgSymMatrix(2)> 
         positionAndCovariance(const CombinedMuonStrip* combinedPrd) {
+        return positionAndCovariance(combinedPrd->primaryStrip(), 
+                                     combinedPrd->secondaryStrip());
+    }
+        
 
-        const Muon::IMuonIdHelperSvc* idHelperSvc = muonReadoutElement(combinedPrd)->idHelperSvc();
-        Amg::Vector2D cmbPos {Amg::Vector2D::Zero()};
+    std::pair<Amg::Vector2D, AmgSymMatrix(2)> 
+        positionAndCovariance(const UncalibratedMeasurement* etaStrip,
+                              const UncalibratedMeasurement* phiStrip) {
+
+        /// These conditions should be trivially fullfilled
+        assert(etaStrip != nullptr);
+        assert(phiStrip != nullptr);
+        assert(etaStrip->identifierHash() == phiStrip->identifierHash());
+        assert(etaStrip->type() == phiStrip->type());
+        assert(layerHash(etaStrip) == layerHash(phiStrip));
+
+        const Muon::IMuonIdHelperSvc* idHelperSvc = muonReadoutElement(etaStrip)->idHelperSvc();
+        Amg::Vector2D cmbPos{Amg::Vector2D::Zero()};
         AmgSymMatrix(2) cmbCov{AmgSymMatrix(2)::Identity()};
-
-        switch(combinedPrd->type()) {
+        /// Catch the geniue 2D measurements (Pads, 2D RPC)
+        if (etaStrip == phiStrip && etaStrip->numDimensions() == 2) {
+            return std::make_pair(xAOD::toEigen(etaStrip->localPosition<2>()),
+                                  xAOD::toEigen(etaStrip->localCovariance<2>()));
+        }
+        switch(etaStrip->type()) {
             using enum UncalibMeasType;
             case RpcStripType: {
-                cmbPos[0] = combinedPrd->primaryStrip()->localPosition<1>()[0];
-                cmbPos[1] = combinedPrd->secondaryStrip()->localPosition<1>()[0];
-                cmbCov (0, 0) = combinedPrd->primaryStrip()->localCovariance<1>()(0,0);
-                cmbCov (1, 1) = combinedPrd->secondaryStrip()->localCovariance<1>()(0,0);
+                cmbPos[0] = etaStrip->localPosition<1>()[0];
+                cmbPos[1] = phiStrip->localPosition<1>()[0];
+                cmbCov (0, 0) = etaStrip->localCovariance<1>()(0,0);
+                cmbCov (1, 1) = phiStrip->localCovariance<1>()(0,0);
                 break;
             } case TgcStripType: {
-                const auto* wireMeas = static_cast<const TgcStrip*>(combinedPrd->primaryStrip());
-                const auto* stripMeas = static_cast<const TgcStrip*>(combinedPrd->secondaryStrip());
+                const auto* wireMeas = static_cast<const TgcStrip*>(etaStrip);
+                const auto* stripMeas = static_cast<const TgcStrip*>(phiStrip);
             
                 const auto& radialDesign = stripMeas->readoutElement()->stripLayout(stripMeas->layerHash());
                 const auto& wireDesign = wireMeas->readoutElement()->wireGangLayout(wireMeas->layerHash());            
+                const auto& sensorPlane = wireMeas->readoutElement()->sensorLayout(stripMeas->layerHash());
+                const Amg::Vector3D phiDir = sensorPlane->to3D(radialDesign.stripDir(stripMeas->channelNumber()),true);
+                const Amg::Vector3D etaDir = sensorPlane->to3D(wireDesign.stripDir(), false);
+                // Calculate the combined strip position
+                using namespace Acts::detail::LineHelper;
+                const Acts::Intersection3D stripIsect = lineIntersect<3>(stripMeas->localMeasurementPos(), phiDir,
+                                                                         wireMeas->localMeasurementPos(), etaDir);
             
-                const Amg::Vector2D phiDir = radialDesign.stripDir(stripMeas->channelNumber());
-                const Amg::Vector2D& etaDir = wireDesign.stripNormal();
+                cmbPos = stripIsect.position().block<2,1>(0,0);
+                
                 const double dirDots = phiDir.dot(etaDir);
                 /// Apply the stereo transform to the covariance
                 AmgSymMatrix(2) stereoTrf{AmgSymMatrix(2)::Identity()};
@@ -207,23 +234,23 @@ namespace xAOD{
                 stereoTrf(0, 0) = stereoTrf(1, 1) = invDist;
                 stereoTrf(0, 1) = stereoTrf(1, 0) = -dirDots * invDist;
 
-                cmbPos = stereoTrf* Amg::Vector2D{
-                        combinedPrd->primaryStrip()->localPosition<1>()[0],
-                        combinedPrd->secondaryStrip()->localPosition<1>()[0]};
-
+                
                 AmgSymMatrix(2) basisTrf{AmgSymMatrix(2)::Identity()};
-                basisTrf.row(0) = etaDir;
-                basisTrf.row(1) = phiDir;
+                basisTrf.row(0) = etaDir.block<2,1>(0,0);
+                basisTrf.row(1) = phiDir.block<2,1>(0,0);
 
-                stereoTrf = stereoTrf * basisTrf;
-                cmbCov(0, 0) = wireMeas->localCovariance<1>()(0,0);
-                cmbCov(1, 1) = stripMeas->localCovariance<1>()(0,0);
-                cmbCov = stereoTrf.transpose()* cmbCov * stereoTrf;
+                stereoTrf = (stereoTrf * basisTrf).inverse();
+
+
+
+                cmbCov(1, 1) = wireMeas->localCovariance<1>()(0,0);
+                cmbCov(0, 0) = stripMeas->localCovariance<1>()(0,0);
+                cmbCov = stereoTrf * cmbCov * stereoTrf.transpose();
                 break;
             } case sTgcStripType: {
                 // combined sTGC Space points can be strip/wire, strip/pad or pad/wire combinations.
-                const auto* primMeas = static_cast<const sTgcMeasurement*>(combinedPrd->primaryStrip());
-                const auto* secMeas = static_cast<const sTgcMeasurement*>(combinedPrd->secondaryStrip());
+                const auto* primMeas = static_cast<const sTgcMeasurement*>(etaStrip);
+                const auto* secMeas = static_cast<const sTgcMeasurement*>(phiStrip);
                 if(primMeas->channelType() == sTgcIdHelper::sTgcChannelTypes::Strip) {
                     cmbPos[0] = primMeas->localPosition<1>()[0];
                     cmbCov(0,0) = primMeas->localCovariance<1>()(0,0);
@@ -232,8 +259,8 @@ namespace xAOD{
                     cmbCov(0,0) = primMeas->localCovariance<2>()(0,0);
                 } else {
                     THROW_EXCEPTION("Unexpected secondary measurement type for combined sTGC space point "
-                                    <<idHelperSvc->toString(identify(combinedPrd))
-                                    << "secondary measurement " << idHelperSvc->toString(identify(secMeas)));
+                                    <<idHelperSvc->toString(identify(etaStrip))
+                                    << "secondary measurement " << idHelperSvc->toString(identify(phiStrip)));
                 }
                 if(secMeas->channelType() == sTgcIdHelper::sTgcChannelTypes::Wire){
                     cmbPos[1] = secMeas->localPosition<1>()[0];
@@ -243,12 +270,12 @@ namespace xAOD{
                     cmbCov(1,1) = secMeas->localCovariance<2>()(1,1);
                 } else {
                     THROW_EXCEPTION("Unexpected secondary measurement type for combined sTGC space point "
-                                    <<idHelperSvc->toString(identify(combinedPrd))
+                                    <<idHelperSvc->toString(identify(etaStrip))
                                     << "secondary measurement " << idHelperSvc->toString(identify(secMeas)));
                 }
                 break;
             } default:{
-                THROW_EXCEPTION("Unexpected measurement "<<idHelperSvc->toString(identify(combinedPrd)));
+                THROW_EXCEPTION("Unexpected measurement "<<idHelperSvc->toString(identify(etaStrip)));
                 break;
             }
         }
