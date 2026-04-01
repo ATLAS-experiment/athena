@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -65,12 +65,12 @@ namespace Muon {
         const Trk::Surface& rio_surface = EL->surface(RIO.identify());
         if (!rio_surface.globalToLocal(GP, GP, lp)) {
             Amg::Vector3D lpos = rio_surface.transform().inverse() * GP;
-	    //sTGC surfaces end up with a 20um shift in z when converted from ACTS track parameters, so optionally don't warn for such cases
-	    if(!m_restrictWarnings || fabs(fabs(lpos.z())-0.02)>1e-6){
-	      ATH_MSG_WARNING("Extrapolated GlobalPosition not on detector surface! Distance " << lpos.z());
-	    }
-            lp[Trk::locX] = lpos.x();
-            lp[Trk::locY] = lpos.y();
+            //sTGC surfaces end up with a 20um shift in z when converted from ACTS track parameters, so optionally don't warn for such cases
+            if(!m_restrictWarnings || 
+                std::abs(std::abs(lpos.z())-0.02)>1e-6) {
+              ATH_MSG_WARNING("Extrapolated GlobalPosition not on detector surface! Distance " << lpos.z());
+            }
+            lp = lpos.block<2,1>(0,0);
             positionAlongZ = lpos.z();
         }
 
@@ -86,9 +86,10 @@ namespace Muon {
                 //***************************
                 const RpcPrepData* MClus = static_cast<const RpcPrepData*>(&RIO);
                 const bool measphi = m_idHelperSvc->measuresPhi(RIO.identify());
-
-                if ((m_doFixedErrorRpcEta && !measphi) || 
-                    (m_doFixedErrorRpcPhi && measphi) ) {
+                if (MClus->localCovariance().cols() == 2) {
+                    loce = MClus->localCovariance();
+                } else if ((m_doFixedErrorRpcEta && !measphi) || 
+                    (m_doFixedErrorRpcPhi && measphi)) {
                     const double fixedError = measphi ? m_fixedErrorRpcPhi 
                                                       : m_fixedErrorRpcEta;
                     Amg::MatrixX mat(1, 1);
@@ -97,8 +98,8 @@ namespace Muon {
                 }
 
                 const MuonGM::RpcReadoutElement* re = MClus->detectorElement();
-                Amg::Vector3D clusPos = re->stripPos(RIO.identify());
-
+                const Amg::Vector3D& clusPos = MClus->globalPosition();
+               
                 // let's correct rpc time subtracting delay due to the induced electric signal propagation along strip
                 double timeAlongStrip = 0;
                 if (!measphi) {
@@ -106,8 +107,9 @@ namespace Muon {
                 } else {
                     timeAlongStrip = re->distanceToPhiReadout(GP) / 1000. * SIG_VEL;
                 }
-                if (positionAlongZ) timeAlongStrip = 0;  // no correction if extrapolated GlobalPosition not on detector surface!
-
+                if (positionAlongZ) {
+                    timeAlongStrip = 0;  // no correction if extrapolated GlobalPosition not on detector surface!
+                }
                 // let's evaluate the average  delay due to the induced electric signal propagation along strip
                 double assignedTimFromPrd = 0;
                 if (!measphi) {

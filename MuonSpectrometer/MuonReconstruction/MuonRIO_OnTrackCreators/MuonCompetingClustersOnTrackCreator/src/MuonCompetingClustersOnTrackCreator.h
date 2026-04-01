@@ -21,11 +21,11 @@ namespace Muon {
   /**
      @brief Tool to create MuonCompetingClustersOnTrack objects 
   */
-  class MuonCompetingClustersOnTrackCreator : public AthAlgTool, virtual public IMuonCompetingClustersOnTrackCreator
+  class MuonCompetingClustersOnTrackCreator : public extends<AthAlgTool, IMuonCompetingClustersOnTrackCreator>
   {
   public:
 
-    MuonCompetingClustersOnTrackCreator(const std::string&,const std::string&,const IInterface*);
+    using base_class::base_class;
     virtual ~MuonCompetingClustersOnTrackCreator()=default;
     virtual StatusCode initialize();
     
