@@ -36,8 +36,6 @@ class CorePlots: public PlotBase {
     TH1* sublead_subjet_pt{};
     TH1* sublead_subjet_ntracks{};
   
-    TH1* omni_score{}; 
-
   private:
     void initializePlots();
     std::string m_sDiTauJetContainerName;
