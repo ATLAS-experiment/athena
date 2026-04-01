@@ -9,6 +9,12 @@
 #include <ColumnarToolWrapperPython/PythonToolHandle.h>
 #include <ColumnarCore/ColumnarDef.h>
 
+#ifdef XAOD_STANDALONE
+#include <AsgMessaging/IMessagePrinter.h>
+#include <AsgMessaging/MessagePrinterOverlay.h>
+#endif
+#include <AsgMessaging/MsgLevel.h>
+
 #include <nanobind/nanobind.h>
 #include <nanobind/ndarray.h>
 #include <nanobind/operators.h>
@@ -144,6 +150,45 @@ void setImmutableColumnVoid(columnar::PythonToolHandle &self, const std::string&
   setColumnVoid(self, key, column, true);
 };
 
+namespace {
+
+#ifdef XAOD_STANDALONE
+/// Routes C++ IMessagePrinter::print() calls to a Python callable.
+/// callback signature: (level_int: int, tool_name: str, text: str)
+struct PyMessagePrinter : public asg::IMessagePrinter {
+    nb::callable m_callback;
+
+    explicit PyMessagePrinter(nb::callable cb)
+        : m_callback(std::move(cb)) {}
+
+    void print(MSG::Level lvl, const std::string& name,
+               const std::string& text) override {
+        // Guard against Python interpreter shutdown
+        if (!Py_IsInitialized())
+            return;
+        nb::gil_scoped_acquire gil;
+        m_callback(static_cast<int>(lvl), name, text);
+    }
+};
+
+// Global state for printer management
+static std::unique_ptr<PyMessagePrinter> g_printer;
+static std::unique_ptr<asg::MessagePrinterOverlay> g_overlay;
+
+void set_printer_from_callable(nb::callable cb) {
+    g_printer = std::make_unique<PyMessagePrinter>(std::move(cb));
+    g_overlay.reset();
+    g_overlay = std::make_unique<asg::MessagePrinterOverlay>(g_printer.get());
+}
+
+void clear_printer() {
+    g_overlay.reset();
+    g_printer.reset();
+}
+#endif  // XAOD_STANDALONE
+
+}  // anonymous namespace
+
 
 NB_MODULE(python_tool_handle, module) {
     module.doc() = "Nanobind bindings for PythonToolHandle";
@@ -153,6 +198,26 @@ NB_MODULE(python_tool_handle, module) {
 
     module.attr("numberOfEventsName") = &columnar::eventRangeColumnName;
     module.attr("eventRangeColumnName") = &columnar::eventRangeColumnName;
+
+    // Install a Python callable as the global C++ message printer.
+#ifdef XAOD_STANDALONE
+    // Overload 1: with callback function
+    module.def("set_python_printer", &set_printer_from_callable, nb::arg("callback"),
+    "Install a Python callable(level: int, name: str, text: str) as the global "
+    "C++ message printer.");
+
+    // Overload 2: reset (no argument)
+    module.def("set_python_printer", &clear_printer,
+    "Reset to the default stdout message printer.");
+#else
+    // In Athena/AthAnalysis builds IMessagePrinter does not exist; expose the
+    // function so Python code doesn't get AttributeError, but raise at call time.
+    module.def("set_python_printer", [](nb::args, nb::kwargs) {
+        throw std::runtime_error(
+            "set_python_printer is only available in standalone "
+            "(AnalysisBase/ColumnarAnalysis) builds, not in Athena/AthAnalysis.");
+    }, "Not available in Athena/AthAnalysis builds.");
+#endif  // XAOD_STANDALONE
 
     /// load in the ColumnAccessMode enum
     nb::enum_<columnar::ColumnAccessMode>(module, "ColumnAccessMode")
@@ -172,6 +237,16 @@ NB_MODULE(python_tool_handle, module) {
           }
       })
       .export_values(); // Makes the enum values accessible without namespace in Python
+
+    nb::enum_<MSG::Level>(module, "MsgLevel", nb::is_arithmetic())
+        .value("NIL",     MSG::NIL)
+        .value("VERBOSE", MSG::VERBOSE)
+        .value("DEBUG",   MSG::DEBUG)
+        .value("INFO",    MSG::INFO)
+        .value("WARNING", MSG::WARNING)
+        .value("ERROR",   MSG::ERROR)
+        .value("FATAL",   MSG::FATAL)
+        .export_values();
 
     nb::class_<columnar::ColumnInfo>(module, "ColumnInfo")
         .def(nb::init<>()) // Default constructor

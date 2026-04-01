@@ -150,6 +150,33 @@ def test_tool_call_synthetic():
     assert valid_values[0][0] == 1
 
 
+def test_tool_call_masked_events():
+    """Tool.__call__ works when events array is masked (e.g. events[selection])."""
+    tool = make_muon_eff_tool()
+    # Two events: select only the first
+    two_events = ak.Array(
+        {
+            "EventInfo.runNumber": np.array([284500, 284500], dtype=np.uint32),
+            "EventInfo.RandomRunNumber": np.array([284500, 284500], dtype=np.uint32),
+            "EventInfo.eventTypeBitmask": np.array([1, 1], dtype=np.uint32),
+            "Muons.pt": ak.values_astype(ak.Array([[10e5], [10e5]]), np.float32),
+            "Muons.eta": ak.values_astype(ak.Array([[1.0], [1.0]]), np.float32),
+            "Muons.phi": ak.values_astype(ak.Array([[1.0], [1.0]]), np.float32),
+            "Muons.muonType": ak.values_astype(ak.Array([[0], [0]]), np.uint16),
+        }
+    )
+    selection = np.array([True, False])
+    events_filtered = two_events[selection]
+
+    # This used to crash with KeyError: 'EventInfoAuxDyn1-data'
+    result = tool(events_filtered)
+
+    sf_values = result["Muons.sfOut"].to_list()
+    assert len(sf_values) == 1
+    assert len(sf_values[0]) == 1
+    assert sf_values[0][0] == approx(0.99509060382843018)
+
+
 def test_tool_systematics():
     """Applying a systematic variation changes the output SF."""
     tool = make_muon_eff_tool()
@@ -162,6 +189,21 @@ def test_tool_systematics():
 
     assert nominal != approx(varied)
 
+
+def test_tool_call_systematic_kwarg():
+    """Tool.__call__(events, systematic=...) applies variation inline and resets to nominal."""
+    tool = make_muon_eff_tool()
+    events = make_muon_events()
+
+    nominal = tool(events)["Muons.sfOut"].to_list()[0][0]
+    varied = tool(events, systematic="MUON_EFF_RECO_SYS__1up")["Muons.sfOut"].to_list()[0][0]
+
+    # Variation must differ from nominal
+    assert nominal != approx(varied)
+
+    # After the inline call, tool must have reset to nominal automatically
+    after = tool(events)["Muons.sfOut"].to_list()[0][0]
+    assert after == approx(nominal)
 
 
 @xfail(reason="nested vectors not yet implemented in extract_buffers")

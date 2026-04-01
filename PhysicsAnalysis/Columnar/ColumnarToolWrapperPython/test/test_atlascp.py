@@ -88,5 +88,18 @@ def test_positional_only_enforcement():
         atlascp.MuonEfficiencyScaleFactors(instance_name="unique0")
 
 
+def test_no_name_creates_tool():
+    """atlascp constructor works without providing an instance name."""
+    tool = atlascp.MuonEfficiencyScaleFactors()
+    assert isinstance(tool, Tool)
+
+
+def test_no_name_unique_per_call():
+    """Two no-name calls produce tools with different C++ handles."""
+    tool_a = atlascp.MuonEfficiencyScaleFactors()
+    tool_b = atlascp.MuonEfficiencyScaleFactors()
+    assert tool_a._handle is not tool_b._handle
+
+
 if __name__ == "__main__":
     _run_tests(sys.modules[__name__])
