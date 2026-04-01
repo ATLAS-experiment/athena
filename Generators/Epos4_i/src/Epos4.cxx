@@ -21,6 +21,8 @@
 
 #include "HepMC3/GenEvent.h"
 #include "HepMC3/Writer.h"
+#include "HepMC3/Print.h"
+#include "HepMC3/GenEvent.h" 
 
 #include <cstdlib> //for std::getenv
 #include <cstring> //for strlen, memcpy
@@ -333,6 +335,10 @@ StatusCode Epos4::fillEvt(HepMC::GenEvent *evt) {
   auto e =
       std::dynamic_pointer_cast<HepMC3::WriterEPOS>(writer)->current_event();
   /// Here we should put e into evt
+
+  e.set_units(HepMC3::Units::MEV, HepMC3::Units::MM);
+  HepMC3::Print::content(e);
+  
   *evt = e;
   return StatusCode::SUCCESS;
 }
