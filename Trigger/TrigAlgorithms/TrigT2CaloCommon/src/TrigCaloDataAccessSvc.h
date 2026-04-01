@@ -126,7 +126,6 @@ class TrigCaloDataAccessSvc : public extends<AthService, ITrigCaloDataAccessSvc>
   
   SG::SlotSpecificObj< HLTCaloEventCache > m_hLTCaloSlot;
 
-  std::mutex m_initMutex; // Build all tables in the first event
   std::mutex m_getCollMutex; // Make sure writing to a collection is protected
   std::mutex m_lardecoderProtect;  // protection for the larRodDecoder
   std::mutex m_tiledecoderProtect;  // protection for the tileRodDecoder
@@ -134,8 +133,8 @@ class TrigCaloDataAccessSvc : public extends<AthService, ITrigCaloDataAccessSvc>
   void reset_LArCol(LArCellCollection* coll);
   void reset_TileCol(TileCellCollection* col);
 
-  StatusCode lateInit( const EventContext& context );
-  bool m_lateInitDone{false};
+  void lateInit( const EventContext& context );
+  std::once_flag m_lateInitFlag;
 
   void convertROBs(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& robFrags, LArCellCont* larcell, LArRodBlockStructure*& larRodBlockStructure, uint16_t rodMinorVersion, uint32_t robBlockType, const LArDeadOTXFromSC* dead );
   void convertROBs( const EventContext& context, const std::vector<IdentifierHash>& rIds, TileCellCont* tilecell, TileROD_Decoder::D0CellsHLT* d0cells );
