@@ -19,13 +19,8 @@
 #include "CaloIdentifier/CaloGain.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "LArIdentifier/LArOnlineID.h"
+class IMessageSvc;
 
-#ifdef LARBSDBGOUTPUT
-#define MYLEVEL (MSG::FATAL)
-#define LARBSDBG(text) logstr<<MYLEVEL<<text<<endmsg
-#else
-#define LARBSDBG(text)
-#endif
 
 class LArRodBlockPhysicsV5 : public LArRodBlockStructure
 {
@@ -185,12 +180,8 @@ inline uint16_t LArRodBlockPhysicsV5::getFirstSampleIndex() const
 
 inline int LArRodBlockPhysicsV5::getNextEnergy(int& channelNumber,int32_t& energy,int32_t& time,int32_t& quality, uint32_t& gain)
 {
-  #ifdef LARBSDBGOUTPUT
-  MsgStream logstr(Athena::getMessageSvc(), BlockType());
-  #endif
-
-  LARBSDBG("in LArRodBlockPhysicsV5::getNextEnergy.");
-  LARBSDBG("m_channelsPerFEB=" << m_channelsPerFEB);
+  m_logstr << MSG::DEBUG << "in LArRodBlockPhysicsV5::getNextEnergy." << endmsg;
+  m_logstr << MSG::DEBUG << "m_channelsPerFEB=" << m_channelsPerFEB << endmsg;
   if (m_EnergyIndex>=m_channelsPerFEB)                       // Already beyond maximal number of channels
     return 0;
   if (!m_EnergyPointer)                                               // No data block present
@@ -206,7 +197,7 @@ inline int LArRodBlockPhysicsV5::getNextEnergy(int& channelNumber,int32_t& energ
   uint16_t range;          // 2 bits range
   uint16_t  sign;
 
-  LARBSDBG("-------->>>> in LArRodBlockPhysicsV5::getNextEnergy : decode energy.....");
+  m_logstr << MSG::DEBUG <<  "-------->>>> in LArRodBlockPhysicsV5::getNextEnergy : decode energy....." << "\n";
   // decode energy
   if(m_EnergyIndex & 0x1) encodedEnergy = m_EnergyPointer[m_EnergyIndex-1]; // Big/Little Endien stuff
   else                    encodedEnergy = m_EnergyPointer[m_EnergyIndex+1]; // Big/Little Endien stuff
@@ -239,7 +230,7 @@ inline int LArRodBlockPhysicsV5::getNextEnergy(int& channelNumber,int32_t& energ
       quality = m_TimeQualityPointer[m_TimeQualityIndex++]; 
 
 #ifdef LARBSDBGOUTPUT
-      logstr << MYLEVEL <<"This cell has time and Quality information "<<endmsg;
+      m_logstr << MSG::DEBUG <<"This cell has time and Quality information "<<endmsg;
 #endif
     }
   else  // Data has no Time and Quality information
@@ -250,9 +241,9 @@ inline int LArRodBlockPhysicsV5::getNextEnergy(int& channelNumber,int32_t& energ
 
 
 #ifdef LARBSDBGOUTPUT
-  logstr << MYLEVEL <<"Range = "<<range<<endmsg;
-  logstr << MYLEVEL <<"Sign = "<<sign<<endmsg;
-  logstr << MYLEVEL <<" Encoded Energy ="<< MSG::hex << encodedEnergy << MSG::dec << " E=" << energy
+  m_logstr << MSG::DEBUG <<"Range = "<<range<<endmsg;
+  m_logstr << MSG::DEBUG <<"Sign = "<<sign<<endmsg;
+  m_logstr << MSG::DEBUG <<" Encoded Energy ="<< MSG::hex << encodedEnergy << MSG::dec << " E=" << energy
 	 << " t=" << time 
 	 << " Q=" << quality 
 	 << " G=" << gain 
@@ -351,11 +342,5 @@ inline void LArRodBlockPhysicsV5::setEz(double Ez){
         setE (4, Ez);
 }
 
-
-
-#ifdef LARBSDBGOUTPUT
-#undef LARBSDBGOUTPUT
-#endif
-#undef LARBSDBG
 
 #endif

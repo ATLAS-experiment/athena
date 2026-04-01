@@ -17,12 +17,6 @@
 #include "GaudiKernel/ISvcLocator.h"
 #include <iostream>
 
-#ifdef LARBSDBGOUTPUT
-#define MYLEVEL (MSG::FATAL)
-#define LARBSDBG(text) logstr<<MYLEVEL<<text<<endmsg
-#else
-#define LARBSDBG(text)
-#endif
 
 namespace {
 union ShortLong {
@@ -46,12 +40,12 @@ LArRodBlockPhysicsV5::LArRodBlockPhysicsV5(IMessageSvc* msgSvc)
   // retrieve onlineHelper
   SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
   if (!detStore) {
-    std::cout << "Unable to locate DetectorStore" << std::endl;
+    m_logstr << MSG::ERROR << "Unable to locate DetectorStore" << endmsg;
     std::abort();
   }
   StatusCode sc = detStore->retrieve(m_onlineHelper, "LArOnlineID");
   if (sc.isFailure()) {
-    std::cout << "Could not get LArOnlineID helper !" << std::endl;
+    m_logstr << MSG::ERROR << "Could not get LArOnlineID helper !" << endmsg;
     std::abort();
   }
 }
@@ -162,13 +156,13 @@ bool LArRodBlockPhysicsV5::setPointers()
       if (m_requiredNSamples > 0 && 
           getHeader32(NGains) != (uint32_t)0x10000 + m_requiredNSamples) problem=9;
       if(problem) { // Try to recompute offsets
-	std::cout << "LArByteStreamProblem " << problem << std::endl;
-        std::cout << "NSamples = " << std::dec << ns << std::endl;
-        std::cout << "getHeader32(NGains) = " << std::hex << getHeader32(NGains) << std::endl;
-	std::cout << "NWTot:   " << std::hex  << getNumberOfWords() << " n1=" << n1 << " (" << n1_tmp << ") n2=" << n2 << " (" << n2_tmp << ")" << std::endl;
-	std::cout << "Found 1: " << off1 << " " << dim1 << std::endl;
-	std::cout << "Found 2: " << off2 << " " << dim2 << std::endl;
-	std::cout << "Found 3: " << off3 << " " << dim3 << std::dec << std::endl;
+        m_logstr << MSG::ERROR << "LArByteStreamProblem " << problem << endmsg;
+        m_logstr << MSG::ERROR << "NSamples = " << std::dec << ns << endmsg;
+        m_logstr << MSG::ERROR << "getHeader32(NGains) = " << std::hex << getHeader32(NGains) << endmsg;
+	m_logstr << MSG::ERROR << "NWTot:   " << std::hex  << getNumberOfWords() << " n1=" << n1 << " (" << n1_tmp << ") n2=" << n2 << " (" << n2_tmp << ")" << endmsg;
+	m_logstr << MSG::ERROR << "Found 1: " << off1 << " " << dim1 << endmsg;
+	m_logstr << MSG::ERROR << "Found 2: " << off2 << " " << dim2 << endmsg;
+	m_logstr << MSG::ERROR << "Found 3: " << off3 << " " << dim3 << std::dec << endmsg;
 	
 	if(n1==n1_tmp && n2==n2_tmp) { 	// Check consistency of cells above threshold
 	  off1 = off1_tmp;
@@ -177,9 +171,9 @@ bool LArRodBlockPhysicsV5::setPointers()
 	  dim2 = dim2_tmp;
 	  off3 = off3_tmp;
 	  dim3 = dim3_tmp;
-	  std::cout << "Recomputed 1: " << std::hex << off1 << " " << dim1 << std::endl;
-	  std::cout << "Recomputed 2: " << off2 << " " << dim2 << std::endl;
-	  std::cout << "Recomputed 3: " << off3 << " " << dim3 << std::dec << std::endl;
+	  m_logstr << MSG::ERROR << "Recomputed 1: " << std::hex << off1 << " " << dim1 << endmsg;
+	  m_logstr << MSG::ERROR << "Recomputed 2: " << off2 << " " << dim2 << endmsg;
+	  m_logstr << MSG::ERROR << "Recomputed 3: " << off3 << " " << dim3 << std::dec << endmsg;
 
 	  if (off1 && dim1+off1+off<m_FebBlockSize) {
 	    off1 += off;
@@ -218,8 +212,8 @@ bool LArRodBlockPhysicsV5::setPointers()
 
       if(problem) {
 	resetPointers();
-	std::cout << "LArByteStreamProblem " << problem << std::endl;
-	std::cout << "Unrecoverable problem" << std::endl;
+	m_logstr << MSG::ERROR << "LArByteStreamProblem " << problem << endmsg;
+	m_logstr << MSG::ERROR << "Unrecoverable problem" << endmsg;
       }
    }
 
@@ -229,17 +223,16 @@ bool LArRodBlockPhysicsV5::setPointers()
 int LArRodBlockPhysicsV5::getNextRawData(int& channelNumber, std::vector<short>& samples, uint32_t& gain)
 {
 #ifdef LARBSDBGOUTPUT
-  MsgStream logstr(Athena::getMessageSvc(), BlockType());
   //Debug output
-  logstr << MYLEVEL << "Let s go in getNextRawData..." << endmsg;
-  logstr << MYLEVEL << "GetNextRawData for FEB 0x" << MSG::hex << (uint32_t)getHeader32(FEBID) << MSG::dec << endmsg;
-  logstr << MYLEVEL << "m_RawDataPointer=" << m_RawDataPointer << " m_RawDataIndex="<<  m_RawDataIndex 
+  m_logstr << MSG::DEBUG << "Let s go in getNextRawData..." << endmsg;
+  m_logstr << MSG::DEBUG << "GetNextRawData for FEB 0x" << MSG::hex << (uint32_t)getHeader32(FEBID) << MSG::dec << endmsg;
+  m_logstr << MSG::DEBUG << "m_RawDataPointer=" << m_RawDataPointer << " m_RawDataIndex="<<  m_RawDataIndex
 	 << " m_channelsPerFEB=" << m_channelsPerFEB << endmsg;
 #endif
 
   if (m_RawDataIndex>=m_channelsPerFEB) { //Already beyond maximal number of channels
 #ifdef LARBSDBGOUTPUT
-    logstr << MYLEVEL << "Maximum number of channels reached" << endmsg;
+    m_logstr << MSG::DEBUG << "Maximum number of channels reached" << endmsg;
 #endif
     return 0;
   }
@@ -256,8 +249,8 @@ int LArRodBlockPhysicsV5::getNextRawData(int& channelNumber, std::vector<short>&
   const unsigned int ngains   = getHeader16(NGains);
 
 #ifdef LARBSDBGOUTPUT
-  logstr << MYLEVEL << "This FEB has " << nsamples <<  " samples" << endmsg;
-  logstr << MYLEVEL << "This FEB has " << ngains   <<  " gains" << endmsg;
+  m_logstr << MSG::DEBUG << "This FEB has " << nsamples <<  " samples" << endmsg;
+  m_logstr << MSG::DEBUG << "This FEB has " << ngains   <<  " gains" << endmsg;
 #endif
 
   if(ngains==0 || nsamples==0) return 0;
@@ -303,11 +296,11 @@ int LArRodBlockPhysicsV5::getNextRawData(int& channelNumber, std::vector<short>&
   gain=RawToOfflineGain(febgain);
 
 #ifdef LARBSDBGOUTPUT
-  logstr << MYLEVEL << " ===> ROD Channel = " << m_RawDataIndex << endmsg; 
-  logstr << MYLEVEL << " ===> FEB Channel = " << channelNumber << endmsg; 
-  logstr << MYLEVEL << " ===> Gain        = " << gain << endmsg;
+  m_logstr << MSG::DEBUG << " ===> ROD Channel = " << m_RawDataIndex << endmsg;
+  m_logstr << MSG::DEBUG << " ===> FEB Channel = " << channelNumber << endmsg; 
+  m_logstr << MSG::DEBUG << " ===> Gain        = " << gain << endmsg;
   for(int i=0;i<nsamples;i++)
-    logstr << MYLEVEL << " ===> sample " << i << "    = " << samples[i] << endmsg;
+    m_logstr << MSG::DEBUG << " ===> sample " << i << "    = " << samples[i] << endmsg;
   int n = m_RawDataIndex;
   int32_t e,t,q;
   uint32_t g;
@@ -327,7 +320,7 @@ int LArRodBlockPhysicsV5::getNextRawData(int& channelNumber, std::vector<short>&
 	samples[rearrangeFirstSample]=movedSample;
    }
 #ifdef LARBSDBGOUTPUT
-  logstr << MYLEVEL << "GetNextRawData for FEB finished 0x" << MSG::hex << (uint32_t)getHeader32(FEBID) << MSG::dec << endmsg;
+  m_logstr << MSG::DEBUG << "GetNextRawData for FEB finished 0x" << MSG::hex << (uint32_t)getHeader32(FEBID) << MSG::dec << endmsg;
 #endif
   return 1;
 }
@@ -335,30 +328,29 @@ int LArRodBlockPhysicsV5::getNextRawData(int& channelNumber, std::vector<short>&
 int LArRodBlockPhysicsV5::getNextDigits(int& channelNumber, std::vector<short>& samples, uint32_t& gain)
 {
 #ifdef LARBSDBGOUTPUT
-  MsgStream logstr(Athena::getMessageSvc(), BlockType());
   //Debug output
-  logstr << MYLEVEL << "Let s go in getNextDigits..." << endmsg;
-  logstr << MYLEVEL << "GetNextDigits for FEB 0x" << MSG::hex << (uint32_t)getHeader32(FEBID) << MSG::dec << endmsg;
-  logstr << MYLEVEL << "m_DigitsPointer=" << m_DigitsPointer << " m_DigitsIndex="<<  m_DigitsIndex 
+  m_logstr << MSG::DEBUG << "Let s go in getNextDigits..." << endmsg;
+  m_logstr << MSG::DEBUG << "GetNextDigits for FEB 0x" << MSG::hex << (uint32_t)getHeader32(FEBID) << MSG::dec << endmsg;
+  m_logstr << MSG::DEBUG << "m_DigitsPointer=" << m_DigitsPointer << " m_DigitsIndex="<<  m_DigitsIndex
 	 << " m_DigitsChannel="<<  m_DigitsChannel 
 	 << " m_channelsPerFEB=" << m_channelsPerFEB << endmsg;
 #endif
 
   if (m_DigitsChannel>=m_channelsPerFEB) { //Already beyond maximal number of channels
 #ifdef LARBSDBGOUTPUT
-    logstr << MYLEVEL << "Maximum number of channels reached" << endmsg;
+    m_logstr << MSG::DEBUG << "Maximum number of channels reached" << endmsg;
 #endif
     return 0;
   }
   if (!m_DigitsPointer) { //Block does not exist
 #ifdef LARBSDBGOUTPUT
-    logstr << MYLEVEL << "No Digits Block in this FEB" << endmsg;
+    m_logstr << MSG::DEBUG << "No Digits Block in this FEB" << endmsg;
 #endif
     return 0; 
   }
   if (!m_MaskDigitsPointer) { //Block does not exist
 #ifdef LARBSDBGOUTPUT
-    logstr << MYLEVEL << "No Mask Digits Block in this FEB" << endmsg;
+    m_logstr << MSG::DEBUG << "No Mask Digits Block in this FEB" << endmsg;
 #endif
     return 0; 
   }
@@ -372,7 +364,7 @@ int LArRodBlockPhysicsV5::getNextDigits(int& channelNumber, std::vector<short>& 
     m_DigitsChannel++;
     if (m_DigitsChannel>=m_channelsPerFEB) { //Already beyond maximal number of channels
 #ifdef LARBSDBGOUTPUT
-      logstr << MYLEVEL << "Maximum number of channels reached" << endmsg;
+      m_logstr << MSG::DEBUG << "Maximum number of channels reached" << endmsg;
 #endif
       return 0;
     }
@@ -391,7 +383,7 @@ int LArRodBlockPhysicsV5::getNextDigits(int& channelNumber, std::vector<short>& 
   } else gain=0xffffffff;
 
 #ifdef LARBSDBGOUTPUT
-  logstr << MYLEVEL << "This FEB has " << nsamples <<  " samples" << endmsg;
+  m_logstr << MSG::DEBUG << "This FEB has " << nsamples <<  " samples" << endmsg;
 #endif
 
   if(nsamples==0) return 0;
@@ -421,11 +413,11 @@ int LArRodBlockPhysicsV5::getNextDigits(int& channelNumber, std::vector<short>& 
   }
 
 #ifdef LARBSDBGOUTPUT
-  logstr << MYLEVEL << " ===> ROD Channel = " << m_DigitsChannel << endmsg; 
-  logstr << MYLEVEL << " ===> FEB Channel = " << channelNumber << endmsg; 
-  logstr << MYLEVEL << " ===> Gain        = " << gain << endmsg;
+  m_logstr << MSG::DEBUG << " ===> ROD Channel = " << m_DigitsChannel << endmsg;
+  m_logstr << MSG::DEBUG << " ===> FEB Channel = " << channelNumber << endmsg; 
+  m_logstr << MSG::DEBUG << " ===> Gain        = " << gain << endmsg;
   for(int i=0;i<nsamples;i++)
-    logstr << MYLEVEL << " ===> sample " << i << "    = " << samples[i] << endmsg;
+    m_logstr << MSG::DEBUG << " ===> sample " << i << "    = " << samples[i] << endmsg;
 #endif
   m_DigitsIndex++;
   m_DigitsChannel++;
@@ -442,7 +434,7 @@ int LArRodBlockPhysicsV5::getNextDigits(int& channelNumber, std::vector<short>& 
 	samples[rearrangeFirstSample]=movedSample;
    }
 #ifdef LARBSDBGOUTPUT
-  logstr << MYLEVEL << "GetNextDigits for FEB finished 0x" << MSG::hex << (uint32_t)getHeader32(FEBID) << MSG::dec << endmsg;
+  m_logstr << MSG::DEBUG << "GetNextDigits for FEB finished 0x" << MSG::hex << (uint32_t)getHeader32(FEBID) << MSG::dec << endmsg;
 #endif
   return 1;
 }
@@ -889,9 +881,3 @@ bool LArRodBlockPhysicsV5::operator ()
 
   return febId1 < febId2 ; 
 }
-
-
-#ifdef LARBSDBGOUTPUT
-#undef LARBSDBGOUTPUT
-#endif
-#undef LARBSDBG
