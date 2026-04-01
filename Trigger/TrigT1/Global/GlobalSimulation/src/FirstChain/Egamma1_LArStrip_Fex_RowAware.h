@@ -47,7 +47,7 @@ namespace GlobalSim {
     // tool to get a vector of cal cells
     ToolHandle<ICaloCellsProducer> m_cellProducer{this,
 	"caloCellProducer",
-	"EMB1CellFromCaloCells",
+	"GlobalSim::EMB1CellFromCaloCells",
 	"AlgTool to provide a vector of CaloCells"
 	};
 
@@ -55,7 +55,7 @@ namespace GlobalSim {
     ToolHandle<eFexRoIAlgTool>
     m_roiAlgTool{this,
 		 "roiAlgTool",
-		 "EMB1CellFromCaloCells",
+		 "GlobalSim::eFexRoIAlgTool",
 		 "AlgTool to provide a vector<const xAOD::eFexEMRoI*>"};
 
     /** @brief Key to the total noise used for each CaloCell */
