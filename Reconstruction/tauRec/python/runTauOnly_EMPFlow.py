@@ -1,5 +1,5 @@
 #!/usr/bin/env athena.py
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Simple script to run a
 # Tau job
@@ -12,16 +12,6 @@
 # python runTauOnly_EMPFlow.py
 
 import sys
-
-def tauSpecialContent(flags,cfg):
-    from OutputStreamAthenaPool.OutputStreamConfig import outputStreamName
-    StreamAOD = cfg.getEventAlgo(outputStreamName("AOD"))
-    newList = [x for x in StreamAOD.ItemList if "Tau" in x]
-    StreamAOD.ItemList = newList
-
-    StreamESD = cfg.getEventAlgo(outputStreamName("ESD"))
-    newList = [x for x in StreamESD.ItemList if "Tau" in x]
-    StreamESD.ItemList = newList
 
 def _run():
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -58,6 +48,7 @@ def _run():
     acc = RecoSteering(flags)
 
     # keep only tau containers
+    from tauRec.ConfigurationHelpers import tauSpecialContent 
     tauSpecialContent(flags,acc)
 
     # Special message service configuration
