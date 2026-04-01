@@ -164,7 +164,7 @@ TrkTrackState* TrackFitter::extrapolate(TrkTrackState* pTS,
   const double minStep=30.0;
 
   double sint,cost,sinf,cosf;
-  double gP[3],gPi[3],lP[3],gV[3],a,b,c,s,J0[7][5],Rf[5],descr,CQ,Ac,Av,Cc;
+  double gP[3],gPi[3],lP[3],gV[3],a,b,c,s,J0[7][5]{},Rf[5],descr,CQ,Ac,Av,Cc;
   double V[3],P[3],M[3][3],AG[5][5],D[4],Jm[7][7],Gi[5][5],Gf[5][5],
          J1[5][7],A[5][5],gB[3],Buf[5][7],DVx,DVy,DVz;
   int i,j,m,nStep,nStepMax;
@@ -176,9 +176,8 @@ TrkTrackState* TrackFitter::extrapolate(TrkTrackState* pTS,
   sinf=sin(pTS->getTrackState(2));cost=cos(pTS->getTrackState(3));
   gV[0]=sint*cosf;gV[1]=sint*sinf;gV[2]=cost;CQ=C*pTS->getTrackState(4);
 
-  memset(&J0[0][0],0,sizeof(J0));
 
-  bool doPrint=false;
+  const bool doPrint=false;
 
   gB[0]=0.0f;gB[1]=0.0f;gB[2]=20.84f;
 
