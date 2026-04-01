@@ -92,7 +92,8 @@ def GoodRunsListSelectionToolCfg(flags, **kwargs):
         '2018': cvmfs + ''.join(GRLDict['GRL2018_Triggerno17e33prim']),
         '2022': cvmfs + ''.join(GRLDict['GRL2022']),
         '2023': cvmfs + ''.join(GRLDict['GRL2023']),
-        '2024': cvmfs + ''.join(GRLDict['GRL2024'])
+        '2024': cvmfs + ''.join(GRLDict['GRL2024']),
+        '2025': cvmfs + ''.join(GRLDict['GRL2025'])
     }
 
     acc.setPrivateTools(CompFactory.GoodRunsListSelectionTool(
