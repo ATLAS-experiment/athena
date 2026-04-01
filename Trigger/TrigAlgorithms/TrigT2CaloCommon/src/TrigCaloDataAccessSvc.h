@@ -134,11 +134,11 @@ class TrigCaloDataAccessSvc : public extends<AthService, ITrigCaloDataAccessSvc>
   void reset_LArCol(LArCellCollection* coll);
   void reset_TileCol(TileCellCollection* col);
 
-  unsigned int lateInit( const EventContext& context );
+  StatusCode lateInit( const EventContext& context );
   bool m_lateInitDone{false};
 
-  unsigned int convertROBs(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& robFrags, LArCellCont* larcell, LArRodBlockStructure*& larRodBlockStructure, uint16_t rodMinorVersion, uint32_t robBlockType, const LArDeadOTXFromSC* dead );
-  unsigned int convertROBs( const EventContext& context, const std::vector<IdentifierHash>& rIds, TileCellCont* tilecell, TileROD_Decoder::D0CellsHLT* d0cells );
+  void convertROBs(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& robFrags, LArCellCont* larcell, LArRodBlockStructure*& larRodBlockStructure, uint16_t rodMinorVersion, uint32_t robBlockType, const LArDeadOTXFromSC* dead );
+  void convertROBs( const EventContext& context, const std::vector<IdentifierHash>& rIds, TileCellCont* tilecell, TileROD_Decoder::D0CellsHLT* d0cells );
 
 
   /**
@@ -158,19 +158,19 @@ class TrigCaloDataAccessSvc : public extends<AthService, ITrigCaloDataAccessSvc>
   /**
    * @brief LAr TT collections preparation code
    **/
-  unsigned int prepareLArCollections( const EventContext& context,
-				const IRoiDescriptor& roi, 
-				const int sampling,
-				DETID detector );
+  StatusCode prepareLArCollections( const EventContext& context,
+                                    const IRoiDescriptor& roi,
+                                    const int sampling,
+                                    DETID detector );
 
-  unsigned int prepareTileCollections( const EventContext& context,
-				const IRoiDescriptor& roi );
+  StatusCode prepareTileCollections( const EventContext& context,
+                                     const IRoiDescriptor& roi );
 
-  unsigned int prepareMBTSCollections( const EventContext& context);
+  StatusCode prepareMBTSCollections( const EventContext& context);
 
-  unsigned int prepareLArFullCollections( const EventContext& context );
+  StatusCode prepareLArFullCollections( const EventContext& context );
 
-  unsigned int prepareTileFullCollections( const EventContext& context );
+  StatusCode prepareTileFullCollections( const EventContext& context );
 
   std::vector<uint32_t> m_vrodid32fullDet;
   std::vector<uint32_t> m_vrodid32tile;
