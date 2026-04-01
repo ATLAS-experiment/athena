@@ -74,7 +74,8 @@ atlas_add_test( MetaDataSvc_test
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} TestTools AthenaKernel CxxUtils GaudiKernel
                   StoreGateLib PersistencySvc AthenaBaseComps RootAuxDynIOHeaders PersistentDataModel SGTools Boost::unit_test_framework
-   POST_EXEC_SCRIPT nopost.sh)
+   LOG_IGNORE_PATTERN "ERROR Unable to get|ERROR Failing|ERROR Unable to call|tool->endInputFile|Cannot create proxy|FAILURE: addProxyToInputMetaDataStore"
+   POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( AthTPCnvSvc
    SCRIPT test/AthTPCnvSvc_test.py
@@ -88,13 +89,14 @@ atlas_add_test( AthDictLoaderSvc
 
 atlas_add_test( ItemListSemanticsTest
    SCRIPT test/OutputStreamItemListTest.py
-   POST_EXEC_SCRIPT nopost.sh)
+   POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( TimeoutAlgTest
    SCRIPT test/TimeoutAlg_test.py
    PROPERTIES PROCESSORS 2
               PASS_REGULAR_EXPRESSION "ERROR Event timeout"
-   POST_EXEC_SCRIPT nopost.sh )
+   LOG_IGNORE_PATTERN "ERROR Event timeout"
+   POST_EXEC_SCRIPT noerror.sh )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py
