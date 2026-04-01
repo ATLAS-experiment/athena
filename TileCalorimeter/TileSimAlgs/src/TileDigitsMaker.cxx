@@ -1103,8 +1103,6 @@ StatusCode TileDigitsMaker::fillDigitCollection(const TileHitCollection* hitColl
   std::array<double, nchMax> ech_tot; ech_tot.fill(0.0);
   //double ech_int[nchMax];
 
-  IdContext drawer_context = m_tileHWID->drawer_context();
-
   /* Set up buffers for handling information in a single collection. */
   HWIdentifier drawer_id = m_tileHWID->drawer_id(hitCollection->identify());
   int ros = m_tileHWID->ros(drawer_id);
