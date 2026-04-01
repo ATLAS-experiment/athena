@@ -47,7 +47,7 @@ namespace CP {
     if (false == answer) ATH_MSG_FATAL("Invalid neutral PFO Scale has been specified in PFlowUtils::PFOWeightTool");
 
     // Compute the weights internally
-    weight = 0.;
+    weight = 1.;
     if(cpfo.pt()>100e3) {
       ATH_MSG_WARNING("PFO with invalid pt " << cpfo.pt() << ", quitting.");
       return StatusCode::FAILURE;
@@ -114,7 +114,7 @@ namespace CP {
     if (false == answer) ATH_MSG_FATAL("Invalid neutral PFO Scale has been specified in PFlowUtils::PFOWeightTool");
 
     // Compute the weights internally
-    weight = 0.;
+    weight = 1.;
     if(cpfo.pt()>100e3) {
       ATH_MSG_WARNING("PFO with invalid pt " << cpfo.pt() << ", quitting.");
       return StatusCode::FAILURE;
