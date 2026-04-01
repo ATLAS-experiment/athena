@@ -23,17 +23,16 @@ DCUBE_CONFIG="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/dcu
 
 
 # Create HITS_SIM.pool.root file for latest release
-setupATLAS
 mkdir -p athena_latest
 (
     cd athena_latest
-    asetup main,Athena,latest
-    # test_RUN3_FullG4MT_QS_ttbar_MT.sh
 
     export ATHENA_CORE_NUMBER=8
-    # RUN3 setup
     geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
     conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+
+
+    # ttbar test
     Sim_tf.py \
         --CA \
         --multithreaded \
@@ -53,15 +52,13 @@ mkdir -p athena_latest
 )
 
 # Create HITS_SIM.pool.root file for 25.0.47 release
-setupATLAS
 mkdir -p athena_25.0.47
 (
     cd athena_25.0.47
     asetup Athena,25.0.47
-    # test_RUN3_FullG4MT_QS_ttbar_MT.sh
 
+    # ttbar test 
     export ATHENA_CORE_NUMBER=8
-    # RUN3 setup
     geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
     conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
     Sim_tf.py \
@@ -81,8 +78,6 @@ mkdir -p athena_25.0.47
 
     SimValid_tf.py --inputHITSFile test.CA.HITS.pool.root --outputHIST_SIMFile test.CA.HITS_SIM.pool.root
 )
-
-
 
 X_FILE="athena_25.0.47/test.CA.HITS_SIM.pool.root"
 R_FILE="athena_latest/test.CA.HITS_SIM.pool.root"
