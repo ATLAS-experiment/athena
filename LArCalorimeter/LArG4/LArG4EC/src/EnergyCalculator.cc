@@ -68,7 +68,7 @@
 
 #include "EnergyCalculator.h"
 #include "AthenaKernel/Units.h"
-
+#include <format>
 
 #define MSG_VECTOR(v) "(" << v.x() << ", " << v.y() << ", " << v.z() << ")"
 
@@ -176,12 +176,8 @@ void EnergyCalculator::CorrectionTypeHandler(Gaudi::Details::PropertyBase&)
     case 8: m_correction_type=EMEC_ECOR_CHCL1; break;
     default:
       {
-        std::ostringstream merr;
-        merr <<
-          "EnergyCalculator::CorrectionTypeHandler FATAL: invalid EnergyCorrection_t specified "
-             << m_corrProp.value();
-        std::cerr << merr.str() << std::endl;
-        throw GaudiException(merr.str(), "EnergyCalculator::CorrectionTypeHandler", StatusCode::FAILURE);
+        throw GaudiException(std::format("EnergyCalculator::CorrectionTypeHandler FATAL: invalid EnergyCorrection_t specified {}",m_corrProp.value())
+                            , "EnergyCalculator::CorrectionTypeHandler", StatusCode::FAILURE);
       }
     }
 }
@@ -212,12 +208,8 @@ void EnergyCalculator::SolidTypeHandler(Gaudi::Details::PropertyBase&)
     case 19: m_solidtype = LArG4::OuterLeadWheel; break;
     default:
       {
-        std::ostringstream merr;
-        merr <<
-          "EnergyCalculator::SolidTypeHandler FATAL: invalid LArWheelCalculator_t specified "
-             << m_solidtypeProp.value();
-        std::cerr << merr.str() << std::endl;
-        throw GaudiException(merr.str(), "EnergyCalculator::SolidTypeHandler", StatusCode::FAILURE);
+        throw GaudiException(std::format("EnergyCalculator::SolidTypeHandler FATAL: invalid LArWheelCalculator_t specified {}",
+                                m_solidtypeProp.value()), "EnergyCalculator::SolidTypeHandler", StatusCode::FAILURE);
       }
     }
 }
@@ -266,24 +258,15 @@ StatusCode EnergyCalculator::initialize()
   }
 
   for(int i = 0; i < 7; i ++){
-    std::ostringstream A0STR;
-    A0STR << "_" << i;
-    const std::string A0 = A0STR.str();
-    const std::string colName = "ZIW" + A0;
+    const std::string colName = std::format("ZIW_{}", i);
     m_ziw[i] = (*emecSamplingSep)[0]->getDouble(colName)*CLHEP::cm;
   }
   for(int i = 0; i < 44; i ++){
-    std::ostringstream A0STR;
-    A0STR << "_" << i;
-    const std::string A0 = A0STR.str();
-    const std::string colName = "ZSEP12" + A0;
+    const std::string colName = std::format("ZSEP12_{}", i);
     m_zsep12[i] = (*emecSamplingSep)[0]->getDouble(colName)*CLHEP::cm;
   }
   for(int i = 0; i < 22; i ++){
-    std::ostringstream A0STR;
-    A0STR << "_" << i;
-    const std::string A0 = A0STR.str();
-    const std::string colName = "ZSEP23" + A0;
+    const std::string colName = std::format("ZSEP23_{}", i);
     m_zsep23[i] = (*emecSamplingSep)[0]->getDouble(colName)*CLHEP::cm;
   }
 
@@ -604,23 +587,22 @@ G4bool EnergyCalculator::FindIdentifier_Default(
 
   const G4String name = preStepVolume->GetName();
 
-  static const std::vector<std::pair<std::string, int>> patterns = {
-    {"Slice",     1},
-    {"Electrode", 2},
-    {"Absorber",  2},
-    {"Glue",      3},
-    {"Lead",      4}
-  };
-  
+  static const std::array<std::pair<std::regex, int>, 5> compiled_patterns = {{
+        {std::regex(R"(Slice\d{2})"),     1},
+        {std::regex(R"(Electrode\d{2})"), 2},
+        {std::regex(R"(Absorber\d{2})"),  2},
+        {std::regex(R"(Glue\d{2})"),      3},
+        {std::regex(R"(Lead\d{2})"),      4}
+  }};
   int offset = 0;
-  for (const auto& p : patterns) {
-	  // Regex: Slice[0-9]{2}, Electrode[0-9]{2}, ecc.
-	  std::regex re(p.first + R"(\d{2})");
-	  if (std::regex_search(name, re)) {
-		  offset = p.second;
-		  break;
-	  }
+  for (const auto& p : compiled_patterns) {
+    // Regex: Slice[0-9]{2}, Electrode[0-9]{2}, ecc.
+    if (std::regex_search(name, p.first)) {
+        offset = p.second;
+        break;
+    }
   }
+  
 
   if (offset > 0) {
 	  transf = pre_step_point->GetTouchable()->GetHistory()->GetTransform(profundis - offset);
@@ -724,33 +706,33 @@ G4bool EnergyCalculator::FindIdentifier_Default(
   // overall geom param.:
 
   //   G4double WheelThickness    =  514.*CLHEP::mm;
-  static const G4double rOuterCutoff      = 2034.*CLHEP::mm;
-  static const G4double gapBetweenWheels  =    3.*CLHEP::mm;
-  static const G4double eta_hi = 3.2;
-  static const G4double eta_mid= 2.5;
-  static const G4double eta_low= 1.375;
+  constexpr G4double rOuterCutoff      = 2034.*CLHEP::mm;
+  constexpr G4double gapBetweenWheels  =    3.*CLHEP::mm;
+  constexpr G4double eta_hi = 3.2;
+  constexpr G4double eta_mid= 2.5;
+  constexpr G4double eta_low= 1.375;
 
   // specific param of electrode design;
 
-  static const G4double WidthofHVBus           = 2.5*CLHEP::mm;
-  static const G4double WidthofKaptonGap       = 1.0*CLHEP::mm;
-  static const G4double WidthofKaptonGapinS1   = 0.5*CLHEP::mm;
-  static const G4double WidthofKaptonGapatEdge = 2.*CLHEP::mm;
-  static const G4double zStartofIW   =   4.*CLHEP::mm;   // what follows measured by hand
-  static const G4double zStartofC7   =   8.4*CLHEP::mm;
-  static const G4double zStartofC3   =   7.8*CLHEP::mm;
-  static const G4double  zEndofC8e2  =   4.5*CLHEP::mm;
-  static const G4double  zEndofC9e19 =  30.*CLHEP::mm;
-  static const G4double   r0aofC9e18 = 743.1*CLHEP::mm;
-  static const G4double   r0cofC9e18 = 751.1*CLHEP::mm;
-  static const G4double  zSepofC9e18 =  14.*CLHEP::mm;
-  static const G4double    txofC9e18 =   0.48;
+  constexpr G4double WidthofHVBus           = 2.5*CLHEP::mm;
+  constexpr G4double WidthofKaptonGap       = 1.0*CLHEP::mm;
+  constexpr G4double WidthofKaptonGapinS1   = 0.5*CLHEP::mm;
+  constexpr G4double WidthofKaptonGapatEdge = 2.*CLHEP::mm;
+  constexpr G4double zStartofIW   =   4.*CLHEP::mm;   // what follows measured by hand
+  constexpr G4double zStartofC7   =   8.4*CLHEP::mm;
+  constexpr G4double zStartofC3   =   7.8*CLHEP::mm;
+  constexpr G4double  zEndofC8e2  =   4.5*CLHEP::mm;
+  constexpr G4double  zEndofC9e19 =  30.*CLHEP::mm;
+  constexpr G4double   r0aofC9e18 = 743.1*CLHEP::mm;
+  constexpr G4double   r0cofC9e18 = 751.1*CLHEP::mm;
+  constexpr G4double  zSepofC9e18 =  14.*CLHEP::mm;
+  constexpr G4double    txofC9e18 =   0.48;
 
-  static const G4double DistMax              = WidthofHVBus+WidthofKaptonGap;
-  static const G4double DistMaxS1            = WidthofHVBus+WidthofKaptonGapinS1;
-  static const G4double DistMaxatEdgeinCrack = gapBetweenWheels/2.+WidthofKaptonGapatEdge+
+  constexpr G4double DistMax              = WidthofHVBus+WidthofKaptonGap;
+  constexpr G4double DistMaxS1            = WidthofHVBus+WidthofKaptonGapinS1;
+  constexpr G4double DistMaxatEdgeinCrack = gapBetweenWheels/2.+WidthofKaptonGapatEdge+
     WidthofHVBus+WidthofKaptonGap/2.;
-  static const G4double DistMinatEdgeinCrack =(gapBetweenWheels+WidthofKaptonGapatEdge)/2.;
+  constexpr G4double DistMinatEdgeinCrack =(gapBetweenWheels+WidthofKaptonGapatEdge)/2.;
 
   G4double dist,dist_min,dist_max,eta_min,eta_max;
 

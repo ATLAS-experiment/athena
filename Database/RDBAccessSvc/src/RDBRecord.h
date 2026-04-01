@@ -120,7 +120,7 @@ class RDBRecord final : public IRDBRecord
   RDBRecord(const coral::AttributeList& attList, const std::string& tableName);
 
  private:
-  typedef std::map<std::string, unsigned int, std::less<std::string> > FieldName2ListIndex;
+  typedef std::map<std::string, unsigned int> FieldName2ListIndex;
 
   /// Empty private constructor
   RDBRecord(){}
@@ -129,6 +129,11 @@ class RDBRecord final : public IRDBRecord
   coral::AttributeList* m_values ATLAS_THREAD_SAFE;
 
   std::string   m_tableName;
+
+  template<typename T>
+  const T& getGeneric(const std::string& fieldName) const;
+  FieldName2ListIndex::const_iterator getItr(const std::string& fieldName) const;
+  FieldName2ListIndex::const_iterator getItr(const std::string& fieldName, int) const;
 
 };
 
