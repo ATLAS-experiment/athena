@@ -97,7 +97,7 @@ class Tool:
         """
         self._handle.apply_systematic_variation(sys_name)
 
-    def __call__(self, events):
+    def __call__(self, events, systematic=None):
         """Run the tool on events and return output columns as an ak.Array.
 
         Parameters
@@ -105,6 +105,10 @@ class Tool:
         events:
             An ak.Array with fields matching the tool's input column names
             (after any rename_containers mapping).
+        systematic:
+            Optional systematic variation name (e.g. "MUON_EFF_RECO_SYS__1up").
+            If provided, applied before running the tool and reset to nominal
+            after execution.
 
         Returns
         -------
@@ -112,35 +116,43 @@ class Tool:
             Record array with one field per output column, each a
             variable-length list over the per-particle values.
         """
-        num_events = int(ak.num(events, axis=0))
+        if systematic is not None:
+            self.apply_systematic_variation(systematic)
 
-        # Resolve optional columns against the actual fields present
-        effective = resolve_optional_columns(self._classified, events)
+        try:
+            num_events = int(ak.num(events, axis=0))
 
-        # Extract flat buffers from the awkward array
-        buffer_dict = extract_buffers(events, effective)
+            # Resolve optional columns against the actual fields present
+            effective = resolve_optional_columns(self._classified, events)
 
-        # Allocate zero-filled output arrays (added into buffer_dict in-place)
-        allocate_outputs(effective, buffer_dict)
+            # Extract flat buffers from the awkward array
+            buffer_dict = extract_buffers(events, effective)
 
-        # Set all columns on the handle
-        for container_name, info in effective.items():
-            # Container offset (always immutable)
-            self._handle[container_name] = np.asarray(buffer_dict[container_name])
+            # Allocate zero-filled output arrays (added into buffer_dict in-place)
+            allocate_outputs(effective, buffer_dict)
 
-            # Nested-vector offsets (immutable)
-            for nested_name in info["nested_offsets"]:
-                if nested_name in buffer_dict:
-                    self._handle[nested_name] = np.asarray(buffer_dict[nested_name])
+            # Set all columns on the handle
+            for container_name, info in effective.items():
+                # Container offset (always immutable)
+                self._handle[container_name] = np.asarray(buffer_dict[container_name])
 
-            # Input data columns (immutable)
-            for col in info["inputs"]:
-                self._handle[col.name] = np.asarray(buffer_dict[col.name])
+                # Nested-vector offsets (immutable)
+                for nested_name in info["nested_offsets"]:
+                    if nested_name in buffer_dict:
+                        self._handle[nested_name] = np.asarray(buffer_dict[nested_name])
 
-            # Output data columns (mutable)
-            for col in info["outputs"]:
-                self._handle.set_column_void(col.name, buffer_dict[col.name], False)
+                # Input data columns (immutable)
+                for col in info["inputs"]:
+                    self._handle[col.name] = np.asarray(buffer_dict[col.name])
 
-        self._handle.call()
+                # Output data columns (mutable)
+                for col in info["outputs"]:
+                    self._handle.set_column_void(col.name, buffer_dict[col.name], False)
 
-        return reconstruct_output(effective, buffer_dict, num_events)
+            self._handle.call()
+
+            return reconstruct_output(effective, buffer_dict, num_events)
+        finally:
+            # Reset to nominal if systematic was applied
+            if systematic is not None:
+                self.apply_systematic_variation("")

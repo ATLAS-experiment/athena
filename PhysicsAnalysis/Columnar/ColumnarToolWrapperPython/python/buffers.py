@@ -175,14 +175,15 @@ def extract_buffers(events, classified):
             )
 
             if isinstance(form, ak.forms.RecordForm):
-                # EventInfo-like: one record per event
+                # EventInfo-like: one record per event.
+                # Use ak.to_numpy per field instead of walking raw_buffers:
+                # when events is masked/indexed, form.content(field) is an
+                # IndexedForm and the "-data" key doesn't exist in raw_buffers.
                 buffers[container_name] = np.array(
                     [0, length], dtype=np.uint64
                 )
-                for field in form.fields:
-                    buffers[field] = np.asarray(
-                        raw_buffers[f"{form.content(field).form_key}-data"]
-                    )
+                for col in cols:
+                    buffers[col.name] = ak.to_numpy(events[col.name])
             elif isinstance(form, ak.forms.ListOffsetForm):
                 # Particle container: extract offsets, cast to uint64
                 # for the C++ side
