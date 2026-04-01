@@ -564,6 +564,60 @@ print(handle.get_recommended_systematics())
 
 ---
 
+## CutBookKeepers (Sum of Weights)
+
+When normalising MC samples you need the sum of weights from before any event selection — this is stored as CutBookKeeper metadata in the `MetaData` TTree of PHYSLITE (and other xAOD) ROOT files, not in the event tree.
+
+```python
+import awkward as ak
+from ColumnarToolWrapperPython import read_cutbookkeepers
+
+# Single file
+cbk = read_cutbookkeepers("DAOD_PHYSLITE.root")
+print(cbk[0].nEventsProcessed)   # total events processed
+print(cbk[0].sumOfWeights)       # sum of MC generator weights
+print(cbk[0].sumOfWeightsSquared)
+
+# Multiple files — one record per file, aggregate with ak.sum()
+files = ["file1.root", "file2.root", "file3.root"]
+cbk = read_cutbookkeepers(files)
+total_sow = float(ak.sum(cbk.sumOfWeights))
+
+# Data integrity check: nonzero means some files had incomplete bookkeepers
+# (produced by crashed jobs — event counts may be unreliable)
+if ak.any(cbk.nIncomplete > 0):
+    print("Warning: incomplete CutBookkeepers found")
+```
+
+The result is an awkward record array with fields:
+
+| Field | Type | Description |
+|---|---|---|
+| `nEventsProcessed` | int | Events processed before any selection |
+| `sumOfWeights` | float | Sum of MC generator weights |
+| `sumOfWeightsSquared` | float | Sum of squared MC generator weights |
+| `nIncomplete` | int | Entries in `IncompleteCutBookkeepers` (data-integrity flag) |
+
+### Stream selection
+
+The `AllExecutedEvents` entry with the maximum skimming cycle is selected from any of the default allowed streams: `StreamAOD`, `StreamDAOD_PHYSLITE`, `StreamEVGEN`, `StreamEVNT`. This matches the logic in `CP::AsgCutBookkeeperAlg`.
+
+To restrict to a specific stream:
+
+```python
+cbk = read_cutbookkeepers(files, input_stream="StreamAOD")
+# or a list:
+cbk = read_cutbookkeepers(files, input_stream=["StreamAOD", "StreamEVGEN"])
+```
+
+To look up a different named bookkeeper:
+
+```python
+cbk = read_cutbookkeepers(files, bookkeeper_name="PHYSLITEKernel")
+```
+
+---
+
 ## Advanced: `buffers` Submodule
 
 The `buffers` submodule contains the internal functions that `Tool.__call__` uses to handle the boilerplate of buffer extraction, allocation, and reconstruction:
