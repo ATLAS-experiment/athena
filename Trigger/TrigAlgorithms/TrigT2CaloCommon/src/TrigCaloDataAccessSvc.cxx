@@ -1,11 +1,11 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#include "AthenaMonitoringKernel/Monitored.h"
+
 #include "TrigCaloDataAccessSvc.h"
+
+#include "AthenaMonitoringKernel/Monitored.h"
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"
-#include "TileByteStream/TileCellCont.h"
-#include "TrigT2CaloCommon/LArCellCont.h"
 #include "IRegionSelector/IRoiDescriptor.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "StoreGate/ReadCondHandle.h"
@@ -54,21 +54,16 @@ StatusCode TrigCaloDataAccessSvc::finalize() {
   std::lock_guard<std::mutex> lock( m_initMutex ); // use the initMutex to finalize
   if ( m_lateInitDone ) { // otherwise nothing to delete
   m_vrodid32fullDet.clear();
-  for( size_t ii=0;ii<m_vrodid32fullDetHG.size();ii++) { m_vrodid32fullDetHG[ii].clear(); }
-  m_vrodid32fullDetHG.clear(); 
+  m_vrodid32fullDetHG.clear();
   for ( size_t slot  = 0; slot <  m_nSlots; ++ slot ) {
       EventContext ec;
       ec.setSlot( slot );
       HLTCaloEventCache *cache = m_hLTCaloSlot.get( ec );
       CHECK( cache->larContainer->finalize() );
-      delete cache->larContainer;
       CHECK( cache->tileContainer->finalize() );
-      delete cache->tileContainer;
       cache->d0cells->clear();
-      delete cache->d0cells;
       cache->lastFSEvent = 0xFFFFFFFF;
       for (unsigned int i : m_insertedCells) delete cache->fullcont->at(i);
-      delete cache->fullcont;
   } // end of for slots
   } // end of m_lateInitDone
   m_lateInitDone=false;
@@ -116,7 +111,7 @@ StatusCode TrigCaloDataAccessSvc::loadCollections ( const EventContext& context,
       ATH_MSG_VERBOSE( "m_rIds[" << i << "]=" << requestHashIDs[i] );
   }
   SG::ReadCondHandle<LArRoIMap> roimap ( m_larRoIMapKey, context);
-  loadedCells.setContainer( ( m_hLTCaloSlot.get( context )->larContainer ) );
+  loadedCells.setContainer( m_hLTCaloSlot.get( context )->larContainer.get() );
   loadedCells.setMap( *roimap );
 
   { 
@@ -151,7 +146,7 @@ StatusCode TrigCaloDataAccessSvc::loadCollections ( const EventContext& context,
   }
   size_t listIDsize = requestHashIDs.size();
   HLTCaloEventCache* cache = m_hLTCaloSlot.get( context );
-  TileCellCont* tilecell = cache->tileContainer;
+  const TileCellCont* tilecell = cache->tileContainer.get();
   std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> robFrags;
   loadedCells.clear(); // should reserve
   for (size_t i = 0; i < listIDsize; ++i){
@@ -189,7 +184,7 @@ StatusCode TrigCaloDataAccessSvc::loadFullCollections ( const EventContext& cont
   m_hLTCaloSlot.get(context)->lastFSEvent = context.evt();
 
   std::lock_guard<std::mutex> getCollClock{ m_getCollMutex };   
-  CaloCellContainer* cont_to_copy = m_hLTCaloSlot.get(context)->fullcont ;
+  const CaloCellContainer* cont_to_copy = m_hLTCaloSlot.get(context)->fullcont.get() ;
   cont.clear();
   cont.reserve( cont_to_copy->size() );
   for( const CaloCell* c : *cont_to_copy ) cont.push_back_fast( c );
@@ -245,12 +240,13 @@ unsigned int TrigCaloDataAccessSvc::prepareLArFullCollections( const EventContex
       m_robDataProvider->addROBData( context, vrodid32fullDet );
       m_robDataProvider->getROBData( context, vrodid32fullDet, robFrags );      
 
-      status |= convertROBs( robFrags, ( cache->larContainer ), (cache->larRodBlockStructure_per_slot), cache->rodMinorVersion, cache->robBlockType, deadHandle );
+      status |= convertROBs( robFrags, cache->larContainer.get(), cache->larRodBlockStructure_per_slot,
+                             cache->rodMinorVersion, cache->robBlockType, deadHandle );
       
       if ( vrodid32fullDet.size() != robFrags.size() ) {
         ATH_MSG_DEBUG( "Missing ROBs, requested " << vrodid32fullDet.size() << " obtained " << robFrags.size() );
         //status |= 0x1; // dummy code
-        clearMissing( vrodid32fullDet, robFrags, ( cache->larContainer ) );
+        clearMissing( vrodid32fullDet, robFrags, cache->larContainer.get() );
       }
   } // end of for m_vrodid32fullDetHG.size()
 
@@ -281,7 +277,7 @@ unsigned int TrigCaloDataAccessSvc::prepareTileFullCollections( const EventConte
   cache->tileContainer->eventNumber( context.evt() );
 
   unsigned int status(0);
-  convertROBs( context, m_rIdstile, cache->tileContainer, cache->d0cells );
+  convertROBs( context, m_rIdstile, cache->tileContainer.get(), cache->d0cells.get() );
 
   int detid(0);
   auto detidMon = Monitored::Scalar<int>( "det", detid );
@@ -380,21 +376,20 @@ unsigned int TrigCaloDataAccessSvc::lateInit(const EventContext& context) { // n
   EventContext ec;
   ec.setSlot( slot );
   HLTCaloEventCache *cache = m_hLTCaloSlot.get( ec );
-  cache->larContainer = new LArCellCont();
+  cache->larContainer = std::make_unique<LArCellCont>();
   cache->larRodBlockStructure_per_slot = nullptr;
   if ( cache->larContainer->initialize( **roimap, **onoff, **mcsym, **febrod, **larBadChan, *theCaloDDM).isFailure() )
 	return 0x1; // dummy code 
   std::vector<CaloCell*> local_cell_copy;
   local_cell_copy.reserve(200000);
-  LArCellCont* larcell = cache->larContainer;
+  LArCellCont* larcell = cache->larContainer.get();
   cache->lastFSEvent = 0xFFFFFFFF;
-  CaloCellContainer* cachefullcont = new CaloCellContainer(SG::VIEW_ELEMENTS);
+  auto cachefullcont = std::make_unique<CaloCellContainer>(SG::VIEW_ELEMENTS);
   cachefullcont->reserve(190000);
   const LArBadChannelCont& badchannel = **larBadChan;
   for(unsigned int lcidx=0; lcidx < larcell->size(); lcidx++){
           LArCellCollection* lcc = larcell->at(lcidx);
-          unsigned int lccsize = lcc->size();
-          for(unsigned int lccidx=0; lccidx<lccsize; lccidx++){
+          for(unsigned int lccidx=0; lccidx<lcc->size(); lccidx++){
                   CaloCell* cell = ((*lcc).at(lccidx));
                   if ( cell && cell->caloDDE() ) {
 		    LArBadChannel bc = badchannel.offlineStatus(cell->ID());
@@ -414,8 +409,8 @@ unsigned int TrigCaloDataAccessSvc::lateInit(const EventContext& context) { // n
   } // end of loop over collection
 
 // This should stay here as this will be enabled when tile is ready to be decoded as well
-  TileCellCont* tilecell = new TileCellCont();
-  cache->tileContainer = tilecell;
+
+  auto tilecell = std::make_unique<TileCellCont>();
   tilecell->setHashIdToROD( *tileHid2RESrcID );
   if( tilecell->initialize().isFailure() ) return 0x1; //dummy code
   for (unsigned int i=0;i<4;i++) {
@@ -428,11 +423,10 @@ unsigned int TrigCaloDataAccessSvc::lateInit(const EventContext& context) { // n
   m_mbts_add_rods.insert(m_mbts_add_rods.end(),(*m_mbts_rods).begin(),(*m_mbts_rods).end());
   sort(m_mbts_add_rods.begin(),m_mbts_add_rods.end());
   m_mbts_add_rods.erase(std::unique(m_mbts_add_rods.begin(),m_mbts_add_rods.end()),m_mbts_add_rods.end());
-  TileROD_Decoder::D0CellsHLT* d0cellsp = new TileROD_Decoder::D0CellsHLT();
+  auto d0cellsp = std::make_unique<TileROD_Decoder::D0CellsHLT>();
   for(unsigned int lcidx=0; lcidx < tilecell->size(); lcidx++){
           TileCellCollection* lcc = tilecell->at(lcidx);
-          unsigned int lccsize = lcc->size();
-          for(unsigned int lccidx=0; lccidx<lccsize; lccidx++){
+          for(unsigned int lccidx=0; lccidx<lcc->size(); lccidx++){
                   CaloCell* cell = ((*lcc).at(lccidx));
                   if ( cell ) local_cell_copy.push_back( cell );
           } // end of loop over cells
@@ -445,9 +439,10 @@ unsigned int TrigCaloDataAccessSvc::lateInit(const EventContext& context) { // n
 	    d0cellsp->m_cells[drawer] = *pCell;
 	  }
   } // end of loop over collection
+  cache->tileContainer = std::move(tilecell);
 
   // d0merge cells
-  cache->d0cells = d0cellsp;
+  cache->d0cells = std::move(d0cellsp);
 
   // For the moment the container has to be completed by hand (again, because of tile)
   for(unsigned int i=0;i<hashMax;i++){
@@ -488,7 +483,7 @@ unsigned int TrigCaloDataAccessSvc::lateInit(const EventContext& context) { // n
     ATH_MSG_ERROR("Problem in the size of the full container");
   cachefullcont->setIsOrdered(true);
   cachefullcont->setIsOrderedAndComplete(true);
-  cache->fullcont = cachefullcont;
+  cache->fullcont = std::move(cachefullcont);
 
   local_cell_copy.clear();
   }
@@ -713,12 +708,13 @@ unsigned int TrigCaloDataAccessSvc::prepareLArCollections( const EventContext& c
     }
   }
   
-  unsigned int status = convertROBs( robFrags, ( cache->larContainer ), (cache->larRodBlockStructure_per_slot), cache->rodMinorVersion, cache->robBlockType, deadHandle  );
+  unsigned int status = convertROBs( robFrags, cache->larContainer.get(), cache->larRodBlockStructure_per_slot,
+                                     cache->rodMinorVersion, cache->robBlockType, deadHandle );
 
   if ( requestROBs.size() != robFrags.size() ) {
     ATH_MSG_DEBUG( "Missing ROBs, requested " << requestROBs.size() << " obtained " << robFrags.size() );
     //status |= 0x1; // dummy code
-    clearMissing( requestROBs, robFrags, ( cache->larContainer ) );
+    clearMissing( requestROBs, robFrags, cache->larContainer.get() );
   }
   auto roiROBs = Monitored::Scalar( "roiROBs_LAr", robFrags.size() );
   auto roiEta = Monitored::Scalar( "roiEta_LAr", roi.eta() );
@@ -751,7 +747,7 @@ unsigned int TrigCaloDataAccessSvc::prepareTileCollections( const EventContext& 
      cache->d0cells->clear();
   cache->tileContainer->eventNumber( context.evt() );
  
-  unsigned int status = convertROBs( context, rIds, cache->tileContainer, cache->d0cells );
+  unsigned int status = convertROBs( context, rIds, cache->tileContainer.get(), cache->d0cells.get() );
 
   return status;
 }
@@ -768,15 +764,14 @@ unsigned int TrigCaloDataAccessSvc::prepareMBTSCollections( const EventContext& 
   std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> robFrags;
   m_robDataProvider->addROBData( context, m_mbts_add_rods );
   std::lock_guard<std::mutex> collectionLock { cache->mutex };  
-  TileCellCont* tilecell = cache->tileContainer;
   if ( cache->tileContainer->eventNumber() != context.evt() )
      cache->d0cells->clear();
   cache->tileContainer->eventNumber( context.evt() );
  
-  const std::vector<unsigned int>* ids = tilecell->MBTS_IDs();
+  const std::vector<unsigned int>* ids = cache->tileContainer->MBTS_IDs();
   std::vector<IdentifierHash> tileIds;
   for(size_t i=0;i<ids->size(); i++) tileIds.push_back( (*ids)[i] );
-  unsigned int status = convertROBs( context, tileIds, cache->tileContainer, cache->d0cells );
+  unsigned int status = convertROBs( context, tileIds, cache->tileContainer.get(), cache->d0cells.get() );
 
   return status;
 }
@@ -793,8 +788,7 @@ StatusCode TrigCaloDataAccessSvc::loadMBTS ( const EventContext& context,
 
   HLTCaloEventCache* cache = m_hLTCaloSlot.get( context );
   std::lock_guard<std::mutex> collectionLock { cache->mutex };  
-  TileCellCont* tilecell = cache->tileContainer;
-  TileCellCollection* mbts = tilecell->MBTS_collection();
+  TileCellCollection* mbts = cache->tileContainer->MBTS_collection();
   loadedCells.reserve(mbts->size());
   for (size_t i=0;i<mbts->size(); ++i)
         loadedCells.push_back(mbts->at(i));
