@@ -65,6 +65,10 @@ StatusCode MonitorThreadOccupancy::postProcess(float weight) {
   }
   for (auto& nameCounterPair : m_counters) {
     CounterThread* ptr = dynamic_cast<CounterThread*>(nameCounterPair.second.get());
+    if (!ptr)[[unlikely]] {
+      ATH_MSG_WARNING ("MonitorThreadOccupancy::postProcess: dynamic cast failure" );
+      continue;
+    }
     ptr->setAllThreadsTimestamps(lowTimestamp, highTimestamp);
     ATH_CHECK( ptr->postProcess(weight) );
   }

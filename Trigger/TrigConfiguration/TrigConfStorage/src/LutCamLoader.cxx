@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////
@@ -85,7 +85,8 @@ TrigConf::LutCamLoader::load( LutCam& lTarget) {
       }
 
       // transform strings to arrays of integers
-
+      //Local variable lut_int uses 198656 bytes of stack space
+      //coverity[STACK_USE]
       u_int lut_int[LutCam::ALL_LUT_SIZE];
       u_int significantBits = 8; // eight hex digits
       u_int preFix = 2;          // 0x
@@ -108,6 +109,7 @@ TrigConf::LutCamLoader::load( LutCam& lTarget) {
          }
          lut_int[i] = tmp_data;
       }
+      //coverity[STACK_USE]
       u_int cam_int[LutCam::ALL_CAM_SIZE] = {90, 90, 90, 90, 90, 90};
       for(u_int i=0; i<LutCam::ALL_CAM_SIZE; i++) {
 	
