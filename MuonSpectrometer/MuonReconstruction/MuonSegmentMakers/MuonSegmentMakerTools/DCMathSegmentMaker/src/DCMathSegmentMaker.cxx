@@ -7,6 +7,7 @@
 #include <cassert>
 #include <functional>
 #include <iostream>
+#include <ranges>
 
 #include "AthenaKernel/Timeout.h"
 #include "EventPrimitives/EventPrimitivesHelpers.h"
@@ -1308,9 +1309,10 @@ namespace Muon {
 
         // associate space points and sort them per detector element and gas gap
         for (const TrkDriftCircleMath::Cluster& clust : segment.clusters()) {
-            ATH_MSG_VERBOSE(" accessing cluster: " << clust.index());
-            const Cluster2D& spacePoint = spVecs.first[clust.index()];
 
+            const Cluster2D& spacePoint = spVecs.first[clust.index()];
+            ATH_MSG_VERBOSE(" accessing cluster: " << clust.index()<<", "
+                <<m_idHelperSvc->toString(spacePoint.identify()));
             // skip corrupt space points
             if (spacePoint.corrupt()) {
                 ATH_MSG_DEBUG(" Found corrupt space point: index " << clust.index());
@@ -1360,11 +1362,11 @@ namespace Muon {
         for (ChamberData& chamb : chamberDataVec) {
             // select best clusters per gas gap in chamber
             std::list<const Trk::PrepRawData*> etaClusterVec{}, phiClusterVec{};
-            std::set<Identifier> etaIds;
+            std::unordered_set<Identifier> etaIds;
             // loop over gas gaps
             for (GasGapData& gasGap : chamb.data) {
                 // sort space points by their pull with the segment
-                std::sort(gasGap.data.begin(), gasGap.data.end(), SortClByPull());
+                std::ranges::sort(gasGap.data, SortClByPull());
 
                 // select all space points with a pull that is within 1 of the best pull
                 double bestPull = std::abs(gasGap.data.front().first);
@@ -1382,12 +1384,12 @@ namespace Muon {
 
                     // here keep open the option not to create CompetingMuonClustersOnTrack
                     if (sp.etaHit) {
-                        if (!etaIds.count(sp.etaHit->identify())) {
-                            etaIds.insert(sp.etaHit->identify());
-
-                            if (m_createCompetingROTsEta)
+                        if (etaIds.insert(sp.etaHit->identify()).second) {
+                            // BI rpc measurements have 2D coordinates
+                            if (m_createCompetingROTsEta && 
+                                sp.etaHit->prepRawData()->localCovariance().cols() == 1) {
                                 etaClusterVec.push_back(sp.etaHit->prepRawData());
-                            else {
+                            } else {
                                 rioDistVec.emplace_back(dist, sp.etaHit->uniqueClone());
                                 ++netaPhiHits.first.first;
                             }
@@ -1396,7 +1398,7 @@ namespace Muon {
                     if (!sp.phiHits.empty()) {
                         if (m_createCompetingROTsPhi) {
                             // can have multiple phi hits per cluster, loop over phi hits and add them
-                            std::transform(sp.phiHits.begin(), sp.phiHits.end(), std::back_inserter(phiClusterVec),
+                            std::ranges::transform(sp.phiHits, std::back_inserter(phiClusterVec),
                                 [](const Muon::MuonClusterOnTrack* clus){
                                     return clus->prepRawData();
                                 });

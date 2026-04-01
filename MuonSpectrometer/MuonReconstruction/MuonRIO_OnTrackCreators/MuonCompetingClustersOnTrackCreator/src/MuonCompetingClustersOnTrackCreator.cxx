@@ -1,16 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-//   Implementation file for class MuonCompetingClustersOnTrackCreator
-///////////////////////////////////////////////////////////////////
-// (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
-// AlgTool used for MuonCompetingClustersOnTrack object production
-///////////////////////////////////////////////////////////////////
-// Version 1.0 18/07/2004
-///////////////////////////////////////////////////////////////////
 
 #include "MuonCompetingClustersOnTrackCreator.h"
 #include "MuonCompetingRIOsOnTrack/CompetingMuonClustersOnTrack.h"
@@ -25,14 +15,6 @@
 
 namespace Muon {
 
-  MuonCompetingClustersOnTrackCreator::MuonCompetingClustersOnTrackCreator
-  (const std::string& ty,const std::string& na,const IInterface* pa)
-    : AthAlgTool(ty,na,pa)
-  {
-    // algtool interface - necessary!
-    declareInterface<IMuonCompetingClustersOnTrackCreator>(this);
-  }
-
   StatusCode MuonCompetingClustersOnTrackCreator::initialize()
   {
 
@@ -45,8 +27,10 @@ namespace Muon {
   std::unique_ptr<CompetingMuonClustersOnTrack>
   MuonCompetingClustersOnTrackCreator::createBroadCluster(const std::list< const Trk::PrepRawData * > & prds, const double errorScaleFactor ) const
   {
-    if (prds.empty()) return nullptr;
-
+    if (prds.empty()) {
+      ATH_MSG_WARNING("Empty prepdata list");
+      return nullptr;
+    }
 // implement cluster formation
     auto rios = std::vector <const Muon::MuonClusterOnTrack* >() ;
     auto assocProbs = std::vector < double >();
@@ -57,7 +41,11 @@ namespace Muon {
       Identifier id = (*it)->identify();
       const Trk::TrkDetElementBase* detEl = (*it)->detectorElement();
       const Amg::Vector3D gHitPos = detEl->center(id);
-      const Muon::MuonClusterOnTrack* cluster = m_clusterCreator->createRIO_OnTrack( **it, gHitPos ); 
+      const Muon::MuonClusterOnTrack* cluster = m_clusterCreator->createRIO_OnTrack( **it, gHitPos );
+      if (!cluster) {
+          ATH_MSG_WARNING("No cluster..."<<(**it));
+          continue;
+      }
       rios.push_back( cluster );
       assocProbs.push_back( prob );
     }
