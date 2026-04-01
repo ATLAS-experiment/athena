@@ -1,21 +1,27 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.Enums import LHCPeriod
 
 def getRecommendedBTagCalib_Run2():
     return "xAODBTaggingEfficiency/13TeV/MC20_2025-06-17_GN2v01_v4.root"
 
-def getRecommendedBTagCalib_Run3():
+def getRecommendedBTagCalib_PCFT_Run3():
     return "xAODBTaggingEfficiency/13p6TeV/MC23_2025-06-17_GN2v01_v4.root"
 
-def getRecommendedBTagCalib(geometry):
+def getRecommendedBTagCalib_Run3():
+    return "xAODBTaggingEfficiency/13p6TeV/MC23_2026-03-24_GN2v01_v6.root"
+
+def getRecommendedBTagCalib(geometry, wp):
     """return the recommended FTag calibration files
     for a given LHCPeriod 'geometry'
     """
     if geometry is LHCPeriod.Run2:
         return getRecommendedBTagCalib_Run2()
     elif geometry >= LHCPeriod.Run3:
-        return getRecommendedBTagCalib_Run3()
+        if "2D" in wp:
+            return getRecommendedBTagCalib_PCFT_Run3()
+        else:
+            return getRecommendedBTagCalib_Run3()
     else:
         raise ValueError(f"LHCPeriod {geometry} does not have a recommended FTag calibration file!")
 
