@@ -195,23 +195,26 @@ namespace MuonValR4{
                     ATH_MSG_DEBUG("Position on "<<(*meas) 
                                 <<" plane "<<Amg::toString(lPos)<<" vs. "
                                 <<Amg::toString((*extpPars).localPosition()));
+                    /// Ensure that the extrapolation ends at the same point
                     const Amg::Vector2D dPos = (*extpPars).localPosition() - lPos;
                     if (dPos.mag() > 0.1_mm) {
                         ATH_MSG_ERROR("Too large deviation for "<<(*meas)
                                     <<", "<<Amg::toString(dPos));
                         retCode = StatusCode::FAILURE;
                     }
+                    /// Calculate the surface residual from the space point
                     const Amg::Vector3D b1 = toSurf.linear()*(meas->measuresEta() ? meas->toNextSensor() : meas->sensorDirection());
                     const Amg::Vector3D b2 = toSurf.linear()*(!meas->measuresEta() ? meas->toNextSensor() : meas->sensorDirection());
                     const Amg::Vector2D lineRes = (pullCalculator.residual()[etaIdx] * b1 +
                                                    pullCalculator.residual()[phiIdx] * b2).block<2,1>(0,0);
 
+                    /// Compare with the direct residual from the measurement
                     const Amg::Vector2D surfRes = lPos - mPos;
 
                     /// Calculate the chi2
                     AmgSymMatrix(2) covMat{AmgSymMatrix(2)::Identity()};
-                    covMat(0,0) = 1./meas->covariance()[etaIdx];
-                    covMat(1,1) = 1./meas->covariance()[phiIdx];
+                    covMat(0,0) = meas->covariance()[etaIdx];
+                    covMat(1,1) = meas->covariance()[phiIdx];
                     // Transform the covariance to take the stereo angles into account
                     AmgSymMatrix(2) surfTrf{AmgSymMatrix(2)::Identity()};
                     surfTrf.row(0) = b1.block<2,1>(0,0);
@@ -223,17 +226,22 @@ namespace MuonValR4{
                     stereoTrf(0, 0) = stereoTrf(1, 1) = invDist;
                     stereoTrf(0, 1) = stereoTrf(1, 0) = -dirDots * invDist;
 
-                    stereoTrf = stereoTrf * surfTrf;
-                    ATH_MSG_VERBOSE("Basis vectors b1: "<<Amg::toString(b1)<<", b2: "<<Amg::toString(b2)
-            <<", product: "<<dirDots<<", invdist: "<<invDist<<" -> trf: "<<Amg::toString(stereoTrf));
+                    stereoTrf = (stereoTrf * surfTrf).inverse();
 
-                    covMat = stereoTrf.transpose() * covMat * stereoTrf;
+                    covMat = stereoTrf * covMat * stereoTrf.transpose();
+
+                    ATH_MSG_VERBOSE("Basis vectors b1: "<<Amg::toString(b1)
+                        <<", b2: "<<Amg::toString(b2)
+                        <<", product: "<<dirDots
+                        <<", invdist: "<<invDist<<" -> trf: "<<Amg::toString(stereoTrf)
+                        <<", covariance:\n"<<covMat);
                 
-                    const double matChi2 = surfRes.dot(covMat * surfRes);
+                    const double matChi2 = surfRes.dot(covMat.inverse() * surfRes);
                 
                     ATH_MSG_DEBUG("Analyze plane residual residual for "<<m_idHelperSvc->toString(sp->identify())
                     <<" / "<<targetSurf.geometryId()
-                    <<"\n --- measurement: "<<Amg::toString(mPos)<<", extraploated: "<<Amg::toString(lPos)
+                    <<"\n --- measurement: "<<Amg::toString(mPos)
+                    <<", extrapolated: "<<Amg::toString(lPos)
                     <<" --> residual: "<<Amg::toString(surfRes)
                     <<", projected: "<<Amg::toString(stereoTrf*surfRes)
                     <<", chi2: "<<matChi2
@@ -255,10 +263,32 @@ namespace MuonValR4{
                                     (*meas)<<" -- line fitter: "<<segChi2<<", matrix: "<<matChi2);
                         retCode = StatusCode::FAILURE;
                     }
-                    if (meas->dimension() == 2 && Acts::abs(segChi2 - fastChi2Term) > 1.e-3) {
+
+                    if (meas->dimension() != 2) {
+                        continue;
+                    }
+                    /// Ensure that the fast chi2 term and the segment chi2 term
+                    /// match with each other
+                    if (Acts::abs(segChi2 - fastChi2Term) > 1.e-3) {
                         ATH_MSG_ERROR("The fast & full chi2 calculations from ACTS don't match for "
                             <<(*meas)<<" - full: "<<segChi2<<", fast: "<<fastChi2Term);
                         retCode = StatusCode::FAILURE;
+                    }
+                    const auto [xPos, xCov] = xAOD::positionAndCovariance(sp->primaryMeasurement(),
+                                                                          sp->secondaryMeasurement());
+                                                        
+                    if ((xPos - mPos).mag() > 1.e-3) {
+                        ATH_MSG_ERROR("The calibrated position from the xAOD util function "<<
+                                      " does not match the expectation from this test. xAOD: "
+                            <<Amg::toString(xPos)<<", test: "<<Amg::toString(mPos));
+                        retCode = StatusCode::FAILURE;
+                    }
+                    if (!xCov.isApprox(covMat, 1.e-3)) {
+                        ATH_MSG_ERROR("The calibrated covariance from the xAOD util function "<<
+                                      " does not match the expectation from this test. xAOD:\n"
+                            <<Amg::toString(xCov)<<",\ntest:\n"<<Amg::toString(covMat));
+                        retCode = StatusCode::FAILURE;
+
                     }
                 } else if (targetSurf.type() == Acts::Surface::SurfaceType::Straw) {
                     const double dist = lPos[0];
