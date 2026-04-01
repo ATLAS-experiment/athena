@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -71,7 +71,7 @@ class FTagConfig (ConfigBlock):
         if self.bTagCalibFile is not None :
             bTagCalibFile = self.bTagCalibFile
         else:
-            bTagCalibFile = getRecommendedBTagCalib(config.geometry())
+            bTagCalibFile = getRecommendedBTagCalib(config.geometry(), self.btagWP)
         
         # Set up the ftag selection algorithm(s):
         if 'Continuous' in self.btagWP:
