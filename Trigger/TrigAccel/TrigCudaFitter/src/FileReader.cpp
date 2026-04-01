@@ -13,7 +13,6 @@
 #include <map>
 #include <memory>
 #include <iostream>
-#include <fstream>
 
 int FileReader::readEvents(std::ifstream& input, std::vector<EventData*>& events)
 {
@@ -31,6 +30,7 @@ int FileReader::readEvents(std::ifstream& input, std::vector<EventData*>& events
             input >> eventNumber;
             input >> par[0] >> par[1] >> par[2] >> par[3] >> par[4] >> par[5] >> Np >> Np2;
             auto pMcTrack = std::make_unique<McTrack>(par);
+            //coverity[TAINTED_SCALAR]
             for(int i=0;i<Np;i++)
             {
                 input >> par[0] >> par[1] >> par[2] >> par[3];
@@ -48,27 +48,30 @@ int FileReader::readEvents(std::ifstream& input, std::vector<EventData*>& events
             // track candidate
             if(!pEvent) pEvent = new EventData();
             int nTracks;
-            input >> nTracks;
+            input >> nTracks;//should check this is sane
+            //coverity[TAINTED_SCALAR]
             for(int k=0;k<nTracks;k++)
             {
                 int AlgoId, nSP;
                 input >> AlgoId;
                 if(AlgoId==0) continue;
                 RecTrack* pTrack = new RecTrack(AlgoId);
-                input >> nSP;
+                input >> nSP; //should check this is sane
                 input >> par[0] >> par[1] >> par[2] >> par[3] >> par[4];
                 pTrack->setInitialParameters(par);
                 float x0,y0,z0=par[1];
                 input >> par[0] >> par[1] >> par[2];
                 pTrack->addBFieldPoint(0.0,0.0,z0,par);
+                //coverity[TAINTED_SCALAR]
                 for(int iSP=0;iSP<nSP;iSP++)
                 {
                     input >> x0 >> y0 >> z0;
                     input >> par[0] >> par[1] >> par[2];
                     pTrack->addBFieldPoint(x0,y0,z0,par);
-                    int nCL;
-                    input >> nCL;
+                    int nCL{};
+                    input >> nCL; //should check this is sane
                     SpacePoint* pSP = new SpacePoint(x0,y0,z0);
+                    //coverity[TAINTED_SCALAR]
                     for(int iCL=0;iCL<nCL;iCL++)
                     {
                         input >> par[0] >> par[1] >> par[2] >> par[3] >> par[4] >> par[5];
