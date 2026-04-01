@@ -570,8 +570,8 @@ namespace ActsTrk
         }
 
         auto measurementRangesForced =
-            m_forceTrackOnSeed ? std::make_unique<ActsTrk::detail::MeasurementRangeListFlat>(measurements.setMeasurementRangesForced(seed, measurementIndex))
-                               : nullptr;
+            m_forceTrackOnSeed ? measurements.createMeasurementRangesForced(seed, measurementIndex)
+                               : std::unique_ptr<ActsTrk::detail::MeasurementRangeListFlat>();
         measurementSelector->setMeasurementRangesForced(measurementRangesForced.get());
         if (measurementRangesForced)
           event_stat[category_i][kNForcedSeedMeasurements] += measurementRangesForced->size();
