@@ -29,8 +29,8 @@ import re
 partition = ispy.IPCPartition(os.getenv("TDAQ_PARTITION","ATLAS"))
 
 flags = initConfigFlags()
-# remove unused flag categories
-neededCats = ["GeoModel","DQ","Trigger","PerfMon","Detector","Muon","Overlay","LAr","Reco"]
+# remove unused flag categories. Note Calo and Tile are only needed if running on CaloCells
+neededCats = ["GeoModel","DQ","Trigger","PerfMon","Detector","Muon","Overlay","LAr","Reco","Calo","Tile"]
 for cat in list(flags._dynaflags.keys()):
   if cat not in neededCats: del flags._dynaflags[cat]
 flags.Input.Files = [] # so that when no files given we can detect that
@@ -142,7 +142,7 @@ if args.runNumber is not None:
   # todo: if an exact event number is provided, we can in theory use the event index and rucio to obtain a filename:
   # e.g: event-lookup -D RAW "477048 3459682284"
   # use GUID result to do:
-  # ~/getRucioLFNbyGUID.sh 264a4214-e922-ef11-ab28-b8cef6444828
+  # ~/getRucioLFNbyGUID.sh 264A4214-E922-EF11-AB28-B8CEF6444828
   # gives a filename (last part): data24_13p6TeV.00477048.physics_Main.daq.RAW._lb0975._SFO-13._0001.data
   from glob import glob
   if args.lumiBlock is None: args.lumiBlock="*"
