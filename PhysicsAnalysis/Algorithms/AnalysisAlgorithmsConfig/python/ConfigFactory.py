@@ -264,17 +264,17 @@ class ConfigFactory():
         self.addAlgConfigBlock(algName="FlavourTagging", alg=FTagConfig,
             defaults={'selectionName': ''},
             superBlocks="Jets")
+        from JetAnalysisAlgorithms.JetUncertaintiesConfig import JetUncertaintiesConfig 
+        self.addAlgConfigBlock(algName="Uncertainties", alg=JetUncertaintiesConfig,
+            superBlocks="Jets")
+        from FTagAnalysisAlgorithms.XbbAnalysisConfig import XbbConfig
+        self.addAlgConfigBlock(algName="XbbTagging", alg=XbbConfig,
+                               superBlocks="Jets")
         from FTagAnalysisAlgorithms.FTagSFAnalysisConfig import FlavourTaggingEventSF
         self.addAlgConfigBlock(algName="FlavourTaggingEventSF",
                                alg=FlavourTaggingEventSF,
                                defaults={'selectionName': ''},
                                superBlocks="Jets")
-        from FTagAnalysisAlgorithms.XbbAnalysisConfig import XbbConfig
-        self.addAlgConfigBlock(algName="XbbTagging", alg=XbbConfig,
-                               superBlocks="Jets")
-        from JetAnalysisAlgorithms.JetUncertaintiesConfig import JetUncertaintiesConfig 
-        self.addAlgConfigBlock(algName="Uncertainties", alg=JetUncertaintiesConfig,
-            superBlocks="Jets")
 
         # muons
         from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonCalibration
