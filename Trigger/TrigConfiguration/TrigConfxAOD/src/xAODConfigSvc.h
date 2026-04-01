@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCONFXAOD_XAODCONFIGSVC_H
@@ -136,22 +136,22 @@ namespace TrigConf {
       /// @{
 
       /// Returns the JSON configured HLTMenu ptree
-      virtual const HLTMenu& hltMenu(const EventContext& ctx = Gaudi::Hive::currentContext()) const override;
+      virtual const HLTMenu& hltMenu(const EventContext& ctx) const override;
 
       /// Returns the JSON configured HLTMonitoring ptree
-      virtual const HLTMonitoring& hltMonitoring(const EventContext& ctx = Gaudi::Hive::currentContext()) const override;
+      virtual const HLTMonitoring& hltMonitoring(const EventContext& ctx) const override;
 
       /// Returns the JSON configured L1 ptree
-      virtual const L1Menu& l1Menu(const EventContext& ctx = Gaudi::Hive::currentContext()) const override;
+      virtual const L1Menu& l1Menu(const EventContext& ctx) const override;
 
       /// Returns the JSON configured HLT prescales ptree
-      virtual const HLTPrescalesSet& hltPrescalesSet(const EventContext& ctx = Gaudi::Hive::currentContext()) const override;
+      virtual const HLTPrescalesSet& hltPrescalesSet(const EventContext& ctx) const override;
 
       /// Returns the JSON configured L1 prescales ptree
-      virtual const L1PrescalesSet& l1PrescalesSet(const EventContext& ctx = Gaudi::Hive::currentContext()) const override;
+      virtual const L1PrescalesSet& l1PrescalesSet(const EventContext& ctx) const override;
 
       /// Returns the JSON configured bunchgroup ptree
-      virtual const L1BunchGroupSet& l1BunchGroupSet(const EventContext& ctx = Gaudi::Hive::currentContext()) const override;
+      virtual const L1BunchGroupSet& l1BunchGroupSet(const EventContext& ctx) const override;
 
       /// @}
 
@@ -166,7 +166,7 @@ namespace TrigConf {
       /// Function reading in a new metadata object from the input
       StatusCode readMetadata();
       /// Function setting up the service for a new event
-      StatusCode prepareEvent();
+      StatusCode prepareEvent(const EventContext& context);
 
       /// Helper function for copying into the service's private data store
       void copyMetadataToPersonalStore(const xAOD::TriggerMenuJsonContainer* input, xAOD::TriggerMenuJsonContainer* existing);

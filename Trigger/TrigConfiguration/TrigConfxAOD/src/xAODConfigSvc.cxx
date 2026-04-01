@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Gaudi/Athena include(s):
@@ -424,7 +424,7 @@ namespace TrigConf {
       // If it's an event-beginning incident, let's make sure that the
       // correct menu is cached:
       else if( inc.type() == IncidentType::BeginEvent ) {
-         if( prepareEvent().isFailure() && m_stopOnFailure ) {
+         if( prepareEvent(inc.context()).isFailure() && m_stopOnFailure ) {
             REPORT_MESSAGE( MSG::FATAL )
                << "Couldn't prepare the trigger configuration for the "
                << "current event";
@@ -631,10 +631,7 @@ namespace TrigConf {
       }
    }
 
-   StatusCode xAODConfigSvc::prepareEvent() {
-
-      // Can the incident service provide this to us?
-      const EventContext& context = Gaudi::Hive::currentContext();
+   StatusCode xAODConfigSvc::prepareEvent(const EventContext& context) {
 
       if (!m_useInFileMetadata) { // Run 3 RAWtoALL decoding mode
          return prepareEventRun3Athena(context);
