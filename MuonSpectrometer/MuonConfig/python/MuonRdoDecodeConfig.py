@@ -154,8 +154,8 @@ def RpcRDODecodeCfg(flags, name="MuonRpcRdoToPrdConv", RDOContainer = None, **kw
    
    
     if flags.Muon.usePhaseIIGeoSetup and flags.Input.isMC:
-        from xAODMuonTrkPrepDataCnv.MuonPrepDataCnvCfg import xRpcToRpcPrepDataCnvAlgCfg
-        acc.merge(xRpcToRpcPrepDataCnvAlgCfg(flags, name=f"xAODRpcToPrepDataCnvAlg{suffix}"))
+        from xAODMuonTrkPrepDataCnv.MuonPrepDataCnvCfg import xRpcToPrepDataCnvAlgCfg
+        acc.merge(xRpcToPrepDataCnvAlgCfg(flags, name=f"xAODRpcToPrepDataCnvAlg{suffix}"))
         from AthenaConfiguration.Enums import LHCPeriod
         if flags.GeoModel.Run >= LHCPeriod.Run4:
             from xAODMuonViewAlgs.ViewAlgsConfig import RpcMeasViewAlgCfg
@@ -165,6 +165,7 @@ def RpcRDODecodeCfg(flags, name="MuonRpcRdoToPrdConv", RDOContainer = None, **kw
 
 def TgcRDODecodeCfg(flags, name="MuonTgcRdoToPrdConv", RDOContainer = None,  **kwargs):
     acc = ComponentAccumulator()
+    suffix = name[name.find("_") :] if name.find("_") != -1 else ""
 
     # We need the TGC cabling to be setup
     from MuonConfig.MuonCablingConfig import TGCCablingConfigCfg
@@ -172,13 +173,26 @@ def TgcRDODecodeCfg(flags, name="MuonTgcRdoToPrdConv", RDOContainer = None,  **k
 
     # Get the RDO -> PRD tool
     tool_args = {}
-    if not flags.Trigger.doHLT:
-       tool_args.setdefault("PrdCacheString", "")
-       tool_args.setdefault("CoinCacheString", "")
-    tool_args.setdefault("xAODKey", "xTgcStrips" if flags.Muon.writexAODPRD or flags.Muon.usePhaseIIGeoSetup else "")
+    
+    if flags.Muon.usePhaseIIGeoSetup:
+        from MuonConfig.MuonByteStreamCnvTestConfig import TgcRdoToTgcDigitCfg
+        acc.merge(TgcRdoToTgcDigitCfg(flags, name=f"MuonTgcRdoToDigitR4{suffix}",
+                                      TgcRdoContainer = "TGCRDO" if not  RDOContainer else RDOContainer,
+                                      TgcDigitContainer="TgcDigitsRdoConv"))
+        kwargs.setdefault("DecodingTool", 
+            CompFactory.MuonR4.TgcDigitToPrepDataCnvTool(name="TgcPrepDataProviderTool",
+                                                      ReadKey="TgcDigitsRdoConv"))
+        from xAODMuonTrkPrepDataCnv.MuonPrepDataCnvCfg import xTgcToPrepDataCnvAlgCfg
+        acc.merge(xTgcToPrepDataCnvAlgCfg(flags, name=f"xAODTgcToPrepDataCnvAlg{suffix}"))
+ 
+    else:
+        if not flags.Trigger.doHLT:
+           tool_args.setdefault("PrdCacheString", "")
+           tool_args.setdefault("CoinCacheString", "")
 
-    if RDOContainer: tool_args.setdefault("RDOContainer", RDOContainer)
-    kwargs.setdefault("DecodingTool", CompFactory.Muon.TgcRdoToPrepDataToolMT(name="TgcPrepDataProviderTool", **tool_args))
+        if RDOContainer: 
+            tool_args.setdefault("RDOContainer", RDOContainer)
+        kwargs.setdefault("DecodingTool", CompFactory.Muon.TgcRdoToPrepDataToolMT(name="TgcPrepDataProviderTool", **tool_args))
 
     # add RegSelTool
     from RegionSelector.RegSelToolConfig import regSelTool_TGC_Cfg
@@ -189,19 +203,6 @@ def TgcRDODecodeCfg(flags, name="MuonTgcRdoToPrdConv", RDOContainer = None,  **k
     ## Add the RDO -> PRD alorithm
     acc.merge(MuonRdoToPrepDataAlgCfg(flags, name, **kwargs))
     return acc
-
-def TgcPrepDataReplicationToolAllBCto3BC(flags, name = "TgcPrepDataAllBCto3BCTool", **kwargs):
-    acc = ComponentAccumulator()
-    the_tool = CompFactory.Muon.TgcPrepDataReplicationToolAllBCto3BC(name, **kwargs)
-    acc.setPrivateTools(the_tool)
-    return acc
-    
-def TgcPrepDataAllBCto3BCCfg(flags, name="TgcPrepDataAllTo3Replicator", **kwargs):
-    acc = ComponentAccumulator()
-    kwargs.setdefault("Tool", acc.popToolsAndMerge(TgcPrepDataReplicationToolAllBCto3BC(flags)))
-    acc.addEventAlgo(CompFactory.Muon.TgcPrepDataReplicationAlg(name, **kwargs))
-    return acc
-
 
 def StgcRdoToPrepDataToolCfg(flags, name="STGC_PrepDataProviderTool", **kwargs):
     result = ComponentAccumulator()
