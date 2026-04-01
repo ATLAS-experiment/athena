@@ -8,9 +8,11 @@
 
 #include "AthenaBaseComps/AthService.h"
 #include "TrigT2CaloCommon/ITrigCaloDataAccessSvc.h"
+#include "TrigT2CaloCommon/LArCellCont.h"
 
 #include "AthenaKernel/SlotSpecificObj.h"
 #include "LArByteStream/LArRodDecoder.h"
+#include "TileByteStream/TileCellCont.h"
 #include "TileByteStream/TileROD_Decoder.h"
 #include "TileByteStream/TileHid2RESrcID.h"
 #include "LArRawUtils/LArTT_Selector.h"
@@ -36,9 +38,8 @@
 #include <iterator> //std::back_inserter
 #include <set>
 #include <initializer_list>
+#include <memory>
 
-class TileCellCont;
-class LArCellCont;
 class IRoiDescriptor;
 
 
@@ -140,13 +141,13 @@ class TrigCaloDataAccessSvc : public extends<AthService, ITrigCaloDataAccessSvc>
    */
   struct  HLTCaloEventCache {
     std::mutex mutex;    
-    LArCellCont* larContainer;
+    std::unique_ptr<LArCellCont> larContainer;
     LArRodBlockStructure* larRodBlockStructure_per_slot; // LAr Rod Block to ease decoding
     uint16_t rodMinorVersion;
     uint32_t robBlockType;
-    TileCellCont* tileContainer;
-    CaloCellContainer* fullcont;
-    TileROD_Decoder::D0CellsHLT* d0cells;
+    std::unique_ptr<TileCellCont> tileContainer;
+    std::unique_ptr<CaloCellContainer> fullcont;
+    std::unique_ptr<TileROD_Decoder::D0CellsHLT> d0cells;
     unsigned int lastFSEvent;
   };
 
