@@ -14,6 +14,7 @@ StatusCode NeutralPFOClusterMLCorrectionTool::initialize() {
 
 void NeutralPFOClusterMLCorrectionTool::correctContainer(xAOD::FlowElementContainer &neutral_pfos, xAOD::FlowElementContainer &charged_pfos) const
 {
+  std::cout << "NeutralPFOClusterMLCorrectionTool: Starting correction of " << neutral_pfos.size() << " neutral PFOs using " << charged_pfos.size() << " charged PFOs." << std::endl;
   for (xAOD::FlowElement *neutral_pfo : neutral_pfos)
   { correctFlowElement(*neutral_pfo, charged_pfos); }
 }
@@ -25,10 +26,12 @@ void NeutralPFOClusterMLCorrectionTool::correctFlowElement(xAOD::FlowElement &ne
     ATH_MSG_WARNING("NeutralPFOClusterMLCorrectionTool: Charged FlowElement found in neutral FlowElementContainer with index " + std::to_string(neutral_pfo.index()));
     return;
   }
+  std::cout << "NeutralPFOClusterMLCorrectionTool: Get linked cluster for neutral PFO with index " << neutral_pfo.index() << std::endl;
   const xAOD::CaloCluster *cls = getLinkedCluster(neutral_pfo);
   if (cls == nullptr)
   { return; }
   
+  std::cout << "NeutralPFOClusterMLCorrectionTool: Found linked cluster with index " << cls->index() << " for neutral PFO with index " << neutral_pfo.index() << std::endl;
   std::pair<float,float> charged_corrections = getChargedCorrectionsToCluster(cls, charged_pfos);
   scaleEnergyToAlternativeSignalState(neutral_pfo, *cls, charged_corrections);
 }
@@ -44,6 +47,7 @@ NeutralPFOClusterMLCorrectionTool::getChargedCorrectionsToCluster(
       corr_total.first += corr.first;
       corr_total.second += corr.second;
     }
+    std::cout << "NeutralPFOClusterMLCorrectionTool: Total charged correction to cluster with index " << cls_ptr->index() << " is corr_pfo_e: " << corr_total.first << " and corr_weight_e: " << corr_total.second << std::endl;
     return corr_total;
 }
 
@@ -108,17 +112,19 @@ void NeutralPFOClusterMLCorrectionTool::scaleEnergyToAlternativeSignalState(xAOD
   const float corr_charged_pfo_e = charged_corrections.first;
   const float corr_weight_e = charged_corrections.second;
 
-  const double neutral_pfo_e = (neutral_pfo.e() + corr_weight_e) * scaleFactor - corr_charged_pfo_e;
+  const double neutral_pfo_e_corrected = (neutral_pfo.e() + corr_weight_e) * scaleFactor - corr_charged_pfo_e;
 
 
-  ATH_MSG_DEBUG("NeutralPFOClusterMLCorrectionTool: Scaling PFO with index " << neutral_pfo.index()
-            << " energy from " << neutral_pfo.e() << " to " << (neutral_pfo.e() * scaleFactor)
-            << " using cluster index " << cls.index()
-            << " EM energy " << clusterEMEnergy
-            << " Decor energy " << clusterDecorEnergy
-            << " scale factor " << scaleFactor);
+  std::cout <<"NeutralPFOClusterMLCorrectionTool: Scaling PFO with index: " << neutral_pfo.index()
+            << " charged pfo energy: " << corr_charged_pfo_e << " weighted charged pfo energy: " << corr_weight_e << " =?= (clusterEMEnergy - neutral_pfo.e()): " << clusterEMEnergy - neutral_pfo.e() 
+            << " scale factor: " << scaleFactor
+            << " energy from: " << neutral_pfo.e() << " to: " << neutral_pfo_e_corrected
+            << " (neutral_pfo.e() + corr_weight_e) / clusterEMEnergy: " << (neutral_pfo.e() + corr_weight_e) / clusterEMEnergy << " =?= 1"
+            << " using cluster index: " << cls.index()
+            << " EM energy: " << clusterEMEnergy
+            << " Decor energy: " << clusterDecorEnergy << std::endl;
 
-  neutral_pfo.setP4(neutral_pfo_e / cosh(neutral_pfo.eta()), neutral_pfo.eta(), neutral_pfo.phi(), neutral_pfo.m());
+  neutral_pfo.setP4(neutral_pfo_e_corrected / cosh(neutral_pfo.eta()), neutral_pfo.eta(), neutral_pfo.phi(), neutral_pfo.m());
 }
 
 const xAOD::CaloCluster *NeutralPFOClusterMLCorrectionTool::getLinkedCluster(const xAOD::FlowElement &neutral_pfo) const
