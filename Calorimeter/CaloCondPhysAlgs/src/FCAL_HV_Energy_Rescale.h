@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOCONDPHYSALGS_FCAL_HV_ENERGY_RESCALE_H
@@ -17,14 +17,7 @@
 
 class FCAL_HV_Energy_Rescale: public AthAlgorithm
 { 
-
-  /////////////////////////////////////////////////////////////////// 
-  // Public methods: 
-  /////////////////////////////////////////////////////////////////// 
  public: 
-
-  // Copy constructor: 
-
   /// Constructor with parameters: 
   FCAL_HV_Energy_Rescale( const std::string& name, ISvcLocator* pSvcLocator );
 
@@ -32,18 +25,15 @@ class FCAL_HV_Energy_Rescale: public AthAlgorithm
   virtual ~FCAL_HV_Energy_Rescale(); 
 
   // Athena algorithm's Hooks
-  virtual StatusCode  initialize();
-  virtual StatusCode  execute();
-  virtual StatusCode  finalize();
-  virtual StatusCode  stop ATLAS_NOT_THREAD_SAFE();//due to AthenaAttributeList ctor  
+  virtual StatusCode  initialize() override;
+  virtual StatusCode  execute() override;
+  virtual StatusCode  stop ATLAS_NOT_THREAD_SAFE() override;//due to AthenaAttributeList ctor  
 
 private:
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
-  SG::ReadCondHandleKey<ILArHVScaleCorr> m_scaleCorrKey
-  { this, "LArHVScaleCorr", "LArHVScaleCorrRecomputed", "" };
+  SG::ReadCondHandleKey<ILArHVScaleCorr> m_scaleCorrKey{this,"LArHVScaleCorr", "LArHVScaleCorrRecomputed", "" };
 
-  std::string m_folder;
-
+  Gaudi::Property<std::string> m_folder{this, "Folder", "/LAR/CellCorrOfl/EnergyCorr"};
 }; 
 
 #endif //> !CALOCONDPHYSALGS_FCAL_HV_ENERGY_RESCALE_H

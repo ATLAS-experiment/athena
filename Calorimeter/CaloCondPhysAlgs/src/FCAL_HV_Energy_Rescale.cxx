@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // FCAL_HV_Energy_Rescale.cxx 
@@ -27,23 +27,15 @@ FCAL_HV_Energy_Rescale::FCAL_HV_Energy_Rescale( const std::string& name,
 						ISvcLocator* pSvcLocator ) : 
   AthAlgorithm( name, pSvcLocator )
 {
-  declareProperty("Folder",m_folder="/LAR/CellCorrOfl/EnergyCorr");
 }
-
 
 FCAL_HV_Energy_Rescale::~FCAL_HV_Energy_Rescale()
 = default;
-
 
 StatusCode FCAL_HV_Energy_Rescale::initialize()
 {
   ATH_CHECK( m_cablingKey.initialize());
   ATH_CHECK( m_scaleCorrKey.initialize());
-  return StatusCode::SUCCESS;
-}
-
-StatusCode FCAL_HV_Energy_Rescale::finalize()
-{
   return StatusCode::SUCCESS;
 }
 

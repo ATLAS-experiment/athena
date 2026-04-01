@@ -13,33 +13,16 @@
 #include "TTree.h"
 #include <cstdio>
 
-
 //Constructor
 CaloRescaleNoise::CaloRescaleNoise(const std::string& name, ISvcLocator* pSvcLocator):
-  AthAlgorithm(name,pSvcLocator),
-  m_calo_id(nullptr),
-  m_iCool(0),
-  m_SubHash(0),
-  m_Hash(0),
-  m_OffId(0),
-  m_eta(0),
-  m_phi(0),
-  m_layer(0),
-  m_Gain(0),
-  m_elecNoise(0),
-  m_pileupNoise (0),
-  m_elecNoiseRescaled(0),
-  m_tree(nullptr)
+  AthAlgorithm(name,pSvcLocator)
 {
-  declareProperty("absScaling",m_absScaling=false);
 }
 
 //__________________________________________________________________________
 //Destructor
-CaloRescaleNoise::~CaloRescaleNoise()
-{
-  ATH_MSG_DEBUG ( "CaloRescaleNoise destructor called" );
-}
+CaloRescaleNoise::~CaloRescaleNoise() = default;
+
 //__________________________________________________________________________
 StatusCode CaloRescaleNoise::initialize()
 {
@@ -240,7 +223,3 @@ StatusCode CaloRescaleNoise::stop()
   return StatusCode::SUCCESS;
  }
 
- StatusCode CaloRescaleNoise::finalize()
-{
-  return StatusCode::SUCCESS;
-}
