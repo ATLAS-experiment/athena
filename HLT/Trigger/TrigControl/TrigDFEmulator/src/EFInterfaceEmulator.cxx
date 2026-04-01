@@ -182,6 +182,7 @@ void DFEF::EFInterfaceEmulator::outputThreadCallback() {
       } else {
        throw std::runtime_error("Missing the FullEvent copy for event accepted with L0ID: " + std::to_string(eventPair.first)); 
       }
+      ERS_DEBUG(2, "m_events size after erase: " << m_events.size());
     }
     //FIXME Remove this, just for debugging
     std::unique_ptr<uint32_t[]> hltResult = std::move(eventPair.second);
@@ -198,7 +199,6 @@ void DFEF::EFInterfaceEmulator::outputThreadCallback() {
       m_file_rw->writeEvent(sizeInBytes, finalEvent.data());
     }
     ERS_DEBUG(2, "Event with L0ID: " << eventPair.first << " written to file");
-    ERS_DEBUG(2, "m_events size after erase: " << m_events.size());
   }
   ERS_DEBUG(2, "Output thread finished processing.");
 }
