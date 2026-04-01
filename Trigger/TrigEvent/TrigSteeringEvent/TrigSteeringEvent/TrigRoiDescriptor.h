@@ -136,8 +136,6 @@ protected:
   unsigned int m_roiId;         //!< RoI number
   unsigned int m_roiWord;       //!< lvl1 RoI word from which this RoI was initially constructed
 
-  std::vector<uint32_t> m_serialized;
-
 };
 
 

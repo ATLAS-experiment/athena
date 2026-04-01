@@ -4,10 +4,7 @@
  <class name="DataVector<TrigOperationalInfo>" /> 
  <class name="std::vector<TrigOperationalInfo*>" /> 
 
- <class name="TrigRoiDescriptor" id="B2C86E23-8421-4F34-8014-AE4A7E4BA0A7" >
-   <field name="m_serialized" transient="true" />
- </class>
-
+ <class name="TrigRoiDescriptor" id="B2C86E23-8421-4F34-8014-AE4A7E4BA0A7" />
  <class name="TrigRoiDescriptorCollection" id="A2E10999-9B32-4510-8483-0BCB9E5B857F" />
  <class name="DataVector<TrigRoiDescriptor>" />
  <class name="std::vector<TrigRoiDescriptor*>" />
