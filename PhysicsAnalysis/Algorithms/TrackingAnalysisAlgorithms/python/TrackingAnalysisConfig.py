@@ -122,17 +122,17 @@ class InDetTrackCalibrationConfig (ConfigBlock):
             if config.campaign() is Campaign.MC23a:
                 # 2022 recommendations (MC23a)
                 alg.biasingTool.calibFiles = [
-                    "dev/InDetTrackSystematicsTools/CalibData_25.2_2025-v00/2022_d0z0qoverp_biasing_factor.root",
+                    "InDetTrackSystematicsTools/CalibData_25.2_2025-v00/2022_d0z0qoverp_biasing_factor.root",
                 ]
             elif config.campaign() is Campaign.MC23d:
                 # 2023 recommendations (MC23d)
                 alg.biasingTool.calibFiles = [
-                    "dev/InDetTrackSystematicsTools/CalibData_25.2_2025-v00/2023_d0z0qoverp_biasing_factor.root",
+                    "InDetTrackSystematicsTools/CalibData_25.2_2025-v00/2023_d0z0qoverp_biasing_factor.root",
                 ]
             elif config.campaign() is Campaign.MC23e:
                 # 2024 recommendations (MC23e)
                 alg.biasingTool.calibFiles = [
-                    "dev/InDetTrackSystematicsTools/CalibData_25.2_2025-v00/2024_d0z0qoverp_biasing_factor.root",
+                    "InDetTrackSystematicsTools/CalibData_25.2_2025-v00/2024_d0z0qoverp_biasing_factor.root",
                 ]
             else:
                 raise ValueError ('No biasing recommendations found for campaign \"'
