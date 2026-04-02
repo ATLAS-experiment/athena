@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # HION5.py  
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -19,23 +19,29 @@ def HION5SkimmingToolCfg(flags):
     acc.addSequence( seqAND("HION5Sequence") )
     acc.getSequence("HION5Sequence").ExtraDataForDynamicConsumers = ExtraData
     acc.getSequence("HION5Sequence").ProcessDynamicDataDependencies = True
-    
-    from DerivationFrameworkHI import ListTriggers
-    
-    triggers = ListTriggers.HION5SkimmingTriggers()
+    filterList = []
     
     req_electrons = 'count( ( Electrons.pt > 15*GeV ) && ( abs(Electrons.eta) < 2.5) )>0'
     req_muons     = 'count( Muons.DFCommonMuonPassPreselection && (Muons.pt > 15*GeV) && ( abs(Muons.eta) < 2.7))>0'
     req_photons = 'count( Photons.DFCommonPhotonsIsEMLoose && (Photons.pt > 30*GeV) ) > 0'
     req_total = '(' + req_electrons + ' || ' + req_muons + ' || ' + req_photons + ')'
-
-    expression = ' ( ' +' || '.join(triggers) + ' )  && ' + req_total
-    
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
         xAODStringSkimmingToolCfg)
-    acc.addPublicTool(acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
-        flags, name = "HION5StringSkimmingTool", expression = expression)), primary = True)
+    HION5StringSkimmingTool = acc.addPublicTool(acc.getPrimaryAndMerge(
+        xAODStringSkimmingToolCfg(flags, name = "HION5StringSkimmingTool",
+                                  expression = req_total)))
+    filterList += [HION5StringSkimmingTool]
     
+    from DerivationFrameworkHI import ListTriggers
+    triggers = ListTriggers.HION5SkimmingTriggers()
+    HION5TriggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(
+        name = "HION5TriggerSkimmingTool", TriggerListOR = triggers)
+    acc.addPublicTool(HION5TriggerSkimmingTool)
+    filterList += [HION5TriggerSkimmingTool]
+
+    HION5SkimmingTool  = CompFactory.DerivationFramework.FilterCombinationAND(
+        name="HION5SkimmingTool",  FilterList=filterList)
+    acc.addPublicTool(HION5SkimmingTool, primary = True)
     return acc
 
 def HION5Thinning(flags):    
