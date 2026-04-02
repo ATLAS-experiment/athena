@@ -122,14 +122,6 @@ def trigger_setup(SlimmingHelper, option=''):
         SlimmingHelper.IncludeBPhysTriggerContent = True
     if option == 'FTAG3':
         SlimmingHelper.IncludeJetTriggerContent = True
-        SlimmingHelper.FinalItemList.append('xAOD::JetContainer#HLT_xAOD__JetContainer_a4tcemsubjesFS')
-        SlimmingHelper.FinalItemList.append('xAOD::JetTrigAuxContainer#HLT_xAOD__JetContainer_a4tcemsubjesFSAux.')
-        SlimmingHelper.FinalItemList.append('xAOD::JetContainer#HLT_xAOD__JetContainer_a4tcemsubjesISFS')
-        SlimmingHelper.FinalItemList.append('xAOD::JetTrigAuxContainer#HLT_xAOD__JetContainer_a4tcemsubjesISFSAux.')
-        SlimmingHelper.FinalItemList.append('xAOD::JetContainer#HLT_xAOD__JetContainer_a10tclcwsubjesFS')
-        SlimmingHelper.FinalItemList.append('xAOD::JetTrigAuxContainer#HLT_xAOD__JetContainer_a10tclcwsubjesFSAux.')
-        SlimmingHelper.FinalItemList.append('xAOD::JetContainer#HLT_xAOD__JetContainer_a10ttclcwjesFS')
-        SlimmingHelper.FinalItemList.append('xAOD::JetTrigAuxContainer#HLT_xAOD__JetContainer_a10ttclcwjesFSAux.')
     if option == 'FTAG5':
         SlimmingHelper.IncludeTriggerNavigation = True
         SlimmingHelper.IncludeJetTriggerContent = True
