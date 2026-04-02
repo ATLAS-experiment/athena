@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALORINGERTOOLS_CALORINGSBUILDER_H
@@ -8,12 +8,6 @@
 // Base includes:
 #include "CaloRingerTools/ICaloRingsBuilder.h"
 #include "AthenaBaseComps/AthAlgTool.h"
-
-// STL includes:
-#include <string>
-#include <vector>
-#include <memory>
-#include <limits>
 
 // Wrap-around phi helper include:
 #include "CaloGeoHelpers/CaloPhiRange.h"
@@ -33,6 +27,12 @@
 // Forward declarations
 #include "xAODCaloEvent/CaloClusterFwd.h"
 #include "xAODJet/JetContainer.h"
+
+// STL includes:
+#include <string>
+#include <vector>
+#include <limits>
+
 class CaloCellContainer;
 class CaloCellList;
 
