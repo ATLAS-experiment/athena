@@ -199,12 +199,12 @@ def MultifoldGNNCfg(
         remapping={},
         useBTaggingObject=None,
         tag_requirements=set(),
-        defaultOutputValues={},
         foldHashName='jetFoldRankHash',
         electrons='',
         muons='',
         suffix='',
 ):
+
     common = commonpath(nnFilePaths)
     nn_name = '_'.join(PurePath(common).with_suffix('').parts)
     algname = 'FtagNN_{jc}_{tc}_{nn}_{fc}{dz}'.format(
@@ -248,7 +248,6 @@ def MultifoldGNNCfg(
             ca = acc, 
             NNFiles=nnFilePaths,
         ),
-        defaultOutputValues=defaultOutputValues,
         defaultZeroTracks=default_zero_tracks,
     )
 
@@ -258,11 +257,16 @@ def MultifoldGNNCfg(
     # and also don't use multifold (for now). So doing it this way
     # lets us support large-R and small-R jets in the same function.
     if len(nnFilePaths) == 1:
+        nn_filepath = nnFilePaths[0]
         Tool = CompFactory.FlavorTagInference.GNNTool
+        path_defaults = _defaultsFromPaths(nnFilePaths)
+
         bonusargs = dict(
             name='unifold',
-            nnFile=nnFilePaths[0]
+            nnFile=nn_filepath,
         )
+        if nn_filepath in path_defaults:
+            bonusargs['defaultOutputValues'] = path_defaults[nn_filepath]
 
     else:
         Tool = CompFactory.FlavorTagInference.MultifoldGNNTool
@@ -323,12 +327,24 @@ def _defaultsFromPaths(nn_paths):
             'GN2v01_ptau': 0.713035464,
         }
     ]
+
+    GN2HLv01_fold_defaults = [
+        {
+            'GN2HLv01_pb':  0.514302135,
+            'GN2HLv01_pc':  0.068148732,
+            'GN2HLv01_pu':  0.012127459,
+            'GN2HLv01_ptau':  0.40542167,
+        }
+    ]
+
     defaults = {}
     fold_re = re.compile('network_fold([0-9]+)')
     for path in nn_paths:
         if '/GN2v01/' in path:
             fold = int(fold_re.search(path).group(1))
             defaults[path] = gn2v01_fold_defaults[fold]
+        if '/GN2HL/' in path:
+            defaults[path] = GN2HLv01_fold_defaults[0]
     return defaults
 
 
@@ -392,7 +408,7 @@ def getDependencySet(tagger_name: str, override: set[str] | None = None) -> set[
         "GN3V02": {"E", "M"},
 
         # Run 4 small-R jet taggers
-        "gn2hl": {},
+        "GN2HL": {},
 
         # Large-R jet taggers
         "gn2xv00": {"X"},
