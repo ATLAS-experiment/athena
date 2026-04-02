@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -16,22 +16,26 @@
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
 
+#include "AthenaMonitoringKernel/MonitoredScalar.h"
+#include "AthenaMonitoringKernel/MonitoredCollection.h"
+#include "AthenaMonitoringKernel/MonitoredGroup.h"
+#include "AthenaMonitoringKernel/MonitoredTimer.h"
+
 //LVL1 ROIS
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"
 
 //MUON CLUSTER
-#include "MuonCluster.h"
 #include "xAODTrigger/TrigCompositeAuxContainer.h"
-#include "CxxUtils/fpcompare.h"
+#include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "CxxUtils/phihelper.h"
 
 //C++ LIBS
 #include <cmath>
-#include <algorithm>
-#include <sstream>
+#include <vector>
 #include <stdexcept>
+#include <memory>
 
-using namespace std;
+
 
 MuonCluster::MuonCluster(const std::string& name, ISvcLocator* svc)
   : AthReentrantAlgorithm(name, svc){
@@ -180,8 +184,8 @@ StatusCode MuonCluster::execute(const EventContext& ctx) const
                     } else{
                         //to recalculate the average with all RoIs within a dR = 0.4 cone of the seed position
                         eta_avg += muonClu0[j_cl].eta;
-                        cosPhi_avg += cos(muonClu0[j_cl].phi);
-                        sinPhi_avg += sin(muonClu0[j_cl].phi);
+                        cosPhi_avg += std::cos(muonClu0[j_cl].phi);
+                        sinPhi_avg += std::sin(muonClu0[j_cl].phi);
                     }
                 } // End of if on deltaR<m_DeltaR
 
@@ -191,8 +195,12 @@ StatusCode MuonCluster::execute(const EventContext& ctx) const
                 //set cluster position as average position of RoIs
                 //This, coupled with the improvement=true/false below, makes an assumption that
                 //improvement = false means same # RoIs in cluster, but never less (code had this before, too)
+                if (n_in_clu == 0)[[unlikely]]{
+                  ATH_MSG_ERROR("MuonCluster::execute: n_in_clu denominator is zero.");
+                  return StatusCode::FAILURE;
+                }
                 muonClu[i_cl].eta = eta_avg/n_in_clu;
-                muonClu[i_cl].phi = atan2(sinPhi_avg,cosPhi_avg);
+                muonClu[i_cl].phi = std::atan2(sinPhi_avg,cosPhi_avg);
             }
 
             //find the number of ROIs in the new cluster
@@ -293,5 +301,5 @@ float MuonCluster::DeltaR(lvl1_muclu_roi p_roi,lvl1_muclu_roi q_roi) const{
     float delPhi = CxxUtils::wrapToPi((p_roi).phi-(q_roi).phi);
     float delEta = (p_roi).eta-(q_roi).eta;
 
-    return(sqrt(delPhi*delPhi+delEta*delEta));
+    return(std::sqrt(delPhi*delPhi+delEta*delEta));
 }
