@@ -819,17 +819,19 @@ def EGammaCommonCfg(flags):
         acc.addPublicTool(CoreCellRecoveryTool)
         EGAugmentationTools.append(CoreCellRecoveryTool)
 
-    # decorate electrons and photons with the transformer calibrated energy
-    from DerivationFrameworkEGamma.EGammaToolsConfig import EGammaEnergyCalibrationWrapperCfg
-    
-    TransformerEnergyCalibration = acc.addPublicTool(acc.popToolsAndMerge(
-        EGammaEnergyCalibrationWrapperCfg(
-            flags,
-            name="TransformerEnergyCalibration",
-        )
-    ))
-    
-    EGAugmentationTools.append(TransformerEnergyCalibration)
+    if flags.Derivation.Egamma.addMissingCellInfo:
+        # decorate electrons and photons with the transformer calibrated energy
+        # the transformer models are trained with missing cell info
+        # the calibration should only be applied when missing cells are included
+        # since hion do not include neither missing cell or transformer-based calibration
+        from DerivationFrameworkEGamma.EGammaToolsConfig import EGammaEnergyCalibrationWrapperCfg
+        TransformerEnergyCalibration = acc.addPublicTool(acc.popToolsAndMerge(
+            EGammaEnergyCalibrationWrapperCfg(
+                flags,
+                name="TransformerEnergyCalibration",
+            )
+        ))
+        EGAugmentationTools.append(TransformerEnergyCalibration)
 
     # ==================================================
     # Truth Related tools
