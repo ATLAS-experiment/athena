@@ -125,7 +125,7 @@ namespace MuonR4 {
                     drawFinalReco("post ambiguity");
                 }
             } else if (m_visionTool.isEnabled() && segments.empty() &&
-                      std::ranges::count_if(seed->getHitsInMax(),[this](const SpacePoint* hit){
+                      std::ranges::any_of(seed->getHitsInMax(),[this](const SpacePoint* hit){
                             return  m_visionTool->isLabeled(*hit);
                       })) {
                 m_visionTool->visualizeSeed(ctx, *seed, "Failed fit");
@@ -166,7 +166,10 @@ namespace MuonR4 {
                 seedLines.push_back(drawLine(s->parameters, -Gaudi::Units::m, Gaudi::Units::m, kViolet));
             }
             seedLines.push_back(drawLabel(std::format("possible seeds: {:d}",  drawMe.nGenSeeds()), 0.2, 0.85, 14));
-            m_visionTool->visualizeSeed(ctx, *patternSeed, "pattern", std::move(seedLines));
+            m_visionTool->visualizeSeed(ctx, *patternSeed, std::format("pattern_{:}{:}{:}",
+               Muon::MuonStationIndex::chName(patternSeed->msSector()->chamberIndex()),
+                patternSeed->msSector()->side() ? 'A' : 'C' ,
+                patternSeed->msSector()->sector()), std::move(seedLines));
         }
 
         ATH_MSG_VERBOSE("fitSegmentHits() - Start segment seed search");
@@ -174,6 +177,26 @@ namespace MuonR4 {
             ATH_MSG_VERBOSE("fitSegmentHits() - Found a seed. Try to fit the segment...");
             // Back convert the seed parameters to athena units
             seed->parameters[toUnderlying(ParamDefs::t0)] = ActsTrk::timeToAthena(seed->parameters[toUnderlying(ParamDefs::t0)]);
+            
+            if (m_doBeamspotConstraint) {
+                const auto [pos, dir] = makeLine(seed->parameters);
+                using namespace Acts::detail::LineHelper;
+
+                const Acts::Intersection3D bsExtp = lineIntersect<3>(Amg::Vector3D::Zero(),
+                                                                     Amg::Vector3D::UnitZ(),
+                                                                     locToGlob*pos, 
+                                                                     locToGlob.linear()*dir);
+                const Amg::Vector3D closePoint = bsExtp.position();
+                if (closePoint.perp() > 2.*m_beamSpotR ||
+                    std::abs(closePoint.z()) > 2.*m_beamSpotL){
+                    ATH_MSG_DEBUG("fitSegmentSeed() - Reject parameters "<<toString(seed->parameters)
+                                    <<" as extrapolation to beamspot is too far "<<Amg::toString(closePoint)
+                                    <<", r: "<<closePoint.perp());
+                    continue;
+                }
+            }
+            
+            
             auto segment = m_fitter->fitSegment(ctx, patternSeed, seed->parameters,
                                                 locToGlob, std::move(seed->hits));
             if (segment) {
@@ -190,8 +213,10 @@ namespace MuonR4 {
         if (segmentCandidates.empty()) {
             return;
         }
-        ATH_MSG_VERBOSE("Resolve ambiguities amongst "<<segmentCandidates.size()<<" segment candidates. ");
-        std::unordered_map<const MuonGMR4::SpectrometerSector*, SegmentVec_t> candidatesPerChamber{};
+        ATH_MSG_VERBOSE("resolveAmbiguities() - Resolve ambiguities amongst "
+                        <<segmentCandidates.size()<<" segment candidates.");
+        std::map<const MuonGMR4::SpectrometerSector*, SegmentVec_t,
+                 MuonGMR4::MuonDetectorManager::MSEnvelopeSorter> candidatesPerChamber{};
         
         for (std::unique_ptr<Segment>& sortMe : segmentCandidates) {
             const MuonGMR4::SpectrometerSector* chamb = sortMe->msSector();
@@ -199,10 +224,14 @@ namespace MuonR4 {
         }
         segmentCandidates.clear();
         for (auto& [chamber, resolveMe] : candidatesPerChamber) {
+            const std::size_t nBefore = resolveMe.size();
             SegmentVec_t resolvedSegments = m_ambiSolver->resolveAmbiguity(gctx, std::move(resolveMe));
+            ATH_MSG_DEBUG("resolveAmbiguities()  - "<<resolvedSegments.size()<<"/"<<nBefore
+                <<" segments survived ambiguity solving in "<<chamber->identString()<<".");
             segmentCandidates.insert(segmentCandidates.end(), 
                                      std::make_move_iterator(resolvedSegments.begin()),
                                      std::make_move_iterator(resolvedSegments.end()));
         }
+        ATH_MSG_VERBOSE("Ambiguity solving done "<<segmentCandidates.size()<<" survived.");
     }
 }
