@@ -43,7 +43,10 @@ public:
     std::vector<Identifier::value_type> ids;
     uint16_t hitsInThirdTimeBin{0};
   };  
-  using ClusterCollection = std::vector<Cluster>;
+  struct ClusterCollection : std::vector<Cluster> {
+     unsigned int nRDOs() const { return n_rdos; }
+     unsigned int n_rdos=0u;
+  };
   
   virtual StatusCode
   clusterize(const EventContext& ctx,

@@ -146,6 +146,7 @@ StripClusteringTool::clusterize(const EventContext& ctx,
     // We are currently not using this, but keeping it here should we need it in the future
 
     Acts::Ccl::createClusters<CellCollection, typename IStripClusteringTool::ClusterCollection, 1>(data, cells, collection.back());
+    collection.back().n_rdos = cells.size();
 
     return StatusCode::SUCCESS;
 }
