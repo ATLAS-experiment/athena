@@ -38,7 +38,7 @@
 #include <cmath>
 #include <cassert>
 #include <string>
-#include <regex>
+#include <string_view>
 
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "RDBAccessSvc/IRDBRecord.h"
@@ -587,22 +587,31 @@ G4bool EnergyCalculator::FindIdentifier_Default(
 
   const G4String name = preStepVolume->GetName();
 
-  static const std::array<std::pair<std::regex, int>, 5> compiled_patterns = {{
-        {std::regex(R"(Slice\d{2})"),     1},
-        {std::regex(R"(Electrode\d{2})"), 2},
-        {std::regex(R"(Absorber\d{2})"),  2},
-        {std::regex(R"(Glue\d{2})"),      3},
-        {std::regex(R"(Lead\d{2})"),      4}
-  }};
+  auto matches_pattern = [](std::string_view text, std::string_view prefix) -> bool {
+    if (!text.starts_with(prefix)) return false;
+    size_t digit_start = prefix.size();
+    return (digit_start + 2 <= text.size() && 
+            std::isdigit(static_cast<unsigned char>(text[digit_start])) &&
+            std::isdigit(static_cast<unsigned char>(text[digit_start + 1])));
+  };
+
+  constexpr auto patterns = std::to_array<std::pair<std::string_view, int>>({
+    {"Slice",     1},
+    {"Electrode", 2},
+    {"Absorber",  2},
+    {"Glue",      3},
+    {"Lead",      4}
+  });
+  
+
   int offset = 0;
-  for (const auto& p : compiled_patterns) {
+  for (const auto& [prefix, val] : patterns) {
     // Regex: Slice[0-9]{2}, Electrode[0-9]{2}, ecc.
-    if (std::regex_search(name, p.first)) {
-        offset = p.second;
+    if (matches_pattern(name, prefix)) {
+        offset = val;
         break;
     }
   }
-  
 
   if (offset > 0) {
 	  transf = pre_step_point->GetTouchable()->GetHistory()->GetTransform(profundis - offset);
