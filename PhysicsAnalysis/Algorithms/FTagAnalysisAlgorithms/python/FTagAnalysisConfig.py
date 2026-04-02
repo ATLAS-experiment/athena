@@ -96,8 +96,8 @@ class FTagConfig (ConfigBlock):
         else:
             alg.selectionDecoration = 'ftag_select_' + selectionName + ',as_char'
             alg.particles = config.readName (self.containerName)
-            config.addOutputVar (self.containerName, 'ftag_select_' + selectionName, selectionName + '_select', noSys=True)
-            config.addSelection (self.containerName, selectionName, alg.selectionDecoration)
+            config.addOutputVar (self.containerName, 'ftag_select_' + selectionName, 'select_' + selectionName, noSys=True)
+            config.addSelection (self.containerName, selectionName, alg.selectionDecoration, comesFrom='ftag')
 
         # Save the b-tagging score
         if self.saveScores in ['True', 'All']:
