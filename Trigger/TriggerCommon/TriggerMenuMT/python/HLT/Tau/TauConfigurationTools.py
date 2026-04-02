@@ -2,6 +2,7 @@
 from typing import Any
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
@@ -54,16 +55,19 @@ def getTauIDScoreVariables(tau_id: str) -> tuple[str, str]:
     return (f'{tau_id}_Score', f'{tau_id}_ScoreSigTrans')
 
 
-def getTauIDAlgorithm(flags: AthConfigFlags, selection: str, name_mapping: dict[str, str] | None = None) -> str:
+@AccumulatorCache  # called many times and looping over flags is slow
+def getTauIDAlgorithm(flags: AthConfigFlags, selection: str,
+                      name_mapping: tuple[tuple[str, str], ...] | None = None) -> str:
+
     # Sort ID names from longest to shortest, to check for a full match
-    tau_ids = sorted(list(flags.Trigger.Offline.Tau), key=len, reverse=True)
+    tau_ids = sorted(flags.Trigger.Offline.Tau, key=len, reverse=True)
     for tau_id in tau_ids:
         if selection.endswith(tau_id): return tau_id
 
     # Remap names (e.g. DS -> DeepSet)
     if name_mapping:
-        name_mapping = dict(sorted(name_mapping.items(), key=lambda p: len(p[0]), reverse=True))
-        for short_name, long_name in name_mapping.items():
+        name_mapping = sorted(name_mapping, key=lambda p: len(p[0]), reverse=True)
+        for short_name, long_name in name_mapping:
             if selection.endswith(short_name): return long_name
     
     return selection
@@ -155,7 +159,7 @@ def getChainCaloHitsPreselConfigName(flags: AthConfigFlags, chainPart: dict[str,
     return getTauIDAlgorithm(
         flags,
         sel,
-        name_mapping={'CHTP': 'GNCaloHitsTauPresel'},
+        name_mapping=(('CHTP', 'GNCaloHitsTauPresel')),
     )
 
 
@@ -227,7 +231,6 @@ def getChainIDConfigName(flags: AthConfigFlags, chainPart: dict[str, Any]) -> st
     return getTauIDAlgorithm(
         flags,
         sel,
-        name_mapping={},
     )
 
     return sel
