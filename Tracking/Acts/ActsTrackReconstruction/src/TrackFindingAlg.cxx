@@ -185,7 +185,7 @@ namespace ActsTrk
     SG::ReadCondHandle<ActsTrk::ActsVolumeIdToDetectorElementCollectionMap>
       volumeIdToDetectorElementCollMap(m_volumeIdToDetectorElementCollMapKey,ctx);
     ATH_CHECK(volumeIdToDetectorElementCollMap.isValid());
-    std::array< const InDet::SiDetectorElementStatus *, static_cast<unsigned int>(ActsTrk::DetectorType::UnDefined)+1u> det_el_status_per_det_type;
+    std::array< const InDet::SiDetectorElementStatus *, static_cast<unsigned int>(ActsTrk::DetectorType::UnDefined)+1u> det_el_status_per_det_type{};
     {
        const std::vector<const InDetDD::SiDetectorElementCollection*> &det_el_collections =volumeIdToDetectorElementCollMap->collections();
        std::vector< const InDet::SiDetectorElementStatus *> det_el_status_arr;

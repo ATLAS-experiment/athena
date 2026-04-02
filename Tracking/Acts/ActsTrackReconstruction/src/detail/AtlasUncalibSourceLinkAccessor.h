@@ -11,7 +11,8 @@
 #include "xAODInDetMeasurement/StripClusterContainer.h"
 #include "xAODInDetMeasurement/HGTDClusterContainer.h"
 
-#include "xAODInDetMeasurement/PixelClusterAuxDataCacheCollection.h"
+//#include "xAODInDetMeasurement/PixelClusterAuxDataCacheCollection.h"
+//#include "xAODInDetMeasurement/StripClusterAuxDataCacheCollection.h"
 // #include "xAODInDetMeasurement/StripClusterAuxDataCache.h"
 
 #include "InDetReadoutGeometry/SiDetectorElementStatus.h"
@@ -53,7 +54,7 @@ namespace ActsTrk::detail {
       std::array< unsigned int, static_cast<unsigned int>(ActsTrk::DetectorType::UnDefined)+1u > m_perDetectorContainerIndex = invalidContainerIndices();
       std::array< std::span<const PhaseII::DataRange>, static_cast<unsigned int>(ActsTrk::DetectorType::UnDefined)+1u > m_perDetectorRanges{};
       const std::array< const InDet::SiDetectorElementStatus *,
-                        static_cast<unsigned int>(ActsTrk::DetectorType::UnDefined)+1u> *m_detectorElementStatusPerDetectorType;
+                        static_cast<unsigned int>(ActsTrk::DetectorType::UnDefined)+1u> *m_detectorElementStatusPerDetectorType{};
       std::vector< std::vector<PhaseII::DataRange> > m_customRanges;
 
    public:
@@ -131,9 +132,9 @@ namespace ActsTrk::detail {
       using MeasurementRangeContainer = std::vector<std::pair<std::size_t, std::pair<abstract_measurement_range_t, unsigned int> >>;
       using MeasurementRangeContainer::MeasurementRangeContainer;
    private:
-      const T_MeasurementContainerList *m_measurementContainerList;
+      const T_MeasurementContainerList *m_measurementContainerList{};
       const std::array< const InDet::SiDetectorElementStatus *,
-                        static_cast<unsigned int>(ActsTrk::DetectorType::UnDefined)+1u> *m_detectorElementStatusPerDetectorType;
+                        static_cast<unsigned int>(ActsTrk::DetectorType::UnDefined)+1u> *m_detectorElementStatusPerDetectorType{};
       bool m_forced = true;
    public:
       void setContainerList(const T_MeasurementContainerList &container_list) {

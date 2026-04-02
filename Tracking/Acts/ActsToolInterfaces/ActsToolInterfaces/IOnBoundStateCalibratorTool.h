@@ -12,7 +12,7 @@
 #include "Acts/EventData/TrackParameters.hpp"
 
 #include "xAODInDetMeasurement/PixelClusterAuxDataCacheCollection.h"
-#include "xAODInDetMeasurement/StripClusterContainer.h"
+#include "xAODInDetMeasurement/StripClusterAuxDataCacheCollection.h"
 #include "xAODInDetMeasurement/HGTDClusterContainer.h"
 
 namespace ActsTrk {
@@ -21,6 +21,7 @@ class IOnBoundStateCalibratorTool : virtual public IAlgTool {
 public:
    DeclareInterfaceID(IOnBoundStateCalibratorTool, 1, 0);
       using PixelCluster_t = traits::ElementProxies<const PixelClusterAuxDataCacheCollection >::ClusterProxy<Utils::AccessPolicy::Const>;
+      using StripCluster_t = traits::ElementProxies<const StripClusterAuxDataCacheCollection >::ClusterProxy<Utils::AccessPolicy::Const>;
       using PixelPos = xAOD::MeasVector<2>;
       using PixelCov = xAOD::MeasMatrix<2>;
       // @TODO should pass through bound state
@@ -35,7 +36,7 @@ public:
       using StripCalibrator = Acts::Delegate<
          std::pair<StripPos, StripCov>(const Acts::GeometryContext&,
                                        const Acts::CalibrationContext&,
-                                       const xAOD::StripCluster &,
+                                       const StripCluster_t &,
                                        const Acts::BoundTrackParameters &)>;
 
       using HgtdPos = xAOD::MeasVector<3>;

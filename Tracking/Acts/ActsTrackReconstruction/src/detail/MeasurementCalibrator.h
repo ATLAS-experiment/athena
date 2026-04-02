@@ -13,7 +13,7 @@
 #include "xAODInDetMeasurement/StripCluster.h"
 #include "xAODInDetMeasurement/HGTDCluster.h"
 #include "xAODInDetMeasurement/PixelClusterAuxDataCache.h"
-//#include "xAODInDetMeasurement/StripClusterAuxDataCache.h"
+#include "xAODInDetMeasurement/StripClusterAuxDataCache.h"
 
 #include "Acts/EventData/MultiTrajectory.hpp"
 #include "Acts/EventData/TrackParameters.hpp"
@@ -106,7 +106,7 @@ namespace ActsTrk {
 
 
       using PixelCluster_t = traits::ElementProxies<const PixelClusterAuxDataCacheCollection >::ClusterProxy<Utils::AccessPolicy::Const>;
-      //      using StripCluster_t = traits::ElementProxies<StripClusterAuxDataCache<Utils::AccessPolicy::Const> >::ClusterProxy<Utils::AccessPolicy::Const>;
+      using StripCluster_t = traits::ElementProxies<StripClusterAuxDataCache<Utils::AccessPolicy::Const> >::ClusterProxy<Utils::AccessPolicy::Const>;
 
       // @TODO should pass through bound state
       using PixelCalibrator = Acts::Delegate<
@@ -120,8 +120,8 @@ namespace ActsTrk {
       using StripCalibrator = Acts::Delegate<
          std::pair<StripPos, StripCov>(const Acts::GeometryContext&,
                                        const Acts::CalibrationContext&,
-                                       //                                       const StripCluster_t &,
-                                       const xAOD::StripCluster &,
+                                       const StripCluster_t &,
+                                       // const xAOD::StripCluster &,
                                        const Acts::BoundTrackParameters &)>;
       using hgtdPos = xAOD::MeasVector<3>;
       using hgtdCov = xAOD::MeasMatrix<3>;
@@ -158,10 +158,9 @@ namespace ActsTrk {
              stripCalibratorTool->connectStripCalibrator( calibrate_after_measurement_selection ?
                                                           strip_postCalibrator : strip_preCalibrator );
              if (calibrate_after_measurement_selection)
-                strip_preCalibrator.template connect<&MeasurementCalibrator::passthrough<1, xAOD::StripCluster>>(this);
+                strip_preCalibrator.template connect<&MeasurementCalibrator::passthrough<1, StripCluster_t>>(this);
           } else {
-             //             strip_preCalibrator.template connect<&MeasurementCalibrator::passthrough<1, StripCluster_t>>(this);
-             strip_preCalibrator.template connect<&MeasurementCalibrator::passthrough<1, xAOD::StripCluster>>(this);
+             strip_preCalibrator.template connect<&MeasurementCalibrator::passthrough<1, StripCluster_t>>(this);
           }
 
           if (hgtdCalibratorTool) {

@@ -394,18 +394,18 @@ namespace {
          //       additionally
          if constexpr( s_fullPreCalibration) {
             m_measurementSelector.template setPreCalibrator<2,ActsTrk::MeasurementCalibrator::PixelCluster_t>(m_calibrator.pixelPreCalibrator());
-            //            m_measurementSelector.template setPreCalibrator<1,ActsTrk::MeasurementCalibrator::StripCluster_t>(m_calibrator.stripPreCalibrator());
-            m_measurementSelector.template setPreCalibrator<1,xAOD::StripCluster>(m_calibrator.stripPreCalibrator());
+            m_measurementSelector.template setPreCalibrator<1,ActsTrk::MeasurementCalibrator::StripCluster_t>(m_calibrator.stripPreCalibrator());
+            //            m_measurementSelector.template setPreCalibrator<1,xAOD::StripCluster>(m_calibrator.stripPreCalibrator());
             m_measurementSelector.template setPreCalibrator<3,xAOD::HGTDCluster>(m_calibrator.hgtdPreCalibrator());
             m_measurementSelector.template setCalibrator<2,ActsTrk::MeasurementCalibrator::PixelCluster_t>(m_calibrator.pixelPostCalibrator());
-            //            m_measurementSelector.template setCalibrator<1,ActsTrk::MeasurementCalibrator::StripCluster_t>(m_calibrator.stripPostCalibrator());
-            m_measurementSelector.template setCalibrator<1,xAOD::StripCluster>(m_calibrator.stripPostCalibrator());
+            m_measurementSelector.template setCalibrator<1,ActsTrk::MeasurementCalibrator::StripCluster_t>(m_calibrator.stripPostCalibrator());
+            //            m_measurementSelector.template setCalibrator<1,xAOD::StripCluster>(m_calibrator.stripPostCalibrator());
             m_measurementSelector.template setCalibrator<3,xAOD::HGTDCluster>(m_calibrator.hgtdPostCalibrator());
          }
          else {
             m_measurementSelector.template setCalibrator<2,ActsTrk::MeasurementCalibrator::PixelCluster_t>(m_calibrator.pixelPostCalibrator());
-            //m_measurementSelector.template setCalibrator<1,ActsTrk::MeasurementCalibrator::StripCluster_t>(m_calibrator.stripPostCalibrator());
-            m_measurementSelector.template setCalibrator<1,xAOD::StripCluster>(m_calibrator.stripPostCalibrator());
+            m_measurementSelector.template setCalibrator<1,ActsTrk::MeasurementCalibrator::StripCluster_t>(m_calibrator.stripPostCalibrator());
+            // m_measurementSelector.template setCalibrator<1,xAOD::StripCluster>(m_calibrator.stripPostCalibrator());
             m_measurementSelector.template setCalibrator<3,xAOD::HGTDCluster>(m_calibrator.hgtdPostCalibrator());
          }
       }

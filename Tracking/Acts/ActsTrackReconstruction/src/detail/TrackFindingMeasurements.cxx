@@ -7,8 +7,8 @@
 #include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
 #include "ActsGeometry/SurfaceOfMeasurementUtil.h"
 #include "xAODInDetMeasurement/PixelClusterAuxDataCache.h"
-//#include "xAODInDetMeasurement/StripClusterAuxDataCache.h"
-#include "xAODInDetMeasurement/StripClusterContainer.h"
+#include "xAODInDetMeasurement/StripClusterAuxDataCache.h"
+// #include "xAODInDetMeasurement/StripClusterContainer.h"
 #include "xAODInDetMeasurement/HGTDClusterContainer.h"
 #include "AuxDataCacheList.icc"
 
@@ -96,10 +96,10 @@ namespace ActsTrk::detail {
           using T_Container = std::remove_cvref_t<decltype(container.container())>;
           using PixelClusterAuxDataCacheProxy =  ClusterAuxDataCacheWithClusterAccess<PixelClusterAuxDataCacheCollection >;
           
-          //          using StripClusterAuxDataCacheProxy =  ClusterAuxDataCacheWithClusterAccess<StripClusterAuxDataCache<Utils::AccessPolicy::Const> >;
-                            //                         || std::is_same_v<T_Container,StripClusterAuxDataCacheProxy>
+          using StripClusterAuxDataCacheProxy =  ClusterAuxDataCacheWithClusterAccess<StripClusterAuxDataCacheCollection >;
+          // || std::is_same_v<T_Container,xAOD::StripClusterContainer>
           static_assert(    std::is_same_v<T_Container,PixelClusterAuxDataCacheProxy>
-                         || std::is_same_v<T_Container,xAOD::StripClusterContainer>
+                         || std::is_same_v<T_Container,StripClusterAuxDataCacheProxy>
                          || std::is_same_v<T_Container,xAOD::HGTDClusterContainer>);
           
           if constexpr(traits::has_moduleIndex<T_Container>) {

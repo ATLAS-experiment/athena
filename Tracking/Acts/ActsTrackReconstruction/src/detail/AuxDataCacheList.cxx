@@ -1,7 +1,7 @@
 #include "AuxDataCacheList.h"
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 #include "xAODInDetMeasurement/PixelClusterAuxDataCacheCollection.h"
-//#include "xAODInDetMeasurement/StripClusterAuxDataCache.h"
+#include "xAODInDetMeasurement/StripClusterAuxDataCacheCollection.h"
 
 #include "AtlasUncalibSourceLinkAccessor.h"
 #include "AuxDataCacheList.icc"
@@ -31,14 +31,14 @@ namespace ActsTrk::detail {
          AuxDataCacheList<derived_t>::setContainerCreateCache<xAOD::PixelClusterContainer,
                                                               PixelClusterAuxDataCacheCollection >(container_index,container);
       }
-      // else if (dynamic_cast<const xAOD::StripClusterContainer*>(&container) != nullptr) {
-      //    AuxDataCacheList<derived_t>::setContainerCreateCache<xAOD::StripClusterContainer,
-      //                                                         StripClusterAuxDataCache<Utils::AccessPolicy::Const> >(container_index,container);
-      // }
       else if (dynamic_cast<const xAOD::StripClusterContainer*>(&container) != nullptr) {
-         assert( dynamic_cast<const xAOD::StripClusterContainer *>(&container) == static_cast<const xAOD::StripClusterContainer *>(&container));
-         BASE::setContainer(container_index, *static_cast<const xAOD::StripClusterContainer *>(&container));
+          AuxDataCacheList<derived_t>::setContainerCreateCache<xAOD::StripClusterContainer,
+                                                               StripClusterAuxDataCacheCollection >(container_index,container);
       }
+      // else if (dynamic_cast<const xAOD::StripClusterContainer*>(&container) != nullptr) {
+      //    assert( dynamic_cast<const xAOD::StripClusterContainer *>(&container) == static_cast<const xAOD::StripClusterContainer *>(&container));
+      //    BASE::setContainer(container_index, *static_cast<const xAOD::StripClusterContainer *>(&container));
+      // }
       else if (dynamic_cast<const xAOD::HGTDClusterContainer*>(&container) != nullptr) {
          assert( dynamic_cast<const xAOD::HGTDClusterContainer *>(&container) == static_cast<const xAOD::HGTDClusterContainer *>(&container));
          BASE::setContainer(container_index, *static_cast<const xAOD::HGTDClusterContainer *>(&container));

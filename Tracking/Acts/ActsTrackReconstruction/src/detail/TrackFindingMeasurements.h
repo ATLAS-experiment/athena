@@ -53,7 +53,7 @@ namespace ActsTrk::detail {
 
     MeasurementRangeList m_measurementRanges{};
     std::array< const InDet::SiDetectorElementStatus *,
-                static_cast<unsigned int>(ActsTrk::DetectorType::UnDefined)+1u> m_detectorElementStatusPerDetectorType;
+                static_cast<unsigned int>(ActsTrk::DetectorType::UnDefined)+1u> m_detectorElementStatusPerDetectorType{};
   };
 
 }  // namespace ActsTrk::detail
