@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TGC_ResidualPullCalculator.h"
@@ -8,13 +8,6 @@
 #include "MuonReadoutGeometry/TgcReadoutElement.h"
 #include "MuonCompetingRIOsOnTrack/CompetingMuonClustersOnTrack.h"
 #include "EventPrimitives/EventPrimitives.h"
-
-//================ Constructor =================================================
-
-Muon::TGC_ResidualPullCalculator::TGC_ResidualPullCalculator(const std::string& t, const std::string& n, const IInterface* p) :
-    AthAlgTool(t,n,p) {
-  declareInterface<IResidualPullCalculator>(this);
-}
 
 //================ Initialisation =================================================
 
