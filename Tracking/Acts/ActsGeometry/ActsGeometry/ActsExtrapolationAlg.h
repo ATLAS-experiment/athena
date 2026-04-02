@@ -14,7 +14,6 @@
 #include "ActsGeometry/RecordedMaterialTrackCollection.h"
 
 // ACTS
-#include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/Geometry/GeometryIdentifier.hpp"
 
 // STL
