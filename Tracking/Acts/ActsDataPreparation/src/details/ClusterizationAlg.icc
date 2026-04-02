@@ -187,7 +187,7 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
   DataPool<xAODCluster_t> pool (nClusters);
   clusterContainer->push_new(nClusters, [&pool]() {return pool.nextElementPtr();});
 
-  std::any vars = m_clusteringTool->makeVars (*clusterHandle);
+  std::any vars = m_clusteringTool->createEventDataCache (*clusterHandle, nClusterRDOs);
 
   // Fill the collection to xAOD format, computing necessary quantities
   std::size_t xaodCounter = 0ul;

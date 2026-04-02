@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -303,7 +303,7 @@ StatusCode TestVectorTool::encodeStripL2G(const xAOD::StripClusterContainer *str
         rdoListSize = rdoListSize > 4 ? 4 : rdoListSize; // restrict to 4 RDOs if more
         for (unsigned int j = 0; j < rdoListSize; j++)
         {
-            rdoList[j] = stripClusters->at(i)->rdoList().at(j).get_compact();
+            rdoList[j] = stripClusters->at(i)->rdoList().at(j);
         }
 
         // Strip cluster w3

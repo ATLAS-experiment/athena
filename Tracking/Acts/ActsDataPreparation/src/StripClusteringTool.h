@@ -42,8 +42,8 @@ public:
          Acts::Ccl::ClusteringData& data,
 	       std::vector<typename IStripClusteringTool::ClusterCollection>& collection) const override;
 
-    virtual std::any makeVars (SG::AuxVectorData& /*cont*/) const override
-    { return std::any(); }
+    virtual std::any createEventDataCache(xAOD::StripClusterContainer& cont,
+                                          std::size_t nClusterRDOs) const override;
 
     virtual StatusCode
     makeClusters(const EventContext& ctx,

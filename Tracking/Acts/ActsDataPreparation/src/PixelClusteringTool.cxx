@@ -263,7 +263,8 @@ PixelClusteringTool::clusterize(const EventContext& /*ctx*/,
 }
 
 
-std::any PixelClusteringTool::makeVars (SG::AuxVectorData& cont) const
+std::any PixelClusteringTool::createEventDataCache(xAOD::PixelClusterContainer& cont,
+                                                   [[maybe_unused]] std::size_t nClusterRDOs) const
 {
   return std::any (xAOD::PixelCluster::ClusterVars (cont));
 }

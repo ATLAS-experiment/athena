@@ -76,6 +76,15 @@ StatusCode StripClusteringTool::initialize()
     return StatusCode::SUCCESS;
 }
 
+std::any StripClusteringTool::createEventDataCache(xAOD::StripClusterContainer& cont,
+                                                   std::size_t nClusterRDOs) const
+{
+   auto *store = cont.getStore();
+   assert(store);
+   store->getData(xAOD::StripCluster::rdoListAcc().linkedAuxid(),0u, nClusterRDOs);
+   return std::any();
+}
+
 StatusCode StripClusteringTool::decodeTimeBins()
 {
     for (size_t i = 0; i < m_timeBinStr.size(); i++) {

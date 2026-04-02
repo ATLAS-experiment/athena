@@ -56,7 +56,8 @@ public:
          Acts::Ccl::ClusteringData& data,
 	       std::vector<ClusterCollection>& collection) const = 0;
 
-    virtual std::any makeVars (SG::AuxVectorData& cont) const = 0;
+    virtual std::any createEventDataCache(xAOD::PixelClusterContainer& cont,
+                                          std::size_t nClusterRDOs) const = 0;
 
     virtual StatusCode
     makeClusters(const EventContext& ctx,
