@@ -32,12 +32,13 @@ class TruthMuonVertexDumperAlg: public AthHistogramAlgorithm {
     SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthMuonsKey{this, "TruthMuonsKey", "MuonTruthParticles", "Key to the truth particle container"};
     SG::ReadHandleKey<xAOD::TruthVertexContainer> m_truthVertexKey{this, "TruthVerticesKey", "TruthVertices", "Key to the truth vertex container"};
 
-    Gaudi::Property<std::vector<int>> m_pdgIdsToKeepVertex{this, "PdgIdsToKeepVertex", {50, 72, 31, 32, 3000001}, "List of PDG IDs to keep vertices for"};
+    Gaudi::Property<std::vector<int>> m_pdgIdsToKeepVertex{this, "PdgIdsToKeepVertex", {25, 36, 50, 72, 31, 32, 3000001}, "List of PDG IDs to keep vertices for"};
 
     MuonVal::MuonTesterTree m_tree{"MuonVertexDump","MuonBucketDump"};
 
     bool selectDecayVertex(const xAOD::TruthVertex* vertex) const;
     void printChildren(const xAOD::TruthParticle* particle, int indentLevel) const;
+    void printParents(const xAOD::TruthParticle* particle, int indentLevel) const;
 
     bool isFromVertexOfInterest(const xAOD::TruthParticle* particle, const xAOD::TruthVertex* vertex) const;
 
