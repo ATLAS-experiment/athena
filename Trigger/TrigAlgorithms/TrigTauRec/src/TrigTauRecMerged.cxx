@@ -157,8 +157,6 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
     auto ptDetectorAxis_log         = Monitored::Scalar<float>("ptDetectorAxis_log", -99.9);
 
     auto n_cells                    = Monitored::Scalar<int>("NCaloCells", 0);
-    auto EMRadius                   = Monitored::Scalar<float>("EMRadius", -0.099);
-    auto HadRadius                  = Monitored::Scalar<float>("HadRadius", -0.099);
     auto EtHad                      = Monitored::Scalar<float>("EtHad", -10);
     auto EtEm                       = Monitored::Scalar<float>("EtEm", -10);
     auto EMFrac                     = Monitored::Scalar<float>("EMFrac", -10);
@@ -244,7 +242,7 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
         std::ref(mEflowApprox), std::ref(ptRatioEflowApprox), std::ref(pt_jetseed_log),
         std::ref(etaDetectorAxis), std::ref(ptDetectorAxis), std::ref(ptDetectorAxis_log),
         std::ref(n_cells),
-        std::ref(EMRadius), std::ref(HadRadius), std::ref(EtHad), std::ref(EtEm), std::ref(EMFrac), std::ref(IsoFrac), std::ref(CentFrac),
+        std::ref(EtHad), std::ref(EtEm), std::ref(EMFrac), std::ref(IsoFrac), std::ref(CentFrac),
         std::ref(clustersMeanCenterLambda), std::ref(clustersMeanFirstEngDens), std::ref(clustersMeanEMProbability),
         std::ref(clustersMeanSecondLambda), std::ref(clustersMeanPresamplerFrac),
         std::ref(n_clusters), std::ref(mon_cluster_et_log), std::ref(mon_cluster_dEta), std::ref(mon_cluster_dPhi),
@@ -662,8 +660,6 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
 
 
         tau->detail(xAOD::TauJetParameters::numCells, n_cells);
-        tau->detail(xAOD::TauJetParameters::EMRadius, EMRadius);
-        tau->detail(xAOD::TauJetParameters::hadRadius, HadRadius);
         tau->detail(xAOD::TauJetParameters::etHadAtEMScale, EtHad);
         EtHad /= Gaudi::Units::GeV;
         tau->detail(xAOD::TauJetParameters::etEMAtEMScale, EtEm);
