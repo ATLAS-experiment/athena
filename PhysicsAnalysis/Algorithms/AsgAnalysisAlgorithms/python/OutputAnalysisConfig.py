@@ -330,7 +330,9 @@ class OutputAnalysisConfig (ConfigBlock):
             if containerName == 'EventInfo':
                 continue
 
-            selectionNames = config.getSelectionNames(containerName)
+            # Get the selection names, except the systematic-dependent version of the FTAG
+            # selection flag, as it's already saved as a systematic-independent output branch
+            selectionNames = config.getSelectionNames(containerName, excludeFrom={'ftag'})
             for selectionName in selectionNames:
                 # skip default selection
                 if selectionName == '':
