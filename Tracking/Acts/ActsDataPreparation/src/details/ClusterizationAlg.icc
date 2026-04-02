@@ -7,6 +7,11 @@
 #include "ActsInterop/TableUtils.h"
 #include "AthAllocators/DataPool.h"
 
+namespace {
+   template <typename T>
+   concept has_nRDOs = requires (T &&a) { a.nRDOs(); };
+}
+
 namespace ActsTrk {
 
 template <typename IClusteringTool, bool useCache>
@@ -108,6 +113,8 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
   Acts::Ccl::ClusteringData data;
   
   // loop on ROIs
+  unsigned int nClusterRDOs=0u;
+  unsigned int nRDOs = 0u;
   std::size_t nClusters = 0ul;
   for (const auto* roi : *roiCollection) {
     // get list of ids
@@ -149,15 +156,21 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
       if constexpr (useCache) {
 	idclocks.push_back( std::move(cache_wh) );
       }
-      
-      m_stat[kNRdo] += rdos->size();
       // make ACTS clusters
       ATH_CHECK( m_clusteringTool->clusterize(ctx,
 					      *rdos,
 					      *detEleStatus,
 					      *element,
-                data,
+                                              data,
 					      clusterCollection) );
+      if constexpr(has_nRDOs<typename IClusteringTool::ClusterCollection>) {
+         nClusterRDOs+=clusterCollection.back().nRDOs();
+      }
+      else {
+         nClusterRDOs += rdos->size();
+      }
+      nRDOs+=rdos->size();
+
       processedElements.push_back( element );
       nClusters += clusterCollection.back().size();
     } // loop on IDs
@@ -207,6 +220,7 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
     xaodCounter += actsClusters.size();
   }
 
+  m_stat[kNRdo] += nRDOs;
   m_stat[kNClusters] += clusterContainer->size();
   ATH_MSG_DEBUG("Clusters produced size: "<<clusterContainer->size());
   timer_processing.stop();
