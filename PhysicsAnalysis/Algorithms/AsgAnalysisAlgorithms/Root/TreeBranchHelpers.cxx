@@ -724,6 +724,12 @@ namespace CP
       return StatusCode::SUCCESS;
     }
 
+    StatusCode ElementBranchProcessor::
+    setup ( ROOT::RNTupleModel& /* model */, const BranchConfig& /* branchConfig */, OutputBranchData& /* outputData */, MsgStream& msg ) {
+      msg << MSG::ERROR << "ElementBranchProcessor::setup for RNTuple should not be called" << endmsg;
+      return StatusCode::FAILURE;
+    }
+
     StatusCode ContainerBranchProcessor::
     setup( TTree& tree, const BranchConfig& branchConfig, OutputBranchData& outputData, MsgStream& msg ) {
 
@@ -812,7 +818,11 @@ namespace CP
       return StatusCode::SUCCESS;
     }
 
-
+    StatusCode ContainerBranchProcessor::
+    setup ( ROOT::RNTupleModel& /* model */, const BranchConfig& /* branchConfig */, OutputBranchData& /* outputData */, MsgStream& msg ) {
+      msg << MSG::ERROR << "ContainerBranchProcessor::setup for RNTuple should not be called" << endmsg;
+      return StatusCode::FAILURE;
+    }
 
 
 
@@ -855,6 +865,12 @@ namespace CP
 
       // Return gracefully.
       return StatusCode::SUCCESS;
+    }
+
+    StatusCode ElementProcessorRegular::
+    addBranch( ROOT::RNTupleModel& /* model */, const BranchConfig& /* branchConfig */, OutputBranchData& /* outputData */ ) {
+      ATH_MSG_ERROR("ElementProcessorRegular::addBranch for RNTuple should not be called");
+      return StatusCode::FAILURE;
     }
 
     ContainerProcessorRegular::ContainerProcessorRegular(const std::string& sgName)
@@ -951,6 +967,12 @@ namespace CP
       return StatusCode::SUCCESS;
     }
 
+    StatusCode ContainerProcessorRegular::
+    addBranch( ROOT::RNTupleModel& /* model */, const BranchConfig& /* branchConfig */, OutputBranchData& /* outputData */ ) {
+      ATH_MSG_ERROR("ContainerProcessorRegular::addBranch for RNTuple should not be called");
+      return StatusCode::FAILURE;
+    }
+
     ElementProcessorMet::ElementProcessorMet (const std::string& sgName, const std::string& termName)
     : asg::AsgMessaging( ("CP::TreeBranchHelpers::ElementProcessorMet/" + sgName).c_str() ),
       m_sgName(sgName),
@@ -982,6 +1004,12 @@ namespace CP
 
         // Return gracefully.
         return StatusCode::SUCCESS;
+    }
+
+    StatusCode ElementProcessorMet::
+    addBranch( ROOT::RNTupleModel& /* model */, const BranchConfig& /* branchConfig */, OutputBranchData& /* outputData */ ) {
+        ATH_MSG_ERROR("ElementProcessorMet::addBranch for RNTuple should not be called");
+        return StatusCode::FAILURE;
     }
 
 

@@ -10,6 +10,7 @@
 #include <vector>
 #include <memory>
 #include <list>
+#include <iostream>
 
 // Framework include(s):
 #include "AsgMessaging/AsgMessaging.h"
@@ -19,6 +20,9 @@
 #include "CxxUtils/checker_macros.h"
 #include "SystematicsHandles/SysListHandle.h"
 #include <AsgTools/PropertyWrapper.h>
+
+// ROOT include(s):
+#include <ROOT/RNTupleModel.hxx>
 
 // EDM include(s):
 #include "AthContainersInterfaces/IAuxTypeVector.h"
@@ -149,11 +153,15 @@ namespace CP
 
 
     /// @brief the interface class for branch processors
-    class IBranchProcessor
+    class IComponentProcessor
     {
     public:
       /// virtual destructor
-      virtual ~IBranchProcessor() = default;
+      virtual ~IComponentProcessor() = default;
+
+      virtual StatusCode setup ( ROOT::RNTupleModel& /* model */, const BranchConfig& /* branchConfig */, OutputBranchData& /* outputData */, MsgStream& msg ) = 0;
+
+      virtual StatusCode setup ( TTree& /* tree */, const BranchConfig& /* branchConfig */, OutputBranchData& /* outputData */, MsgStream& msg ) = 0;
     };
 
 
@@ -193,12 +201,11 @@ namespace CP
       /// @param branchName The name of the branch to create in the tree
       /// @return The usual @c StatusCode values
       ///
-      virtual StatusCode addBranch( TTree& tree, const BranchConfig& branchConfig, OutputBranchData& outputData ) = 0;
+
+      virtual StatusCode addBranch(TTree&, const BranchConfig&, OutputBranchData&) = 0;
+
+      virtual StatusCode addBranch(ROOT::RNTupleModel&, const BranchConfig&, OutputBranchData&) = 0;
     };
-
-
-
-
 
     /// Class writing one variable from an xAOD object into a branch
     ///
@@ -215,9 +222,13 @@ namespace CP
     /// its members are public. Since the owner of such objects should know
     /// perfectly well how they behave.
     ///
-    class ElementBranchProcessor : public IBranchProcessor {
+    class ElementBranchProcessor : public IComponentProcessor {
 
     public:
+      ElementBranchProcessor() = default;
+      virtual ~ElementBranchProcessor() = default;
+      ElementBranchProcessor( const ElementBranchProcessor& ) = delete;
+      ElementBranchProcessor& operator=( const ElementBranchProcessor& ) = delete;
       /// Function setting up the object, and the branch
       ///
       /// This is pretty much the constructor of the class. I just decided
@@ -232,8 +243,11 @@ namespace CP
       /// @param msg Reference to the parent's @c MsgStream object
       /// @return The usual @c StatusCode values
       ///
-      StatusCode setup( TTree& tree, const BranchConfig& branchConfig, OutputBranchData& outputData, MsgStream& msg );
 
+
+      virtual StatusCode setup( TTree& tree, const BranchConfig& branchConfig, OutputBranchData& outputData, MsgStream& msg ) override;
+
+      virtual StatusCode setup( ROOT::RNTupleModel& /* model */, const BranchConfig& /* branchConfig */, OutputBranchData& /* outputData */, MsgStream& msg ) override;
       /// Function processing the object, filling the variable
       ///
       /// This function is called by @c ElementProcessorRegular, to extract one
@@ -248,6 +262,7 @@ namespace CP
       ///
       StatusCode process( const SG::AuxElement& element,
                           MsgStream& msg );
+
 
       /// Name of the branch being written
       std::string m_branchName;
@@ -285,16 +300,21 @@ namespace CP
     /// fill explicitly when extracting the variables from the xAOD
     /// objects.
     ///
-    class ContainerBranchProcessor : public IBranchProcessor {
+    class ContainerBranchProcessor : public IComponentProcessor {
 
     public:
+      ContainerBranchProcessor() = default;
+      virtual ~ContainerBranchProcessor() = default;
+      ContainerBranchProcessor( const ContainerBranchProcessor& ) = delete;
+      ContainerBranchProcessor& operator=( const ContainerBranchProcessor& ) = delete;
       /// Function setting up the object, and the branch
-      StatusCode setup( TTree& tree, const BranchConfig& branchConfig, OutputBranchData& outputData, MsgStream& msg );
+      virtual StatusCode setup( TTree& tree, const BranchConfig& branchConfig, OutputBranchData& outputData, MsgStream& msg ) override;
       /// Function (re)sizing the variable for a new event
       StatusCode resize( size_t size, MsgStream& msg );
       /// Function processing the object, filling the variable
       StatusCode process( const SG::AuxElement& element, size_t index,
                           MsgStream& msg );
+      virtual StatusCode setup( ROOT::RNTupleModel& /* model */, const BranchConfig& /* branchConfig */, OutputBranchData& /* outputData */, MsgStream& msg ) override;
 
       /// Name of the branch being written
       std::string m_branchName;
@@ -328,9 +348,12 @@ namespace CP
       /// would not need an explicit constructor themselves.
       ///
       ElementProcessorRegular(const std::string& sgName);
+      virtual ~ElementProcessorRegular() = default;
+      ElementProcessorRegular( const ElementProcessorRegular& ) = delete;
+      ElementProcessorRegular& operator=( const ElementProcessorRegular& ) = delete;
 
       /// retrieve and process the object
-      StatusCode retrieveProcess (StoreType& evtStore) override;
+      virtual StatusCode retrieveProcess (StoreType& evtStore) override;
 
       /// Add one branch to the output tree
       ///
@@ -348,7 +371,9 @@ namespace CP
       /// @param created Used to store if the branch was actually created
       /// @return The usual @c StatusCode values
       ///
-      StatusCode addBranch( TTree& tree, const BranchConfig& branchConfig, OutputBranchData& outputData ) override;
+      virtual StatusCode addBranch( TTree& tree, const BranchConfig& branchConfig, OutputBranchData& outputData ) override;
+
+      virtual StatusCode addBranch( ROOT::RNTupleModel& model, const BranchConfig& branchConfig, OutputBranchData& outputData ) override;
 
     private:
 
@@ -390,9 +415,12 @@ namespace CP
       /// would not need an explicit constructor themselves.
       ///
       ContainerProcessorRegular(const std::string& sgName);
+      virtual ~ContainerProcessorRegular() = default;
+      ContainerProcessorRegular( const ContainerProcessorRegular& ) = delete;
+      ContainerProcessorRegular& operator=( const ContainerProcessorRegular& ) = delete;
 
       /// retrieve and process the object
-      StatusCode retrieveProcess (StoreType& evtStore) override;
+      virtual StatusCode retrieveProcess (StoreType& evtStore) override;
 
       /// Add one branch to the output tree
       ///
@@ -410,7 +438,9 @@ namespace CP
       /// @param created Used to store if the branch was actually created
       /// @return The usual @c StatusCode values
       ///
-      StatusCode addBranch( TTree& tree, const BranchConfig& branchConfig, OutputBranchData& outputData ) override;
+      virtual StatusCode addBranch( TTree& tree, const BranchConfig& branchConfig, OutputBranchData& outputData ) override;
+
+      virtual StatusCode addBranch( ROOT::RNTupleModel& model, const BranchConfig& branchConfig, OutputBranchData& outputData ) override;
 
     private:
       /// List of branch processors set up for this xAOD object
@@ -451,9 +481,12 @@ namespace CP
       /// would not need an explicit constructor themselves.
       ///
       ElementProcessorMet (const std::string& sgName, const std::string& termName);
+      virtual ~ElementProcessorMet() = default;
+      ElementProcessorMet( const ElementProcessorMet& ) = delete;
+      ElementProcessorMet& operator=( const ElementProcessorMet& ) = delete;
 
       /// retrieve and process the object
-      StatusCode retrieveProcess (StoreType& evtStore) override;
+      virtual StatusCode retrieveProcess (StoreType& evtStore) override;
 
       /// Add one branch to the output tree
       ///
@@ -471,7 +504,9 @@ namespace CP
       /// @param created Used to store if the branch was actually created
       /// @return The usual @c StatusCode values
       ///
-      StatusCode addBranch( TTree& tree, const BranchConfig& branchConfig, OutputBranchData& outputData ) override;
+      virtual StatusCode addBranch( TTree& tree, const BranchConfig& branchConfig, OutputBranchData& outputData ) override;
+
+      virtual StatusCode addBranch( ROOT::RNTupleModel& model, const BranchConfig& branchConfig, OutputBranchData& outputData ) override;
 
     private:
 
@@ -495,10 +530,12 @@ namespace CP
     }; // class ElementProcessorMet
 
 
-
     class ProcessorList : public asg::AsgMessagingForward {
     public:
       using AsgMessagingForward::AsgMessagingForward;
+      virtual ~ProcessorList() = default;
+      ProcessorList( const ProcessorList& ) = delete;
+      ProcessorList& operator=( const ProcessorList& ) = delete;
 
       /// Function setting up the internal data structures on the first
       /// event for regular branches

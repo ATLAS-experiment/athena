@@ -72,8 +72,11 @@ class OutputAnalysisConfig (ConfigBlock):
             info="If set to `True`, all branches will be given a systematics suffix, "
             "even if they have no systematics (beyond the nominal).")
         self.addOption ('skipRedundantSelectionFlags', True, type=bool,
-            info="remove the redundant `outputSelect` branches created by the `Thinning` step. "
-            "These could however be used to simplify downstream workflows, as in Easyjet.")
+            info="remove the redundant 'outputSelect' branches created by the Thinning step. "
+            "These could however be used to simplify downstream workflows, as in Easyjet. "
+            "The default is True.")
+        self.addOption ('outputFormat', 'TTree', type=str,
+            info="The output format. The default is 'TTree'.")
         self.addOption ('defaultBasketSize', None, type=int,
             info="default basket size for all branches in the output tree. "
             "If not set (the default), no basket size is configured and ROOT's "
@@ -279,6 +282,22 @@ class OutputAnalysisConfig (ConfigBlock):
                     else:
                         branchDecl += f" metTerm={self.metTermName}"
                 myVars.add(branchDecl)
+                
+                # RNTuple Path
+        if self.outputFormat == 'RNTuple':
+            allBranches = self.vars | autoVars
+            print("allBranches in OutputAnalysisConfig: ", allBranches)
+            alg = config.createAlgorithm( 'CP::RNtupleTreeMakerAlg', 'RNtupleMaker' )
+            alg.TreeName = self.treeName
+            alg.RootStreamName = self.streamName
+            alg.OutputStreamName = self.streamName
+            alg.NonContainers = list(self.nonContainers)
+
+            branchList = list(allBranches)
+            branchList.sort(key=self.branchSortOrder)
+            alg.Branches = branchList
+
+            return
 
         # Add an ntuple dumper algorithm:
         treeMaker = config.createAlgorithm( 'CP::TreeMakerAlg', 'TreeMaker' )
