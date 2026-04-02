@@ -151,14 +151,20 @@ StripClusteringTool::clusterize(const EventContext& ctx,
     return StatusCode::SUCCESS;
 }
 
+/*StripClusterAuxDataCache<Utils::AccessPolicy::Mutable>*/ std::any
+StripClusteringTool::createAuxDataCache(xAOD::StripClusterContainer& cont, std::size_t nClusterRDOs) const 
+{
+  return StripClusterAuxDataCache<Utils::AccessPolicy::Mutable>(cont, nClusterRDOs, false);
+}
+
   
 StatusCode
 StripClusteringTool::makeClusters(const EventContext& ctx,
 				  typename IStripClusteringTool::ClusterCollection& clusters,
 				  const InDetDD::SiDetectorElement& element,
                                   size_t /*icluster*/,
-                                  std::any& /*vars*/,
-				  typename ClusterContainer::iterator itrContainer) const
+                                  std::any& vars,
+				  [[maybe_unused]] typename ClusterContainer::iterator itrContainer) const
 {
     const IdentifierHash idHash = element.identifyHash();
     double lorentzShift = m_lorentzAngleTool->getLorentzShift(idHash, ctx);
@@ -172,17 +178,19 @@ StripClusteringTool::makeClusters(const EventContext& ctx,
       : static_cast<const InDetDD::StripStereoAnnulusDesign&>(element.design()).phiPitchPhi();
     Eigen::Matrix<float,1,1> localCov(pitch * pitch * ONE_TWELFTH);
 
+    StripClusterAuxDataCache<Utils::AccessPolicy::Mutable> *clusterAuxDataCache
+       = std::any_cast<StripClusterAuxDataCache<Utils::AccessPolicy::Mutable> >(&vars);
+    if (!clusterAuxDataCache) throw std::bad_any_cast();
+    
     for (typename IStripClusteringTool::Cluster& cl : clusters) {
       try {
-	xAOD::StripCluster *xaodCluster = *itrContainer;
 	ATH_CHECK(makeCluster(cl,
 			      lorentzShift,
 			      localCov,
 			      *m_stripID,
 			      element,
 			      design,
-			      *xaodCluster));
-	++itrContainer;
+			      *clusterAuxDataCache));
       } catch (const std::exception& e) {
 	ATH_MSG_FATAL("Exception thrown while creating xAOD::StripCluster:"
 		      << e.what());
@@ -304,7 +312,7 @@ StripClusteringTool::makeCluster(Cluster &cluster,
 				 const StripID& stripID,
 				 const InDetDD::SiDetectorElement& element,
 				 const InDetDD::SiDetectorDesign& design,
-				 xAOD::StripCluster& cl) const
+                                 StripClusterAuxDataCache<Utils::AccessPolicy::Mutable> &clusterAuxDataCache) const
 {
     std::size_t size = cluster.ids.size();
     
@@ -339,14 +347,16 @@ StripClusteringTool::makeCluster(Cluster &cluster,
       localCov(0,0) = computeRotatedLocalCov(localCov(0,0), element, design, cluster, size, stripID, localPos(0,0));
     }
 
-    cl.setMeasurement<1>(element.identifyHash(), localPos, localCov);
-    cl.setIdentifier( cluster.ids.front() );
-
     // Do I really need the global position in fast tracking?
-    cl.globalPosition() = globalPos;     
     
-    cl.setChannelsInPhi(size);
-    cl.setRDOlist(std::move(cluster.ids));
+    clusterAuxDataCache.emplace_back(cluster.ids.front(),
+                                     element.identifyHash(),
+                                     std::span<const float, localPos.rows()>(localPos.data(), localPos.rows()),
+                                     std::span<const float, localCov.rows()*localCov.cols() >(localCov.data(),
+                                                                                              localCov.rows()*localCov.cols()),
+                                     std::span<const float, globalPos.rows()>(globalPos.cast<float>().eval().data(), globalPos.rows()),
+                                     static_cast<unsigned int>(size) /*channels in phi*/,
+                                     clusterAuxDataCache.currentRdoEndIndex());
     
     return StatusCode::SUCCESS;
 }
