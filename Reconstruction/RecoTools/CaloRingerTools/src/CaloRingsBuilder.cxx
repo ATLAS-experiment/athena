@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // =================================================================================
@@ -28,10 +28,11 @@
 #include "xAODCaloEvent/CaloCluster.h"
 
 // STL
-#include <algorithm>
-#include <cfloat>
 #include <cmath>
+#include <vector>
+#include <span>
 #include <sstream>
+#include <stdexcept>
 
 namespace Ringer
 {
@@ -85,7 +86,7 @@ namespace Ringer
                 xAOD::RingSetConf::whichSection(rsLayers));
 
             // Build our raw configuration structure:
-            m_rsRawConfCol.push_back(rawConf);
+            m_rsRawConfCol.push_back(std::move(rawConf));
         }
 
         // We have finished filling the main raw configuration properties, now we add
@@ -344,11 +345,11 @@ namespace Ringer
                 unsigned int ringNumber(0);
 
                 // calculate the normalised difference in eta
-                const float deltaEta = fabs(
+                const float deltaEta = std::fabs(
                                            (cell->eta() - seed.eta())) /
                                        rawConf.etaWidth;
                 // calculate the normalised difference in phi
-                const float deltaPhi = fabs(
+                const float deltaPhi = std::fabs(
                                            CaloPhiRange::diff(cell->phi(), seed.phi())) /
                                        rawConf.phiWidth;
                 // The biggest difference indicates the ring number (we are using
@@ -361,7 +362,7 @@ namespace Ringer
                 {
                     if (m_doTransverseEnergy)
                     {
-                        rs->at(ringNumber) += cell->energy() / cosh(cell->eta());
+                        rs->at(ringNumber) += cell->energy() / std::cosh(cell->eta());
                     }
                     else
                     {
