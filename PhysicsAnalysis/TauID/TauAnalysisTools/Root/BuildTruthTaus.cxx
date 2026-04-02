@@ -292,6 +292,25 @@ StatusCode BuildTruthTaus::examineTruthTau(const xAOD::TruthParticle& xTruthPart
     decMVisCharged(xTruthParticle)   = truthInfo.m_vTruthVisTLVCharged.M();
   }
 
+  if ( m_bWriteVisibleChargedFourMomentumComponent )
+  { 
+    static const SG::Decorator<std::vector<double>> decCharged_pt("pt_charged"); std::vector<double> vec_ptcharged;
+    static const SG::Decorator<std::vector<double>> decCharged_eta("eta_charged"); std::vector<double> vec_etacharged;
+    static const SG::Decorator<std::vector<double>> decCharged_phi("phi_charged"); std::vector<double> vec_phicharged;
+    static const SG::Decorator<std::vector<double>> decCharged_m("m_charged"); std::vector<double> vec_mcharged;
+    for(size_t iProducts=0; iProducts < truthInfo.m_TLVCharged.size(); ++iProducts){
+      TLorentzVector iTLV_c = truthInfo.m_TLVCharged.at(iProducts);
+      vec_ptcharged.push_back(iTLV_c.Pt());
+      vec_etacharged.push_back(iTLV_c.Eta());
+      vec_phicharged.push_back(iTLV_c.Phi());
+      vec_mcharged.push_back(iTLV_c.M());
+    }  
+    decCharged_pt(xTruthParticle) = vec_ptcharged;
+    decCharged_eta(xTruthParticle) = vec_etacharged;
+    decCharged_phi(xTruthParticle) = vec_phicharged;
+    decCharged_m(xTruthParticle) = vec_mcharged;    
+  }
+
   if ( m_bWriteVisibleNeutralFourMomentum )
   {
     static const SG::Decorator<double> decPtVisNeutral("pt_vis_neutral");
@@ -302,6 +321,25 @@ StatusCode BuildTruthTaus::examineTruthTau(const xAOD::TruthParticle& xTruthPart
     decEtaVisNeutral(xTruthParticle) = truthInfo.m_vTruthVisTLVNeutral.Eta();
     decPhiVisNeutral(xTruthParticle) = truthInfo.m_vTruthVisTLVNeutral.Phi();
     decMVisNeutral(xTruthParticle)   = truthInfo.m_vTruthVisTLVNeutral.M();
+  }
+
+  if ( m_bWriteVisibleNeutralFourMomentumComponent ) 
+  {
+    static const SG::Decorator<std::vector<double>> decNeutral_pt("pt_neutral"); std::vector<double> vec_ptneutral;
+    static const SG::Decorator<std::vector<double>> decNeutral_eta("eta_neutral"); std::vector<double> vec_etaneutral;    
+    static const SG::Decorator<std::vector<double>> decNeutral_phi("phi_neutral"); std::vector<double> vec_phineutral;
+    static const SG::Decorator<std::vector<double>> decNeutral_m("m_neutral"); std::vector<double> vec_mneutral;
+    for(size_t iProducts=0; iProducts < truthInfo.m_TLVNeutral.size(); ++iProducts){
+      TLorentzVector iTLV_n = truthInfo.m_TLVNeutral.at(iProducts);
+      vec_ptneutral.push_back(iTLV_n.Pt());
+      vec_etaneutral.push_back(iTLV_n.Eta());
+      vec_phineutral.push_back(iTLV_n.Phi());
+      vec_mneutral.push_back(iTLV_n.M());
+    }
+    decNeutral_pt(xTruthParticle) = vec_ptneutral;
+    decNeutral_eta(xTruthParticle) = vec_etaneutral;
+    decNeutral_phi(xTruthParticle) = vec_phineutral;
+    decNeutral_m(xTruthParticle) = vec_mneutral;    
   }
 
   if ( m_bWriteDecayModeVector )
@@ -398,10 +436,16 @@ StatusCode BuildTruthTaus::examineTruthTauDecay (const xAOD::TruthParticle& xTru
     if ( m_bWriteVisibleChargedFourMomentum )
       if ( xTruthDaughter->isCharged() )
         truthInfo.m_vTruthVisTLVCharged += xTruthDaughter->p4();
+    if ( m_bWriteVisibleChargedFourMomentumComponent)
+      if ( xTruthDaughter->isCharged() )
+        truthInfo.m_TLVCharged.push_back(xTruthDaughter->p4()); 	      
     if ( m_bWriteVisibleNeutralFourMomentum )
       if ( xTruthDaughter->isNeutral() )
         truthInfo.m_vTruthVisTLVNeutral += xTruthDaughter->p4();
-
+    if ( m_bWriteVisibleNeutralFourMomentumComponent)
+      if ( xTruthDaughter->isNeutral() )
+        truthInfo.m_TLVNeutral.push_back(xTruthDaughter->p4());	      
+  
     // only count charged decay particles
     if ( xTruthDaughter->isCharged() )
     {
