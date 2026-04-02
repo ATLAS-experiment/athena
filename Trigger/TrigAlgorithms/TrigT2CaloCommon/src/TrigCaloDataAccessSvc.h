@@ -45,8 +45,7 @@ class IRoiDescriptor;
 
 class TrigCaloDataAccessSvc : public extends<AthService, ITrigCaloDataAccessSvc> {
  public:
-  TrigCaloDataAccessSvc(const std::string& name, ISvcLocator* pSvcLocator);
-
+  using base_class::base_class;
   using ITrigCaloDataAccessSvc::Status;
 
 
@@ -64,7 +63,7 @@ class TrigCaloDataAccessSvc : public extends<AthService, ITrigCaloDataAccessSvc>
                                        std::vector<const TileCell*>& loadedCells ) override;
   
   virtual StatusCode loadMBTS ( const EventContext& context,
-                                                    std::vector<const TileCell*>& loadedCells ) override;
+                                std::vector<const TileCell*>& loadedCells ) override;
 
 
   
@@ -87,7 +86,8 @@ class TrigCaloDataAccessSvc : public extends<AthService, ITrigCaloDataAccessSvc>
   
   Gaudi::Property<bool> m_applyOffsetCorrection { this, "ApplyOffsetCorrection", true, "Enable offset correction" };
 
-  SG::ReadHandleKey<CaloBCIDAverage> m_bcidAvgKey ;
+  SG::ReadHandleKey<CaloBCIDAverage> m_bcidAvgKey
+   {this, "BCIDAvgKey", "CaloBCIDAverage", "SG Key of CaloBCIDAverage object"} ;
   SG::ReadCondHandleKey<LArMCSym> m_mcsymKey 
    {this, "MCSymKey", "LArMCSym", "SG Key of LArMCSym object"} ;
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_onOffIdMappingKey
@@ -104,42 +104,12 @@ class TrigCaloDataAccessSvc : public extends<AthService, ITrigCaloDataAccessSvc>
    {this, "TileHid2RESrcID", "TileHid2RESrcIDHLT", "SG Key of TileHid2RESrcID object"} ;
   SG::ReadHandleKey<LArDeadOTXFromSC> m_deadOTXFromSCKey
    {this, "LArDeadOTXFromSC", "DeadOTXFromSC", "Key of the DeadOTXFromSC CDO" };
-  bool m_correctDead;
+  bool m_correctDead{false};
 
-  void reset_LArCol ( LArCellCollection* coll ){
-    for(LArCellCollection::iterator ii=coll->begin();ii!=coll->end();++ii)
-      (*ii)->setEnergyFast(0.0);
-  }
-  void reset_TileCol(TileCellCollection* col){
-     for ( TileCell* tr: *col ) {
-        (tr)->setEnergy_nonvirt(0.0F, 0.0F, 0, CaloGain::INVALIDGAIN);
-        (tr)->setTime_nonvirt(-100.0F);
-        (tr)->setQuality_nonvirt(static_cast<unsigned char>(255), 0, 0);
-        (tr)->setQuality_nonvirt(static_cast<unsigned char>(255), 0, 1);
-      } // end of for all channels
-   }
-
-  /**
-   * @brief Convenience structure to keep together all ROBs and IdentifierHashes 
-   * for whole detectors.
-   **/
-  struct FullDetIDs {
-    std::vector<uint32_t> robs;
-    std::vector<IdentifierHash> ids;
-    DETID detid;
-    void merge( const std::initializer_list<FullDetIDs>& list ) {
-      for ( auto& el: list ) {
-	std::copy( el.robs.begin(), el.robs.end(), std::back_inserter(robs) );
-	std::copy( el.ids.begin(), el.ids.end(), std::back_inserter(ids) );
-      }
-    }
-
-  };
-  
   /**
    * @brief convience structure to keep together a collection and auxiliar full collection selectors
    */
-  struct  HLTCaloEventCache {
+  struct HLTCaloEventCache {
     std::mutex mutex;    
     std::unique_ptr<LArCellCont> larContainer;
     LArRodBlockStructure* larRodBlockStructure_per_slot; // LAr Rod Block to ease decoding
@@ -156,16 +126,18 @@ class TrigCaloDataAccessSvc : public extends<AthService, ITrigCaloDataAccessSvc>
   
   SG::SlotSpecificObj< HLTCaloEventCache > m_hLTCaloSlot;
 
-  std::mutex m_initMutex; // Build all tables in the first event
   std::mutex m_getCollMutex; // Make sure writing to a collection is protected
   std::mutex m_lardecoderProtect;  // protection for the larRodDecoder
   std::mutex m_tiledecoderProtect;  // protection for the tileRodDecoder
 
-  unsigned int lateInit( const EventContext& context );
-  bool m_lateInitDone = false;
+  void reset_LArCol(LArCellCollection* coll);
+  void reset_TileCol(TileCellCollection* col);
 
-  unsigned int convertROBs(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& robFrags, LArCellCont* larcell, LArRodBlockStructure*& larRodBlockStructure, uint16_t rodMinorVersion, uint32_t robBlockType, const LArDeadOTXFromSC* dead );
-  unsigned int convertROBs( const EventContext& context, const std::vector<IdentifierHash>& rIds, TileCellCont* tilecell, TileROD_Decoder::D0CellsHLT* d0cells );
+  void lateInit( const EventContext& context );
+  std::once_flag m_lateInitFlag;
+
+  void convertROBs(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& robFrags, LArCellCont* larcell, LArRodBlockStructure*& larRodBlockStructure, uint16_t rodMinorVersion, uint32_t robBlockType, const LArDeadOTXFromSC* dead );
+  void convertROBs( const EventContext& context, const std::vector<IdentifierHash>& rIds, TileCellCont* tilecell, TileROD_Decoder::D0CellsHLT* d0cells );
 
 
   /**
@@ -185,28 +157,25 @@ class TrigCaloDataAccessSvc : public extends<AthService, ITrigCaloDataAccessSvc>
   /**
    * @brief LAr TT collections preparation code
    **/
-  unsigned int prepareLArCollections( const EventContext& context,
-				const IRoiDescriptor& roi, 
-				const int sampling,
-				DETID detector );
+  StatusCode prepareLArCollections( const EventContext& context,
+                                    const IRoiDescriptor& roi,
+                                    const int sampling,
+                                    DETID detector );
 
-  unsigned int prepareTileCollections( const EventContext& context,
-				const IRoiDescriptor& roi );
+  StatusCode prepareTileCollections( const EventContext& context,
+                                     const IRoiDescriptor& roi );
 
-  unsigned int prepareMBTSCollections( const EventContext& context);
+  StatusCode prepareMBTSCollections( const EventContext& context);
 
-  unsigned int prepareFullCollections( const EventContext& context );
+  StatusCode prepareLArFullCollections( const EventContext& context );
 
-  unsigned int prepareLArFullCollections( const EventContext& context );
-  unsigned int prepareTileFullCollections( const EventContext& context );
+  StatusCode prepareTileFullCollections( const EventContext& context );
 
   std::vector<uint32_t> m_vrodid32fullDet;
   std::vector<uint32_t> m_vrodid32tile;
   std::vector<unsigned int> m_mbts_add_rods;
-  const std::vector<unsigned int>* m_mbts_rods = nullptr;
   std::vector<IdentifierHash> m_rIdstile;
   std::vector<std::vector<uint32_t> > m_vrodid32fullDetHG;
-  size_t m_nSlots;
 };
 
 
