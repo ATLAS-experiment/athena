@@ -39,8 +39,6 @@ def tauMonitoringCaloOnlyMVA(flags: AthConfigFlags, name: str = 'CaloMVA', RoI_n
 
     # TauJet low-level Calorimeter variables
     monTool.defineHistogram('NCaloCells', path='EXPERT', type='TH1F', title=name+' TauJet calorimeter cells; N Cells; Entries', xbins=100, xmin=0, xmax=6000)
-    monTool.defineHistogram('EMRadius', path='EXPERT', type='TH1F', title=name+' TauJet EM radius; EM radius; Entries', xbins=50, xmin=-0.1, xmax=1)
-    monTool.defineHistogram('HadRadius', path='EXPERT', type='TH1F', title=name+' TauJet Had radius; Had radius; Entries', xbins=50, xmin=-0.1, xmax=1)
     monTool.defineHistogram('EtHad, EtEm', path='EXPERT', type='TH2F', title=name+' TauJet E_{T}^{Had} vs E_{T}^{EM}; E_{T}^{Had} (at EM scale) [GeV]; E_{T}^{EM} (at EM scale) [GeV]',
                                                  xbins=30, xmin=0, xmax=150,
                                                  ybins=30, ymin=0, ymax=150)

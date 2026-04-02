@@ -119,8 +119,6 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
 
   auto LB = Monitored::Scalar<int>("LB", 0.0);
 
-  auto EMRadius = Monitored::Scalar<float>("EMRadius", 0.0);
-  auto hadRadius = Monitored::Scalar<float>("hadRadius", 0.0);
   auto isolFrac = Monitored::Scalar<float>("isolFrac", 0.0);
   auto etEMAtEMScale = Monitored::Scalar<float>("etEMAtEMScale", 0.0);
 
@@ -256,8 +254,6 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
     LB = GetEventInfo(ctx)->lumiBlock();
 
     // calo
-    EMRadius = tau->detail<float>(xAOD::TauJetParameters::EMRadius);
-    hadRadius = tau->detail<float>(xAOD::TauJetParameters::hadRadius);
     isolFrac = tau->detail<float>(xAOD::TauJetParameters::isolFrac);
     etEMAtEMScale = tau->detail<float>(xAOD::TauJetParameters::etEMAtEMScale);
     etHadAtEMScale = tau->detail<float>(xAOD::TauJetParameters::etHadAtEMScale);
@@ -704,8 +700,7 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
         fill(tool, tauPhiEt15, tauEtaEt15);
       }
 
-      fill(tool, tauPhi, tauEta, LB, tauEt, centFrac, isolFrac, EMRadius,
-           hadRadius, etEMAtEMScale, etHadAtEMScale,
+      fill(tool, tauPhi, tauEta, LB, tauEt, centFrac, isolFrac,etEMAtEMScale, etHadAtEMScale,
            tauCharge, JetScore, JetScoreSigTrans, RNNEleScore, RNNEleScoreSigTrans,
 	   muonVeto, tauLoose, tauMedium, tauTight, PSSFrac, EMFrac, EMFracTrk, nNeutPFO,
            nShot, NumTracks, nClusters, jetSeedEta, jetSeedPhi, jetSeedPt,
