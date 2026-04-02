@@ -274,15 +274,16 @@ namespace TrackingUtilities {
     const auto designShape = design->shape();
 
 
-    const auto& rdoList = xaodCluster.rdoList();
-    Identifier id = rdoList.front();
+    SG::ConstAccessor<SG::JaggedVecElt<Identifier::value_type> >::element_type
+       rdo_list_cluster = xaodCluster.rdoList();
+    Identifier id(rdo_list_cluster.front());
 
     const auto& localPos = xaodCluster.localPosition<1>();
 
     double pos_x = localPos(0, 0);
     double pos_y = 0;
     if (not isBarrel) {
-      const Identifier firstStripId = rdoList.front();
+      const Identifier firstStripId(id);
       int firstStrip = stripID.strip(firstStripId);
       int stripRow = stripID.row(firstStripId);
       int clusterSizeInStrips = xaodCluster.channelsInPhi();
@@ -296,9 +297,9 @@ namespace TrackingUtilities {
     // Most of the following is taken from what is done in ClusterMakerTool
     // Need to make this computation instead of using the local pos
     // with local pos instead some differences w.r.t. reference are observed
-    const auto& firstStrip = stripID.strip(rdoList.front());
-    const auto& lastStrip = stripID.strip(rdoList.back());
-    const auto& row = stripID.row(rdoList.front());
+    const auto& firstStrip = stripID.strip(Identifier(rdo_list_cluster.front()));
+    const auto& lastStrip = stripID.strip(Identifier(rdo_list_cluster.back()));
+    const auto& row = stripID.row(Identifier(rdo_list_cluster.front()));
     const int firstStrip1D = design->strip1Dim (firstStrip, row );
     const int lastStrip1D = design->strip1Dim( lastStrip, row );
     const InDetDD::SiCellId cell1(firstStrip1D);
@@ -346,10 +347,14 @@ namespace TrackingUtilities {
       errorMatrix.fillSymmetric( 0, 1, sn * std::sqrt(cs2) * (v0 - v1) );
       errorMatrix.fillSymmetric( 1, 1, sn2 * v0 + cs2 * v1 );
     }
+    std::vector<Identifier> rdo_list_new;
+    for(Identifier::value_type rdo_id_value : rdo_list_cluster) {
+       rdo_list_new.emplace_back(rdo_id_value);
+    }
 
     indetCluster = new InDet::SCT_Cluster(id,
 					  locpos,
-					  std::vector<Identifier>(rdoList),
+					  std::move(rdo_list_new),
 					  width,
 					  &element,
 					  std::move(errorMatrix));

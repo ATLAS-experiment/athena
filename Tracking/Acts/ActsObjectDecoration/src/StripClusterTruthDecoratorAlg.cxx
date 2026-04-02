@@ -126,11 +126,12 @@ namespace ActsTrk {
 	return StatusCode::FAILURE;
       }
       
-      const std::vector<Identifier> rdoList = cluster->rdoList();
+      SG::ConstAccessor<SG::JaggedVecElt<Identifier::value_type> >::element_type
+         rdoList = cluster->rdoList();
       std::vector< std::uint64_t > rdoIdentifierList;
       rdoIdentifierList.reserve(rdoList.size());
-      for( const Identifier& hitIdentifier : rdoList ){
-	rdoIdentifierList.push_back( hitIdentifier.get_compact() );
+      for( Identifier::value_type hitIdentifierValue : rdoList ){
+	rdoIdentifierList.push_back( hitIdentifierValue );
       }
     
       //Set Identifier

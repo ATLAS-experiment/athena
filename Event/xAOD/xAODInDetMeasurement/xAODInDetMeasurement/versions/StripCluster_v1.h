@@ -8,6 +8,8 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "Identifier/Identifier.h"
 #include "xAODMeasurementBase/versions/UncalibratedMeasurement_v1.h"
+#include "AthContainers/JaggedVecAccessor.h"
+#include <span>
 
 namespace xAOD {
 
@@ -36,7 +38,8 @@ class StripCluster_v1 : public UncalibratedMeasurement_v1 {
     VectorMap<3> globalPosition();
 
     /// Returns the list of identifiers of the channels building the cluster
-    const std::vector<Identifier> rdoList() const;
+    SG::ConstAccessor<SG::JaggedVecElt<Identifier::value_type> >::element_type
+    rdoList() const;
 
     /// Returns the dimensions of the cluster in numbers of channels in phi (x),
     /// respectively
@@ -47,15 +50,30 @@ class StripCluster_v1 : public UncalibratedMeasurement_v1 {
     /// @name Functions to set pixel cluster properties
     /// @{
   
-    /// Sets the list of identifiers of the channels building the cluster
+       /// Sets the list of identifiers of the channels building the cluster
     void setRDOlist(const std::vector<Identifier>& rdolist);
+
     /// Setter with std::move if the value_type is already available
     void setRDOlist(std::vector<Identifier::value_type>&& rdolist);
-    /// Sets the dimensions of the cluster in numbers of channels in phi (x)
+
+    /// Setter with std::move if the value_type is already available
+    void setRDOlist(std::span<Identifier::value_type> rdolist);
+
+   /// Sets the dimensions of the cluster in numbers of channels in phi (x)
     void setChannelsInPhi(int channelsInPhi);
 
     /// @}
+    static const SG::AuxElement::Accessor<SG::JaggedVecElt<Identifier::value_type> > rdoListAcc() { return s_rdoListAcc; }
+protected:
+    static const SG::AuxElement::Accessor<SG::JaggedVecElt<Identifier::value_type> > s_rdoListAcc;
 };
+
+
+inline
+SG::ConstAccessor<SG::JaggedVecElt<Identifier::value_type> >::element_type
+StripCluster_v1::rdoList() const {
+   return s_rdoListAcc(*this);
+}
 
 }  // namespace xAOD
 #include "AthContainers/DataVector.h"

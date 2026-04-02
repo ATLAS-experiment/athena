@@ -332,7 +332,7 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
 
       if (matchedClusters.size() == 0 && handle1->size() > 0) {
         std::vector<std::string> regions {"all"};
-        if(m_stripid->barrel_ec(cluster0->rdoList()[0]) == 0) regions.push_back("barrel");
+        if(m_stripid->barrel_ec(Identifier(cluster0->rdoList()[0])) == 0) regions.push_back("barrel");
         else regions.push_back("endcap");
         for (const auto& region : regions) {
           Monitored::Group(
@@ -353,7 +353,7 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
       const xAOD::StripCluster *cluster1 = matchedClusters[0];
 
       std::vector<std::string> regions {"all"};
-      if(m_stripid->barrel_ec(cluster0->rdoList()[0]) == 0) regions.push_back("barrel");
+      if(m_stripid->barrel_ec(Identifier(cluster0->rdoList()[0])) == 0) regions.push_back("barrel");
       else regions.push_back("endcap");
 
       for(auto const& region: regions)
@@ -437,7 +437,7 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
     for(auto cluster : *handle)
     {
       std::vector<std::string> regions {"all"};
-      if(m_stripid->barrel_ec(cluster->rdoList()[0]) == 0) regions.push_back("barrel");
+      if(m_stripid->barrel_ec(Identifier(cluster->rdoList()[0])) == 0) regions.push_back("barrel");
       else regions.push_back("endcap");
 
       for(auto const& region: regions)
