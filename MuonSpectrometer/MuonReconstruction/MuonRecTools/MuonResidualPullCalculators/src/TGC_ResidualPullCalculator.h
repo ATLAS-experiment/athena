@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_RESIDUALPULLCALCULATOR_H
@@ -28,11 +28,10 @@ namespace Muon
       @author  Wolfgang Liebig <http://consult.cern.ch/xwho/people/54608>
   */
 
-  class TGC_ResidualPullCalculator final: virtual public Trk::IResidualPullCalculator, public AthAlgTool
+  class TGC_ResidualPullCalculator final:  public extends<AthAlgTool, Trk::IResidualPullCalculator>
     {
     public:
-      TGC_ResidualPullCalculator(const std::string&,const std::string&,const IInterface*);
-
+      using base_class::base_class;
       virtual ~TGC_ResidualPullCalculator()=default;
 
       virtual StatusCode initialize() override;
