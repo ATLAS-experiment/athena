@@ -1,73 +1,21 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # HION15.py 
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory
-from AthenaCommon.CFElements import seqAND
 
 #########################################################################################
-#Skiming
-def HION15SkimmingToolCfg(flags):
-    """Configure the example skimming tool"""
-    acc = ComponentAccumulator()
-    JetColl = flags.HeavyIon.HIJetPrefix
-    ExtraData  = []
-    ExtraData += ['xAOD::JetContainer/'+JetColl+'AntiKt2HIJets']
-    ExtraData += ['xAOD::JetContainer/'+JetColl+'AntiKt4HIJets']
-
-    acc.addSequence( seqAND("HION15Sequence") )
-    acc.getSequence("HION15Sequence").ExtraDataForDynamicConsumers = ExtraData
-    acc.getSequence("HION15Sequence").ProcessDynamicDataDependencies = True
-    
-    #Trigger selection
-    filterList = []
-    from DerivationFrameworkHI import ListTriggers
-    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import xAODStringSkimmingToolCfg
-    from CoolConvUtilities.ParticleTypeUtil import getTypeForRun
-    info=getTypeForRun(flags.Input.RunNumbers[0])
-    isSmallSystem = False
-    if (info.getBeam1Type() < 11) or (info.getBeam2Type() < 11):
-        isSmallSystem = True
-    if not flags.Input.isMC and not flags.Overlay.DataOverlay:
-        print('project: ', flags.Input.ProjectName,', isSmallSystem: ', isSmallSystem)
-        TriggerDict = ListTriggers.GetTriggers(flags.Input.ProjectName, isSmallSystem)
-        for key in TriggerDict:
-            filterList_trig = []
-            expression = 'count('+JetColl+'AntiKt4HIJets.pt >' + str(TriggerDict[key]) + '*GeV) >=1  ||  count('+JetColl+'AntiKt2HIJets.pt >' + str(TriggerDict[key]) + '*GeV) >=1 '
-
-            HION15StringSkimmingTool = acc.addPublicTool(acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
-            flags, name = "HION15StringSkimmingTool_"+key, expression = expression)), primary = True)
-            filterList_trig += [HION15StringSkimmingTool]
-
-            HION15TriggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(name = "HION7TriggerSkimmingTool_"+key, TriggerListOR = [key])
-            acc.addPublicTool(HION15TriggerSkimmingTool)
-            filterList_trig += [HION15TriggerSkimmingTool]
-
-            HION15SkimmingTool_trig  = CompFactory.DerivationFramework.FilterCombinationAND(name="HION7SkimmingTool_trig_"+key,  FilterList=filterList_trig)
-            acc.addPublicTool(HION15SkimmingTool_trig)
-            filterList += [HION15SkimmingTool_trig]
-
-    else:
-        expression = 'count('+JetColl+'AntiKt2HIJets.pt > 15000) > 1 || count('+JetColl+'AntiKt4HIJets.pt > 15000) > 1'
-        HION15StringSkimmingTool = acc.addPublicTool(acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
-        flags, name = "HION15StringSkimmingTool", expression = expression)), primary = True)
-        filterList += [HION15StringSkimmingTool]
-
-    HION15SkimmingTool = CompFactory.DerivationFramework.FilterCombinationOR(name="HION15SkimmingTool", FilterList=filterList)
-    acc.addPublicTool(HION15SkimmingTool, primary = True)
-
-    return(acc)                             
 
 def HION15KernelCfg(flags, name='HION15Kernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel)"""
     acc = ComponentAccumulator()
 
-    from DerivationFrameworkHI.HION7 import PhysAugmentationsHION7Cfg
+    from DerivationFrameworkHI.HION7 import (
+        PhysAugmentationsHION7Cfg, HION7SkimmingToolCfg, HION7GlobalAugmentationToolCfg)
     acc.merge(PhysAugmentationsHION7Cfg(flags))
     thinningTools = []
-    skimmingTool = acc.getPrimaryAndMerge(HION15SkimmingToolCfg(flags))
-    from DerivationFrameworkHI.HION7 import HION7GlobalAugmentationToolCfg
+    skimmingTool = acc.getPrimaryAndMerge(HION7SkimmingToolCfg(flags, format="HION15"))
     globalAugmentationTool = acc.getPrimaryAndMerge(HION7GlobalAugmentationToolCfg(flags))
     augmentationTool=[globalAugmentationTool]
 
