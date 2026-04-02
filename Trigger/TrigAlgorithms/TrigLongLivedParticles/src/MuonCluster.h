@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGLONGLIVEDPARTICLES_MUONCLUSTER_H
@@ -13,33 +13,21 @@
   Algorithm for selection of Long-Lived neutral particle decays (Hidden Valley sector):
   Clustering of LVL1 muon RoIs, access to LVL2 jets and SITRACK tracks.
 */
-#include <string>
-#include <vector>
-#include <set>
-#include <map>
+
 
 #include "GaudiKernel/Algorithm.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/StatusCode.h"
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
-#include "AthenaMonitoringKernel/Monitored.h"
-#include "AthenaMonitoringKernel/MonitoredScalar.h"
-#include "AthenaMonitoringKernel/MonitoredGroup.h"
-#include "AthenaMonitoringKernel/MonitoredCollection.h"
-#include "AthenaMonitoringKernel/MonitoredTimer.h"
 
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
-#include "xAODTrigger/TrigComposite.h"
 #include "xAODTrigger/TrigCompositeContainer.h"
-#include "xAODTrigger/TrigCompositeAuxContainer.h"
 
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
-#include "TrigCompositeUtils/TrigCompositeUtils.h"
 
+#include <string>
 
 #define kMAX_ROI 20
 
