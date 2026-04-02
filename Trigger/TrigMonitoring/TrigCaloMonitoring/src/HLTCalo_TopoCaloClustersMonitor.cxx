@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HLTCalo_TopoCaloClustersMonitor.h"
@@ -98,7 +98,7 @@ StatusCode HLTCalo_TopoCaloClustersMonitor::fillHistograms( const EventContext& 
   std::vector<const xAOD::CaloCluster*> accepted_hlt_clusters = ifStepPassed(m_hltChainsT0);
 
   // For monitoring signature specific clusters
-   if (accepted_hlt_clusters.size()>0){
+   if (!accepted_hlt_clusters.empty()){
     for (const auto* hlt_cluster : accepted_hlt_clusters) {
         auto hlt_clus_et = hlt_cluster->et();
         if (hlt_clus_et < m_HLT_min_et) continue;
@@ -114,7 +114,7 @@ StatusCode HLTCalo_TopoCaloClustersMonitor::fillHistograms( const EventContext& 
     }
   }
    else{
-    for (const auto hlt_cluster : *hltCluster_readHandle) {
+    for (const auto* hlt_cluster : *hltCluster_readHandle) {
         auto hlt_clus_et = hlt_cluster->et();
         if (hlt_clus_et < m_HLT_min_et) continue;
 
@@ -134,14 +134,14 @@ StatusCode HLTCalo_TopoCaloClustersMonitor::fillHistograms( const EventContext& 
   float	off_clus_phi = 0;
   float off_clus_et = 0;
   std::vector<clus_kin> vec_off_clusters;
-  for (const auto off_cluster : *offCluster_readHandle) {
+  for (const auto* off_cluster : *offCluster_readHandle) {
         if (m_doLC){
 	  off_clus_et = off_cluster->et();
           off_clus_eta = off_cluster->eta();
           off_clus_phi = off_cluster->phi();
         }
         else{
-          off_clus_et = off_cluster->rawE()/std::cosh(std::abs(off_cluster->rawEta()));
+          off_clus_et = off_cluster->rawE()/std::cosh(off_cluster->rawEta());
           off_clus_eta = off_cluster->rawEta();
           off_clus_phi = off_cluster->rawPhi();
         }
@@ -379,10 +379,9 @@ StatusCode HLTCalo_TopoCaloClustersMonitor::fillHistograms( const EventContext& 
   if (n_off_clusters>0) {
     OFF_matched_fraction = static_cast<float>(n_off_clusters_with_match) / n_off_clusters;
   }
-  const std::string chain = m_hltChainsT0;
 
   if(m_hltChainsT0 != "All"){
-   if(accepted_hlt_clusters.size()>0){
+   if(!accepted_hlt_clusters.empty()){
      ATH_MSG_DEBUG("Filling for : "<<m_hltChainsT0);
     
      fill(m_mongroup_name,
@@ -467,7 +466,7 @@ float HLTCalo_TopoCaloClustersMonitor::calculateDeltaR( float max_deltar, float 
   if (std::abs(eta_1-eta_2) > max_deltar) return 99.9;
   double DeltaPhi = calculateDeltaPhi(phi_1, phi_2);
   if (DeltaPhi > max_deltar) return 99.9;
-  return sqrt( ((eta_1-eta_2)*(eta_1-eta_2)) + (DeltaPhi*DeltaPhi) );
+  return std::sqrt( ((eta_1-eta_2)*(eta_1-eta_2)) + (DeltaPhi*DeltaPhi) );
 }
 
 float HLTCalo_TopoCaloClustersMonitor::calculateDeltaPhi( float phi_1, float phi_2 ) const {
