@@ -171,7 +171,7 @@ def FlavorTaggingCfg(
         else:
             args['remapping'].setdefault('BTagTrackToJetAssociator', 'GhostTrack')
 
-        if any(tag in dirname for tag in ['/GN2v01/', '/gn2hl/']):
+        if any(tag in dirname for tag in ['/GN2v01/', '/GN2HL/']):
             args['tag_requirements'] = {'nonzeroTracks'}
         acc.merge(MultifoldGNNCfg(**args))
 
@@ -258,7 +258,7 @@ def JetBTagginglessByVertexAlgCfg(
                         tagger + '_VertexIndex': tagger + dz_suffix + 'VertexIndex',
                         tagger + '_TrackLinks': tagger + dz_suffix + 'TrackLinks'})
 
-                if any(tag in dirname for tag in ['/GN2v01/', '/gn2hl/']):
+                if any(tag in dirname for tag in ['/GN2v01/', '/GN2HL/']):
                     args['tag_requirements'] = {'nonzeroTracks'}
 
                 acc.merge(MultifoldGNNCfg(**args, suffix=dz_suffix))

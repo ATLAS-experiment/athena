@@ -83,7 +83,7 @@ def getNNs(flags):
     # dummy for now
     ak4_nns = []
     if flags.GeoModel.Run >= LHCPeriod.Run4:
-        ak4_nns = ["BTagging/20240918/gn2hl/antikt4emtopo/network.onnx"]
+        ak4_nns = ["BTagging/20260308/GN2HL/antikt4emtopo/network.onnx"]
     else:
         caldir = 'BTagging/20231205/GN2v01/antikt4empflow'
         ak4_nns = [f'{caldir}/network_fold{n}.onnx' for n in range(4)]
