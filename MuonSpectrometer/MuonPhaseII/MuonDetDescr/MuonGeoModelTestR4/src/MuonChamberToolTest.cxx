@@ -54,7 +54,6 @@ namespace{
         for (const Acts::TrackingVolume& childVol : vol.volumes()) {
             std::vector<const Acts::Volume*> grandChildren = chamberVolumes(childVol);
             children.insert(children.end(), grandChildren.begin(), grandChildren.end());
-
         }
         return children;
     }
@@ -86,22 +85,6 @@ namespace{
     Identifier identify(const Acts::Surface& surface) {
         const auto* detEl = dynamic_cast<const ActsTrk::IDetectorElementBase*>(surface.surfacePlacement());
         return detEl ? detEl->identify(): Identifier{};
-    }
-
-    bool insideInterval(const double testLow, const double testHigh,
-                        const double envLow, const double envHigh) {
-        return envLow < testLow && testHigh < envHigh;
-    }
-
-    bool outsideInterval(const double testLow, const double testHigh,
-                         const double envLow, const double envHigh) {
-        return testHigh < envLow || envHigh < testLow;
-    }
-
-    bool overlapsInterval(const double testLow, const double testHigh,
-                          const double envLow, const double envHigh)  {
-        return !insideInterval(testLow, testHigh, envLow, envHigh) &&
-               !outsideInterval(testLow, testHigh, envLow, envHigh);
     }
 }
 
@@ -168,11 +151,10 @@ namespace MuonGMR4 {
         if (volume.inside(gctx.context(), point, tolerance)) {
             return StatusCode::SUCCESS;
         }
-        const std::vector<Amg::Vector3D> volumeCorners = cornerPoints(gctx, volume);
         ATH_MSG_ERROR("In channel "<<m_idHelperSvc->toString(chamberId) <<", the point "
                      << descr <<" "<<Amg::toString(volume.globalToLocalTransform(gctx.context())* point)
                      <<" is not part of the chamber volume. The corners of the volume are:");
-        for(const auto& corner : volumeCorners) {
+        for(const Amg::Vector3D& corner : cornerPoints(gctx, volume)) {
             ATH_MSG_ERROR("  "<<Amg::toString(volume.globalToLocalTransform(gctx.context())*corner));
         }
         return StatusCode::FAILURE;
@@ -229,7 +211,8 @@ namespace MuonGMR4 {
         return StatusCode::SUCCESS;
     }
 
-    std::vector<Amg::Vector3D> MuonChamberToolTest::cornerPoints(const ActsTrk::GeometryContext& gctx, const Acts::Volume& volume) const {
+    std::vector<Amg::Vector3D> MuonChamberToolTest::cornerPoints(const ActsTrk::GeometryContext& gctx, 
+                                                                 const Acts::Volume& volume) const {
         
         const auto& bounds = volume.volumeBounds();
         unsigned int edgeIdx{0};
@@ -238,8 +221,7 @@ namespace MuonGMR4 {
             const auto& diamondBounds = static_cast<const Acts::DiamondVolumeBounds&>(bounds);
             using BoundEnum = Acts::DiamondVolumeBounds::BoundValues;        
             std::vector<Amg::Vector3D> edges(12, Amg::Vector3D::Zero());
-            double xCord{0};
-            double yCord{0};
+            double xCord{0.}, yCord{0};
             for(double signX : {-1.,1.}){
                 for(double signY : {-1., 0., 1.}){
                     for(double signZ : {-1.,1.}){
@@ -254,14 +236,13 @@ namespace MuonGMR4 {
                         }
 
                         const Amg::Vector3D edge{signX*xCord, 
-                                                signY*yCord, 
-                                                signZ*diamondBounds.get(BoundEnum::eHalfLengthZ)};
+                                                 signY*yCord, 
+                                                 signZ*diamondBounds.get(BoundEnum::eHalfLengthZ)};
                         edges[edgeIdx] = volume.localToGlobalTransform(gctx.context())*edge;
-                        edgeIdx++;
+                        ++edgeIdx;
                     }
                 }
             }
-
             return edges;
         }
 
@@ -382,7 +363,6 @@ namespace MuonGMR4 {
                     const Amg::Vector3D testPoint = section* chamberEdges[edge1] + (1. -section) *chamberEdges[edge2];
                     // Using acts::Volume::inside is horribly slow in dbg builds.
                     // Using the bounds method directly is much faster.
-                    //if (volume.inside (gctx.context(), testPoint)) {
                     if (volBounds.inside (transform * testPoint)) {
                         return true;
                     }
@@ -563,7 +543,7 @@ namespace MuonGMR4 {
         //visit the volumes and check the overlaps with the other volumes in the tracking geometry
         // also check overlaps between volumes and surfaces (e.g surfaces where the passive material is mapped)
         std::vector<const Acts::TrackingVolume*> volumeVec{};
-        std::vector<const Acts::Surface*> surfacesVec{};
+        std::vector<const Acts::Surface*> passiveSurfaces{};
 
         std::unordered_set<const Acts::TrackingVolume*> overlapVolumes{};
         std::unordered_set<const Acts::Surface*> overlapSurfaces{};
@@ -573,10 +553,14 @@ namespace MuonGMR4 {
         trackingGeometry.visitVolumes([&](const Acts::TrackingVolume* vol) {
             //for the cylinder type volumes , fetch the inner surfaces only (e.g passive material surfaces)
             if(vol->volumeBounds().type() == Acts::VolumeBounds::BoundsType::eCylinder){  
-                std::ranges::for_each(vol->surfaces(), [&](const auto& surf){                 
-                    surfacesVec.push_back(&surf);
+                ATH_MSG_DEBUG("checkTrackingGeometry() "<<__LINE__<<" -  Fetch "<<vol->surfaces().size()
+                    <<" passive surfaces from "<<vol->volumeName()<<".");
+                std::ranges::for_each(vol->surfaces(), [&](const Acts::Surface& surf){
+                    ATH_MSG_VERBOSE(" --- "<<surf.type()<<" @"<<Amg::toString(surf.center(gctx.context()))
+                                <<" "<<surf.bounds());             
+                    passiveSurfaces.push_back(&surf);
                 });
-                return;                
+                return;
             } 
             const auto* placement = dynamic_cast<const ActsTrk::VolumePlacement*>(vol->volumePlacement());
             // Not a senitive muon volume
@@ -589,7 +573,16 @@ namespace MuonGMR4 {
         });   
 
         ATH_MSG_INFO(__func__<<"() "<<__LINE__<<" - Fetched "
-                    << surfacesVec.size()<< " surfaces");
+                    << passiveSurfaces.size()<< " passive surfaces");
+        {
+            Acts::ObjVisualization3D visualHelper{};
+            std::ranges::for_each(passiveSurfaces, 
+                [&visualHelper, &gctx](const Acts::Surface* surface) {
+                    Acts::GeometryView3D::drawSurface(visualHelper, *surface, gctx.context());
+                });
+            visualHelper.write("MsTrackTest_passiveSurfaces.obj");
+  
+        }
         StatusCode retCode = StatusCode::SUCCESS;
         for(std::size_t vIdx = 0; vIdx < volumeVec.size(); ++vIdx) {
             const Acts::TrackingVolume* testVol{volumeVec.at(vIdx)};
@@ -698,11 +691,18 @@ namespace MuonGMR4 {
                                  halfX * Amg::Vector3D::UnitX() +
                                  volHalfR * Amg::Vector3D::Unit(1 + isBarrel))).perp();
     
-            const double zMin = center.z() - volHalfZ;
-            const double zMax = center.z() + volHalfZ;
+            double zMin = center.z() - volHalfZ;
+            double zMax = center.z() + volHalfZ;
+            /// That's a dirty hack because the halfZ is invalid here
+            if (testVol->volumeBounds().type() == Acts::VolumeBounds::eDiamond) {
+                zMin = 1._km; zMax = -1._km;
+                for (const Amg::Vector3D& p : cornerPoints(gctx, *testVol)){
+                    zMin = std::min(zMin, p.z());
+                    zMax = std::max(zMax, p.z());
+                }
+            }  
 
-            for(const Acts::Surface* surf : surfacesVec) {
-                double surfRMin{0.}, surfRMax{0.}, halfZ{0.};
+            for(const Acts::Surface* surf : passiveSurfaces) {
 
                 ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Check "<<surf->type()
                                 <<" surface "<<surf->name()<< " , "<<surf->geometryId());
@@ -710,41 +710,37 @@ namespace MuonGMR4 {
                 if(surf->type() == Acts::Surface::SurfaceType::Cylinder) {
                     using BoundEnum = Acts::CylinderBounds::BoundValues;
                     const auto& bounds = static_cast<const Acts::CylinderBounds&>(surf->bounds());
-                    surfRMax = bounds.get(BoundEnum::eR) + 2._mm;
-                    surfRMin = bounds.get(BoundEnum::eR) - 2._mm;
-
-                    halfZ = bounds.get(BoundEnum:: eHalfLengthZ);
+                    const double passiveR = bounds.get(BoundEnum::eR);
+                    const double passiveZ = bounds.get(BoundEnum:: eHalfLengthZ);
+                    if (rMin < passiveR || rMax > passiveR){
+                        continue;
+                    }
+                    if (passiveZ < zMin || -passiveZ > zMax) {
+                        continue;
+                    }
                 } else if(surf->type() == Acts::Surface::SurfaceType::Disc){
                     using BoundEnum = Acts::RadialBounds::BoundValues;
                     const auto& bounds = static_cast<const Acts::RadialBounds&>(surf->bounds());
-                    surfRMax = bounds.get(BoundEnum::eMaxR);
-                    surfRMin = bounds.get(BoundEnum::eMinR);
+                    if (center.z() < zMin || center.z() > zMax) {
+                        continue;
+                    }
+                    const double surfRMax = bounds.get(BoundEnum::eMaxR);
+                    const double surfRMin = bounds.get(BoundEnum::eMinR);
+                    if (surfRMax < rMin || surfRMin > rMax){
+                        continue;
+                    }
+                    // continue;
                 } else {
                     ATH_MSG_ERROR(__func__<<"() "<<__LINE__<<" - The surface "<< surf->geometryId()
                     <<", "<< surf->name() <<" is not a cylinder surface or disc");
                     return StatusCode::FAILURE;
                 }
 
-                //check for overlap in R in case the surface and the volume have overlapping Z position
-
-                const double surfZMin = center.z() - halfZ;
-                const double surfZMax = center.z() + halfZ;
-
-                const bool rOverlap = overlapsInterval(rMin, rMax, surfRMin, surfRMax);
-                const bool zOverlap = overlapsInterval(zMin, zMax, surfZMax, surfZMax);
-
-                const bool rOutside = outsideInterval(rMin, rMax, surfRMin, surfRMax);
-                const bool zOutside = outsideInterval(zMin, zMax, surfZMax, surfZMax);
-                if ( (!rOverlap && !zOverlap) || (rOverlap && zOutside) || 
-                     (zOverlap && rOutside)) {
-                    continue;
-                }
-
                 ATH_MSG_ERROR(__func__<<"() "<<__LINE__<<" - The volume " 
                              << testVol->volumeName() <<  " overlaps with the surface "
                              << surf->name() << " with geo id" << surf->geometryId()
                              <<" -- volume radius: ["<<rMin<<";"<<rMax<<"] z: ["<<zMin<<";"<<zMax<<"]"
-                             <<" -- surface radius: ["<<surfRMin<<";"<<surfRMax<<"] z: ["<<surfZMin<<";"<<surfZMax<<"]");
+                             <<" "<<surf->bounds());
                 if (m_ignoreOutsideSurf) {    
                     retCode = StatusCode::FAILURE;
                 }
