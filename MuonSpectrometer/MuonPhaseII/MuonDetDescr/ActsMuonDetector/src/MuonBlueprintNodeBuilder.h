@@ -91,7 +91,7 @@ private:
   /** @brief Flag to control if the volumes should be alignable or not */
   Gaudi::Property<bool> m_alignableVolumes{this, "AlignableVolumes", true};
   /** @brief Flag to construct the passive material surfaces */
-  Gaudi::Property<bool> m_buildPassiveVolumes{this, "BuildPassiveVolumes", false};
+  Gaudi::Property<bool> m_buildPassiveVolumes{this, "BuildPassiveVolumes", true};
   
   /** @brief Get the chamber's sensitive elements
     * @param gctx Geometry context
