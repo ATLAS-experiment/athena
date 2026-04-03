@@ -9,7 +9,6 @@
 #include "FPGATrackSimObjects/FPGATrackSimFunctions.h"
 #include <iostream>
 #include <iomanip>
-#include <cmath>
 using namespace std;
 
 // first stage only

@@ -8,18 +8,28 @@
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "FPGATrackSimObjects/FPGATrackSimMultiTruth.h"
 #include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
-#include <vector>
-#include <iosfwd>
-#include <cmath>
+
 
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "TObject.h"
+
+#include <vector>
+#include <iosfwd>
+#include <cmath>
+#include <algorithm> //count_if
+#include <memory>
+#include <limits>
 
 class FPGATrackSimTrack {
 
  public:
 
   FPGATrackSimTrack() = default;
+  
+  FPGATrackSimTrack(const FPGATrackSimTrack&) = default;
+  FPGATrackSimTrack& operator=(const FPGATrackSimTrack&) = default;
+  FPGATrackSimTrack(FPGATrackSimTrack&&)  = default;
+  FPGATrackSimTrack& operator=(FPGATrackSimTrack&&)  = default;
   virtual ~FPGATrackSimTrack();
 
   TrackCorrType getTrackCorrType() const { return m_trackCorrType; }
