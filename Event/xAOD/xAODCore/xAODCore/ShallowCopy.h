@@ -15,6 +15,8 @@
 #include "AthLinks/DataLink.h"
 #include "AthContainersInterfaces/IConstAuxStore.h"
 #include "AthContainers/CurrentContext.h"
+#include "AthContainers/tools/AuxElementConcepts.h"
+#include "AthContainers/tools/DataVectorConcepts.h"
 
 // Local include(s):
 #include "xAODCore/ShallowAuxContainer.h"
@@ -38,6 +40,78 @@ namespace xAOD {
   std::unique_ptr<T> prepareElementForShallowCopy(const T* /*elem*/) {
     return std::make_unique<T>();
   }
+
+  /// Create a shallow copy of an existing container
+  ///
+  /// This function can be used to make a shallow copy of an existing
+  /// (constant) container. It is most useful when reading an input file,
+  /// and/or applying systematic variations on a container.
+  ///
+  /// @note If @c cont has decorations, then the scheduler won't automatically
+  ///       known that they are available on the copy.  To make that happen, see
+  ///       @c StoreGate/ShallowCopyDecorDeps.h.
+  ///
+  /// @param cont The container to make a shallow copy of
+  /// @param ctx The current EventContext
+  /// @returns A pair of unique_ptr to the created objects.
+  ///
+  template <SG::IsAuxDataVector T>
+  std::pair<std::unique_ptr<T>, std::unique_ptr<ShallowAuxContainer>>
+  shallowCopy(const T& cont, const EventContext& ctx);
+
+  /// Create a shallow copy of an existing container
+  ///
+  /// This function can be used to make a shallow copy of an existing
+  /// (constant) container. It is most useful when reading an input file,
+  /// and/or applying systematic variations on a container.
+  ///
+  /// @note This version of the function is mainly for analysis (non-MT) use.
+  ///
+  /// @param cont The container to make a shallow copy of
+  /// @returns A pair of unique_ptr to the created objects.
+  ///
+  template <SG::IsAuxDataVector T>
+  std::pair<std::unique_ptr<T>, std::unique_ptr<ShallowAuxContainer>>
+  shallowCopy(const T& cont);
+
+  /// Create a shallow copy of an existing standalone object
+  ///
+  /// This function can be used to make a shallow copy of an existing
+  /// (constant) object. It is most useful when reading an input file,
+  /// and/or applying systematic variations on an object.
+  ///
+  /// @note If @c obj has decorations, then the scheduler won't automatically
+  ///       known that they are available on the copy.  To make that happen, see
+  ///       @c StoreGate/ShallowCopyDecorDeps.h.
+  ///
+  /// @warning There are not many legitimate use cases for shallow-copying a
+  ///          standalone object. Think twice before using this function!
+  ///
+  /// @param obj The object to make a shallow copy of
+  /// @param ctx The current EventContext
+  /// @returns A pair of unique_ptr to the created objects.
+  ///
+  template <SG::IsConstAuxElement T>
+  std::pair<std::unique_ptr<T>, std::unique_ptr<ShallowAuxInfo>> shallowCopy(
+      const T& obj, const EventContext& ctx);
+
+  /// Create a shallow copy of an existing standalone object
+  ///
+  /// This function can be used to make a shallow copy of an existing
+  /// (constant) object. It is most useful when reading an input file,
+  /// and/or applying systematic variations on an object.
+  ///
+  /// @note This version of the function is mainly for analysis (non-MT) use.
+  ///
+  /// @warning There are not many legitimate use cases for shallow-copying a
+  ///          standalone object. Think twice before using this function!
+  ///
+  /// @param obj The object to make a shallow copy of
+  /// @returns A pair of unique_ptr to the created objects.
+  ///
+  template <SG::IsConstAuxElement T>
+  std::pair<std::unique_ptr<T>, std::unique_ptr<ShallowAuxInfo>> shallowCopy(
+      const T& obj);
 
   namespace detail{
   /// Impl function for shallow copy container
@@ -193,5 +267,8 @@ namespace xAOD {
    }
 
 } // namespace xAOD
+
+// Include the implementation.
+#include "xAODCore/ShallowCopy.icc"
 
 #endif // XAODCORE_SHALLOWCOPY_H
