@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s)
@@ -305,10 +305,10 @@ StatusCode BuildTruthTaus::examineTruthTau(const xAOD::TruthParticle& xTruthPart
       vec_phicharged.push_back(iTLV_c.Phi());
       vec_mcharged.push_back(iTLV_c.M());
     }  
-    decCharged_pt(xTruthParticle) = vec_ptcharged;
-    decCharged_eta(xTruthParticle) = vec_etacharged;
-    decCharged_phi(xTruthParticle) = vec_phicharged;
-    decCharged_m(xTruthParticle) = vec_mcharged;    
+    decCharged_pt(xTruthParticle) = std::move(vec_ptcharged);
+    decCharged_eta(xTruthParticle) = std::move(vec_etacharged);
+    decCharged_phi(xTruthParticle) = std::move(vec_phicharged);
+    decCharged_m(xTruthParticle) = std::move(vec_mcharged);    
   }
 
   if ( m_bWriteVisibleNeutralFourMomentum )
@@ -336,10 +336,10 @@ StatusCode BuildTruthTaus::examineTruthTau(const xAOD::TruthParticle& xTruthPart
       vec_phineutral.push_back(iTLV_n.Phi());
       vec_mneutral.push_back(iTLV_n.M());
     }
-    decNeutral_pt(xTruthParticle) = vec_ptneutral;
-    decNeutral_eta(xTruthParticle) = vec_etaneutral;
-    decNeutral_phi(xTruthParticle) = vec_phineutral;
-    decNeutral_m(xTruthParticle) = vec_mneutral;    
+    decNeutral_pt(xTruthParticle) = std::move(vec_ptneutral);
+    decNeutral_eta(xTruthParticle) = std::move(vec_etaneutral);
+    decNeutral_phi(xTruthParticle) = std::move(vec_phineutral);
+    decNeutral_m(xTruthParticle) = std::move(vec_mneutral);    
   }
 
   if ( m_bWriteDecayModeVector )
