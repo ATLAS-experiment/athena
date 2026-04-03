@@ -17,7 +17,6 @@
 #include "xAODJet/JetContainer.h"
 
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
-#include "TrkToolInterfaces/ITrackSelectorTool.h"
 #include "RecoToolInterfaces/IParticleCaloExtensionTool.h"
 #include "TrkVertexFitterInterfaces/ITrackToVertexIPEstimator.h"
 #include "BeamSpotConditionsData/BeamSpotData.h"
@@ -99,7 +98,7 @@ private:
     //! tools
     //-------------------------------------------------------------
     ToolHandle<Trk::IParticleCaloExtensionTool> m_caloExtensionTool {this, "ParticleCaloExtensionTool", "Trk::ParticleCaloExtensionTool/ParticleCaloExtensionTool", "Tool for the extrapolation of charged tracks"};
-    ToolHandle<Trk::ITrackSelectorTool> m_trackSelectorTool_tau {this, "TrackSelectorToolTau", "", "Tool for track selection"};
+    ToolHandle<InDet::IInDetTrackSelectionTool> m_trackSelectorTool_tau {this, "TrackSelectorToolTau", "", "Tool for track selection"}; 
     ToolHandle<Reco::ITrackToVertex> m_trackToVertexTool {this, "TrackToVertexTool", "Reco::TrackToVertex"};
     ToolHandle<Trk::ITrackToVertexIPEstimator> m_trackToVertexIPEstimator {this, "TrackToVertexIPEstimator", ""};
     

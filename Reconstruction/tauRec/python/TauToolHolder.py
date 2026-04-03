@@ -89,7 +89,7 @@ def TauTrackFinderCfg(flags):
     from TrackToVertex.TrackToVertexConfig import TrackToVertexCfg
     from TrackToCalo.TrackToCaloConfig import ParticleCaloExtensionToolCfg
     from TrkConfig.TrkVertexFitterUtilsConfig import AtlasTrackToVertexIPEstimatorCfg
-    from InDetConfig.InDetTrackSelectorToolConfig import TauRecInDetTrackSelectorToolCfg
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import TauRecInDetTrackSelectorToolCfg
 
     _LargeD0TrackInputContainer = (flags.Tau.ActiveConfig.LargeD0TrackCollection if flags.Tau.associateLRT else "")
 

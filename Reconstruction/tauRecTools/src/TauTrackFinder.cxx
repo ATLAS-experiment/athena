@@ -348,9 +348,7 @@ TauTrackFinder::TauTrackType TauTrackFinder::tauTrackType( const xAOD::TauJet& p
 
   if (dR > m_maxJetDr_wide) return NotTauTrack;
 
-  bool goodTrack = m_trackSelectorTool_tau->decision(trackParticle, primaryVertex);
-    
-  if (goodTrack) {
+  if(m_trackSelectorTool_tau->accept(trackParticle, primaryVertex)){ 
     if (dR > m_maxJetDr_tau)
       return TauTrackWide;
     else

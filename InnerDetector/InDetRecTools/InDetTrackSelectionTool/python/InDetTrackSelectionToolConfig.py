@@ -156,6 +156,25 @@ def Tau_InDetTrackSelectionToolForTJVACfg(flags, name="tauRec_InDetTrackSelectio
     acc.setPrivateTools(CompFactory.InDet.InDetTrackSelectionTool(name, **kwargs))
     return acc
 
+def TauRecInDetTrackSelectorToolCfg(flags, name='tauRec_InDetTrackSelectorTool', **kwargs):
+
+    import AthenaCommon.SystemOfUnits as Units
+
+    acc = ComponentAccumulator() 
+    kwargs.setdefault("minPt",    1000.0)
+    kwargs.setdefault("maxD0",    1*Units.mm)
+    kwargs.setdefault("maxZ0SinTheta", 1.5*Units.mm)
+    kwargs.setdefault("minNNextToInnermostLayerHits", 0)
+    kwargs.setdefault("minNPixelHits",  2) 
+    kwargs.setdefault("minNSctHits",    0)
+    kwargs.setdefault("minNSiHits",     7)
+    kwargs.setdefault("minNSiHitsPhysical",   3) #to be checked
+    kwargs.setdefault("minNTrtHits",    0)
+    kwargs.setdefault("maxChiSq", 999)
+    kwargs.setdefault("maxChiSqperNdf", 99999) 
+    acc.setPrivateTools(CompFactory.InDet.InDetTrackSelectionTool(name, **kwargs))
+    return acc
+
 def InDetGlobalLRTMonAlg_TrackSelectionToolCfg(flags, name="InDetGlobalLRTMonAlg_TrackSelectionTool", **kwargs):
     kwargs.setdefault("minPt", 1000.)
     kwargs.setdefault("maxNPixelHoles", 1)

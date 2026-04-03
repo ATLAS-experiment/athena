@@ -11,12 +11,12 @@ atlas_add_component( DiTauRec
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${FASTJET_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${FASTJET_LIBRARIES} AthenaBaseComps xAODJet xAODTau GaudiKernel JetEDM TrkToolInterfaces CaloEvent xAODTracking StoreGateLib tauRecToolsLib PathResolver)
+                     LINK_LIBRARIES ${FASTJET_LIBRARIES} AthenaBaseComps xAODJet xAODTau GaudiKernel JetEDM TrkToolInterfaces CaloEvent xAODTracking StoreGateLib tauRecToolsLib PathResolver InDetTrackSelectionToolLib)
 
 atlas_add_library( DiTauRecLib
 	DiTauRec/*.h src/*.cxx
 	PUBLIC_HEADERS DiTauRec
-	LINK_LIBRARIES ${FASTJET_LIBRARIES} AthenaBaseComps xAODJet xAODTau GaudiKernel JetEDM TrkToolInterfaces CaloEvent xAODTracking StoreGateLib tauRecToolsLib PathResolver
+	LINK_LIBRARIES ${FASTJET_LIBRARIES} AthenaBaseComps xAODJet xAODTau GaudiKernel JetEDM TrkToolInterfaces CaloEvent xAODTracking StoreGateLib tauRecToolsLib PathResolver InDetTrackSelectionToolLib
 )
 
 # Install files from the package:

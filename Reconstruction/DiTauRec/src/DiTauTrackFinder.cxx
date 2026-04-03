@@ -165,8 +165,8 @@ DiTauTrackFinder::DiTauTrackType DiTauTrackFinder::diTauTrackType(const DiTauCan
   if ( pDiTau->p4().DeltaR(track->p4()) > m_MaxDrJet) return OutsideTrack;
     
   // check quality criteria
-  bool goodTrack = m_TrackSelectorTool->decision(*track, pVertex);
-  if (!goodTrack) return DiTauOtherTrack;
+  if (!m_TrackSelectorTool->accept(*track, pVertex))
+      return DiTauOtherTrack;		  
 
   // check if track is inside a subjet
   std::vector<fastjet::PseudoJet> vSubjets = data->subjets;
