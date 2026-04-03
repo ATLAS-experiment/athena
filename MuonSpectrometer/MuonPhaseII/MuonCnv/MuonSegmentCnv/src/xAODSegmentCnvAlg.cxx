@@ -104,7 +104,7 @@ namespace MuonR4{
                 return cmbMeas;
             };
             // Loop over the measurements
-            for (const auto& [segIdx, meas] : Acts::enumerate(inSegment.measurements())) {
+            for (const auto [segIdx, meas] : Acts::enumerate(inSegment.measurements())) {
                 const SpacePoint* sp = meas->spacePoint();
                 if (!sp) {
                     if (!m_convertBeamSpot) {
