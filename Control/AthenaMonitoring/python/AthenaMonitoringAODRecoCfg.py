@@ -11,7 +11,7 @@ def AthenaMonitoringAODRecoCfg(flags):
     if flags.DQ.Environment == 'AOD':
         info('Running on AOD: Scheduling rebuild of standard jet collections if necessary')
         from JetRecConfig.StandardSmallRJets import AntiKt4EMTopo, AntiKt4EMPFlow, AntiKt4LCTopo
-        from JetRecConfig.StandardLargeRJets import AntiKt10LCTopo_noVR, AntiKt10LCTopoTrimmed_trigger, AntiKt10UFOCSSKSoftDrop_trigger
+        from JetRecConfig.StandardLargeRJets import AntiKt10LCTopo_tau, AntiKt10UFOCSSKSoftDrop_trigger
         from AthenaConfiguration.Enums import BeamType
 
         # first, check small R jets, skip PFlow when running over cosmics
@@ -19,7 +19,7 @@ def AthenaMonitoringAODRecoCfg(flags):
                             if _.fullname() not in flags.Input.Collections]
         # if we reschedule small R jets, check if we need to reschedule large R as well
         if jets_to_schedule:
-            jets_to_schedule += [_ for _ in ((AntiKt10LCTopo_noVR, AntiKt10LCTopoTrimmed_trigger, AntiKt10UFOCSSKSoftDrop_trigger) if flags.Beam.Type is not BeamType.Cosmics else (AntiKt10LCTopo_noVR, AntiKt10LCTopoTrimmed_trigger))
+            jets_to_schedule += [_ for _ in ((AntiKt10LCTopo_tau, AntiKt10UFOCSSKSoftDrop_trigger) if flags.Beam.Type is not BeamType.Cosmics else (AntiKt10LCTopo_tau))
                                  if _.fullname() not in flags.Input.Collections]
 
         if jets_to_schedule:
