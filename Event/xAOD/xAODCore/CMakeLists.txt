@@ -80,9 +80,15 @@ atlas_add_test( ut_xaodcore_auxinfobase_test
    SOURCES test/ut_xaodcore_auxinfobase_test.cxx
    LINK_LIBRARIES AthContainers xAODCore TestTools )
 
+set(_ignoreArgs)
+if (XAOD_STANDALONE)
+   set(_ignoreArgs LOG_IGNORE_PATTERN
+       "DataLink::findIdentifier.*Event object is not available" )
+endif()
 atlas_add_test( ut_xaodcore_shallowcopy_test
    SOURCES test/ut_xaodcore_shallowcopy.cxx
-   LINK_LIBRARIES AthContainers AthLinks xAODCore )
+   LINK_LIBRARIES AthContainers xAODCore
+   ${_ignoreArgs} )
 
 atlas_add_test( ut_xaodcore_basecontainer_test
    SOURCES test/ut_xaodcore_basecontainer.cxx

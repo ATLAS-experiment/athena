@@ -374,6 +374,13 @@ bool DataLink< STORABLE >::toTransient() {
 template< class STORABLE >
 void DataLink< STORABLE >::findIdentifier() {
 
+   // Allow tests to create a link object, even without setting up an event
+   // object.
+   if (m_event == nullptr) {
+      Warning("DataLink::findIdentifier", "Event object is not available");
+      return;
+   }
+
    // Ask the event for the identifier of this object:
    const sgkey_t key = m_event->getKey( m_object );
    if( ! key ) {
