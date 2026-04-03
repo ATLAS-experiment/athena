@@ -419,7 +419,7 @@ class CPGridRun:
         isCPRunDefault = self.args.exec.startswith('-') or self.args.exec.startswith('CPRun.py')
         formatingClause = {
             'input_list': 'in.txt',
-            'merge_output_files': True,
+            'merge_output_files': len(self.args.output_files) == 1,
         }
         if not isCPRunDefault:
             if self._isFirstRun: logCPGridRun.warning("Non-CPRun.py is detected, please ensure the exec string is formatted correctly. Exec string will not be automatically formatted.")
@@ -485,7 +485,7 @@ class CPGridRun:
                 f"Or if you are only using central packages, please use the `--useCentralPackage` flag."
 
     def outputsFormatter(self):
-        outputs = [f'{output.split(".")[0]}:{output}' for output in self.args.output_files]
+        outputs = [f'{output.split(".")[0]}:{output}' if ":" not in output else output for output in self.args.output_files]
         return ','.join(outputs)
 
     def hasPrun(self) -> bool:
