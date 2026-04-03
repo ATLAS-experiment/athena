@@ -1,13 +1,9 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
-
-################################################################################
-# Package: MuonInferenceInterfaces
-################################################################################
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MuonInferenceInterfaces )
 
-find_package( onnxruntime REQUIRED)
+find_package( onnxruntime )
 
 atlas_add_library(  MuonInferenceInterfaces
                     src/*.cxx
@@ -16,5 +12,3 @@ atlas_add_library(  MuonInferenceInterfaces
                     LINK_LIBRARIES  MuonReadoutGeometryR4 AthenaBaseComps MuonPatternHelpers
                                     MuonSpacePoint MuonPatternEvent ${ONNXRUNTIME_LIBRARIES}
                 )
-
-

@@ -1,17 +1,11 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PhotonVertexSelection )
 
 # External dependencies:
 find_package( ROOT COMPONENTS Core Hist RIO Physics TMVA )
-find_package( onnxruntime REQUIRED )
-
-# set libraries and includes for onnx, then print message about the paths
-set(ALL_ONNX_LIBS ${onnxruntime_LIBRARY} ${onnxruntime_LIBRARIES} ${ONNXRUNTIME_LIBRARIES})
-message(NOTICE "-- HyyVertexInference/CMakeLists: Using onnx libs=${ALL_ONNX_LIBS}")
-set(ALL_ONNX_INCS ${onnxruntime_INCLUDE_DIR} ${ONNXRUNTIME_INCLUDE_DIRS})
-message(NOTICE "-- HyyVertexInference/CMakeLists: Using onnx incs=${ALL_ONNX_INCS}")
+find_package( onnxruntime )
 
 # Add the shared library:
 # Declare package as a library
@@ -22,8 +16,8 @@ message(NOTICE "-- HyyVertexInference/CMakeLists: Using onnx incs=${ALL_ONNX_INC
 atlas_add_library( PhotonVertexSelectionLib
    PhotonVertexSelection/*.h Root/*.cxx
    PUBLIC_HEADERS PhotonVertexSelection
-   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${ALL_ONNX_INCS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} ${ALL_ONNX_LIBS} AsgDataHandlesLib AsgTools xAODEgamma xAODEventInfo xAODMetaData AnaAlgorithmLib PATCoreLib
+   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
+   LINK_LIBRARIES ${ROOT_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} AsgDataHandlesLib AsgTools xAODEgamma xAODEventInfo xAODMetaData AnaAlgorithmLib PATCoreLib
    xAODTracking
    PRIVATE_LINK_LIBRARIES PathResolver egammaUtils CxxUtils)
 
