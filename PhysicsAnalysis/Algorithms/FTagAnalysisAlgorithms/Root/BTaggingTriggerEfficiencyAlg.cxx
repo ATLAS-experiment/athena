@@ -35,7 +35,7 @@ namespace CP
     ANA_CHECK (m_triggerEfficiencyTool.retrieve());
     ANA_CHECK (m_conditionalEfficiencyTool.retrieve());
 
-    m_conditionalFixedCut = (m_conditionalEfficiencyTool->getOperatingPoint() == "Continuous");
+    m_conditionalFixedCut = (m_conditionalEfficiencyTool->getOperatingPoint().find("Continuous") == std::string::npos);
     
     ANA_CHECK (m_jetHandle.initialize (m_systematicsList));
     ATH_CHECK (m_truthFlav.initialize(m_systematicsList, m_jetHandle));
