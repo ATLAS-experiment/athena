@@ -4,7 +4,7 @@
 
 atlas_subdir( AsgAnalysisAlgorithms )
 
-find_package( ROOT COMPONENTS Core Hist Tree )
+find_package( ROOT COMPONENTS Core Hist Tree ROOTNTuple )
 find_package( VDT )
 find_package( Lhapdf )
 
@@ -32,7 +32,7 @@ atlas_add_dictionary( AsgAnalysisAlgorithmsDict
 atlas_add_component( AsgAnalysisAlgorithms
    src/components/*.cxx
    INCLUDE_DIRS  ${LHAPDF_INCLUDE_DIRS} ${VDT_INCLUDE_DIRS}
-   LINK_LIBRARIES AsgAnalysisAlgorithmsLib ${LHAPDF_LIBRARIES})
+   LINK_LIBRARIES AsgAnalysisAlgorithmsLib ${LHAPDF_LIBRARIES} ${ROOT_LIBRARIES} )
 
 atlas_install_data( data/* )
 atlas_install_python_modules( python/*.py )
