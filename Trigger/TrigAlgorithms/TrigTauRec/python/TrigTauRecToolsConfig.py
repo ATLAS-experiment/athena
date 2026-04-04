@@ -32,14 +32,14 @@ def trigTauTrackFinderCfg(flags, name='', TrackParticlesContainer=''):
     from TrackToCalo.TrackToCaloConfig import ParticleCaloExtensionToolCfg
     ParticleCaloExtensionTool = acc.popToolsAndMerge(ParticleCaloExtensionToolCfg(flags))
 
-    from InDetConfig.InDetTrackSelectorToolConfig import TrigTauInDetTrackSelectorToolCfg
-    TrigTauInDetTrackSelectorTool = acc.popToolsAndMerge(TrigTauInDetTrackSelectorToolCfg(flags))
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import TrigTauInDetTrackSelectionToolCfg
+    TrigTauInDetTrackSelectionTool = acc.popToolsAndMerge(TrigTauInDetTrackSelectionToolCfg(flags))
 
     acc.setPrivateTools(CompFactory.TauTrackFinder(
         name                            = name,
         MaxJetDrTau                     = 0.2,
         MaxJetDrWide                    = 0.4,
-        TrackSelectorToolTau            = TrigTauInDetTrackSelectorTool,
+        TrackSelectorToolTau            = TrigTauInDetTrackSelectionTool,
         TrackToVertexTool               = TrackToVertexTool,
         Key_trackPartInputContainer     = TrackParticlesContainer,
         maxDeltaZ0wrtLeadTrk            = 0.75*mm,
