@@ -184,15 +184,15 @@ def TrigTauInDetTrackSelectionToolCfg(
         flags, name="TrigTau_InDetTrackSelectionTool", **kwargs):
     acc = ComponentAccumulator()
 
-    if flags.Tracking.ActiveConfig.doTRT and "TrtDCCutTool" not in kwargs:
-        from InDetConfig.InDetTrackSelectorToolConfig import InDetTrigTRTDriftCircleCutToolCfg
-        kwargs.setdefault("TrtDCCutTool", acc.popToolsAndMerge(
-            InDetTrigTRTDriftCircleCutToolCfg(flags)))
+    #if flags.Tracking.ActiveConfig.doTRT and "TrtDCCutTool" not in kwargs:
+    #from InDetConfig.InDetTrackSelectorToolConfig import InDetTrigTRTDriftCircleCutToolCfg
+    #kwargs.setdefault("TrtDCCutTool", acc.popToolsAndMerge(
+    #    InDetTrigTRTDriftCircleCutToolCfg(flags)))
 
-    if "Extrapolator" not in kwargs:
-        from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-        kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(
-            AtlasExtrapolatorCfg(flags)))
+    #if "Extrapolator" not in kwargs:
+    #    from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
+    #    kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(
+    #        AtlasExtrapolatorCfg(flags)))
 
     import AthenaCommon.SystemOfUnits as Units
     kwargs.setdefault("minPt",    1000.0)
