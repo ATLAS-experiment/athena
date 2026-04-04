@@ -39,10 +39,11 @@
 #include "Acts/Propagator/ActorList.hpp"
 #include "Acts/Propagator/Propagator.hpp"
 #include "Acts/Definitions/ParticleData.hpp"
-#include "ActsFatras/EventData/ProcessType.hpp"
+#include "ActsFatras/EventData/GenerationProcess.hpp"
 #include "ActsFatras/Kernel/InteractionList.hpp"
-#include "ActsFatras/Kernel/Simulation.hpp"
-#include "ActsFatras/Kernel/SimulationResult.hpp"
+#include "ActsFatras/Kernel/SingleParticleSimulation.hpp"
+#include "ActsFatras/Kernel/SingleParticleSimulationResult.hpp"
+#include "ActsFatras/Kernel/MultiParticleSimulation.hpp"
 #include "ActsFatras/Physics/Decay/NoDecay.hpp"
 #include "ActsFatras/Physics/StandardInteractions.hpp"
 #include "ActsFatras/Physics/ElectroMagnetic/PhotonConversion.hpp"
@@ -133,7 +134,7 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
     /// @param particle is the initial particle state
     /// @returns Simulated particle state, hits, and generated particles.
     template <typename generator_t>
-    Acts::Result<ActsFatras::SimulationResult> simulate(
+    Acts::Result<ActsFatras::SingleParticleSimulationResult> simulate(
         const Acts::GeometryContext &geoCtx,
         const Acts::MagneticFieldContext &magCtx, generator_t &generator,
         const ActsFatras::Particle &particle) const {
@@ -200,8 +201,9 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
           NeutralPropagator, NeutralInteractions, ActsFatras::NoSurface,
           ActsFatras::NoDecay>;
   // Combined
-  using Simulation = ActsFatras::Simulation<ChargedSelector, ChargedSimulation,
-                                            NeutralSelector, NeutralSimulation>;
+  using Simulation = ActsFatras::MultiParticleSimulation<
+          ChargedSelector, ChargedSimulation,
+          NeutralSelector, NeutralSimulation>;
   // ===============================
   /// Convert ACTS momentum to Athena momentum
   inline Amg::Vector3D convertMom3FromActs(const Acts::Vector3& actsMom) {
@@ -333,8 +335,8 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
   // https://vmc-project.github.io/geant4_vmc/g4vmc_html/TG4ProcessMapPhysics_8cxx_source.html#:~:text=155%20pMap%2D%3EAdd(DECAY,);%20//%20G4%20value:%20231
   Gaudi::Property<std::map<int,int>> m_processTypeMap{this, "ProcessTypeMap",
       {{0,0}, {1,201}, {2,14}, {3,3}, {4,121}}, "proessType map <ActsFatras,G4>"};
-      //{{ActsProcessType::eUndefined,0}, {ActsProcessType::eDecay,201}, {ActsProcessType::ePhotonConversion,14}, {ActsProcessType::eBremsstrahlung,3}, {ActsProcessType::eNuclearInteraction,121}}
-  inline int getATLASProcessCode(ActsFatras::ProcessType actspt){return m_processTypeMap[static_cast<uint32_t>(actspt)];};
+      //{{ActsFatras::GenerationProcess::eUndefined,0}, {ActsFatras::GenerationProcess::eDecay,201}, {ActsFatras::GenerationProcess::ePhotonConversion,14}, {ActsFatras::GenerationProcess::eBremsstrahlung,3}, {ActsFatras::GenerationProcess::eNuclearInteraction,121}}
+  inline int getATLASProcessCode(ActsFatras::GenerationProcess actspt){return m_processTypeMap[static_cast<uint32_t>(actspt)];};
 };
 
 }  // namespace ISF
