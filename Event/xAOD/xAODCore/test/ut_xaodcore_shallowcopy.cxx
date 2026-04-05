@@ -167,6 +167,7 @@ int testCopy(SG::AuxElement& copyObj, xAOD::ShallowAuxInfo& copyAux) {
   return 0;
 }
 
+//coverity[UNCAUGHT_EXCEPT]
 int main() {
 
    // Create a test container that we'll make a copy of later on:
