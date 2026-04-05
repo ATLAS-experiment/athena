@@ -329,7 +329,7 @@ StatusCode TauTruthMatchingTool::findTruthTau(const xAOD::TauJet& xTau,
   }
 
   if (*m_bIsTruthMatchedAvailable.ptr() || *m_bIsTruthParticleLinkAvailable.ptr()) {
-    return StatusCode::SUCCESS;
+    if (!m_bForceCheckTruthMatch) return StatusCode::SUCCESS;
   }
 
   // only search for truth taus once

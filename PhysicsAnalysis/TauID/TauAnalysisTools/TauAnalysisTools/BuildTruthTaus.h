@@ -69,6 +69,7 @@ public:
   virtual StatusCode retrieveTruthTaus() override;
   virtual StatusCode retrieveTruthTaus(ITruthTausEvent& truthTausEvent, const EventContext& ctx) const override;
 
+  Gaudi::Property<bool> m_bForceCheckTruthMatch{ this, "ForceCheckTruthMatch", false};
 
 protected:
   StatusCode retrieveTruthTausImpl(TruthTausEvent& truthTausEvent, const EventContext& ctx) const;
