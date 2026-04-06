@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArG4Code/LArG4SDTool.h"
@@ -89,7 +89,7 @@ void LArG4SDTool::setupAllSDs(const std::map<G4VSensitiveDetector*,std::vector<s
       }
     // Go through the logical volumes and hook the SDs up
     G4LogicalVolumeStore * logicalVolumeStore = G4LogicalVolumeStore::GetInstance();
-    for (auto myvol : *(iter.second)){
+    for (const auto & myvol : *(iter.second)){
       int found = 0;
       std::string_view myvolstring(myvol);
       for (auto *ilv : *logicalVolumeStore ){
