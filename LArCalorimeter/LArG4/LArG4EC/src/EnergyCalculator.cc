@@ -595,13 +595,13 @@ G4bool EnergyCalculator::FindIdentifier_Default(
             std::isdigit(static_cast<unsigned char>(text[digit_start + 1])));
   };
 
-  constexpr auto patterns = std::to_array<std::pair<std::string_view, int>>({
+  static constexpr std::array<std::pair<std::string_view, int>,5> patterns = {{
     {"Slice",     1},
     {"Electrode", 2},
     {"Absorber",  2},
     {"Glue",      3},
     {"Lead",      4}
-  });
+  }};
   
 
   int offset = 0;
