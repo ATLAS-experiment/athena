@@ -162,7 +162,7 @@ int TrackFitter::fitTracks(const std::vector<FPGATrackSimRoad>& roads, std::vect
             ATH_MSG_DEBUG("Set z0 = " << track_cand.getZ0());
             ATH_MSG_DEBUG("Set eta = " << track_cand.getEta());
             ATH_MSG_DEBUG("Set phi = " << track_cand.getPhi());
-            tracks.push_back(track_cand);
+            tracks.push_back(std::move(track_cand));
             continue;
         } else {
 
@@ -198,7 +198,7 @@ int TrackFitter::fitTracks(const std::vector<FPGATrackSimRoad>& roads, std::vect
                     }
                     newtrack.setHitMap(bitmask); // update bitmask
                     m_nominalBank->linfit(sector, newtrack, m_do2ndStage);
-                    m_tracks_missinghits_track.push_back(newtrack);
+                    m_tracks_missinghits_track.push_back(std::move(newtrack));
                     if (m_pmap->getDim(icoord) == 2) {
                         icoord++; // skip 2nd of pixel coordinates so we don't do them twice
                     }

@@ -443,7 +443,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
             for (size_t ihit = 0; ihit < track_hits.size(); ++ihit) {
                 track_cand.setFPGATrackSimHit(ihit, track_hits[ihit]);
             }
-            tracks_1st.push_back(track_cand); 
+            tracks_1st.push_back(std::move(track_cand)); 
         }
       }
       else { roadsToTrack(roads_1st, tracks_1st, m_FPGATrackSimMapping->PlaneMap_1st(0)); }
