@@ -452,7 +452,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_1st(std::vector<FPGATrackSimRoad> 
             for (unsigned ihit = 0; ihit < hit_list.size(); ihit++) {
               track_cand.setFPGATrackSimHit(ihit, hit_list[ihit]);
             }
-            tracks.push_back(track_cand);
+            tracks.push_back(std::move(track_cand));
 
             ATH_MSG_DEBUG("NN InputTensorValues:");
             ATH_MSG_DEBUG(inputTensorValues);
@@ -697,7 +697,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<FPGATrackSimRoad> 
             for (unsigned ihit = 0; ihit < hit_list.size(); ihit++) {
               track_cand.setFPGATrackSimHit(ihit, hit_list[ihit]);
             }
-            tracks.push_back(track_cand);
+            tracks.push_back(std::move(track_cand));
 
         }  // loop over combinations
     }  // loop over roads
@@ -946,7 +946,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_GNN(std::vector<FPGATrackSimRoad> 
         for (unsigned ihit = 0; ihit < hit_list.size(); ihit++) {
           track_cand.setFPGATrackSimHit(ihit, hit_list[ihit]);
         }
-        tracks.push_back(track_cand);
+        tracks.push_back(std::move(track_cand));
 
 
         ATH_MSG_DEBUG("NN InputTensorValues:");
