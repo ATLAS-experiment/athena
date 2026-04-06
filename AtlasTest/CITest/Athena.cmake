@@ -422,6 +422,9 @@ atlas_add_citest( ACTS_ActsEFTrackFit
 atlas_add_citest( ACTS_ActsGSFRefitting
    SCRIPT ActsGSFRefitting.sh )
 
+atlas_add_citest( ACTS_ActsGSFRefittingWithActsElectronExtrapolation
+   SCRIPT ActsGSFRefitWithActsElectronExtrapolation.sh )
+
 atlas_add_citest( ACTS_ActsGSFRefitLegacy
    SCRIPT ActsGSFRefitLegacy.sh )
 

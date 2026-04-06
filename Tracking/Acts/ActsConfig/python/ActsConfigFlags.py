@@ -172,6 +172,7 @@ def createActsConfigFlags():
     actscf.addFlag("Acts.GsfComponentMergeMethod", 'MaxWeight')
     actscf.addFlag("Acts.GsfDirectNavigation", False)
     actscf.addFlag("Acts.GsfOutlierChi2Cut", 1e4) # Effectively no cut. Compatible with legacy
+    actscf.addFlag("Acts.extrapolateElectronsLegacy", False) # Use legacy calo extrapolation with ACTS tracks
 
     # Decorations
     actscf.addFlag('Acts.decoratePRD.sdoSiHit', lambda pcf: pcf.Tracking.doTIDE_AmbiTrackMonitoring)

@@ -29,7 +29,8 @@ def ActsEMBremCollectionBuilderCfg(flags,
             ActsTrackToTrackParticleCnvToolCfg(flags)))
 
     kwargs.setdefault('RefittedTracksLocation', 'ActsRefittedGSFTracks')
-    kwargs.setdefault("SelectedTrackParticleContainerName", "InDetTrackParticles")
+    kwargs.setdefault("SelectedTrackParticleContainerName",
+                      flags.Egamma.Keys.Output.TrkPartContainerName)
     kwargs.setdefault("TrackParticleContainerName", "InDetTrackParticles")
     kwargs.setdefault("TrackParticlesOutKey", "GSFTrackParticles")
 
