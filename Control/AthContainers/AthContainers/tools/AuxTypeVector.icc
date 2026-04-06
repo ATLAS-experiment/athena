@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/tools/AuxTypeVector.icc
@@ -9,6 +9,7 @@
  */
 
 
+#include "AthContainersInterfaces/ToTransient.h"
 
 
 namespace SG { 
@@ -289,6 +290,23 @@ bool AuxTypeVectorHolder<T, CONT>::setOption (const AuxDataOption& option)
     (m_vecPtr,
      option,
      typename std::is_base_of<SG::IAuxSetOption,vector_type>::type());
+}
+
+
+/**
+ * @brief Perform post-read processing on this auxiliary variable.
+ * @param ctx The current event context.
+ *
+ * Some object types require some processing after being read before
+ * they are usable.  This can be indicated by specializing SG::ToTransient
+ * for the vector type containing the variable.  This method will call
+ * such a ToTransient method on the contents, if one is defined.
+ */
+template <class T, class CONT>
+inline
+void AuxTypeVectorHolder<T, CONT>::toTransient (const EventContext& ctx)
+{
+  SG::ToTransient<vector_type>::toTransient (*m_vecPtr, ctx);
 }
 
 

@@ -18,6 +18,10 @@
 <class name="std::vector<ElementLink<std::vector<AthContainersRootTest::Foo> > >"/>
 <class name="std::vector<std::vector<ElementLink<std::vector<AthContainersRootTest::Foo> > > >"/>
 
+<class name="DataLink<std::vector<AthContainersRootTest::Foo*> >"/>
+<class name="std::vector<DataLink<std::vector<AthContainersRootTest::Foo*> > >"/>
+<class name="std::vector<std::vector<DataLink<std::vector<AthContainersRootTest::Foo*> > > >"/>
+
 <class name="AthContainersRootTest::L1"/>
 <class name="std::vector<AthContainersRootTest::L1>"/>
 <class name="AthContainersRootTest::L2"/>

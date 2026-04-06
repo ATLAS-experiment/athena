@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainersRoot/src/RootAuxVectorFactory.cxx
@@ -15,6 +15,8 @@
 #include "AthContainers/tools/error.h"
 #include "AthContainers/normalizedTypeinfoName.h"
 #include "AthLinks/ElementLinkBase.h"
+#include "AthLinks/DataLinkBase.h"
+#include "AthenaKernel/proxyDictFromEventContext.h"
 #include "CxxUtils/ClassName.h"
 #include "CxxUtils/checker_macros.h"
 #include "TClass.h"
@@ -341,6 +343,21 @@ const std::type_info* RootAuxVector::objType() const
 
 
 /**
+ * @brief Perform post-read processing on this auxiliary variable.
+ * @param ctx The current event context.
+ *
+ * Some object types require some processing after being read before
+ * they are usable.  This can be indicated by specializing SG::ToTransient
+ * for the vector type containing the variable.  This method will call
+ * such a ToTransient method on the contents, if one is defined.
+ */
+void RootAuxVector::toTransient (const EventContext& ctx)
+{
+  m_factory->toTransient (ctx, *this);
+}
+
+
+/**
  * @brief Return a span object describing the current vector.
  *        Used to initialize @c m_span the first time that @c getDataSpan
  *        is called.
@@ -415,6 +432,8 @@ RootAuxVectorFactory::RootAuxVectorFactory (TClass* objClass)
 
       static const CxxUtils::ClassName pat1 ("ElementLink<$T>");
       static const CxxUtils::ClassName pat2 ("std::vector<ElementLink<$T> >");
+      static const CxxUtils::ClassName pat3 ("DataLink<$T>");
+      static const CxxUtils::ClassName pat4 ("std::vector<DataLink<$T> >");
 
       CxxUtils::ClassName clname (SG::normalizedTypeinfoName (*ti));
       CxxUtils::ClassName::match_t matches;
@@ -436,6 +455,12 @@ RootAuxVectorFactory::RootAuxVectorFactory (TClass* objClass)
             }
           }
         }
+      }
+      else if (clname.match (pat3, matches)) {
+        m_isEL = DATA_LINK;
+      }
+      else if (clname.match (pat4, matches)) {
+        m_isEL = DATA_LINK_VECTOR;
       }
     }
   }
@@ -582,7 +607,7 @@ void RootAuxVectorFactory::copyForOutput (SG::auxid_t auxid,
     size_t eltsz = m_type.getSize();
     for (size_t i = 0; i < n; i++) {
       reinterpret_cast<ElementLinkBase*>(dstptr + i*eltsz)->thin();
-  }
+    }
   }
   else if (m_isEL == ELEMENT_LINK_VECTOR) {
     size_t eltsz = m_type.getSize();
@@ -699,6 +724,65 @@ std::string RootAuxVectorFactory::tiAllocName() const
     alloc_name += ">";
   }
   return alloc_name;
+}
+
+
+/**
+ * @brief Perform post-read processing for one variable.
+ * @param ctx The current event context.
+ * @param vec The variable to process.
+ *
+ * Some object types require some processing after being read before
+ * they are usable.  This can be indicated by specializing SG::ToTransient
+ * for the vector type containing the variable.  This method will call
+ * such a ToTransient method on the contents, if one is defined.
+ */
+void RootAuxVectorFactory::toTransient (const EventContext& ctx,
+                                        RootAuxVector& vec) const
+{
+  if (m_isEL == NONE) {
+    return;
+  }
+  if (m_isEL == ELEMENT_LINK_NONPOINTER) {
+    ATHCONTAINERS_ERROR("RootAuxVectorFactory::toTransient",
+                        std::string("Cannot call toTransient for ElementLink with non-pointer element: ") +
+                        m_vecClass->GetName());
+    return;
+  }
+
+  char* ptr = reinterpret_cast<char*> (vec.toPtr());
+  size_t n = vec.size();
+  IProxyDict* pdict = Atlas::proxyDictFromEventContext (ctx);
+  size_t eltsz = m_type.getSize();
+
+  if (m_isEL == ELEMENT_LINK) {
+    for (size_t i = 0; i < n; i++) {
+      reinterpret_cast<ElementLinkBase*>(ptr + i*eltsz)->toTransient (pdict);
+    }
+  }
+  else if (m_isEL == ELEMENT_LINK_VECTOR) {
+    for (size_t i = 0; i < n; i++) {
+      std::vector<ElementLinkBase>& v =
+        *reinterpret_cast<std::vector<ElementLinkBase>* > (ptr +i*eltsz);
+      for (ElementLinkBase& el : v) {
+        el.toTransient (pdict);
+      }
+    }
+  }
+  else if (m_isEL == DATA_LINK) {
+    for (size_t i = 0; i < n; i++) {
+      reinterpret_cast<DataLinkBase*>(ptr + i*eltsz)->toTransient (pdict);
+    }
+  }
+  else if (m_isEL == DATA_LINK_VECTOR) {
+    for (size_t i = 0; i < n; i++) {
+      std::vector<DataLinkBase>& v =
+        *reinterpret_cast<std::vector<DataLinkBase>* > (ptr +i*eltsz);
+      for (DataLinkBase& dl : v) {
+        dl.toTransient (pdict);
+      }
+    }
+  }
 }
 
 

@@ -25,7 +25,7 @@ atlas_add_library( xAODCore
    PUBLIC_HEADERS xAODCore
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AthLinks CxxUtils RootUtils
-   SGCoreLib ${extra_libs} )
+   SGCoreLib AthContainersInterfaces ${extra_libs} )
 
 atlas_add_dictionary( xAODCoreDict
    xAODCore/xAODCoreDict.h
