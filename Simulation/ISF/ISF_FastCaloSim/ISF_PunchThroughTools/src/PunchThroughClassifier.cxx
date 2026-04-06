@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PunchThroughClassifier.h"
@@ -13,17 +13,9 @@
 //LWTNN
 #include "lwtnn/parse_json.hh"
 
-//libXML
-#include <libxml/xmlmemory.h>
-#include <libxml/parser.h>
-#include <libxml/tree.h>
-#include <libxml/xmlreader.h>
-#include <libxml/xpath.h>
-#include <libxml/xpathInternals.h>
+#include "XMLCoreParser/XMLCoreParser.h"
+#include "XMLCoreParser/XMLCoreNode.h"
 
-#include "CxxUtils/libxml2Helper.h"
-
-using namespace CxxUtils;
 
 ISF::PunchThroughClassifier::PunchThroughClassifier(const std::string& type, const std::string& name, const IInterface*  parent)
     : base_class(type, name, parent) {
@@ -75,32 +67,22 @@ StatusCode ISF::PunchThroughClassifier::initialize(){
 StatusCode ISF::PunchThroughClassifier::initializeScaler(const std::string & scalerConfigFile){
 
     //parse xml that contains config for MinMaxScaler for each of the network inputs
+    XMLCoreParser p;
+    std::unique_ptr<XMLCoreNode> doc = p.parse (scalerConfigFile);
 
-    xmlDocPtr doc = xmlParseFile( scalerConfigFile.c_str() );
+    ATH_MSG_DEBUG( "[ punchthroughclassifier ] Loading scaler: " << scalerConfigFile);
 
-    ATH_MSG_INFO( "[ punchthroughclassifier ] Loading scaler: " << scalerConfigFile);
-
-    for( xmlNodePtr nodeRoot = doc->children; nodeRoot != nullptr; nodeRoot = nodeRoot->next) {
-
-        if (xmlStrEqual( nodeRoot->name, BAD_CAST "Transformations" )) {
-            for( xmlNodePtr nodeTransform = nodeRoot->children; nodeTransform != nullptr; nodeTransform = nodeTransform->next ) {
-
-                //Get min and max values that we normalise values to
-                if (xmlStrEqual( nodeTransform->name, BAD_CAST "ScalerValues" )) {
-                    m_scalerMin = GetXmlAttr<double>( nodeTransform, "min" );
-                    m_scalerMax = GetXmlAttr<double>( nodeTransform, "max" );
-                }
-
-                //Get values necessary to normalise each input variable
-                if (xmlStrEqual( nodeTransform->name, BAD_CAST "VarScales" )) {
-                    std::string name = GetXmlAttr<std::string>( nodeTransform, "name" );
-                    double min = GetXmlAttr<double>( nodeTransform, "min" );
-                    double max = GetXmlAttr<double>( nodeTransform, "max" );
-                    m_scalerMinMap.emplace ( name, min );
-                    m_scalerMaxMap.emplace ( name, max );
-                }
-            }
-        }
+    for (const XMLCoreNode* node : doc->get_children ("Transformations/*"))
+    {
+      if (node->get_name() == "ScalerValues") {
+        m_scalerMin = node->get_double_attrib ("min");
+        m_scalerMax = node->get_double_attrib ("max");
+      }
+      else if (node->get_name() == "VarScales") {
+        std::string name = node->get_attrib ("name");
+        m_scalerMinMap[name] = node->get_double_attrib ("min");
+        m_scalerMaxMap[name] = node->get_double_attrib ("max");
+      }
     }
 
     return StatusCode::SUCCESS;
@@ -129,30 +111,23 @@ StatusCode ISF::PunchThroughClassifier::initializeNetwork(const std::string & ne
 
 StatusCode ISF::PunchThroughClassifier::initializeCalibrator(const std::string & calibratorConfigFile){
 
+    XMLCoreParser p;
+    std::unique_ptr<XMLCoreNode> doc = p.parse (calibratorConfigFile);
+
     //parse xml that contains config for isotonic regressor used to calibrate the network output
-    ATH_MSG_INFO( "[ punchthroughclassifier ] Loading calibrator: " << calibratorConfigFile);
+    ATH_MSG_DEBUG( "[ punchthroughclassifier ] Loading calibrator: " << calibratorConfigFile);
 
-    xmlDocPtr doc = xmlParseFile( calibratorConfigFile.c_str() );
-
-    for( xmlNodePtr nodeRoot = doc->children; nodeRoot != nullptr; nodeRoot = nodeRoot->next) {
-
-        if (xmlStrEqual( nodeRoot->name, BAD_CAST "Transformations" )) {
-            for( xmlNodePtr nodeTransform = nodeRoot->children; nodeTransform != nullptr; nodeTransform = nodeTransform->next ) {
-
-                //get lower and upper bounds of isotonic regressor
-                if (xmlStrEqual( nodeTransform->name, BAD_CAST "LimitValues" )) {
-                    m_calibrationMin = GetXmlAttr<double>( nodeTransform, "min" );
-                    m_calibrationMax = GetXmlAttr<double>( nodeTransform, "max" );
-                }
-
-                //get defined points where isotonic regressor knows transform
-                if (xmlStrEqual( nodeTransform->name, BAD_CAST "LinearNorm" )) {
-                    double orig = GetXmlAttr<double>( nodeTransform, "orig" );
-                    double norm = GetXmlAttr<double>( nodeTransform, "norm" );
-                    m_calibrationMap.emplace ( orig, norm );
-                }
-            }
-        }
+    for (const XMLCoreNode* node : doc->get_children ("Transformations/*"))
+    {
+      if (node->get_name() == "LimitValues") {
+        m_calibrationMin = node->get_double_attrib ("min");
+        m_calibrationMax = node->get_double_attrib ("max");
+      }
+      else if (node->get_name() == "LinearNorm") {
+        double orig = node->get_double_attrib ("orig");
+        double norm = node->get_double_attrib ("norm");
+        m_calibrationMap[orig] = norm;
+      }
     }
 
     return StatusCode::SUCCESS;
