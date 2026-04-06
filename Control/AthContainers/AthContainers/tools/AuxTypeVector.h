@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/tools/AuxTypeVector.h
@@ -183,6 +183,18 @@ public:
    * Returns true if the option setting was successful; false otherwise.
    */
   virtual bool setOption (const AuxDataOption& option) override;
+
+
+  /**
+   * @brief Perform post-read processing on this auxiliary variable.
+   * @param ctx The current event context.
+   *
+   * Some object types require some processing after being read before
+   * they are usable.  This can be indicated by specializing SG::ToTransient
+   * for the vector type containing the variable.  This method will call
+   * such a ToTransient method on the contents, if one is defined.
+   */
+  virtual void toTransient (const EventContext& ctx) override;
 
 
   /**

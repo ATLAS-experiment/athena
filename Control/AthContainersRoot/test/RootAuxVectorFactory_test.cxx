@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainersRoot/test/RootAuxVectorFactory_test.cxx
@@ -15,6 +15,9 @@
 #include "AthContainers/AuxStoreInternal.h"
 #include "AthContainersRoot/test/Foo.h"
 #include "AthLinks/ElementLink.h"
+#include "AthLinks/DataLink.h"
+#include "AthenaKernel/ExtendedEventContext.h"
+#include "SGTools/DataProxy_cast.h"
 #include "SGTools/TestStore.h"
 #include "CxxUtils/StrFormat.h"
 #include "TClass.h"
@@ -57,6 +60,30 @@ std::string str (int x)
 {
   return CxxUtils::strformat ("%d", x);
 }
+
+
+class ElementLinkBase_test
+{
+public:
+  static void setLink (ElementLinkBase& l,
+                       SG::sgkey_t key,
+                       unsigned int index)
+  {
+    l.m_persKey = key;
+    l.m_persIndex = index;
+  }
+};
+
+
+class DataLinkBase_test
+{
+public:
+  static void setLink (DataLinkBase& l,
+                       SG::sgkey_t key)
+  {
+    l.m_persKey = key;
+  }
+};
 
 
 void test1()
@@ -626,6 +653,97 @@ void test7()
 }
 
 
+// Testing toTransient
+void test8()
+{
+  std::cout << "test8\n";
+
+  using Foo = AthContainersRootTest::Foo;
+  using Foovec = std::vector<Foo*>;
+  using EL = ElementLink<Foovec>;
+  using DL = DataLink<Foovec>;
+
+  TClass* cl1 = TClass::GetClass ("std::vector<ElementLink<std::vector<AthContainersRootTest::Foo*> > >");
+  SG::RootAuxVectorFactory fac1 (cl1);
+
+  TClass* cl2 = TClass::GetClass ("std::vector<std::vector<ElementLink<std::vector<AthContainersRootTest::Foo*> > > >");
+  SG::RootAuxVectorFactory fac2 (cl2);
+
+  TClass* cl3 = TClass::GetClass ("std::vector<DataLink<std::vector<AthContainersRootTest::Foo*> > >");
+  SG::RootAuxVectorFactory fac3 (cl3);
+
+  TClass* cl4 = TClass::GetClass ("std::vector<std::vector<DataLink<std::vector<AthContainersRootTest::Foo*> > > >");
+  SG::RootAuxVectorFactory fac4 (cl4);
+
+  std::unique_ptr<SGTest::TestStore> store = SGTest::getTestStore();
+
+  std::vector<Foo> vfoo;
+  for (int i = 0; i < 10; i++) {
+    vfoo.emplace_back (i);
+  }
+  auto vfoo_up = std::make_unique<Foovec>();
+  for (int i = 0; i < 10; i++) {
+    vfoo_up->push_back (&vfoo[i]);
+  }
+
+  store->record (std::move(vfoo_up), "vfoo");
+  SG::sgkey_t sgkey = store->stringToKey ("vfoo", ClassID_traits<Foovec>::ID());
+  SG::DataProxy* proxy = store->proxy_exact (sgkey);
+  auto vfoo_p = SG::DataProxy_cast<Foovec> (proxy);
+
+  EventContext ctx;
+  ctx.setExtension (Atlas::ExtendedEventContext (store.get()));
+
+  {
+    std::unique_ptr<SG::IAuxTypeVector> vec = fac1.create (1, 3, 3, false);
+    EL* elv = reinterpret_cast<EL*> (vec->toPtr());
+    ElementLinkBase_test::setLink (elv[0], sgkey, 3);
+    ElementLinkBase_test::setLink (elv[2], sgkey, 5);
+    assert (elv[0].cptr() == nullptr);
+    vec->toTransient (ctx);
+    assert (*elv[0].cptr() == &vfoo[3]);
+    assert (*elv[2].cptr() == &vfoo[5]);
+  }
+
+  {
+    std::unique_ptr<SG::IAuxTypeVector> vec = fac2.create (1, 3, 3, false);
+    std::vector<EL>* elvv = reinterpret_cast<std::vector<EL>*> (vec->toPtr());
+    elvv[0].resize (3);
+    elvv[2].resize (3);
+    ElementLinkBase_test::setLink (elvv[0][0], sgkey, 3);
+    ElementLinkBase_test::setLink (elvv[2][2], sgkey, 5);
+    assert (elvv[0][0].cptr() == nullptr);
+    vec->toTransient (ctx);
+    assert (*elvv[0][0].cptr() == &vfoo[3]);
+    assert (*elvv[2][2].cptr() == &vfoo[5]);
+  }
+
+  {
+    std::unique_ptr<SG::IAuxTypeVector> vec = fac3.create (1, 3, 3, false);
+    DL* dlv = reinterpret_cast<DL*> (vec->toPtr());
+    DataLinkBase_test::setLink (dlv[0], sgkey);
+    DataLinkBase_test::setLink (dlv[2], sgkey);
+    assert (dlv[0].cptr() == nullptr);
+    vec->toTransient (ctx);
+    assert (dlv[0].cptr() == vfoo_p);
+    assert (dlv[2].cptr() == vfoo_p);
+  }
+
+  {
+    std::unique_ptr<SG::IAuxTypeVector> vec = fac4.create (1, 3, 3, false);
+    std::vector<DL>* dlvv = reinterpret_cast<std::vector<DL>*> (vec->toPtr());
+    dlvv[0].resize (3);
+    dlvv[2].resize (3);
+    DataLinkBase_test::setLink (dlvv[2][0], sgkey);
+    DataLinkBase_test::setLink (dlvv[0][2], sgkey);
+    assert (dlvv[2][0].cptr() == nullptr);
+    vec->toTransient (ctx);
+    assert (dlvv[2][0].cptr() == vfoo_p);
+    assert (dlvv[0][2].cptr() == vfoo_p);
+  }
+}
+
+
 int main()
 {
   std::cout << "RootAuxVectorFactory_test\n";
@@ -636,5 +754,6 @@ int main()
   test5();
   test6();
   test7();
+  test8();
   return 0;
 }
