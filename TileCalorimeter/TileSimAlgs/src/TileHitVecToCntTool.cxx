@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -279,7 +279,6 @@ void TileHitVecToCntTool::processHitVectorForPileUp(const TileHitVector* inputHi
                                                     int& nHit, double& eHitTot, bool isSignal) const {
 
   IdContext pmt_context = m_tileID->pmt_context();
-  IdContext tbchannel_context = m_tileTBID->channel_context();
   IdentifierHash hit_idhash;
 
   // Loop over hits in this HitVector

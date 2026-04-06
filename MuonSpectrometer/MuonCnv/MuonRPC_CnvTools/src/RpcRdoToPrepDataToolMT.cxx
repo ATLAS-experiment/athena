@@ -320,9 +320,6 @@ StatusCode RpcRdoToPrepDataToolMT::decodeImpl(const EventContext& ctx, State& st
     ATH_CHECK(rpcCabling->giveRDO_fromPRD(idVectToBeDecoded, rdoHashVec));
   }
 
-  /// RPC context
-  IdContext rpcContext = m_idHelperSvc->rpcIdHelper().module_context();
-
   // we come here if the rdo container is already in SG (for example in MC RDO!)
   ATH_MSG_DEBUG("Retrieving Rpc PAD container from the store");
   auto rdoContainerHandle = SG::makeHandle(m_rdoContainerKey, ctx);
