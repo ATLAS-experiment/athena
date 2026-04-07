@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArIdentifier/LArElectrodeID.h"
@@ -328,15 +328,15 @@ int LArElectrodeID::initLevelsFromDict()
   m_electrode_impl  = region.implementation(m_electrode_index);
   
   ATH_MSG_DEBUG("[initLevelsFromDict] Decode index and bit fields for each level:");
-  ATH_MSG_DEBUG("[initLevelsFromDict] > Atlas       " << m_atlas_impl.show_to_string());
-  ATH_MSG_DEBUG("[initLevelsFromDict] > larConfig  " << m_configuration_impl.show_to_string());
-  ATH_MSG_DEBUG("[initLevelsFromDict] > detector    " << m_detector_impl.show_to_string());
-  ATH_MSG_DEBUG("[initLevelsFromDict] > z-side      " << m_zside_impl.show_to_string());
-  ATH_MSG_DEBUG("[initLevelsFromDict] > module      " << m_module_impl.show_to_string());
-  ATH_MSG_DEBUG("[initLevelsFromDict] > hvphi       " << m_hvphi_impl.show_to_string());
-  ATH_MSG_DEBUG("[initLevelsFromDict] > hveta       " << m_hveta_impl.show_to_string());
-  ATH_MSG_DEBUG("[initLevelsFromDict] > hvgap       " << m_hvgap_impl.show_to_string());
-  ATH_MSG_DEBUG("[initLevelsFromDict] > hv line     " << m_electrode_impl.show_to_string());
+  ATH_MSG_DEBUG("[initLevelsFromDict] > Atlas       " << m_atlas_impl);
+  ATH_MSG_DEBUG("[initLevelsFromDict] > larConfig  " << m_configuration_impl);
+  ATH_MSG_DEBUG("[initLevelsFromDict] > detector    " << m_detector_impl);
+  ATH_MSG_DEBUG("[initLevelsFromDict] > z-side      " << m_zside_impl);
+  ATH_MSG_DEBUG("[initLevelsFromDict] > module      " << m_module_impl);
+  ATH_MSG_DEBUG("[initLevelsFromDict] > hvphi       " << m_hvphi_impl);
+  ATH_MSG_DEBUG("[initLevelsFromDict] > hveta       " << m_hveta_impl);
+  ATH_MSG_DEBUG("[initLevelsFromDict] > hvgap       " << m_hvgap_impl);
+  ATH_MSG_DEBUG("[initLevelsFromDict] > hv line     " << m_electrode_impl);
 
 
   return(0) ;

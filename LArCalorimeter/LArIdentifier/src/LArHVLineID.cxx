@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArIdentifier/LArHVLineID.h"
@@ -290,12 +290,12 @@ int LArHVLineID::initLevelsFromDict()
   m_hvline_impl       = region.implementation(m_hvline_index);
   
   ATH_MSG_DEBUG("[initLevelsFromDict] Decode index and bit fields for each level:");
-  ATH_MSG_DEBUG("[initLevelsFromDict] > larHV      " << m_atlas_impl.show_to_string());
-  ATH_MSG_DEBUG("[initLevelsFromDict] > larConfig  " << m_configuration_impl.show_to_string());
-  ATH_MSG_DEBUG("[initLevelsFromDict] > partition  " << m_partition_impl.show_to_string());
-  ATH_MSG_DEBUG("[initLevelsFromDict] > can line   " << m_canline_impl.show_to_string());
-  ATH_MSG_DEBUG("[initLevelsFromDict] > can node   " << m_cannode_impl.show_to_string());
-  ATH_MSG_DEBUG("[initLevelsFromDict] > hv line    " << m_hvline_impl.show_to_string());
+  ATH_MSG_DEBUG("[initLevelsFromDict] > larHV      " << m_atlas_impl);
+  ATH_MSG_DEBUG("[initLevelsFromDict] > larConfig  " << m_configuration_impl);
+  ATH_MSG_DEBUG("[initLevelsFromDict] > partition  " << m_partition_impl);
+  ATH_MSG_DEBUG("[initLevelsFromDict] > can line   " << m_canline_impl);
+  ATH_MSG_DEBUG("[initLevelsFromDict] > can node   " << m_cannode_impl);
+  ATH_MSG_DEBUG("[initLevelsFromDict] > hv line    " << m_hvline_impl);
 
 
   return(0) ;
