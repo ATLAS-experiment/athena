@@ -8,6 +8,7 @@
   <class name="SG::JaggedVecElt<unsigned int>"/>
   <class name="SG::JaggedVecElt<long>"/>
   <class name="SG::JaggedVecElt<unsigned long>"/>
+  <class name="SG::JaggedVecElt<unsigned long long>"/>
   <class name="SG::JaggedVecElt<float>"/>
   <class name="SG::JaggedVecElt<double>"/>
   <class name="SG::JaggedVecElt<std::string>"/>
@@ -20,6 +21,7 @@
   <class name="std::vector<SG::JaggedVecElt<unsigned int> >"/>
   <class name="std::vector<SG::JaggedVecElt<long> >"/>
   <class name="std::vector<SG::JaggedVecElt<unsigned long> >"/>
+  <class name="std::vector<SG::JaggedVecElt<unsigned long long> >"/>
   <class name="std::vector<SG::JaggedVecElt<float> >"/>
   <class name="std::vector<SG::JaggedVecElt<double> >"/>
   <class name="std::vector<SG::JaggedVecElt<std::string> >"/>
