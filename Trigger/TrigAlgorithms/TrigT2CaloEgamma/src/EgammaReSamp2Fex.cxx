@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -248,9 +248,7 @@ StatusCode EgammaReSamp2Fex::execute(xAOD::TrigEMCluster& rtrigEmCluster, const 
         energyEta += energyCell * etaCell;
         // energy37Lay2 += energyCell;
 
-        if (cluster_in_barrel) {
-          samp = larcell->caloDDE()->getSampling();
-        }
+        
 
         if (phiCell > 0.) { // SRA phi wrap-around
           energyPosPhi += double(energyCell) * phiCell;
@@ -279,13 +277,8 @@ StatusCode EgammaReSamp2Fex::execute(xAOD::TrigEMCluster& rtrigEmCluster, const 
         }   // End of do the 3*5 stuff
 
       } // End of do the 3x7 stuff
-      // 4. do the 5*5 stuff
-      nCellsEta = 5;
-      nCellsPhi = 5;
-      if ((!cluster_in_barrel) && deta <= 0.5 * double(nCellsEta - 1) * cellSizeEta + 0.005 &&
-          dphi <= 0.5 * double(nCellsPhi - 1) * cellSizePhi + 0.005) {
-        samp = larcell->caloDDE()->getSampling();
-      } // End of do the 5*5 stuff
+      
+      
     }   // End of do the 7*7 stuff
 
   } // end of loop over sampling 2

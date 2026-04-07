@@ -1,13 +1,17 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef TRIGGERMATCHINGTOOL_EGAMMADRSCORINGTOOL_H
 #define TRIGGERMATCHINGTOOL_EGAMMADRSCORINGTOOL_H
 
 #include "AsgTools/AsgTool.h"
-#include "AsgTools/PropertyWrapper.h"
 #include "TriggerMatchingTool/IMatchScoringTool.h"
+#include <string>
+
+namespace xAOD{
+ class IParticle;
+}
 
 namespace Trig {
     /// Score pairs of particles based on their deltaR

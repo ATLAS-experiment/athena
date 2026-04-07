@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "TrigEFMissingET/StatusFlags.h"
 #include <stdexcept>
@@ -59,8 +59,6 @@ namespace HLT { namespace MET { namespace StatusFlag {
         return "GlobalErrors";
       default:
         throw std::out_of_range("Invalid index provided " + std::to_string(idx) );
-        // Make gcc happy
-        return "";
     }
   }
 } } } //> end namespace HLT::MET::StatusFlag
