@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloIdentifier/LArMiniFCAL_ID.h"
@@ -471,13 +471,13 @@ int         LArMiniFCAL_ID::initLevelsFromDict()
   m_phi_impl      = region.implementation(m_PHI_INDEX);
 
   ATH_MSG_DEBUG("decode index and bit fields for each level: ");
-  ATH_MSG_DEBUG("lar   " << m_lar_impl.show_to_string());
-  ATH_MSG_DEBUG("fcal  " << m_fcal_impl.show_to_string());
-  ATH_MSG_DEBUG("pn    " << m_pn_impl.show_to_string());
-  ATH_MSG_DEBUG("mod   " << m_module_impl.show_to_string());
-  ATH_MSG_DEBUG("depth " << m_depth_impl.show_to_string());
-  ATH_MSG_DEBUG("eta   " << m_eta_impl.show_to_string());
-  ATH_MSG_DEBUG("phi   " << m_phi_impl.show_to_string());
+  ATH_MSG_DEBUG("lar   " << m_lar_impl);
+  ATH_MSG_DEBUG("fcal  " << m_fcal_impl);
+  ATH_MSG_DEBUG("pn    " << m_pn_impl);
+  ATH_MSG_DEBUG("mod   " << m_module_impl);
+  ATH_MSG_DEBUG("depth " << m_depth_impl);
+  ATH_MSG_DEBUG("eta   " << m_eta_impl);
+  ATH_MSG_DEBUG("phi   " << m_phi_impl);
 
   return(0) ;
 }

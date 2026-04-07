@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloIdentifier/JGTowerBase_ID.h"
@@ -594,12 +594,12 @@ int   JGTowerBase_ID::initLevelsFromDict(const std::string& t_pre)
   m_phi_impl      = region.implementation(m_PHI_INDEX);
 
   ATH_MSG_DEBUG("decode index and bit fields for each level:");
-  ATH_MSG_DEBUG("calo  " << m_calo_impl.show_to_string());
-  ATH_MSG_DEBUG("detzside  " << m_jgtower_impl.show_to_string());
-  ATH_MSG_DEBUG("sampling  " << m_sampling_impl.show_to_string());
-  ATH_MSG_DEBUG("reg  " << m_region_impl.show_to_string());
-  ATH_MSG_DEBUG("eta  " << m_eta_impl.show_to_string());
-  ATH_MSG_DEBUG("phi  " << m_phi_impl.show_to_string());
+  ATH_MSG_DEBUG("calo  " << m_calo_impl);
+  ATH_MSG_DEBUG("detzside  " << m_jgtower_impl);
+  ATH_MSG_DEBUG("sampling  " << m_sampling_impl);
+  ATH_MSG_DEBUG("reg  " << m_region_impl);
+  ATH_MSG_DEBUG("eta  " << m_eta_impl);
+  ATH_MSG_DEBUG("phi  " << m_phi_impl);
   
   return(0) ;
 }

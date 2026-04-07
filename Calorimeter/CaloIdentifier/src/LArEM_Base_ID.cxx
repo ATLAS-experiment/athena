@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CaloIdentifier/src/LArEM_Base_ID.cxx
@@ -331,14 +331,14 @@ int LArEM_Base_ID::initLevelsFromDict (const std::string& group_name)
   m_slar_impl     = region.implementation(m_SLAR_INDEX);
 
   ATH_MSG_DEBUG("decode index and bit fields for each level: ");
-  ATH_MSG_DEBUG("lar  " << m_lar_impl.show_to_string());
-  ATH_MSG_DEBUG("em   "  << m_em_impl.show_to_string());
-  ATH_MSG_DEBUG("bec  " << m_bec_impl.show_to_string());
-  ATH_MSG_DEBUG("samp " << m_sampling_impl.show_to_string());
-  ATH_MSG_DEBUG("reg  " << m_region_impl.show_to_string());
-  ATH_MSG_DEBUG("eta  " << m_eta_impl.show_to_string());
-  ATH_MSG_DEBUG("phi  " << m_phi_impl.show_to_string());
-  ATH_MSG_DEBUG("is-slar  " << m_slar_impl.show_to_string());
+  ATH_MSG_DEBUG("lar  " << m_lar_impl);
+  ATH_MSG_DEBUG("em   "  << m_em_impl);
+  ATH_MSG_DEBUG("bec  " << m_bec_impl);
+  ATH_MSG_DEBUG("samp " << m_sampling_impl);
+  ATH_MSG_DEBUG("reg  " << m_region_impl);
+  ATH_MSG_DEBUG("eta  " << m_eta_impl);
+  ATH_MSG_DEBUG("phi  " << m_phi_impl);
+  ATH_MSG_DEBUG("is-slar  " << m_slar_impl);
 
   return(0) ;
 }
