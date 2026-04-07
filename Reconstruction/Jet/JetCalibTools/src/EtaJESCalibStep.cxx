@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // EtaJESCalibStep.cxx 
@@ -58,7 +58,10 @@ StatusCode EtaJESCalibStep::calibrate(xAOD::JetContainer& jets) const {
     JetHelper::JetContext jc;
     double varE {m_vartoolE->getValue(*jet,jc)};
     double varEta {m_vartoolEta->getValue(*jet,jc)};
-    double Emax = getEmaxJES(varEta);
+    double Emax = 14000;
+    if(m_freezeJESatHighE){
+      Emax = getEmaxJES(varEta);
+    }
 
     // Extract JES from the text handling tool
     double jesCorrection = getJES(varE, varEta, Emax);
@@ -97,9 +100,9 @@ bool EtaJESCalibStep::readMCJESFromText()
 
   std::string jetAlgo=static_cast<std::string> (m_jetAlgo);
 
-  std::vector<double> etaBins = VectorizeD(config.GetValue("JES.EtaBins","")," ");
+  std::vector<double> etaBins = static_cast<std::vector<double>> (m_etaBins);
   if (etaBins.size()==0){ // default binning
-    for (int i=0;i<=90; i++) 
+    for (int i=0;i<=90; i++)
       etaBins.push_back(0.1*i-4.5);
   }
 
@@ -120,6 +123,7 @@ bool EtaJESCalibStep::readMCJESFromText()
 	//Used in the GetLowPtJES method when Pt < minPt
 	const double *factors = m_JESFactors[ieta];
 	double Ecutoff = m_minPt_JES*cosh(etaBins[ieta]);
+	if(m_useSecondaryminPt_JES && std::abs(etaBins[ieta]) >= m_etaSecondaryminPt_JES) Ecutoff = m_secondaryminPt_JES*cosh(etaBins[ieta]);
 	const double Rcutoff = getLogPolN(factors,Ecutoff);
 	const double Slope = getLogPolNSlope(factors,Ecutoff);
 	if(Slope > Rcutoff/Ecutoff) ATH_MSG_FATAL("Slope of calibration curve at minimum ET is too steep for the JES factors of etabin " << ieta << ", eta = " << etaBins[ieta] );
@@ -127,7 +131,7 @@ bool EtaJESCalibStep::readMCJESFromText()
 	m_JES_MinPt_E[ieta] = Ecutoff;
 	m_JES_MinPt_R[ieta] = Rcutoff;
 	m_JES_MinPt_Slopes[ieta] = Slope;
-	
+
 	//Calculate the parameters for a 2nd order polynomial extension to the calibration curve below minimum ET
 	//Used in the GetLowPtJES method when Pt < minPt
 	if(m_lowPtExtrap == 2) {
@@ -142,11 +146,13 @@ bool EtaJESCalibStep::readMCJESFromText()
       m_nPar = params.size();	
       ATH_MSG_VERBOSE("Number of parameters: " << m_nPar);            
       for (uint ipar=0;ipar<m_nPar;++ipar) m_etaCorrFactors[ieta][ipar] = params[ipar];
-      
-      key=Form("EmaxJES.%s_Bin%d",jetAlgo.c_str(),ieta);
-      ATH_MSG_VERBOSE("reading: " << key << " = "<< config.GetValue(key,""));
-      params = VectorizeD(config.GetValue(key,"")," ");
-      m_energyFreezeJES[ieta] = params[0];
+
+      if(m_freezeJESatHighE){
+	key=Form("EmaxJES.%s_Bin%d",jetAlgo.c_str(),ieta);
+	ATH_MSG_VERBOSE("reading: " << key << " = "<< config.GetValue(key,""));
+	params = VectorizeD(config.GetValue(key,"")," ");
+	m_energyFreezeJES[ieta] = params[0];
+      }
     }
   return true;
 }
@@ -187,6 +193,7 @@ bool EtaJESCalibStep::readMCJESFromHists()
     //Calculate the slope of the response curve at the minPt for each eta bin
     //Used in the GetLowPtJES method when Pt < minPt
     double Ecutoff= m_minPt_JES*cosh(etaBins[ieta]);
+    if(m_useSecondaryminPt_JES && std::abs(etaBins[ieta]) >= m_etaSecondaryminPt_JES) Ecutoff = m_secondaryminPt_JES*cosh(etaBins[ieta]);
     const double Rcutoff = getSplineCorr(ieta, Ecutoff);
     const double Slope = getSplineSlope(ieta, Ecutoff);
     if(Slope > Rcutoff/Ecutoff) ATH_MSG_WARNING("Slope of calibration curve at minimum ET is too steep for the JES factors of etabin " << ieta << ", eta = " << etaBins[ieta] );
@@ -195,18 +202,19 @@ bool EtaJESCalibStep::readMCJESFromHists()
     m_JES_MinPt_R[ieta] = Rcutoff;
     m_JES_MinPt_Slopes[ieta] = Slope;
 
-    TString key=Form("EmaxJES.%s_Bin%d",jetAlgo.c_str(),ieta);
+    TString key=Form("EtaCorr.%s_Bin%d",jetAlgo.c_str(),ieta);
     ATH_MSG_VERBOSE("reading: " << key << " = "<< config.GetValue(key,""));
     std::vector<double> params = VectorizeD(config.GetValue(key,"")," ");
-    m_energyFreezeJES[ieta] = params[0];
-
-    key=Form("EtaCorr.%s_Bin%d",jetAlgo.c_str(),ieta);
-    ATH_MSG_VERBOSE("reading: " << key << " = "<< config.GetValue(key,""));
-    params = VectorizeD(config.GetValue(key,"")," ");
     m_nPar = params.size();	
     ATH_MSG_VERBOSE("Number of parameters: " << m_nPar);            
     for (uint ipar=0;ipar<m_nPar;++ipar) m_etaCorrFactors[ieta][ipar] = params[ipar];
 
+    if(m_freezeJESatHighE){
+      key=Form("EmaxJES.%s_Bin%d",jetAlgo.c_str(),ieta);
+      ATH_MSG_VERBOSE("reading: " << key << " = "<< config.GetValue(key,""));
+      params = VectorizeD(config.GetValue(key,"")," ");
+      m_energyFreezeJES[ieta] = params[0];
+    }
     
   }
   return true;
@@ -216,9 +224,21 @@ bool EtaJESCalibStep::readMCJESFromHists()
 double EtaJESCalibStep::getJES(const double X, const double Y, const double Emax) const
 {
 
-  if ( X/cosh(Y) < m_minPt_JES ) { // WARNING !! Won't work if X is actually pT
-    double R = getLowPtJES(X,Y);
-    return 1.0/R;
+  if(!m_useSecondaryminPt_JES){
+    if ( X/cosh(Y) < m_minPt_JES ) { // WARNING !! Won't work if X is actually pT
+      double R = getLowPtJES(X,Y);
+      return 1.0/R;
+    }
+  }
+  else{
+    if(std::abs(Y) < m_etaSecondaryminPt_JES && X/cosh(Y) < m_minPt_JES){
+      double R = getLowPtJES(X,Y);
+      return 1.0/R;
+    }
+    if(std::abs(Y) >= m_etaSecondaryminPt_JES && X/cosh(Y) < m_secondaryminPt_JES){
+      double R = getLowPtJES(X,Y);
+      return 1.0/R;
+    }
   }
   
   double JES_R;
@@ -254,7 +274,7 @@ double EtaJESCalibStep::getLowPtJES(double E_uncorr, double eta_det) const {
     const double *factors = m_JESFactors[ieta];
     double E = m_minPt_JES*cosh(eta_det);
     R= getLogPolN(factors,E);
-  } if (m_lowPtExtrap == 1) {
+  } else if (m_lowPtExtrap == 1) {
     double Ecutoff = m_JES_MinPt_E[ieta];
     double Rcutoff = m_JES_MinPt_R[ieta];
     double slope = m_JES_MinPt_Slopes[ieta];

@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // EtaJESCalibStep.h 
@@ -68,10 +68,17 @@ private:
   Gaudi::Property< std::string > m_constantFileName { this, "CalibConstantFile", "/afs/cern.ch/work/s/stapiaar/JetDev4/athena/JetToolHelpers/data/file_JES.config", "text file containing constants" };
   /// jet collection to be calibrated
   Gaudi::Property< std::string > m_jetAlgo { this, "JetAlgo", "AntiKt4EMPFlow", "jet collection" };
-  Gaudi::Property< float >  m_minPt_JES = {this, "MinPtForETAJES",15, "min pT"};
   Gaudi::Property< bool >  m_freezeJESatHighE = {this, "FreezeJEScorrectionatHighE",false, " freeze at high e"};
-  Gaudi::Property< float > m_lowPtExtrap = {this, "LowPtJESExtrapolationMethod", 0, " low pt etrap"};
+  Gaudi::Property< int > m_lowPtExtrap = {this, "LowPtJESExtrapolationMethod", 0, " low pt etrap"};
   Gaudi::Property< float > m_lowPtMinR = {this, "LowPtJESExtrapolationMinimumResponse", 0.25, " low pt etrap min"};
+
+  Gaudi::Property< float >  m_minPt_JES = {this, "MinPtForETAJES",15, "min pT"};
+  //Allowing to use different minPt_JES depending on eta (only for extrapolation methon 1)
+  Gaudi::Property< bool > m_useSecondaryminPt_JES = {this, "UseSecondaryMinPtForETAJES", false, "min pT dependent on eta?"};
+  //Starting eta for secondary minPt_JES (Default |eta|>=1.9) (Used only if UseSecondaryMinPtForETAJES is true)
+  Gaudi::Property< double > m_etaSecondaryminPt_JES = {this, "EtaSecondaryMinPtForETAJES", 1.9, "eta value for second min pT cut"};
+  //SecondaryminPt_JES (Default 7 GeV) (Used only if UseSecondaryMinPtForETAJES is true)
+  Gaudi::Property< float > m_secondaryminPt_JES = {this, "SecondaryMinPtForETAJES", 7.0, "pt value for second min pT cut"};
 
   Gaudi::Property< float > m_minPt_EtaCorr = {this, "MinPtForEtaCorr" ,8. , ""};
   Gaudi::Property< float > m_maxE_EtaCorr = {this, "MaxEForEtaCorr" ,2500. , ""};

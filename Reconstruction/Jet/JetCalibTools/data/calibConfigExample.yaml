@@ -40,9 +40,6 @@ Residual:
   #OriginCorrectedClusters: false obsolete
   # [PATCH] Specification to rho
   RhoKey: Kt4EMPFlowNeutEventShape
-  # What residual jet-area offset correction to apply
-  CorrectionName: ResidualOffsetMC23aFebruary2024
-  #ResidualOffsetCorrection.Name:   ResidualOffsetMC23aFebruary2024
 
   # These corrections should correspond to the
   # conditions of the absolute JES calibration

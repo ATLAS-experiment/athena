@@ -67,6 +67,19 @@ except ModuleNotFoundError:
     jetlog.info("No JetMomentTools pakage found (expected in AthGeneration or analysis releases). Some jet calculations will be disabled.")
     pass
 
+try:
+    from JetCalibTools import JetCalibToolsCfg
+    stdJetModifiers.update(
+        CalibNew = JetModifier("JetCalibTool","jetcalib_jetcoll_calibseq",
+                               createfn=JetCalibToolsCfg.defineJetCalibTool,
+                               prereqs=lambda mod,jetdef : JetCalibToolsCfg.getJetCalibToolPrereqs(jetdef,mod)+[inputsFromContext("Vertices")])
+    )
+except ModuleNotFoundError:
+    from AthenaCommon import Logging
+    jetlog = Logging.logging.getLogger('JetStandardMods')
+    jetlog.info("No JetMomentTools pakage found (expected in AthGeneration or analysis releases). Some jet calculations will be disabled.")
+    pass
+
 # TBD:
 # All items below in principle will support decoration mode, rather
 # than only non-const modification. Mode of operation should be
