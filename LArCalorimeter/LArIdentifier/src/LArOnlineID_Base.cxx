@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArIdentifier/LArOnlineID_Base.h"
@@ -902,15 +902,15 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
    m_slar_impl           = region.implementation(m_slar_index);
 
   ATH_MSG_DEBUG("decode index and bit fields for each level:");
-  ATH_MSG_DEBUG("lar     " << m_lar_impl.show_to_string());
-  ATH_MSG_DEBUG("online  " << m_laronline_impl.show_to_string());
-  ATH_MSG_DEBUG("bec     " << m_bec_impl.show_to_string());
-  ATH_MSG_DEBUG("side    " << m_side_impl.show_to_string());
-  ATH_MSG_DEBUG("ft      " << m_feedthrough_impl.show_to_string());
-  ATH_MSG_DEBUG("slot    " << m_slot_impl.show_to_string());
-  ATH_MSG_DEBUG("channel " << m_channel_in_slot_impl.show_to_string());
+  ATH_MSG_DEBUG("lar     " << m_lar_impl);
+  ATH_MSG_DEBUG("online  " << m_laronline_impl);
+  ATH_MSG_DEBUG("bec     " << m_bec_impl);
+  ATH_MSG_DEBUG("side    " << m_side_impl);
+  ATH_MSG_DEBUG("ft      " << m_feedthrough_impl);
+  ATH_MSG_DEBUG("slot    " << m_slot_impl);
+  ATH_MSG_DEBUG("channel " << m_channel_in_slot_impl);
   if ( m_this_is_slar )
-    ATH_MSG_DEBUG("is-slar " << m_slar_impl.show_to_string());
+    ATH_MSG_DEBUG("is-slar " << m_slar_impl);
 
   return(0) ;
 }
