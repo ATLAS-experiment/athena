@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGINDETCUDA_DEVCONTEXTS_H
@@ -37,7 +37,7 @@ public:
   unsigned char *d_doubletinfo{};
   
   size_t d_size{}, h_size{};
-  GPU_PARAMETERS m_gpuParams;
+  GPU_PARAMETERS m_gpuParams{};
   
 private:
   SeedMakingDeviceContext(const SeedMakingDeviceContext& sc) : m_deviceId(sc.m_deviceId) {};

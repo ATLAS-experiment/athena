@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cuda.h>
@@ -22,7 +22,10 @@ int GPUHelpers::getNumberOfGPUs() {
     close(fd[1]);
     // read the data (blocking operation)
     int maxDev;
-    read(fd[0], &maxDev, sizeof(maxDev));
+    int nbytes = read(fd[0], &maxDev, sizeof(maxDev));
+    if (nbytes == 0){
+      std::cout << "ERROR: no data were read." << std::endl;
+    }
     // close the read-descriptor
     close(fd[0]);
     return maxDev;
