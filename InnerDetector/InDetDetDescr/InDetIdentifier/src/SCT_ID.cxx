@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 /***************************************************************************
@@ -602,17 +602,17 @@ SCT_ID::initLevelsFromDict() {
   }
   m_strip_impl = region.implementation(m_indices[STRIP]);
   ATH_MSG_DEBUG("decode index and bit fields for each level: ");
-  ATH_MSG_DEBUG("indet    " + m_indet_impl.show_to_string());
-  ATH_MSG_DEBUG("sct      " + m_sct_impl.show_to_string());
-  ATH_MSG_DEBUG("bec      " + m_bec_impl.show_to_string());
-  ATH_MSG_DEBUG("lay_disk " + m_lay_disk_impl.show_to_string());
-  ATH_MSG_DEBUG("phi_mod  " + m_phi_mod_impl.show_to_string());
-  ATH_MSG_DEBUG("eta_mod  " + m_eta_mod_impl.show_to_string());
-  ATH_MSG_DEBUG("side     " + m_side_impl.show_to_string());
+  ATH_MSG_DEBUG("indet    " << m_indet_impl);
+  ATH_MSG_DEBUG("sct      " << m_sct_impl);
+  ATH_MSG_DEBUG("bec      " << m_bec_impl);
+  ATH_MSG_DEBUG("lay_disk " << m_lay_disk_impl);
+  ATH_MSG_DEBUG("phi_mod  " << m_phi_mod_impl);
+  ATH_MSG_DEBUG("eta_mod  " << m_eta_mod_impl);
+  ATH_MSG_DEBUG("side     " << m_side_impl);
   if (m_hasRows) {
-    ATH_MSG_DEBUG("row     " + m_row_impl.show_to_string());
+    ATH_MSG_DEBUG("row     " << m_row_impl);
   }
-  ATH_MSG_DEBUG("strip    " + m_strip_impl.show_to_string());
+  ATH_MSG_DEBUG("strip    " << m_strip_impl);
 
   return(0);
 }
