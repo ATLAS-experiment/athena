@@ -35,6 +35,10 @@ def ITkPixelDecodingAlgCfg(flags, name = "ITkPixelDecodingAlg", **kwargs) -> Com
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
     acc.merge(ITkPixelReadoutGeometryCfg(flags))
 
+    from ITkPixelCabling.ITkPixelCablingAlgConfig import ITkPixelCablingAlgCfg
+    acc.merge(ITkPixelCablingAlgCfg(flags))
+
+
     acc.addEventAlgo(CompFactory.ITkPixelDecodingAlg(name, **kwargs))
 
     return acc

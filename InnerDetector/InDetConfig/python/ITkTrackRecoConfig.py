@@ -505,8 +505,13 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
     result = ComponentAccumulator()
     
     if flags.Input.Format is Format.BS:
-        # TODO: ITk BS providers
-        raise RuntimeError("ByteStream inputs not supported")
+        from ITkPixelByteStreamCnv.ITkPixelByteStreamCnvConfig import ITkPixelDecodingAlgCfg
+        result.merge( ITkPixelDecodingAlgCfg(flags) )
+
+        from ITkStripsByteStreamCnv.ITkStripByteStreamCnvConfig import ITkStripRawDataProviderCfg
+        result.merge(ITkStripRawDataProviderCfg(flags))
+
+
 
     # Get all the requested tracking passes
     flags_set = CombinedTrackingPassFlagSets(flags)
