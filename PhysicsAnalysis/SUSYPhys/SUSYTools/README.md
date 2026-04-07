@@ -88,10 +88,10 @@ TestSUSYToolsAlg.py -f PHYS -t mc20e  -m 2000 --dosyst
 In AthAnalysis, e.g.
 
 ```shell
-athena SUSYTools/jobOptions.py --evtMax 2000 - --testCampaign mc23a
+python -m SUSYTools.SUSYToolsConfig --evtMax 2000 --testCampaign mc23a
 ```
 
-This algorithm is also run in the SUSYTOols ART tests (see below).
+This algorithm is also run in the SUSYTools ART tests (see below).
 
 ## Testing
 
