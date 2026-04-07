@@ -281,9 +281,9 @@ int main(int argc, char** argv) {
 	if ( frac > 0 ) est = t/frac - t;
 	
 	double eventsps = 1000*i/t;
-
+  // (1000*(i+1)/entries)) is implicitly unsigned division; make this clear with a cast
 	std::printf( "\r%c    %6.2lf %%     time: %6.2lf s    remaining %6.2lf s   (%u at %5.2lf ps) ", 
-		     cck[ii%4], ((1000*(i+1)/entries)*0.1), t*0.001, est*0.001, i, eventsps );   
+		     cck[ii%4], (static_cast<unsigned>((1000*(i+1)/entries))*0.1), t*0.001, est*0.001, i, eventsps );   
 
 	std::fflush(stdout);
 
