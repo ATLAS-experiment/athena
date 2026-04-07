@@ -11,7 +11,6 @@ export ATHENA_CORE_NUMBER=1
 Reco_tf.py \
     --preExec "flags.Exec.FPE=-1; flags.Acts.TrackingGeometry.UseBlueprint=True;" \
     --preInclude "egammaConfig.ConfigurationHelpers.egammaOnlyFromRaw,ActsConfig.ActsCIFlags.actsGSFEgammaFlags" \
-    --autoConfiguration="everything" \
     --inputRDOFile ${input_rdo} \
     --outputAODFile AOD.pool.root \
     --maxEvents ${n_events} \
