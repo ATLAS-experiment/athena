@@ -44,7 +44,7 @@ namespace ActsTrk::detail {
                                             const Acts::CalibrationContext& cctx,
                                             const Acts::SourceLink& link,
                                             TrackStateProxy state) const {
-    
+  
     const xAOD::UncalibratedMeasurement& measurement{*xAODUncalibMeasCalibrator::unpack(link)};
     // @TODO in principle only need to lookup surface for strips
     switch (measurement.type()) {
