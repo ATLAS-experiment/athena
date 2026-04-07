@@ -80,7 +80,7 @@ def JetRecoSteeringCfg(flags):
 
     if flags.Output.doWriteAOD and flags.Jet.WriteToAOD:
         result.merge(addJetsToOutputCfg(flags, jetdefs, toAOD=True, toESD=False))
-    if flags.Output.doWriteESD:
+    if flags.Output.doWriteESD and flags.Jet.WriteToESD:
         jetdefs.remove(AntiKt10UFOCSSKSoftDrop_trigger)
         result.merge(addJetsToOutputCfg(flags, jetdefs, toAOD=False, toESD=True))
 
