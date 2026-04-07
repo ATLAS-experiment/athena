@@ -84,7 +84,7 @@ namespace CP {
 
    StatusCode RNtupleTreeMakerAlg::setupTree() {
        std::unordered_set<std::string> nonContainerSet( m_nonContainers.begin(), m_nonContainers.end() );
-       ATH_CHECK( m_processorList.setupTree( m_branches, nonContainerSet, *m_systematicsService, *m_model ) );
+       ATH_CHECK( m_processorList.setupTree( m_branches, std::move(nonContainerSet), *m_systematicsService, *m_model ) );
        return StatusCode::SUCCESS;
    }
 
