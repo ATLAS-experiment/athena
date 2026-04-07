@@ -1537,10 +1537,13 @@ TF1* Resplot::FitNull95Obsolete(TH1D* s, double frac, bool useroot ) {
       
       
       /// root does not calculate the uncertainty on the rms correctly
-      
+      //certain values (rlower, erlower, rupper, erupper) are overwritten before they are used
+      //due to the commented 'else'; add notation to indicate this is intentional.
       if ( !useroot ) { 
         GetStats( s, stats );
+        //coverity[UNUSED_VALUE]
         rlower  = stats[2];
+        //coverity[UNUSED_VALUE]
         erlower = stats[3];
       }
       //      else { 
@@ -1559,7 +1562,9 @@ TF1* Resplot::FitNull95Obsolete(TH1D* s, double frac, bool useroot ) {
       
       if ( !useroot ) { 
         GetStats( s, stats );
+        //coverity[UNUSED_VALUE]
         rupper  = stats[2];
+        //coverity[UNUSED_VALUE]
         erupper = stats[3];
       }
       //      else { 
