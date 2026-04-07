@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETCALIBTOOLS_JETPILEUP1DRESIDUALCALIBSTEP_H
@@ -92,9 +92,6 @@ class Pileup1DResidualCalibStep   : public asg::AsgTool,
 
   
   Gaudi::Property<std::string> m_calibFile {this, "CalibFile", "none", "residual offset calib file"};
-
-  Gaudi::Property<std::string> m_corrName {this, "CorrectionName", "none", ""};
-  Gaudi::Property<std::string> m_corrDesc {this, "CorrectionDesc", "none", ""};
 
   Gaudi::Property<std::vector<double> > m_offsetEtaBins{this, "AbsEtaBins", {} ,""};  
   Gaudi::Property<std::vector<double> > m_resOffsetMu{this, "MuTerm", {} ,""};  
