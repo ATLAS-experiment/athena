@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TileRawUtils )
@@ -20,4 +20,4 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_add_test( RegSelCondAlg_Tile_test
                 SCRIPT python -m TileRawUtils.RegSelCondAlg_TileConfig
                 PROPERTIES TIMEOUT 300
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
