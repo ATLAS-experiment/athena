@@ -743,7 +743,7 @@ void test8()
   }
 }
 
-
+//coverity[UNCAUGHT_EXCEPT]
 int main()
 {
   std::cout << "RootAuxVectorFactory_test\n";
