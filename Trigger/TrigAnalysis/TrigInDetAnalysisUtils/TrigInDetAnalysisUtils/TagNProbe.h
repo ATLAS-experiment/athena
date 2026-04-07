@@ -5,14 +5,14 @@
  **     @author  mark sutton
  **     @date    Sat Apr  9 12:55:17 CEST 2022
  **
- **     Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 
 #ifndef TIDAUTILS_TAGNPROBE_H
 #define TIDAUTILS_TAGNPROBE_H
 
-#include <vector> 
+ 
 
 #include "TrigInDetAnalysis/TIDAChain.h"
 #include "TrigInDetAnalysis/TIDARoiDescriptor.h"
@@ -23,7 +23,10 @@
 #include "TrigInDetAnalysisUtils/Filters.h" 
 
 #include "TLorentzVector.h"
-
+#include <vector>
+#include <string>
+#include <ostream>
+#include <cmath>
 
 class TagNProbe {
 
@@ -158,7 +161,7 @@ protected:
     /// get reference tracks from the tag roi                                                                                                                                                                           
     TIDARoiDescriptor roi_tag( troi.roi() );
   
-    dynamic_cast<Filter_Combined*>(filter_tag)->setRoi( &roi_tag );
+    static_cast<Filter_Combined*>(filter_tag)->setRoi( &roi_tag );
 
     std::vector<TIDA::Track*> refp_tag = selector_tag->tracks( filter_tag );
 
@@ -166,7 +169,7 @@ protected:
                                                                                                                                                                      
     TIDARoiDescriptor roi_probe( proi.roi() );
 
-    dynamic_cast<Filter_Combined* >( filter_probe )->setRoi( &roi_probe );
+    static_cast<Filter_Combined* >( filter_probe )->setRoi( &roi_probe );
 
     std::vector<TIDA::Track*> refp_probe = selector_probe->tracks( filter_probe );
 
