@@ -15,6 +15,7 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
+#include "CaloInterface/IHadronicCalibrationTool.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloEvent/CaloConstCellContainer.h"
 #include "xAODTau/TauJet.h"
@@ -42,10 +43,14 @@ public:
 private:
   Gaudi::Property<bool> m_removeElectronCells {this, "RemoveElectronCells", false};
   Gaudi::Property<double> m_maxDeltaRTauCells {this, "MaxDeltaRTauCells", 0.4, "max DeltaR for cells-tau association"};
+  Gaudi::Property<float> m_energyThreshold{this, "EnergyThreshold", 100., "energy threshold (in MeV) to select cells"};
 
   SG::ReadHandleKey<CaloCellContainer>          m_caloCellInputContainer       {this,"Key_caloCellInputContainer",       "AllCalo",           "input calo cell container key"};
   SG::ReadCondHandleKey<CaloDetDescrManager>    m_caloMgrKey                   {this,"CaloDetDescrManager",              "CaloDetDescrManager"                               };
   SG::ReadHandleKey<xAOD::CaloClusterContainer> m_removedClusterInputContainer {this,"Key_RemovedClusterInputContainer", "",                   "input removed cluster key"   };
+
+  ToolHandle<IHadronicCalibrationTool> m_caloWeightTool {this, "CaloWeightTool", "H1WeightToolCSC12Generic"};
+
 };
  
 
