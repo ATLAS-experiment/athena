@@ -304,8 +304,8 @@ PLR_ID::initLevelsFromDict(void) {
   
   ATH_MSG_DEBUG("decode index and bit fields for each level:");
   ATH_MSG_DEBUG("indet          " << m_impl[kIndet].show_to_string());
-  ATH_MSG_DEBUG("lumi           " << m_lumi_impl.show_to_string());
-  ATH_MSG_DEBUG("plr            " << m_plr_impl.show_to_string());
+  ATH_MSG_DEBUG("lumi           " << m_lumi_impl);
+  ATH_MSG_DEBUG("plr            " << m_plr_impl);
   ATH_MSG_DEBUG("bec            " << m_impl[kBec].show_to_string());
   ATH_MSG_DEBUG("bec_shift      " << m_impl[kBecShift].show_to_string());
   ATH_MSG_DEBUG("lay_disk       " << m_impl[kLayDisk].show_to_string());

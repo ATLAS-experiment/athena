@@ -631,13 +631,13 @@ TRT_ID::initLevelsFromDict() {
   m_straw_impl = region.implementation(m_STRAW_INDEX);
 
   ATH_MSG_DEBUG("decode index and bit fields for each level: ");
-  ATH_MSG_DEBUG("indet     " << m_indet_impl.show_to_string());
-  ATH_MSG_DEBUG("trt       " << m_trt_impl.show_to_string());
-  ATH_MSG_DEBUG("bec       " << m_bec_impl.show_to_string());
-  ATH_MSG_DEBUG("phi_mod   " << m_phi_mod_impl.show_to_string());
-  ATH_MSG_DEBUG("lay_wheel " << m_lay_wheel_impl.show_to_string());
-  ATH_MSG_DEBUG("str_lay   " << m_str_lay_impl.show_to_string());
-  ATH_MSG_DEBUG("straw     " << m_straw_impl.show_to_string());
+  ATH_MSG_DEBUG("indet     " << m_indet_impl);
+  ATH_MSG_DEBUG("trt       " << m_trt_impl);
+  ATH_MSG_DEBUG("bec       " << m_bec_impl);
+  ATH_MSG_DEBUG("phi_mod   " << m_phi_mod_impl);
+  ATH_MSG_DEBUG("lay_wheel " << m_lay_wheel_impl);
+  ATH_MSG_DEBUG("str_lay   " << m_str_lay_impl);
+  ATH_MSG_DEBUG("straw     " << m_straw_impl);
   
   return(0);
 }
