@@ -155,8 +155,8 @@ StatusCode FPGATrackSimMergeOutputsAlg::execute() {
     if (track.passedOR()) m_tracksPassOR++;
   }
   // Increase evtloop
-  m_evtloop++;
-  m_evtlooptree++;
+  ++m_evtloop;
+  ++m_evtlooptree;
   
   return StatusCode::SUCCESS;
 }
