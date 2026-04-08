@@ -633,6 +633,11 @@ if flags.Trigger.L1.doeFex and (args.evtNumber is not None):
 # example of adding user algorithm
 # cfg.addEventAlgo(CompFactory.AnotherPackageAlg(),sequenceName="AthAlgSeq")
 
+from AthenaCommon.Include import include
+from AthenaCommon.Configurable import ConfigurableCABehavior
+with ConfigurableCABehavior():
+  for inc in args.postInclude: include(inc)
+
 for conf in args.postConfig:
   compName,propNameAndVal=conf.split(".",1)
   propName,propVal=propNameAndVal.split("=",1)
@@ -657,11 +662,6 @@ for conf in args.postConfig:
     for k,v in availableComps.items():
       print(k,":",*v,sep="\n\t")
     raise ValueError(f"postConfig {conf} had no effect ... typo? See list above of available components")
-
-from AthenaCommon.Include import include
-from AthenaCommon.Configurable import ConfigurableCABehavior
-with ConfigurableCABehavior():
-  for inc in args.postInclude: include(inc)
 
 if args.postHelp is not None:
   from collections import defaultdict
