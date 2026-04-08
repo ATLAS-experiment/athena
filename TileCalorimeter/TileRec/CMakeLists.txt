@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TileRec )
@@ -21,19 +21,19 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_add_test( TileAANtuple_test
                 SCRIPT python -m TileRec.TileAANtupleConfig
                 PROPERTIES TIMEOUT 300
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( TileHitVecToNtuple_test
                 SCRIPT python -m TileRec.TileHitVecToNtupleConfig
                 PROPERTIES TIMEOUT 300
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( TileDigitsToNtuple_test
                 SCRIPT python -m TileRec.TileDigitsToNtupleConfig
                 PROPERTIES TIMEOUT 300
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( TileRawChannelToNtuple_test
                 SCRIPT python -m TileRec.TileRawChannelToNtupleConfig
                 PROPERTIES TIMEOUT 300
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
