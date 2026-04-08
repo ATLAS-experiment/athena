@@ -14,12 +14,14 @@ def NRPCCablingConfigCfg(flags, name = "MuonNRPC_CablingAlg", **kwargs):
         cablingFolder = "/RPC/NCABLING/JSON" if flags.Input.isMC else "/RPC/Onl/NCABLING/JSON"
         cablingTag = "RpcNcablingJson-RUN3-09"
         from AthenaConfiguration.Enums import LHCPeriod
-        if flags.Muon.usePhaseIIGeoSetup and flags.Input.isMC:  
-            if flags.GeoModel.Run <= LHCPeriod.Run3:   
-                cablingTag = "RpcNcablingJson-RUN3-FantasyCabling-5"
-            else:
+        if flags.Muon.usePhaseIIGeoSetup:  
+            if flags.GeoModel.Run <= LHCPeriod.Run3:
+                if flags.Input.isMC:   
+                    cablingTag = "RpcNcablingJson-RUN3-FantasyCabling-5"
+                else:
+                    cablingTag = "RpcNcablingJson-RUN3-FantasyHybridCabling-1"
+            elif flags.Input.isMC: #Run4 MC
                 cablingTag = "RpcNcablingJson-RUN4-FantasyCabling-8"
-
         result.merge(addFolders(flags, [cablingFolder], detDb=dbName, className='CondAttrListCollection', tag=cablingTag))
         kwargs.setdefault("MapFolders",  cablingFolder)
     
