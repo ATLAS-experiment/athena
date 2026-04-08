@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig import HLTMenuConfig
 from TriggerMenuMT.HLT.Config.ControlFlow.MenuComponentsNaming import CFNaming
@@ -145,11 +145,11 @@ class HypoAlgNode(AlgNode):
             result = hypoToolConf.create(flags)
             if isinstance(result, ComponentAccumulator):
                 tool = result.popPrivateTools()
-                assert not isinstance(tool, list), "Can not handle list of tools"
+                assert not isinstance(tool, list), "Cannot handle list of tools"
                 self.Alg.HypoTools.append(tool)
                 return result
             else:
-                self.Alg.HypoTools = self.Alg.HypoTools + [result]  # see ATEAM-773
+                self.Alg.HypoTools.append(result)
 
         except NoHypoToolCreated as e:
             log.debug("%s returned empty tool: %s", hypoToolConf.name, e)
@@ -241,14 +241,14 @@ class ComboHypoNode(AlgNode):
 
     def createComboHypoTools(self, flags, chainDict, comboToolConfs):
          """Create the ComboHypoTools and add them to the main alg"""
-         if not len(comboToolConfs):
+         if len(comboToolConfs)==0:
              return
-         confs = [ HypoToolConf( tool ) for tool in comboToolConfs ]
-         log.debug("ComboHypoNode.createComboHypoTools for chain %s, Alg %s with %d tools", chainDict["chainName"],self.Alg.getName(), len(comboToolConfs))        
-         for conf in confs:
+         log.debug("ComboHypoNode.createComboHypoTools for chain %s, Alg %s with %d tools",
+                   chainDict["chainName"], self.Alg.getName(), len(comboToolConfs))
+         for tool in comboToolConfs:
+             conf = HypoToolConf( tool )
              log.debug("ComboHypoNode.createComboHypoTools adding %s", conf)
-             tools = self.Alg.ComboHypoTools
-             self.Alg.ComboHypoTools = tools + [ conf.confAndCreate( flags, chainDict ) ]
+             self.Alg.ComboHypoTools.append(conf.confAndCreate( flags, chainDict ))
  
 
 ##########################################################
