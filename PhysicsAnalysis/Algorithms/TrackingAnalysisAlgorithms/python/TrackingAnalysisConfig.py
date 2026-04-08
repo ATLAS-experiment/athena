@@ -61,9 +61,6 @@ class InDetTrackCalibrationConfig (ConfigBlock):
             "calibration. Expert option to override the recommendations "
             "based on the campaign.",
             expertMode=True)
-        self.addOption ('smearingToolSeed', None, type=int,
-            info="random seed to be used by the `InDetTrackSmearingTool`.",
-            expertMode=True)
         self.addOption ('minPt', 0.5*GeV, type=float,
             info=r"the minimum $p_\mathrm{T}$ cut (in MeV) to apply to calibrated tracks.")
         self.addOption ('maxEta', 2.5, type=float,
@@ -162,12 +159,9 @@ class InDetTrackCalibrationConfig (ConfigBlock):
     @staticmethod
     def makeTrackSmearingTool(config,
                               alg,
-                              seed      :   int=None,
                               calibFile :   str=None) :
         toolName = "smearingTool"
         config.addPrivateTool(toolName, "InDet::InDetTrackSmearingTool")
-        if seed:
-            alg.smearingTool.Seed = seed
         if calibFile:
             alg.tackSmearingTool.calibFileIP_CTIDE = calibFile
         else:
@@ -242,7 +236,6 @@ class InDetTrackCalibrationConfig (ConfigBlock):
             alg = config.createAlgorithm( 'CP::InDetTrackSmearingAlg', 'InDetTrackSmearingAlg' )
             self.makeTrackSmearingTool(config,
                                        alg,
-                                       self.smearingToolSeed,
                                        self.calibFile)
             alg.inDetTracks = config.readName (self.containerName)
             alg.inDetTracksOut = config.copyName (self.containerName)
