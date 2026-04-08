@@ -162,6 +162,7 @@ def gFexByteStreamToolCfg(flags, name, *, writeBS=False, multiSlice=False):
     tool.gFexLRJetOutputContainerReadKey                ="L1_gFexLRJetRoI"
     tool.gScalarEJwojOutputContainerReadKey             ="L1_gScalarEJwoj"
     tool.gEspressoOutputContainerReadKey                ="L1_gEspresso"
+    tool.gRistrettoOutputContainerReadKey               ="L1_gRistretto"
     tool.gMETComponentsJwojOutputContainerReadKey       ="L1_gMETComponentsJwoj"
     tool.gMHTComponentsJwojOutputContainerReadKey       ="L1_gMHTComponentsJwoj"
     tool.gMSTComponentsJwojOutputContainerReadKey       ="L1_gMSTComponentsJwoj"
@@ -176,6 +177,7 @@ def gFexByteStreamToolCfg(flags, name, *, writeBS=False, multiSlice=False):
     tool.gFexLRJetOutputContainerWriteKey               =""
     tool.gScalarEJwojOutputContainerWriteKey            =""
     tool.gEspressoOutputContainerWriteKey               =""
+    tool.gRistrettoOutputContainerWriteKey              =""
     tool.gMETComponentsJwojOutputContainerWriteKey      =""
     tool.gMHTComponentsJwojOutputContainerWriteKey      =""
     tool.gMSTComponentsJwojOutputContainerWriteKey      =""
@@ -190,6 +192,7 @@ def gFexByteStreamToolCfg(flags, name, *, writeBS=False, multiSlice=False):
     tool.gFexLRJetOutputContainerReadKey                =""
     tool.gScalarEJwojOutputContainerReadKey             =""
     tool.gEspressoOutputContainerReadKey                =""
+    tool.gRistrettoOutputContainerReadKey               =""
     tool.gMETComponentsJwojOutputContainerReadKey       =""
     tool.gMHTComponentsJwojOutputContainerReadKey       =""
     tool.gMSTComponentsJwojOutputContainerReadKey       =""
@@ -204,6 +207,7 @@ def gFexByteStreamToolCfg(flags, name, *, writeBS=False, multiSlice=False):
     tool.gFexLRJetOutputContainerWriteKey               ="L1_gFexLRJetRoI"
     tool.gScalarEJwojOutputContainerWriteKey            ="L1_gScalarEJwoj"
     tool.gEspressoOutputContainerWriteKey               ="L1_gEspresso"
+    tool.gRistrettoOutputContainerWriteKey              ="L1_gRistretto"
     tool.gMETComponentsJwojOutputContainerWriteKey      ="L1_gMETComponentsJwoj"
     tool.gMHTComponentsJwojOutputContainerWriteKey      ="L1_gMHTComponentsJwoj"
     tool.gMSTComponentsJwojOutputContainerWriteKey      ="L1_gMSTComponentsJwoj"
@@ -225,6 +229,8 @@ def gFexByteStreamToolCfg(flags, name, *, writeBS=False, multiSlice=False):
       tool.gMSTComponentsJwojSliceContainerWriteKey    ="L1_gMSTComponentsJwojOutOfTime"
       # Global TOBs - gEspresso
       tool.gEspressoSliceContainerWriteKey             ="L1_gEspressoOutOfTime"
+      # Global TOBs - gRistretto
+      tool.gRistrettoSliceContainerWriteKey            ="L1_gRistrettoOutOfTime"
       # Global TOBs - NoiseCut
       tool.gMETComponentsNoiseCutSliceContainerWriteKey="L1_gMETComponentsNoiseCutOutOfTime"
       tool.gScalarENoiseCutSliceContainerWriteKey      ="L1_gScalarENoiseCutOutOfTime"
