@@ -7,6 +7,12 @@
 ///////////////////////////////////////////////////////////////////
 
 #include "TrkDetDescrGeoModelCnv/GMTreeBrowser.h"
+
+#include "GeoModelHelpers/GeoShapeSorter.h"
+#include "GeoModelHelpers/TransformSorter.h"
+#include "GeoModelHelpers/GeoMaterialSorter.h"
+#include "GeoModelHelpers/getChildNodesWithTrf.h"
+
 // GeoModel includes
 #include <cmath>
 #include <iomanip>
@@ -58,8 +64,8 @@ int Trk::GMTreeBrowser::compareGeoVolumes(const GeoVPhysVol* gv1,
         //  more serious problems, continue the loop
     }
     // CASE 2: material type difference
-    if (gv1->getLogVol()->getMaterial()->getName() !=
-        gv2->getLogVol()->getMaterial()->getName()) {
+    if (GeoMaterialSorter{}.compare(gv1->getLogVol()->getMaterial(),
+                                    gv2->getLogVol()->getMaterial()) != 0) {
         diff = 1000 * level + 2;
         if (dumpInfo) {
             std::cout << "CASE 2: material types differ for volume:"
@@ -71,23 +77,10 @@ int Trk::GMTreeBrowser::compareGeoVolumes(const GeoVPhysVol* gv1,
         } else
             return diff;
     }
-    //  CASE 3: shape type difference
-    if (gv1->getLogVol()->getShape()->typeID() !=
-        gv2->getLogVol()->getShape()->typeID()) {
-        diff = 1000 * level + 3;
-        if (dumpInfo) {
-            std::cout << "CASE 3: shape types differ at level:" << level
-                      << ":volume name:" << gv1->getLogVol()->getName()
-                      << ":shape:" << gv1->getLogVol()->getShape()->type()
-                      << ":shape ref:" << gv2->getLogVol()->getShape()->type()
-                      << std::endl;
-        } else
-            return diff;
-    }
-    //  CASE 4: difference in shape definition
+    //  CASE 3: difference in shape definition
     if (!compareShapes(gv1->getLogVol()->getShape(),
                        gv2->getLogVol()->getShape(), tolerance)) {
-        diff = 1000 * level + 4;
+        diff = 1000 * level + 3;
         if (dumpInfo) {
             std::cout << "CASE 4: shape definition differ at level:" << level
                       << std::endl;
@@ -95,9 +88,9 @@ int Trk::GMTreeBrowser::compareGeoVolumes(const GeoVPhysVol* gv1,
             return diff;
     }
     unsigned int nChild1 = gv1->getNChildVols();
-    // CASE 5: difference in the number of child volumes
+    // CASE 4: difference in the number of child volumes
     if (nChild1 != gv2->getNChildVols()) {
-        diff = 1000 * level + 5;
+        diff = 1000 * level + 4;
         if (dumpInfo) {
             std::cout << "CASE 5: number of child vols differ at level:"
                       << level << ":volume name:" << gv1->getLogVol()->getName()
@@ -123,49 +116,59 @@ int Trk::GMTreeBrowser::compareGeoVolumes(const GeoVPhysVol* gv1,
     // all children anyway.
     // (It would be even better if GeoVPhysVol has some sort of iterator
     // interface.  Maybe we can use a generator with C++23...)
-    GeoVolumeVec_t children1 = geoGetVolumes (gv1, 1, nChild1);
-    GeoVolumeVec_t children2 = geoGetVolumes (gv2, 1, nChild1);
-    assert (children1.size() == nChild1 && children2.size() == nChild1);
-    for (unsigned int ic = 0; ic < nChild1; ic++) {
-        GeoTrf::Transform3D& transf1 = children1.at(ic).second;
-        GeoTrf::Transform3D& transf2 = children2.at(ic).second;
 
-        const GeoVPhysVol* cv1 = children1.at(ic).first;
-        const GeoVPhysVol* cv2 = children2.at(ic).first;
 
-        if ((transf1.translation() - transf2.translation()).norm() >
-            tolerance) {
-            diff = 1000 * level + 10 * ic + 6;
+    const auto children1 = getChildrenWithRef(gv1);
+    const auto children2 = getChildrenWithRef(gv2);
+   
+    if (children1.size() != children2.size()) {
+        diff = 1000 * level + 5;
+        if (dumpInfo) {
+            std::cout << "CASE 5: number of child vols differ at level:"
+                      << level << ":volume name:" << gv1->getLogVol()->getName()
+                      << ":nChildVols:" << gv1->getNChildVols()
+                      << ":nChildVols ref:" << gv2->getNChildVols()
+                      << std::endl;
+        } 
+        return diff;
+    }
+   
+    for (std::size_t ic = 0; ic < children1.size(); ++ic) {
+        const auto& child1 = children1.at(ic);
+        const auto& child2 = children2.at(ic);
+        
+        if (child1.nCopies != child2.nCopies) {
+            diff = 1000 * level + 6;
             if (dumpInfo) {
-                std::cout << "CASE 6: translation differs at level:" << level
-                          << ": between mother and child:"
-                          << gv1->getLogVol()->getName() << ":"
-                          << cv1->getLogVol()->getName() << std::endl;
-                Trk::GMTreeBrowser::printTranslationDiff(transf1, transf2, tolerance);
-            } else
-                return diff;
-        }
-        // For rotation matrices, transpose is the same as inverse.
-        GeoTrf::RotationMatrix3D rot =
-            transf1.rotation() * transf2.rotation().transpose();
-        if (std::abs(rot(0, 1)) > tolerance ||
-            std::abs(rot(0, 2)) > tolerance ||
-            std::abs(rot(1, 2)) > tolerance) {
-            diff = 1000 * level + 10 * ic + 7;
+                std::cout << "CASE 5: number of child vols differ at level:"
+                          << level << ":volume name:" << child1.volume->getLogVol()->getName()
+                          << std::endl;
+            } 
+            return diff;
+        } 
+        if (child1.nCopies > 1 && 
+            GeoTrf::TransformSorter{}.compare(child1.inductionRule, child2.inductionRule) !=0) {
+            diff = 1000 * level + 7;
             if (dumpInfo) {
-                std::cout << "CASE 7: rotation differs at level:" << level
-                          << ":between mother and child:"
-                          << gv1->getLogVol()->getName() << ":"
-                          << cv1->getLogVol()->getName() << std::endl;
-                Trk::GMTreeBrowser::printRotationDiff(transf1, transf2, tolerance);
-            } else
-                return diff;
+                std::cout << "CASE 7: Replication rule  is different at level:"
+                          << level << ":volume name:" << child1.volume->getLogVol()->getName()
+                          << std::endl;
+            } 
+            return diff;
         }
-
-        int child_comp =
-            compareGeoVolumes(cv1, cv2, tolerance, dumpInfo, level + 1);
-        if (child_comp != 0)
+        if (GeoTrf::TransformSorter{}.compare(child1.transform, child2.transform) != 0) {
+            diff = 1000 * level + 7;
+            if (dumpInfo) {
+                std::cout << "CASE 7:  Volume transform is different:"
+                          << level << ":volume name:" << child1.volume->getLogVol()->getName()
+                          << std::endl;
+            } 
+            return diff;
+        }
+        int child_comp = compareGeoVolumes(child1.volume, child2.volume, tolerance, dumpInfo, level + 1);
+        if (child_comp != 0) {
             return child_comp;
+        }
     }
 
     return diff;
@@ -180,219 +183,8 @@ int Trk::GMTreeBrowser::compareGeoVolumes(const GeoVPhysVol* gv1,
     ATH_FLATTEN
 #endif
 bool Trk::GMTreeBrowser::compareShapes(const GeoShape* sh1, const GeoShape* sh2,
-                                       double tol) const {
-
-    if (sh1->typeID() != sh2->typeID())
-        return false;
-
-    if (sh1->type() == "Pgon") {
-        const GeoPgon* pgon1 = static_cast<const GeoPgon*>(sh1);
-        const GeoPgon* pgon2 = static_cast<const GeoPgon*>(sh2);
-        if (!pgon1 || !pgon2)
-            return false;
-
-        if (pgon1->getNPlanes() != pgon2->getNPlanes())
-            return false;
-        if (pgon1->getNSides() != pgon2->getNSides())
-            return false;
-        if (std::abs(pgon1->getSPhi() - pgon2->getSPhi()) > tol)
-            return false;
-        if (std::abs(pgon1->getDPhi() - pgon2->getDPhi()) > tol)
-            return false;
-
-        return true;
-
-    } else if (sh1->type() == "Trd") {
-        const GeoTrd* trd1 = static_cast<const GeoTrd*>(sh1);
-        const GeoTrd* trd2 = static_cast<const GeoTrd*>(sh2);
-
-        if (std::abs(trd1->getXHalfLength1() - trd2->getXHalfLength1()) > tol)
-            return false;
-        if (std::abs(trd1->getXHalfLength2() - trd2->getXHalfLength2()) > tol)
-            return false;
-        if (std::abs(trd1->getYHalfLength1() - trd2->getYHalfLength1()) > tol)
-            return false;
-        if (std::abs(trd1->getYHalfLength2() - trd2->getYHalfLength2()) > tol)
-            return false;
-        if (std::abs(trd1->getZHalfLength() - trd2->getZHalfLength()) > tol)
-            return false;
-
-        return true;
-
-    } else if (sh1->type() == "Box") {
-        const GeoBox* box1 = static_cast<const GeoBox*>(sh1);
-        const GeoBox* box2 = static_cast<const GeoBox*>(sh2);
-
-        if (std::abs(box1->getXHalfLength() - box2->getXHalfLength()) > tol)
-            return false;
-        if (std::abs(box1->getYHalfLength() - box2->getYHalfLength()) > tol)
-            return false;
-        if (std::abs(box1->getZHalfLength() - box2->getZHalfLength()) > tol)
-            return false;
-
-        return true;
-
-    } else if (sh1->type() == "Tube") {
-        const GeoTube* tube1 = static_cast<const GeoTube*>(sh1);
-        const GeoTube* tube2 = static_cast<const GeoTube*>(sh2);
-
-        if (std::abs(tube1->getRMin() - tube2->getRMin()) > tol)
-            return false;
-        if (std::abs(tube1->getRMax() - tube2->getRMax()) > tol)
-            return false;
-        if (std::abs(tube1->getZHalfLength() - tube2->getZHalfLength()) > tol)
-            return false;
-
-        return true;
-
-    } else if (sh1->type() == "Tubs") {
-        const GeoTubs* tubs1 = static_cast<const GeoTubs*>(sh1);
-        const GeoTubs* tubs2 = static_cast<const GeoTubs*>(sh2);
-
-        if (std::abs(tubs1->getRMin() - tubs2->getRMin()) > tol)
-            return false;
-        if (std::abs(tubs1->getRMax() - tubs2->getRMax()) > tol)
-            return false;
-        if (std::abs(tubs1->getZHalfLength() - tubs2->getZHalfLength()) > tol)
-            return false;
-        if (std::abs(tubs1->getSPhi() - tubs2->getSPhi()) > tol)
-            return false;
-        if (std::abs(tubs1->getDPhi() - tubs2->getDPhi()) > tol)
-            return false;
-
-        return true;
-
-    } else if (sh1->type() == "Cons") {
-        const GeoCons* cons1 = static_cast<const GeoCons*>(sh1);
-        const GeoCons* cons2 = static_cast<const GeoCons*>(sh2);
-
-        if (std::abs(cons1->getRMin1() - cons2->getRMin1()) > tol)
-            return false;
-        if (std::abs(cons1->getRMin2() - cons2->getRMin2()) > tol)
-            return false;
-        if (std::abs(cons1->getRMax1() - cons2->getRMax1()) > tol)
-            return false;
-        if (std::abs(cons1->getRMax2() - cons2->getRMax2()) > tol)
-            return false;
-        if (std::abs(cons1->getDZ() - cons2->getDZ()) > tol)
-            return false;
-        if (std::abs(cons1->getSPhi() - cons2->getSPhi()) > tol)
-            return false;
-        if (std::abs(cons1->getDPhi() - cons2->getDPhi()) > tol)
-            return false;
-
-        return true;
-
-    } else if (sh1->type() == "SimplePolygonBrep") {
-        const GeoSimplePolygonBrep* spb1 =
-            static_cast<const GeoSimplePolygonBrep*>(sh1);
-        const GeoSimplePolygonBrep* spb2 =
-            static_cast<const GeoSimplePolygonBrep*>(sh2);
-        if (!spb1 || !spb2)
-            return false;
-
-        unsigned int nv1 = spb1->getNVertices();
-        unsigned int nv2 = spb2->getNVertices();
-        if (nv1 != nv2)
-            return false;
-        if (std::abs(spb1->getDZ() - spb2->getDZ()) > tol)
-            return false;
-
-        for (unsigned int iv = 0; iv < nv1; iv++) {
-
-            if (std::abs(spb1->getXVertex(iv) - spb2->getXVertex(iv)) > tol)
-                return false;
-            if (std::abs(spb1->getYVertex(iv) - spb2->getYVertex(iv)) > tol)
-                return false;
-        }
-
-        return true;
-
-    } else if (sh1->type() == "Pcon") {
-        const GeoPcon* pc1 = static_cast<const GeoPcon*>(sh1);
-        const GeoPcon* pc2 = static_cast<const GeoPcon*>(sh2);
-        if (!pc1 || !pc2)
-            return false;
-
-        if (std::abs(pc1->getSPhi() - pc2->getSPhi()) > tol)
-            return false;
-        if (std::abs(pc1->getDPhi() - pc2->getDPhi()) > tol)
-            return false;
-
-        unsigned int nv1 = pc1->getNPlanes();
-        unsigned int nv2 = pc2->getNPlanes();
-        if (nv1 != nv2)
-            return false;
-
-        for (unsigned int iv = 0; iv < nv1; iv++) {
-
-            if (std::abs(pc1->getZPlane(iv) - pc2->getZPlane(iv)) > tol)
-                return false;
-            if (std::abs(pc1->getRMinPlane(iv) - pc2->getRMinPlane(iv)) > tol)
-                return false;
-            if (std::abs(pc1->getRMaxPlane(iv) - pc2->getRMaxPlane(iv)) > tol)
-                return false;
-        }
-
-        return true;
-
-    } else if (sh1->type() == "Subtraction") {
-        const GeoShapeSubtraction* sub1 =
-            static_cast<const GeoShapeSubtraction*>(sh1);
-        const GeoShapeSubtraction* sub2 =
-            static_cast<const GeoShapeSubtraction*>(sh2);
-
-        if (!sub1 || !sub2)
-            return false;
-
-        if (!compareShapes(sub1->getOpA(), sub2->getOpA(), tol))
-            return false;
-        if (!compareShapes(sub1->getOpB(), sub2->getOpB(), tol))
-            return false;
-
-        return true;
-
-    } else if (sh1->type() == "Union") {
-        const GeoShapeUnion* sub1 = static_cast<const GeoShapeUnion*>(sh1);
-        const GeoShapeUnion* sub2 = static_cast<const GeoShapeUnion*>(sh2);
-
-        if (!sub1 || !sub2)
-            return false;
-
-        if (!compareShapes(sub1->getOpA(), sub2->getOpA(), tol))
-            return false;
-        if (!compareShapes(sub1->getOpB(), sub2->getOpB(), tol))
-            return false;
-
-        return true;
-
-    } else if (sh1->type() == "Shift") {
-        const GeoShapeShift* shift1 = static_cast<const GeoShapeShift*>(sh1);
-        const GeoShapeShift* shift2 = static_cast<const GeoShapeShift*>(sh2);
-
-        if (!shift1 || !shift2)
-            return false;
-
-        if (!compareShapes(shift1->getOp(), shift2->getOp(), tol))
-            return false;
-
-        const GeoTrf::Transform3D& transf1 = shift1->getX();
-        const GeoTrf::Transform3D& transf2 = shift2->getX();
-
-        if ((transf1.translation() - transf2.translation()).norm() > tol)
-            return false;
-
-        // For rotation matrices, transpose is the same as inverse.
-        if (!identity_check(transf1.rotation() * transf2.rotation().transpose(),
-                            tol))
-            return false;
-
-        return true;
-    }
-
-    std::cout << "unknown shape to compare:" << sh1->type() << std::endl;
-
-    return false;
+                                       double /*tol*/) const {
+    return GeoShapeSorter{}.compare(sh1, sh2) == 0;
 }
 
 bool Trk::GMTreeBrowser::findNamePattern(const GeoVPhysVol* gv,
@@ -402,9 +194,8 @@ bool Trk::GMTreeBrowser::findNamePattern(const GeoVPhysVol* gv,
         return true;
 
     for (unsigned int ic = 0; ic < gv->getNChildVols(); ic++) {
-
-        const GeoVPhysVol* cv = &(*(gv->getChildVol(ic)));
-        if (this->findNamePattern(cv, name))
+        const GeoVPhysVol* cv = gv->getChildVol(ic);
+        if (findNamePattern(cv, name))
             return true;
     }
 
