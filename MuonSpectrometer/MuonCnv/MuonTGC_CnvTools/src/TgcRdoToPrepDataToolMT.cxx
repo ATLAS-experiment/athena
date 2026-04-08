@@ -397,6 +397,20 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decode(
             }
         }
     }
+    /// Sort the all BC PRDs
+    for (std::unique_ptr<TgcPrepDataCollection>& allBcColl :
+             state.tgcPrepDataCollections[NBC_HIT]) {
+        if (!allBcColl) {
+            continue;
+        }
+        std::sort(allBcColl->begin(), allBcColl->end(), 
+                [](const TgcPrepData* a, const TgcPrepData* b){
+                    return a->identify() < b->identify();
+                });
+        for (std::size_t i = 0; i < allBcColl->size(); ++i) {
+            allBcColl->at(i)->setHashAndIndex(allBcColl->identifyHash(), i);
+        }
+    }
 
     if (!m_xAODKey.empty()) {
         for (std::unique_ptr<TgcPrepDataCollection>& allBcColl :
