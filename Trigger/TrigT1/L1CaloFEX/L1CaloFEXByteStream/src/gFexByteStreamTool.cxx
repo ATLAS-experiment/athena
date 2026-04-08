@@ -64,6 +64,13 @@ StatusCode gFexByteStreamTool::initialize() {
     ATH_CHECK(m_gEspressoReadKey.initialize(gEspressomode==ConversionMode::Encoding));
     ATH_MSG_DEBUG((gEspressomode==ConversionMode::Encoding ? "Encoding" : "Decoding") << " gEspresso ");
 
+    // Conversion mode for gRistretto TOBs
+    ConversionMode gRistrettomode = getConversionMode(m_gRistrettoReadKey, m_gRistrettoWriteKey, msg());
+    ATH_CHECK(gRistrettomode!=ConversionMode::Undefined);
+    ATH_CHECK(m_gRistrettoWriteKey.initialize(gRistrettomode==ConversionMode::Decoding));
+    ATH_CHECK(m_gRistrettoReadKey.initialize(gRistrettomode==ConversionMode::Encoding));
+    ATH_MSG_DEBUG((gRistrettomode==ConversionMode::Encoding ? "Encoding" : "Decoding") << " gRistretto ");
+
     // Conversion mode for gMETComponentsJwoj TOBs
     ConversionMode gMETComponentsJwojmode = getConversionMode(m_gMETComponentsJwojReadKey, m_gMETComponentsJwojWriteKey, msg());
     ATH_CHECK(gMETComponentsJwojmode!=ConversionMode::Undefined);
@@ -122,6 +129,7 @@ StatusCode gFexByteStreamTool::initialize() {
     ATH_CHECK(m_gMHTComponentsJwojSliceWriteKey.initialize(!m_gMHTComponentsJwojSliceWriteKey.empty()));
     ATH_CHECK(m_gMSTComponentsJwojSliceWriteKey.initialize(!m_gMSTComponentsJwojSliceWriteKey.empty()));
     ATH_CHECK(m_gEspressoSliceWriteKey.initialize(!m_gEspressoSliceWriteKey.empty()));
+    ATH_CHECK(m_gRistrettoSliceWriteKey.initialize(!m_gRistrettoSliceWriteKey.empty()));
     ATH_CHECK(m_gMETComponentsNoiseCutSliceWriteKey.initialize(!m_gMETComponentsNoiseCutSliceWriteKey.empty()));
     ATH_CHECK(m_gScalarENoiseCutSliceWriteKey.initialize(!m_gScalarENoiseCutSliceWriteKey.empty()));
     ATH_CHECK(m_gMETComponentsRmsSliceWriteKey.initialize(!m_gMETComponentsRmsSliceWriteKey.empty()));
@@ -139,6 +147,7 @@ StatusCode gFexByteStreamTool::initialize() {
     ATH_CHECK(m_gMHTComponentsJwojOOTDecorKey.initialize(!m_gFexJetSliceWriteKey.empty()));
     ATH_CHECK(m_gMSTComponentsJwojOOTDecorKey.initialize(!m_gFexJetSliceWriteKey.empty()));
     ATH_CHECK(m_gEspressoOOTDecorKey.initialize(!m_gFexJetSliceWriteKey.empty()));
+    ATH_CHECK(m_gRistrettoOOTDecorKey.initialize(!m_gFexJetSliceWriteKey.empty()));
     ATH_CHECK(m_gMETComponentsNoiseCutOOTDecorKey.initialize(!m_gFexJetSliceWriteKey.empty()));
     ATH_CHECK(m_gScalarENoiseCutOOTDecorKey.initialize(!m_gFexJetSliceWriteKey.empty()));
     ATH_CHECK(m_gMETComponentsRmsOOTDecorKey.initialize(!m_gFexJetSliceWriteKey.empty()));
@@ -222,6 +231,11 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
     ATH_CHECK(gEspressoContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
     ATH_MSG_DEBUG("Recorded gFexJetGlobalContainer with key " << gEspressoContainer.key());
 
+    //---gRistretto Container
+    SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gRistrettoContainer(m_gRistrettoWriteKey, ctx);
+    ATH_CHECK(gRistrettoContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
+    ATH_MSG_DEBUG("Recorded gFexJetGlobalContainer with key " << gRistrettoContainer.key());
+
     //---MET Components JwoJ Container
     SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gMETComponentsJwojContainer(m_gMETComponentsJwojWriteKey, ctx);
     ATH_CHECK(gMETComponentsJwojContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
@@ -270,6 +284,7 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
     SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gMHTComponentsJwojSliceContainer;
     SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gMSTComponentsJwojSliceContainer;
     SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gEspressoSliceContainer;
+    SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gRistrettoSliceContainer;
     SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gMETComponentsNoiseCutSliceContainer;
     SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gScalarENoiseCutSliceContainer;
     SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gMETComponentsRmsSliceContainer;
@@ -307,6 +322,10 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
         gEspressoSliceContainer = SG::WriteHandle<xAOD::gFexGlobalRoIContainer>(m_gEspressoSliceWriteKey, ctx);
         ATH_CHECK(gEspressoSliceContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
         ATH_MSG_DEBUG("Recorded gFexGlobalRoIContainer (out-of-time) with key " << gEspressoSliceContainer.key());
+
+        gRistrettoSliceContainer = SG::WriteHandle<xAOD::gFexGlobalRoIContainer>(m_gRistrettoSliceWriteKey, ctx);
+        ATH_CHECK(gRistrettoSliceContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
+        ATH_MSG_DEBUG("Recorded gFexGlobalRoIContainer (out-of-time) with key " << gRistrettoSliceContainer.key());
 
         gMETComponentsNoiseCutSliceContainer = SG::WriteHandle<xAOD::gFexGlobalRoIContainer>(m_gMETComponentsNoiseCutSliceWriteKey, ctx);
         ATH_CHECK(gMETComponentsNoiseCutSliceContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
@@ -360,6 +379,7 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
         std::vector<std::array<uint32_t, 3>> JWOJ_MET;
         std::vector<std::array<uint32_t, 3>> JWOJ_SCALAR;
         std::vector<std::array<uint32_t, 3>> GESPRESSO;
+        std::vector<std::array<uint32_t, 3>> GRISTRETTO;
         std::vector<std::array<uint32_t, 3>> NC_MET;
         std::vector<std::array<uint32_t, 3>> NC_SCALAR;
         std::vector<std::array<uint32_t, 3>> RMS_MET;
@@ -377,6 +397,7 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
                 JWOJ_MET.resize(newSize, {0, 0, 0});
                 JWOJ_SCALAR.resize(newSize, {0, 0, 0});
                 GESPRESSO.resize(newSize, {0, 0, 0});
+                GRISTRETTO.resize(newSize, {0, 0, 0});
                 NC_MET.resize(newSize, {0, 0, 0});
                 NC_SCALAR.resize(newSize, {0, 0, 0});
                 RMS_MET.resize(newSize, {0, 0, 0});
@@ -546,6 +567,12 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
                             if (blockType == 0x2) {GESPRESSO[sliceNumber][1] = dataArray[index+iWord];}
                             if (blockType == 0x3) {GESPRESSO[sliceNumber][2] = dataArray[index+iWord];}
                         }
+                        //Saving gRistretto TOBs into the EDM container
+                        if (iWord == gPos::GRISTRETTO_POSITION){
+                            if (blockType == 0x1) {GRISTRETTO[sliceNumber][0] = dataArray[index+iWord];}
+                            if (blockType == 0x2) {GRISTRETTO[sliceNumber][1] = dataArray[index+iWord];}
+                            if (blockType == 0x3) {GRISTRETTO[sliceNumber][2] = dataArray[index+iWord];}
+                        }
                         //Saving Noise Cut MET TOBs into the EDM container
                         if (iWord == gPos::NC_MET_POSITION){
                             if (blockType == 0x1) {NC_MET[sliceNumber][0] = dataArray[index+iWord];}
@@ -594,6 +621,7 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
                     auto& targetMETContainer = (slice == 0) ? gMETComponentsJwojContainer : gMETComponentsJwojSliceContainer;
                     auto& targetScalarContainer = (slice == 0) ? gScalarEJwojContainer : gScalarEJwojSliceContainer;
                     auto& targetEspressoContainer = (slice == 0) ? gEspressoContainer : gEspressoSliceContainer;
+                    auto& targetRistrettoContainer = (slice == 0) ? gRistrettoContainer : gRistrettoSliceContainer;
                     auto& targetNCMETContainer = (slice == 0) ? gMETComponentsNoiseCutContainer : gMETComponentsNoiseCutSliceContainer;
                     auto& targetNCScalarContainer = (slice == 0) ? gScalarENoiseCutContainer : gScalarENoiseCutSliceContainer;
                     auto& targetRMSMETContainer = (slice == 0) ? gMETComponentsRmsContainer : gMETComponentsRmsSliceContainer;
@@ -605,6 +633,8 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
                     fillGlobal(JWOJ_SCALAR[slice], 1, targetScalarContainer, slice, scalar);
 
                     fillGlobal(GESPRESSO[slice], 1, targetEspressoContainer, slice, 0);
+
+                    fillGlobal(GRISTRETTO[slice], 1, targetRistrettoContainer, slice, 0);
 
                     scalar = fillGlobal(NC_MET[slice], 2, targetNCMETContainer, slice);
                     fillGlobal(NC_SCALAR[slice], 1, targetNCScalarContainer, slice, scalar);
@@ -647,9 +677,9 @@ int16_t gFexByteStreamTool::fillGlobal(const std::array<uint32_t, 3> &tob, const
         sum_y += y;
     }
 
-    // Special case for gEspresso: in the readout the gEspresso quantity is stored in x. We need to move it to y to armonize this with the other scalar quantities
+    // Special case for gEspresso/gRistretto: in the readout these quantities are stored in x. We need to move them to y to armonize this with the other scalar quantities
     // This is true for the readout only. On the realtime path gEspresso is sent to Topo on y (see https://docs.google.com/spreadsheets/d/15YVVtGofhXMtV7jXRFzWO0FVUtUAjS-X-aQjh3FKE_w/edit?gid=1546010783#gid=1546010783).
-    if  (container.key() == "L1_gEspresso" ) {
+    if  (container.key() == "L1_gEspresso" || container.key() == "L1_gRistretto" ) {
         sum_y = sum_x; 
     }
 

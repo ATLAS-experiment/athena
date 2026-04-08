@@ -82,6 +82,7 @@ class gFexByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamTool> 
         SG::WriteHandleKey< xAOD::gFexJetRoIContainer    > m_gFexJetWriteKey                {this,"gFexLRJetOutputContainerWriteKey","L1_gFexLRJetRoI","Write gFEX EDM gFexJet container"};
         SG::WriteHandleKey< xAOD::gFexGlobalRoIContainer > m_gScalarEJwojWriteKey           {this,"gScalarEJwojOutputContainerWriteKey","L1_gScalarEJwoj","Write gFEX EDM Scalar MET and SumET (JwoJ) container"};
         SG::WriteHandleKey< xAOD::gFexGlobalRoIContainer > m_gEspressoWriteKey              {this,"gEspressoOutputContainerWriteKey","L1_gEspresso","Write gFEX EDM gEspresso container"}; 
+        SG::WriteHandleKey< xAOD::gFexGlobalRoIContainer > m_gRistrettoWriteKey             {this,"gRistrettoOutputContainerWriteKey","L1_gRistretto","Write gFEX EDM gRistretto container"}; 
         SG::WriteHandleKey< xAOD::gFexGlobalRoIContainer > m_gMETComponentsJwojWriteKey     {this,"gMETComponentsJwojOutputContainerWriteKey","L1_gMETComponentsJwoj","Write gFEX EDM total MET components (JwoJ) container"};
         SG::WriteHandleKey< xAOD::gFexGlobalRoIContainer > m_gMHTComponentsJwojWriteKey     {this,"gMHTComponentsJwojOutputContainerWriteKey","L1_gMHTComponentsJwoj","Write gFEX EDM hard MET components (JwoJ) container"};
         SG::WriteHandleKey< xAOD::gFexGlobalRoIContainer > m_gMSTComponentsJwojWriteKey     {this,"gMSTComponentsJwojOutputContainerWriteKey","L1_gMSTComponentsJwoj","Write gFEX EDM soft MET components (JwoJ) container"};
@@ -100,6 +101,7 @@ class gFexByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamTool> 
         SG::WriteHandleKey< xAOD::gFexGlobalRoIContainer > m_gMHTComponentsJwojSliceWriteKey{this,"gMHTComponentsJwojSliceContainerWriteKey","","Write gFEX EDM MHT (JwoJ) out-of-time container"};
         SG::WriteHandleKey< xAOD::gFexGlobalRoIContainer > m_gMSTComponentsJwojSliceWriteKey{this,"gMSTComponentsJwojSliceContainerWriteKey","","Write gFEX EDM MST (JwoJ) out-of-time container"};
         SG::WriteHandleKey< xAOD::gFexGlobalRoIContainer > m_gEspressoSliceWriteKey         {this,"gEspressoSliceContainerWriteKey","","Write gFEX EDM gEspresso out-of-time container"};
+        SG::WriteHandleKey< xAOD::gFexGlobalRoIContainer > m_gRistrettoSliceWriteKey        {this,"gRistrettoSliceContainerWriteKey","","Write gFEX EDM gRistretto out-of-time container"};
         SG::WriteHandleKey< xAOD::gFexGlobalRoIContainer > m_gMETComponentsNoiseCutSliceWriteKey{this,"gMETComponentsNoiseCutSliceContainerWriteKey","","Write gFEX EDM MET (NoiseCut) out-of-time container"};
         SG::WriteHandleKey< xAOD::gFexGlobalRoIContainer > m_gScalarENoiseCutSliceWriteKey  {this,"gScalarENoiseCutSliceContainerWriteKey","","Write gFEX EDM Scalar (NoiseCut) out-of-time container"};
         SG::WriteHandleKey< xAOD::gFexGlobalRoIContainer > m_gMETComponentsRmsSliceWriteKey {this,"gMETComponentsRmsSliceContainerWriteKey","","Write gFEX EDM MET (Rms) out-of-time container"};
@@ -118,6 +120,7 @@ class gFexByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamTool> 
         SG::WriteDecorHandleKey<xAOD::gFexGlobalRoIContainer> m_gMHTComponentsJwojOOTDecorKey  {this,"gMHTComponentsJwojOOTDecorKey",m_gMHTComponentsJwojSliceWriteKey,"sliceNumber","Slice number decoration for gMHTComponentsJwoj out-of-time"};
         SG::WriteDecorHandleKey<xAOD::gFexGlobalRoIContainer> m_gMSTComponentsJwojOOTDecorKey  {this,"gMSTComponentsJwojOOTDecorKey",m_gMSTComponentsJwojSliceWriteKey,"sliceNumber","Slice number decoration for gMSTComponentsJwoj out-of-time"};
         SG::WriteDecorHandleKey<xAOD::gFexGlobalRoIContainer> m_gEspressoOOTDecorKey           {this,"gEspressoOOTDecorKey",m_gEspressoSliceWriteKey,"sliceNumber","Slice number decoration for gEspresso out-of-time"};
+        SG::WriteDecorHandleKey<xAOD::gFexGlobalRoIContainer> m_gRistrettoOOTDecorKey          {this,"gRistrettoOOTDecorKey",m_gRistrettoSliceWriteKey,"sliceNumber","Slice number decoration for gRistretto out-of-time"};
         SG::WriteDecorHandleKey<xAOD::gFexGlobalRoIContainer> m_gMETComponentsNoiseCutOOTDecorKey{this,"gMETComponentsNoiseCutOOTDecorKey",m_gMETComponentsNoiseCutSliceWriteKey,"sliceNumber","Slice number decoration for gMETComponentsNoiseCut out-of-time"};
         SG::WriteDecorHandleKey<xAOD::gFexGlobalRoIContainer> m_gScalarENoiseCutOOTDecorKey    {this,"gScalarENoiseCutOOTDecorKey",m_gScalarENoiseCutSliceWriteKey,"sliceNumber","Slice number decoration for gScalarENoiseCut out-of-time"};
         SG::WriteDecorHandleKey<xAOD::gFexGlobalRoIContainer> m_gMETComponentsRmsOOTDecorKey   {this,"gMETComponentsRmsOOTDecorKey",m_gMETComponentsRmsSliceWriteKey,"sliceNumber","Slice number decoration for gMETComponentsRms out-of-time"};
@@ -129,6 +132,7 @@ class gFexByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamTool> 
         SG::ReadHandleKey< xAOD::gFexJetRoIContainer    > m_gFexJetReadKey                {this,"gFexLRJetOutputContainerReadKey","L1_gFexLRJetRoI","Read gFEX EDM gFexJet container"};
         SG::ReadHandleKey< xAOD::gFexGlobalRoIContainer > m_gScalarEJwojReadKey           {this,"gScalarEJwojOutputContainerReadKey","L1_gScalarEJwoj","Read gFEX EDM Scalar MET and SumET (JwoJ) container"};
         SG::ReadHandleKey< xAOD::gFexGlobalRoIContainer > m_gEspressoReadKey              {this,"gEspressoOutputContainerReadKey","L1_gEspresso","Read gFEX EDM gEspresso container"};
+        SG::ReadHandleKey< xAOD::gFexGlobalRoIContainer > m_gRistrettoReadKey             {this,"gRistrettoOutputContainerReadKey","L1_gRistretto","Read gFEX EDM gRistretto container"};
         SG::ReadHandleKey< xAOD::gFexGlobalRoIContainer > m_gMETComponentsJwojReadKey     {this,"gMETComponentsJwojOutputContainerReadKey","L1_gMETComponentsJwoj","Read gFEX EDM total MET components (JwoJ) container"};
         SG::ReadHandleKey< xAOD::gFexGlobalRoIContainer > m_gMHTComponentsJwojReadKey     {this,"gMHTComponentsJwojOutputContainerReadKey","L1_gMHTComponentsJwoj","Read gFEX EDM hard MET components (JwoJ) container"};
         SG::ReadHandleKey< xAOD::gFexGlobalRoIContainer > m_gMSTComponentsJwojReadKey     {this,"gMSTComponentsJwojOutputContainerReadKey","L1_gMSTComponentsJwoj","Read gFEX EDM soft MET components (JwoJ) container"};

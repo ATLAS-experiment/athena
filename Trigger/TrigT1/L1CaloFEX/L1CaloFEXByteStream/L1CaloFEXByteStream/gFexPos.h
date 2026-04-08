@@ -24,9 +24,9 @@ namespace LVL1::gFEXPos {
         
         //The following definitions reflect the position of the 32-bits words in the gFEX bytestream
         
-        constexpr std::array<unsigned int, 2> TRAILER_POSITION        = { 6, 13 };//position of trailer in Jet/Global TOB dataframe, wihin he same slice 
-        constexpr std::array<unsigned int, 5> JET_UNUSED_POSITION     = { 0, 4, 5, 11, 12 };//position of unused word in Jet TOB dataframe, wihin he same slice 
-        constexpr std::array<unsigned int, 4> GLOBAL_UNUSED_POSITION  = { 4, 5, 11, 12 };//position of unused word in Global TOB dataframe, wihin he same slice 
+        constexpr std::array<unsigned int, 2> TRAILER_POSITION        = { 6, 13 };//position of trailer in Jet/Global TOB dataframe, wihin the same slice 
+        constexpr std::array<unsigned int, 5> JET_UNUSED_POSITION     = { 0, 4, 5, 11, 12 };//position of unused word in Jet TOB dataframe, wihin the same slice 
+        constexpr std::array<unsigned int, 2> GLOBAL_UNUSED_POSITION  = { 11, 12 };//position of unused word in Global TOB dataframe, wihin he same slice 
 
         constexpr std::array<unsigned int, 4> GBLOCK_POSITION         = { 1, 2, 8, 9 };//position of gBlocks word in Jet TOB dataframe, within the same slice
         constexpr std::array<unsigned int, 2> GJET_POSITION           = { 3, 10 };//position of gBlocks word in Jet TOB dataframe, within the same slice
@@ -37,6 +37,7 @@ namespace LVL1::gFEXPos {
         constexpr unsigned int JWOJ_MET_POSITION    = 2 ;//position of JwoJ MET word in Global TOB dataframe, within the same slice
         constexpr unsigned int JWOJ_SCALAR_POSITION = 3 ;//position of JwoJ Scalar word in Global TOB dataframe, within the same slice
         // constexpr unsigned int GLOBAL_FIBER0_POSITION_FOUR   = 4 ;// For accessing this data generically, very useful for debugging firmware
+        constexpr unsigned int GRISTRETTO_POSITION  = 4 ;//position of gRistretto word in Global TOB dataframe, within the same slice
         constexpr unsigned int GESPRESSO_POSITION   = 5 ;//position of gEspresso word in Global TOB dataframe, within the same slice
  
         constexpr unsigned int NC_MET_POSITION      = 7 ;//position of Noise Cut MET word in Global TOB dataframe, within the same slice
