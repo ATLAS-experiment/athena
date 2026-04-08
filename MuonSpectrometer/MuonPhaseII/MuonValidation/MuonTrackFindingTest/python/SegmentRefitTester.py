@@ -2,11 +2,12 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-def SegmentRefitTestCfg(flags,name="SegmentRefitter", drawEvent=False, **kwargs):
+def SegmentRefitTestCfg(flags,name="SegmentRefitter", 
+                        drawEvent=False, smearSegPars=False, **kwargs):
     result = ComponentAccumulator()
     from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import ActsMuonSegmentRefitAlgCfg
 
-    result.merge(ActsMuonSegmentRefitAlgCfg(flags, drawEvent=drawEvent))
+    result.merge(ActsMuonSegmentRefitAlgCfg(flags, drawEvent=drawEvent, smearSegPars = smearSegPars))
     the_alg = CompFactory.MuonValR4.SegmentRefitTest(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
@@ -30,6 +31,8 @@ if __name__=="__main__":
     parser.add_argument("--dumpObjFiles", help="If set to true, the spacepoints in the bucket are saved to disk",
                         default=False, action='store_true')
     parser.add_argument("--noPerfMon", help="If set to true, disable performance monitoring.",
+                        default=False, action='store_true')
+    parser.add_argument("--smearSegPars", help="If set to true the segment parameters are smeared",
                         default=False, action='store_true')
     parser.set_defaults(nEvents = -1)
   
@@ -60,14 +63,15 @@ if __name__=="__main__":
 
     from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
     cfg.merge(MuonPatternRecognitionCfg(flags))
-    cfg.merge(SegmentRefitTestCfg(flags, drawEvent = args.dumpObjFiles))
+    cfg.merge(SegmentRefitTestCfg(flags, drawEvent = args.dumpObjFiles,
+                                         smearSegPars = args.smearSegPars))
     cfg.merge(SegmentExtpTestCfg(flags, drawEvent = args.dumpObjFiles))
    
     from MuonPatternRecognitionTest.PatternTestConfig import PatternVisualizationToolCfg
 
     cfg.getEventAlgo("MuonSegmentFittingAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                         CanvasPreFix="SegmentPlotValid", outSubDir="SegmentValidPlots", 
-                                                                                        displayTruthOnly = True, saveSinglePDFs = True, saveSummaryPDF= True))
+                                                                                        displayTruthOnly = False, saveSinglePDFs = True, saveSummaryPDF= True))
 
     cfg.getEventAlgo("MuonR4xAODSegmentCnvAlg").convertBeamSpot = True
     executeTest(cfg)
