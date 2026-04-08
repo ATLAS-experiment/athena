@@ -71,7 +71,12 @@ StatusCode TauCommonCalcVars::execute(xAOD::TauJet& pTau) const {
     for (const xAOD::TauTrack* tauTrk : tauTracks){
       sumOfTrackVector += tauTrk->p4();
 
-      double deltaR_tautrack = inTrigger() ? pTau.p4().DeltaR(tauTrk->p4()) : pTau.p4(xAOD::TauJetParameters::IntermediateAxis).DeltaR(tauTrk->p4());
+      double deltaR_tautrack = 0;  
+      if( inTrigger() || m_doRun4){
+        deltaR_tautrack = pTau.p4().DeltaR(tauTrk->p4());
+      } else {
+        deltaR_tautrack = pTau.p4(xAOD::TauJetParameters::IntermediateAxis).DeltaR(tauTrk->p4());
+      }  
 
       ptSum += tauTrk->pt();
       sumWeightedDR_tautrack += deltaR_tautrack * tauTrk->pt();
