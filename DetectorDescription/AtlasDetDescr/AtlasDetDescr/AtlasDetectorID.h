@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATLASDETDESCR_ATLASDETECTORID_H
@@ -30,7 +30,7 @@
 
 #include <string>
 #include <vector>
-
+#include <memory>
 
 class IdDictDictionary;
 class AtlasDetectorIDHelper;
@@ -76,7 +76,8 @@ public:
       Zdc,ZdcHardware,
       TT
     };
-    
+    static constexpr int invalidIndex{999};
+    static constexpr int invalidId{-1};
 
     /// @name strutors
     //@{
@@ -365,6 +366,7 @@ protected:
     /// List of dictionary versions used by this helper
     std::vector<std::string>  m_dict_tags;
 private:
+   const IdDictDictionary* dictionary(const Identifier& id) const;
 
     typedef Identifier::size_type                       size_type;
 
@@ -424,7 +426,7 @@ private:
     const IdDictDictionary*   m_muon_dict{};
     const IdDictDictionary*   m_calo_dict{};
     const IdDictDictionary*   m_fwd_dict{};
-    AtlasDetectorIDHelper* m_helper{};
+    std::unique_ptr<AtlasDetectorIDHelper> m_helper{};
     IdDictFieldImplementation m_det_impl;
     IdDictFieldImplementation m_indet_part_impl;
     IdDictFieldImplementation m_calo_side_impl;
