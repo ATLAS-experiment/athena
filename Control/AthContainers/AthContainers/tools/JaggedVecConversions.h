@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/tools/JaggedVecConversions.h
@@ -124,7 +124,7 @@ public:
 
   /**
    * @brief Return one jagged vector element (const).
-   * @param eltindex The index of the element.
+   * @param elt_index The index of the element.
    */
   const Elt_t& elt (size_t elt_index) const noexcept;
 
@@ -134,7 +134,7 @@ public:
    * @param elt_index The index of the element to resize.
    * @param n_new The size of the new element.
    *
-   * Any added payload elemnets are default-initialized.
+   * Any added payload elements are default-initialized.
    */
   void resize1 (size_t elt_index, index_type n_new);
 

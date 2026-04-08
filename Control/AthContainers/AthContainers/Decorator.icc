@@ -66,7 +66,7 @@ Decorator<T, ALLOC>::Decorator (const SG::auxid_t auxid)
  * @brief Constructor.
  * @param name Name of this aux variable.
  * @param clsname The name of its associated class.  May be blank.
- * @param flags Optional flags qualifying the type.  See AuxTypeRegsitry.
+ * @param flags Optional flags qualifying the type.  See AuxTypeRegistry.
  *
  * The name -> auxid lookup is done here.
  */
@@ -187,7 +187,7 @@ Decorator<T, ALLOC>::getDecorationArray (const AuxVectorData& container) const
 
 
 /**
- * @brief Get a span over the auxilary data array.
+ * @brief Get a span over the auxiliary data array.
  * @param container The container from which to fetch the variable.
  */
 template <class T, class ALLOC>
@@ -202,7 +202,7 @@ Decorator<T, ALLOC>::getDataSpan (const AuxVectorData& container) const
 
 
 /**
- * @brief Get a span over the auxilary data array.
+ * @brief Get a span over the auxiliary data array.
  * @param container The container from which to fetch the variable.
  *
  * If the container is locked, this will allow fetching only variables

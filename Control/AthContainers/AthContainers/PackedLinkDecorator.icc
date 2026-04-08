@@ -72,7 +72,7 @@ Decorator<PackedLink<CONT>, ALLOC>::Decorator (const SG::auxid_t auxid)
  * @brief Constructor.
  * @param name Name of this aux variable.
  * @param clsname The name of its associated class.  May be blank.
- * @param flags Optional flags qualifying the type.  See AuxTypeRegsitry.
+ * @param flags Optional flags qualifying the type.  See AuxTypeRegistry.
  *
  * The name -> auxid lookup is done here.
  */
@@ -457,7 +457,7 @@ DECORATOR::Decorator (const SG::auxid_t auxid)
  * @brief Constructor.
  * @param name Name of this aux variable.
  * @param clsname The name of its associated class.  May be blank.
- * @param flags Optional flags qualifying the type.  See AuxTypeRegsitry.
+ * @param flags Optional flags qualifying the type.  See AuxTypeRegistry.
  *
  * The name -> auxid lookup is done here.
  */

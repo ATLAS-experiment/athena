@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/tools/JaggedVecVectorFactory.icc
@@ -146,7 +146,7 @@ void JaggedVecVectorFactory<T, ALLOC>::copyImpl (SG::auxid_t auxid,
     payload_fac->copy (payload_auxid, dst, dst_first, src, src_first, n_src);
   }
 
-  // Fixup the Elt entries --- first the ones we copied, then the following
+  // Fix up the Elt entries --- first the ones we copied, then the following
   // ones in the destination container.
   std::for_each_n (v_dst+dst_index, n, Shift (dst_first - src_first_orig));
   std::for_each (v_dst+dst_index+n, v_dst+dst.size_v(), Shift (n_src - n_dst));
