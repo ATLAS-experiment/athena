@@ -1,7 +1,7 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef ACTMUONDETECTOR_MuonMaterialDecoratorTool_H
+#ifndef ACTSMUONDETECTOR_MuonMaterialDecoratorTool_H
 #define ACTSMUONDETECTOR_MuonMaterialDecoratorTool_H
 
 #include "GeoPrimitives/GeoPrimitives.h"
