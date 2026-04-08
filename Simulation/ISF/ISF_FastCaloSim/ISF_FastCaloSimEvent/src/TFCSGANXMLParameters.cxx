@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -8,9 +8,9 @@
 
 // Class header include
 #include "ISF_FastCaloSimEvent/TFCSGANXMLParameters.h"
-#include "CxxUtils/libxml2Helper.h"
 
-using namespace CxxUtils;
+#include "XMLCoreParser/XMLCoreParser.h"
+#include "XMLCoreParser/XMLCoreNode.h"
 
 TFCSGANXMLParameters::TFCSGANXMLParameters() = default;
 
@@ -23,97 +23,73 @@ void TFCSGANXMLParameters::InitialiseFromXML(
   std::string xmlFullFileName = FastCaloGANInputFolderName + "/binning.xml";
 
   // Parse the XML file
-  xmlDocPtr doc = xmlParseFile(xmlFullFileName.c_str());
+  XMLCoreParser p;
+  std::unique_ptr<XMLCoreNode> doc = p.parse (xmlFullFileName);
+
   if (!doc) {
     ATH_MSG_WARNING("Failed to parse XML file: " << xmlFullFileName);
     return;
   }
 
-  for (xmlNodePtr nodeRoot = doc->children; nodeRoot != nullptr;
-       nodeRoot = nodeRoot->next) {
-    if (xmlStrEqual(nodeRoot->name, BAD_CAST "Bins")) {
-      for (xmlNodePtr nodeParticle = nodeRoot->children;
-           nodeParticle != nullptr; nodeParticle = nodeParticle->next) {
-        if (xmlStrEqual(nodeParticle->name, BAD_CAST "Particle")) {
-          int nodePid =  GetXmlAttr<int>(nodeParticle, "pid");
+  for (const XMLCoreNode* nodeParticle : doc->get_children ("Bins/Particle")) {
+    if (nodeParticle->get_int_attrib ("pid") == pid) {
+      for (const XMLCoreNode* nodeBin : nodeParticle->get_children ("Bin")) {
+        int nodeEtaMin = nodeBin->get_int_attrib ("etaMin");
+        int nodeEtaMax = nodeBin->get_int_attrib ("etaMax");
+        int regionId = nodeBin->get_int_attrib ("regionId");
 
-          if (nodePid == pid) {
-            for (xmlNodePtr nodeBin = nodeParticle->children;
-                 nodeBin != nullptr; nodeBin = nodeBin->next) {
-              if (xmlStrEqual(nodeBin->name, BAD_CAST "Bin")) {
-                int nodeEtaMin = GetXmlAttr<int>(nodeBin, "etaMin");
-                int nodeEtaMax = GetXmlAttr<int>(nodeBin, "etaMax");
-                int regionId   = GetXmlAttr<int>(nodeBin, "regionId");
+        if (std::abs(etaMid) > nodeEtaMin &&
+            std::abs(etaMid) < nodeEtaMax)
+        {
+          m_symmetrisedAlpha = nodeBin->has_attrib ("symmetriseAlpha") &&
+            nodeBin->get_attrib ("symmetriseAlpha") == "true";
+          m_ganVersion = nodeBin->get_int_attrib ("ganVersion");
+          m_latentDim = nodeParticle->get_int_attrib ("latentDim");
 
-                if (std::abs(etaMid) > nodeEtaMin &&
-                    std::abs(etaMid) < nodeEtaMax) {
+          for (const XMLCoreNode* nodeLayer : nodeBin->get_children ("Layer")) {
+            std::vector<double> edges;
+            std::string s = nodeLayer->get_attrib ("r_edges");
+            std::istringstream ss(s);
+            std::string token;
 
-                  m_symmetrisedAlpha =
-                      ReadBooleanAttribute("symmetriseAlpha", nodeParticle);
-                  m_ganVersion = GetXmlAttr<int>(nodeBin, "ganVersion");
-                  m_latentDim  = GetXmlAttr<int>(nodeParticle, "latentDim");
+            while (std::getline(ss, token, ',')) {
+              edges.push_back(std::stod(token));
+            }
 
-                  for (xmlNodePtr nodeLayer = nodeBin->children;
-                       nodeLayer != nullptr; nodeLayer = nodeLayer->next) {
-                    if (xmlStrEqual(nodeLayer->name, BAD_CAST "Layer")) {
-                      std::vector<double> edges;
-                      std::string s(GetXmlAttr<std::string>(nodeLayer, "r_edges"));
+            int binsInAlpha = nodeLayer->get_int_attrib ("n_bin_alpha");
+            int layer = nodeLayer->get_int_attrib ("id");
 
-                      std::istringstream ss(s);
-                      std::string token;
+            std::string name = "hist_pid_" + std::to_string(pid) +
+              "_region_" + std::to_string(regionId) +
+              "_layer_" + std::to_string(layer);
+            int xBins = static_cast<int>(edges.size()) - 1;
 
-                      while (std::getline(ss, token, ',')) {
-                        edges.push_back(std::stod(token));
-                      }
-
-                      int binsInAlpha = GetXmlAttr<int>(nodeLayer, "n_bin_alpha");
-                      int layer = GetXmlAttr<int>(nodeLayer, "id");
-
-                      std::string name = "hist_pid_" + std::to_string(nodePid) +
-                                         "_region_" + std::to_string(regionId) +
-                                         "_layer_" + std::to_string(layer);
-                      int xBins = static_cast<int>(edges.size()) - 1;
-
-                      if (xBins <= 0) {
-                        ATH_MSG_DEBUG(
+            if (xBins <= 0) {
+              ATH_MSG_DEBUG(
                             "No bins defined in r for layer "
                             << layer
                             << ", setting to 1 bin to avoid empty histogram");
-                        xBins = 1;  // Remove warning and set a default bin
-                        edges.push_back (edges.back()+1);
-                      } else {
-                        m_relevantlayers.push_back(layer);
-                      }
-
-                      double minAlpha = -M_PI;
-                      if (m_symmetrisedAlpha && binsInAlpha > 1) {
-                        minAlpha = 0;
-                      }
-                      // Create histogram and add to binning map
-                      auto itr = m_binning.emplace(
-                          layer,
-                          TH2D(name.c_str(), name.c_str(), xBins, edges.data(),
-                               binsInAlpha, minAlpha, M_PI));
-                      itr.first->second.SetDirectory(nullptr);
-                    }
-                  }
-                }
-              }
+              xBins = 1;  // Remove warning and set a default bin
+              edges.push_back (edges.back()+1);
+            } else {
+              m_relevantlayers.push_back(layer);
             }
+
+            double minAlpha = -M_PI;
+            if (m_symmetrisedAlpha && binsInAlpha > 1) {
+              minAlpha = 0;
+            }
+            // Create histogram and add to binning map
+            auto itr = m_binning.emplace(
+                                         layer,
+                                         TH2D(name.c_str(), name.c_str(), xBins, edges.data(),
+                                              binsInAlpha, minAlpha, M_PI));
+            itr.first->second.SetDirectory(nullptr);
           }
         }
       }
     }
   }
-
-  // Free XML document after parsing
-  xmlFreeDoc(doc);
-}
-
-bool TFCSGANXMLParameters::ReadBooleanAttribute(const std::string& name,
-                                                xmlNodePtr node) {
-  std::string attribute(GetXmlAttr<std::string>(node, name.c_str()));
-  return attribute == "true";
 }
 
 void TFCSGANXMLParameters::Print() const {

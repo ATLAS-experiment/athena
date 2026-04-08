@@ -33,16 +33,9 @@
 #include "lwtnn/LightweightGraph.hh"
 #include "lwtnn/parse_json.hh"
 
-// XML reader
-#include <libxml/xmlmemory.h>
-#include <libxml/parser.h>
-#include <libxml/tree.h>
-#include <libxml/xmlreader.h>
-#include <libxml/xpath.h>
-#include <libxml/xpathInternals.h>
-#include "CxxUtils/libxml2Helper.h"
+#include "XMLCoreParser/XMLCoreParser.h"
+#include "XMLCoreParser/XMLCoreNode.h"
 
-using namespace CxxUtils;
 
 //=============================================
 //======= TFCSEnergyAndHitGAN =========
@@ -148,67 +141,56 @@ void TFCSEnergyAndHitGAN::GetBinning(
   std::vector<Binning> AllBinning;
   std::vector<int> EtaMaxList;
 
-  xmlDocPtr doc = xmlParseFile(xmlFullFileName.c_str());
-  for (xmlNodePtr nodeRoot = doc->children; nodeRoot != nullptr;
-       nodeRoot = nodeRoot->next) {
-    if (xmlStrEqual(nodeRoot->name, BAD_CAST "Bins")) {
-      for (xmlNodePtr nodeBin = nodeRoot->children; nodeBin != nullptr;
-           nodeBin = nodeBin->next) {
-        if (xmlStrEqual(nodeBin->name, BAD_CAST "Bin")) {
-          int nodePid = GetXmlAttr<int>(nodeBin, "pid");
-          // int nodeEtaMin = atof( (const char*) xmlGetProp( nodeBin, BAD_CAST
-          // "etaMin" ) );
-          int nodeEtaMax = GetXmlAttr<int>(nodeBin, "etaMax");
+  XMLCoreParser p;
+  std::unique_ptr<XMLCoreNode> doc = p.parse (xmlFullFileName);
+  for (const XMLCoreNode* bin : doc->get_children ("Bins/Bin")) {
+    int nodePid = bin->get_int_attrib ("pid");
+    int nodeEtaMax = bin->get_int_attrib ("etaMax");
 
-          Binning binsInLayer;
-          bool correctentry = true;
-          if (nodePid != pid)
-            correctentry = false;
+    Binning binsInLayer;
+    bool correctentry = true;
+    if (nodePid != pid)
+      correctentry = false;
 
-          for (xmlNodePtr nodeLayer = nodeBin->children; nodeLayer != nullptr;
-               nodeLayer = nodeLayer->next) {
-            if (xmlStrEqual(nodeLayer->name, BAD_CAST "Layer")) {
-              std::vector<double> edges;
-              std::string s(GetXmlAttr<std::string>(nodeLayer, "r_edges"));
+    for (const XMLCoreNode* nodeLayer : bin->get_children ("Layer")) {
+      std::vector<double> edges;
+      std::string s = nodeLayer->get_attrib ("r_edges");
+      std::istringstream ss(s);
+      std::string token;
 
-              std::istringstream ss(s);
-              std::string token;
-
-              while (std::getline(ss, token, ',')) {
-                edges.push_back(atof(token.c_str()));
-              }
-
-              int binsInAlpha = GetXmlAttr<int>(nodeLayer, "n_bin_alpha");
-              int layer = GetXmlAttr<int>(nodeLayer, "id");
-
-              if (correctentry)
-                ATH_MSG_DEBUG("nodepid=" << nodePid << " nodeEtaMax="
-                                         << nodeEtaMax << " Layer: " << layer
-                                         << " binsInAlpha: " << binsInAlpha
-                                         << " edges: " << s);
-
-              std::string name = std::format("hist_pid_{}_etaSliceNumber_{}_layer_{}", 
-                                               nodePid, EtaMaxList.size(), layer);
-              int xBins = edges.size() - 1;
-              if (xBins == 0) {
-                xBins = 1; // remove warning
-                edges.push_back(0);
-                edges.push_back(1);
-              }
-              binsInLayer[layer] =
-                  TH2D(name.c_str(), name.c_str(), xBins, &edges[0],
-                       binsInAlpha, -TMath::Pi(), TMath::Pi());
-              binsInLayer[layer].SetDirectory(nullptr);
-            }
-          }
-
-          if (!correctentry)
-            continue;
-          AllBinning.push_back(std::move(binsInLayer));
-          EtaMaxList.push_back(nodeEtaMax);
-        }
+      while (std::getline(ss, token, ',')) {
+        edges.push_back(atof(token.c_str()));
       }
+
+      int binsInAlpha = nodeLayer->get_int_attrib ("n_bin_alpha");
+      int layer = nodeLayer->get_int_attrib ("id");
+
+      if (correctentry)
+        ATH_MSG_DEBUG("nodepid=" << nodePid << " nodeEtaMax="
+                      << nodeEtaMax << " Layer: " << layer
+                      << " binsInAlpha: " << binsInAlpha
+                      << " edges: " << s);
+
+      std::string name = "hist_pid_" + std::to_string(nodePid) +
+        "_etaSliceNumber_" +
+        std::to_string(EtaMaxList.size()) + "_layer_" +
+        std::to_string(layer);
+      int xBins = edges.size() - 1;
+      if (xBins == 0) {
+        xBins = 1; // remove warning
+        edges.push_back(0);
+        edges.push_back(1);
+      }
+      binsInLayer[layer] =
+        TH2D(name.c_str(), name.c_str(), xBins, &edges[0],
+             binsInAlpha, -TMath::Pi(), TMath::Pi());
+      binsInLayer[layer].SetDirectory(nullptr);
     }
+
+    if (!correctentry)
+      continue;
+    AllBinning.push_back(std::move(binsInLayer));
+    EtaMaxList.push_back(nodeEtaMax);
   }
 
   int index = 0;
@@ -219,7 +201,6 @@ void TFCSEnergyAndHitGAN::GetBinning(
     }
     index++;
   }
-  xmlFreeDoc(doc);
   ATH_MSG_DEBUG("Done XML file");
 }
 
