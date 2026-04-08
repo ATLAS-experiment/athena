@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -19,17 +19,9 @@
 //LWTNN
 #include "lwtnn/parse_json.hh"
 
-//libXML
-#include <libxml/xmlmemory.h>
-#include <libxml/parser.h>
-#include <libxml/tree.h>
-#include <libxml/xmlreader.h>
-#include <libxml/xpath.h>
-#include <libxml/xpathInternals.h>
+#include "XMLCoreParser/XMLCoreParser.h"
+#include "XMLCoreParser/XMLCoreNode.h"
 
-#include "CxxUtils/libxml2Helper.h"
-
-using namespace CxxUtils;
 
 PunchThroughG4Classifier::PunchThroughG4Classifier(const std::string& type, const std::string& name, const IInterface*  parent)
     : base_class(type, name, parent) {
@@ -59,44 +51,23 @@ StatusCode PunchThroughG4Classifier::finalize(){
 }
 
 StatusCode PunchThroughG4Classifier::initializeScaler(const std::string & scalerConfigFile){
-    // Initialize pointers
-    xmlDocPtr doc;
-
-    // Parse xml that contains config for MinMaxScaler for each of the network inputs
-    doc = xmlParseFile( scalerConfigFile.c_str() );
+    XMLCoreParser p;
+    std::unique_ptr<XMLCoreNode> doc = p.parse (scalerConfigFile);
 
     ATH_MSG_DEBUG( "[ punchthroughclassifier ] Loading scaler: " << scalerConfigFile);
 
-    for( xmlNodePtr nodeRoot = doc->children; nodeRoot != nullptr; nodeRoot = nodeRoot->next) {
-
-        if (xmlStrEqual( nodeRoot->name, BAD_CAST "Transformations" )) {
-            for( xmlNodePtr nodeTransform = nodeRoot->children; nodeTransform != nullptr; nodeTransform = nodeTransform->next ) {
-
-                //Get min and max values that we normalise values to
-                if (xmlStrEqual( nodeTransform->name, BAD_CAST "ScalerValues" )) {
-                    GetXmlAttrIfThere(nodeTransform, "min", m_scalerMin);
-                    GetXmlAttrIfThere(nodeTransform, "max", m_scalerMax);
-                }
-
-                //Get values necessary to normalise each input variable
-                if (xmlStrEqual( nodeTransform->name, BAD_CAST "VarScales" )) {
-                    std::string name = "";
-                    double min=-1, max=-1;
-
-                    GetXmlAttrIfThere(nodeTransform, "name", name);
-                    GetXmlAttrIfThere(nodeTransform, "min", min);
-                    GetXmlAttrIfThere(nodeTransform, "max", max);
-
-                    // Insert into maps
-                    m_scalerMinMap.emplace ( name, min );
-                    m_scalerMaxMap.emplace ( name, max );
-                }
-            }
-        }
+    for (const XMLCoreNode* node : doc->get_children ("Transformations/*"))
+    {
+      if (node->get_name() == "ScalerValues") {
+        m_scalerMin = node->get_double_attrib ("min");
+        m_scalerMax = node->get_double_attrib ("max");
+      }
+      else if (node->get_name() == "VarScales") {
+        std::string name = node->get_attrib ("name");
+        m_scalerMinMap[name] = node->get_double_attrib ("min");
+        m_scalerMaxMap[name] = node->get_double_attrib ("max");
+      }
     }
-
-    // free memory when done 
-    xmlFreeDoc(doc);
 
     return StatusCode::SUCCESS;
 }
@@ -122,41 +93,24 @@ StatusCode PunchThroughG4Classifier::initializeNetwork(const std::string & netwo
 }
 
 StatusCode PunchThroughG4Classifier::initializeCalibrator(const std::string & calibratorConfigFile){
-    // Initialize pointers
-    xmlDocPtr doc;
+    XMLCoreParser p;
+    std::unique_ptr<XMLCoreNode> doc = p.parse (calibratorConfigFile);
 
     //parse xml that contains config for isotonic regressor used to calibrate the network output
     ATH_MSG_DEBUG( "[ punchthroughclassifier ] Loading calibrator: " << calibratorConfigFile);
 
-    doc = xmlParseFile( calibratorConfigFile.c_str() );
-
-    for( xmlNodePtr nodeRoot = doc->children; nodeRoot != nullptr; nodeRoot = nodeRoot->next) {
-
-        if (xmlStrEqual( nodeRoot->name, BAD_CAST "Transformations" )) {
-            for( xmlNodePtr nodeTransform = nodeRoot->children; nodeTransform != nullptr; nodeTransform = nodeTransform->next ) {
-
-                //get lower and upper bounds of isotonic regressor
-                if (xmlStrEqual( nodeTransform->name, BAD_CAST "LimitValues" )) {
-                    GetXmlAttrIfThere(nodeTransform, "min", m_calibrationMin);
-                    GetXmlAttrIfThere(nodeTransform, "max", m_calibrationMax);
-                }
-
-                //get defined points where isotonic regressor knows transform
-                if (xmlStrEqual( nodeTransform->name, BAD_CAST "LinearNorm" )) {
-                    double orig = -1;
-                    double norm = -1;
-                    GetXmlAttrIfThere(nodeTransform, "orig", orig);
-                    GetXmlAttrIfThere(nodeTransform, "norm", norm);
-
-                    // Insert into maps
-                    m_calibrationMap.emplace ( orig, norm );
-                }
-            }
-        }
+    for (const XMLCoreNode* node : doc->get_children ("Transformations/*"))
+    {
+      if (node->get_name() == "LimitValues") {
+        m_calibrationMin = node->get_double_attrib ("min");
+        m_calibrationMax = node->get_double_attrib ("max");
+      }
+      else if (node->get_name() == "LinearNorm") {
+        double orig = node->get_double_attrib ("orig");
+        double norm = node->get_double_attrib ("norm");
+        m_calibrationMap[orig] = norm;
+      }
     }
-
-    // free memory when done 
-    xmlFreeDoc(doc);
 
     return StatusCode::SUCCESS;
 }
