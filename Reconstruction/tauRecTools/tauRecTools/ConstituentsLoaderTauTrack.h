@@ -147,7 +147,7 @@ namespace FlavorTagInference {
       public:
         ConstituentLoaderTauTrack(const ConstituentsInputConfig& cfg);
 
-        std::tuple<Inputs, std::vector<const xAOD::IParticle*>> getData(const xAOD::IParticle& p) const override ;
+        Inputs getData(const xAOD::IParticle& p) const override;
         const FTagDataDependencyNames& getDependencies() const override;
         const std::set<std::string>& getUsedRemap() const override;
         const std::string& getName() const override;

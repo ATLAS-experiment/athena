@@ -26,7 +26,6 @@ namespace FlavorTagInference {
     struct SaltModelData {
         SaltModelInputs gnn_inputs;
         size_t num_inputs = 0;
-        std::map<std::string, std::vector<const xAOD::IParticle*>> constituents;
     };
 
     class SaltModelEDMLoaderBase {
@@ -62,11 +61,10 @@ namespace FlavorTagInference {
             //load vector inputs.
             for (auto loader : vectorVarLoaders) {
                 std::string input_name = loader.first;
-                auto [input_data, input_objects] = loader.second->getData(*p);
+                Inputs input_data = loader.second->getData(*p);
 
                 salt_model_data.gnn_inputs.insert({input_name, input_data});
                 salt_model_data.num_inputs += input_data.first.size();
-                salt_model_data.constituents[input_name] = input_objects;
             }
             return salt_model_data;
         }

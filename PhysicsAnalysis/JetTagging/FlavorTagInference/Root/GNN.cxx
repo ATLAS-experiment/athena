@@ -6,7 +6,6 @@
 #include "FlavorTagInference/SaltModel.h"
 #include "FlavorTagInference/GNNOptions.h"
 #include "FlavorTagInference/StringUtils.h"
-
 #include "xAODJet/JetContainer.h"
 
 #include "PathResolver/PathResolver.h"
@@ -107,8 +106,8 @@ namespace FlavorTagInference {
       for (const auto& dec: m_decorators.jetVecFloat) {
         dec.second(i_jet) = {};
       }
-      for (const auto& dec: m_decorators.jetTrackLinks) {
-        dec.second(i_jet) = {};
+      for (const auto& [name, loader] : m_dataLoader.vectorVarLoaders) {
+        loader->setDefaults(i_jet);
       }
     }
   }
@@ -117,7 +116,6 @@ namespace FlavorTagInference {
     /* Main function for decorating a i_jet object with GNN outputs. */
     SaltModelData salt_model_data = m_dataLoader.loadInputs(&i_jet);
     // DumpGnnInputs(salt_model_data.gnn_inputs);
-    auto input_tracks = salt_model_data.constituents.at("track_features");
 
     // run inference
     // -------------
@@ -153,18 +151,6 @@ namespace FlavorTagInference {
         dec.second(i_jet) = out_vf.at(dec.first);
       }
 
-      // decorate links to the input tracks to the b-tagging object
-      for (const auto& dec: m_decorators.jetTrackLinks) {
-        TrackLinks links;
-        for (const xAOD::IParticle* it: input_tracks) {
-          TrackLinks::value_type link;
-          const auto* itc = dynamic_cast<const xAOD::TrackParticleContainer*>(
-            it->container());
-          link.toIndexedElement(*itc, it->index());
-          links.push_back(link);
-        }
-        dec.second(i_jet) = links;
-      }
     }
     else {
       throw std::logic_error("unsupported ONNX metadata version");
@@ -217,20 +203,6 @@ namespace FlavorTagInference {
         default:
           throw std::logic_error("Unknown output data type");
       }
-    }
-
-    // Create decorators for links to the input tracks
-    if (!m_decorators.jetVecChar.empty() || !m_decorators.jetVecFloat.empty()) {
-      std::string name = m_saltModel->getModelName() + "_TrackLinks";
-
-      // modify the deco name if we're using flip taggers
-      if (options.flip != FlipTagConfig::STANDARD) {
-        name = str::sub_first(flip_converters, name, context);
-      }
-
-      name = str::remapName(name, remap, usedRemap);
-      deps.bTagOutputs.insert(name);
-      m_decorators.jetTrackLinks.emplace_back(name, Dec<TrackLinks>(name));
     }
 
     return std::make_tuple(deps, usedRemap);

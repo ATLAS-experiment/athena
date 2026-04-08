@@ -15,10 +15,10 @@ namespace FlavorTagInference {
     }
 
 
-    std::tuple<Inputs, std::vector<const xAOD::IParticle*>> ConstituentLoaderTauHit::getData(const xAOD::IParticle& p) const
+    Inputs ConstituentLoaderTauHit::getData(const xAOD::IParticle& p) const
     {
         const std::vector<const xAOD::TrackMeasurementValidation*> hits = getParticleHits(p);
-        return std::make_tuple(getFeatures(p, hits), std::vector<const xAOD::IParticle*>{} );
+        return getFeatures(p, hits);
     }
 
 

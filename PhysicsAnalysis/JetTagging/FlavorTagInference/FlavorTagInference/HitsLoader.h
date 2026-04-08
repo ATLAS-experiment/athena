@@ -37,8 +37,7 @@ namespace FlavorTagInference {
     class HitsLoader : public IConstituentsLoader {
       public:
         HitsLoader(const ConstituentsInputConfig&, const FTagOptions& options);
-        std::tuple<Inputs, std::vector<const xAOD::IParticle*>> getData(
-          const xAOD::IParticle& jet ) const override ;
+        Inputs getData(const xAOD::IParticle& jet) const override;
         const FTagDataDependencyNames& getDependencies() const override;
         const std::set<std::string>& getUsedRemap() const override;
         const std::string& getName() const override;

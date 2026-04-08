@@ -186,11 +186,9 @@ namespace FlavorTagInference {
         return only_electrons;
     }
 
-    std::tuple<Inputs, std::vector<const xAOD::IParticle*>> ElectronsLoader::getData(const xAOD::IParticle& jet) const {
+    Inputs ElectronsLoader::getData(const xAOD::IParticle& jet) const {
         Electrons sorted_electrons = getElectronsFromJet(jet);
-
-        // We return a dummy vector of IParticles as we don't decorate flow elements
-        return {m_seqGetter.getFeats(jet, sorted_electrons), std::vector<const xAOD::IParticle*>{}};
+        return m_seqGetter.getFeats(jet, sorted_electrons);
     }
 
     const FTagDataDependencyNames& ElectronsLoader::getDependencies() const {

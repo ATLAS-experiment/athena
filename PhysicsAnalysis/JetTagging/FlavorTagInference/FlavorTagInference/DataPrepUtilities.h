@@ -47,6 +47,7 @@ namespace FlavorTagInference {
     std::string track_prefix;
     FlipTagConfig flip;
     std::string track_link_name;
+    std::string object_link_prefix;
     std::map<std::string,std::string> remap_scalar;
     float default_output_value;
     std::string invalid_ip_key;
@@ -157,7 +158,8 @@ namespace FlavorTagInference {
     FTagOptions>
     createGetterConfig( GraphConfig& graph_config,
       FlipTagConfig flip_config,
-      std::map<std::string, std::string> remap_scalar);
+      std::map<std::string, std::string> remap_scalar,
+      const std::string& object_link_prefix);
 
     // return the scalar getter functions for NNs
     std::tuple<
