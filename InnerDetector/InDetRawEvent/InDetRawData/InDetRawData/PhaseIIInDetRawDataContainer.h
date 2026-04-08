@@ -55,9 +55,9 @@ namespace PhaseII {
       DataRange(unsigned int  begin_val, unsigned int n, unsigned int idx)
          : m_payload{ .m_range = {static_cast<std::uint32_t>(begin_val), static_cast<std::uint16_t>(n), static_cast<std::uint16_t>(idx)} }
       {
-         assert(begin_val<std::numeric_limits<std::uint32_t>::max());
-         assert(n<std::numeric_limits<std::uint16_t>::max());
-         assert(idx<std::numeric_limits<std::uint16_t>::max());
+         assert(begin_val<=std::numeric_limits<std::uint32_t>::max());
+         assert(n<=std::numeric_limits<std::uint16_t>::max());
+         assert(idx<=std::numeric_limits<std::uint16_t>::max());
       }
       DataRange(std::uint32_t begin_val, std::uint16_t  n, std::uint16_t idx)
          : m_payload{ .m_range= {begin_val, n, idx} }
@@ -83,7 +83,7 @@ namespace PhaseII {
          //       Replace this convenience method into a constructor ? But an exception could be thrown here.
          assert( end_index >= begin_index ) ;
          assert( static_cast<std::uint32_t>(begin_index) == begin_index);
-         assert( static_cast<std::size_t>(end_index -  begin_index) < std::numeric_limits<std::uint16_t>::max());
+         assert( static_cast<std::size_t>(end_index -  begin_index) <= std::numeric_limits<std::uint16_t>::max());
          assert( static_cast<std::uint16_t>(container_index) == container_index);
          return DataRange(static_cast<std::uint32_t>(begin_index),
                           static_cast<std::uint16_t>(end_index - begin_index),
