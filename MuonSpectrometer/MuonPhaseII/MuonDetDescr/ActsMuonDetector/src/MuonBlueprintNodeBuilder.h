@@ -29,6 +29,7 @@ namespace Acts {
   class GeometryContext;
   namespace Experimental {
     class StaticBlueprintNode;
+    class MaterialDesignatorBlueprintNode;
     
 }
 
@@ -43,12 +44,16 @@ namespace ActsTrk {
  */
 class MuonBlueprintNodeBuilder : public extends<AthAlgTool, IBlueprintNodeBuilder> {
 public:
+  /** @brief Abrivation of the blueprint node ptr base class */
+  using blueprintNodePtr = std::shared_ptr<Acts::Experimental::BlueprintNode>;
   /** @brief Abrivation of the blue print node pointer */
   using staticNodePtr = std::shared_ptr<Acts::Experimental::StaticBlueprintNode>;
+  /** @brief Abrivation of the material node pointer */
+  using materialNodePtr = std::shared_ptr<Acts::Experimental::MaterialDesignatorBlueprintNode>;
   /** @brief Abrivation of the surface pointer*/
   using surfacePtr = std::shared_ptr<Acts::Surface>;
   /** @brief Abrivate the vector pair of blue print nodes and associated active surfaces */
-  using BluePrintSurfPairs_t = std::pair<std::vector<staticNodePtr>, std::vector<surfacePtr>>;
+  using BluePrintSurfPairs_t = std::pair<std::vector<blueprintNodePtr>, std::vector<surfacePtr>>;
   /** @brief Abrivation of the container holding all chambers */
   using MuonChamberSet = MuonGMR4::MuonDetectorManager::MuonChamberSet;
   /** @brief Abrivation of the container holding all ms sectors */
@@ -92,6 +97,8 @@ private:
   Gaudi::Property<bool> m_alignableVolumes{this, "AlignableVolumes", true};
   /** @brief Flag to construct the passive material surfaces */
   Gaudi::Property<bool> m_buildPassiveVolumes{this, "BuildPassiveVolumes", true};
+  /** @brief Flag to assign active material on the chambers */
+  Gaudi::Property<bool> m_assignActiveMaterial{this, "AssignActiveMaterial", false};
   
   /** @brief Get the chamber's sensitive elements
     * @param gctx Geometry context
@@ -114,6 +121,16 @@ private:
   template <typename ElementSet_t>
    std::vector<surfacePtr> getPassiveMaterialSurfaces(const Acts::GeometryContext& gctx,
                                                      const std::unordered_map<unsigned int, ElementSet_t>& elementsPerStation) const;
+    
+  
+  /** @brief Get the active material for a given element representing the chamber/sector
+   *  @param element The element for which to get the active material
+   *  @return The active surface material */
+    template<typename T>    
+    std::shared_ptr<const Acts::ISurfaceMaterial>
+    getActiveMaterial(const T& element) const
+      requires (std::is_same_v<T, MuonGMR4::Chamber> ||
+              std::is_same_v<T, MuonGMR4::SpectrometerSector>);
 
   /** @brief Check if the chamber is in this node
     * @param element The element to check (chamber or sector)
