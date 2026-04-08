@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -17,9 +17,23 @@
 #include "IdDict/IdDictMgr.h"
 #include "IdDict/IdDictRange.h"
 #include "IdDict/IdDictRegion.h"
-#include <stdio.h>
-#include <assert.h>
 #include <format>
+
+namespace{
+  Identifier makeId(const IdDictFieldImplementation & impl, int det){
+    Identifier result{0};
+    impl.pack(det, result);
+    return result;
+  }
+  
+  Identifier makeId(const IdDictFieldImplementation & impl0, 
+      const IdDictFieldImplementation & impl1, int det, int subdet){
+    Identifier result{0};
+    impl0.pack(det, result);
+    impl1.pack(subdet, result);
+    return result;
+  }
+}
 
 AtlasDetectorID::AtlasDetectorID(const std::string &name,
                                  const std::string& group)
@@ -27,9 +41,7 @@ AtlasDetectorID::AtlasDetectorID(const std::string &name,
     m_group (group)
 {
 }
-AtlasDetectorID::~AtlasDetectorID() {
-    if(m_helper) delete m_helper;
-}
+AtlasDetectorID::~AtlasDetectorID() = default;
 
 const std::string& AtlasDetectorID::group() const
 {
@@ -55,127 +67,69 @@ Identifier AtlasDetectorID::mm() const {
     return Identifier{};
 }
 Identifier AtlasDetectorID::indet() const {
-    Identifier result{0};
-    // Pack field
-    m_det_impl.pack(indet_field_value(), result);
-    return result;
+  return makeId(m_det_impl, indet_field_value());
 }
 
 Identifier AtlasDetectorID::lar() const {
-    Identifier result{0};
-    // Pack field
-    m_det_impl.pack(lar_field_value(), result);
-    return result;
+  return makeId(m_det_impl, lar_field_value());
 }
 
 Identifier AtlasDetectorID::tile() const {
-    Identifier result{0};
-    // Pack field
-    m_det_impl.pack(tile_field_value(), result);
-    return result;
+  return makeId(m_det_impl, tile_field_value());
 }
 
 Identifier AtlasDetectorID::muon() const {
-    Identifier result{0};
-    // Pack field
-    m_det_impl.pack(muon_field_value(), result);
-    return result;
+  return makeId(m_det_impl, muon_field_value());
 }
 
 Identifier AtlasDetectorID::calo() const {
-    Identifier result{0};
-    // Pack field
-    m_det_impl.pack(calo_field_value(), result);
-    return result;
+  return makeId(m_det_impl, calo_field_value());
 }
 
 Identifier AtlasDetectorID::pixel() const {
-    Identifier result{0};
-    // Pack field
-    m_det_impl.pack(indet_field_value(), result);
-    m_indet_part_impl.pack(m_PIXEL_ID, result);
-    return result;
+  return makeId(m_det_impl, m_indet_part_impl, indet_field_value(), m_PIXEL_ID);
 }
 
 Identifier AtlasDetectorID::sct() const {
-    Identifier result{0};
-    // Pack field
-    m_det_impl.pack(indet_field_value(), result);
-    m_indet_part_impl.pack(m_SCT_ID, result);
-    return result;
+  return makeId(m_det_impl, m_indet_part_impl, indet_field_value(), m_SCT_ID);
 }
 
 Identifier AtlasDetectorID::trt() const {
-    Identifier result{0};
-    // Pack field
-    m_det_impl.pack(indet_field_value(), result);
-    m_indet_part_impl.pack(m_TRT_ID, result);
-    return result;
+  return makeId(m_det_impl, m_indet_part_impl, indet_field_value(), m_TRT_ID);
 }
 
 Identifier AtlasDetectorID::hgtd() const {
-    Identifier result{0};
-    // Pack field
-    m_det_impl.pack(indet_field_value(), result);
-    m_indet_part_impl.pack(m_HGTD_ID, result);
-    return result;
+  return makeId(m_det_impl, m_indet_part_impl, indet_field_value(), m_HGTD_ID);
 }
 
 Identifier AtlasDetectorID::lumi() const {
-    Identifier result{0};
-    // Pack field
-    m_det_impl.pack(indet_field_value(), result);
-    m_indet_part_impl.pack(m_LUMI_ID, result);
-    return result;
+  return makeId(m_det_impl, m_indet_part_impl, indet_field_value(), m_LUMI_ID);
 }
 
-Identifier AtlasDetectorID::lar_em() const { 
-    Identifier result{0};
-    // Pack field
-    m_det_impl.pack(lar_field_value(), result);
-    m_lar_part_impl.pack(m_LAR_EM_ID, result);
-    return result;
-}
-
-Identifier AtlasDetectorID::lar_lvl1() const {
-    Identifier result{0};
-    // Pack field
-    m_det_impl.pack(calo_field_value(), result);
-    m_calo_side_impl.pack(-1, result);
-    return result;
-}
-
-Identifier AtlasDetectorID::lar_dm() const {
-    Identifier result{0};
-    // Pack field
-    m_det_impl.pack(calo_field_value(), result);
-    m_calo_side_impl.pack(-4, result);
-    return result;
-}
-
-Identifier AtlasDetectorID::tile_dm() const {
-    Identifier result{0};
-    // Pack field
-    m_det_impl.pack(calo_field_value(), result);
-    m_calo_side_impl.pack(-5, result);
-    return result;
+Identifier AtlasDetectorID::lar_em() const {
+  return makeId(m_det_impl, m_lar_part_impl, lar_field_value(), m_LAR_EM_ID);
 }
 
 Identifier AtlasDetectorID::lar_hec() const {
-    Identifier result{0};
-    // Pack field
-    m_det_impl.pack(lar_field_value(), result);
-    m_lar_part_impl.pack(m_LAR_HEC_ID, result);
-    return result;
+  return makeId(m_det_impl, m_lar_part_impl, lar_field_value(), m_LAR_HEC_ID);
 }
 
 Identifier AtlasDetectorID::lar_fcal() const {
-    Identifier result{0};
-    // Pack field
-    m_det_impl.pack(lar_field_value(), result);
-    m_lar_part_impl.pack(m_LAR_FCAL_ID, result);
-    return result;
+  return makeId(m_det_impl, m_lar_part_impl, lar_field_value(), m_LAR_FCAL_ID);
 }
+
+Identifier AtlasDetectorID::lar_lvl1() const {
+  return makeId(m_det_impl, m_calo_side_impl, calo_field_value(), -1);
+}
+
+Identifier AtlasDetectorID::lar_dm() const {
+  return makeId(m_det_impl, m_calo_side_impl, calo_field_value(), -4);
+}
+
+Identifier AtlasDetectorID::tile_dm() const {
+  return makeId(m_det_impl, m_calo_side_impl, calo_field_value(), -5);
+}
+
 /// IdContext (indicates id length) for detector systems
 IdContext AtlasDetectorID::detsystem_context() const {
     ExpandedIdentifier id{};
@@ -222,13 +176,10 @@ int AtlasDetectorID::register_dict_tag(const IdDictMgr &dict_mgr,
 /// change of tags
 bool AtlasDetectorID::reinitialize(const IdDictMgr &dict_mgr) {
     // If no tag has been registered, then reinitialize
-    if (m_dict_tags.size() == 0){
+    if (m_dict_tags.empty() || m_dict_names.empty() ){
         return true;
     }
-    // If no dict names have been registered, then reinitialize
-    if (m_dict_names.size() == 0){
-        return true;
-    }
+    
     // Loop over dict names and check version tags
     if (m_dict_names.size() != m_dict_tags.size()) {
         ATH_MSG_ERROR("reinitialize: dict names and tags vectors not the same length ");
@@ -263,7 +214,7 @@ int AtlasDetectorID::initialize_from_dictionary(const IdDictMgr &dict_mgr) {
     }
     // Initialize helper, needed for init of AtlasDetectorID
     if (!m_helper) {
-        m_helper = std::make_unique<AtlasDetectorIDHelper>().release();
+        m_helper = std::make_unique<AtlasDetectorIDHelper>();
     }
 
     if (m_helper->initialize_from_dictionary(dict_mgr)){
@@ -378,25 +329,10 @@ AtlasDetectorID::show_to_string(const Identifier id, const IdContext *context, c
         return result;
 
     // Find the dictionary to use:
-    const IdDictDictionary *dict{nullptr};
+    const IdDictDictionary * dict = dictionary(id);
     ExpandedIdentifier expId{};
     ExpandedIdentifier prefix{}; // default is null prefix
     Identifier compact = id;
-
-    if (is_indet(id)) {
-        dict = m_indet_dict;
-    } else if (is_lar(id)) {
-        dict = m_lar_dict;
-    } else if (is_tile(id)) {
-        dict = m_tile_dict;
-    } else if (is_muon(id)) {
-        dict = m_muon_dict;
-    } else if (is_lvl1_trig_towers(id) || is_lvl1_online(id) ||
-               is_lar_dm(id) || is_tile_dm(id)) {
-        dict = m_calo_dict;
-    } else if (is_forward(id)) {
-        dict = m_fwd_dict;
-    }
 
     if (!dict) {
         ATH_MSG_WARNING(__func__<<" No detector type associated to id "<<id);
@@ -436,26 +372,10 @@ std::string AtlasDetectorID::print_to_string(Identifier id,
         unsigned int max_index = (context) ? context->end_index() : 999;
 
         // Find the dictionary to use:
-        const IdDictDictionary *dict{nullptr};
+        const IdDictDictionary *dict = dictionary(id);
         ExpandedIdentifier expId;
         ExpandedIdentifier prefix; // default is null prefix
         Identifier compact = id;
-
-        if (is_indet(id)) {
-            dict = m_indet_dict;
-        } else if (is_lar(id)) {
-            dict = m_lar_dict;
-        } else if (is_tile(id)) {
-            dict = m_tile_dict;
-        } else if (is_muon(id)) {
-            dict = m_muon_dict;
-        } else if (is_lvl1_trig_towers(id) ||  is_lvl1_online(id) ||
-                   is_lar_dm(id) || is_tile_dm(id)) {
-            dict = m_calo_dict;
-        } else if (is_forward(id)) {
-            dict = m_fwd_dict;
-        }
-
         if (!dict) {
             ATH_MSG_WARNING(__func__<<":"<<__LINE__<<" No dictionary could be associated to "<<id);
             return result;
@@ -499,10 +419,10 @@ std::string AtlasDetectorID::to_range(const ExpandedIdentifier &id) const {
 
     // Build a string from the contents of an identifier
     int fields = id.fields();
-    std::string result("");
+    std::string result;
     for (int i = 0; i < fields; ++i) {
         if (i > 0) {
-            result += '/'; // add '/' only if NOT last one
+            result += '/'; // add '/' only if NOT first one
         }
         result += std::format("{}", id[i]);
     }
@@ -520,35 +440,35 @@ int AtlasDetectorID::initLevelsFromDict(const IdDictMgr &dict_mgr) {
 
     
     const IdDictField *field{nullptr};
-
+  
     // Find out from the dictionary the detector and subdetector
     // levels and id values
-    m_DET_INDEX = 999;
-    m_SUBDET_INDEX = 999;
-    m_MUON_SUBDET_INDEX = 999;
-    m_INDET_ID = -1;
-    m_LAR_ID = -1;
-    m_TILE_ID = -1;
-    m_MUON_ID = -1;
-    m_PIXEL_ID = -1;
-    m_SCT_ID = -1;
-    m_TRT_ID = -1;
-    m_HGTD_ID = -1;
-    m_FWD_ID = -1;
-    m_ALFA_ID = -1;
-    m_BCM_ID = -1;
-    m_LUCID_ID = -1;
-    m_ZDC_ID = -1;
-    m_LAR_EM_ID = -1;
-    m_LAR_HEC_ID = -1;
-    m_LAR_FCAL_ID = -1;
-    m_LAR_FCAL_MODULE_INDEX = 999;
-    m_MDT_ID = -1;
-    m_CSC_ID = -1;
-    m_RPC_ID = -1;
-    m_TGC_ID = -1;
-    m_STGC_ID = -1;
-    m_MM_ID = -1;
+    m_DET_INDEX = invalidIndex;
+    m_SUBDET_INDEX = invalidIndex;
+    m_MUON_SUBDET_INDEX = invalidIndex;
+    m_INDET_ID = invalidId;
+    m_LAR_ID = invalidId;
+    m_TILE_ID = invalidId;
+    m_MUON_ID = invalidId;
+    m_PIXEL_ID = invalidId;
+    m_SCT_ID = invalidId;
+    m_TRT_ID = invalidId;
+    m_HGTD_ID = invalidId;
+    m_FWD_ID = invalidId;
+    m_ALFA_ID = invalidId;
+    m_BCM_ID = invalidId;
+    m_LUCID_ID = invalidId;
+    m_ZDC_ID = invalidId;
+    m_LAR_EM_ID = invalidId;
+    m_LAR_HEC_ID = invalidId;
+    m_LAR_FCAL_ID = invalidId;
+    m_LAR_FCAL_MODULE_INDEX = invalidIndex;
+    m_MDT_ID = invalidId;
+    m_CSC_ID = invalidId;
+    m_RPC_ID = invalidId;
+    m_TGC_ID = invalidId;
+    m_STGC_ID = invalidId;
+    m_MM_ID = invalidId;
 
     // Save generic dict for top levels
     const IdDictDictionary *top_dict {nullptr};
@@ -978,7 +898,7 @@ int AtlasDetectorID::initLevelsFromDict(const IdDictMgr &dict_mgr) {
         // when a pixel channel id is decoded
         if (not m_det_impl.ored_field().isEnumerated()) {
             ATH_MSG_ERROR("initLevelsFromDict - ERROR det implementation is not enumerated: "
-                          << m_det_impl.show_to_string());
+                          << m_det_impl);
             return 1;
         }
 
@@ -992,7 +912,7 @@ int AtlasDetectorID::initLevelsFromDict(const IdDictMgr &dict_mgr) {
         }
         // Replace ored field with modified one
         m_det_impl.set_ored_field(det);
-        ATH_MSG_VERBOSE("set extra bits    "<< m_det_impl.show_to_string());
+        ATH_MSG_VERBOSE("set extra bits    "<< m_det_impl);
 
         // InDet part
         m_indet_part_impl = region.implementation(m_SUBDET_INDEX);
@@ -1162,4 +1082,26 @@ AtlasDetectorID::zdc_exp             (void) const
 {
     ExpandedIdentifier result(fwd_exp());
     return (result << m_ZDC_ID);
+}
+
+const IdDictDictionary* AtlasDetectorID::dictionary(const Identifier& id) const {
+    if (is_indet(id)) {
+        return m_indet_dict;
+    }
+    if (is_lar(id)) {
+        return m_lar_dict;
+    }
+    if (is_tile(id)) {
+        return m_tile_dict;
+    }
+    if (is_muon(id)) {
+        return m_muon_dict;
+    }
+    if (is_lvl1_trig_towers(id) || is_lvl1_online(id) || is_lar_dm(id) || is_tile_dm(id)) {
+        return m_calo_dict;
+    }
+    if (is_forward(id)) {
+        return m_fwd_dict;
+    }
+    return nullptr;
 }
