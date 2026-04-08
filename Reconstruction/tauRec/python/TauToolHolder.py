@@ -11,7 +11,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
-from AthenaConfiguration.Enums import ProductionStep
+from AthenaConfiguration.Enums import ProductionStep, LHCPeriod
 from AthenaCommon.SystemOfUnits import GeV, deg
 
 ########################################################################
@@ -638,7 +638,8 @@ def TauCommonCalcVarsCfg(flags):
     _name = flags.Tau.ActiveConfig.prefix + 'TauCommonCalcVars'
 
     TauCommonCalcVars = CompFactory.getComp("TauCommonCalcVars")
-    TauCommonCalcVars = TauCommonCalcVars(name = _name)
+    TauCommonCalcVars = TauCommonCalcVars(name = _name,
+                                          doRun4 = flags.GeoModel.Run > LHCPeriod.Run3)
     
     result.setPrivateTools(TauCommonCalcVars)
     return result
@@ -650,7 +651,8 @@ def TauSubstructureCfg(flags):
     _name = flags.Tau.ActiveConfig.prefix + 'TauSubstructure'
 
     TauSubstructureVariables = CompFactory.getComp("TauSubstructureVariables")
-    TauSubstructureVariables = TauSubstructureVariables(  name = _name )
+    TauSubstructureVariables = TauSubstructureVariables(  name = _name,
+                                                          doRun4 = flags.GeoModel.Run > LHCPeriod.Run3) 
 
     result.setPrivateTools(TauSubstructureVariables)
     return result

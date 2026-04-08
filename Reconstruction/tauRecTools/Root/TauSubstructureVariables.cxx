@@ -43,8 +43,8 @@ StatusCode TauSubstructureVariables::execute(xAOD::TauJet& tau) const {
   TLorentzVector approxSubstructure4Vec;
   double clusELead = DEFAULT;
   double clusESubLead = DEFAULT;
-
-  TLorentzVector tauAxis = tauRecTools::getTauAxis(tau, m_doVertexCorrection);
+  
+  TLorentzVector tau_mom = m_doRun4 ? tau.p4() : tauRecTools::getTauAxis(tau, m_doVertexCorrection);
 
   // TODO: check which scale is needed here
   // p4 from cluster is at LC scale, p4 from vertexedCluster is at LC/EM scale for LC/EM seed jets
@@ -78,7 +78,7 @@ StatusCode TauSubstructureVariables::execute(xAOD::TauJet& tau) const {
 
     totalEnergy += clusterP4.E();
     
-    if (tauAxis.DeltaR(clusterP4) < 0.2) {
+    if (tau_mom.DeltaR(clusterP4) < 0.2) {
       double clusEnergyBE = ( cluster.energyBE(0) + cluster.energyBE(1) + cluster.energyBE(2) );
 		    
       if (clusEnergyBE > clusELead) {
@@ -115,12 +115,7 @@ StatusCode TauSubstructureVariables::execute(xAOD::TauJet& tau) const {
   }
 
   // set new approximate energy flow variables for tau ID
-  if(m_doVertexCorrection) {
-    tau.setDetail(xAOD::TauJetParameters::ptRatioEflowApprox, static_cast<float>(approxSubstructure4Vec.Pt()/ tau.ptIntermediateAxis()) );
-  }
-  else {
-    tau.setDetail(xAOD::TauJetParameters::ptRatioEflowApprox, static_cast<float>(approxSubstructure4Vec.Pt()/ tau.ptDetectorAxis()) );
-  }
+  tau.setDetail(xAOD::TauJetParameters::ptRatioEflowApprox, static_cast<float>(approxSubstructure4Vec.Pt()/ tau_mom.Pt()) );
   tau.setDetail(xAOD::TauJetParameters::mEflowApprox, static_cast<float>(approxSubstructure4Vec.M()) );
 
   float fPSSFraction = (totalEnergy != 0.) ? PSSEnergy / totalEnergy : DEFAULT;
@@ -139,7 +134,7 @@ StatusCode TauSubstructureVariables::execute(xAOD::TauJet& tau) const {
     float dR = 0.;
 
     for (size_t i=0; i < numTrack; ++i) {
-      dR = tau.track(i)->p4().DeltaR(tauAxis);
+      dR = tau.track(i)->p4().DeltaR(tau_mom);
       if (dR > dRmax) dRmax = dR;
     }
     tau.setDetail(xAOD::TauJetParameters::dRmax, dRmax);

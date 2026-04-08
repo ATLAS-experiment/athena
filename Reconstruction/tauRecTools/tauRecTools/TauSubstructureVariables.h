@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUSUBSTRUCTUREVARIABLES_H
@@ -35,6 +35,7 @@ public:
 private:
 
   Gaudi::Property<bool> m_doVertexCorrection{this, "VertexCorrection", true}; 
+  Gaudi::Property<bool> m_doRun4{this, "doRun4", false};
 
 };
 
