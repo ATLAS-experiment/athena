@@ -62,8 +62,8 @@ def RpcRdoToPrepDataToolCfg(flags, suffix ="", RDOContainer = None, **kwargs):
     result = ComponentAccumulator()
     #### Check whether the input collection contains an old legacy pad container. 
     #### Introduce the digit conversion bypass to convert them into the new RDO format
-    if flags.Input.isMC and flags.Muon.usePhaseIIGeoSetup and \
-        len([x for x in flags.Input.TypedCollections if x.find("RpcPadContainer#") != -1]):
+    if flags.Muon.usePhaseIIGeoSetup and ( \
+       not flags.Input.isMC or len([x for x in flags.Input.TypedCollections if x.find("RpcPadContainer#") != -1])):
        
         from MuonConfig.MuonByteStreamCnvTestConfig import RpcRdoToRpcDigitCfg, NrpcDigitToNrpcRDOCfg
        
@@ -85,7 +85,7 @@ def RpcRdoToPrepDataToolCfg(flags, suffix ="", RDOContainer = None, **kwargs):
     if RDOContainer: 
         kwargs.setdefault("RpcRdoContainer", RDOContainer)
 
-    if flags.Input.isMC and flags.Muon.usePhaseIIGeoSetup:
+    if flags.Muon.usePhaseIIGeoSetup:
         from MuonConfig.MuonCablingConfig import NRPCCablingConfigCfg
         result.merge(NRPCCablingConfigCfg(flags))
         from AthenaConfiguration.Enums import LHCPeriod
@@ -117,8 +117,6 @@ def RpcRdoToPrepDataToolCfg(flags, suffix ="", RDOContainer = None, **kwargs):
         if not flags.Muon.enableNRPC:
             kwargs["NrpcInputCollection"] = ""
 
-        kwargs["xAODKey"] = "xRpcMeasurements" if flags.Muon.writexAODPRD or \
-                                                  flags.Muon.usePhaseIIGeoSetup else ""
 
         #### After the tree ripping the main LHC powerline, the Rpc
         #### community has managed to introduce a 50 ns shift on top
@@ -153,13 +151,14 @@ def RpcRDODecodeCfg(flags, name="MuonRpcRdoToPrdConv", RDOContainer = None, **kw
     acc.merge(MuonRdoToPrepDataAlgCfg(flags, name, **kwargs))
    
    
-    if flags.Muon.usePhaseIIGeoSetup and flags.Input.isMC:
+    if flags.Muon.usePhaseIIGeoSetup:
         from xAODMuonTrkPrepDataCnv.MuonPrepDataCnvCfg import xRpcToPrepDataCnvAlgCfg
-        acc.merge(xRpcToPrepDataCnvAlgCfg(flags, name=f"xAODRpcToPrepDataCnvAlg{suffix}"))
         from AthenaConfiguration.Enums import LHCPeriod
         if flags.GeoModel.Run >= LHCPeriod.Run4:
             from xAODMuonViewAlgs.ViewAlgsConfig import RpcMeasViewAlgCfg
             acc.merge(RpcMeasViewAlgCfg(flags, name=f"RpcMeasViewAlg{suffix}"))
+        acc.merge(xRpcToPrepDataCnvAlgCfg(flags, name=f"xAODRpcToPrepDataCnvAlg{suffix}"))
+
     return acc
 
 
