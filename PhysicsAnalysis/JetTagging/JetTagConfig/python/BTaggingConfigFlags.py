@@ -218,7 +218,7 @@ def createBTaggingConfigFlags():
     #  - remapping (optional): any variable remapping
     btagcf.addFlag("BTagging.NNs", getNNs)
     btagcf.addFlag("BTagging.AK4TaggerName", lambda pcf: (
-        "GN2HL" if pcf.GeoModel.Run>=LHCPeriod.Run4 else "GN2v01"))
+        "GN2HLv01" if pcf.GeoModel.Run>=LHCPeriod.Run4 else "GN2v01"))
 
     # master switch for using Triton for NN inference. 
     # see athena/PhysicsAnalysis/JetTagging/FlavorTagInference/python/FlavorTagNNConfig.py

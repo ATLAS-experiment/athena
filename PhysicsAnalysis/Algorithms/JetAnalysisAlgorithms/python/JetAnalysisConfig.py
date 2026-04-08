@@ -70,7 +70,7 @@ class PreJetAnalysisConfig (ConfigBlock) :
                 alg.muons = "AnalysisMuons"
             if config.wantCopy (self.containerName) :
                 alg.jetsOut = config.copyName (self.containerName)
-                taggerName = "GN2HL" if config.geometry() >= LHCPeriod.Run4 else "GN2v01"
+                taggerName = "GN2HLv01" if config.geometry() >= LHCPeriod.Run4 else "GN2v01"
                 extraInputs = [
                     ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.DFCommonJets_jetClean_LooseBad".format(baseName=self.jetCollection)),
                     ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.DFCommonJets_jetClean_TightBad".format(baseName=self.jetCollection)),
