@@ -13,85 +13,93 @@ def RDOtoBS_Steering(flags):
     itemList = []
 
     # LAr
-    from LArGeoAlgsNV.LArGMConfig import LArGMCfg
-    acc.merge(LArGMCfg(flags))
-    from LArByteStream.LArByteStreamConfig import LArRawDataContByteStreamToolCfg
-    larBS, larExtraInputs = LArRawDataContByteStreamToolCfg(flags, InitializeForWriting=True,DSPRunMode = 4, RodBlockVersion = 10)
-    acc.merge(larBS)
-    itemList += ["LArRawChannelContainer#*"]
+    if flags.Detector.EnableLAr:
+        from LArGeoAlgsNV.LArGMConfig import LArGMCfg
+        acc.merge(LArGMCfg(flags))
+        from LArByteStream.LArByteStreamConfig import LArRawDataContByteStreamToolCfg
+        larBS, larExtraInputs = LArRawDataContByteStreamToolCfg(flags, InitializeForWriting=True,DSPRunMode = 4, RodBlockVersion = 10)
+        acc.merge(larBS)
+        itemList += ["LArRawChannelContainer#*"]
     # Tile
-    from TileGeoModel.TileGMConfig import TileGMCfg
-    acc.merge(TileGMCfg(flags))
-    from TileByteStream.TileByteStreamConfig import TileRawChannelContByteStreamToolCfg
-    tileCfg, tileExtraInputs = TileRawChannelContByteStreamToolCfg(flags, InitializeForWriting=True)
-    acc.merge(tileCfg)
-    itemList += ["TileRawChannelContainer#*"]
-    from TileConditions.TileBadChannelsConfig import TileBadChannelsCondAlgCfg
-    acc.merge( TileBadChannelsCondAlgCfg(flags) )
+    if flags.Detector.EnableTile:
+        from TileGeoModel.TileGMConfig import TileGMCfg
+        acc.merge(TileGMCfg(flags))
+        from TileByteStream.TileByteStreamConfig import TileRawChannelContByteStreamToolCfg
+        tileCfg, tileExtraInputs = TileRawChannelContByteStreamToolCfg(flags, InitializeForWriting=True)
+        acc.merge(tileCfg)
+        itemList += ["TileRawChannelContainer#*"]
+        from TileConditions.TileBadChannelsConfig import TileBadChannelsCondAlgCfg
+        acc.merge( TileBadChannelsCondAlgCfg(flags) )
 
-    if flags.GeoModel.Run is LHCPeriod.Run4:
-        #ITk pixel
-        from ITkPixelCabling.ITkPixelCablingAlgConfig import ITkPixelCablingAlgCfg
-        acc.merge(ITkPixelCablingAlgCfg(flags, name="ITkPixelCablingAlg", UseTestCabling=True))
+    if flags.GeoModel.Run >= LHCPeriod.Run4:
+        # ITk pixel
+        if flags.Detector.EnableITkPixel:
+            from ITkPixelCabling.ITkPixelCablingAlgConfig import ITkPixelCablingAlgCfg
+            acc.merge(ITkPixelCablingAlgCfg(flags, name="ITkPixelCablingAlg", UseTestCabling=True))
 
-        from PixelReadoutGeometry.PixelReadoutGeometryConfig import ITkPixelReadoutManagerCfg
-        acc.merge(ITkPixelReadoutManagerCfg(flags, name="ITkPixelReadoutManager"))
+            from PixelReadoutGeometry.PixelReadoutGeometryConfig import ITkPixelReadoutManagerCfg
+            acc.merge(ITkPixelReadoutManagerCfg(flags, name="ITkPixelReadoutManager"))
 
-        from ITkPixelByteStreamCnv.ITkPixelByteStreamCnvConfig import ITkPixelEncodingAlgCfg
-        acc.merge( ITkPixelEncodingAlgCfg(flags) )
-        itemList += ['ITkPixelRDO_Container#ITkPixelRDOs']
+            from ITkPixelByteStreamCnv.ITkPixelByteStreamCnvConfig import ITkPixelEncodingAlgCfg
+            acc.merge( ITkPixelEncodingAlgCfg(flags) )
+            itemList += ['ITkPixelRDO_Container#ITkPixelRDOs']
 
-        #ITk strips
-        from ITkStripsByteStreamCnv.ITkStripByteStreamCnvConfig import ITkStripRawContByteStreamToolProviderToolCfg
-        acc.merge(ITkStripRawContByteStreamToolProviderToolCfg(flags))
-        itemList += ['SCT_RDO_Container#ITkStripRDOs']
+        # ITk strip
+        if flags.Detector.EnableITkStrip:
+            from ITkStripsByteStreamCnv.ITkStripByteStreamCnvConfig import ITkStripRawContByteStreamToolProviderToolCfg
+            acc.merge(ITkStripRawContByteStreamToolProviderToolCfg(flags))
+            itemList += ['SCT_RDO_Container#ITkStripRDOs']
 
     else:
-        if flags.Trigger.enableL1CaloLegacy or not flags.Trigger.enableL1MuonPhase1:
-            itemList += ["ROIB::RoIBResult#RoIBResult"]
-
-        if flags.Trigger.enableL1MuonPhase1 or flags.Trigger.enableL1CaloPhase1:
-            itemList += ["xAOD::TrigCompositeContainer#L1TriggerResult"]
-
-        from TrigT1ResultByteStream.TrigT1ResultByteStreamConfig import L1TriggerByteStreamEncoderCfg
-        acc.merge(L1TriggerByteStreamEncoderCfg(flags))
-
-        from InDetConfig.InDetPrepRawDataFormationConfig import (
-            PixelClusterizationCfg,
-            SCTClusterizationCfg,
-            InDetTRT_RIO_MakerCfg,
-        )
-
         # Pixel
-        from PixelConditionsAlgorithms.PixelConditionsConfig import PixelCablingCondAlgCfg, PixelHitDiscCnfgAlgCfg
-        acc.merge(PixelCablingCondAlgCfg(flags))
-        acc.merge(PixelHitDiscCnfgAlgCfg(flags))
-        acc.merge(PixelClusterizationCfg(flags))
-        itemList += ["PixelRDO_Container#*"]
+        if flags.Detector.EnablePixel:
+            from InDetConfig.InDetPrepRawDataFormationConfig import PixelClusterizationCfg
+            from PixelConditionsAlgorithms.PixelConditionsConfig import PixelCablingCondAlgCfg, PixelHitDiscCnfgAlgCfg
+            acc.merge(PixelCablingCondAlgCfg(flags))
+            acc.merge(PixelHitDiscCnfgAlgCfg(flags))
+            acc.merge(PixelClusterizationCfg(flags))
+            itemList += ["PixelRDO_Container#*"]
+
         # SCT
+        if flags.Detector.EnableSCT:
+            from InDetConfig.InDetPrepRawDataFormationConfig import SCTClusterizationCfg
+            acc.merge(SCTClusterizationCfg(flags))
+            itemList += ["SCT_RDO_Container#*"]
 
-        acc.merge(SCTClusterizationCfg(flags))
-        itemList += ["SCT_RDO_Container#*"]
         # TRT
-        acc.merge(InDetTRT_RIO_MakerCfg(flags))
-        itemList += ["TRT_RDO_Container#*"]
+        if flags.Detector.EnableTRT:
+            from InDetConfig.InDetPrepRawDataFormationConfig import InDetTRT_RIO_MakerCfg
+            acc.merge(InDetTRT_RIO_MakerCfg(flags))
+            itemList += ["TRT_RDO_Container#*"]
 
-        from MuonConfig.MuonRdoDecodeConfig import (
-            MuonRDOtoPRDConvertorsCfg
-        )
-
+    # Muon
+    if flags.Detector.EnableMuon:
+        from MuonConfig.MuonRdoDecodeConfig import MuonRDOtoPRDConvertorsCfg
         acc.merge(MuonRDOtoPRDConvertorsCfg(flags))
 
         # MDT
-        itemList += ["MdtCsmContainer#*"]
+        if flags.Detector.EnableMDT:
+            itemList += ["MdtCsmContainer#*"]
         # RPC
-        itemList += ["RpcPadContainer#*"]
+        if flags.Detector.EnableRPC:
+            itemList += ["RpcPadContainer#*"]
         # TGC
-        itemList += ["TgcRdoContainer#*"]
+        if flags.Detector.EnableTGC:
+            itemList += ["TgcRdoContainer#*"]
         # MMG -- no converter?
         # itemList += ["Muon::MM_RawDataContainer#*"]
         # sTGC -- no converter?
         # itemList += ["Muon::STGC_RawDataContainer#*"]
+
+    # L1 trigger
+    if flags.Trigger.enableL1CaloLegacy or not flags.Trigger.enableL1MuonPhase1:
+          itemList += ["ROIB::RoIBResult#RoIBResult"]
+
+    if flags.Trigger.enableL1MuonPhase1 or flags.Trigger.enableL1CaloPhase1:
+          itemList += ["xAOD::TrigCompositeContainer#L1TriggerResult"]
+
+    from TrigT1ResultByteStream.TrigT1ResultByteStreamConfig import L1TriggerByteStreamEncoderCfg
+    acc.merge(L1TriggerByteStreamEncoderCfg(flags))
 
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamWriteCfg
     acc.merge(ByteStreamWriteCfg(flags, itemList))
