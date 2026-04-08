@@ -91,12 +91,15 @@ namespace MuonR4{
 
                 cmbMeas->setPrimaryStrip(m1);
                 cmbMeas->setSecondaryStrip(m2);
-                ATH_MSG_VERBOSE("Combine "<<m_idHelperSvc->toString(xAOD::identify(m1))
-                                <<" & "<<m_idHelperSvc->toString(xAOD::identify(m2)));
-                if (m_idHelperSvc->measuresPhi(xAOD::identify(m1)) ==
-                    m_idHelperSvc->measuresPhi(xAOD::identify(m2))) {
-                    THROW_EXCEPTION("Cannot combine "<<m_idHelperSvc->toString(xAOD::identify(m1))
-                                <<" & "<<m_idHelperSvc->toString(xAOD::identify(m2)));
+                const Identifier id1{xAOD::identify(m1)}, id2{xAOD::identify(m2)};
+                ATH_MSG_VERBOSE("Combine "<<m_idHelperSvc->toString(id1)
+                                <<" & "<<m_idHelperSvc->toString(id2));
+                const sTgcIdHelper& sIdHelper{m_idHelperSvc->stgcIdHelper()};
+                if ((m1->type() != xAOD::UncalibMeasType::sTgcStripType || 
+                     sIdHelper.channelType(id1) == sIdHelper.channelType(id2))&&
+                    m_idHelperSvc->measuresPhi(id1) == m_idHelperSvc->measuresPhi(id2)) {
+                    THROW_EXCEPTION("Cannot combine "<<m_idHelperSvc->toString(id1)
+                                <<" & "<<m_idHelperSvc->toString(id2));
                 }
                 return cmbMeas;
             };
