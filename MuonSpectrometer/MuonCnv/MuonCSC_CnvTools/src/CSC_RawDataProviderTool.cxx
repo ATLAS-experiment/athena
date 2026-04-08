@@ -100,8 +100,6 @@ StatusCode CSC_RawDataProviderTool::convertIntoContainer(
 
 StatusCode CSC_RawDataProviderTool::convert(const std::vector<IdentifierHash>& rdoIdhVect, 
                                             const EventContext& ctx) const {
-    IdContext cscContext = m_idHelperSvc->cscIdHelper().module_context();
-
     ROBFragmentList vecOfRobf;
     std::vector<uint32_t> robIds;
 
