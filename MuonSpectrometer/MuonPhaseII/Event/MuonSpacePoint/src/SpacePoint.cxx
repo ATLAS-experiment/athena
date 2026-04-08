@@ -30,13 +30,13 @@ namespace MuonR4{
     using Cov_t = SpacePoint::Cov_t;
     
     SpacePoint::SpacePoint(const xAOD::UncalibratedMeasurement* primMeas,
-                           const xAOD::UncalibratedMeasurement* secondMeas) : 
+                           const xAOD::UncalibratedMeasurement* secondMeas): 
         m_primaryMeas{primMeas},
         m_secondaryMeas{secondMeas} {
         /// In case of 2D measurements like sTgc-pads or BI-RPC strips we can directly take the covariance
         /// from the measurement itself. To indicate that the space point measures both, eta & phi coordinate
         /// set the secondary measurement to be the primary one
-        if (primMeas->numDimensions() == 2) {
+        if (!secondMeas && primMeas->numDimensions() == 2) {
             m_secondaryMeas = m_primaryMeas;
         } 
     }

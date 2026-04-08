@@ -43,9 +43,9 @@ if __name__=="__main__":
     ####
     flags, cfg = setupGeoR4TestCfg(args,flags)
     cfg.getService("MessageSvc").setVerbose = ["ActsMuonSegmentRefitAlg", "SegmentExtrapolationTest"]
-    # cfg.getService("MessageSvc").setDebug = ["SegmentExtrapolationTest"]
+    cfg.getService("MessageSvc").setDebug = ["SegmentExtrapolationTest"]
    
-    # cfg.getService("MessageSvc").setVerbose = []
+    cfg.getService("MessageSvc").setVerbose = []
     cfg.getService("MessageSvc").setDebug = []
     
     cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,

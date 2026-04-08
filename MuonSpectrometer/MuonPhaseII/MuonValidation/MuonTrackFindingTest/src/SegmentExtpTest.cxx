@@ -278,13 +278,15 @@ namespace MuonValR4{
                                                                           sp->secondaryMeasurement());
                                                         
                     if ((xPos - mPos).mag() > 1.e-3) {
-                        ATH_MSG_ERROR("The calibrated position from the xAOD util function "<<
+                        ATH_MSG_ERROR("The calibrated position from the xAOD util function"<<
                                       " does not match the expectation from this test. xAOD: "
-                            <<Amg::toString(xPos)<<", test: "<<Amg::toString(mPos));
+                            <<Amg::toString(xPos)<<", test: "<<Amg::toString(mPos)
+                            <<", combined: "<<(sp->primaryMeasurement() != sp->secondaryMeasurement())
+                        );
                         retCode = StatusCode::FAILURE;
                     }
                     if (!xCov.isApprox(covMat, 1.e-3)) {
-                        ATH_MSG_ERROR("The calibrated covariance from the xAOD util function "<<
+                        ATH_MSG_ERROR("The calibrated covariance from the xAOD util function"<<
                                       " does not match the expectation from this test. xAOD:\n"
                             <<Amg::toString(xCov)<<",\ntest:\n"<<Amg::toString(covMat));
                         retCode = StatusCode::FAILURE;

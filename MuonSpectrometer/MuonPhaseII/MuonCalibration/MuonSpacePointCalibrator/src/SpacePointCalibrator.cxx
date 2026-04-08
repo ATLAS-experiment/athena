@@ -113,7 +113,7 @@ namespace MuonR4{
         CalibSpacePointPtr calibSP{};
         ATH_MSG_VERBOSE("Calibrate "<<(*spacePoint) <<" -> updated pos "<<Amg::toString(calibSpPos));
         switch (spacePoint->type()) {
-            case xAOD::UncalibMeasType::MdtDriftCircleType: {
+           case xAOD::UncalibMeasType::MdtDriftCircleType: {
                 const Amg::Vector3D locClosestApproach = posInChamb 
                                                        + Amg::intersect<3>(spPos, chDir,
                                                                            posInChamb, dirInChamb).value_or(0) * dirInChamb;
