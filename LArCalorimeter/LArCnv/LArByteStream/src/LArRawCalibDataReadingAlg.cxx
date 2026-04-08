@@ -142,7 +142,6 @@ LArRawCalibDataReadingAlg::LArRawCalibDataReadingAlg(const std::string& name, IS
       ATH_MSG_ERROR("Configuration problem, property 'SubCaloPreselection' set to " << m_subCaloPreselection.value() << ", expect 'EM', 'HEC' or 'FCAL'");
       return StatusCode::FAILURE;
     }
-    std::cout << "set sizes:" << subcaloFTs.size() << ", " << m_vFinalPreselection.size() << std::endl;
     if (m_vFinalPreselection.size()>0) {
       //Form the intersection of the preselection give as subdet and side/FT/slot
       for(auto it = m_vFinalPreselection.begin(); it != m_vFinalPreselection.end(); ) {
