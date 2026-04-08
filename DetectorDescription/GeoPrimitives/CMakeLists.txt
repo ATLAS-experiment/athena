@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # $Id: CMakeLists.txt 744450 2016-05-03 12:38:18Z krasznaa $
 
@@ -41,6 +41,6 @@ if( NOT XAOD_STANDALONE )
        atlas_add_test( ${_theExec} 
                        SOURCES  ${_exeFile}
                        LINK_LIBRARIES GeoPrimitives GaudiKernel
-                       POST_EXEC_SCRIPT nopost.sh) 
+                       POST_EXEC_SCRIPT noerror.sh)
    endforeach()
 endif()

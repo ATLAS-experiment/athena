@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name.
 atlas_subdir( GeoModelUtilities )
@@ -43,7 +43,7 @@ atlas_add_test( GeoAlignStore_test
                 INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                 LINK_LIBRARIES ${GEOMODEL_LIBRARIES} ${ROOT_LIBRARIES} GeoModelUtilities
                 PROPERTIES TIMEOUT 900
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
 # Code in this file makes heavy use of eigen and runs orders of magnitude
 # more slowly without optimization.  So force this to be optimized even
 # in debug builds.  If you need to debug it you might want to change this.
