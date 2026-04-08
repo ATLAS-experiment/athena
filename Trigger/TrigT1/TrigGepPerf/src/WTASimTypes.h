@@ -57,7 +57,7 @@ const phi_t PHI_LEN = 64;
 const phi_t HALF_PHI_LEN = PHI_LEN / 2;
 const float PHI_WIDTH = (fl_PHI_MAX - (-fl_PHI_MAX)) / PHI_LEN;
 #define CORE_DIST 8
-#elif defined(FLOATING_POINT_SIMULATION)
+#elif defined(FLOATING_POINT_SIMULATION) || defined(__CPPCHECK__)
 typedef float pt_t;
 typedef float eta_t;
 typedef float phi_t;
