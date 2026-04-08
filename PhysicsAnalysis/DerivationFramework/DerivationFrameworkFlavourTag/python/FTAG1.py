@@ -108,6 +108,8 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
             "GlobalNeutralParticleFlowObjects",
             "CHSGChargedParticleFlowObjects",
             "CHSGNeutralParticleFlowObjects",
+            "CSSKGChargedParticleFlowObjects",
+            "CSSKGNeutralParticleFlowObjects",
             "CaloCalTopoClusters",
             "TauJets",
             "TauNeutralParticleFlowObjects",
