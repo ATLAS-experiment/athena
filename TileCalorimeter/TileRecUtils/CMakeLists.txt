@@ -66,58 +66,58 @@ atlas_add_test( TileRawChannelBuilderFitConfig_test
                  SCRIPT python -m TileRecUtils.TileRawChannelBuilderFitConfig
                  PROPERTIES TIMEOUT 300
                  PRIVATE_WORKING_DIRECTORY
-                 POST_EXEC_SCRIPT nopost.sh)
+                 POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( TileRawChannelBuilderOptConfig_test
                  SCRIPT python -m TileRecUtils.TileRawChannelBuilderOptConfig
                  PROPERTIES TIMEOUT 300
                  PRIVATE_WORKING_DIRECTORY
-                 POST_EXEC_SCRIPT nopost.sh)
+                 POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( TileRawChannelBuilderMFConfig_test
                  SCRIPT python -m TileRecUtils.TileRawChannelBuilderMFConfig
                  PROPERTIES TIMEOUT 300
                  PRIVATE_WORKING_DIRECTORY
-                 POST_EXEC_SCRIPT nopost.sh)
+                 POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( TileRawChannelBuilderWienerConfig_test
                  SCRIPT python -m TileRecUtils.TileRawChannelBuilderWienerConfig
                  PROPERTIES TIMEOUT 300
                  PRIVATE_WORKING_DIRECTORY
-                 POST_EXEC_SCRIPT nopost.sh)
+                 POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( TileCellNoiseFilterConfig_test
                  SCRIPT python -m TileRecUtils.TileCellNoiseFilterConfig
                  PROPERTIES TIMEOUT 300
                  PRIVATE_WORKING_DIRECTORY
-                 POST_EXEC_SCRIPT nopost.sh)
+                 POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( TileCellBuilderConfig_test
                  SCRIPT python -m TileRecUtils.TileCellBuilderConfig
                  PROPERTIES TIMEOUT 300
                  PRIVATE_WORKING_DIRECTORY
-                 POST_EXEC_SCRIPT nopost.sh)
+                 POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( TileDQstatusConfig_test
                  SCRIPT python -m TileRecUtils.TileDQstatusConfig
                  PROPERTIES TIMEOUT 300
                  PRIVATE_WORKING_DIRECTORY
-                 POST_EXEC_SCRIPT nopost.sh)
+                 POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( TileRawChannelCorrectionConfig_test
                  SCRIPT python -m TileRecUtils.TileRawChannelCorrectionConfig
                  PROPERTIES TIMEOUT 300
                  PRIVATE_WORKING_DIRECTORY
-                 POST_EXEC_SCRIPT nopost.sh)
+                 POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( TileRawChannelMakerConfig_test
                  SCRIPT python -m TileRecUtils.TileRawChannelMakerConfig
                  PROPERTIES TIMEOUT 300
                  PRIVATE_WORKING_DIRECTORY
-                 POST_EXEC_SCRIPT nopost.sh)
+                 POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( TileCellMakerConfig_test
                  SCRIPT python -m TileRecUtils.TileCellMakerConfig
                  PROPERTIES TIMEOUT 300
                  PRIVATE_WORKING_DIRECTORY
-                 POST_EXEC_SCRIPT nopost.sh)
+                 POST_EXEC_SCRIPT noerror.sh)
