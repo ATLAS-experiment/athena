@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( IdDict )
@@ -14,52 +14,52 @@ atlas_add_test(IdDictLabel_test
   SOURCES test/IdDictLabel_test.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} IdDict
-  POST_EXEC_SCRIPT nopost.sh 
+  POST_EXEC_SCRIPT noerror.sh
 )
 
 atlas_add_test(IdDictField_test
   SOURCES test/IdDictField_test.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} IdDict
-  POST_EXEC_SCRIPT nopost.sh 
+  POST_EXEC_SCRIPT noerror.sh
 )
 
 atlas_add_test(IdDictRegion_test
   SOURCES test/IdDictRegion_test.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} IdDict Identifier
-  POST_EXEC_SCRIPT nopost.sh 
+  POST_EXEC_SCRIPT noerror.sh
 )
 atlas_add_test(IdDictSubRegion_test
   SOURCES test/IdDictSubRegion_test.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} IdDict Identifier
-  POST_EXEC_SCRIPT nopost.sh 
+  POST_EXEC_SCRIPT noerror.sh
 )
 
 atlas_add_test(IdDictRange_test
   SOURCES test/IdDictRange_test.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} IdDict
-  POST_EXEC_SCRIPT nopost.sh 
+  POST_EXEC_SCRIPT noerror.sh
 )
 atlas_add_test(IdDictRangeRef_test
   SOURCES test/IdDictRangeRef_test.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} IdDict
-  POST_EXEC_SCRIPT nopost.sh 
+  POST_EXEC_SCRIPT noerror.sh
 )
 atlas_add_test(IdDictReference_test
   SOURCES test/IdDictReference_test.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} IdDict
-  POST_EXEC_SCRIPT nopost.sh 
+  POST_EXEC_SCRIPT noerror.sh
 )
 atlas_add_test(IdDictDictionaryRef_test
   SOURCES test/IdDictDictionaryRef_test.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} IdDict
-  POST_EXEC_SCRIPT nopost.sh 
+  POST_EXEC_SCRIPT noerror.sh
 )
 
 
@@ -67,14 +67,14 @@ atlas_add_test(IdDictDictionary_test
   SOURCES test/IdDictDictionary_test.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} IdDict
-  POST_EXEC_SCRIPT nopost.sh 
+  POST_EXEC_SCRIPT noerror.sh
 )
 
 atlas_add_test(get_bits_test
   SOURCES test/get_bits_test.cxx src/get_bits.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} IdDict Identifier
-  POST_EXEC_SCRIPT nopost.sh 
+  POST_EXEC_SCRIPT noerror.sh
 )
 
 atlas_add_test(IdDictGroup_test
@@ -87,5 +87,5 @@ atlas_add_test(IdDictFieldImplementation_test
   SOURCES test/IdDictFieldImplementation_test.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} IdDict TestTools AthenaKernel
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
