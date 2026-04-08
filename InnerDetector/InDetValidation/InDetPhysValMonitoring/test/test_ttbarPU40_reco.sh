@@ -39,7 +39,6 @@ conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultCond
 run Reco_tf.py \
   --runNumber="801271" \
   --AMITag="r14519" \
-  --autoConfiguration="everything" \
   --conditionsTag "default:${conditions}" \
   --inputRDOFile     ${ArtInFile} \
   --outputAODFile   physval.AOD.root \

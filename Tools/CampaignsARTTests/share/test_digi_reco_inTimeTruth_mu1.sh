@@ -44,7 +44,6 @@ export ATHENA_CORE_NUMBER=1
 
 run "RAWtoALL" Reco_tf.py \
   --athenaMPEventsBeforeFork "1" \
-  --autoConfiguration "everything" \
   --conditionsTag "all:${default_condition}" \
   --digiSteeringConf "StandardInTimeOnlyTruth" \
   --geometryVersion "all:${default_geometry}" \

@@ -16,7 +16,6 @@ ATHENA_CORE_NUMBER=${NTHREADS} Reco_tf.py \
     --maxEvents  ${NEVENTS} \
     --perfmon 'fullmonmt' \
     --multithreaded 'True' \
-    --autoConfiguration 'everything' \
     --conditionsTag "all:${conditions}" \
     --postInclude 'all:PyJobTransforms.UseFrontier' \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsLegacyWorkflowFlags" \
