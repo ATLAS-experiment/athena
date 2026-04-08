@@ -70,12 +70,9 @@ namespace FlavorTagInference {
         return only_particles;
     }
 
-    std::tuple<Inputs, std::vector<const xAOD::IParticle*>> FlowElementsLoader::getData(
-      const xAOD::IParticle& jet) const {
+    Inputs FlowElementsLoader::getData(const xAOD::IParticle& jet) const {
         FlowElements sorted_flows = getFlowElementsFromJet(jet);
-
-        // We return a dummy vector of IParticles as we don't decorate flow elements
-        return std::make_tuple(m_seqGetter.getFeats(jet, sorted_flows), std::vector<const xAOD::IParticle *>{});
+        return m_seqGetter.getFeats(jet, sorted_flows);
     }
 
     const FTagDataDependencyNames& FlowElementsLoader::getDependencies() const {

@@ -5,6 +5,7 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #include "FlavorTagInference/FlipTagEnums.h"
 #include "FlavorTagInference/TracksLoader.h"
 #include "FlavorTagInference/StringUtils.h"
+#include "xAODTracking/TrackParticleContainer.h"
 
 namespace FlavorTagInference {
     // factory for functions which return the sort variable we
@@ -297,6 +298,15 @@ namespace FlavorTagInference {
         m_deps.bTagInputs.insert(options.track_link_name);
         m_used_remap = m_seqGetter.getUsedRemap();
         m_name = cfg.name;
+        if (!options.object_link_prefix.empty()) {
+            std::string link_dec = options.object_link_prefix + "_TrackLinks";
+            if (options.remap_scalar.contains(link_dec)) {
+                m_used_remap.insert(link_dec);
+                link_dec = options.remap_scalar.at(link_dec);
+            }
+            m_linkDecorator = std::make_unique<LinkDec>(link_dec);
+            m_deps.bTagOutputs.insert(link_dec);
+        }
     }
 
 
@@ -318,21 +328,26 @@ namespace FlavorTagInference {
         return only_tracks;
     }
 
-    std::tuple<Inputs, std::vector<const xAOD::IParticle*>>
-    TracksLoader::getData(const xAOD::IParticle& jet) const
+    Inputs TracksLoader::getData(const xAOD::IParticle& jet) const
     {
         Tracks sorted_tracks = getTracksFromJet(jet);
         Tracks flipped_tracks = m_trackFlipper(sorted_tracks, jet);
-        
-        // cast to IParticle for aux task decoration
-        // this could probably be templated since we cast back again later
-        std::vector<const xAOD::IParticle*> flipped_iparticles;
-        for (const auto& trk: flipped_tracks) {
-          flipped_iparticles.push_back(trk);
-        }
 
-        Inputs features = m_seqGetter.getFeats(jet, flipped_tracks);
-        return std::make_tuple(features, flipped_iparticles);
+        TrackLinks links;
+        links.reserve(flipped_tracks.size());
+        for (const xAOD::TrackParticle* trk : flipped_tracks) {
+            TrackLinks::value_type link;
+            link.toIndexedElement(
+                *static_cast<const TPC*>(trk->container()), trk->index());
+            links.push_back(std::move(link));
+        }
+        if (m_linkDecorator) (*m_linkDecorator)(jet) = std::move(links);
+
+        return m_seqGetter.getFeats(jet, flipped_tracks);
+    }
+
+    void TracksLoader::setDefaults(const xAOD::IParticle& jet) const {
+        if (m_linkDecorator) (*m_linkDecorator)(jet) = {};
     }
 
     //! kept for DL2 track loading only. Can be removed once DL2 is fully deprecated.

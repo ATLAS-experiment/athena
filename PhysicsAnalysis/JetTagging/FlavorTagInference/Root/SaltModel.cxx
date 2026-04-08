@@ -103,7 +103,7 @@ namespace FlavorTagInference {
         if (underscore_pos != std::string::npos) {
           model_names.insert(name.substr(0, underscore_pos));
         } else {
-          return std::string("UnknownModelName");
+          return std::string("");
         }
       }
       if (model_names.size() != 1) {

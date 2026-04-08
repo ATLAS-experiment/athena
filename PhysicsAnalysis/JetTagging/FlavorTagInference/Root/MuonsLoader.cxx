@@ -143,11 +143,9 @@ namespace FlavorTagInference {
         return only_muons;
     }
 
-    std::tuple<Inputs, std::vector<const xAOD::IParticle*>> MuonsLoader::getData(const xAOD::IParticle& jet) const {
+    Inputs MuonsLoader::getData(const xAOD::IParticle& jet) const {
         Muons sorted_muons = getMuonsFromJet(jet);
-
-        // We return a dummy vector of IParticles as we don't decorate muons
-        return {m_seqGetter.getFeats(jet, sorted_muons), std::vector<const xAOD::IParticle*>{}};
+        return m_seqGetter.getFeats(jet, sorted_muons);
     }
 
     const FTagDataDependencyNames& MuonsLoader::getDependencies() const {

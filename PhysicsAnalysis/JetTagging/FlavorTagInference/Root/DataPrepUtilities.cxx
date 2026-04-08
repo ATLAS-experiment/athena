@@ -135,6 +135,7 @@ namespace FlavorTagInference {
     : track_prefix ("btagIp_"),
       flip (FlipTagConfig::STANDARD),
       track_link_name ("BTagTrackToJetAssociator"),
+      object_link_prefix (""),
       default_output_value (NAN),
       invalid_ip_key ("invalidIp"),
       electron_link_name("FTagElectrons"),
@@ -238,7 +239,8 @@ namespace FlavorTagInference {
       FTagOptions>
     createGetterConfig( GraphConfig& config,
       FlipTagConfig flip_config,
-      std::map<std::string, std::string> remap_scalar
+      std::map<std::string, std::string> remap_scalar,
+      const std::string& object_link_prefix
     ){
 
       // we rewrite the inputs if we're using flip taggers
@@ -342,6 +344,15 @@ namespace FlavorTagInference {
       }
       if (auto h = remap_scalar.extract(options.muon_link_name)) {
         options.muon_link_name = h.mapped();
+      }
+      {
+        std::string link_prefix = object_link_prefix;
+        if (flip_config != FlipTagConfig::STANDARD) {
+          std::string ctx = "building negative tag b-tagger";
+          link_prefix = str::sub_first(
+              flip_converters, link_prefix, ctx);
+        }
+        options.object_link_prefix = link_prefix;
       }
       options.flip = flip_config;
       options.remap_scalar = remap_scalar;
@@ -513,10 +524,11 @@ namespace FlavorTagInference {
     std::vector<FTagInputConfig>,
     std::vector<ConstituentsInputConfig>,
     FTagOptions>
-  createGetterConfig<lwt::GraphConfig, lwt::OutputNodeConfig>( 
+  createGetterConfig<lwt::GraphConfig, lwt::OutputNodeConfig>(
     lwt::GraphConfig& config,
     FlipTagConfig flip_config,
-    std::map<std::string, std::string> remap_scalar
+    std::map<std::string, std::string> remap_scalar,
+    const std::string& object_link_prefix
   );
 
   template
@@ -524,10 +536,11 @@ namespace FlavorTagInference {
     std::vector<FTagInputConfig>,
     std::vector<ConstituentsInputConfig>,
     FTagOptions>
-  createGetterConfig<SaltModelGraphConfig::GraphConfig, SaltModelGraphConfig::OutputNodeConfig>( 
+  createGetterConfig<SaltModelGraphConfig::GraphConfig, SaltModelGraphConfig::OutputNodeConfig>(
     SaltModelGraphConfig::GraphConfig& config,
     FlipTagConfig flip_config,
-    std::map<std::string, std::string> remap_scalar
+    std::map<std::string, std::string> remap_scalar,
+    const std::string& object_link_prefix
   );
 
   template

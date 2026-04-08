@@ -80,7 +80,7 @@ namespace FlavorTagInference {
     class ConstituentLoaderTauCluster : public IConstituentsLoader {
       public:
         ConstituentLoaderTauCluster(const ConstituentsInputConfig& cfg, double max_cluster_dr, bool doVertexCorrection);
-        std::tuple<Inputs, std::vector<const xAOD::IParticle*>> getData(const xAOD::IParticle& p) const override ;
+        Inputs getData(const xAOD::IParticle& p) const override;
         const std::string& getName() const override;
         const ConstituentsType& getType() const override;
         const FTagDataDependencyNames& getDependencies() const override;
