@@ -63,7 +63,7 @@ namespace ORUtils
     if(!m_tauLabel.empty()) {
       ATH_MSG_DEBUG("Configuring tau OR with label: " << m_tauLabel);
       m_tauDecHelper =
-        std::make_unique<OverlapDecorationHelper<columnar::ContainerId::particle2>>
+        std::make_unique<OverlapDecorationHelper<columnar::Particle2Def>>
           (m_tauLabel, m_outputLabel, m_outputPassValue);
       addSubtool(*m_tauDecHelper);
     }
@@ -72,7 +72,7 @@ namespace ORUtils
     if(!m_antiTauLabel.empty()) {
       ATH_MSG_DEBUG("Configuring anti-tau OR with label: " << m_antiTauLabel);
       m_antiTauDecHelper =
-        std::make_unique<OverlapDecorationHelper<columnar::ContainerId::particle2>>
+        std::make_unique<OverlapDecorationHelper<columnar::Particle2Def>>
           (m_antiTauLabel, m_outputLabel, m_outputPassValue);
       addSubtool(*m_antiTauDecHelper);
     }

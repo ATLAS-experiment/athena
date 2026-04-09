@@ -28,9 +28,9 @@ namespace columnar
 {
   // Type aliases for ColumnarModeArray (hardcoded for this test)
   using MyTool = ColumnarTool<ColumnarModeArray>;
-  template<typename CT> using MyAccessor = AccessorTemplate<ContainerId::particle,CT,ColumnAccessMode::input,ColumnarModeArray>;
-  template<typename CT> using MyDecorator = AccessorTemplate<ContainerId::particle,CT,ColumnAccessMode::output,ColumnarModeArray>;
-  template<typename CT> using MyUpdater = AccessorTemplate<ContainerId::particle,CT,ColumnAccessMode::update,ColumnarModeArray>;
+  template<typename CT> using MyAccessor = AccessorTemplate<ParticleDef,CT,ColumnAccessMode::input,ColumnarModeArray>;
+  template<typename CT> using MyDecorator = AccessorTemplate<ParticleDef,CT,ColumnAccessMode::output,ColumnarModeArray>;
+  template<typename CT> using MyUpdater = AccessorTemplate<ParticleDef,CT,ColumnAccessMode::update,ColumnarModeArray>;
 
 
   // ==========================================================================

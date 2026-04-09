@@ -24,7 +24,7 @@ namespace columnar
   inline constexpr ColumnarOffsetType invalidObjectIndex = static_cast<ColumnarOffsetType>(-1);
 
 
-  /// @brief the `ContainerId::name` for the event context
+  /// @brief the name for the event context container id
   inline constexpr std::string_view eventContextCIName = "eventContext";
 
   /// @brief the default name for the column containing the event range

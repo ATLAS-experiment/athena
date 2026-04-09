@@ -93,7 +93,7 @@ namespace ORUtils
       //
 
       /// IDTrack type
-      using MyTrackDef = columnar::VariantContainerId<columnar::ContainerId::track0,columnar::ContainerId::track0, columnar::ContainerId::track1>;
+      using MyTrackDef = columnar::VariantContainerId<columnar::Track0Def,columnar::Track0Def, columnar::Track1Def>;
 
       /// Columnar accessors
       struct Accessors final : columnar::ColumnarTool<>

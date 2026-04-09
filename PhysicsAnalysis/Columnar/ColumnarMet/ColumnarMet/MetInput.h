@@ -28,7 +28,7 @@ namespace columnar
     /// but with MET being the only user (so far) it is a specialized
     /// helper for the MET tools.
 
-    template<ContainerIdConcept CI = ContainerId::particle,typename CM=ColumnarModeDefault>
+    template<ContainerIdConcept CI = ParticleDef,typename CM=ColumnarModeDefault>
     struct InputMomentumAccessors final
     {
       InputMomentumAccessors (ColumnarTool<CM>& columnarBase)
@@ -68,7 +68,7 @@ namespace columnar
 
 
 
-    template<ContainerIdConcept CI = ContainerId::particle,typename CM = ColumnarModeDefault> class OriginalObjectHandle;
+    template<ContainerIdConcept CI = ParticleDef,typename CM = ColumnarModeDefault> class OriginalObjectHandle;
     template<ContainerIdConcept CI,typename CM> OriginalObjectHandle (const asg::AsgTool&,ObjectRange<CI,CM>) -> OriginalObjectHandle<CI,CM>;
 
     template<ContainerIdConcept CI> class OriginalObjectHandle<CI,ColumnarModeXAOD> final
@@ -84,7 +84,7 @@ namespace columnar
       {
         if (!container.empty())
         {
-          using namespace MetDef;
+          using namespace MetHelperDefs;
           m_originalInputs = !acc_originalObject.isAvailable(*container.getXAODObject().front());
           m_isShallowCopy = dynamic_cast<const xAOD::ShallowAuxContainer*>(container.getXAODObject().front()->container()->getConstStore());
           if (tool.msgLvl(MSG::VERBOSE))
@@ -109,7 +109,7 @@ namespace columnar
           return id;
         } else
         {
-          using namespace MetDef;
+          using namespace MetHelperDefs;
           auto *originalObject = *acc_originalObject(id.getXAODObject());
           if (!originalObject)
             throw std::runtime_error ("originalObjectLink not available for MET input");
@@ -119,7 +119,7 @@ namespace columnar
 
       ObjectId<CI,CM> getNominalObject (const ObjectId<CI,CM>& jet) const
       {
-        using namespace MetDef;
+        using namespace MetHelperDefs;
         if (acc_nominalObject.isAvailable(jet.getXAODObject())) {
           auto nominal = acc_nominalObject(jet.getXAODObject());
           if (nominal && *nominal)

@@ -100,7 +100,7 @@ inline float get_eta_calo(const xAOD::CaloCluster& cluster, int author,
 namespace columnar {
   namespace ClusterHelpers {
 
-    template<ContainerIdConcept CI = ContainerId::cluster,typename CM=ColumnarModeDefault>
+    template<ContainerIdConcept CI = ClusterDef,typename CM=ColumnarModeDefault>
     class PhiCaloAccessor final
     {
       ColumnAccessor<CI,float,CM> m_phiCaloAcc;
@@ -138,7 +138,7 @@ namespace columnar {
       }
     };
 
-    template<ContainerIdConcept CI = ContainerId::cluster,typename CM=ColumnarModeDefault>
+    template<ContainerIdConcept CI = ClusterDef,typename CM=ColumnarModeDefault>
     class EtaCaloAccessor final
     {
       ColumnAccessor<CI,float,CM> m_etaCaloAcc;
@@ -456,7 +456,7 @@ public:
     Accessors(columnar::ColumnarTool<>& tool) : columnar::ColumnarTool<>(&tool) {}
 
     columnar::MutableEgammaAccessor<columnar::ObjectColumn> m_egammaHandle {*this, "EGamma"};
-    columnar::MomentumAccessors<columnar::ContainerId::egamma> momAcc;
+    columnar::MomentumAccessors<columnar::EgammaDef> momAcc;
     columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> ptAcc {*this, "pt"};
     columnar::EgammaDecorator<float> ptOutDec {*this, "ptOut", {.replacesColumn = "pt"}};
     columnar::EgammaDecorator<float> decEmva;

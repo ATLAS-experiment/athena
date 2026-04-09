@@ -13,19 +13,16 @@
 
 namespace columnar
 {
-  namespace ContainerId
+  struct MuonDef : RegularContainerId<xAOD::Muon,xAOD::MuonContainer>
   {
-    struct muon : regularCIBase<xAOD::Muon,xAOD::MuonContainer>
-    {
-      static constexpr std::string_view idName = "muon";
-    };
-  }
+    static constexpr std::string_view idName = "muon";
+  };
 
-  using MuonRange = ObjectRange<ContainerId::muon>;
-  using MuonId = ObjectId<ContainerId::muon>;
-  using OptMuonId = OptObjectId<ContainerId::muon>;
-  template<typename CT,typename CM=ColumnarModeDefault> using MuonAccessor  = AccessorTemplate<ContainerId::muon,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using MuonDecorator = AccessorTemplate<ContainerId::muon,CT,ColumnAccessMode::output,CM>;
+  using MuonRange = ObjectRange<MuonDef>;
+  using MuonId = ObjectId<MuonDef>;
+  using OptMuonId = OptObjectId<MuonDef>;
+  template<typename CT,typename CM=ColumnarModeDefault> using MuonAccessor  = AccessorTemplate<MuonDef,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using MuonDecorator = AccessorTemplate<MuonDef,CT,ColumnAccessMode::output,CM>;
 }
 
 #endif
