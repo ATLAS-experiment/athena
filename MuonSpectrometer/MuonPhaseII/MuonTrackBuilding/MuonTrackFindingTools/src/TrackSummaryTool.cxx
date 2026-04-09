@@ -38,7 +38,7 @@ namespace MuonR4 {
                 }
                 if (state.hasUncalibratedSourceLink()) {
                     const auto* meas = xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());
-                    // for the combined sTgc space point we have to fill the primary and secodnray measuremment seperately to resolve the strip/pad/wire combinations
+                    // for the combined sTgc space point we have to fill the primary and secondary measuremment seperately to resolve the strip/pad/wire combinations
                     if(meas->type() == xAOD::UncalibMeasType::sTgcStripType && meas->numDimensions() == 0){
                         const auto* combinedMeas = static_cast<const xAOD::CombinedMuonStrip*>(meas);
                         incrementSummary(xAOD::identify(combinedMeas->primaryStrip()), status, combinedMeas->primaryStrip()->numDimensions(), summary);
@@ -50,12 +50,11 @@ namespace MuonR4 {
                 } else if (state.hasReferenceSurface()) {
                     const Acts::Surface& surf{state.referenceSurface()};
                     /// Surface is not active
-                    const Acts::SurfacePlacementBase* detEl = surf.surfacePlacement();
+                    const auto* detEl = dynamic_cast<const ActsTrk::IDetectorElementBase*>(surf.surfacePlacement());
                     if (!detEl) {
                         return;
                     }
-                    incrementSummary(static_cast<const ActsTrk::IDetectorElementBase*>(detEl)->identify(),
-                                     status, 1, summary);
+                    incrementSummary(detEl->identify(), status, 1, summary);
                 }
         });
         ATH_MSG_DEBUG("Obtained track summary from track with "<<Acts::toString(trackProxy.fourMomentum())
