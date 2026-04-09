@@ -1,0 +1,10 @@
+CommonServices: {}
+
+PartonHistory:
+  - history: Ttbar
+
+Output:
+  treeName: analysis
+
+PrintConfiguration: {}
+    

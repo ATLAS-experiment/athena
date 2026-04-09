@@ -321,6 +321,10 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (jets='AntiKt4TruthDressedWZJets')
     config.setOptions (useRapidityForDeltaR=False)
 
+    # Parton history
+    config.addBlock ('PartonHistory')
+    config.setOptions (history='Ttbar')
+
     # Thinning
     config.addBlock ('Thinning')
     config.setOptions (containerName='AnaElectrons')

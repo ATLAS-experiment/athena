@@ -196,6 +196,9 @@ PL_OverlapRemoval:
   jets: AntiKt4TruthDressedWZJets
   useRapidityForDeltaR: False
 
+PartonHistory:
+  - history: Ttbar
+
 # containerName and selectionName must be defined in their respective blocks
 MissingET:
   - containerName: AnaMET
