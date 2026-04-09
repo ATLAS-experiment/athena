@@ -17,7 +17,8 @@
 
 #include "ActsInterop/Logger.h"
 #include "Acts/Definitions/Algebra.hpp"
-#include "Acts/Vertexing/HoughVertexFinder.hpp"
+#include "Acts/Vertexing/HoughVertexFinder2.hpp"
+#include "Acts/EventData/SpacePointContainer2.hpp"
 
 #include <cmath>
 #include <memory> // unique_ptr
@@ -52,17 +53,7 @@ private:
   std::unique_ptr<const Acts::Logger> m_logger{nullptr};
   const Acts::Logger &logger() const { return *m_logger; }
 
-  // spacepoint is required to have "x()", "y()", and "z()" methods
-  struct SpacePoint {
-    SpacePoint(const xAOD::SpacePoint *sp) : m_x(sp->x()), m_y(sp->y()), m_z(sp->z()) {}
-    double x() const { return m_x; }
-    double y() const { return m_y; }
-    double z() const { return m_z; }
-   private:
-    double m_x, m_y, m_z;
-  };
-
-  using VertexFinder = Acts::HoughVertexFinder<SpacePoint>;
+  using VertexFinder = Acts::HoughVertexFinder2;
   VertexFinder::Config m_finderCfg;
 
   SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey{this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot"};
