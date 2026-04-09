@@ -5,14 +5,11 @@
 #ifndef ACTSMUONDETECTOR_MUONBLUEPRINTNODEBUILDER_H
 #define ACTSMUONDETECTOR_MUONBLUEPRINTNODEBUILDER_H
 
-
-
-#include <GaudiKernel/MsgStream.h>
-#include <AthenaBaseComps/AthMessaging.h>
+#include <AthenaBaseComps/AthAlgTool.h>
 
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
-#include "MuonStationIndex/MuonStationIndex.h"
-#include "ActsGeometryInterfaces/IBlueprintNodeBuilder.h"
+#include <MuonStationIndex/MuonStationIndex.h>
+#include <ActsGeometryInterfaces/IBlueprintNodeBuilder.h>
 
 #include "Acts/Utilities/BoundFactory.hpp"
 #include "Acts/Surfaces/PlanarBounds.hpp"
@@ -74,7 +71,7 @@ public:
   /*** @brief Subdivide the envelopes according to their station index  */
   using EnvelopesPerStIdx_t = std::unordered_map<StIdx, EnvelopeSet_t>;
 
-  enum class EndcapSide {
+  enum class EndcapSide: std::uint8_t {
       A,
       C,
       Both
@@ -96,7 +93,46 @@ private:
   /** @brief Flag to control if the volumes should be alignable or not */
   Gaudi::Property<bool> m_alignableVolumes{this, "AlignableVolumes", true};
   /** @brief Flag to construct the passive material surfaces */
-  Gaudi::Property<bool> m_buildPassiveVolumes{this, "BuildPassiveVolumes", true};
+  Gaudi::Property<bool> m_buildPassiveVolumes{this, "BuildPassiveVolumes", false};
+  /** @brief Number of bins in phi direction on the BI cylinder surface */
+  Gaudi::Property<std::size_t> m_nPhiBinsBI{this, "nPhiBinsBI", 16};
+  /** @brief Number of bins in Z direction on the BI cylinder surface */
+  Gaudi::Property<std::size_t> m_nZBinsBI{this, "nZBinsBI", 12};
+  /** @brief Number of bins in phi direction on the BM cylinder surface */
+  Gaudi::Property<std::size_t> m_nPhiBinsBM{this, "nPhiBinsBM", 16};
+  /** @brief Number of bins in Z direction on the BM cylinder surface */
+  Gaudi::Property<std::size_t> m_nZBinsBM{this, "nZBinsBM", 12};
+  /** @brief Number of bins in phi direction on the BM cylinder surface */
+  Gaudi::Property<std::size_t> m_nPhiBinsBO{this, "nPhiBinsBO", 16};
+  /** @brief Number of bins in Z direction on the BM cylinder surface */
+  Gaudi::Property<std::size_t> m_nZBinsBO{this, "nZBinsBO", 12};
+  /** @brief Number of bins in R direction on the disc before the NSW */
+  Gaudi::Property<std::size_t> m_nRBinsEI1{this, "nRBinsEIbNSW", 4};
+  /** @brief Number of bins in phi direction on the disc before the NSW */
+  Gaudi::Property<std::size_t> m_nPhiBinsEI1{this, "nPhiBinsEIbNSW", 16};
+  /** @brief Number of bins in R direction on the disc after the NSW */
+  Gaudi::Property<std::size_t> m_nRBinsEI2{this, "nRBinsEIaNSW", 4};
+  /** @brief Number of bins in phi direction on the disc after the NSW */
+  Gaudi::Property<std::size_t> m_nPhiBinsEI2{this, "nPhiBinsEIaNSW", 16};
+
+  /** @brief Number of bins in R direction on the disc before the middle big wheel */
+  Gaudi::Property<std::size_t> m_nRBinsEM1{this, "nRBinsEMbBW", 16};
+  /** @brief Number of bins in phi direction on the disc before the middle big wheel  */
+  Gaudi::Property<std::size_t> m_nPhiBinsEM1{this, "nPhiBinsEMbBW", 16};
+  /** @brief Number of bins in R direction on the disc after the middle big wheel  */
+  Gaudi::Property<std::size_t> m_nRBinsEM2{this, "nRBinsEMaBW", 5};
+  /** @brief Number of bins in phi direction on the disc after the NSW */
+  Gaudi::Property<std::size_t> m_nPhiBinsEM2{this, "nPhiBinsEMaBW", 16};
+
+  /** @brief Prepare a binned material which is associated to the surface
+   *  @param type: The surface type on which the material is mapped (Plane, Disc, Cylinder)
+   *  @param nBins1: Number of bins in the local0 direction
+   *  @param nBins2: Number of bins in the complementary direction */
+  std::shared_ptr<Acts::ISurfaceMaterial> preparePassiveMaterial(const Acts::SurfaceBounds& bounds,
+                                                          const std::size_t nBins1,
+                                                          const std::size_t nBins2) const;
+
+  std::pair<std::size_t, std::size_t> getMaterialBins(const Muon::MuonStationIndex::ChIndex chIdx) const;
   /** @brief Flag to assign active material on the chambers */
   Gaudi::Property<bool> m_assignActiveMaterial{this, "AssignActiveMaterial", false};
   

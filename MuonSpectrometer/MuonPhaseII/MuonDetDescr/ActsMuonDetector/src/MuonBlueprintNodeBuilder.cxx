@@ -4,17 +4,16 @@
 
 #include "MuonBlueprintNodeBuilder.h"
 
-#include "Acts/Geometry/BlueprintNode.hpp"
-#include "Acts/Geometry/StaticBlueprintNode.hpp"
-#include "Acts/Geometry/CylinderVolumeBounds.hpp"
+#include <Acts/Geometry/BlueprintNode.hpp>
+#include <Acts/Geometry/StaticBlueprintNode.hpp>
+#include <Acts/Geometry/CylinderVolumeBounds.hpp>
 #include <Acts/Geometry/ContainerBlueprintNode.hpp>
-#include "Acts/Geometry/MultiWireVolumeBuilder.hpp"
-#include "Acts/Surfaces/TrapezoidBounds.hpp"
-#include "Acts/Material/HomogeneousSurfaceMaterial.hpp"
+#include <Acts/Geometry/MultiWireVolumeBuilder.hpp>
+#include <Acts/Surfaces/TrapezoidBounds.hpp>
 #include <Acts/Geometry/MaterialDesignatorBlueprintNode.hpp>
 #include <Acts/Geometry/GeometryIdentifierBlueprintNode.hpp>
 #include <Acts/Geometry/VolumeAttachmentStrategy.hpp>
-#include "Acts/Geometry/VolumeResizeStrategy.hpp"
+#include <Acts/Geometry/VolumeResizeStrategy.hpp>
 #include <Acts/Geometry/TrackingVolume.hpp>
 #include <Acts/Geometry/TrapezoidVolumeBounds.hpp>
 #include <Acts/Geometry/CuboidVolumeBounds.hpp>
@@ -22,11 +21,14 @@
 #include <Acts/Surfaces/PlaneSurface.hpp>
 #include <Acts/Surfaces/CylinderSurface.hpp>
 #include <Acts/Surfaces/DiscSurface.hpp>
-#include "Acts/Surfaces/RadialBounds.hpp"
+#include <Acts/Surfaces/RadialBounds.hpp>
 #include <ActsPlugins/GeoModel/GeoModelMaterialConverter.hpp>
 #include <Acts/Visualization/ObjVisualization3D.hpp>
 #include <Acts/Visualization/GeometryView3D.hpp>
 #include <Acts/Surfaces/LineBounds.hpp>
+#include <Acts/Material/HomogeneousSurfaceMaterial.hpp>
+#include <Acts/Material/ProtoSurfaceMaterial.hpp>
+#include <Acts/Surfaces/RectangleBounds.hpp>
 
 #include <MuonReadoutGeometryR4/Chamber.h>
 #include <MuonReadoutGeometryR4/SpectrometerSector.h>
@@ -36,6 +38,7 @@
 #include "GeoModelValidation/GeoMaterialHelper.h"
 
 using namespace Acts::UnitLiterals;
+using namespace Muon::MuonStationIndex;
 namespace {
 
   //Muon System IDs
@@ -257,8 +260,8 @@ MuonBlueprintNodeBuilder::buildMuonNode(const Acts::GeometryContext& gctx,
         continue;
       }
 
-      DetIdx detIdx = Muon::MuonStationIndex::toDetectorRegionIndex(element->chamberIndex(), element->side());    
-      elementsPerStation[Muon::MuonStationIndex::regionChamberHash(detIdx, element->chamberIndex())].push_back(element);
+      DetIdx detIdx = toDetectorRegionIndex(element->chamberIndex(), element->side());    
+      elementsPerStation[regionChamberHash(detIdx, element->chamberIndex())].push_back(element);
     }
     //construct the surfaces we want to map passive material on using the elements' geometrical parameters
     passiveSurfaces = getPassiveMaterialSurfaces(gctx, std::move(elementsPerStation));
@@ -322,7 +325,8 @@ MuonBlueprintNodeBuilder::BluePrintSurfPairs_t
 
           //special treatment of BIS78 MDT multilayer
           //use different shape because of clashes with EIL chambers 
-          if(isBIS78(mdtReadoutEle) && mdtReadoutEle->multilayer() == 2){
+          if(isBIS78(readoutEle) && mdtReadoutEle->multilayer() == 2){
+
             
             //find the minimum and the maximum tube length (x dimension of the diamond bounds)
             std::vector<double> tubeLengths;
@@ -424,7 +428,7 @@ MuonBlueprintNodeBuilder::BluePrintSurfPairs_t
 
 bool MuonBlueprintNodeBuilder::isBIS78(const MuonGMR4::MuonReadoutElement* element) const {    
       return element->detectorType() == ActsTrk::DetectorType::Mdt && 
-             element->chamberIndex() == Muon::MuonStationIndex::ChIndex::BIS && 
+             element->chamberIndex() == ChIndex::BIS && 
              element->stationEta()>=7;
   }
 
@@ -478,8 +482,8 @@ MuonBlueprintNodeBuilder::getPassiveMaterialSurfaces(
   for(const auto& [hash, elements] : elementsPerStation){
 
     //decompose the layer hash to the detector region idx and layer index
-    const auto& [detIdxVal, chIdx] = Muon::MuonStationIndex::decomposeRegionChamberHash(hash);
-    layIdx = Muon::MuonStationIndex::toLayerIndex(chIdx);
+    const auto& [detIdxVal, chIdx] = decomposeRegionChamberHash(hash);
+    layIdx = toLayerIndex(chIdx);
     detIdx = detIdxVal;
 
     double maxZ{std::numeric_limits<double>::lowest()};
@@ -492,7 +496,6 @@ MuonBlueprintNodeBuilder::getPassiveMaterialSurfaces(
       if(rejectBIS78(el->readoutEles().front())){
         continue;
       }
-      //for the rMin we use the center of the chamber insetad of the vertices - otherwise there is overlap with the chamber volume
       const Amg::Transform3D& locToGlobal = el->localToGlobalTransform(*context);
       const auto& bounds = el->bounds();
       for(const auto& surface : bounds->orientedSurfaces(locToGlobal)){
@@ -508,7 +511,8 @@ MuonBlueprintNodeBuilder::getPassiveMaterialSurfaces(
     double halfZ = 0.5*std::abs(maxZ-minZ);  
     Amg::Transform3D trf = Amg::Transform3D::Identity();
     double zShift{0.};
-    //the chambers are groupd per chamber index and detector region(side) - we can use the first one for the distinction
+    // the chambers are groupd per chamber index and detector region(side) - 
+    // we can use the first one for the distinction
     const auto& testCh = elements.front();
     int8_t side = testCh->side();
     switch (testCh->chamberIndex()) {      
@@ -518,11 +522,12 @@ MuonBlueprintNodeBuilder::getPassiveMaterialSurfaces(
         side > 0 ? zShift = minZ - margin : zShift = maxZ + margin;
         trf = Amg::getTranslateZ3D(zShift);
         auto surface = Acts::Surface::makeShared<Acts::DiscSurface>(trf, std::make_shared<Acts::RadialBounds>(0., rMax));
-        //surface->assignSurfaceMaterial(std::make_shared<ProtoGridSurfaceMaterial>(std::vector{loc0, loc1}));
+        const auto [nBins1, nBins2] = getMaterialBins(testCh->chamberIndex());
+        surface->assignSurfaceMaterial(preparePassiveMaterial(surface->bounds(), nBins1, nBins2));
         surfaces.push_back(surface);
         break;
-      //large sectors (disc passive surface after NSW/EIL and after EML)
-    } case ChIdx::EIL :
+        //large sectors (disc passive surface after NSW/EIL and after EML)
+      } case ChIdx::EIL :
       case ChIdx::EML : {
         // HARDCODED!! (maybe think a better solution in the future) 
         // But for the EIL that we put after the EIS/EIL chambers we extend the radius of the disc surface 
@@ -532,31 +537,36 @@ MuonBlueprintNodeBuilder::getPassiveMaterialSurfaces(
         }
         side > 0 ? zShift = maxZ + margin : zShift = minZ - margin;
         trf = Amg::getTranslateZ3D(zShift);
-        auto surface = Acts::Surface::makeShared<Acts::DiscSurface>(trf, std::make_shared<Acts::RadialBounds>(0., rMax));
-        //surface->assignSurfaceMaterial(std::make_shared<ProtoGridSurfaceMaterial>(std::vector{loc0, loc1}));
+        auto surface = Acts::Surface::makeShared<Acts::DiscSurface>(trf, 
+                             std::make_shared<Acts::RadialBounds>(0., rMax));
+        const auto [nBins1, nBins2] = getMaterialBins(testCh->chamberIndex());
+        surface->assignSurfaceMaterial(preparePassiveMaterial(surface->bounds(), nBins1, nBins2));
         surfaces.push_back(surface);
         break;
-    } case ChIdx::BIS :
-      case ChIdx::BML :
-      case ChIdx::BOL : {
-       trf = Amg::getTranslateZ3D(halfZ + minZ);
-       auto surface = Acts::Surface::makeShared<Acts::CylinderSurface>(
-        trf, std::make_shared<Acts::CylinderBounds>(rMin - margin, halfZ));
-        //surface->assignSurfaceMaterial(std::make_shared<ProtoGridSurfaceMaterial>(std::vector{loc0, loc1}));
+      } case ChIdx::BIS :
+        case ChIdx::BML :
+        case ChIdx::BOL : {
+        trf = Amg::getTranslateZ3D(halfZ + minZ);
+        auto surface = Acts::Surface::makeShared<Acts::CylinderSurface>(trf, 
+                             std::make_shared<Acts::CylinderBounds>(rMin - margin, halfZ));
+        const auto [nBins1, nBins2] = getMaterialBins(testCh->chamberIndex());
+        surface->assignSurfaceMaterial(preparePassiveMaterial(surface->bounds(), nBins1, nBins2));
         surfaces.push_back(surface);
-      break;
+        break;
     } default :
-    throw std::runtime_error("No implementation of passive material surface for this station!!!! - sorry :) ");
+        THROW_EXCEPTION("No implementation of passive material surface for this station!!!! - sorry :) ");
     }    
-     ATH_MSG_VERBOSE("Putting passive material surface for station " << layerName(layIdx) << "/ "<< regionName(detIdx) << ": minZ = " << minZ << ", maxZ = " << maxZ<< "and radius "<< rMax);
+    ATH_MSG_VERBOSE("Putting passive material surface for station " << layerName(layIdx) << "/ "<< regionName(detIdx) << ": minZ = " << minZ << ", maxZ = " << maxZ<< "and radius "<< rMax);
   }
 
   if(msgLvl(MSG::VERBOSE)){
     std::stringstream stream{};
     for(const auto& surf : surfaces){
-      stream<< " at position  : "<< Amg::toString(surf->center(gctx))<< "with bounds "<< surf->bounds()<<std::endl;
+      stream<< " at position  : "<< Amg::toString(surf->center(gctx))
+             << "with bounds "<< surf->bounds()<<std::endl;
     }
-    ATH_MSG_VERBOSE("Constructed "<< surfaces.size()<< " surfaces for passive material description : "<<std::endl<<stream.str());
+    ATH_MSG_VERBOSE("Constructed "<< surfaces.size()
+        << " surfaces for passive material description : "<<std::endl<<stream.str());
   }
 
   return surfaces;
@@ -600,4 +610,62 @@ bool MuonBlueprintNodeBuilder::isElementInTheStation(const T& element,
 }
 
 
+std::shared_ptr<Acts::ISurfaceMaterial> 
+    MuonBlueprintNodeBuilder::preparePassiveMaterial(const Acts::SurfaceBounds& bounds,
+                                                     const std::size_t nBins1,
+                                                     const std::size_t nBins2) const {
+    if (nBins1 == 0 || nBins2 == 0) {
+      ATH_MSG_ERROR("Cannot create material for "<<bounds
+        <<" as one of the bin dimensions is zero. nBins1: "<<nBins1<<", nBins2: "<<nBins2);
+      return nullptr;
+    }
+    if (nBins1 == 1 && nBins1 == nBins2) {
+      return std::make_shared<Acts::HomogeneousSurfaceMaterial>();
+    }
+
+    std::vector<Acts::DirectedProtoAxis> pmBinning = {};
+
+    switch (bounds.type()) {
+       using enum Acts::SurfaceBounds::BoundsType;
+      case eCylinder: {
+          pmBinning = {{Acts::AxisDirection::AxisZ, Acts::AxisBoundaryType::Bound, nBins1},
+                       {Acts::AxisDirection::AxisPhi, Acts::AxisBoundaryType::Bound, nBins2}};        
+          break;
+      } case eDisc: {
+          pmBinning = {{Acts::AxisDirection::AxisR, Acts::AxisBoundaryType::Bound, nBins1},
+                       {Acts::AxisDirection::AxisPhi, Acts::AxisBoundaryType::Bound, nBins2}};
+      
+          break;
+      } default:
+        ATH_MSG_ERROR("Unsupoorted type "<<bounds<<".");
+        return nullptr;
+    }
+    return std::make_shared<Acts::ProtoGridSurfaceMaterial>(pmBinning);
+}
+std::pair<std::size_t, std::size_t> 
+    MuonBlueprintNodeBuilder::getMaterialBins(const ChIndex chIdx) const {
+    switch(chIdx) {
+      using enum ChIndex;
+      case BIS:
+      case BIL:
+        return std::make_pair(1ul * m_nZBinsBI, 1ul * m_nPhiBinsBI);
+      case BML:
+      case BMS:
+        return std::make_pair(1ul * m_nZBinsBM, 1ul * m_nPhiBinsBM);
+      case BOL:
+      case BOS:
+        return std::make_pair(1ul * m_nZBinsBO, 1ul * m_nPhiBinsBO);
+      case EIS:
+        return std::make_pair(1ul*  m_nRBinsEI1, 1ul* m_nPhiBinsEI1);
+      case EIL:
+        return std::make_pair(1ul*  m_nRBinsEI2, 1ul* m_nPhiBinsEI2);
+      case EMS:
+        return std::make_pair(1ul*  m_nRBinsEM1, 1ul* m_nPhiBinsEM1);
+      case EML:
+        return std::make_pair(1ul*  m_nRBinsEM2, 1ul* m_nPhiBinsEM2);
+      default:
+        THROW_EXCEPTION("getMaterialBins() - "<<chName(chIdx)<<" is not yet implemented");
+    }
+    return std::make_pair(0ul, 0ul);
+}
 } //namespace ActsTrk
