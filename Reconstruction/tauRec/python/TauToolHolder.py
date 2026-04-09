@@ -697,7 +697,8 @@ def TauIDVarCalculatorCfg(flags):
 
     TauIDVarCalculator = CompFactory.getComp("TauIDVarCalculator")    
     myTauIDVarCalculator = TauIDVarCalculator(name=_name,
-                                              VertexCorrection = flags.Tau.doVertexCorrection)
+                                              VertexCorrection = flags.Tau.doVertexCorrection,
+                                              doRun4 = flags.GeoModel.Run > LHCPeriod.Run3)
 
     result.setPrivateTools(myTauIDVarCalculator)
     return result
