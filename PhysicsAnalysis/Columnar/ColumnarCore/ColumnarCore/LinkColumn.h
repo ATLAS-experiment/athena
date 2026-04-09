@@ -131,7 +131,7 @@ namespace columnar
 
       static void updateColumnInfo (ColumnInfo& info)
       {
-        info.linkTargetNames = {std::string{LT::idName}};
+        info.soleLinkTargetName = LT::idName;
       }
 
       [[nodiscard]] static auto makeViewer (void** dataArea)
@@ -159,7 +159,7 @@ namespace columnar
 
       static void updateColumnInfo (ColumnInfo& info)
       {
-        info.linkTargetNames = {std::string{LT::idName}};
+        info.soleLinkTargetName = LT::idName;
       }
 
       static auto makeViewer (void** dataArea)

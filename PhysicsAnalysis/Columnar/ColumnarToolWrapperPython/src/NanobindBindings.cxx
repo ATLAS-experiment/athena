@@ -258,8 +258,10 @@ NB_MODULE(python_tool_handle, module) {
         .def_ro("access_mode", &columnar::ColumnInfo::accessMode)
         .def_ro("offset_name", &columnar::ColumnInfo::offsetName)
         .def_ro("fixed_dimensions", &columnar::ColumnInfo::fixedDimensions)
-        .def_ro("link_target_names", &columnar::ColumnInfo::linkTargetNames)
-        .def_ro("variant_link_key_column", &columnar::ColumnInfo::variantLinkKeyColumn)
+        .def_ro("sole_link_target_name", &columnar::ColumnInfo::soleLinkTargetName)
+        .def_ro("is_variant_link", &columnar::ColumnInfo::isVariantLink)
+        .def_ro("variant_link_target_names", &columnar::ColumnInfo::variantLinkTargetNames)
+        .def_ro("key_column_for_variant_link", &columnar::ColumnInfo::keyColumnForVariantLink)
         .def_ro("is_offset", &columnar::ColumnInfo::isOffset)
         .def_ro("replaces_column", &columnar::ColumnInfo::replacesColumn)
         .def_ro("is_optional", &columnar::ColumnInfo::isOptional)
@@ -294,8 +296,10 @@ NB_MODULE(python_tool_handle, module) {
             d["access_mode"] = static_cast<int>(self.accessMode);
             d["offset_name"] = self.offsetName;
             d["fixed_dimensions"] = self.fixedDimensions;
-            d["link_target_names"] = self.linkTargetNames;
-            d["variant_link_key_column"] = self.variantLinkKeyColumn;
+            d["sole_link_target_name"] = self.soleLinkTargetName;
+            d["is_variant_link"] = self.isVariantLink;
+            d["variant_link_target_names"] = self.variantLinkTargetNames;
+            d["key_column_for_variant_link"] = self.keyColumnForVariantLink;
             d["is_offset"] = self.isOffset;
             d["replaces_column"] = self.replacesColumn;
             d["is_optional"] = self.isOptional;

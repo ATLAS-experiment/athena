@@ -215,6 +215,36 @@ namespace columnar
     ToolColumnVectorMap wrapper2{header, tool2};
     EXPECT_FALSE(header.getColumn(ptIndex).readOnly); // should stay read-write
   }
+
+
+  TEST (ColumnVectorWrapperTest, MultiTool_VariantLinkKeyRename)
+  {
+    // Two key columns for the same variant link but with different targets
+    // should be auto-renamed rather than throwing an error
+    ColumnInfo key1;
+    key1.name = "myLink.keys";
+    key1.type = &typeid(unsigned);
+    key1.keyColumnForVariantLink = "myLink";
+    key1.variantLinkTargetNames = {"ContainerA", "ContainerB"};
+
+    ColumnInfo key2;
+    key2.name = "myLink.keys";
+    key2.type = &typeid(unsigned);
+    key2.keyColumnForVariantLink = "myLink";
+    key2.variantLinkTargetNames = {"ContainerC", "ContainerD"};
+
+    ColumnVectorHeader header;
+    std::size_t idx1 = header.addColumn(key1);
+    std::size_t idx2 = header.addColumn(key2);
+
+    // Should get distinct indices
+    EXPECT_NE(idx1, idx2);
+
+    // Both should be present in getAllColumnInfo
+    auto allInfo = header.getAllColumnInfo();
+    EXPECT_TRUE(allInfo.count("myLink.keys") > 0);
+    EXPECT_TRUE(allInfo.count("myLink.keys.1") > 0);
+  }
 }
 
 ATLAS_GOOGLE_TEST_MAIN

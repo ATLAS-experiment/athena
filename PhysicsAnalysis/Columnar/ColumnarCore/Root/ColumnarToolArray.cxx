@@ -137,9 +137,10 @@ namespace columnar
       info.name = name.second;
       info.offsetName = m_data->convertInternalToUserName (info.offsetName);
       info.replacesColumn = m_data->convertInternalToUserName (info.replacesColumn);
-      for (auto& targetName : info.linkTargetNames)
+      info.soleLinkTargetName = m_data->convertInternalToUserName (info.soleLinkTargetName);
+      for (auto& targetName : info.variantLinkTargetNames)
         targetName = m_data->convertInternalToUserName (targetName);
-      info.variantLinkKeyColumn = m_data->convertInternalToUserName (info.variantLinkKeyColumn);
+      info.keyColumnForVariantLink = m_data->convertInternalToUserName (info.keyColumnForVariantLink);
       if (result.empty() || result.back().name != info.name)
         result.push_back (std::move(info));
       else
@@ -218,10 +219,12 @@ namespace columnar
       m_data->columns[info.offsetName];
     if (!info.replacesColumn.empty())
       m_data->columns[info.replacesColumn];
-    for (auto& targetName : info.linkTargetNames)
+    if (!info.soleLinkTargetName.empty())
+      m_data->columns[info.soleLinkTargetName];
+    for (auto& targetName : info.variantLinkTargetNames)
       m_data->columns[targetName];
-    if (!info.variantLinkKeyColumn.empty())
-      m_data->columns[info.variantLinkKeyColumn];
+    if (!info.keyColumnForVariantLink.empty())
+      m_data->columns[info.keyColumnForVariantLink];
   }
 
 

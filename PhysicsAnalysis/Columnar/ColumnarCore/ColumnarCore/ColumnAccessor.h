@@ -60,45 +60,11 @@ namespace columnar
     /// this accessor should be added as a data dependency in AthenaMT.
     bool addMTDependency = false;
 
-
-    /// @brief for link columns: the name(s) of the container(s) we link
-    /// to
-    ///
-    /// Some of our columns contain links to other objects. For those
-    /// columns this will contain the names of the containers we link
-    /// to (i.e. the names of their offset columns).
-    ///
-    /// For simple link columns that can only link to a single other
-    /// container, this will be a vector of length one and @ref
-    /// variantLinkKeyColumn will not be set. In that case the link
-    /// column will simply contain the index of the object in the linked
-    /// too container.
-    ///
-    /// For variant link columns (i.e. columns with links that can
-    /// reference objects in more than one container), this will contain
-    /// the list of all linked to columns that this tool will use. In
-    /// that case the most significant bits of the index in this column
-    /// will encode a container key that is matched against @ref
-    /// variantLinkKeyColumn to identify which container is being
-    /// referenced by each link.
-    ///
-    /// Note that a variant link column may contain links to columns
-    /// that are not listed here, but those will not be used by this
-    /// tool. There are also no requirements on the exact values of the
-    /// keys, as long as they match @ref variantLinkKeyColumn. And
-    /// different tools may list the columns in different order. The
-    /// thought behind that is that it allows multiple tools to read the
-    /// same link column as long as they have each a unique key column,
-    /// without having to coordinate the exact list of linked containers
-    /// used.
-    std::vector<std::string> internalLinkTargetNames {};
-
     ColumnInfo makeColumnInfo () const
     {
       ColumnInfo info;
       info.replacesColumn = replacesColumn;
       info.isOptional = isOptional;
-      info.linkTargetNames = internalLinkTargetNames;
       return info;
     }
   };
