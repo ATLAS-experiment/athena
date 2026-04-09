@@ -12,6 +12,8 @@
 #include "FlavorTagInference/HitsLoader.h"
 #include "FlavorTagInference/ElectronsLoader.h"
 #include "FlavorTagInference/MuonsLoader.h"
+#include "FlavorTagInference/CaloClusterLoader.h"
+#include "FlavorTagInference/TowerLoader.h"
 
 #include <map>
 #include <vector>

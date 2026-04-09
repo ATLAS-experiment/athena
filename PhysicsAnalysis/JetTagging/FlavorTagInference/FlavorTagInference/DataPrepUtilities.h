@@ -53,6 +53,9 @@ namespace FlavorTagInference {
     std::string invalid_ip_key;
     std::string electron_link_name;
     std::string muon_link_name;
+    // Skip invalid element links in CaloClusterLoader rather than throwing.
+    // constituentLinks can be invalid after jet constituent thinning.
+    bool skip_invalid_links{false};
   };
 
 

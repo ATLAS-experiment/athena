@@ -267,6 +267,7 @@ namespace FlavorTagInference {
         {"(log_)?pt|abs_eta|eta|phi|energy|mass"_r, EDMType::CUSTOM_GETTER},
         {"softMuon_p[bcu]"_r, EDMType::FLOAT},
         {"softMuon_.*"_r, EDMType::FLOAT},
+        {".*"_r, EDMType::FLOAT},  // catch-all: arbitrary float decorations
       };
 
       StringRegexes default_flag_regexes{
@@ -287,7 +288,8 @@ namespace FlavorTagInference {
         {"EtaJES_GSC_(pt|eta|phi|mass)"_r, ""},
         {"smt_.*"_r, "softMuon_isDefaults"},
         {"softMuon_.*"_r, "softMuon_isDefaults"},
-        {"((log_)?pt|abs_eta|eta|phi|energy|mass)"_r, ""}}; // no default for custom cases
+        {"((log_)?pt|abs_eta|eta|phi|energy|mass)"_r, ""}, // no default for custom cases
+        {".*"_r, ""}}; // catch-all: no default flag for arbitrary variables
 
       std::vector<FTagInputConfig> input_config;
       for (auto& node: config.inputs){
