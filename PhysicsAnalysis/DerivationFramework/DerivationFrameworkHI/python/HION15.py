@@ -14,6 +14,8 @@ def HION15KernelCfg(flags, name='HION15Kernel', **kwargs):
     from DerivationFrameworkHI.HION7 import (
         PhysAugmentationsHION7Cfg, HION7SkimmingToolCfg, HION7GlobalAugmentationToolCfg)
     acc.merge(PhysAugmentationsHION7Cfg(flags))
+    from DerivationFrameworkHI.HION7 import getDFJets
+    acc.merge(getDFJets(flags))
     thinningTools = []
     skimmingTool = acc.getPrimaryAndMerge(HION7SkimmingToolCfg(flags, format="HION15"))
     globalAugmentationTool = acc.getPrimaryAndMerge(HION7GlobalAugmentationToolCfg(flags))
@@ -29,8 +31,6 @@ def HION15Cfg(flags):
     acc = ComponentAccumulator()
 
     JetColl = flags.HeavyIon.HIJetPrefix
-    from DerivationFrameworkHI.HION7 import getDFJets
-    acc.merge(getDFJets(flags))
 
     acc.merge(HION15KernelCfg(flags, name="HION15Kernel",StreamName = "StreamDAOD_HION15"))
 
