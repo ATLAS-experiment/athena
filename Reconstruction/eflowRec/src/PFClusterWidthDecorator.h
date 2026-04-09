@@ -1,18 +1,23 @@
-#ifndef PFCLUSTERWIDTHDECORATOR_H
-#define PFCLUSTERWIDTHDECORATOR_H
+/*
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#ifndef EFLOWREC_PFCLUSTERWIDTHDECORATOR_H
+#define EFLOWREC_PFCLUSTERWIDTHDECORATOR_H
+
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "PFClusterWidthCalculator.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "StoreGate/WriteDecorHandle.h"
 
-class PFClusterWidthDecorator : public AthAlgorithm {
+class PFClusterWidthDecorator : public AthReentrantAlgorithm {
+
 public:
   PFClusterWidthDecorator(const std::string& name, ISvcLocator* pSvcLocator);    
   ~PFClusterWidthDecorator() = default;
 
   StatusCode initialize() override;
-  StatusCode execute() override;
+  StatusCode execute(const EventContext & ctx) const override;
 
 private:
   SG::WriteDecorHandleKey<xAOD::CaloClusterContainer> m_clusterContainerWidthEtaKey{this,"clusterContainerWidthEtaName","CaloCalTopoClusters.ClusterWidthEta","Cluster Container Width Eta Key"};

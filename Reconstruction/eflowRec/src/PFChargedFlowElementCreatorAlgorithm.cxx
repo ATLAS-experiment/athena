@@ -72,16 +72,16 @@ void PFChargedFlowElementCreatorAlgorithm::createChargedFlowElements(const eflow
       etaPhi = efRecTrack->getTrackCaloPoints().getEM2etaPhi();
 
       /*add information to xAOD*/
-      const static SG::AuxElement::Accessor<int> accLHED("LayerHED");
+      const static SG::Accessor<int> accLHED("LayerHED");
       accLHED(*thisFE) = efRecTrack->getLayerHED();
 
-      const static SG::AuxElement::Accessor<std::vector<int> > accCellOrderVector("LayerVectorCellOrdering");
+      const static SG::Accessor<std::vector<int> > accCellOrderVector("LayerVectorCellOrdering");
       accCellOrderVector(*thisFE) = efRecTrack->getLayerCellOrderVector();
 
-      const static SG::AuxElement::Accessor<std::vector<float> > accRadiusCellOrderVector("RadiusVectorCellOrdering");
+      const static SG::Accessor<std::vector<float> > accRadiusCellOrderVector("RadiusVectorCellOrdering");
       accRadiusCellOrderVector(*thisFE) = efRecTrack->getRadiusCellOrderVector();
 
-      const static SG::AuxElement::Accessor<std::vector<float> > accAvgEDensityCellOrderVector("AvgEdensityVectorCellOrdering");
+      const static SG::Accessor<std::vector<float> > accAvgEDensityCellOrderVector("AvgEdensityVectorCellOrdering");
       accAvgEDensityCellOrderVector(*thisFE) = efRecTrack->getAvgEDensityCellOrderVector();
     } else {
       /* In normal mode we want the track eta,phi at the perigee */
@@ -95,13 +95,13 @@ void PFChargedFlowElementCreatorAlgorithm::createChargedFlowElements(const eflow
     ATH_MSG_DEBUG("Created charged PFO with E, pt, eta and phi of " << thisFE->e() << ", " << thisFE->pt() << ", " << thisFE->eta() << " and " << thisFE->phi());
 
     /* Add the amount of energy the track was expected to deposit in the calorimeter - this is needed to calculate the charged weight in the jet finding */
-    const static SG::AuxElement::Accessor<float> accTracksExpectedEnergyDeposit("TracksExpectedEnergyDeposit");
+    const static SG::Accessor<float> accTracksExpectedEnergyDeposit("TracksExpectedEnergyDeposit");
     accTracksExpectedEnergyDeposit(*thisFE) = efRecTrack->getEExpect();
     ATH_MSG_DEBUG("Have set that PFO's expected energy deposit to be " << efRecTrack->getEExpect());
 
     /* Flag if this track was in a dense environment for later checking */
     //There is an issue using bools - when written to disk they convert to chars. So lets store the bool as an int.
-    const static SG::AuxElement::Accessor<int> accIsInDenseEnvironment("IsInDenseEnvironment");
+    const static SG::Accessor<int> accIsInDenseEnvironment("IsInDenseEnvironment");
     accIsInDenseEnvironment(*thisFE) = efRecTrack->isInDenseEnvironment();
 
      /* Optionally we add the links to clusters to the xAOD::PFO */
@@ -111,7 +111,7 @@ void PFChargedFlowElementCreatorAlgorithm::createChargedFlowElements(const eflow
 
       ATH_MSG_DEBUG("Have got " << trackClusterLinkPairs.size() << " trackClusterLinkPairs");
 
-      std::vector<eflowTrackClusterLink*> thisTracks_trackClusterLinks = efRecTrack->getClusterMatches();
+      const std::vector<eflowTrackClusterLink*>& thisTracks_trackClusterLinks = efRecTrack->getClusterMatches();
 
       ATH_MSG_DEBUG("Have got " << thisTracks_trackClusterLinks.size() << " cluster matches");
 
@@ -133,7 +133,7 @@ void PFChargedFlowElementCreatorAlgorithm::createChargedFlowElements(const eflow
             eflowRecCluster* efRecCluster = trackClusterLinkPair.first->getCluster();
             ElementLink<xAOD::CaloClusterContainer> theOriginalClusterLink = efRecCluster->getOriginalClusElementLink();
             ElementLink<xAOD::CaloClusterContainer> theSisterClusterLink = (*theOriginalClusterLink)->getSisterClusterLink();
-	          ATH_MSG_DEBUG("Will add cluster with E, ratio and absolute subtracted energy " << (*theOriginalClusterLink)->e() << ", " << trackClusterLinkPair.second.first << ", " << trackClusterLinkPair.second.second);
+	    ATH_MSG_DEBUG("Will add cluster with E, ratio and absolute subtracted energy " << (*theOriginalClusterLink)->e() << ", " << trackClusterLinkPair.second.first << ", " << trackClusterLinkPair.second.second);
             if (theSisterClusterLink.isValid()) vectorClusterToSubtractedEnergies.emplace_back(std::pair(theSisterClusterLink,trackClusterLinkPair.second.second));
             else vectorClusterToSubtractedEnergies.emplace_back(std::pair(theOriginalClusterLink,trackClusterLinkPair.second.second));
           }
@@ -154,7 +154,7 @@ void PFChargedFlowElementCreatorAlgorithm::createChargedFlowElements(const eflow
       //now split this into two vectors, ready to be used by the FlowElement
       std::vector<ElementLink<xAOD::IParticleContainer> > theClusters;
       std::vector<float> theClusterWeights;
-      for (auto thePair : vectorClusterToSubtractedEnergies){
+      for (const auto& thePair : vectorClusterToSubtractedEnergies){
         ElementLink< xAOD::IParticleContainer > theIParticleTrackLink(thePair.first); 
         theClusters.push_back(theIParticleTrackLink);
         theClusterWeights.push_back(thePair.second);
@@ -167,25 +167,25 @@ void PFChargedFlowElementCreatorAlgorithm::createChargedFlowElements(const eflow
 
     //Add detailed CP data
     if (m_addCPData){
-      const static SG::AuxElement::Accessor<float> accEtaEM2("EtaEM2");
+      const static SG::Accessor<float> accEtaEM2("EtaEM2");
       accEtaEM2(*thisFE) = efRecTrack->getTrackCaloPoints().getEM2etaPhi().first;
 
-      const static SG::AuxElement::Accessor<float> accPhiEM2("PhiEM2");
+      const static SG::Accessor<float> accPhiEM2("PhiEM2");
       accPhiEM2(*thisFE) = efRecTrack->getTrackCaloPoints().getEM2etaPhi().second;
 
-      const static SG::AuxElement::Accessor<char> accIsRecovered("isRecovered");
+      const static SG::Accessor<char> accIsRecovered("isRecovered");
       accIsRecovered(*thisFE) = efRecTrack->isRecovered();
 
-      const static SG::AuxElement::Accessor<unsigned int>  accNumMatchedClusters("numMatchedClusters");
+      const static SG::Accessor<unsigned int>  accNumMatchedClusters("numMatchedClusters");
       accNumMatchedClusters(*thisFE) = efRecTrack->getClusterMatches().size();
 
-      const static SG::AuxElement::Accessor<std::vector<float> > accDRPrimes("dRPrimes");
+      const static SG::Accessor<std::vector<float> > accDRPrimes("dRPrimes");
       accDRPrimes(*thisFE) = efRecTrack->getDRPrimes();
 
-      const static SG::AuxElement::Accessor<float > accPull15("Pull15");
+      const static SG::Accessor<float > accPull15("Pull15");
       accPull15(*thisFE) = efRecTrack->getpull15();
 
-      const static SG::AuxElement::Accessor<std::vector<std::pair<ElementLink<CaloCellContainer>, double> > > accSubtractedCaloCells("SubtractedCaloCells");
+      const static SG::Accessor<std::vector<std::pair<ElementLink<CaloCellContainer>, double> > > accSubtractedCaloCells("SubtractedCaloCells");
       accSubtractedCaloCells(*thisFE) = efRecTrack->getSubtractedCaloCells();
     }
 

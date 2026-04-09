@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef EFLOWEVENT_EFLOWCALOOBJECT_H
-#define EFLOWEVENT_EFLOWCALOOBJECT_H
+#ifndef EFLOWREC_EFLOWCALOOBJECT_H
+#define EFLOWREC_EFLOWCALOOBJECT_H
 /********************************************************************
 
 NAME:     eflowCaloObject.h
@@ -46,7 +46,7 @@ public:
   /* For a specific eflowTrackClusterLink indicate whether or not it has been fully/partially subtracted by setting the energy ratio
   ** of subtracted cluster energy to original cluster enegry (first float). A value other than nan indicates it has been fully or partially subtracted. 
   ** The second float is the actual subtracted energy at the EM scale  */
-  void setTrackClusterLinkSubtractionStatus(unsigned int index, std::pair<float,float> energyRatio_energyValPair) { m_trackClusterLinks[index].second = energyRatio_energyValPair; }
+  void setTrackClusterLinkSubtractionStatus(unsigned int index, const std::pair<float,float>& energyRatio_energyValPair) { m_trackClusterLinks[index].second = energyRatio_energyValPair; }
   
   /* Track accessor methods */
   const eflowRecTrack* efRecTrack(int i) const { return m_eflowRecTracks[i]; }

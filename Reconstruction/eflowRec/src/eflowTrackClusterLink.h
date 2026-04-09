@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -9,8 +9,8 @@
  *      Author: tlodd
  */
 
-#ifndef EFLOWTRACKCLUSTERLINK_H_
-#define EFLOWTRACKCLUSTERLINK_H_
+#ifndef EFLOWREC_EFLOWTRACKCLUSTERLINK_H
+#define EFLOWREC_EFLOWTRACKCLUSTERLINK_H
 
 #include <utility>
 #include <unordered_map>
@@ -78,4 +78,4 @@ private:
   std::vector<double> m_clusterIntegral;
 };
 
-#endif /* EFLOWTRACKCLUSTERLINK_H_ */
+#endif /* EFLOWREC_EFLOWTRACKCLUSTERLINK_H */

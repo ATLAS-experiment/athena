@@ -27,7 +27,7 @@ StatusCode PFLCNeutralFlowElementCreatorAlgorithm::execute(const EventContext& c
   for( unsigned int counter = 0; counter < (*neutralFEContainerReadHandle).size(); counter++){
     const xAOD::FlowElement* thisFE = (*neutralFEContainerReadHandle)[counter];
 
-    const static SG::AuxElement::Accessor<ElementLink<xAOD::CaloClusterContainer> > accShowerSubtractedClusterLink("FEShowerSubtractedClusterLink");
+    const static SG::Accessor<ElementLink<xAOD::CaloClusterContainer> > accShowerSubtractedClusterLink("FEShowerSubtractedClusterLink");
     const ElementLink<xAOD::CaloClusterContainer>& clusElementLink = accShowerSubtractedClusterLink(*thisFE);
 
     xAOD::FlowElement* theCopiedFE = (*neutralFELCContainerWriteHandle)[counter];

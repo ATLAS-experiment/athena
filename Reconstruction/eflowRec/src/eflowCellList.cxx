@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -50,7 +50,7 @@ eflowCellList::setNewExtrapolatedTrack(const eflowTrackCaloPoints& trackCalo)
 }
 
 void
-eflowCellList::addCell(std::pair<const CaloCell*, int> cell)
+eflowCellList::addCell(const std::pair<const CaloCell*, int>& cell)
 {
   eflowCellPosition myPos(this, cell.first);
 
@@ -117,5 +117,5 @@ eflowCellList::dR2(double eta, double phi, eflowCaloENUM layer) const
 double
 eflowCellList::dR(double eta, double phi, eflowCaloENUM layer) const
 {
-  return (eflowCalo::Unknown != layer) ? sqrt(dR2(eta, phi, layer)) : -999.0;
+  return (eflowCalo::Unknown != layer) ? std::sqrt(dR2(eta, phi, layer)) : -999.0;
 }

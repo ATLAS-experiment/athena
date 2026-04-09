@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PFTrackMuonIsoTaggingAlg.h"
@@ -74,7 +74,7 @@ StatusCode PFTrackMuonIsoTaggingAlg::execute(const EventContext &ctx) const
       caloIsoCorr.calobitset.set(xAOD::Iso::IsolationCaloCorrection::coreCone);
       m_caloIsoTool->caloTopoClusterIsolation(caloIsoResult, *itrk, {xAOD::Iso::IsolationType::etcone20}, caloIsoCorr, inputClusters.ptr());
       float etConeCore = caloIsoResult.coreCorrections[xAOD::Iso::IsolationCaloCorrection::coreCone][xAOD::Iso::IsolationCorrectionParameter::coreEnergy];
-      float rerr = Amg::error(itrk->definingParametersCovMatrix(), 4) / fabs(itrk->qOverP());
+      float rerr = Amg::error(itrk->definingParametersCovMatrix(), 4) / std::fabs(itrk->qOverP());
       float eOverP = etConeCore / itrk->pt();
       float trackIso = ptCone20 / itrk->pt();
       float ptsum = itrk->pt() + ptCone20;

@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef EFLOWFIRSTINT_H
-#define EFLOWFIRSTINT_H
+#ifndef EFLOWREC_EFLOWFIRSTINT_H
+#define EFLOWREC_EFLOWFIRSTINT_H
 
 /********************************************************************
 
@@ -14,8 +14,6 @@ AUTHORS:  M.Hodgkinson, R Duxfield (based on R.Duxfields Root package)
 CREATED:  18th Aug, 2005
 
 ********************************************************************/
-
-#include <iostream>
 
 /**
 This object holds the expected energy deposit of a track and the known width of that distribution.

@@ -2,8 +2,8 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef PFOClusterMLCorrectionAlgorithm_H
-#define PFOClusterMLCorrectionAlgorithm_H
+#ifndef EFLOWREC_PFOClusterMLCorrectionAlgorithm_H
+#define EFLOWREC_PFOClusterMLCorrectionAlgorithm_H
 
 ////////////////////////////////////////////
 /// \class PFOClusterMLCorrectionAlgorithm

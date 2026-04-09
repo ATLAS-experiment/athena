@@ -1,5 +1,9 @@
-#ifndef PFTRACKFILLER_H
-#define PFTRACKFILLER_H
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+
+#ifndef EFLOWREC_PFTRACKFILLER_H
+#define EFLOWREC_PFTRACKFILLER_H
 
 #include "eflowRecTrack.h"
 #include "PFData.h"

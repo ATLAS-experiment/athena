@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -9,8 +9,8 @@
  *      Author: tlodd
  */
 
-#ifndef EFLOWCELLINTEGRATION_H_
-#define EFLOWCELLINTEGRATION_H_
+#ifndef EFLOWREC_EFLOWCELLINTEGRATION_H
+#define EFLOWREC_EFLOWCELLINTEGRATION_H
 
 #include <stdexcept>
 #include <iostream>
@@ -46,7 +46,7 @@ public:
 
     /* If results agree within m_error threshold, return the mean... */
     double Imean = (I5 + I6) / 2.0;
-    if (fabs(I5 - I6) / Imean <= m_error) {
+    if (std::fabs(I5 - I6) / Imean <= m_error) {
       return Imean;
     } else {
       /* ...else recursively part up the integration into n subRanges */
@@ -125,7 +125,7 @@ public:
 
   inline void setEtaSq(double xSq) { m_etaSq = xSq; }
 
-  inline double evaluateStdExp(double rSq) const { return m_norm * exp(-rSq * m_oneOverTwoSigmaSq); }
+  inline double evaluateStdExp(double rSq) const { return m_norm * std::exp(-rSq * m_oneOverTwoSigmaSq); }
   inline double evaluateLookupExp(double rSq) const { return m_lookupExp->evaluate(rSq * m_oneOverTwoSigmaSq)*m_norm; }
 
   /** The evaluate method for the integration. The implementation depends on the template parameter */
@@ -190,4 +190,4 @@ private:
 };
 
 
-#endif /* EFLOWCELLINTEGRATION_H_ */
+#endif /* EFLOWREC_EFLOWCELLINTEGRATION_H */

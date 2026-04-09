@@ -10,10 +10,9 @@
  *      Author: J. C. MacDonald & Upgraded by M.T. Anthony
  */
 
-#ifndef PFEGAMFLOWELEMENTASSOC_H
-#define PFEGAMFLOWELEMENTASSOC_H
+#ifndef EFLOWREC_PFEGAMFLOWELEMENTASSOC_H
+#define EFLOWREC_PFEGAMFLOWELEMENTASSOC_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 
@@ -80,4 +79,4 @@ private:
 
 };
 
-#endif // PFEGamFlowElementAssoc
+#endif // EFLOWREC_PFEGAMFLOWELEMENTASSOC_H

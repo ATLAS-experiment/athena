@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -26,7 +26,7 @@ namespace eflowSubtract {
 void
 Subtractor::subtractTracksFromClusters(
   eflowRecTrack* efRecTrack,
-  std::vector<std::pair<xAOD::CaloCluster*, bool>>& clusterSubtractionList, const bool& addCPData) const
+  std::vector<std::pair<xAOD::CaloCluster*, bool>>& clusterSubtractionList, bool addCPData) const
 {
 
   /* Make ordered cell list */
@@ -56,7 +56,7 @@ Subtractor::makeOrderedCellList(
   orderedCells.setNewExtrapolatedTrack(trackCalo);
 
   unsigned int countMatchedClusters = 0;
-  for (auto thisPair : clusters) {
+  for (const auto& thisPair : clusters) {
 
     xAOD::CaloCluster* thisCluster = thisPair.first;
 

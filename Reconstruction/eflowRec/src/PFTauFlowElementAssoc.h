@@ -10,10 +10,9 @@
  *     Author: L. Miller
  */
 
-#ifndef PFTAUFLOWELEMENTASSOC_H
-#define PFTAUFLOWELEMENTASSOC_H
+#ifndef EFLOWREC_PFTAUFLOWELEMENTASSOC_H
+#define EFLOWREC_PFTAUFLOWELEMENTASSOC_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
@@ -65,4 +64,4 @@ private:
 
 };
 
-#endif // PFTAUFLOWELEMENTASSOC_H
+#endif // EFLOWREC_PFTAUFLOWELEMENTASSOC_H
