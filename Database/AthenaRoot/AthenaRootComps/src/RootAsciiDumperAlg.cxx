@@ -4,13 +4,13 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// RootAsciiDumperAlgHandle.cxx 
-// Implementation file for class RootAsciiDumperAlgHandle
+// RootAsciiDumperAlg.cxx 
+// Implementation file for class RootAsciiDumperAlg
 // Author: S.Binet<binet@cern.ch>
 /////////////////////////////////////////////////////////////////// 
 
 // AthenaRootComps includes
-#include "RootAsciiDumperAlgHandle.h"
+#include "RootAsciiDumperAlg.h"
 
 // STL includes
 #include <sstream>
@@ -41,7 +41,7 @@ namespace Athena {
 
 // Athena Algorithm's Hooks
 ////////////////////////////
-StatusCode RootAsciiDumperAlgHandle::initialize()
+StatusCode RootAsciiDumperAlg::initialize()
 {
   ATH_MSG_INFO ("Initializing " << name() << "...");
   ATH_CHECK( m_eiKey.initialize() );
@@ -70,7 +70,7 @@ StatusCode RootAsciiDumperAlgHandle::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode RootAsciiDumperAlgHandle::finalize()
+StatusCode RootAsciiDumperAlg::finalize()
 {
   ATH_MSG_INFO ("Finalizing " << name() << "...");
 
@@ -84,7 +84,7 @@ StatusCode RootAsciiDumperAlgHandle::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode RootAsciiDumperAlgHandle::execute()
+StatusCode RootAsciiDumperAlg::execute()
 {  
   ATH_MSG_DEBUG ("Executing " << name() << "...");
 
@@ -121,7 +121,7 @@ StatusCode RootAsciiDumperAlgHandle::execute()
   );
 
     if (buf.empty()) {
-        throw std::runtime_error("Empty buffer in RootAsciiDumperAlgHandle::execute");
+        throw std::runtime_error("Empty buffer in RootAsciiDumperAlg::execute");
     }
 
     if (write(m_ofd, buf.data(), buf.size()) == -1) {
@@ -149,7 +149,7 @@ StatusCode RootAsciiDumperAlgHandle::execute()
     );
 
     if (buf.empty()) {
-        throw std::runtime_error("Empty buffer in RootAsciiDumperAlgHandle::execute");
+        throw std::runtime_error("Empty buffer in RootAsciiDumperAlg::execute");
     }
 
     if (write(m_ofd, buf.data(), buf.size()) == -1) {

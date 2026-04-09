@@ -1,15 +1,15 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// RootAsciiDumperAlgHandle.h 
-// Header file for class RootAsciiDumperAlgHandle
+// RootAsciiDumperAlg.h 
+// Header file for class RootAsciiDumperAlg
 // Author: S.Binet<binet@cern.ch>
 /////////////////////////////////////////////////////////////////// 
-#ifndef ATHENAROOTCOMPS_ATHENA_ROOTASCIIDUMPERALGHANDLE_H
-#define ATHENAROOTCOMPS_ATHENA_ROOTASCIIDUMPERALGHANDLE_H 1
+#ifndef ATHENAROOTCOMPS_ATHENA_ROOTASCIIDUMPERALG_H
+#define ATHENAROOTCOMPS_ATHENA_ROOTASCIIDUMPERALG_H 1
 
 // STL includes
 #include <string>
@@ -23,7 +23,7 @@
 
 namespace Athena {
 
-class RootAsciiDumperAlgHandle
+class RootAsciiDumperAlg
   : public ::AthAlgorithm
 { 
 
@@ -36,10 +36,10 @@ class RootAsciiDumperAlgHandle
   using ::AthAlgorithm::AthAlgorithm;
 
   /// Destructor: 
-  virtual ~RootAsciiDumperAlgHandle() = default;
+  virtual ~RootAsciiDumperAlg() = default;
 
   // Assignment operator: 
-  //RootAsciiDumperAlgHandle &operator=(const RootAsciiDumperAlgHandle &alg); 
+  //RootAsciiDumperAlg &operator=(const RootAsciiDumperAlg &alg); 
 
   // Athena algorithm's Hooks
   virtual StatusCode  initialize();
@@ -60,7 +60,7 @@ class RootAsciiDumperAlgHandle
  private: 
 
   /// Default constructor: 
-  RootAsciiDumperAlgHandle();
+  RootAsciiDumperAlg();
 
   /// ASCII output file name
   StringProperty m_ofname
@@ -106,4 +106,4 @@ class RootAsciiDumperAlgHandle
 /////////////////////////////////////////////////////////////////// 
 
 } //> end namespace Athena
-#endif //> !ATHENAROOTCOMPS_ATHENA_ROOTASCIIDUMPERALGHANDLE_H
+#endif //> !ATHENAROOTCOMPS_ATHENA_ROOTASCIIDUMPERALG_H

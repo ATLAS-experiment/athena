@@ -6,7 +6,7 @@
 #include "../RootNtupleEventSelector.h"
 #include "../RootNtupleOutputStream.h"
 #include "../RootNtupleOutputMetadataTool.h"
-#include "../RootAsciiDumperAlgHandle.h"
+#include "../RootAsciiDumperAlg.h"
 
 #include "../IoSvc.h"
 
@@ -25,7 +25,7 @@ DECLARE_COMPONENT( Athena::RootNtupleEventSelector )
 DECLARE_COMPONENT( Athena::xAODEventSelector )
 DECLARE_COMPONENT( Athena::RootNtupleOutputStream )
 DECLARE_COMPONENT( Athena::RootNtupleOutputMetadataTool )
-DECLARE_COMPONENT( Athena::RootAsciiDumperAlgHandle )
+DECLARE_COMPONENT( Athena::RootAsciiDumperAlg )
 
 DECLARE_COMPONENT( IoSvc )
 

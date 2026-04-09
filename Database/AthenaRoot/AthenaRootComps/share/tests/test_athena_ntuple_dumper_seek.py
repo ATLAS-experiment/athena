@@ -13,7 +13,7 @@ from AthenaCommon.AlgSequence import AlgSequence
 job = AlgSequence()
 
 import AthenaRootComps.AthenaRootCompsConf as arcc
-job += arcc.Athena__RootAsciiDumperAlgHandle("rootdumper")
+job += arcc.Athena__RootAsciiDumperAlg("rootdumper")
 
 
 import os, time

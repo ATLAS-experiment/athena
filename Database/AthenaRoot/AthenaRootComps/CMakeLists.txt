@@ -45,14 +45,14 @@ atlas_add_test( test_athena_ntuple_dumper_multiple_diffroot  # diff-root on the 
                 PRIVATE_WORKING_DIRECTORY
                 DEPENDS test_athena_ntuple_dumper_multiple )
 
-atlas_add_test( test_athena_ntuple_dumper_varhandles_nooutput
+atlas_add_test( test_athena_ntuple_dumper_nooutput
                 SCRIPT athena.py -c"DOWRITE=0" -lERROR AthenaRootComps/test_athena_ntuple_dumper.py
                 ENVIRONMENT ATLAS_REFERENCE_TAG=${_reftag}
                 POST_EXEC_SCRIPT "arc_refcomp.sh ref.d3pd.ascii"
                 PROPERTIES TIMEOUT 600
                 PRIVATE_WORKING_DIRECTORY )
 
-atlas_add_test( test_athena_ntuple_dumper_varhandles
+atlas_add_test( test_athena_ntuple_dumper
                 SCRIPT athena.py -lERROR AthenaRootComps/test_athena_ntuple_dumper.py
                 ENVIRONMENT ATLAS_REFERENCE_TAG=${_reftag}
                 POST_EXEC_SCRIPT "arc_refcomp.sh ref.d3pd.ascii"
@@ -60,12 +60,12 @@ atlas_add_test( test_athena_ntuple_dumper_varhandles
                 PRIVATE_WORKING_DIRECTORY )
 
 atlas_add_test( test_athena_ntuple_dumper_read
-                SCRIPT athena.py -c"FNAMES=['../unitTestRun_test_athena_ntuple_dumper_varhandles/d3pd.root']" -lERROR AthenaRootComps/test_athena_ntuple_dumper.py
+                SCRIPT athena.py -c"FNAMES=['../unitTestRun_test_athena_ntuple_dumper/d3pd.root']" -lERROR AthenaRootComps/test_athena_ntuple_dumper.py
                 ENVIRONMENT ATLAS_REFERENCE_TAG=${_reftag}
                 POST_EXEC_SCRIPT "arc_refcomp.sh ref.d3pd.ascii collectionName"
                 PROPERTIES TIMEOUT 450
                 PRIVATE_WORKING_DIRECTORY
-                DEPENDS test_athena_ntuple_dumper_varhandles )
+                DEPENDS test_athena_ntuple_dumper )
 
 atlas_add_test( test_athena_variable_shape1
                 SCRIPT test/test_athena_variable_shape1.sh
