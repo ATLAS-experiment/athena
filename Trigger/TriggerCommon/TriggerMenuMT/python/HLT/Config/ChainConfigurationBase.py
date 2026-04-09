@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 
 from AthenaCommon.Logging import logging
@@ -49,15 +49,14 @@ class ChainConfigurationBase(metaclass=abc.ABCMeta):
         # do not generate Menu Sequences, just store the functions that can do that
         seqArray = [functools.partial(gen, flags, **stepArgs) for gen in sequenceCfgArray]
 
-        if (len(seqArray)>0):                                
-            if inspect.signature(comboHypoCfg).parameters and all(inspect.signature(comboTool).parameters for comboTool in comboTools):                
-                # Bind flags to comboHypo generator if needed                
-                if 'flags' in inspect.signature(comboHypoCfg).parameters:
-                    comboHypoCfg = functools.partial(comboHypoCfg, flags)
-                else:
-                    comboHypoCfg = functools.partial(comboHypoCfg)                
-                return ChainStep(stepName, seqArray, 
-                                 [self.dict], comboHypoCfg = comboHypoCfg, comboToolConfs = comboTools)
+        if (len(seqArray)>0):
+            # Bind flags to comboHypo generator if needed
+            if 'flags' in inspect.signature(comboHypoCfg).parameters:
+                comboHypoCfg = functools.partial(comboHypoCfg, flags)
+            else:
+                comboHypoCfg = functools.partial(comboHypoCfg)
+            return ChainStep(stepName, seqArray,
+                             [self.dict], comboHypoCfg = comboHypoCfg, comboToolConfs = comboTools)
 
         # if not returned any step
         raise RuntimeError("[getStep] No sequences generated for step %s!", stepName)
