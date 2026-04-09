@@ -41,6 +41,7 @@ namespace FlavorTagInference {
     ///   ]
     /// }
     PassThroughSaltModel(const nlohmann::json& config);
+    virtual ~PassThroughSaltModel() = default;
 
     InferenceOutput runInference(
       std::map<std::string, Inputs>& gnn_inputs) const override;
