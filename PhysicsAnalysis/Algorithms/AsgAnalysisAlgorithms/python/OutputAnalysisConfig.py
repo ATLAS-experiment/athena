@@ -282,12 +282,30 @@ class OutputAnalysisConfig (ConfigBlock):
                     else:
                         branchDecl += f" metTerm={self.metTermName}"
                 myVars.add(branchDecl)
-                
-                # RNTuple Path
+
+        # Unified branch collection for all output formats
+        allBranches = set()
+        allBranches |= self.vars
+        allBranches |= autoVars
+        # Add MET branches
+        userMetVars = set()
+        if self.metVars:
+            for var in self.metVars:
+                userMetVars.add(var + " metTerm=" + self.metTermName)
+        allBranches |= userMetVars
+        allBranches |= autoMetVars
+        # Add truth MET branches (for MC)
+        userTruthMetVars = set()
+        if config.dataType() is not DataType.Data:
+            if self.truthMetVars:
+                for var in self.truthMetVars:
+                    userTruthMetVars.add(var + " metTerm=" + self.truthMetTermName)
+            allBranches |= userTruthMetVars
+            allBranches |= autoTruthMetVars
+
+        # Create the output algorithm based on outputFormat
         if self.outputFormat == 'RNTuple':
-            allBranches = self.vars | autoVars
-            print("allBranches in OutputAnalysisConfig: ", allBranches)
-            alg = config.createAlgorithm( 'CP::RNtupleTreeMakerAlg', 'RNtupleMaker' )
+            alg = config.createAlgorithm('CP::RNtupleTreeMakerAlg', 'RNtupleMaker')
             alg.TreeName = self.treeName
             alg.RootStreamName = self.streamName
             alg.OutputStreamName = self.streamName
@@ -310,17 +328,9 @@ class OutputAnalysisConfig (ConfigBlock):
             self.createOutputAlgs(config, 'NTupleMaker', self.vars | autoVars)
 
         if self.metVars or autoMetVars:
-            userMetVars = set ()
-            if self.metVars :
-                for var in self.metVars:
-                    userMetVars.add(var + " metTerm=" + self.metTermName)
             self.createOutputAlgs(config, 'MetNTupleMaker', userMetVars | autoMetVars)
 
         if config.dataType() is not DataType.Data and (self.truthMetVars or autoTruthMetVars):
-            userTruthMetVars = set ()
-            if self.truthMetVars :
-                for var in self.truthMetVars:
-                    userTruthMetVars.add(var + " metTerm=" + self.truthMetTermName)
             self.createOutputAlgs(config, 'TruthMetNTupleMaker', userTruthMetVars | autoTruthMetVars)
 
         treeFiller = config.createAlgorithm( 'CP::TreeFillerAlg', 'TreeFiller' )

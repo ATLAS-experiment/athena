@@ -492,6 +492,26 @@ namespace CP {
         }
         return StatusCode::SUCCESS;
     }
+      // ======================================================================
+      // ElementProcessorMET
+      // ======================================================================
+        ElementProcessorMet::ElementProcessorMet(const std::string& sgName, const std::string& termName)
+            : ElementProcessor(sgName),
+                m_termName(termName) {
+        }
+    
+    StatusCode ElementProcessorMet::retrieveProcess(StoreType& evtStore) {
+
+      const xAOD::MissingETContainer* met = nullptr;
+      ANA_CHECK(evtStore.retrieve(met, m_sgName));
+      const SG::AuxElement& element = *(*met)[m_termName];
+      // Process all fields.
+      for (auto& p : m_fields) {
+        ATH_CHECK(p->process(element, msg()));
+      }
+
+      return StatusCode::SUCCESS;
+    }
 
       // ======================================================================
       // ProcessorList
@@ -617,11 +637,18 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
 
-    TreeBranchHelpers::IObjectProcessor& ProcessorList::getObjectProcessor( const BranchConfig& /*branchConfig*/, const std::string& sgName ) {
+    TreeBranchHelpers::IObjectProcessor& ProcessorList::getObjectProcessor( const BranchConfig& branchConfig, const std::string& sgName ) {
         std::string processorName = sgName;
+        if (!branchConfig.metTermName.empty()) {
+            processorName += ":metTerm=" + branchConfig.metTermName;
+        }
+
         if (auto iter = m_processors.find(processorName); iter != m_processors.end()) {
             return *iter->second;
         }
+        if (!branchConfig.metTermName.empty())
+            return *m_processors.emplace (processorName, std::make_unique<ElementProcessorMet>(sgName, branchConfig.metTermName)).first->second;
+
 
         if (m_nonContainers.contains(sgName)) {
             return *(m_processors.emplace(processorName, std::make_unique<ElementProcessor>(sgName)).first->second);
