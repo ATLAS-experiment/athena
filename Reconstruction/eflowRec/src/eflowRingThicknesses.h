@@ -1,7 +1,9 @@
-/*   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration */
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
 
-#ifndef EFLOWRINGTHICKNESSES_H
-#define EFLOWRINGTHICKNESSES_H
+#ifndef EFLOWREC_EFLOWRINGTHICKNESSES_H
+#define EFLOWREC_EFLOWRINGTHICKNESSES_H
 
 #include "eflowCaloRegions.h"
 

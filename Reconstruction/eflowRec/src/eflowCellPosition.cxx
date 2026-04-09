@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -49,8 +49,8 @@ bool eflowCellPosition::operator<(const eflowCellPosition& rhs) const {
     double r1 = m_deposit->dR2(m_eta, m_phi, m_layer);
     double r2 = m_deposit->dR2(rhs.m_eta, rhs.m_phi, m_layer);
 
-    if (fabs(r1 - r2) < 1.0e-12) {
-      if (fabs(m_eta - rhs.m_eta) < 1.0e-6) {
+    if (std::fabs(r1 - r2) < 1.0e-12) {
+      if (std::fabs(m_eta - rhs.m_eta) < 1.0e-6) {
 	return  CxxUtils::fpcompare::greater(xAOD::P4Helpers::deltaPhi(m_phi,rhs.m_phi),0);
       } else {
         return (m_eta < rhs.m_eta);

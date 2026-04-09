@@ -34,7 +34,7 @@ void NeutralPFOClusterMLCorrectionTool::scaleEnergyToAlternativeSignalState(xAOD
   // Scale factor is defined as the ratio of the cluster energy stored in decoration
   // to the energy in the EM calibration state (UNCALIBRATED). This scale factor is then applied to the PFO energy.
   // If the EM energy is zero or if decoration is not found, no scaling is applied.
-  const SG::AuxElement::Accessor<double> clusterMLCorrectedEnergyAccessor(m_clusterMLCorrectedEnergyKey.value());
+  const SG::Accessor<double> clusterMLCorrectedEnergyAccessor(m_clusterMLCorrectedEnergyKey.value());
   const double clusterEMEnergy = cls.rawE();
   if (!clusterMLCorrectedEnergyAccessor.isAvailable(cls))
   {

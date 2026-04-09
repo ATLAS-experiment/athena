@@ -1,8 +1,8 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef PFTRACKSELECTOR_H
-#define PFTRACKSELECTOR_H
+#ifndef EFLOWREC_PFTRACKSELECTOR_H
+#define EFLOWREC_PFTRACKSELECTOR_H
 
 /** Algorithm which will select tracks for downstream algorithms to use within eflowRec */
 
@@ -32,7 +32,7 @@ public:
   /** Default destructor */
   ~PFTrackSelector(){};
 
-  /** Gaudi AthAlgorithm hooks */
+  /** Gaudi AthReentrantAlgorithm hooks */
   StatusCode initialize();
   StatusCode execute(const EventContext& ctx) const;
   StatusCode finalize();

@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef IPFCLUSTERCOLLECTIONTOOL_H
-#define IPFCLUSTERCOLLECTIONTOOL_H
+#ifndef EFLOWREC_IPFCLUSTERCOLLECTIONTOOL_H
+#define EFLOWREC_IPFCLUSTERCOLLECTIONTOOL_H
 
 #include "GaudiKernel/IAlgTool.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"

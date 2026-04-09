@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -59,9 +59,9 @@ bool eflowRecCluster::isEOverPFail(bool consistencySigmaCut, bool useGoldenMode)
     return false;
   }
 
-  double sigma = sqrt(getVarianceOfSumExpectedEnergy());
+  double sigma = std::sqrt(getVarianceOfSumExpectedEnergy());
 
-  bool result = useGoldenMode ? fabs(clusterEnergy - expectedEnergy) > consistencySigmaCut*sigma
+  bool result = useGoldenMode ? std::fabs(clusterEnergy - expectedEnergy) > consistencySigmaCut*sigma
                               : clusterEnergy < expectedEnergy - consistencySigmaCut*sigma;
   return result;
 }

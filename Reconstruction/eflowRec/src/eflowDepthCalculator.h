@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef EFLOWDEPTHCALCULATOR_H
-#define EFLOWDEPTHCALCULATOR_H
+#ifndef EFLOWREC_EFLOWDEPTHCALCULATOR_H
+#define EFLOWREC_EFLOWDEPTHCALCULATOR_H
 
 /********************************************************************
 

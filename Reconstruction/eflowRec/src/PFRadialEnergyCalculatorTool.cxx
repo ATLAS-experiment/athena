@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PFRadialEnergyCalculatorTool.h"
@@ -23,13 +23,12 @@ StatusCode PFRadialEnergyCalculatorTool::execute(eflowCaloObjectContainer& theEf
 
     const std::vector<std::pair<eflowTrackClusterLink*,std::pair<float,float> > > matchedTrackList = thisEflowCaloObject->efRecLink();
 
-    for( auto track: matchedTrackList){
+    for(const auto& track: matchedTrackList){
 
       eflowRecTrack* efRecTrack = (track.first)->getTrack();
           
       std::vector<eflowRecCluster*> matchedClusters;
-      matchedClusters.clear();
-      std::vector<eflowTrackClusterLink*> links = efRecTrack->getClusterMatches();
+      const std::vector<eflowTrackClusterLink*>& links = efRecTrack->getClusterMatches();
       for (auto *thisEFlowTrackClusterLink : links) matchedClusters.push_back(thisEFlowTrackClusterLink->getCluster());
 
       std::vector<std::pair<xAOD::CaloCluster*, bool> > clusterSubtractionList;
@@ -72,10 +71,10 @@ StatusCode PFRadialEnergyCalculatorTool::execute(eflowCaloObjectContainer& theEf
       	  double averageEnergyDensityPerRing = 0;
 
           //Get the list of calorimeter cells in this cell ring
-      	  std::vector<std::pair<const CaloCell*,int> > tempVector = (*beginRing).second;
+      	  const std::vector<std::pair<const CaloCell*,int> >& tempVector = (*beginRing).second;
 
           //Loop over the calorimeter cells in this cell ring and calculate total and average energy densities in this cell ring.
-          for (auto thisPair : tempVector){
+          for (const auto& thisPair : tempVector){
       	    const CaloDetDescrElement* DDE = (thisPair.first)->caloDDE();
 	          CaloCell_ID::CaloSample sampling = DDE->getSampling();
 

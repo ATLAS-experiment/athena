@@ -1,8 +1,8 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef PFALGORITHM_H
-#define PFALGORITHM_H
+#ifndef EFLOWREC_PFALGORITHM_H
+#define EFLOWREC_PFALGORITHM_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"

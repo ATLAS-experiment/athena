@@ -1,26 +1,32 @@
-#ifndef PFCLUSTERWIDTHCALCULATOR_H
-#define PFCLUSTERWIDTHCALCULATOR_H
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+
+#ifndef EFLOWREC_PFCLUSTERWIDTHCALCULATOR_H
+#define EFLOWREC_PFCLUSTERWIDTHCALCULATOR_H
 
 #include <vector>
 
+
+struct PFClusterWidth {
+  double etaMean{};
+  double phiMean{};
+  double etaVariance{};
+  double phiVariance{};
+};
+
 class PFClusterWidthCalculator {
 
-    public:
+public:
     
     PFClusterWidthCalculator();
     ~PFClusterWidthCalculator() = default;
-    
-    std::pair<double,double> getPFClusterCoordinateWidth(const std::vector<double>& eta, const std::vector<double>& phi,const double& clusterEta, const double& clusterPhi, unsigned int nCells);
-    double getEtaMean() const {return m_etaMean;}
-    double getPhiMean() const {return m_phiMean;}
 
+  PFClusterWidth getPFClusterCoordinateWidth(const std::vector<double>& eta, const std::vector<double>& phi, double clusterEta, double clusterPhi, unsigned int nCells) const;
 
-    private:
-    double m_etaPhiLowerLimit;
-    double m_etaMean;
-    double m_phiMean;
+private:
+  double m_etaPhiLowerLimit{};
 
-    
 };
 
 #endif

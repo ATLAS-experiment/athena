@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef EFLOWCELLSUBTRACTIONFACILITATOR_H
-#define EFLOWCELLSUBTRACTIONFACILITATOR_H
+#ifndef EFLOWREC_EFLOWCELLSUBTRACTIONFACILITATOR_H
+#define EFLOWREC_EFLOWCELLSUBTRACTIONFACILITATOR_H
 
 /********************************************************************
 
@@ -43,13 +43,13 @@ public:
                        eflowRecTrack& theTrack,
                        xAOD::CaloCluster* tracksClus,
                        eflowCellList& orderedCells,
-                       bool& annFlag, const bool& addCPData) const;
+                       bool& annFlag, bool addCPData) const;
   double subtractCells(
     eflowRingSubtractionManager& ringSubtractionManager,
     eflowRecTrack& theTrack,
     std::vector<std::pair<xAOD::CaloCluster*, bool>>& tracksClus,
     eflowCellList& orderedCells,
-    bool& annFlag, const bool& addCPData) const;
+    bool& annFlag, bool addCPData) const;
 
 private:
   static CaloClusterCellLink::iterator getCellIterator(
@@ -74,13 +74,13 @@ private:
     CellIt endRing,
     double targetRingEnergy,
     double eRing, eflowRecTrack& theTrack,
-    const bool& addCPData) const;
+    bool addCPData) const;
 
   void subtractFullRings(
     std::vector<std::pair<xAOD::CaloCluster*, bool>>& tracksClusters,
     CellIt beginRing,
     CellIt endRing, eflowRecTrack& theTrack,
-    const bool& addCPData) const;
+    bool addCPData) const;
 
   bool subtractRings(
     eflowRingSubtractionManager& ringSubtractionManager,
@@ -90,18 +90,18 @@ private:
     eflowCellList& orderedCells,
     std::vector<std::pair<xAOD::CaloCluster*, bool>>& tracksClusters,
     bool& annFlag, eflowRecTrack& theTrack,
-    const bool& addCPData) const;
+    bool addCPData) const;
 
   static bool subtractCaloCell(double& eSubtracted,
                                const double eExpect,
                                xAOD::CaloCluster* cluster,
                                const CaloCell* cell, 
                                eflowRecTrack& theTrack,
-                               const bool& addCPData);
+                               bool addCPData);
 
   static void annihilateClusters(
     std::vector<std::pair<xAOD::CaloCluster*, bool>>& tracksClusters, bool& annFlag,
-    eflowRecTrack& theTrack, const bool& addCPData) ;
+    eflowRecTrack& theTrack, bool addCPData) ;
 
   static bool subtractReorderedCells(
     std::vector<std::pair<xAOD::CaloCluster*, bool>>& tracksClusters,
@@ -109,6 +109,6 @@ private:
     const double eExpect,
     eflowCellList& orderedCells,
     eflowRecTrack& theTrack,
-    const bool& addCPData);
+    bool addCPData);
 };
 #endif
