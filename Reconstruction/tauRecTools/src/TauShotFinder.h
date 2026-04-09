@@ -100,7 +100,8 @@ private:
   Gaudi::Property<std::vector<float>> m_minPtCut {this, "MinPtCut"};
   Gaudi::Property<std::vector<float>> m_doubleShotCut {this, "AutoDoubleShotCut"};
   Gaudi::Property<bool> m_removeElectronCells {this, "RemoveElectronCells", false};
-   
+  Gaudi::Property<float> m_energyThreshold{this, "EnergyThreshold", 100., "energy threshold (in MeV) to select cells"};
+
   SG::ReadHandleKey<CaloCellContainer> m_caloCellInputContainer{this,"Key_caloCellInputContainer", "AllCalo", "input calo cell container key"};
   ToolHandle<IHadronicCalibrationTool> m_caloWeightTool {this, "CaloWeightTool", "H1WeightToolCSC12Generic"};
   SG::ReadHandleKey<xAOD::CaloClusterContainer> m_removedClusterInputContainer {this,"Key_RemovedClusterInputContainer", "", "input removed cluster key"};

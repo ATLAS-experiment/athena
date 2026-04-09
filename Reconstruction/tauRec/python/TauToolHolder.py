@@ -270,9 +270,6 @@ def Pi0ClusterFinderCfg(flags):
     _name = flags.Tau.ActiveConfig.prefix + 'Pi0ClusterFinder'
 
     TauPi0CreateROI = CompFactory.getComp("TauPi0CreateROI")
-   
-    from CaloClusterCorrection.StandardCellWeightCalib import getCellWeightTool
-    CaloWeightTool = getCellWeightTool(flags=flags)
 
     myTauPi0CreateROI = TauPi0CreateROI(
         name                             = _name,
@@ -280,7 +277,6 @@ def Pi0ClusterFinderCfg(flags):
         Key_RemovedClusterInputContainer = flags.Tau.ActiveConfig.RemovedElectronClusters,
         inEleRM                          = flags.Tau.ActiveConfig.inTauEleRM,
         RemoveElectronCells              = flags.Tau.ActiveConfig.RemoveElectronCells,
-        CaloWeightTool                   = result.popToolsAndMerge(CaloWeightTool),
     )
 
     result.setPrivateTools(myTauPi0CreateROI)
