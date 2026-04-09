@@ -13,10 +13,7 @@ from AthenaCommon.AlgSequence import AlgSequence
 job = AlgSequence()
 
 import AthenaRootComps.AthenaRootCompsConf as arcc
-if not 'USEVARHANDLE' in dir():
-    USEVARHANDLE=1
-if USEVARHANDLE: job += arcc.Athena__RootAsciiDumperAlgHandle("rootdumper")
-else:            job += arcc.Athena__RootAsciiDumperAlg      ("rootdumper")
+job += arcc.Athena__RootAsciiDumperAlgHandle("rootdumper")
 
 
 import os, time

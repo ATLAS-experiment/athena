@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import os
 from AthenaCommon.Utils import unixtools
@@ -23,10 +23,7 @@ from AthenaCommon.AlgSequence import AlgSequence
 job = AlgSequence()
 
 import AthenaRootComps.AthenaRootCompsConf as arcc
-if not 'USEVARHANDLE' in dir():
-    USEVARHANDLE=1
-if USEVARHANDLE: job += arcc.Athena__RootAsciiDumperAlgHandle("rootdumper")
-else:            job += arcc.Athena__RootAsciiDumperAlg      ("rootdumper")
+job += arcc.Athena__RootAsciiDumperAlgHandle("rootdumper")
 
 if not 'EVTMAX' in dir():
     EVTMAX=-1
