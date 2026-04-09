@@ -23,7 +23,7 @@ atlas_add_component( InDetPhysValMonitoring
 # Install files from the package:
 atlas_install_python_modules( python/*.py )
 atlas_install_joboptions( share/*.txt )
-atlas_install_runtime( share/*.xml share/*.dtd share/*.xsd)
+atlas_install_runtime( share/*.xml share/*.dtd share/*.xsd share/*.json share/*.txt)
 atlas_install_scripts( scripts/*.py scripts/histdef_bookkeep/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_scripts( share/test_*.sh share/clean_up_outdir.sh)
 
