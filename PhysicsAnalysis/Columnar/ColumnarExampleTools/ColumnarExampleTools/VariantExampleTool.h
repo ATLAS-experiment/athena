@@ -76,7 +76,7 @@ namespace columnar
     /// base type/container that is used in xAOD mode for the internal
     /// pointer. If you also want to use it as a possible "variant"
     /// container id, you need to list it twice.
-    using MyVariantDef = VariantContainerId<ContainerId::particle, ContainerId::electron, ContainerId::muon>;
+    using MyVariantDef = VariantContainerId<ParticleDef, ElectronDef, MuonDef>;
 
 
     /// @brief the pt and eta accessors for the variant container
@@ -105,7 +105,7 @@ namespace columnar
     ///
     /// this is to show how you can have accessors/decorators for just
     /// one of the contained "variants".
-    ColumnDecorator<ContainerId::electron,std::uint16_t> etaRankSpecialDec {*this, "etaRank"};
+    ColumnDecorator<ElectronDef,std::uint16_t> etaRankSpecialDec {*this, "etaRank"};
   };
 }
 

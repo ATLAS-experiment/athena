@@ -410,7 +410,7 @@ namespace met {
           auto ind = m_assocAcc.overlapIndices(assoc,orig);
           auto allObjects = m_assocAcc.objects(assoc);
           for (size_t indi = 0; indi < ind.size(); indi++) if (allObjects[ind[indi]]) {
-              if (allObjects[ind[indi]].isContainer<columnar::ContainerId::electron>()
+              if (allObjects[ind[indi]].isContainer<columnar::ElectronDef>()
                   && helper.objSelected(assoc, ind[indi])) {
                 selected = false;
                 break;
@@ -656,7 +656,7 @@ namespace met {
       return StatusCode::SUCCESS;
     }
     static const SG::AuxElement::ConstAccessor<std::vector<ElementLink<IParticleContainer> > > acc_softConst("softConstituents");
-    std::optional<columnar::MetHelpers::ObjectWeightHandle<columnar::ContainerId::mutableMet,columnar::ContainerId::jet>> metSoftClusLinks;
+    std::optional<columnar::MetHelpers::ObjectWeightHandle<columnar::MutableMetDef,columnar::JetDef>> metSoftClusLinks;
     if(metSoftClus) {
       metSoftClusLinks.emplace(*this,m_jetOutputMetWeightDecSoft,metSoftClus.value(),jets);
       if(!coreSoftClus) {
@@ -678,7 +678,7 @@ namespace met {
         ATH_MSG_DEBUG(softConst->size() << " soft constituents from core term");
       }
     }
-    std::optional<columnar::MetHelpers::ObjectWeightHandle<columnar::ContainerId::mutableMet,columnar::ContainerId::jet>> metSoftTrkLinks;
+    std::optional<columnar::MetHelpers::ObjectWeightHandle<columnar::MutableMetDef,columnar::JetDef>> metSoftTrkLinks;
     if(metSoftTrk) {
       metSoftTrkLinks.emplace(*this,m_jetOutputMetWeightDecSoft,metSoftTrk.value(),jets);
       if(!coreSoftTrk) {
@@ -698,7 +698,7 @@ namespace met {
       }
     }
 
-    columnar::MetHelpers::ObjectWeightHandle<columnar::ContainerId::mutableMet,columnar::ContainerId::jet> metJetWeights(*this,m_jetOutputMetWeightDecRegular,metJet,jets);
+    columnar::MetHelpers::ObjectWeightHandle<columnar::MutableMetDef,columnar::JetDef> metJetWeights(*this,m_jetOutputMetWeightDecRegular,metJet,jets);
 
     // Get the hashed key of this jet, if we can. Though his only works if
     //   1. the container is an owning container, and not just a view;
@@ -707,7 +707,7 @@ namespace met {
     // code, and it should work in AnalysisBase, only the first one of these
     // is checked. Since the code can not work otherwise.
 
-    columnar::MetHelpers::OriginalObjectHandle<columnar::ContainerId::jet> jetsOriginals(*this,jets);
+    columnar::MetHelpers::OriginalObjectHandle<columnar::JetDef> jetsOriginals(*this,jets);
     for(auto jet : jets) {
       auto originalJet = jetsOriginals.getOriginal(jet);
       auto assoc = helper.getJetAssociation(originalJet);
@@ -803,8 +803,8 @@ namespace met {
       }
       for(const auto obj : m_assocAcc.objects(*assoc)) {
         if(!obj) continue;
-        if(!m_useGhostMuons && obj.isContainer<columnar::ContainerId::muon>()) {
-          auto mu_test = obj.tryGetVariant<columnar::ContainerId::muon>().value();
+        if(!m_useGhostMuons && obj.isContainer<columnar::MuonDef>()) {
+          auto mu_test = obj.tryGetVariant<columnar::MuonDef>().value();
           ATH_MSG_VERBOSE("Muon " << mu_test << " found in jet " << jet);
           if((m_doRemoveMuonJets || m_doSetMuonJetEMScale)) {
             if constexpr (columnar::ColumnarModeDefault::isXAOD) {
@@ -815,8 +815,8 @@ namespace met {
               ATH_MSG_VERBOSE("Muon is selected by MET.");
             }
           }
-        } else if(m_doRemoveElecTrks && obj.isContainer<columnar::ContainerId::electron>()) {
-          auto el_test = obj.tryGetVariant<columnar::ContainerId::electron>().value();
+        } else if(m_doRemoveElecTrks && obj.isContainer<columnar::ElectronDef>()) {
+          auto el_test = obj.tryGetVariant<columnar::ElectronDef>().value();
           ATH_MSG_VERBOSE("Electron " << el_test << " found in jet " << jet);
           if constexpr (columnar::ColumnarModeDefault::isXAOD) {
             if(acc_originalObject.isAvailable(el_test.getXAODObject())) el_test = *static_cast<const xAOD::Electron*>(*acc_originalObject(el_test.getXAODObject()));

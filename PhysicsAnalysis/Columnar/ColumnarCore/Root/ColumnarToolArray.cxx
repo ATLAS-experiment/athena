@@ -39,7 +39,7 @@ namespace columnar
       m_data->sharedTools.push_back (this);
 
       m_eventsData = std::make_unique<ColumnAccessorDataArray> (&m_eventsIndex, &m_eventsData, &typeid (ColumnarOffsetType), ColumnAccessMode::input);
-      addColumn (std::string (ContainerId::eventContext::idName), m_eventsData.get(), {.isOffset = true});
+      addColumn (std::string (EventContextDef::idName), m_eventsData.get(), {.isOffset = true});
     }
   }
 

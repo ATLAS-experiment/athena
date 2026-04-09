@@ -50,8 +50,8 @@ namespace ORUtils
       bool m_useRapidity;
 
       /// Columnar accessors
-      columnar::MomentumAccessors<columnar::ContainerId::particle1> m_momAcc1;
-      columnar::MomentumAccessors<columnar::ContainerId::particle2> m_momAcc2;
+      columnar::MomentumAccessors<columnar::Particle1Def> m_momAcc1;
+      columnar::MomentumAccessors<columnar::Particle2Def> m_momAcc2;
 
   }; // class DeltaRMatcher
 
@@ -99,8 +99,8 @@ namespace ORUtils
       bool m_useRapidity;
 
       /// Columnar accessors
-      columnar::MomentumAccessors<columnar::ContainerId::particle1> m_momAcc1;
-      columnar::MomentumAccessors<columnar::ContainerId::particle2> m_momAcc2;
+      columnar::MomentumAccessors<columnar::Particle1Def> m_momAcc1;
+      columnar::MomentumAccessors<columnar::Particle2Def> m_momAcc2;
 
   }; // class SlidingDeltaRMatcher
 

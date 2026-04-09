@@ -56,33 +56,33 @@ namespace columnar
     AccessorTemplate (const AccessorTemplate&) = delete;
     AccessorTemplate& operator = (const AccessorTemplate&) = delete;
 
-    ObjectRange<CI,CM> operator() (ObjectId<ContainerId::eventContext,CM> eventId) const
+    ObjectRange<CI,CM> operator() (ObjectId<EventContextDef,CM> eventId) const
       requires (CI::perEventRange)
     {
       auto *offsets = static_cast<const ColumnarOffsetType*>(eventId.getDataArea()[m_offsetsIndex]);
       return ObjectRange<CI,CM> (eventId.getDataArea(), offsets[eventId.getIndex()], offsets[eventId.getIndex() + 1]);
     }
 
-    ObjectRange<CI,CM> operator() (ObjectRange<ContainerId::eventContext,CM> eventRange) const
+    ObjectRange<CI,CM> operator() (ObjectRange<EventContextDef,CM> eventRange) const
       requires (CI::perEventRange)
     {
       auto *offsets = static_cast<const ColumnarOffsetType*>(eventRange.getDataArea()[m_offsetsIndex]);
       return ObjectRange<CI,CM> (eventRange.getDataArea(), offsets[eventRange.beginIndex()], offsets[eventRange.endIndex()]);
     }
 
-    ObjectId<CI,CM> operator() (ObjectId<ContainerId::eventContext,CM> eventId) const
+    ObjectId<CI,CM> operator() (ObjectId<EventContextDef,CM> eventId) const
       requires (CI::perEventId)
     {
       return ObjectId<CI,CM> (eventId.getDataArea(), eventId.getIndex());
     }
 
-    ObjectRange<CI,CM> operator() (ObjectRange<ContainerId::eventContext,CM> eventRange) const
+    ObjectRange<CI,CM> operator() (ObjectRange<EventContextDef,CM> eventRange) const
       requires (CI::perEventId)
     {
       return ObjectRange<CI,CM> (eventRange.getDataArea(), eventRange.beginIndex(), eventRange.endIndex());
     }
 
-    [[nodiscard]] bool isAvailable (ObjectId<ContainerId::eventContext,CM> eventId) const noexcept
+    [[nodiscard]] bool isAvailable (ObjectId<EventContextDef,CM> eventId) const noexcept
     {
       auto *offsets = static_cast<const ColumnarOffsetType*>(eventId.getDataArea()[m_offsetsIndex]);
       return offsets != nullptr;

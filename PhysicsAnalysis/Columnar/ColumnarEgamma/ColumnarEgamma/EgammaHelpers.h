@@ -28,12 +28,12 @@ namespace columnar
 
     // not sure if this should live here, since it draws in a dependency
     // on ColumnarTracking/xAODTracking, but let's keep it here for now
-    template<ContainerIdConcept CI = ContainerId::egamma,typename CM=ColumnarModeDefault>
+    template<ContainerIdConcept CI = EgammaDef,typename CM=ColumnarModeDefault>
     class IsConvertedPhotonAccessor final
     {
       ColumnAccessor<CI,float,CM> m_etaAcc;
-      ColumnAccessor<CI,std::vector<OptObjectId<ContainerId::vertex,CM>>,CM> m_vertexLinksAcc;
-      VertexAccessor<std::vector<OptObjectId<ContainerId::track,CM>>,CM> m_trackParticleLinksAcc;
+      ColumnAccessor<CI,std::vector<OptObjectId<VertexDef,CM>>,CM> m_vertexLinksAcc;
+      VertexAccessor<std::vector<OptObjectId<TrackDef,CM>>,CM> m_trackParticleLinksAcc;
       TrackAccessor<std::uint8_t,CM> m_numberOfPixelHitsAcc;
       TrackAccessor<std::uint8_t,CM> m_numberOfSCTHitsAcc;
       ColumnAccessor<CI,RetypeColumn<xAOD::Type::ObjectType,std::uint16_t>,CM> m_objectTypeAcc;

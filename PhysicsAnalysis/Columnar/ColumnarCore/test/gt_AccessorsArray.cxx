@@ -28,10 +28,10 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 namespace columnar
 {
   using MyTool = ColumnarTool<ColumnarModeArray>;
-  template<typename CT,ContainerIdConcept CI=ContainerId::particle> using MyAccessor = AccessorTemplate<CI,CT,ColumnAccessMode::input,ColumnarModeArray>;
-  template<typename CT,ContainerIdConcept CI=ContainerId::particle> using MyDecorator = AccessorTemplate<CI,CT,ColumnAccessMode::output,ColumnarModeArray>;
-  template<ContainerIdConcept CI=ContainerId::particle> using MyId = ObjectId<CI,ColumnarModeArray>;
-  template<ContainerIdConcept CI=ContainerId::particle> using MyRange = ObjectRange<CI,ColumnarModeArray>;
+  template<typename CT,ContainerIdConcept CI=ParticleDef> using MyAccessor = AccessorTemplate<CI,CT,ColumnAccessMode::input,ColumnarModeArray>;
+  template<typename CT,ContainerIdConcept CI=ParticleDef> using MyDecorator = AccessorTemplate<CI,CT,ColumnAccessMode::output,ColumnarModeArray>;
+  template<ContainerIdConcept CI=ParticleDef> using MyId = ObjectId<CI,ColumnarModeArray>;
+  template<ContainerIdConcept CI=ParticleDef> using MyRange = ObjectRange<CI,ColumnarModeArray>;
 
 
   TEST (AccessorTest, defaultEventOffsets)
@@ -58,7 +58,7 @@ namespace columnar
   TEST (AccessorTest, nativeEventAccessor)
   {
     MyTool tool;
-    MyAccessor<uint32_t,ContainerId::eventInfo> eventAccessor {tool, "var1"};
+    MyAccessor<uint32_t,EventInfoDef> eventAccessor {tool, "var1"};
     ASSERT_SUCCESS (tool.initializeColumns());
     {
       auto columns = tool.getColumnInfo();
@@ -74,12 +74,12 @@ namespace columnar
     std::vector<void*> data (2, nullptr);
     std::vector<uint32_t> var1 = {0, 1, 2, 3, 4, 5};
     data[1] = var1.data();
-    MyId<ContainerId::eventInfo> id1 {data.data(), 1};
-    MyId<ContainerId::eventInfo> id2 {data.data(), 2};
+    MyId<EventInfoDef> id1 {data.data(), 1};
+    MyId<EventInfoDef> id2 {data.data(), 2};
     EXPECT_EQ (eventAccessor (id1), 1);
     EXPECT_EQ (eventAccessor (id2), 2);
     EXPECT_EQ (&eventAccessor(id1),&id1(eventAccessor));
-    MyRange<ContainerId::eventInfo> range {data.data(), 1, 3};
+    MyRange<EventInfoDef> range {data.data(), 1, 3};
     auto rangeView = eventAccessor (range);
     EXPECT_EQ (rangeView.size(), 2);
     EXPECT_EQ (rangeView.data(), var1.data() + 1);
@@ -122,7 +122,7 @@ namespace columnar
     data[2] = var1.data();
 
     {
-      MyId<ContainerId::eventContext> eventId {data.data(), 1};
+      MyId<EventContextDef> eventId {data.data(), 1};
       auto objectRange = objectAccessor (eventId);
       EXPECT_EQ (objectRange.size(), 2);
       EXPECT_EQ (objectRange.beginIndex(), 1);
@@ -130,7 +130,7 @@ namespace columnar
     }
 
     {
-      MyRange<ContainerId::eventContext> eventRange {data.data(), 1, 3};
+      MyRange<EventContextDef> eventRange {data.data(), 1, 3};
       auto objectRange = objectAccessor (eventRange);
       EXPECT_EQ (objectRange.size(), 5);
       EXPECT_EQ (objectRange.beginIndex(), 1);
@@ -142,8 +142,8 @@ namespace columnar
   TEST (AccessorTest, vectorEventAccessor)
   {
     MyTool tool;
-    MyAccessor<std::vector<uint32_t>,ContainerId::eventInfo> eventAccessor {tool, "var1"};
-    MyAccessor<std::vector<RetypeColumn<uint64_t,uint32_t>>,ContainerId::eventInfo> eventRetypeAccessor {tool, "var1"};
+    MyAccessor<std::vector<uint32_t>,EventInfoDef> eventAccessor {tool, "var1"};
+    MyAccessor<std::vector<RetypeColumn<uint64_t,uint32_t>>,EventInfoDef> eventRetypeAccessor {tool, "var1"};
     ASSERT_SUCCESS (tool.initializeColumns());
     {
       auto columns = tool.getColumnInfo();
@@ -168,8 +168,8 @@ namespace columnar
     std::vector<uint32_t> var1Data = {0, 1, 2, 3, 4, 5, 6};
     data[1] = var1Offsets.data();
     data[2] = var1Data.data();
-    MyId<ContainerId::eventInfo> id1 {data.data(), 1};
-    MyId<ContainerId::eventInfo> id2 {data.data(), 2};
+    MyId<EventInfoDef> id1 {data.data(), 1};
+    MyId<EventInfoDef> id2 {data.data(), 2};
     EXPECT_EQ (eventAccessor (id1).size(), 2);
     EXPECT_EQ (eventAccessor (id2).size(), 3);
     EXPECT_EQ (eventAccessor(id1)[0],1);
@@ -189,7 +189,7 @@ namespace columnar
   TEST (AccessorTest, vectorVectorEventAccessor)
   {
     MyTool tool;
-    MyAccessor<std::vector<std::vector<uint32_t>>,ContainerId::eventInfo> eventAccessor {tool, "var1"};
+    MyAccessor<std::vector<std::vector<uint32_t>>,EventInfoDef> eventAccessor {tool, "var1"};
     ASSERT_SUCCESS (tool.initializeColumns());
     {
       auto columns = tool.getColumnInfo();
@@ -222,9 +222,9 @@ namespace columnar
     data[1] = var1OuterOffsets.data();
     data[2] = var1InnerOffsets.data();
     data[3] = var1Data.data();
-    MyId<ContainerId::eventInfo> id0 {data.data(), 0};
-    MyId<ContainerId::eventInfo> id1 {data.data(), 1};
-    MyId<ContainerId::eventInfo> id2 {data.data(), 2};
+    MyId<EventInfoDef> id0 {data.data(), 0};
+    MyId<EventInfoDef> id1 {data.data(), 1};
+    MyId<EventInfoDef> id2 {data.data(), 2};
     EXPECT_EQ (eventAccessor (id0).size(), 0);
     EXPECT_EQ (eventAccessor (id1).size(), 2);
     EXPECT_EQ (eventAccessor (id2).size(), 3);
@@ -255,8 +255,8 @@ namespace columnar
   TEST (RenameColumnTest, namedParticles)
   {
     MyTool tool;
-    MyAccessor<uint32_t,ContainerId::particle> particleAccessor {tool, "var1"};
-    MyAccessor<ObjectColumn,ContainerId::particle> objectAccessor {tool, "Particles"};
+    MyAccessor<uint32_t,ParticleDef> particleAccessor {tool, "var1"};
+    MyAccessor<ObjectColumn,ParticleDef> objectAccessor {tool, "Particles"};
     ASSERT_SUCCESS (tool.initializeColumns());
 
     {
@@ -337,7 +337,7 @@ namespace columnar
   TEST (RenameColumnTest, basicEventInfo)
   {
     MyTool tool;
-    MyAccessor<uint32_t,ContainerId::eventInfo> eventAccessor {tool, "var1"};
+    MyAccessor<uint32_t,EventInfoDef> eventAccessor {tool, "var1"};
     ASSERT_SUCCESS (tool.initializeColumns());
 
     {

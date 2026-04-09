@@ -49,7 +49,7 @@ namespace columnar
 
 
     /// @brief call the tool for the given event range
-    virtual void callEvents (ObjectRange<ContainerId::eventContext,ColumnarModeXAOD> events) const;
+    virtual void callEvents (ObjectRange<EventContextDef,ColumnarModeXAOD> events) const;
 
 
 
