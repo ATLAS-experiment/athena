@@ -345,7 +345,9 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq.setOptionValue ('.jets', 'AntiKt4TruthDressedWZJets')
     configSeq.setOptionValue ('.useRapidityForDeltaR', False)
 
-
+    # Parton history
+    configSeq += config.makeConfig ('PartonHistory')
+    configSeq.setOptionValue ('.history', 'Ttbar')
 
     # Include, and then set up the met analysis algorithm config:
     configSeq += config.makeConfig ('MissingET')

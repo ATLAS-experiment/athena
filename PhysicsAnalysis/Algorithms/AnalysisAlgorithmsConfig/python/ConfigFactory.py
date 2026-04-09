@@ -364,6 +364,10 @@ class ConfigFactory():
         from TruthParticleLevelAnalysisAlgorithms.ParticleLevelOverlapRemovalConfig import ParticleLevelOverlapRemovalBlock
         self.addAlgConfigBlock(algName="PL_OverlapRemoval", alg=ParticleLevelOverlapRemovalBlock)
 
+        # Parton-level truth algorithms
+        from TruthPartonLevelAnalysisAlgorithms.PartonHistoryConfig import PartonHistoryBlock
+        self.addAlgConfigBlock(algName="PartonHistory", alg=PartonHistoryBlock)
+
         # IFF truth classification
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import IFFLeptonDecorationBlock
         self.addAlgConfigBlock(algName="IFFClassification", alg=IFFLeptonDecorationBlock,
