@@ -428,5 +428,61 @@ def getDependencySet(tagger_name: str, override: set[str] | None = None) -> set[
             "Please check the name and add the tagger to the dict in getDependencySet "
             "if it is a newly deployed tagger!"
         )
-    
     return tagger_dep_dict[tagger_name]
+
+
+def PassThroughModelCfg(flags, JetCollection,
+                        TrackCollection='InDetTrackParticles',
+                        variableRemapping=None,
+                        electrons='Electrons',
+                        muons=''):
+    """Configure a pass-through model for jet and constituent variables.
+
+    Reads the JSON file from flags.BTagging.PassThroughVarsJSON.
+    If the flag is empty, returns an empty ComponentAccumulator.
+
+    The JSON may specify scalar jet_variables and/or constituent
+    variables (tracks, electrons, muons, flows). Constituent loading
+    uses the existing GNN loader infrastructure (TracksLoader,
+    ElectronsLoader, MuonsLoader, FlowElementsLoader).
+
+    variableRemapping: dict mapping default link names to actual names,
+        e.g. {"BTagTrackToJetAssociator": "GhostTrack",
+               "FTagElectrons": "GhostFTagSelectedElectrons",
+               "FTagMuons": "GhostFTagMuons"}
+    """
+    json_path = flags.BTagging.PassThroughVarsJSON
+    if not json_path:
+        return ComponentAccumulator()
+
+    acc = ComponentAccumulator()
+    FTI = CompFactory.FlavorTagInference
+
+    remap = variableRemapping or {}
+
+    svc = FTI.PassThroughModelSvc(
+        'FTagPassThroughSvc',
+        JsonFile=json_path,
+        VariableRemapping=remap,
+    )
+    acc.addService(svc)
+
+    tool = FTI.GNNTool(
+        name='passthrough_decorator',
+        nnFile='passthrough',
+        nnSharingService=svc,
+        variableRemapping=remap,
+    )
+
+    acc.addEventAlgo(
+        FTI.JetTagDecoratorAlg(
+            name=f'FtagPassThrough_{JetCollection}_Jet',
+            container=JetCollection,
+            constituentContainer=TrackCollection,
+            electronContainer=electrons,
+            muonContainer=muons,
+            decorator=tool,
+        )
+    )
+
+    return acc

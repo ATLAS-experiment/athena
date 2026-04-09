@@ -3,6 +3,7 @@
 */
 
 #include "FlavorTagInference/GNN.h"
+#include "FlavorTagInference/FP16Utils.h"
 #include "FlavorTagInference/SaltModel.h"
 #include "FlavorTagInference/GNNOptions.h"
 #include "FlavorTagInference/StringUtils.h"
@@ -98,7 +99,8 @@ namespace FlavorTagInference {
       dec(i_jet) = v;
     }
     // for some networks we need to set a lot of empty vectors as well
-    if (m_saltModel->getSaltModelVersion() == SaltModelVersion::V1) {
+    if (m_saltModel->getSaltModelVersion() == SaltModelVersion::V1
+     || m_saltModel->getSaltModelVersion() == SaltModelVersion::V2) {
       // vector outputs, e.g. track predictions
       for (const auto& dec: m_decorators.jetVecChar) {
         dec.second(i_jet) = {};
@@ -108,6 +110,15 @@ namespace FlavorTagInference {
       }
       for (const auto& [name, loader] : m_dataLoader.vectorVarLoaders) {
         loader->setDefaults(i_jet);
+      }
+      for (const auto& dec: m_decorators.jetVecInt) {
+        dec.second(i_jet) = {};
+      }
+      for (const auto& dec: m_decorators.jetVecFP16) {
+        dec.second(i_jet) = {};
+      }
+      for (const auto& dec: m_decorators.jetVecBF16) {
+        dec.second(i_jet) = {};
       }
     }
   }
@@ -138,7 +149,8 @@ namespace FlavorTagInference {
       }
     }
     // the new metadata format supports writing aux tasks
-    else if (m_saltModel->getSaltModelVersion() == SaltModelVersion::V1) {
+    else if (m_saltModel->getSaltModelVersion() == SaltModelVersion::V1
+          || m_saltModel->getSaltModelVersion() == SaltModelVersion::V2) {
       // float outputs, e.g. i_jet probabilities
       for (const auto& dec: m_decorators.jetFloat) {
         dec.second(i_jet) = out_f.at(dec.first);
@@ -149,6 +161,31 @@ namespace FlavorTagInference {
       }
       for (const auto& dec: m_decorators.jetVecFloat) {
         dec.second(i_jet) = out_vf.at(dec.first);
+      }
+      for (const auto& dec: m_decorators.jetVecInt) {
+        const auto& floats = out_vf.at(dec.first);
+        std::vector<int> ints(floats.begin(), floats.end());
+        dec.second(i_jet) = ints;
+      }
+      for (size_t idx = 0; idx < m_decorators.jetVecFP16.size(); ++idx) {
+        const auto& dec = m_decorators.jetVecFP16[idx];
+        const auto& floats = out_vf.at(dec.first);
+        float scale = m_fp16Scales[idx];
+        std::vector<uint16_t> fp16(floats.size());
+        for (size_t i = 0; i < floats.size(); ++i) {
+          fp16[i] = FP16Utils::floatToFP16(floats[i] * scale);
+        }
+        dec.second(i_jet) = fp16;
+      }
+      for (size_t idx = 0; idx < m_decorators.jetVecBF16.size(); ++idx) {
+        const auto& dec = m_decorators.jetVecBF16[idx];
+        const auto& floats = out_vf.at(dec.first);
+        float scale = m_bf16Scales[idx];
+        std::vector<uint16_t> bf16(floats.size());
+        for (size_t i = 0; i < floats.size(); ++i) {
+          bf16[i] = FP16Utils::floatToBF16(floats[i] * scale);
+        }
+        dec.second(i_jet) = bf16;
       }
 
     }
@@ -199,6 +236,17 @@ namespace FlavorTagInference {
           break;
         case SaltModelOutput::OutputType::VECFLOAT:
           m_decorators.jetVecFloat.emplace_back(outNode.name, Dec<std::vector<float>>(dec_name));
+          break;
+        case SaltModelOutput::OutputType::VECINT:
+          m_decorators.jetVecInt.emplace_back(outNode.name, Dec<std::vector<int>>(dec_name));
+          break;
+        case SaltModelOutput::OutputType::VECFP16:
+          m_decorators.jetVecFP16.emplace_back(outNode.name, Dec<std::vector<uint16_t>>(dec_name));
+          m_fp16Scales.push_back(outNode.scale);
+          break;
+        case SaltModelOutput::OutputType::VECBF16:
+          m_decorators.jetVecBF16.emplace_back(outNode.name, Dec<std::vector<uint16_t>>(dec_name));
+          m_bf16Scales.push_back(outNode.scale);
           break;
         default:
           throw std::logic_error("Unknown output data type");

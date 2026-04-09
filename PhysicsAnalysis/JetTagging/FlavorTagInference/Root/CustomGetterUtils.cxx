@@ -11,6 +11,7 @@
 #include "xAODTracking/TrackMeasurementValidation.h"
 #include "xAODEgamma/Electron.h"
 #include "xAODMuon/Muon.h"
+#include "xAODCaloEvent/CaloCluster.h"
 
 #include <limits>
 #include <optional>
@@ -318,8 +319,8 @@ namespace {
         return barrel_hits(tp) + endcap_hits(tp);
       });
     }
-    const std::regex number_match("numberOf.*");
-    if (std::regex_match(name, number_match)){ 
+    const std::regex number_match("(numberOf|expect).*");
+    if (std::regex_match(name, number_match)){
       SG::AuxElement::ConstAccessor<unsigned char> pix_hits(name);
       return CustomSeqGetter<Tp>([pix_hits](const Tp& tp, const Jet&) {
         return pix_hits(tp);
@@ -609,6 +610,121 @@ namespace {
 
     return std::nullopt;
   }
+
+  // Getters from xAOD::CaloCluster
+  std::optional<SequenceGetterFunc<xAOD::CaloCluster>>
+  getterFromCaloClusters(const std::string& name)
+  {
+    using CC = xAOD::CaloCluster;
+    using Jet = xAOD::IParticle;
+
+    // 16 moments via retrieveMoment
+    static const std::map<std::string, xAOD::CaloCluster::MomentType> momentMap = {
+        {"ENG_BAD_CELLS", xAOD::CaloCluster::ENG_BAD_CELLS},
+        {"ISOLATION", xAOD::CaloCluster::ISOLATION},
+        {"CENTER_MAG", xAOD::CaloCluster::CENTER_MAG},
+        {"CELL_SIGNIFICANCE", xAOD::CaloCluster::CELL_SIGNIFICANCE},
+        {"ENG_FRAC_MAX", xAOD::CaloCluster::ENG_FRAC_MAX},
+        {"LATERAL", xAOD::CaloCluster::LATERAL},
+        {"SIGNIFICANCE", xAOD::CaloCluster::SIGNIFICANCE},
+        {"LONGITUDINAL", xAOD::CaloCluster::LONGITUDINAL},
+        {"ENG_POS", xAOD::CaloCluster::ENG_POS},
+        {"EM_PROBABILITY", xAOD::CaloCluster::EM_PROBABILITY},
+        {"CENTER_LAMBDA", xAOD::CaloCluster::CENTER_LAMBDA},
+        {"SECOND_LAMBDA", xAOD::CaloCluster::SECOND_LAMBDA},
+        {"FIRST_ENG_DENS", xAOD::CaloCluster::FIRST_ENG_DENS},
+        {"SECOND_R", xAOD::CaloCluster::SECOND_R},
+        {"AVG_LAR_Q", xAOD::CaloCluster::AVG_LAR_Q},
+        {"MASS", xAOD::CaloCluster::MASS},
+    };
+    auto mom_it = momentMap.find(name);
+    if (mom_it != momentMap.end()) {
+      auto moment_type = mom_it->second;
+      return CustomSeqGetter<CC>([moment_type](const CC& c, const Jet&) {
+        double val = 0;
+        c.retrieveMoment(moment_type, val);
+        return val;
+      });
+    }
+
+    // 6 kinematics via direct methods
+    if (name == "rawPhi") {
+      return CustomSeqGetter<CC>([](const CC& c, const Jet&) {
+        return c.rawPhi();
+      });
+    }
+    if (name == "calPhi") {
+      return CustomSeqGetter<CC>([](const CC& c, const Jet&) {
+        return c.calPhi();
+      });
+    }
+    if (name == "rawEta") {
+      return CustomSeqGetter<CC>([](const CC& c, const Jet&) {
+        return c.rawEta();
+      });
+    }
+    if (name == "calEta") {
+      return CustomSeqGetter<CC>([](const CC& c, const Jet&) {
+        return c.calEta();
+      });
+    }
+    if (name == "rawE") {
+      return CustomSeqGetter<CC>([](const CC& c, const Jet&) {
+        return c.rawE();
+      });
+    }
+    if (name == "calE") {
+      return CustomSeqGetter<CC>([](const CC& c, const Jet&) {
+        return c.calE();
+      });
+    }
+
+    // 22 samplings via eSample
+    using CS = xAOD::CaloCluster::CaloSample;
+    static const std::map<std::string, CS> sampleMap = {
+        {"PreSamplerB", CS::PreSamplerB},
+        {"EMB1", CS::EMB1},
+        {"EMB2", CS::EMB2},
+        {"EMB3", CS::EMB3},
+        {"PreSamplerE", CS::PreSamplerE},
+        {"EME1", CS::EME1},
+        {"EME2", CS::EME2},
+        {"EME3", CS::EME3},
+        {"HEC0", CS::HEC0},
+        {"HEC1", CS::HEC1},
+        {"HEC2", CS::HEC2},
+        {"HEC3", CS::HEC3},
+        {"TileBar0", CS::TileBar0},
+        {"TileBar1", CS::TileBar1},
+        {"TileBar2", CS::TileBar2},
+        {"TileGap1", CS::TileGap1},
+        {"TileGap2", CS::TileGap2},
+        {"TileGap3", CS::TileGap3},
+        {"TileExt0", CS::TileExt0},
+        {"TileExt1", CS::TileExt1},
+        {"TileExt2", CS::TileExt2},
+        {"FCAL0", CS::FCAL0},
+        {"FCAL1", CS::FCAL1},
+        {"FCAL2", CS::FCAL2},
+    };
+    auto samp_it = sampleMap.find(name);
+    if (samp_it != sampleMap.end()) {
+      auto sample = samp_it->second;
+      return CustomSeqGetter<CC>([sample](const CC& c, const Jet&) {
+        return c.eSample(sample);
+      });
+    }
+
+    // 1 flag: usedInChargedFlow
+    if (name == "usedInChargedFlow") {
+      SG::AuxElement::ConstAccessor<int> accInFlow("usedInChargedFlow");
+      return CustomSeqGetter<CC>([accInFlow](const CC& c, const Jet&) {
+        return accInFlow.isAvailable(c) ? static_cast<double>(accInFlow(c)) : 0.0;
+      });
+    }
+
+    return std::nullopt;
+  }
 }
   namespace FlavorTagInference {
   namespace getter_utils {
@@ -655,6 +771,12 @@ namespace {
 
       if constexpr (std::is_same_v<T, xAOD::Muon>) {
         if (auto getter = getterFromMuons(name, prefix)){
+          return {*getter, {}};
+        }
+      }
+
+      if constexpr (std::is_same_v<T, xAOD::CaloCluster>) {
+        if (auto getter = getterFromCaloClusters(name)){
           return {*getter, {}};
         }
       }
@@ -794,12 +916,13 @@ namespace {
     }
 
 
-    // Explicit instantiations of supported types (IParticle, FlowElement, TrackParticle, TrackMeasurementValidation, Electron, Muon)
+    // Explicit instantiations of supported types (IParticle, FlowElement, TrackParticle, TrackMeasurementValidation, Electron, Muon, CaloCluster)
     template class SeqGetter<xAOD::IParticle>;
     template class SeqGetter<xAOD::FlowElement>;
     template class SeqGetter<xAOD::TrackParticle>;
     template class SeqGetter<xAOD::TrackMeasurementValidation>;
     template class SeqGetter<xAOD::Electron>;
     template class SeqGetter<xAOD::Muon>;
+    template class SeqGetter<xAOD::CaloCluster>;
   }
 }

@@ -36,6 +36,8 @@ set(FTISource
   Root/ElectronsLoader.cxx
   Root/MuonsLoader.cxx
   Root/FlipTagEnums.cxx
+  Root/CaloClusterLoader.cxx
+  Root/TowerLoader.cxx
   Root/FlowElementsLoader.cxx
   Root/FTagDataDependencyNames.cxx
   Root/GNN.cxx
@@ -50,6 +52,8 @@ set(FTISource
   Root/HitsLoader.cxx
   Root/SaltModelGraphConfig.cxx
   Root/GNNDataLoader.cxx
+  Root/PassThroughSaltModel.cxx
+  Root/PassThroughModelSvc.cxx
 )
 
 if (NOT XAOD_STANDALONE)
@@ -88,6 +92,8 @@ atlas_add_library( FlavorTagInference
     xAODBTagging
     xAODEgamma
     xAODMuon
+    xAODCaloEvent
+    xAODPFlow
   )
 
 

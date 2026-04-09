@@ -19,10 +19,19 @@ SaltModelOutput::SaltModelOutput(const std::string& name,
 /* constructor for SaltModelVersion::V0 */
 SaltModelOutput::SaltModelOutput(const std::string& name,
                        const ONNXTensorElementDataType type,
-                       const std::string& model_name) 
+                       const std::string& model_name)
                        : name(getName(name, model_name)),
                          name_in_model(name),
                          type(getOutputType(type, 0)){}
+
+/* constructor for directly specifying OutputType (e.g. VECFP16) */
+SaltModelOutput::SaltModelOutput(const std::string& name,
+                       OutputType type,
+                       float scale)
+                       : name(name),
+                         name_in_model(name),
+                         type(type),
+                         scale(scale){}
 
 const std::string SaltModelOutput::getName(const std::string& name, const std::string& model_name) {
   // unfortunately, this is block is needed to support some taggers that we schedule that don't have
@@ -44,6 +53,10 @@ SaltModelOutput::OutputType SaltModelOutput::getOutputType(ONNXTensorElementData
     }
   } else if (type == ORT::ONNX_TENSOR_ELEMENT_DATA_TYPE_INT8) {
     return OutputType::VECCHAR;
+  } else if (type == ORT::ONNX_TENSOR_ELEMENT_DATA_TYPE_INT32) {
+    if (rank == 1) {
+      return OutputType::VECINT;
+    }
   }
   return OutputType::UNKNOWN;
 }

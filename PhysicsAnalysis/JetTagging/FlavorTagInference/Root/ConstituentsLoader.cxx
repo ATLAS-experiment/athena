@@ -129,9 +129,13 @@ namespace FlavorTagInference {
           // default electron variables
           {"(deltaEta1|deltaPhiRescaled2|Rhad|Rhad1|"
                "Eratio|weta2|Rphi|Reta|wtots1|f1|f3|pt|eta|phi)"_r, ConstituentsEDMType::FLOAT},
-          // custom variables
-          {"(ftag_.*|ptfrac|ptrel|dr|"
-               "et|deltaPOverP|ptVarCone30OverPt|energyOverP)"_r, ConstituentsEDMType::CUSTOM_GETTER},
+          // truth labels
+          {"ftagTruth.*"_r, ConstituentsEDMType::INT},
+          // custom variables that require special computation
+          {"(ftag_et|ftag_deltaPOverP|ftag_energyOverP|ftag_ptVarCone30OverPt|"
+               "ptfrac|ptrel|dr|et|deltaPOverP|ptVarCone30OverPt|energyOverP)"_r, ConstituentsEDMType::CUSTOM_GETTER},
+          // ftag_ float decorations (SoftElectronDecoratorAlg, ElectronGSFTrackDecoratorAlg)
+          {"ftag_.*"_r, ConstituentsEDMType::FLOAT},
           // variables extracted from the corresponding track
           {"(numberOf.*|d0.*|abs_eta|qOverP|eProbabilityHT)"_r, ConstituentsEDMType::CUSTOM_GETTER}
       };
@@ -166,6 +170,7 @@ namespace FlavorTagInference {
           // definition in 21p9, recomputed here with customGetter to reuse
           // existing training
           // ConstituentsEDMType picked correspond to the first matching regex
+          {"ftagTruth.*"_r, ConstituentsEDMType::INT},
           {"numberOf.*21p9"_r, ConstituentsEDMType::CUSTOM_GETTER},
           {"numberOf.*"_r, ConstituentsEDMType::UCHAR},
           {"btagIp_(d0|z0SinTheta)Uncertainty"_r, ConstituentsEDMType::FLOAT},
@@ -258,9 +263,34 @@ namespace FlavorTagInference {
         config.type = ConstituentsType::MUON;
         config.output_name = "muons";
       }
+      else if (name.find("clusters") != std::string::npos
+               && name.find("taucluster") == std::string::npos){
+        TypeRegexes cluster_type_regexes {
+            // All CaloCluster variables are handled by custom getters:
+            // moments, kinematics, samplings, flags, and IParticle vars
+            {".*"_r, ConstituentsEDMType::CUSTOM_GETTER}
+        };
+        config = get_flow_input_config(
+          name, input_variables,
+          cluster_type_regexes);
+        config.type = ConstituentsType::CALO_CLUSTER;
+        config.output_name = "clusters";
+      }
+      else if (name.find("towers") != std::string::npos){
+        // Towers are CaloCluster objects accessed via GhostTower links.
+        // All variables are custom getters (same as clusters).
+        TypeRegexes tower_type_regexes {
+            {".*"_r, ConstituentsEDMType::CUSTOM_GETTER}
+        };
+        config = get_flow_input_config(
+          name, input_variables,
+          tower_type_regexes);
+        config.type = ConstituentsType::TOWER;
+        config.output_name = "towers";
+      }
       else{
         throw std::runtime_error(
-          "Unknown constituent type: " + name + ". Only tracks, flows, hits, electrons and muons are supported."
+          "Unknown constituent type: " + name + ". Only tracks, flows, hits, electrons, muons, clusters and towers are supported."
           );
       }
       return config;

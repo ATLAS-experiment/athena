@@ -22,6 +22,7 @@
 // EDM includes
 #include "xAODBase/IParticle.h"
 
+#include <cstdint>
 #include <string>
 #include <map>
 
@@ -68,6 +69,9 @@ namespace FlavorTagInference {
       Decs<float> jetFloat;
       Decs<std::vector<char>> jetVecChar;
       Decs<std::vector<float>> jetVecFloat;
+      Decs<std::vector<int>> jetVecInt;
+      Decs<std::vector<uint16_t>> jetVecFP16;
+      Decs<std::vector<uint16_t>> jetVecBF16;
       Decs<char> trackChar;
       Decs<float> trackFloat;
     };
@@ -81,6 +85,8 @@ namespace FlavorTagInference {
     GNNDataLoader m_dataLoader;
 
     Decorators m_decorators;
+    std::vector<float> m_fp16Scales;  // per-entry scale for jetVecFP16
+    std::vector<float> m_bf16Scales;  // per-entry scale for jetVecBF16
     std::vector<std::pair<Dec<float>, float>> m_defaultValues;
     bool m_defaultZeroTracks;
   };
