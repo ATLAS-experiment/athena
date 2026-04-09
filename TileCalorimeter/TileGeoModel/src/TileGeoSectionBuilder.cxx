@@ -3015,7 +3015,13 @@ void TileGeoSectionBuilder::computeCellDim(TileDetDescrManager*& manager,
 
       rMin = m_dbManager->TILBrmin()*Gaudi::Units::cm;
       if (addPlates) rMin -= m_dbManager->TILBdrfront() *Gaudi::Units::cm;
-      CurrentScin = 100*m_dbManager->TILBsection() + 1;
+      if(const auto section = m_dbManager->TILBsection(); section != -999)[[likely]]{
+        CurrentScin = 100 * section + 1;
+      } else {
+        (*m_log) << MSG::ERROR << "TileGeoSectionBuilder::computeCellDim: error return"<< endmsg;
+        return;
+      }
+      
 
       for (unsigned int j = CurrentScin; j < (CurrentScin + m_dbManager->TILBnscin()); j++) {
         m_dbManager->SetCurrentScin(j);
