@@ -32,6 +32,7 @@ public:
 private:
 
   Gaudi::Property<bool> m_doVertexCorrection{this, "VertexCorrection", true}; 
+  Gaudi::Property<bool> m_doRun4{this, "doRun4", false};
 
 };
 
