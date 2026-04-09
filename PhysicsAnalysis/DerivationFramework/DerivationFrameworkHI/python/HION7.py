@@ -19,7 +19,9 @@ def PhysAugmentationsHION7Cfg(flags):
             AddStandardTruthContentsCfg,
             AddHFAndDownstreamParticlesCfg,
             AddMiniTruthCollectionLinksCfg,
-            AddPVCollectionCfg)
+            AddPVCollectionCfg,
+            TruthClassificationAugmentationsCfg)
+        acc.merge(TruthClassificationAugmentationsCfg(flags))
         from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthCharmToolCfg
         PhysCommonTruthCharmTool = acc.getPrimaryAndMerge(DFCommonTruthCharmToolCfg(
             flags,
@@ -196,6 +198,7 @@ def HION7KernelCfg(flags, name='HION7Kernel', **kwargs):
     acc = ComponentAccumulator()
 
     acc.merge(PhysAugmentationsHION7Cfg(flags))
+    acc.merge(getDFJets(flags))
 #########################################################################################
 #Thinning
     from CoolConvUtilities.ParticleTypeUtil import getTypeForRun
@@ -269,7 +272,6 @@ def HION7Cfg(flags):
     acc = ComponentAccumulator()
 
     JetColl = flags.HeavyIon.HIJetPrefix
-    acc.merge(getDFJets(flags))
 
     acc.merge(HION7KernelCfg(flags, name="HION7Kernel",StreamName = "StreamDAOD_HION7"))
 
