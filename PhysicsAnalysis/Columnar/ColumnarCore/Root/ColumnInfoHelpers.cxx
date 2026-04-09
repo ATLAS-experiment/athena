@@ -63,10 +63,16 @@ namespace columnar
     if (!source.isOptional)
       target.isOptional = false;
 
-    if (target.linkTargetNames != source.linkTargetNames)
-      throw std::runtime_error ("mismatched linkTargetNames in mergeColumnInfo for column: " + target.name);
+    if (target.soleLinkTargetName != source.soleLinkTargetName)
+      throw std::runtime_error ("mismatched soleLinkTargetName in mergeColumnInfo for column: " + target.name);
 
-    if (target.variantLinkKeyColumn != source.variantLinkKeyColumn)
-      throw std::runtime_error ("mismatched variantLinkKeyColumn in mergeColumnInfo for column: " + target.name + ": " + target.variantLinkKeyColumn + " and " + source.variantLinkKeyColumn);
+    if (target.isVariantLink != source.isVariantLink)
+      throw std::runtime_error ("mismatched isVariantLink in mergeColumnInfo for column: " + target.name);
+
+    if (target.variantLinkTargetNames != source.variantLinkTargetNames)
+      throw std::runtime_error ("mismatched variantLinkTargetNames in mergeColumnInfo for column: " + target.name);
+
+    if (target.keyColumnForVariantLink != source.keyColumnForVariantLink)
+      throw std::runtime_error ("mismatched keyColumnForVariantLink in mergeColumnInfo for column: " + target.name + ": " + target.keyColumnForVariantLink + " and " + source.keyColumnForVariantLink);
   }
 }

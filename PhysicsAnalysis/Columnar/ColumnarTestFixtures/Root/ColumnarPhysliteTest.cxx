@@ -281,6 +281,246 @@ namespace columnar
       }
     };
 
+    class LinkColumnVector final
+    {
+      /// Public Members
+      /// ==============
+    public:
+
+      using CM = ColumnarModeArray;
+
+      ~LinkColumnVector () noexcept
+      {
+        if (!m_unknownKeysAllowedTargets.empty())
+        {
+          std::cout << "found unknown keys for " << m_columnName << ":";
+          for (auto& [key, allowedSet] : m_unknownKeysAllowedTargets)
+          {
+            std::cout << "  " << std::hex << key << std::dec << " (allowed targets:";
+            for (auto index : allowedSet)
+              std::cout << " " << m_targetNames.at(index);
+            std::cout << ")";
+          }
+        }
+      }
+
+      [[nodiscard]] std::vector<std::string> connect (const ColumnInfo& columnInfo, const std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*>& offsetColumns, const std::unordered_map<std::string,ColumnInfo>& requestedColumns)
+      {
+        m_columnName = columnInfo.name;
+        std::vector<std::string> keyColumnNames;
+        if (!columnInfo.soleLinkTargetName.empty())
+        {
+          addTarget (columnInfo.soleLinkTargetName, offsetColumns);
+        } else
+        {
+          for (auto& [requestedName, requestedInfo] : requestedColumns)
+          {
+            if (requestedInfo.keyColumnForVariantLink == m_columnName)
+            {
+              keyColumnNames.push_back (requestedName);
+              m_keysColumns.emplace_back();
+              for (const auto& targetName : requestedInfo.variantLinkTargetNames)
+                addTarget (targetName, offsetColumns);
+            }
+          }
+          if (m_keysColumns.empty())
+            throw std::runtime_error ("no key column found for variant link: " + m_columnName);
+        }
+        return keyColumnNames;
+      }
+
+      void clear ()
+      {
+        m_columnData.clear();
+      }
+
+      void checkOffsets (unsigned eventIndex)
+      {
+        for (std::size_t i = 0; i < m_targetNames.size(); ++ i)
+        {
+          auto& targetOffsetColumn = *m_targetOffsetColumns.at(i);
+          if (eventIndex + 1 >= targetOffsetColumn.size())
+            throw std::runtime_error ("target offset column not yet filled for: " + m_targetNames.at(i) + " when checking link column " + m_columnName);
+        }
+      }
+
+      template<typename T>
+      void addLink (const ElementLink<T>& element, unsigned eventIndex)
+      {
+        if (element.isDefault())
+        {
+          addEmptyLink();
+          return;
+        }
+
+        addSplitLink (element.index(), element.key(), eventIndex);
+      }
+
+      void addEmptyLink ()
+      {
+        m_columnData.push_back (invalidObjectIndex);
+      }
+
+      void addSplitLink (std::size_t linkIndex, SG::sgkey_t linkKey, unsigned eventIndex)
+      {
+        if (linkIndex == 0 && linkKey == 0)
+        {
+          addEmptyLink();
+          return;
+        }
+
+        unsigned targetIndex = 0u;
+        while (targetIndex < m_targetKeys.size() && m_targetKeys.at(targetIndex) != linkKey)
+          ++ targetIndex;
+
+        // We didn't find the key, so we try to figure out which of the
+        // targets it could be. The idea is that you wouldn't rely on
+        // this for real tests, but that you then go and fill in those
+        // keys in the central lookup table. It will always record and
+        // report, that means if there is a variant link with extra
+        // targets you didn't declare you will get a diagnostic. This
+        // may be overly cautious, but it gives an extra diagnostic if
+        // maybe you missed a target.
+        if (targetIndex == m_targetKeys.size())
+        {
+          if (!m_unknownKeysAllowedTargets.contains (linkKey))
+          {
+            auto& allowedSet = m_unknownKeysAllowedTargets[linkKey];
+            for (std::size_t i = 0; i < m_targetKeys.size(); ++ i)
+            {
+              if (m_targetKeys.at(i) == 0)
+                allowedSet.insert(i);
+            }
+          }
+          auto& allowedSet = m_unknownKeysAllowedTargets[linkKey];
+          for (auto iter = allowedSet.begin(); iter != allowedSet.end();)
+          {
+            auto index = *iter;
+            auto& targetOffsetColumn = *m_targetOffsetColumns.at(index);
+            if (eventIndex + 1 >= targetOffsetColumn.size())
+              throw std::runtime_error ("target offset column not yet filled for: " + m_targetNames.at(index));
+            if (targetOffsetColumn.at(eventIndex) + linkIndex >= targetOffsetColumn.at(eventIndex + 1))
+              iter = allowedSet.erase(iter);
+            else
+              ++ iter;
+          }
+          // Not quite sure whether it is safer to use or not use one of
+          // the targets from the allowed set in this case. In general
+          // tools are expected to handle invalid links gracefully,
+          // worst case they throw an exception when trying to access
+          // it. So what I came up with is that for variant links we
+          // assume it invalid, but for non-variant links the tool
+          // expects exactly one target and we either found it or throw
+          // an exception.
+          if (m_keysColumns.empty())
+          {
+            if (allowedSet.size() == 1 && m_targetKeys.at(*allowedSet.begin()) == 0 && m_unknownKeysAllowedTargets.size() == 1)
+              targetIndex = *allowedSet.begin();
+            else
+            {
+              std::ostringstream error;
+              error << "target key mismatch: read sgkey " << std::hex << linkKey << std::dec;
+              error << " for column " << m_columnName << " with element index " << linkIndex << " targeting " << m_targetNames.at(0);
+              if (m_targetKeys.at(0) != 0u)
+              {
+                error << ", expected sgkey " << std::hex << m_targetKeys.at(0) << std::dec;
+              } else if (m_unknownKeysAllowedTargets.size() > 1)
+              {
+                error << ", alternate key found for non-variant link:";
+                for (auto& [key, allowedSet] : m_unknownKeysAllowedTargets)
+                {
+                  if (key != linkKey)
+                    error << " " << std::hex << key << std::dec;
+                }
+              } else
+              {
+                error << ", no expected sgkey configured but the maximum allowed index for the target is " << m_targetOffsetColumns.at(0)->at(eventIndex + 1) - m_targetOffsetColumns.at(0)->at(eventIndex) - 1;
+              }
+              throw std::runtime_error (std::move (error).str());
+            }
+          }
+        }
+
+        if (targetIndex == m_targetKeys.size())
+        {
+          // this creates a link with an unknown key, which the user
+          // will ignore
+          m_columnData.push_back (CM::mergeLinkKeyIndex (0xff, linkIndex));
+          return;
+        }
+
+        auto& targetOffsetColumn = *m_targetOffsetColumns.at(targetIndex);
+        if (eventIndex + 1 >= targetOffsetColumn.size())
+          throw std::runtime_error ("target offset column not yet filled for: " + m_targetNames.at(targetIndex));
+        auto myLinkIndex = linkIndex + targetOffsetColumn.at(eventIndex);
+        if (myLinkIndex >= targetOffsetColumn.at(eventIndex + 1))
+          throw std::runtime_error ("index out of range for link: " + m_columnName + " with element index " + std::to_string(linkIndex) + " targeting " + m_targetNames.at(targetIndex) + " with offset " + std::to_string(targetOffsetColumn.at(eventIndex)) + " and next offset " + std::to_string(targetOffsetColumn.at(eventIndex + 1)));
+
+        m_columnData.push_back (CM::mergeLinkKeyIndex (targetIndex, myLinkIndex));
+      }
+
+      [[nodiscard]] std::size_t size () const noexcept
+      {
+        return m_columnData.size();
+      }
+
+      [[nodiscard]] const typename CM::LinkIndexType* data () const noexcept
+      {
+        return m_columnData.data();
+      }
+
+      [[nodiscard]] auto begin () const noexcept { return m_columnData.begin(); }
+      [[nodiscard]] auto end () const noexcept { return m_columnData.end(); }
+
+      [[nodiscard]] const std::vector<typename CM::LinkKeyType>& keysColumn (std::size_t index) const
+      {
+        return m_keysColumns.at(index);
+      }
+
+
+
+      /// Private Members
+      /// ===============
+    private:
+
+      std::vector<typename CM::LinkIndexType> m_columnData;
+
+      std::string m_columnName;
+
+      std::vector<std::string> m_targetNames;
+      std::vector<SG::sgkey_t> m_targetKeys;
+      std::vector<const std::vector<ColumnarOffsetType>*> m_targetOffsetColumns;
+
+      // there can be multiple keys-columns, hence this is a vector of
+      // vectors. if this is empty, then it is a single-target link
+      std::vector<std::vector<typename CM::LinkKeyType>> m_keysColumns;
+
+      std::unordered_map<SG::sgkey_t,std::unordered_set<std::size_t>> m_unknownKeysAllowedTargets;
+
+
+
+      void addTarget (const std::string& name, const std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*>& offsetColumns)
+      {
+        unsigned targetIndex = 0;
+        while (targetIndex < m_targetNames.size() && m_targetNames.at(targetIndex) != name)
+          ++ targetIndex;
+        if (targetIndex == m_targetNames.size())
+        {
+          m_targetNames.push_back(name);
+          if (auto offsetIter = offsetColumns.find (name); offsetIter != offsetColumns.end())
+            m_targetOffsetColumns.push_back (offsetIter->second);
+          else
+            throw std::runtime_error ("missing offset column: " + name);
+          if (auto keyIter = knownKeys.find (name); keyIter != knownKeys.end())
+            m_targetKeys.push_back (keyIter->second);
+          else
+            m_targetKeys.push_back (0);
+        }
+        if (!m_keysColumns.empty())
+          m_keysColumns.back().push_back (targetIndex);
+      }
+    };
+
     class IColumnData
     {
     public:
@@ -700,10 +940,8 @@ namespace columnar
       using CM = ColumnarModeArray;
       BranchReader<std::vector<std::vector<ElementLink<T>>>> branchReader;
       std::vector<ColumnarOffsetType> offsets = {0};
-      std::vector<typename CM::LinkIndexType> columnData;
-      const std::vector<ColumnarOffsetType>* targetOffsetColumn = nullptr;
-      SG::sgkey_t targetKey = 0;
-      std::string targetContainerName;
+      std::vector<ColumnarOffsetType> eventOffsets = {0};
+      LinkColumnVector columnData;
       Benchmark benchmarkUnpack;
       Benchmark benchmark;
       unsigned entries = 0;
@@ -727,16 +965,11 @@ namespace columnar
 
         if (iter->second.offsetName != outputColumns.at(1).name)
           throw std::runtime_error ("offset name mismatch: " + iter->second.offsetName + " != " + outputColumns.at(1).name);
-
-        if (iter->second.linkTargetNames.size() != 1)
-          throw std::runtime_error ("expected exactly one link target name for: " + outputColumns.at(0).name);
-        targetContainerName = iter->second.linkTargetNames.at(0);
-        if (auto keyIter = knownKeys.find (targetContainerName); keyIter != knownKeys.end())
-          targetKey = keyIter->second;
-        if (auto offsetIter = offsetColumns.find (iter->second.linkTargetNames.at(0)); offsetIter != offsetColumns.end())
-          targetOffsetColumn = offsetIter->second;
-        else
-          throw std::runtime_error ("missing offset column: " + iter->second.linkTargetNames.at(0));
+        for (auto keyColumn : columnData.connect (iter->second, offsetColumns, requestedColumns))
+        {
+          outputColumns.push_back ({.name = keyColumn, .primary = false, .enabled = true});
+          requestedColumns.erase (keyColumn);
+        }
 
         requestedColumns.erase (iter);
 
@@ -753,6 +986,8 @@ namespace columnar
         columnData.clear();
         offsets.clear();
         offsets.push_back (0);
+        eventOffsets.clear();
+        eventOffsets.push_back (0);
       }
 
       virtual void getEntry (Long64_t entry) override
@@ -761,35 +996,16 @@ namespace columnar
         const auto& branchData = branchReader.getEntry (entry);
         benchmark.stopTimer ();
         benchmarkUnpack.startTimer ();
-        if (targetOffsetColumn->size() < 2)
-          throw std::runtime_error ("target offset column not yet filled for: " + outputColumns.at(0).name);
+        columnData.checkOffsets (eventOffsets.size() - 1);
         for (auto& data : branchData)
         {
           for (auto& element : data)
           {
-            if (element.isDefault() || (element.key() == 0 && element.index() == 0))
-              columnData.push_back (invalidObjectIndex);
-            else
-            {
-              columnData.push_back (element.index() + targetOffsetColumn->at (targetOffsetColumn->size()-2));
-              if (element.key() != targetKey)
-              {
-                if (targetKey == 0)
-                {
-                  targetKey = element.key();
-                  std::cout << "assume target key for " << targetContainerName << " is " << std::hex << targetKey << std::dec << std::endl;
-                } else
-                {
-                  throw std::runtime_error(
-                      std::format("target key mismatch: {:x} != {:x} for {} with element index {}",
-                                  element.key(), targetKey, outputColumns.at(0).name, element.index())
-                  );
-                }
-              }
-            }
+            columnData.addLink (element, eventOffsets.size()-1);
           }
           offsets.push_back (columnData.size());
         }
+        eventOffsets.push_back (offsets.size());
         benchmarkUnpack.stopTimer ();
       }
 
@@ -799,6 +1015,11 @@ namespace columnar
           colData.setColumn (outputColumns.at(0).columnIndex, columnData.size(), columnData.data());
         if (outputColumns.at(1).columnIndex != ColumnVectorHeader::nullIndex)
           colData.setColumn (outputColumns.at(1).columnIndex, offsets.size(), offsets.data());
+        for (std::size_t i = 2; i < outputColumns.size(); ++ i)
+        {
+          if (outputColumns.at(i).columnIndex != ColumnVectorHeader::nullIndex)
+            colData.setColumn (outputColumns.at(i).columnIndex, columnData.keysColumn(i-2).size(), columnData.keysColumn(i-2).data());
+        }
       }
 
       [[nodiscard]] virtual BranchPerfData getPerfData (float emptyTime) override
@@ -945,10 +1166,7 @@ namespace columnar
       BranchReader<std::vector<ElementLink<T>>> branchReader;
       const std::vector<ColumnarOffsetType>* offsetColumn = nullptr;
       std::vector<ColumnarOffsetType> offsets = {0};
-      std::vector<typename CM::LinkIndexType> columnData;
-      const std::vector<ColumnarOffsetType>* targetOffsetColumn = nullptr;
-      SG::sgkey_t targetKey = 0;
-      std::string targetContainerName;
+      LinkColumnVector columnData;
       Benchmark benchmarkUnpack;
       Benchmark benchmark;
       unsigned entries = 0;
@@ -972,16 +1190,11 @@ namespace columnar
 
         if (iter->second.offsetName != outputColumns.at(1).name)
           throw std::runtime_error ("offset name mismatch: " + iter->second.offsetName + " != " + outputColumns.at(1).name);
-
-        if (iter->second.linkTargetNames.size() != 1)
-          throw std::runtime_error ("expected exactly one link target name for: " + outputColumns.at(0).name);
-        targetContainerName = iter->second.linkTargetNames.at(0);
-        if (auto keyIter = knownKeys.find (targetContainerName); keyIter != knownKeys.end())
-          targetKey = keyIter->second;
-        if (auto targetOffsetIter = offsetColumns.find (iter->second.linkTargetNames.at(0)); targetOffsetIter != offsetColumns.end())
-          targetOffsetColumn = targetOffsetIter->second;
-        else
-          throw std::runtime_error ("missing offset column(vector-link): " + iter->second.linkTargetNames.at(0));
+        for (auto keyColumn : columnData.connect (iter->second, offsetColumns, requestedColumns))
+        {
+          outputColumns.push_back ({.name = keyColumn, .primary = false, .enabled = true});
+          requestedColumns.erase (keyColumn);
+        }
 
         requestedColumns.erase (iter);
 
@@ -1013,28 +1226,9 @@ namespace columnar
         const auto& branchData = branchReader.getEntry (entry);
         benchmark.stopTimer ();
         benchmarkUnpack.startTimer ();
-        if (targetOffsetColumn->size() < 2)
-          throw std::runtime_error ("target offset column not yet filled for: " + outputColumns.at(0).name);
+        columnData.checkOffsets (offsets.size() - 1);
         for (auto& element : branchData)
-        {
-            if (element.isDefault() || (element.key() == 0 && element.index() == 0))
-            columnData.push_back (invalidObjectIndex);
-          else
-          {
-            columnData.push_back (element.index() + targetOffsetColumn->at (targetOffsetColumn->size()-2));
-            if (element.key() != targetKey)
-            {
-              if (targetKey == 0)
-              {
-                targetKey = element.key();
-                std::cout << "assume target key for " << targetContainerName << " is " << std::hex << targetKey << std::dec << std::endl;
-              } else
-              {
-                throw std::runtime_error ("target key mismatch: " + std::to_string (element.key()) + " != " + std::to_string (targetKey) + " for " + outputColumns.at(0).name);
-              }
-            }
-          }
-        }
+          columnData.addLink (element, offsets.size()-1);
         offsets.push_back (columnData.size());
         if (offsetColumn)
         {
@@ -1052,6 +1246,11 @@ namespace columnar
           colData.setColumn (outputColumns.at(0).columnIndex, columnData.size(), columnData.data());
         if (outputColumns.at(1).columnIndex != ColumnVectorHeader::nullIndex)
           colData.setColumn (outputColumns.at(1).columnIndex, offsets.size(), offsets.data());
+        for (std::size_t i = 2; i < outputColumns.size(); ++ i)
+        {
+          if (outputColumns.at(i).columnIndex != ColumnVectorHeader::nullIndex)
+            colData.setColumn (outputColumns.at(i).columnIndex, columnData.keysColumn(i-2).size(), columnData.keysColumn(i-2).data());
+        }
       }
 
       [[nodiscard]] virtual BranchPerfData getPerfData (float emptyTime) override
@@ -1090,10 +1289,7 @@ namespace columnar
       BranchReaderArray<UInt_t> branchReaderIndex;
       const std::vector<ColumnarOffsetType>* offsetColumn = nullptr;
       std::vector<ColumnarOffsetType> offsets = {0};
-      std::vector<typename CM::LinkIndexType> columnData;
-      std::vector<const std::vector<ColumnarOffsetType>*> targetOffsetColumns;
-      std::vector<SG::sgkey_t> targetKeys;
-      std::vector<typename CM::LinkKeyType> keyColumnData;
+      LinkColumnVector columnData;
       Benchmark benchmarkUnpack;
       Benchmark benchmark;
       unsigned entries = 0;
@@ -1104,7 +1300,6 @@ namespace columnar
       {
         outputColumns.push_back ({.name = branchReaderSize.columnName()});
         outputColumns.push_back ({.name = branchReaderSize.containerName(), .isOffset = true, .primary = false});
-        outputColumns.push_back ({.name = branchReaderSize.columnName() + ".keys", .primary = false});
       }
 
       virtual bool connect (TTree *tree, std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*>& offsetColumns, std::unordered_map<std::string,ColumnInfo>& requestedColumns) override
@@ -1121,18 +1316,10 @@ namespace columnar
         if (iter->second.offsetName != outputColumns.at(1).name)
           throw std::runtime_error ("offset name mismatch: " + iter->second.offsetName + " != " + outputColumns.at(1).name);
 
-        const auto& linkContainers = iter->second.linkTargetNames;
-        for (const auto& container : linkContainers)
+        for (auto keyColumn : columnData.connect (iter->second, offsetColumns, requestedColumns))
         {
-          if (auto keyIter = knownKeys.find (container); keyIter != knownKeys.end())
-            targetKeys.push_back (keyIter->second);
-          else
-            throw std::runtime_error ("no key known for link container: " + container);
-          if (auto targetOffsetIter = offsetColumns.find (container); targetOffsetIter != offsetColumns.end())
-            targetOffsetColumns.push_back (targetOffsetIter->second);
-          else
-            throw std::runtime_error ("missing offset column: " + container);
-          keyColumnData.push_back (keyColumnData.size());
+          outputColumns.push_back ({.name = keyColumn, .primary = false, .enabled = true});
+          requestedColumns.erase (keyColumn);
         }
         requestedColumns.erase (iter);
 
@@ -1145,13 +1332,6 @@ namespace columnar
         if (iter != requestedColumns.end())
         {
           outputColumns.at(1).enabled = true;
-          requestedColumns.erase (iter);
-        }
-
-        iter = requestedColumns.find (outputColumns.at(2).name);
-        if (iter != requestedColumns.end())
-        {
-          outputColumns.at(2).enabled = true;
           requestedColumns.erase (iter);
         }
 
@@ -1173,50 +1353,13 @@ namespace columnar
         auto branchDataIndex = branchReaderIndex.getEntry (entry, branchDataSize);
         benchmark.stopTimer ();
         benchmarkUnpack.startTimer ();
-        for (auto& targetOffsetColumn : targetOffsetColumns)
-        {
-          if (targetOffsetColumn->size() <= offsets.size())
-            throw std::runtime_error ("target offset column not yet filled for: " + outputColumns.at(0).name);
-        }
+        columnData.checkOffsets (offsets.size() - 1);
         for (std::size_t index = 0; index < branchDataSize; ++index)
         {
           if (branchDataIndex[index] == static_cast<UInt_t>(-1))
-            columnData.push_back (invalidObjectIndex);
+            columnData.addEmptyLink ();
           else
-          {
-            CM::LinkIndexType keyIndex = CM::invalidLinkValue;
-            if (auto keyIter = std::find(targetKeys.begin(), targetKeys.end(), branchDataKey[index]); keyIter != targetKeys.end())
-            {
-              keyIndex = std::distance(targetKeys.begin(), keyIter);
-            } else if (targetKeys.empty())
-            {
-              targetKeys.push_back (branchDataKey[index]);
-              keyIndex = 0;
-              std::cout << "assume target key for " << outputColumns.at(0).name << " is " << std::hex << branchDataKey[index] << std::dec << std::endl;
-            } else if (branchDataKey[index] != 0)
-            {
-              std::ostringstream error;
-              error << "target key mismatch: read " << std::hex << branchDataKey[index];
-              error << ", expected one of";
-              for (const auto& key : targetKeys)
-                error << " " << key;
-              error << " for " << outputColumns.at(0).name;
-              throw std::runtime_error (std::move (error).str());
-            }
-            if (keyIndex == CM::invalidLinkValue)
-            {
-              columnData.push_back (CM::invalidLinkValue);
-            } else
-            {
-              auto& targetOffsetColumn = *targetOffsetColumns.at(keyIndex);
-              auto targetOffset = targetOffsetColumn.at (offsets.size()-1);
-              CM::LinkIndexType linkIndex = branchDataIndex[index];
-              linkIndex += targetOffset;
-              if (linkIndex >= targetOffsetColumn.at(offsets.size()))
-                throw std::runtime_error (std::format ("index out of range for link: {} >= {} (base index {})", outputColumns.at(0).name, linkIndex, targetOffsetColumn.at(offsets.size()), targetOffset));
-              columnData.push_back (CM::mergeLinkKeyIndex (keyIndex, branchDataIndex[index] + targetOffset));
-            }
-          }
+            columnData.addSplitLink (branchDataIndex[index], branchDataKey[index], offsets.size()-1);
         }
         offsets.push_back (columnData.size());
         if (offsetColumn)
@@ -1235,8 +1378,11 @@ namespace columnar
           colData.setColumn (outputColumns.at(0).columnIndex, columnData.size(), columnData.data());
         if (outputColumns.at(1).columnIndex != ColumnVectorHeader::nullIndex)
           colData.setColumn (outputColumns.at(1).columnIndex, offsets.size(), offsets.data());
-        if (outputColumns.at(2).columnIndex != ColumnVectorHeader::nullIndex)
-          colData.setColumn (outputColumns.at(2).columnIndex, keyColumnData.size(), keyColumnData.data());
+        for (std::size_t i = 2; i < outputColumns.size(); ++ i)
+        {
+          if (outputColumns.at(i).columnIndex != ColumnVectorHeader::nullIndex)
+            colData.setColumn (outputColumns.at(i).columnIndex, columnData.keysColumn(i-2).size(), columnData.keysColumn(i-2).data());
+        }
       }
 
       [[nodiscard]] virtual BranchPerfData getPerfData (float emptyTime) override
@@ -1272,42 +1418,18 @@ namespace columnar
       using CM = ColumnarModeArray;
       BranchReader<std::vector<std::vector<ElementLink<T>>>> branchReader;
       std::vector<ColumnarOffsetType> offsets = {0};
-      std::vector<typename CM::LinkIndexType> columnData;
-      std::vector<typename CM::LinkKeyType> keysColumn;
-      std::vector<std::string> containers;
-      std::vector<SG::sgkey_t> containerKeys;
-      std::vector<const std::vector<ColumnarOffsetType>*> containerOffsets;
+      std::vector<ColumnarOffsetType> eventOffsets = {0};
+      LinkColumnVector columnData;
       Benchmark benchmarkUnpack;
       Benchmark benchmark;
       unsigned entries = 0;
       unsigned nullEntries = 0;
-
-      bool checkUnknownKeys = false;
-      std::unordered_map<SG::sgkey_t,std::unordered_set<std::string>> unknownKeys;
 
       explicit ColumnDataVectorVectorVariantLink (const std::string& val_branchName)
         : branchReader (val_branchName), benchmarkUnpack (branchReader.columnName()+"(unpack)"), benchmark (branchReader.columnName())
       {
         outputColumns.push_back ({.name = branchReader.columnName() + ".data"});
         outputColumns.push_back ({.name = branchReader.columnName() + ".offset", .isOffset = true});
-        outputColumns.push_back ({.name = branchReader.columnName() + ".keys"});
-      }
-
-      ~ColumnDataVectorVectorVariantLink ()
-      {
-        // print unknown keys and containers they may be associated
-        // with, based on whether they were always within the range of
-        // elements allowed for the container.
-        for (auto& [key, forbiddenContainer] : unknownKeys)
-        {
-          std::cout << "unknown key: " << std::hex << key << std::dec << ", allowed containers:";
-          for (const auto& container : containers)
-          {
-            if (forbiddenContainer.find (container) == forbiddenContainer.end())
-              std::cout << " " << container;
-          }
-          std::cout << std::endl;
-        }
       }
 
       virtual bool connect (TTree *tree, std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*>& offsetColumns, std::unordered_map<std::string,ColumnInfo>& requestedColumns) override
@@ -1321,26 +1443,11 @@ namespace columnar
 
         if (iter->second.offsetName != outputColumns.at(1).name)
           throw std::runtime_error ("offset name mismatch: " + iter->second.offsetName + " != " + outputColumns.at(1).name);
-        containers = iter->second.linkTargetNames;
-        if (containers.empty() || iter->second.variantLinkKeyColumn.empty())
-          throw std::runtime_error ("no variant link containers for: " + outputColumns.at(0).name);
-        if (iter->second.variantLinkKeyColumn != outputColumns.at(2).name)
-          throw std::runtime_error ("variant link key column mismatch: " + iter->second.variantLinkKeyColumn + " != " + outputColumns.at(2).name);
 
-        for ([[maybe_unused]] auto& container : containers)
+        for (auto keyColumn : columnData.connect (iter->second, offsetColumns, requestedColumns))
         {
-          keysColumn.push_back (keysColumn.size()+1);
-          if (!offsetColumns.contains (container))
-            throw std::runtime_error ("missing offset column(variant-link): " + container);
-          containerOffsets.push_back (offsetColumns.at (container));
-          if (auto iter = knownKeys.find (container); iter != knownKeys.end())
-          {
-            containerKeys.push_back (iter->second);
-          } else
-          {
-            checkUnknownKeys = true;
-            containerKeys.push_back (0u);
-          }
+          outputColumns.push_back ({.name = keyColumn, .primary = false, .enabled = true});
+          requestedColumns.erase (keyColumn);
         }
 
         requestedColumns.erase (iter);
@@ -1366,6 +1473,8 @@ namespace columnar
         columnData.clear();
         offsets.clear();
         offsets.push_back (0);
+        eventOffsets.clear();
+        eventOffsets.push_back (0);
       }
 
       virtual void getEntry (Long64_t entry) override
@@ -1374,46 +1483,16 @@ namespace columnar
         const auto& branchData = branchReader.getEntry (entry);
         benchmark.stopTimer ();
         benchmarkUnpack.startTimer ();
+        columnData.checkOffsets (eventOffsets.size() - 1);
         for (auto& data : branchData)
         {
           for (auto& element : data)
           {
-            if (element.isDefault() || (element.key() == 0 && element.index() == 0))
-              columnData.push_back (invalidObjectIndex);
-            else
-            {
-              typename CM::LinkIndexType key = 0xff;
-              typename CM::LinkIndexType index = 0;
-              for (std::size_t i = 0; i < containers.size(); ++i)
-              {
-                if (element.key() == containerKeys[i])
-                {
-                  if (containerOffsets[i]->back() <= element.index())
-                    throw std::runtime_error ("invalid index: " + std::to_string (element.index()) + " in container: " + containers[i] + " with size: " + std::to_string (containerOffsets[i]->back()));
-                  key = keysColumn[i];
-                  if (containerOffsets[i]->size() < 2)
-                    throw std::runtime_error ("container offset not yet filled for: " + containers[i]);
-                  index = containerOffsets[i]->at (containerOffsets[i]->size()-2) + element.index();
-                  break;
-                }
-              }
-              if (key == 0xff && checkUnknownKeys)
-              {
-                // this records which containers the unknown key is
-                // compatible with, so that I may figure out which
-                // container it is and hard-code it above.
-                auto& forbiddenContainers = unknownKeys[element.key()];
-                for (std::size_t i = 0; i < containers.size(); ++i)
-                {
-                  if (containerOffsets[i]->back() <= containerOffsets[i]->at (containerOffsets[i]->size()-2) + element.index())
-                    forbiddenContainers.insert (containers[i]);
-                }
-              }
-              columnData.push_back (CM::mergeLinkKeyIndex (key, index));
-            }
+            columnData.addLink (element, eventOffsets.size()-1);
           }
           offsets.push_back (columnData.size());
         }
+        eventOffsets.push_back (offsets.size());
         benchmarkUnpack.stopTimer ();
       }
 
@@ -1423,8 +1502,11 @@ namespace columnar
           colData.setColumn (outputColumns.at(0).columnIndex, columnData.size(), columnData.data());
         if (outputColumns.at(1).columnIndex != ColumnVectorHeader::nullIndex)
           colData.setColumn (outputColumns.at(1).columnIndex, offsets.size(), offsets.data());
-        if (outputColumns.at(2).columnIndex != ColumnVectorHeader::nullIndex)
-          colData.setColumn (outputColumns.at(2).columnIndex, keysColumn.size(), keysColumn.data());
+        for (std::size_t i = 2; i < outputColumns.size(); ++ i)
+        {
+          if (outputColumns.at(i).columnIndex != ColumnVectorHeader::nullIndex)
+            colData.setColumn (outputColumns.at(i).columnIndex, columnData.keysColumn(i-2).size(), columnData.keysColumn(i-2).data());
+        }
       }
 
       [[nodiscard]] virtual BranchPerfData getPerfData (float emptyTime) override
