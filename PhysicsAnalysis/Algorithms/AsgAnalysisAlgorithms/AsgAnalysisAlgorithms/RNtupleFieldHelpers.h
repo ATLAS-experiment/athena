@@ -138,7 +138,7 @@ namespace CP {
                                const BranchConfig& branchConfig,
                                OutputBranchData& outputData ) override;
 
-      private:
+      protected:
          std::string m_sgName;
          std::vector< std::unique_ptr<ElementFieldProcessor> > m_fields;
       };
@@ -168,6 +168,17 @@ namespace CP {
          int m_auxElementOffset = -1;
       };
 
+      class ElementProcessorMet : public ElementProcessor {
+      public:
+         ElementProcessorMet(const std::string& sgName, const std::string& termName);
+         virtual ~ElementProcessorMet() = default;
+         ElementProcessorMet( const ElementProcessorMet& ) = delete;
+         ElementProcessorMet& operator=( const ElementProcessorMet& ) = delete;
+         virtual StatusCode retrieveProcess( StoreType& evtStore ) override;
+      private:
+         std::string m_termName;
+      };
+
       class ProcessorList : public asg::AsgMessagingForward {
       public:
          using AsgMessagingForward::AsgMessagingForward;
@@ -186,7 +197,7 @@ namespace CP {
 
          StatusCode process( StoreType& evtStore );
          
-         TreeBranchHelpers::IObjectProcessor& getObjectProcessor( const BranchConfig& /*branchConfig*/, const std::string& sgName );
+         TreeBranchHelpers::IObjectProcessor& getObjectProcessor( const BranchConfig& branchConfig, const std::string& sgName );
          std::optional<int> defaultBasketSize;
          std::unordered_set<std::string> m_nonContainers;
          std::unordered_map< std::string, std::unique_ptr<TreeBranchHelpers::IObjectProcessor> > m_processors;
