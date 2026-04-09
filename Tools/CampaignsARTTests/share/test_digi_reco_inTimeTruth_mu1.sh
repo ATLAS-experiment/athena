@@ -49,7 +49,7 @@ run "RAWtoALL" Reco_tf.py \
   --geometryVersion "all:${default_geometry}" \
   --multithreaded "True" \
   --postInclude "all:PyJobTransforms.UseFrontier" \
-  --preInclude "all:Campaigns.PhaseIIPileUp1" \
+  --preInclude "all:Campaigns.MC23PhaseIIPileUp1" \
   --inputHITSFile ${HSHitsFile} \
   --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles} \
   --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles} \
