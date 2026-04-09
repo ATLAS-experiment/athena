@@ -206,7 +206,7 @@ int TrackFitter::fitTracks(const std::vector<FPGATrackSimRoad>& roads, std::vect
             }
         }
         }
-        tracks.push_back(track_cand);
+        tracks.push_back(std::move(track_cand));
 
         // Enforce m_max_ncomb here, but only for the tracks that we actually fit.
         // Let's see how often this warning fires.
