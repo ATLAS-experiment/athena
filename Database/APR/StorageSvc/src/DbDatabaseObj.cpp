@@ -13,6 +13,7 @@
 //  @author      M.Frank
 //====================================================================
 
+#include "StorageSvc/APRDefaults.h"
 #include "StorageSvc/DbString.h"
 #include "DbDatabaseObj.h"
 #include "DbContainerObj.h"
@@ -459,6 +460,26 @@ StatusCode DbDatabaseObj::open()   {
           if ( !param("POOL_VSN", par_val).isSuccess() )  {
             if ( !addParam("POOL_VSN", "1.1").isSuccess() )  {
               ATH_MSG_ERROR("Failed to write parameter POOL_VSN.");
+            }
+          }
+          if ( !param("POOL_CONTAINERNAME_EVENTDATA", par_val).isSuccess() )  {
+            if ( !addParam("POOL_CONTAINERNAME_EVENTDATA", APRDefaults::getEventDataName()).isSuccess() )  {
+              ATH_MSG_ERROR("Failed to write parameter POOL_CONTAINERNAME_EVENTDATA.");
+            }
+          }
+          if ( !param("POOL_CONTAINERNAME_EVENTTAG", par_val).isSuccess() )  {
+            if ( !addParam("POOL_CONTAINERNAME_EVENTTAG", APRDefaults::getEventTagName()).isSuccess() )  {
+              ATH_MSG_ERROR("Failed to write parameter POOL_CONTAINERNAME_EVENTTAG.");
+            }
+          }
+          if ( !param("POOL_CONTAINERNAME_DATAHEADER", par_val).isSuccess() )  {
+            if ( !addParam("POOL_CONTAINERNAME_DATAHEADER", APRDefaults::getDataHeaderName()).isSuccess() )  {
+              ATH_MSG_ERROR("Failed to write parameter POOL_CONTAINERNAME_DATAHEADER.");
+            }
+          }
+          if ( !param("POOL_CONTAINERNAME_METADATA", par_val).isSuccess() )  {
+            if ( !addParam("POOL_CONTAINERNAME_METADATA", APRDefaults::getMetaDataName()).isSuccess() )  {
+              ATH_MSG_ERROR("Failed to write parameter POOL_CONTAINERNAME_METADATA.");
             }
           }
         }
