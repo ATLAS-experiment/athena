@@ -171,6 +171,8 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
 
     def makeAlgs (self, config) :
 
+        log = logging.getLogger('SmallRJetAnalysisConfig')
+
         jetCollectionName=self.jetCollection
         if(self.jetCollection=="AnalysisJets") :
             jetCollectionName="AntiKt4EMPFlowJets"
@@ -269,6 +271,8 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         # Change the truthJetCollection property to AntiKt4TruthWZJets if preferred
         if self.runJvtSelection :
             assert self.jetInput=="EMPFlow", "NNJvt WPs and SFs only valid for PFlow jets"
+            log.warning("jvtWP, runJvtSelection and runJvtEfficiency are deprecated - please use a JVTWorkingPoint block instead.")
+
             alg = config.createAlgorithm('CP::AsgSelectionAlg', 'JvtSelectionAlg')
             config.addPrivateTool('selectionTool', 'CP::NNJvtSelectionTool')
             alg.selectionTool.JetContainer = config.readName(self.containerName)
@@ -300,6 +304,8 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
 
         if self.runFJvtSelection :
             assert self.jetInput=="EMPFlow", "fJvt WPs and SFs only valid for PFlow jets"
+            log.warning("fJvtWP, runFJvtSelection and runFJvtEfficiency are deprecated - please use a FJVTWorkingPoint block instead.")
+
             alg = config.createAlgorithm('CP::AsgSelectionAlg', 'FJvtSelectionAlg')
             config.addPrivateTool('selectionTool', 'CP::FJvtSelectionTool')
             alg.selectionTool.JetContainer = config.readName(self.containerName)
@@ -572,12 +578,12 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             alg.selectionTool.minPt = self.minPt
             alg.selectionTool.maxPt = self.maxPt
             alg.selectionTool.maxEta = self.maxEta
-            alg.selectionTool.maxRapidity = self.maxRapidity            
+            alg.selectionTool.maxRapidity = self.maxRapidity
             alg.particles = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
             config.addSelection (self.containerName, '', alg.selectionDecoration,
                                  preselection=True)
-            
+
         if self.minMass > 0 or self.maxMass > 0:
             # Set up the the mass selection
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'JetMassCutAlg' )
@@ -589,8 +595,215 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             alg.preselection = config.getPreselection (self.containerName, '')
             config.addSelection (self.containerName, '', alg.selectionDecoration,
                                  preselection=True)
-            
+
         config.addOutputVar (self.containerName, 'm', 'm')
+
+class JvtWorkingPointSelectionConfig (ConfigBlock) :
+    """the ConfigBlock for the Jvt working point selection"""
+
+    def __init__ (self) :
+        super (JvtWorkingPointSelectionConfig, self).__init__ ()
+        self.setBlockName('JvtWorkingPointSelectionConfig')
+        self.addOption ('containerName', '', type=str,
+            noneAction='error',
+            info="the name of the input container.")
+        self.addOption ('selectionName', '', type=str,
+            noneAction='error',
+            info="the name of the jet selection to define (e.g. `tight` or `loose`).")
+        self.addOption ('jvtWP', '', type=str,
+            noneAction='error',
+            info="the NNJvt WP to use. Supported WPs: `FixedEffPt`.")
+
+    def instanceName (self) :
+        return self.containerName + '_' + self.selectionName
+
+    def makeAlgs (self, config) :
+
+        decorationName = f"jvt_selection_{self.jvtWP},as_char"
+        selectionName = self.selectionName
+
+        alg = config.createAlgorithm('CP::AsgSelectionAlg', f'JvtSelectionAlg_{self.jvtWP}')
+        config.addPrivateTool('selectionTool', 'CP::NNJvtSelectionTool')
+        alg.selectionTool.JetContainer = config.readName(self.containerName)
+        alg.selectionTool.JvtMomentName = "NNJvt"
+        alg.selectionTool.WorkingPoint = self.jvtWP
+        alg.selectionTool.MaxPtForJvt = 60*GeV
+        alg.selectionDecoration = decorationName
+        alg.particles = config.readName(self.containerName)
+
+        config.addSelection (self.containerName, selectionName, decorationName, preselection=False)
+
+
+class JvtWorkingPointEfficiencyConfig (ConfigBlock) :
+    """the ConfigBlock for the Jvt working point efficiency"""
+
+    def __init__ (self) :
+        super (JvtWorkingPointEfficiencyConfig, self).__init__ ()
+        self.setBlockName('JvtWorkingPointEfficiencyConfig')
+        self.addDependency('OverlapRemoval', required=False)
+        self.addDependency('EventSelection', required=False)
+        self.addDependency('EventSelectionMerger', required=False)
+        self.addOption ('containerName', '', type=str,
+            noneAction='error',
+            info="the name of the input container.")
+        self.addOption ('selectionName', '', type=str,
+            noneAction='error',
+            info="the name of the jet selection to define (e.g. `tight` or `loose`).")
+        self.addOption ('jvtWP', '', type=str,
+            noneAction='error',
+            info="the NNJvt WP to use. Supported WPs: `FixedEffPt`.")
+        self.addOption ('noEffSF', False, type=bool,
+            info="disables the calculation of efficiencies and scale factors. "
+            "Only useful to test a new WP for which scale factors are not available.",
+            expertMode=True)
+        self.addOption ('eventSF', True, type=bool,
+            info="add calculation of event-level efficiency SF.")
+
+    def instanceName (self) :
+        return self.containerName + '_' + self.selectionName
+
+    def makeAlgs (self, config) :
+
+        decorationName = f"jvt_selection_{self.jvtWP},as_char"
+
+        if not self.noEffSF and config.dataType() is not DataType.Data:
+            alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', f'JvtEfficiencyAlg_{self.jvtWP}' )
+            config.addPrivateTool( 'efficiencyTool', 'CP::NNJvtEfficiencyTool' )
+            alg.efficiencyTool.JetContainer = config.readName(self.containerName)
+            alg.efficiencyTool.MaxPtForJvt = 60*GeV
+            alg.efficiencyTool.WorkingPoint = self.jvtWP
+            if config.geometry() is LHCPeriod.Run2:
+                alg.efficiencyTool.SFFile = "JetJvtEfficiency/May2024/NNJvtSFFile_Run2_EMPFlow.root"
+            else:
+                alg.efficiencyTool.SFFile = "JetJvtEfficiency/May2024/NNJvtSFFile_Run3_EMPFlow.root"
+            alg.selection = decorationName
+            alg.scaleFactorDecoration = f'jvt_effSF_{self.jvtWP}_%SYS%'
+            alg.outOfValidity = 2
+            alg.outOfValidityDeco = f'no_jvt_{self.jvtWP}'
+            alg.skipBadEfficiency = False
+            alg.jets = config.readName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, '')
+
+            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, f'jvtEfficiency_{self.jvtWP}')
+
+            # Set up the per-event jet efficiency scale factor calculation algorithm
+            if self.eventSF:
+                alg = config.createAlgorithm( 'CP::AsgEventScaleFactorAlg', f'JvtEventScaleFactorAlg_{self.jvtWP}' )
+                preselection = config.getFullSelection (self.containerName, '')
+                alg.preselection = preselection + f'&&no_jvt_{self.jvtWP}' if preselection else f'no_jvt_{self.jvtWP}'
+                alg.scaleFactorInputDecoration = f'jvt_effSF_{self.jvtWP}_%SYS%'
+                alg.scaleFactorOutputDecoration = f'jvt_effSF_{self.jvtWP}_%SYS%'
+                alg.particles = config.readName (self.containerName)
+
+                config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration, f'weight_jvt_effSF_{self.jvtWP}')
+
+
+class FJvtWorkingPointSelectionConfig (ConfigBlock) :
+    """the ConfigBlock for the fJvt working point selection"""
+
+    def __init__ (self) :
+        super (FJvtWorkingPointSelectionConfig, self).__init__ ()
+        self.setBlockName('FJvtWorkingPointSelectionConfig')
+        self.addOption ('containerName', '', type=str,
+            noneAction='error',
+            info="the name of the input container.")
+        self.addOption ('selectionName', '', type=str,
+            noneAction='error',
+            info="the name of the jet selection to define (e.g. `tight` or `loose`).")
+        self.addOption ('fjvtWP', '', type=str,
+            noneAction='error',
+            info="the fJvt WP to use. Supported WPs: `Loose`, `Tight`, `Tighter`.")
+
+    def instanceName (self) :
+        return self.containerName + '_' + self.selectionName
+
+    def makeAlgs (self, config) :
+
+        decorationName = f"fjvt_selection_{self.fjvtWP},as_char"
+        selectionName = self.selectionName
+
+        alg = config.createAlgorithm('CP::AsgSelectionAlg', f'FJvtSelectionAlg_{self.fjvtWP}')
+        config.addPrivateTool('selectionTool', 'CP::FJvtSelectionTool')
+        alg.selectionTool.JetContainer = config.readName(self.containerName)
+        alg.selectionTool.JvtMomentName = "DFCommonJets_fJvt"
+        alg.selectionTool.WorkingPoint = self.fjvtWP
+        alg.selectionDecoration = decorationName
+        alg.particles = config.readName(self.containerName)
+
+        config.addSelection (self.containerName, selectionName, decorationName, preselection=False)
+
+
+class FJvtWorkingPointEfficiencyConfig (ConfigBlock) :
+    """the ConfigBlock for the fJvt working point efficiency"""
+
+    def __init__ (self) :
+        super (FJvtWorkingPointEfficiencyConfig, self).__init__ ()
+        self.setBlockName('FJvtWorkingPointEfficiencyConfig')
+        self.addDependency('OverlapRemoval', required=False)
+        self.addDependency('EventSelection', required=False)
+        self.addDependency('EventSelectionMerger', required=False)
+        self.addOption ('containerName', '', type=str,
+            noneAction='error',
+            info="the name of the input container.")
+        self.addOption ('selectionName', '', type=str,
+            noneAction='error',
+            info="the name of the jet selection to define (e.g. `tight` or `loose`).")
+        self.addOption ('fjvtWP', '', type=str,
+            noneAction='error',
+            info="the fJvt WP to use. Supported WPs: `Loose`, `Tight`, `Tighter`.")
+        self.addOption ('noEffSF', False, type=bool,
+            info="disables the calculation of efficiencies and scale factors. "
+            "Only useful to test a new WP for which scale factors are not available.",
+            expertMode=True)
+        self.addOption ('eventSF', True, type=bool,
+            info="add calculation of event-level efficiency SF.")
+
+    def instanceName (self) :
+        return self.containerName + '_' + self.selectionName
+
+    def makeAlgs (self, config) :
+
+        if not self.noEffSF and config.dataType() is not DataType.Data:
+            alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', f'FJvtEfficiencyAlg_{self.fjvtWP}' )
+            config.addPrivateTool( 'efficiencyTool', 'CP::FJvtEfficiencyTool' )
+            alg.efficiencyTool.JetContainer = config.readName(self.containerName)
+            alg.efficiencyTool.WorkingPoint = self.fjvtWP
+            if config.geometry() is LHCPeriod.Run2:
+                alg.efficiencyTool.SFFile = "JetJvtEfficiency/May2024/fJvtSFFile_Run2_EMPFlow.root"
+            else:
+                alg.efficiencyTool.SFFile = "JetJvtEfficiency/May2024/fJvtSFFile_Run3_EMPFlow.root"
+            alg.selection = f'fjvt_selection_{self.fjvtWP},as_char'
+            alg.scaleFactorDecoration = f'fjvt_effSF_{self.fjvtWP}_%SYS%'
+            alg.outOfValidity = 2
+            alg.outOfValidityDeco = f'no_fjvt_{self.fjvtWP}'
+            alg.skipBadEfficiency = False
+            alg.jets = config.readName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, '')
+
+            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, f'fjvtEfficiency_{self.fjvtWP}')
+
+            # Set up the per-event jet efficiency scale factor calculation algorithm
+            if self.eventSF:
+                alg = config.createAlgorithm( 'CP::AsgEventScaleFactorAlg', f'ForwardJvtEventScaleFactorAlg_{self.fjvtWP}' )
+                preselection = config.getFullSelection (self.containerName, '')
+                alg.preselection = preselection + f'&&no_fjvt_{self.fjvtWP}' if preselection else f'no_fjvt_{self.fjvtWP}'
+                alg.scaleFactorInputDecoration = f'fjvt_effSF_{self.fjvtWP}_%SYS%'
+                alg.scaleFactorOutputDecoration = f'fjvt_effSF_{self.fjvtWP}_%SYS%'
+                alg.particles = config.readName (self.containerName)
+
+                config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration, f'weight_fjvt_effSF_{self.fjvtWP}')
+
+
+@groupBlocks
+def JvtWorkingPoint(seq):
+    seq.append(JvtWorkingPointSelectionConfig())
+    seq.append(JvtWorkingPointEfficiencyConfig())
+
+@groupBlocks
+def FJvtWorkingPoint(seq):
+    seq.append(FJvtWorkingPointSelectionConfig())
+    seq.append(FJvtWorkingPointEfficiencyConfig())
+
 
 # These algorithms set up the jet recommendations as-of 04/02/2019.
 # Jet recommendations:
