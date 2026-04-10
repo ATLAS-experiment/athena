@@ -107,8 +107,6 @@ bool makePostFit(VKVertex* vk, double wgtvrtd[], double& dCoefNorm) {
   //
   int NCNST = vk->ConstraintList.size();
   int PostFitIteration = 4;
-  if (NCNST)
-    PostFitIteration = 4;
   double ValForChk;  // Now PostFit=4 works better than default PostFit=7.
   // Reason is unclear
 
@@ -205,7 +203,6 @@ bool makePostFit(VKVertex* vk, double wgtvrtd[], double& dCoefNorm) {
       }
       if (ValForChk > chi2t[2] * 1.0001) {
         alf = 1.0;
-        ValForChk = chi2t[2];
         notImproved = true;
       }
       if (notImproved) {  // Recalculate all with reverted alf
@@ -220,9 +217,6 @@ bool makePostFit(VKVertex* vk, double wgtvrtd[], double& dCoefNorm) {
         if (NCNST) {  // VK 25.10.2006 new mechanism for constraint treatment
           applyConstraints(vk);
           ContribC[jm1] = 5. * dScale * getCnstValues2(vk);
-          if (j != PostFitIteration) {
-            chi2t[jm1] += ContribC[jm1];
-          }  // Last cycle is ALWAYS without constraints
         }
       }
     }
