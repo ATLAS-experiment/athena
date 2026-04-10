@@ -97,10 +97,7 @@ def MuDataPrepViewDataVerifierCfg(flags):
                  ( 'MdtCsm_Cache' , 'StoreGateSvc+MdtCsmRdoCache' ),
                  ( 'RpcPad_Cache' , 'StoreGateSvc+RpcRdoCache' ),
                  ( 'RpcCoinDataCollection_Cache' , 'StoreGateSvc+RpcCoinCache' ),
-                 ( 'TgcPrepDataCollection_Cache' , 'StoreGateSvc+' + MuonPrdCacheNames.TgcCache + 'PriorBC' ),
-                 ( 'TgcPrepDataCollection_Cache' , 'StoreGateSvc+' + MuonPrdCacheNames.TgcCache + 'NextBC' ),
                  ( 'TgcPrepDataCollection_Cache' , 'StoreGateSvc+' + MuonPrdCacheNames.TgcCache + 'AllBCs' ),
-                 ( 'TgcPrepDataCollection_Cache' , 'StoreGateSvc+' + MuonPrdCacheNames.TgcCache ),
                  ( 'TgcCoinDataCollection_Cache' , 'StoreGateSvc+' + MuonPrdCacheNames.TgcCoinCache + 'PriorBC' ),
                  ( 'TgcCoinDataCollection_Cache' , 'StoreGateSvc+' + MuonPrdCacheNames.TgcCoinCache + 'NextBC' ),
                  ( 'TgcCoinDataCollection_Cache' , 'StoreGateSvc+' + MuonPrdCacheNames.TgcCoinCache + 'NextNextBC' ),
@@ -201,7 +198,7 @@ def muFastVDVCfg(flags, RoIs, postFix, InsideOutMode, extraLoads):
   # In insideout mode, need to inherit muon decoding objects for TGC, RPC, MDT, CSC
   dataObjects=[]
   if InsideOutMode:
-    dataObjects = [('Muon::TgcPrepDataContainer','StoreGateSvc+TGC_Measurements'),
+    dataObjects = [('Muon::TgcPrepDataContainer','StoreGateSvc+TGC_MeasurementsAllBCs'),
                    ('TgcRdoContainer' , 'StoreGateSvc+TGCRDO'),
                    ('Muon::RpcPrepDataContainer','StoreGateSvc+RPC_Measurements'),
                    ('Muon::MdtPrepDataContainer','StoreGateSvc+MDT_DriftCircles'),
@@ -427,7 +424,7 @@ def muEFSARecoSequenceCfg( flags, RoIs, name, useBucketFilter=False):
 def VDVEFMuCBCfg(flags, RoIs, name, suffix):
   acc = ComponentAccumulator()
   dataObjects = [( 'Muon::MdtPrepDataContainer' , 'StoreGateSvc+MDT_DriftCircles' ),  
-                 ( 'Muon::TgcPrepDataContainer' , 'StoreGateSvc+TGC_Measurements' ),
+                 ( 'Muon::TgcPrepDataContainer' , 'StoreGateSvc+TGC_MeasurementsAllBCs' ),
                  ( 'Muon::RpcPrepDataContainer' , 'StoreGateSvc+RPC_Measurements' ),
                  ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % RoIs ),
                  ( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
@@ -578,7 +575,7 @@ def muEFCBRecoSequenceCfg( flags, RoIs, name, suffix ):
 def VDVMuInsideOutCfg(flags, name, candidatesName, suffix):
   acc = ComponentAccumulator()
   dataObjects = [( 'Muon::RpcPrepDataContainer' , 'StoreGateSvc+RPC_Measurements' ),
-                 ( 'Muon::TgcPrepDataContainer' , 'StoreGateSvc+TGC_Measurements' ),
+                 ( 'Muon::TgcPrepDataContainer' , 'StoreGateSvc+TGC_MeasurementsAllBCs' ),
                  ( 'MuonCandidateCollection' , 'StoreGateSvc+'+candidatesName ),
                  ('Trk::SegmentCollection' , 'StoreGateSvc+TrackMuonSegments')]
   if not isCosmic(flags): dataObjects += [( 'Muon::HoughDataPerSectorVec' , 'StoreGateSvc+HoughDataPerSectorVec')]
