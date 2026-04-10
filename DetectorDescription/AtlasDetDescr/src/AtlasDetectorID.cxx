@@ -20,16 +20,10 @@
 #include <format>
 
 namespace{
-  Identifier makeId(const IdDictFieldImplementation & impl, int det){
-    Identifier result{0};
-    impl.pack(det, result);
-    return result;
-  }
   
   Identifier makeId(const IdDictFieldImplementation & impl0, 
       const IdDictFieldImplementation & impl1, int det, int subdet){
-    Identifier result{0};
-    impl0.pack(det, result);
+    Identifier result = impl0.new_pack(det);
     impl1.pack(subdet, result);
     return result;
   }
@@ -67,23 +61,23 @@ Identifier AtlasDetectorID::mm() const {
     return Identifier{};
 }
 Identifier AtlasDetectorID::indet() const {
-  return makeId(m_det_impl, indet_field_value());
+  return m_det_impl.new_pack(indet_field_value());
 }
 
 Identifier AtlasDetectorID::lar() const {
-  return makeId(m_det_impl, lar_field_value());
+  return m_det_impl.new_pack(lar_field_value());
 }
 
 Identifier AtlasDetectorID::tile() const {
-  return makeId(m_det_impl, tile_field_value());
+  return m_det_impl.new_pack(tile_field_value());
 }
 
 Identifier AtlasDetectorID::muon() const {
-  return makeId(m_det_impl, muon_field_value());
+  return m_det_impl.new_pack(muon_field_value());
 }
 
 Identifier AtlasDetectorID::calo() const {
-  return makeId(m_det_impl, calo_field_value());
+  return m_det_impl.new_pack(calo_field_value());
 }
 
 Identifier AtlasDetectorID::pixel() const {
@@ -181,14 +175,14 @@ bool AtlasDetectorID::reinitialize(const IdDictMgr &dict_mgr) {
     }
     
     // Loop over dict names and check version tags
-    if (m_dict_names.size() != m_dict_tags.size()) {
+    if (m_dict_names.size() != m_dict_tags.size()) [[unlikely]]{
         ATH_MSG_ERROR("reinitialize: dict names and tags vectors not the same length ");
         ATH_MSG_ERROR("names: " << m_dict_names.size() << " tags: " << m_dict_tags.size());
     }
     for (unsigned int i = 0; i < m_dict_names.size(); ++i) {
         // Access dictionary by name
         const IdDictDictionary *dict = dict_mgr.find_dictionary(m_dict_names[i]);
-        if (!dict) {
+        if (!dict)[[unlikely]] {
             ATH_MSG_ERROR("reinitialize: could not find dict -  " << m_dict_names[i]);
             return false;
         }

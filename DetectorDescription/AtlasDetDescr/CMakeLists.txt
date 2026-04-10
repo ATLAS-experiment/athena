@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AtlasDetDescr )
@@ -16,3 +16,11 @@ atlas_add_dictionary( AtlasDetDescrDict
                       AtlasDetDescr/AtlasDetDescrDict.h
                       AtlasDetDescr/selection.xml
                       LINK_LIBRARIES AtlasDetDescr )
+
+# Tests in the package:
+atlas_add_test( AtlasDetectorID_test                
+                SOURCES
+                test/AtlasDetectorID_test.cxx
+                INCLUDE_DIRS ${Boost_INCLUDE_DIRS}  
+                LINK_LIBRARIES  AtlasDetDescr IdDictParser ${Boost_LIBRARIES} 
+                POST_EXEC_SCRIPT "nopost.sh" )    

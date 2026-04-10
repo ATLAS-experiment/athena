@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MAIN
@@ -46,6 +46,20 @@ BOOST_AUTO_TEST_SUITE(IdDictFieldImplementationTest)
     const std::string expected{"decode 0 vals 0               mask/zero mask/shift/bits/offset 0   0   0   0   0   indexes                      mode  both_bounded  "};
     BOOST_CHECK_EQUAL(s, expected);
   }
+  BOOST_AUTO_TEST_CASE(new_packGivesExpectedAnswer){
+    IdDictFieldImplementation impl;
+    Identifier packed = impl.new_pack(0x4F292);
+    Identifier::value_type expected(0x4f29200000000);
+    BOOST_TEST(packed == expected);
+  }
+  BOOST_AUTO_TEST_CASE(packGivesExpectedAnswer){
+    IdDictFieldImplementation impl;
+    Identifier packed = impl.new_pack(0x4F292);
+    Identifier::value_type expected(0x4f2920000000a);
+    impl.pack(10, packed);
+    BOOST_TEST(packed == expected);
+  }
+
   BOOST_AUTO_TEST_CASE(show_to_stringGivesExpectedOutputForInitialisedObject){
     IdDictFieldImplementation impl;
     impl.set_decode_index(true);
