@@ -381,7 +381,7 @@ HLT_g20_etcut_ion_L1eEM15:
   stepFeatures:
     0: 43
     1: 43
-    2: 38
+    2: 39
 HLT_g20_loose_L1eEM15:
   eventCount: 6
   stepCounts:
@@ -404,7 +404,7 @@ HLT_g20_loose_ion_L1eEM15:
   stepFeatures:
     0: 43
     1: 43
-    2: 38
+    2: 39
     3: 8
 HLT_g20_loose_ion_L1eEM18:
   eventCount: 8
@@ -416,17 +416,17 @@ HLT_g20_loose_ion_L1eEM18:
   stepFeatures:
     0: 41
     1: 41
-    2: 37
+    2: 38
     3: 8
 HLT_g28_etcut_ion_L1eEM18:
   eventCount: 13
   stepCounts:
-    0: 14
-    1: 14
+    0: 15
+    1: 15
     2: 13
   stepFeatures:
-    0: 31
-    1: 31
+    0: 32
+    1: 32
     2: 24
 HLT_g30_loose_ion_L1eEM18:
   eventCount: 6
