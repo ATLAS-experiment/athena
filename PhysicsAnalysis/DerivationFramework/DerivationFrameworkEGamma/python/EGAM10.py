@@ -33,8 +33,6 @@ photonRequirements = " && ".join(
     ["(DFCommonPhotons_et >= 15*GeV)", "(abs(DFCommonPhotons_eta) < 2.5)"]
 )
 
-decorateCells = True
-
 def EGAM10SkimmingToolCfg(flags):
     """Configure the EGAM10 skimming tool"""
     acc = ComponentAccumulator()
@@ -110,24 +108,9 @@ def EGAM10KernelCfg(flags, name="EGAM10Kernel", **kwargs):
     # Common calo decoration tools
     # ====================================================================
     from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
-        CaloDecoratorKernelCfg, CaloCellDecoratorCfg)
+        CaloDecoratorKernelCfg
+    )
     acc.merge(CaloDecoratorKernelCfg(flags))
-
-    if decorateCells:
-        # For EGAM10, we want the to decorate only the photons
-        EGAM10CaloCellDecoratorTool = (
-            acc.popToolsAndMerge(
-                CaloCellDecoratorCfg(
-                    flags,
-                    name="EGAM10CaloCellDecoratorTool",
-                    SGKey_photons="Photons",
-                    SGKey_electrons="", # do not decorate electrons
-                    SGKey_CaloCells="AllCalo",
-                )
-            )
-        )
-        acc.addPublicTool(EGAM10CaloCellDecoratorTool)
-        augmentationTools.append(EGAM10CaloCellDecoratorTool)
 
     # thinning tools
     thinningTools = []
@@ -247,7 +230,8 @@ def EGAM10Cfg(flags):
 
     # baseline
     EGAM10SlimmingHelper.AllVariables = [
-        "CaloCalTopoClusters"
+        "CaloCalTopoClusters",
+        "egammaClusters"
     ]
 
     # and on MC we also add:
@@ -353,17 +337,6 @@ def EGAM10Cfg(flags):
     print("EGAM10 cluster energy decorations: ", clusterEnergyDecorations)
     EGAM10SlimmingHelper.ExtraVariables.extend(clusterEnergyDecorations)
 
-    # photons: cell decorations
-    if decorateCells:
-        EGAM10SlimmingHelper.ExtraVariables += [
-            "Photons.cells_E.cells_time.cells_onlId",
-            "Photons.cells_eta.cells_phi.cells_layer",
-            "Photons.cells_x.cells_y.cells_z",
-            "Photons.cells_gain",
-            "Photons.cells_quality",
-            "Photons.cells_clusterOriginInfo",
-        ] 
-
     # energy density
     EGAM10SlimmingHelper.ExtraVariables += [
         "TopoClusterIsoCentralEventShape.Density",
@@ -430,6 +403,12 @@ def EGAM10Cfg(flags):
     if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(EGAM10SlimmingHelper)
+
+    # Add full CellContainer
+    EGAM10SlimmingHelper.StaticContent = [
+        "CaloCellContainer#AllCalo",
+        "CaloClusterCellLinkContainer#egammaClusters_links",
+    ]
 
     EGAM10ItemList = EGAM10SlimmingHelper.GetItemList()
     acc.merge(
