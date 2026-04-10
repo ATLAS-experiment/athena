@@ -13,15 +13,14 @@
 HLT_BEGIN_TYPE_REGISTRATION
      HLT_REGISTER_TYPE(struct ObjectA, struct ObjectA, struct ContainerA)
      HLT_REGISTER_TYPE(struct ObjectB, struct ObjectB, struct ContainerB, struct AuxContainerB)
+     HLT_REGISTER_TYPE(struct ObjectB, struct ObjectB2, struct ContainerB, struct AuxContainerB)
 HLT_END_TYPE_REGISTRATION(Test)
 
 // Declare testing EDM map
 TYPEMAPCLASS(Test)
 
 struct TypeInfo_EDM {
-  using map = HLT::TypeInformation::newlist
-    ::add<class_Test>::go
-    ::done;
+  using map = class_Test::map;
 };
 
 
@@ -36,7 +35,13 @@ int main() {
   static_assert(std::is_same_v< Features2Object_t<ObjectA, TypeInfo_EDM>, ObjectA >);
 
   using featuresA = Object2Features_t<ObjectA, TypeInfo_EDM>;
-  static_assert(std::is_same_v< HLT::TypeInformation::at<featuresA,0>::type, ObjectA >);
+  static_assert(featuresA::size == 1);  // one feature
+  static_assert(std::is_same_v< featuresA::at<0>, ObjectA >);
+
+  using featuresB = Object2Features_t<ObjectB, TypeInfo_EDM>;
+  static_assert(featuresB::size == 2);  // two features
+  static_assert(std::is_same_v< featuresB::at<0>, ObjectB >);
+  static_assert(std::is_same_v< featuresB::at<1>, ObjectB2 >);
 
   return 0;
 }

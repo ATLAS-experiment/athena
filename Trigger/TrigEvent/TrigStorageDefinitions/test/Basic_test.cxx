@@ -6,40 +6,31 @@
 
 #include "TrigStorageDefinitions/TypeInformation.h"
 
+#include <type_traits>
+
 struct testX{};
 struct testY{};
+struct testZ{};
 
 
 // Just a "compilation test"
 int main(){
   using namespace HLT::TypeInformation;
 
-  // with newlist
-  using mylist = newlist::
-    add<testX>::go::
-    add<testY>::go::
-    done;
+  using list1 = List<testX, testY>;
 
-  static_assert( std::is_same_v< at<mylist,0>::type, testX > );
-  static_assert( std::is_same_v< at<mylist,1>::type, testY > );
+  static_assert( std::is_same_v< list1::at<0>, testX > );
+  static_assert( std::is_same_v< list1::at<1>, testY > );
 
-  static_assert( std::is_same_v< mylist::get<0>::type, testX > );
-  static_assert( std::is_same_v< mylist::get<1>::type, testY > );
+  static_assert( list1::size == 2 );
+  static_assert( list1::has<testX> );
+  static_assert( list1::indexOf<testY>() == 1 );
+  static_assert( list1::indexOf<struct Foo>() == list1::size );
 
-  // manual list
-  using manual_list = list<testY,
-                           list<testX,nil>>;
+  static_assert( std::is_same_v< list1::find<testX>, testX > );
 
-  static_assert( std::is_same_v< at<manual_list,0>::type, testX > );
-  static_assert( std::is_same_v< at<manual_list,1>::type, testY > );
-
-  static_assert( std::is_same_v< manual_list::get<0>::type, testX > );
-  static_assert( std::is_same_v< manual_list::get<1>::type, testY > );
-
-  // single entry
-  using single_entry_list = list<testY,nil>;
-
-  static_assert( std::is_same_v< single_entry_list::get<0>::type, testY > );
+  using list2 = list1::join<List<testZ>>;
+  static_assert( list2::size == 3 );
 
   return 0;
 }

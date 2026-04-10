@@ -87,9 +87,7 @@ HLT_END_TYPE_REGISTRATION(TrigNavigationUnitTest)
 TYPEMAPCLASS(TrigNavigationUnitTest)
 
 struct TypeInfo_EDM {
-  typedef  HLT::TypeInformation::newlist
-  ::add<class_TrigNavigationUnitTest>  ::go
-  ::done map;
+  using map = class_TrigNavigationUnitTest::map;
 };
 REGISTER_PACKAGE_WITH_NAVI(TrigNavigationUnitTest)
 

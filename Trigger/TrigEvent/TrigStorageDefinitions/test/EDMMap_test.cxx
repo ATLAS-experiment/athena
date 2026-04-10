@@ -19,10 +19,14 @@ int main(){
   static_assert( std::is_same_v< Object2Container_t<ElectronMuonTopoInfo, TypeInfo_EDM>,
                                  ElectronMuonTopoInfoContainer> );
 
-  static_assert( IsKnownFeature<ElectronMuonTopoInfo>::value == 1 );
-  static_assert( IsKnownFeature<xAOD::TrigElectronContainer>::value == 1);
+  static_assert( IsKnownFeature<ElectronMuonTopoInfo>::value );
+  static_assert( IsKnownFeature<xAOD::TrigElectronContainer>::value );
 
-  static_assert( IsKnownFeature<dummy>::value == 0 );
+  static_assert( !IsKnownFeature<dummy>::value );
+
+  auto print = []<typename T>() { std::cout << typeid(T).name() << std::endl; };
+  TypeInfo_EDM::map::for_each(print);
+
 
   return 0;
 }

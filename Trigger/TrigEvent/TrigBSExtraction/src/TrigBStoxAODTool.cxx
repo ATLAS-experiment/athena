@@ -102,18 +102,15 @@
 
 namespace {
   /// Helper for EDM search
-  template<typename element, typename list, int index>
-  struct get_strictly_feat {
-    static constexpr bool result = HLT::TypeInformation::at<list,index>::type::list_of_features::template has<element>::result;
+  template <typename T, typename Element>
+  struct MatchFeaturesStrict {
+    static constexpr bool value = Element::list_of_features::template has<T>;
   };
 
   /// Get CLID for type T if known to Trigger EDM
   template<typename T>
   constexpr int getCLID() {
-
-    using search_result = master_search<TypeInfo_EDM::map, get_strictly_feat, T>::result::search_result;
-    constexpr bool known = !std::is_same_v<search_result, HLT::TypeInformation::ERROR_THE_FOLLOWING_TYPE_IS_NOT_KNOWN_TO_THE_EDM<T>>;
-
+    constexpr bool known = TypeInfo_EDM::map::template has<T, MatchFeaturesStrict>;
     if constexpr (known) return ClassID_traits<T>::ID();
     else                 return -1;
   }

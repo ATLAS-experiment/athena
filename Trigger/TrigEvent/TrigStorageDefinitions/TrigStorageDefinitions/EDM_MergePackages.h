@@ -31,18 +31,17 @@ TYPEMAPCLASS(TrigSteeringEvent)
 
    
 struct TypeInfo_EDM {
-  using map = HLT::TypeInformation::newlist
-    ::add<class_TrigBphysicsEvent>    ::go
-    ::add<class_TrigMonitoringEvent>  ::go
-    ::add<class_TrigCombinedEvent>    ::go
-    ::add<class_TrigCaloEvent>        ::go
-    ::add<class_TrigTopoEvent>        ::go
-    ::add<class_TrigParticle>         ::go
-    ::add<class_TrigMissingEtEvent>   ::go
-    ::add<class_TrigMuonEvent>        ::go
-    ::add<class_TrigInDetEvent>       ::go
-    ::add<class_TrigSteeringEvent>    ::go
-    ::done;
+  using map = HLT::TypeInformation::List<>
+    ::join<class_TrigBphysicsEvent::map>
+    ::join<class_TrigMonitoringEvent::map>
+    ::join<class_TrigCombinedEvent::map>
+    ::join<class_TrigCaloEvent::map>
+    ::join<class_TrigTopoEvent::map>
+    ::join<class_TrigParticle::map>
+    ::join<class_TrigMissingEtEvent::map>
+    ::join<class_TrigMuonEvent::map>
+    ::join<class_TrigInDetEvent::map>
+    ::join<class_TrigSteeringEvent::map>;
 };
 
 #endif
