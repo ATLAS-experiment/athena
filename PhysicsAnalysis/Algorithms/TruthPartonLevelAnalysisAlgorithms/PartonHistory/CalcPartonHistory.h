@@ -146,9 +146,12 @@ class CalcPartonHistory : public asg::AsgTool {
 
   /// Configure this instance with a scheme configuration.
   /// Must be called before initialize().
+#ifndef XAOD_STANDALONE
+  using AsgTool::configure;
+#endif
   void configure(const PartonSchemeConfig& config);
 
-  virtual StatusCode initialize();
+  virtual StatusCode initialize() override;
   virtual StatusCode execute();
 
  protected:
