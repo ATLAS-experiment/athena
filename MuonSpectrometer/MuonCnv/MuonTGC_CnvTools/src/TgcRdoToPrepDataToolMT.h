@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CNVTOOLS_TGCRDOTOPREPDATATOOLMT_H
@@ -22,11 +22,9 @@
 #include "MuonTGC_Cabling/TgcCablingMap.h"
 #include "MuonTrigCoinData/MuonTrigCoinData_Cache.h"
 #include "MuonTrigCoinData/TgcCoinDataContainer.h"
-#include "StoreGate/HandleKeyArray.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/UpdateHandle.h"
 #include "StoreGate/UpdateHandleKey.h"
-#include "xAODMuonPrepData/TgcStripContainer.h"
 
 namespace MuonGM {
 class TgcReadoutElement;
@@ -36,14 +34,10 @@ namespace Muon {
 // Typedef the two update handle arrays that can be used to match handle key
 // functionality Requested to not use StoreGate template for
 // UpdateHandleKeyArray
-typedef SG::HandleKeyArray<SG::UpdateHandle<TgcPrepDataCollection_Cache>,
-                           SG::UpdateHandleKey<TgcPrepDataCollection_Cache>,
-                           Gaudi::DataHandle::Reader>
-    TgcPrdUpdateHandles;
-typedef SG::HandleKeyArray<SG::UpdateHandle<TgcCoinDataCollection_Cache>,
+using TgcCoinUpdateHandles = 
+        SG::HandleKeyArray<SG::UpdateHandle<TgcCoinDataCollection_Cache>,
                            SG::UpdateHandleKey<TgcCoinDataCollection_Cache>,
-                           Gaudi::DataHandle::Reader>
-    TgcCoinUpdateHandles;
+                           Gaudi::DataHandle::Reader>;
 
 /** @class TgcRdoToPrepDataToolMT
  *  This is the algorithm that convert TGCRdo To TGCPrepdata as a tool.
@@ -96,21 +90,17 @@ class TgcRdoToPrepDataToolMT
 
     struct State {
         /** TgcPrepRawData (hit PRD) containers */
-        std::array<TgcPrepDataContainer*, NBC_HIT + 1>
-            tgcPrepDataContainer{};  // +1 for AllBCs
+        TgcPrepDataContainer* tgcPrepDataContainer{};
 
         using TempPrepDataContainer =
             std::vector<std::unique_ptr<TgcPrepDataCollection>>;
-        std::array<TempPrepDataContainer, NBC_HIT + 1> tgcPrepDataCollections{};
+        TempPrepDataContainer tgcPrepDataCollections{};
         /** TgcCoinData (coincidence PRD) containers */
         std::array<TgcCoinDataContainer*, NBC_TRIG> tgcCoinDataContainer{};
 
         using TempCoinDataContainer =
             std::vector<std::unique_ptr<TgcCoinDataCollection>>;
         std::array<TempCoinDataContainer, NBC_TRIG> tgcCoinDataCollections{};
-
-        /// Handle for the xAOD container
-        SG::WriteHandle<xAOD::TgcStripContainer> m_xaodHandle{};
 
         const MuonGM::MuonDetectorManager* muDetMgr{nullptr};
 
@@ -451,24 +441,18 @@ class TgcRdoToPrepDataToolMT
         this, "outputCoinKey", {}};
     // Write handle keys for PrepDataContainers, need 4, for current, previous,
     // next and all BC
-    SG::WriteHandleKeyArray<Muon::TgcPrepDataContainer> m_outputprepdataKeys{
-        this, "prepDataKeys", {}};
+    SG::WriteHandleKey<Muon::TgcPrepDataContainer> m_prdWriteKey{
+        this, "prepDataKey",  "TGC_MeasurementsAllBCs"};
 
-    SG::WriteHandleKey<xAOD::TgcStripContainer> m_xAODKey{
-        this, "xAODKey", "",
-        "If empty, do not produce xAOD, otherwise this is the key of the "
-        "output xAOD MDT PRD container"};
 
     /// Keys for the PRD cache containers, 4 needed for different BC
-    TgcPrdUpdateHandles m_prdContainerCacheKeys{this, "UpdateKeysPrd", {}};
+    SG::UpdateHandleKey<TgcPrepDataCollection_Cache> m_prdContainerCacheKey{this, "UpdateKeyPrd", "", "Optional external cache for the sTGC PRD container"};
     /// Keys for the Coin cache containers, 3 needed for different BC
     TgcCoinUpdateHandles m_coinContainerCacheKeys{this, "UpdateKeysCoin", {}};
 
     // TgcPrepRawData container cache key prefix (code automatically creates
     // three keys with from this string if it is non-empty)
-    Gaudi::Property<std::string> m_prdContainerCacheKeyStr{
-        this, "PrdCacheString", "",
-        "Prefix for names of PRD cache collections"};
+
     // TgcCoinData container cache key prefix (code automatically creates three
     // keys with from this string if it is non-empty)
     Gaudi::Property<std::string> m_coinContainerCacheKeyStr{

@@ -186,7 +186,7 @@ def TgcRDODecodeCfg(flags, name="MuonTgcRdoToPrdConv", RDOContainer = None,  **k
  
     else:
         if not flags.Trigger.doHLT:
-           tool_args.setdefault("PrdCacheString", "")
+           tool_args.setdefault("UpdateKeyPrd", "")
            tool_args.setdefault("CoinCacheString", "")
 
         if RDOContainer: 
@@ -383,7 +383,7 @@ def MuonPRD_MultiTruthMakerCfg(flags, name="MuonPRD_MultiTruthMaker", **kwargs):
     if not flags.Detector.GeometrysTGC: kwargs.setdefault("sTgcPrdKey", "")
     if not flags.Detector.GeometryMM: kwargs.setdefault("MmPrdKey", "")
 
-    kwargs.setdefault("TgcPrdKey", 'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
+    kwargs.setdefault("TgcPrdKey", 'TGC_MeasurementsAllBCs')
     result.addEventAlgo(CompFactory.MuonPRD_MultiTruthMaker(name, **kwargs), primary = True)
     return result
 

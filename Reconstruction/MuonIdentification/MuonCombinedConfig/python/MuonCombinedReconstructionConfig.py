@@ -56,7 +56,7 @@ def MuonInsideOutRecoAlgCfg(flags, name="MuonInsideOutRecoAlg", **kwargs):
     kwargs.setdefault("TagMap", "muGirlTagMap")
     kwargs.setdefault("SegmentCollection", "MuGirlSegments")
     kwargs.setdefault("TGCPrepDataLocation",
-                      'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
+                      'TGC_MeasurementsAllBCs')
     kwargs.setdefault("InDetCandidateLocation",
                       "InDetCandidates" if not flags.MuonCombined.doCombinedFit else "InDetCandidatesSystemExtened")
 
@@ -85,10 +85,7 @@ def MuGirlStauAlgCfg(flags, name="MuGirlStauAlg", **kwargs):
     kwargs.setdefault("HasCSC", flags.Detector.GeometryCSC)
     kwargs.setdefault("HasSTgc", False)
     kwargs.setdefault("HasMM", False)
-    # kwargs.setdefault("TGCPrepDataLocation",
-    #                   'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
-    # This is probably wrong, but matches old-config. #FIXME
-    kwargs.setdefault("TGCPrepDataLocation", 'TGC_Measurements')
+    kwargs.setdefault("TGCPrepDataLocation", 'TGC_MeasurementsAllBCs')
     kwargs.setdefault("CombinedTrackCollection", "MuGirlStauCombinedTracks")
     kwargs.setdefault("METrackCollection", "")
     kwargs.setdefault("SegmentCollection", "TrkStauSegments")
@@ -809,7 +806,6 @@ if __name__ == "__main__":
     from MuonConfig.MuonConfigUtils import configureCondTag
     configureCondTag(flags)
    
-    flags.Muon.useTGCPriorNextBC = False
     # This fails due to "Hough data per sector vector not found"
     flags.MuonCombined.doMuGirlLowBeta = False
 
