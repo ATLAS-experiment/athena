@@ -9,27 +9,25 @@
 #define TRACKS_LOADER_H
 
 // local includes
-#include "FlavorTagInference/FlipTagEnums.h"
+
 
 #include "FlavorTagInference/ConstituentsLoader.h"
-#include "FlavorTagInference/DataPrepUtilities.h"
-#include "FlavorTagInference/BTagTrackIpAccessor.h"
 #include "FlavorTagInference/CustomGetterUtils.h"
 
 // EDM includes
 #include "xAODJet/Jet.h"
 
 // external libraries
-#include "lwtnn/lightweight_network_config.hh"
+//#include "lwtnn/lightweight_network_config.hh"
 
 // STL includes
 #include <memory>
 #include <string>
 #include <vector>
+#include <map>
+#include <set>
+#include <tuple>
 #include <functional>
-#include <exception>
-#include <type_traits>
-#include <regex>
 
 namespace FlavorTagInference {
     using Tracks = std::vector<const xAOD::TrackParticle*>;

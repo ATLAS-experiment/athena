@@ -27,11 +27,7 @@ namespace FlavorTagInference {
         m_jet_output_names.push_back(output_name);
 
         // Graph config: identity normalisation (offset=0, scale=1)
-        SaltModelGraphConfig::Input inp;
-        inp.name = input_name;
-        inp.offset = 0.0;
-        inp.scale = 1.0;
-        input_node.variables.push_back(inp);
+        input_node.variables.emplace_back(input_name,0.0,1.0);
 
         // Output config: scalar float (rank 0)
         m_output_config.emplace_back(
@@ -75,11 +71,7 @@ namespace FlavorTagInference {
           cn.var_types.push_back(var_type);
 
           // Graph config: identity normalisation
-          SaltModelGraphConfig::Input inp;
-          inp.name = input_name;
-          inp.offset = 0.0;
-          inp.scale = 1.0;
-          seq_node.variables.push_back(inp);
+          seq_node.variables.emplace_back(input_name, 0.0, 1.0);
 
           // Output config: vector type based on JSON "type"/"cast" fields
           if (cast == "fp16") {

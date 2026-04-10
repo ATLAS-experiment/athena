@@ -1,21 +1,21 @@
 /*
-Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 # pragma once
 
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
 #include <nlohmann/json.hpp>
+
+#include <string>
+#include <map>
+#include <vector>
 
 namespace FlavorTagInference {
     namespace SaltModelGraphConfig {
         struct Input
         {
             std::string name;
-            double offset;
-            double scale;
+            double offset{};
+            double scale{1.0};
         };
 
         struct InputNodeConfig
@@ -29,7 +29,7 @@ namespace FlavorTagInference {
         struct OutputNodeConfig
         {
             std::vector<std::string> labels;
-            std::size_t node_index;
+            std::size_t node_index{};
         };
 
         struct GraphConfig
