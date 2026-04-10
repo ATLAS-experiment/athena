@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // NAME:     LArCellMonAlg.cxx
@@ -457,7 +457,11 @@ StatusCode LArCellMonAlg::fillHistograms(const EventContext& ctx) const{
   bool ifPass = true;
   bool passBeamBackgroundRemoval = true;
   ATH_CHECK(checkFilters(ifPass,passBeamBackgroundRemoval,m_MonGroupName,ctx)); //Check ATLAS-Ready, beam-background, etc from base class
-  if(!ifPass) return StatusCode::SUCCESS;
+  //Continue if 'ifpass' set but also if we identified a background event (for the control plot)
+  if(!ifPass and not passBeamBackgroundRemoval==false) {
+    ATH_MSG_DEBUG("Event rejected by filters");
+    return StatusCode::SUCCESS;
+  }
 
   std::vector<threshold_t> thresholds = m_thresholds;
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloMonAlgBase.h" 
@@ -146,7 +146,7 @@ StatusCode CaloMonAlgBase::checkFilters(bool &ifPass, bool &passBeamBackgroundRe
     if(ifPass) {evtbin=5; fill(MonGroupName,evtbin);}  //All events with ATLAS Ready and Good LB and Good LAr collision time and not Beam Background
   
   }
-  ATH_MSG_DEBUG("CaloMonAlgBase::checkFilters() m_useBeamBackgroundRemoval  done");
+  ATH_MSG_DEBUG("CaloMonAlgBase::checkFilters() m_useBeamBackgroundRemoval done");
 
   std::string TheTrigger;
   if ( m_vTrigChainNames.empty()) {  
@@ -167,7 +167,7 @@ StatusCode CaloMonAlgBase::checkFilters(bool &ifPass, bool &passBeamBackgroundRe
     if(ifPass) {evtbin=7; fill(MonGroupName,evtbin);} //All events with ATLAS Ready and Good LB and Good LAr collision time and not Beam Background and Trigger Filter pass and no Lar Error
   }
 
-  ATH_MSG_DEBUG("CaloMonAlgBase::checkFilters() is done");
+  ATH_MSG_DEBUG("CaloMonAlgBase::checkFilters() is done with pass=" << ifPass);
   return StatusCode::SUCCESS;
 }
 
