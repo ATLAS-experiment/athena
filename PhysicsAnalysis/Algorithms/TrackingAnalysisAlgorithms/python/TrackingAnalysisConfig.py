@@ -82,63 +82,16 @@ class InDetTrackCalibrationConfig (ConfigBlock):
                              applyD0Bias        :   bool=True,
                              applyZ0Bias        :   bool=False,
                              applyQoverPBias    :   bool=False) :
+        from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import (
+            InDetTrackBiasingCalibKwargs,
+        )
         toolName = "biasingTool"
         config.addPrivateTool(toolName, "InDet::InDetTrackBiasingTool")
 
-        # Configure calibration files and run number ranges per MC campaign.
-        # Each calibration file corresponds to events with runNumberBounds[i] < runNumber <= runNumberBounds[i+1];
-        # the tool matches the event run number against these ranges at runtime.
-        if config.geometry() is LHCPeriod.Run2:
-            if config.campaign() is Campaign.MC20a:
-                # 2015 + 2016 recommendations (MC20a)
-                alg.biasingTool.calibFiles = [
-                    "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/REL22_REPRO_2015.root",
-                    "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/REL22_REPRO_2016_1stPart.root",
-                    "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/REL22_REPRO_2016_2ndPart.root",
-                ]
-                alg.biasingTool.runNumberBounds = [0, 296938, 301912, 999999]
-            elif config.campaign() is Campaign.MC20d:
-                # 2017 recommendations (MC20d)
-                alg.biasingTool.calibFiles = [
-                    "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/REL22_REPRO_2017_1stPart.root",
-                    "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/REL22_REPRO_2017_2ndPart.root",
-                ]
-                alg.biasingTool.runNumberBounds = [0, 334842, 999999]
-            elif config.campaign() is Campaign.MC20e:
-                # 2018 recommendations (MC20e)
-                alg.biasingTool.calibFiles = [
-                    "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/REL22_REPRO_2018_1stPart.root",
-                    "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/REL22_REPRO_2018_2ndPart.root",
-                ]
-                alg.biasingTool.runNumberBounds = [0, 353000, 999999]
-            else:
-                raise ValueError ('No biasing recommendations found for campaign \"'
-                                  + config.campaign().value + '\" in Run 2. '
-                                  'Please check the configuration.')
-        elif config.geometry() is LHCPeriod.Run3:
-            if config.campaign() is Campaign.MC23a:
-                # 2022 recommendations (MC23a)
-                alg.biasingTool.calibFiles = [
-                    "InDetTrackSystematicsTools/CalibData_25.2_2025-v00/2022_d0z0qoverp_biasing_factor.root",
-                ]
-            elif config.campaign() is Campaign.MC23d:
-                # 2023 recommendations (MC23d)
-                alg.biasingTool.calibFiles = [
-                    "InDetTrackSystematicsTools/CalibData_25.2_2025-v00/2023_d0z0qoverp_biasing_factor.root",
-                ]
-            elif config.campaign() is Campaign.MC23e:
-                # 2024 recommendations (MC23e)
-                alg.biasingTool.calibFiles = [
-                    "InDetTrackSystematicsTools/CalibData_25.2_2025-v00/2024_d0z0qoverp_biasing_factor.root",
-                ]
-            else:
-                raise ValueError ('No biasing recommendations found for campaign \"'
-                                  + config.campaign().value + '\" in Run 3. '
-                                  'Please check the configuration.')
-        else:
-            raise ValueError ('No biasing recommendations found for geometry \"'
-                              + config.geometry().value + '\". Please check '
-                              'the configuration.')
+        calib = InDetTrackBiasingCalibKwargs(config.flags)
+        alg.biasingTool.calibFiles = calib['calibFiles']
+        if 'runNumberBounds' in calib:
+            alg.biasingTool.runNumberBounds = calib['runNumberBounds']
 
         if biasD0:
             alg.biasingTool.biasD0 = biasD0
