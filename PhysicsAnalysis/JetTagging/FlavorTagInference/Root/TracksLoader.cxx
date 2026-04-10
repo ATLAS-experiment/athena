@@ -2,10 +2,14 @@
 Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "FlavorTagInference/FlipTagEnums.h"
 #include "FlavorTagInference/TracksLoader.h"
+#include "FlavorTagInference/FlipTagEnums.h"
+#include "FlavorTagInference/BTagTrackIpAccessor.h"
 #include "FlavorTagInference/StringUtils.h"
 #include "xAODTracking/TrackParticleContainer.h"
+
+#include <stdexcept>
+#include <cmath>
 
 namespace FlavorTagInference {
     // factory for functions which return the sort variable we
