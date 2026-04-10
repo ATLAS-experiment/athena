@@ -5,7 +5,8 @@
     <class name="xAOD::PixelClusterContainer_v1"
            id="DE61015F-C762-47D6-BFC5-A64344734DE4" />
     <typedef name="xAOD::PixelCluster" />
-    <typedef name="xAOD::PixelClusterContainer" />
+    <typedef name="xAOD::PixelClusterContainerAlt"
+             id="9B8E6CFC-4620-4974-9B52-93005151F3FE"/>
 
     <class name="xAOD::PixelClusterAuxContainer_v1"
            id="AC1AEA8C-20D8-4206-B785-0B4538EFF66B" />
