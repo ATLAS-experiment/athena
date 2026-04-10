@@ -18,7 +18,6 @@ StatusCode TauPi0CreateROI::initialize() {
     ATH_CHECK( m_caloMgrKey.initialize() );
     ATH_CHECK( m_removedClusterInputContainer.initialize(SG::AllowEmpty) );
     ATH_MSG_INFO("Find Pi0 in context: " << (inEleRM() ? "`EleRM`" : "`Standard`") << ", with Electron cell removal Flag: " << m_removeElectronCells);
-    ATH_CHECK(m_caloWeightTool.retrieve()); 
 
     return StatusCode::SUCCESS;
 }
@@ -83,7 +82,7 @@ StatusCode TauPi0CreateROI::executePi0CreateROI(xAOD::TauJet& tau, CaloConstCell
     }
 
     if (sampling == CaloCell_ID::EMB1 || sampling == CaloCell_ID::EME1) {
-      if (cell->pt() * m_caloWeightTool->wtCell(cell) >= m_energyThreshold) {
+      if (cell->pt() > 0) {
          shotCells.push_back(cell);
       }
     }
