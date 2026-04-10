@@ -10,9 +10,9 @@ cd $testname
 rm -f *.txt *.xml
 
 echo "::: generate merged.root..."
-athena.py \
-    -c 'EVTMAX=30; BRANCHES=["RunNumber", "EventNumber", "el_n", "el_eta","el_phi"]; OUTBRANCHES=["el_n",]; FNAMES=["shape1/f1.root","shape2/f2.root","shape3/f3.root"]' \
-    AthenaRootComps/test_athena_variable_shape_ntuple.py \
+test_athena_variable_shape_ntuple.py \
+    --evtMax 30 --branches "RunNumber,EventNumber,el_n,el_eta,el_phi" --outbranches "el_n" \
+    --filesInput="shape1/f1.root,shape2/f2.root,shape3/f3.root" \
     >| log.004.txt 2>| log.004.stderr.txt \
     || exit 1
 /bin/mv d3pd.root f4.root || exit 1
