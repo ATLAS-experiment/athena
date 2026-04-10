@@ -89,6 +89,9 @@ namespace MuonValR4{
         cfg.calcAlongStrip = true;
         SeedingAux pullCalculator{cfg, makeActsAthenaLogger(this, "PullCalculator")};
 
+        cfg.calcAlongStrip = false;
+        SeedingAux pullCalculatorChi2{cfg, makeActsAthenaLogger(this, "PullcalculatorXAOD")};
+
         SeedingAux::Line_t line{};
         SeedingAux::ChiSqWithDerivatives chiSqObj{};
 
@@ -183,10 +186,11 @@ namespace MuonValR4{
                     drawBoundParameters(*gctx, *extpPars, visualHelper,
                                         Acts::ViewConfig{.color = {0, 0, 220}}, 6._cm); 
                 }
+                chiSqObj.reset();
 
                 pullCalculator.updateSpatialResidual(line, *meas);
-                chiSqObj.reset();
-                pullCalculator.updateChiSq(chiSqObj, meas->covariance());
+                pullCalculatorChi2.updateSpatialResidual(line, *meas);
+                pullCalculatorChi2.updateChiSq(chiSqObj, meas->covariance());
 
                 const double segChi2 = chiSqObj.chi2;
                 const double fastChi2Term = SeedingAux::chi2Term(line, *meas);
@@ -238,17 +242,18 @@ namespace MuonValR4{
                 
                     const double matChi2 = surfRes.dot(covMat.inverse() * surfRes);
                 
-                    ATH_MSG_DEBUG("Analyze plane residual residual for "<<m_idHelperSvc->toString(sp->identify())
-                    <<" / "<<targetSurf.geometryId()
-                    <<"\n --- measurement: "<<Amg::toString(mPos)
-                    <<", extrapolated: "<<Amg::toString(lPos)
-                    <<" --> residual: "<<Amg::toString(surfRes)
-                    <<", projected: "<<Amg::toString(stereoTrf*surfRes)
-                    <<", chi2: "<<matChi2
-                    <<"\n --- line fitter - projected: "
-                    <<Amg::toString(pullCalculator.residual()) 
-                    <<", cartesian: "<<Amg::toString(lineRes)<<", chi2: "
-                    <<segChi2);
+                    ATH_MSG_DEBUG("Analyze plane residual residual for "
+                        <<m_idHelperSvc->toString(sp->identify())
+                        <<" / "<<targetSurf.geometryId()
+                        <<"\n --- measurement: "<<Amg::toString(mPos)
+                        <<", extrapolated: "<<Amg::toString(lPos)
+                        <<" --> residual: "<<Amg::toString(surfRes)
+                        <<", projected: "<<Amg::toString(stereoTrf*surfRes)
+                        <<", chi2: "<<matChi2
+                        <<"\n --- line fitter - projected: "
+                        <<Amg::toString(pullCalculator.residual()) 
+                        <<", cartesian: "<<Amg::toString(lineRes)<<", chi2: "
+                        <<segChi2);
 
                     const Amg::Vector2D dRes = (surfRes - lineRes);
                     if (dRes.mag() > 0.1_mm) {
@@ -264,9 +269,6 @@ namespace MuonValR4{
                         retCode = StatusCode::FAILURE;
                     }
 
-                    if (meas->dimension() != 2) {
-                        continue;
-                    }
                     /// Ensure that the fast chi2 term and the segment chi2 term
                     /// match with each other
                     if (Acts::abs(segChi2 - fastChi2Term) > 1.e-3) {
@@ -274,22 +276,52 @@ namespace MuonValR4{
                             <<(*meas)<<" - full: "<<segChi2<<", fast: "<<fastChi2Term);
                         retCode = StatusCode::FAILURE;
                     }
-                    const auto [xPos, xCov] = xAOD::positionAndCovariance(sp->primaryMeasurement(),
-                                                                          sp->secondaryMeasurement());
-                                                        
-                    if ((xPos - mPos).mag() > 1.e-3) {
-                        ATH_MSG_ERROR("The calibrated position from the xAOD util function"<<
-                                      " does not match the expectation from this test. xAOD: "
-                            <<Amg::toString(xPos)<<", test: "<<Amg::toString(mPos)
-                            <<", combined: "<<(sp->primaryMeasurement() != sp->secondaryMeasurement())
-                        );
-                        retCode = StatusCode::FAILURE;
-                    }
-                    if (!xCov.isApprox(covMat, 1.e-3)) {
-                        ATH_MSG_ERROR("The calibrated covariance from the xAOD util function"<<
-                                      " does not match the expectation from this test. xAOD:\n"
-                            <<Amg::toString(xCov)<<",\ntest:\n"<<Amg::toString(covMat));
-                        retCode = StatusCode::FAILURE;
+                    if (sp->dimension() == 2) {
+                        const auto [xPos, xCov] = xAOD::positionAndCovariance(sp->primaryMeasurement(),
+                                                                              sp->secondaryMeasurement());
+
+                        if ((xPos - mPos).mag() > 1.e-3) {
+                            ATH_MSG_ERROR("The calibrated position from the xAOD util function "<<
+                                          " does not match the expectation from this test. xAOD: "
+                                <<Amg::toString(xPos)<<", test: "<<Amg::toString(mPos));
+                            retCode = StatusCode::FAILURE;
+                        }
+                        if (!xCov.isApprox(covMat, 1.e-3)) {
+                            ATH_MSG_ERROR("The calibrated covariance from the xAOD util function "<<
+                                          " does not match the expectation from this test. xAOD:\n"
+                                <<Amg::toString(xCov)<<",\ntest:\n"<<Amg::toString(covMat));
+                            retCode = StatusCode::FAILURE;
+                        }
+                    } else {
+                        chiSqObj.reset();
+                        pullCalculatorChi2.updateSpatialResidual(line, *sp);
+                        pullCalculatorChi2.updateChiSq(chiSqObj, sp->covariance());
+
+                        const auto [xPos, xCov] = xAOD::positionAndCovariance(sp->primaryMeasurement());
+
+                        const double refPos = (toSurf * sp->localPosition())[sp->measuresPhi()];
+                        const double refCov = sp->covariance()[!sp->measuresPhi()];
+                        if ( std::abs(xPos -refPos) > 1.e-3) {
+                            ATH_MSG_ERROR("The calibrated position from the xAOD util function "<<
+                                          " does not match the expectation from this test. xAOD: "
+                                         <<xPos<<", test: "<<refPos);
+                            retCode = StatusCode::FAILURE;
+                        }
+                        if (std::abs(refCov - xCov) > 1.e-3) {
+                            ATH_MSG_ERROR("The calibrated covariance from the xAOD util function "<<
+                                          " does not match the expectation from this test. xAOD: "
+                                <<xCov<<", test: "<<refCov);
+                            retCode = StatusCode::FAILURE;                            
+                        }
+                        const double xAODRes = refPos - lPos[sp->measuresPhi()];
+                        const double xAODChi2 = Acts::square(xAODRes) / xCov;
+
+                        if (std::abs(xAODChi2 - chiSqObj.chi2) > 1.e-3) {
+                            ATH_MSG_ERROR("The calculated chi2 term from the xAOD util function: "
+                                        <<xAODChi2<<" deviates from the line fitter chi2: "
+                                     <<chiSqObj.chi2);
+                            retCode = StatusCode::FAILURE;
+                        }
 
                     }
                 } else if (targetSurf.type() == Acts::Surface::SurfaceType::Straw) {

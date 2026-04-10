@@ -182,7 +182,32 @@ namespace xAOD{
         return positionAndCovariance(combinedPrd->primaryStrip(), 
                                      combinedPrd->secondaryStrip());
     }
-        
+    
+    std::pair<double, double> positionAndCovariance(const UncalibratedMeasurement* oneDimMeas) {
+        double pos{0.}, cov{0.};
+        /// These conditions should be trivially fullfilled but it's worth
+        /// to keep a check for the debug builds
+        assert(oneDimMeas != nullptr);
+        assert(oneDimMeas->numDimensions() == 1);
+        switch (oneDimMeas->type()) {
+            using enum UncalibMeasType;
+            case MMClusterType:
+            case sTgcStripType:
+            case TgcStripType:
+            case RpcStripType: {
+                pos = oneDimMeas->localPosition<1>()[0];
+                cov = oneDimMeas->localCovariance<1>()[0];
+                break;
+            } case MdtDriftCircleType: {
+                const auto* dc = static_cast<const xAOD::MdtDriftCircle*>(oneDimMeas);
+                pos = dc->driftRadius();
+                cov = dc->driftRadiusCov();
+                break;
+            } default:
+                THROW_EXCEPTION("Unsupported measurement");
+        }
+        return std::make_pair(pos, cov);
+    }
 
     std::pair<Amg::Vector2D, AmgSymMatrix(2)> 
         positionAndCovariance(const UncalibratedMeasurement* etaStrip,
