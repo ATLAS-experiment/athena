@@ -10,7 +10,7 @@ ATLAS_PROJECT_DIR=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
 ATLAS_EXT_PROJECT_NAME="AthAnalysisExternals"
 ATLAS_BUILDTYPE="Release"
 ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=109
-                        -DLCG_VERSION_POSTFIX="a_ATLAS_1"
+                        -DLCG_VERSION_POSTFIX="a_ATLAS_3"
                         -DATLAS_ONNXRUNTIME_USE_CUDA=FALSE
                         -DATLAS_GAUDI_SOURCE="URL;https://gitlab.cern.ch/atlas/Gaudi/-/archive/v40r3.001/Gaudi-v40r3.001.tar.gz;URL_MD5;86b44fe14086e2fa67b25a797c6bb165")
 ATLAS_EXTRA_MAKE_ARGS=()
