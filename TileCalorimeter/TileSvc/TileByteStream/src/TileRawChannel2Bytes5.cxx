@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileByteStream/TileRawChannel2Bytes5.h" 
@@ -165,18 +165,18 @@ uint32_t _ssub(int32_t a, int32_t b) {
 }
 
 uint32_t _deal(uint32_t u) {
-  uint32_t u1, u0, k, k1, k0;
-  u1 = 0; u0 = 0;
-  k = 1; k0 = 1; k1 = 1 << 16;
+  uint32_t lo = 0;
+  uint32_t hi = 0;
 
-  for (int i = 0; i < 16; ++i, (k1 <<= 1), (k <<= 1)) {
-    if (u & k) u0 |= k0;
-    k0 = k0 << 1;
-    k  = k  << 1;
-
-    if (u & k) u1 |= k1;
+  for (unsigned i = 0; i < 16; ++i) {
+    if (u & (uint32_t{1} << (2 * i))) {
+      lo |= uint32_t{1} << i;
+    }
+    if (u & (uint32_t{1} << (2 * i + 1))) {
+      hi |= uint32_t{1} << (16 + i);
+    }
   }
-  return u1 | u0;
+  return lo | hi;
 }
 
 /// Intrinsic functions which do not work correctly
