@@ -1,93 +1,46 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT2CaloCommon/LArRodIdHash.h" 
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/IToolSvc.h"
-#include <iostream>
 
 #include "eformat/SourceIdentifier.h"
-
 #include "LArIdentifier/LArReadoutModuleService.h"
 
-using eformat::helper::SourceIdentifier; 
+#include <stdexcept>
 
-// This class converts a LArReadoutModuleID into an integer, 
-// 
+using eformat::helper::SourceIdentifier;
 
 
 void LArRodIdHash::initialize( int offset, const std::vector<HWIdentifier>& roms )  {
 
-// 
-
-  m_offset = offset; 
+  m_offset = offset;
 
   LArReadoutModuleService larROMService;
-   eformat::SubDetector detid ;
-   std::vector<ID>  rmod;
-   std::vector<HWIdentifier>::const_iterator tit =  roms.begin(); 
-   std::vector<HWIdentifier>::const_iterator tit_end =  roms.end(); 
- 
-   for(; tit!=tit_end; ++tit)
-     { 
-      
-       HWIdentifier mId = (*tit); 
-       detid = (eformat::SubDetector) larROMService.subDet(mId); 
-       uint8_t m = larROMService.rodFragId(mId); 
- 
-       SourceIdentifier sid = SourceIdentifier(detid,m); 
-       uint32_t rod_id =  sid.code(); 
-       rmod.push_back(rod_id);
-       
-     }
+  std::vector<ID> rmod;
+  rmod.reserve(roms.size());
 
-  std::vector<ID>::const_iterator 
-    it = rmod.begin(); 
-  std::vector<ID>::const_iterator 
-    it_end = rmod.end() ; 
+  for(const HWIdentifier& mId : roms) {
+    SourceIdentifier sid{static_cast<eformat::SubDetector>(larROMService.subDet(mId)),
+                         static_cast<uint8_t>(larROMService.rodFragId(mId))};
+    const uint32_t rod_id = sid.code();
+    rmod.push_back(rod_id);
+  }
 
-  int n = 0; 
-  for (; it!=it_end;++it) {
-    ID id = *it; 
-    // std::cout << " LArReadoutModuleID = "<<id.id()<<std::endl;
-    unsigned int i = id; 
-    m_lookup[i] = n ; 
-    m_int2id.push_back(id); 
-    ++n; 
-  } 
-
-  // cout << " Number of LArReadoutModuleID valid ID  "<< n <<endl; 
-  m_size = n; 
-
+  size_t n = 0;
+  for (ID id : rmod) {
+    m_lookup[id] = n;
+    m_int2id.push_back(id);
+    ++n;
+  }
 }
 
-LArRodIdHash::ID LArRodIdHash::identifier(int index) const {
 
-  return m_int2id[index] ; 
+size_t LArRodIdHash::operator() (ID id) const {
 
-}
+  const auto it = m_lookup.find(id);
+  if(it!=m_lookup.end()) return it->second;
 
-int LArRodIdHash::operator() (const ID& id) const {
-
-  unsigned int i = id  ; 
-  std::map<unsigned int, int> ::const_iterator it= m_lookup.find(i); 
-  if(it!=m_lookup.end()) return (*it).second; 
-  std::cout <<" ERROR in LArRodIdHash :  invalid Rod number"
-	    <<std::endl;
-  return -1; 
+  throw std::out_of_range("LArRodIdHash: invalid Rod number" + std::to_string(id));
 
 }
-
-int LArRodIdHash::max() const {
-
-return m_size; 
-
-}
-
-int LArRodIdHash::offset() const {
-
-return m_offset; 
-
-}
-
