@@ -127,7 +127,8 @@ m_hashSym.resize(onlineId->febHashMax());
                 bool good(true);
 		if (! bc.good() ){
 		   // cell has some specific problems
-		   if ( bc.unstable() ) good=false;
+		   if ( bc.deadReadout() ) good=false;
+		   if ( bc.deadPhys()    ) good=false;
 		   if ( bc.highNoiseHG() ) good=false;
 		   if ( bc.highNoiseMG() ) good=false;
 		   if ( bc.highNoiseLG() ) good=false;
