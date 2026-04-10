@@ -128,10 +128,93 @@ def InDetTrackSmearingToolCfg(flags, name="InDetTrackSmearingTool", **kwargs):
         CompFactory.InDet.InDetTrackSmearingTool(name, **kwargs))
     return acc
 
-def InDetTrackBiasingToolCfg(flags, name="InDetTrackBiasingTool", **kwargs):
+def InDetTrackBiasingCalibKwargs(flags):
+    """Return calibFiles/runNumberBounds kwargs for InDetTrackBiasingTool.
+
+    Selects campaign-specific calibration files and (for multi-period
+    campaigns) run-number boundaries.  Raises ValueError for unknown
+    campaigns or geometries.
+    """
+    from AthenaConfiguration.Enums import LHCPeriod
+    c2 = "InDetTrackSystematicsTools/CalibData_22.0_2022-v00"
+    c3 = "InDetTrackSystematicsTools/CalibData_25.2_2025-v00"
+    if flags.GeoModel.Run is LHCPeriod.Run2:
+        if flags.Input.MCCampaign is Campaign.MC20a:
+            # 2015 + 2016 recommendations (MC20a)
+            return {
+                "calibFiles": [
+                    f"{c2}/REL22_REPRO_2015.root",
+                    f"{c2}/REL22_REPRO_2016_1stPart.root",
+                    f"{c2}/REL22_REPRO_2016_2ndPart.root",
+                ],
+                "runNumberBounds": [0, 296938, 301912, 999999],
+            }
+        elif flags.Input.MCCampaign is Campaign.MC20d:
+            # 2017 recommendations (MC20d)
+            return {
+                "calibFiles": [
+                    f"{c2}/REL22_REPRO_2017_1stPart.root",
+                    f"{c2}/REL22_REPRO_2017_2ndPart.root",
+                ],
+                "runNumberBounds": [0, 334842, 999999],
+            }
+        elif flags.Input.MCCampaign is Campaign.MC20e:
+            # 2018 recommendations (MC20e)
+            return {
+                "calibFiles": [
+                    f"{c2}/REL22_REPRO_2018_1stPart.root",
+                    f"{c2}/REL22_REPRO_2018_2ndPart.root",
+                ],
+                "runNumberBounds": [0, 353000, 999999],
+            }
+        else:
+            raise ValueError(
+                'No biasing recommendations found for campaign "'
+                + flags.Input.MCCampaign.value
+                + '" in Run 2. Please check the configuration.'
+            )
+    elif flags.GeoModel.Run is LHCPeriod.Run3:
+        if flags.Input.MCCampaign is Campaign.MC23a:
+            # 2022 recommendations (MC23a)
+            return {
+                "calibFiles": [
+                    f"{c3}/2022_d0z0qoverp_biasing_factor.root",
+                ]
+            }
+        elif flags.Input.MCCampaign is Campaign.MC23d:
+            # 2023 recommendations (MC23d)
+            return {
+                "calibFiles": [
+                    f"{c3}/2023_d0z0qoverp_biasing_factor.root",
+                ]
+            }
+        elif flags.Input.MCCampaign is Campaign.MC23e:
+            # 2024 recommendations (MC23e)
+            return {
+                "calibFiles": [
+                    f"{c3}/2024_d0z0qoverp_biasing_factor.root",
+                ]
+            }
+        else:
+            raise ValueError(
+                'No biasing recommendations found for campaign "'
+                + flags.Input.MCCampaign.value
+                + '" in Run 3. Please check the configuration.'
+            )
+    else:
+        raise ValueError(
+            'No biasing recommendations found for geometry "'
+            + flags.GeoModel.Run.value
+            + '". Please check the configuration.'
+        )
+
+
+def InDetTrackBiasingToolCfg(flags, name="InDetTrackBiasingTool",
+                              **kwargs):
     acc = ComponentAccumulator()
     kwargs.setdefault("isMC", flags.Input.isMC)
-
+    if "calibFiles" not in kwargs:
+        kwargs.update(InDetTrackBiasingCalibKwargs(flags))
     acc.setPrivateTools(
         CompFactory.InDet.InDetTrackBiasingTool(name, **kwargs))
     return acc
