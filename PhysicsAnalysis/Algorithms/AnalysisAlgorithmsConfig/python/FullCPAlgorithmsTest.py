@@ -129,10 +129,13 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
         jetCollection='AntiKt4EMPFlowJets')
     configSeq.setOptionValue ('.runJvtUpdate', False )
     configSeq.setOptionValue ('.runNNJvtUpdate', True )
+    configSeq.setOptionValue ('.runJvtSelection', False )  # deprecated, done via JVTWorkingPoint block now
     configSeq.setOptionValue ('.recalibratePhyslite', False)
 
-    configSeq += config.makeConfig( 'Jets.JVT' )
-    configSeq.setOptionValue ('.containerName', 'AnaJets')
+    configSeq += config.makeConfig('Jets.JVTWorkingPoint')
+    configSeq.setOptionValue ('.containerName' ,'AnaJets')
+    configSeq.setOptionValue ('.selectionName', 'baselineJvt')
+    configSeq.setOptionValue ('.jvtWP', 'FixedEffPt')
 
     configSeq += config.makeConfig( 'Jets.FTagTriggerMatching' )
     configSeq.setOptionValue('.containerName', 'AnaJets')

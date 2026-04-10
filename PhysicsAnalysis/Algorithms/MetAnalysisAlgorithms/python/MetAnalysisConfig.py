@@ -18,6 +18,8 @@ class MetAnalysisConfig (ConfigBlock):
             info="whether to use the JVT decision in the MET calculation.")
         self.addOption ('useFJVT', False, type=bool,
             info="whether to use the forward JVT decision in the MET calculation.")
+        self.addOption ('selectionNameFJVT', "", type=str,
+            info="name of the forward JVT selection to be used if `useFJVT` is activated.")
         self.addOption ('treatPUJets', False, type=bool,
             info="whether to treat pile-up jets in the MET significance calculation.")
         self.addOption ('setMuonJetEMScale', True, type=bool,
@@ -110,7 +112,13 @@ class MetAnalysisConfig (ConfigBlock):
             alg.makerTool.JvtSelTool.JetContainer = config.readName (self.jets)
             alg.makerTool.JvtSelTool.JvtMomentName = "NNJvt"
         if self.useFJVT:
-            alg.makerTool.JetRejectionDec = 'fjvt_selection'
+            # for backwards compatibility with "old" FJVT handling in JetAnalysisConfig.py
+            if not self.selectionNameFJVT:
+                alg.makerTool.JetRejectionDec = 'fjvt_selection'
+            # otherwise get the decoration from the selection
+            else:
+                fjvt_decoration = config.getFullSelection(self.jets, self.selectionNameFJVT, skipBase=True).replace(",as_char", "")
+                alg.makerTool.JetRejectionDec = fjvt_decoration
 
         alg.makerTool.JetSelection = self.metWP
         alg.makerTool.DoPFlow = 'PFlow' in metSuffix or metSuffix=="AnalysisMET"

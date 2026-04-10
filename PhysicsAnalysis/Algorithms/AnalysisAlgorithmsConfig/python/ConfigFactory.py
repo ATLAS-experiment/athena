@@ -251,6 +251,12 @@ class ConfigFactory():
         # jets
         from JetAnalysisAlgorithms.JetAnalysisConfig import makeJetAnalysisConfig
         self.addAlgConfigBlock(algName="Jets", alg=makeJetAnalysisConfig)
+        from JetAnalysisAlgorithms.JetAnalysisConfig import JvtWorkingPoint
+        self.addAlgConfigBlock(algName="JVTWorkingPoint", alg=JvtWorkingPoint,
+            superBlocks="Jets")
+        from JetAnalysisAlgorithms.JetAnalysisConfig import FJvtWorkingPoint
+        self.addAlgConfigBlock(algName="FJVTWorkingPoint", alg=FJvtWorkingPoint,
+            superBlocks="Jets")
         from JetAnalysisAlgorithms.JetJvtAnalysisConfig import JetJvtAnalysisConfig
         self.addAlgConfigBlock(algName="JVT", alg=JetJvtAnalysisConfig,
             superBlocks="Jets")
@@ -264,7 +270,7 @@ class ConfigFactory():
         self.addAlgConfigBlock(algName="FlavourTagging", alg=FTagConfig,
             defaults={'selectionName': ''},
             superBlocks="Jets")
-        from JetAnalysisAlgorithms.JetUncertaintiesConfig import JetUncertaintiesConfig 
+        from JetAnalysisAlgorithms.JetUncertaintiesConfig import JetUncertaintiesConfig
         self.addAlgConfigBlock(algName="Uncertainties", alg=JetUncertaintiesConfig,
             superBlocks="Jets")
         from FTagAnalysisAlgorithms.XbbAnalysisConfig import XbbConfig

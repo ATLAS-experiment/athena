@@ -11,7 +11,11 @@ Jets:
   jetCollection: AntiKt4EMPFlowJets
   runJvtUpdate: False
   runNNJvtUpdate: True
+  runJvtSelection: False # deprecated, done via JVTWorkingPoint block now
   recalibratePhyslite: False
+  JVTWorkingPoint:
+    - selectionName: baselineJvt
+      jvtWP: FixedEffPt
   FlavourTagging:
   - selectionName: ftag
     btagger: GN2v01
@@ -20,7 +24,6 @@ Jets:
   FlavourTaggingEventSF:
   - containerName: AnaJets.baselineJvt
     btagger: GN2v01
-  JVT: {}
 - containerName: AnaLargeRJets
   jetCollection: AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets
   recalibratePhyslite: False

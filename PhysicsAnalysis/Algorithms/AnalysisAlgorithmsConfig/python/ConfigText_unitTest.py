@@ -72,7 +72,13 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (jetCollection='AntiKt4EMPFlowJets')
     config.setOptions (runJvtUpdate=False)
     config.setOptions (runNNJvtUpdate=True)
+    config.setOptions (runJvtSelection=False)  # deprecated, done via JVTWorkingPoint block now
     config.setOptions (recalibratePhyslite=False)
+    # Jets.JVTWorkingPoint
+    config.addBlock('Jets.JVTWorkingPoint')
+    config.setOptions (containerName='AnaJets')
+    config.setOptions (selectionName='baselineJvt')
+    config.setOptions (jvtWP='FixedEffPt')
     # Jets.FlavourTagging
     config.addBlock( 'Jets.FlavourTagging')
     config.setOptions (containerName='AnaJets')
@@ -80,8 +86,6 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (btagger='GN2v01')
     config.setOptions (btagWP='FixedCutBEff_65')
     config.setOptions (saveScores='All')
-    # Jets.JVT
-    config.addBlock('Jets.JVT', containerName='AnaJets')
     # FTagJetTriggerMatching
     bjetTriggerChainsPerYear = {
         2022: ['HLT_2j45_0eta290_020jvt_bdl1d60_2j45_pf_ftf_presel2j25XX2j25b85_L14J15p0ETA25'],

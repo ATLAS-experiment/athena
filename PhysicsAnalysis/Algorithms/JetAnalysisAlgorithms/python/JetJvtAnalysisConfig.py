@@ -4,7 +4,7 @@
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
-
+from AthenaCommon.Logging import logging
 
 class JetJvtAnalysisConfig (ConfigBlock) :
     """the ConfigBlock for the JVT sequence"""
@@ -29,6 +29,9 @@ class JetJvtAnalysisConfig (ConfigBlock) :
         return self.containerName + self.postfix
 
     def makeAlgs (self, config) :
+
+        log = logging.getLogger('JetJvtAnalysisConfig')
+        log.warning("The JVT block is deprecated and its functionality has been moved to the (F)JVTWorkingPoint blocks.")
 
         if config.dataType() is DataType.Data: return
 
