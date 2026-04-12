@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonIdHelpers/MuonIdHelperSvc.h"
@@ -11,19 +11,27 @@
 
 namespace Muon {
     using namespace MuonStationIndex;
-
-    MuonIdHelperSvc::MuonIdHelperSvc(const std::string& name, ISvcLocator* svc) :
-        base_class(name, svc) {}
-
+  
     StatusCode MuonIdHelperSvc::initialize() {
         ATH_CHECK(m_detStore.retrieve());
-        if (m_hasMDT) ATH_CHECK(m_detStore->retrieve(m_mdtIdHelper));
-        if (m_hasRPC) ATH_CHECK(m_detStore->retrieve(m_rpcIdHelper));
-        if (m_hasTGC) ATH_CHECK(m_detStore->retrieve(m_tgcIdHelper));
-        if (m_hasCSC) ATH_CHECK(m_detStore->retrieve(m_cscIdHelper));       
-        if (m_hasSTGC) ATH_CHECK(m_detStore->retrieve(m_stgcIdHelper));
-        if (m_hasMM) ATH_CHECK(m_detStore->retrieve(m_mmIdHelper));
-       
+        if (m_hasMDT){ 
+            ATH_CHECK(m_detStore->retrieve(m_mdtIdHelper));
+        }
+        if (m_hasRPC){ 
+            ATH_CHECK(m_detStore->retrieve(m_rpcIdHelper));
+        }
+        if (m_hasTGC){ 
+            ATH_CHECK(m_detStore->retrieve(m_tgcIdHelper));
+        }
+        if (m_hasCSC){ 
+            ATH_CHECK(m_detStore->retrieve(m_cscIdHelper));
+        }
+        if (m_hasSTGC) {
+            ATH_CHECK(m_detStore->retrieve(m_stgcIdHelper));
+        }
+        if (m_hasMM) {
+            ATH_CHECK(m_detStore->retrieve(m_mmIdHelper));
+        }
         /// Find an id helper that is not a nullptr
         using AllHelperArray = std::array<const MuonIdHelper*, 6>; 
         const AllHelperArray allHelpers{m_mdtIdHelper, m_rpcIdHelper, m_tgcIdHelper,

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONIDHELPERSVC_H
@@ -11,6 +11,7 @@
 
 #include <unordered_set>
 #include <array>
+#include <cassert>
 namespace Muon {
     /**
        @brief Helper service that creates muon Identifiers and can be used to print Identifiers
@@ -19,7 +20,7 @@ namespace Muon {
     class MuonIdHelperSvc : public extends<AthService, IMuonIdHelperSvc> {
     public:
         /** @brief default AlgService constructor */
-        MuonIdHelperSvc(const std::string& name, ISvcLocator* svc);
+        using base_class::base_class;
 
         /** @brief destructor */
         virtual ~MuonIdHelperSvc() override = default;
@@ -105,22 +106,40 @@ namespace Muon {
         virtual Identifier layerId(const Identifier& id) const override;
 
         /** @brief access to MdtIdHelper */
-        virtual const MdtIdHelper& mdtIdHelper() const override { return *m_mdtIdHelper; }
+        virtual const MdtIdHelper& mdtIdHelper() const override { 
+            assert(m_mdtIdHelper != nullptr);
+            return *m_mdtIdHelper; 
+        }
 
         /** @brief access to RpcIdHelper */
-        virtual const RpcIdHelper& rpcIdHelper() const override { return *m_rpcIdHelper; }
+        virtual const RpcIdHelper& rpcIdHelper() const override { 
+            assert(m_rpcIdHelper != nullptr);
+            return *m_rpcIdHelper; 
+        }
 
         /** @brief access to TgcIdHelper */
-        virtual const TgcIdHelper& tgcIdHelper() const override { return *m_tgcIdHelper; }
+        virtual const TgcIdHelper& tgcIdHelper() const override { 
+            assert(m_tgcIdHelper != nullptr);
+            return *m_tgcIdHelper; 
+        }
 
         /** @brief access to CscIdHelper */
-        virtual const CscIdHelper& cscIdHelper() const override { return *m_cscIdHelper; }
+        virtual const CscIdHelper& cscIdHelper() const override { 
+            assert(m_cscIdHelper != nullptr);
+            return *m_cscIdHelper; 
+        }
 
         /** @brief access to TgcIdHelper */
-        virtual const sTgcIdHelper& stgcIdHelper() const override { return *m_stgcIdHelper; }
+        virtual const sTgcIdHelper& stgcIdHelper() const override { 
+            assert(m_stgcIdHelper != nullptr);
+            return *m_stgcIdHelper; 
+        }
 
         /** @brief access to CscIdHelper */
-        virtual const MmIdHelper& mmIdHelper() const override { return *m_mmIdHelper; }
+        virtual const MmIdHelper& mmIdHelper() const override { 
+            assert(m_mmIdHelper != nullptr);
+            return *m_mmIdHelper; 
+        }
 
         /** @brief calculate chamber index from Identifier */
         virtual MuonStationIndex::ChIndex chamberIndex(const Identifier& id) const override;
