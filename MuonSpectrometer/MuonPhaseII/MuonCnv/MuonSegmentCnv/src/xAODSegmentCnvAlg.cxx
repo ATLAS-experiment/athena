@@ -94,9 +94,9 @@ namespace MuonR4{
                 const Identifier id1{xAOD::identify(m1)}, id2{xAOD::identify(m2)};
                 ATH_MSG_VERBOSE("Combine "<<m_idHelperSvc->toString(id1)
                                 <<" & "<<m_idHelperSvc->toString(id2));
-                const sTgcIdHelper& sIdHelper{m_idHelperSvc->stgcIdHelper()};
                 if ((m1->type() != xAOD::UncalibMeasType::sTgcStripType || 
-                     sIdHelper.channelType(id1) == sIdHelper.channelType(id2))&&
+                     m_idHelperSvc->stgcIdHelper().channelType(id1) == 
+                     m_idHelperSvc->stgcIdHelper().channelType(id2))&&
                     m_idHelperSvc->measuresPhi(id1) == m_idHelperSvc->measuresPhi(id2)) {
                     THROW_EXCEPTION("Cannot combine "<<m_idHelperSvc->toString(id1)
                                 <<" & "<<m_idHelperSvc->toString(id2));
