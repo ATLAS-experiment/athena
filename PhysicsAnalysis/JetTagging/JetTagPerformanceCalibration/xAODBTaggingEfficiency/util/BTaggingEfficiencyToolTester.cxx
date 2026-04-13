@@ -14,12 +14,19 @@
 #include "xAODRootAccess/Init.h"
 #include "xAODRootAccess/TEvent.h"
 using TEVENT = xAOD::TEvent;
+
+// For setting formatting of ANA_MSG_INFO etc 
+#include "AsgMessaging/MessagePrinter.h"
+#include "AsgMessaging/MessagePrinterOverlay.h"
 #else
 // Those lines are only included if using AthAnalysis
 #include "POOLRootAccess/TEvent.h"
 using TEVENT = POOL::TEvent;
+// For setting formatting of ANA_MSG_INFO etc 
+#include "GaudiKernel/IMessageSvc.h"
 #endif
 
+#include "TTree.h"
 #include <string>
 #include <iomanip>
 
@@ -44,9 +51,37 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
   POOL::Init();
   #endif
 
+  // Adopt same print formatting for AnalysisBase and AthAnalysis/Athena 
+  // Do not remove those lines as otherwise 
+  // the formatting of printed messages with ANA_MSG_INFO etc 
+  // is not the same 
+  #ifdef XAOD_STANDALONE
+  // Those lines are only included if using AnalysisBase
+
+  // See MsgStream::doOutput function and MessagePrinterOverlay class 
+  // https://gitlab.cern.ch/atlas/athena/-/blob/main/Control/AthToolSupport/AsgMessaging/Root/MsgStream.cxx
+  // https://gitlab.cern.ch/atlas/athena/-/blob/main/Control/AthToolSupport/AsgMessaging/AsgMessaging/MessagePrinterOverlay.h
+  // https://gitlab.cern.ch/atlas/athena/-/blob/main/Control/AthToolSupport/AsgMessaging/Root/MessagePrinterOverlay.cxx
+  asg::MessagePrinter *msgPrinter = new asg::MessagePrinter(25);
+  asg::MessagePrinterOverlay msgPrinterOverlay(msgPrinter);
+  
+  #else 
+  // Retrieve/Initialize message service 
+  IMessageSvc* msgSvc = Athena::getMessageSvc();
+  if (msgSvc) {
+    IProperty* msgSvcProp = dynamic_cast<IProperty*>(msgSvc);
+    if (msgSvcProp) {
+      // See MsgStream::doOutput function and Message class 
+      // https://gitlab.cern.ch/atlas/Gaudi/-/blob/master/GaudiKernel/src/Lib/MsgStream.cpp
+      // https://gitlab.cern.ch/atlas/Gaudi/-/blob/master/GaudiKernel/include/GaudiKernel/Message.h
+      msgSvcProp->setProperty("Format", "% F%25W%S%0W%L%T    %0W%M").ignore(); 
+    }
+  }
+  #endif
+
   const char* TEST_NAME = argv[0];
   if (argc < 5) {
-    ANA_MSG_ERROR ( "No right inputs received!" );
+    ANA_MSG_ERROR ( "Incorrect inputs received!" );
     ANA_MSG_ERROR ( "Usage: " << TEST_NAME << "[DAOD] [CDI path] [b-tagger name] [WP name]" );
     return 1;
   }
@@ -56,9 +91,37 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
   std::string taggerName = argv[3];
   std::string workingPointName = argv[4];
   std::string JetCollectionName = "AntiKt4EMPFlowJets";
-  // select your efficiency map based on the DSID of your sample:
-  unsigned int sample_dsid = 601229;
 
+  std::unique_ptr<TFile> root_file {TFile::Open(DAODpath.c_str(), "READ")};
+  if (!root_file || root_file->IsZombie()) {
+    ANA_MSG_ERROR("Failed to open input file: " << DAODpath);
+    return 1;
+  }
+  
+  //Importing MetaData to access DSID and get the correct SF
+  TTree* metaTree = nullptr;
+  root_file->GetObject("MetaData", metaTree);
+  if (!metaTree) {
+    ANA_MSG_ERROR("Could not find TTree 'MetaData' in file: " << DAODpath);
+    return 1;
+  }
+ 
+  if (!metaTree->GetBranch("FileMetaDataAuxDyn.mcProcID")) {
+    ANA_MSG_ERROR("Branch 'mcProcID' not found in MetaData tree.");
+    return 1;
+  }
+  
+  Float_t mcProcID = 0.0f;
+  metaTree->SetBranchAddress("FileMetaDataAuxDyn.mcProcID", &mcProcID);
+
+  if (metaTree->GetEntries() <= 0) {
+    ANA_MSG_ERROR("MetaData tree has no entries.");
+    return 1;
+  }
+  metaTree->GetEntry(0);
+  
+  unsigned int sample_dsid = static_cast<unsigned int>(mcProcID);
+  ANA_MSG_INFO("Read sample DSID (mcProcID) = " << sample_dsid);
 
   asg::StandaloneToolHandle<IBTaggingEfficiencyTool> tool("BTaggingEfficiencyTool/BTagEffTest");
   StatusCode code1 = tool.setProperty("ScaleFactorFileName", CDIPath);
@@ -79,7 +142,6 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
 
   TEVENT event(TEVENT::kClassAccess);
   gErrorIgnoreLevel = kError;
-  std::unique_ptr<TFile> root_file {TFile::Open(DAODpath.c_str(), "READ")};
   if(!event.readFrom(root_file.get()).isSuccess()) {
     ANA_MSG_ERROR ( "Accessing events in input file " << DAODpath.c_str() << "failed! " );
     return 1;
@@ -88,17 +150,17 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
     for(long long int i = 0; i < imax; i++){
       ANA_MSG_DEBUG("Successfully opened file "<<DAODpath.c_str());
 
-        event.getEntry(i);
+      event.getEntry(i);
       ANA_MSG_INFO("\n--- Reading Event: "<<i<<" ---");
 
-        // retrieve the "real jets" of the jet collection in question
+      // retrieve the "real jets" of the jet collection in question
       const xAOD::JetContainer* jets = nullptr;
       if (!event.retrieve(jets, JetCollectionName).isSuccess()){
         ANA_MSG_ERROR ( "Retrieving jet collection " << JetCollectionName << " failed! " );
         return 1;
       }
 
-          int jet_index = 0;
+      int jet_index = 0;
       for(const xAOD::Jet* jet : *jets){
         // skip jet as any lower than this and you start seeing failed SF/Eff retrieval
         if(jet->pt() < 20000 or std::abs(jet->eta()) > 2.4) continue;
