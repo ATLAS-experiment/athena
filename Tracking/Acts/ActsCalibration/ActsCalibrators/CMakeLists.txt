@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ActsCalibrators )
@@ -17,4 +17,4 @@ atlas_add_library( ActsCalibratorsLib
 atlas_add_test ( MeasurementCalibratorBaseTest
                  SOURCES test/MeasurementCalibratorBaseTest.cxx
                 LINK_LIBRARIES Acts::Core ActsEventLib ActsCalibratorsLib ActsGeometryInterfacesLib
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
