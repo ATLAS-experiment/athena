@@ -80,8 +80,11 @@ namespace MuonR4{
             BooleanProperty m_seedFromMdt {this, "SeedFromMdt", false, "Activate the seeding from MDT hits"};
             /** @brief Maximum number of attempts to build a pattern from hits already used in existing patterns */
             UnsignedIntegerProperty m_maxSeedAttempts {this, "MaxSeedAttempts", 2, " Maximum number of attempts to build a pattern from hits already used in existing patterns"};
+            
             /** @brief Pointer to the actual global pattern finder */
             std::unique_ptr<FastReco::GlobalPatternFinder> m_globPatFinder{};
+
+            /** -------------------------- Configuration options for segment fitter ------------------------- */
             
     };
 }

@@ -13,6 +13,7 @@
 #include "xAODMuon/MuonSegmentContainer.h"
 #include <xAODTruth/TruthParticle.h>
 #include <xAODMuonSimHit/MuonSimHit.h>
+#include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 
 // muon includes
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
@@ -30,30 +31,19 @@ namespace MuonValR4{
     virtual StatusCode finalize() override;
 
   private:
-    enum class eHitType : std::uint8_t {
-        ePrec = 0,
-        eTriggerEta = 1,
-        ePhi = 2,
-        nTypes = 3
-    };
-    using HitCounts = std::array<unsigned int, Acts::toUnderlying(eHitType::nTypes)>;
-    struct PatternHitCount {
-        HitCounts hitCounts{};
-        HitCounts trueHitCounts{};
-        HitCounts pileupHitCounts{};
-        HitCounts allHitCounts{};
-    };
     using simHitSet = std::unordered_set<const xAOD::MuonSimHit*>;
     using TruthParticleMap = std::map<const xAOD::TruthParticle*, std::vector<simHitSet>>;
     /** @brief Fill the truth particle map
      *  @param truthSegments: Pointer to the truth segments
+     *  @param roiCollection: Pointer to the RoI collection, needed to match truth particles to RoIs in seeded reco
      *  @return Map of truth particle hits */
-    TruthParticleMap fillTruthMap(const xAOD::MuonSegmentContainer* truthSegments) const;
+    TruthParticleMap fillTruthMap(const xAOD::MuonSegmentContainer* truthSegments,
+                                  const TrigRoiDescriptorCollection* roiCollection) const;
     /** @brief Fill the space point information into the tree
      *  @param spc: Pointer to the space point container
      *  @param patternCont: Pointer to the global pattern container, needed to match spacepoints to patterns
      *  @param truthHits: Map of truth particle hits
-     *  @param spTester: Space point braches
+     *  @param spTester: Space point branches
      *  @param spTypeBranch: Branch for space point types
      *  @param spMatchedToPatternBranch: Branch for space point matches to patterns
      *  @param spMatchedToTruthBranch: Branch for space point matches to truth */
@@ -71,11 +61,31 @@ namespace MuonValR4{
     void fillGlobPatternInfo(const MuonR4::GlobalPatternContainer* patternCont,
                              const TruthParticleMap& truthHits,
                              const std::vector<const MuonR4::SpacePointContainer*>& spContainers);
-    /** @brief Fill the truth particleinformation into the tree
+    /** @brief Fill the truth particle information into the tree
     *  @param truthHits: Map of truth particle hits
     *  @param truthSegments: Truth segments needed for truth hit counts */
     void fillTruthInfo(const TruthParticleMap& truthHits,
                        const xAOD::MuonSegmentContainer* truthSegments);
+    /** @brief Fill the RoI information into the tree
+    *  @param roiCollection: Pointer to the RoI collection */
+    void fillRoIInfo(const TrigRoiDescriptorCollection* roiCollection);
+
+    /** @brief Enum for different types of pattern hit content branches */
+    enum class ePatBranchType : std::uint8_t {
+        eReco = 0,    // Counts of pattern hits
+        eTruth = 1,   // Counts of pattern hits matched to truth
+        ePileup = 3,  // Counts of pattern hits matched to pileup truth
+        eAll = 2,     // Counts of all hits in the buckets crossed by the pattern
+        eAllTruth = 4 // Counts of all truth hits in the buckets crossed by the pattern
+    };
+    /** @brief Update the hit counts for a given pattern branch type
+     *  @param type: The pattern branch type
+     *  @param sp: Pointer to the space point
+     *  @param patIdx: Index of the pattern */
+    void updatePatHitInfo (ePatBranchType type, 
+                           const std::size_t patIdx,
+                           const Muon::MuonStationIndex::StIndex hitSt,
+                           const MuonR4::SpacePoint* sp);
                          
     // // output tree 
     MuonVal::MuonTesterTree m_tree{"MuonFastRecoTest","FastRecoTester"}; 
@@ -87,14 +97,20 @@ namespace MuonValR4{
     // Global patterns
     SG::ReadHandleKey<MuonR4::GlobalPatternContainer> m_patternKey{this, "PatternKey", "R4MuonGlobalPatterns", "global pattern container"};
     
+    // Truth segments
     SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_truthSegmentKey {this, "TruthSegmentKey","MuonTruthSegments", "truth segment container"};
+
+    // HLT seeding RoIs
+    SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiCollectionKey{this, "MuRoIs", "EFMuMSReco_RoI", "Name of the input data from HLTSeeding"};
     
     SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
     
-    Gaudi::Property<bool> m_isMC{this, "isMC", false, "Toggle whether the job is ran on MC or not"};
+    BooleanProperty m_isMC{this, "isMC", false, "Toggle whether the job is ran on MC or not"};
 
-    Gaudi::Property<bool> m_writeSpacePoints{this, "writeSpacePoints", false,
+    BooleanProperty m_isSeededReco{this, "isSeededReco", false, "Toggle whether the job is ran on seeded reconstruction or not"};
+
+    BooleanProperty m_writeSpacePoints{this, "writeSpacePoints", false,
                                              "Toggle whether the particular space poitns shall be written"};
                                             
   /// ====== Spacepoint block  =========== 
@@ -119,11 +135,11 @@ namespace MuonValR4{
     MuonVal::VectorBranch<float>& m_gen_Pt{m_tree.newVector<float>("gen_Pt",-10.)}; 
 
     /// @brief Number of trigger eta measurements per station
-    MuonVal::MatrixBranch<unsigned char>& m_gen_nNonPrecSpacePointsPerStation{m_tree.newMatrix<unsigned char>("gen_NNonPrecMeasPerStation")};
+    MuonVal::MatrixBranch<unsigned char>& m_gen_nNonPrecMeas{m_tree.newMatrix<unsigned char>("gen_NNonPrecMeas", 0)};
     /// @brief Number of precision measurements per station
-    MuonVal::MatrixBranch<unsigned char>& m_gen_nPrecSpacePointsPerStation{m_tree.newMatrix<unsigned char>("gen_NPrecMeasPerStation")};
+    MuonVal::MatrixBranch<unsigned char>& m_gen_nPrecMeas{m_tree.newMatrix<unsigned char>("gen_NPrecMeas", 0)};
     /// @brief Number of phi measurements per station
-    MuonVal::MatrixBranch<unsigned char>& m_gen_nPhiSpacePointsPerStation{m_tree.newMatrix<unsigned char>("gen_NPhiMeasPerStation")};
+    MuonVal::MatrixBranch<unsigned char>& m_gen_nPhiMeas{m_tree.newMatrix<unsigned char>("gen_NPhiMeas", 0)};
 
     
   /// ====== Global Pattern block  =========== 
@@ -135,47 +151,63 @@ namespace MuonValR4{
     /// pattern primary & secondary sectors (different if the pattern is in the sector overlap)  
     MuonVal::VectorBranch<uint16_t>& m_pat_sector1{m_tree.newVector<uint16_t>("pat_Sector1", 0)};
     MuonVal::VectorBranch<uint16_t>& m_pat_sector2{m_tree.newVector<uint16_t>("pat_Sector2", 0)};
-    /// pattern residual
-    MuonVal::VectorBranch<float>& m_pat_residual{m_tree.newVector<float>("pat_Residual", 0.0)};
-    /// pattern normalized residual
-    MuonVal::VectorBranch<float>& m_pat_normalizedResidual{m_tree.newVector<float>("pat_NormalizedResidual", 0.0)};
+    /// mean square normalized pattern residual
+    MuonVal::VectorBranch<float>& m_pat_meanNormResidual2{m_tree.newVector<float>("pat_meanNormResidual2", 0.0)};
     /// +1 for A-, -1 of C-side 
     MuonVal::VectorBranch<short>& m_pat_side{m_tree.newVector<short>("pat_Side", 0)};
     /// Number of stations
     MuonVal::VectorBranch<unsigned char>& m_pat_nStations{m_tree.newVector<unsigned char>("pat_NStations", 0)};    
 
-    /// @brief Number of trigger eta space points in the pattern
-    MuonVal::VectorBranch<unsigned char>& m_pat_nNonPrecSpacePoints{m_tree.newVector<unsigned char>("pat_NNonPrecMeas",0)};
-    /// @brief Number of precision measurements in the pattern
-    MuonVal::VectorBranch<unsigned char>& m_pat_nPrecSpacePoints{m_tree.newVector<unsigned char>("pat_NPrecMeas",0)};
-    /// @brief Number of phi measurements in the pattern
-    MuonVal::VectorBranch<unsigned char>& m_pat_nPhiSpacePoints{m_tree.newVector<unsigned char>("pat_NPhiMeas",0)};
+    /// @brief Number of trigger eta measurements per station
+    MuonVal::MatrixBranch<unsigned char>& m_pat_nNonPrecMeas{m_tree.newMatrix<unsigned char>("pat_NNonPrecMeas", 0)};
+    /// @brief Number of precision measurements per station
+    MuonVal::MatrixBranch<unsigned char>& m_pat_nPrecMeas{m_tree.newMatrix<unsigned char>("pat_NPrecMeas", 0)};
+    /// @brief Number of phi measurements per station
+    MuonVal::MatrixBranch<unsigned char>& m_pat_nPhiMeas{m_tree.newMatrix<unsigned char>("pat_NPhiMeas", 0)};
     
-    /// @brief Number of truth trigger eta space points in the pattern
-    MuonVal::VectorBranch<unsigned char>& m_pat_nTrueNonPrecSpacePoints{m_tree.newVector<unsigned char>("pat_NTrueNonPrecMeas",0)};
-    /// @brief Number of truth precision space points in the pattern
-    MuonVal::VectorBranch<unsigned char>& m_pat_nTruePrecSpacePoints{m_tree.newVector<unsigned char>("pat_NTruePrecMeas",0)};
-    /// @brief Number of truth phi space points in the pattern
-    MuonVal::VectorBranch<unsigned char>& m_pat_nTruePhiSpacePoints{m_tree.newVector<unsigned char>("pat_NTruePhiMeas",0)};
+    /// @brief Number of truth trigger eta measurements per station
+    MuonVal::MatrixBranch<unsigned char>& m_pat_nTruthNonPrecMeas{m_tree.newMatrix<unsigned char>("pat_NTruthNonPrecMeas", 0)};
+    /// @brief Number of truth precision measurements per station
+    MuonVal::MatrixBranch<unsigned char>& m_pat_nTruthPrecMeas{m_tree.newMatrix<unsigned char>("pat_NTruthPrecMeas", 0)};
+    /// @brief Number of truth phi measurements per station
+    MuonVal::MatrixBranch<unsigned char>& m_pat_nTruthPhiMeas{m_tree.newMatrix<unsigned char>("pat_NTruthPhiMeas", 0)};
 
-    /// @brief Number of pileup trigger eta space points in the pattern
-    MuonVal::VectorBranch<unsigned char>& m_pat_nPileupNonPrecSpacePoints{m_tree.newVector<unsigned char>("pat_NPileupNonPrecMeas",0)};
-    /// @brief Number of pileup precision space points in the pattern
-    MuonVal::VectorBranch<unsigned char>& m_pat_nPileupPrecSpacePoints{m_tree.newVector<unsigned char>("pat_NPileupPrecMeas",0)};
-    /// @brief Number of pileup phi space points in the pattern
-    MuonVal::VectorBranch<unsigned char>& m_pat_nPileupPhiSpacePoints{m_tree.newVector<unsigned char>("pat_NPileupPhiMeas",0)};
+    /// @brief Number of pileup trigger eta measurements per station
+    MuonVal::MatrixBranch<unsigned char>& m_pat_nPileupNonPrecMeas{m_tree.newMatrix<unsigned char>("pat_NPileupNonPrecMeas", 0)};
+    /// @brief Number of pileup precision measurements per station
+    MuonVal::MatrixBranch<unsigned char>& m_pat_nPileupPrecMeas{m_tree.newMatrix<unsigned char>("pat_NPileupPrecMeas", 0)};
+    /// @brief Number of pileup phi measurements per station
+    MuonVal::MatrixBranch<unsigned char>& m_pat_nPileupPhiMeas{m_tree.newMatrix<unsigned char>("pat_NPileupPhiMeas", 0)};
 
-    /// @brief Number of trigger eta space points in the buckets crossed by the pattern
-    MuonVal::VectorBranch<unsigned char>& m_pat_nAllNonPrecSpacePoints{m_tree.newVector<unsigned char>("pat_NAllNonPrecMeas",0)};
-    /// @brief Number of precision space points in the buckets crossed by the pattern
-    MuonVal::VectorBranch<unsigned char>& m_pat_nAllPrecSpacePoints{m_tree.newVector<unsigned char>("pat_NAllPrecMeas",0)};
-    /// @brief Number of phi space points in the buckets crossed by the pattern
-    MuonVal::VectorBranch<unsigned char>& m_pat_nAllPhiSpacePoints{m_tree.newVector<unsigned char>("pat_NAllPhiMeas",0)};
+    /// @brief Number of trigger eta measurements in the buckets crossed by the pattern, grouped by station
+    MuonVal::MatrixBranch<unsigned char>& m_pat_nAllNonPrecMeas{m_tree.newMatrix<unsigned char>("pat_NAllNonPrecMeas", 0)};
+    /// @brief Number of precision measurements in the buckets crossed by the pattern, grouped by station
+    MuonVal::MatrixBranch<unsigned char>& m_pat_nAllPrecMeas{m_tree.newMatrix<unsigned char>("pat_NAllPrecMeas", 0)};
+    /// @brief Number of phi measurements in the buckets crossed by the pattern, grouped by station
+    MuonVal::MatrixBranch<unsigned char>& m_pat_nAllPhiMeas{m_tree.newMatrix<unsigned char>("pat_NAllPhiMeas", 0)};
 
-    /// @brief Branch indicating which truth particles in the tree are associated to the i-th pattern
+    /// @brief Number of truth trigger eta measurements in the buckets crossed by the pattern, grouped by station
+    MuonVal::MatrixBranch<unsigned char>& m_pat_nAllTruthNonPrecMeas{m_tree.newMatrix<unsigned char>("pat_NAllTruthNonPrecMeas", 0)};
+    /// @brief Number of truth precision measurements in the buckets crossed by the pattern, grouped by station
+    MuonVal::MatrixBranch<unsigned char>& m_pat_nAllTruthPrecMeas{m_tree.newMatrix<unsigned char>("pat_NAllTruthPrecMeas", 0)};
+    /// @brief Number of truth phi measurements in the buckets crossed by the pattern, grouped by station
+    MuonVal::MatrixBranch<unsigned char>& m_pat_nAllTruthPhiMeas{m_tree.newMatrix<unsigned char>("pat_NAllTruthPhiMeas", 0)};
+
+    /// @brief Branch indicating which truth particles in the tree are associated to the i-th pattern. We can have in principle
+    /// multiple truth particles associated to the same pattern or patterns matched to both a signal and a pileup muon. Since the
+    /// pattern can be matched to pile-up particles as well, in this case the tpIdx has been chosen to be the size of truth particle 
+    /// map, so it is bigger than any index of a signal truth particle in the tree.
     MuonVal::MatrixBranch<unsigned char>& m_pat_MatchedToTruth{m_tree.newMatrix<unsigned char>("pat_truthMatched")};
-    /// number of matched truth particles 
+    /// number of matched truth particles (no Pileup truth particles)
     MuonVal::VectorBranch<unsigned char> & m_pat_nTruthparticles{m_tree.newVector<unsigned char>("pat_NTruthParticles", 0)};
+
+  /// ====== RoI info  =========== 
+    MuonVal::VectorBranch<float>& m_roi_EtaMin{m_tree.newVector<float>("roi_EtaMin",-10.)};
+    MuonVal::VectorBranch<float>& m_roi_EtaMax{m_tree.newVector<float>("roi_EtaMax",-10.)};
+    MuonVal::VectorBranch<float>& m_roi_PhiMin{m_tree.newVector<float>("roi_PhiMin",-10.)};
+    MuonVal::VectorBranch<float>& m_roi_PhiMax{m_tree.newVector<float>("roi_PhiMax",-10.)};
+    MuonVal::VectorBranch<float>& m_roi_ZMin{m_tree.newVector<float>("roi_ZMin",-10.)}; 
+    MuonVal::VectorBranch<float>& m_roi_ZMax{m_tree.newVector<float>("roi_ZMax",-10.)}; 
 
   };
 }

@@ -80,14 +80,15 @@ StatusCode FastReconstructionAlg::execute(const EventContext& ctx) const {
                         << " SP Buckets into StoreGate with key "
                         << m_outSpacePoints.at(idx));
     }
-
-    /** Write out the global patterns */
+    /** Write out the global patterns. Make this optional in the future */
     SG::WriteHandle<GlobalPatternContainer> writeHandle{m_outPatterns, ctx};
     ATH_CHECK(writeHandle.record(std::make_unique<GlobalPatternContainer>()));
-    for (GlobalPattern& pat : patterns) {
-        writeHandle->push_back(std::make_unique<GlobalPattern>(std::move(pat)));
+    for (const GlobalPattern& pat : patterns) {
+        writeHandle->push_back(std::make_unique<GlobalPattern>(pat));
     }
     ATH_MSG_DEBUG("Written "<<writeHandle->size()<<" GlobalPatterns into StoreGate.");
+
+    /* Consume the patterns to build muon candidates. WORK IN PROGRESS */
     return StatusCode::SUCCESS;
 }
 

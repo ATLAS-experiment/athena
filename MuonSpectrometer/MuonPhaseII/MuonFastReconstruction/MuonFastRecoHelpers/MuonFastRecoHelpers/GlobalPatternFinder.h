@@ -1,8 +1,8 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef MUONR4_FASTRECONSTRUCTIONALGS_GLOBALHOUGHTRANSFORM__H
-#define MUONR4_FASTRECONSTRUCTIONALGS_GLOBALHOUGHTRANSFORM__H
+#ifndef MUONR4_FASTRECONSTRUCTIONALGS_GLOBALPATTERNFINDER__H
+#define MUONR4_FASTRECONSTRUCTIONALGS_GLOBALPATTERNFINDER__H
 
 #include "MuonFastRecoEvent/GlobalPattern.h"
 #include "MuonRecToolInterfacesR4/IFastRecoVisualizationTool.h"
@@ -22,9 +22,8 @@ namespace MuonR4::FastReco{
     /// of the Phase-2 fast reconstruction stage. It builds global patterns
     /// of precision and non-precision hits using space-points created in 
     /// upstream algorithms. It first builds patterns in eta and then adds
-    /// compatible phi-only hits to the patterns. It will optionally write
-    /// the final GlobalPatterns into the event store for downstream use. 
-
+    /// compatible phi-only hits to the patterns. The resulting patterns are
+    /// returned by the main method of the tool. 
 
     class GlobalPatternFinder : public AthMessaging {
         public:
@@ -94,6 +93,30 @@ namespace MuonR4::FastReco{
         private:
             /** @brief Hit information stored during pattern building */
             struct HitPayload{
+                /** @brief Full constructor for eta hits 
+                 *  @param hit: Pointer to the underlying hit
+                 *  @param bucket: Pointer to the parent bucket
+                 *  @param container: Pointer to the parent container
+                 *  @param station: Station index
+                 *  @param layerNum: Logical layer number in the sector frame
+                 *  @param R: Global R                    
+                 *  @param Z: Global Z
+                 *  @param phi: Global Phi */
+                HitPayload(const SpacePoint* hit, 
+                           const SpacePointBucket* bucket,
+                           const SpacePointContainer* container,
+                           StIndex station,
+                           unsigned layerNum,
+                           double R, 
+                           double Z,
+                           double phi);
+                /** @brief Compact constructor for phi-only hits 
+                 *  @param hit: Pointer to the underlying hit
+                 *  @param station: Station index
+                 *  @param phi: Global Phi */
+                HitPayload(const SpacePoint* hit, 
+                           StIndex station, 
+                           double phi);
                 /** @brief Pointer to the underlying hit */
                 const SpacePoint* hit{nullptr};
                 /** @brief Pointer to the parent bucket */
@@ -103,13 +126,13 @@ namespace MuonR4::FastReco{
                 /** @brief Station index */
                 StIndex station{};
                 /** @brief Logical layer number in the sector frame */
-                unsigned layerNum{};
+                unsigned layerNum{0u};
                 /** @brief Global R */
-                double R{};
+                double R{0.};
                 /** @brief Global Z */
-                double Z{};
+                double Z{0.};
                 /** @brief Global Phi */
-                double phi{};
+                double phi{0.};
                 /** @brief Equal operator: it compares the underlying hit */
                 bool operator==(const HitPayload& other) const;
             };
@@ -158,8 +181,10 @@ namespace MuonR4::FastReco{
                  *  @param hit: hit to be checked
                  *  @return: boolean indicating if the hit is in the pattern */
                 bool isInPattern(const HitPayload& hit) const;
-                /** @brief Finalize the pattern and update its state */
-                void finalizePattern();
+                /** @brief Finalize the pattern building in eta and update its state */
+                void finalizePatternEta();
+                /** @brief Finalize the pattern building in phi and update its state */
+                void finalizePatternPhi();
                 /** @brief Equal operator, it checks the hit-per-station map. It'svery expensive and in principle should be avoided */
                 bool operator==(const PatternState& other) const;
                 /** @brief Map collection of hits per station. A pattern is determined by the hits belonging to it. */
@@ -169,21 +194,23 @@ namespace MuonR4::FastReco{
                 std::vector<StIndex> stations{};
                 /** @brief Map of spacepoint buckets per spacepoint container associated to the pattern */
                 BucketPerContainer bucketsPerContainer{};
-                /** @brief **expanded** sector coordinate & average theta & average phi of the pattern */
+                /** @brief **expanded** sector coordinate & the two corresponding physical sectors */
                 int sectorCoord{-1};
+                int sector1{0};
+                int sector2{0};
+                /** @brief Average theta & average phi of the pattern */
                 double theta{0.};
                 double phi{0.};
-                /** Counts of precision measurements / non-precision in bending direction / phi measurements  */
+                /** @brief Counts of precision measurements / non-precision in bending direction / phi measurements  */
                 unsigned nPrecisionHits{0};
                 unsigned nBendingTriggerHits{0};
                 unsigned nPhiHits{0};
-                /** Total residual and last contribution to the residual (needed when replacing a hit) */
-                double totalResidual{0.};
+                /** @brief Mean over eta hits of the square of their residual divided by acceptance window */
+                double meanNormResidual2{0.};
+                /** @brief Residual & acceptance window of the last inserted hit (needed when replacing a hit) */
                 double lastResidual{0.};
-                /** Sum of residual divided by acceptance window and last contribution to the acceptance window (needed when replacing a hit) */
-                double totalRes2AcceptWindow{0.};
                 double lastAccepWindow{0.};
-                /** Flag to indicate if the pattern is overlapping with another one, used during overlap removal */
+                /** @brief Flag to indicate if the pattern is overlapping with another one, used during overlap removal */
                 bool isOverlap{false};
                 /** @brief Number of inserted hits during one of the two search stages (from seed outward and from seed inward) */
                 unsigned nInsertedHits{0};
@@ -201,7 +228,7 @@ namespace MuonR4::FastReco{
             using PatternStateVec = std::vector<PatternState>;
 
             
-            /** @brief Method to construct the search tree by filling it up with spacepoints from the given containers
+            /** @brief Method to construct the search tree by filling it up with spacepoints from the given containers. The tree does not contain only-phi hits.
              *  @param gctx: Geometry context
              *  @param spacepoints: Vector of space point containers
              *  @return: Constructed search tree */
@@ -209,7 +236,8 @@ namespace MuonR4::FastReco{
                                        const SpacePointContainerVec& spacepoints) const;
             /** @brief Method steering the building of patterns in eta
              *  @param orderedSpacepoints: Search tree with spacepoints ordered by their corresponding coordinates
-             *  @param visualInfo: Pointer to visual information for pattern visualization (nullptr if the VisualizationTool is disabled)
+             *  @param visualInfo: Pointer to visual information for pattern visualization (nullptr if the VisualizationTool is disabled).
+             *                     Needed to add visual info about pattern candidates discarded during the building stage.
              *  @return: resulting vector of PatternStates successfully built */
             PatternStateVec findPatternsInEta(const SearchTree_t& orderedSpacepoints,
                                               PatternHitVisualInfoVec* visualInfo = nullptr) const;
@@ -248,14 +276,6 @@ namespace MuonR4::FastReco{
             LineCompatibilityResult checkLineCompatibility(const HitPayload& seed,
                                                            const HitPayload& test,
                                                            const PatternState& pattern) const;                     
-            /** @brief Method to check the phi compatibility of a test hit with a given pattern
-             *  @param seed: seed hit information
-             *  @param test: test hit information 
-             *  @param pattern: pattern to be extended
-             *  @return: true if the test hit is phi compatible with the pattern, false otherwise */
-            bool isPhiCompatible(const HitPayload& test,
-                                 const HitPayload& seed, 
-                                 const PatternState& pattern) const;
             /** @brief Helper method to compute the line slope between the seed and the last hit in a given pattern in the R-Z plane
              *  @param lastPatHit: reference to the last hit in the pattern
              *  @param seed: seed hit information
@@ -294,6 +314,18 @@ namespace MuonR4::FastReco{
              *  @return: resolved patterns */
             PatternStateVec resolveOverlaps(PatternStateVec&& toResolve,
                                             PatternHitVisualInfoVec* visualInfo = nullptr) const;
+            /** @brief Method to add phi-only measurements to existing PatternStates
+             *  @param gctx: Geometry context
+             *  @param patterns: Vector of pattern states to which to add phi-only hits
+             *  @return: void */
+            void addPhiOnlyHits(const ActsTrk::GeometryContext& gctx,
+                                PatternStateVec& patterns) const;
+            /** @brief Method to check the phi compatibility of a test hit with a given pattern
+             *  @param testPhi: test global phi
+             *  @param pattern: pattern to be extended
+             *  @return: true if the test hit is phi compatible with the pattern, false otherwise */
+            bool isPhiCompatible(const double testPhi,
+                                 const PatternState& pattern) const;
             /** @brief Method to convert a PatternState into a GlobalPattern object
              *  @param candidate: PatternState to be converted
              *  @return: Converted GlobalPattern */

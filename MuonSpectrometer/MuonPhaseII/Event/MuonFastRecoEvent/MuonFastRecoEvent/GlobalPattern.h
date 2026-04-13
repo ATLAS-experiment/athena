@@ -37,10 +37,8 @@ class GlobalPattern {
     void setNEtaNonPrecisionHits(unsigned n) { m_nEtaNonPrecisionHits = n; }
     /// @brief Set the number of phi hits in the pattern
     void setNPhiHits(unsigned n) { m_nPhiHits = n; }
-    /// @brief Total residual of the pattern from pattern finding
-    void setTotalResidual(double res) { m_totalResidual = res; }
-    /// @brief Total normalized residual of the pattern from pattern finding
-    void setTotalNormalizedResidual(double res) { m_totalNormalizedResidual = res; }
+    /// @brief Set the mean over eta hits of the square of their residual divided by acceptance window from pattern finding
+    void setMeanNormResidual2(double res) { m_meanNormResidual2 = res; }
     
 
     /// @brief Return the average global theta of the pattern
@@ -65,10 +63,8 @@ class GlobalPattern {
     unsigned nEtaNonPrecisionHits() const { return m_nEtaNonPrecisionHits; }
     /// @brief Return the number of phi hits in the pattern
     unsigned nPhiHits() const { return m_nPhiHits; }
-    /// @brief Return the total residual of the pattern from pattern finding
-    double totalResidual() const { return m_totalResidual; }
-    /// @brief Return the total normalized residual of the pattern from pattern finding
-    double totalNormalizedResidual() const { return m_totalNormalizedResidual; }
+    /// @brief Return the mean over eta hits of the square of their residual divided by acceptance window from pattern finding
+    double meanNormResidual2() const { return m_meanNormResidual2; }
     /// @brief Return the hits per station
     const HitCollection& hitsPerStation() const { return m_hitsInStation; }
 
@@ -95,10 +91,8 @@ class GlobalPattern {
     unsigned m_nEtaNonPrecisionHits{0};
     /** Number of phi measurements */
     unsigned m_nPhiHits{0};
-    /** Total residual of the pattern from pattern finding */
-    double m_totalResidual{0.};
-    /** Total residual normalized to the acceptance window of the pattern from pattern finding */
-    double m_totalNormalizedResidual{0.};
+    /** Mean over eta hits of the square of their residual divided by acceptance window from pattern finding */
+    double m_meanNormResidual2{0.};
 
     // The pattern can extend over two sectors in the overlap region
     int m_sector1{-1};
