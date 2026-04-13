@@ -143,10 +143,10 @@ BTaggingEfficiencyTool::~BTaggingEfficiencyTool() {
 
 StatusCode BTaggingEfficiencyTool::initialize() {
 
-  ATH_MSG_INFO( " Hello BTaggingEfficiencyTool user... initializing");
-  ATH_MSG_INFO( " TaggerName = " << m_taggerName);
-  ATH_MSG_INFO( " OP = " << m_OP);
-  ATH_MSG_INFO( " m_systStrategy is " << m_systStrategy);
+  ATH_MSG_INFO( " Hello BTaggingEfficiencyTool user... initializing" );
+  ATH_MSG_INFO( " TaggerName = " << m_taggerName.value() );
+  ATH_MSG_INFO( " OP = " << m_OP.value() );
+  ATH_MSG_INFO( " m_systStrategy is " << m_systStrategy.value() );
 
   m_SFNames["B"] = m_SFNamesB;
   m_SFNames["C"] = m_SFNamesC;
@@ -265,7 +265,7 @@ StatusCode BTaggingEfficiencyTool::initialize() {
     ATH_MSG_INFO( " c-jet     SF/eff calibration = " << m_SFNames["C"] <<     " / " << m_EffNames["C"]);
     ATH_MSG_INFO( " tau-jet   SF/eff calibration = " << m_SFNames["T"] <<     " / " << m_EffNames["T"]);
     ATH_MSG_INFO( " light-jet SF/eff calibration = " << m_SFNames["Light"] << " / " << m_EffNames["Light"]);
-    ATH_MSG_INFO( " JetAuthor = " << m_jetAuthor);
+    ATH_MSG_INFO( " JetAuthor = " << m_jetAuthor.value() );
 
 
   } else {
@@ -455,7 +455,7 @@ StatusCode BTaggingEfficiencyTool::initialize() {
     }
   }
 
-  ATH_MSG_INFO( "Using systematics model " << m_systStrategy);
+  ATH_MSG_INFO( "Using systematics model " << m_systStrategy.value() );
   if (m_systStrategy != "Envelope" && m_useRecommendedEVExclusions) ATH_MSG_INFO( "excluding pre-set uncertainties from eigenvector decomposition");
 
   // We have a double loop over flavours here.. not nice but this is to ensure that the suffixes are always well determined before using them.
