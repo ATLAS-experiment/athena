@@ -123,8 +123,12 @@ LArCellCont::initialize( const LArRoIMap& roiMap,
 
           const bool bad = !bc.good() &&
             // cell has some specific problems
-            ( bc.unstable() || bc.highNoiseHG() || bc.highNoiseMG() ||
-              bc.highNoiseLG() || bc.problematicForUnknownReason() );
+            ( bc.deadReadout() ||
+              bc.deadPhys() ||
+              bc.highNoiseHG() ||
+              bc.highNoiseMG() ||
+              bc.highNoiseLG() ||
+              bc.problematicForUnknownReason() );
 
           if ( !bad ) collMap[ttId].push_back(larcell); // cell masked if not know to be good
 
