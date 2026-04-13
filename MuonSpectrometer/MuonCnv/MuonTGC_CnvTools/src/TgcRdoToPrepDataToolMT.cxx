@@ -452,6 +452,11 @@ StatusCode TgcRdoToPrepDataToolMT::decodeHits(
             }
             continue;
         }
+        const std::uint16_t bcTag = translateBC(rd.bcTag());
+        if (!m_convertAllBCs && (bcTag != Muon::TgcPrepData::BCBIT_CURRENT)) {
+            continue;
+        }
+
 
         std::unique_ptr<TgcPrepDataCollection>& collection = state.tgcPrepDataCollections[tgcHashId];
         if (!collection) {
@@ -464,7 +469,7 @@ StatusCode TgcRdoToPrepDataToolMT::decodeHits(
                             return prd->identify() == channelId;
                          });
         if (duplicate_itr != collection->end()) {
-            const int newBCTag = (**duplicate_itr).getBcBitMap() | translateBC(rd.bcTag());
+            const int newBCTag = (**duplicate_itr).getBcBitMap() | bcTag;
             // A converted PRD of this RDO is duplicated.
             isDuplicated |= (newBCTag == (**duplicate_itr).getBcBitMap());  
             (**duplicate_itr).setBcBitMap(newBCTag);

@@ -43,6 +43,10 @@ namespace MuonR4{
 
             SG::WriteHandleKey<xAOD::TgcStripContainer> m_writeKey{this, "WriteKey", "xTgcStrips", "Output container"};
 
+            /** @brief Convert hits from all bunch crossings. If false only the current BC 
+             *         is converted */
+            Gaudi::Property<bool> m_convertAllBCs{this, "convertAllBCs", true};
+
             const MuonGMR4::MuonDetectorManager* m_detMgr{};
     };
 }

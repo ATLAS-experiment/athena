@@ -390,7 +390,7 @@ class TgcRdoToPrepDataToolMT
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
         this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-    /** TgcPrepRawData container key for current BC */
+    /** TgcPrepRawData container key for curfrent BC */
     Gaudi::Property<std::string> m_outputCollectionLocation{
         this, "OutputCollection", "TGC_Measurements"};
 
@@ -458,6 +458,9 @@ class TgcRdoToPrepDataToolMT
     Gaudi::Property<std::string> m_coinContainerCacheKeyStr{
         this, "CoinCacheString", "",
         "Prefix for names of Coin cache collections"};
+    /** @brief Convert hits from all bunch crossings. If false only the current BC 
+     *         is converted */
+    Gaudi::Property<bool> m_convertAllBCs{this, "convertAllBCs", true};
 
     /** Avoid compiler warning **/
     StatusCode decode(const EventContext& ctx,
