@@ -6,8 +6,26 @@
 #include "TgcDigitToPrepDataCnvTool.h"
 
 #include "xAODMuonPrepData/TgcStripAuxContainer.h"
-
+#include "MuonPrepRawData/TgcPrepData.h"
 #include "Acts/Utilities/Helpers.hpp"
+
+
+namespace {
+    constexpr std::uint16_t translateBC(const std::uint16_t bc) {
+        using namespace Muon;
+        switch(bc) {
+            case TgcDigit::BC_UNDEFINED:
+            case TgcDigit::BC_CURRENT:
+                return TgcPrepData::BCBIT_CURRENT;
+            case TgcDigit::BC_PREVIOUS:
+                return TgcPrepData::BCBIT_PREVIOUS;
+            case TgcDigit::BC_NEXT:
+                return TgcPrepData::BCBIT_NEXT;
+            default:
+              return 0;
+        }
+    }
+}
 
 namespace MuonR4 {
 
@@ -42,7 +60,10 @@ namespace MuonR4 {
                 std::find_if(writeHandle->begin() + nPrdBefore, writeHandle->end(), [digit](const xAOD::TgcStrip* prd) {
                         return prd->identify() == digit->identify();
                 });
-                const std::uint16_t bcTag = (1<< digit->bcTag());
+                const std::uint16_t bcTag = translateBC(digit->bcTag());
+                if (!m_convertAllBCs && (bcTag != Muon::TgcPrepData::BCBIT_CURRENT)) {
+                    continue;
+                }
                 if (sameHitOtherBC != writeHandle->end()) {
                     xAOD::TgcStrip* updateMe{*sameHitOtherBC};
                     updateMe->setBcBitMap(updateMe->bcBitMap() | bcTag);

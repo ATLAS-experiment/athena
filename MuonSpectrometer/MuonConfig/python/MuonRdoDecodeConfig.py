@@ -180,7 +180,8 @@ def TgcRDODecodeCfg(flags, name="MuonTgcRdoToPrdConv", RDOContainer = None,  **k
                                       TgcDigitContainer="TgcDigitsRdoConv"))
         kwargs.setdefault("DecodingTool", 
             CompFactory.MuonR4.TgcDigitToPrepDataCnvTool(name="TgcPrepDataProviderTool",
-                                                      ReadKey="TgcDigitsRdoConv"))
+                                                         ReadKey="TgcDigitsRdoConv",
+                                                         convertAllBCs = not flags.Muon.useTGCPriorNextBC))
         from xAODMuonTrkPrepDataCnv.MuonPrepDataCnvCfg import xTgcToPrepDataCnvAlgCfg
         acc.merge(xTgcToPrepDataCnvAlgCfg(flags, name=f"xAODTgcToPrepDataCnvAlg{suffix}"))
  
@@ -191,6 +192,7 @@ def TgcRDODecodeCfg(flags, name="MuonTgcRdoToPrdConv", RDOContainer = None,  **k
 
         if RDOContainer: 
             tool_args.setdefault("RDOContainer", RDOContainer)
+            tool_args.setdefault("convertAllBCs", not flags.Muon.useTGCPriorNextBC)
         kwargs.setdefault("DecodingTool", CompFactory.Muon.TgcRdoToPrepDataToolMT(name="TgcPrepDataProviderTool", **tool_args))
 
     # add RegSelTool
