@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration 
 
-from TrkConfig.TrackingPassFlags import createITkTrackingPassFlags, createITkFastTrackingPassFlags, createITkConversionTrackingPassFlags, createITkHeavyIonTrackingPassFlags, createITkLargeD0TrackingPassFlags, createITkLowPtTrackingPassFlags
+from TrkConfig.TrackingPassFlags import createTrackingPassFlags, createITkTrackingPassFlags, createITkFastTrackingPassFlags, createITkConversionTrackingPassFlags, createITkHeavyIonTrackingPassFlags, createITkLargeD0TrackingPassFlags, createITkLowPtTrackingPassFlags
+import AthenaCommon.SystemOfUnits as Units
 
 def deactivateAthenaComponents(icf):
     icf.doAthenaCluster = False
@@ -229,4 +230,24 @@ def createEFValidateF150TrackingPassFlags():
     # Override acts default values
     icf.Xi2max = [50]
     icf.Xi2maxNoAdd = [100]
+    return icf
+
+# Main Inner Detector ACTS Tracking pass
+def createACTSInnerDetectorTrackingPassFlags():
+    # flags for ACTS based InnerDetector silicon tracking
+    icf = createTrackingPassFlags()
+    icf.extension               = ""
+    icf.Xi2max = 25.0
+    icf.Xi2maxNoAdd = 25.0
+    # ACTS components
+    icf.addFlag("isSecondaryPass", False)
+    icf.addFlag("doActsCluster", True)
+    icf.addFlag("doActsSpacePoint", True)
+    icf.addFlag("doActsSeed", True)
+    icf.addFlag("doActsTrack", True)
+    icf.addFlag("doActsAmbiguityResolution", True)
+
+    # Maximum bin set to 9999 instead of four to prevent out of bounds lookups
+    icf.addFlag("etaBins"                   , [-1.0, 3.0, 9999.0])
+    icf.addFlag("maxPrimaryImpactList"      , [5.0 * Units.mm, 5.0 * Units.mm, 25.0 * Units.mm])
     return icf

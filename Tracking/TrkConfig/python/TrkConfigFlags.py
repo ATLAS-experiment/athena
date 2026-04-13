@@ -17,6 +17,7 @@ class PrimaryPassConfig(FlagEnum):
     HIP = 'HIP'
     MinBias = 'MinBias'
     Default = 'Main'
+    Acts = 'Acts'
 
 
 class ITkPrimaryPassConfig(FlagEnum):
@@ -472,6 +473,8 @@ def createTrackingConfigFlags():
         createTRTTrackingPassFlags, createTRTStandaloneTrackingPassFlags)
 
     def primaryPass(flags):
+        if TrackingComponent.ActsChain in flags.Tracking.recoChain:
+            return PrimaryPassConfig.Acts
         if flags.Beam.Type is BeamType.Cosmics:
             return PrimaryPassConfig.Cosmics
         elif flags.Reco.EnableHI:
@@ -595,11 +598,14 @@ def createTrackingConfigFlags():
         createActsValidateAmbiguityResolutionTrackingPassFlags,
         createActsHeavyIonTrackingPassFlags,
         createEFValidateF100TrackingPassFlags,
-        createEFValidateF150TrackingPassFlags
+        createEFValidateF150TrackingPassFlags,
+        createACTSInnerDetectorTrackingPassFlags
     )
 
     icf.addFlagsCategory ("Tracking.ITkActsPass",
                           createActsTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ActsPass",
+                          createACTSInnerDetectorTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsLegacyPass",
                           createActsLegacyTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsLargeRadiusPass",

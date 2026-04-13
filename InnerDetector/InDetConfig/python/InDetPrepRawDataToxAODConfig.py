@@ -269,3 +269,31 @@ def ITkPrepDataToxAODCfg(flags):
             acc.merge(ITkStripPrepDataToxAODCfg(flags))
 
     return acc
+
+def ActsPrepDataToxAODCfg(flags,
+                             *,
+                             PixelClusterContainer: str = "PixelClusters",
+                             StripClusterContainer: str = "SCT_Clusters",
+                             PixelMeasurementContainer: str = "PixelMeasurements",
+                             StripMeasurementContainer: str = "SCT_Measurements",
+                             TrackParticles: list[str] = None) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    # need to decorate truth particles and clusters with same unique identified
+    # which is the origin truth particle index
+    if not flags.Tracking.doTruth:
+        return acc
+
+    acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
+
+    from ActsConfig.ActsObjectDecorationConfig import ActsInDetPixelClusterTruthDecoratorAlgCfg,ActsInDetStripClusterTruthDecoratorAlgCfg
+    acc.merge(ActsInDetPixelClusterTruthDecoratorAlgCfg(flags,
+                                                   ClusterContainer = PixelClusterContainer,
+                                                   MeasurementContainer = PixelMeasurementContainer,
+                                                   TrackParticles = TrackParticles))
+    acc.merge(ActsInDetStripClusterTruthDecoratorAlgCfg(flags,
+                                                   ClusterContainer = StripClusterContainer,
+                                                   MeasurementContainer = StripMeasurementContainer,
+                                                   TrackParticles = TrackParticles))
+
+    return acc
