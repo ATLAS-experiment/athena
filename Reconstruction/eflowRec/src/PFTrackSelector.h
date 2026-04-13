@@ -10,7 +10,8 @@
 
 #include "AthenaMonitoringKernel/Monitored.h"
 
-#include "StoreGate/ReadCondHandleKey.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteHandleKey.h"
 
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
@@ -42,10 +43,10 @@ private:
   bool selectTrack(const xAOD::TrackParticle& track) const;
 
   /** check if track belongs to an electron */
-  bool isElectron(const xAOD::TrackParticle* track) const;
+  bool isElectron(const xAOD::TrackParticle* track, const xAOD::ElectronContainer* electronContainer) const;
 
   /** check if track belongs to an muon */
-  bool isMuon(const xAOD::TrackParticle* track) const;
+  bool isMuon(const xAOD::TrackParticle* track, const xAOD::MuonContainer* muonContainer) const;
 
   /** ReadHandleKey for the TrackParticleContainer to be used as input */
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_tracksReadHandleKey{
