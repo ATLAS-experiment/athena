@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -64,7 +64,7 @@ namespace columnar
             break;
         }
         ColumnInfo renamedInfo = columnInfo;
-        renamedInfo.name = uniqueName;
+        renamedInfo.name = std::move(uniqueName);
         return addColumn(renamedInfo);
       }
 
