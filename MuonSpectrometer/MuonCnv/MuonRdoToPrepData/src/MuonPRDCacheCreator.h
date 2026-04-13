@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #pragma once
@@ -14,7 +14,7 @@
 class MuonPRDCacheCreator : public IDCCacheCreatorBase {
 public:
     /// Constructor
-    MuonPRDCacheCreator(const std::string &name, ISvcLocator *pSvcLocator);
+    using IDCCacheCreatorBase::IDCCacheCreatorBase;
     /// Destructor
     virtual ~MuonPRDCacheCreator() = default;
 
@@ -26,23 +26,21 @@ public:
 
 protected:
     /// Write handle keys for the PRD caches
-    SG::WriteHandleKey<CscPrepDataCollection_Cache> m_CscCacheKey;
-    SG::WriteHandleKey<CscStripPrepDataCollection_Cache> m_CscStripCacheKey;
-    SG::WriteHandleKey<MdtPrepDataCollection_Cache> m_MdtCacheKey;
-    SG::WriteHandleKey<RpcPrepDataCollection_Cache> m_RpcCacheKey;
-    SG::WriteHandleKeyArray<TgcPrepDataCollection_Cache> m_TgcCacheKeys;
-    SG::WriteHandleKey<sTgcPrepDataCollection_Cache> m_sTgcCacheKey;
-    SG::WriteHandleKey<MMPrepDataCollection_Cache> m_MmCacheKey;
-    SG::WriteHandleKey<RpcCoinDataCollection_Cache> m_RpcCoinCacheKey;
-    SG::WriteHandleKeyArray<TgcCoinDataCollection_Cache> m_TgcCoinCacheKeys;
+    SG::WriteHandleKey<CscPrepDataCollection_Cache> m_CscCacheKey{this, "CscCacheKey", ""};
+    SG::WriteHandleKey<CscStripPrepDataCollection_Cache> m_CscStripCacheKey{this, "CscStripCacheKey", ""};
+    SG::WriteHandleKey<MdtPrepDataCollection_Cache> m_MdtCacheKey{this, "MdtCacheKey", ""};
+    SG::WriteHandleKey<RpcPrepDataCollection_Cache> m_RpcCacheKey{this, "RpcCacheKey", ""};
+    SG::WriteHandleKey<TgcPrepDataCollection_Cache> m_TgcCacheKey{this, "TgcCacheKey", ""};
+    SG::WriteHandleKey<sTgcPrepDataCollection_Cache> m_sTgcCacheKey{this, "sTgcCacheKey", ""};
+    SG::WriteHandleKey<MMPrepDataCollection_Cache> m_MmCacheKey{this, "MmCacheKey", ""};
+    SG::WriteHandleKey<RpcCoinDataCollection_Cache> m_RpcCoinCacheKey{this, "RpcCoinCacheKey", ""};
+    SG::WriteHandleKeyArray<TgcCoinDataCollection_Cache> m_TgcCoinCacheKeys{this, "TgcCoinCacheKeys", {}};
 
-    /// Name for the TGC PRD cache containers
-    Gaudi::Property<std::string> m_tgcPrdCacheKeyStr{this, "TgcCacheStr", "", "Prefix for names of TGC PRD Cache collections"};
     /// Name for the TGC Coin cache containers
     Gaudi::Property<std::string> m_tgcCoinCacheKeyStr{this, "TgcCoinCacheStr", "", "Prefix for names of TGC Coin Cache collections"};
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-    bool m_disableWarning = false;
+    Gaudi::Property<bool> m_disableWarning{this, "disableWarning", false};
 
 };  // class MuonPRDCacheCreator

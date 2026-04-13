@@ -11,7 +11,7 @@ class MuonPrdCacheNames(object):
     CscCache       = "CscPrdCache"
     CscStripCache  = "CscStripPrdCache"
     RpcCache       = "RpcPrdCache"
-    TgcCache       = "TgcPrdCache"
+    TgcCache       = "TgcPrdCacheAllBCs"
     sTgcCache      = "sTgcPrdCache"
     MmCache        = "MmPrdCache"
     RpcCoinCache   = "RpcCoinCache"
@@ -32,7 +32,7 @@ def MuonPrdCacheCfg(flags):
                                        MdtCacheKey       = MuonPrdCacheNames.MdtCache,
                                        CscCacheKey       = (MuonPrdCacheNames.CscCache if flags.Detector.GeometryCSC else ""),
                                        RpcCacheKey       = MuonPrdCacheNames.RpcCache,
-                                       TgcCacheStr       = MuonPrdCacheNames.TgcCache,
+                                       TgcCacheKey      = MuonPrdCacheNames.TgcCache,
                                        sTgcCacheKey      = (MuonPrdCacheNames.sTgcCache if flags.Detector.GeometrysTGC else ""),
                                        MmCacheKey        = (MuonPrdCacheNames.MmCache if flags.Detector.GeometryMM else ""),
                                        TgcCoinCacheStr   = MuonPrdCacheNames.TgcCoinCache,
