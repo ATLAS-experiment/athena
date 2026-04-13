@@ -56,7 +56,7 @@ namespace CP {
 
     StatusCode MuonSelectionTool::initialize() {
         // Greet the user:
-        ATH_MSG_INFO("Initialising...!");
+        ATH_MSG_INFO("Initialising...");
 
         m_runPeriodEnum = static_cast<RunPeriod>(m_runPeriod.value());
 
@@ -71,10 +71,16 @@ namespace CP {
         ATH_MSG_INFO("Muon quality: " << m_quality);
 
 
-        //UNICORN! Adapt for the current recommendations!
-        //This should be in initialize and not here! 
-        if(m_quality!=0 && m_quality!=1 && m_quality!=2 && m_quality!=4) ATH_MSG_WARNING("muonSelectionTool currently only supports loose, medium, tight and highpt WPs for run 3 data/MC, all other WPs can currently only be used for tests using Expert mode");
-        if(m_quality==0 && !m_developMode && (m_excludeNSWFromPrecisionLayers || !m_recalcPrecisionLayerswNSW)) ATH_MSG_WARNING("for run3, Tight WP is only supported when ExcludeNSWFromPrecisionLayers=False and RecalcPrecisionLayerswNSW=True");
+        //Crash if selection is veryloose and Run3
+        if( isRun3() && m_quality==3 && !m_developMode){
+            ATH_MSG_ERROR("muonSelectionTool currently supports for Run3 all WPs with the exception of veryLoose" );
+            return StatusCode::FAILURE;
+        }
+
+        if(!m_developMode && (m_excludeNSWFromPrecisionLayers || !m_recalcPrecisionLayerswNSW)){
+             ATH_MSG_ERROR("for run3, all WPs are only supported when ExcludeNSWFromPrecisionLayers=False and RecalcPrecisionLayerswNSW=True");
+             return StatusCode::FAILURE;
+        }
 
         if (m_toroidOff) ATH_MSG_INFO("!! CONFIGURED FOR TOROID-OFF COLLISIONS !!");
         if (m_SctCutOff) ATH_MSG_WARNING("!! SWITCHING SCT REQUIREMENTS OFF !! FOR DEVELOPMENT USE ONLY !!");
