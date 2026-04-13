@@ -70,7 +70,7 @@ else()
 
     atlas_add_test( Decorators
        SCRIPT test/test_Decorators.py
-       POST_EXEC_SCRIPT nopost.sh
+       POST_EXEC_SCRIPT noerror.sh
     )
     
     atlas_add_test( fprint_test
@@ -80,7 +80,7 @@ else()
     if( NOT GENERATIONBASE AND NOT SIMULATIONBASE AND NOT XAOD_ANALYSIS )
         atlas_add_test( filter_files_raw_run3_data22
                         SCRIPT test/filter_files_raw_run3_data22.sh "${CMAKE_CURRENT_SOURCE_DIR}"
-                        POST_EXEC_SCRIPT nopost.sh
+                        POST_EXEC_SCRIPT noerror.sh
                         PRIVATE_WORKING_DIRECTORY
                         PROPERTIES TIMEOUT 900 )
     endif()
