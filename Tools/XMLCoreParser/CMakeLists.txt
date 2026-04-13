@@ -35,7 +35,7 @@ atlas_add_test( XMLCoreParser_test
                 SOURCES test/XMLCoreParser_test.cxx
                 INCLUDE_DIRS ${EXPAT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
                 LINK_LIBRARIES ${EXPAT_LIBRARIES} ${Boost_LIBRARIES} PathResolver XMLCoreParser
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 
 atlas_add_test( parse1_test
