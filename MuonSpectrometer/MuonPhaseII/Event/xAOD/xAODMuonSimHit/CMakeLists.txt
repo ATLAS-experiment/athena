@@ -33,6 +33,6 @@ atlas_add_test( SimHitTest
                 SOURCES test/test_simHit.cxx
                 INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
                 LINK_LIBRARIES ${GTEST_LIBRARIES} xAODMuonSimHit TestTools
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
     
 
