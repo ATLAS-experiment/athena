@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrkConfig )
@@ -10,7 +10,7 @@ atlas_install_data( share/*.ref )
 
 atlas_add_test( TrackingPassFlags_test
 		SCRIPT python -m TrkConfig.TrackingPassFlags
-		POST_EXEC_SCRIPT nopost.sh)
+		POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( TrackCollectionReadConfig_test
                 SCRIPT python -m TrkConfig.TrackCollectionReadConfig
@@ -18,7 +18,7 @@ atlas_add_test( TrackCollectionReadConfig_test
 
 atlas_add_test( AtlasTrackingGeometrySvcCfgTest    
                 SCRIPT python -m TrkConfig.AtlasTrackingGeometrySvcConfig
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( SolenoidalIntersectorConfig_test
                 SCRIPT python -m TrkConfig.SolenoidalIntersectorConfig
@@ -26,8 +26,8 @@ atlas_add_test( SolenoidalIntersectorConfig_test
 
 atlas_add_test( AtlasExtrapolatorCfgTest    
                 SCRIPT python -m TrkConfig.AtlasExtrapolatorConfig
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( GSFTrackFitterConfigTest
                 SCRIPT python -m TrkConfig.TrkGaussianSumFilterConfig
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
