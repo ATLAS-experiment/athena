@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ################################################################################
 # Package: MuonReadoutGeometryR4
@@ -30,20 +30,20 @@ atlas_add_test( testR3Geometry
                 SCRIPT python -m MuonGeoModelTestR4.testGeoModel --chambers STL1A1 BML1A3 T1E1A01 MML1A1
                 PROPERTIES TIMEOUT 1800
                 PRIVATE_WORKING_DIRECTORY
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
 
 #### Standard geometry dumping test R3-MTech (MC)
 atlas_add_test( testR3Geometry_MTech
                 SCRIPT python -m MuonGeoModelTestR4.testGeoModel --chambers BML1A3 T1E1A01 MML1A1 STS1A1 --geoModelFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-R3S-2021-03-02-00_MTech.db
                 PROPERTIES TIMEOUT 600
                 PRIVATE_WORKING_DIRECTORY
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
 #### Standard geometry dumping test R3 (data)
 atlas_add_test( testR3GeometryData
                 SCRIPT python -m MuonGeoModelTestR4.testGeoModel  --chambers BML1A3 T1E1A01 MML1A1 STL1A1 --inputFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data
                 PROPERTIES TIMEOUT 1800
                 PRIVATE_WORKING_DIRECTORY
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
 
 
 
@@ -52,40 +52,40 @@ atlas_add_test( testR4Geometry
                 SCRIPT python -m MuonGeoModelTestR4.testGeoModel --chambers BML1A3 T1E1A01 MML1A1 STL1A1 --defaultGeoFile RUN4
                 PROPERTIES TIMEOUT 1800
                 PRIVATE_WORKING_DIRECTORY
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
 
 #### Check consistency of the strip design
 atlas_add_test( checkStripDesign
                 SCRIPT runStripDesignDump                
                 PROPERTIES TIMEOUT 900
                 PRIVATE_WORKING_DIRECTORY
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
 
 ##### Simulation test R3
 atlas_add_test( testR3SensitiveDetectors
                 SCRIPT python -m MuonGeoModelTestR4.testSensitiveDetectors  --nEvents 2 
                 PROPERTIES TIMEOUT 1800
                 PRIVATE_WORKING_DIRECTORY
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
 
 ##### Simulation test R4
 atlas_add_test( testR4SensitiveDetectors
                 SCRIPT python -m MuonGeoModelTestR4.testSensitiveDetectors  --nEvents 2 --defaultGeoFile RUN4
                 PROPERTIES TIMEOUT 1800
                 PRIVATE_WORKING_DIRECTORY
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
 #### Test that the sector envelopes fully enclose the particular chambers
 atlas_add_test( testChamberBuilding
                 SCRIPT python -m MuonGeoModelTestR4.testChamberBuilder 
                 PROPERTIES TIMEOUT 1200
                 PRIVATE_WORKING_DIRECTORY
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
 #### Test that the sector envelopes fully enclose the particular chambers (R4)
 atlas_add_test( testChamberBuildingR4
                 SCRIPT python -m MuonGeoModelTestR4.testChamberBuilder --defaultGeoFile RUN4
                 PROPERTIES TIMEOUT 1200
                 PRIVATE_WORKING_DIRECTORY
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
 
 
 file(GLOB_RECURSE files "util/*.cxx")
