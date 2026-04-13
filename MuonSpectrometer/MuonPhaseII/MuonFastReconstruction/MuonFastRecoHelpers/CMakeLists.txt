@@ -11,5 +11,5 @@ atlas_add_library( MuonFastRecoHelpers
                    PUBLIC_HEADERS MuonFastRecoHelpers
                    LINK_LIBRARIES xAODMuonPrepData MuonSpacePoint MuonFastRecoEvent MuonReadoutGeometryR4
                                   MuonRecToolInterfacesR4 MuonDetDescrUtils MuonTrackFindingToolsLib
-                                  MuonVisualizationHelpersR4 
+                                  MuonVisualizationHelpersR4 MuonPatternHelpers
                                   ActsToolInterfacesLib ActsEventLib AthenaKernel StoreGateLib)

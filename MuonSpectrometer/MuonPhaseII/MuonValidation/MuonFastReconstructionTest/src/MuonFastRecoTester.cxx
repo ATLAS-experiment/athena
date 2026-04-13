@@ -8,11 +8,21 @@
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
 #include "MuonSpacePoint/SpacePointHelpers.h"
 #include "MuonStationIndex/MuonStationIndex.h"
+#include "CxxUtils/phihelper.h"
+
+namespace {
+    void resize_all (const std::size_t nEle, const std::size_t size, auto&&... vecs) {
+        for (std::size_t idx = 0; idx < nEle; ++idx) {
+            (vecs[idx].resize(size), ...);
+        }
+    };
+}
 
 namespace MuonValR4 {
     using namespace MuonR4;
     using namespace MuonVal;
     using StIndex = Muon::MuonStationIndex::StIndex;
+    constexpr std::size_t s_nStations {Acts::toUnderlying(StIndex::StIndexMax)};
     using simHitSet = std::unordered_set<const xAOD::MuonSimHit*>;
     using TruthParticleMap = std::map<const xAOD::TruthParticle*, std::vector<simHitSet>>;
     std::optional<std::size_t> isTruthMatched (const SpacePoint* sp,
@@ -49,6 +59,7 @@ namespace MuonValR4 {
         }       
         ATH_CHECK(m_spKey.initialize(!m_spKey.empty()));
         ATH_CHECK(m_NSWspKey.initialize(!m_NSWspKey.empty()));
+        ATH_CHECK(m_roiCollectionKey.initialize(m_isSeededReco));
         if (m_writeSpacePoints) {
             if (!m_spKey.empty()) {
                 m_spTester = std::make_shared<SpacePointTesterModule>(m_tree, m_spKey.key(), msgLevel(), "Muon");
@@ -73,11 +84,22 @@ namespace MuonValR4 {
             m_tree.disableBranch(m_gen_Phi.name());
             m_tree.disableBranch(m_gen_Pt.name());
             m_tree.disableBranch(m_gen_Q.name());
-            m_tree.disableBranch(m_pat_nTrueNonPrecSpacePoints.name());
-            m_tree.disableBranch(m_pat_nTruePrecSpacePoints.name());
-            m_tree.disableBranch(m_pat_nTruePhiSpacePoints.name());
+            m_tree.disableBranch(m_pat_nTruthNonPrecMeas.name());
+            m_tree.disableBranch(m_pat_nTruthPrecMeas.name());
+            m_tree.disableBranch(m_pat_nTruthPhiMeas.name());
+            m_tree.disableBranch(m_pat_nAllTruthNonPrecMeas.name());
+            m_tree.disableBranch(m_pat_nAllTruthPrecMeas.name());
+            m_tree.disableBranch(m_pat_nAllTruthPhiMeas.name());
             m_tree.disableBranch(m_pat_MatchedToTruth.name());
             m_tree.disableBranch(m_pat_nTruthparticles.name());
+        }
+        if (!m_isSeededReco) {
+            m_tree.disableBranch(m_roi_EtaMin.name());
+            m_tree.disableBranch(m_roi_EtaMax.name());
+            m_tree.disableBranch(m_roi_PhiMin.name());
+            m_tree.disableBranch(m_roi_PhiMax.name());
+            m_tree.disableBranch(m_roi_ZMin.name());
+            m_tree.disableBranch(m_roi_ZMax.name());
         }
         ATH_CHECK(m_patternKey.initialize());
         ATH_CHECK(m_truthSegmentKey.initialize(!m_truthSegmentKey.empty()));   
@@ -109,12 +131,18 @@ namespace MuonValR4 {
         if(m_isMC){
              ATH_CHECK(SG::get(readTruthSegments , m_truthSegmentKey, ctx));
         }
+        const TrigRoiDescriptorCollection* roiCollection{nullptr};
+        if(m_isSeededReco) {
+            ATH_CHECK(SG::get(roiCollection, m_roiCollectionKey, ctx));
+        }
             
-        ATH_MSG_DEBUG("Succesfully retrieved input collections. Global Patterns: "<<globPatterns->size()
-                    <<", truth segments: "<<(readTruthSegments? readTruthSegments->size() : -1)<<".");
+        ATH_MSG_DEBUG("Succesfully retrieved input collections: Global Patterns: "<<globPatterns->size()
+                    <<", truth segments: "<<(readTruthSegments? readTruthSegments->size() : -1)
+                    <<", Rois: "<<(roiCollection ? roiCollection->size() : -1));
 
-        const TruthParticleMap truthMap{fillTruthMap(readTruthSegments)};
+        const TruthParticleMap truthMap{fillTruthMap(readTruthSegments, roiCollection)};
         fillTruthInfo(truthMap, readTruthSegments);
+        fillRoIInfo(roiCollection);
 
         if (m_writeSpacePoints) {
             fillSpacePointInfo(spContainer, globPatterns, truthMap, 
@@ -128,21 +156,40 @@ namespace MuonValR4 {
         ATH_CHECK(m_tree.fill(ctx));
         return StatusCode::SUCCESS;
     }
-    TruthParticleMap MuonFastRecoTester::fillTruthMap(const xAOD::MuonSegmentContainer* truthSegments) const {
+    TruthParticleMap MuonFastRecoTester::fillTruthMap(const xAOD::MuonSegmentContainer* truthSegments,
+                                                      const TrigRoiDescriptorCollection* roiCollection) const {
         if (!truthSegments) return TruthParticleMap{};
+        ATH_MSG_VERBOSE("Filling truth map with "<<truthSegments->size());
+        /** In seeded reco, we want to include only truth particles that are in the RoIs */                                                    
+        auto isInROI = [roiCollection](const xAOD::TruthParticle* tp) {
+            for (const TrigRoiDescriptor* roi : *roiCollection) {
+                /** Check eta */
+                if (tp->eta() < roi->etaMinus() || tp->eta() > roi->etaPlus()) continue;
+                /** Check phi */
+                const double dPhiPlus = CxxUtils::deltaPhi(roi->phiPlus(), tp->phi());
+                const double dPhiMinus = CxxUtils::deltaPhi(roi->phiMinus(), tp->phi());
+                if (dPhiPlus >= 0. && dPhiMinus <= 0.) return true;
+            }
+            return false;
+        };
 
         TruthParticleMap truthMap{};
         for (const xAOD::MuonSegment* truth : *truthSegments) {
             if (!truth) continue;
             const xAOD::TruthParticle* tp = getTruthMatchedParticle(*truth);
+            // In case of seeded reco, we only save truth particles that are in the RoIs
+            if (m_isSeededReco && tp && roiCollection && !isInROI(tp)){
+                continue;
+            }
             truthMap[tp].push_back(getMatchingSimHits(*truth));
         }
         return truthMap;
     }
     void MuonFastRecoTester::fillTruthInfo(const TruthParticleMap& truthHits,
                                            const xAOD::MuonSegmentContainer* truthSegments) {
-        using enum eHitType;
         if (!m_isMC || truthHits.empty()) return;
+        resize_all(truthHits.size(), s_nStations, 
+                   m_gen_nNonPrecMeas, m_gen_nPrecMeas, m_gen_nPhiMeas);
         int tpIdx{-1};
         for (const auto& [tp, _] : truthHits) {
             // We skip pileup muons
@@ -154,18 +201,25 @@ namespace MuonValR4 {
             m_gen_Q.push_back(tp->charge());
 
             ++tpIdx;
-            m_gen_nNonPrecSpacePointsPerStation[tpIdx].resize(Acts::toUnderlying(StIndex::StIndexMax));
-            m_gen_nPrecSpacePointsPerStation[tpIdx].resize(Acts::toUnderlying(StIndex::StIndexMax));
-            m_gen_nPhiSpacePointsPerStation[tpIdx].resize(Acts::toUnderlying(StIndex::StIndexMax));
-            
             for (const auto& segment : *truthSegments) {
                 if (!segment) continue;
                 if (getTruthMatchedParticle(*segment) != tp) continue;
                 const auto StIdx {Acts::toUnderlying(toStationIndex(segment->chamberIndex()))};
-                m_gen_nNonPrecSpacePointsPerStation[tpIdx][StIdx] += segment->nTrigEtaLayers();
-                m_gen_nPrecSpacePointsPerStation[tpIdx][StIdx] += segment->nPrecisionHits();
-                m_gen_nPhiSpacePointsPerStation[tpIdx][StIdx] += segment->nPhiLayers();
+                m_gen_nNonPrecMeas[tpIdx][StIdx] += segment->nTrigEtaLayers();
+                m_gen_nPrecMeas[tpIdx][StIdx] += segment->nPrecisionHits();
+                m_gen_nPhiMeas[tpIdx][StIdx] += segment->nPhiLayers();
             }
+        }
+    }
+    void MuonFastRecoTester::fillRoIInfo(const TrigRoiDescriptorCollection* roiCollection) {
+        if (!m_isSeededReco || !roiCollection || roiCollection->empty()) return;
+        for (const TrigRoiDescriptor* roi : *roiCollection) {
+            m_roi_EtaMin.push_back(roi->etaMinus());
+            m_roi_EtaMax.push_back(roi->etaPlus());
+            m_roi_PhiMin.push_back(roi->phiMinus());
+            m_roi_PhiMax.push_back(roi->phiPlus());
+            m_roi_ZMin.push_back(roi->zedMinus());
+            m_roi_ZMax.push_back(roi->zedPlus());
         }
     }
     void MuonFastRecoTester::fillSpacePointInfo(const MuonR4::SpacePointContainer* spc,
@@ -200,26 +254,31 @@ namespace MuonValR4 {
     void MuonFastRecoTester::fillGlobPatternInfo(const MuonR4::GlobalPatternContainer* patternCont,
                                                  const TruthParticleMap& truthHits,
                                                  const std::vector<const MuonR4::SpacePointContainer*>& spContainers) {
-        using enum eHitType;
-        auto updateCounts = [](HitCounts& hitCount, const SpacePoint* sp){
-            const bool isPrec = MuonR4::isPrecisionHit(*sp);
-            const bool isTriggerEta = !isPrec && sp->measuresEta();
-            hitCount[Acts::toUnderlying(ePrec)] += isPrec;
-            hitCount[Acts::toUnderlying(eTriggerEta)] += isTriggerEta;
-            hitCount[Acts::toUnderlying(ePhi)] += sp->measuresPhi();
-        };
         m_pat_n = patternCont->size();
+        // Resize all the matrix branches
+        resize_all(patternCont->size(), s_nStations,
+                    m_pat_nNonPrecMeas, m_pat_nPrecMeas, m_pat_nPhiMeas, 
+                    m_pat_nPileupNonPrecMeas, m_pat_nPileupPrecMeas, m_pat_nPileupPhiMeas,
+                    m_pat_nAllNonPrecMeas, m_pat_nAllPrecMeas, m_pat_nAllPhiMeas);
+        if (m_isMC) {
+            resize_all(patternCont->size(), s_nStations,
+                        m_pat_nTruthNonPrecMeas, m_pat_nTruthPrecMeas, m_pat_nTruthPhiMeas,
+                        m_pat_nAllTruthNonPrecMeas, m_pat_nAllTruthPrecMeas, m_pat_nAllTruthPhiMeas);
+        }
         std::size_t patternIdx{0};
         for (const GlobalPattern* pattern : *patternCont) {
-            PatternHitCount patHitCount{};
+
             const std::vector<StIndex> stations {pattern->getStations()};
             for (const StIndex station : stations) {
                 for (const SpacePoint* sp : pattern->hitsInStation(station)) {
-                    updateCounts(patHitCount.hitCounts, sp);
+                    updatePatHitInfo(ePatBranchType::eReco, patternIdx, station, sp);
 
                     if (!m_isMC) continue;
                     if (const auto tpIdx {isTruthMatched(sp, truthHits)}; tpIdx.has_value()) {
-                        updateCounts(tpIdx.value() < truthHits.size() ? patHitCount.trueHitCounts : patHitCount.pileupHitCounts, sp);
+                        // By convention, if truth particle index is equal to the size of the truth map, it means it's a pileup particle
+                        updatePatHitInfo(tpIdx.value() < truthHits.size() ? ePatBranchType::eTruth : ePatBranchType::ePileup, 
+                                  patternIdx, station, sp);
+                        // Save the matched truth particle index in the tree, either is a signal or pileup particle
                         auto& matchedTPs = m_pat_MatchedToTruth[patternIdx];
                         if (std::ranges::find(matchedTPs, tpIdx.value()) == matchedTPs.end()) {
                             matchedTPs.push_back(tpIdx.value());
@@ -227,58 +286,86 @@ namespace MuonValR4 {
                     }
                 }
             }
+            // Loop over the space point containers to count the number of hits in the buckets crossed by the pattern
             for (const SpacePointContainer* spContainer : spContainers) {
                 if (!spContainer) continue;
                 for (const SpacePointBucket* bucket : *spContainer) {
                     bool bucketInPattern{false};
                     const StIndex bucketStation {m_idHelperSvc->stationIndex(bucket->front()->identify())};
-                    std::vector<const SpacePoint*> allHits{};
+                    std::vector<const SpacePoint*> allHits{}, allTruthHits{};
                     
                     for (const auto& sp : *bucket) {
                         if (isInPattern(sp.get(), bucketStation, *pattern)) {
                             bucketInPattern = true;
                         }
                         allHits.push_back(sp.get());
+                        if (m_isMC && isTruthMatched(sp.get(), truthHits).has_value()) {
+                            allTruthHits.push_back(sp.get());
+                        }
                     }
                     if (bucketInPattern) {
                         for (const SpacePoint* sp : allHits) {
-                            updateCounts(patHitCount.allHitCounts, sp);
+                            updatePatHitInfo(ePatBranchType::eAll, patternIdx, bucketStation, sp);
+                        }
+                        for (const SpacePoint* sp : allTruthHits) {
+                            updatePatHitInfo(ePatBranchType::eAllTruth, patternIdx, bucketStation, sp);
                         }
                     }
                 }
             }
-            m_pat_nNonPrecSpacePoints.push_back(patHitCount.hitCounts[Acts::toUnderlying(eTriggerEta)]);
-            m_pat_nPrecSpacePoints.push_back(patHitCount.hitCounts[Acts::toUnderlying(ePrec)]);
-            m_pat_nPhiSpacePoints.push_back(patHitCount.hitCounts[Acts::toUnderlying(ePhi)]);
-
-            m_pat_nAllNonPrecSpacePoints.push_back(patHitCount.allHitCounts[Acts::toUnderlying(eTriggerEta)]);
-            m_pat_nAllPrecSpacePoints.push_back(patHitCount.allHitCounts[Acts::toUnderlying(ePrec)]);
-            m_pat_nAllPhiSpacePoints.push_back(patHitCount.allHitCounts[Acts::toUnderlying(ePhi)]);
 
             m_pat_Eta.push_back(-std::log(std::tan(pattern->theta()/2.)));
             m_pat_phi.push_back(pattern->phi());
             m_pat_sector1.push_back(pattern->sector());
             m_pat_sector2.push_back(pattern->secondarySector());
-            m_pat_residual.push_back(pattern->totalResidual());
-            m_pat_normalizedResidual.push_back(pattern->totalNormalizedResidual());
+            m_pat_meanNormResidual2.push_back(pattern->meanNormResidual2());
             m_pat_side.push_back(pattern->hitsInStation(stations.front()).front()->msSector()->side());
             m_pat_nStations.push_back(stations.size());
 
             if(m_isMC) {
-                /// Fill the truth info
-                m_pat_nTrueNonPrecSpacePoints.push_back(patHitCount.trueHitCounts[Acts::toUnderlying(eTriggerEta)]);
-                m_pat_nTruePrecSpacePoints.push_back(patHitCount.trueHitCounts[Acts::toUnderlying(ePrec)]);
-                m_pat_nTruePhiSpacePoints.push_back(patHitCount.trueHitCounts[Acts::toUnderlying(ePhi)]);
-
-                m_pat_nPileupNonPrecSpacePoints.push_back(patHitCount.pileupHitCounts[Acts::toUnderlying(eTriggerEta)]);
-                m_pat_nPileupPrecSpacePoints.push_back(patHitCount.pileupHitCounts[Acts::toUnderlying(ePrec)]);
-                m_pat_nPileupPhiSpacePoints.push_back(patHitCount.pileupHitCounts[Acts::toUnderlying(ePhi)]);
-
                 m_pat_nTruthparticles.push_back(std::ranges::count_if(m_pat_MatchedToTruth[patternIdx], 
                     [&truthHits](unsigned char tpIdx){ return tpIdx < truthHits.size(); }));
             }
             patternIdx++;
         }
                                  
+    }
+
+    void MuonFastRecoTester::updatePatHitInfo(ePatBranchType type, 
+                                              const std::size_t patIdx,
+                                              const Muon::MuonStationIndex::StIndex hitSt,
+                                              const MuonR4::SpacePoint* sp) {
+        using enum ePatBranchType;
+        const bool isPrec = MuonR4::isPrecisionHit(*sp);
+        const bool isTriggerEta = !isPrec && sp->measuresEta();
+        const auto stIdx = Acts::toUnderlying(hitSt);
+        
+        switch (type) {
+            case eReco:
+                m_pat_nNonPrecMeas[patIdx][stIdx] += isTriggerEta;
+                m_pat_nPrecMeas[patIdx][stIdx] += isPrec;
+                m_pat_nPhiMeas[patIdx][stIdx] += sp->measuresPhi();
+                return;
+            case eTruth:
+                m_pat_nTruthNonPrecMeas[patIdx][stIdx] += isTriggerEta;
+                m_pat_nTruthPrecMeas[patIdx][stIdx] += isPrec;
+                m_pat_nTruthPhiMeas[patIdx][stIdx] += sp->measuresPhi();
+                return;
+            case eAll:
+                m_pat_nAllNonPrecMeas[patIdx][stIdx] += isTriggerEta;
+                m_pat_nAllPrecMeas[patIdx][stIdx] += isPrec;
+                m_pat_nAllPhiMeas[patIdx][stIdx] += sp->measuresPhi();
+                return;
+            case ePileup:
+                m_pat_nPileupNonPrecMeas[patIdx][stIdx] += isTriggerEta;
+                m_pat_nPileupPrecMeas[patIdx][stIdx] += isPrec;
+                m_pat_nPileupPhiMeas[patIdx][stIdx] += sp->measuresPhi();
+                return;
+            case eAllTruth:
+                m_pat_nAllTruthNonPrecMeas[patIdx][stIdx] += isTriggerEta;
+                m_pat_nAllTruthPrecMeas[patIdx][stIdx] += isPrec;
+                m_pat_nAllTruthPhiMeas[patIdx][stIdx] += sp->measuresPhi();
+                return;
+        }
     }
 }  // namespace MuonValR4

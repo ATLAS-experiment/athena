@@ -14,7 +14,7 @@ atlas_add_component( MuonFastReconstructionTest
                      LINK_LIBRARIES AthenaKernel StoreGateLib MuonTesterTreeLib MuonPRDTestLib FourMomUtils 
                                     MuonTruthHelpers xAODMuon xAODMuonSimHit xAODMuonPrepData MuonVisualizationHelpersR4 
                                     MuonPatternEvent MuonPatternHelpers MuonReadoutGeometryR4 MuonPRDTestR4Lib 
-                                    ActsGeometryInterfacesLib MuonFastRecoEvent
+                                    ActsGeometryInterfacesLib MuonFastRecoEvent TrigSteeringEvent
                                     ${ROOT_LIBRARIES} )
 
 # Install files from the package:

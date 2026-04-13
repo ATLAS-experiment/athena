@@ -251,7 +251,7 @@ namespace MuonValR4 {
         printOnCanvas(std::format("nPhi: {:d}", pat.nPhiHits()));
         printOnCanvas(std::format("theta: {:.2f}^{{#circ}}", inDegrees(pat.theta())));
         printOnCanvas(std::format("phi: {:.2f}^{{#circ}}", inDegrees(pat.phi())));
-        printOnCanvas(std::format("TotalResidual: {:.2f}", pat.totalResidual()));
+        printOnCanvas(std::format("MeanNormResidual: {:.2f}", pat.meanNormResidual2()));
         printOnCanvas(std::format("Status: {}", patStatus == PatternStatus::eSuccessful ? "Success" : (patStatus == PatternStatus::eFailed ? "Fail" : "Overlap")));
         printOnCanvas(std::format("Sector: {:d}", pat.sector()));
         printOnCanvas(std::format("OverlapSector: {:d}", pat.isSectorOverlap() ? pat.secondarySector() : -1));

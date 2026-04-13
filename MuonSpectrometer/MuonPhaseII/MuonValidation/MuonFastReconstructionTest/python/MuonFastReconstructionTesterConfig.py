@@ -19,6 +19,7 @@ def FastRecoVisualizationToolCfg(flags, name="FastRecoVisualizationTool", **kwar
 def MuonFastRecoTesterCfg(flags, name = "MuonFastRecoTester", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("isMC", flags.Input.isMC)
+    kwargs.setdefault("isSeededReco", flags.Trigger.doHLT) 
 
     if flags.Detector.GeometryMDT or flags.Detector.GeometryRPC or flags.Detector.GeometryTGC:
         kwargs.setdefault("SpacePointKey", "MuonSpacePoints")
