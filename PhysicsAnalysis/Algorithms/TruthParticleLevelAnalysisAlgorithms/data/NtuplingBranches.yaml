@@ -74,6 +74,24 @@ ParticleLevelTausBlock:
     description: the original ID from HepMC (no systematics)
     toggled_by: saveUID
 
+ParticleLevelResonancesBlock:
+  - name: pt
+    description: $p_\mathrm{T}$ (no systematics)
+  - name: eta
+    description: $\eta$ (no systematics)
+  - name: phi
+    description: $\phi$ (no systematics)
+  - name: m
+    description: invariant mass (no systematics)
+  - name: type
+    description: particle type according to the [`MCTruthClassifier`](https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/PhysicsAnalysis/MCTruthClassifier/MCTruthClassifier/MCTruthClassifierDefs.h) (no systematics)
+  - name: origin
+    description: particle origin according to the [`MCTruthClassifier`](https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/PhysicsAnalysis/MCTruthClassifier/MCTruthClassifier/MCTruthClassifierDefs.h) (no systematics)
+  - name: pdgId
+    description: PDG ID (no systematics)
+  - name: status
+    description: generator status code of the particle (no systematics)
+
 ParticleLevelNeutrinosBlock:
   - name: pt
     description: $p_\mathrm{T}$ (no systematics)
