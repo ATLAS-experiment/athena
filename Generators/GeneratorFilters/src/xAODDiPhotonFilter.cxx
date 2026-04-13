@@ -109,9 +109,7 @@ StatusCode xAODDiPhotonFilter::filterEvent() {
         double m2 = sumE*sumE-(sumPx*sumPx+sumPy*sumPy+sumPz*sumPz);
         double mGamGam = m2 >= 0. ? std::sqrt(m2) : -std::sqrt(-m2);
         ATH_MSG_DEBUG("mass(gamgam) = " << mGamGam << " (CLHEP::MeV)");
-        double deltaEta = MCTruthPhotonList2[0]->abseta() - MCTruthPhotonList2[1]->abseta();
-        double deltaPhi = MCTruthPhotonList2[0]->phi() - MCTruthPhotonList2[1]->phi();
-        double deltaR = std::sqrt(deltaEta*deltaEta+deltaPhi*deltaPhi);
+        double deltaR = MCTruthPhotonList2[0]->p4().DeltaR(MCTruthPhotonList2[1]->p4());
         ATH_MSG_DEBUG("deltaR(gamgam) = " << deltaR);
         int testMassDeltaRCuts = 0;
         
@@ -161,9 +159,7 @@ StatusCode xAODDiPhotonFilter::filterEvent() {
             double m2 = sumE*sumE-(sumPx*sumPx+sumPy*sumPy+sumPz*sumPz);
             double mGamGam = m2 >= 0. ? std::sqrt(m2) : -std::sqrt(-m2);
             ATH_MSG_DEBUG("mass(gamgam) = " << mGamGam << " (CLHEP::MeV)");
-            double deltaEta = MCTruthPhotonList2[i]->abseta() - MCTruthPhotonList2[j]->abseta();
-            double deltaPhi = MCTruthPhotonList2[i]->phi() - MCTruthPhotonList2[j]->phi();
-            double deltaR = std::sqrt(deltaEta*deltaEta+deltaPhi*deltaPhi);
+            double deltaR = MCTruthPhotonList2[i]->p4().DeltaR(MCTruthPhotonList2[j]->p4());
             ATH_MSG_DEBUG("deltaR(gamgam) = " << deltaR);
             int testMassDeltaRCuts = 0;
             
