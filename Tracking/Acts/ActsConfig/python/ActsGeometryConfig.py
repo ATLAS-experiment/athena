@@ -275,6 +275,30 @@ def ActsVolumeIdToDetectorCollectionMappingAlgCfg(flags,
     acc.addCondAlgo(CompFactory.ActsTrk.ActsVolumeIdToDetectorElementCollectionMappingAlg(name, **kwargs))
     return acc
 
+def ActsInDetVolumeIdToDetectorCollectionMappingAlgCfg(flags,
+                           name: str = "ActsInDetVolumeIdToDetectorCollectionMappingAlgCfg",
+                           **kwargs) -> ComponentAccumulator:
+    # Inner Detector version of ActsVolumeIdToDetectorCollectionMappingAlgCfg
+    acc = ComponentAccumulator()
+    if 'TrackingGeometryTool' not in kwargs :
+      kwargs.setdefault('TrackingGeometryTool',
+                        acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    kwargs.setdefault('ActsVolumeIdToDetectorElementCollectionMap', 'VolumeIdToDetectorElementCollectionMap')
+
+    def filterCollections(flags, pixel_det_el, strip_det_el) :
+      ret=[]
+      if flags.Detector.GeometryPixel:
+        ret += [ pixel_det_el ]
+      if flags.Detector.GeometrySCT:
+        ret += [ strip_det_el ]
+      return ret
+    kwargs.setdefault('DetectorElementsKeys', filterCollections( flags,
+                                                                 'PixelDetectorElementCollection',
+                                                                 'SCT_DetectorElementCollection'))
+
+    acc.addCondAlgo(CompFactory.ActsTrk.ActsVolumeIdToDetectorElementCollectionMappingAlg(name, **kwargs))
+    return acc
+
 def ItkBlueprintNodeBuilderCfg(flags,
                                    name: str = "ItkBlueprintNodeBuilder",
                                    **kwargs) -> ComponentAccumulator:

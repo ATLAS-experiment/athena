@@ -7,22 +7,19 @@ from ActsConfig.ActsConfigFlags import SeedingStrategy
 import AthenaCommon.SystemOfUnits as Units
 from ActsInterop import UnitConstants
 
-
 # Tools
 
 def isdet(flags,
           *,
           pixel: list = None,
           strip: list = None,
-          hgtd: list = None,
           noStrip: bool = False) -> list:
     keys = []
-    if flags.Detector.EnableITkPixel and pixel is not None:
+    if flags.Detector.EnablePixel and pixel is not None:
         keys += pixel
-    if flags.Detector.EnableITkStrip and strip is not None and not noStrip:
+    if flags.Detector.EnableSCT and strip is not None and not noStrip:
         keys += strip
-    if flags.Acts.useHGTDClusterInTrackFinding and hgtd is not None:
-        keys += hgtd
+
     return keys
 
 def seedOrder(flags,
@@ -34,15 +31,14 @@ def seedOrder(flags,
         keys.reverse()
     return keys
 
-def ActsTrackStatePrinterToolCfg(flags,
-                                 name: str = "ActsTrackStatePrinterTool",
+def ActsInDetTrackStatePrinterToolCfg(flags,
+                                 name: str = "ActsInDetTrackStatePrinterTool",
                                  **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    from InDetConfig.ITkActsHelpers import isFastPrimaryPass
-    kwargs.setdefault("InputSpacePoints", isdet(flags, noStrip=isFastPrimaryPass(flags),
-                                                pixel=['ITkPixelSpacePoints_Cached'] if flags.Acts.useCache else ['ITkPixelSpacePoints'],
-                                                strip=['ITkStripSpacePoints_Cached', 'ITkStripOverlapSpacePoints_Cached'] if flags.Acts.useCache else ['ITkStripSpacePoints', 'ITkStripOverlapSpacePoints']))
+    kwargs.setdefault("InputSpacePoints", isdet(flags, noStrip=False,
+                                                pixel=['PixelSpacePoints'],
+                                                strip=['SCT_SpacePoints', 'OverlapSpacePoints']))
 
     if 'TrackingGeometryTool' not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
@@ -56,7 +52,7 @@ def ActsTrackStatePrinterToolCfg(flags,
 
 # ACTS only algorithm
 
-def ActsMainTrackFindingAlgCfg(flags,
+def ActsInDetMainTrackFindingAlgCfg(flags,
                                name: str = "ActsTrackFindingAlg",
                                **kwargs) -> ComponentAccumulator:
     def tolist(c):
@@ -64,40 +60,34 @@ def ActsMainTrackFindingAlgCfg(flags,
 
     acc = ComponentAccumulator()
 
-    from ActsConfig.ActsGeometryConfig import ActsVolumeIdToDetectorCollectionMappingAlgCfg
-    # Remove HGTD Volumes from the propagation unless we need it
-    if not flags.Acts.useHGTDClusterInTrackFinding:
-        # HGTD has volume id:
-        # 2 for negative endcap
-        # 25 for positive endcap
-        kwargs.setdefault('EndOfTheWorldVolumeIds', [2, 25])
-    
-    acc.merge( ActsVolumeIdToDetectorCollectionMappingAlgCfg(flags) )
+    from ActsConfig.ActsGeometryConfig import ActsInDetVolumeIdToDetectorCollectionMappingAlgCfg
+
+    acc.merge( ActsInDetVolumeIdToDetectorCollectionMappingAlgCfg(flags) )
     kwargs.setdefault("ActsVolumeIdToDetectorElementCollectionMapKey", "VolumeIdToDetectorElementCollectionMap")
 
-    if flags.Detector.EnableITkPixel:
-        from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelDetectorElementStatusAlgCfg
-        acc.merge(ITkPixelDetectorElementStatusAlgCfg(flags))
-    if flags.Detector.EnableITkStrip:
-        from SCT_ConditionsAlgorithms.ITkStripConditionsAlgorithmsConfig import ITkStripDetectorElementStatusAlgCfg
-        acc.merge(ITkStripDetectorElementStatusAlgCfg(flags))
-    kwargs.setdefault("DetElStatus", seedOrder(flags, pixel=["ITkPixelDetectorElementStatus"], strip=["ITkStripDetectorElementStatus"]))
+    if flags.Detector.EnablePixel:
+        from PixelConditionsAlgorithms.PixelConditionsConfig import PixelDetectorElementStatusAlgCfg
+        acc.merge(PixelDetectorElementStatusAlgCfg(flags))
+    if flags.Detector.EnableSCT:
+        from SCT_ConditionsAlgorithms.SCT_ConditionsAlgorithmsConfig import SCT_DetectorElementStatusAlgCfg
+        acc.merge(SCT_DetectorElementStatusAlgCfg(flags))
+    kwargs.setdefault("DetElStatus", seedOrder(flags, pixel=["PixelDetectorElementStatus"], strip=["SCTDetectorElementStatus"]))
 
     # Seed labels and collections.
     # These 3 lists must match element for element, reversed if flags.Acts.useStripSeedsFirst is True.
     # Maybe it is best to start with strips where the occupancy is lower.
     kwargs.setdefault("SeedLabels", seedOrder(flags, pixel=["PPP"], strip=["SSS"]))
-    kwargs.setdefault("SeedContainerKeys", seedOrder(flags, pixel=["ActsPixelSeeds"], strip=["ActsStripSeeds"]))
-    kwargs.setdefault('DetectorElementsKeys', seedOrder(flags, pixel=['ITkPixelDetectorElementCollection'], strip=['ITkStripDetectorElementCollection']))
+    kwargs.setdefault("SeedContainerKeys", seedOrder(flags, pixel=["ActsPixelSeeds"], strip=["ActsSCT_Seeds"]))
+    kwargs.setdefault('DetectorElementsKeys', seedOrder(flags, pixel=['PixelDetectorElementCollection'], strip=['SCT_DetectorElementCollection']))
     if flags.Acts.Tracks.doAnalysis:
         kwargs.setdefault("SeedDestiny", [f'{seedkey}Destiny' for seedkey in kwargs["SeedContainerKeys"]])
 
-    kwargs.setdefault("UncalibratedMeasurementContainerKeys", isdet(flags, pixel=["ITkPixelClusters_Cached" if flags.Acts.useCache else "ITkPixelClusters"], strip=["ITkStripClusters_Cached" if flags.Acts.useCache else "ITkStripClusters"], hgtd=["HGTD_Clusters"]))
+    kwargs.setdefault("UncalibratedMeasurementContainerKeys", isdet(flags, pixel=["PixelClusters"], strip=["SCT_Clusters"]))
 
     kwargs.setdefault('ACTSTracksLocation', 'ActsTracks')
 
     kwargs.setdefault("maxPropagationStep", 10000)
-    kwargs.setdefault("skipDuplicateSeeds", flags.Acts.skipDuplicateSeeds)
+    kwargs.setdefault("skipDuplicateSeeds", True)# flags.Acts.skipDuplicateSeeds
     kwargs.setdefault("seedMeasOffset", 1)
 
     # Ambi strategy 0 means do the ambiguity resolution outside the track finding.
@@ -110,7 +100,10 @@ def ActsMainTrackFindingAlgCfg(flags,
     
     kwargs.setdefault("refitSeeds", seedOrder(flags, pixel=[False], strip=[False]))
     kwargs.setdefault("doTwoWay", flags.Acts.doTwoWayCKF)
-    kwargs.setdefault("autoReverseSearch", flags.Tracking.ActiveConfig.autoReverseSearch)
+    kwargs.setdefault("autoReverseSearch", flags.Acts.autoReverseSearchCKF)
+    # kwargs.setdefault("autoReverseSearch", True)
+    # kwargs.setdefault("useTopSpRZboundary",[ 229.0 * UnitConstants.mm, 450.0 * UnitConstants.mm])
+    
     # forceTrackOnSeed isn't effective with secondary passes, which will have removed most/all of the seed measurements from the measurement containers.
     kwargs.setdefault("forceTrackOnSeed", flags.Acts.forceTrackOnSeed and not flags.Tracking.ActiveConfig.isSecondaryPass)
 
@@ -118,11 +111,12 @@ def ActsMainTrackFindingAlgCfg(flags,
     # https://gitlab.cern.ch/atlas/athena/-/blob/main/Tracking/TrkConfig/python/TrackingPassFlags.py#L121
 
     # bins in |eta|, used for both MeasurementSelectorConfig and TrackSelector::EtaBinnedConfig
-    if flags.Detector.GeometryITk:
-        kwargs.setdefault("etaBins", flags.Tracking.ActiveConfig.etaBins)
+    kwargs.setdefault("etaBins", flags.Tracking.ActiveConfig.etaBins) # 
     # new default chi2 cuts optimise efficiency vs speed. Set same value as Athena's Xi2maxNoAdd.
-    kwargs.setdefault("chi2CutOff", flags.Tracking.ActiveConfig.Xi2max)
-    kwargs.setdefault("chi2OutlierCutOff", flags.Tracking.ActiveConfig.Xi2maxNoAdd)
+    kwargs.setdefault("chi2CutOff", tolist(flags.Tracking.ActiveConfig.Xi2max*1))
+    kwargs.setdefault("chi2OutlierCutOff", tolist(flags.Tracking.ActiveConfig.Xi2maxNoAdd*1))
+    kwargs.setdefault("checkCounts", True)
+    kwargs.setdefault("doBranchStopper", True)
 
     kwargs.setdefault("branchStopperPtMinFactor", 0.9)
     kwargs.setdefault("branchStopperAbsEtaMaxExtra", 0.1)
@@ -141,11 +135,11 @@ def ActsMainTrackFindingAlgCfg(flags,
     kwargs.setdefault("absEtaMax", flags.Tracking.ActiveConfig.maxEta)
     kwargs.setdefault("ptMin", [p / Units.GeV * UnitConstants.GeV for p in tolist(flags.Tracking.ActiveConfig.minPT)])
     # z0 cut is the same for all eta bins. I use the size of the eta bins limits minus one to find the number of bins.
-    kwargs.setdefault("z0Min", [-flags.Tracking.ActiveConfig.maxZImpactSeed / Units.mm * UnitConstants.mm for etabin in flags.Tracking.ActiveConfig.etaBins[:-1]])
-    kwargs.setdefault("z0Max", [ flags.Tracking.ActiveConfig.maxZImpactSeed / Units.mm * UnitConstants.mm for etabin in flags.Tracking.ActiveConfig.etaBins[:-1]])
-    kwargs.setdefault("d0Min", [-d0 / Units.mm * UnitConstants.mm for d0 in tolist(flags.Tracking.ActiveConfig.maxPrimaryImpact)])
-    kwargs.setdefault("d0Max", [ d0 / Units.mm * UnitConstants.mm for d0 in tolist(flags.Tracking.ActiveConfig.maxPrimaryImpact)])
-    kwargs.setdefault("minMeasurements", tolist(flags.Tracking.ActiveConfig.minClusters))
+    kwargs.setdefault("z0Min", [-flags.Tracking.ActiveConfig.maxZImpact / Units.mm * UnitConstants.mm for etabin in flags.Tracking.ActiveConfig.etaBins[:-1]])
+    kwargs.setdefault("z0Max", [ flags.Tracking.ActiveConfig.maxZImpact / Units.mm * UnitConstants.mm for etabin in flags.Tracking.ActiveConfig.etaBins[:-1]])
+    kwargs.setdefault("d0Min", [-d0 / Units.mm * UnitConstants.mm for d0 in tolist(flags.Tracking.ActiveConfig.maxPrimaryImpactList)])
+    kwargs.setdefault("d0Max", [ d0 / Units.mm * UnitConstants.mm for d0 in tolist(flags.Tracking.ActiveConfig.maxPrimaryImpactList)])
+    kwargs.setdefault("minMeasurements", tolist([ 8, 8, 8]))
     kwargs.setdefault("maxHoles", tolist(flags.Tracking.ActiveConfig.maxHoles))
     kwargs.setdefault("minPixelHits", tolist(flags.Tracking.ActiveConfig.minPixel))
     kwargs.setdefault("maxPixelHoles", tolist(flags.Tracking.ActiveConfig.maxPixelHoles))
@@ -155,10 +149,10 @@ def ActsMainTrackFindingAlgCfg(flags,
     ### kwargs.setdefault("maxSharedHits", tolist(flags.Tracking.ActiveConfig.maxShared))
 
     # GBTS produces much purer seeds, so the branch stopper selections aren't needed with GBTS seeds.
-    if flags.Acts.SeedingStrategy not in (SeedingStrategy.GbtsFtf, SeedingStrategy.Gbts):
+    if flags.Acts.SeedingStrategy is not SeedingStrategy.Gbts2:
         kwargs.setdefault("ptMinMeasurements", seedOrder(flags, pixel=[3], strip=[6]))
         kwargs.setdefault("absEtaMaxMeasurements", seedOrder(flags, pixel=[3], strip=[999999]))
-    
+
     if 'TrackingGeometryTool' not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
         kwargs.setdefault(
@@ -172,12 +166,7 @@ def ActsMainTrackFindingAlgCfg(flags,
 
     if 'TrackParamsEstimationTool' not in kwargs:
         from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
-
-        tpe_tool_kwargs = {}
-        if flags.Tracking.ActiveConfig.extension in ['ActsLargeRadius', 'ActsValidateLargeRadiusStandalone']:
-            tpe_tool_kwargs["allowPropagatorFailure"] = True
-
-        kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags, **tpe_tool_kwargs)))
+        kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags)))
         
     if 'ExtrapolationTool' not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
@@ -189,9 +178,9 @@ def ActsMainTrackFindingAlgCfg(flags,
     if flags.Acts.doPrintTrackStates and 'TrackStatePrinter' not in kwargs:
         kwargs.setdefault(
             "TrackStatePrinter",
-            acc.popToolsAndMerge(ActsTrackStatePrinterToolCfg(flags)),
+            acc.popToolsAndMerge(ActsInDetTrackStatePrinterToolCfg(flags)),
         )
- 
+
     if 'FitterTool' not in kwargs:
         from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg 
         kwargs.setdefault(
@@ -201,6 +190,7 @@ def ActsMainTrackFindingAlgCfg(flags,
                                                OutlierChi2Cut=float('inf')))
         )
 
+    # !!! Calibrator is not used for Inner Detector yet
     if 'PixelCalibrator' not in kwargs:
         from AthenaConfiguration.Enums import BeamType
 
@@ -216,7 +206,7 @@ def ActsMainTrackFindingAlgCfg(flags,
                     acc.popToolsAndMerge(ActsAnalogueClusteringToolCfg(flags,
                                                                        CalibrateAfterMeasurementSelection = flags.Acts.PixelCalibrationStrategy is PixelCalibrationStrategy.AnalogueClusteringAfterSelection))
                 )
-
+    # !!! Calibrator is not used for Inner Detector yet
     if 'StripCalibrator' not in kwargs:
         from AthenaConfiguration.Enums import BeamType
         if not (flags.Beam.Type is BeamType.Cosmics):
@@ -232,7 +222,6 @@ def ActsMainTrackFindingAlgCfg(flags,
                                                                      CalibrateAfterMeasurementSelection = flags.Acts.StripCalibrationStrategy is StripCalibrationStrategy.DigitalCalibrationAfterSelection))
                 )
 
-        
     if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
         from ActsConfig.ActsMonitoringConfig import ActsTrackFindingMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(
@@ -243,7 +232,7 @@ def ActsMainTrackFindingAlgCfg(flags,
 
 
 
-def ActsTrackFindingCfg(flags,
+def ActsInDetTrackFindingCfg(flags,
                         **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
@@ -251,9 +240,8 @@ def ActsTrackFindingCfg(flags,
     dataPrepPrefix = f'{flags.Tracking.ActiveConfig.extension.replace("Acts", "")}'
     if not flags.Tracking.ActiveConfig.isSecondaryPass:
         dataPrepPrefix = ''
-    pixelClusters = f'ITk{dataPrepPrefix}PixelClusters'
-    stripClusters = f'ITk{dataPrepPrefix}StripClusters'    
-    hgtdClusters = f'{dataPrepPrefix}HGTD_Clusters'
+    pixelClusters = f'{dataPrepPrefix}PixelClusters'
+    stripClusters = f'{dataPrepPrefix}SCT_Clusters'    
     # If cache is activated the keys have "_Cached" as postfix
     if flags.Acts.useCache:
         pixelClusters += '_Cached'
@@ -263,74 +251,60 @@ def ActsTrackFindingCfg(flags,
     # Understand what are the seeds we need to consider
     pixelSeedLabels = ['PPP']
     stripSeedLabels = ['SSS']
-    # Conversion and LRT do not process pixel seeds
-    from InDetConfig.ITkActsHelpers import isFastPrimaryPass
-    if flags.Tracking.ActiveConfig.extension in ['ActsConversion', 'ActsLargeRadius', 'ActsValidateLargeRadiusStandalone']:
-        pixelSeedLabels = None
-    # Main pass does not process strip seeds in the fast tracking configuration
-    elif isFastPrimaryPass(flags):
-        stripSeedLabels = None
+
+    # Consider if pixel seeds and SCT seeds are needed, for the moment, both are kept for Inner Detector
 
     # Now set the seed and estimated parameters keys accordingly
     pixelSeedKeys = [f'{flags.Tracking.ActiveConfig.extension}PixelSeeds']
-    stripSeedKeys = [f'{flags.Tracking.ActiveConfig.extension}StripSeeds']
-    pixelDetElements = ['ITkPixelDetectorElementCollection']
-    stripDetElements = ['ITkStripDetectorElementCollection']
-
-    pixelRefit = [False]
-    stripRefit = [False]
-    if flags.Tracking.ActiveConfig.extension in ['ActsLargeRadius', 'ActsValidateLargeRadiusStandalone']:
-        stripRefit = [True]
-
+    stripSeedKeys = [f'{flags.Tracking.ActiveConfig.extension}SCT_Seeds']
+    pixelDetElements = ['PixelDetectorElementCollection']
+    stripDetElements = ['SCT_DetectorElementCollection']
     if pixelSeedLabels is None:
         pixelSeedKeys = None
         pixelDetElements = None
-        pixelRefit = None
     if stripSeedLabels is None:
         stripSeedKeys = None
         stripDetElements = None
-        stripRefit = None
 
     kwargs.setdefault('ACTSTracksLocation', f"{flags.Tracking.ActiveConfig.extension}Tracks")
-    kwargs.setdefault('UncalibratedMeasurementContainerKeys', isdet(flags, pixel=[pixelClusters], strip=[stripClusters], hgtd=[hgtdClusters]))
+    kwargs.setdefault('UncalibratedMeasurementContainerKeys', isdet(flags, pixel=[pixelClusters], strip=[stripClusters]))
     kwargs.setdefault('SeedLabels', seedOrder(flags, pixel=pixelSeedLabels, strip=stripSeedLabels))
     kwargs.setdefault('SeedContainerKeys', seedOrder(flags, pixel=pixelSeedKeys, strip=stripSeedKeys))
     kwargs.setdefault('DetectorElementsKeys', seedOrder(flags, pixel=pixelDetElements, strip=stripDetElements))
-    kwargs.setdefault("refitSeeds", seedOrder(flags, pixel=pixelRefit, strip=stripRefit))
 
-    acc.merge(ActsMainTrackFindingAlgCfg(flags,
+    acc.merge(ActsInDetMainTrackFindingAlgCfg(flags,
                                          name=f"{flags.Tracking.ActiveConfig.extension}TrackFindingAlg",
                                          **kwargs))
 
-    # Analysis extensions
-    if flags.Acts.Tracks.doAnalysis:
-        from ActsConfig.ActsAnalysisConfig import ActsTrackAnalysisAlgCfg
-        acc.merge(ActsTrackAnalysisAlgCfg(flags,
-                                          name=f"{flags.Tracking.ActiveConfig.extension}TrackAnalysisAlg",
-                                          TracksLocation=f"{flags.Tracking.ActiveConfig.extension}Tracks"))
+    # # Analysis extensions
+    # if flags.Acts.Tracks.doAnalysis:
+    #     from ActsConfig.ActsAnalysisConfig import ActsTrackAnalysisAlgCfg
+    #     acc.merge(ActsTrackAnalysisAlgCfg(flags,
+    #                                       name=f"{flags.Tracking.ActiveConfig.extension}TrackAnalysisAlg",
+    #                                       TracksLocation=f"{flags.Tracking.ActiveConfig.extension}Tracks"))
 
-        # Seed To Track Monitoring
-        if len(kwargs["SeedContainerKeys"]) != len(kwargs["DetectorElementsKeys"]):
-            raise AttributeError("SeedContainerKeys and DetectorElementsKeys must have same size")
+    #     # Seed To Track Monitoring
+    #     if len(kwargs["SeedContainerKeys"]) != len(kwargs["DetectorElementsKeys"]):
+    #         raise AttributeError("SeedContainerKeys and DetectorElementsKeys must have same size")
 
-        for i in range(0, len(kwargs["SeedContainerKeys"])):
-            seedKey = kwargs["SeedContainerKeys"][i]
-            detElKey = kwargs["DetectorElementsKeys"][i]
+    #     for i in range(0, len(kwargs["SeedContainerKeys"])):
+    #         seedKey = kwargs["SeedContainerKeys"][i]
+    #         detElKey = kwargs["DetectorElementsKeys"][i]
 
-            # make seed params
-            from ActsConfig.ActsAnalysisConfig import ActsBaseSeedsToTrackParamsAlgCfg
-            acc.merge(ActsBaseSeedsToTrackParamsAlgCfg(flags,
-                                                       name = f'{seedKey}SeedsToTrackParamsAlg',
-                                                       InputSeedContainerKey = seedKey,
-                                                       DetectorElementsKey = detElKey,
-                                                       OutputTrackParamsCollectionKey = f'{seedKey}Params'))
+    #         # make seed params
+    #         from ActsConfig.ActsAnalysisConfig import ActsBaseSeedsToTrackParamsAlgCfg
+    #         acc.merge(ActsBaseSeedsToTrackParamsAlgCfg(flags,
+    #                                                    name = f'{seedKey}SeedsToTrackParamsAlg',
+    #                                                    InputSeedContainerKey = seedKey,
+    #                                                    DetectorElementsKey = detElKey,
+    #                                                    OutputTrackParamsCollectionKey = f'{seedKey}Params'))
 
-            from ActsConfig.ActsAnalysisConfig import ActsSeedToTrackAnalysisAlgCfg
-            acc.merge(ActsSeedToTrackAnalysisAlgCfg(flags,
-                                                    name = f'{seedKey}ToTrackAnalysisAlg',
-                                                    InputSeedCollection = seedKey,
-                                                    InputTrackParamsCollection = f'{seedKey}Params',
-                                                    InputDestinyCollection = f'{seedKey}Destiny'))
+    #         from ActsConfig.ActsAnalysisConfig import ActsSeedToTrackAnalysisAlgCfg
+    #         acc.merge(ActsSeedToTrackAnalysisAlgCfg(flags,
+    #                                                 name = f'{seedKey}ToTrackAnalysisAlg',
+    #                                                 InputSeedCollection = seedKey,
+    #                                                 InputTrackParamsCollection = f'{seedKey}Params',
+    #                                                 InputDestinyCollection = f'{seedKey}Destiny'))
 
     # Persistification
     if flags.Acts.EDM.PersistifyTracks:
@@ -363,8 +337,8 @@ def ActsTrackFindingCfg(flags,
     return acc
 
 
-def ActsMainScoreBasedAmbiguityResolutionAlgCfg(flags,
-                                      name: str = "ActsScoreBasedAmbiguityResolutionAlg",
+def ActsInDetMainScoreBasedAmbiguityResolutionAlgCfg(flags,
+                                      name: str = "ActsInDetScoreBasedAmbiguityResolutionAlg",
                                       **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
@@ -388,8 +362,8 @@ def ActsMainScoreBasedAmbiguityResolutionAlgCfg(flags,
     return acc
 
 
-def ActsMainAmbiguityResolutionAlgCfg(flags,
-                                      name: str = "ActsAmbiguityResolutionAlg",
+def ActsInDetMainAmbiguityResolutionAlgCfg(flags,
+                                      name: str = "ActsInDetAmbiguityResolutionAlg",
                                       **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
@@ -409,7 +383,7 @@ def ActsMainAmbiguityResolutionAlgCfg(flags,
     return acc
 
 
-def ActsAmbiguityResolutionCfg(flags,
+def ActsInDetAmbiguityResolutionCfg(flags,
                                **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     kwargs.setdefault('TracksLocation', f"{flags.Tracking.ActiveConfig.extension}Tracks")
@@ -417,11 +391,11 @@ def ActsAmbiguityResolutionCfg(flags,
     from ActsConfig.ActsConfigFlags import AmbiguitySolverStrategy
             
     if flags.Acts.AmbiguitySolverStrategy is AmbiguitySolverStrategy.ScoreBased:
-        acc.merge(ActsMainScoreBasedAmbiguityResolutionAlgCfg(flags,
+        acc.merge(ActsInDetMainScoreBasedAmbiguityResolutionAlgCfg(flags,
                                                     name=f"{flags.Tracking.ActiveConfig.extension}ScoreBasedAmbiguityResolutionAlg",
                                                     **kwargs))
     else:
-        acc.merge(ActsMainAmbiguityResolutionAlgCfg(flags,
+        acc.merge(ActsInDetMainAmbiguityResolutionAlgCfg(flags,
                                                     name=f"{flags.Tracking.ActiveConfig.extension}AmbiguityResolutionAlg",
                                                     **kwargs))
     # Analysis extensions
@@ -459,101 +433,4 @@ def ActsAmbiguityResolutionCfg(flags,
         from OutputStreamAthenaPool.OutputStreamConfig import addToAOD    
         acc.merge(addToAOD(flags, toAOD))
 
-    return acc
-
-def ActsTrackToTrackParticleCnvToolCfg(flags,
-                                       name: str = "ActsTrackToTrackParticleCnvTool",
-                                       **kwargs) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
-
-    # To produce AtlasFieldCacheCondObj
-    from MagFieldServices.MagFieldServicesConfig import (
-        AtlasFieldCacheCondAlgCfg)
-    acc.merge(AtlasFieldCacheCondAlgCfg(flags))
-
-    if 'ExtrapolationTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-        kwargs.setdefault('ExtrapolationTool', acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags)) )
-
-    kwargs.setdefault('FirstAndLastParameterOnly',True)
-    kwargs.setdefault('ComputeExpectedLayerPattern',True)
-
-    det_elements=[]
-    element_types=[]
-    if flags.Detector.EnableITkPixel:
-        from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
-        acc.merge(ITkPixelReadoutGeometryCfg(flags))
-        det_elements += ['ITkPixelDetectorElementCollection']
-        element_types += [1]
-    if flags.Detector.EnableITkStrip:
-        from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
-        acc.merge(ITkStripReadoutGeometryCfg(flags))
-        det_elements += ['ITkStripDetectorElementCollection']
-        element_types += [2]
-    if flags.Detector.EnablePixel:
-        from PixelGeoModel.PixelGeoModelConfig import PixelReadoutGeometryCfg
-        acc.merge(PixelReadoutGeometryCfg(flags))
-        det_elements += ['PixelDetectorElementCollection']
-        element_types += [1]
-    if flags.Detector.EnableSCT:
-        from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
-        acc.merge(SCT_ReadoutGeometryCfg(flags))
-        det_elements += ['SCT_DetectorElementCollection']
-        element_types += [2]
-
-    kwargs.setdefault('SiDetectorElementCollections',det_elements)
-    kwargs.setdefault('SiDetEleCollToMeasurementType',element_types)
-
-    acc.setPrivateTools(CompFactory.ActsTrk.TrackToTrackParticleCnvTool(name, **kwargs))
-    return acc
-
-
-def ActsTrackToTrackParticleCnvAlgCfg(flags,
-                                      name: str = "ActsTrackToTrackParticleCnvAlg",
-                                      **kwargs) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
-
-    # Beam Spot Cond is a requirement
-    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
-    acc.merge(BeamSpotCondAlgCfg(flags))
-
-    # Configure TrackToTrackParticleConvTool
-    tool_kwargs = {}
-    if "ExtrapolationTool" in kwargs:
-        tool_kwargs["ExtrapolationTool"] = kwargs.pop("ExtrapolationTool")
-    if "FirstAndLastParameterOnly" in kwargs:
-        tool_kwargs["FirstAndLastParameterOnly"] = kwargs.pop("FirstAndLastParameterOnly")
-    if "ComputeExpectedLayerPattern" in kwargs:
-        tool_kwargs["ComputeExpectedLayerPattern"] = kwargs.pop("ComputeExpectedLayerPattern")
-    if "SiDetectorElementCollections" in kwargs:
-        tool_kwargs["SiDetectorElementCollections"] = kwargs.pop("SiDetectorElementCollections")
-    if "SiDetEleCollToMeasurementType" in kwargs:
-        tool_kwargs["SiDetEleCollToMeasurementType"] = kwargs.pop("SiDetEleCollToMeasurementType")
-
-    if 'TrackToTrackParticleCnvTool' not in kwargs:
-        kwargs['TrackToTrackParticleCnvTool'] = acc.popToolsAndMerge(
-            ActsTrackToTrackParticleCnvToolCfg(flags, **tool_kwargs))
-
-    kwargs.setdefault('BeamSpotKey', 'BeamSpotData')
-    kwargs.setdefault("PerigeeExpression", flags.Tracking.perigeeExpression)
-    kwargs.setdefault('VertexContainerKey', 'PrimaryVertices')
-
-    acc.addEventAlgo(
-        CompFactory.ActsTrk.TrackToTrackParticleCnvAlg(name, **kwargs))
-
-    return acc
-
-def ActsToXAODTrackConverterAlgCfg(flags,
-                                   name: str = "ActsToXAODTrackConverterAlg",
-                                   **kwargs) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
-
-    kwargs.setdefault('InputActsTracksLocation', '')
-    kwargs.setdefault('OutputActsTracksLocation', '')
-
-    if 'TrackingGeometryTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault('TrackingGeometryTool', acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
-    
-    acc.addEventAlgo(CompFactory.ActsTrk.ActsToXAODTrackConverterAlg(name, **kwargs))    
     return acc

@@ -161,29 +161,43 @@ namespace ActsTrk {
   
   xAOD::UncalibMeasType ActsTrackStateOnSurfaceDecoratorAlg::getDetectorType(std::uint64_t volumeId) const
   {
-    switch (volumeId) {
-    case 2:
-    case 25:
-      return xAOD::UncalibMeasType::HGTDClusterType;
-    case 22:
-    case 23:
-    case 24:
-      return xAOD::UncalibMeasType::StripClusterType;
-    case 8:
-    case 9:
-    case 10:
-    case 13:
-    case 14:
-    case 15:
-    case 16:
-    case 18:
-    case 19:
-    case 20:
-      return xAOD::UncalibMeasType::PixelClusterType;
-    default:
-	throw std::runtime_error("Cannot recognize volume id");
-    };
+    if (m_isITk) {
+      switch (volumeId) {
+      case 2:
+      case 25:
+        return xAOD::UncalibMeasType::HGTDClusterType;
+      case 22:
+      case 23:
+      case 24:
+        return xAOD::UncalibMeasType::StripClusterType;
+      case 8:
+      case 9:
+      case 10:
+      case 13:
+      case 14:
+      case 15:
+      case 16:
+      case 18:
+      case 19:
+      case 20:
+        return xAOD::UncalibMeasType::PixelClusterType;
+      default:
+        throw std::runtime_error("Cannot recognize volume id");
+      }
+    } else {
+      switch (volumeId) {
+      case 9:
+      case 10:
+      case 11:
+        return xAOD::UncalibMeasType::StripClusterType;
+      case 5:
+      case 6:
+      case 7:
+        return xAOD::UncalibMeasType::PixelClusterType;
+      default:
+        throw std::runtime_error("Cannot recognize Inner Detetor volume id");
+      }
+    }
   }
-  
 }
 

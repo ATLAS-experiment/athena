@@ -989,6 +989,7 @@ def createTRTStandaloneTrackingPassFlags():
 
     return icf
 
+
 #####################################################################
 
 def printPrimaryConfig(flags):

@@ -41,6 +41,10 @@ def actsWorkflowFlags(flags) -> None:
     flags.Tracking.doPixelDigitalClustering = lambda pcf: pcf.GeoModel.Run >= LHCPeriod.Run4
     flags.Tracking.recoChain = [TrackingComponent.ActsChain]
 
+def actsInnerDetectorWorkflowFlags(flags) -> None:
+    """flags for Reco_tf with CA used in unit test: schedule a pure ACTS workflow to reco sequence, with Inner Detector settings"""
+    flags.Tracking.recoChain = [TrackingComponent.ActsChain]
+
 def actsScoreBasedAmbiguityWorkflowFlags(flags) -> None:
     """flags for Reco_tf with CA used in unit test: schedule a pure ACTS (legacy like) workflow to reco sequence"""
     actsLegacyWorkflowFlags(flags)
