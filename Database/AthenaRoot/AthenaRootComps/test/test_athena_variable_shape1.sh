@@ -8,9 +8,8 @@ mkdir -p $testname
 cd $testname
 
 echo "::: generate f1.root..."
-athena.py \
-    -c 'EVTMAX=10; BRANCHES=["RunNumber", "EventNumber", "el_n", "el_eta"]; OUTBRANCHES=["el_n","el_eta"]' \
-    AthenaRootComps/test_athena_variable_shape_ntuple.py \
+test_athena_variable_shape_ntuple.py \
+    --evtMax 10 --branches "RunNumber,EventNumber,el_n,el_eta" --outbranches "el_n,el_eta" \
     >| log.001.txt 2>| log.001.stderr.txt \
     || exit 1
 /bin/mv d3pd.root f1.root || exit 1
