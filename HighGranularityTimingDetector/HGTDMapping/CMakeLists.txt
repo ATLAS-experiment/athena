@@ -29,7 +29,7 @@ atlas_add_test( HGTDOnlineID_test
   test/HGTDOnlineID_test.cxx
   INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} HGTDMappingLib
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
 
 atlas_add_test( HGTDMappingData_test	
@@ -37,7 +37,7 @@ atlas_add_test( HGTDMappingData_test
   test/HGTDMappingData_test.cxx 
   INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}  
   LINK_LIBRARIES ${Boost_LIBRARIES} HGTDMappingLib
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
 
 atlas_add_test( HGTDMappingAlg_test	
@@ -47,5 +47,5 @@ atlas_add_test( HGTDMappingAlg_test
   LINK_LIBRARIES ${Boost_LIBRARIES} TestTools AthenaBaseComps GaudiKernel
     PathResolver StoreGateLib Identifier IdDictParser HGTDMappingLib
     HGTD_Identifier
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
