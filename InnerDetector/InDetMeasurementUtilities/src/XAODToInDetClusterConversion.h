@@ -71,13 +71,13 @@ class XAODToInDetClusterConversion
   ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool {this, "LorentzAngleTool", "", "Tool to retrieve Lorentz angle of SCT"};
 
   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey {this, "PixelDetEleCollKey", "ITkPixelDetectorElementCollection", "Key of SiDetectorElementCollection for Pixel"};
-  SG::ReadHandleKey<xAOD::PixelClusterContainer> m_inputPixelClusterContainerKey {this, "InputPixelClustersName", "ITkPixelClusters", "name of the input xAOD pixel cluster container"};
+  SG::ReadHandleKey<xAOD::PixelClusterContainerAlt> m_inputPixelClusterContainerKey {this, "InputPixelClustersName", "ITkPixelClusters", "name of the input xAOD pixel cluster container"};
 
   SG::WriteHandleKey<InDet::PixelClusterContainer> m_outputPixelClusterContainerKey {this, "OutputPixelClustersName", "ITkPixelClusters", "name of the output InDet pixel cluster container"};
   SG::WriteHandleKey< InDet::SiClusterContainer > m_pixelClusterContainerLinkKey {this, "PixelClustersLinkName", "ITkPixelClusters"};
 
   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_stripDetEleCollKey {this, "StripDetEleCollKey", "ITkStripDetectorElementCollection", "Key of SiDetectorElementCollection for Strip"};
-  SG::ReadHandleKey<xAOD::StripClusterContainer> m_inputStripClusterContainerKey {this, "InputStripClustersName", "ITkStripClusters", "name of the input xAOD strip cluster container"};
+  SG::ReadHandleKey<xAOD::StripClusterContainerAlt> m_inputStripClusterContainerKey {this, "InputStripClustersName", "ITkStripClusters", "name of the input xAOD strip cluster container"};
 
   SG::WriteHandleKey<InDet::SCT_ClusterContainer> m_outputStripClusterContainerKey {this, "OutputStripClustersName", "ITkStripClusters", "name of the output InDet pixel cluster container"};
   SG::WriteHandleKey< InDet::SiClusterContainer > m_stripClusterContainerLinkKey {this, "StripClustersLinkName", "ITkStripClusters"};

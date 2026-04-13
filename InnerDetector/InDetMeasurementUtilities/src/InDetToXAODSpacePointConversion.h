@@ -43,14 +43,14 @@ namespace InDet {
 
   private:
     StatusCode convertPixel(const EventContext& ctx,
-			    xAOD::PixelClusterContainer* cluster_xaod_container) const;
+			    xAOD::PixelClusterContainerAlt* cluster_xaod_container) const;
     StatusCode convertStrip(const EventContext& ctx, 
 			    const Amg::Vector3D& vertex,
-			    xAOD::StripClusterContainer* cluster_xaod_container,
+			    xAOD::StripClusterContainerAlt* cluster_xaod_container,
 			    std::unordered_map<Identifier, std::size_t>& mapClusters) const;
     StatusCode convertStripOverlap(const EventContext& ctx, 
 				   const Amg::Vector3D& vertex,
-				   xAOD::StripClusterContainer* cluster_xaod_container,
+				   xAOD::StripClusterContainerAlt* cluster_xaod_container,
 				   std::unordered_map<Identifier, std::size_t>& mapClusters) const;
 
   private:
@@ -64,9 +64,9 @@ namespace InDet {
     SG::ReadHandleKey< ::SpacePointOverlapCollection > m_inSpacepointsOverlap {this, "InputStripOverlapSpacePointsName", "ITkOverlapSpacePoints",
 	"Input Strip overlap space points container"};
 
-    SG::WriteHandleKey< xAOD::PixelClusterContainer > m_outClustersPixel {this, "OutputPixelClustersName", "ITkPixelClusters",
+    SG::WriteHandleKey< xAOD::PixelClusterContainerAlt > m_outClustersPixel {this, "OutputPixelClustersName", "ITkPixelClusters",
       "Output Pixel cluster container"};
-    SG::WriteHandleKey< xAOD::StripClusterContainer > m_outClustersStrip {this, "OutputStripClustersName", "ITkStripClusters",
+    SG::WriteHandleKey< xAOD::StripClusterContainerAlt > m_outClustersStrip {this, "OutputStripClustersName", "ITkStripClusters",
       "Output Strip cluster container"};
     
     SG::WriteHandleKey< xAOD::SpacePointContainer > m_outSpacepointsPixel {this, "OutputPixelSpacePointsName", "ITkPixelSpacePoints",

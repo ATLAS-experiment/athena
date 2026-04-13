@@ -158,7 +158,7 @@ StatusCode TestVectorTool::compare(const EFTrackingFPGAIntegration::TVHolder &tv
     return StatusCode::SUCCESS;
 }
 
-StatusCode TestVectorTool::encodePixelL2G(const xAOD::PixelClusterContainer *pixelClusters, std::vector<uint64_t> &encodedData) const
+StatusCode TestVectorTool::encodePixelL2G(const xAOD::PixelClusterContainerAlt *pixelClusters, std::vector<uint64_t> &encodedData) const
 {
     ATH_MSG_DEBUG("Encoding xAOD pixel clusters to L2G EDM TV");
 
@@ -266,7 +266,7 @@ StatusCode TestVectorTool::encodePixelL2G(const xAOD::PixelClusterContainer *pix
     return StatusCode::SUCCESS;
 }
 
-StatusCode TestVectorTool::encodeStripL2G(const xAOD::StripClusterContainer *stripClusters, std::vector<uint64_t> &encodedData) const
+StatusCode TestVectorTool::encodeStripL2G(const xAOD::StripClusterContainerAlt *stripClusters, std::vector<uint64_t> &encodedData) const
 {
     ATH_MSG_DEBUG("Encoding xAOD strip clusters to L2G EDM TV");
 

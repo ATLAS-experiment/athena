@@ -73,7 +73,7 @@ StatusCode xAODSpacePointMaker::makePixelSpacePointContainer(
     ATH_MSG_DEBUG("Container '" << m_pixelSpacePointsKey << "' initialised");
 
     // Get pixel cluster container for linking
-    SG::ReadHandle<xAOD::PixelClusterContainer> pixelClusters(m_pixelClusterKey, ctx);
+    SG::ReadHandle<xAOD::PixelClusterContainerAlt> pixelClusters(m_pixelClusterKey, ctx);
     if (!pixelClusters.isValid()) {
         ATH_MSG_ERROR("Could not retrieve pixel cluster container");
         return StatusCode::FAILURE;
@@ -134,8 +134,8 @@ StatusCode xAODSpacePointMaker::makePixelSpacePointContainer(
 
         // Create ElementLink to the pixel cluster
         if (measIdx >= 0 && static_cast<size_t>(measIdx) < pixelClusters->size()) {
-            ElementLink<xAOD::PixelClusterContainer> link(*pixelClusters, measIdx);
-            static const SG::Decorator<ElementLink<xAOD::PixelClusterContainer>> dec("fpgaPixelClusterLink");
+            ElementLink<xAOD::PixelClusterContainerAlt> link(*pixelClusters, measIdx);
+            static const SG::Decorator<ElementLink<xAOD::PixelClusterContainerAlt>> dec("fpgaPixelClusterLink");
             dec(*sp) = link;
         }
     }
@@ -187,7 +187,7 @@ StatusCode xAODSpacePointMaker::makeStripSpacePointContainer(
     ATH_MSG_DEBUG("Container '" << m_stripSpacePointsKey << "' initialised");
 
     // get the strip cluster container for linking
-    SG::ReadHandle<xAOD::StripClusterContainer> stripClusters(m_stripClusterKey, ctx);
+    SG::ReadHandle<xAOD::StripClusterContainerAlt> stripClusters(m_stripClusterKey, ctx);
     if (!stripClusters.isValid()) {
         ATH_MSG_ERROR("Could not retrieve strip cluster container");
         return StatusCode::FAILURE;
@@ -309,12 +309,12 @@ StatusCode xAODSpacePointMaker::makeStripSpacePointContainer(
             meas_idx2 >= 0 && static_cast<size_t>(meas_idx2) < stripClusters->size()) {
             
             // Create ElementLinks to the strip clusters
-            ElementLink<xAOD::StripClusterContainer> link1(*stripClusters, meas_idx1);
-            ElementLink<xAOD::StripClusterContainer> link2(*stripClusters, meas_idx2);
+            ElementLink<xAOD::StripClusterContainerAlt> link1(*stripClusters, meas_idx1);
+            ElementLink<xAOD::StripClusterContainerAlt> link2(*stripClusters, meas_idx2);
             
             // Store the links as auxiliary data
-            static const SG::Decorator<ElementLink<xAOD::StripClusterContainer>> dec1("fpgaStripClusterLink1");
-            static const SG::Decorator<ElementLink<xAOD::StripClusterContainer>> dec2("fpgaStripClusterLink2");
+            static const SG::Decorator<ElementLink<xAOD::StripClusterContainerAlt>> dec1("fpgaStripClusterLink1");
+            static const SG::Decorator<ElementLink<xAOD::StripClusterContainerAlt>> dec2("fpgaStripClusterLink2");
             dec1(*ssp) = link1;
             dec2(*ssp) = link2;
         }

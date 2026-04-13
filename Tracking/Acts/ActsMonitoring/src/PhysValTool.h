@@ -57,9 +57,9 @@ namespace ActsTrk {
     SG::ReadHandleKey< xAOD::EventInfo > m_eventInfo {this, "EventInfo", "EventInfo", 
 	"Event info key"};
     
-    SG::ReadHandleKey< xAOD::PixelClusterContainer > m_pixelClusterContainerKey {this, "PixelClusterContainerKey", "ITkPixelClusters",
+    SG::ReadHandleKey< xAOD::PixelClusterContainerAlt > m_pixelClusterContainerKey {this, "PixelClusterContainerKey", "ITkPixelClusters",
 	"Key of input pixel clusters"};
-    SG::ReadHandleKey< xAOD::StripClusterContainer > m_stripClusterContainerKey {this, "StripClusterContainerKey", "ITkStripClusters", 
+    SG::ReadHandleKey< xAOD::StripClusterContainerAlt > m_stripClusterContainerKey {this, "StripClusterContainerKey", "ITkStripClusters", 
 	"Key of input pixel clusters"};
     SG::ReadHandleKey< xAOD::HGTDClusterContainer > m_hgtdClusterContainerKey {this, "HGTDClusterContainerKey", "HGTD_Clusters",
         "Key of input hgtd clusters"};

@@ -47,12 +47,12 @@ namespace FPGATrackSim {
    	        Gaudi::Property<bool> m_isDataPrep {this, "isDataPrep", false, "If True, this is for data prep pipeline only"};
                 //_________________________________________________________________________________________________________________________
                 // xAOD Pixel clusters to monitor
-                SG::ReadHandleKeyArray <xAOD::PixelClusterContainer> m_xAODPixelClusterContainerKeys{
+                SG::ReadHandleKeyArray <xAOD::PixelClusterContainerAlt> m_xAODPixelClusterContainerKeys{
                         this, "xAODPixelClusterContainers", {},
                         "input list of xAOD Pixel Cluster Containers, as resulted from FPGATrackSim (hit/road) EDM conversion" };
                 
                 // xAOD Strip clusters to monitor
-                SG::ReadHandleKeyArray <xAOD::StripClusterContainer> m_xAODStripClusterContainerKeys{
+                SG::ReadHandleKeyArray <xAOD::StripClusterContainerAlt> m_xAODStripClusterContainerKeys{
                         this, "xAODStripClusterContainers", {"ITkStripClusters" ,"xAODStripClusters_1stFromFPGACluster", "xAODStripClusters_1stFromFPGAHit"},
                         "input list of xAOD Strip Cluster Containers, as resulted from FPGATrackSim (hit/road) EDM conversion" };
                 

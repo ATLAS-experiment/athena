@@ -56,7 +56,7 @@ class TrackExtensionAlg : public AthReentrantAlgorithm {
   using CKFOptions = Acts::CombinatorialKalmanFilterOptions<detail::RecoTrackContainer>;
 
  private:
-  SG::ReadHandleKey<xAOD::PixelClusterContainer> m_pixelClusters{
+  SG::ReadHandleKey<xAOD::PixelClusterContainerAlt> m_pixelClusters{
       this, "PixelClusterContainer", "", "the pix clusters"};
   SG::ReadHandleKey<ActsTrk::ProtoTrackCollection> m_protoTrackCollectionKey{
       this, "ProtoTracksLocation", "", "Input proto tracks"};

@@ -28,8 +28,8 @@ namespace ActsTrk {
       /// @param foundProtoTracks: vector to hold the found proto tracks - will be populated by the method.
       /// Method will not discard existing content 
     virtual StatusCode findProtoTracks(const EventContext& ctx,
-                  const xAOD::PixelClusterContainer & pixelContainer,
-                  const xAOD::StripClusterContainer & stripContainer,
+                  const xAOD::PixelClusterContainerAlt & pixelContainer,
+                  const xAOD::StripClusterContainerAlt & stripContainer,
                   std::vector<ActsTrk::ProtoTrack> & foundProtoTracks ) const override final; 
     protected:
     /// @brief creates a random, dummy set of parameters 

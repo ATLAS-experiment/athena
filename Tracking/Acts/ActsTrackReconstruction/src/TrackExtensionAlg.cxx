@@ -145,7 +145,7 @@ namespace ActsTrk{
    
     detail::xAODUncalibMeasSurfAcc surfAcc{m_trackingGeometryTool.get()};
 
-    SG::ReadHandle<xAOD::PixelClusterContainer> pixelClustersHandle = SG::makeHandle(m_pixelClusters, context);
+    SG::ReadHandle<xAOD::PixelClusterContainerAlt> pixelClustersHandle = SG::makeHandle(m_pixelClusters, context);
     ATH_MSG_DEBUG("Measurements (pixels only) size: " << pixelClustersHandle->size());
     // potential TODO: filtering only certain layers
     detail::TrackFindingMeasurements measurements(1ul /* number of measurement containers*/);

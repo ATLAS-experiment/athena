@@ -25,7 +25,7 @@ public:
     using RDOContainer = PixelRDO_Container;
     using RawDataCollection = RDOContainer::base_value_type;
     using IDHelper = PixelID;
-    using ClusterContainer = xAOD::PixelClusterContainer;
+    using ClusterContainer = xAOD::PixelClusterContainerAlt;
     using ClusterAuxContainer = xAOD::PixelClusterAuxContainer;
 
     struct Cell {
@@ -57,7 +57,7 @@ public:
 	       std::vector<ClusterCollection>& collection) const = 0;
 
     virtual /*PixelClusterAuxDataCache<Utils::AccessPolicy::Mutable>*/ std::any
-    createAuxDataCache(xAOD::PixelClusterContainer& cont, std::size_t nClusterRDOs) const = 0;
+    createAuxDataCache(xAOD::PixelClusterContainerAlt& cont, std::size_t nClusterRDOs) const = 0;
 
     virtual StatusCode
     makeClusters(const EventContext& ctx,

@@ -46,19 +46,19 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
     std::unique_ptr<InDet::SCT_ClusterCollection> SCTCollFromClusters = std::make_unique<InDet::SCT_ClusterCollection>();
 
     std::unique_ptr<InDet::SCT_ClusterCollection> SCTCollFromSP = std::make_unique<InDet::SCT_ClusterCollection>();     
-    std::unique_ptr<xAOD::PixelClusterContainer> PixelContFromHits = std::make_unique<xAOD::PixelClusterContainer>();
+    std::unique_ptr<xAOD::PixelClusterContainerAlt> PixelContFromHits = std::make_unique<xAOD::PixelClusterContainerAlt>();
     std::unique_ptr<xAOD::PixelClusterAuxContainer> PixelAuxContFromHits = std::make_unique<xAOD::PixelClusterAuxContainer>();
     PixelContFromHits->setStore (PixelAuxContFromHits.get());
 
-    std::unique_ptr<xAOD::StripClusterContainer> SCTContFromHits = std::make_unique<xAOD::StripClusterContainer>();
+    std::unique_ptr<xAOD::StripClusterContainerAlt> SCTContFromHits = std::make_unique<xAOD::StripClusterContainerAlt>();
     std::unique_ptr<xAOD::StripClusterAuxContainer> SCTAuxContFromHits = std::make_unique<xAOD::StripClusterAuxContainer>();
     SCTContFromHits->setStore(SCTAuxContFromHits.get() );
 
-    std::unique_ptr<xAOD::PixelClusterContainer> PixelContFromClusters = std::make_unique<xAOD::PixelClusterContainer>();
+    std::unique_ptr<xAOD::PixelClusterContainerAlt> PixelContFromClusters = std::make_unique<xAOD::PixelClusterContainerAlt>();
     std::unique_ptr<xAOD::PixelClusterAuxContainer> PixelAuxContFromClusters = std::make_unique<xAOD::PixelClusterAuxContainer>();
     PixelContFromClusters->setStore (PixelAuxContFromClusters.get());
 
-    std::unique_ptr<xAOD::StripClusterContainer> SCTContFromClusters = std::make_unique<xAOD::StripClusterContainer>();
+    std::unique_ptr<xAOD::StripClusterContainerAlt> SCTContFromClusters = std::make_unique<xAOD::StripClusterContainerAlt>();
     std::unique_ptr<xAOD::StripClusterAuxContainer> SCTAuxContFromClusters = std::make_unique<xAOD::StripClusterAuxContainer>();
     SCTContFromClusters->setStore(SCTAuxContFromClusters.get() );
 
@@ -130,8 +130,8 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
       }
 
       else {ATH_MSG_WARNING("Failed to retrieve 1st stage FPGATrackSimClusterCollection. Will skip clusters and track conversion ");}
-      SG::WriteHandle<xAOD::PixelClusterContainer> xAODPixelClusterFromFPGAClusterHandle (m_xAODPixelClusterFromFPGAClusterKey, ctx);
-      SG::WriteHandle<xAOD::StripClusterContainer> xAODStripClusterFromFPGAClusterHandle (m_xAODStripClusterFromFPGAClusterKey, ctx);
+      SG::WriteHandle<xAOD::PixelClusterContainerAlt> xAODPixelClusterFromFPGAClusterHandle (m_xAODPixelClusterFromFPGAClusterKey, ctx);
+      SG::WriteHandle<xAOD::StripClusterContainerAlt> xAODStripClusterFromFPGAClusterHandle (m_xAODStripClusterFromFPGAClusterKey, ctx);
 
       ATH_CHECK( xAODPixelClusterFromFPGAClusterHandle.record (std::move(PixelContFromClusters), std::move(PixelAuxContFromClusters)));
       ATH_CHECK( xAODStripClusterFromFPGAClusterHandle.record (std::move(SCTContFromClusters), std::move(SCTAuxContFromClusters)));
@@ -171,8 +171,8 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
       else {ATH_MSG_WARNING("Failed to retrieve 1st stage FPGATrackSimHitCollection. Will skip hit conversion ");}
 
 
-      SG::WriteHandle<xAOD::PixelClusterContainer> xAODPixelClusterFromFPGAHitHandle (m_xAODPixelClusterFromFPGAHitKey, ctx);
-      SG::WriteHandle<xAOD::StripClusterContainer> xAODStripClusterFromFPGAHitHandle (m_xAODStripClusterFromFPGAHitKey, ctx);
+      SG::WriteHandle<xAOD::PixelClusterContainerAlt> xAODPixelClusterFromFPGAHitHandle (m_xAODPixelClusterFromFPGAHitKey, ctx);
+      SG::WriteHandle<xAOD::StripClusterContainerAlt> xAODStripClusterFromFPGAHitHandle (m_xAODStripClusterFromFPGAHitKey, ctx);
       ATH_CHECK( xAODPixelClusterFromFPGAHitHandle.record (std::move(PixelContFromHits),std::move(PixelAuxContFromHits)));
       ATH_CHECK( xAODStripClusterFromFPGAHitHandle.record (std::move(SCTContFromHits),std::move(SCTAuxContFromHits)));
 

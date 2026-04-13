@@ -85,9 +85,9 @@ namespace InDet {
       return StatusCode::FAILURE;
     }
 
-    SG::ReadHandle<xAOD::PixelClusterContainer> inputPixelClusterContainer = SG::makeHandle( m_inputPixelClusterContainerKey, ctx );
+    SG::ReadHandle<xAOD::PixelClusterContainerAlt> inputPixelClusterContainer = SG::makeHandle( m_inputPixelClusterContainerKey, ctx );
     ATH_CHECK( inputPixelClusterContainer.isValid() );
-    const xAOD::PixelClusterContainer *inputPixelClusters = inputPixelClusterContainer.cptr();
+    const xAOD::PixelClusterContainerAlt *inputPixelClusters = inputPixelClusterContainer.cptr();
 
     SG::WriteHandle<InDet::PixelClusterContainer> outputPixelClusterContainer = SG::makeHandle(m_outputPixelClusterContainerKey, ctx);
     ATH_CHECK( outputPixelClusterContainer.record (std::make_unique<InDet::PixelClusterContainer>(m_pixelID->wafer_hash_max(), EventContainers::Mode::OfflineFast)) );
@@ -147,9 +147,9 @@ namespace InDet {
       return StatusCode::FAILURE;
     }
 
-    SG::ReadHandle<xAOD::StripClusterContainer> inputStripClusterContainer = SG::makeHandle( m_inputStripClusterContainerKey, ctx );
+    SG::ReadHandle<xAOD::StripClusterContainerAlt> inputStripClusterContainer = SG::makeHandle( m_inputStripClusterContainerKey, ctx );
     ATH_CHECK( inputStripClusterContainer.isValid() );
-    const xAOD::StripClusterContainer *inputStripClusters = inputStripClusterContainer.cptr();
+    const xAOD::StripClusterContainerAlt *inputStripClusters = inputStripClusterContainer.cptr();
 
     SG::WriteHandle<InDet::SCT_ClusterContainer> outputStripClusterContainer = SG::makeHandle( m_outputStripClusterContainerKey, ctx );
     ATH_CHECK( outputStripClusterContainer.record (std::make_unique<InDet::SCT_ClusterContainer>(m_stripID->wafer_hash_max(), EventContainers::Mode::OfflineFast)) );

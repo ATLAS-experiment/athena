@@ -8,6 +8,7 @@ atlas_add_poolcnv_library( xAODInDetMeasurementAthenaPoolPoolCnv
   src/*.h src/*.cxx
   FILES
      xAODInDetMeasurement/PixelClusterContainer.h
+     xAODInDetMeasurement/PixelClusterContainerAlt.h
      xAODInDetMeasurement/PixelClusterAuxContainer.h
      xAODInDetMeasurement/StripClusterContainer.h
      xAODInDetMeasurement/StripClusterAuxContainer.h
@@ -17,8 +18,10 @@ atlas_add_poolcnv_library( xAODInDetMeasurementAthenaPoolPoolCnv
      xAODInDetMeasurement/SpacePointAuxContainer.h     
   TYPES_WITH_NAMESPACE
      xAOD::PixelClusterContainer
+     xAOD::PixelClusterContainerAlt
      xAOD::PixelClusterAuxContainer
      xAOD::StripClusterContainer
+     xAOD::StripClusterContainerAlt
      xAOD::StripClusterAuxContainer
      xAOD::HGTDClusterContainer
      xAOD::HGTDClusterAuxContainer

@@ -1,6 +1,8 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
+#pragma GCC optimize ("O0")
+#undef NDEBUG
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "src/detail/TrackFindingMeasurements.h"
 
@@ -97,7 +99,7 @@ namespace ActsTrk::detail {
           using PixelClusterAuxDataCacheProxy =  ClusterAuxDataCacheWithClusterAccess<PixelClusterAuxDataCacheCollection >;
           
           using StripClusterAuxDataCacheProxy =  ClusterAuxDataCacheWithClusterAccess<StripClusterAuxDataCacheCollection >;
-          // || std::is_same_v<T_Container,xAOD::StripClusterContainer>
+          // || std::is_same_v<T_Container,xAOD::StripClusterContainerAlt>
           static_assert(    std::is_same_v<T_Container,PixelClusterAuxDataCacheProxy>
                          || std::is_same_v<T_Container,StripClusterAuxDataCacheProxy>
                          || std::is_same_v<T_Container,xAOD::HGTDClusterContainer>);

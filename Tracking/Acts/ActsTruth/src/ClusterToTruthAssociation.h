@@ -13,7 +13,7 @@
 #include "MeasurementToTruthAssociationAlg.h"
 
 // Adapter to use MeasurementToTruthAssociation algorithm to
-// xAOD::PixelClusterContainer and xAOD::StripClusterContainer to
+// xAOD::PixelClusterContainerAlt and xAOD::StripClusterContainerAlt to
 // xAOD::TruthParticles using the InDetSimDataCollection and
 // the xAODTruthParticleLink which pairs HepMcParticleLinks with the
 // corresponding xAOD::TruthParticle.
@@ -80,13 +80,13 @@ namespace ActsTrk {
 
    // name the specialistion to get a nicer name in python
    class PixelClusterToTruthAssociationAlg
-      : public MeasurementToTruthAssociationAlg<xAOD::PixelClusterContainer,
+      : public MeasurementToTruthAssociationAlg<xAOD::PixelClusterContainerAlt,
                                                 InDetSimDataCollection,
                                                 xAODTruthParticleLinkVector,
                                                 MeasurementToTruthAssociationDebugHistograms>
    {
    public:
-      using MeasurementToTruthAssociationAlg<xAOD::PixelClusterContainer,
+      using MeasurementToTruthAssociationAlg<xAOD::PixelClusterContainerAlt,
                                              InDetSimDataCollection,
                                              xAODTruthParticleLinkVector,
                                              MeasurementToTruthAssociationDebugHistograms>::MeasurementToTruthAssociationAlg;
@@ -94,13 +94,13 @@ namespace ActsTrk {
 
    // name the specialistion to get a nicer name in python
    class StripClusterToTruthAssociationAlg
-      : public MeasurementToTruthAssociationAlg<xAOD::StripClusterContainer,
+      : public MeasurementToTruthAssociationAlg<xAOD::StripClusterContainerAlt,
                                                 InDetSimDataCollection,
                                                 xAODTruthParticleLinkVector,
                                                 MeasurementToTruthAssociationDebugHistograms>
    {
    public:
-      using MeasurementToTruthAssociationAlg<xAOD::StripClusterContainer,
+      using MeasurementToTruthAssociationAlg<xAOD::StripClusterContainerAlt,
                                              InDetSimDataCollection,
                                              xAODTruthParticleLinkVector,
                                              MeasurementToTruthAssociationDebugHistograms>::MeasurementToTruthAssociationAlg;

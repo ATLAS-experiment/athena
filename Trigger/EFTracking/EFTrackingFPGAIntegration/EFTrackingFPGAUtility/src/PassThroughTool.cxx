@@ -28,9 +28,9 @@ StatusCode PassThroughTool::runPassThrough(EFTrackingTransient::StripClusterAuxI
                                            const EventContext &ctx) const
 {
     // Retrieve the strip and pixel cluster container from the event store
-    SG::ReadHandle<xAOD::StripClusterContainer> inputStripClusters(
+    SG::ReadHandle<xAOD::StripClusterContainerAlt> inputStripClusters(
         m_stripClustersKey, ctx);
-    SG::ReadHandle<xAOD::PixelClusterContainer> inputPixelClusters(
+    SG::ReadHandle<xAOD::PixelClusterContainerAlt> inputPixelClusters(
         m_pixelClustersKey, ctx);
     
     // Retrieve the space point container from the event store
@@ -446,7 +446,7 @@ StatusCode PassThroughTool::runPassThrough(EFTrackingTransient::StripClusterAuxI
 }
 
 StatusCode PassThroughTool::getInputClusterData(
-    const xAOD::StripClusterContainer *sc,
+    const xAOD::StripClusterContainerAlt *sc,
     std::vector<EFTrackingTransient::StripCluster> &ef_sc,
     unsigned long N) const
 {
@@ -461,7 +461,7 @@ StatusCode PassThroughTool::getInputClusterData(
     for (unsigned long i = 0; i < N; i++)
     {
         EFTrackingTransient::StripCluster cache;
-        // Get the data from the input xAOD::StripClusterContainer and set it to the
+        // Get the data from the input xAOD::StripClusterContainerAlt and set it to the
         // cache
         cache.localPosition = sc->at(i)->localPosition<1>()(0, 0);
         cache.localCovariance = sc->at(i)->localCovariance<1>()(0, 0);
@@ -487,7 +487,7 @@ StatusCode PassThroughTool::getInputClusterData(
 }
 
 StatusCode PassThroughTool::getInputClusterData(
-    const xAOD::PixelClusterContainer *pc,
+    const xAOD::PixelClusterContainerAlt *pc,
     std::vector<EFTrackingTransient::PixelCluster> &ef_pc,
     unsigned long N) const
 {
@@ -504,7 +504,7 @@ StatusCode PassThroughTool::getInputClusterData(
         // Local variable cache uses 16096 bytes of stack space
         //coverity[STACK_USE]
         EFTrackingTransient::PixelCluster cache;
-        // Get the data from the input xAOD::PixelClusterContainer and set it to the
+        // Get the data from the input xAOD::PixelClusterContainerAlt and set it to the
         // cache
         cache.id = pc->at(i)->identifier();
         cache.idHash = pc->at(i)->identifierHash();

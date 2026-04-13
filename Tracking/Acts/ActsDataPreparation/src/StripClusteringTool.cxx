@@ -152,7 +152,7 @@ StripClusteringTool::clusterize(const EventContext& ctx,
 }
 
 /*StripClusterAuxDataCache<Utils::AccessPolicy::Mutable>*/ std::any
-StripClusteringTool::createAuxDataCache(xAOD::StripClusterContainer& cont, std::size_t nClusterRDOs) const 
+StripClusteringTool::createAuxDataCache(xAOD::StripClusterContainerAlt& cont, std::size_t nClusterRDOs) const 
 {
   return StripClusterAuxDataCache<Utils::AccessPolicy::Mutable>(cont, nClusterRDOs, false);
 }

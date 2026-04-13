@@ -92,10 +92,10 @@ StatusCode InDetToXAODClusterConversion::convertPixelClusters(const EventContext
     return StatusCode::FAILURE;
   }
 
-  SG::WriteHandle<xAOD::PixelClusterContainer> outputPixelClusterContainer(m_outputPixelClusterContainerKey, ctx);
-  ATH_CHECK( outputPixelClusterContainer.record (std::make_unique<xAOD::PixelClusterContainer>(SG::VIEW_ELEMENTS, SG::ALWAYS_TRACK_INDICES),
+  SG::WriteHandle<xAOD::PixelClusterContainerAlt> outputPixelClusterContainer(m_outputPixelClusterContainerKey, ctx);
+  ATH_CHECK( outputPixelClusterContainer.record (std::make_unique<xAOD::PixelClusterContainerAlt>(SG::VIEW_ELEMENTS, SG::ALWAYS_TRACK_INDICES),
 						 std::make_unique<xAOD::PixelClusterAuxContainer>()) );
-  ATH_MSG_DEBUG( "Recorded xAOD::PixelClusterContainer with key: " << m_outputPixelClusterContainerKey.key()  );
+  ATH_MSG_DEBUG( "Recorded xAOD::PixelClusterContainerAlt with key: " << m_outputPixelClusterContainerKey.key()  );
 
   SG::ReadHandle<InDet::PixelClusterContainer> inputPixelClusterContainer(m_inputPixelClusterContainerKey, ctx);
 
@@ -130,11 +130,11 @@ StatusCode InDetToXAODClusterConversion::convertPixelClusters(const EventContext
     }
   }
   if (icluster != outputPixelClusterContainer->size()) {
-    ATH_MSG_ERROR("xAOD::PixelClusterContainer miscount; " << icluster << " versus " << outputPixelClusterContainer->size());
+    ATH_MSG_ERROR("xAOD::PixelClusterContainerAlt miscount; " << icluster << " versus " << outputPixelClusterContainer->size());
     return StatusCode::FAILURE;
   }
 
-  ATH_MSG_DEBUG("xAOD::PixelClusterContainer with size: " << outputPixelClusterContainer->size());
+  ATH_MSG_DEBUG("xAOD::PixelClusterContainerAlt with size: " << outputPixelClusterContainer->size());
   return StatusCode::SUCCESS;
 }
 
@@ -146,10 +146,10 @@ StatusCode InDetToXAODClusterConversion::convertStripClusters(const EventContext
     return StatusCode::FAILURE;
   }
 
-  SG::WriteHandle<xAOD::StripClusterContainer> outputStripClusterContainer(m_outputStripClusterContainerKey, ctx);
-  ATH_CHECK( outputStripClusterContainer.record (std::make_unique<xAOD::StripClusterContainer>(SG::VIEW_ELEMENTS, SG::ALWAYS_TRACK_INDICES),
+  SG::WriteHandle<xAOD::StripClusterContainerAlt> outputStripClusterContainer(m_outputStripClusterContainerKey, ctx);
+  ATH_CHECK( outputStripClusterContainer.record (std::make_unique<xAOD::StripClusterContainerAlt>(SG::VIEW_ELEMENTS, SG::ALWAYS_TRACK_INDICES),
 						 std::make_unique<xAOD::StripClusterAuxContainer>()) );
-  ATH_MSG_DEBUG( "Recorded xAOD::StripClusterContainer with key: " << m_outputStripClusterContainerKey.key()  );
+  ATH_MSG_DEBUG( "Recorded xAOD::StripClusterContainerAlt with key: " << m_outputStripClusterContainerKey.key()  );
 
   SG::ReadHandle<InDet::SCT_ClusterContainer> inputStripClusterContainer(m_inputStripClusterContainerKey, ctx);
 
@@ -184,11 +184,11 @@ StatusCode InDetToXAODClusterConversion::convertStripClusters(const EventContext
     }
   }
   if (icluster != outputStripClusterContainer->size()) {
-    ATH_MSG_ERROR("xAOD::StripClusterContainer miscount; " << icluster << " versus " << outputStripClusterContainer->size());
+    ATH_MSG_ERROR("xAOD::StripClusterContainerAlt miscount; " << icluster << " versus " << outputStripClusterContainer->size());
     return StatusCode::FAILURE;
   }
 
-  ATH_MSG_DEBUG("xAOD::StripClusterContainer with size: " << outputStripClusterContainer->size());
+  ATH_MSG_DEBUG("xAOD::StripClusterContainerAlt with size: " << outputStripClusterContainer->size());
 
   return StatusCode::SUCCESS;
 }

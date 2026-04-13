@@ -98,7 +98,7 @@ int main() {
 
     // create the main containers to test:
     xAOD::StripClusterAuxContainer aux;
-    xAOD::StripClusterContainer tpc;
+    xAOD::StripClusterContainerAlt tpc;
 
     tpc.setStore(&aux);
 

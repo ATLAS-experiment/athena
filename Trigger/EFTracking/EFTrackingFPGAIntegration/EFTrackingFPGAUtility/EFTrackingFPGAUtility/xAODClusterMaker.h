@@ -92,12 +92,12 @@ public:
 
 private:
   /// Key for the pixel clusters container to be created
-  SG::WriteHandleKey<xAOD::PixelClusterContainer> m_pixelClustersKey{
+  SG::WriteHandleKey<xAOD::PixelClusterContainerAlt> m_pixelClustersKey{
       this, "PixelClusterContainerKey", "FPGAPixelClusters",
       "Key for output pixel cluster container"};
 
   /// Key for the strip clusters container to be created
-  SG::WriteHandleKey<xAOD::StripClusterContainer> m_stripClustersKey{
+  SG::WriteHandleKey<xAOD::StripClusterContainerAlt> m_stripClustersKey{
       this, "StripClusterContainerKey", "FPGAStripClusters",
       "Key for output strip cluster container"};
 

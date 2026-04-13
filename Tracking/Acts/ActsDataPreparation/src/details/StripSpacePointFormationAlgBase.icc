@@ -68,12 +68,12 @@ namespace ActsTrk {
     auto nReceivedSPsStripOverlap = Monitored::Scalar<int>( "numStripOverlapSpacePoints" , 0 );
     auto mon = Monitored::Group( m_monTool, timer,timer_ca, nReceivedSPsStrip, nReceivedSPsStripOverlap, mon_nCachedIdHashes );
 
-    SG::ReadHandle<xAOD::StripClusterContainer> inputStripClusterContainer( m_stripClusterContainerKey, ctx );
+    SG::ReadHandle<xAOD::StripClusterContainerAlt> inputStripClusterContainer( m_stripClusterContainerKey, ctx );
     if (!inputStripClusterContainer.isValid()){
-        ATH_MSG_FATAL("xAOD::StripClusterContainer with key " << m_stripClusterContainerKey.key() << " is not available...");
+        ATH_MSG_FATAL("xAOD::StripClusterContainerAlt with key " << m_stripClusterContainerKey.key() << " is not available...");
         return StatusCode::FAILURE;
     }
-    const xAOD::StripClusterContainer* inputClusters = inputStripClusterContainer.cptr();
+    const xAOD::StripClusterContainerAlt* inputClusters = inputStripClusterContainer.cptr();
     ATH_MSG_DEBUG("Retrieved " << inputClusters->size() << " clusters from container " << m_stripClusterContainerKey.key());
     m_stat[kNClusters] += inputClusters->size();
     
@@ -260,7 +260,7 @@ namespace ActsTrk {
   }
 
   template <bool useCache>
-  void StripSpacePointFormationAlgBase<useCache>::fillSpacepoints(xAOD::SpacePointContainer* cont, std::vector<StripSP>& input, const xAOD::StripClusterContainer* inputClusters, unsigned int indexBase) const{
+  void StripSpacePointFormationAlgBase<useCache>::fillSpacepoints(xAOD::SpacePointContainer* cont, std::vector<StripSP>& input, const xAOD::StripClusterContainerAlt* inputClusters, unsigned int indexBase) const{
       std::vector<xAOD::SpacePoint*> sp_collection;
       sp_collection.reserve(input.size());
       for (std::size_t i(0); i<input.size(); ++i)

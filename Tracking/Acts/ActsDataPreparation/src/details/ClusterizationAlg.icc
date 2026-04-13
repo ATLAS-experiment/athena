@@ -7,7 +7,7 @@
 #include "AthAllocators/DataPool.h"
 
 namespace xAOD {
-   struct PixelClusterContainer;
+   struct PixelClusterContainerAlt;
 }
 namespace {
    template <typename T>
@@ -189,7 +189,7 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
   ATH_CHECK(clusterHandle.record( std::make_unique<ClusterContainer>(SG::VIEW_ELEMENTS, SG::ALWAYS_TRACK_INDICES),
 				  std::make_unique<ClusterAuxContainer>() ));
   ClusterContainer *clusterContainer = clusterHandle.ptr();
-  static_assert( !std::is_same_v<ClusterContainer, xAOD::PixelClusterContainer> || has_moduleIndex<ClusterContainer>);
+  static_assert( !std::is_same_v<ClusterContainer, xAOD::PixelClusterContainerAlt> || has_moduleIndex<ClusterContainer>);
 
   using xAODCluster_t = typename ClusterContainer::base_value_type;
   DataPool<xAODCluster_t> pool (nClusters);

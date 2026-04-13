@@ -127,8 +127,8 @@ StatusCode FPGAClusterConverter::convertHits(const std::vector<const FPGATrackSi
 
 
 StatusCode FPGAClusterConverter::convertHits(const FPGATrackSimHitCollection& hits,
-                                              xAOD::PixelClusterContainer& pixelCont,
-                                              xAOD::StripClusterContainer& SCTCont) const {
+                                              xAOD::PixelClusterContainerAlt& pixelCont,
+                                              xAOD::StripClusterContainerAlt& SCTCont) const {
   ATH_MSG_DEBUG("Found " << hits.size() << " FPGATrackSimHits [xAOD]");
     // reserve some memory
   pixelCont.reserve(hits.size());
@@ -190,8 +190,8 @@ StatusCode FPGAClusterConverter::convertClusters(const std::vector<FPGATrackSimC
 }
 
 StatusCode FPGAClusterConverter::convertClusters(const std::vector<FPGATrackSimCluster>& clusters,
-                                                  xAOD::PixelClusterContainer& pixelCont,
-                                                  xAOD::StripClusterContainer& SCTCont) const {
+                                                  xAOD::PixelClusterContainerAlt& pixelCont,
+                                                  xAOD::StripClusterContainerAlt& SCTCont) const {
   ATH_MSG_DEBUG("Found " << clusters.size() << " FPGATrackSimClusters [xAOD]");
   // reserve some memory
   pixelCont.reserve(clusters.size());
@@ -224,8 +224,8 @@ StatusCode FPGAClusterConverter::convertClusters(const std::vector<FPGATrackSimC
 StatusCode FPGAClusterConverter::convertSpacePoints(const std::vector<FPGATrackSimCluster>& fpgaSPs,
                                                   xAOD::SpacePointContainer& SPStripCont,
                                                   xAOD::SpacePointContainer& SPPixelCont, 
-                                                  xAOD::StripClusterContainer& stripClusterCont,
-                                                  xAOD::PixelClusterContainer& pixelClusterCont) const {
+                                                  xAOD::StripClusterContainerAlt& stripClusterCont,
+                                                  xAOD::PixelClusterContainerAlt& pixelClusterCont) const {
   ATH_MSG_INFO("Converting Pixel SPs");
   SPPixelCont.reserve(pixelClusterCont.size());
   ATH_CHECK(createPixelSPs(SPPixelCont, pixelClusterCont));
@@ -677,7 +677,7 @@ StatusCode FPGAClusterConverter::createSCTCluster(const FPGATrackSimCluster& clu
 }
 
 
-StatusCode FPGAClusterConverter::createPixelSPs(xAOD::SpacePointContainer& pixelSPs, xAOD::PixelClusterContainer& clustersCont) const {
+StatusCode FPGAClusterConverter::createPixelSPs(xAOD::SpacePointContainer& pixelSPs, xAOD::PixelClusterContainerAlt& clustersCont) const {
 
   for (const xAOD::PixelCluster* p_cl : clustersCont)
   {
@@ -704,7 +704,7 @@ StatusCode FPGAClusterConverter::createPixelSPs(xAOD::SpacePointContainer& pixel
 }
 
 
-StatusCode FPGAClusterConverter::createSP(const FPGATrackSimCluster& cl, xAOD::SpacePoint& sp , xAOD::StripClusterContainer& clustersCont ) const {
+StatusCode FPGAClusterConverter::createSP(const FPGATrackSimCluster& cl, xAOD::SpacePoint& sp , xAOD::StripClusterContainerAlt& clustersCont ) const {
 
   SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey };
   const InDet::BeamSpotData* beamSpot = *beamSpotHandle;

@@ -28,7 +28,7 @@ namespace ActsTrk::detail {
 template <class derived_t>
 class AuxDataCacheList : protected MeasurementContainerListWithDimension<derived_t,
                                                                       ContainerRefWithDim<PixelClusterAuxDataCacheProxy,2>,
-                                                                         //ContainerRefWithDim<xAOD::StripClusterContainer,1>,
+                                                                         //ContainerRefWithDim<xAOD::StripClusterContainerAlt,1>,
                                                                          ContainerRefWithDim<StripClusterAuxDataCacheProxy,1>,
                                                                          ContainerRefWithDim<xAOD::HGTDClusterContainer,3> >  {
 public:

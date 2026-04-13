@@ -65,9 +65,9 @@ namespace ActsTrk {
   StatusCode PixelClusterTruthDecoratorAlg::execute(const EventContext& ctx) const {
 
   //Mandatory. Require if the algorithm is scheduled.
-  SG::ReadHandle<xAOD::PixelClusterContainer> PixelClusterContainer = SG::makeHandle(m_clustercontainer_key,ctx);
+  SG::ReadHandle<xAOD::PixelClusterContainerAlt> PixelClusterContainer = SG::makeHandle(m_clustercontainer_key,ctx);
   ATH_CHECK(PixelClusterContainer.isValid());
-  const xAOD::PixelClusterContainer* clusters = PixelClusterContainer.cptr();
+  const xAOD::PixelClusterContainerAlt* clusters = PixelClusterContainer.cptr();
 
   SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleHandle = SG::makeHandle( m_pixelDetEleCollKey, ctx );
   ATH_CHECK(pixelDetEleHandle.isValid());
@@ -88,7 +88,7 @@ namespace ActsTrk {
                         std::make_unique<xAOD::TrackMeasurementValidationAuxContainer>()));
 
   // Decorations
-  SG::WriteDecorHandle<xAOD::PixelClusterContainer,
+  SG::WriteDecorHandle<xAOD::PixelClusterContainerAlt,
 		       ElementLink< xAOD::TrackMeasurementValidationContainer > > decorator_measurement_link( m_trackMeasurement_link, ctx );  
     
   SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, std::uint64_t> decor_detectorElementID ( m_measurement_detectorElementID, ctx );
@@ -252,7 +252,7 @@ namespace ActsTrk {
 }
 
 StatusCode PixelClusterTruthDecoratorAlg::labelMeasurementToKeep(const EventContext& ctx,
-								 const xAOD::PixelClusterContainer& clusters,
+								 const xAOD::PixelClusterContainerAlt& clusters,
 								 std::vector<bool>& labels) const
 {
   labels.clear();

@@ -34,7 +34,7 @@ public:
                std::vector<ClusterCollection>& collection) const override;
   
     virtual /*PixelClusterAuxDataCache<Utils::AccessPolicy::Mutable>*/ std::any
-    createAuxDataCache(xAOD::PixelClusterContainer& cont, std::size_t nClusterRDOs) const override;
+    createAuxDataCache(xAOD::PixelClusterContainerAlt& cont, std::size_t nClusterRDOs) const override;
 
     virtual StatusCode
     makeClusters(const EventContext& ctx,

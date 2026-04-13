@@ -28,8 +28,8 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::initialize() {
 StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::execute(const EventContext & ctx) const {  
 
   // Read the pixel and strip cluster list
-  SG::ReadHandle<xAOD::PixelClusterContainer> thePixelClusters(m_PixelClusters,ctx); 
-  SG::ReadHandle<xAOD::StripClusterContainer> theStripClusters(m_StripClusters,ctx); 
+  SG::ReadHandle<xAOD::PixelClusterContainerAlt> thePixelClusters(m_PixelClusters,ctx); 
+  SG::ReadHandle<xAOD::StripClusterContainerAlt> theStripClusters(m_StripClusters,ctx); 
   if (!thePixelClusters.isValid()){
     ATH_MSG_FATAL("no Pixel clusters"); 
     return StatusCode::FAILURE;

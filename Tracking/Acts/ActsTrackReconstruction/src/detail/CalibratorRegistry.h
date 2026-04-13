@@ -13,7 +13,7 @@
 // this class only provides calibrators for types and associated dimension which are defined by the measurement container
 // and the associated dimension. The template parameter is assumed to be:
 // std::variant< ContainerRefWithDim<ContainerType1,N1>, ContainerRefWithDim<ContainerType2,N2>, .... >
-// where ContainerType1 is the type of the container e.g. xAOD::PixelClusterContainer, and N1 the associated
+// where ContainerType1 is the type of the container e.g. xAOD::PixelClusterContainerAlt, and N1 the associated
 // dimension e.g. 2.
 template <typename MeasurementTypeTraits, typename bound_track_parameters_t, typename measurement_container_variant_t>
 struct CalibratorRegistry {
@@ -48,7 +48,7 @@ private:
 
       // this is supposed to  be the value type of the measurement container
       // T_Container is ContainerWithDimension<T>, needed is T::const_value_type where T should
-      // be xAOD::PixelClusterContainer which should be DataVector<xAOD::PixelCluster>
+      // be xAOD::PixelClusterContainerAlt which should be DataVector<xAOD::PixelCluster>
       template <typename T_Container>
       using value_type = typename MeasurementTypeTraits::template MeassurementContainerValueType<typename T_Container::container_type >;
 

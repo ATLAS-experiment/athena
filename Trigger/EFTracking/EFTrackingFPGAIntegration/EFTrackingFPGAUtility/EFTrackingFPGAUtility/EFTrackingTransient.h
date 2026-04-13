@@ -220,7 +220,7 @@ namespace EFTrackingTransient
 
   /**
    * @brief The StripClusterAuxInput struct is used to simplify the creaction of
-   * the xAOD::StripClusterContainer
+   * the xAOD::StripClusterContainerAlt
    */
   struct StripClusterAuxInput
   {
@@ -235,7 +235,7 @@ namespace EFTrackingTransient
 
   /**
    * @brief The PixelClusterAuxInput struct is used to simplify the creaction of
-   * the xAOD::PixelClusterContainer
+   * the xAOD::PixelClusterContainerAlt
    */
   struct PixelClusterAuxInput
   {

@@ -258,7 +258,7 @@ PixelClusteringTool::clusterize(const EventContext& /*ctx*/,
 
 
 /*PixelClusterAuxDataCache<Utils::AccessPolicy::Mutable>*/ std::any
-PixelClusteringTool::createAuxDataCache(xAOD::PixelClusterContainer& cont, std::size_t nClusterRDOs) const
+PixelClusteringTool::createAuxDataCache(xAOD::PixelClusterContainerAlt& cont, std::size_t nClusterRDOs) const
 {
   return PixelClusterAuxDataCache<Utils::AccessPolicy::Mutable>(cont, nClusterRDOs, false);
 }

@@ -26,7 +26,8 @@
     <class name="xAOD::StripClusterContainer_v1"
            id="BF692A4A-BF3E-4626-8DD4-135C58E6C0AB" />
     <typedef name="xAOD::StripCluster" />
-    <typedef name="xAOD::StripClusterContainer" />
+    <typedef name="xAOD::StripClusterContainerAlt"
+             id="DBD2C606-9CDC-4318-903F-7C81C31A5C37"/>
 
     <class name="xAOD::StripClusterAuxContainer_v1"
            id="25606F37-C929-45DD-8B85-9DF98D04D456" />

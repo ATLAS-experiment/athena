@@ -23,13 +23,13 @@ class FPGAActsTrkConverter : public extends<AthAlgTool,IFPGAActsTrkConverter> {
     virtual ~FPGAActsTrkConverter() = default;
     virtual StatusCode initialize() override final;
     virtual StatusCode findProtoTracks(const EventContext& ctx,
-                  const xAOD::PixelClusterContainer & pixelContainer,
-                  const xAOD::StripClusterContainer & stripContainer,
+                  const xAOD::PixelClusterContainerAlt & pixelContainer,
+                  const xAOD::StripClusterContainerAlt & stripContainer,
                   std::vector<ActsTrk::ProtoTrack> & foundProtoTracks,
                   const std::vector<FPGATrackSimRoad>& roads) const override final; 
     virtual StatusCode findProtoTracks(const EventContext& ctx,
-                  const xAOD::PixelClusterContainer & pixelContainer,
-                  const xAOD::StripClusterContainer & stripContainer,
+                  const xAOD::PixelClusterContainerAlt & pixelContainer,
+                  const xAOD::StripClusterContainerAlt & stripContainer,
                   std::vector<ActsTrk::ProtoTrack> & foundProtoTracks,
                   const std::vector<FPGATrackSimTrack>& tracks) const override final; 
     protected:

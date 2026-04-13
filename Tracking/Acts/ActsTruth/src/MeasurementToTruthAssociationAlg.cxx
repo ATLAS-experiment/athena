@@ -4,11 +4,11 @@
 #include "ClusterToTruthAssociation.h"
 namespace ActsTrk {
    // instantiate the templates
-   template class MeasurementToTruthAssociationAlg<xAOD::PixelClusterContainer,
+   template class MeasurementToTruthAssociationAlg<xAOD::PixelClusterContainerAlt,
                                                    InDetSimDataCollection,
                                                    xAODTruthParticleLinkVector,
                                                    MeasurementToTruthAssociationDebugHistograms>;
-   template class MeasurementToTruthAssociationAlg<xAOD::StripClusterContainer,
+   template class MeasurementToTruthAssociationAlg<xAOD::StripClusterContainerAlt,
                                                    InDetSimDataCollection,
                                                    xAODTruthParticleLinkVector,
                                                    MeasurementToTruthAssociationDebugHistograms>;

@@ -376,7 +376,7 @@ namespace {
                      typename track_container_t::TrackStateContainerBackend,
                      ActsTrk::detail::AtlasMeasurementContainerList::measurement_container_variant_t
                      // where measurement_container_variant_t is e.g.
-                     //   variant<  ContainerRefWithDim<xAOD::PixelClusterContainer,2>, ... >
+                     //   variant<  ContainerRefWithDim<xAOD::PixelClusterContainerAlt,2>, ... >
                     >;
 
       using BoundState = std::tuple<Acts::BoundTrackParameters, Acts::BoundMatrix, double>;

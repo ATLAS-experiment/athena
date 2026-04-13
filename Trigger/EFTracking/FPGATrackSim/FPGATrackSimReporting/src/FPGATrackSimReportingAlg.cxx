@@ -27,8 +27,8 @@ StatusCode FPGATrackSim::FPGATrackSimReportingAlg::initialize()
 StatusCode FPGATrackSim::FPGATrackSimReportingAlg::execute(const EventContext& ctx) const
 {
     // Process xAOD Pixel Clusters
-    std::vector<SG::ReadHandle<xAOD::PixelClusterContainer>> xAODPixelClusterContainers = m_xAODPixelClusterContainerKeys.makeHandles(ctx);
-    for (SG::ReadHandle<xAOD::PixelClusterContainer>& clusterContainer : xAODPixelClusterContainers)
+    std::vector<SG::ReadHandle<xAOD::PixelClusterContainerAlt>> xAODPixelClusterContainers = m_xAODPixelClusterContainerKeys.makeHandles(ctx);
+    for (SG::ReadHandle<xAOD::PixelClusterContainerAlt>& clusterContainer : xAODPixelClusterContainers)
     {
         if (!clusterContainer.isValid()) {
             ATH_MSG_WARNING("SG key not available " << clusterContainer.key());
@@ -37,8 +37,8 @@ StatusCode FPGATrackSim::FPGATrackSimReportingAlg::execute(const EventContext& c
         processxAODClusters(clusterContainer);
     }
     // Process xAOD Strip Clusters
-    std::vector<SG::ReadHandle<xAOD::StripClusterContainer>> xAODStripClusterContainers = m_xAODStripClusterContainerKeys.makeHandles(ctx);
-    for (SG::ReadHandle<xAOD::StripClusterContainer>& clusterContainer : xAODStripClusterContainers)
+    std::vector<SG::ReadHandle<xAOD::StripClusterContainerAlt>> xAODStripClusterContainers = m_xAODStripClusterContainerKeys.makeHandles(ctx);
+    for (SG::ReadHandle<xAOD::StripClusterContainerAlt>& clusterContainer : xAODStripClusterContainers)
     {
         if (!clusterContainer.isValid()) {
             ATH_MSG_WARNING("SG key not available  " << clusterContainer.key());
