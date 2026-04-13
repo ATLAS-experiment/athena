@@ -5,6 +5,7 @@
 # art-input: data23_hi:data23_hi.00463364.physics_UPC.merge.AOD.r16069_p6447
 # art-input-nfiles: 1
 # art-type: grid
+# art-memory: 4096
 # art-output: *.pool.root
 # art-output: checkFile*.txt
 # art-output: checkxAOD*.txt
