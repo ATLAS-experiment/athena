@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrkParametersBase )
@@ -16,5 +16,5 @@ atlas_add_test( ParametersBase_test
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
    LINK_LIBRARIES ${Boost_LIBRARIES} 
    GaudiKernel  TrkParametersBase
-   POST_EXEC_SCRIPT "nopost.sh" )
+   POST_EXEC_SCRIPT noerror.sh )
 
