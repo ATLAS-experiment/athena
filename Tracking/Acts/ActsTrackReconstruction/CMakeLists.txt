@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ActsTrackReconstruction )
@@ -60,11 +60,11 @@ atlas_add_component( ActsTrackReconstruction
 atlas_add_test ( TrackFindingMeasurementsTest
   SOURCES test/TrackFindingMeasurementsTest.cxx src/detail/TrackFindingMeasurements.cxx
   LINK_LIBRARIES ActsEventLib xAODInDetMeasurement
-  POST_EXEC_SCRIPT nopost.sh )
+  POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test ( DuplicateSeedDetectorTest
   SOURCES test/DuplicateSeedDetectorTest.cxx
   LINK_LIBRARIES ActsEventLib xAODInDetMeasurement
-  POST_EXEC_SCRIPT nopost.sh)
+  POST_EXEC_SCRIPT noerror.sh)
 
 
