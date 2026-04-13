@@ -357,13 +357,6 @@ def getDevSignatures():
         ChainProp(name='HLT_tau35_mediumGNTau_HitZ_tau25_mediumGNTau_HitZ_03dRAB_L1cTAU30M_2cTAU20M_4jJ30p0ETA25', l1SeedThresholds=['cTAU30M', 'cTAU20M'], groups=SupportPhIGroup+MultiTauGroup+Topo2Group, monGroups=['tauMon:online', 'tauMon:shifter']),
         ChainProp(name='HLT_tau35_mediumGNTau_HitZ_tau25_mediumGNTau_HitZ_03dRAB_L1cTAU30M_2cTAU20M', l1SeedThresholds=['cTAU30M', 'cTAU20M'], groups=SupportPhIGroup+MultiTauGroup+Topo2Group, monGroups=['tauMon:online', 'tauMon:shifter']),
 
-        # Bootstrapped di-tau chains with probe HitZ legs to avoid increasing the CPU usage at the full L1 rate.
-        # P1 candidates:
-        ChainProp(name='HLT_tau160_mediumGNTau_tau160_mediumGNTau_HitZ_probe_L1eTAU140_L1eTAU140', l1SeedThresholds=['eTAU140', 'PROBEeTAU140'], groups=TagAndProbePhIGroup+SingleTauGroup+DevGroup, monGroups=['tauMon:online', 'tauMon:t0']),
-        ChainProp(name='HLT_tau35_mediumGNTau_tau25_mediumGNTau_tau35_mediumGNTau_HitZ_probe_L1cTAU30M_tau25_mediumGNTau_HitZ_probe_L1cTAU20M_03dRAB30_03dRCD30_L1cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55', l1SeedThresholds=['cTAU30M', 'cTAU20M', 'PROBEcTAU30M', 'PROBEcTAU20M'], groups=SupportPhIGroup+MultiTauGroup+Topo2Group, monGroups=['tauMon:online', 'tauMon:shifter']),
-        ChainProp(name='HLT_tau35_mediumGNTau_tau25_mediumGNTau_tau35_mediumGNTau_HitZ_probe_L1cTAU30M_tau25_mediumGNTau_HitZ_probe_L1cTAU20M_03dRAB_03dRCD_L1cTAU30M_2cTAU20M_4jJ30p0ETA25', l1SeedThresholds=['cTAU30M', 'cTAU20M', 'PROBEcTAU30M', 'PROBEcTAU20M'], groups=SupportPhIGroup+MultiTauGroup+Topo2Group, monGroups=['tauMon:online', 'tauMon:shifter']),
-        ChainProp(name='HLT_tau35_mediumGNTau_tau25_mediumGNTau_tau35_mediumGNTau_HitZ_probe_L1cTAU30M_tau25_mediumGNTau_HitZ_probe_L1cTAU20M_03dRAB_03dRCD_L1cTAU30M_2cTAU20M', l1SeedThresholds=['cTAU30M', 'cTAU20M', 'PROBEcTAU30M', 'PROBEcTAU20M'], groups=SupportPhIGroup+MultiTauGroup+Topo2Group, monGroups=['tauMon:online', 'tauMon:shifter']),
-
 
         # GNTauExt test chains for 2026 (ATR-32383)
         ChainProp(name='HLT_tau20_mediumvar1noperfGNTauDev1_L1cTAU20M', groups=SingleTauGroup+SupportPhIGroup+DevGroup, monGroups=['tauMon:online', 'tauMon:t0']),
@@ -651,11 +644,6 @@ def getDevSignatures():
 
         ChainProp(name='HLT_mu24_ivarmedium_tau20_mediumvar2noperfGNTauDev1_probe_L1cTAU20M_03dRAB_L1MU14FCH', l1SeedThresholds=['MU14FCH', 'PROBEcTAU20M'], groups=TagAndProbePhIGroup+SingleMuonGroup, monGroups=['tauMon:t0']),
         ChainProp(name='HLT_e26_lhtight_ivarloose_tau20_mediumvar2noperfGNTauDev1_probe_L1cTAU20M_03dRAB_L1eEM26M', l1SeedThresholds=['eEM26M', 'PROBEcTAU20M'], groups=TagAndProbePhIGroup+SingleElectronGroup, monGroups=['tauMon:t0']),
-
-
-        # HitZ test chains for 2026 (ATR-32384)
-        ChainProp(name='HLT_mu24_ivarmedium_tau20_mediumGNTau_HitZ_probe_L1cTAU20M_03dRAB_L1MU14FCH', l1SeedThresholds=['MU14FCH', 'PROBEcTAU20M'], groups=TagAndProbePhIGroup+SingleMuonGroup, monGroups=['tauMon:t0']),
-        ChainProp(name='HLT_e26_lhtight_ivarloose_tau20_mediumGNTau_HitZ_probe_L1cTAU20M_03dRAB_L1eEM26M', l1SeedThresholds=['eEM26M', 'PROBEcTAU20M'], groups=TagAndProbePhIGroup+SingleElectronGroup, monGroups=['tauMon:t0']),
     ]
 
     chains['Beamspot'] = [
