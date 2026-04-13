@@ -1,15 +1,14 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import os
 import re
 import math
 import xml.dom.minidom
 
-from GeneratorModules.EvgenAnalysisAlg import EvgenAnalysisAlg
 from AthenaPython.PyAthena import StatusCode
+from AthenaPython.PyAthena import Alg
 
-
-class LheConverterUpc(EvgenAnalysisAlg):
+class LheConverterUpc(Alg):
     '''
     Class for modifying output LHE file from Superchic and Madgraph + ensuring compatibility with Tauola
     Intended for ultraperipheral collision (UPC) processes i.e. y y -> l+ l-
@@ -18,10 +17,11 @@ class LheConverterUpc(EvgenAnalysisAlg):
     The hack changes the PDG ID of the initial state particles, from photons to electrons
     '''
 
-    def __init__(self, name='LheConverterUpc', generator='Superchic', mode='Pythia8'):
+    def __init__(self, name='LheConverterUpc', generator='Superchic', mode='Pythia8', energy=5020):
         super(LheConverterUpc, self).__init__(name=name)
         self.generator = generator # options: 'Superchic' (default), 'Madgraph5'
         self.mode = mode # options: 'Pythia8' (default), 'Tauolapp'
+        self.energy = energy # energy read via JOs from runArg
     
     outFileName = 'events.lhe'
     done = False
@@ -54,11 +54,19 @@ class LheConverterUpc(EvgenAnalysisAlg):
 
             # Replace init block
             init = collection.getElementsByTagName('init')
-            init_repl = r'''
- 13  -13  2.510000e+03  2.510000e+03  0  0  0  0  3  1
- 1.000000e+00  0.000000e+00  1.000000e+00   9999
- '''
-            init[0].firstChild.data = init_repl
+
+            # LHE requires very strict format of the <init> block
+            l_init_repl1=["13","-13","2.510000e+03","2.510000e+03","0","0","0","0","3","1"]
+            str_init_repl2 =" 1.000000e+00  0.000000e+00  1.000000e+00  9999"
+            l_init_repl1[2]='%.6e'  %(self.energy/2.)
+            l_init_repl1[3]='%.6e'  %(self.energy/2.)
+            
+            delimiter = "  " # Define a delimiter
+            str_init_repl1 = map(str, l_init_repl1)
+            jstr_init_repl1 = delimiter.join(str_init_repl1)
+            jstr_init_repl1 = '\n ' + jstr_init_repl1 + '\n'
+            jstr_init_repl = jstr_init_repl1 + str_init_repl2 + '\n'
+            init[0].firstChild.data = jstr_init_repl
 
             # The comment line below indicates which part of the regex grabs the parton-level information that's to be modified. The index in list(header.groups()) is also shown
             #                                        energy scale [1]
