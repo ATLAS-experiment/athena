@@ -49,6 +49,7 @@ def generateText(formatName,label,inputFile,isTruth,isMC,nEvents):
    outputFile.write("# art-include: main/Athena"+"\n")
    outputFile.write("# art-description: DAOD building "+formatName+" "+label+"\n")
    outputFile.write("# art-type: grid"+"\n")
+   outputFile.write("# art-memory: 4096"+"\n")
    outputFile.write("# art-output: *.pool.root"+"\n")
    outputFile.write("# art-output: checkFile*.txt"+"\n")
    outputFile.write("# art-output: checkxAOD*.txt"+"\n")
