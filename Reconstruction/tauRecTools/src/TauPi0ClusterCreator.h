@@ -56,8 +56,7 @@ private:
 
   std::map<unsigned, const xAOD::CaloCluster*> getShotToClusterMap(
       const std::vector<const xAOD::PFO*>& shotVector,
-      const xAOD::CaloClusterContainer& pi0ClusterContainer,
-      const xAOD::TauJet &pTau) const;
+      std::vector<const xAOD::CaloCluster*>& goodpi0Vecor) const;
 
   std::vector<unsigned> getShotsMatchedToCluster(
       const std::vector<const xAOD::PFO*>& shotVector,
