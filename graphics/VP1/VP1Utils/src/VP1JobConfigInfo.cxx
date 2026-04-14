@@ -180,10 +180,14 @@ bool VP1JobConfigInfo::Imp::actualInit( StoreGateSvc* detStore )
 
   while (!av.atEnd()) {
     std::string name = av.getName();
-    if ( !hasPixelGeometry && (name=="Pixel" or name=="ITkPixel")) {
+
+    if ( !hasITkGeometry && name=="ITkPixel") { hasITkGeometry = true; }
+    if ( !hasITkGeometry && name=="ITkStrip") { hasITkGeometry = true; }
+    if ( !hasPixelGeometry && name=="Pixel") {
       hasPixelGeometry = true;
-      if (not hasITkGeometry and name == "ITkPixel")
-        hasITkGeometry = true;
+      if (not hasITkGeometry and name == "ITkPixel") { 
+          VP1Msg::messageWarningAllRed("WARNING!!! --- The GeoVolume has name 'ITkPixel' but the flag 'hasITkGeometry' is false ---> CHECK IT!!");
+      }
       if ( !hasBCMGeometry ) {
 	    //Loop under the top Pixel volume to check if there are BCM volumes
 	    //present in the current config:
@@ -197,10 +201,11 @@ bool VP1JobConfigInfo::Imp::actualInit( StoreGateSvc* detStore )
 	    }
       }
     }
-    if ( !hasSCTGeometry && (name=="SCT" or name=="ITkStrip")) {
+    if ( !hasSCTGeometry && name=="SCT" ) {
       hasSCTGeometry = true;
-      if (not hasITkGeometry and name == "ITkStrip")
-        hasITkGeometry = true;
+      if (not hasITkGeometry and name == "ITkStrip") { 
+          VP1Msg::messageWarningAllRed("WARNING!!! --- The GeoVolume has name 'ITkStrip' but the flag 'hasITkGeometry' is false ---> CHECK IT!!");
+      }
     }
     if ( !hasTRTGeometry && name=="TRT") hasTRTGeometry = true;
     if ( !hasInDetServiceMaterialGeometry && name=="InDetServMat") hasInDetServiceMaterialGeometry = true;

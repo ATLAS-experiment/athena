@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1GeometrySystems/VolumeTreeModel.h"
@@ -114,9 +114,9 @@ VolumeTreeModel::VolumeTreeModel( QObject * parent )
     Imp::defineSubSystem(VP1GeoFlags::None,"None",Imp::UNKNOWN);
     // Inner Detector
     Imp::defineSubSystem(VP1GeoFlags::Pixel,"Pixel",Imp::INDET);
-    Imp::defineSubSystem(VP1GeoFlags::Pixel,"ITkPixel",Imp::INDET);
+    Imp::defineSubSystem(VP1GeoFlags::ITkPixel,"ITkPixel",Imp::INDET);
     Imp::defineSubSystem(VP1GeoFlags::SCT,"SCT",Imp::INDET);
-    Imp::defineSubSystem(VP1GeoFlags::SCT,"ITkStrip",Imp::INDET);
+    Imp::defineSubSystem(VP1GeoFlags::ITkStrip,"ITkStrip",Imp::INDET);
     Imp::defineSubSystem(VP1GeoFlags::TRT,"TRT",Imp::INDET);
     Imp::defineSubSystem(VP1GeoFlags::InDetServMat,"Services",Imp::INDET);
     // Calorimeters

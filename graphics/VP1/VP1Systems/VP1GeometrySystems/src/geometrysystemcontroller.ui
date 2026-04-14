@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>338</width>
+    <width>410</width>
     <height>822</height>
    </rect>
   </property>
@@ -190,20 +190,6 @@
             <property name="verticalSpacing">
              <number>0</number>
             </property>
-            <item row="0" column="1">
-             <widget class="QCheckBox" name="checkBox_SCT">
-              <property name="text">
-               <string>SCT</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QCheckBox" name="checkBox_TRT">
-              <property name="text">
-               <string>TRT</string>
-              </property>
-             </widget>
-            </item>
             <item row="0" column="0">
              <widget class="QCheckBox" name="checkBox_Pixel">
               <property name="text">
@@ -211,10 +197,44 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="1">
+            <item row="1" column="2">
              <widget class="QCheckBox" name="checkBox_InDetServMat">
+              <property name="toolTip">
+               <string>InDetServMat</string>
+              </property>
+              <property name="whatsThis">
+               <string>This enables the visualization of the &quot;InDetServMat&quot; geometry</string>
+              </property>
               <property name="text">
                <string>Services</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QCheckBox" name="checkBox_SCT">
+              <property name="text">
+               <string>SCT</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QCheckBox" name="checkBox_TRT">
+              <property name="text">
+               <string>TRT</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QCheckBox" name="checkBox_ITkPixel">
+              <property name="text">
+               <string>ITkPixel</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QCheckBox" name="checkBox_ITkStrip">
+              <property name="text">
+               <string>ITkStrip</string>
               </property>
              </widget>
             </item>
@@ -609,14 +629,14 @@
                <string>ZDC</string>
               </property>
              </widget>
-         </item>
-         <item>
+            </item>
+            <item>
              <widget class="QCheckBox" name="checkBox_AFP">
-                 <property name="text">
-                     <string>AFP</string>
-                 </property>
+              <property name="text">
+               <string>AFP</string>
+              </property>
              </widget>
-         </item>
+            </item>
             <item>
              <widget class="QCheckBox" name="checkBox_ALFA">
               <property name="text">
