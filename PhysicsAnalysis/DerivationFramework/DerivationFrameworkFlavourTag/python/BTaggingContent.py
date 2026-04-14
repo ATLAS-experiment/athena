@@ -109,12 +109,11 @@ def BTaggingStandardContent(flags, jetcol):
         )
         BTaggingAux += _getSmallRDiscriminantVars(
             'GN3EPCLV01',
-            extra_flavours=['tau', 'ud', 'g', 's', 'bquark', 'antibquark',
-                            'cquark', 'anticquark', 'other'],
+            extra_flavours=['tau', 'ud', 'g', 's', 'bquark', 'antibquark', 'cquark', 'anticquark', 'other'],
             flip_modes=['SimpleFlip']
         )
-        BTaggingAux += ['GN3PflowMuonsV00_ptFromTruthDressedWZJet']
-        BTaggingAux += ['GN3EPCLV01_ptFromTruthDressedWZJet']
+        BTaggingAux += ['GN3PflowMuonsV00_ptFromTruthDressedWZJet'] # GN3PflowMuonsV00 extra vars
+        BTaggingAux += ['GN3EPCLV01_ptFromTruthDressedWZJet'] # GN3EPCLV01 extra vars
 
     btagContent = _getVariableList(jetcol, BTaggingAux)
     return btagContent + jetBasicContent
