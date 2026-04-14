@@ -3,7 +3,6 @@
 # @file xAODHybridSelectorConfig
 # @purpose make the Athena framework read a set of xAOD files to emulate the
 #          usual TEvent event loop ... BUT READ METADATA WITH POOL!
-#          Converted from ReadAthenaxAODHybrid.py
 # @author Teng Jian Khoo
 #
 
@@ -27,7 +26,7 @@ def xAODReadCfg(flags, AccessMode=xAODAccessMode.CLASS_ACCESS):
     athena services required for xAOD file reading
     """
 
-    msg = Logging.logging.getLogger( 'ReadAthenaxAODHybrid' )
+    msg = Logging.logging.getLogger( 'xAODReadCfg' )
     msg.debug("Configuring Athena for reading xAOD files (via TEvent, with POOL for Metadata)...")
 
 
