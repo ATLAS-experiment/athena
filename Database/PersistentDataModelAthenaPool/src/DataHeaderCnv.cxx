@@ -293,6 +293,7 @@ StatusCode DataHeaderCnv::updateRepRefs(IOpaqueAddress* pAddress, DataObject* pO
 //______________________________________________________________________________
 StatusCode DataHeaderCnv::DataObjectToPool(IOpaqueAddress* pAddr, DataObject* pObj)
 {
+   std::lock_guard<AthenaPoolConverter::CallMutex> lock(this->m_conv_mut);
    DataHeader* obj = nullptr;
    if (!SG::fromStorable(pObj, obj) || obj == nullptr) {
       ATH_MSG_ERROR( "Failed to cast DataHeader to transient type" );
@@ -322,7 +323,7 @@ StatusCode DataHeaderCnv::DataObjectToPool(IOpaqueAddress* pAddr, DataObject* pO
       return(StatusCode::FAILURE);
    }
    // Queue the DH for write
-   std::unique_ptr<Token> dh_token (m_athenaPoolCnvSvc->registerForWrite(&dh_placement, persObj, m_classDesc));
+   std::unique_ptr<Token> dh_token(m_athenaPoolCnvSvc->registerForWrite(&dh_placement, persObj, m_classDesc));
    if (dh_token == nullptr) {
       ATH_MSG_FATAL("Failed to write DataHeader");
       return(StatusCode::FAILURE);

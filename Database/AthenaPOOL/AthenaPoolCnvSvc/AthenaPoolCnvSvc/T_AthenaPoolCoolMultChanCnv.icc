@@ -146,7 +146,6 @@ T_AthenaPoolCoolMultChanCnv<COLL_T, ELEM_T, ELEM_P>::objectToAttrListColl ATLAS_
     typename COLL_T::chan_const_iterator itChan = obj->chan_begin();
     typename COLL_T::iov_const_iterator  itIOV  = obj->iov_begin();
     std::string token_str;
-    std::lock_guard<AthenaPoolConverter::CallMutex> lock(this->m_conv_mut);
     for (unsigned int chan = 0; chan < obj->size(); ++chan, ++itChan) {
 	ELEM_T* elem = (*obj)[chan];
         // Allow for T/P separation, convert to persistent object
@@ -288,11 +287,8 @@ T_AthenaPoolCoolMultChanCnv<COLL_T, ELEM_T, ELEM_P>::attrListCollToObject(CondAt
 	}
         // Allow T/P separation - set token and use createTransient
         ELEM_T* elem {nullptr};
-        {
-           std::lock_guard<AthenaPoolConverter::CallMutex> lock(this->m_conv_mut);
-           poolToken.fromString(token + context);
-           elem = this->createTransient(&poolToken);
-        }
+        poolToken.fromString(token + context);
+        elem = this->createTransient(&poolToken);
 	// Add elem, channel number and IOV
 	obj->push_back(elem);
 	obj->add((*it).first);
@@ -323,7 +319,6 @@ T_AthenaPoolCoolMultChanCnv<COLL_T, ELEM_T, ELEM_P>::condMultChanCollImplToObjec
     ELEM_T* elem = 0;
 
     // Read in the CondMultChanCollImpl
-    std::lock_guard<AthenaPoolConverter::CallMutex> lock(this->m_conv_mut);
     CondMultChanCollImpl* impl = 0;
     Token poolToken;
     char context[32];
@@ -351,7 +346,6 @@ T_AthenaPoolCoolMultChanCnv<COLL_T, ELEM_T, ELEM_P>::condMultChanCollImplToObjec
     CondMultChanCollImpl::iov_const_iterator   itIOV   = impl->iov_begin();
     CondMultChanCollImpl::token_const_iterator itToken = impl->token_begin();
     for (unsigned int i = 0; i < impl->chan_size(); ++i, ++itChan, ++itIOV, ++itToken) {
-
         // Allow T/P separation
         poolToken.fromString(*itToken + context);
         elem = this->createTransient(&poolToken);

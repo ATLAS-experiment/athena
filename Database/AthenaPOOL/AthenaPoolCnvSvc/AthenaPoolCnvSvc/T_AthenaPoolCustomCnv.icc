@@ -29,12 +29,6 @@ T_AthenaPoolCustomCnvWithKey<TRANS, PERS>::T_AthenaPoolCustomCnvWithKey(ISvcLoca
 }
 
 template <class TRANS, class PERS>
-StatusCode T_AthenaPoolCustomCnvWithKey<TRANS, PERS>::DataObjectToPers(DataObject* pObj, IOpaqueAddress*& /*pAddr*/) {
-   ATH_MSG_VERBOSE("In DataObjectToPers() for key = " << pObj->name());
-   return(StatusCode::SUCCESS);
-}
-
-template <class TRANS, class PERS>
 StatusCode T_AthenaPoolCustomCnvWithKey<TRANS, PERS>::DataObjectToPool(IOpaqueAddress* pAddr, DataObject* pObj) {
    ATH_MSG_VERBOSE("In DataObjectToPool() for key = " << pObj->name());
    TRANS* obj = nullptr;
@@ -45,6 +39,7 @@ StatusCode T_AthenaPoolCustomCnvWithKey<TRANS, PERS>::DataObjectToPool(IOpaqueAd
       return(StatusCode::FAILURE);
    }
    try {
+     std::lock_guard<AthenaPoolConverter::CallMutex> lock(this->m_conv_mut);
      persObj = createPersistentWithKey(obj, pObj->name());
    }
    catch (const std::exception& ex) {
@@ -86,6 +81,7 @@ T_AthenaPoolCustomCnvWithKey<TRANS, PERS>::PoolToDataObject(DataObject*& pObj,
                                                             const Token* token,
                                                             const std::string& key)
 {
+   std::lock_guard<AthenaPoolConverter::CallMutex> lock(this->m_conv_mut);
    TRANS* transObj = nullptr;
    AthenaConverterTLPExtension *extCnv = dynamic_cast<AthenaConverterTLPExtension*>(this);
    // reset the TP converter used for reading, so old value is not used

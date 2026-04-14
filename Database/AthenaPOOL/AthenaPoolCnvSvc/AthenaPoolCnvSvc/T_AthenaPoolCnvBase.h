@@ -11,6 +11,7 @@
  **/
 
 #include "AthenaPoolCnvSvc/AthenaPoolConverter.h"
+#include "DataModelRoot/RootType.h"
 
 #include <string>
 
@@ -32,10 +33,6 @@ protected:
    /// Gaudi Service Interface method implementations:
    virtual StatusCode initialize();
 
-   /// Convert an object into Persistent.
-   /// @param pObj [IN] pointer to the transient object.
-   virtual StatusCode DataObjectToPers(DataObject* pObj, IOpaqueAddress*& pAddr);
-
    /// Write an object into POOL.
    /// @param pObj [IN] pointer to the transient object.
    virtual StatusCode DataObjectToPool(IOpaqueAddress* pAddr, DataObject* pObj);
@@ -53,6 +50,9 @@ protected:
 public:
    /// @return class ID.
    static CLID classID();
+
+protected:
+   RootType              m_classDesc;
 };
 
 
