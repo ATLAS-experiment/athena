@@ -39,7 +39,9 @@ def PhysValBTagCfg(flags, **kwargs):
         kwargs.setdefault("trackTruthOriginTool", acc.popToolsAndMerge(
             InDetTrackTruthOriginToolCfg(flags)))
 
-    kwargs.setdefault("GN2v01TaggerName", flags.BTagging.AK4TaggerName)
+    kwargs.setdefault("GN2v01TaggerName",
+        "GN2HLv01" if flags.GeoModel.Run >= LHCPeriod.Run4
+        else "GN2v01")
 
     tool = CompFactory.JetTagDQA.PhysValBTag(**kwargs)
     acc.setPrivateTools(tool)

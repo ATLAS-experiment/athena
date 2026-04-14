@@ -244,7 +244,10 @@ def JetBTagginglessByVertexAlgCfg(
                     dz_suffix = '_' + str(dzCut) + '_' + 'inclusive_'
 
                 # Remap variables
-                tagger = flags.BTagging.AK4TaggerName
+                tagger = (
+                    "GN2HLv01" if "/GN2HL/" in dirname
+                    else "GN2v01"
+                )
                 args["remapping"] = {
                     'BTagTrackToJetAssociator':'TracksForBTagging' + dz_suffix + "assoc",
                     tagger + '_pb': tagger + dz_suffix + 'pb',

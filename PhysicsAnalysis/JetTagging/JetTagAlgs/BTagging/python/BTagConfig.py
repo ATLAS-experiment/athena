@@ -63,7 +63,10 @@ def RetagRenameInputContainerCfg(flags, suffix, JetCollectionShort, tracksKey='I
     tc = tracksKey
     jac = 'xAOD::JetAuxContainer'
     tpac = 'xAOD::TrackParticleAuxContainer'
-    tagger = flags.BTagging.AK4TaggerName
+    tagger = (
+        "GN2HLv01" if flags.GeoModel.Run >= LHCPeriod.Run4
+        else "GN2v01"
+    )
 
     vars = ["jetFoldHash",
             "jetFoldHash_noHits",

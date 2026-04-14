@@ -2,6 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import LHCPeriod
 from TrkConfig.TrkVKalVrtFitterConfig import TrkVKalVrtFitterCfg
 from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
 from FlavorTagDiscriminants.FlavorTagNNConfig import MultifoldGNNCfg
@@ -17,7 +18,9 @@ def GNNVertexFitterToolCfg(flags, name="GNNVertexFitterTool", **kwargs):
 
     acc.merge(BeamSpotCondAlgCfg(flags))
     kwargs.setdefault("VertexFitterTool", acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags)))
-    kwargs.setdefault("GNNModel", flags.BTagging.AK4TaggerName)
+    kwargs.setdefault("GNNModel",
+        "GN2HLv01" if flags.GeoModel.Run >= LHCPeriod.Run4
+        else "GN2v01")
     kwargs.setdefault("JetCollection", "AntiKt4EMPFlowJets")
     kwargs.setdefault("includePrimaryVertex", False)
     kwargs.setdefault("removeNonHFVertices", False)
