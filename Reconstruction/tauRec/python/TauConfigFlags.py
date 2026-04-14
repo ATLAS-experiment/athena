@@ -87,7 +87,7 @@ def createTauConfigFlags():
     tau_cfg.addFlagsCategory("Tau.ActiveConfig", createTauRecConfigFlags, prefix=True)
 
     # e-had boosted ditaus, aka electron-subtracted taus
-    tau_cfg.addFlag("Tau.doTauEleRMRec", True)
+    tau_cfg.addFlag("Tau.doTauEleRMRec", lambda prevFlags : True  if prevFlags.GeoModel.Run <= LHCPeriod.Run3 else False)
     # helper for derivations, TauJets_EleRM not available for AODs produced before 24.0.17
     tau_cfg.addFlag("Tau.TauEleRM_isAvailable", lambda prevFlags : "xAOD::TauJetContainer#TauJets_EleRM" in prevFlags.Input.TypedCollections)
     # helper for derivations, used in PHYSVAL monitoring
@@ -123,9 +123,9 @@ def createTauRecConfigFlags():
     # Input containers
     flags.addFlag("VertexCollection", "PrimaryVertices")
     flags.addFlag("TrackCollection", "InDetTrackParticles")
-    flags.addFlag("SeedJetCollection", "AntiKt4LCTopoJets")
+    flags.addFlag("SeedJetCollection", lambda prevFlags: "AntiKt4LCTopoJets" if prevFlags.GeoModel.Run <= LHCPeriod.Run3 else "AntiKt4EMPFlowNoPtCutTauSeedJets")
     flags.addFlag("LargeD0TrackCollection", "InDetLargeD0TrackParticles")
-    flags.addFlag("EventShapeCollection", "Kt4LCTopoOriginEventShape")
+    flags.addFlag("EventShapeCollection", lambda prevFlags: "Kt4LCTopoOriginEventShape" if prevFlags.GeoModel.Run <= LHCPeriod.Run3 else "Kt4EMPFlowEventShape")
 
     # Electron-subtracted tau flags appearing in standard tau reconstruction
     flags.addFlag("inTauEleRM", False)
