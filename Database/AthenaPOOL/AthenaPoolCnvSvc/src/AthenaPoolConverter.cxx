@@ -18,6 +18,7 @@
 #include "PersistentDataModel/TokenAddress.h"
 #include "StorageSvc/DbType.h"
 #include "StorageSvc/APRDefaults.h"
+
 #include <format>
 
 //__________________________________________________________________________
@@ -80,7 +81,6 @@ StatusCode AthenaPoolConverter::createObj(IOpaqueAddress* pAddr, DataObject*& pO
    }
    ATH_MSG_VERBOSE("createObj: " << tokAddr->getToken()->toString() << ", CTX=" << tokAddr->ipar()[0]
                    << ", auxStr=" << tokAddr->getToken()->auxString() );
-   std::lock_guard<CallMutex> lock(m_conv_mut);
    try {
       std::string key = pAddr->par()[1];
       if (!PoolToDataObject(pObj, tokAddr->getToken(), key).isSuccess()) {
@@ -109,16 +109,6 @@ StatusCode AthenaPoolConverter::createRep(DataObject* pObj, IOpaqueAddress*& pAd
       ATH_MSG_ERROR("AthenaPoolConverter CreateRep failed to cast DataProxy, key = " << pObj->name());
       return StatusCode::FAILURE;
    }
-   try {
-      std::lock_guard<CallMutex> lock(m_conv_mut);
-      if (!DataObjectToPers(pObj, pAddr).isSuccess()) {
-         ATH_MSG_ERROR("CreateRep failed, key = " << pObj->name());
-         return StatusCode::FAILURE;
-      }
-   } catch (std::exception& e) {
-      ATH_MSG_ERROR("createRep - caught exception: " << e.what());
-      return StatusCode::FAILURE;
-   }
    const CLID clid = proxy->clID();
    if (pAddr == nullptr) {
       // Create a IOpaqueAddress for this object.
@@ -133,7 +123,6 @@ StatusCode AthenaPoolConverter::createRep(DataObject* pObj, IOpaqueAddress*& pAd
 }
 //__________________________________________________________________________
 StatusCode AthenaPoolConverter::fillRepRefs(IOpaqueAddress* pAddr, DataObject* pObj) {
-   std::lock_guard<CallMutex> lock(m_conv_mut);
    try {
       if (!DataObjectToPool(pAddr, pObj).isSuccess()) {
          ATH_MSG_ERROR("FillRepRefs failed, key = " << pObj->name());
@@ -158,9 +147,6 @@ AthenaPoolConverter::AthenaPoolConverter(const CLID& myCLID, ISvcLocator* pSvcLo
   m_detStore("DetectorStore", name ? name : "AthenaPoolConverter"),
   m_athenaPoolCnvSvc(pSvcLocator && pSvcLocator->existsService("AthenaPoolSharedIOCnvSvc") ? "AthenaPoolSharedIOCnvSvc" : "AthenaPoolCnvSvc", name ? name : "AthenaPoolConverter"),
   m_poolSvc("PoolSvc", name ? name : "AthenaPoolConverter"),
-  m_classDesc(),
-  m_className(),
-  m_classDescs(),
   m_defContainerType(0) {
 }
 //__________________________________________________________________________

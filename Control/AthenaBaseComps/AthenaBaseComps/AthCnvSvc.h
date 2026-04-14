@@ -318,7 +318,7 @@ protected:
   Workers             m_workers;
   /// Mutex to protect Converter creation
   typedef std::recursive_mutex CallMutex;
-  CallMutex           m_conv_mut;
+  CallMutex           m_convsvc_mut;
 }; 
 
 // I/O operators

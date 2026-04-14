@@ -47,11 +47,6 @@ protected:
    template <class P>
    Placement setPlacementForP(P& p, const std::string& key, const std::string& output);
 
-   /// Convert an object into Persistent.
-   /// @param pObj [IN] pointer to the transient object.
-   /// @param key [IN] StoreGate key (string) - placement hint to generate POOL container name
-   virtual StatusCode DataObjectToPers(DataObject* pObj, IOpaqueAddress*& pAddr);
-
    /// Write an object into POOL.
    /// @param pObj [IN] pointer to the transient object.
    /// @param key [IN] StoreGate key (string) - placement hint to generate POOL container name
@@ -88,6 +83,12 @@ protected:
 public:
    /// @return class ID.
    static CLID classID();
+
+private:
+   std::string           m_className;
+
+   typedef std::map<std::string, RootType>            ClassMap;
+   ClassMap              m_classDescs;
 };
 
 #include "AthenaPoolCnvSvc/T_AthenaPoolCustCnv.icc"
