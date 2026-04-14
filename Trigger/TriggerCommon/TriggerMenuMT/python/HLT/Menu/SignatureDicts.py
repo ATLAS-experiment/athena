@@ -626,7 +626,7 @@ MuonChainParts = {
     'extra'          : ['noL1', 'lateMu', "muoncalib" ,'noL2Comb','vtx','mucombTag'],
     'IDinfo'         : [],
     'isoInfo'        : ['ivarloose', 'ivarmedium', 'ivarperf','iloosems'],
-    'l2AlgInfo'      : ['l2io','l2mt'],
+    'l2AlgInfo'      : ['l2io','l2mt', 'newFast'],
     'lrtInfo'        : ['d0loose','d0medium','d0tight'],
     'invMassInfo'    : ['invmJPsiOS','invmDimu'],
     'msonlyInfo'     : ['msonly'],
