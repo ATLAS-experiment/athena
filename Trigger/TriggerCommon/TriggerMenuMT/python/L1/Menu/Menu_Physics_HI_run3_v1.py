@@ -131,21 +131,21 @@ def defineMenu():
         'L1_jTE50_VjTE200',
 
         # CALMTEA version of some items needed for lowMu HLT menu and L1_ARTEMIS, will need to be removed to make room for jTEFWD items for HI menu below
-        'L1_CALMTEA_jJ10',
-        'L1_CALMTEA_jTE5',
-        'L1_CALMTEA_jTE10',
-        'L1_ARTEMISL',
-        'L1_ARTEMIST',
-        
-        # temporarily commented out to make room for items needed for lowMu HLT menu added above
-        # # jTEFWD UCC seeds: ATR-30726
+        # Commented out fot HI
+        # 'L1_CALMTEA_jJ10',
+        # 'L1_CALMTEA_jTE5',
+        # 'L1_CALMTEA_jTE10',
+        # 'L1_ARTEMISL',
+        # 'L1_ARTEMIST',
+
+        # jTEFWD UCC seeds: ATR-30726
         # 'L1_jTEFWD2600',
         # 'L1_jTEFWD5600',
         # 'L1_jTEFWD6300',
         # 'L1_jTEFWD6600',
-        # 'L1_ZDC_PU_jTEFWD5600',
-        # 'L1_ZDC_PU_jTEFWD6300',
-        # 'L1_ZDC_PU_jTEFWD6600',
+        'L1_ZDC_PU_jTEFWD5600',
+        'L1_ZDC_PU_jTEFWD6300',
+        'L1_ZDC_PU_jTEFWD6600',
 
         #Overlay items
         'L1_ZDC_A_C_VjTE50_OVERLAY', 'L1_jTE50_OVERLAY', 'L1_jTE1500_OVERLAY', 'L1_jTE4000_OVERLAY',
@@ -213,6 +213,8 @@ def defineMenu():
         'L1_1ZDC_A_VZDC_C', #comb4
         'L1_VZDC_A_1ZDC_C', #comb6
         'L1_1ZDC_A_1ZDC_C', #comb1
+        'L1_5ZDC_A_VZDC_C', #comb5
+        'L1_VZDC_A_5ZDC_C', #comb7
         'L1_ZDC_1XOR5',     #comb2
         'L1_5ZDC_A_5ZDC_C', #comb3
         
@@ -461,10 +463,10 @@ def defineMenu():
         'L1_CALMTEA_eEM2_VjTE200',
         'L1_CALMTEA_eTAU2_VjTE200',
 
-        'L1_MATCHA_eTAU2',
-        'L1_MATCHA_eTAU2_VjTE200',
-        'L1_MATCHA_eTAU2_EMPTY',
-        'L1_MATCHA_eTAU2_VjTE200_EMPTY',
+        # 'L1_MATCHA_eTAU2',
+        # 'L1_MATCHA_eTAU2_VjTE200',
+        # 'L1_MATCHA_eTAU2_EMPTY',
+        # 'L1_MATCHA_eTAU2_VjTE200_EMPTY',
 
         'L1_ESP_1ZDC_NZDC_jJ10_VjTE200',
         'L1_ESP_5ZDC_A_5ZDC_C_jJ10_VjTE200',
@@ -486,16 +488,25 @@ def defineMenu():
         'L1_ESP_ASYM2_ZDC_XOR_VjTE200',
         'L1_ESP_ASYM3_ZDC_XOR_VjTE200',
 
+        # 2026 pp low-µ
         # tau
         #ATR-32259: L1 items for L1BKeePrimary
         'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55', 'L1_cTAU30M_3DR35-MU8F-eTAU30', 
-        
+
         'L1_eEM22M_jMJJ-300',
 
         'L1_jMJJ-500-NFF', 'L1_jMJJ-700',
 
         #ATR-32300
         'L1_DY-BOX-2MU3VF', 'L1_DY-BOX-2MU5VF',
+
+        # 2026 HI
+        'L1_eEM3',
+        'L1_eEM3_EMPTY',
+
+        'L1_eEM3_VjTE200_EMPTY',
+        'L1_CALMTEA_eEM3',
+        'L1_CALMTEA_eEM3_VjTE200',
     ]
 
 
