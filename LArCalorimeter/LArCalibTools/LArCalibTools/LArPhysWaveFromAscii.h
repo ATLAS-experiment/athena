@@ -6,7 +6,6 @@
 #define LARPHYSWAVEFROMASCII_H
 
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "LArRawConditions/LArPhysWaveContainer.h"
 
 /** @class LArPhysWaveFromAscii
 

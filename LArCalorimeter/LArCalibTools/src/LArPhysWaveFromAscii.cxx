@@ -6,11 +6,14 @@
 
 #include "LArIdentifier/LArOnlineID.h"
 #include "LArIdentifier/LArOnline_SuperCellID.h"
+#include "LArRawConditions/LArPhysWaveContainer.h"
+
 #include "CaloIdentifier/CaloGain.h"
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <fstream>
+#include <memory>
 
 LArPhysWaveFromAscii::LArPhysWaveFromAscii(const std::string & name, ISvcLocator * pSvcLocator):AthAlgorithm(name, pSvcLocator) {};
 
@@ -28,7 +31,7 @@ StatusCode LArPhysWaveFromAscii::stop()
   }
 
   // Create new LArPhysWaveContainer
-  LArPhysWaveContainer* larPhysWaveContainerNew = new LArPhysWaveContainer();
+  auto larPhysWaveContainerNew = std::make_unique<LArPhysWaveContainer>();
   ATH_CHECK ( larPhysWaveContainerNew->setGroupingType(m_groupingType, msg()) );
   ATH_CHECK ( larPhysWaveContainerNew->initialize() );
 
@@ -147,7 +150,7 @@ StatusCode LArPhysWaveFromAscii::stop()
   // Add physics wave to container
   larPhysWaveContainerNew->setPdata(HWIdentifier(hwid), newLArPhysWave, (CaloGain::CaloGain)m_gain.value());
 
-  ATH_CHECK( detStore()->record(larPhysWaveContainerNew,m_store_key) );
+  ATH_CHECK( detStore()->record(std::move(larPhysWaveContainerNew),m_store_key) );
   ATH_MSG_INFO ( "LArPhysWaveFromAscii finalized!" );
   return StatusCode::SUCCESS;
 }
