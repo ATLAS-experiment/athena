@@ -93,7 +93,7 @@ private:
   /** @brief Flag to control if the volumes should be alignable or not */
   Gaudi::Property<bool> m_alignableVolumes{this, "AlignableVolumes", true};
   /** @brief Flag to construct the passive material surfaces */
-  Gaudi::Property<bool> m_buildPassiveVolumes{this, "BuildPassiveVolumes", false};
+  Gaudi::Property<bool> m_buildPassiveVolumes{this, "BuildPassiveVolumes", true};
   /** @brief Number of bins in phi direction on the BI cylinder surface */
   Gaudi::Property<std::size_t> m_nPhiBinsBI{this, "nPhiBinsBI", 16};
   /** @brief Number of bins in Z direction on the BI cylinder surface */
@@ -195,6 +195,23 @@ private:
                               const Acts::GeometryIdentifier& id,
                               Acts::VolumeBoundFactory& boundsFactory,
                               const std::vector<ChIdx>& passiveStationIds = {}) const;
+
+  /** @brief Build a static or a material node for a chamber that corresponds to a single blueprint node (e.g for a single MDT multilayer)
+   *  @param chamberNode The blueprint node out of which the variant node will be built
+   *  @return A variant holding either a static node or material node depending on wether the assignment of active material is enabled
+   */
+  std::variant<staticNodePtr, materialNodePtr> buildChamberNode(const blueprintNodePtr& chamberNode) const;
+
+  /** @brief Build a static or a material node for a chamber that corresponds to a single blueprint node (e.g for a single MDT multilayer)
+   *  @param innerStructure The inner structure of the chamber that corresponds to the children nodes
+   *  @param element The element representing the chamber/sector for which the node is built
+   *  @param vol The tracking volume associated to the chamber/sector
+   *  @return A variant holding either a static node or material node depending on wether the assignment of active material is enabled
+   */
+  template<typename T>
+  std::variant<staticNodePtr, materialNodePtr> buildChamberNode(const T& element, 
+                                                                std::unique_ptr<Acts::TrackingVolume>& vol,
+                                                                const std::vector<blueprintNodePtr>& innerStructure) const;
 
   /** @brief Helper function determining whether a readout element is BIS78 */
   bool isBIS78(const MuonGMR4::MuonReadoutElement* element) const;

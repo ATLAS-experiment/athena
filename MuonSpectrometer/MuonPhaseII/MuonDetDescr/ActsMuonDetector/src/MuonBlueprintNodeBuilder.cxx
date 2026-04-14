@@ -82,6 +82,13 @@ namespace {
     }
 
   }
+  // null check for variant of shared ptrs
+  template<typename... T>
+  bool isNullVariant(std::variant<T...> variant) {
+    return std::visit([](auto&& ptr) { 
+      return !ptr; 
+    }, variant);
+  }
 
 }
 
@@ -173,10 +180,9 @@ MuonBlueprintNodeBuilder::buildMuonNode(const Acts::GeometryContext& gctx,
 
     const ActsTrk::GeometryContext* context = gctx.get<const ActsTrk::GeometryContext* >();
     std::vector<std::string> stationNames;
-  
-    std::vector<staticNodePtr> nodes;
-    //build the material nodes that will have as children the static nodes bult from the tracking volumes of the chambers
-    std::vector<materialNodePtr> materialNodes;                                        
+
+    //build the material nodes that will have as children the static nodes bult from the tracking volumes of the chambers   
+    std::vector<std::variant<staticNodePtr, materialNodePtr>> nodes;                                       
   
     double innerRadius{0.0};
     double outerRadius{std::numeric_limits<double>::lowest()};
@@ -224,36 +230,27 @@ MuonBlueprintNodeBuilder::buildMuonNode(const Acts::GeometryContext& gctx,
           outerRadius = std::max(outerRadius, vertex.perp());
         }
       }
-      //create the null blueprint nodes     
-      staticNodePtr node;
-      materialNodePtr materialNode;
+
+      std::variant<staticNodePtr, materialNodePtr> chamberNode;      
       const bool isSingleMdt =
           (element->readoutEles().size() == 1 &&
           element->readoutEles().front()->detectorType() == DetectorType::Mdt);
       //for the single MDT elements we build the material node during the volume construction 
       //and the node returned is the material node already
       if (isSingleMdt) {
-          // Take ownership of the single existing material node where we have already included the static node as child
-          auto matNode = std::dynamic_pointer_cast<Acts::Experimental::MaterialDesignatorBlueprintNode>(innerStructure.first.front());
-          materialNode = std::move(matNode);
+          // Take ownership of the single existing node where we have already included the static node as child
+          // if we allow active material assignment the node is the material node, otherwise it is the static node
+        chamberNode = buildChamberNode(innerStructure.first.front());
       } else {
-        //for the non single MDT elements we build the material node that has as child the static node representing the chamber volume
-        materialNode = std::make_shared<Acts::Experimental::MaterialDesignatorBlueprintNode>(element->identString() + "_MaterialNode");
-        configureMaterialFaces(*materialNode, vol->volumeBounds(), getActiveMaterial(*element));
-        node = std::make_shared<Acts::Experimental::StaticBlueprintNode>(std::move(vol));
-        for (auto& childNode : innerStructure.first) {
-          auto staticNode = std::dynamic_pointer_cast<Acts::Experimental::StaticBlueprintNode>(childNode);
-          if (staticNode) {
-            node->addChild(std::move(staticNode));
-          } 
-        }
-        materialNode->addChild(node);
+        //for the non single MDT elements we build the material node that has as child the static node representing the chamber volume if we build with material
+        // or it is a static node with the other static nodes as children if not active material is assigned 
+        chamberNode = buildChamberNode(element, vol, innerStructure.first);
         innerStructure.first.clear();
       }
-      if (!materialNode) {
-          THROW_EXCEPTION("No blueprint node constructed");
+      if (isNullVariant(chamberNode)) {
+        THROW_EXCEPTION("No blueprint node constructed");
       }     
-      materialNodes.push_back(std::move(materialNode));
+      nodes.push_back(std::move(chamberNode));
   
       //keep the elements of the stations we want to assign passive material surfaces     
       if(!Acts::rangeContainsValue(passiveStationIds, element->chamberIndex())){
@@ -284,13 +281,50 @@ MuonBlueprintNodeBuilder::buildMuonNode(const Acts::GeometryContext& gctx,
     });
 
     auto muonNode = std::make_shared<Acts::Experimental::StaticBlueprintNode>(std::move(volume));
-    ATH_MSG_DEBUG("There are " << materialNodes.size() << " nodes");
+    ATH_MSG_DEBUG("There are " << nodes.size() << " nodes");
     //loop through the nodes-material pairs to add the nodes to the muon node and assign the material to the faces 
-    std::ranges::for_each(materialNodes, [&muonNode](const auto& node) {
-      muonNode->addChild(std::move(node));
+    std::ranges::for_each(nodes, [&muonNode](auto& nodeVariant){
+      std::visit([&](auto&& ptr) {
+        muonNode->addChild(ptr);
+      }, nodeVariant);     
     });
     return muonNode;
   }
+
+
+std::variant<MuonBlueprintNodeBuilder::staticNodePtr, MuonBlueprintNodeBuilder::materialNodePtr>
+MuonBlueprintNodeBuilder::buildChamberNode(const blueprintNodePtr& chamberVolumeNode) const{
+    if (m_assignActiveMaterial) {
+        auto materialNode = std::dynamic_pointer_cast<Acts::Experimental::MaterialDesignatorBlueprintNode>(chamberVolumeNode);  
+        return materialNode;
+    }
+    auto staticNode = std::dynamic_pointer_cast<Acts::Experimental::StaticBlueprintNode>(chamberVolumeNode);
+    return staticNode;   
+}
+
+template<typename T>
+std::variant<MuonBlueprintNodeBuilder::staticNodePtr, MuonBlueprintNodeBuilder::materialNodePtr>
+MuonBlueprintNodeBuilder::buildChamberNode(const T& element,
+                                          std::unique_ptr<Acts::TrackingVolume>& vol,
+                                          const std::vector<blueprintNodePtr>& innerStructure) const{
+  //copy of the volume bounds
+  const Acts::VolumeBounds& bounds = vol->volumeBounds();
+  staticNodePtr staticNode = std::make_shared<Acts::Experimental::StaticBlueprintNode>(std::move(vol));
+  for (auto& childNode : innerStructure) {
+      auto node = std::dynamic_pointer_cast<Acts::Experimental::StaticBlueprintNode>(childNode);
+      if (node) {
+          staticNode->addChild(std::move(node));
+      } 
+  }
+  if(!m_assignActiveMaterial){
+    return staticNode;
+  }
+  auto materialNode = std::make_shared<Acts::Experimental::MaterialDesignatorBlueprintNode>(element->identString() + "_MaterialNode");
+  configureMaterialFaces(*materialNode, bounds, getActiveMaterial(*element));
+  materialNode->addChild(staticNode);
+  return materialNode;
+}
+
 
 template<typename T>
 MuonBlueprintNodeBuilder::BluePrintSurfPairs_t  
@@ -320,7 +354,8 @@ MuonBlueprintNodeBuilder::BluePrintSurfPairs_t
           mwCfg.mlSurfaces = detSurfaces;
           mwCfg.transform = readoutEle->localToGlobalTransform(gctx);
 
-          //initialize a nullptr material node which will be filled in the case of single MDT readout elements and used to assign the material to the volume and add the static node as child of the material node
+          //initialize a nullptr material node which will be filled in the case of single MDT readout elements 
+          //and used to assign the material to the volume and add the static node as child of the material node
           std::shared_ptr<Acts::Experimental::MaterialDesignatorBlueprintNode> mdtMaterialNode;
 
           //special treatment of BIS78 MDT multilayer
@@ -390,7 +425,7 @@ MuonBlueprintNodeBuilder::BluePrintSurfPairs_t
           mdtVolume->assignGeometryId(chId.withExtra(mdtId++));
           //create the blueprint node for the mdt multilayers
           // check if this is a single mdt (single multilayer) chamber so we assign the material directly to the multilayer
-          if(element.readoutEles().size() == 1){
+          if(element.readoutEles().size() == 1 && m_assignActiveMaterial){
 
             mdtMaterialNode = std::make_shared<Acts::Experimental::MaterialDesignatorBlueprintNode>(element.identString() + "_MaterialNode");
             configureMaterialFaces(*mdtMaterialNode, mdtVolume->volumeBounds(), getActiveMaterial(element));
@@ -578,10 +613,6 @@ MuonBlueprintNodeBuilder::getActiveMaterial(const T& element) const
   requires(std::is_same_v<T, MuonGMR4::Chamber> ||
            std::is_same_v<T, MuonGMR4::SpectrometerSector>) {
   
-  if(!m_assignActiveMaterial){
-    return std::make_shared<Acts::HomogeneousSurfaceMaterial>(Acts::MaterialSlab::Nothing());
-  }
-
   const float thickness = element.halfZ();
   PVConstLink parentVolume = element.readoutEles().front()->getMaterialGeom()->getParent();
   GeoModelTools::GeoMaterialHelper geoMaterialHelper;
