@@ -274,6 +274,7 @@ LockedHandle<T> WebdaqHistSvc::getShared_i(const std::string& id) const
 {
   tbb::concurrent_hash_map<std::string, THistID>::const_accessor accessor;
   if (m_hists.find(accessor, id)) {
+    //coverity[FORWARD_NULL]
     auto * obj = accessor->second.obj;
     //accessor is implicitly valid
     //coverity[FORWARD_NULL]
