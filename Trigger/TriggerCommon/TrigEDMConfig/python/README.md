@@ -72,11 +72,11 @@ It is used in the case of ShallowCopy containers: An alias with suffix `ShallowC
 Common functions for EDM handling are defined in `TriggerEDM.py`. Particularly useful to note are:
 
 ```py
-recordable( arg, runVersion=3 )
+recordable(arg)
 ```
 -> A handy function used in signature configuration code to ensure that an algorithm
 output collection name is properly formatted and has a corresponding entry in the
-corresponding `TriggerEDM` file (the latter is only verified for Run 3 input currently).
+corresponding `TriggerEDM` file.
 
 
 ```py
