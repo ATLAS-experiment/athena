@@ -35,6 +35,8 @@ namespace columnar
         skipShallowCopies = json["skipShallowCopies"].get<bool>();
       if (json.contains ("measureNonAccessForEmpty"))
         measureNonAccessForEmpty = json["measureNonAccessForEmpty"].get<bool>();
+      if (json.contains("isrntuple"))
+        isrntuple = json["isrntuple"].get<bool>();
     }
 
     UserConfiguration UserConfiguration :: fromEnvironment ()

@@ -4,7 +4,6 @@
 
 /// @author Nils Krumnack
 
-
 //
 // includes
 //
@@ -28,7 +27,6 @@
 #include <xAODMuon/MuonContainer.h>
 #include <xAODMissingET/versions/MissingETAuxAssociationMap_v2.h>
 #include <xAODMissingET/versions/MissingETBase.h>
-#include <xAODCaloEvent/CaloClusterContainer.h>
 #include <xAODEgamma/ElectronContainer.h>
 #include <xAODEgamma/PhotonContainer.h>
 
@@ -44,6 +42,11 @@
 #include <TFile.h>
 #include <TLeaf.h>
 #include <TTree.h>
+
+#include "ROOT/RNTuple.hxx"
+#include "ROOT/RNTupleInspector.hxx"
+#include "ROOT/RNTupleReader.hxx"
+#include <ROOT/RNTupleView.hxx>
 
 #include <boost/core/demangle.hpp>
 
@@ -61,109 +64,122 @@
 // method implementations
 //
 
-namespace columnar
+namespace columnar 
 {
   // I'm moving code to this namespace but some of the code in this file
   // is still just in the columnar namespace. As I evolve the code I'll
   // move more of it to TestUtils.
   using namespace TestUtils;
 
-  namespace TestUtils
+  namespace TestUtils 
   {
-    template<typename T>
-    class BranchReader final
+
+    struct RNTupleBackend {
+      ROOT::RNTupleReader* reader = nullptr;
+      ROOT::Experimental::RNTupleInspector* inspector = nullptr;
+    };
+
+    using Backend = std::variant<TTree*, RNTupleBackend*>;
+    template <typename T>
+    class BranchReader final 
     {
       std::string m_branchName;
-      TBranch *m_branch = nullptr;
+      TBranch* m_branch = nullptr;
       bool m_isStatic = std::is_pod_v<T>;
-      T *m_data {new T()};
+      T* m_data{new T()};
 
     public:
-      BranchReader (const std::string& val_branchName)
-        : m_branchName (val_branchName)
-      {
-        if (m_branchName.find ("Aux.") != std::string::npos)
+      BranchReader(const std::string& val_branchName)
+         : m_branchName(val_branchName) 
+        {
+         if (m_branchName.find("Aux.") != std::string::npos)
           m_isStatic = true;
+        }
+
+      ~BranchReader() noexcept 
+      { 
+        delete m_data; 
       }
 
-      ~BranchReader () noexcept
-      {
-        delete m_data;
+      BranchReader(const BranchReader&) = delete;
+      BranchReader& operator=(const BranchReader&) = delete;
+
+      void setIsStatic(bool isStatic) 
+      { 
+        m_isStatic = isStatic; 
       }
 
-      BranchReader (const BranchReader&) = delete;
-      BranchReader& operator= (const BranchReader&) = delete;
-
-      void setIsStatic (bool isStatic)
-      {
-        m_isStatic = isStatic;
+      [[nodiscard]] const std::string& branchName() const 
+      { 
+        return m_branchName; 
       }
 
-      [[nodiscard]] const std::string& branchName () const
-      {
-        return m_branchName;
-      }
-
-      [[nodiscard]] std::string columnName () const
+      [[nodiscard]] std::string columnName() const 
       {
         std::string columnName = m_branchName;
-        if (auto index = columnName.find ("AuxDyn."); index != std::string::npos)
-          columnName.replace (index, 6, "");
-        else if (auto index = columnName.find ("Aux."); index != std::string::npos)
-          columnName.replace (index, 3, "");
-        else if (columnName.find (".") != std::string::npos)
-          throw std::runtime_error ("branch name does not contain AuxDyn or Aux: " + m_branchName);
+        if (auto index = columnName.find("AuxDyn."); index != std::string::npos)
+          columnName.replace(index, 6, "");
+        else if (auto index = columnName.find("Aux."); index != std::string::npos)
+          columnName.replace(index, 3, "");
+        else if (columnName.find(".") != std::string::npos)
+          throw std::runtime_error("branch name does not contain AuxDyn or Aux: " +m_branchName);
         return columnName;
       }
 
-      [[nodiscard]] std::string containerName () const
+      [[nodiscard]] std::string containerName() const 
       {
-        if (auto index = m_branchName.find ("AuxDyn."); index != std::string::npos)
-          return m_branchName.substr (0, index);
-        else if (auto index = m_branchName.find ("Aux."); index != std::string::npos)
-          return m_branchName.substr (0, index);
-        else if (m_branchName.find (".") == std::string::npos)
+        if (auto index = m_branchName.find("AuxDyn."); index != std::string::npos)
+          return m_branchName.substr(0, index);
+        else if (auto index = m_branchName.find("Aux."); index != std::string::npos)
+          return m_branchName.substr(0, index);
+        else if (m_branchName.find(".") == std::string::npos)
           return m_branchName;
         else
-          throw std::runtime_error ("branch name does not contain AuxDyn or Aux: " + m_branchName);
+          throw std::runtime_error("branch name does not contain AuxDyn or Aux: " +m_branchName);
       }
 
-      void connectTree (TTree *tree)
+      void connectTree(TTree* tree) 
       {
-        m_branch = tree->GetBranch (m_branchName.c_str());
+        m_branch = tree->GetBranch(m_branchName.c_str());
         if (!m_branch)
-          throw std::runtime_error ("failed to get branch: " + m_branchName);
-        m_branch->SetMakeClass (1);
+          throw std::runtime_error("failed to get branch: " + m_branchName);
+        m_branch->SetMakeClass(1);
         if (m_isStatic)
-          m_branch->SetAddress (m_data);
+          m_branch->SetAddress(m_data);
         else
-          m_branch->SetAddress (&m_data);
+         m_branch->SetAddress(&m_data);
       }
-
-      const T& getEntry (Long64_t entry)
+  
+      void connectTree(const Backend& b) 
+      {
+        auto* tree = std::get<TTree*>(b);  // throws if wrong backend
+        connectTree(tree);
+      }
+  
+      const T& getEntry(Long64_t entry) 
       {
         if (!m_branch)
-          throw std::runtime_error ("branch not connected: " + m_branchName);
-        if (m_branch->GetEntry (entry) <= 0)
-          throw std::runtime_error ("failed to get entry " + std::to_string (entry) + " for branch: " + m_branchName);
+          throw std::runtime_error("branch not connected: " + m_branchName);
+        if (m_branch->GetEntry(entry) <= 0)
+          throw std::runtime_error("failed to get entry " + std::to_string(entry) + " for branch: " + m_branchName);
         if (m_data == nullptr)
-          throw std::runtime_error ("got nullptr reading data for branch: " + m_branchName);
+          throw std::runtime_error("got nullptr reading data for branch: " + m_branchName);
         return *m_data;
       }
 
-      const T& getCachedEntry () const
-      {
-        return *m_data;
+      const T& getCachedEntry() const 
+      { 
+        return *m_data; 
       }
 
-      std::optional<float> entrySize () const
+      std::optional<float> entrySize() const 
       {
         if (!m_branch)
           return std::nullopt;
         return static_cast<float>(m_branch->GetZipBytes()) / m_branch->GetEntries();
       }
 
-      std::optional<float> uncompressedSize () const
+      std::optional<float> uncompressedSize() const 
       {
         if (!m_branch)
           return std::nullopt;
@@ -172,7 +188,7 @@ namespace columnar
 
       // technically this is const-correct, but I don't want to convince
       // the code checker of that
-      std::optional<unsigned> numBaskets ()
+      std::optional<unsigned> numBaskets() 
       {
         if (!m_branch)
           return std::nullopt;
@@ -180,46 +196,45 @@ namespace columnar
       }
     };
 
-    template<typename T>
-    class BranchReaderArray final
+    template <typename T>
+    class BranchReaderArray final 
     {
     public:
       std::string m_branchName;
-      TBranch *m_branch = nullptr;
+      TBranch* m_branch = nullptr;
       std::vector<T> m_dataVec;
 
     public:
-      BranchReaderArray (const std::string& val_branchName)
-        : m_branchName (val_branchName)
+      BranchReaderArray(const std::string& val_branchName)
+        : m_branchName(val_branchName) 
       {}
 
-      BranchReaderArray (const BranchReaderArray&) = delete;
-      BranchReaderArray& operator= (const BranchReaderArray&) = delete;
+      BranchReaderArray(const BranchReaderArray&) = delete;
+      BranchReaderArray& operator=(const BranchReaderArray&) = delete;
 
-      [[nodiscard]] std::string columnName () const
+      [[nodiscard]] std::string columnName() const 
       {
         std::string columnName = m_branchName;
-        if (auto index = columnName.find ("AuxDyn."); index != std::string::npos)
-          columnName.replace (index, 6, "");
-        else if (auto index = columnName.find ("Aux."); index != std::string::npos)
-          columnName.replace (index, 3, "");
-        else if (columnName.find (".") != std::string::npos)
-          throw std::runtime_error ("branch name does not contain AuxDyn or Aux: " + m_branchName);
+        if (auto index = columnName.find("AuxDyn."); index != std::string::npos)
+          columnName.replace(index, 6, "");
+        else if (auto index = columnName.find("Aux."); index != std::string::npos)
+          columnName.replace(index, 3, "");
+        else if (columnName.find(".") != std::string::npos)
+          throw std::runtime_error("branch name does not contain AuxDyn or Aux: " + m_branchName);
         return columnName;
       }
 
-      [[nodiscard]] std::string containerName () const
+      [[nodiscard]] std::string containerName() const 
       {
-        if (auto index = m_branchName.find ("AuxDyn."); index != std::string::npos)
-          return m_branchName.substr (0, index);
-        else if (auto index = m_branchName.find ("Aux."); index != std::string::npos)
-          return m_branchName.substr (0, index);
-        else if (m_branchName.find (".") == std::string::npos)
+        if (auto index = m_branchName.find("AuxDyn."); index != std::string::npos)
+          return m_branchName.substr(0, index);
+        else if (auto index = m_branchName.find("Aux."); index != std::string::npos)
+          return m_branchName.substr(0, index);
+        else if (m_branchName.find(".") == std::string::npos)
           return m_branchName;
         else
-          throw std::runtime_error ("branch name does not contain AuxDyn or Aux: " + m_branchName);
+          throw std::runtime_error("branch name does not contain AuxDyn or Aux: " + m_branchName);
       }
-
       void connectTree (TTree *tree)
       {
         m_branch = tree->GetBranch (m_branchName.c_str());
@@ -521,6 +536,119 @@ namespace columnar
       }
     };
 
+    template <typename T>
+    class RNTFieldReader final 
+    {
+      std::string m_FieldName;
+      std::unique_ptr<ROOT::RNTupleView<T>> m_view;
+      ROOT::Experimental::RNTupleInspector* m_inspector = nullptr;
+      ROOT::RNTupleReader* m_reader = nullptr;
+      const T* m_data = nullptr;
+
+    public:
+      RNTFieldReader(const std::string& val_fieldName)
+      : m_FieldName(val_fieldName) 
+      {}
+
+      ~RNTFieldReader() noexcept {}
+      RNTFieldReader(const RNTFieldReader&) = delete;
+      RNTFieldReader& operator=(const RNTFieldReader&) = delete;
+
+      [[nodiscard]] const std::string& fieldName() const 
+      { 
+        return m_FieldName; 
+      }
+
+      [[nodiscard]] std::string columnName() const 
+      {
+        std::string columnName = m_FieldName;
+        if (auto index = columnName.find("AuxDyn:"); index != std::string::npos)
+          columnName.replace(index, 6, "");
+        else if (auto index = columnName.find("Aux:."); index != std::string::npos)
+          columnName.replace(index, 4, "");
+        else if (auto index = columnName.find("Aux:"); index != std::string::npos)
+          columnName.replace(index, 3, "");
+        else if (columnName.find(":") != std::string::npos)
+          throw std::runtime_error("field name does not contain AuxDyn or Aux: " + m_FieldName);
+        std::replace(columnName.begin(), columnName.end(), ':', '.');
+
+        return columnName;
+      }
+
+      [[nodiscard]] std::string containerName() const 
+      {
+        if (auto index = m_FieldName.find("AuxDyn:"); index != std::string::npos)
+          return m_FieldName.substr(0, index);
+        else if (auto index = m_FieldName.find("Aux:"); index != std::string::npos)
+          return m_FieldName.substr(0, index);
+        else if (m_FieldName.find(":") == std::string::npos)
+          return m_FieldName;
+        else
+          throw std::runtime_error("field name does not contain AuxDyn or Aux: " + m_FieldName);
+      }
+
+      void connectRNTuple(ROOT::RNTupleReader* reader,
+                      ROOT::Experimental::RNTupleInspector* inspector) 
+      {
+        m_inspector = inspector;
+        m_reader = reader;
+        m_view = std::make_unique<ROOT::RNTupleView<T>>(reader->GetView<T>(m_FieldName));
+
+        if (!m_view)
+          throw std::runtime_error("failed to get field: " + m_FieldName);
+      }
+
+      void connectTree(const Backend& b) 
+      {
+        auto* rntbackend = std::get<RNTupleBackend*>(b);  // throws if wrong backend
+
+        if (!rntbackend->reader || !rntbackend->inspector)
+          throw std::runtime_error("RNTuple backend not properly initialized");
+        connectRNTuple(rntbackend->reader, rntbackend->inspector);
+      }
+  
+  
+      const T& getEntry(Long64_t entry) 
+      {
+        if (!m_view)
+          throw std::runtime_error("field not connected: " + m_FieldName);
+
+        m_data = &((*m_view)(static_cast<ROOT::NTupleSize_t>(entry)));
+
+        if (m_data == nullptr)
+          throw std::runtime_error("got nullptr reading data for field: " + m_FieldName);
+        return *m_data;
+      }
+
+      const T& getCachedEntry() const 
+      {  
+        return *m_data; 
+      }
+
+      std::optional<float> entrySize() const 
+      {
+
+        const ROOT::Experimental::RNTupleInspector::RFieldTreeInspector& fieldTreeInspector = m_inspector->GetFieldTreeInspector(m_FieldName);
+        return static_cast<float>(fieldTreeInspector.GetCompressedSize()) /
+          m_inspector->GetDescriptor().GetNEntries();
+      }
+
+      std::optional<float> uncompressedSize() const 
+      {
+
+        const ROOT::Experimental::RNTupleInspector::RFieldTreeInspector& fieldTreeInspector = m_inspector->GetFieldTreeInspector(m_FieldName);
+
+        return static_cast<float>(fieldTreeInspector.GetUncompressedSize()) /
+          m_inspector->GetDescriptor().GetNEntries();
+      }
+
+      std::optional<unsigned> numBaskets() 
+      {
+       // placeholder
+       return std::nullopt;
+      }
+    };
+
     class IColumnData
     {
     public:
@@ -537,7 +665,7 @@ namespace columnar
 
       virtual ~IColumnData () noexcept = default;
 
-      virtual bool connect (TTree *tree, std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*>& offsetColumns, std::unordered_map<std::string,ColumnInfo>& requestedColumns) = 0;
+      virtual bool connect(Backend source, std::unordered_map<std::string, const std::vector<ColumnarOffsetType>*>& offsetColumns, std::unordered_map<std::string, ColumnInfo>& requestedColumns) = 0;
 
       /// @brief lookup and store column indices from the header for all enabled output columns
       void connectColumnIndices (const ColumnVectorHeader& header)
@@ -568,18 +696,17 @@ namespace columnar
       {
         outputColumns.push_back ({.name = eventRangeColumnName, .isOffset = true});
       }
-  
-      virtual bool connect (TTree * /*tree*/, std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*>& /*offsetColumns*/, std::unordered_map<std::string,ColumnInfo>& requestedColumns) override
-      {
-        if (requestedColumns.contains (outputColumns.at(0).name))
-        {
-          requestedColumns.erase (outputColumns.at(0).name);
-          outputColumns.at(0).enabled = true;
-          return true;
-        }
-        return false;
-      }
 
+      virtual bool connect(Backend /*source*/, std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*>& /*offsetColumns*/,std::unordered_map<std::string, ColumnInfo>& requestedColumns) override 
+      {
+       if (requestedColumns.contains(outputColumns.at(0).name)) 
+       {
+         requestedColumns.erase(outputColumns.at(0).name);
+         outputColumns.at(0).enabled = true;
+         return true;
+       }
+       return false;
+      }
       virtual void clearColumns () override
       {
         data[0] = 0;
@@ -608,10 +735,11 @@ namespace columnar
       {}
     };
 
-    template<typename T>
+
+    template <typename T, template <typename> class Reader>
     struct ColumnDataScalar final : public TestUtils::IColumnData
     {
-      BranchReader<T> branchReader;
+      Reader<T> branchReader;
       Benchmark benchmarkUnpack;
       Benchmark benchmark;
       std::vector<T> outData;
@@ -623,7 +751,7 @@ namespace columnar
         outputColumns.push_back ({.name = branchReader.columnName()});
       }
 
-      virtual bool connect (TTree *tree, std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*>& /*offsetColumns*/, std::unordered_map<std::string,ColumnInfo>& requestedColumns) override
+      virtual bool connect( Backend source, std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*>& /*offsetColumns*/,std::unordered_map<std::string, ColumnInfo>& requestedColumns) override 
       {
         auto iter = requestedColumns.find (outputColumns.at(0).name);
         if (iter == requestedColumns.end())
@@ -631,11 +759,10 @@ namespace columnar
         outputColumns.at(0).enabled = true;
         requestedColumns.erase (iter);
 
-        branchReader.connectTree (tree);
+        branchReader.connectTree (source);
 
         return true;
       }
-
       virtual void clearColumns () override
       {
         outData.clear ();
@@ -678,10 +805,10 @@ namespace columnar
       }
     };
 
-    template<typename T>
-    struct ColumnDataVector final : public TestUtils::IColumnData
+    template <typename T, template <typename> class Reader>
+    struct ColumnDataVector final : public TestUtils::IColumnData 
     {
-      BranchReader<std::vector<T>> branchReader;
+      Reader<std::vector<T>> branchReader;
       const std::vector<ColumnarOffsetType>* offsetColumn = nullptr;
       std::vector<ColumnarOffsetType> offsets = {0};
       std::vector<T> outData;
@@ -696,14 +823,14 @@ namespace columnar
         outputColumns.push_back ({.name = branchReader.containerName(), .isOffset = true, .primary = false});
       }
 
-      virtual bool connect (TTree *tree, std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*>& offsetColumns, std::unordered_map<std::string,ColumnInfo>& requestedColumns) override
+      virtual bool connect(Backend source, std::unordered_map<std::string, const std::vector<ColumnarOffsetType>*>& offsetColumns, std::unordered_map<std::string, ColumnInfo>& requestedColumns) override 
       {
         auto iter = requestedColumns.find (outputColumns.at(0).name);
         if (iter == requestedColumns.end())
           return false;
         outputColumns.at(0).enabled = true;
 
-        branchReader.connectTree (tree);
+        branchReader.connectTree(source);
 
         if (iter->second.offsetName != outputColumns.at(1).name)
           throw std::runtime_error ("offset name mismatch: " + iter->second.offsetName + " != " + outputColumns.at(1).name);
@@ -779,8 +906,8 @@ namespace columnar
       }
     };
 
-    template<typename T>
-    struct ColumnDataOutVector final : public TestUtils::IColumnData
+    template <typename T, template <typename> class Reader>
+    struct ColumnDataOutVector final : public TestUtils::IColumnData 
     {
       T defaultValue;
       const std::vector<ColumnarOffsetType>* offsetColumn = nullptr;
@@ -793,7 +920,7 @@ namespace columnar
         outputColumns.push_back ({.name = val_columnName});
       }
 
-      virtual bool connect (TTree * /*tree*/, std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*>& offsetColumns, std::unordered_map<std::string,ColumnInfo>& requestedColumns) override
+      virtual bool connect([[maybe_unused]]Backend source, std::unordered_map<std::string, const std::vector<ColumnarOffsetType>*>& offsetColumns, std::unordered_map<std::string, ColumnInfo>& requestedColumns) override 
       {
         auto iter = requestedColumns.find (outputColumns.at(0).name);
         if (iter == requestedColumns.end())
@@ -845,10 +972,10 @@ namespace columnar
       }
     };
 
-    template<typename T>
-    struct ColumnDataVectorVector final : public TestUtils::IColumnData
+    template <typename T, template <typename> class Reader>
+    struct ColumnDataVectorVector final : public TestUtils::IColumnData 
     {
-      BranchReader<std::vector<std::vector<T>>> branchReader;
+      Reader<std::vector<std::vector<T>>> branchReader;
       std::vector<ColumnarOffsetType> offsets = {0};
       std::vector<T> columnData;
       Benchmark benchmarkUnpack;
@@ -862,14 +989,14 @@ namespace columnar
         outputColumns.push_back ({.name = branchReader.columnName() + ".offset", .isOffset = true});
       }
 
-      virtual bool connect (TTree *tree, std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*>& /*offsetColumns*/, std::unordered_map<std::string,ColumnInfo>& requestedColumns) override
+      virtual bool connect(Backend source, std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*>& /*offsetColumns*/, std::unordered_map<std::string, ColumnInfo>& requestedColumns) override 
       {
         auto iter = requestedColumns.find (outputColumns.at(0).name);
         if (iter == requestedColumns.end())
           return false;
         outputColumns.at(0).enabled = true;
 
-        branchReader.connectTree (tree);
+        branchReader.connectTree(source);
 
         if (iter->second.offsetName != outputColumns.at(1).name)
           throw std::runtime_error ("offset name mismatch: " + iter->second.offsetName + " != " + outputColumns.at(1).name);
@@ -934,11 +1061,11 @@ namespace columnar
       }
     };
 
-    template<typename T>
-    struct ColumnDataVectorVectorLink final : public TestUtils::IColumnData
+    template <typename T, template <typename> class Reader>
+    struct ColumnDataVectorVectorLink final : public TestUtils::IColumnData 
     {
       using CM = ColumnarModeArray;
-      BranchReader<std::vector<std::vector<ElementLink<T>>>> branchReader;
+      Reader<std::vector<std::vector<ElementLink<T>>>> branchReader;
       std::vector<ColumnarOffsetType> offsets = {0};
       std::vector<ColumnarOffsetType> eventOffsets = {0};
       LinkColumnVector columnData;
@@ -954,14 +1081,14 @@ namespace columnar
         outputColumns.push_back ({.name = branchReader.columnName() + ".offset", .isOffset = true});
       }
 
-      virtual bool connect (TTree *tree, std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*>& offsetColumns, std::unordered_map<std::string,ColumnInfo>& requestedColumns) override
-      {
+     virtual bool connect(Backend source, std::unordered_map<std::string, const std::vector<ColumnarOffsetType>*>& offsetColumns, std::unordered_map<std::string, ColumnInfo>& requestedColumns) override 
+     {
         auto iter = requestedColumns.find (outputColumns.at(0).name);
         if (iter == requestedColumns.end())
           return false;
         outputColumns.at(0).enabled = true;
 
-        branchReader.connectTree (tree);
+        branchReader.connectTree(source);
 
         if (iter->second.offsetName != outputColumns.at(1).name)
           throw std::runtime_error ("offset name mismatch: " + iter->second.offsetName + " != " + outputColumns.at(1).name);
@@ -1049,11 +1176,11 @@ namespace columnar
       }
     };
 
-    template<typename T>
-    struct ColumnDataVectorVectorVector final : public TestUtils::IColumnData
+    template <typename T, template <typename> class Reader>
+    struct ColumnDataVectorVectorVector final : public TestUtils::IColumnData 
     {
       std::string columnName;
-      BranchReader<std::vector<std::vector<std::vector<T>>>> branchReader;
+      Reader<std::vector<std::vector<std::vector<T>>>> branchReader;
       std::vector<ColumnarOffsetType> outerOffsets = {0};
       std::vector<ColumnarOffsetType> innerOffsets = {0};
       std::vector<T> columnData;
@@ -1069,14 +1196,14 @@ namespace columnar
         outputColumns.push_back ({.name = branchReader.columnName() + ".outerOffset", .isOffset = true});
       }
 
-      virtual bool connect (TTree *tree, std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*>& /*offsetColumns*/, std::unordered_map<std::string,ColumnInfo>& requestedColumns) override
+      virtual bool connect(Backend source, std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*>& /*offsetColumns*/, std::unordered_map<std::string, ColumnInfo>& requestedColumns) override 
       {
         auto iter = requestedColumns.find (outputColumns.at(0).name);
         if (iter == requestedColumns.end())
           return false;
         outputColumns.at(0).enabled = true;
 
-        branchReader.connectTree (tree);
+        branchReader.connectTree(source);
 
         if (iter->second.offsetName != outputColumns.at(1).name)
           throw std::runtime_error ("offset name mismatch: " + iter->second.offsetName + " != " + outputColumns.at(1).name);
@@ -1159,11 +1286,11 @@ namespace columnar
       }
     };
 
-    template<typename T>
-    struct ColumnDataVectorLink final : public TestUtils::IColumnData
+    template <typename T, template <typename> class Reader>
+    struct ColumnDataVectorLink final : public TestUtils::IColumnData 
     {
       using CM = ColumnarModeArray;
-      BranchReader<std::vector<ElementLink<T>>> branchReader;
+      Reader<std::vector<ElementLink<T>>> branchReader;
       const std::vector<ColumnarOffsetType>* offsetColumn = nullptr;
       std::vector<ColumnarOffsetType> offsets = {0};
       LinkColumnVector columnData;
@@ -1179,14 +1306,15 @@ namespace columnar
         outputColumns.push_back ({.name = branchReader.containerName(), .isOffset = true, .primary = false});
       }
 
-      virtual bool connect (TTree *tree, std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*>& offsetColumns, std::unordered_map<std::string,ColumnInfo>& requestedColumns) override
+
+      virtual bool connect(Backend source, std::unordered_map<std::string, const std::vector<ColumnarOffsetType>*>& offsetColumns, std::unordered_map<std::string, ColumnInfo>& requestedColumns) override 
       {
         auto iter = requestedColumns.find (outputColumns.at(0).name);
         if (iter == requestedColumns.end())
           return false;
         outputColumns.at(0).enabled = true;
 
-        branchReader.connectTree (tree);
+        branchReader.connectTree(source);
 
         if (iter->second.offsetName != outputColumns.at(1).name)
           throw std::runtime_error ("offset name mismatch: " + iter->second.offsetName + " != " + outputColumns.at(1).name);
@@ -1280,6 +1408,140 @@ namespace columnar
       }
     };
 
+    template <typename T, template <typename> class Reader>
+    struct ColumnDataVectorRLink final : public TestUtils::IColumnData 
+    {
+      using CM = ColumnarModeArray;
+      Reader<std::vector<ElementLink<T>>> branchReader;
+      const std::vector<ColumnarOffsetType>* offsetColumn = nullptr;
+      std::vector<ColumnarOffsetType> offsets = {0};
+      LinkColumnVector columnData;
+      Benchmark benchmarkUnpack;
+      Benchmark benchmark;
+      unsigned entries = 0;
+      unsigned nullEntries = 0;
+
+      ColumnDataVectorRLink(const std::string& val_branchName)
+      : branchReader(val_branchName), benchmarkUnpack(branchReader.columnName() + "(unpack)"), benchmark(branchReader.columnName()) 
+      {
+        outputColumns.push_back({.name = branchReader.columnName()});
+        outputColumns.push_back({.name = branchReader.containerName(), .isOffset = true, .primary = false});
+      }
+
+      virtual bool connect(Backend source, std::unordered_map<std::string, const std::vector<ColumnarOffsetType>*>& offsetColumns, std::unordered_map<std::string, ColumnInfo>& requestedColumns) override 
+      {
+        auto iter = requestedColumns.find(outputColumns.at(0).name);
+        if (iter == requestedColumns.end())
+          return false;
+        outputColumns.at(0).enabled = true;
+
+        branchReader.connectTree(source);
+        if (iter->second.offsetName != outputColumns.at(1).name)
+          throw std::runtime_error ("offset name mismatch: " + iter->second.offsetName + " != " + outputColumns.at(1).name);
+
+        for (auto keyColumn : columnData.connect (iter->second, offsetColumns, requestedColumns))
+        {
+          outputColumns.push_back ({.name = keyColumn, .primary = false, .enabled = true});
+          requestedColumns.erase (keyColumn);
+        }
+        requestedColumns.erase (iter);
+
+        if (auto offsetIter = offsetColumns.find (outputColumns.at(1).name); offsetIter != offsetColumns.end())
+          offsetColumn = offsetIter->second;
+        else
+          offsetColumns.emplace (outputColumns.at(1).name, &offsets);
+
+        iter = requestedColumns.find (outputColumns.at(1).name);
+        if (iter != requestedColumns.end())
+        {
+          outputColumns.at(1).enabled = true;
+          requestedColumns.erase (iter);
+        }
+
+        return true;
+      }
+
+      virtual void clearColumns() override 
+      {
+        columnData.clear();
+        offsets.clear();
+        offsets.push_back(0);
+      }
+
+      virtual void getEntry(Long64_t entry) override 
+      {
+        benchmark.startTimer();
+        const auto& branchData = branchReader.getEntry(entry);
+        benchmark.stopTimer();
+        benchmarkUnpack.startTimer();
+
+       columnData.checkOffsets (offsets.size() - 1);
+       for (const auto& element : branchData) 
+       {
+         if (element.isDefault() || element.index() == static_cast<unsigned int>(-1)) 
+           columnData.addEmptyLink ();
+          else
+            columnData.addSplitLink (element.index(), element.key(), offsets.size()-1);
+       }
+      
+    
+      offsets.push_back(columnData.size());
+
+      if (offsetColumn) {
+        if (offsetColumn->size() != offsets.size()) 
+        {
+          throw std::runtime_error("offset column not filled yet: " + outputColumns.at(1).name);
+        }
+        if (offsetColumn->back() != offsets.back()) 
+        {
+          throw std::runtime_error("offset column does not match: " + outputColumns.at(1).name);
+       }
+      }
+
+     benchmarkUnpack.stopTimer();
+    }
+
+    virtual void setData(ColumnVectorData& colData) override 
+    {
+      if (outputColumns.at(0).columnIndex != ColumnVectorHeader::nullIndex)
+        colData.setColumn(outputColumns.at(0).columnIndex, columnData.size(), columnData.data());
+      if (outputColumns.at(1).columnIndex != ColumnVectorHeader::nullIndex) 
+        colData.setColumn(outputColumns.at(1).columnIndex, offsets.size(), offsets.data());
+      for (std::size_t i = 2; i < outputColumns.size(); ++ i)
+      {
+        if (outputColumns.at(i).columnIndex != ColumnVectorHeader::nullIndex)
+          colData.setColumn (outputColumns.at(i).columnIndex, columnData.keysColumn(i-2).size(), columnData.keysColumn(i-2).data());
+      }
+    }
+
+    [[nodiscard]] virtual BranchPerfData getPerfData(float emptyTime) override 
+    {
+      BranchPerfData result;
+      result.name = branchReader.columnName();
+      result.timeRead = benchmark.getEntryTime(emptyTime);
+      result.timeUnpack = benchmarkUnpack.getEntryTime(emptyTime);
+      benchmark.setSilence();
+      benchmarkUnpack.setSilence();
+      result.entrySize = branchReader.entrySize();
+      result.uncompressedSize = branchReader.uncompressedSize();
+      result.numBaskets = branchReader.numBaskets();
+      result.entries = entries;
+      result.nullEntries = nullEntries;
+      return result;
+    }
+
+   virtual void collectColumnData() override 
+   {
+      entries += columnData.size();
+      for (const auto& index : columnData) 
+      {
+        if (index == invalidObjectIndex)
+          nullEntries += 1;
+        }
+    }
+  };
+
+
     template<typename T>
     struct ColumnDataVectorSplitLink final : public TestUtils::IColumnData
     {
@@ -1302,13 +1564,13 @@ namespace columnar
         outputColumns.push_back ({.name = branchReaderSize.containerName(), .isOffset = true, .primary = false});
       }
 
-      virtual bool connect (TTree *tree, std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*>& offsetColumns, std::unordered_map<std::string,ColumnInfo>& requestedColumns) override
+      virtual bool connect (Backend source, std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*>& offsetColumns, std::unordered_map<std::string,ColumnInfo>& requestedColumns) override
       {
         auto iter = requestedColumns.find (outputColumns.at(0).name);
         if (iter == requestedColumns.end())
           return false;
         outputColumns.at(0).enabled = true;
-
+        auto* tree = std::get<TTree*>(source);
         branchReaderSize.connectTree (tree);
         branchReaderKey.connectTree (tree);
         branchReaderIndex.connectTree (tree);
@@ -1412,11 +1674,11 @@ namespace columnar
       }
     };
 
-    template<typename T>
-    struct ColumnDataVectorVectorVariantLink final : public TestUtils::IColumnData
+    template <typename T, template <typename> class Reader>
+    struct ColumnDataVectorVectorVariantLink final : public TestUtils::IColumnData 
     {
       using CM = ColumnarModeArray;
-      BranchReader<std::vector<std::vector<ElementLink<T>>>> branchReader;
+      Reader<std::vector<std::vector<ElementLink<T>>>> branchReader;
       std::vector<ColumnarOffsetType> offsets = {0};
       std::vector<ColumnarOffsetType> eventOffsets = {0};
       LinkColumnVector columnData;
@@ -1432,16 +1694,16 @@ namespace columnar
         outputColumns.push_back ({.name = branchReader.columnName() + ".offset", .isOffset = true});
       }
 
-      virtual bool connect (TTree *tree, std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*>& offsetColumns, std::unordered_map<std::string,ColumnInfo>& requestedColumns) override
+      virtual bool connect(Backend source, std::unordered_map<std::string, const std::vector<ColumnarOffsetType>*>& offsetColumns, std::unordered_map<std::string, ColumnInfo>& requestedColumns) override 
       {
-        auto iter = requestedColumns.find (outputColumns.at(0).name);
+       auto iter = requestedColumns.find (outputColumns.at(0).name);
         if (iter == requestedColumns.end())
           return false;
         outputColumns.at(0).enabled = true;
 
-        branchReader.connectTree (tree);
+       branchReader.connectTree(source);
 
-        if (iter->second.offsetName != outputColumns.at(1).name)
+       if (iter->second.offsetName != outputColumns.at(1).name)
           throw std::runtime_error ("offset name mismatch: " + iter->second.offsetName + " != " + outputColumns.at(1).name);
 
         for (auto keyColumn : columnData.connect (iter->second, offsetColumns, requestedColumns))
@@ -1536,9 +1798,10 @@ namespace columnar
       }
     };
 
-    struct ColumnDataMetNames final : public TestUtils::IColumnData
+    template <template <typename> class Reader>
+    struct ColumnDataMetNames final : public TestUtils::IColumnData 
     {
-      BranchReader<std::vector<std::string>> branchReader;
+      Reader<std::vector<std::string>> branchReader;
       std::vector<ColumnarOffsetType> offsets = {0};
       std::vector<char> columnData;
       std::vector<std::size_t> columnHashData;
@@ -1553,16 +1816,16 @@ namespace columnar
         outputColumns.push_back ({.name = branchReader.columnName() + "Hash"});
       }
 
-      virtual bool connect (TTree *tree, std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*>& /*offsetColumns*/, std::unordered_map<std::string,ColumnInfo>& requestedColumns) override
+      virtual bool connect(Backend source, std::unordered_map<std::string, const std::vector<ColumnarOffsetType>*>& /*offsetColumns*/, std::unordered_map<std::string, ColumnInfo>& requestedColumns) override 
       {
-        auto iter = requestedColumns.find (outputColumns.at(0).name);
+       auto iter = requestedColumns.find (outputColumns.at(0).name);
         if (iter == requestedColumns.end())
           return false;
         outputColumns.at(0).enabled = true;
 
-        branchReader.connectTree (tree);
+        branchReader.connectTree(source);
 
-        if (iter->second.offsetName != outputColumns.at(1).name)
+       if (iter->second.offsetName != outputColumns.at(1).name)
           throw std::runtime_error ("offset name mismatch: " + iter->second.offsetName + " != " + outputColumns.at(1).name);
 
         requestedColumns.erase (iter);
@@ -1635,9 +1898,10 @@ namespace columnar
       {}
     };
 
-    struct ColumnDataOutputMet final : public TestUtils::IColumnData
+    template <template <typename> class Reader>
+    struct ColumnDataOutputMet final : public TestUtils::IColumnData 
     {
-      std::vector<std::string> termNames;
+     std::vector<std::string> termNames;
       const std::vector<ColumnarOffsetType>* offsetColumns = nullptr;
       std::vector<ColumnarOffsetType> offsets = {0};
       std::vector<ColumnarOffsetType> namesOffsets = {0};
@@ -1653,9 +1917,9 @@ namespace columnar
         outputColumns.push_back ({.name = val_columnName + ".nameHash"});
       }
 
-      virtual bool connect (TTree * /*tree*/, std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*>& offsetColumns, std::unordered_map<std::string,ColumnInfo>& requestedColumns) override
+      virtual bool connect([[maybe_unused]]Backend source, std::unordered_map<std::string, const std::vector<ColumnarOffsetType>*>& offsetColumns, std::unordered_map<std::string, ColumnInfo>& requestedColumns) override 
       {
-        if (auto iter = requestedColumns.find (outputColumns.at(0).name);
+       if (auto iter = requestedColumns.find (outputColumns.at(0).name);
             iter != requestedColumns.end())
           requestedColumns.erase (iter);
         else
@@ -1734,9 +1998,10 @@ namespace columnar
       {}
     };
 
-    struct ColumnDataSamplingPattern final : public TestUtils::IColumnData
+    template <template <typename> class Reader>
+    struct ColumnDataSamplingPattern final : public TestUtils::IColumnData 
     {
-      BranchReader<xAOD::CaloClusterContainer> branchReader;
+      Reader<xAOD::CaloClusterContainer> branchReader;
       std::vector<ColumnarOffsetType> offsets = {0};
       std::vector<std::uint32_t> columnData;
       Benchmark benchmarkUnpack;
@@ -1750,16 +2015,15 @@ namespace columnar
         outputColumns.push_back ({.name = branchReader.columnName(), .isOffset = true, .primary = false});
       }
 
-      virtual bool connect (TTree *tree, std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*>& /*offsetColumns*/, std::unordered_map<std::string,ColumnInfo>& requestedColumns) override
+      virtual bool connect(Backend source, std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*>& /*offsetColumns*/, std::unordered_map<std::string, ColumnInfo>& requestedColumns) override 
       {
-        auto iter = requestedColumns.find (outputColumns.at(0).name);
+       auto iter = requestedColumns.find (outputColumns.at(0).name);
         if (iter == requestedColumns.end())
           return false;
         outputColumns.at(0).enabled = true;
 
-        branchReader.connectTree (tree);
-
-        if (iter->second.offsetName != outputColumns.at(1).name)
+        branchReader.connectTree(source);
+       if (iter->second.offsetName != outputColumns.at(1).name)
           throw std::runtime_error ("offset name mismatch: " + iter->second.offsetName + " != " + outputColumns.at(1).name);
 
         requestedColumns.erase (iter);
@@ -1824,8 +2088,7 @@ namespace columnar
       }
     };
 
-
-    namespace
+   namespace
     {
       /// @brief wrapper around a tool and its benchmarks for mode 2
       struct ToolData
@@ -1873,6 +2136,8 @@ namespace columnar
   }
 
 
+
+
   ColumnarPhysLiteTest ::
   ColumnarPhysLiteTest ()
   {
@@ -1886,18 +2151,36 @@ namespace columnar
 #endif
     });
 
-    auto *fileName = getenv ("ASG_TEST_FILE_LITE_MC");
-    if (fileName == nullptr)
-      throw std::runtime_error ("missing ASG_TEST_FILE_LITE_MC");
-    file.reset (TFile::Open (fileName, "READ"));
-    if (!file)
-      throw std::runtime_error ("failed to open file");
-    tree = dynamic_cast<TTree*> (file->Get ("CollectionTree"));
-    if (!tree)
-      throw std::runtime_error ("failed to open tree");
+    auto userConfiguration = TestUtils::UserConfiguration::fromEnvironment();
+    if (userConfiguration.isrntuple) 
+    {
+      auto* fileName = getenv("ASG_TEST_FILE_RNTUPLE_LITE_MC");
+      if (fileName == nullptr)
+        throw std::runtime_error("missing ASG_TEST_FILE_RNTUPLE_LITE_MC");
+      rntreader = ROOT::RNTupleReader::Open("EventData", fileName);
+      inspector = ROOT::Experimental::RNTupleInspector::Create("EventData", fileName);
+      rntbackend = new TestUtils::RNTupleBackend{rntreader.get(), inspector.get()};
+      if (!rntreader or !inspector)
+        throw std::runtime_error("failed to open rntuple");
+    } else 
+    {
+      auto* fileName = getenv("ASG_TEST_FILE_LITE_MC");
+      if (fileName == nullptr)
+        throw std::runtime_error("missing ASG_TEST_FILE_LITE_MC");
+      file.reset(TFile::Open(fileName, "READ"));
+      if (!file)
+        throw std::runtime_error("failed to open file");
+      tree = dynamic_cast<TTree*>(file->Get("CollectionTree"));
+      if (!tree)
+        throw std::runtime_error("failed to open rntuple");
+    }
   }
 
-  ColumnarPhysLiteTest :: ~ColumnarPhysLiteTest () = default;
+  ColumnarPhysLiteTest ::~ColumnarPhysLiteTest() 
+  {
+    if (rntbackend)
+      delete rntbackend;
+  }
 
   std::string ColumnarPhysLiteTest :: makeUniqueName ()
   {
@@ -1917,137 +2200,267 @@ namespace columnar
 
     knownColumns.push_back (std::make_shared<ColumnDataEventCount> ());
 
-    tree->SetMakeClass (1);
+    if (tree) 
     {
-      std::unordered_map<std::string,TBranch*> branches;
+      tree->SetMakeClass(1);
       {
-        TIter branchIter (tree->GetListOfBranches());
-        TObject *obj = nullptr;
-        while ((obj = branchIter()))
+        std::unordered_map<std::string, TBranch*> branches;
         {
-          TBranch *branch = nullptr;
-          if ((branch = dynamic_cast<TBranch*>(obj)))
+          TIter branchIter(tree->GetListOfBranches());
+          TObject* obj = nullptr;
+          while ((obj = branchIter())) 
           {
-            branches.emplace (branch->GetName(), branch);
-            TIter subBranchIter (branch->GetListOfBranches());
-            while ((obj = subBranchIter()))
+            TBranch* branch = nullptr;
+            if ((branch = dynamic_cast<TBranch*>(obj))) 
             {
-              if (auto subBranch = dynamic_cast<TBranch*>(obj))
-                branches.emplace (subBranch->GetName(), subBranch);
+              branches.emplace(branch->GetName(), branch);
+              TIter subBranchIter(branch->GetListOfBranches());
+              while ((obj = subBranchIter())) 
+              {
+                if (auto subBranch = dynamic_cast<TBranch*>(obj))
+                  branches.emplace(subBranch->GetName(), subBranch);
+              }
             }
+          }
+        }
+
+        for (const auto& [name, branch] : branches) 
+        {
+          if (name.find("AuxDyn.") != std::string::npos ||
+               name.find("Aux.") != std::string::npos) 
+          {
+            TClass* branchClass = nullptr;
+            EDataType branchType{};
+            branch->GetExpectedType(branchClass, branchType);
+            if (branchClass == nullptr) 
+            {
+              switch (branchType) 
+              {
+                case kInt_t:
+                  knownColumns.push_back(std::make_shared<ColumnDataScalar<std::int32_t, BranchReader>>(branch->GetName()));
+                  break;
+                case kUInt_t:
+                  knownColumns.push_back(std::make_shared<ColumnDataScalar<std::uint32_t, BranchReader>>(branch->GetName()));
+                  break;
+                case kULong_t:
+                  knownColumns.push_back(std::make_shared<ColumnDataScalar<std::uint64_t, BranchReader>>(branch->GetName()));
+                  break;
+                case kULong64_t:
+                  knownColumns.push_back(std::make_shared<ColumnDataScalar<std::uint64_t, BranchReader>>(branch->GetName()));
+                  break;
+                case kFloat_t:
+                  knownColumns.push_back(std::make_shared<ColumnDataScalar<float, BranchReader>>(branch->GetName()));
+                  break;
+                default:
+                  // no-op
+                  break;
+              }
+            } else 
+            {
+              if (*branchClass->GetTypeInfo() == typeid(std::vector<float>))
+              {
+                knownColumns.push_back (std::make_shared<ColumnDataVector<float,BranchReader>> (branch->GetName()));
+              } else if (*branchClass->GetTypeInfo() == typeid(std::vector<char>))
+              {
+                knownColumns.push_back (std::make_shared<ColumnDataVector<char,BranchReader>> (branch->GetName()));
+              } else if (*branchClass->GetTypeInfo() == typeid(std::vector<std::int8_t>))
+              {
+                knownColumns.push_back (std::make_shared<ColumnDataVector<std::int8_t,BranchReader>> (branch->GetName()));
+              } else if (*branchClass->GetTypeInfo() == typeid(std::vector<std::uint8_t>))
+              {
+                knownColumns.push_back (std::make_shared<ColumnDataVector<std::uint8_t,BranchReader>> (branch->GetName()));
+              } else if (*branchClass->GetTypeInfo() == typeid(std::vector<std::int16_t>))
+              {
+                knownColumns.push_back (std::make_shared<ColumnDataVector<std::int16_t,BranchReader>> (branch->GetName()));
+              } else if (*branchClass->GetTypeInfo() == typeid(std::vector<std::uint16_t>))
+              {
+                knownColumns.push_back (std::make_shared<ColumnDataVector<std::uint16_t,BranchReader>> (branch->GetName()));
+              } else if (*branchClass->GetTypeInfo() == typeid(std::vector<std::int32_t>))
+              {
+                knownColumns.push_back (std::make_shared<ColumnDataVector<std::int32_t,BranchReader>> (branch->GetName()));
+              } else if (*branchClass->GetTypeInfo() == typeid(std::vector<std::uint32_t>))
+              {
+                knownColumns.push_back (std::make_shared<ColumnDataVector<std::uint32_t,BranchReader>> (branch->GetName()));
+              } else if (*branchClass->GetTypeInfo() == typeid(std::vector<std::int64_t>))
+              {
+                knownColumns.push_back (std::make_shared<ColumnDataVector<std::int64_t,BranchReader>> (branch->GetName()));
+              } else if (*branchClass->GetTypeInfo() == typeid(std::vector<std::uint64_t>))
+              {
+                knownColumns.push_back (std::make_shared<ColumnDataVector<std::uint64_t,BranchReader>> (branch->GetName()));
+              } else if (*branchClass->GetTypeInfo() == typeid(std::vector<std::vector<float>>))
+              {
+                knownColumns.push_back (std::make_shared<ColumnDataVectorVector<float,BranchReader>> (branch->GetName()));
+              } else if (*branchClass->GetTypeInfo() == typeid(std::vector<std::vector<std::int32_t>>))
+              {
+                knownColumns.push_back (std::make_shared<ColumnDataVectorVector<std::int32_t,BranchReader>> (branch->GetName()));
+              } else if (*branchClass->GetTypeInfo() == typeid(std::vector<std::vector<std::uint64_t>>))
+              {
+                knownColumns.push_back (std::make_shared<ColumnDataVectorVector<std::uint64_t,BranchReader>> (branch->GetName()));
+              } else if (*branchClass->GetTypeInfo() == typeid(std::vector<std::vector<std::vector<std::size_t>>>))
+              {
+                knownColumns.push_back (std::make_shared<ColumnDataVectorVectorVector<std::size_t,BranchReader>> (branch->GetName()));
+              } else if (*branchClass->GetTypeInfo() == typeid(std::vector<std::vector<std::vector<unsigned char>>>))
+              {
+                knownColumns.push_back (std::make_shared<ColumnDataVectorVectorVector<unsigned char,BranchReader>> (branch->GetName()));
+              } else if (*branchClass->GetTypeInfo() == typeid(std::vector<std::string>))
+              {
+                knownColumns.push_back (std::make_shared<ColumnDataMetNames<BranchReader>> (branch->GetName()));
+              }
+            }
+          }
+        }  
+      }
+      // This is a fallback for the case that we don't have an explicit
+      // `samplingPattern` branch in our input file (i.e. an older file),
+      // to allow us to still test tools needing it.  This is likely not
+      // something that actual users can do (they need the new files), but
+      // for testing it seems like a reasonable workaround.
+      knownColumns.push_back(std::make_shared<ColumnDataSamplingPattern<BranchReader>>("egammaClusters"));
+
+      // For branches that are element links they need to be explicitly
+      // declared to have the correct xAOD type, correct split setting,
+      // and correct linked containers.
+      
+      knownColumns.push_back(std::make_shared<ColumnDataVectorVectorLink<xAOD::CaloClusterContainer,BranchReader>>("AnalysisElectronsAuxDyn.caloClusterLinks"));
+      knownColumns.push_back(std::make_shared<ColumnDataVectorVectorLink<xAOD::TrackParticleContainer, BranchReader>>("AnalysisElectronsAuxDyn.trackParticleLinks"));
+      knownColumns.push_back(std::make_shared<ColumnDataVectorVectorLink<xAOD::CaloClusterContainer,BranchReader>>("AnalysisPhotonsAuxDyn.caloClusterLinks"));
+      knownColumns.push_back(std::make_shared<ColumnDataVectorVectorLink<xAOD::VertexContainer, BranchReader>>("AnalysisPhotonsAuxDyn.vertexLinks"));
+      knownColumns.push_back(std::make_shared<ColumnDataVectorSplitLink<xAOD::TrackParticleContainer>>("AnalysisMuonsAuxDyn.inDetTrackParticleLink"));
+      knownColumns.push_back(std::make_shared<ColumnDataVectorSplitLink<xAOD::TrackParticleContainer>>("AnalysisMuonsAuxDyn.combinedTrackParticleLink"));
+      knownColumns.push_back(std::make_shared<ColumnDataVectorSplitLink<xAOD::TrackParticleContainer>>("AnalysisMuonsAuxDyn.extrapolatedMuonSpectrometerTrackParticleLink"));
+      knownColumns.push_back(std::make_shared<ColumnDataVectorVectorLink<xAOD::TrackParticleContainer, BranchReader>>("GSFConversionVerticesAuxDyn.trackParticleLinks"));
+      knownColumns.push_back(std::make_shared<ColumnDataVectorSplitLink<xAOD::TrackParticleContainer>>("GSFTrackParticlesAuxDyn.originalTrackParticle"));
+      knownColumns.push_back(std::make_shared<ColumnDataVectorVectorVariantLink<xAOD::IParticleContainer, BranchReader>>("AnalysisJetsAuxDyn.GhostTrack"));
+      knownColumns.push_back(std::make_shared<ColumnDataVectorLink<xAOD::JetContainer, BranchReader>>("METAssoc_AnalysisMETAux.jetLink"));
+      knownColumns.push_back(std::make_shared<ColumnDataVectorVectorVariantLink<xAOD::IParticleContainer, BranchReader>>("METAssoc_AnalysisMETAux.objectLinks"));
+      
+    }else if (rntbackend) 
+    {
+      std::unordered_map<std::string, ROOT::DescriptorId_t> fields;
+      {
+       const auto& desc = rntreader->GetDescriptor();
+
+       for (const auto& field : desc.GetTopLevelFields()) 
+       {
+          auto fieldName = field.GetFieldName();
+          fields.emplace(desc.GetQualifiedFieldName(field.GetId()), field.GetId());
+
+         std::vector<ROOT::DescriptorId_t> subFieldIds{field.GetId()};
+         while (!subFieldIds.empty()) 
+         {
+           const auto parentId = subFieldIds.back();
+           auto parentname=desc.GetQualifiedFieldName(parentId);
+           subFieldIds.pop_back();
+
+           for (const auto& subField : desc.GetFieldIterable(parentId)) 
+           {
+             auto subFieldName = desc.GetQualifiedFieldName(subField.GetId());
+
+             fields.emplace(desc.GetQualifiedFieldName(subField.GetId()), subField.GetId());
+
+             subFieldIds.push_back(subField.GetId());
+           }
           }
         }
       }
 
-      for (const auto& [name, branch] : branches)
+      const auto& desc = rntreader->GetDescriptor();
+      for (const auto& [name, fieldId] : fields) 
       {
-        if (name.find ("AuxDyn.") != std::string::npos ||
-            name.find ("Aux.") != std::string::npos)
+        auto fieldName = desc.GetQualifiedFieldName(fieldId);
+
+        if (name.find("AuxDyn:") != std::string::npos ||
+          name.find("Aux:") != std::string::npos) 
         {
-          TClass *branchClass = nullptr;
-          EDataType branchType {};
-          branch->GetExpectedType (branchClass, branchType);
-          if (branchClass == nullptr)
+
+          const auto& fieldDesc = desc.GetFieldDescriptor(fieldId);
+          const std::string typeName = desc.GetTypeNameForComparison(fieldDesc);
+          if (typeName == "std::int32_t" || typeName == "int") 
           {
-            switch (branchType)
-            {
-              case kInt_t:
-                knownColumns.push_back (std::make_shared<ColumnDataScalar<std::int32_t>> (branch->GetName()));
-                break;
-              case kUInt_t:
-                knownColumns.push_back (std::make_shared<ColumnDataScalar<std::uint32_t>> (branch->GetName()));
-                break;
-              case kULong_t:
-                knownColumns.push_back (std::make_shared<ColumnDataScalar<std::uint64_t>> (branch->GetName()));
-                break;
-              case kULong64_t:
-                knownColumns.push_back (std::make_shared<ColumnDataScalar<std::uint64_t>> (branch->GetName()));
-                break;
-              case kFloat_t:
-                knownColumns.push_back (std::make_shared<ColumnDataScalar<float>> (branch->GetName()));
-                break;
-              default:
-                // no-op
-                break;
-            }
-          } else
+            knownColumns.push_back(std::make_shared<ColumnDataScalar<std::int32_t, RNTFieldReader>>(name));
+          } else if (typeName == "std::uint32_t" || typeName == "unsigned int") 
           {
-            if (*branchClass->GetTypeInfo() == typeid(std::vector<float>))
-            {
-              knownColumns.push_back (std::make_shared<ColumnDataVector<float>> (branch->GetName()));
-            } else if (*branchClass->GetTypeInfo() == typeid(std::vector<char>))
-            {
-              knownColumns.push_back (std::make_shared<ColumnDataVector<char>> (branch->GetName()));
-            } else if (*branchClass->GetTypeInfo() == typeid(std::vector<std::int8_t>))
-            {
-              knownColumns.push_back (std::make_shared<ColumnDataVector<std::int8_t>> (branch->GetName()));
-            } else if (*branchClass->GetTypeInfo() == typeid(std::vector<std::uint8_t>))
-            {
-              knownColumns.push_back (std::make_shared<ColumnDataVector<std::uint8_t>> (branch->GetName()));
-            } else if (*branchClass->GetTypeInfo() == typeid(std::vector<std::int16_t>))
-            {
-              knownColumns.push_back (std::make_shared<ColumnDataVector<std::int16_t>> (branch->GetName()));
-            } else if (*branchClass->GetTypeInfo() == typeid(std::vector<std::uint16_t>))
-            {
-              knownColumns.push_back (std::make_shared<ColumnDataVector<std::uint16_t>> (branch->GetName()));
-            } else if (*branchClass->GetTypeInfo() == typeid(std::vector<std::int32_t>))
-            {
-              knownColumns.push_back (std::make_shared<ColumnDataVector<std::int32_t>> (branch->GetName()));
-            } else if (*branchClass->GetTypeInfo() == typeid(std::vector<std::uint32_t>))
-            {
-              knownColumns.push_back (std::make_shared<ColumnDataVector<std::uint32_t>> (branch->GetName()));
-            } else if (*branchClass->GetTypeInfo() == typeid(std::vector<std::int64_t>))
-            {
-              knownColumns.push_back (std::make_shared<ColumnDataVector<std::int64_t>> (branch->GetName()));
-            } else if (*branchClass->GetTypeInfo() == typeid(std::vector<std::uint64_t>))
-            {
-              knownColumns.push_back (std::make_shared<ColumnDataVector<std::uint64_t>> (branch->GetName()));
-            } else if (*branchClass->GetTypeInfo() == typeid(std::vector<std::vector<float>>))
-            {
-              knownColumns.push_back (std::make_shared<ColumnDataVectorVector<float>> (branch->GetName()));
-            } else if (*branchClass->GetTypeInfo() == typeid(std::vector<std::vector<std::int32_t>>))
-            {
-              knownColumns.push_back (std::make_shared<ColumnDataVectorVector<std::int32_t>> (branch->GetName()));
-            } else if (*branchClass->GetTypeInfo() == typeid(std::vector<std::vector<std::uint64_t>>))
-            {
-              knownColumns.push_back (std::make_shared<ColumnDataVectorVector<std::uint64_t>> (branch->GetName()));
-            } else if (*branchClass->GetTypeInfo() == typeid(std::vector<std::vector<std::vector<std::size_t>>>))
-            {
-              knownColumns.push_back (std::make_shared<ColumnDataVectorVectorVector<std::size_t>> (branch->GetName()));
-            } else if (*branchClass->GetTypeInfo() == typeid(std::vector<std::vector<std::vector<unsigned char>>>))
-            {
-              knownColumns.push_back (std::make_shared<ColumnDataVectorVectorVector<unsigned char>> (branch->GetName()));
-            } else if (*branchClass->GetTypeInfo() == typeid(std::vector<std::string>))
-            {
-              knownColumns.push_back (std::make_shared<ColumnDataMetNames> (branch->GetName()));
-            }
+            knownColumns.push_back(std::make_shared<ColumnDataScalar<std::uint32_t, RNTFieldReader>>(name));
+          } else if (typeName == "std::uint64_t" || typeName == "unsigned long" || typeName == "unsigned long long") 
+          {
+            knownColumns.push_back(std::make_shared<ColumnDataScalar<std::uint64_t, RNTFieldReader>>(name));
+          } else if (typeName == "float") 
+          {
+            knownColumns.push_back(std::make_shared<ColumnDataScalar<float, RNTFieldReader>>(name));
+          } else if (typeName == "std::vector<float>") 
+          {
+            knownColumns.push_back(std::make_shared<ColumnDataVector<float, RNTFieldReader>>(name));
+          } else if (typeName == "std::vector<char>") 
+          {
+            knownColumns.push_back(std::make_shared<ColumnDataVector<char, RNTFieldReader>>(name));
+          } else if (typeName == "std::vector<std::int8_t>") 
+          {
+            knownColumns.push_back(std::make_shared<ColumnDataVector<std::int8_t, RNTFieldReader>>(name));
+          } else if (typeName == "std::vector<std::uint8_t>") 
+          {
+            knownColumns.push_back(std::make_shared<ColumnDataVector<std::uint8_t, RNTFieldReader>>(name));
+          } else if (typeName == "std::vector<std::int16_t>") 
+          {
+            knownColumns.push_back(std::make_shared<ColumnDataVector<std::int16_t, RNTFieldReader>>(name));
+          } else if (typeName == "std::vector<std::uint16_t>") 
+          {
+            knownColumns.push_back(std::make_shared<ColumnDataVector<std::uint16_t, RNTFieldReader>>(name));
+          } else if (typeName == "std::vector<std::int32_t>") 
+          {
+             knownColumns.push_back(std::make_shared<ColumnDataVector<std::int32_t, RNTFieldReader>>(name));
+          } else if (typeName == "std::vector<std::uint32_t>") 
+          {
+             knownColumns.push_back(std::make_shared<ColumnDataVector<std::uint32_t, RNTFieldReader>>(name));
+          } else if (typeName == "std::vector<std::int64_t>") 
+          {
+             knownColumns.push_back(std::make_shared<ColumnDataVector<std::int64_t, RNTFieldReader>>(name));
+          } else if (typeName == "std::vector<std::uint64_t>") 
+          {
+             knownColumns.push_back(std::make_shared<ColumnDataVector<std::uint64_t, RNTFieldReader>>(name));
+          } else if (typeName == "std::vector<std::vector<float>>") 
+          {
+             knownColumns.push_back(std::make_shared<ColumnDataVectorVector<float, RNTFieldReader>>(name));
+          } else if (typeName == "std::vector<std::vector<std::int32_t>>") 
+          {
+             knownColumns.push_back(std::make_shared<ColumnDataVectorVector<std::int32_t, RNTFieldReader>>(name));
+          } else if (typeName == "std::vector<std::vector<std::uint64_t>>") 
+          {
+             knownColumns.push_back(std::make_shared<ColumnDataVectorVector<std::uint64_t, RNTFieldReader>>(name));
+          } else if (typeName =="std::vector<std::vector<std::vector<std::size_t>>>") 
+          {
+             knownColumns.push_back(std::make_shared<ColumnDataVectorVectorVector<std::size_t, RNTFieldReader>>(name));
+          }else if (typeName =="std::vector<std::vector<std::vector<std::uint64_t>>>") 
+          {
+             knownColumns.push_back(std::make_shared<ColumnDataVectorVectorVector<std::uint64_t, RNTFieldReader>>(name));
+          }else if (typeName =="std::vector<std::vector<std::vector<std::uint8_t>>>") 
+          {
+             knownColumns.push_back(std::make_shared<ColumnDataVectorVectorVector<std::uint8_t, RNTFieldReader>>(name));
+          } else if (typeName =="std::vector<std::vector<std::vector<unsigned char>>>") 
+          {
+             knownColumns.push_back(std::make_shared<ColumnDataVectorVectorVector<unsigned char, RNTFieldReader>>(name));
+          } else if (typeName == "std::vector<std::string>") 
+          {
+             knownColumns.push_back(std::make_shared<ColumnDataMetNames<RNTFieldReader>>(name));
           }
         }
       }
+      knownColumns.push_back(std::make_shared<ColumnDataSamplingPattern<RNTFieldReader>>("egammaClusters"));
+
+      knownColumns.push_back(std::make_shared<ColumnDataVectorVectorLink<xAOD::CaloClusterContainer,RNTFieldReader>>("AnalysisElectronsAuxDyn:caloClusterLinks"));
+      knownColumns.push_back(std::make_shared<ColumnDataVectorVectorLink<xAOD::TrackParticleContainer, RNTFieldReader>>("AnalysisElectronsAuxDyn:trackParticleLinks"));
+      knownColumns.push_back(std::make_shared<ColumnDataVectorVectorLink<xAOD::CaloClusterContainer,RNTFieldReader>>("AnalysisPhotonsAuxDyn:caloClusterLinks"));
+      knownColumns.push_back(std::make_shared<ColumnDataVectorVectorLink<xAOD::VertexContainer, RNTFieldReader>>("AnalysisPhotonsAuxDyn:vertexLinks"));
+      knownColumns.push_back(std::make_shared<ColumnDataVectorRLink<xAOD::TrackParticleContainer,RNTFieldReader>>("AnalysisMuonsAuxDyn:inDetTrackParticleLink"));
+      knownColumns.push_back(std::make_shared<ColumnDataVectorRLink<xAOD::TrackParticleContainer,RNTFieldReader>>("AnalysisMuonsAuxDyn:combinedTrackParticleLink"));
+      knownColumns.push_back(std::make_shared<ColumnDataVectorRLink< xAOD::TrackParticleContainer, RNTFieldReader>>("AnalysisMuonsAuxDyn:extrapolatedMuonSpectrometerTrackParticleLink"));
+      knownColumns.push_back(std::make_shared<ColumnDataVectorVectorLink<xAOD::TrackParticleContainer, RNTFieldReader>>("GSFConversionVerticesAuxDyn:trackParticleLinks"));
+      knownColumns.push_back(std::make_shared<ColumnDataVectorRLink<xAOD::TrackParticleContainer,RNTFieldReader>>("GSFTrackParticlesAuxDyn:originalTrackParticle"));
+      knownColumns.push_back(std::make_shared<ColumnDataVectorVectorVariantLink<xAOD::IParticleContainer, RNTFieldReader>>("AnalysisJetsAuxDyn:GhostTrack"));
+      knownColumns.push_back(std::make_shared<ColumnDataVectorLink<xAOD::JetContainer, RNTFieldReader>>("METAssoc_AnalysisMETAux:.jetLink"));
+      knownColumns.push_back(std::make_shared<ColumnDataVectorVectorVariantLink<xAOD::IParticleContainer, RNTFieldReader>>("METAssoc_AnalysisMETAux:.objectLinks"));
+
     }
 
-    // This is a fallback for the case that we don't have an explicit
-    // `samplingPattern` branch in our input file (i.e. an older file),
-    // to allow us to still test tools needing it.  This is likely not
-    // something that actual users can do (they need the new files), but
-    // for testing it seems like a reasonable workaround.
-    knownColumns.push_back (std::make_shared<ColumnDataSamplingPattern> ("egammaClusters"));
-
-    // For branches that are element links they need to be explicitly
-    // declared to have the correct xAOD type, correct split setting,
-    // and correct linked containers.
-    knownColumns.push_back (std::make_shared<ColumnDataVectorVectorLink<xAOD::CaloClusterContainer>> ("AnalysisElectronsAuxDyn.caloClusterLinks"));
-    knownColumns.push_back (std::make_shared<ColumnDataVectorVectorLink<xAOD::TrackParticleContainer>> ("AnalysisElectronsAuxDyn.trackParticleLinks"));
-    knownColumns.push_back (std::make_shared<ColumnDataVectorVectorLink<xAOD::CaloClusterContainer>> ("AnalysisPhotonsAuxDyn.caloClusterLinks"));
-    knownColumns.push_back (std::make_shared<ColumnDataVectorVectorLink<xAOD::VertexContainer>> ("AnalysisPhotonsAuxDyn.vertexLinks"));
-    knownColumns.push_back (std::make_shared<ColumnDataVectorSplitLink<xAOD::TrackParticleContainer>> ("AnalysisMuonsAuxDyn.inDetTrackParticleLink"));
-    knownColumns.push_back (std::make_shared<ColumnDataVectorSplitLink<xAOD::TrackParticleContainer>> ("AnalysisMuonsAuxDyn.combinedTrackParticleLink"));
-    knownColumns.push_back (std::make_shared<ColumnDataVectorSplitLink<xAOD::TrackParticleContainer>> ("AnalysisMuonsAuxDyn.extrapolatedMuonSpectrometerTrackParticleLink"));
-    knownColumns.push_back (std::make_shared<ColumnDataVectorVectorLink<xAOD::TrackParticleContainer>> ("GSFConversionVerticesAuxDyn.trackParticleLinks"));
-    knownColumns.push_back (std::make_shared<ColumnDataVectorSplitLink<xAOD::TrackParticleContainer>> ("GSFTrackParticlesAuxDyn.originalTrackParticle"));
-    knownColumns.push_back (std::make_shared<ColumnDataVectorVectorVariantLink<xAOD::IParticleContainer>>("AnalysisJetsAuxDyn.GhostTrack"));
-    knownColumns.push_back (std::make_shared<ColumnDataVectorLink<xAOD::JetContainer>>("METAssoc_AnalysisMETAux.jetLink"));
-    knownColumns.push_back (std::make_shared<ColumnDataVectorVectorVariantLink<xAOD::IParticleContainer>>("METAssoc_AnalysisMETAux.objectLinks"));
 
     // For METMaker we need to preplace all of the MET terms that we
     // expect to be used, that's what this line does.
@@ -2060,23 +2473,46 @@ namespace columnar
           allMetTermNames.push_back (name);
       }
     }
-    if (!allMetTermNames.empty())
-      knownColumns.push_back (std::make_shared<ColumnDataOutputMet> ("OutputMET", allMetTermNames));
+   
 
-    // For METMaker we need various extra columns to run. This may need
-    // some work to avoid, but would likey be worth it.
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<std::uint16_t>> ("AnalysisMuons.objectType", xAOD::Type::Muon));
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisMuons.m", ParticleConstants::muonMassInMeV));
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<std::uint16_t>> ("AnalysisJets.objectType", xAOD::Type::Jet));
+    if (tree) 
+    {
+       if (!allMetTermNames.empty())
+         knownColumns.push_back(std::make_shared<ColumnDataOutputMet<BranchReader>>("OutputMET",allMetTermNames));
 
-    // These are columns that represent variables that are normally held
-    // by METAssociationHelper, or alternatively are decorated on the
-    // MET terms (even though they are per object).
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisMuons.MetObjectWeight", 0));
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisJets.MetObjectWeight", 0));
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<float>> ("AnalysisJets.MetObjectWeightSoft", 0));
-    knownColumns.push_back (std::make_shared<ColumnDataOutVector<MissingETBase::Types::bitmask_t>> ("METAssoc_AnalysisMET.useObjectFlags", 0));
-  }
+      // For METMaker we need various extra columns to run. This may need
+      // some work to avoid, but would likey be worth it.
+      knownColumns.push_back(std::make_shared<ColumnDataOutVector<std::uint16_t, BranchReader>>("AnalysisMuons.objectType", xAOD::Type::Muon));
+      knownColumns.push_back(std::make_shared<ColumnDataOutVector<float, BranchReader>>("AnalysisMuons.m", ParticleConstants::muonMassInMeV));
+      knownColumns.push_back(std::make_shared<ColumnDataOutVector<std::uint16_t, BranchReader>>("AnalysisJets.objectType", xAOD::Type::Jet));
+
+      // These are columns that represent variables that are normally held
+      // by METAssociationHelper, or alternatively are decorated on the
+      // MET terms (even though they are per object).
+      knownColumns.push_back(std::make_shared<ColumnDataOutVector<float, BranchReader>>("AnalysisMuons.MetObjectWeight", 0));
+      knownColumns.push_back(std::make_shared<ColumnDataOutVector<float, BranchReader>>("AnalysisJets.MetObjectWeight", 0));
+      knownColumns.push_back(std::make_shared<ColumnDataOutVector<float, BranchReader>>("AnalysisJets.MetObjectWeightSoft", 0));
+      knownColumns.push_back(std::make_shared<ColumnDataOutVector<MissingETBase::Types::bitmask_t,BranchReader>>("METAssoc_AnalysisMET.useObjectFlags", 0));
+    } else if (rntbackend) 
+    {
+      if (!allMetTermNames.empty())
+         knownColumns.push_back(std::make_shared<ColumnDataOutputMet<BranchReader>>("OutputMET",allMetTermNames));
+
+      // For METMaker we need various extra columns to run. This may need
+      // some work to avoid, but would likey be worth it.
+      knownColumns.push_back(std::make_shared<ColumnDataOutVector<std::uint16_t, RNTFieldReader>>("AnalysisMuons.objectType", xAOD::Type::Muon));
+      knownColumns.push_back(std::make_shared<ColumnDataOutVector<float, RNTFieldReader>>("AnalysisMuons.m", ParticleConstants::muonMassInMeV));
+      knownColumns.push_back(std::make_shared<ColumnDataOutVector<std::uint16_t, RNTFieldReader>>("AnalysisJets.objectType", xAOD::Type::Jet));
+
+      // These are columns that represent variables that are normally held
+      // by METAssociationHelper, or alternatively are decorated on the
+      // MET terms (even though they are per object).
+      knownColumns.push_back(std::make_shared<ColumnDataOutVector<float, RNTFieldReader>>("AnalysisMuons.MetObjectWeight", 0));
+      knownColumns.push_back(std::make_shared<ColumnDataOutVector<float, RNTFieldReader>>("AnalysisJets.MetObjectWeight", 0));
+      knownColumns.push_back(std::make_shared<ColumnDataOutVector<float, RNTFieldReader>>("AnalysisJets.MetObjectWeightSoft", 0));
+      knownColumns.push_back(std::make_shared<ColumnDataOutVector<MissingETBase::Types::bitmask_t,RNTFieldReader>>("METAssoc_AnalysisMET.useObjectFlags", 0));
+    }
+  }  // namespace columnar
 
   void ColumnarPhysLiteTest :: setupColumns (const ColumnVectorHeader& columnHeader)
   {
@@ -2092,8 +2528,15 @@ namespace columnar
 
     for (auto& column : knownColumns)
     {
-      if (column->connect (tree, offsetColumns, requestedColumns))
-        usedColumns.push_back (column);
+      if (tree) 
+      {
+        if (column->connect (tree, offsetColumns, requestedColumns))
+          usedColumns.push_back (column);
+      } else if (rntbackend) 
+      {
+        if (column->connect(rntbackend, offsetColumns, requestedColumns))
+          usedColumns.push_back(column);
+      }
     }
 
     std::set<std::string> unclaimedColumns;
@@ -2121,34 +2564,61 @@ namespace columnar
       if (offsetIter == usedColumns.end())
         return false;
       std::shared_ptr<TestUtils::IColumnData> myColumn;
-      if (*info.type == typeid(float))
-        myColumn = std::make_shared<TestUtils::ColumnDataOutVector<float>> (info.name, 0);
-      else if (*info.type == typeid(char))
-        myColumn = std::make_shared<TestUtils::ColumnDataOutVector<char>> (info.name, 0);
-      else if (*info.type == typeid(std::uint16_t))
-        myColumn = std::make_shared<TestUtils::ColumnDataOutVector<std::uint16_t>> (info.name, 0);
-      else if (*info.type == typeid(std::uint64_t))
-        myColumn = std::make_shared<TestUtils::ColumnDataOutVector<std::uint64_t>> (info.name, 0);
-      else
+      if (tree) 
       {
-        ANA_MSG_WARNING ("unhandled column type: " << info.name << " " << info.type->name());
-        return false;
-      }
-      knownColumns.push_back (myColumn);
-      if (!myColumn->connect (tree, offsetColumns, requestedColumns))
+        if (*info.type == typeid(float))
+          myColumn = std::make_shared<TestUtils::ColumnDataOutVector<float, BranchReader>>(info.name, 0);
+        else if (*info.type == typeid(char))
+          myColumn = std::make_shared<TestUtils::ColumnDataOutVector<char, BranchReader>>(info.name, 0);
+        else if (*info.type == typeid(std::uint16_t))
+          myColumn = std::make_shared<TestUtils::ColumnDataOutVector<std::uint16_t, BranchReader>>(info.name, 0);
+        else if (*info.type == typeid(std::uint64_t))
+          myColumn = std::make_shared<TestUtils::ColumnDataOutVector<std::uint64_t, BranchReader>>(info.name, 0);
+        else 
+        {
+          ANA_MSG_WARNING("unhandled column type: " << info.name << " "<< info.type->name());
+          return false;
+        }
+      } else if (rntbackend) 
       {
-        ANA_MSG_WARNING ("failed to connect dynamic output column: " << info.name);
-        return false;
+        if (*info.type == typeid(float))
+          myColumn = std::make_shared<TestUtils::ColumnDataOutVector<float, RNTFieldReader>>(info.name,0);
+        else if (*info.type == typeid(char))
+          myColumn = std::make_shared<TestUtils::ColumnDataOutVector<char, RNTFieldReader>>(info.name, 0);
+        else if (*info.type == typeid(std::uint16_t))
+          myColumn = std::make_shared<TestUtils::ColumnDataOutVector<std::uint16_t, RNTFieldReader>>(info.name, 0);
+        else if (*info.type == typeid(std::uint64_t))
+          myColumn = std::make_shared<TestUtils::ColumnDataOutVector<std::uint64_t, RNTFieldReader>>(info.name, 0);
+        else 
+        {
+          ANA_MSG_WARNING("unhandled column type: " << info.name << " " << info.type->name());
+          return false;
+        }
       }
-      usedColumns.push_back (myColumn);
+      knownColumns.push_back(myColumn);
+      if (tree) {
+        if (!myColumn->connect(tree, offsetColumns, requestedColumns)) 
+        {
+          ANA_MSG_WARNING("failed to connect dynamic output column: " << info.name);
+          return false;
+        }
+      } else if (rntbackend) 
+      {
+        if (!myColumn->connect(rntbackend, offsetColumns, requestedColumns)) 
+        {
+          ANA_MSG_WARNING("failed to connect dynamic output column: " << info.name);
+          return false;
+        }
+      }
+      usedColumns.push_back(myColumn);
       return true;
     });
-    if (!unclaimedColumns.empty())
+    if (!unclaimedColumns.empty()) 
     {
       std::string message = "columns not claimed:";
       for (auto& column : unclaimedColumns)
         message += " " + column;
-      throw std::runtime_error (message);
+      throw std::runtime_error(message);
     }
   }
 
@@ -2157,87 +2627,90 @@ namespace columnar
     doCallMulti ({testDefinition});
   }
 
-  void ColumnarPhysLiteTest :: doCallMulti (const std::vector<TestDefinition>& testDefinitions)
-  {
-    using namespace asg::msgUserCode;
-    auto userConfiguration = TestUtils::UserConfiguration::fromEnvironment();
 
-    // apply systematics for all test definitions
+void ColumnarPhysLiteTest ::doCallMulti(
+    const std::vector<TestDefinition>& testDefinitions) {
+  using namespace asg::msgUserCode;
+  auto userConfiguration = TestUtils::UserConfiguration::fromEnvironment();
+
+  // apply systematics for all test definitions
+  for (const auto& td : testDefinitions) {
+    if (!td.sysName.empty()) {
+      auto* sysTool = dynamic_cast<CP::ISystematicsTool*>(td.tool);
+      if (!sysTool)
+        throw std::runtime_error("tool does not support systematics");
+      std::cout << "applying systematic variation: " << td.sysName << std::endl;
+      if (sysTool->applySystematicVariation(CP::SystematicSet(td.sysName))
+              .isFailure())
+        throw std::runtime_error("failed to apply systematic variation: " +
+                                 td.sysName);
+    }
+  }
+
+  if constexpr (columnarAccessMode == 2) {
+    // Create shared column header for all tools
+    ColumnVectorHeader columnHeader;
+
+    // Build vector of ToolData from all testDefinitions
+    std::vector<TestUtils::ToolData> toolDataVec;
     for (const auto& td : testDefinitions)
-    {
-      if (!td.sysName.empty())
-      {
-        auto *sysTool = dynamic_cast<CP::ISystematicsTool*>(td.tool);
-        if (!sysTool)
-          throw std::runtime_error ("tool does not support systematics");
-        std::cout << "applying systematic variation: " << td.sysName << std::endl;
-        if (sysTool->applySystematicVariation (CP::SystematicSet (td.sysName)).isFailure())
-          throw std::runtime_error ("failed to apply systematic variation: " + td.sysName);
+      toolDataVec.emplace_back(userConfiguration, td, columnHeader);
+
+    setupKnownColumns(testDefinitions);
+    // Set up columns using the shared header (all tools have already
+    // registered their columns via ToolColumnVectorMap, so we get all columns
+    // from the header)
+    setupColumns(columnHeader);
+
+    // connect column indices from header to each column for direct setting
+    for (auto& column : usedColumns)
+      column->connectColumnIndices(columnHeader);
+
+    Benchmark benchmarkEmpty("empty");
+    Benchmark benchmarkCheck("", userConfiguration.batchSize);
+    auto numberOfEvents = 0;
+    if (tree) {
+      numberOfEvents = tree->GetEntries();
+    } else if (rntbackend) {
+      numberOfEvents = rntreader->GetNEntries();
+    }
+    Long64_t entry = 0;
+    const auto startTime = std::chrono::high_resolution_clock::now();
+    bool endLoop = false;
+    for (; !endLoop; ++entry) {
+      // just sample how much overhead there is for starting and
+      // stopping the timer
+      benchmarkEmpty.startTimer();
+      benchmarkEmpty.stopTimer();
+      ColumnVectorData columnData(&columnHeader);
+      for (auto& column : usedColumns)
+        column->getEntry(entry % numberOfEvents);
+      if ((entry + 1) % userConfiguration.batchSize == 0) {
+        if (entry < numberOfEvents) {
+          for (auto& column : usedColumns)
+            column->collectColumnData();
+        }
+        for (auto& column : usedColumns)
+          column->setData(columnData);
+
+        // Check data once (shared column data)
+        benchmarkCheck.startTimer();
+        columnData.checkData();
+        benchmarkCheck.stopTimer();
+        // Call each tool
+        for (auto& toolData : toolDataVec) {
+          toolData.call(columnData);
+        }
+        for (auto& column : usedColumns)
+          column->clearColumns();
+        if ((std::chrono::high_resolution_clock::now() - startTime) >
+            userConfiguration.targetTime)
+          endLoop = true;
+      } else if (entry + 1 == numberOfEvents) {
+        for (auto& column : usedColumns)
+          column->collectColumnData();
       }
     }
-
-    if constexpr (columnarAccessMode == 2)
-    {
-      // Create shared column header for all tools
-      ColumnVectorHeader columnHeader;
-
-      // Build vector of ToolData from all testDefinitions
-      std::vector<TestUtils::ToolData> toolDataVec;
-      for (const auto& td : testDefinitions)
-        toolDataVec.emplace_back (userConfiguration, td, columnHeader);
-
-      setupKnownColumns (testDefinitions);
-      // Set up columns using the shared header (all tools have already registered
-      // their columns via ToolColumnVectorMap, so we get all columns from the header)
-      setupColumns (columnHeader);
-
-      // Connect column indices from header to each column for direct setting
-      for (auto& column : usedColumns)
-        column->connectColumnIndices (columnHeader);
-
-      Benchmark benchmarkEmpty ("empty");
-      Benchmark benchmarkCheck ("", userConfiguration.batchSize);
-
-      const auto numberOfEvents = tree->GetEntries();
-      Long64_t entry = 0;
-      const auto startTime = std::chrono::high_resolution_clock::now();
-      bool endLoop = false;
-      for (; !endLoop; ++entry)
-      {
-        // just sample how much overhead there is for starting and
-        // stopping the timer
-        benchmarkEmpty.startTimer ();
-        benchmarkEmpty.stopTimer ();
-
-        ColumnVectorData columnData (&columnHeader);
-        for (auto& column : usedColumns)
-          column->getEntry (entry % numberOfEvents);
-        if ((entry + 1) % userConfiguration.batchSize == 0)
-        {
-          if (entry < numberOfEvents)
-          {
-            for (auto& column : usedColumns)
-              column->collectColumnData ();
-          }
-          for (auto& column : usedColumns)
-            column->setData (columnData);
-          // Check data once (shared column data)
-          benchmarkCheck.startTimer ();
-          columnData.checkData ();
-          benchmarkCheck.stopTimer ();
-          // Call each tool
-          for (auto& toolData : toolDataVec)
-            toolData.call (columnData);
-          for (auto& column : usedColumns)
-            column->clearColumns ();
-          if ((std::chrono::high_resolution_clock::now() - startTime) > userConfiguration.targetTime)
-            endLoop = true;
-        } else if (entry + 1 == numberOfEvents)
-        {
-          for (auto& column : usedColumns)
-            column->collectColumnData ();
-        }
-      }
       std::cout << "Entries in file: " << numberOfEvents << std::endl;
       std::cout << "Total entries read: " << entry << std::endl;
       const float emptyTime = benchmarkEmpty.getEntryTime(0).value();
@@ -2266,7 +2739,8 @@ namespace columnar
         std::sort (branchPerfData.begin(), branchPerfData.end(), [] (const auto& a, const auto& b) {return a.name < b.name;});
         branchPerfData.insert (branchPerfData.end(), summary);
         const std::size_t nameWidth = std::max_element (branchPerfData.begin(), branchPerfData.end(), [] (const auto& a, const auto& b) {return a.name.size() < b.name.size();})->name.size();
-        std::string header = std::format ("{:{}} | read(ns) | unpack(ns) | size(B) | rate(MB/s) | compression | baskets | entries | null", "branch name", nameWidth);
+        std::string label = userConfiguration.isrntuple ? "field name" : "branch name";
+        std::string header = std::format ("{:{}} | read(ns) | unpack(ns) | size(B) | rate(MB/s) | compression | baskets | entries | null", label, nameWidth);
         std::cout << "\n" << header << std::endl;
         std::cout << std::string (header.size(), '-') << std::endl;
         for (auto& data : branchPerfData)

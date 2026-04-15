@@ -13,7 +13,10 @@
 #include <ColumnarInterfaces/IColumnarTool.h>
 #include <ColumnarTestFixtures/Configuration.h>
 #include <ColumnarTestFixtures/IXAODToolCaller.h>
-
+#include <ROOT/RNTupleDescriptor.hxx>
+#include <ROOT/RNTupleInspector.hxx>
+#include <ROOT/RNTupleReader.hxx>
+#include <ROOT/RPageStorageFile.hxx>
 #include <gtest/gtest.h>
 
 #include <functional>
@@ -32,6 +35,7 @@ namespace columnar
   namespace TestUtils
   {
     class IColumnData;
+    struct RNTupleBackend;
   }
 
 
@@ -39,7 +43,9 @@ namespace columnar
   {
     std::unique_ptr<TFile> file;
     TTree *tree = nullptr;
-
+    std::unique_ptr<ROOT::RNTupleReader> rntreader;
+    std::unique_ptr<ROOT::Experimental::RNTupleInspector> inspector;
+    columnar::TestUtils::RNTupleBackend* rntbackend = nullptr;
     std::vector<std::shared_ptr<TestUtils::IColumnData>> knownColumns;
     std::vector<std::shared_ptr<TestUtils::IColumnData>> usedColumns;
     std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*> offsetColumns;
