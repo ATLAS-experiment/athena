@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/GenericSeedingAlg.h"
@@ -10,8 +10,6 @@
 #include "Acts/EventData/SpacePointContainer2.hpp"
 #include "Acts/MagneticField/MagneticFieldContext.hpp"
 #include "Acts/Seeding/BinnedGroup.hpp"
-#include "Acts/Seeding/SeedFilter.hpp"
-#include "Acts/Seeding/SeedFinder.hpp"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 
 // Other
