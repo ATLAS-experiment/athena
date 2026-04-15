@@ -72,7 +72,7 @@ namespace MuonValR4{
                                                              n.dot(target.center(tgContext)));
 
             const auto* detEl = static_cast<const ActsTrk::IDetectorElementBase*>(target.surfacePlacement());
-            ATH_MSG_VERBOSE("Propagate "<<Amg::toString(start.position(tgContext))<<" + "
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Propagate "<<Amg::toString(start.position(tgContext))<<" + "
                   <<Amg::toString(start.direction())<<" onto surface: "<<target.toString(tgContext)
                   <<"\n, "<<m_idHelperSvc->toString(detEl->identify())
                   << " geoId: "<<target.geometryId()<<", "<<( lambda.value_or(0.) > 0 ? "forward" : "backward"));
@@ -130,7 +130,8 @@ namespace MuonValR4{
                                         :  Acts::GeometryIdentifier{})
                         <<std::endl;
                 }
-                ATH_MSG_VERBOSE("Run propagation test on "<<sector->identString()<<std::endl<<sstr.str());
+                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Run propagation test on "
+                                <<sector->identString()<<std::endl<<sstr.str());
             }
             for (const auto& meas: detSeg->measurements()) {
                 if (!meas->spacePoint() || 
@@ -175,7 +176,7 @@ namespace MuonValR4{
                 }
                 auto extpPars = extrapolate(startPars, *sp);
                 if (!extpPars.ok()) {
-                   ATH_MSG_ERROR("Failed to propagate to "<<(*meas)
+                   ATH_MSG_ERROR(__func__<<"() "<<__LINE__<<" - Failed to propagate to "<<(*meas)
                                 <<",\n lPos: "<<Amg::toString(toSurf * meas->localPosition())
                                 <<", expected: "<<Amg::toString(lPos)<<", "<<targetSurf.bounds());
                    retCode = StatusCode::FAILURE;
@@ -196,13 +197,14 @@ namespace MuonValR4{
                 const double fastChi2Term = SeedingAux::chi2Term(line, *meas);
 
                 if (targetSurf.type() == Acts::Surface::SurfaceType::Plane) {
-                    ATH_MSG_DEBUG("Position on "<<(*meas) 
+                    ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Position on "
+                                <<m_idHelperSvc->toString(sp->identify()) 
                                 <<" plane "<<Amg::toString(lPos)<<" vs. "
                                 <<Amg::toString((*extpPars).localPosition()));
                     /// Ensure that the extrapolation ends at the same point
                     const Amg::Vector2D dPos = (*extpPars).localPosition() - lPos;
                     if (dPos.mag() > 0.1_mm) {
-                        ATH_MSG_ERROR("Too large deviation for "<<(*meas)
+                        ATH_MSG_ERROR(__func__<<"() "<<__LINE__<<" - Too large deviation for "<<(*meas)
                                     <<", "<<Amg::toString(dPos));
                         retCode = StatusCode::FAILURE;
                     }
@@ -223,7 +225,6 @@ namespace MuonValR4{
                     AmgSymMatrix(2) surfTrf{AmgSymMatrix(2)::Identity()};
                     surfTrf.row(0) = b1.block<2,1>(0,0);
                     surfTrf.row(1) = b2.block<2,1>(0,0);
-
                     AmgSymMatrix(2) stereoTrf{AmgSymMatrix(2)::Identity()};
                     const double dirDots = b1.dot(b2);
                     const double invDist = 1. / (1. - Acts::square(dirDots));
@@ -232,17 +233,17 @@ namespace MuonValR4{
 
                     stereoTrf = (stereoTrf * surfTrf).inverse();
 
-                    covMat = stereoTrf * covMat * stereoTrf.transpose();
+                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Basis vectors b1: "<<Amg::toString(b1)
+                        <<", b2: "<<Amg::toString(b2) <<", product: "<<dirDots
+                        <<", invdist: "<<invDist<<" -> trf: \n"<<stereoTrf
+                        <<",\ncovariance:\n"<<covMat
+                        <<" -> transformed:\n"<<(stereoTrf * covMat * stereoTrf.transpose()));
 
-                    ATH_MSG_VERBOSE("Basis vectors b1: "<<Amg::toString(b1)
-                        <<", b2: "<<Amg::toString(b2)
-                        <<", product: "<<dirDots
-                        <<", invdist: "<<invDist<<" -> trf: "<<Amg::toString(stereoTrf)
-                        <<", covariance:\n"<<covMat);
-                
+                    covMat = stereoTrf * covMat * stereoTrf.transpose();
+               
                     const double matChi2 = surfRes.dot(covMat.inverse() * surfRes);
                 
-                    ATH_MSG_DEBUG("Analyze plane residual residual for "
+                    ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Analyze plane residual residual for "
                         <<m_idHelperSvc->toString(sp->identify())
                         <<" / "<<targetSurf.geometryId()
                         <<"\n --- measurement: "<<Amg::toString(mPos)
@@ -257,14 +258,14 @@ namespace MuonValR4{
 
                     const Amg::Vector2D dRes = (surfRes - lineRes);
                     if (dRes.mag() > 0.1_mm) {
-                        ATH_MSG_ERROR("Surface and line residuals are too much apart for "
+                        ATH_MSG_ERROR(__func__<<"() "<<__LINE__<<" - Surface and line residuals are too much apart for "
                             <<(*meas)
                             <<", difference: "<<Amg::toString(dPos));
                         retCode = StatusCode::FAILURE;
                     }
                     const double dChi2 = std::abs(matChi2 - segChi2);
                     if (dChi2 > 0.01) {
-                        ATH_MSG_ERROR("Too large deviation in chi2 calculation "<<
+                        ATH_MSG_ERROR(__func__<<"() "<<__LINE__<<" - Too large deviation in chi2 calculation "<<
                                     (*meas)<<" -- line fitter: "<<segChi2<<", matrix: "<<matChi2);
                         retCode = StatusCode::FAILURE;
                     }
@@ -272,7 +273,7 @@ namespace MuonValR4{
                     /// Ensure that the fast chi2 term and the segment chi2 term
                     /// match with each other
                     if (Acts::abs(segChi2 - fastChi2Term) > 1.e-3) {
-                        ATH_MSG_ERROR("The fast & full chi2 calculations from ACTS don't match for "
+                        ATH_MSG_ERROR(__func__<<"() "<<__LINE__<<" - The fast & full chi2 calculations from ACTS don't match for "
                             <<(*meas)<<" - full: "<<segChi2<<", fast: "<<fastChi2Term);
                         retCode = StatusCode::FAILURE;
                     }
@@ -281,13 +282,13 @@ namespace MuonValR4{
                                                                               sp->secondaryMeasurement());
 
                         if ((xPos - mPos).mag() > 1.e-3) {
-                            ATH_MSG_ERROR("The calibrated position from the xAOD util function "<<
+                            ATH_MSG_ERROR(__func__<<"() "<<__LINE__<<" - The calibrated position from the xAOD util function "<<
                                           " does not match the expectation from this test. xAOD: "
                                 <<Amg::toString(xPos)<<", test: "<<Amg::toString(mPos));
                             retCode = StatusCode::FAILURE;
                         }
                         if (!xCov.isApprox(covMat, 1.e-3)) {
-                            ATH_MSG_ERROR("The calibrated covariance from the xAOD util function "<<
+                            ATH_MSG_ERROR(__func__<<"() "<<__LINE__<<" - The calibrated covariance from the xAOD util function "<<
                                           " does not match the expectation from this test. xAOD:\n"
                                 <<Amg::toString(xCov)<<",\ntest:\n"<<Amg::toString(covMat));
                             retCode = StatusCode::FAILURE;
@@ -297,32 +298,36 @@ namespace MuonValR4{
                         pullCalculatorChi2.updateSpatialResidual(line, *sp);
                         pullCalculatorChi2.updateChiSq(chiSqObj, sp->covariance());
 
+                        const bool mPhi = sp->measuresPhi();
+
                         const auto [xPos, xCov] = xAOD::positionAndCovariance(sp->primaryMeasurement());
 
-                        const double refPos = (toSurf * sp->localPosition())[sp->measuresPhi()];
-                        const double refCov = sp->covariance()[!sp->measuresPhi()];
-                        if ( std::abs(xPos -refPos) > 1.e-3) {
-                            ATH_MSG_ERROR("The calibrated position from the xAOD util function "<<
+                        const Amg::Vector2D refPos = (toSurf * sp->localPosition()).block<2,1>(0,0);
+                        const double refCov = sp->covariance()[!mPhi];
+                        if ((xPos - refPos).mag() > 1.e-3) {
+                            ATH_MSG_ERROR(__func__<<"() "<<__LINE__<<" - The calibrated position from the xAOD util function "<<
                                           " does not match the expectation from this test. xAOD: "
-                                         <<xPos<<", test: "<<refPos);
+                                         <<Amg::toString(xPos)<<", test: "<<Amg::toString(refPos));
                             retCode = StatusCode::FAILURE;
                         }
-                        if (std::abs(refCov - xCov) > 1.e-3) {
-                            ATH_MSG_ERROR("The calibrated covariance from the xAOD util function "<<
+                        if (std::abs(refCov - xCov(mPhi,mPhi)) > 1.e-3) {
+                            ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - The calibrated covariance from the xAOD util function "<<
                                           " does not match the expectation from this test. xAOD: "
-                                <<xCov<<", test: "<<refCov);
-                            retCode = StatusCode::FAILURE;                            
+                                <<xCov(mPhi, mPhi)<<", test: "<<refCov);
                         }
-                        const double xAODRes = refPos - lPos[sp->measuresPhi()];
-                        const double xAODChi2 = Acts::square(xAODRes) / xCov;
+                        const Amg::Vector2D xAODRes = (xPos - lPos);
+                        const double xAODChi2 = xAODRes.dot(xCov.inverse()*xAODRes);
 
                         if (std::abs(xAODChi2 - chiSqObj.chi2) > 1.e-3) {
-                            ATH_MSG_ERROR("The calculated chi2 term from the xAOD util function: "
-                                        <<xAODChi2<<" deviates from the line fitter chi2: "
-                                     <<chiSqObj.chi2);
+                            ATH_MSG_ERROR(__func__<<"() "<<__LINE__<<" - The calculated chi2 term from the xAOD util function: "
+                                        <<xAODChi2<<" deviates from the line fitter chi2: "<<chiSqObj.chi2
+                                        <<"\n measurement: "<<xPos<<", extp: "<<Amg::toString(lPos)<<" ("
+                                        <<sp->measuresPhi()<<") cov:\n"<<xCov
+                                        <<"\n-> inverse:\n"<<xCov.inverse()
+                                        <<"\n "<<Amg::toString(pullCalculatorChi2.residual())<<", xAOD: "
+                                        <<Amg::toString(xAODRes));
                             retCode = StatusCode::FAILURE;
                         }
-
                     }
                 } else if (targetSurf.type() == Acts::Surface::SurfaceType::Straw) {
                     const double dist = lPos[0];
@@ -335,7 +340,7 @@ namespace MuonValR4{
                                 <<", along the tube: "<<lPos[1]<<", extrapolated: "<<extLocZ);
                     if (std::abs(dist - extDist)  / std::sqrt(cov) > 0.05 ||
                         std::abs(lPos[1] - extLocZ) > 0.1_mm) {
-                        ATH_MSG_ERROR("Too large deviation on "<<(*meas)
+                        ATH_MSG_ERROR(__func__<<"() "<<__LINE__<<" - Too large deviation on "<<(*meas)
                                     <<",\n"<<Amg::toString(lPos)<<" vs. ("<<extDist<<", "<<extLocZ<<")"
                                     <<", deviate R: "<<(std::abs(dist -extDist)  / std::sqrt(cov))
                                     <<", deviate Z: "<<std::abs(lPos[1] - extLocZ));

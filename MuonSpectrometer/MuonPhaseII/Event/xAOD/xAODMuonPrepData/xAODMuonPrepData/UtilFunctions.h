@@ -46,7 +46,7 @@ namespace xAOD{
      *         measurement. Attention for strip-like measurements no distinction is made between eta or phi measurements
      *         The drift radius and the associated covariance is returned for the drift circle type measurements
      * @param oneDimMeas: Pointer to the muon measurement of interest */
-    std::pair<double, double> positionAndCovariance(const UncalibratedMeasurement* oneDimMeas);
+    std::pair<Amg::Vector2D, AmgSymMatrix(2)> positionAndCovariance(const UncalibratedMeasurement* oneDimMeas);
 }
 
 #endif
