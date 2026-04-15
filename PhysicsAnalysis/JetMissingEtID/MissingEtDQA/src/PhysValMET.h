@@ -117,38 +117,22 @@ class PhysValMET
   TH1D *m_MET_Calo = nullptr, *m_MET_Calo_x = nullptr, *m_MET_Calo_y = nullptr, *m_MET_Calo_phi = nullptr, *m_MET_Calo_sum = nullptr;
 
   //Maps
-  std::map<std::string,std::vector<TH1D*> > m_MET_Ref;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Ref_x;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Ref_y;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Ref_phi;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Ref_sum;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_Ref;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_Ref_x;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_Ref_y;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_Ref_phi;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_Ref_sum;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Cumu_Ref;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Resolution_Ref;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Significance_Ref;
-  std::map<std::string,std::vector<TH1D*> > m_MET_dPhi_Ref;
-  std::map<std::string,std::vector<TH2D*> > m_MET_CorrFinalTrk_Ref;
-  std::map<std::string,std::vector<TH2D*> > m_MET_CorrFinalClus_Ref;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Reb;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Reb_x;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Reb_y;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Reb_phi;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Reb_sum;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_Reb;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_Reb_x;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_Reb_y;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_Reb_phi;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_Reb_sum;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Cumu_Reb;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Resolution_Reb;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Significance_Reb;
-  std::map<std::string,std::vector<TH1D*> > m_MET_dPhi_Reb;
-  std::map<std::string,std::vector<TH2D*> > m_MET_CorrFinalTrk_Reb;
-  std::map<std::string,std::vector<TH2D*> > m_MET_CorrFinalClus_Reb;
+  std::map<std::string,std::vector<TH1D*> > m_MET;
+  std::map<std::string,std::vector<TH1D*> > m_MET_x;
+  std::map<std::string,std::vector<TH1D*> > m_MET_y;
+  std::map<std::string,std::vector<TH1D*> > m_MET_phi;
+  std::map<std::string,std::vector<TH1D*> > m_MET_sum;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Diff;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_x;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_y;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_phi;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_sum;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Cumu;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Resolution;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Significance;
+  std::map<std::string,std::vector<TH1D*> > m_MET_dPhi;
+  std::map<std::string,std::vector<TH2D*> > m_MET_CorrFinalTrk;
+  std::map<std::string,std::vector<TH2D*> > m_MET_CorrFinalClus;
 
   std::vector<std::string> m_dir_met;
 
