@@ -15,11 +15,11 @@ struct InDetClusterAuxDataCacheCollection  {
       std::vector< T_AuxDataCache > ret{ T_AuxDataCache(container) };
       return ret;
    }
-   static std::vector< T_AuxDataCache > make(const std::vector<const std::remove_cvref_t<T_Container> *> &container_list)  {
+   static std::vector< T_AuxDataCache > make(const std::vector<DataLink<std::remove_cvref_t<T_Container> > > &container_list)  {
       std::vector< T_AuxDataCache > ret;
       ret.reserve(container_list.size());
-      for (const auto *container : container_list) {
-         ret.emplace_back(*container);
+      for (const auto &container_link : container_list) {
+         ret.emplace_back(*(container_link.cptr()));
       }
       return ret;
    }

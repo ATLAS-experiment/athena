@@ -296,7 +296,7 @@ namespace ActsTrk {
        }
        outputCollection_moduleIndex.m_selection.reserve(n_elements_total);
        for (unsigned int id_hash=0u; id_hash < outputCollection_moduleIndex.m_range.size(); ++id_hash) {
-          PhaseII::DataRange &range = outputCollection_moduleIndex.m_range[id_hash];
+          const PhaseII::DataRange range = outputCollection_moduleIndex.m_range[id_hash];
           if(range.empty()) continue;
           auto const &src_container = outputCollection_moduleIndex.container(range);
           unsigned int begin_index=outputCollection_moduleIndex.m_selection.size();

@@ -37,6 +37,7 @@ namespace {
 namespace ActsTrk::detail {
 
    using abstract_measurement_range_t = PhaseII::DataRange;
+   using DataRangeValueType = decltype(std::declval<PhaseII::DataRange>().m_payload.m_compactRange);
   
    // List of measurement ranges and the measurement container targeted by the ranges.
    template <typename T_MeasurementContainerList >
@@ -52,24 +53,25 @@ namespace ActsTrk::detail {
          return perDetectorContainerIndex;
       }
       std::array< unsigned int, static_cast<unsigned int>(ActsTrk::DetectorType::UnDefined)+1u > m_perDetectorContainerIndex = invalidContainerIndices();
-      std::array< std::span<const PhaseII::DataRange>, static_cast<unsigned int>(ActsTrk::DetectorType::UnDefined)+1u > m_perDetectorRanges{};
+      std::array< std::span<const ActsTrk::detail::DataRangeValueType>,
+                  static_cast<unsigned int>(ActsTrk::DetectorType::UnDefined)+1u > m_perDetectorRanges{};
       const std::array< const InDet::SiDetectorElementStatus *,
                         static_cast<unsigned int>(ActsTrk::DetectorType::UnDefined)+1u> *m_detectorElementStatusPerDetectorType{};
-      std::vector< std::vector<PhaseII::DataRange> > m_customRanges;
+      std::vector< std::vector<ActsTrk::detail::DataRangeValueType> > m_customRanges;
 
    public:
-      void setRange(unsigned int detector_type_i, std::span<const PhaseII::DataRange> per_module_measurement_ranges, unsigned int container_index) {
+      void setRange(unsigned int detector_type_i,
+                    std::span<const ActsTrk::detail::DataRangeValueType> per_module_measurement_ranges, unsigned int container_index) {
          m_perDetectorRanges.at(detector_type_i)=per_module_measurement_ranges;
          m_perDetectorContainerIndex.at(detector_type_i)=container_index;
       }
-      std::vector< std::vector<PhaseII::DataRange> > &customRanges() { return m_customRanges; }
+      std::vector< std::vector<ActsTrk::detail::DataRangeValueType> > &customRanges() { return m_customRanges; }
 
       const std::vector< MeasurementContainer > &measurementContainerList() const { return  m_measurementContainerList.containerList(); }
 
-      static const PhaseII::DataRange &at(const std::span<const PhaseII::DataRange> &perDetectorRanges, unsigned int id_hash) {
+      static PhaseII::DataRange at(const std::span<const ActsTrk::detail::DataRangeValueType> &perDetectorRanges, unsigned int id_hash) {
          if (id_hash>=perDetectorRanges.size()) {
-            static const PhaseII::DataRange emptyRange{};
-            return emptyRange;
+            return PhaseII::DataRange{};
             //throw std::range_error("Invalid id hash for per detector measurement ranges.");
          }
          else {
@@ -83,13 +85,13 @@ namespace ActsTrk::detail {
          }
          return detector_container_index;
       }
-      const PhaseII::DataRange &getRange(unsigned int detector_type_i, unsigned int id_hash) const {
+      PhaseII::DataRange getRange(unsigned int detector_type_i, unsigned int id_hash) const {
          return at(m_perDetectorRanges.at(detector_type_i),id_hash);
       }
       
       std::tuple<const MeasurementContainer *, abstract_measurement_range_t, bool >
       getMeasurementRange(unsigned int detector_type_i, unsigned int id_hash) const {
-         const PhaseII::DataRange &data_range = at(m_perDetectorRanges.at(detector_type_i),id_hash);
+         PhaseII::DataRange data_range = at(m_perDetectorRanges.at(detector_type_i),id_hash);
          bool measurement_expected=measurementExpected(detector_type_i, id_hash);
          abstract_measurement_range_t range= ( (measurement_expected)
                                               ? data_range
@@ -282,7 +284,7 @@ namespace ActsTrk::detail {
 
           unsigned int container_index = m_measurementRanges->getContainerIndex(detector_type_i, id_hash);
           if (container_index< m_measurementRanges->numContainers()) {
-             const PhaseII::DataRange &range = m_measurementRanges->getRange(detector_type_i, id_hash);
+             PhaseII::DataRange range = m_measurementRanges->getRange(detector_type_i, id_hash);
              return {Iterator(BaseIterator(&measurementContainerList(),
                                            container_index,
                                            /*cache index: */ range.containerIndex(),

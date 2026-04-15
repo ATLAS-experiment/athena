@@ -134,7 +134,7 @@ namespace ActsTrk::detail {
                        }
                        m_measurementRanges.customRanges().back().at(current_idHash)=PhaseII::DataRange( begin_idx,
                                                                                                         idx - begin_idx,
-                                                                                                        0u);
+                                                                                                        0u).makeCompact();
                        current_idHash=idHash;
                        begin_idx=idx;
                     }
@@ -144,10 +144,10 @@ namespace ActsTrk::detail {
                  }
                  m_measurementRanges.customRanges().back().at(current_idHash)=PhaseII::DataRange( begin_idx,
                                                                                                   idx - begin_idx,
-                                                                                                  0u);
+                                                                                                  0u).makeCompact();
                  m_measurementRanges.setRange( detector_type_i,
-                                               std::span<const PhaseII::DataRange>(m_measurementRanges.customRanges().back().begin(),
-                                                                                   m_measurementRanges.customRanges().back().end()),
+                                               std::span<ActsTrk::detail::DataRangeValueType>(m_measurementRanges.customRanges().back().begin(),
+                                                                                              m_measurementRanges.customRanges().back().end()),
                                                typeIndex32);
               }
           }
