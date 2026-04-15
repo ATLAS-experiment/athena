@@ -2,33 +2,58 @@
  *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
-#ifndef L0MuonMDTTools_LOMDTSEGMENT_H
-#define L0MuonMDTTools_LOMDTSEGMENT_H
-
+#ifndef L0MuonMDTTools_L0MDTSEGMENT_H
+#define L0MuonMDTTools_L0MDTSEGMENT_H
 
 namespace L0MDT {
+
 /**
- * @class L0MDTSegment
+ * @class Segment
  * @brief Class describing a reconstructed MDT segment used by the L0Muon trigger.
  *
- * The class stores the parameters of the segment reconstructed from MDT hits
- * such as slope, intercept and associated hit information. It is used by the
- * MDT segment finding tools in the L0Muon trigger simulation.*/
-    class Segment {
-    public:
-        Segment(const float slope, const float intercept): m_slope(slope), m_intercept(intercept) {}
-        ~Segment() = default;
+ * The class stores the fitted segment parameters in the global (z, R) plane,
+ * together with representative quantities derived from the hits used in the fit.
+ */
+class Segment {
+public:
+  Segment() = default;
+  Segment(float m, float b) : m_m(m), m_b(b) {}
+  ~Segment() = default;
 
-        float slope() const { return m_slope; }
-        float intercept() const { return m_intercept; }
+  // Setters
+  void setM(float x) { m_m = x; }
+  void setB(float x) { m_b = x; }
+  void setChi2(float x) { m_chi2 = x; }
+  void setNHits(unsigned int x) { m_nHits = x; }
 
-    private:
+  void setZMin(float x) { m_zMin = x; }
+  void setZMax(float x) { m_zMax = x; }
+  void setZRef(float x) { m_zRef = x; }
+  void setRRef(float x) { m_rRef = x; }
 
-        float m_slope{0.f};
-        float m_intercept{0.f};
+  // Getters
+  float m() const { return m_m; }
+  float b() const { return m_b; }
+  float chi2() const { return m_chi2; }
+  unsigned int nHits() const { return m_nHits; }
 
-    };
+  float zMin() const { return m_zMin; }
+  float zMax() const { return m_zMax; }
+  float zRef() const { return m_zRef; }
+  float rRef() const { return m_rRef; }
 
-}// end of namespace
+private:
+  float m_m{0.f};
+  float m_b{0.f};
+  float m_chi2{0.f};
+  unsigned int m_nHits{0};
+
+  float m_zMin{0.f};
+  float m_zMax{0.f};
+  float m_zRef{0.f};
+  float m_rRef{0.f};
+};
+
+} // end of namespace L0MDT
 
 #endif

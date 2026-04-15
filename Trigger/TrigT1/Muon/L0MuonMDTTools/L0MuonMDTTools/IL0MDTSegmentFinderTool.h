@@ -8,7 +8,7 @@
 
 #include "GaudiKernel/IAlgTool.h"
 #include "L0MuonMDTTools/L0MDTSegment.h"
-
+#include "ActsGeometryInterfaces/GeometryContext.h"
 
 namespace L0MDT {
 
@@ -21,8 +21,8 @@ namespace L0MDT {
   public:
     DeclareInterfaceID(IL0MDTSegmentFinderTool, 1 ,0);
     virtual ~IL0MDTSegmentFinderTool() = default;
-    virtual StatusCode findSegments(const std::vector<const xAOD::MdtDriftCircle*>& driftCircles, const EventContext& ctx,
-                                    std::vector<L0MDT::Segment>& segments) const = 0;
+    virtual StatusCode findSegments(const std::vector<const xAOD::MdtDriftCircle*>& driftCircles, const ActsTrk::GeometryContext& gctx,
+                                    float m, float b,std::vector<L0MDT::Segment>& segments) const = 0;
   };
 }
 #endif

@@ -112,7 +112,7 @@ namespace L0Muon
     /// retrieve the truth particles
     const xAOD::TruthParticleContainer *truthParticles = nullptr;
     ATH_CHECK(SG::get(truthParticles, m_truthPartKey, ctx));
-
+    
     /// create the trigger candidates from the MC truth
     for (const xAOD::TruthParticle* truthMuon : *truthParticles) {
       std::vector<const xAOD::MuonSimHit*> rpcHits = collectHits(*truthMuon, ctx);
@@ -135,7 +135,10 @@ namespace L0Muon
       uint16_t subdetectorId = eta > 0 ? 0x65 : 0x66;
       auto cand = std::make_unique<L0Muon::RPCCandData>(subdetectorId, 0, 0);
 
+      std::cout << "eta before setEta = " << eta << std::endl;
       cand->setEta(eta);
+      std::cout << "eta after setEta  = " << cand->eta() << std::endl;
+      //cand->setEta(eta);
       cand->setPhi(phi);
       cand->setPt(pt);
       cand->setThreshold(0);
@@ -178,11 +181,17 @@ namespace L0Muon
       // Set the Z positions in the candidate
       for (int i = 0; i < 4; ++i) {
           if (nZPos[i] > 0) {
-              //            zPos[i] = std::abs(zPos[i]); // Use absolute value for Z position
-              zPos[i] /= nZPos[i];
-              // Normalize the Z position to the range of 12 bits
-              // The range is from -12500 to +12500, mapped to 0-4095
-              cand->setZPos(zPos[i], i);
+            zPos[i] = std::abs(zPos[i]); // Use absolute value for Z position
+            zPos[i] /= nZPos[i];
+            // Normalize the Z position to the range of 12 bits
+            // The range is from 0 to +12500, so we map it to 0-4095
+
+            //std::cout << "z before setZpos = " <<zPos[i] << std::endl;
+            //cand->setZPos(static_cast<uint16_t>(zPos[i]/
+            //  L0Muon::RPCCandData::s_zPosRange*L0Muon::RPCCandData::s_zPosBitRange), i);
+            //std::cout << "z after setZpos = " <<cand->zPos(i)<< std::endl;
+
+            cand->setZPos(zPos[i], i);
           }
       }
       cand->setQuality(L0Muon::RPCCandData::Quality::Q_BEST);
