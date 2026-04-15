@@ -67,21 +67,24 @@ atlas_add_test( test_athena_ntuple_dumper_read
                 DEPENDS test_athena_ntuple_dumper )
 
 atlas_add_test( test_athena_variable_shape1
-                SCRIPT test/test_athena_variable_shape1.sh
+                SCRIPT test/test_athena_variable_shape.sh "el_n,el_eta"
                 ENVIRONMENT ATLAS_REFERENCE_TAG=${_reftag}
                 PROPERTIES TIMEOUT 450
+                PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( test_athena_variable_shape2
-                SCRIPT test/test_athena_variable_shape2.sh
+                SCRIPT test/test_athena_variable_shape.sh "el_n,el_phi"
                 ENVIRONMENT ATLAS_REFERENCE_TAG=${_reftag}
                 PROPERTIES TIMEOUT 450
+                PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( test_athena_variable_shape3
-                SCRIPT test/test_athena_variable_shape3.sh
+                SCRIPT test/test_athena_variable_shape.sh "el_n,el_eta"
                 ENVIRONMENT ATLAS_REFERENCE_TAG=${_reftag}
                 PROPERTIES TIMEOUT 450
+                PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( test_athena_variable_shape_merged
@@ -89,6 +92,7 @@ atlas_add_test( test_athena_variable_shape_merged
                 ENVIRONMENT ATLAS_REFERENCE_TAG=${_reftag}
                 POST_EXEC_SCRIPT noerror.sh
                 PROPERTIES TIMEOUT 450
+                PRIVATE_WORKING_DIRECTORY
                 DEPENDS test_athena_variable_shape1 test_athena_variable_shape2 test_athena_variable_shape3 )
 
 atlas_add_test( test_athena_multtuple
