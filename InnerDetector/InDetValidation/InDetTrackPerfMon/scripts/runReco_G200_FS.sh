@@ -65,7 +65,16 @@ cd G-200
 mkdir build
 cd build
 #
-cmake ../traccc-athena
+
+# If asetup didn't give us CUDACXX (only at CERN?), select cuda-12 in preference to cuda-13.
+if [ -z "$CUDACXX" -a -x "/usr/local/cuda-12/bin/nvcc" ]; then
+  cuda_root=$(readlink -e "/usr/local/cuda-12")
+  echo "Use nvcc from $cuda_root"
+  export CUDACXX="${cuda_root}/bin/nvcc"
+  export CMAKE_PREFIX_PATH="${cuda_root}/targets/x86_64-linux/:${CMAKE_PREFIX_PATH}"
+fi
+
+cmake ../traccc-athena -DTRACCC_USE_SYSTEM_ACTS=ON
 rc=$?
 echo "G-200 cmake result: $rc"
 if [ $rc != 0 ]; then exit $rc; fi
