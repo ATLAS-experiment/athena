@@ -11,6 +11,7 @@ atlas_add_poolcnv_library( xAODInDetMeasurementAthenaPoolPoolCnv
      xAODInDetMeasurement/PixelClusterContainerAlt.h
      xAODInDetMeasurement/PixelClusterAuxContainer.h
      xAODInDetMeasurement/StripClusterContainer.h
+     xAODInDetMeasurement/StripClusterContainerAlt.h
      xAODInDetMeasurement/StripClusterAuxContainer.h
      xAODInDetMeasurement/HGTDClusterContainer.h
      xAODInDetMeasurement/HGTDClusterAuxContainer.h

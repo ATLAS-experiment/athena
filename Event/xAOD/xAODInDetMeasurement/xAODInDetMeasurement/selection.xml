@@ -5,8 +5,8 @@
     <class name="xAOD::PixelClusterContainer_v1"
            id="DE61015F-C762-47D6-BFC5-A64344734DE4" />
     <typedef name="xAOD::PixelCluster" />
-    <typedef name="xAOD::PixelClusterContainerAlt"
-             id="9B8E6CFC-4620-4974-9B52-93005151F3FE"/>
+    <class name="xAOD::PixelClusterContainerAlt"
+           id="9B8E6CFC-4620-4974-9B52-93005151F3FE"/>
 
     <class name="xAOD::PixelClusterAuxContainer_v1"
            id="AC1AEA8C-20D8-4206-B785-0B4538EFF66B" />
@@ -26,7 +26,7 @@
     <class name="xAOD::StripClusterContainer_v1"
            id="BF692A4A-BF3E-4626-8DD4-135C58E6C0AB" />
     <typedef name="xAOD::StripCluster" />
-    <typedef name="xAOD::StripClusterContainerAlt"
+    <class name="xAOD::StripClusterContainerAlt"
              id="DBD2C606-9CDC-4318-903F-7C81C31A5C37"/>
 
     <class name="xAOD::StripClusterAuxContainer_v1"
