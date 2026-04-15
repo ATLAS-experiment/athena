@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CopyTRT_DriftCircleContainer.h"
@@ -50,6 +50,7 @@ StatusCode CopyTRT_DriftCircleContainer::execute(const EventContext& ctx) const
   for(const InDet::TRT_DriftCircleCollection* col : *inputContainer){
     InDet::TRT_DriftCircleCollection* newCol=new InDet::TRT_DriftCircleCollection(col->identifyHash());
     newCol->setIdentifier(col->identify());
+    newCol->reserve(col->size());
     for(const InDet::TRT_DriftCircle* clus : *col){
       newCol->push_back(std::make_unique<InDet::TRT_DriftCircle>(*clus));
     }
