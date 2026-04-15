@@ -81,8 +81,10 @@ StatusCode SubjetBuilder::execute(DiTauCandidateData * data,
   }
 
   ATH_MSG_DEBUG("found "<< vSubjets.size() << " subjets");
-  for (const auto& subjet: vSubjets) {
-    ATH_MSG_DEBUG("pt: " << subjet.pt() << "  eta: " << subjet.eta() << "  phi: " << subjet.phi());
+  if (this->msgLevel() <= MSG::DEBUG){
+    for (const auto& subjet: vSubjets) {
+      ATH_MSG_DEBUG("pt: " << subjet.pt() << "  eta: " << subjet.eta() << "  phi: " << subjet.phi());
+    }
   }
 
   data->subjets = vSubjets;
