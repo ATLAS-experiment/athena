@@ -2402,6 +2402,12 @@ def setupMenu():
         ChainProp(name='HLT_e26_lhtight_ivarloose_tau20_mediumnoperfGNTauDev1_probe_L1cTAU20M_03dRAB_L1eEM26M', l1SeedThresholds=['eEM26M', 'PROBEcTAU20M'], groups=TagAndProbePhIGroup+SingleElectronGroup, monGroups=['tauMon:t0']),
 
 
+        # HitZ test Mu/Electron + Tau T&P chains (ATR-32384)
+        ChainProp(name='HLT_mu24_ivarmedium_tau20_mediumGNTau_HitZ_probe_L1cTAU20M_03dRAB_L1MU14FCH', l1SeedThresholds=['MU14FCH', 'PROBEcTAU20M'], groups=TagAndProbePhIGroup+SingleMuonGroup, monGroups=['tauMon:t0']),
+        ChainProp(name='HLT_e26_lhtight_ivarloose_tau20_mediumGNTau_HitZ_probe_L1cTAU20M_03dRAB_L1eEM26M', l1SeedThresholds=['eEM26M', 'PROBEcTAU20M'], groups=TagAndProbePhIGroup+SingleElectronGroup, monGroups=['tauMon:t0']),
+
+
+
         # Photon + Tau T&P chains (ATR-28791)
         ChainProp(name='HLT_g140_loose_tau20_mediumGNTau_probe_L1eTAU12_03dRAB_L1eEM26M', l1SeedThresholds=['eEM26M', 'PROBEeTAU12'], groups=TagAndProbePhIGroup+TauPhotonGroup),
         ChainProp(name='HLT_g140_loose_tau20_mediumGNTau_probe_L1eTAU12_03dRAB_L1eEM28M', l1SeedThresholds=['eEM28M', 'PROBEeTAU12'], groups=TagAndProbePhIGroup+TauPhotonGroup),
