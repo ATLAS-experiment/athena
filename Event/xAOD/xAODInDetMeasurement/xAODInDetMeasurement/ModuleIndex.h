@@ -13,10 +13,9 @@ public:
    using DataRangeValueType = ModuleIndexBase::DataRangeValueType;
    
    unsigned int containerIndex(const T_Container &src_container) {
-      static_assert( sizeof(DataLinkBase) == sizeof(DataLink<T_Container>));
-      typename std::vector< DataLinkBase >::const_iterator iter =
-         std::find_if(m_srcContainer.begin(),m_srcContainer.end(), [container_ptr=&src_container](const DataLinkBase &link) {
-            return container_ptr == reinterpret_cast<const DataLink<T_Container> &>(link).cptr();
+      typename std::vector< DataLink<T_Container> >::const_iterator iter =
+         std::find_if(m_srcContainer.begin(),m_srcContainer.end(), [container_ptr=&src_container](const DataLink<T_Container> &link) {
+            return container_ptr == link.cptr();
          });
       unsigned int index = iter - m_srcContainer.begin();
       if (iter == m_srcContainer.end()) {
@@ -33,11 +32,11 @@ public:
    // @TODO introduce concept
    template <typename T_Function>
    void visitContainers(T_Function &&function) const {
-      for (const DataLinkBase &base_link: m_srcContainer) {
-         function( *(reinterpret_cast<const DataLink<T_Container> &>(base_link).cptr()) );
+      for (const DataLink<T_Container> &link: m_srcContainer) {
+         function( *(link.cptr()) );
       }
    }
-   void copyContainerList(const ModuleIndexBase &other) {
+   void copyContainerList(const ModuleIndex<T_Container> &other) {
       m_srcContainer = other.m_srcContainer;
    }
    unsigned int containerListSize() const {

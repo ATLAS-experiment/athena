@@ -38,16 +38,9 @@ public:
    const std::vector<unsigned int> &selection() const { return m_selection; };
    std::vector<unsigned int> &selection() { return m_selection; };
 
-   void copyContainerList(const ModuleIndexBase &other) {
-      m_srcContainer = other.m_srcContainer;
-   }
-   unsigned int containerListSize() const {
-      return m_srcContainer.size();
-   }
    const std::vector<DataRangeValueType> &range() const { return m_range; };
 
 protected:
-   std::vector< DataLinkBase > m_srcContainer; // list of source countainers the range refers to.
    std::vector<DataRangeValueType> m_range; // the per module element range refers to either the element selection, or if empty to all elements.
    std::vector<unsigned int> m_selection;   // selection of elements per module
 };
