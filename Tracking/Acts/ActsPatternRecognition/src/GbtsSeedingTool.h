@@ -112,13 +112,18 @@ namespace ActsTrk {
     Gaudi::Property<bool> m_beamSpotCorrection {this, "beamSpotCorrection", true, "apply primary vertex corrections to spacepoints"};
     Gaudi::Property<float> m_minPt {this, "minPt", 1000.0, "Lower cutoff for seeds"};
     Gaudi::Property<float> m_phiSliceWidth {this, "phiSliceWidth",0, "initialised in loadSpacePoints function"};
+    Gaudi::Property<float> m_tau_ratio_corr{this, "tau_ratio_correction", 0.006, "not sure"};
+    Gaudi::Property<bool> m_validateTriplets{this, "ValidateTriplets", true, "not sure"};
+    Gaudi::Property<bool> m_useAdaptiveCuts{this, "UseAdaptiveCuts", true, "not sure"};
 
     // BuildTheGraph() options
     Gaudi::Property<bool> m_useEtaBinning {this, "useEtaBinning",true, "bool to use eta binning from geometry structure"}; 
     Gaudi::Property<bool> m_doubletFilterRZ {this, "doubletFilterRZ",true, "bool applies new Z cuts on doublets"}; 
     Gaudi::Property<float> m_minDeltaRadius {this, "minDeltaRadius",2.0, " min dr for doublet"}; 
     Gaudi::Property<int> m_nMaxEdges {this, "MaxEdges",3000000, " max number of Gbts edges/doublets"};
-    Gaudi::Property<double> m_ptCoeff {this, "ptCoeff", 0.29997 * 1.9972 / 2.0, "~0.3*B/2 - assumes nominal field of 2*T"}; 
+
+    // triplet validation options
+    Gaudi::Property<float> m_d0_max{this, "d0_max", 3.0, "not sure"};
 
     // GbtsTrackingFilter
     Gaudi::Property<float> m_sigmaMS {this, "sigmaMS", 0.016, "process noise from multiple scattering"};
