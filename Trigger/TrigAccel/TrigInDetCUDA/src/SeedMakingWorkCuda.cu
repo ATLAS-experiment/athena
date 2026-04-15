@@ -219,14 +219,22 @@ bool SeedMakingWorkCudaManaged::run() {
   checkError();
   
 
-
+#if CUDA_VERSION >= 13000
+  cudaMemLocation loc { .type = cudaMemLocationTypeDevice, .id = id };
+  cudaMemPrefetchAsync(p.m_settings, sizeof(TrigAccel::SEED_FINDER_SETTINGS), loc, 0, p.m_stream);
+#else
   cudaMemPrefetchAsync(p.m_settings, sizeof(TrigAccel::SEED_FINDER_SETTINGS), id, p.m_stream);
+#endif
 
   checkError();
 
 
 
+#if CUDA_VERSION >= 13000
+  cudaMemPrefetchAsync(p.m_spacepoints, sizeof(TrigAccel::SPACEPOINT_STORAGE), loc, 0, p.m_stream);
+#else
   cudaMemPrefetchAsync(p.m_spacepoints, sizeof(TrigAccel::SPACEPOINT_STORAGE), id, p.m_stream);
+#endif
 
   checkError();
 
