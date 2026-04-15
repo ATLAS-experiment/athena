@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRKEVENT_SEEDCONTAINER_H
@@ -9,7 +9,6 @@
 #include <utility>
 #include <vector>
 
-#include "Acts/EventData/Seed.hpp"  // only needed for conversion from Acts::Seed
 #include "Acts/EventData/SeedContainer2.hpp"
 #include "xAODInDetMeasurement/SpacePoint.h"
 
