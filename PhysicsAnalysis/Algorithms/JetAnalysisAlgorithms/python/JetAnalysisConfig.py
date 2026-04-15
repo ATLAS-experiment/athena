@@ -12,6 +12,43 @@ from AthenaCommon.Logging import logging
 import re
 
 
+def _parseJetCollection(jetCollection):
+    """Parse a jet collection name into its components.
+
+    Returns (radius, jetInput, trim, hasBTag) where:
+      radius   -- the jet radius parameter (2, 4, 6, or 10)
+      jetInput -- the input type string (e.g. 'EMPFlow', 'UFO', ...)
+      trim     -- the trimming suffix string, or None
+      hasBTag  -- whether the original collection name had a '_BTagging' suffix
+    """
+    hasBTag = False
+    btIndex = jetCollection.find('_BTagging')
+    if btIndex != -1:
+        jetCollection = jetCollection[:btIndex]
+        hasBTag = True
+
+    jetCollectionName = jetCollection
+    if jetCollection == "AnalysisJets":
+        jetCollectionName = "AntiKt4EMPFlowJets"
+    elif jetCollection == "AnalysisLargeRJets":
+        jetCollectionName = "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"
+
+    collection_pattern = re.compile(
+        r"AntiKt(\d+)(EMTopo|EMPFlow|LCTopo|TrackCaloCluster|UFO|Track|HI)"
+        r"(TrimmedPtFrac5SmallR20|CSSKSoftDropBeta100Zcut10)?Jets")
+    match = collection_pattern.match(jetCollectionName)
+    if not match:
+        raise ValueError(
+            "Jet collection {0} does not match expected pattern!".format(jetCollectionName))
+    radius = int(match.group(1))
+    if radius not in [2, 4, 6, 10]:
+        raise ValueError(
+            "Jet collection has unsupported radius '{0}'!".format(radius))
+    jetInput = match.group(2)
+    trim = match.group(3)
+    return radius, jetInput, trim, hasBTag
+
+
 class PreJetAnalysisConfig (ConfigBlock) :
     """the ConfigBlock for the common preprocessing of jet sequences"""
 
@@ -49,8 +86,15 @@ class PreJetAnalysisConfig (ConfigBlock) :
         else :
             config.setSourceName (self.containerName, self.jetCollection, originalName = self.jetCollection)
 
+        # Parse and store jet collection metadata for downstream blocks
+        radius, jetInput, trim, hasBTag = _parseJetCollection(self.jetCollection)
+        config.setContainerMeta(self.containerName, 'jetRadius', radius)
+        config.setContainerMeta(self.containerName, 'jetInput', jetInput)
+        config.setContainerMeta(self.containerName, 'jetTrim', trim)
+        config.setContainerMeta(self.containerName, 'hasBTag', hasBTag)
+
         # Relink original jets in case of b-tagging calibration
-        if self.runOriginalObjectLink :
+        if self.runOriginalObjectLink or hasBTag :
             alg = config.createAlgorithm( 'CP::AsgOriginalObjectLinkAlg',
                                           'JetOriginalObjectLinkAlg',
                                            reentrant=True )
@@ -129,9 +173,6 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             noneAction='error',
             info="the jet container to run on. It is interpreted to determine "
             "the correct config blocks to call for small- or large-R jets.")
-        self.addOption ('jetInput', '', type=str,
-            noneAction='error',
-            info="the type of jet input. Supported options are: `EMPFlow`, `EMTopo`, `HI`.")
         self.addOption ('runJvtUpdate', False, type=bool,
             info="whether to update the JVT.")
         self.addOption ('runNNJvtUpdate', False, type=bool,
@@ -171,6 +212,10 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
 
     def makeAlgs (self, config) :
 
+        # Self-select: only run for radius-4 jets
+        if config.getContainerMeta(self.containerName, 'jetRadius', failOnMiss=True) != 4:
+            return
+
         log = logging.getLogger('SmallRJetAnalysisConfig')
 
         jetCollectionName=self.jetCollection
@@ -179,9 +224,11 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         if(self.jetCollection=="AnalysisLargeRJets") :
             jetCollectionName="AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"
 
-        if self.jetInput not in ["EMTopo", "EMPFlow", "HI"]:
+        jetInput = config.getContainerMeta(self.containerName, 'jetInput', failOnMiss=True)
+
+        if jetInput not in ["EMTopo", "EMPFlow", "HI"]:
             raise ValueError(
-                "Unsupported input type '{0}' for R=0.4 jets!".format(self.jetInput) )
+                "Unsupported input type '{0}' for R=0.4 jets!".format(jetInput) )
 
         if self.jvtWP not in ["FixedEffPt"]:
             raise ValueError(
@@ -200,14 +247,14 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             calibTool = config.createPublicTool( 'JetCalibrationTool', calibToolName )
             calibTool.JetCollection = jetCollectionName[:-4]
             # Get the correct string to use in the config file name
-            if self.jetInput == "EMPFlow":
+            if jetInput == "EMPFlow":
                 if config.geometry() is LHCPeriod.Run2:
                     configFile = "PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config"
                     calibTool.CalibArea = "00-04-82"
                 elif config.geometry() >= LHCPeriod.Run3:
                     configFile = "AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_CalibConfig_ResPU_EtaJES_GSC_241208_InSitu.config"
                     calibTool.CalibArea = "00-04-83"
-            elif self.jetInput == "HI":
+            elif jetInput == "HI":
                 if config.geometry() is LHCPeriod.Run2:
                     configFile = "JES_MC16_HI_Jan2021_5TeV.config"
                 if config.geometry() is LHCPeriod.Run3:
@@ -218,21 +265,21 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
                     configFile = "JES_MC16Recommendation_AFII_{0}_Apr2019_Rel21.config"
                 else:
                     configFile = "JES_MC16Recommendation_Consolidated_{0}_Apr2019_Rel21.config"
-                configFile = configFile.format(self.jetInput)
+                configFile = configFile.format(jetInput)
             if self.calibToolCalibArea is not None:
                 calibTool.CalibArea = self.calibToolCalibArea
             if self.calibToolConfigFile is not None:
                 configFile = self.calibToolConfigFile
             calibTool.ConfigFile = configFile
             if config.dataType() is DataType.Data:
-                if self.jetInput == "HI":
+                if jetInput == "HI":
                     calibTool.CalibSequence = 'EtaJES_Insitu'
                 else:
                     calibTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC_Insitu'
             else:
-                if self.jetInput == "EMPFlow":
+                if jetInput == "EMPFlow":
                     calibTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC'
-                elif self.jetInput == "HI":
+                elif jetInput == "HI":
                     calibTool.CalibSequence = 'EtaJES'
                 else:
                     calibTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC_Smear'
@@ -241,7 +288,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             calibTool.IsData = (config.dataType() is DataType.Data)
             # Prepare the jet calibration algorithm
             alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg' )
-            alg.HIsetup = self.jetInput == "HI"
+            alg.HIsetup = jetInput == "HI"
             alg.calibrationTool = f'{calibTool.getType()}/{calibTool.getName()}'
             alg.jets = config.readName (self.containerName)
             alg.jetsOut = config.copyName (self.containerName)
@@ -257,7 +304,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg.preselection = config.getPreselection (self.containerName, '')
 
         if self.runNNJvtUpdate:
-            assert self.jetInput=="EMPFlow", "NN JVT only defined for PFlow jets"
+            assert jetInput=="EMPFlow", "NN JVT only defined for PFlow jets"
             alg = config.createAlgorithm( 'CP::JetDecoratorAlg', 'NNJvtUpdateAlg' )
             config.addPrivateTool( 'decorator', 'JetPileupTag::JetVertexNNTagger' )
             # Set this actually to the *output* collection
@@ -270,7 +317,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         # Set up the jet efficiency scale factor calculation algorithm
         # Change the truthJetCollection property to AntiKt4TruthWZJets if preferred
         if self.runJvtSelection :
-            assert self.jetInput=="EMPFlow", "NNJvt WPs and SFs only valid for PFlow jets"
+            assert jetInput=="EMPFlow", "NNJvt WPs and SFs only valid for PFlow jets"
             log.warning("jvtWP, runJvtSelection and runJvtEfficiency are deprecated - please use a JVTWorkingPoint block instead.")
 
             alg = config.createAlgorithm('CP::AsgSelectionAlg', 'JvtSelectionAlg')
@@ -303,7 +350,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             config.addSelection (self.containerName, 'baselineJvt', 'jvt_selection,as_char', preselection=False)
 
         if self.runFJvtSelection :
-            assert self.jetInput=="EMPFlow", "fJvt WPs and SFs only valid for PFlow jets"
+            assert jetInput=="EMPFlow", "fJvt WPs and SFs only valid for PFlow jets"
             log.warning("fJvtWP, runFJvtSelection and runFJvtEfficiency are deprecated - please use a FJVTWorkingPoint block instead.")
 
             alg = config.createAlgorithm('CP::AsgSelectionAlg', 'FJvtSelectionAlg')
@@ -346,14 +393,6 @@ class RScanJetAnalysisConfig (ConfigBlock) :
             noneAction='error',
             info="the jet container to run on. It is interpreted to determine "
             "the correct config blocks to call for small- or large-R jets.")
-        # TODO: add info string
-        self.addOption ('jetInput', '', type=str,
-            noneAction='error',
-            info="")
-        # TODO: add info string
-        self.addOption ('radius', None, type=int,
-            noneAction='error',
-            info="")
         self.addOption ('recalibratePhyslite', True, type=bool,
             info="whether to run the CP::JetCalibrationAlg on PHYSLITE "
             "derivations. The default is True.")
@@ -364,6 +403,11 @@ class RScanJetAnalysisConfig (ConfigBlock) :
 
     def makeAlgs (self, config) :
 
+        # Self-select: only run for r-scan jets (radius 2 or 6)
+        radius = config.getContainerMeta(self.containerName, 'jetRadius', failOnMiss=True)
+        if radius not in [2, 6]:
+            return
+
         log = logging.getLogger('RScanJetAnalysisConfig')
 
         jetCollectionName=self.jetCollection
@@ -372,22 +416,24 @@ class RScanJetAnalysisConfig (ConfigBlock) :
         if(self.jetCollection=="AnalysisLargeRJets") :
             jetCollectionName="AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets"
 
+        jetInput = config.getContainerMeta(self.containerName, 'jetInput', failOnMiss=True)
+
         if not config.isPhyslite() or self.recalibratePhyslite:
-            if self.jetInput not in ["LCTopo", "HI"]:
+            if jetInput not in ["LCTopo", "HI"]:
                 raise ValueError(
-                    "Unsupported input type '{0}' for R-scan jets!".format(self.jetInput) )
+                    "Unsupported input type '{0}' for R-scan jets!".format(jetInput) )
             # Create calibration tool before algorithm (EventLoop ordering)
             calibToolName = 'JetCalibTool_' + jetCollectionName[:-4]
             calibTool = config.createPublicTool( 'JetCalibrationTool', calibToolName )
             calibTool.JetCollection = jetCollectionName[:-4]
-            if self.jetInput=="LCTopo":
+            if jetInput=="LCTopo":
                 calibTool.ConfigFile = \
-                    "JES_MC16Recommendation_Rscan{0}LC_Feb2022_R21.config".format(self.radius)
+                    "JES_MC16Recommendation_Rscan{0}LC_Feb2022_R21.config".format(radius)
                 if config.dataType() is DataType.Data:
                     calibTool.CalibSequence = "JetArea_Residual_EtaJES_GSC_Insitu"
                 else:
                     calibTool.CalibSequence = "JetArea_Residual_EtaJES_GSC_Smear"
-            elif self.jetInput=="HI":
+            elif jetInput=="HI":
                 calibTool.ConfigFile = \
                     "JES_MC16_HI_Jan2021_5TeV.config"
                 if config.dataType() is DataType.Data:
@@ -397,7 +443,7 @@ class RScanJetAnalysisConfig (ConfigBlock) :
             calibTool.IsData = (config.dataType() is DataType.Data)
             # Prepare the jet calibration algorithm
             alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg' )
-            alg.HIsetup = self.jetInput == "HI"
+            alg.HIsetup = jetInput == "HI"
             alg.calibrationTool = f'{calibTool.getType()}/{calibTool.getName()}'
             alg.jets = config.readName (self.containerName)
             # Logging would be good
@@ -507,6 +553,10 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
 
     def makeAlgs (self, config) :
 
+        # Self-select: only run for large-R (radius 10) jets
+        if config.getContainerMeta(self.containerName, 'jetRadius', failOnMiss=True) != 10:
+            return
+
         configFile = None
         calibSeq = None
         calibArea = None
@@ -517,8 +567,14 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
         if(self.jetCollection=="AnalysisLargeRJets") :
             jetCollectionName="AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"
 
-        if self.jetInput not in ["UFO"]:
-            raise ValueError("Invalid input type '{0}' for large-R jets!".format(self.jetInput) )
+        jetInput = config.getContainerMeta(self.containerName, 'jetInput', failOnMiss=True)
+        trim = config.getContainerMeta(self.containerName, 'jetTrim', failOnMiss=True)
+
+        if jetInput not in ["UFO"]:
+            raise ValueError("Invalid input type '{0}' for large-R jets!".format(jetInput) )
+
+        if not trim:
+            raise ValueError("Untrimmed large-R jets are not supported!")
 
         configFile = "JES_MC20PreRecommendation_R10_UFO_CSSK_SoftDrop_JMS_R21Insitu_26Nov2024.config"
         calibArea = "00-04-83"
@@ -560,7 +616,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             alg.jets = config.readName(self.containerName)
             alg.jetsOut = config.copyName(self.containerName)
 
-        if self.jetInput == "UFO" and config.dataType() is not DataType.Data:
+        if jetInput == "UFO" and config.dataType() is not DataType.Data:
             # set up the FF smearing algorithm
             alg = config.createAlgorithm( 'CP::JetFFSmearingAlg', 'JetFFSmearingAlg' )
             self.createFFSmearingTool(alg, config)
@@ -795,6 +851,13 @@ class FJvtWorkingPointEfficiencyConfig (ConfigBlock) :
 
 
 @groupBlocks
+def Jets(seq):
+    seq.append(PreJetAnalysisConfig())
+    seq.append(SmallRJetAnalysisConfig())
+    seq.append(RScanJetAnalysisConfig())
+    seq.append(LargeRJetAnalysisConfig())
+
+@groupBlocks
 def JvtWorkingPoint(seq):
     seq.append(JvtWorkingPointSelectionConfig())
     seq.append(JvtWorkingPointEfficiencyConfig())
@@ -803,143 +866,3 @@ def JvtWorkingPoint(seq):
 def FJvtWorkingPoint(seq):
     seq.append(FJvtWorkingPointSelectionConfig())
     seq.append(FJvtWorkingPointEfficiencyConfig())
-
-
-# These algorithms set up the jet recommendations as-of 04/02/2019.
-# Jet recommendations:
-# https://atlas-jetetmiss.docs.cern.ch/recs/latest-recs/
-
-@groupBlocks
-def makeJetAnalysisConfig( seq, containerName, jetCollection,
-                           runGhostMuonAssociation = None):
-    """Create a jet analysis algorithm sequence
-      The jet collection is interpreted and selects the correct function to call,
-      makeSmallRJetAnalysisConfig, makeRScanJetAnalysisConfig or
-      makeLargeRJetAnalysisConfig
-
-      Keyword arguments
-        jetCollection -- The jet container to run on.
-    """
-
-    # Remove b-tagging calibration from the container name
-    btIndex = jetCollection.find('_BTagging')
-    if btIndex != -1:
-        jetCollection = jetCollection[:btIndex]
-
-    jetCollectionName=jetCollection
-    # needed for PHYSLITE
-    if(jetCollection=="AnalysisJets") :
-        jetCollectionName="AntiKt4EMPFlowJets"
-    if(jetCollection=="AnalysisLargeRJets") :
-        jetCollectionName="AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"
-
-    # interpret the jet collection
-    collection_pattern = re.compile(
-        r"AntiKt(\d+)(EMTopo|EMPFlow|LCTopo|TrackCaloCluster|UFO|Track|HI)(TrimmedPtFrac5SmallR20|CSSKSoftDropBeta100Zcut10)?Jets")
-    match = collection_pattern.match(jetCollectionName)
-    if not match:
-        raise ValueError(
-            "Jet collection {0} does not match expected pattern!".format(jetCollectionName) )
-    radius = int(match.group(1) )
-    if radius not in [2, 4, 6, 10]:
-        raise ValueError("Jet collection has an unsupported radius '{0}'!".format(radius) )
-    jetInput = match.group(2)
-
-    config = PreJetAnalysisConfig()
-    config.setOptionValue ('containerName', containerName)
-    config.setOptionValue ('jetCollection', jetCollection)
-    config.runOriginalObjectLink = (btIndex != -1)
-    config.setOptionValue ('runGhostMuonAssociation', runGhostMuonAssociation)
-    seq.append (config)
-
-    if radius == 4:
-        makeSmallRJetAnalysisConfig(seq, containerName,
-            jetCollection, jetInput=jetInput)
-    elif radius in [2, 6]:
-        makeRScanJetAnalysisConfig(seq, containerName,
-            jetCollection, jetInput=jetInput, radius=radius)
-    else:
-        trim = match.group(3)
-        if trim == "":
-            raise ValueError("Untrimmed large-R jets are not supported!")
-        makeLargeRJetAnalysisConfig(seq, containerName,
-            jetCollection, jetInput=jetInput)
-
-
-
-def makeSmallRJetAnalysisConfig( seq, containerName, jetCollection, jetInput,
-                                 runJvtUpdate = None, runNNJvtUpdate = None,
-                                 runJvtSelection = None, runFJvtSelection = None,
-                                 jvtWP = None, fJvtWP = None,
-                                 runJvtEfficiency = None, runFJvtEfficiency = None):
-    """Add algorithms for the R=0.4 jets.
-
-      Keyword arguments
-        seq -- The sequence to add the algorithms to
-        jetCollection -- The jet container to run on.
-        jetInput -- The type of input used, read from the collection name.
-        runJvtUpdate -- Determines whether or not to update JVT on the jets
-        runNNJvtUpdate -- Determines whether or not to update NN JVT on the jets
-        runJvtSelection -- Determines whether or not to run JVT selection on the jets
-        runFJvtSelection -- Determines whether or not to run forward JVT selection on the jets
-        jvtWP -- Defines the NNJvt WP to apply on the jets
-        fJvtWP -- Defines the fJvt WP to apply on the jets
-        runJvtEfficiency -- Determines whether or not to calculate the JVT efficiency
-        runFJvtEfficiency -- Determines whether or not to calculate the forward JVT efficiency
-    """
-
-    if jetInput not in ["EMTopo", "EMPFlow", "HI"]:
-        raise ValueError(
-            "Unsupported input type '{0}' for R=0.4 jets!".format(jetInput) )
-
-    config = SmallRJetAnalysisConfig()
-    config.setOptionValue ('containerName', containerName)
-    config.setOptionValue ('jetCollection', jetCollection)
-    config.setOptionValue ('jetInput', jetInput)
-    config.setOptionValue ('runJvtUpdate', runJvtUpdate)
-    config.setOptionValue ('runNNJvtUpdate', runNNJvtUpdate)
-    config.setOptionValue ('runJvtSelection', runJvtSelection)
-    config.setOptionValue ('runFJvtSelection', runFJvtSelection)
-    config.setOptionValue ('jvtWP', jvtWP)
-    config.setOptionValue ('fJvtWP', fJvtWP)
-    config.setOptionValue ('runJvtEfficiency', runJvtEfficiency)
-    config.setOptionValue ('runFJvtEfficiency', runFJvtEfficiency)
-    seq.append (config)
-
-
-def makeRScanJetAnalysisConfig( seq, containerName, jetCollection,
-                                  jetInput, radius ):
-    """Add algorithms for the R-scan jets.
-
-      Keyword arguments
-        seq -- The sequence to add the algorithms to
-        jetCollection -- The jet container to run on.
-        jetInput -- The type of input used, read from the collection name.
-        radius -- The radius of the r-scan jets.
-    """
-
-    config = RScanJetAnalysisConfig()
-    config.setOptionValue ('containerName', containerName)
-    config.setOptionValue ('jetCollection', jetCollection)
-    config.setOptionValue ('jetInput', jetInput)
-    config.setOptionValue ('radius', radius)
-    seq.append (config)
-
-
-
-
-def makeLargeRJetAnalysisConfig( seq, containerName, jetCollection,
-                                 jetInput):
-    """Add algorithms for the R=1.0 jets.
-
-      Keyword arguments
-        seq -- The sequence to add the algorithms to
-        jetCollection -- The jet container to run on.
-        jetInput -- The type of input used, read from the collection name.
-    """
-    config = LargeRJetAnalysisConfig()
-    config.setOptionValue ('containerName', containerName)
-    config.setOptionValue ('jetCollection', jetCollection)
-    config.setOptionValue ('jetInput', jetInput)
-    seq.append (config)
-

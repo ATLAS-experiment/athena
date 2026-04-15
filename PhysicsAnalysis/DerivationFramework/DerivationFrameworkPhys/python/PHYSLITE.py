@@ -204,8 +204,9 @@ def CPAlgorithmsCfg(flags):
 
     # set up the jet analysis algorithm config:
     jetContainer = 'AntiKt4EMPFlowJets'
-    subConfig = factory.makeConfig ('Jets', containerName='AnalysisJets',
-        jetCollection=jetContainer)
+    subConfig = factory.makeConfig ('Jets')
+    subConfig.setOptionValue ('.containerName', 'AnalysisJets')
+    subConfig.setOptionValue ('.jetCollection', jetContainer)
     subConfig.setOptionValue ('.runFJvtSelection', False)
     subConfig.setOptionValue ('.runJvtSelection', False)
     configSeq += subConfig
@@ -221,8 +222,9 @@ def CPAlgorithmsCfg(flags):
     configSeq += subConfig
 
     largeRjetContainer='AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets'
-    subConfig = factory.makeConfig ('Jets', containerName='AnalysisLargeRJets',
-        jetCollection=largeRjetContainer)
+    subConfig = factory.makeConfig ('Jets')
+    subConfig.setOptionValue ('.containerName', 'AnalysisLargeRJets')
+    subConfig.setOptionValue ('.jetCollection', largeRjetContainer)
     subConfig.setOptionValue ('.runGhostMuonAssociation', False)
     # Disable kinematic selections on large-R jets
     subConfig.setOptionValue ('.minPt', 0.)
