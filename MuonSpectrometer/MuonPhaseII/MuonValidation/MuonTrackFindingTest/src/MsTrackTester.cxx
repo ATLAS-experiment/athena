@@ -323,9 +323,6 @@ namespace MuonValR4 {
         /** Fetch the containers from store gate */
         const xAOD::MuonSegmentContainer* recoSegments{nullptr};
         ATH_CHECK(SG::get(recoSegments, m_recoSegmentKey, ctx));
-        if (recoSegments->empty()){
-            return StatusCode::SUCCESS;
-        }
         const MuonR4::MsTrackSeedContainer* trkSeeds{nullptr};
         ATH_CHECK(SG::get(trkSeeds, m_msTrkSeedKey, ctx));
         const ActsTrk::GeometryContext* gctx{nullptr};
@@ -425,8 +422,6 @@ namespace MuonValR4 {
         for (const auto trk : *msTracks) {
             m_trackSummary->push_back(ctx, trk);
         }
-
-        
 
         ATH_CHECK(m_tree.fill(ctx));
         return StatusCode::SUCCESS;
