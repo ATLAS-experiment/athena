@@ -11,7 +11,7 @@
 
 #include "TrigT1CaloUtils/CrateEnergy.h"
 #include <iostream>
-
+#include <stdexcept>
 
 namespace LVL1 {
 
@@ -154,12 +154,14 @@ CrateEnergy::CrateEnergy(unsigned int crate, const DataVector<EnergyCMXData>* JE
   if (!m_overflowX){
     m_crateEx = eX[0] - eX[1];
   } else{
-    m_crateEx = -(mask + 1);
+    if (std::in_range<int>(-(mask + 1))) m_crateEx = -(mask + 1);
+    else throw std::out_of_range("m_crateEx set value is out of integer range");
   }
   if (!m_overflowY){
     m_crateEy = eY[0] - eY[1];
   }else{
-    m_crateEy = -(mask + 1);
+    if (std::in_range<int>(-(mask + 1))) m_crateEy = -(mask + 1);
+    else throw std::out_of_range("m_crateEy set value is out of integer range");
   }
 
   if (m_debug) {
