@@ -94,8 +94,8 @@ namespace MissingEtDQA {
     m_MET_dPhi.clear();
     m_MET_CorrFinalTrk.clear();
     m_MET_CorrFinalClus.clear();
-}
-  
+  }
+   
   // Athena algtool's Hooks
   ////////////////////////////
   StatusCode PhysValMET::initialize()
@@ -163,7 +163,7 @@ namespace MissingEtDQA {
   }
   
   StatusCode PhysValMET::bookHistograms()
-  {
+  { 
     std::cout<<"----------TEST___________________"<<std::endl;
     ATH_MSG_INFO ("Booking hists " << name() << "...");
       
@@ -210,10 +210,11 @@ namespace MissingEtDQA {
         sum_names.emplace_back("RefJet");
 
         //Ref and Rebuild
-        met_type = {"MET_Reference_","MET_Rebuilt"};
-        for (type : met_type){
+        std::vector <std::string> met_type = {"MET_Reference_","MET_Rebuilt"};
+        for (const auto& type : met_type){
           // First set-up Reference MET histograms (if we want them)
           if (type == "MET_Reference" && ! m_doMETRefPlots){ continue;} //Skip MET reference iffla is false
+
           name_met = type + jet_type;
           m_dir_met.clear();
           std::vector<TH1D*> v_MET;
@@ -359,7 +360,7 @@ namespace MissingEtDQA {
         std::string name_met = "MET_Track";
         std::string dir = "MET/" + name_met + "/";
         std::string sub_dir;
-
+  
         sub_dir = dir + "Track/";
         ATH_CHECK(regHist(m_MET_Track = new  TH1D("Track", (name_met + " " + m_names["Track"] + "; E_{T}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinp, 0., suptmi), sub_dir, all));
         ATH_CHECK(regHist(m_MET_Track_x = new  TH1D("Track_x", (name_met + " " + m_names["Track"] + " x; E_{x}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy), sub_dir, all));
@@ -380,21 +381,21 @@ namespace MissingEtDQA {
         ATH_CHECK(regHist(m_MET_PVTrack_Pileup_y = new  TH1D("PVTrack_Pileup_y", (name_met +" " +  m_names["PVTrack_Pileup"] + " y; E_{y}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy), sub_dir, all));
         ATH_CHECK(regHist(m_MET_PVTrack_Pileup_phi = new  TH1D("PVTrack_Pileup_phi", (name_met + " " + m_names["PVTrack_Pileup"] + " phi; #Phi; Entries / 0.1").c_str(), nbinphi,-binphi,binphi), sub_dir, all));
         ATH_CHECK(regHist(m_MET_PVTrack_Pileup_sum = new  TH1D("PVTrack_Pileup_sum", (name_met + " " + m_names["PVTrack_Pileup"] + " sum; E_{T}^{sum} [GeV]; Entries / 25 GeV").c_str(), nbinE, lowET, suET), sub_dir, all));
-        }
+      }
+  
+      //-------------------------------------------------------------------------------------
+      //Now MET_Calo
+  
+      std::string name_met = "MET_Calo";
+      std::string dir = "MET/" + name_met + "/";
 
-        //-------------------------------------------------------------------------------------
-        //Now MET_Calo
-
-        std::string name_met = "MET_Calo";
-        std::string dir = "MET/" + name_met + "/";
-
-        ATH_CHECK(regHist(m_MET_Calo = new  TH1D("Calo", (name_met + " " + m_names["Calo"] + "; E_{T}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinp, 0., suptmi), dir, all));
-        ATH_CHECK(regHist(m_MET_Calo_x = new  TH1D("Calo_x", (name_met + " " + m_names["Calo"] + " x; E_{x}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy), dir, all));
-        ATH_CHECK(regHist(m_MET_Calo_y = new  TH1D("Calo_y", (name_met + " " + m_names["Calo"] + " y; E_{y}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy), dir, all));
-        ATH_CHECK(regHist(m_MET_Calo_phi = new  TH1D("Calo_phi", (name_met + " " + m_names["Calo"] + " phi;  #Phi; Entries / 0.1").c_str(), nbinphi,-binphi,binphi), dir, all));
-        ATH_CHECK(regHist(m_MET_Calo_sum = new  TH1D("Calo_sum", (name_met + " " + m_names["Calo"] + " sum; E_{T}^{sum} [GeV]; Entries / 25 GeV").c_str(), nbinE, lowET, suET), dir, all));
+      ATH_CHECK(regHist(m_MET_Calo = new  TH1D("Calo", (name_met + " " + m_names["Calo"] + "; E_{T}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinp, 0., suptmi), dir, all));
+      ATH_CHECK(regHist(m_MET_Calo_x = new  TH1D("Calo_x", (name_met + " " + m_names["Calo"] + " x; E_{x}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy), dir, all));
+      ATH_CHECK(regHist(m_MET_Calo_y = new  TH1D("Calo_y", (name_met + " " + m_names["Calo"] + " y; E_{y}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy), dir, all));
+      ATH_CHECK(regHist(m_MET_Calo_phi = new  TH1D("Calo_phi", (name_met + " " + m_names["Calo"] + " phi;  #Phi; Entries / 0.1").c_str(), nbinphi,-binphi,binphi), dir, all));
+      ATH_CHECK(regHist(m_MET_Calo_sum = new  TH1D("Calo_sum", (name_met + " " + m_names["Calo"] + " sum; E_{T}^{sum} [GeV]; Entries / 25 GeV").c_str(), nbinE, lowET, suET), dir, all));
     }
-
+  
     return StatusCode::SUCCESS;      
   }
 
@@ -916,7 +917,7 @@ namespace MissingEtDQA {
           const std::string& name = it->name();
           if(name == "RefEle"){
             (m_MET_CorrFinalTrk["MET_Reference_"+jet_type]).at(0)->Fill((*met_Ref)[name.c_str()]->met()/1000.,(*met_Ref)["FinalTrk"]->met()/1000., weight);
-            (m_MET_CorrFinalClus_Ref["MET_Reference_"+jet_type]).at(0)->Fill((*met_Ref)[name.c_str()]->met()/1000.,(*met_Ref)["FinalClus"]->met()/1000., weight);
+            (m_MET_CorrFinalClus["MET_Reference_"+jet_type]).at(0)->Fill((*met_Ref)[name.c_str()]->met()/1000.,(*met_Ref)["FinalClus"]->met()/1000., weight);
           }
           if(name == "RefGamma"){
             (m_MET_CorrFinalTrk["MET_Reference_"+jet_type]).at(1)->Fill((*met_Ref)[name.c_str()]->met()/1000.,(*met_Ref)["FinalTrk"]->met()/1000., weight);
@@ -1205,7 +1206,7 @@ namespace MissingEtDQA {
   StatusCode PhysValMET::procHistograms()
   {
     ATH_MSG_INFO ("Finalising hists " << name() << "...");
-
+  
     for (const auto& jet_type : m_types){
       for(std::vector<TH1D*>::size_type i = 0; i < (m_MET["MET_Rebuilt_"+jet_type]).size(); ++i) {
         if (m_doMETRefPlots){
@@ -1243,14 +1244,14 @@ namespace MissingEtDQA {
         }
         (m_MET_CorrFinalTrk["MET_Rebuilt_"+jet_type]).at(i)->Sumw2();
       }
-
+  
       for(std::vector<TH2D*>::size_type i = 0; i < (m_MET_CorrFinalClus["MET_Rebuilt_"+jet_type]).size(); ++i) {
         if (m_doMETRefPlots){
           (m_MET_CorrFinalClus["MET_Reference_"+jet_type]).at(i)->Sumw2();
         }
         (m_MET_CorrFinalClus["MET_Rebuilt_"+jet_type]).at(i)->Sumw2();
       }
-
+  
       for(std::vector<TH1D*>::size_type i = 0; i < (m_MET_Significance["MET_Rebuilt_"+jet_type]).size(); ++i) {
         if (m_doMETRefPlots){
           (m_MET_Significance["MET_Reference_"+jet_type]).at(i)->Sumw2();
@@ -1262,7 +1263,7 @@ namespace MissingEtDQA {
         if (m_doMETRefPlots){
          (m_MET_Resolution["MET_Reference_"+jet_type]).at(i)->Sumw2();
         }
-       (m_MET_Resolution["MET_Rebuilt_"+jet_type]).at(i)->Sumw2();
+      	(m_MET_Resolution["MET_Rebuilt_"+jet_type]).at(i)->Sumw2();
       }
   
       for(std::vector<TH1D*>::size_type i = 0; i < (m_MET_dPhi["MET_Reference_"+jet_type]).size(); ++i) {
@@ -1292,7 +1293,7 @@ namespace MissingEtDQA {
         }
         m_MET_Cumu["MET_Rebuilt_"+jet_type].at(i)->Scale(1./(m_MET_Cumu["MET_Rebuilt_"+jet_type]).at(i)->GetBinContent(1));
       }
-
+  
     }
 
     if (m_doMETRefPlots){
@@ -1312,13 +1313,13 @@ namespace MissingEtDQA {
       m_MET_PVTrack_Pileup_phi->Sumw2();
       m_MET_PVTrack_Pileup_sum->Sumw2();
     }
-
+  
     m_MET_Calo->Sumw2();
     m_MET_Calo_x->Sumw2();
     m_MET_Calo_y->Sumw2();
     m_MET_Calo_phi->Sumw2();
     m_MET_Calo_sum->Sumw2();
-
+  
     return StatusCode::SUCCESS;
   }
   
