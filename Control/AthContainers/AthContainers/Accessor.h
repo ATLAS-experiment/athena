@@ -70,6 +70,11 @@ public:
   /// Type referencing an item.
   using reference_type = typename AuxDataTraits<T, ALLOC>::reference_type;
 
+  /// A const reference type that can appear on the RHS of an assignment
+  /// to an application of an Accessor of this type.
+  using rhs_const_reference_type =
+    typename ConstAccessor<T, ALLOC>::const_reference_type;
+
   /// Type the user sees.
   using element_type = typename AuxDataTraits<T, ALLOC>::element_type;
 

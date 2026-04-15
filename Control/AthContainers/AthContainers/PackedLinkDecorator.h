@@ -114,6 +114,13 @@ public:
   /// Type referencing an item.
   using reference_type = ELProxy;
 
+  /// Type referencing an item.
+  using const_reference_type = element_type;
+
+  /// A const reference type that can appear on the RHS of an assignment
+  /// to an application of a Decorator of this type.
+  using rhs_const_reference_type = const Link_t&;
+
   /// Not supported.
   using container_pointer_type = void;
   using const_container_pointer_type = void;

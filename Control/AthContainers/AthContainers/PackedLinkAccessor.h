@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/PackedLinkAccessor.h
@@ -104,6 +104,10 @@ public:
 
   /// Type referencing an item.
   using reference_type = ELProxy;
+
+  /// A const reference type that can appear on the RHS of an assignment
+  /// to an application of an Accessor of this type.
+  using rhs_const_reference_type = const Link_t&;
 
   /// Not supported.
   using container_pointer_type = void;
