@@ -93,8 +93,6 @@ FEAssociationTool::FEAssociationTool(const std::string& name)
 
 StatusCode FEAssociationTool::initialize()
 {
-  ANA_CHECK_SET_TYPE(StatusCode);
-
 #ifndef XAOD_STANDALONE
   ATH_CHECK(m_elKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_muKey.initialize(SG::AllowEmpty));
@@ -167,8 +165,6 @@ StatusCode FEAssociationTool::collectObjects(const EventContext& ctx,
 StatusCode FEAssociationTool::collectObjects(std::vector<ObjView>& objects) const
 #endif
 {
-  ANA_CHECK_SET_TYPE(StatusCode);
-
   auto collect_one = [&](ObjView::Type type, const xAOD::IParticleContainer* base)
   {
     if (!base) return;
@@ -475,8 +471,6 @@ StatusCode FEAssociationTool::buildMapFromPairs(const EventContext& ctx,
 StatusCode FEAssociationTool::buildMapFromPairs(const std::vector<ObjView>& objects)
 #endif
 {
-  ANA_CHECK_SET_TYPE(StatusCode);
-
   std::unordered_map<PairKey, SharedAcc, PairKeyHash> shared;
   shared.reserve(objects.size() * 2);
 
