@@ -22,6 +22,7 @@ def getBTagOnlineWP(chain, onlineTagger):
 
 def getBTagOnlineTaggerWP(chain, log):
     bTagOnlineTaggers = {
+        'bmv2c10': 'OnlineMV2c10',
         'bdl1d' : 'OnlineDL1d',
         'bgn1' : 'OnlineGN1' }
 

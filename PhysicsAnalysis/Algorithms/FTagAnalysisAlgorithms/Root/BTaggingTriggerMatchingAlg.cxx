@@ -55,15 +55,16 @@ namespace CP
 
 
   StatusCode BTaggingTriggerMatchingAlg ::
-  execute (const EventContext& ctx)
+  execute ()
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       const xAOD::JetContainer *jets = nullptr;
-      ANA_CHECK (m_jetHandle.retrieve (jets, sys, ctx));
+      ANA_CHECK (m_jetHandle.retrieve (jets, sys));
 
       std::map<const xAOD::Jet*, const xAOD::Jet*> matchedOfflineOnlineJets;
-      SG::ReadHandle<xAOD::JetContainer> hlt_bjets(m_bjetInput, ctx);
+      if(m_useRun3TriggerEDM){
+      SG::ReadHandle<xAOD::JetContainer> hlt_bjets(m_bjetInput);
 
       for (const xAOD::Jet* jet : *jets) {
         if (m_preselection.getBool(*jet, sys)) {
@@ -78,6 +79,7 @@ namespace CP
           }
           matchedOfflineOnlineJets[jet] = bestHLTJet;
         }
+      }
       }
 
       for (const xAOD::Jet *jet : *jets)

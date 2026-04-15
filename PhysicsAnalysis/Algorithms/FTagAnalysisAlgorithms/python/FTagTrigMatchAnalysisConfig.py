@@ -38,9 +38,9 @@ class FTagJetTrigMatchingBlock(ConfigBlock):
         if config.isPhyslite():
             log.warning ('The b-jet trigger matching is currently not supported in PHYSLITE')
             return
-        if config.geometry() is LHCPeriod.Run2:
-            log.warning ('The b-jet trigger matching is currently not supported for Run 2')
-            return
+        #if config.geometry() is LHCPeriod.Run2:
+        #    log.warning ('The b-jet trigger matching is currently not supported for Run 2')
+        #    return
 
         # Need to split container name from selections, to support AnaJets.baselineJvt
         jetContainer = self.containerName.split('.')[0]
@@ -63,7 +63,8 @@ class FTagJetTrigMatchingBlock(ConfigBlock):
                 if alg.useRun3TriggerEDM:
                     decors_to_check = [deco + '_pb' for deco in getDecoByTrigName(chain)]
                     log.info(f'Configured b-tagging trigger decorations for trigger {chain}: {decors_to_check}')
-                alg.ftagRun3TriggerDecoNames = decors_to_check
+                    alg.ftagRun3TriggerDecoNames = decors_to_check
+
                 # alg.OutputLevel = 1 # VERBOSE. for detailed debug
                 # Helper function to implement to provide cut for given trigger
                 # Only used for Run 2
