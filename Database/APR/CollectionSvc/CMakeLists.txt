@@ -38,6 +38,6 @@ if( NOT GENERATIONBASE )
 
   atlas_add_test( collSorting_test
                   SCRIPT test/test_CollSort.py
-                  POST_EXEC_SCRIPT nopost.sh )
+                  POST_EXEC_SCRIPT noerror.sh )
 
 endif()
