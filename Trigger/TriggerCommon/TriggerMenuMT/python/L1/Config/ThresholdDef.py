@@ -116,7 +116,7 @@ class ThresholdDef:
         NSWMonThreshold('NSWMon')
 
         # eEM
-        eEM_cuts = [1, 2, 5, 7, 9, 12, 15, 18, 26]
+        eEM_cuts = [1, 2, 3, 5, 7, 9, 12, 15, 18, 26]
         # get ptMinToTopo value (different for pp and HI), then adjust threshold for lowest pT items based on this value 
         ttconfig = tc.l1menu.thresholds.typeWideThresholdConfig('eEM')
         ptMin = ttconfig["ptMinToTopo"]

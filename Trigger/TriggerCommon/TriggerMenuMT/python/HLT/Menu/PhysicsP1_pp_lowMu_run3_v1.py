@@ -329,10 +329,11 @@ def getLowMuPhysicsSignatures():
         ChainProp(name='HLT_j15_pf_ftf_L1jJ10', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream, 'express'], groups=LowMuGroupPhI+SingleJetGroup, monGroups=['jetMon:shifter', 'jetMon:online']),  
         ChainProp(name='HLT_j0_pf_ftf_PhysicsTLA_L1jJ10', l1SeedThresholds=['FSNOSEED'], stream=['TLA'], groups=LowMuGroupPhI+SingleJetGroup), 
         ChainProp(name='HLT_j15_pf_ftf_PhysicsTLA_L1jJ10', l1SeedThresholds=['FSNOSEED'], stream=['TLA'], groups=LowMuGroupPhI+SingleJetGroup), 
-        ChainProp(name='HLT_j0_perf_pf_ftf_L1CALMTEA_jJ10', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=LowMuGroupPhI+SingleJetGroup),  
-        ChainProp(name='HLT_j15_pf_ftf_L1CALMTEA_jJ10', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream, 'express'], groups=LowMuGroupPhI+SingleJetGroup, monGroups=['jetMon:shifter', 'jetMon:online']),  
-        ChainProp(name='HLT_j0_pf_ftf_PhysicsTLA_L1CALMTEA_jJ10', l1SeedThresholds=['FSNOSEED'], stream=['TLA'], groups=LowMuGroupPhI+SingleJetGroup), 
-        ChainProp(name='HLT_j15_pf_ftf_PhysicsTLA_L1CALMTEA_jJ10', l1SeedThresholds=['FSNOSEED'], stream=['TLA'], groups=LowMuGroupPhI+SingleJetGroup, monGroups=['tlaMon:shifter', 'tlaMon:online']), 
+        # Commented out due to L1 item being removed for HI run
+        # ChainProp(name='HLT_j0_perf_pf_ftf_L1CALMTEA_jJ10', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=LowMuGroupPhI+SingleJetGroup),  
+        # ChainProp(name='HLT_j15_pf_ftf_L1CALMTEA_jJ10', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream, 'express'], groups=LowMuGroupPhI+SingleJetGroup, monGroups=['jetMon:shifter', 'jetMon:online']),  
+        # ChainProp(name='HLT_j0_pf_ftf_PhysicsTLA_L1CALMTEA_jJ10', l1SeedThresholds=['FSNOSEED'], stream=['TLA'], groups=LowMuGroupPhI+SingleJetGroup), 
+        # ChainProp(name='HLT_j15_pf_ftf_PhysicsTLA_L1CALMTEA_jJ10', l1SeedThresholds=['FSNOSEED'], stream=['TLA'], groups=LowMuGroupPhI+SingleJetGroup, monGroups=['tlaMon:shifter', 'tlaMon:online']), 
         
         ChainProp(name='HLT_j0_perf_pf_ftf_L1jJ20', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=LowMuGroupPhI+SingleJetGroup),  
         ChainProp(name='HLT_j30_pf_ftf_L1jJ20', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=LowMuGroupPhI+SingleJetGroup),  
@@ -348,19 +349,21 @@ def getLowMuPhysicsSignatures():
         ChainProp(name='HLT_j15_pf_ftf_L1jTE5', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=LowMuGroupPhI+SingleJetGroup),  
         ChainProp(name='HLT_j0_pf_ftf_PhysicsTLA_L1jTE5', l1SeedThresholds=['FSNOSEED'], stream=['TLA'], groups=LowMuGroupPhI+SingleJetGroup), 
         ChainProp(name='HLT_j15_pf_ftf_PhysicsTLA_L1jTE5', l1SeedThresholds=['FSNOSEED'], stream=['TLA'], groups=LowMuGroupPhI+SingleJetGroup), 
-        ChainProp(name='HLT_j0_perf_pf_ftf_L1CALMTEA_jTE5', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=LowMuGroupPhI+SingleJetGroup),  
-        ChainProp(name='HLT_j15_pf_ftf_L1CALMTEA_jTE5', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=LowMuGroupPhI+SingleJetGroup),  
-        ChainProp(name='HLT_j0_pf_ftf_PhysicsTLA_L1CALMTEA_jTE5', l1SeedThresholds=['FSNOSEED'], stream=['TLA'], groups=LowMuGroupPhI+SingleJetGroup), 
-        ChainProp(name='HLT_j15_pf_ftf_PhysicsTLA_L1CALMTEA_jTE5', l1SeedThresholds=['FSNOSEED'], stream=['TLA'], groups=LowMuGroupPhI+SingleJetGroup), 
+        # Commented out due to L1 item being removed for HI run
+        # ChainProp(name='HLT_j0_perf_pf_ftf_L1CALMTEA_jTE5', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=LowMuGroupPhI+SingleJetGroup),  
+        # ChainProp(name='HLT_j15_pf_ftf_L1CALMTEA_jTE5', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=LowMuGroupPhI+SingleJetGroup),  
+        # ChainProp(name='HLT_j0_pf_ftf_PhysicsTLA_L1CALMTEA_jTE5', l1SeedThresholds=['FSNOSEED'], stream=['TLA'], groups=LowMuGroupPhI+SingleJetGroup), 
+        # ChainProp(name='HLT_j15_pf_ftf_PhysicsTLA_L1CALMTEA_jTE5', l1SeedThresholds=['FSNOSEED'], stream=['TLA'], groups=LowMuGroupPhI+SingleJetGroup), 
         
         ChainProp(name='HLT_j0_perf_pf_ftf_L1jTE10', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=LowMuGroupPhI+SingleJetGroup),  
         ChainProp(name='HLT_j20_pf_ftf_L1jTE10', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=LowMuGroupPhI+SingleJetGroup),  
         ChainProp(name='HLT_j0_pf_ftf_PhysicsTLA_L1jTE10', l1SeedThresholds=['FSNOSEED'], stream=['TLA'], groups=LowMuGroupPhI+SingleJetGroup), 
         ChainProp(name='HLT_j20_pf_ftf_PhysicsTLA_L1jTE10', l1SeedThresholds=['FSNOSEED'], stream=['TLA'], groups=LowMuGroupPhI+SingleJetGroup), 
-        ChainProp(name='HLT_j0_perf_pf_ftf_L1CALMTEA_jTE10', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=LowMuGroupPhI+SingleJetGroup),  
-        ChainProp(name='HLT_j20_pf_ftf_L1CALMTEA_jTE10', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=LowMuGroupPhI+SingleJetGroup),  
-        ChainProp(name='HLT_j0_pf_ftf_PhysicsTLA_L1CALMTEA_jTE10', l1SeedThresholds=['FSNOSEED'], stream=['TLA'], groups=LowMuGroupPhI+SingleJetGroup), 
-        ChainProp(name='HLT_j20_pf_ftf_PhysicsTLA_L1CALMTEA_jTE10', l1SeedThresholds=['FSNOSEED'], stream=['TLA'], groups=LowMuGroupPhI+SingleJetGroup), 
+        # Commented out due to L1 item being removed for HI run
+        # ChainProp(name='HLT_j0_perf_pf_ftf_L1CALMTEA_jTE10', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=LowMuGroupPhI+SingleJetGroup),  
+        # ChainProp(name='HLT_j20_pf_ftf_L1CALMTEA_jTE10', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=LowMuGroupPhI+SingleJetGroup),  
+        # ChainProp(name='HLT_j0_pf_ftf_PhysicsTLA_L1CALMTEA_jTE10', l1SeedThresholds=['FSNOSEED'], stream=['TLA'], groups=LowMuGroupPhI+SingleJetGroup), 
+        # ChainProp(name='HLT_j20_pf_ftf_PhysicsTLA_L1CALMTEA_jTE10', l1SeedThresholds=['FSNOSEED'], stream=['TLA'], groups=LowMuGroupPhI+SingleJetGroup), 
 
         ChainProp(name='HLT_j0_perf_pf_ftf_L1jTE20', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=LowMuGroupPhI+SingleJetGroup),  
         ChainProp(name='HLT_j20_pf_ftf_L1jTE20', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=LowMuGroupPhI+SingleJetGroup),  
@@ -438,8 +441,9 @@ def getLowMuPhysicsSignatures():
         ChainProp(name='HLT_j15f_L1jTE5', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=SingleJetGroup+LowMuGroupPhI),
         ChainProp(name='HLT_j25f_L1jTE10', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=SingleJetGroup+LowMuGroupPhI),
         # ATR-32289
-        ChainProp(name='HLT_j15f_L1CALMTEA_jTE5', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=SingleJetGroup+LowMuGroupPhI),
-        ChainProp(name='HLT_j25f_L1CALMTEA_jTE10', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=SingleJetGroup+LowMuGroupPhI),
+        # Commented out due to L1 item being removed for HI run
+        # ChainProp(name='HLT_j15f_L1CALMTEA_jTE5', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=SingleJetGroup+LowMuGroupPhI),
+        # ChainProp(name='HLT_j25f_L1CALMTEA_jTE10', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=SingleJetGroup+LowMuGroupPhI),
         ChainProp(name='HLT_j35f_L1jTE20', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=SingleJetGroup+LowMuGroupPhI),
         ChainProp(name='HLT_j45f_L1jJ40p30ETA49', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=SingleJetGroup+LowMuGroupPhI),
         ChainProp(name='HLT_j60f_L1jJ50p30ETA49', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=SingleJetGroup+LowMuGroupPhI),
@@ -841,8 +845,8 @@ def setupMenu():
     P1_run3_v1.addLowMuP1Signatures(chains)
     for sig, chainsInSig in chains.items():
         for c in chainsInSig:
-                if "EM3" in c.name: # EM3 without VTE or AFP is removed from HI L1 menu to avoid L1Calo EM overflow
-                    raise RuntimeError(f"EM3 not available in HI L1 menu, requested by chain {c.name}")
+                # if "EM3" in c.name: # EM3 without VTE or AFP is removed from HI L1 menu to avoid L1Calo EM overflow
+                #     raise RuntimeError(f"EM3 not available in HI L1 menu, requested by chain {c.name}")
                 if "EM7" in c.name: # EM7 without VTE or AFP is removed from HI L1 menu to avoid L1Calo EM overflow
                     raise RuntimeError(f"EM7 not available in HI L1 menu, requested by chain {c.name}")
                 else:

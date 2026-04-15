@@ -89,13 +89,13 @@ def getHitZAlgs(flags: AthConfigFlags, precision_sequence: str, alt_precision_se
         alt_key=alt_precision_sequence,
 
         # Default HitZ algorithms to run in all menus
-        algs={},
+        algs=['HitZ'],
 
         # Additional HitZ algorithms to run ONLY if we're using the MC (or Dev) menu
         mc_algs={},
 
         # Additional HitZ algorithms to run ONLY if we're using the Dev menu
-        dev_algs=['HitZ'],
+        dev_algs={},
     )
 
 

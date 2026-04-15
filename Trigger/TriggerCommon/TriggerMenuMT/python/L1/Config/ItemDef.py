@@ -209,6 +209,7 @@ class ItemDef:
         # Phase-I
         MenuItem('L1_eEM1'      ).setLogic( d.eEM1       & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eEM2'      ).setLogic( d.eEM2       & physcond).setTriggerType( TT.calo )
+        MenuItem('L1_eEM3'      ).setLogic( d.eEM3       & physcond).setTriggerType( TT.calo )
         MenuItem('L1_TEA_eEM2'  ).setLogic( d.eEM2 & TeATIME & physcond).setTriggerType( TT.calo )
         MenuItem('L1_ESP_eEM2'  ).setLogic( d.eEM2 & gESPRESSO & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eEM5'      ).setLogic( d.eEM5       & physcond).setTriggerType( TT.calo )
@@ -233,6 +234,7 @@ class ItemDef:
         MenuItem('L1_eEM1_EMPTY'        ).setLogic(d.eEM1 & cosmiccond      ).setTriggerType( TT.calo )
         MenuItem('L1_eEM5_EMPTY'        ).setLogic(d.eEM5 & cosmiccond      ).setTriggerType( TT.calo )
         MenuItem('L1_eEM2_EMPTY'        ).setLogic(d.eEM2 & cosmiccond      ).setTriggerType( TT.calo )
+        MenuItem('L1_eEM3_EMPTY'        ).setLogic(d.eEM3 & cosmiccond      ).setTriggerType( TT.calo )
         MenuItem('L1_eEM9_EMPTY'        ).setLogic(d.eEM9 & cosmiccond      ).setTriggerType( TT.calo )
         MenuItem('L1_2eEM9_EMPTY'       ).setLogic(d.eEM9.x(2) & cosmiccond ).setTriggerType( TT.calo )
         MenuItem('L1_eEM9_UNPAIRED_ISO' ).setLogic(d.eEM9 & unpaired_isocond).setTriggerType( TT.calo )
@@ -360,6 +362,7 @@ class ItemDef:
         MenuItem('L1_eTAU1_TRT_VjTE50').setLogic( d.eTAU1 & d.NIMTRT & Not(d.jTE50) & physcond)
 
         MenuItem('L1_eEM2_VjTE200_EMPTY' ).setLogic( d.eEM2 & Not(d.jTE200) & cosmiccond).setTriggerType(TT.calo)
+        MenuItem('L1_eEM3_VjTE200_EMPTY' ).setLogic( d.eEM3 & Not(d.jTE200) & cosmiccond).setTriggerType(TT.calo)
         MenuItem('L1_eEM5_VjTE200_EMPTY' ).setLogic( d.eEM5 & Not(d.jTE200) & cosmiccond).setTriggerType(TT.calo)
 
         MenuItem('L1_eTAU2_VjTE200'       ).setLogic( d.eTAU2      & Not(d.jTE200) & physcond).setTriggerType(TT.calo)
@@ -1766,8 +1769,10 @@ class ItemDef:
 
         # Items for further TeATIME tuning - possibly non-spike'y
         MenuItem('L1_CALMTEA_eEM2'          ).setLogic( d.eEM2  & Not(d.TOPO_TeATIME_jTENoSort_ParamSet1) & physcond)
+        MenuItem('L1_CALMTEA_eEM3'          ).setLogic( d.eEM3  & Not(d.TOPO_TeATIME_jTENoSort_ParamSet1) & physcond)
         MenuItem('L1_CALMTEA_eTAU2'         ).setLogic( d.eTAU2 & Not(d.TOPO_TeATIME_jTENoSort_ParamSet1) & physcond)
         MenuItem('L1_CALMTEA_eEM2_VjTE200'  ).setLogic( d.eEM2  & Not(d.TOPO_TeATIME_jTENoSort_ParamSet1) & Not(d.jTE200) & physcond)
+        MenuItem('L1_CALMTEA_eEM3_VjTE200'  ).setLogic( d.eEM3  & Not(d.TOPO_TeATIME_jTENoSort_ParamSet1) & Not(d.jTE200) & physcond)
         MenuItem('L1_CALMTEA_eTAU2_VjTE200' ).setLogic( d.eTAU2 & Not(d.TOPO_TeATIME_jTENoSort_ParamSet1) & Not(d.jTE200) & physcond)
 
         # Items for further TeATIME tuning - possibly non-spike'y

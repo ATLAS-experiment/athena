@@ -25,11 +25,10 @@ class TopoAlgoDefMultiplicity:
         ]
         emVarThresholds_2bits = [
             'eEM24VM',  'eEM26',  'eEM26L', 'eEM26M', 'eEM26T', 'eEM28M',
-            'eEM1', 'eEM2', 'eEM20M', 'eEM24M',
+            'eEM1', 'eEM2', 'eEM3', 'eEM20M', 'eEM24M',
             'eEM40L',
 
             # spares
-            'eEMSPARE1',
         ]
 
         for em in emThresholds_3bits:

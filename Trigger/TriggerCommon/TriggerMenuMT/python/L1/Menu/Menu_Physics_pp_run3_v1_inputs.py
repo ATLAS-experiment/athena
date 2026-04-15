@@ -120,10 +120,9 @@ def defineInputsMenu():
             # variable eEM  thresholds
             'eEM24VM', 'eEM26', 'eEM26L', 'eEM26M', 'eEM26T', 'eEM28M', 'eEM40L',
             #ATR-26979, eEMSPARE1 was replaced by eEM1, eEMSPARE2 was replaced by eEM2, decrement other eEMSPARE thresholds
-            'eEM1', 'eEM2',
+            'eEM1', 'eEM2', 'eEM3',
 
             # eEM thresholds for production
-            'eEMSPARE1',
 
             ('ZeroBiasA', 1)
         ],

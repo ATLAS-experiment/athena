@@ -341,7 +341,7 @@ class MonitorDef:
                     "L1_jTE5", "L1_jTE10", "L1_jTE20", "L1_jTE50",
                     "L1_jJ10", "L1_jJ20",
                     "L1_eEM5", "L1_eEM9",
-                    "L1_ARTEMISL", "L1_ARTEMIST",
+                    # "L1_ARTEMISL", "L1_ARTEMIST",
                 ])
 
                 # lowMu HLT menu: Add triggers that are not in the MC menu
@@ -373,8 +373,8 @@ class MonitorDef:
                     # ZDC
                     # Basic inputs
                     "L1_ZDC_XOR", "L1_ZDC_C_VZDC_A", "L1_ZDC_A_VZDC_C",
-                    "L1_1ZDC_A_VZDC_C", "L1_VZDC_A_1ZDC_C",
-                    "L1_1ZDC_A_1ZDC_C", "L1_ZDC_1XOR5",
+                    "L1_1ZDC_A_1ZDC_C", "L1_5ZDC_A_VZDC_C", "L1_VZDC_A_5ZDC_C",
+                    "L1_ZDC_1XOR5", "L1_5ZDC_A_5ZDC_C",
                     "L1_5ZDC_A_5ZDC_C",
                     # Mu+X
                     "L1_MU3V_jJ40",
@@ -383,10 +383,11 @@ class MonitorDef:
                     "L1_eTAU1",
                     "L1_DPHI-2eEM1", "L1_DPHI-2eTAU1",
                     "L1_DPHI-2eEM1_VjTE200",
-                    "L1_2eEM1_VjTE200", "L1_2eEM2_VjTE200",
+                    # "L1_2eEM1_VjTE200",
+                    # "L1_2eEM2_VjTE200",
                     "L1_eEM5_VjTE200", "L1_eEM9_VjTE200",
-                    "L1_eEM1_jTE4_VjTE200", "L1_eEM2_jTE4_VjTE200", "L1_eTAU1_jTE4_VjTE200",
-                    "L1_2eTAU1_VjTE200",
+                    # "L1_eEM1_jTE4_VjTE200", "L1_eEM2_jTE4_VjTE200", "L1_eTAU1_jTE4_VjTE200",
+                    # "L1_2eTAU1_VjTE200",
                     # "L1_eEM1_TRT_VjTE200", "L1_eTAU1_TRT_VjTE200",
                     # "L1_eEM1_TRT_ZDC_XOR_VjTE200", "L1_eTAU1_TRT_ZDC_XOR_VjTE200",
                     # "L1_eEM1_TRT_VZDC_A_VZDC_C_VjTE100", "L1_eTAU1_TRT_VZDC_A_VZDC_C_VjTE100",
@@ -397,7 +398,6 @@ class MonitorDef:
                     #
                     "L1_jTE3", "L1_jTE4", "L1_jTE5", "L1_jTE10", "L1_jTE20", "L1_jTE50",
                     "L1_jTE100", "L1_jTE600", "L1_jTE1500", "L1_jTE6500",
-                    # temporarily commented out to make room for items needed for lowMu HLT menu
                     # "L1_jTEFWD2600", "L1_jTEFWD5600", "L1_jTEFWD6300", "L1_jTEFWD6600",
                     "L1_jTE5_VjTE200",
                     #
@@ -451,10 +451,10 @@ class MonitorDef:
                     'L1_CALMTEA_eEM2_VjTE200',
                     'L1_CALMTEA_eTAU2_VjTE200',
 
-                    'L1_MATCHA_eTAU2',
-                    'L1_MATCHA_eTAU2_VjTE200',
-                    'L1_MATCHA_eTAU2_EMPTY',
-                    'L1_MATCHA_eTAU2_VjTE200_EMPTY',
+                    # 'L1_MATCHA_eTAU2',
+                    # 'L1_MATCHA_eTAU2_VjTE200',
+                    # 'L1_MATCHA_eTAU2_EMPTY',
+                    # 'L1_MATCHA_eTAU2_VjTE200_EMPTY',
 
                     'L1_ESP_1ZDC_NZDC_jJ10_VjTE200',
                     'L1_ESP_5ZDC_A_5ZDC_C_jJ10_VjTE200',
@@ -483,6 +483,13 @@ class MonitorDef:
 
                     'L1_CALMTEA_23INVM-27DPHI-2eTAU1_VjTE200',
                     'L1_CALMTEA_23INVM-27DPHI-2eTAU1_VjTE200_EMPTY',
+
+                    # 2026 HI
+                    'L1_eEM3',
+                    'L1_eEM3_EMPTY',
+
+                    'L1_CALMTEA_eEM3',
+                    'L1_CALMTEA_eEM3_VjTE200',
                 ])
 
                 # HI HLT menu: Add triggers that are not in the MC menu
