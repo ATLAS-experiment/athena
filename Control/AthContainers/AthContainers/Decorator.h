@@ -61,6 +61,14 @@ public:
   /// Type referencing an item.
   using reference_type = typename AuxDataTraits<T, ALLOC>::reference_type;
 
+  /// Type referencing an item, as const reference.
+  using const_reference_type =
+    typename AuxDataTraits<T, ALLOC>::const_reference_type;
+
+  /// A const reference type that can appear on the RHS of an assignment
+  /// to an application of a Decorator of this type.
+  using rhs_const_reference_type = const_reference_type;
+
   /// Type the user sees.
   using element_type = typename AuxDataTraits<T, ALLOC>::element_type;
 

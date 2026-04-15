@@ -110,8 +110,15 @@ public:
   /// Const span resulting from the conversion.
   using element_type = typename ConstConverter_t::element_type;
 
+  /// Type referencing an item (const).
+  using const_reference_type = element_type;
+
   /// The writable type we return.
   using reference_type = JVecProxy;
+
+  /// A const reference type that can appear on the RHS of an assignment
+  /// to an application of a Decorator of this type.
+  using rhs_const_reference_type = std::span<const Payload_t>;
 
   /// Not supported.
   using container_pointer_type = void;
