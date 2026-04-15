@@ -47,3 +47,8 @@ atlas_add_test( xAODInDetMeasurement_SpacePoint_test
    SOURCES test/xAODInDetMeasurement_SpacePoint_test.cxx
    LINK_LIBRARIES xAODInDetMeasurement )
 
+atlas_add_test( ModuleIndex_test
+   SOURCES test/ModuleIndex_test.cxx
+   LINK_LIBRARIES xAODInDetMeasurement
+   POST_EXEC_SCRIPT nopost.sh )
+
