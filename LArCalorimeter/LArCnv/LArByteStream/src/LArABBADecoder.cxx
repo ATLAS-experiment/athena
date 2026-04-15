@@ -180,7 +180,7 @@ case 0x410522:
   break;
 
 default:
-msg(MSG::ERROR) << "ROD_source_id not found" << endmsg;
+  ATH_MSG_ERROR("ROD_source_id not found");
 }
 
 
@@ -190,7 +190,7 @@ ABBAMapping::fill(&abba_mapping, iphi, msg());
 for (std::size_t index_abba_channel_samples = 0; index_abba_channel_samples < abba_channel_samples.size(); ++index_abba_channel_samples) {
   auto abba_mapping_search = abba_mapping.find(index_abba_channel_samples);
   if (abba_mapping_search == abba_mapping.end()) {
-    msg(MSG::WARNING) << "No mapping for index_abba_channel_samples: "<<std::dec<<index_abba_channel_samples << endmsg;
+    ATH_MSG_WARNING("No mapping for index_abba_channel_samples: "<<std::dec<<index_abba_channel_samples);
     continue;
   }
     
