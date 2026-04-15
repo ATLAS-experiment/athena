@@ -505,11 +505,13 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
     result = ComponentAccumulator()
     
     if flags.Input.Format is Format.BS:
-        from ITkPixelByteStreamCnv.ITkPixelByteStreamCnvConfig import ITkPixelDecodingAlgCfg
-        result.merge( ITkPixelDecodingAlgCfg(flags) )
+        if flags.Detector.EnableITkPixel:
+            from ITkPixelByteStreamCnv.ITkPixelByteStreamCnvConfig import ITkPixelDecodingAlgCfg
+            result.merge( ITkPixelDecodingAlgCfg(flags) )
 
-        from ITkStripsByteStreamCnv.ITkStripByteStreamCnvConfig import ITkStripRawDataProviderCfg
-        result.merge(ITkStripRawDataProviderCfg(flags))
+        if flags.Detector.EnableITkStrip:
+            from ITkStripsByteStreamCnv.ITkStripByteStreamCnvConfig import ITkStripRawDataProviderCfg
+            result.merge(ITkStripRawDataProviderCfg(flags))
 
 
 
