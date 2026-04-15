@@ -15,7 +15,7 @@
 #include "Acts/Utilities/Result.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Utilities/CalibrationContext.hpp"
-#include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/EventData/BoundTrackParameters.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Utilities/Logger.hpp"
 #include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
