@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaussianSumFitterTool.h"
@@ -8,7 +8,7 @@
 #include "TrkTrackSummary/TrackSummary.h"
 
 // ACTS
-#include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/EventData/BoundTrackParameters.hpp"
 #include "ActsEvent/TrackContainer.h"
 
 // STL

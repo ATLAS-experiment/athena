@@ -25,7 +25,7 @@
 // for BaseTypes
 #include "Acts/EventData/TrackStateProxy.hpp"
 #include "Acts/Utilities/CalibrationContext.hpp"
-#include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/EventData/BoundTrackParameters.hpp"
 
 // for MeasurementSizeMax
 #include "Acts/EventData/MultiTrajectory.hpp"
