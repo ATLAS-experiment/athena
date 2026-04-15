@@ -124,9 +124,9 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
         configSeq.setOptionValue ('.triggerMatchingChainsPerYear', triggerMatchingChainsPerYear)
 
     # Include, and then set up the jet analysis algorithm sequence:
-    configSeq += config.makeConfig( 'Jets',
-        containerName='AnaJets',
-        jetCollection='AntiKt4EMPFlowJets')
+    configSeq += config.makeConfig( 'Jets' )
+    configSeq.setOptionValue ('.containerName', 'AnaJets')
+    configSeq.setOptionValue ('.jetCollection', 'AntiKt4EMPFlowJets')
     configSeq.setOptionValue ('.runJvtUpdate', False )
     configSeq.setOptionValue ('.runNNJvtUpdate', True )
     configSeq.setOptionValue ('.runJvtSelection', False )  # deprecated, done via JVTWorkingPoint block now
@@ -161,9 +161,9 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
                                  bjetTriggerChainsPerYear)
 
     if largeRJets :
-        configSeq += config.makeConfig( 'Jets',
-            containerName='AnaLargeRJets',
-            jetCollection='AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets' )
+        configSeq += config.makeConfig( 'Jets' )
+        configSeq.setOptionValue ('.containerName', 'AnaLargeRJets')
+        configSeq.setOptionValue ('.jetCollection', 'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets')
         outputContainers['larger_jet_'] = 'OutLargeRJets'
         configSeq.setOptionValue ('.recalibratePhyslite', False)
 

@@ -249,8 +249,8 @@ class ConfigFactory():
         self.addAlgConfigBlock(algName="TriggerMatching", alg=TriggerAnalysisSFBlock)
 
         # jets
-        from JetAnalysisAlgorithms.JetAnalysisConfig import makeJetAnalysisConfig
-        self.addAlgConfigBlock(algName="Jets", alg=makeJetAnalysisConfig)
+        from JetAnalysisAlgorithms.JetAnalysisConfig import Jets
+        self.addAlgConfigBlock(algName="Jets", alg=Jets)
         from JetAnalysisAlgorithms.JetAnalysisConfig import JvtWorkingPoint
         self.addAlgConfigBlock(algName="JVTWorkingPoint", alg=JvtWorkingPoint,
             superBlocks="Jets")
