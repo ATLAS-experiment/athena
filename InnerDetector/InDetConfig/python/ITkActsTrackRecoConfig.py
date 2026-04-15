@@ -128,6 +128,13 @@ def ITkActsTrackRecoCfg(flags) -> ComponentAccumulator:
         acc.merge(ITkActsPrepDataToxAODCfg(flags,
                                            TrackParticles = generatedTrackParticleCollections))
 
+        # PLR measurements are produced as a dedicated sidecar container.
+        # They are never filtered to "on-track" subsets because PLR is not
+        # injected into the ITk tracking chain.
+        if flags.Detector.EnablePLR:
+            from ActsConfig.ActsObjectDecorationConfig import ActsPLRClusterMeasurementDecoratorAlgCfg
+            acc.merge(ActsPLRClusterMeasurementDecoratorAlgCfg(flags))
+
         # Create MSOS on final InDetTrackParticles collection
         from ActsConfig.ActsObjectDecorationConfig import ActsTrackStateOnSurfaceDecoratorAlgCfg
         acc.merge(ActsTrackStateOnSurfaceDecoratorAlgCfg(flags,
@@ -171,4 +178,3 @@ def ITkActsTrackRecoCfg(flags) -> ComponentAccumulator:
         
     acc.printConfig(withDetails = False, summariseProps = False)
     return acc
-

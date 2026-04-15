@@ -42,6 +42,10 @@ def _createRegSelCondAlg( detector,  CondAlgConstructor, printTable=False ):
         condAlg.DetEleCollKey = "ITkPixelDetectorElementCollection"
         # No cabling data for ITk
         condAlg.PixelCablingCondData = ""
+    elif detector == "PLR":
+        condAlg.DetEleCollKey = "PLR_DetectorElementCollection"
+        # No cabling data for PLR RDO input
+        condAlg.PixelCablingCondData = ""
     elif detector == "ITkStrip":
         condAlg.DetEleCollKey = "ITkStripDetectorElementCollection"
         # No cabling data for ITk
@@ -119,6 +123,12 @@ def regSelTool_ITkPixel_Cfg(flags):
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
     return regSelToolCfg(flags, "ITkPixel", CompFactory.SiRegSelCondAlg,
                          readout_geometry=ITkPixelReadoutGeometryCfg(flags))
+
+@AccumulatorCache
+def regSelTool_PLR_Cfg(flags):
+    from PLRGeoModelXml.PLR_GeoModelConfig import PLR_ReadoutGeometryCfg
+    return regSelToolCfg(flags, "PLR", CompFactory.SiRegSelCondAlg,
+                         readout_geometry=PLR_ReadoutGeometryCfg(flags))
 
 @AccumulatorCache
 def regSelTool_ITkStrip_Cfg(flags):

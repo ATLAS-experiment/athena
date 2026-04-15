@@ -57,7 +57,7 @@ namespace ActsTrk {
     ATH_CHECK(m_measurement_tots.initialize());
     
     ATH_CHECK( m_lorentzAngleTool.retrieve() );
-    ATH_CHECK( detStore()->retrieve(m_PixelHelper, "PixelID") );
+    ATH_CHECK( detStore()->retrieve(m_PixelHelper, m_idHelperName) );
     
     return StatusCode::SUCCESS;
   }
@@ -306,5 +306,4 @@ StatusCode PixelClusterTruthDecoratorAlg::labelMeasurementToKeep(const EventCont
 }
   
 }
-
 
