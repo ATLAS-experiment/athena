@@ -40,16 +40,6 @@ PhaseII::DataRange getRange(const ModuleIndex<xAOD::PixelClusterContainer> &inde
    return index.range(hash);
 }
 
-void registerRangeAlt2(ModuleIndex<xAOD::PixelClusterContainer> &index,
-                   unsigned int identifier_hash,
-                   unsigned int begin_index,
-                   unsigned int end_index,
-                   unsigned int container_index) {
-   //   m_range[identifier_hash]=PhaseII::DataRange(begin_index, end_index - begin_index, container_index).makeCompact();
-   assert(identifier_hash < index.m_range.size());
-   reinterpret_cast<PhaseII::DataRange &>(index.m_range[identifier_hash])=PhaseII::DataRange::makeDataRange(begin_index,end_index,container_index);
-}
-
 void registerRange(ModuleIndex<xAOD::PixelClusterContainer> &index,
                    unsigned int identifier_hash,
                    unsigned int begin_index,
@@ -63,7 +53,7 @@ void registerRange(ModuleIndex<xAOD::PixelClusterContainer> &index,
 
 int main() {
    ModuleIndex<xAOD::PixelClusterContainer> index;
-   index.m_range.resize(100);
+   index.setIdentifierHashMax(100);
    std::array<std::unique_ptr<xAOD::PixelClusterContainer>,3> cont{
       std::make_unique<xAOD::PixelClusterContainer>(),
       std::make_unique<xAOD::PixelClusterContainer>(),
@@ -102,6 +92,14 @@ int main() {
       assert_always(   reg_range.beginIndex() == a_range.begin
                     && reg_range.endIndex() == a_range.end
                     && reg_range.containerIndex() == a_range.idx);
+      unsigned int cont_i =0;
+      for (; cont_i<cont.size(); ++cont_i) {
+         if (cont_idx[cont_i] == reg_range.containerIndex()) {
+            break;
+         }
+      }
+      assert_always( cont_i < cont.size());
+      assert_always( &index.container(reg_range) == cont[cont_i].get());
       assert_always( reg_range.beginIndex() != reg_range.endIndex() || reg_range.empty());
       assert_always( reg_range.size()>0 || reg_range.empty());
       assert_always( reg_range.empty() || index.elementIndex(reg_range.beginIndex())==reg_range.beginIndex());

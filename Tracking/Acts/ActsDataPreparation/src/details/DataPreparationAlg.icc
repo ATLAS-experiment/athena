@@ -141,9 +141,9 @@ namespace ActsTrk {
           n_elements_total+=range.size(); // does not take element selection into account -> overallocation of selection index
        }
        m_stat[kNInputs] += n_elements_total;
-       outputCollection_moduleIndex.m_range.resize( inputCollection->moduleIndex().m_range.size());
-       outputCollection_moduleIndex.m_selection.reserve(n_elements_total);
-       outputCollection_moduleIndex.m_srcContainer = inputCollection->moduleIndex().m_srcContainer;
+       outputCollection_moduleIndex.setIdentifierHashMax( inputCollection->moduleIndex().identifierHashMax());
+       outputCollection_moduleIndex.selection().reserve(n_elements_total);
+       outputCollection_moduleIndex.copyContainerList(inputCollection->moduleIndex());
        for (const IdentifierHash id : hashes) {
           const PhaseII::DataRange &range(inputCollection->moduleIndex().range(id));
           // If the requested idHash is not present move to the next one
@@ -152,7 +152,8 @@ namespace ActsTrk {
              continue;
           }
           auto const &src_container = inputCollection->moduleIndex().container(range);
-          unsigned int begin_index = outputCollection_moduleIndex.m_selection.size();
+          std::vector<unsigned int> &outputCollectionSelection = outputCollection_moduleIndex.selection();
+          unsigned int begin_index = outputCollectionSelection.size();
           for (unsigned int idx = range.beginIndex(); idx < range.endIndex(); ++idx) {
              assert(idx < src_container.size());
              const auto *element = src_container[idx];
@@ -167,12 +168,12 @@ namespace ActsTrk {
                    continue;
                 }
              }
-             outputCollection_moduleIndex.m_selection.push_back(element->index());
+             outputCollectionSelection.push_back(element->index());
              outputCollection.push_back(element);
           }
           outputCollection_moduleIndex.registerRange(id,
                                                      begin_index,
-                                                     outputCollection_moduleIndex.m_selection.size(),
+                                                     outputCollectionSelection.size(),
                                                      range.containerIndex());
        }
     }
@@ -273,7 +274,7 @@ namespace ActsTrk {
           if (!ce->container)  continue;
           const input_collection_t *src_container=dynamic_cast<const input_collection_t *>(ce->container);
           assert(src_container);
-          outputCollection_moduleIndex.m_range.resize( src_container->moduleIndex().m_range.size() );
+          outputCollection_moduleIndex.setIdentifierHashMax( src_container->moduleIndex().identifierHashMax() );
           break;
        }
        for (const IdentifierHash idHash : hashes) {
@@ -294,12 +295,12 @@ namespace ActsTrk {
              n_elements_total+=rng.second - rng.first; // does not take element selection into account -> overallocation of selection index
           }
        }
-       outputCollection_moduleIndex.m_selection.reserve(n_elements_total);
-       for (unsigned int id_hash=0u; id_hash < outputCollection_moduleIndex.m_range.size(); ++id_hash) {
-          const PhaseII::DataRange range = outputCollection_moduleIndex.m_range[id_hash];
+       outputCollection_moduleIndex.selection().reserve(n_elements_total);
+       for (unsigned int id_hash=0u; id_hash < outputCollection_moduleIndex.identifierHashMax(); ++id_hash) {
+          const PhaseII::DataRange range = outputCollection_moduleIndex.range(id_hash);
           if(range.empty()) continue;
           auto const &src_container = outputCollection_moduleIndex.container(range);
-          unsigned int begin_index=outputCollection_moduleIndex.m_selection.size();
+          unsigned int begin_index=outputCollection_moduleIndex.selection().size();
           for (unsigned int element_index = range.beginIndex(); element_index < range.endIndex(); ++element_index) {
              const auto *element = src_container[element_index];
              // Check the measurement has not been used previously
@@ -315,12 +316,12 @@ namespace ActsTrk {
                 }
              }
              assert( element->index() < src_container.size());
-             outputCollection_moduleIndex.m_selection.push_back(element->index());
+             outputCollection_moduleIndex.selection().push_back(element->index());
              outputCollection.push_back(element);
           }
           outputCollection_moduleIndex.registerRange(id_hash,
                                                      begin_index,
-                                                     outputCollection_moduleIndex.m_selection.size(),
+                                                     outputCollection_moduleIndex.selection().size(),
                                                      range.containerIndex());
        }
     }

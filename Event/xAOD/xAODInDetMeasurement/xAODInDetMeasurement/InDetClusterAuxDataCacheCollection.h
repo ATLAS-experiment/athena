@@ -8,6 +8,7 @@ namespace traits {
 
 template<typename T_AuxDataCache, typename T_Container>
 struct InDetClusterAuxDataCacheCollection  {
+   using ContainerNonConst = std::remove_cvref_t<T_Container>;
    std::vector< T_AuxDataCache > m_caches;
    const ModuleIndex<std::remove_cvref_t<T_Container> > *m_moduleIndex;
 
@@ -15,17 +16,17 @@ struct InDetClusterAuxDataCacheCollection  {
       std::vector< T_AuxDataCache > ret{ T_AuxDataCache(container) };
       return ret;
    }
-   static std::vector< T_AuxDataCache > make(const std::vector<DataLink<std::remove_cvref_t<T_Container> > > &container_list)  {
+   static std::vector< T_AuxDataCache > make(const ModuleIndex<ContainerNonConst> &module_index)  {
       std::vector< T_AuxDataCache > ret;
-      ret.reserve(container_list.size());
-      for (const auto &container_link : container_list) {
-         ret.emplace_back(*(container_link.cptr()));
-      }
+      ret.reserve(module_index.containerListSize());
+      module_index.visitContainers([&ret](T_Container &container) {
+         ret.emplace_back(container);
+      });
       return ret;
    }
 
    InDetClusterAuxDataCacheCollection(T_Container &container) requires( traits::has_moduleIndex<std::remove_cvref_t<T_Container> > )
-   : m_caches( container.moduleIndex().m_srcContainer.empty() ?  make(container) : make(container.moduleIndex().m_srcContainer)),
+   : m_caches( container.moduleIndex().containerListSize()==0u ?  make(container) : make(container.moduleIndex())),
      m_moduleIndex(&container.moduleIndex())
    {}
 
@@ -44,14 +45,14 @@ struct InDetClusterAuxDataCacheCollection  {
    }
    const std::vector<unsigned int> &selection() const {
       assert( m_moduleIndex);
-      return m_moduleIndex->m_selection;
+      return m_moduleIndex->selection();
    }
    // return the number of ranges (needed by the container proxy)
    std::size_t size() const {
-      return m_moduleIndex->m_range.size();
+      return m_moduleIndex->identifierHashMax();
    }
-   bool emptyy() const {
-      return m_moduleIndex->m_range.empty();
+   bool empty() const {
+      return m_moduleIndex->identifierHashMax() == 0;
    }
 
    /// get the interface object representing a certain element of a certain container.
@@ -61,11 +62,7 @@ struct InDetClusterAuxDataCacheCollection  {
       assert(container_index < m_caches.size() );
       const auto &the_container = m_caches[container_index];
       assert(m_moduleIndex);
-      if (!m_moduleIndex->m_selection.empty()) {
-         assert( element_index < m_moduleIndex->m_selection.size());
-         element_index=m_moduleIndex->m_selection[element_index];
-      }
-      return the_container.getInterfaceObject(element_index);
+      return the_container.getInterfaceObject(m_moduleIndex->elementIndex(element_index));
    }
 
    const ModuleIndex<std::remove_cvref_t<T_Container> > &moduleIndex() const {

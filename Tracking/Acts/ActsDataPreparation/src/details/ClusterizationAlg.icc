@@ -198,7 +198,7 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
   std::any vars = m_clusteringTool->createAuxDataCache(*clusterHandle,nClusterRDOs);
 
   if constexpr(has_moduleIndex<ClusterContainer>) {
-     clusterHandle->m_moduleIndex.m_range.resize(m_idHelper->wafer_hash_max());
+     clusterHandle->m_moduleIndex.setIdentifierHashMax(m_idHelper->wafer_hash_max());
   }
   // Fill the collection to xAOD format, computing necessary quantities
   std::size_t xaodCounter = 0ul;

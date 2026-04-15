@@ -105,7 +105,7 @@ namespace ActsTrk::detail {
                          || std::is_same_v<T_Container,xAOD::HGTDClusterContainer>);
           
           if constexpr(traits::has_moduleIndex<T_Container>) {
-             m_measurementRanges.setRange( detector_type_i, container.container().moduleIndex().m_range, typeIndex32);
+             m_measurementRanges.setRange( detector_type_i, container.container().moduleIndex().range(), typeIndex32);
              
              // using AllClusterProxy=typename traits::ElementProxies<T_Container>::AllClusterProxy<Utils::AccessPolicy::Const>;
              // AllClusterProxy clusters(container.containerPtr());
