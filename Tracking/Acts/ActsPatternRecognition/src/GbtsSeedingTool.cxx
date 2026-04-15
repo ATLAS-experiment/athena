@@ -49,7 +49,7 @@ namespace ActsTrk {
     for(const auto& l : *m_sct_h2l) m_are_pixels[l] = false;
 
     // parse connection 
-    Acts::Experimental::GbtsLayerConnectionMap layerConnectionMap(m_finderCfg.connectorInputFile, m_finderCfg.lrtMode);
+    auto layerConnectionMap = Acts::Experimental::GbtsLayerConnectionMap::fromFile(m_finderCfg.connectorInputFile, m_finderCfg.lrtMode);
 
     // option that allows for adding custom eta binning (default is at 0.2)
     if (m_finderCfg.etaBinWidthOverride != 0.0f) {
@@ -78,7 +78,8 @@ namespace ActsTrk {
   {
     // to avoid compile issues with unused veriables 
     (void) ctx;
-    (void) bFieldInZ;
+
+    const Acts::Experimental::GraphBasedTrackSeeder::Options options(bFieldInZ);
 
     // define new custom spacepoint container
     Acts::SpacePointContainer2 coreSpacePoints(
@@ -154,16 +155,17 @@ namespace ActsTrk {
 
     ATH_MSG_VERBOSE("Spacepoints successfully added to new container");
 
-    int max_layers = m_are_pixels.size(); 
+    const int max_layers = m_are_pixels.size();
     // eta,etaMinus,etaPlus,phi,phiMinus,Phiplus,z,zMinus,zPlus
-    Acts::Experimental::GbtsRoiDescriptor internalRoi(0, -4.5, 4.5, 0, -std::numbers::pi, std::numbers::pi, 0, -150.0,150.0);
-    Acts::SeedContainer2 seeds = m_finder->createSeeds(coreSpacePoints, internalRoi, max_layers, *m_filter); 
+    const Acts::Experimental::GbtsRoiDescriptor internalRoi(0, -4.5, 4.5, 0, -std::numbers::pi, std::numbers::pi, 0, -150.0,150.0);
+    Acts::SeedContainer2 seeds;
+    m_finder->createSeeds(coreSpacePoints, internalRoi, max_layers, *m_filter, options, seeds);
 
     // add seeds to the output container
     seedContainer.reserve(seedContainer.size() + seeds.size(), 7.0f);
-    for (Acts::MutableSeedProxy2 seed : seeds) {
+    for (auto seed : seeds) {
       seedContainer.push_back(
-        Acts::ConstSeedProxy2(seed),
+        seed.asConst(),
         [&](const Acts::SpacePointIndex2 spIndex) {
           return tmpSpacePoints[spIndex];
         });
@@ -193,10 +195,13 @@ namespace ActsTrk {
     m_finderCfg.nMaxEdges = m_nMaxEdges;
     m_finderCfg.tauRatioCut = m_tau_ratio_cut; 
     m_finderCfg.tauRatioPrecut = m_tau_ratio_precut;
-    m_finderCfg.ptCoeff = m_ptCoeff;
     m_finderCfg.edgeMaskMinEta = m_edge_mask_min_eta;
     m_finderCfg.hitShareThreshold = m_hit_share_threshold;
     m_finderCfg.maxEndcapClusterWidth = m_max_endcap_clusterwidth;
+    m_finderCfg.d0Max = m_d0_max;
+    m_finderCfg.validateTriplets = m_validateTriplets;
+    m_finderCfg.useAdaptiveCuts = m_useAdaptiveCuts;
+    m_finderCfg.tauRatioCorr = m_tau_ratio_corr;
 
     m_filterCfg.sigmaMS = m_sigmaMS;
     m_filterCfg.radLen = m_radLen;
@@ -228,7 +233,6 @@ namespace ActsTrk {
     ATH_MSG_DEBUG( "etaBinWidthOverride: " << m_finderCfg.etaBinWidthOverride);
     ATH_MSG_DEBUG( "nMaxPhiSlice: " << m_finderCfg.nMaxPhiSlice);
     ATH_MSG_DEBUG( "minPt: " << m_finderCfg.minPt);
-    ATH_MSG_DEBUG( "ptCoeff: " << m_finderCfg.ptCoeff);
     ATH_MSG_DEBUG( "useEtaBinning: " << m_finderCfg.useEtaBinning);
     ATH_MSG_DEBUG( "doubletFilterRZ: " << m_finderCfg.doubletFilterRZ);
     ATH_MSG_DEBUG( "nMaxEdges: " << m_finderCfg.nMaxEdges);
