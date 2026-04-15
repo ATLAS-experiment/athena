@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "InDetRawData/PhaseIIPixelRawDataContainerMT.h"
 
@@ -586,7 +586,6 @@ void conversionTest(PhaseIIPixelRawDataContainerMT &rdo_container ) {
 
    PhaseII::PixelRawDataTypeTraits<PhaseII::AccessPolicy::Mutable>::ContainerCollectionProxy
       rdo_container_collection_proxy = PhaseII::makeRawDataCollectionProxy(rdo_container);
-   using PixelRawDataContainerProxy = PhaseII::PixelRawDataTypeTraits<>::RawDataContainerProxy;
    using PixelRawDataContainerProxyRW = PhaseII::PixelRawDataTypeTraits<Utils::AccessPolicy::Mutable>::RawDataContainerProxy;
    using PixelRawDataProxy = PhaseII::PixelRawDataTypeTraits<>::RawDataProxy;
    using PixelRawDataProxyRW = PhaseII::PixelRawDataTypeTraits<Utils::AccessPolicy::Mutable>::RawDataProxy;
