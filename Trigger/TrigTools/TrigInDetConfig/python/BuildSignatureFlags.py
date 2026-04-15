@@ -942,15 +942,21 @@ class FlagValuesTest(unittest.TestCase):
         from AthenaConfiguration.AllConfigFlags import initConfigFlags
         flags = initConfigFlags()
         flags.Trigger.InDetTracking.electron.pTmin=3.
-        self.newflags = flags.cloneAndReplace('Tracking.ActiveConfig', 'Trigger.InDetTracking.electron',  
+        flags.Trigger.ITkTracking.muonLRT.maxEta=5.
+        flags.Trigger.ITkTracking.jetSuper.minPT=[3.,2.,1.]
+        self.newflags1 = flags.cloneAndReplace('Tracking.ActiveConfig', 'Trigger.InDetTracking.electron',  
                                               keepOriginal = True)
-        self.newflags2 = flags.cloneAndReplace('Tracking.ActiveConfig', 'Trigger.InDetTracking.muonLRT',
+        self.newflags2 = flags.cloneAndReplace('Tracking.ActiveConfig', 'Trigger.ITkTracking.muonLRT',
+                                               keepOriginal = True)
+        self.newflags3 = flags.cloneAndReplace('Tracking.ActiveConfig', 'Trigger.ITkTracking.jetSuper',
                                                keepOriginal = True)
         
     def runTest(self):
-        self.assertEqual(self.newflags.Tracking.ActiveConfig.pTmin,  3.,             msg="Preset value lost")        
-        self.assertEqual(self.newflags.Tracking.ActiveConfig.input_name, "electron", msg="Incorrect config")
-        self.assertEqual(self.newflags2.Tracking.ActiveConfig.input_name, "muonLRT", msg="Incorrect config")
+        self.assertEqual(self.newflags1.Tracking.ActiveConfig.pTmin,  3.,             msg="Preset value lost")        
+        self.assertEqual(self.newflags1.Tracking.ActiveConfig.input_name, "electron", msg="Incorrect version of flags")
+        self.assertEqual(self.newflags2.Tracking.ActiveConfig.input_name, "muonLRT",  msg="Incorrect version of flags")
+        self.assertEqual(self.newflags2.Tracking.ActiveConfig.maxEta, 5.,             msg="Preset value lost")
+        self.assertEqual(self.newflags3.Tracking.ActiveConfig.minPT, [3.,2.,1.],      msg="Preset value lost")        
 
   
 if __name__ == "__main__":
