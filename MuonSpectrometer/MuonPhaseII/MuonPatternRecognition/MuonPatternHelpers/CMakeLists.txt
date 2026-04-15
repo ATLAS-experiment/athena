@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MuonPatternHelpers )
@@ -12,14 +12,3 @@ atlas_add_library( MuonPatternHelpers
                     LINK_LIBRARIES xAODMuonPrepData Acts::Core Identifier MuonReadoutGeometryR4 ActsCalibBase
                                                     MuonPatternEvent MuonStationIndexLib MuonSpacePoint 
                                                     MuonRecToolInterfacesR4 CxxUtils)
-
-
-file(GLOB_RECURSE files "test/*.cxx")
-foreach(_exeFile ${files})
-    get_filename_component(_theExec ${_exeFile} NAME_WE)
-    get_filename_component(_theLoc ${_exeFile} DIRECTORY)
-    atlas_add_test( ${_theExec} 
-                    SOURCES  ${_exeFile}
-                    LINK_LIBRARIES MuonPatternHelpers
-                    POST_EXEC_SCRIPT nopost.sh) 
-endforeach()
