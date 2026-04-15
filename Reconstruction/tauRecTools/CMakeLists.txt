@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( tauRecTools )
@@ -34,7 +34,7 @@ atlas_add_library( tauRecToolsLib
    ${ROOT_LIBRARIES} ${ONNXRUNTIME_LIBRARIES}
    CxxUtils AthLinks AsgMessagingLib AsgDataHandlesLib AsgTools xAODCaloEvent
    xAODEventInfo xAODJet xAODParticleEvent xAODPFlow xAODTau xAODTracking xAODEventShape
-   MVAUtils FlavorTagDiscriminants FlavorTagInference ${extra_public_libs}
+   MVAUtils FlavorTagInference ${extra_public_libs}
    PRIVATE_LINK_LIBRARIES CaloGeoHelpers FourMomUtils PathResolver )
 
 atlas_add_dictionary( tauRecToolsDict
@@ -47,7 +47,7 @@ if( NOT XAOD_STANDALONE )
       INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
       LINK_LIBRARIES ${Boost_LIBRARIES} AsgTools AsgMessagingLib xAODBase
       xAODCaloEvent xAODJet xAODPFlow xAODTau FourMomUtils tauRecToolsLib PFlowUtilsLib
-      FlavorTagDiscriminants FlavorTagInference ${extra_private_libs} )
+      FlavorTagInference ${extra_private_libs} )
 else()
    atlas_add_component( tauRecTools
       src/components/*.cxx
