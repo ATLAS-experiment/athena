@@ -57,7 +57,7 @@ namespace ActsTrk {
 
         /// @name Input data using SG::ReadHandleKey
         //@{
-        SG::ReadHandleKey<xAOD::PixelClusterContainerAlt> m_pixelClusterContainerKey{this, "PixelClusters", "", "name of the input pixel cluster container"};
+        SG::ReadHandleKey<xAOD::PixelClusterContainer> m_pixelClusterContainerKey{this, "PixelClusters", "", "name of the input pixel cluster container"};
         //@}
 
         /// @name Input condition data using SG::ReadCondHandleKey

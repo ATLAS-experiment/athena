@@ -5,7 +5,7 @@
 ///////////////////////////////////////////////////////////////////
 // Header file for class StipClusterTruthDecoratorAlg
 //
-// The algorithm extends xAOD::StripClusterContainerAlt
+// The algorithm extends xAOD::StripClusterContainer
 // with additional decorations associated to truth information
 // And stores the results in a TrackMeasurementValidationContainer
 // for compatibility with monitoring tools
@@ -48,11 +48,11 @@ namespace ActsTrk {
     // and which one to skip. It does so by filling a std::vector<bool>, which
     // size is the same as the cluster collection.
     StatusCode labelMeasurementToKeep(const EventContext& ctx,
-				      const xAOD::StripClusterContainerAlt& clusters,
+				      const xAOD::StripClusterContainer& clusters,
 				      std::vector<bool>& labels) const;
     
   private:
-    SG::ReadHandleKey<xAOD::StripClusterContainerAlt> m_clustercontainer_key{this,"ClusterContainer", "", "Input Strip Cluster container"};
+    SG::ReadHandleKey<xAOD::StripClusterContainer> m_clustercontainer_key{this,"ClusterContainer", "", "Input Strip Cluster container"};
     SG::ReadHandleKey<MeasurementToTruthParticleAssociation> m_associationMap_key{this,"AssociationMapOut", "", "Association map between measurements and truth particles"};
     SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_stripDetEleCollKey{this, "StripDetectorElements", "ITkStripDetectorElementCollection"};
 
@@ -60,7 +60,7 @@ namespace ActsTrk {
     
     SG::WriteHandleKey<xAOD::TrackMeasurementValidationContainer> m_write_xaod_key{this,"MeasurementContainer","", "Output Strip Validation Clusters"};
 
-    SG::WriteDecorHandleKey< xAOD::StripClusterContainerAlt > m_trackMeasurement_link {this, "MeasurementLink", m_clustercontainer_key, "validationMeasurementLink"};
+    SG::WriteDecorHandleKey< xAOD::StripClusterContainer > m_trackMeasurement_link {this, "MeasurementLink", m_clustercontainer_key, "validationMeasurementLink"};
     
     SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_truth_indices {this, "MeasurementTruthIndices", m_write_xaod_key, "truth_index"};
     SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_truth_barcodes {this, "MeasurementTruthBarcode", m_write_xaod_key, "truth_barcode"};

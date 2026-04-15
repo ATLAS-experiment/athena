@@ -50,11 +50,11 @@ namespace ActsTrk::detail {
       std::size_t nPixelClusters = 900;
       std::size_t nStripClusters = 600;
 
-      xAOD::PixelClusterContainerAlt pixelClusters;
+      xAOD::PixelClusterContainer pixelClusters;
       xAOD::PixelClusterAuxContainer pixelAuxClusters;
       pixelClusters.setStore( &pixelAuxClusters );
 
-      xAOD::StripClusterContainerAlt stripClusters;
+      xAOD::StripClusterContainer stripClusters;
       xAOD::StripClusterAuxContainer stripAuxClusters;
       stripClusters.setStore( &stripAuxClusters );
 

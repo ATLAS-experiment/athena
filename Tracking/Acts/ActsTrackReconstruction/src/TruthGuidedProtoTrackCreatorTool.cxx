@@ -21,8 +21,8 @@ StatusCode  ActsTrk::TruthGuidedProtoTrackCreatorTool::initialize()
 }
 
 StatusCode ActsTrk::TruthGuidedProtoTrackCreatorTool::findProtoTracks(const EventContext& ctx,
-								      const xAOD::PixelClusterContainerAlt & pixelContainer,
-								      const xAOD::StripClusterContainerAlt & stripContainer,
+								      const xAOD::PixelClusterContainer & pixelContainer,
+								      const xAOD::StripClusterContainer & stripContainer,
 								      std::vector<ActsTrk::ProtoTrack> & foundProtoTracks ) const {
 
     // Read the PRD information

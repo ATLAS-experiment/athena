@@ -14,8 +14,8 @@ ActsTrk::RandomProtoTrackCreatorTool::RandomProtoTrackCreatorTool(const std::str
 {}
 
 StatusCode ActsTrk::RandomProtoTrackCreatorTool::findProtoTracks(const EventContext& ctx,
-								 const xAOD::PixelClusterContainerAlt & pixelContainer,
-								 const xAOD::StripClusterContainerAlt & stripContainer,
+								 const xAOD::PixelClusterContainer & pixelContainer,
+								 const xAOD::StripClusterContainer & stripContainer,
 								 std::vector<ActsTrk::ProtoTrack> & foundProtoTracks ) const {
     // Sample N random hits for example
     std::vector<ActsTrk::ATLASUncalibSourceLink> dummyPoints;  

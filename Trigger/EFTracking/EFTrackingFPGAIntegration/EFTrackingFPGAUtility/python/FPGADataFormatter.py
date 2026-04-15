@@ -142,9 +142,9 @@ if __name__=="__main__":
 
     from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
     OutputItemList = [
-                    "xAOD::StripClusterContainerAlt#FPGAStripClusters",
+                    "xAOD::StripClusterContainer#FPGAStripClusters",
                     "xAOD::StripClusterAuxContainer#FPGAStripClustersAux.",
-                    "xAOD::PixelClusterContainerAlt#FPGAPixelClusters",
+                    "xAOD::PixelClusterContainer#FPGAPixelClusters",
                     "xAOD::PixelClusterAuxContainer#FPGAPixelClustersAux.",
                     ]
    

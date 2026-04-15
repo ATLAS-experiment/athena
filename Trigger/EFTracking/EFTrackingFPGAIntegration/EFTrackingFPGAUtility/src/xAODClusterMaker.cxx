@@ -59,12 +59,12 @@ StatusCode xAODClusterMaker::makeStripClusterContainer(
         const uint32_t* stripClusters,
         const EFTrackingTransient::Metadata *metadata,
         const EventContext &ctx) const {
-    ATH_MSG_DEBUG("Making xAOD::StripClusterContainerAlt");
+    ATH_MSG_DEBUG("Making xAOD::StripClusterContainer");
 
-    SG::WriteHandle<xAOD::StripClusterContainerAlt> stripClustersHandle{m_stripClustersKey, ctx};
+    SG::WriteHandle<xAOD::StripClusterContainer> stripClustersHandle{m_stripClustersKey, ctx};
 
     if (!m_doBulkCopy) {
-        ATH_CHECK(stripClustersHandle.record(std::make_unique<xAOD::StripClusterContainerAlt>(), std::make_unique<xAOD::StripClusterAuxContainer>()));
+        ATH_CHECK(stripClustersHandle.record(std::make_unique<xAOD::StripClusterContainer>(), std::make_unique<xAOD::StripClusterAuxContainer>()));
 
 
         for (unsigned int i = 0; i < metadata->numOfStripClusters; i++)
@@ -122,7 +122,7 @@ StatusCode xAODClusterMaker::makeStripClusterContainer(
     const size_t nClusters = metadata->numOfStripClusters;
     DataPool<xAOD::StripCluster> stripPool{ctx};
     stripPool.reserve(nClusters);
-    auto stripCl = std::make_unique<xAOD::StripClusterContainerAlt>(SG::VIEW_ELEMENTS, SG::ALWAYS_TRACK_INDICES);
+    auto stripCl = std::make_unique<xAOD::StripClusterContainer>(SG::VIEW_ELEMENTS, SG::ALWAYS_TRACK_INDICES);
     {
         if constexpr (enableBenchmark) Athena::Chrono chrono("Strip object creating", m_chronoSvc.get());
         stripCl->push_new(nClusters, [&stripPool]() { return stripPool.nextElementPtr(); });
@@ -232,13 +232,13 @@ StatusCode xAODClusterMaker::makeStripClusterContainer(
         const EFTrackingTransient::StripClusterAuxInput &scAux,
         const EFTrackingTransient::Metadata *metadata,
         const EventContext &ctx) const {
-    ATH_MSG_DEBUG("Making xAOD::StripClusterContainerAlt");
+    ATH_MSG_DEBUG("Making xAOD::StripClusterContainer");
 
-    SG::WriteHandle<xAOD::StripClusterContainerAlt> stripClustersHandle{
+    SG::WriteHandle<xAOD::StripClusterContainer> stripClustersHandle{
         m_stripClustersKey , ctx};
 
     ATH_CHECK(stripClustersHandle.record(
-                std::make_unique<xAOD::StripClusterContainerAlt>(),
+                std::make_unique<xAOD::StripClusterContainer>(),
                 std::make_unique<xAOD::StripClusterAuxContainer>()));
 
     int rdoIndexCounter = 0;
@@ -283,16 +283,16 @@ StatusCode xAODClusterMaker::makePixelClusterContainer(
         const uint32_t* pixelClusters,
         const EFTrackingTransient::Metadata *metadata,
         const EventContext &ctx) const {
-    ATH_MSG_DEBUG("Making xAOD::PixelClusterContainerAlt");
+    ATH_MSG_DEBUG("Making xAOD::PixelClusterContainer");
 
 
-    SG::WriteHandle<xAOD::PixelClusterContainerAlt> pixelClustersHandle{m_pixelClustersKey, ctx};
+    SG::WriteHandle<xAOD::PixelClusterContainer> pixelClustersHandle{m_pixelClustersKey, ctx};
 
     if (!m_doBulkCopy) {
         // --------------------------------------------------------------------
         // proceed with the element-wise method
         // --------------------------------------------------------------------
-        ATH_CHECK(pixelClustersHandle.record(std::make_unique<xAOD::PixelClusterContainerAlt>(),std::make_unique<xAOD::PixelClusterAuxContainer>()));
+        ATH_CHECK(pixelClustersHandle.record(std::make_unique<xAOD::PixelClusterContainer>(),std::make_unique<xAOD::PixelClusterAuxContainer>()));
 
         ATH_CHECK(pixelClustersHandle.isValid());
 
@@ -375,7 +375,7 @@ StatusCode xAODClusterMaker::makePixelClusterContainer(
     const size_t nClusters = metadata->numOfPixelClusters;  
     DataPool<xAOD::PixelCluster> pixelPool{ctx};
     pixelPool.reserve(nClusters);
-    auto pixelCl = std::make_unique<xAOD::PixelClusterContainerAlt>(SG::VIEW_ELEMENTS, SG::ALWAYS_TRACK_INDICES);
+    auto pixelCl = std::make_unique<xAOD::PixelClusterContainer>(SG::VIEW_ELEMENTS, SG::ALWAYS_TRACK_INDICES);
     {
         if constexpr (enableBenchmark) Athena::Chrono chrono("Pixel object creating", m_chronoSvc.get());
         pixelCl->push_new(nClusters, [&pixelPool]() { return pixelPool.nextElementPtr(); });
@@ -512,10 +512,10 @@ StatusCode xAODClusterMaker::makePixelClusterContainer(
         const EFTrackingTransient::PixelClusterAuxInput &pxAux,
         const EFTrackingTransient::Metadata *metadata,
         const EventContext &ctx) const {
-    ATH_MSG_DEBUG("Making xAOD::PixelClusterContainerAlt");
+    ATH_MSG_DEBUG("Making xAOD::PixelClusterContainer");
 
 
-    SG::WriteHandle<xAOD::PixelClusterContainerAlt> pixelClustersHandle{m_pixelClustersKey, ctx};
+    SG::WriteHandle<xAOD::PixelClusterContainer> pixelClustersHandle{m_pixelClustersKey, ctx};
 
     if (!m_doBulkCopy) {
         // --------------------------------------------------------------------
@@ -525,7 +525,7 @@ StatusCode xAODClusterMaker::makePixelClusterContainer(
         if constexpr (enableBenchmark) Athena::Chrono chrono("ElementWiseMethod", m_chronoSvc.get());
 
         ATH_CHECK(pixelClustersHandle.record(
-                    std::make_unique<xAOD::PixelClusterContainerAlt>(),
+                    std::make_unique<xAOD::PixelClusterContainer>(),
                     std::make_unique<xAOD::PixelClusterAuxContainer>()));
 
         ATH_CHECK(pixelClustersHandle.isValid());
@@ -580,7 +580,7 @@ StatusCode xAODClusterMaker::makePixelClusterContainer(
     // --------------------------
     // Create the container and aux. container
     // --------------------------
-    auto pixelCl = std::make_unique<xAOD::PixelClusterContainerAlt>();
+    auto pixelCl = std::make_unique<xAOD::PixelClusterContainer>();
     auto pixelClAux = std::make_unique<xAOD::PixelClusterAuxContainer>();
     pixelCl->setStore(pixelClAux.get());
 

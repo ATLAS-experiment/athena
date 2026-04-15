@@ -67,11 +67,11 @@ int test1() {
   // create containers
   std::cout << "----------------------------------------------" << std::endl;
   std::cout << "Creating cluster containers ..." << std::endl;
-  xAOD::PixelClusterContainerAlt pixelContainer;
+  xAOD::PixelClusterContainer pixelContainer;
   xAOD::PixelClusterAuxContainer auxPixelContainer;
   pixelContainer.setStore( &auxPixelContainer );
 
-  xAOD::StripClusterContainerAlt stripContainer;
+  xAOD::StripClusterContainer stripContainer;
   xAOD::StripClusterAuxContainer auxStripContainer;
   stripContainer.setStore( &auxStripContainer );
 

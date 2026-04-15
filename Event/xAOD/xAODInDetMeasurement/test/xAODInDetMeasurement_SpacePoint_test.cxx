@@ -46,8 +46,8 @@ std::ostream& operator<< ( std::ostream& out,
 }
 
 void fill(xAOD::SpacePoint& pixel, xAOD::SpacePoint& strip,
-	  const xAOD::PixelClusterContainerAlt& pixelClusters,
-	  const xAOD::StripClusterContainerAlt& stripClusters) {
+	  const xAOD::PixelClusterContainer& pixelClusters,
+	  const xAOD::StripClusterContainer& stripClusters) {
 
   const xAOD::PixelCluster *pclus = pixelClusters.at(0);
   const xAOD::StripCluster *sclus0 = stripClusters.at(0);
@@ -123,13 +123,13 @@ void print(xAOD::SpacePoint& pixel, xAOD::SpacePoint& strip) {
 
 int main() {
   // Make dummy cluster containers, sps need element links to these clusters
-  xAOD::PixelClusterContainerAlt tpc;
+  xAOD::PixelClusterContainer tpc;
   xAOD::PixelClusterAuxContainer tpc_aux;
   tpc.setStore(&tpc_aux);
   // add one pixel cluster to the container
   tpc.push_back(new xAOD::PixelCluster());
 
-  xAOD::StripClusterContainerAlt spc;
+  xAOD::StripClusterContainer spc;
   xAOD::StripClusterAuxContainer spc_aux;
   spc.setStore(&spc_aux);
   // add two strip clusters to the container

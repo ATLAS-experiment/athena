@@ -26,7 +26,7 @@ public:
   using RDOContainer = SCT_RDO_Container;
   using RawDataCollection = RDOContainer::base_value_type;
   using IDHelper = SCT_ID;
-  using ClusterContainer = xAOD::StripClusterContainerAlt;
+  using ClusterContainer = xAOD::StripClusterContainer;
   using ClusterAuxContainer = xAOD::StripClusterAuxContainer;
   
   struct Cell {
@@ -57,7 +57,7 @@ public:
 	     std::vector<ClusterCollection>& collection) const = 0;
   
   virtual /*StripClusterAuxDataCache<Utils::AccessPolicy::Mutable>*/ std::any
-  createAuxDataCache(xAOD::StripClusterContainerAlt& cont, std::size_t nClusterRDOs) const = 0;
+  createAuxDataCache(xAOD::StripClusterContainer& cont, std::size_t nClusterRDOs) const = 0;
 
   virtual StatusCode
   makeClusters(const EventContext& ctx,

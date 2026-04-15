@@ -14,12 +14,12 @@
 
 ///@TODO in principle it would be sufficient to define 
 // template<Utils::AccessPolicy accessPolicy=Utils::AccessPolicy::Const>
-// using StripClusterAuxDataCache = InDetClusterAuxDataCache< typename Utils::ContainerAccessHelper<const xAOD::StripClusterContainerAlt, accessPolicy>::ContainerType ,1 >
+// using StripClusterAuxDataCache = InDetClusterAuxDataCache< typename Utils::ContainerAccessHelper<const xAOD::StripClusterContainer, accessPolicy>::ContainerType ,1 >
 
 template<Utils::AccessPolicy accessPolicy=Utils::AccessPolicy::Const>
 struct StripClusterAuxDataCache
-   : InDetClusterAuxDataCache< typename Utils::ContainerAccessHelper<const xAOD::StripClusterContainerAlt, accessPolicy>::ContainerType ,1 >  {
-   using T_Container = typename Utils::ContainerAccessHelper<const xAOD::StripClusterContainerAlt, accessPolicy>::ContainerType;
+   : InDetClusterAuxDataCache< typename Utils::ContainerAccessHelper<const xAOD::StripClusterContainer, accessPolicy>::ContainerType ,1 >  {
+   using T_Container = typename Utils::ContainerAccessHelper<const xAOD::StripClusterContainer, accessPolicy>::ContainerType;
    using BASE = InDetClusterAuxDataCache< T_Container ,1 >;
 
    template <Utils::AccessPolicy proxyAccessPolicy=Utils::AccessPolicy::Const>

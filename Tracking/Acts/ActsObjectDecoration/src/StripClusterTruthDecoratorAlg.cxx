@@ -60,9 +60,9 @@ namespace ActsTrk {
   
   StatusCode StripClusterTruthDecoratorAlg::execute(const EventContext& ctx)  const {
     
-    SG::ReadHandle<xAOD::StripClusterContainerAlt> StripClusterContainer = SG::makeHandle(m_clustercontainer_key,ctx);
+    SG::ReadHandle<xAOD::StripClusterContainer> StripClusterContainer = SG::makeHandle(m_clustercontainer_key,ctx);
     ATH_CHECK(StripClusterContainer.isValid());
-    const xAOD::StripClusterContainerAlt *stripClusters = StripClusterContainer.cptr();
+    const xAOD::StripClusterContainer *stripClusters = StripClusterContainer.cptr();
 
     SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> stripDetEleHandle = SG::makeHandle( m_stripDetEleCollKey, ctx );
     ATH_CHECK(stripDetEleHandle.isValid());
@@ -81,7 +81,7 @@ namespace ActsTrk {
     ATH_CHECK(xaod.record(std::make_unique<xAOD::TrackMeasurementValidationContainer>(),
 			  std::make_unique<xAOD::TrackMeasurementValidationAuxContainer>()));
 
-    SG::WriteDecorHandle<xAOD::StripClusterContainerAlt,
+    SG::WriteDecorHandle<xAOD::StripClusterContainer,
 			 ElementLink< xAOD::TrackMeasurementValidationContainer > > decorator_measurement_link( m_trackMeasurement_link, ctx );
     
     SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, std::uint64_t> decor_detectorElementID ( m_measurement_detectorElementID, ctx );
@@ -210,7 +210,7 @@ namespace ActsTrk {
   }
 
 StatusCode StripClusterTruthDecoratorAlg::labelMeasurementToKeep(const EventContext& ctx,
-                                                                 const xAOD::StripClusterContainerAlt& clusters,
+                                                                 const xAOD::StripClusterContainer& clusters,
                                                                  std::vector<bool>& labels) const
 {
   labels.clear();

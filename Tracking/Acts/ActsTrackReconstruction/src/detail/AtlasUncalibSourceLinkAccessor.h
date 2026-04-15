@@ -318,9 +318,9 @@ namespace ActsTrk::detail {
      }
 
      // to support 2D and 3D pixel measurements
-     // @note to support 3D pixel measurements, still need to add ContainerRefWithDim<xAOD::PixelClusterContainerAlt,3> as
+     // @note to support 3D pixel measurements, still need to add ContainerRefWithDim<xAOD::PixelClusterContainer,3> as
      //       template paramter to MeasurementContainerListWithDimension
-     unsigned int getDimension(const xAOD::PixelClusterContainerAlt &container) {
+     unsigned int getDimension(const xAOD::PixelClusterContainer &container) {
         if (isDimension<2>(container.auxbase())) { return 2u; }
         else if (isDimension<3>(container.auxbase())) { return 3u; }
         else {

@@ -76,8 +76,8 @@ private:
   SG::ReadHandleKey<InDet::PixelClusterContainer> m_inputPixelClusterContainerKey {this, "InputPixelClustersName", "ITkPixelClusters", "name of the input InDet pixel cluster container"};
   SG::ReadHandleKey<InDet::SCT_ClusterContainer>  m_inputStripClusterContainerKey {this, "InputStripClustersName", "ITkStripClusters", "name of the input InDet strip cluster container"};
 
-  SG::WriteHandleKey<xAOD::PixelClusterContainerAlt> m_outputPixelClusterContainerKey {this, "OutputPixelClustersName", "ITkPixelClusters", "name of the output xAOD pixel cluster container"};
-  SG::WriteHandleKey<xAOD::StripClusterContainerAlt> m_outputStripClusterContainerKey {this, "OutputStripClustersName", "ITkStripClusters", "name of the output xAOD strip cluster container"};
+  SG::WriteHandleKey<xAOD::PixelClusterContainer> m_outputPixelClusterContainerKey {this, "OutputPixelClustersName", "ITkPixelClusters", "name of the output xAOD pixel cluster container"};
+  SG::WriteHandleKey<xAOD::StripClusterContainer> m_outputStripClusterContainerKey {this, "OutputStripClustersName", "ITkStripClusters", "name of the output xAOD strip cluster container"};
 
   SG::ReadHandleKey<::HGTD_ClusterContainer> m_inputHgtdClusterContainerKey {this, "InputHgtdClustersName", "HGTD_Clusters", "name of the input hgtd cluster container"};
   SG::WriteHandleKey<xAOD::HGTDClusterContainer> m_outputHgtdClusterContainerKey {this, "OutputHgtdClustersName", "HGTD_Clusters", "name of the output xAOD hgtd cluster container"};

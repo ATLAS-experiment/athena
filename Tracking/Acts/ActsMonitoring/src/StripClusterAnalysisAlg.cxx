@@ -26,9 +26,9 @@ namespace ActsTrk {
   StatusCode StripClusterAnalysisAlg::fillHistograms(const EventContext& ctx) const {
     ATH_MSG_DEBUG(" In " << name() << "::fillHistograms()" );
     
-    SG::ReadHandle< xAOD::StripClusterContainerAlt > inputStripClusterContainer( m_stripClusterContainerKey, ctx );
+    SG::ReadHandle< xAOD::StripClusterContainer > inputStripClusterContainer( m_stripClusterContainerKey, ctx );
     if (!inputStripClusterContainer.isValid()){
-        ATH_MSG_FATAL("xAOD::StripClusterContainerAlt with key " << m_stripClusterContainerKey.key() << " is not available...");
+        ATH_MSG_FATAL("xAOD::StripClusterContainer with key " << m_stripClusterContainerKey.key() << " is not available...");
         return StatusCode::FAILURE;
     }
     

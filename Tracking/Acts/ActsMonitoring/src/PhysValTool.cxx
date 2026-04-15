@@ -148,12 +148,12 @@ namespace ActsTrk {
   StatusCode PhysValTool::fillPixelClusters(const EventContext& ctx,
 					    float beamSpotWeight) {
     ATH_MSG_DEBUG("Analysing Pixel Clusters");
-    SG::ReadHandle< xAOD::PixelClusterContainerAlt > inputPixelClusterContainer = SG::makeHandle( m_pixelClusterContainerKey, ctx );
+    SG::ReadHandle< xAOD::PixelClusterContainer > inputPixelClusterContainer = SG::makeHandle( m_pixelClusterContainerKey, ctx );
     if (not inputPixelClusterContainer.isValid()) {
-      ATH_MSG_FATAL("xAOD::PixelClusterContainerAlt with key " << m_pixelClusterContainerKey.key() << " is not available...");
+      ATH_MSG_FATAL("xAOD::PixelClusterContainer with key " << m_pixelClusterContainerKey.key() << " is not available...");
       return StatusCode::FAILURE;
     }
-    const xAOD::PixelClusterContainerAlt *pixelClusterContainer = inputPixelClusterContainer.cptr();
+    const xAOD::PixelClusterContainer *pixelClusterContainer = inputPixelClusterContainer.cptr();
     
     for (const xAOD::PixelCluster* cluster : *pixelClusterContainer) {
       m_pixelClusterValidationPlots->fill(cluster, beamSpotWeight, m_pixelID);
@@ -165,12 +165,12 @@ namespace ActsTrk {
   StatusCode PhysValTool::fillStripClusters(const EventContext& ctx,
 					    float beamSpotWeight) {
     ATH_MSG_DEBUG("Analysing Strip Clusters");
-    SG::ReadHandle< xAOD::StripClusterContainerAlt > inputStripClusterContainer = SG::makeHandle( m_stripClusterContainerKey, ctx );
+    SG::ReadHandle< xAOD::StripClusterContainer > inputStripClusterContainer = SG::makeHandle( m_stripClusterContainerKey, ctx );
     if (not inputStripClusterContainer.isValid()) {
-      ATH_MSG_FATAL("xAOD::StripClusterContainerAlt with key " << m_stripClusterContainerKey.key() << " is not available...");
+      ATH_MSG_FATAL("xAOD::StripClusterContainer with key " << m_stripClusterContainerKey.key() << " is not available...");
       return StatusCode::FAILURE;
     }
-    const xAOD::StripClusterContainerAlt *stripClusterContainer = inputStripClusterContainer.cptr();
+    const xAOD::StripClusterContainer *stripClusterContainer = inputStripClusterContainer.cptr();
 
     for (const xAOD::StripCluster* cluster : *stripClusterContainer) {
       m_stripClusterValidationPlots->fill(cluster, beamSpotWeight, m_stripID);

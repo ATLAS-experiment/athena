@@ -22,7 +22,7 @@ namespace ActsTrk {
     virtual StatusCode fillHistograms(const EventContext& ctx) const override;
 
   private:
-    SG::ReadHandleKey< xAOD::PixelClusterContainerAlt > m_pixelClusterContainerKey
+    SG::ReadHandleKey< xAOD::PixelClusterContainer > m_pixelClusterContainerKey
     {this, "ClusterContainerKey", "ITkPixelClusters",
 	"Key of input pixel clusters"};    
     

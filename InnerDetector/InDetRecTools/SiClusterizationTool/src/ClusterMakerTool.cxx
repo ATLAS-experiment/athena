@@ -77,7 +77,7 @@ InDet::PixelCluster newInDetpixelCluster(const Identifier& RDOId,
 }
 
 // Function-like class to add an xAOD::PixelCluster to an
-// xAOD::PixelClusterContainerAlt. This is needed because the
+// xAOD::PixelClusterContainer. This is needed because the
 // PixelCluster object needs an aux store for the setMeasurement call
 // to not crash
 class AddNewxAODpixelCluster {

@@ -112,7 +112,7 @@ int main() {
 
     // create the main containers to test:
     xAOD::PixelClusterAuxContainer aux;
-    xAOD::PixelClusterContainerAlt tpc;
+    xAOD::PixelClusterContainer tpc;
 
     tpc.setStore(&aux);
 

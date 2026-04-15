@@ -46,7 +46,7 @@ public:
      * This is needed for the kernel input.
      */
     StatusCode getInputClusterData(
-        const xAOD::StripClusterContainerAlt *sc,
+        const xAOD::StripClusterContainer *sc,
         std::vector<EFTrackingTransient::StripCluster> &ef_sc,
         unsigned long N) const;
 
@@ -57,7 +57,7 @@ public:
      * This is needed for the kernel input.
      */
     StatusCode getInputClusterData(
-        const xAOD::PixelClusterContainerAlt *pc,
+        const xAOD::PixelClusterContainer *pc,
         std::vector<EFTrackingTransient::PixelCluster> &ef_pc,
         unsigned long N) const;
 
@@ -130,10 +130,10 @@ private:
                                                    "Maximum number of space points that can be processed"};
                                                    
     
-    SG::ReadHandleKey<xAOD::StripClusterContainerAlt> m_stripClustersKey{
+    SG::ReadHandleKey<xAOD::StripClusterContainer> m_stripClustersKey{
         this, "StripClusterContainerKey", "ITkStripClusters",
         "Key for Strip Cluster Containers"};
-    SG::ReadHandleKey<xAOD::PixelClusterContainerAlt> m_pixelClustersKey{
+    SG::ReadHandleKey<xAOD::PixelClusterContainer> m_pixelClustersKey{
         this, "PixelClusterContainerKey", "ITkPixelClusters",
         "Key for Pixel Cluster Containers"};
     SG::ReadHandleKey<xAOD::SpacePointContainer> m_spacePointsKey{

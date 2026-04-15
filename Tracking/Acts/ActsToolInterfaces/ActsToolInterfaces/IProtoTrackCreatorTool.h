@@ -32,8 +32,8 @@ namespace ActsTrk {
     /// @param foundProtoTracks: vector to hold the found proto tracks - will be populated by the method.
     /// Method will not discard existing content 
     virtual StatusCode findProtoTracks(const EventContext& ctx,
-                  const xAOD::PixelClusterContainerAlt & pixelContainer,
-                  const xAOD::StripClusterContainerAlt & stripContainer,
+                  const xAOD::PixelClusterContainer & pixelContainer,
+                  const xAOD::StripClusterContainer & stripContainer,
                   std::vector<ActsTrk::ProtoTrack> & foundProtoTracks ) const = 0;
   };
   

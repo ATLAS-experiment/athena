@@ -32,7 +32,7 @@ namespace ActsTrk {
     }
 
   StatusCode StripSpacePointFormationTool::produceSpacePoints(const EventContext& ,
-                                                              const xAOD::StripClusterContainerAlt& clusterContainer,
+                                                              const xAOD::StripClusterContainer& clusterContainer,
                                                               const InDet::SiElementPropertiesTable& properties,
                                                               const InDetDD::SiDetectorElementCollection& elements,
                                                               const Amg::Vector3D& beamSpotVertex,

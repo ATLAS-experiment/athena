@@ -99,7 +99,7 @@ namespace ActsTrk::detail {
           using PixelClusterAuxDataCacheProxy =  ClusterAuxDataCacheWithClusterAccess<PixelClusterAuxDataCacheCollection >;
           
           using StripClusterAuxDataCacheProxy =  ClusterAuxDataCacheWithClusterAccess<StripClusterAuxDataCacheCollection >;
-          // || std::is_same_v<T_Container,xAOD::StripClusterContainerAlt>
+          // || std::is_same_v<T_Container,xAOD::StripClusterContainer>
           static_assert(    std::is_same_v<T_Container,PixelClusterAuxDataCacheProxy>
                          || std::is_same_v<T_Container,StripClusterAuxDataCacheProxy>
                          || std::is_same_v<T_Container,xAOD::HGTDClusterContainer>);

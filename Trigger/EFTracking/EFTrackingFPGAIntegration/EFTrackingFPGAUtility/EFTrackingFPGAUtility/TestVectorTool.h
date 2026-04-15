@@ -71,18 +71,18 @@ public:
 
     /**
      * @brief Encode xAOD pixel cluster to L2G EDM TV
-     * @param pixelClusters The xAOD::PixelClusterContainerAlt object
+     * @param pixelClusters The xAOD::PixelClusterContainer object
      * @param encodedData The encoded data in the form of std::vector<uint64_t>
      */
-    StatusCode encodePixelL2G(const xAOD::PixelClusterContainerAlt *pixelClusters, std::vector<uint64_t> &encodedData) const;
+    StatusCode encodePixelL2G(const xAOD::PixelClusterContainer *pixelClusters, std::vector<uint64_t> &encodedData) const;
 
     /**
      * @brief Encode xAOD strip cluster to L2G EDM TV
      * 
-     * @param stripClusters The xAOD::StripClusterContainerAlt object
+     * @param stripClusters The xAOD::StripClusterContainer object
      * @param encodedData The encoded data in the form of std::vector<uint64_t>
      */
-    StatusCode encodeStripL2G(const xAOD::StripClusterContainerAlt *stripClusters, std::vector<uint64_t> &encodedData) const;
+    StatusCode encodeStripL2G(const xAOD::StripClusterContainer *stripClusters, std::vector<uint64_t> &encodedData) const;
 };
 
 #endif // EFTRACKING_FPGA_INTEGRATION__TEST_VECTOR_TOOL_H

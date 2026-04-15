@@ -5,7 +5,7 @@
 ///////////////////////////////////////////////////////////////////
 // Header file for class PixelClusterTruthDecoratorAlg
 //
-// The algorithm extends xAOD::PixelClusterContainerAlt
+// The algorithm extends xAOD::PixelClusterContainer
 // with additional decorations associated to truth information
 // And stores the results in a TrackMeasurementValidationContainer
 // for compatibility with monitoring tools
@@ -51,13 +51,13 @@ namespace ActsTrk {
     // and which one to skip. It does so by filling a std::vector<bool>, which
     // size is the same as the cluster collection.
     StatusCode labelMeasurementToKeep(const EventContext& ctx,
-				      const xAOD::PixelClusterContainerAlt& clusters,
+				      const xAOD::PixelClusterContainer& clusters,
 				      std::vector<bool>& labels) const;
     
   private:
     ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool {this, "LorentzAngleTool", ""};
 
-    SG::ReadHandleKey<xAOD::PixelClusterContainerAlt> m_clustercontainer_key {this,"ClusterContainer", "","Input Pixel Cluster container"};
+    SG::ReadHandleKey<xAOD::PixelClusterContainer> m_clustercontainer_key {this,"ClusterContainer", "","Input Pixel Cluster container"};
     SG::ReadHandleKey<ActsTrk::MeasurementToTruthParticleAssociation> m_associationMap_key {this,"AssociationMapOut","", "Association map between measurements and truth particles"};
 
     SG::ReadHandleKeyArray< xAOD::TrackParticleContainer > m_trackParticlesKey {this, "TrackParticles", {}, "Input xAOD::TrackParticles"};
@@ -66,7 +66,7 @@ namespace ActsTrk {
     SG::WriteHandleKey<xAOD::TrackMeasurementValidationContainer> m_write_xaod_key{this,"MeasurementContainer","", "Output Pixel Validation Clusters"};
 
     // Decorations
-    SG::WriteDecorHandleKey< xAOD::PixelClusterContainerAlt > m_trackMeasurement_link {this, "MeasurementLink", m_clustercontainer_key, "validationMeasurementLink"};
+    SG::WriteDecorHandleKey< xAOD::PixelClusterContainer > m_trackMeasurement_link {this, "MeasurementLink", m_clustercontainer_key, "validationMeasurementLink"};
 
     SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_truth_indices {this, "MeasurementTruthIndices", m_write_xaod_key, "truth_index"};
     SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_truth_barcodes {this, "MeasurementTruthBarcode", m_write_xaod_key, "truth_barcode"};

@@ -36,9 +36,9 @@ namespace ActsTrk{
     private: 
 
       // the pixel clusters to read as input 
-      SG::ReadHandleKey<xAOD::PixelClusterContainerAlt> m_PixelClusters{this, "PixelClusterContainer","","the pix clusters"};
+      SG::ReadHandleKey<xAOD::PixelClusterContainer> m_PixelClusters{this, "PixelClusterContainer","","the pix clusters"};
       // the strip clusters to read as input 
-      SG::ReadHandleKey<xAOD::StripClusterContainerAlt> m_StripClusters{this, "StripClusterContainer","","the strip clusters"};
+      SG::ReadHandleKey<xAOD::StripClusterContainer> m_StripClusters{this, "StripClusterContainer","","the strip clusters"};
       // the user-provided pattern recognition tool to test 
       ToolHandle<ActsTrk::IProtoTrackCreatorTool> m_patternBuilder{this, "PatternBuilder", "", "the pattern builder to use"};
       // the track fitter to use for the refit 

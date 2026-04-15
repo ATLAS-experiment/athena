@@ -57,11 +57,11 @@ namespace InDet {
     auto vertex = beamSpot->beamVtx().position();
 
     // Cluster Containers if requested
-    std::unique_ptr< xAOD::PixelClusterContainerAlt > pixel_cluster_xaod_container = std::make_unique< xAOD::PixelClusterContainerAlt >();
+    std::unique_ptr< xAOD::PixelClusterContainer > pixel_cluster_xaod_container = std::make_unique< xAOD::PixelClusterContainer >();
     std::unique_ptr< xAOD::PixelClusterAuxContainer > pixel_cluster_xaod_aux_container = std::make_unique< xAOD::PixelClusterAuxContainer >();
     pixel_cluster_xaod_container->setStore( pixel_cluster_xaod_aux_container.get() );
 
-    std::unique_ptr< xAOD::StripClusterContainerAlt > strip_cluster_xaod_container = std::make_unique< xAOD::StripClusterContainerAlt >();
+    std::unique_ptr< xAOD::StripClusterContainer > strip_cluster_xaod_container = std::make_unique< xAOD::StripClusterContainer >();
     std::unique_ptr< xAOD::StripClusterAuxContainer > strip_cluster_xaod_aux_container =  std::make_unique< xAOD::StripClusterAuxContainer >();
     strip_cluster_xaod_container->setStore( strip_cluster_xaod_aux_container.get() );
     
@@ -83,13 +83,13 @@ namespace InDet {
     // Save optional clusters
     if (m_convertClusters) {
       if (m_processPixel.value()) {
-	SG::WriteHandle< xAOD::PixelClusterContainerAlt > pixel_cluster_xaod_handle = SG::makeHandle( m_outClustersPixel, ctx );
+	SG::WriteHandle< xAOD::PixelClusterContainer > pixel_cluster_xaod_handle = SG::makeHandle( m_outClustersPixel, ctx );
 	ATH_CHECK( pixel_cluster_xaod_handle.record( std::move(pixel_cluster_xaod_container),
 						     std::move(pixel_cluster_xaod_aux_container) ) );
       }
 
       if (m_processStrip.value()) {
-	SG::WriteHandle< xAOD::StripClusterContainerAlt > strip_cluster_xaod_handle = SG::makeHandle( m_outClustersStrip, ctx );
+	SG::WriteHandle< xAOD::StripClusterContainer > strip_cluster_xaod_handle = SG::makeHandle( m_outClustersStrip, ctx );
 	ATH_CHECK( strip_cluster_xaod_handle.record( std::move(strip_cluster_xaod_container),
 						     std::move(strip_cluster_xaod_aux_container) ) );
       }
@@ -99,7 +99,7 @@ namespace InDet {
   }
 
   StatusCode InDetToXAODSpacePointConversion::convertPixel(const EventContext& ctx,
-							   xAOD::PixelClusterContainerAlt* cluster_xaod_container) const
+							   xAOD::PixelClusterContainer* cluster_xaod_container) const
   {
     static const SG::AuxElement::Accessor< ElementLink< ::SpacePointCollection > > linkAcc("pixelSpacePointLink");
     
@@ -175,7 +175,7 @@ namespace InDet {
 
   StatusCode InDetToXAODSpacePointConversion::convertStrip(const EventContext& ctx,
 							   const Amg::Vector3D& vertex,
-							   xAOD::StripClusterContainerAlt* cluster_xaod_container,
+							   xAOD::StripClusterContainer* cluster_xaod_container,
 							   std::unordered_map<Identifier, std::size_t>& mapClusters) const
   {
     const InDetDD::SiDetectorElementCollection* stripElements = nullptr;
@@ -271,7 +271,7 @@ namespace InDet {
 
   StatusCode InDetToXAODSpacePointConversion::convertStripOverlap(const EventContext& ctx,
 								  const Amg::Vector3D& vertex,
-								  xAOD::StripClusterContainerAlt* cluster_xaod_container,
+								  xAOD::StripClusterContainer* cluster_xaod_container,
 								  std::unordered_map<Identifier, std::size_t>& mapClusters) const
   {
     const InDetDD::SiDetectorElementCollection* stripElements = nullptr;

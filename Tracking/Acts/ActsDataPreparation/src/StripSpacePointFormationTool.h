@@ -45,7 +45,7 @@ namespace ActsTrk {
         /// @name Production of space points
         //@{
         virtual StatusCode produceSpacePoints(const EventContext& ctx,
-					    const xAOD::StripClusterContainerAlt& clusterContainer,
+					    const xAOD::StripClusterContainer& clusterContainer,
 					    const InDet::SiElementPropertiesTable& properties,
 					    const InDetDD::SiDetectorElementCollection& elements,
 					    const Amg::Vector3D& beamSpotVertex,

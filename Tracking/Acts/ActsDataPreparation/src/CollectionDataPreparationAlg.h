@@ -26,11 +26,11 @@ namespace ActsTrk {
 
   // Pixel Clusters
   class PixelClusterDataPreparationAlg
-    : public DataPreparationAlg< xAOD::PixelClusterContainerAlt,
+    : public DataPreparationAlg< xAOD::PixelClusterContainer,
 				 InDetDD::SiDetectorElementCollection,
 				 false > {
   public:
-    using DataPreparationAlg<xAOD::PixelClusterContainerAlt,
+    using DataPreparationAlg<xAOD::PixelClusterContainer,
 			     InDetDD::SiDetectorElementCollection,
 			     false>::DataPreparationAlg;
 
@@ -39,22 +39,22 @@ namespace ActsTrk {
   };
   
   class PixelClusterCacheDataPreparationAlg
-    : public DataPreparationAlg< xAOD::PixelClusterContainerAlt,
+    : public DataPreparationAlg< xAOD::PixelClusterContainer,
 				 InDetDD::SiDetectorElementCollection,
 				 true > {
   public:
-    using DataPreparationAlg<xAOD::PixelClusterContainerAlt,
+    using DataPreparationAlg<xAOD::PixelClusterContainer,
 			     InDetDD::SiDetectorElementCollection,
 			     true>::DataPreparationAlg;
   };
   
   // Strip Clusters
   class StripClusterDataPreparationAlg
-    : public DataPreparationAlg< xAOD::StripClusterContainerAlt,
+    : public DataPreparationAlg< xAOD::StripClusterContainer,
 				 InDetDD::SiDetectorElementCollection,
 				 false > {
   public:
-    using DataPreparationAlg<xAOD::StripClusterContainerAlt,
+    using DataPreparationAlg<xAOD::StripClusterContainer,
 			     InDetDD::SiDetectorElementCollection,
 			     false>::DataPreparationAlg;
 
@@ -63,11 +63,11 @@ namespace ActsTrk {
   };
 
   class StripClusterCacheDataPreparationAlg
-    : public DataPreparationAlg< xAOD::StripClusterContainerAlt,
+    : public DataPreparationAlg< xAOD::StripClusterContainer,
 				 InDetDD::SiDetectorElementCollection,
 				 true > {
   public:
-    using DataPreparationAlg< xAOD::StripClusterContainerAlt,
+    using DataPreparationAlg< xAOD::StripClusterContainer,
 			      InDetDD::SiDetectorElementCollection,
 			      true >::DataPreparationAlg;
   };

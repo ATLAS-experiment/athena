@@ -65,7 +65,7 @@ namespace ActsTrk {
 
         /// @name Input data using SG::ReadHandleKey
         //@{
-        SG::ReadHandleKey<xAOD::StripClusterContainerAlt>  m_stripClusterContainerKey{this, "StripClusters", "", "name of the input strip cluster container"};
+        SG::ReadHandleKey<xAOD::StripClusterContainer>  m_stripClusterContainerKey{this, "StripClusters", "", "name of the input strip cluster container"};
         //@}
 
         /// @name Input condition data using SG::ReadCondHandleKey
@@ -111,7 +111,7 @@ namespace ActsTrk {
         Cache_WriteHandleKey m_OSPCache{this,"OSPCache",""};
         Cache_BackendUpdateHandleKey m_OSPCacheBackend{this,"OSPCacheBackend",""};
 
-        void fillSpacepoints(xAOD::SpacePointContainer* cont, std::vector<StripSP>& input, const xAOD::StripClusterContainerAlt* inputClusters, unsigned int indexBase=0) const;
+        void fillSpacepoints(xAOD::SpacePointContainer* cont, std::vector<StripSP>& input, const xAOD::StripClusterContainer* inputClusters, unsigned int indexBase=0) const;
 
     private:
       enum EStat {

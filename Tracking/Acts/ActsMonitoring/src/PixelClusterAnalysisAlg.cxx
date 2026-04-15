@@ -27,9 +27,9 @@ namespace ActsTrk {
   StatusCode PixelClusterAnalysisAlg::fillHistograms(const EventContext& ctx) const {
     ATH_MSG_DEBUG( "In " << name() << "::fillHistograms()" );
     
-    SG::ReadHandle< xAOD::PixelClusterContainerAlt > inputPixelClusterContainer( m_pixelClusterContainerKey, ctx );
+    SG::ReadHandle< xAOD::PixelClusterContainer > inputPixelClusterContainer( m_pixelClusterContainerKey, ctx );
     if (!inputPixelClusterContainer.isValid()){
-        ATH_MSG_FATAL("xAOD::PixelClusterContainerAlt with key " << m_pixelClusterContainerKey.key() << " is not available...");
+        ATH_MSG_FATAL("xAOD::PixelClusterContainer with key " << m_pixelClusterContainerKey.key() << " is not available...");
         return StatusCode::FAILURE;
     }
 

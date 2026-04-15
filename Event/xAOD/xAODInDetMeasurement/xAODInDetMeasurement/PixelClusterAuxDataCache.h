@@ -13,8 +13,8 @@
 /// a loop.
 template<Utils::AccessPolicy accessPolicy=Utils::AccessPolicy::Const>
 struct PixelClusterAuxDataCache
-   : InDetClusterAuxDataCache< typename Utils::ContainerAccessHelper<const xAOD::PixelClusterContainerAlt, accessPolicy>::ContainerType ,2 >  {
-   using T_Container = typename Utils::ContainerAccessHelper<const xAOD::PixelClusterContainerAlt, accessPolicy>::ContainerType;
+   : InDetClusterAuxDataCache< typename Utils::ContainerAccessHelper<const xAOD::PixelClusterContainer, accessPolicy>::ContainerType ,2 >  {
+   using T_Container = typename Utils::ContainerAccessHelper<const xAOD::PixelClusterContainer, accessPolicy>::ContainerType;
    using BASE = InDetClusterAuxDataCache< T_Container ,2 >;
 
    template <Utils::AccessPolicy proxyAccessPolicy=Utils::AccessPolicy::Const>

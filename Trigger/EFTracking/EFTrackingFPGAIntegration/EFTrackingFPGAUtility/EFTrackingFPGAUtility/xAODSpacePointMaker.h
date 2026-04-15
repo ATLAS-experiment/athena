@@ -65,12 +65,12 @@ public:
 
 private:
   /// Key for the pixel cluster container to read from
-  SG::ReadHandleKey<xAOD::PixelClusterContainerAlt> m_pixelClusterKey{
+  SG::ReadHandleKey<xAOD::PixelClusterContainer> m_pixelClusterKey{
       this, "PixelClusterContainerKey", "FPGAPixelClusters",
       "Key for input pixel cluster container"};
 
   /// Key for the strip cluster container to read from
-  SG::ReadHandleKey<xAOD::StripClusterContainerAlt> m_stripClusterKey{
+  SG::ReadHandleKey<xAOD::StripClusterContainer> m_stripClusterKey{
       this, "StripClusterContainerKey", "FPGAStripClusters",
       "Key for input strip cluster container"};
 

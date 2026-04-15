@@ -44,7 +44,7 @@ public:
 	       std::vector<typename IStripClusteringTool::ClusterCollection>& collection) const override;
 
     virtual /*StripClusterAuxDataCache<Utils::AccessPolicy::Mutable>*/ std::any
-    createAuxDataCache(xAOD::StripClusterContainerAlt& cont, std::size_t nClusterRDOs) const override;
+    createAuxDataCache(xAOD::StripClusterContainer& cont, std::size_t nClusterRDOs) const override;
 
     virtual StatusCode
     makeClusters(const EventContext& ctx,

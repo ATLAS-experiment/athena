@@ -167,11 +167,11 @@ StatusCode FPGAOutputValidationAlg::initialize() {
 StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const { 
   if (m_pixelKeys.size() == 2 && m_doDiffHistograms) { /// just compare two for now
     m_chrono->chronoStart("FPGAOutputValidationAlg::pixel diff");
-    const SG::ReadHandleKey<xAOD::PixelClusterContainerAlt>& key0 = m_pixelKeys[0];
-    const SG::ReadHandleKey<xAOD::PixelClusterContainerAlt>& key1 = m_pixelKeys[1];
-    SG::ReadHandle<xAOD::PixelClusterContainerAlt> handle0{key0, ctx};
+    const SG::ReadHandleKey<xAOD::PixelClusterContainer>& key0 = m_pixelKeys[0];
+    const SG::ReadHandleKey<xAOD::PixelClusterContainer>& key1 = m_pixelKeys[1];
+    SG::ReadHandle<xAOD::PixelClusterContainer> handle0{key0, ctx};
     ATH_CHECK(handle0.isValid());
-    SG::ReadHandle<xAOD::PixelClusterContainerAlt> handle1{key1, ctx};
+    SG::ReadHandle<xAOD::PixelClusterContainer> handle1{key1, ctx};
     ATH_CHECK(handle1.isValid());
     
     if (m_checkClusterRdos) {
@@ -194,7 +194,7 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
       }
     }
 
-    const xAOD::PixelClusterContainerAlt pixelClusters1 = *handle1;
+    const xAOD::PixelClusterContainer pixelClusters1 = *handle1;
     std::unordered_multimap<xAOD::DetectorIdentType, const xAOD::PixelCluster*> pixelClustersMap1;
     std::unordered_multimap<xAOD::DetectorIDHashType, const xAOD::PixelCluster*> pixelClustersHashIdMap1;
     for (const auto* cluster1 : pixelClusters1) {
@@ -284,15 +284,15 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
 
   if (m_stripKeys.size() == 2 && m_doDiffHistograms) { /// just compare two for now
     m_chrono->chronoStart("FPGAOutputValidationAlg::strip diff");
-    const SG::ReadHandleKey<xAOD::StripClusterContainerAlt>& key0 = m_stripKeys[0];
-    const SG::ReadHandleKey<xAOD::StripClusterContainerAlt>& key1 = m_stripKeys[1];
-    SG::ReadHandle<xAOD::StripClusterContainerAlt> handle0{key0, ctx};
+    const SG::ReadHandleKey<xAOD::StripClusterContainer>& key0 = m_stripKeys[0];
+    const SG::ReadHandleKey<xAOD::StripClusterContainer>& key1 = m_stripKeys[1];
+    SG::ReadHandle<xAOD::StripClusterContainer> handle0{key0, ctx};
     ATH_CHECK(handle0.isValid());
-    SG::ReadHandle<xAOD::StripClusterContainerAlt> handle1{key1, ctx};
+    SG::ReadHandle<xAOD::StripClusterContainer> handle1{key1, ctx};
     ATH_CHECK(handle1.isValid());
 
     if (m_checkClusterRdos) {
-      const xAOD::StripClusterContainerAlt stripClusters0 = *handle0;
+      const xAOD::StripClusterContainer stripClusters0 = *handle0;
       std::unordered_multimap<xAOD::DetectorIDHashType, const xAOD::StripCluster*> stripClustersHashIdMap0; // assumes that the first key is the FPGA one
       for (const auto* cluster0 : stripClusters0) {
         const xAOD::DetectorIDHashType hashId0 = cluster0->identifierHash();
@@ -314,7 +314,7 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
         ATH_MSG_ERROR("Strip cluster pairs with common RDOs:\n" << ss.str());
       }
     }
-    const xAOD::StripClusterContainerAlt stripClusters1 = *handle1; 
+    const xAOD::StripClusterContainer stripClusters1 = *handle1; 
     std::unordered_multimap<xAOD::DetectorIdentType, const xAOD::StripCluster*> stripClustersMap1;
     std::unordered_multimap<xAOD::DetectorIDHashType, const xAOD::StripCluster*> stripClustersHashIdMap1;
     for (const auto *cluster1 : stripClusters1) {
@@ -398,8 +398,8 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
   }
 
   for (std::size_t index = 0; index < m_pixelKeys.size(); index++) {
-    const SG::ReadHandleKey<xAOD::PixelClusterContainerAlt>& key = m_pixelKeys[index];
-    SG::ReadHandle<xAOD::PixelClusterContainerAlt> handle{key, ctx};
+    const SG::ReadHandleKey<xAOD::PixelClusterContainer>& key = m_pixelKeys[index];
+    SG::ReadHandle<xAOD::PixelClusterContainer> handle{key, ctx};
     ATH_CHECK(handle.isValid());
 
 
@@ -430,8 +430,8 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
   }
       
   for (std::size_t index = 0; index < m_stripKeys.size(); index++) {
-    const SG::ReadHandleKey<xAOD::StripClusterContainerAlt>& key = m_stripKeys[index];
-    SG::ReadHandle<xAOD::StripClusterContainerAlt> handle{key, ctx};
+    const SG::ReadHandleKey<xAOD::StripClusterContainer>& key = m_stripKeys[index];
+    SG::ReadHandle<xAOD::StripClusterContainer> handle{key, ctx};
     ATH_CHECK(handle.isValid());
 
     for(auto cluster : *handle)
