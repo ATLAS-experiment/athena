@@ -27,6 +27,8 @@
 #include "xAODMuonPrepData/CombinedMuonStrip.h" 
 
 #include "Acts/Surfaces/detail/LineHelper.hpp"
+#include "Acts/Utilities/MathHelpers.hpp"
+#include "Acts/Definitions/Units.hpp"
 
 namespace {
     template <class MeasType> const Acts::Surface& fetchSurface(const xAOD::UncalibratedMeasurement* meas) {
@@ -183,25 +185,58 @@ namespace xAOD{
                                      combinedPrd->secondaryStrip());
     }
     
-    std::pair<double, double> positionAndCovariance(const UncalibratedMeasurement* oneDimMeas) {
-        double pos{0.}, cov{0.};
+    std::pair<Amg::Vector2D, AmgSymMatrix(2)> positionAndCovariance(const UncalibratedMeasurement* oneDimMeas) {
+        /** @brief dummy value to assign to the non-sensitive part of the covariance */
+        using namespace Acts::UnitLiterals;
+        constexpr double covStrip = Acts::square(1._km);
+        Amg::Vector2D pos{Amg::Vector2D::Zero()};
+        AmgSymMatrix(2) cov{covStrip * AmgSymMatrix(2)::Identity()};
         /// These conditions should be trivially fullfilled but it's worth
         /// to keep a check for the debug builds
         assert(oneDimMeas != nullptr);
         assert(oneDimMeas->numDimensions() == 1);
+
         switch (oneDimMeas->type()) {
             using enum UncalibMeasType;
-            case MMClusterType:
-            case sTgcStripType:
-            case TgcStripType:
-            case RpcStripType: {
-                pos = oneDimMeas->localPosition<1>()[0];
-                cov = oneDimMeas->localCovariance<1>()[0];
+            case MMClusterType: {
+                const auto* clust = static_cast<const MMCluster*>(oneDimMeas);
+                pos = clust->localMeasurementPos().block<2,1>(0,0);
+                cov(0,0) = clust->localCovariance<1>()[0];
+                break;
+            } case sTgcStripType: {
+                const auto* clust = static_cast<const sTgcMeasurement*>(oneDimMeas);
+                const unsigned idx = clust->channelType() == sTgcMeasurement::sTgcChannelTypes::Wire;
+                pos = clust->localMeasurementPos().block<2,1>(0,0);
+                cov(idx, idx) = clust->localCovariance<1>()(0,0);
+                break; 
+            } case TgcStripType: {
+                const auto* stripMeas = static_cast<const TgcStrip*>(oneDimMeas);
+                const unsigned idx = stripMeas->measuresPhi();
+                pos = stripMeas->localMeasurementPos().block<2,1>(0,0);
+                cov(idx, idx) = stripMeas->localCovariance<1>()(0,0);
+                if (idx == 1) {
+                    const auto& radialDesign = stripMeas->readoutElement()->stripLayout(stripMeas->layerHash());
+                    const auto& sensorPlane = stripMeas->readoutElement()->sensorLayout(stripMeas->layerHash());
+                    const Amg::Vector3D phiDir = sensorPlane->to3D(radialDesign.stripDir(stripMeas->channelNumber()),true);
+                    const Amg::Vector3D etaDir = sensorPlane->to3D(radialDesign.stripNormal(stripMeas->channelNumber()),true);
+
+                    AmgSymMatrix(2) trf{AmgSymMatrix(2)::Zero()};
+                    trf.col(1) = etaDir.block<2,1>(0,0);
+                    trf.col(0) = phiDir.block<2,1>(0,0);
+                    trf = trf.inverse();
+                    cov = trf.transpose() * cov * trf;
+                }
+                break;
+            } case RpcStripType: {
+                const auto* clust = static_cast<const RpcMeasurement*>(oneDimMeas);
+                const unsigned idx = clust->measuresPhi();
+                pos = clust->localMeasurementPos().block<2,1>(0,0);
+                cov(idx, idx) = clust->localCovariance<1>()(0,0);
                 break;
             } case MdtDriftCircleType: {
                 const auto* dc = static_cast<const xAOD::MdtDriftCircle*>(oneDimMeas);
-                pos = dc->driftRadius();
-                cov = dc->driftRadiusCov();
+                pos[0] = dc->driftRadius();
+                cov(0,0) = dc->driftRadiusCov();
                 break;
             } default:
                 THROW_EXCEPTION("Unsupported measurement");
@@ -241,7 +276,7 @@ namespace xAOD{
                 const auto* stripMeas = static_cast<const TgcStrip*>(phiStrip);
             
                 const auto& radialDesign = stripMeas->readoutElement()->stripLayout(stripMeas->layerHash());
-                const auto& wireDesign = wireMeas->readoutElement()->wireGangLayout(wireMeas->layerHash());            
+                const auto& wireDesign = wireMeas->readoutElement()->wireGangLayout(wireMeas->layerHash());
                 const auto& sensorPlane = wireMeas->readoutElement()->sensorLayout(stripMeas->layerHash());
                 const Amg::Vector3D phiDir = sensorPlane->to3D(radialDesign.stripDir(stripMeas->channelNumber()),true);
                 const Amg::Vector3D etaDir = sensorPlane->to3D(wireDesign.stripDir(), false);

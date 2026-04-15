@@ -559,11 +559,18 @@ namespace MuonR4{
             } case TgcStripType: {
                 const auto* tgcClust = static_cast<const xAOD::TgcStrip*>(muonMeas);
                 if (!m_useTgcTime) {
-                    const auto proj = tgcClust->measuresPhi() ? ProjectorType::e1DimRotNoTime
-                                                              : ProjectorType::e1DimNoTime;
-                    setState<1, ActsTrk::MutableTrackStateBackend>(proj, 
-                                                                   tgcClust->localPosition<1>(), 
-                                                                   tgcClust->localCovariance<1>(), link, trackState);
+                    if (!tgcClust->measuresPhi()) {
+                        setState<1, ActsTrk::MutableTrackStateBackend>(ProjectorType::e1DimNoTime, 
+                                                                       tgcClust->localPosition<1>(), 
+                                                                       tgcClust->localCovariance<1>(), 
+                                                                       link, trackState);
+
+                    } else {
+                        const auto [pos, cov] = xAOD::positionAndCovariance(tgcClust);
+                        setState<2, ActsTrk::MutableTrackStateBackend>(ProjectorType::e1DimRotNoTime, 
+                                                                       pos, cov, link, trackState);
+
+                    }
                     } else {
                         ATH_MSG_WARNING("Tgc time calibration to be implemented...");
                     }
