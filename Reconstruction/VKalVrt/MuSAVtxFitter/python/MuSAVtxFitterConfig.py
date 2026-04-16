@@ -21,6 +21,7 @@ def MuSAVtxFitterToolConfig(flags, name="MuSAVtxFitterTool", **kwargs):
     kwargs.setdefault("baseChi2Cut", 50)
     
     kwargs.setdefault("doValidation", False)
+    kwargs.setdefault("doStacoRecovery", True)
 
     acc.setPrivateTools(CompFactory.Rec.MuSAVtxFitterTool(name,**kwargs))
     return acc
