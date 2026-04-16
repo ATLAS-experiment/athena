@@ -26,7 +26,7 @@ namespace DerivationFramework {
        DeclareInterfaceID(ISkimmingTool, 1, 0);
 
        /** Virtual destructor */
-       virtual ~ISkimmingTool(){}
+       virtual ~ISkimmingTool() = default;
 
        /** Check that the current event passes this filter */
        virtual bool eventPassesFilter(const EventContext& ctx) const = 0;
