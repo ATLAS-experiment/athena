@@ -508,6 +508,12 @@ bool psc::Psc::stopRun (const ptree& /*args*/)
 {
   psc::Utils::ScopeTimer timer("Psc stopRun");
 
+  if ( Py_IsInitialized() && m_workerID==0 ) {
+    // We are back in the mother process after fork. Fixes deadlock with Python 3.13 (ATR-32627).
+    ERS_DEBUG(1, "After-fork initialization of Python interpreter");
+    PyOS_AfterFork_Parent();
+  }
+
   if(!callOnEventLoopMgr<IService>(&IService::sysStop, "sysStop").isSuccess())
   {
     return false;
