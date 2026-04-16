@@ -64,22 +64,22 @@ namespace CP
 
       std::map<const xAOD::Jet*, const xAOD::Jet*> matchedOfflineOnlineJets;
       if(m_useRun3TriggerEDM){
-      SG::ReadHandle<xAOD::JetContainer> hlt_bjets(m_bjetInput);
+        SG::ReadHandle<xAOD::JetContainer> hlt_bjets(m_bjetInput);
 
-      for (const xAOD::Jet* jet : *jets) {
-        if (m_preselection.getBool(*jet, sys)) {
-          float minDR = 0.4;
-          const xAOD::Jet* bestHLTJet = nullptr;
-          for (const xAOD::Jet* hlt_bjet : *hlt_bjets) {
-            float dR = jet->p4().DeltaR(hlt_bjet->p4());
-            if (dR < minDR) {
-                minDR = dR;
-                bestHLTJet = hlt_bjet;
+        for (const xAOD::Jet* jet : *jets) {
+          if (m_preselection.getBool(*jet, sys)) {
+            float minDR = 0.4;
+            const xAOD::Jet* bestHLTJet = nullptr;
+            for (const xAOD::Jet* hlt_bjet : *hlt_bjets) {
+              float dR = jet->p4().DeltaR(hlt_bjet->p4());
+              if (dR < minDR) {
+                  minDR = dR;
+                  bestHLTJet = hlt_bjet;
+              }
             }
+            matchedOfflineOnlineJets[jet] = bestHLTJet;
           }
-          matchedOfflineOnlineJets[jet] = bestHLTJet;
         }
-      }
       }
 
       for (const xAOD::Jet *jet : *jets)
