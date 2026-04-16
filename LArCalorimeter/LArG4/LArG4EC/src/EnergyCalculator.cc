@@ -656,21 +656,29 @@ G4bool EnergyCalculator::FindIdentifier_Default(
 
   const G4String name = preStepVolume->GetName();
 
-  static const std::vector<std::pair<std::string, int>> patterns = {
+  auto matches_pattern = [](std::string_view text, std::string_view prefix) -> bool {
+    if (!text.starts_with(prefix)) return false;
+    size_t digit_start = prefix.size();
+    return (digit_start + 2 <= text.size() && 
+            std::isdigit(static_cast<unsigned char>(text[digit_start])) &&
+            std::isdigit(static_cast<unsigned char>(text[digit_start + 1])));
+  };
+
+  constexpr auto patterns = std::to_array<std::pair<std::string_view, int>>({
     {"Slice",     1},
     {"Electrode", 2},
     {"Absorber",  2},
     {"Glue",      3},
     {"Lead",      4}
-  };
+  });
+  
   
   int offset = 0;
-  for (const auto& p : patterns) {
+  for (const auto& [prefix, val] : patterns) {
 	  // Regex: Slice[0-9]{2}, Electrode[0-9]{2}, ecc.
-	  std::regex re(p.first + R"(\d{2})");
-	  if (std::regex_search(name, re)) {
-		  offset = p.second;
-		  break;
+    if (matches_pattern(name, prefix)) {
+        offset = val;
+        break;
 	  }
   }
 
