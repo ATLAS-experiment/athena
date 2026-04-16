@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // xAODEventSelector.cxx
@@ -348,6 +348,14 @@ StatusCode xAODEventSelector::initialize()
   return StatusCode::SUCCESS;
 }
 
+StatusCode xAODEventSelector::stop()
+{
+  // Fire EndInputFile for any file still open (the event loop may end
+  // before the file is fully read).
+  m_inputFileGuard.reset();
+  return StatusCode::SUCCESS;
+}
+
 StatusCode xAODEventSelector::finalize()
 {
   ATH_MSG_VERBOSE ("Finalize...");
@@ -386,7 +394,9 @@ xAODEventSelector::next( IEvtSelector::Context& ctx ) const
   const TFile *file = rctx->file();
   if(file && m_nbrEvts==0) {
     //fire the BeginInputFile incident for the first file
-    m_incsvc->fireIncident(FileIncident(name(), "BeginInputFile", file->GetName()));
+    m_inputFileGuard = InputFileIncidentGuard::begin(*m_incsvc, name(),
+                            file->GetName(), {},
+                            /*endFileName=*/file->GetName());
   }
 
   if (!file) { //must be starting another file ...
@@ -404,7 +414,9 @@ xAODEventSelector::next( IEvtSelector::Context& ctx ) const
 	 }
          ATH_MSG_DEBUG("TEvent entries = " << m_tevent_entries);
 	 //fire incident for this file ..
-	 m_incsvc->fireIncident(FileIncident(name(), "BeginInputFile", rctx->file()->GetName()));
+	 InputFileIncidentGuard::transition(m_inputFileGuard, *m_incsvc, name(),
+	                         rctx->file()->GetName(), {},
+	                         /*endFileName=*/rctx->file()->GetName());
       } else {
          // end of collections
 	return StatusCode::FAILURE; //this is a valid failure ... athena will interpret as 'finished looping'
@@ -468,10 +480,8 @@ xAODEventSelector::next( IEvtSelector::Context& ctx ) const
     return StatusCode::SUCCESS;
 
   } else {
-    // file is depleted
-    auto& fnames = rctx->files();
-    std::size_t fidx = rctx->fileIndex();
-    m_incsvc->fireIncident(FileIncident(name(), "EndInputFile", fnames[fidx]));
+    // file is depleted — fire EndInputFile
+    m_inputFileGuard.reset();
 
     // prepare for next file, if any...
     // std::cout << "=========================================================="
@@ -865,13 +875,6 @@ xAODEventSelector::createRootBranchAddresses(StoreID::type storeID,
   }
 
   m_needReload = false;
-  // remember that we need to fire a BeginInputFile incident.
-  // we can't fire it just now as some client may need the tree and its
-  // content loaded in the evtstore when their ::handle method is
-  // called.
-  // so we do it later.
-  //MOVED TO handle method - which is fired on BeginEvent after StoreGateSvc
-  //m_fireBIF = true;
 
   ATH_MSG_DEBUG("In xAODEventSelector::createRootBranchAddresses end ...");
 
