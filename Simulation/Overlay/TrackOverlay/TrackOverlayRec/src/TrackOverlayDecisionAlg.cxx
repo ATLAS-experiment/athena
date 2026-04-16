@@ -1,5 +1,5 @@
 /*
- *  *   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ *  *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  *   *   */
 //
 #include <fstream>
@@ -184,6 +184,9 @@ StatusCode TrackOverlayDecisionAlg::execute(const EventContext &ctx) const
             if (deltaPhi > M_PI) {
                 deltaPhi -= 2.0 * M_PI;
             }
+	    else if (deltaPhi < -M_PI) {
+	        deltaPhi += 2.0 * M_PI;
+	    }
             float distances = std::sqrt(deltaEta * deltaEta + deltaPhi * deltaPhi);
             if (distances < 0.05){
                 multiplicity_0p05++;
