@@ -64,6 +64,7 @@ namespace DerivationFramework {
       double m_lxyMin;                      //!< min lxy cut
       int m_DoVertexType;                   //!< Allows user to skip certain vertexes - bitwise test 7==all(111)
       bool m_do3d;
+      SG::WriteDecorHandleKey<xAOD::VertexContainer> m_passKey{this, "WriteDecorHandleKey", m_inputVtxContainerName, "passed" };
   }; 
 }
 
