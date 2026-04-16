@@ -19,6 +19,7 @@
 #include "TruthUtils/ParticleConstants.h"
 #include <vector>
 #include <string>
+#include "StoreGate/WriteDecorHandle.h"
 
 namespace DerivationFramework {
 
@@ -58,6 +59,8 @@ namespace DerivationFramework {
     CHECK( m_v0Tools.retrieve() );
     ATH_CHECK(m_inputVtxContainerName.initialize());
 
+    m_passKey = std::format("passed_{}", m_hypoName);
+    ATH_CHECK( m_passKey.initialize() );
     return StatusCode::SUCCESS;
     
   }
@@ -137,6 +140,7 @@ namespace DerivationFramework {
     bool doA0   = (m_DoVertexType & 2) != 0;
     bool doZ0   = (m_DoVertexType & 4) != 0;
     bool doZ0BA = (m_DoVertexType & 8) != 0;
+    SG::WriteDecorHandle<xAOD::VertexContainer, Char_t> passflag(m_passKey, ctx);
     // loop over onia candidates and perform selection and augmentation
     xAOD::VertexContainer::const_iterator oniaItr = oniaContainer->begin();
     for(; oniaItr!=oniaContainer->end(); ++oniaItr) {
@@ -164,27 +168,25 @@ namespace DerivationFramework {
       // perform the selection (i.e. flag the vertex)
       //----------------------------------------------------
       // flag the vertex indicating that it is selected by this selector
-      onia.setPass(true);
+      bool pass = true;
       
       // now we check othe cuts. if one of them didn't pass, set the flag to 0
       // and continue to the next candidate:
       
       // 1) invariant mass cut
       if( onia.mass() < m_massMin || onia.mass() > m_massMax) {
-        onia.setPass(false); // flag as failed
-        continue;
+        pass = false; // flag as failed
       }
 
       // 2) chi2 cut
-      if( onia.vtx()->chiSquared() > m_chi2Max) {
-        onia.setPass(false);; // flag as failed
-        continue;
+      if(pass && onia.vtx()->chiSquared() > m_chi2Max) {
+        pass = false; // flag as failed
       }
       // 3) lxy cut
-      if( onia.lxy(xAOD::BPhysHelper::PV_MAX_SUM_PT2) < m_lxyMin) {
-        onia.setPass(false);; // flag as failed
-        continue;
+      if(pass && onia.lxy(xAOD::BPhysHelper::PV_MAX_SUM_PT2) < m_lxyMin) {
+        pass = false; // flag as failed
       }
+      passflag(**oniaItr) = pass;
 
     } // end of loop over onia candidates
 
@@ -194,7 +196,7 @@ namespace DerivationFramework {
     for (SG::auxid_t auxid : decor_auxids) {
       onia_nc->lockDecoration (auxid);
     }
-    
+
     // all OK
     return StatusCode::SUCCESS;
   }  
