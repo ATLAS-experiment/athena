@@ -247,7 +247,7 @@ StatusCode FPGATrackSimSpacePointsTool::makeSpacePoints(FPGATrackSimTowerInputHe
 }
 
 
-bool FPGATrackSimSpacePointsTool::searchForMatch(FPGATrackSimHit& hit_in,std::vector<FPGATrackSimHit>& hits_outer,FPGATrackSimTowerInputHeader &tower, std::vector<FPGATrackSimCluster> &spacepoints)
+bool FPGATrackSimSpacePointsTool::searchForMatch(const FPGATrackSimHit& hit_in, const std::vector<FPGATrackSimHit>& hits_outer, FPGATrackSimTowerInputHeader &tower, std::vector<FPGATrackSimCluster> &spacepoints)
 {
     bool foundPair = false;
     for (const FPGATrackSimHit& hit_out : hits_outer)
@@ -261,29 +261,30 @@ bool FPGATrackSimSpacePointsTool::searchForMatch(FPGATrackSimHit& hit_in,std::ve
     return foundPair;
 }
 
-//hit_in and hit_out are suspiciously named and only passed by value;
-//we assume this is intentional and suppress the coverity warning
-//coverity[PASS_BY_VALUE]
-void FPGATrackSimSpacePointsTool::addSpacePoints(FPGATrackSimHit hit_in, FPGATrackSimHit hit_out ,FPGATrackSimTowerInputHeader &tower, std::vector<FPGATrackSimCluster> &spacepoints)
+void FPGATrackSimSpacePointsTool::addSpacePoints(const FPGATrackSimHit &hit_in, const FPGATrackSimHit &hit_out, FPGATrackSimTowerInputHeader &tower, std::vector<FPGATrackSimCluster> &spacepoints)
 {
+    // Build spacepoint hits from local copies so input hits remain unchanged.
+    FPGATrackSimHit sp_hit_in = hit_in;
+    FPGATrackSimHit sp_hit_out = hit_out;
+
     // Make a spacepoint
     //------------------
     float x{},y{},z{};
-    calcPosition(hit_in, hit_out, x, y, z);
+    calcPosition(sp_hit_in, sp_hit_out, x, y, z);
 
-    float phi_window = abs(hit_in.getGPhi()-hit_out.getGPhi());
+    float phi_window = abs(sp_hit_in.getGPhi()-sp_hit_out.getGPhi());
 
     // Let's print out the coords of the spacepoints we identify.
     float r = TMath::Sqrt(x*x + y*y);
     ATH_MSG_DEBUG("Spacepoint x = " << x << ", y = " << y << ", z = " << z << ", r = " << r);
-    ATH_MSG_DEBUG("    Paired hit z = " << hit_in.getZ() << ", r = " << hit_in.getR() << ", phi = " << hit_in.getGPhi() << ", phi module = " << hit_in.getPhiModule() << ", eta module = " << hit_in.getEtaModule());
-    ATH_MSG_DEBUG("    Paired hit z = " << hit_out.getZ() << ", r = " << hit_out.getR() << ", phi = " << hit_out.getGPhi() << ", phi module = " << hit_out.getPhiModule() << ", eta module = " << hit_out.getEtaModule());
+    ATH_MSG_DEBUG("    Paired hit z = " << sp_hit_in.getZ() << ", r = " << sp_hit_in.getR() << ", phi = " << sp_hit_in.getGPhi() << ", phi module = " << sp_hit_in.getPhiModule() << ", eta module = " << sp_hit_in.getEtaModule());
+    ATH_MSG_DEBUG("    Paired hit z = " << sp_hit_out.getZ() << ", r = " << sp_hit_out.getR() << ", phi = " << sp_hit_out.getGPhi() << ", phi module = " << sp_hit_out.getPhiModule() << ", eta module = " << sp_hit_out.getEtaModule());
 
     // We need to merge the truth information for the hits together in order
     // to use them in matrix generation.
 
-    const FPGATrackSimMultiTruth truth_in = hit_in.getTruth();
-    const FPGATrackSimMultiTruth truth_out = hit_out.getTruth();
+    const FPGATrackSimMultiTruth truth_in = sp_hit_in.getTruth();
+    const FPGATrackSimMultiTruth truth_out = sp_hit_out.getTruth();
 
     FPGATrackSimMultiTruth new_truth;
     new_truth.add(truth_in);
@@ -301,41 +302,41 @@ void FPGATrackSimSpacePointsTool::addSpacePoints(FPGATrackSimHit hit_in, FPGATra
     // This function now does everything (I think) including storing the correct
     // local coordinates for later retrieval.
     // Maybe it should return a new FPGATrackSimHit rather than modifying in place.
-    hit_in.makeSpacepoint(x, y, z, phi_window, hit_out, new_truth);
-    hit_in.setCluster2ID(hit_out.getCluster1ID());
+    sp_hit_in.makeSpacepoint(x, y, z, phi_window, sp_hit_out, new_truth);
+    sp_hit_in.setCluster2ID(sp_hit_out.getCluster1ID());
 
     if (m_reduceCoordPrecision)
-        reduceGlobalCoordPrecision(hit_in);
+        reduceGlobalCoordPrecision(sp_hit_in);
 
     // abusing hit type 'guessed' to be able to indentify it as spacepoint later on
     // Guessed is ambiguous with an actual guessed hit-- there is a spacepoint type which
     // should be used instead.
     //    hit_in.setHitType(HitType::guessed);
     //    hit_in.setHitType(HitType::spacepoint);
-    tower.addHit(hit_in);
+    tower.addHit(sp_hit_in);
 
     if (m_duplicate) {
-        hit_out.makeSpacepoint(x, y, z, phi_window, hit_in, new_truth);
-        hit_out.setCluster2ID(hit_in.getCluster1ID());
+        sp_hit_out.makeSpacepoint(x, y, z, phi_window, sp_hit_in, new_truth);
+        sp_hit_out.setCluster2ID(sp_hit_in.getCluster1ID());
 
         if (m_reduceCoordPrecision)
-            reduceGlobalCoordPrecision(hit_out);
+            reduceGlobalCoordPrecision(sp_hit_out);
 
-        tower.addHit(hit_out);
+        tower.addHit(sp_hit_out);
     }
 
     // push back a copy for monitoring
     FPGATrackSimCluster sp;
-    sp.setClusterEquiv(hit_in);
-    sp.push_backHitList(hit_in);
-    if (m_duplicate) sp.push_backHitList(hit_out);
+    sp.setClusterEquiv(sp_hit_in);
+    sp.push_backHitList(sp_hit_in);
+    if (m_duplicate) sp.push_backHitList(sp_hit_out);
     spacepoints.push_back(std::move(sp));
 
 }
 
 
 
-void FPGATrackSimSpacePointsTool::calcPosition(FPGATrackSimHit &hit_in, FPGATrackSimHit &hit_out, float &x, float &y, float &z)
+void FPGATrackSimSpacePointsTool::calcPosition(const FPGATrackSimHit &hit_in, const FPGATrackSimHit &hit_out, float &x, float &y, float &z)
 {
     float phi_sp = (hit_in.getGPhi() + hit_out.getGPhi()) / 2.0;
     float r_sp = (hit_in.getR() + hit_out.getR()) / 2.0;;
