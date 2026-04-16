@@ -74,14 +74,33 @@ StatusCode MuSAVtxFitterTool::doMuSAVtxFit(std::vector<MuSAVtxFitterTool::WrkVrt
     ATH_MSG_DEBUG("MuSAVtxFitterTool::doMuSAVtxFit");
 
     // first gather all SA muons that pass basic checks
+    // also recover Staco-authored Combined muons with large MS-ID mismatch if configured
     std::vector<const xAOD::Muon*> candidateSAmuons;
     for (const auto muon : muonContainer) {
         bool isSA = (muon->muonType() == xAOD::Muon::MuonStandAlone);
         bool isCalo = (muon->muonType() == xAOD::Muon::CaloTagged);
         bool isSegment = (muon->muonType() == xAOD::Muon::SegmentTagged);
         bool isSiForward = (muon->muonType() == xAOD::Muon::SiliconAssociatedForwardMuon);
+        bool isCombined = (muon->muonType() == xAOD::Muon::Combined);
+        bool isStaco = (muon->author() == xAOD::Muon::STACO);
 
-        if (!isSA && !m_doValidation) {
+        // Check if this is a Staco Combined muon eligible for recovery
+        bool isStacoRecovery = false;
+        if (m_doStacoRecovery && isCombined && isStaco) {
+            const xAOD::TrackParticle* msTrk = muon->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);
+            const xAOD::TrackParticle* idTrk = muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+            if (msTrk && idTrk) {
+                double dEta = std::abs(msTrk->eta() - idTrk->eta());
+                double dPhi = std::abs(msTrk->phi() - idTrk->phi());
+                if (dPhi > M_PI) dPhi = 2.0 * M_PI - dPhi;
+                if (dEta > m_stacoMatchDeltaCut || dPhi > m_stacoMatchDeltaCut) {
+                    ATH_MSG_DEBUG("Recovering Staco Combined muon with dEta=" << dEta << " dPhi=" << dPhi);
+                    isStacoRecovery = true;
+                }
+            }
+        }
+
+        if (!isSA && !isStacoRecovery && !m_doValidation) {
             continue; 
         }
 
