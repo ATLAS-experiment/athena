@@ -208,9 +208,7 @@ ApplicationMgr                                       INFO Application Manager St
 RootDatabase                                        DEBUG Request tree cache
 RootDatabase                                        DEBUG File name SimplePoolFile1.root
 RootDatabase                                        DEBUG Got tree CollectionTree read entry -1
-RootDatabase                                        DEBUG Using Tree cache. Size: -1 Nevents to learn with: -1
-RootDatabase                                         INFO TREE_CACHE_LEARN_EVENTS: Overwriting LearnEvents with CollectionTree AutoFlush
-RootDatabase                                        DEBUG TREE_CACHE_LEARN_EVENTS = 10
+RootDatabase                                        DEBUG Using Tree cache. Size: -1 Nevents to learn with: 10
 RootDatabase                                        DEBUG Request tree cache
 RootDatabase                                        DEBUG File name SimplePoolFile1.root
 RootDatabase                                        DEBUG Got tree CollectionTree read entry -1
@@ -679,9 +677,7 @@ POOLContainer(DataHeader)                           DEBUG Opened container POOLC
 RootDatabase                                        DEBUG Request tree cache
 RootDatabase                                        DEBUG File name SimplePoolFile2.root
 RootDatabase                                        DEBUG Got tree CollectionTree read entry -1
-RootDatabase                                        DEBUG Using Tree cache. Size: -1 Nevents to learn with: -1
-RootDatabase                                         INFO TREE_CACHE_LEARN_EVENTS: Overwriting LearnEvents with CollectionTree AutoFlush
-RootDatabase                                        DEBUG TREE_CACHE_LEARN_EVENTS = 10
+RootDatabase                                        DEBUG Using Tree cache. Size: -1 Nevents to learn with: 10
 RootDatabase                                        DEBUG Request tree cache
 RootDatabase                                        DEBUG File name SimplePoolFile2.root
 RootDatabase                                        DEBUG Got tree CollectionTree read entry -1
@@ -1411,9 +1407,7 @@ POOLContainer(DataHeader)                           DEBUG Opened container POOLC
 RootDatabase                                        DEBUG Request tree cache
 RootDatabase                                        DEBUG File name SimplePoolFile3.root
 RootDatabase                                        DEBUG Got tree CollectionTree read entry -1
-RootDatabase                                        DEBUG Using Tree cache. Size: -1 Nevents to learn with: -1
-RootDatabase                                         INFO TREE_CACHE_LEARN_EVENTS: Overwriting LearnEvents with CollectionTree AutoFlush
-RootDatabase                                        DEBUG TREE_CACHE_LEARN_EVENTS = 10
+RootDatabase                                        DEBUG Using Tree cache. Size: -1 Nevents to learn with: 10
 RootDatabase                                        DEBUG Request tree cache
 RootDatabase                                        DEBUG File name SimplePoolFile3.root
 RootDatabase                                        DEBUG Got tree CollectionTree read entry -1
