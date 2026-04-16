@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 """!@file LArRawChannelMonAlg.py
@@ -23,7 +23,7 @@ def LArRawChannelMonConfig(flags):
     from AthenaMonitoring.AtlasReadyFilterConfig import AtlasReadyFilterCfg
     from AthenaConfiguration.Enums import BeamType
     cosmics = (flags.Beam.Type is BeamType.Cosmics)
-    stream = _get_stream(flags.DQ)
+    stream = _get_stream(flags)
     try:
        signal = flags.LArMon.doLArRawMonitorSignal
     except AttributeError:
@@ -240,12 +240,10 @@ def _define_histograms(partition, part_index, montool, alg):
 
 
 def _get_stream(flags):
-    from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
-    flag = flags.useTrigger
-    if callable(flag): flag = flag()
-    if flag and not athenaCommonFlags.isOnline():
-        from PyUtils.MetaReaderPeeker import metadata
-        return (metadata.get('stream', '') + '_').split('_')[1]
+    if flags.DQ.useTrigger and not flags.Common.isOnline:
+        from PyUtils.MetaReader import read_metadata
+        metadata=read_metadata(flags.Input.Files[0])
+        return (metadata[flags.Input.Files[0]]['stream'] + '_').split('_')[1]
     return ''
 
 
@@ -318,20 +316,18 @@ if __name__=='__main__':
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaConfiguration.Enums import BeamType
-    flags.Input.Files = defaultTestFiles.RAW_RUN2
+    flags.Input.Files = defaultTestFiles.RAW_RUN3
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
     flags.Output.HISTFileName = 'LArRawChannelMonOutput.root'
     flags.DQ.enableLumiAccess = False
     flags.DQ.useTrigger = False
     flags.Beam.Type = BeamType.Collisions
     flags.lock()
 
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    cfg = MainServicesCfg(flags)
     from CaloRec.CaloRecoConfig import CaloRecoCfg
-    cfg = CaloRecoCfg(flags)
-    acc = LArRawChannelMonConfig(flags)
-    cfg.merge(acc)
-    f = open("LArRawChannelMon.pkl", "wb")
-    cfg.store(f)
-    f.close()
-
-    #in case you need directly run uncomment:
-    #cfg.run(100)
+    cfg.merge(CaloRecoCfg(flags))
+    cfg.merge(LArRawChannelMonConfig(flags))
+    cfg.run(100)
