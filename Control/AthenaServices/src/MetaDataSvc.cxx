@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file MetaDataSvc.cxx
@@ -162,6 +162,9 @@ StatusCode MetaDataSvc::finalize() {
    if (!m_inputDataStore.release().isSuccess()) {
       ATH_MSG_WARNING("Cannot release InputMetaDataStore.");
    }
+   if (m_beginInputFileSeen && !m_allowMetaDataStop) {
+      ATH_MSG_WARNING("EndInputFile was not received before finalize");
+   }
    return(StatusCode::SUCCESS);
 }
 
@@ -219,6 +222,7 @@ StatusCode MetaDataSvc::newMetadataSource(const Incident& inc)
    const std::string guid = fileInc->fileGuid();
    const std::string fileName = fileInc->fileName();
    m_allowMetaDataStop = false;
+   m_beginInputFileSeen = true;
    if (!fileName.starts_with( "BSF:")) {
       // the input file is _not_ bytestream
       if (!m_clearedInputDataStore) {

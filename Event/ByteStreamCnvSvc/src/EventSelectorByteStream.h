@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BYTESTREAMCNVSVC_EVENTSELECTORBYTESTREAM_H
@@ -26,12 +26,14 @@
 #include "AthenaKernel/IEvtSelectorSeek.h"
 #include "AthenaKernel/IEventShare.h"
 #include "AthenaKernel/ISecondaryEventSelector.h"
+#include "AthenaKernel/InputFileIncidentGuard.h"
 #include "AthenaBaseComps/AthService.h"
 
 #include "ByteStreamCnvSvcBase/IByteStreamInputSvc.h"
 #include "ByteStreamData/RawEvent.h"
 #include "CxxUtils/checker_macros.h"
 #include <mutex>
+#include <optional>
 
 // Forward declarations.
 class ISvcLocator;
@@ -194,7 +196,8 @@ private: // properties
    Gaudi::Property<std::vector<long>> m_skipEventSequenceProp{this, "SkipEventSequence", {}, ""};
 
    bool m_firstFileFired{};
-   bool m_beginFileFired{};
+   /// RAII guard: guarantees a matching EndInputFile for every BeginInputFile
+   mutable std::optional<InputFileIncidentGuard> m_inputFileGuard ATLAS_THREAD_SAFE;
 
    /// HelperTools, vector of names of AlgTools that are executed by the EventSelector
    ToolHandleArray<IAthenaSelectorTool> m_helperTools{this, "HelperTools", {}, "Helper tools executed by EventSelector"};

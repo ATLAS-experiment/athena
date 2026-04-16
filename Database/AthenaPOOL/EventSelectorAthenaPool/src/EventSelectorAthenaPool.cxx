@@ -337,28 +337,15 @@ StatusCode EventSelectorAthenaPool::stop() {
    if (!m_eventStreamingTool.empty() && m_eventStreamingTool->isClient()) {
       return StatusCode::SUCCESS;
    }
+   // Fire EndInputFile for any file still open (the event loop may end
+   // before the file is fully read).
+   m_inputFileGuard.reset();
+
    IEvtSelector::Context* ctxt(nullptr);
    if (!releaseContext(ctxt).isSuccess()) {
       ATH_MSG_WARNING("Cannot release context");
    }
    return StatusCode::SUCCESS;
-}
-
-//________________________________________________________________________________
-void EventSelectorAthenaPool::fireEndFileIncidents(bool isLastFile) const {
-   if (m_processMetadata.value()) {
-      if (m_evtCount >= 0) {
-         // Assume that the end of collection file indicates the end of payload file.
-         if (m_guid != Guid::null()) {
-            // Fire EndInputFile incident
-            FileIncident endInputFileIncident(name(), "EndInputFile", "FID:" + m_guid.toString(), m_guid.toString());
-            m_incidentSvc->fireIncident(endInputFileIncident);
-         }
-      }
-      if (isLastFile && m_firedIncident) {
-         m_firedIncident = false;
-      }
-   }
 }
 
 //________________________________________________________________________________
@@ -432,14 +419,10 @@ StatusCode EventSelectorAthenaPool::next(IEvtSelector::Context& ctxt) const {
       delete [] (char*)tokenStr; tokenStr = nullptr;
       Guid guid = token.dbID();
       if (guid != m_guid && m_processMetadata.value()) {
-         if (m_evtCount >= 0 && m_guid != Guid::null()) {
-            // Fire EndInputFile incident
-            FileIncident endInputFileIncident(name(), "EndInputFile", "FID:" + m_guid.toString(), m_guid.toString());
-            m_incidentSvc->fireIncident(endInputFileIncident);
-         }
+         InputFileIncidentGuard::transition(m_inputFileGuard, *m_incidentSvc, name(),
+                                          "FID:" + guid.toString(), guid.toString(),
+                                          /*endFileName=*/{});
          m_guid = guid;
-         FileIncident beginInputFileIncident(name(), "BeginInputFile", "FID:" + m_guid.toString(), m_guid.toString());
-         m_incidentSvc->fireIncident(beginInputFileIncident);
       }
       return StatusCode::SUCCESS;
    }
@@ -552,7 +535,8 @@ StatusCode EventSelectorAthenaPool::nextHandleFileTransition(IEvtSelector::Conte
          // Close previous collection.
          m_poolCollectionConverter.reset();
 
-         // zero the current DB ID (m_guid) before disconnect() to indicate it is no longer in use
+         // Fire EndInputFile while data is still accessible, then disconnect
+         m_inputFileGuard.reset();
          const SG::SourceID old_guid = m_guid.toString();
          m_guid = Guid::null();
          disconnectIfFinished( old_guid );
@@ -591,6 +575,7 @@ StatusCode EventSelectorAthenaPool::nextHandleFileTransition(IEvtSelector::Conte
          // zero the current DB ID (m_guid) before trying disconnect() to indicate it is no longer in use
          const SG::SourceID old_guid = m_guid.toString();
          m_guid = Guid::null();
+         // EndInputFile is fired by the guard transition() below; just disconnect here
          disconnectIfFinished( old_guid );
       }
       m_guid = guid;
@@ -604,14 +589,16 @@ StatusCode EventSelectorAthenaPool::nextHandleFileTransition(IEvtSelector::Conte
                return StatusCode::FAILURE;
          }
          if (m_processMetadata.value()) {
-            FileIncident beginInputFileIncident(name(), "BeginInputFile", *m_inputCollectionsIterator, m_guid.toString());
-            m_incidentSvc->fireIncident(beginInputFileIncident);
+            InputFileIncidentGuard::transition(m_inputFileGuard, *m_incidentSvc, name(),
+                                    *m_inputCollectionsIterator, m_guid.toString(),
+                                    /*endFileName=*/{});
          }
       } else {
          // Check if File is BS
          if (tech != 0x00001000 && m_processMetadata.value()) {
-            FileIncident beginInputFileIncident(name(), "BeginInputFile", "FID:" + m_guid.toString(), m_guid.toString());
-            m_incidentSvc->fireIncident(beginInputFileIncident);
+            InputFileIncidentGuard::transition(m_inputFileGuard, *m_incidentSvc, name(),
+                                    "FID:" + m_guid.toString(), m_guid.toString(),
+                                    /*endFileName=*/{});
          }
       }
    }  // end if (guid != m_guid)
@@ -730,7 +717,7 @@ StatusCode EventSelectorAthenaPool::seek(Context& /*ctxt*/, int evtNum) const {
    if (newColl == -1) {
       m_headerIterator = nullptr;
       ATH_MSG_INFO("seek: Reached end of Input.");
-      fireEndFileIncidents(true);
+      m_inputFileGuard.reset();
       return StatusCode::RECOVERABLE;
    }
    if (newColl != m_curCollection) {
@@ -976,10 +963,10 @@ EventSelectorAthenaPool::getCollectionCnv(bool throwIncidents) const {
             pCollCnv.reset();
             ATH_MSG_DEBUG("No events found in: " << *m_inputCollectionsIterator << " skipped!!!");
             if (throwIncidents && m_processMetadata.value()) {
-               FileIncident beginInputFileIncident(name(), "BeginInputFile", *m_inputCollectionsIterator);
-               m_incidentSvc->fireIncident(beginInputFileIncident);
-               FileIncident endInputFileIncident(name(), "EndInputFile", "eventless " + *m_inputCollectionsIterator);
-               m_incidentSvc->fireIncident(endInputFileIncident);
+               // Scoped guard: fires BeginInputFile now, EndInputFile at scope exit
+               auto guard = InputFileIncidentGuard::begin(*m_incidentSvc, name(),
+                              *m_inputCollectionsIterator, {},
+                              "eventless " + *m_inputCollectionsIterator);
             }
             m_athenaPoolCnvSvc->getPoolSvc()->disconnectDb(*m_inputCollectionsIterator).ignore();
             ++m_inputCollectionsIterator;
@@ -1086,6 +1073,8 @@ StatusCode EventSelectorAthenaPool::io_reinit() {
 //__________________________________________________________________________
 StatusCode EventSelectorAthenaPool::io_finalize() {
    ATH_MSG_INFO("I/O finalization...");
+   // Fire EndInputFile before disconnecting — file data is still accessible here
+   m_inputFileGuard.reset();
    if (m_poolCollectionConverter) {
       m_poolCollectionConverter->disconnectDb().ignore();
       m_poolCollectionConverter.reset();
@@ -1144,13 +1133,9 @@ bool EventSelectorAthenaPool::disconnectIfFinished( const SG::SourceID &fid ) co
 {
    if( m_eventStreamingTool.empty() && m_activeEventsPerSource.find(fid) != m_activeEventsPerSource.end() 
            && m_activeEventsPerSource[fid] <= 0 && m_guid != fid ) {
-      // Explicitly disconnect file corresponding to old FID to release memory
+      // Explicitly disconnect file corresponding to old FID to release memory.
+      // EndInputFile is handled by the InputFileIncidentGuard.
       if( !m_keepInputFilesOpen.value() ) {
-         // Assume that the end of collection file indicates the end of payload file.
-         if (m_processMetadata.value()) {
-            FileIncident endInputFileIncident(name(), "EndInputFile", "FID:" + fid, fid);
-            m_incidentSvc->fireIncident(endInputFileIncident);
-         }
          ATH_MSG_INFO("Disconnecting input sourceID: " << fid );
          m_athenaPoolCnvSvc->getPoolSvc()->disconnectDb("FID:" + fid, IPoolSvc::kInputStream).ignore();
          m_activeEventsPerSource.erase( fid );

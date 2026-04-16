@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // RootNtupleEventSelector.cxx 
@@ -232,8 +232,7 @@ RootNtupleEventSelector::RootNtupleEventSelector( const std::string& name,
   m_curEvt   ( 0 ),
   m_collEvts (   ),
   m_tuple    (NULL),
-  m_needReload (true),
-  m_fireBIF  (true)
+  m_needReload (true)
 {
   declareProperty( "DataStore",
 		   m_dataStore,
@@ -351,7 +350,6 @@ StatusCode RootNtupleEventSelector::initialize()
   if (!do_init_io().isSuccess()) {
     return StatusCode::FAILURE;
   }
-
   // retrieve event store
   // this needs to happen *after* having initialized the i/o
   // as our branches (which need a valid m_ntuple pointer)
@@ -402,6 +400,15 @@ StatusCode RootNtupleEventSelector::initialize()
   return StatusCode::SUCCESS;
 }
 
+StatusCode RootNtupleEventSelector::stop()
+{
+  // Fire EndInputFile for any file still open (the event loop may end
+  // before the file is fully read).
+  m_inputFileGuard.reset();
+  m_fireBIF = false;
+  return StatusCode::SUCCESS;
+}
+
 StatusCode RootNtupleEventSelector::finalize()
 {
   ATH_MSG_INFO ("Finalize...");
@@ -423,11 +430,10 @@ StatusCode RootNtupleEventSelector::finalize()
 // Const methods: 
 ///////////////////////////////////////////////////////////////////
 
-StatusCode RootNtupleEventSelector::endInputFile (RootNtupleEventContext* rctx) const
+StatusCode RootNtupleEventSelector::endInputFile (RootNtupleEventContext* /*rctx*/) const
 {
-  const FileNames_t& fnames = rctx->files();
-  std::size_t fidx = rctx->fileIndex();
-  m_incsvc->fireIncident(FileIncident(name(), "EndInputFile", fnames[fidx]));
+  // Fire EndInputFile via guard reset
+  m_inputFileGuard.reset();
 
   // prepare for next file, if any...
   // std::cout << "=========================================================="
@@ -449,7 +455,10 @@ StatusCode RootNtupleEventSelector::endInputFile (RootNtupleEventContext* rctx) 
 
   const bool forceRemove = false;
   CHECK( m_dataStore->clearStore(forceRemove) ); //must clear the storegate so that any tampering user did in EndInputFile incident is cleared
-  m_needReload = true;m_fireBIF=true;
+  m_needReload = true;
+  // Defer BeginInputFile for the next file to the next BeginEvent.
+  // The actual file name is resolved in handle() from m_tuple.
+  m_fireBIF = true;
 
   return StatusCode::SUCCESS;
 }
@@ -562,19 +571,8 @@ RootNtupleEventSelector::next( IEvtSelector::Context& ctx ) const
       CHECK( m_dataStore->record (std::move(ei_store), "EventInfoAux.") );
     }
     
-    // now the data has been loaded into the store, we can
-    // notify clients and fire the BeginInputFile incident
-   //MOVED TO handle method
-    /*if (m_fireBIF) {
-      m_fireBIF = false;
-      const FileNames_t& fnames = rctx->files();
-      std::size_t fidx = rctx->fileIndex();
-      const std::string& fname = fnames[fidx];
-      // notify other clients
-      // std::cout << "::switchED to next file..." << std::endl;
-      m_incsvc->fireIncident(FileIncident(name(), "BeginInputFile", fname));
-      // std::cerr << ":: new file: [" << fname << "]\n";
-    }*/
+    // BeginInputFile is deferred to handle() on BeginEvent — data must
+    // be loaded in the store before listeners' handle() is called.
     return StatusCode::SUCCESS;
 
   } else {
@@ -937,13 +935,7 @@ RootNtupleEventSelector::createRootBranchAddresses(StoreID::type storeID,
     }
   }
   m_needReload = false;
-  // remember that we need to fire a BeginInputFile incident.
-  // we can't fire it just now as some client may need the tree and its
-  // content loaded in the evtstore when their ::handle method is
-  // called.
-  // so we do it later.
-  //MOVED TO handle method - which is fired on BeginEvent after StoreGateSvc
-  //m_fireBIF = true;
+  // BeginInputFile is deferred to handle() on BeginEvent — see comment there.
 
   return StatusCode::SUCCESS;
 }
@@ -1276,10 +1268,12 @@ int RootNtupleEventSelector::size (Context& /*refCtxt*/) const {
 
 
 void RootNtupleEventSelector::handle(const Incident& incident) {
-   if(m_fireBIF && incident.type() == IncidentType::BeginEvent) {
-      //fire the BeginInputFile
-      m_incsvc->fireIncident(FileIncident(name(), "BeginInputFile", m_tuple->GetCurrentFile()->GetName())); 
-      m_fireBIF=false;
+   if (m_fireBIF && incident.type() == IncidentType::BeginEvent) {
+      std::string fname = m_tuple->GetCurrentFile()->GetName();
+      m_inputFileGuard = InputFileIncidentGuard::begin(*m_incsvc, name(),
+                              fname, {},
+                              /*endFileName=*/fname);
+      m_fireBIF = false;
    }
 }
 
