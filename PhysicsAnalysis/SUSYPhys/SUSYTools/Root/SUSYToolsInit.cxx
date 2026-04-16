@@ -832,11 +832,17 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Initialise muon efficiency tools
+
+    // Hotfix for the Run2 Muon Identiﬁcation SFs for the Tight WP
+    std::string MuonCP_Run2_TightFix = "";
+    if(!m_isRun3) {
+      MuonCP_Run2_TightFix = (m_muId == xAOD::Muon::Tight) ? "220725_Preliminary_r22run2" : "230213_Preliminary_r22run2_loosefix";
+    }
     if (!m_muonEfficiencySFTool.isUserConfigured() && m_muId != xAOD::Muon::VeryLoose && !isData()) {
       toolName = "MuonEfficiencyScaleFactors_" + muQual;
       m_muonEfficiencySFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       ATH_CHECK( m_muonEfficiencySFTool.setProperty("WorkingPoint", muQual) );
-      ATH_CHECK( m_muonEfficiencySFTool.setProperty("CalibrationRelease", m_isRun3? "251211_Preliminary_r24run3":"230213_Preliminary_r22run2_loosefix") );
+      ATH_CHECK( m_muonEfficiencySFTool.setProperty("CalibrationRelease", m_isRun3 ? "251211_Preliminary_r24run3" : MuonCP_Run2_TightFix) );
       ATH_CHECK( m_muonEfficiencySFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_muonEfficiencySFTool.retrieve() );
     } else if (m_muonEfficiencySFTool.isUserConfigured()) ATH_CHECK( m_muonEfficiencySFTool.retrieve() );
