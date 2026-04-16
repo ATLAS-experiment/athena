@@ -9,7 +9,7 @@ should be added there, not here.
 """
 
 from DerivationFrameworkFlavourTag.FtagDerivationConfig import (
-    ParentDecoratorCfg, trackTruthDecorator
+    ParentDecoratorCfg, trackTruthDecorator, truthVertexDecorator
 )
 from JetTagDerivationUtils.JetMatchingConfig import JetMatchingCfg
 
@@ -164,7 +164,51 @@ def _match_vars(flags, source):
     return allvars
 
 
-def addCommonAugmentation(flags, cfg, helper, target = "AntiKt4EMPFlowJets"):
+_FTAG_JET_NUM_VERTEX_VARS = (
+    ".ftagJetNumBVertices"
+    ".ftagJetNumCVertices"
+    ".ftagJetNumTauVertices"
+    ".ftagJetNumStrangeVertices"
+    ".ftagJetNumPionVertices"
+    ".ftagJetNumMaterialIntVertices"
+    ".ftagJetNumOtherVertices"
+    ".ftagJetNumVertices"
+)
+
+
+def addTruthVertexDecorations(flags, cfg, helper, target="AntiKt4EMPFlowJets",
+                              largeRJetCollection=None):
+    """schedule truth-vertex decorators and add their slimming variables.
+
+    Opt-in per derivation (e.g. FTAG1) rather than common, because not every
+    derivation wants the truth-vertex content.
+
+    Args:
+        target: small-R jet collection (decorated with dR=0.4 matching).
+        largeRJetCollection: optional large-R jet collection (decorated with
+            dR=1.0 matching).
+    """
+    if not flags.Input.isMC:
+        return
+
+    jet_collections = [(target, 0.4)]
+    if largeRJetCollection is not None:
+        jet_collections.append((largeRJetCollection, 1.0))
+
+    cfg.merge(truthVertexDecorator(flags, jetCollections=jet_collections))
+
+    # TruthParticles is in AllVariables so its decorations are saved automatically
+    helper.ExtraVariables += [
+        "InDetTrackParticles.ftagTrackDecayVertexID"
+        ".ftagTrackDecayVertexType"
+        ".ftagTrackDecaySimpleVertexType"
+        ".trackPDGID.trackParentPDGID",
+    ]
+    for jet_container, _ in jet_collections:
+        helper.ExtraVariables += [jet_container + _FTAG_JET_NUM_VERTEX_VARS]
+
+
+def addCommonAugmentation(flags, cfg, helper, target="AntiKt4EMPFlowJets"):
     """add content common to all ftag derivations"""
 
     cfg.merge(

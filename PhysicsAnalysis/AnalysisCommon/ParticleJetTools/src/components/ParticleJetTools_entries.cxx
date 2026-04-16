@@ -11,8 +11,15 @@
 #include "ParticleJetTools/JetTruthLabelingTool.h"
 #include "ParticleJetTools/JetPileupLabelingTool.h"
 #include "ParticleJetTools/JetQuarkChargeLabelingTool.h"
-
+#include "ParticleJetTools/FatVertex.h"
 #include "../TruthParentDecoratorAlg.h"
+#ifndef GENERATIONBASE
+// TruthVertexDecoratorAlg uses InDet::InDetTrackTruthOriginTool, whose package
+// is not available in AthGeneration. JetTruthVertexSummaryDecoratorAlg is
+// excluded together as a pair — both are derivation-only.
+#include "../TruthVertexDecoratorAlg.h"
+#include "../JetTruthVertexSummaryDecoratorAlg.h"
+#endif
 
 using namespace Analysis;
 
@@ -31,4 +38,9 @@ DECLARE_COMPONENT( JetParticleOriginVertexAssociation )
 DECLARE_COMPONENT( JetTruthLabelingTool )
 DECLARE_COMPONENT( JetPileupLabelingTool )
 DECLARE_COMPONENT( JetQuarkChargeLabelingTool )
+
 DECLARE_COMPONENT( TruthParentDecoratorAlg )
+#ifndef GENERATIONBASE
+DECLARE_COMPONENT( ParticleJetTools::TruthVertexDecoratorAlg )
+DECLARE_COMPONENT( ParticleJetTools::JetTruthVertexSummaryDecoratorAlg )
+#endif
