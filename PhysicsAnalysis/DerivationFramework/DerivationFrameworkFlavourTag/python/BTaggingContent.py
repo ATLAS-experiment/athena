@@ -84,22 +84,27 @@ def BTaggingStandardContent(flags, jetcol):
     jetBasicContent = _getVariableList(jetcol, _getStandardSmallRVars())
     # b-tagging variables
     BTaggingAux = []
-    BTaggingAux += _getSmallRDiscriminantVars(
-        flags.BTagging.AK4TaggerName,
-        extra_flavours=['tau'],
-        flip_modes=['SimpleFlip']
-    )
-    BTaggingAux += ["SV1_NGTinSvx", "SV1_masssvx"] # GN2v01 extra vars
-
-    if not _isRun4(flags):
+    if _isRun4(flags):
         BTaggingAux += _getSmallRDiscriminantVars(
-            'GN3V00',           
-            extra_flavours=['tau'], 
+            'GN2HLv01',
+            extra_flavours=['tau'],
+            flip_modes=['SimpleFlip']
+        )
+    else:
+        BTaggingAux += _getSmallRDiscriminantVars(
+            'GN2v01',
+            extra_flavours=['tau'],
+            flip_modes=['SimpleFlip']
+        )
+        BTaggingAux += ["SV1_NGTinSvx", "SV1_masssvx"] # GN2v01 extra vars
+        BTaggingAux += _getSmallRDiscriminantVars(
+            'GN3V00',
+            extra_flavours=['tau'],
             flip_modes=['SimpleFlip']
         )
         BTaggingAux += _getSmallRDiscriminantVars(
-            'GN3PflowMuonsV00', 
-            extra_flavours=['tau', 'ud', 'g', 's', 'quark'], 
+            'GN3PflowMuonsV00',
+            extra_flavours=['tau', 'ud', 'g', 's', 'quark'],
             flip_modes=['SimpleFlip']
         )
         BTaggingAux += _getSmallRDiscriminantVars(
