@@ -47,6 +47,27 @@ def trackTruthDecorator(cfgFlags) -> ComponentAccumulator:
     return acc
 
 
+def truthVertexDecorator(cfgFlags, jetCollections=None) -> ComponentAccumulator:
+    """Decorate tracks, truth particles, and jets with truth vertex labels.
+
+    ``jetCollections`` is a list of ``(jetContainer, drThreshold)`` tuples; one
+    jet-summary alg is scheduled per entry. Default matches small-R EMPFlow.
+    """
+    acc = ComponentAccumulator()
+    if not cfgFlags.Input.isMC:
+        return acc
+
+    from ParticleJetTools.TruthVertexDecoratorConfig import (
+        TruthVertexDecoratorsCfg,
+    )
+    acc.merge(TruthVertexDecoratorsCfg(
+        cfgFlags,
+        jetCollections=jetCollections,
+    ))
+
+    return acc
+
+
 def _getTrackCollection(cfgFlags):
     if cfgFlags.BTagging.Pseudotrack:
         return 'InDetPseudoTrackParticles'

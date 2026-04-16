@@ -16,7 +16,7 @@ from DerivationFrameworkEGamma.ElectronsCPDetailedContent import (
     ElectronsCPDetailedContent
 )
 from DerivationFrameworkFlavourTag.FtagBaseContent import (
-    addCommonAugmentation
+    addCommonAugmentation, addTruthVertexDecorations
 )
 
 
@@ -76,6 +76,10 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
     FtagBaseContent.add_baseline_slimming_smartcollections(FTAG1SlimmingHelper)
 
     addCommonAugmentation(flags, acc, FTAG1SlimmingHelper)
+    addTruthVertexDecorations(
+        flags, acc, FTAG1SlimmingHelper,
+        largeRJetCollection="AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
+    )
 
     FTAG1SlimmingHelper.SmartCollections += [
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
