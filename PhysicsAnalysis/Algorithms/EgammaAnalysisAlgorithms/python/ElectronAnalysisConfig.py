@@ -5,7 +5,11 @@ from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
 from AthenaCommon.SystemOfUnits	import GeV
 from AthenaConfiguration.Enums import LHCPeriod
-from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+from AnalysisAlgorithmsConfig.ConfigAccumulator import (
+    DataType, ElectronEfficiencyCorrelationWarning,
+    Run4FallbackWarning, TestingOnlyWarning,
+    Run2OnlyFeatureWarning, TriggerSFWarning)
+import warnings
 from TrackingAnalysisAlgorithms.TrackingAnalysisConfig import InDetTrackCalibrationConfig
 from TrigGlobalEfficiencyCorrection.TriggerLeg_DictHelpers import TriggerDict, MapKeysDict
 from AthenaCommon.Logging import logging
@@ -85,7 +89,6 @@ class ElectronMomentumCalibrationConfig (ConfigBlock) :
 
         Factoring this out into its own function, as we want to
         instantiate it in multiple places"""
-        log = logging.getLogger('ElectronMomentumCalibrationConfig')
 
         # Set up the calibration and smearing algorithm:
         alg = config.createAlgorithm( 'CP::EgammaCalibrationAndSmearingAlg', name )
@@ -100,7 +103,9 @@ class ElectronMomentumCalibrationConfig (ConfigBlock) :
             elif config.geometry() is LHCPeriod.Run3:
                 alg.calibrationAndSmearingTool.ESModel = 'es2024_Run3_v0'
             elif config.geometry() is LHCPeriod.Run4:
-                log.warning("No ESModel set for Run4, using Run 3 model instead")
+                warnings.warn_explicit(
+                    "No ESModel set for Run4, using Run 3 model instead",
+                    Run4FallbackWarning, filename='', lineno=0)
                 alg.calibrationAndSmearingTool.ESModel = 'es2024_Run3_v0'
             else:
                 raise ValueError (f"Can't set up the ElectronCalibrationConfig with {config.geometry().value}, "
@@ -119,11 +124,12 @@ class ElectronMomentumCalibrationConfig (ConfigBlock) :
 
     def makeAlgs (self, config) :
 
-        log = logging.getLogger('ElectronCalibrationConfig')
-
         if self.forceFullSimConfigForP4:
-            log.warning("You are running ElectronCalibrationConfig forcing full sim config")
-            log.warning(" This is only intended to be used for testing purposes")
+            warnings.warn_explicit(
+                "You are running ElectronCalibrationConfig forcing full sim"
+                " config. This is only intended to be used for testing"
+                " purposes.",
+                TestingOnlyWarning, filename='', lineno=0)
 
         inputContainer = "AnalysisElectrons" if config.isPhyslite() else "Electrons"
         if self.inputContainer:
@@ -248,8 +254,10 @@ class ElectronMomentumCalibrationConfig (ConfigBlock) :
             alg.egammasType = 'xAOD::ElectronContainer'
             alg.preselection = config.getPreselection (self.containerName, '')
         else:
-            log.warning("You are not applying the isolation corrections")
-            log.warning("This is only intended to be used for testing purposes")
+            warnings.warn_explicit(
+                "You are not applying the isolation corrections."
+                " This is only intended to be used for testing purposes.",
+                TestingOnlyWarning, filename='', lineno=0)
 
         alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' )
         alg.particles = config.readName(self.containerName)
@@ -383,8 +391,6 @@ class ElectronWorkingPointSelectionConfig (ConfigBlock) :
         return self.containerName + '_' + self.selectionName
 
     def makeAlgs (self, config) :
-
-        log = logging.getLogger('ElectronWorkingPointSelectionConfig')
 
         selectionPostfix = self.selectionName
         if selectionPostfix != '' and selectionPostfix[0] != '_' :
@@ -594,7 +600,10 @@ class ElectronWorkingPointSelectionConfig (ConfigBlock) :
                                  preselection=self.addSelectionToPreselection)
 
         if self.chargeIDSelectionRun2 and config.geometry() >= LHCPeriod.Run3:
-            log.warning("ECIDS is only available for Run 2 and will not have any effect in Run 3.")
+            warnings.warn_explicit(
+                "ECIDS is only available for Run 2 and will not have any"
+                " effect in Run 3.",
+                Run2OnlyFeatureWarning, filename='', lineno=0)
 
         # Select electrons only if they don't appear to have flipped their charge.
         if self.chargeIDSelectionRun2 and config.geometry() < LHCPeriod.Run3:
@@ -682,11 +691,12 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
 
     def makeAlgs (self, config) :
 
-        log = logging.getLogger('ElectronWorkingPointEfficiencyConfig')
-
         if self.forceFullSimConfig:
-            log.warning("You are running ElectronWorkingPointSelectionConfig forcing full sim config")
-            log.warning("This is only intended to be used for testing purposes")
+            warnings.warn_explicit(
+                "You are running ElectronWorkingPointSelectionConfig forcing"
+                " full sim config. This is only intended to be used for"
+                " testing purposes.",
+                TestingOnlyWarning, filename='', lineno=0)
 
         selectionPostfix = self.selectionName
         if selectionPostfix != '' and selectionPostfix[0] != '_' :
@@ -724,8 +734,11 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
                 raise ValueError('Invalid correlation model for reconstruction efficiency, '
                                  f'has to be one of: {", ".join(correlationModels)}')
             if config.geometry() >= LHCPeriod.Run3 and self.correlationModelReco != "TOTAL":
-                log.warning("Only TOTAL correlation model is currently supported "
-                            "for reconstruction efficiency correction in Run 3.")
+                warnings.warn_explicit(
+                    "Only TOTAL correlation model is currently supported "
+                    "for reconstruction efficiency correction in Run 3.",
+                    ElectronEfficiencyCorrelationWarning,
+                    filename='', lineno=0)
                 alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
             else:
                 alg.efficiencyCorrectionTool.CorrelationModel = self.correlationModelReco
@@ -789,8 +802,11 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
                 raise ValueError('Invalid correlation model for isolation efficiency, '
                                  f'has to be one of: {", ".join(correlationModels)}')
             if self.correlationModelIso != 'TOTAL':
-                log.warning("Only TOTAL correlation model is currently supported "
-                      "for isolation efficiency correction in Run 3.")
+                warnings.warn_explicit(
+                    "Only TOTAL correlation model is currently supported "
+                    "for isolation efficiency correction in Run 3.",
+                    ElectronEfficiencyCorrelationWarning,
+                    filename='', lineno=0)
             alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
             if config.dataType() is DataType.FastSim:
                 alg.efficiencyCorrectionTool.ForceDataType = (
@@ -846,7 +862,10 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
             sfList += [alg.scaleFactorDecoration]
 
         if self.addChargeMisIDSF and config.dataType() is not DataType.Data and not self.noEffSF and config.geometry() >= LHCPeriod.Run3:
-            log.warning("Charge mis-ID SFs are only available for Run 2 and will not have any effect in Run 3.")
+            warnings.warn_explicit(
+                "Charge mis-ID SFs are only available for Run 2 and will not"
+                " have any effect in Run 3.",
+                Run2OnlyFeatureWarning, filename='', lineno=0)
 
         elif self.addChargeMisIDSF and config.dataType() is not DataType.Data and not self.noEffSF and config.geometry() < LHCPeriod.Run3:
             alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
@@ -978,8 +997,11 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
             triggerChainsPerYear_Run3 = {}
             for year, chains in self.triggerChainsPerYear.items():
                 if not chains:
-                    log.warning("No trigger chains configured for year %s. "
-                                "Assuming this is intended, no Electron trigger SF will be computed.", year)
+                    warnings.warn_explicit(
+                        f"No trigger chains configured for year {year}."
+                        " Assuming this is intended, no Electron trigger SF"
+                        " will be computed.",
+                        TriggerSFWarning, filename='', lineno=0)
                     continue
 
                 chains_split = [chain.replace("HLT_", "").replace(" || ", "_OR_") for chain in chains]

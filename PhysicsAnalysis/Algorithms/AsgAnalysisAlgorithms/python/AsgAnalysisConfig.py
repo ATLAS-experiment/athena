@@ -4,7 +4,9 @@
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
 from AthenaConfiguration.Enums import LHCPeriod
-from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType, ExpertModeWarning
+from AnalysisAlgorithmsConfig.ConfigAccumulator import (
+    DataType, ExpertModeWarning,
+    Run4FallbackWarning, GeneratorWeightWarning)
 from enum import Enum
 import warnings
 
@@ -222,6 +224,10 @@ class PileupReweightingBlock (ConfigBlock):
         self.addOption ('alternativeConfig', False, type=bool,
             info="whether this is used as an additional alternative config for `PileupReweighting`. "
             "Will only store the alternative pileup weight in that case.")
+        self.addOption ('unrepresentedDataWarningThreshold', 1e-4, type=float,
+            info="suppress the unrepresented-data WARNING when the unrepresented "
+            "fraction is below this value (default 0.01%). Set to 0 to always "
+            "warn.")
         self.addOption ('writeColumnarToolVariables', False, type=bool,
             info="whether to add `EventInfo` variables needed for running the columnar tool(s) on the output n-tuple. (EXPERIMENTAL).",
             expertMode=True)
@@ -349,7 +355,9 @@ class PileupReweightingBlock (ConfigBlock):
 
         # Set up the only algorithm of the sequence:
         if config.geometry() is LHCPeriod.Run4:
-            log.warning ('Pileup reweighting is not yet supported for Run 4 geometry')
+            warnings.warn_explicit(
+                'Pileup reweighting is not yet supported for Run 4 geometry',
+                Run4FallbackWarning, filename='', lineno=0)
             alg = config.createAlgorithm( 'CP::EventDecoratorAlg', 'EventDecoratorAlg' )
             alg.uint32Decorations = { 'RandomRunNumber' :
                                       config.flags.Input.RunNumbers[0] }
@@ -366,6 +374,8 @@ class PileupReweightingBlock (ConfigBlock):
             else:
                 alg.pileupWeightDecoration = "PileupWeight" + self.postfix + "_%SYS%"
             alg.pileupReweightingTool.LumiCalcFiles = toolLumicalcFiles
+            alg.pileupReweightingTool.UnrepresentedDataWarningThreshold = (
+                self.unrepresentedDataWarningThreshold)
 
         if not self.alternativeConfig:
             for var in eventInfoVar:
@@ -471,7 +481,9 @@ class GeneratorAnalysisBlock (ConfigBlock):
             DSID = "000000"
 
             if not generatorInfo:
-                log.warning("No generator info found.")
+                warnings.warn_explicit(
+                    "No generator info found.",
+                    GeneratorWeightWarning, filename='', lineno=0)
                 DSID = "000000"
             elif isinstance(generatorInfo, dict):
                 if "Pythia8" in generatorInfo:
@@ -481,13 +493,25 @@ class GeneratorAnalysisBlock (ConfigBlock):
                 elif "Sherpa" in generatorInfo and "2.2.10" in generatorInfo["Sherpa"]:
                     DSID = "700122"
                 elif "Sherpa" in generatorInfo and "2.2.11" in generatorInfo["Sherpa"]:
-                    log.warning("HF production fraction reweighting is not configured for Sherpa 2.2.11. Using weights for Sherpa 2.2.10 instead.")
+                    warnings.warn_explicit(
+                        "HF production fraction reweighting is not configured"
+                        " for Sherpa 2.2.11. Using weights for Sherpa 2.2.10"
+                        " instead.",
+                        GeneratorWeightWarning, filename='', lineno=0)
                     DSID = "700122"
                 elif "Sherpa" in generatorInfo and "2.2.12" in generatorInfo["Sherpa"]:
-                    log.warning("HF production fraction reweighting is not configured for Sherpa 2.2.12. Using weights for Sherpa 2.2.10 instead.")
+                    warnings.warn_explicit(
+                        "HF production fraction reweighting is not configured"
+                        " for Sherpa 2.2.12. Using weights for Sherpa 2.2.10"
+                        " instead.",
+                        GeneratorWeightWarning, filename='', lineno=0)
                     DSID = "700122"
                 elif "Sherpa" in generatorInfo and "2.2.14" in generatorInfo["Sherpa"]:
-                    log.warning("HF production fraction reweighting is not configured for Sherpa 2.2.14. New weights need to be calculated.")
+                    warnings.warn_explicit(
+                        "HF production fraction reweighting is not configured"
+                        " for Sherpa 2.2.14. New weights need to be"
+                        " calculated.",
+                        GeneratorWeightWarning, filename='', lineno=0)
                     DSID = "000000"
                 elif "Sherpa" in generatorInfo and "2.2.1" in generatorInfo["Sherpa"]:
                     DSID = "410250"
@@ -500,16 +524,24 @@ class GeneratorAnalysisBlock (ConfigBlock):
                 elif "amc@NLO" in generatorInfo:
                     DSID = "410464"
                 else:
-                    log.warning(f"HF production fraction reweighting is not configured for this generator: {generatorInfo}")
-                    log.warning("New weights need to be calculated.")
+                    warnings.warn_explicit(
+                        f"HF production fraction reweighting is not configured"
+                        f" for this generator: {generatorInfo}."
+                        f" New weights need to be calculated.",
+                        GeneratorWeightWarning, filename='', lineno=0)
                     DSID = "000000"
             else:
-                log.warning("Failed to determine generator from metadata")
+                warnings.warn_explicit(
+                    "Failed to determine generator from metadata",
+                    GeneratorWeightWarning, filename='', lineno=0)
                 DSID = "000000"
 
             log.info(f"Using HF production fraction weights calculated using DSID {DSID}")
             if DSID == "000000":
-                log.warning("HF production fraction reweighting will return dummy weights of 1.0")
+                warnings.warn_explicit(
+                    "HF production fraction reweighting will return dummy"
+                    " weights of 1.0",
+                    GeneratorWeightWarning, filename='', lineno=0)
 
             alg = config.createAlgorithm( 'CP::SysTruthWeightAlg', f'SysTruthWeightAlg_{streamName}' )
             config.addPrivateTool( 'sysTruthWeightTool', 'PMGTools::PMGHFProductionFractionTool' )

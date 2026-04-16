@@ -5,8 +5,9 @@ from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
 from AthenaCommon.SystemOfUnits	import GeV
 from AthenaConfiguration.Enums import LHCPeriod
-from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
-from AthenaCommon.Logging import logging
+from AnalysisAlgorithmsConfig.ConfigAccumulator import (
+    DataType, Run4FallbackWarning, TestingOnlyWarning)
+import warnings
 
 import ROOT
 
@@ -86,7 +87,6 @@ class PhotonCalibrationConfig (ConfigBlock) :
 
         Factoring this out into its own function, as we want to
         instantiate it in multiple places"""
-        log = logging.getLogger('PhotonCalibrationConfig')
 
         # Set up the calibration and smearing algorithm:
         alg = config.createAlgorithm( 'CP::EgammaCalibrationAndSmearingAlg', name )
@@ -101,7 +101,9 @@ class PhotonCalibrationConfig (ConfigBlock) :
             elif config.geometry() is LHCPeriod.Run3:
                 alg.calibrationAndSmearingTool.ESModel = 'es2024_Run3_v0'
             elif config.geometry() is LHCPeriod.Run4:
-                log.warning("No ESModel set for Run4, using Run3 model")
+                warnings.warn_explicit(
+                    "No ESModel set for Run4, using Run3 model",
+                    Run4FallbackWarning, filename='', lineno=0)
                 alg.calibrationAndSmearingTool.ESModel = 'es2024_Run3_v0'
             else:
                 raise ValueError (f"Can't set up the ElectronCalibrationConfig with {config.geometry().value}, "
@@ -120,15 +122,16 @@ class PhotonCalibrationConfig (ConfigBlock) :
 
     def makeAlgs (self, config) :
 
-        log = logging.getLogger('PhotonCalibrationConfig')
-
         postfix = self.postfix
         if postfix != '' and postfix[0] != '_' :
             postfix = '_' + postfix
 
         if self.forceFullSimConfigForP4:
-            log.warning("You are running PhotonCalibrationConfig forcing full sim config for P4 corrections")
-            log.warning("This is only intended to be used for testing purposes")
+            warnings.warn_explicit(
+                "You are running PhotonCalibrationConfig forcing"
+                " full sim config for P4 corrections."
+                " This is only intended to be used for testing purposes.",
+                TestingOnlyWarning, filename='', lineno=0)
 
         if config.isPhyslite() :
             config.setSourceName (self.containerName, "AnalysisPhotons")
@@ -257,8 +260,10 @@ class PhotonCalibrationConfig (ConfigBlock) :
             alg.calibrationAndSmearingTool.decorateEmva = False
 
         if not self.applyIsolationCorrection:
-            log.warning("You are not applying the isolation corrections")
-            log.warning("This is only intended to be used for testing purposes")
+            warnings.warn_explicit(
+                "You are not applying the isolation corrections."
+                " This is only intended to be used for testing purposes.",
+                TestingOnlyWarning, filename='', lineno=0)
 
         if self.minPt > 0:
                 
@@ -276,8 +281,11 @@ class PhotonCalibrationConfig (ConfigBlock) :
         if self.applyIsolationCorrection:
 
             if self.forceFullSimConfigForIso:
-                log.warning("You are running PhotonCalibrationConfig forcing full sim config for isolation corrections")
-                log.warning("This is only intended to be used for testing purposes")
+                warnings.warn_explicit(
+                    "You are running PhotonCalibrationConfig forcing"
+                    " full sim config for isolation corrections."
+                    " This is only intended to be used for testing purposes.",
+                    TestingOnlyWarning, filename='', lineno=0)
             
             alg = config.createAlgorithm( 'CP::EgammaIsolationCorrectionAlg',
                                           'PhotonIsolationCorrectionAlg' )
@@ -496,19 +504,23 @@ class PhotonWorkingPointEfficiencyConfig (ConfigBlock) :
 
     def makeAlgs (self, config) :
 
-        log = logging.getLogger('PhotonWorkingPointEfficiencyConfig')
-
         # The setup below is inappropriate for Run 1
         if config.geometry() is LHCPeriod.Run1:
             raise ValueError ("Can't set up the PhotonWorkingPointConfig with %s, there must be something wrong!" % config.geometry().value)
 
         if self.forceFullSimConfigForID:
-            log.warning("You are running PhotonWorkingPointConfig forcing full sim config for ID")
-            log.warning("This is only intended to be used for testing purposes")
-           
+            warnings.warn_explicit(
+                "You are running PhotonWorkingPointConfig forcing"
+                " full sim config for ID."
+                " This is only intended to be used for testing purposes.",
+                TestingOnlyWarning, filename='', lineno=0)
+
         if self.forceFullSimConfigForIso:
-            log.warning("You are running PhotonWorkingPointConfig forcing full sim config for Iso")
-            log.warning("This is only intended to be used for testing purposes") 
+            warnings.warn_explicit(
+                "You are running PhotonWorkingPointConfig forcing"
+                " full sim config for Iso."
+                " This is only intended to be used for testing purposes.",
+                TestingOnlyWarning, filename='', lineno=0)
 
         postfix = self.postfix
         if postfix is None :

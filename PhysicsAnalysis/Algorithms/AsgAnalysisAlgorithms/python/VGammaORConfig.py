@@ -1,8 +1,9 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
-from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
-from AthenaCommon.Logging import logging
+from AnalysisAlgorithmsConfig.ConfigAccumulator import (
+    DataType, VGammaORSkipWarning)
+import warnings
 
 class VGammaORBlock(ConfigBlock):
 
@@ -31,11 +32,15 @@ class VGammaORBlock(ConfigBlock):
 
     def makeAlgs(self, config):
 
-        log = logging.getLogger('VGammaORBlock')
 
         if config.dataType() is DataType.Data: return
         if config.dsid() not in self.keepInOverlap and config.dsid() not in self.removeInOverlap:
-            log.warning(f"CP::VGammaORAlg --> this sample has DSID {config.dsid()}, which is not set up for overlap removal. Will skip the configuration of the algorithm!")
+            warnings.warn_explicit(
+                f"CP::VGammaORAlg --> this sample has DSID {config.dsid()}"
+                ", which is not set up for overlap removal."
+                " Will skip the configuration of the algorithm!",
+                VGammaORSkipWarning,
+                filename='', lineno=0)
             return
 
         alg = config.createAlgorithm('CP::VGammaORAlg', 'VGammaORAlg')

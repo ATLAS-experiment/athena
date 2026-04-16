@@ -54,6 +54,12 @@ PileupReweightingTool::PileupReweightingTool( const std::string& name ) :CP::TPi
    declareProperty("Prefix",m_prefix="","Prefix to attach to all decorations ... only used in the 'apply' method");
    declareProperty("UnrepresentedDataAction",m_unrepresentedDataAction=3,"1 = remove unrepresented data, 2 = leave it there, 3 = reassign it to nearest represented bin");
    declareProperty("UnrepresentedDataThreshold",m_unrepDataTolerance=0.05,"When unrepresented data is above this level, will require the PRW config file to be repaired");
+   declareProperty("UnrepresentedDataWarningThreshold",
+                   m_unrepDataWarningThreshold=0.0,
+                   "Suppress the unrepresented-data WARNING when the"
+                   " unrepresented fraction is below this value."
+                   " Default 0 means always warn (preserving the"
+                   " existing behaviour).");
    declareProperty("UseMultiPeriods",m_useMultiPeriods=true,"If true, will try to treat each mc runNumber in a single mc dataset (channel) as a modelling a distinct period of data taking");
    declareProperty("UseRunDependentPrescaleWeight",m_useRunDependentPrescaleWeight=false,"If true, prescale weights in the getCombinedWeight method with Trigger string are determined with the specific random run number");
    declareProperty("DataScaleFactor",m_dataScaleFactorX=1./1.03);

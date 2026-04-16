@@ -4,10 +4,11 @@
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
-from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+from AnalysisAlgorithmsConfig.ConfigAccumulator import (
+    DataType, JetUncertaintyWarning)
 from AthenaConfiguration.Enums import LHCPeriod
-from AthenaCommon.Logging import logging
 import re
+import warnings
 
 
 class JetUncertaintiesConfig (ConfigBlock) :
@@ -169,8 +170,6 @@ class JetUncertaintiesConfig (ConfigBlock) :
         # We do this separately from the tool declaration, as we may need to set uo
         # two such tools, but they have to be private.
 
-        log = logging.getLogger('LargeRJetAnalysisConfig')
-
         # Config file:
         config_file = None
         if self.systematicsModelJER in ["Simple", "Full"] and self.systematicsModelJMS in ["Simple", "Full"]:
@@ -187,7 +186,9 @@ class JetUncertaintiesConfig (ConfigBlock) :
             if config.geometry() in [LHCPeriod.Run2, LHCPeriod.Run3]:
                 config_file = "rel22/Summer2025_PreRec/" + config_file
             else:
-                log.warning("Uncertainties for UFO jets are not for Run 4!")
+                warnings.warn_explicit(
+                    "Uncertainties for UFO jets are not for Run 4!",
+                    JetUncertaintyWarning, filename='', lineno=0)
 
         # Calibration area:
         calib_area = None

@@ -5,6 +5,7 @@ from AthenaConfiguration.Enums import LHCPeriod, FlagEnum
 import re
 
 import warnings
+import logging
 import functools
 
 # warn about deprecations with a FutureWarning instead of a
@@ -34,6 +35,57 @@ class ExpertModeWarning(Warning):
 # Default filter: error out unless the user overrides
 if not any(f[0] == 'error' and f[2] is ExpertModeWarning for f in warnings.filters):
     warnings.simplefilter('error', ExpertModeWarning)
+
+# Route Python warnings through the logging system so they appear in
+# the Athena log stream and remain suppressible via filterwarnings.
+logging.captureWarnings(True)
+
+
+class AnalysisWarning(UserWarning):
+    """Base for expected-but-noteworthy analysis configuration conditions.
+    Silence with:
+        warnings.filterwarnings("ignore", category=AnalysisWarning)
+    """
+
+
+class ElectronEfficiencyCorrelationWarning(AnalysisWarning):
+    """Correlation model not fully supported for this run period."""
+
+
+class VGammaORSkipWarning(AnalysisWarning):
+    """Sample DSID not configured for VGammaOR removal; alg skipped."""
+
+
+class Run4FallbackWarning(AnalysisWarning):
+    """Run 4 geometry lacks dedicated config; falling back to Run 3."""
+
+
+class GeneratorWeightWarning(AnalysisWarning):
+    """HF production fraction reweighting cannot be configured for this
+    generator; using fallback weights or dummy weights of 1.0."""
+
+
+class TestingOnlyWarning(AnalysisWarning):
+    """Configuration is only intended for testing/debugging purposes."""
+
+
+class Run2OnlyFeatureWarning(AnalysisWarning):
+    """Feature is only available for Run 2 and has no effect here."""
+
+
+class JetUncertaintyWarning(AnalysisWarning):
+    """Jet uncertainty configuration not available for this jet
+    type or geometry."""
+
+
+class TriggerSFWarning(AnalysisWarning):
+    """Trigger SF configuration issue (e.g. no chains for a year)."""
+
+
+class ConfigDeprecationWarning(FutureWarning):
+    """A configuration option is deprecated and will be removed
+    in a future release."""
+
 
 class DataType(FlagEnum):
     """holds the various data types as an enum"""
