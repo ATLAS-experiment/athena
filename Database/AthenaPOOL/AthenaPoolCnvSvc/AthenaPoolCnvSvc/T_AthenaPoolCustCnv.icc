@@ -56,17 +56,15 @@ template <class P>
 StatusCode T_AthenaPoolCustCnv<TRANS, PERS>::objectToPool(P* pObj, std::unique_ptr<Token>& token, const std::string& key, const std::string& output) {
    const static std::string className = ClassName<P>::name();
    // Check dictionary
-   {
-      std::lock_guard<AthenaPoolConverter::CallMutex> lock(this->m_conv_mut);
-      // Allow for multiple class names
-      if (m_className != className) {
-         m_className = className;
-         // Different class name - get description
-         auto itClass = m_classDescs.find(className);
-         if (itClass == m_classDescs.end()) {
-            // For new class names, check dictionary
-            m_classDescs[className] = RootType( typeid(P) );
-         }
+   std::lock_guard<AthenaPoolConverter::CallMutex> lock(this->m_conv_mut);
+   // Allow for multiple class names
+   if (m_className != className) {
+      m_className = className;
+      // Different class name - get description
+      auto itClass = m_classDescs.find(className);
+      if (itClass == m_classDescs.end()) {
+         // For new class names, check dictionary
+         m_classDescs[className] = RootType( typeid(P) );
       }
    }
    Placement placement = setPlacementForP(*pObj, key, output);
