@@ -77,11 +77,16 @@ class SeedingToolBase: public AthAlgTool {
   BooleanProperty m_useOldTunings{this, "UseOldTunings", false};
   BooleanProperty m_validateTriplets{this, "ValidateTriplets", true};
   BooleanProperty m_useAdaptiveCuts{this, "UseAdaptiveCuts", true};
+  BooleanProperty m_addTriplets{this, "AddTriplets", false};
+  
 
   FloatProperty m_tau_ratio_cut{this, "tau_ratio_cut", 0.007};
   FloatProperty m_tau_ratio_corr{this, "tau_ratio_correction", 0.006};
 
   FloatProperty m_d0_max{this, "d0_max", 3.0};
+
+  FloatProperty m_max_eta_add_triplets{this, "add_triplets_eta_cut", 1.5};
+  FloatProperty m_max_eta_for_seed_split{this, "split_seeds_eta_cut", 0.6};
   
   float m_phiSliceWidth = 0.;
 

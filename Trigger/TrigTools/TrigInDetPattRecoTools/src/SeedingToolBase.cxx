@@ -537,49 +537,60 @@ void SeedingToolBase::extractSeedsFromTheGraph(int maxLevel, int nEdges, int nHi
 
   const float edge_mask_min_eta      = 1.5;
   const float hit_share_threshold    = 0.49;
-  const float max_eta_for_seed_split = 0.6;
   const float max_inv_rad_diff       = 0.7e-2;//in inverse meters
 
-  int minLevel = 3;//a triplet + 2 confirmation
+  int minLevel = 3;//a triplet + 1 confirmation
 
   if(m_LRTmode) {
-    minLevel = 2;//a triplet + 1 confirmation
+    minLevel = 2;//a triplet + no confirmation
   }
 
   if(maxLevel < minLevel) return;
-  
-  std::vector<GNN_Edge*> vSeeds;
 
-  vSeeds.reserve(nEdges/2);
+  std::vector<GNN_Edge*> vChainHeads;
+
+  vChainHeads.reserve(nEdges/2);
 
   for(int edgeIndex = 0; edgeIndex < nEdges; edgeIndex++) {
     
     GNN_Edge* pS = &(edgeStorage.at(edgeIndex));
+
+    if (m_LRTmode || !m_addTriplets) {
+      if(pS->m_level < minLevel) continue;
+    }
+    else { //eta-dependent cut
+      float edge_eta = std::abs(-std::log(pS->m_p[0]));
+
+      if (edge_eta > m_max_eta_add_triplets) {
+        if(pS->m_level < minLevel) continue;
+      }
+      else {
+        if(pS->m_level < minLevel - 1) continue;
+      }
+    }
     
-    if(pS->m_level < minLevel) continue;
-    
-    vSeeds.push_back(pS);
+    vChainHeads.push_back(pS);
   }
   
-  if(vSeeds.empty()) return;
+  if(vChainHeads.empty()) return;
   
-  std::sort(vSeeds.begin(), vSeeds.end(), GNN_Edge::CompareLevel());
+  std::sort(vChainHeads.begin(), vChainHeads.end(), GNN_Edge::CompareLevel());
     
   //backtracking
 
   std::vector<std::tuple<float, int, std::vector<const GNN_Node*>, int > > vSeedCandidates;
 
-  vSeedCandidates.reserve(vSeeds.size());
+  vSeedCandidates.reserve(vChainHeads.size());
 
   std::vector<std::pair<float, unsigned int> > vArgSort;
 
-  vArgSort.reserve(vSeeds.size());
+  vArgSort.reserve(vChainHeads.size());
 
   unsigned int seed_counter = 0;
   
   auto tFilter = std::make_unique<TrigFTF_GNN_TrackingFilter>(m_layerGeometry, edgeStorage);
 
-  for(auto pS : vSeeds) {
+  for(auto pS : vChainHeads) {
 
     if(pS->m_level == -1) continue;
 
@@ -590,11 +601,23 @@ void SeedingToolBase::extractSeedsFromTheGraph(int maxLevel, int nEdges, int nHi
     if(!rs.m_initialized) {
       continue;
     }
-
-    if(static_cast<int>(rs.m_vs.size()) < minLevel) continue;
-
-    float seed_eta = std::abs(-std::log(pS->m_p[0]));
     
+    float seed_eta = std::abs(-std::log(pS->m_p[0]));
+
+    int chain_length = static_cast<int>(rs.m_vs.size());
+
+    if (m_LRTmode || !m_addTriplets) {
+      if(chain_length < minLevel) continue;
+    }
+    else {
+      if (seed_eta > m_max_eta_add_triplets) {
+        if(chain_length < minLevel) continue;
+      }
+      else {
+        if(chain_length < minLevel - 1) continue;
+      }
+    }
+
     std::vector<const GNN_Node*> vN;
 
     for(std::vector<GNN_Edge*>::reverse_iterator sIt=rs.m_vs.rbegin();sIt!=rs.m_vs.rend();++sIt) {
@@ -611,13 +634,13 @@ void SeedingToolBase::extractSeedsFromTheGraph(int maxLevel, int nEdges, int nHi
 	    
     }
 
-    if(vN.size()<3) continue;
+    if(vN.size()<3) continue; //a triplet are accepted if it makes upto this point 
 
     unsigned int orig_seed_size = vN.size();
 
     float orig_seed_quality = -rs.m_J/orig_seed_size;
     
-    int seed_split_flag = (seed_eta < max_eta_for_seed_split) && (orig_seed_size > 3) && (orig_seed_size <= 5) ? 1 : 0;
+    int seed_split_flag = (seed_eta < m_max_eta_for_seed_split) && (orig_seed_size > 3) && (orig_seed_size <= 5) ? 1 : 0;
 
     if (seed_split_flag) {//split the seed by dropping spacepoints
       
