@@ -27,6 +27,8 @@
 #include "AsgTools/AsgTool.h"
 #include "xAODEgamma/ElectronFwd.h"
 
+#include "EgammaAnalysisInterfaces/IForwardElectronCalib.h"
+
 #include "lwtnn/LightweightGraph.hh"
 
 #include <vector>
@@ -39,8 +41,10 @@ class EventContext;
 
 class AsgForwardElectronCalibrationTool 
   : public asg::AsgTool
+  , virtual public IForwardElectronCalib
 {
-  ASG_TOOL_CLASS0(AsgForwardElectronCalibrationTool)
+  ASG_TOOL_CLASS1(AsgForwardElectronCalibrationTool,
+		  IForwardElectronCalib)
 
 
 
