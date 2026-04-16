@@ -5,11 +5,12 @@
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
-from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+from AnalysisAlgorithmsConfig.ConfigAccumulator import (
+    DataType, ConfigDeprecationWarning, JetUncertaintyWarning)
 from AthenaCommon.SystemOfUnits	import GeV
 from AthenaConfiguration.Enums import LHCPeriod
-from AthenaCommon.Logging import logging
 import re
+import warnings
 
 
 def _parseJetCollection(jetCollection):
@@ -216,7 +217,6 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         if config.getContainerMeta(self.containerName, 'jetRadius', failOnMiss=True) != 4:
             return
 
-        log = logging.getLogger('SmallRJetAnalysisConfig')
 
         jetCollectionName=self.jetCollection
         if(self.jetCollection=="AnalysisJets") :
@@ -307,9 +307,9 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             assert jetInput=="EMPFlow", "NN JVT only defined for PFlow jets"
             alg = config.createAlgorithm( 'CP::JetDecoratorAlg', 'NNJvtUpdateAlg' )
             config.addPrivateTool( 'decorator', 'JetPileupTag::JetVertexNNTagger' )
-            # Set this actually to the *output* collection
             alg.jets = config.readName (self.containerName)
             alg.jetsOut = config.copyName (self.containerName)
+            # Set this actually to the *output* collection
             alg.decorator.JetContainer = alg.jetsOut.replace ('%SYS%', 'NOSYS')
             alg.decorator.SuppressInputDependence=True
             alg.decorator.SuppressOutputDependence=True
@@ -318,7 +318,11 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         # Change the truthJetCollection property to AntiKt4TruthWZJets if preferred
         if self.runJvtSelection :
             assert jetInput=="EMPFlow", "NNJvt WPs and SFs only valid for PFlow jets"
-            log.warning("jvtWP, runJvtSelection and runJvtEfficiency are deprecated - please use a JVTWorkingPoint block instead.")
+            warnings.warn_explicit(
+                "jvtWP, runJvtSelection and runJvtEfficiency"
+                " are deprecated - please use a"
+                " JVTWorkingPoint block instead.",
+                ConfigDeprecationWarning, filename='', lineno=0)
 
             alg = config.createAlgorithm('CP::AsgSelectionAlg', 'JvtSelectionAlg')
             config.addPrivateTool('selectionTool', 'CP::NNJvtSelectionTool')
@@ -351,7 +355,11 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
 
         if self.runFJvtSelection :
             assert jetInput=="EMPFlow", "fJvt WPs and SFs only valid for PFlow jets"
-            log.warning("fJvtWP, runFJvtSelection and runFJvtEfficiency are deprecated - please use a FJVTWorkingPoint block instead.")
+            warnings.warn_explicit(
+                "fJvtWP, runFJvtSelection and runFJvtEfficiency"
+                " are deprecated - please use a"
+                " FJVTWorkingPoint block instead.",
+                ConfigDeprecationWarning, filename='', lineno=0)
 
             alg = config.createAlgorithm('CP::AsgSelectionAlg', 'FJvtSelectionAlg')
             config.addPrivateTool('selectionTool', 'CP::FJvtSelectionTool')
@@ -408,8 +416,6 @@ class RScanJetAnalysisConfig (ConfigBlock) :
         if radius not in [2, 6]:
             return
 
-        log = logging.getLogger('RScanJetAnalysisConfig')
-
         jetCollectionName=self.jetCollection
         if(self.jetCollection=="AnalysisJets") :
             jetCollectionName="AntiKt4EMPFlowJets"
@@ -446,8 +452,9 @@ class RScanJetAnalysisConfig (ConfigBlock) :
             alg.HIsetup = jetInput == "HI"
             alg.calibrationTool = f'{calibTool.getType()}/{calibTool.getName()}'
             alg.jets = config.readName (self.containerName)
-            # Logging would be good
-            log.warning("Uncertainties for R-Scan jets are not yet released!")
+            warnings.warn_explicit(
+                "Uncertainties for R-Scan jets are not yet released!",
+                JetUncertaintyWarning, filename='', lineno=0)
 
 
 class LargeRJetAnalysisConfig (ConfigBlock) :
@@ -515,8 +522,6 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
     def createFFSmearingTool(self, jetFFSmearingAlg, config):
         # Retrieve appropriate large-R jet mass resolution recommendations for the FFJetSmearingTool.
 
-        log = logging.getLogger('LargeRJetAnalysisConfig')
-
         # Config file:
         if self.systematicsModelJMR in ["Simple", "Full"]:
             config_file = f"R10_{self.systematicsModelJMR}JMR.config"
@@ -531,7 +536,9 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
         else:
             config_file = "rel22/Summer2025_PreRec/" + config_file
             if config.geometry() is LHCPeriod.Run4:
-                log.warning("Uncertainties for UFO jets are not for Run 4!")
+                warnings.warn_explicit(
+                    "Uncertainties for UFO jets are not for Run 4!",
+                    JetUncertaintyWarning, filename='', lineno=0)
 
         # MC type:
         if config.geometry() is LHCPeriod.Run2:

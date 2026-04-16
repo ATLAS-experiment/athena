@@ -1302,7 +1302,11 @@ Int_t CP::TPileupReweighting::Initialize() {
       }  else if(m_unrepresentedDataAction==2) {
          Warning("Initialize","has %f%% unrepresented data. This was kept in (UnrepresentedDataAction=2)",100.*frac);
       } else if(m_unrepresentedDataAction==3) {
-         Warning("Initialize","has %f%% unrepresented data. This was reassigned (UnrepresentedDataAction=3)",100.*frac);
+         if(frac >= m_unrepDataWarningThreshold) {
+            Warning("Initialize","has %f%% unrepresented data."
+                    " This was reassigned (UnrepresentedDataAction=3)",
+                    100.*frac);
+         }
       } else if(m_unrepresentedDataAction==0) {
          Error("Initialize","has %f%% unrepresented data:",100.*frac);
          //print the report of which channels caused it
