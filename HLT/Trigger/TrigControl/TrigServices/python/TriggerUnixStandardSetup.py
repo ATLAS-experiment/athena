@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ## @file TriggerUnixStandardSetup.py
 ## @brief py-module to configure the Athena AppMgr for trigger
@@ -10,10 +10,6 @@ def commonServicesCfg(flags):
     from AthenaCommon.Constants import INFO
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     from AthenaConfiguration.ComponentFactory import CompFactory
-
-    # set ROOT to batch mode (ATR-21890)
-    from PyUtils.Helpers import ROOTSetup
-    ROOTSetup(batch=True)
 
     # Basic services
     cfg = ComponentAccumulator()

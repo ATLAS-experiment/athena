@@ -1103,8 +1103,8 @@ def main():
    check_args(parser, args)
 
    # set ROOT to batch mode (ATR-21890)
-   from ROOT import gROOT
-   gROOT.SetBatch()
+   from PyUtils.Helpers import ROOTSetup
+   ROOTSetup(batch=True)
 
    # set default OutputLevels and file inclusion
    import AthenaCommon.Logging
