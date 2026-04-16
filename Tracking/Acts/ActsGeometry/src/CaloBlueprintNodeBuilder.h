@@ -9,6 +9,7 @@
 #include "CaloDetDescr/CaloDetDescrManager.h"
 
 #include "Acts/Surfaces/CylinderSurface.hpp"
+#include "Acts/Surfaces/DiscSurface.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "CaloDetDescr/CaloDetDescrElement.h"
@@ -23,6 +24,8 @@ using caloSampleDDEElementsMap_t = std::map<std::pair<std::string, CaloCell_ID::
 using caloDimensionMap_t = std::map<std::string, double>;
 
 namespace ActsTrk {
+
+    enum class caloRegion {DiscNegativeZ, DiscPositiveZ, Global};
 
     /** @class CaloBlueprintNodeBuilder
      *  @brief Builds the Calo Blueprint Node
@@ -47,7 +50,8 @@ namespace ActsTrk {
         ** The second map is filled by looping over all DDE in the CaloDetDescrManager
         ** and adding each DDE to the vector corresponding to its sampling in the map
         */
-        void fillMaps(caloSampleSurfaceMap_t& caloSampleSurfaceMap, caloSampleDDEElementsMap_t& caloSampleDDEElementsMap) const;
+        void fillMaps(std::map<caloRegion, caloSampleSurfaceMap_t>& caloRegionSampleSurfaceMap,
+                      std::map<caloRegion, caloSampleDDEElementsMap_t>& caloRegionSampleDDEElementsMap) const;
         /** fillCaloDimensionsMap fills a map of calorimeter dimensions for each sampling layer.
         ** The map contains minR, maxR, minZ, maxZ and halfLengthZ for each sampling layer.
         */
@@ -71,7 +75,11 @@ namespace ActsTrk {
         ** It creates a new CylinderContainerBlueprintNode in the container node, then creates a new Acts::TrackingVolume with the appropriate dimensions.
         ** Finally it adds the Acts::CylinderSurface to that Acts::TrackingVolume, then adds the tracking volume to the container node.
         */
-        void addCylindricalTrackingVolumeToCaloNode(Acts::Experimental::CylinderContainerBlueprintNode& containerNode, caloDimensionMap_t& caloDimensionMap, const std::string& volumeName,const std::vector<std::shared_ptr<Acts::Surface>>& surfaces, int layerIndex) const;
+        void addCylindricalTrackingVolumeToCaloNode(Acts::Experimental::CylinderContainerBlueprintNode& containerNode, const std::string& volumeName,const std::vector<std::shared_ptr<Acts::Surface>>& surfaces, int layerIndex,  const bool& isDisc) const;
+
+        void generateDiscSurfaces(caloSampleSurfaceMap_t& caloSampleSurfaceMap, caloSampleDDEElementsMap_t& caloSampleDDEElementsMap) const;
+
+        std::shared_ptr<Acts::DiscSurface> generateDiscSurface(const double& z, const double& maxLArBRadius, const double& minLArBRadius) const;
 
         std::unique_ptr<CaloDetDescrManager> m_caloDetSecrMgr;   
 
