@@ -118,7 +118,7 @@ ApplicationMgr                                       INFO Application Manager St
 RootDatabase                                        DEBUG Request tree cache
 RootDatabase                                        DEBUG File name SimplePoolFile1.root
 RootDatabase                                        DEBUG Got tree CollectionTree read entry -1
-RootDatabase                                        DEBUG Using Tree cache. Size: -1 Nevents to learn with: -1
+RootDatabase                                        DEBUG Using Tree cache. Size: -1 Nevents to learn with: 10
 MetaDataSvc                                         DEBUG handle() BeginInputFile for SimplePoolFile1.root
 MetaDataSvc                                         DEBUG initInputMetaDataStore: file name SimplePoolFile1.root
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaDataHdr(DataHeader)

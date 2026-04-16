@@ -60,7 +60,6 @@ RootDatabase::RootDatabase() :
         m_minBufferEntries(-1),
         m_defWritePolicy(TObject::kOverwrite),   // On write create new versions
         m_branchOffsetTabLen(0),
-        m_defTreeCacheLearnEvents(-1),
         m_rntBufferedWriteEnabled(true),
         m_rntReaderMetricsEnabled(false),
         m_rntWriterMetricsEnabled(false),
@@ -500,8 +499,6 @@ StatusCode RootDatabase::getOption(DbOption& opt)  {
           TTree* tr = getTree( m_treeNameWithCache );
           if (tr) return opt.setValue((int)tr->GetCacheSize());
           return opt.setValue((int)0);
-      } else if( !strcasecmp(n+5,"CACHE_LEARN_EVENTS") ) {
-          return opt.setValue((int)TTreeCache::GetLearnEntries());
       } else if( !strcasecmp(n+5,"NAME_WITH_CACHE") ) {
           return opt.setValue(m_treeNameWithCache.c_str());
       }
@@ -681,23 +678,6 @@ StatusCode RootDatabase::setOption(const DbOption& opt)  {
        else if ( !strcasecmp(n+5,"AUTO_FLUSH") )  {
           return setAutoFlush(opt);
        }
-       else if ( !strcasecmp(n+5,"CACHE_LEARN_EVENTS") )  {
-          StatusCode s = opt.getValue(m_defTreeCacheLearnEvents);
-          if( s.isSuccess() ) {
-            for ( auto scheme : APRDefaults::getAllNamingSchemes() ) {
-              if ( TTree *tree = getTree( APRDefaults::getEventDataName(scheme) ) ) {
-                if ( tree->GetAutoFlush() > 0 && m_defTreeCacheLearnEvents < tree->GetAutoFlush() ) {
-                   ATH_MSG_INFO(n << ": Overwriting LearnEvents with " << APRDefaults::getEventDataName(scheme) << " AutoFlush");
-                   m_defTreeCacheLearnEvents = tree->GetAutoFlush();
-                }
-                break;
-              }
-            }
-            TTreeCache::SetLearnEntries(m_defTreeCacheLearnEvents);
-            ATH_MSG_DEBUG(n << " = " << m_defTreeCacheLearnEvents);
-          }
-          return s;
-       }
        else if ( !strcasecmp(n+5,"CACHE") )  {
            ATH_MSG_DEBUG("Request tree cache");
            if( !m_file ) return FAILURE;
@@ -718,19 +698,15 @@ StatusCode RootDatabase::setOption(const DbOption& opt)  {
               ATH_MSG_DEBUG("Got tree " << tr->GetName() << " read entry " << tr->GetReadEntry());
            }
            tr->SetCacheSize(cacheSize);
-           if (m_defTreeCacheLearnEvents < 0) {
-              long long int autoFlush = tr->GetAutoFlush();
-              if (autoFlush > 0) { // Tree was written flushing on number of events
-                 TTreeCache::SetLearnEntries(-m_defTreeCacheLearnEvents * autoFlush);
-              }
-           } else {
-              TTreeCache::SetLearnEntries(m_defTreeCacheLearnEvents);
+           long long int autoFlush = tr->GetAutoFlush();
+           if (autoFlush > 0) { // Tree was written flushing on number of events
+              TTreeCache::SetLearnEntries(autoFlush);
            }
            TTreeCache* cache = (TTreeCache*)m_file->GetCacheRead();
            if (cache) {
                cache->SetEntryRange(0, tr->GetEntries());
                ATH_MSG_DEBUG("Using Tree cache. Size: " << cacheSize
-                            << " Nevents to learn with: " << m_defTreeCacheLearnEvents);
+                            << " Nevents to learn with: " << TTreeCache::GetLearnEntries());
            } else if (cacheSize != 0) {
                ATH_MSG_ERROR("Could not get cache");
                return FAILURE;
