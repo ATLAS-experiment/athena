@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # art-description: transform test of BSRDOtoRAW + T0Reco + T0Mon, using v1PhysP1 menu
 # art-type: build
@@ -27,7 +27,7 @@ hlt.args += ' --outputBSFile=RAW.pool.root'
 hlt.args += ' --outputHIST_HLTMONFile=hltmon.root'
 hlt.args += ' --outputDRAW_TRIGCOSTFile=TRIGCOST.pool.root'
 hlt.args += ' --outputNTUP_TRIGCOSTFile=cost.ntup.root'
-hlt.args += ' --runNumber 475321'  # RunNumber is set by Panda, but ignored by Trf to avoid changes from !48070
+hlt.args += ' --runNumber 500306'  # RunNumber is set by Panda, but ignored by Trf to avoid changes from !48070
 
 #====================================================================================================
 # Tier-0 reco step (BS->AOD)
@@ -63,7 +63,7 @@ tzreco.args = '--inputBSFile=RAW.pool.root'  # output of the previous step
 tzreco.args += ' --outputAODFile=AOD.pool.root'
 tzreco.args += ' --outputNTUP_TRIGRATEFile=rate.ntup.root'
 tzreco.args += ' --outputHISTFile=ExampleMonitorOutput.root'
-tzreco.args += f' --conditionsTag="{defaultConditionsTags.RUN3_DATA}" --geometryVersion=\'ATLAS-R3S-2021-03-02-00\''
+tzreco.args += f' --conditionsTag="{defaultConditionsTags.RUN3_DATA25}" --geometryVersion=\'ATLAS-R3S-2021-03-02-00\''
 tzreco.args += ' --preExec="{:s}"'.format(tzrecoPreExec)
 tzreco.args += ' --CA'
 
