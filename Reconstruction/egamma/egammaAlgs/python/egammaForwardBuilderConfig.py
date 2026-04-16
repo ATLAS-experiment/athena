@@ -5,7 +5,7 @@ from egammaTools.EMTrackMatchBuilderConfig import EMTrackMatchBuilderCfg
 from ElectronPhotonSelectorTools.AsgForwardElectronIsEMSelectorsConfig import (
     AsgForwardElectronIsEMSelectorCfg)
 from ElectronPhotonSelectorTools.ForwardElectronSelectorConfig import (
-    AsgForwardElectronSelectorToolCfg)
+    AsgForwardElectronSelectorToolCfg, AsgForwardElectronCalibrationToolCfg)
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -61,6 +61,8 @@ def egammaForwardBuilderCfg(flags, name='egammaForwardElectron', **kwargs):
             "Tight")
 
 
+    
+
         kwargs.setdefault("forwardelectronNNselectors",
                           [LooseFwdElectronSelector_NN.popPrivateTools(),
                           MediumFwdElectronSelector_NN.popPrivateTools(),
@@ -72,8 +74,14 @@ def egammaForwardBuilderCfg(flags, name='egammaForwardElectron', **kwargs):
         acc.merge(LooseFwdElectronSelector_NN)
         acc.merge(MediumFwdElectronSelector_NN)
         acc.merge(TightFwdElectronSelector_NN)
-
         
+    forward_elecpTCalib = AsgForwardElectronCalibrationToolCfg (flags,
+                                          "forwardelectronNNpTCalib")
+
+    kwargs.setdefault("forwardelectronNNCalib",forward_elecpTCalib.popPrivateTools())
+
+    kwargs["dopTCal"] = True
+
     if "ObjectQualityTool" not in kwargs and not flags.Common.isOnline:
         egOQ = egammaOQFlagsBuilderCfg(flags)
         kwargs["ObjectQualityTool"] = egOQ.popPrivateTools()
