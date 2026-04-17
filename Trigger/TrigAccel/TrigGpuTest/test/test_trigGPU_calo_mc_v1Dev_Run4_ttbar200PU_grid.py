@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger RDO->RDO_TRIG athena CaloGPU for Run4 with ttbar mu=200
 # art-type: grid
 # art-include: main/Athena
-# art-input: group.trig-hlt.mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_s4345_r15583
-# art-input-nfiles: 10
+# art-input: group.trig-hlt.mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4494_r16635
+# art-input-nfiles: 5
 # art-athena-mt: 8
 # art-architecture: '#&nvidia'
 # art-output: *.txt
@@ -23,20 +23,21 @@
 # art-output: prmon*
 # art-output: *.check*
 
-from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
+from TriggerTest.MCExecStep import MCGridStep
+from TrigValTools.TrigValSteering import Test, CheckSteps
 from AthenaConfiguration.TestDefaults import defaultConditionsTags
 
-ex = ExecStep.ExecStep()
-ex.type = 'athena'
-ex.job_options = 'TriggerJobOpts/runHLT.py'
+ex = MCGridStep(
+    menu='MC_pp_run4_v1',
+    global_tag=defaultConditionsTags.RUN4_MC,
+    mc_campaign='Campaigns.PhaseIIPileUp200'
+)
+
 ex.input = 'ttbar_pu200_Run4'
-ex.threads = 8
-ex.concurrent_events = 8
+
 ex.flags = [ 'CaloRecGPU.GlobalFlags.UseCaloRecGPU=True',
-             'Trigger.triggerMenuSetup="MC_pp_run4_v1"',
              'ITk.doTruth=False',
-             'Tracking.doTruth=False',
-            f'IOVDb.GlobalTag={defaultConditionsTags.RUN4_MC}']
+             'Tracking.doTruth=False']
 
 test = Test.Test()
 test.art_type = 'grid'
