@@ -1,7 +1,8 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
-from AsgAnalysisAlgorithms.AsgAnalysisConfig import makeEventCutFlowConfig
+from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
+from AsgAnalysisAlgorithms.AsgAnalysisConfig import EventCutFlowBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 
 
@@ -10,27 +11,31 @@ class EventSelectionMergerConfig(ConfigBlock):
 
     def __init__(self):
         super(EventSelectionMergerConfig, self).__init__()
+        self._instance_number = EventSelectionMergerConfig.get_instance_count()
         self.setBlockName('EventSelectionMerger')
-        self.addOption('selections', [], type=list,
-            info="the selection decisions to unify into a "
-            "final decision (internally: `selection_1 || selection_2 || ...`). ")
+        self.addDependency('EventSelection', required=True)
         self.addOption('noFilter', False, type=bool,
             info="do not apply an event filter, i.e. setting it to `False` "
             "removes events not passing the full list of selection cuts.")
 
     def instanceName (self) :
         """Return the instance name for this block"""
-        return '' # I think there is only one instance of this block, not sure what the name ought to be
+        return '' # There is only ever one instance of this block
 
     def makeAlgs(self, config):
-        if not ( isinstance(self.selections, list) and self.selections and all(isinstance(item, str) for item in self.selections) ):
-            print('EventSelectionMerger: selections = ', self.selections)
-            raise ValueError('EventSelectionMerger requires a non-empty list of selection strings to be '
-                             'passed as `selections`!')
-        alg = config.createAlgorithm('CP::SaveFilterAlg', 'EventSelectionMerger' + self.selections[0].split("_%SYS%")[0])
-        alg.FilterDescription = 'events passing at least one EventSelection algorithm'
+        # Only the first instance runs; all others are no-ops
+        if self._instance_number != 1:
+            return
+
+        selections = config.getContainerMeta('EventInfo', 'eventSelectionNames',
+                                             failOnMiss=True)
+        selections = [sel for sel in selections if not sel.startswith("pass_SUB")]
+
+        alg = config.createAlgorithm('CP::SaveFilterAlg',
+                                     'EventSelectionMerger' + selections[0].split("_%SYS%")[0])
+        alg.FilterDescription = 'events passing at least one EventSelection'
         alg.eventDecisionOutputDecoration = 'ignore_anySelection_%SYS%'
-        alg.selection = '||'.join([sel+',as_char' for sel in self.selections if sel])
+        alg.selection = '||'.join([sel + ',as_char' for sel in selections])
         alg.noFilter = self.noFilter
         alg.selectionName = 'pass_anySelection_%SYS%'
         alg.decorationName = 'ntuplepass_anySelection_%SYS%'
@@ -41,7 +46,7 @@ class EventSelectionConfig(ConfigBlock):
     def __init__(self):
         super(EventSelectionConfig, self).__init__()
         self.setBlockName('EventSelection')
-        self.addOption('name', '', type=str,
+        self.addOption('selectionName', '', type=str,
             noneAction='error',
             info="the name of the event selection, used to uniquely identify "
             "the `EventSelectionConfig` block.")
@@ -76,9 +81,6 @@ class EventSelectionConfig(ConfigBlock):
             noneAction='error',
             info="a single string listing one selection cut per line. "
             "See [available keywords](https://topcptoolkit.docs.cern.ch/latest/settings/eventselection/#available-keywords).")
-        self.addOption('noFilter', False, type=bool,
-            info="do not apply an event filter, i.e. setting it to `False` "
-            "removes events not passing the full list of selection cuts.")
         self.addOption('debugMode', False, type=bool,
             info="whether to create an output branch for every single line "
             "of the selection cuts. Setting it to `False` only saves the"
@@ -92,9 +94,13 @@ class EventSelectionConfig(ConfigBlock):
 
     def instanceName (self) :
         """Return the instance name for this block"""
-        return self.name
+        return self.selectionName
 
     def makeAlgs(self, config):
+        existing = config.getContainerMeta('EventInfo', 'eventSelectionNames', defaultValue=[])
+        config.setContainerMeta('EventInfo', 'eventSelectionNames',
+                                existing + [f'pass_{self.selectionName}_%SYS%'], allowOverwrite=True)
+
         # need to re-initialize here to deal with multiple passes
         self.step = 0
         # initialize the pre-selection
@@ -107,7 +113,8 @@ class EventSelectionConfig(ConfigBlock):
                               "a single string where each line represents a different selection cut to apply in order.")
         for line in self.selectionCuts.split("\n"):
             self.interpret(line, config)
-        config.addEventCutFlow(self.name, self.getCutflow())
+        config.addEventCutFlow(self.selectionName, self.getCutflow())
+
 
     def interpret(self, text, cfg):
         text = text.strip()
@@ -298,7 +305,7 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "number of arguments")
         if not self.electrons:
             self.raise_missinginput("electrons")
-        thisalg = f'{self.name}_NEL_{self.step}'
+        thisalg = f'{self.selectionName}_NEL_{self.step}'
         alg = config.createAlgorithm('CP::NObjectPtSelectorAlg', thisalg)
         alg.particles, alg.objectSelection = config.readNameAndSelection(self.electrons)
         if "Truth" in self.electrons:
@@ -325,7 +332,7 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "number of arguments")
         if not self.muons:
             self.raise_missinginput("muons")
-        thisalg = f'{self.name}_NMU_{self.step}'
+        thisalg = f'{self.selectionName}_NMU_{self.step}'
         alg = config.createAlgorithm('CP::NObjectPtSelectorAlg', thisalg)
         alg.particles, alg.objectSelection = config.readNameAndSelection(self.muons)
         if "Truth" in self.muons:
@@ -352,7 +359,7 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "number of arguments")
         if not self.electrons and not self.muons:
             self.raise_missinginput("electrons or muons")
-        thisalg = f'{self.name}_SUMNELNMU_{self.step}'
+        thisalg = f'{self.selectionName}_SUMNELNMU_{self.step}'
         alg = config.createAlgorithm('CP::SumNLeptonPtSelectorAlg', thisalg)
         alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
         alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
@@ -389,7 +396,7 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "number of arguments")
         if not self.electrons and not self.muons and not self.taus:
             self.raise_missinginput("electrons, muons or taus")
-        thisalg = f'{self.name}_SUMNLEPTONS_{self.step}'
+        thisalg = f'{self.selectionName}_SUMNLEPTONS_{self.step}'
         alg = config.createAlgorithm('CP::SumNLeptonPtSelectorAlg', thisalg)
         alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
         alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
@@ -432,7 +439,7 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "number of arguments")
         if not self.jets:
             self.raise_missinginput("jets")
-        thisalg = f'{self.name}_NJET_{self.step}'
+        thisalg = f'{self.selectionName}_NJET_{self.step}'
         alg = config.createAlgorithm('CP::NObjectPtSelectorAlg', thisalg)
         alg.particles, alg.objectSelection = config.readNameAndSelection(self.jets)
         alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
@@ -457,7 +464,7 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "number of arguments")
         if not self.jets:
             self.raise_missinginput("jets")
-        thisalg = f'{self.name}_NBJET_{self.step}'
+        thisalg = f'{self.selectionName}_NBJET_{self.step}'
         alg = config.createAlgorithm('CP::NObjectPtSelectorAlg', thisalg)
         particles, selection = config.readNameAndSelection(self.jets)
         alg.particles = particles
@@ -495,7 +502,7 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "number of arguments")
         if not self.photons:
             self.raise_missinginput("photons")
-        thisalg = f'{self.name}_NPH_{self.step}'
+        thisalg = f'{self.selectionName}_NPH_{self.step}'
         alg = config.createAlgorithm('CP::NObjectPtSelectorAlg', thisalg)
         alg.particles, alg.objectSelection = config.readNameAndSelection(self.photons)
         alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
@@ -520,7 +527,7 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "number of arguments")
         if not self.taus:
             self.raise_missinginput("taus")
-        thisalg = f'{self.name}_NTAU_{self.step}'
+        thisalg = f'{self.selectionName}_NTAU_{self.step}'
         alg = config.createAlgorithm('CP::NObjectPtSelectorAlg', thisalg)
         alg.particles, alg.objectSelection = config.readNameAndSelection(self.taus)
         alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
@@ -543,7 +550,7 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "LJET_N")
         if len(items) != 4 and len(items) != 5:
             self.raise_misconfig(text, "number of arguments")
-        thisalg = f'{self.name}_NLJET_{self.step}'
+        thisalg = f'{self.selectionName}_NLJET_{self.step}'
         alg = config.createAlgorithm('CP::NObjectPtSelectorAlg', thisalg)
         alg.particles, alg.objectSelection = config.readNameAndSelection(self.largeRjets)
         alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
@@ -566,7 +573,7 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "LJETMASS_N")
         if len(items) != 4 and len(items) != 5:
             self.raise_misconfig(text, "number of arguments")
-        thisalg = f'{self.name}_NLJETMASS_{self.step}'
+        thisalg = f'{self.selectionName}_NLJETMASS_{self.step}'
         alg = config.createAlgorithm('CP::NObjectMassSelectorAlg', thisalg)
         alg.particles, alg.objectSelection = config.readNameAndSelection(self.largeRjets)
         alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
@@ -589,7 +596,7 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "LJETMASSWINDOW_N")
         if len(items) != 5 and len(items) != 6 and len(items) != 7:
             self.raise_misconfig(text, "number of arguments")
-        thisalg = f'{self.name}_NLJETMASSWINDOW_{self.step}'
+        thisalg = f'{self.selectionName}_NLJETMASSWINDOW_{self.step}'
         alg = config.createAlgorithm('CP::NLargeRJetMassWindowSelectorAlg', thisalg)
         alg.ljets, alg.ljetSelection = config.readNameAndSelection(self.largeRjets)
         vetoMode = items[-1] == 'veto' or items[-1] == 'VETO'
@@ -617,7 +624,7 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "JET_N_GHOST")
         if len(items) != 4 and len(items) != 5:
             self.raise_misconfig(text, "number of arguments")
-        thisalg = f'{self.name}_NJETGHOST_{self.step}'
+        thisalg = f'{self.selectionName}_NJETGHOST_{self.step}'
         alg = config.createAlgorithm('CP::JetNGhostSelectorAlg', thisalg)
         alg.jets, alg.jetSelection = config.readNameAndSelection(self.jets)
         ghosts = self.check_ghosts(items[1])
@@ -641,7 +648,7 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "LJET_N_GHOST")
         if len(items) != 4 and len(items) != 5:
             self.raise_misconfig(text, "number of arguments")
-        thisalg = f'{self.name}_NLJETGHOST_{self.step}'
+        thisalg = f'{self.selectionName}_NLJETGHOST_{self.step}'
         alg = config.createAlgorithm('CP::JetNGhostSelectorAlg', thisalg)
         alg.jets, alg.jetSelection = config.readNameAndSelection(self.largeRjets)
         ghosts = self.check_ghosts(items[1])
@@ -665,7 +672,7 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "OBJ_N")
         if len(items) != 5:
             self.raise_misconfig(text, "number of arguments")
-        thisalg = f'{self.name}_NOBJ_{self.step}'
+        thisalg = f'{self.selectionName}_NOBJ_{self.step}'
         alg = config.createAlgorithm('CP::NObjectPtSelectorAlg', thisalg)
         alg.particles, alg.objectSelection = config.readNameAndSelection(self.check_string(items[1]))
         alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
@@ -683,7 +690,7 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "number of arguments")
         if not self.met:
             self.raise_missinginput("MET")
-        thisalg = f'{self.name}_MET_{self.step}'
+        thisalg = f'{self.selectionName}_MET_{self.step}'
         alg = config.createAlgorithm('CP::MissingETSelectorAlg', thisalg)
         alg.met = config.readName(self.met)
         alg.metTerm = self.metTerm
@@ -701,7 +708,7 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "number of arguments")
         if not self.electrons and not self.muons:
             self.raise_missinginput("electrons or muons")
-        thisalg = f'{self.name}_MWT_{self.step}'
+        thisalg = f'{self.selectionName}_MWT_{self.step}'
         alg = config.createAlgorithm('CP::TransverseMassSelectorAlg', thisalg)
         alg.met = config.readName(self.met)
         alg.metTerm = self.metTerm
@@ -725,7 +732,7 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_missinginput("MET")
         if not self.electrons and not self.muons:
             self.raise_missinginput("electrons or muons")
-        thisalg = f'{self.name}_METMWT_{self.step}'
+        thisalg = f'{self.selectionName}_METMWT_{self.step}'
         alg = config.createAlgorithm('CP::MissingETPlusTransverseMassSelectorAlg', thisalg)
         alg.met = config.readName(self.met)
         alg.metTerm = self.metTerm
@@ -747,7 +754,7 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "number of arguments")
         if not self.electrons and not self.muons:
             self.raise_missinginput("electrons or muons")
-        thisalg = f'{self.name}_MLL_{self.step}'
+        thisalg = f'{self.selectionName}_MLL_{self.step}'
         alg = config.createAlgorithm('CP::DileptonInvariantMassSelectorAlg', thisalg)
         if self.electrons:
             alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
@@ -769,7 +776,7 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "number of arguments")
         if not self.electrons and not self.muons:
             self.raise_missinginput("electrons or muons")
-        thisalg = f'{self.name}_MLLWINDOW_{self.step}'
+        thisalg = f'{self.selectionName}_MLLWINDOW_{self.step}'
         alg = config.createAlgorithm('CP::DileptonInvariantMassWindowSelectorAlg', thisalg)
         if self.electrons:
             alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
@@ -790,7 +797,7 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "number of arguments")
         if not self.electrons and not self.muons and not self.taus:
             self.raise_missinginput("electrons or muons or taus")
-        thisalg = f'{self.name}_OS_{self.step}'
+        thisalg = f'{self.selectionName}_OS_{self.step}'
         alg = config.createAlgorithm('CP::ChargeSelectorAlg', thisalg)
         if self.electrons and (len(items) == 1 or "el" in items):
             if "Particle" in self.electrons or "Truth" in self.electrons:
@@ -818,7 +825,7 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "number of arguments")
         if not self.electrons and not self.muons and not self.taus:
             self.raise_missinginput("electrons or muons or taus")
-        thisalg = f'{self.name}_SS_{self.step}'
+        thisalg = f'{self.selectionName}_SS_{self.step}'
         alg = config.createAlgorithm('CP::ChargeSelectorAlg', thisalg)
         if self.electrons and (len(items) == 1 or "el" in items):
             if "Particle" in self.electrons or "Truth" in self.electrons:
@@ -848,7 +855,7 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "number of arguments")
         if not self.electrons and not self.muons:
             self.raise_missinginput("electrons or muons")
-        thisalg = f'{self.name}_MLL_OSSF_{self.step}'
+        thisalg = f'{self.selectionName}_MLL_OSSF_{self.step}'
         alg = config.createAlgorithm('CP::DileptonOSSFInvariantMassWindowSelectorAlg', thisalg)
         if self.electrons:
             if "Particle" in self.electrons or "Truth" in self.electrons:
@@ -898,7 +905,7 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "RUN_NUMBER")
         if len(items) != 3:
             self.raise_misconfig(text, "number of arguments")
-        thisalg = f'{self.name}_RUN_NUMBER_{self.step}'
+        thisalg = f'{self.selectionName}_RUN_NUMBER_{self.step}'
         alg = config.createAlgorithm('CP::RunNumberSelectorAlg', thisalg)
         alg.sign = self.check_sign(items[1])
         alg.runNumber = self.check_int(items[2])
@@ -913,101 +920,19 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "SAVE")
         if len(items) != 1:
             self.raise_misconfig(text, "number of arguments")
-        thisalg = f'{self.name}_SAVE'
+        thisalg = f'{self.selectionName}_SAVE'
         alg = config.createAlgorithm('CP::SaveFilterAlg', thisalg)
-        alg.FilterDescription = f'events passing < {self.name} >'
-        alg.eventDecisionOutputDecoration = f'ignore_{self.name}_%SYS%'
+        alg.FilterDescription = f'events passing < {self.selectionName} >'
+        alg.eventDecisionOutputDecoration = f'ignore_{self.selectionName}_%SYS%'
         alg.selection = self.checkDecorationName(self.currentDecoration)
-        alg.noFilter = self.noFilter
-        alg.selectionName = f'pass_{self.name}_%SYS%,as_char' # this one is used as a selection
-        alg.decorationName = f'ntuplepass_{self.name}_%SYS%' # this one is saved to file
-        config.addOutputVar('EventInfo', f'ntuplepass_{self.name}_%SYS%', f'pass_{self.name}')
+        alg.noFilter = True
+        alg.selectionName = f'pass_{self.selectionName}_%SYS%,as_char' # this one is used as a selection
+        alg.decorationName = f'ntuplepass_{self.selectionName}_%SYS%' # this one is saved to file
+        config.addOutputVar('EventInfo', f'ntuplepass_{self.selectionName}_%SYS%', f'pass_{self.selectionName}')
         return
 
-def makeEventSelectionConfig(seq,
-                             name,
-                             electrons=None, muons=None, jets=None,
-                             largeRjets=None,
-                             photons=None, taus=None, met=None, metTerm=None,
-                             btagDecoration=None, preselection=None,
-                             selectionCuts=None, noFilter=None,
-                             debugMode=None, cutFlowHistograms=None):
-    """Create an event selection config block
-
-    Keyword arguments:
-        name -- the name defining this selection
-        electrons -- the electron container and selection
-        muons -- the muon container and selection
-        jets -- the jet container and selection
-        largeRjets -- the large-R jet container and selection
-        photons -- the photon container and selection
-        taus -- the tau-jet container and selection
-        met -- the MET container
-        metTerm -- the MET term to use (e.g. 'Final', 'NonInt')
-        btagDecoration -- the b-tagging decoration to use when defining b-jets
-        preselection -- optional event-wise selection flag to start from
-        selectionCuts -- a string listing one selection cut per line
-        noFilter -- whether to disable the event filter
-        debugMode -- enables saving all intermediate decorations
-        cutFlowHistograms -- whether to toggle event cutflow histograms per systematic
-    """
-
-    config = EventSelectionConfig()
-    config.setOptionValue ('name', name)
-    config.setOptionValue ('electrons', electrons)
-    config.setOptionValue ('muons', muons)
-    config.setOptionValue ('jets', jets)
-    config.setOptionValue ('largeRjets', largeRjets)
-    config.setOptionValue ('photons', photons)
-    config.setOptionValue ('taus', taus)
-    config.setOptionValue ('met', met)
-    config.setOptionValue ('metTerm', metTerm)
-    config.setOptionValue ('btagDecoration', btagDecoration)
-    config.setOptionValue ('preselection', preselection)
-    config.setOptionValue ('selectionCuts', selectionCuts)
-    config.setOptionValue ('noFilter', noFilter)
-    config.setOptionValue ('debugMode', debugMode)
-    seq.append(config)
-
-    # add event cutflow algorithm
-    if cutFlowHistograms:
-        makeEventCutFlowConfig(seq, 'EventInfo', selectionName='', postfix=name,
-                               customSelections=name)
-
-def makeMultipleEventSelectionConfigs(seq,
-                                      electrons=None, muons=None, jets=None,
-                                      largeRjets=None,
-                                      photons=None, taus=None, met=None, metTerm=None,
-                                      btagDecoration=None, preselection=None,
-                                      selectionCutsDict=None, noFilter=None,
-                                      debugMode=None, cutFlowHistograms=None):
-    """Create multiple event selection config blocks
-
-       Keyword arguments:
-        electrons -- the electron container and selection
-        muons -- the muon container and selection
-        jets -- the jet container and selection
-        largeRjets -- the large-R jet container and selection
-        photons -- the photon container and selection
-        taus -- the tau-jet container and selection
-        met -- the MET container
-        metTerm -- the MET term to use (e.g. 'Final', 'NonInt')
-        btagDecoration -- the b-tagging decoration to use when defining b-jets
-        preselection -- optional event-wise selection flag to start from
-        selectionCutsDict -- a dictionary with key the name of the selection and value a string listing one selection cut per line
-        noFilter -- whether to disable the event filter
-        debugMode -- enables saving all intermediate decorations
-        cutFlowHistograms -- whether to toggle event cutflow histograms per region and per systematic
-    """
-
-    # first, we generate all the individual event selections
-    # !!! it's important to pass noFilter=True, to avoid applying the individual filters in series
-    for name, selectionCuts in selectionCutsDict.items():
-        makeEventSelectionConfig(seq, name, electrons, muons, jets, largeRjets, photons, taus, met, metTerm, btagDecoration, preselection, selectionCuts, noFilter=True, debugMode=debugMode, cutFlowHistograms=cutFlowHistograms)
-
-    # now we are ready to collect all the filters and apply their logical OR
-    # !!! subregions (name starts with "SUB") are not used in the final filtering
-    config = EventSelectionMergerConfig()
-    config.setOptionValue ('selections', [f'pass_{name}_%SYS%' for name in selectionCutsDict.keys() if not name.startswith("SUB")])
-    config.setOptionValue ('noFilter', noFilter)
-    seq.append(config)
+@groupBlocks
+def EventSelection(seq):
+    seq.append(EventSelectionConfig())
+    seq.append(EventCutFlowBlock())
+    seq.append(EventSelectionMergerConfig())

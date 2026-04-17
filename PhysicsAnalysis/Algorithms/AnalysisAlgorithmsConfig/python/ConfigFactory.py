@@ -415,13 +415,12 @@ class ConfigFactory():
         self.addAlgConfigBlock(algName="ReclusteredJetCalibration", alg=ReclusteredJetCalibrationBlock)
 
         # event selection
-        from EventSelectionAlgorithms.EventSelectionConfig import makeMultipleEventSelectionConfigs
-        self.addAlgConfigBlock(algName='EventSelection', alg=makeMultipleEventSelectionConfigs)
+        from EventSelectionAlgorithms.EventSelectionConfig import EventSelection
+        self.addAlgConfigBlock(algName='EventSelection', alg=EventSelection)
 
         # event-based cutflow
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import EventCutFlowBlock
-        self.addAlgConfigBlock(algName='EventCutFlow', alg=EventCutFlowBlock,
-            defaults={'containerName': 'EventInfo', 'selectionName': ''})
+        self.addAlgConfigBlock(algName='EventCutFlow', alg=EventCutFlowBlock)
 
         # generator level analysis
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import GeneratorAnalysisBlock

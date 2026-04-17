@@ -414,15 +414,17 @@ MU_N medium 25000 > 0
 SAVE
 """
     }
-    config.addBlock ('EventSelection')
-    config.setOptions (electrons='AnaElectrons.loose')
-    config.setOptions (muons='AnaMuons.medium')
-    config.setOptions (jets='AnaJets.baselineJvt')
-    config.setOptions (met='AnaMET')
-    config.setOptions (btagDecoration='ftag_select_ftag')
-    config.setOptions (noFilter=True)
-    config.setOptions (cutFlowHistograms=True)
-    config.setOptions (selectionCutsDict=exampleSelectionCuts)
+    for sel_name,sel_cuts in exampleSelectionCuts.items():
+        config.addBlock ('EventSelection')
+        config.setOptions (electrons='AnaElectrons.loose')
+        config.setOptions (muons='AnaMuons.medium')
+        config.setOptions (jets='AnaJets.baselineJvt')
+        config.setOptions (met='AnaMET')
+        config.setOptions (btagDecoration='ftag_select_ftag')
+        config.setOptions (noFilter=True)
+        config.setOptions (cutFlowHistograms=True)
+        config.setOptions (selectionName=sel_name)
+        config.setOptions (selectionCuts=sel_cuts)
 
     # Bootstraps
     config.addBlock ('Bootstraps')
