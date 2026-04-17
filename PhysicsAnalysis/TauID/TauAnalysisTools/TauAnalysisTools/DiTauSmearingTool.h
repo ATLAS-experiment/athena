@@ -41,13 +41,13 @@ public:
   virtual StatusCode initialize() override;
 
   /// Apply the correction on a modifyable object
-  virtual CP::CorrectionCode applyCorrection( xAOD::DiTauJet& xDiTau ) override;
+  virtual CP::CorrectionCode applyCorrection( xAOD::DiTauJet& xDiTau ) const;
   /// Create a corrected copy from a constant ditau
   virtual CP::CorrectionCode correctedCopy( const xAOD::DiTauJet& input,
-      xAOD::DiTauJet*& output ) override;
+      xAOD::DiTauJet*& output ) const;
 
   /// returns: whether this tool is affected by the given systematis
-  virtual bool isAffectedBySystematic( const CP::SystematicVariation& systematic ) const override;
+  virtual bool isAffectedBySystematic( const CP::SystematicVariation& systematic ) const;
 
   /// returns: the list of all systematics this tool can be affected by
   virtual CP::SystematicSet affectingSystematics() const override;

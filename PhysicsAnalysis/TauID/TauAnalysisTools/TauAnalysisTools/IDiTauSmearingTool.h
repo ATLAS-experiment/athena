@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLS_IDITAUSMEARINGTOOL_H
@@ -25,7 +25,8 @@ namespace TauAnalysisTools
 {
 
 class IDiTauSmearingTool
-  : public virtual CP::ISystematicsTool
+  : public virtual asg::IAsgTool	
+  , public virtual CP::ISystematicsTool
 {
 
   /// Declare the interface that the class provides
@@ -34,10 +35,10 @@ class IDiTauSmearingTool
 public:
 
   /// Apply the correction on a modifiable object
-  virtual CP::CorrectionCode applyCorrection( xAOD::DiTauJet& xDiTau ) = 0;
+  virtual CP::CorrectionCode applyCorrection( xAOD::DiTauJet& xDiTau ) const = 0;
   /// Create a corrected copy from a constant ditau
   virtual CP::CorrectionCode correctedCopy( const xAOD::DiTauJet& input,
-      xAOD::DiTauJet*& output ) = 0;
+      xAOD::DiTauJet*& output ) const = 0;
 
 }; // class IDiTauSmearingTool
 
