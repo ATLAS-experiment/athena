@@ -278,7 +278,7 @@ class TopoAlgoDefMultiplicity:
                 thrtype = algo.input
                 if 'LArSaturation' in algo.name:
                     thrtype = 'LArSaturation'
-                elif 'XE' in algo.input or 'TE' in algo.input or 'MHT' in algo.input or 'ESPRESSO' in algo.input:
+                elif 'XE' in algo.input or 'TE' in algo.input or 'MHT' in algo.input or 'ESPRESSO' in algo.input or 'RISTRETTO' in algo.input:
                     thrtype = 'EN'
                 elif 'eEmVar' in algo.classtype:
                     thrtype = 'eEMV'
