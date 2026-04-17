@@ -12,6 +12,8 @@
 #include "ParticleJetTools/JetPileupLabelingTool.h"
 #include "ParticleJetTools/JetQuarkChargeLabelingTool.h"
 #include "ParticleJetTools/FatVertex.h"
+#include "ParticleJetTools/FtagLargeRJetTruthLabelTool.h"
+
 #include "../TruthParentDecoratorAlg.h"
 #ifndef GENERATIONBASE
 // TruthVertexDecoratorAlg uses InDet::InDetTrackTruthOriginTool, whose package
@@ -44,3 +46,4 @@ DECLARE_COMPONENT( TruthParentDecoratorAlg )
 DECLARE_COMPONENT( ParticleJetTools::TruthVertexDecoratorAlg )
 DECLARE_COMPONENT( ParticleJetTools::JetTruthVertexSummaryDecoratorAlg )
 #endif
+DECLARE_COMPONENT( FtagLargeRJetTruthLabelTool )

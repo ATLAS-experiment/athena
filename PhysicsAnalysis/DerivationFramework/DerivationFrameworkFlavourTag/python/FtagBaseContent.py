@@ -238,6 +238,16 @@ def addCommonAugmentation(flags, cfg, helper, target="AntiKt4EMPFlowJets"):
         )
     )
     # todo add large-R jets
+
+    # FTAG simplified large-R jet truth labelling
+    from ParticleJetTools.FtagLargeRJetTruthLabelConfig import FtagLargeRJetTruthLabelCfg
+    cfg.merge(
+        FtagLargeRJetTruthLabelCfg(
+            flags,
+            jetCollection="AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
+        )
+    )
+
     truth_labels = [
         *[f"nTopTo{p}Children" for p in "BW"],
         *[f"parent{p}ParentsMask" for p in ["Higgs", "Z", "Scalar", "Top"]],
