@@ -48,7 +48,6 @@ namespace L0Muon {
       continue;  // do NOT abort event
       }
 
-
       std::vector<const xAOD::MdtDriftCircle*> mdtHits;
       ATH_CHECK(collectMDTHits(ctx, gctx, cand->eta(), cand->phi(), mdtHits, m, b));
  
@@ -156,10 +155,8 @@ namespace L0Muon {
 
     for (int i = 0; i < 4; ++i) {
         const float z_pos = cand.zPos(i);
-        const float z_signed = std::copysign(z_pos, cand.eta());
-
-        z_positions.push_back(z_signed);
-        r_positions.push_back(z_signed * tanTheta);
+        z_positions.push_back(z_pos);
+        r_positions.push_back(z_pos * tanTheta);
       }
 
     size_t N = z_positions.size();
@@ -236,7 +233,6 @@ namespace L0Muon {
           if (std::abs(resZ) > windowSize * pitch) continue;
 
           hits.push_back(dc);
-      
 
       
 
