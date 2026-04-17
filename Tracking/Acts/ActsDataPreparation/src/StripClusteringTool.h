@@ -35,6 +35,8 @@ public:
 
     virtual StatusCode initialize() override;
 
+    virtual StatusCode finalize() override;
+
     virtual StatusCode
     clusterize(const EventContext& ctx,
 	       const InDetRawDataCollection<StripRDORawData>& RDOs,
@@ -108,7 +110,7 @@ private:
     Gaudi::Property<unsigned int> m_errorStrategy{this, "errorStrategy", 0, "Use different error strategies for the strip clusters"};
 
     int m_timeBinBits[3]{-1, -1, -1};
-
+   mutable std::atomic<unsigned int> m_failedTimeCut{};
 
   const StripID* m_stripID {nullptr};
 };

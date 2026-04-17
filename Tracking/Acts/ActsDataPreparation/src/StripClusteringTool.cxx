@@ -75,7 +75,11 @@ StatusCode StripClusteringTool::initialize()
     
     return StatusCode::SUCCESS;
 }
-
+StatusCode StripClusteringTool::finalize()
+{
+   ATH_MSG_INFO("Number of RDOs which failed the time cut: " << m_failedTimeCut);
+   return StatusCode::SUCCESS;
+}
 StatusCode StripClusteringTool::decodeTimeBins()
 {
     for (size_t i = 0; i < m_timeBinStr.size(); i++) {
@@ -411,6 +415,7 @@ StripClusteringTool::unpackRDOs(const EventContext& ctx,
     Identifier::value_type waferId_compact_cache = 0;
     IdentifierHash waferHash_cache(0);
     bool cache_valid = false;
+    unsigned int nFailedTimeCut{};
 
     for (const StripRDORawData * raw : RDOs) {
 
@@ -421,6 +426,7 @@ StripClusteringTool::unpackRDOs(const EventContext& ctx,
 	std::bitset<3> timePattern(raw3->getTimeBin());
 	if (!passTiming(timePattern)) {
 	    ATH_MSG_DEBUG("Strip failed timing check");
+            ++nFailedTimeCut;
 	    continue;
 	}
 
@@ -457,7 +463,7 @@ StripClusteringTool::unpackRDOs(const EventContext& ctx,
 	    }
 	}
     }
-
+    m_failedTimeCut+=nFailedTimeCut;
     return std::make_pair(std::move(cells), badStripOnModule);
 }
 
