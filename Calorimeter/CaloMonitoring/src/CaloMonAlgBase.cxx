@@ -6,18 +6,7 @@
 
 CaloMonAlgBase::CaloMonAlgBase(const std::string& name, ISvcLocator* pSvcLocator) 
   :AthMonitorAlgorithm(name, pSvcLocator)
- {
-  declareProperty("useBadLBTool", m_useBadLBTool=false);
-  declareProperty("BadLBTool", m_BadLBTool);
-
-  declareProperty("useReadyFilterTool",m_useReadyFilterTool=true);
-  declareProperty("ReadyFilterTool",m_ReadyFilterTool);
-
-  declareProperty("useLArCollisionFilterTool",m_useCollisionFilterTool=true);
-
-  declareProperty("useLArNoisyAlg",m_useLArNoisyAlg=false);
-
-  declareProperty("useBeamBackgroundRemoval",m_useBeamBackgroundRemoval=false);
+{
 }
 
 StatusCode CaloMonAlgBase::initialize() {
