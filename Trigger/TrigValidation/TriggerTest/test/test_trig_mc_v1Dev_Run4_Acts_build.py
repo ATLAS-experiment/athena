@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger test with full Run 4 menu using Acts tracking 
 # art-type: build
@@ -7,18 +7,21 @@
 # Skipping art-output which has no effect for build tests.
 # If you create a grid version, check art-output in existing grid tests.
 
-from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
+from TriggerTest.MCExecStep import MCBuildStep
+from TrigValTools.TrigValSteering import Test, CheckSteps
+from AthenaConfiguration.TestDefaults import defaultConditionsTags
 
 # Generate configuration run file
-run = ExecStep.ExecStep()
-run.type = 'athena'
-run.threads = 1
+run = MCBuildStep(
+    menu='MC_pp_run4_v1',
+    global_tag=defaultConditionsTags.RUN4_MC,
+    mc_campaign='Campaigns.PhaseIIPileUp200'
+)
+
 run.input = 'ttbar_pu200_Run4'
-run.job_options = 'TriggerJobOpts/runHLT.py'
 
 actsTracking = True
 
-from AthenaConfiguration.TestDefaults import defaultConditionsTags
 run.flags = [f'Trigger.useActsTracking={actsTracking}',
              f'Acts.GsfRefitActs={actsTracking}',
              f'Acts.useCache={actsTracking}',

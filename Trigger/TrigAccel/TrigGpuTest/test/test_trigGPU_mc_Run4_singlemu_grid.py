@@ -1,14 +1,13 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger AthenaMT test running new-style job options
 # art-type: grid
 # art-include: main/Athena
-# art-input: group.trig-hlt.mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8557_s4422_r16128
+# art-input: mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8481_s4494_r16632
 # art-input-nfiles: 1
 # art-athena-mt: 8
 # art-architecture: '#&nvidia'
-# If you create a grid version, check art-output in existing grid tests.
 # art-output: *.txt
 # art-output: *.log
 # art-output: log.*
@@ -24,16 +23,20 @@
 # art-output: prmon*
 # art-output: *.check*
 
-from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
+from TriggerTest.MCExecStep import MCGridStep
+from TrigValTools.TrigValSteering import Test, CheckSteps
+from AthenaConfiguration.TestDefaults import defaultConditionsTags
 
 # Generate configuration run file
-run = ExecStep.ExecStep()
-run.type = 'athena'
-run.threads = 8
+run = MCGridStep(
+    menu='MC_pp_run4_v1',
+    global_tag=defaultConditionsTags.RUN4_MC,
+    mc_campaign='Campaigns.PhaseIINoPileUp'
+)
+
 run.input = 'Single_mu_Run4'
-run.job_options = 'TriggerJobOpts/runHLT.py'
-run.flags = ['Trigger.triggerMenuSetup="MC_pp_run4_v1"',
-             'Trigger.doRuntimeNaviVal=True',
+
+run.flags = ['Trigger.doRuntimeNaviVal=True',
              'ITk.doTruth=False',
              'Tracking.doTruth=False',
              'Trigger.InDetTracking.doGPU=True',

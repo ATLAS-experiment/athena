@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # art-description: art job for all_ttbar_pu200_ITk
 # art-type: grid
 # art-include: main/Athena/x86_64-el9-gcc14-opt
-# art-input: mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_s4345_r15583
-# art-input-nfiles: 20
+# art-input: group.trig-hlt.mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4494_r16635
+# art-input-nfiles: 10
 # art-athena-mt: 8
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=
 # art-output: *.txt
@@ -29,7 +29,7 @@
 # art-output: *.dat 
 
 Slices  = ['muon','electron','tau','fsjet'] # TODO: Get Bjet working for ITk
-Events  = 4000
+Events  = 2000
 Threads = 8
 Slots   = 8
 Input   = 'ttbar_pu200_Run4'    # defined in TrigValTools/share/TrigValInputs.json

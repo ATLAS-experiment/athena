@@ -1,11 +1,14 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger RDO->RDO_TRIG athena test of the muon slice in Dev_pp_run4_v1 menu
 # art-type: grid
 # art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-architecture: '#x86_64-intel'
-# art-input: '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/myRDO.R4.pool.root'
+# FIXME: no detail about this file but metadata looks suspicious (MC23a campaign and conditions run number, mixed with Run4 geometry and global tag)
+# /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/myRDO.R4.pool.root
+# for now uploaded it to rucio dataset, replace at next occasion!
+# art-input: group.trig-hlt.MuonGeomRTT.myRDO.R4
 # art-input-nfiles: 1
 # art-athena-mt: 8
 # art-output: *.txt
@@ -31,7 +34,9 @@ from TrigValTools.TrigValSteering import Test, CheckSteps
 from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITestDefaults
 from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultConditionsTags
 
-ex = MCGridStep(menu='Dev_pp_run4_v1',signatures=['Muon'])
+ex = MCGridStep(menu='Dev_pp_run4_v1', signatures=['Muon'])
+
+# FIXME: MC inputs should be on EOS, not cvmfs
 ex.input = f'{MuonPhaseIITestDefaults.RDO_R4[0]}'
 
 ex.flags+=[ 'GeoModel.SQLiteDB=True',

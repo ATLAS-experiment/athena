@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from TrigValTools.TrigValSteering import ExecStep
 from AthenaConfiguration.TestDefaults import defaultConditionsTags
@@ -20,6 +20,12 @@ def prepare_acts_rdo2aod(pipeline : str):
 
     preExec = ';'.join(_args)
 
+    # hopefully temporary
+    preExecTrig = ';'.join([
+        'flags.ITk.doTruth=False',
+        'flags.Tracking.doTruth=False',
+    ])
+
     rdo2aod = ExecStep.ExecStep()
     rdo2aod.type = 'Reco_tf'
     rdo2aod.input = 'ttbar_pu200_Run4'
@@ -28,8 +34,8 @@ def prepare_acts_rdo2aod(pipeline : str):
     rdo2aod.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG"'
     rdo2aod.args += ' --CA "all:True"'
     rdo2aod.args += ' --perfmon fullmonmt'
-    rdo2aod.args += ' --preExec "all:{:s};"'.format(preExec)
-    rdo2aod.args += ' --preInclude "RAWtoALL:ActsConfig.ActsCIFlags.actsWorkflowFlags"'
+    rdo2aod.args += f' --preExec "RDOtoRDOTrigger:{preExecTrig};" "all:{preExec};"'
+    rdo2aod.args += ' --preInclude "all:Campaigns.PhaseIIPileUp200" "RAWtoALL:ActsConfig.ActsCIFlags.actsWorkflowFlags"'
     rdo2aod.args += ' --conditionsTag f"default:{defaultConditionsTags.RUN4_MC}"'
     rdo2aod.args += ' --ignorePatterns ""'
     rdo2aod.timeout = 5400 # default = 3600 s
@@ -40,8 +46,6 @@ def prepare_acts_rdo2aod(pipeline : str):
                      'Acts.GsfDirectNavigation=True',
                      'Tracking.doITkFastTracking=True',
                      'Trigger.doRuntimeNaviVal=True',
-                     'ITk.doTruth=False',
-                     'Tracking.doTruth=False',
                      f'IOVDb.GlobalTag=\'{defaultConditionsTags.RUN4_MC}\'',
                      ]
 
