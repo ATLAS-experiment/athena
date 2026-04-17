@@ -140,7 +140,7 @@ namespace ActsTrk {
           }
           n_elements_total+=range.size(); // does not take element selection into account -> overallocation of selection index
        }
-       m_stat[kNInputs] += n_elements_total;
+       m_stat[kNInputs] += inputCollection->size(); // @TODO should store n_elements_total
        outputCollection_moduleIndex.setIdentifierHashMax( inputCollection->moduleIndex().identifierHashMax());
        outputCollection_moduleIndex.selection().reserve(n_elements_total);
        outputCollection_moduleIndex.copyContainerList(inputCollection->moduleIndex());
@@ -295,6 +295,7 @@ namespace ActsTrk {
              n_elements_total+=rng.second - rng.first; // does not take element selection into account -> overallocation of selection index
           }
        }
+       m_stat[kNInputs]+=n_elements_total;
        outputCollection_moduleIndex.selection().reserve(n_elements_total);
        for (unsigned int id_hash=0u; id_hash < outputCollection_moduleIndex.identifierHashMax(); ++id_hash) {
           const PhaseII::DataRange range = outputCollection_moduleIndex.range(id_hash);

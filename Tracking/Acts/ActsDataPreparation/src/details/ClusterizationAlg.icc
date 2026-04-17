@@ -121,6 +121,7 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
   // loop on ROIs
   std::size_t nClusters = 0ul;
   std::size_t nClusterRDOs = 0ul;
+  std::size_t nRDOs = 0ul;
   for (const auto* roi : *roiCollection) {
     // get list of ids
     listOfIds.clear();    
@@ -177,6 +178,7 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
       else {
          nClusterRDOs += rdos->size();
       }
+      nRDOs += rdos->size();
 
       processedElements.push_back( element );
       nClusters += clusterCollection.back().size();
@@ -237,7 +239,7 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
     xaodCounter += actsClusters.size();
   }
 
-  m_stat[kNRdo] += nClusterRDOs;
+  m_stat[kNRdo] += nRDOs; //@TODO should store nClusterRDOs which takes into account strip groups (?)
   m_stat[kNClusters] += clusterContainer->size();
   ATH_MSG_DEBUG("Clusters produced size: "<<clusterContainer->size());
   timer_processing.stop();
