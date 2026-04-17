@@ -409,7 +409,10 @@ namespace MuonCombined {
                 std::vector<const Muon::MuonClusterOnTrack*> clusters;
                 const Muon::CompetingMuonClustersOnTrack* crot = dynamic_cast<const Muon::CompetingMuonClustersOnTrack*>(meas);
                 if (crot) {
-                    clusters = crot->containedROTs();
+                    std::ranges::transform(crot->containedROTs(), std::back_inserter(clusters), 
+                                            [](const auto& rot){
+                                                return rot.get();
+                                            });
                 } else {
                     const Muon::RpcClusterOnTrack* rpc = dynamic_cast<const Muon::RpcClusterOnTrack*>(meas);
                     if (rpc) clusters.push_back(rpc);

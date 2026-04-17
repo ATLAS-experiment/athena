@@ -287,7 +287,9 @@ namespace Muon {
         else {
             const CompetingMuonClustersOnTrack* compclus = dynamic_cast<const CompetingMuonClustersOnTrack*>(&meas);
             if (compclus) {
-                rots.insert(rots.end(), compclus->containedROTs().begin(), compclus->containedROTs().end());
+                std::ranges::transform(compclus->containedROTs(),std::back_inserter(rots), [](const auto& rot){
+                    return rot.get();
+                });
             } else {
                 Identifier id = m_edmHelperSvc->getIdentifier(meas);
                 ATH_MSG_WARNING(" Trigger Measurement is not a MuonClusterOnTrack or CompetingMuonClustersOnTrack!!  "
@@ -432,8 +434,9 @@ namespace Muon {
             if (!rot) {
                 const CompetingMuonClustersOnTrack* crot = dynamic_cast<const CompetingMuonClustersOnTrack*>(&meas);
                 if (crot) {
-                    const std::vector<const MuonClusterOnTrack*>& rots = crot->containedROTs();
-                    if (!rots.empty()) rot = rots.front();
+                    if (!crot->containedROTs().empty()) {
+                        rot = crot->containedROTs().front().get();
+                    }
                 }
             }
             if (rot) {

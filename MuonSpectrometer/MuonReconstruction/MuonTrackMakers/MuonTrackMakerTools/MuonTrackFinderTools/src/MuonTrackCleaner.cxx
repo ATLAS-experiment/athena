@@ -1204,7 +1204,7 @@ namespace Muon {
                 const RpcClusterOnTrack* rpc = dynamic_cast<const RpcClusterOnTrack*>(meas);
                 if (!rpc) {
                     const CompetingMuonClustersOnTrack* crot = dynamic_cast<const CompetingMuonClustersOnTrack*>(meas);
-                    if (crot) { rpc = dynamic_cast<const RpcClusterOnTrack*>(crot->containedROTs().front()); }
+                    if (crot) { rpc = dynamic_cast<const RpcClusterOnTrack*>(crot->containedROTs().front().get()); }
                 }
                 if (rpc) ATH_MSG_DEBUG(" time " << rpc->prepRawData()->time() - rpc->globalPosition().mag() / 300.);
             }

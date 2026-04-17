@@ -75,9 +75,7 @@ void compare (const Muon::CompetingMuonClustersOnTrack& p1,
   assert (p1.globalPosition() == p2.globalPosition());
   compare (p1.associatedSurface(), p2.associatedSurface());
 
-  const std::vector<const Muon::MuonClusterOnTrack*>& rots1 = p1.containedROTs();
-  const std::vector<const Muon::MuonClusterOnTrack*>& rots2 = p2.containedROTs();
-  assert (rots1.size() == rots2.size());
+  assert (p1.containedROTs().size() == p2.containedROTs().size());
 }
 
 
@@ -163,10 +161,10 @@ void test1 ATLAS_NOT_THREAD_SAFE (const MuonGM::MuonDetectorManager& muo_dd)
 
   std::vector<double> probs { 5, 3, 10.5, 3, 1 };
 
-  auto childrots = std::vector<const Muon::MuonClusterOnTrack*>();
-
-  childrots.push_back (make_csccluster (muo_dd));
-  childrots.push_back (make_rpccluster (muo_dd));
+  std::vector<std::unique_ptr<const Muon::MuonClusterOnTrack>> childrots{};
+ 
+  childrots.emplace_back (make_csccluster (muo_dd));
+  childrots.emplace_back (make_rpccluster (muo_dd));
 
   Muon::CompetingMuonClustersOnTrack trans1 (std::move(locpars),
                                              std::move(cov),
