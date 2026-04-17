@@ -291,17 +291,17 @@ def HION7Cfg(flags):
     if flags.Input.isMC:
         AllVars += ListSlimming.HION7AllVarTruthContent()
         if flags.HeavyIon.doHIBTagging:
-            FtagBaseContent.add_truth_to_SlimmingHelper(HION7SlimmingHelper)
+            FtagBaseContent.add_truth_to_slimming_helper(HION7SlimmingHelper)
     if flags.HeavyIon.doHIBTagging:
-        from DerivationFrameworkFlavourTag.FtagBaseContent import addCommonAugmentation
-        addCommonAugmentation(flags, acc, HION7SlimmingHelper, JetColl+"AntiKt4HIJets")
+        from DerivationFrameworkFlavourTag.FtagBaseContent import add_common_augmentation
+        add_common_augmentation(flags, acc, HION7SlimmingHelper, JetColl+"AntiKt4HIJets")
         AllVars += ListSlimming.HION7AllVarFromFTAG1()
         # update AppendToDictionary
         extra_AppendToDictionary = {}
-        FtagBaseContent.update_AppendToDictionary_in_SlimmingHelper(HION7SlimmingHelper, flags, extra_AppendToDictionary)
+        FtagBaseContent.update_append_to_dictionary_in_slimming_helper(HION7SlimmingHelper, flags, extra_AppendToDictionary)
         # Add ExtraVariables
         ExtraVars += ListSlimming.HION7ExtraVarForBtag(JetColl)
-        FtagBaseContent.add_ExtraVariables_to_SlimmingHelper(HION7SlimmingHelper, flags)
+        FtagBaseContent.add_extra_variables_to_slimming_helper(HION7SlimmingHelper, flags)
 
     HION7SlimmingHelper.ExtraVariables = ExtraVars
     HION7SlimmingHelper.AllVariables = AllVars

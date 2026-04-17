@@ -80,7 +80,7 @@ def FTAG5Cfg(flags):
 
     # Add truth containers
     if flags.Input.isMC:
-        FtagBaseContent.add_truth_to_SlimmingHelper(FTAG5SlimmingHelper)
+        FtagBaseContent.add_truth_to_slimming_helper(FTAG5SlimmingHelper)
         if flags.Trigger.EDMVersion == 3:
             # Add truth labels to Run 3 trigger jets
             from DerivationFrameworkFlavourTag.FtagDerivationConfig import HLTJetFTagDecorationCfg
@@ -103,8 +103,13 @@ def FTAG5Cfg(flags):
         ))
 
    
-    # Trigger content
+    # Add default trigger setup
     FtagBaseContent.trigger_setup(FTAG5SlimmingHelper, 'FTAG5')
+
+    # Add trigger menu needed for FTAG5
+    FTAG5SlimmingHelper.IncludeTriggerNavigation = True
+
+    # Add trigger matching
     FtagBaseContent.trigger_matching(FTAG5SlimmingHelper, FTAG5TriggerListsHelper, flags)
 
     # Output stream
@@ -113,5 +118,4 @@ def FTAG5Cfg(flags):
     acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_FTAG5", AcceptAlgs=["FTAG5Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
 
     return acc
-
 

@@ -77,7 +77,7 @@ def STDM13Cfg(flags):
     STDM13SlimmingHelper = SlimmingHelper("STDM13SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
 
     from DerivationFrameworkFlavourTag import FtagBaseContent
-    FtagBaseContent.addCommonAugmentation(flags, acc, STDM13SlimmingHelper)
+    FtagBaseContent.add_common_augmentation(flags, acc, STDM13SlimmingHelper)
     
     STDM13SlimmingHelper.SmartCollections = [
         "Electrons",
@@ -150,4 +150,5 @@ def STDM13Cfg(flags):
     acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_STDM13", AcceptAlgs=["STDM13Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
 
     return acc
+
 

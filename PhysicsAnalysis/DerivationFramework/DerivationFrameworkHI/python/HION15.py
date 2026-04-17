@@ -50,17 +50,17 @@ def HION15Cfg(flags):
     if flags.Input.isMC or flags.Overlay.DataOverlay:
         AllVars += ListSlimming.HION15AllVarTruthContent()
         if flags.HeavyIon.doHIBTagging:
-            FtagBaseContent.add_truth_to_SlimmingHelper(HION15SlimmingHelper)
+            FtagBaseContent.add_truth_to_slimming_helper(HION15SlimmingHelper)
     if flags.HeavyIon.doHIBTagging:
-        from DerivationFrameworkFlavourTag.FtagBaseContent import addCommonAugmentation
-        addCommonAugmentation(flags, acc, HION15SlimmingHelper, JetColl+"AntiKt4HIJets")
+        from DerivationFrameworkFlavourTag.FtagBaseContent import add_common_augmentation
+        add_common_augmentation(flags, acc, HION15SlimmingHelper, JetColl+"AntiKt4HIJets")
         AllVars += ListSlimming.HION15AllVarFromFTAG1()
         # update AppendToDictionary
         extra_AppendToDictionary = {}
-        FtagBaseContent.update_AppendToDictionary_in_SlimmingHelper(HION15SlimmingHelper, flags, extra_AppendToDictionary)
+        FtagBaseContent.update_append_to_dictionary_in_slimming_helper(HION15SlimmingHelper, flags, extra_AppendToDictionary)
         # Add ExtraVariables
         ExtraVars += ListSlimming.HION15ExtraVarForBtag(JetColl)
-        FtagBaseContent.add_ExtraVariables_to_SlimmingHelper(HION15SlimmingHelper, flags)
+        FtagBaseContent.add_extra_variables_to_slimming_helper(HION15SlimmingHelper, flags)
 
     HION15SlimmingHelper.ExtraVariables = ExtraVars
     HION15SlimmingHelper.AllVariables = AllVars
@@ -78,3 +78,4 @@ def HION15Cfg(flags):
     acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_HION15", AcceptAlgs=["HION15Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc
+

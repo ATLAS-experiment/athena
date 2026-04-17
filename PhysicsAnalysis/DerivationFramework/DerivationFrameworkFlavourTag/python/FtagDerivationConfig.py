@@ -1,117 +1,130 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
+from __future__ import annotations
+
+from typing import Any, TYPE_CHECKING
+
+import ParticleJetTools.ParentDecoratorConfig as parent_decorator_config
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import (
+    InDetTrackTruthOriginToolCfg,
+)
+from ParticleJetTools.ParticleJetToolsConfig import getJetDeltaRFlavorLabelTool
+from ParticleJetTools.TruthVertexDecoratorConfig import TruthVertexDecoratorsCfg
 
-import ParticleJetTools.ParentDecoratorConfig as pdc
+if TYPE_CHECKING:
+    from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
-PFLOW_JETS = 'AntiKt4EMPFlowJets'
 
-
-def HLTJetFTagDecorationCfg(cfgFlags):
-    from ParticleJetTools.ParticleJetToolsConfig import getJetDeltaRFlavorLabelTool
-
+def HLTJetFTagDecorationCfg(flags: AthConfigFlags) -> ComponentAccumulator:
+    """Configure HLT jet flavour-label decoration."""
     acc = ComponentAccumulator()
 
-    jetDec = CompFactory.JetDecorationAlg(
-        name='hltJetLabelingAlg', 
-        JetContainer='HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf',
-        Decorators=[getJetDeltaRFlavorLabelTool()]) 
-
-    acc.addEventAlgo(jetDec)
+    jet_decoration_alg = CompFactory.JetDecorationAlg(
+        name="hltJetLabelingAlg",
+        JetContainer="HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf",
+        Decorators=[getJetDeltaRFlavorLabelTool()],
+    )
+    acc.addEventAlgo(jet_decoration_alg)
 
     return acc
 
 
-def trackTruthDecorator(cfgFlags) -> ComponentAccumulator:
+def trackTruthDecorator(flags: AthConfigFlags) -> ComponentAccumulator:
     """Decorate tracks with detailed truth information."""
     acc = ComponentAccumulator()
-    if not cfgFlags.Input.isMC:
+
+    if not flags.Input.isMC:
         return acc
 
-    from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import (
-        InDetTrackTruthOriginToolCfg,
+    track_truth_origin_tool = acc.popToolsAndMerge(InDetTrackTruthOriginToolCfg(flags))
+
+    acc.addEventAlgo(
+        CompFactory.FlavorTagDiscriminants.TruthParticleDecoratorAlg(
+            "TruthParticleDecoratorAlg",
+            trackTruthOriginTool=track_truth_origin_tool,
+        )
     )
-    trackTruthOriginTool = acc.popToolsAndMerge(InDetTrackTruthOriginToolCfg(cfgFlags))
-    acc.addEventAlgo(CompFactory.FlavorTagDiscriminants.TruthParticleDecoratorAlg(
-        'TruthParticleDecoratorAlg',
-        trackTruthOriginTool=trackTruthOriginTool
-    ))
-    acc.addEventAlgo(CompFactory.FlavorTagDiscriminants.TrackTruthDecoratorAlg(
-        'TrackTruthDecoratorAlg',
-        trackContainer=_getTrackCollection(cfgFlags),
-        trackTruthOriginTool=trackTruthOriginTool,
-        truthLeptonTool=CompFactory.TruthClassificationTool("TruthClassificationTool")
-    ))
+
+    acc.addEventAlgo(
+        CompFactory.FlavorTagDiscriminants.TrackTruthDecoratorAlg(
+            "TrackTruthDecoratorAlg",
+            trackContainer=_get_track_collection(flags),
+            trackTruthOriginTool=track_truth_origin_tool,
+            truthLeptonTool=CompFactory.TruthClassificationTool("TruthClassificationTool"),
+        )
+    )
 
     return acc
 
 
-def truthVertexDecorator(cfgFlags, jetCollections=None) -> ComponentAccumulator:
+def truthVertexDecorator(
+    flags: AthConfigFlags,
+    jet_collections: list | None = None,
+) -> ComponentAccumulator:
     """Decorate tracks, truth particles, and jets with truth vertex labels.
 
-    ``jetCollections`` is a list of ``(jetContainer, drThreshold)`` tuples; one
+    ``jet_collections`` is a list of ``(jetContainer, drThreshold)`` tuples; one
     jet-summary alg is scheduled per entry. Default matches small-R EMPFlow.
     """
     acc = ComponentAccumulator()
-    if not cfgFlags.Input.isMC:
+    if not flags.Input.isMC:
         return acc
 
-    from ParticleJetTools.TruthVertexDecoratorConfig import (
-        TruthVertexDecoratorsCfg,
+    acc.merge(
+        TruthVertexDecoratorsCfg(
+            flags,
+            jetCollections=jet_collections,
+        )
     )
-    acc.merge(TruthVertexDecoratorsCfg(
-        cfgFlags,
-        jetCollections=jetCollections,
-    ))
 
     return acc
 
 
-def _getTrackCollection(cfgFlags):
-    if cfgFlags.BTagging.Pseudotrack:
-        return 'InDetPseudoTrackParticles'
-    return 'InDetTrackParticles'
+def _get_track_collection(flags: AthConfigFlags) -> str:
+    """Return the track-particle container name."""
+    if flags.BTagging.Pseudotrack:
+        return "InDetPseudoTrackParticles"
+
+    return "InDetTrackParticles"
 
 
-def ParentDecoratorCfg(flags, prefix="", **kwargs):
+def ParentDecoratorCfg(
+    flags: AthConfigFlags,
+    prefix: str = "",
+    **kwargs: Any,
+) -> ComponentAccumulator:
+    """Configure truth-parent decorators for the FTAG derivations."""
     cfg = ComponentAccumulator()
-    cfg.merge(pdc.HiggsParentDecoratorCfg(
-        flags, name=prefix + "HiggsParentDecoratorAlg", **kwargs))
-    cfg.merge(pdc.ZParentDecoratorCfg(
-        flags, name=prefix + "ZParentDecoratorAlg", **kwargs))
-    cfg.merge(pdc.ScalarParentDecoratorCfg(
-        flags, name=prefix + "ScalarParentDecoratorAlg", **kwargs))
-    cfg.merge(pdc.TopParentDecoratorCfg(
-        flags, name=prefix + "TopParentDecoratorAlg", **kwargs))
+
+    cfg.merge(
+        parent_decorator_config.HiggsParentDecoratorCfg(
+            flags,
+            name=prefix + "HiggsParentDecoratorAlg",
+            **kwargs,
+        )
+    )
+    cfg.merge(
+        parent_decorator_config.ZParentDecoratorCfg(
+            flags,
+            name=prefix + "ZParentDecoratorAlg",
+            **kwargs,
+        )
+    )
+    cfg.merge(
+        parent_decorator_config.ScalarParentDecoratorCfg(
+            flags,
+            name=prefix + "ScalarParentDecoratorAlg",
+            **kwargs,
+        )
+    )
+    cfg.merge(
+        parent_decorator_config.TopParentDecoratorCfg(
+            flags,
+            name=prefix + "TopParentDecoratorAlg",
+            **kwargs,
+        )
+    )
+
     return cfg
-
-
-# Valerio's magic hacks for emtopo
-def RenameInputContainerEmTopoHacksCfg(suffix):
-    acc = ComponentAccumulator()
-
-    #Delete BTagging container read from input ESD
-    AddressRemappingSvc, ProxyProviderSvc=CompFactory.getComps("AddressRemappingSvc","ProxyProviderSvc",)
-    AddressRemappingSvc = AddressRemappingSvc("AddressRemappingSvc")
-    AddressRemappingSvc.TypeKeyRenameMaps += ['xAOD::JetAuxContainer#AntiKt4EMTopoJets.BTagTrackToJetAssociator->AntiKt4EMTopoJets.BTagTrackToJetAssociator_' + suffix]
-    AddressRemappingSvc.TypeKeyRenameMaps += ['xAOD::JetAuxContainer#AntiKt4EMTopoJets.JFVtx->AntiKt4EMTopoJets.JFVtx_' + suffix]
-    AddressRemappingSvc.TypeKeyRenameMaps += ['xAOD::JetAuxContainer#AntiKt4EMTopoJets.SecVtx->AntiKt4EMTopoJets.SecVtx_' + suffix]
-
-    acc.addService(AddressRemappingSvc)
-    acc.addService(ProxyProviderSvc(ProviderNames = [ "AddressRemappingSvc" ]))
-    return acc
-
-# Valerio's magic hacks for pflow
-def RenameInputContainerEmPflowHacksCfg(suffix):
-    acc = ComponentAccumulator()
-
-    AddressRemappingSvc, ProxyProviderSvc=CompFactory.getComps("AddressRemappingSvc","ProxyProviderSvc",)
-    AddressRemappingSvc = AddressRemappingSvc("AddressRemappingSvc")
-    AddressRemappingSvc.TypeKeyRenameMaps += ['xAOD::JetAuxContainer#AntiKt4EMPFlowJets.BTagTrackToJetAssociator->AntiKt4EMPFlowJets.BTagTrackToJetAssociator_' + suffix]
-    AddressRemappingSvc.TypeKeyRenameMaps += ['xAOD::JetAuxContainer#AntiKt4EMPFlowJets.JFVtx->AntiKt4EMPFlowJets.JFVtx_' + suffix]
-    AddressRemappingSvc.TypeKeyRenameMaps += ['xAOD::JetAuxContainer#AntiKt4EMPFlowJets.SecVtx->AntiKt4EMPFlowJets.SecVtx_' + suffix]
-
-    acc.addService(AddressRemappingSvc)
-    acc.addService(ProxyProviderSvc(ProviderNames = [ "AddressRemappingSvc" ]))
-    return acc
