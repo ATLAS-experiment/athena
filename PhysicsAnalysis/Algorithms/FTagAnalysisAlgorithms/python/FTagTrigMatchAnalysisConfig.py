@@ -11,6 +11,31 @@ from TriggerAnalysisAlgorithms.TriggerAnalysisSFConfig import trigger_set
 
 from FTagAnalysisAlgorithms.BJetTriggerByYearContent import getDecoByTrigName
 
+def getBTagWP(chain, tag):
+    # We have a chain with something like "..._bdl1d77_..."
+    # Get the substring after the tagger, e.g. bdl1d
+    after = chain.split(tag)[1]
+    # Get the two first characters, corresponding to the WP
+    wp = after[:2]
+    return 'FixedCutBEff_'+wp
+
+
+def getBTagThreshold(chain):
+
+    if 'bmv2c10' in chain:
+        bTagWP = getBTagWP(chain, 'bmv2c10')
+        if bTagWP == 'FixedCutBEff_60':
+            return 0.939187
+        if bTagWP == 'FixedCutBEff_70':
+            return 0.826829
+        if bTagWP == 'FixedCutBEff_77':
+            return 0.629222
+        if bTagWP == 'FixedCutBEff_85':
+            return 0.0722749
+    return 999.
+
+
+
 class FTagJetTrigMatchingBlock(ConfigBlock):
     """the ConfigBlock for the FTAG jet trigger matching"""
     def __init__(self):
