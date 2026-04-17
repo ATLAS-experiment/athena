@@ -629,52 +629,44 @@ class ObjectCutFlowBlock (ConfigBlock):
 class EventCutFlowBlock (ConfigBlock):
     """the ConfigBlock for an event-level cutflow"""
 
-    def __init__ (self) :
-        super (EventCutFlowBlock, self).__init__ ()
-        self.addOption ('containerName', '', type=str,
+    def __init__(self):
+        super(EventCutFlowBlock, self).__init__()
+        self.addOption('selectionName', '', type=str,
             noneAction='error',
-            info="the name of the input container, typically `EventInfo`.")
-        self.addOption ('selectionName', '', type=str,
-            noneAction='error',
-            info="the name of an optional selection decoration to use.")
-        self.addOption ('customSelections', [], type=None,
-            info="the selections for which to generate cutflow histograms. If "
-            "a single string, corresponding to a particular event selection, "
-            "the event cutflow for that selection will be looked up. If a list "
-            "of strings, will use explicitly those selections. If left blank, "
-            "all selections attached to the container will be looked up.")
-        self.addOption ('postfix', '', type=str,
-            info="a postfix to apply in the naming of cutflow histograms. Set "
-            "it when defining multiple cutflows.")
+            info="the name of the event selection to generate cutflow histograms for. "
+            "If left blank, all selections on EventInfo will be used.")
+        self.addOption('customSelections', [], type=None,
+            info="explicit list of selection decorations to use for the cutflow. "
+            "If provided, takes precedence over selectionName.")
+        self.addOption('cutFlowHistograms', True, type=bool,
+            info="whether to generate cutflow histograms for the selection cuts.")
 
-    def instanceName (self) :
-        """Return the instance name for this block"""
-        return self.containerName + '_' + self.selectionName + self.postfix
+    def instanceName(self):
+        return 'EventInfo_' + self.selectionName
 
-    def makeAlgs (self, config) :
+    def makeAlgs(self, config):
 
-        postfix = self.postfix
-        if postfix != '' and postfix[0] != '_' :
-            postfix = '_' + postfix
+        if not self.cutFlowHistograms:
+            return
 
-        alg = config.createAlgorithm( 'CP::EventCutFlowHistAlg', 'CutFlowDumperAlg' )
-        alg.histPattern = 'cflow_' + self.containerName + "_" + self.selectionName + postfix + '_%SYS%'
-        # find out which selection decorations to use
-        if isinstance(self.customSelections, str):
-            # user provides a dynamic reference to selections, corresponding to an EventSelection alg
-            alg.selections = config.getEventCutFlow(self.customSelections)
-        elif len(self.customSelections) > 0:
-            # user provides a list of hardcoded selections
+        postfix = ('_' + self.selectionName) if self.selectionName else ''
+
+        alg = config.createAlgorithm('CP::EventCutFlowHistAlg', 'CutFlowDumperAlg')
+        alg.histPattern = 'cflow_EventInfo' + postfix + '_%SYS%'
+        alg.eventInfo = config.readName('EventInfo')
+        alg.histTitle = 'Event Cutflow: EventInfo.' + self.selectionName
+
+        if isinstance(self.customSelections, list) and len(self.customSelections) > 0:
+            # user provides a hardcoded list of selections
             alg.selections = self.customSelections
+        elif self.selectionName:
+            # resolve selectionName to the list of cuts registered by EventSelectionConfig
+            alg.selections = config.getEventCutFlow(self.selectionName)
         else:
-            # user provides nothing: get all available selections from EventInfo directly
-            alg.selections = config.getSelectionCutFlow (self.containerName, self.selectionName)
-        alg.selections = [sel+',as_char' for sel in alg.selections]
-        if self.selectionName:
-            alg.preselection = self.selectionName + '_%SYS%'
-        alg.eventInfo = config.readName (self.containerName)
-        alg.histTitle = "Event Cutflow: " + self.containerName + "." + self.selectionName
+            # fallback: get all available selections from EventInfo
+            alg.selections = config.getSelectionCutFlow('EventInfo', '')
 
+        alg.selections = [sel + ',as_char' for sel in alg.selections]
 
 class OutputThinningBlock (ConfigBlock):
     """the ConfigBlock for output thinning"""
@@ -882,21 +874,3 @@ class SelectionDecorationBlock (ConfigBlock):
                                                             selectionName)
                 config.addOutputVar(
                     originContainerName, selectionDecoration, selectionName)
-
-def makeEventCutFlowConfig(seq, containerName,
-                            *, postfix=None, selectionName, customSelections=None):
-    """Create an event-level cutflow config
-
-    Keyword arguments:
-    containerName -- name of the container
-    postfix -- a postfix to apply to decorations and algorithm names.
-    selectionName -- the name of the selection to do the cutflow for
-    customSelections -- a list of decorations to use in the cutflow, to override the retrieval of all decorations
-    """
-
-    config = EventCutFlowBlock()
-    config.setOptionValue('containerName', containerName)
-    config.setOptionValue('selectionName', selectionName)
-    config.setOptionValue('postfix', postfix)
-    config.setOptionValue('customSelections', customSelections)
-    seq.append(config)

@@ -248,27 +248,32 @@ Thinning:
     skipOnData: true
 
 EventSelection:
-  - electrons: AnaElectrons.loose
+  - &common
+    electrons: AnaElectrons.loose
     muons: AnaMuons.medium
     jets: AnaJets.baselineJvt
     met: AnaMET
     btagDecoration: ftag_select_ftag
-    noFilter: True
     cutFlowHistograms: True
-    selectionCutsDict:
-      SUBcommon: |
+    noFilter: True
+    selectionName: SUBcommon
+    selectionCuts: |
         JET_N_BTAG >= 2
         JET_N 25000 >= 4
         MET >= 20000
         SAVE
-      ejets: |
+  - <<: *common
+    selectionName: ejets
+    selectionCuts: |
         IMPORT SUBcommon
         EL_N 5000 == 1
         MU_N 3000 == 0
         MWT < 170000
         MET+MWT > 40000
         SAVE
-      mujets: |
+  - <<: *common
+    selectionName: mujets
+    selectionCuts: |
         IMPORT SUBcommon
         EL_N 5000 == 0
         MU_N medium 25000 > 0

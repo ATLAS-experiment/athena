@@ -403,17 +403,17 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
 
     # Include and set up a basic run of the event selection algorithm config:
     if geometry is not LHCPeriod.Run4:
-        # configSeq += config.makeConfig( 'EventSelection', None )
-        # configSeq.setOptionValue ('.electrons',   'AnaElectrons.loose')
-        # configSeq.setOptionValue ('.muons',       'AnaMuons.medium')
-        # configSeq.setOptionValue ('.jets',        'AnaJets')
-        # configSeq.setOptionValue ('.met',         'AnaMET')
-        # configSeq.setOptionValue ('.selectionCutsDict', exampleSelectionCuts)
-        from EventSelectionAlgorithms.EventSelectionConfig import makeMultipleEventSelectionConfigs
-        makeMultipleEventSelectionConfigs(configSeq, electrons = 'AnaElectrons.loose', muons = 'AnaMuons.medium', jets = 'AnaJets.baselineJvt',
-                                          met = 'AnaMET', btagDecoration = 'ftag_select_ftag',
-                                          selectionCutsDict = exampleSelectionCuts, noFilter = True,
-                                          cutFlowHistograms = True)
+        for sel_name, sel_cuts in exampleSelectionCuts.items():
+            configSeq += config.makeConfig( 'EventSelection' )
+            configSeq.setOptionValue ('.electrons',   'AnaElectrons.loose')
+            configSeq.setOptionValue ('.muons',       'AnaMuons.medium')
+            configSeq.setOptionValue ('.jets',        'AnaJets.baselineJvt')
+            configSeq.setOptionValue ('.met',         'AnaMET')
+            configSeq.setOptionValue ('.btagDecoration', 'ftag_select_ftag')
+            configSeq.setOptionValue ('.selectionName', sel_name)
+            configSeq.setOptionValue ('.selectionCuts', sel_cuts)
+            configSeq.setOptionValue ('.cutFlowHistograms', True)
+            configSeq.setOptionValue ('.noFilter', True)
 
     if dataType is not DataType.Data :
         # Include, and then set up the generator analysis sequence:
