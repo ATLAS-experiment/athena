@@ -83,6 +83,7 @@ def StandaloneMuonOutputCfg(flags):
         esd_items += ["xAOD::TgcStripContainer#xTgcStrips", "xAOD::TgcStripAuxContainer#xTgcStripsAux." ]
         esd_items += ["xAOD::RpcStripContainer#xRpcStrips", "xAOD::RpcStripAuxContainer#xRpcStripsAux." ]
         esd_items += ["xAOD::RpcStrip2DContainer#xRpcBILStrips", "xAOD::RpcStrip2DAuxContainer#xRpcBILStripsAux." ]
+        esd_items += ["xAOD::CombinedMuonStripContainer#CombinedMuonPrds", "xAOD::CombinedMuonStripAuxContainer#CombinedMuonPrdsAux."]
 
 
 
