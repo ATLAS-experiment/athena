@@ -27,10 +27,9 @@ namespace L0Muon
       return;
     }
     /// convert z position to binary
- 
-    
-    const float zClamped = std::max(0.f, std::min(zPos, s_zPosRange));
-    m_zPos[index] = static_cast<uint16_t>(std::lround(zClamped / s_zPosRange * static_cast<float>(s_zPosBitRange)));
+
+    m_zPos[index] = static_cast<uint16_t>(std::round((zPos + s_zPosRange) / (2.0f * s_zPosRange) * static_cast<float>(s_zPosBitRange)));
+
    
   }
   void RPCCandData::setCoinType(uint8_t coinType)
@@ -49,9 +48,7 @@ namespace L0Muon
   if (m_zPos[index] == 0xffff) {
     return -999.f;
   }
-
-  return static_cast<float>(m_zPos[index]) /
-         static_cast<float>(s_zPosBitRange) * s_zPosRange;
+  return static_cast<float>(m_zPos[index]) / static_cast<float>(s_zPosBitRange) * 2.0f * s_zPosRange - s_zPosRange;
 }
 
   uint8_t RPCCandData::coinType() const
