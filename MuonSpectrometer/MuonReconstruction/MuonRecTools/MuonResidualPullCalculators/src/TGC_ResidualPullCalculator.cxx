@@ -30,8 +30,7 @@ Muon::TGC_ResidualPullCalculator::residuals(
   if (!rot) {
     const Muon::CompetingMuonClustersOnTrack* muonCompClusters =
       dynamic_cast<const Muon::CompetingMuonClustersOnTrack*>(measurement);
-    if (muonCompClusters) rot = muonCompClusters->containedROTs().empty() ? nullptr :
-      muonCompClusters->containedROTs().front();
+    if (muonCompClusters) rot = muonCompClusters->containedROTs().empty() ? nullptr : &muonCompClusters->rioOnTrack(0);
   }
   if (!trkPar || !rot) {
     if( !trkPar ) ATH_MSG_WARNING ("No TrackParameters, cannot calculate residual/pull ");
@@ -99,7 +98,7 @@ std::optional<Trk::ResidualPull> Muon::TGC_ResidualPullCalculator::residualPull(
     const Muon::CompetingMuonClustersOnTrack* muonCompClusters =
       dynamic_cast<const Muon::CompetingMuonClustersOnTrack*>(measurement);
     if (muonCompClusters) rot = muonCompClusters->containedROTs().empty() ? nullptr :
-      muonCompClusters->containedROTs().front();
+      muonCompClusters->containedROTs().front().get();
   }
   if (!trkPar || !rot) {
     if( !trkPar ) ATH_MSG_WARNING ("No TrackParameters, cannot calculate residual/pull ");

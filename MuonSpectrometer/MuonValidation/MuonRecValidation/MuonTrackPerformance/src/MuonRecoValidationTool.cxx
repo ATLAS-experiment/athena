@@ -479,7 +479,8 @@ namespace Muon {
             else {
                 const CompetingMuonClustersOnTrack* crot = dynamic_cast<const CompetingMuonClustersOnTrack*>(*mit);
                 if (!crot || crot->containedROTs().empty()) continue;
-                clusters.insert(clusters.end(), crot->containedROTs().begin(), crot->containedROTs().end());
+                std::ranges::transform(crot->containedROTs(),std::back_inserter(clusters), 
+                                       [](const auto& rot) { return rot.get();});
             }
         }
     }

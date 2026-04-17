@@ -810,10 +810,8 @@ namespace Muon {
                         ATH_MSG_VERBOSE(" new detector element stopping ");
                         break;
                     }
-                    std::vector<const MuonClusterOnTrack*>::const_iterator clit = comp->containedROTs().begin();
-                    std::vector<const MuonClusterOnTrack*>::const_iterator clit_end = comp->containedROTs().end();
-                    for (; clit != clit_end; ++clit) { prdList.push_back((*clit)->prepRawData()); }
-
+                    std::ranges::transform(comp->containedROTs(), std::back_inserter(prdList),
+                                            [](const auto& rot){ return rot->prepRawData();});
                 } else {
                     ATH_MSG_WARNING(" Unknown trigger hit type! ");
                     continue;

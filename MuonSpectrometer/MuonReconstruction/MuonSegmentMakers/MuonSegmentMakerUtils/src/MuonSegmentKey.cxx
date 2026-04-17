@@ -36,7 +36,7 @@ void Muon::MuonSegmentKey::calculateKeys(const std::vector<const Trk::Measuremen
         if (!rot) {
             crot = dynamic_cast<const Muon::CompetingMuonClustersOnTrack*>(*it);
 
-            if (crot && !crot->containedROTs().empty()) rot = crot->containedROTs().front();
+            if (crot && !crot->containedROTs().empty()) rot = &crot->rioOnTrack(0);
         }
         if (!rot) continue;
 

@@ -167,7 +167,7 @@ namespace Muon {
             const CompetingMuonClustersOnTrack* comp = dynamic_cast<const CompetingMuonClustersOnTrack*>(meas);
             if (!comp) { continue; }
 
-            for (const Muon::MuonClusterOnTrack* clust : comp->containedROTs()) {
+            for (const std::unique_ptr<const Muon::MuonClusterOnTrack>& clust : comp->containedROTs()) {
                 layerIds.insert(m_idHelperSvc->layerId(clust->identify()));
             }
         }

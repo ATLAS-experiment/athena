@@ -76,8 +76,11 @@ MuonSegmentConverterTool::addClusterTiming(const MuonSegment& seg, xAOD::MuonSeg
             clusters.push_back(clus);
         else {
             const CompetingMuonClustersOnTrack* crot = dynamic_cast<const CompetingMuonClustersOnTrack*>(meas);
-            if (!crot || crot->containedROTs().empty()) continue;
-            clusters.insert(clusters.end(), crot->containedROTs().begin(), crot->containedROTs().end());
+            if (!crot){
+                continue;
+            } 
+            std::ranges::transform(crot->containedROTs(), std::back_inserter(clusters),
+                                       [](const auto& rot) { return rot.get();});
         }
     }
 

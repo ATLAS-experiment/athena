@@ -1148,7 +1148,7 @@ namespace Muon {
                 const CompetingMuonClustersOnTrack* crot = dynamic_cast<const CompetingMuonClustersOnTrack*>(meas);
                 // if also to a crot we cannot create a fake phi hit
                 if (!crot || crot->containedROTs().empty()) continue;
-                rot = crot->containedROTs().front();
+                rot = crot->containedROTs().front().get();
             }
 
             if (!rot) {
@@ -1710,8 +1710,8 @@ namespace Muon {
             }
             const CompetingMuonClustersOnTrack* crot = dynamic_cast<const CompetingMuonClustersOnTrack*>(hit);
             if (crot) {
-                for (const MuonClusterOnTrack* mit : crot->containedROTs()) {
-                    rots.push_back(mit);
+                for (const std::unique_ptr<const MuonClusterOnTrack>& mit : crot->containedROTs()) {
+                    rots.push_back(mit.get());
                     ids.insert(mit->identify());
                     MuonStationIndex::StIndex stIndex = m_idHelperSvc->stationIndex(mit->identify());
                     stations.insert(stIndex);
