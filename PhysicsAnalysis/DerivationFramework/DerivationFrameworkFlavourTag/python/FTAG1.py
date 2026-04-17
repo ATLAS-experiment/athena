@@ -16,7 +16,8 @@ from DerivationFrameworkEGamma.ElectronsCPDetailedContent import (
     ElectronsCPDetailedContent
 )
 from DerivationFrameworkFlavourTag.FtagBaseContent import (
-    addCommonAugmentation, addTruthVertexDecorations
+    add_common_augmentation,
+    add_truth_vertex_decorations,
 )
 
 
@@ -75,10 +76,10 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
     FTAG1SlimmingHelper.SmartCollections = []
     FtagBaseContent.add_baseline_slimming_smartcollections(FTAG1SlimmingHelper)
 
-    addCommonAugmentation(flags, acc, FTAG1SlimmingHelper)
-    addTruthVertexDecorations(
+    add_common_augmentation(flags, acc, FTAG1SlimmingHelper)
+    add_truth_vertex_decorations(
         flags, acc, FTAG1SlimmingHelper,
-        largeRJetCollection="AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
+        large_r_jet_collection="AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
     )
 
     FTAG1SlimmingHelper.SmartCollections += [
@@ -154,7 +155,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
 
     # update AppendToDictionary
     extra_AppendToDictionary = {} #only add those items specifically for FTAG1 here!
-    FtagBaseContent.update_AppendToDictionary_in_SlimmingHelper(FTAG1SlimmingHelper, flags, extra_AppendToDictionary)
+    FtagBaseContent.update_append_to_dictionary_in_slimming_helper(FTAG1SlimmingHelper, flags, extra_AppendToDictionary)
 
     # Static content
     StaticContent = [] #only add extra static content for FTAG1 here!
@@ -180,12 +181,12 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
             StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % cascades]
 
 
-    FtagBaseContent.add_static_content_to_SlimmingHelper(FTAG1SlimmingHelper, flags, StaticContent)
+    FtagBaseContent.add_static_content_to_slimming_helper(FTAG1SlimmingHelper, flags, StaticContent)
 
 
     # Add truth containers
     if flags.Input.isMC:
-        FtagBaseContent.add_truth_to_SlimmingHelper(FTAG1SlimmingHelper)
+        FtagBaseContent.add_truth_to_slimming_helper(FTAG1SlimmingHelper)
         if flags.Trigger.EDMVersion == 3:
             # Add truth labels to Run 3 trigger jets
             from DerivationFrameworkFlavourTag.FtagDerivationConfig import HLTJetFTagDecorationCfg
@@ -196,7 +197,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
                                                "AntiKt4TruthJets.constituentLinks"]
 
     # Add ExtraVariables
-    FtagBaseContent.add_ExtraVariables_to_SlimmingHelper(FTAG1SlimmingHelper, flags)
+    FtagBaseContent.add_extra_variables_to_slimming_helper(FTAG1SlimmingHelper, flags)
    
     # Trigger content
     FtagBaseContent.trigger_setup(FTAG1SlimmingHelper, trigger_option)
