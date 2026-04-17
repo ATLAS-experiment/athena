@@ -38,7 +38,8 @@ namespace TCS {
                          GMHT=27,
                          GTE=28,
                          CXE=29,
-                         GESPRESSO=30
+                         GESPRESSO=30,
+                         GRISTRETTO=31
    }; 
 
   enum outputTopoType_t { UNDEF=999,
