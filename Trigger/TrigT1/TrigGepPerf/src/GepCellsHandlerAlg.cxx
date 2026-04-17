@@ -345,7 +345,7 @@ std::vector<unsigned int> GepCellsHandlerAlg::getNeighbours(const CaloCellContai
     if (neighbour) {
       neighbour_ids.push_back((neighbour->ID().get_identifier32()).get_compact());
     } else {
-      ATH_MSG_ERROR("Couldn't access neighbour #" << iNeighbour
+      ATH_MSG_WARNING("Couldn't access neighbour #" << iNeighbour
 		    << " for cell ID "
 		    << (acell->ID().get_identifier32()).get_compact());
     }
