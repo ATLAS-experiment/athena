@@ -18,6 +18,7 @@
 
 #include <xAODJet/JetContainer.h>
 #include <TrigDecisionTool/TrigDecisionTool.h>
+#include <TrigBtagEmulationTool/ITrigBtagEmulationTool.h>
 
 namespace CP
 {
@@ -38,10 +39,13 @@ namespace CP
         #ifndef XAOD_STANDALONE
         // For AthAnalysis and Athena, PublicToolHandle exist
         PublicToolHandle<Trig::TrigDecisionTool> m_trigDecTool{this, "TrigDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool", "trigger decision tool"};
+        PublicToolHandle<Trig::ITrigBtagEmulationTool> m_emulationTool {this, "TrigBtagEmulationTool", "Trig::TrigBtagEmulationTool/TrigBtagEmulationTool", "trigger emulation for Run 2"};
         #else
         // For AnalysisBase use ToolHandle as PublicToolHandle is not available
         ToolHandle<Trig::TrigDecisionTool> m_trigDecTool{this, "TrigDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool", "trigger decision tool"};
+        ToolHandle<Trig::ITrigBtagEmulationTool> m_emulationTool {this, "TrigBtagEmulationTool", "Trig::TrigBtagEmulationTool/TrigBtagEmulationTool", "trigger emulation for Run 2"};
         #endif
+
         
         Gaudi::Property<std::string> m_trigger {this, "trigger", "",
         "the trigger path to consider"};
@@ -85,7 +89,7 @@ namespace CP
         "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJets", "Input b-Jet Collection Key, retrieved from reconstructed jets"};   
 
         std::vector<SG::ConstAccessor<float>> m_ftagRun3TriggerDecorAccessors;
-        
+
     }; // class BTaggingTriggerMatchingAlg
 } // namespace CP
 

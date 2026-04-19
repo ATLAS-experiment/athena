@@ -6,33 +6,99 @@ from AthenaCommon.Logging import logging
 
 from AthenaConfiguration.Enums import LHCPeriod
 
+
 from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import TriggerAnalysisBlock
 from TriggerAnalysisAlgorithms.TriggerAnalysisSFConfig import trigger_set
 
 from FTagAnalysisAlgorithms.BJetTriggerByYearContent import getDecoByTrigName
 
-def getBTagWP(chain, tag):
-    # We have a chain with something like "..._bdl1d77_..."
-    # Get the substring after the tagger, e.g. bdl1d
-    after = chain.split(tag)[1]
-    # Get the two first characters, corresponding to the WP
-    wp = after[:2]
-    return 'FixedCutBEff_'+wp
+
+def makeJetManagerTool(config, containerName):
+    jmTool = config.createPublicTool("Trig::JetManagerTool", containerName)
+    jmTool.JetContainerName = containerName
+    jmTool.BTaggingLink = 'btaggingLink'
+    jmTool.LHCPeriod = 2 if config.geometry() is LHCPeriod.Run2 else 3
+    return jmTool
+
+def makeEmulationTool(config, toBeEmulatedTriggers):
+    toolName = "TrigBtagEmulationTool"
+    decisionToolName = "TrigDecisionTool"
+    if toolName in config._algorithms:
+        return config._algorithms[toolName]
+
+    ### determine trigger thresholds from to be emulated chain names
+    chainDefinitions = {}
+    for chain in toBeEmulatedTriggers:
+        from ROOT.ChainNameParser import HLTChainInfo
+        chainInfo = HLTChainInfo(chain)
+        chainParts = ['L1item:' + chainInfo.l1Item()]
+        for legInfo in chainInfo:
+            eta = '0eta320'
+            tagger = ''
+            gscthreshold = '-99999'
+            for part in legInfo.legParts:
+                if part.startswith('b'):
+                    tagger = part
+                elif 'eta' in part:
+                    eta = part
+                elif part.startswith('gsc'):
+                    gscthreshold = str(part)[3:]
+            partDefinition = ''
+            partDefinition += 'L1threshold:' + chainInfo.l1Item()
+            partDefinition += '|name:' + legInfo.legName()
+            partDefinition += '|multiplicity:' + str(legInfo.multiplicity)
+            partDefinition += '|threshold:' + str(legInfo.threshold)
+            partDefinition += '|etaRange:' + eta
+            partDefinition += '|jvt:-99999'
+            partDefinition += '|tagger:' + tagger
+            partDefinition += '|jetpresel:nopresel'
+            partDefinition += '|dijetmass:None' # TODO: add invm chain support
+            partDefinition += '|isPFlow:False'
+            partDefinition += '|isShared:False'
+            partDefinition += '|GSCthreshold:' + gscthreshold
+            chainParts.append(partDefinition)
+        chainDefinitions[chain] = chainParts
 
 
-def getBTagThreshold(chain):
+    decisionTool = config._algorithms[decisionToolName] if decisionToolName in config._algorithms else config.createPublicTool("Trig::TrigDecisionTool", decisionToolName)
+    emulationTool = config.createPublicTool("Trig::TrigBtagEmulationTool", toolName)
+    emulationTool.TrigDecisionTool = f"{decisionTool.getType()}/{decisionTool.getName()}"
+    emulationTool.LHCPeriod = 2 if config.geometry() is LHCPeriod.Run2 else 3
 
-    if 'bmv2c10' in chain:
-        bTagWP = getBTagWP(chain, 'bmv2c10')
-        if bTagWP == 'FixedCutBEff_60':
-            return 0.939187
-        if bTagWP == 'FixedCutBEff_70':
-            return 0.826829
-        if bTagWP == 'FixedCutBEff_77':
-            return 0.629222
-        if bTagWP == 'FixedCutBEff_85':
-            return 0.0722749
-    return 999.
+    if config.geometry() is LHCPeriod.Run2:
+        from Campaigns.Utils import Campaign
+        InputJetContainer_a4tcemsubjesJet = 'HLT_xAOD__JetContainer_a4tcemsubjesFS' if config.campaign() == Campaign.MC20a else 'HLT_xAOD__JetContainer_a4tcemsubjesISFS'
+        InputJetContainer_SplitJet = 'HLT_xAOD__JetContainer_SplitJet'
+        InputJetContainer_GSCJet = 'HLT_xAOD__JetContainer_GSCJet'
+
+
+        emulationTool.JM_a4tcemsubjes_CNT = makeJetManagerTool(config, InputJetContainer_a4tcemsubjesJet)
+        emulationTool.JM_Split_CNT = makeJetManagerTool(config, InputJetContainer_SplitJet)
+        emulationTool.JM_GSC_CNT = makeJetManagerTool(config, InputJetContainer_GSCJet)
+
+        working_points = {
+                "mv2c2040": 0.75,
+                "mv2c2050": 0.50,
+                "mv2c2060": -0.0224729,
+                "mv2c2070": -0.509032,
+                "mv2c2077": -0.764668,
+                "mv2c2085": -0.938441,
+                }
+        working_points.update({
+            "mv2c1040": 0.978,
+            "mv2c1050": 0.948,
+            "mv2c1060": 0.846,
+            "mv2c1070": 0.580,
+            "mv2c1077": 0.162,
+            "mv2c1085": -0.494
+            })
+
+        emulationTool.EmulatedChainDefinitions = chainDefinitions
+
+        emulationTool.WorkingPoints = working_points
+
+    return emulationTool
+
 
 
 
@@ -71,7 +137,10 @@ class FTagJetTrigMatchingBlock(ConfigBlock):
             triggers = trigger_set(config, self.triggerChainsPerYear,
                                    self.includeAllYearsPerRun)
             decisionTool = TriggerAnalysisBlock.makeTriggerDecisionTool(config)
-            
+
+            if config.geometry() is LHCPeriod.Run2:
+                emulationTool = makeEmulationTool(config, triggers)
+
             for chain in triggers:
                 chain_noHLT = chain.replace("HLT_", "")
                 chain_out = chain_noHLT if self.removeHLTPrefix else chain
@@ -91,7 +160,8 @@ class FTagJetTrigMatchingBlock(ConfigBlock):
                 # Helper function to implement to provide cut for given trigger
                 # Only used for Run 2
                 if config.geometry() is LHCPeriod.Run2:
-                    alg.btagThreshold = getBTagThreshold(chain)
+                    #alg.btagThreshold = getBTagThreshold(chain)
+                    alg.TrigBtagEmulationTool = f"{emulationTool.getType()}/{emulationTool.getName()}"
 
                 alg.matchingDecoration = 'ftag_jetTrigMatching_' + chain_out + '_%SYS%'
                 alg.bTagMatchingDecoration = 'ftag_bTagTrigMatching_' + chain_out + '_%SYS%'
