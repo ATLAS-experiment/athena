@@ -80,9 +80,9 @@ namespace ActsTrk::detail {
       }
       unsigned int getContainerIndex( unsigned int detector_type_i, [[maybe_unused]] unsigned int id_hash) const {
          unsigned int detector_container_index = m_perDetectorContainerIndex.at(detector_type_i);
-         if (detector_container_index> numContainers()) {
-            throw std::range_error("No container registered for detector type.");
-         }
+         // if (detector_container_index> numContainers()) {
+         //    throw std::range_error("No container registered for detector type.");
+         // }
          return detector_container_index;
       }
       PhaseII::DataRange getRange(unsigned int detector_type_i, unsigned int id_hash) const {
