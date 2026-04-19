@@ -319,6 +319,10 @@ StripClusteringTool::makeCluster(Cluster &cluster,
                                  StripClusterAuxDataCache<Utils::AccessPolicy::Mutable> &clusterAuxDataCache) const
 {
     std::size_t size = cluster.ids.size();
+
+    for (Identifier::value_type rdo_id : cluster.ids) {
+       clusterAuxDataCache.emplace_back_rdos(rdo_id);
+    }
     
     auto [localPos, globalPos]
       = computePosition(cluster, size, lorentzShift, stripID, element, design, m_isITk);
