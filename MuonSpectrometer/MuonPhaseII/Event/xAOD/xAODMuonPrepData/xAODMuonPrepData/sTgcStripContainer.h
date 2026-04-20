@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODMUONPREPDATA_STGCSTRIPCONTAINER_H
@@ -7,7 +7,7 @@
 
 #include "xAODMuonPrepData/sTgcStripClusterFwd.h"
 #include "xAODMuonPrepData/sTgcStripCluster.h"
-#include "xAODCore/CLASS_DEF.h"
+#include "xAODMuonPrepData/MuonMeasurementContainer.h"
 
 namespace xAOD{
    using sTgcStripContainer_v1 = DataVector<sTgcStripCluster_v1>;

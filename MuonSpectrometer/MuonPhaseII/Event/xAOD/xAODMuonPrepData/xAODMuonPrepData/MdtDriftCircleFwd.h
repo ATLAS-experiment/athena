@@ -1,9 +1,10 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMUONPREPDATA_MDTDRIFTCIRCLEFWD_H
 #define XAODMUONPREPDATA_MDTDRIFTCIRCLEFWD_H
 
+#include "xAODMuonPrepData/MuonMeasurementFwd.h"
 /** @brief Forward declaration of the xAOD::MdtDriftCircle */
 namespace xAOD{
    class MdtDriftCircle_v1;

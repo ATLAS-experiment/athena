@@ -17,7 +17,7 @@ class MdtTwinDriftCircle_v1 : public MdtDriftCircle_v1 {
     /// Virtual destructor
     virtual ~MdtTwinDriftCircle_v1() = default;
 
-    unsigned int numDimensions() const override final { return 2; }
+    unsigned numDimensions() const override final { return 2; }
     
     /** @brief Returns the Identifier of the twin tube */
     Identifier twinIdentify() const;
@@ -28,21 +28,21 @@ class MdtTwinDriftCircle_v1 : public MdtDriftCircle_v1 {
     /** @brief Returns the uncertainty on the coordinate along the wire */
     float posAlongWireUncert() const;
     /** @brief Returns the TDC (typically range is 0 to 2500)*/
-    int16_t twinTdc() const;
+    std::int16_t twinTdc() const;
     /** @brief Returns the ADC (typically range is 0 to 250)*/
-    int16_t twinAdc() const;
+    std::int16_t twinAdc() const;
     /** @brief Returns the tube number of the associated twin channel (1-120)*/
-    uint16_t twinTube() const;
+    std::uint16_t twinTube() const;
     /** @brief Returns the layer number of the associated twin channel (1-4)*/
-    uint8_t twinLayer() const;   
+   std:: uint8_t twinLayer() const;   
     /** @brief Sets the TDC counts */
-    void setTwinTdc(int16_t tdc);
+    void setTwinTdc(std::int16_t tdc);
     /** @brief Sets the ADC counts */
-    void setTwinAdc(int16_t adc);
+    void setTwinAdc(std::int16_t adc);
     /** @brief Sets the tube number */
-    void setTwinTube(uint16_t tube_n);
+    void setTwinTube(std::uint16_t tube_n);
     /** @brief Sets the layer number */
-    void setTwinLayer(uint8_t layer_n);
+    void setTwinLayer(std::uint8_t layer_n);
 };
 
 }  // namespace xAOD

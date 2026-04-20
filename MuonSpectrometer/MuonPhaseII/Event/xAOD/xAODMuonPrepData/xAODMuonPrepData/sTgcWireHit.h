@@ -7,7 +7,7 @@
 #include "xAODMuonPrepData/sTgcWireHitFwd.h"
 #include "xAODMuonPrepData/versions/sTgcWireHit_v1.h"
 #include "xAODMuonPrepData/sTgcMeasurement.h"
-#include "xAODCore/CLASS_DEF.h"
+
 DATAVECTOR_BASE(xAOD::sTgcWireHit_v1, xAOD::sTgcMeasurement_v1);
 
 // Set up a CLID for the class:

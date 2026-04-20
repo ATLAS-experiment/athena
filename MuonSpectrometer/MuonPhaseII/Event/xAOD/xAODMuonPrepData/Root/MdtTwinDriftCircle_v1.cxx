@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
@@ -15,10 +15,10 @@ namespace {
 
 namespace xAOD {
 
-IMPLEMENT_SETTER_GETTER(MdtTwinDriftCircle_v1, int16_t, twinTdc, setTwinTdc)
-IMPLEMENT_SETTER_GETTER(MdtTwinDriftCircle_v1, int16_t, twinAdc, setTwinAdc)
-IMPLEMENT_SETTER_GETTER(MdtTwinDriftCircle_v1, uint8_t, twinLayer, setTwinLayer)
-IMPLEMENT_SETTER_GETTER(MdtTwinDriftCircle_v1, uint16_t, twinTube, setTwinTube)
+IMPLEMENT_SETTER_GETTER(MdtTwinDriftCircle_v1, std::int16_t, twinTdc, setTwinTdc)
+IMPLEMENT_SETTER_GETTER(MdtTwinDriftCircle_v1, std::int16_t, twinAdc, setTwinAdc)
+IMPLEMENT_SETTER_GETTER(MdtTwinDriftCircle_v1, std::uint8_t, twinLayer, setTwinLayer)
+IMPLEMENT_SETTER_GETTER(MdtTwinDriftCircle_v1, std::uint16_t, twinTube, setTwinTube)
 
 Identifier MdtTwinDriftCircle_v1::twinIdentify() const {
     return readoutElement()->measurementId(readoutElement()->measurementHash(twinLayer(), twinTube()));

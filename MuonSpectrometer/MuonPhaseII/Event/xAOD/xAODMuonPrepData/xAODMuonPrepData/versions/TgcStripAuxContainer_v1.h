@@ -21,16 +21,14 @@ class TgcStripAuxContainer_v1 : public AuxContainerBase {
    private:
     /// @name Defining Mdt Drift Circle parameters
     /// @{
-    std::vector<DetectorIdentType> identifier{};
     std::vector<DetectorIDHashType> identifierHash{};
     std::vector<PosAccessor<1>::element_type> localPosition{};
     std::vector<CovAccessor<1>::element_type> localCovariance{};
+    std::vector<std::uint16_t> channelNumber{};
 
-    std::vector<uint16_t> bcBitMap{};
-    
-    std::vector<uint16_t> channelNumber{};
-    std::vector<uint8_t> gasGap{};
-    std::vector<uint8_t> measuresPhi{};
+    std::vector<std::uint8_t> bcBitMap{};
+    std::vector<std::uint8_t> gasGap{};
+    std::vector<std::uint8_t> measuresPhi{};
     /// @}
 };
 }  // namespace xAOD

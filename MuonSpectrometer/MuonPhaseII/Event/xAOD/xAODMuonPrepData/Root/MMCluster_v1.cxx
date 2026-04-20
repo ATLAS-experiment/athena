@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
@@ -23,21 +23,15 @@ IdentifierHash MMCluster_v1::measurementHash() const {
 IdentifierHash MMCluster_v1::layerHash() const {
     return MuonGMR4::MmReadoutElement::createHash(gasGap(), 0);
 }
-const Identifier& MMCluster_v1::identify() const {
-    if (!m_identifier.isValid()){
-        m_identifier.set(readoutElement()->measurementId(measurementHash()));
-    }
-    return (*m_identifier.ptr());
-}
-IMPLEMENT_SETTER_GETTER(MMCluster_v1, uint16_t, time, setTime)
-IMPLEMENT_SETTER_GETTER(MMCluster_v1, uint32_t, charge, setCharge)
+IMPLEMENT_SETTER_GETTER(MMCluster_v1, std::uint16_t, time, setTime)
+IMPLEMENT_SETTER_GETTER(MMCluster_v1, std::uint32_t, charge, setCharge)
 IMPLEMENT_SETTER_GETTER(MMCluster_v1, float, driftDist, setDriftDist)
 IMPLEMENT_SETTER_GETTER(MMCluster_v1, float, angle, setAngle)
 IMPLEMENT_SETTER_GETTER(MMCluster_v1, float, chiSqProb, setChiSqProb)
-IMPLEMENT_SETTER_GETTER(MMCluster_v1, uint8_t, gasGap, setGasGap)
-IMPLEMENT_SETTER_GETTER(MMCluster_v1, uint16_t, channelNumber, setChannelNumber)
+IMPLEMENT_SETTER_GETTER(MMCluster_v1, std::uint8_t, gasGap, setGasGap)
+IMPLEMENT_SETTER_GETTER(MMCluster_v1, std::uint16_t, channelNumber, setChannelNumber)
 IMPLEMENT_SETTER_GETTER_WITH_CAST(MMCluster_v1, short, MMCluster_v1::Author, author, setAuthor)
-IMPLEMENT_SETTER_GETTER_WITH_CAST(MMCluster_v1, uint8_t, MMCluster_v1::Quality, quality, setQuality)
+IMPLEMENT_SETTER_GETTER_WITH_CAST(MMCluster_v1, std::uint8_t, MMCluster_v1::Quality, quality, setQuality)
 
 IMPLEMENT_VECTOR_SETTER_GETTER(MMCluster_v1, uint16_t, stripNumbers, setStripNumbers)
 IMPLEMENT_VECTOR_SETTER_GETTER(MMCluster_v1, int16_t, stripTimes, setStripTimes)
