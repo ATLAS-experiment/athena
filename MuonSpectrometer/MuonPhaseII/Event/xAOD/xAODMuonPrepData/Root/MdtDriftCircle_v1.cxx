@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
@@ -19,28 +19,28 @@ namespace {
 namespace xAOD {
 using MdtDriftCircleStatus = MdtDriftCircle_v1::MdtDriftCircleStatus;
 
-IMPLEMENT_SETTER_GETTER(MdtDriftCircle_v1, int16_t, tdc, setTdc)
-IMPLEMENT_SETTER_GETTER(MdtDriftCircle_v1, int16_t, adc, setAdc)
-IMPLEMENT_SETTER_GETTER(MdtDriftCircle_v1, uint16_t, driftTube, setTube)
-IMPLEMENT_SETTER_GETTER(MdtDriftCircle_v1, uint8_t, tubeLayer, setLayer)
-IMPLEMENT_SETTER_GETTER_WITH_CAST(MdtDriftCircle_v1, uint8_t, MdtDriftCircleStatus, status, setStatus)
+IMPLEMENT_SETTER_GETTER(MdtDriftCircle_v1, std::int16_t, tdc, setTdc)
+IMPLEMENT_SETTER_GETTER(MdtDriftCircle_v1, std::int16_t, adc, setAdc)
+IMPLEMENT_SETTER_GETTER(MdtDriftCircle_v1, std::uint16_t, driftTube, setTube)
+IMPLEMENT_SETTER_GETTER(MdtDriftCircle_v1, std::uint8_t, tubeLayer, setLayer)
+IMPLEMENT_SETTER_GETTER_WITH_CAST(MdtDriftCircle_v1, std::uint8_t, MdtDriftCircleStatus, status, setStatus)
 IMPLEMENT_READOUTELEMENT(MdtDriftCircle_v1, m_readoutEle, MdtReadoutElement)
 
 IdentifierHash MdtDriftCircle_v1::measurementHash() const {
     return MuonGMR4::MdtReadoutElement::measurementHash(tubeLayer(),
-                                                        driftTube());
+                                                       driftTube());
+}
+IdentifierHash MdtDriftCircle_v1::layerHash() const {
+    return MuonGMR4::MdtReadoutElement::layerHash(measurementHash());
+}
+std::uint8_t MdtDriftCircle_v1::measuresPhi() const {
+    return numDimensions() == 2;
 }
 Amg::Vector3D MdtDriftCircle_v1::localMeasurementPos() const {
     if (numDimensions() == 1) {
         return Amg::Vector3D::Zero();
     }
     return localPosition<2>()[Trk::locZ] * Amg::Vector3D::UnitZ(); 
-}
-const Identifier& MdtDriftCircle_v1::identify() const {
-    if (!m_identifier.isValid()){
-        m_identifier.set(readoutElement()->measurementId(measurementHash()));
-    }
-    return (*m_identifier.ptr());
 }
 float MdtDriftCircle_v1::driftRadius() const {
     return numDimensions() == 1 ? localPosition<1>()[Trk::locR] 

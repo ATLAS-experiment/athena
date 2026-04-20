@@ -7,7 +7,6 @@
 #include "xAODMuonPrepData/RpcMeasurementFwd.h"
 /** @brief Forward declaration of the xAOD::RpcStrip */
 namespace xAOD{
-   class RpcMeasurement_v1;
    class RpcStrip_v1;
    using RpcStrip = RpcStrip_v1;
 

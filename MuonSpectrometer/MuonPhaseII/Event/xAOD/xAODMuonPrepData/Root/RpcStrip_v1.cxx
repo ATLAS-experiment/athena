@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
@@ -12,5 +12,5 @@ namespace {
     static const std::string preFixStr{"Rpc_"};
 }
 namespace xAOD {
-    IMPLEMENT_SETTER_GETTER(RpcStrip_v1, uint8_t, measuresPhi, setMeasuresPhi)
+    IMPLEMENT_SETTER_GETTER(RpcStrip_v1, std::uint8_t, measuresPhi, setMeasuresPhi)
 }  // namespace xAOD

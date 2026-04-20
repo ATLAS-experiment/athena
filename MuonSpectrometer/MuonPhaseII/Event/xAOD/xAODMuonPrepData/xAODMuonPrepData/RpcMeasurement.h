@@ -6,11 +6,10 @@
 
 #include "xAODMuonPrepData/RpcMeasurementFwd.h"
 #include "xAODMuonPrepData/versions/RpcMeasurement_v1.h"
-#include "AthContainers/DataVector.h"
+#include "xAODMuonPrepData/MuonMeasurement.h"
 
-DATAVECTOR_BASE(xAOD::RpcMeasurement_v1, xAOD::UncalibratedMeasurement_v1);
+DATAVECTOR_BASE(xAOD::RpcMeasurement_v1, xAOD::MuonMeasurement_v1);
 
 // Set up a CLID for the class:
-#include "xAODCore/CLASS_DEF.h"
 CLASS_DEF( xAOD::RpcMeasurement , 47915827 , 1 )
 #endif  // XAODMUONPREPDATA_RPCSTRIP_H

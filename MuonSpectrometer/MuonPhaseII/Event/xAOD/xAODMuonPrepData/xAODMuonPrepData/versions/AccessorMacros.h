@@ -59,23 +59,20 @@
                                                                                                 \
     const MuonGMR4::READOUT_ELEMENT_TYPE* CLASS_NAME::readoutElement() const {                  \
         if (!CACHED_VALUE.isValid()) {                                                          \
-            ServiceHandle<StoreGateSvc> service{"DetectorStore", #CLASS_NAME};                  \
+            SmartIF<StoreGateSvc> service{Gaudi::svcLocator()->service("DetectorStore")};       \
             const MuonGMR4::MuonDetectorManager* detMgr{};                                      \
-            if (!service.retrieve().isSuccess() ||                                              \
-                !service->retrieve(detMgr).isSuccess()){                                        \
+            if (!service || !service->retrieve(detMgr).isSuccess()){                            \
                 THROW_EXCEPTION("Failed to retrieve the Run4 muon detector manager. "<<         \
                          "Please schedule the MuonGeometry in your job");                       \
             }                                                                                   \
             const IdentifierHash hash{identifierHash()};                                        \
             const MuonGMR4::READOUT_ELEMENT_TYPE* re = detMgr->get##READOUT_ELEMENT_TYPE(hash); \
             if (!re) {                                                                          \
-                const Identifier id{static_cast<Identifier::value_type>(identifier())};         \
-                THROW_EXCEPTION(detMgr->idHelperSvc()->toString(id)                             \
-                            <<" does not have a readout element.");                             \
+                THROW_EXCEPTION(#READOUT_ELEMENT_TYPE<<" does not exist for hash "<<hash);      \
             }                                                                                   \
             CACHED_VALUE.set(re);                                                               \
         }                                                                                       \
-        return (*CACHED_VALUE.ptr());                                                           \
+        return static_cast<const MuonGMR4::READOUT_ELEMENT_TYPE*>(*CACHED_VALUE.ptr());         \
     }
 
 /**

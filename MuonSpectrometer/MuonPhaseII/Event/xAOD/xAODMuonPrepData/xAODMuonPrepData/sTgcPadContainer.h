@@ -7,8 +7,9 @@
 
 #include "xAODMuonPrepData/sTgcPadHitFwd.h"
 #include "xAODMuonPrepData/sTgcPadHit.h"
+#include "xAODMuonPrepData/MuonMeasurementContainer.h"
 // Set up a CLID for the class:
-#include "xAODCore/CLASS_DEF.h"
+
 namespace xAOD{
    using sTgcPadContainer_v1 = DataVector<sTgcPadHit_v1>;
    using sTgcPadContainer = sTgcPadContainer_v1;

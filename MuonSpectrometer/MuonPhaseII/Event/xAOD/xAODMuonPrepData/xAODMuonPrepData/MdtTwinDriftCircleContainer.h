@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODMUONPREPDATA_MDTTWINDRIFTCIRCLECONTAINER_H
@@ -7,7 +7,7 @@
 
 #include "xAODMuonPrepData/MdtTwinDriftCircleFwd.h"
 #include "xAODMuonPrepData/MdtTwinDriftCircle.h"
-#include "xAODCore/CLASS_DEF.h"
+
 
 namespace xAOD{
    using MdtTwinDriftCircleContainer_v1 = DataVector<MdtTwinDriftCircle_v1>;

@@ -16,12 +16,12 @@ class RpcStrip_v1 : public RpcMeasurement_v1 {
         /// Virtual destructor
         virtual ~RpcStrip_v1() = default;
 
-        unsigned int numDimensions() const override final { return 1; }
+        unsigned numDimensions() const override final { return 1; }
         
         /** @brief returns whether the hit measures the phi coordinate */
-        uint8_t measuresPhi() const override final;
+        std::uint8_t measuresPhi() const override final;
         /** @brief sets the measuresPhi value */
-        void setMeasuresPhi(uint8_t measPhi);
+        void setMeasuresPhi(std::uint8_t measPhi);
 
 };
 

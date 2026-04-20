@@ -14,8 +14,6 @@ namespace {
 namespace xAOD {
 RpcStrip2DAuxContainer_v1::RpcStrip2DAuxContainer_v1()
     : AuxContainerBase() {
-    /// Identifier variable hopefully unique
-    AUX_VARIABLE(identifier);
     AUX_VARIABLE(identifierHash);  
     AUX_MEASUREMENTVAR(localPosition, 2)
     AUX_MEASUREMENTVAR(localCovariance, 2)
