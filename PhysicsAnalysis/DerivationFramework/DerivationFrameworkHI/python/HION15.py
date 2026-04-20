@@ -57,10 +57,10 @@ def HION15Cfg(flags):
         AllVars += ListSlimming.HION15AllVarFromFTAG1()
         # update AppendToDictionary
         extra_AppendToDictionary = {}
-        FtagBaseContent.update_append_to_dictionary_in_slimming_helper(HION15SlimmingHelper, flags, extra_AppendToDictionary)
+        FtagBaseContent.update_append_to_dictionary_in_slimming_helper(flags, HION15SlimmingHelper, extra_AppendToDictionary)
         # Add ExtraVariables
         ExtraVars += ListSlimming.HION15ExtraVarForBtag(JetColl)
-        FtagBaseContent.add_extra_variables_to_slimming_helper(HION15SlimmingHelper, flags)
+        FtagBaseContent.add_extra_variables_to_slimming_helper(flags, HION15SlimmingHelper)
 
     HION15SlimmingHelper.ExtraVariables = ExtraVars
     HION15SlimmingHelper.AllVariables = AllVars

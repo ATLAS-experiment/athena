@@ -104,13 +104,13 @@ def FTAG5Cfg(flags):
 
    
     # Add default trigger setup
-    FtagBaseContent.trigger_setup(FTAG5SlimmingHelper, 'FTAG5')
+    FtagBaseContent.trigger_setup(FTAG5SlimmingHelper)
 
     # Add trigger menu needed for FTAG5
     FTAG5SlimmingHelper.IncludeTriggerNavigation = True
 
     # Add trigger matching
-    FtagBaseContent.trigger_matching(FTAG5SlimmingHelper, FTAG5TriggerListsHelper, flags)
+    FtagBaseContent.trigger_matching(flags, FTAG5SlimmingHelper, FTAG5TriggerListsHelper)
 
     # Output stream
     FTAG5ItemList = FTAG5SlimmingHelper.GetItemList()

@@ -155,7 +155,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
 
     # update AppendToDictionary
     extra_AppendToDictionary = {} #only add those items specifically for FTAG1 here!
-    FtagBaseContent.update_append_to_dictionary_in_slimming_helper(FTAG1SlimmingHelper, flags, extra_AppendToDictionary)
+    FtagBaseContent.update_append_to_dictionary_in_slimming_helper(flags, FTAG1SlimmingHelper, extra_AppendToDictionary)
 
     # Static content
     StaticContent = [] #only add extra static content for FTAG1 here!
@@ -181,7 +181,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
             StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % cascades]
 
 
-    FtagBaseContent.add_static_content_to_slimming_helper(FTAG1SlimmingHelper, flags, StaticContent)
+    FtagBaseContent.add_static_content_to_slimming_helper(flags, FTAG1SlimmingHelper, StaticContent)
 
 
     # Add truth containers
@@ -197,11 +197,11 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
                                                "AntiKt4TruthJets.constituentLinks"]
 
     # Add ExtraVariables
-    FtagBaseContent.add_extra_variables_to_slimming_helper(FTAG1SlimmingHelper, flags)
+    FtagBaseContent.add_extra_variables_to_slimming_helper(flags, FTAG1SlimmingHelper)
    
     # Trigger content
-    FtagBaseContent.trigger_setup(FTAG1SlimmingHelper, trigger_option)
-    FtagBaseContent.trigger_matching(FTAG1SlimmingHelper, TriggerListsHelper, flags)
+    FtagBaseContent.trigger_setup(FTAG1SlimmingHelper)
+    FtagBaseContent.trigger_matching(flags, FTAG1SlimmingHelper, TriggerListsHelper)
 
     jetOutputList = ["AntiKt4UFOCSSKJets"]
     from DerivationFrameworkJetEtMiss.JetCommonConfig import addJetsToSlimmingTool
