@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ACTSGEOMETRYINTERFACES_GEOMETRYDEFS_H
 #define ACTSGEOMETRYINTERFACES_GEOMETRYDEFS_H
@@ -8,13 +8,15 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 /// Then load the Acts TypeDef definitions for Eigen
 #include <string>
+#include <ostream>
 #ifndef SIMULATIONBASE 
 #   include "ActsInterop/UnitConverters.h"
+#   include "Acts/Utilities/OstreamFormatter.hpp"
 #endif
 namespace ActsTrk {
     /// Simple enum to Identify the Type of the
     /// ACTS sub detector
-    enum class DetectorType: unsigned short {
+    enum class DetectorType: std::uint8_t {
         /// Inner detector legacy
         Pixel,
         Sct,
@@ -32,28 +34,30 @@ namespace ActsTrk {
     };
 
     inline std::string to_string(const DetectorType& type) {
-        if (type == DetectorType::Pixel)
-            return "Pixel";
-        else if (type == DetectorType::Sct)
-            return "Sct";
-        else if (type == DetectorType::Trt)
-            return "Trt";
-        else if (type == DetectorType::Hgtd)
-            return "Hgtd";
-        else if (type == DetectorType::Mdt)
-            return "Mdt";
-        else if (type == DetectorType::Rpc)
-            return "Rpc";
-        else if (type == DetectorType::Tgc)
-            return "Tgc";
-        else if (type == DetectorType::Csc)
-            return "Csc";
-        else if (type == DetectorType::Mm)
-            return "Mm";
-        else if (type == DetectorType::sTgc)
-            return "sTgc";
+        switch (type) {
+            using enum DetectorType;
+            case Pixel: return "Pixel";
+            case Sct: return "Sct";
+            case Trt: return "Trt";
+            case Hgtd: return "Hgtd";
+            case Mdt: return "Mdt";
+            case Rpc: return "Rpc";
+            case Tgc: return "Tgc";
+            case Mm: return "Mm";
+            case sTgc: return "sTgc";
+            case Csc: return "Csc";
+            case UnDefined: return "UnDefined";
+        }
         return "Unknown";
     }
 
+    inline std::ostream& operator<<(std::ostream& ostr, const DetectorType type) {
+        return (ostr<<to_string(type));
+    }
+
 }  // namespace ActsTrk
+
+#ifndef SIMULATIONBASE 
+ACTS_OSTREAM_FORMATTER(ActsTrk::DetectorType);
+#endif
 #endif
