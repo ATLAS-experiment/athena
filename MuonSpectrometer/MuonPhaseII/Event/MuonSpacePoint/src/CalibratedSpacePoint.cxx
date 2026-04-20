@@ -86,7 +86,7 @@ namespace MuonR4{
         } else {
             ostr<<"Auxiliary measurement";
         }
-        ostr<<" ("<<toString(fitState())<<")";
+        ostr<<" ("<<fitState()<<")";
         ostr<<" @ "<<Amg::toString(localPosition());
         if (type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
             ostr<<", wire: "<<Amg::toString(sensorDirection())<<", drift R: "<<driftRadius();
