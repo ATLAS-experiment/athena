@@ -149,24 +149,26 @@ def defaultITkTrigTrackingFlags() -> AthConfigFlags:
   flags.doCaloSeededAmbiSi  = False
   flags.DoubletDR_Max       = 150.0
   flags.useTIDE_Ambi        = False  
-  flags.maxEta = 4.0
+  flags.maxEta              = 4.0
+
   return flags
 
 def defaultITkActsTrigTrackingFlags() -> AthConfigFlags:
-    flags = createActsTrackingPassFlags()
-    defaultTrigTrackingFlags(flags)
+  flags = createActsTrackingPassFlags()
+  defaultTrigTrackingFlags(flags)
+  
+  flags.minPT               = [0.9*Units.GeV, 0.4*Units.GeV, 0.4*Units.GeV]
+  flags.minClusters         = [9, 8, 7]
+  flags.doTRT               = False
+  flags.maxEta              = 4.0
+  flags.maxShared           = [2]
+  flags.maxHoles            = [1]
+  flags.maxPixelHoles       = [2]
+  flags.maxSctHoles         = [2]
+  flags.maxShared           = [2]
+  flags.maxDoubleHoles      = [1]
     
-    flags.minPT               = [0.9*Units.GeV, 0.4*Units.GeV, 0.4*Units.GeV]
-    flags.minClusters         = [9, 8, 7]
-    flags.doTRT = False
-    flags.maxEta = 4.0
-    flags.maxShared = [2]
-    flags.maxHoles = [1]
-    flags.maxPixelHoles = [2]
-    flags.maxSctHoles = [2]
-    flags.maxShared = [2]
-    flags.maxDoubleHoles = [1]
-    return flags
+  return flags
 
 def defaultModeTrigTrackingFlags(flags: AthConfigFlags) -> AthConfigFlags:
   return flags
