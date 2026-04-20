@@ -52,7 +52,7 @@ atlas_add_test( IOVDbSvc_Boost_test
    LINK_LIBRARIES ${COOL_LIBRARIES} ${ROOT_LIBRARIES}
    GaudiKernel AthenaKernel CxxUtils TestTools StoreGateLib EventInfoMgtLib
    Boost::unit_test_framework
-   POST_EXEC_SCRIPT "nopost.sh" )
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( IOVDbSvc_InvalidMarkup_test
    SOURCES test/IOVDbSvc_InvalidMarkup_test.cxx
@@ -60,7 +60,8 @@ atlas_add_test( IOVDbSvc_InvalidMarkup_test
    LINK_LIBRARIES ${COOL_LIBRARIES} ${ROOT_LIBRARIES}
    GaudiKernel AthenaKernel CxxUtils TestTools StoreGateLib EventInfoMgtLib
    Boost::unit_test_framework
-   POST_EXEC_SCRIPT "nopost.sh" )
+   LOG_IGNORE_PATTERN "Badly formed XML|Folder setup string is invalid|FAILURE: setupFolders|Unable to initialize"
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( IOVDbConn_test
    SOURCES test/IOVDbConn_test.cxx src/IOVDbConn.cxx
@@ -68,14 +69,14 @@ atlas_add_test( IOVDbConn_test
    LINK_LIBRARIES ${COOL_LIBRARIES} ${ROOT_LIBRARIES}
    GaudiKernel CxxUtils TestTools CoraCool CrestApi::CrestApiLib
    Boost::unit_test_framework
-   POST_EXEC_SCRIPT "nopost.sh" )
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( IOVDbStringFunctions_test
    SOURCES test/IOVDbStringFunctions_test.cxx src/IOVDbStringFunctions.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
    LINK_LIBRARIES 
    Boost::unit_test_framework
-   POST_EXEC_SCRIPT "nopost.sh" )
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( IOVDbParser_test
    SOURCES test/IOVDbParser_test.cxx src/IOVDbParser.cxx
@@ -84,7 +85,8 @@ atlas_add_test( IOVDbParser_test
    LINK_LIBRARIES ${ROOT_LIBRARIES} GaudiKernel CxxUtils
    TestTools
    Boost::unit_test_framework
-   POST_EXEC_SCRIPT "nopost.sh" )
+   LOG_IGNORE_PATTERN "Badly formed XML"
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( FolderTypes_test
    SOURCES test/FolderTypes_test.cxx src/FolderTypes.cxx
@@ -95,7 +97,7 @@ atlas_add_test( FolderTypes_test
    ${ROOT_LIBRARIES} GaudiKernel AthenaKernel StoreGateLib CxxUtils TestTools
    AthenaPoolUtilities
    Boost::unit_test_framework
-   POST_EXEC_SCRIPT "nopost.sh" )
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( IOVDbCoolFunctions_test
    SOURCES test/IOVDbCoolFunctions_test.cxx src/IOVDbCoolFunctions.cxx
@@ -104,7 +106,7 @@ atlas_add_test( IOVDbCoolFunctions_test
    LINK_LIBRARIES ${COOL_LIBRARIES} ${CORAL_LIBRARIES}
    GaudiKernel AthenaKernel CoraCool CrestApi::CrestApiLib
    Boost::unit_test_framework
-   POST_EXEC_SCRIPT "nopost.sh" )
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( ReadFromFileMetaData_test
    SOURCES test/ReadFromFileMetaData_test.cxx src/ReadFromFileMetaData.cxx
@@ -115,7 +117,7 @@ atlas_add_test( ReadFromFileMetaData_test
    AthenaKernel IOVDbDataModel AthenaPoolUtilities CoraCool CxxUtils TestTools
    IOVDbMetaDataToolsLib
    Boost::unit_test_framework
-   POST_EXEC_SCRIPT "nopost.sh" )
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( IOVDbFolder_test
    SOURCES test/IOVDbFolder_test.cxx src/FolderTypes.cxx
@@ -132,24 +134,14 @@ atlas_add_test( IOVDbFolder_test
    TestTools CoraCool AthenaPoolUtilities GeoModelInterfaces
    IOVDbMetaDataToolsLib IOVDbDataModel EventInfoMgtLib CrestApi::CrestApiLib
    Boost::unit_test_framework
-   POST_EXEC_SCRIPT "nopost.sh" )
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( IovStore_test
    SOURCES test/IovStore_test.cxx src/IovStore.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
    LINK_LIBRARIES ${COOL_LIBRARIES} ${CORAL_LIBRARIES}
    Boost::unit_test_framework
-   POST_EXEC_SCRIPT "nopost.sh" )
-
-atlas_add_test( TagFunctions_test
-   SOURCES test/TagFunctions_test.cxx src/TagFunctions.cxx
-   src/IOVDbStringFunctions.cxx
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${COOL_LIBRARIES} ${ROOT_LIBRARIES}
-   GaudiKernel AthenaKernel StoreGateLib AthenaPoolUtilities CxxUtils TestTools
-   EventInfoMgtLib GeoModelInterfaces
-   Boost::unit_test_framework
-   POST_EXEC_SCRIPT "nopost.sh" )
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( Cool2Json_test
    SOURCES test/Cool2Json_test.cxx src/Cool2Json.cxx src/IOVDbConn.cxx
@@ -161,19 +153,30 @@ atlas_add_test( Cool2Json_test
    ${ROOT_LIBRARIES} GaudiKernel AthenaKernel StoreGateLib CoraCool
    AthenaPoolUtilities CxxUtils TestTools 
    Boost::unit_test_framework
-   POST_EXEC_SCRIPT "nopost.sh" )
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( Base64Codec_test
    SOURCES test/Base64Codec_test.cxx src/Base64Codec.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} CxxUtils
    LINK_LIBRARIES ${CORAL_LIBRARIES} CxxUtils
    Boost::unit_test_framework
-   POST_EXEC_SCRIPT "nopost.sh" )
+   POST_EXEC_SCRIPT noerror.sh )
 
 if( NOT SIMULATIONBASE AND NOT GENERATIONBASE AND NOT XAOD_ANALYSIS )
    atlas_add_test( IOVDbSvcCfgTest
       SCRIPT python -m IOVDbSvc.IOVDbSvcConfig
-      POST_EXEC_SCRIPT "nopost.sh" )
+      POST_EXEC_SCRIPT noerror.sh )
+
+    atlas_add_test( TagFunctions_test
+      SOURCES test/TagFunctions_test.cxx src/TagFunctions.cxx
+      src/IOVDbStringFunctions.cxx
+      INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+      LINK_LIBRARIES ${COOL_LIBRARIES} ${ROOT_LIBRARIES}
+      GaudiKernel AthenaKernel StoreGateLib AthenaPoolUtilities CxxUtils TestTools
+      EventInfoMgtLib GeoModelInterfaces
+      Boost::unit_test_framework
+      LOG_IGNORE_PATTERN "The Supported Geometry flag was not set|Unable to initialize service .GeoModelSvc"
+      POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_executable( cool_crest_compare
    test/CoolCrestCompare.cxx test/*.h src/*.h src/IOVDbFolder.cxx src/CoralCrestManager.cxx
