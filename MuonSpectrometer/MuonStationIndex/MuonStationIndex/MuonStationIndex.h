@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONSTATIONINDEX_MUONSTATIONINDEX_H
@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <stdint.h>
+#include <iosfwd>
 
 namespace Muon {
   namespace MuonStationIndex {
@@ -132,6 +133,13 @@ namespace Muon {
     
     /** convert ChIndex name string to enum */
     ChIndex chIndex( const std::string& index );
+
+    std::ostream& operator<<(std::ostream& ostr, const StIndex stIdx);
+    std::ostream& operator<<(std::ostream& ostr, const ChIndex chIdx);
+    std::ostream& operator<<(std::ostream& ostr, const PhiIndex phiIdx);
+    std::ostream& operator<<(std::ostream& ostr, const DetectorRegionIndex detIdx);
+    std::ostream& operator<<(std::ostream& ostr, const LayerIndex layIdx);
+    std::ostream& operator<<(std::ostream& ostr, const TechnologyIndex techIdx);
 
   }
 }
