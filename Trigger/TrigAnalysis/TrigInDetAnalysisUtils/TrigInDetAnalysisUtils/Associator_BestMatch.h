@@ -16,6 +16,7 @@
 
 #include <set>
 #include <map>
+#include <cmath>
 
 
 #include "TrigInDetAnalysis/TrackAssociator.h"
@@ -42,6 +43,8 @@ public:
 
   virtual TrackAssociator* clone() override { return new Associator_DeltaRMatcher(*this); }
 
+  virtual std::unique_ptr<TrackAssociator> uclone() const override { return std::make_unique<Associator_DeltaRMatcher>(*this); }
+
   virtual double distance( const TIDA::Track* t0,  const TIDA::Track* t1 ) const override {
     double deta = t0->eta()-t1->eta();
     double dphi = t0->phi()-t1->phi();    
@@ -67,6 +70,8 @@ public:
 
   virtual TrackAssociator* clone() override { return new Associator_SecondBestpTMatcher(*this); }
 
+  virtual std::unique_ptr<TrackAssociator> uclone() const override { return std::make_unique<Associator_SecondBestpTMatcher>(*this); }
+  
   virtual double distance( const TIDA::Track* t0, const TIDA::Track* t1 ) const override {
     double dpT = fabs( t0->pT()/1000 - t1->pT()/1000 );
     //std::cout << "pT dist = " << dpT << "    dpT / pT = " << dpT/fabs(t0->pT()/1000) << std::endl;
@@ -88,6 +93,8 @@ public:
   virtual ~Associator_BestDeltaRMatcher() { } 
 
   virtual TrackAssociator* clone() override { return new Associator_BestDeltaRMatcher(*this); }
+
+  virtual std::unique_ptr<TrackAssociator> uclone() const override { return std::make_unique<Associator_BestDeltaRMatcher>(*this); }
 
   virtual double distance( const TIDA::Track* t0, const TIDA::Track* t1 ) const override {
     double deta = t0->eta()-t1->eta();
@@ -123,6 +130,8 @@ public:
 
   virtual TrackAssociator* clone() override { return new Associator_BestDeltaRZMatcher(*this); }
 
+  virtual std::unique_ptr<TrackAssociator> uclone() const override { return std::make_unique<Associator_BestDeltaRZMatcher>(*this); }
+
   virtual double distance( const TIDA::Track* t0, const TIDA::Track* t1 ) const override {
     double deta = t0->eta()-t1->eta();
     double dphi = t0->phi()-t1->phi(); if ( dphi> M_PI ) dphi-=2*M_PI;  if ( dphi<-M_PI ) dphi+=2*M_PI;
@@ -150,6 +159,7 @@ protected:
 
 
 class Associator_BestDeltaRZSinThetaMatcher : public Associator_BestMatcher { 
+  // public Clonable<Associator_BestDeltaRZSinThetaMatcher, TrackAssociator>, 
 
 public:
 
@@ -166,6 +176,8 @@ public:
 
   virtual TrackAssociator* clone() override { return new Associator_BestDeltaRZSinThetaMatcher(*this); }
 
+  virtual std::unique_ptr<TrackAssociator> uclone() const override { return std::make_unique<Associator_BestDeltaRZSinThetaMatcher>(*this); }
+  
   virtual double distance( const TIDA::Track* t0, const TIDA::Track* t1 ) const override {
     double theta = 2*std::atan(std::exp(-t1->eta()));
 
@@ -195,6 +207,7 @@ protected:
 
 
 class Associator_BestSigmaMatcher : public Associator_BestMatcher { 
+  // public Clonable<Associator_BestSigmaMatcher, TrackAssociator>,
 
 public:
 
@@ -208,6 +221,8 @@ public:
 
   virtual TrackAssociator* clone() override { return new Associator_BestSigmaMatcher(*this); }
 
+  virtual std::unique_ptr<TrackAssociator> uclone() const override { return std::make_unique<Associator_BestSigmaMatcher>(*this); }
+  
   virtual double distance( const TIDA::Track* t0, const TIDA::Track* t1 ) const override {
     double deta = t1->eta()-t0->eta();
     double dphi = t1->phi()-t0->phi(); 
@@ -230,12 +245,19 @@ public:
     return dr;
   }
 
+protected: 
+
+  double m_deta2;
+  double m_dphi2;
+  double m_dzed2;
+
 };
 
 
 
 
 class Associator_BestDeltaPhiMatcher : public Associator_BestMatcher { 
+  // public Clonable<Associator_BestDetlaPhiMatcher, TrackAssociator>, 
 
 public:
 
@@ -247,6 +269,8 @@ public:
 
   virtual TrackAssociator* clone() override { return new Associator_BestDeltaPhiMatcher(*this); }
 
+  virtual std::unique_ptr<TrackAssociator> uclone() const override { return std::make_unique<Associator_BestDeltaPhiMatcher>(*this); }
+  
   virtual double distance( const TIDA::Track* t0, const TIDA::Track* t1 ) const override {
     double dphi = t0->phi()-t1->phi();    
     if ( dphi> M_PI ) dphi-=2*M_PI; 

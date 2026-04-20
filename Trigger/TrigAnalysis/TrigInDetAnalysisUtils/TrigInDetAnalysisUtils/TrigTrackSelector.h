@@ -14,10 +14,6 @@
 
 #include "TrigInDetAnalysisUtils/TIDA_newtracking.h"
 
-#ifndef  TIDA_NEWTRACKING_H
-#include "TrigInDetAnalysisUtils/TrigTrackSelector_old.h"
-#else
-
 /// L2 tracks
 #include "TrigInDetEvent/TrigInDetTrackCollection.h"
 ///TruthMap
@@ -210,6 +206,4 @@ private:
 
 };
 
-
-#endif //   TIDA_NEWTRACKING_H
 #endif // TIDAUTILS_TRIGTRACKSELECTOR_H
