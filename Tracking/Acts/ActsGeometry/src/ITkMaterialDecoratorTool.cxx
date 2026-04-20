@@ -11,7 +11,7 @@ namespace ActsTrk {
         m_matDecorator->decorate(surface);
     }
     StatusCode ITkMaterialDecoratorTool::initialize() {
-        ActsPlugins::RootMaterialDecorator::Config decoratorConfig{};
+        ActsPlugins::RootMaterialDecorator::Config decoratorConfig;
         decoratorConfig.fileName = m_materialMapFile;
         m_matDecorator = std::make_unique<ActsPlugins::RootMaterialDecorator>(decoratorConfig,
                                                                               ActsTrk::actsLevelVector(msg().level()));
