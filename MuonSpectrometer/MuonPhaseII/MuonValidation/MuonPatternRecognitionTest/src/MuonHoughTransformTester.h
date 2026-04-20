@@ -167,6 +167,9 @@ namespace MuonValR4{
     MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMDTHits{m_tree.newScalar<unsigned short>("genNMdtHits",0)};
     MuonVal::ScalarBranch<unsigned short>& m_out_gen_nTGCHits{m_tree.newScalar<unsigned short>("genNTgcHits",0)};
     MuonVal::ScalarBranch<unsigned short>& m_out_gen_nNswHits{m_tree.newScalar<unsigned short>("genNNswHits",0)};
+    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMmHits{m_tree.newScalar<unsigned short>("genNMmHits",0)};
+    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nSTGCHits{m_tree.newScalar<unsigned short>("genNsTgcHits",0)};
+    
     // truth segment size in the y direction
     MuonVal::ScalarBranch<float>& m_out_gen_minYhit{m_tree.newScalar<float>("genMinYhit", 1.0)}; 
     MuonVal::ScalarBranch<float>& m_out_gen_maxYhit{m_tree.newScalar<float>("genMaxYhit", -1.0)};
@@ -199,8 +202,13 @@ namespace MuonValR4{
     MuonVal::VectorBranch<unsigned short>& m_out_seed_nMdt{m_tree.newVector<unsigned short>("seedNMdtHits", 0)}; 
     MuonVal::VectorBranch<unsigned short>& m_out_seed_nRpc{m_tree.newVector<unsigned short>("seedNRpcHits", 0)}; 
     MuonVal::VectorBranch<unsigned short>& m_out_seed_nTgc{m_tree.newVector<unsigned short>("seedNTgcHits", 0)}; 
-    MuonVal::VectorBranch<unsigned short>& m_out_seed_nsTgc{m_tree.newVector<unsigned short>("seedNsTgcHits", 0)};
-    MuonVal::VectorBranch<unsigned short>& m_out_seed_nMm{m_tree.newVector<unsigned short>("seedNMmHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_nsTgcStrip{m_tree.newVector<unsigned short>("seedNsTgcStripHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_nsTgcWire{m_tree.newVector<unsigned short>("seedNsTgcWireHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_nsTgcPad{m_tree.newVector<unsigned short>("seedNsTgcPadHits", 0)};
+    
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_nMmEta{m_tree.newVector<unsigned short>("seedNMmHitsEta", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_nMmStereo{m_tree.newVector<unsigned short>("seedNMmHitsStereo", 0)};
+    
 
     /// @brief Labelled hits from the pattern visualization tool
     MuonVal::VectorBranch<unsigned short>& m_out_seed_nTrueHits{m_tree.newVector<unsigned short>("seedNTrueHits", 0)};
