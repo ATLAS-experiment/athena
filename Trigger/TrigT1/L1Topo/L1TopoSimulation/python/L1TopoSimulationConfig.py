@@ -138,6 +138,7 @@ def L1TopoSimulationCfg(flags, doMonitoring=True, readMuCTPI=False, name="L1Topo
             energyProvider.gMETComponentsRmsKey = ""
             energyProvider.gScalarEJwojKey = ""
             energyProvider.gEspressoKey = ""
+            energyProvider.gRistrettoKey = ""
             
     if (jetProvider != "") and (energyProvider != ""): 
         #both, j+gFEX are available, ensure they use consistent keys for gFEX JwoJ MET
@@ -178,7 +179,7 @@ def L1TopoSimulationStandaloneCfg(flags, outputEDM=[], doMuons = False, doMonito
 
     efex_provider_attr = ['eFexEMRoI','eFexTauRoI']
     jfex_provider_attr = ['jFexSRJetRoI','jFexLRJetRoI','jFexFwdElRoI','jFexTauRoI','jFexMETRoI','jFexSumETRoI', 'gMETComponentsJwoj']
-    gfex_provider_attr = ['gFexSRJetRoI','gFexLRJetRoI', 'gScalarEJwoj','gMETComponentsJwoj','gMHTComponentsJwoj', 'gMETComponentsNoiseCut', 'gMETComponentsRms', 'gEspresso']
+    gfex_provider_attr = ['gFexSRJetRoI','gFexLRJetRoI', 'gScalarEJwoj','gMETComponentsJwoj','gMHTComponentsJwoj', 'gMETComponentsNoiseCut', 'gMETComponentsRms', 'gEspresso', 'gRistretto']
     #Note: Unused container outputs from gFEX are:
     #'gFexRhoRoI', 'gMSTComponentsJwoj', 'gScalarENoiseCut', 'gScalarERms'
     #as compared with: https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigT1/L1CaloFEX/L1CaloFEXSim/L1CaloFEXSim/gFEXSysSim.h#L128-136
@@ -438,7 +439,9 @@ if __name__ == '__main__':
       outputEDM += addEDM('xAOD::gFexJetRoIContainer', gFexTool.gFexLRJetOutputContainerWriteKey.Path)
       outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', gFexTool.gScalarEJwojOutputContainerWriteKey.Path)
       outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', gFexTool.gEspressoOutputContainerWriteKey.Path)
-      print("Espresso Path: ", gFexTool.gEspressoOutputContainerWriteKey.Path)
+      #safeguard until gFEX implements this on their side
+      if hasattr(gFexTool, 'gRistrettoOutputContainerWriteKey'):
+        outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', gFexTool.gRistrettoOutputContainerWriteKey.Path)
       outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', gFexTool.gMETComponentsJwojOutputContainerWriteKey.Path)
       outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', gFexTool.gMHTComponentsJwojOutputContainerWriteKey.Path)
       outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', gFexTool.gMSTComponentsJwojOutputContainerWriteKey.Path)

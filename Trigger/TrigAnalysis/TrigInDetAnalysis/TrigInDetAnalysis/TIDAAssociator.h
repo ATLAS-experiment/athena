@@ -17,6 +17,7 @@
 #include <string>
 #include <cmath>
 #include <map>
+#include <memory>
 
 namespace TIDA { 
 
@@ -25,8 +26,8 @@ class Associator {
 
 public:
 
-  typedef std::map<T*, S*>  map_type; 
-  typedef std::map<S*, T*> rmap_type; 
+  typedef std::map<const T*, const S*>  map_type; 
+  typedef std::map<const S*, const T*> rmap_type; 
 
 public:
 
@@ -38,18 +39,20 @@ public:
 
   virtual Associator* clone() = 0;
 
+  virtual std::unique_ptr<Associator> uclone() const = 0;
+
   virtual void match(const std::vector<T*>& s1, 
 		     const std::vector<S*>& s2 ) = 0;
   
   // get matched track from map
-  virtual const S* matched( T* t) { 
+  virtual const S* matched( T* t) const { 
      typename map_type::const_iterator titr = mmatched.find(t);
      if ( titr != mmatched.end() ) return titr->second;
      else                          return 0;
   } 
 
   // get matched track from reverse map
-  virtual const T* revmatched( S* t) { 
+  virtual const T* revmatched( S* t) const { 
      typename rmap_type::const_iterator titr = mrevmatched.find(t);
      if ( titr != mrevmatched.end() ) return titr->second;
      else                             return 0;

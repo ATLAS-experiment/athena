@@ -282,7 +282,11 @@ class ThresholdDef:
         #gTE from BC+2 (for HI anti-shadowing)
         for thrV in [280]:
             TEThreshold('gESPRESSO%i' % thrV, 'gTE').setTE(thrV)
-            
+        
+        #gTE from BC+1 (for HI anti-shadowing in special 25ns runs)
+        for thrV in []: #note: do not populate with actual values until green lit by L1Topo FW experts!
+            TEThreshold('gRISTRETTO%i' % thrV, 'gTE').setTE(thrV)
+             
         # jXE
         jXE_cuts = [60, 70, 80, 90, 100, 110, 120, 500]
         for thrV in jXE_cuts:

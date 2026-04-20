@@ -12,8 +12,6 @@
 #ifndef TIDAUTILS_TAGNPROBE_H
 #define TIDAUTILS_TAGNPROBE_H
 
- 
-
 #include "TrigInDetAnalysis/TIDAChain.h"
 #include "TrigInDetAnalysis/TIDARoiDescriptor.h"
 #include "TrigInDetAnalysis/TrigObjectMatcher.h"
@@ -27,6 +25,7 @@
 #include <string>
 #include <ostream>
 #include <cmath>
+
 
 class TagNProbe {
 
@@ -169,7 +168,7 @@ protected:
                                                                                                                                                                      
     TIDARoiDescriptor roi_probe( proi.roi() );
 
-    static_cast<Filter_Combined* >( filter_probe )->setRoi( &roi_probe );
+    static_cast<Filter_Combined*>( filter_probe )->setRoi( &roi_probe );
 
     std::vector<TIDA::Track*> refp_probe = selector_probe->tracks( filter_probe );
 

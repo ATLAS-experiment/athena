@@ -53,6 +53,11 @@ gFexInputProvider::initialize() {
     renounce(m_gESPRESSO_EDMKey); //make this optional, as its availability depends on how gFEX TOBs are being produced (cannot be simulated by gFEX sim, optional form gFEX bytestream decoders
   }
   
+  ATH_CHECK(m_gRISTRETTO_EDMKey.initialize(SG::AllowEmpty));
+  if (! m_gRISTRETTO_EDMKey.empty() ) {
+    renounce(m_gRISTRETTO_EDMKey); //make this optional, as its availability depends on how gFEX TOBs are being produced (cannot be simulated by gFEX sim, optional form gFEX bytestream decoders
+  }
+  
   if (!m_monTool.empty()) ATH_CHECK(m_monTool.retrieve());
 
   return StatusCode::SUCCESS;
@@ -444,6 +449,46 @@ gFexInputProvider::fillGESPRESSO(TCS::TopoInputEvent& inputEvent) const {
 }
 
 StatusCode
+gFexInputProvider::fillGRISTRETTO(TCS::TopoInputEvent& inputEvent) const {
+  if (m_gRISTRETTO_EDMKey.empty()) {
+    ATH_MSG_DEBUG("gFex RISTRETTO input disabled, skip filling");
+    return StatusCode::SUCCESS;
+  }
+  
+  SG::ReadHandle<xAOD::gFexGlobalRoIContainer> gRISTRETTO_EDM(m_gRISTRETTO_EDMKey);
+  if (! gRISTRETTO_EDM.isValid() ) {
+    //gRISTRETTO is only active in HI runs and only available from data. If not present simply skip it.
+    ATH_MSG_DEBUG("gFex RISTRETTO input is not available, skip filling");
+    return StatusCode::SUCCESS;
+  }
+  
+  for(const xAOD::gFexGlobalRoI* gFexRoI : * gRISTRETTO_EDM) {
+
+    auto globalType = gFexRoI->globalType();
+    if ( globalType != 1 ) { continue; } // 1 = scalar values (MET, SumET)
+
+    ATH_MSG_DEBUG( "EDM gFex RISTRETTO type: "
+                   << gFexRoI->globalType()
+                   << " sumEt: " 
+		   << gFexRoI->METquantityTwo() // returns sumEt in MeV
+		   );
+    
+   unsigned int sumEtTopo = gFexRoI->METquantityTwo()*m_EtGlobal_conversion;
+
+   TCS::gTETOB gristretto( sumEtTopo, TCS::GRISTRETTO );
+ 
+   gristretto.setSumEtDouble( static_cast<double>(sumEtTopo*m_EtDoubleGlobal_conversion) );
+ 
+   inputEvent.setgRISTRETTO( gristretto );
+   auto mon_h_gTEsumEt = Monitored::Scalar("gRISTRETTOsumEt", gristretto.sumEtDouble());
+   Monitored::Group(m_monTool, mon_h_gTEsumEt); 
+
+   }
+
+   return StatusCode::SUCCESS;
+}
+
+StatusCode
 gFexInputProvider::fillTopoInputEvent(TCS::TopoInputEvent& inputEvent) const {
   ATH_CHECK(fillSRJet(inputEvent));
   ATH_CHECK(fillLRJet(inputEvent));
@@ -455,6 +500,7 @@ gFexInputProvider::fillTopoInputEvent(TCS::TopoInputEvent& inputEvent) const {
 
   ATH_CHECK(fillTE(inputEvent));
   ATH_CHECK(fillGESPRESSO(inputEvent));
+  ATH_CHECK(fillGRISTRETTO(inputEvent));
   return StatusCode::SUCCESS;
 }
 
