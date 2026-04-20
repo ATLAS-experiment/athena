@@ -6,6 +6,8 @@
 
 #include <MuonSpacePoint/SpacePoint.h>
 
+#include "Acts/Utilities/OstreamFormatter.hpp"
+
 namespace MuonR4{
     /** @brief The calibrated Space point is created during the calibration process.
      *         It usually exploits the information of the external tracking seed. Calibrated
@@ -31,6 +33,10 @@ namespace MuonR4{
             };
             /** @brief Converts the state enum into a string */
             static std::string toString(const State s);
+            /** @brief Define the ostream operator */
+            inline friend std::ostream& operator<<(std::ostream& ostr, const State s){
+                    return (ostr<<toString(s));
+            }
             /** @brief Standard constructor
              *  @param uncalibSpacePoint: Pointer to the underyling uncalibrated space point
              *  @param posInChamber: Calibrated position of the space point inside the chamber
@@ -117,8 +123,7 @@ namespace MuonR4{
         
         };
         static_assert(Acts::Experimental::CompositeSpacePoint<CalibratedSpacePoint>);
-
-
 }
+ACTS_OSTREAM_FORMATTER(MuonR4::CalibratedSpacePoint::State);
 
 #endif
