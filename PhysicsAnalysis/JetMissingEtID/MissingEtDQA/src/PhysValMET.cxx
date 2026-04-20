@@ -165,7 +165,7 @@ namespace MissingEtDQA
   
   StatusCode PhysValMET::bookHistograms()
   { 
-    std::cout<<"----------TEST___________________"<<std::endl;
+    std::cout<<"___________________TEST___________________"<<std::endl;
     ATH_MSG_INFO ("Booking hists " << name() << "...");
       
     // Physics validation plots are level 10
@@ -217,8 +217,9 @@ namespace MissingEtDQA
         for (const auto& type : met_type)
         {
           // First set-up Reference MET histograms (if we want them)
-          if (type == "MET_Reference" && ! m_doMETRefPlots){ continue;} //Skip MET reference iffla is false
+          if (type == "MET_Reference_" && ! m_doMETRefPlots){ continue;} //Skip MET reference iffla is false
 
+          std::cout<<"___________________Define Hist Vectors___________________"<<std::endl; 
           name_met = type + jet_type;
           m_dir_met.clear();
           std::vector<TH1D*> v_MET;
@@ -237,6 +238,8 @@ namespace MissingEtDQA
           std::vector<TH1D*> v_MET_Diff_y;
           std::vector<TH1D*> v_MET_Diff_phi;
           std::vector<TH1D*> v_MET_Diff_sum;
+
+          std::cout<<"___________________TEST1___________________"<<std::endl; 
 
           for(const auto& term : m_terms) 
           {
@@ -263,6 +266,8 @@ namespace MissingEtDQA
             ATH_CHECK(regHist(m_MET_sum[name_met].at(i),m_dir_met[i],all));
           }
 
+          std::cout<<"___________________TEST2___________________"<<std::endl; 
+
           name_sub = name_met + "/Cumulative";
           v_MET_Cumu.push_back( new  TH1D((name_met + "_Cumulative_FinalClus").c_str(), (name_met + " CST MET cumulative; E_{T}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinp, 0., suptmi) );
           v_MET_Cumu.push_back( new  TH1D((name_met + "_Cumulative_FinalTrk").c_str(), (name_met + " TST MET cumulative; E_{T}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinp, 0., suptmi) );
@@ -273,6 +278,8 @@ namespace MissingEtDQA
           {
             ATH_CHECK(regHist(m_MET_Cumu[name_met].at(i),"MET/" + name_sub + "/",all));
           }
+
+          std::cout<<"___________________TEST3___________________"<<std::endl; 
         
           name_sub = name_met + "/Residuals";
           v_MET_Resolution.push_back(  new TH1D((name_met + "_Resolution_FinalClus_x").c_str(), ("x-Residual of CST MET in " + name_met + "; #Delta(E_{T,CST}^{miss}, E_{T,truth}^{miss})_{x} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy) );
@@ -286,6 +293,8 @@ namespace MissingEtDQA
           {
             ATH_CHECK(regHist(m_MET_Resolution[name_met].at(i),"MET/" + name_sub + "/",all));
           }
+
+          std::cout<<"___________________TEST4___________________"<<std::endl; 
         
           name_sub = name_met + "/Significance";
           v_MET_Significance.push_back(  new TH1D((name_met + "_Significance_FinalClus").c_str(), ("MET / sqrt(sumet) for " + name_met + " CST; MET/#sqrt{SET} [#sqrt{GeV}]; Entries / 0.25 #sqrt{GeV}").c_str(), nbinp, 0., 25.) );
@@ -297,6 +306,8 @@ namespace MissingEtDQA
           {
             ATH_CHECK(regHist(m_MET_Significance[name_met].at(i),"MET/" + name_sub + "/",all));
           }
+
+          std::cout<<"___________________TEST5___________________"<<std::endl; 
         
           name_sub = name_met + "/dPhi";
           v_MET_dPhi.push_back(  new TH1D((name_met + "_dPhi_leadJetMET_FinalClus").c_str(), ("MET deltaPhi vs leading jet for " + name_met + " CST; #Delta#Phi(leadJet, MET); Entries / 0.05").c_str(), nbinphi, 0., binphi) );
@@ -313,6 +324,8 @@ namespace MissingEtDQA
             ATH_CHECK(regHist(m_MET_dPhi[name_met].at(i),"MET/" + name_sub + "/",all));
           }
         
+          std::cout<<"___________________TEST6___________________"<<std::endl; 
+
           name_sub = name_met + "/Correlations";
         
           v_MET_CorrFinalClus.reserve(corrClus_names.size());
@@ -342,6 +355,8 @@ namespace MissingEtDQA
 
           m_dir_met.clear();
         
+          std::cout<<"___________________TEST7___________________"<<std::endl; 
+
           for(const auto& it : sum_names) 
           {
             v_MET_Diff.push_back( new  TH1D((name_met + "_Diff_" + it).c_str(), ("MET_Diff " + m_names[it] + " in " + name_met +"; E_{T}^{miss} - #Sigma p_{T} [GeV]; Entries / 3 GeV").c_str(), nbinpxy, -150, 150));
@@ -369,7 +384,7 @@ namespace MissingEtDQA
         // End of loop
         }
       } 
-
+      std::cout<<"___________________MET Track___________________"<<std::endl; 
       //-------------------------------------------------------------------------------------
       // Now MET_Track (only built if METRef is too)
       if (m_doMETRefPlots)
@@ -818,34 +833,35 @@ namespace MissingEtDQA
       }
 
       ATH_MSG_INFO( "  MET_Rebuilt_" << jet_type << ":" );
+      std::cout<<"___PFlow___"<<std::endl;
       //Select and flag objects for final MET building ***************************
       if( jet_type.find("PFlow") != std::string::npos) m_metmaker = &m_metmakerPFlow;
       else m_metmaker = &m_metmakerTopo;
-
+      std::cout<<"___electron___"<<std::endl;
       // Electrons
       if( (*m_metmaker)->rebuildMET("RefEle", xAOD::Type::Electron, met_Reb, metElectrons.asDataVector(), metHelper).isFailure() ) 
       {
         ATH_MSG_WARNING("Failed to build electron term.");
       }
-
+      std::cout<<"___photon___"<<std::endl;
       // Photons
       if( (*m_metmaker)->rebuildMET("RefGamma", xAOD::Type::Photon, met_Reb, metPhotons.asDataVector(), metHelper).isFailure() ) 
       {
         ATH_MSG_WARNING("Failed to build photon term.");
       }
-
+      std::cout<<"___tau___"<<std::endl;
       // Taus
       if( (*m_metmaker)->rebuildMET("RefTau", xAOD::Type::Tau, met_Reb,metTaus.asDataVector(),metHelper).isFailure() )
       {
         ATH_MSG_WARNING("Failed to build tau term.");
       }
-
+      std::cout<<"___muon___"<<std::endl;
       // Muons
       if( (*m_metmaker)->rebuildMET("Muons", xAOD::Type::Muon, met_Reb, metMuons.asDataVector(), metHelper).isFailure() ) 
       {
         ATH_MSG_WARNING("Failed to build muon term.");
       }
-
+      std::cout<<"___jets___"<<std::endl;
       // Jets
       if( (*m_metmaker)->rebuildJetMET("RefJet", "SoftClus", "PVSoftTrk", met_Reb, jets, coreMet, metHelper, true).isFailure() ) 
       {
@@ -860,17 +876,18 @@ namespace MissingEtDQA
       MissingETBase::Types::bitmask_t clsource;
       if (jet_type == "AntiKt4EMTopo") clsource = static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::EMTopo);
       else clsource = static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::UnknownSignal);
-      
+      std::cout<<"___SoftClus___"<<std::endl;
       if((*met_Reb)["SoftClus"]) clsource = (*met_Reb)["SoftClus"]->source();
       if( met::buildMETSum("FinalClus", met_Reb, clsource).isFailure() ) 
       {
         ATH_MSG_WARNING("Building MET FinalClus sum failed.");
       }
-
+      std::cout<<"___Fill MET Reb___"<<std::endl;
       // Fill MET_Reb
       for(const auto it : *met_Reb) 
       {
         std::string name = it->name();
+        std::cout<< name <<std::endl;
         if(name == "RefEle")
         {
           (m_MET["MET_Rebuilt_"+jet_type]).at(0)->Fill((*met_Reb)[name.c_str()]->met()/1000., weight);
