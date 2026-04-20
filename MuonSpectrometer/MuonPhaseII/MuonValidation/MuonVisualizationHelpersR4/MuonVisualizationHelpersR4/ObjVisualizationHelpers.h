@@ -14,7 +14,7 @@
 
 
 #include "Acts/Visualization/ObjVisualization3D.hpp"
-#include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/EventData/BoundTrackParameters.hpp"
 #include "Acts/Propagator/detail/SteppingLogger.hpp"
 
 namespace MuonR4{
