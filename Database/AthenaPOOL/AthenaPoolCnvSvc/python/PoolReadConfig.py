@@ -86,6 +86,11 @@ def PoolReadCfg(flags):
         # Create DoubleEventSelector (universal for any seconday input type)
         evSel = CompFactory.DoubleEventSelectorAthenaPool("EventSelector",
                                                           InputCollections=flags.Input.Files)
+        if flags.Common.isOverlay and flags.Overlay.DataOverlay:
+            evSel.OverrideRunNumber = True
+            evSel.RunNumber = flags.Input.RunNumbers[0]
+            evSel.FirstLB = flags.Input.LumiBlockNumbers[0]
+            evSel.InitialTimeStamp = flags.Input.TimeStamps[0]
 
         # In case of MC overlay RDOs are primary input
         evSel.SkipEvents = skipEventsSecondary

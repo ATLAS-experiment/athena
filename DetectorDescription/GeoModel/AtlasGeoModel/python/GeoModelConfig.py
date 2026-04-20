@@ -32,7 +32,7 @@ def GeoModelCfg(flags):
                                 EMECStandard=flags.GeoModel.EMECStandard,
                                 IgnoreTagDifference=flags.GeoModel.IgnoreTagDifference,
                                 SupportedGeometry=int(relversion[0]))
-    if flags.Common.ProductionStep == ProductionStep.Simulation:
+    if flags.Common.ProductionStep == ProductionStep.Simulation or (flags.Common.ProductionStep == ProductionStep.FastChain and flags.Overlay.DataOverlay):
         ## Protects GeoModelSvc in the simulation from the AlignCallbacks
         gms.AlignCallbacks = False
     result.addService(gms, primary=True, create=True)

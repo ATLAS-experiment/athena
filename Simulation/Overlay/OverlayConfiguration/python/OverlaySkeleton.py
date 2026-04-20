@@ -34,6 +34,8 @@ def setOverlayInputFiles(runArgs, flags, log):
     else:
         log.info('Running MC+data overlay')
         flags.Overlay.DataOverlay = True
+        from CoolConvUtilities.MagFieldUtils import getTimeForLB
+        flags.Input.TimeStamps = [int(getTimeForLB(run=flags.Input.RunNumbers[0], LB=flags.Input.LumiBlockNumbers[0])/1e9)]
 
     if flags.Common.ProductionStep == ProductionStep.Overlay:
         flags.Input.SecondaryFiles = runArgs.inputHITSFile
