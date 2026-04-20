@@ -12,7 +12,10 @@ from AthenaConfiguration.Enums import MetadataCategory
 from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
 
 from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
-from DerivationFrameworkFlavourTag import FtagBaseContent
+from DerivationFrameworkFlavourTag.FtagBaseContent import (
+    trigger_matching,
+    trigger_setup,
+)
 from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
 from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
 from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
@@ -177,15 +180,12 @@ def FTAG3SlimmingCfg(flags, name_tag="FTAG3", TriggerListsHelper=None):
         )
     ]
 
-    # Triger setup and matching
-    FtagBaseContent.trigger_setup(
-        SlimmingHelper=slimming_helper,
-        option="FTAG3",
-    )
-    FtagBaseContent.trigger_matching(
-        SlimmingHelper=slimming_helper,
-        TriggerListsHelper=TriggerListsHelper,
-        ConfigFlags=flags,
+    # Trigger setup and matching
+    trigger_setup(slimming_helper=slimming_helper)
+    trigger_matching(
+        flags=flags,
+        slimming_helper=slimming_helper,
+        trigger_lists_helper=TriggerListsHelper,
     )
 
     # Define the output streams

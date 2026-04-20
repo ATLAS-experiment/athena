@@ -40,8 +40,8 @@ if TYPE_CHECKING:
 
 
 def update_append_to_dictionary_in_slimming_helper(
-    slimming_helper: SlimmingHelper,
     flags: AthConfigFlags,
+    slimming_helper: SlimmingHelper,
     extra_append_to_dictionary: dict[str, str] | None = None,
 ) -> None:
     """Update ``AppendToDictionary`` in the slimming helper."""
@@ -66,8 +66,8 @@ def update_append_to_dictionary_in_slimming_helper(
 
 
 def add_static_content_to_slimming_helper(
-    slimming_helper: SlimmingHelper,
     flags: AthConfigFlags,
+    slimming_helper: SlimmingHelper,
     extra_static_content: list[str] | None = None,
 ) -> None:
     """Add common ``StaticContent`` in the slimming helper."""
@@ -136,8 +136,8 @@ def add_truth_to_slimming_helper(slimming_helper: SlimmingHelper) -> None:
 
 
 def add_extra_variables_to_slimming_helper(
-    slimming_helper: SlimmingHelper,
     flags: AthConfigFlags,
+    slimming_helper: SlimmingHelper,
 ) -> None:
     """Add extra FTAG variables to the slimming helper."""
 
@@ -213,7 +213,7 @@ def add_baseline_slimming_allvariables(slimming_helper: SlimmingHelper) -> None:
     ]
 
 
-def trigger_setup(slimming_helper: SlimmingHelper, option: str = "") -> None:
+def trigger_setup(slimming_helper: SlimmingHelper) -> None:
     """Configure trigger content flags for FTAG derivations."""
 
     # Deactivate trigger content
@@ -232,12 +232,12 @@ def trigger_setup(slimming_helper: SlimmingHelper, option: str = "") -> None:
 
 
 def trigger_matching(
+    flags: AthConfigFlags,
     slimming_helper: SlimmingHelper,
     trigger_lists_helper: TriggerListsHelper,
-    config_flags: AthConfigFlags,
 ) -> None:
     """Configure trigger matching and trigger-navigation slimming."""
-    if config_flags.Trigger.EDMVersion == 2:
+    if flags.Trigger.EDMVersion == 2:
         AddRun2TriggerMatchingToSlimmingHelper(
             SlimmingHelper=slimming_helper,
             OutputContainerPrefix="TrigMatch_",
@@ -249,8 +249,8 @@ def trigger_matching(
             TriggerList=trigger_lists_helper.Run2TriggerNamesNoTau,
         )
 
-    if config_flags.Trigger.EDMVersion == 3 or (
-        config_flags.Trigger.EDMVersion == 2 and config_flags.Trigger.doEDMVersionConversion
+    if flags.Trigger.EDMVersion == 3 or (
+        flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion
     ):
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(slimming_helper)
 
@@ -292,7 +292,7 @@ def add_truth_vertex_decorations(
     if large_r_jet_collection is not None:
         jet_collections.append((large_r_jet_collection, 1.0))
 
-    acc.merge(truthVertexDecorator(flags, jetCollections=jet_collections))
+    acc.merge(truthVertexDecorator(flags, jet_collections=jet_collections))
 
     # TruthParticles is in AllVariables so its decorations are saved automatically
     slimming_helper.ExtraVariables += [
@@ -349,7 +349,7 @@ def add_common_augmentation(
         )
     )
 
-    # FTAG simplified large-R jet truth labelling
+    # FTAG simplified large-R jet truth labelling (see https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/AnalysisCommon/ParticleJetTools/ParticleJetTools/FtagLargeRJetLabelEnum.h?ref_type=heads)
     acc.merge(
         FtagLargeRJetTruthLabelCfg(
             flags,
