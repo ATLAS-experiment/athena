@@ -437,10 +437,17 @@ StatusCode CalcPartonHistory::buildContainerFromMultipleCollections(
   }
   // Retain only particles that have no ancestor among the other candidates.
   for (const xAOD::TruthParticle* potential_parent : p_candidates) {
+    if (PartonHistoryUtils::isQuarkFromPDF(potential_parent)) {
+      continue;
+    }
+
     if (std::none_of(p_candidates.begin(), p_candidates.end(),
                      [&](const xAOD::TruthParticle* other_candidate) {
                        return other_candidate != potential_parent &&
+                              !PartonHistoryUtils::isQuarkFromPDF(
+                                  other_candidate) &&
                               PartonHistoryUtils::isChildOf(other_candidate,
+
                                                             potential_parent);
                      }))
       p_parents.push_back(potential_parent);

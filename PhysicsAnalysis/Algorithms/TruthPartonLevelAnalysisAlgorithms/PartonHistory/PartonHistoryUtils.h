@@ -44,6 +44,9 @@ bool hasParentAbsPdgId(const xAOD::TruthParticle* particle, int absPdgId);
 // Checking whether a particle has an identical child
 bool hasIdenticalChild(const xAOD::TruthParticle* particle);
 
+// Checking whether a particle is a quark from the PDF (massless)
+bool isQuarkFromPDF(const xAOD::TruthParticle* particle);
+
 }  // namespace PartonHistoryUtils
 }  // namespace CP
 

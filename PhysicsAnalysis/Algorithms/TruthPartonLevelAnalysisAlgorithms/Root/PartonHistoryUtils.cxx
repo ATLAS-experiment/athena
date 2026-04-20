@@ -130,5 +130,15 @@ std::string getretrievalstring(const std::string& parent,
   return baseprefix + (parent.empty() ? "" : parent + "_") + suffix + postfix;
 }
 
+bool isQuarkFromPDF(const xAOD::TruthParticle* particle) {
+  // In principle we could use some status codes here, e.g. 31/41/42/53/61 for
+  // Pythia 8. But that is not guaranteed to be compatible across generators,
+  // so instead we just check if it's a massless quark.
+  bool isQuark = 1 <= particle->absPdgId() && particle->absPdgId() <= 5;
+  bool isMassless = particle->m() == 0;
+  return isQuark && isMassless;
+}
+
+
 }  // namespace PartonHistoryUtils
 }  // namespace CP
