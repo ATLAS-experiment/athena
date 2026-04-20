@@ -117,6 +117,9 @@ def postprocessAndLockFlags(flags, args):
         flags.Scheduler.ShowDataFlow = True
         flags.Scheduler.ShowControlFlow = True
         flags.Concurrency.NumConcurrentEvents = args.concurrent if args.concurrent > 0 else args.threads
+    if flags.Overlay.DataOverlay:
+        from CoolConvUtilities.MagFieldUtils import getTimeForLB
+        flags.Input.TimeStamps=[int(getTimeForLB(run=flags.Input.RunNumbers[0], LB=flags.Input.LumiBlockNumbers[0])/1e9)]
 
     flags.lock()
 
