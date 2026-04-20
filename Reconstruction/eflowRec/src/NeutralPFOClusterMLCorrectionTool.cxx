@@ -62,6 +62,9 @@ NeutralPFOClusterMLCorrectionTool::getChargedCorrectionsToClusterFromSingleFe(
   const auto& cl_links = fe.otherObjectLinks();
   const auto& cl_weights = fe.otherObjectWeights();
 
+  float sum_weights = 0.f;
+  size_t n_matched_clusters = 0;
+
   // Loop over all cluster links of this FE
   bool has_matched_cluster = false;
   for (size_t i = 0; i < cl_links.size(); ++i) {
@@ -79,6 +82,9 @@ NeutralPFOClusterMLCorrectionTool::getChargedCorrectionsToClusterFromSingleFe(
 
     if (!linked_cluster) continue;
 
+    sum_weights += weight;
+    n_matched_clusters++;
+
     // Compare pointer identity
     if (linked_cluster == cls_ptr) {
       has_matched_cluster = true;
@@ -87,7 +93,25 @@ NeutralPFOClusterMLCorrectionTool::getChargedCorrectionsToClusterFromSingleFe(
   }
   
   if (has_matched_cluster)
-  { corr_pfo_e = fe.e(); }
+  { 
+    const static SG::AuxElement::ConstAccessor<int> accDenseEnv("IsInDenseEnvironment");
+    int isInDenseEnvironment = accDenseEnv(fe);
+    // corr_pfo_e = isInDenseEnvironment ? 0. : fe.e();
+    corr_pfo_e = fe.e();
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+    uint64_t eventNumber = ctx.eventID().event_number();
+    corr_pfo_e = corr_pfo_e * corr_weight_e / sum_weights; // Scale the FE energy by the fraction of the weight of the matched cluster to the sum of weights for this FE
+    
+    std::cout << "NeutralPFOClusterMLCorrectionTool: Found matching cluster link in charged FE with index " << fe.index() 
+              << " for cluster with index " << cls_ptr->index() 
+              << " with weight " << corr_weight_e 
+              << " and charged FE energy " << corr_pfo_e
+              << " (sum of weights for this FE: " << sum_weights << ")"
+              << " (n_matched_clusters: " << n_matched_clusters << ")"
+              << " (isInDenseEnvironment: " << isInDenseEnvironment << ")" 
+              << " Event number: " << eventNumber
+              << std::endl;
+  }
 
   return {corr_pfo_e, corr_weight_e};
 }
