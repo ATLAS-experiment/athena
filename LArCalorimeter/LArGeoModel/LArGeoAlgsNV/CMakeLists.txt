@@ -1,4 +1,4 @@
-#Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( LArGeoAlgsNV )
@@ -17,5 +17,5 @@ atlas_add_component( LArGeoAlgsNV
 atlas_install_python_modules( python/*.py )
 
 if( NOT SIMULATIONBASE )
-  atlas_add_test( LArGMConfigTest SCRIPT python -m LArGeoAlgsNV.LArGMConfig POST_EXEC_SCRIPT nopost.sh )
+  atlas_add_test( LArGMConfigTest SCRIPT python -m LArGeoAlgsNV.LArGMConfig POST_EXEC_SCRIPT noerror.sh )
 endif()
