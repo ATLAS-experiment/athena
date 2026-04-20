@@ -18,7 +18,7 @@
 #include "TrigInDetAnalysis/TrackSelector.h"
 #include "TrigInDetAnalysis/TrackTrigObject.h"
 
-//coverity[MISSING_MOVE_ASSIGNMENT]
+
 class TrigObjectMatcher {
 
 public:
