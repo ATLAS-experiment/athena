@@ -297,6 +297,15 @@ namespace MuonValR4 {
         m_out_gen_nNswHits = segment->nPrecisionHits() * (segment->technology() != TechnologyIndex::MDT); 
         m_out_gen_nTGCHits = (segment->nPhiLayers() + segment->nTrigEtaLayers()) * !isBarrel(segment->chamberIndex());
         m_out_gen_nRPCHits = (segment->nPhiLayers() + segment->nTrigEtaLayers()) *  isBarrel(segment->chamberIndex());
+        
+        unsigned nMMHits{0}, nSTGHits{0};
+        for (const xAOD::MuonSimHit* simHit : getMatchingSimHits(*segment)) {
+            const TechnologyIndex simIdx = m_idHelperSvc->technologyIndex(simHit->identify());
+            nMMHits  += simIdx == TechnologyIndex::MM;
+            nSTGHits += simIdx == TechnologyIndex::STGC;
+        }
+        m_out_gen_nMmHits = nMMHits;
+        m_out_gen_nSTGCHits = nSTGHits;
 
         m_out_gen_tantheta = houghTanBeta(chamberDir); 
         m_out_gen_tanphi   = houghTanAlpha(chamberDir);
@@ -375,10 +384,11 @@ namespace MuonValR4 {
             }
          
             m_out_seed_nHits.push_back(seed->getHitsInMax().size());
-            unsigned nMdtSeed{0}, nRpcSeed{0}, nTgcSeed{0}, nMmSeed{0}, nsTgcSeed{0}; 
+            unsigned nMdtSeed{0}, nRpcSeed{0}, nTgcSeed{0}, nMmEtaSeed{0}, nMmStereoSeed{0},
+                     nsTgcStripSeed{0}, nsTgcWireSeed{0}, nsTgcPadSeed{0}; 
             unsigned nPrecHits{0}, nEtaHits{0}, nPhiHits{0}, nTrueHits{0}, nTruePrecHits{0}, nTrueEtaHits{0}, nTruePhiHits{0};
             std::vector<unsigned char> treeIdxs{};
-           
+          
             for (const HoughHitType & houghSP: seed->getHitsInMax()){                
                 if (m_writeSpacePoints){
                     unsigned treeIdx = m_spTester->push_back(*houghSP);
@@ -406,22 +416,41 @@ namespace MuonValR4 {
                         nTgcSeed+=houghSP->measuresEta();
                         nTgcSeed+=houghSP->measuresPhi();
                         break;
-                    case xAOD::UncalibMeasType::sTgcStripType:
-                        nsTgcSeed += houghSP->measuresEta();
-                        nsTgcSeed += houghSP->measuresPhi();
+                    case xAOD::UncalibMeasType::sTgcStripType: {
+                        const Identifier sTgc = xAOD::identify(houghSP->primaryMeasurement());
+                        const Identifier sTgc2 = xAOD::identify(houghSP->secondaryMeasurement());
+                        const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
+                        const int primType = idHelper.channelType(sTgc);
+                        const int secType = idHelper.channelType(sTgc2);
+                        nsTgcStripSeed += primType == sTgcIdHelper::sTgcChannelTypes::Strip;
+                        nsTgcWireSeed  += primType == sTgcIdHelper::sTgcChannelTypes::Wire;
+                        nsTgcPadSeed   += primType == sTgcIdHelper::sTgcChannelTypes::Pad;
+
+                        nsTgcWireSeed += secType == sTgcIdHelper::sTgcChannelTypes::Wire;
+                        nsTgcPadSeed += primType != sTgcIdHelper::sTgcChannelTypes::Pad && 
+                                        secType == sTgcIdHelper::sTgcChannelTypes::Pad;
                         break;
-                    case xAOD::UncalibMeasType::MMClusterType:
-                        ++nMmSeed;
+                    } case xAOD::UncalibMeasType::MMClusterType:{
+                        if (m_idHelperSvc->mmIdHelper().isStereo(houghSP->identify())) {
+                            ++nMmEtaSeed;
+                        } else {
+                            ++nMmStereoSeed;
+                        }
                         break;
-                    default:
+                    }default:
                         ATH_MSG_WARNING("Technology "<<houghSP->identify()  <<" not yet implemented");                        
                 }                    
             }
             m_out_seed_nMdt.push_back(nMdtSeed);
             m_out_seed_nRpc.push_back(nRpcSeed);
             m_out_seed_nTgc.push_back(nTgcSeed);
-            m_out_seed_nsTgc.push_back(nsTgcSeed);
-            m_out_seed_nMm.push_back(nMmSeed);
+
+            m_out_seed_nMmEta.push_back(nMmEtaSeed);
+            m_out_seed_nMmStereo.push_back(nMmStereoSeed);
+
+            m_out_seed_nsTgcStrip.push_back(nsTgcStripSeed);
+            m_out_seed_nsTgcWire.push_back(nsTgcWireSeed);
+            m_out_seed_nsTgcPad.push_back(nsTgcPadSeed);
 
             m_out_seed_nPrecHits.push_back(nPrecHits);
             m_out_seed_nEtaHits.push_back(nEtaHits); 
@@ -511,14 +540,14 @@ namespace MuonValR4 {
                         break;
                     } case xAOD::UncalibMeasType::sTgcStripType: {
                         const auto* prd = static_cast<const xAOD::sTgcMeasurement*>(meas->spacePoint()->primaryMeasurement());
-                        nStgcStripHits += prd->channelType() == sTgcIdHelper::sTgcChannelTypes::Strip;
-                        nStgcWireHits += prd->channelType() == sTgcIdHelper::sTgcChannelTypes::Wire;
-                        nStgcPadHits += prd->channelType() == sTgcIdHelper::sTgcChannelTypes::Pad;
+                        const int primType = prd->channelType();
                         prd = dynamic_cast<const xAOD::sTgcMeasurement*>(meas->spacePoint()->secondaryMeasurement());
-                        if (prd) {
-                            nStgcWireHits += prd->channelType() == sTgcIdHelper::sTgcChannelTypes::Wire;
-                            nStgcPadHits += prd->channelType() == sTgcIdHelper::sTgcChannelTypes::Pad;                            
-                        }
+                        const int secType = (prd != nullptr ? prd->channelType() : -1);
+                        nStgcStripHits += primType == sTgcIdHelper::sTgcChannelTypes::Strip;
+                        nStgcWireHits  += primType == sTgcIdHelper::sTgcChannelTypes::Wire;
+                        nStgcPadHits   += primType == sTgcIdHelper::sTgcChannelTypes::Pad;
+                        nStgcWireHits  += secType == sTgcIdHelper::sTgcChannelTypes::Wire;
+                        nStgcPadHits   += primType != secType && secType == sTgcIdHelper::sTgcChannelTypes::Pad;
                         break;
                     } default:
                         break;
