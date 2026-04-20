@@ -4,6 +4,7 @@
 
 #include "MuonStationIndex/MuonStationIndex.h"
 #include <array>
+#include <ostream>
 
 namespace Muon {
    namespace MuonStationIndex{
@@ -182,6 +183,23 @@ namespace Muon {
       return technologyIndexNames[ toInt(index) ];
    }
 
-
+    std::ostream& operator<<(std::ostream& ostr, const StIndex stIdx){
+         return (ostr<<stName(stIdx));
+    }
+    std::ostream& operator<<(std::ostream& ostr, const ChIndex chIdx){
+         return (ostr<<chName(chIdx));
+    }
+    std::ostream& operator<<(std::ostream& ostr, const PhiIndex phiIdx){
+         return (ostr<<phiName(phiIdx));
+    }
+    std::ostream& operator<<(std::ostream& ostr, const DetectorRegionIndex detIdx){
+         return (ostr<<regionName(detIdx));
+    }
+    std::ostream& operator<<(std::ostream& ostr, const LayerIndex layIdx){
+         return (ostr<<layerName(layIdx));
+    }
+    std::ostream& operator<<(std::ostream& ostr, const TechnologyIndex techIdx){
+         return (ostr<<technologyName(techIdx));
+    }
    }
 } // namespace Muon
