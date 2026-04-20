@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( LArTPCnv )
@@ -105,4 +105,4 @@ atlas_add_test( LArTTL1ContainerCnv_p1_test
                 SOURCES
                 test/LArTTL1ContainerCnv_p1_test.cxx
                 LINK_LIBRARIES AthenaPoolCnvSvcLib LArRawEvent LArRecEvent TestTools CaloIdentifier AthenaKernel Identifier LArTPCnv
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
