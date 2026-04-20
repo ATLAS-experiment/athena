@@ -265,7 +265,7 @@ AsgForwardElectronSelectorTool::accept(const xAOD::IParticle* part) const
 
 asg::AcceptData
 AsgForwardElectronSelectorTool::accept(const EventContext& ctx,
-                                        const xAOD::IParticle* part) const
+				         const xAOD::IParticle* part) const
 {
   if (part->type() == xAOD::Type::Electron) {
     const xAOD::Electron* el = static_cast<const xAOD::Electron*>(part);
@@ -281,7 +281,7 @@ AsgForwardElectronSelectorTool::accept(const EventContext& ctx,
 // ============================================================================
 asg::AcceptData
 AsgForwardElectronSelectorTool::accept(const EventContext& ctx,
-                                        const xAOD::Electron* eg) const
+				       const xAOD::Electron* eg) const
 {
   return accept(ctx, eg, -99);
 }
@@ -319,7 +319,7 @@ AsgForwardElectronSelectorTool::accept(const EventContext& ctx,
 asg::AcceptData
 AsgForwardElectronSelectorTool::accept(const EventContext& ctx,
                                         const xAOD::Egamma* eg,
-                                        double mu) const
+				       double mu) const
 {
   const xAOD::Electron* el = dynamic_cast<const xAOD::Electron*>(eg);
   if (!el) {
@@ -357,7 +357,7 @@ AsgForwardElectronSelectorTool::calculate(const EventContext& ctx,
 double
 AsgForwardElectronSelectorTool::calculate(const EventContext& ctx,
                                            const xAOD::Electron* eg,
-                                           double /*mu*/) const
+					  double /*mu*/) const
 {
   double score{-999.}, calibPt{-999.};
   calculateWithCalibPt(ctx, eg, score, calibPt);
@@ -389,10 +389,10 @@ AsgForwardElectronSelectorTool::calculate(const EventContext& ctx,
 // calculateWithCalibPt
 // ============================================================================
 bool
-AsgForwardElectronSelectorTool::calculateWithCalibPt(const EventContext& ctx,
-                                                      const xAOD::Electron* eg,
+AsgForwardElectronSelectorTool::calculateWithCalibPt(const EventContext& /*ctx*/,
+						     const xAOD::Electron* eg,
                                                       double& score,
-                                                      double& calibPt) const
+						     double& calibPt) const
 {
   score = -999.; calibPt = -999.;
 
@@ -423,14 +423,16 @@ AsgForwardElectronSelectorTool::calculateWithCalibPt(const EventContext& ctx,
   }
 
   // Step 1 - calibration of pT
-  calibPt = m_calibTool->calibrate(ctx, eg);
-  if (calibPt < 0.) return false;
-
-  const int ptBin = getPtBin(calibPt);
-  if (ptBin < 0) {
-    ATH_MSG_WARNING("Calibrated pT=" << calibPt / 1000. << " GeV out of range.");
-    return false;
-  }
+  calibPt=eg->pt();
+  /*    calibPt = m_calibTool->calibrate(ctx, eg);
+      if (calibPt < 0.) return false;
+      
+      const int ptBin = getPtBin(calibPt);
+      if (ptBin < 0) {
+	ATH_MSG_WARNING("Calibrated pT=" << calibPt / 1000. << " GeV out of range.");
+	return false;
+      }
+      }*/
 
   // Step 2 - extract inputs with LR decorrelation
   std::vector<double> inputs;
