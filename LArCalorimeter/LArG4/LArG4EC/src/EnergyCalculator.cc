@@ -654,7 +654,8 @@ G4bool EnergyCalculator::FindIdentifier_Default(
 
   int profundis=pre_step_point->GetTouchable()->GetHistoryDepth();
 
-  const G4String name = preStepVolume->GetName();
+  const G4String &name = preStepVolume->GetName();
+  std::string_view namesv(name);
 
   auto matches_pattern = [](std::string_view text, std::string_view prefix) -> bool {
     if (!text.starts_with(prefix)) return false;
@@ -676,7 +677,7 @@ G4bool EnergyCalculator::FindIdentifier_Default(
   int offset = 0;
   for (const auto& [prefix, val] : patterns) {
 	  // Regex: Slice[0-9]{2}, Electrode[0-9]{2}, ecc.
-    if (matches_pattern(name, prefix)) {
+    if (matches_pattern(namesv, prefix)) {
         offset = val;
         break;
 	  }
