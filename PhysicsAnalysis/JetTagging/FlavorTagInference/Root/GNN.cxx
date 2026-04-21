@@ -3,7 +3,7 @@
 */
 
 #include "FlavorTagInference/GNN.h"
-#include "FlavorTagInference/FP16Utils.h"
+#include "FlavorTagInference/FPCompressionUtils.h"
 #include "FlavorTagInference/SaltModel.h"
 #include "FlavorTagInference/GNNOptions.h"
 #include "FlavorTagInference/StringUtils.h"
@@ -114,10 +114,7 @@ namespace FlavorTagInference {
       for (const auto& dec: m_decorators.jetVecInt) {
         dec.second(i_jet) = {};
       }
-      for (const auto& dec: m_decorators.jetVecFP16) {
-        dec.second(i_jet) = {};
-      }
-      for (const auto& dec: m_decorators.jetVecBF16) {
+      for (const auto& dec: m_decorators.jetVecTruncFloat) {
         dec.second(i_jet) = {};
       }
     }
@@ -167,25 +164,17 @@ namespace FlavorTagInference {
         std::vector<int> ints(floats.begin(), floats.end());
         dec.second(i_jet) = ints;
       }
-      for (size_t idx = 0; idx < m_decorators.jetVecFP16.size(); ++idx) {
-        const auto& dec = m_decorators.jetVecFP16[idx];
+      for (size_t idx = 0; idx < m_decorators.jetVecTruncFloat.size(); ++idx) {
+        const auto& dec = m_decorators.jetVecTruncFloat[idx];
         const auto& floats = out_vf.at(dec.first);
-        float scale = m_fp16Scales[idx];
-        std::vector<uint16_t> fp16(floats.size());
+        const float scale = m_truncFloatScales[idx];
+        const int E = m_truncFloatBits[idx].first;
+        const int M = m_truncFloatBits[idx].second;
+        std::vector<float> truncated(floats.size());
         for (size_t i = 0; i < floats.size(); ++i) {
-          fp16[i] = FP16Utils::floatToFP16(floats[i] * scale);
+          truncated[i] = FPCompressionUtils::truncateToFloat(floats[i] * scale, E, M);
         }
-        dec.second(i_jet) = fp16;
-      }
-      for (size_t idx = 0; idx < m_decorators.jetVecBF16.size(); ++idx) {
-        const auto& dec = m_decorators.jetVecBF16[idx];
-        const auto& floats = out_vf.at(dec.first);
-        float scale = m_bf16Scales[idx];
-        std::vector<uint16_t> bf16(floats.size());
-        for (size_t i = 0; i < floats.size(); ++i) {
-          bf16[i] = FP16Utils::floatToBF16(floats[i] * scale);
-        }
-        dec.second(i_jet) = bf16;
+        dec.second(i_jet) = truncated;
       }
 
     }
@@ -240,13 +229,10 @@ namespace FlavorTagInference {
         case SaltModelOutput::OutputType::VECINT:
           m_decorators.jetVecInt.emplace_back(outNode.name, Dec<std::vector<int>>(dec_name));
           break;
-        case SaltModelOutput::OutputType::VECFP16:
-          m_decorators.jetVecFP16.emplace_back(outNode.name, Dec<std::vector<uint16_t>>(dec_name));
-          m_fp16Scales.push_back(outNode.scale);
-          break;
-        case SaltModelOutput::OutputType::VECBF16:
-          m_decorators.jetVecBF16.emplace_back(outNode.name, Dec<std::vector<uint16_t>>(dec_name));
-          m_bf16Scales.push_back(outNode.scale);
+        case SaltModelOutput::OutputType::VECTRUNCFLOAT:
+          m_decorators.jetVecTruncFloat.emplace_back(outNode.name, Dec<std::vector<float>>(dec_name));
+          m_truncFloatScales.push_back(outNode.scale);
+          m_truncFloatBits.emplace_back(outNode.exp_bits, outNode.man_bits);
           break;
         default:
           throw std::logic_error("Unknown output data type");

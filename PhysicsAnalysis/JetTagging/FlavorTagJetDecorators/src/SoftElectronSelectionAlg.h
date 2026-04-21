@@ -106,6 +106,10 @@ namespace FlavorTagJetDecorators {
       this, "deta1Maximum", 10., "Maximum |deltaEta1|"};
     Gaudi::Property<float> m_dpopMaximum {
       this, "dpopMaximum", 5., "Maximum |deltaPOverP|"};
+    Gaudi::Property<float> m_maxDeltaR {
+      this, "maxDeltaR", -1.,
+      "Maximum DeltaR(jet, electron); <=0 disables the cut "
+      "(rely on ghost-association alone)"};
   };
 
 }  // namespace FlavorTagJetDecorators

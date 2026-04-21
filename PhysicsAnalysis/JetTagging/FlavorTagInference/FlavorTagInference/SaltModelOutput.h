@@ -16,7 +16,7 @@ namespace FlavorTagInference {
 class SaltModelOutput {
 
   public:
-    enum class OutputType {UNKNOWN, FLOAT, VECCHAR, VECFLOAT, VECINT, VECFP16, VECBF16};
+    enum class OutputType {UNKNOWN, FLOAT, VECCHAR, VECFLOAT, VECINT, VECTRUNCFLOAT};
 
     /* constructor for SaltModelVersion::V1 and higher */
     SaltModelOutput(const std::string& name,
@@ -28,15 +28,19 @@ class SaltModelOutput {
                ONNXTensorElementDataType type,
                const std::string& name_in_model);
 
-    /* constructor for directly specifying OutputType (e.g. VECFP16) */
+    /* constructor for parametric reduced-precision float32 (VECTRUNCFLOAT with explicit E,M) */
     SaltModelOutput(const std::string& name,
                OutputType type,
-               float scale = 1.0f);
+               float scale,
+               int exp_bits,
+               int man_bits);
 
     const std::string name;
     const std::string name_in_model;
     const OutputType type;
     const float scale{1.0f};
+    int exp_bits{8};  // exponent bits for VECTRUNCFLOAT (default: bf16-equivalent)
+    int man_bits{7};  // mantissa bits for VECTRUNCFLOAT (default: bf16-equivalent)
 
   private:
     OutputType getOutputType(ONNXTensorElementDataType type, int rank) const;

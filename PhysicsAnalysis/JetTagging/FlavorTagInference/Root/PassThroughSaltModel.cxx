@@ -64,7 +64,6 @@ namespace FlavorTagInference {
           std::string input_name = var.at("input").get<std::string>();
           std::string output_name = var.at("output").get<std::string>();
           std::string var_type = var.value("type", "float");
-          std::string cast = var.value("cast", "");
           float fp16_scale = var.value("scale", 1.0f);
 
           cn.output_names.push_back(output_name);
@@ -73,13 +72,27 @@ namespace FlavorTagInference {
           // Graph config: identity normalisation
           seq_node.variables.emplace_back(input_name, 0.0, 1.0);
 
-          // Output config: vector type based on JSON "type"/"cast" fields
-          if (cast == "fp16") {
+          // Output config: vector type based on JSON "type"/"cast" fields.
+          // "cast" is an object {exp: E, man: M} specifying reduced-precision
+          // float32 with E/M mantissa/exponent bits (default E=8, M=7).
+          // Non-float variables use "type" instead ("int" → INT32, "char" → INT8)
+          // and never have "cast".
+          if (var.contains("cast")) {
+            const auto& cast_val = var.at("cast");
+            if (!cast_val.is_object()) {
+              throw std::runtime_error(
+                "PassThroughSaltModel: 'cast' for variable '" + input_name
+                + "' must be an object {exp, man}");
+            }
+            int exp_bits = cast_val.value("exp", 8);
+            int man_bits = cast_val.value("man", 7);
+            if (exp_bits < 2 || exp_bits > 8 || man_bits < 0 || man_bits > 23) {
+              throw std::runtime_error(
+                "PassThroughSaltModel: cast {exp,man} requires 2<=exp<=8 and 0<=man<=23, got exp="
+                + std::to_string(exp_bits) + " man=" + std::to_string(man_bits));
+            }
             m_output_config.push_back(
-              SaltModelOutput(output_name, SaltModelOutput::OutputType::VECFP16, fp16_scale));
-          } else if (cast == "bf16") {
-            m_output_config.push_back(
-              SaltModelOutput(output_name, SaltModelOutput::OutputType::VECBF16, fp16_scale));
+              SaltModelOutput(output_name, SaltModelOutput::OutputType::VECTRUNCFLOAT, fp16_scale, exp_bits, man_bits));
           } else {
             ONNXTensorElementDataType onnx_type;
             if (var_type == "int") {
@@ -94,7 +107,13 @@ namespace FlavorTagInference {
         }
 
         cn.num_vars = cn.output_names.size();
-        cn.input_key = deriveInputKey(node_name);
+        if (!cnode.contains("input_key")) {
+          throw std::runtime_error(
+            "PassThroughSaltModel: constituent node '" + node_name
+            + "' must define 'input_key' (e.g. \"tracks\", \"flows\", "
+              "\"hits\", \"electrons\", \"muons\", \"clusters\", \"towers\")");
+        }
+        cn.input_key = cnode.at("input_key").get<std::string>();
         m_constituent_nodes.push_back(std::move(cn));
         m_graph_config.input_sequences.push_back(std::move(seq_node));
       }
@@ -158,8 +177,21 @@ namespace FlavorTagInference {
 
       auto it = gnn_inputs.find(cn.input_key);
       if (it == gnn_inputs.end()) {
-        writeEmpty(cn);
-        continue;
+        // Config bug: JSON input_key does not match any registered loader's
+        // output_name (set in ConstituentsLoader.cxx, e.g. "tracks", "flows",
+        // "electrons", "muons", "clusters", "towers", "hits" — all plural).
+        // Fail loudly with the list of available keys so the typo is obvious.
+        std::string available;
+        for (const auto& kv : gnn_inputs) {
+          if (!available.empty()) available += ", ";
+          available += "'" + kv.first + "'";
+        }
+        throw std::runtime_error(
+          "PassThroughSaltModel: constituent node '" + cn.node_name
+          + "' has input_key='" + cn.input_key
+          + "' but no loader registered under that key. Available keys: ["
+          + available + "]. Check ConstituentsInputConfig.output_name in "
+          + "ConstituentsLoader.cxx.");
       }
 
       const auto& data = it->second.first;
@@ -220,32 +252,6 @@ namespace FlavorTagInference {
 
   const std::string& PassThroughSaltModel::getModelName() const {
     return m_model_name;
-  }
-
-  std::string PassThroughSaltModel::deriveInputKey(
-    const std::string& node_name)
-  {
-    // V2 naming: GNNDataLoader::getVecInputName() returns the raw
-    // output_name from ConstituentsLoader (e.g. "tracks", "flows").
-    // We match the node_name substring to the same base names.
-    static const std::pair<const char*, const char*> types[] = {
-      {"tracks",    "tracks"},
-      {"flows",     "flows"},
-      {"hits",      "hits"},
-      {"electrons", "electrons"},
-      {"muons",     "muons"},
-      {"clusters",  "clusters"},
-      {"towers",    "towers"},
-    };
-    for (const auto& [substr, key] : types) {
-      if (node_name.find(substr) != std::string::npos) {
-        return key;
-      }
-    }
-    throw std::runtime_error(
-      "PassThroughSaltModel: cannot determine constituent type from "
-      "node_name '" + node_name + "'. Must contain one of: "
-      "tracks, flows, hits, electrons, muons, clusters, towers");
   }
 
 } // namespace FlavorTagInference

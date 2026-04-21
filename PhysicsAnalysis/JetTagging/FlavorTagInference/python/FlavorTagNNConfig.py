@@ -435,11 +435,15 @@ def PassThroughModelCfg(flags, JetCollection,
                         TrackCollection='InDetTrackParticles',
                         variableRemapping=None,
                         electrons='Electrons',
-                        muons=''):
+                        muons='',
+                        jsonPath=None):
     """Configure a pass-through model for jet and constituent variables.
 
-    Reads the JSON file from flags.BTagging.PassThroughVarsJSON.
-    If the flag is empty, returns an empty ComponentAccumulator.
+    jsonPath: PathResolver-resolvable path (relative to DATAPATH) or an
+    absolute path to the PassThrough JSON. If falsy (None/""), returns
+    an empty ComponentAccumulator.  Callers must pass the path
+    explicitly; the derivation config owns which JSON to use (e.g.
+    FTAG1LITE's small-R vs large-R).
 
     The JSON may specify scalar jet_variables and/or constituent
     variables (tracks, electrons, muons, flows). Constituent loading
@@ -451,7 +455,7 @@ def PassThroughModelCfg(flags, JetCollection,
                "FTagElectrons": "GhostFTagSelectedElectrons",
                "FTagMuons": "GhostFTagMuons"}
     """
-    json_path = flags.BTagging.PassThroughVarsJSON
+    json_path = jsonPath
     if not json_path:
         return ComponentAccumulator()
 
@@ -460,15 +464,17 @@ def PassThroughModelCfg(flags, JetCollection,
 
     remap = variableRemapping or {}
 
+    # Unique svc/tool names per jet collection so multiple instances
+    # can coexist (e.g. small-R + large-R running side-by-side).
     svc = FTI.PassThroughModelSvc(
-        'FTagPassThroughSvc',
+        f'FTagPassThroughSvc_{JetCollection}',
         JsonFile=json_path,
         VariableRemapping=remap,
     )
     acc.addService(svc)
 
     tool = FTI.GNNTool(
-        name='passthrough_decorator',
+        name=f'passthrough_decorator_{JetCollection}',
         nnFile='passthrough',
         nnSharingService=svc,
         variableRemapping=remap,

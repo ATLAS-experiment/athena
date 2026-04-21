@@ -24,14 +24,18 @@ SaltModelOutput::SaltModelOutput(const std::string& name,
                          name_in_model(name),
                          type(getOutputType(type, 0)){}
 
-/* constructor for directly specifying OutputType (e.g. VECFP16) */
+/* constructor for parametric reduced-precision float32 (VECTRUNCFLOAT with explicit E,M) */
 SaltModelOutput::SaltModelOutput(const std::string& name,
                        OutputType type,
-                       float scale)
+                       float scale,
+                       int exp_bits_in,
+                       int man_bits_in)
                        : name(name),
                          name_in_model(name),
                          type(type),
-                         scale(scale){}
+                         scale(scale),
+                         exp_bits(exp_bits_in),
+                         man_bits(man_bits_in){}
 
 const std::string SaltModelOutput::getName(const std::string& name, const std::string& model_name) {
   // unfortunately, this is block is needed to support some taggers that we schedule that don't have

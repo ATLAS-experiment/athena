@@ -9,7 +9,7 @@ questions. Contact details can be found in the main FTAG docs: https://ftag.docs
 | Derivation | Main use | Notes |
 | --- | --- | --- |
 | `FTAG1` | Main FTAG derivation for flavour-tagging studies on MC | Unskimmed, with the most complete track, vertex, jet, truth, and FTAG-specific content in this package. |
-| `FTAG1LITE` | Lightweight derivation for GN3 training / TDD production | Runs only the augmentation blocks needed by training workflows and strips content that is not required. |
+| `FTAG1LITE` | An extremely light weight training derivation. Instead of storing all collections, decorate jets with vectors representing constituent variables. | |
 | `FTAG2` | `ttbar` calibration derivation with dilepton selection | Built on top of `FTAG1` content and adds a two-lepton skim plus targeted thinning. Runs on data and MC. |
 | `FTAG3` | Slim derivation for boosted `g->bb` and Xbb calibration studies | Requires at least one muon and one large-`R` jet, and keeps the large-`R` / VR track-jet content needed for calibration. |
 | `FTAG4` | PHYS-like derivation with a one-lepton skim | Uses `PHYS` content and applies a single-lepton calibration-style event selection. |
