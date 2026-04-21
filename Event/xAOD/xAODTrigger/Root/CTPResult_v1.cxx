@@ -123,11 +123,10 @@ namespace xAOD {
   }
 
   // set the L1 Accept Bunch Position
-  void CTPResult_v1::setL1AcceptBunchPosition(const uint32_t pos) {
-    if(pos < numberOfBunches()) {
-      static const SG::Accessor< uint32_t > acc("l1AcceptBunchPosition");
-      acc( *this ) = pos;
-    }
+  void CTPResult_v1::setL1AcceptBunchPosition(uint32_t pos) {
+    if (numberOfBunches() == 1 && pos > 0) {pos=0;}    
+    static const SG::Accessor<uint32_t> acc("l1AcceptBunchPosition");
+    acc(*this) = pos;
   }
 
   // Get TIP words for a specific bunch crossing

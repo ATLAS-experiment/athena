@@ -2172,6 +2172,18 @@ class ItemDef:
         MenuItem('L1_AFP_A_AND_C_TOF_jJ125').setLogic( AFP_TOF_A & AFP_TOF_C & d.jJ125 & physcond )
         MenuItem('L1_AFP_A_AND_C_TOF_T0T1_jJ125').setLogic( (d.AFP_FSA_TOF_T0 | d.AFP_FSA_TOF_T1) & (d.AFP_FSC_TOF_T0 | d.AFP_FSC_TOF_T1) & d.jJ125 & physcond )
 
+        # ATR-32660: AFP in HI
+        MenuItem('L1_ESP_AFP_OR_jJ5p30ETA49_VZDC_A_VZDC_C_VjTE200').setLogic( gESPRESSO & (AFP_A | AFP_C) & d.jJ530ETA49 & PHYS_VZDC_A_VZDC_C & Not(d.jTE200) & physcond ).setTriggerType(TT.calo)
+        MenuItem('L1_ESP_AFP_OR_jJ5p30ETA49_ZDC_XOR_VjTE200').setLogic( gESPRESSO & (AFP_A | AFP_C) & d.jJ530ETA49 & ZDC_XOR & Not(d.jTE200) & physcond ).setTriggerType(TT.calo)
+
+        MenuItem('L1_AFP_OR_VZDC_A_VZDC_C_VjTE200').setLogic( (AFP_A | AFP_C) & PHYS_VZDC_A_VZDC_C & Not(d.jTE200) & physcond ).setTriggerType(TT.calo)
+        MenuItem('L1_AFP_OR_TRT_VZDC_A_VZDC_C_VjTE200').setLogic( (AFP_A | AFP_C) & d.NIMTRT & PHYS_VZDC_A_VZDC_C & Not(d.jTE200) & physcond ).setTriggerType(TT.calo)
+
+        MenuItem('L1_AFP_OR_ZDC_XOR_VjTE200').setLogic( (AFP_A | AFP_C) & ZDC_XOR & Not(d.jTE200) & physcond ).setTriggerType(TT.calo)
+        MenuItem('L1_AFP_OR_TRT_ZDC_XOR_VjTE200').setLogic( (AFP_A | AFP_C) & d.NIMTRT & ZDC_XOR & Not(d.jTE200) & physcond ).setTriggerType(TT.calo)
+
+        MenuItem('L1_AFP_OR_VjTE200').setLogic( (AFP_A | AFP_C) & Not(d.jTE200) & physcond ).setTriggerType(TT.calo)
+
         try:
 
             # Legacy primary (items passed via the merger board):
