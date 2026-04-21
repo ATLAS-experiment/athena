@@ -29,11 +29,6 @@ preExec = ';'.join([
   'flags.Trigger.triggerMenuSetup=\'Dev_pp_run4_v1_TriggerValidation_prescale\'',
   'flags.Trigger.AODEDMSet=\'AODFULL\'',
 ])
-# hopefully temporary
-preExecTrig = ';'.join([
-  'flags.ITk.doTruth=False',
-  'flags.Tracking.doTruth=False',
-])
 
 conditions = defaultConditionsTags.RUN4_MC
 
@@ -46,7 +41,7 @@ rdo2aod.concurrent_events = 8
 rdo2aod.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG"'
 rdo2aod.args += ' --CA "all:True"'
 rdo2aod.args += ' --preInclude "all:Campaigns.PhaseIIPileUp200"'
-rdo2aod.args += f' --preExec "RDOtoRDOTrigger:{preExecTrig};" "all:{preExec};"'
+rdo2aod.args += f' --preExec "all:{preExec};"'
 rdo2aod.args += ' --conditionsTag "default:' + conditions + '"'
 
 test = Test.Test()
