@@ -11,6 +11,9 @@
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "AthContainers/ConstAccessor.h"
+#include "StoreGate/WriteHandle.h"
+#include "StoreGate/ReadHandle.h"
+#include "StoreGate/ReadDecorHandle.h"
 
 
 using VertexLink = ElementLink<xAOD::VertexContainer>;
@@ -20,16 +23,12 @@ namespace DerivationFramework {
 BPhysBGammaFinder::BPhysBGammaFinder(const std::string& t, const std::string& n, const IInterface* p)
     : base_class(t,n,p),
       m_v0Tools("Trk::V0Tools"),
-      m_vertexFitter("Trk::TrkVKalVrtFitter"),
-      m_vertexEstimator("InDet::VertexPointEstimator"),
+      m_vertexFitter("Trk::TrkVKalVrtFitter", this),
+      m_vertexEstimator("InDet::VertexPointEstimator", this),
       m_inputTrackParticleContainerName("InDetTrackParticles"),
       m_inputLowPtTrackContainerName("LowPtRoITrackParticles"),
       m_conversionContainerName("BPhysConversionCandidates"),
-      m_maxDistBetweenTracks(10.0),
-      m_maxDeltaCotTheta(0.3),
-      m_requireDeltaQ(true),
-      m_use_low_pT(false),
-      m_maxDeltaQ(1000.0),
+      m_maxDeltaQ(700.0),
       m_Chi2Cut(20.0),
       m_maxGammaMass(100.0) {
 
@@ -43,10 +42,6 @@ BPhysBGammaFinder::BPhysBGammaFinder(const std::string& t, const std::string& n,
   declareProperty("InputTrackParticleContainerName", m_inputTrackParticleContainerName);
   declareProperty("InputLowPtTrackContainerName", m_inputLowPtTrackContainerName);
   declareProperty("ConversionContainerName", m_conversionContainerName);
-  declareProperty("MaxDistBetweenTracks", m_maxDistBetweenTracks = 10.0); // Maximum allowed distance of minimum approach
-  declareProperty("MaxDeltaCotTheta", m_maxDeltaCotTheta = 0.3); // Maximum allowed dCotTheta between tracks
-  declareProperty("RequireDeltaQ", m_requireDeltaQ = true); // Only save a conversions if it's a chi_c,b candidate (must then pass "MaxDeltaM" requirement), if "False" all conversions in the event will be saved
-  declareProperty("Use_low_pT", m_use_low_pT = false); // Only save a conversions if it's a chi_c,b candidate (must then pass "MaxDeltaM" requirement), if "False" all conversions in the event will be saved
   declareProperty("MaxDeltaQ", m_maxDeltaQ = 700.0); // Maximum mass difference between di-muon+conversion and di-muon
   declareProperty("Chi2Cut", m_Chi2Cut = 20.0);
   declareProperty("MaxGammaMass", m_maxGammaMass = 100.0);
@@ -60,6 +55,10 @@ StatusCode BPhysBGammaFinder::initialize() {
   ATH_CHECK( m_v0Tools.retrieve() );
   ATH_CHECK( m_vertexFitter.retrieve() );
   ATH_CHECK( m_vertexEstimator.retrieve() );
+  ATH_CHECK( m_BVertexCollectionsToCheck.initialize() );
+  ATH_CHECK( m_inputTrackParticleContainerName.initialize() );
+  ATH_CHECK( m_inputLowPtTrackContainerName.initialize(SG::AllowEmpty) );
+  ATH_CHECK( m_conversionContainerName.initialize() );
   return StatusCode::SUCCESS;
 }
 
@@ -69,10 +68,9 @@ StatusCode BPhysBGammaFinder::finalize() {
 }
 
 
-StatusCode BPhysBGammaFinder::addBranches(const EventContext&) const {
+StatusCode BPhysBGammaFinder::addBranches(const EventContext& ctx) const {
 
   std::vector<const xAOD::Vertex*> BVertices;
-  BVertices.clear();
   std::vector<const xAOD::TrackParticle*> BVertexTracks;
 
 
@@ -82,52 +80,32 @@ StatusCode BPhysBGammaFinder::addBranches(const EventContext&) const {
   conversionContainer->setStore(conversionAuxContainer.get());
 
   // Retrieve track particles from StoreGate
-  const xAOD::TrackParticleContainer* inputTrackParticles{};
-  ATH_CHECK( evtStore()->retrieve(inputTrackParticles, m_inputTrackParticleContainerName)); // FIXME Use Handles
+  SG::ReadHandle<xAOD::TrackParticleContainer> inputTrackParticles{m_inputTrackParticleContainerName, ctx};
   ATH_MSG_DEBUG( "Track particle container size " << inputTrackParticles->size() );
-  // Low pT collection
-  const xAOD::TrackParticleContainer* lowPtTrackParticles{};
-  if (m_use_low_pT) {
-    StatusCode sc = evtStore()->retrieve(lowPtTrackParticles, m_inputLowPtTrackContainerName); // FIXME Use Handles
-    if (sc.isFailure()) {
-      ATH_MSG_WARNING("No low pT collection with key " << m_inputLowPtTrackContainerName << " found in StoreGate.");
-      return StatusCode::SUCCESS;;
-    }
-    else {
-      ATH_MSG_DEBUG("Low pT track particle container size " <<  lowPtTrackParticles->size());
-    }
-  }
 
-  // Look for B candidate
-  if (m_BVertexCollectionsToCheck.empty()) {
-    ATH_MSG_FATAL( "No B vertex collections provided" );
-    return StatusCode::FAILURE;
-  }
-  else {
-    for ( auto itr = m_BVertexCollectionsToCheck.begin(); itr != m_BVertexCollectionsToCheck.end(); ++itr) {
-      ATH_MSG_DEBUG( "Using " << *itr << " as the source B vertex collection" );
-    }
-  }
+  std::vector<const xAOD::TrackParticle*> trackPair(2);
 
+  static const SG::Decorator< std::vector< VertexLink > > BGammaLinks( "BGammaLinks" );
+
+  auto flaghandles = m_passFlagsToCheck.makeHandles(ctx);
   // Retrieve vertex containers
-  for (auto itr = m_BVertexCollectionsToCheck.begin(); itr!=m_BVertexCollectionsToCheck.end(); ++itr) {
-    // retieve vertex
-    const xAOD::VertexContainer* BVtxContainer{};
-    CHECK( evtStore()->retrieve(BVtxContainer, *itr)); // FIXME Use Handles
-    ATH_MSG_DEBUG( "Vertex Container (" << *itr << ") contains " << BVtxContainer->size() << " vertices" );
+    for (SG::ReadHandle<xAOD::VertexContainer>& BVtxContainer : m_BVertexCollectionsToCheck.makeHandles(ctx)) {
+       if (!BVtxContainer.isValid()) {          // replaces the CHECK
+           ATH_MSG_ERROR("Failed to retrieve VertexContainer " << BVtxContainer.key());
+           return StatusCode::FAILURE;          // or ATH_CHECK if you prefer the macro style
+       }
 
-    static const SG::Decorator< std::vector< VertexLink > > BGammaLinks( "BGammaLinks" );
-    static const std::vector< VertexLink > vertexLinks;
+       ATH_MSG_DEBUG( "Vertex Container (" << BVtxContainer.key() << ") contains " << BVtxContainer->size() << " vertices" );
+
 
     for (const xAOD::Vertex* vertex : *BVtxContainer) {
-      BGammaLinks(*vertex) = vertexLinks;
+      auto &vect = BGammaLinks(*vertex) = std::vector< VertexLink >();
 
       bool passedHypothesis = false;
       BVertexTracks.clear();
 
-      for (const auto &flag : m_passFlagsToCheck) {
-        SG::ConstAccessor<Char_t> acc(flag);
-        bool pass = acc(*vertex);
+      for (const auto &flag : flaghandles) {
+        bool pass = flag(*vertex);
         if (pass) passedHypothesis = true;
       }
 
@@ -143,27 +121,27 @@ StatusCode BPhysBGammaFinder::addBranches(const EventContext&) const {
       // Track Selection
       // Track1 Loop
       for (xAOD::TrackParticleContainer::const_iterator tpIt1 = inputTrackParticles->begin(); tpIt1 != inputTrackParticles->end(); ++tpIt1) {
-        const xAOD::TrackParticle* trackParticle1 = *tpIt1;
+        trackPair[0] = *tpIt1;
 
-        auto itr1 = std::find(BVertexTracks.begin(), BVertexTracks.end(), trackParticle1);
+        auto itr1 = std::find(BVertexTracks.begin(), BVertexTracks.end(), trackPair[0]);
         if (itr1 != BVertexTracks.end()) continue;
 
-        const Trk::Perigee& trackPerigee1 = trackParticle1->perigeeParameters();
+        const Trk::Perigee& trackPerigee1 = trackPair[0]->perigeeParameters();
 
         // Track2 Loop
         for (xAOD::TrackParticleContainer::const_iterator tpIt2 = tpIt1 + 1; tpIt2 != inputTrackParticles->end(); ++tpIt2) {
-  	    const xAOD::TrackParticle* trackParticle2 = *tpIt2;
-          if (trackParticle1 == trackParticle2) continue;
+  	    trackPair[1] = *tpIt2;
+          if (trackPair[0] == trackPair[1]) continue;
 
-          auto itr2 = std::find(BVertexTracks.begin(), BVertexTracks.end(), trackParticle2);
+          auto itr2 = std::find(BVertexTracks.begin(), BVertexTracks.end(), trackPair[1]);
           if (itr2 != BVertexTracks.end()) continue;
 
-          const Trk::Perigee& trackPerigee2 = trackParticle2->perigeeParameters();
+          const Trk::Perigee& trackPerigee2 = trackPair[1]->perigeeParameters();
 
           // Track pair selection
           TLorentzVector e1, e2, gamma_m, BcStar;
-          e1.SetPtEtaPhiM(trackParticle1->pt(), trackParticle1->eta(), trackParticle1->phi(), Trk::electron);
-          e2.SetPtEtaPhiM(trackParticle2->pt(), trackParticle2->eta(), trackParticle2->phi(), Trk::electron);
+          e1.SetPtEtaPhiM(trackPair[0]->pt(), trackPair[0]->eta(), trackPair[0]->phi(), Trk::electron);
+          e2.SetPtEtaPhiM(trackPair[1]->pt(), trackPair[1]->eta(), trackPair[1]->phi(), Trk::electron);
 
           gamma_m = e1 + e2;
           if (gamma_m.M() > m_maxGammaMass) continue;
@@ -185,21 +163,17 @@ StatusCode BPhysBGammaFinder::addBranches(const EventContext&) const {
           std::vector<float> RefTrackPx, RefTrackPy, RefTrackPz, RefTrackE;
           std::vector<float> OrigTrackPx, OrigTrackPy, OrigTrackPz, OrigTrackE;
 
-          std::vector<const xAOD::TrackParticle*> trackPair;
-          trackPair.clear();
-          trackPair.push_back(trackParticle1);
-          trackPair.push_back(trackParticle2);
 
           // Do the vertex fit
-          xAOD::Vertex* convVertexCandidate = m_vertexFitter->fit(trackPair, startingPoint);
+          auto convVertexCandidate = m_vertexFitter->fit(ctx, trackPair, startingPoint);
 
           // Check for successful fit
           if (convVertexCandidate) {
             if (convVertexCandidate->chiSquared() / convVertexCandidate->numberDoF() > m_Chi2Cut) continue;
 
-            xAOD::BPhysHelper Photon(convVertexCandidate);
+            xAOD::BPhysHelper Photon(convVertexCandidate.get());
             // set link to the parent Bc+ vertex
-            Photon.setPrecedingVertices(precedingVertices, BVtxContainer);
+            Photon.setPrecedingVertices(precedingVertices, BVtxContainer.cptr());
 
             // Parameters at vertex
             convVertexCandidate->clearTracks();
@@ -215,11 +189,11 @@ StatusCode BPhysBGammaFinder::addBranches(const EventContext&) const {
             std::vector<Amg::Vector3D> positionList;
 
             //Get photon momentum 3-vector
-            Amg::Vector3D momentum = m_v0Tools->V0Momentum(convVertexCandidate);
+            Amg::Vector3D momentum = m_v0Tools->V0Momentum(convVertexCandidate.get());
 
             TLorentzVector photon, electron1, electron2, ph;
-            electron1.SetVectM( trackMomentum( convVertexCandidate, 0 ), Trk::electron );
-            electron2.SetVectM( trackMomentum( convVertexCandidate, 1 ), Trk::electron );
+            electron1.SetVectM( trackMomentum( *convVertexCandidate, 0 ), Trk::electron );
+            electron2.SetVectM( trackMomentum( *convVertexCandidate, 1 ), Trk::electron );
             photon = electron1 + electron2;
             ph.SetXYZM(momentum.x(), momentum.y(), momentum.z(), 0.);
 
@@ -241,14 +215,14 @@ StatusCode BPhysBGammaFinder::addBranches(const EventContext&) const {
             const double deltaQ = (B_m + photon).M() - Bc.mass() - 2 * Trk::electron;
             const double mass = photon.M();
 
-            RefTrackPx.push_back(trackMomentum(convVertexCandidate, 0).Px());
-            RefTrackPx.push_back(trackMomentum(convVertexCandidate, 1).Px());
+            RefTrackPx.push_back(trackMomentum(*convVertexCandidate, 0).Px());
+            RefTrackPx.push_back(trackMomentum(*convVertexCandidate, 1).Px());
 
-            RefTrackPy.push_back(trackMomentum(convVertexCandidate, 0).Py());
-            RefTrackPy.push_back(trackMomentum(convVertexCandidate, 1).Py());
+            RefTrackPy.push_back(trackMomentum(*convVertexCandidate, 0).Py());
+            RefTrackPy.push_back(trackMomentum(*convVertexCandidate, 1).Py());
 
-            RefTrackPz.push_back(trackMomentum(convVertexCandidate, 0).Pz());
-            RefTrackPz.push_back(trackMomentum(convVertexCandidate, 1).Pz());
+            RefTrackPz.push_back(trackMomentum(*convVertexCandidate, 0).Pz());
+            RefTrackPz.push_back(trackMomentum(*convVertexCandidate, 1).Pz());
 
             for (size_t i = 0; i < B_Px.size(); i++) {
               RefTrackPx.push_back(B_Px.at(i));
@@ -310,13 +284,13 @@ StatusCode BPhysBGammaFinder::addBranches(const EventContext&) const {
             static const SG::Accessor<Char_t> passed_GammaAcc("passed_Gamma");
             passed_GammaAcc(*convVertexCandidate) = true; // Used in event skimming
 
-            conversionContainer->push_back( convVertexCandidate );
 
             // add cross-link to the original Bc+ vertex
             VertexLink BGammaLink;
-            BGammaLink.setElement(convVertexCandidate);
+            BGammaLink.setElement(convVertexCandidate.get());
             BGammaLink.setStorableObject(*conversionContainer);
-            BGammaLinks(*vertex).push_back(std::move(BGammaLink));
+            conversionContainer->push_back( std::move(convVertexCandidate) );
+            vect.push_back(std::move(BGammaLink));
           }
           else {
             ATH_MSG_DEBUG( "Vertex Fit Failed" );
@@ -329,26 +303,23 @@ StatusCode BPhysBGammaFinder::addBranches(const EventContext&) const {
 
   } // end of vertex container loop
 
-  // Write the results to StoreGate
-  CHECK(evtStore()->record(conversionContainer.release(), m_conversionContainerName)); // FIXME Use Handles
-  CHECK(evtStore()->record(conversionAuxContainer.release(), m_conversionContainerName + "Aux.")); // FIXME Use Handles
+  SG::WriteHandle<xAOD::VertexContainer> wh(m_conversionContainerName, ctx);
+  ATH_CHECK( wh.record(std::move(conversionContainer), std::move(conversionAuxContainer)) );
 
   return StatusCode::SUCCESS;
 }
 
 
 // trackMomentum: returns refitted track momentum
-TVector3 BPhysBGammaFinder::trackMomentum(const xAOD::Vertex* vxCandidate, int trkIndex) const {
+TVector3 BPhysBGammaFinder::trackMomentum(const xAOD::Vertex &vxCandidate, int trkIndex) const {
 
   double px = 0.;
   double py = 0.;
   double pz = 0.;
-  if (vxCandidate) {
-    const Trk::TrackParameters* aPerigee = vxCandidate->vxTrackAtVertex()[trkIndex].perigeeAtVertex();
-    px = aPerigee->momentum()[Trk::px];
-    py = aPerigee->momentum()[Trk::py];
-    pz = aPerigee->momentum()[Trk::pz];
-  }
+  const Trk::TrackParameters* aPerigee = vxCandidate.vxTrackAtVertex()[trkIndex].perigeeAtVertex();
+  px = aPerigee->momentum()[Trk::px];
+  py = aPerigee->momentum()[Trk::py];
+  pz = aPerigee->momentum()[Trk::pz];
 
   return TVector3(px,py,pz);
 }
