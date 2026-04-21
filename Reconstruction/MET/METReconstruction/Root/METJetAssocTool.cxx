@@ -58,7 +58,7 @@ namespace met {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode METJetAssocTool::executeTool(xAOD::MissingETContainer* /*metCont*/, xAOD::MissingETAssociationMap* metMap) const
+  StatusCode METJetAssocTool::executeTool(xAOD::MissingETContainer* /*metCont*/, xAOD::MissingETAssociationMap* metMap, const EventContext& ctx) const
   {
     ATH_MSG_VERBOSE ("In execute: " << name() << "...");
 
@@ -70,7 +70,7 @@ namespace met {
     }
 
     // Retrieve the jet container
-    SG::ReadHandle<xAOD::JetContainer> jetCont(m_jetContKey);
+    SG::ReadHandle<xAOD::JetContainer> jetCont(m_jetContKey ,ctx);
     if (!jetCont.isValid()) {
       ATH_MSG_WARNING("Unable to retrieve input jet container " << m_jetContKey.key());
       return StatusCode::FAILURE;
@@ -79,7 +79,7 @@ namespace met {
     ATH_MSG_DEBUG("Successfully retrieved jet collection");
 
     ConstitHolder constits;
-    if (retrieveConstituents(constits).isFailure()) {
+    if (retrieveConstituents(constits, ctx).isFailure()) {
       ATH_MSG_WARNING("Unable to retrieve constituent containers");
       return StatusCode::FAILURE;
     }

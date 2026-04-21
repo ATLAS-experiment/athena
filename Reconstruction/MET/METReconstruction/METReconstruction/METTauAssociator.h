@@ -44,24 +44,24 @@ namespace met{
     /////////////////////////////////////////////////////////////////// 
     protected: 
 
-    StatusCode executeTool(xAOD::MissingETContainer* metCont, xAOD::MissingETAssociationMap* metMap) const final;
+    StatusCode executeTool(xAOD::MissingETContainer* metCont, xAOD::MissingETAssociationMap* metMap, const EventContext& ctx) const final;
     StatusCode extractTopoClusters(const xAOD::IParticle* obj,
                                    std::vector<const xAOD::IParticle*>& tclist,
-                                   const met::METAssociator::ConstitHolder& constits) const final;
+                                   const met::METAssociator::ConstitHolder& constits, const EventContext& ctx) const final;
 
     StatusCode extractPFO(const xAOD::IParticle* obj,
                           std::vector<const xAOD::IParticle*>& pfolist,
                           const met::METAssociator::ConstitHolder& constits,
-                          std::map<const xAOD::IParticle*,MissingETBase::Types::constvec_t> &momenta) const final;
+                          std::map<const xAOD::IParticle*,MissingETBase::Types::constvec_t> &momenta, const EventContext& ctx) const final;
 
     StatusCode extractFE(const xAOD::IParticle* obj,
                          std::vector<const xAOD::IParticle*>& felist,
                          const met::METAssociator::ConstitHolder& constits,
-                         std::map<const xAOD::IParticle*,MissingETBase::Types::constvec_t> &momenta) const final;   
+                         std::map<const xAOD::IParticle*,MissingETBase::Types::constvec_t> &momenta, const EventContext& ctx) const final;   
 
    StatusCode extractFEsFromLinks(const xAOD::TauJet* tau,
     				    std::vector<const xAOD::IParticle*>& felist,
-				    const met::METAssociator::ConstitHolder& constits) const;
+				    const met::METAssociator::ConstitHolder& constits, const EventContext& ctx) const;
 
     StatusCode extractFEs(const xAOD::TauJet* tau, 
 				 std::vector<const xAOD::IParticle*>& felist,
@@ -77,9 +77,9 @@ namespace met{
     METTauAssociator();
 
     SG::ReadHandleKey<xAOD::TauJetContainer> m_tauContKey{this, "InputCollection", "TauJets", "taus input key"};
-    SG::ReadDecorHandleKey<xAOD::TauJetContainer> m_neutralFEReadDecorKey{this,"NeutralFEReadDecorKey","", "Neutral FlowElement links key"};
-    SG::ReadDecorHandleKey<xAOD::TauJetContainer> m_chargedFEReadDecorKey{this,"ChargedFEReadDecorKey","", "Charged FlowElement links key"};
-  }; 
+    SG::ReadDecorHandleKey<xAOD::TauJetContainer> m_neutralFEReadDecorKey{this,"NeutralFEReadDecorKey", m_tauContKey, "neutralGlobalFELinks", "Neutral FlowElement links key"};
+    SG::ReadDecorHandleKey<xAOD::TauJetContainer> m_chargedFEReadDecorKey{this,"ChargedFEReadDecorKey", m_tauContKey, "chargedGlobalFELinks", "Charged FlowElement links key"};
+  };
 
 }
 

@@ -30,13 +30,10 @@
 // Track errors
 #include "EventPrimitives/EventPrimitivesHelpers.h"
 
-// Tool interface headers
-#include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
-#include "RecoToolInterfaces/ITrackIsolationTool.h"
-#include "RecoToolInterfaces/ICaloTopoClusterIsolationTool.h"
-
 // For DeltaR
 #include "FourMomUtils/xAODP4Helpers.h"
+
+#include "AsgDataHandles/WriteDecorHandle.h"
 
 #include "GaudiKernel/SystemOfUnits.h"
 
@@ -47,10 +44,6 @@ namespace met {
 
   using namespace xAOD;
 
-  // UE correction for each lepton
-  const static SG::Decorator<float> dec_UEcorr("UEcorr_Pt");
-
-
   ///////////////////////////////////////////////////////////////////
   // Public methods:
   ///////////////////////////////////////////////////////////////////
@@ -58,31 +51,8 @@ namespace met {
   // Constructors
   ////////////////
   METAssociator::METAssociator(const std::string& name) :
-    AsgTool(name),
-    m_trkseltool(this,""),
-    m_trkIsolationTool(this,""),
-    m_caloIsolationTool(this,"")
+    AsgTool(name)
   {
-    ATH_MSG_INFO("METAssoc constructor");
-    declareProperty( "UseModifiedClus",    m_useModifiedClus = false             );
-    declareProperty( "UseTracks",          m_useTracks   = true                  );
-    declareProperty( "PFlow",              m_pflow       = false                 );
-    declareProperty( "UseRapidity",        m_useRapidity = false                 );
-    declareProperty( "TrackSelectorTool",  m_trkseltool                          );
-    declareProperty( "TrackIsolationTool", m_trkIsolationTool                    );
-    declareProperty( "CaloIsolationTool",  m_caloIsolationTool                   );
-    declareProperty( "IgnoreJetConst",     m_skipconst = false                   );
-    declareProperty( "ForwardColl",        m_forcoll   = ""                      );
-    declareProperty( "ForwardDef",         m_foreta    = 2.5                     );
-    declareProperty( "CentralTrackPtThr",  m_cenTrackPtThr = 30e+3               );
-    declareProperty( "ForwardTrackPtThr",  m_forTrackPtThr = 30e+3               );
-    declareProperty( "CleanCPFO",          m_cleanChargedPFO = true              );
-    declareProperty( "UsePFOLinks",        m_usePFOLinks = false                 );
-    declareProperty( "UseFELinks",         m_useFELinks = false                  );
-    declareProperty( "NeutralPFOLinksKey", m_neutralPFOLinksKey = "neutralpfoLinks");
-    declareProperty( "ChargedPFOLinksKey", m_chargedPFOLinksKey = "chargedpfoLinks");
-    declareProperty( "NeutralFELinksKey",  m_neutralFELinksKey  = "neutralGlobalFELinks");
-    declareProperty( "ChargedFELinksKey",  m_chargedFELinksKey  = "chargedGlobalFELinks");
   }
 
   // Destructor
@@ -135,19 +105,23 @@ namespace met {
       }
     }
 
-    ATH_CHECK( m_clcollKey.initialize(!m_skipconst || m_forcoll.empty()));
+    ATH_CHECK( m_clcollKey.initialize(!m_skipconst || m_forcoll.value().empty()));
 
     std::string hybridname = "Etmiss";
     hybridname += m_clcollKey.key();
-    hybridname += m_foreta;
-    hybridname += m_forcoll;
-    ATH_CHECK( m_hybridContKey.assign(hybridname));
-    ATH_CHECK( m_hybridContKey.initialize(m_skipconst && !m_forcoll.empty()));
+    hybridname += m_foreta.value();
+    hybridname += m_forcoll.value();
+    ATH_CHECK( m_hybridContKey.assign(hybridname)); // FIXME Keys should be properly assigned during the configuration
+    ATH_CHECK( m_hybridContKey.initialize(m_skipconst && !m_forcoll.value().empty()));
 
+    ATH_CHECK(m_UEcorrPtDecorKey.initialize(SG::AllowEmpty));
+    if (!m_recoil && !m_UEcorrPtDecorKey.key().empty()) {
+      renounce(m_UEcorrPtDecorKey);
+    }
     return StatusCode::SUCCESS;
   }
 
-  StatusCode METAssociator::execute(xAOD::MissingETContainer* metCont, xAOD::MissingETAssociationMap* metMap) const
+  StatusCode METAssociator::execute(xAOD::MissingETContainer* metCont, xAOD::MissingETAssociationMap* metMap, const EventContext& ctx) const
   {
     ATH_MSG_DEBUG ("In execute: " << name() << "...");
     if(!metCont) {
@@ -164,15 +138,15 @@ namespace met {
       return StatusCode::FAILURE;
     }
 
-    return this->executeTool(metCont, metMap);
+    return this->executeTool(metCont, metMap, ctx);
   }
 
-  StatusCode METAssociator::retrieveConstituents(met::METAssociator::ConstitHolder& constits) const
+  StatusCode METAssociator::retrieveConstituents(met::METAssociator::ConstitHolder& constits, const EventContext& ctx) const
   {
     ATH_MSG_DEBUG ("In execute: " << name() << "...");
-    if (!m_skipconst || m_forcoll.empty()) {
+    if (!m_skipconst || m_forcoll.value().empty()) { // FIXME m_clcollKey.value().empty() ???
 
-      SG::ReadHandle<IParticleContainer> topoclusterCont(m_clcollKey);
+      SG::ReadHandle<IParticleContainer> topoclusterCont(m_clcollKey, ctx);
       if (!topoclusterCont.isValid()) {
         ATH_MSG_WARNING("Unable to retrieve topocluster container " << m_clcollKey.key() << " for overlap removal");
         return StatusCode::FAILURE;
@@ -182,10 +156,10 @@ namespace met {
     } else {
       std::string hybridname = "Etmiss";
       hybridname += m_clcollKey.key();
-      hybridname += m_foreta;
-      hybridname += m_forcoll;
+      hybridname += m_foreta.value();
+      hybridname += m_forcoll.value();
 
-      SG::ReadHandle<IParticleContainer> hybridCont(m_hybridContKey);
+      SG::ReadHandle<IParticleContainer> hybridCont(m_hybridContKey, ctx);
       if( hybridCont.isValid()) {
         constits.tcCont=hybridCont.cptr();
       } else {
@@ -193,7 +167,7 @@ namespace met {
         return StatusCode::FAILURE;
         // Trying to do this using write handles (need to get some input here)
         /*std::unique_ptr<ConstDataVector<IParticleContainer>> hybridCont = std::make_unique<ConstDataVector<IParticleContainer>>();
-        SG::WriteHandle<ConstDataVector<IParticleContainer>> hybridContHandle(hybridname);
+        SG::WriteHandle<ConstDataVector<IParticleContainer>> hybridContHandle(hybridname, ctx);
 
         StatusCode sc = hybridContHandle.record(std::make_unique<ConstDataVector<IParticleContainer>>(*hybridCont));
 
@@ -203,13 +177,13 @@ namespace met {
 
         }*/
 
-        /*SG::ReadHandle<IParticleContainer> centCont(m_clcoll);
+        /*SG::ReadHandle<IParticleContainer> centCont(m_clcoll, ctx);
         if (!centCont.isValid()) {
           ATH_MSG_WARNING("Unable to retrieve central container " << m_clcoll << " for overlap removal");
           return StatusCode::FAILURE;
         }
 
-        SG::ReadHandle<IParticleContainer> forCont(m_forcoll);
+        SG::ReadHandle<IParticleContainer> forCont(m_forcoll, ctx);
         if (!forCont.isValid()) {
           ATH_MSG_WARNING("Unable to retrieve forward container " << m_forcoll << " for overlap removal");
           return StatusCode::FAILURE;
@@ -240,7 +214,7 @@ namespace met {
       //if you want to skip tracks, set the track collection empty manually
       ATH_MSG_DEBUG("Skipping tracks");
     }else{
-      SG::ReadHandle<VertexContainer> vxCont(m_pvcollKey);
+      SG::ReadHandle<VertexContainer> vxCont(m_pvcollKey, ctx);
       if (!vxCont.isValid()) {
         ATH_MSG_WARNING("Unable to retrieve primary vertex container " << m_pvcollKey.key());
         //this is actually really bad.  If it's empty that's okay
@@ -263,7 +237,7 @@ namespace met {
 
       constits.trkCont=nullptr;
       ATH_MSG_DEBUG("Retrieving Track collection " << m_trkcollKey.key());
-      SG::ReadHandle<TrackParticleContainer> trCont(m_trkcollKey);
+      SG::ReadHandle<TrackParticleContainer> trCont(m_trkcollKey, ctx);
       if (!trCont.isValid()) {
         ATH_MSG_WARNING("Unable to retrieve track particle container");
         return StatusCode::FAILURE;
@@ -274,7 +248,7 @@ namespace met {
         if(!m_fecollKey.key().empty()){
           ATH_MSG_DEBUG("Retrieving FlowElement collection " << m_fecollKey.key());
           constits.feCont = nullptr;
-          SG::ReadHandle<xAOD::FlowElementContainer> feCont(m_fecollKey);
+          SG::ReadHandle<xAOD::FlowElementContainer> feCont(m_fecollKey, ctx);
           if (!feCont.isValid()) {
             ATH_MSG_ERROR("Unable to retrieve FlowElement container "<< m_fecollKey.key());
             return StatusCode::FAILURE;
@@ -284,7 +258,7 @@ namespace met {
         else{
           ATH_MSG_DEBUG("Retrieving PFlow collection " << m_pfcollKey.key());
           constits.pfoCont = nullptr;
-          SG::ReadHandle<PFOContainer> pfCont(m_pfcollKey);
+          SG::ReadHandle<PFOContainer> pfCont(m_pfcollKey, ctx);
           if (!pfCont.isValid()) {
             ATH_MSG_WARNING("Unable to PFlow object container");
             return StatusCode::FAILURE;
@@ -302,15 +276,16 @@ namespace met {
   ///////////////////////////////////////////////////////////////////
 
   StatusCode METAssociator::fillAssocMap(xAOD::MissingETAssociationMap* metMap,
-                                         const xAOD::IParticleContainer* hardObjs) const
+                                         const xAOD::IParticleContainer* hardObjs, const EventContext& ctx) const
   {
     ConstitHolder constits;
 
-    if (retrieveConstituents(constits).isFailure()) {
+    if (retrieveConstituents(constits, ctx).isFailure()) {
       ATH_MSG_DEBUG("Unable to retrieve constituent containers");
       return StatusCode::FAILURE;
     }
 
+    SG::WriteDecorHandle<xAOD::IParticleContainer, float> dec_UEcorr (m_UEcorrPtDecorKey, ctx);
     std::vector<const IParticle*> constlist;
     constlist.reserve(20);
     std::vector<const IParticle*> hardObjs_tmp;
@@ -340,7 +315,7 @@ namespace met {
             dec_UEcorr(*obj) = UEcorr_Pt;
           }
           else{ // MET part:
-            ATH_CHECK( this->extractFE(obj, constlist, constits, momentumOverride) );
+            ATH_CHECK( this->extractFE(obj, constlist, constits, momentumOverride, ctx) );
           }
           MissingETComposition::insert(metMap, obj, constlist, momentumOverride);
         }
@@ -351,14 +326,14 @@ namespace met {
             return StatusCode::FAILURE;
           }else{
             std::map<const IParticle*,MissingETBase::Types::constvec_t> momentumOverride;
-            ATH_CHECK( this->extractPFO(obj,constlist,constits,momentumOverride) );
+            ATH_CHECK( this->extractPFO(obj,constlist,constits,momentumOverride, ctx) );
             MissingETComposition::insert(metMap,obj,constlist,momentumOverride);
           }
         }
       } else {
         std::vector<const IParticle*> tclist;
         tclist.reserve(20);
-        ATH_CHECK( this->extractTopoClusters(obj,tclist,constits) );
+        ATH_CHECK( this->extractTopoClusters(obj,tclist,constits, ctx) );
         if(m_useModifiedClus) {
           for(const auto& cl : tclist) {
             // use index-parallelism to identify shallow copied constituents

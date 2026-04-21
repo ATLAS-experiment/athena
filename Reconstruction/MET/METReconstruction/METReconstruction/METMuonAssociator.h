@@ -43,19 +43,19 @@ namespace met{
     /////////////////////////////////////////////////////////////////// 
     protected: 
     
-    StatusCode executeTool(xAOD::MissingETContainer* metCont, xAOD::MissingETAssociationMap* metMap) const final;
-    StatusCode extractTopoClusters(const xAOD::IParticle* obj,
-                                   std::vector<const xAOD::IParticle*>& tclist,
-                                   const met::METAssociator::ConstitHolder& constits) const final;
-    StatusCode extractPFO(const xAOD::IParticle* obj,
-                          std::vector<const xAOD::IParticle*>& pfolist,
-                          const met::METAssociator::ConstitHolder& constits,
-                          std::map<const xAOD::IParticle*,MissingETBase::Types::constvec_t> &momenta) const final;
+    StatusCode executeTool(xAOD::MissingETContainer* metCont, xAOD::MissingETAssociationMap* metMap, const EventContext& ctx) const final;
+    virtual StatusCode extractTopoClusters(const xAOD::IParticle* obj,
+                                           std::vector<const xAOD::IParticle*>& tclist,
+                                           const met::METAssociator::ConstitHolder& constits, const EventContext& ctx) const final;
+    virtual StatusCode extractPFO(const xAOD::IParticle* obj,
+                                  std::vector<const xAOD::IParticle*>& pfolist,
+                                  const met::METAssociator::ConstitHolder& constits,
+                                  std::map<const xAOD::IParticle*,MissingETBase::Types::constvec_t> &momenta, const EventContext& ctx) const final;
 
-    StatusCode extractFE(const xAOD::IParticle* obj,
-                         std::vector<const xAOD::IParticle*>& felist,
-                         const met::METAssociator::ConstitHolder& constits,
-                         std::map<const xAOD::IParticle*,MissingETBase::Types::constvec_t> &momenta) const final; 
+    virtual StatusCode extractFE(const xAOD::IParticle* obj,
+                                 std::vector<const xAOD::IParticle*>& felist,
+                                 const met::METAssociator::ConstitHolder& constits,
+                                 std::map<const xAOD::IParticle*,MissingETBase::Types::constvec_t> &momenta, const EventContext& ctx) const final; 
 
     StatusCode extractFEHR(const xAOD::IParticle* obj,
                            std::vector<const xAOD::IParticle*> hardObjs,
@@ -66,11 +66,11 @@ namespace met{
 
     StatusCode extractFEsFromLinks(const xAOD::Muon* mu, //TODO
     				    std::vector<const xAOD::IParticle*>& felist,
-				    const met::METAssociator::ConstitHolder& constits) const;
+				    const met::METAssociator::ConstitHolder& constits, const EventContext& ctx) const;
 
     StatusCode extractFEs(const xAOD::Muon* mu, 
 				 std::vector<const xAOD::IParticle*>& felist,
-				 const met::METAssociator::ConstitHolder& constits) const;
+				 const met::METAssociator::ConstitHolder& constits, const EventContext& ctx) const;
 
     StatusCode extractTracks(const xAOD::IParticle* obj,
                              std::vector<const xAOD::IParticle*>& constlist,
@@ -96,13 +96,13 @@ namespace met{
     SG::ReadDecorHandleKey<xAOD::MuonContainer> m_neutralFEReadDecorKey{
       this,
       "NeutralFEReadDecorKey",
-      "",
+      m_muContKey, "neutralGlobalFELinks",
       "Neutral FlowElement links key"
     };
     SG::ReadDecorHandleKey<xAOD::MuonContainer> m_chargedFEReadDecorKey{
       this,
       "ChargedFEReadDecorKey",
-      "",
+      m_muContKey, "chargedGlobalFELinks",
       "Charged FlowElement links key"
     };
     SG::ReadDecorHandleKey<xAOD::CaloClusterContainer> m_elementLinkName{

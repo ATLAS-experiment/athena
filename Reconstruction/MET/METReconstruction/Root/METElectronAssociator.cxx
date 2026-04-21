@@ -40,18 +40,14 @@ namespace met {
     ATH_CHECK( m_elContKey.initialize());
     ATH_CHECK( METEgammaAssociator::initialize() );
 
-    if (m_usePFOLinks) {
-        if (m_electronNeutralPFOReadDecorKey.empty()) {ATH_CHECK( m_electronNeutralPFOReadDecorKey.assign(m_elContKey.key()+"."+m_neutralPFOLinksKey));} 
-        if (m_electronChargedPFOReadDecorKey.empty()) {ATH_CHECK( m_electronChargedPFOReadDecorKey.assign(m_elContKey.key()+"."+m_chargedPFOLinksKey));} 
-	ATH_CHECK(m_electronNeutralPFOReadDecorKey.initialize());
-    	ATH_CHECK(m_electronChargedPFOReadDecorKey.initialize());
-    }
-    if (m_useFELinks) {
-        if (m_electronNeutralFEReadDecorKey.empty())  {ATH_CHECK( m_electronNeutralFEReadDecorKey.assign(m_elContKey.key()+"."+m_neutralFELinksKey));} 
-        if (m_electronChargedFEReadDecorKey.empty())  {ATH_CHECK( m_electronChargedFEReadDecorKey.assign(m_elContKey.key()+"."+m_chargedFELinksKey));} 
-    	ATH_CHECK(m_electronNeutralFEReadDecorKey.initialize());
-    	ATH_CHECK(m_electronChargedFEReadDecorKey.initialize());
-    }
+    ATH_CHECK(m_electronNeutralPFOReadDecorKey.initialize(m_usePFOLinks));
+    ATH_CHECK(m_electronChargedPFOReadDecorKey.initialize(m_usePFOLinks));
+    ATH_CHECK(m_electronNeutralFEReadDecorKey.initialize(m_useFELinks));
+    ATH_CHECK(m_electronChargedFEReadDecorKey.initialize(m_useFELinks));
+    ATH_CHECK(m_photonNeutralPFOReadDecorKey.initialize(false));
+    ATH_CHECK(m_photonChargedPFOReadDecorKey.initialize(false));
+    ATH_CHECK(m_photonNeutralFEReadDecorKey.initialize(false));
+    ATH_CHECK(m_photonChargedFEReadDecorKey.initialize(false));
 
     return StatusCode::SUCCESS;
   }
@@ -59,18 +55,18 @@ namespace met {
 
   // executeTool
   ////////////////
-  StatusCode METElectronAssociator::executeTool(xAOD::MissingETContainer* /*metCont*/, xAOD::MissingETAssociationMap* metMap) const
+  StatusCode METElectronAssociator::executeTool(xAOD::MissingETContainer* /*metCont*/, xAOD::MissingETAssociationMap* metMap, const EventContext& ctx) const
   {
     ATH_MSG_VERBOSE ("In execute: " << name() << "...");
 
-    SG::ReadHandle<xAOD::ElectronContainer> elCont(m_elContKey);
+    SG::ReadHandle<xAOD::ElectronContainer> elCont(m_elContKey, ctx);
     if (!elCont.isValid()) {
       ATH_MSG_WARNING("Unable to retrieve input electron container " << m_elContKey.key());
       return StatusCode::FAILURE;
     }
 
     ATH_MSG_DEBUG("Successfully retrieved electron collection");
-    if (fillAssocMap(metMap,elCont.cptr()).isFailure()) {
+    if (fillAssocMap(metMap,elCont.cptr(), ctx).isFailure()) {
       ATH_MSG_WARNING("Unable to fill map with electron container " << m_elContKey.key());
       return StatusCode::FAILURE;
     }
