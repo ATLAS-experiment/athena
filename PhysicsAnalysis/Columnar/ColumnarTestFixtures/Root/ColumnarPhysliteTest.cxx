@@ -2727,6 +2727,9 @@ void ColumnarPhysLiteTest ::doCallMulti(
         summary.timeRead = 0;
         summary.timeUnpack = 0;
         summary.timeShallowCopy = 0;
+        summary.entrySize = 0;
+        summary.uncompressedSize = 0;
+        summary.numBaskets = 0;
         summary.entries = std::nullopt;
         summary.nullEntries = std::nullopt;
         for (auto& column : usedColumns)
@@ -2734,6 +2737,9 @@ void ColumnarPhysLiteTest ::doCallMulti(
           branchPerfData.push_back (column->getPerfData (emptyTime));
           summary.timeRead.value() += branchPerfData.back().timeRead.value_or(0);
           summary.timeUnpack.value() += branchPerfData.back().timeUnpack.value_or(0);
+          summary.entrySize.value() += branchPerfData.back().entrySize.value_or(0);
+          summary.uncompressedSize.value() += branchPerfData.back().uncompressedSize.value_or(0);
+          summary.numBaskets.value() += branchPerfData.back().numBaskets.value_or(0);
           summary.timeShallowCopy.value() += branchPerfData.back().timeShallowCopy.value_or(0);
         }
         std::sort (branchPerfData.begin(), branchPerfData.end(), [] (const auto& a, const auto& b) {return a.name < b.name;});
