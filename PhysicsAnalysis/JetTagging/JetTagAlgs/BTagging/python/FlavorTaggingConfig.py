@@ -247,6 +247,7 @@ def JetBTagginglessByVertexAlgCfg(
                 tagger = flags.BTagging.AK4TaggerName
                 args["remapping"] = {
                     'BTagTrackToJetAssociator':'TracksForBTagging' + dz_suffix + "assoc",
+                    tagger + '_TrackLinks': tagger + dz_suffix + 'TrackLinks',
                     tagger + '_pb': tagger + dz_suffix + 'pb',
                     tagger + '_pc': tagger + dz_suffix + 'pc',
                     tagger + '_pu': tagger + dz_suffix + 'pu',
@@ -255,8 +256,7 @@ def JetBTagginglessByVertexAlgCfg(
                 if flags.GeoModel.Run <= LHCPeriod.Run3:
                     args["remapping"].update({
                         tagger + '_TrackOrigin': tagger + dz_suffix + 'TrackOrigin',
-                        tagger + '_VertexIndex': tagger + dz_suffix + 'VertexIndex',
-                        tagger + '_TrackLinks': tagger + dz_suffix + 'TrackLinks'})
+                        tagger + '_VertexIndex': tagger + dz_suffix + 'VertexIndex'})
 
                 if any(tag in dirname for tag in ['/GN2v01/', '/GN2HL/']):
                     args['tag_requirements'] = {'nonzeroTracks'}
