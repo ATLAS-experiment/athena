@@ -15,8 +15,10 @@ if (NOT XAOD_STANDALONE)
 
   atlas_add_component( FlavorTagJetDecoratorsLib
     src/JetOverlapLeptonDecoratorAlg.cxx
+    src/JetScalarCastAlg.cxx
     src/PrimaryVertexDecoratorAlg.cxx
     src/SoftElectronSelectionAlg.cxx
+    src/VectorExploderAlg.cxx
     src/components/FlavorTagJetDecorators_entries.cxx
     INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
     LINK_LIBRARIES

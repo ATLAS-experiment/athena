@@ -6,6 +6,7 @@ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #include "xAODBase/IParticle.h"
 #include "xAODPFlow/FlowElement.h"
 #include "xAODCaloEvent/CaloCluster.h"
+#include <unordered_set>
 #include <vector>
 
 namespace FlavorTagInference {
@@ -44,11 +45,18 @@ namespace FlavorTagInference {
         const xAOD::IParticle& jet
     ) const
     {
-        // Two-hop navigation: jet -> constituentLinks -> FlowElement
-        //                     -> otherObjects() -> CaloCluster
+        // Three-hop navigation for UFO jets:
+        //   jet -> constituentLinks -> FlowElement (UFO)
+        //       -> otherObjects() -> FlowElement (intermediate CSSK PFO)
+        //       -> otherObjects() -> CaloCluster
+        // Two-hop navigation for PFlow jets (small-R):
+        //   jet -> constituentLinks -> FlowElement (PFO)
+        //       -> otherObjects() -> CaloCluster
+        // Dedup via unordered_set because UFO->cluster is many-to-many.
         static const SG::AuxElement::ConstAccessor<PartLinks> acc("constituentLinks");
 
         std::vector<std::pair<double, const xAOD::CaloCluster*>> clusters;
+        std::unordered_set<const xAOD::CaloCluster*> seen;
 
         for (const ElementLink<IPC>& link : acc(jet)) {
             if (!link.isValid()) {
@@ -59,14 +67,28 @@ namespace FlavorTagInference {
             if (!flow) {
                 continue;
             }
-            // Second hop: FlowElement -> otherObjects() -> CaloCluster
+            // Second hop: FlowElement -> otherObjects()
             for (const auto* other : flow->otherObjects()) {
                 if (!other) {
                     continue;
                 }
-                const auto* cluster = dynamic_cast<const xAOD::CaloCluster*>(other);
-                if (cluster) {
-                    clusters.push_back({m_caloClusterSortVar(cluster, jet), cluster});
+                // PFlow path: `other` is already a CaloCluster.
+                if (const auto* cluster = dynamic_cast<const xAOD::CaloCluster*>(other)) {
+                    if (seen.insert(cluster).second) {
+                        clusters.push_back({m_caloClusterSortVar(cluster, jet), cluster});
+                    }
+                    continue;
+                }
+                // UFO path: `other` is an intermediate FlowElement
+                // (e.g. CSSKGParticleFlowObject). Recurse one more hop.
+                if (const auto* intermediate = dynamic_cast<const xAOD::FlowElement*>(other)) {
+                    for (const auto* grandOther : intermediate->otherObjects()) {
+                        if (!grandOther) { continue; }
+                        const auto* cluster = dynamic_cast<const xAOD::CaloCluster*>(grandOther);
+                        if (cluster && seen.insert(cluster).second) {
+                            clusters.push_back({m_caloClusterSortVar(cluster, jet), cluster});
+                        }
+                    }
                 }
             }
         }

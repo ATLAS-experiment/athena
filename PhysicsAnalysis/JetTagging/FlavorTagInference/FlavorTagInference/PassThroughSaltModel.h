@@ -33,6 +33,7 @@ namespace FlavorTagInference {
     ///   "constituents": [
     ///     {
     ///       "node_name": "tracks_r22loose_sd0sort",
+    ///       "input_key": "tracks",
     ///       "variables": [
     ///         {"input": "d0", "output": "trk_d0"},
     ///         ...
@@ -40,6 +41,9 @@ namespace FlavorTagInference {
     ///     }
     ///   ]
     /// }
+    /// "input_key" must be one of: tracks, flows, hits, electrons, muons,
+    /// clusters, towers — it is the key used to look up the pre-assembled
+    /// constituent tensor produced by the matching *Loader.
     PassThroughSaltModel(const nlohmann::json& config);
     virtual ~PassThroughSaltModel() = default;
 
@@ -63,18 +67,13 @@ namespace FlavorTagInference {
 
     /// Per-constituent node config
     struct ConstituentNode {
-      std::string node_name;       ///< e.g. "tracks_r22loose_sd0sort"
-      std::string input_key;       ///< key in gnn_inputs, e.g. "track_features"
+      std::string node_name;       ///< e.g. "tracks_r22loose_sd0sort" (drives ConstituentsLoader sort/select regex)
+      std::string input_key;       ///< key in gnn_inputs, read from JSON "input_key" (e.g. "tracks", "flows")
       size_t num_vars;             ///< number of variables in this node
       std::vector<std::string> output_names; ///< per-variable output names
       std::vector<std::string> var_types;  ///< per-variable: "float", "int", or "char"
     };
     std::vector<ConstituentNode> m_constituent_nodes;
-
-    /// Derive gnn_inputs key from the JSON node_name for V1 models.
-    /// Mirrors GNNDataLoader::getVecInputName() + ConstituentsLoader
-    /// output_name convention.
-    static std::string deriveInputKey(const std::string& node_name);
   };
 
 } // namespace FlavorTagInference

@@ -292,7 +292,7 @@ def add_truth_vertex_decorations(
     if large_r_jet_collection is not None:
         jet_collections.append((large_r_jet_collection, 1.0))
 
-    acc.merge(truthVertexDecorator(flags, jetCollections=jet_collections))
+    acc.merge(truthVertexDecorator(flags, jet_collections=jet_collections))
 
     # TruthParticles is in AllVariables so its decorations are saved automatically
     slimming_helper.ExtraVariables += [

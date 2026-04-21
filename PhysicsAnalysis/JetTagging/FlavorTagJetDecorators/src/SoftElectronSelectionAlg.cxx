@@ -92,7 +92,7 @@ namespace FlavorTagJetDecorators {
     TLorentzVector el4;
     el4.SetPtEtaPhiE(el.pt(), el.eta(), el.phi(), el.e());
 
-    if (jet4.DeltaR(el4) > 0.4)
+    if (m_maxDeltaR > 0. && jet4.DeltaR(el4) > m_maxDeltaR)
       return false;
 
     if (std::abs(el.eta()) > m_absEtaMaximum)

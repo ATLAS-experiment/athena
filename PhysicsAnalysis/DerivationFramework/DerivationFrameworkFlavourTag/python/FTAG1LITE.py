@@ -1,20 +1,119 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_FTAG1LITE.py
-# Minimal derivation for producing GN3 training samples via TDD.
+# Minimal derivation for producing GN3/GN3X training samples via TDD.
 #
 # Built from individual augmentation modules rather than the monolithic
 # PhysCommonAugmentationsCfg, so we only run what TDD actually needs.
-# Skips: MET, DiTau, large-R jets, triggers, LRT, pixel/SCT clusters.
+# Skips: MET, DiTau, triggers, LRT, pixel/SCT clusters.
+#
+# Supports two jet collections (JET_COLLECTIONS):
+#   small: AntiKt4EMPFlowJets  — full calibration + NNJvt + overlap-lepton
+#   large: AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets  — as-is, no calibration
 #
 # See AODToFTAGTraining (TDD ca_block) for the individual augmentation
 # pattern this is based on.
 #====================================================================
 
+from __future__ import annotations
+
+import json
+import os
+
+import ROOT
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod
-JETS = "AntiKt4EMPFlowJets"
+
+# PassThrough JSON filenames (shipped under DerivationFrameworkFlavourTag/data
+# via atlas_install_data, resolved at runtime via PathResolver on DATAPATH).
+# To test a local copy without rebuilding, override via --preExec, e.g.
+#   --preExec "from DerivationFrameworkFlavourTag import FTAG1LITE as m; \
+#              m.PASSTHROUGH_JSON_SMALL='/abs/path/to/local.json'"
+PASSTHROUGH_JSON_SMALL = "DerivationFrameworkFlavourTag/passthrough_ftag1lite.json"
+PASSTHROUGH_JSON_LARGE = "DerivationFrameworkFlavourTag/passthrough_ftag1lite_largeR.json"
+
+# Calorimeter sampling layer names in enum order (CaloSampling::CaloSample).
+# Used to build the OutputNamesMap for VectorExploderAlg when exploding
+# EnergyPerSampling / EnergyPerSamplingCaloBased on AntiKt4EMPFlowJets.
+# These vectors are small-R only — large-R jets do not carry them.
+_CALO_SAMPLING_NAMES = [
+    "PreSamplerB", "EMB1", "EMB2", "EMB3",
+    "PreSamplerE", "EME1", "EME2", "EME3",
+    "HEC0", "HEC1", "HEC2", "HEC3",
+    "TileBar0", "TileBar1", "TileBar2",
+    "TileGap1", "TileGap2", "TileGap3",
+    "TileExt0", "TileExt1", "TileExt2",
+    "FCAL0", "FCAL1", "FCAL2",
+    "MINIFCAL0", "MINIFCAL1", "MINIFCAL2", "MINIFCAL3",
+]
+
+_ptjson_cache = {}
+
+
+def _load_passthrough_json(path):
+    """Resolve a PassThrough JSON path and return the parsed dict.
+
+    Accepts either a DATAPATH-relative string (e.g.
+    'DerivationFrameworkFlavourTag/passthrough_ftag1lite.json') or an
+    absolute path.  Result is cached per-path within the process.
+    """
+    if path in _ptjson_cache:
+        return _ptjson_cache[path]
+    resolved = path
+    if not os.path.isabs(resolved):
+        # DATAPATH hosts files shipped via atlas_install_data (i.e.
+        # InstallArea/data/<package>/<file>).  CALIBPATH (used by
+        # FindCalibFile) only resolves CVMFS calib-area paths and will
+        # not find package-shipped JSONs.
+        resolved = ROOT.PathResolver.find_file(resolved, "DATAPATH")
+    with open(resolved) as f:
+        cfg = json.load(f)
+    _ptjson_cache[path] = cfg
+    return cfg
+
+
+# Jet collection registry — one entry per collection FTAG1LITE processes.
+# `small` gets NNJvt + lepton-overlap cuts + calibration decorator.
+# `large` is stored as-is; analysis-time calibration only.
+#
+# The `thinning` selection string lives in each PassThrough JSON under the
+# top-level "thinning" key; it uses `{jet}` as a placeholder for the
+# container name and is substituted at config time.
+JET_COLLECTIONS = {
+    "small": {
+        "name": "AntiKt4EMPFlowJets",
+        "calibrate": True,
+        "nnjvt": True,
+        "overlap_lepton": True,
+        "matching": True,
+        "passthrough_json": PASSTHROUGH_JSON_SMALL,
+        "ghost_muons": True,
+        "soft_electron_selection": True,
+        # FlavorTaggingCfg schedules electron association for small-R when the
+        # NN modset contains "E" — no need to schedule it again here.
+        "needs_electron_association": False,
+    },
+    "large": {
+        "name": "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
+        "calibrate": False,
+        "nnjvt": False,
+        "overlap_lepton": False,
+        "matching": False,
+        "passthrough_json": PASSTHROUGH_JSON_LARGE,
+        "ghost_muons": True,
+        "soft_electron_selection": True,
+        # FlavorTaggingCfg does NOT schedule electron association for large-R
+        # (GN3x modset lacks "E"). We must schedule it explicitly so that
+        # FTagElectrons is available for SoftElectronSelectionAlg.
+        "needs_electron_association": True,
+    },
+}
+
+# Convenience alias for the small-R collection (used where JETS was referenced
+# in non-looped contexts: e.g. JetLeptonDecayLabelAlg, soft-electron algs,
+# ghost-muon association, truth-tau matching).
+JETS = JET_COLLECTIONS["small"]["name"]
 
 
 def _int_labels():
@@ -22,14 +121,6 @@ def _int_labels():
     algs = ['HadronConeExcl', 'HadronGhost']
     types = ['Extended', '']
     return [f'{a}{e}TruthLabelID' for a in algs for e in types]
-
-
-def _match_vars(source):
-    """Extra variables produced by jet matching augmentation."""
-    labels = _int_labels()
-    allvars = [f'{l}From{source}' for l in labels]
-    allvars += [f'delta{v}To{source}' for v in ['R', 'Pt']]
-    return allvars
 
 
 def _filter_aux_vars(item_list, container, vars_to_remove, prefix_filter=None):
@@ -130,7 +221,8 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
     # ── Flavour tagging ──
     if flags.Reco.EnableBTagging:
         from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
-        acc.merge(FlavorTaggingCfg(flags, JETS))
+        for cfg in JET_COLLECTIONS.values():
+            acc.merge(FlavorTaggingCfg(flags, cfg["name"]))
 
     # ── Ftag-specific augmentations ──
     from JetTagDerivationUtils.JetMatchingConfig import JetMatchingCfg
@@ -138,10 +230,6 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
         ParentDecoratorCfg,
         trackTruthDecorator,
     )
-
-    acc.merge(JetMatchingCfg(
-        flags, target=JETS, ints_to_copy=_int_labels(),
-    ))
 
     # ── NearestJet matching (reco-to-reco) ──
     # Match each jet to its nearest neighbour reco jet and copy kinematic
@@ -214,23 +302,44 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
         )
     )
 
-    # ── Track covariance uncertainties ──
-    # Pre-compute phiUncertainty, thetaUncertainty, qOverPUncertainty from
-    # the track covariance matrix diagonal.  The full CovMatrix is then
-    # stripped from the DAOD output (significant size savings) while TDD
-    # reads these simple float decorations instead.
-    acc.addEventAlgo(
-        CompFactory.TrackingDecorAlgorithms.TrackCovarianceDecoratorAlg(
-            "TrackCovarianceDecoratorAlg_InDetTrackParticles",
-            TrackContainer="InDetTrackParticles",
-        )
-    )
+    # ── Soft electron selection (per-collection) ──
+    # Apply TDD's 14 selection cuts at derivation time using the ftag_
+    # decorations from SoftElectronDecoratorAlg (not caloCluster).
+    # Writes GhostFTagSelectedElectrons on each jet.  TDD reads these
+    # pre-selected links directly, so egammaClusters can be dropped.
+    # For large-R, FlavorTaggingCfg doesn't schedule electron association
+    # (no "E" modset), so we schedule FTagElectronAssociationCfg first.
+    from FlavorTagDiscriminants.FTagElectronAssociationConfig import FTagElectronAssociationCfg
+    for cfg in JET_COLLECTIONS.values():
+        if cfg["needs_electron_association"]:
+            # Only needed when FlavorTaggingCfg didn't already schedule electron
+            # association (i.e. large-R GN3x without "E" modset).
+            acc.merge(FTagElectronAssociationCfg(flags, cfg["name"]))
+        if cfg["soft_electron_selection"]:
+            acc.addEventAlgo(
+                CompFactory.FlavorTagJetDecorators.SoftElectronSelectionAlg(
+                    f"SoftElectronSelectionAlg_{cfg['name']}",
+                    jetContainer=cfg["name"],
+                    selectedElectronsKey=(
+                        f"{cfg['name']}.GhostFTagSelectedElectrons"
+                    ),
+                )
+            )
+
+    # ── Ghost muon association (per-collection) ──
+    # Must run before PassThrough model (MuonsLoader).
+    for cfg in JET_COLLECTIONS.values():
+        if cfg["ghost_muons"]:
+            acc.addEventAlgo(
+                CompFactory.FlavorTagDiscriminants.FTagGhostMuonAssociationAlg(
+                    f"FTagGhostMuonAssociationAlg_{cfg['name']}",
+                    jetContainer=cfg["name"],
+                    outMuons=f"{cfg['name']}.GhostFTagMuons",
+                )
+            )
 
     # ── Calo charged flow decorator ──
-    # Pre-compute usedInChargedFlow flag on CaloCalTopoClusters before
-    # jet constituent thinning removes PFlow objects. Without this, TDD
-    # computes the flag at dump time on the thinned DAOD, missing charged
-    # PFOs that were thinned out.
+    # Pre-compute usedInChargedFlow flag on CaloCalTopoClusters.
     acc.addEventAlgo(
         CompFactory.FlavorTagDiscriminants.CaloChargedFlowDecoratorAlg(
             "CaloChargedFlowDecoratorAlg",
@@ -245,9 +354,9 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
         acc.merge(FlowEnergyDecoratorCfg())
 
     # ── Jet calibrated pT decorator ──
-    # Register a public JetCalibrationTool with the same name as PHYSLITE's.
-    # Both algorithms use PublicToolHandle, so Gaudi shares a single instance.
-    # In co-production the CA deduplicates; standalone just has one copy.
+    # Apply TDD-compatible calibration (JetArea_Residual_EtaJES_GSC) and
+    # decorate each jet with pt_calibrated. Used for the thinning selection
+    # to match TDD's 20 GeV calibrated pT cut exactly.
     # Calibration config differs between Run 2 and Run 3 — must match
     # JetAnalysisConfig.py (JetCalibrationBlock) to share the tool.
     if flags.GeoModel.Run is LHCPeriod.Run2:
@@ -275,6 +384,105 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
         )
     )
 
+    # ── Large-R jet truth label ──
+    # New factorised truth label (Origin × Decay × Containment enum,
+    # Int_t) for AntiKt10UFOCSSK...Jets.  Written by
+    # FtagLargeRJetTruthLabelTool (MR !87294).  Guard is inside the
+    # cfg — returns empty CA on data.
+    from ParticleJetTools.FtagLargeRJetTruthLabelConfig import (
+        FtagLargeRJetTruthLabelCfg,
+    )
+    acc.merge(FtagLargeRJetTruthLabelCfg(
+        flags,
+        jetCollection="AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
+    ))
+
+    # ── Pass-through model (constituent variables from JSON) ──
+    # Reads all constituent types (tracks, electrons, muons, calo,
+    # flow, towers) via GNN loaders and outputs per-constituent
+    # vectors as jet decorations.  bfloat16 compression is inline
+    # via "cast": {"exp":8, "man":7} in the JSON config.
+    # One PassThroughModel instance per jet collection; each reads its
+    # own JSON from the module-level PASSTHROUGH_JSON_* constants.
+    from FlavorTagInference.FlavorTagNNConfig import PassThroughModelCfg
+    for cfg in JET_COLLECTIONS.values():
+        json_path = cfg["passthrough_json"]
+        if json_path:
+            acc.merge(PassThroughModelCfg(
+                flags, cfg["name"],
+                jsonPath=json_path,
+                variableRemapping={
+                    'BTagTrackToJetAssociator': 'GhostTrack',
+                    'FTagElectrons': 'GhostFTagSelectedElectrons',
+                    'FTagMuons': 'GhostFTagMuons',
+                },
+                muons='Muons',
+            ))
+
+    # ── bfloat16 compression of constituent vector decorations ──
+    # Handled inline by PassThrough model via "cast": "bf16" in JSON config.
+    # The GNN framework converts float→uint16 at decoration time using
+    # FPCompressionUtils::truncateToUint16(v, 8, 7).  bfloat16 has float32's
+    # exponent range, so no scale factors needed — values stored in native MeV.
+
+    # ── VectorExploderAlg: explode EnergyPerSampling vectors into scalars ──
+    # Hardcoded to AntiKt4EMPFlowJets only — large-R jets do not carry these
+    # vectors.  Each entry in _CALO_SAMPLING_NAMES corresponds to one index
+    # in the 28-element EnergyPerSampling / EnergyPerSamplingCaloBased aux
+    # vectors.  The resulting scalar decorations (e_<layer> / e_<layer>_CaloBased)
+    # are then picked up by the JetScalarCastAlg loop below (via jet_vars in
+    # the JSON) and stored as bf16.  Scheduling lives here in Python — the JSON
+    # is the persistence spec only.
+    _eps_scalar_names = [f"e_{s}" for s in _CALO_SAMPLING_NAMES]
+    acc.addEventAlgo(
+        CompFactory.FlavorTagJetDecorators.VectorExploderAlg(
+            "VectorExploderAlg_AntiKt4EMPFlowJets_EnergyPerSampling",
+            Collection="AntiKt4EMPFlowJets",
+            InputVectorName="EnergyPerSampling",
+            OutputNamesMap={i: name for i, name in enumerate(_eps_scalar_names)},
+        )
+    )
+    _epscb_scalar_names = [f"e_{s}_CaloBased" for s in _CALO_SAMPLING_NAMES]
+    acc.addEventAlgo(
+        CompFactory.FlavorTagJetDecorators.VectorExploderAlg(
+            "VectorExploderAlg_AntiKt4EMPFlowJets_EnergyPerSamplingCaloBased",
+            Collection="AntiKt4EMPFlowJets",
+            InputVectorName="EnergyPerSamplingCaloBased",
+            OutputNamesMap={i: name for i, name in enumerate(_epscb_scalar_names)},
+        )
+    )
+
+    # ── JetScalarCastAlg: cast exploded scalars to bf16 ──
+    # For each entry in `jet_vars`, run one JetScalarCastAlg per jet
+    # collection.  Reads a bare scalar decoration and writes a bf16-truncated
+    # copy.  Only small-R uses jet_vars (large-R JSON has no such section).
+    for cfg in JET_COLLECTIONS.values():
+        pt_cfg_jv = _load_passthrough_json(cfg["passthrough_json"])
+        collection = cfg["name"]
+        for jvar in pt_cfg_jv.get("jet_vars", []):
+            alg_name = f"JetScalarCastAlg_{collection}_{jvar['output']}"
+            cast = jvar.get("cast", {"exp": 8, "man": 7})
+            acc.addEventAlgo(
+                CompFactory.FlavorTagJetDecorators.JetScalarCastAlg(
+                    alg_name,
+                    Collection=collection,
+                    InputDecor=jvar["input"],
+                    OutputDecor=jvar["output"],
+                    ExpBits=cast.get("exp", 8),
+                    ManBits=cast.get("man", 7),
+                )
+            )
+
+    # ── Primary vertex decorator ──
+    # Pre-compute nPrimaryVertices (int) and primaryVertexZ (float) as
+    # EventInfo decorations.  TDD reads these instead of the PrimaryVertices
+    # container, which can then be dropped from the DAOD output.
+    acc.addEventAlgo(
+        CompFactory.FlavorTagJetDecorators.PrimaryVertexDecoratorAlg(
+            "PrimaryVertexDecoratorAlg",
+        )
+    )
+
     # ── Truth tau matching ──
     # Match each jet to the nearest isolated truth tau using visible
     # 4-momentum, and decorate with tau properties (isHadronicTau,
@@ -290,91 +498,57 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
         )
     )
 
+    # ── Overlap lepton flag ──
+    # For each jet, check if any truth electron/muon from W/Z/top
+    # (status==1, classifierParticleOrigin in {WBoson, ZBoson, top})
+    # is within DeltaR < 0.4.  Writes char ftag_hasOverlapLepton on
+    # the jet.  TDD reads this flag to skip overlapping jets, replacing
+    # the truth association that required TruthElectrons/TruthMuons
+    # containers in the DAOD.
+    # Only applied to small-R jets (large-R has no overlap-lepton cut).
+    for cfg in JET_COLLECTIONS.values():
+        if cfg["overlap_lepton"]:
+            acc.addEventAlgo(
+                CompFactory.FlavorTagJetDecorators.JetOverlapLeptonDecoratorAlg(
+                    f"JetOverlapLeptonDecoratorAlg_{cfg['name']}",
+                    JetContainer=cfg["name"],
+                    TruthElectronContainer="TruthElectrons",
+                    TruthMuonContainer="TruthMuons",
+                )
+            )
+
     # ── Thinning ──
-    from DerivationFrameworkInDet.InDetToolsConfig import (
-        EgammaTrackParticleThinningCfg,
-        JetConstituentThinningCfg,
-        JetGhostThinningCfg,
-        JetTrackParticleThinningCfg,
-        MuonTrackParticleThinningCfg,
-    )
+    # Only jet thinning remains.  All constituent variables (tracks,
+    # electrons, muons, calo, flow, towers) are jet decorations via
+    # PassThrough — no separate constituent containers need thinning.
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
         GenericObjectThinningCfg,
     )
 
-    jet_sel = (
-        f'{JETS}.pt_calibrated > 20*GeV'
-        f' && abs({JETS}.eta) < 2.5'
-    )
     stream = kwargs['StreamName']
     thinningTools = []
 
-    thinningTools.append(acc.getPrimaryAndMerge(GenericObjectThinningCfg(
-        flags,
-        name="FTAG1LITEJetThinningTool",
-        StreamName=stream,
-        ContainerName=JETS,
-        SelectionString=jet_sel,
-    )))
-
-    # Track quality thinning — mirrors TDD r22loose-track-cuts
-    # (TDD still applies all cuts at dump time, so this is purely a DAOD size optimisation)
-    track_quality_sel = (
-        "InDetTrackParticles.pt > 500"
-        " && abs(InDetTrackParticles.eta) < 2.5"
-        " && abs(InDetTrackParticles.d0) < 5.0*mm"
-        " && (InDetTrackParticles.numberOfPixelHits + InDetTrackParticles.numberOfPixelDeadSensors"
-        " + InDetTrackParticles.numberOfSCTHits + InDetTrackParticles.numberOfSCTDeadSensors) >= 8"
-        " && (InDetTrackParticles.numberOfPixelHoles + InDetTrackParticles.numberOfSCTHoles) <= 2"
-        " && InDetTrackParticles.numberOfPixelHoles <= 1"
-    )
-
-    thinningTools.append(acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(
-        flags,
-        name="FTAG1LITEJetTPThinningTool",
-        StreamName=stream,
-        JetKey=JETS,
-        SelectionString=jet_sel,
-        InDetTrackParticlesKey="InDetTrackParticles",
-        TrackSelectionString=track_quality_sel,
-    )))
-
-    thinningTools.append(acc.getPrimaryAndMerge(MuonTrackParticleThinningCfg(
-        flags,
-        name="FTAG1LITEMuonTPThinningTool",
-        StreamName=stream,
-        MuonKey="Muons",
-        InDetTrackParticlesKey="InDetTrackParticles",
-    )))
-
-    thinningTools.append(acc.getPrimaryAndMerge(EgammaTrackParticleThinningCfg(
-        flags,
-        name="FTAG1LITEElectronTPThinningTool",
-        StreamName=stream,
-        SGKey="Electrons",
-        InDetTrackParticlesKey="InDetTrackParticles",
-    )))
-
-    thinningTools.append(acc.getPrimaryAndMerge(JetConstituentThinningCfg(
-        flags,
-        name="FTAG1LITEJetConstituentThinningTool",
-        StreamName=stream,
-        JetKey=JETS,
-        SelectionString=jet_sel,
-        JetConstituentName="CHSG",
-        GlobalConstituentName="Global",
-        OtherObjectsName="CaloCalTopoClusters",
-    )))
-
-    thinningTools.append(acc.getPrimaryAndMerge(JetGhostThinningCfg(
-        flags,
-        name="FTAG1LITEGhostTowerThinningTool",
-        StreamName=stream,
-        JetKey=JETS,
-        SelectionString=jet_sel,
-        GhostName="GhostTower",
-        GhostContainerName="CaloCalFwdTopoTowers",
-    )))
+    # Thin each jet collection independently using its own selection string.
+    # The thinning expression lives in the PassThrough JSON under the
+    # top-level "thinning" key and uses `{jet}` as a placeholder for the
+    # container name.
+    for key, cfg in JET_COLLECTIONS.items():
+        jet_name = cfg["name"]
+        pt_cfg = _load_passthrough_json(cfg["passthrough_json"])
+        thinning_tmpl = pt_cfg.get("thinning")
+        if not thinning_tmpl:
+            raise RuntimeError(
+                f"PassThrough JSON {cfg['passthrough_json']} is missing a "
+                f"top-level 'thinning' selection string."
+            )
+        jet_sel = thinning_tmpl.format(jet=jet_name)
+        thinningTools.append(acc.getPrimaryAndMerge(GenericObjectThinningCfg(
+            flags,
+            name=f"FTAG1LITEJetThinningTool_{key}",
+            StreamName=stream,
+            ContainerName=jet_name,
+            SelectionString=jet_sel,
+        )))
 
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(
@@ -399,180 +573,42 @@ def FTAG1LITECoreCfg(flags, name_tag='FTAG1LITE'):
         flags=flags,
     )
 
-    helper.SmartCollections = [
-        "AntiKt4EMPFlowJets",
-        "Muons",
-        "PrimaryVertices",
-        "InDetTrackParticles",
-    ]
+    helper.SmartCollections = []
 
     helper.AllVariables = [
         "EventInfo",
-        "CHSGNeutralParticleFlowObjects",
-        "CHSGChargedParticleFlowObjects",
-        "CaloCalFwdTopoTowers",
     ]
 
-    jet_match_vars = _match_vars(JETS)
-    parent_labels = [
-        *[f"nTopTo{p}Children" for p in "BW"],
-        *[f"parent{p}ParentsMask"
-          for p in ["Higgs", "Z", "Scalar", "Top"]],
-    ]
+    # ── Build ExtraVariables from each collection's PassThrough JSON ──
+    # The JSON is the complete authoritative spec for what jet-level variables
+    # are persisted for each collection. Three sources get appended:
+    #   * `copy_vars`       — bare strings naming already-existing jet
+    #                         decorations / AOD moments to persist.  The
+    #                         PassThroughSaltModel does not touch this key.
+    #   * `jet_variables`   — list of {input, output, cast} dicts for
+    #                         PassThrough-computed scalar outputs (the C++
+    #                         SaltModel reads this too).
+    #   * `constituents[].variables[].output` — per-constituent vector
+    #                         decorations written by the C++ SaltModel.
+    # With SmartCollections = [], ExtraVariables IS the complete item list
+    # for each jet collection — nothing is persisted that isn't named here.
+    def _output_name(entry):
+        return entry["output"]
 
-    _jet_vars = [
-        "isJvtPU", "isJvtHS",
-        "EnergyPerSamplingCaloBased",
-        "FracSamplingMaxCaloBased", "FracSamplingMaxIndexCaloBased",
-        "EMFrac", "EMFracCaloBased",
-        "HECFrac", "HECFracCaloBased",
-        "PSFrac", "PSFracCaloBased",
-        "CentroidR", "LambdaLeadingCluster",
-        "MeanRadialDistanceSquared", "MeanLongitudinalDistanceSquared",
-        "GhostTrackPt", "GhostTrackCount",
-        "TrackSumPt", "TrackSumMass",
-        "GhostBHadronsFinalCount", "GhostBHadronsFinalPt",
-        "GhostCHadronsFinalCount", "GhostCHadronsFinalPt",
-        "HadronConeExclTruthLabelPt",
-        "HadronConeExclTruthLabelLxy",
-        "HadronConeExclTruthLabelDR",
-        "HadronGhostTruthLabelID",
-        "HadronGhostExtendedTruthLabelID",
-        "HadronGhostTruthLabelPdgId",
-        "HadronGhostTruthLabelPt",
-        "HadronGhostTruthLabelLxy",
-        "HadronGhostTruthLabelDR",
-        "PartonTruthLabelPt", "PartonTruthLabelDR",
-        "HadronConeExclTruthLabelChildPdgId",
-        "HadronConeExclTruthLabelChildPt",
-        "HadronConeExclTruthLabelChildLxy",
-        "HadronGhostTruthLabelChildPdgId",
-        "HadronGhostTruthLabelChildPt",
-        "HadronGhostTruthLabelChildLxy",
-        "HadronGhostInitialTruthLabelID",
-        "HadronGhostInitialExtendedTruthLabelID",
-        "HadronGhostInitialTruthLabelPdgId",
-        "HadronGhostInitialTruthLabelPt",
-        "HadronGhostInitialTruthLabelLxy",
-        "PartonExtendedTruthLabelID",
-        "GhostFTagElectrons", "GhostFTagMuons",
-        "GhostTower",
-        "LeptonDecayLabel", "TauDecayLabel",
-        "constituentLinks",
-        # NearestJet matching (derivation-time, replaces TDD JetMatcher block)
-        "ptFromNearestJet", "etaFromNearestJet", "phiFromNearestJet",
-        "HadronGhostTruthLabelIDFromNearestJet",
-        "matchedToNearestJet", "deltaRToNearestJet",
-        "deltaEtaToNearestJet", "deltaPhiToNearestJet",
-        "deltaPtToNearestJet", "numberOfMatchesToNearestJet",
-        # TauJet matching (derivation-time, replaces TDD JetMatcher block)
-        "RNNJetScoreFromTauJet", "RNNJetScoreSigTransFromTauJet",
-        "GNTauScore_v0pruneFromTauJet", "GNTauScoreSigTrans_v0pruneFromTauJet",
-        "GNTauScoreSigTrans_v1truncFromTauJet", "ptFinalCalibFromTauJet",
-        "matchedToTauJet", "deltaRToTauJet", "deltaPtToTauJet",
-        "numberOfMatchesToTauJet",
-        # TruthTau matching (derivation-time, replaces TDD TruthTauMatcher block)
-        "isHadronicTauFromTruthTaus", "decayModeFromTruthTaus",
-        "classifierParticleOutComeFromTruthTaus",
-        "deltaPtToTruthTaus", "pt_visFromTruthTaus", "matchedToTruthTaus",
-    ]
-
-    helper.ExtraVariables = [
-        '.'.join([JETS] + _jet_vars),
-        "TruthPrimaryVertices.t.x.y.z",
-        "Muons.TruthLink.segmentDeltaPhi.segmentDeltaEta"
-        ".ParamEnergyLoss.ParamEnergyLossSigmaPlus"
-        ".ParamEnergyLossSigmaMinus.MeasEnergyLoss.MeasEnergyLossSigma",
-        "GSFTrackParticles.d0.z0.phi.theta.qOverP.vz.chiSquared"
-        ".definingParametersCovMatrixDiag"
-        ".numberOfPixelHits.numberOfSCTHits.numberOfSCTDeadSensors"
-        ".numberOfInnermostPixelLayerHits"
-        ".numberOfNextToInnermostPixelLayerHits"
-        ".eProbabilityHT.eProbabilityNN.eProbabilityComb"
-        ".originalTrackParticle.truthParticleLink",
-        "PrimaryVertices.time.covariance.chiSquared.numberDoF",
-        "Electrons.pt.eta.phi.charge.author.OQ"
-        ".trackParticleLinks.caloClusterLinks.truthParticleLink"
-        ".ambiguityLink.ambiguityType"
-        ".Rhad.Rhad1.Eratio.weta2.Rphi.Reta.wtots1.f1.f3"
-        ".deltaEta1.deltaPhiRescaled2"
-        ".ftag_et.ftag_z0AlongBeamspot.ftag_z0AlongBeamspotSignificance"
-        ".ftag_ptVarCone30OverPt.ftag_deltaPOverP.ftag_energyOverP"
-        ".ftagTruthOriginLabel.ftagTruthTypeLabel"
-        ".ftagTruthSourceLabel.ftagTruthVertexIndex"
-        ".ftagTruthBarcode.ftagTruthParentBarcode",
-        # egammaClusters: needed by TDD's SoftElectronSelector which calls
-        # el.caloCluster()->e() following Electrons.caloClusterLinks.
-        # Must NOT be in AllVariables (causes segfault from missing CaloCell data).
-        "egammaClusters.calE.calEta.calPhi.e_sampl"
-        ".ETA2CALOFRAME.ETACALOFRAME.PHI2CALOFRAME.PHICALOFRAME"
-        ".constituentClusterLinks",
-        "GlobalChargedParticleFlowObjects"
-        ".pt.eta.phi.m.e.chargedObjectLinks.otherObjectLinks.signalType",
-        "GlobalNeutralParticleFlowObjects"
-        ".pt.eta.phi.m.e.otherObjectLinks.signalType",
-        "CaloCalTopoClusters"
-        ".ENG_BAD_CELLS.ISOLATION.CENTER_MAG.CELL_SIGNIFICANCE"
-        ".ENG_FRAC_MAX.LATERAL.SIGNIFICANCE.LONGITUDINAL"
-        ".ENG_POS.EM_PROBABILITY.CENTER_LAMBDA.SECOND_LAMBDA"
-        ".FIRST_ENG_DENS.SECOND_R.AVG_LAR_Q.MASS"
-        ".rawPhi.calPhi.rawEta.calEta.rawE.calE.rawM.calM.e_sampl"
-        ".usedInChargedFlow"
-        ".altE.altEta.altM.altPhi"
-        ".eta0.phi0"
-        ".clusterSize.NCELL_SAMPLING"
-        ".N_BAD_CELLS.BADLARQ_FRAC.AVG_TILE_Q"
-        ".PTD.sigmaWidth.SECOND_TIME",
-        "InDetTrackParticles"
-        ".numberOfNextToInnermostPixelLayerHits"
-        ".numberOfInnermostPixelLayerSharedHits"
-        ".numberOfInnermostPixelLayerSplitHits"
-        ".numberOfPixelSplitHits"
-        ".numberOfInnermostPixelLayerOutliers"
-        ".numberOfNextToInnermostPixelLayerOutliers"
-        ".numberOfPixelSpoiltHits"
-        ".expectInnermostPixelLayerHit"
-        ".expectNextToInnermostPixelLayerHit"
-        ".btagIp_d0.btagIp_z0SinTheta"
-        ".btagIp_d0Uncertainty.btagIp_z0SinThetaUncertainty"
-        ".btagIp_invalidIp"
-        ".TTVA_AMVFVertices.TTVA_AMVFWeights"
-        ".ftagTruthOriginLabel.ftagTruthTypeLabel.ftagTruthSourceLabel"
-        ".ftagTruthVertexIndex.ftagTruthBarcode.ftagTruthParentBarcode"
-        ".ftagTruthMuonOriginLabel"
-        ".muon_qOverPratio.muon_momentumBalanceSignificance"
-        ".muon_scatteringNeighbourSignificance.muon_quality.leptonID"
-        ".eProbabilityHT.truthMatchProbability"
-        # Pre-computed from CovMatrix diagonal by TrackCovarianceDecoratorAlg
-        ".phiUncertainty.thetaUncertainty.qOverPUncertainty"
-        # Track IP vectors computed by the standard btag chain (FlavorTaggingCfg)
-        ".btagIp_trackMomentum.btagIp_trackDisplacement",
-    ]
-    helper.ExtraVariables.append(
-        '.'.join([JETS] + jet_match_vars)
-    )
-    helper.ExtraVariables.append(
-        '.'.join([JETS] + parent_labels)
-    )
-    helper.ExtraVariables += [
-        # Truth jet matching (derivation-time, replaces TDD JetMatcher blocks)
-        JETS + ".ptFromTruthJet.matchedToTruthJet.deltaRToTruthJet"
-            + ".deltaEtaToTruthJet.deltaPhiToTruthJet.deltaPtToTruthJet"
-            + ".numberOfMatchesToTruthJet"
-            + ".ptFromTruthDressedWZJet.matchedToTruthDressedWZJet"
-            + ".deltaRToTruthDressedWZJet.deltaEtaToTruthDressedWZJet"
-            + ".deltaPhiToTruthDressedWZJet.deltaPtToTruthDressedWZJet"
-            + ".numberOfMatchesToTruthDressedWZJet",
-        "TruthEvents.Q.XF1.XF2.PDGID1.PDGID2.PDFID1.PDFID2.X1.X2.crossSection",
-        "MET_Truth.mpx.mpy.sumet.name.source",
-        "TruthElectrons.prodVtxLink.decayVtxLink.parentLinks.childLinks.m.px.py.pz.e.pdgId.ptcone30.etcone20.classifierParticleOrigin.Classification.barcode.status.classifierParticleType.classifierParticleOutCome.polarizationPhi.polarizationTheta.e_dressed.pt_dressed.eta_dressed.phi_dressed.nPhotons_dressed.uid",
-        "TruthMuons.m.px.py.pz.e.pdgId.barcode.status.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.Classification.e_dressed.pt_dressed.eta_dressed.phi_dressed.nPhotons_dressed.ptcone30.etcone20.decayVtxLink.prodVtxLink.parentLinks.childLinks.polarizationPhi.polarizationTheta.uid",
-        "TruthBottom.m.px.py.pz.e.pdgId.barcode.status.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.Classification.prodVtxLink.decayVtxLink.parentLinks.childLinks.polarizationPhi.polarizationTheta.uid",
-        "TruthBoson.m.px.py.pz.e.pdgId.barcode.status.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.Classification.prodVtxLink.decayVtxLink.parentLinks.childLinks.polarizationPhi.polarizationTheta.uid",
-    ]
-    helper.AllVariables += [
-        "TruthCharm",
-    ]
+    helper.ExtraVariables = []
+    for cfg in JET_COLLECTIONS.values():
+        pt_config = _load_passthrough_json(cfg["passthrough_json"])
+        extras = list(pt_config.get("copy_vars", []))
+        # jet_variables: GNN-computed scalar outputs (C++ PassThrough reads this key)
+        extras.extend(_output_name(v) for v in pt_config.get("jet_variables", []))
+        # jet_vars: exploded+cast scalar outputs from VectorExploderAlg+JetScalarCastAlg
+        # (Python-only key; C++ PassThrough ignores it)
+        extras.extend(_output_name(v) for v in pt_config.get("jet_vars", []))
+        for cnode in pt_config.get("constituents", []):
+            extras.extend(_output_name(v) for v in cnode.get("variables", []))
+        helper.ExtraVariables.append(
+            '.'.join([cfg["name"]] + extras)
+        )
 
     excludedVtxAux = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
     static = [
@@ -614,55 +650,41 @@ def FTAG1LITECoreCfg(flags, name_tag='FTAG1LITE'):
     FTAG1LITEItemList = [i for i in FTAG1LITEItemList
                          if i not in _trigger_items]
 
-    # Strip CovMatrix from InDetTrackParticles — TDD reads pre-computed
-    # uncertainties (phiUncertainty, thetaUncertainty, qOverPUncertainty)
-    # from TrackCovarianceDecoratorAlg instead.
-    _track_vars_to_remove = {
-        'definingParametersCovMatrixDiag',
-        'definingParametersCovMatrixOffDiag',
-    }
-    FTAG1LITEItemList = _filter_aux_vars(
-        FTAG1LITEItemList, 'InDetTrackParticles', _track_vars_to_remove)
-
     # Remove containers not needed by TDD
+    # Remove containers not needed — all constituent variables are
+    # jet decorations via PassThrough, no separate containers required.
     _containers_to_remove = [
         '#Photons', '#TruthTaus', '#InDetForwardTrackParticles',
+        '#MET_Truth', '#egammaClusters', '#GSFTrackParticles',
+        '#PrimaryVertices',
+        '#CHSGChargedParticleFlowObjects',
+        '#CHSGNeutralParticleFlowObjects',
+        '#CaloCalTopoClusters',
+        '#TruthBottom', '#TruthTop',
+        '#TruthBoson', '#TruthCharm', '#TruthEvents',
+        '#TruthPrimaryVertices',
+        '#Electrons',
+        '#Muons',
+        '#CombinedMuonTrackParticles',
+        '#ExtrapolatedMuonTrackParticles',
+        '#MuonSpectrometerTrackParticles',
+        '#InDetTrackParticles',
+        '#TruthElectrons', '#TruthMuons',
     ]
     FTAG1LITEItemList = [i for i in FTAG1LITEItemList
                           if not any(c in i for c in _containers_to_remove)]
 
-    # Strip unused jet variables.  Most SmartCollection variables are read
-    # by TDD's internal tools (JetCalibrationTool, JetCleaningTool,
-    # NNJvtTagger, GSC) so only confirmed-unused variables are removed.
-    _jet_vars_to_remove = {
-        # Ghost hadron element links (TDD reads Count/Pt, not the links)
-        'ConeExclBHadronsFinal', 'ConeExclCHadronsFinal',
-        # Fold hash (from BTaggingStandardContent, not needed for training)
-        'jetFoldHash', 'jetFoldHash_noHits',
-    }
-    # Tagger scores for disabled taggers.  Only GN3EPCLV01 (non-flip) runs;
-    # BTaggingStandardContent still adds all tagger outputs to SmartCollections.
-    _disabled_tagger_prefixes = (
-        'GN2v01_', 'GN2v01SimpleFlip_',
-        'GN3V00_', 'GN3V00SimpleFlip_',
-        'GN3PflowMuonsV00_', 'GN3PflowMuonsV00SimpleFlip_',
-        'GN3EPCLV01SimpleFlip_',
-    )
-    FTAG1LITEItemList = _filter_aux_vars(
-        FTAG1LITEItemList, 'AntiKt4EMPFlowJets', _jet_vars_to_remove,
-        prefix_filter=_disabled_tagger_prefixes)
+    # NOTE: mcEventWeights vector is NOT stripped here because framework code
+    # (CutFlowSvc or similar) calls EventInfo::mcEventWeight() at dump time,
+    # which reads the vector.  The McEventWeightDecoratorAlg adds a single-float
+    # mcEventWeight decoration alongside the vector; TDD reads the decoration
+    # when available.  Stripping the vector requires finding and fixing all
+    # framework readers first.
 
-    # Strip muon variables that are never decorated in our config
-    # (CloseByCorr isolation, DFCommonGoodMuon).
-    _muon_vars_to_remove = {
-        'DFCommonGoodMuon',
-        'neflowisol20_CloseByCorr',
-        'ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000_CloseByCorr',
-        'ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500_CloseByCorr',
-        'topoetcone20_CloseByCorr',
-    }
+    # Strip hardScatterVertexLink from EventInfo.
+    _eventinfo_vars_to_remove = {'hardScatterVertexLink'}
     FTAG1LITEItemList = _filter_aux_vars(
-        FTAG1LITEItemList, 'Muons', _muon_vars_to_remove)
+        FTAG1LITEItemList, 'EventInfo', _eventinfo_vars_to_remove)
 
     acc.merge(OutputStreamCfg(
         flags, "DAOD_" + name_tag,
