@@ -90,110 +90,99 @@ namespace CTPResultUtils {
   }
 
   // Print object content to default message stream
-  void dumpData(xAOD::CTPResult& ctpRes) {
-    SmartIF<IMessageSvc> msgSvc{Gaudi::svcLocator()->service("MessageSvc")};
-    if ( !msgSvc ) {
-      return;
-    }
-    MsgStream log(msgSvc, "xAOD::CTPResult");
-    dumpData(ctpRes, log);
-  }
+  const std::string print(const xAOD::CTPResult& ctpRes) {
 
-  // Print object content to given message stream
-  void dumpData(xAOD::CTPResult& ctpRes, MsgStream& log) {
+    std::ostringstream s;
 
-    log << MSG::DEBUG << "*BEGIN* xAOD::CTPResult" << endmsg;
+    s << "\n*BEGIN* xAOD::CTPResult" << std::endl;
 
     // Check number of bunches
     if(ctpRes.numberOfBunches() == 0) {
-      log << MSG::DEBUG << "xAOD::CTPResult empty" << endmsg;
-      log << MSG::DEBUG << "*END* xAOD::CTPResult" << endmsg;
-      return;
+      s << "xAOD::CTPResult empty" << std::endl;
+      s << "*END* xAOD::CTPResult" << std::endl;
+      return s.str();
     }
 
-    // Check number of bunches size
-    if(ctpRes.numberOfBunches() != ctpRes.tipWords().size()) {
-      log << MSG::ERROR <<"Mismatch: " << ctpRes.numberOfBunches() << " bunches, but the size of tipWords is " << ctpRes.tipWords().size() << endmsg;
-    }
-
-    log << MSG::DEBUG << "CTP version number: " <<  ctpRes.ctpVersionNumber() << endmsg;
-    log << MSG::DEBUG << "Number of bunches: " <<  ctpRes.numberOfBunches() << endmsg;
-    log << MSG::DEBUG << "L1A position: " << ctpRes.l1AcceptBunchPosition() << endmsg;
+    s << "CTP version number: " <<  ctpRes.ctpVersionNumber() << std::endl;
+    s << "Number of bunches: " <<  ctpRes.numberOfBunches() << std::endl;
+    s << "L1A position: " << ctpRes.l1AcceptBunchPosition() << std::endl;
 
     // Print header info
-    log << MSG::DEBUG << "Header information:  " << endmsg;
-    log << MSG::DEBUG << "    Header marker           :  " << MSG::hex << ctpRes.headerMarker() << MSG::dec << endmsg;
-    log << MSG::DEBUG << "    Header size             :  " << ctpRes.headerSize() << endmsg;
-    log << MSG::DEBUG << "    Header format version   :  " << ctpRes.headerFormatVersion() << endmsg;
-    log << MSG::DEBUG << "    Source ID               :  0x" << MSG::hex << ctpRes.sourceID() << MSG::dec << endmsg;
-    log << MSG::DEBUG << "    Run number              :  " << ctpRes.runNumber() << endmsg;
-    log << MSG::DEBUG << "    Ext. LVL1 ID            :  " << ctpRes.L1ID() << endmsg;
-    log << MSG::DEBUG << "    BCID                    :  " << ctpRes.BCID() << endmsg;
-    log << MSG::DEBUG << "    Trigger type            :  " << ctpRes.triggerType() << endmsg;
-    log << MSG::DEBUG << "    Det. event type         :  " << ctpRes.eventType() << endmsg;
+    s << "Header information:  " << std::endl;
+    s << "    Header marker           :  " << std::hex << ctpRes.headerMarker() << std::dec << std::endl;
+    s << "    Header size             :  " << ctpRes.headerSize() << std::endl;
+    s << "    Header format version   :  " << ctpRes.headerFormatVersion() << std::endl;
+    s << "    Source ID               :  0x" << std::hex << ctpRes.sourceID() << std::dec << std::endl;
+    s << "    Run number              :  " << ctpRes.runNumber() << std::endl;
+    s << "    Ext. LVL1 ID            :  " << ctpRes.L1ID() << std::endl;
+    s << "    BCID                    :  " << ctpRes.BCID() << std::endl;
+    s << "    Trigger type            :  " << ctpRes.triggerType() << std::endl;
+    s << "    Det. event type         :  " << ctpRes.eventType() << std::endl;
 
     // Print payload info
-    log << MSG::DEBUG << "Payload information:  " << endmsg;
-    log << MSG::DEBUG << "    Time " << ctpRes.timeSec() << "s "
+    s << "Payload information:  " << std::endl;
+    s << "    Time " << ctpRes.timeSec() << "s "
         << std::setw(10) << std::setiosflags(std::ios_base::right) << std::setfill(' ')
         << ctpRes.timeNanoSec() << std::resetiosflags(std::ios_base::right)
-        << "ns" << endmsg;
+        << "ns" << std::endl;
 
     // Print per-bunch information
     for(unsigned int i = 0; i<ctpRes.numberOfBunches(); ++i) {
 
       auto bunch = ctpRes.getBC(i);
-      log << MSG::DEBUG << "    BC dump for bunch " << i << endmsg;
+      s << "    BC dump for bunch " << i << std::endl;
 
       // TIP words
       for(unsigned int j = 0; j<ctpRes.tipWords()[i].size(); ++j) {
-        log << MSG::DEBUG << "        TIP word number " << j << ": " << ctpRes.tipWords()[i][j] << endmsg;
+        s << "        TIP word number " << j << ": 0x" << std::hex << std::setw( 8 ) << std::setfill( '0' ) << ctpRes.tipWords()[i][j] << std::dec << std::endl;
       }
       if (ctpRes.tipWords()[i].size() == 0) {
-        log << MSG::DEBUG << "        No TIP words!" << endmsg;
+        s << "        No TIP words!" << std::endl;
       }
 
       // TBP words
       for(unsigned int j = 0; j<ctpRes.tbpWords()[i].size(); ++j) {
-        log << MSG::DEBUG << "        TBP word number " << j << ": " << ctpRes.tbpWords()[i][j] << endmsg;
+        s << "        TBP word number " << j << ": 0x" << std::hex << std::setw( 8 ) << std::setfill( '0' ) << ctpRes.tbpWords()[i][j] << std::dec << std::endl;
       }
       if (ctpRes.tbpWords()[i].size() == 0) {
-        log << MSG::DEBUG << "        No TBP words!" << endmsg;
+        s << "        No TBP words!" << std::endl;
       }
 
       // TAP words
       for(unsigned int j = 0; j<ctpRes.tapWords()[i].size(); ++j) {
-        log << MSG::DEBUG << "        TAP word number " << j << ": " << ctpRes.tapWords()[i][j] << endmsg;
+        s << "        TAP word number " << j << ": 0x" << std::hex << std::setw( 8 ) << std::setfill( '0' ) << ctpRes.tapWords()[i][j] << std::dec << std::endl;
       }
       if (ctpRes.tapWords()[i].size() == 0) {
-        log << MSG::DEBUG << "        No TAP words!" << endmsg;
+        s << "        No TAP words!" << std::endl;
       }
 
       // TAV words
       for(unsigned int j = 0; j<ctpRes.tavWords()[i].size(); ++j) {
-        log << MSG::DEBUG << "        TAV word number " << j << ": " << ctpRes.tavWords()[i][j] << endmsg;
+        s << "        TAV word number " << j << ": 0x" << std::hex << std::setw( 8 ) << std::setfill( '0' ) << ctpRes.tavWords()[i][j] << std::dec << std::endl;
       }
       if (ctpRes.tavWords()[i].size() == 0) {
-        log << MSG::DEBUG << "        No TAV words!" << endmsg;
+        s << "        No TAV words!" << std::endl;
       }
     }
 
     // Additional words
     for(unsigned int i = 0; i<ctpRes.additionalWords().size(); ++i) {
-      log << MSG::DEBUG << "    Additional word number " << i << ": " << ctpRes.additionalWords()[i] << endmsg;
+      s << "    Additional word number " << i << ": 0x" << std::hex << std::setw( 8 ) << std::setfill( '0' ) << ctpRes.additionalWords()[i] << std::dec << std::endl;
     }
     if (ctpRes.additionalWords().size() == 0) {
-      log << MSG::DEBUG << "    No additional words!" << endmsg;
+      s << "    No additional words!" << std::endl;
     }
 
     // Print trailer info
-    log << MSG::DEBUG << "Trailer information:  " << endmsg;
-    log << MSG::DEBUG << "    Error status                :  " << ctpRes.errorStatus() << endmsg;
-    log << MSG::DEBUG << "    Status info                 :  " << ctpRes.infoStatus() << endmsg;
-    log << MSG::DEBUG << "    Number of status words      :  " << ctpRes.numStatusWords() << endmsg;
-    log << MSG::DEBUG << "    Number of data words        :  " << ctpRes.numDataWords() << endmsg;
-    log << MSG::DEBUG << "    Status information position :  " << ctpRes.statusPosition() << endmsg;
-    log << MSG::DEBUG << "*END* xAOD::CTPResult" << endmsg;
+    s << "Trailer information:  " << std::endl;
+    s << "    Error status                :  " << ctpRes.errorStatus() << std::endl;
+    s << "    Status info                 :  " << ctpRes.infoStatus() << std::endl;
+    s << "    Number of status words      :  " << ctpRes.numStatusWords() << std::endl;
+    s << "    Number of data words        :  " << ctpRes.numDataWords() << std::endl;
+    s << "    Status information position :  " << ctpRes.statusPosition() << std::endl;
+    s << "*END* xAOD::CTPResult" << std::endl;
+
+    return s.str();
   }
 
 
