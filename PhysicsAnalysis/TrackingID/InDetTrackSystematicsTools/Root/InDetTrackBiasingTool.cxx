@@ -59,7 +59,24 @@ namespace InDet {
   }
 
   CP::CorrectionCode InDetTrackBiasingTool::applyCorrection(xAOD::TrackParticle& track) {
+    if (m_activeSysts == nullptr) {
+      ATH_MSG_ERROR( "applySystematicVariation() was not called before applyCorrection()." );
+      return CP::CorrectionCode::Error;
+    }
+    return applyBiasWithSyst(track, *m_activeSysts);
+  }
 
+  CP::CorrectionCode InDetTrackBiasingTool::applyCorrection(
+      xAOD::TrackParticle& track, const CP::SystematicSet& syst) const
+  {
+    const CP::SystematicSet* filtered = getFilteredSysts(syst);
+    if (filtered == nullptr) return CP::CorrectionCode::Error;
+    return applyBiasWithSyst(track, *filtered);
+  }
+
+  CP::CorrectionCode InDetTrackBiasingTool::applyBiasWithSyst(
+      xAOD::TrackParticle& track, const CP::SystematicSet& filtered) const
+  {
     if ( !m_isMC ) {
       ATH_MSG_ERROR( "InDetTrackBiasingTool should only be run on MC." );
       return CP::CorrectionCode::Error;
@@ -123,14 +140,14 @@ namespace InDet {
     if ( doD0Bias ) {
       const float d0Corr = readHistogram(m_biasD0, biasD0Histogram, phi, eta);
       accD0( track ) += d0Corr;
-      if ( isActive( TRK_BIAS_D0_WM ) ) {
+      if ( isActive( TRK_BIAS_D0_WM, filtered ) ) {
         accD0( track ) -= d0Corr;
       }
     }
     if ( doZ0Bias ) {
       const float z0Corr = readHistogram(m_biasZ0, biasZ0Histogram, phi, eta);
       accZ0( track ) += z0Corr;
-      if ( isActive( TRK_BIAS_Z0_WM ) ) {
+      if ( isActive( TRK_BIAS_Z0_WM, filtered ) ) {
         accZ0( track ) -= z0Corr;
       }
     }
@@ -138,7 +155,7 @@ namespace InDet {
       auto sinTheta = 1.0 / std::cosh(eta);
       const float qOverPCorr = 1.e-6*sinTheta*readHistogram(m_biasQoverPsagitta, biasQoverPsagittaHistogram, phi, eta);
       accQOverP( track ) += qOverPCorr;
-      if ( isActive( TRK_BIAS_QOVERP_SAGITTA_WM ) ) {
+      if ( isActive( TRK_BIAS_QOVERP_SAGITTA_WM, filtered ) ) {
         accQOverP( track ) -= qOverPCorr;
       }
     }

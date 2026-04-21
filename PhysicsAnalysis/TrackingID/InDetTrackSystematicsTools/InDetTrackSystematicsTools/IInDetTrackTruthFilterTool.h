@@ -34,6 +34,11 @@ namespace InDet {
     // standard accept method to determine if a track should be kept or not
     virtual bool accept(const xAOD::TrackParticle* track) const = 0;
 
+    /// Reentrant accept: applies @p syst without mutating shared state.
+    /// Requires applySystematicVariation(@p syst) during initialize().
+    virtual bool accept(const xAOD::TrackParticle* track,
+                        const CP::SystematicSet& syst) const = 0;
+
     // implement the CP::ISystematicTool interface
 
     /// returns: whether the tool is affected by the systematic

@@ -63,14 +63,15 @@ namespace InDet {
     return StatusCode::SUCCESS;
   }
 
-  float InDetTrackSmearingTool::GetSmearD0Sigma(const xAOD::TrackParticle& track) const {
+  float InDetTrackSmearingTool::GetSmearD0Sigma(
+      const xAOD::TrackParticle& track,
+      const CP::SystematicSet& filtered) const
+  {
     float pt = 1.e-3*track.pt(); // need to convert pt to GeV
     float eta = track.eta();
     float sigma_D0 = 0.f;
 
-    bool isActiveD0Meas = isActive(TRK_RES_D0_MEAS);
-
-    if (isActiveD0Meas == 0) {
+    if (!isActive(TRK_RES_D0_MEAS, filtered)) {
       // pass-through D0Meas, return sigma_D0 early
       return std::sqrt(sigma_D0);
     }
@@ -93,14 +94,15 @@ namespace InDet {
   }
 
 
-  float InDetTrackSmearingTool::GetSmearZ0Sigma(const xAOD::TrackParticle& track) const {
+  float InDetTrackSmearingTool::GetSmearZ0Sigma(
+      const xAOD::TrackParticle& track,
+      const CP::SystematicSet& filtered) const
+  {
     float pt = 1.e-3*track.pt(); // need to convert pt to GeV
     float eta = track.eta();
     float sigma_Z0 = 0.f;
 
-    bool isActiveZ0Meas = isActive(TRK_RES_Z0_MEAS);
-
-    if (isActiveZ0Meas == 0) {
+    if (!isActive(TRK_RES_Z0_MEAS, filtered)) {
       // pass-through Z0Meas, return sigma_Z0 early
       return std::sqrt(sigma_Z0);
     }
@@ -122,8 +124,9 @@ namespace InDet {
     return std::sqrt(sigma_Z0);
   }
 
-CP::CorrectionCode InDetTrackSmearingTool::applyCorrection( xAOD::TrackParticle& track ) {
-
+CP::CorrectionCode InDetTrackSmearingTool::applyCorrectionImpl(
+    xAOD::TrackParticle& track, const CP::SystematicSet& filtered) const
+  {
     const xAOD::EventInfo* event_info {nullptr};
     if (evtStore()->retrieve(event_info, "EventInfo").isFailure()) {
       ATH_MSG_ERROR("No EventInfo object could be retrieved");
@@ -133,8 +136,8 @@ CP::CorrectionCode InDetTrackSmearingTool::applyCorrection( xAOD::TrackParticle&
     int seed = std::abs(track.phi()) * 1e6 + std::abs(track.eta()) * 1e3 + event_info->eventNumber();
     FastReseededPRNG prng = FastReseededPRNG(seed);
 
-    float sigmaD0 = GetSmearD0Sigma( track );
-    float sigmaZ0 = GetSmearZ0Sigma( track );
+    float sigmaD0 = GetSmearD0Sigma( track, filtered );
+    float sigmaZ0 = GetSmearZ0Sigma( track, filtered );
 
     static const SG::AuxElement::Accessor< float > accD0( "d0" );
     static const SG::AuxElement::Accessor< float > accZ0( "z0" );
@@ -144,6 +147,19 @@ CP::CorrectionCode InDetTrackSmearingTool::applyCorrection( xAOD::TrackParticle&
     if ( sigmaZ0 > 0. ) accZ0( track ) = std::normal_distribution<double>( track.z0(), sigmaZ0 )(prng);
 
     return CP::CorrectionCode::Ok;
+  }
+
+CP::CorrectionCode InDetTrackSmearingTool::applyCorrection( xAOD::TrackParticle& track ) {
+    static const CP::SystematicSet empty{};
+    return applyCorrectionImpl(track, m_activeSysts ? *m_activeSysts : empty);
+  }
+
+  CP::CorrectionCode InDetTrackSmearingTool::applyCorrection(
+      xAOD::TrackParticle& track, const CP::SystematicSet& syst) const
+  {
+    const CP::SystematicSet* filtered = getFilteredSysts(syst);
+    if (filtered == nullptr) return CP::CorrectionCode::Error;
+    return applyCorrectionImpl(track, *filtered);
   }
 
   CP::CorrectionCode InDetTrackSmearingTool::correctedCopy( const xAOD::TrackParticle& in,

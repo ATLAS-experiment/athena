@@ -15,6 +15,7 @@
 #include "InDetTrackSystematicsTools/InDetTrackSystematicsTool.h"
 #include "AsgTools/PropertyWrapper.h"
 
+#include <mutex>
 #include <string>
 #include <TH2.h>
 #include <TRandom3.h>
@@ -49,6 +50,8 @@ namespace InDet {
 
     // right now this returns a bool; if we want to implement the ASG selection tool interface then this will need to change to a TAccept
     virtual bool accept( const xAOD::TrackParticle* ) const override;
+    virtual bool accept( const xAOD::TrackParticle*,
+                         const CP::SystematicSet& syst ) const override;
 
     /// returns: whether the tool is affected by the systematic
     virtual bool isAffectedBySystematic( const CP::SystematicVariation& ) const override;
@@ -79,6 +82,7 @@ namespace InDet {
 
     std::unique_ptr<TRandom3> m_rnd  = nullptr; //!
     std::unique_ptr<TH2> m_trkLRTEff = nullptr; //!
+    mutable std::mutex m_rndMutex; //!
 
   }; // class InclusiveTrackFilterTool
 

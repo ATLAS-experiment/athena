@@ -55,6 +55,19 @@ namespace InDet {
 
     bool isActive( TrackSystematic ) const;
 
+    /// Look up the pre-filtered systematic set for @p syst.
+    /// Returns nullptr if @p syst was never passed to
+    /// applySystematicVariation() (e.g. not called during initialize()).
+    /// Safe to call concurrently from execute() since m_sysFilterMap is
+    /// read-only after initialize().
+    const CP::SystematicSet* getFilteredSysts(
+        const CP::SystematicSet& syst) const;
+
+    /// Reentrant variant of isActive(): checks @p syst against a
+    /// caller-provided filtered set rather than the shared m_activeSysts.
+    bool isActive(TrackSystematic syst,
+                  const CP::SystematicSet& filtered) const;
+
   };
 
 }

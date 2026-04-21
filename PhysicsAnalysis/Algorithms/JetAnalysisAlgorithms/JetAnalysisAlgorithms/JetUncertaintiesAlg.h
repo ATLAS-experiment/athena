@@ -21,7 +21,8 @@ namespace CP
 {
   /// \brief an algorithm for calling \ref ICPJetUncertaintiesTool
 
-  class JetUncertaintiesAlg final : public EL::AnaAlgorithm
+  class ATLAS_NOT_THREAD_SAFE JetUncertaintiesAlg final
+    : public EL::AnaAlgorithm
   {
     /// \brief the standard constructor
   public:
