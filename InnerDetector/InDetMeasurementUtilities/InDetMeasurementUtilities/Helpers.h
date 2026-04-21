@@ -4,11 +4,16 @@
 
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "InDetIdentifier/PixelID.h"
+#include "xAODInDetMeasurement/PixelClusterAuxDataCacheCollection.h"
 
 namespace TrackingUtilities {
 
   std::pair<float, float> computeOmegas(const xAOD::PixelCluster& cluster,
-					 const PixelID& pixelID);
+                                        const PixelID& pixelID);
+
+  using PixelCluster_t = traits::ElementProxies<const PixelClusterAuxDataCacheCollection >::ClusterProxy<Utils::AccessPolicy::Const>;
+  std::pair<float, float> computeOmegas(const PixelCluster_t& cluster,
+                                        const PixelID& pixelID);
 
 }
 

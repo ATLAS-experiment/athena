@@ -4,95 +4,104 @@
 #ifndef ATLASUNCALIBSROUCELINACCESOR_H
 #define ATLASUNCALIBSROUCELINACCESOR_H
 
+#include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometry/ATLASSourceLink.h"
 
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
 #include "xAODInDetMeasurement/HGTDClusterContainer.h"
 
+//#include "xAODInDetMeasurement/PixelClusterAuxDataCacheCollection.h"
+//#include "xAODInDetMeasurement/StripClusterAuxDataCacheCollection.h"
+// #include "xAODInDetMeasurement/StripClusterAuxDataCache.h"
+
+#include "InDetReadoutGeometry/SiDetectorElementStatus.h"
+
 #include "src/detail/MeasurementContainerWithDimension.h"
+#include "src/detail/AuxDataCacheList.h"
+
 #include <variant>
 #include <vector>
 #include <unordered_map>
 #include <utility>
+#include <ranges>
+#include <limits>
+#include <algorithm>
+
+namespace {
+   template <typename T_Container>
+   concept has_interfaceObject = requires(T_Container &&a, unsigned int cacheIndex, unsigned int index)
+      { a.getInterfaceObject(cacheIndex, index); };
+}
 
 namespace ActsTrk::detail {
+
+   using abstract_measurement_range_t = PhaseII::DataRange;
+   using DataRangeValueType = decltype(std::declval<PhaseII::DataRange>().m_payload.m_compactRange);
   
-// Helper class to describe ranges of measurements
-// the range provides the measurement collection index and  element index range (begin, end)
-  struct MeasurementRange : public std::pair<unsigned int, unsigned int>
-  {
-    static constexpr unsigned int CONTAINER_IDX_SHIFT = 28;
-    static constexpr unsigned int CONTAINER_IDX_MASK = (1u << 31) | (1u << 30) | (1u << 29) | (1u << 28);
-    static constexpr unsigned int ELEMENT_IDX_MASK = ~CONTAINER_IDX_MASK;
-    static constexpr unsigned int createRangeValue(unsigned int container_idx, unsigned int index)
-    {
-      assert(container_idx < (1u << (32 - CONTAINER_IDX_SHIFT)));
-      assert((index & CONTAINER_IDX_MASK) == 0u);
-      return (container_idx << CONTAINER_IDX_SHIFT) | index;
-    }
-    static constexpr unsigned int extractContainerIndex(unsigned int value) {
-       return (value & CONTAINER_IDX_MASK) >> CONTAINER_IDX_SHIFT;
-    }
-    static constexpr unsigned int extractElementIndex(unsigned int value) {
-      return value & ELEMENT_IDX_MASK;
-    }
-    bool isConsistentRange() const {
-       return     extractContainerIndex(this->first)  == extractContainerIndex(this->second)
-              && (    extractElementIndex(this->first) <= extractElementIndex(this->second)
-                  || (extractElementIndex(this->first)==ELEMENT_IDX_MASK && extractElementIndex(this->second)==0));
-    }
-
-    MeasurementRange() : std::pair<unsigned int, unsigned int>(std::numeric_limits<unsigned int>::max(), std::numeric_limits<unsigned int>::max()) {}
-    MeasurementRange(unsigned int container_idx, unsigned int start_element_idx, unsigned int end_element_idx)
-       : std::pair<unsigned int, unsigned int>( createRangeValue(container_idx, start_element_idx),
-                                                createRangeValue(container_idx, end_element_idx) ) {
-    }
-
-    static MeasurementRange noMeasurementExpected() {
-       return MeasurementRange(CONTAINER_IDX_MASK >> CONTAINER_IDX_SHIFT,
-                               ELEMENT_IDX_MASK,
-                               0);
-    }
-
-    void updateEnd(std::size_t container_idx, unsigned int end_element_idx) {
-       assert( extractContainerIndex(this->first) == container_idx);
-       this->second = createRangeValue(container_idx, end_element_idx);
-    }
-
-    unsigned int containerIndex() const
-    {
-      assert(isConsistentRange());
-      return extractContainerIndex(this->first);
-    }
-    unsigned int elementBeginIndex() const
-    {
-      assert(isConsistentRange());
-      return extractElementIndex(this->first);
-    }
-    unsigned int elementEndIndex() const
-    {
-      assert(isConsistentRange());
-      return extractElementIndex(this->second);
-    }
-    bool empty() const { assert(isConsistentRange()); return this->first == this->second; }
-    bool isMeasurementExpected() const { assert(isConsistentRange()); return this->first <= this->second; }
-  };
-
    // List of measurement ranges and the measurement container targeted by the ranges.
    template <typename T_MeasurementContainerList >
-   class GenMeasurementRangeList : public std::unordered_map<std::size_t, MeasurementRange>
+   class GenMeasurementRangeList
    {
    public:
       using MeasurementContainer = typename T_MeasurementContainerList::measurement_container_variant_t;
-      using MeasurementRangeContainer = std::unordered_map<std::size_t, MeasurementRange>;
    private:
       T_MeasurementContainerList m_measurementContainerList;
+      std::array< unsigned int, static_cast<unsigned int>(ActsTrk::DetectorType::UnDefined)+1u > invalidContainerIndices() {
+         std::array< unsigned int, static_cast<unsigned int>(ActsTrk::DetectorType::UnDefined)+1u > perDetectorContainerIndex;
+         std::fill(perDetectorContainerIndex.begin(),perDetectorContainerIndex.end(), std::numeric_limits<unsigned int>::max());
+         return perDetectorContainerIndex;
+      }
+      std::array< unsigned int, static_cast<unsigned int>(ActsTrk::DetectorType::UnDefined)+1u > m_perDetectorContainerIndex = invalidContainerIndices();
+      std::array< std::span<const ActsTrk::detail::DataRangeValueType>,
+                  static_cast<unsigned int>(ActsTrk::DetectorType::UnDefined)+1u > m_perDetectorRanges{};
+      const std::array< const InDet::SiDetectorElementStatus *,
+                        static_cast<unsigned int>(ActsTrk::DetectorType::UnDefined)+1u> *m_detectorElementStatusPerDetectorType{};
+      std::vector< std::vector<ActsTrk::detail::DataRangeValueType> > m_customRanges;
 
    public:
+      void setRange(unsigned int detector_type_i,
+                    std::span<const ActsTrk::detail::DataRangeValueType> per_module_measurement_ranges, unsigned int container_index) {
+         m_perDetectorRanges.at(detector_type_i)=per_module_measurement_ranges;
+         m_perDetectorContainerIndex.at(detector_type_i)=container_index;
+      }
+      std::vector< std::vector<ActsTrk::detail::DataRangeValueType> > &customRanges() { return m_customRanges; }
 
       const std::vector< MeasurementContainer > &measurementContainerList() const { return  m_measurementContainerList.containerList(); }
 
+      static PhaseII::DataRange at(const std::span<const ActsTrk::detail::DataRangeValueType> &perDetectorRanges, unsigned int id_hash) {
+         if (id_hash>=perDetectorRanges.size()) {
+            return PhaseII::DataRange{};
+            //throw std::range_error("Invalid id hash for per detector measurement ranges.");
+         }
+         else {
+            return perDetectorRanges[id_hash];
+         }
+      }
+      unsigned int getContainerIndex( unsigned int detector_type_i, [[maybe_unused]] unsigned int id_hash) const {
+         unsigned int detector_container_index = m_perDetectorContainerIndex.at(detector_type_i);
+         // if (detector_container_index> numContainers()) {
+         //    throw std::range_error("No container registered for detector type.");
+         // }
+         return detector_container_index;
+      }
+      PhaseII::DataRange getRange(unsigned int detector_type_i, unsigned int id_hash) const {
+         return at(m_perDetectorRanges.at(detector_type_i),id_hash);
+      }
+      
+      std::tuple<const MeasurementContainer *, abstract_measurement_range_t, bool >
+      getMeasurementRange(unsigned int detector_type_i, unsigned int id_hash) const {
+         PhaseII::DataRange data_range = at(m_perDetectorRanges.at(detector_type_i),id_hash);
+         bool measurement_expected=measurementExpected(detector_type_i, id_hash);
+         abstract_measurement_range_t range= ( (measurement_expected)
+                                              ? data_range
+                                               : abstract_measurement_range_t(std::numeric_limits<unsigned int>::max(),
+                                                                              0u,
+                                                                              static_cast<unsigned int>(data_range.containerIndex())));
+            
+         return { !range.empty() ? &container(m_perDetectorContainerIndex[detector_type_i]) : nullptr,
+                  std::move(range), false};
+      }
       // set container, resizing if necessary. That is just in case we call addMeasurements out of order or not for 2 types of measurements
       void setContainer(unsigned int container_index, const xAOD::UncalibratedMeasurementContainer *container) {
          if (container) {
@@ -103,33 +112,71 @@ namespace ActsTrk::detail {
       std::size_t numContainers() const { return m_measurementContainerList.size(); }
 
       const MeasurementContainer &container(unsigned index) const { return m_measurementContainerList.at(index); }
+      void setDetectorElementStatus(const std::array< const InDet::SiDetectorElementStatus *,
+                                                      static_cast<unsigned int>(ActsTrk::DetectorType::UnDefined)+1u> &det_el_status_per_arr) {
+         m_detectorElementStatusPerDetectorType=&det_el_status_per_arr;
+      }
+      bool measurementExpected(unsigned int detector_type_i, unsigned int id_hash) const {
+         const InDet::SiDetectorElementStatus * det_el_status = (*m_detectorElementStatusPerDetectorType)[detector_type_i];
+         return !det_el_status || det_el_status->isGood(id_hash);
+      }
+      const T_MeasurementContainerList &getFullContainerList() const {
+         return m_measurementContainerList;
+      }
    };
 
    // List of measurement ranges and the measurement container targeted by the ranges.
    template <typename T_MeasurementContainerList >
-   class GenMeasurementRangeListFlat : public std::vector<std::pair<std::size_t, MeasurementRange>>
+   class GenMeasurementRangeListFlat : public std::vector<std::pair<std::size_t, std::pair<abstract_measurement_range_t, unsigned int> > >
    {
    public:
       using MeasurementContainer = typename T_MeasurementContainerList::measurement_container_variant_t;
-      using MeasurementRangeContainer = std::vector<std::pair<std::size_t, MeasurementRange>>;
+      using MeasurementRangeContainer = std::vector<std::pair<std::size_t, std::pair<abstract_measurement_range_t, unsigned int> >>;
+      using MeasurementRangeContainer::MeasurementRangeContainer;
    private:
-      T_MeasurementContainerList m_measurementContainerList;
-
+      const T_MeasurementContainerList *m_measurementContainerList{};
+      const std::array< const InDet::SiDetectorElementStatus *,
+                        static_cast<unsigned int>(ActsTrk::DetectorType::UnDefined)+1u> *m_detectorElementStatusPerDetectorType{};
+      bool m_forced = true;
    public:
+      void setContainerList(const T_MeasurementContainerList &container_list) {
+         m_measurementContainerList = &container_list;
+      }
 
-      const std::vector< MeasurementContainer > &measurementContainerList() const { return  m_measurementContainerList.containerList(); }
+      const std::vector< MeasurementContainer > &measurementContainerList() const { return  m_measurementContainerList->containerList(); }
 
-      // set container, resizing if necessary. That is just in case we call addMeasurements out of order or not for 2 types of measurements
-      void setContainer(unsigned int container_index, const xAOD::UncalibratedMeasurementContainer *container) {
-         if (container) {
-            // @TODO allow for container == nullprt ?
-            m_measurementContainerList.setContainer(container_index, *container);
+      // // set container, resizing if necessary. That is just in case we call addMeasurements out of order or not for 2 types of measurements
+      // void setContainer(unsigned int container_index, const xAOD::UncalibratedMeasurementContainer *container) {
+      //    if (container) {
+      //       // @TODO allow for container == nullprt ?
+      //       m_measurementContainerList.setContainer(container_index, *container);
+      //    }
+      // }
+      std::size_t numContainers() const { return m_measurementContainerList->size(); }
+
+      const MeasurementContainer &container(unsigned index) const { return m_measurementContainerList->at(index); }
+
+      static std::uint64_t makeKey(unsigned int detector_type_i, unsigned int id_hash) {
+         return (static_cast<std::uint64_t>(detector_type_i)<<32) | id_hash;
+      }
+      std::tuple<const MeasurementContainer *, abstract_measurement_range_t, bool >
+      getMeasurementRange(unsigned int detector_type_i, unsigned int id_hash) const {
+         auto range_iter = find( makeKey(detector_type_i, id_hash));
+         if (range_iter == end()) {
+            return {nullptr, abstract_measurement_range_t{}, m_forced};
+         }
+         else {
+            // @TODO find source container, 
+            bool measurement_expected=measurementExpected(detector_type_i, id_hash);
+            abstract_measurement_range_t range= ( (measurement_expected)
+                                                  ? range_iter->second.first
+                                                  : abstract_measurement_range_t(std::numeric_limits<unsigned int>::max(), 0u, 0u));
+            assert( !measurement_expected || range.beginIndex() <= range.endIndex());
+            // if surface marked as defect
+            return { m_forced || measurement_expected ? &(container(range_iter->second.second)) : nullptr,
+                     std::move(range), m_forced};
          }
       }
-      std::size_t numContainers() const { return m_measurementContainerList.size(); }
-
-      const MeasurementContainer &container(unsigned index) const { return m_measurementContainerList.at(index); }
-
       // required std::unordered_map methods compatible with GenMeasurementRangeList
       MeasurementRangeContainer::const_iterator find(const MeasurementRangeContainer::value_type::first_type &key) const {
         return std::find_if(begin(), end(),
@@ -138,9 +185,17 @@ namespace ActsTrk::detail {
                             });
       }
 
-      std::pair<MeasurementRangeContainer::iterator, bool> insert(MeasurementRangeContainer::value_type&& value) {
-        emplace_back(std::forward<MeasurementRangeContainer::value_type>(value));
+      std::pair<MeasurementRangeContainer::iterator, bool> insert(std::pair<std::size_t, std::pair<abstract_measurement_range_t, unsigned int> > && value) {
+        emplace_back(std::move(value));
         return {std::prev(end()), true};
+      }
+      void setDetectorElementStatus(const std::array< const InDet::SiDetectorElementStatus *,
+                                    static_cast<unsigned int>(ActsTrk::DetectorType::UnDefined)+1u> &det_el_status_per_arr) {
+         m_detectorElementStatusPerDetectorType=&det_el_status_per_arr;
+      }
+      bool measurementExpected(unsigned int detector_type_i, unsigned int id_hash) const {
+         const InDet::SiDetectorElementStatus * det_el_status = (*m_detectorElementStatusPerDetectorType)[detector_type_i];
+         return !det_el_status || det_el_status->isGood(id_hash);
       }
    };
 
@@ -160,10 +215,12 @@ namespace ActsTrk::detail {
     {
     public:
        BaseIterator(const std::vector< MeasurementContainer > *containerList,
-                    unsigned int container_index,
+                    std::uint16_t container_index,
+                    std::uint16_t cache_index,
                     unsigned int element_index)
           : m_containerList(containerList),
             m_containerIndex(container_index),
+            m_cacheIndex(cache_index),
             m_index(element_index)
       {
       }
@@ -177,15 +234,25 @@ namespace ActsTrk::detail {
       Acts::SourceLink operator*() const
       {
          // @TODO avoid double indirection
-         const xAOD::UncalibratedMeasurementContainer *base_container
-            = std::visit([](const auto &a) -> const xAOD::UncalibratedMeasurementContainer *{return  a.containerPtr(); },
-                         (*m_containerList)[m_containerIndex] );
-         assert( m_index < base_container->size());
-         return Acts::SourceLink{ makeATLASUncalibSourceLink( (*base_container)[m_index] )};
+         const xAOD::UncalibratedMeasurement *interface_object
+            = std::visit([cacheIndex=m_cacheIndex, index=m_index](const auto &a) -> const xAOD::UncalibratedMeasurement *{
+               if constexpr(has_interfaceObject<std::remove_cvref_t<decltype(*a.containerPtr())> >) {
+                  assert( index < a.containerPtr()->selection().size());
+                  
+                  return  a.containerPtr()->getInterfaceObject(cacheIndex, index);
+               }
+               else {
+                  assert( index < a.containerPtr()->size());
+                  return  (*a.containerPtr())[index];
+               }
+            },
+               (*m_containerList)[m_containerIndex] );
+         return Acts::SourceLink{ makeATLASUncalibSourceLink( interface_object )};
       }
 
       const std::vector< MeasurementContainer > &measurementContainerList() const { return *m_containerList; }
-      unsigned int containerIndex() const { return m_containerIndex; }
+      std::uint16_t containerIndex() const { return m_containerIndex; }
+      std::uint16_t cacheIndex() const { return m_cacheIndex; }
       unsigned int index() const { return m_index; }
 
       using value_type = unsigned int;
@@ -196,7 +263,8 @@ namespace ActsTrk::detail {
 
     private:
        const std::vector< MeasurementContainer > *m_containerList;
-       unsigned int m_containerIndex;
+       std::uint16_t m_containerIndex;
+       std::uint16_t m_cacheIndex;
        unsigned int m_index;
     };
 
@@ -208,28 +276,40 @@ namespace ActsTrk::detail {
     // get the range of elements with requested geoId
     std::pair<Iterator, Iterator> range(const Acts::Surface &surface) const
     {
-      typename T_MeasurementRangeList::const_iterator
-         range_iter = m_measurementRanges->find(surface.geometryId().value());
-      if (range_iter == m_measurementRanges->end())
-      {
-        return {Iterator(BaseIterator(nullptr, 0u, 0u)),
-                Iterator(BaseIterator(nullptr, 0u, 0u))};
-      }
+       const Acts::SurfacePlacementBase* detector_element = surface.surfacePlacement();
+       const ActsDetectorElement *acts_detector_element = detector_element ? static_cast<const ActsDetectorElement*>(detector_element) : nullptr;
+       if (acts_detector_element) {
+          unsigned int detector_type_i =static_cast<unsigned int>(acts_detector_element->detectorType());
+          unsigned int id_hash = acts_detector_element->identifyHash();
 
-      return {Iterator(BaseIterator(&measurementContainerList(), range_iter->second.containerIndex(), range_iter->second.elementBeginIndex())),
-              Iterator(BaseIterator(&measurementContainerList(), range_iter->second.containerIndex(), range_iter->second.elementEndIndex()))};
+          unsigned int container_index = m_measurementRanges->getContainerIndex(detector_type_i, id_hash);
+          if (container_index< m_measurementRanges->numContainers()) {
+             PhaseII::DataRange range = m_measurementRanges->getRange(detector_type_i, id_hash);
+             return {Iterator(BaseIterator(&measurementContainerList(),
+                                           container_index,
+                                           /*cache index: */ range.containerIndex(),
+                                           range.beginIndex())),
+                     Iterator(BaseIterator(&measurementContainerList(),
+                                           container_index,
+                                           /*cache index: */ range.containerIndex(),
+                                           range.endIndex()))};
+          }
+       }
+       constexpr std::uint16_t zero_us=0;
+       return {Iterator(BaseIterator(nullptr, zero_us, zero_us, 0u)),
+               Iterator(BaseIterator(nullptr, zero_us, zero_us, 0u))};
     }
     const MeasurementContainer &container(unsigned index) const { return m_measurementRanges->container(index); }
     const std::vector< MeasurementContainer > &measurementContainerList() const { return  m_measurementRanges->measurementContainerList(); }
 
   };
 
-  class AtlasMeasurementContainerList : public MeasurementContainerListWithDimension< AtlasMeasurementContainerList,
-                                                                                      ContainerRefWithDim<xAOD::PixelClusterContainer,2>,
-                                                                                      ContainerRefWithDim<xAOD::StripClusterContainer,1>,
-                                                                                      ContainerRefWithDim<xAOD::HGTDClusterContainer,3> >
+  class AtlasMeasurementContainerList : public AuxDataCacheList<AtlasMeasurementContainerList>
   {
   public:
+     using BASE = AuxDataCacheList<AtlasMeasurementContainerList>;
+     using BASE::BASE;
+     ~AtlasMeasurementContainerList();
 
      template <std::size_t DIM>
      static bool isDimension(const SG::AuxVectorBase &container) {

@@ -1,0 +1,27 @@
+template<typename T_Container, std::size_t NDim>
+const typename InDetClusterAuxDataCache<T_Container,NDim> ::template accessor_t<xAOD::DetectorIdentType>
+InDetClusterAuxDataCache<T_Container,NDim>::s_identifierAcc("identifier");
+
+template<typename T_Container, std::size_t NDim>
+const typename InDetClusterAuxDataCache<T_Container,NDim> ::template accessor_t<xAOD::DetectorIDHashType>
+InDetClusterAuxDataCache<T_Container,NDim>::s_identifierHashAcc("identifierHash");
+
+template<typename T_Container, std::size_t NDim>
+const typename InDetClusterAuxDataCache<T_Container,NDim> ::template accessor_t<typename xAOD::PosAccessor<NDim>::element_type >
+InDetClusterAuxDataCache<T_Container,NDim>::s_localPositionAcc{std::string("localPositionDim") + std::to_string(NDim)};
+
+template<typename T_Container, std::size_t NDim>
+const typename InDetClusterAuxDataCache<T_Container,NDim> ::template accessor_t<typename xAOD::CovAccessor<NDim>::element_type >
+InDetClusterAuxDataCache<T_Container,NDim>::s_localCovarianceAcc{std::string("localCovarianceDim") + std::to_string(NDim)};
+
+template<typename T_Container, std::size_t NDim>
+const typename InDetClusterAuxDataCache<T_Container,NDim> ::template accessor_t< std::array<float, 3> >
+InDetClusterAuxDataCache<T_Container,NDim>::s_globalPositionAcc("globalPosition");
+
+template<typename T_Container, std::size_t NDim>
+const typename InDetClusterAuxDataCache<T_Container,NDim> ::template accessor_t<int>
+InDetClusterAuxDataCache<T_Container,NDim>::s_channelsInPhiAcc("channelsInPhi");
+
+template<typename T_Container, std::size_t NDim>
+const typename InDetClusterAuxDataCache<T_Container,NDim> ::template accessor_t< SG::JaggedVecElt<Identifier::value_type> >
+InDetClusterAuxDataCache<T_Container,NDim>::s_rdoListAcc("rdoListjv");

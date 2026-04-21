@@ -8,16 +8,16 @@ namespace ActsTrk::detail {
     return m_measurementRanges;
   }
 
-  inline std::size_t TrackFindingMeasurements::nMeasurements() const {
-    return m_measurementsTotal;
-  }
+  // inline std::size_t TrackFindingMeasurements::nMeasurements() const {
+  //   return m_measurementsTotal;
+  // }
 
-  inline const std::vector<std::size_t>& TrackFindingMeasurements::measurementOffsets() const {
-    return m_measurementOffsets;
-  }
+  // inline const std::vector<std::size_t>& TrackFindingMeasurements::measurementOffsets() const {
+  //   return m_measurementOffsets;
+  // }
 
-  inline const xAOD::UncalibratedMeasurementContainer* TrackFindingMeasurements::container(std::size_t typeIndex) const {
-    return m_containers.at(typeIndex);
-  }
+  // inline const xAOD::UncalibratedMeasurementContainer* TrackFindingMeasurements::container(std::size_t typeIndex) const {
+  //   return m_containers.at(typeIndex);
+  // }
 
 }  // namespace ActsTrk::detail

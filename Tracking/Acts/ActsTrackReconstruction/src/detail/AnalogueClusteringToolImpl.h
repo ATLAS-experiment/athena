@@ -25,7 +25,15 @@ namespace ActsTrk::detail {
     using Pos = typename OnTrackCalibrator<traj_t>::PixelPos;
     using Cov = typename OnTrackCalibrator<traj_t>::PixelCov;
     using TrackStateProxy = typename OnTrackCalibrator<traj_t>::TrackStateProxy;
-    
+    using PixelCluster_t = IOnTrackCalibratorTool<traj_t>::PixelCluster_t;
+    using PixelCalibrator = Acts::Delegate<
+       std::pair<Pos, Cov>(const Acts::GeometryContext&,
+                           const Acts::CalibrationContext&,
+                           const PixelCluster_t &,
+                           const Acts::BoundTrackParameters &)>;
+     
+     
+     
     AnalogueClusteringToolImpl(const std::string& type,
                                const std::string& name,
                                const IInterface* parent);
@@ -39,12 +47,12 @@ namespace ActsTrk::detail {
     
     std::pair<Pos, Cov> calibrate(const Acts::GeometryContext&,
                                   const Acts::CalibrationContext&,
-                                  const xAOD::PixelCluster&,
+                                  const PixelCluster_t&,
                                   const Acts::BoundTrackParameters&) const;
     
     virtual void connect(OnTrackCalibrator<traj_t>& calibrator) const override;
     
-    virtual void connectPixelCalibrator(IOnBoundStateCalibratorTool::PixelCalibrator& calibrator) const override;
+    virtual void connectPixelCalibrator(PixelCalibrator& calibrator) const override;
     
     virtual bool calibrateAfterMeasurementSelection() const override;
     
@@ -54,11 +62,12 @@ namespace ActsTrk::detail {
     
     const InDetDD::SiDetectorElement& getDetectorElement(xAOD::DetectorIDHashType id) const;
     
+    template <typename T_PixelCluster>
     std::pair<typename AnalogueClusteringToolImpl<calib_data_t, traj_t>::Pos,
               typename AnalogueClusteringToolImpl<calib_data_t, traj_t>::Cov>
     calibrate(const Acts::GeometryContext& gctx,
               const Acts::CalibrationContext& cctx,
-              const xAOD::PixelCluster& cluster,
+              const T_PixelCluster& cluster,
               const InDetDD::SiDetectorElement& detElement,
               const std::pair<float, float>& angles) const;
     
@@ -67,22 +76,25 @@ namespace ActsTrk::detail {
                       const Acts::Vector3& direction) const;
     
     
-    std::pair<float, float> getCentroid(const xAOD::PixelCluster& cluster,
+    template <typename T_PixelCluster>
+    std::pair<float, float> getCentroid(const T_PixelCluster& cluster,
                                         const InDetDD::SiDetectorElement& element) const;
     
     const error_data_t* getErrorData() const;
     
+    template <typename T_PixelCluster>
     std::pair<std::optional<float>, std::optional<float>>
-    getCorrectedPosition(const xAOD::PixelCluster& cluster,
+    getCorrectedPosition(const T_PixelCluster& cluster,
                          const error_data_t& errorData,
                          const InDetDD::SiDetectorElement& element,
                          const std::pair<float, float>& angles) const;
-    
+
+    template <typename T_PixelCluster>
     std::pair<std::optional<float>, std::optional<float>>
     getCorrectedError(const error_data_t& errorData,
                       const InDetDD::SiDetectorElement& element,
                       const std::pair<float, float>& angles,
-                      const xAOD::PixelCluster& cluster) const;
+                      const T_PixelCluster& cluster) const;
     
     SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey {this, "DetEleCollKey", "",
       "Key of SiDetectorElementCollection for Pixel"

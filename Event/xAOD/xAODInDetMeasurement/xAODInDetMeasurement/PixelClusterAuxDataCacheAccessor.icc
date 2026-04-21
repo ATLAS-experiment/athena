@@ -1,0 +1,12 @@
+
+template<Utils::AccessPolicy accessPolicy>
+const PixelClusterAuxDataCache<accessPolicy>::template accessor_t<int>  PixelClusterAuxDataCache<accessPolicy>::s_channelsInEtaAcc("channelsInEta");
+
+template<Utils::AccessPolicy accessPolicy>
+const PixelClusterAuxDataCache<accessPolicy>::template accessor_t<float>  PixelClusterAuxDataCache<accessPolicy>::s_widthInEtaAcc("widthInEta");
+
+template<Utils::AccessPolicy accessPolicy>
+const PixelClusterAuxDataCache<accessPolicy>::template accessor_t<SG::JaggedVecElt<float> >  PixelClusterAuxDataCache<accessPolicy>::s_chargeListAcc("chargeListjv");
+
+template<Utils::AccessPolicy accessPolicy>
+const PixelClusterAuxDataCache<accessPolicy>::template accessor_t<SG::JaggedVecElt<int> >  PixelClusterAuxDataCache<accessPolicy>::s_totListAcc("totListjv");

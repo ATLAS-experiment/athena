@@ -19,6 +19,10 @@
 #include "ActsInterop/Logger.h"
 #include "src/detail/AtlasMeasurementSelector.h"
 #include "src/detail/OnTrackCalibrator.h"
+#include "src/detail/AuxDataCacheList.h"
+#include "xAODInDetMeasurement/PixelClusterAuxDataCache.h"
+//#include "xAODInDetMeasurement/StripClusterAuxDataCache.h"
+#include "src/detail/AuxDataCacheList.icc"
 #include "src/detail/TrackFindingMeasurements.h"
 #include "src/detail/MeasurementIndex.h"
 #include "ActsGeometry/SurfaceOfMeasurementUtil.h"
@@ -214,11 +218,11 @@ StatusCode HGTDTrackExtensionAlg::execute(const EventContext& ctx) const
   << " source links from measurements in "
   << m_uncalibratedMeasurementContainerKey_HGTD.key());
 
-  if (m_trackStatePrinter.isSet()) {
-    m_trackStatePrinter->printMeasurements(ctx, 
-    {uncalibratedMeasurementContainer}, //wrap in a braced initializer list to make a vector
-    measurements.measurementOffsets());
-  }
+  // if (m_trackStatePrinter.isSet()) {
+  //   m_trackStatePrinter->printMeasurements(ctx, 
+  //   {uncalibratedMeasurementContainer}, //wrap in a braced initializer list to make a vector
+  //   measurements.measurementOffsets());
+  // }
 
   Acts::PropagatorPlainOptions plainOptions(geoContext, mfContext);
   plainOptions.direction = Acts::Direction::Forward(); 

@@ -9,8 +9,8 @@
 
 static const SG::AuxElement::Accessor<std::array<float, 3> > globalPosAcc(
     "globalPosition");
-static const SG::AuxElement::Accessor<std::vector<Identifier::value_type> >
-    rdoListAcc("rdoList");
+const SG::AuxElement::Accessor<SG::JaggedVecElt<Identifier::value_type> >
+    xAOD::StripCluster_v1::s_rdoListAcc("rdoListjv");
 
 xAOD::ConstVectorMap<3> xAOD::StripCluster_v1::globalPosition() const {
     const auto& values = globalPosAcc(*this);
@@ -23,24 +23,19 @@ xAOD::VectorMap<3> xAOD::StripCluster_v1::globalPosition() {
 }
 
 void xAOD::StripCluster_v1::setRDOlist(std::vector<Identifier::value_type>&& rdoList) {
-  rdoListAcc(*this) = std::move(rdoList);
+   s_rdoListAcc.set(*this,rdoList);
+}
+void xAOD::StripCluster_v1::setRDOlist(std::span<Identifier::value_type> rdoList) {
+   s_rdoListAcc.set(*this,rdoList);
 }
 
+//Custom setter for identifier inputs
 void xAOD::StripCluster_v1::setRDOlist(const std::vector<Identifier>& rdoList) {
     std::vector<Identifier::value_type> rdos(rdoList.size());
     for (std::size_t i(0); i < rdos.size(); ++i) {
         rdos[i] = rdoList[i].get_compact();
     }
-    rdoListAcc(*this) = std::move(rdos);
-}
-
-const std::vector<Identifier> xAOD::StripCluster_v1::rdoList() const {
-    const std::vector<Identifier::value_type>& values = rdoListAcc(*this);
-    std::vector<Identifier> rdos(values.size());
-    for (std::size_t i(0); i < rdos.size(); ++i) {
-        rdos[i].set_literal(values[i]);
-    }
-    return rdos;
+    s_rdoListAcc.set(*this,rdos);
 }
 
 AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(xAOD::StripCluster_v1, int, channelsInPhi,

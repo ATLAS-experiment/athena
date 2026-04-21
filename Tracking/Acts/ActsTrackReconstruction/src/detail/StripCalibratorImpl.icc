@@ -60,7 +60,8 @@ namespace ActsTrk::detail{
   }
 
   template <typename traj_t>
-  std::optional<float> StripCalibratorImpl<traj_t>::getCorrectedError(const xAOD::StripCluster& cluster) const
+  template <typename T_StripCluster>
+  std::optional<float> StripCalibratorImpl<traj_t>::getCorrectedError(const T_StripCluster& cluster) const
   {
     std::optional<float> errX {std::nullopt};
     if (not m_correctCovariance) {
@@ -103,7 +104,7 @@ namespace ActsTrk::detail{
   StripCalibratorImpl<traj_t>::calibrate(
       const Acts::GeometryContext& gctx,
       const Acts::CalibrationContext& cctx,
-      const xAOD::StripCluster& cluster,
+      const StripCluster_t& cluster,
       const Acts::BoundTrackParameters& /*bound_parameters*/) const
   {
       const InDetDD::SiDetectorElement &detElement = getDetectorElement(cluster.identifierHash());
@@ -111,12 +112,13 @@ namespace ActsTrk::detail{
   }
 
   template <typename traj_t>
+  template <typename T_StripCluster>
   std::pair<typename StripCalibratorImpl<traj_t>::Pos,
             typename StripCalibratorImpl<traj_t>::Cov>
   StripCalibratorImpl<traj_t>::calibrate(
       const Acts::GeometryContext& /*gctx*/,
       const Acts::CalibrationContext& /*cctx*/,
-      const xAOD::StripCluster& cluster,
+      const T_StripCluster& cluster,
       const InDetDD::SiDetectorElement& /*detElement*/) const
   {
       Pos pos = cluster.template localPosition<1>();
@@ -145,14 +147,14 @@ namespace ActsTrk::detail{
 }
 
 template <typename traj_t>
-void StripCalibratorImpl<traj_t>::connectStripCalibrator(IOnBoundStateCalibratorTool::StripCalibrator& stripCalibrator) const
+void StripCalibratorImpl<traj_t>::connectStripCalibrator(StripCalibratorImpl<traj_t>::StripCalibrator& stripCalibrator) const
 {
    using CalibFuncPtr_t =
       std::pair<typename StripCalibratorImpl<traj_t>::Pos,
                 typename StripCalibratorImpl<traj_t>::Cov>
       (StripCalibratorImpl<traj_t>:: *)(const Acts::GeometryContext&,
                                         const Acts::CalibrationContext&,
-                                        const xAOD::StripCluster&,
+                                        const StripCluster_t&,
                                         const Acts::BoundTrackParameters&) const;
 
    stripCalibrator.template connect<static_cast<CalibFuncPtr_t>(&StripCalibratorImpl<traj_t>::calibrate)>(this);

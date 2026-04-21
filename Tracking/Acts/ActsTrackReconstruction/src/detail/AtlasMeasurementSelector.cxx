@@ -8,6 +8,13 @@
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometry/ATLASSourceLink.h"
 
+#include "src/detail/AuxDataCacheList.h"
+#include "xAODInDetMeasurement/PixelClusterAuxDataCache.h"
+//#include "xAODInDetMeasurement/StripClusterAuxDataCache.h"
+#include "src/detail/AuxDataCacheList.icc"
+// to allow to create a std::ranges::subrange from proxy object iterators
+#include "InDetRawData/ProxyContainerOperators.icc"
+
 #include "Acts/Definitions/Common.hpp"
 #include "Acts/Definitions/Algebra.hpp"
 #include "Acts/Utilities/VectorHelpers.hpp"
@@ -46,6 +53,13 @@ template <std::size_t NMeasMax, typename traj_t, typename measurement_container_
 struct AtlasMeasurementSelector;
 
 static constexpr bool s_fullPreCalibration=true;
+
+// test whether an object can create an interface object
+template <typename T_Proxy>
+concept has_getInterfaceObject = requires(T_Proxy a) { a.getInterfaceObject(); };
+
+template <typename T_Container, typename T_Range>
+concept has_moduleProxy = requires(T_Container &&a, T_Range &&range) { a.moduleProxy(range); };
 
 // need an "Eigen Map" which is default constructable and assignable
 // and where an assignment changes the data pointer not the contents of
@@ -129,7 +143,7 @@ struct MeasurementSelectorTraits<  AtlasMeasurementSelector<NMeasMax, traj_t, me
       using value_type = typename T_MeasurementRangeIterator::value_type;
    };
 
-   using abstract_measurement_range_t = std::ranges::iota_view<unsigned int, unsigned int>;
+   using abstract_measurement_range_t = PhaseII::DataRange;
 
    // the trajectory type to which states for selected measurements are to be added
    using trajectory_t = traj_t;
@@ -235,13 +249,24 @@ struct AtlasMeasurementSelector
    }
 
    // helper to create a Acts::SourceLink from an uncalibrated measurement pointer
-   template <typename T_Value>
-   static Acts::SourceLink makeSourceLink(T_Value &&value) {
-      // value is pointer
-      static_assert( !std::is_same<std::remove_pointer_t<T_Value>, T_Value>::value );
-      // ... and pointer to xAOD::UncalibgratedMeasurement
-      static_assert(std::is_base_of_v< xAOD::UncalibratedMeasurement, std::remove_cv_t<std::remove_pointer_t<T_Value> > > );
-      return Acts::SourceLink{ ActsTrk::makeATLASUncalibSourceLink(value) };
+   template <typename T_InValue>
+   static Acts::SourceLink makeSourceLink(T_InValue &&in_value) {
+      if constexpr(has_getInterfaceObject<T_InValue>) {
+         auto value=in_value.getInterfaceObject();
+         using T_Value = decltype(value);
+         // value is pointer
+         static_assert( !std::is_same<std::remove_pointer_t<T_Value>, T_Value>::value );
+         // ... and pointer to xAOD::UncalibgratedMeasurement
+         static_assert(std::is_base_of_v< xAOD::UncalibratedMeasurement, std::remove_cv_t<std::remove_pointer_t<T_Value> > > );
+         return Acts::SourceLink{ ActsTrk::makeATLASUncalibSourceLink(value) };
+      }
+      else {
+         // value is pointer
+         static_assert( !std::is_same<std::remove_pointer_t<T_InValue>, T_InValue>::value );
+         // ... and pointer to xAOD::UncalibgratedMeasurement
+         static_assert(std::is_base_of_v< xAOD::UncalibratedMeasurement, std::remove_cv_t<std::remove_pointer_t<T_InValue> > > );
+         return Acts::SourceLink{ ActsTrk::makeATLASUncalibSourceLink(in_value) };
+      }
    }
 
    // helper to provide a map from bound parameters to coordinates
@@ -285,46 +310,49 @@ struct AtlasMeasurementSelector
 
    std::tuple<const measurement_container_variant_t *, abstract_measurement_range_t, bool >
    containerAndRange(const Acts::Surface &surface) const {
+      const Acts::SurfacePlacementBase* detector_element = surface.surfacePlacement();
+      const ActsDetectorElement *acts_detector_element = detector_element ? static_cast<const ActsDetectorElement*>(detector_element) : nullptr;
+      if (!acts_detector_element) {
+         // @TODO are there measurements without associated detector element.
+         return {nullptr, abstract_measurement_range_t{}, false};
+      }
+      unsigned int detector_type_i = static_cast<unsigned int>(acts_detector_element->detectorType());
+      unsigned int id_hash = acts_detector_element->identifyHash();
+      
       if (m_measurementRangesForced) {
-          auto ret = containerAndRangeSingle(*m_measurementRangesForced, surface, true);
+         auto ret = containerAndRangeSingle(*m_measurementRangesForced, detector_type_i, id_hash);
           if (std::get<0>(ret)) return ret;
       }
-      return containerAndRangeSingle(*m_measurementRanges, surface, false);
+      return containerAndRangeSingle(*m_measurementRanges, detector_type_i, id_hash);
    }
 
 
    template <typename MeasurementRangeList_t>
    static std::tuple<const measurement_container_variant_t *, abstract_measurement_range_t, bool >
-   containerAndRangeSingle(const MeasurementRangeList_t& measurementRanges, const Acts::Surface &surface, bool forced) {
-      typename MeasurementRangeList_t::const_iterator range_iter = measurementRanges.find(surface.geometryId().value());
-      if (range_iter == measurementRanges.end())
-      {
-         return {nullptr, abstract_measurement_range_t{}, forced};
-      }
-      else {
-         abstract_measurement_range_t range{range_iter->second.elementBeginIndex(),
-                                            range_iter->second.elementEndIndex()};
-         assert( !range_iter->second.isMeasurementExpected() || range.begin() <= range.end());
-         // if surface marked as defect
-         return { forced || range_iter->second.isMeasurementExpected() ? &(measurementRanges.container(range_iter->second.containerIndex())) : nullptr,
-                 std::move(range), forced};
-      }
+   containerAndRangeSingle(const MeasurementRangeList_t& measurementRanges, unsigned int detector_type_i, unsigned int id_hash) {
+      return measurementRanges.getMeasurementRange(detector_type_i, id_hash);
    }
 
    bool expectMeasurements([[maybe_unused]] const Acts::Surface &surface,
                            [[maybe_unused]] const measurement_container_variant_t *container_variant_ptr,
                            const abstract_measurement_range_t &abstract_range) const {
-      return (abstract_range.begin()<=abstract_range.end());
+      return (abstract_range.beginIndex()<=abstract_range.endIndex());
    }
 
    template <typename measurement_container_t>
    auto
    rangeForContainer(const measurement_container_t &concrete_container,
                      const abstract_measurement_range_t &abstract_range) const {
-      unsigned int begin_idx = abstract_range.front();
-      auto begin_iter = concrete_container.container().begin() + begin_idx;
-      auto end_iter = begin_iter + static_cast<unsigned int>(abstract_range.size());
-      return  std::ranges::subrange(begin_iter, end_iter);
+      if constexpr(has_moduleProxy<std::remove_cvref_t<decltype(concrete_container.container())>, abstract_measurement_range_t>) {
+         auto module_proxy = concrete_container.container().moduleProxy(abstract_range);
+         return module_proxy;
+      }
+      else {
+         unsigned int begin_idx = abstract_range.beginIndex();
+         auto begin_iter = concrete_container.container().begin() + begin_idx;
+         auto end_iter = begin_iter + static_cast<unsigned int>(abstract_range.size());
+         return  std::ranges::subrange(begin_iter, end_iter);
+      }
    }
 };
 
@@ -365,16 +393,19 @@ namespace {
          // @TODO unfortunately automatic type deduction does not work, so have to provide the type
          //       additionally
          if constexpr( s_fullPreCalibration) {
-            m_measurementSelector.template setPreCalibrator<2,xAOD::PixelCluster>(m_calibrator.pixelPreCalibrator());
-            m_measurementSelector.template setPreCalibrator<1,xAOD::StripCluster>(m_calibrator.stripPreCalibrator());
+            m_measurementSelector.template setPreCalibrator<2,ActsTrk::MeasurementCalibrator::PixelCluster_t>(m_calibrator.pixelPreCalibrator());
+            m_measurementSelector.template setPreCalibrator<1,ActsTrk::MeasurementCalibrator::StripCluster_t>(m_calibrator.stripPreCalibrator());
+            //            m_measurementSelector.template setPreCalibrator<1,xAOD::StripCluster>(m_calibrator.stripPreCalibrator());
             m_measurementSelector.template setPreCalibrator<3,xAOD::HGTDCluster>(m_calibrator.hgtdPreCalibrator());
-            m_measurementSelector.template setCalibrator<2,xAOD::PixelCluster>(m_calibrator.pixelPostCalibrator());
-            m_measurementSelector.template setCalibrator<1,xAOD::StripCluster>(m_calibrator.stripPostCalibrator());
+            m_measurementSelector.template setCalibrator<2,ActsTrk::MeasurementCalibrator::PixelCluster_t>(m_calibrator.pixelPostCalibrator());
+            m_measurementSelector.template setCalibrator<1,ActsTrk::MeasurementCalibrator::StripCluster_t>(m_calibrator.stripPostCalibrator());
+            //            m_measurementSelector.template setCalibrator<1,xAOD::StripCluster>(m_calibrator.stripPostCalibrator());
             m_measurementSelector.template setCalibrator<3,xAOD::HGTDCluster>(m_calibrator.hgtdPostCalibrator());
          }
          else {
-            m_measurementSelector.template setCalibrator<2,xAOD::PixelCluster>(m_calibrator.pixelPostCalibrator());
-            m_measurementSelector.template setCalibrator<1,xAOD::StripCluster>(m_calibrator.stripPostCalibrator());
+            m_measurementSelector.template setCalibrator<2,ActsTrk::MeasurementCalibrator::PixelCluster_t>(m_calibrator.pixelPostCalibrator());
+            m_measurementSelector.template setCalibrator<1,ActsTrk::MeasurementCalibrator::StripCluster_t>(m_calibrator.stripPostCalibrator());
+            // m_measurementSelector.template setCalibrator<1,xAOD::StripCluster>(m_calibrator.stripPostCalibrator());
             m_measurementSelector.template setCalibrator<3,xAOD::HGTDCluster>(m_calibrator.hgtdPostCalibrator());
          }
       }

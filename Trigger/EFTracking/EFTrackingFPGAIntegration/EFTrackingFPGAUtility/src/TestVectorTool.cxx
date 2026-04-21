@@ -195,7 +195,7 @@ StatusCode TestVectorTool::encodePixelL2G(const xAOD::PixelClusterContainer *pix
         rdoListSize = rdoListSize > 4 ? 4 : rdoListSize; // restrict to 4 RDOs if more
         for (unsigned int j = 0; j < rdoListSize; j++)
         {
-            rdoList[j] = pixelClusters->at(i)->rdoList().at(j).get_compact();
+            rdoList[j] = pixelClusters->at(i)->rdoList().at(j);
         }
 
         // Pixel cluster w2
@@ -303,7 +303,7 @@ StatusCode TestVectorTool::encodeStripL2G(const xAOD::StripClusterContainer *str
         rdoListSize = rdoListSize > 4 ? 4 : rdoListSize; // restrict to 4 RDOs if more
         for (unsigned int j = 0; j < rdoListSize; j++)
         {
-            rdoList[j] = stripClusters->at(i)->rdoList().at(j).get_compact();
+            rdoList[j] = stripClusters->at(i)->rdoList().at(j);
         }
 
         // Strip cluster w3

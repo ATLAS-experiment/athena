@@ -23,6 +23,12 @@ namespace ActsTrk::detail {
     using Pos = typename OnTrackCalibrator<traj_t>::StripPos;
     using Cov = typename OnTrackCalibrator<traj_t>::StripCov;
     using TrackStateProxy = typename OnTrackCalibrator<traj_t>::TrackStateProxy;
+    using StripCluster_t = IOnTrackCalibratorTool<traj_t>::StripCluster_t;
+     using StripCalibrator = Acts::Delegate<
+         std::pair<Pos, Cov>(const Acts::GeometryContext&,
+                             const Acts::CalibrationContext&,
+                             const StripCluster_t &,
+                             const Acts::BoundTrackParameters &)>;
 
     StripCalibratorImpl(const std::string& type,
                         const std::string& name,
@@ -37,27 +43,29 @@ namespace ActsTrk::detail {
 
     std::pair<Pos, Cov> calibrate(const Acts::GeometryContext&,
                                   const Acts::CalibrationContext&,
-                                  const xAOD::StripCluster&,
+                                  const StripCluster_t&,
                                   const Acts::BoundTrackParameters&) const;
 
     virtual void connect(OnTrackCalibrator<traj_t>& calibrator) const override;
 
-    virtual void connectStripCalibrator(IOnBoundStateCalibratorTool::StripCalibrator& calibrator) const override;
+    virtual void connectStripCalibrator(StripCalibrator& calibrator) const override;
 
     virtual bool calibrateAfterMeasurementSelection() const override;
 
   private:
 
     const InDetDD::SiDetectorElement& getDetectorElement(xAOD::DetectorIDHashType id) const;
-    
+
+    template <typename T_StripCluster>
     std::pair<typename StripCalibratorImpl<traj_t>::Pos,
               typename StripCalibratorImpl<traj_t>::Cov>
     calibrate(const Acts::GeometryContext&,
               const Acts::CalibrationContext&,
-              const xAOD::StripCluster&,
+              const T_StripCluster&,
               const InDetDD::SiDetectorElement&) const;
 
-    std::optional<float> getCorrectedError(const xAOD::StripCluster& cluster) const;
+    template <typename T_StripCluster>
+    std::optional<float> getCorrectedError(const T_StripCluster& cluster) const;
 
     SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_stripDetEleCollKey {this, "DetEleCollKey", "",
       "Key of SiDetectorElementCollection for Strip"

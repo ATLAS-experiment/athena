@@ -15,6 +15,7 @@
 #include <InDetConditionsSummaryService/IInDetConditionsTool.h>
 #include <InDetIdentifier/SCT_ID.h>
 #include <InDetRawData/InDetRawDataCollection.h>
+#include "xAODInDetMeasurement/StripClusterAuxDataCache.h"
 #include <InDetRawData/SCT_RDORawData.h>
 #include <InDetReadoutGeometry/SiDetectorElement.h>
 #include <InDetReadoutGeometry/SiDetectorElementStatus.h>
@@ -34,6 +35,8 @@ public:
 
     virtual StatusCode initialize() override;
 
+    virtual StatusCode finalize() override;
+
     virtual StatusCode
     clusterize(const EventContext& ctx,
 	       const InDetRawDataCollection<StripRDORawData>& RDOs,
@@ -42,8 +45,8 @@ public:
          Acts::Ccl::ClusteringData& data,
 	       std::vector<typename IStripClusteringTool::ClusterCollection>& collection) const override;
 
-    virtual std::any makeVars (SG::AuxVectorData& /*cont*/) const override
-    { return std::any(); }
+    virtual /*StripClusterAuxDataCache<Utils::AccessPolicy::Mutable>*/ std::any
+    createAuxDataCache(xAOD::StripClusterContainer& cont, std::size_t nClusterRDOs) const override;
 
     virtual StatusCode
     makeClusters(const EventContext& ctx,
@@ -77,7 +80,7 @@ private:
 			   const StripID& stripID,
 			   const InDetDD::SiDetectorElement& element,
 			   const InDetDD::SiDetectorDesign& design,
-			   xAOD::StripCluster& container) const;
+			   StripClusterAuxDataCache<Utils::AccessPolicy::Mutable> &clusterAuxDataCache) const;
 
     StringProperty m_timeBinStr{this, "timeBins", ""};
 
@@ -107,7 +110,7 @@ private:
     Gaudi::Property<unsigned int> m_errorStrategy{this, "errorStrategy", 0, "Use different error strategies for the strip clusters"};
 
     int m_timeBinBits[3]{-1, -1, -1};
-
+   mutable std::atomic<unsigned int> m_failedTimeCut{};
 
   const StripID* m_stripID {nullptr};
 };

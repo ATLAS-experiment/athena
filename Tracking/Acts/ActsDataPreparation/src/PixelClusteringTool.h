@@ -11,6 +11,7 @@
 #include "InDetIdentifier/PixelID.h"
 #include "InDetRawData/PixelRDORawData.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
+#include "xAODInDetMeasurement/PixelClusterAuxDataCache.h"
 #include "InDetCondTools/ISiLorentzAngleTool.h"
 #include "PixelConditionsData/PixelChargeCalibCondData.h"
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
@@ -32,7 +33,8 @@ public:
                Acts::Ccl::ClusteringData& data,
                std::vector<ClusterCollection>& collection) const override;
   
-    virtual std::any makeVars (SG::AuxVectorData& cont) const override;
+    virtual /*PixelClusterAuxDataCache<Utils::AccessPolicy::Mutable>*/ std::any
+    createAuxDataCache(xAOD::PixelClusterContainer& cont, std::size_t nClusterRDOs) const override;
 
     virtual StatusCode
     makeClusters(const EventContext& ctx,
@@ -54,8 +56,7 @@ private:
 			 const PixelChargeCalibCondData *calibData,
 			 const PixelChargeCalibCondData::CalibrationStrategy calibStrategy,
 			 double lorentz_shift,
-                         size_t icluster,
-                         xAOD::PixelCluster::ClusterVars& clusterVars) const;
+                         PixelClusterAuxDataCache<Utils::AccessPolicy::Mutable> &clusterAuxDataCache) const;
 
   typename IPixelClusteringTool::CellCollection
   unpackRDOs(const RawDataCollection& RDOs,

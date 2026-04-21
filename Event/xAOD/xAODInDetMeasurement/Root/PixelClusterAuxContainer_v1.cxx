@@ -12,12 +12,9 @@ PixelClusterAuxContainer_v1::PixelClusterAuxContainer_v1()
     AUX_MEASUREMENTVAR(localPosition, 2);
     AUX_MEASUREMENTVAR(localCovariance, 2);
     AUX_VARIABLE(globalPosition);
-    AUX_VARIABLE(rdoList);
     AUX_VARIABLE(channelsInPhi);
     AUX_VARIABLE(channelsInEta);
     AUX_VARIABLE(widthInEta);
-    AUX_VARIABLE(totList);
-    AUX_VARIABLE(chargeList);
     AUX_VARIABLE(energyLoss);
     AUX_VARIABLE(lvl1a);
 }

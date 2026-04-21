@@ -1,0 +1,41 @@
+namespace ActsTrk::detail {
+   template <typename T_AuxDataCache>
+   struct ClusterAuxDataCacheWithClusterAccess : T_AuxDataCache
+   {
+      //      using T_Container = T_AuxDataCache::T_Container;
+      using T_AuxDataCache::T_AuxDataCache;
+
+      using value_type=typename traits::ElementProxies<const T_AuxDataCache>::template ClusterProxy<Utils::AccessPolicy::Const>;
+      using ModuleProxy=typename traits::ElementProxies<const T_AuxDataCache>::template ModuleProxy<Utils::AccessPolicy::Const>;
+
+      ModuleProxy moduleProxy(const PhaseII::DataRange &range) const {
+         (void) this->moduleIndex();
+         if (range.containerIndex() & (1u<<15)) {
+            const static std::vector<unsigned int> empty_selection;
+            return ModuleProxy(&(this->container(PhaseII::DataRange(range.beginIndex(),static_cast<unsigned int>(range.size()),range.containerIndex() & (~(1u<<15))))),
+                               IndexWithSubsetRange(range.beginIndex(),
+                                                    range.endIndex(),
+                                                    0u /* dummy identifier hash */,
+                                                    empty_selection)
+                               );
+         }
+         else {
+            return ModuleProxy(&(this->container(range)),
+                               IndexWithSubsetRange(range.beginIndex(),
+                                                    range.endIndex(),
+                                                    0u /* dummy identifier hash */,
+                                                    this->selection())
+                               );
+         }
+      }
+      // value_type operator[](unsigned int index) const {
+      //    assert( index < this->m_sizeInfo.initializedSize());
+      //    return value_type( *this, index);
+      // }
+      // auto begin() const {
+      //    using AllClusterProxy=typename traits::ElementProxies<T_AuxDataCache>::template AllClusterProxy<Utils::AccessPolicy::Const>;
+      //    return AllClusterProxy(static_cast<const T_AuxDataCache *>(this)).begin();
+      // }
+   };
+
+}

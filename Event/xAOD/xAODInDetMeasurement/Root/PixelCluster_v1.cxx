@@ -9,8 +9,8 @@
 
 static const SG::AuxElement::Accessor<std::array<float, 3> > globalPosAcc(
     "globalPosition");
-static const SG::AuxElement::Accessor<std::vector<Identifier::value_type> >
-    rdoListAcc("rdoList");
+const SG::AuxElement::Accessor<SG::JaggedVecElt<Identifier::value_type> >
+    xAOD::PixelCluster_v1::s_rdoListAcc("rdoListjv");
 
 xAOD::ConstVectorMap<3> xAOD::PixelCluster_v1::globalPosition() const {
     const auto& values = globalPosAcc(*this);
@@ -24,9 +24,11 @@ xAOD::VectorMap<3> xAOD::PixelCluster_v1::globalPosition() {
 
 
 void xAOD::PixelCluster_v1::setRDOlist(std::vector<Identifier::value_type>&& rdoList) {
-  rdoListAcc(*this) = std::move(rdoList);
+   s_rdoListAcc.set(*this,rdoList);
 }
-
+void xAOD::PixelCluster_v1::setRDOlist(std::span<Identifier::value_type> rdoList) {
+   s_rdoListAcc.set(*this,rdoList);
+}
 
 //Custom setter for identifier inputs
 void xAOD::PixelCluster_v1::setRDOlist(const std::vector<Identifier>& rdoList) {
@@ -34,18 +36,28 @@ void xAOD::PixelCluster_v1::setRDOlist(const std::vector<Identifier>& rdoList) {
     for (std::size_t i(0); i < rdos.size(); ++i) {
         rdos[i] = rdoList[i].get_compact();
     }
-    rdoListAcc(*this) = std::move(rdos);
+    s_rdoListAcc.set(*this,rdos);
 }
 
+const SG::AuxElement::Accessor<SG::JaggedVecElt<int> >
+    xAOD::PixelCluster_v1::s_totListAcc("totListjv");
 
+void xAOD::PixelCluster_v1::setToTlist(const std::vector<int>& tots) {
+   s_totListAcc.set(*this,tots);
+}
 
-const std::vector<Identifier> xAOD::PixelCluster_v1::rdoList() const {
-    const std::vector<Identifier::value_type>& values = rdoListAcc(*this);
-    std::vector<Identifier> rdos(values.size());
-    for (std::size_t i(0); i < rdos.size(); ++i) {
-        rdos[i].set_literal(values[i]);
-    }
-    return rdos;
+void xAOD::PixelCluster_v1::setToTlist(std::span<int> tots) {
+   s_totListAcc.set(*this,tots);
+}
+const SG::AuxElement::Accessor<SG::JaggedVecElt<float> >
+    xAOD::PixelCluster_v1::s_chargeListAcc("chargeListjv");
+
+void xAOD::PixelCluster_v1::setChargelist(const std::vector<float>& charges) {
+   s_chargeListAcc.set(*this,charges);
+}
+
+void xAOD::PixelCluster_v1::setChargelist(std::span<float> charges) {
+   s_chargeListAcc.set(*this,charges);
 }
 
 AUXSTORE_PRIMITIVE_GETTER(xAOD::PixelCluster_v1, int, channelsInPhi)
@@ -63,15 +75,13 @@ void xAOD::PixelCluster_v1::setChannelsInPhiEta(int channelsInPhi,
 AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(xAOD::PixelCluster_v1, float, widthInEta,
                                      setWidthInEta)
 
-AUXSTORE_OBJECT_SETTER_AND_GETTER(xAOD::PixelCluster_v1, std::vector<int>, totList,
-				  setToTlist)
+// AUXSTORE_OBJECT_SETTER_AND_GETTER(xAOD::PixelCluster_v1, std::vector<int>, totList,
+// 				  setToTlist)
 
-AUXSTORE_OBJECT_MOVE(xAOD::PixelCluster_v1, std::vector<int>, totList, setToTlist)
+//AUXSTORE_OBJECT_MOVE(xAOD::PixelCluster_v1, std::vector<int>, totList, setToTlist)
 
-AUXSTORE_OBJECT_SETTER_AND_GETTER(xAOD::PixelCluster_v1, std::vector<float>, chargeList,
-				  setChargelist)
 
-AUXSTORE_OBJECT_MOVE(xAOD::PixelCluster_v1, std::vector<float>, chargeList, setChargelist)
+// AUXSTORE_OBJECT_MOVE(xAOD::PixelCluster_v1, std::vector<float>, chargeList, setChargelist)
 
 AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(xAOD::PixelCluster_v1, float, energyLoss,
                                      setEnergyLoss)

@@ -16,6 +16,8 @@
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "Acts/Geometry/TrackingGeometry.hpp"
 
+#include <limits>
+
 namespace ActsTrk {
 ActsVolumeIdToDetectorElementCollectionMappingAlg::ActsVolumeIdToDetectorElementCollectionMappingAlg(const std::string& name, ISvcLocator* pSvcLocator) :
     AthCondAlgorithm(name, pSvcLocator) {}
@@ -45,7 +47,7 @@ StatusCode ActsVolumeIdToDetectorElementCollectionMappingAlg::execute(const Even
        volume_id_to_detector_element_collection_map = std::make_unique<ActsTrk::ActsVolumeIdToDetectorElementCollectionMap>();
 
 
-    std::unordered_map<unsigned long long, unsigned int> detector_element_to_volume_id;
+    std::unordered_map<unsigned long long, std::pair<unsigned char,unsigned char> > detector_element_to_volume_id;
     createDetectorElementToVolumeIdMap(*acts_tracking_geometry,
                                        detector_element_to_volume_id);
 
@@ -54,8 +56,9 @@ StatusCode ActsVolumeIdToDetectorElementCollectionMappingAlg::execute(const Even
        ATH_CHECK(det_ele_col.isValid());
        volumeIdTodetectorElementCollMap.addDependency(det_ele_col);
        for (const InDetDD::SiDetectorElement *det_ele : *(det_ele_col.cptr())) {
-          unsigned int vol_id = detector_element_to_volume_id.at(det_ele->identify().get_compact());
-          volume_id_to_detector_element_collection_map->registerCollection(vol_id, det_ele_col.cptr());
+          auto [volume_id, detector_type_i] = detector_element_to_volume_id.at(det_ele->identify().get_compact());
+          volume_id_to_detector_element_collection_map->registerCollection(volume_id, det_ele_col.cptr());
+          volume_id_to_detector_element_collection_map->registerDetectorType(volume_id, detector_type_i);
        }
     }
     if (msgLvl(MSG::DEBUG)) {
@@ -77,12 +80,13 @@ StatusCode ActsVolumeIdToDetectorElementCollectionMappingAlg::execute(const Even
 void
 ActsVolumeIdToDetectorElementCollectionMappingAlg::createDetectorElementToVolumeIdMap(const Acts::TrackingGeometry &acts_tracking_geometry,
                                                                                       std::unordered_map<unsigned long long,
-                                                                                                         unsigned int> &detector_element_to_volume_id)
+                                                                                                         std::pair<unsigned char,unsigned char> >
+                                                                                            &detector_element_to_volume_id)
 const
 {
    using Counter = struct { unsigned int n_detector_elements, n_missing_detector_elements, n_wrong_type; };
    Counter counter {0u,0u,0u};
-   acts_tracking_geometry.visitSurfaces([&counter, &detector_element_to_volume_id](const Acts::Surface *surface_ptr) {
+   acts_tracking_geometry.visitSurfaces([this,&counter, &detector_element_to_volume_id](const Acts::Surface *surface_ptr) {
       if (!surface_ptr) return;
       const Acts::Surface &surface = *surface_ptr;
       const Acts::SurfacePlacementBase* detector_element = surface.surfacePlacement();
@@ -91,7 +95,14 @@ const
          if (acts_detector_element) {
             const auto*trk_detector_element  = dynamic_cast<const Trk::TrkDetElementBase*>(acts_detector_element->upstreamDetectorElement());
             if(trk_detector_element  != nullptr) {
-               detector_element_to_volume_id.insert( std::make_pair( trk_detector_element->identify().get_compact(), surface.geometryId().volume()));
+               if (   surface.geometryId().volume() >= std::numeric_limits<unsigned char>::max()
+                   && static_cast<unsigned int>(acts_detector_element->detectorType())+1 >= std::numeric_limits<unsigned char>::max()) {
+                  ATH_MSG_FATAL("Volume id " << surface.geometryId().volume() << " or " << static_cast<unsigned int>(acts_detector_element->detectorType())
+                                << " exceed capacity of type \"unsigned char\".");
+               }
+               detector_element_to_volume_id.insert( std::make_pair( trk_detector_element->identify().get_compact(),
+                                                                     std::make_pair( static_cast<unsigned char>(surface.geometryId().volume()),
+                                                                                     static_cast<unsigned char>(acts_detector_element->detectorType()) )));
             }
             else {
                ++counter.n_wrong_type;

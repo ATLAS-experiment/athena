@@ -1,7 +1,6 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
 #include "TrkSurfaces/Surface.h"
 #include "InDetIdentifier/PixelID.h"
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
@@ -25,7 +24,7 @@ namespace ActsTrk {
     }
 
     StatusCode
-    PixelSpacePointFormationTool::producePixelSpacePoint(const xAOD::PixelCluster& cluster,
+    PixelSpacePointFormationTool::producePixelSpacePoint(const PixelCluster_t& cluster,
                                                          xAOD::SpacePoint& sp,
                                                          const InDetDD::SiDetectorElement& element) const
     {
@@ -52,7 +51,7 @@ namespace ActsTrk {
 			 cluster.globalPosition(),
 			 cov_r, 
 			 cov_z,
-			 std::vector< const xAOD::UncalibratedMeasurement* >({&cluster}));
+			 std::vector< const xAOD::UncalibratedMeasurement* >({cluster.getInterfaceObject()}));
 	
         return StatusCode::SUCCESS;
     }

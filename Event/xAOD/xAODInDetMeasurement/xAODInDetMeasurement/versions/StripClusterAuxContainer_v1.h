@@ -10,6 +10,8 @@
 #include "Identifier/Identifier.h"
 #include "Identifier/IdentifierHash.h"
 #include "xAODCore/AuxContainerBase.h"
+#include "xAODCore/JaggedVec.h"
+#include "AthContainers/JaggedVecAccessor.h"
 #include "xAODMeasurementBase/MeasurementDefs.h"
 
 namespace xAOD {
@@ -32,7 +34,7 @@ class StripClusterAuxContainer_v1 : public AuxContainerBase {
     /// @name Defining strip cluster parameters
     /// @{
     std::vector<PosAccessor<3>::element_type> globalPosition;
-    std::vector<std::vector<Identifier::value_type> > rdoList;
+    AUXVAR_JAGGEDVEC_DECL(Identifier::value_type,rdoListjv);
     std::vector<int> channelsInPhi;
     /// @}
 };

@@ -12,7 +12,6 @@ StripClusterAuxContainer_v1::StripClusterAuxContainer_v1()
     AUX_MEASUREMENTVAR(localPosition, 1);
     AUX_MEASUREMENTVAR(localCovariance, 1);
     AUX_VARIABLE(globalPosition);
-    AUX_VARIABLE(rdoList);
     AUX_VARIABLE(channelsInPhi);
 }
 }  // namespace xAOD

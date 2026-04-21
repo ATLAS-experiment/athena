@@ -82,10 +82,10 @@ namespace FPGATrackSim {
                 ToolHandle<FPGATrackSim::ActsTrackInspectionTool> m_ActsInspectionTool {this, "ActsInspectionTool", "FPGATrackSim::ActsTrackInspectionTool/ActsTrackInspectionTool", "Monitoring tool for acts tracks"};
 
                 //_________________________________________________________________________________________________________________________              
-                template <class XAOD_CLUSTER>
-                void processxAODClusters(SG::ReadHandle<DataVector< XAOD_CLUSTER >>& clusterContainer) const;
-                template <class XAOD_CLUSTER>
-                void printxAODClusters(SG::ReadHandle<DataVector< XAOD_CLUSTER >>& clusterContainer) const;
+                template <class XAOD_CLUSTER_CONTAINER>
+                void processxAODClusters(SG::ReadHandle<XAOD_CLUSTER_CONTAINER>& clusterContainer) const;
+                template <class XAOD_CLUSTER_CONTAINER>
+                void printxAODClusters(SG::ReadHandle<XAOD_CLUSTER_CONTAINER>& clusterContainer) const;
 
                 void processxAODSpacePoints(SG::ReadHandle<DataVector< xAOD::SpacePoint >>& spContainer) const;
                 void printxAODSpacePoints(SG::ReadHandle<DataVector< xAOD::SpacePoint >>& spContainer) const;

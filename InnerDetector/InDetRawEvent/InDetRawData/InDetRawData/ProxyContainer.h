@@ -325,20 +325,19 @@ private:
    // e.g. used to compute the size of std::ranges::subrange
    template <typename T>
    struct diff_type_helper {
-      // for integral types assume that a 64 bit signed integer is a good choice
-      static std::int64_t diff(const T &a, const T &b)
-         requires(std::is_integral_v<T>)
-      {return a-b;}
 
-      // if a difference operation is defined for the index then use the return type
       static auto  diff(const T &a, const T &b)
-         requires(!std::is_integral_v<T> && hasDifference<T>)
-      {return a-b;}
+      {
+         if constexpr(hasDifference<T>) {
+            // if a difference operation is defined for the index then use the return type
+            return a-b;
+         }
+         else {
+            // otherwise use a type which is not a valid difference type what concerns std::ranges::subrange
+            return;
+         }
+      }
 
-      // otherwise use a type which is not a valid difference type what concerns std::ranges::subrange
-      static void  diff([[maybe_unused]] const T &a, [[maybe_unused]] const T &b)
-         requires(!std::is_integral_v<T> && !hasDifference<T>)
-      { }
    };
 public:
    using difference_type = decltype( diff_type_helper<typename BASE::element_index_t>::diff(std::declval<typename BASE::element_index_t>(),

@@ -133,7 +133,8 @@ namespace ActsTrk
     const T_MeasurementCollection *measurements = measurementHandle.cptr();
     for ( const auto *measurement : *measurements ) {
        summed_contribution.clear();
-       for (const auto& a_rdo : getRDOList(*measurement) ) {
+       for (const auto& a_rdo_id_value : getRDOList(*measurement) ) {
+          Identifier a_rdo(a_rdo_id_value);
           typename T_SimDataCollection::const_iterator sim_data_iter(simData->find(a_rdo));
 
           if(sim_data_iter != simData->end() )  {

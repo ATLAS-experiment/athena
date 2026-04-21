@@ -12,6 +12,8 @@
 #include "xAODInDetMeasurement/PixelCluster.h"
 #include "xAODInDetMeasurement/StripCluster.h"
 #include "xAODInDetMeasurement/HGTDCluster.h"
+#include "xAODInDetMeasurement/PixelClusterAuxDataCache.h"
+#include "xAODInDetMeasurement/StripClusterAuxDataCache.h"
 
 #include "Acts/EventData/MultiTrajectory.hpp"
 #include "Acts/EventData/BoundTrackParameters.hpp"
@@ -101,11 +103,16 @@ namespace ActsTrk {
    struct MeasurementCalibrator {
       using PixelPos = xAOD::MeasVector<2>;
       using PixelCov = xAOD::MeasMatrix<2>;
+
+
+      using PixelCluster_t = traits::ElementProxies<const PixelClusterAuxDataCacheCollection >::ClusterProxy<Utils::AccessPolicy::Const>;
+      using StripCluster_t = traits::ElementProxies<StripClusterAuxDataCache<Utils::AccessPolicy::Const> >::ClusterProxy<Utils::AccessPolicy::Const>;
+
       // @TODO should pass through bound state
       using PixelCalibrator = Acts::Delegate<
          std::pair<PixelPos, PixelCov>(const Acts::GeometryContext&,
                                        const Acts::CalibrationContext&,
-                                       const xAOD::PixelCluster &,
+                                       const PixelCluster_t &,
                                        const Acts::BoundTrackParameters &)>;
 
       using StripPos = xAOD::MeasVector<1>;
@@ -113,7 +120,8 @@ namespace ActsTrk {
       using StripCalibrator = Acts::Delegate<
          std::pair<StripPos, StripCov>(const Acts::GeometryContext&,
                                        const Acts::CalibrationContext&,
-                                       const xAOD::StripCluster &,
+                                       const StripCluster_t &,
+                                       // const xAOD::StripCluster &,
                                        const Acts::BoundTrackParameters &)>;
       using hgtdPos = xAOD::MeasVector<3>;
       using hgtdCov = xAOD::MeasMatrix<3>;
@@ -140,19 +148,20 @@ namespace ActsTrk {
              pixelCalibratorTool->connectPixelCalibrator( calibrate_after_measurement_selection ?
                                                           pixel_postCalibrator : pixel_preCalibrator );
              if (calibrate_after_measurement_selection)
-                pixel_preCalibrator.template connect<&MeasurementCalibrator::passthrough<2, xAOD::PixelCluster>>(this);
+                pixel_preCalibrator.template connect<&MeasurementCalibrator::passthrough<2,PixelCluster_t >>(this);
           } else
-             pixel_preCalibrator.template connect<&MeasurementCalibrator::passthrough<2, xAOD::PixelCluster>>(this);
+            pixel_preCalibrator.template connect<&MeasurementCalibrator::passthrough<2, PixelCluster_t>>(this);
 
           if (stripCalibratorTool) {
+             throw std::runtime_error("calibration tool not supported.");
              bool calibrate_after_measurement_selection = stripCalibratorTool->calibrateAfterMeasurementSelection();
              stripCalibratorTool->connectStripCalibrator( calibrate_after_measurement_selection ?
                                                           strip_postCalibrator : strip_preCalibrator );
              if (calibrate_after_measurement_selection)
-                strip_preCalibrator.template connect<&MeasurementCalibrator::passthrough<1, xAOD::StripCluster>>(this);
-          } else
-             strip_preCalibrator.template connect<&MeasurementCalibrator::passthrough<1, xAOD::StripCluster>>(this);
-
+                strip_preCalibrator.template connect<&MeasurementCalibrator::passthrough<1, StripCluster_t>>(this);
+          } else {
+             strip_preCalibrator.template connect<&MeasurementCalibrator::passthrough<1, StripCluster_t>>(this);
+          }
 
           if (hgtdCalibratorTool) {
              bool calibrate_after_measurement_selection = hgtdCalibratorTool->calibrateAfterMeasurementSelection();
@@ -170,7 +179,7 @@ namespace ActsTrk {
       const HGTDCalibrator &hgtdPostCalibrator() const { return hgtd_postCalibrator; }
       const PixelCalibrator &pixelPreCalibrator() const { return pixel_preCalibrator; }
       const StripCalibrator &stripPreCalibrator() const { return strip_preCalibrator; }
-      const HGTDCalibrator &hgtdPreCalibrator() const { return hgtd_preCalibrator; }   
+      const HGTDCalibrator &hgtdPreCalibrator() const { return hgtd_preCalibrator; }
 
 
       template <std::size_t Dim, typename Cluster>
