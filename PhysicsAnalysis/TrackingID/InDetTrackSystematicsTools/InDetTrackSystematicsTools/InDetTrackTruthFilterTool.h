@@ -16,6 +16,7 @@
 #include "InDetTrackSystematicsTools/InDetTrackSystematicsTool.h"
 
 #include "xAODTracking/TrackParticle.h"
+#include <mutex>
 #include <string>
 
 class TH2;
@@ -53,6 +54,9 @@ namespace InDet {
 
     // accept method to determine if a track should be kept or not
     virtual bool accept(const xAOD::TrackParticle* track) const override;
+    /// Reentrant accept (see IInDetTrackTruthFilterTool)
+    virtual bool accept(const xAOD::TrackParticle* track,
+                        const CP::SystematicSet& syst) const override;
 
     /// returns: whether the tool is affected by the systematic
     virtual bool isAffectedBySystematic( const CP::SystematicVariation& ) const override;
@@ -75,6 +79,7 @@ namespace InDet {
 
     Gaudi::Property<int> m_seed{this, "Seed", 0, "Random seed"};
     std::unique_ptr<TRandom3> m_rnd; //!
+    mutable std::mutex m_rndMutex; //!
     
     Gaudi::Property<float> m_fFakeLoose{this, "fFakeLoose", -1.0, "Fake loose fraction"};
     Gaudi::Property<float> m_fFakeTight{this, "fFakeTight", -1.0, "Fake tight fraction"};

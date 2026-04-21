@@ -35,6 +35,11 @@ namespace InDet {
                 xAOD::TrackParticle*& out ) = 0;
     virtual CP::CorrectionCode applyContainerCorrection( xAOD::TrackParticleContainer& cont ) = 0;
 
+    /// Reentrant biasing: applies @p syst without mutating shared state.
+    /// Requires applySystematicVariation(@p syst) during initialize().
+    virtual CP::CorrectionCode applyCorrection(
+        xAOD::TrackParticle& track, const CP::SystematicSet& syst) const = 0;
+
     // implement the CP::ISystematicTool interface
     /// returns: whether the tool is affected by the systematic
     virtual bool isAffectedBySystematic( const CP::SystematicVariation& ) const = 0;

@@ -58,6 +58,9 @@ namespace InDet {
     virtual CP::CorrectionCode correctedCopy( const xAOD::TrackParticle& in,
                 xAOD::TrackParticle*& out ) override;
     virtual CP::CorrectionCode applyContainerCorrection( xAOD::TrackParticleContainer& cont ) override;
+    /// Reentrant biasing (see IInDetTrackBiasingTool)
+    virtual CP::CorrectionCode applyCorrection(
+        xAOD::TrackParticle& track, const CP::SystematicSet& syst) const override;
 
 
     /// returns: whether the tool is affected by the systematic
@@ -72,6 +75,9 @@ namespace InDet {
   protected:
 
     StatusCode initHistograms();
+    /// Core biasing logic; delegates from both applyCorrection overloads.
+    CP::CorrectionCode applyBiasWithSyst(
+        xAOD::TrackParticle& track, const CP::SystematicSet& filtered) const;
 
     float readHistogram(float fDefault, TH2* histogram, float phi, float eta) const;
 

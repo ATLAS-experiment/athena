@@ -15,9 +15,12 @@
 
 #include "PathResolver/PathResolver.h"
 
+#include "CxxUtils/checker_macros.h"
+
 #include <TH2.h>
 #include <TRandom3.h>
 #include <TFile.h>
+#include <stdexcept>
 
 namespace InDet {
 
@@ -297,6 +300,19 @@ namespace InDet {
   StatusCode InDetTrackTruthFilterTool::applySystematicVariation( const CP::SystematicSet& systs )
   {
     return InDetTrackSystematicsTool::applySystematicVariation(systs);
+  }
+
+  bool InDetTrackTruthFilterTool::accept(
+      const xAOD::TrackParticle* track,
+      const CP::SystematicSet& syst) const
+  {
+    std::lock_guard<std::mutex> lock(m_rndMutex);
+    InDetTrackTruthFilterTool* nc_this ATLAS_THREAD_SAFE =
+        const_cast<InDetTrackTruthFilterTool*>(this);
+    if (nc_this->applySystematicVariation(syst).isFailure())
+      throw std::invalid_argument("Systematic '" + syst.name()
+          + "' was not pre-registered in initialize()");
+    return accept(track);
   }
 
 } // namespace InDet

@@ -38,10 +38,15 @@ namespace InDet {
     public:
     // implement the CP::CorrectionTool interface
 
-    /// Smearing method 
-    virtual CP::CorrectionCode applyCorrection( xAOD::TrackParticle& ID ) = 0; 
-    virtual CP::CorrectionCode correctedCopy( const xAOD::TrackParticle&, xAOD::TrackParticle*& ) = 0; 
+    /// Smearing method
+    virtual CP::CorrectionCode applyCorrection( xAOD::TrackParticle& ID ) = 0;
+    virtual CP::CorrectionCode correctedCopy( const xAOD::TrackParticle&, xAOD::TrackParticle*& ) = 0;
     virtual CP::CorrectionCode applyContainerCorrection( xAOD::TrackParticleContainer& ) = 0;
+
+    /// Reentrant smearing: applies @p syst without mutating shared state.
+    /// Requires applySystematicVariation(@p syst) during initialize().
+    virtual CP::CorrectionCode applyCorrection(
+        xAOD::TrackParticle& ID, const CP::SystematicSet& syst) const = 0;
 
     // implement the CP::ISystematicTool interface
 
