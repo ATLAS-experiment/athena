@@ -19,13 +19,14 @@
 #define METRECOINTERFACE_IMETRECOTOOL_H
 	
 #include "AsgTools/IAsgTool.h"
-	
+#include "AsgTools/CurrentContext.h"
+
 class IMETRecoTool : virtual public asg::IAsgTool {
   ASG_TOOL_INTERFACE(IMETRecoTool)
 	
     public:
 	
-  virtual StatusCode execute() const = 0;
+  virtual StatusCode execute(const EventContext& ctx) const = 0;
 	
 };
 	

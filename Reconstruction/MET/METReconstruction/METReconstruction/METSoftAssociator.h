@@ -43,17 +43,17 @@ namespace met{
     /////////////////////////////////////////////////////////////////// 
     protected: 
 
-    StatusCode executeTool(xAOD::MissingETContainer* metCont, xAOD::MissingETAssociationMap* metMap) const final;
+    StatusCode executeTool(xAOD::MissingETContainer* metCont, xAOD::MissingETAssociationMap* metMap, const EventContext& ctx) const final;
 
-    StatusCode extractPFO(const xAOD::IParticle*,
+    virtual StatusCode extractPFO(const xAOD::IParticle*,
                           std::vector<const xAOD::IParticle*>&,
                           const met::METAssociator::ConstitHolder&,
-                          std::map<const xAOD::IParticle*,MissingETBase::Types::constvec_t>&) const final
+                          std::map<const xAOD::IParticle*,MissingETBase::Types::constvec_t>&, const EventContext&) const final
     {return StatusCode::FAILURE;} // should not be called
-    StatusCode extractFE(const xAOD::IParticle*,
+    virtual StatusCode extractFE(const xAOD::IParticle*,
                          std::vector<const xAOD::IParticle*>&,
                          const met::METAssociator::ConstitHolder&,
-                         std::map<const xAOD::IParticle*,MissingETBase::Types::constvec_t>&) const final
+                         std::map<const xAOD::IParticle*,MissingETBase::Types::constvec_t>&, const EventContext&) const final
     {return StatusCode::FAILURE;} // should not be called
     StatusCode extractTracks(const xAOD::IParticle*,
                              std::vector<const xAOD::IParticle*>&,
@@ -61,7 +61,7 @@ namespace met{
     {return StatusCode::FAILURE;} // should not be called
     StatusCode extractTopoClusters(const xAOD::IParticle*,
                                    std::vector<const xAOD::IParticle*>&,
-                                   const met::METAssociator::ConstitHolder&) const final
+                                   const met::METAssociator::ConstitHolder&, const EventContext&) const final
     {return StatusCode::FAILURE;} // should not be called
 
     private:
@@ -69,11 +69,11 @@ namespace met{
     /// Default constructor: 
     METSoftAssociator();
 
-    bool m_decorateSoftTermConst;
+    Gaudi::Property<bool> m_decorateSoftTermConst{this, "DecorateSoftConst", false};
     bool m_weight_soft_pfo = false;
 
-    SG::ReadHandleKey<xAOD::CaloClusterContainer> m_lcmodclus_key;
-    SG::ReadHandleKey<xAOD::CaloClusterContainer> m_emmodclus_key;
+    SG::ReadHandleKey<xAOD::CaloClusterContainer> m_lcmodclus_key{this, "LCModClusterKey", "LCOriginTopoClusters"};
+    SG::ReadHandleKey<xAOD::CaloClusterContainer> m_emmodclus_key{this, "EMModClusterKey", "EMOriginTopoClusters"};
 
   }; 
 

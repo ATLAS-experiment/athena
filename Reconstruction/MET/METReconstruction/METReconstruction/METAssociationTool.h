@@ -76,7 +76,7 @@ namespace met{
 
     // AsgTool Hooks
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() const override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
     virtual StatusCode finalize() override;
 
     /////////////////////////////////////////////////////////////////// 
@@ -88,7 +88,7 @@ namespace met{
     METAssociationTool();
 
     // Run the MET tools here
-    StatusCode buildMET(xAOD::MissingETContainer* metCont, xAOD::MissingETAssociationMap* metMap) const;
+    StatusCode buildMET(xAOD::MissingETContainer* metCont, xAOD::MissingETAssociationMap* metMap, const EventContext& ctx) const;
 
     // Data members
     Gaudi::Property<std::string> m_metSuffix{this, "METSuffix", "AntiKt4LCTopo", "MET suffix"};

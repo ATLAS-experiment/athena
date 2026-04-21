@@ -51,30 +51,30 @@ namespace met{
 
     StatusCode extractTopoClusters(const xAOD::IParticle* obj,
                                    std::vector<const xAOD::IParticle*>& tclist,
-                                   const met::METAssociator::ConstitHolder& constits) const final;
+                                   const met::METAssociator::ConstitHolder& constits, const EventContext& ctx) const final;
 
-    StatusCode extractPFO(const xAOD::IParticle* obj,
+    virtual StatusCode extractPFO(const xAOD::IParticle* obj,
                           std::vector<const xAOD::IParticle*>& pfolist,
                           const met::METAssociator::ConstitHolder& constits,
-                          std::map<const xAOD::IParticle*,MissingETBase::Types::constvec_t> &momenta) const final;
+                          std::map<const xAOD::IParticle*,MissingETBase::Types::constvec_t> &momenta, const EventContext& ctx) const final;
 
     StatusCode extractPFOsFromLinks(const xAOD::Egamma* eg,
     				    std::vector<const xAOD::IParticle*>& pfolist,
-				    const met::METAssociator::ConstitHolder& constits) const;
+				    const met::METAssociator::ConstitHolder& constits, const EventContext& ctx) const;
 
 
     StatusCode extractPFOs(const xAOD::Egamma* eg,
 				 std::vector<const xAOD::IParticle*>& pfolist,
 				 const met::METAssociator::ConstitHolder& constits) const;
 
-    StatusCode extractFE(const xAOD::IParticle* obj,
+    virtual StatusCode extractFE(const xAOD::IParticle* obj,
                          std::vector<const xAOD::IParticle*>& felist,
                          const met::METAssociator::ConstitHolder& constits,
-                         std::map<const xAOD::IParticle*,MissingETBase::Types::constvec_t> &momenta) const final; 
+                         std::map<const xAOD::IParticle*,MissingETBase::Types::constvec_t> &momenta, const EventContext& ctx) const final; 
 
     StatusCode extractFEsFromLinks(const xAOD::Egamma* eg, 
     				    std::vector<const xAOD::IParticle*>& felist,
-				    const met::METAssociator::ConstitHolder& constits) const; // TODO: to be tested
+				    const met::METAssociator::ConstitHolder& constits, const EventContext& ctx) const; // TODO: to be tested
 
     StatusCode extractFEs(const xAOD::Egamma* eg, 
 				 std::vector<const xAOD::IParticle*>& felist,
@@ -107,16 +107,15 @@ namespace met{
     unsigned short m_tcMatch_method;
 
     double m_extraTrkMatch_dR;
+    SG::ReadDecorHandleKey<xAOD::PhotonContainer> m_photonNeutralPFOReadDecorKey{this,"photonNeutralPFOReadDecorKey","","Neutral PFO links key"};
+    SG::ReadDecorHandleKey<xAOD::PhotonContainer> m_photonChargedPFOReadDecorKey{this,"photonChargedPFOReadDecorKey","","Charged PFO links key"};
+    SG::ReadDecorHandleKey<xAOD::PhotonContainer> m_photonNeutralFEReadDecorKey{this,"photonNeutralFEReadDecorKey","","Neutral FE links key"};
+    SG::ReadDecorHandleKey<xAOD::PhotonContainer> m_photonChargedFEReadDecorKey{this,"photonChargedFEReadDecorKey","","Charged FE links key"};
 
-    SG::ReadDecorHandleKey<xAOD::PhotonContainer> m_photonNeutralPFOReadDecorKey{this,"photonNeutralPFOReadDecorKey","", "Neutral PFO links key"};
-    SG::ReadDecorHandleKey<xAOD::PhotonContainer> m_photonChargedPFOReadDecorKey{this,"photonChargedPFOReadDecorKey","", "Charged PFO links key"};
-    SG::ReadDecorHandleKey<xAOD::PhotonContainer> m_photonNeutralFEReadDecorKey{this,"photonNeutralFEReadDecorKey","", "Neutral FE links key"};
-    SG::ReadDecorHandleKey<xAOD::PhotonContainer> m_photonChargedFEReadDecorKey{this,"photonChargedFEReadDecorKey","", "Charged FE links key"};
-
-    SG::ReadDecorHandleKey<xAOD::ElectronContainer> m_electronNeutralPFOReadDecorKey{this,"electronNeutralPFOReadDecorKey","", "Neutral PFO links key"};
-    SG::ReadDecorHandleKey<xAOD::ElectronContainer> m_electronChargedPFOReadDecorKey{this,"electronCargedPFOReadDecorKey","", "Charged PFO links key"};
-    SG::ReadDecorHandleKey<xAOD::ElectronContainer> m_electronNeutralFEReadDecorKey{this,"electronNeutralFEReadDecorKey","", "Neutral FE links key"};
-    SG::ReadDecorHandleKey<xAOD::ElectronContainer> m_electronChargedFEReadDecorKey{this,"electronCargedFEReadDecorKey","", "Charged FE links key"};
+    SG::ReadDecorHandleKey<xAOD::ElectronContainer> m_electronNeutralPFOReadDecorKey{this,"electronNeutralPFOReadDecorKey","","Neutral PFO links key"};
+    SG::ReadDecorHandleKey<xAOD::ElectronContainer> m_electronChargedPFOReadDecorKey{this,"electronChargedPFOReadDecorKey","","Charged PFO links key"};
+    SG::ReadDecorHandleKey<xAOD::ElectronContainer> m_electronNeutralFEReadDecorKey{this,"electronNeutralFEReadDecorKey","","Neutral FE links key"};
+    SG::ReadDecorHandleKey<xAOD::ElectronContainer> m_electronChargedFEReadDecorKey{this,"electronChargedFEReadDecorKey","","Charged FE links key"};
 
     bool m_checkUnmatched; 
 

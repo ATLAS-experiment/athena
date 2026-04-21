@@ -74,7 +74,7 @@ namespace met{
 
     // AsgTool Hooks
     virtual StatusCode initialize();
-    virtual StatusCode execute() const;
+    virtual StatusCode execute(const EventContext& ctx) const;
     virtual StatusCode finalize();
 
     /////////////////////////////////////////////////////////////////// 
@@ -89,15 +89,15 @@ namespace met{
     StatusCode buildMET(xAOD::MissingETContainer* metCont, xAOD::MissingETComponentMap* metMap) const;
 
     // Data members
-    bool m_doMetSum;
-    bool m_warnOfDupes;
-    SG::WriteHandleKey<xAOD::MissingETContainer> m_contname;
-    SG::WriteHandleKey<xAOD::MissingETComponentMap> m_mapname;
-    std::string m_metfinalname;
-    ToolHandleArray<IMETToolBase> m_metbuilders;
-    ToolHandleArray<IMETToolBase> m_metrefiners;
+    bool m_doMetSum{false};
+    Gaudi::Property<bool> m_warnOfDupes{this, "WarnIfDuplicate", true};
+    SG::WriteHandleKey<xAOD::MissingETContainer> m_contname{this, "METContainer", "MET"};
+    SG::WriteHandleKey<xAOD::MissingETComponentMap> m_mapname{this, "METComponentMap", "METMap"};
+    Gaudi::Property<std::string> m_metfinalname{this, "METFinalName", ""};
+    ToolHandleArray<IMETToolBase> m_metbuilders{this, "METBuilders", {} };
+    ToolHandleArray<IMETToolBase> m_metrefiners{this, "METRefiners", {} };
 
-    mutable std::atomic<unsigned int> m_nevt;
+    mutable std::atomic<unsigned int> m_nevt{0};
   }; 
 
 }

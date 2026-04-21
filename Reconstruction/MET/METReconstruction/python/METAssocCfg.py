@@ -99,10 +99,25 @@ def getAssociator(configFlags, config,suffix,doPFlow=False,doRecoil=False,
     tool.UseFELinks = False if config.objType == 'MuonLRT' or config.objType == 'LRTEle' else  useFELinks
     # set input/output key names
     if config.inputKey == '' and defaultInputKey[config.objType] != '':
-        tool.InputCollection = defaultInputKey[config.objType]
-        config.inputKey = tool.InputCollection
-    elif hasattr(tool, 'InputCollection'):
+        config.inputKey = defaultInputKey[config.objType] # No defaultInputKey for HadronicRecoil objType
+
+    if hasattr(tool, 'InputCollection'):
         tool.InputCollection = config.inputKey
+        if config.objType in ['Ele', 'LRTEle', 'Gamma', 'Tau', 'Muon', 'MuonLRT']:
+            tool.UEcorrPtDecorKey = "{inputKey}.UEcorr_Pt".format(inputKey=config.inputKey)
+            if config.inputKey == '':
+                metlog.error("Unable to correctly set {}.InputCollection as config.inputKey is empty! config.objType = {}".format(tool.name, config.ObjType))
+        if config.objType in ['Gamma']:
+            tool.photonNeutralPFOReadDecorKey = "{}.neutralpfoLinks".format(config.inputKey)
+            tool.photonChargedPFOReadDecorKey = "{}.chargedpfoLinks".format(config.inputKey)
+            tool.photonNeutralFEReadDecorKey = "{}.neutralGlobalFELinks".format(config.inputKey)
+            tool.photonChargedFEReadDecorKey = "{}.chargedGlobalFELinks".format(config.inputKey)
+        if config.objType in ['Ele', 'LRTEle']:
+            tool.electronNeutralPFOReadDecorKey = "{}.neutralpfoLinks".format(config.inputKey)
+            tool.electronChargedPFOReadDecorKey = "{}.chargedpfoLinks".format(config.inputKey)
+            tool.electronNeutralFEReadDecorKey = "{}.neutralGlobalFELinks".format(config.inputKey)
+            tool.electronChargedFEReadDecorKey = "{}.chargedGlobalFELinks".format(config.inputKey)
+
     if doModClus:
         tool.ClusColl = modLCClus
         if 'EMTopo' in suffix: tool.ClusColl = modEMClus
