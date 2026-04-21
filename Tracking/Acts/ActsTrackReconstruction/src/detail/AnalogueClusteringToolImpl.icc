@@ -6,7 +6,7 @@
 #define ANALOGUECLUSTERINGTOOLIMPL_ICC
 
 #include <limits>
-
+#include "ActsGeometry/ActsDetectorElement.h"
 #include <PixelReadoutGeometry/PixelModuleDesign.h>
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "InDetMeasurementUtilities/Helpers.h"
@@ -27,7 +27,6 @@ template <typename calib_data_t, typename traj_t>
 StatusCode AnalogueClusteringToolImpl<calib_data_t, traj_t>::initialize()
 {
     ATH_MSG_DEBUG("Initializing " << AthAlgTool::name() << " ...");
-    ATH_CHECK(m_pixelDetEleCollKey.initialize());
     ATH_CHECK(m_clusterErrorKey.initialize()); 
     ATH_CHECK(m_lorentzAngleTool.retrieve());
     ATH_CHECK(AthAlgTool::detStore()->retrieve(m_pixelid, "PixelID"));
@@ -47,41 +46,39 @@ StatusCode AnalogueClusteringToolImpl<calib_data_t, traj_t>::initialize()
 
 template <typename calib_data_t, typename traj_t>
 const InDetDD::SiDetectorElement&
-AnalogueClusteringToolImpl<calib_data_t, traj_t>::getDetectorElement(xAOD::DetectorIDHashType id) const
+AnalogueClusteringToolImpl<calib_data_t, traj_t>::getDetectorElement(const Acts::Surface &surface) const
 {
-    const InDetDD::SiDetectorElement* element=nullptr;
-    SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleHandle(
-                                                                               m_pixelDetEleCollKey,
-                                                                               Gaudi::Hive::currentContext());
-
-    const InDetDD::SiDetectorElementCollection* detElements(*pixelDetEleHandle);
-    
-    if (!pixelDetEleHandle.isValid() or detElements == nullptr) {
-      ATH_MSG_ERROR(m_pixelDetEleCollKey.fullKey() << " is not available.");
+    const ActsDetectorElement* detElem = dynamic_cast<const ActsDetectorElement*>(surface.surfacePlacement());
+    const InDetDD::SiDetectorElement *siDetElement = detElem ? dynamic_cast<const InDetDD::SiDetectorElement *>(detElem->upstreamDetectorElement()) : nullptr;
+    if (!siDetElement) {
+        ATH_MSG_ERROR("Surface without associated SI detector element");
+        throw std::runtime_error("SiDetectorElement is NULL");
     }
-    else {
-         element = detElements->getDetectorElement(id);
-    }
-    if (element == nullptr) {
-      ATH_MSG_ERROR("No element corresponding to hash " << id << " for " << m_pixelDetEleCollKey.fullKey());
-      throw std::runtime_error("SiDetectorElement is NULL");
-    }
-
-    return *element;
+    return *siDetElement;
 }
 
 template <typename calib_data_t, typename traj_t>
 std::pair<float, float>
-AnalogueClusteringToolImpl<calib_data_t, traj_t>::anglesOfIncidence(const InDetDD::SiDetectorElement& element,
+AnalogueClusteringToolImpl<calib_data_t, traj_t>::anglesOfIncidence(const Acts::GeometryContext& gctx,
+                                                                    const Acts::Surface &surface,
+                                                                    const InDetDD::SiDetectorElement& element,
                                                                     const Acts::Vector3& direction) const
 {
-
+    // to ensure that referenceFrame can be called with dummy direction and position
+    assert(dynamic_cast<Acts::PlaneSurface *>(&surface) != nullptr);
+    static const Acts::Vector3 dummy=Acts::Vector3::Zero();
+    Acts::Vector3 projection = surface.referenceFrame(gctx, dummy,dummy) * direction;
+#ifndef NDEBUG
     float projPhi = direction.dot(element.phiAxis());
     float projEta = direction.dot(element.etaAxis());
     float projNorm = direction.dot(element.normal());
+#endif
+    assert( std::abs(projection[0] - projPhi)   < projPhi  * std::numeric_limits<float>::epsilon() *2.);
+    assert( std::abs(projection[1] - projEta)   < projEta  * std::numeric_limits<float>::epsilon() *2.);
+    assert( std::abs(projection[2] - projNorm)  < projNorm * std::numeric_limits<float>::epsilon() *2.);
 
-    float anglePhi = std::atan2(projPhi, projNorm);
-    float angleEta = std::atan2(projEta, projNorm);
+    double anglePhi = std::atan2(projection[0], projection[2]);
+    double angleEta = std::atan2(projection[1], projection[2]);
 
     // Map the angles of inward-going tracks onto [-PI/2, PI/2]
     if (anglePhi > M_PI *0.5) {
@@ -294,11 +291,11 @@ AnalogueClusteringToolImpl<calib_data_t, traj_t>::calibrate(const Acts::Geometry
                                                             const xAOD::PixelCluster& cluster,
                                                             const TrackStateProxy& state) const
 {
-    const InDetDD::SiDetectorElement &detElement = getDetectorElement(cluster.identifierHash());
+    const InDetDD::SiDetectorElement &detElement = getDetectorElement(state.referenceSurface());
     Acts::Vector3 direction = Acts::makeDirectionFromPhiTheta(
                                                               state.parameters()[Acts::eBoundPhi],
                                                               state.parameters()[Acts::eBoundTheta]);
-    return calibrate(gctx, cctx, cluster, detElement, anglesOfIncidence(detElement, direction));
+    return calibrate(gctx, cctx, cluster, detElement, anglesOfIncidence(gctx, state.referenceSurface(), detElement, direction));
 }
 
 template <typename calib_data_t, typename traj_t>
@@ -306,13 +303,14 @@ std::pair<typename AnalogueClusteringToolImpl<calib_data_t, traj_t>::Pos,
           typename AnalogueClusteringToolImpl<calib_data_t, traj_t>::Cov>
 AnalogueClusteringToolImpl<calib_data_t, traj_t>::calibrate(const Acts::GeometryContext& gctx,
                                                             const Acts::CalibrationContext& cctx,
+                                                            const Acts::Surface& surface,
                                                             const xAOD::PixelCluster& cluster,
                                                             const Acts::BoundTrackParameters& bound_parameters) const
 {
-    const InDetDD::SiDetectorElement &detElement = getDetectorElement(cluster.identifierHash());
+    const InDetDD::SiDetectorElement &detElement = getDetectorElement(surface);
     Acts::Vector3 direction = Acts::makeDirectionFromPhiTheta(bound_parameters.parameters()[Acts::eBoundPhi],
                                                               bound_parameters.parameters()[Acts::eBoundTheta]);
-    return calibrate(gctx, cctx, cluster, detElement, anglesOfIncidence(detElement, direction));
+    return calibrate(gctx, cctx, cluster, detElement, anglesOfIncidence(gctx, surface, detElement, direction));
 }
 
 template <typename calib_data_t, typename traj_t>
@@ -377,6 +375,7 @@ void AnalogueClusteringToolImpl<calib_data_t, traj_t>::connectPixelCalibrator(IO
                 typename AnalogueClusteringToolImpl<calib_data_t, traj_t>::Cov>
       (AnalogueClusteringToolImpl<calib_data_t, traj_t>:: *)(const Acts::GeometryContext&,
                                                              const Acts::CalibrationContext&,
+                                                             const Acts::Surface&,
                                                              const xAOD::PixelCluster&,
                                                              const Acts::BoundTrackParameters&) const;
 

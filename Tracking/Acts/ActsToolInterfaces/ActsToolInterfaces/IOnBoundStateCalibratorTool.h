@@ -27,6 +27,7 @@ public:
       using PixelCalibrator = Acts::Delegate<
          std::pair<PixelPos, PixelCov>(const Acts::GeometryContext&,
                                        const Acts::CalibrationContext&,
+                                       const Acts::Surface&,
                                        const xAOD::PixelCluster &,
                                        const Acts::BoundTrackParameters &)>;
 
@@ -35,6 +36,7 @@ public:
       using StripCalibrator = Acts::Delegate<
          std::pair<StripPos, StripCov>(const Acts::GeometryContext&,
                                        const Acts::CalibrationContext&,
+                                       const Acts::Surface&,
                                        const xAOD::StripCluster &,
                                        const Acts::BoundTrackParameters &)>;
 
@@ -43,6 +45,7 @@ public:
       using HGTDCalibrator = Acts::Delegate<
          std::pair<HgtdPos, HgtdCov>(const Acts::GeometryContext&,
                                        const Acts::CalibrationContext&,
+                                       const Acts::Surface&,
                                        const xAOD::HGTDCluster &,
                                        const Acts::BoundTrackParameters &)>;
 

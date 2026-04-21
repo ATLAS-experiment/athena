@@ -176,6 +176,7 @@ struct AtlasMeasurementSelector
                   typename traits::template CalibratedMeasurementCovariance<DIM> >
                 (const Acts::GeometryContext&,
                  const Acts::CalibrationContext&,
+                 const Acts::Surface&,
                  const measurement_t &,
                  const typename traits::BoundTrackParameters &)>;
 
@@ -276,6 +277,7 @@ struct AtlasMeasurementSelector
          //       above ConstVectorMapWithInvalidDef etc. Does this introduce some overhead ?
          return []( [[maybe_unused]] const Acts::GeometryContext&,
                     [[maybe_unused]] const Acts::CalibrationContext&,
+                    [[maybe_unused]] const Acts::Surface&,
                     const measurement_t &measurement,
                     [[maybe_unused]] const typename traits::BoundTrackParameters &) {
                return std::make_pair( measurement.template localPosition<DIM>(), measurement.template localCovariance<DIM>() );
