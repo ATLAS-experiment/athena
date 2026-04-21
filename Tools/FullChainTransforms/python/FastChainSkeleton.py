@@ -130,9 +130,16 @@ def fromRunArgs(runArgs):
     # For jobs running Overlay we take the run number from the
     # background RDOs, so we don't actually need to override the run
     # number.
-    flags.Input.OverrideRunNumber = not flags.Common.isOverlay
+    if flags.Common.isOverlay:
+        flags.Input.OverrideRunNumber = False
+    # data overlay is special, in this case we want and need to do it
+    if flags.Overlay.DataOverlay:
+        flags.Input.OverrideRunNumber = True
+        from CoolConvUtilities.MagFieldUtils import getTimeForLB
+        flags.Input.TimeStamps = [int(getTimeForLB(run=flags.Input.RunNumbers[0], LB=flags.Input.LumiBlockNumbers[0])/1e9)]
+
     
-    # To respect --athenaopts 
+    # To respect --athenaopts
     flags.fillFromArgs()
 
     # Moving here so that it is ahead of flags being locked. Need to

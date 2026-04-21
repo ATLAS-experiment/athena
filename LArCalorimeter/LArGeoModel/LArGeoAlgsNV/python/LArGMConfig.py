@@ -27,7 +27,7 @@ def LArGMCfg(flags):
             result.merge(addFolders(flags,"/LAR/Align","LAR_ONL",className="DetCondKeyTrans"))
             result.merge(addFolders(flags,"/LAR/LArCellPositionShift","LAR_ONL",className="CaloRec::CaloCellPositionShift"))
 
-        if not flags.GeoModel.Align.LegacyConditionsAccess:
+        if not flags.GeoModel.Align.LegacyConditionsAccess or flags.Common.isOverlay:
             result.addCondAlgo(CompFactory.LArAlignCondAlg())
             result.addCondAlgo(CompFactory.CaloAlignCondAlg())
             AthReadAlg_ExtraInputs = set()
