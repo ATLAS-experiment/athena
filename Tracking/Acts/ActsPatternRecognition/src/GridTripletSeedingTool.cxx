@@ -233,7 +233,7 @@ StatusCode GridTripletSeedingTool::initialize() {
   m_tripletFinderCfg.impactMax = m_impactMax;
   m_tripletFinderCfg.helixCutTolerance = 1.;
   m_tripletFinderCfg.toleranceParam = m_toleranceParam;
-
+  m_tripletFinderCfg.cotThetaDiffMax = m_maxStripDeltaCotTheta;
   m_filterCfg.deltaInvHelixDiameter = m_deltaInvHelixDiameter;
   m_filterCfg.deltaRMin = m_deltaRMin;
   m_filterCfg.compatSeedWeight = m_compatSeedWeight;
@@ -273,6 +273,9 @@ StatusCode GridTripletSeedingTool::initialize() {
   m_filterCfg.maxSeedsPerSpMConf = m_maxSeedsPerSpMConf;
   m_filterCfg.maxQualitySeedsPerSpMConf = m_maxQualitySeedsPerSpMConf;
   m_filterCfg.useDeltaRinsteadOfTopRadius = m_useDeltaRorTopRadius;
+  m_filterCfg.absDeltaEtaWeightFactor = m_absDeltaEtaWeightFactor;
+  m_filterCfg.absDeltaEtaMinImpact = m_absDeltaEtaMinImpact;
+
 
   m_finder = Acts::TripletSeeder(logger().cloneWithSuffix("Finder"));
 
