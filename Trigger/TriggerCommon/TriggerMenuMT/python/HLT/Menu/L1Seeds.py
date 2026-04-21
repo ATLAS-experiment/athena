@@ -185,7 +185,7 @@ def getL1BKeeLowMu():
     return [
         # Unprescaled
         'L1_eEM15',
-        'L1_2eEM9',
+        # 'L1_2eEM9',  # Added for low-µ runs - removed for HI to make space
         'L1_JPSI-1M5-eEM9',
         # Next Higher Thresholds for Buffer
         'L1_eEM18',
@@ -193,7 +193,7 @@ def getL1BKeeLowMu():
         # Prescaled
         'L1_eEM9',
         'L1_eEM9_VjTE200',
-        'L1_2eEM5_jTE200'
+        # 'L1_2eEM5_jTE200'  # Added for low-µ runs - removed for HI to make space
     ]
 
 #####################################

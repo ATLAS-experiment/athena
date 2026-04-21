@@ -502,6 +502,10 @@ HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L1jTE5_VjTE200:
   stepFeatures:
     0: 6
     1: 28
+HLT_j0_MULT0mult11XX10ptXX0eta490_j10f_pf_jes_ftf_L1ESP_AFP_OR_jJ5p30ETA49_VZDC_A_VZDC_C_VjTE200:
+  eventCount: 0
+HLT_j0_MULT0mult11XX10ptXX0eta490_j10f_pf_jes_ftf_L1ESP_AFP_OR_jJ5p30ETA49_ZDC_XOR_VjTE200:
+  eventCount: 0
 HLT_j0_MULT0mult11XX10ptXX0eta490_j10f_pf_jes_ftf_L1ESP_VZDC_A_VZDC_C_jJ5p30ETA49_VjTE200:
   eventCount: 1
   stepCounts:
@@ -647,6 +651,10 @@ HLT_j10a_preselVETOMULT11a10_pf_jes_ftf_L1TRT_ZDC_A_C_VjTE200:
 HLT_j10a_preselVETOMULT11a10_pf_jes_ftf_L1TRT_ZDC_OR_VjTE200:
   eventCount: 0
 HLT_j10a_preselVETOMULT11a10_pf_jes_ftf_L1TRT_ZDC_XOR_VjTE200:
+  eventCount: 0
+HLT_j10f_preselVETOMULT11a10_pf_jes_ftf_L1ESP_AFP_OR_jJ5p30ETA49_VZDC_A_VZDC_C_VjTE200:
+  eventCount: 0
+HLT_j10f_preselVETOMULT11a10_pf_jes_ftf_L1ESP_AFP_OR_jJ5p30ETA49_ZDC_XOR_VjTE200:
   eventCount: 0
 HLT_j10f_preselVETOMULT11a10_pf_jes_ftf_L1ESP_VZDC_A_VZDC_C_jJ5p30ETA49_VjTE200:
   eventCount: 1
@@ -1702,6 +1710,8 @@ HLT_mb_sp_vpix60_hi_FgapAC5_L1eTAU2_VjTE200_EMPTY:
   eventCount: 0
 HLT_mb_sptrk_L11ZDC_A_1ZDC_C_VjTE200:
   eventCount: 0
+HLT_mb_sptrk_L1AFP_OR_VjTE200:
+  eventCount: 0
 HLT_mb_sptrk_L1MBTS_1_1_VjTE50:
   eventCount: 0
 HLT_mb_sptrk_L1TRT_1ZDC_NZDC_VjTE200:
@@ -1767,6 +1777,14 @@ HLT_mb_sptrk_pt0p8_L1eTAU2_TRT_VZDC_A_VZDC_C_VjTE200:
 HLT_mb_sptrk_pt0p8_L1eTAU2_TRT_ZDC_OR_VjTE200:
   eventCount: 0
 HLT_mb_sptrk_pt0p8_sp_vpix800_L1TRT_ZDC_OR_VjTE200:
+  eventCount: 0
+HLT_mb_sptrk_pt0p8_sp_vpix800_trk2_L1AFP_OR_TRT_VZDC_A_VZDC_C_VjTE200:
+  eventCount: 0
+HLT_mb_sptrk_pt0p8_sp_vpix800_trk2_L1AFP_OR_TRT_ZDC_XOR_VjTE200:
+  eventCount: 0
+HLT_mb_sptrk_pt0p8_sp_vpix800_trk2_L1AFP_OR_VZDC_A_VZDC_C_VjTE200:
+  eventCount: 0
+HLT_mb_sptrk_pt0p8_sp_vpix800_trk2_L1AFP_OR_ZDC_XOR_VjTE200:
   eventCount: 0
 HLT_mb_sptrk_pt0p8_sp_vpix800_trk2_L1TRT_ZDC_OR_VjTE200:
   eventCount: 0
