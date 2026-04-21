@@ -350,12 +350,14 @@ def add_common_augmentation(
     )
 
     # FTAG simplified large-R jet truth labelling (see https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/AnalysisCommon/ParticleJetTools/ParticleJetTools/FtagLargeRJetLabelEnum.h?ref_type=heads)
-    acc.merge(
-        FtagLargeRJetTruthLabelCfg(
-            flags,
-            jetCollection="AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
+    # Skipped for heavy-ion derivations which do not build this jet collection
+    if not flags.HeavyIon.isDerivation:
+        acc.merge(
+            FtagLargeRJetTruthLabelCfg(
+                flags,
+                jetCollection="AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
+            )
         )
-    )
 
     truth_labels = [
         *[f"nTopTo{particle}Children" for particle in "BW"],
