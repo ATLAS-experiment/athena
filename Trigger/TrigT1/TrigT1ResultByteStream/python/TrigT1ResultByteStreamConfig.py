@@ -48,10 +48,10 @@ def RoIBResultByteStreamToolCfg(flags, name, writeBS=False):
   acc.setPrivateTools(tool)
   return acc
 
-def CTPResultByteStreamToolCfg(flags, name, writeBS=False):
+def CTPResultByteStreamToolCfg(flags, name, robID=0, writeBS=False):
   acc = ComponentAccumulator()
   tool = CompFactory.CTPResultByteStreamTool(name)
-  ctp_robid = int(SourceIdentifier(SubDetector.TDAQ_CTP, 1)) # 0x770001
+  ctp_robid = int(SourceIdentifier(SubDetector.TDAQ_CTP, robID)) # (robID=1 for ROIB ROB , robID=0 for CTP ROB)
   tool.ROBIDs = [ctp_robid]
 
   if writeBS:
@@ -148,7 +148,7 @@ def doRoIBResult(flags):
   # Otherwise don't need RoIBResult
   return False
 
-def L1TriggerByteStreamDecoderCfg(flags, returnEDM=False):
+def L1TriggerByteStreamDecoderCfg(flags):
   acc = ComponentAccumulator()
   decoderTools = []
   maybeMissingRobs = []
@@ -175,8 +175,11 @@ def L1TriggerByteStreamDecoderCfg(flags, returnEDM=False):
   # # CTP decoding via CTPResult
   # ########################################
   if not flags.Trigger.doLVL1 and flags.Trigger.CTP.UseEDMxAOD:
+    rob = 0 # use CTP ROB by default
+    if flags.Trigger.CTP.UseRoibROB: 
+      rob = 1
     ctpResultTool = acc.popToolsAndMerge(CTPResultByteStreamToolCfg(
-        flags, name="CTPResultBSDecoderTool", writeBS=False))
+      flags, name="CTPResultBSDecoderTool", robID=rob, writeBS=False))
     decoderTools += [ctpResultTool]
 
   ########################################
@@ -312,15 +315,16 @@ def L1TriggerByteStreamDecoderCfg(flags, returnEDM=False):
   if not flags.Trigger.doHLT:
     from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
     outputEDM = getEDMListFromWriteHandles([tool for tool in decoderAlg.DecoderTools if ('RoIBResult' not in tool.getName() and 'CTPResult' not in tool.getName())])
+     
+    # Only add CTPResult explicitly if CTP decoding via CTPResult is being used and result uses CTP ROB
+    if (any('CTPResult' in tool.getName() for tool in decoderAlg.DecoderTools) and (not flags.Trigger.CTP.UseRoibROB)):
+      for item in ('xAOD::CTPResult#CTPResult','xAOD::CTPResultAuxInfo#CTPResultAux.-'):
+          outputEDM.append(item)
+
     _log.info('Adding the following output EDM to ItemList: %s', outputEDM)
     acc.merge(addToESD(flags, outputEDM))
     acc.merge(addToAOD(flags, outputEDM))
 
-  # Return outputEDM as a second object to be used for compatibility with RecExCommon output configuration,
-  # because the above calls to addToESD/addtoAOD are no-op when this fragment is wrapped in RecExCommon.
-  # See discussions in https://gitlab.cern.ch/atlas/athena/-/merge_requests/55891#note_5912844
-  if returnEDM:
-    return acc, outputEDM
   return acc
 
 def L1TriggerByteStreamEncoderCfg(flags):
