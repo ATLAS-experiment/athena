@@ -23,6 +23,7 @@
 #include <ColumnarExampleTools/MomentumAccessorExampleTool.h>
 #include <ColumnarExampleTools/StringExampleTool.h>
 #include <ColumnarExampleTools/VariantExampleTool.h>
+#include <ColumnarExampleTools/VectorExampleTool.h>
 
 #include <xAODJet/JetContainer.h>
 #include <xAODEgamma/PhotonContainer.h>
@@ -561,6 +562,104 @@ TEST_F (ColumnarPhysLiteTest, VariantExampleTool)
   // this will call the tool in either mode, and also performs some
   // performance measurements of the tool in either mode
   doCall ({.tool = tool.get(), .name = "VariantExampleTool", .xAODToolCaller = &xAODToolCaller, .containerRenames = {{{}}}});
+}
+
+
+
+TEST_F (ColumnarMemoryTest, VectorExampleTool)
+{
+  if (!checkMode())
+    return;
+
+  auto tool = std::make_unique<columnar::VectorExampleTool> (makeUniqueName());
+  ASSERT_SUCCESS (tool->initialize ());
+
+  ColumnarTestToolHandle toolHandle (*tool);
+  toolHandle.initialize ();
+
+  for (auto& name : toolHandle.getColumnNames())
+    std::cout << "requested column: " << name << std::endl;
+  std::cout << "recommended systematics size: " << toolHandle.getRecommendedSystematics().size() << std::endl;
+
+  ColumnMapType columnMap {toolHandle};
+
+  columnMap.addColumn ("EventInfo", {0, 1});
+
+  columnMap.addColumn ("Particles", {0, 2});
+  columnMap.addColumn ("Particles.selection", {0, 0});
+  columnMap.addColumn ("Particles.pt", {10e3, 50e3});
+  columnMap.addColumn ("Particles.SumPtTrkPt500.offset", {0, 2, 4});
+  columnMap.addColumn ("Particles.SumPtTrkPt500.data", {10e3, 50e3, 10e3, 50e3});
+  columnMap.addColumn ("Particles.NumTrkPt500.offset", {0, 2, 4});
+  columnMap.addColumn ("Particles.NumTrkPt500.data", {10, 10, 10, 10});
+
+  columnMap.setExpectation ("Particles.selection", {0, 1});
+
+  columnMap.connectColumnsToTool ();
+
+  columnMap.call ();
+
+  columnMap.checkExpectations ();
+}
+
+// this is a helper function for the PHYSLITE test below.  there is
+// usually some amount of boilerplate code that test needs to run in
+// XAOD mode, which is usually factored out into a separate function.
+class XAODVectorExampleToolCaller final : public IXAODToolCaller, public asg::AsgMessaging
+{
+public:
+  XAODVectorExampleToolCaller (const columnar::VectorExampleTool& tool, const std::string& jetName)
+    : AsgMessaging("XAODVectorExampleToolCaller"), m_tool (tool), m_jetName (jetName)
+  {}
+
+  virtual StatusCode retrieve (EventStoreType& evtStore) override
+  {
+    ANA_CHECK (evtStore.retrieve (m_jets, m_jetName));
+    return StatusCode::SUCCESS;
+  }
+
+  virtual StatusCode copyRecord (EventStoreType& evtStore, const std::string& postfix) override
+  {
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+
+    auto [jetsCopy, jetsAuxCopy] = xAOD::shallowCopyContainer (*m_jets, ctx);
+    m_jets = jetsCopy.get();
+    ANA_CHECK (evtStore.record (std::move(jetsCopy), m_jetName + postfix));
+    ANA_CHECK (evtStore.record (std::move(jetsAuxCopy), m_jetName + postfix + "Aux."));
+    return StatusCode::SUCCESS;
+  }
+
+  virtual StatusCode call () override
+  {
+    m_tool.callSingleEvent (*m_jets);
+    return StatusCode::SUCCESS;
+  }
+
+private:
+  const columnar::VectorExampleTool& m_tool;
+  std::string m_jetName;
+
+  const xAOD::JetContainer *m_jets = nullptr;
+};
+
+// this is a test that runs the tool on PHYSLITE.  this ensures that the
+// tool works on actual data, not just synthetic one of the in-memory
+// test.  it also allows for performance measurements of the tool in the
+// different modes.
+TEST_F (ColumnarPhysLiteTest, VectorExampleTool)
+{
+  // check that we are in a project that supports this test
+  if (!checkMode())
+    return;
+
+  auto tool = std::make_unique<columnar::VectorExampleTool> (makeUniqueName());
+  ASSERT_SUCCESS (tool->initialize ());
+
+  XAODVectorExampleToolCaller xAODToolCaller (*tool, "AnalysisJets");
+
+  // this will call the tool in either mode, and also performs some
+  // performance measurements of the tool in either mode
+  doCall ({.tool = tool.get(), .name = "VectorExampleTool", .xAODToolCaller = &xAODToolCaller, .containerRenames = {{"Particles", "AnalysisJets"}}});
 }
 
 ATLAS_GOOGLE_TEST_MAIN

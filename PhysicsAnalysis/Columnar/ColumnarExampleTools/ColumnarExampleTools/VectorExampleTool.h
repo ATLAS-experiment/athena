@@ -37,6 +37,8 @@ namespace columnar
 
     virtual StatusCode initialize () override;
 
+    void callSingleEvent (ParticleRange particles) const;
+
     virtual void callEvents (EventContextRange events) const override;
 
 
