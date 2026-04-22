@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #==============================================================================
 # Contains the configuration for customs jet reconstruction + decorations
@@ -250,11 +250,6 @@ def HIGG1D1CustomJetsCleaningCfg(ConfigFlags):
     # Use modified OR that does not check overlaps with tauls
     from AssociationUtils.AssociationUtilsConfig import OverlapRemovalToolCfg
 
-    # Sequences for event cleaning and decorator locking.
-    # See comments in JetCommonConfig.AddEventCleanFlagsCfg.
-    acc.addSequence(CompFactory.AthSequencer('EventCleanSeq', Sequential=True))
-    acc.addSequence(CompFactory.AthSequencer('EventCleanLockSeq', Sequential=True))
-
     outputLabel = 'DFCommonJets_passOR_EMPFlowCustomVtx'
     bJetLabel = '' #default
     tauLabel = 'DFTauGNTauLoose'
@@ -265,22 +260,7 @@ def HIGG1D1CustomJetsCleaningCfg(ConfigFlags):
                                                 OverlapRemovalTool=orTool,
                                                 TauLabel=tauLabel,
                                                 BJetLabel=bJetLabel)
-    acc.addEventAlgo(algOR, 'EventCleanSeq')
-
-    # Explictly lock the decorations produced by overlap removal.
-    lockOR = CompFactory.DerivationFramework.LockDecorations \
-        ('OverlapRemovalLockDecorAlg_CustomVtx',
-         Decorations = [
-             'Electrons.selected',
-             'Electrons.' + outputLabel,
-             'Muons.selected',
-             'Muons.' + outputLabel,
-             'Photons.selected',
-             'Photons.' + outputLabel,
-             'AntiKt4EMPFlowCustomVtxJets.selected',
-             'AntiKt4EMPFlowCustomVtxJets.' + outputLabel,
-         ])
-    acc.addEventAlgo(lockOR, 'EventCleanLockSeq')
+    acc.addEventAlgo(algOR)
 
     from JetSelectorTools.JetSelectorToolsConfig import EventCleaningToolCfg, JetCleaningToolCfg
     workingPoints = ['Loose', 'Tight']
@@ -318,6 +298,6 @@ def HIGG1D1CustomJetsCleaningCfg(ConfigFlags):
             CleaningLevel=cleaningLevel,
             doEvent=True,
         )
-        acc.addEventAlgo(eventCleanAlg, 'EventCleanSeq')
+        acc.addEventAlgo(eventCleanAlg)
     
     return acc

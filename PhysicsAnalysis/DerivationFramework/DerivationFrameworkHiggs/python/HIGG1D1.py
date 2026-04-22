@@ -30,14 +30,6 @@ def HIGG1D1KernelCfg(flags, name='HIGG1D1Kernel', **kwargs):
     acc.merge(HIGG1D1CustomJetsCfg(flags))
     acc.merge(HIGG1D1CustomJetsCleaningCfg(flags))
 
-    # Reorder event cleaning / decoration locking to run at this
-    # point in the algorithm sequence. 
-    # See comments in JetCommonConfig.AddEventCleanFlagsCfg.
-    seq = acc.getSequence('AthAlgSeq')
-    cleanSeqs = [acc.getSequence ('EventCleanSeq'),
-                 acc.getSequence ('EventCleanLockSeq')]
-    seq.Members = [a for a in seq.Members if a not in cleanSeqs] + cleanSeqs
-
     from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
     acc.merge(FlavorTaggingCfg(flags, 'AntiKt4EMPFlowCustomVtxJets', 'HggPrimaryVertices', trackAugmenterPrefix='btagIpHgg_'))
 
