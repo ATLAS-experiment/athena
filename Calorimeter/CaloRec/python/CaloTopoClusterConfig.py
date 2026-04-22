@@ -42,6 +42,33 @@ def CaloCalibHitDecoratorFullEnergyTool(flags, name="CaloCalibClusterDecoratorTo
     return decoratorTool
 
 
+def CaloCalibHitDecoratorToolOOC(flags, name="CaloCalibClusterDecoratorToolOOC", **kwargs):
+
+    kwargs.setdefault(
+        "CaloClusterWriteDecorHandleKey_NLeadingTruthParticlesL",
+        "CaloTopoClusters." + flags.Calo.TopoCluster.CalibrationHitDecorationName + "_OOC_L",
+    )
+    kwargs.setdefault(
+        "CaloClusterWriteDecorHandleKey_NLeadingTruthParticlesT",
+        "CaloTopoClusters." + flags.Calo.TopoCluster.CalibrationHitDecorationName + "_OOC_T",
+    )
+
+    DecoratorTool = CompFactory.CaloCalibClusterDecoratorToolOOC
+    decoratorTool = DecoratorTool(name,**kwargs,ExtraInputs =  {('CaloCellContainer','StoreGateSvc+AllCalo')})
+    decoratorTool.CalibrationHitContainerNames = [
+    "LArCalibrationHitInactive",
+    "LArCalibrationHitActive",
+    "TileCalibHitActiveCell",
+    "TileCalibHitInactiveCell"
+    ]
+    return decoratorTool
+
+
+
+
+
+
+
 def caloTopoCoolFolderCfg(flags):
     result=ComponentAccumulator()
     from IOVDbSvc.IOVDbSvcConfig import addFolders
@@ -415,7 +442,8 @@ def CaloTopoClusterCfg(flags, cellsname="AllCalo", clustersname=None, clustersna
                 caloCalibTruthMapMaker = CaloCalibClusterTruthMapMakerTool(flags)
                 caloCalibDecorator = CaloCalibHitDecoratorTool(flags)
                 caloCalibDecoratorFullEnergy = CaloCalibHitDecoratorFullEnergyTool(flags)
-                CaloTopoCluster.ClusterCorrectionTools += [caloCalibTruthMapMaker, caloCalibDecorator, caloCalibDecoratorFullEnergy]
+                caloCalibDecoratorOOC = CaloCalibHitDecoratorToolOOC(flags)
+                CaloTopoCluster.ClusterCorrectionTools += [caloCalibTruthMapMaker, caloCalibDecorator, caloCalibDecoratorFullEnergy,caloCalibDecoratorOOC]
 
 
     
@@ -550,6 +578,7 @@ def CaloTopoClusterConfigTest(flags=None):
     cfg.merge(PoolReadCfg(flags))
 
     topoAcc = CaloTopoClusterCfg(flags)
+    #topoAcc = CaloTopoClusterCfg(flags)
     topoAlg = topoAcc.getPrimary()
     topoAlg.ClustersOutputName = "CaloCalTopoClustersNew"
     cfg.merge(topoAcc)
@@ -575,11 +604,13 @@ def CaloTopoClusterConfigTest(flags=None):
     return cfg.run().isSuccess()
 
 if __name__=="__main__":
+    
     import sys, subprocess
     stat=CaloTopoClusterConfigTest()
     if stat==0: 
         print ("Executing returned StatusCode FAILURE")
         sys.exit(-1)
+    
     else:
         from AthenaCommon.Utils.unixtools import find_datafile
         import os
