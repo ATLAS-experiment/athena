@@ -9,15 +9,16 @@
 #include "AsgTools/PropertyWrapper.h"
 #include "JetInterface/IJetDecorator.h"
 #include "xAODJet/JetContainer.h"
-#include "xAODTruth/TruthParticle.h"
+#include "xAODTruth/TruthParticleFwd.h"
 #include "ParticleJetTools/FtagLargeRJetLabelEnum.h"
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "AsgDataHandles/WriteDecorHandleKey.h"
-#include "AsgDataHandles/WriteDecorHandle.h"
+
 
 #include <set>
 #include <string>
 #include <vector>
+
 
 /// Simplified FTAG large-R jet truth labelling tool.
 ///

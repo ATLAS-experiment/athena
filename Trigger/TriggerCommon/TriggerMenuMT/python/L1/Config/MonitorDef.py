@@ -490,6 +490,8 @@ class MonitorDef:
 
                     'L1_CALMTEA_eEM3',
                     'L1_CALMTEA_eEM3_VjTE200',
+
+                    'L1_AFP_OR_VjTE200',
                 ])
 
                 # HI HLT menu: Add triggers that are not in the MC menu

@@ -417,8 +417,9 @@ namespace MuonValR4 {
                         nTgcSeed+=houghSP->measuresPhi();
                         break;
                     case xAOD::UncalibMeasType::sTgcStripType: {
-                        const Identifier sTgc = xAOD::identify(houghSP->primaryMeasurement());
-                        const Identifier sTgc2 = xAOD::identify(houghSP->secondaryMeasurement());
+                        const Identifier sTgc = houghSP->primaryMeasurement()->identify();
+                        const Identifier sTgc2 = houghSP->secondaryMeasurement() ? 
+                                                houghSP->secondaryMeasurement()->identify() : Identifier{};
                         const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
                         const int primType = idHelper.channelType(sTgc);
                         const int secType = idHelper.channelType(sTgc2);

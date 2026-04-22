@@ -579,10 +579,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
         CleaningLevel     = jet_clean_level,
         doEvent           = True)
 
-    # Sequence for decorator locking.
-    # See comments in JetCommonConfig.AddEventCleanFlagsCfg.
-    acc.addSequence(CompFactory.AthSequencer('EventCleanSeq', Sequential=True))
-    acc.addEventAlgo(LLP1EventCleanAlg, 'EventCleanSeq')
+    acc.addEventAlgo(LLP1EventCleanAlg)
 
 
 

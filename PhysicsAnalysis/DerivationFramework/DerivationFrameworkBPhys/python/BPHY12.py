@@ -49,8 +49,6 @@ def BPHY12Cfg(flags):
                              useCombinedMeasurement      = False,
                              muonCollectionKey           = "Muons",
                              TrackParticleCollection     = "InDetTrackParticles",
-                             V0VertexFitterTool          = None, 
-                             useV0Fitter                 = False,
                              TrkVertexFitterTool         = vkalvrt, 
                              TrackSelectorTool           = trackselect,
                              VertexPointEstimator        = vpest,

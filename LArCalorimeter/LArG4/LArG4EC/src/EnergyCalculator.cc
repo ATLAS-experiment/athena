@@ -589,9 +589,11 @@ G4bool EnergyCalculator::FindIdentifier_Default(
   std::string_view namesv(name);
 
   auto matches_pattern = [](std::string_view text, std::string_view prefix) -> bool {
-    if (!text.starts_with(prefix)) return false;
-    size_t digit_start = prefix.size();
-    return (digit_start + 2 <= text.size() && 
+    size_t pos = text.find(prefix);
+    if (pos == std::string_view::npos)
+        return false;
+    size_t digit_start = pos+prefix.size();
+    return (digit_start + 1 < text.size() && 
             std::isdigit(static_cast<unsigned char>(text[digit_start])) &&
             std::isdigit(static_cast<unsigned char>(text[digit_start + 1])));
   };
@@ -607,7 +609,7 @@ G4bool EnergyCalculator::FindIdentifier_Default(
 
   int offset = 0;
   for (const auto& [prefix, val] : patterns) {
-	  // Regex: Slice[0-9]{2}, Electrode[0-9]{2}, ecc.
+	  // Regex: *Slice[0-9]{2}, *Electrode[0-9]{2}, etc.
     if (matches_pattern(namesv, prefix)) {
         offset = val;
         break;

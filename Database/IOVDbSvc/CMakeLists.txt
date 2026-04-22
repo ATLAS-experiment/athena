@@ -133,7 +133,7 @@ atlas_add_test( IOVDbFolder_test
    GaudiKernel AthenaKernel AthenaBaseComps StoreGateLib SGTools CxxUtils
    TestTools CoraCool AthenaPoolUtilities GeoModelInterfaces
    IOVDbMetaDataToolsLib IOVDbDataModel EventInfoMgtLib CrestApi::CrestApiLib
-   Boost::unit_test_framework
+   Boost::unit_test_framework Boost::timer
    POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( IovStore_test

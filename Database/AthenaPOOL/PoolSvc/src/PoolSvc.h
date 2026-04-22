@@ -264,13 +264,13 @@ private: // properties
    Gaudi::Property<std::string> m_defaultContainerType{this, "DefaultContainerType", "ROOTTREEINDEX"};
 
 private: // internal helper functions
-   // delete all APR::Persistency Services, Catalog, Mutexes and Indexes
+   // delete all Persistency Services, Catalog, Mutexes and Indexes
    void clearState();
 
    pool::IFileCatalog* createCatalog();
    void patchCatalog(const std::string& pfn, pool::IDatabase& dbH) const;
 
-   // setup APR persistency
+   // setup persistency
    StatusCode setupPersistencySvc();
 
    /// Get Database handle

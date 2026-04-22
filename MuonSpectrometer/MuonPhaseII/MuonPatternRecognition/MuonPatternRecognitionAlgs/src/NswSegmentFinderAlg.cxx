@@ -12,6 +12,7 @@
 
 
 #include "MuonPatternEvent/SegmentFitterEventData.h"
+#include "MuonSpacePoint/SpacePointHelpers.h"
 
 #include "xAODMuonPrepData/MMCluster.h"
 #include "xAODMuonPrepData/sTgcMeasurement.h"
@@ -64,6 +65,12 @@ namespace {
         return chType == sTgcIdHelper::Strip ? "S" :
                chType == sTgcIdHelper::Wire ? "W" : "P";
     }
+
+    //local struct to encapsulate hit candidates data (e.g for seed extension)
+    struct HitCandidate {
+        double minPull{std::numeric_limits<float>::max()};
+        const MuonR4::SpacePoint* spacePoint{nullptr};
+    };
 }
 
 namespace MuonR4 {
@@ -272,11 +279,11 @@ NswSegmentFinderAlg::HitVec
         const HitVec& layer{extensionLayers[i].get()};
         const Amg::Vector3D extrapPos = SeedingAux::extrapolateToPlane(startPos, direction, *layer.front());
 
-        unsigned indexOfHit = layer.size() + 1;
+        
         unsigned triedHit{0};
-        double minPull{std::numeric_limits<double>::max()};
-       
-        // loop over the hits on the same layer
+        HitCandidate precisionHit, noPrecisionHit;
+        ATH_MSG_VERBOSE("Moving to next layer");
+        
         for (unsigned j = 0; j < layer.size(); ++j) {
             if (usedHits[i].get().at(j) > m_maxUsed) {
                 continue;
@@ -284,30 +291,45 @@ NswSegmentFinderAlg::HitVec
             auto hit = layer.at(j);
             const double pull = std::sqrt(SeedingAux::chi2Term(extrapPos, direction, *hit));
             ATH_MSG_VERBOSE("Trying extension with hit " << m_idHelperSvc->toString(hit->identify())<<" and pull "<<pull);
-           
-            //find the hit with the minimum pull (check at least one hit after we have increasing pulls)
+            bool isPrecision = isPrecisionHit(*hit);
+            double minPull = isPrecision ? precisionHit.minPull : noPrecisionHit.minPull;
+            //find the hit with the minimum pull (check at least three hits after we have increasing pulls)
             if (pull > minPull) {
                 triedHit+=1;  
                 continue;                 
             }
 
-            if(triedHit>1){
+            if(triedHit>3){
                 break;
             }
 
-            indexOfHit = j;
-            minPull = pull;
+            if(isPrecision){
+                precisionHit.spacePoint = hit;
+                precisionHit.minPull = pull;
+                continue;
+            }
+
+            noPrecisionHit.spacePoint = hit;
+            noPrecisionHit.minPull = pull;            
         }
 
         // complete the seed with the extended hits
-        if (minPull < m_minPullThreshold) {
-            const auto* bestCand = layer.at(indexOfHit);
+        //we first choose the precision hit and if does not exist then we pick the non precision hit 
+        const SpacePoint* bestCand{nullptr};
+        if(precisionHit.minPull < m_minPullThreshold){ 
+            bestCand = precisionHit.spacePoint;
+        }else if(noPrecisionHit.minPull < m_minPullThreshold){
+            bestCand = noPrecisionHit.spacePoint;
+        }else{
+            ATH_MSG_VERBOSE("No hit found in layer "<<i<<" with pull below threshold "<<m_minPullThreshold);            
+            continue;
+        }
             ATH_MSG_VERBOSE("Extension successfull - hit" << m_idHelperSvc->toString(bestCand->identify())
                           <<", pos: "<<Amg::toString(bestCand->localPosition())
-                          <<", dir: "<<Amg::toString(bestCand->sensorDirection())<<" found with pull "<<minPull);
+                          <<", dir: "<<Amg::toString(bestCand->sensorDirection()));
             combinatoricHits.push_back(bestCand);
         }
-    }
+    
     return combinatoricHits;
 }
 

@@ -8,7 +8,7 @@
 
 #include <string>
 #include <algorithm>//for lexicographical_compare in the .icc file
-#include <boost/container/small_vector.hpp>
+#include "CxxUtils/inplace_vector.h"
 #include <iosfwd>
 
 class MsgStream;
@@ -107,12 +107,12 @@ public:
 
   using id_type = ExpandedIdentifier;
   using element_type = int;
-  using element_vector = boost::container::small_vector<element_type,12>;
+  using element_vector = CxxUtils::inplace_vector<element_type,12>;
 #ifdef __CPPCHECK__
   // Otherwise cppcheck warns about passing this type by value.
   using size_type = size_t ;
 #else
-  using size_type = boost::container::small_vector<element_type,12>::size_type ;
+  using size_type = element_vector::size_type ;
 #endif
 
   static constexpr element_type max_value = 0x3FFFFFFF;
