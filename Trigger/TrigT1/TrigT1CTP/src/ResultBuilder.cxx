@@ -397,7 +397,7 @@ LVL1CTP::ResultBuilder::constructCTPResult( const EventIDBase & eventID,
    result->setHeader(eformat::ROD, version_word, source_id, 0, eventID.run_number(), eventID.bunch_crossing_id(), triggerType, 0); // Header words
    result->setTrailer(data.size());                         // Trailer words
    result->setL1AcceptBunchPosition(l1a_pos);               // L1A bunch position
-   CTPResultUtils::dumpData(*result);
+   ATH_MSG_DEBUG(CTPResultUtils::print(*result));
    ATH_MSG_DEBUG( "Created CTPResult object" );
    return std::make_pair(std::move(result), std::move(resultAux));
 }
