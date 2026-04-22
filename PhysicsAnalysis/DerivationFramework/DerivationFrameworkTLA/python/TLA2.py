@@ -42,10 +42,6 @@ def TLA2KernelCfg(flags, name='TLA2Kernel', **kwargs):
     from DerivationFrameworkTLA.TLACommonConfig import TLACommonAugmentationsCfg
     acc.merge(TLACommonAugmentationsCfg(flags, prefix="TLA2_", TriggerListsHelper = kwargs['TriggerListsHelper']))
 
-    # Jets
-    from DerivationFrameworkJetEtMiss.JetCommonConfig import JetCommonCfg
-    acc.merge(JetCommonCfg(flags))
-
     from DerivationFrameworkInDet.InDetToolsConfig import InDetTrackSelectionToolWrapperCfg
     DFCommonTrackSelection = acc.getPrimaryAndMerge(InDetTrackSelectionToolWrapperCfg(
         flags,
@@ -74,7 +70,7 @@ def TLA2KernelCfg(flags, name='TLA2Kernel', **kwargs):
         SGKey                   = "Electrons",
         InDetTrackParticlesKey  = "InDetTrackParticles"))
 
-    TLA2_thinning_expression = "InDetTrackParticles.DFTLA2Loose && ( abs(InDetTrackParticles.d0) < 5.0*mm ) && ( abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm )"
+    TLA2_thinning_expression = ""
 
     TLA2Akt4JetTPThinningTool  = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(
         flags,
