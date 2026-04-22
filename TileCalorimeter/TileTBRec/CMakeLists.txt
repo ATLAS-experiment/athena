@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TileTBRec )
@@ -23,19 +23,20 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_add_test( TileTBDumpConfig_test
                 SCRIPT python -m TileTBRec.TileTBDumpConfig
                 PROPERTIES TIMEOUT 300
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( TileTBStatConfig_test
                 SCRIPT python -m TileTBRec.TileTBStatConfig
                 PROPERTIES TIMEOUT 300
-                POST_EXEC_SCRIPT nopost.sh)
+                LOG_IGNORE_PATTERN "problem opening the LASER"
+                POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( TileTestBeamRecoConfig_test
                 SCRIPT python -m TileTBRec.TileTestBeamRecoConfig
                 PROPERTIES TIMEOUT 300
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( TileTBAANtupleConfig_test
                 SCRIPT python -m TileTBRec.TileTBAANtupleConfig
                 PROPERTIES TIMEOUT 300
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
