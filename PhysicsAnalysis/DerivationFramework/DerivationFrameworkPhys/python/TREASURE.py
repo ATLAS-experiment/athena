@@ -14,7 +14,7 @@ from GoodRunsLists.GoodRunsListsDictionary import getGoodRunsLists
 
 
 
-def CPAlgorithmsCfg(flags):
+def TREASURECPAlgorithmsCfg(flags):
     """do the CP algorithm configuration for TREASURE"""
 
     from AthenaCommon.Logging import logging
@@ -379,7 +379,7 @@ def TREASUREKernelCfg(flags, name='TREASUREKernel', **kwargs):
     #    acc.merge(GeoModelCfg(flags))    
 
     # add CP algorithms to job
-    acc.merge(CPAlgorithmsCfg(flags))
+    acc.merge(TREASURECPAlgorithmsCfg(flags))
 
     # Build MET from our analysis objects
     if 'StreamAOD' in flags.Input.ProcessingTags:
