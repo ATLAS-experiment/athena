@@ -68,10 +68,10 @@ uproot's `virtual=True` returns lazily-loaded arrays — data is read from disk 
 
 ```python
 input_fields = [c.name for c in tool.input_columns if not c.is_optional]
-events = tree.arrays(input_fields, virtual=True)  # Lazy loading
+events = tree.arrays(filter_name=input_fields, virtual=True)  # Lazy loading
 ```
 
-Remove `virtual=True` if you want eager loading of all columns into memory immediately.
+Remove `virtual=True` and `filter_name` if you want eager loading of all columns into memory immediately.
 
 ---
 
@@ -202,7 +202,7 @@ tool = Tool(
 with uproot.open("DAOD_PHYSLITE.root") as f:
     tree = f["CollectionTree"]
     input_fields = [c.name for c in tool.input_columns if not c.is_optional]
-    events = tree.arrays(input_fields, entry_stop=100, virtual=True)
+    events = tree.arrays(filter_name=input_fields, entry_stop=100, virtual=True)
 
 # Returns an ak.Array with one field per output column
 result = tool(events)
@@ -273,7 +273,8 @@ tool = atlascp.MuonEfficiencyScaleFactors(
 
 with uproot.open("DAOD_PHYSLITE.root") as f:
     events = f["CollectionTree"].arrays(
-        [c.name for c in tool.input_columns if not c.is_optional], virtual=True
+        filter_name=[c.name for c in tool.input_columns if not c.is_optional],
+        virtual=True,
     )
 
 result = tool(events)
@@ -294,7 +295,8 @@ tool = Tool(
 
 with uproot.open("DAOD_PHYSLITE.root") as f:
     events = f["CollectionTree"].arrays(
-        [c.name for c in tool.input_columns if not c.is_optional], virtual=True
+        filter_name=[c.name for c in tool.input_columns if not c.is_optional],
+        virtual=True,
     )
 
 result = tool(events)
