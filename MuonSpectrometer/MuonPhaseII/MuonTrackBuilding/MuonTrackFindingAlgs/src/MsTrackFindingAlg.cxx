@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MsTrackFindingAlg.h"
@@ -19,7 +19,7 @@
 
 #include "ActsInterop/UnitConverters.h"
 #include "GaudiKernel/PhysicalConstants.h"
-#include "TruthUtils/AtlasPID.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "MuonVisualizationHelpersR4/ObjVisualizationHelpers.h"
 
 using namespace Acts::UnitLiterals;
