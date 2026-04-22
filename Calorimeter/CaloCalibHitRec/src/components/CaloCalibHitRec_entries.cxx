@@ -4,9 +4,12 @@
 #include "../CaloCalibClusterTruthAttributerTool.h"
 #include "../CaloCalibClusterTruthMapMakerAlgorithm.h"
 #include "../CaloCalibClusterDecoratorAlgorithm.h"
+
 #include "../CalibHitToCaloCellTool.h"
 #include "CaloCalibHitRec/CaloCalibClusterTruthMapMakerTool.h"
 #include "CaloCalibHitRec/CaloCalibClusterDecoratorTool.h"
+#include "CaloCalibHitRec/CaloCalibClusterDecoratorToolOOC.h"
+
 
 DECLARE_COMPONENT( CalibHitToCaloCell )
 DECLARE_COMPONENT( CalibHitIDCheck )
@@ -19,4 +22,4 @@ DECLARE_COMPONENT( CalibHitToCaloCellTool )
 DECLARE_COMPONENT( CaloCalibClusterTruthMapMakerTool )
 DECLARE_COMPONENT( CaloCalibClusterDecoratorTool )
 DECLARE_COMPONENT( CaloCalibClusterTruthAttributerTool )
-
+DECLARE_COMPONENT( CaloCalibClusterDecoratorToolOOC )

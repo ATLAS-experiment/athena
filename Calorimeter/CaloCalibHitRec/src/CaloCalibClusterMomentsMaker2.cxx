@@ -51,80 +51,116 @@ using CLHEP::cm;
 //###############################################################################
 
 CaloCalibClusterMomentsMaker2::CaloCalibClusterMomentsMaker2(const std::string& type, 
-							     const std::string& name,
-							     const IInterface* parent)
-  : AthAlgTool(type, name, parent)
+                                                             const std::string& name,
+                                                             const IInterface* parent)
+  : AthAlgTool(type, name, parent), 
+    m_calo_id(nullptr),
+    m_caloDM_ID(nullptr),
+    m_caloDmDescrManager(nullptr),
+    m_useParticleID(true),
+    m_energyMin(200*MeV),
+    m_energyMinCalib(20*MeV),
+    m_apars_alpha(0.5),
+    m_apars_r0(0.2),
+    m_MatchDmType(kMatchDmLoose)
 {
-  declareInterface<CaloClusterCollectionProcessor> (this);
+  declareInterface<CaloClusterCollectionProcessor>(this);
   // Name(s) of Moments to calculate
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_TOT"),xAOD::CaloCluster::ENG_CALIB_TOT));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_OUT_L"),xAOD::CaloCluster::ENG_CALIB_OUT_L));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_OUT_M"),xAOD::CaloCluster::ENG_CALIB_OUT_M));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_OUT_T"),xAOD::CaloCluster::ENG_CALIB_OUT_T));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_EMB0"),xAOD::CaloCluster::ENG_CALIB_EMB0));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_EME0"),xAOD::CaloCluster::ENG_CALIB_EME0));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_TILEG3"),xAOD::CaloCluster::ENG_CALIB_TILEG3));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_DEAD_TOT"),xAOD::CaloCluster::ENG_CALIB_DEAD_TOT));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_DEAD_EMB0"),xAOD::CaloCluster::ENG_CALIB_DEAD_EMB0));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_DEAD_TILE0"),xAOD::CaloCluster::ENG_CALIB_DEAD_TILE0));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_DEAD_TILEG3"),xAOD::CaloCluster::ENG_CALIB_DEAD_TILEG3));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_DEAD_EME0"),xAOD::CaloCluster::ENG_CALIB_DEAD_EME0));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_DEAD_HEC0"),xAOD::CaloCluster::ENG_CALIB_DEAD_HEC0));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_DEAD_FCAL"),xAOD::CaloCluster::ENG_CALIB_DEAD_FCAL));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_DEAD_LEAKAGE"),xAOD::CaloCluster::ENG_CALIB_DEAD_LEAKAGE));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_DEAD_UNCLASS"),xAOD::CaloCluster::ENG_CALIB_DEAD_UNCLASS));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_FRAC_EM"),xAOD::CaloCluster::ENG_CALIB_FRAC_EM));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_FRAC_HAD"),xAOD::CaloCluster::ENG_CALIB_FRAC_HAD));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_FRAC_REST"),xAOD::CaloCluster::ENG_CALIB_FRAC_REST));
+  declareProperty("MomentsNames", m_momentsNames);
+  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_TOT"), xAOD::CaloCluster::ENG_CALIB_TOT));
+  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_OUT_L"), xAOD::CaloCluster::ENG_CALIB_OUT_L));
+  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_OUT_M"), xAOD::CaloCluster::ENG_CALIB_OUT_M));
+  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_OUT_T"), xAOD::CaloCluster::ENG_CALIB_OUT_T));
+  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_EMB0"), xAOD::CaloCluster::ENG_CALIB_EMB0));
+  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_EME0"), xAOD::CaloCluster::ENG_CALIB_EME0));
+  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_TILEG3"), xAOD::CaloCluster::ENG_CALIB_TILEG3));
+  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_DEAD_TOT"), xAOD::CaloCluster::ENG_CALIB_DEAD_TOT));
+  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_DEAD_EMB0"), xAOD::CaloCluster::ENG_CALIB_DEAD_EMB0));
+  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_DEAD_TILE0"), xAOD::CaloCluster::ENG_CALIB_DEAD_TILE0));
+  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_DEAD_TILEG3"), xAOD::CaloCluster::ENG_CALIB_DEAD_TILEG3));
+  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_DEAD_EME0"), xAOD::CaloCluster::ENG_CALIB_DEAD_EME0));
+  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_DEAD_HEC0"), xAOD::CaloCluster::ENG_CALIB_DEAD_HEC0));
+  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_DEAD_FCAL"), xAOD::CaloCluster::ENG_CALIB_DEAD_FCAL));
+  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_DEAD_LEAKAGE"), xAOD::CaloCluster::ENG_CALIB_DEAD_LEAKAGE));
+  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_DEAD_UNCLASS"), xAOD::CaloCluster::ENG_CALIB_DEAD_UNCLASS));
+  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_FRAC_EM"), xAOD::CaloCluster::ENG_CALIB_FRAC_EM));
+  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_FRAC_HAD"), xAOD::CaloCluster::ENG_CALIB_FRAC_HAD));
+  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_FRAC_REST"), xAOD::CaloCluster::ENG_CALIB_FRAC_REST));
 
   // Name(s) of Moments which can be stored on the AOD - all others go to ESD
-  m_momentsNamesAOD.value().emplace_back("ENG_CALIB_TOT");
-  m_momentsNamesAOD.value().emplace_back("ENG_CALIB_OUT_L");
-  m_momentsNamesAOD.value().emplace_back("ENG_CALIB_OUT_M");
-  m_momentsNamesAOD.value().emplace_back("ENG_CALIB_OUT_T");
-  m_momentsNamesAOD.value().emplace_back("ENG_CALIB_EMB0");
-  m_momentsNamesAOD.value().emplace_back("ENG_CALIB_EME0");
-  m_momentsNamesAOD.value().emplace_back("ENG_CALIB_TILEG3");
-  m_momentsNamesAOD.value().emplace_back("ENG_CALIB_DEAD_TOT");
-  m_momentsNamesAOD.value().emplace_back("ENG_CALIB_DEAD_EMB0");
-  m_momentsNamesAOD.value().emplace_back("ENG_CALIB_DEAD_TILE0");
-  m_momentsNamesAOD.value().emplace_back("ENG_CALIB_DEAD_TILEG3");
-  m_momentsNamesAOD.value().emplace_back("ENG_CALIB_DEAD_EME0");
-  m_momentsNamesAOD.value().emplace_back("ENG_CALIB_DEAD_HEC0");
-  m_momentsNamesAOD.value().emplace_back("ENG_CALIB_DEAD_FCAL");
-  m_momentsNamesAOD.value().emplace_back("ENG_CALIB_DEAD_LEAKAGE");
-  m_momentsNamesAOD.value().emplace_back("ENG_CALIB_DEAD_UNCLASS");
-  m_momentsNamesAOD.value().emplace_back("ENG_CALIB_FRAC_EM");
-  m_momentsNamesAOD.value().emplace_back("ENG_CALIB_FRAC_HAD");
-  m_momentsNamesAOD.value().emplace_back("ENG_CALIB_FRAC_REST");
+  m_momentsNamesAOD.emplace_back("ENG_CALIB_TOT");
+  m_momentsNamesAOD.emplace_back("ENG_CALIB_OUT_L");
+  m_momentsNamesAOD.emplace_back("ENG_CALIB_OUT_M");
+  m_momentsNamesAOD.emplace_back("ENG_CALIB_OUT_T");
+  m_momentsNamesAOD.emplace_back("ENG_CALIB_EMB0");
+  m_momentsNamesAOD.emplace_back("ENG_CALIB_EME0");
+  m_momentsNamesAOD.emplace_back("ENG_CALIB_TILEG3");
+  m_momentsNamesAOD.emplace_back("ENG_CALIB_DEAD_TOT");
+  m_momentsNamesAOD.emplace_back("ENG_CALIB_DEAD_EMB0");
+  m_momentsNamesAOD.emplace_back("ENG_CALIB_DEAD_TILE0");
+  m_momentsNamesAOD.emplace_back("ENG_CALIB_DEAD_TILEG3");
+  m_momentsNamesAOD.emplace_back("ENG_CALIB_DEAD_EME0");
+  m_momentsNamesAOD.emplace_back("ENG_CALIB_DEAD_HEC0");
+  m_momentsNamesAOD.emplace_back("ENG_CALIB_DEAD_FCAL");
+  m_momentsNamesAOD.emplace_back("ENG_CALIB_DEAD_LEAKAGE");
+  m_momentsNamesAOD.emplace_back("ENG_CALIB_DEAD_UNCLASS");
+  m_momentsNamesAOD.emplace_back("ENG_CALIB_FRAC_EM");
+  m_momentsNamesAOD.emplace_back("ENG_CALIB_FRAC_HAD");
+  m_momentsNamesAOD.emplace_back("ENG_CALIB_FRAC_REST");
 
-  for( int im=0;im<3;im++) {
+  declareProperty("AODMomentsNames", m_momentsNamesAOD);
+  declareProperty("CalibrationHitContainerNames", m_CalibrationHitContainerNames);
+  declareProperty("DMCalibrationHitContainerNames", m_DMCalibrationHitContainerNames);
+  m_n_phi_out = 127; // not more than 127 since we store indices (-127,...-1,0,...,126) and have 8 bits only
+  m_n_eta_out = 127;
+  m_out_phi_max = M_PI;
+  m_out_eta_max = 6;
+
+  m_rmaxOut[0] = 1.0;
+  m_rmaxOut[1] = 0.5; 
+  m_rmaxOut[2] = 0.3;
+
+  for (int im = 0; im < 3; im++) {
     m_i_phi_eta[im].resize(m_n_eta_out);
   }
+  m_doDeadEnergySharing = false;
+  m_foundAllContainers = false;
+  m_doOutOfClusterL = false;
+  m_doOutOfClusterM = false;
+  m_doOutOfClusterT = false;
+  m_doDeadL = false;
+  m_doDeadM = false;
+  m_doDeadT = false;
+  m_doCalibFrac = false;
+
+  declareProperty("MatchDmType", m_MatchDmType);
+  declareProperty("UseParticleID", m_useParticleID);
 }
+
 
 //###############################################################################
 
 StatusCode CaloCalibClusterMomentsMaker2::initialize()
 {
-  ATH_MSG_INFO( "Initializing " << name()  );
+  ATH_MSG_INFO("Initializing " << name());
 
   for (const std::string& name : m_momentsNames) {
     bool isValid(false);
     for (const moment_name_pair& vname : m_validNames) {
-      if ( name == vname.first ) {
-	m_validMoments.insert(vname);
-	isValid = true;
-        ATH_MSG_DEBUG( "Inserting " << name );
-	break;
+      if (name == vname.first) {
+        m_validMoments.insert(vname);
+        isValid = true;
+        ATH_MSG_DEBUG("Inserting " << name);
+        break;
       }
     }
-    if ( !isValid) {
+    if (!isValid) {
       msg() << MSG::ERROR << "Moment " << name
-	  << " is not a valid Moment name and will be ignored! "
-	  << "Valid names are:";
-      for (unsigned int i=0;i<m_validNames.size();i++) 
-	msg() << (i==0?" ":", ") << m_validNames[i].first;
+            << " is not a valid Moment name and will be ignored! "
+            << "Valid names are:";
+      for (unsigned int i = 0; i < m_validNames.size(); i++) {
+        msg() << (i == 0 ? " " : ", ") << m_validNames[i].first;
+      }
       msg() << endmsg;
     }
   }
@@ -160,77 +196,211 @@ StatusCode CaloCalibClusterMomentsMaker2::initialize()
     }
   }
   
-  if(m_doCalibFrac && !m_useParticleID) {
-    ATH_MSG_INFO( "Usage of ParticleID was switched off (UseParticleID==False), no ENG_CALIB_FRAC_* moments will be available"  );
+  if (m_doCalibFrac && !m_useParticleID) {
+    ATH_MSG_INFO("Usage of ParticleID was switched off (UseParticleID==False), no ENG_CALIB_FRAC_* moments will be available");
     m_doCalibFrac = false;
   }
 
   for (const std::string& name : m_momentsNamesAOD) {
     for (const moment_name_pair& vname : m_validNames) {
-      if ( vname.first == name ) {
-	m_momentsAOD.insert(vname.second);
-	break;
+      if (vname.first == name) {
+        m_momentsAOD.insert(vname.second);
+        break;
       }
     }
   }
-  if( m_momentsAOD.find(xAOD::CaloCluster::ENG_CALIB_DEAD_TOT) != m_momentsAOD.end()) {
+  if (m_momentsAOD.find(xAOD::CaloCluster::ENG_CALIB_DEAD_TOT) != m_momentsAOD.end()) {
     m_doDeadEnergySharing = true;
   }
 
   // dead material identifier description manager
   m_caloDmDescrManager = CaloDmDescrManager::instance(); 
 
-  ATH_CHECK( detStore()->retrieve(m_calo_id, "CaloCell_ID") );
-  ATH_CHECK( detStore()->retrieve(m_caloDM_ID) );
+  ATH_CHECK(detStore()->retrieve(m_calo_id, "CaloCell_ID"));
+  ATH_CHECK(detStore()->retrieve(m_caloDM_ID));
 
-  // initialize distance tables
-  for(int jeta = 0;jeta<m_n_eta_out;jeta++) {
-    double eta0 = (jeta+0.5) * (m_out_eta_max)/m_n_eta_out; 
-    HepLorentzVector middle(1,0,0,1);
-    middle.setREtaPhi(1./cosh(eta0),eta0,0);
-    double x_rmaxOut[3];
-    for (int im=0;im<3;im++) {
-      x_rmaxOut[im] = m_rmaxOut[im]*angle_mollier_factor(eta0);
-    }
-    for (int jp=-m_n_phi_out;jp<m_n_phi_out;jp++) {
-      double phi = (jp+0.5) * m_out_phi_max/m_n_phi_out; 
-      int ietaMin[3] = {m_n_eta_out,m_n_eta_out,m_n_eta_out};
-      int ietaMax[3] = {-m_n_eta_out,-m_n_eta_out,-m_n_eta_out};
-      for(int je = -m_n_eta_out;je<m_n_eta_out;je++) {
-        double eta = (je+0.5) * m_out_eta_max/m_n_eta_out; 
-        HepLorentzVector cpoint(1,0,0,1);
-        cpoint.setREtaPhi(1./cosh(eta),eta,phi);
-        double r = middle.angle(cpoint.vect());
-        for (int im=0;im<3;im++) {
-          if ( r < x_rmaxOut[im] ) {
-            if ( je < ietaMin[im] ) 
-              ietaMin[im] = je;
-            if ( je > ietaMax[im] ) 
-              ietaMax[im] = je;
-          }
-        }
-      }
-      for (int im=0;im<3;im++) {
-        if ( ietaMin[im] <= ietaMax[im] ) {
-          CalibHitIPhiIEtaRange theRange{};
-          theRange.iPhi = (char)jp;
-          theRange.iEtaMin = (char)ietaMin[im];
-          theRange.iEtaMax = (char)ietaMax[im];
-          m_i_phi_eta[im][jeta].push_back(theRange); 
-        }
-      }
-    }
-  }
+  initializeOutOfClusterDistanceTables(
+      m_n_phi_out,
+      m_n_eta_out,
+      m_out_phi_max,
+      m_out_eta_max,
+      m_rmaxOut,
+      m_i_phi_eta);
 
-  ATH_CHECK( m_CalibrationHitContainerNames.initialize() );
-  ATH_CHECK( m_DMCalibrationHitContainerNames.initialize() );
-
+  ATH_CHECK(m_CalibrationHitContainerNames.initialize());
+  ATH_CHECK(m_DMCalibrationHitContainerNames.initialize());
   ATH_CHECK(m_truthParticleContainerKey.initialize());
-
   ATH_CHECK(m_caloDetDescrMgrKey.initialize());
 
   return StatusCode::SUCCESS;
 }
+
+
+void CaloCalibClusterMomentsMaker2::initializeOutOfClusterDistanceTables(
+    int n_phi_out,
+    int n_eta_out,
+    double out_phi_max,
+    double out_eta_max,
+    const double (&rmaxOut)[3],
+    std::array<std::vector<std::vector<CalibHitIPhiIEtaRange>>, 3>& i_phi_eta)
+{
+  for (int im = 0; im < 3; ++im) {
+    i_phi_eta[im].clear();
+    i_phi_eta[im].resize(n_eta_out);
+  }
+
+  for (int jeta = 0; jeta < n_eta_out; ++jeta) {
+    const double eta0 = (jeta + 0.5) * out_eta_max / n_eta_out;
+    HepLorentzVector middle(1, 0, 0, 1);
+    middle.setREtaPhi(1. / std::cosh(eta0), eta0, 0.0);
+
+    double x_rmaxOut[3];
+    for (int im = 0; im < 3; ++im) {
+      x_rmaxOut[im] = rmaxOut[im] * angle_mollier_factor(eta0);
+    }
+
+    for (int jp = -n_phi_out; jp < n_phi_out; ++jp) {
+      const double phi = (jp + 0.5) * out_phi_max / n_phi_out;
+      int ietaMin[3] = {n_eta_out, n_eta_out, n_eta_out};
+      int ietaMax[3] = {-n_eta_out, -n_eta_out, -n_eta_out};
+
+      for (int je = -n_eta_out; je < n_eta_out; ++je) {
+        const double eta = (je + 0.5) * out_eta_max / n_eta_out;
+        HepLorentzVector cpoint(1, 0, 0, 1);
+        cpoint.setREtaPhi(1. / std::cosh(eta), eta, phi);
+        const double r = middle.angle(cpoint.vect());
+        for (int im = 0; im < 3; ++im) {
+          if (r < x_rmaxOut[im]) {
+            if (je < ietaMin[im]) {
+              ietaMin[im] = je;
+            }
+            if (je > ietaMax[im]) {
+              ietaMax[im] = je;
+            }
+          }
+        }
+      }
+
+      for (int im = 0; im < 3; ++im) {
+        if (ietaMin[im] <= ietaMax[im]) {
+          CalibHitIPhiIEtaRange theRange{};
+          theRange.iPhi = static_cast<char>(jp);
+          theRange.iEtaMin = static_cast<char>(ietaMin[im]);
+          theRange.iEtaMax = static_cast<char>(ietaMax[im]);
+          i_phi_eta[im][jeta].push_back(theRange);
+        }
+      }
+    }
+  }
+}
+
+
+void CaloCalibClusterMomentsMaker2::buildCellInfoMap(
+    const xAOD::CaloClusterContainer& theClusColl,
+    CellInfoSet_t& cellInfo)
+{
+  cellInfo.clear();
+
+  int iClus = 0;
+  for (const xAOD::CaloCluster* theCluster : theClusColl) {
+    xAOD::CaloCluster::const_cell_iterator cellIter = theCluster->cell_begin();
+    xAOD::CaloCluster::const_cell_iterator cellIterEnd = theCluster->cell_end();
+
+    for (; cellIter != cellIterEnd; ++cellIter) {
+      const CaloCell* pCell = *cellIter;
+      const Identifier myId = pCell->ID();
+
+      MyCellInfo info(iClus, cellIter.weight());
+      CellInfoSet_t::iterator bookmark = cellInfo.lower_bound(myId);
+      if (bookmark == cellInfo.end() || bookmark->first != myId) {
+        if (bookmark != cellInfo.begin()) {
+          --bookmark;
+        }
+        cellInfo.emplace_hint(bookmark, myId, std::move(info));
+      }
+      else {
+        bookmark->second.Add(info);
+      }
+    }
+
+    ++iClus;
+  }
+}
+
+
+//###############################################################################
+
+void CaloCalibClusterMomentsMaker2::buildOutOfClusterClusterLists(
+    const xAOD::CaloClusterContainer& theClusColl,
+    const ClusInfo_t& clusInfoVec,
+    int n_phi_out,
+    int n_eta_out,
+    double out_phi_max,
+    double out_eta_max,
+    const std::array<std::vector<std::vector<CalibHitIPhiIEtaRange>>, 3>& i_phi_eta,
+    const std::array<bool, 3>& doOutOfCluster,
+    const std::array<ClusList*, 3>& clusLists)
+{
+  for (unsigned int ii = 0; ii < 3; ++ii) {
+    ClusList* pClusList = clusLists[ii];
+    if (!doOutOfCluster[ii] || pClusList == nullptr) {
+      continue;
+    }
+
+    int iClus = -1;
+    for (const xAOD::CaloCluster* theCluster : theClusColl) {
+      ++iClus;
+      const MyClusInfo& clusInfo = clusInfoVec[iClus];
+
+      if (clusInfo.engCalibIn.engTot <= 0.) {
+        continue;
+      }
+
+      int iEtaSign = 1;
+      if (theCluster->eta() < 0.) {
+        iEtaSign = -1;
+      }
+
+      const int jeta = static_cast<int>(std::floor(n_eta_out * (theCluster->eta() / out_eta_max)));
+      int jphi = static_cast<int>(std::floor(n_phi_out * (theCluster->phi() / out_phi_max)));
+
+      if (jeta < -n_eta_out || jeta >= n_eta_out) {
+        continue;
+      }
+
+      if (jphi < -n_phi_out) {
+        jphi += 2 * n_phi_out;
+      }
+      if (jphi >= n_phi_out) {
+        jphi -= 2 * n_phi_out;
+      }
+
+      unsigned int iEtaBin = static_cast<unsigned int>(jeta);
+      if (jeta < 0) {
+        iEtaBin = std::abs(jeta) - 1;
+      }
+
+      const std::vector<CalibHitIPhiIEtaRange>& bins = i_phi_eta[ii][iEtaBin];
+      for (const CalibHitIPhiIEtaRange& range : bins) {
+        int jp = range.iPhi + jphi;
+        if (jp < -n_phi_out) {
+          jp += 2 * n_phi_out;
+        }
+        if (jp >= n_phi_out) {
+          jp -= 2 * n_phi_out;
+        }
+
+        const int jEtaMin = (iEtaSign < 0) ? -range.iEtaMax - 1 : range.iEtaMin;
+        const int jEtaMax = (iEtaSign < 0) ? -range.iEtaMin - 1 : range.iEtaMax;
+
+        for (int je = jEtaMin; je <= jEtaMax; ++je) {
+          (*pClusList)[(jp + n_phi_out) * (2 * n_eta_out + 1) + je + n_eta_out].push_back(iClus);
+        }
+      }
+    }
+  }
+}
+
 
 //###############################################################################
 
@@ -251,9 +421,10 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
     SG::ReadHandle<CaloCalibrationHitContainer> cchc (key, ctx);
     if ( !cchc.isValid() ) {
       if (m_foundAllContainers) {
-	// print ERROR message only if there was at least one event with 
-	// all containers 
-	msg(MSG::ERROR) << "SG does not contain calibration hit container " << key.key() << endmsg;
+        // print ERROR message only if there was at least one event with
+        // all containers
+        msg(MSG::ERROR) << "SG does not contain calibration hit container "
+                        << key.key() << endmsg;
       }
       foundAllContainers = false;
     }
@@ -269,9 +440,10 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
     SG::ReadHandle<CaloCalibrationHitContainer> cchc (key, ctx);
     if ( !cchc.isValid() ) {
       if (m_foundAllContainers) {
-	// print ERROR message only if there was at least one event with 
-	// all containers 
-	ATH_MSG_ERROR("SG does not contain DM calibration hit container " << key.key());
+        // print ERROR message only if there was at least one event with
+        // all containers
+        ATH_MSG_ERROR("SG does not contain DM calibration hit container "
+                      << key.key());
       }
       foundAllContainers = false;
     }
@@ -280,221 +452,119 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
     }
   }
 
-  if ( !m_foundAllContainers && foundAllContainers ) 
+  if ( !m_foundAllContainers && foundAllContainers ) {
     m_foundAllContainers = true;
-
-  if ( !foundAllContainers ) return StatusCode::SUCCESS;
-  ATH_MSG_DEBUG("SG has all containers ");
-
-  // will contain detailed info about cluster calibration eneries
-  ClusInfo_t clusInfoVec (theClusColl->size());
-
-  CellInfoSet_t cellInfo;
-
-  /* ********************************************
-  filling the map with info which cell belongs to which cluster and what 
-  is the cell weight in the cluster
-  ******************************************** */
-  xAOD::CaloClusterContainer::iterator clusIter = theClusColl->begin();
-  xAOD::CaloClusterContainer::iterator clusIterEnd = theClusColl->end();
-  int iClus = 0;
-  for( ;clusIter!=clusIterEnd;++clusIter,++iClus) {
-     const xAOD::CaloCluster * theCluster = (*clusIter);
-
-    // loop over all cell members and fill cell vector for used cells
-    xAOD::CaloCluster::const_cell_iterator cellIter    = theCluster->cell_begin();
-    xAOD::CaloCluster::const_cell_iterator cellIterEnd = theCluster->cell_end();
-    for(; cellIter != cellIterEnd; cellIter++ ){
-      const CaloCell* pCell = (*cellIter);
-      Identifier myId = pCell->ID();
-
-      MyCellInfo info (iClus, cellIter.weight() );
-      CellInfoSet_t::iterator bookmark = cellInfo.lower_bound( myId );
-      if(bookmark == cellInfo.end() || bookmark->first != myId) {
-        // We haven't had a infohit in this cell before.  Add it to our set.
-        if (bookmark != cellInfo.begin()) --bookmark;
-        cellInfo.emplace_hint (bookmark, myId, std::move(info));
-      }else{
-        // Update the existing hit.
-        bookmark->second.Add( info );
-      }
-    } // cellIter
-  } // iClus
-
-
-  /* ********************************************
-  calculate total calib energy inside clusters
-  ******************************************** */
-  unsigned int nHitsTotal = 0;
-  unsigned int nHitsWithoutParticleUID = 0;
-  for (const CaloCalibrationHitContainer* cchc : v_cchc) {
-    //loop over cells in calibration container
-    for (const CaloCalibrationHit* hit : *cchc) {
-      Identifier myId = hit->cellID();
-
-      CellInfoSet_t::iterator pos = cellInfo.find( myId );
-      if(pos != cellInfo.end() ) {
-        // i.e. given hit id belongs to one or more clusters
-        CaloSampling::CaloSample nsmp = CaloSampling::CaloSample(m_calo_id->calo_sample(myId));
-        for ( const std::pair<int, double>& p : pos->second) {
-          int iClus = p.first;
-          double weight = p.second;
-          if(m_useParticleID){
-            const int uniqueID = HepMC::uniqueID(hit);
-            if (uniqueID == HepMC::INVALID_PARTICLE_ID) {
-              ATH_MSG_ERROR("Invalid uniqueID detected - this sample cannot be properly analysed.");
-              break;
-            }
-            clusInfoVec[iClus].Add(weight * hit->energyTotal(), nsmp, (unsigned int)(HepMC::uniqueID(hit)));
-          }else{
-            clusInfoVec[iClus].Add(weight * hit->energyTotal(), nsmp);
-          }
-        }
-      }
-      if( m_useParticleID && HepMC::uniqueID(hit) == HepMC::UNDEFINED_ID) {
-        nHitsWithoutParticleUID++;
-      }
-      nHitsTotal++;
-    }
   }
 
-  // if all calibration hits have ParticleUID(i.e GenParticle::id())==0 when simulation was done without ParticleUID
+  if ( !foundAllContainers ) {
+    return StatusCode::SUCCESS;
+  }
+  ATH_MSG_DEBUG("SG has all containers ");
+
+  // will contain detailed info about cluster calibration energies
+  ClusInfo_t clusInfoVec(theClusColl->size());
+
+  CellInfoSet_t cellInfo;
+  buildCellInfoMap(*theClusColl, cellInfo);
+
+  xAOD::CaloClusterContainer::iterator clusIter = theClusColl->begin();
+  xAOD::CaloClusterContainer::iterator clusIterEnd = theClusColl->end();
+
+  /* ********************************************
+   calculate total calib energy inside clusters
+   ******************************************** */
+  unsigned int nHitsTotal = 0;
+  unsigned int nHitsWithoutParticleUID = 0;
+
+  accumulateClusterCalibHits(
+      v_cchc,
+      cellInfo,
+      *m_calo_id,
+      clusInfoVec,
+      nHitsTotal,
+      nHitsWithoutParticleUID,
+      m_useParticleID,
+      [this]() {
+        ATH_MSG_ERROR("Invalid uniqueID detected - this sample cannot be properly analysed.");
+      });
+
+  // if all calibration hits have ParticleUID (i.e. GenParticle::id()) == 0
+  // when simulation was done without ParticleUID
   bool doCalibFrac = m_doCalibFrac;
   bool useParticleID = m_useParticleID;
-  if(m_useParticleID && (nHitsTotal == nHitsWithoutParticleUID) ) {
+  if (m_useParticleID && (nHitsTotal == nHitsWithoutParticleUID)) {
     ATH_MSG_INFO("Calibration hits do not have ParticleUID, ids of particle-caused hits are always 0. Continuing without ParticleID machinery.");
     useParticleID = false;
   }
 
-  // reading particle information for later calcution of calibration enegry fraction caused
+  // reading particle information for later calculation of calibration energy fraction caused
   // by particles of different types
   SG::ReadHandle<xAOD::TruthParticleContainer> truthParticleContainerReadHandle(m_truthParticleContainerKey, ctx);
 
-  if (doCalibFrac && !truthParticleContainerReadHandle.isValid()){
-    ATH_MSG_WARNING("Invalid read handle to TruthParticleContainer with key: " << m_truthParticleContainerKey.key());
+  if (doCalibFrac && !truthParticleContainerReadHandle.isValid()) {
+    ATH_MSG_WARNING("Invalid read handle to TruthParticleContainer with key: "
+                    << m_truthParticleContainerKey.key());
     doCalibFrac = false;
   }
 
-  std::vector<double> engCalibOut[3];
+  std::array<std::vector<double>, 3> engCalibOut;
 
   /* ****************************************************************
-  lists of clusters populating given area [eta*phi][iClus list]
-  **************************************************************** */
-  std::vector<std::vector <int > > clusListL;
-  std::vector<std::vector <int > > clusListM;
-  std::vector<std::vector <int > > clusListT;
-  if ( m_doOutOfClusterL || m_doDeadL || (m_doDeadEnergySharing && m_MatchDmType==kMatchDmLoose) )
-    clusListL.resize((2*m_n_phi_out+1)*(2*m_n_eta_out+1));
-  if ( m_doOutOfClusterM || m_doDeadM || (m_doDeadEnergySharing && m_MatchDmType==kMatchDmMedium) )
-    clusListM.resize((2*m_n_phi_out+1)*(2*m_n_eta_out+1));
-  if ( m_doOutOfClusterT || m_doDeadT || (m_doDeadEnergySharing && m_MatchDmType==kMatchDmTight) )
-    clusListT.resize((2*m_n_phi_out+1)*(2*m_n_eta_out+1));
+   lists of clusters populating given area [eta*phi][iClus list]
+   **************************************************************** */
+  std::array<ClusList, 3> clusLists;
+  const std::array<bool, 3> doOutOfCluster{{
+    m_doOutOfClusterL, m_doOutOfClusterM, m_doOutOfClusterT
+  }};
+  const std::array<bool, 3> doClusterLists{{
+    m_doOutOfClusterL || m_doDeadL ||
+      (m_doDeadEnergySharing && m_MatchDmType == kMatchDmLoose),
+    m_doOutOfClusterM || m_doDeadM ||
+      (m_doDeadEnergySharing && m_MatchDmType == kMatchDmMedium),
+    m_doOutOfClusterT || m_doDeadT ||
+      (m_doDeadEnergySharing && m_MatchDmType == kMatchDmTight)
+  }};
 
-  for(unsigned int ii=0;ii<3;ii++) {
-    if ( (ii == 0 && (m_doOutOfClusterL || m_doDeadL || (m_doDeadEnergySharing && m_MatchDmType==kMatchDmLoose) ) ) || 
-         (ii == 1 && (m_doOutOfClusterM || m_doDeadM || (m_doDeadEnergySharing && m_MatchDmType==kMatchDmMedium) ) ) || 
-         (ii == 2 && (m_doOutOfClusterT || m_doDeadT || (m_doDeadEnergySharing && m_MatchDmType==kMatchDmTight)) ) ) {
-      engCalibOut[ii].resize(theClusColl->size(),0);
-      iClus = -1;
-      for (const xAOD::CaloCluster * theCluster : *theClusColl) {
-	++iClus;
-        MyClusInfo& clusInfo = clusInfoVec[iClus];
-
-        if ( clusInfo.engCalibIn.engTot > 0 ) {
-          int iEtaSign = 1;
-          if ( theCluster->eta() < 0 ) iEtaSign = -1;
-          int jeta = (int)(floor(m_n_eta_out*(theCluster->eta()/(m_out_eta_max))));
-          int jphi = (int)(floor(m_n_phi_out*(theCluster->phi())/(m_out_phi_max)));
-          if ( jeta >= -m_n_eta_out && jeta < m_n_eta_out ) {
-            if ( jphi < -m_n_phi_out ) jphi +=  2*m_n_phi_out;
-            if ( jphi >=  m_n_phi_out ) jphi -=  2*m_n_phi_out;
-            unsigned int iEtaBin(jeta);
-            if ( jeta < 0 ) iEtaBin = abs(jeta)-1;
-            const std::vector<CalibHitIPhiIEtaRange>& bins
-              = m_i_phi_eta[ii][iEtaBin];
-            for (const CalibHitIPhiIEtaRange& range : bins) {
-              int jp = range.iPhi+jphi;
-              if ( jp < -m_n_phi_out )  jp +=  2*m_n_phi_out;
-              if ( jp >=  m_n_phi_out )  jp -=  2*m_n_phi_out;
-              int jEtaMin = iEtaSign<0?-range.iEtaMax-1:range.iEtaMin;
-              int jEtaMax = iEtaSign<0?-range.iEtaMin-1:range.iEtaMax;
-              for( int je = jEtaMin;je<=jEtaMax;je++ ) {
-              if(ii == 0 ) clusListL[(jp+m_n_phi_out)*(2*m_n_eta_out+1)+je+m_n_eta_out].push_back(iClus);
-              else if(ii == 1 ) clusListM[(jp+m_n_phi_out)*(2*m_n_eta_out+1)+je+m_n_eta_out].push_back(iClus);
-              else if(ii == 2 ) clusListT[(jp+m_n_phi_out)*(2*m_n_eta_out+1)+je+m_n_eta_out].push_back(iClus);
-              }
-            }
-          }
-        }
-      }
+  for (unsigned int ii = 0; ii < 3; ++ii) {
+    if (doClusterLists[ii]) {
+      clusLists[ii].resize((2 * m_n_phi_out + 1) * (2 * m_n_eta_out + 1));
+      engCalibOut[ii].resize(theClusColl->size(), 0.0);
     }
   }
 
-  /* ****************************************************************
-  calculate out-of-cluster energy of clusters
-  **************************************************************** */
-  if ( m_doOutOfClusterL  ||  m_doOutOfClusterM  ||  m_doOutOfClusterT  ) {
-    for (const CaloCalibrationHitContainer* cchc : v_cchc) {
-      //loop over cells in calibration container
-      for (const CaloCalibrationHit* hit : *cchc) {
-        Identifier myId = hit->cellID();
+  std::array<ClusList*, 3> clusListPtrs{{&clusLists[0], &clusLists[1], &clusLists[2]}};
+  buildOutOfClusterClusterLists(
+      *theClusColl,
+      clusInfoVec,
+      m_n_phi_out,
+      m_n_eta_out,
+      m_out_phi_max,
+      m_out_eta_max,
+      m_i_phi_eta,
+      doClusterLists,
+      clusListPtrs);
 
-          CellInfoSet_t::iterator pos = cellInfo.find( myId );
-          if(pos == cellInfo.end() ) {
-            // hit is not inside any cluster
-            const CaloDetDescrElement* myCDDE = 
-              calo_dd_man->get_element(myId);
-            int uniqueID(HepMC::UNDEFINED_ID);
-            if(useParticleID) uniqueID = HepMC::uniqueID(hit);
-            if ( myCDDE ) {
-              int jeO = (int)floor(m_n_eta_out*(myCDDE->eta()/m_out_eta_max));
-              if ( jeO >= -m_n_eta_out && jeO < m_n_eta_out ) {
-                int jpO = (int)floor(m_n_phi_out*(myCDDE->phi()/m_out_phi_max));
-                if ( jpO < -m_n_phi_out ) jpO +=  2*m_n_phi_out;
-                if ( jpO >=  m_n_phi_out ) jpO -=  2*m_n_phi_out;
-                for (unsigned int ii=0;ii<3;ii++) {
-                  std::vector<std::vector <int > > *pClusList=nullptr;
-                  if ( ii == 0 && m_doOutOfClusterL ) 
-                    pClusList = &clusListL;
-                  else if ( ii == 1 && m_doOutOfClusterM ) 
-                    pClusList = &clusListM;
-                  else if ( ii == 2 && m_doOutOfClusterT ) 
-                    pClusList = &clusListT;
-                  if ( pClusList) {
-                    // loop over list of potential neighboring clusters
-                    double hitClusNorm(0.);
-                    std::vector<int> hitClusIndex;
-                    std::vector<double > hitClusEffEnergy;
-                    // loop over clusters which match given OOC hit
-                    for(unsigned int i_cls=0; i_cls<(*pClusList)[(jpO+m_n_phi_out)*(2*m_n_eta_out+1)+jeO+m_n_eta_out].size(); i_cls++){
-                      int iClus = (*pClusList)[(jpO+m_n_phi_out)*(2*m_n_eta_out+1)+jeO+m_n_eta_out][i_cls];
-                      MyClusInfo& clusInfo = clusInfoVec[iClus];
-                      // getting access to calibration energy inside cluster caused by same particleUID (uniqueID)
-                      // as given OOC hit
-                      auto pos = clusInfo.engCalibParticle.find(uniqueID);
-                      if(pos!=clusInfo.engCalibParticle.end()) {
-                        // given cluster have some energy inside caused by same particle as given OOC hitClusEffEnergy
-                        // so the hit will be assigned to this cluster with some weight
-                        hitClusNorm += pos->second.engTot;
-                        hitClusEffEnergy.push_back(pos->second.engTot);
-                        hitClusIndex.push_back(iClus);
-                      }
-                    }
-                    if ( hitClusNorm > 0 ) {
-                      const double inv_hitClusNorm = 1. / hitClusNorm;
-                      for(unsigned int i_cls=0; i_cls<hitClusIndex.size(); i_cls++){
-                        int iClus = hitClusIndex[i_cls];
-                        double w = hitClusEffEnergy[i_cls] * inv_hitClusNorm;
-                        engCalibOut[ii][iClus] += w*hit->energyTotal();
-                    }
-                  }
-                }
-              }
-            }
-          }
-        } // hits not in cluster
-      }
-    }
+  /* ****************************************************************
+   calculate out-of-cluster energy of clusters
+   **************************************************************** */
+  if ( m_doOutOfClusterL || m_doOutOfClusterM || m_doOutOfClusterT ) {
+    std::array<const ClusList*, 3> constClusListPtrs{{
+      &clusLists[0], &clusLists[1], &clusLists[2]
+    }};
+    accumulateOutOfClusterEnergy(
+        v_cchc,
+        cellInfo,
+        *calo_dd_man,
+        clusInfoVec,
+        m_n_phi_out,
+        m_n_eta_out,
+        m_out_phi_max,
+        m_out_eta_max,
+        doOutOfCluster,
+        constClusListPtrs,
+        [&engCalibOut](unsigned int ii, int iClus, int /*uniqueID*/, double energy) {
+          engCalibOut[ii][iClus] += energy;
+        });
   }
 
   // ------------------------------------------------------------------------
@@ -502,15 +572,16 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
   // + energy is shared among clusters within certain area
   // + distance to clusters and energy in specific samplings are used as sharing criteria
   // + calculations are done separately for different dead material areas
-  std::vector<std::vector <int > > *pClusList=nullptr;
+  ClusList* pClusList = nullptr;
   if ( m_MatchDmType == kMatchDmLoose ) {
-    pClusList = &clusListL;
+    pClusList = &clusLists[0];
   } else if ( m_MatchDmType == kMatchDmMedium ) {
-    pClusList = &clusListM;
+    pClusList = &clusLists[1];
   } else if ( m_MatchDmType == kMatchDmTight ) {
-    pClusList = &clusListT;
+    pClusList = &clusLists[2];
   }
-  if( m_doDeadEnergySharing && pClusList) {
+
+  if (m_doDeadEnergySharing && pClusList) {
 
     for (const CaloCalibrationHitContainer* dmcchc : v_dmcchc) {
       for (const CaloCalibrationHit* hit : *dmcchc) {
@@ -520,89 +591,97 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
           myCDDE = m_caloDmDescrManager->get_element(myId);
           if ( myCDDE ) {
             int uniqueID(HepMC::UNDEFINED_ID);
-            if(useParticleID) uniqueID = HepMC::uniqueID(hit);
+            if (useParticleID) {
+              uniqueID = HepMC::uniqueID(hit);
+            }
 
-            int jeO = (int)floor(m_n_eta_out*(myCDDE->eta()/m_out_eta_max));
+            int jeO = (int)floor(m_n_eta_out * (myCDDE->eta() / m_out_eta_max));
             if ( jeO >= -m_n_eta_out && jeO < m_n_eta_out ) {
-              int jpO = (int)floor(m_n_phi_out*(myCDDE->phi()/m_out_phi_max));
-              if ( jpO < -m_n_phi_out ) jpO +=  2*m_n_phi_out;
-              if ( jpO >=  m_n_phi_out ) jpO -=  2*m_n_phi_out;
+              int jpO = (int)floor(m_n_phi_out * (myCDDE->phi() / m_out_phi_max));
+              if ( jpO < -m_n_phi_out ) {
+                jpO += 2 * m_n_phi_out;
+              }
+              if ( jpO >= m_n_phi_out ) {
+                jpO -= 2 * m_n_phi_out;
+              }
 
               /* ****************************************
-              share energy of DM hit among different clusters
-              ***************************************** */
+               share energy of DM hit among different clusters
+               ***************************************** */
               int nDmArea = m_caloDmDescrManager->get_dm_area(myId);
               const CaloDmRegion *dmRegion = m_caloDmDescrManager->get_dm_region(myId);
-	      int hitClusVecIndex = 0;
+              int hitClusVecIndex = 0;
               std::vector<int> hitClusIndex(theClusColl->size());
-              std::vector<double > hitClusEffEnergy(theClusColl->size());
+              std::vector<double> hitClusEffEnergy(theClusColl->size());
               double hitClusNorm = 0.0;
+
               // loop over clusters which match given DM hit
-              for(unsigned int i_cls=0; i_cls< (*pClusList)[(jpO+m_n_phi_out)*(2*m_n_eta_out+1)+jeO+m_n_eta_out].size(); i_cls++){
-		int iClus = (*pClusList)[(jpO+m_n_phi_out)*(2*m_n_eta_out+1)+jeO+m_n_eta_out][i_cls];
+              for (unsigned int i_cls = 0;
+                   i_cls < (*pClusList)[(jpO + m_n_phi_out) * (2 * m_n_eta_out + 1) + jeO + m_n_eta_out].size();
+                   i_cls++) {
+                int iClus = (*pClusList)[(jpO + m_n_phi_out) * (2 * m_n_eta_out + 1) + jeO + m_n_eta_out][i_cls];
                 xAOD::CaloCluster * theCluster = theClusColl->at(iClus);
-                
+
                 MyClusInfo& clusInfo = clusInfoVec[iClus];
-                // getting access to calibration energy inside cluster caused by same particleUID (uniqueID)
-                // as given OOC hit
                 auto pos = clusInfo.engCalibParticle.find(uniqueID);
-                if(pos!=clusInfo.engCalibParticle.end()) {
+                if (pos != clusInfo.engCalibParticle.end()) {
                   double engClusTruthUniqueIDCalib = pos->second.engTot;
 
-                  if(engClusTruthUniqueIDCalib > m_energyMinCalib  && theCluster->e()>m_energyMin) {
+                  if (engClusTruthUniqueIDCalib > m_energyMinCalib && theCluster->e() > m_energyMin) {
                     double sum_smp_energy = 0.0;
                     // loop over calo sampling numbers registered for given DM area
-                    for(unsigned int i_smp=0; i_smp<dmRegion->m_CaloSampleNeighbours.size(); i_smp++) {
-                      CaloSampling::CaloSample nsmp = (CaloSampling::CaloSample) dmRegion->m_CaloSampleNeighbours[i_smp];
-		      if( (dmRegion->m_CaloSampleEtaMin[i_smp]-0.5) <= theCluster->eta()  &&
-                          theCluster->eta() <= (dmRegion->m_CaloSampleEtaMax[i_smp]+0.5) ){
-                        //sum_smp_energy += theCluster->eSample(nsmp);
+                    for (unsigned int i_smp = 0; i_smp < dmRegion->m_CaloSampleNeighbours.size(); i_smp++) {
+                      CaloSampling::CaloSample nsmp =
+                          (CaloSampling::CaloSample) dmRegion->m_CaloSampleNeighbours[i_smp];
+                      if ( (dmRegion->m_CaloSampleEtaMin[i_smp] - 0.5) <= theCluster->eta() &&
+                           theCluster->eta() <= (dmRegion->m_CaloSampleEtaMax[i_smp] + 0.5) ) {
                         sum_smp_energy += pos->second.engSmp[nsmp];
                       }
                     }
-                    if(sum_smp_energy > 0.0) {
-                      double phi_diff=myCDDE->phi()-theCluster->phi();
-                      if(phi_diff <= -M_PI){
-                        phi_diff += 2.*M_PI;
-                      } else if (phi_diff > M_PI){
-                        phi_diff -= 2.*M_PI;
+                    if (sum_smp_energy > 0.0) {
+                      double phi_diff = myCDDE->phi() - theCluster->phi();
+                      if (phi_diff <= -M_PI) {
+                        phi_diff += 2. * M_PI;
+                      } else if (phi_diff > M_PI) {
+                        phi_diff -= 2. * M_PI;
                       }
-                      double eta_diff = (myCDDE->eta()-theCluster->eta());
-		      float distance=sqrt(eta_diff * eta_diff + phi_diff * phi_diff);
+                      double eta_diff = (myCDDE->eta() - theCluster->eta());
+                      float distance = sqrt(eta_diff * eta_diff + phi_diff * phi_diff);
 
-                      double effEner = pow(sum_smp_energy,m_apars_alpha)*exp(-distance/m_apars_r0);
-					  
-                      hitClusIndex [hitClusVecIndex] = iClus;
-                      hitClusEffEnergy [hitClusVecIndex++]= effEner;
+                      double effEner = pow(sum_smp_energy, m_apars_alpha) * exp(-distance / m_apars_r0);
+
+                      hitClusIndex[hitClusVecIndex] = iClus;
+                      hitClusEffEnergy[hitClusVecIndex++] = effEner;
                       hitClusNorm += effEner;
                     }
                   } // good energetic cluster
-		} // we ve found a uniqueID
+                } // we found a uniqueID
               } // loop over clusters in the list
+
               hitClusIndex.resize(hitClusVecIndex);
               hitClusEffEnergy.resize(hitClusVecIndex);
 
-
               // now we have to calculate weight for assignment hit energy to cluster
-              if(hitClusNorm >0.0) {
+              if (hitClusNorm > 0.0) {
                 const double inv_hitClusNorm = 1. / hitClusNorm;
-                for(unsigned int i_cls=0; i_cls<hitClusIndex.size(); i_cls++){
+                for (unsigned int i_cls = 0; i_cls < hitClusIndex.size(); i_cls++) {
                   int iClus = hitClusIndex[i_cls];
                   double dm_weight = hitClusEffEnergy[i_cls] * inv_hitClusNorm;
-                  if(dm_weight > 1.0 || dm_weight < 0.0 ){
-                    std::cout << "CaloCalibClusterMomentsMaker2::execute() ->Error! Strange weight " <<  dm_weight<< std::endl;
+                  if (dm_weight > 1.0 || dm_weight < 0.0) {
+                    std::cout << "CaloCalibClusterMomentsMaker2::execute() ->Error! Strange weight "
+                              << dm_weight << std::endl;
                     std::cout << hitClusEffEnergy[i_cls] << " " << hitClusNorm << std::endl;
                   }
-                  clusInfoVec[iClus].engCalibDeadInArea[nDmArea] += hit->energyTotal()*dm_weight;
-                  clusInfoVec[iClus].engCalibDeadInArea[CaloDmDescrArea::DMA_ALL] += hit->energyTotal()*dm_weight;
+                  clusInfoVec[iClus].engCalibDeadInArea[nDmArea] += hit->energyTotal() * dm_weight;
+                  clusInfoVec[iClus].engCalibDeadInArea[CaloDmDescrArea::DMA_ALL] += hit->energyTotal() * dm_weight;
                 }
               } // hit clus norm
 
             } // loop over united ieta*iphi
           } // myCDDE
         } // tile and lar
-      } // eol over DM calibration hits
-    } //eol over containers
+      } // loop over DM calibration hits
+    } // loop over containers
 
   } // doDeadEnergySharing
 
@@ -610,21 +689,24 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
   std::vector<double> engCalibFrac;
   engCalibFrac.resize(kCalibFracMax, 0.0);
 
-  std::map<unsigned int,int> truthIDToPdgCodeMap;
-  
-  //loop on truth particle container is slow, so put needed information in a map for faster key lookup in later loops
-  for ( const auto *thisTruthParticle : *truthParticleContainerReadHandle){	  
+  std::map<unsigned int, int> truthIDToPdgCodeMap;
 
-    if (!thisTruthParticle){
+  // loop on truth particle container is slow, so put needed information in a map for faster key lookup in later loops
+  for ( const auto *thisTruthParticle : *truthParticleContainerReadHandle ) {
+
+    if (!thisTruthParticle) {
       ATH_MSG_WARNING("Got invalid pointer to TruthParticle");
       continue;
     }
-    
+
     truthIDToPdgCodeMap[HepMC::uniqueID(thisTruthParticle)] = thisTruthParticle->pdgId();
-  }//truth particle loop
-  
+  } // truth particle loop
+
   // assign moments
-  for( clusIter = theClusColl->begin(),iClus=0;  clusIter!=clusIterEnd;++clusIter,++iClus) {
+  int iClus = 0;
+  for (clusIter = theClusColl->begin(), iClus = 0;
+       clusIter != clusIterEnd;
+       ++clusIter, ++iClus) {
     xAOD::CaloCluster * theCluster = *clusIter;
     MyClusInfo& clusInfo = clusInfoVec[iClus];
 
@@ -642,7 +724,7 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
     // DM energy before scintillator and inside scintillator
     double eng_calib_dead_tileg3 = clusInfo.engCalibDeadInArea[CaloDmDescrArea::DMA_SCN]
           + clusInfo.engCalibIn.engSmp[CaloSampling::TileGap3];
-    // DM energy beforee endcap presampler, inside it and between presampler and strips
+    // DM energy before endcap presampler, inside it and between presampler and strips
     double eng_calib_dead_eme0 = clusInfo.engCalibDeadInArea[CaloDmDescrArea::DMA_EME0]
           + clusInfo.engCalibDeadInArea[CaloDmDescrArea::DMA_EME12]
           + clusInfo.engCalibIn.engSmp[CaloSampling::PreSamplerE];
@@ -654,47 +736,49 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
     // DM leakage behind the calorimeter
     double eng_calib_dead_leakage = clusInfo.engCalibDeadInArea[CaloDmDescrArea::DMA_LEAK];
     // the rest of DM energy which remains unclassified
-    double eng_calib_dead_unclass = eng_calib_dead_tot - eng_calib_dead_emb0 - eng_calib_dead_tile0 
+    double eng_calib_dead_unclass = eng_calib_dead_tot - eng_calib_dead_emb0 - eng_calib_dead_tile0
           - eng_calib_dead_tileg3 - eng_calib_dead_eme0 - eng_calib_dead_hec0 - eng_calib_dead_fcal
           - eng_calib_dead_leakage;
 
-    if(doCalibFrac){
+    if (doCalibFrac) {
 /*****************************************************************************
 Calculation of energy fraction caused by particles of different types
 *****************************************************************************/
       engCalibFrac.assign(kCalibFracMax, 0.0);
-      if(clusInfo.engCalibIn.engTot > 0.0) {
+      if (clusInfo.engCalibIn.engTot > 0.0) {
         // each MyClusInfo has a map of particle's uniqueID (GenParticle::id()) and particle calibration deposits in given cluster
         for (const auto& p : clusInfo.engCalibParticle) {
           int pdg_id = 0;
-          if ( auto it = truthIDToPdgCodeMap.find(p.first); it != truthIDToPdgCodeMap.end()) {
+          if (auto it = truthIDToPdgCodeMap.find(p.first); it != truthIDToPdgCodeMap.end()) {
             pdg_id = it->second;
-          } else {   
+          } else {
             ATH_MSG_WARNING("truthIDToPdgCodeMap cannot find an entry with uniqueID " << p.first);
             continue;
           }
-          if( std::abs(pdg_id) == 211) {
+          if (std::abs(pdg_id) == 211) {
             engCalibFrac[kCalibFracHAD] += p.second.engTot;
-          } else if( pdg_id == 111 || pdg_id == 22 || std::abs(pdg_id)==11) {
+          } else if (pdg_id == 111 || pdg_id == 22 || std::abs(pdg_id) == 11) {
             engCalibFrac[kCalibFracEM] += p.second.engTot;
           } else {
             engCalibFrac[kCalibFracREST] += p.second.engTot;
           }
         }
-        for(size_t i=0; i<engCalibFrac.size(); i++) engCalibFrac[i] = engCalibFrac[i]/clusInfo.engCalibIn.engTot;
+        for (size_t i = 0; i < engCalibFrac.size(); i++) {
+          engCalibFrac[i] = engCalibFrac[i] / clusInfo.engCalibIn.engTot;
+        }
       }
     }
 
     if ( !m_momentsNames.empty() ) {
-      std::vector<double> myMoments(m_validMoments.size(),0);
-      // assign moments 
-      moment_name_set::const_iterator vMomentsIter = m_validMoments.begin(); 
+      std::vector<double> myMoments(m_validMoments.size(), 0);
+      // assign moments
+      moment_name_set::const_iterator vMomentsIter = m_validMoments.begin();
       moment_name_set::const_iterator vMomentsIterEnd = m_validMoments.end();
 
-      int iMoment=0;
-      for(; vMomentsIter!=vMomentsIterEnd; ++vMomentsIter,++iMoment) {
+      int iMoment = 0;
+      for (; vMomentsIter != vMomentsIterEnd; ++vMomentsIter, ++iMoment) {
         // now calculate the actual moments
-        switch (vMomentsIter->second) { 
+        switch (vMomentsIter->second) {
         case xAOD::CaloCluster::ENG_CALIB_TOT:
           ATH_MSG_DEBUG("Inserting ENG_CALIB_TOT");
           myMoments[iMoment] = clusInfo.engCalibIn.engTot;
@@ -767,7 +851,6 @@ Calculation of energy fraction caused by particles of different types
 }
 
 
-
 /* ****************************************************************************
 
 **************************************************************************** */
@@ -775,12 +858,12 @@ double CaloCalibClusterMomentsMaker2::angle_mollier_factor(double x)
 {
   double eta = fabs(x);
   double ff;
-  if(eta<1.6){
-    ff = atan(5.0*1.7/(200.0*cosh(eta)));
-  }else if(eta<3.2){
-    ff = atan(5.0*1.6/(420./tanh(eta)));
-  }else{
-    ff = atan(5.0*0.95/(505./tanh(eta)));
+  if (eta < 1.6) {
+    ff = atan(5.0 * 1.7 / (200.0 * cosh(eta)));
+  } else if (eta < 3.2) {
+    ff = atan(5.0 * 1.6 / (420. / tanh(eta)));
+  } else {
+    ff = atan(5.0 * 0.95 / (505. / tanh(eta)));
   }
-  return ff*(1./atan(5.0*1.7/200.0));
+  return ff * (1. / atan(5.0 * 1.7 / 200.0));
 }
