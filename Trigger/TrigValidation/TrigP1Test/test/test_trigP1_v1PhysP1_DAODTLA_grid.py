@@ -50,7 +50,10 @@ filter_bs.input = ''
 filter_bs.args = '-s TLA ' + find_file('*_HLTMPPy_output.*.data')
 
 # Tier-0 reco step (BS->AOD)
-tlarecoPreExec = f"flags.Trigger.triggerMenuSetup=\'{triggermenu}\';"
+tlarecoPreExec = ';'.join([f"flags.Trigger.triggerMenuSetup=\'{triggermenu}\'",
+                           "flags.Trigger.CTP.UseEDMxAOD=False",
+                           "flags.Trigger.CTP.UseRoibROB=True",
+                           ])
 
 tlareco = ExecStep.ExecStep('Tier0Reco')
 tlareco.type = 'Reco_tf'
