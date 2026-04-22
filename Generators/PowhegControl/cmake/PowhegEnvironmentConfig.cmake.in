@@ -4,7 +4,7 @@
 #
 
 # Convenience cache variable(s).
-set( ATLAS_POWHEGVER "08-05" CACHE STRING "Version of the Powheg configuration files" )
+set( ATLAS_POWHEGVER "08-12" CACHE STRING "Version of the Powheg configuration files" )
 
 # Reset the environment variable as a first step.
 set( POWHEGENVIRONMENT_ENVIRONMENT )
