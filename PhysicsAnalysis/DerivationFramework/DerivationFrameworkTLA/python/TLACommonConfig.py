@@ -71,15 +71,16 @@ def TLACommonAugmentationsCfg(flags,**kwargs):
 
     # Jets, flavour tagging
     from DerivationFrameworkTLA.TLACommonConfigFunctions import TLAJetCommonCfg
-    from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollectionsCfg, HLTJetFTagDecorationCfg
+    from DerivationFrameworkFlavourTag.FtagDerivationConfig import HLTJetFTagDecorationCfg
     acc.merge(TLAJetCommonCfg(flags))
     if flags.Input.isMC and flags.Trigger.EDMVersion == 3:
         acc.merge(HLTJetFTagDecorationCfg(flags))
 
-    FTagJetColl = ['AntiKt4EMPFlowJets']
+    from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
+    acc.merge(FlavorTaggingCfg(flags, "AntiKt4EMPFlowJets"))
     if flags.GeoModel.Run >= LHCPeriod.Run4:
-        FTagJetColl.append('AntiKt4EMTopoJets')
-    acc.merge(FtagJetCollectionsCfg(flags,FTagJetColl))
+        acc.merge(FlavorTaggingCfg(flags, "AntiKt4EMTopoJets"))
+
     
     # Trigger matching (from PhysCommonConfig.py)
     if flags.Reco.EnableTrigger or flags.Trigger.triggerConfig == 'INFILE':
