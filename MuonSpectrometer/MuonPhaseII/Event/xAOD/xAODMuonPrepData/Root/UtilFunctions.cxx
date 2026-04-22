@@ -44,35 +44,18 @@ namespace {
 }
 
 namespace xAOD{
-    const MuonGMR4::MuonReadoutElement* muonReadoutElement(const UncalibratedMeasurement* meas){
-        if (!meas) {
-            return nullptr;
+    
+
+
+    const Identifier& identify(const UncalibratedMeasurement* meas) {
+        static const Identifier& dummyId{};
+        if (meas->numDimensions() == 0) {
+            return static_cast<const CombinedMuonStrip*>(meas)->primaryStrip()->identify();
         }
-        /// Composite space point EDM
-        if (meas->numDimensions() == 0u) {
-           const auto* comp = static_cast<const CombinedMuonStrip*>(meas);
-           return muonReadoutElement(comp->primaryStrip());
-        }
-        switch (meas->type()) {
-            using enum UncalibMeasType;
-            case MdtDriftCircleType: {
-                return static_cast<const MdtDriftCircle*>(meas)->readoutElement();
-            } case RpcStripType: {
-                return static_cast<const RpcMeasurement*>(meas)->readoutElement();
-            } case TgcStripType: {
-                return static_cast<const TgcStrip*>(meas)->readoutElement();
-            } case sTgcStripType: {
-                return static_cast<const sTgcMeasurement*>(meas)->readoutElement();
-            } case MMClusterType: {
-                return static_cast<const MMCluster*>(meas)->readoutElement();
-            } default:
-#ifndef NDEBUG
-                THROW_EXCEPTION("Unsupported measurement given "<<typeid(*meas).name());
-#endif
-                break;
-        }
-        return nullptr;
+        const auto* muon = dynamic_cast<const MuonMeasurement*>(meas);
+        return  muon ? muon->identify() : dummyId;
     }
+
     const Acts::Surface& muonSurface(const UncalibratedMeasurement* meas) {
         if (!meas) {
             THROW_EXCEPTION("No measurement passed");
@@ -100,67 +83,6 @@ namespace xAOD{
         }
     }
 
-    const Identifier& identify(const UncalibratedMeasurement* meas) {
-        static const Identifier detId{};
-        if (!meas) {
-            return detId;
-        }
-        /// Composite space point EDM
-        if (meas->numDimensions() == 0u) {
-           const auto* comp = static_cast<const CombinedMuonStrip*>(meas);
-           return identify(comp->primaryStrip());
-        }
-        switch (meas->type()) {
-            using enum UncalibMeasType;
-            case MdtDriftCircleType: {
-                return static_cast<const MdtDriftCircle*>(meas)->identify();
-            } case RpcStripType: {
-                return static_cast<const RpcMeasurement*>(meas)->identify();
-            } case TgcStripType: {
-                return static_cast<const TgcStrip*>(meas)->identify();
-            } case MMClusterType: {
-                return static_cast<const MMCluster*>(meas)->identify();
-            } case sTgcStripType: {
-                return static_cast<const sTgcMeasurement*>(meas)->identify();
-            } case Other: {
-                return detId;
-            } default: {
-                THROW_EXCEPTION("Unsupported measurement given "<<typeid(*meas).name());
-                break;
-            }
-        }
-        return detId;
-    }
-    IdentifierHash layerHash(const UncalibratedMeasurement* meas) {
-        if (!meas) {
-            return IdentifierHash{};
-        }
-        /// Composite space point EDM
-        if (meas->numDimensions() == 0u) {
-           const auto* comp = static_cast<const CombinedMuonStrip*>(meas);
-           return layerHash(comp->primaryStrip());
-        }
-        switch (meas->type()) {
-            using enum UncalibMeasType;
-            case MdtDriftCircleType: {
-                return static_cast<const MdtDriftCircle*>(meas)->measurementHash();
-            } case RpcStripType: {
-                return static_cast<const RpcMeasurement*>(meas)->layerHash();
-            } case TgcStripType: {
-                return static_cast<const TgcStrip*>(meas)->layerHash();
-            } case MMClusterType: {
-                return static_cast<const MMCluster*>(meas)->layerHash();
-            } case sTgcStripType: {
-                return static_cast<const sTgcMeasurement*>(meas)->layerHash();
-            } case Other: {
-                break;
-            } default: {
-                THROW_EXCEPTION("Unsupported measurement given "<<typeid(*meas).name());
-                break;
-            }
-        }
-        return IdentifierHash{};
-    }
     ::Muon::MuonStationIndex::TechnologyIndex toTechnologyIndex(const UncalibMeasType aodType){
         using enum ::Muon::MuonStationIndex::TechnologyIndex;
         switch (aodType){
@@ -185,7 +107,7 @@ namespace xAOD{
                                      combinedPrd->secondaryStrip());
     }
     
-    std::pair<Amg::Vector2D, AmgSymMatrix(2)> positionAndCovariance(const UncalibratedMeasurement* oneDimMeas) {
+    std::pair<Amg::Vector2D, AmgSymMatrix(2)> positionAndCovariance(const MuonMeasurement* oneDimMeas) {
         /** @brief dummy value to assign to the non-sensitive part of the covariance */
         using namespace Acts::UnitLiterals;
         constexpr double covStrip = Acts::square(1._km);
@@ -245,17 +167,17 @@ namespace xAOD{
     }
 
     std::pair<Amg::Vector2D, AmgSymMatrix(2)> 
-        positionAndCovariance(const UncalibratedMeasurement* etaStrip,
-                              const UncalibratedMeasurement* phiStrip) {
+        positionAndCovariance(const MuonMeasurement* etaStrip,
+                              const MuonMeasurement* phiStrip) {
 
         /// These conditions should be trivially fullfilled
         assert(etaStrip != nullptr);
         assert(phiStrip != nullptr);
         assert(etaStrip->identifierHash() == phiStrip->identifierHash());
         assert(etaStrip->type() == phiStrip->type());
-        assert(layerHash(etaStrip) == layerHash(phiStrip));
+        assert(etaStrip->layerHash() == phiStrip->layerHash());
 
-        const Muon::IMuonIdHelperSvc* idHelperSvc = muonReadoutElement(etaStrip)->idHelperSvc();
+        const Muon::IMuonIdHelperSvc* idHelperSvc = etaStrip->readoutElement()->idHelperSvc();
         Amg::Vector2D cmbPos{Amg::Vector2D::Zero()};
         AmgSymMatrix(2) cmbCov{AmgSymMatrix(2)::Identity()};
         /// Catch the geniue 2D measurements (Pads, 2D RPC)
@@ -319,8 +241,8 @@ namespace xAOD{
                     cmbCov(0,0) = primMeas->localCovariance<2>()(0,0);
                 } else {
                     THROW_EXCEPTION("Unexpected secondary measurement type for combined sTGC space point "
-                                    <<idHelperSvc->toString(identify(etaStrip))
-                                    << "secondary measurement " << idHelperSvc->toString(identify(phiStrip)));
+                                    <<idHelperSvc->toString(etaStrip->identify())
+                                    << "secondary measurement " << idHelperSvc->toString(phiStrip->identify()));
                 }
                 if(secMeas->channelType() == sTgcIdHelper::sTgcChannelTypes::Wire){
                     cmbPos[1] = secMeas->localPosition<1>()[0];
@@ -330,12 +252,12 @@ namespace xAOD{
                     cmbCov(1,1) = secMeas->localCovariance<2>()(1,1);
                 } else {
                     THROW_EXCEPTION("Unexpected secondary measurement type for combined sTGC space point "
-                                    <<idHelperSvc->toString(identify(etaStrip))
-                                    << "secondary measurement " << idHelperSvc->toString(identify(secMeas)));
+                                    <<idHelperSvc->toString(etaStrip->identify())
+                                    << "secondary measurement " << idHelperSvc->toString(secMeas->identify()));
                 }
                 break;
             } default:{
-                THROW_EXCEPTION("Unexpected measurement "<<idHelperSvc->toString(identify(etaStrip)));
+                THROW_EXCEPTION("Unexpected measurement "<<idHelperSvc->toString(etaStrip->identify()));
                 break;
             }
         }

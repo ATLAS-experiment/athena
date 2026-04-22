@@ -77,14 +77,14 @@ namespace MuonR4{
                                                         std::vector<std::unique_ptr<Trk::RIO_OnTrack>>& convMeasVec) const {
         bool added{false};
 
-        for (const xAOD::UncalibratedMeasurement* uncalib: {spacePoint.spacePoint()->primaryMeasurement(), 
-                                                            spacePoint.spacePoint()->secondaryMeasurement()}){
+        for (const xAOD::MuonMeasurement* uncalib: {spacePoint.spacePoint()->primaryMeasurement(), 
+                                                    spacePoint.spacePoint()->secondaryMeasurement()}){
             if (!uncalib) continue;
             added = true;
 
-            const PrdType* prd = fetchPrd(xAOD::identify(uncalib), prdContainer);
+            const PrdType* prd = fetchPrd(uncalib->identify(), prdContainer);
             if (!prd) {
-                ATH_MSG_FATAL("Failed to retrieve segment from "<<m_idHelperSvc->toString(xAOD::identify(uncalib)));
+                ATH_MSG_FATAL("Failed to retrieve segment from "<<m_idHelperSvc->toString(uncalib->identify()));
                 return StatusCode::FAILURE;
             }
             const Trk::Surface& surf{prd->detectorElement()->surface(prd->identify())};

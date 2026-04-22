@@ -5,6 +5,7 @@
 
 #include "xAODMuon/MuonSegmentAuxContainer.h"
 #include "xAODMuonPrepData/CombinedMuonStripAuxContainer.h"
+#include "xAODMuonPrepData/UtilFunctions.h"
 
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
@@ -63,9 +64,8 @@ namespace MuonR4{
 
         using State = CalibratedSpacePoint::State;
         // Cache all measurements that can be combined to two measurements in a single gas gap
-        using PrdTuple_t = std::tuple<const xAOD::UncalibratedMeasurement*, State, std::size_t>;
-        std::vector<PrdTuple_t> combineMap{};
-        std::vector<PrdTuple_t> linkMap{};
+        std::vector< std::tuple<const xAOD::MuonMeasurement*, State, std::size_t>> combineMap{};
+        std::vector< std::tuple<const xAOD::UncalibratedMeasurement*, State, std::size_t>> linkMap{};
 
         const xAOD::UncalibratedMeasurement* beamSpotMeas{};
 
@@ -85,13 +85,13 @@ namespace MuonR4{
 
             /** @brief Combine the two prds from the space point to a combined muonstrip and link
              *         the latter to the segment. */
-            auto combine = [this,&prdCombContainer](const xAOD::UncalibratedMeasurement* m1, 
-                                                    const xAOD::UncalibratedMeasurement* m2) {
+            auto combine = [this,&prdCombContainer](const xAOD::MuonMeasurement* m1, 
+                                                    const xAOD::MuonMeasurement* m2) {
                 auto cmbMeas = prdCombContainer->push_back(std::make_unique<xAOD::CombinedMuonStrip>());
 
                 cmbMeas->setPrimaryStrip(m1);
                 cmbMeas->setSecondaryStrip(m2);
-                const Identifier id1{xAOD::identify(m1)}, id2{xAOD::identify(m2)};
+                const Identifier id1{m1->identify()}, id2{m2->identify()};
                 ATH_MSG_VERBOSE("Combine "<<m_idHelperSvc->toString(id1)
                                 <<" & "<<m_idHelperSvc->toString(id2));
                 if ((m1->type() != xAOD::UncalibMeasType::sTgcStripType || 
@@ -167,23 +167,23 @@ namespace MuonR4{
             }
             // Finally we need to check whether there're measurements left to combine
             for (std::size_t cmbIdx = 0; cmbIdx < combineMap.size(); ++cmbIdx){
-                const xAOD::UncalibratedMeasurement* m1{std::get<0>(combineMap[cmbIdx])};
+                const xAOD::MuonMeasurement* m1{std::get<0>(combineMap[cmbIdx])};
                 const State s1{std::get<1>(combineMap[cmbIdx])};
                 const std::size_t segIdx1{std::get<2>(combineMap[cmbIdx])};
                 ATH_MSG_VERBOSE("Find another measurement to combine with "
-                                <<m_idHelperSvc->toString(xAOD::identify(m1)));
+                                <<m_idHelperSvc->toString(m1->identify()));
                 if (cmbIdx +1 < combineMap.size()){
-                    const xAOD::UncalibratedMeasurement* m2{std::get<0>(combineMap[cmbIdx +1])};
+                    const xAOD::MuonMeasurement* m2{std::get<0>(combineMap[cmbIdx +1])};
                     const State s2{std::get<1>(combineMap[cmbIdx+1])};
-                    ATH_MSG_VERBOSE("Check whether "<<m_idHelperSvc->toString(xAOD::identify(m2))
+                    ATH_MSG_VERBOSE("Check whether "<<m_idHelperSvc->toString(m2->identify())
                                     <<" is a good candidate");
                     if (m1->type() == m2->type() && 
                         m1->identifierHash() == m2->identifierHash() && 
-                        xAOD::layerHash(m1)  == xAOD::layerHash(m2) &&
+                        m1->layerHash() == m2->layerHash() &&
                         s1 == s2) {
                         /// The first measurement should always be the eta measurement 
                         ATH_MSG_VERBOSE("They match");
-                        if (m_idHelperSvc->measuresPhi(xAOD::identify(m1))) {
+                        if (m1->measuresPhi()) {
                             linkMap.emplace_back(combine(m2, m1), s2, segIdx1);
                         } else {
                             linkMap.emplace_back(combine(m1, m2), s1, segIdx1);
@@ -201,11 +201,6 @@ namespace MuonR4{
             });
 
             for (const auto& [prd, state, segIdx]: linkMap) {
-                ATH_MSG_VERBOSE("Add link associate to measurement: "
-                    <<m_idHelperSvc->toString(xAOD::identify(prd))<<", "
-                    <<CalibratedSpacePoint::toString(state)
-                    <<", position in segment "<<segIdx);
-                
                 links.emplace_back( 
                     *static_cast<const xAOD::UncalibratedMeasurementContainer*>(prd->container()), 
                     prd->index());

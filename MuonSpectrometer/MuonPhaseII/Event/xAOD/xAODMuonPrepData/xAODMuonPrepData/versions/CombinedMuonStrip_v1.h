@@ -1,11 +1,11 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMUONPREPDATA_VERSION_COMBINEDMUONSTRIP_V1_H
 #define XAODMUONPREPDATA_VERSION_COMBINEDMUONSTRIP_V1_H
 
 //
-#include "xAODMeasurementBase/UncalibratedMeasurement.h"
+#include "xAODMuonPrepData/MuonMeasurement.h"
 namespace xAOD{
     /** @brief The Acts fitters running on the Uncalibrated measurements are uncapable of 
      *         producing two track states on the same surface or alternatively, the propagation
@@ -27,13 +27,13 @@ namespace xAOD{
             /** @brief Specify the number of dimensions as zero -> handle in the calibrator */
             unsigned numDimensions() const override { return 0; } 
             /** @brief Returns the primary associated measurement */
-            const xAOD::UncalibratedMeasurement* primaryStrip() const;
+            const xAOD::MuonMeasurement* primaryStrip() const;
             /** @brief Links a prd measurement as primary meaurement */
-            void setPrimaryStrip(const xAOD::UncalibratedMeasurement* meas);
+            void setPrimaryStrip(const xAOD::MuonMeasurement* meas);
             /** @brief Returns the secondary associated measurement */
-            const xAOD::UncalibratedMeasurement* secondaryStrip() const;
+            const xAOD::MuonMeasurement* secondaryStrip() const;
             /** @brief Linkt a prd measurement as secondary measurement */
-            void setSecondaryStrip(const xAOD::UncalibratedMeasurement* meas);
+            void setSecondaryStrip(const xAOD::MuonMeasurement* meas);
     };
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONOBJECTMARKER_TRUTHMEASMARKER_H
 #define MUONOBJECTMARKER_TRUTHMEASMARKER_H
@@ -12,7 +12,7 @@
 #include "StoreGate/ReadDecorHandleKeyArray.h"
 
 #include "xAODMuon/MuonSegmentContainer.h"
-#include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
+#include "xAODMuonPrepData/MuonMeasurementContainer.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
 namespace MuonR4{
@@ -37,13 +37,13 @@ namespace MuonR4{
             /** @brief Decoration key of the prd -> simHit association */
             Gaudi::Property<std::string> m_simLink{this, "SimHitLink", "simHitLink"};
             /** @brief Key to the prd containers in the event */
-            SG::ReadHandleKeyArray<xAOD::UncalibratedMeasurementContainer> m_measKeys{this, "PrdContainer",{}};
+            SG::ReadHandleKeyArray<xAOD::MuonMeasurementContainer> m_measKeys{this, "PrdContainer",{}};
             /** @brief Dependency on the sim hit decoration */
-            SG::ReadDecorHandleKeyArray<xAOD::UncalibratedMeasurementContainer> m_prdLinkKeys{this, "PrdLinkKeys", {}};
+            SG::ReadDecorHandleKeyArray<xAOD::MuonMeasurementContainer> m_prdLinkKeys{this, "PrdLinkKeys", {}};
             /** @brief Key to the marker decoration. Will be copied from writeMarker */
-            SG::WriteDecorHandleKeyArray<xAOD::UncalibratedMeasurementContainer> m_writeMarkKeys{this, "OutMarkerKeys", {}};
+            SG::WriteDecorHandleKeyArray<xAOD::MuonMeasurementContainer> m_writeMarkKeys{this, "OutMarkerKeys", {}};
             /** @brief Key to the segment link decoration. */
-            SG::WriteDecorHandleKeyArray<xAOD::UncalibratedMeasurementContainer> m_writeSegLinkKeys{this, "SegLinkKeys", {}};
+            SG::WriteDecorHandleKeyArray<xAOD::MuonMeasurementContainer> m_writeSegLinkKeys{this, "SegLinkKeys", {}};
     };
 }
 

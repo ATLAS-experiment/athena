@@ -12,6 +12,7 @@
 #include "MuonTrackFindingTools/MsTrackSeeder.h"
 #include "ActsCalibBase/CalibrationContext.h"
 #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
+#include "xAODMuonPrepData/UtilFunctions.h"
 
 #include "GaudiKernel/PhysicalConstants.h"
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
