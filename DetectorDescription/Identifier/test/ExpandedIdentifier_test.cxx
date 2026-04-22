@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MAIN
@@ -54,8 +54,8 @@ BOOST_AUTO_TEST_CASE(ExpandedIdentifierConstructors){
   BOOST_CHECK_THROW(ExpandedIdentifier nonsense("piggy back"), std::invalid_argument);
   ExpandedIdentifier g(initialiserString);
   BOOST_CHECK_NO_THROW(ExpandedIdentifier h(g,3));
-  BOOST_CHECK_NO_THROW(ExpandedIdentifier h = g);
-  BOOST_CHECK_NO_THROW(ExpandedIdentifier i = std::move(g));
+  BOOST_CHECK_NO_THROW([[maybe_unused]] ExpandedIdentifier h = g);
+  BOOST_CHECK_NO_THROW([[maybe_unused]] ExpandedIdentifier i = std::move(g));
 }
 
 BOOST_AUTO_TEST_CASE(ExpandedIdentifierRepresentation){
