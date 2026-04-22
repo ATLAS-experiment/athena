@@ -21,7 +21,7 @@ hlt.threads = 4
 hlt.concurrent_events = 4
 hlt.input = 'data'
 hlt.max_events = 50
-hlt.args = f'--CA --preExec="Trigger.triggerMenuSetup=\'{triggermenu}\' Trigger.doLVL1=True"'
+hlt.args = f'--CA --preExec="Trigger.triggerMenuSetup=\'{triggermenu}\' Trigger.doLVL1=True Trigger.CTP.UseEDMxAOD=False Trigger.CTP.UseRoibROB=True"'
 hlt.args += ' --prodSysBSRDO True'
 hlt.args += ' --outputBSFile=RAW.pool.root'
 hlt.args += ' --outputHIST_HLTMONFile=hltmon.root'
@@ -50,6 +50,8 @@ tzrecoPreExec = ' '.join([
   "flags.DQ.Steering.HLT.doMinBias=True;",
   "flags.DQ.Steering.HLT.doMuon=True;",
   "flags.DQ.Steering.HLT.doTau=True;",
+  "flags.Trigger.CTP.UseEDMxAOD=False",
+  "flags.Trigger.CTP.UseRoibROB=True",
 ])
 
 tzreco = ExecStep.ExecStep('Tier0Reco')
