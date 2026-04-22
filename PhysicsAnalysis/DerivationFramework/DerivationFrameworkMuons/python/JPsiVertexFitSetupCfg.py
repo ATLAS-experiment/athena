@@ -32,7 +32,6 @@ def AddJPsiVertexingFitterCfg(flags, prefix='', IdTrkContainer = "InDetTrackPart
                                            useCombinedMeasurement = False, # Only takes effect if combOnly=True  
                                            muonCollectionKey = MuonContainer,                                        
                                            TrackParticleCollection = IdTrkContainer,
-                                           useV0Fitter                 = False,                   # if False a TrkVertexFitterTool will be used
                                            useMCPCuts                  = True))
 
   

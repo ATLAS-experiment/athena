@@ -76,8 +76,6 @@ def BPHY18Cfg(flags):
                              electronCollectionKey       = "Electrons",
                              TrackParticleCollection     = "GSFTrackParticles",
                              useEgammaCuts               = True,
-                             V0VertexFitterTool          = None,
-                             useV0Fitter                 = False,
                              TrkVertexFitterTool         = vkalvrt,
                              TrackSelectorTool           = trackselect,
                              VertexPointEstimator        = vpest,

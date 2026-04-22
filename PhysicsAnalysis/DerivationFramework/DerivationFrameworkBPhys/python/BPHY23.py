@@ -72,8 +72,6 @@ def BPHY23Cfg(flags):
         useCombinedMeasurement      = False, # Only takes effect if combOnly=True	
         muonCollectionKey           = "Muons",
         TrackParticleCollection     = "InDetTrackParticles",
-        V0VertexFitterTool          = None,
-        useV0Fitter                 = False, # if False a TrkVertexFitterTool will be used
         TrkVertexFitterTool         = vkalvrt, # VKalVrt vertex fitter
         TrackSelectorTool           = trackselect,
         VertexPointEstimator        = vpest,

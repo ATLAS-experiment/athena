@@ -16,7 +16,6 @@
 #include "xAODBPhys/BPhysHelper.h"
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
-#include "TrkV0Fitter/TrkV0VertexFitter.h"
 #include "InDetConversionFinderTools/VertexPointEstimator.h"
 #include "TrkToolInterfaces/ITrackSelectorTool.h"
 #include "GaudiKernel/IPartPropSvc.h"
@@ -41,8 +40,6 @@ namespace Analysis {
         // retrieving vertex Fitter
         ATH_CHECK(m_iVertexFitter.retrieve());
 
-        // retrieving V0 Fitter
-        ATH_CHECK(m_iV0VertexFitter.retrieve(DisableTool{!m_useV0Fitter }));
         // Get the track selector tool from ToolSvc
         ATH_CHECK(m_trkSelector.retrieve());
 
@@ -98,7 +95,6 @@ namespace Analysis {
     m_trktrk(false),
     m_allElectrons(false),
     m_useTrackMeasurement(true),
-    m_useV0Fitter(false),
     m_diElectrons(true),
     m_trk1M(ParticleConstants::electronMassInMeV),
     m_trk2M(ParticleConstants::electronMassInMeV),
@@ -116,7 +112,6 @@ namespace Analysis {
     m_electronCollectionKey("Electrons"),
     m_TrkParticleCollection("InDetTrackParticles"),
     m_iVertexFitter("Trk::TrkVKalVrtFitter"),
-    m_iV0VertexFitter("Trk::V0VertexFitter"),
     m_trkSelector("InDet::TrackSelectorTool"),
     m_vertexEstimator("InDet::VertexPointEstimator"),
     m_egammaCuts(true),
@@ -130,7 +125,6 @@ namespace Analysis {
         declareProperty("TrackAndTrack",m_trktrk);
         declareProperty("allElectrons",m_allElectrons);
         declareProperty("useElectronTrackMeasurement",m_useTrackMeasurement);
-        declareProperty("useV0Fitter",m_useV0Fitter);
         declareProperty("assumeDiElectrons",m_diElectrons);
 //        declareProperty("electronLHValue",m_electronLHValue);
         declareProperty("track1Mass",m_trk1M);
@@ -149,7 +143,6 @@ namespace Analysis {
         declareProperty("electronCollectionKey",m_electronCollectionKey);
         declareProperty("TrackParticleCollection",m_TrkParticleCollection);
         declareProperty("TrkVertexFitterTool",m_iVertexFitter);
-        declareProperty("V0VertexFitterTool",m_iV0VertexFitter);
         declareProperty("TrackSelectorTool",m_trkSelector);
         declareProperty("VertexPointEstimator",m_vertexEstimator);
         declareProperty("useEgammaCuts",m_egammaCuts);
@@ -357,7 +350,7 @@ namespace Analysis {
             theTracks.push_back((*jpsiItr).trackParticle1);
             theTracks.push_back((*jpsiItr).trackParticle2);
             ATH_MSG_DEBUG("theTracks size (should be two!) " << theTracks.size() << " being vertexed with tracks " << importedTrackCollection);
-            std::unique_ptr<xAOD::Vertex> myVxCandidate{fit(theTracks,importedTrackCollection)}; // This line actually does the fitting and object making
+            std::unique_ptr<xAOD::Vertex> myVxCandidate{fit(ctx, theTracks,importedTrackCollection)}; // This line actually does the fitting and object making
             if (myVxCandidate != 0) {
                 // Chi2 cut if requested
                 double chi2 = myVxCandidate->chiSquared();
@@ -393,18 +386,8 @@ namespace Analysis {
     // fit - does the fit
     // ---------------------------------------------------------------------------------
 
-    xAOD::Vertex* JpsiFinder_ee::fit(const std::vector<const xAOD::TrackParticle*> &inputTracks,const xAOD::TrackParticleContainer* importedTrackCollection) const {
+    std::unique_ptr<xAOD::Vertex> JpsiFinder_ee::fit(const EventContext& ctx, const std::vector<const xAOD::TrackParticle*> &inputTracks,const xAOD::TrackParticleContainer* importedTrackCollection) const {
         ATH_MSG_DEBUG("inside JpsiFinder_ee::fit");
-        const Trk::TrkV0VertexFitter* concreteVertexFitter=0;
-        if (m_useV0Fitter) {
-            ATH_MSG_DEBUG("using v0 fitter");
-            // making a concrete fitter for the V0Fitter
-            concreteVertexFitter = dynamic_cast<const Trk::TrkV0VertexFitter * >(m_iV0VertexFitter.get());
-            if(concreteVertexFitter == 0) {
-                ATH_MSG_FATAL("The vertex fitter passed is not a V0 Vertex Fitter");
-                return NULL;
-            }
-        }
 
         const Trk::Perigee& aPerigee1 = inputTracks[0]->perigeeParameters();
         const Trk::Perigee& aPerigee2 = inputTracks[1]->perigeeParameters();
@@ -412,29 +395,11 @@ namespace Analysis {
         int errorcode = 0;
         Amg::Vector3D startingPoint = m_vertexEstimator->getCirclesIntersectionPoint(&aPerigee1,&aPerigee2,sflag,errorcode);
         if (errorcode != 0) {startingPoint(0) = 0.0; startingPoint(1) = 0.0; startingPoint(2) = 0.0;}
-        if (m_useV0Fitter) {
-            xAOD::Vertex* myVxCandidate = concreteVertexFitter->fit(inputTracks, startingPoint);
-            ATH_MSG_DEBUG("Initial fit was a success!");
-            // Added by ASC
-            if(myVxCandidate != 0){
-            std::vector<ElementLink<DataVector<xAOD::TrackParticle> > > newLinkVector;
-            for(unsigned int i=0; i< myVxCandidate->trackParticleLinks().size(); i++)
-            { ElementLink<DataVector<xAOD::TrackParticle> > mylink=myVxCandidate->trackParticleLinks()[i]; //makes a copy (non-const)
-            mylink.setStorableObject(*importedTrackCollection, true);
-            newLinkVector.push_back( mylink ); }
 
-            myVxCandidate->clearTracks();
-            myVxCandidate->setTrackParticleLinks( newLinkVector );
-            }
-
-
-
-            return myVxCandidate;
-        } else {
-            xAOD::Vertex* myVxCandidate = m_iVertexFitter->fit(inputTracks, startingPoint);
-            ATH_MSG_DEBUG("Initial fit was a success! " << myVxCandidate);
-            // Added by ASC
-            if(myVxCandidate != 0){
+        auto myVxCandidate = m_iVertexFitter->fit(ctx, inputTracks, startingPoint);
+        ATH_MSG_DEBUG("Initial fit was a success! " << myVxCandidate);
+        // Added by ASC
+        if(myVxCandidate != 0){
             std::vector<ElementLink<DataVector<xAOD::TrackParticle> > > newLinkVector;
             for(unsigned int i=0; i< myVxCandidate->trackParticleLinks().size(); i++){
                 ElementLink<DataVector<xAOD::TrackParticle> > mylink=myVxCandidate->trackParticleLinks()[i]; //makes a copy (non-const)
@@ -445,14 +410,9 @@ namespace Analysis {
             myVxCandidate->clearTracks();
             myVxCandidate->setTrackParticleLinks( newLinkVector );
             ATH_MSG_DEBUG("Set all links");
-            }
-
-            return myVxCandidate;
         }
 
-
-
-        return NULL;
+        return myVxCandidate;
 
     } // End of fit method
 
@@ -653,23 +613,6 @@ namespace Analysis {
 
     bool JpsiFinder_ee::isContainedIn(const xAOD::TrackParticle* theTrack, const xAOD::TrackParticleContainer* theCollection) const {
        return std::find(theCollection->begin(), theCollection->end(), theTrack) != theCollection->end();
-    }
-
-    // ---------------------------------------------------------------------------------
-    // trackMomentum: returns refitted track momentum
-    // ---------------------------------------------------------------------------------
-
-    TVector3 JpsiFinder_ee::trackMomentum(const xAOD::Vertex * vxCandidate, int trkIndex) const
-    {
-      double px = 0., py = 0., pz = 0.;
-      if (0 != vxCandidate) {
-        const Trk::TrackParameters* aPerigee = vxCandidate->vxTrackAtVertex()[trkIndex].perigeeAtVertex();
-        px = aPerigee->momentum()[Trk::px];
-        py = aPerigee->momentum()[Trk::py];
-        pz = aPerigee->momentum()[Trk::pz];
-      }
-      TVector3 mom(px,py,pz);
-      return mom;
     }
 
 }
