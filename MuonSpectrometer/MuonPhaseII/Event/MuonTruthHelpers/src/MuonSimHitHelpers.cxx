@@ -128,6 +128,22 @@ namespace MuonR4 {
         }
         return nullptr;
     }
+
+    const xAOD::MuonSegment* getMatchedTruthSegment(const xAOD::MuonSimHit& hit) {
+        static const SG::ConstAccessor<SegLink_t> acc{"truthSegmentLink"};
+        if (acc.isAvailable(hit)) {
+            const SegLink_t& link{acc(hit)};
+            if (link.isValid()){
+                return *link;
+            }
+        }
+        return nullptr;
+    }
+    const xAOD::TruthParticle* getTruthMatchedParticle(const xAOD::MuonSimHit& hit) {
+        const xAOD::MuonSegment* truthSeg = getMatchedTruthSegment(hit);
+        return truthSeg ? getTruthMatchedParticle(*truthSeg) : nullptr;
+    }
+
     std::vector<const xAOD::MuonSegment*> getTruthSegments(const xAOD::TruthParticle& truthMuon) {
         static const SG::ConstAccessor<SegLinkVec_t> acc{"truthSegmentLinks"};
         std::vector<const xAOD::MuonSegment*> segments{};

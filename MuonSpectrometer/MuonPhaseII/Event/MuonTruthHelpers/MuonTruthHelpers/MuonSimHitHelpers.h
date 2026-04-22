@@ -41,6 +41,10 @@ namespace MuonR4 {
     const xAOD::MuonSegment* getMatchedTruthSegment(const xAOD::MuonSegment& segment);
     /** @brief Returns the segments associated to the truth muon */
     std::vector<const xAOD::MuonSegment*> getTruthSegments(const xAOD::TruthParticle& truthMuon);
+    /** @brief Returns the segment matched to the sim hit */
+    const xAOD::MuonSegment* getMatchedTruthSegment(const xAOD::MuonSimHit& hit);
+    /** @brief Returns the truth particle matched to the sim hit */
+    const xAOD::TruthParticle* getTruthMatchedParticle(const xAOD::MuonSimHit& hit);
 }
 
 #endif
