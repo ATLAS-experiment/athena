@@ -222,7 +222,7 @@ bool EtaHoughTransformAlg::passSeedQuality (const HoughSetupForBucket& currentBu
                             re->multilayer(), clust->gasGap());   
              }
          } else {
-            seenChambers.insert(xAOD::muonReadoutElement(SP->primaryMeasurement()));
+            seenChambers.insert(SP->primaryMeasurement()->readoutElement());
          }
      }
      // loop over all chambers in the bucket    

@@ -42,7 +42,7 @@ namespace MuonR4{
     template <typename PrdType_t>
         const xAOD::MuonSimHit*
             PrepDataToSimHitAssocAlg::truthMatchPrd(Viewer_t<xAOD::MuonSimHitContainer>& simHits,
-                                                    const xAOD::UncalibratedMeasurement* measurement) const {
+                                                    const xAOD::MuonMeasurement* measurement) const {
 
         const auto* prd = dynamic_cast<const  PrdType_t*>(measurement);
         // const MuonGMR4::MuonReadoutElement* re = prd->readoutElement();
@@ -85,7 +85,7 @@ namespace MuonR4{
     
     StatusCode PrepDataToSimHitAssocAlg::execute(const EventContext & ctx) const {
         const xAOD::MuonSimHitContainer* simHits{nullptr};
-        const xAOD::UncalibratedMeasurementContainer* measurements{nullptr};
+        const xAOD::MuonMeasurementContainer* measurements{nullptr};
         ATH_CHECK(SG::get(simHits, m_simHitsKey, ctx));
         ATH_CHECK(SG::get(measurements, m_prdHitKey, ctx));
 
@@ -95,10 +95,10 @@ namespace MuonR4{
 
         xAOD::ChamberViewer prdViewer{*measurements};
         xAOD::ChamberViewer simHitViewer{*simHits, m_idHelperSvc.get(), xAOD::ChamberView::Mode::DetElement};
-        SG::WriteDecorHandle<xAOD::UncalibratedMeasurementContainer, LinkType> decorHandle{m_decorKey, ctx};
+        SG::WriteDecorHandle<xAOD::MuonMeasurementContainer, LinkType> decorHandle{m_decorKey, ctx};
         /** Loop over the measurements */
         do {
-            const Identifier chambId = xAOD::identify(prdViewer.at(0));
+            const Identifier chambId = prdViewer.at(0)->identify();
             const IdentifierHash viewHash = m_idHelperSvc->detElementHash(chambId);
             /** Setup a default empty link */
             decorHandle(*prdViewer.at(0)) = LinkType{};
@@ -116,7 +116,7 @@ namespace MuonR4{
             }
             ATH_MSG_VERBOSE("Container size "<<simHits->size()<<" viewer size: "<<simHitViewer.size()
                             <<" view hash: "<<viewHash);
-            for (const xAOD::UncalibratedMeasurement* measurement : prdViewer) {
+            for (const xAOD::MuonMeasurement* measurement : prdViewer) {
                 /** Define the place holder for the closest simHit */
                 const xAOD::MuonSimHit* bestSimHit{nullptr};
                 switch (measurement->type()) {

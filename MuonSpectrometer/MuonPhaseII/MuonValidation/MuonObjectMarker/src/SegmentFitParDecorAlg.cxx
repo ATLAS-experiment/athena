@@ -32,15 +32,15 @@ namespace MuonR4 {
    StatusCode SegmentFitParDecorAlg::fetchMeasurement(const EventContext& ctx,
                                                       const MeasKey_t& key,
                                                       const Identifier& measId,
-                                                      const xAOD::UncalibratedMeasurement*& meas) const {
-        const PrdCont_t* cont{nullptr};
+                                                      const xAOD::MuonMeasurement*& meas) const {
+        const xAOD::MuonMeasurementContainer* cont{nullptr};
         ATH_CHECK(SG::get(cont, key, ctx));
         if (!cont) {
             ATH_MSG_VERBOSE("No container key given");
             return StatusCode::SUCCESS;
         }
-        for (const xAOD::UncalibratedMeasurement* inCont : *cont) {
-            if (xAOD::identify(inCont) == measId) {
+        for (const xAOD::MuonMeasurement* inCont : *cont) {
+            if (inCont->identify() == measId) {
                 meas = inCont;
                 break;
             }
@@ -53,7 +53,7 @@ namespace MuonR4 {
     StatusCode SegmentFitParDecorAlg::addLink(const EventContext& ctx,
                                               const Identifier& rotId,
                                               PrdLinkVec& prdLinks) const {
-        const xAOD::UncalibratedMeasurement* prd{nullptr};
+        const xAOD::MuonMeasurement* prd{nullptr};
         switch(m_idHelperSvc->technologyIndex(rotId)){
             case TechIdx_t::MDT:
                 ATH_CHECK(fetchMeasurement(ctx, m_keyMdt, rotId, prd));

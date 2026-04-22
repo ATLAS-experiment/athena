@@ -5,6 +5,7 @@
 #define XAODMUONPREPDATA_MUONMEASUREMENTCONTAINER_H
 
 #include "xAODMuonPrepData/MuonMeasurement.h"
+#include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 
 namespace xAOD{
    using MuonMeasurementContainer_v1 = DataVector<MuonMeasurement_v1>;

@@ -7,6 +7,7 @@
 #include "EventPrimitives/EventPrimitivesHelpers.h"
 #include "MuonTrackEvent/TrackingHelpers.h"
 #include "MuonVisualizationHelpersR4/ObjVisualizationHelpers.h"
+#include "xAODMuonPrepData/UtilFunctions.h"
 
 #include "ActsCalibBase/CalibrationContext.h"
 #include "MuonReadoutGeometryR4/SpectrometerSector.h"

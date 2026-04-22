@@ -6,6 +6,7 @@
 
 #include "xAODMuonPrepData/MuonMeasurementFwd.h"
 #include "xAODMuonPrepData/versions/MuonMeasurement_v1.h"
+#include "xAODMeasurementBase/UncalibratedMeasurement.h"
 
 #include "AthContainers/DataVector.h"
 // Set up a CLID for the class:
