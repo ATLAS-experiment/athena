@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/errorcheck.h"
@@ -177,7 +177,7 @@ StatusCode ActsEMBremCollectionBuilder::convertTracks(
   static const SG::AuxElement::Accessor<ElementLink<xAOD::TrackParticleContainer>>
       originalTPLink("originalTrackParticle");
 
-  for (const auto& [track, originalTP] : Acts::zip(actsContainer, originals)) {
+  for (const auto [track, originalTP] : Acts::zip(actsContainer, originals)) {
     xAOD::TrackParticle* tp = new xAOD::TrackParticle();
     outputTPs.push_back(tp);
 
