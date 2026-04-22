@@ -511,16 +511,17 @@ namespace AthONNX {
     );
 
     std::vector<Ort::Value> output_tensors = m_session->Run(Ort::RunOptions{nullptr}, m_input_node_names.data(), input_tensors.data(), m_input_node_names.size(), m_output_node_names.data(), m_output_node_names.size());
-    assert(output_tensors.size() == 1 && output_tensors.front().IsTensor());
-    
+    assert(output_tensors.front().IsTensor());
+
     // Get pointer to output tensor float values
     float* floatarr = output_tensors.front().GetTensorMutableData<float>();
-    int arrSize = sizeof(*floatarr)/sizeof(floatarr[0]);
+    auto info = output_tensors.front().GetTensorTypeAndShapeInfo();
+    size_t arrSize = info.GetElementCount();
 
     // show  true label for the test input
     ATH_MSG_DEBUG("Label for the input test data  = "<<output_tensor_values);
     std::vector<float> ConstScores;
-    for (int i = 0; i < arrSize; i++){
+    for (long unsigned int i = 0; i < arrSize; i++){
       ATH_MSG_VERBOSE(" +++ Score for class " << i << " = " << floatarr[i]);
       ConstScores.push_back(floatarr[i]);
     }
