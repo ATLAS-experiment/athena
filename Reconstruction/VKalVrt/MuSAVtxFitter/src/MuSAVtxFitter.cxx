@@ -34,7 +34,7 @@ namespace {
   const SG::AuxElement::Accessor<int>   num_selectedTracksAcc("num_selectedTracks");
   const SG::AuxElement::Accessor<int>   num_associatedTracksAcc("num_associatedTracks");
   const SG::AuxElement::Accessor<float> dCloseVrtAcc("dCloseVrt");
-  // accessors for track parameters wrt vertex
+  // accessors for track parameters wrt vertex (coordinate transformation only)
   const SG::AuxElement::Accessor<float> qOverP_wrtSVAcc("qOverP_wrtSV");
   const SG::AuxElement::Accessor<float> theta_wrtSVAcc("theta_wrtSV");
   const SG::AuxElement::Accessor<float> p_wrtSVAcc("p_wrtSV");
@@ -46,6 +46,13 @@ namespace {
   const SG::AuxElement::Accessor<float> sqrd0Err_wrtSVAcc("sqrd0Err_wrtSV");
   const SG::AuxElement::Accessor<float> sqrz0Err_wrtSVAcc("sqrz0Err_wrtSV");
   const SG::AuxElement::Accessor<float> sqrQoPErr_wrtSVAcc("sqrQoPErr_wrtSV");
+  // accessors for refit track parameters from VKalVrt (proper refit accounting for magnetic field)
+  const SG::AuxElement::Accessor<float> phi_refitAcc("phi_refit");
+  const SG::AuxElement::Accessor<float> theta_refitAcc("theta_refit");
+  const SG::AuxElement::Accessor<float> qOverP_refitAcc("qOverP_refit");
+  const SG::AuxElement::Accessor<float> p_refitAcc("p_refit");
+  const SG::AuxElement::Accessor<float> pt_refitAcc("pt_refit");
+  const SG::AuxElement::Accessor<float> eta_refitAcc("eta_refit");
 }
 
 namespace Rec {
@@ -203,6 +210,26 @@ StatusCode MuSAVtxFitter::fillCollections(std::vector<MuSAVtxFitterTool::WrkVrt>
             sqrd0Err_wrtSVAcc(*containerTrack) = sqrd0Err_wrtSV;
             sqrz0Err_wrtSVAcc(*containerTrack) = sqrz0Err_wrtSV;
             sqrQoPErr_wrtSVAcc(*containerTrack) = sqrQoPErr_wrtSV;
+
+            // Save VKalVrt refit track parameters (proper refit accounting for magnetic field)
+            // trkAtVrt contains: [0]=phi, [1]=theta, [2]=1/p (with sign)
+            if (i < workVertex.trkAtVrt.size() && workVertex.trkAtVrt[i].size() >= 3) {
+                double phi_refit = workVertex.trkAtVrt[i][0];
+                double theta_refit = workVertex.trkAtVrt[i][1];
+                double qOverP_refit = workVertex.trkAtVrt[i][2];
+                double p_refit = 1.0 / std::abs(qOverP_refit);
+                double pt_refit = p_refit * std::sin(theta_refit);
+                double eta_refit = -std::log(std::tan(theta_refit / 2.0));
+
+                phi_refitAcc(*containerTrack) = phi_refit;
+                theta_refitAcc(*containerTrack) = theta_refit;
+                qOverP_refitAcc(*containerTrack) = qOverP_refit;
+                p_refitAcc(*containerTrack) = p_refit;
+                pt_refitAcc(*containerTrack) = pt_refit;
+                eta_refitAcc(*containerTrack) = eta_refit;
+            } else {
+                ATH_MSG_WARNING("trkAtVrt not available for track " << i << ", skipping refit parameters");
+            }
         }
 
         massAcc(*MuSAVertex) = sumP4_muon.M();
