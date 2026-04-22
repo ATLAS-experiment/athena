@@ -95,19 +95,16 @@ def STDM16Kernel(flags, name='STDM16Kernel', **kwargs):
 
     #acc.merge(FtagJetCollectionsCfg(flags,FTagJetColl))
         
-    from TrkConfig.TrkV0FitterConfig import TrkV0VertexFitter_InDetExtrCfg     
     
     V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, "STDM16"))
     vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, "STDM16"))    # VKalVrt vertex fitter
     trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(flags, "STDM16"))
     vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, "STDM16"))     
-    v0fitter = acc.popToolsAndMerge(TrkV0VertexFitter_InDetExtrCfg(flags))     
 
     acc.addPublicTool(vkalvrt)
     acc.addPublicTool(V0Tools)
     acc.addPublicTool(trackselect)
     acc.addPublicTool(vpest)
-    acc.addPublicTool(v0fitter)
     
     #====================================================================
     # AUGMENTATION TOOLS
@@ -138,8 +135,6 @@ def STDM16Kernel(flags, name='STDM16Kernel', **kwargs):
         trackThresholdPt            = 1000.0,
         muonCollectionKey           = "Muons",
         TrackParticleCollection     = "InDetTrackParticles",
-        V0VertexFitterTool          = v0fitter,             # V0 vertex fitter
-        useV0Fitter                 = False,                   # if False a TrkVertexFitterTool will be used
         TrkVertexFitterTool         = vkalvrt,        # VKalVrt vertex fitter
         TrackSelectorTool           = trackselect,
         VertexPointEstimator        = vpest,

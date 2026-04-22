@@ -76,8 +76,6 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
         useCombinedMeasurement      = False, # Only takes effect if combOnly=True    
         muonCollectionKey           = mainMuonInput,
         TrackParticleCollection     = mainIDInput,
-        V0VertexFitterTool          = None, # V0 vertex fitter
-        useV0Fitter                 = False, # if False a TrkVertexFitterTool will be used
         TrkVertexFitterTool         = vkalvrt, # VKalVrt vertex fitter
         TrackSelectorTool           = TrackSelector,
         VertexPointEstimator        = vpest,
@@ -99,8 +97,6 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
         useCombinedMeasurement      = False, # Only takes effect if combOnly=True    
         muonCollectionKey           = mainMuonInput,
         TrackParticleCollection     = mainIDInput,
-        V0VertexFitterTool          = None, # V0 vertex fitter
-        useV0Fitter                 = False, # if False a TrkVertexFitterTool will be used
         TrkVertexFitterTool         = vkalvrt, # VKalVrt vertex fitter
         TrackSelectorTool           = TrackSelector,
         VertexPointEstimator        = vpest,
