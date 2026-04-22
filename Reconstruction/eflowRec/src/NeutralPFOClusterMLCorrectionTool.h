@@ -37,10 +37,10 @@ private:
   Gaudi::Property<std::string> m_clusterMLCorrectedEnergyKey{this, "ClusterMLCorrectedEnergyDecorationKey", "clusterE_ML", 
     "Name of the decoration storing the ML-corrected cluster energy"};
 
-  void correctFlowElement(xAOD::FlowElement &pfo, const xAOD::FlowElementContainer &charged_pfos) const;
-  void scaleEnergyToAlternativeSignalState(xAOD::FlowElement &pfo, const xAOD::CaloCluster &cls, const std::pair<float,float> &charged_corrections) const;
-  std::pair<float,float> getChargedCorrectionsToClusterFromSingleFe(const xAOD::CaloCluster* cls_ptr, const xAOD::FlowElement& fe) const;
-  std::pair<float,float> getChargedCorrectionsToCluster(const xAOD::CaloCluster* cls_ptr, const xAOD::FlowElementContainer& charged_pfos) const;
+  void correctNeutralFlowElement(xAOD::FlowElement &pfo, const xAOD::FlowElementContainer &charged_pfos) const;
+  float getChargedCorrectionsToClusterFromSingleChargedFe(const xAOD::CaloCluster* cls_ptr, const xAOD::FlowElement& charged_fe) const;
+  float getChargedCorrectionToCluster(const xAOD::CaloCluster* cls_ptr, const xAOD::FlowElementContainer& charged_pfos) const;
+  double getClusterMLCorrectedEnergy(const xAOD::CaloCluster &cls) const;
   const xAOD::CaloCluster* getLinkedCluster(const xAOD::FlowElement &pfo) const;
 };
 #endif
