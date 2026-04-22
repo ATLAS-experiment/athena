@@ -173,7 +173,7 @@ StatusCode PoolSvc::io_reinit() {
 //__________________________________________________________________________
 StatusCode PoolSvc::setupPersistencySvc() {
    clearState();
-   ATH_MSG_INFO("Setting up APR FileCatalog and Streams");
+   ATH_MSG_INFO("Setting up FileCatalog and Streams");
    m_catalog = createCatalog();
    if (m_catalog != nullptr) {
       m_catalog->start();
@@ -489,7 +489,7 @@ pool::ICollection* PoolSvc::createCollection(const std::string& connection,
    pool::CollectionService collSvc ATLAS_THREAD_SAFE = pool::CollectionService();
    pool::ICollection* collPtr ATLAS_THREAD_SAFE = nullptr;
 
-   // Try to open APR EventTags Collection in the input file
+   // Try to open EventTags Collection in the input file
    std::scoped_lock sc_lock(m_pool_mut);
    std::string error_text;
    try {
@@ -503,7 +503,7 @@ pool::ICollection* PoolSvc::createCollection(const std::string& connection,
       if (dbH != nullptr && !dbH->fid().empty()) {
          return(nullptr); // no events
       }
-      throw std::runtime_error( "Failed to open APR Collection: " + error_text  + ", PoolSvc::createCollection");
+      throw std::runtime_error( "Failed to open Collection: " + error_text  + ", PoolSvc::createCollection");
    }
    if (insertFile && m_attemptCatalogPatch.value()) {
       std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);

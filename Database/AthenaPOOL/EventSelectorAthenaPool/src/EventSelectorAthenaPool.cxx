@@ -1125,7 +1125,7 @@ void EventSelectorAthenaPool::handle(const Incident& inc)
 }
 
 //__________________________________________________________________________
-/* Disconnect APR Database identifieed by a SG::SourceID when it is no longer in use:
+/* Disconnect Database identifieed by a SG::SourceID when it is no longer in use:
    m_guid is not pointing to it and there are no events from it being processed
    (if the EventLoopMgr was not firing Begin/End incidents, this will just close the DB)
 */
