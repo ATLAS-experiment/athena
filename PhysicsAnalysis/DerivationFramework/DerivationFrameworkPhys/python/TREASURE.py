@@ -523,6 +523,7 @@ def TREASURECfg(flags):
     TREASURESlimmingHelper.AllVariables = [
         "CHSGNeutralParticleFlowObjects",
         "CHSGChargedParticleFlowObjects",
+        "AntiKt4EMPFlowJets",
     ]
     
     from DerivationFrameworkMuons.MuonsCommonConfig import MuonVariablesCfg
