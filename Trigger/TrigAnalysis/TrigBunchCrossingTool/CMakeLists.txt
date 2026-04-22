@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigBunchCrossingTool )
@@ -33,7 +33,7 @@ atlas_add_test( ut_static_bunch_tool_test
    Root/StaticBunchCrossingTool.cxx
    Root/count_bunch_neighbors.cxx
    LINK_LIBRARIES AsgTools xAODTrigger TrigConfL1Data TrigAnalysisInterfaces
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
