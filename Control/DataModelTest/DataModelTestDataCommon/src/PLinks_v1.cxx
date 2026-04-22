@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 /**
  * @file DataModelTestDataCommon/src/PLinks_v1.h
@@ -10,24 +10,14 @@
 
 
 #include "DataModelTestDataCommon/versions/PLinks_v1.h"
+#include "xAODCore/AuxStoreAccessorMacros.h"
 #include "AthContainers/PackedLink.h"
 
 
 namespace DMTest {
 
 
-/// Get the single link.
-ElementLink<CVec> PLinks_v1::plink() const {
-  static const SG::ConstAccessor<plink_type> acc( "plink" );
-  return acc( *this );
-}
-
-
-/// Set the single link.
-void PLinks_v1::setPLink( const ElementLink<CVec>& value ) {
-  static const SG::Accessor<plink_type> acc( "plink" );
-  acc( *this ) = value;
-}
+AUXSTORE_OBJECT_SETTER_AND_GETTER(PLinks_v1, SG::PackedLink<CVec>, plink, setPLink)
 
 
 /// Get element @c i of the vector of links.

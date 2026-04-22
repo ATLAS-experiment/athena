@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 /**
  * @file DataModelTestDataCommon/versions/JVec_v1.h
@@ -50,13 +50,13 @@ public:
   // Getters / setters.
 
   intRange_t ivec() const;
-  void setIVec (const std::vector<int>& v);
+  void setIVec (std::span<const int> v);
   floatRange_t fvec() const;
-  void setFVec (const std::vector<float>& v);
+  void setFVec (std::span<const float> v);
   stringRange_t svec() const;
-  void setSVec (const std::vector<std::string>& v);
+  void setSVec (std::span<const std::string> v);
   linkRange_t lvec() const;
-  void setLVec (const std::vector<ElementLink<CVec> >& v);
+  void setLVec (std::span<const ElementLink<CVec> > v);
 };
 
 
