@@ -16,6 +16,7 @@ AntiKt4EMPFlowJetsCPContent = [
 "AntiKt4EMPFlowJetsAux.DFCommonJets_jetClean_LooseBad.DFCommonJets_jetClean_TightBad",
 "AntiKt4EMPFlowJetsAux.PartonTruthLabelID.HadronConeExclExtendedTruthLabelID.HadronConeExclTruthLabelID",
 "AntiKt4EMPFlowJetsAux.QGTransformer_ConstScore",
+"AntiKt4EMPFlowJetsAux.R4TruthLabel",
 "PrimaryVertices",
-"PrimaryVerticesAux.vertexType" 
+"PrimaryVerticesAux.vertexType"
 ]

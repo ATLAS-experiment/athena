@@ -59,6 +59,8 @@ pflowmods        = ()
 
 substrmods = ("nsubjettiness","ecorr")
 
+truthlabels = ("JetTaggingTruthLabel:R4TruthLabel",)
+
 # ********************************************************
 # Standard track jet definition
 # ********************************************************
@@ -85,10 +87,9 @@ AntiKt4PV0Track = JetDefinition("AntiKt", 0.4, cst.PV0Track,
 
 AntiKt4EMPFlow = JetDefinition("AntiKt",0.4,cst.GPFlow,
                                ghostdefs = standardghosts+flavourghosts,
-                               modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:10000","JetGhostLabel","JetDeltaRInitialLabel:5000","JetGhostInitialLabel","JetQuarkChargeLabel","LArHVCorr","jetiso"),
+                               modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:10000","JetGhostLabel","JetDeltaRInitialLabel:5000","JetGhostInitialLabel","JetQuarkChargeLabel","LArHVCorr","jetiso")+truthlabels,
                                lock = True
 )
-
 
 AntiKt4EMPFlowML = JetDefinition("AntiKt",0.4,cst.GPFlowML,
                                infix = "ML",
@@ -240,6 +241,9 @@ AntiKt4Truth = JetDefinition("AntiKt",0.4, cst.Truth,
                              modifiers = ("Sort", "Width", "jetisoTruth", "numConstit")+truthmods,
                              lock = True,
 )
+
+# These jets may be used as input for the JetTruthLabelling, so they also need to be defined as constituents:
+registerAsInputConstit(AntiKt4Truth)
 
 AntiKt2Truth = JetDefinition("AntiKt",0.2, cst.Truth,
                              ghostdefs = flavourghosts,

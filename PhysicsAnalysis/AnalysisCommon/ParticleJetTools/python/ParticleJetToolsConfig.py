@@ -267,7 +267,15 @@ def getJetTruthLabelTool(jetdef, modspec):
     return jetTruthLabelTool
 
 def getJetTruthLabelToolPrereqs(jetdef, modspec):
-    return ["input:AntiKt10TruthDressedWZSoftDropBeta100Zcut10Jets"] if modspec == "R10WZTruthLabel_R22v1" and jetdef._cflags.Input.isMC else []
+    if (jetdef._cflags.Input.isMC):
+        if modspec == "R10WZTruthLabel_R22v1":
+            return ["input:AntiKt10TruthDressedWZSoftDropBeta100Zcut10Jets"]
+        elif modspec == "R4TruthLabel":
+            return ["input:AntiKt4TruthJets"]
+            # return ["input:AntiKt4TruthDressedWZJets"]
+            # Dressed option not working as of 2026-04-17, using regular.
+    return []
+
 
 def getJetPileupLabelTool(jetdef, modspec):
 

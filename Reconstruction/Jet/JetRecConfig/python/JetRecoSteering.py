@@ -67,7 +67,7 @@ def JetRecoSteeringCfg(flags):
     result = ComponentAccumulator()
     
     # the Standard list of jets to run :
-    jetdefs = [AntiKt4EMTopo, AntiKt4EMPFlow, AntiKt4LCTopo, AntiKt4Truth, AntiKt10LCTopo_tau, AntiKt10UFOCSSKSoftDrop_trigger]
+    jetdefs = [AntiKt4Truth, AntiKt4EMTopo, AntiKt4EMPFlow, AntiKt4LCTopo, AntiKt10LCTopo_tau, AntiKt10UFOCSSKSoftDrop_trigger]
 
     # We're in Reco job : propagate this info to the runIII jet config
     # (see JetConfigFlags.py for motivations on this way of doing)
