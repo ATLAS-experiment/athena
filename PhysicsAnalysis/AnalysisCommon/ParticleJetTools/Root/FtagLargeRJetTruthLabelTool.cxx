@@ -6,14 +6,13 @@
 #include "ParticleJetTools/ParticleJetLabelCommon.h"
 
 #include "xAODJet/Jet.h"
-#include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthVertex.h"
-#include "AsgTools/CurrentContext.h"
+#include "xAODTruth/TruthParticle.h"
 
+#include "AsgTools/CurrentContext.h"
+#include "AsgDataHandles/WriteDecorHandle.h"
 #include <algorithm>
 #include <cmath>
-#include <set>
-#include <vector>
 
 FtagLargeRJetTruthLabelTool::FtagLargeRJetTruthLabelTool(const std::string& name)
     : asg::AsgTool(name) {}
@@ -59,7 +58,7 @@ StatusCode FtagLargeRJetTruthLabelTool::decorate(const xAOD::JetContainer& jets)
     else if (!ghostW.empty())   { originPdgId = 24; parent = *std::max_element(ghostW.begin(), ghostW.end(), ptComp);     }
 
     // C-hadron count after removing B->C cascade descendants
-    std::vector<const xAOD::TruthParticle*> deduplicatedC = ghostC;
+    std::vector<const xAOD::TruthParticle*> deduplicatedC = std::move(ghostC);
     ParticleJetTools::childrenRemoved(ghostB, deduplicatedC);
     int nB   = static_cast<int>(ghostB.size());
     int nC   = static_cast<int>(deduplicatedC.size());

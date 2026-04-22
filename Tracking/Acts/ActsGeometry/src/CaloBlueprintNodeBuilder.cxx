@@ -310,9 +310,9 @@ std::shared_ptr<CylinderSurface> ActsTrk::CaloBlueprintNodeBuilder::generateCyli
 
 void ActsTrk::CaloBlueprintNodeBuilder::generateDiscSurfaces(caloSampleSurfaceMap_t& caloSampleSurfaceMap, caloSampleDDEElementsMap_t& caloSampleDDEElementsMap) const{
 
-  for (auto currentSample : m_caloDiscSampleList) {
+  for (const auto & currentSample : m_caloDiscSampleList) {
 
-        std::vector<const CaloDetDescrElement*> currentElements = caloSampleDDEElementsMap[currentSample];
+        const std::vector<const CaloDetDescrElement*> & currentElements = caloSampleDDEElementsMap[currentSample];
 
         double totalZFixedPhi = 0.0;
         bool firstCellInPhiRing = true;
