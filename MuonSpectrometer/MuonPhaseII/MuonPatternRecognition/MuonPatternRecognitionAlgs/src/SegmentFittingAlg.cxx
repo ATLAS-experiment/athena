@@ -41,7 +41,7 @@ namespace MuonR4 {
         fitCfg.recalibrate = m_recalibInFit;
         fitCfg.useFastFitter = m_useFastFitter;
         fitCfg.fastPreFitter = m_fastPreFitter;
-        //fitCfg.ignoreFailedPreFit = m_ignoreFailedPreFit;
+        fitCfg.ignoreFailedPreFit = m_ignoreFailedPreFit;
         fitCfg.useHessian = m_hessianResidual;
 
         fitCfg.doBeamSpot = m_doBeamspotConstraint;
