@@ -1146,13 +1146,13 @@ StatusCode JSSTaggerUtils::GetPolarisationScore(const xAOD::JetContainer& jets) 
     }
     // multi regression
     else if(scores.size() == 7){
-      decConstScore_cosT(*jet) = scores.at(0);
-      decConstScore_pT1(*jet) = scores.at(1);
-      decConstScore_eta1(*jet) = scores.at(2);
-      decConstScore_phi1(*jet) = scores.at(3);
-      decConstScore_pT2(*jet) = scores.at(4);
-      decConstScore_eta2(*jet) = scores.at(5);
-      decConstScore_phi2(*jet) = scores.at(6);
+      decConstScore_pT1(*jet) = scores.at(0);
+      decConstScore_eta1(*jet) = scores.at(1);
+      decConstScore_phi1(*jet) = scores.at(2);
+      decConstScore_pT2(*jet) = scores.at(3);
+      decConstScore_eta2(*jet) = scores.at(4);
+      decConstScore_phi2(*jet) = scores.at(5);
+      decConstScore_cosT(*jet) = scores.at(6);
     }
     // multiclass + regression
     else if(scores.size() == 12){
@@ -1161,13 +1161,13 @@ StatusCode JSSTaggerUtils::GetPolarisationScore(const xAOD::JetContainer& jets) 
       decConstScore_wt(*jet) = scores.at(2);
       decConstScore_zl(*jet) = scores.at(3);
       decConstScore_zt(*jet) = scores.at(4);
-      decConstScore_cosT(*jet) = scores.at(5);
-      decConstScore_pT1(*jet) = scores.at(6);
-      decConstScore_eta1(*jet) = scores.at(7);
-      decConstScore_phi1(*jet) = scores.at(8);
-      decConstScore_pT2(*jet) = scores.at(9);
-      decConstScore_eta2(*jet) = scores.at(10);
-      decConstScore_phi2(*jet) = scores.at(11);
+      decConstScore_pT1(*jet) = scores.at(5);
+      decConstScore_eta1(*jet) = scores.at(6);
+      decConstScore_phi1(*jet) = scores.at(7);
+      decConstScore_pT2(*jet) = scores.at(8);
+      decConstScore_eta2(*jet) = scores.at(9);
+      decConstScore_phi2(*jet) = scores.at(10);
+      decConstScore_cosT(*jet) = scores.at(11);
     }
     else{
       ATH_MSG_ERROR("ERROR: the output size of this tagger is not currently supported!");
