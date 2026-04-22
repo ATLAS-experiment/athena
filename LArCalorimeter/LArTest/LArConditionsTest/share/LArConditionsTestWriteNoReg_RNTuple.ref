@@ -21,7 +21,7 @@ DBReplicaSvc         INFO Read replica configuration from /home/sss/atlas/rootac
 DBReplicaSvc         INFO No specific match for domain found - use default fallback
 DBReplicaSvc         INFO Total of 1 servers found for host karma [atlas_dd ]
 PoolSvc              INFO Successfully setup replica sorting algorithm
-PoolSvc              INFO Setting up APR FileCatalog and Streams
+PoolSvc              INFO Setting up FileCatalog and Streams
 PoolSvc              INFO Resolved path (via ATLAS_POOLCOND_PATH) is /home/sss/atlas/DBRelease/poolcond/PoolFileCatalog.xml
 PoolSvc              INFO Resolved path (via DATAPATH) is /home/sss/atlas/DBRelease/current/poolcond/PoolCat_oflcond.xml
 PoolSvc              INFO POOL WriteCatalog is file:Catalog1.xml
