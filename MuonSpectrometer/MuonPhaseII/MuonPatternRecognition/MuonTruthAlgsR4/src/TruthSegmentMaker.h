@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTRUTHSEGMENTMAKER_TRUTHSEGMENTMAKER_H
 #define MUONTRUTHSEGMENTMAKER_TRUTHSEGMENTMAKER_H
@@ -9,6 +9,7 @@
 #include "StoreGate/ReadHandleKeyArray.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
+#include "StoreGate/WriteDecorHandleKeyArray.h"
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
 
@@ -119,6 +120,10 @@ namespace MuonR4{
            * @param ctx: EventContext to fetch the constants from store gate
            * @param hit: Reference to the sim hit */
           float hitUncertainty(const EventContext& ctx, const xAOD::MuonSimHit& hit) const;
+          /** @brief Establish the link from the simulated hit -> truth segment
+           *  @param ctx: EventContext to setup the write decor handles
+           *  @param segments: The completed truth segment container */
+          StatusCode linkSegmentsToHits(const EventContext& ctx, const xAOD::MuonSegmentContainer& segments) const;
           /** @brief IdHelperSvc to decode the Identifiers */
           ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
           /** @brief List of sim hit containers from which the truth segments shall be retrieved */
@@ -135,6 +140,10 @@ namespace MuonR4{
           SG::WriteDecorHandleKey<xAOD::MuonSegmentContainer> m_locParKey{this, "LocParKey", m_segmentKey,"localSegPars"};
           /** @brief Decoration key of the muon charge  */
           SG::WriteDecorHandleKey<xAOD::MuonSegmentContainer> m_qKey{this, "qKey", m_segmentKey, "charge"};
+          /** @brief Decorate the truth segment link to the simHit */
+          SG::WriteDecorHandleKeyArray<xAOD::MuonSimHitContainer> m_segLinkKeys{this, "SimHitToSegLinkKey", {}};
+          /** @brief Name of the link to the truth segment */
+          Gaudi::Property<std::string> m_segLinkKey{this, "SegmentLink", "truthSegmentLink"};
           /** @brief Build segments from muon hits only */
           Gaudi::Property<bool> m_useOnlyMuonHits{this, "useOnlyMuonHits", true};
           /** @brief Construct segments from pile-up hits without GenParticleLink */
