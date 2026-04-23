@@ -134,16 +134,20 @@ class Tool:
             # Set all columns on the handle
             for container_name, info in effective.items():
                 # Container offset (always immutable)
-                self._handle[container_name] = np.asarray(buffer_dict[container_name])
+                self._handle[container_name] = np.ascontiguousarray(
+                    buffer_dict[container_name]
+                )
 
                 # Nested-vector offsets (immutable)
                 for nested_name in info["nested_offsets"]:
                     if nested_name in buffer_dict:
-                        self._handle[nested_name] = np.asarray(buffer_dict[nested_name])
+                        self._handle[nested_name] = np.ascontiguousarray(
+                            buffer_dict[nested_name]
+                        )
 
                 # Input data columns (immutable)
                 for col in info["inputs"]:
-                    self._handle[col.name] = np.asarray(buffer_dict[col.name])
+                    self._handle[col.name] = np.ascontiguousarray(buffer_dict[col.name])
 
                 # Output data columns (mutable)
                 for col in info["outputs"]:
