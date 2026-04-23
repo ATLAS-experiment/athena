@@ -6,20 +6,12 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 def GlobalCellTowerAlgToolCfg(
         flags,
         name='GlobalCellTowerAlgTool',
-        gblLArCellsKey = "GlobalLArCells",
-        gblCellTowersKey = "GlobalCellTowers",
-        OutputLevel=None):
+        **kwargs):
     
     cfg = ComponentAccumulator()
     alg = CompFactory.GlobalSim.GlobalSimulationAlg(name)
 
-    cellTowerAlgTool = CompFactory.GlobalSim.GlobalCellTowerAlgTool(name)
-
-    if OutputLevel is not None:
-        cellTowerAlgTool.OutputLevel = OutputLevel
-
-    cellTowerAlgTool.GlobalLArCellsKey = gblLArCellsKey
-    cellTowerAlgTool.GlobalCellTowersKey = gblCellTowersKey
+    cellTowerAlgTool = CompFactory.GlobalSim.GlobalCellTowerAlgTool(name,**kwargs)
 
     alg.globalsim_algs = [cellTowerAlgTool]
     #alg.enableDumps = dump

@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef GLOBALSIM_GLOBALLARCELL_H
@@ -34,6 +34,8 @@ namespace GlobalSim{
     void setEnergy (float energy, boost::dynamic_bitset<>&& energy_bitset);
     /** @brief set position of cell in eta-phi space */
     void setPosition (float eta, float phi);
+    /** @brief set size of cell in eta-phi space */
+    void setSize (float deta, float dphi);
     /** @brief set sampling of cell */
     void setSampling (int sampling);
     /** @brief set layer of cell */
@@ -63,6 +65,10 @@ namespace GlobalSim{
     float eta () const;
     /** @brief get the phi position of the cell */
     float phi () const;
+    /** @brief get the eta width of the cell */
+    float deta () const;
+    /** @brief get the phi width of the cell */
+    float dphi () const;
     /** @brief get the sampling of the cell */
     int getSampling() const;
     /** @brief get the layer of the cell */
@@ -89,6 +95,12 @@ namespace GlobalSim{
 
     /** @brief phi position of this cell */
     float m_phi = -99.9;
+
+    /** @brief eta width of this cell */
+    float m_deta = -99.9;
+
+    /** @brief phi width of this cell */
+    float m_dphi = -99.9;
 
     /** @brief sampling of this cell */
     int m_sampling = -1;
@@ -161,6 +173,10 @@ namespace GlobalSim{
       m_eta = eta;
       m_phi = phi;
   }
+  inline void GlobalLArCell::setSize (float deta, float dphi) { 
+      m_deta = deta;
+      m_dphi = dphi;
+  }
   inline void GlobalLArCell::setSampling (int sampling) { m_sampling = sampling; }
   inline void GlobalLArCell::setLayer (int layer) { m_layer = layer; }
   inline void GlobalLArCell::setSigma (float sigma) { m_sigma = sigma; }
@@ -181,6 +197,8 @@ namespace GlobalSim{
   inline float GlobalLArCell::getSigma () const { return m_sigma; }
   inline float GlobalLArCell::eta () const { return m_eta; }
   inline float GlobalLArCell::phi () const { return m_phi; }
+  inline float GlobalLArCell::deta () const { return m_deta; }
+  inline float GlobalLArCell::dphi () const { return m_dphi; }
   inline int GlobalLArCell::getSampling () const { return m_sampling; }
   inline int GlobalLArCell::getLayer () const { return m_layer; }
   inline const std::string& GlobalLArCell::getFEB2 () const { return m_feb2; }
