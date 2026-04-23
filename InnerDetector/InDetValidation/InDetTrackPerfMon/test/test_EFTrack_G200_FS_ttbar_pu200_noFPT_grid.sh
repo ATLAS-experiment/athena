@@ -1,8 +1,9 @@
 #!/bin/bash
 # art-description: Nightly test to compare G-200 vs C-000 (Full-scan) for EFTrack studies using ttbar pu200 noFPT sample
 # art-type: grid
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-architecture: '#&nvidia'
+# art-memory: 4095
 # art-output: IDTPM.*.root
 # art-output: *.json
 # art-output: *.xml
