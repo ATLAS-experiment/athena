@@ -83,6 +83,7 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
                         'tau_': 'OutTauJets',
                         'jet_': 'OutJets',
                         'met_': 'AnaMET',
+                        'trk_': 'OutTracks',
                         ''    : 'EventInfo'}
     outputContainersForMC = {'truth_mu_' : 'OutTruthMuons',
                              'truth_el_' : 'OutTruthElectrons',
@@ -271,6 +272,19 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq.setOptionValue ('.prefix', 'truth_')
 
 
+    # Include, and then set up the tracks analysis algorithm sequence:
+    configSeq += config.makeConfig ('InDetTracks')
+    configSeq.setOptionValue ('.containerName', 'AnaTracks')
+    configSeq.setOptionValue ('.minPt', 500)
+    configSeq.setOptionValue ('.maxEta', 2.5)
+    configSeq.setOptionValue ('.outputTrackSummaryInfo', True)
+
+    configSeq += config.makeConfig ('InDetTracks.WorkingPoint')
+    configSeq.setOptionValue ('.containerName', 'AnaTracks')
+    configSeq.setOptionValue ('.selectionName', 'tight')
+    configSeq.setOptionValue ('.cutLevel', 'TightPrimary')
+
+
     # Add systematic object links
     configSeq += config.makeConfig('SystObjectLink')
     configSeq.setOptionValue ('.containerName', 'AnaJets')
@@ -400,6 +414,9 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq += config.makeConfig ('ObjectCutFlow')
     configSeq.setOptionValue ('.containerName', 'AnaTauJets')
     configSeq.setOptionValue ('.selectionName', 'tight')
+    configSeq += config.makeConfig ('ObjectCutFlow')
+    configSeq.setOptionValue ('.containerName', 'AnaTracks')
+    configSeq.setOptionValue ('.selectionName', 'tight')
 
     # Include and set up a basic run of the event selection algorithm config:
     if geometry is not LHCPeriod.Run4:
@@ -455,6 +472,10 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
         configSeq += config.makeConfig ('Thinning')
         configSeq.setOptionValue ('.containerName', 'AnaLargeRJets')
         configSeq.setOptionValue ('.outputName', 'OutLargeRJets')
+    configSeq += config.makeConfig ('Thinning')
+    configSeq.setOptionValue ('.containerName', 'AnaTracks')
+    configSeq.setOptionValue ('.selectionName', 'tight')
+    configSeq.setOptionValue ('.outputName', 'OutTracks')
 
     configSeq += config.makeConfig ('Thinning')
     configSeq.setOptionValue ('.containerName', 'TruthElectrons')

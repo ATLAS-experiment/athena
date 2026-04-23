@@ -140,6 +140,15 @@ TauJets:
     MCTCClassification:
       prefix: truth_
 
+InDetTracks:
+  - containerName: 'AnaTracks'
+    minPt: 500
+    maxEta: 2.5
+    outputTrackSummaryInfo: True
+    WorkingPoint:
+      - selectionName: 'tight'
+        cutLevel: 'TightPrimary'
+
 SystObjectLink:
   - containerName: AnaJets
   - containerName: AnaLargeRJets
@@ -158,6 +167,8 @@ ObjectCutFlow:
   - containerName: AnaMuons
     selectionName: medium
   - containerName: AnaTauJets
+    selectionName: tight
+  - containerName: AnaTracks
     selectionName: tight
 
 GeneratorLevelAnalysis: {}
@@ -240,6 +251,9 @@ Thinning:
     outputName: OutJets
   - containerName: AnaLargeRJets
     outputName: OutLargeRJets
+  - containerName: AnaTracks
+    outputName: OutTracks
+    selectionName: tight
   - containerName: TruthElectrons
     outputName: OutTruthElectrons
     skipOnData: true
@@ -319,6 +333,7 @@ Output:
     jet_: OutJets
     larger_jet_: OutLargeRJets
     met_: AnaMET
+    trk_: OutTracks
     "": EventInfo
   containersOnlyForMC:
     truth_mu_: OutTruthMuons

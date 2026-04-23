@@ -335,50 +335,53 @@ class InDetTrackWorkingPointConfig (ConfigBlock):
                 setattr(alg.selectionTool, cutName, value)
         # Set up the truth filtering algorithm:
         if config.dataType() is not DataType.Data:
-            if not self.runTruthFilter:
-                log.warning('Disabling the TruthFilterTool.')
-            else:
-                config.addPrivateTool( 'filterTool', 'InDet::InDetTrackTruthFilterTool' )
-                config.addPrivateTool( 'filterTool.trackOriginTool', 'InDet::InDetTrackTruthOriginTool' )
-                # Set working point based on cut level
-                if self.cutLevel == "Loose":
-                    alg.filterWP = "LOOSE"
-                elif self.cutLevel == "TightPrimary":
-                    alg.filterWP = "TIGHT"
+            if self.runTruthFilter:
+                if config.isPhyslite():
+                    log.warning ('The TruthFilterTool is not compatible with Physlite mode. '
+                                 'This tool is skipped for now. Please set \"runTruthFilter: '
+                                 'False\" to get rid of this warning.')
                 else:
-                    raise ValueError ('Attempting to set TruthFilter WP based on cut level: \"'
-                                      + self.efficiencyWP + '\" that is not supported.')
-                # Set calibFile and fake rates based on campaign
-                if config.geometry() is LHCPeriod.Run2:
-                    # Run 2 recommendations (MC20)
-                    alg.filterTool.calibFileNomEff = "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/TrackingRecommendations_prelim_rel22.root"
-                    alg.filterTool.fFakeLoose = 0.10
-                    alg.filterTool.fFakeTight = 1.00
-                elif config.geometry() is LHCPeriod.Run3:
-                    if config.campaign() in [Campaign.MC23a, Campaign.MC23d, Campaign.MC23e]:
-                        # 2022/23/24 recommendations (MC23a/d/e)
+                    config.addPrivateTool( 'filterTool', 'InDet::InDetTrackTruthFilterTool' )
+                    config.addPrivateTool( 'filterTool.trackOriginTool', 'InDet::InDetTrackTruthOriginTool' )
+                    # Set working point based on cut level
+                    if self.cutLevel == "Loose":
+                        alg.filterWP = "LOOSE"
+                    elif self.cutLevel == "TightPrimary":
+                        alg.filterWP = "TIGHT"
+                    else:
+                        raise ValueError ('Attempting to set TruthFilter WP based on cut level: \"'
+                                          + self.efficiencyWP + '\" that is not supported.')
+                    # Set calibFile and fake rates based on campaign
+                    if config.geometry() is LHCPeriod.Run2:
+                        # Run 2 recommendations (MC20)
                         alg.filterTool.calibFileNomEff = "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/TrackingRecommendations_prelim_rel22.root"
-                        alg.filterTool.fFakeLoose = 0.40
+                        alg.filterTool.fFakeLoose = 0.10
                         alg.filterTool.fFakeTight = 1.00
+                    elif config.geometry() is LHCPeriod.Run3:
+                        if config.campaign() in [Campaign.MC23a, Campaign.MC23d, Campaign.MC23e]:
+                            # 2022/23/24 recommendations (MC23a/d/e)
+                            alg.filterTool.calibFileNomEff = "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/TrackingRecommendations_prelim_rel22.root"
+                            alg.filterTool.fFakeLoose = 0.40
+                            alg.filterTool.fFakeTight = 1.00
+                        elif not (self.calibFile and self.fFakeLoose and self.fFakeTight):
+                            raise ValueError ('No efficiency recommendations found for campaign \"'
+                                              + config.campaign().value + '\" in Run 3. '
+                                              'Please check that the recommendations exist.')
                     elif not (self.calibFile and self.fFakeLoose and self.fFakeTight):
-                        raise ValueError ('No efficiency recommendations found for campaign \"'
-                                          + config.campaign().value + '\" in Run 3. '
-                                          'Please check that the recommendations exist.')
-                elif not (self.calibFile and self.fFakeLoose and self.fFakeTight):
-                    raise ValueError ('No efficiency recommendations found for geometry \"'
-                                      + config.geometry().value + '\". Please check '
-                                      'the configuration.')
-                # Set custom calibFile, fake rates, or random seed
-                if self.calibFile:
-                    alg.filterTool.calibFileNomEff = self.calibFile
-                if self.fFakeLoose:
-                    alg.filterTool.fFakeLoose = self.fFakeLoose
-                if self.fFakeTight:
-                    alg.filterTool.fFakeTight = self.fFakeTight
-                if self.filterToolSeed:
-                    alg.filterTool.Seed = self.filterToolSeed
-                if self.trkEffSystScale:
-                    alg.filterTool.trkEffSystScale = self.trkEffSystScale
+                        raise ValueError ('No efficiency recommendations found for geometry \"'
+                                          + config.geometry().value + '\". Please check '
+                                          'the configuration.')
+                    # Set custom calibFile, fake rates, or random seed
+                    if self.calibFile:
+                        alg.filterTool.calibFileNomEff = self.calibFile
+                    if self.fFakeLoose:
+                        alg.filterTool.fFakeLoose = self.fFakeLoose
+                    if self.fFakeTight:
+                        alg.filterTool.fFakeTight = self.fFakeTight
+                    if self.filterToolSeed:
+                        alg.filterTool.Seed = self.filterToolSeed
+                    if self.trkEffSystScale:
+                        alg.filterTool.trkEffSystScale = self.trkEffSystScale
         alg.inDetTracks = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
         config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
