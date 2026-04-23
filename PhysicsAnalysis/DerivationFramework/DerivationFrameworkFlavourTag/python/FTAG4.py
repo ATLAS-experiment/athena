@@ -1,88 +1,103 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
-#====================================================================
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+# ====================================================================
 # DAOD_FTAG4.py
-# This defines DAOD_FTAG4, an unskimmed DAOD format for Run 3.
-# It is designed to do free data derivations for calibrations.
-# It requires the flag FTAG4 in Derivation_tf.py   
-#====================================================================
+#
+# PHYS-like DAOD format with a one-lepton skim for calibration studies.
+# Requires the FTAG4 flag in Derivation_tf.py
+# ====================================================================
+
+from __future__ import annotations
+
+from typing import Any, TYPE_CHECKING
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-#from AthenaCommon.Logging import logging
-#logFTAG4 = logging.getLogger('FTAG4')
 
-# Main algorithm config
-def FTAG4KernelCfg(flags, name='FTAG4Kernel', **kwargs):
-    """Configure the derivation framework driving algorithm (kernel) for FTAG4"""
+from DerivationFrameworkPhys.PHYS import PHYSCoreCfg, PHYSKernelCfg
+from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
+from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+    xAODStringSkimmingToolCfg,
+)
+
+if TYPE_CHECKING:
+    from AthenaConfiguration.AthConfigFlags import AthConfigFlags
+
+
+def _get_lepton_skimming_expression() -> str:
+    """Return the FTAG4 one-lepton skimming expression."""
+    muon_quality = "(0 == Muons.muonType || 1 == Muons.muonType || 4 == Muons.muonType)"
+    electron_quality = "((Electrons.Loose) || (Electrons.DFCommonElectronsLHLoose))"
+
+    return (
+        f"count( (Muons.pt > 25*GeV) && {muon_quality} ) "
+        f"+ count(( Electrons.pt > 25*GeV) && {electron_quality}) >= 1"
+    )
+
+
+def FTAG4KernelCfg(
+    flags: AthConfigFlags,
+    name: str = "FTAG4Kernel",
+    **kwargs: Any,
+) -> ComponentAccumulator:
+    """Configure the derivation kernel for FTAG4."""
     acc = ComponentAccumulator()
-    
 
-    from DerivationFrameworkPhys.PHYS import PHYSKernelCfg
-    acc.merge(PHYSKernelCfg(flags, name, StreamName = kwargs['StreamName'], TriggerListsHelper = kwargs['TriggerListsHelper']))
+    acc.merge(
+        PHYSKernelCfg(
+            flags=flags,
+            name=name,
+            StreamName=kwargs["StreamName"],
+            TriggerListsHelper=kwargs["TriggerListsHelper"],
+        )
+    )
 
-    # augmentation tools
-    augmentationTools = []
+    lepton_skimming_tool = acc.getPrimaryAndMerge(
+        xAODStringSkimmingToolCfg(
+            flags=flags,
+            name="FTAG4LeptonSkimmingTool",
+            expression=_get_lepton_skimming_expression(),
+        )
+    )
 
-    # skimming tools
-    skimmingTools = []
-    # filter leptons
-    lepton_skimming_expression = 'count( (Muons.pt > 25*GeV) && (0 == Muons.muonType || 1 == Muons.muonType || 4 == Muons.muonType) ) + count(( Electrons.pt > 25*GeV) && ((Electrons.Loose) || (Electrons.DFCommonElectronsLHLoose))) >= 1'
+    acc.addEventAlgo(
+        CompFactory.DerivationFramework.DerivationKernel(
+            name=name,
+            AugmentationTools=[],
+            SkimmingTools=[lepton_skimming_tool],
+            ThinningTools=[],
+        )
+    )
 
-    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
-        xAODStringSkimmingToolCfg)
-    FTAG4LeptonSkimmingTool = acc.getPrimaryAndMerge(
-        xAODStringSkimmingToolCfg(flags, name = "FTAG4LeptonSkimmingTool",
-                                  expression = lepton_skimming_expression))
-    
-    # thinning tools
-    thinningTools = []
-
-    skimmingTools += [FTAG4LeptonSkimmingTool]
-
-    thinningTools = []
-
-    # Finally the kernel itself
-    DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
-    acc.addEventAlgo(DerivationKernel(name, AugmentationTools = augmentationTools, ThinningTools = thinningTools, SkimmingTools = skimmingTools))
     return acc
 
 
-def FTAG4Cfg(flags):
+def FTAG4Cfg(
+    flags: AthConfigFlags,
+    name_tag: str = "FTAG4",
+) -> ComponentAccumulator:
+    """Configure the full FTAG4 derivation."""
     acc = ComponentAccumulator()
-    
-    # Get the lists of triggers needed for trigger matching.
-    # This is needed at this scope (for the slimming) and further down in the config chain
-    # for actually configuring the matching, so we create it here and pass it down
-    # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
-    #from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    #FTAG4TriggerListsHelper = TriggerListsHelper(flags)
 
-    # the name_tag has to consistent between KernelCfg and CoreCfg
-    FTAG4_name_tag = 'FTAG4'
+    trigger_lists_helper = TriggerListsHelper(flags)
+    stream_name = "StreamDAOD_" + name_tag
 
-    
-    # Get the lists of triggers needed for trigger matching.
-    # This is needed at this scope (for the slimming) and further down in the config chain
-    # for actually configuring the matching, so we create it here and pass it down
-    # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
-    from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    PHYSTriggerListsHelper = TriggerListsHelper(flags)
+    acc.merge(
+        FTAG4KernelCfg(
+            flags=flags,
+            name=name_tag + "Kernel",
+            StreamName=stream_name,
+            TriggerListsHelper=trigger_lists_helper,
+        )
+    )
 
-    # Common augmentations
-    acc.merge(FTAG4KernelCfg(flags,
-        name= FTAG4_name_tag + "Kernel", 
-        StreamName = 'StreamDAOD_'+FTAG4_name_tag,
-        TriggerListsHelper = PHYSTriggerListsHelper,
-        ))
-    
     # PHYS content
-    from DerivationFrameworkPhys.PHYS import PHYSCoreCfg
-    acc.merge(PHYSCoreCfg(flags, 
-        FTAG4_name_tag,
-        StreamName = 'StreamDAOD_'+FTAG4_name_tag,
-        TriggerListsHelper = PHYSTriggerListsHelper,
-        ))
+    acc.merge(
+        PHYSCoreCfg(
+            flags=flags,
+            name_tag=name_tag,
+            StreamName=stream_name,
+            TriggerListsHelper=trigger_lists_helper,
+        )
+    )
 
     return acc
-
-
