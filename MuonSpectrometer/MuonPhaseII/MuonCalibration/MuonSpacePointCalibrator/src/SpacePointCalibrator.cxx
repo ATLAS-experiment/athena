@@ -113,7 +113,8 @@ namespace MuonR4{
         CalibSpacePointPtr calibSP{};
         ATH_MSG_VERBOSE("Calibrate "<<(*spacePoint) <<" -> updated pos "<<Amg::toString(calibSpPos));
         switch (spacePoint->type()) {
-           case xAOD::UncalibMeasType::MdtDriftCircleType: {
+           using enum xAOD::UncalibMeasType;
+           case MdtDriftCircleType: {
                 const Amg::Vector3D locClosestApproach = posInChamb 
                                                        + Amg::intersect<3>(spPos, chDir,
                                                                            posInChamb, dirInChamb).value_or(0) * dirInChamb;
@@ -187,7 +188,7 @@ namespace MuonR4{
                 }
                 break;
            }
-           case xAOD::UncalibMeasType::RpcStripType: {
+           case RpcStripType: {
                 auto* strip = static_cast<const xAOD::RpcMeasurement*>(spacePoint->primaryMeasurement());
 
                 /// Transform the space point into the local frame to calculate the propagation time towards the readout
@@ -221,12 +222,22 @@ namespace MuonR4{
                                 <<", time Uncert: "<<ActsTrk::timeToAthena(std::sqrt(calibSP->covariance()[Acts::toUnderlying(AxisDefs::timeCov)])));
                 break;
            }
-           case xAOD::UncalibMeasType::TgcStripType: {
+           case TgcStripType: {
                 calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos));
+                /// Update the covariance of the strip measurements along the strip
+                if (spacePoint->primaryMeasurement()->measuresPhi()) {
+                    const auto* strip = static_cast<const xAOD::TgcStrip*>(spacePoint->primaryMeasurement());
+                    const Amg::Transform3D toGasGap{strip->readoutElement()->globalToLocalTransform(*gctx, strip->layerHash()) * locToGlob};
+                    const Amg::Vector3D lPos = toGasGap * calibSP->localPosition();
+                    const auto& sensorPlane = strip->readoutElement()->sensorLayout(strip->layerHash());
+                    const auto& radialDesign = strip->readoutElement()->stripLayout(strip->layerHash());
+                    cov[Acts::toUnderlying(AxisDefs::phiCov)] = Acts::square(
+                        radialDesign.stripPitch(strip->channelNumber(), sensorPlane->to2D(lPos,true))) / 12.;
+                }
                 calibSP->setCovariance(cov);
                 break;
            }
-           case xAOD::UncalibMeasType::MMClusterType: {
+           case MMClusterType: {
                 const xAOD::MMCluster* cluster = static_cast<const xAOD::MMCluster*>(spacePoint->primaryMeasurement());
                 Amg::Vector3D globalPos{locToGlob * posInChamb};
                 Amg::Vector3D globalDir{locToGlob.linear() * dirInChamb};
@@ -250,7 +261,7 @@ namespace MuonR4{
                                 
                 break;
            }
-           case xAOD::UncalibMeasType::sTgcStripType: {
+           case sTgcStripType: {
                 const auto* cluster = static_cast<const xAOD::sTgcMeasurement*>(spacePoint->primaryMeasurement());
 
                 // We do not apply any correction for pads or wire only space points

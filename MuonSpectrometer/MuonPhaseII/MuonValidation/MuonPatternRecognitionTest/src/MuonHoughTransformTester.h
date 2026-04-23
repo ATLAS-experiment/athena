@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONVALR4_MuonHoughTransformTester_H
@@ -9,6 +9,7 @@
 #include "AthenaBaseComps/AthHistogramAlgorithm.h"
 
 #include "StoreGate/ReadHandleKeyArray.h"
+#include "StoreGate/ReadDecorHandleKeyArray.h"
 
 // EDM includes 
 #include "xAODMuonSimHit/MuonSimHitContainer.h"
@@ -94,9 +95,17 @@ namespace MuonValR4{
     // // output tree - allows to compare the sim and fast-digitised hits
     MuonVal::MuonTesterTree m_tree{"MuonEtaHoughTest","MuonEtaHoughTransformTest"}; 
 
-    // MDT sim hits in xAOD format 
+    /** @brief Key to the truth segment */
     SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_truthSegmentKey {this, "TruthSegmentKey","MuonTruthSegments", "truth segment container"};
-                                                          
+    /** @brief Declare the dependencies on the decorations */
+    SG::ReadDecorHandleKeyArray<xAOD::MuonSegmentContainer> m_truthSegLinkKeys{this, "TruthSegLinkKeys", {}};
+    /** @brief Name of the decorations for the truth segment */
+    Gaudi::Property<std::vector<std::string>> m_truthLinks{this, "TruthSegLinks", {"simHitLinks", "truthParticleLink"}};
+    /** @brief Key to the xAOD::MuonSegment container */
+    SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_recoSegKey{this, "SegmentKey", "MuonSegmentsFromR4"};
+    /** @brief name of the truth link decorations for the reco segment container */
+    Gaudi::Property<std::vector<std::string>> m_recoSegLinks{this, "RecoSegLinks", {"truthSegmentLink", "truthParticleLink"}};
+    
     SG::ReadHandleKeyArray<MuonR4::SegmentSeedContainer> m_inHoughSegmentSeedKeys{this, "SegmentSeedKeys", {"MuonHoughStationSegmentSeeds"}};
     SG::ReadHandleKeyArray<MuonR4::SegmentContainer> m_inSegmentKeys{this, "SegmentKeys", {"R4MuonSegments"}};
 

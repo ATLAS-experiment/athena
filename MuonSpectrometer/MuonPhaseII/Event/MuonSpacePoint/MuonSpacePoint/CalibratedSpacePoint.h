@@ -1,11 +1,10 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONSPACEPOINT_CALIBSPACEPOINT_H
 #define MUONSPACEPOINT_CALIBSPACEPOINT_H
 
 #include <MuonSpacePoint/SpacePoint.h>
-
 #include "Acts/Utilities/OstreamFormatter.hpp"
 
 namespace MuonR4{
@@ -93,8 +92,15 @@ namespace MuonR4{
             void setFitState(State st);
             /** @brief Returns the local dimension of the measurement */
             unsigned dimension() const;
+            /** @brief Returns whether the space point has a defined chi2 */
+            bool hasChi2() const;
+            /** @brief Returns the cached chi2 term w.r.t. the segment line */
+            double chi2Term() const;
             /** @brief Sets the beamline direction */
             void setBeamDirection(Amg::Vector3D&& beamDir);
+            /** @brief Sets the chi2 term w.r.t. the associated segment
+             *  @param chi2: Chi2 value to be set */
+            void setChi2Term(const double chi2);
 
             friend std::ostream& operator<<(std::ostream& ostr, const CalibratedSpacePoint& sp) {
                     sp.print(ostr);
@@ -120,10 +126,11 @@ namespace MuonR4{
             State m_state{State::Valid};
             /** @brief time flag (By default true for Mdt detectors) */
             bool m_measuresTime{type() == xAOD::UncalibMeasType::MdtDriftCircleType};
+            /** @brief The chi2 term w.r.t the associated segment  */
+            std::optional<double> m_chi2Term{};
         
         };
         static_assert(Acts::Experimental::CompositeSpacePoint<CalibratedSpacePoint>);
 }
 ACTS_OSTREAM_FORMATTER(MuonR4::CalibratedSpacePoint::State);
-
 #endif

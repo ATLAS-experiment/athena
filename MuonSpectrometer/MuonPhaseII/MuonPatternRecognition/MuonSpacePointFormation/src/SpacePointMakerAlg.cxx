@@ -368,9 +368,14 @@ template <typename ContType>
                     const auto& design = stripLayout->design();
                     sensorDir = toSectorTrans.linear() * stripLayout->to3D(design.stripDir(), false);
                     toNextDir = toSectorTrans.linear() * stripLayout->to3D(design.stripNormal(), false);
-                } else {
-                    toNextDir = toSectorTrans.linear().col(Amg::x);
-                    sensorDir = toSectorTrans.linear().col(Amg::y);
+                } else if constexpr (std::is_same_v<xAOD::sTgcMeasContainer, ContType>){
+                    const auto& stripLayout = firstEta->readoutElement()->stripLayer(firstEta->measurementHash());
+                    const auto& design = stripLayout.design(false);
+                    sensorDir = toSectorTrans.linear() * stripLayout.to3D(design.stripDir(), false);
+                    toNextDir = toSectorTrans.linear() * stripLayout.to3D(design.stripNormal(), false);
+                }  else {
+                    ATH_MSG_ERROR("Unsupported container type");
+                    return StatusCode::FAILURE;
                 }               
                 
                 using namespace Acts::detail::LineHelper;
@@ -397,6 +402,15 @@ template <typename ContType>
                         auto cov = Acts::filledArray<double, 3>(0.);
                         cov[Acts::toUnderlying(CovIdx::etaCov)] = etaHits[etaP]->template localCovariance<1>()[0];
                         cov[Acts::toUnderlying(CovIdx::phiCov)] = phiHits[phiP]->template localCovariance<1>()[0];
+                        ///
+                        if constexpr(std::is_same_v<xAOD::TgcStripContainer, ContType>) {
+                            const auto& stripLay = phiHits[phiP]->readoutElement()->sensorLayout(phiHits[phiP]->layerHash());
+                            const auto& radialDesign = static_cast<const MuonGMR4::RadialStripDesign&>(stripLay->design(true));
+                            const Amg::Vector2D planePos = stripLay->to2D(toSectorTrans.inverse()*spIsect.position(), true);
+                            cov[Acts::toUnderlying(CovIdx::phiCov)] =
+                                Acts::square(radialDesign.stripPitch(phiHits[phiP]->channelNumber(), planePos)) / 12.;
+                        }
+
                         newSp.setCovariance(std::move(cov));
                         ATH_MSG_VERBOSE("Created new space point "<<newSp);
                     }

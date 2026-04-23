@@ -59,8 +59,17 @@ namespace MuonValR4 {
             if (m_isMC) infoOpts = EventInfoBranch::isMC;
             m_tree.addBranch(std::make_unique<EventInfoBranch>(m_tree, infoOpts));  
         }
-        
-        ATH_CHECK(m_truthSegmentKey.initialize(!m_truthSegmentKey.empty()));        
+
+        ATH_CHECK(m_recoSegKey.initialize());
+        for (const std::string& recoLink : m_recoSegLinks) {
+            m_truthSegLinkKeys.emplace_back(m_recoSegKey, recoLink);
+        }
+        ATH_CHECK(m_truthSegmentKey.initialize(!m_truthSegmentKey.empty())); 
+        for (const std::string& link: m_truthLinks) {
+            m_truthSegLinkKeys.emplace_back(m_truthSegmentKey, link);
+        }
+        ATH_CHECK(m_truthSegLinkKeys.initialize(!m_truthSegmentKey.empty()));
+
         /// The collection of readHandle keys should be either 1 or 2
         ATH_CHECK(m_inSegmentKeys.initialize());
         ATH_CHECK(m_inHoughSegmentSeedKeys.initialize());
@@ -282,8 +291,8 @@ namespace MuonValR4 {
         m_out_hasTruth = true; 
 
         const Amg::Vector3D segDir{segment->direction()};
-        static const SG::Accessor<float> acc_pt{"pt"};
-        static const SG::Accessor<float> acc_charge{"charge"};
+        static const SG::ConstAccessor<float> acc_pt{"pt"};
+        static const SG::ConstAccessor<float> acc_charge{"charge"};
         // eta is interpreted as the eta-location 
         m_out_gen_Eta = segDir.eta();
         m_out_gen_Phi = segDir.phi();
@@ -475,9 +484,9 @@ namespace MuonValR4 {
         using namespace SegmentFit;
 
         m_out_segment_n = obj.matchedSegments.size(); 
-        for (auto & segment : obj.matchedSegments){
-            m_out_segment_hasPhi.push_back(std::ranges::find_if(segment->measurements(), [](const auto& meas){  return meas->measuresPhi();}) 
-                                !=segment->measurements().end());
+        for (const Segment* segment : obj.matchedSegments){
+            m_out_segment_hasPhi.push_back(std::ranges::any_of(segment->measurements(), 
+                                                [](const auto& meas){  return meas->measuresPhi();}));
             m_out_segment_fitIter.push_back(segment->nFitIterations());
             m_out_segment_truthMatchedHits.push_back(countMatched(obj.truthSegment, segment));
             m_out_segment_chi2.push_back(segment->chi2());
@@ -506,7 +515,10 @@ namespace MuonValR4 {
             std::vector<unsigned char> matched;
             for (const auto & meas : segment->measurements()){
                 // skip dummy measurement from beam spot constraint
-                if (meas->type() == xAOD::UncalibMeasType::Other) continue;
+                ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<" Dump "<<(*meas));
+                if (meas->type() == xAOD::UncalibMeasType::Other) {
+                    continue;
+                }
                 minYhit = std::min(meas->localPosition().y(),minYhit); 
                 maxYhit = std::max(meas->localPosition().y(),maxYhit);
                 if (m_writeSpacePoints) {

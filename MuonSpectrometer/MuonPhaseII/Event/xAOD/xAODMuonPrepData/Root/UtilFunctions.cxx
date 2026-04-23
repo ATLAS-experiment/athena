@@ -196,10 +196,10 @@ namespace xAOD{
             } case TgcStripType: {
                 const auto* wireMeas = static_cast<const TgcStrip*>(etaStrip);
                 const auto* stripMeas = static_cast<const TgcStrip*>(phiStrip);
-            
+
+                const auto& sensorPlane = wireMeas->readoutElement()->sensorLayout(stripMeas->layerHash());
                 const auto& radialDesign = stripMeas->readoutElement()->stripLayout(stripMeas->layerHash());
                 const auto& wireDesign = wireMeas->readoutElement()->wireGangLayout(wireMeas->layerHash());
-                const auto& sensorPlane = wireMeas->readoutElement()->sensorLayout(stripMeas->layerHash());
                 const Amg::Vector3D phiDir = sensorPlane->to3D(radialDesign.stripDir(stripMeas->channelNumber()),true);
                 const Amg::Vector3D etaDir = sensorPlane->to3D(wireDesign.stripDir(), false);
                 // Calculate the combined strip position
@@ -223,10 +223,11 @@ namespace xAOD{
 
                 stereoTrf = (stereoTrf * basisTrf).inverse();
 
-
-
                 cmbCov(1, 1) = wireMeas->localCovariance<1>()(0,0);
-                cmbCov(0, 0) = stripMeas->localCovariance<1>()(0,0);
+                // Do not take the covariance of the radial strip measurement
+                // but update according to the position along the strip
+                cmbCov(0, 0) = Acts::square(radialDesign.stripPitch(stripMeas->channelNumber(),
+                                            sensorPlane->to2D(stripIsect.position(), true))) / 12.;
                 cmbCov = stereoTrf * cmbCov * stereoTrf.transpose();
                 break;
             } case sTgcStripType: {
