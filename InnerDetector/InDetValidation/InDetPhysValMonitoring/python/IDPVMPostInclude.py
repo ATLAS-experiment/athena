@@ -8,6 +8,8 @@
 # "removePRDFromAOD" will remove the MeasurementsAux content from the AOD, which significantly
 # reduces the AOD for ITk.
 
+from InDetPhysValMonitoring.InDetPhysValMonitoringConfig import HardScatterStrategy
+
 def setIDPVMFlags(flags, idpvm_output_file:str='idpvm.root') :
     flags.PhysVal.OutputFileName = idpvm_output_file
 
@@ -20,7 +22,7 @@ def setIDPVMFlags(flags, idpvm_output_file:str='idpvm.root') :
     flags.PhysVal.IDPVM.doTechnicalEfficiency = True
 
     # force the vertex for hgg case
-    if flags.PhysVal.IDPVM.hardScatterStrategy == 3:
+    if flags.PhysVal.IDPVM.hardScatterStrategy == HardScatterStrategy.HYY:
         flags.PhysVal.IDPVM.PrimaryVertexContainer = 'HggPrimaryVertices'
 
     flags.PhysVal.doExample = False

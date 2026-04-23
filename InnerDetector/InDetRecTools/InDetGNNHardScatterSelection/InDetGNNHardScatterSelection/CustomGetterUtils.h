@@ -93,6 +93,7 @@ namespace InDetGNNHardScatterSelection {
             const std::string& name);
           std::pair<NamedSequenceFromConstituents, std::set<std::string>> seqFromConsituents(
             const InputVariableConfig& cfg); 
+          std::vector<std::string> m_sequenceNames;
           std::vector<NamedSequenceFromConstituents> m_sequencesFromConstituents;
         };
     }
