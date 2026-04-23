@@ -1,7 +1,9 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetTrackSystematicsTools package
-from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.ComponentFactory import CompFactory
+from AnaAlgorithm.DualUseConfig import isAthena
+if isAthena:
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    from AthenaConfiguration.ComponentFactory import CompFactory
 from Campaigns.Utils import Campaign
 from AthenaCommon.Logging import logging
 

@@ -214,6 +214,18 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (containerName='AnaTauJets')
     config.setOptions (prefix='truth_')
 
+    # InDetTracks
+    config.addBlock ('InDetTracks')
+    config.setOptions (containerName='AnaTracks')
+    config.setOptions (minPt=500)
+    config.setOptions (maxEta=2.5)
+    config.setOptions (outputTrackSummaryInfo=True)
+    # InDetTracks.WorkingPoint
+    config.addBlock ('InDetTracks.WorkingPoint')
+    config.setOptions (containerName='AnaTracks')
+    config.setOptions (selectionName='tight')
+    config.setOptions (cutLevel='TightPrimary')
+
     config.addBlock ('SystObjectLink')
     config.setOptions (containerName='AnaJets')
     config.addBlock ('SystObjectLink')
@@ -241,6 +253,9 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (selectionName='medium')
     config.addBlock ('ObjectCutFlow')
     config.setOptions (containerName='AnaTauJets')
+    config.setOptions (selectionName='tight')
+    config.addBlock ('ObjectCutFlow')
+    config.setOptions (containerName='AnaTracks')
     config.setOptions (selectionName='tight')
 
     # GeneratorLevelAnalysis
@@ -353,6 +368,10 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (containerName='AnaLargeRJets')
     config.setOptions (outputName='OutLargeRJets')
     config.addBlock ('Thinning')
+    config.setOptions (containerName='AnaTracks')
+    config.setOptions (selectionName='tight')
+    config.setOptions (outputName='OutTracks')
+    config.addBlock ('Thinning')
     config.setOptions (containerName='TruthElectrons')
     config.setOptions (skipOnData=True)
     config.setOptions (outputName='OutTruthElectrons')
@@ -446,6 +465,7 @@ SAVE
         'jet_': 'OutJets',
         'larger_jet_': 'OutLargeRJets',
         'met_': 'AnaMET',
+        'trk_': 'OutTracks',
         '': 'EventInfo'}
     outputContainersForMC = {'truth_mu_' : 'OutTruthMuons',
                              'truth_el_' : 'OutTruthElectrons',
