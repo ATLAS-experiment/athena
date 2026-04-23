@@ -20,6 +20,37 @@ def egammaForwardBuilderCfg(flags, name='egammaForwardElectron', **kwargs):
         kwargs["doTrackMatching"] = True
         kwargs["doCookieCutting"] = True
         kwargs.setdefault("TrackMatchBuilderTool", acc.popToolsAndMerge(EMTrackMatchBuilderCfg(flags)))
+        if "forwardelectronNNselectors" not in kwargs:
+            LooseFwdElectronSelector_NN = AsgForwardElectronSelectorToolCfg(
+                flags,
+                "LooseForwardNNElectronSelector",
+                "Loose")
+            MediumFwdElectronSelector_NN = AsgForwardElectronSelectorToolCfg(
+                flags,
+                "MediumForwardNNElectronSelector",
+                "Medium")
+            TightFwdElectronSelector_NN = AsgForwardElectronSelectorToolCfg(
+                flags,
+                "TightForwardNNElectronSelector",
+                "Tight")
+
+            kwargs.setdefault("forwardelectronNNselectors",
+                              [LooseFwdElectronSelector_NN.popPrivateTools(),
+                               MediumFwdElectronSelector_NN.popPrivateTools(),
+                               TightFwdElectronSelector_NN.popPrivateTools()])
+            kwargs.setdefault(
+                "forwardelectronNNselectorResultNames",
+                ["Loose", "Medium", "Tight"])
+            acc.merge(LooseFwdElectronSelector_NN)
+            acc.merge(MediumFwdElectronSelector_NN)
+            acc.merge(TightFwdElectronSelector_NN)
+        
+            kwargs["dopTCal"] = True
+            forward_elecpTCalib = AsgForwardElectronCalibrationToolCfg (flags,
+                                                                    "forwardelectronNNpTCalib")
+            kwargs.setdefault("forwardelectronNNCalib",forward_elecpTCalib.popPrivateTools())
+
+
     if "forwardelectronIsEMselectors" not in kwargs:
         LooseFwdElectronSelector = AsgForwardElectronIsEMSelectorCfg(
             flags,
@@ -46,41 +77,7 @@ def egammaForwardBuilderCfg(flags, name='egammaForwardElectron', **kwargs):
         acc.merge(MediumFwdElectronSelector)
         acc.merge(TightFwdElectronSelector)
 
-    if "forwardelectronNNselectors" not in kwargs:
-        LooseFwdElectronSelector_NN = AsgForwardElectronSelectorToolCfg(
-            flags,
-            "LooseForwardNNElectronSelector",
-            "Loose")
-        MediumFwdElectronSelector_NN = AsgForwardElectronSelectorToolCfg(
-            flags,
-            "MediumForwardNNElectronSelector",
-            "Medium")
-        TightFwdElectronSelector_NN = AsgForwardElectronSelectorToolCfg(
-            flags,
-            "TightForwardNNElectronSelector",
-            "Tight")
 
-
-    
-
-        kwargs.setdefault("forwardelectronNNselectors",
-                          [LooseFwdElectronSelector_NN.popPrivateTools(),
-                          MediumFwdElectronSelector_NN.popPrivateTools(),
-                          TightFwdElectronSelector_NN.popPrivateTools()])
-        kwargs.setdefault(
-            "forwardelectronNNselectorResultNames",
-            ["Loose", "Medium", "Tight"])
-
-        acc.merge(LooseFwdElectronSelector_NN)
-        acc.merge(MediumFwdElectronSelector_NN)
-        acc.merge(TightFwdElectronSelector_NN)
-        
-    forward_elecpTCalib = AsgForwardElectronCalibrationToolCfg (flags,
-                                          "forwardelectronNNpTCalib")
-
-    kwargs.setdefault("forwardelectronNNCalib",forward_elecpTCalib.popPrivateTools())
-
-    kwargs["dopTCal"] = True
 
     if "ObjectQualityTool" not in kwargs and not flags.Common.isOnline:
         egOQ = egammaOQFlagsBuilderCfg(flags)
