@@ -91,7 +91,6 @@ print(currentGlobal)
 _EOF4_
 
 globalTag=`python getGlobalTag.py | awk '{print($1)}'`
-#globalTag="COMCOND-BLKPA-006-01"
 
 echo "Found current global tag $globalTag"
 
@@ -107,7 +106,8 @@ fi
 echo "Running athena to compute new HV corrections"
 echo parameters are " $time $run $lb -g $globalTag ""$@"  
 python -m LArCalibProcessing.LArCalib_HVCorrConfig $time $run $lb -g $globalTag "$@" > hv.log 2>&1
-#athena.py -c "date=\"${time}\";GlobalTag=\"${globalTag}\""  LArCalibProcessing/LArCalib_Example_HVCorr.py > hv.log 2>&1
+# for low mu:
+#python -m LArCalibProcessing.LArCalib_HVCorrConfig $time $run $lb -g $globalTag --isHI "$@" > hv.log 2>&1
 if [ $? -ne 0 ];  then
       echo "Athena reported an error ! Please check hv.log!"
       exit
