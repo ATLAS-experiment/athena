@@ -16,7 +16,7 @@ namespace xAOD{
      *         the fitting infrastructre. By convention, the combined Muon strip returns the same measurement
      *         type as the prds that they're carrying but the dimension is always zero providing a handle
      *         to properly distinguish them in the SpacePointCalibrator without the useage of dynamic_casts */
-    class CombinedMuonStrip_v1 : public UncalibratedMeasurement {
+    class CombinedMuonStrip_v1 : public MuonMeasurement_v1 {
         public:
             /** @brief Empty constructor */
             CombinedMuonStrip_v1() = default;
@@ -34,6 +34,16 @@ namespace xAOD{
             const xAOD::MuonMeasurement* secondaryStrip() const;
             /** @brief Linkt a prd measurement as secondary measurement */
             void setSecondaryStrip(const xAOD::MuonMeasurement* meas);
+            /** @brief Returns the associated readout element */
+            const MuonGMR4::MuonReadoutElement* readoutElement() const override final;
+            /** @brief Returns whether the phi coordinate is measured */
+            virtual std::uint8_t measuresPhi() const override final;
+            /** @brief Returns the hash of the measurement channel */
+            virtual IdentifierHash measurementHash() const override final;
+            /** @brief Returns the hash of the associated layer (Needed for surface retrieval)*/
+            virtual  IdentifierHash layerHash() const override final;
+            /** @brief Returns the local measurement position in the layer frame */
+            Amg::Vector3D localMeasurementPos() const override final;
     };
 }
 

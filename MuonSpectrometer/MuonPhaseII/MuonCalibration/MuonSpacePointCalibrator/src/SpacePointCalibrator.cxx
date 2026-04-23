@@ -392,7 +392,8 @@ namespace MuonR4{
                                                     ActsTrk::MutableTrackContainer::TrackStateProxy state) const {
         const auto sl = ActsTrk::detail::xAODUncalibMeasCalibrator::pack(combinedPrd);
 
-        auto [cmbPos, cmbCov] = xAOD::positionAndCovariance(combinedPrd);
+        Amg::Vector2D cmbPos = xAOD::toEigen(combinedPrd->localPosition<2>());
+        AmgSymMatrix(2) cmbCov = xAOD::toEigen(combinedPrd->localCovariance<2>());
         if (combinedPrd->type() == xAOD::UncalibMeasType::RpcStripType) {
             if (m_useRpcTime) {
                 ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Implement me");
@@ -430,7 +431,7 @@ namespace MuonR4{
         
         } else {
             THROW_EXCEPTION("Undefined uncalibrated measurement "
-                            <<m_idHelperSvc->toString(xAOD::identify(combinedPrd)));
+                            <<m_idHelperSvc->toString(combinedPrd->identify()));
         }
     }
     void SpacePointCalibrator::calibrateSourceLink(const Acts::GeometryContext& geoctx,

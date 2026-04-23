@@ -91,6 +91,9 @@ namespace MuonR4{
 
                 cmbMeas->setPrimaryStrip(m1);
                 cmbMeas->setSecondaryStrip(m2);
+                const auto [locPos, locCov] = xAOD::positionAndCovariance(m1, m2);
+                cmbMeas->localCovariance<2>() = xAOD::toStorage(locCov);
+                cmbMeas->localPosition<2>() = xAOD::toStorage(locPos);
                 const Identifier id1{m1->identify()}, id2{m2->identify()};
                 ATH_MSG_VERBOSE("Combine "<<m_idHelperSvc->toString(id1)
                                 <<" & "<<m_idHelperSvc->toString(id2));

@@ -31,9 +31,6 @@ namespace xAOD{
     /** @brief Transforms the uncalibrated measurement type to a technology index
         @param aodType Uncalibrated measurement type */
     ::Muon::MuonStationIndex::TechnologyIndex toTechnologyIndex(const UncalibMeasType aodType);
-    /** @brief Returns the position and covariance from a combined strip measurement
-     *  @param combinedPrd: Combined strip measurement */
-    std::pair<Amg::Vector2D, AmgSymMatrix(2)> positionAndCovariance(const CombinedMuonStrip* combinedPrd);
     /** @brief Returns the position and covariance from two single strip measurements
      *  @param etaStrip: Pointer to the eta strip measurement
      *  @param phiStrip: Pointer to the phi stirp measurement */
