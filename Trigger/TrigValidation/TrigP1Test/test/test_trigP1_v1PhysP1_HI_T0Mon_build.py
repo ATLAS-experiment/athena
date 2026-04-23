@@ -58,6 +58,8 @@ recoHPPreExec = ';'.join([f"flags.Trigger.triggerMenuSetup=\'{triggermenu}\'",
                            "flags.Trigger.AODEDMSet=\'AODFULL\'", 
                            "flags.Reco.HIMode=HIMode.HI",
                            "flags.Input.ProjectName='data23_hi'",
+                           "flags.Trigger.CTP.UseEDMxAOD=False",
+                           "flags.Trigger.CTP.UseRoibROB=True",
                            ])
 
 monPreExec = ';'.join([
@@ -102,6 +104,8 @@ recoUPCPreExec = ';'.join([f"flags.Trigger.triggerMenuSetup=\'{triggermenu}\'",
                            "flags.Trigger.AODEDMSet=\'AODFULL\'",
                            "flags.Reco.HIMode=HIMode.UPC",
                            "flags.Input.ProjectName='data23_hi'",
+                           "flags.Trigger.CTP.UseEDMxAOD=False",
+                           "flags.Trigger.CTP.UseRoibROB=True",
                            ])
 
 reco_upc = ExecStep.ExecStep('Tier0RecoUPC')

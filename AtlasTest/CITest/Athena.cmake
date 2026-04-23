@@ -65,7 +65,7 @@ atlas_add_citest( OverlayRun3DataChain
 #################################################################################
 
 atlas_add_citest( RecoRun2Data
-   SCRIPT RunWorkflowTests_Run2.py --CI -r -w DataReco -e '--maxEvents 25 --conditionsTag CONDBR2-BLKPA-RUN2-11 --preExec pass' )
+   SCRIPT RunWorkflowTests_Run2.py --CI -r -w DataReco -e '--maxEvents 25 --conditionsTag CONDBR2-BLKPA-RUN2-13 --preExec pass' )
 
 atlas_add_citest( RecoRun2MC
 	SCRIPT RunWorkflowTests_Run2.py --CI -r -w MCReco --threads 0 -e '--maxEvents 25 --conditionsTag OFLCOND-MC16-SDR-RUN2-12' )
