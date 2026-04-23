@@ -272,6 +272,17 @@ def L1TriggerByteStreamDecoderCfg(flags):
         decoderTools += [gFexByteStreamTool]
         maybeMissingRobs += gFexByteStreamTool.ROBIDs  # Allow the data to be missing during commissioning of the phase-1 L1Calo (2022)
 
+      else:
+        gFexByteStreamTool = acc.popToolsAndMerge(gFexByteStreamToolCfg(
+          flags,
+          'gFexBSDecoderTool',
+          writeBS=False,
+          multiSlice=True,
+          TOBs=False
+        ))
+        decoderTools += [gFexByteStreamTool]
+        maybeMissingRobs += gFexByteStreamTool.ROBIDs  # Allow the data to be missing during commissioning of the phase-1 L1Calo (2022)
+
       # Input towers decoding
       if flags.Trigger.L1.doCaloInputs:
         gFexInputByteStreamTool = acc.popToolsAndMerge(gFexInputByteStreamToolCfg(
