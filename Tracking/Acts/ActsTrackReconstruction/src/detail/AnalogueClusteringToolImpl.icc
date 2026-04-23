@@ -67,15 +67,15 @@ AnalogueClusteringToolImpl<calib_data_t, traj_t>::anglesOfIncidence(const Acts::
     // to ensure that referenceFrame can be called with dummy direction and position
     assert(dynamic_cast<const Acts::PlaneSurface *>(&surface) != nullptr);
     static const Acts::Vector3 dummy=Acts::Vector3::Zero();
-    Acts::Vector3 projection = surface.referenceFrame(gctx, dummy,dummy) * direction;
+    Acts::Vector3 projection = surface.referenceFrame(gctx, dummy,dummy).transpose() * direction;
 #ifndef NDEBUG
     float projPhi = direction.dot(element.phiAxis());
     float projEta = direction.dot(element.etaAxis());
     float projNorm = direction.dot(element.normal());
+    assert( std::abs(projection[0] - projPhi)   < std::abs(projPhi)  * std::numeric_limits<float>::epsilon() *2.);
+    assert( std::abs(projection[1] - projEta)   < std::abs(projEta)  * std::numeric_limits<float>::epsilon() *2.);
+    assert( std::abs(projection[2] - projNorm)  < std::abs(projNorm) * std::numeric_limits<float>::epsilon() *2.);
 #endif
-    assert( std::abs(projection[0] - projPhi)   < projPhi  * std::numeric_limits<float>::epsilon() *2.);
-    assert( std::abs(projection[1] - projEta)   < projEta  * std::numeric_limits<float>::epsilon() *2.);
-    assert( std::abs(projection[2] - projNorm)  < projNorm * std::numeric_limits<float>::epsilon() *2.);
 
     double anglePhi = std::atan2(projection[0], projection[2]);
     double angleEta = std::atan2(projection[1], projection[2]);
@@ -89,7 +89,7 @@ AnalogueClusteringToolImpl<calib_data_t, traj_t>::anglesOfIncidence(const Acts::
     }
 
     // settle the sign/pi periodicity issues
-    float thetaloc;
+    double thetaloc;
     if (angleEta > -0.5 * M_PI && angleEta < M_PI / 2.) {
       thetaloc = M_PI_2 - angleEta;
     } else if (angleEta > M_PI_2 && angleEta < M_PI) {
@@ -101,10 +101,10 @@ AnalogueClusteringToolImpl<calib_data_t, traj_t>::anglesOfIncidence(const Acts::
 
     
     // Subtract the Lorentz angle effect
-    float angleShift = m_lorentzAngleTool->getTanLorentzAngle(element.identifyHash(), Gaudi::Hive::currentContext());
+    double angleShift = m_lorentzAngleTool->getTanLorentzAngle(element.identifyHash(), Gaudi::Hive::currentContext());
     anglePhi = std::atan(std::tan(anglePhi) - element.design().readoutSide() * angleShift);
 
-    return std::make_pair(anglePhi, angleEta);
+    return std::make_pair(static_cast<float>(anglePhi), static_cast<float>(angleEta));
 }
 
 
