@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 /*
@@ -118,10 +118,8 @@ namespace GlobalSim {
 							    const CaloNoise& noise) const{
     
     for (const auto& roi : rois) {
-      //kill low energy RoIs
-      if(roi->et() > 5000){ // MeV
-	CHECK(findNeighborhood_RowAware(roi, cells, neighborhoodTOBs, noise));
-      }
+      ATH_MSG_DEBUG("roi et " << roi->et());
+      CHECK(findNeighborhood_RowAware(roi, cells, neighborhoodTOBs, noise));
     }
     
     return StatusCode::SUCCESS;
@@ -287,6 +285,8 @@ namespace GlobalSim {
     // per adjacent RoI phi indices.
     auto neigh_cells = std::vector<std::vector<const CaloCell*>>(3);
 
+    ATH_MSG_DEBUG("Window: " << neigh_cells.size());
+    
     const CaloCell* max_cell{*(*max_row)};
     const auto  max_cell_eta = max_cell->eta();
 

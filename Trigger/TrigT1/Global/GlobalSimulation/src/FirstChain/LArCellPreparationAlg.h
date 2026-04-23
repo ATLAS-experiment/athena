@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef GLOBALSIM_LARCELLPREPARATIONALG_H
@@ -24,6 +24,9 @@
 #include <vector>
 #include <boost/dynamic_bitset.hpp>
 
+//forward declarations for ID helpers                                                                                 
+class CaloCell_ID;
+
 namespace GlobalSim {
 
   class LArCellPreparationAlg : public AthReentrantAlgorithm { 
@@ -38,6 +41,8 @@ namespace GlobalSim {
 
   private:
 
+    const CaloCell_ID*     m_calocell_id{};
+    
     /** @brief Function to simulate the cell energy as seen by Global */
     std::pair<float,boost::dynamic_bitset<>> encodeEnergy(float energy) const;
     /** @brief Function to simulate the truncation of overflowing FEB2s */

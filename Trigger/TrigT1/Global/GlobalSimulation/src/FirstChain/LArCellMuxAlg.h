@@ -51,7 +51,7 @@ namespace GlobalSim {
     /** @brief Function that compiles the MUX to GEP bitstream and writes it to file */
     StatusCode writeMuxOutputBitstream(const Feb2BitsetMap& feb2Bitsets, const xAOD::EventInfo& eventInfo, const GlobalSim::GlobalLArCellContainer& gblLArCells) const;
     /** @brief Function which compiles the bitset for one particular FEB2 */
-    std::bitset<FEB2_BITSTREAM_SIZE> assembleBitsetForFeb2(const std::vector<GlobalSim::GlobalLArCell*>& cells, std::size_t maxCells, bool inOverflow, bool inError, uint32_t bcid) const;
+    std::bitset<FEB2_BITSTREAM_SIZE> assembleBitsetForFeb2(const std::vector<std::shared_ptr<GlobalSim::GlobalLArCell>>& cells, std::size_t maxCells, bool inOverflow, bool inError, uint32_t bcid) const;
     /** Helper function to append a bitset or vector of bools at a specific position in another bitset */
     template <std::size_t N, typename T> static std::size_t appendBits(std::bitset<N>& target, const T& src, std::size_t pos);
 

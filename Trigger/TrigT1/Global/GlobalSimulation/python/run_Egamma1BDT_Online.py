@@ -79,24 +79,42 @@ if __name__ == '__main__':
     from CaloRec.CaloTopoClusterConfig import CaloTopoClusterCfg
     caloconditions = CaloTopoClusterCfg(flags)
     acc.merge(caloconditions)
-        
-    # add in the Algortihm to build a  LArStrip Neighborhood container
-    from  GlobalSimulation.Egamma1_LArStrip_Fex_RowAwareCfg import (
-        Egamma1_LArStrip_Fex_RowAwareCfg,
-        )
-    acc.merge(Egamma1_LArStrip_Fex_RowAwareCfg(flags,
-                                               OutputLevel=DEBUG,
-                                               makeCaloCellContainerChecks=False,
-                                               dump=False,
-                                               dumpTerse=False))
 
+    # Add algorithm to prepare LAr cells for Global
+    from  GlobalSimulation.LArCellPreparationAlgCfg import LArCellPreparationAlgCfg
+    gblLArCellContainerKey = "GlobalLArCells"
+    acc.merge(LArCellPreparationAlgCfg(flags,
+                               NumberOfEnergyBits = 6,
+                               ValueLeastSignificantBit = 40,
+                               ValueGainFactor = 4,
+                               gblLArCellsKey = gblLArCellContainerKey,
+                               OutputLevel=DEBUG))
+
+    
+    # add in the Algortihm to build an online GlobalLArStrip Neighborhood container
+    from  GlobalSimulation.Egamma1_OnlineMapNbhoodCfg import (
+        Egamma1_OnlineMapNbhoodCfg,
+        )
+    acc.merge(Egamma1_OnlineMapNbhoodCfg(flags,
+                                          OutputLevel=DEBUG,
+                                          makeCaloCellContainerChecks=False,
+                                          dump=True,
+                                          dumpTerse=False))
+
+    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    acc.merge(OutputStreamCfg(flags, 'AOD', ["std::vector<float>#eFEXeta"]))
+    acc.merge(OutputStreamCfg(flags, 'AOD', ["std::vector<float>#eFEXphi"]))
+    acc.merge(OutputStreamCfg(flags, 'AOD', ["std::vector<float>#FailedeFEXeta"]))
+    acc.merge(OutputStreamCfg(flags, 'AOD', ["std::vector<float>#FailedeFEXphi"]))
+    
+    acc.getService("MessageSvc").debugLimit = 100000000
+    
     # add in the EgammaBDT Algorithm to be run
     from GlobalSimulation.GlobalSimAlgCfg_Egamma1BDT  import GlobalSimulationAlgCfg
     acc.merge(GlobalSimulationAlgCfg(flags,
                                      OutputLevel=DEBUG,
                                      dump=False))
 
-    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     acc.merge(OutputStreamCfg(flags, 'AOD', ["std::vector<float>#eGamma1BDT"]))
     
     if acc.run().isFailure():

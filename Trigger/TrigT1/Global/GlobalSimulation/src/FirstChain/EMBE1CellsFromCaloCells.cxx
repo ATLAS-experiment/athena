@@ -1,28 +1,27 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "EMB1CellsFromCaloCells.h"
+#include "EMBE1CellsFromCaloCells.h"
 
 namespace GlobalSim {
 
-  EMB1CellsFromCaloCells::EMB1CellsFromCaloCells(const std::string& type,
+  EMBE1CellsFromCaloCells::EMBE1CellsFromCaloCells(const std::string& type,
 						 const std::string& name,
 						 const IInterface* parent):
     base_class(type, name, parent){
   }
 
-  StatusCode EMB1CellsFromCaloCells::initialize() {
+  StatusCode EMBE1CellsFromCaloCells::initialize() {
     CHECK(m_caloCellsKey.initialize());
     return StatusCode::SUCCESS;
   }
   
   StatusCode
-  EMB1CellsFromCaloCells::cells(std::vector<const CaloCell*>& cells,
+  EMBE1CellsFromCaloCells::cells(std::vector<const CaloCell*>& cells,
 				const EventContext& ctx) const {
     
     // Read in a container containing all CaloCells
-
     SG::ReadHandle<CaloCellContainer> h_caloCells;    
 
     h_caloCells = SG::makeHandle(m_caloCellsKey, ctx);
@@ -38,16 +37,20 @@ namespace GlobalSim {
     }
 
   
-    // lambda to select EMB1 cells
-    auto EMB1_sel = [](const CaloCell* cell) {
-      return cell->caloDDE()->getSampling() == CaloCell_Base_ID::EMB1;
+    // lambda to select EMB1 and EME1 cells
+    auto EMBE1_sel = [](const CaloCell* cell) {
+      if (cell->caloDDE()->getSampling() == CaloCell_Base_ID::EMB1 || cell->caloDDE()->getSampling() == CaloCell_Base_ID::EME1){
+	return true;
+      } else {
+	return false;
+      }
     };
     
 
     std::copy_if(allCaloCells.beginConstCalo(CaloCell_ID::LAREM),
 		 allCaloCells.endConstCalo(CaloCell_ID::LAREM),
 		 std::back_inserter(cells),
-		 EMB1_sel);
+		 EMBE1_sel);
     
    
     return StatusCode::SUCCESS;

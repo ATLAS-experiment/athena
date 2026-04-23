@@ -47,7 +47,7 @@ namespace GlobalSim {
     // tool to get a vector of cal cells
     ToolHandle<ICaloCellsProducer> m_cellProducer{this,
 	"caloCellProducer",
-	"GlobalSim::EMB1CellFromCaloCells",
+	"GlobalSim::EMBE1CellsFromCaloCells",
 	"AlgTool to provide a vector of CaloCells"
 	};
 

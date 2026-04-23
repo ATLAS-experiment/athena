@@ -11,7 +11,7 @@ logger.setLevel(DEBUG)
 def Egamma1_LArStrip_FexCfg(
         flags,
         name='Egamma1_LArStrip_Fex',
-        caloCellProducer="EMB1CellsFromCaloCells",
+        caloCellProducer="EMBE1CellsFromCaloCells",
         dump=False,
         dumpTerse=False,
         makeCaloCellContainerChecks=True,
@@ -22,8 +22,8 @@ def Egamma1_LArStrip_FexCfg(
 
     alg = CompFactory.GlobalSim.Egamma1_LArStrip_Fex(name)
 
-    if caloCellProducer == "EMB1CellsFromCaloCells":
-        caloCellProducer = CompFactory.GlobalSim.EMB1CellsFromCaloCells()
+    if caloCellProducer == "EMBE1CellsFromCaloCells":
+        caloCellProducer = CompFactory.GlobalSim.EMBE1CellsFromCaloCells()
         caloCellProducer.makeCaloCellContainerChecks = makeCaloCellContainerChecks
         if flags.Input.isMC:
             caloCellProducer.caloCells = "AllCalo"
@@ -34,7 +34,10 @@ def Egamma1_LArStrip_FexCfg(
         return cfg
 
     roiAlgTool = CompFactory.GlobalSim.eFexRoIAlgTool()
-            
+    roiAlgTool.etMin = 5000.
+    roiAlgTool.etaMin = 0.2
+    roiAlgTool.etaMax = 1.4
+    
     alg.caloCellProducer = caloCellProducer
     alg.roiAlgTool = roiAlgTool
 
