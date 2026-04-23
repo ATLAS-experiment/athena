@@ -50,8 +50,8 @@ tzrecoPreExec = ' '.join([
   "flags.DQ.Steering.HLT.doMinBias=True;",
   "flags.DQ.Steering.HLT.doMuon=True;",
   "flags.DQ.Steering.HLT.doTau=True;",
-  "flags.Trigger.CTP.UseEDMxAOD=False",
-  "flags.Trigger.CTP.UseRoibROB=True",
+  "flags.Trigger.CTP.UseEDMxAOD=False;",
+  "flags.Trigger.CTP.UseRoibROB=True;",
 ])
 
 tzreco = ExecStep.ExecStep('Tier0Reco')
