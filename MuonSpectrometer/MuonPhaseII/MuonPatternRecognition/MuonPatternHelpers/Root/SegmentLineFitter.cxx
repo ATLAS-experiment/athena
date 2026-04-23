@@ -61,23 +61,6 @@ namespace MuonR4::SegmentFit{
                             return a->type() == xAOD::UncalibMeasType::Other;
                         }), hits.end());
         }
-        /** @brief Copy the hit vector */
-        HitVec_t copy(const HitVec_t& hits) {
-            HitVec_t copied{};
-            copied.reserve(hits.size());
-            std::ranges::transform(hits, std::back_inserter(copied), 
-                                    [](const Hit_t& hit) { 
-                                        return std::make_unique<CalibratedSpacePoint>(*hit);
-                                    });
-            return copied;
-        }
-        Result_t copy(const Result_t& toCopy) {
-            Result_t toRet{};
-            using FitPars_t = SegmentLineFitter::FitPars_t;
-            static_cast<FitPars_t&>(toRet) = toCopy;
-            toRet.measurements = copy(toCopy.measurements);
-            return toRet;
-        }
     } 
     SegmentLineFitter::Config::RangeArray 
         SegmentLineFitter::Config::defaultRanges() {
@@ -159,7 +142,7 @@ namespace MuonR4::SegmentFit{
             beamSpotSP->setCovariance(std::move(covariance));
             ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": Beam spot constraint "
                             <<Amg::toString(beamSpotSP->localPosition())<<", "<<beamSpotSP->covariance());
-            calibHits.push_back(std::move(beamSpotSP));
+            calibHits.emplace_back(std::move(beamSpotSP));
         }
         ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__ <<": Start segment fit with parameters "
                 <<toString(startPars) <<", plane location: "<<Amg::toString(localToGlobal)
@@ -208,13 +191,13 @@ namespace MuonR4::SegmentFit{
         if (m_cfg.visionTool) {
             Result_t preFit{};
             preFit.parameters = startPars;
-            preFit.measurements = copy(calibHits);
+            preFit.measurements = calibHits;
             auto seedCopy = convertToSegment(localToGlobal, parent, std::move(preFit));
             m_cfg.visionTool->visualizeSegment(ctx, *seedCopy, "Prefit");
         }
         Result_t segFit = callLineFit(cctx, startPars, localToGlobal, std::move(calibHits));
         if (m_cfg.visionTool && segFit.converged) {
-            auto seedCopy = convertToSegment(localToGlobal, parent, copy(segFit));
+            auto seedCopy = convertToSegment(localToGlobal, parent, Result_t{segFit});
             m_cfg.visionTool->visualizeSegment(ctx, *seedCopy, "Intermediate fit"); 
         }
         if (!removeOutliers(cctx, *parent, localToGlobal,
@@ -312,7 +295,7 @@ namespace MuonR4::SegmentFit{
             fitResult = std::move(newAttempt);
              if (m_cfg.visionTool) {
                 const EventContext& ctx{*cctx.get<const EventContext*>()};
-                auto seedCopy = convertToSegment(localToGlobal, &seed, copy(fitResult));
+                auto seedCopy = convertToSegment(localToGlobal, &seed, Result_t{fitResult});
                 m_cfg.visionTool->visualizeSegment(ctx, *seedCopy, "Bad fit recovery");
             }
         } else {
@@ -514,21 +497,20 @@ namespace MuonR4::SegmentFit{
         ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": Found "<<hasCandidate<<" space points for recovery. ");
 
 
-        HitVec_t copied = copy(toRecover.measurements);
-        HitVec_t copiedCandidates = copy(candidateHits);
+        HitVec_t hitsForRecovery = toRecover.measurements;
         /// Remove the beamspot constraint measurement
         if (m_cfg.doBeamSpot) {
-            removeBeamSpot(copied);
+            removeBeamSpot(hitsForRecovery);
         }
 
-        candidateHits.insert(candidateHits.end(), 
-                             std::make_move_iterator(copied.begin()), 
-                             std::make_move_iterator(copied.end()));
+        hitsForRecovery.insert(hitsForRecovery.end(), 
+                               candidateHits.begin(),
+                               candidateHits.end());
 
-        cleanStripLayers(candidateHits);
+        cleanStripLayers(hitsForRecovery);
 
         Result_t recovered = callLineFit(cctx, toRecover.parameters, localToGlobal, 
-                                         std::move(candidateHits));
+                                         std::move(hitsForRecovery));
        
         /// If the chi2 is less than 5, no outlier rejection is launched. 
         /// So also accept any recovered segment below that threshold
@@ -542,23 +524,23 @@ namespace MuonR4::SegmentFit{
             stripOutliers.reserve(toRecover.measurements.size());
             /** Next check whether the recovery made measurements marked 
              *  as outlier feasable to the hole recovery*/
-            unsigned recovLoop{(copiedCandidates.size() != hasCandidate)*m_cfg.nRecoveryLoops};
+            unsigned recovLoop{(candidateHits.size() != hasCandidate)*m_cfg.nRecoveryLoops};
             while (++recovLoop <= m_cfg.nRecoveryLoops) {   
                 ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": Enter recovery loop "<<recovLoop<<".");
-                copied = copy(toRecover.measurements);
+                hitsForRecovery = toRecover.measurements;
                 // Remove the beamspot
                 if (m_cfg.doBeamSpot) {
-                    removeBeamSpot(copied);
+                    removeBeamSpot(hitsForRecovery);
                 }
                 // Check whether an outlier can be lifted to on-track
-                for (HitVec_t::value_type& copyHit : copied) {
-                    if (copyHit->fitState() != HitState::Outlier) {
+                for (HitVec_t::value_type& hit : hitsForRecovery) {
+                    if (hit->fitState() != HitState::Outlier) {
                         continue;
                     }
-                    if (copyHit->chi2Term() < Acts::square(m_cfg.recoveryPull)) {
-                        ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": Try to recover outlier "<<(*copyHit));
-                        copyHit->setFitState(HitState::Valid);
-                        stripOutliers.push_back(copyHit.get());
+                    if (hit->chi2Term() < Acts::square(m_cfg.recoveryPull)) {
+                        ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": Try to recover outlier "<<(*hit));
+                        hit->setFitState(HitState::Valid);
+                        stripOutliers.push_back(hit.get());
                     } 
                 }
                 // Nothing to recover
@@ -567,7 +549,7 @@ namespace MuonR4::SegmentFit{
                     break;
                 }
                 // Ensure that only one hit per layer is fit
-                cleanStripLayers(copied);
+                cleanStripLayers(hitsForRecovery);
                 // Recovery turned out to be duplicates on the same layer
                 if (std::ranges::none_of(stripOutliers,[](const CalibratedSpacePoint* sp){
                         return sp->fitState() == HitState::Valid;
@@ -577,7 +559,7 @@ namespace MuonR4::SegmentFit{
                 }
                 ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": Start fit without the outliers.");
                 stripOutliers.clear();
-                recovered = callLineFit(cctx, toRecover.parameters, localToGlobal, std::move(copied));
+                recovered = callLineFit(cctx, toRecover.parameters, localToGlobal, std::move(hitsForRecovery));
                 if (!betterResult(recovered, toRecover)) {
                     break;
                 }
@@ -585,7 +567,7 @@ namespace MuonR4::SegmentFit{
                 toRecover = std::move(recovered);
             }
         } else{
-            for (HitVec_t::value_type& hit : copiedCandidates) {
+            for (HitVec_t::value_type& hit : candidateHits) {
                 hit->setFitState(HitState::Outlier);
                 toRecover.measurements.push_back(std::move(hit));
             }
