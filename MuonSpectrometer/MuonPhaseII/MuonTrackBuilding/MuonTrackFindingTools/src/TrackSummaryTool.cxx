@@ -37,7 +37,7 @@ namespace MuonR4 {
                     status = Stat_t::Hole;
                 }
                 if (state.hasUncalibratedSourceLink()) {
-                    const auto* uncalib = xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());
+                    const auto* uncalib = dynamic_cast<const xAOD::MuonMeasurement*>(xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink()));
                     // for the combined sTgc space point we have to fill the primary and secondary measuremment seperately to resolve the strip/pad/wire combinations
                     if(uncalib->type() == xAOD::UncalibMeasType::sTgcStripType && uncalib->numDimensions() == 0){
                         const auto* combinedMeas = dynamic_cast<const xAOD::CombinedMuonStrip*>(uncalib);
@@ -45,7 +45,7 @@ namespace MuonR4 {
                         incrementSummary(combinedMeas->secondaryStrip()->identify(), status, combinedMeas->secondaryStrip()->numDimensions(), summary);
                         
                     } else {
-                        incrementSummary(xAOD::identify(uncalib), status, uncalib->numDimensions(), summary);
+                        incrementSummary(uncalib->identify(), status, uncalib->numDimensions(), summary);
                     }
                 } else if (state.hasReferenceSurface()) {
                     const Acts::Surface& surf{state.referenceSurface()};
@@ -143,7 +143,7 @@ namespace MuonR4 {
                 const std::size_t nHits = nMeasurements(*seg);
                 for (std::size_t hit = 0; hit < nHits; ++hit) {
                     Stat_t state = isOutlierMeasurement(*seg, hit) ? Stat_t::Outlier : Stat_t::OnTrack;
-                    const auto* uncalibMeas = getMeasurement(*seg, hit);
+                    const auto* uncalibMeas = dynamic_cast<const xAOD::MuonMeasurement*>(getMeasurement(*seg, hit));
                     // for the combined sTgc space point we have to fill the primary and secodnray measuremment seperately to resolve the strip/pad/wire combinations
                     if(uncalibMeas->type() == xAOD::UncalibMeasType::sTgcStripType && uncalibMeas->numDimensions() == 0){
                         const auto* combinedMeas = static_cast<const xAOD::CombinedMuonStrip*>(uncalibMeas);
@@ -151,7 +151,7 @@ namespace MuonR4 {
                         incrementSummary(combinedMeas->secondaryStrip()->identify(), state, combinedMeas->secondaryStrip()->numDimensions(), summary);
                         
                     } else {
-                        incrementSummary(xAOD::identify(uncalibMeas), state, uncalibMeas->numDimensions(), summary);
+                        incrementSummary(uncalibMeas->identify(), state, uncalibMeas->numDimensions(), summary);
                     }
                 }
             }

@@ -156,10 +156,9 @@ namespace  MuonValR4 {
             /// Combined pseudo measurement 
             case 0:{
                 const auto* cmbMeas = static_cast<const xAOD::CombinedMuonStrip*>(meas);
-                const auto [locPos2D, locCov2D] = xAOD::positionAndCovariance(cmbMeas);
-                dX = std::sqrt(locCov2D(0,0));
-                dY = std::sqrt(locCov2D(1,1));
-                locPos.block<2,1>(0,0) = locPos2D;
+                dX = std::sqrt(cmbMeas->localCovariance<2>()(0,0));
+                dY = std::sqrt(cmbMeas->localCovariance<2>()(1,1));
+                locPos.block<2,1>(0,0) = xAOD::toEigen(cmbMeas->localPosition<2>());
                 break;
             } case 1:{
                 /// Check whether the measurement is a phi measurement or not

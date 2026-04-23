@@ -48,4 +48,25 @@ namespace xAOD {
         const auto* cont = static_cast<const xAOD::MuonMeasurementContainer*>(meas->container());
         acc_secondLink(*this) = Link_t{*cont, meas->index()};
     }
+
+    const MuonGMR4::MuonReadoutElement* CombinedMuonStrip_v1::readoutElement() const {
+        const  xAOD::MuonMeasurement*  strip =  primaryStrip();
+        return strip ? strip->readoutElement() : nullptr;
+    }
+    std::uint8_t CombinedMuonStrip_v1::measuresPhi() const {
+        return 1;
+    }
+    IdentifierHash CombinedMuonStrip_v1::measurementHash() const {
+        const  xAOD::MuonMeasurement*  strip =  primaryStrip();
+        return strip ? strip->measurementHash() : IdentifierHash{};
+    }
+    IdentifierHash CombinedMuonStrip_v1::layerHash() const {
+        const  xAOD::MuonMeasurement*  strip =  primaryStrip();
+        return strip ? strip->layerHash() : IdentifierHash{}; 
+    }
+      Amg::Vector3D CombinedMuonStrip_v1::localMeasurementPos() const {
+            Amg::Vector3D pos{Amg::Vector3D::Zero()};
+            pos.block<2,1>(0,0) = xAOD::toEigen(localPosition<2>());
+            return pos;
+      }
 }

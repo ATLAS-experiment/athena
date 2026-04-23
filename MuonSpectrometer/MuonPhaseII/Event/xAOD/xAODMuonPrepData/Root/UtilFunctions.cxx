@@ -48,10 +48,7 @@ namespace xAOD{
 
 
     const Identifier& identify(const UncalibratedMeasurement* meas) {
-        static const Identifier& dummyId{};
-        if (meas->numDimensions() == 0) {
-            return static_cast<const CombinedMuonStrip*>(meas)->primaryStrip()->identify();
-        }
+        static const Identifier& dummyId{};       
         const auto* muon = dynamic_cast<const MuonMeasurement*>(meas);
         return  muon ? muon->identify() : dummyId;
     }
@@ -101,11 +98,6 @@ namespace xAOD{
         }
     }
     
-    std::pair<Amg::Vector2D, AmgSymMatrix(2)> 
-        positionAndCovariance(const CombinedMuonStrip* combinedPrd) {
-        return positionAndCovariance(combinedPrd->primaryStrip(), 
-                                     combinedPrd->secondaryStrip());
-    }
     
     std::pair<Amg::Vector2D, AmgSymMatrix(2)> positionAndCovariance(const MuonMeasurement* oneDimMeas) {
         /** @brief dummy value to assign to the non-sensitive part of the covariance */
