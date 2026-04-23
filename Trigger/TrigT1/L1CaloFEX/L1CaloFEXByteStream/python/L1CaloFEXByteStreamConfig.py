@@ -150,7 +150,7 @@ def jFexRoiByteStreamToolCfg(flags, name, *, writeBS=False, xTOBs=False):
   return acc
 
  
-def gFexByteStreamToolCfg(flags, name, *, writeBS=False, multiSlice=False):
+def gFexByteStreamToolCfg(flags, name, *, writeBS=False, multiSlice=False, TOBs=True):
   acc = ComponentAccumulator()
   tool = CompFactory.gFexByteStreamTool(name)
   gfex_roi_moduleids = [0x3000]
@@ -201,20 +201,22 @@ def gFexByteStreamToolCfg(flags, name, *, writeBS=False, multiSlice=False):
     tool.gScalarENoiseCutOutputContainerReadKey         =""
     tool.gScalarERmsOutputContainerReadKey              =""
     
-    
-    tool.gFexRhoOutputContainerWriteKey                 ="L1_gFexRhoRoI"
-    tool.gFexSRJetOutputContainerWriteKey               ="L1_gFexSRJetRoI"
-    tool.gFexLRJetOutputContainerWriteKey               ="L1_gFexLRJetRoI"
-    tool.gScalarEJwojOutputContainerWriteKey            ="L1_gScalarEJwoj"
+    # When TOBs=False, standard L1A containers are disabled (empty write keys).
+    # They are already provided by the HLT result deserialiser.
+    # Only gEspresso, gRistretto and multi-slice (OutOfTime) containers are decoded.
+    tool.gFexRhoOutputContainerWriteKey                 ="L1_gFexRhoRoI" if TOBs else ""
+    tool.gFexSRJetOutputContainerWriteKey               ="L1_gFexSRJetRoI" if TOBs else ""
+    tool.gFexLRJetOutputContainerWriteKey               ="L1_gFexLRJetRoI" if TOBs else ""
+    tool.gScalarEJwojOutputContainerWriteKey            ="L1_gScalarEJwoj" if TOBs else ""
     tool.gEspressoOutputContainerWriteKey               ="L1_gEspresso"
     tool.gRistrettoOutputContainerWriteKey              ="L1_gRistretto"
-    tool.gMETComponentsJwojOutputContainerWriteKey      ="L1_gMETComponentsJwoj"
-    tool.gMHTComponentsJwojOutputContainerWriteKey      ="L1_gMHTComponentsJwoj"
-    tool.gMSTComponentsJwojOutputContainerWriteKey      ="L1_gMSTComponentsJwoj"
-    tool.gMETComponentsNoiseCutOutputContainerWriteKey  ="L1_gMETComponentsNoiseCut"
-    tool.gMETComponentsRmsOutputContainerWriteKey       ="L1_gMETComponentsRms"
-    tool.gScalarENoiseCutOutputContainerWriteKey        ="L1_gScalarENoiseCut"
-    tool.gScalarERmsOutputContainerWriteKey             ="L1_gScalarERms"
+    tool.gMETComponentsJwojOutputContainerWriteKey      ="L1_gMETComponentsJwoj" if TOBs else ""
+    tool.gMHTComponentsJwojOutputContainerWriteKey      ="L1_gMHTComponentsJwoj" if TOBs else ""
+    tool.gMSTComponentsJwojOutputContainerWriteKey      ="L1_gMSTComponentsJwoj" if TOBs else ""
+    tool.gMETComponentsNoiseCutOutputContainerWriteKey  ="L1_gMETComponentsNoiseCut" if TOBs else ""
+    tool.gMETComponentsRmsOutputContainerWriteKey       ="L1_gMETComponentsRms" if TOBs else ""
+    tool.gScalarENoiseCutOutputContainerWriteKey        ="L1_gScalarENoiseCut" if TOBs else ""
+    tool.gScalarERmsOutputContainerWriteKey             ="L1_gScalarERms" if TOBs else ""
 
     # Multi-slice containers (out-of-time TOBs from slices 1,2)
     if multiSlice:
