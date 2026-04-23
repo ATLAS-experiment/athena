@@ -65,7 +65,7 @@ AnalogueClusteringToolImpl<calib_data_t, traj_t>::anglesOfIncidence(const Acts::
                                                                     const Acts::Vector3& direction) const
 {
     // to ensure that referenceFrame can be called with dummy direction and position
-    assert(dynamic_cast<Acts::PlaneSurface *>(&surface) != nullptr);
+    assert(dynamic_cast<const Acts::PlaneSurface *>(&surface) != nullptr);
     static const Acts::Vector3 dummy=Acts::Vector3::Zero();
     Acts::Vector3 projection = surface.referenceFrame(gctx, dummy,dummy) * direction;
 #ifndef NDEBUG
