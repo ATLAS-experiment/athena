@@ -66,18 +66,21 @@ mkdir build
 cd build
 #
 
-# If asetup didn't give us CUDACXX (only at CERN?), select cuda-12 in preference to cuda-13.
-if [ -z "$CUDACXX" -a -x "/usr/local/cuda-12/bin/nvcc" ]; then
-  cuda_root=$(readlink -e "/usr/local/cuda-12")
-  echo "Use nvcc from $cuda_root"
-  export CUDACXX="${cuda_root}/bin/nvcc"
-  export CMAKE_PREFIX_PATH="${cuda_root}/targets/x86_64-linux/:${CMAKE_PREFIX_PATH}"
+if [ -z "$CUDACXX" ] && type -t nvcc >/dev/null; then
+  export CUDACXX=$(type -p nvcc)
+fi
+
+echo "CUDACXX=$CUDACXX"
+echo "PANDA_RESOURCE=$PANDA_RESOURCE"
+if [ -n "$CUDACXX" ]; then
+  "$CUDACXX" --version
 fi
 
 cmake ../traccc-athena -DTRACCC_USE_SYSTEM_ACTS=ON
 rc=$?
 echo "G-200 cmake result: $rc"
-if [ $rc != 0 ]; then exit $rc; fi
+### Let's see if we can continue, even with a cmake error...
+# if [ $rc != 0 ]; then exit $rc; fi
 #
 make -j4
 rc=$?
