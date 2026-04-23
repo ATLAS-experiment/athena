@@ -277,6 +277,11 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
     EMFourMomBuilder::calculate(*el);
     ATH_CHECK(ExecObjectQualityTool(ctx, el));
 
+    if (m_dopTCal)
+      {
+	double DNN_pT=m_forwardElectronpTCalib->calibrate(ctx,el);
+	el->setPt(DNN_pT);
+      }
     
     // Apply the Forward Electron selectors.
     for (size_t i = 0; i < m_forwardElectronIsEMSelectors.size(); ++i) {
@@ -293,7 +298,6 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
 
     
 
-    std::cout<<"before selector"<<std::endl;
 	
     // Apply the Forward Electron selectors.
     for (size_t i = 0; i < m_forwardElectronNNSelectors.size(); ++i) {
@@ -310,13 +314,6 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
     float val=selector->calculate(ctx,el);
     el->setLikelihoodValue(val,LikeliHoodName);
 
-    if (m_dopTCal)
-      {
-	std::cout<<"before Calib"<<std::endl;
-	double DNN_pT=m_forwardElectronpTCalib->calibrate(ctx,el);
-	std::cout<<"The new pT DNN is "<<DNN_pT<<" Before it was "<<el->pt()<<std::endl;
-	el->setPt(DNN_pT);
-      }
     
   }//end of loop over egammaRecs
 
