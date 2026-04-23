@@ -75,7 +75,8 @@ namespace MuonR4 {
             SG::ReadCondHandleKey<Muon::TgcCablingMap> m_cablingTgcKey{this, "TgcCablingKey", "MuonTgc_CablingMap"};
             /** @brief Instantiate a new transform cache to ensure lazy transform population in the event processing */
             Gaudi::Property<bool> m_splitTrfCache{this, "splitTrfCache", false, ""};
-
+            /** @brief Dump the volumes from which the region selector tables are built  */
+            Gaudi::Property<bool> m_dumpObjVolumes{this, "dumpObjVolumes", false};
     };
 }
 #endif // MuonRegSelCondAlg_h
