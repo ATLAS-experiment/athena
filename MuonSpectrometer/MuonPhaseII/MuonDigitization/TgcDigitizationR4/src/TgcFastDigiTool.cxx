@@ -101,7 +101,8 @@ namespace MuonR4 {
             ATH_MSG_VERBOSE("Reject hit due to dead map constraint");
             return false;
         }
-        ATH_MSG_VERBOSE("Convert simulated hit "<<m_idHelperSvc->toString(digitId)<<" located at "
+        ATH_MSG_VERBOSE("Convert simulated hit "<<m_idHelperSvc->toString(digitId)
+                      <<", pdgId: "<<timedHit->pdgId()<<", located at "
                       <<Amg::toString(locSimHitPos, 2)<<" wire group number: "<<prdWireNum<<", time: "<<hitTime(timedHit)
                       <<" wiregroup pos "<<Amg::toString(design.center(prdWireNum).value_or(Amg::Vector2D::Zero()), 2));
         outColl.push_back(std::make_unique<TgcDigit>(digitId, associateBCIdTag(ctx, timedHit)));
@@ -149,17 +150,9 @@ namespace MuonR4 {
                         <<m_idHelperSvc->toStringGasGap(hitId)<<". "<<design);
             return false;
         }
-        /// Vector pointing perpendicular to the strips
-        const Amg::Vector2D stripNorm{design.stripNormal(stripNum)};
-        
         /// From the local sim hit walk to the left & to the right strip edge. The sum of the two steps is the 
         /// pitch at that position
-        const double stripPitch = std::abs(*Amg::intersect<2>(design.stripLeftBottom(stripNum), design.stripLeftEdge(stripNum),
-                                                              locSimHitPos, stripNorm)) +
-                                  std::abs(*Amg::intersect<2>(design.stripRightBottom(stripNum), design.stripRightEdge(stripNum),
-                                                              locSimHitPos, stripNorm));
-
-        const double uncert = stripPitch / std::sqrt(12);
+        const double uncert = design.stripPitch(stripNum, locSimHitPos) / std::sqrt(12);
         const double locX = CLHEP::RandGaussZiggurat::shoot(rndEngine, locSimHitPos.x(), uncert);
         /// Recalculate the strip number with the smeared hit -> Use the real Y to ensure that the 
         /// hit remains within the active trapzoid
@@ -185,9 +178,10 @@ namespace MuonR4 {
             ATH_MSG_VERBOSE("Reject hit due to dead time constraint.");
             return false;
         }
-        ATH_MSG_VERBOSE("Convert simulated hit "<<m_idHelperSvc->toString(digitId)<<" located at "
-                        <<Amg::toString(locSimHitPos, 2)<<" phi strip number: "<<digitStripNum<<", time: "<<hitTime(timedHit)
-                        <<" strip position "<<Amg::toString(design.center(digitStripNum).value_or(Amg::Vector2D::Zero()), 2));
+        ATH_MSG_VERBOSE("Convert simulated hit "<<m_idHelperSvc->toString(digitId)
+                    <<", pdgId: "<<timedHit->pdgId()<<", located at "
+                    <<Amg::toString(locSimHitPos, 2)<<" phi strip number: "<<digitStripNum<<", time: "<<hitTime(timedHit)
+                    <<" strip position "<<Amg::toString(design.center(digitStripNum).value_or(Amg::Vector2D::Zero()), 2));
 
         outColl.push_back(std::make_unique<TgcDigit>(digitId, associateBCIdTag(ctx, timedHit)));
 

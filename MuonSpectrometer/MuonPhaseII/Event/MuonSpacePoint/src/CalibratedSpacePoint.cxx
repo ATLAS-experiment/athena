@@ -50,6 +50,12 @@ namespace MuonR4{
         CalibratedSpacePoint::covariance() const {
         return m_cov;
     }
+
+    bool CalibratedSpacePoint::hasChi2() const { return m_chi2Term != std::nullopt; }
+    double CalibratedSpacePoint::chi2Term() const { return m_chi2Term.value_or(std::numeric_limits<double>::max()); }
+    void CalibratedSpacePoint::setChi2Term(const double chi2) {
+        m_chi2Term = chi2;
+    }
     bool CalibratedSpacePoint::hasTime() const { return m_measuresTime; }
     bool CalibratedSpacePoint::measuresLoc0() const { return measuresPhi(); }
     bool CalibratedSpacePoint::measuresLoc1() const { return measuresEta(); } 
@@ -104,5 +110,8 @@ namespace MuonR4{
             <<"/"<<boolToStr(measuresPhi())<<"/"<<boolToStr(hasTime());
         ostr<<", covariance (eta/phi/time): ("<<m_cov[Acts::toUnderlying(CovIdx::etaCov)]<<", "
              <<m_cov[Acts::toUnderlying(CovIdx::phiCov)]<<", "<<m_cov[Acts::toUnderlying(CovIdx::timeCov)]<<")";
+        if (hasChi2()) {
+            ostr<<", pull: "<<std::sqrt(chi2Term());
+        }
     }
 }
