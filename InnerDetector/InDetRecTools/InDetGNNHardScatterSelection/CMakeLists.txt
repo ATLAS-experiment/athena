@@ -36,6 +36,7 @@ atlas_add_library( InDetGNNHardScatterSelectionLib
     InDetPhysValMonitoringLib
     PhotonVertexSelectionLib
     TrackVertexAssociationToolLib
+    xAODParticleEvent
 )
 
 

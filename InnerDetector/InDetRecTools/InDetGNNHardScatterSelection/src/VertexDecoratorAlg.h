@@ -21,6 +21,7 @@
 #include <InDetTruthVertexValidation/IInDetVertexTruthMatchTool.h>
 #include <InDetGNNHardScatterSelection/GNNTool.h>
 #include <TrackVertexAssociationTool/TrackVertexAssociationTool.h>
+#include <xAODParticleEvent/CompositeParticleContainer.h>
 
 /**
  * @class VertexDecoratorAlg
@@ -87,6 +88,12 @@ private:
       this, "electronLinks", "", "" };
     SG::WriteDecorHandleKey<xAOD::VertexContainer> m_muonLinksKey{
       this, "muonLinks", "", "" };
+    
+    SG::WriteHandleKey<xAOD::CompositeParticleContainer> m_multiPhotonsOutKey{
+      this, "multiPhotonsOut", "MultiPhotons", "Output container for multi-photon node"};
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_multiPhotonLinksKey{
+      this, "multiPhotonLinks", "multiPhotonLinks", "Per-vertex link(s) to multi-photon node"};
+
 
     SG::ReadDecorHandleKey<xAOD::VertexContainer> m_deltaZKey{
       this, "deltaZKey", "", "" };
@@ -112,6 +119,7 @@ private:
         this, "gnnTool",
         "InDetGNNHardScatterSelection/GNNTool",
         "GNN tool to use"};
+
   };
 } // namespace InDetGNNHardScatterSelection
 

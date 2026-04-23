@@ -15,20 +15,49 @@
 #include "InDetGNNHardScatterSelection/MuonsLoader.h"
 #include "InDetGNNHardScatterSelection/IParticlesLoader.h"
 
-#include <fstream>
+#include <algorithm>
+#include <cfenv>
+#include <cmath>
+#include <array>
+#include <sstream>
+#include <stdexcept>
 
 namespace InDetGNNHardScatterSelection {
 
   GNN::GNN(const std::string& nn_file):
-    m_saltModel(nullptr)
+    m_saltModel(nullptr),
+    m_modelPath(),
+    m_input_node_name()
   {
 
     // Load and initialize the neural network model from the given file path.
     std::string fullPathToOnnxFile = PathResolverFindCalibFile(nn_file);
+    m_modelPath = fullPathToOnnxFile;
     m_saltModel = std::make_shared<FlavorTagInference::SaltModel>(fullPathToOnnxFile);
-
-    // Extract metadata from the ONNX file, primarily about the model's inputs.
     auto graph_config = m_saltModel->getGraphConfig();
+
+    // Vertex tensor key for runInference: must match InputNodeConfig::name in embedded gnn_config
+    // (same metadata SaltModel uses for graph_config).
+    std::vector<std::string> input_node_names;
+    input_node_names.reserve(graph_config.inputs.size());
+    for (const auto& node : graph_config.inputs) {
+      input_node_names.push_back(node.name);
+    }
+
+    if (std::find(input_node_names.begin(), input_node_names.end(), "vertice_features") != input_node_names.end()) {
+      m_input_node_name = "vertice_features";
+    } else if (std::find(input_node_names.begin(), input_node_names.end(), "vertex_features") != input_node_names.end()) {
+      m_input_node_name = "vertex_features";
+    } else if (graph_config.inputs.size() == 1) {
+      m_input_node_name = graph_config.inputs.front().name;
+    } else {
+      std::ostringstream msg;
+      msg << "Unsupported scalar vertex input name in model '" << nn_file << "'. Graph config inputs: ";
+      for (const auto& name : input_node_names) {
+        msg << name << " ";
+      }
+      throw std::runtime_error(msg.str());
+    }
 
     // Create configuration objects for data preprocessing.
     auto [inputs, constituents_configs] = dataprep::createGetterConfig(graph_config);
@@ -65,11 +94,12 @@ namespace InDetGNNHardScatterSelection {
       // the node's output name will be used to define the decoration name
       std::string dec_name = outNode.name;
       m_decorators.vertexFloat.emplace_back(outNode.name, Dec<float>(dec_name));
+      if (outNode.name == "salt_phsvertex") {
+        m_decorators.vertexFloat.emplace_back("salt_phsvertex", Dec<float>("HSGN2_phsvertex"));
+      }
     }
   }
 
-  GNN::GNN(GNN&&) = default;
-  GNN::GNN(const GNN&) = default;
   GNN::~GNN() = default;
 
   void GNN::decorate(const xAOD::Vertex& vertex) const {
@@ -82,28 +112,50 @@ namespace InDetGNNHardScatterSelection {
 
     std::vector<float> vertex_feat;
     vertex_feat.reserve(m_varsFromVertex.size());
-for (const auto& getter: m_varsFromVertex) {
+    for (const auto& getter: m_varsFromVertex) {
       vertex_feat.push_back(getter(vertex).second);
     }
     std::vector<int64_t> vertexfeat_dim = {1, static_cast<int64_t>(vertex_feat.size())};
 
+    for (const auto& value : vertex_feat) {
+      if (!std::isfinite(value)) {
+        throw std::runtime_error("Non-finite scalar vertex input before runInference");
+      }
+    }
+
     FlavorTagInference::Inputs vertex_info (vertex_feat, vertexfeat_dim);
-    gnn_input.insert({"vertex_features", vertex_info});
+    gnn_input.insert({m_input_node_name, vertex_info});
+    // Provide common scalar aliases to absorb metadata/model naming mismatches.
+    constexpr std::array<const char*, 4> scalar_input_aliases = {
+      "vertice_features", "vertex_features", "vertice_var", "vertex_var"
+    };
+    for (const char* alias : scalar_input_aliases) {
+      gnn_input.insert({alias, vertex_info});
+    }
 
     for (const auto& loader : m_constituentsLoaders){
       auto [sequence_name, sequence_data, sequence_constituents] = loader->getData(vertex);
       gnn_input.insert({sequence_name, sequence_data});
+      const std::string legacy_sequence_name = loader->getName();
+      if (legacy_sequence_name != sequence_name) {
+        gnn_input.insert({legacy_sequence_name, sequence_data});
+      }
     }
 
     // run inference
     // -------------
-    auto [out_f, out_vc, out_vf] = m_saltModel->runInference(gnn_input);
+    // Clear sticky flags around inference so they do not propagate to FPEAuditor.
+    std::feclearexcept(FE_ALL_EXCEPT);
+    const FlavorTagInference::InferenceOutput inference_output =
+      m_saltModel->runInference(gnn_input);
+    const auto& out_f = inference_output.singleFloat;
 
     // decorate outputs
     // ----------------
     for (const auto& dec: m_decorators.vertexFloat) {
       dec.second(vertex) = out_f.at(dec.first);
     }
+    std::feclearexcept(FE_ALL_EXCEPT);
   } // end of decorate()
 
 } // end of namespace InDetGNNHardScatterSelection

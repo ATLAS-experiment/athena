@@ -37,11 +37,17 @@ def GNNHSSelectionAlgCfg(flags, input, minPt):
         selectionTool = cfg.popToolsAndMerge(
             AsgPtEtaSelectionToolCfg(flags, minPt = minPt))
     
+    selection_outputs = [
+        ("SG::AuxVectorBase", f"StoreGateSvc+{input}.selectPtEta"),
+        ("xAOD::IParticleContainer", f"StoreGateSvc+{input}.selectPtEta"),
+    ]
+
     cfg.addEventAlgo(CompFactory.CP.AsgSelectionAlg(
         name = "GNNHS_"+input+"_SelectionAlg",
         selectionTool = selectionTool,
         selectionDecoration = "selectPtEta,as_char",
-        particles = input))
+        particles = input,
+        ExtraOutputs = selection_outputs))
 
     return cfg
 
@@ -89,17 +95,52 @@ def GNNHSOverlapRemovalAlgCfg(flags, name="GNNHS_OverlapRemovalAlg",
         kwargs.setdefault(obj, overlapInputNames[obj])
         kwargs.setdefault(obj+"Decoration", kwargs["OutputLabel"] + ",as_char")
 
+    extraInputs = set(kwargs.get("ExtraInputs", set()))
+    for inputContainer in overlapInputNames.values():
+        extraInputs.add(("xAOD::IParticleContainer", f"StoreGateSvc+{inputContainer}.selectPtEta"))
+    kwargs["ExtraInputs"] = list(extraInputs)
+
+    overlap_outputs = [
+        ("SG::AuxVectorBase", f"StoreGateSvc+{overlapInputNames['jets']}.passesOR"),
+        ("xAOD::IParticleContainer", f"StoreGateSvc+{overlapInputNames['jets']}.passesOR"),
+        ("SG::AuxVectorBase", f"StoreGateSvc+{overlapInputNames['electrons']}.passesOR"),
+        ("xAOD::IParticleContainer", f"StoreGateSvc+{overlapInputNames['electrons']}.passesOR"),
+        ("SG::AuxVectorBase", f"StoreGateSvc+{overlapInputNames['muons']}.passesOR"),
+        ("xAOD::IParticleContainer", f"StoreGateSvc+{overlapInputNames['muons']}.passesOR"),
+        ("SG::AuxVectorBase", f"StoreGateSvc+{overlapInputNames['photons']}.passesOR"),
+        ("xAOD::IParticleContainer", f"StoreGateSvc+{overlapInputNames['photons']}.passesOR"),
+    ]
+
     kwargs.setdefault("overlapTool", cfg.popToolsAndMerge(GNNHSOverlapRemovalToolCfg(flags)))
     
-    cfg.addEventAlgo(CompFactory.CP.OverlapRemovalAlg(name, **kwargs))
+    cfg.addEventAlgo(CompFactory.CP.OverlapRemovalAlg(name, ExtraOutputs=overlap_outputs, **kwargs))
+
+    or_container_types = {
+        "jets": ["xAOD::JetContainer", "xAOD::IParticleContainer"],
+        "electrons": ["xAOD::ElectronContainer", "xAOD::IParticleContainer"],
+        "muons": ["xAOD::MuonContainer", "xAOD::IParticleContainer"],
+        "photons": ["xAOD::PhotonContainer", "xAOD::EgammaContainer", "xAOD::IParticleContainer"],
+    }
 
     for obj in overlapInputNames:
+        output_name = overlapOutputNames[obj]
+        view_outputs = [("xAOD::AuxContainerBase", f"StoreGateSvc+{output_name}Aux.")]
+        for out_type in or_container_types[obj]:
+            view_outputs.append((out_type, f"StoreGateSvc+{output_name}"))
+        view_outputs.extend([
+            ("SG::AuxVectorBase", f"StoreGateSvc+{output_name}.passesOR"),
+            ("xAOD::IParticleContainer", f"StoreGateSvc+{output_name}.passesOR"),
+            ("SG::AuxVectorBase", f"StoreGateSvc+{output_name}.selectPtEta"),
+            ("xAOD::IParticleContainer", f"StoreGateSvc+{output_name}.selectPtEta"),
+        ])
+
         cfg.addEventAlgo(CompFactory.CP.AsgViewFromSelectionAlg(
             name = "GNNHS_"+obj+"_ORSelectionAlg",
             input = overlapInputNames[obj],
-            output = overlapOutputNames[obj],
+            output = output_name,
             selection = [kwargs["OutputLabel"]+",as_char"],
-            deepCopy = True))
+            deepCopy = True,
+            ExtraOutputs = view_outputs))
     
     return cfg
 
@@ -117,9 +158,10 @@ def GNNHSVertexDecoratorAlgCfg(flags, name="GNNHS_VertexDecoratorAlg", **kwargs)
     kwargs.setdefault("photonsIn", "Photons")
 
     if "gnnTool" not in kwargs:
+
         kwargs.setdefault("gnnTool", cfg.popToolsAndMerge(
             GNNToolCfg(flags,
-                       nnFile="InDetGNNHardScatterSelection/v0/HSGN2_export_090824.onnx")))
+                       nnFile="InDetGNNHardScatterSelection/v1.2/HSGNN_baseline_v1.2.onnx")))
 
     if "TrackVertexAssociationTool" not in kwargs:
         from TrackVertexAssociationTool.TrackVertexAssociationToolConfig import TTVAToolCfg
@@ -139,18 +181,28 @@ def GNNHSVertexDecoratorAlgCfg(flags, name="GNNHS_VertexDecoratorAlg", **kwargs)
         )
 
 
-    cfg.addEventAlgo(
-        CompFactory.InDetGNNHardScatterSelection.VertexDecoratorAlg(name, **kwargs))
+    vertex_extra_inputs = set(kwargs.get("ExtraInputs", set()))
+    for cont in ["electronsIn", "muonsIn", "photonsIn", "jetsIn"]:
+        if cont in kwargs:
+            vertex_extra_inputs.add(("xAOD::IParticleContainer", f"StoreGateSvc+{kwargs[cont]}"))
+    if "photonsIn" in kwargs:
+        photons_key = kwargs["photonsIn"]
+        vertex_extra_inputs.update({
+            ("xAOD::IParticleContainer", f"StoreGateSvc+{photons_key}.zCommon"),
+            ("xAOD::IParticleContainer", f"StoreGateSvc+{photons_key}.caloPointingZ"),
+            ("xAOD::IParticleContainer", f"StoreGateSvc+{photons_key}.zCommonError"),
+        })
+    kwargs["ExtraInputs"] = list(vertex_extra_inputs)
+
+    cfg.addEventAlgo(CompFactory.InDetGNNHardScatterSelection.VertexDecoratorAlg(name, **kwargs))
     return cfg
         
 
 # Global Sequence
-def GNNSequenceCfg(flags, **kwargs):
+def GNNSequenceCfg(flags, doOverlapRemoval=True):
     cfg = ComponentAccumulator()
 
-    sysSvc = CompFactory.CP.SystematicsSvc("SystematicsSvc")
     selectionSvc = CompFactory.CP.SelectionNameSvc("SelectionNameSvc")
-    cfg.addService(sysSvc)
     cfg.addService(selectionSvc)
 
     inputCollections = {
@@ -175,18 +227,38 @@ def GNNSequenceCfg(flags, **kwargs):
         cfg.merge(GNNHSSelectionAlgCfg(flags, input = inputCollections[obj],
                                        minPt = ptThresholds[obj]))
 
-    overlapOutputNames = {
-        "muons": f'{inputCollections["muons"]}_OR',
-        "electrons": f'{inputCollections["electrons"]}_OR',
-        "photons": f'{inputCollections["photons"]}_OR',
-        "jets": f'{inputCollections["jets"]}_OR',
-    }
-
-    cfg.merge(GNNHSOverlapRemovalAlgCfg(flags, overlapInputNames = inputCollections,
-                                        overlapOutputNames = overlapOutputNames))
+    if doOverlapRemoval:
+        # OverlapRemovalAlg is configured with affectingSystematicsFilter,
+        # so the CP systematics service is only needed in this branch.
+        cfg.addService(CompFactory.CP.SystematicsSvc("SystematicsSvc"))
+        overlapOutputNames = {
+            "muons": f'{inputCollections["muons"]}_OR',
+            "electrons": f'{inputCollections["electrons"]}_OR',
+            "photons": f'{inputCollections["photons"]}_OR',
+            "jets": f'{inputCollections["jets"]}_OR',
+        }
+        cfg.merge(GNNHSOverlapRemovalAlgCfg(flags, overlapInputNames = inputCollections,
+                                            overlapOutputNames = overlapOutputNames))
+    else:
+        # If overlap removal is disabled, use original containers
+        overlapOutputNames = inputCollections
 
     from PhotonVertexSelection.PhotonVertexSelectionConfig import DecoratePhotonPointingAlgCfg
-    cfg.merge(DecoratePhotonPointingAlgCfg(flags, PhotonContainerKey=overlapOutputNames["photons"]))
+    photon_key = overlapOutputNames["photons"]
+    cfg.merge(
+        DecoratePhotonPointingAlgCfg(
+            flags,
+            PhotonContainerKey=photon_key,
+            ExtraInputs=[
+                ("xAOD::EgammaContainer", f"StoreGateSvc+{photon_key}"),
+            ],
+            ExtraOutputs=[
+                ("xAOD::IParticleContainer", f"StoreGateSvc+{photon_key}.zCommon"),
+                ("xAOD::IParticleContainer", f"StoreGateSvc+{photon_key}.caloPointingZ"),
+                ("xAOD::IParticleContainer", f"StoreGateSvc+{photon_key}.zCommonError"),
+            ],
+        )
+    )
 
     cfg.merge(
         GNNHSVertexDecoratorAlgCfg(

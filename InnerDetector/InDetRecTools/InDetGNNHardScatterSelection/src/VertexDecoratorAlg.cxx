@@ -3,13 +3,15 @@
 */
 
 #include "VertexDecoratorAlg.h"
-#include "InDetTruthVertexValidation/InDetVertexTruthMatchUtils.h"
 #include "xAODEgamma/ElectronxAODHelpers.h"
-#include "xAODEgamma/EgammaContainer.h"
-#include "AthContainers/ConstDataVector.h"
+#include "AthContainers/AuxElement.h"
 #include "AsgDataHandles/WriteDecorHandle.h"
 #include "AsgDataHandles/ReadDecorHandle.h"
 #include "PhotonVertexSelection/PhotonVertexHelpers.h"
+#include <StoreGate/WriteHandleKey.h>
+#include <xAODParticleEvent/CompositeParticleAuxContainer.h>
+#include <TLorentzVector.h>
+#include <cmath>
 
 
 namespace InDetGNNHardScatterSelection
@@ -28,6 +30,7 @@ namespace InDetGNNHardScatterSelection
     ATH_CHECK(m_electronsInKey.initialize());
     ATH_CHECK(m_muonsInKey.initialize());
     ATH_CHECK(m_jetsInKey.initialize());
+    ATH_CHECK(m_multiPhotonsOutKey.initialize());
 
     const std::string baseName = m_vertexInKey.key();
 
@@ -46,7 +49,9 @@ namespace InDetGNNHardScatterSelection
     m_mDecor_photon_deltaz = baseName + "." + m_mDecor_photon_deltaz.key();
     m_mDecor_photon_deltaPhi = baseName + "." + m_mDecor_photon_deltaPhi.key();
     m_mDecor_actualInterPerXing = baseName + "." + m_mDecor_actualInterPerXing.key();
+    m_multiPhotonLinksKey = baseName + ".multiPhotonLinks";
 
+    ATH_CHECK(m_multiPhotonLinksKey.initialize());
     ATH_CHECK(m_photonLinksKey.initialize());
     ATH_CHECK(m_jetLinksKey.initialize());
     ATH_CHECK(m_electronLinksKey.initialize());
@@ -98,6 +103,7 @@ namespace InDetGNNHardScatterSelection
 
     SG::ReadHandle<xAOD::PhotonContainer> photonsIn(m_photonsInKey, ctx);
     ATH_CHECK(photonsIn.isValid());
+    
     SG::ReadHandle<xAOD::ElectronContainer> electronsIn(m_electronsInKey, ctx);
     ATH_CHECK(electronsIn.isValid());
     SG::ReadHandle<xAOD::MuonContainer> muonsIn(m_muonsInKey, ctx);
@@ -111,9 +117,13 @@ namespace InDetGNNHardScatterSelection
     SG::WriteDecorHandle<xAOD::VertexContainer, std::vector<ElementLink<xAOD::JetContainer>>> dec_jetLinks(m_jetLinksKey, ctx);
     SG::WriteDecorHandle<xAOD::VertexContainer, std::vector<ElementLink<xAOD::ElectronContainer>>> dec_electronLinks(m_electronLinksKey, ctx);
     SG::WriteDecorHandle<xAOD::VertexContainer, std::vector<ElementLink<xAOD::MuonContainer>>> dec_muonLinks(m_muonLinksKey, ctx);
+    SG::WriteDecorHandle<xAOD::VertexContainer, std::vector<ElementLink<xAOD::CompositeParticleContainer>>> dec_multiPhotonLinks(m_multiPhotonLinksKey, ctx);
 
     SG::ReadDecorHandle<xAOD::VertexContainer, float> acc_deltaZ(m_deltaZKey, ctx);
     SG::ReadDecorHandle<xAOD::VertexContainer, float> acc_deltaPhi(m_deltaPhiKey, ctx);
+    SG::ReadDecorHandle<xAOD::PhotonContainer, float> acc_caloPointingZ(m_caloPointingZKey, ctx);
+    SG::ReadDecorHandle<xAOD::PhotonContainer, float> acc_zCommon(m_zCommonKey, ctx);
+    SG::ReadDecorHandle<xAOD::PhotonContainer, float> acc_zCommonError(m_zCommonErrorKey, ctx);
 
     // Decorations needed by the GNNTool
     SG::WriteDecorHandle<xAOD::VertexContainer, int> dec_ntrk(m_mDecor_ntrk, ctx);
@@ -126,6 +136,117 @@ namespace InDetGNNHardScatterSelection
     SG::WriteDecorHandle<xAOD::VertexContainer, float> dec_photon_deltaz(m_mDecor_photon_deltaz,ctx);
     SG::WriteDecorHandle<xAOD::VertexContainer, float> dec_photon_deltaPhi(m_mDecor_photon_deltaPhi,ctx);
     SG::WriteDecorHandle<xAOD::VertexContainer, float> dec_actualInterPerXing(m_mDecor_actualInterPerXing,ctx);
+    SG::WriteHandle<xAOD::CompositeParticleContainer> mpHandle(m_multiPhotonsOutKey, ctx);
+
+    auto mpCont = std::make_unique<xAOD::CompositeParticleContainer>();
+    auto mpAux  = std::make_unique<xAOD::CompositeParticleAuxContainer>();
+    mpCont->setStore(mpAux.get());
+
+    const xAOD::Vertex* bestVtxForMP = nullptr;
+    ElementLink<xAOD::CompositeParticleContainer> mpLink; // will be valid only if created
+    bool haveMP = false;
+
+    // For MT safety, decoration keys must be initialized and available upfront.
+    const bool haveZCommonDecor = acc_zCommon.isAvailable() && acc_zCommonError.isAvailable();
+    const bool haveCaloPointingDecor = acc_caloPointingZ.isAvailable();
+    
+    if (photonsIn->size() > 1 && (!haveZCommonDecor || !haveCaloPointingDecor))
+    {
+      ATH_MSG_ERROR("photonsIn has size > 1 but required decorations are missing: "
+                    << m_zCommonKey.key() << " and/or " << m_zCommonErrorKey.key()
+                    << " and/or " << m_caloPointingZKey.key());
+      return StatusCode::FAILURE;
+    }
+
+    if (photonsIn->size() > 1)
+    {
+      // Combined pointing Z (weighted)
+      double sumW = 0.0;
+      double sumWZ = 0.0;
+
+      TLorentzVector p4sum;
+      int nUsed = 0;
+      for (const xAOD::Photon* ph : *photonsIn)
+      {
+        const float zCommon = acc_zCommon(*ph);
+        const float zCaloPointing = acc_caloPointingZ(*ph);
+        // Value-based selection only: prefer zCommon, then fallback to caloPointing value.
+        const bool useZCommonValue = std::isfinite(zCommon);
+        const float z = useZCommonValue ? zCommon : zCaloPointing;
+        if (!std::isfinite(z)) {
+          ATH_MSG_ERROR("Non-finite photon pointing values found in both "
+                        << m_zCommonKey.key() << " and " << m_caloPointingZKey.key());
+          return StatusCode::FAILURE;
+        }
+
+        // Keep weighting consistent with the z source:
+        // use zCommonError only when z comes from zCommon.
+        double w = 1.0;
+        if (useZCommonValue) {
+          const float s = acc_zCommonError(*ph);
+          if (std::isfinite(s) && s > 0.0f) w = 1.0 / (double(s) * double(s));
+        }
+        
+        sumW  += w;
+        sumWZ += w * z;
+        p4sum += ph->p4();
+        ++nUsed;
+      }
+
+      if (nUsed > 1 && sumW > 0.0)
+      {
+        const float zPoint = sumWZ / sumW;
+
+        // Choose vertex closest in z to combined pointing
+        float bestAbsDZ = 1e30;
+        for (const xAOD::Vertex* vtx : *vertices)
+        {
+          if (vtx->vertexType() == xAOD::VxType::NoVtx) continue;
+
+          const float dz = zPoint - vtx->z();
+          const float adz = std::abs(dz);
+          if (adz < bestAbsDZ)
+          {
+            bestAbsDZ = adz;
+            bestVtxForMP = vtx;
+          }
+        }
+
+        if (bestVtxForMP)
+        {
+          // Create exactly one CompositeParticle node
+          auto* mp = new xAOD::CompositeParticle();
+          mpCont->push_back(mp);
+
+          mp->setP4(p4sum);
+
+          SG::AuxElement::Decorator<float> dec_mp_deltaZ("deltaZ");
+          SG::AuxElement::Decorator<float> dec_mp_deltaPhi("deltaPhi");
+          SG::AuxElement::Decorator<int>   dec_mp_nPhotons("nPhotons");
+          SG::AuxElement::Decorator<float> dec_mp_zPointing("zPointing");
+
+          const float deltaZ = zPoint - bestVtxForMP->z();
+          dec_mp_deltaZ(*mp) = deltaZ;
+          dec_mp_zPointing(*mp) = zPoint;
+          dec_mp_nPhotons(*mp) = static_cast<int>(photonsIn->size());
+
+          float dphi = 0.0f;
+          if (acc_deltaPhi.isAvailable())
+          {
+            dphi = acc_deltaPhi(*bestVtxForMP);
+            if (!std::isfinite(dphi)) dphi = 0.0f;
+          }
+          dec_mp_deltaPhi(*mp) = dphi;
+          mpLink.setElement(mp);
+          mpLink.setStorableObject(*mpCont, true);
+
+          haveMP = true;
+        }
+      }
+    }
+
+    // Record the MultiPhotons container (even if empty)
+    ATH_CHECK(mpHandle.record(std::move(mpCont), std::move(mpAux)));
 
     std::map< const xAOD::Vertex*, std::vector<ElementLink<xAOD::JetContainer>> > jetsInVertex;
     std::map< const xAOD::Jet*, std::map< const xAOD::Vertex*, int> > jetVertexPt;
@@ -172,6 +293,9 @@ namespace InDetGNNHardScatterSelection
       if (vertex->vertexType() == xAOD::VxType::NoVtx)
         continue;
 
+      if (vertex->nTrackParticles() < 2)
+        continue;
+
       dec_actualInterPerXing(*vertex) = eventInfo->actualInteractionsPerCrossing();
 
       // variables for calculation of delta Z asymmetry and delta d asymmetry
@@ -212,8 +336,9 @@ namespace InDetGNNHardScatterSelection
         weighted_z_asym = weighted_sumDZ / weighted_modsumDZ;
       }
 
-      float mean_Dz = sumDZ / track_deltaZ.size(); // calculate average
-      float number_tracks = track_deltaZ.size(); // get number of tracks
+      const float number_tracks = track_deltaZ.size(); // get number of tracks
+      const float mean_Dz =
+        number_tracks > 0 ? sumDZ / number_tracks : 0.F; // calculate average
 
       float z_skew = 0; // skewness of DeltaZ asymmetry
       float z_kurt = 0; // Kurtosis of DeltaZ asymmetry
@@ -229,8 +354,18 @@ namespace InDetGNNHardScatterSelection
       if (number_tracks > 1 && z_var > 0) {
         z_var /= (number_tracks - 1);
         float z_sd = std::sqrt(z_var);
-        z_skew /= (number_tracks - 1) * std::pow(z_sd, 3);
-        z_kurt /= (number_tracks - 1) * std::pow(z_sd, 4);
+        const float skew_denom = (number_tracks - 1) * std::pow(z_sd, 3);
+        const float kurt_denom = (number_tracks - 1) * std::pow(z_sd, 4);
+        if (std::isfinite(skew_denom) && skew_denom != 0.F) {
+          z_skew /= skew_denom;
+        } else {
+          z_skew = 0.F;
+        }
+        if (std::isfinite(kurt_denom) && kurt_denom != 0.F) {
+          z_kurt /= kurt_denom;
+        } else {
+          z_kurt = 0.F;
+        }
       }
       else
       {
@@ -244,36 +379,39 @@ namespace InDetGNNHardScatterSelection
       if(!dec_sumPt.isAvailable()){
         dec_sumPt(*vertex) = xAOD::PVHelpers::getVertexSumPt(vertex, 1, false);
       }
-      dec_chi2Over_ndf(*vertex) = vertex->chiSquared() / vertex->numberDoF();
+      const float numberDoF = vertex->numberDoF();
+      dec_chi2Over_ndf(*vertex) =
+        numberDoF > 0.F ? vertex->chiSquared() / numberDoF : 0.F;
       dec_z_asym(*vertex) = z_asym;
       dec_weighted_z_asym(*vertex) = weighted_z_asym;
       dec_z_kurt(*vertex) = z_kurt;
       dec_z_skew(*vertex) = z_skew;
 
-      if (acc_deltaZ.isAvailable()) {
+      if (acc_deltaZ.isAvailable() && photonsIn->size() > 0 ) {
         //protect against rare NaNs before assigning decorator: setting to 0 (-999 cause NaNs)
-        if (std::isnan(acc_deltaZ(*vertex))) {
-          ATH_MSG_WARNING("photon deltaPhi is NaN: setting to 0!");
-          dec_photon_deltaz(*vertex) = 0;
+        if (!std::isfinite(acc_deltaZ(*vertex))) {
+          ATH_MSG_WARNING("photon deltaPhi is NaN: setting to -1!");
+          dec_photon_deltaz(*vertex) = -1;
         }
         else{
         dec_photon_deltaz(*vertex) = acc_deltaZ(*vertex);
         }
       }
       else{
-       dec_photon_deltaz(*vertex) = 0;
+       dec_photon_deltaz(*vertex) = -1;
       }
-      if (acc_deltaPhi.isAvailable()) {
-        if (std::isnan(acc_deltaPhi(*vertex))) {
+      if (acc_deltaPhi.isAvailable() && photonsIn->size() > 0) {
+        
+        if (!std::isfinite(acc_deltaPhi(*vertex))) {
           ATH_MSG_WARNING("photon deltaPhi is NaN: setting to 0!");
-          dec_photon_deltaPhi(*vertex) = 0;
+          dec_photon_deltaPhi(*vertex) = -1;
         }
         else{
         dec_photon_deltaPhi(*vertex) = acc_deltaPhi(*vertex);
         }
       }
       else{
-       dec_photon_deltaPhi(*vertex) = 0;
+       dec_photon_deltaPhi(*vertex) = -1;
       }
 
       // associate objects to vertices
@@ -300,6 +438,14 @@ namespace InDetGNNHardScatterSelection
         photonLinks.push_back(phLink);
       }
       dec_photonLinks(*vertex) = photonLinks;
+      
+      // multi-photon link 
+      std::vector<ElementLink<xAOD::CompositeParticleContainer>> mpLinks;
+      if (haveMP && vertex == bestVtxForMP)
+      {
+        mpLinks.push_back(mpLink);
+      }
+      dec_multiPhotonLinks(*vertex) = mpLinks;
 
       // for jets, use prefilled map
       dec_jetLinks(*vertex) = jetsInVertex[vertex];

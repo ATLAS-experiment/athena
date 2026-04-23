@@ -5,6 +5,9 @@
 
 #include <optional>
 #include <utility>
+#include <cmath>
+#include <sstream>
+#include <stdexcept>
 
 #include "xAODMuon/Muon.h"
 #include "xAODJet/Jet.h"
@@ -32,12 +35,10 @@ namespace {
     if (name == "z") {
       return [](const xAOD::Vertex& v) -> float {return v.z();};
     }
-    // Temporary hack to fix GeV/MeV discrepancy between training samples and athena 
-    // TODO: revert this once new model is ready
     if (name == "sumPt") {
       return [](const xAOD::Vertex& v) -> float {
         static const SG::AuxElement::ConstAccessor<float> acc_sumPt("sumPt");
-        return acc_sumPt(v) * 1000;
+        return acc_sumPt(v);
       };
     }
     throw std::logic_error("no match for custom getter " + name);
@@ -84,7 +85,7 @@ namespace {
       std::pair<std::string, std::vector<double>> operator()(const xAOD::Vertex&, const std::vector<const U*>& consts) const {
         std::vector<double> seq;
         seq.reserve(consts.size());
-for (const U* el: consts) {
+        for (const U* el: consts) {
           seq.push_back(m_getter(*el));
         }
         return {m_name, seq};
@@ -127,7 +128,10 @@ for (const U* el: consts) {
           float first = acc_f(p);
           float second = acc_s(p);
 
-          return abs(first - vertex.z())/second;
+          if (!std::isfinite(second) || second == 0.F) {
+            return 0.F;
+          }
+          return std::abs(first - vertex.z()) / second;
 
         }        
         return (float)0.;
@@ -176,6 +180,142 @@ for (const U* el: consts) {
           }
         }
         return (float)0.;
+      });
+    }
+
+    if (name == "trkpt") {
+      return CJGetter<T>([](const T& p, const Vertex& /*vertex*/) {
+        if constexpr (std::is_same_v<T, xAOD::Electron>) {
+          const auto *gsf_trk = p.trackParticle(0);
+          if (gsf_trk) {
+            const auto *id_trk = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF(gsf_trk);
+            if (id_trk) {
+              return id_trk->pt();
+            }
+          }
+        } else if constexpr (std::is_same_v<T, xAOD::Muon>) {
+          auto tp = p.trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+          if (tp) {
+            return tp->pt();
+          }
+        }
+        return 0.;
+      });
+    }
+
+    if (name == "trketa") {
+      return CJGetter<T>([](const T& p, const Vertex& /*vertex*/) {
+        if constexpr (std::is_same_v<T, xAOD::Electron>) {
+          const auto *gsf_trk = p.trackParticle(0);
+          if (gsf_trk) {
+            const auto *id_trk = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF(gsf_trk);
+            if (id_trk) {
+              return id_trk->eta();
+            }
+          }
+        } else if constexpr (std::is_same_v<T, xAOD::Muon>) {
+          auto tp = p.trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+          if (tp) {
+            return tp->eta();
+          }
+        }
+        return 0.;
+      });
+    }
+
+    if (name == "trkphi") {
+      return CJGetter<T>([](const T& p, const Vertex& /*vertex*/) {
+        if constexpr (std::is_same_v<T, xAOD::Electron>) {
+          const auto *gsf_trk = p.trackParticle(0);
+          if (gsf_trk) {
+            const auto *id_trk = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF(gsf_trk);
+            if (id_trk) {
+              return id_trk->phi();
+            }
+          }
+        } else if constexpr (std::is_same_v<T, xAOD::Muon>) {
+          auto tp = p.trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+          if (tp) {
+            return tp->phi();
+          }
+        }
+        return 0.;
+      });
+    }
+    if (name == "gsftrkpt") {
+      return CJGetter<T>([](const T& p, const Vertex& /*vertex*/) {
+        if constexpr (std::is_same_v<T, xAOD::Electron>) {
+          const auto *gsf_trk = p.trackParticle(0);
+          if (gsf_trk) {
+            return gsf_trk->pt();
+          }
+        } else if constexpr (std::is_same_v<T, xAOD::Muon>) {
+          auto tp = p.trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+          if (tp) {
+            return tp->pt();
+          }
+        }
+        return 0.;
+      });
+    }
+    if (name == "gsftrketa") {
+      return CJGetter<T>([](const T& p, const Vertex& /*vertex*/) {
+        if constexpr (std::is_same_v<T, xAOD::Electron>) {
+          const auto *gsf_trk = p.trackParticle(0);
+          if (gsf_trk) {
+            return gsf_trk->eta();
+          }
+        } else if constexpr (std::is_same_v<T, xAOD::Muon>) {
+          auto tp = p.trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+          if (tp) {
+            return tp->eta();
+          }
+        }
+        return 0.;
+      });
+    }
+    if (name == "gsftrkphi") {
+      return CJGetter<T>([](const T& p, const Vertex& /*vertex*/) {
+        if constexpr (std::is_same_v<T, xAOD::Electron>) {
+          const auto *gsf_trk = p.trackParticle(0);
+          if (gsf_trk) {
+            return gsf_trk->phi();
+          }
+        } else if constexpr (std::is_same_v<T, xAOD::Muon>) {
+          auto tp = p.trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+          if (tp) {
+            return tp->phi();
+          }
+        }
+        return 0.;
+      });
+    }
+    if (name == "cluster_phi") {
+      return CJGetter<T>([](const T& p, const Vertex& /*vertex*/) {
+        if constexpr (std::is_same_v<T, xAOD::Electron>) {
+          const auto *caloCluster = p.caloCluster();
+          if (caloCluster) { return caloCluster->phi(); }
+        }
+        return -99.;
+      });
+    }
+    if (name == "cluster_eta") {
+      return CJGetter<T>([](const T& p, const Vertex& /*vertex*/) {
+        if constexpr (std::is_same_v<T, xAOD::Electron>) {
+          const auto *caloCluster = p.caloCluster();
+          if (caloCluster) { return caloCluster->eta(); }
+        }
+        return -99.;
+      });
+    }
+    if (name == "isAmbiguous") {
+      return CJGetter<T>([](const T& p, const Vertex& /*vertex*/) {
+        if constexpr (std::is_same_v<T, xAOD::Electron>) {
+          auto maybephoton = p.ambiguousObject();
+          if (maybephoton) return 1;
+          else return 0;
+        }
+        return -1;
       });
     }
     if (name == "ntracks_ga") {
@@ -276,6 +416,7 @@ for (const U* el: consts) {
         for (const InputVariableConfig& input_cfg: inputs) {
           auto [seqGetter, seq_deps] = seqFromConsituents(input_cfg);
 
+          m_sequenceNames.push_back(input_cfg.name);
           m_sequencesFromConstituents.push_back(seqGetter);
         }
     }
@@ -299,8 +440,17 @@ for (const U* el: consts) {
 
         // need to transpose + flatten
         for (unsigned int cnst_idx=0; cnst_idx<double_vec.size(); cnst_idx++){
+          const double value = double_vec.at(cnst_idx);
+          if (!std::isfinite(value)) {
+            std::ostringstream msg;
+            msg << "Non-finite sequence feature '"
+                << m_sequenceNames.at(cnst_var_idx)
+                << "' for constituent index " << cnst_idx
+                << " with value " << value;
+            throw std::runtime_error(msg.str());
+          }
           cnsts_feats.at(cnst_idx*num_vars + cnst_var_idx)
-              = double_vec.at(cnst_idx);
+              = value;
         }
         cnst_var_idx++;
       }
