@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @file   AFPSiDBasicKalmanTool.h
@@ -185,7 +185,7 @@ private:
   Gaudi::Property<double> m_allowedDistanceBetweenClustersInSeed{this, "allowedDistanceBetweenClustersInSeed", 0.5, "Maximum allowed distance between clusters in a seed to be considered coming from the same proton; if the difference between clusters is 2 layers (3 layers), this distance is multiplied by 2 (3)"};
   
   /// Vector of pairs of layers. These pairs will be used to make seeds
-  Gaudi::Property<std::vector<std::pair<int,int>>> m_layersForSeeds{this, "layersForSeeds", {{0,1}}, "Pairs of layers that are used to create seeds."};
+  Gaudi::Property<std::vector<std::pair<int,int>>> m_layersForSeeds{this, "layersForSeeds", {{2,3}}, "Pairs of layers that are used to create seeds."};
   
   /// Fills layers with clusters of hits, dividing them into stations and layers
   void fillLayersWithClusters(AFPLocRecoStationBasicObj& my_stationClusters, SG::ReadHandle<xAOD::AFPSiHitsClusterContainer>& hitsClusterContainer) const;
