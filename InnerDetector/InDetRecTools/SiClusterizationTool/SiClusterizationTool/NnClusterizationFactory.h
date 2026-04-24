@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
  #ifndef SICLUSTERIZATIONTOOL_NnClusterizationFactory_C
@@ -31,6 +31,7 @@
 #include "InDetCondTools/ISiLorentzAngleTool.h"
 #include "SiClusterizationTool/TTrainedNetworkCollection.h"
 #include "SiClusterizationTool/LWTNNCollection.h"
+#include "SiClusterizationTool/OnnxNNCollection.h"
 #include "PixelConditionsData/PixelModuleData.h"
 #include "PixelConditionsData/PixelChargeCalibCondData.h"
 #include "StoreGate/ReadCondHandleKey.h"
@@ -153,6 +154,18 @@ namespace InDet {
                                                 const InDet::PixelCluster& pCluster,
                                                 int numberSubClusters,
                                                 std::vector<Amg::MatrixX> & errors) const;
+
+    /* Estimate number of particles using ONNX */
+    std::vector<double> estimateNumberOfParticlesONNX(
+        const Eigen::VectorXd& input) const;
+
+    /* Estimate position using ONNX */
+    std::vector<Amg::Vector2D> estimatePositionsONNX(
+        const Eigen::VectorXd& input,
+        NNinput& rawInput,
+        const InDet::PixelCluster& pCluster,
+        int numberSubClusters,
+        std::vector<Amg::MatrixX>& errors) const;
 
     // For error formatting in lwtnn cases
     static double correctedRMSX(double posPixels) ;
@@ -283,6 +296,13 @@ namespace InDet {
 
     Gaudi::Property<bool> m_doRunI
        {this, "doRunI", false, "Use runI style network (outputs are not normalised; add pitches; use charge if not m_useToT)"};
+
+    SG::ReadCondHandleKey<OnnxNNCollection> m_readKeyONNX
+       {this, "NnCollectionONNXReadKey", "",
+        "The conditions key for ONNX-based pixel cluster NNs"};
+
+    Gaudi::Property<bool> m_useONNX
+       {this, "useONNX", false, "Use ONNX models instead of LWTNN for NN inference."};
 
     Gaudi::Property<bool> m_useTTrainedNetworks
        {this, "useTTrainedNetworks", false, "Use earlier (release-21-like) neural networks stored in ROOT files and accessed via TTrainedNetowrk."};
