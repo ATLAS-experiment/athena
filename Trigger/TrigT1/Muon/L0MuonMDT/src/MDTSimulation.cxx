@@ -39,7 +39,7 @@ namespace L0Muon {
 
 
   
-    for(const auto& cand : *barrelCandidates) {
+    for(const L0Muon::RPCCandData* cand : *barrelCandidates) {
 
       float m=0, b=0;
 
