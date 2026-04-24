@@ -189,6 +189,7 @@ def SiTrkAlignDBToolCfg(flags, name="SiTrkAlignDBTool", **kwargs):
     from InDetAlignGenTools.InDetAlignGenToolsConfig import InDetAlignDBTool
     kwargs.setdefault("IDAlignDBTool", cfg.addPublicTool(cfg.popToolsAndMerge(InDetAlignDBTool(flags))))
 
+    kwargs.setdefault("WriteAsL2", True)
     kwargs.setdefault("WriteOldConstants", not flags.InDet.Align.accumulate)
     kwargs.setdefault("UpdateConstants", not flags.InDet.Align.accumulate)
 
