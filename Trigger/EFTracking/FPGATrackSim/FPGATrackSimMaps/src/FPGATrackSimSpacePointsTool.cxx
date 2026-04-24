@@ -100,19 +100,19 @@ StatusCode FPGATrackSimSpacePointsTool::makeSpacePoints(FPGATrackSimTowerInputHe
     // delete the old clusters, this will be replaced by the spacepoints
     tower.clearHits();
 
-    for (auto entry : m_map)
+    for (const auto & [moduleDescriptor, hits] : m_map)
     {
         // std::vector<int> const & module_desc = entry.first;
-        std::vector<FPGATrackSimHit>& hits_inner = entry.second.first;
-        std::vector<FPGATrackSimHit>& hits_outer = entry.second.second;
+        const std::vector<FPGATrackSimHit>& hits_inner = hits.first;
+        const std::vector<FPGATrackSimHit>& hits_outer = hits.second;
 
-        for (auto hit_in : hits_inner) {
+        for (const auto & hit_in : hits_inner) {
             int startsize =  spacepoints.size();
             bool foundPair = searchForMatch(hit_in,hits_outer,tower,spacepoints);
 
             if (!foundPair && !m_sameModulesOnly) {
                 // search in +1 eta direction
-                std::vector<int> nextmod = entry.first;
+                std::vector<int> nextmod = moduleDescriptor;
                 nextmod[3]+=1; // increment eta module counter
                 auto entry2 = m_map.find(nextmod);
                 if (entry2!=m_map.end()) {
@@ -124,7 +124,7 @@ StatusCode FPGATrackSimSpacePointsTool::makeSpacePoints(FPGATrackSimTowerInputHe
             // Also seek in +1 phi direction.
             if (!foundPair && !m_sameModulesOnly) {
                 // search in +1 eta direction
-                std::vector<int> nextphimod = entry.first;
+                std::vector<int> nextphimod = moduleDescriptor;
                 nextphimod[2]+=1; // increment phi module counter
                 auto entry3 = m_map.find(nextphimod);
                 if (entry3!=m_map.end()) {
@@ -136,7 +136,7 @@ StatusCode FPGATrackSimSpacePointsTool::makeSpacePoints(FPGATrackSimTowerInputHe
             // If all else fails, seek in +1 eta, +1 phi direction.
             if (!foundPair && !m_sameModulesOnly) {
                 // search in +1 eta direction
-                std::vector<int> next2mod = entry.first;
+                std::vector<int> next2mod = moduleDescriptor;
                 next2mod[3]+=1; // increment eta module counter
                 next2mod[2]+=1; // increment phi module counter
                 auto entry4 = m_map.find(next2mod);
@@ -173,7 +173,7 @@ StatusCode FPGATrackSimSpacePointsTool::makeSpacePoints(FPGATrackSimTowerInputHe
             }
 
             // search in -1 eta direction
-            std::vector<int> nextmod = entry.first;
+            std::vector<int> nextmod = moduleDescriptor;
             nextmod[3]-=1; // increment eta module counter
             auto entry2 = m_map.find(nextmod);
             if (entry2!=m_map.end()) {
@@ -189,7 +189,7 @@ StatusCode FPGATrackSimSpacePointsTool::makeSpacePoints(FPGATrackSimTowerInputHe
             // Also seek in -1 phi direction.
             if (!foundPair) {
                 // search in +1 eta direction
-                std::vector<int> nextphimod = entry.first;
+                std::vector<int> nextphimod = moduleDescriptor;
                 nextphimod[2]-=1; // increment phi module counter
                 auto entry3 = m_map.find(nextphimod);
                 if (entry3!=m_map.end()) {
@@ -206,7 +206,7 @@ StatusCode FPGATrackSimSpacePointsTool::makeSpacePoints(FPGATrackSimTowerInputHe
             // If all else fails, seek in -1 eta, -1 phi direction.
             if (!foundPair) {
                 // search in +1 eta direction
-                std::vector<int> next2mod = entry.first;
+                std::vector<int> next2mod = moduleDescriptor;
                 next2mod[3]-=1; // increment eta module counter
                 next2mod[2]-=1; // increment phi module counter
                 auto entry4 = m_map.find(next2mod);
