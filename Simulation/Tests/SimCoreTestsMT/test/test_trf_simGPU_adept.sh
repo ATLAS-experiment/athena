@@ -31,7 +31,7 @@ OUTPUT="PhaseIISim.AdePT"
 
 export ATHENA_CORE_NUMBER=8
 
-timeout 28800 AtlasG4_tf.py  \
+timeout 10800 AtlasG4_tf.py  \
   --maxEvents 500 \
   --multithreaded \
   --simulator 'AtlasG4_QS' \
@@ -74,7 +74,7 @@ echo "art-result: ${rc4} SimValid_tf"
 # change back to AthSimulation,main--simGPU so that the dcube labels are correct
 asetup AthSimulation,main--simGPU,latest
 
-echo "============ dcube references == copy to CVMFS later == will be changed in next iteration"
+echo "============ dcube references"
 dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTestsMT/v1/PhaseIISim.HIST.root"
 dcubeXML="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTestsMT/v1/dcube_config_hist_PhaseIISim_25057.xml"
 echo ${dcubeRef}
