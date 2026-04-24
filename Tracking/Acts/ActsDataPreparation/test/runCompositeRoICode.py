@@ -40,6 +40,7 @@ if __name__ == "__main__":
         "Tracking.ActiveConfig",
         "Tracking.ITkMainPass")
 
+    flags.fillFromArgs()
     flags.lock()
     flags.dump()
 
