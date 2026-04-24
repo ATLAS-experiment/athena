@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -30,6 +30,9 @@ def TileSimD3PDCfg(flags, outputFile=None, saveHitsInfo=True, saveHits=True, sav
 
     from D3PDMakerCoreComps.MakerAlgConfig import MakerAlgConfig
     alg = MakerAlgConfig(flags, acc, 'truth', outputFile, ExistDataHeader=False)
+
+    from EventCommonD3PDMaker.EventInfoD3PDObject import EventInfoD3PDObject
+    alg += EventInfoD3PDObject(1)
 
     from TruthD3PDMaker.TruthParticleD3PDObject  import TruthParticleD3PDObject
     alg += TruthParticleD3PDObject(1)
