@@ -8,7 +8,6 @@
 
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "PoolSvc/IPoolSvc.h"
-#include "PersistencySvc/IFileCatalog.h"
 #include "TH1.h"
 #include "TH2.h"
 #include <TObjString.h>
@@ -460,7 +459,7 @@ namespace Analysis {
 
     // Open the file
     std::string pfname, tech;
-    m_poolsvc->catalog()->getFirstPFN(coolguid, pfname, tech );
+    m_poolsvc->lookupBestPfn(coolguid, pfname, tech );
     std::unique_ptr< TFile > pfile(TFile::Open(pfname.c_str(),"READ"));
     if (pfile.get()==nullptr || !pfile.get()->IsOpen()) {
       ATH_MSG_WARNING("Problems opening input file " << pfname 

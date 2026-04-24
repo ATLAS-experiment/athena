@@ -182,7 +182,7 @@ StatusCode PoolSvc::setupPersistencySvc() {
       return(StatusCode::FAILURE);
    }
    // Setup a persistency services
-   m_dbSessionVec.push_back(pool::PersistencySvc::createSession(*m_catalog).release()); // Read Service
+   m_dbSessionVec.push_back(pool::createSession(*m_catalog).release()); // Read Service
    m_pers_mut.push_back(new CallMutex);
    if (!m_dbSessionVec[IPoolSvc::kInputStream]->technologySpecificAttributes(pool::ROOT_StorageType.type()).setAttribute<bool>("ENABLE_THREADSAFETY", true)) {
       ATH_MSG_FATAL("Failed to enable thread safety in ROOT via PersistencySvc.");
@@ -193,7 +193,7 @@ StatusCode PoolSvc::setupPersistencySvc() {
       ATH_MSG_FATAL("Failed to connect Input PersistencySvc.");
       return(StatusCode::FAILURE);
    }
-   m_dbSessionVec.push_back(pool::PersistencySvc::createSession(*m_catalog).release()); // Write Service
+   m_dbSessionVec.push_back(pool::createSession(*m_catalog).release()); // Write Service
    m_pers_mut.push_back(new CallMutex);
    pool::DatabaseConnectionPolicy policy;
    policy.setWriteModeForNonExisting(pool::DatabaseConnectionPolicy::CREATE);
@@ -338,7 +338,7 @@ unsigned int PoolSvc::getOutputContext(const std::string& label) {
       return(contextIter->second);
    }
    const unsigned int id = m_dbSessionVec.size();
-   m_dbSessionVec.push_back(pool::PersistencySvc::createSession(*m_catalog).release());
+   m_dbSessionVec.push_back(pool::createSession(*m_catalog).release());
    m_pers_mut.push_back(new CallMutex);
    pool::DatabaseConnectionPolicy policy;
    policy.setWriteModeForNonExisting(pool::DatabaseConnectionPolicy::CREATE);
@@ -367,7 +367,7 @@ unsigned int PoolSvc::getInputContext(const std::string& label, unsigned int max
       }
    }
    const unsigned int id = m_dbSessionVec.size();
-   m_dbSessionVec.push_back( pool::PersistencySvc::createSession(*m_catalog).release() );
+   m_dbSessionVec.push_back( pool::createSession(*m_catalog).release() );
    m_pers_mut.push_back(new CallMutex);
    if (!connect(pool::ITransaction::READ, id).isSuccess()) {
       ATH_MSG_WARNING("Failed to connect Input PersistencySvc: " << id);
@@ -610,7 +610,7 @@ StatusCode PoolSvc::commitAndHold(unsigned int contextId) const {
       return(StatusCode::FAILURE);
    }
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
-   pool::PersistencySvc::ISession* session = m_dbSessionVec[contextId];
+   pool::ISession* session = m_dbSessionVec[contextId];
    if (session != nullptr && session->transaction().isActive()) {
       if (!session->commitAndHold()) {
          ATH_MSG_ERROR("POOL commitAndHold failed " << session);
@@ -626,7 +626,7 @@ StatusCode PoolSvc::disconnect(unsigned int contextId) const {
       return(StatusCode::SUCCESS);
    }
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
-   pool::PersistencySvc::ISession* session = m_dbSessionVec[contextId];
+   pool::ISession* session = m_dbSessionVec[contextId];
    if (session != nullptr && session->transaction().isActive()) {
       if (!commit(contextId).isSuccess()) {
          ATH_MSG_ERROR("disconnect failed to commit " << session);

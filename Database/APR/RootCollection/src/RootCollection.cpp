@@ -43,7 +43,7 @@ namespace pool {
 
      RootCollection::RootCollection( const pool::CollectionDescription* description,
                                      pool::ICollection::OpenMode mode,
-                                     pool::PersistencySvc::ISession* session )
+                                     pool::ISession* session )
          : APRMessaging( "RootCollection"),
            m_description( *description ),
            m_name( description->name() ),

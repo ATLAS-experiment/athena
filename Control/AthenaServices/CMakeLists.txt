@@ -73,7 +73,7 @@ atlas_add_test( MetaDataSvc_test
    SOURCES test/MetaDataSvc_test.cxx src/MetaDataSvc.cxx src/OutputStreamSequencerSvc.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} TestTools AthenaKernel CxxUtils GaudiKernel
-                  StoreGateLib PersistencySvc AthenaBaseComps RootAuxDynIOHeaders PersistentDataModel SGTools Boost::unit_test_framework
+                  StoreGateLib AthenaBaseComps RootAuxDynIOHeaders PersistentDataModel SGTools Boost::unit_test_framework
    LOG_IGNORE_PATTERN "ERROR Unable to get|ERROR Failing|ERROR Unable to call|tool->endInputFile|Cannot create proxy|FAILURE: addProxyToInputMetaDataStore"
    POST_EXEC_SCRIPT noerror.sh)
 

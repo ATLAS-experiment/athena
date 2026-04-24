@@ -16,8 +16,7 @@
 namespace pool {
 
   // forward declarations
-   namespace PersistencySvc { class ISession; }
-   using PersistencySvc::ISession;
+   class ISession;
    class IContainer;
    class ICollectionQuery;
    class ICollectionIterator;

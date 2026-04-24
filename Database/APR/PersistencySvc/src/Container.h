@@ -14,65 +14,62 @@ namespace pool {
   // forward declarations
   class FileDescriptor;
 
-  namespace PersistencySvc {
-
-    /** @class Container
-     *
-     *  Container is an implementation of the IContainer interface
-     *
-     */
-    
-    class Container : virtual public IContainer,
-                      virtual public ITechnologySpecificAttributes {
-    public:
-      Container( FileDescriptor& fileDescriptor,
-                 long technology,
-                 const std::string& name );
-      
-      /// destructor
-      virtual ~Container() = default;
-
-      /// Returns the name of this container
-      virtual const std::string& name() const override final { return m_name; }
-
-      /// Returns the technology identifier for this container
-      virtual long technology() const override final { return m_technology; }
-
-      /** Starts an iteration over the tokens in the container.
-       *  Returns a token iterator whose ownership is passed to the user.
-       */
-      virtual ITokenIterator* tokens() override;
+  /** @class Container
+   *
+   *  Container is an implementation of the IContainer interface
+   *
+   */
   
-      /// Returns the object holding the technology specific attributes for a given technology domain
-      virtual const ITechnologySpecificAttributes& technologySpecificAttributes() const override final { return *this; }
-      virtual ITechnologySpecificAttributes& technologySpecificAttributes() override final { return *this; }
+  class Container : virtual public IContainer,
+                    virtual public ITechnologySpecificAttributes {
+  public:
+    Container( FileDescriptor& fileDescriptor,
+               long technology,
+               const std::string& name );
+    
+    /// destructor
+    virtual ~Container() = default;
 
-    protected:
-      /// The actual method returning the attribute data given a name
-      virtual
-      bool attributeOfType( const std::string& attributeName,
-                            void* data,
-                            const std::type_info& typeInfo,
-                            const std::string& option ) override;
+    /// Returns the name of this container
+    virtual const std::string& name() const override final { return m_name; }
 
-      /// The actual method setting the attribute data given a name
-      virtual
-      bool setAttributeOfType( const std::string& attributeName,
-                               const void* data,
-                               const std::type_info& typeInfo,
-                               const std::string& option ) override;
+    /// Returns the technology identifier for this container
+    virtual long technology() const override final { return m_technology; }
 
-    private:
-      /// The name of the container
-      std::string m_name;
+    /** Starts an iteration over the tokens in the container.
+     *  Returns a token iterator whose ownership is passed to the user.
+     */
+    virtual ITokenIterator* tokens() override;
 
-      /// Reference to file descriptor of the parent database
-      FileDescriptor& m_fileDescriptor;
+    /// Returns the object holding the technology specific attributes for a given technology domain
+    virtual const ITechnologySpecificAttributes& technologySpecificAttributes() const override final { return *this; }
+    virtual ITechnologySpecificAttributes& technologySpecificAttributes() override final { return *this; }
 
-      /// The technology identifier
-      long m_technology;
-    };
-  }
+  protected:
+    /// The actual method returning the attribute data given a name
+    virtual
+    bool attributeOfType( const std::string& attributeName,
+                          void* data,
+                          const std::type_info& typeInfo,
+                          const std::string& option ) override;
+
+    /// The actual method setting the attribute data given a name
+    virtual
+    bool setAttributeOfType( const std::string& attributeName,
+                             const void* data,
+                             const std::type_info& typeInfo,
+                             const std::string& option ) override;
+
+  private:
+    /// The name of the container
+    std::string m_name;
+
+    /// Reference to file descriptor of the parent database
+    FileDescriptor& m_fileDescriptor;
+
+    /// The technology identifier
+    long m_technology;
+  };
 }
 
 #endif

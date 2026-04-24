@@ -13,14 +13,14 @@
 #include "PersistentDataModel/Placement.h"
 
 
-std::unique_ptr< pool::PersistencySvc::ISession >
-pool::PersistencySvc::createSession( IFileCatalog& catalog )
+std::unique_ptr< pool::ISession >
+pool::createSession( IFileCatalog& catalog )
 {
-   return std::unique_ptr<ISession>(  new pool::PersistencySvc::UserSession(catalog) );
+   return std::unique_ptr<ISession>(  new pool::UserSession(catalog) );
 }
 
 
-pool::PersistencySvc::UserSession::UserSession( pool::IFileCatalog& fileCatalog ):
+pool::UserSession::UserSession( pool::IFileCatalog& fileCatalog ):
   APRMessaging( "APR Session" ),
   m_policy( 0 ),
   m_catalog( &fileCatalog ),
@@ -28,10 +28,10 @@ pool::PersistencySvc::UserSession::UserSession( pool::IFileCatalog& fileCatalog 
   m_transactionType( pool::ITransaction::INACTIVE )
 {
   m_policy = new pool::DatabaseConnectionPolicy;
-  m_registry = new pool::PersistencySvc::DatabaseRegistry();
+  m_registry = new pool::DatabaseRegistry();
 }
 
-pool::PersistencySvc::UserSession::~UserSession()
+pool::UserSession::~UserSession()
 {
   // order is important
   m_technologies.clear();
@@ -41,7 +41,7 @@ pool::PersistencySvc::UserSession::~UserSession()
 
 
 void*
-pool::PersistencySvc::UserSession::readObject( const Token& token, void* object )
+pool::UserSession::readObject( const Token& token, void* object )
 {
   void* result {};
   if( isActive() ) {
@@ -56,7 +56,7 @@ pool::PersistencySvc::UserSession::readObject( const Token& token, void* object 
 }
 
 Token*
-pool::PersistencySvc::UserSession::registerForWrite( const Placement& place,
+pool::UserSession::registerForWrite( const Placement& place,
                                                      const void* object,
                                                      const RootType& type )
 {
@@ -75,26 +75,26 @@ pool::PersistencySvc::UserSession::registerForWrite( const Placement& place,
 }
 
 
-pool::PersistencySvc::DatabaseRegistry&
-pool::PersistencySvc::UserSession::registry()
+pool::DatabaseRegistry&
+pool::UserSession::registry()
 {
   return *m_registry;
 }
 
 void
-pool::PersistencySvc::UserSession::setDefaultConnectionPolicy( const pool::DatabaseConnectionPolicy& policy )
+pool::UserSession::setDefaultConnectionPolicy( const pool::DatabaseConnectionPolicy& policy )
 {
   *m_policy = policy;
 }
 
 const pool::DatabaseConnectionPolicy&
-pool::PersistencySvc::UserSession::defaultConnectionPolicy() const
+pool::UserSession::defaultConnectionPolicy() const
 {
   return *m_policy;
 }
 
 bool
-pool::PersistencySvc::UserSession::disconnectAll()
+pool::UserSession::disconnectAll()
 {
   bool ret = true;
   for( auto& iManager : m_technologies ) {
@@ -105,7 +105,7 @@ pool::PersistencySvc::UserSession::disconnectAll()
       
 
 bool
-pool::PersistencySvc::UserSession::start( pool::ITransaction::Type type )
+pool::UserSession::start( pool::ITransaction::Type type )
 {
   if( isActive() || type == pool::ITransaction::INACTIVE ) return false;
   m_transactionType = type;
@@ -114,7 +114,7 @@ pool::PersistencySvc::UserSession::start( pool::ITransaction::Type type )
 
 
 bool
-pool::PersistencySvc::UserSession::commit()
+pool::UserSession::commit()
 {
   if( isActive() ) {
     bool OK = true;
@@ -134,7 +134,7 @@ pool::PersistencySvc::UserSession::commit()
 
 
 bool
-pool::PersistencySvc::UserSession::commitAndHold()
+pool::UserSession::commitAndHold()
 {
   if( isActive() ) {
     bool OK = true;
@@ -154,7 +154,7 @@ pool::PersistencySvc::UserSession::commitAndHold()
 
 
 std::unique_ptr<pool::IDatabase>
-pool::PersistencySvc::UserSession::databaseHandle( const std::string& dbName,
+pool::UserSession::databaseHandle( const std::string& dbName,
                                                    DatabaseSpecification::NameType dbNameType )
 {
   if( isActive() ) {
@@ -164,20 +164,20 @@ pool::PersistencySvc::UserSession::databaseHandle( const std::string& dbName,
 }
 
 pool::IFileCatalog&
-pool::PersistencySvc::UserSession::fileCatalog()
+pool::UserSession::fileCatalog()
 {
   return *m_catalog;
 }
 
 void
-pool::PersistencySvc::UserSession::setFileCatalog(pool::IFileCatalog& catalog)
+pool::UserSession::setFileCatalog(pool::IFileCatalog& catalog)
 {
   m_catalog = &catalog;
 }
 
 
-pool::PersistencySvc::MicroSessionManager&
-pool::PersistencySvc::UserSession::microSessionManager( long technology )
+pool::MicroSessionManager&
+pool::UserSession::microSessionManager( long technology )
 {
   pool::DbType dbType( technology );
   long majorType = dbType.majorType();
@@ -186,14 +186,14 @@ pool::PersistencySvc::UserSession::microSessionManager( long technology )
     return *(iManager->second);
   }
   // Technology does not exist. Create the new session.
-  auto mgr = new pool::PersistencySvc::MicroSessionManager( *m_registry, majorType );
+  auto mgr = new pool::MicroSessionManager( *m_registry, majorType );
   m_technologies.insert( std::make_pair( majorType, mgr ) );
   return *mgr;
 }
 
 
 const pool::ITechnologySpecificAttributes&
-pool::PersistencySvc::UserSession::technologySpecificAttributes( long technology ) const
+pool::UserSession::technologySpecificAttributes( long technology ) const
 {
   auto iManager = m_technologies.find( pool::DbType( technology ).majorType() );
   if( iManager == m_technologies.end() ) {
@@ -203,9 +203,9 @@ pool::PersistencySvc::UserSession::technologySpecificAttributes( long technology
 }
 
 pool::ITechnologySpecificAttributes&
-pool::PersistencySvc::UserSession::technologySpecificAttributes( long technology )
+pool::UserSession::technologySpecificAttributes( long technology )
 {
-  pool::PersistencySvc::MicroSessionManager& mgr = microSessionManager( technology );
+  pool::MicroSessionManager& mgr = microSessionManager( technology );
   mgr.connect( m_transactionType );
   return mgr;
 }

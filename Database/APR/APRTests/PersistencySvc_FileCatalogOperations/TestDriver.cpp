@@ -53,7 +53,7 @@ pool::TestDriver::write()
   pool::IFileCatalog& catalog = *m_fileCatalog;
 
   std::cout << "Creating the persistency service" << std::endl;
-  auto dbsession = pool::PersistencySvc::createSession(catalog);
+  auto dbsession = pool::createSession(catalog);
   catalog.start();
 
   // Set up the policy.
@@ -123,7 +123,7 @@ pool::TestDriver::read()
   pool::IFileCatalog& catalog = *m_fileCatalog;
 
   std::cout << "Creating the persistency service" << std::endl;
-  auto dbsession = pool::PersistencySvc::createSession(catalog);
+  auto dbsession = pool::createSession(catalog);
   catalog.start();
 
   // Starting a read transaction

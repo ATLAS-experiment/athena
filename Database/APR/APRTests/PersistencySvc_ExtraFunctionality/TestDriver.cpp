@@ -61,7 +61,7 @@ pool::TestDriver::write(pool::DbType storageType)
   catalog.start();
 
   std::cout << "Creating the persistency service" << std::endl;
-  auto dbsession = pool::PersistencySvc::createSession(catalog);
+  auto dbsession = pool::createSession(catalog);
 
   // Set up the policy.
   pool::DatabaseConnectionPolicy policy;
@@ -135,7 +135,7 @@ pool::TestDriver::read()
   catalog.start();
 
   std::cout << "Creating the persistency service" << std::endl;
-  auto dbsession = pool::PersistencySvc::createSession(catalog);
+  auto dbsession = pool::createSession(catalog);
 
   // Starting a read transaction
   if( !dbsession->start( pool::ITransaction::READ ) ) {
