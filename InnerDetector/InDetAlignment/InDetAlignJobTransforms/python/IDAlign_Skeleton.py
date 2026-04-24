@@ -84,6 +84,19 @@ def configureFlags(runArgs):
     for tag in [tag for tag in dir(runArgs) if "Tag" in tag and tag != "globalTag"]:
         setattr(flags.InDet.Align, tag, getattr(runArgs, tag))
 
+    if flags.InDet.Align.localDataBase:
+        msg.info(f"Change IBLDist tag from '{flags.InDet.Align.IBLDistTag}' to 'InDetAlignIBLDIST-T0-Alignment'")
+        msg.info(f"Change L1IDTag tag from '{flags.InDet.Align.L1IDTag}' to 'InDetAlignL1-T0-Alignment'")
+        msg.info(f"Change L2PIXTag tag from '{flags.InDet.Align.L2PIXTag}' to 'InDetAlignL2PIX-T0-Alignment'")
+        msg.info(f"Change L2SCTTag tag from '{flags.InDet.Align.L2SCTTag}' to 'InDetAlignL2SCT-T0-Alignment'")
+        msg.info(f"Change L1TRTTag tag from '{flags.InDet.Align.L1TRTTag}' to 'InDetAlignL1TRT-T0-Alignment'")
+
+        flags.InDet.Align.IBLDistTag = "InDetAlignIBLDIST-T0-Alignment"
+        flags.InDet.Align.L1IDTag = "InDetAlignL1-T0-Alignment"
+        flags.InDet.Align.L2PIXTag = "InDetAlignL2PIX-T0-Alignment"
+        flags.InDet.Align.L2SCTTag = "InDetAlignL2SCT-T0-Alignment"
+        flags.InDet.Align.L1TRTTag = "InDetAlignL1TRT-T0-Alignment"
+
     ## Set configuration for chosen alignment level
     from InDetAlignConfig.IDAlignFlags import setL11AlignmentFlags, setL16AlignmentFlags, setL2AlignmentFlags, setL3AlignmentFlags
 
