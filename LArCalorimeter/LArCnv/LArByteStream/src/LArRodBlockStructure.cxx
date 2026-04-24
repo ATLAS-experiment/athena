@@ -27,7 +27,6 @@ LArRodBlockStructure::LArRodBlockStructure(IMessageSvc* msgSvc,
     m_ROB_to_decode(0),
     m_logstr(msgSvc, blockType)
 {
-  
   m_channelsPerFEB=128;
   m_RodBlockSize=0;
   m_FebBlockSize=0;
@@ -176,31 +175,26 @@ void LArRodBlockStructure::initializeFragment(std::vector<uint32_t>& )
 void LArRodBlockStructure::finalizeFEB()
 {
   m_logstr << MSG::ERROR << "Error: Function finalizeFEB not implemented in this instance of LArRodBlockStructure!" << endmsg;
-  return;
 }
 
 void  LArRodBlockStructure::setEx(const double)
 {
- // Do not set anything
- return;
+  // Do not set anything
 }
 
 void  LArRodBlockStructure::setEy(const double)
 {
- // Do not set anything
- return;
+  // Do not set anything
 }
 
 void  LArRodBlockStructure::setEz(const double)
 {
- // Do not set anything
- return;
+  // Do not set anything
 }
 
 void  LArRodBlockStructure::setSumE(const double)
 {
- // Do not set anything
- return;
+  // Do not set anything
 }
 
 int  LArRodBlockStructure::setGain(const int)
@@ -210,19 +204,19 @@ int  LArRodBlockStructure::setGain(const int)
 
 //Default instances of sort-method. Default is to leave things unsorted.
 void  LArRodBlockStructure::sortDataVector(std::vector<const LArRawChannel*>& )
-{return;}
+{}
 
 void  LArRodBlockStructure::sortDataVector( std::vector<const LArDigit*>& )
-{return;}
+{}
 
 void  LArRodBlockStructure::sortDataVector( std::vector<const LArCalibDigit*>& )
-{return;}
+{}
 
 void  LArRodBlockStructure::sortDataVector( std::vector<const LArAccumulatedCalibDigit*>& )
-{return;}
+{}
 
 void  LArRodBlockStructure::sortDataVector( std::vector<const LArAccumulatedDigit*>& )
-{return;}
+{}
 
 uint32_t LArRodBlockStructure::getNumberOfSamples()  const { return 0; }
 uint32_t LArRodBlockStructure::getNumberOfGains()  const { return 0; }

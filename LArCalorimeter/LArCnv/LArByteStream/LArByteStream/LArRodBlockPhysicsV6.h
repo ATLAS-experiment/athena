@@ -285,8 +285,8 @@ inline uint32_t  LArRodBlockPhysicsV6::getVROBFebId()
 {
   m_ROB_to_decode--;
   if ( m_ROB_to_decode>=0){
-  	m_virtualROBPointerLocal = m_virtualROBPointer;
-  	m_virtualROBPointer+=m_virtualROBJump;
+    m_virtualROBPointerLocal = m_virtualROBPointer;
+    m_virtualROBPointer+=m_virtualROBJump;
   } else m_virtualROBPointerLocal=0;
   if(m_virtualROBPointerLocal) return (m_virtualROBPointerLocal[0]);
   else return 0;
@@ -322,44 +322,42 @@ inline int32_t  LArRodBlockPhysicsV6::getVROBSumE() const
 
 inline int LArRodBlockPhysicsV6::FebToRodChannel(int ch) const
 {
-return ( (ch&0x7) << 4) | ( (ch&0x38) >>2 ) | ((ch&0x40)>>6);
-
+  return ( (ch&0x7) << 4) | ( (ch&0x38) >>2 ) | ((ch&0x40)>>6);
 }
 
 inline void LArRodBlockPhysicsV6::setE(unsigned index, double E){ 
-
-        union {
-          int32_t i;
-          uint16_t us[2];
-        } conv;
-        conv.i = static_cast<int32_t>(E);
-        // Write as multiplication, not as left shift, since left-shifting
-        // a negative number is undefined in C++.
-        // Compiles to the same code on x86_64.
-        conv.i *= (1<<9);
-        if ( m_TimeQualityBlock.size()>=8 ){
-                m_TimeQualityBlock[index]=conv.us[0];
-                m_TimeQualityBlock[index+1]=conv.us[1];
-        }
+  union {
+    int32_t i;
+    uint16_t us[2];
+  } conv;
+  conv.i = static_cast<int32_t>(E);
+  // Write as multiplication, not as left shift, since left-shifting
+  // a negative number is undefined in C++.
+  // Compiles to the same code on x86_64.
+  conv.i *= (1<<9);
+  if ( m_TimeQualityBlock.size()>=8 ){
+    m_TimeQualityBlock[index]=conv.us[0];
+    m_TimeQualityBlock[index+1]=conv.us[1];
+  }
 }
 
 
 inline void LArRodBlockPhysicsV6::setEx(double Ex){ 
-        setE (0, Ex);
+  setE (0, Ex);
 }
 
 
 inline void LArRodBlockPhysicsV6::setEy(double Ey){
-        setE (2, Ey);
+  setE (2, Ey);
 }
 
 
 inline void LArRodBlockPhysicsV6::setEz(double Ez){
-        setE (4, Ez);
+  setE (4, Ez);
 }
 
 inline void LArRodBlockPhysicsV6::setSumE(double SumE){
-        setE (6, SumE);
+  setE (6, SumE);
 }
 
 

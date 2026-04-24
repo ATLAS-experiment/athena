@@ -36,31 +36,35 @@ LArRodEncoder::~LArRodEncoder()
 // Add LArRawChannel
 void LArRodEncoder::add(const LArRawChannel* rc)
 {
- uint32_t FEB_ID = (m_onlineHelper.feb_Id(rc->channelID()).get_identifier32().get_compact());
- if ( m_mFEB[FEB_ID].vLArRC.empty() ){
-	m_mFEB[FEB_ID].vLArRC.resize(128,0);
- }
- uint32_t chan = m_BlStruct->FebToRodChannel(m_onlineHelper.channel( rc->channelID() ) );
- m_mFEB[FEB_ID].vLArRC[chan]=rc;
+  uint32_t FEB_ID = (m_onlineHelper.feb_Id(rc->channelID()).get_identifier32().get_compact());
+  if ( m_mFEB[FEB_ID].vLArRC.empty() ){
+    m_mFEB[FEB_ID].vLArRC.resize(128,0);
+  }
+  uint32_t chan = m_BlStruct->FebToRodChannel(m_onlineHelper.channel( rc->channelID() ) );
+  m_mFEB[FEB_ID].vLArRC[chan]=rc;
 }
 
 // Add free gain digits
 void LArRodEncoder::add(const LArDigit* dg)
 {
- uint32_t FEB_ID = (m_onlineHelper.feb_Id(dg->hardwareID()).get_identifier32().get_compact());
- m_mFEB[FEB_ID].vLArDigit.push_back(dg);
+  uint32_t FEB_ID = (m_onlineHelper.feb_Id(dg->hardwareID()).get_identifier32().get_compact());
+  m_mFEB[FEB_ID].vLArDigit.push_back(dg);
 }
+
+
 //Add fixed gain digits
 void LArRodEncoder::add(const LArDigit* dg, const int gain)
 {
- uint32_t FEB_ID = (m_onlineHelper.feb_Id(dg->hardwareID()).get_identifier32().get_compact());
- m_mFEB[FEB_ID].vLArDigitFixed[gain].push_back(dg);
+  uint32_t FEB_ID = (m_onlineHelper.feb_Id(dg->hardwareID()).get_identifier32().get_compact());
+  m_mFEB[FEB_ID].vLArDigitFixed[gain].push_back(dg);
 }
+
+
 //Add calibration digits
 void LArRodEncoder::add(const LArCalibDigit* dg, const int gain)
 {
- uint32_t FEB_ID = (m_onlineHelper.feb_Id(dg->hardwareID()).get_identifier32().get_compact());
- m_mFEB[FEB_ID].vLArCalibDigit[gain].push_back(dg);
+  uint32_t FEB_ID = (m_onlineHelper.feb_Id(dg->hardwareID()).get_identifier32().get_compact());
+  m_mFEB[FEB_ID].vLArCalibDigit[gain].push_back(dg);
 }
 
 
@@ -74,16 +78,17 @@ void LArRodEncoder::clear()
 // in the current list to a vector of 32bit words
 void LArRodEncoder::fillROD(std::vector<uint32_t>& v, MsgStream& logstr, const CaloNoise& noise, double nsigma)
 {
- if (!m_BlStruct)
-  {logstr << MSG::ERROR << "No LArRodBlockStructure defined! Can't encode fragment!" << endmsg; 
-   return;
+  if (!m_BlStruct)
+  {
+    logstr << MSG::ERROR << "No LArRodBlockStructure defined! Can't encode fragment!" << endmsg;
+    return;
   }
- m_BlStruct->initializeFragment(v); //Makes new Fragment or splits v into existing Feb-Blocks
- std::map<uint32_t,FebData_t>::iterator it=m_mFEB.begin();
- std::map<uint32_t,FebData_t>::iterator it_end=m_mFEB.end();
- // The sort alorithm for the vectors inside the data object of the map fails
- // when I use const_iterator at this point. Don't ask me why
- for(;it!=it_end;++it) {
+  m_BlStruct->initializeFragment(v); //Makes new Fragment or splits v into existing Feb-Blocks
+  std::map<uint32_t,FebData_t>::iterator it=m_mFEB.begin();
+  std::map<uint32_t,FebData_t>::iterator it_end=m_mFEB.end();
+  // The sort alorithm for the vectors inside the data object of the map fails
+  // when I use const_iterator at this point. Don't ask me why
+  for(;it!=it_end;++it) {
     m_BlStruct->initializeFEB(it->first);                                     // Set FEB id
     // ************* Energy Block *************
     if (m_BlStruct->canSetEnergy() && it->second.vLArRC.size()>0) {
@@ -97,27 +102,27 @@ void LArRodEncoder::fillROD(std::vector<uint32_t>& v, MsgStream& logstr, const C
 
         for (const LArRawChannel *theChannel : it->second.vLArRC) {
 	  if ( theChannel != nullptr ){
-	  int cId =  m_onlineHelper.channel(theChannel->hardwareID());
+            int cId =  m_onlineHelper.channel(theChannel->hardwareID());
 
-	  int e=theChannel->energy();
-          uint32_t quality = theChannel->quality();
-	  m_BlStruct->setNextEnergy(cId,e, theChannel->time(), 
-				    quality,theChannel->gain());
+            int e=theChannel->energy();
+            uint32_t quality = theChannel->quality();
+            m_BlStruct->setNextEnergy(cId,e, theChannel->time(),
+                                      quality,theChannel->gain());
 	  
-	  // you convert from hardwareID to offline channle ID hash (???)
-	  myofflineID = m_onOffIdMapping.cnvToIdentifier(theChannel->hardwareID()) ;
-          const CaloDetDescrElement* caloDDE = m_CaloDetDescrManager.get_element(myofflineID);
-	  // This is probably NOT what one wants. You want the cell gain!
-          double cellnoise = noise.getNoise(myofflineID,theChannel->gain());
-          if( e > (nsigma*cellnoise) && (quality != 65535 ) ){
-	    double aux=caloDDE->sinTh();
-	    double aux_z=tanh(caloDDE->eta());
-            Ex += e*aux*caloDDE->cosPhi(); 
-	    Ey += e*aux*caloDDE->sinPhi();
-	    Ez += e*aux_z;
-	    SumE += e;
-          }
-	 } // End of if to check for the LArRawChannel existence
+            // you convert from hardwareID to offline channle ID hash (???)
+            myofflineID = m_onOffIdMapping.cnvToIdentifier(theChannel->hardwareID()) ;
+            const CaloDetDescrElement* caloDDE = m_CaloDetDescrManager.get_element(myofflineID);
+            // This is probably NOT what one wants. You want the cell gain!
+            double cellnoise = noise.getNoise(myofflineID,theChannel->gain());
+            if( e > (nsigma*cellnoise) && (quality != 65535 ) ){
+              double aux=caloDDE->sinTh();
+              double aux_z=tanh(caloDDE->eta());
+              Ex += e*aux*caloDDE->cosPhi();
+              Ey += e*aux*caloDDE->sinPhi();
+              Ez += e*aux_z;
+              SumE += e;
+            }
+          } // End of if to check for the LArRawChannel existence
         } // end of chit loop
 	// Set after the loop finishes
 	m_BlStruct->setEx(Ex);
@@ -167,26 +172,25 @@ void LArRodEncoder::fillROD(std::vector<uint32_t>& v, MsgStream& logstr, const C
   
     // ************** Calibration Digit Block ***********
     if (m_BlStruct->canSetCalibration()) { 
-        for (int i=0;i<3;i++) { //Loop over three gains
-	  m_BlStruct->sortDataVector(it->second.vLArCalibDigit[i]);
-	  std::vector<const LArCalibDigit*>::const_iterator digit_it = it->second.vLArCalibDigit[i].begin();
-	  std::vector<const LArCalibDigit*>::const_iterator digit_it_end=it->second.vLArCalibDigit[i].end();
-	  if(digit_it!=digit_it_end) {//Container not empty
-	    m_BlStruct->setNumberOfSamples((*digit_it)->samples().size());
-	    m_BlStruct->setDelay((*digit_it)->delay());
-	    m_BlStruct->setDAC((*digit_it)->DAC());
-	    for (;digit_it!=digit_it_end;++digit_it) { 
-	      int cId =  m_onlineHelper.channel((*digit_it)->hardwareID()); 
-	      m_BlStruct->setRawDataFixed(cId, (*digit_it)->samples(), (*digit_it)->gain());
-	      if ((*digit_it)->isPulsed())
-		m_BlStruct->setPulsed(cId);
-	    }
-	  } //End Container not empty
-	}// end loop over three gains
+      for (int i=0;i<3;i++) { //Loop over three gains
+        m_BlStruct->sortDataVector(it->second.vLArCalibDigit[i]);
+        std::vector<const LArCalibDigit*>::const_iterator digit_it = it->second.vLArCalibDigit[i].begin();
+        std::vector<const LArCalibDigit*>::const_iterator digit_it_end=it->second.vLArCalibDigit[i].end();
+        if(digit_it!=digit_it_end) {//Container not empty
+          m_BlStruct->setNumberOfSamples((*digit_it)->samples().size());
+          m_BlStruct->setDelay((*digit_it)->delay());
+          m_BlStruct->setDAC((*digit_it)->DAC());
+          for (;digit_it!=digit_it_end;++digit_it) {
+            int cId =  m_onlineHelper.channel((*digit_it)->hardwareID());
+            m_BlStruct->setRawDataFixed(cId, (*digit_it)->samples(), (*digit_it)->gain());
+            if ((*digit_it)->isPulsed())
+              m_BlStruct->setPulsed(cId);
+          }
+        } //End Container not empty
+      }// end loop over three gains
     } //end can set calibration
     
     m_BlStruct->finalizeFEB();
- }// end iterating over FEB-map
- m_BlStruct->concatinateFEBs();
- return; 
+  }// end iterating over FEB-map
+  m_BlStruct->concatinateFEBs();
 }

@@ -317,12 +317,12 @@ int LArRodBlockPhysicsV6::getNextRawData(int& channelNumber, std::vector<short>&
   else
     rearrangeFirstSample=getFirstSampleIndex();
   if (rearrangeFirstSample && rearrangeFirstSample<samples.size()) //FIXME: Very ugly hack! See explanation in LArRodDecoder.h file
-      {//Change e.g. 3 0 1 2 4 to 0 1 2 3 4 
-	short movedSample=samples[0];
-	for (unsigned i=1;i<=rearrangeFirstSample;i++)
-	  samples[i-1]=samples[i];
-	samples[rearrangeFirstSample]=movedSample;
-   }
+  {//Change e.g. 3 0 1 2 4 to 0 1 2 3 4
+    short movedSample=samples[0];
+    for (unsigned i=1;i<=rearrangeFirstSample;i++)
+      samples[i-1]=samples[i];
+    samples[rearrangeFirstSample]=movedSample;
+  }
 #ifdef LARBSDBGOUTPUT
   m_logstr << MSG::DEBUG << "GetNextRawData for FEB finished 0x" << MSG::hex << (uint32_t)getHeader32(FEBID) << MSG::dec << endmsg;
 #endif
@@ -438,12 +438,12 @@ int LArRodBlockPhysicsV6::getNextDigits(int& channelNumber, std::vector<short>& 
   else
     rearrangeFirstSample=getFirstSampleIndex();
   if (rearrangeFirstSample && rearrangeFirstSample<samples.size()) //FIXME: Very ugly hack! See explanation in LArRodDecoder.h file
-      {//Change e.g. 3 0 1 2 4 to 0 1 2 3 4 
-	short movedSample=samples[0];
-	for (unsigned i=1;i<=rearrangeFirstSample;i++)
-	  samples[i-1]=samples[i];
-	samples[rearrangeFirstSample]=movedSample;
-   }
+  {//Change e.g. 3 0 1 2 4 to 0 1 2 3 4
+    short movedSample=samples[0];
+    for (unsigned i=1;i<=rearrangeFirstSample;i++)
+      samples[i-1]=samples[i];
+    samples[rearrangeFirstSample]=movedSample;
+  }
 #ifdef LARBSDBGOUTPUT
   m_logstr << MSG::DEBUG << "GetNextDigits for FEB finished 0x" << MSG::hex << (uint32_t)getHeader32(FEBID) << MSG::dec << endmsg;
 #endif
@@ -575,15 +575,13 @@ void LArRodBlockPhysicsV6::initializeFragment(std::vector<uint32_t>& fragment ){
     } // end while
   }
   fragment.clear(); //Clear existing vector
-  return;
-
 }
 
 //For writing: Initalizes a single FEB-Block
 void LArRodBlockPhysicsV6::initializeFEB(const uint32_t id)
 {
- m_vFragment=&(m_mFebBlocks[id]);
- if (m_vFragment->size()<m_iHeadBlockSize) //Got empty or spoiled fragment
+  m_vFragment=&(m_mFebBlocks[id]);
+  if (m_vFragment->size()<m_iHeadBlockSize) //Got empty or spoiled fragment
   {
     m_vFragment->resize(m_iHeadBlockSize,0); //Initialize FEB-Header
     setHeader32(FEBID,id);                //Set Feb ID
@@ -591,96 +589,94 @@ void LArRodBlockPhysicsV6::initializeFEB(const uint32_t id)
     m_vFragment->reserve(90);
   }
 
- m_SumBlkBlockE1.resize(4);
- for(unsigned int i=0;i<4;i++) m_SumBlkBlockE1[i]=0x0;
- m_SumBlkBlockE2.resize(4);
- for(unsigned int i=0;i<4;i++) m_SumBlkBlockE2[i]=0x0;
- m_GainBlock.resize(8);
- for(unsigned int i=0;i<8;i++) m_GainBlock[i]=0x0;
- m_TimeQualityBlock.resize(8);
- for(unsigned int i=0;i<8;i++) m_TimeQualityBlock[i]=0x0;
- m_EnergyBlockEncode.resize(128);
- for(unsigned int i=0;i<128;i++) m_EnergyBlockEncode[i]=0x0;
- m_DigitsEncode.clear();
+  m_SumBlkBlockE1.resize(4);
+  for(unsigned int i=0;i<4;i++) m_SumBlkBlockE1[i]=0x0;
+  m_SumBlkBlockE2.resize(4);
+  for(unsigned int i=0;i<4;i++) m_SumBlkBlockE2[i]=0x0;
+  m_GainBlock.resize(8);
+  for(unsigned int i=0;i<8;i++) m_GainBlock[i]=0x0;
+  m_TimeQualityBlock.resize(8);
+  for(unsigned int i=0;i<8;i++) m_TimeQualityBlock[i]=0x0;
+  m_EnergyBlockEncode.resize(128);
+  for(unsigned int i=0;i<128;i++) m_EnergyBlockEncode[i]=0x0;
+  m_DigitsEncode.clear();
 
- resetPointers();
-
+  resetPointers();
 }
 
 void LArRodBlockPhysicsV6::setNextEnergy(const int channel, const int32_t energy,
                                          const int32_t time, const int32_t quality, const uint32_t gain)
 {
- int rcNb=FebToRodChannel(channel);
- //rcNb ist supposed to equal or bigger than m_EIndex.
- //In the latter case, we fill up the missing  channels with zero
- if (rcNb<m_EnergyIndex) {
-   return;
- }
+  int rcNb=FebToRodChannel(channel);
+  //rcNb ist supposed to equal or bigger than m_EIndex.
+  //In the latter case, we fill up the missing  channels with zero
+  if (rcNb<m_EnergyIndex) {
+    return;
+  }
 
- //Fill up missing channels with zeros:
- while (m_EnergyIndex<rcNb)
-   setNextEnergy((int16_t)0,(int16_t)32767,(int16_t)-32767,(uint32_t)0);
+  //Fill up missing channels with zeros:
+  while (m_EnergyIndex<rcNb)
+    setNextEnergy((int16_t)0,(int16_t)32767,(int16_t)-32767,(uint32_t)0);
 
- // transform 32 bits data into 16 bits data
+  // transform 32 bits data into 16 bits data
 
- uint16_t theenergy;
- uint32_t abse,EncodedE;
- int16_t thetime,thequality;
- int32_t sign;
+  uint16_t theenergy;
+  uint32_t abse,EncodedE;
+  int16_t thetime,thequality;
+  int32_t sign;
 
- //Time is in 10 ps in ByteStream, hence the factor 10 to convert from ps
- thetime = (int16_t) time/10;
- thequality = (int16_t) quality;
+  //Time is in 10 ps in ByteStream, hence the factor 10 to convert from ps
+  thetime = (int16_t) time/10;
+  thequality = (int16_t) quality;
 
- sign=(energy>=0?1:-1); // get sign of energy
- abse=(uint32_t)abs(energy);
+  sign=(energy>=0?1:-1); // get sign of energy
+  abse=(uint32_t)abs(energy);
 
- EncodedE=abse; // range 0 
+  EncodedE=abse; // range 0
 
- if ((abse>8192)&&(abse<65536))
-   {
-     EncodedE=((abse>>3)|0x4000); // range 1 : drop last 3 bits and put range bits (bits 14 and 13 = 01)
-   }
- else if ((abse>65535)&&(abse<524288))
-   {
-     EncodedE=((abse>>6)|0x8000); // range 2 : drop last 6 bits and put range bits (bits 14 and 13 = 10)
-   }
- else if ((abse>524288))
-   {
-     EncodedE=((abse>>9)|0xc000); // range 3 : drop last 9 bits and put range bits (bits 14 and 13 = 11)
-   }
+  if ((abse>8192)&&(abse<65536))
+  {
+    EncodedE=((abse>>3)|0x4000); // range 1 : drop last 3 bits and put range bits (bits 14 and 13 = 01)
+  }
+  else if ((abse>65535)&&(abse<524288))
+  {
+    EncodedE=((abse>>6)|0x8000); // range 2 : drop last 6 bits and put range bits (bits 14 and 13 = 10)
+  }
+  else if ((abse>524288))
+  {
+    EncodedE=((abse>>9)|0xc000); // range 3 : drop last 9 bits and put range bits (bits 14 and 13 = 11)
+  }
 
- // treat sign now :
+  // treat sign now :
 
- if (sign<0) EncodedE |= 0x2000;
- theenergy = (uint16_t) EncodedE;
+  if (sign<0) EncodedE |= 0x2000;
+  theenergy = (uint16_t) EncodedE;
 
+  // Add data...
 
- // Add data...
-
- if (abse> m_EnergyThreshold1)
-   {
-     setNextEnergy(theenergy,thetime,thequality,gain);
-   }
- else
-   {
-     setNextEnergy(theenergy,(int16_t)32767,(int16_t)-32767,gain);
-   }
- return;
+  if (abse> m_EnergyThreshold1)
+  {
+    setNextEnergy(theenergy,thetime,thequality,gain);
+  }
+  else
+  {
+    setNextEnergy(theenergy,(int16_t)32767,(int16_t)-32767,gain);
+  }
 }
 
 //Private function, expects channel number is rod-style ordering
 void LArRodBlockPhysicsV6::setNextEnergy(const uint16_t energy,const int16_t time, const int16_t quality, const uint32_t gain)
 {
   if (m_EnergyIndex>=m_channelsPerFEB)        //Use m_EIndex to count total number of channels
-    {
-      return;
-    }
+  {
+    return;
+  }
 
   // Energy
   int endianindex;
   if (m_EnergyIndex & 0x1) endianindex = m_EnergyIndex-1;
   else                    endianindex = m_EnergyIndex+1;
+
   m_EnergyBlockEncode[endianindex] = energy;
 
   // Find correct position
@@ -713,41 +709,40 @@ void LArRodBlockPhysicsV6::setNextEnergy(const uint16_t energy,const int16_t tim
 
 void LArRodBlockPhysicsV6::setRawData(const int chIdx, const std::vector<short>& samples , const uint32_t /* gain_not_used */ ){
 
-      // First of all, set the bits
-      int cchIdx = FebToRodChannel(chIdx);
-      uint16_t mask_idx=cchIdx>>5;
-      uint16_t mask_bit=(cchIdx&0x1f);
-      m_SumBlkBlockE2[mask_idx] |= (0x1 << mask_bit);
-      for(std::vector<short>::const_iterator i=samples.begin();i!=samples.end();++i){
-	m_DigitsEncode.push_back((*i)<<2);
-      }
-
+  // First of all, set the bits
+  int cchIdx = FebToRodChannel(chIdx);
+  uint16_t mask_idx=cchIdx>>5;
+  uint16_t mask_bit=(cchIdx&0x1f);
+  m_SumBlkBlockE2[mask_idx] |= (0x1 << mask_bit);
+  for(std::vector<short>::const_iterator i=samples.begin();i!=samples.end();++i){
+    m_DigitsEncode.push_back((*i)<<2);
+  }
 }
 
 void LArRodBlockPhysicsV6::finalizeFEB()
 {
-//Complete non-complete Energy block
+  //Complete non-complete Energy block
   while (m_EnergyIndex<m_channelsPerFEB)
     setNextEnergy((uint16_t)0,(int16_t)32767,(int32_t)-32767,(uint32_t)0);//E=0,t=32767,q=-32767,G=0
 
-uint16_t n;
-uint16_t nsamples=5;
-// checkSum value
-uint32_t sum=0;
+  uint16_t n;
+  uint16_t nsamples=5;
+  // checkSum value
+  uint32_t sum=0;
 
-// Will Hardcode here for the moment FIXME. Minimal 1 sample
-setHeader16(NGains,1);
-setHeader16(NSamples,nsamples);
-// These will never be used form MC. Nice to put in here thought
-setHeader16(FEB_SN,0xfefe);
-setHeader16(FEB_SN_h,0xdede);
-setHeader16(InFPGAFormat,0x0);
-setHeader16(InFPGAFormat_h,0x2);
+  // Will Hardcode here for the moment FIXME. Minimal 1 sample
+  setHeader16(NGains,1);
+  setHeader16(NSamples,nsamples);
+  // These will never be used form MC. Nice to put in here thought
+  setHeader16(FEB_SN,0xfefe);
+  setHeader16(FEB_SN_h,0xdede);
+  setHeader16(InFPGAFormat,0x0);
+  setHeader16(InFPGAFormat_h,0x2);
 
-// Gain block...
-n = m_GainBlock.size();
-//Check if Gain-Block exists and is not yet part of the fragment
-if (n)
+  // Gain block...
+  n = m_GainBlock.size();
+  //Check if Gain-Block exists and is not yet part of the fragment
+  if (n)
   {
     for(unsigned int i=0;i<n;i++){
       m_vFragment->push_back(m_GainBlock[i]);
@@ -755,123 +750,119 @@ if (n)
     }
   }
 
- // Cells above energy threshold E1
- n = m_SumBlkBlockE1.size();
- //Check if Summary Block exists and is not yet part of the fragment
- if (n)
-   {
-     for (unsigned i=0;i<n;i++){
-       m_vFragment->push_back(m_SumBlkBlockE1[i]);
-       sum+=m_SumBlkBlockE1[i];
-     }
-   }
+  // Cells above energy threshold E1
+  n = m_SumBlkBlockE1.size();
+  //Check if Summary Block exists and is not yet part of the fragment
+  if (n)
+  {
+    for (unsigned i=0;i<n;i++){
+      m_vFragment->push_back(m_SumBlkBlockE1[i]);
+      sum+=m_SumBlkBlockE1[i];
+    }
+  }
 
- // Cells above energy threshold E2 (not included so far)
- n = m_SumBlkBlockE2.size();
- //Check if Summary Block exists and is not yet part of the fragment
- if (n)
-   {
-     for (unsigned i=0;i<n;i++){
-       m_vFragment->push_back(m_SumBlkBlockE2[i]);
-       sum+=m_SumBlkBlockE2[i];
-     }
-   }
+  // Cells above energy threshold E2 (not included so far)
+  n = m_SumBlkBlockE2.size();
+  //Check if Summary Block exists and is not yet part of the fragment
+  if (n)
+  {
+    for (unsigned i=0;i<n;i++){
+      m_vFragment->push_back(m_SumBlkBlockE2[i]);
+      sum+=m_SumBlkBlockE2[i];
+    }
+  }
 
- // fill info from counters
- // for moment just include 1 fake words (32 bits) to put radd
- uint32_t radd_nANC=0x0;
- // Second threshold missing (FIXME)
- radd_nANC = ((m_numberHotCell<<8))+(m_DigitsEncode.size()/nsamples);
- radd_nANC = (radd_nANC<<16);
- m_vFragment->push_back(radd_nANC);
- sum+=radd_nANC;
- // Need to include radd nsamples-1
- // No need to include in sum's for now
- for( int i=0; i < (nsamples-1)/2; i++)
- 	m_vFragment->push_back(0x0);
+  // fill info from counters
+  // for moment just include 1 fake words (32 bits) to put radd
+  uint32_t radd_nANC=0x0;
+  // Second threshold missing (FIXME)
+  radd_nANC = ((m_numberHotCell<<8))+(m_DigitsEncode.size()/nsamples);
+  radd_nANC = (radd_nANC<<16);
+  m_vFragment->push_back(radd_nANC);
+  sum+=radd_nANC;
+  // Need to include radd nsamples-1
+  // No need to include in sum's for now
+  for( int i=0; i < (nsamples-1)/2; i++)
+    m_vFragment->push_back(0x0);
 
+  // Energy block...
+  n = 128 ; // Fixed size m_EnergyBlock.size();
+  // Block also include time, whenever necessary
+  int size_of_block=80+(nsamples+1)/2+(m_TimeQualityBlock.size())/2;
+  //Check if Energy-Block exists and is not yet part of the fragment
+  if (n)
+  {
+    setHeader16(ResultsOff1,18);
+    setHeader16(ResultsDim1,size_of_block);
+    for(unsigned int i=0;i<n/2;i++) {
+      // WARNING which one should be >>16 2*i or 2*i+1? To be tested
+      uint32_t Encode = m_EnergyBlockEncode[2*i]+(m_EnergyBlockEncode[2*i+1]<<16);
+      m_vFragment->push_back(Encode);
+      sum+=Encode;
+    }
+  }
 
- // Energy block...
- n = 128 ; // Fixed size m_EnergyBlock.size();
- // Block also include time, whenever necessary
- int size_of_block=80+(nsamples+1)/2+(m_TimeQualityBlock.size())/2;
- //Check if Energy-Block exists and is not yet part of the fragment
- if (n)
-   {
-     setHeader16(ResultsOff1,18);
-     setHeader16(ResultsDim1,size_of_block);
-     for(unsigned int i=0;i<n/2;i++) {
-       // WARNING which one should be >>16 2*i or 2*i+1? To be tested
-       uint32_t Encode = m_EnergyBlockEncode[2*i]+(m_EnergyBlockEncode[2*i+1]<<16);
-       m_vFragment->push_back(Encode);
-       sum+=Encode;
-     }
-   }
+  // Magic numbers (4 or 8) for Ex, Ey and Ez
+  n = m_TimeQualityBlock.size();
+  //Check if Time and Quality Block exists and is not yet part of the fragment
+  if (n)
+  {
+    unsigned int imax = n/2;
+    for(unsigned int i=0;i<imax;i++){
+      ShortLong to_push{};
+      to_push.s[0] = m_TimeQualityBlock[i*2];
+      to_push.s[1] = m_TimeQualityBlock[i*2+1];
+      m_vFragment->push_back(to_push.l);
+      sum+=to_push.l;
+    }
+  }
+  // Now include digits
+  n = m_DigitsEncode.size();
+  if ( n ) {
+    // First make sure it is not and odd number to store
+    if ( m_DigitsEncode.size() & 0x1 ) m_DigitsEncode.push_back(0x0);
+    unsigned int imax=m_DigitsEncode.size()/2;
+    for(unsigned int i=0;i<imax;i++){
+      // Better by-swap
+      ShortLong to_push{};
+      to_push.s[1]=m_DigitsEncode[i*2];
+      to_push.s[0]=m_DigitsEncode[i*2+1];
+      m_vFragment->push_back(to_push.l);
+      sum+=to_push.l;
+    }
+    setHeader16(ResultsDim2,m_DigitsEncode.size()/2);
+    setHeader16(ResultsOff2,18+size_of_block);
+  } // End of check for format
 
- // Magic numbers (4 or 8) for Ex, Ey and Ez
- n = m_TimeQualityBlock.size();
- //Check if Time and Quality Block exists and is not yet part of the fragment
- if (n)
-   {
-     unsigned int imax = n/2;
-     for(unsigned int i=0;i<imax;i++){
-       ShortLong to_push{};
-       to_push.s[0] = m_TimeQualityBlock[i*2];
-       to_push.s[1] = m_TimeQualityBlock[i*2+1];
-       m_vFragment->push_back(to_push.l);
-       sum+=to_push.l;
-     }
-   }
-   // Now include digits
-   n = m_DigitsEncode.size();
-   if ( n ) {
-     // First make sure it is not and odd number to store
-     if ( m_DigitsEncode.size() & 0x1 ) m_DigitsEncode.push_back(0x0);
-     unsigned int imax=m_DigitsEncode.size()/2;
-     for(unsigned int i=0;i<imax;i++){
-	// Better by-swap
-	ShortLong to_push{};
-	to_push.s[1]=m_DigitsEncode[i*2];
-	to_push.s[0]=m_DigitsEncode[i*2+1];
-        m_vFragment->push_back(to_push.l);
-        sum+=to_push.l;
-     }
-     setHeader16(ResultsDim2,m_DigitsEncode.size()/2);
-     setHeader16(ResultsOff2,18+size_of_block);
-   } // End of check for format
-
-   // Need to add header to check sum
-   for(size_t ii=0;ii<endtag/2;ii++){
-	sum+=((*m_vFragment)[ii]);
-   }
-   // Three final magic words
-   m_vFragment->push_back(0x0); // For the moment
-   m_vFragment->push_back(0x12345678); // For the moment
-   sum+=m_vFragment->size()+1;
-   m_vFragment->push_back(sum& 0x7fffffff);
+  // Need to add header to check sum
+  for(size_t ii=0;ii<endtag/2;ii++){
+    sum+=((*m_vFragment)[ii]);
+  }
+  // Three final magic words
+  m_vFragment->push_back(0x0); // For the moment
+  m_vFragment->push_back(0x12345678); // For the moment
+  sum+=m_vFragment->size()+1;
+  m_vFragment->push_back(sum& 0x7fffffff);
    
-   setHeader32(NWTot,m_vFragment->size());
-   return;
-
+  setHeader32(NWTot,m_vFragment->size());
 }
 
 
 void  LArRodBlockPhysicsV6::concatinateFEBs()
 {
- FEBMAPTYPE::const_iterator feb_it_b=m_mFebBlocks.begin();
- FEBMAPTYPE::const_iterator feb_it_e=m_mFebBlocks.end();
- FEBMAPTYPE::const_iterator feb_it;
- for (feb_it=feb_it_b;feb_it!=feb_it_e;++feb_it) {
-   if (feb_it!=feb_it_b) //Not first Feb
-       m_pRODblock->resize( m_pRODblock->size()+m_MiddleHeaderSize);
+  FEBMAPTYPE::const_iterator feb_it_b=m_mFebBlocks.begin();
+  FEBMAPTYPE::const_iterator feb_it_e=m_mFebBlocks.end();
+  FEBMAPTYPE::const_iterator feb_it;
+  for (feb_it=feb_it_b;feb_it!=feb_it_e;++feb_it) {
+    if (feb_it!=feb_it_b) //Not first Feb
+      m_pRODblock->resize( m_pRODblock->size()+m_MiddleHeaderSize);
 
-   //Add feb data to rod data block
-   m_pRODblock->insert (m_pRODblock->end(),
-                        feb_it->second.begin(), feb_it->second.end());
- } //end for feb_it
+    //Add feb data to rod data block
+    m_pRODblock->insert (m_pRODblock->end(),
+                         feb_it->second.begin(), feb_it->second.end());
+  } //end for feb_it
 
   m_mFebBlocks.clear();
-  return;
 }
 
 //Sort functions & ordering relation:

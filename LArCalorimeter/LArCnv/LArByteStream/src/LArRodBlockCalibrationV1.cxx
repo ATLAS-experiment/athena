@@ -123,12 +123,12 @@ int LArRodBlockCalibrationV1::getNextRawData(int& channelNumber, std::vector<sho
   }
   ++m_RawDataCounter;
   if (m_rearrangeFirstSample && m_rearrangeFirstSample<samples.size()) //FIXME: Very ugly hack! See explanation in LArRodDecoder.h file
-      {//Change e.g. 3 0 1 2 4 to 0 1 2 3 4 
-	short movedSample=samples[0];
-	for (unsigned i=1;i<=m_rearrangeFirstSample;i++)
-	  samples[i-1]=samples[i];
-	samples[m_rearrangeFirstSample]=movedSample;
-      }
+  {//Change e.g. 3 0 1 2 4 to 0 1 2 3 4
+    short movedSample=samples[0];
+    for (unsigned i=1;i<=m_rearrangeFirstSample;i++)
+      samples[i-1]=samples[i];
+    samples[m_rearrangeFirstSample]=movedSample;
+  }
   LARBSDBG("GetNextRawData for FEB finished 0x" << MSG::hex << (uint32_t)getHeader32(FEBID) << MSG::dec);
   return 1;
 }
@@ -137,7 +137,7 @@ int LArRodBlockCalibrationV1::getNextAccumulatedCalibDigit(int& channelNumber,  
 #ifdef LARBSDBGOUTPUT
   MsgStream logstr(Athena::getMessageSvc(), BlockType());
 #endif
- //Debug output
+  //Debug output
   LARBSDBG("GetAccumulatedCalibDigits for FEB 0x" << MSG::hex << 
 	   (uint32_t)getHeader32(FEBID) << MSG::dec << "iStepTriggers=" << iStepTriggers);
   LARBSDBG("m_Result1Counter" << m_Result1Counter << " m_Result1Index="<<  m_Result1Index 
