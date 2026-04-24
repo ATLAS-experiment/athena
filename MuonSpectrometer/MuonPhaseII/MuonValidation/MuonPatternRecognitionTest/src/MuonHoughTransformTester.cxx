@@ -5,6 +5,8 @@
 #include "MuonHoughTransformTester.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "MuonTesterTree/EventInfoBranch.h"
+
+#include "MuonTrackEvent/TrackingHelpers.h"
 #include "MuonReadoutGeometryR4/SpectrometerSector.h"
 #include "MuonPatternEvent/MuonHoughDefs.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
@@ -13,12 +15,23 @@
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
 #include "Acts/Utilities/Enumerate.hpp"
 #include "GaudiKernel/PhysicalConstants.h"
+#include "MuonSpacePoint/SpacePointHelpers.h"
 
  #include "AthContainers/ConstDataVector.h"
 
 
 namespace {
     constexpr double c_inv = 1. /Gaudi::Units::c_light;
+
+    template <typename SegObj>
+
+    unsigned countMatched(const xAOD::MuonSegment* truthSeg,
+                          const SegObj& obj) {
+        return truthSeg != nullptr ?
+             std::ranges::count_if(getMatchingSimHits(obj), [truthSeg](const xAOD::MuonSimHit* hit) {
+                return MuonR4::getMatchedTruthSegment(*hit) == truthSeg;
+             }) : 0;
+    }
 }
 
 
@@ -26,30 +39,7 @@ namespace MuonValR4 {
     using namespace MuonR4;
     using namespace MuonVal;
     using ObjectMatching = MuonHoughTransformTester::ObjectMatching;
-    using simHitSet = std::unordered_set<const xAOD::MuonSimHit*>;
-    unsigned int countMatched(const simHitSet& truthHits,
-                              const simHitSet& recoHits) {
-        unsigned int matched{0};
-        for (const xAOD::MuonSimHit* reco : recoHits) {
-            matched += truthHits.count(reco);
-        }
-        return matched;
-    }
-    unsigned int countMatched(const xAOD::MuonSegment* truthSeg,
-                              const MuonR4::SegmentSeed* seed) {
-        return truthSeg ? countMatched(getMatchingSimHits(*truthSeg), getMatchingSimHits(*seed)) : 0;
-    }
-    unsigned int countMatched(const xAOD::MuonSegment* truthSeg,
-                              const MuonR4::Segment* segment) {
-        return truthSeg ? countMatched(getMatchingSimHits(*truthSeg), getMatchingSimHits(*segment)) : 0;
-    }
-    /** @brief Define a spacepoint as precision hit if it's a Mdt or NSW eta hit */
-    template <class SpType>
-    bool isPrecHit(const SpType& sp) {
-        return sp.type() == xAOD::UncalibMeasType::MdtDriftCircleType ||
-               sp.type() == xAOD::UncalibMeasType::MMClusterType ||
-               (sp.type() == xAOD::UncalibMeasType::sTgcStripType && sp.measuresEta());
-    }
+    
 
     StatusCode MuonHoughTransformTester::initialize() {
         ATH_CHECK(m_geoCtxKey.initialize());
@@ -71,11 +61,10 @@ namespace MuonValR4 {
         ATH_CHECK(m_truthSegLinkKeys.initialize(!m_truthSegmentKey.empty()));
 
         /// The collection of readHandle keys should be either 1 or 2
-        ATH_CHECK(m_inSegmentKeys.initialize());
-        ATH_CHECK(m_inHoughSegmentSeedKeys.initialize());
-        ATH_CHECK(m_spKey.initialize(m_writeSpacePoints));
+        ATH_CHECK(m_patternSeedKeys.initialize());
+        ATH_CHECK(m_spKeys.initialize(m_writeSpacePoints));
         if (m_writeSpacePoints) {
-            m_spTester = std::make_unique<SpacePointTesterModule>(m_tree, m_spKey.key(), msgLevel());
+            m_spTester = std::make_unique<SpacePointTesterModule>(m_tree, m_spKeys.front().key(), msgLevel());
             m_tree.addBranch(m_spTester);
         } else {
             m_tree.disableBranch(m_spMatchedToPattern.name());
@@ -107,131 +96,120 @@ namespace MuonValR4 {
     }
     std::vector<ObjectMatching> 
             MuonHoughTransformTester::matchWithTruth(const ActsTrk::GeometryContext& gctx,
-                                                     const xAOD::MuonSegmentContainer* truthSegments,
-                                                     const SegmentSeedContainer* seedContainer,
-                                                     const SegmentContainer* segmentContainer) const {
+                                                     const MuonR4::SegmentSeedContainer& seedContainer,
+                                                     const xAOD::MuonSegmentContainer& segmentContainer,
+                                                     const xAOD::MuonSegmentContainer* truthSegments) const {
         std::vector<ObjectMatching> allAssociations{};
         std::unordered_set<const SegmentSeed*> usedSeeds{};
-        std::unordered_set<const Segment*> usedSegs{};
-
-        /// Step 1: Truth matched seeds and segments, and non-reconstructed truth. 
-        /// Go from truth to the matched reco objects and fill one common tree entry
-        if (m_isMC) {
-            // collect the sim hits that contributed to our segments and seeds.
-            std::vector<simHitSet> truthHitsVec{}, seedSimHitVec{}, segmentSimHitVec{};
-            for (const SegmentSeed* seed: *seedContainer) {
-                seedSimHitVec.emplace_back(getMatchingSimHits(*seed));
-            }
-            for (const Segment* segment: *segmentContainer){
-                segmentSimHitVec.emplace_back(getMatchingSimHits(*segment));
-            }
-
-            // Now look at the truth segments, collecting their sim hits.
-            // Compare these to the sim hits on our reco objects 
-            for (const xAOD::MuonSegment* truth: *truthSegments) {
-                const simHitSet& truthHits{truthHitsVec.emplace_back(getMatchingSimHits(*truth))};
-                ObjectMatching & matchedWithTruth = allAssociations.emplace_back(); 
-                matchedWithTruth.truthSegment = truth;
-                matchedWithTruth.chamber = m_detMgr->getSectorEnvelope((*truthHits.begin())->identify());
-
-                std::vector<std::pair<const SegmentSeed*, unsigned>> matchedSeeds{};
-                
-                // Find seeds sharing at least one simHit with our truth segment 
-                // can't wait for views::enumerate
-                int seedIdx{-1};
-                for (const SegmentSeed* seed : *seedContainer) {
-                    ++seedIdx;
-                    if (seed->msSector() != matchedWithTruth.chamber) {
-                        continue;
-                    }
-                    const simHitSet& seedHits{seedSimHitVec[seedIdx]};
-                    unsigned int matchedHits = countMatched(truthHits, seedHits);
-                    if (!matchedHits) {
-                        continue;
-                    }
-                    matchedSeeds.emplace_back(std::make_pair(seed, matchedHits));
-                }
-                // Find segments sharing at least one simHit with our truth segment 
-                std::vector<std::pair<const Segment*, unsigned>> matchedSegs{};
-                int segmentIdx{-1};
-                for (const Segment* segment  : *segmentContainer) {
-                    ++segmentIdx; 
-                    if (segment->msSector() != matchedWithTruth.chamber) {
-                        continue;
-                    }
-                    const simHitSet& segmentHits{segmentSimHitVec[segmentIdx]};
-                    unsigned int matchedHits = countMatched(truthHits, segmentHits);
-                    if (!matchedHits) {
-                        continue;
-                    }
-                    matchedSegs.emplace_back(std::make_pair(segment,matchedHits));
-                }
-
-                // sort by quality of match 
-
-                // for segments (by hit count and same-side hits) 
-                std::ranges::sort(matchedSegs,
-                        [this, &truth, &gctx](const std::pair<const Segment*, unsigned>& segA, 
-                                              const std::pair<const Segment*, unsigned>& segB){
-                    if (segA.second != segB.second) return segA.second > segB.second;
-                    return countOnSameSide(gctx, *truth, *segA.first) > countOnSameSide(gctx, *truth, *segB.first);
+        /// Step 1 Loop over all reconstructed segments && fill them
+        /// into the association table
+        for (const xAOD::MuonSegment* recoSeg : segmentContainer) {
+            const MuonR4::Segment* segment = detailedSegment(*recoSeg);
+            assert(segment != nullptr);
+            std::vector<ObjectMatching>::iterator assoc_itr = allAssociations.end();
+            const xAOD::MuonSegment* truthSeg = getMatchedTruthSegment(*recoSeg);
+            if (truthSeg) {
+                assoc_itr = std::ranges::find_if(allAssociations, [truthSeg](const ObjectMatching& obj){
+                    return obj.truthSegment == truthSeg;
                 });
-                // and for seeds (by raw hit count)
-                std::ranges::sort(matchedSeeds, [](const std::pair<const SegmentSeed*, unsigned>& seedA, 
-                                                const std::pair<const SegmentSeed*, unsigned>& seedB) {
-                    return seedA.second > seedB.second;
-                });
-
-
-                // now we can populate our association object 
-
-                // first, we handle the segments and any seeds connected with them
-                for (const auto& [matched, nMatchedHits] : matchedSegs) {
-                    // add segment to the list of all segments
-                    matchedWithTruth.matchedSegments.push_back(matched);
-                    // and update our book-keeping to record that this segment and its seed have already been written 
-                    usedSeeds.insert(matched->parent());
-                    usedSegs.insert(matched);
-                }
+            }
+            if (assoc_itr == allAssociations.end()) {
+                ObjectMatching & newObj = allAssociations.emplace_back();
+                newObj.chamber = m_detMgr->getSectorEnvelope(recoSeg->chamberIndex(),
+                                                             recoSeg->sector(),
+                                                             recoSeg->etaIndex());
+                newObj.truthSegment = truthSeg;
+                assoc_itr = allAssociations.end() -1;
+            }
+            ObjectMatching& assocObj{*assoc_itr};
+            assocObj.matchedSegments.push_back(segment);
+            if (!truthSeg) {
+                assocObj.matchedSeeds.push_back(segment->parent());
+            }
+            assocObj.matchedSeedFoundSegment.push_back(1);
+            usedSeeds.insert(segment->parent());
+        }
         
-                // now, we add the seeds
-                for (const auto& [seed , nHits] : matchedSeeds) {
-                    // add seed to the list of all seeds
-                    ATH_MSG_VERBOSE("Seed with "<<nHits);
-                    matchedWithTruth.matchedSeeds.push_back(seed);
-                    matchedWithTruth.matchedSeedFoundSegment.push_back(usedSeeds.count(seed)); 
-                    usedSeeds.insert(seed); 
+        if (truthSegments) {
+            for (ObjectMatching& assocObj : allAssociations) {
+                if (!assocObj.truthSegment) {
+                    continue;
                 }
-            } // end of loop over truth segments
-        }
-
-        /// Now we have processed all truth segments, as well as all reco objects that share sim hits with them. 
-        /// We still need to collect seeds and segments that are not matched to any truth. 
-        /// This happens in all data events, or through fake hits / segments. 
-
-        // start with segments, and also collect "their" seeds in a common entry
-        for (const Segment* seg: *segmentContainer) {
-            // skip segments that were previously seen and written in the truth loop
-            if (usedSegs.count(seg)) {
-                continue;
+                std::ranges::sort(assocObj.matchedSegments, 
+                                  [&](const Segment* a, const Segment* b){
+                                        return countOnSameSide(gctx,*assocObj.truthSegment, *a) >
+                                               countOnSameSide(gctx,*assocObj.truthSegment, *b);
+                                  });
+                std::ranges::transform(assocObj.matchedSegments, std::back_inserter(assocObj.matchedSeeds),
+                                       &MuonR4::Segment::parent);
             }
-            ObjectMatching & match = allAssociations.emplace_back();
-            match.chamber = seg->msSector();
-            match.matchedSegments = {seg}; 
-            match.matchedSeeds = {seg->parent()};
-            // this seed has been written as well - do not write it in the following loop 
-            usedSeeds.insert(seg->parent());
-            match.matchedSeedFoundSegment.push_back(1);
+            
         }
-        for (const SegmentSeed* seed: *seedContainer) {
-            // skip seeds that are on segments or seen in the truth loop so these will be seeds without segment 
+        /// Next loop over all seeds
+        for (const SegmentSeed* seed : seedContainer) {
+            /// Don't recycle the  used seeds again
             if (usedSeeds.count(seed)) {
                 continue;
             }
-            ObjectMatching & match = allAssociations.emplace_back(); 
-            match.chamber = seed->msSector();
-            match.matchedSeeds = {seed}; 
-            match.matchedSeedFoundSegment.push_back(0);
+            /// Find the best matching truth segment
+            std::vector<std::pair<const xAOD::MuonSegment*, std::size_t>> segCounts{};
+            std::unordered_set<const xAOD::MuonSimHit* > matchedHits = getMatchingSimHits(*seed);
+            for (const xAOD::MuonSimHit* hit : matchedHits) {
+                const xAOD::MuonSegment* truthSeg = getMatchedTruthSegment(*hit);
+                if (!truthSeg) {
+                    continue;
+                }
+                auto count_itr = std::ranges::find_if(segCounts, [truthSeg](const auto& segCounter){
+                    return segCounter.first == truthSeg;
+                });
+                if (count_itr != segCounts.end()) {
+                    ++(count_itr->second);
+                } else {
+                    segCounts.emplace_back(std::make_pair(truthSeg, 1ul));
+                }
+            }
+            /// find the best matching segment
+            std::ranges::sort(segCounts, [](const auto& a, const auto& b){
+                return a.second > b.second;
+            });
+            // Add a criterion on the number of counts?
+            const xAOD::MuonSegment* truthSeg = segCounts.size() 
+                                              ? segCounts.front().first : nullptr;
+            if (truthSeg) {
+                auto assoc_itr = std::ranges::find_if(allAssociations, 
+                    [truthSeg](const ObjectMatching& obj){
+                        return obj.truthSegment == truthSeg;
+                    });
+                if (assoc_itr == allAssociations.end()) {
+                    ObjectMatching & newObj = allAssociations.emplace_back();
+                    newObj.chamber = seed->msSector();
+                    newObj.truthSegment = truthSeg;
+                    assoc_itr = allAssociations.end() -1;
+                }
+                assoc_itr->matchedSeeds.push_back(seed);
+                assoc_itr->matchedSeedFoundSegment.push_back(0);
+            } else {
+                ObjectMatching & newObj = allAssociations.emplace_back();
+                newObj.chamber = seed->msSector(); 
+                newObj.matchedSeeds.push_back(seed);
+                newObj.matchedSeedFoundSegment.push_back(0);
+            }
+        }
+        /// Finally loop over all truth segments and push back the unused ones
+        if (truthSegments) {
+            for (const xAOD::MuonSegment* truthSeg :  *truthSegments) {
+                /// Check that the segment is not used yet
+                if (std::ranges::any_of(allAssociations, [truthSeg](const auto& assocObj){
+                    return assocObj.truthSegment == truthSeg;
+                })) {
+                    continue;
+                }
+                ObjectMatching & newObj = allAssociations.emplace_back();
+                newObj.chamber = m_detMgr->getSectorEnvelope(truthSeg->chamberIndex(),
+                                                             truthSeg->sector(),
+                                                             truthSeg->etaIndex());
+                newObj.truthSegment = truthSeg;
+            }
         }
         return allAssociations;
     }
@@ -243,34 +221,30 @@ namespace MuonValR4 {
     StatusCode MuonHoughTransformTester::execute()  {
         
         const EventContext & ctx = Gaudi::Hive::currentContext();
+
         const ActsTrk::GeometryContext* gctxPtr{nullptr};
         ATH_CHECK(SG::get(gctxPtr, m_geoCtxKey, ctx));
         const ActsTrk::GeometryContext& gctx{*gctxPtr};
 
-
         ConstDataVector<MuonR4::SegmentSeedContainer> segmentSeeds{SG::VIEW_ELEMENTS};
-        ConstDataVector<MuonR4::SegmentContainer> segments{SG::VIEW_ELEMENTS};
-
-        for (const SG::ReadHandleKey<SegmentSeedContainer>& key : m_inHoughSegmentSeedKeys) {
+        for (const SG::ReadHandleKey<SegmentSeedContainer>& key : m_patternSeedKeys) {
             const SegmentSeedContainer* readSegmentSeeds{nullptr};
             ATH_CHECK(SG::get(readSegmentSeeds, key, ctx));
-            segmentSeeds.insert(segmentSeeds.end(),readSegmentSeeds->begin(), readSegmentSeeds->end());
+            segmentSeeds.insert(segmentSeeds.end(), readSegmentSeeds->begin(), readSegmentSeeds->end());
         }
-        for (const SG::ReadHandleKey<SegmentContainer>& key : m_inSegmentKeys) {
-            const SegmentContainer* readSegments{nullptr};
-            ATH_CHECK(SG::get(readSegments, key, ctx));
-            segments.insert(segments.end(),readSegments->begin(), readSegments->end());
-        }
-        const xAOD::MuonSegmentContainer* readTruthSegments{nullptr};
 
-        if(m_isMC){
-             ATH_CHECK(SG::get(readTruthSegments , m_truthSegmentKey, ctx));
-        }
-            
+        const xAOD::MuonSegmentContainer* truthSegments{nullptr};
+        ATH_CHECK(SG::get(truthSegments, m_truthSegmentKey, ctx));
+
+        const xAOD::MuonSegmentContainer* recoSegments{nullptr};
+        ATH_CHECK(SG::get(recoSegments, m_recoSegKey, ctx));
+
         ATH_MSG_DEBUG("Succesfully retrieved input collections. Seeds: "<<segmentSeeds.size()
-                    <<", segments: "<<segments.size() <<", truth segments: "<<(readTruthSegments? readTruthSegments->size() : -1)<<".");
-        std::vector<ObjectMatching> objects = matchWithTruth(gctx, readTruthSegments, segmentSeeds.asDataVector(), 
-                                                             segments.asDataVector());
+                    <<", segments: "<<recoSegments->size() 
+                    <<", truth segments: "<<(truthSegments? truthSegments->size() : -1)
+                    <<".");
+        std::vector<ObjectMatching> objects = matchWithTruth(gctx, *segmentSeeds.asDataVector(), 
+                                                             *recoSegments, truthSegments);
         for (const ObjectMatching& obj : objects) {
             fillChamberInfo(obj.chamber);
             fillSeedInfo(obj);
@@ -346,7 +320,7 @@ namespace MuonValR4 {
         m_out_bucketStart = bucket.coveredMin();
         m_out_nSpacePoints = bucket.size();
         m_out_nPrecSpacePoints = std::ranges::count_if(bucket, [](const SpacePointBucket::value_type& sp){
-            return isPrecHit(*sp);
+            return isPrecisionHit(*sp);
         });
         m_out_nPhiSpacePoints = std::ranges::count_if(bucket, [](const SpacePointBucket::value_type& sp){
             return sp->measuresPhi();
@@ -358,7 +332,7 @@ namespace MuonValR4 {
             return m_visionTool->isLabeled(*sp);
         });
         m_out_nTruePrecSpacePoints = std::ranges::count_if(bucket,[this](const SpacePointBucket::value_type& sp){
-            return isPrecHit(*sp) && m_visionTool->isLabeled(*sp);
+            return isPrecisionHit(*sp) && m_visionTool->isLabeled(*sp);
         });
         m_out_nTruePhiSpacePoints = std::ranges::count_if(bucket,[this](const SpacePointBucket::value_type& sp){
             return sp->measuresPhi() && m_visionTool->isLabeled(*sp);
@@ -381,7 +355,7 @@ namespace MuonValR4 {
             m_out_seed_maxYhit.push_back(maxYhit);
 
             m_out_seed_hasPhiExtension.push_back(seed->hasPhiExtension()); 
-            m_out_seed_nMatchedHits.push_back(countMatched(obj.truthSegment, seed));
+            m_out_seed_nMatchedHits.push_back(countMatched(obj.truthSegment, *seed));
             m_out_seed_y0.push_back(seed->interceptY());
             m_out_seed_tantheta.push_back(seed->tanBeta());
             if (seed->hasPhiExtension()){
@@ -403,13 +377,13 @@ namespace MuonValR4 {
                     unsigned treeIdx = m_spTester->push_back(*houghSP);
                     treeIdxs.push_back(treeIdx);
                 }
-                nPrecHits += isPrecHit(*houghSP);
+                nPrecHits += isPrecisionHit(*houghSP);
                 nPhiHits  += houghSP->measuresPhi();
                 nEtaHits  += houghSP->measuresEta();
 
                 if (m_visionTool.isEnabled()) {
                     nTrueHits += m_visionTool->isLabeled(*houghSP);
-                    nTruePrecHits += m_visionTool->isLabeled(*houghSP) && isPrecHit(*houghSP);
+                    nTruePrecHits += m_visionTool->isLabeled(*houghSP) && isPrecisionHit(*houghSP);
                     nTruePhiHits += m_visionTool->isLabeled(*houghSP) && houghSP->measuresPhi();
                     nTrueEtaHits += m_visionTool->isLabeled(*houghSP) && houghSP->measuresEta();
                 }
@@ -484,11 +458,11 @@ namespace MuonValR4 {
         using namespace SegmentFit;
 
         m_out_segment_n = obj.matchedSegments.size(); 
-        for (const Segment* segment : obj.matchedSegments){
+        for (const Segment* segment : obj.matchedSegments) {
             m_out_segment_hasPhi.push_back(std::ranges::any_of(segment->measurements(), 
                                                 [](const auto& meas){  return meas->measuresPhi();}));
             m_out_segment_fitIter.push_back(segment->nFitIterations());
-            m_out_segment_truthMatchedHits.push_back(countMatched(obj.truthSegment, segment));
+            m_out_segment_truthMatchedHits.push_back(countMatched(obj.truthSegment, *segment));
             m_out_segment_chi2.push_back(segment->chi2());
             m_out_segment_nDoF.push_back(segment->nDoF());
             m_out_segment_hasTimeFit.push_back(segment->hasTimeFit());
@@ -530,7 +504,7 @@ namespace MuonValR4 {
                 }
                 if (m_visionTool.isEnabled()) {
                     nTrueHits += m_visionTool->isLabeled(*meas->spacePoint());
-                    nTruePrecHits += isPrecHit(*meas) && m_visionTool->isLabeled(*meas->spacePoint());
+                    nTruePrecHits += isPrecisionHit(*meas) && m_visionTool->isLabeled(*meas->spacePoint());
                     nTrueEtaHits += meas->measuresEta() && m_visionTool->isLabeled(*meas->spacePoint());
                     nTruePhiHits += meas->measuresPhi() && m_visionTool->isLabeled(*meas->spacePoint());
                 }

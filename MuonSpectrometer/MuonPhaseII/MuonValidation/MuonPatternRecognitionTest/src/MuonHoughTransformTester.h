@@ -60,9 +60,9 @@ namespace MuonValR4{
 
   private:
     std::vector<ObjectMatching> matchWithTruth(const ActsTrk::GeometryContext& gctx,
-                                               const xAOD::MuonSegmentContainer* truthSegments,
-                                               const MuonR4::SegmentSeedContainer* seedContainer,
-                                               const MuonR4::SegmentContainer* segmentContainer) const;
+                                               const MuonR4::SegmentSeedContainer& seedContainer,
+                                               const xAOD::MuonSegmentContainer& segmentContainer,
+                                               const xAOD::MuonSegmentContainer* truthSegments) const;
     /** @brief Calculates how many measurements from the segment fit have the same drift sign
      *          as when evaluated with the truth parameters
      *  @param gctx: Geometry context to fetch the alignment constants
@@ -105,12 +105,11 @@ namespace MuonValR4{
     SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_recoSegKey{this, "SegmentKey", "MuonSegmentsFromR4"};
     /** @brief name of the truth link decorations for the reco segment container */
     Gaudi::Property<std::vector<std::string>> m_recoSegLinks{this, "RecoSegLinks", {"truthSegmentLink", "truthParticleLink"}};
-    
-    SG::ReadHandleKeyArray<MuonR4::SegmentSeedContainer> m_inHoughSegmentSeedKeys{this, "SegmentSeedKeys", {"MuonHoughStationSegmentSeeds"}};
-    SG::ReadHandleKeyArray<MuonR4::SegmentContainer> m_inSegmentKeys{this, "SegmentKeys", {"R4MuonSegments"}};
-
-
-    SG::ReadHandleKey<MuonR4::SpacePointContainer> m_spKey{this, "SpacePointKey", "MuonSpacePoints"};
+    /** @brief List of the two segment seed containers from which the segments are buiit (Complets the pattern finding step) */
+    SG::ReadHandleKeyArray<MuonR4::SegmentSeedContainer> m_patternSeedKeys{this, "SegmentSeedKeys", {"MuonHoughStationSegmentSeeds"}};
+    /** @brief List of the space point containers in the event legacy + NSW containers */
+    SG::ReadHandleKeyArray<MuonR4::SpacePointContainer> m_spKeys{this, "SpacePointKeys", {"MuonSpacePoints"}};
+    /** @brief Tracking geometry context */
     SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
