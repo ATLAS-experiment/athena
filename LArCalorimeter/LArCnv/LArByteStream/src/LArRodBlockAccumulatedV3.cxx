@@ -117,12 +117,12 @@ int LArRodBlockAccumulatedV3::getNextRawData(int& channelNumber, std::vector<sho
   else
     rearrangeFirstSample=getFirstSampleIndex();
   if (rearrangeFirstSample && rearrangeFirstSample<samples.size()) //FIXME: Very ugly hack! See explanation in LArRodDecoder.h file
-      {//Change e.g. 3 0 1 2 4 to 0 1 2 3 4 
-	short movedSample=samples[0];
-	for (unsigned i=1;i<=rearrangeFirstSample;i++)
-	  samples[i-1]=samples[i];
-	samples[rearrangeFirstSample]=movedSample;
-      }
+  {//Change e.g. 3 0 1 2 4 to 0 1 2 3 4
+    short movedSample=samples[0];
+    for (unsigned i=1;i<=rearrangeFirstSample;i++)
+      samples[i-1]=samples[i];
+    samples[rearrangeFirstSample]=movedSample;
+  }
   LARBSDBG("GetNextRawData for FEB finished 0x" << MSG::hex << (uint32_t)getHeader32(FEBID) << MSG::dec);
   return 1;
 }

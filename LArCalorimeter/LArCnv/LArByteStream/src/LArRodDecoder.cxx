@@ -73,62 +73,64 @@ const InterfaceID& LArRodDecoder::interfaceID( )
 StatusCode
 LArRodDecoder::initialize ATLAS_NOT_THREAD_SAFE ()
 {
- // Before anything, access message service
+  // Before anything, access message service
   m_StatusNMask = !m_StatusMask;
-
 
   StatusCode sc = detStore()->retrieve(m_onlineHelper, "LArOnlineID");
   if (sc.isFailure()) {
-    msg(MSG::ERROR) << "Could not get LArOnlineID helper !" << endmsg;
+    ATH_MSG_ERROR ("Could not get LArOnlineID helper !");
     return sc;
-  } 
+  }
 
- ATH_CHECK( m_evt.initialize() );
+  ATH_CHECK( m_evt.initialize() );
 
- std::vector<std::string>::const_iterator it = m_LArCellCorrNames.begin(); 
- std::vector<std::string>::const_iterator it_end = m_LArCellCorrNames.end();
- for(; it!=it_end;++it)
-   {IAlgTool* tool; 
+  std::vector<std::string>::const_iterator it = m_LArCellCorrNames.begin();
+  std::vector<std::string>::const_iterator it_end = m_LArCellCorrNames.end();
+  for(; it!=it_end;++it)
+  {
+    IAlgTool* tool;
     CaloCellCorrection* corr; 
     Gaudi::Utils::TypeNameString li(*it);
     if((toolSvc()->retrieveTool(li.type(), li.name(), tool)).isFailure() )
-      {msg(MSG::ERROR) << " Can't get AlgTool for CaloCellCorrection " << endmsg;
-       return StatusCode::FAILURE; 
-      }
+    {
+      ATH_MSG_ERROR(" Can't get AlgTool for CaloCellCorrection ");
+      return StatusCode::FAILURE;
+    }
 
     corr = dynamic_cast<CaloCellCorrection*> (tool); 
     if(!corr  ) 
-      {msg(MSG::ERROR) << " Can't d-cast to CaloCellCorrection*  " << endmsg;
-       return StatusCode::FAILURE; 
-      }
+    {
+      ATH_MSG_ERROR(" Can't d-cast to CaloCellCorrection*  ");
+      return StatusCode::FAILURE;
+    }
     m_LArCellCorrTools.push_back(corr); 
-  } 
+  }
 
-   //Build list of preselected Feedthroughs
-   if (m_vBEPreselection.size() &&  m_vPosNegPreselection.size() && m_vFTPreselection.size()) {
-     ATH_MSG_INFO("Building list of selected feedthroughs");
-     for (const unsigned BE : m_vBEPreselection) {
-       for (const unsigned PN : m_vPosNegPreselection) {
-         for (const unsigned FT : m_vFTPreselection) {
-	   HWIdentifier finalFTId=m_onlineHelper->feedthrough_Id(BE,PN,FT);
-	   unsigned int finalFTId32 = finalFTId.get_identifier32().get_compact();
-	   ATH_MSG_INFO("Adding feedthrough Barrel/Endcap=" << BE << " pos/neg=" << PN << " FT=" << FT 
-			<< " (0x" << std::hex << finalFTId32 << std::dec << ")");
-	   m_vFinalPreselection.push_back(finalFTId32);
-	 }
-       }
-     }
-     std::sort(m_vFinalPreselection.begin(),m_vFinalPreselection.end());
-   }//end if something set
-   else {
-     if (m_vBEPreselection.size() ||  m_vPosNegPreselection.size() || m_vFTPreselection.size()) {
-       msg(MSG::ERROR) << "Feedthrough preselection: jobOption inconsistency! "<< endmsg;
-       msg(MSG::ERROR) << "Need to set all three jobOptions BEPreselection PNPreselecton and FTPreselection" << endmsg;
-       return StatusCode::FAILURE;
-     }
-     ATH_MSG_DEBUG("No feedthrough preselection by jobOptions.");
-   }
-   return sc;
+  //Build list of preselected Feedthroughs
+  if (m_vBEPreselection.size() &&  m_vPosNegPreselection.size() && m_vFTPreselection.size()) {
+    ATH_MSG_INFO("Building list of selected feedthroughs");
+    for (const unsigned BE : m_vBEPreselection) {
+      for (const unsigned PN : m_vPosNegPreselection) {
+        for (const unsigned FT : m_vFTPreselection) {
+          HWIdentifier finalFTId=m_onlineHelper->feedthrough_Id(BE,PN,FT);
+          unsigned int finalFTId32 = finalFTId.get_identifier32().get_compact();
+          ATH_MSG_INFO("Adding feedthrough Barrel/Endcap=" << BE << " pos/neg=" << PN << " FT=" << FT
+                       << " (0x" << std::hex << finalFTId32 << std::dec << ")");
+          m_vFinalPreselection.push_back(finalFTId32);
+        }
+      }
+    }
+    std::sort(m_vFinalPreselection.begin(),m_vFinalPreselection.end());
+  }//end if something set
+  else {
+    if (m_vBEPreselection.size() ||  m_vPosNegPreselection.size() || m_vFTPreselection.size()) {
+      ATH_MSG_ERROR("Feedthrough preselection: jobOption inconsistency! ");
+      ATH_MSG_ERROR("Need to set all three jobOptions BEPreselection PNPreselecton and FTPreselection");
+      return StatusCode::FAILURE;
+    }
+    ATH_MSG_DEBUG("No feedthrough preselection by jobOptions.");
+  }
+  return sc;
 }
 
 
@@ -145,79 +147,79 @@ void LArRodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragmen
   if (!BlStruct) return;
 
   do {
-      HWIdentifier fId( Identifier32(BlStruct->getFEBID()) );
-      unsigned int fId32 = fId.get_identifier32().get_compact();
-      if (!m_onlineHelper->isValidId(fId)) {
-	msg(MSG::WARNING) << "Invalid FEB identifer 0x" << std::hex << fId32 << std::dec << ". Skipping" << endmsg;
-	continue;
-      }
-      if(m_febExchange) {
-        if     (fId32 == m_febId1) {
-          fId = HWIdentifier(Identifier32(m_febId2));
-          fId32 = fId.get_identifier32().get_compact();
-        }
-        else if(fId32 == m_febId2) {
-          fId = HWIdentifier(Identifier32(m_febId1));
-          fId32 = fId.get_identifier32().get_compact();
-        }
-      }
-      
-      // IWS 24.01.2006 protection against NULL events (null pointer to rawdata block) 
-      if (!BlStruct->hasRawDataBlock())
-      {
-	ATH_MSG_DEBUG("No Raw Data for this FEB - NULL event for FEBID 0x"<< std::hex << BlStruct->getFEBID() << std::dec);
-        continue; 
-      }
-
-      // RL 04.17.2008 skip check for some FEBs
-      int do_check=1;
-      std::vector<unsigned int>::const_iterator it_feb     = m_IgnoreCheckFEBs.begin(); 
-      std::vector<unsigned int>::const_iterator it_feb_end = m_IgnoreCheckFEBs.end();
-      for(; it_feb!=it_feb_end;++it_feb)
-	if(fId==*it_feb) {
-	  do_check=0;
-	  break;
-	}
-      if(do_check) {
-	//WL 31.10.2007 //check RodStatus-word to catch corrupt events
-	if (BlStruct->getStatus() & m_StatusNMask) {
-	  msg(MSG::WARNING) << "RodStatus&0x" << std::hex << m_StatusNMask << " indicates corrupt data for FEB  "<< std::hex << fId32 << std::dec <<".  Ignored." << endmsg;
-	  continue;
-	}
-      }
-      // RL 05.11.2007 checksum
-      if(m_CheckSum) {
-	const uint32_t onsum  = BlStruct->onlineCheckSum();
-	const uint32_t offsum = BlStruct->offlineCheckSum();
-	if(onsum!=offsum) {
-	  msg(MSG::WARNING) << "Checksum error for FEB: " << MSG::hex << fId32 << endmsg;
-	  msg(MSG::WARNING) << " online checksum  = " << MSG::hex << onsum  << endmsg;
-	  msg(MSG::WARNING) << " offline checksum = " << MSG::hex << offsum << MSG::dec << endmsg;
-	  continue;
-	}
-      }
-
-      if (m_vFinalPreselection.size()) {
-	const unsigned int ftId=m_onlineHelper->feedthrough_Id(fId).get_identifier32().get_compact();
-	if (!std::binary_search(m_vFinalPreselection.begin(), m_vFinalPreselection.end(),ftId)) {
-	  ATH_MSG_DEBUG("Feedthrough with id 0x" << MSG::hex << ftId << MSG::dec <<" not in preselection. Ignored.");
-	  continue;
-	}
-      }
-      const int NthisFebChannel=m_onlineHelper->channelInSlotMax(fId);
-      while (BlStruct->getNextRawData(fcNb,samples,gain))
-	{if (fcNb>=NthisFebChannel)
-	  continue;
-	if (samples.size()==0) continue; // Ignore missing cells
-	HWIdentifier cId = m_onlineHelper->channel_Id(fId,fcNb);
-	calogain=(CaloGain::CaloGain)gain;
-	dg = new LArDigit(cId, calogain, std::move(samples));
-	samples.clear();
-	coll.push_back(dg);
-	}
+    HWIdentifier fId( Identifier32(BlStruct->getFEBID()) );
+    unsigned int fId32 = fId.get_identifier32().get_compact();
+    if (!m_onlineHelper->isValidId(fId)) {
+      ATH_MSG_WARNING("Invalid FEB identifer 0x" << std::hex << fId32 << std::dec << ". Skipping");
+      continue;
     }
-   while (BlStruct->nextFEB()); //Get NextFeb
-   return;
+    if(m_febExchange) {
+      if     (fId32 == m_febId1) {
+        fId = HWIdentifier(Identifier32(m_febId2));
+        fId32 = fId.get_identifier32().get_compact();
+      }
+      else if(fId32 == m_febId2) {
+        fId = HWIdentifier(Identifier32(m_febId1));
+        fId32 = fId.get_identifier32().get_compact();
+      }
+    }
+      
+    // IWS 24.01.2006 protection against NULL events (null pointer to rawdata block)
+    if (!BlStruct->hasRawDataBlock())
+    {
+      ATH_MSG_DEBUG("No Raw Data for this FEB - NULL event for FEBID 0x"<< std::hex << BlStruct->getFEBID() << std::dec);
+      continue;
+    }
+
+    // RL 04.17.2008 skip check for some FEBs
+    int do_check=1;
+    std::vector<unsigned int>::const_iterator it_feb     = m_IgnoreCheckFEBs.begin();
+    std::vector<unsigned int>::const_iterator it_feb_end = m_IgnoreCheckFEBs.end();
+    for(; it_feb!=it_feb_end;++it_feb)
+      if(fId==*it_feb) {
+        do_check=0;
+        break;
+      }
+    if(do_check) {
+      //WL 31.10.2007 //check RodStatus-word to catch corrupt events
+      if (BlStruct->getStatus() & m_StatusNMask) {
+        ATH_MSG_WARNING("RodStatus&0x" << std::hex << m_StatusNMask << " indicates corrupt data for FEB  "<< std::hex << fId32 << std::dec <<".  Ignored.");
+        continue;
+      }
+    }
+    // RL 05.11.2007 checksum
+    if(m_CheckSum) {
+      const uint32_t onsum  = BlStruct->onlineCheckSum();
+      const uint32_t offsum = BlStruct->offlineCheckSum();
+      if(onsum!=offsum) {
+        ATH_MSG_WARNING("Checksum error for FEB: " << MSG::hex << fId32);
+        ATH_MSG_WARNING(" online checksum  = " << MSG::hex << onsum);
+        ATH_MSG_WARNING(" offline checksum = " << MSG::hex << offsum << MSG::dec);
+        continue;
+      }
+    }
+
+    if (m_vFinalPreselection.size()) {
+      const unsigned int ftId=m_onlineHelper->feedthrough_Id(fId).get_identifier32().get_compact();
+      if (!std::binary_search(m_vFinalPreselection.begin(), m_vFinalPreselection.end(),ftId)) {
+        ATH_MSG_DEBUG("Feedthrough with id 0x" << MSG::hex << ftId << MSG::dec <<" not in preselection. Ignored.");
+        continue;
+      }
+    }
+    const int NthisFebChannel=m_onlineHelper->channelInSlotMax(fId);
+    while (BlStruct->getNextRawData(fcNb,samples,gain))
+    {
+      if (fcNb>=NthisFebChannel)
+        continue;
+      if (samples.size()==0) continue; // Ignore missing cells
+      HWIdentifier cId = m_onlineHelper->channel_Id(fId,fcNb);
+      calogain=(CaloGain::CaloGain)gain;
+      dg = new LArDigit(cId, calogain, std::move(samples));
+      samples.clear();
+      coll.push_back(dg);
+    }
+  }
+  while (BlStruct->nextFEB()); //Get NextFeb
 }
 
 //*******
@@ -236,81 +238,80 @@ void LArRodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragmen
   if (!BlStruct) return;
 
   do {
-      HWIdentifier fId( Identifier32(BlStruct->getFEBID()) );
-      unsigned int fId32 = fId.get_identifier32().get_compact();
-      if (!m_onlineHelper->isValidId(fId)) {
-	msg(MSG::WARNING) << "Invalid FEB identifer " << std::hex << fId32 << std::dec << ". Skipping" << endmsg;
-	continue;
-      }
+    HWIdentifier fId( Identifier32(BlStruct->getFEBID()) );
+    unsigned int fId32 = fId.get_identifier32().get_compact();
+    if (!m_onlineHelper->isValidId(fId)) {
+      ATH_MSG_WARNING("Invalid FEB identifer " << std::hex << fId32 << std::dec << ". Skipping");
+      continue;
+    }
 
-      if(m_febExchange) {
-        if     (fId32 == m_febId1) {
-          fId = HWIdentifier(Identifier32(m_febId2));
-          fId32 = fId.get_identifier32().get_compact();
-        }
-        else if(fId32 == m_febId2) {
-          fId = HWIdentifier(Identifier32(m_febId1));
-          fId32 = fId.get_identifier32().get_compact();
-        }
+    if(m_febExchange) {
+      if     (fId32 == m_febId1) {
+        fId = HWIdentifier(Identifier32(m_febId2));
+        fId32 = fId.get_identifier32().get_compact();
       }
-      if (!BlStruct->hasPhysicsBlock()) {
-        ATH_MSG_DEBUG("No Physics Data for this FEB - NULL event for FEBID 0x" << std::hex << BlStruct->getFEBID() << std::dec);
-        continue; 
-      }
-
-      // RL 04.17.2008 skip check for some FEBs
-      int do_check=1;
-      std::vector<unsigned int>::const_iterator it_feb     = m_IgnoreCheckFEBs.begin(); 
-      std::vector<unsigned int>::const_iterator it_feb_end = m_IgnoreCheckFEBs.end();
-      for(; it_feb!=it_feb_end;++it_feb)
-	if(fId==*it_feb) {
-	  do_check=0;
-	  break;
-	}
-      if(do_check) {
-	//WL 31.10.2007 //check RodStatus-word to catch corrupt events
-	if (BlStruct->getStatus() & m_StatusNMask) {
-	  msg(MSG::WARNING) << "RodStatus&0x" << std::hex << m_StatusNMask << " indicates corrupt data for FEB  "<< std::hex << fId32 << std::dec <<".  Ignored." << endmsg;
-	  continue;
-	}
-      }
-      
-      // RL 05.11.2007 checksum
-      if(m_CheckSum) {
-	const uint32_t onsum  = BlStruct->onlineCheckSum();
-	const uint32_t offsum = BlStruct->offlineCheckSum();
-	if(onsum!=offsum) {
-	  msg(MSG::WARNING) << "Checksum error:" << endmsg;
-	  msg(MSG::WARNING) << " online checksum  = " << MSG::hex << onsum  << endmsg;
-	  msg(MSG::WARNING) << " offline checksum = " << MSG::hex << offsum << endmsg;
-	  continue;
-	}
-      }
-
-      if (m_vFTPreselection.size()) {
-	int ftId=m_onlineHelper->feedthrough_Id(fId).get_identifier32().get_compact();
-	if (!std::binary_search(m_vFTPreselection.begin(), m_vFTPreselection.end(),ftId)) {
-	  ATH_MSG_DEBUG("Feedthrough with id " << std::hex << ftId << std::dec <<" not in preselection. Ignored.");
-	  continue;
-	}
-      }
-      const int NthisFebChannel=m_onlineHelper->channelInSlotMax(fId);
-      while (BlStruct->getNextEnergy(fcNb,energy,time,quality,gain)) {
-	if (fcNb>=NthisFebChannel)
-	  continue;
-	cId = m_onlineHelper->channel_Id(fId,fcNb);
-        uint16_t iquality = 0;
-        uint16_t iprovenance = 0x1000;
-        if (quality>0) {
-            iprovenance |= 0x2000;
-            iquality = (quality & 0xFFFF);
-        } 
-	LArRawChannel chan(cId, energy, time, iquality, iprovenance, (CaloGain::CaloGain)gain);
-	coll.push_back(chan);  
+      else if(fId32 == m_febId2) {
+        fId = HWIdentifier(Identifier32(m_febId1));
+        fId32 = fId.get_identifier32().get_compact();
       }
     }
-   while (BlStruct->nextFEB()); //Get NextFeb
-   return;
+    if (!BlStruct->hasPhysicsBlock()) {
+      ATH_MSG_DEBUG("No Physics Data for this FEB - NULL event for FEBID 0x" << std::hex << BlStruct->getFEBID() << std::dec);
+      continue;
+    }
+
+    // RL 04.17.2008 skip check for some FEBs
+    int do_check=1;
+    std::vector<unsigned int>::const_iterator it_feb     = m_IgnoreCheckFEBs.begin();
+    std::vector<unsigned int>::const_iterator it_feb_end = m_IgnoreCheckFEBs.end();
+    for(; it_feb!=it_feb_end;++it_feb)
+      if(fId==*it_feb) {
+        do_check=0;
+        break;
+      }
+    if(do_check) {
+      //WL 31.10.2007 //check RodStatus-word to catch corrupt events
+      if (BlStruct->getStatus() & m_StatusNMask) {
+        ATH_MSG_WARNING("RodStatus&0x" << std::hex << m_StatusNMask << " indicates corrupt data for FEB  "<< std::hex << fId32 << std::dec <<".  Ignored.");
+        continue;
+      }
+    }
+      
+    // RL 05.11.2007 checksum
+    if(m_CheckSum) {
+      const uint32_t onsum  = BlStruct->onlineCheckSum();
+      const uint32_t offsum = BlStruct->offlineCheckSum();
+      if(onsum!=offsum) {
+        ATH_MSG_WARNING("Checksum error:");
+        ATH_MSG_WARNING(" online checksum  = " << MSG::hex << onsum);
+        ATH_MSG_WARNING(" offline checksum = " << MSG::hex << offsum);
+        continue;
+      }
+    }
+
+    if (m_vFTPreselection.size()) {
+      int ftId=m_onlineHelper->feedthrough_Id(fId).get_identifier32().get_compact();
+      if (!std::binary_search(m_vFTPreselection.begin(), m_vFTPreselection.end(),ftId)) {
+        ATH_MSG_DEBUG("Feedthrough with id " << std::hex << ftId << std::dec <<" not in preselection. Ignored.");
+        continue;
+      }
+    }
+    const int NthisFebChannel=m_onlineHelper->channelInSlotMax(fId);
+    while (BlStruct->getNextEnergy(fcNb,energy,time,quality,gain)) {
+      if (fcNb>=NthisFebChannel)
+        continue;
+      cId = m_onlineHelper->channel_Id(fId,fcNb);
+      uint16_t iquality = 0;
+      uint16_t iprovenance = 0x1000;
+      if (quality>0) {
+        iprovenance |= 0x2000;
+        iquality = (quality & 0xFFFF);
+      }
+      LArRawChannel chan(cId, energy, time, iquality, iprovenance, (CaloGain::CaloGain)gain);
+      coll.push_back(chan);
+    }
+  }
+  while (BlStruct->nextFEB()); //Get NextFeb
 }
 
 
@@ -501,7 +502,6 @@ void LArRodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragmen
     while (BlStruct->nextFEB()); //Get NextFeb
   }
   coll.setDelayScale(m_delayScale);
-  return;
 }
 
 void LArRodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag,
@@ -556,7 +556,7 @@ void LArRodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragmen
       if(do_check) {
 	//WL 31.10.2007 //check RodStatus-word to catch corrupt events
 	if (BlStruct->getStatus() & m_StatusNMask) {
-	  msg(MSG::WARNING) << "RodStatus&0x" << std::hex << m_StatusNMask << " indicates corrupt data for FEB  "<< std::hex << fId32 << std::dec <<".  Ignored." << endmsg;
+	  ATH_MSG_WARNING("RodStatus&0x" << std::hex << m_StatusNMask << " indicates corrupt data for FEB  "<< std::hex << fId32 << std::dec <<".  Ignored.");
 	  continue;
 	}
       }
@@ -565,9 +565,9 @@ void LArRodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragmen
 	uint32_t onsum  = BlStruct->onlineCheckSum();
 	uint32_t offsum = BlStruct->offlineCheckSum();
 	if(onsum!=offsum) {
-	  msg(MSG::WARNING) << "Checksum error:" << endmsg;
-	  msg(MSG::WARNING) << " online checksum  = " << MSG::hex << onsum  << endmsg;
-	  msg(MSG::WARNING) << " offline checksum = " << MSG::hex << offsum << endmsg;
+	  ATH_MSG_WARNING("Checksum error:");
+	  ATH_MSG_WARNING(" online checksum  = " << MSG::hex << onsum);
+	  ATH_MSG_WARNING(" offline checksum = " << MSG::hex << offsum);
 	  continue;
 	}
       }
@@ -627,8 +627,6 @@ void LArRodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragmen
 	} // End while
     }//End do loop of FEBs
   while (BlStruct->nextFEB()); //Get NextFeb
-
-  return;
 }
 
 void LArRodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag,
@@ -669,7 +667,7 @@ void LArRodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragmen
       if(do_check) {
 	//WL 31.10.2007 //check RodStatus-word to catch corrupt events
 	if (BlStruct->getStatus() & m_StatusNMask) {
-	  msg(MSG::WARNING) << "RodStatus&0x" << std::hex << m_StatusNMask << " indicates corrupt data for FEB  "<< std::hex << fId32 << std::dec <<".  Ignored." << endmsg;
+	  ATH_MSG_WARNING("RodStatus&0x" << std::hex << m_StatusNMask << " indicates corrupt data for FEB  "<< std::hex << fId32 << std::dec <<".  Ignored.");
 	  continue;
 	}
       }
@@ -678,9 +676,9 @@ void LArRodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragmen
 	uint32_t onsum  = BlStruct->onlineCheckSum();
 	uint32_t offsum = BlStruct->offlineCheckSum();
 	if(onsum!=offsum) {
-	  msg(MSG::WARNING) << "Checksum error:" << endmsg;
-	  msg(MSG::WARNING) << " online checksum  = " << MSG::hex << onsum  << endmsg;
-	  msg(MSG::WARNING) << " offline checksum = " << MSG::hex << offsum << endmsg;
+	  ATH_MSG_WARNING("Checksum error:");
+	  ATH_MSG_WARNING(" online checksum  = " << MSG::hex << onsum);
+	  ATH_MSG_WARNING(" offline checksum = " << MSG::hex << offsum);
 	  continue;
 	}
       }
@@ -714,8 +712,6 @@ void LArRodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragmen
 	} // End while
     }//End do loop of FEBs
   while (BlStruct->nextFEB()); //Get NextFeb
-
-  return;
 }
 
 void LArRodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag,
@@ -733,7 +729,7 @@ void LArRodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragmen
     FEBID=HWIdentifier(Identifier32(BlStruct->getFEBID()));
     unsigned int FEBID32 = FEBID.get_identifier32().get_compact();
     if (!m_onlineHelper->isValidId(FEBID)) {
-      msg(MSG::WARNING) << "Invalid FEB identifer " << std:: hex << FEBID32 << std::dec << ". Skipping" << endmsg;
+      ATH_MSG_WARNING("Invalid FEB identifer " << std:: hex << FEBID32 << std::dec << ". Skipping");
       continue;
     }
 
@@ -815,8 +811,8 @@ LArRodDecoder::prepareBlockStructure1 (const uint16_t rodMinorVersion, const uin
   const unsigned MAXTYPE = 10;
 
   if (rodMinorVersion > MAXMINOR || robBlockType > MAXTYPE) {
-    msg(MSG::ERROR) << "Bad Rod block type " <<  robBlockType
-                    << " / " << rodMinorVersion << endmsg;
+    ATH_MSG_ERROR("Bad Rod block type " <<  robBlockType
+                  << " / " << rodMinorVersion);
     return nullptr;
   }
   std::vector<std::unique_ptr<LArRodBlockStructure> >& blstructs =
@@ -829,8 +825,8 @@ LArRodDecoder::prepareBlockStructure1 (const uint16_t rodMinorVersion, const uin
     blstructs[index] = makeBlockStructure (robBlockType, rodMinorVersion);
   }
   if (!blstructs[index]) {
-    msg(MSG::ERROR) << "Bad Rod block type " <<  robBlockType
-                    << " / " << rodMinorVersion << endmsg;
+    ATH_MSG_ERROR("Bad Rod block type " <<  robBlockType
+                  << " / " << rodMinorVersion);
     return nullptr;
   }
 
@@ -864,9 +860,9 @@ LArRodDecoder::prepareBlockStructure(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragm
     static std::atomic<int> nMess = 1;
     int thismess = nMess++;
     if (thismess <= maxMess) {
-      msg(MSG::ERROR) << "Could not set fragment (wrong number of samples in data ?) - container will not be filled" << endmsg;
+      ATH_MSG_ERROR("Could not set fragment (wrong number of samples in data ?) - container will not be filled");
       if (thismess == maxMess)
-        msg(MSG::ERROR) << "This message will not be repeated" << endmsg;
+        ATH_MSG_ERROR("This message will not be repeated");
     }
     return NULL;
   }

@@ -248,7 +248,7 @@ private:
     std::vector<LatomeCalibPatterns> m_latomeCalibPatternsInEvent;
   };
 
-  // propary of tool
+  // tool properties
   const LArOnline_SuperCellID* m_onlineId{};
   ToolHandle<ICaloSuperCellIDTool> m_sc2ccMappingTool;
   
