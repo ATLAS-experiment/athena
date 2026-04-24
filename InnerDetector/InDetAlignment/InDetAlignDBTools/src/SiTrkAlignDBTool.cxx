@@ -83,6 +83,7 @@ SiTrkAlignDBTool::SiTrkAlignDBTool(const std::string & type, const std::string &
   declareProperty("OldIBLDistFile",    m_oldIBLDistFile);
   declareProperty("OldGlobalFolderFile",m_oldGlobalFolderFile);
   declareProperty("UpdateConstants",   m_updateConstants);
+  declareProperty("WriteAsL2",         m_writeAsL2);
   declareProperty("WriteAsL3",         m_writeAsL3);
 
   declareProperty("IDAlignDBTool",     m_IDAlignDBTool);

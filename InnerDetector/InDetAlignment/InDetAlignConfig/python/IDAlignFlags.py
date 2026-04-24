@@ -3,8 +3,6 @@
 # File: InDetAlignConfig/python/IDAlignFlags.py
 # Author: David Brunner (david.brunner@cern.ch), Thomas Strebler (thomas.strebler@cern.ch)
 
-from AthenaCommon.Logging import logging
-
 def createInDetAlignFlags():
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
     icf = AthConfigFlags()
@@ -61,14 +59,6 @@ def setL11AlignmentFlags(flags):
     flags.InDet.Align.TRTAlignmentLevelBarrel = -1
     flags.InDet.Align.TRTAlignmentLevelEndcaps = -1
 
-    if flags.InDet.Align.localDataBase:
-        msg = logging.getLogger('setL16AlignmentFlags')
-        msg.info(f"Change IBLDist tag from '{flags.InDet.Align.IBLDistTag}' to 'InDetAlignIBLDIST-T0-Alignment'")
-        msg.info(f"Change L1IDTag tag from '{flags.InDet.Align.L1IDTag}' to 'InDetAlignL1-T0-Alignment'")
-            
-        flags.InDet.Align.IBLDistTag = "InDetAlignIBLDIST-T0-Alignment"
-        flags.InDet.Align.L1IDTag = "InDetAlignL1-T0-Alignment"
-
 def setL16AlignmentFlags(flags):
     if not flags.InDet.Align.alignPixel:
         raise Exception("With alignment level '16' the flag 'flags.InDet.Align.alignPixel' must be true'")
@@ -87,14 +77,6 @@ def setL16AlignmentFlags(flags):
 
     flags.InDet.Align.alignSCT = False
     flags.InDet.Align.alignTRT = False
-    
-    if flags.InDet.Align.localDataBase:
-        msg = logging.getLogger('setL16AlignmentFlags')
-        msg.info(f"Change IBLDist tag from '{flags.InDet.Align.IBLDistTag}' to 'InDetAlignIBLDIST-T0-Alignment'")
-        msg.info(f"Change L1IDTag tag from '{flags.InDet.Align.L1IDTag}' to 'InDetAlignL1-T0-Alignment'")
-    
-        flags.InDet.Align.IBLDistTag = "InDetAlignIBLDIST-T0-Alignment"
-        flags.InDet.Align.L1IDTag = "InDetAlignL1-T0-Alignment"
 
 ## TODO Fill L2 and L3 from current T0 setup
 def setL2AlignmentFlags(flags):
