@@ -72,7 +72,6 @@ def RootMaterialWriterToolCfg(configFlags, name="RootMaterialWriterTool", **kwar
   return acc
 
 def MaterialMappingCfg(configFlags,
-                       inputFiles,
                        name="MaterialMapping",
                        StoreTracks=False,
                        OutputMappedMaterialTracks="OuputMappedMaterialTracks",
@@ -92,8 +91,6 @@ def MaterialMappingCfg(configFlags,
   kwargs.setdefault("MappedMaterialTrackCollectionKey", OutputMappedMaterialTracks)
   kwargs.setdefault("UnmappedMaterialTrackCollectionKey", OutputUnmappedMaterialTracks)
 
-
-  acc.merge(MaterialTrackReaderCfg(configFlags, FileNames=inputFiles))
 
   acc.addEventAlgo(CompFactory.ActsTrk.MaterialMapping(name, **kwargs), primary = True)
 

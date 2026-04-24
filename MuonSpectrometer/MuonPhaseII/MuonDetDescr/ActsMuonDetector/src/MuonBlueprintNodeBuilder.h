@@ -92,6 +92,8 @@ private:
   Gaudi::Property<bool> m_useSectors{this, "UseSectors", false}; 
   /** @brief Flag to control if the volumes should be alignable or not */
   Gaudi::Property<bool> m_alignableVolumes{this, "AlignableVolumes", true};
+  /** @brief Flag to assign active material on the chambers */
+  Gaudi::Property<bool> m_assignActiveMaterial{this, "AssignActiveMaterial", false};
   /** @brief Flag to construct the passive material surfaces */
   Gaudi::Property<bool> m_buildPassiveVolumes{this, "BuildPassiveVolumes", true};
   /** @brief Number of bins in phi direction on the BI cylinder surface */
@@ -133,8 +135,7 @@ private:
                                                           const std::size_t nBins2) const;
 
   std::pair<std::size_t, std::size_t> getMaterialBins(const Muon::MuonStationIndex::ChIndex chIdx) const;
-  /** @brief Flag to assign active material on the chambers */
-  Gaudi::Property<bool> m_assignActiveMaterial{this, "AssignActiveMaterial", false};
+
   
   /** @brief Get the chamber's sensitive elements
     * @param gctx Geometry context
