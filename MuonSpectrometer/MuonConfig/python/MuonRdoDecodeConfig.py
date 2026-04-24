@@ -422,7 +422,7 @@ def MuonRDOtoPRDConvertorsCfg(flags):
     if flags.Input.isMC and flags.Input.Format!=Format.BS:
         if not flags.Muon.usePhaseIIGeoSetup:
             acc.merge(MuonPRD_MultiTruthMakerCfg(flags))
-        else:
+        elif flags.Muon.setupTruthAlgorithms:
             from MuonTruthAlgsR4.MuonTruthAlgsConfig import MuonTruthAlgsCfg
             acc.merge(MuonTruthAlgsCfg(flags))
     return acc
