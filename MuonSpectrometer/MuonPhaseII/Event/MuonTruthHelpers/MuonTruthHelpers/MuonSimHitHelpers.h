@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTRUTHHELPERS_MUONSIMHITHELPERS_H
 #define MUONTRUTHHELPERS_MUONSIMHITHELPERS_H
 
-#include <xAODMeasurementBase/UncalibratedMeasurement.h>
+#include <xAODMuonPrepData/MuonMeasurementFwd.h>
 #include <xAODMuonSimHit/MuonSimHit.h>
 #include <xAODMuon/MuonSegment.h>
 #include <xAODTruth/TruthParticle.h>
@@ -21,7 +21,7 @@ namespace MuonR4 {
     class SegmentSeed;
     class SpacePointBucket;
     /** @brief Returns the MuonSimHit, if there's any, matched to the uncalibrated muon measurement. */
-    const xAOD::MuonSimHit* getTruthMatchedHit(const xAOD::UncalibratedMeasurement& prdHit);
+    const xAOD::MuonSimHit* getTruthMatchedHit(const xAOD::MuonMeasurement& prdHit);
     /** @brief: Returns all sim hits matched to a xAOD::MuonSegment */
     std::unordered_set<const xAOD::MuonSimHit*> getMatchingSimHits(const xAOD::MuonSegment& segment);
     /** @brief Returns all sim hits that are matched to a collection of space points. For each spacepoint, the hit truth matching to
