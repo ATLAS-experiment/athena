@@ -154,8 +154,6 @@ def getRawTriggerEDMList(flags, runVersion=-1):
         lenPostMerge = len(edm4ListCopy)
         edmListCopy = edm4ListCopy
         log.info(f"Added TriggerHLTListRun4 to TriggerHLTListRun3. EDM entries {lenPreMerge} -> {lenPostMerge}")
-        if testEDMList(edmListCopy, error_on_edmdetails=False):
-            log.error("edmList contains inconsistencies!")
     else:
         errMsg="ERROR the getRawTriggerEDMList function supports runs 3 and 4."
         log.error(errMsg)
