@@ -31,8 +31,10 @@ if __name__=='__main__':
   parser.add_argument('-v','--addEvTree', dest='evtree', default=False, help='Add tree with per event info to output ntuple', action="store_true")
   parser.add_argument('--EMF', dest='emf', default=False, help='Is it for EMF', action='store_true')
   parser.add_argument('-d','--digikey', dest='dkey', default="FREE", help='Input digits key', type=str)
-  parser.add_argument('-e','--acckey', dest='acckey', default="", help='Input accumulated calib digits key', type=str)
+  parser.add_argument('-e','--acckey', dest='acckey', default="", help='Input accumulated digits key', type=str)
+  parser.add_argument('-l','--acccalibkey', dest='acccalibkey', default="", help='Input accumulated calib digits key', type=str)
   parser.add_argument('--CALIB', dest='iscalib', default=False, help='Is it from calib run ?', action='store_true')
+  parser.add_argument('--RDO', dest='rdo', default=False, help='Is it from pool file ?', action='store_true')
   parser.add_argument('--FTs', dest='ft', default=[], nargs="+", type=int, help='list of FT which will be read out (space separated).')
   parser.add_argument('--posneg', dest='posneg', default=[], nargs="+", help='side to read out (-1 means both), can give multiple arguments (space separated). Default %(default)s.', type=int,choices=range(-1,2))
   parser.add_argument('--barrel_ec', dest='be', default=[], nargs="+", help='subdet to read out (-1 means both), can give multiple arguments (space separated) Default %(default)s.', type=int,choices=range(-1,2))
@@ -94,7 +96,7 @@ if __name__=='__main__':
       flags.LArSCDump.nSamples=args.nsamp
   
   log.info("Autoconfigured: ")
-  log.info("nSamples: %d digitsKey %s accKey %s",flags.LArSCDump.nSamples, flags.LArSCDump.digitsKey, args.acckey)
+  log.info("nSamples: %d digitsKey %s accKey %s accCalibKey %s",flags.LArSCDump.nSamples, flags.LArSCDump.digitsKey, args.acckey, args.acccalibkey)
 
   #GEometry
   from AthenaConfiguration.TestDefaults import defaultGeometryTags
@@ -102,6 +104,10 @@ if __name__=='__main__':
 
   # now construct the job
   flags.LAr.doAlign=False
+
+  #if RDO, MC job
+  if args.rdo:
+     flags.Input.isMC=True
 
   if args.evtree: # should include trigger info
      flags.Trigger.triggerConfig = 'DB'
@@ -147,18 +153,16 @@ if __name__=='__main__':
 
   if args.geom:
       log.warning("Adding real geometry is not working yet")
-      args.geom=False
-      # FIXME
-      #acc.addCondAlgo(CompFactory.CaloAlignCondAlg(LArAlignmentStore="",CaloCellPositionShiftFolder=""))
-      #acc.addCondAlgo(CompFactory.CaloSuperCellAlignCondAlg())
-      #AthReadAlg_ExtraInputs.append(('CaloSuperCellDetDescrManager', 'ConditionStore+CaloSuperCellDetDescrManager')) 
+      acc.addCondAlgo(CompFactory.CaloAlignCondAlg(LArAlignmentStore="",CaloCellPositionShiftFolder=""))
+      acc.addCondAlgo(CompFactory.CaloSuperCellAlignCondAlg())
+      args.offline=True
 
   from LArCalibTools.LArDigits2NtupleConfig import LArDigits2NtupleCfg
   acc.merge(LArDigits2NtupleCfg(flags, AddBadChannelInfo=args.bc, AddFEBTempInfo=False, isSC=False, isFlat=True, 
                             OffId=args.offline, AddHash=args.ahash, AddCalib=args.calib, RealGeometry=args.geom, # from LArCond2NtupleBase 
                             NSamples=flags.LArSCDump.nSamples, FTlist=flags.LArCalib.Preselection.FT, Slotlist=flags.LArCalib.Preselection.Slot, BElist=flags.LArCalib.Preselection.BEC, Sidelist=flags.LArCalib.Preselection.Side,
-                            ContainerKey=flags.LArSCDump.digitsKey,  AccContainerKey=args.acckey, isCalib=args.iscalib, # from LArDigits2Ntuple
-                            FillLB=args.evtree, FillBCID=args.bcid, 
+                            ContainerKey=flags.LArSCDump.digitsKey,  AccContainerKey=args.acckey, AccCalibContainerKey=args.acccalibkey, isCalib=args.iscalib, # from LArDigits2Ntuple
+                            FillLB=args.evtree, FillBCID=args.bcid, isRDO=args.rdo,
                             OutputLevel=args.olevel
                            ))
   # ROOT file writing
