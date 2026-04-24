@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //==================================================================================
@@ -138,6 +138,7 @@ bool MuonSelector::passSelection( const xAOD::Muon* pxMuon)
   if(m_doDebug){ std::cout << "  * MuonSelector::passSelection * START * new muon " << pxMuon << " with pt: " << pxMuon->pt() << std::endl; }
 
   std::vector<bool> passes;
+  passes.reserve(8);
   bool pass = true;
   if ( pxMuon ) {
     // Save local copy of muon address if it's ok.
