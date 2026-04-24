@@ -13,6 +13,6 @@ if( NOT SIMULATIONBASE )
 
     atlas_add_test( TileConfigFlagsTest
                     SCRIPT python -m TileConfiguration.TileConfigFlags
-                    POST_EXEC_SCRIPT nopost.sh )
+                    POST_EXEC_SCRIPT noerror.sh )
 
 endif()

@@ -19,12 +19,16 @@ StatusCode TauAxisSetter::execute(xAOD::TauJet& tau) const {
 
   const xAOD::Jet* jetSeed = tau.jet();
 
+  // store all jet constituents p4 in a vector
+  std::vector<TLorentzVector> jet_const_vec;
   // Barycenter is the sum of cluster p4 in the seed jet
   TLorentzVector baryCenter;  
   
   xAOD::JetConstituentVector constituents = jetSeed->getConstituents();
-  for (const xAOD::JetConstituent* constituent : constituents) {
-    baryCenter += tauRecTools::GetConstituentP4(*constituent);
+  for (TLorentzVector const_p4; const xAOD::JetConstituent* constituent : constituents) {
+    const_p4 = tauRecTools::GetConstituentP4(*constituent);   	  
+    baryCenter += const_p4;
+    jet_const_vec.push_back(const_p4); 	    
   }
   
   ATH_MSG_DEBUG("barycenter (eta, phi): "  << baryCenter.Eta() << " " << baryCenter.Phi());
@@ -32,11 +36,8 @@ StatusCode TauAxisSetter::execute(xAOD::TauJet& tau) const {
   // Detector axis is the total p4 of clusters within m_clusterCone core of the barycenter 
   TLorentzVector tauDetectorAxis;
 
-  for (const xAOD::JetConstituent* constituent : constituents) {
-    TLorentzVector constituentP4 = tauRecTools::GetConstituentP4(*constituent);
-    
+  for (const auto& constituentP4 : jet_const_vec) {
     if (baryCenter.DeltaR(constituentP4) > m_clusterCone) continue;
-
     tauDetectorAxis += constituentP4;
   }
 
@@ -73,23 +74,25 @@ StatusCode TauAxisSetter::execute(xAOD::TauJet& tau) const {
         position -= jetVertex->position();
       }
 
+      // store all jet constituents p4 in a vector to avoid doing vertex correction twice
+      std::vector<TLorentzVector> jet_const_vec_vtxcorr;
       // Barycenter at the tau vertex
       TLorentzVector baryCenterTauVertex; 
- 
+
       // Loop over the jet constituents, and calculate the barycenter using the four momentum 
       // corrected to point at tau vertex 
-      for (const xAOD::JetConstituent* constituent : constituents) {
-        baryCenterTauVertex += getVertexCorrectedP4(*constituent, position);
+      for (TLorentzVector const_vtxcorr_p4; const xAOD::JetConstituent* constituent : constituents) {
+         const_vtxcorr_p4 = getVertexCorrectedP4(*constituent, position); 
+         baryCenterTauVertex += const_vtxcorr_p4;
+	 jet_const_vec_vtxcorr.push_back(const_vtxcorr_p4);
       }
       ATH_MSG_DEBUG("barycenter (eta, phi) at tau vertex: "  << baryCenterTauVertex.Eta() << " " << baryCenterTauVertex.Phi());
 
       // Tau intermediate axis is the four momentum (corrected to point at tau vertex) of clusters 
       // within m_clusterCone of the barycenter
-      for (const xAOD::JetConstituent* constituent : constituents) {
-        TLorentzVector constituentP4 = getVertexCorrectedP4(*constituent, position);
-        if (baryCenterTauVertex.DeltaR(constituentP4) > m_clusterCone) continue;
-        
-        tauInterAxis += constituentP4;
+      for (const auto& constituent_vtxcorr_P4 : jet_const_vec_vtxcorr) {
+        if (baryCenterTauVertex.DeltaR(constituent_vtxcorr_P4) > m_clusterCone) continue; 
+        tauInterAxis += constituent_vtxcorr_P4;
       }
     }
     else {  

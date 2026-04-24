@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
@@ -67,7 +67,20 @@ def Phase1TopoMonitoringCfg(flags):
     IsData = not flags.Input.isMC
     return getL1TopoPhase1DQMonitor(flags,"L1TopoInL1CaloDQMonitor",doHwMon=IsData,doComp=IsData, doMultComp=IsData)
 
-def getL1TopoPhase1OnlineMonitor(flags, name='L1TopoOnlineMonitor', doSimMon=True, doHwMonCtp=False, doHwMon=False, doComp=False, doMultComp=False, forceCtp=False, logLevel = None, toolName="L1TopoMonitoringTool"):
+def getL1TopoPhase1OnlineMonitor(flags, name='L1TopoOnlineMonitor', 
+                                 doSimMon=True, 
+                                 doHwMonCtp=False, 
+                                 doHwMon=False,
+                                 doComp=False,
+                                 doMultComp=False, 
+                                 forceCtp=False, 
+                                 logLevel = None, 
+                                 toolName="L1TopoMonitoringTool"):
+
+    # Do not plot triggers that can not be reproduced by the simulation
+    AlgoVetoList = ["jXE40delay","TeATIME","gESPRESSO","gRISTRETTO","CALMTEA","MATCHA"]
+    MultVetoList = ["ZeroBiasA","ZeroBiasB"]
+
     alg = CompFactory.L1TopoOnlineMonitor(toolName,
                                           doHwMon = doHwMon,
                                           doHwErrorMon = False,
@@ -76,8 +89,8 @@ def getL1TopoPhase1OnlineMonitor(flags, name='L1TopoOnlineMonitor', doSimMon=Tru
                                           doComp = doComp,
                                           doMultComp = doMultComp,
                                           forceCTPasHdw=forceCtp,
-                                          MultiplicityVetoList=["ZeroBiasA","ZeroBiasB"],
-                                          AlgorithmVetoList   =["jXE40delay","TeATIME"])
+                                          AlgorithmVetoList    = AlgoVetoList,
+                                          MultiplicityVetoList = MultVetoList)
     if logLevel : alg.OutputLevel=logLevel
     alg.MonTool = GenericMonitoringTool(flags, 'MonTool')
     alg.MonTool.HistPath = name
@@ -85,7 +98,23 @@ def getL1TopoPhase1OnlineMonitor(flags, name='L1TopoOnlineMonitor', doSimMon=Tru
 
     return alg
 
-def getL1TopoPhase1DQMonitor(flags, name='L1TopoDQMonitor', doSimMon=True, doHwMonCtp=False, doHwMon=False, doComp=False, doMultComp=False, forceCtp=False, logLevel = None, toolName="L1TopoMonitoringTool"):
+def getL1TopoPhase1DQMonitor(flags, name='L1TopoDQMonitor', 
+                             doSimMon=True, 
+                             doHwMonCtp=False, 
+                             doHwMon=False, 
+                             doComp=False, 
+                             doMultComp=False, 
+                             forceCtp=False, 
+                             logLevel = None, 
+                             toolName="L1TopoMonitoringTool"):
+
+    # Do not plot triggers that can not be reproduced by the simulation
+    AlgoVetoList = ["jXE40delay","TeATIME","gESPRESSO","gRISTRETTO","CALMTEA","MATCHA"]
+    MultVetoList = ["ZeroBiasA","ZeroBiasB"]
+    # Ignore expected mismatches from these triggers in the DQ plots
+    AlgoIgnoreList = ["*:ADBDT*", "*:ADVAE*", "*:ARTEMIS*"]
+    MultIgnoreList = []
+
     from TrigT1CaloMonitoring.LVL1CaloMonitoringConfig import L1CaloMonitorCfgHelper
     helper = L1CaloMonitorCfgHelper(flags,CompFactory.L1TopoOnlineMonitor,toolName,
                                     doHwMon = doHwMon,
@@ -94,23 +123,25 @@ def getL1TopoPhase1DQMonitor(flags, name='L1TopoDQMonitor', doSimMon=True, doHwM
                                     doHwMonCTP = doHwMonCtp,
                                     doComp = doComp,
                                     doMultComp = doMultComp,
-                                    MultiplicityVetoList=["ZeroBiasA","ZeroBiasB"],
-                                    AlgorithmVetoList   =["jXE40delay","TeATIME"],
+                                    AlgorithmVetoList    = AlgoVetoList,
+                                    MultiplicityVetoList = MultVetoList,
                                     forceCTPasHdw=forceCtp)
 
     #Define the Monitoring plots for L1Calo DQ
     helper.defineDQAlgorithm("L1TopoAlgMismatchRate",
-                             hanConfig={"libname":"libdqm_summaries.so","name":"Bins_GreaterThan_Threshold","BinThreshold":"0.002","PublishBins":"1","IgnoreBins":"\"*:125,*:123,*:96,*:94,*:92,*:90,*:37,*:20,*:18\""}, # counts bins with value>0.001. IgnoreBins: Masking MuonAD and VAEAD and TEaTime mismatches. Also ZEE-eEM24sm2
+                             hanConfig={"libname":"libdqm_summaries.so","name":"Bins_GreaterThan_Threshold","BinThreshold":"0.002","PublishBins":"1",
+                                        "IgnoreBins":"\""+",".join(AlgoIgnoreList)+"\""},
                              thresholdConfig={"NBins":[0,1]}, # warn if any high rate, error if more than 1 bin anywhere.
                              )
 
     helper.defineDQAlgorithm("L1TopoMultMismatchRate",
-                             hanConfig={"libname":"libdqm_summaries.so","name":"Bins_GreaterThan_Threshold","BinThreshold":"0.002","PublishBins":"1","IgnoreBins":"\"*:120,*:119,*:115\""}, # counts bins with value>0.001. IgnoreBins: Masking gTE500, gTE200 and gXEJWOJ500 mismatches
+                             hanConfig={"libname":"libdqm_summaries.so","name":"Bins_GreaterThan_Threshold","BinThreshold":"0.002","PublishBins":"1",
+                                        "IgnoreBins":"\""+",".join(MultIgnoreList)+"\""},
                              thresholdConfig={"NBins":[0,1]}, # warn if any high rate, error if more than 1 bin anywhere.
                              )
 
     helper.defineDQAlgorithm("L1TopoMismatchCountVerticalRange",
-                             hanConfig={"libname":"libdqm_summaries.so","name":"Bins_GreaterThan_Threshold","BinThreshold":"0.001","PublishBins":"1","yMax":"2"}, #,"IgnoreBins":"\"25:1,26:2,*:25,*:58,500:*\""}, # counts bins with value>0.001 for Bins in Y between 0 and 1.
+                             hanConfig={"libname":"libdqm_summaries.so","name":"Bins_GreaterThan_Threshold","BinThreshold":"0.001","PublishBins":"1","yMax":"2"},
                              thresholdConfig={"NBins":[0,1]}, # warn if any high rate, error if more than 1 bin anywhere.
                              )
 

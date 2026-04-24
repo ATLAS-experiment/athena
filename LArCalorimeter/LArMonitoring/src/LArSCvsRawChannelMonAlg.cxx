@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSCvsRawChannelMonAlg.h"
@@ -83,7 +83,7 @@ StatusCode LArSCvsRawChannelMonAlg::fillHistograms(const EventContext& ctx) cons
 
   // get regular LArRawChannel container
   SG::ReadHandle<LArRawChannelContainer> rcHdl(m_RCKey, ctx);
-  if (!scHdl.isValid()) {
+  if (!rcHdl.isValid()) {
     ATH_MSG_WARNING("Do not have LArRawChannel container with key" << m_RCKey.key());
     return StatusCode::SUCCESS;
   } else {

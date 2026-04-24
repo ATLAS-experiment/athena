@@ -29,7 +29,7 @@ public:
 protected:
 
   ALFA_HitCollection_PERS*  createPersistent (ALFA_HitCollection *transCont);
-  ALFA_HitCollection*       createTransient ();
+  ALFA_HitCollection*       createTransient(const Token* token);
     
  };
  

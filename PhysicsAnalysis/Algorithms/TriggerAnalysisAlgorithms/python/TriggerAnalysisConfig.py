@@ -23,30 +23,30 @@ class TriggerAnalysisBlock (ConfigBlock):
 
     def __init__ (self) :
         super (TriggerAnalysisBlock, self).__init__ ()
-        self.addOption ('triggerChainsPerYear', {}, type=None,
+        self.addOption ('triggerChainsPerYear', {}, type=dict,
             info="a dictionary with key (string) the year and value (list of "
             "strings) the trigger chains. You can also use `||` within a string "
             "to enforce an OR of triggers without looking up the individual "
             "triggers. Used for both trigger selection and SFs.")
-        self.addOption ('multiTriggerChainsPerYear', {}, type=None,
+        self.addOption ('multiTriggerChainsPerYear', {}, type=dict,
             info="a dictionary with key (string) a trigger set name and value a "
             "`triggerChainsPerYear` dictionary, following the previous convention. "
             "Relevant for analyses using different triggers in different categories, "
             "where the trigger global scale factors shouldn't be combined.")
-        self.addOption ('triggerChainsForSelection', [], type=None,
+        self.addOption ('triggerChainsForSelection', [], type=list,
             info="a list of trigger chains (list of strings) to be used for "
             "trigger selection. Only set it if you need a different setup "
             "than for trigger SFs.")
-        self.addOption ('triggerChainsForDecoration', [], type=None,
+        self.addOption ('triggerChainsForDecoration', [], type=list,
             info="a list of trigger chains (list of strings) to be used for "
             "trigger decoration, if it needs to be different from the selection one.")
         self.addOption ('prescaleDecoration', 'prescale', type=str,
             info="name of the decoration for trigger prescales.")
-        self.addOption ('prescaleLumiCalcFiles', [], type=None,
+        self.addOption ('prescaleLumiCalcFiles', [], type=list,
             info="a list of lumicalc files (list of strings) to calculate "
             "trigger prescales. Mutually "
             "exclusive with `prescaleLumiCalcFilesPerYear`.")
-        self.addOption ('prescaleLumiCalcFilesPerYear', {}, type=None,
+        self.addOption ('prescaleLumiCalcFilesPerYear', {}, type=dict,
             info="a dicrionary with key (string) the year and value (list of "
             "strings) the list of lumicalc files to calculate trigger prescales "
             "for an individual data year. "

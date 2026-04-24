@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "HltROBDataProviderSvc.h"
 #include "TrigKernel/HltExceptions.h"
@@ -269,6 +269,7 @@ void HltROBDataProviderSvc::setNextEvent(const EventContext& context, const RawE
   //--------------------+
 
   // get all the ROBFragments
+  //coverity[STACK_USE]
   OFFLINE_FRAGMENTS_NAMESPACE::PointerType robF[MAX_ROBFRAGMENTS];
   size_t number_robs = re->children(robF,MAX_ROBFRAGMENTS);
   if (number_robs == MAX_ROBFRAGMENTS) {
@@ -279,7 +280,7 @@ void HltROBDataProviderSvc::setNextEvent(const EventContext& context, const RawE
   rob_fragments.reserve(number_robs);
   // loop over all ROBs
   for (size_t irob = 0; irob < number_robs; irob++) {
-    rob_fragments.push_back(ROBF(robF[irob]));
+    rob_fragments.emplace_back(robF[irob]);
   }
   // add the ROBs to the cache/rob map, but extract the size before moving it
   const size_t nRobs = rob_fragments.size();

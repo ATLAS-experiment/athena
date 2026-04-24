@@ -41,7 +41,7 @@ TrigMonConfigCollection_PERS* TrigMonConfigCollectionCnv::createPersistent(TrigM
 
 //---------------------------------------------------------------------------------------------
 //createTransient
-TrigMonConfigCollection* TrigMonConfigCollectionCnv::createTransient() 
+TrigMonConfigCollection* TrigMonConfigCollectionCnv::createTransient(const Token* token) 
 {
   (*m_log) << MSG::DEBUG << "TrigMonConfigCollectionCnv::createTransient " << endmsg;
   
@@ -50,17 +50,17 @@ TrigMonConfigCollection* TrigMonConfigCollectionCnv::createTransient()
   
   TrigMonConfigCollection *trans_obj(0);
   
-  if( compareClassGuid(tlp1_guid) ) {
+  if( compareClassGuid(token, tlp1_guid) ) {
     
     (*m_log) << MSG::DEBUG << "TrigMonConfigCollectionCnv::reading tlp1 persistent object" << endmsg;
-    std::unique_ptr< TrigMonConfigCollection_tlp1 >   col_vect( this->poolReadObject< TrigMonConfigCollection_tlp1 >() );
+    std::unique_ptr< TrigMonConfigCollection_tlp1 >   col_vect( this->poolReadObject< TrigMonConfigCollection_tlp1 >(token) );
     (*m_log) << MSG::DEBUG << "TrigMonConfigCollectionCnv::reading tlp1 persistent object pointer" <<  col_vect.get() << endmsg;
     trans_obj = m_impl->m_TPConverter_tlp1.createTransient( col_vect.get(), *m_log);
   }
-  else if( compareClassGuid(p1_guid) ) {
+  else if( compareClassGuid(token, p1_guid) ) {
     
     (*m_log) << MSG::DEBUG << "TrigMonConfigCollectionCnv::reading p1 persistent object" << endmsg;
-    std::unique_ptr< TrigMonConfigCollection_p1 >   col_vect( this->poolReadObject< TrigMonConfigCollection_p1 >() );
+    std::unique_ptr< TrigMonConfigCollection_p1 >   col_vect( this->poolReadObject< TrigMonConfigCollection_p1 >(token) );
     (*m_log) << MSG::DEBUG << "TrigMonConfigCollectionCnv::reading p1 persistent object pointer" <<  col_vect.get() << endmsg;
     trans_obj = m_impl->m_TPConverter.createTransient( col_vect.get(), *m_log);
   }

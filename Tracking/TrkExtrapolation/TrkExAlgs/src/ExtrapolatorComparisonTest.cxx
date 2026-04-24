@@ -247,12 +247,12 @@ StatusCode Trk::ExtrapolatorComparisonTest::execute(const EventContext& ctx) con
     Acts::BoundVector pars;
     //cppcheck-suppress constStatement
     pars << perigee.m_d0, perigee.m_z0, perigee.m_phi, theta, qOverP, t;
-    std::optional<Acts::BoundSquareMatrix> cov = std::nullopt;
+    std::optional<Acts::BoundMatrix> cov = std::nullopt;
     
     // Perigee, no alignment -> default geo context
     const ActsTrk::GeometryContext& gctx = m_trackingGeometryTool->getNominalGeometryContext();
     auto anygctx = gctx.context();
-    const auto* startParameters = new const Acts::GenericBoundTrackParameters(std::move(actsPerigeeSurface), pars, std::move(cov), Acts::ParticleHypothesis::pion());
+    const auto* startParameters = new const Acts::BoundTrackParameters(std::move(actsPerigeeSurface), pars, std::move(cov), Acts::ParticleHypothesis::pion());
     
     for (unsigned int surface = 0; surface < m_actsReferenceSurfaceTriples.size(); surface++) {
       n_extraps++;

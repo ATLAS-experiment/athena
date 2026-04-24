@@ -30,10 +30,12 @@
 namespace {
    void popRenounced(const std::vector<std::string>  &renounce,
                      std::vector<Gaudi::DataHandle *> &new_input_handles) {
-      for (const std::string &a_key : renounce) {
-         if (new_input_handles.back()->objKey() == a_key ) {
-            new_input_handles.pop_back();
-            break;
+      if (!new_input_handles.empty()) {
+         for (const std::string &a_key : renounce) {
+            if (new_input_handles.back()->objKey() == a_key ) {
+               new_input_handles.pop_back();
+               break;
+            }
          }
       }
    }
@@ -319,7 +321,8 @@ namespace ExpressionParsing {
 
            auto clid = container_data_id->clid();
            (void) clid;
-           const SG::BaseInfoBase* base_info = (container_data_id ? SG::BaseInfoBase::find (container_data_id->clid()) : nullptr);
+           //container_data_id logically cannot be nullptr here
+           const SG::BaseInfoBase* base_info = SG::BaseInfoBase::find (container_data_id->clid());
            if (!base_info) {
               std::stringstream msg;
               msg << "Missing type information about container " << container_name << ".";

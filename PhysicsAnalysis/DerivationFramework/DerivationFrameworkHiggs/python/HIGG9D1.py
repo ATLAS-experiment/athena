@@ -6,7 +6,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import MetadataCategory
+from AthenaConfiguration.Enums import MetadataCategory, LHCPeriod
 from AthenaCommon.Logging import logging
 log_HIGG9D1 = logging.getLogger('HIGG9D1')
 
@@ -26,7 +26,6 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
     mainIDInput   = "InDetWithLRTTrackParticles" if doLRT else "InDetTrackParticles"
     if doLRT:
         from DerivationFrameworkLLP.LLPToolsConfig import LRTMuonMergerAlg
-        from AthenaConfiguration.Enums import LHCPeriod
         acc.merge(LRTMuonMergerAlg( flags,
                                     PromptMuonLocation    = "Muons",
                                     LRTMuonLocation       = "MuonsLRT",
@@ -77,8 +76,6 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
         useCombinedMeasurement      = False, # Only takes effect if combOnly=True    
         muonCollectionKey           = mainMuonInput,
         TrackParticleCollection     = mainIDInput,
-        V0VertexFitterTool          = None, # V0 vertex fitter
-        useV0Fitter                 = False, # if False a TrkVertexFitterTool will be used
         TrkVertexFitterTool         = vkalvrt, # VKalVrt vertex fitter
         TrackSelectorTool           = TrackSelector,
         VertexPointEstimator        = vpest,
@@ -100,8 +97,6 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
         useCombinedMeasurement      = False, # Only takes effect if combOnly=True    
         muonCollectionKey           = mainMuonInput,
         TrackParticleCollection     = mainIDInput,
-        V0VertexFitterTool          = None, # V0 vertex fitter
-        useV0Fitter                 = False, # if False a TrkVertexFitterTool will be used
         TrkVertexFitterTool         = vkalvrt, # VKalVrt vertex fitter
         TrackSelectorTool           = TrackSelector,
         VertexPointEstimator        = vpest,
@@ -212,6 +207,11 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
     # /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/xAODBTaggingEfficiency/13TeV/MC20_2024-10-17_GN2v01_v1.root (run-2) and
     # /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/xAODBTaggingEfficiency/13p6TeV/MC23_2024-10-17_GN2v01_v1.root (run-3)
     HIGG9D1_smallR_EMPFlow_1b_sel = "count(AntiKt4EMPFlowJets.pt > 18*GeV && abs(AntiKt4EMPFlowJets.eta) < 2.8 && log(AntiKt4EMPFlowJets.GN2v01_pb/(0.2*AntiKt4EMPFlowJets.GN2v01_pc + (1.-0.2-0.01)*AntiKt4EMPFlowJets.GN2v01_pu + 0.01*AntiKt4EMPFlowJets.GN2v01_ptau))>=0.844) >= 1"
+    # Drop FTAG requirement for Run 4 as WPs are not available
+    # Should ultimately be reworked into a precomputed flag with an FTAG tool rather than hardcoding the FTAG discriminant cut
+    if flags.GeoModel.Run >= LHCPeriod.Run4:
+        HIGG9D1_smallR_EMPFlow_1b_sel = "count(AntiKt4EMPFlowJets.pt > 18*GeV && abs(AntiKt4EMPFlowJets.eta) < 2.8) >= 1"
+
 
     HIGG9D1_bjet_sel = "%s && %s && %s" % (HIGG9D1_smallR_EMPFlow_2j_sel, HIGG9D1_smallR_EMPFlow_1j_sel, HIGG9D1_smallR_EMPFlow_1b_sel)
     HIGG9D1_bb_skim = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
@@ -221,7 +221,7 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
     HIGG9D1_tauTrks = '(TauJets.nTracks + TauJets.nTracksIsolation >= 1 && TauJets.nTracks + TauJets.nTracksIsolation <= 8)'
     HIGG9D1_tauLead = '(TauJets.pt > 23.0*GeV || TauJets.ptFinalCalib > 23.0*GeV)'
     HIGG9D1_tauSubl = '(TauJets.pt > 18.0*GeV || TauJets.ptFinalCalib > 18.0*GeV)'
-    HIGG9D1_tauId   = 'TauJets.DFTauRNNLoose'
+    HIGG9D1_tauId   = 'TauJets.DFTauGNTauLoose'
     HIGG9D1_tauReq0 = 'count( '+HIGG9D1_tauSubl+' && '+HIGG9D1_tauTrks+' ) >= 2'
     HIGG9D1_tauReq1 = 'count( '+HIGG9D1_tauSubl+' && '+HIGG9D1_tauTrks+' && '+HIGG9D1_tauId+' ) >= 1'
     HIGG9D1_tauReq2 = 'count( '+HIGG9D1_tauLead+' && '+HIGG9D1_tauTrks+' ) >= 1'
@@ -439,7 +439,6 @@ def HIGG9D1Cfg(flags):
         "TauJets_MuonRM",
         "DiTauJets",
         "DiTauJetsLowPt",
-        "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
         "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"]
 
     if flags.Tau.TauEleRM_isAvailable:
@@ -509,8 +508,8 @@ def HIGG9D1Cfg(flags):
     HIGG9D1SlimmingHelper.StaticContent = StaticContent
 
     HIGG9D1SlimmingHelper.ExtraVariables += [
-        "AntiKt4EMTopoJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.IsoFixedCone5PtPUsub",
-        "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.GhostPartons.isJvtHS.isJvtPU.IsoFixedCone5PtPUsub",
+        "AntiKt4EMTopoJets.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.IsoFixedCone5PtPUsub",
+        "AntiKt4EMPFlowJets.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.GhostPartons.isJvtHS.isJvtPU.IsoFixedCone5PtPUsub",
         "InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers",
         "EventInfo.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ.HF_Classification.HF_SimpleClassification",
         "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET.ex.ey",

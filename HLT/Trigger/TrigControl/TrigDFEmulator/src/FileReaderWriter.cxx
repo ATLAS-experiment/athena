@@ -11,7 +11,7 @@ DFEF::FileReaderWriter::FileReaderWriter(const boost::property_tree::ptree &args
   m_currFile=args.get("fileOffset",-1);
   m_nMaxEvents=args.get("numEvents",-1);
   m_nSkip=args.get("skipEvents",0);
-  m_loopFiles=(args.get("loopOverFiles","false")!="False");
+  m_loopFiles=(args.get("loopOverFiles","false")!="false");
   m_nEvents=0;
   m_currEventInFile=0;
   try{

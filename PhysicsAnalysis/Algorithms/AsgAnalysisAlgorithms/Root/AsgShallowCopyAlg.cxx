@@ -8,6 +8,7 @@
 #include <AsgAnalysisAlgorithms/AsgShallowCopyAlg.h>
 
 #include <SystematicsHandles/CopyHelpers.h>
+#include <xAODCaloEvent/CaloClusterContainer.h>
 #include <xAODCore/AuxContainerBase.h>
 #include <xAODEgamma/ElectronContainer.h>
 #include <xAODEgamma/PhotonContainer.h>
@@ -92,6 +93,11 @@ namespace CP
       m_function =
         &AsgShallowCopyAlg::executeTemplate<xAOD::MissingETContainer>;
     }
+    else if (evtStore()->contains<xAOD::CaloClusterContainer>(m_inputHandle.getName(sys)))
+    {
+      m_function =
+        &AsgShallowCopyAlg::executeTemplate<xAOD::CaloClusterContainer>;
+    }
     else
     {
       ANA_MSG_ERROR ("unknown type contained in AsgShallowCopyAlg, please extend it");
@@ -115,10 +121,25 @@ namespace CP
   StatusCode AsgShallowCopyAlg ::
   initialize ()
   {
+    for (const auto& deco : m_declareDecorations)
+      ANA_CHECK (m_systematicsList.service().setDecorSystematics (m_inputHandle.getNamePattern(), deco, {}));
     ANA_CHECK (m_systematicsList.service().registerCopy (m_inputHandle.getNamePattern(), m_outputHandle.getNamePattern()));
     ANA_CHECK (m_inputHandle.initialize (m_systematicsList));
     ANA_CHECK (m_outputHandle.initialize (m_systematicsList));
     ANA_CHECK (m_systematicsList.initialize());
+
+#ifndef XAOD_STANDALONE
+    const CLID clidRead = detail::getClidForDependency<xAOD::IParticleContainer>("", "deco", false);
+    const CLID clidWrite = detail::getClidForDependency<xAOD::IParticleContainer>("", "deco", true);
+    std::function<void(const DataObjID&, Gaudi::DataHandle::Mode)> addAlgDependency = [this] (const DataObjID& id, Gaudi::DataHandle::Mode mode) {
+      this->addDependency(id, mode);
+    };
+    for (const auto& decoName : m_systematicsList.service().getObjectDecorations(m_inputHandle.getNamePattern()))
+    {
+      ANA_CHECK (detail::addSysDependency(msg(), m_systematicsList.service(), addAlgDependency, clidRead, m_inputHandle.getNamePattern(), Gaudi::DataHandle::Reader, decoName, false));
+      ANA_CHECK (detail::addSysDependency(msg(), m_systematicsList.service(), addAlgDependency, clidWrite, m_outputHandle.getNamePattern(), Gaudi::DataHandle::Writer, decoName, true));
+    }
+#endif
 
     return StatusCode::SUCCESS;
   }

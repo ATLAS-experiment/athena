@@ -17,7 +17,7 @@ ZdcDigitsCollection_PERS* ZdcDigitsCollectionCnv::createPersistent(ZdcDigitsColl
     return persObj;
 }
 
-ZdcDigitsCollection* ZdcDigitsCollectionCnv::createTransient() {
+ZdcDigitsCollection* ZdcDigitsCollectionCnv::createTransient(const Token* token) {
 
 
     MsgStream mlog(msgSvc(), "ZdcDigitsCollectionConverter" );
@@ -26,8 +26,8 @@ ZdcDigitsCollection* ZdcDigitsCollectionCnv::createTransient() {
     ZdcDigitsCollection       *trans_cont(nullptr);
 
     static const pool::Guid   p1_guid("B77B5F9A-1C29-4D74-A107-B3C71680C029");
-    if( this->compareClassGuid(p1_guid)) {
-      std::unique_ptr< ZdcDigitsCollection_p1 >   col_vect( this->poolReadObject< ZdcDigitsCollection_p1 >() );
+    if( this->compareClassGuid(token, p1_guid)) {
+      std::unique_ptr< ZdcDigitsCollection_p1 >   col_vect( this->poolReadObject< ZdcDigitsCollection_p1 >(token) );
       trans_cont = converter_p1.createTransient(col_vect.get(), mlog );
     }
     else {

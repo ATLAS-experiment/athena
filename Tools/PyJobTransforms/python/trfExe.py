@@ -970,6 +970,9 @@ class athenaExecutor(scriptExecutor):
     def onlyMT(self, value):
         self._onlyMT = value
 
+    def skeletonCA(self):
+        return self._skeletonCA
+
     def preExecute(self, input = set(), output = set()):
         self.setPreExeStart()
         msg.debug('Preparing for execution of {0} with inputs {1} and outputs {2}'.format(self.name, input, output))

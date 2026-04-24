@@ -3,9 +3,11 @@
 def getGoodRunsLists():
     GRLDict={}
     ## RUN 3
+    # 2025
+    GRLDict['GRL2025'] = ['GoodRunsLists/data25_13p6TeV/20260129/physics_25ns_data25_periodsDEFKMOQ.xml']
 
     # 2024
-    GRLDict['GRL2024'] = ['GoodRunsLists/data24_13p6TeV/20241118/physics_25ns_data24.xml']
+    GRLDict['GRL2024'] = ['GoodRunsLists/data24_13p6TeV/20260127/physics_25ns_data24_periodsEtoO_reproc.xml']
     
     # 2023
     GRLDict['GRL2023'] = ['GoodRunsLists/data23_13p6TeV/20250321/data23_13p6TeV.periodAllYear_DetStatus-v133-pro31-11_MERGED_PHYS_StandardGRL_All_Good_25ns.xml']

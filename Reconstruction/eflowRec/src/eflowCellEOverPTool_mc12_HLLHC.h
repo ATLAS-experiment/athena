@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef EFLOWCELLEOVERPTOOL_MC12_HLLHC_H
-#define EFLOWCELLEOVERPTOOL_MC12_HLLHC_H
+#ifndef EFLOWREC_EFLOWCELLEOVERPTOOL_MC12_HLLHC_H
+#define EFLOWREC_EFLOWCELLEOVERPTOOL_MC12_HLLHC_H
 
 #include "IEFlowCellEOverPTool.h"
 

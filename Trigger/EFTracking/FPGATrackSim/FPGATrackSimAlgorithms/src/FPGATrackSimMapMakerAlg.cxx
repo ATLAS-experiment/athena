@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FPGATrackSimMapMakerAlg.h"
@@ -303,7 +303,10 @@ StatusCode FPGATrackSimMapMakerAlg::writeSubrmap(std::vector<FPGATrackSimHit> co
         total_hits += etamod.second;
     }
     ATH_MSG_INFO("Found " << total_hits << " hits in the key layer, applying global trim factor of " << m_globalTrim << "%");
-
+    if (total_hits == 0)[[unlikely]]{
+      ATH_MSG_ERROR("FPGATrackSimMapMakerAlg::writeSubrmap: Failure due to zero total hits.");
+      return StatusCode::FAILURE;
+    }
     // Then, do the trim.
     for (auto const &etamod : m_key_etamods) {
         if (m_globalTrim == 0 || ((etamod.second / total_hits) >= m_globalTrim*0.01)) {
@@ -425,16 +428,6 @@ StatusCode FPGATrackSimMapMakerAlg::writeSubrmap(std::vector<FPGATrackSimHit> co
         ATH_MSG_INFO("Using " << m_usedTracks.size() << " tracks out of " << m_maxEvents << ". The rest missed the key layer");
     }
 
-    std::stringstream trim;
-    std::stringstream gtrim;
-    trim << std::fixed << std::setprecision(3) << m_trim;
-    gtrim << std::fixed << std::setprecision(3) << m_globalTrim;
-    std::string str_trim = trim.str();
-    std::string str_gtrim = gtrim.str();
-    int dot = str_trim.find_last_of(".");
-    str_trim.replace(dot,1,"p");
-    str_gtrim.replace(str_gtrim.find_last_of("."), 1, "p");
-
     std::string subrmap_path = m_outFileName.value() + "region" + std::to_string(m_region) + ".subrmap";
 
     ATH_MSG_INFO("Creating subrmap: " << subrmap_path);
@@ -514,16 +507,6 @@ StatusCode FPGATrackSimMapMakerAlg::writeSubrmap(std::vector<FPGATrackSimHit> co
 
 StatusCode FPGATrackSimMapMakerAlg::writeEtaPatterns()
 {
-    std::stringstream trim;
-    std::stringstream gtrim;
-    trim << std::fixed << std::setprecision(3) << m_trim;
-    gtrim << std::fixed << std::setprecision(3) << m_globalTrim;
-    std::string str_trim = trim.str();
-    std::string str_gtrim = gtrim.str();
-    int dot = str_trim.find_last_of(".");
-    str_trim.replace(dot,1,"p");
-    str_gtrim.replace(str_gtrim.find_last_of("."), 1, "p");
-
     std::string slicingType = "";
     if (m_key2) slicingType = "2D";
 

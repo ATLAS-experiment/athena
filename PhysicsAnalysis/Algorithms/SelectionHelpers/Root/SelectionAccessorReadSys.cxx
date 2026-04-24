@@ -12,6 +12,7 @@
 #include <SelectionHelpers/SelectionAccessorReadSys.h>
 
 #include <AsgMessaging/MessageCheck.h>
+#include <SystematicsHandles/ISysHandleBase.h>
 #include <SystematicsHandles/ISystematicsSvc.h>
 
 //
@@ -89,7 +90,7 @@ namespace CP
   StatusCode SelectionAccessorReadSys ::
   fillSystematics (const ISystematicsSvc& svc,
                    const std::vector<CP::SystematicSet>& sysList,
-                   const std::string& objectName)
+                   ISysObjectHandleBase& objectHandle)
   {
     using namespace msgSelectionHelpers;
 
@@ -103,7 +104,7 @@ namespace CP
     }
 
     const CP::SystematicSet affecting
-      = svc.getDecorSystematics (objectName, baseName);
+      = svc.getDecorSystematics (objectHandle.getNamePattern(), baseName);
     for (auto& sys : sysList)
     {
       CP::SystematicSet inputSys;
@@ -115,6 +116,7 @@ namespace CP
       ANA_CHECK (makeSelectionReadAccessor (decorName + suffix, accessor));
       m_dataCache.emplace (sys, std::make_tuple (decorName, std::move (accessor)));
     }
+    ANA_CHECK (objectHandle.addDecorationDependency (svc, baseName, false));
     return StatusCode::SUCCESS;
   }
 }

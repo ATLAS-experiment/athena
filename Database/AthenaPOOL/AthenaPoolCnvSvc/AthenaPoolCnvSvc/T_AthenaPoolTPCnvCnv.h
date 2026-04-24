@@ -73,7 +73,7 @@ public:
    * Returns a newly-allocated transient object.
    * Errors are reported by raising exceptions.
    */
-  virtual TRANS* createTransientWithKey (const std::string& key) override;
+  virtual TRANS* createTransientWithKey (const Token* token, const std::string& key) override;
 
   
 private:

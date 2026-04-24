@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LAREMSAMPLINGFRACTION_H
@@ -8,21 +8,21 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "LArElecCalib/ILArfSampl.h"
-#include "CaloIdentifier/TileID.h"
-#include "TileIdentifier/TileHWID.h"
-#include "CaloIdentifier/CaloIdManager.h"
+
 #include "TileConditions/TileSamplingFraction.h"
 #include "TileConditions/TileCablingSvc.h"
 
-#include "StoreGate/StoreGateSvc.h"
-#include "CaloIdentifier/CaloCell_ID.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "StoreGate/ReadCondHandleKey.h"
-
+#include "GaudiKernel/ServiceHandle.h"
+#include "Rtypes.h" //Long64_t
 #include <vector>
 #include <string>
-#include "TTree.h"
 
+class TTree;
+class TileID;
+class TileHWID;
+class CaloCell_ID;
 
 class LarEMSamplingFraction  : public ::AthAlgorithm
 {

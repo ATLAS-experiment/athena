@@ -4,6 +4,10 @@
 
 #include "TriggerChamberClusterOnTrackCreator.h"
 
+#include <functional>
+#include <ranges>
+
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 #include "MuonCompetingRIOsOnTrack/CompetingMuonClustersOnTrack.h"
 #include "MuonRIO_OnTrack/MuonClusterOnTrack.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
@@ -14,336 +18,249 @@
 #include "TrkSurfaces/RotatedTrapezoidBounds.h"
 #include "TrkSurfaces/TrapezoidBounds.h"
 
-#include <functional>
+namespace Muon {
 
-namespace Muon
-{
-
-TriggerChamberClusterOnTrackCreator::TriggerChamberClusterOnTrackCreator(const std::string&	type, const std::string& name, const IInterface* parent) :
-    AthAlgTool(type, name, parent),
-	m_chooseBroadestCluster(true)
-{
-    declareInterface<Muon::IMuonCompetingClustersOnTrackCreator>(this);
-    declareProperty("ChooseBroadestCluster", 	m_chooseBroadestCluster);
-}
-
-StatusCode
-TriggerChamberClusterOnTrackCreator::initialize()
-{
+StatusCode TriggerChamberClusterOnTrackCreator::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_clusterCreator.retrieve());
     return StatusCode::SUCCESS;
 }
-  
+
 std::unique_ptr<CompetingMuonClustersOnTrack>
-TriggerChamberClusterOnTrackCreator::createBroadCluster(const std::list<const Trk::PrepRawData*>& prds, const double) const {
-    ATH_MSG_VERBOSE("enter createBroadCluster: number of prds " << prds.size() );
+TriggerChamberClusterOnTrackCreator::createBroadCluster(
+    const std::list<const Trk::PrepRawData*>& prds, const double) const {
+    ATH_MSG_VERBOSE("enter createBroadCluster: number of prds " << prds.size());
 
     // make some PRD consistency checks
     if (prds.empty()) {
         ATH_MSG_WARNING("fails: empty PRD list ");
         return nullptr;
     }
-    if (!(*prds.begin())) {
-        ATH_MSG_WARNING("fails: first element of RPD list is nullptr");
+    const Trk::TrkDetElementBase* detectorElement = (*prds.front()).detectorElement();
+    Identifier channelId = (*prds.front()).identify();
+    const bool isRpc = m_idHelperSvc->isRpc(channelId);
+    const bool isTgc = m_idHelperSvc->isTgc(channelId);
+    if (!isRpc && !isTgc) {
+        ATH_MSG_WARNING("fails: PRD must be from rpc or tgc ");
         return nullptr;
     }
-    const Trk::TrkDetElementBase* detectorElement = (**prds.begin()).detectorElement();
-    Identifier channelId = (**prds.begin()).identify();
-    bool isRpc = m_idHelperSvc->isRpc(channelId);
-    if (!isRpc) {
-	    if (!m_idHelperSvc->isTgc(channelId)) {
-	        ATH_MSG_WARNING("fails: PRD must be from rpc or tgc ");
-	        return nullptr;
-	    }
-    }
 
-    bool measuresPhi = isRpc && m_idHelperSvc->rpcIdHelper().measuresPhi(channelId);
-    if (!isRpc) measuresPhi = m_idHelperSvc->tgcIdHelper().isStrip(channelId);
-    for (std::list<const Trk::PrepRawData*>::const_iterator p = prds.begin(); p != prds.end(); ++p) {
-        if (!(*p)) {
-            ATH_MSG_WARNING("fails: current PrepRawData is nullptr, continuing");
-            continue;
-        }
-        channelId = (**p).identify();
-        if ((isRpc && m_idHelperSvc->rpcIdHelper().measuresPhi(channelId) != measuresPhi) || (!isRpc && m_idHelperSvc->tgcIdHelper().isStrip(channelId) != measuresPhi)) {
+    const bool measuresPhi = m_idHelperSvc->measuresPhi(channelId);
+    for (const Trk::PrepRawData* prd : prds) {
+        channelId = prd->identify();
+        if (m_idHelperSvc->measuresPhi(channelId) != measuresPhi) {
             ATH_MSG_WARNING("fails: PRDs must measure same coordinate ");
             return nullptr;
         }
-        if ((**p).detectorElement() != detectorElement) {
+        if (prd->detectorElement() != detectorElement) {
             ATH_MSG_WARNING("fails: PRDs must be from same detectorElement ");
             return nullptr;
         }
+        ATH_MSG_VERBOSE("Create trigger prd from "
+                        << m_idHelperSvc->toString(channelId)
+                        << ", nDim: " << prd->localCovariance().rows());
     }
 
     // create a rot for each prd (which gets weight zero)
-    std::vector<const Muon::MuonClusterOnTrack*> rots = createPrdRots(prds);
+    std::vector<std::unique_ptr<const Muon::MuonClusterOnTrack>> rots = createPrdRots(prds);
     auto assocProbs = std::vector<double>(rots.size(), 0.);
-    
 
     // for each surface, find the first and last rot forming the cluster
-    std::list<int>				limitingChannels;
-    std::list<const Muon::MuonClusterOnTrack*>	limitingRots;
-    makeClustersBySurface(limitingChannels,limitingRots,prds,rots);
+    std::list<int> limitingChannels;
+    std::vector<std::unique_ptr<const Muon::MuonClusterOnTrack>> limitingRots;
+    makeClustersBySurface(limitingChannels, limitingRots, prds, rots);
 
     // cluster consistency - discard any surfaces not contributing to the final cluster
-    applyClusterConsistency(limitingChannels,limitingRots);
+    applyClusterConsistency(limitingChannels, limitingRots);
 
     // overall localPosition, error matrix and surface
     Trk::LocalParameters parameters{};
     Amg::MatrixX errorMatrix{};
-    Trk::Surface* surface		= nullptr;
-    makeOverallParameters(parameters,errorMatrix,surface,limitingChannels,limitingRots);
-    
+    std::unique_ptr<Trk::Surface> surface{};
+    makeOverallParameters(parameters, errorMatrix, surface, limitingChannels,
+                          limitingRots);
+
     // clear lists
     limitingChannels.clear();
-    
+
     // return the competingMuonClusterOnTrack object containing the final parameters,
     // error matrix, surface, list of rots and weights
     return std::make_unique<CompetingMuonClustersOnTrack>(
-     std::move(parameters), std::move(errorMatrix), surface, std::move(rots), std::move(assocProbs));
+        std::move(parameters), std::move(errorMatrix), surface.release(),
+        std::move(rots), std::move(assocProbs));
 }
 
-void
-TriggerChamberClusterOnTrackCreator::applyClusterConsistency(
-	std::list<int>&						limitingChannels,
-	std::list<const Muon::MuonClusterOnTrack*>&		limitingRots) const
-{
+void TriggerChamberClusterOnTrackCreator::applyClusterConsistency(
+    std::list<int>& limitingChannels,
+    std::vector<std::unique_ptr<const Muon::MuonClusterOnTrack>>& limitingRots) const {
     // remove any clusters that will NOT contribute to the final cluster
-    int numClusters	= limitingChannels.size()/2;
-    int sizeMax		= 0;
-    int sizeMin 	= 999;
+    int numClusters = limitingChannels.size() / 2;
+    int sizeMax = 0;
+    int sizeMin = 999;
     for (std::list<int>::iterator l = limitingChannels.begin();
-	 l != limitingChannels.end() && l != std::prev(limitingChannels.end());
-	 )
-    {
+         l != limitingChannels.end() &&
+         l != std::prev(limitingChannels.end());) {
         int end = *l++;
         int beg = *l++;
-	int size = abs(end - beg);
-	if (size > sizeMax) sizeMax = size;
-	if (size < sizeMin) sizeMin = size;
+        int size = std::abs(end - beg);
+        sizeMax = std::max(sizeMax, size);
+        sizeMin = std::min(sizeMin, size);
     }
-    
-    std::list<int>::iterator discard	= limitingChannels.end();
+
+    std::list<int>::iterator discard = limitingChannels.end();
     for (std::list<int>::iterator l = limitingChannels.begin();
-	 l != limitingChannels.end() && l != std::prev(limitingChannels.end());
-	 )
-    {
-	std::list<int>::iterator first = l;
+         l != limitingChannels.end() &&
+         l != std::prev(limitingChannels.end());) {
+        std::list<int>::iterator first = l;
         int end = *l++;
         int beg = *l++;
-	int size = abs(end - beg);
-	if (m_chooseBroadestCluster	&& size < sizeMax) discard = first;
-	if (! m_chooseBroadestCluster	&& size > sizeMin) discard = first;
+        int size = std::abs(end - beg);
+        if (m_chooseBroadestCluster && size < sizeMax) {
+            discard = first;
+        }
+        if (!m_chooseBroadestCluster && size > sizeMin) {
+            discard = first;
+        }
     }
-    if (discard == limitingChannels.begin())
-    {
-	ATH_MSG_VERBOSE(" discard cluster #" << 1 );
-	limitingRots.pop_front();
-	limitingRots.pop_front();
-	limitingChannels.pop_front();
-	limitingChannels.pop_front();
-    }
-    else if (discard != limitingChannels.end())
-    {
-	ATH_MSG_VERBOSE(" discard cluster #" << numClusters );
-	limitingRots.pop_back();
-	limitingRots.pop_back();
-	limitingChannels.pop_back();
-	limitingChannels.pop_back();
+    if (discard == limitingChannels.begin()) {
+        ATH_MSG_VERBOSE(" discard cluster #" << 1);
+        limitingRots.erase(limitingRots.begin());
+        limitingRots.erase(limitingRots.begin());
+        limitingChannels.pop_front();
+        limitingChannels.pop_front();
+    } else if (discard != limitingChannels.end()) {
+        ATH_MSG_VERBOSE(" discard cluster #" << numClusters);
+        limitingRots.pop_back();
+        limitingRots.pop_back();
+        limitingChannels.pop_back();
+        limitingChannels.pop_back();
     }
 }
 
-std::vector<const Muon::MuonClusterOnTrack*> TriggerChamberClusterOnTrackCreator::createPrdRots(const std::list<const Trk::PrepRawData*>& prds) const {
+std::vector<std::unique_ptr<const Muon::MuonClusterOnTrack>>
+TriggerChamberClusterOnTrackCreator::createPrdRots(
+    const std::list<const Trk::PrepRawData*>& prds) const {
     // create clusterRot for each PRD
-    auto rots = std::vector<const Muon::MuonClusterOnTrack*>();
+    std::vector<std::unique_ptr<const Muon::MuonClusterOnTrack>> rots{};
     if (prds.empty()) {
         ATH_MSG_WARNING("empty PRD list ");
         return rots;
     }
-    if (!(*prds.begin())) {
-        ATH_MSG_WARNING("first element of RPD list is nullptr");
-        return rots;
-    }
-    for (std::list<const Trk::PrepRawData*>::const_iterator p = prds.begin(); p != prds.end(); ++p) {
-        if (!(*p)) {
-            ATH_MSG_WARNING("current PrepRawData is nullptr, continuing");
+    std::optional<int> dim{};
+    for (const Trk::PrepRawData* prd : prds) {
+        Identifier id = prd->identify();
+        const Trk::TrkDetElementBase* detectorElement = prd->detectorElement();
+        const Amg::Vector3D globalPosition = detectorElement->center(id);
+        std::unique_ptr<const Muon::MuonClusterOnTrack> cluster{
+            m_clusterCreator->createRIO_OnTrack(*prd, globalPosition)};
+        if (!cluster) {
+            ATH_MSG_WARNING("Cannot create a ROT from "
+                            << m_idHelperSvc->toString(id) << ".");
             continue;
         }
-        Identifier id = (**p).identify();
-        const Trk::TrkDetElementBase* detectorElement = (**p).detectorElement();
-        const Amg::Vector3D globalPosition = detectorElement->center(id);
-        const Muon::MuonClusterOnTrack* cluster = m_clusterCreator->createRIO_OnTrack(**p,globalPosition);
-        rots.push_back(cluster);
+        if (!dim) {
+            dim = cluster->localCovariance().cols();
+        } else if ((*dim) != cluster->localCovariance().cols()) {
+            ATH_MSG_WARNING("The covariance dimension of "<<m_idHelperSvc->toString(id)
+                            <<" does not match "<<(*dim));
+            continue;
+        }
+        rots.push_back(std::move(cluster));
     }
     return rots;
 }
 
-void
-TriggerChamberClusterOnTrackCreator::makeClustersBySurface(std::list<int>& limitingChannels, std::list<const Muon::MuonClusterOnTrack*>& limitingRots, const std::list<const Trk::PrepRawData*>& prds, const std::vector<const Muon::MuonClusterOnTrack*>& rots) const {
+void TriggerChamberClusterOnTrackCreator::makeClustersBySurface(
+    std::list<int>& limitingChannels,
+    std::vector<std::unique_ptr<const Muon::MuonClusterOnTrack>>& limitingRots,
+    const std::list<const Trk::PrepRawData*>& prds,
+    const std::vector<std::unique_ptr<const Muon::MuonClusterOnTrack>>& rots) const {
     if (prds.empty()) {
         ATH_MSG_WARNING("makeClustersBySurface- empty PRD list ");
         return;
     }
-    if (!(*prds.begin())) {
-        ATH_MSG_WARNING("makeClustersBySurface - first element of RPD list is nullptr");
-        return;
-    }
-    std::vector<const Trk::PrepRawData*> usedPrd;
-    std::vector<const Muon::MuonClusterOnTrack*>::const_iterator r = rots.begin();
-    for (std::list<const Trk::PrepRawData*>::const_iterator p = prds.begin(); p != prds.end(); ++p, ++r) {
-        if (!(*p)) {
-            ATH_MSG_WARNING("makeClustersBySurface - current PrepRawData is nullptr, continuing");
-            continue;
-        }
-	if (std::find(usedPrd.begin(),usedPrd.end(),*p) != usedPrd.end()) continue;
-	usedPrd.push_back(*p);
-	int channel	= 0;
-	int gasGap	= 0;
-	Identifier channelId = (**p).identify();
-	bool isRpc = m_idHelperSvc->isRpc(channelId);
-	if (isRpc)
-	{
-	    gasGap	= m_idHelperSvc->rpcIdHelper().gasGap(channelId);
-	    channel	= m_idHelperSvc->rpcIdHelper().strip(channelId);
-	}
-	else
-	{
-	    gasGap	= m_idHelperSvc->tgcIdHelper().gasGap(channelId);
-	    channel	= m_idHelperSvc->tgcIdHelper().channel(channelId);
-	}
-	int channelMax	= channel;
-	int channelMin	= channel;
-	const Muon::MuonClusterOnTrack* rotMax = *r;
-	const Muon::MuonClusterOnTrack* rotMin = *r;
-	
-	std::list<const Trk::PrepRawData*>::const_iterator q = p;
-	std::vector<const Muon::MuonClusterOnTrack*>::const_iterator s = r;
-	for (++q, ++s; q != prds.end(); ++q, ++s) {
-        if (!(*q)) {
-            ATH_MSG_WARNING("makeClustersBySurface - current PrepRawData is nullptr, continuing");
-            continue;
-        }
-	    channelId = (**q).identify();
-	    if ((     isRpc && m_idHelperSvc->rpcIdHelper().gasGap(channelId)	!= gasGap)
-		|| (! isRpc && m_idHelperSvc->tgcIdHelper().gasGap(channelId)	!= gasGap)) continue;
-	    usedPrd.push_back(*q);
-	    if (isRpc)
-	    {
-		channel	= m_idHelperSvc->rpcIdHelper().strip(channelId);
-	    }
-	    else
-	    {
-		channel	= m_idHelperSvc->tgcIdHelper().channel(channelId);
-	    }
-	    if (channel > channelMax)
-	    {
-		channelMax	= channel;
-		rotMax		= *s;
-	    }
-	    if (channel < channelMin)
-	    {
-		channelMin	= channel;
-		rotMin		= *s;
-	    }
-	    
-	}
-	limitingChannels.push_back(channelMin);
-	limitingChannels.push_back(channelMax);
-	limitingRots.push_back(rotMin);
-	limitingRots.push_back(rotMax);
-    }
+    std::unordered_set<const Trk::PrepRawData*> usedPrd;
+    std::vector<std::unique_ptr<const Muon::MuonClusterOnTrack>>::const_iterator r = rots.begin();
+    for (std::list<const Trk::PrepRawData*>::const_iterator p = prds.begin();
+         p != prds.end(); ++p, ++r) {
 
-    // debug
-    if ( msgLvl(MSG::VERBOSE) )
-    {
-	std::list<int>::const_iterator l = limitingChannels.begin();
-	std::list<int>::const_iterator m = limitingChannels.begin();
-	int number	= 0;
-	int size	= abs(*l - *(++m));
-	for (std::vector<const Trk::PrepRawData*>::const_iterator q = usedPrd.begin();
-	     q != usedPrd.end();
-	     ++q, --size)
-	{
-	    Identifier channelId = (**q).identify();
-		bool isRpc = m_idHelperSvc->isRpc(channelId);
-	    if (isRpc)
-	    {
-		int stationIndex	= m_idHelperSvc->rpcIdHelper().stationName(channelId);
-		ATH_MSG_VERBOSE(" rpc "  
-		       << std::setiosflags(std::ios::fixed)
-		       << " localPosition "
-		       << std::setw(8) << std::setprecision(1) << (**q).localPosition()[Trk::locX]
-		       << std::setw(8) << std::setprecision(1) << (**q).localPosition()[Trk::locY]
-		       << "   doublet z/phi"
-		       << std::setw(2) << m_idHelperSvc->rpcIdHelper().doubletZ(channelId)
-		       << std::setw(2) << m_idHelperSvc->rpcIdHelper().doubletPhi(channelId)
-		       << "   gasGap"  << std::setw(2) << m_idHelperSvc->rpcIdHelper().gasGap(channelId)
-		       << "   strip"   << std::setw(3) << m_idHelperSvc->rpcIdHelper().strip(channelId)
-		       << "   station " << m_idHelperSvc->rpcIdHelper().stationNameString(stationIndex)
-		       << "  " << m_idHelperSvc->rpcIdHelper().show_to_string(channelId) );
-	    }
-	    else
-	    {
-		int stationIndex	= m_idHelperSvc->tgcIdHelper().stationName(channelId);
-		ATH_MSG_VERBOSE(" tgc "
-		       << std::setiosflags(std::ios::fixed)
-		       << " localPosition "
-		       << std::setw(8) << std::setprecision(1) << (**q).localPosition()[Trk::locX]
-		       << std::setw(8) << std::setprecision(1) << (**q).localPosition()[Trk::locY]
-		       << "   gasGap"  << std::setw(2) << m_idHelperSvc->tgcIdHelper().gasGap(channelId)
-		       << "   channel" << std::setw(3) << m_idHelperSvc->tgcIdHelper().channel(channelId)
-		       << "   station " << m_idHelperSvc->tgcIdHelper().stationNameString(stationIndex)
-		       << "  " << m_idHelperSvc->tgcIdHelper().show_to_string(channelId) );
-	    }
-	    if (size == 0)
-	    {
-		ATH_MSG_VERBOSE(" cluster " << ++number
-		       << "  between channels " << *l << " and " << *m );
-		if (++m != limitingChannels.end())
-		{
-		    ++l;
-		    size = 1 + abs(*(++l) - *(++m));
-		}
-	    }
-	}
+        const Trk::PrepRawData* prd{*p};
+        if (!usedPrd.insert(prd).second) {
+            continue;
+        }
+        int channel = 0;
+        int gasGap = 0;
+        const Identifier channelId = prd->identify();
+        const bool isRpc = m_idHelperSvc->isRpc(channelId);
+        if (isRpc) {
+            gasGap = m_idHelperSvc->rpcIdHelper().gasGap(channelId);
+            channel = m_idHelperSvc->rpcIdHelper().strip(channelId);
+        } else {
+            gasGap = m_idHelperSvc->tgcIdHelper().gasGap(channelId);
+            channel = m_idHelperSvc->tgcIdHelper().channel(channelId);
+        }
+        int channelMax = channel;
+        int channelMin = channel;
+        const Muon::MuonClusterOnTrack *rotMax{r->get()}, *rotMin{r->get()};
+        std::list<const Trk::PrepRawData*>::const_iterator q = p;
+        std::vector<std::unique_ptr<const Muon::MuonClusterOnTrack>>::const_iterator s = r;
+        for (++q, ++s; q != prds.end(); ++q, ++s) {
+            const Identifier channelId1 = (**q).identify();
+            if ((isRpc && m_idHelperSvc->rpcIdHelper().gasGap(channelId1) != gasGap) ||
+                (!isRpc && m_idHelperSvc->tgcIdHelper().gasGap(channelId1) != gasGap)) {
+                continue;
+            }
+            usedPrd.insert(*q);
+            if (isRpc) {
+                channel = m_idHelperSvc->rpcIdHelper().strip(channelId1);
+            } else {
+                channel = m_idHelperSvc->tgcIdHelper().channel(channelId1);
+            }
+            if (channel > channelMax) {
+                channelMax = channel;
+                rotMax = s->get();
+            }
+            if (channel < channelMin) {
+                channelMin = channel;
+                rotMin = s->get();
+            }
+        }
+        limitingChannels.push_back(channelMin);
+        limitingChannels.push_back(channelMax);
+        limitingRots.emplace_back(rotMin->clone());
+        limitingRots.emplace_back(rotMax->clone());
     }
+    ATH_MSG_VERBOSE("makeClustersBySurface - " << limitingChannels.size()
+                                               << ", " << limitingRots.size());
 }
 
-void
-TriggerChamberClusterOnTrackCreator::makeOverallParameters(
-	Trk::LocalParameters&			parameters,
-	Amg::MatrixX&				      errorMatrix,
-	Trk::Surface*&						surface,
-	std::list<int>&						limitingChannels,
-	std::list<const Muon::MuonClusterOnTrack*>&		limitingRots) const
-{
-    // surfaces, overall localPosition and error matrix
-    //std::list<const Trk::Surface*>	surfaces;
-    std::list<const Muon::MuonClusterOnTrack*>::const_iterator r = limitingRots.begin();
+void TriggerChamberClusterOnTrackCreator::makeOverallParameters(
+    Trk::LocalParameters& parameters, Amg::MatrixX& errorMatrix,
+    std::unique_ptr<Trk::Surface>& surface, std::list<int>& limitingChannels,
+    std::vector<std::unique_ptr<const Muon::MuonClusterOnTrack>>& limitingRots) const {
+
+    std::vector<std::unique_ptr<const Muon::MuonClusterOnTrack>>::const_iterator r = limitingRots.begin();
     Amg::Vector3D centre		= (**r).associatedSurface().center();
     Amg::MatrixX covariance	= (**r).localCovariance();
-    parameters				= Trk::LocalParameters((**r).localParameters());
-    Identifier channelId = (**r).identify();
-    bool isRpc = m_idHelperSvc->isRpc(channelId);
+    parameters				= Trk::LocalParameters{(**r).localParameters()};
+    const bool isRpc = m_idHelperSvc->isRpc((**r).identify());
     
-    int pair = 1;
+   
     for (++r;
 	 r != limitingRots.end();
-	 ++r, ++pair)
+	 ++r)
     {
       centre		+= (**r).associatedSurface().center();
       covariance	+= (**r).localCovariance();
       parameters	+= (**r).localParameters();
     }
-    double norm			= 1.;
-    norm /= static_cast<double>(limitingRots.size());
+    const double norm			= 1. /static_cast<double>(limitingRots.size());
     std::list<int>::iterator l	= limitingChannels.begin();
     int firstChannel   		= *l;
-    double width		= static_cast<double>(1 + abs(*(++l) - firstChannel));
+    double width		= static_cast<double>(1 + std::abs(*(++l) - firstChannel));
     if (limitingRots.size() > 2)
     {
-      int offset = abs(*(++l) - firstChannel);
+      int offset = std::abs(*(++l) - firstChannel);
       if (!isRpc && offset < 2) {
         width *= 0.5;
       } else {
@@ -356,55 +273,28 @@ TriggerChamberClusterOnTrackCreator::makeOverallParameters(
     covariance	*= width*width*norm;
     parameters	*= norm;
 
+    ATH_MSG_VERBOSE("Final parameters "<<m_idHelperSvc->toString((*limitingRots.begin())->identify())<<", centre: "<<Amg::toString(centre)<<", "
+                    <<", covariance: "<<covariance<<", parameters: "<<parameters<<" , limiting ROTs: "<<limitingRots.size());
     // finally create the mean ErrorMatrix and the average Surface
     // note the cluster surfaces are assumed to have identical orientation and bounds
-    errorMatrix			= Amg::MatrixX(covariance);
-    const Trk::Surface& surf	= (**limitingRots.begin()).associatedSurface();
-    Amg::Transform3D rotation  = surf.transform();
-    std::string shape		= "";
+    errorMatrix = Amg::MatrixX(covariance);
+    const Trk::Surface& surf = (**limitingRots.begin()).associatedSurface();
 
-    const Trk::RectangleBounds* rectbds = dynamic_cast<const Trk::RectangleBounds*>(&surf.bounds());
-    const Trk::TrapezoidBounds* trapbds = dynamic_cast<const Trk::TrapezoidBounds*>(&surf.bounds());
-    const Trk::RotatedTrapezoidBounds* rottrapbds = dynamic_cast<const Trk::RotatedTrapezoidBounds*>(&surf.bounds());
-
-    if (rectbds)
-    {
-       shape = " RPC rectangle ";
-       surface = new Trk::PlaneSurface(Amg::Transform3D(rotation),
-                                       std::shared_ptr<Trk::RectangleBounds>(rectbds->clone()));
-    }
-    else if (trapbds)
-    {
-       shape = " TGC trapezoid ";
-       surface = new Trk::PlaneSurface(
-           Amg::Transform3D(rotation),
-           std::shared_ptr<Trk::TrapezoidBounds>(trapbds->clone()));
-    }
-    else if (rottrapbds)
-    {
-       shape = " TGC rotatedTrapezoid ";
-       surface = new Trk::PlaneSurface(
-           Amg::Transform3D(rotation),
-           std::shared_ptr<Trk::RotatedTrapezoidBounds>(rottrapbds->clone()));
-    }
-
-    // debug
-    if ( msgLvl(MSG::DEBUG) )
-    {
-	ATH_MSG_DEBUG(shape << "  width " << width << "   localParameters " << (parameters)[Trk::locX]);
-	if (covariance.cols() > 1) ATH_MSG_DEBUG(" " << (parameters)[Trk::locY]);
-	ATH_MSG_DEBUG("   covariance " << std::sqrt(covariance(Trk::locX,Trk::locX)));
-	if (covariance.cols() > 1) ATH_MSG_DEBUG(" " << std::sqrt(covariance(Trk::locY,Trk::locY)));
-	ATH_MSG_DEBUG("   channel range (cluster) ");
-	pair = 2;
-	for (std::list<int>::iterator i = limitingChannels.begin();
-	     i != limitingChannels.end();
-	     ++i, ++pair)
-	{
-	    ATH_MSG_DEBUG( *i << " ");
-	    if (pair%2) ATH_MSG_DEBUG("(" << pair/2 << ")    ");
-	}
+    if (const auto* rectbds =
+            dynamic_cast<const Trk::RectangleBounds*>(&surf.bounds())) {
+        surface = std::make_unique<Trk::PlaneSurface>(
+            surf.transform(), std::make_unique<Trk::RectangleBounds>(*rectbds));
+    } else if (const auto* trapbds =
+                   dynamic_cast<const Trk::TrapezoidBounds*>(&surf.bounds())) {
+        surface = std::make_unique<Trk::PlaneSurface>(
+            surf.transform(), std::make_unique<Trk::TrapezoidBounds>(*trapbds));
+    } else if (const auto* rottrapbds =
+                   dynamic_cast<const Trk::RotatedTrapezoidBounds*>(
+                       &surf.bounds())) {
+        surface = std::make_unique<Trk::PlaneSurface>(
+            surf.transform(),
+            std::make_unique<Trk::RotatedTrapezoidBounds>(*rottrapbds));
     }
 }
 
-}	// end of namespace
+}  // namespace Muon

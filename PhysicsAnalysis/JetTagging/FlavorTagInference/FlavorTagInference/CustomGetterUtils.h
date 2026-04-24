@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// This file contains "getter" functions used for accessing tagger inputs
@@ -64,6 +64,7 @@ namespace FlavorTagInference {
      * - xAOD::TrackParticle
      * - xAOD::TrackMeasurementValidation
      * - xAOD::Electron
+     * - xAOD::Muon
     */
     template <typename T>
     class SeqGetter {

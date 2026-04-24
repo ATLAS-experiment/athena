@@ -115,11 +115,11 @@ namespace ActsTrk::detail {
     }
   }
 
-  MeasurementRangeListFlat
-  TrackFindingMeasurements::setMeasurementRangesForced(const ActsTrk::Seed &seed,
-                                                      const MeasurementIndex &measurementIndex) const {
-    ActsTrk::detail::MeasurementRangeListFlat measurementRangesForced;
-    measurementRangesForced.reserve(seed.sp().size());  // wrong for strip seeds, but just means an extra allocation in this rare case
+  std::unique_ptr<MeasurementRangeListFlat>
+  TrackFindingMeasurements::createMeasurementRangesForced(const ActsTrk::Seed &seed,
+                                                          const MeasurementIndex &measurementIndex) const {
+    std::unique_ptr<MeasurementRangeListFlat> measurementRangesForced=std::make_unique<ActsTrk::detail::MeasurementRangeListFlat>();
+    measurementRangesForced->reserve(seed.sp().size());  // wrong for strip seeds, but just means an extra allocation in this rare case
     for (const xAOD::SpacePoint *sp : seed.sp()) {
       for (const xAOD::UncalibratedMeasurement *measurement : sp->measurements()) {
         std::size_t idx = measurementIndex.index(*measurement);
@@ -136,8 +136,8 @@ namespace ActsTrk::detail {
           continue;
         }
         assert(container(typeIndex)->at(sl_idx) == measurement);
-        measurementRangesForced.setContainer(typeIndex, container(typeIndex));
-        addMeasurementToRange(measurementRangesForced,
+        measurementRangesForced->setContainer(typeIndex, container(typeIndex));
+        addMeasurementToRange(*measurementRangesForced,
                               typeIndex,
                               sl_idx,
                               sl_idx + 1,

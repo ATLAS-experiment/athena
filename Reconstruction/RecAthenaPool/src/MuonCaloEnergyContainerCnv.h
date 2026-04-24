@@ -28,7 +28,7 @@ protected:
 
   virtual MuonCaloEnergyContainer_PERS* createPersistent( MuonCaloEnergyContainer* transCont );
 
-  virtual MuonCaloEnergyContainer* createTransient();
+  virtual MuonCaloEnergyContainer* createTransient(const Token* token);
 
 };
 

@@ -1,9 +1,10 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # HIONHPOD.py
-# author: Mariana Vivas <mariana.vivas.albornoz@cern.ch>
+# Authors: Mariana Vivas <mariana.vivas.albornoz@cern.ch>, Ryan Jackson <r.d.jackson@cern.ch>
 # Application: Open Data
 #====================================================================
+# Derivation for the heavy ion hard probes Open Data release.
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -36,44 +37,95 @@ def HIONHPODCentralityAugmentationToolCfg(flags):
 def HIONHPODKernelCfg(flags, name='HIONHPODKernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel)"""
     acc = ComponentAccumulator()
+    GeV=1e3 # GeV -> MeV conversion factor
 
-    from DerivationFrameworkInDet.InDetToolsConfig import JetTrackParticleThinningCfg
+    from DerivationFrameworkInDet.InDetToolsConfig import (
+        MuonTrackParticleThinningCfg,
+        EgammaTrackParticleThinningCfg
+    )
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        InDetTrackSelectionTool_HITight_Cfg
+    )
     
     # Initialize a list for all the different type of tools
     thinningTool = []
     augmentationTool = []
 
-    # AntiKt4HI jets thinning
-    AntiKt4HIJetsThinningTool  = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(flags,
-                                                                                    name                   = "AntiKt4HIJetsThinningTool",
-                                                                                    StreamName             = kwargs['StreamName'],
-                                                                                    JetKey                 = "AntiKt4HIJets",
-                                                                                    InDetTrackParticlesKey = "InDetTrackParticles"))
-    
-    acc.addPublicTool(AntiKt4HIJetsThinningTool)
-    thinningTool += [AntiKt4HIJetsThinningTool]
+    HITightTrackSelector = acc.popToolsAndMerge(InDetTrackSelectionTool_HITight_Cfg(
+        flags,
+        name = "HIONHPODTrackSelectionToolTight",
+        minPt = 10*GeV
+    ))
+    acc.addPublicTool(HITightTrackSelector)
+
+    HIONHPODTrackThinningTool = CompFactory.DerivationFramework.HITrackParticleThinningTool(
+        name = "HIONHPODTrackThinningTool",
+        PrimaryVertexKey = "PrimaryVertices",
+        PrimaryVertexSelection = "sumPt2",
+        TrackSelectionTool = HITightTrackSelector,
+        StreamName = kwargs["StreamName"]
+    )
+
+    acc.addPublicTool(HIONHPODTrackThinningTool)
+    thinningTool += [HIONHPODTrackThinningTool]
+
+    for jetKey in ("AntiKt2HIJets","AntiKt4HIJets"):    
+        HIONHPODJetTrackThinningTool = CompFactory.DerivationFramework.HIJetTrackParticleThinningTool(
+            name = f"HIONHPOD{jetKey}TrackThinningTool",
+            PrimaryVertexKey = "PrimaryVertices",
+            PrimaryVertexSelection = "sumPt2",
+            JetKey = jetKey,
+            TrackSelectionTool = HITightTrackSelector,
+            StreamName = kwargs["StreamName"]
+        )
+
+        acc.addPublicTool(HIONHPODJetTrackThinningTool)
+        thinningTool += [HIONHPODJetTrackThinningTool]
 
     # Muon thinning
-    muonThinningTool = CompFactory.DerivationFramework.MuonTrackParticleThinning(name                  = "HIONHPODMuonThinningTool",
-                                                                                MuonKey                = "Muons",
-                                                                                InDetTrackParticlesKey = "InDetTrackParticles")
+    muonThinningTool = acc.getPrimaryAndMerge(MuonTrackParticleThinningCfg(
+        flags,
+        name                   = "HIONHPODMuonThinningTool",
+        StreamName             = kwargs['StreamName'], 
+        MuonKey                = "Muons",
+        InDetTrackParticlesKey = "InDetTrackParticles"
+    ))
 
     acc.addPublicTool(muonThinningTool)
     thinningTool += [muonThinningTool]
+
+    # Electron/photon thinning
+    egamma_thinning_config = {
+        "Electrons": {
+        },
+        "Photons": {
+            "GSFConversionVerticesKey": "GSFConversionVertices"
+        }
+    }
+    for egammaKey in egamma_thinning_config:
+        egammaThinningTool = acc.getPrimaryAndMerge(EgammaTrackParticleThinningCfg(
+            flags,
+            name       = f"HIONHPOD{egammaKey}ThinningTool",
+            StreamName = kwargs["StreamName"],
+            SGKey      = egammaKey,
+            **egamma_thinning_config[egammaKey]
+        ))
+        acc.addPublicTool(egammaThinningTool)
+        thinningTool += [egammaThinningTool]
 
     # Merge the augmentation tools to the ComponetAccumlator
     globalAugmentationTool = acc.getPrimaryAndMerge(HIONHPODGlobalAugmentationToolCfg(flags))
     augmentationTool += [globalAugmentationTool]
 
-    centralityAugmentatioTool = acc.getPrimaryAndMerge(HIONHPODCentralityAugmentationToolCfg(flags))
-    augmentationTool += [centralityAugmentatioTool]
+    centralityAugmentationTool = acc.getPrimaryAndMerge(HIONHPODCentralityAugmentationToolCfg(flags))
+    augmentationTool += [centralityAugmentationTool]
 
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
-    acc.addEventAlgo(DerivationKernel(name,
-                                    ThinningTools=thinningTool,
-                                    AugmentationTools=augmentationTool
-                                    ),
-                                )
+    acc.addEventAlgo(DerivationKernel(
+        name,
+        ThinningTools=thinningTool,
+        AugmentationTools=augmentationTool
+    ))
 
     return acc
 
@@ -86,61 +138,27 @@ def HIONHPODCfg(flags):
 
     ################################### Slimming ###################################
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
+
     HIONHPODSlimmingHelper = SlimmingHelper("HIONHPODSlimmingHelper", NamesAndTypes=flags.Input.TypedCollections, flags=flags)
     
+    # ListSlimming details all variable slimming configurations
     from DerivationFrameworkHI import ListSlimming
-    # Only smart collection variables for electrons, muons and photons
-    HIONHPODSlimmingHelper.SmartCollections = ListSlimming.HIONHPODSmartCollections()
-    # And all the variables for AntiKt4HIJets, CaloSums and EventInfo
-    HIONHPODSlimmingHelper.AllVariables = ["AntiKt4HIJets",
-                                           "CaloSums",
-                                           "EventInfo"]
 
+    # Smart collections: Empty
+    HIONHPODSlimmingHelper.SmartCollections = ListSlimming.HIONHPODSmartCollections()
+
+    # All variables: CaloSums
+    HIONHPODSlimmingHelper.AllVariables += ListSlimming.HIONHPODAllVariables()
+
+    # Extra variables: The bulk of the derivation. See ListSlimming.py for branches
+    HIONHPODSlimmingHelper.ExtraVariables += ListSlimming.HIONHPODExtraVariablesAll()
+    HIONHPODSlimmingHelper.ExtraVariables += ListSlimming.HIONHPODExtraVariablesJets()
+    
     # Add truth information to Monte Carlo samples
     if flags.Input.isMC:
-        from SGComps.AddressRemappingConfig import AddressRemappingCfg
-        from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddStandardTruthContentsCfg
-        
-        # Define required container names as encoded bytes
-        required_containers = { "AntiKt10TruthJets".encode("utf-8"), "AntiKt10TruthJetsAux".encode("utf-8") }
-
-        # No need to decode the collections as they are all bytes
-        inputCollections = set(flags.Input.Collections)
-
-        if inputCollections.intersection(required_containers):
-            rename_maps = ['%s#%s->%s' % ("xAOD::JetContainer", "AntiKt10TruthJets", "old_AntiKt10TruthJets"),
-                           '%s#%s->%s' % ("xAOD::JetAuxContainer", "AntiKt10TruthJetsAux.", "old_AntiKt10TruthJetsAux.")
-                         ]
-            acc.merge(AddressRemappingCfg(rename_maps))
-    
-        acc.merge(AddStandardTruthContentsCfg(flags))
-
-        HIONHPODSlimmingHelper.AppendToDictionary = {'EventInfo':'xAOD::EventInfo','EventInfoAux':'xAOD::EventAuxInfo',
-                                                'TruthEvents':'xAOD::TruthEventContainer','TruthEventsAux':'xAOD::TruthEventAuxContainer',
-                                                'MET_Truth':'xAOD::MissingETContainer','MET_TruthAux':'xAOD::MissingETAuxContainer',
-                                                'TruthLHEParticles':'xAOD::TruthParticleContainer', 'TruthLHEParticlesAux':'xAOD::TruthParticleAuxContainer',
-                                                'TruthElectrons':'xAOD::TruthParticleContainer','TruthElectronsAux':'xAOD::TruthParticleAuxContainer',
-                                                'TruthMuons':'xAOD::TruthParticleContainer','TruthMuonsAux':'xAOD::TruthParticleAuxContainer',
-                                                'TruthPhotons':'xAOD::TruthParticleContainer','TruthPhotonsAux':'xAOD::TruthParticleAuxContainer',
-                                                'TruthTaus':'xAOD::TruthParticleContainer','TruthTausAux':'xAOD::TruthParticleAuxContainer',
-                                                'TruthNeutrinos':'xAOD::TruthParticleContainer','TruthNeutrinosAux':'xAOD::TruthParticleAuxContainer',
-                                                'TruthBSM':'xAOD::TruthParticleContainer','TruthBSMAux':'xAOD::TruthParticleAuxContainer',
-                                                'TruthBoson':'xAOD::TruthParticleContainer','TruthBosonAux':'xAOD::TruthParticleAuxContainer',
-                                                'TruthBottom':'xAOD::TruthParticleContainer','TruthBottomAux':'xAOD::TruthParticleAuxContainer',
-                                                'TruthTop':'xAOD::TruthParticleContainer','TruthTopAux':'xAOD::TruthParticleAuxContainer',
-                                                'TruthForwardProtons':'xAOD::TruthParticleContainer','TruthForwardProtonsAux':'xAOD::TruthParticleAuxContainer',
-                                                'BornLeptons':'xAOD::TruthParticleContainer','BornLeptonsAux':'xAOD::TruthParticleAuxContainer',
-                                                'TruthBosonsWithDecayParticles':'xAOD::TruthParticleContainer','TruthBosonsWithDecayParticlesAux':'xAOD::TruthParticleAuxContainer',
-                                                'TruthBosonsWithDecayVertices':'xAOD::TruthVertexContainer','TruthBosonsWithDecayVerticesAux':'xAOD::TruthVertexAuxContainer',
-                                                'TruthBSMWithDecayParticles':'xAOD::TruthParticleContainer','TruthBSMWithDecayParticlesAux':'xAOD::TruthParticleAuxContainer',
-                                                'TruthBSMWithDecayVertices':'xAOD::TruthVertexContainer','TruthBSMWithDecayVerticesAux':'xAOD::TruthVertexAuxContainer',
-                                                'AntiKt4TruthDressedWZJets':'xAOD::JetContainer','AntiKt4TruthDressedWZJetsAux':'xAOD::JetAuxContainer',
-                                                'AntiKt10TruthSoftDropBeta100Zcut10Jets':'xAOD::JetContainer','AntiKt10TruthSoftDropBeta100Zcut10JetsAux':'xAOD::JetAuxContainer'
-                                             }
-
-    # Add standard content
-    from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
-    addTruth3ContentToSlimmerTool(HIONHPODSlimmingHelper)
+        HIONHPODSlimmingHelper.ExtraVariables += ListSlimming.HIONHPODExtraTruthVariables()
+        HIONHPODSlimmingHelper.ExtraVariables += ListSlimming.HIONHPODExtraTruthVariablesJets()
+        HIONHPODSlimmingHelper.AllVariables += ListSlimming.HIONHPODAllTruthVariables()
 
     HIONHPODItemList = HIONHPODSlimmingHelper.GetItemList()
     

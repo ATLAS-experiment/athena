@@ -4,12 +4,17 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def xRpcToRpcPrepDataCnvAlgCfg(flags,name = "xAODRpcToPrepDataCnvAlg", **kwargs):
+def xRpcToPrepDataCnvAlgCfg(flags,name = "xAODRpcToPrepDataCnvAlg", **kwargs):
     result = ComponentAccumulator()
-    the_alg = CompFactory.MuonR4.xRpcMeasToRpcTrkPrdCnvAlg(name, **kwargs)
+    the_alg = CompFactory.MuonR4.xRpcMeasToTrkPrdCnvAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
 
+def xTgcToPrepDataCnvAlgCfg(flags,name = "xAODTgcToPrepDataCnvAlg", **kwargs):
+    result = ComponentAccumulator()
+    the_alg = CompFactory.MuonR4.xTgcMeasToTrkPrdCnvAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
 def MuonPrepDataToxAODCnvAlg(flags,name="MuonPrepDataToxAODCnvAlg", **kwargs):
     result = ComponentAccumulator()
     the_alg = CompFactory.Muon.PRDxAODConvertorAlg(name=name, **kwargs)

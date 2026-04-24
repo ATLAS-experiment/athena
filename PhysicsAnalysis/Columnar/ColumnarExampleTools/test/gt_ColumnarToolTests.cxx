@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -23,10 +23,12 @@
 #include <ColumnarExampleTools/MomentumAccessorExampleTool.h>
 #include <ColumnarExampleTools/StringExampleTool.h>
 #include <ColumnarExampleTools/VariantExampleTool.h>
+#include <ColumnarExampleTools/VectorExampleTool.h>
 
 #include <xAODJet/JetContainer.h>
 #include <xAODEgamma/PhotonContainer.h>
 #include <xAODCore/ShallowCopy.h>
+#include <AthContainers/CurrentContext.h>
 
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
@@ -112,10 +114,10 @@ public:
 
   virtual StatusCode copyRecord (EventStoreType& evtStore, const std::string& postfix) override
   {
-    auto [jetsCopy, auxCopy] = xAOD::shallowCopyContainer (*m_jets);
-    m_jets = jetsCopy;
-    ANA_CHECK (evtStore.record (jetsCopy, m_name + postfix));
-    ANA_CHECK (evtStore.record (auxCopy, m_name + postfix + "Aux."));
+    auto [jetsCopy, auxCopy] = xAOD::shallowCopyContainer (*m_jets, Gaudi::Hive::currentContext());
+    m_jets = jetsCopy.get();
+    ANA_CHECK (evtStore.record (std::move(jetsCopy), m_name + postfix));
+    ANA_CHECK (evtStore.record (std::move(auxCopy), m_name + postfix + "Aux."));
     return StatusCode::SUCCESS;
   }
 
@@ -322,10 +324,10 @@ public:
 
   virtual StatusCode copyRecord (EventStoreType& evtStore, const std::string& postfix) override
   {
-    auto [jetsCopy, auxCopy] = xAOD::shallowCopyContainer (*m_jets);
-    m_jets = jetsCopy;
-    ATH_CHECK (evtStore.record (jetsCopy, m_name + postfix));
-    ATH_CHECK (evtStore.record (auxCopy, m_name + postfix + "Aux."));
+    auto [jetsCopy, auxCopy] = xAOD::shallowCopyContainer (*m_jets, Gaudi::Hive::currentContext());
+    m_jets = jetsCopy.get();
+    ATH_CHECK (evtStore.record (std::move(jetsCopy), m_name + postfix));
+    ATH_CHECK (evtStore.record (std::move(auxCopy), m_name + postfix + "Aux."));
     return StatusCode::SUCCESS;
   }
 
@@ -514,14 +516,16 @@ public:
 
   virtual StatusCode copyRecord (EventStoreType& evtStore, const std::string& postfix) override
   {
-    auto [electronsCopy, electronsAuxCopy] = xAOD::shallowCopyContainer (*m_electrons);
-    m_electrons = electronsCopy;
-    ANA_CHECK (evtStore.record (electronsCopy, m_electronName + postfix));
-    ANA_CHECK (evtStore.record (electronsAuxCopy, m_electronName + postfix + "Aux."));
-    auto [muonsCopy, muonsAuxCopy] = xAOD::shallowCopyContainer (*m_muons);
-    m_muons = muonsCopy;
-    ANA_CHECK (evtStore.record (muonsCopy, m_muonName + postfix));
-    ANA_CHECK (evtStore.record (muonsAuxCopy, m_muonName + postfix + "Aux."));
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+
+    auto [electronsCopy, electronsAuxCopy] = xAOD::shallowCopyContainer (*m_electrons, ctx);
+    m_electrons = electronsCopy.get();
+    ANA_CHECK (evtStore.record (std::move(electronsCopy), m_electronName + postfix));
+    ANA_CHECK (evtStore.record (std::move(electronsAuxCopy), m_electronName + postfix + "Aux."));
+    auto [muonsCopy, muonsAuxCopy] = xAOD::shallowCopyContainer (*m_muons, ctx);
+    m_muons = muonsCopy.get();
+    ANA_CHECK (evtStore.record (std::move(muonsCopy), m_muonName + postfix));
+    ANA_CHECK (evtStore.record (std::move(muonsAuxCopy), m_muonName + postfix + "Aux."));
     return StatusCode::SUCCESS;
   }
 
@@ -558,6 +562,104 @@ TEST_F (ColumnarPhysLiteTest, VariantExampleTool)
   // this will call the tool in either mode, and also performs some
   // performance measurements of the tool in either mode
   doCall ({.tool = tool.get(), .name = "VariantExampleTool", .xAODToolCaller = &xAODToolCaller, .containerRenames = {{{}}}});
+}
+
+
+
+TEST_F (ColumnarMemoryTest, VectorExampleTool)
+{
+  if (!checkMode())
+    return;
+
+  auto tool = std::make_unique<columnar::VectorExampleTool> (makeUniqueName());
+  ASSERT_SUCCESS (tool->initialize ());
+
+  ColumnarTestToolHandle toolHandle (*tool);
+  toolHandle.initialize ();
+
+  for (auto& name : toolHandle.getColumnNames())
+    std::cout << "requested column: " << name << std::endl;
+  std::cout << "recommended systematics size: " << toolHandle.getRecommendedSystematics().size() << std::endl;
+
+  ColumnMapType columnMap {toolHandle};
+
+  columnMap.addColumn ("EventInfo", {0, 1});
+
+  columnMap.addColumn ("Particles", {0, 2});
+  columnMap.addColumn ("Particles.selection", {0, 0});
+  columnMap.addColumn ("Particles.pt", {10e3, 50e3});
+  columnMap.addColumn ("Particles.SumPtTrkPt500.offset", {0, 2, 4});
+  columnMap.addColumn ("Particles.SumPtTrkPt500.data", {10e3, 50e3, 10e3, 50e3});
+  columnMap.addColumn ("Particles.NumTrkPt500.offset", {0, 2, 4});
+  columnMap.addColumn ("Particles.NumTrkPt500.data", {10, 10, 10, 10});
+
+  columnMap.setExpectation ("Particles.selection", {0, 1});
+
+  columnMap.connectColumnsToTool ();
+
+  columnMap.call ();
+
+  columnMap.checkExpectations ();
+}
+
+// this is a helper function for the PHYSLITE test below.  there is
+// usually some amount of boilerplate code that test needs to run in
+// XAOD mode, which is usually factored out into a separate function.
+class XAODVectorExampleToolCaller final : public IXAODToolCaller, public asg::AsgMessaging
+{
+public:
+  XAODVectorExampleToolCaller (const columnar::VectorExampleTool& tool, const std::string& jetName)
+    : AsgMessaging("XAODVectorExampleToolCaller"), m_tool (tool), m_jetName (jetName)
+  {}
+
+  virtual StatusCode retrieve (EventStoreType& evtStore) override
+  {
+    ANA_CHECK (evtStore.retrieve (m_jets, m_jetName));
+    return StatusCode::SUCCESS;
+  }
+
+  virtual StatusCode copyRecord (EventStoreType& evtStore, const std::string& postfix) override
+  {
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+
+    auto [jetsCopy, jetsAuxCopy] = xAOD::shallowCopyContainer (*m_jets, ctx);
+    m_jets = jetsCopy.get();
+    ANA_CHECK (evtStore.record (std::move(jetsCopy), m_jetName + postfix));
+    ANA_CHECK (evtStore.record (std::move(jetsAuxCopy), m_jetName + postfix + "Aux."));
+    return StatusCode::SUCCESS;
+  }
+
+  virtual StatusCode call () override
+  {
+    m_tool.callSingleEvent (*m_jets);
+    return StatusCode::SUCCESS;
+  }
+
+private:
+  const columnar::VectorExampleTool& m_tool;
+  std::string m_jetName;
+
+  const xAOD::JetContainer *m_jets = nullptr;
+};
+
+// this is a test that runs the tool on PHYSLITE.  this ensures that the
+// tool works on actual data, not just synthetic one of the in-memory
+// test.  it also allows for performance measurements of the tool in the
+// different modes.
+TEST_F (ColumnarPhysLiteTest, VectorExampleTool)
+{
+  // check that we are in a project that supports this test
+  if (!checkMode())
+    return;
+
+  auto tool = std::make_unique<columnar::VectorExampleTool> (makeUniqueName());
+  ASSERT_SUCCESS (tool->initialize ());
+
+  XAODVectorExampleToolCaller xAODToolCaller (*tool, "AnalysisJets");
+
+  // this will call the tool in either mode, and also performs some
+  // performance measurements of the tool in either mode
+  doCall ({.tool = tool.get(), .name = "VectorExampleTool", .xAODToolCaller = &xAODToolCaller, .containerRenames = {{"Particles", "AnalysisJets"}}});
 }
 
 ATLAS_GOOGLE_TEST_MAIN

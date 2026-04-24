@@ -52,7 +52,7 @@ class LArDSPThresholdFillInline:public AthAlgorithm {
   LArBadChannelMask m_bcMask;
   SG::ReadCondHandleKey<LArBadChannelCont> m_bcContKey {this, "BadChanKey", "LArBadChannel", "SG key for LArBadChan object"};
   Gaudi::Property<std::vector<std::string> > m_problemsToMask{this,"ProblemsToMask",{}, "Bad-Channel categories to mask"};
-  Gaudi::Property<float> m_scaleIW{this,"ScaleIW",0.,"if >0 scale EMEC IW and FCAL thresholds with this factor"};
+  Gaudi::Property<float> m_scaleIW{this,"ScaleIW",0.,"if >0 scale EMEC IW, HEC thresholds with this factor"};
  
 
   enum mode_t{

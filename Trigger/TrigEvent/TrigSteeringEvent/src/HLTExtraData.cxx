@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -38,6 +38,7 @@ HLTExtraData::HLTExtraData(HLTExtraData&& rhs)
   swap(*this, rhs);
 }
 
+//coverity[PASS_BY_VALUE]
 HLTExtraData& HLTExtraData::operator=(HLTExtraData rhs)
 {
   swap(*this, rhs);

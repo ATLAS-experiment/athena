@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EventInfoByteStreamAuxCnv.h"
@@ -37,7 +37,7 @@ EventInfoByteStreamAuxCnv::EventInfoByteStreamAuxCnv(ISvcLocator* svcloc)
 {
 }
 
-const CLID& EventInfoByteStreamAuxCnv::classID() 
+CLID EventInfoByteStreamAuxCnv::classID() 
 {
   return ClassID_traits<xAOD::EventAuxInfo>::ID();
 }

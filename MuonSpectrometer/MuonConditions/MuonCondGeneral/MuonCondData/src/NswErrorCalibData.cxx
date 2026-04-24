@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
 #include "MuonCondData/NswErrorCalibData.h"
 #include <sstream>
 #include "GeoModelKernel/throwExcept.h"
@@ -40,13 +43,12 @@ errorParametrizer NswErrorCalibData::getParametrizer(const std::string& funcName
         };
     }
     /// Return a surprise box if the function is unknown
-    return [funcName](const Input&, const std::vector<double>& ) {
-        std::stringstream except_str{};
-        except_str<<"NswErrorCalibData::parametrizer() - The function '"<<funcName<<"' is unknown.";
-        except_str<<"Please check"<<__FILE__<<" for the set of valid function names. ";
-        THROW_EXCEPTION(except_str.str());
-        return 0.;
-    };
+    std::stringstream except_str;
+    except_str << "NswErrorCalibData::getParametrizer() - The function '"
+             << funcName << "' is unknown. "
+             << "Please check " << __FILE__
+             << " for the set of valid function names.";
+    THROW_EXCEPTION(except_str.str());
 }
 
 

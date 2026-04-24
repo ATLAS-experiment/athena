@@ -3,6 +3,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.CFElements import parOR
 from eflowRec import PFOnlineMon
+from TrigEDMConfig.TriggerEDM import recordable
 
 
 #---------------------------------------------------------------------------------#
@@ -329,13 +330,13 @@ def PFCfg(inputFlags, tracktype="", clustersin=None, calclustersin=None, tracksi
     chargedPFOArgs = dict(
             inputFlags=inputFlags,
             nameSuffix=f"_{tracktype}",
-            chargedFlowElementOutputName=f"HLT_{tracktype}ChargedParticleFlowObjects",
+            chargedFlowElementOutputName=recordable(f"HLT_{tracktype}ChargedParticleFlowObjects"),
             eflowCaloObjectContainerName=f"eflowCaloObjects_{tracktype}"
     )
     neutralPFOArgs = dict(
             inputFlags=inputFlags,
             nameSuffix=f"_{tracktype}",
-            neutralFlowElementOutputName=f"HLT_{tracktype}NeutralParticleFlowObjects",
+            neutralFlowElementOutputName=recordable(f"HLT_{tracktype}NeutralParticleFlowObjects"),
             eflowCaloObjectContainerName=f"eflowCaloObjects_{tracktype}"
     )
     from eflowRec.PFCfg import getChargedFlowElementCreatorAlgorithm,getNeutralFlowElementCreatorAlgorithm

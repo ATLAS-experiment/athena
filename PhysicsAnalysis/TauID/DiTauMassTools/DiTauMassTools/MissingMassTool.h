@@ -52,17 +52,6 @@ class MissingMassTool : virtual public IMissingMassTool, virtual public asg::Asg
 				    const xAOD::MissingET* met,
 				    const int & njets);
 
-  virtual void calculate(const xAOD::EventInfo & ei, 
-			 const PtEtaPhiMVector & vis_tau1,
-			 const PtEtaPhiMVector & vis_tau2,
-			 const int & tau1_decay_type,
-			 const int & tau2_decay_type,
-			 const xAOD::MissingET & met,
-			 const int & njets){
-	  ignore(ei); ignore(vis_tau1); ignore(vis_tau2);
-	  ignore(tau1_decay_type); ignore(tau2_decay_type);
-	  ignore(met); ignore(njets);}
-
   virtual MissingMassCalculator* get() {return m_MMC;}
   virtual double GetFitStatus(int method) {(void) method; return m_MMC->OutputInfo.GetFitStatus();}
   virtual double GetFittedMass(int method) {return m_MMC->OutputInfo.GetFittedMass(method);}

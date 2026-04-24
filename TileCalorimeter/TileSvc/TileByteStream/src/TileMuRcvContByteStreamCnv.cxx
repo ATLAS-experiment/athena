@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Gaudi includes
@@ -40,7 +40,7 @@ TileMuRcvContByteStreamCnv::TileMuRcvContByteStreamCnv(ISvcLocator* svcloc)
 {
 }
 
-const CLID& TileMuRcvContByteStreamCnv::classID(){
+CLID TileMuRcvContByteStreamCnv::classID(){
   return ClassID_traits<TileMuonReceiverContainer>::ID();
 }
 

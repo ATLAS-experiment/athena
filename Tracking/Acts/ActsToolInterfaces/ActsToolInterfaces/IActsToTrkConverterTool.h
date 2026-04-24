@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRYINTERFACES_IActsToTrkConverterTool_H
@@ -18,7 +18,7 @@
 #include "xAODTracking/TrackMeasurementContainer.h"
 #include "xAODTracking/TrackParametersContainer.h"
 #include "xAODTracking/TrackStateContainer.h"
-#include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/EventData/BoundTrackParameters.hpp"
 #include "Acts/EventData/VectorTrackContainer.hpp"
 #include "ActsEvent/TrackContainer.h"
 

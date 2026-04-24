@@ -22,7 +22,7 @@ public:
       virtual ~LArG4H62004DeadCalibrationCalculator();
 
 
-      virtual G4bool Process (const G4Step* step, LArG4Identifier & identifier,
+      virtual G4bool Process (const G4Step* step, LArG4Identifier & identifier, LArG4Identifier & identifier_sr,
                               std::vector<G4double> & energies,
                               const LArG4::eCalculatorProcessing p = LArG4::kEnergyAndID) const override final;
 

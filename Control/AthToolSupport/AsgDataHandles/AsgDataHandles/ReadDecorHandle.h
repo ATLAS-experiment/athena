@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 
 /**
@@ -60,6 +60,9 @@ public:
   /// Pointer into the vector holding an aux data item.
   typedef typename accessor_t::const_container_pointer_type
     const_container_pointer_type;
+
+  /// Span of aux data items.
+  using const_span = typename accessor_t::const_span;
 
 
   /**
@@ -139,12 +142,22 @@ public:
   const_reference_type operator() (size_t index);
 
 
-//   /**
-//    * @brief Get a pointer to the start of the auxiliary data array,
-//    *        for the referenced object.
-//    */
-//   const_container_pointer_type
-//   getDataArray();
+  /**
+   * @brief Get a pointer to the start of the auxiliary data array,
+   *        for the referenced object.
+   */
+  template <class POINTER_TYPE = const_container_pointer_type>
+  requires (!std::is_void_v<POINTER_TYPE>)
+  POINTER_TYPE
+  getDataArray();
+
+
+  /**
+   * @brief Get a span over the auxilary data array,
+   *        for the referenced object.
+   */
+  const_span
+  getDataSpan();
 
 
   /**

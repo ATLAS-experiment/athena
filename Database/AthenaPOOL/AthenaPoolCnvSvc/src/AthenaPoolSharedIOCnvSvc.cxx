@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AthenaPoolSharedIOCnvSvc.cxx
@@ -17,6 +17,7 @@
 
 #include "AthenaKernel/IAthenaOutputStreamTool.h"
 #include "AthenaKernel/IAthMetaDataSvc.h"
+#include "AthenaKernel/InputFileIncidentGuard.h"
 #include "PersistentDataModel/Placement.h"
 #include "PersistentDataModel/Token.h"
 #include "PersistentDataModel/TokenAddress.h"
@@ -221,10 +222,9 @@ StatusCode AthenaPoolSharedIOCnvSvc::commitOutput(const std::string& outputConne
                   if (m_metadataClient != num) {
                      if (m_metadataClient != 0) {
                         std::string memName = std::format("SHM[NUM={}]", m_metadataClient);
-                        FileIncident beginInputIncident(name(), "BeginInputMemFile", memName);
-                        incSvc->fireIncident(beginInputIncident);
-                        FileIncident endInputIncident(name(), "EndInputMemFile", std::move(memName));
-                        incSvc->fireIncident(endInputIncident);
+                        auto guard = InputFileIncidentGuard::begin(*incSvc, name(),
+                                         memName, {}, /*endFileName=*/memName,
+                                         "BeginInputMemFile", "EndInputMemFile");
                      }
                      m_metadataClient = num;
                   }
@@ -366,10 +366,11 @@ StatusCode AthenaPoolSharedIOCnvSvc::commitOutput(const std::string& outputConne
       if (sc.isFailure() || fileName.empty()) {
          ServiceHandle<IIncidentSvc> incSvc("IncidentSvc", name());
          std::string memName = std::format("SHM[NUM={}]", m_metadataClient);
-         FileIncident beginInputIncident(name(), "BeginInputMemFile", memName);
-         incSvc->fireIncident(beginInputIncident);
-         FileIncident endInputIncident(name(), "EndInputMemFile", std::move(memName));
-         incSvc->fireIncident(endInputIncident);
+         {
+            auto guard = InputFileIncidentGuard::begin(*incSvc, name(),
+                              memName, {}, /*endFileName=*/memName,
+                              "BeginInputMemFile", "EndInputMemFile");
+         }
          if (sc.isFailure()) {
             ATH_MSG_INFO("All SharedWriter clients stopped - exiting");
          } else {
@@ -766,13 +767,13 @@ StatusCode AthenaPoolSharedIOCnvSvc::readData() {
       }
    } else if (token.dbID() != Guid::null()) {
       std::string returnToken;
-      const Token* metadataToken = getPoolSvc()->getToken("FID:" + token.dbID().toString(), token.contID(), token.oid().first);
-      if (metadataToken != nullptr) {
+      Token* metadataToken = getPoolSvc()->getToken("FID:" + token.dbID().toString(), token.contID(), token.oid().first);
+      if( metadataToken ) {
          returnToken = metadataToken->toString();
+         metadataToken->release(); metadataToken = nullptr;
       } else {
          returnToken = token.toString();
       }
-      delete metadataToken; metadataToken = nullptr;
       // Share token
       sc = m_inputStreamingTool->putObject(returnToken.c_str(), returnToken.size() + 1, num);
       if (!sc.isSuccess() || !m_inputStreamingTool->putObject(nullptr, 0, num).isSuccess()) {

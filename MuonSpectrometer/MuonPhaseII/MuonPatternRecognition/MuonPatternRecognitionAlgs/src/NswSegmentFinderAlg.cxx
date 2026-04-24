@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "NswSegmentFinderAlg.h"
@@ -12,6 +12,7 @@
 
 
 #include "MuonPatternEvent/SegmentFitterEventData.h"
+#include "MuonSpacePoint/SpacePointHelpers.h"
 
 #include "xAODMuonPrepData/MMCluster.h"
 #include "xAODMuonPrepData/sTgcMeasurement.h"
@@ -64,6 +65,12 @@ namespace {
         return chType == sTgcIdHelper::Strip ? "S" :
                chType == sTgcIdHelper::Wire ? "W" : "P";
     }
+
+    //local struct to encapsulate hit candidates data (e.g for seed extension)
+    struct HitCandidate {
+        double minPull{std::numeric_limits<float>::max()};
+        const MuonR4::SpacePoint* spacePoint{nullptr};
+    };
 }
 
 namespace MuonR4 {
@@ -272,42 +279,57 @@ NswSegmentFinderAlg::HitVec
         const HitVec& layer{extensionLayers[i].get()};
         const Amg::Vector3D extrapPos = SeedingAux::extrapolateToPlane(startPos, direction, *layer.front());
 
-        unsigned indexOfHit = layer.size() + 1;
+        
         unsigned triedHit{0};
-        double minPull{std::numeric_limits<double>::max()};
-       
-        // loop over the hits on the same layer
+        HitCandidate precisionHit, noPrecisionHit;
+        ATH_MSG_VERBOSE("Moving to next layer");
+        
         for (unsigned j = 0; j < layer.size(); ++j) {
             if (usedHits[i].get().at(j) > m_maxUsed) {
                 continue;
             }
             auto hit = layer.at(j);
             const double pull = std::sqrt(SeedingAux::chi2Term(extrapPos, direction, *hit));
-            ATH_MSG_VERBOSE("Trying extension with hit " << m_idHelperSvc->toString(hit->identify()));
-           
-            //find the hit with the minimum pull (check at least one hit after we have increasing pulls)
+            ATH_MSG_VERBOSE("Trying extension with hit " << m_idHelperSvc->toString(hit->identify())<<" and pull "<<pull);
+            bool isPrecision = isPrecisionHit(*hit);
+            double minPull = isPrecision ? precisionHit.minPull : noPrecisionHit.minPull;
+            //find the hit with the minimum pull (check at least three hits after we have increasing pulls)
             if (pull > minPull) {
                 triedHit+=1;  
                 continue;                 
             }
 
-            if(triedHit>1){
+            if(triedHit>3){
                 break;
             }
 
-            indexOfHit = j;
-            minPull = pull;
+            if(isPrecision){
+                precisionHit.spacePoint = hit;
+                precisionHit.minPull = pull;
+                continue;
+            }
+
+            noPrecisionHit.spacePoint = hit;
+            noPrecisionHit.minPull = pull;            
         }
 
         // complete the seed with the extended hits
-        if (minPull < m_minPullThreshold) {
-            const auto* bestCand = layer.at(indexOfHit);
+        //we first choose the precision hit and if does not exist then we pick the non precision hit 
+        const SpacePoint* bestCand{nullptr};
+        if(precisionHit.minPull < m_minPullThreshold){ 
+            bestCand = precisionHit.spacePoint;
+        }else if(noPrecisionHit.minPull < m_minPullThreshold){
+            bestCand = noPrecisionHit.spacePoint;
+        }else{
+            ATH_MSG_VERBOSE("No hit found in layer "<<i<<" with pull below threshold "<<m_minPullThreshold);            
+            continue;
+        }
             ATH_MSG_VERBOSE("Extension successfull - hit" << m_idHelperSvc->toString(bestCand->identify())
                           <<", pos: "<<Amg::toString(bestCand->localPosition())
-                          <<", dir: "<<Amg::toString(bestCand->sensorDirection())<<" found with pull "<<minPull);
+                          <<", dir: "<<Amg::toString(bestCand->sensorDirection()));
             combinatoricHits.push_back(bestCand);
         }
-    }
+    
     return combinatoricHits;
 }
 
@@ -352,6 +374,12 @@ std::unique_ptr<SegmentSeed>
 
     double interceptX = segPos.x();
     double interceptY = segPos.y();
+
+    //seed quality check - we expect the tanAlpha not to be too big which would mean big deflection along the strip layers
+    if(std::abs(tanAlpha) > m_maxTanAlpha){
+        ATH_MSG_VERBOSE("Seed Rejection: Invalid seed - tanAlpha "<<tanAlpha<<" above threshold "<<m_maxTanAlpha);
+        return nullptr;
+    }
 
 
     // extend the seed to the segment -- include hits from the other layers too
@@ -580,14 +608,14 @@ NswSegmentFinderAlg::buildSegmentsFromMM(const EventContext& ctx,
             if(!seedHits[1]){
                 continue;
             }
-            for (std::size_t k = j + 1; k < layerSize - 1; ++k) {
-                seedHits[2] = unusedStripHit(hitLayers[k], k);
-                if(!seedHits[2]){
+            for (std::size_t l = layerSize - 1; l > j+1; --l) {
+                seedHits[3] = unusedStripHit(hitLayers[l], l);
+                if(!seedHits[3]){
                     continue;
                 }
-                for (std::size_t l = k + 1; l < layerSize; ++l) {
-                    seedHits[3] = unusedStripHit(hitLayers[l], l);
-                    if(!seedHits[3]){
+                for (std::size_t k = l-1; k > j ; --k) {
+                    seedHits[2] = unusedStripHit(hitLayers[k], k);
+                    if(!seedHits[2]){
                         continue;
                     }
 
@@ -638,8 +666,7 @@ NswSegmentFinderAlg::buildSegmentsFromMM(const EventContext& ctx,
                         if (seed->getHitsInMax().size() < m_minSeedHits) { 
                             seeds.push_back(std::move(seed));                           
                             continue;
-                        }
-                                             
+                        }                                             
                         std::unique_ptr<Segment> segment = fitSegmentSeed(ctx, gctx, seed.get());
                         processSegment(std::move(segment), seed->getHitsInMax(), hitLayers, usedHits, segments);
                         seeds.push_back(std::move(seed));                                    
@@ -677,7 +704,7 @@ NswSegmentFinderAlg::findSegmentsFromMaximum(const HoughMaximum &max,
     if (m_visionTool.isEnabled()) {
         MuonValR4::IPatternVisualizationTool::PrimitiveVec primitives{};
         constexpr double legX{0.2};
-        double legY{0.8};
+        double legY{0.8};       
         for (const SpacePoint* sp : max.getHitsInMax()) {
             const xAOD::MuonSimHit* simHit = getTruthMatchedHit(*sp->primaryMeasurement());
             if (!simHit) {
@@ -716,6 +743,20 @@ NswSegmentFinderAlg::findSegmentsFromMaximum(const HoughMaximum &max,
                                       "truth", std::move(primitives));
     }
 
+    //dump spacepoints associated with truth sim hits to an obj file
+    if(m_dumpObj){
+        Acts::ObjVisualization3D visualHelper{};
+         for (const SpacePoint* sp : max.getHitsInMax()) {
+            const xAOD::MuonSimHit* simHit = getTruthMatchedHit(*sp->primaryMeasurement());
+            if (!simHit) {
+                continue;
+            }
+            MuonValR4::drawSpacePoint(gctx, *sp, visualHelper);
+        }
+        visualHelper.write(std::format("Event_{:}_{:}_spacepoints_truth.obj", ctx.eventID().event_number(), max.getHitsInMax().front()->chamber()->identString()));       
+    }
+
+
     UsedHitMarker_t allUsedHits = emptyBookKeeper(stripHitsLayers); 
     std::size_t nSeeds{0}, nExtSeeds{0}, nSegments{0}; //for the seed statistics
 
@@ -726,7 +767,21 @@ NswSegmentFinderAlg::findSegmentsFromMaximum(const HoughMaximum &max,
         ATH_MSG_DEBUG("From " << source << ": built " << returnSeeds.size() << " seeds and " << returnSegments.size() << " segments.");
         for(auto& seed : returnSeeds) {            
             ++nSeeds;
+            Acts::ObjVisualization3D visualHelper{};
             if(seed->getHitsInMax().size() < m_minSeedHits){
+                ATH_MSG_VERBOSE("Seed with "<< seed->getHitsInMax().size() <<" hits rejected");
+                for(const auto& hit : seed->getHitsInMax()){
+                     ATH_MSG_VERBOSE("Hit "<<m_idHelperSvc->toString(hit->identify())<<", "
+                                <<Amg::toString(hit->localPosition())<<", dir: "
+                                <<Amg::toString(hit->sensorDirection()));
+                     if(m_dumpObj){
+                        MuonValR4::drawSpacePoint(gctx, *hit, visualHelper);
+                     }
+
+                }
+                if(m_dumpObj){
+                    visualHelper.write(std::format("Event_{:}_{:}_notExtendedSeed.obj", ctx.eventID().event_number(), seed->getHitsInMax().front()->chamber()->identString()));
+                }
                 continue;
             }                   
             ++nExtSeeds;
@@ -744,10 +799,12 @@ NswSegmentFinderAlg::findSegmentsFromMaximum(const HoughMaximum &max,
     //continue with the combinatorial seeding for the strip measurements
     if(m_doOnlyMMCombinatorics){
 
+        ATH_MSG_VERBOSE("Start building combinatoric seeds only from Micromegas");
         processSeedsAndSegments(buildSegmentsFromMM(ctx, gctx, stripHitsLayers, max, globToLocal.translation(), allUsedHits, true), "MM combinatoric segment seeds");
 
     }else{
 
+        ATH_MSG_VERBOSE("Start building combinatoric seeds from Micromegas and sTgc hits");
         processSeedsAndSegments(buildSegmentsFromMM(ctx, gctx, stripHitsLayers, max, globToLocal.translation(), allUsedHits, true), "MM combinatoric segment seeds");
         processSeedsAndSegments(buildSegmentsFromMM(ctx, gctx, stripHitsLayers, max, globToLocal.translation(), allUsedHits, false), "MM and STGC combinatoric segment seeds");
 
@@ -851,6 +908,7 @@ StatusCode NswSegmentFinderAlg::execute(const EventContext &ctx) const {
         auto [seeds, segments] = findSegmentsFromMaximum(*max, *gctx, ctx);
        
         if (msgLvl(MSG::VERBOSE)) {
+            ATH_MSG_VERBOSE("Hits from Hough maximum");
             for(const auto& hitMax : max->getHitsInMax()){
                 ATH_MSG_VERBOSE("Hit "<<m_idHelperSvc->toString(hitMax->identify())<<", "
                                 <<Amg::toString(hitMax->localPosition())<<", dir: "
@@ -881,13 +939,19 @@ StatusCode NswSegmentFinderAlg::execute(const EventContext &ctx) const {
         }
 
         for (auto &seg : segments) {
-
             const Parameters pars = localSegmentPars(*gctx, *seg);
 
             ATH_MSG_VERBOSE("Segment parameters : "<<toString(pars));
 
             if (m_visionTool.isEnabled()) {          
                 m_visionTool->visualizeSegment(ctx, *seg, "#phi-segment");
+            }
+
+            if(m_dumpObj){
+                Acts::ObjVisualization3D visualHelper{};
+                MuonValR4::drawSegmentMeasurements(*gctx, *seg, visualHelper);
+                MuonValR4::drawSegmentLine(*gctx, *seg, visualHelper);
+                visualHelper.write(std::format("Event_{:}_segment_{:}.obj", ctx.eventID().event_number(), seg->msSector()->identString()));
             }
             
             writeSegments->push_back(std::move(seg));

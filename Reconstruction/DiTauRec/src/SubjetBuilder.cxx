@@ -70,7 +70,7 @@ StatusCode SubjetBuilder::execute(DiTauCandidateData * data,
 
   // Jet and area definitions
   JetDefinition jd = JetDefinition(antikt_algorithm, m_Rsubjet);
-  AreaDefinition area_def(active_area_explicit_ghosts,GhostedAreaSpec(SelectorAbsRapMax(4.0)));
+  AreaDefinition area_def(active_area_explicit_ghosts,GhostedAreaSpec(SelectorAbsRapMax(m_maxEta)));
   ClusterSequenceArea cs(vpjClusters, jd, area_def); 
 
   // store (pt-sorted) subjets
@@ -81,8 +81,10 @@ StatusCode SubjetBuilder::execute(DiTauCandidateData * data,
   }
 
   ATH_MSG_DEBUG("found "<< vSubjets.size() << " subjets");
-  for (const auto& subjet: vSubjets) {
-    ATH_MSG_DEBUG("pt: " << subjet.pt() << "  eta: " << subjet.eta() << "  phi: " << subjet.phi());
+  if (this->msgLevel() <= MSG::DEBUG){
+    for (const auto& subjet: vSubjets) {
+      ATH_MSG_DEBUG("pt: " << subjet.pt() << "  eta: " << subjet.eta() << "  phi: " << subjet.phi());
+    }
   }
 
   data->subjets = vSubjets;

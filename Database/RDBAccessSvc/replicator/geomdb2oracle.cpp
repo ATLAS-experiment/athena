@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // geomdb_ofl2onl utility for transferring *locked*
@@ -1018,7 +1018,7 @@ int main(int argc, char ** argv)
 	  // Ensure that select permissions on all tables in the target schema are granted to readers
 	  proxyTarg->nominalSchema().callProcedure("GRANT_GLOBSEL_TO_READERS",coral::AttributeList());
 	  if(verbose)
-	    std::cout << "Select permissions granted" << std::endl;
+	    std::cout << "Select permissions granted\n";
 	}
 
 	// Commit transaction 
@@ -1044,7 +1044,7 @@ int main(int argc, char ** argv)
 	    inputData4Caching[0].data<std::string>() = currentTag;
 	    proxyTarg->nominalSchema().callProcedure("ROOTTAG2CACHE",inputData4Caching);
 	    if(verbose)
-	      std::cout << currentTag << " added to the Tag Cache" << std::endl;
+	      std::cout << currentTag << " added to the Tag Cache\n";
 	  }
 
 	  // Commit transaction 
@@ -1059,9 +1059,10 @@ int main(int argc, char ** argv)
 	}
       }
 
-      if(!buildSchema) {
+      if(fileSchemaIncons && !buildSchema) {
 	fileSchemaIncons->close();
 	delete fileSchemaIncons;
+	fileSchemaIncons = nullptr;
       }
     }
 
@@ -1071,19 +1072,19 @@ int main(int argc, char ** argv)
   }
   catch(coral::Exception& ce)  {
     std::cerr << "CORAL Exception : " << ce.what() << std::endl;
-    if(!buildSchema) 
+    if(fileSchemaIncons && !buildSchema) 
       fileSchemaIncons->close();
     return 1;
   }
   catch(std::exception& se) {
     std::cerr << "Std exception " << se.what() << std::endl;
-    if(!buildSchema) 
+    if(fileSchemaIncons && !buildSchema) 
       fileSchemaIncons->close();
     return 1;
   }
   catch(...)  {
     std::cerr << "Exception caught(...)" << std::endl;
-    if(!buildSchema) 
+    if(fileSchemaIncons && !buildSchema) 
       fileSchemaIncons->close();
     return 1;
   }

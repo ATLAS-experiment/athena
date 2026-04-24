@@ -40,7 +40,7 @@ public:
 
 protected:
   virtual TrigInDetTrackCollection_PERS*  createPersistent(TrigInDetTrackCollection* transObj);
-  virtual TrigInDetTrackCollection*       createTransient ();
+  virtual TrigInDetTrackCollection*       createTransient(const Token* token);
 
  private:
 

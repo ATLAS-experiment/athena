@@ -67,8 +67,9 @@ def mergeFractions(probA,fractionA, probB, fractionB) :
 
 def expectationValue(fractions) :
     expectation_value=0
-    for idx in range(0,len(fractions)) :
-        expectation_value += (idx+1)*fractions[idx]
+    if fractions is not None :
+        for idx in range(0,len(fractions)) :
+            expectation_value += (idx+1)*fractions[idx]
     return expectation_value
 
 
@@ -115,11 +116,13 @@ def emulateITkStripDefects(flags,
 
     # coldNoiseDefectFractions=poissonFractions(4,16)
     fractions=mergeFractions(StripDefectProb,[1.],coldNoiseDefectProb,coldNoiseNDefectFractions)
+    if fractions is None :
+        fractions = [1.]
     # total number of defects due to cold noise should be steered just by the coldNoiseDefectProb
     # so in case of defect groups reduce this probability according to the defect group size created
     # in average by each generated defect:
     expectation_value = expectationValue(fractions)
-    coldNoiseDefectProb/=expectation_value
+    coldNoiseDefectProb=coldNoiseDefectProb/expectation_value   if expectation_value>0. else 0.
 
     cold_noise_phi_range=EVEN_INDEX if coldNoiseDefectsEvenOnly else [-99,99]
 
@@ -201,7 +204,7 @@ def emulateITkStripDefects(flags,
                                         probability=[],
                                         noiseProbability=NoiseProb * 0.5*( 1 + length / 37627.5 ),
                                         noiseShape=time_bin_dist)]
-            module_pattern_noise, ignore_module_defect_prob, ignore_fractions, NoiseProbability,NoiseShape,cornerDefectParam,cornerDefectFractions = combineModuleDefects(defects)
+        module_pattern_noise, ignore_module_defect_prob, ignore_fractions, NoiseProbability,NoiseShape,cornerDefectParam,cornerDefectFractions = combineModuleDefects(defects)
     else :
         module_pattern_noise=[]
         NoiseProbability=[]

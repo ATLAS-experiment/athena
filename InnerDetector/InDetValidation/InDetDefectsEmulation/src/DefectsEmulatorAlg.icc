@@ -123,14 +123,17 @@ namespace InDet{
                    const Identifier rdoID = new_hit->identify();
                    auto row_idx = id_helper.row_index(rdoID);
                    auto col_idx = id_helper.col_index(rdoID);
-                   unsigned int key = module_helper.hardwareCoordinates(row_idx,col_idx);
-                   auto iter = std::lower_bound(sorted_keys.begin(), sorted_keys.end(), key);
-                   if (iter == sorted_keys.end()) {
-                      sorted_keys.push_back(key);
-                   }
-                   else {
-                      if (*iter != key) {
-                         sorted_keys.insert(iter, key);
+                   unsigned int nConsecutiveRows = id_helper.nConsecutiveRows(*rdo);
+                   for (unsigned int row_seq_i=0; row_seq_i<nConsecutiveRows; ++row_seq_i) {
+                      unsigned int key = module_helper.hardwareCoordinates(row_idx+row_seq_i,col_idx);
+                      auto iter = std::lower_bound(sorted_keys.begin(), sorted_keys.end(), key);
+                      if (iter == sorted_keys.end()) {
+                         sorted_keys.push_back(key);
+                      }
+                      else {
+                         if (*iter != key) {
+                            sorted_keys.insert(iter, key);
+                         }
                       }
                    }
                 }
@@ -179,6 +182,11 @@ namespace InDet{
                 }
 
                 clone->push_back( id_helper.createNoiseHit( module_helper, collection->identify(), cell_idx, noise_value).release() );
+                unsigned int nConsecutiveRows = id_helper.nConsecutiveRows(*clone->back());
+                if (nConsecutiveRows!=1u) {
+                   ATH_MSG_ERROR("Noise hit has group size larger than 1. This may create duplicate hits.");
+                }
+
                 if (m_histogrammingEnabled && h2_noise_hits) {
                    unsigned int row_idx = cell_idx % module_helper.rows();
                    unsigned int col_idx = cell_idx / module_helper.rows();

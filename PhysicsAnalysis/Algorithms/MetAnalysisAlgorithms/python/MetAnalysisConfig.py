@@ -18,6 +18,8 @@ class MetAnalysisConfig (ConfigBlock):
             info="whether to use the JVT decision in the MET calculation.")
         self.addOption ('useFJVT', False, type=bool,
             info="whether to use the forward JVT decision in the MET calculation.")
+        self.addOption ('selectionNameFJVT', "", type=str,
+            info="name of the forward JVT selection to be used if `useFJVT` is activated.")
         self.addOption ('treatPUJets', False, type=bool,
             info="whether to treat pile-up jets in the MET significance calculation.")
         self.addOption ('setMuonJetEMScale', True, type=bool,
@@ -67,7 +69,7 @@ class MetAnalysisConfig (ConfigBlock):
         self.addOption ('tauUseMVAResolution', True, type=bool,
             info="whether to use MVA resolution for taus-jets (for MET significance).")
         self.addOption ('addExtraSignificanceVars', False, type=bool,
-            info="whether to save some additional (event-based) MET significance variables")
+            info="whether to save some additional (event-based) MET significance variables.")
         self.addOption ('useLRT', False, type=bool,
             info="whether to use LRT MET Core and association map.")
         self.addOption ('useCaloSoftTerm', False, type=bool,
@@ -75,6 +77,9 @@ class MetAnalysisConfig (ConfigBlock):
             expertMode=True)
         self.addOption ('softTermResolution', -1.0, type=float,
             info="override the default soft term resolution in METSignificance.",
+            expertMode=True)
+        self.addOption ('switchTauMuOrder', False, type=bool,
+            info="whether to switch order of taus and muons",
             expertMode=True)
 
     def instanceName (self) :
@@ -107,11 +112,18 @@ class MetAnalysisConfig (ConfigBlock):
             alg.makerTool.JvtSelTool.JetContainer = config.readName (self.jets)
             alg.makerTool.JvtSelTool.JvtMomentName = "NNJvt"
         if self.useFJVT:
-            alg.makerTool.JetRejectionDec = 'fjvt_selection'
+            # for backwards compatibility with "old" FJVT handling in JetAnalysisConfig.py
+            if not self.selectionNameFJVT:
+                alg.makerTool.JetRejectionDec = 'fjvt_selection'
+            # otherwise get the decoration from the selection
+            else:
+                fjvt_decoration = config.getFullSelection(self.jets, self.selectionNameFJVT, skipBase=True).replace(",as_char", "")
+                alg.makerTool.JetRejectionDec = fjvt_decoration
 
         alg.makerTool.JetSelection = self.metWP
         alg.makerTool.DoPFlow = 'PFlow' in metSuffix or metSuffix=="AnalysisMET"
         alg.makerTool.DoSetMuonJetEMScale = self.setMuonJetEMScale if self.muons else False
+        alg.switchTauMu = self.switchTauMuOrder
 
         if config.dataType() is not DataType.Data :
             config.addPrivateTool( 'systematicsTool', 'met::METSystematicsTool' )

@@ -27,7 +27,7 @@ public:
   TBBPCContCnv (ISvcLocator* svcloc) : TBBPCContCnvBase(svcloc) {}
 protected:
   virtual TBBPCCont_PERS*   createPersistent (TBBPCCont* transCont);
-  virtual TBBPCCont*        createTransient ();
+  virtual TBBPCCont*        createTransient(const Token* token);
 
   TBBPCContCnv_p1  m_TPConverter;
 };

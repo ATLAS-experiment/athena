@@ -17,6 +17,7 @@ atlas_add_component (GlobalSimulation
    src/FirstChain/*.h src/FirstChain/*.cxx 
    src/IO/*.h src/IO/*.cxx
    src/components/*.cxx
+   src/GlobalAlgs/PU1/Algorithms/*.h src/GlobalAlgs/PU1/Algorithms/*.cxx src/GlobalAlgs/PU1/PITT/*.h src/GlobalAlgs/PU1/PITT/*.cxx
    INCLUDE_DIRS ${APTYPES_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${APTYPES_LIBRARIES} ${ROOT_LIBRARIES} GaudiKernel
    CaloDetDescrLib
@@ -34,8 +35,9 @@ atlas_add_component (GlobalSimulation
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_runtime(share/*.txt share/*.json)
-atlas_install_data( data/* )
+atlas_install_runtime(share/*.txt share/*.json )
+atlas_install_data( data/* share/*.xml )
+atlas_install_joboptions( share/plugin_*.py )
 
 atlas_add_test(testEgamma1BDT_tv
                SOURCES src/FirstChain/Egamma1BDT/TestEgamma1/all_tests.cxx
@@ -57,5 +59,6 @@ atlas_add_test(test_eEmMult
    SCRIPT python/run_hypo_mult_ctest.py --evtMax 1
    PRIVATE_WORKING_DIRECTORY
    POST_EXEC_SCRIPT noerror.sh )
+
 
 

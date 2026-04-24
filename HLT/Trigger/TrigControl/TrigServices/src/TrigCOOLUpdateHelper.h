@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGSERVICES_TRIGCOOLUPDATEHELPER_H
@@ -23,7 +23,6 @@
 #include "AthenaKernel/IIOVDbSvc.h"
 #include "AthenaKernel/IIOVSvc.h"
 #include "AthenaMonitoringKernel/Monitored.h"
-#include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/EventIDBase.h"
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
 
@@ -91,7 +90,7 @@ public:
   /**
    * @brief Read information about existing COOL folders
    */
-  StatusCode readFolderInfo ATLAS_NOT_THREAD_SAFE ();
+  StatusCode readFolderInfo();
 
 private:
   /**

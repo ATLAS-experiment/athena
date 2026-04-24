@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMUONPREPDATA_STGCPADHIT_H
 #define XAODMUONPREPDATA_STGCPADHIT_H
@@ -9,7 +9,7 @@
 #include "xAODMuonPrepData/sTgcMeasurement.h"
 DATAVECTOR_BASE(xAOD::sTgcPadHit_v1, xAOD::sTgcMeasurement_v1);
 // Set up a CLID for the class:
-#include "xAODCore/CLASS_DEF.h"
+
 CLASS_DEF( xAOD::sTgcPadHit , 28752257 , 1 )
 
 #endif  // XAODMUONPREPDATA_STGCSTRIP_H

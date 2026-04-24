@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCONF_SIG_H
@@ -18,7 +18,7 @@
 #include "AthenaKernel/CLASS_DEF.h"
 
 // C/C++
-#include <iostream>
+#include <iosfwd>
 #include <stdint.h>
 #include <string>
 #include <vector>
@@ -27,9 +27,8 @@ class TrigConfSig
 {
  public:
   
-  TrigConfSig();
+  TrigConfSig() = default;
   TrigConfSig(uint32_t counter, int logic, const std::string &label);
-  ~TrigConfSig() {}
   
   void clearStrings();
 
@@ -43,12 +42,12 @@ class TrigConfSig
   
   bool matchOutputTE(uint32_t te) const;
   
-  void print(std::ostream &os = std::cout) const;
-  
+  void print(std::ostream &os) const;
+  void print() const; //uses cout
  private:
   
-  uint32_t                 m_counter;     // Signature counter in chain
-  int                      m_logic;       // Signature logic
+  uint32_t                 m_counter{};     // Signature counter in chain
+  int                      m_logic{};       // Signature logic
   std::string              m_label;       // Signature label
   std::vector<uint32_t>    m_output_te;   // Id list of output TEs
 };

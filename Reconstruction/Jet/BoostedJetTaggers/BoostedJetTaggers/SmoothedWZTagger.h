@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BOOSTEDJETSTAGGERS_SMOOTHEDWZTAGGER_H_
@@ -21,6 +21,9 @@ class SmoothedWZTagger :
 
       /// Decorate single jet with tagging info
       virtual StatusCode tag( const xAOD::Jet& jet ) const override;
+
+      /// Decorate jet container with tagging info
+      virtual StatusCode decorate(const xAOD::JetContainer& jets) const override;
 
     private:
 
@@ -49,7 +52,7 @@ class SmoothedWZTagger :
       SG::WriteDecorHandleKey<xAOD::JetContainer> m_decCutNtrkKey{this, "CutNtrkName", "Cut_Ntrk", "SG key for Cut_Ntrk"};
       SG::WriteDecorHandleKey<xAOD::JetContainer> m_decCutScoreKey{this, "CutScoreName", "Cut_Score", "SG key for Cut_Score"};
       SG::WriteDecorHandleKey<xAOD::JetContainer> m_decAcceptKey{this, "acceptName", "accept", "SG key for accept"};
-
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_decValidKinRangeKey{this, "ValidKinRangeName", "ValidKinRange", "SG key for ValidKinRange"};
 
   };
 

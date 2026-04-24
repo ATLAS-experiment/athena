@@ -56,7 +56,7 @@ AthExElephantinoCnv::createPersistent(AthExElephantino* transCont)
   return persObj; 
 }
 
-AthExElephantino* AthExElephantinoCnv::createTransient() 
+AthExElephantino* AthExElephantinoCnv::createTransient(const Token* token) 
 {
    MsgStream msg( msgSvc(), "AthExElephantinoConverter" );
 
@@ -64,10 +64,10 @@ AthExElephantino* AthExElephantinoCnv::createTransient()
 
    static const pool::Guid p1_guid("F90BE215-64AD-45E3-B5E4-6AD7DE35BDF9");
 
-   if ( compareClassGuid(p1_guid) ) {
+   if ( compareClassGuid(token, p1_guid) ) {
 
      // using unique_ptr ensures deletion of the persistent object
-     std::unique_ptr<AthExElephantino_p1> persObj( poolReadObject<AthExElephantino_p1>() );
+     std::unique_ptr<AthExElephantino_p1> persObj( poolReadObject<AthExElephantino_p1>(token) );
      AthExElephantinoCnv_p1 cnv;
      transObj = cnv.createTransient( persObj.get(), msg );
      

@@ -1,9 +1,10 @@
 //// FPGATrackSimAlgorithm/src/FPGATrackSimLogicalHitsProcessAlg.cxx
 
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #include "FPGATrackSimLogicalHitsProcessAlg.h"
 
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "FPGATrackSimObjects/FPGATrackSimCluster.h"
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "FPGATrackSimObjects/FPGATrackSimDataFlowInfo.h"
@@ -123,7 +124,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
         ATH_CHECK(m_monTool.retrieve());
 
     ATH_CHECK( m_FPGASpacePointsKey.initialize() );
-    ATH_CHECK( m_FPGAHitInRoadsKey.initialize() );
     ATH_CHECK( m_FPGAHitFilteredKey.initialize() );
     ATH_CHECK( m_FPGARoadKey.initialize() );
     ATH_CHECK( m_FPGATrackKey.initialize() );
@@ -167,7 +167,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     SG::WriteHandle<ConstDataVector<FPGATrackSimHitCollection>> FPGAHits_1st (m_FPGAHitKey_1st,ctx);
     SG::WriteHandle<ConstDataVector<FPGATrackSimHitCollection>> FPGAHits_2nd (m_FPGAHitKey_2nd,ctx);
     SG::WriteHandle<FPGATrackSimRoadCollection> FPGARoads_1st (m_FPGARoadKey, ctx);
-    SG::WriteHandle<FPGATrackSimHitContainer> FPGAHitsInRoads_1st (m_FPGAHitInRoadsKey, ctx);
 
     // Use ConstDataVector with VIEW_ELEMENTS for non-owning const pointer storage
     ATH_CHECK( FPGAHits_1st.record (std::make_unique<ConstDataVector<FPGATrackSimHitCollection>>(SG::VIEW_ELEMENTS)) );
@@ -176,7 +175,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     auto* FPGAHits_2nd_cdv = FPGAHits_2nd.ptr();
 
     ATH_CHECK( FPGARoads_1st.record (std::make_unique<FPGATrackSimRoadCollection>()));
-    ATH_CHECK( FPGAHitsInRoads_1st.record (std::make_unique<FPGATrackSimHitContainer>()));
 
     SG::WriteHandle<FPGATrackSimTrackCollection> FPGATracks_1stHandle (m_FPGATrackKey, ctx);
     ATH_CHECK(FPGATracks_1stHandle.record (std::make_unique<FPGATrackSimTrackCollection>()));
@@ -207,7 +205,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
     // Event passes cuts, count it. technically, DataPrep does this now.
     m_evt++;
-
     // Read event info structure. all we need this for is to propagate to our event info structures.
     SG::ReadHandle<FPGATrackSimEventInfo> FPGAEventInfo(m_FPGAEventInfoKey, ctx);
     if (!FPGAEventInfo.isValid()) {
@@ -244,7 +241,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     }
 
     if(m_writeOutputData) *m_slicedStripHeaderPreSP = *m_slicedStripHeader;
-
     // The slicing engine puts strip hits into a logical event input header. That header now needs to go
     // to the spacepoint tool if it's turned on. Those hits then get added to phits_1st or phits_2nd as appropriate.
     if (m_doSpacepoints) {
@@ -282,14 +278,23 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         phits_output.emplace_back(hit, [](const FPGATrackSimHit*){});
     }
     ATH_MSG_DEBUG("1st stage hits: " << phits_1st.size() << "          2nd stage hits: " << phits_2nd.size() );
-    if (phits_1st.empty()) return StatusCode::SUCCESS;
+    if (phits_1st.empty()) {
+      // Potentially write the output data, now it's empty and reset, but this keeps things synchronized over trees
+      if (m_writeOutputData)  {
+	std::vector<FPGATrackSimRoad> roads_1st;
+	std::vector<FPGATrackSimTrack> tracks_1st;
+	auto dataFlowInfo = std::make_unique<FPGATrackSimDataFlowInfo>();
+	ATH_CHECK(writeOutputData(roads_1st, tracks_1st, dataFlowInfo.get()));
+      }
+      return StatusCode::SUCCESS;
+    }
+    
     // Get truth tracks from DataPrep as well.
     SG::ReadHandle<FPGATrackSimTruthTrackCollection> FPGATruthTracks(m_FPGATruthTrackKey, ctx);
     if (!FPGATruthTracks.isValid()) {
         ATH_MSG_ERROR("Could not find FPGA Truth Track Collection with key " << FPGATruthTracks.key());
         return StatusCode::FAILURE;
     }
-
     // Same for offline tracks.
     SG::ReadHandle<FPGATrackSimOfflineTrackCollection> FPGAOfflineTracks(m_FPGAOfflineTrackKey, ctx);
     if (!FPGAOfflineTracks.isValid()) {
@@ -361,7 +366,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         monitorRoads(m_1st_stage_road_post_filter_2_monitor, roads_1st);
     }
 
-
     ////////////////////////////////////////////////////
     //                     tracks                     //
     ////////////////////////////////////////////////////
@@ -431,15 +435,15 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         for (const auto& road : roads_1st) {
             std::vector<std::shared_ptr<const FPGATrackSimHit>> track_hits;
             for (unsigned layer = 0; layer < road.getNLayers(); ++layer) {
-                track_hits.insert(track_hits.end(), road.getHits(layer).begin(), road.getHits(layer).end());
+                track_hits.insert(track_hits.end(), road.getHitPtrs(layer).begin(), road.getHitPtrs(layer).end());
             }
 
             FPGATrackSimTrack track_cand;
             track_cand.setNLayers(track_hits.size());
             for (size_t ihit = 0; ihit < track_hits.size(); ++ihit) {
-                track_cand.setFPGATrackSimHit(ihit, *(track_hits[ihit]));
+                track_cand.setFPGATrackSimHit(ihit, track_hits[ihit]);
             }
-            tracks_1st.push_back(track_cand); 
+            tracks_1st.push_back(std::move(track_cand)); 
         }
       }
       else { roadsToTrack(roads_1st, tracks_1st, m_FPGATrackSimMapping->PlaneMap_1st(0)); }
@@ -485,16 +489,30 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
     // Loop over roads and store them in SG (after track finding to also copy the sector information)
     for (auto const& road : roads_1st) {
-        auto road_hits = std::make_unique<FPGATrackSimHitCollection>();
-        ATH_MSG_DEBUG("Hough Road X Y: " << road.getX() << " " << road.getY());
-        for (size_t l = 0; l < road.getNLayers(); ++l) {
-            for (const auto& layerH : road.getHits(l)) {
-                road_hits->push_back(new FPGATrackSimHit(*layerH));
-            }
-        }
-        FPGAHitsInRoads_1st->push_back(std::move(*road_hits));
         FPGARoads_1st->push_back(road);
     }
+
+    // Do some simple monitoring of efficiencies for truth before anything else
+    if (truthtracks.size() > 0) {
+        m_evt_truth++;
+        if (roads_1st.size() > 0) m_nRoadsFound++;
+        if (roads_1st.size() > m_maxNRoadsFound) m_maxNRoadsFound = roads_1st.size();
+        if (tracks_1st.size() > 0) {
+            m_nTracksFound++;
+            if (tracks_1st.size() > m_maxNTracksTot) m_maxNTracksTot = tracks_1st.size();
+	}
+    }
+
+    
+    // Apply OLR but remove tracks that failed chi2 first
+    for (auto itrack = tracks_1st.begin(); itrack != tracks_1st.end();) {
+      if (!passesChi2Cut(*itrack)) itrack = tracks_1st.erase(itrack);
+      else ++itrack;
+    }
+    // do monitoring of chi2
+    m_nTracksChi2Tot += tracks_1st.size();
+    //// (third track monitor, after chi2)
+    monitorTracks(m_1st_stage_track_post_chi2_monitor, tracks_1st);
 
     {
     // overlap removal
@@ -505,51 +523,42 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     std::vector<const FPGATrackSimTrack*> tracks_1st_after_chi2;
     std::vector<const FPGATrackSimTrack*> tracks_1st_after_overlap;
     for (const FPGATrackSimTrack& track : tracks_1st) {
-        if (track.getChi2ndof() < m_trackScoreCut.value()) {
-            m_nTracksChi2Tot++;
-            tracks_1st_after_chi2.push_back(&track);
-            if (track.passedOR()) {
-                tracks_1st_after_overlap.push_back(&track);
-                m_nTracksChi2OLRTot++;
-            }
-        }
+      if (track.passedOR()) {
+	tracks_1st_after_overlap.push_back(&track);
+	m_nTracksChi2OLRTot++;
+      }
     }
-    //// (third track monitor, after chi2)
-    monitorTracks(m_1st_stage_track_post_chi2_monitor, tracks_1st_after_chi2);
     //// (fourth track monitor, after overlap removal)
     monitorTracks(m_1st_stage_track_post_OLR_monitor, tracks_1st_after_overlap);
     }
 
     m_nRoadsTot += roads_1st.size();
     m_nTracksTot += tracks_1st.size();
-
-    // Do some simple monitoring of efficiencies. okay, we need truth tracks here.
+    // Do some simple monitoring of efficiencies now for tracks passing chi2 and potentially OLR
     if (truthtracks.size() > 0) {
-        m_evt_truth++;
-        if (roads_1st.size() > 0) m_nRoadsFound++;
-        if (roads_1st.size() > m_maxNRoadsFound) m_maxNRoadsFound = roads_1st.size();
 
         unsigned npasschi2(0);
         unsigned npasschi2OLR(0);
         if (tracks_1st.size() > 0) {
-            m_nTracksFound++;
-            if (tracks_1st.size() > m_maxNTracksTot) m_maxNTracksTot = tracks_1st.size();
-            for (const auto& track : tracks_1st) {
-                if (track.getChi2ndof() < m_trackScoreCut.value()) {
-                    npasschi2++;
-                    if (track.passedOR()) {
-                        npasschi2OLR++;
-                    }
-                }
-            }
-        }
+	  for (const auto& track : tracks_1st) { // these passed the chi2
+	    npasschi2++;
+	    if (track.passedOR()) {
+	      npasschi2OLR++;
+	    }
+	  }
+	}
         if (npasschi2 > m_maxNTracksChi2Tot) m_maxNTracksChi2Tot = npasschi2;
         if (npasschi2OLR > m_maxNTracksChi2OLRTot) m_maxNTracksChi2OLRTot = npasschi2OLR;
         if (npasschi2 > 0) m_nTracksChi2Found++;
         if (npasschi2OLR > 0) m_nTracksChi2OLRFound++;
     }
 
-    for (const FPGATrackSimTrack& track : tracks_1st) FPGATracks_1stHandle->push_back(track);
+    // Now pick hits for seeding, this changes the tracks to have fewer hits
+    if (m_keepHitsStrategy > 0)  MakeSeedTracks(tracks_1st);
+
+    for (const FPGATrackSimTrack& track : tracks_1st) {
+      FPGATracks_1stHandle->push_back(track);
+    }
 
     // Now, we may want to do large-radius tracking on the hits not used by the first stage tracking.
     // This follows overlap removal.
@@ -645,21 +654,72 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::finalize()
     ATH_MSG_INFO("========================================================================================");
     ATH_MSG_INFO("Ran on events = " << m_evt);
     ATH_MSG_INFO("Inclusive efficiency to find a road = " << (m_evt_truth == 0 ? "NAN" : std::to_string(m_nRoadsFound/(float)m_evt_truth)));
-    ATH_MSG_INFO("Inclusive efficiency to find a track = " << (m_evt_truth == 0 ? "NAN" : std::to_string(m_nTracksFound/(float)m_evt_truth)));
-    ATH_MSG_INFO("Inclusive efficiency to find a track passing chi2 = " << (m_evt_truth == 0 ? "NAN" : std::to_string(m_nTracksChi2Found/(float)m_evt_truth)));
-    ATH_MSG_INFO("Inclusive efficiency to find a track passing chi2 and OLR = " << (m_evt_truth == 0 ? "NAN" : std::to_string(m_nTracksChi2OLRFound/(float)m_evt_truth)));
+    //// m_1st_stage_road_monitor
+    ATH_MSG_INFO("New Inclusive efficiency to find a road = " << (m_evt_truth == 0 ? "NAN" : std::to_string(m_1st_stage_road_monitor->getNElements()/(float)m_evt_truth)));
+    //// m_1st_stage_road_post_filter_1_monitor
+    ATH_MSG_INFO("New Inclusive efficiency to find a road passing filter1 = " << (m_evt_truth == 0 ? "NAN" : std::to_string(m_1st_stage_road_post_filter_1_monitor->getNElements()/(float)m_evt_truth))); 
+    //// m_1st_stage_road_post_OLR_monitor
+    ATH_MSG_INFO("New Inclusive efficiency to find a road passing OLR = " << (m_evt_truth == 0 ? "NAN" : std::to_string(m_1st_stage_road_post_OLR_monitor->getNElements()/(float)m_evt_truth)));
+    //// m_1st_stage_road_post_filter_2_monitor
+    ATH_MSG_INFO("New Inclusive efficiency to find a road passing filter2 = " << (m_evt_truth == 0 ? "NAN" : std::to_string(m_1st_stage_road_post_filter_2_monitor->getNElements()/(float)m_evt_truth)));
 
+    //// m_1st_stage_track_monitor
+    ATH_MSG_INFO("Inclusive efficiency to find a track = " << (m_evt_truth == 0 ? "NAN" : std::to_string(m_nTracksFound/(float)m_evt_truth)));
+    ATH_MSG_INFO("New Inclusive efficiency to find a track = " << (m_evt_truth == 0 ? "NAN" : std::to_string(m_1st_stage_track_monitor->getNElements()/(float)m_evt_truth)));
+    //// m_1st_stage_track_post_setTruth_monitor
+    ATH_MSG_INFO("New Inclusive efficiency to find a track after set truth= " << (m_evt_truth == 0 ? "NAN" : std::to_string(m_1st_stage_track_post_setTruth_monitor->getNElements()/(float)m_evt_truth)));
+    //// m_1st_stage_track_post_chi2_monitor
+    ATH_MSG_INFO("Inclusive efficiency to find a track passing chi2 = " << (m_evt_truth == 0 ? "NAN" : std::to_string(m_nTracksChi2Found/(float)m_evt_truth)));
+    ATH_MSG_INFO("New Inclusive efficiency to find a track passing chi2 = " << (m_evt_truth == 0 ? "NAN" : std::to_string(m_1st_stage_track_post_chi2_monitor->getNElements()/(float)m_evt_truth)));
+    //// m_1st_stage_track_post_OLR_monitor
+    ATH_MSG_INFO("Inclusive efficiency to find a track passing chi2 and OLR = " << (m_evt_truth == 0 ? "NAN" : std::to_string(m_nTracksChi2OLRFound/(float)m_evt_truth)));
+    ATH_MSG_INFO("New Inclusive efficiency to find a track passing chi2 and OLR = " << (m_evt_truth == 0 ? "NAN" : std::to_string(m_1st_stage_track_post_OLR_monitor->getNElements()/(float)m_evt_truth)));
+    
 
     ATH_MSG_INFO("Number of 1st stage roads/event = " << (m_evt == 0 ? "NAN" : std::to_string(m_nRoadsTot/(float)m_evt)));
+    //// m_1st_stage_road_monitor
+    ATH_MSG_INFO("New Number of 1st stage roads/event = " << (m_evt == 0 ? "NAN" : std::to_string(m_1st_stage_road_monitor->getTotNElements()/(float)m_evt)));
+    //// m_1st_stage_road_post_filter_1_monitor
+    ATH_MSG_INFO("New Number of 1st stage roads passing filter1/event = " << (m_evt == 0 ? "NAN" : std::to_string(m_1st_stage_road_post_filter_1_monitor->getTotNElements()/(float)m_evt))); 
+    //// m_1st_stage_road_post_OLR_monitor 
+    ATH_MSG_INFO("New Number of 1st stage roads passing OLR/event = " << (m_evt == 0 ? "NAN" : std::to_string(m_1st_stage_road_post_OLR_monitor->getTotNElements()/(float)m_evt)));
+    //// m_1st_stage_road_post_filter_2_monitor
+    ATH_MSG_INFO("New Number of 1st stage roads passing filter2/event = " << (m_evt == 0 ? "NAN" : std::to_string(m_1st_stage_road_post_filter_2_monitor->getTotNElements()/(float)m_evt)));
+    
+    //// m_1st_stage_track_monitor
     ATH_MSG_INFO("Number of 1st stage track combinations/event = " << (m_evt == 0 ? "NAN" : std::to_string(m_nTracksTot/(float)m_evt)));
+    ATH_MSG_INFO("New Number of 1st stage track combinations/event = " << (m_evt == 0 ? "NAN" : std::to_string(m_1st_stage_track_monitor->getTotNElements()/(float)m_evt)));
+    //// m_1st_stage_track_post_setTruth_monitor
+    ATH_MSG_INFO("New Number of 1st stage track after set truth/event= " << (m_evt == 0 ? "NAN" : std::to_string(m_1st_stage_track_post_setTruth_monitor->getTotNElements()/(float)m_evt)));
+    //// m_1st_stage_track_post_chi2_monitor
     ATH_MSG_INFO("Number of 1st stage tracks passing chi2/event = " << (m_evt == 0 ? "NAN" : std::to_string(m_nTracksChi2Tot/(float)m_evt)));
+    ATH_MSG_INFO("New Number of 1st stage track passing chi2/event = " << (m_evt == 0 ? "NAN" : std::to_string(m_1st_stage_track_post_chi2_monitor->getTotNElements()/(float)m_evt)));
+    //// m_1st_stage_track_post_OLR_monitor
     ATH_MSG_INFO("Number of 1st stage tracks passing chi2 and OLR/event = " << (m_evt == 0 ? "NAN" : std::to_string(m_nTracksChi2OLRTot/(float)m_evt)));
+    ATH_MSG_INFO("New Number of 1st stage track passing chi2 and OLR/event = " << (m_evt == 0 ? "NAN" : std::to_string(m_1st_stage_track_post_OLR_monitor->getTotNElements()/(float)m_evt)));
     ATH_MSG_INFO("========================================================================================");
 
     ATH_MSG_INFO("Max number of 1st stage roads in an event = " << m_maxNRoadsFound);
+    //// m_1st_stage_road_monitor
+    ATH_MSG_INFO("New Max number of 1st stage roads in an event = " << m_1st_stage_road_monitor->getMaxNElements());
+    //// m_1st_stage_road_post_filter_1_monitor
+    ATH_MSG_INFO("New Max number of 1st stage roads passing filter1 in an event = " << m_1st_stage_road_post_filter_1_monitor->getMaxNElements());
+    //// m_1st_stage_road_post_OLR_monitor
+    ATH_MSG_INFO("New Max number of 1st stage roads passing OLR in an event = " << m_1st_stage_road_post_OLR_monitor->getMaxNElements());
+    //// m_1st_stage_road_post_filter_2_monitor
+    ATH_MSG_INFO("New Max number of 1st stage roads passing filter2 in an event = " << m_1st_stage_road_post_filter_2_monitor->getMaxNElements());
+
+    //// m_1st_stage_track_monitor
     ATH_MSG_INFO("Max number of 1st stage track combinations in an event = " << m_maxNTracksTot);
+    ATH_MSG_INFO("New Max number of 1st stage track combinations in an event = " << m_1st_stage_track_monitor->getMaxNElements());
+    //// m_1st_stage_track_post_setTruth_monitor
+    ATH_MSG_INFO("New Max number of 1st stage tracks after set truth in an event = " << m_1st_stage_track_post_setTruth_monitor->getMaxNElements());
+    //// m_1st_stage_track_post_chi2_monitor
     ATH_MSG_INFO("Max number of 1st stage tracks passing chi2 in an event = " << m_maxNTracksChi2Tot);
+    ATH_MSG_INFO("New Max number of 1st stage tracks passing chi2 in an event = " << m_1st_stage_track_post_chi2_monitor->getMaxNElements());
+    //// m_1st_stage_track_post_OLR_monitor
     ATH_MSG_INFO("Max number of 1st stage tracks passing chi2 and OLR in an event = " << m_maxNTracksChi2OLRTot);
+    ATH_MSG_INFO("New Max number of 1st stage tracks passing chi2 and OLR in an event = " << m_1st_stage_track_post_OLR_monitor->getMaxNElements());
     ATH_MSG_INFO("========================================================================================");
 
     return StatusCode::SUCCESS;
@@ -680,4 +740,143 @@ void FPGATrackSimLogicalHitsProcessAlg::printHitSubregions(std::vector<FPGATrack
             ss << r << ",";
         ATH_MSG_WARNING("\t[" << ss.str() << "]");
     }
+}
+
+
+// Chi2 cut implementation
+bool FPGATrackSimLogicalHitsProcessAlg::passesChi2Cut(const FPGATrackSimTrack& track){
+    bool retv = track.getChi2ndof() < m_trackScoreCut.value();
+    
+    if (int(track.getFPGATrackSimHitPtrs().size()) < track.getNHits()) 
+        ATH_MSG_FATAL("More hits than layers on track");
+
+    unsigned  missedhits = track.getFPGATrackSimHitPtrs().size() - track.getNHits();
+    if ((missedhits>=m_track_Chi2PhiCut.value().size()) || 
+        (missedhits>=m_track_Chi2EtaCut.value().size())) {
+            ATH_MSG_ERROR("More missed hits than entries in Chi2 cut " <<missedhits << " " << m_track_Chi2PhiCut.value().size() << " " <<m_track_Chi2EtaCut.value().size() 
+                   << track.getFPGATrackSimHitPtrs().size() << " " << track.getNHits());
+        }
+
+    if (m_track_Chi2PhiCut.value().at(missedhits) > 0) {
+        retv &= track.getChi2Phi() < m_track_Chi2PhiCut.value().at(missedhits);
+    }
+    if (m_track_Chi2EtaCut.value().at(missedhits) > 0) {
+        retv &= track.getChi2Eta() < m_track_Chi2EtaCut.value().at(missedhits);
+    }
+
+
+    return retv;
+}
+
+void FPGATrackSimLogicalHitsProcessAlg::MakeSeedTracks(std::vector<FPGATrackSimTrack>& tracks)
+{
+    for (auto &track : tracks) {        
+      const auto& hitptrs = track.getFPGATrackSimHitPtrs();
+      layer_bitmask_t hitmask = 0x0;
+      for (unsigned ihit = 0; ihit < hitptrs.size(); ihit++) { // can't just use hit mask directly from track because that is for coordinates
+	if (hitptrs[ihit] && hitptrs[ihit]->isReal()) hitmask |= (0x1 << ihit);
+      }
+      std::vector<unsigned> toUse = PickHitsToUse(hitmask);
+      track.setNLayers(hitptrs.size()); //clears old hits
+      for (unsigned lyrToUse : toUse) {
+	    track.setFPGATrackSimHit(lyrToUse, hitptrs.at(lyrToUse));
+      }
+    }  
+}
+
+
+std::vector<unsigned> FPGATrackSimLogicalHitsProcessAlg::PickHitsToUse(layer_bitmask_t hitmask) const
+{
+  std::vector<unsigned> toUse;
+  switch (m_keepHitsStrategy) {
+    case 1: // try and pick hits furthest apart, use only 3
+      {
+        if (hitmask == 0x1f) { // miss no hits
+          toUse = {0,2,4};
+        }
+        else if (hitmask == 0x1e) { // miss inner layer, ie layer 0
+          toUse = {1,3,4};
+        }
+        else if (hitmask == 0x1d) { // miss layer 1
+          toUse = {0,2,4};
+        }
+        else if (hitmask == 0x1b) { // miss layer 2
+          toUse = {0,3,4};
+        }
+        else if (hitmask == 0x17) { // miss layer 3
+          toUse = {0,2,4};
+        }
+        else if (hitmask == 0x0f) { // miss layer 4
+          toUse = {0,2,3};
+        }
+      }
+      break;
+    case 2: // pick inner hits, use only 3
+      {
+        if (hitmask == 0x1f) { // miss no hits
+          toUse = {0,1,2};
+        }
+        else if (hitmask == 0x1e) { // miss inner layer, ie layer 0
+          toUse = {1,2,3};
+        }
+        else if (hitmask == 0x1d) { // miss layer 1
+          toUse = {0,2,3};
+        }
+        else if (hitmask == 0x1b) { // miss layer 2
+          toUse = {0,1,3};
+        }
+        else if (hitmask == 0x17) { // miss layer 3
+          toUse = {0,1,2};
+        }
+        else if (hitmask == 0x0f) { // miss layer 4
+          toUse = {0,1,2};
+        }
+      }
+      break;
+    case 3: // pick outer hits, use only 3
+      {
+        if (hitmask == 0x1f) { // miss no hits
+          toUse = {2,3,4};
+        }
+        else if (hitmask == 0x1e) { // miss inner layer, ie layer 0
+          toUse = {2,3,4};
+        }
+        else if (hitmask == 0x1d) { // miss layer 1
+          toUse = {2,3,4};
+        }
+        else if (hitmask == 0x1b) { // miss layer 2
+          toUse = {1,3,4};
+        }
+        else if (hitmask == 0x17) { // miss layer 3
+          toUse = {1,2,4};
+        }
+        else if (hitmask == 0x0f) { // miss layer 4
+          toUse = {1,2,3};
+        }
+      }
+      break;
+    case 4: // keep 4 hits, choose middle one to drop if necessary
+      {
+        if (hitmask == 0x1f) { // miss no hits
+          toUse = {0,1,2,3};
+        }
+        else if (hitmask == 0x1e) { // miss inner layer, ie layer 0
+          toUse = {1,2,3,4};
+        }
+        else if (hitmask == 0x1d) { // miss layer 1
+          toUse = {0,2,3,4};
+        }
+        else if (hitmask == 0x1b) { // miss layer 2
+          toUse = {0,1,3,4};
+        }
+        else if (hitmask == 0x17) { // miss layer 3
+          toUse = {0,1,2,4};
+        }
+        else if (hitmask == 0x0f) { // miss layer 4
+          toUse = {0,1,2,3};
+        }
+      }
+      break;
+  }
+  return toUse;
 }

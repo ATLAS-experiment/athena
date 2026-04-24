@@ -16,7 +16,7 @@ atlas_add_executable( AtlCoolCopy
                       src/ReplicaSorter.cxx
                       src/CoolTagInfo.cxx
                       INCLUDE_DIRS ${COOL_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
-                      LINK_LIBRARIES ${CURL_LIBRARIES} ${COOL_LIBRARIES} ${ROOT_LIBRARIES} ${CORAL_LIBRARIES} nlohmann_json::nlohmann_json PersistencySvc CoraCool CxxUtils )
+                      LINK_LIBRARIES ${CURL_LIBRARIES} ${COOL_LIBRARIES} ${ROOT_LIBRARIES} ${CORAL_LIBRARIES} nlohmann_json::nlohmann_json PersistencySvc StorageSvc CoraCool CxxUtils )
 set_target_properties( AtlCoolCopy PROPERTIES ENABLE_EXPORTS True )
 
 # Install files from the package:

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGMON_TE_H
@@ -15,14 +15,14 @@
 // Framework
 #include "AthenaKernel/CLASS_DEF.h"
 
-// C/C++
-#include <iostream>
-#include <stdint.h>
-#include <vector>
 
 // Local
 #include "TrigMonitoringEvent/TrigConfSeq.h"
 #include "TrigMonitoringEvent/TrigMonVar.h"
+// C/C++
+#include <iosfwd>
+#include <stdint.h>
+#include <vector>
 
 class TrigMonTE
 {
@@ -43,9 +43,8 @@ class TrigMonTE
     topologicalTE = 0x200000   // Topological TE (more than 1 parent)
   };
     
-  TrigMonTE();
+  TrigMonTE() = default;
   TrigMonTE(uint32_t id, uint16_t index);
-  ~TrigMonTE() {}
     
   void addChildIndex (uint16_t index) { m_child.push_back(index); }
   void addParentIndex(uint16_t index) { m_parent.push_back(index); }
@@ -82,13 +81,13 @@ class TrigMonTE
   const std::vector<uint16_t>&  getVarKey() const { return m_var_key; }
   const std::vector<float>&     getVarVal() const { return m_var_val; }
 
-  void print(std::ostream &os = std::cout);
-
+  void print(std::ostream &os);
+  void print(); //uses std::cout by default
  private:
   friend class TrigMonTECnv_p1;
   
-  uint32_t                 m_id;           // Trigger element id
-  uint32_t                 m_encoded;      // Encoded word (see below)
+  uint32_t                 m_id{};           // Trigger element id
+  uint32_t                 m_encoded{};      // Encoded word (see below)
   
   std::vector<uint16_t>    m_child;        // Index of child (successor) TEs
   std::vector<uint16_t>    m_parent;       // Index of parent (predecessors) TEs

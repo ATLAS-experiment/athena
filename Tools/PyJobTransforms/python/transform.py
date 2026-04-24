@@ -31,7 +31,7 @@ from PyJobTransforms.trfExitCodes import trfExit
 from PyJobTransforms.trfUtils import shQuoteStrings, infanticide, pickledDump, JSONDump, cliToKey, convertToStr
 from PyJobTransforms.trfUtils import isInteractiveEnv, calcCpuTime, calcWallTime
 from PyJobTransforms.trfReports import trfJobReport, defaultFileReport
-from PyJobTransforms.trfExe import transformExecutor
+from PyJobTransforms.trfExe import transformExecutor, athenaExecutor
 from PyJobTransforms.trfGraph import executorGraph
 
 ## @class transform
@@ -243,7 +243,7 @@ class transform(object):
     ## @brief Parse command line arguments for a transform
     def parseCmdLineArgs(self, args):
         msg.info('Transform command line was: %s', ' '.join(shQuoteStrings(sys.argv)))
-
+        
         try:
             # Use the argparse infrastructure to get the actual command line arguments
             self._argdict=vars(self.parser.parse_args(args))
@@ -280,7 +280,7 @@ class transform(object):
                                   ' because output files have been specified on the command line'.format(k))
                         continue
                     updateDict[k] = v
-                extraParameters.update(updateDict)
+                extraParameters.update(updateDict)                
 
             # JSON arguments?
             if 'argJSON' in self._argdict:
@@ -383,7 +383,21 @@ class transform(object):
     # @return None.
     def execute(self):
         msg.debug('Entering transform execution phase')
-  
+
+        #Warn if a CA-based tranform has deprecated command line args
+        #Print warning once per deprecated arg
+        deprecationWarningPrinted = False
+        for exe in self._executors:
+            if isinstance(exe, athenaExecutor):
+                if (not deprecationWarningPrinted) and exe.skeletonCA:
+                    toBeRemoved = ["autoConfiguration","trigStream","topOptions","valid"]
+                    for deprecatedArg in toBeRemoved:
+                        if deprecatedArg in self._argdict:
+                            msg.warning("!!!Detected use of "+deprecatedArg+" in command line arguments for CA-based transform!!!")
+                            msg.warning(deprecatedArg+" is DEPRECATED and due for removal. Applying it will not do anything, please remove it from your Transform definition.")
+                            deprecationWarningPrinted = True
+                            msg.debug(deprecatedArg+" detected in executor "+exe.name)
+                                      
         try:
             # Intercept a few special options here      
             if 'dumpargs' in self._argdict:

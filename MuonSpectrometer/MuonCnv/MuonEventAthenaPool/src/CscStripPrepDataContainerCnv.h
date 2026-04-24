@@ -31,7 +31,7 @@ public:
     virtual ~CscStripPrepDataContainerCnv();
     
     virtual CscStripPrepDataContainer_PERS*   createPersistent (Muon::CscStripPrepDataContainer* transCont);
-    virtual Muon::CscStripPrepDataContainer*  createTransient ();
+    virtual Muon::CscStripPrepDataContainer*  createTransient(const Token* token);
 
     // Must initialize ID helpers
     virtual StatusCode initialize();

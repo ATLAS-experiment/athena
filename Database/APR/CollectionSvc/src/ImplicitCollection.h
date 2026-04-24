@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef COLLECTIONSVC_IMPLICITCOLLECTION_H
@@ -8,7 +8,7 @@
 #include "CollectionSvc/ICollection.h"
 #include "CollectionSvc/CollectionDescription.h"
 #include "CollectionSvc/CollectionRowBuffer.h"
-#include "POOLCore/DbPrint.h"
+#include "StorageSvc/DbPrint.h"
 
 #include "CxxUtils/checker_macros.h"
 #include "Gaudi/PluginService.h"
@@ -16,7 +16,8 @@
 namespace pool {
 
   // forward declarations
-   class ISession;
+   namespace PersistencySvc { class ISession; }
+   using PersistencySvc::ISession;
    class IContainer;
    class ICollectionQuery;
    class ICollectionIterator;
@@ -57,7 +58,7 @@ namespace pool {
     virtual const CollectionDescription& description() const override;
 
     /// Returns a cursor for the collection.
-    virtual ICollectionCursor& cursor() final override;
+    virtual std::unique_ptr<ICollectionCursor> cursor() final override;
 
   protected:
     void open( ICollection::OpenMode mode, ISession* session );

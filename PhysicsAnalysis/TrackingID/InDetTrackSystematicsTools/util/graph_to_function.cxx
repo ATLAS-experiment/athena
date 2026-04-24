@@ -1,17 +1,19 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 // utility to take a root file full of TGraph2DErrors and create a root file with TF2s.
-#include <iostream>
-#include <memory>
-#include <string>
-#include <vector>
-#include <cmath>
+
 
 #include "TFile.h"
 #include "TGraph2DErrors.h"
 #include "TF2.h"
 #include "TFitResult.h"
+
+#include <iostream>
+#include <memory>
+#include <string>
+#include <vector>
+#include <cmath>
 
 using std::make_unique;
 using std::cout;
@@ -27,15 +29,8 @@ int main(int argc, char** argv) {
   }
   
   auto fin = make_unique<TFile>(argv[1], "READ");
-  if (fin == nullptr) {
-    cerr << "Could not open input file " << argv[1] << endl;
-    return 2;
-  }
   auto fout = make_unique<TFile>(argv[2], "RECREATE");
-  if (fout == nullptr) {
-    cerr << "Could not open output file " << argv[2] << endl;
-    return 2;
-  }
+  //fin and fout are necessarily non-null pointers
 
   auto etaLegFunc = [](double* x, double* par){
     double tanhEtaSq = std::tanh(x[0]);

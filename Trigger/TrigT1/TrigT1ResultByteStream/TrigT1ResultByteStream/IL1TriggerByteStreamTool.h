@@ -1,16 +1,21 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGT1RESULTBYTESTREAM_IL1TRIGGERBYTESTREAMTOOL_H
 #define TRIGT1RESULTBYTESTREAM_IL1TRIGGERBYTESTREAMTOOL_H
 
 #include "AthenaKernel/SlotSpecificObj.h"
-#include "ByteStreamData/RawEvent.h"
+#include "ByteStreamData/RawEvent.h" //OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment typedef
 #include "StoreGate/VarHandleKey.h"
 #include "StoreGate/VarHandleKeyArray.h"
 #include "GaudiKernel/IAlgTool.h"
 #include "GaudiKernel/EventContext.h"
-#include "eformat/Status.h"
+#include "eformat/Status.h" //eformat::STATUS_BACK enum
+
+#include <vector>
+#include <type_traits>
+#include <cstdint>
+#include <memory>
 
 /**
  * @class IL1TriggerByteStreamTool

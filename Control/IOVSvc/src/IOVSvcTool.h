@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IOVSVC_IOVSVCTOOL_H
@@ -26,18 +26,16 @@
 #include "GaudiKernel/ServiceHandle.h"
 
 #include "AthenaKernel/IOVTime.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "SGTools/DataProxy.h"
-#include "SGTools/CallBackID.h"
 #include "IOVSvc/IIOVSvcTool.h"
 #include "IOVEntry.h"
 
 #include <string>
 #include <set>
 #include <map>
-#include <list>
 #include <utility>
-
+#include <atomic>
+#include <memory>
 
 class StoreGateSvc;
 class IIncidentSvc;
@@ -46,26 +44,25 @@ class IProxyProviderSvc;
 class IClassIDSvc;
 class IProxyDict;
 class IToolSvc;
-class CallBackID;
-class CBTree;
 
 namespace SG {
   class TransientAddress;
   class DataProxy;
 }
 
-class SortTADptr {
-public:
-  bool operator() ( const SG::TransientAddress*, 
-                    const SG::TransientAddress* ) const;
+struct SortTADptr {
+  using is_transparent = void;
+
+  template<typename X, typename Y>
+  bool operator() (X&& x, Y&& y) const {
+    return x->clID() == y->clID() ? x->name() < y->name() : x->clID() < y->clID();
+  }
 };
 
-class SortDPptr {
-public:
-  bool operator() ( const SG::DataProxy*, 
+struct SortDPptr {
+  bool operator() ( const SG::DataProxy*,
                     const SG::DataProxy* ) const;
 };
-
 
 class IOVSvcTool: public extends<AthAlgTool, IIOVSvcTool, IIncidentListener> {
 
@@ -76,7 +73,6 @@ public:
 
 
   virtual StatusCode initialize() override;
-  virtual StatusCode reinitialize() override;
 
 
   /////////////////////////////////////////////////////////////////////////
@@ -89,18 +85,6 @@ public:
     m_storeName = storeName;    
   }
   virtual const std::string& getStoreName() const override { return m_storeName; }
-
-  // register callback functions
-  virtual StatusCode regFcn(SG::DataProxy *dp, const CallBackID& c,
-                            const IOVSvcCallBackFcn& fcn, bool trigger = false) override;
-
-  virtual StatusCode regFcn(const CallBackID& c1,
-                            const CallBackID& c2, const IOVSvcCallBackFcn& fcn2,
-                            bool trigger = false) override;
-
-  virtual StatusCode regFcn(const IAlgTool* ia,
-                            const CallBackID& c2, const IOVSvcCallBackFcn& fcn2,
-                            bool trigger = false) override;
 
   // Update Range from dB
   virtual StatusCode setRange(const CLID& clid, const std::string& key, 
@@ -145,15 +129,8 @@ public:
   // supply a list of TADs whose data will be preloaded
   virtual StatusCode preLoadDataTAD( const SG::TransientAddress * ) override;
 
-  // return list of tools (or functions) that have been triggered by key
-  // will return FAILURE if no tools found, or no key found
-  virtual StatusCode getTriggeredTools(const std::string& key,
-                                       std::set<std::string>& tools) override;
-
   virtual bool holdsProxy( SG::DataProxy* proxy ) const override;
   virtual bool holdsProxy( const CLID& clid, const std::string& key ) const override;
-  virtual bool holdsCallback( const CallBackID& ) const override;
-  virtual bool holdsAlgTool( const IAlgTool* ia ) const override;
 
   virtual void resetAllProxies() override;
 
@@ -166,15 +143,10 @@ public:
     m_ignoredProxies.insert(proxy);
   }
 
-  // Destructor.
-  virtual ~IOVSvcTool();
-
 private:
 
   StatusCode preLoadProxies(const EventContext& ctx);
   StatusCode preLoadData();
-  StatusCode triggerCallback( IOVSvcCallBackFcn*, const std::string& key );
-  StatusCode triggerCallback( const SG::DataProxy*, const std::string& key );
   std::string fullProxyName( const SG::TransientAddress* ) const;
   std::string fullProxyName( const SG::DataProxy* ) const;
   std::string fullProxyName( const CLID&, const std::string& ) const;
@@ -188,16 +160,6 @@ private:
   ServiceHandle<IClassIDSvc> p_CLIDSvc;
   ServiceHandle<IToolSvc> p_toolSvc;
 
-  //IOVTime m_curTime{0};
-
-  typedef IOVSvcCallBackFcn BFCN;
-  typedef std::multimap<const SG::DataProxy*, BFCN*>::iterator pmITR;
-  typedef std::multimap<BFCN*, const SG::DataProxy*>::iterator fnITR;
-  typedef std::multiset<IOVEntry*, IOVEntry::IOVEntryStartCritereon> startSet;
-  typedef std::multiset<IOVEntry*, IOVEntry::IOVEntryStopCritereon> stopSet;
-  typedef startSet::iterator startITR;
-  typedef stopSet::iterator  stopITR;
-
   std::map< const SG::DataProxy*, std::string> m_names;
 
   mutable std::recursive_mutex m_handleMutex ATLAS_THREAD_SAFE;
@@ -210,29 +172,19 @@ private:
    // mutex is needed.
 
   std::set< SG::DataProxy*, SortDPptr > m_proxies;
-  std::multimap< const SG::DataProxy*, BFCN* > m_proxyMap;
-  std::multimap< BFCN*, const SG::DataProxy* > m_bfcnMap;
 
   std::set<SG::DataProxy*> m_ignoredProxies;
   std::set< std::pair<CLID, std::string> > m_ignoredProxyNames;
 
-  std::map<BFCN*, CallBackID> m_fcnMap;
-  std::map<CallBackID, BFCN*> m_cbidMap;
+  std::map< const SG::DataProxy*, std::unique_ptr<IOVEntry> > m_entries;
 
-  typedef std::map<const void*, std::set<CallBackID>* > ObjMap;
-  ObjMap m_objMap;
+  IOVEntry::StartSet_t* p_startSet{nullptr};
+  IOVEntry::StopSet_t* p_stopSet{nullptr};
 
-  std::map< const SG::DataProxy*, IOVEntry*> m_entries;
+  IOVEntry::StartSet_t m_startSet_Clock, m_startSet_RE;
+  IOVEntry::StopSet_t m_stopSet_Clock, m_stopSet_RE;
 
-  startSet *p_startSet{nullptr};
-  stopSet  *p_stopSet{nullptr};
-
-  startSet m_startSet_Clock, m_startSet_RE;
-  stopSet  m_stopSet_Clock, m_stopSet_RE;
-
-  CBTree* m_trigTree{nullptr};
-
-  std::set< const SG::TransientAddress*, SortTADptr > m_preLoad;
+  std::set< std::unique_ptr<const SG::TransientAddress>, SortTADptr > m_preLoad;
 
   typedef std::tuple <CLID, std::string> TADkey_t;
   TADkey_t TADkey (const SG::DataProxy& p)
@@ -243,9 +195,7 @@ private:
 
   std::atomic<bool> m_first{true};
   bool m_checkOnce{false};
-  bool m_triggered{false};
   bool m_firstEventOfRun{false};
-  bool m_resetAllCallbacks{false}; 
   std::string m_checkTrigger;
 
   Gaudi::Property<bool> m_preLoadRanges{this, "preLoadRanges", false};
@@ -257,10 +207,10 @@ private:
   Gaudi::Property<std::string> m_updateInterval{this, "updateInterval", "Event"};
 
 
-  void scanStartSet(startSet &pSet, const std::string &type,
+  void scanStartSet(IOVEntry::StartSet_t &pSet, const std::string &type,
                     std::set<SG::DataProxy*, SortDPptr> &proxiesToReset,
 		    const IOVTime& curTime) const;
-  void scanStopSet(stopSet &pSet, const std::string &type,
+  void scanStopSet(IOVEntry::StopSet_t &pSet, const std::string &type,
                    std::set<SG::DataProxy*, SortDPptr> &proxiesToReset,
 		   const IOVTime& curTime) const;
 

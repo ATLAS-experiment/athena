@@ -1,16 +1,20 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMUONPREPDATA_CHAMBERVIEWER_H
 #define XAODMUONPREPDATA_CHAMBERVIEWER_H
 
-#include <stdexcept>
-#include <format>
+
 
 #include <xAODMeasurementBase/MeasurementDefs.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 
 #include "Acts/Utilities/PointerTraits.hpp"
+
+#include <stdexcept>
+#include <format>
+#include <functional> //std::function
+#include <algorithm>  //std::ranges::find_if
 
 namespace xAOD{
     /** @brief Under the assumption that all measurements in an uncalibrated measurement container are sorted by their
@@ -67,7 +71,7 @@ namespace xAOD{
                 
                 /** @brief Standard constructor
                  *  @param container: UncalibratedMeasurementContainer from which the views per chamber shall be generated*/
-                 ChamberViewer(const HitObjContainer& container) noexcept
+                 ChamberViewer(const HitObjContainer& container) 
                     requires(ChamberViewConcepts::identifierHashConcept<element_type>):
                     m_container{container} {                   
                     next();
@@ -76,7 +80,7 @@ namespace xAOD{
                  *  @param container: UncalibratedMeasurementContainer from which the views per chamber shall be generated*/ 
                  ChamberViewer(const HitObjContainer& container, 
                              const Muon::IMuonIdHelperSvc* idHelperSvc,
-                             const ViewMode mode = ViewMode::DetElement) noexcept
+                             const ViewMode mode = ViewMode::DetElement) 
                     requires(ChamberViewConcepts::identifyConcept<element_type>):
                     m_container{container},
                     m_idHelperSvc{idHelperSvc},
@@ -113,13 +117,13 @@ namespace xAOD{
                 }
                 /** @brief Loads the hits from the next chamber. 
                  *         Returns false if all chambers have been traversed. */
-                bool next() noexcept {
+                bool next() {
                     if (m_end == m_container.end()) {
                         return false;
                     }
                     m_begin = m_end;
                     if constexpr (ChamberViewConcepts::identifierHashConcept<element_type>) {
-                        const IdentifierHash currentHash = (*m_end)->identifierHash();
+                         const IdentifierHash currentHash = (*m_end)->identifierHash();
                         m_end = std::find_if(m_begin, m_container.end(),
                                          [&currentHash](const_ref meas){
                                             return meas->identifierHash() != currentHash;

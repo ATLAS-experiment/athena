@@ -1,30 +1,18 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigInDetEvent/TrigHisto.h"
 
-//---------------------------------------------------------------
 
-TrigHisto::TrigHisto(void): m_nbins_x(0),
-			    m_underflowBin_x(0),
-			    m_overflowBin_x(0),
-			    m_min_x(0.),
-			    m_max_x(0.),
-			    m_binSize_x(0.) {
-}
 
-//---------------------------------------------------------------
-
-TrigHisto::~TrigHisto(void) {
-}
 
 //---------------------------------------------------------------
 
 void TrigHisto::clear(void) {
-  m_itr = m_contents.begin();
-  m_itr_end = m_contents.end();
-  for(; m_itr != m_itr_end; ++m_itr) (*m_itr) = 0.; 
+  for (auto& v : m_contents) {
+    v = 0.f;
+  }
 }
 
 //---------------------------------------------------------------
@@ -52,4 +40,3 @@ unsigned int TrigHisto::findBin(unsigned int nbins,
   return ibin;
 }
 
-//---------------------------------------------------------------

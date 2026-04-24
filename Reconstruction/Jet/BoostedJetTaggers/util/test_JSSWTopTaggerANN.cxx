@@ -201,7 +201,7 @@ int main( int argc, char* argv[] ) {
   ANA_CHECK( m_Tagger.retrieve() );
 
   static const SG::ConstAccessor<float> acc_ANNWContained80_PassScore("ANNWContained80_PassScore");
-  static const SG::ConstAccessor<int> acc_truthLabel("R10TruthLabel_R21Precision_2022v1");
+  static const SG::ConstAccessor<int> acc_truthLabel("R10TruthLabel_R22v1");
   static const SG::ConstAccessor<float> acc_ANNWContained80_SF("ANNWContained80_SF");
   static const SG::ConstAccessor<float> acc_ANNTagger_SF("ANNTagger_SF");
 

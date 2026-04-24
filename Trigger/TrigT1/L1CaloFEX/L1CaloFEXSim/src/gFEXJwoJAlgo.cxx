@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXJwoJAlg - Jets without jets algorithm for gFEX
@@ -14,6 +14,7 @@
 #include "L1CaloFEXSim/gFEXJwoJTOB.h"
 
 #include <cmath> //for std::sqrt
+#include <vector>
 
 namespace LVL1 {
 
@@ -290,8 +291,8 @@ std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const gTowersTy
 
 void gFEXJwoJAlgo::gBlockAB(const gTowersType & twrs, gTowersType & gBlkSum, gTowersType & hasSeed, int seedThreshold) const {
 
-  int rows = twrs.size();
-  int cols = twrs[0].size();
+  const int rows = twrs.size();
+  const int cols = twrs[0].size();
   for( int irow = 0; irow < rows; irow++ ){
     for(int jcolumn = 0; jcolumn<cols; jcolumn++){
       // zero jet sum here
@@ -309,7 +310,8 @@ void gFEXJwoJAlgo::gBlockAB(const gTowersType & twrs, gTowersType & gBlkSum, gTo
         twrs[irow][jcolumn]   + twrs[krowUp][jcolumn]   + twrs[krowDn][jcolumn] +
         twrs[irow][jcolumn-1] + twrs[krowUp][jcolumn-1] + twrs[krowDn][jcolumn-1];
       } else{
-        // normal case
+        // normal case; jcolumn is not 11 so does not overrun
+        //coverity[OVERRUN:FALSE]
         gBlkSum[irow][jcolumn] =
         twrs[irow][jcolumn]   + twrs[krowUp][jcolumn]   + twrs[krowDn][jcolumn]   +
         twrs[irow][jcolumn-1] + twrs[krowUp][jcolumn-1] + twrs[krowDn][jcolumn-1] +

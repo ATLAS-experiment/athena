@@ -102,7 +102,7 @@ namespace columnar
       // something just for that container. in this case we are just
       // applying the same decoration under a different name, but it is
       // hopefully clear how that could be utilized otherwise.
-      if (auto castObject = variantParticles[rank].tryGetVariant<ContainerId::electron>())
+      if (auto castObject = variantParticles[rank].tryGetVariant<ElectronDef>())
         etaRankSpecialDec(*castObject) = rank;
     }
   }
@@ -138,7 +138,7 @@ namespace columnar
       //   ptRankDec(variantParticles[rank]) = rank;
 
       //   // an example of how to convert to a specific 
-      //   if (auto castObject = variantParticles[rank].tryGetVariant<ContainerId::electron>())
+      //   if (auto castObject = variantParticles[rank].tryGetVariant<ElectronDef>())
       //     ptRankSpecialDec(*castObject) = rank;
       // }
       callSingleEvent (electronsHandle(event), muonsHandle (event));

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATLASDETDESCR_ATLASDETECTORID_H
@@ -30,7 +30,8 @@
 
 #include <string>
 #include <vector>
-
+#include <memory>
+#include <cmath>
 
 class IdDictDictionary;
 class AtlasDetectorIDHelper;
@@ -76,9 +77,10 @@ public:
       Zdc,ZdcHardware,
       TT
     };
-    
+    static constexpr int invalidIndex{999};
+    static constexpr int invalidId{-1};
 
-    /// @name strutors
+    /// @name 'structors
     //@{
     AtlasDetectorID(const std::string& name, const std::string& group);
     virtual ~AtlasDetectorID();
@@ -349,13 +351,6 @@ protected:
     /// Group name.
     std::string m_group;
 
-    /// Flag for subclasses to know whether or not to perform
-    /// checks. In general, this is set to false in optimized mode.
-    bool        m_do_checks{};
-    /// Flag for subclasses to know whether or not to perform
-    /// neighbour initialization
-    bool        m_do_neighbours{true};
-
     /// List of dictionary names used by this helper
     std::vector<std::string>  m_dict_names;
 
@@ -364,23 +359,30 @@ protected:
 
     /// List of dictionary versions used by this helper
     std::vector<std::string>  m_dict_tags;
-private:
-
-    typedef Identifier::size_type                       size_type;
-
-    // Identifiear numbering:
-    //   Temporary fixes - set LAR and MUON ids to single level
-    enum        ID   { ATLAS_ID		= static_cast<Identifier::value_type>(0),
-		       MAX_BIT 		= Identifier::MAX_BIT,
-		       // mask to distinguish a pixel id from lvl1 id (bit 1 set)
-		       PIXEL_MASK	= static_cast<Identifier::value_type>(0xFF),
-		       ALL_BITS		= Identifier::ALL_BITS };
-
-    int                 initLevelsFromDict(const IdDictMgr& dict_mgr);
+  private:
+    typedef Identifier::size_type  size_type;
 
     // dictionary version
     std::string         m_dict_version;
-    bool                m_is_initialized_from_dict{};
+    const IdDictDictionary* dictionary(const Identifier& id) const;
+    const IdDictDictionary*   m_atlas_dict{};
+    const IdDictDictionary*   m_indet_dict{};
+    const IdDictDictionary*   m_lar_dict{};
+    const IdDictDictionary*   m_tile_dict{};
+    const IdDictDictionary*   m_muon_dict{};
+    const IdDictDictionary*   m_calo_dict{};
+    const IdDictDictionary*   m_fwd_dict{};
+   // Identifier numbering:
+   //   Temporary fixes - set LAR and MUON ids to single level
+  enum ID   { 
+    ATLAS_ID		= static_cast<Identifier::value_type>(0),
+		MAX_BIT 		= Identifier::MAX_BIT,
+		// mask to distinguish a pixel id from lvl1 id (bit 1 set)
+		PIXEL_MASK	= static_cast<Identifier::value_type>(0xFF),
+		ALL_BITS		= Identifier::ALL_BITS 
+	};
+
+    int                 initLevelsFromDict(const IdDictMgr& dict_mgr);
     size_type           m_DET_INDEX{999};
     size_type           m_SUBDET_INDEX{999};
     size_type           m_MUON_SUBDET_INDEX{999};
@@ -410,21 +412,8 @@ private:
     int                 m_BCM_ID{3};
     int                 m_LUCID_ID{5};
     int                 m_ZDC_ID{7};
-
-    bool                m_isHighLuminosityLHC{};
-
-    Range::field        m_lvl1_field;
-    Range::field        m_lvl1_onl_field;
-    Range::field        m_lar_dm_field;
-    Range::field        m_tile_dm_field;
-    const IdDictDictionary*   m_atlas_dict{};
-    const IdDictDictionary*   m_indet_dict{};
-    const IdDictDictionary*   m_lar_dict{};
-    const IdDictDictionary*   m_tile_dict{};
-    const IdDictDictionary*   m_muon_dict{};
-    const IdDictDictionary*   m_calo_dict{};
-    const IdDictDictionary*   m_fwd_dict{};
-    AtlasDetectorIDHelper* m_helper{};
+    
+    
     IdDictFieldImplementation m_det_impl;
     IdDictFieldImplementation m_indet_part_impl;
     IdDictFieldImplementation m_calo_side_impl;
@@ -434,23 +423,24 @@ private:
     IdDictFieldImplementation m_muon_mdt_impl;
     IdDictFieldImplementation m_muon_rpc_impl;
     IdDictFieldImplementation m_fwd_part_impl;
-
+    Range::field        m_lvl1_field;
+    Range::field        m_lvl1_onl_field;
+    Range::field        m_lar_dm_field;
+    Range::field        m_tile_dm_field;
+    std::unique_ptr<AtlasDetectorIDHelper> m_helper{};
+    
     // vector used to store info to distinguish between muon technologies.
     std::vector<unsigned int> m_muon_tech_bits;
-
-    /* removed by Philipp */
-    /* // enum defining the different muon technologies (MDT and RPC are */
-    /* // distinguished using the technology bit inside the identifiers) */
-    /* enum MuonTechBits */
-    /* { */
-    /*   unknown = 0, */
-    /*   isMdtOrRpc = 1, */
-    /*   isCsc = 2, */
-    /*   isTgc = 3, */
-    /*   isMm = 4, */
-    /*   isStgc = 5 */
-    /* }; */
-    /* removed by Philipp */
+    //4 bools placed here to fill any padding
+    bool                m_is_initialized_from_dict{};
+    bool                m_isHighLuminosityLHC{};
+    /// Flag for subclasses to know whether or not to perform
+    /// checks. In general, this is set to false in optimized mode.
+protected:
+    bool        m_do_checks{};
+    /// Flag for subclasses to know whether or not to perform
+    /// neighbour initialization
+    bool        m_do_neighbours{true};
 
 };
 
@@ -672,7 +662,7 @@ AtlasDetectorID::is_lar_em      (Identifier id) const
 {
     bool result = false;
     if(is_lar(id)) {
-        result = (abs(m_lar_part_impl.unpack(id)) == m_LAR_EM_ID);
+        result = (std::abs(m_lar_part_impl.unpack(id)) == m_LAR_EM_ID);
     }
     return result;
 }
@@ -683,7 +673,7 @@ AtlasDetectorID::is_lar_hec             (Identifier id) const
 {
     bool result = false;
     if(is_lar(id)) {
-        result = (abs(m_lar_part_impl.unpack(id)) == m_LAR_HEC_ID);
+        result = (std::abs(m_lar_part_impl.unpack(id)) == m_LAR_HEC_ID);
     }
     return result;
 }
@@ -693,7 +683,7 @@ AtlasDetectorID::is_lar_fcal            (Identifier id) const
 {
     bool result = false;
     if(is_lar(id)) {
-        result = (abs(m_lar_part_impl.unpack(id)) == m_LAR_FCAL_ID);
+        result = (std::abs(m_lar_part_impl.unpack(id)) == m_LAR_FCAL_ID);
     }
     return result;
 }
@@ -795,7 +785,7 @@ AtlasDetectorID::is_alfa          (Identifier id) const
 {
     bool result = false;
     if(is_forward(id)) {
-        result = (abs(m_lar_part_impl.unpack(id)) == m_ALFA_ID);
+        result = (std::abs(m_lar_part_impl.unpack(id)) == m_ALFA_ID);
     }
     return result;
 }
@@ -805,7 +795,7 @@ AtlasDetectorID::is_bcm          (Identifier id) const
 {
     bool result = false;
     if(is_forward(id)) {
-        result = (abs(m_lar_part_impl.unpack(id)) == m_BCM_ID);
+        result = (std::abs(m_lar_part_impl.unpack(id)) == m_BCM_ID);
     }
     return result;
 }
@@ -815,7 +805,7 @@ AtlasDetectorID::is_lucid        (Identifier id) const
 {
     bool result = false;
     if(is_forward(id)) {
-        result = (abs(m_lar_part_impl.unpack(id)) == m_LUCID_ID);
+        result = (std::abs(m_lar_part_impl.unpack(id)) == m_LUCID_ID);
     }
     return result;
 }
@@ -825,7 +815,7 @@ AtlasDetectorID::is_zdc          (Identifier id) const
 {
     bool result = false;
     if(is_forward(id)) {
-        result = (abs(m_lar_part_impl.unpack(id)) == m_ZDC_ID);
+        result = (std::abs(m_lar_part_impl.unpack(id)) == m_ZDC_ID);
     }
     return result;
 }

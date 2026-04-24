@@ -29,7 +29,7 @@ public:
 protected:
 
   AFP_TDLocRecoEvCollection_PERS*  createPersistent (AFP_TDLocRecoEvCollection *transCont);
-  AFP_TDLocRecoEvCollection*       createTransient ();
+  AFP_TDLocRecoEvCollection*       createTransient(const Token* token);
     
  };
  

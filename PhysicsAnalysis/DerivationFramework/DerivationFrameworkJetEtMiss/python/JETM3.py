@@ -250,7 +250,7 @@ def JETM3Cfg(flags):
     
     JETM3SlimmingHelper.AllVariables = ["CHSGChargedParticleFlowObjects", "CHSGNeutralParticleFlowObjects",
                                         "MuonSegments","LVL1JetRoIs",
-                                        "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape","Kt4EMPFlowNeutEventShape"]
+                                        "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowNeutEventShape"]
 
     JETM3SlimmingHelper.ExtraVariables = ["AntiKt4EMPFlowJets.passOnlyBJVT.DFCommonJets_bJvt.isJvtHS.isJvtPU",
                                           "Muons.energyLossType.EnergyLoss.ParamEnergyLoss.MeasEnergyLoss.EnergyLossSigma.MeasEnergyLossSigma.ParamEnergyLossSigmaPlus.ParamEnergyLossSigmaMinus"]
@@ -274,7 +274,6 @@ def JETM3Cfg(flags):
                                              "TruthParticles", "TruthEvents", "TruthVertices", 
                                              "MuonTruthParticles", "egammaTruthParticles",]
         JETM3SlimmingHelper.SmartCollections += ["AntiKt4TruthWZJets","AntiKt4TruthJets","AntiKt10TruthJets",
-                                                 "AntiKt10TruthTrimmedPtFrac5SmallR20Jets",
                                                  "AntiKt10TruthSoftDropBeta100Zcut10Jets"]
 
     # Trigger content

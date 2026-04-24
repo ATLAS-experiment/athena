@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HiveAlgA.h"
@@ -28,11 +28,11 @@ StatusCode HiveAlgA::initialize() {
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-StatusCode HiveAlgA::execute() {
+StatusCode HiveAlgA::execute(const EventContext& ctx) const {
 
   ATH_MSG_DEBUG("execute " << name());
 
-  SG::ReadHandle<xAOD::EventInfo> evt( m_evt );
+  SG::ReadHandle<xAOD::EventInfo> evt{m_evt, ctx};
   if (!evt.isValid()) {
     ATH_MSG_ERROR ("Could not retrieve EventInfo");
     return StatusCode::FAILURE;
@@ -43,12 +43,12 @@ StatusCode HiveAlgA::execute() {
 
   sleep();
 
-  unsigned int i = Gaudi::Hive::currentContextEvt();
+  unsigned int i = ctx.evt();
 
-  SG::WriteHandle<HiveDataObj> wrh1( m_wrh1 );
+  SG::WriteHandle<HiveDataObj> wrh1{m_wrh1, ctx};
   ATH_CHECK(wrh1.record(std::make_unique< HiveDataObj >(10000 + evt->eventNumber()*100 + i)));
 
-  SG::WriteHandle<HiveDataObj> wrh2( m_wrh2 );
+  SG::WriteHandle<HiveDataObj> wrh2{m_wrh2, ctx};
   ATH_CHECK(wrh2.record(std::make_unique< HiveDataObj >(10050+i)));
   
   ATH_MSG_INFO("  write: " << wrh1.key() << " = " << wrh1->val() );

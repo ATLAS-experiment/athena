@@ -1,11 +1,11 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMUONPREPDATA_VERSION_COMBINEDMUONSTRIP_V1_H
 #define XAODMUONPREPDATA_VERSION_COMBINEDMUONSTRIP_V1_H
 
 //
-#include "xAODMeasurementBase/UncalibratedMeasurement.h"
+#include "xAODMuonPrepData/MuonMeasurement.h"
 namespace xAOD{
     /** @brief The Acts fitters running on the Uncalibrated measurements are uncapable of 
      *         producing two track states on the same surface or alternatively, the propagation
@@ -16,7 +16,7 @@ namespace xAOD{
      *         the fitting infrastructre. By convention, the combined Muon strip returns the same measurement
      *         type as the prds that they're carrying but the dimension is always zero providing a handle
      *         to properly distinguish them in the SpacePointCalibrator without the useage of dynamic_casts */
-    class CombinedMuonStrip_v1 : public UncalibratedMeasurement {
+    class CombinedMuonStrip_v1 : public MuonMeasurement_v1 {
         public:
             /** @brief Empty constructor */
             CombinedMuonStrip_v1() = default;
@@ -27,13 +27,23 @@ namespace xAOD{
             /** @brief Specify the number of dimensions as zero -> handle in the calibrator */
             unsigned numDimensions() const override { return 0; } 
             /** @brief Returns the primary associated measurement */
-            const xAOD::UncalibratedMeasurement* primaryStrip() const;
+            const xAOD::MuonMeasurement* primaryStrip() const;
             /** @brief Links a prd measurement as primary meaurement */
-            void setPrimaryStrip(const xAOD::UncalibratedMeasurement* meas);
+            void setPrimaryStrip(const xAOD::MuonMeasurement* meas);
             /** @brief Returns the secondary associated measurement */
-            const xAOD::UncalibratedMeasurement* secondaryStrip() const;
+            const xAOD::MuonMeasurement* secondaryStrip() const;
             /** @brief Linkt a prd measurement as secondary measurement */
-            void setSecondaryStrip(const xAOD::UncalibratedMeasurement* meas);
+            void setSecondaryStrip(const xAOD::MuonMeasurement* meas);
+            /** @brief Returns the associated readout element */
+            const MuonGMR4::MuonReadoutElement* readoutElement() const override final;
+            /** @brief Returns whether the phi coordinate is measured */
+            virtual std::uint8_t measuresPhi() const override final;
+            /** @brief Returns the hash of the measurement channel */
+            virtual IdentifierHash measurementHash() const override final;
+            /** @brief Returns the hash of the associated layer (Needed for surface retrieval)*/
+            virtual  IdentifierHash layerHash() const override final;
+            /** @brief Returns the local measurement position in the layer frame */
+            Amg::Vector3D localMeasurementPos() const override final;
     };
 }
 

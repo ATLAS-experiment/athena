@@ -31,7 +31,7 @@ public:
     virtual ~GenericMuonSimHitCollectionCnv();
 
     virtual GenericMuonSimHitCollection_PERS*   createPersistent (GenericMuonSimHitCollection* transCont);
-    virtual GenericMuonSimHitCollection*        createTransient ();
+    virtual GenericMuonSimHitCollection*        createTransient(const Token* token);
 
 private:
     GenericMuonSimHitCollectionCnv_p1    m_TPConverter_p1;

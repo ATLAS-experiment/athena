@@ -243,7 +243,7 @@ namespace MuonR4 {
         
         const Amg::Vector2D wirePos = readOutEle->stripLayer(hitHash).to2D(xAOD::toEigen(timedHit->localPosition()), true);
         // do not digitise wires that are never read out in reality
-        bool isInnerQ1 = readOutEle->isEtaZero(hitHash, wirePos);
+        bool isInnerQ1 = readOutEle->isEtaZero(hitHash, xAOD::toEigen(timedHit->localPosition()).block<2,1>(0,0));
         if(isInnerQ1) {
             return false;
         }
@@ -339,7 +339,7 @@ namespace MuonR4 {
         }
         
         /// Check efficiencies
-        bool isInnerQ1 = readOutEle->isEtaZero(readOutEle->measurementHash(hitId), padPos);
+        bool isInnerQ1 = readOutEle->isEtaZero(readOutEle->measurementHash(hitId), xAOD::toEigen(timedHit->localPosition()).block<2,1>(0,0));
         if (efficiencyMap && efficiencyMap->getEfficiency(hitId, isInnerQ1) < CLHEP::RandFlat::shoot(rndEngine,0.,1.)){
             ATH_MSG_VERBOSE("Simulated pad hit "<<xAOD::toEigen(timedHit->localPosition())
                             << m_idHelperSvc->toString(hitId) <<" is rejected because of efficency modelling");

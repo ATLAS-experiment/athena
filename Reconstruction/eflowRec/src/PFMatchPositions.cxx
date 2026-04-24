@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -8,9 +8,6 @@
  *  Created on: 25.03.2014
  *      Author: tlodd
  */
-
-#include <cassert>
-#include <iostream>
 
 #include "PFMatchPositions.h"
 #include "PFClusterWidthCalculator.h"
@@ -52,16 +49,16 @@ EtaPhiWithVariance ClusterGeometricalCenterProvider::getPosition(ICluster* clust
   unsigned int nCells = cluster->nCells();
 
   PFClusterWidthCalculator widthCalc;
-  std::pair<double,double> width = widthCalc.getPFClusterCoordinateWidth(cluster->cellEta(),cluster->cellPhi(),cluster->eta(),cluster->phi(),nCells);
+  PFClusterWidth width = widthCalc.getPFClusterCoordinateWidth(cluster->cellEta(),cluster->cellPhi(),cluster->eta(),cluster->phi(),nCells);
 
   if (nCells > 1){
-    cluster->etaMean(widthCalc.getEtaMean());
-    cluster->phiMean(widthCalc.getPhiMean());
+    cluster->etaMean(width.etaMean);
+    cluster->phiMean(width.phiMean);
   }
-  cluster->etaVariance(width.first);
-  cluster->phiVariance(width.second);
+  cluster->etaVariance(width.etaVariance);
+  cluster->phiVariance(width.phiVariance);
   
-  return {eflowEtaPhiPosition(widthCalc.getEtaMean(),widthCalc.getPhiMean()), width.first, width.second};
+  return {eflowEtaPhiPosition(width.etaMean,width.phiMean), width.etaVariance, width.phiVariance};
 
 
 

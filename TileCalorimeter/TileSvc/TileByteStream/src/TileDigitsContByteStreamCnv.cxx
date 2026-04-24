@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Gaudi includes
@@ -43,7 +43,7 @@ TileDigitsContByteStreamCnv::TileDigitsContByteStreamCnv(ISvcLocator* svcloc)
 {
 }
 
-const CLID& TileDigitsContByteStreamCnv::classID(){ return ClassID_traits<TileDigitsContainer>::ID();}
+CLID TileDigitsContByteStreamCnv::classID(){ return ClassID_traits<TileDigitsContainer>::ID();}
 
 long TileDigitsContByteStreamCnv::storageType() { return ByteStreamAddress::storageType(); }
 

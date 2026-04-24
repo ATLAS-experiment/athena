@@ -43,6 +43,9 @@ namespace InDet {
     virtual StatusCode initialize() override;
     /// Smearing method
     virtual CP::CorrectionCode applyCorrection( xAOD::TrackParticle& ID ) override;
+    /// Reentrant smearing (see IInDetTrackSmearingTool)
+    virtual CP::CorrectionCode applyCorrection(
+        xAOD::TrackParticle& ID, const CP::SystematicSet& syst) const override;
 
     // we need explicit forwarding calls because CP::CorrectionTool does not have a pure interface
     // this isn't really elegant (ideally these would come automatically) but we'd need IInDetTrackSmearingTool
@@ -63,9 +66,15 @@ namespace InDet {
 
   private:
 
+    /// Core smearing logic; @p filtered is the pre-resolved systematic set.
+    CP::CorrectionCode applyCorrectionImpl(xAOD::TrackParticle& track,
+                                           const CP::SystematicSet& filtered) const;
+
     /// Get smearing widths to add to IPs
-    float GetSmearD0Sigma(const xAOD::TrackParticle&) const;
-    float GetSmearZ0Sigma(const xAOD::TrackParticle&) const;
+    float GetSmearD0Sigma(const xAOD::TrackParticle&,
+                          const CP::SystematicSet& filtered) const;
+    float GetSmearZ0Sigma(const xAOD::TrackParticle&,
+                          const CP::SystematicSet& filtered) const;
 
     // StatusCode initHistogram(TH1*& histogram, std::string rootFileName, std::string histogramName) const;
     // StatusCode initFunction(TF2*& function, std::string rootFileName, std::string functionName) const;

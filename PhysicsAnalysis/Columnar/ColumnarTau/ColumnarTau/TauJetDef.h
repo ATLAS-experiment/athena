@@ -13,19 +13,16 @@
 
 namespace columnar
 {
-  namespace ContainerId
+  struct TauJetDef : RegularContainerId<xAOD::TauJet,xAOD::TauJetContainer>
   {
-    struct tauJet : regularCIBase<xAOD::TauJet,xAOD::TauJetContainer>
-    {
-      static constexpr std::string_view idName = "tauJet";
-    };
-  }
+    static constexpr std::string_view idName = "tauJet";
+  };
 
-  using TauJetRange = ObjectRange<ContainerId::tauJet>;
-  using TauJetId = ObjectId<ContainerId::tauJet>;
-  using OptTauJetId = OptObjectId<ContainerId::tauJet>;
-  template<typename CT,typename CM=ColumnarModeDefault> using TauJetAccessor  = AccessorTemplate<ContainerId::tauJet,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using TauJetDecorator = AccessorTemplate<ContainerId::tauJet,CT,ColumnAccessMode::output,CM>;
+  using TauJetRange = ObjectRange<TauJetDef>;
+  using TauJetId = ObjectId<TauJetDef>;
+  using OptTauJetId = OptObjectId<TauJetDef>;
+  template<typename CT,typename CM=ColumnarModeDefault> using TauJetAccessor  = AccessorTemplate<TauJetDef,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using TauJetDecorator = AccessorTemplate<TauJetDef,CT,ColumnAccessMode::output,CM>;
 }
 
 #endif

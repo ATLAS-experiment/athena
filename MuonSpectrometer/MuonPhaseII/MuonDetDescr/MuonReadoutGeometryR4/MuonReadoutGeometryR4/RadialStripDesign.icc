@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_RADIALSTRIPDESIGN_ICC
 #define MUONREADOUTGEOMETRYR4_RADIALSTRIPDESIGN_ICC
@@ -90,9 +90,21 @@ namespace MuonGMR4{
     }
     inline double RadialStripDesign::stripPitch(int stripNumb) const {
         CHECK_STRIPRANGESCAL(stripNumb);
-
         return 0.5*(m_strips[stripCh].center() - m_strips[stripCh+1].center()).mag();
 
+    }
+    inline double RadialStripDesign::stripPitch(int stripNum, const Amg::Vector2D& extPos) const {
+        const Amg::Vector2D dir = stripDir(stripNum);
+         const Eigen::Rotation2D normalRot{(m_reversedStripOrder ? 90 : -90)*Gaudi::Units::deg};
+        const Amg::Vector2D norm = normalRot * dir;
+        const Amg::Vector2D cen = center(stripNum).value_or(Amg::Vector2D::Zero());
+        /* Calculate the closest pont along the strip */
+        const Amg::Vector2D closePoint = cen + dir.dot(extPos -cen) * dir;
+        /** Calculate the intersection with the left & right strip edge using the normal */
+        return std::abs(Amg::intersect<2>(stripLeftBottom(stripNum),  stripLeftEdge(stripNum),
+                                          closePoint, norm).value_or(0.)) +
+               std::abs(Amg::intersect<2>(stripRightBottom(stripNum), stripRightEdge(stripNum),
+                                          closePoint, norm).value_or(0.));
     }
     inline int RadialStripDesign::stripNumber(const Amg::Vector2D& extPos) const {        
         if (!insideTrapezoid(extPos)) {

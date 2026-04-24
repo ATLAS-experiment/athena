@@ -1,12 +1,12 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMUONPREPDATA_MMClusterFWD_H
 #define XAODMUONPREPDATA_MMClusterFWD_H
 
 /** @brief Forward declaration of the xAOD::MMCluster */
+#include "xAODMuonPrepData/MuonMeasurementFwd.h"
 namespace xAOD{
-   class UncalibratedMeasurement_v1;
    class MMCluster_v1;
    using MMCluster = MMCluster_v1;
 

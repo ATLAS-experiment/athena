@@ -1,0 +1,74 @@
+ActsPixelClusterizationAlg                                        INFO Clusterization statistics
+|----------|------------|
+| RDOs     |    3442033 |
+| Clusters |    1164869 |
+|----------|------------|
+ActsStripClusterizationAlg                                        INFO Clusterization statistics
+|----------|------------|
+| RDOs     |    4642935 |
+| Clusters |    1116636 |
+|----------|------------|
+ActsPixelSpacePointFormationAlg                                   INFO Space Point Formation statistics
+|--------------|------------|
+| Clusters     |    1164869 |
+| Space Points |    1164869 |
+|--------------|------------|
+ActsPixelSeedingAlg                                               INFO Seed statistics
+|-------------|------------|
+| Spacepoints |    1164869 |
+| Seeds       |      18057 |
+|-------------|------------|
+ActsTrackFindingAlg                                               INFO statistics
+|-----------------------------------|------------|------------|
+|                           All eta | PPP        | ALL        |
+|-----------------------------------|------------|------------|
+| Input seeds                       |      18057 |      18057 |
+| No track parameters               |          0 |          0 |
+| Used   seeds                      |      15658 |      15658 |
+| Cannot find track                 |       3624 |       3624 |
+| Duplicate seeds                   |       2399 |       2399 |
+| Initial param estimation failed   |          0 |          0 |
+| CKF tracks                        |      12034 |      12034 |
+| Rejected refined parameters       |          0 |          0 |
+| selected tracks                   |      10143 |      10143 |
+| Stopped tracks reaching max holes |       3624 |       3624 |
+| Seeds with more than one branch   |          0 |          0 |
+| Tracks failing second CKF         |          4 |          4 |
+| Stopped tracks below pT cut       |          0 |          0 |
+| Stopped tracks above max eta      |          0 |          0 |
+| Total shared hits                 |       1526 |       1526 |
+| Total forced measurements         |      93884 |      93884 |
+| resolved tracks                   |      10083 |      10083 |
+|-----------------------------------|------------|------------|
+ActsTrackFindingAlg                                               INFO Ratios
+|-------------------------------------------|------------|------------|
+|                                           | PPP        | ALL        |
+|-------------------------------------------|------------|------------|
+| failed / seeds                            |   0.200698 |   0.200698 |
+| duplication / seeds                       |   0.132857 |   0.132857 |
+| Rejected refined params / seeds           |          0 |          0 |
+| selected / CKF tracks                     |   0.842862 |   0.842862 |
+| selected tracks / used seeds              |   0.647784 |   0.647784 |
+| resolved / selected tracks                |   0.994085 |   0.994085 |
+| resolved tracks / used seeds              |   0.643952 |   0.643952 |
+| branched tracks / used seeds              |          0 |          0 |
+| no 2nd CKF / CKF tracks                   | 0.000332392 | 0.000332392 |
+| shared hits / CKF tracks                  |   0.126807 |   0.126807 |
+| forced measurements / used seeds          |    5.99591 |    5.99591 |
+|-------------------------------------------|------------|------------|
+| resolved tracks / used seeds     0.0- 0.5 |    0.46348 |    0.46348 |
+|                                  0.5- 1.0 |   0.478404 |   0.478404 |
+|                                  1.0- 1.5 |   0.423275 |   0.423275 |
+|                                  1.5- 2.0 |   0.540473 |   0.540473 |
+|                                  2.0- 2.5 |    0.69642 |    0.69642 |
+|                                  2.5- 3.0 |   0.804712 |   0.804712 |
+|                                  3.0- 3.5 |   0.882166 |   0.882166 |
+|                                  3.5-+inf |   0.787282 |   0.787282 |
+|-------------------------------------------|------------|------------|
+ActsPrdAssociationAlg                                             INFO Prd Map statistics
+|-----------------------|------------|
+| N. Tracks             |      10083 |
+| N. Pixel Measurements |     111575 |
+| N. Strip Measurements |      36858 |
+| N. Hgtd Measurements  |          0 |
+|-----------------------|------------|

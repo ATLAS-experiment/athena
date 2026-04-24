@@ -46,10 +46,10 @@ namespace MuonR4 {
              *  @param others: Other keys for recursive dependency declaration */
             template <typename Key_t,
                       typename... OtherKey_t>
-            StatusCode addDependency(const EventContext& ctx,
-                                     SG::WriteCondHandle<IRegSelLUTCondData>& writeHandle,
-                                     const SG::ReadCondHandleKey<Key_t>& key,
-                                     OtherKey_t... others) const;
+            StatusCode addCondDependency(const EventContext& ctx,
+                                         SG::WriteCondHandle<IRegSelLUTCondData>& writeHandle,
+                                         const SG::ReadCondHandleKey<Key_t>& key,
+                                         OtherKey_t... others) const;
             /** @brief Retrieve the idHelper for the given detector technology
              *  @param type: Muon detector technology type */
             const MuonIdHelper& getIdHelper(const ActsTrk::DetectorType type) const;
@@ -75,7 +75,8 @@ namespace MuonR4 {
             SG::ReadCondHandleKey<Muon::TgcCablingMap> m_cablingTgcKey{this, "TgcCablingKey", "MuonTgc_CablingMap"};
             /** @brief Instantiate a new transform cache to ensure lazy transform population in the event processing */
             Gaudi::Property<bool> m_splitTrfCache{this, "splitTrfCache", false, ""};
-
+            /** @brief Dump the volumes from which the region selector tables are built  */
+            Gaudi::Property<bool> m_dumpObjVolumes{this, "dumpObjVolumes", false};
     };
 }
 #endif // MuonRegSelCondAlg_h

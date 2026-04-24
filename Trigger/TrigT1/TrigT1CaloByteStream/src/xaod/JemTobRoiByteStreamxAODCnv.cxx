@@ -40,7 +40,7 @@ JemTobRoiByteStreamxAODCnv::JemTobRoiByteStreamxAODCnv(ISvcLocator* svcloc) :
 
 // CLID
 
-const CLID& JemTobRoiByteStreamxAODCnv::classID() {
+CLID JemTobRoiByteStreamxAODCnv::classID() {
   return ClassID_traits<xAOD::JEMTobRoIContainer>::ID();
 }
 

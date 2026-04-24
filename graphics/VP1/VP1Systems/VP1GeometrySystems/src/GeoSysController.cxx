@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -107,9 +107,10 @@ GeoSysController::GeoSysController(IVP1System * sys)
     m_d->ui.groupBox_innerdetector->setVisible(VP1JobConfigInfo::hasPixelGeometry()
 					      || VP1JobConfigInfo::hasSCTGeometry()
 					      || VP1JobConfigInfo::hasTRTGeometry()
+					      || VP1JobConfigInfo::hasITkGeometry()
 					      || VP1JobConfigInfo::hasInDetServiceMaterialGeometry());
-    m_d->ui_misc.groupBox_pixelactivemodules->setVisible(VP1JobConfigInfo::hasPixelGeometry());
-    m_d->ui_misc.groupBox_sctactivemodules->setVisible(VP1JobConfigInfo::hasSCTGeometry());
+    m_d->ui_misc.groupBox_pixelactivemodules->setVisible(VP1JobConfigInfo::hasPixelGeometry() || VP1JobConfigInfo::hasITkGeometry() );
+    m_d->ui_misc.groupBox_sctactivemodules->setVisible(VP1JobConfigInfo::hasSCTGeometry() || VP1JobConfigInfo::hasITkGeometry() );
     m_d->ui.groupBox_calorimeters->setVisible(VP1JobConfigInfo::hasLArGeometry()
 					     ||VP1JobConfigInfo::hasTileGeometry());
     m_d->ui.groupBox_muonsystems->setVisible(VP1JobConfigInfo::hasMuonGeometry());
@@ -193,6 +194,9 @@ GeoSysController::GeoSysController(IVP1System * sys)
   m_d->subSysCheckBoxMap[VP1GeoFlags::SCT] = m_d->ui.checkBox_SCT;
   m_d->subSysCheckBoxMap[VP1GeoFlags::TRT] = m_d->ui.checkBox_TRT;
   m_d->subSysCheckBoxMap[VP1GeoFlags::InDetServMat] = m_d->ui.checkBox_InDetServMat;
+  // Phase-II
+  m_d->subSysCheckBoxMap[VP1GeoFlags::ITkPixel] = m_d->ui.checkBox_ITkPixel;
+  m_d->subSysCheckBoxMap[VP1GeoFlags::ITkStrip] = m_d->ui.checkBox_ITkStrip;
 
   // CALO
   m_d->subSysCheckBoxMap[VP1GeoFlags::LAr] = m_d->ui.checkBox_LAr;
@@ -575,7 +579,7 @@ void GeoSysController::emit_autoAdaptMuonNSW()
   bool pSt   = m_d->ui_misc.checkBox_NSW_Passive_Structure->isChecked();
   bool pAP   = m_d->ui_misc.checkBox_NSW_Passive_APlate->isChecked();
 
-  messageVerbose ("Emitting autoAdaptPixelsOrSCT("+str(reset)+","+str(stgc)+","+str(mm)+")");
+  messageVerbose ("Emitting autoAdaptMuonNSW("+str(reset)+","+str(stgc)+","+str(mm)+")");
   emit autoAdaptMuonNSW(reset, stgc, mm, pSp, pSt, pAP);
 }
 

@@ -70,7 +70,7 @@ class GepCellsHandlerAlg: public ::AthReentrantAlgorithm {
 
 	return StatusCode::SUCCESS;
   }
- 
+
   // Values are set in the initialize function
   int m_nEnergyBits = -1; 
   int m_valLeastSigBit = -1;
@@ -92,6 +92,9 @@ class GepCellsHandlerAlg: public ::AthReentrantAlgorithm {
 
   Gaudi::Property<bool> m_writeAllCells {this, "WriteAllCells", false, 
     "If true, all cells are considered regardless whether they are truncated or below the 2sigma threshold"};
+
+  Gaudi::Property<float> m_noiseThreshold {this, "NoiseThreshold", 2., 
+    "Minimum threshold for GEP cells in sigma"};
 
   Gaudi::Property<bool> m_cleanOutputCells {this, "CleanOutputCells", false, 
     "If true, all output cells are included in the output, but those truncated or below 2sigma will have their energies set to 0; to be used only with WriteAllCells"};

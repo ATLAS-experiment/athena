@@ -102,7 +102,9 @@ namespace ORUtils
           // Get the muon ID track
           auto muTrk = muon(acc.m_muonTrkAcc);
           // Flag the calo muon as overlapping if they share the track
-          if(elTrk == muTrk) {
+          bool removeMu = false;
+          if (elTrk.has_value() && muTrk.has_value()) removeMu = (elTrk == muTrk);
+          if (removeMu) {
             ATH_CHECK( handleOverlap(muon, electron) );
           }
         }
@@ -125,7 +127,8 @@ namespace ORUtils
 
         // Flag the electron as overlapping if they share the track
         // or if they are DR matched
-        bool removeEle = (elTrk == muTrk);
+        bool removeEle = false;
+        if (elTrk.has_value() && muTrk.has_value()) removeEle = (elTrk == muTrk);
         if( (m_useDRMatching)
             && (m_dRMatcher->objectsMatch(electron, muon)) ){
           removeEle = true;

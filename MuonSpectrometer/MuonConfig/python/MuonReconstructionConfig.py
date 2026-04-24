@@ -83,6 +83,7 @@ def StandaloneMuonOutputCfg(flags):
         esd_items += ["xAOD::TgcStripContainer#xTgcStrips", "xAOD::TgcStripAuxContainer#xTgcStripsAux." ]
         esd_items += ["xAOD::RpcStripContainer#xRpcStrips", "xAOD::RpcStripAuxContainer#xRpcStripsAux." ]
         esd_items += ["xAOD::RpcStrip2DContainer#xRpcBILStrips", "xAOD::RpcStrip2DAuxContainer#xRpcBILStripsAux." ]
+        esd_items += ["xAOD::CombinedMuonStripContainer#CombinedMuonPrds", "xAOD::CombinedMuonStripAuxContainer#CombinedMuonPrdsAux."]
 
 
 
@@ -174,7 +175,8 @@ def MuonReconstructionCfg(flags):
 
     # FIXME - this is copied from the old configuration, but I'm not sure it really belongs here.
     # It's probably better to have as part of TrackBuilding, or Segment building...
-    if flags.Input.isMC  or flags.Overlay.DataOverlay:
+    from AthenaConfiguration.Enums import Format
+    if (flags.Input.isMC or flags.Overlay.DataOverlay) and flags.Input.Format!=Format.BS:
         # filter TrackRecordCollection (true particles in muon spectrometer)
         if "MuonEntryLayerFilter" not in flags.Input.Collections and \
             ("MuonEntryLayer" in flags.Input.Collections):
@@ -217,7 +219,7 @@ def MuonReconstructionCfg(flags):
         msvertexrecotool = CompFactory.Muon.MSVertexRecoTool(
             MyExtrapolator=result.popToolsAndMerge(
                 AtlasExtrapolatorCfg(flags)),
-            TGCKey='TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
+            TGCKey='TGC_MeasurementsAllBCs')
         the_alg = CompFactory.MSVertexRecoAlg(
             name="MSVertexRecoAlg", MSVertexRecoTool=msvertexrecotool)
         # Not explicitly configuring MSVertexTrackletTool

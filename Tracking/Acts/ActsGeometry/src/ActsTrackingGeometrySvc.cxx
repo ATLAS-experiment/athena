@@ -60,6 +60,7 @@
 #include "ActsInterop/Logger.h"
 #include "ActsInterop/LoggerUtils.h"
 
+#include "TrackingGeoAlignVisitor.h"
 #include <Acts/Utilities/AxisDefinitions.hpp>
 #include <limits>
 #include <random>
@@ -1129,16 +1130,10 @@ ActsTrackingGeometrySvc::makeSCTTRTAssembly(
 
 unsigned int ActsTrackingGeometrySvc::populateAlignmentStore(DetectorAlignStore &store) const {
     ATH_MSG_DEBUG("Populate the alignment store with all detector elements");
-    unsigned int nElements = 0;
-    m_trackingGeometry->visitSurfaces([&store, &nElements](const Acts::Surface *srf) {
-        const auto *detElem = dynamic_cast<const IDetectorElement *>(srf->surfacePlacement());
-        if (!detElem) {
-            return;
-        }
-        nElements += detElem->storeAlignedTransforms(store);
-    });
-    ATH_MSG_DEBUG("Populated with " << nElements << " elements");
-    return nElements;
+    TrackingGeoAlignVisitor visitor{store};
+    m_trackingGeometry->apply(visitor);
+    ATH_MSG_DEBUG("Populated with " << visitor.alignedObjects() << " elements");
+    return visitor.alignedObjects();
 }
 const GeometryContext &ActsTrackingGeometrySvc::getNominalContext() const { return m_nominalContext; }
 

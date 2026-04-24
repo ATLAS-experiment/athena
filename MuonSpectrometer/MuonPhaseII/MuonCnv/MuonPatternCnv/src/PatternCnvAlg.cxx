@@ -80,7 +80,7 @@ namespace MuonR4{
             for (const HoughHitType& hit : seed->getHitsInMax()) {
                 channelsInMax.insert(hit->identify());
                 if (hit->secondaryMeasurement()) {
-                    channelsInMax.insert(xAOD::identify(hit->secondaryMeasurement()));
+                    channelsInMax.insert(hit->secondaryMeasurement()->identify());
                 }
             }
             std::vector<const Trk::PrepRawData*> trkHits{};

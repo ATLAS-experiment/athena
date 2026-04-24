@@ -22,12 +22,7 @@
 #include "TrigNavigation/NavigationCore.icc"
 
 #include "TrigNavigation/TypeMaps.h"
-
-
-//#include "TrigNavigation/AccessProxy.h"
-
 #include "TrigNavigation/TrigFeatureLink.h"
-#include "TrigNavigation/NavigationTraits.h"
 
 namespace HLT {
   class TriggerElement;

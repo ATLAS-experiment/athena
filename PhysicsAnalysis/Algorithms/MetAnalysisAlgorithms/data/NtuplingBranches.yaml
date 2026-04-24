@@ -1,0 +1,20 @@
+MetAnalysisConfig:
+  - name: met
+    description: the transverse missing energy $E_\mathrm{T}$
+  - name: phi
+    description: the transverse missing energy $\phi$
+  - name: sumet
+    description: the sum of all visible transverse momentum
+  - name: significance
+    description: the transverse missing energy significance
+    toggled_by: saveSignificance
+  - name: sigDirectional
+    description: directional missing energy significance
+    toggled_by: addExtraSignificanceVars
+  - name: METOverSqrtSumET
+    description: $E_\mathrm{T}/\sum E_T$
+    toggled_by: addExtraSignificanceVars
+  - name: METOverSqrtHT
+    description: $E_\mathrm{T}/\sum p_T$
+    toggled_by: addExtraSignificanceVars
+

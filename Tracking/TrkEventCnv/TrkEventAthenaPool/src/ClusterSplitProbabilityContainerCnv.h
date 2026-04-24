@@ -27,7 +27,7 @@ public:
 
 protected:
   virtual ClusterSplitProbabilityContainer_PERS *createPersistent( Trk::ClusterSplitProbabilityContainer *transCont);
-  virtual Trk::ClusterSplitProbabilityContainer      *createTransient();
+  virtual Trk::ClusterSplitProbabilityContainer      *createTransient(const Token* token);
 
   Trk::ClusterSplitProbabilityContainerCnv_p1 m_converter;
   static const std::string s_name;

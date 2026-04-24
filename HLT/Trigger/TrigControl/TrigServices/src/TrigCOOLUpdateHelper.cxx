@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -15,7 +15,6 @@
 #include "AthenaKernel/IOVRange.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "CoralBase/AttributeListException.h"
-#include "StoreGate/DataHandle.h"
 
 // TDAQ includes
 #include "CTPfragment/CTPfragment.h"
@@ -102,12 +101,13 @@ StatusCode TrigCOOLUpdateHelper::readFolderInfo()
   }
 
   if (!m_coolFolderName.empty()) {
-    // Read COOL folder map
-    const DataHandle<CondAttrListCollection> folderMapHandle;
-    ATH_CHECK( detStore()->regHandle(folderMapHandle, m_coolFolderName) );
+    // Read COOL folder map. We cannot use a ReadCondHandle because
+    // this is executed before the first event.
+    const CondAttrListCollection* folderMap{};
+    ATH_CHECK( detStore()->retrieve(folderMap, m_coolFolderName) );
 
     ATH_MSG_INFO("COOL folder map in " << m_coolFolderName << ":");
-    for (auto const& [idx, attr] : *folderMapHandle) {
+    for (auto const& [idx, attr] : *folderMap) {
       m_folderNames[idx] = attr["FolderName"].data<std::string>();
       ATH_MSG_INFO("   (" << idx << ") " << m_folderNames[idx]);
     }
@@ -234,8 +234,8 @@ StatusCode TrigCOOLUpdateHelper::getFolderName(CTPfragment::FolderIndex idx, std
   if (itr==m_folderNames.end()) {
     ATH_MSG_ERROR(m_coolFolderName << " does not contain a folder for index/channel " << idx
                   << ". Existing folders are:");
-    for (auto const& [idx, name] : m_folderNames) {
-      ATH_MSG_INFO("   (" << idx << ") " << name);
+    for (auto const& [i, name] : m_folderNames) {
+      ATH_MSG_INFO("   (" << i << ") " << name);
     }
     return StatusCode::FAILURE;
   }

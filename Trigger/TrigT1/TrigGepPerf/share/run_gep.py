@@ -63,6 +63,10 @@ if __name__ == '__main__':
                         default='GepCells',
                         help='commma separated list of input cell Collection for CellTower algorithm: [GepCells,CaloCells]')
 
+    p.add_argument('-pu', '--puSupAlgs',
+                        default='',
+                        help='comma separated list of PU suppression algorithms: [EtaSK]')
+
     args = p.parse_args()
 
     clusterAlgNames = args.clusterAlgs.split(',')
@@ -71,8 +75,10 @@ if __name__ == '__main__':
     enable_tc_tower = args.enableTCTower  # Boolean flag
     enable_cell_tower = args.enableCellTower  # Boolean flag
     cellCollectionName = args.cellCollection
+    puSuppressionAlgNames = args.puSupAlgs.split(',') if args.puSupAlgs else ['']
     info('GEP clusterAlgs: ' + str(clusterAlgNames))
     info('GEP jetAlgs: ' + str(jetAlgNames))
+    info('GEP puSuppressionAlgs: ' + str(puSuppressionAlgNames))
 
     # Print Tower statuses
     info(f'GEP TopoTower enabled: {"Yes" if enable_topo_tower else "No"}')
@@ -380,22 +386,66 @@ if __name__ == '__main__':
                 outputCaloClustersKey='GEP'+ cluster_alg +'TCTower',
                 OutputLevel=gepAlgs_output_level))
 
-        puSuppressionAlgs = ['']
+        for puSuppressionAlg in puSuppressionAlgNames:
 
-        for puSuppressionAlg in puSuppressionAlgs:
+            puLabel = puSuppressionAlg
 
-            tcLabel = cluster_alg + puSuppressionAlg
+            # Apply EtaSoftKiller PU suppression if requested
+            if puLabel == 'EtaSK':
+                from TrigGepPerf.GepEtaSoftKillerAlgConfig import GepEtaSoftKillerAlgCfg
+
+                puClustersKey = 'GEP' + cluster_alg + puLabel + 'Clusters'
+                acc.merge(GepEtaSoftKillerAlgCfg(
+                    flags,
+                    name='GepEtaSK' + cluster_alg + 'Alg',
+                    inputClustersKey=caloClustersKey,
+                    outputClustersKey=puClustersKey,
+                    OutputLevel=gepAlgs_output_level))
+
+                if enable_topo_tower:
+                    puTopoTowerKey = 'GEP' + cluster_alg + puLabel + 'TopoTower'
+                    acc.merge(GepEtaSoftKillerAlgCfg(
+                        flags,
+                        name='GepEtaSK' + cluster_alg + 'TopoTowerAlg',
+                        inputClustersKey='GEP' + cluster_alg + 'TopoTower',
+                        outputClustersKey=puTopoTowerKey,
+                        OutputLevel=gepAlgs_output_level))
+
+                if enable_tc_tower:
+                    puTcTowerKey = 'GEP' + cluster_alg + puLabel + 'TCTower'
+                    acc.merge(GepEtaSoftKillerAlgCfg(
+                        flags,
+                        name='GepEtaSK' + cluster_alg + 'TCTowerAlg',
+                        inputClustersKey='GEP' + cluster_alg + 'TCTower',
+                        outputClustersKey=puTcTowerKey,
+                        OutputLevel=gepAlgs_output_level))
+
+                if enable_cell_tower:
+                    puCellTowerKey = 'GEP' + puLabel + 'CellTower'
+                    acc.merge(GepEtaSoftKillerAlgCfg(
+                        flags,
+                        name='GepEtaSKCellTowerAlg',
+                        inputClustersKey=cell_tower_key,
+                        outputClustersKey=puCellTowerKey,
+                        OutputLevel=gepAlgs_output_level))
+                else:
+                    puCellTowerKey = ''
+            else:
+                puClustersKey = caloClustersKey
+                puTopoTowerKey = 'GEP' + cluster_alg + 'TopoTower'
+                puTcTowerKey = 'GEP' + cluster_alg + 'TCTower'
+                puCellTowerKey = cell_tower_key if enable_cell_tower else ''
 
             for jetAlg in jetAlgNames:
 
                 from TrigGepPerf.GepJetAlgConfig import GepJetAlgCfg 
-                alg_name='Gep'+cluster_alg + jetAlg + 'JetAlg'
+                alg_name='Gep' + cluster_alg + puLabel + jetAlg + 'JetAlg'
                 acc.merge(GepJetAlgCfg(
                     flags,
                     name=alg_name,
                     jetAlgName=jetAlg,
-                    caloClustersKey=caloClustersKey,
-                    outputJetsKey='GEP' + cluster_alg + jetAlg +'Jets',
+                    caloClustersKey=puClustersKey,
+                    outputJetsKey='GEP' + cluster_alg + puLabel + jetAlg + 'Jets',
                     OutputLevel=gepAlgs_output_level))
                 
                 info('\nGepJetAlg properties dump\n')
@@ -403,14 +453,13 @@ if __name__ == '__main__':
 
                 # Custom jets for TopoTowers using the correct key
                 if enable_topo_tower:
-                    topoTowerKey = 'GEP' + cluster_alg + 'TopoTower'
-                    ttalg_name = 'Gep' + cluster_alg + 'TopoTower' + jetAlg + 'JetAlg'
+                    ttalg_name = 'Gep' + cluster_alg + puLabel + 'TopoTower' + jetAlg + 'JetAlg'
                     acc.merge(GepJetAlgCfg(
                         flags,
                         name=ttalg_name,
                         jetAlgName=jetAlg,
-                        caloClustersKey=topoTowerKey,
-                        outputJetsKey='GEP' + cluster_alg + 'TopoTower' + jetAlg + 'Jets',
+                        caloClustersKey=puTopoTowerKey,
+                        outputJetsKey='GEP' + cluster_alg + puLabel + 'TopoTower' + jetAlg + 'Jets',
                         OutputLevel=gepAlgs_output_level))
 
                     info('\nGepJetAlg properties dump for TopoTowers\n')
@@ -418,14 +467,13 @@ if __name__ == '__main__':
 
                 # Custom jets for TCTowers using the correct key
                 if enable_tc_tower:
-                    tcTowerKey = 'GEP' + cluster_alg + 'TCTower'
-                    tctalg_name = 'Gep' + cluster_alg + 'TCTower' + jetAlg + 'JetAlg'
+                    tctalg_name = 'Gep' + cluster_alg + puLabel + 'TCTower' + jetAlg + 'JetAlg'
                     acc.merge(GepJetAlgCfg(
                         flags,
                         name=tctalg_name,
                         jetAlgName=jetAlg,
-                        caloClustersKey=tcTowerKey,
-                        outputJetsKey='GEP' + cluster_alg + 'TCTower' + jetAlg + 'Jets',
+                        caloClustersKey=puTcTowerKey,
+                        outputJetsKey='GEP' + cluster_alg + puLabel + 'TCTower' + jetAlg + 'Jets',
                         OutputLevel=gepAlgs_output_level))
 
                     info('\nGepJetAlg properties dump for TCTowers\n')
@@ -433,93 +481,91 @@ if __name__ == '__main__':
 
                 # CellTowers
                 if enable_cell_tower:
-                    ctalg_name = 'GepCellTower' + jetAlg + 'JetAlg'
+                    ctalg_name = 'Gep' + puLabel + 'CellTower' + jetAlg + 'JetAlg'
                     acc.merge(GepJetAlgCfg(
                         flags,
                         name=ctalg_name,
                         jetAlgName=jetAlg,
-                        caloClustersKey=cell_tower_key,
-                        outputJetsKey='GEPCellTower' + jetAlg + 'Jets',
+                        caloClustersKey=puCellTowerKey,
+                        outputJetsKey='GEP' + puLabel + 'CellTower' + jetAlg + 'Jets',
                         OutputLevel=gepAlgs_output_level))
 
                     info('\nGepJetAlg properties dump for CellTower\n')
                     info(str(acc.getEventAlgo(ctalg_name)._properties))
 
             from TrigGepPerf.GepMETAlgConfig import GepMETAlgCfg 
-            alg_name='GepMET'+ cluster_alg +'Alg'
+            alg_name='GepMET' + cluster_alg + puLabel + 'Alg'
             acc.merge(GepMETAlgCfg(
                 flags,
                 name=alg_name,
-                caloClustersKey=caloClustersKey,
-                outputMETKey='GEP'+ cluster_alg +'MET',
+                caloClustersKey=puClustersKey,
+                outputMETKey='GEP' + cluster_alg + puLabel + 'MET',
                 OutputLevel=gepAlgs_output_level))
 
             # MET for TopoTowers using the correct key
             if enable_topo_tower:
-                topoTowerMETKey = 'GEP' + cluster_alg + 'TopoTower'
-                ttMETalg_name = 'GepMET' + cluster_alg + 'TopoTower' + 'Alg'
+                ttMETalg_name = 'GepMET' + cluster_alg + puLabel + 'TopoTower' + 'Alg'
                 acc.merge(GepMETAlgCfg(
                     flags,
                     name=ttMETalg_name,
-                    caloClustersKey=topoTowerMETKey,
-                    outputMETKey='GEP' + cluster_alg + 'TopoTower' + 'MET',
+                    caloClustersKey=puTopoTowerKey,
+                    outputMETKey='GEP' + cluster_alg + puLabel + 'TopoTower' + 'MET',
                     OutputLevel=gepAlgs_output_level))
 
             # MET for TCTowers using the correct key
             if enable_tc_tower:
-                tcTowerMETKey = 'GEP' + cluster_alg + 'TCTower'
-                tctMETalg_name = 'GepMET' + cluster_alg + 'TCTower' + 'Alg'
+                tctMETalg_name = 'GepMET' + cluster_alg + puLabel + 'TCTower' + 'Alg'
                 acc.merge(GepMETAlgCfg(
                     flags,
                     name=tctMETalg_name,
-                    caloClustersKey=tcTowerMETKey,
-                    outputMETKey='GEP' + cluster_alg + 'TCTower' + 'MET',
+                    caloClustersKey=puTcTowerKey,
+                    outputMETKey='GEP' + cluster_alg + puLabel + 'TCTower' + 'MET',
                     OutputLevel=gepAlgs_output_level))
 
             # MET for CellTower using the correct key
             if enable_cell_tower:
-                ctMETalg_name = 'GepMETCellTowerAlg'
+                ctMETalg_name = 'GepMET' + puLabel + 'CellTowerAlg'
                 acc.merge(GepMETAlgCfg(
                     flags,
                     name=ctMETalg_name,
-                    caloClustersKey=cell_tower_key,
-                    outputMETKey='GEPCellTowerMET',
+                    caloClustersKey=puCellTowerKey,
+                    outputMETKey='GEP' + puLabel + 'CellTowerMET',
                     OutputLevel=gepAlgs_output_level))
                     
             from TrigGepPerf.GepMETPufitAlgConfig import GepMETPufitAlgCfg 
-            alg_name='GepMET' + cluster_alg + 'PufitAlg'
+            alg_name='GepMET' + cluster_alg + puLabel + 'PufitAlg'
             acc.merge(GepMETPufitAlgCfg(
                 flags,
                 name=alg_name,
-                caloClustersKey=caloClustersKey,
-                outputMETPufitKey='GEP'+ cluster_alg + 'METPufit',
+                caloClustersKey=puClustersKey,
+                outputMETPufitKey='GEP' + cluster_alg + puLabel + 'METPufit',
                 OutputLevel=gepAlgs_output_level))
 
             if enable_topo_tower: 
-                ttPufitMETalg_name = 'GepMET' + cluster_alg + 'TopoTower' + 'PufitAlg'
+                ttPufitMETalg_name = 'GepMET' + cluster_alg + puLabel + 'TopoTower' + 'PufitAlg'
                 acc.merge(GepMETPufitAlgCfg(
                     flags,
                     name=ttPufitMETalg_name,
-                    caloClustersKey=topoTowerMETKey,
-                    outputMETKey='GEP' + cluster_alg + 'TopoTower' + 'METPufit',
+                    caloClustersKey=puTopoTowerKey,
+                    outputMETKey='GEP' + cluster_alg + puLabel + 'TopoTower' + 'METPufit',
                     OutputLevel=gepAlgs_output_level))
 
             if enable_tc_tower:
-                tctPufitMETalg_name = 'GepMET' + cluster_alg + 'TCTower' + 'PufitAlg'
+                tctPufitMETalg_name = 'GepMET' + cluster_alg + puLabel + 'TCTower' + 'PufitAlg'
                 acc.merge(GepMETPufitAlgCfg(
                     flags,
                     name=tctPufitMETalg_name,
-                    caloClustersKey=tcTowerMETKey,
-                    outputMETKey='GEP' + cluster_alg + 'TCTower' + 'METPufit',
+                    caloClustersKey=puTcTowerKey,
+                    outputMETKey='GEP' + cluster_alg + puLabel + 'TCTower' + 'METPufit',
                     OutputLevel=gepAlgs_output_level))
 
             if enable_cell_tower:
-                ctPufitMETalg_name = 'GepMETCellTowerPufitAlg'
+                ctPufitMETalg_name = 'GepMET' + puLabel + 'CellTowerPufitAlg'
                 acc.merge(GepMETPufitAlgCfg(
                     flags,
                     name=ctPufitMETalg_name,
-                    caloClustersKey=cell_tower_key,
-                    outputMETKey='GEPCellTowerMETPufit',
+                    caloClustersKey=puCellTowerKey,
+                    outputMETKey='GEP' + puLabel + 'CellTowerMETPufit',
                     OutputLevel=gepAlgs_output_level))
 
     ##################################################

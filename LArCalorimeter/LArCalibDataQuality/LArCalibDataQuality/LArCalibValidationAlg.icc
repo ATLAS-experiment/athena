@@ -1,6 +1,6 @@
 //Dear emacs, this is -*-c++-*-
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -474,7 +474,7 @@ bool LArCalibValidationAlg<CONDITIONSCONTAINER, REFCONTAINER>::checkCoolChannelC
                ATH_MSG_WARNING("Not a SC identifier, skipping ! ");
                continue;
             }
-            try { const HWIdentifier chanIdd(chanId.get_identifier32().get_compact());chanIdd.show();}
+            try { const HWIdentifier chanIdd(chanId.get_identifier32().get_compact());chanIdd.show(msg());}
             catch (...) {
                ATH_MSG_WARNING("Something wrong with this id, skipping ! ");
                continue;

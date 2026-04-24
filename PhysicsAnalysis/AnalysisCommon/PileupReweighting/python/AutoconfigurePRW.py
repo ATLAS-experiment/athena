@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from Campaigns.Utils import Campaign, getMCCampaign
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 
@@ -39,8 +39,11 @@ def getLumicalcFiles(campaign):
             'GoodRunsLists/data23_13p6TeV/20250321/ilumicalc_histograms_None_451587-456749_OflLumi-Run3-004.root'
         ],
         Campaign.MC23e: [
-            'GoodRunsLists/data24_13p6TeV/20241118/ilumicalc_histograms_None_473235-486706_OflLumi-Run3-005.root'
-        ]
+            'GoodRunsLists/data24_13p6TeV/20260127/ilumicalc_histograms_None_473235-486706_OflLumi-Run3-008.root'
+        ],
+        Campaign.MC23g: [
+            'GoodRunsLists/data25_13p6TeV/20260129/ilumicalc_histograms_None_497924-509849_OflLumi-Run3-006.root'
+        ],
     }
 
     try:
@@ -70,10 +73,14 @@ def actualMuFiles(campaign):
         )
     elif campaign in [Campaign.MC23e]:
         list.append(
-            'GoodRunsLists/data24_13p6TeV/20241118/purw.actualMu.root'
+            'GoodRunsLists/data24_13p6TeV/20260127/purw.actualMu.root'
+        )
+    elif campaign in [Campaign.MC23g]:
+        list.append(
+            'GoodRunsLists/data25_13p6TeV/20260129/purw.actualMu.root'
         )
 
-    if campaign in [Campaign.MC16d, Campaign.MC20d, Campaign.MC16e, Campaign.MC20e, Campaign.MC21a, Campaign.MC23a, Campaign.MC23c, Campaign.MC23d, Campaign.MC23e]:
+    if campaign in [Campaign.MC16d, Campaign.MC20d, Campaign.MC16e, Campaign.MC20e, Campaign.MC21a, Campaign.MC23a, Campaign.MC23c, Campaign.MC23d, Campaign.MC23e, Campaign.MC23g]:
         assert(len(list) == 1)
     else:
         assert(len(list) == 0)
@@ -115,6 +122,10 @@ def defaultConfigFiles(campaign):
     elif campaign in [Campaign.MC23e]:
         list.append(
             'PileupReweighting/mc23_common/mc23e.470000.physlite.prw.v1.root'
+        )
+    elif campaign in [Campaign.MC23g]:
+        list.append(
+            'PileupReweighting/mc23_common/mc23g.495000.physlite.prw.v1.root'
         )
     else:
         raise ValueError(f'Unsupported campaign {campaign}')

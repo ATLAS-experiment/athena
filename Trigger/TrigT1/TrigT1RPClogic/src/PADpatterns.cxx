@@ -1,11 +1,13 @@
 /* // -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "TrigT1RPClogic/PADpatterns.h"
+#include <utility> // std::in_range
+#include <stdexcept>
 
 
 PADpatterns::PADpatterns(int sector, int pad,unsigned long int debug) : 
@@ -98,11 +100,16 @@ PADpatterns::give_pad(const RpcCablingCondData* readCdo, int NOBXS, int BCZERO)
     m_pad = std::make_unique<Pad>(0,0,m_debug,subsystem,logic_sector,m_pad_id,1,oldSimulation, NOBXS);
 
     //M.Corradi 8/1/2015 get Pad configuration Parameters 
-    bool  eta_and_phi, feet_on;
-    unsigned short int cma_mask, feet_th0, feet_th1, feet_th2 ;
-
-    if (readCdo->give_Pad_Parameters((unsigned short int)m_sector,
-          (unsigned short int)m_pad_id,
+    bool  eta_and_phi{}, feet_on{};
+    unsigned short int cma_mask{}, feet_th0{}, feet_th1{}, feet_th2{};
+    auto canBeUShort = [](auto a){return std::in_range<unsigned short>(a);};
+    if (not canBeUShort(m_pad_id) or not canBeUShort(m_sector)){
+      throw std::out_of_range("PADpatterns::give_pad: m_pad_id or m_sector are not within the range of an unsigned short int");
+    }
+    const unsigned short shortPad = static_cast<unsigned short int>(m_pad_id);
+    const unsigned short shortSector = static_cast<unsigned short int>(m_sector);
+    if (readCdo->give_Pad_Parameters(shortSector,
+          shortPad,
           feet_on,eta_and_phi,cma_mask,
           feet_th0,feet_th1,feet_th2)){
       m_pad->setFeetOn(feet_on);
@@ -113,7 +120,7 @@ PADpatterns::give_pad(const RpcCablingCondData* readCdo, int NOBXS, int BCZERO)
       // MASK AND eta_and_phi to be implemented
 
     }else {
-      std::runtime_error("Could not retrieve Pad Parameters m_sector, m_pad_id = " +
+      std::runtime_error("PADpatterns::give_pad: Could not retrieve Pad Parameters m_sector, m_pad_id = " +
                          std::to_string(m_sector) + ", " + std::to_string(m_pad_id));
     }
 

@@ -29,7 +29,7 @@ public:
     LArPhysWaveContainerCnv (ISvcLocator* svcloc) : LArPhysWaveContainerCnvBase(svcloc) {}
 protected:
     LArPhysWavePersType*   createPersistent (LArPhysWaveTransType* transObj);
-    LArPhysWaveTransType*  createTransient ();
+    LArPhysWaveTransType*  createTransient(const Token* token);
     LArPhysWaveTransType*  createTransient(LArPhysWaveTransType* orig); //used to read non t/p split version
 };
 #endif

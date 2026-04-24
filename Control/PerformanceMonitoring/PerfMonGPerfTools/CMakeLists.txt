@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PerfMonGPerfTools )
@@ -19,7 +19,8 @@ if( NOT XAOD_ANALYSIS )
         SCRIPT python -m PerfMonGPerfTools.GPT_ProfilerServiceConfig
         PRIVATE_WORKING_DIRECTORY
         PROPERTIES TIMEOUT 600
-        POST_EXEC_SCRIPT nopost.sh )
+        LOG_IGNORE_PATTERN "An ERROR message|A FATAL error message"
+        POST_EXEC_SCRIPT noerror.sh )
 endif()
 
 # Install files from the package:

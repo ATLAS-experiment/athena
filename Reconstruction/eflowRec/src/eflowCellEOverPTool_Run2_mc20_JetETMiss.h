@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef EFLOWCELLEOVERPTOOL_RUN2_MC20_JETETMISS_H
-#define EFLOWCELLEOVERPTOOL_RUN2_MC20_JETETMISS_H
+#ifndef EFLOWREC_EFLOWCELLEOVERPTOOL_RUN2_MC20_JETETMISS_H
+#define EFLOWREC_EFLOWCELLEOVERPTOOL_RUN2_MC20_JETETMISS_H
 
 #include "IEFlowCellEOverPTool.h"
 

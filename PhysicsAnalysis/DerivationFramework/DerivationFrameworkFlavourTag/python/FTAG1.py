@@ -1,385 +1,289 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
-#====================================================================
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+# ====================================================================
 # DAOD_FTAG1.py
-# This defines DAOD_FTAG1, an unskimmed DAOD format for Run 3.
-# It contains the variables and objects needed for the large majority 
-# of physics analyses in ATLAS.
-# It requires the flag FTAG1 in Derivation_tf.py   
-#====================================================================
+#
+# Unskimmed DAOD format for Run 2/3 flavour-tagging studies.
+# Contains objects and variables needed for most FTAG studies.
+# Requires the FTAG1 flag in Derivation_tf.py
+# ====================================================================
+
+from __future__ import annotations
+
+from typing import Any, TYPE_CHECKING
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import MetadataCategory
-from AthenaConfiguration.Enums import LHCPeriod
+from AthenaConfiguration.Enums import LHCPeriod, MetadataCategory
 
-from DerivationFrameworkEGamma.ElectronsCPDetailedContent import (
-    ElectronsCPDetailedContent
-)
+from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
+from DerivationFrameworkEGamma.ElectronsCPDetailedContent import ElectronsCPDetailedContent
 from DerivationFrameworkFlavourTag.FtagBaseContent import (
-    addCommonAugmentation
+    add_common_augmentation,
+    add_baseline_slimming_allvariables,
+    add_baseline_slimming_smartcollections,
+    add_extra_variables_to_slimming_helper,
+    add_truth_to_slimming_helper,
+    add_truth_vertex_decorations,
+    trigger_matching,
+    trigger_setup,
+    update_append_to_dictionary_in_slimming_helper,
 )
+from DerivationFrameworkFlavourTag.FtagDerivationConfig import (
+    HLTJetFTagDecorationCfg,
+)
+from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
+from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
+from JetRecConfig.JetRecConfig import JetRecCfg
+from JetRecConfig.StandardSmallRJets import AntiKt4LCTopo
+from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+
+if TYPE_CHECKING:
+    from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
 
-# Main algorithm config
-def FTAG1KernelCfg(flags, name='FTAG1Kernel', **kwargs):
-    """Configure the derivation framework driving algorithm (kernel) for FTAG1"""
+def FTAG1KernelCfg(
+    flags: AthConfigFlags,
+    name: str = "FTAG1Kernel",
+    **kwargs: Any,
+) -> ComponentAccumulator:
+    """Configure the derivation kernel for FTAG1."""
     acc = ComponentAccumulator()
 
-    # Common augmentations
-    from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
-    acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
+    acc.merge(
+        PhysCommonAugmentationsCfg(
+            flags=flags,
+            TriggerListsHelper=kwargs["trigger_lists_helper"],
+        )
+    )
 
-    nametag = name.replace('Kernel', '') #get the name to label the tools below such that other formats can use this KernelCfg
-    augmentationTools = []
-    # Add V0Tool
-    if flags.BTagging.AddV0Finder:
-        acc.merge(V0ToolCfg(flags, augmentationTools=augmentationTools, tool_name_prefix=nametag, container_name_prefix="FTAG"))
+    # Setup the derivation kernel
+    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(name=name))
 
-    # thinning tools
-    thinningTools = []
-
-    # Finally the kernel itself
-    DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
-    acc.addEventAlgo(DerivationKernel(name, AugmentationTools = augmentationTools, ThinningTools = thinningTools))      
-
-    # Extra jet content:
+    # Configure extra reconstruction of jets
     acc.merge(FTAG1ExtraContentCfg(flags))
-
     return acc
 
 
-def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_AllVariables=None, trigger_option='', TriggerListsHelper = None):
-
-    if extra_SmartCollections is None: extra_SmartCollections = []
-    if extra_AllVariables is None: extra_AllVariables = []
-
+def FTAG1CoreCfg(
+    flags: AthConfigFlags,
+    name_tag: str = "FTAG1",
+    extra_SmartCollections: list[str] | None = None,
+    extra_AllVariables: list[str] | None = None,
+    trigger_lists_helper: TriggerListsHelper | None = None,
+) -> ComponentAccumulator:
+    """Configure FTAG1 slimming and output content."""
+    if extra_SmartCollections is None:
+        extra_SmartCollections = []
+    if extra_AllVariables is None:
+        extra_AllVariables = []
 
     acc = ComponentAccumulator()
 
-    # ============================
-    # Define contents of the format
-    # =============================
-    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-    from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
+    ftag1_slimming_helper = SlimmingHelper(
+        inputName=name_tag + "SlimmingHelper",
+        NamesAndTypes=flags.Input.TypedCollections,
+        flags=flags,
+    )
 
-    FTAG1SlimmingHelper = SlimmingHelper(name_tag+"SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
+    # Initialise explicit lists
+    ftag1_slimming_helper.SmartCollections = []
+    ftag1_slimming_helper.AllVariables = []
+    ftag1_slimming_helper.ExtraVariables = []
 
-    # Many of these are added to AllVariables below as well. We add
-    # these items in both places in case some of the smart collections
-    # add variables from some other collection. For flavor tagging,
-    # for example will add jet variables.
-    
-    from DerivationFrameworkFlavourTag import FtagBaseContent
+    # Baseline content
+    add_baseline_slimming_smartcollections(slimming_helper=ftag1_slimming_helper)
+    add_baseline_slimming_allvariables(slimming_helper=ftag1_slimming_helper)
+    add_truth_to_slimming_helper(slimming_helper=ftag1_slimming_helper)
 
-    FTAG1SlimmingHelper.SmartCollections = []
-    FtagBaseContent.add_baseline_slimming_smartcollections(FTAG1SlimmingHelper)
+    # Common FTAG augmentations
+    add_common_augmentation(
+        flags=flags,
+        acc=acc,
+        slimming_helper=ftag1_slimming_helper,
+    )
 
-    addCommonAugmentation(flags, acc, FTAG1SlimmingHelper)
+    # Truth vertex labeling for Maskformer (see https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/AnalysisCommon/ParticleJetTools/docs/TruthVertexLabelling.md?ref_type=heads)
+    add_truth_vertex_decorations(
+        flags=flags,
+        acc=acc,
+        slimming_helper=ftag1_slimming_helper,
+        large_r_jet_collection="AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
+    )
 
-    FTAG1SlimmingHelper.SmartCollections += [
-                                           "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
-                                          ]
-
-    if flags.GeoModel.Run >= LHCPeriod.Run4:
-        FTAG1SlimmingHelper.SmartCollections += [
-                                                "AntiKt4EMTopoJets",
-                                                "MET_Baseline_AntiKt4EMTopo",
-                                                ]
-
-    if len(extra_SmartCollections)>0:
-        for a_container in extra_SmartCollections:
-            if a_container not in FTAG1SlimmingHelper.SmartCollections:
-                FTAG1SlimmingHelper.SmartCollections.append(a_container)
-
-    FTAG1SlimmingHelper.AllVariables = []
-    FtagBaseContent.add_baseline_slimming_allvariables(FTAG1SlimmingHelper)
-
-    FTAG1SlimmingHelper.AllVariables += [
-            "InDetLargeD0TrackParticles",
-            "AntiKt4EMPFlowJets",
-            "AntiKt4UFOCSSKJets",
-            "CaloCalFwdTopoTowers",
-            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
-            "UFOCSSK",
-            "GlobalChargedParticleFlowObjects",
-            "GlobalNeutralParticleFlowObjects",
-            "CHSGChargedParticleFlowObjects",
-            "CHSGNeutralParticleFlowObjects",
-            "CaloCalTopoClusters",
-            "TruthParticles",
-            "TruthVertices",
-            "JetAssociatedPixelClusters",
-            "JetAssociatedSCTClusters",
-            "PixelClusters",
-            "SCT_Clusters"
+    # FTAG1-specific smart collections
+    ftag1_slimming_helper.SmartCollections += [
+        "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
+        "AntiKt4LCTopoJets",
     ]
-    
+
+    # FTAG1-specific all-variable content
+    ftag1_slimming_helper.AllVariables += [
+        "InDetLargeD0TrackParticles",
+        "AntiKt4EMPFlowJets",
+        "AntiKt4LCTopoJets",
+        "CaloCalFwdTopoTowers",
+        "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
+        "UFOCSSK",
+        "GlobalChargedParticleFlowObjects",
+        "GlobalNeutralParticleFlowObjects",
+        "CHSGChargedParticleFlowObjects",
+        "CHSGNeutralParticleFlowObjects",
+        "CSSKGChargedParticleFlowObjects",
+        "CSSKGNeutralParticleFlowObjects",
+        "CaloCalTopoClusters",
+        "TauJets",
+        "TauNeutralParticleFlowObjects",
+        "TauShotParticleFlowObjects",
+        "TauTracks",
+        "TruthEvents",
+        "TruthParticles",
+        "TruthVertices",
+        "JetAssociatedPixelClusters",
+        "JetAssociatedSCTClusters",
+        "PixelClusters",
+        "SCT_Clusters",
+    ]
+
+    # Extra variables from e/gamma and common FTAG content
+    ftag1_slimming_helper.ExtraVariables += ElectronsCPDetailedContent
+    add_extra_variables_to_slimming_helper(
+        flags=flags,
+        slimming_helper=ftag1_slimming_helper,
+    )
+
+    # FTAG1-specific extra variables
+    ftag1_slimming_helper.ExtraVariables += [
+        "AntiKt10TruthSoftDropBeta100Zcut10Jets.constituentLinks",
+        "AntiKt4TruthDressedWZJets.constituentLinks",
+        "AntiKt4TruthJets.constituentLinks",
+        (
+            "AntiKt4EMTopoJets."
+            "HadronConeExclTruthLabelID."
+            "HadronGhostTruthLabelID."
+            "GhostBHadronsFinal."
+            "GhostCHadronsFinal."
+            "GhostTausFinal."
+            "ConeExclBHadronsFinal."
+            "ConeExclCHadronsFinal."
+            "ConeExclTausFinal"
+        ),
+        (
+            "AntiKt4LCTopoJets."
+            "HadronConeExclTruthLabelID."
+            "HadronGhostTruthLabelID."
+            "GhostBHadronsFinal."
+            "GhostCHadronsFinal."
+            "GhostTausFinal."
+            "ConeExclBHadronsFinal."
+            "ConeExclCHadronsFinal."
+            "ConeExclTausFinal"
+        ),
+    ]
+
+    # Run-4-specific additions
     if flags.GeoModel.Run >= LHCPeriod.Run4:
-        FTAG1SlimmingHelper.AllVariables += [
+        ftag1_slimming_helper.SmartCollections += [
+            "AntiKt4EMTopoJets",
+            "MET_Baseline_AntiKt4EMTopo",
+        ]
+        ftag1_slimming_helper.AllVariables += [
             "AntiKt4EMTopoJets",
             "AntiKt4TruthJets",
             "ITkPixelMeasurements",
-            "ITkStripMeasurements"
-            ]
+            "ITkStripMeasurements",
+        ]
 
+    # User-provided extras
+    for container in extra_SmartCollections:
+        if container not in ftag1_slimming_helper.SmartCollections:
+            ftag1_slimming_helper.SmartCollections.append(container)
 
-    if len(extra_AllVariables)>0:
-        for a_container in extra_AllVariables:
-            if a_container not in FTAG1SlimmingHelper.AllVariables:
-                FTAG1SlimmingHelper.AllVariables.append(a_container)
+    for container in extra_AllVariables:
+        if container not in ftag1_slimming_helper.AllVariables:
+            ftag1_slimming_helper.AllVariables.append(container)
 
+    # Optional pseudotrack content
     if flags.BTagging.Pseudotrack:
-        FTAG1SlimmingHelper.AllVariables += [ "InDetPseudoTrackParticles" ]
+        ftag1_slimming_helper.AllVariables += ["InDetPseudoTrackParticles"]
 
+    # Append-to-dictionary updates
+    update_append_to_dictionary_in_slimming_helper(
+        flags=flags,
+        slimming_helper=ftag1_slimming_helper,
+    )
 
-    # Add additional e/gamma variables
-    FTAG1SlimmingHelper.ExtraVariables += ElectronsCPDetailedContent
-
-    # Add labels in EMTopo jets
-    FTAG1SlimmingHelper.ExtraVariables += ["AntiKt4EMTopoJets.HadronConeExclTruthLabelID.HadronGhostTruthLabelID.GhostBHadronsFinal.GhostCHadronsFinal.GhostTausFinal.ConeExclBHadronsFinal.ConeExclCHadronsFinal.ConeExclTausFinal"]
-
-    # update AppendToDictionary
-    extra_AppendToDictionary = {} #only add those items specifically for FTAG1 here!
-    FtagBaseContent.update_AppendToDictionary_in_SlimmingHelper(FTAG1SlimmingHelper, flags, extra_AppendToDictionary)
-
-    # Static content
-    StaticContent = [] #only add extra static content for FTAG1 here!
-    if flags.BTagging.AddV0Finder:
-        FTAGV0ContainerName = "FTAGRecoV0Candidates"
-        FTAGKshortContainerName = "FTAGRecoKshortCandidates"
-        FTAGLambdaContainerName = "FTAGRecoLambdaCandidates"
-        FTAGLambdabarContainerName = "FTAGRecoLambdabarCandidates"
-        StaticContent += ["xAOD::VertexContainer#%s"        %                 FTAGV0ContainerName]
-        StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % FTAGV0ContainerName]
-        StaticContent += ["xAOD::VertexContainer#%s"        %                 FTAGKshortContainerName]
-        StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % FTAGKshortContainerName]
-        StaticContent += ["xAOD::VertexContainer#%s"        %                 FTAGLambdaContainerName]
-        StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % FTAGLambdaContainerName]
-        StaticContent += ["xAOD::VertexContainer#%s"        %                 FTAGLambdabarContainerName]
-        StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % FTAGLambdabarContainerName]
-        CascadeCollections = []
-        CascadeCollections += ["FTAGJpsiKshortCascadeSV2", "FTAGJpsiKshortCascadeSV1"]
-        CascadeCollections += ["FTAGJpsiLambdaCascadeSV2", "FTAGJpsiLambdaCascadeSV1"]
-        CascadeCollections += ["FTAGJpsiLambdabarCascadeSV2", "FTAGJpsiLambdabarCascadeSV1"]
-        for cascades in CascadeCollections:
-            StaticContent += ["xAOD::VertexContainer#%s"   %     cascades]
-            StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % cascades]
-
-
-    FtagBaseContent.add_static_content_to_SlimmingHelper(FTAG1SlimmingHelper, flags, StaticContent)
-
-
-    # Add truth containers
-    if flags.Input.isMC:
-        FtagBaseContent.add_truth_to_SlimmingHelper(FTAG1SlimmingHelper)
-        if flags.Trigger.EDMVersion == 3:
-            # Add truth labels to Run 3 trigger jets
-            from DerivationFrameworkFlavourTag.FtagDerivationConfig import HLTJetFTagDecorationCfg
-            acc.merge(HLTJetFTagDecorationCfg(flags))
-
-    # Add ExtraVariables
-    FtagBaseContent.add_ExtraVariables_to_SlimmingHelper(FTAG1SlimmingHelper, flags)
-   
     # Trigger content
-    FtagBaseContent.trigger_setup(FTAG1SlimmingHelper, trigger_option)
-    FtagBaseContent.trigger_matching(FTAG1SlimmingHelper, TriggerListsHelper, flags)
+    trigger_setup(slimming_helper=ftag1_slimming_helper)
+    trigger_matching(
+        flags=flags,
+        slimming_helper=ftag1_slimming_helper,
+        trigger_lists_helper=trigger_lists_helper,
+    )
 
-    jetOutputList = ["AntiKt4UFOCSSKJets"]
-    from DerivationFrameworkJetEtMiss.JetCommonConfig import addJetsToSlimmingTool
-    addJetsToSlimmingTool(FTAG1SlimmingHelper, jetOutputList, FTAG1SlimmingHelper.SmartCollections)
+    # Run jet labelling for trigger jets
+    if flags.Trigger.EDMVersion == 3 and flags.Input.isMC:
+        acc.merge(HLTJetFTagDecorationCfg(flags))
 
+    # Output stream
+    ftag1_item_list = ftag1_slimming_helper.GetItemList()
 
-    # Output stream    
-    FTAG1ItemList = FTAG1SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(flags, "DAOD_"+name_tag, ItemList=FTAG1ItemList, AcceptAlgs=[name_tag+"Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_"+name_tag, AcceptAlgs=[name_tag+"Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
+    acc.merge(
+        OutputStreamCfg(
+            flags=flags,
+            streamName="DAOD_" + name_tag,
+            ItemList=ftag1_item_list,
+            AcceptAlgs=[name_tag + "Kernel"],
+        )
+    )
+
+    acc.merge(
+        SetupMetaDataForStreamCfg(
+            flags=flags,
+            streamName="DAOD_" + name_tag,
+            AcceptAlgs=[name_tag + "Kernel"],
+            createMetadata=[
+                MetadataCategory.CutFlowMetaData,
+                MetadataCategory.TruthMetaData,
+            ],
+        )
+    )
 
     return acc
 
-def FTAG1Cfg(flags, name_tag='FTAG1'):
 
+def FTAG1ExtraContentCfg(flags: AthConfigFlags) -> ComponentAccumulator:
+    """Configure extra reconstructed jet content for FTAG1."""
     acc = ComponentAccumulator()
 
-    # Get the lists of triggers needed for trigger matching.
-    # This is needed at this scope (for the slimming) and further down in the config chain
-    # for actually configuring the matching, so we create it here and pass it down
-    # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
-    from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    FTAG1TriggerListsHelper = TriggerListsHelper(flags)
-   
-
-    # Common augmentations
-    acc.merge(FTAG1KernelCfg(flags, name=name_tag + "Kernel", StreamName = 'StreamDAOD_'+name_tag, TriggerListsHelper = FTAG1TriggerListsHelper))
-    # Content of FTAG1 
-    acc.merge(FTAG1CoreCfg(flags, name_tag, trigger_option=name_tag, TriggerListsHelper = FTAG1TriggerListsHelper))
+    jet_list = [AntiKt4LCTopo]
+    for jet_def in jet_list:
+        acc.merge(JetRecCfg(flags, jet_def))
 
     return acc
 
 
-def V0ToolCfg(flags, augmentationTools=None, tool_name_prefix="FTAG1", container_name_prefix="FTAG"):
-    
-    acc = ComponentAccumulator()
-    
-    if augmentationTools is None:
-        augmentationTools = []
-    
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (
-        BPHY_V0ToolCfg, BPHY_InDetDetailedTrackSelectorToolCfg,
-        BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
-    from JpsiUpsilonTools.JpsiUpsilonToolsConfig import (
-        PrimaryVertexRefittingToolCfg, JpsiFinderCfg)
-
-    V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, tool_name_prefix))
-    acc.addPublicTool(V0Tools)
-
-    vkalvrt = acc.popToolsAndMerge(
-        BPHY_TrkVKalVrtFitterCfg(flags, tool_name_prefix))
-
-    trackselect = acc.popToolsAndMerge(
-        BPHY_InDetDetailedTrackSelectorToolCfg(flags, tool_name_prefix))
-
-    vpest = acc.popToolsAndMerge(
-        BPHY_VertexPointEstimatorCfg(flags, tool_name_prefix))
-
-    JpsiFinder = acc.popToolsAndMerge(JpsiFinderCfg(flags,
-            name                        = tool_name_prefix+"JpsiFinder",
-            muAndMu                     = True,
-            muAndTrack                  = False,
-            TrackAndTrack               = False,
-            assumeDiMuons               = True,
-            invMassUpper                = 4000.0,
-            invMassLower                = 2600.0,
-            Chi2Cut                     = 200.,
-            oppChargesOnly              = True,
-            combOnly                    = True,
-            atLeastOneComb              = False,
-            useCombinedMeasurement      = False, # Only takes effect if combOnly=True   
-            muonCollectionKey           = "Muons",
-            TrackParticleCollection     = "InDetTrackParticles",
-            V0VertexFitterTool          = None,             # V0 vertex fitter
-            useV0Fitter                 = False,                   # if False a TrkVertexFitterTool will be used
-            TrkVertexFitterTool         = acc.addPublicTool(vkalvrt),        # VKalVrt vertex fitter
-            TrackSelectorTool           = acc.addPublicTool(trackselect),
-            VertexPointEstimator        = acc.addPublicTool(vpest),
-            useMCPCuts                  = False))
-    acc.addPublicTool(JpsiFinder)
-    JpsiSelectAndWrite   = CompFactory.DerivationFramework.Reco_Vertex(
-            name                   = tool_name_prefix+"JpsiSelectAndWrite",
-            VertexSearchTool       = JpsiFinder,
-            OutputVtxContainerName = container_name_prefix+"JpsiCandidates",
-            PVContainerName        = "PrimaryVertices",
-            V0Tools                = V0Tools,
-            PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
-            RefPVContainerName     = "SHOULDNOTBEUSED",
-            DoVertexType = 1)
-    Select_Jpsi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
-            name                  = tool_name_prefix+"_Select_Jpsi2mumu",
-            HypothesisName        = "Jpsi",
-            InputVtxContainerName = container_name_prefix+"JpsiCandidates",
-            V0Tools               = V0Tools,
-            VtxMassHypo           = 3096.916,
-            MassMin               = 2600.0,
-            MassMax               = 4000.0,
-            Chi2Max               = 200,
-            DoVertexType =1)
-
-    V0ContainerName = container_name_prefix+"RecoV0Candidates"
-    KshortContainerName = container_name_prefix+"RecoKshortCandidates"
-    LambdaContainerName = container_name_prefix+"RecoLambdaCandidates"
-    LambdabarContainerName = container_name_prefix+"RecoLambdabarCandidates"
-
-    from DerivationFrameworkBPhys.V0ToolConfig import BPHY_Reco_V0FinderCfg
-    Reco_V0Finder = acc.popToolsAndMerge(BPHY_Reco_V0FinderCfg(
-        flags, derivation = tool_name_prefix,
-        V0ContainerName = V0ContainerName,
-        KshortContainerName = KshortContainerName,
-        LambdaContainerName = LambdaContainerName,
-        LambdabarContainerName = LambdabarContainerName,
-        CheckVertexContainers = [container_name_prefix+'JpsiCandidates']))
-
-    from TrkConfig.TrkVKalVrtFitterConfig import JpsiV0VertexFitCfg
-    JpsiV0VertexFit = acc.popToolsAndMerge(JpsiV0VertexFitCfg(flags))
-    acc.addPublicTool(JpsiV0VertexFit)
-
-    JpsiKshort  = CompFactory.DerivationFramework.JpsiPlusV0Cascade(
-            name                    = tool_name_prefix+"JpsiKshort",
-            V0Tools                 = V0Tools,
-            HypothesisName          = "Bd",
-            TrkVertexFitterTool     = JpsiV0VertexFit,
-            V0Hypothesis            = 310,
-            PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
-            JpsiMassLowerCut        = 2800.,
-            JpsiMassUpperCut        = 4000.,
-            V0MassLowerCut          = 400.,
-            V0MassUpperCut          = 600.,
-            MassLowerCut            = 4300.,
-            MassUpperCut            = 6300.,
-            RefitPV                 = True,
-            RefPVContainerName      = container_name_prefix+"RefittedPrimaryVertices2",
-            JpsiVertices            = container_name_prefix+"JpsiCandidates",
-            CascadeVertexCollections= [container_name_prefix+"JpsiKshortCascadeSV2", container_name_prefix+"JpsiKshortCascadeSV1"],
-            V0Vertices              = V0ContainerName)
-
-    JpsiLambda   = CompFactory.DerivationFramework.JpsiPlusV0Cascade(
-            name                    = tool_name_prefix+"JpsiLambda",
-            V0Tools                 = V0Tools,
-            HypothesisName          = "Lambda_b",
-            TrkVertexFitterTool     = JpsiV0VertexFit,
-            PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
-            V0Hypothesis            = 3122,
-            JpsiMassLowerCut        = 2800.,
-            JpsiMassUpperCut        = 4000.,
-            V0MassLowerCut          = 1050.,
-            V0MassUpperCut          = 1250.,
-            MassLowerCut            = 4600.,
-            MassUpperCut            = 6600.,
-            RefitPV                 = True,
-            RefPVContainerName      = container_name_prefix+"RefittedPrimaryVertices3",
-            JpsiVertices            = container_name_prefix+"JpsiCandidates",
-            CascadeVertexCollections= [container_name_prefix+"JpsiLambdaCascadeSV2", container_name_prefix+"JpsiLambdaCascadeSV1"],
-            V0Vertices              = V0ContainerName)
-    JpsiLambdabar         = CompFactory.DerivationFramework.JpsiPlusV0Cascade(
-            name                    = tool_name_prefix+"JpsiLambdabar",
-            HypothesisName          = "Lambda_bbar",
-            V0Tools                 = V0Tools,
-            TrkVertexFitterTool     = JpsiV0VertexFit,
-            PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
-            V0Hypothesis            = -3122,
-            JpsiMassLowerCut        = 2800.,
-            JpsiMassUpperCut        = 4000.,
-            V0MassLowerCut          = 1050.,
-            V0MassUpperCut          = 1250.,
-            MassLowerCut            = 4600.,
-            MassUpperCut            = 6600.,
-            RefitPV                 = True,
-            RefPVContainerName      = container_name_prefix+"RefittedPrimaryVertices4",
-            JpsiVertices            = container_name_prefix+"JpsiCandidates",
-            CascadeVertexCollections= [container_name_prefix+"JpsiLambdabarCascadeSV2", container_name_prefix+"JpsiLambdabarCascadeSV1"],
-            V0Vertices              = V0ContainerName)
-
-    _augmentationTools = [JpsiSelectAndWrite,  Select_Jpsi2mumu,
-            Reco_V0Finder, JpsiKshort, JpsiLambda, JpsiLambdabar,
-            ]
-    for t in  _augmentationTools : acc.addPublicTool(t)
-    augmentationTools += _augmentationTools
-    return acc
-
-def FTAG1ExtraContentCfg(flags):
+def FTAG1Cfg(flags: AthConfigFlags, name_tag: str = "FTAG1") -> ComponentAccumulator:
+    """Configure the full FTAG1 derivation."""
     acc = ComponentAccumulator()
 
-    from JetRecConfig.JetRecConfig import JetRecCfg
-    jetList = []
-    #=======================================
-    # CSSK R = 0.4 UFO jets
-    #=======================================
-    from JetRecConfig.StandardSmallRJets import AntiKt4UFOCSSK
-    jetList += [AntiKt4UFOCSSK]
+    ftag1_trigger_lists_helper = TriggerListsHelper(flags)
 
+    acc.merge(
+        FTAG1KernelCfg(
+            flags=flags,
+            name=name_tag + "Kernel",
+            StreamName="StreamDAOD_" + name_tag,
+            trigger_lists_helper=ftag1_trigger_lists_helper,
+        )
+    )
 
-    for jd in jetList:
-        acc.merge(JetRecCfg(flags,jd))
+    acc.merge(
+        FTAG1CoreCfg(
+            flags=flags,
+            name_tag=name_tag,
+            trigger_lists_helper=ftag1_trigger_lists_helper,
+        )
+    )
 
     return acc
-
-

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -8,7 +8,9 @@
 #ifndef COLUMNAR_CORE_VECTOR_CONVERT_VIEW_H
 #define COLUMNAR_CORE_VECTOR_CONVERT_VIEW_H
 
-#include <ColumnarCore/ColumnAccessor.h>
+#include <cstddef> //std::size_t
+#include <stdexcept> //std::out_of_range
+#include <utility> //for std::move
 
 namespace columnar
 {
@@ -57,7 +59,7 @@ namespace columnar
       [[no_unique_address]] FunctionType m_function;
       IteratorType m_iterator;
     };
-    template<typename FunctionType,typename IteratorType> VectorConvertIterator (FunctionType&&,IteratorType&&) -> VectorConvertIterator<std::remove_cv_t<FunctionType>,std::remove_cv_t<IteratorType>>;
+    template<typename FunctionType,typename IteratorType> VectorConvertIterator (FunctionType&&,IteratorType&&) -> VectorConvertIterator<std::decay_t<FunctionType>,std::decay_t<IteratorType>>;
 
 
 
@@ -102,7 +104,7 @@ namespace columnar
       [[no_unique_address]] FunctionType m_function;
       ViewType m_view;
     };
-    template<typename FunctionType,typename ViewType> VectorConvertView (FunctionType&&,ViewType&&) -> VectorConvertView<std::remove_cv_t<FunctionType>,std::remove_cv_t<ViewType>>;
+    template<typename FunctionType,typename ViewType> VectorConvertView (FunctionType&&,ViewType&&) -> VectorConvertView<std::decay_t<FunctionType>,std::decay_t<ViewType>>;
   }
 }
 

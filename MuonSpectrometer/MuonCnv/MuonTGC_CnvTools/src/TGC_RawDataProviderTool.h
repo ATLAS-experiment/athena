@@ -37,44 +37,20 @@ class TGC_RawDataProviderTool
 
     /** Standard AlgTool method */
     virtual StatusCode initialize() override;
-
-    /** Old decoding method which uses IROBDataProviderSvc in
-     * TgcRdoToPrepDataTool */
-    virtual StatusCode convert(const ROBFragmentList& vecRobs) const override;
-    /** Old decoding method which uses IROBDataProviderSvc in
-     * TgcRdoToPrepDataTool with IdentifierHash vector */
-    virtual StatusCode convert(
-        const ROBFragmentList& vecRobs,
-        const std::vector<IdentifierHash>& rdoIdhVect) const override;
-    /** New decoding methods which do not use IROBDataProviderSvc in
-     * TgcRdoToPrepDataTool */
-    virtual StatusCode convert() const override;
-    /** New decoding methods which do not use IROBDataProviderSvc in
-     * TgcRdoToPrepDataTool with ID Hash vector */
-    virtual StatusCode convert(
-        const std::vector<IdentifierHash>& rdoIdhVect) const override;
-
     /** EventContext ones **/
-    virtual StatusCode convert(const ROBFragmentList&,
-                               const EventContext&) const override;
-    virtual StatusCode convert(const ROBFragmentList&,
-                               const std::vector<IdentifierHash>&,
-                               const EventContext&) const override;
+    
     virtual StatusCode convert(const EventContext&) const override;
     virtual StatusCode convert(const std::vector<IdentifierHash>&,
                                const EventContext&) const override;
 
    private:
     /** Method that converts the ROBFragments into the passed container */
-    StatusCode convertIntoContainer(
-        const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>&
-            vecRobs,
-        TgcRdoContainer& tgcRdoContainer, const EventContext& ctx) const;
+    StatusCode convertIntoContainer(const ROBFragmentList& vecRobs,
+                                    const EventContext& ctx) const;
 
     /** Function to get the ROB data from a vector of IdentifierHash **/
-    std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> getROBData(
-        const std::vector<IdentifierHash>& rdoIdhVect,
-        const EventContext& ctx) const;
+    ROBFragmentList getROBData(const std::vector<IdentifierHash>& rdoIdhVect,
+                               const EventContext& ctx) const;
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
         this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
@@ -99,10 +75,6 @@ class TGC_RawDataProviderTool
     // TGC container cache key
     SG::UpdateHandleKey<TgcRdo_Cache> m_rdoContainerCacheKey{
         this, "TgcContainerCacheKey", ""};
-    /** convert from vector of ROB IDs is not available */
-    virtual StatusCode convert(const std::vector<uint32_t>&) const override {
-        return StatusCode::FAILURE;
-    }
     /** EventContext ones **/
     virtual StatusCode convert(const std::vector<uint32_t>&,
                                const EventContext&) const override {

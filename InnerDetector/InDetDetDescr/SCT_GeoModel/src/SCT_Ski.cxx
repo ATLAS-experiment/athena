@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_Ski.h"
@@ -33,7 +33,6 @@
 #include "GaudiKernel/SystemOfUnits.h"
 
 #include <cmath>
-#include <sstream>
 #include <utility>
 
 SCT_Ski::SCT_Ski(const std::string & name,
@@ -317,9 +316,8 @@ SCT_Ski::preBuild()
   // Make names once only so we don't recreate them again again.
   for (int iModule = 0; iModule < m_modulesPerSki; iModule++) {
     // Add identifier to name.
-    std::ostringstream name;
-    name << "Module#" << m_id[iModule];
-    m_nameTag.push_back(new GeoNameTag(name.str()));
+    std::string name = std::format("Module#{}",m_id[iModule]);
+    m_nameTag.push_back(new GeoNameTag(name));
   }
 
 
@@ -385,7 +383,7 @@ SCT_Ski::build(SCT_Identifier id)
             id.setEtaModule(m_id[iModule]); // Set identifier.
             m_module->build(id);
             
-            std::string key="ModuleSKI_"+std::to_string(id.getLayerDisk())+"_"+std::to_string(id.getEtaModule())+"_"+std::to_string(id.getPhiModule());
+            std::string key=std::format("ModuleSKI_{}_{}_{}",id.getLayerDisk(),id.getEtaModule(),id.getPhiModule());
             
             // Store alignable transform
             m_detectorManager->addAlignableTransform(1, id.getWaferId(), (*m_mapAX)[key], (*m_mapFPV)[key]);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -567,11 +567,11 @@ int TileTBID::initLevelsFromDict()
   m_section_impl.pack (TileTBID::TILE_TESTBEAM,m_base_tile_type);
 
   ATH_MSG_DEBUG("initLevelsFromDict decode index and bit fields for each level: "             );
-  ATH_MSG_DEBUG(" system   [" << m_SYSTEM_INDEX   << "]  " << m_system_impl.show_to_string()  );
-  ATH_MSG_DEBUG(" section  [" << m_SECTION_INDEX  << "]  " << m_section_impl.show_to_string() );
-  ATH_MSG_DEBUG(" type     [" << m_TYPE_INDEX     << "]  " << m_type_impl.show_to_string()    );
-  ATH_MSG_DEBUG(" module   [" << m_MODULE_INDEX   << "]  " << m_module_impl.show_to_string()  );
-  ATH_MSG_DEBUG(" channel  [" << m_CHANNEL_INDEX  << "]  " << m_channel_impl.show_to_string() );
+  ATH_MSG_DEBUG(" system   [" << m_SYSTEM_INDEX   << "]  " << m_system_impl  );
+  ATH_MSG_DEBUG(" section  [" << m_SECTION_INDEX  << "]  " << m_section_impl );
+  ATH_MSG_DEBUG(" type     [" << m_TYPE_INDEX     << "]  " << m_type_impl    );
+  ATH_MSG_DEBUG(" module   [" << m_MODULE_INDEX   << "]  " << m_module_impl  );
+  ATH_MSG_DEBUG(" channel  [" << m_CHANNEL_INDEX  << "]  " << m_channel_impl );
 
   return(0) ;
 }

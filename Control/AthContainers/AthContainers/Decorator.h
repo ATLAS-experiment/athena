@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/Decorator.h
@@ -60,6 +60,14 @@ class Decorator
 public:
   /// Type referencing an item.
   using reference_type = typename AuxDataTraits<T, ALLOC>::reference_type;
+
+  /// Type referencing an item, as const reference.
+  using const_reference_type =
+    typename AuxDataTraits<T, ALLOC>::const_reference_type;
+
+  /// A const reference type that can appear on the RHS of an assignment
+  /// to an application of a Decorator of this type.
+  using rhs_const_reference_type = const_reference_type;
 
   /// Type the user sees.
   using element_type = typename AuxDataTraits<T, ALLOC>::element_type;
@@ -160,7 +168,7 @@ public:
     
 
   /**
-   * @brief Get a span over the auxilary data array.
+   * @brief Get a span over the auxiliary data array.
    * @param container The container from which to fetch the variable.
    */
   const_span
@@ -168,7 +176,7 @@ public:
 
 
   /**
-   * @brief Get a span over the auxilary data array.
+   * @brief Get a span over the auxiliary data array.
    * @param container The container from which to fetch the variable.
    *
    * If the container is locked, this will allow fetching only variables
@@ -220,7 +228,7 @@ protected:
    * @brief Constructor.
    * @param name Name of this aux variable.
    * @param clsname The name of its associated class.  May be blank.
-   * @param flags Optional flags qualifying the type.  See AuxTypeRegsitry.
+   * @param flags Optional flags qualifying the type.  See AuxTypeRegistry.
    *
    * The name -> auxid lookup is done here.
    */

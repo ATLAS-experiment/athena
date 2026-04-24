@@ -111,7 +111,7 @@ void TFCSPhiModulationCorrection::load_phi_modulation(
 
   ATH_MSG_DEBUG("Loading phi modulation correction from " << filename);
 
-  TFile *muon_corr = TFile::Open(filename.c_str());
+  std::unique_ptr<TFile> muon_corr ( TFile::Open(filename.c_str()));
   TH2F *muon_corr_hist = (TH2F *)muon_corr->Get("hWt_Layer0");
 
   int n_bins = muon_corr_hist->GetNbinsX();

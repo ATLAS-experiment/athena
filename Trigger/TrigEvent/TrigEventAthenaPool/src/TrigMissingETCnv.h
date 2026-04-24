@@ -42,7 +42,7 @@ public:
 
 protected:
   virtual TrigMissingET_PERS  *createPersistent(TrigMissingET *transObj);
-  virtual TrigMissingET       *createTransient();
+  virtual TrigMissingET       *createTransient(const Token* token);
 };
 
 

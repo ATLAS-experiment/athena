@@ -1,9 +1,13 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MonitorThreadOccupancy.h"
 #include "../counters/CounterThread.h"
+#include <algorithm> // std::min, max
+#include <sstream>
+#include <iomanip>
+#include <limits> //std::numeric_limits<uint64_t>::max();
 
 MonitorThreadOccupancy::MonitorThreadOccupancy(const std::string& name, const MonitoredRange* parent)
   : MonitorBase(name, parent),
@@ -54,11 +58,17 @@ StatusCode MonitorThreadOccupancy::postProcess(float weight) {
   uint64_t highTimestamp = 0;
   for (const auto& nameCounterPair : m_counters) {
     const CounterThread* ptr = dynamic_cast<const CounterThread*>(nameCounterPair.second.get());
-    lowTimestamp = std::min(lowTimestamp, ptr->getLowTimestamp());
-    highTimestamp = std::max(highTimestamp, ptr->getHighTimestamp());
+    if (ptr){
+      lowTimestamp = std::min(lowTimestamp, ptr->getLowTimestamp());
+      highTimestamp = std::max(highTimestamp, ptr->getHighTimestamp());
+    }
   }
   for (auto& nameCounterPair : m_counters) {
     CounterThread* ptr = dynamic_cast<CounterThread*>(nameCounterPair.second.get());
+    if (!ptr)[[unlikely]] {
+      ATH_MSG_WARNING ("MonitorThreadOccupancy::postProcess: dynamic cast failure" );
+      continue;
+    }
     ptr->setAllThreadsTimestamps(lowTimestamp, highTimestamp);
     ATH_CHECK( ptr->postProcess(weight) );
   }

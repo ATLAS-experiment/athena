@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCOSTMONITOR_TRIGCOSTSVC_H
@@ -17,7 +17,6 @@
 #include "StoreGate/WriteHandle.h"
 
 #include "xAODTrigger/TrigCompositeContainer.h"
-#include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 
 #include "TrigCostMonitor/ITrigCostSvc.h"
 #include "AlgorithmPayload.h"

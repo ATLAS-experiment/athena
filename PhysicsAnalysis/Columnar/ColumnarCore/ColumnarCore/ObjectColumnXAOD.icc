@@ -31,38 +31,38 @@ namespace columnar
 
     AccessorTemplate (ColumnarTool<CM>& columnBase,
                       const std::string& name,
-                      ColumnInfo&& info = {})
+                      ColumnAccessorOptions&& options = {})
       : m_columnBase (&columnBase), m_key (name)
     {
-      if (info.addMTDependency)
+      if (options.addMTDependency)
         throw std::runtime_error ("adding MT dependencies not supported for non-const ObjectColumn");
     }
 
-    ObjectRange<CI,CM> operator() (ObjectId<ContainerId::eventContext,CM> /*eventId*/) const
+    ObjectRange<CI,CM> operator() (ObjectId<EventContextDef,CM> /*eventId*/) const
       requires (CI::perEventRange)
     {
       return ObjectRange<CI,CM> (retrieveObject ());
     }
 
-    ObjectRange<CI,CM> operator() (ObjectRange<ContainerId::eventContext,CM> /*eventRange*/) const
+    ObjectRange<CI,CM> operator() (ObjectRange<EventContextDef,CM> /*eventRange*/) const
       requires (CI::perEventRange)
     {
       return ObjectRange<CI,CM> (retrieveObject ());
     }
 
-    ObjectId<CI,CM> operator() (ObjectId<ContainerId::eventContext,CM> /*eventId*/) const
+    ObjectId<CI,CM> operator() (ObjectId<EventContextDef,CM> /*eventId*/) const
       requires (CI::perEventId)
     {
       return ObjectId<CI,CM> (retrieveObject ());
     }
 
-    ObjectRange<CI,CM> operator() (ObjectRange<ContainerId::eventContext,CM> /*eventRange*/) const
+    ObjectRange<CI,CM> operator() (ObjectRange<EventContextDef,CM> /*eventRange*/) const
       requires (CI::perEventId)
     {
       return ObjectRange<CI,CM> (retrieveObject ());
     }
 
-    [[nodiscard]] bool isAvailable (ObjectId<ContainerId::eventContext,CM> /*eventId*/) const noexcept
+    [[nodiscard]] bool isAvailable (ObjectId<EventContextDef,CM> /*eventId*/) const noexcept
     {
       return !m_key.empty() && m_columnBase && m_columnBase->eventStore().contains< std::remove_cv_t<typename CI::xAODObjectRangeType> >(m_key);
     }
@@ -109,39 +109,39 @@ namespace columnar
 
     AccessorTemplate (ColumnarTool<CM>& columnBase,
                       const std::string& name,
-                      ColumnInfo&& info = {})
+                      ColumnAccessorOptions&& options = {})
       : m_columnBase (&columnBase), m_keyPtr(std::make_shared<KeyType>(name))
     {
-      if (info.addMTDependency && info.isOptional)
+      if (options.addMTDependency && options.isOptional)
         throw std::runtime_error ("adding MT dependencies not supported for optional ObjectColumn");
-      columnBase.internalAddKey (m_keyPtr, info.addMTDependency);
+      columnBase.internalAddKey (m_keyPtr, options.addMTDependency);
     }
 
-    ObjectRange<CI,CM> operator() (ObjectId<ContainerId::eventContext,CM> eventId) const
+    ObjectRange<CI,CM> operator() (ObjectId<EventContextDef,CM> eventId) const
       requires (CI::perEventRange)
     {
       return ObjectRange<CI,CM> (retrieveObject (eventId.getXAODObject()));
     }
 
-    ObjectRange<CI,CM> operator() (ObjectRange<ContainerId::eventContext,CM> eventRange) const
+    ObjectRange<CI,CM> operator() (ObjectRange<EventContextDef,CM> eventRange) const
       requires (CI::perEventRange)
     {
       return ObjectRange<CI,CM> (retrieveObject (eventRange.getXAODObject()));
     }
 
-    ObjectId<CI,CM> operator() (ObjectId<ContainerId::eventContext,CM> eventId) const
+    ObjectId<CI,CM> operator() (ObjectId<EventContextDef,CM> eventId) const
       requires (CI::perEventId)
     {
       return ObjectId<CI,CM> (retrieveObject (eventId.getXAODObject()));
     }
 
-    ObjectRange<CI,CM> operator() (ObjectRange<ContainerId::eventContext,CM> eventRange) const
+    ObjectRange<CI,CM> operator() (ObjectRange<EventContextDef,CM> eventRange) const
       requires (CI::perEventId)
     {
       return ObjectRange<CI,CM> (retrieveObject (eventRange.getXAODObject()));
     }
 
-    [[nodiscard]] bool isAvailable (ObjectId<ContainerId::eventContext,CM> /*eventId*/) const noexcept
+    [[nodiscard]] bool isAvailable (ObjectId<EventContextDef,CM> /*eventId*/) const noexcept
     {
       return m_keyPtr && m_columnBase && m_columnBase->eventStore().contains< std::remove_cv_t<typename CI::xAODObjectRangeType> >(m_keyPtr->key());
     }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /* file contains the implementation for the AthenaSharedMemoryTool class.
@@ -57,6 +57,8 @@ StatusCode AthenaSharedMemoryTool::initialize() {
 //___________________________________________________________________________
 StatusCode AthenaSharedMemoryTool::stop() {
    ATH_MSG_INFO("in stop()");
+   // Fire EndInputFile for any file still open.
+   m_inputFileGuard.reset();
    if (m_isClient && m_num > 0) {
       ATH_MSG_INFO("Client stop() inform Server: " << m_num);
       m_num = -1;
@@ -270,11 +272,8 @@ StatusCode AthenaSharedMemoryTool::lockEvent(long eventNumber) const {
       return(StatusCode::RECOVERABLE);
    }
    if (evtH->fileSeqNumber != m_fileSeqNumber && m_fileSeqNumber > 0) {
-      FileIncident endFileIncident(name(), "EndInputFile", "SHM");
-      m_incidentSvc->fireIncident(endFileIncident);
+      InputFileIncidentGuard::transition(m_inputFileGuard, *m_incidentSvc, name(), "SHM", {});
       const_cast<AthenaSharedMemoryTool*>(this)->m_fileSeqNumber = evtH->fileSeqNumber;
-      FileIncident beginFileIncident(name(), "BeginInputFile", "SHM");
-      m_incidentSvc->fireIncident(beginFileIncident);
    }
    ATH_MSG_DEBUG("Locking eventNumber = " << eventNumber);
    evtH->evtProcessStatus = ShareEventHeader::LOCKED;

@@ -173,7 +173,7 @@ pflowHistosSpec = [
 calibToolConfigurations = {
     "AntiKt4EMPFlowJets":("AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_CalibConfig_ResPU_EtaJES_GSC_241208_InSitu.config","00-04-83","JetArea_Residual_EtaJES"),
     "AntiKt4EMTopoJets":("PreRec_R22_EMTopo_ResPU_EtaJES_October23_231024.config","00-04-82","JetArea_Residual_EtaJES"),
-    "AntiKt4LCTopoJets":("JES_MC16Recommendation_28Nov2017.config","00-04-81","JetArea_Residual_EtaJES")
+    "AntiKt4LCTopoJets":("JES_MC15cRecommendation_May2016_rel21.config","00-04-77","JetArea_Residual_EtaJES")
 }
 
 def jetMonAlgConfig(  jetName, inputFlags, truthJetName='', trigger=''):

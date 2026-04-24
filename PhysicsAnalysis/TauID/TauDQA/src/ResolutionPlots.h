@@ -16,7 +16,7 @@ namespace Tau{
   class ResolutionPlots: public PlotBase {
   public:
     ResolutionPlots(PlotBase *pParent, const std::string& sDir, std::string sTauJetContainerName);
-    virtual ~ResolutionPlots();
+    virtual ~ResolutionPlots() = default;
     void fill(const xAOD::TauJet& tau, const xAOD::TruthParticle&, float weight);
     
     TH1* m_ptResolution{};

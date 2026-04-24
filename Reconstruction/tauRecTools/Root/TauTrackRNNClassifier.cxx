@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauTrackRNNClassifier.h"
@@ -67,7 +67,7 @@ StatusCode TauTrackRNNClassifier::executeTrackClassifier(xAOD::TauJet& xTau, xAO
 
   // Collect the associated tracks from TauTrackFinder and either classify 
   // with dedicated TC or not at all
-  if(!m_classifyLRT || m_classifyLRTWithDedicated) {
+  if (!m_classifyLRT) {
     std::vector<xAOD::TauTrack*> vLRTs;
     std::vector<xAOD::TauTrack*>::iterator it = vTracks.begin(); 
     while(it != vTracks.end()) {      
@@ -80,14 +80,9 @@ StatusCode TauTrackRNNClassifier::executeTrackClassifier(xAOD::TauJet& xTau, xAO
       }
     }
 
-    if (m_classifyLRTWithDedicated) {
-      // decorate LRTs with dedicated TC scores
-      ATH_CHECK(classifyLRTTracks(vLRTs, xTau));
-    } else {
-      // decorate LRTs with default RNN scores
-      for (auto classifier : m_vClassifier) {
-        ATH_CHECK(classifier->classifyTracks(vLRTs, xTau, vertexContainer, tauTrackCon, true));
-      }
+    // decorate LRTs with default RNN scores
+    for (auto classifier : m_vClassifier) {
+      ATH_CHECK(classifier->classifyTracks(vLRTs, xTau, vertexContainer, tauTrackCon, true));
     }
   }
 
@@ -138,8 +133,12 @@ StatusCode TauTrackRNNClassifier::executeTrackClassifier(xAOD::TauJet& xTau, xAO
   } 
 
   // classify tracks
-  for (auto classifier : m_vClassifier) {
-    ATH_CHECK(classifier->classifyTracks(vTracks, xTau, vertexContainer, tauTrackCon));
+  if (m_classifyLRTWithDedicated){
+    ATH_CHECK(classifyLRTTracks(vTracks, xTau));
+  } else {
+    for (auto classifier : m_vClassifier) {
+      ATH_CHECK(classifier->classifyTracks(vTracks, xTau, vertexContainer, tauTrackCon));
+    }
   }
 
   std::vector< ElementLink< xAOD::TauTrackContainer > >& tauTrackLinks(xTau.allTauTrackLinksNonConst());
@@ -410,10 +409,14 @@ StatusCode TrackRNN::calculateVars(const std::vector<xAOD::TauTrack*>& vTracks,
       sumpt2_TV += pow((*trk)->pt(), 2.);
     }
   }
-
+  //these are false positives
+  //cppcheck-suppress invalidFunctionArg
   double log_sumpt_TV = (sumpt_TV>0.) ? std::log(sumpt_TV) : 0.;
+  //cppcheck-suppress invalidFunctionArg
   double log_sumpt2_TV = (sumpt2_TV>0.) ? std::log(sumpt2_TV) : 0.;
+  //cppcheck-suppress invalidFunctionArg
   double log_sumpt_PV0 = (sumpt_PV0>0.) ? std::log(sumpt_PV0) : 0.;
+  //cppcheck-suppress invalidFunctionArg
   double log_sumpt2_PV0 = (sumpt2_PV0>0.) ? std::log(sumpt2_PV0) : 0.;
 
   // track variables

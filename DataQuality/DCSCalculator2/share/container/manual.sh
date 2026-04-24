@@ -9,7 +9,7 @@ KRBPATH=$(echo $KRB5CCNAME | awk -F : '{ print $2 }')
 ( cd /cvmfs/atlas-condb.cern.ch )
 
 cd $TOPDIR
-apptainer --quiet exec --env KRB5CCNAME=$KRB5CCNAME --env-file envvars \
+apptainer --quiet exec --env KRB5CCNAME=$KRB5CCNAME --env-file envvars --cleanenv \
 --bind /eos/user/a/atlasdqm,/eos/project/o/oracle/public/admin,$KRBPATH,/cvmfs \
 --bind /afs/cern.ch/user/a/atlasdqm/private:/config \
---pwd /RunDCSCalc docker://registry.cern.ch/atlas-dqm-core/dcscalculator:latest /bin/bash
+--pwd /RunDCSCalc docker://registry.cern.ch/atlas-dqm-core/dcscalculator:latest /bin/bash $@

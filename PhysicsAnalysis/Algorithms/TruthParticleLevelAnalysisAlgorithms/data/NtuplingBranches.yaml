@@ -1,0 +1,134 @@
+ParticleLevelElectronsBlock:
+  - name: pt
+    description: dressed $p_\mathrm{T}$ (no systematics)
+  - name: eta
+    description: dressed $\eta$ (no systematics)
+  - name: phi
+    description: dressed $\phi$ (no systematics)
+  - name: e
+    description: dressed $E$ (no systematics)
+  - name: charge
+    description: charge (no systematics)
+  - name: type
+    description: particle type according to the [`MCTruthClassifier`](https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/PhysicsAnalysis/MCTruthClassifier/MCTruthClassifier/MCTruthClassifierDefs.h) (no systematics)
+  - name: origin
+    description: particle origin according to the [`MCTruthClassifier`](https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/PhysicsAnalysis/MCTruthClassifier/MCTruthClassifier/MCTruthClassifierDefs.h) (no systematics)
+  - name: uid
+    description: the original ID from HepMC (no systematics)
+    toggled_by: saveUID
+
+ParticleLevelMuonsBlock:
+  - name: pt
+    description: dressed $p_\mathrm{T}$ (no systematics)
+  - name: eta
+    description: dressed $\eta$ (no systematics)
+  - name: phi
+    description: dressed $\phi$ (no systematics)
+  - name: e
+    description: dressed $E$ (no systematics)
+  - name: charge
+    description: charge (no systematics)
+  - name: type
+    description: particle type according to the [`MCTruthClassifier`](https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/PhysicsAnalysis/MCTruthClassifier/MCTruthClassifier/MCTruthClassifierDefs.h) (no systematics)
+  - name: origin
+    description: particle origin according to the [`MCTruthClassifier`](https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/PhysicsAnalysis/MCTruthClassifier/MCTruthClassifier/MCTruthClassifierDefs.h) (no systematics)
+  - name: uid
+    description: the original ID from HepMC (no systematics)
+    toggled_by: saveUID
+
+ParticleLevelPhotonsBlock:
+  - name: pt
+    description: $p_\mathrm{T}$ (no systematics)
+  - name: eta
+    description: $\eta$ (no systematics)
+  - name: phi
+    description: $\phi$ (no systematics)
+  - name: e
+    description: $E$ (no systematics)
+  - name: type
+    description: particle type according to the [`MCTruthClassifier`](https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/PhysicsAnalysis/MCTruthClassifier/MCTruthClassifier/MCTruthClassifierDefs.h) (no systematics)
+  - name: origin
+    description: particle origin according to the [`MCTruthClassifier`](https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/PhysicsAnalysis/MCTruthClassifier/MCTruthClassifier/MCTruthClassifierDefs.h) (no systematics)
+  - name: uid
+    description: the original ID from HepMC (no systematics)
+    toggled_by: saveUID
+
+ParticleLevelTausBlock:
+  - name: pt
+    description: $p_\mathrm{T}$ (no systematics)
+  - name: eta
+    description: $\eta$ (no systematics)
+  - name: phi
+    description: $\phi$ (no systematics)
+  - name: e
+    description: $E$ (no systematics)
+  - name: charge
+    description: charge (no systematics)
+  - name: IsHadronicTau
+    description: whether the tau decays hadronically (no systematics)
+  - name: type
+    description: particle type according to the [`MCTruthClassifier`](https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/PhysicsAnalysis/MCTruthClassifier/MCTruthClassifier/MCTruthClassifierDefs.h) (no systematics)
+  - name: origin
+    description: particle origin according to the [`MCTruthClassifier`](https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/PhysicsAnalysis/MCTruthClassifier/MCTruthClassifier/MCTruthClassifierDefs.h) (no systematics)
+  - name: uid
+    description: the original ID from HepMC (no systematics)
+    toggled_by: saveUID
+
+ParticleLevelResonancesBlock:
+  - name: pt
+    description: $p_\mathrm{T}$ (no systematics)
+  - name: eta
+    description: $\eta$ (no systematics)
+  - name: phi
+    description: $\phi$ (no systematics)
+  - name: m
+    description: invariant mass (no systematics)
+  - name: type
+    description: particle type according to the [`MCTruthClassifier`](https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/PhysicsAnalysis/MCTruthClassifier/MCTruthClassifier/MCTruthClassifierDefs.h) (no systematics)
+  - name: origin
+    description: particle origin according to the [`MCTruthClassifier`](https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/PhysicsAnalysis/MCTruthClassifier/MCTruthClassifier/MCTruthClassifierDefs.h) (no systematics)
+  - name: pdgId
+    description: PDG ID (no systematics)
+  - name: status
+    description: generator status code of the particle (no systematics)
+
+ParticleLevelNeutrinosBlock:
+  - name: pt
+    description: $p_\mathrm{T}$ (no systematics)
+  - name: eta
+    description: $\eta$ (no systematics)
+  - name: phi
+    description: $\phi$ (no systematics)
+  - name: e
+    description: $E$ (no systematics)
+
+ParticleLevelJetsBlock:
+  - name: pt
+    description: $p_\mathrm{T}$ (no systematics)
+  - name: eta
+    description: $\eta$ (no systematics)
+  - name: phi
+    description: $\phi$ (no systematics)
+  - name: e
+    description: $E$ (no systematics)
+  - name: nGhosts_bHadron
+    description: number of ghost-matched b-hadrons in the jet (no systematics)
+  - name: nGhosts_cHadron
+    description: number of ghost-matched c-hadrons in the jet (no systematics)
+  - name: num_truth_bjets_nocuts
+    description: number of truth small-R b-jets according to [`HadronConeExclTruthLabelID`](https://ftag.docs.cern.ch/algorithms/labelling/jet_labels/#delta-r-matching-default-scheme-in-ftag) without any cuts per event (no systematics)
+  - name: num_truth_cjets_nocuts
+    description: number of truth small-R c-jets according to [`HadronConeExclTruthLabelID`](https://ftag.docs.cern.ch/algorithms/labelling/jet_labels/#delta-r-matching-default-scheme-in-ftag) without any cuts per event (no systematics)
+  - name: HadronConeExclTruthLabelID
+    description: truth labels used by the FTAG group (no systematics)
+    toggled_by: outputTruthLabelIDs
+  - name: PartonTruthLabelID
+    description: PDG identification of the highest-energy ghost-associated parton (no systematics)
+    toggled_by: outputTruthLabelIDs
+
+ParticleLevelMissingETBlock:
+  - name: met
+    description: the transverse missing energy $E_\mathrm{T}$ (no systematics)
+  - name: phi
+    description: the transverse missing energy $\phi$ (no systematics)
+

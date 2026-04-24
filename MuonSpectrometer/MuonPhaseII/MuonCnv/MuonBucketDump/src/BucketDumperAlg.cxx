@@ -12,7 +12,9 @@
 #include "MuonTrackEvent/TrackingHelpers.h"
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
 #include "MuonPatternEvent/SegmentFitterEventData.h"
+#include "MuonInferenceInterfaces/GraphData.h"
 #include <fstream>
+#include <unordered_map>
 #include <AthenaKernel/RNGWrapper.h>
 #include "CLHEP/Random/RandFlat.h"
 
@@ -49,15 +51,27 @@ namespace MuonR4{
             }
         }
         ATH_CHECK(m_truthDecorKeys.initialize());
-        ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_geoCtxKey.initialize());
         m_tree.addBranch(std::make_shared<MuonVal::EventHashBranch>(m_tree.tree()));
         ATH_CHECK(m_visionTool.retrieve(EnableTool{!m_visionTool.empty()}));        
         if (m_visionTool.empty()) {
             m_tree.disableBranch(m_spoint_trueLabel.name());
         }
+        
+        // Setup ML bucket score branches
+        if (m_doMLBucketScore) {
+            ATH_CHECK(m_inferenceTool.retrieve());
+            ATH_MSG_INFO("ML bucket scoring enabled with tool: " << m_inferenceTool.name());
+        }
+        
+        // Disable ML score branches if not enabled
+        if (!m_doMLBucketScore) {
+            m_tree.disableBranch(m_bucket_ml_score_class0.name());
+            m_tree.disableBranch(m_bucket_ml_score_class1.name());
+            m_tree.disableBranch(m_bucket_ml_score_class2.name());
+        }
+        
         ATH_CHECK(m_tree.init(this));
-        ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_MSG_DEBUG("Successfully initialized");
 
         return StatusCode::SUCCESS;
@@ -72,19 +86,20 @@ namespace MuonR4{
         const EventContext& ctx{Gaudi::Hive::currentContext()};
         SG::ReadHandleKey<xAOD::MuonSegmentContainer> emptyKey{};
         ATH_CHECK(emptyKey.initialize(SG::AllowEmpty));
+        
         for (unsigned  keyNum = 0 ; keyNum < m_spacePointKeys.size(); ++keyNum) {
             ATH_CHECK(dumpContainer(ctx, m_spacePointKeys[keyNum], 
-                                    keyNum < m_inSegmentKeys.size() ? m_inSegmentKeys[keyNum] : emptyKey ));
+                                    keyNum < m_inSegmentKeys.size() ?  m_inSegmentKeys[keyNum] : emptyKey));
         }
         return StatusCode::SUCCESS;
     }
     StatusCode BucketDumperAlg::dumpContainer(const EventContext& ctx,
                                               const SG::ReadHandleKey<SpacePointContainer>& spacePointKey,
                                               const SG::ReadHandleKey<xAOD::MuonSegmentContainer>& segmentKey) {
-
-        using SegmentsPerBucket_t = std::unordered_map <const SpacePointBucket*, 
+        
+        // Define the segment mapping type
+        using SegmentsPerBucket_t = std::unordered_map<const SpacePointBucket*,
                                                        std::set<const xAOD::MuonSegment*, LocalSegSorter>>;
-
         SegmentsPerBucket_t segmentMap{};
         
         const xAOD::MuonSegmentContainer* readSegment{nullptr};
@@ -101,6 +116,19 @@ namespace MuonR4{
         const SpacePointContainer* spContainer{nullptr};
         ATH_CHECK(SG::get(spContainer, spacePointKey, ctx));
 
+        // Compute ML bucket scores if enabled - only for MuonSpacePoints container
+        // The tool is configured to read "MuonSpacePoints" from StoreGate, so we only run it for that container
+        std::unordered_map<const SpacePointBucket*, std::vector<float>> bucketScores;
+        const std::string& containerName = spacePointKey.key();
+        if (m_doMLBucketScore && containerName == "MuonSpacePoints") {
+            ATH_MSG_DEBUG("Computing ML bucket scores for container: " << containerName);
+            ATH_CHECK(computeAllBucketScores(ctx, spContainer, bucketScores));
+            ATH_MSG_DEBUG("ML scoring completed, got scores for " << bucketScores.size() << " buckets");
+        } else if (m_doMLBucketScore && containerName != "MuonSpacePoints") {
+            ATH_MSG_DEBUG("Skipping ML scoring for container: " << containerName  
+                         << " (only MuonSpacePoints is supported)");
+        }
+
         CLHEP::HepRandomEngine* rndEngine = getRandomEngine(ctx);
 
         const SpacePointPerLayerSorter layerSorter{};
@@ -112,6 +140,19 @@ namespace MuonR4{
                 ATH_MSG_VERBOSE("Skipping bucket without segment");
                 continue;
             }
+            
+            if (m_doMLBucketFilter && !bucketScores.empty()) {
+                auto scoreIt = bucketScores.find(bucket);
+                if (scoreIt != bucketScores.end() && scoreIt->second.size() >= 3) {
+                    const auto& logits = scoreIt->second;
+                    int predictedClass = 0;
+                    float maxLogit = logits[0];
+                    if (logits[1] > maxLogit) { maxLogit = logits[1]; predictedClass = 1; }
+                    if (logits[2] > maxLogit) { maxLogit = logits[2]; predictedClass = 2; }
+                    if (predictedClass == 0) continue;
+                }
+            }
+            
             /// Bucket identifier
             m_bucket_sector     = bucket->msSector()->sector();
             m_bucket_chamberIdx = static_cast<uint8_t>(bucket->msSector()->chamberIndex());
@@ -254,6 +295,31 @@ namespace MuonR4{
 
             m_bucket_layers = layNumbers.size();
 
+            // Add ML bucket filter scores if available
+            // Only add scores if we actually computed them for this container
+            if (m_doMLBucketScore && !bucketScores.empty()) {
+                auto scoreIt = bucketScores.find(bucket);
+                if (scoreIt != bucketScores.end() && scoreIt->second.size() >= 3) {
+                    m_bucket_ml_score_class0.push_back(scoreIt->second[0]);
+                    m_bucket_ml_score_class1.push_back(scoreIt->second[1]);
+                    m_bucket_ml_score_class2.push_back(scoreIt->second[2]);
+                } else {
+                    // Empty buckets are skipped during inference, so missing scores is expected
+                    // Only warn if a non-empty bucket is missing scores (indicates a real problem)
+                    if (bucket && !bucket->empty()) {
+                        ATH_MSG_WARNING("Non-empty bucket from scored container not found in ML scores map");
+                    }
+                    m_bucket_ml_score_class0.push_back(0.f);
+                    m_bucket_ml_score_class1.push_back(0.f);
+                    m_bucket_ml_score_class2.push_back(0.f);
+                }
+            } else if (m_doMLBucketScore) {
+                // No scores computed for this container (e.g., NswSpacePoints) - fill with zeros
+                m_bucket_ml_score_class0.push_back(0.f);
+                m_bucket_ml_score_class1.push_back(0.f);
+                m_bucket_ml_score_class2.push_back(0.f);
+            }
+
             if (!m_tree.fill(ctx)) {
                 return StatusCode::FAILURE; 
             }
@@ -270,4 +336,95 @@ namespace MuonR4{
         return rngWrapper->getEngine(ctx);
     }
 
+    StatusCode BucketDumperAlg::computeAllBucketScores(const EventContext& ctx,
+                                                       const SpacePointContainer* spContainer,
+                                                       std::unordered_map<const SpacePointBucket*, std::vector<float>>& bucketScoreMap) const {
+        bucketScoreMap.clear();
+        
+        ATH_MSG_DEBUG("computeAllBucketScores: doMLBucketScore=" << m_doMLBucketScore 
+                      << ", tool empty=" << m_inferenceTool.empty() 
+                      << ", spContainer=" << (spContainer ? "valid" : "null"));
+        
+        if (!m_doMLBucketScore || m_inferenceTool.empty() || !spContainer) {
+            return StatusCode::SUCCESS;
+        }
+        
+        // Count non-empty buckets
+        size_t nonEmptyBuckets = 0;
+        for (const MuonR4::SpacePointBucket* bucket : *spContainer) {
+            if (bucket && !bucket->empty()) {
+                ++nonEmptyBuckets;
+            }
+        }
+        
+        // If no non-empty buckets, skip inference
+        if (nonEmptyBuckets == 0) {
+            ATH_MSG_DEBUG("Container has no non-empty buckets, skipping ML scoring");
+            return StatusCode::SUCCESS;
+        }
+
+        // Run the inference tool
+        ATH_MSG_DEBUG("Calling runGraphInference on tool: " << m_inferenceTool.name());
+        MuonML::GraphRawData graphData{};
+        ATH_CHECK(m_inferenceTool->runGraphInference(ctx, graphData));
+        ATH_MSG_DEBUG("runGraphInference completed successfully");
+
+        // Extract logits from the inference output
+        if (!graphData.graph || graphData.graph->dataTensor.size() <= 2) {
+            ATH_MSG_ERROR("Missing output logits tensor at index 2");
+            return StatusCode::FAILURE;
+        }
+        
+        const Ort::Value& outTensor = graphData.graph->dataTensor[2];
+        const auto& info = outTensor.GetTensorTypeAndShapeInfo();
+        std::vector<int64_t> outShape = info.GetShape();
+        
+        if (outShape.size() != 2 || outShape[1] != 3) {
+            ATH_MSG_ERROR("Unexpected ONNX output tensor shape");
+            return StatusCode::FAILURE;
+        }
+        
+        const float* logitsPtr = outTensor.GetTensorData<float>();
+        if (!logitsPtr) {
+            ATH_MSG_ERROR("Failed to get logits data pointer");
+            return StatusCode::FAILURE;
+        }
+        
+        // Map logits to buckets - only considering non-empty buckets
+        size_t totalNumPredictions = static_cast<size_t>(outShape[0]);
+        size_t predIdx = 0;
+        
+        for (const MuonR4::SpacePointBucket* bucket : *spContainer) {
+            if (!bucket || bucket->empty()) {
+                continue;  // Skip empty buckets
+            }
+            
+            if (predIdx >= totalNumPredictions) {
+                ATH_MSG_ERROR("More non-empty buckets than predictions from model");
+                return StatusCode::FAILURE;
+            }
+            
+            std::vector<float> scores(3);
+            scores[0] = logitsPtr[3 * predIdx + 0];
+            scores[1] = logitsPtr[3 * predIdx + 1];
+            scores[2] = logitsPtr[3 * predIdx + 2];
+            
+            bucketScoreMap[bucket] = scores;
+            ++predIdx;
+        }
+        
+        if (predIdx != totalNumPredictions) {
+            ATH_MSG_ERROR("Number of non-empty buckets (" << predIdx << ") does not match predictions (" 
+                          << totalNumPredictions << ")");
+            return StatusCode::FAILURE;
+        }
+        
+        ATH_MSG_DEBUG("Successfully computed ML bucket scores for " << bucketScoreMap.size() << " buckets");
+        return StatusCode::SUCCESS;
+    }
+
 }
+
+
+
+

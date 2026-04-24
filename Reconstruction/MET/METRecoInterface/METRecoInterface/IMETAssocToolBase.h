@@ -18,6 +18,7 @@
 #define IMETAssocToolBase_H
 
 #include "AsgTools/IAsgTool.h"
+#include "AsgTools/CurrentContext.h"
 
 #include "xAODMissingET/MissingETContainer.h"
 #include "xAODMissingET/MissingETAssociationMap.h"
@@ -27,7 +28,7 @@ class IMETAssocToolBase : virtual public asg::IAsgTool {
 	
   public:
 
-  virtual StatusCode execute(xAOD::MissingETContainer*,xAOD::MissingETAssociationMap*) const = 0;
+  virtual StatusCode execute(xAOD::MissingETContainer*,xAOD::MissingETAssociationMap*, const EventContext& ctx) const = 0;
   
 };
 	

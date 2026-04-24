@@ -1,0 +1,73 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+
+#ifndef XAODCORE_SHALLOWCOPY_ICC
+#define XAODCORE_SHALLOWCOPY_ICC
+
+// System include(s).
+#include <cassert>
+
+namespace xAOD {
+
+template <SG::IsAuxDataVector T>
+std::pair<std::unique_ptr<T>, std::unique_ptr<ShallowAuxContainer>> shallowCopy(
+    const T& cont, const EventContext& ctx) {
+
+  // Create the new interface container.
+  auto newCont = std::make_unique<T>();
+  newCont->reserve(cont.size());
+  for (const auto& elem : cont) {
+    newCont->push_back(prepareElementForShallowCopy(elem));
+  }
+
+  // Create a new shallow auxiliary container.
+  assert(cont.getConstStore() != nullptr);
+  DataLink<SG::IConstAuxStore> link(cont.getConstStore(), ctx);
+  assert(link.cptr() != nullptr);
+  auto aux = std::make_unique<ShallowAuxContainer>(link);
+
+  // Connect it to the interface container.
+  newCont->setStore(aux.get());
+
+  // Return the new objects:
+  return {std::move(newCont), std::move(aux)};
+}
+
+template <SG::IsAuxDataVector T>
+std::pair<std::unique_ptr<T>, std::unique_ptr<ShallowAuxContainer>> shallowCopy(
+    const T& cont) {
+
+  return shallowCopy(cont, Gaudi::Hive::currentContext());
+}
+
+template <SG::IsConstAuxElement T>
+std::pair<std::unique_ptr<T>, std::unique_ptr<ShallowAuxInfo>> shallowCopy(
+    const T& obj, const EventContext& ctx) {
+
+  // Create the new interface object.
+  auto newObj = prepareElementForShallowCopy(&obj);
+
+  // Create a new shallow auxiliary container.
+  assert(obj.getConstStore() != nullptr);
+  DataLink<SG::IConstAuxStore> link(obj.getConstStore(), ctx);
+  assert(link.cptr() != nullptr);
+  auto aux = std::make_unique<ShallowAuxInfo>(link);
+
+  // Connect it to the interface container.
+  newObj->setStore(aux.get());
+
+  // Return the new objects:
+  return {std::move(newObj), std::move(aux)};
+}
+
+template <SG::IsConstAuxElement T>
+std::pair<std::unique_ptr<T>, std::unique_ptr<ShallowAuxInfo>> shallowCopy(
+    const T& obj) {
+
+  return shallowCopy(obj, Gaudi::Hive::currentContext());
+}
+
+}  // namespace xAOD
+
+#endif  // XAODCORE_SHALLOWCOPY_ICC

@@ -493,6 +493,129 @@ end of hit residuals & cluster width plots
   <y title="Entries"/>
 </h>
 
+<!-- Track Time Resolution Plots -->
+<h id="pull_time" type="TH1F" title="(reco_{time} - truth_{time}) / #sigma(time)">
+  <x title="(reco_{time} - truth_{time}) / #sigma(time)" n="100" lo="-10.0" hi="10.0"/>
+  <y title="Number of Entries"/>
+</h>
+
+<h id="res_time" type="TH1F" title="reco_{time} - truth_{time}">
+  <x title="reco_{time} - truth_{time} [ns]" n="100" lo="-&TIMERES;" hi="&TIMERES;"/>
+  <y title="Number of Entries"/>
+</h>
+
+<h id="sigma_time" type="TH1F" title="#sigma(time)">
+  <x title="#sigma(time) [ns]" n="100" lo="0" hi="&TIMERES;"/>
+  <y title="Number of Entries"/>
+</h>
+
+<h id="resHelper_eta_time" type="TH2F" title="residual vs #eta for time">
+  <x title="#eta" n="&NETA;" lo="-&ETA;" hi="&ETA;"/>
+  <y title="reco_{time} - truth_{time} [ns]" n="3000" lo="-10.0" hi="10.0"/>
+</h>
+
+<h id="resHelper_pt_time" type="TH2F" title="residual vs p_{T} for time">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="100"/>
+  <y title="reco_{time} - truth_{time} [ns]" n="1000" lo="-10.0" hi="10.0"/>
+</h>
+
+<h id="resHelper_lowpt_time" type="TH2F" title="residual vs p_{T} for time, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="reco_{time} - truth_{time} [ns]" n="1000" lo="-10.0" hi="10.0"/>
+</h>
+
+<h id="pullHelper_eta_time" type="TH2F" title="pull vs #eta for time">
+  <x title="#eta" n="&NETA;" lo="-&ETA;" hi="&ETA;"/>
+  <y title="(reco_{time} - truth_{time}) / #sigma(time)" n="100" lo="-10.0" hi="10.0"/>
+</h>
+
+<h id="pullHelper_pt_time" type="TH2F" title="pull  vs p_{T} for time">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="100"/>
+  <y title="(reco_{time} - truth_{time}) / #sigma(time)" n="100" lo="-10.0" hi="10.0"/>
+</h>
+
+<h id="pullHelper_lowpt_time" type="TH2F" title="pull  vs p_{T} for time, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="(reco_{time} - truth_{time}) / #sigma(time)" n="100" lo="-10.0" hi="10.0"/>
+</h>
+
+<h id="resolution_vs_eta_time" type="TH1F" title="resolution vs #eta for time">
+  <x title="#eta" n="&NETA;" lo="-&ETA;" hi="&ETA;"/>
+  <y title="width of resolution for time"/>
+</h>
+
+<h id="resmean_vs_eta_time" type="TH1F" title="mean of resolution vs #eta for time">
+  <x title="#eta" n="&NETA;" lo="-&ETA;" hi="&ETA;"/>
+  <y title="mean of resolution for time"/>
+</h>
+
+<h id="resolution_vs_pt_time" type="TH1F" title="resolution vs p_{T} for time">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="100"/>
+  <y title="width of resolution for time"/>
+</h>
+
+<h id="resolution_vs_lowpt_time" type="TH1F" title="resolution vs p_{T} for time, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="width of resolution for time"/>
+</h>
+
+<h id="resmean_vs_pt_time" type="TH1F" title="mean of resolution vs p_{T} for time">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="100"/>
+  <y title="mean of resolution for time"/>
+</h>
+
+<h id="resmean_vs_lowpt_time" type="TH1F" title="mean of resolution vs p_{T} for time, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="mean of resolution for time"/>
+</h>
+
+<h id="pullwidth_vs_eta_time" type="TH1F" title="pull vs #eta for time">
+  <x title="#eta" n="&NETA;" lo="-&ETA;" hi="&ETA;"/>
+  <y title="width of pull for time"/>
+</h>
+
+<h id="pullmean_vs_eta_time" type="TH1F" title="mean of pull vs #eta for time">
+  <x title="#eta" n="&NETA;" lo="-&ETA;" hi="&ETA;"/>
+  <y title="mean of pull for time"/>
+</h>
+
+<h id="pullwidth_vs_pt_time" type="TH1F" title="pull vs p_{T} for time">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="100"/>
+  <y title="width of pull for time"/>
+</h>
+
+<h id="pullwidth_vs_lowpt_time" type="TH1F" title="pull vs p_{T} for time, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="width of pull for time"/>
+</h>
+
+<h id="pullmean_vs_pt_time" type="TH1F" title="mean of pull vs p_{T} for time">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="100"/>
+  <y title="mean of pull time [ns]"/>
+</h>
+
+<h id="pullmean_vs_lowpt_time" type="TH1F" title="mean of pull vs p_{T} for time, low pt">
+  <x title="p_{T} [GeV]" n="100" lo="0." hi="1"/>
+  <y title="mean of pull time [ns]"/>
+</h>
+
+<h id="sigma_vs_eta_time" type="TProfile" title="#sigma(time) vs #eta">
+  <x title="#eta" n="&NETA;" lo="-&ETA;" hi="&ETA;"/>
+  <y title="#sigma(time) [ns]" lo="0." hi="10."/>
+</h>
+
+<h id="sigma_vs_pt_time" type="TProfile" title="#sigma(time) vs p_{T}">
+  <x title="p_{T} [GeV]" n="&NETA;" lo="0.0" hi="100"/>
+  <y title="#sigma(time) [ns]" lo="0." hi="10."/>
+</h>
+
+<h id="sigma_vs_lowpt_time" type="TProfile" title="#sigma(time) vs p_{T}, low pt">
+  <x title="p_{T} [GeV]" n="&NETA;" lo="0.0" hi="1"/>
+  <y title="#sigma(time) [ns]" lo="0." hi="10."/>
+</h>
+
+<!-- End of time resolution plots-->
+
 <!--
     =======================================================
     end of HGTD timing plots

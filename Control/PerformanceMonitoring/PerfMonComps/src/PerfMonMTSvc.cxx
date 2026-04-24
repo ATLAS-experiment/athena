@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -664,7 +664,7 @@ void PerfMonMTSvc::report2JsonFile_Summary(nlohmann::json& j) const {
   // Report snapshot level results
   for(int i=0; i < NSNAPSHOTS; i++){
 
-    const std::string step = m_snapshotStepNames[i];
+    const std::string & step = m_snapshotStepNames[i];
     const double dCPU = m_snapshotData[i].getDeltaCPU();
     const double dWall = m_snapshotData[i].getDeltaWall();
     const double cpuUtil = dCPU / dWall;
@@ -735,8 +735,8 @@ void PerfMonMTSvc::report2JsonFile_ComponentLevel(nlohmann::json& j) const {
 
     for(const auto& meas : dataMapPerStep){
 
-      const std::string step = meas.first.stepName;
-      const std::string component = meas.first.compName;
+      const std::string & step = meas.first.stepName;
+      const std::string & component = meas.first.compName;
       const uint64_t count = meas.second->getCallCount();
       const double cpuTime = meas.second->getDeltaCPU();
       const double wallTime = meas.second->getDeltaWall();

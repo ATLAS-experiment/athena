@@ -32,7 +32,7 @@ TrigTrackCountsCollection_PERS * TrigTrackCountsCollectionCnv::createPersistent(
 
 
 //createTransient
-TrigTrackCountsCollection * TrigTrackCountsCollectionCnv::createTransient()
+TrigTrackCountsCollection * TrigTrackCountsCollectionCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "TrigTrackCountsCollectionConverter" );
   
@@ -42,14 +42,14 @@ TrigTrackCountsCollection * TrigTrackCountsCollectionCnv::createTransient()
   static const pool::Guid p0_guid( "7A4412AD-C11D-4EFD-AE15-D343D2CB28BC" );
   
   TrigTrackCountsCollection *p_collection = 0;
-  if( compareClassGuid( tlp1_guid ) )     
+  if( compareClassGuid(token,  tlp1_guid ) )     
     {
-      poolReadObject< TrigTrackCountsCollection_PERS >(*m_TPConverter);
+      poolReadObject< TrigTrackCountsCollection_PERS >(*m_TPConverter, token);
       p_collection = m_TPConverter->createTransient( m_log );
       
-    }else if( compareClassGuid( p0_guid ) ){
+    }else if( compareClassGuid(token,  p0_guid ) ){
       
-      p_collection = poolReadObject< TrigTrackCountsCollection >();
+      p_collection = poolReadObject< TrigTrackCountsCollection >(token);
       
     }else  throw std::runtime_error( "Unsupported persistent version of TrigTrackCountsCollection" );
   

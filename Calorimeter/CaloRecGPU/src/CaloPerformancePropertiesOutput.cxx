@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -9,8 +9,6 @@
 #include "CaloIdentifier/LArNeighbours.h"
 
 #include "CaloRecGPU/BaseDefinitions.h"
-
-#include "StoreGate/DataHandle.h"
 
 #include "MacroHelpers.h"
 

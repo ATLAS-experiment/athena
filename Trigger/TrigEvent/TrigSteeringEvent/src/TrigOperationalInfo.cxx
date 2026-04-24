@@ -1,10 +1,13 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigSteeringEvent/TrigOperationalInfo.h"
+#include "GaudiKernel/MsgStream.h"
+
 #include <sstream>
 #include <cmath>
+#include <algorithm>
 
 
 TrigOperationalInfo::TrigOperationalInfo() {
@@ -19,12 +22,12 @@ TrigOperationalInfo::TrigOperationalInfo(const std::vector<std::string>& keys,
 }
 
 unsigned int TrigOperationalInfo::defined(const std::string& name) const {
-  return count( m_infoName.begin(), m_infoName.end(), name ); 
+  return std::count( m_infoName.begin(), m_infoName.end(), name ); 
 }
 
 float TrigOperationalInfo::get(const std::string& name) const {
   std::vector<std::string>::const_iterator it;
-  it = find ( m_infoName.begin(), m_infoName.end(), name ); 
+  it = std::find ( m_infoName.begin(), m_infoName.end(), name ); 
   return m_infoValue[it - m_infoName.begin()];
 }
 

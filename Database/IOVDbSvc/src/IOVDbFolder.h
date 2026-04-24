@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // IOVDbFolder.h
@@ -11,6 +11,7 @@
 
 #include <string>
 #include "GaudiKernel/IClassIDSvc.h"
+#include "GaudiKernel/ServiceHandle.h"
 #include "AthenaBaseComps/AthMessaging.h"
 #include "AthenaKernel/IOVTime.h"
 #include "AthenaKernel/IOVRange.h"

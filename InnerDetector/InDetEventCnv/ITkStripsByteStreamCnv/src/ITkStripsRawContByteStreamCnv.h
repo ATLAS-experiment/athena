@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ITkStripsRawDataByteStreamCnv_ITkStripsRawContByteStreamCnv_h
@@ -42,7 +42,7 @@ class ITkStripsRawContByteStreamCnv : public AthConstConverter {
   /** Storage type */
   static long storageType() { return ByteStreamAddress::storageType(); }
   /** Class ID */
-  static const CLID& classID() { return ClassID_traits<SCT_RDO_Container>::ID(); }
+  static CLID classID() { return ClassID_traits<SCT_RDO_Container>::ID(); }
   
   /** createObj method (not used!) */
   virtual StatusCode createObjConst(IOpaqueAddress*, DataObject*&) const override { return StatusCode::FAILURE; }

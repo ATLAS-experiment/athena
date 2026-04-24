@@ -3,7 +3,7 @@
 */
 
 #include "H5Cpp.h"
-#include <HDF5Utils/DefaultMerger.h>
+#include <HDF5Utils/Merger.h>
 
 #include <boost/program_options.hpp>
 #include <boost/algorithm/string/split.hpp> 
@@ -18,7 +18,7 @@
  * with all datasets contained inside them concatenated along a particular axis.
  */
 
-
+//coverity[UNCAUGHT_EXCEPT]
 int main(int argc, char* argv[]) {
   // The options
   std::string outputFile = "merged.h5";
@@ -115,7 +115,7 @@ int main(int argc, char* argv[]) {
   }
 
   // Make the merger
-  H5Utils::DefaultMerger merger(
+  H5Utils::Merger merger(
       mergeAxis, chunkSize, requireSameFormat, buffer, bufferInRows);
 
   // Make the output file
@@ -125,9 +125,17 @@ int main(int argc, char* argv[]) {
   for (const std::string& inName : inputFiles) {
     std::cout << "Merging file " << inName << std::endl;
     H5::H5File fIn(inName, H5F_ACC_RDONLY);
+    //this can throw
     merger.merge(fOut, fIn);
   }
-    
+
+  // Write any deferred data (e.g. merged UHI histograms).
+  //
+  // Note that treating the file as a group here, although technically
+  // possible, exposes some techical oddities. Instead we use the root
+  // group.
+  H5::Group root = fOut.openGroup("/");
+  merger.flush(root);
 
   return 0;
 }

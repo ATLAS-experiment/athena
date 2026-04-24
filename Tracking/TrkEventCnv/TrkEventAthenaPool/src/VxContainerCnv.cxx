@@ -58,17 +58,17 @@ VxContainerCnv::createPersistent( VxContainer* )
 }//end of create persistent method
 
 
-VxContainer * VxContainerCnv::createTransient()
+VxContainer * VxContainerCnv::createTransient(const Token* token)
 {
     static const pool::Guid p2_guid( "B5254571-6B6D-47F7-A52C-CBE857CF1812" );
     static const pool::Guid p1_guid( "AFA5FE76-EEC6-4BD1-B704-B5747F729291" );
     static const pool::Guid p0_guid( "639B478A-7355-4430-B6FC-F0A6148A2E87" );
 
   VxContainer *p_collection = nullptr;
-  if( compareClassGuid( p2_guid ) ) {
+  if( compareClassGuid(token,  p2_guid ) ) {
   //  std::cout << "VxContainerCnv::createTransient: do new TP 2" << std::endl;  
      usingTPCnvForReading( m_TPConverter );
-     std::unique_ptr< VxContainer_PERS >  p_coll( poolReadObject< VxContainer_PERS >() );
+     std::unique_ptr< VxContainer_PERS >  p_coll( poolReadObject< VxContainer_PERS >(token) );
 
   /*  
      std::cout<<"READING: Dumping the contents of the VxContainer "<<std::endl;
@@ -93,16 +93,12 @@ VxContainer * VxContainerCnv::createTransient()
      p_collection = m_TPConverter.createTransient( p_coll.get(), m_log );
 
     }
-    else if( compareClassGuid( p1_guid ) ) {
+    else if( compareClassGuid(token,  p1_guid ) ) {
  //       std::cout << "VxContainerCnv::createTransient: do TP 1" << std::endl;  
-        
-        // usingTPCnvForReading( m_TPConverter );
-        // std::unique_ptr< VxContainer_PERS >  p_coll( poolReadObject< VxContainer_PERS >() );
-        // p_collection = m_TPConverter.createTransient( p_coll.get(), m_log );
         
         VxContainerCnv_tlp1 tmpTPCnv;
         usingTPCnvForReading( tmpTPCnv );
-        std::unique_ptr< Trk::VxContainer_tlp1 >  p_coll( poolReadObject< Trk::VxContainer_tlp1 >() );
+        std::unique_ptr< Trk::VxContainer_tlp1 >  p_coll( poolReadObject< Trk::VxContainer_tlp1 >(token) );
         p_collection = tmpTPCnv.createTransient( p_coll.get(), m_log );
         
     //    std::cout << "VxContainerCnv::createTransient: done! " << std::endl;
@@ -127,9 +123,9 @@ VxContainer * VxContainerCnv::createTransient()
    std::cout<<"*************************************** "<<std::endl;  
 */    
 
-  }else if( compareClassGuid( p0_guid ) ){
+  }else if( compareClassGuid(token,  p0_guid ) ){
 //   std::cout << "VxContainerCnv::createTransient: use old converter" << std::endl;  
-   p_collection = poolReadObject< VxContainer >();
+   p_collection = poolReadObject< VxContainer >(token);
    
   }else  throw std::runtime_error( "Unsupported persistent version of VxContainer" );
     

@@ -10,7 +10,7 @@
 #include <iomanip>
 #include <vector>
 
-int main ATLAS_NOT_THREAD_SAFE () {
+int test1 ATLAS_NOT_THREAD_SAFE () {
 
   asg::StandaloneToolHandle<IBTaggingTruthTaggingTool> tool("BTaggingTruthTaggingTool/BtagTT_Tool");
 
@@ -97,4 +97,15 @@ int main ATLAS_NOT_THREAD_SAFE () {
   }
 
   return 0;
+}
+
+
+int main ATLAS_NOT_THREAD_SAFE()
+{
+  try {
+    return test1();
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
 }

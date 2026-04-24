@@ -91,6 +91,8 @@ namespace Rec {
         DoubleProperty m_etaCutMSTP{this, "etaCutMSTP", 2.5, "Maximum |eta| of input MSTPs"};
         DoubleProperty m_baseChi2Cut{this, "baseChi2Cut", 50., "Maximum allowed chi2 of saved vertices"};
         Gaudi::Property<bool> m_doValidation{this, "doValidation", false, "Vertex every MSTP in input as part of validation process"};
+        Gaudi::Property<bool> m_doStacoRecovery{this, "doStacoRecovery", false, "Recover MS tracks from Staco-authored Combined muons with large MS-ID mismatch"};
+        DoubleProperty m_stacoMatchDeltaCut{this, "stacoMatchDeltaCut", 0.2, "dEta or dPhi threshold between MS and ID tracks for Staco recovery"};
 
     };
 }

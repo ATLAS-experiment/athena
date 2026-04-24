@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/PackedLinkAccessor.icc
@@ -180,8 +180,14 @@ auto
 Accessor<PackedLink<CONT>, ALLOC>::getPackedLinkSpan (AuxVectorData& container) const
   -> PackedLink_span
 {
-  auto beg = reinterpret_cast<PLink_t*>(container.getDataArray (this->m_auxid));
-  return PackedLink_span (beg, container.size_v());
+  // nb. AuxVectorData::getDataSpan is suitable only for const;
+  // getDataArray may throw if the container is empty.
+  size_t sz = container.size_v();
+  PLink_t* beg = nullptr;
+  if (sz) {
+    beg = reinterpret_cast<PLink_t*> (container.getDataArray (this->m_auxid));
+  }
+  return PackedLink_span (beg, sz);
 }
 
 
@@ -195,8 +201,12 @@ auto
 Accessor<PackedLink<CONT>, ALLOC>::getDataLinkSpan (AuxVectorData& container) const
   -> DataLink_span
 {
-  const AuxDataSpanBase* sp = container.getDataSpan (this->m_linkedAuxid);
-  return DataLink_span (reinterpret_cast<DLink_t*>(sp->beg), sp->size);
+  const AuxDataSpanBase sp = *container.getDataSpan (this->m_linkedAuxid);
+  if (sp.size > 0) {
+    // Accessibility check.  ??? Can we get rid of this?
+    (void)container.getDataArray (this->m_linkedAuxid);
+  }
+  return DataLink_span (reinterpret_cast<DLink_t*>(sp.beg), sp.size);
 }
 
 

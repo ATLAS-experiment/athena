@@ -1,0 +1,11 @@
+LineNumber,VariableName,Type,Description
+1,bvrtPt,vector<float>,Pt of the soft secondary vertex
+2,bvrtEta,vector<float>,Eta of the soft secondary vertex
+3,bvrtPhi,vector<float>,Phi of the soft secondary vertex
+4,bvrtM,vector<float>,Mass of the soft secondary vertex
+5,mindRjetP,vector<float>,Minimum DeltaR between soft secondary vertex and a jet from the AntiKt4EMPFlowJets container
+6,mindRjetV,vector<float>,Minimum DeltaR between SV-PV vector and jet from the AntiKt4EMPFlowJets container (SV-PV is the vector that points from the primary vertex to the soft secondary vertex)
+7,mindRBTagSV,vector<float>,Minimum DeltaR between soft secondary vertex and vertex from AntiKt4EMPFlowSecVtx container
+8,wgtBDT,vector<float>,BDT weight of the soft secondary vertex
+9,nTracks,vector<int>,number of tracks of the soft secondary vertex
+10,vCharge,vector<float>,charge of the soft secondary vertex

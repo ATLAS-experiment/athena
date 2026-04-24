@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCNV_T_MUON_IDDETDESCRCNV_H
@@ -31,7 +31,7 @@ public:
 
   // Storage type and class ID (used by CnvFactory)
   static long  storageType()   { return DetDescr_StorageType; }
-  static const CLID& classID() { return ClassID_traits<IDHELPER>::ID(); }
+  static CLID  classID()       { return ClassID_traits<IDHELPER>::ID(); }
 };
 
 #include "T_Muon_IDDetDescrCnv.icc"

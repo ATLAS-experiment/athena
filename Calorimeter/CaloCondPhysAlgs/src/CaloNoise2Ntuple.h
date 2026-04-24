@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // CaloNoise2Ntuple.h
@@ -39,8 +39,6 @@ class CaloNoise2Ntuple : public AthAlgorithm {
     /** standard Athena-Algorithm method */
     virtual StatusCode          execute() override;
     /** standard Athena-Algorithm method */
-    virtual StatusCode          finalize() override;
-    /** standard Athena-Algorithm method */
     virtual StatusCode          stop() override;
     
   private:
@@ -50,7 +48,7 @@ class CaloNoise2Ntuple : public AthAlgorithm {
   //---------------------------------------------------
   ServiceHandle<ITHistSvc> m_thistSvc{this,"THistSvc","THistSvc"};
 
-  const CaloCell_ID*       m_calo_id;
+  const CaloCell_ID*       m_calo_id{};
 
   SG::ReadCondHandleKey<CaloNoise> m_totalNoiseKey
     { this, "TotalNoiseKey", "totalNoise", "SG key for total noise" };
@@ -61,23 +59,22 @@ class CaloNoise2Ntuple : public AthAlgorithm {
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey
     {this,"CaloDetDescrManager","CaloDetDescrManager","SG Key for CaloDetDescrManager in the Condition Store" };
 
-  std::string m_treeName;
+  Gaudi::Property<std::string> m_treeName{this, "TreeName", "mytree"};
 
-  int m_iCool;
-  int m_SubHash;
-  int m_Hash;
-  int m_OffId;
-  float m_eta;
-  float m_phi;
-  int m_layer;
-  int m_Gain;
-  float m_noise;
-  float m_elecNoise;
-  float m_pileupNoise; 
-  TTree* m_tree;
+  int m_iCool{0};
+  int m_SubHash{0};
+  int m_Hash{0};
+  int m_OffId{0};
+  float m_eta{0.};
+  float m_phi{0.};
+  int m_layer{0};
+  int m_Gain{0};
+  float m_noise{0.};
+  float m_elecNoise{0.};
+  float m_pileupNoise{0.}; 
+  TTree* m_tree{};
 
-  int m_runNumber;
-  int m_lumiBlock;
-
+  int m_runNumber{0};
+  int m_lumiBlock{0};
 };
 #endif

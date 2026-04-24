@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ASSOCIATIONUTILS_OVERLAPREMOVALGENUSEALG_H
@@ -75,10 +75,22 @@ class OverlapRemovalGenUseAlg : public EL::AnaAlgorithm
          return StatusCode::SUCCESS;
        }
        operator const SG::ReadHandleKey<ContainerType>& () const  {return m_readKey;}
+       const SG::ReadHandleKey<ContainerType>& hk() const  {return m_readKey;}
        std::string key() const { return m_readKey.key();}
        bool empty() const { return m_readKey.empty(); }
        void declareDependency(const std::string& variable) { if (!empty() && !variable.empty()) m_readDecorKeys.emplace_back(m_readKey.key() + "." + variable );}
        void declareOutput(const std::string& variable) { if (!empty() && !variable.empty()) m_writeDecorKeys.emplace_back(m_readKey.key() + "." + variable); }
+
+       template <class T>
+       void lockDecor (const std::string& decorKey, const EventContext& ctx) const {
+         for (const SG::WriteDecorHandleKey<ContainerType>& dhk : m_writeDecorKeys) {
+           if (SG::decorKeyFromKey (dhk.key()) == decorKey) {
+             SG::WriteDecorHandle<ContainerType, T> h (dhk, ctx);
+             if (h->size() > 0)
+               (void)h.getDecorationArray();
+           }
+         }
+       }
      private:
        SG::ReadHandleKey<ContainerType> m_readKey{};
        SG::ReadDecorHandleKeyArray<ContainerType> m_readDecorKeys{};

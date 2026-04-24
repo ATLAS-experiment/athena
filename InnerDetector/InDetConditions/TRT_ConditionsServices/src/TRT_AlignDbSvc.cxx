@@ -139,9 +139,6 @@ StatusCode TRT_AlignDbSvc::initialize()
 
   if( alignFolderExists ) {    
     
-    /** register the callback */
-//    ATH_CHECK( m_detStore->regFcn(&TRT_AlignDbSvc::IOVCallBack,this,m_aligncontainerhandle,m_alignroot) );
-    
     /** Reminder that the constants will be read from text file. */
     if( alignTextFileExists ) 
       ATH_MSG_INFO( "AlignableTransformContainer with name " << m_alignroot
@@ -1597,8 +1594,6 @@ StatusCode TRT_AlignDbSvc::tweakGlobalFolder(Identifier ident, const Amg::Transf
 
 const AlignableTransformContainer* TRT_AlignDbSvc::getContainer() const
 {
-  if (m_aligncontainerhandle.isValid())
-    return m_aligncontainerhandle.cptr();
   const AlignableTransformContainer* ptr = nullptr;
   if (m_detStore->retrieve (ptr, m_alignroot).isFailure()) {
     ATH_MSG_ERROR ("Cannot retrieve " << m_alignroot << " from detStore ");

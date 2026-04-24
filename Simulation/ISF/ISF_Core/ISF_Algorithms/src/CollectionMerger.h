@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_ALGS_COLLECTIONMERGER_H
@@ -71,12 +71,12 @@ namespace ISF {
                                  const SG::WriteHandleKey<T>& outputWriteHandleKey,
                                  const EventContext& ctx ) const;
 
-    /** Copy the given hit into the given output collection, container or DataHandle */
+    /** Copy the given hit into the given output collection, container or handle */
     template <typename HitType_t, typename OutputType_t>
       void insertCopy(const HitType_t& hit, OutputType_t& outputHandle) const;
 
     /** Copy the given const pointer to a hit into the given output collection,
-        container or DataHandle */
+        container or handle */
     template <typename HitType_t, typename OutputType_t>
       void insertCopy(HitType_t * const hit, OutputType_t& outputHandle) const;
 
@@ -168,7 +168,7 @@ inline StatusCode ISF::CollectionMerger::mergeCollections( const SG::ReadHandleK
 }
 
 
-/** Copy the given hit into the given output collection, container or DataHandle */
+/** Copy the given hit into the given output collection, container or handle */
 template <typename HitType_t, typename OutputType_t>
 inline void ISF::CollectionMerger::insertCopy(const HitType_t& hit,
                                            OutputType_t& outputHandle) const {
@@ -178,7 +178,7 @@ inline void ISF::CollectionMerger::insertCopy(const HitType_t& hit,
 }
 
 
-/** Copy the given const pointer to a hit into the given output collection, container or DataHandle */
+/** Copy the given const pointer to a hit into the given output collection, container or handle */
 template <typename HitType_t, typename OutputType_t>
 inline void ISF::CollectionMerger::insertCopy(HitType_t * const hit,
                                            OutputType_t& outputHandle) const {

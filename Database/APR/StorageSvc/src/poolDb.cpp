@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -82,4 +82,10 @@ const char* pool::accessMode(pool::DbAccessMode mode)   {
     return "NOT_OPEN ";
   else                                 
     return "UNKNOWN  ";
+}
+
+
+std::string pool::getEnvStr(const std::string& key) {
+  const char *var = getenv( key.c_str() );
+  return var? std::string(var) : std::string();
 }

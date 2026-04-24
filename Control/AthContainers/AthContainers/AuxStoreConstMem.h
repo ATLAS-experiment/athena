@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/AuxStoreConstMem.h
@@ -75,7 +75,7 @@ public:
    * @brief Return vector interface for one aux data item.
    * @param auxid The identifier of the desired aux data item.
    *
-   * Unimplmented for this implementation.
+   * Unimplemented for this implementation.
    */
   virtual const IAuxTypeVector* getVector (SG::auxid_t /*auxid*/) const override;
 

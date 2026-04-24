@@ -29,9 +29,9 @@ class FPGATrackSimSpacePointsTool : public extends<AthAlgTool, FPGATrackSimSpace
  private:
     StatusCode fillMaps(std::vector<FPGATrackSimHit>& hits);
     StatusCode makeSpacePoints(FPGATrackSimTowerInputHeader &tower, std::vector<FPGATrackSimCluster> &spacepoints);
-    void calcPosition(FPGATrackSimHit &hit_in, FPGATrackSimHit &hit_out, float &x, float &y, float &z);
-    bool searchForMatch(FPGATrackSimHit& hit_in,std::vector<FPGATrackSimHit>& hits_outer,FPGATrackSimTowerInputHeader &tower, std::vector<FPGATrackSimCluster> &spacepoints);
-    void addSpacePoints(FPGATrackSimHit  hit_in, FPGATrackSimHit  hit_out ,FPGATrackSimTowerInputHeader &tower, std::vector<FPGATrackSimCluster> &spacepoints);
+   void calcPosition(const FPGATrackSimHit &hit_in, const FPGATrackSimHit &hit_out, float &x, float &y, float &z);
+   bool searchForMatch(const FPGATrackSimHit& hit_in, const std::vector<FPGATrackSimHit>& hits_outer, FPGATrackSimTowerInputHeader &tower, std::vector<FPGATrackSimCluster> &spacepoints);
+   void addSpacePoints(const FPGATrackSimHit &hit_in, const FPGATrackSimHit &hit_out, FPGATrackSimTowerInputHeader &tower, std::vector<FPGATrackSimCluster> &spacepoints);
     void reduceGlobalCoordPrecision(FPGATrackSimHit &hit) const;
 
     //----------------------

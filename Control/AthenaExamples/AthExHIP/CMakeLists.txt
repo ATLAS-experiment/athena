@@ -12,13 +12,14 @@ endif()
 # Set up the build of the example library.
 atlas_add_component( AthExHIP
    src/*.h src/*.cxx src/*.hip src/components/*.cxx
-   LINK_LIBRARIES AthenaBaseComps GaudiKernel )
+   LINK_LIBRARIES AthenaBaseComps AthenaInterprocess GaudiKernel )
 set_target_properties( AthExHIP PROPERTIES
    LINKER_LANGUAGE HIP )
 
-# Install files from the package.
-atlas_install_joboptions( share/*.py )
+# Install extra files from the package.
+atlas_install_python_modules( python/*.py )
 
 # Test(s) in the package.
 atlas_add_test( LinearTransformExample
-   SCRIPT athena.py AthExHIP/LinearTransformExample_jobOptions.py )
+   SCRIPT athena.py --threads=1 AthExHIP/LinearTransformExampleConfig.py
+   POST_EXEC_SCRIPT nopost.sh)

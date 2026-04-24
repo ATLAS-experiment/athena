@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -41,15 +41,9 @@ CaloTTDescriptor::CaloTTDescriptor(float eta_min,   float eta_max,   float deta,
 void	
 CaloTTDescriptor::print	() const
 {
-    std::cout << std::endl << " CaloTTDescriptor print: " 
-	      << std::endl << std::endl;
-    
-    // Print out id
-    m_id.show();
-    
-    std::cout << " Calo LVL1 Trigger Towers: " << std::endl;
-    std::cout << "  eta min  eta max     deta   phi min   phi max      dphi   nLay"
-	      << std::endl;
+    std::cout << "\n CaloTTDescriptor print: \n\n" << m_id;
+    std::cout << " Calo LVL1 Trigger Towers: \n";
+    std::cout << "  eta min  eta max     deta   phi min   phi max      dphi   nLay\n";
     std::cout << std::setiosflags(std::ios::fixed);
     std::cout << std::setw(9) << std::setprecision(4) << m_eta_min << " " 
 	      << std::setw(9) << std::setprecision(4) << m_eta_max << " " 

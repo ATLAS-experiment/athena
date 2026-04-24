@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRACKRECONSTRUCTION_TRACKSTATEPRINTERTOOL_H
@@ -17,7 +17,7 @@
 
 // ACTS CORE
 #include "Acts/Geometry/TrackingGeometry.hpp"
-#include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/EventData/BoundTrackParameters.hpp"
 #include "Acts/EventData/TrackStateType.hpp"
 
 // PACKAGE

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -9,8 +9,8 @@
  *      Author: tlodd
  */
 
-#ifndef EFLOWLOOKUPEXP_H_
-#define EFLOWLOOKUPEXP_H_
+#ifndef EFLOWREC_EFLOWLOOKUPEXP_H
+#define EFLOWREC_EFLOWLOOKUPEXP_H
 
 #include <vector>
 #include <stdexcept>
@@ -58,4 +58,4 @@ private:
 
 
 
-#endif /* EFLOWLOOKUPEXP_H_ */
+#endif /* EFLOWREC_EFLOWLOOKUPEXP_H */

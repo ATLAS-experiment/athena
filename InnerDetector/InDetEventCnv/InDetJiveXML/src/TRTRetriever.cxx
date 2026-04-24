@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRTRetriever.h"
-#include "StoreGate/DataHandle.h"
 #include "JiveXML/DataType.h"
 
 #include "TRT_ReadoutGeometry/TRT_DetectorManager.h"

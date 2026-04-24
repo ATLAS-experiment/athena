@@ -19,6 +19,7 @@ StatusCode LArG4H6COLDTCMod0CalibCalculator::initialize()
 }
 
 G4bool LArG4H6COLDTCMod0CalibCalculator::Process( const G4Step* a_step, LArG4Identifier & identifier,
+                                                  LArG4Identifier &,
                                                   std::vector<G4double> & energies, const LArG4::eCalculatorProcessing a_process ) const
 {
 

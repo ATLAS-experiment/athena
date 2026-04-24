@@ -97,10 +97,7 @@ def MuDataPrepViewDataVerifierCfg(flags):
                  ( 'MdtCsm_Cache' , 'StoreGateSvc+MdtCsmRdoCache' ),
                  ( 'RpcPad_Cache' , 'StoreGateSvc+RpcRdoCache' ),
                  ( 'RpcCoinDataCollection_Cache' , 'StoreGateSvc+RpcCoinCache' ),
-                 ( 'TgcPrepDataCollection_Cache' , 'StoreGateSvc+' + MuonPrdCacheNames.TgcCache + 'PriorBC' ),
-                 ( 'TgcPrepDataCollection_Cache' , 'StoreGateSvc+' + MuonPrdCacheNames.TgcCache + 'NextBC' ),
                  ( 'TgcPrepDataCollection_Cache' , 'StoreGateSvc+' + MuonPrdCacheNames.TgcCache + 'AllBCs' ),
-                 ( 'TgcPrepDataCollection_Cache' , 'StoreGateSvc+' + MuonPrdCacheNames.TgcCache ),
                  ( 'TgcCoinDataCollection_Cache' , 'StoreGateSvc+' + MuonPrdCacheNames.TgcCoinCache + 'PriorBC' ),
                  ( 'TgcCoinDataCollection_Cache' , 'StoreGateSvc+' + MuonPrdCacheNames.TgcCoinCache + 'NextBC' ),
                  ( 'TgcCoinDataCollection_Cache' , 'StoreGateSvc+' + MuonPrdCacheNames.TgcCoinCache + 'NextNextBC' ),
@@ -201,7 +198,7 @@ def muFastVDVCfg(flags, RoIs, postFix, InsideOutMode, extraLoads):
   # In insideout mode, need to inherit muon decoding objects for TGC, RPC, MDT, CSC
   dataObjects=[]
   if InsideOutMode:
-    dataObjects = [('Muon::TgcPrepDataContainer','StoreGateSvc+TGC_Measurements'),
+    dataObjects = [('Muon::TgcPrepDataContainer','StoreGateSvc+TGC_MeasurementsAllBCs'),
                    ('TgcRdoContainer' , 'StoreGateSvc+TGCRDO'),
                    ('Muon::RpcPrepDataContainer','StoreGateSvc+RPC_Measurements'),
                    ('Muon::MdtPrepDataContainer','StoreGateSvc+MDT_DriftCircles'),
@@ -347,7 +344,7 @@ def EFMuSADataPrepViewDataVerifierCfg(flags, RoIs, roiName):
     return result
 
 
-def muEFSARecoSequenceCfg( flags, RoIs, name):
+def muEFSARecoSequenceCfg( flags, RoIs, name, useBucketFilter=False):
 
     from MuonCombinedAlgs.MuonCombinedAlgsMonitoring import MuonCreatorAlgMonitoring
     from MuonConfig.MuonSegmentFindingConfig import MuonSegmentFinderAlgCfg, MuonLayerHoughAlgCfg, MuonSegmentFilterAlgCfg
@@ -372,11 +369,22 @@ def muEFSARecoSequenceCfg( flags, RoIs, name):
 
         # Schedule muon EF reco
         from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg
-        acc.merge( MuonSpacePointFormationCfg( flags ) )
+        acc.merge( MuonSpacePointFormationCfg( flags, suffix =f'_{name}' ) )
+        
+        ### Setup the bucket filter if requested
+        if useBucketFilter:
+            from MuonInference.InferenceConfig import GraphBucketFilterToolCfg, GraphInferenceAlgCfg
+            bucketTool = acc.popToolsAndMerge( GraphBucketFilterToolCfg(flags, name=f"GraphBucketFilterTool_{name}",
+                                                                        WriteSpacePointKey=f"FilteredMlBuckets_{name}"))
+            acc.merge(GraphInferenceAlgCfg(flags, name=f"GraphInferenceAlg_{name}", InferenceTools=[bucketTool]))
         
         ### Setup the new chain
         from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
-        acc.merge(MuonPatternRecognitionCfg(flags))
+        acc.merge(MuonPatternRecognitionCfg(flags, suffix = f'_{name}'))
+        
+        if useBucketFilter:
+            # Change the input container to use filtered buckets
+            acc.getEventAlgo(f"MuonEtaHoughTransformAlg_{name}").SpacePointContainer = f"FilteredMlBuckets_{name}"
 
     else: 
         acc.merge(MuonLayerHoughAlgCfg(flags, "TrigMuonLayerHoughAlg"))
@@ -416,7 +424,7 @@ def muEFSARecoSequenceCfg( flags, RoIs, name):
 def VDVEFMuCBCfg(flags, RoIs, name, suffix):
   acc = ComponentAccumulator()
   dataObjects = [( 'Muon::MdtPrepDataContainer' , 'StoreGateSvc+MDT_DriftCircles' ),  
-                 ( 'Muon::TgcPrepDataContainer' , 'StoreGateSvc+TGC_Measurements' ),
+                 ( 'Muon::TgcPrepDataContainer' , 'StoreGateSvc+TGC_MeasurementsAllBCs' ),
                  ( 'Muon::RpcPrepDataContainer' , 'StoreGateSvc+RPC_Measurements' ),
                  ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % RoIs ),
                  ( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
@@ -567,7 +575,7 @@ def muEFCBRecoSequenceCfg( flags, RoIs, name, suffix ):
 def VDVMuInsideOutCfg(flags, name, candidatesName, suffix):
   acc = ComponentAccumulator()
   dataObjects = [( 'Muon::RpcPrepDataContainer' , 'StoreGateSvc+RPC_Measurements' ),
-                 ( 'Muon::TgcPrepDataContainer' , 'StoreGateSvc+TGC_Measurements' ),
+                 ( 'Muon::TgcPrepDataContainer' , 'StoreGateSvc+TGC_MeasurementsAllBCs' ),
                  ( 'MuonCandidateCollection' , 'StoreGateSvc+'+candidatesName ),
                  ('Trk::SegmentCollection' , 'StoreGateSvc+TrackMuonSegments')]
   if not isCosmic(flags): dataObjects += [( 'Muon::HoughDataPerSectorVec' , 'StoreGateSvc+HoughDataPerSectorVec')]
@@ -648,8 +656,6 @@ def muEFInsideOutRecoSequenceCfg(flags, RoIs, name, suffix ):
     acc.merge(MuonCreatorAlgCfg(flags, name="TrigMuonCreatorAlgInsideOut_"+name+suffix,  MuonCandidateLocation=[candidatesName], TagMaps=["muGirlTagMap"],InDetCandidateLocation="InDetCandidates_"+name+suffix,
                                          MuonContainerLocation = cbMuonName, ExtrapolatedLocation = "InsideOutCBExtrapolatedMuons"+suffix,
                                          MSOnlyExtrapolatedLocation = "InsideOutCBMSOnlyExtrapolatedMuons"+suffix, CombinedLocation = "InsideOutCBCombinedMuon"+suffix, MonTool = MuonCreatorAlgMonitoring(flags, "MuonCreatorAlgInsideOut_"+name+suffix)))
-
-
 
   return acc
 

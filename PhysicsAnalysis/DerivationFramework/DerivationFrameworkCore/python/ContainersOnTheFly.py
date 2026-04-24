@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # List of containers that are made on-the-fly by basically all DAOD types and
 # can therefore be reasonably added to the NameAndTypes dictionary centrally
@@ -97,22 +97,16 @@ def ContainersOnTheFly(flags=None):
         ["AntiKt4UFOCSSKLowPtJets","xAOD::JetContainer"],
         ["AntiKt4UFOCSSKLowPtJetsAux","xAOD::JetAuxContainer"],
 
-        ["AntiKt10PV0TrackJets","xAOD::JetContainer"],
-        ["AntiKt10PV0TrackJetsAux","xAOD::JetAuxContainer"],
         ["AntiKt10LCTopoJets","xAOD::JetContainer"],
         ["AntiKt10LCTopoJetsAux","xAOD::JetAuxContainer"],
-        ["AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets","xAOD::JetContainer"],
-        ["AntiKt10LCTopoTrimmedPtFrac5SmallR20JetsAux","xAOD::JetAuxContainer"],
-        ["AntiKt10TruthTrimmedPtFrac5SmallR20Jets","xAOD::JetContainer"],
-        ["AntiKt10TruthTrimmedPtFrac5SmallR20JetsAux","xAOD::JetAuxContainer"],
-        ["AntiKt10TrackCaloClusterJets","xAOD::JetContainer"],
-        ["AntiKt10TrackCaloClusterJetsAux","xAOD::JetAuxContainer"],
         ["AntiKt10UFOCSSKJets","xAOD::JetContainer"],
         ["AntiKt10UFOCSSKJetsAux","xAOD::JetAuxContainer"],
         ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets","xAOD::JetContainer"],
         ["AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAux","xAOD::JetAuxContainer"],
         ["AntiKt10TruthSoftDropBeta100Zcut10Jets","xAOD::JetContainer"],
         ["AntiKt10TruthSoftDropBeta100Zcut10JetsAux","xAOD::JetAuxContainer"],
+        ["AntiKt10TruthTrimmedPtFrac5SmallR20Jets","xAOD::JetContainer"],
+        ["AntiKt10TruthTrimmedPtFrac5SmallR20JetsAux","xAOD::JetAuxContainer"],
         ["AntiKt10TruthJets","xAOD::JetContainer"],
         ["AntiKt10TruthJetsAux","xAOD::JetAuxContainer"],
         ["AntiKt10TruthDressedWZSoftDropBeta100Zcut10Jets","xAOD::JetContainer"],
@@ -122,8 +116,6 @@ def ContainersOnTheFly(flags=None):
 
         ["Kt4EMPFlowEventShape","xAOD::EventShape"],
         ["Kt4EMPFlowEventShapeAux","xAOD::EventShapeAuxInfo"],
-        ["Kt4EMPFlowPUSBEventShape","xAOD::EventShape"],
-        ["Kt4EMPFlowPUSBEventShapeAux","xAOD::EventShapeAuxInfo"],
         ["Kt4EMPFlowNeutEventShape","xAOD::EventShape"],
         ["Kt4EMPFlowNeutEventShapeAux","xAOD::EventShapeAuxInfo"],
         ["Kt4EMTopoOriginEventShape","xAOD::EventShape"],

@@ -35,7 +35,7 @@ public:
   
 protected:
   TrigT2MbtsBits_PERS* createPersistent(TrigT2MbtsBits* transObj);
-  TrigT2MbtsBits* createTransient();
+  TrigT2MbtsBits* createTransient(const Token* token);
 };
 
 

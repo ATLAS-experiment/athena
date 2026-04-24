@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(Identifier32Representation){
   boost::test_tools::output_test_stream output;
   {//scoped redirect of cout
     cout_redirect guard( output.rdbuf( ) );
-    g.show();
+    g.show(std::cout);
   }
   BOOST_CHECK( output.is_equal( "0xf1234" ) );
   //new methods, Aug 2024

@@ -29,7 +29,6 @@
                   const xAOD::PixelClusterContainer & pixelContainer,
                   const xAOD::StripClusterContainer & stripContainer,
                   std::vector<ActsTrk::ProtoTrack> & foundProtoTracks ,
-                  const FPGATrackSimHitContainer & hitsInRoads,
                   const std::vector<FPGATrackSimRoad>& roads) const = 0;
     virtual StatusCode findProtoTracks(const EventContext& ctx,
                   const xAOD::PixelClusterContainer & pixelContainer,

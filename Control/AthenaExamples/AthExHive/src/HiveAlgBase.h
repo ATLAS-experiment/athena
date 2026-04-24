@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -15,7 +15,7 @@
 #ifndef ATHEXHIVE_BASEALG_H
 #define ATHEXHIVE_BASEALG_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthenaKernel/IAthRNGSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ICPUCrunchSvc.h"
@@ -23,7 +23,7 @@
 
 #include <string>
 
-class HiveAlgBase  :  public AthAlgorithm {
+class HiveAlgBase  :  public AthReentrantAlgorithm {
   
 public:
   
@@ -38,7 +38,7 @@ public:
 protected:
 
   // cause Alg to sleep for time defined by "Time" Property
-  unsigned int sleep();
+  unsigned int sleep() const;
 
   // Handle to HiveExSvc, which accumulates how much time each Alg sleeps
   ServiceHandle<IHiveExSvc> m_hes{this,"HiveExSvc","HiveExSvc","Handle to HiveExSvc"};

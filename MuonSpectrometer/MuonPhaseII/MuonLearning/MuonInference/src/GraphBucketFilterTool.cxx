@@ -13,9 +13,21 @@
 namespace MuonML {
 
 StatusCode GraphBucketFilterTool::initialize() {
+  // setupModel() already initializes m_readKey and m_geoCtxKey from base class
   ATH_CHECK(setupModel());
-  ATH_CHECK(m_readKey.initialize());
-  ATH_CHECK(m_writeKey.initialize());
+  
+  ATH_MSG_DEBUG("Base class keys initialized: ReadSpacePoints=" << m_readKey.key() 
+                << ", AlignmentKey=" << m_geoCtxKey.key());
+  
+  // Only initialize write key if it's configured (not empty)
+  // This allows the tool to run in inference-only mode for score dumping
+  const std::string& writeKey = m_writeKey.key();
+  if (!writeKey.empty()) {
+    ATH_CHECK(m_writeKey.initialize());
+    ATH_MSG_INFO("Filtering mode enabled: writing filtered buckets to " << writeKey);
+  } else {
+    ATH_MSG_INFO("Inference-only mode enabled: no store writes");
+  }
 
   auto& accept = m_acceptClasses.value();
   std::sort(accept.begin(), accept.end());
@@ -26,13 +38,27 @@ StatusCode GraphBucketFilterTool::initialize() {
 
 StatusCode GraphBucketFilterTool::runGraphInference(const EventContext& ctx,
                                                     GraphRawData& graphData) const {
+  ATH_MSG_DEBUG("runGraphInference called");
+  
+  // buildGraph reads the container and builds features + edges
   ATH_CHECK(buildGraph(ctx, graphData));
   
+  // Read the container again for classification (buildGraph doesn't store it)
   const MuonR4::SpacePointContainer* inputBuckets{nullptr};
+  ATH_MSG_DEBUG("Reading container from key: " << m_readKey.key());
   ATH_CHECK(SG::get(inputBuckets, m_readKey, ctx));
+  ATH_MSG_DEBUG("Container read successfully, size: " << (inputBuckets ? inputBuckets->size() : 0));
 
-  SG::WriteHandle filteredBuckets{m_writeKey, ctx};
-  ATH_CHECK(filteredBuckets.record(std::make_unique<MuonR4::SpacePointContainer>()));
+  // Check if we're in filtering mode (write key configured) or inference-only mode
+  const bool doStoreWrite = !m_writeKey.key().empty();
+  ATH_MSG_DEBUG("Store write mode: " << (doStoreWrite ? "YES" : "NO (inference-only)"));
+  
+  // Only create WriteHandle if we're actually writing to store
+  std::unique_ptr<SG::WriteHandle<MuonR4::SpacePointContainer>> filteredBuckets;
+  if (doStoreWrite) {
+    filteredBuckets = std::make_unique<SG::WriteHandle<MuonR4::SpacePointContainer>>(m_writeKey, ctx);
+    ATH_CHECK(filteredBuckets->record(std::make_unique<MuonR4::SpacePointContainer>()));
+  }
 
   if (inputBuckets->empty()) {
     ATH_MSG_DEBUG("No input buckets found.");
@@ -77,6 +103,7 @@ StatusCode GraphBucketFilterTool::runGraphInference(const EventContext& ctx,
 
   // DEBUG: Print filter configuration
   ATH_MSG_DEBUG("=== DEBUGGING: Filter Configuration ===");
+  ATH_MSG_DEBUG("Mode: " << (doStoreWrite ? "Filtering" : "Inference-only"));
   ATH_MSG_DEBUG("AcceptClasses: [" << m_acceptClasses[0] 
                << (m_acceptClasses.size() > 1 ? (", " + std::to_string(m_acceptClasses[1])) : "")
                << (m_acceptClasses.size() > 2 ? (", " + std::to_string(m_acceptClasses[2])) : "") << "]");
@@ -121,9 +148,10 @@ StatusCode GraphBucketFilterTool::runGraphInference(const EventContext& ctx,
                   << " logits(biased0)=(" << l0 << ", " << l1 << ", " << l2
                   << ") -> class " << argmax);
     
-    if (std::binary_search(m_acceptClasses.begin(), m_acceptClasses.end(), argmax)) {
+    // Only add to filtered output if in filtering mode AND class is accepted
+    if (doStoreWrite && std::binary_search(m_acceptClasses.begin(), m_acceptClasses.end(), argmax)) {
         auto copied = std::make_unique<MuonR4::SpacePointBucket>(*bucket);
-        filteredBuckets->push_back(std::move(copied));
+        (*filteredBuckets)->push_back(std::move(copied));
         ++kept;
     }
     
@@ -148,8 +176,10 @@ StatusCode GraphBucketFilterTool::runGraphInference(const EventContext& ctx,
   ATH_MSG_DEBUG("Class 0 (reject): " << class0_count << " (" << (100.0 * class0_count / std::max(predIdx, size_t(1))) << "%)");
   ATH_MSG_DEBUG("Class 1 (accept): " << class1_count << " (" << (100.0 * class1_count / std::max(predIdx, size_t(1))) << "%)");
   ATH_MSG_DEBUG("Class 2 (accept): " << class2_count << " (" << (100.0 * class2_count / std::max(predIdx, size_t(1))) << "%)");
-  ATH_MSG_DEBUG("Total kept: " << kept << " (" << (100.0 * kept / std::max(validBuckets, size_t(1))) << "% efficiency)");
-  ATH_MSG_DEBUG("Expected kept (class1+class2): " << (class1_count + class2_count));
+  if (doStoreWrite) {
+    ATH_MSG_DEBUG("Total kept: " << kept << " (" << (100.0 * kept / std::max(validBuckets, size_t(1))) << "% efficiency)");
+    ATH_MSG_DEBUG("Expected kept (class1+class2): " << (class1_count + class2_count));
+  }
   ATH_MSG_DEBUG("=== END DEBUG SUMMARY ===");
 
   return StatusCode::SUCCESS;

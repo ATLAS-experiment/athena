@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonAlignmentData/ALinePar.h"
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 #include "GaudiKernel/SystemOfUnits.h"
+#include <iostream>
 
 std::ostream& operator<<(std::ostream& ostr, const ALinePar& par) {
   using Parameter = ALinePar::Parameter;

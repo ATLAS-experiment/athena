@@ -20,11 +20,11 @@ def HistoInDetGlobalPrimaryVertexMonAlgCfg(helper, alg):
     # begin histogram definitions
     varName = 'm_PvX;pvX' #done
     title = 'Primary vertex: x;x (mm);Events'
-    pvGroup.defineHistogram(varName, type='TH1F', path=pathpv, title=title, xbins=500, xmin=-1.0, xmax=1.0)
+    pvGroup.defineHistogram(varName, type='TH1F', path=pathpv, title=title, xbins=500, xmin=-1.5, xmax=0.5)
 
     varName = 'm_PvY;pvY' #done
     title = 'Primary vertex: y;y (mm);Events'
-    pvGroup.defineHistogram(varName, type='TH1F', path=pathpv, title=title, xbins=500, xmin=-1.0, xmax=1.0)
+    pvGroup.defineHistogram(varName, type='TH1F', path=pathpv, title=title, xbins=500, xmin=-1.5, xmax=0.5)
 
     varName = 'm_PvZ;pvZ' #done
     title = 'Primary vertex: z;z (mm);Events'

@@ -15,6 +15,8 @@ import uuid
 import socket
 
 import multiprocessing
+import multiprocessing.pool
+
 import base64
 
 from datetime import datetime
@@ -715,7 +717,7 @@ def isInteractiveEnv():
 #  @details A Job object is a set of pieces of information relevant to a given
 #  work function. A Job object comprises a name, a work function, work function
 #  arguments, the work function timeout specification, a
-#  multiprocessing.Pool.apply_async() object and, ultimately, a result object.
+#  multiprocessing.pool.ApplyResult (AsyncResult alias thereof) object and, ultimately, a result object.
 #  @param name the Job object name
 #  @param workFunction the work function object
 #  @param workFunctionArguments the work function keyword arguments dictionary
@@ -874,10 +876,16 @@ class ParallelJobProcessor(object):
         self,
         jobSubmission = None,
         numberOfProcesses = multiprocessing.cpu_count(),  # noqa: B008 (cpu_count is constant)
+            # name of start method used for starting processes,
+            # 'fork', 'spawn', 'forkserver'
+            # "fork" is default prior to Python 3.14, planned to change in Python 3.14
+        startMethod="fork"
         ):
         self.jobSubmission = jobSubmission
         self.numberOfProcesses = numberOfProcesses
+        self.startMethod = startMethod
         self.className = self.__class__.__name__
+        msg.debug(f"{self.className}: current process: {multiprocessing.current_process().name}")
         self.status = "starting"
         msg.debug("{notifier}: status: {status}".format(
             notifier = self.className,
@@ -885,15 +893,20 @@ class ParallelJobProcessor(object):
         )
         self.countOfJobs = None
         self.countOfRemainingJobs = 0
-        self.pool = multiprocessing.Pool(
+
+        self.pool = multiprocessing.pool.Pool(
             self.numberOfProcesses,
-            initialise_processes
+            initialise_processes,
+            (),
+            None,
+            multiprocessing.get_context(self.startMethod)
         )
-        msg.debug("{notifier}: pool of {numberOfProcesses} {units} created".format(
+        msg.debug("{notifier}: pool of {numberOfProcesses} {units} with start method {startMethod!r} created".format(
             notifier = self.className,
             numberOfProcesses = str(self.numberOfProcesses),
             units = units(quantity = self.numberOfProcesses,
-            unitSingular = "process", unitPlural = "processes")
+            unitSingular = "process", unitPlural = "processes"),
+            startMethod = self.startMethod,
         ))
         self.status = "ready"
         msg.debug("{notifier}: status: {status}".format(
@@ -975,7 +988,8 @@ class ParallelJobProcessor(object):
                 notifier = self.className,
                 name = job.name
             ))
-            # Apply the job to the pool, applying the object pool.ApplyResult
+            # Apply the job to the pool, applying the object
+            # multiprocessing.pool.ApplyResult (AsyncResult alias thereof)
             # to the job as a data attribute.
             job.resultGetter = self.pool.apply_async(
                 func = job.workFunction,
@@ -1032,7 +1046,7 @@ class ParallelJobProcessor(object):
             # group submission timestamp, then raise an excepton, otherwise
             # cycle over all jobs.
             # Allow time for jobs to complete.
-            time.sleep(0.25)
+            time.sleep(5.0)
             if self.jobSubmission.timeoutStatus():
                 msg.error("{notifier}: job group '{name}' timed out".format(
                     notifier = self.className,
@@ -1052,11 +1066,7 @@ class ParallelJobProcessor(object):
                 )
             else:
                 for job in self.jobSubmission.jobs:
-                    self.listOfNamesOfRemainingJobs = []
                     if not hasattr(job, 'result'):
-                        # Maintain a contemporary list of the names of remaining
-                        # jobs.
-                        self.listOfNamesOfRemainingJobs.append(job.name)
                         # If the result of the job is ready...
                         if job.resultGetter.ready():
                             msg.debug(
@@ -1085,6 +1095,7 @@ class ParallelJobProcessor(object):
                                     )
                                 )
                                 self.countOfRemainingJobs -= 1
+                                self.listOfNamesOfRemainingJobs.remove(job.name)
                                 msg.debug(
                                     "{notifier}: {countOfRemainingJobs} {units} remaining".format(
                                         notifier = self.className,
@@ -1095,6 +1106,7 @@ class ParallelJobProcessor(object):
                                             unitPlural = "jobs"
                                         )
                                     )
+                                    + f"\n          names of remaining jobs: {self.listOfNamesOfRemainingJobs}"
                                 )
                             # If the job was not successful, raise an exception
                             # and abort processing.
@@ -1146,16 +1158,15 @@ class ParallelJobProcessor(object):
         ))
         for job in self.jobSubmission.jobs:
             self.jobSubmission.results.append(job.result)
-            self._terminate()
-        return self.jobSubmission.results
         self._terminate()
+        return self.jobSubmission.results
 
     ## @brief return a status report string
     #  @details This method returns a status report string, detailing
     #  information on the JobGroup submission and on the job processing status.
     #  @return status report string
     def statusReport(self):
-        statusReport = "\n{notifier}:\n   status report:".format(
+        statusReport = "{notifier}:\n   status report:".format(
             notifier = self.className
         )
         # information on parallel job processor

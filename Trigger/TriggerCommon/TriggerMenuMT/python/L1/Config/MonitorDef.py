@@ -141,11 +141,12 @@ class MonitorDef:
                 "L1_jXE110", "L1_jXE120", "L1_jXE500",
                 "L1_jXEC100",
                 "L1_jTE200",
-                "L1_jTEC200", "L1_jTEFWD100", "L1_jTEFWDA100", "L1_jTEFWDC100",
+                "L1_jTEC200", "L1_jTEFWD100",
                 "L1_gJ20p0ETA25", "L1_gJ20p25ETA49", "L1_gJ50p0ETA25",
                 "L1_gJ100p0ETA25", "L1_gJ400p0ETA25",
                 "L1_gLJ80p0ETA25", "L1_gLJ100p0ETA25", "L1_gLJ140p0ETA25", "L1_gLJ160p0ETA25",
                 "L1_gXEJWOJ60", "L1_gXEJWOJ70", "L1_gXEJWOJ80", "L1_gXEJWOJ100", "L1_gXEJWOJ110", "L1_gXEJWOJ120", "L1_gXEJWOJ500",
+                "L1_gXENC100",  "L1_gXENC110", 
                 "L1_cXE100", "L1_cXE110",
                 "L1_gTE200",
                 "L1_gMHT500",
@@ -234,6 +235,13 @@ class MonitorDef:
                     "L1_3eEM12L",
                     #
                     "L1_eTAU20L", "L1_eTAU35", "L1_eTAU40HM",
+                    # 
+                    # AD monitoring - ATR-32397
+                    "L1_ADVAET", "L1_ADVAEL", "L1_ADBDTT", "L1_ADBDTL",
+                    "L1_ARTEMISL", "L1_ARTEMIST",
+                    #
+                    # splash items
+                    "L1_eEM22A", "L1_eEM22C",
                 ]
 
         else: # HI L1 menu
@@ -333,6 +341,7 @@ class MonitorDef:
                     "L1_jTE5", "L1_jTE10", "L1_jTE20", "L1_jTE50",
                     "L1_jJ10", "L1_jJ20",
                     "L1_eEM5", "L1_eEM9",
+                    # "L1_ARTEMISL", "L1_ARTEMIST",
                 ])
 
                 # lowMu HLT menu: Add triggers that are not in the MC menu
@@ -364,9 +373,9 @@ class MonitorDef:
                     # ZDC
                     # Basic inputs
                     "L1_ZDC_XOR", "L1_ZDC_C_VZDC_A", "L1_ZDC_A_VZDC_C",
-                    "L1_1ZDC_A_VZDC_C", "L1_VZDC_A_1ZDC_C",
                     "L1_1ZDC_A_1ZDC_C", "L1_5ZDC_A_VZDC_C", "L1_VZDC_A_5ZDC_C",
                     "L1_ZDC_1XOR5", "L1_5ZDC_A_5ZDC_C",
+                    "L1_5ZDC_A_5ZDC_C",
                     # Mu+X
                     "L1_MU3V_jJ40",
                     # Phase-I L1Calo
@@ -374,10 +383,11 @@ class MonitorDef:
                     "L1_eTAU1",
                     "L1_DPHI-2eEM1", "L1_DPHI-2eTAU1",
                     "L1_DPHI-2eEM1_VjTE200",
-                    "L1_2eEM1_VjTE200", "L1_2eEM2_VjTE200",
+                    # "L1_2eEM1_VjTE200",
+                    # "L1_2eEM2_VjTE200",
                     "L1_eEM5_VjTE200", "L1_eEM9_VjTE200",
-                    "L1_eEM1_jTE4_VjTE200", "L1_eEM2_jTE4_VjTE200", "L1_eTAU1_jTE4_VjTE200",
-                    "L1_2eTAU1_VjTE200",
+                    # "L1_eEM1_jTE4_VjTE200", "L1_eEM2_jTE4_VjTE200", "L1_eTAU1_jTE4_VjTE200",
+                    # "L1_2eTAU1_VjTE200",
                     # "L1_eEM1_TRT_VjTE200", "L1_eTAU1_TRT_VjTE200",
                     # "L1_eEM1_TRT_ZDC_XOR_VjTE200", "L1_eTAU1_TRT_ZDC_XOR_VjTE200",
                     # "L1_eEM1_TRT_VZDC_A_VZDC_C_VjTE100", "L1_eTAU1_TRT_VZDC_A_VZDC_C_VjTE100",
@@ -387,7 +397,8 @@ class MonitorDef:
                     "L1_jJ5p30ETA49","L1_jJ10p30ETA49",
                     #
                     "L1_jTE3", "L1_jTE4", "L1_jTE5", "L1_jTE10", "L1_jTE20", "L1_jTE50",
-                    "L1_jTE100", "L1_jTE600", "L1_jTE1500", "L1_jTE6500", "L1_jTEFWD2600", "L1_jTEFWD5600", "L1_jTEFWD6300", "L1_jTEFWD6600",
+                    "L1_jTE100", "L1_jTE600", "L1_jTE1500", "L1_jTE6500",
+                    # "L1_jTEFWD2600", "L1_jTEFWD5600", "L1_jTEFWD6300", "L1_jTEFWD6600",
                     "L1_jTE5_VjTE200",
                     #
                     "L1_VjTE10", "L1_VjTE200", "L1_VjTE600", "L1_jTE50_VjTE600",
@@ -440,10 +451,10 @@ class MonitorDef:
                     'L1_CALMTEA_eEM2_VjTE200',
                     'L1_CALMTEA_eTAU2_VjTE200',
 
-                    'L1_MATCHA_eTAU2',
-                    'L1_MATCHA_eTAU2_VjTE200',
-                    'L1_MATCHA_eTAU2_EMPTY',
-                    'L1_MATCHA_eTAU2_VjTE200_EMPTY',
+                    # 'L1_MATCHA_eTAU2',
+                    # 'L1_MATCHA_eTAU2_VjTE200',
+                    # 'L1_MATCHA_eTAU2_EMPTY',
+                    # 'L1_MATCHA_eTAU2_VjTE200_EMPTY',
 
                     'L1_ESP_1ZDC_NZDC_jJ10_VjTE200',
                     'L1_ESP_5ZDC_A_5ZDC_C_jJ10_VjTE200',
@@ -472,6 +483,15 @@ class MonitorDef:
 
                     'L1_CALMTEA_23INVM-27DPHI-2eTAU1_VjTE200',
                     'L1_CALMTEA_23INVM-27DPHI-2eTAU1_VjTE200_EMPTY',
+
+                    # 2026 HI
+                    'L1_eEM3',
+                    'L1_eEM3_EMPTY',
+
+                    'L1_CALMTEA_eEM3',
+                    'L1_CALMTEA_eEM3_VjTE200',
+
+                    'L1_AFP_OR_VjTE200',
                 ])
 
                 # HI HLT menu: Add triggers that are not in the MC menu

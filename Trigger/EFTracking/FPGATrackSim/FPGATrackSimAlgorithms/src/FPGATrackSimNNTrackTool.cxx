@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
    */
 /**
  * @file FPGATrackSimNNTrackTool.cxx
@@ -73,7 +73,7 @@ StatusCode FPGATrackSimNNTrackTool::setTrackParameters(std::vector<FPGATrackSimT
     for (auto &track : tracks) {
       if (!track.passedOR()) continue; /// only set this for tracks passing goodness of fit AND overlap removal
         std::vector<float> inputTensorValues;
-        const std::vector <FPGATrackSimHit>& hits = track.getFPGATrackSimHits();
+        const auto& hits = track.getFPGATrackSimHitPtrs();
         bool gotSecondSP = false;
         float tmp_xf;
         float tmp_yf;
@@ -81,8 +81,13 @@ StatusCode FPGATrackSimNNTrackTool::setTrackParameters(std::vector<FPGATrackSimT
 	float tmp_rf;
 	float tmp_phif;
 	
-        for (const auto& hit : hits) {
-            if (!hit.isReal()) continue;
+        for (const auto& hit_ptr : hits) {
+            if (!hit_ptr) {
+                ATH_MSG_ERROR("Null hit pointer in track");
+                return StatusCode::FAILURE;
+            }
+            if (!hit_ptr->isReal()) continue;
+            const auto& hit = *hit_ptr;
 
             // Need to rotate hits
             float xf = hit.getX();
@@ -302,7 +307,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_1st(std::vector<FPGATrackSimRoad> 
                 // Check to see if this is a valid hit
                 if (hit_indices[layer] >= 0) {
 
-                    std::shared_ptr<const FPGATrackSimHit> hit = iroad.getHits(layer)[hit_indices[layer]];
+                    std::shared_ptr<const FPGATrackSimHit> hit = iroad.getHitPtrs(layer)[hit_indices[layer]];
                     // Add this hit to the road
                     if (hit->isReal()){
                         hit_list.push_back(std::move(hit));
@@ -445,9 +450,9 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_1st(std::vector<FPGATrackSimRoad> 
             track_cand.setNLayers(planeMap->getNLogiLayers());
 	    track_cand.setNMissing(nMissing);
             for (unsigned ihit = 0; ihit < hit_list.size(); ihit++) {
-                track_cand.setFPGATrackSimHit(ihit, *(hit_list[ihit]));
+              track_cand.setFPGATrackSimHit(ihit, hit_list[ihit]);
             }
-            tracks.push_back(track_cand);
+            tracks.push_back(std::move(track_cand));
 
             ATH_MSG_DEBUG("NN InputTensorValues:");
             ATH_MSG_DEBUG(inputTensorValues);
@@ -539,7 +544,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<FPGATrackSimRoad> 
                 // Check to see if this is a valid hit
                 if (hit_indices[layer] >= 0) {
 
-                    std::shared_ptr<const FPGATrackSimHit> hit = iroad.getHits(layer)[hit_indices[layer]];
+                    std::shared_ptr<const FPGATrackSimHit> hit = iroad.getHitPtrs(layer)[hit_indices[layer]];
                     // Add this hit to the road
                     if (hit->isReal()){
                         hit_list.push_back(std::move(hit));
@@ -690,9 +695,9 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<FPGATrackSimRoad> 
             track_cand.setNLayers(13);
 	    track_cand.setNMissing(nMissing);
             for (unsigned ihit = 0; ihit < hit_list.size(); ihit++) {
-                track_cand.setFPGATrackSimHit(ihit, *(hit_list[ihit]));
+              track_cand.setFPGATrackSimHit(ihit, hit_list[ihit]);
             }
-            tracks.push_back(track_cand);
+            tracks.push_back(std::move(track_cand));
 
         }  // loop over combinations
     }  // loop over roads
@@ -735,18 +740,19 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_GNN(std::vector<FPGATrackSimRoad> 
 
         // Get info on layers with missing hits
         int nMissing = 0;
-        layer_bitmask_t missing_mask = 0;
-	layer_bitmask_t hit_mask = 0x0;
-	for (unsigned ilayer = 0; ilayer < 13; ilayer++) {
-	  if ((missing_mask >> ilayer) & 0x1) {
-	    nMissing++;
-	    if (planeMap->isPixel(ilayer)) nMissing++; /// should be 2 missing coords for pixel
-	  }
-	  else {
-	    hit_mask |= (0x1 << ilayer);
-	  }
-	}
-
+        //if missing_mask is set to zero, then the condition ""(missing_mask >> ilayer) 
+        // & 1U" cannot be true.
+        layer_bitmask_t missing_mask = iroad.getNWCLayers();
+        layer_bitmask_t hit_mask = 0x0;
+        for (unsigned ilayer = 0; ilayer < 13; ilayer++) {
+          if ((missing_mask >> ilayer) & 0x1) {
+            nMissing++;
+            if (planeMap->isPixel(ilayer)) nMissing++;
+          }
+          else {
+            hit_mask |= (0x1 << ilayer);
+          }
+        }
 
         // Create a template track with common parameters filled already for
         // initializing below
@@ -777,7 +783,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_GNN(std::vector<FPGATrackSimRoad> 
         size_t pixelCount = 0;
 
         for (unsigned layer = 0; layer < iroad.getNLayers(); ++layer) {
-            all_hits.insert(all_hits.end(), iroad.getHits(layer).begin(), iroad.getHits(layer).end());
+            all_hits.insert(all_hits.end(), iroad.getHitPtrs(layer).begin(), iroad.getHitPtrs(layer).end());
         }
 
         for (const auto& hit : all_hits) {
@@ -938,9 +944,9 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_GNN(std::vector<FPGATrackSimRoad> 
         track_cand.setTrackID(n_track);
         track_cand.setNLayers(hit_list.size());
         for (unsigned ihit = 0; ihit < hit_list.size(); ihit++) {
-            track_cand.setFPGATrackSimHit(ihit, *(hit_list[ihit]));
+          track_cand.setFPGATrackSimHit(ihit, hit_list[ihit]);
         }
-        tracks.push_back(track_cand);
+        tracks.push_back(std::move(track_cand));
 
 
         ATH_MSG_DEBUG("NN InputTensorValues:");
@@ -976,13 +982,13 @@ void FPGATrackSimNNTrackTool::compute_truth(FPGATrackSimTrack &t) const {
     std::vector<FPGATrackSimMultiTruth> mtv;
 
     unsigned nl = (m_do2ndStage ? 13 : 5);
+    const auto& hits = t.getFPGATrackSimHitPtrs();
     for (unsigned layer = 0; layer < nl; layer++) {
       if (!(t.getHitMap() & (1 << layer))) continue;
-      
+
       // Sanity check that we have enough hits.
-      if (layer < t.getFPGATrackSimHits().size())
-	mtv.push_back(t.getFPGATrackSimHits().at(layer).getTruth());
-      
+      if (layer < hits.size() && hits[layer])
+        mtv.push_back(hits[layer]->getTruth());
       // adjust weight for hits without (and also with) a truth match, so that
       // each is counted with the same weight.
       mtv.back().assign_equal_normalization();

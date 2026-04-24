@@ -33,7 +33,7 @@ public:
     LArOFCBinCompleteCnv (ISvcLocator* svcloc) : LArOFCBinCompleteCnvBase(svcloc) {}
 protected:
     virtual LArOFCBinPersType*   createPersistent (LArOFCBinTransType* transObj);
-    virtual LArOFCBinTransType*  createTransient ();
+    virtual LArOFCBinTransType*  createTransient(const Token* token);
  private:
     LArOFCBinSubsetCnv_p1 m_TPconverter;
 };

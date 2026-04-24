@@ -4,7 +4,9 @@
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
 from AthenaConfiguration.Enums import LHCPeriod
-from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType, ExpertModeWarning
+from AnalysisAlgorithmsConfig.ConfigAccumulator import (
+    DataType, ExpertModeWarning,
+    Run4FallbackWarning, GeneratorWeightWarning)
 from enum import Enum
 import warnings
 
@@ -63,8 +65,8 @@ class CommonServicesConfig (ConfigBlock) :
         self.addOption ('enableExpertMode', False, type=bool,
             info="allows CP experts and CPAlgorithm devs to use non-recommended configurations. "
             "DO NOT USE FOR ANALYSIS.")
-        self.addOption ('streamName', 'ANALYSIS', type=str,
-            info="name of the output stream to save the cut bookkeeper in.")
+        self.addOption ('streamName', None, type=str,
+            info="name of the output stream to save metadata histograms in.")
         self.addOption ('setupONNX', False, type=bool,
             info="creates an instance of `AthOnnx::OnnxRuntimeSvc`.")
 
@@ -76,17 +78,24 @@ class CommonServicesConfig (ConfigBlock) :
 
         sysService = config.createService( 'CP::SystematicsSvc', 'SystematicsSvc' )
 
-        if self.runSystematics is False :
+        # Setup stream name
+        streamName = self.streamName or config.defaultHistogramStream()
+
+        # Handle all possible configuration options for systematics
+        if self.runSystematics is False:
             runSystematics = self.runSystematics
-        elif config.noSystematics() is not None :
+        elif config.noSystematics() is not None:
             # if option not set:
             # check to see if set in config accumulator
             self.runSystematics = not config.noSystematics()
             runSystematics = self.runSystematics
-        else :
+        else:
             runSystematics = True
 
-        if runSystematics :
+        # Now update the global configuration
+        config._noSystematics = not runSystematics
+
+        if runSystematics:
             sysService.sigmaRecommended = 1
             if config.dataType() is DataType.Data:
                 # Only one type of allowed systematics on data: the JER variations!
@@ -111,7 +120,7 @@ class CommonServicesConfig (ConfigBlock) :
             # print out all systematics
             allSysDumper = config.createAlgorithm( 'CP::SysListDumperAlg', 'SystematicsPrinter' )
             allSysDumper.histogramName = self.systematicsHistogram
-            allSysDumper.RootStreamName = self.streamName
+            allSysDumper.RootStreamName = streamName
 
             if self.separateWeightSystematics:
                 # print out only the weight systematics (for more efficient histogramming down the line)
@@ -128,7 +137,7 @@ class CommonServicesConfig (ConfigBlock) :
             metadataHistAlg.dataType = str(config.dataType().value)
             metadataHistAlg.campaign = str(config.dataYear()) if config.dataType() is DataType.Data else str(config.campaign().value)
             metadataHistAlg.mcChannelNumber = str(config.dsid())
-            metadataHistAlg.RootStreamName = self.streamName
+            metadataHistAlg.RootStreamName = streamName
             if config.dataType() is DataType.Data:
                 etag = "unavailable"
             else:
@@ -192,21 +201,21 @@ class PileupReweightingBlock (ConfigBlock):
         super (PileupReweightingBlock, self).__init__ ()
         self.addOption ('campaign', None, type=None,
             info="the MC campaign for the PRW auto-configuration.")
-        self.addOption ('files', None, type=None,
+        self.addOption ('files', None, type=list,
             info="the input files being processed (list of strings). "
             "Alternative to auto-configuration.")
         self.addOption ('useDefaultConfig', True, type=bool,
             info="whether to use the central PRW files.")
-        self.addOption ('userLumicalcFiles', None, type=None,
+        self.addOption ('userLumicalcFiles', None, type=list,
             info="user-provided lumicalc files (list of strings). Alternative "
             "to auto-configuration.")
-        self.addOption ('userLumicalcFilesPerCampaign', None, type=None,
+        self.addOption ('userLumicalcFilesPerCampaign', None, type=dict,
             info="user-provided lumicalc files (dictionary of list of strings, "
             "with MC campaigns as the keys). Alternative to auto-configuration.")
-        self.addOption ('userPileupConfigs', None, type=None,
+        self.addOption ('userPileupConfigs', None, type=list,
             info="user-provided PRW files (list of strings). Alternative to "
             "auto-configuration.")
-        self.addOption ('userPileupConfigsPerCampaign', None, type=None,
+        self.addOption ('userPileupConfigsPerCampaign', None, type=dict,
             info="user-provided PRW files (dictionary of list of strings, with "
             "MC campaigns as the keys).")
         self.addOption ('postfix', '', type=str,
@@ -215,6 +224,10 @@ class PileupReweightingBlock (ConfigBlock):
         self.addOption ('alternativeConfig', False, type=bool,
             info="whether this is used as an additional alternative config for `PileupReweighting`. "
             "Will only store the alternative pileup weight in that case.")
+        self.addOption ('unrepresentedDataWarningThreshold', 1e-4, type=float,
+            info="suppress the unrepresented-data WARNING when the unrepresented "
+            "fraction is below this value (default 0.01%). Set to 0 to always "
+            "warn.")
         self.addOption ('writeColumnarToolVariables', False, type=bool,
             info="whether to add `EventInfo` variables needed for running the columnar tool(s) on the output n-tuple. (EXPERIMENTAL).",
             expertMode=True)
@@ -342,7 +355,9 @@ class PileupReweightingBlock (ConfigBlock):
 
         # Set up the only algorithm of the sequence:
         if config.geometry() is LHCPeriod.Run4:
-            log.warning ('Pileup reweighting is not yet supported for Run 4 geometry')
+            warnings.warn_explicit(
+                'Pileup reweighting is not yet supported for Run 4 geometry',
+                Run4FallbackWarning, filename='', lineno=0)
             alg = config.createAlgorithm( 'CP::EventDecoratorAlg', 'EventDecoratorAlg' )
             alg.uint32Decorations = { 'RandomRunNumber' :
                                       config.flags.Input.RunNumbers[0] }
@@ -359,6 +374,8 @@ class PileupReweightingBlock (ConfigBlock):
             else:
                 alg.pileupWeightDecoration = "PileupWeight" + self.postfix + "_%SYS%"
             alg.pileupReweightingTool.LumiCalcFiles = toolLumicalcFiles
+            alg.pileupReweightingTool.UnrepresentedDataWarningThreshold = (
+                self.unrepresentedDataWarningThreshold)
 
         if not self.alternativeConfig:
             for var in eventInfoVar:
@@ -388,7 +405,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
             "`False` or `True` to override.")
         self.addOption ('histPattern', None, type=str,
             info="the histogram name pattern for the cut-bookkeeper histogram names.")
-        self.addOption ('streamName', 'ANALYSIS', type=str,
+        self.addOption ('streamName', None, type=str,
             info="name of the output stream to save the cut bookkeeper in.")
         self.addOption ('detailedPDFinfo', False, type=bool,
             info="save the necessary information to run the LHAPDF tool offline.")
@@ -403,10 +420,11 @@ class GeneratorAnalysisBlock (ConfigBlock):
         self.addOption ('doHFProdFracReweighting', False, type=bool,
             info="whether to apply HF production fraction reweighting.")
         self.addOption ('truthParticleContainer', 'TruthParticles', type=str,
-            info="the name of the truth particle container to use for HF production fraction reweighting.")
+            info="the name of the truth particle container to use for HF production fraction reweighting.")       
+
     def instanceName (self) :
         """Return the instance name for this block"""
-        return self.streamName
+        return self.streamName or "DEFAULT"
 
     def makeAlgs (self, config) :
 
@@ -414,6 +432,9 @@ class GeneratorAnalysisBlock (ConfigBlock):
             # there are no generator weights in data!
             return
         log = logging.getLogger('makeGeneratorAnalysisSequence')
+
+        # Setup stream name
+        streamName = self.streamName or config.defaultHistogramStream()
 
         if self.runNumber is None:
             self.runNumber = config.runNumber()
@@ -424,7 +445,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
         # Set up the CutBookkeepers algorithm:
         if self.saveCutBookkeepers:
             alg = config.createAlgorithm('CP::AsgCutBookkeeperAlg', 'CutBookkeeperAlg')
-            alg.RootStreamName = self.streamName
+            alg.RootStreamName = streamName
             alg.runNumber = self.runNumber
             if self.cutBookkeepersSystematics is None:
                 alg.enableSystematics = not config.noSystematics()
@@ -460,7 +481,9 @@ class GeneratorAnalysisBlock (ConfigBlock):
             DSID = "000000"
 
             if not generatorInfo:
-                log.warning("No generator info found.")
+                warnings.warn_explicit(
+                    "No generator info found.",
+                    GeneratorWeightWarning, filename='', lineno=0)
                 DSID = "000000"
             elif isinstance(generatorInfo, dict):
                 if "Pythia8" in generatorInfo:
@@ -470,13 +493,25 @@ class GeneratorAnalysisBlock (ConfigBlock):
                 elif "Sherpa" in generatorInfo and "2.2.10" in generatorInfo["Sherpa"]:
                     DSID = "700122"
                 elif "Sherpa" in generatorInfo and "2.2.11" in generatorInfo["Sherpa"]:
-                    log.warning("HF production fraction reweighting is not configured for Sherpa 2.2.11. Using weights for Sherpa 2.2.10 instead.")
+                    warnings.warn_explicit(
+                        "HF production fraction reweighting is not configured"
+                        " for Sherpa 2.2.11. Using weights for Sherpa 2.2.10"
+                        " instead.",
+                        GeneratorWeightWarning, filename='', lineno=0)
                     DSID = "700122"
                 elif "Sherpa" in generatorInfo and "2.2.12" in generatorInfo["Sherpa"]:
-                    log.warning("HF production fraction reweighting is not configured for Sherpa 2.2.12. Using weights for Sherpa 2.2.10 instead.")
+                    warnings.warn_explicit(
+                        "HF production fraction reweighting is not configured"
+                        " for Sherpa 2.2.12. Using weights for Sherpa 2.2.10"
+                        " instead.",
+                        GeneratorWeightWarning, filename='', lineno=0)
                     DSID = "700122"
                 elif "Sherpa" in generatorInfo and "2.2.14" in generatorInfo["Sherpa"]:
-                    log.warning("HF production fraction reweighting is not configured for Sherpa 2.2.14. New weights need to be calculated.")
+                    warnings.warn_explicit(
+                        "HF production fraction reweighting is not configured"
+                        " for Sherpa 2.2.14. New weights need to be"
+                        " calculated.",
+                        GeneratorWeightWarning, filename='', lineno=0)
                     DSID = "000000"
                 elif "Sherpa" in generatorInfo and "2.2.1" in generatorInfo["Sherpa"]:
                     DSID = "410250"
@@ -489,18 +524,26 @@ class GeneratorAnalysisBlock (ConfigBlock):
                 elif "amc@NLO" in generatorInfo:
                     DSID = "410464"
                 else:
-                    log.warning(f"HF production fraction reweighting is not configured for this generator: {generatorInfo}")
-                    log.warning("New weights need to be calculated.")
+                    warnings.warn_explicit(
+                        f"HF production fraction reweighting is not configured"
+                        f" for this generator: {generatorInfo}."
+                        f" New weights need to be calculated.",
+                        GeneratorWeightWarning, filename='', lineno=0)
                     DSID = "000000"
             else:
-                log.warning("Failed to determine generator from metadata")
+                warnings.warn_explicit(
+                    "Failed to determine generator from metadata",
+                    GeneratorWeightWarning, filename='', lineno=0)
                 DSID = "000000"
 
             log.info(f"Using HF production fraction weights calculated using DSID {DSID}")
             if DSID == "000000":
-                log.warning("HF production fraction reweighting will return dummy weights of 1.0")
+                warnings.warn_explicit(
+                    "HF production fraction reweighting will return dummy"
+                    " weights of 1.0",
+                    GeneratorWeightWarning, filename='', lineno=0)
 
-            alg = config.createAlgorithm( 'CP::SysTruthWeightAlg', 'SysTruthWeightAlg' + self.streamName )
+            alg = config.createAlgorithm( 'CP::SysTruthWeightAlg', f'SysTruthWeightAlg_{streamName}' )
             config.addPrivateTool( 'sysTruthWeightTool', 'PMGTools::PMGHFProductionFractionTool' )
             alg.decoration = 'prodFracWeight_%SYS%'
             alg.TruthParticleContainer = self.truthParticleContainer
@@ -522,9 +565,9 @@ class PtEtaSelectionBlock (ConfigBlock):
             "object within the container. Specifying a name (e.g. `loose`) "
             "applies the cut only to those object who also pass that selection.")
         self.addOption ('minPt', None, type=float,
-            info=r"minimum $p_\mathrm{T}$ value to cut on, in MeV.")
+            info=r"minimum $p_\mathrm{T}$ value to cut on (in MeV).")
         self.addOption ('maxPt', None, type=float,
-            info=r"maximum  $p_\mathrm{T}$ value to cut on, in MeV.")
+            info=r"maximum  $p_\mathrm{T}$ value to cut on (in MeV).")
         self.addOption ('minEta', None, type=float,
             info=r"minimum $\vert\eta\vert$ value to cut on.")
         self.addOption ('maxEta', None, type=float,
@@ -596,14 +639,18 @@ class ObjectCutFlowBlock (ConfigBlock):
         self.addOption ('forceCutSequence', False, type=bool,
             info="whether to force the cut sequence and not accept objects "
             "if previous cuts failed.")
+        self.addOption ('streamName', None, type=str,
+            info="name of the output stream to save the cutflow histogram in.")
 
     def instanceName (self) :
         """Return the instance name for this block"""
         return self.containerName + '_' + self.selectionName
 
     def makeAlgs (self, config) :
+        streamName = self.streamName or config.defaultHistogramStream()
 
         alg = config.createAlgorithm( 'CP::ObjectCutFlowHistAlg', 'CutFlowDumperAlg' )
+        alg.RootStreamName = streamName
         alg.histPattern = 'cflow_' + self.containerName + "_" + self.selectionName + '_%SYS%'
         alg.selections = config.getSelectionCutFlow (self.containerName, self.selectionName)
         alg.input = config.readName (self.containerName)
@@ -614,58 +661,51 @@ class ObjectCutFlowBlock (ConfigBlock):
 class EventCutFlowBlock (ConfigBlock):
     """the ConfigBlock for an event-level cutflow"""
 
-    def __init__ (self) :
-        super (EventCutFlowBlock, self).__init__ ()
-        self.addOption ('containerName', '', type=str,
+    def __init__(self):
+        super(EventCutFlowBlock, self).__init__()
+        self.addOption('selectionName', '', type=str,
             noneAction='error',
-            info="the name of the input container, typically `EventInfo`.")
-        self.addOption ('selectionName', '', type=str,
-            noneAction='error',
-            info="the name of an optional selection decoration to use.")
-        self.addOption ('customSelections', [], type=None,
-            info="the selections for which to generate cutflow histograms. If "
-            "a single string, corresponding to a particular event selection, "
-            "the event cutflow for that selection will be looked up. If a list "
-            "of strings, will use explicitly those selections. If left blank, "
-            "all selections attached to the container will be looked up.")
-        self.addOption ('postfix', '', type=str,
-            info="a postfix to apply in the naming of cutflow histograms. Set "
-            "it when defining multiple cutflows.")
+            info="the name of the event selection to generate cutflow histograms for. "
+            "If left blank, all selections on EventInfo will be used.")
+        self.addOption('customSelections', [], type=None,
+            info="explicit list of selection decorations to use for the cutflow. "
+            "If provided, takes precedence over selectionName.")
+        self.addOption('cutFlowHistograms', True, type=bool,
+            info="whether to generate cutflow histograms for the selection cuts.")
 
-    def instanceName (self) :
-        """Return the instance name for this block"""
-        return self.containerName + '_' + self.selectionName + self.postfix
+    def instanceName(self):
+        return 'EventInfo_' + self.selectionName
 
-    def makeAlgs (self, config) :
+    def makeAlgs(self, config):
 
-        postfix = self.postfix
-        if postfix != '' and postfix[0] != '_' :
-            postfix = '_' + postfix
+        if not self.cutFlowHistograms:
+            return
 
-        alg = config.createAlgorithm( 'CP::EventCutFlowHistAlg', 'CutFlowDumperAlg' )
-        alg.histPattern = 'cflow_' + self.containerName + "_" + self.selectionName + postfix + '_%SYS%'
-        # find out which selection decorations to use
-        if isinstance(self.customSelections, str):
-            # user provides a dynamic reference to selections, corresponding to an EventSelection alg
-            alg.selections = config.getEventCutFlow(self.customSelections)
-        elif len(self.customSelections) > 0:
-            # user provides a list of hardcoded selections
+        postfix = ('_' + self.selectionName) if self.selectionName else ''
+
+        alg = config.createAlgorithm('CP::EventCutFlowHistAlg', 'CutFlowDumperAlg')
+        alg.histPattern = 'cflow_EventInfo' + postfix + '_%SYS%'
+        alg.eventInfo = config.readName('EventInfo')
+        alg.histTitle = 'Event Cutflow: EventInfo.' + self.selectionName
+
+        if isinstance(self.customSelections, list) and len(self.customSelections) > 0:
+            # user provides a hardcoded list of selections
             alg.selections = self.customSelections
+        elif self.selectionName:
+            # resolve selectionName to the list of cuts registered by EventSelectionConfig
+            alg.selections = config.getEventCutFlow(self.selectionName)
         else:
-            # user provides nothing: get all available selections from EventInfo directly
-            alg.selections = config.getSelectionCutFlow (self.containerName, self.selectionName)
-        alg.selections = [sel+',as_char' for sel in alg.selections]
-        if self.selectionName:
-            alg.preselection = self.selectionName + '_%SYS%'
-        alg.eventInfo = config.readName (self.containerName)
-        alg.histTitle = "Event Cutflow: " + self.containerName + "." + self.selectionName
+            # fallback: get all available selections from EventInfo
+            alg.selections = config.getSelectionCutFlow('EventInfo', '')
 
+        alg.selections = [sel + ',as_char' for sel in alg.selections]
 
 class OutputThinningBlock (ConfigBlock):
     """the ConfigBlock for output thinning"""
 
     def __init__ (self) :
         super (OutputThinningBlock, self).__init__ ()
+        self.setBlockName('Thinning')
         self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.")
@@ -684,9 +724,11 @@ class OutputThinningBlock (ConfigBlock):
         self.addOption ('deepCopy', False, type=bool,
             info="run a deep copy of the container.")
         self.addOption ('sortPt', False, type=bool,
-            info=r"whether to sort objects in $p_\mathrm{T}.")
+            info=r"whether to sort objects in $p_\mathrm{T}$.")
         self.addOption ('noUniformSelection', False, type=bool,
             info="do not run the union over all selections.")
+        self.addOption ('containerType', None, type=str,
+            info="the type of the container to thin. Only needed in AthenaMT, and only if subsequent code has a data dependency on the created container under that type.")
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -719,6 +761,8 @@ class OutputThinningBlock (ConfigBlock):
             config.addOutputContainer (self.containerName, self.outputName)
         else :
             alg.output = config.copyName (self.containerName)
+        if self.containerType is not None :
+            alg.outputType = self.containerType
         if selection != '' :
             alg.selection = [selection]
         else :
@@ -862,21 +906,3 @@ class SelectionDecorationBlock (ConfigBlock):
                                                             selectionName)
                 config.addOutputVar(
                     originContainerName, selectionDecoration, selectionName)
-
-def makeEventCutFlowConfig(seq, containerName,
-                            *, postfix=None, selectionName, customSelections=None):
-    """Create an event-level cutflow config
-
-    Keyword arguments:
-    containerName -- name of the container
-    postfix -- a postfix to apply to decorations and algorithm names.
-    selectionName -- the name of the selection to do the cutflow for
-    customSelections -- a list of decorations to use in the cutflow, to override the retrieval of all decorations
-    """
-
-    config = EventCutFlowBlock()
-    config.setOptionValue('containerName', containerName)
-    config.setOptionValue('selectionName', selectionName)
-    config.setOptionValue('postfix', postfix)
-    config.setOptionValue('customSelections', customSelections)
-    seq.append(config)

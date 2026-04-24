@@ -44,11 +44,9 @@ namespace FlavorTagInference {
         return hits;
     }
 
-    std::tuple<Inputs, std::vector<const xAOD::IParticle*>> HitsLoader::getData(
-      const xAOD::IParticle& jet) const {
+    Inputs HitsLoader::getData(const xAOD::IParticle& jet) const {
         Hits sorted_hits = getHitsFromJet(jet);
-        std::vector<const xAOD::IParticle*> dummy;
-        return std::make_tuple(m_seqGetter.getFeats(jet, sorted_hits), dummy);
+        return m_seqGetter.getFeats(jet, sorted_hits);
     }
 
     const FTagDataDependencyNames& HitsLoader::getDependencies() const {

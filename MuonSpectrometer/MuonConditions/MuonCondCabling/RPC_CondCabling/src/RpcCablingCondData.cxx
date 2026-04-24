@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
    */
 
 #include "RPC_CondCabling/RpcCablingCondData.h"
@@ -262,7 +262,6 @@ unsigned int RpcCablingCondData::computeZIndexInCablingStation(const std::string
         }
     }
     if (cablingStation < 1 || cablingStation > 3 || (cabStat != cablingStation)) { return 99999; }
-    if (zIndexInCablingStation > 19) { return 99999; }
 
     return zIndexInCablingStation;
 }

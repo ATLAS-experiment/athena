@@ -22,7 +22,7 @@ TileTrackMuFeatureContainer_PERS * TileTrackMuFeatureContainerCnv::createPersist
 
 
 //createTransient
-TileTrackMuFeatureContainer * TileTrackMuFeatureContainerCnv::createTransient()
+TileTrackMuFeatureContainer * TileTrackMuFeatureContainerCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "TileTrackMuFeatureContainerConverter" );
   
@@ -32,17 +32,17 @@ TileTrackMuFeatureContainer * TileTrackMuFeatureContainerCnv::createTransient()
   static const pool::Guid tlp1_guid( "983ED5FE-D0A2-43AE-90A9-268C8B61E8B3");
   static const pool::Guid p0_guid( "1AFABC18-EB97-412D-B27C-C744ABA6E1DC");
 
-  if( compareClassGuid( p3_guid ) ){
-         std::unique_ptr< TileTrackMuFeatureContainer_p3 > col_vect( poolReadObject< TileTrackMuFeatureContainer_p3 >() );
+  if( compareClassGuid(token,  p3_guid ) ){
+         std::unique_ptr< TileTrackMuFeatureContainer_p3 > col_vect( poolReadObject< TileTrackMuFeatureContainer_p3 >(token) );
          return m_converter.createTransient( col_vect.get(), mlog ) ;
   
-    }else if( compareClassGuid( tlp1_guid ) ) {
-         std::unique_ptr< TileTrackMuFeatureContainer_tlp1 > col_vect( poolReadObject< TileTrackMuFeatureContainer_tlp1 >() );
+    }else if( compareClassGuid(token,  tlp1_guid ) ) {
+         std::unique_ptr< TileTrackMuFeatureContainer_tlp1 > col_vect( poolReadObject< TileTrackMuFeatureContainer_tlp1 >(token) );
          return m_converter1.createTransient( col_vect.get(), mlog );
 
-    }else if( compareClassGuid( p0_guid ) ){
+    }else if( compareClassGuid(token,  p0_guid ) ){
       
-         return poolReadObject< TileTrackMuFeatureContainer >();
+         return poolReadObject< TileTrackMuFeatureContainer >(token);
       
     }else  throw std::runtime_error( "Unsupported persistent version of TileTrackMuFeatureContainer" );
   

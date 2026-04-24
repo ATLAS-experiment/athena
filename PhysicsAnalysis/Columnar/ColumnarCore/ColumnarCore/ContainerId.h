@@ -10,19 +10,23 @@
 
 #include <ColumnarCore/ColumnarDef.h>
 #include <ColumnarInterfaces/ColumnInfo.h>
+#include <ColumnarInterfaces/ColumnarDef.h>
 
 class EventContext;
 
 namespace columnar
 {
-  /// @brief a namespace for holding the ids for the different "virtual"
-  /// containers
+  /// @brief Container id definitions for the columnar infrastructure
   ///
-  /// This is a namespace that holds the container ids for the different
-  /// "virtual" containers. The individual container ids are represented
-  /// by structs that describe each container. The user should not be
-  /// trying to create instances of these structs, but rather use them
-  /// as identifiers to pass into various columnar templates.
+  /// Container ids identify the different "virtual" containers used by
+  /// the columnar infrastructure. Each container id is represented by a
+  /// struct (typically named with a `Def` suffix, e.g. `JetDef`,
+  /// `ElectronDef`, `ParticleDef`) that describes the container. These
+  /// structs are defined directly in the `columnar` namespace and are
+  /// used as template parameters throughout the columnar code. The user
+  /// should not be trying to create instances of these structs, but
+  /// rather use them as identifiers to pass into various columnar
+  /// templates.
   ///
   /// To first order there is one container id for each xAOD type, and
   /// there is a direct mapping from container id to xAOD type. And for
@@ -79,92 +83,85 @@ namespace columnar
   /// prototyping stage when I found that the syntax that included all
   /// template parameters quickly became unwieldy.
   ///
-  /// Originally this was an enum class, and from a user perspective the
-  /// syntax should still look mostly the same, except that there is no
-  /// longer an enum that can be used to identify it, and the template
-  /// parameters now take types instead of enum values. The main
-  /// downside is that the container id can no longer be represented by
-  /// an enum at runtime, but there are workarounds for the few
-  /// situtations that need that.
+  /// The main motivation for representing container ids as "traits"
+  /// structs is that it makes it possible to define parametric container
+  /// ids. It also alleviates the need to have a single list of all
+  /// container ids in a single place — each package can define its own
+  /// container id structs as needed.
+
+  /// @brief a template that provides a base definition of container id
+  /// for a regular container
   ///
-  /// The main motivation for representing this as a "traits" struct is
-  /// that it makes it possible to define parametric container ids. It
-  /// also alleviates the need to have a single list of all container
-  /// ides in a single place.
-
-  namespace ContainerId
+  /// Essentially most container ids represent xAOD types underneath
+  /// (in xAOD mode), and will as such share a lot of traits. Instead
+  /// of repeating these over and over, I am instead defining them all
+  /// here once, and then the individual definitions just need to
+  /// derive from this and define a unique `idName`.
+  template<typename ObjectType,typename ContainerType>
+  struct RegularContainerId
   {
-    /// a template that provides a base definition of container id for a
-    /// regular container
-    ///
-    /// Essentially most container ids represent xAOD types underneath
-    /// (in xAOD mode), and will as such share a lot of traits. Instead
-    /// of repeating these over and over, I am instead defining them all
-    /// here once, and then the individual definitions just need to
-    /// derive from this and define a unique `idName`.
-    template<typename ObjectType,typename ContainerType>
-    struct regularCIBase
-    {
-      /// identify this as a container id definition
-      static constexpr bool isContainerId = true;
+    /// identify this as a container id definition
+    static constexpr bool isContainerId = true;
 
-      /// whether to use the regular ObjectId/ObjectRange
-      static constexpr bool regularObjectId = true;
+    /// whether to use the regular ObjectId/ObjectRange
+    static constexpr bool regularObjectId = true;
 
-      /// whether to use a regular column accessor in array mode
-      static constexpr bool regularColumnAccessorArray = true;
+    /// whether to use a variant ObjectId
+    static constexpr bool variantObjectId = false;
 
-      /// whether this is a non-const container
-      static constexpr bool isMutable = false;
+    /// whether to use a regular column accessor in array mode
+    static constexpr bool regularColumnAccessorArray = true;
 
-      /// whether this can be retrieved as a range per event
-      static constexpr bool perEventRange = true;
+    /// whether this is a non-const container
+    static constexpr bool isMutable = false;
 
-      /// whether this can be retrieved as a single object per event
-      static constexpr bool perEventId = false;
+    /// whether this can be retrieved as a range per event
+    static constexpr bool perEventRange = true;
 
-      /// the xAOD type to use with ObjectId
-      using xAODObjectIdType = const ObjectType;
+    /// whether this can be retrieved as a single object per event
+    static constexpr bool perEventId = false;
 
-      /// the xAOD type to use with ObjectRange
-      using xAODObjectRangeType = const ContainerType;
+    /// the xAOD type to use with ObjectId
+    using xAODObjectIdType = const ObjectType;
 
-      /// the xAOD type to use with ElementLink
-      using xAODElementLinkType = ContainerType;
-    };
+    /// the xAOD type to use with ObjectRange
+    using xAODObjectRangeType = const ContainerType;
 
-    /// a template to define a mutable version of a given container id
-    ///
-    /// By default all xAOD objects will be held by `const` references,
-    /// but some tools expect to have non-`const` access (usually to
-    /// call xAOD-only code). This needs a separate mutable container
-    /// id, and this template allows to define one with a simple `using`
-    /// statement.
-    template<typename CI>
-      requires (CI::isContainerId && CI::regularObjectId)
-    struct mutableCI : public CI
-    {
-      static constexpr bool isMutable = true;
-      using constId = CI;
+    /// the xAOD type to use with ElementLink
+    using xAODElementLinkType = ContainerType;
+  };
 
-      /// the xAOD type to use with ObjectId
-      using xAODObjectIdType = std::remove_const_t<typename CI::xAODObjectIdType>;
+  /// a template to define a mutable version of a given container id
+  ///
+  /// By default all xAOD objects will be held by `const` references,
+  /// but some tools expect to have non-`const` access (usually to
+  /// call xAOD-only code). This needs a separate mutable container
+  /// id, and this template allows to define one with a simple `using`
+  /// statement.
+  template<typename CI>
+    requires (CI::isContainerId && CI::regularObjectId)
+  struct MutableContainerId : public CI
+  {
+    static constexpr bool isMutable = true;
+    using constId = CI;
 
-      /// the xAOD type to use with ObjectRange
-      using xAODObjectRangeType = std::remove_const_t<typename CI::xAODObjectRangeType>;
-    };
+    /// the xAOD type to use with ObjectId
+    using xAODObjectIdType = std::remove_const_t<typename CI::xAODObjectIdType>;
 
-    // including this here, since everyone needs EventContextId/EventContextRange
-    struct eventContext : regularCIBase<EventContext,EventContext>
-    {
-      static constexpr std::string_view idName = "eventContext";
+    /// the xAOD type to use with ObjectRange
+    using xAODObjectRangeType = std::remove_const_t<typename CI::xAODObjectRangeType>;
+  };
 
-      // disable retrieve as either ObjectId or ObjectRange, the event
-      // context will always be passed into tool code by the caller
-      static constexpr bool perEventRange = false;
-      static constexpr bool perEventId = false;
-    };
-  }
+  // including this here, since everyone needs EventContextId/EventContextRange
+  struct EventContextDef : RegularContainerId<EventContext,EventContext>
+  {
+    static constexpr std::string_view idName = eventContextCIName;
+
+    // disable retrieve as either ObjectId or ObjectRange, the event
+    // context will always be passed into tool code by the caller
+    static constexpr bool perEventRange = false;
+    static constexpr bool perEventId = false;
+  };
 
   /// concept for a container id
   template<typename CI>
@@ -181,8 +178,8 @@ namespace columnar
   template<ContainerIdConcept CI,typename CT,ColumnAccessMode CAM,typename CM = ColumnarModeDefault> class AccessorTemplate;
 
 
-  using EventContextRange = ObjectRange<ContainerId::eventContext>;
-  using EventContextId = ObjectId<ContainerId::eventContext>;
+  using EventContextRange = ObjectRange<EventContextDef>;
+  using EventContextId = ObjectId<EventContextDef>;
 }
 
 #endif

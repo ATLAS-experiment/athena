@@ -1,14 +1,13 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef PFLEPTONSELECTOR_H
-#define PFLEPTONSELECTOR_H
+#ifndef EFLOWREC_PFLEPTONSELECTOR_H
+#define EFLOWREC_PFLEPTONSELECTOR_H
 
 /** Algorithm which will select leptons for downstream algorithms to use within eflowRec */
 
 #include "AthContainers/ConstDataVector.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "StoreGate/DataHandle.h"
 
 #include "xAODEgamma/ElectronContainer.h"
 #include "xAODMuon/MuonContainer.h"
@@ -24,7 +23,7 @@ public:
   /** Default destructor */
   ~PFLeptonSelector(){};
 
-  /** Gaudi AthAlgorithm hooks */
+  /** Gaudi AthReentrantAlgorithm hooks */
   StatusCode initialize();
   StatusCode execute(const EventContext& ctx) const;
   StatusCode finalize();

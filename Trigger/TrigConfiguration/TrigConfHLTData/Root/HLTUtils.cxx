@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -393,13 +393,11 @@ TrigConf::HLTTEUtils::ChainCondenseDisplay( const HLTChain& chain,
    int ilevel = (chain.level()=="L2")?2:3;
    for( const string& te : stillToWrite)
       recursivelyFindOutputTEsWithLevelFromSequence( te, sequenceList, allStillToWrite, ilevel );
-
-   bool first=true;
+   //this is unused if the in-loop usage is commented 
    for(set<string>::iterator teIt = allStillToWrite.begin(); teIt != allStillToWrite.end(); ++teIt) {
       const std::string& outTEName(*teIt);
       const TrigConf::HLTSequence* seq = sequenceList.getSequence(outTEName);
       if(seq==0) continue;
-      if(!first) { first=false; teCat = "," + teCat; } // separate sequences by ','  // TODO careful not to change COOL format JS
       teCat = seq->concise() + teCat;
    }
    return teCat;

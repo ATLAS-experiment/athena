@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef EFLOWCELLLIST_H
-#define EFLOWCELLLIST_H
+#ifndef EFLOWREC_EFLOWCELLLIST_H
+#define EFLOWREC_EFLOWCELLLIST_H
 
 /********************************************************************
 
@@ -49,7 +49,7 @@ public:
 
   void setNewExtrapolatedTrack(const eflowTrackCaloPoints& trackCalo);
 
-  void addCell(std::pair<const CaloCell*, int> cell);
+  void addCell(const std::pair<const CaloCell*, int>& cell);
 
   void reorderWithoutLayers();
 

@@ -5,7 +5,7 @@
 #ifndef RNTUPLEWRITERHELPER_H
 #define RNTUPLEWRITERHELPER_H
 
-#include "POOLCore/DbPrint.h"
+#include "StorageSvc/DbPrint.h"
 
 #include "ROOT/REntry.hxx"
 #include "ROOT/RField.hxx"

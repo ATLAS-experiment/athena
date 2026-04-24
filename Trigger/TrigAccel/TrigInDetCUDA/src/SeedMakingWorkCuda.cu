@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cuda.h>
@@ -219,14 +219,22 @@ bool SeedMakingWorkCudaManaged::run() {
   checkError();
   
 
-
+#if CUDA_VERSION >= 13000
+  cudaMemLocation loc { .type = cudaMemLocationTypeDevice, .id = id };
+  cudaMemPrefetchAsync(p.m_settings, sizeof(TrigAccel::SEED_FINDER_SETTINGS), loc, 0, p.m_stream);
+#else
   cudaMemPrefetchAsync(p.m_settings, sizeof(TrigAccel::SEED_FINDER_SETTINGS), id, p.m_stream);
+#endif
 
   checkError();
 
 
 
+#if CUDA_VERSION >= 13000
+  cudaMemPrefetchAsync(p.m_spacepoints, sizeof(TrigAccel::SPACEPOINT_STORAGE), loc, 0, p.m_stream);
+#else
   cudaMemPrefetchAsync(p.m_spacepoints, sizeof(TrigAccel::SPACEPOINT_STORAGE), id, p.m_stream);
+#endif
 
   checkError();
 

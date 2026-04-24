@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -44,18 +44,18 @@ private:
 
 int main ATLAS_NOT_THREAD_SAFE () {
 
-  xAOD::TFileAccessTracer::enableDataSubmission(false); // disable file reporting in unittest
+  xAOD::TFileAccessTracer::instance().enableDataSubmission(false); // disable file reporting in unittest
 
   ANA_CHECK_SET_TYPE (int); // because we are running in a method that returns int
   using namespace asg::msgUserCode;
-  
+
   POOL::TEvent evt(POOL::TEvent::kClassAccess);
   ANA_CHECK( evt.readFrom("$ASG_TEST_FILE_MC") );
 
   MyTestAlg* alg = new MyTestAlg("MyAlg");
   ANA_CHECK( alg->setProperty("MyProperty",4) );
 
-  ANA_CHECK( alg->sysInitialize() ); //calling sysInitialize means incident listening set up  
+  ANA_CHECK( alg->sysInitialize() ); //calling sysInitialize means incident listening set up
 
   for(int i=0;i<10;i++) {
     evt.getEntry(i);

@@ -42,7 +42,7 @@ public:
 
 protected:
   virtual TrigSpacePointCounts_PERS  *createPersistent(TrigSpacePointCounts *transObj) override;
-  virtual TrigSpacePointCounts       *createTransient() override;
+  virtual TrigSpacePointCounts       *createTransient(const Token* token) override;
 
 private:
   TrigSpacePointCountsCnv_p1 m_converter_p1;

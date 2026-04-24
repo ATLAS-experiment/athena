@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigPartialEventBuilding_PEBInfoWriterToolBase_h
@@ -8,10 +8,12 @@
 // Trigger includes
 #include "TrigCompositeUtils/HLTIdentifier.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
-#include "TrigSteeringEvent/TrigRoiDescriptor.h"
+#include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 
 // Athena includes
 #include "AthenaBaseComps/AthAlgTool.h"
+
+#include <cstdint>
 
 /** @class PEBInfoWriterToolBase
  *  @brief Base class for tools used by PEBInfoWriterAlg

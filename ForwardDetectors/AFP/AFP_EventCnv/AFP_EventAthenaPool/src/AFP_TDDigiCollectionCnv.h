@@ -23,7 +23,7 @@ AFP_TDDigiCollection_PERS >(svcloc) {}
 
 protected:
 	AFP_TDDigiCollection_PERS* createPersistent (AFP_TDDigiCollection *transCont);
-	AFP_TDDigiCollection* createTransient ();
+	AFP_TDDigiCollection* createTransient(const Token* token);
  };
 
 #endif //AFP_TDDigiCollectionCnv_h

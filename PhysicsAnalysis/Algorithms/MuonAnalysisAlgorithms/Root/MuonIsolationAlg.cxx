@@ -27,8 +27,8 @@ namespace CP
 
     ANA_CHECK (m_isolationTool.retrieve());
     ANA_CHECK (m_muonHandle.initialize (m_systematicsList));
-    ANA_CHECK (m_preselection.initialize (m_systematicsList, m_preselection, SG::AllowEmpty));
-    ANA_CHECK (m_isolationHandle.initialize (m_systematicsList, m_preselection));
+    ANA_CHECK (m_preselection.initialize (m_systematicsList, m_muonHandle, SG::AllowEmpty));
+    ANA_CHECK (m_isolationHandle.initialize (m_systematicsList, m_muonHandle));
     ANA_CHECK (m_systematicsList.initialize());
 
     if (!m_nameSvc.empty())

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /* To run with something like
@@ -20,10 +20,15 @@ http://valgrind.org/docs/manual/faq.html#faq.deflost
 
 int main(){
   using namespace asg::msgUserCode;
-  ANA_CHECK_SET_TYPE (int);
-  asg::StandaloneToolHandle<IAsgElectronLikelihoodTool> MediumLH("AsgElectronLikelihoodTool/MediumLH");
-  ANA_CHECK(MediumLH.setProperty("WorkingPoint", "MediumLHElectron"));
-  ANA_CHECK(MediumLH.initialize());
+  try {
+    ANA_CHECK_SET_TYPE (int);
+    asg::StandaloneToolHandle<IAsgElectronLikelihoodTool> MediumLH("AsgElectronLikelihoodTool/MediumLH");
+    ANA_CHECK(MediumLH.setProperty("WorkingPoint", "MediumLHElectron"));
+    ANA_CHECK(MediumLH.initialize());
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
 
   return 0;
 }

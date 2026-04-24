@@ -1,15 +1,16 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
-#pragma once
 #ifndef TRIGSTEERINGEVENT_PARTIALEVENTBUILDINGINFO_H
 #define TRIGSTEERINGEVENT_PARTIALEVENTBUILDINGINFO_H
-#include <set>
-#include <vector>
 #include "AthenaKernel/CLASS_DEF.h"
 #include "eformat/SourceIdentifier.h"
+
+#include <set>
+#include <stdint.h>
+#include <vector>
 
 class PartialEventBuildingInfo {
 public:
@@ -87,9 +88,6 @@ private:
   std::set<uint32_t> m_robs;         //!< selected ROBs for partial event building 
   std::set<uint32_t> m_subDetectors; //!< selected SubDetectors 
 };
-
-// removed so the object become an internal steering structure rather than something which can go to SG
-//CLASS_DEF( PartialEventBuildingInfo , 257191353 , 1 )
 
 #endif
 #endif //XAOD_ANALYSIS

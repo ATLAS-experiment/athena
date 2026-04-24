@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // METTruthAssociator.cxx 
@@ -14,8 +14,6 @@
 
 // METReconstruction includes
 #include "METReconstruction/METTruthAssociator.h"
-
-#include "StoreGate/DataHandle.h"
 
 // xAOD EDM
 #include "xAODMissingET/MissingETComposition.h"
@@ -40,7 +38,7 @@ namespace met {
 
   using namespace xAOD;
 
-  static const SG::AuxElement::ConstAccessor<std::vector<ElementLink<IParticleContainer> > > cacc_ghosttruth("GhostTruth");
+  static const SG::ConstAccessor<std::vector<ElementLink<IParticleContainer> > > cacc_ghosttruth("GhostTruth");
 
   // Constructors
   ////////////////
@@ -79,60 +77,60 @@ namespace met {
 
   // executeTool
   ////////////////
-  StatusCode METTruthAssociator::executeTool(xAOD::MissingETContainer* metCont, xAOD::MissingETAssociationMap* metMap) const
+  StatusCode METTruthAssociator::executeTool(xAOD::MissingETContainer* metCont, xAOD::MissingETAssociationMap* metMap, const EventContext& ctx) const
   {
     ATH_MSG_VERBOSE ("In execute: " << name() << "...");
 
-    ATH_CHECK( associateJets(metMap) );
+    ATH_CHECK( associateJets(metMap, ctx) );
 
-    SG::ReadHandle<xAOD::ElectronContainer> electronCont(m_recoElKey);
+    SG::ReadHandle<xAOD::ElectronContainer> electronCont(m_recoElKey, ctx);
     if (!electronCont.isValid()) {
       ATH_MSG_WARNING("Unable to retrieve input electron container " << m_recoElKey.key());
       return StatusCode::FAILURE;
     }
 
     ATH_MSG_DEBUG("Successfully retrieved electron collection");
-    if(fillAssocMap(metMap,electronCont.cptr()).isFailure()) {
+    if(fillAssocMap(metMap,electronCont.cptr(), ctx).isFailure()) {
       ATH_MSG_WARNING("Unable to fill map with electron container " << m_recoElKey.key());
       return StatusCode::FAILURE;
     }
 
-    SG::ReadHandle<xAOD::PhotonContainer> photonCont(m_recoGamKey);
+    SG::ReadHandle<xAOD::PhotonContainer> photonCont(m_recoGamKey, ctx);
     if (!photonCont.isValid()) {
       ATH_MSG_WARNING("Unable to retrieve input photon container " << m_recoGamKey.key());
       return StatusCode::FAILURE;
     }
 
     ATH_MSG_DEBUG("Successfully retrieved photon collection");
-    if(fillAssocMap(metMap,photonCont.cptr()).isFailure()) {
+    if(fillAssocMap(metMap,photonCont.cptr(), ctx).isFailure()) {
       ATH_MSG_WARNING("Unable to fill map with photon container " << m_recoGamKey.key());
       return StatusCode::FAILURE;
     }
 
-    SG::ReadHandle<xAOD::MuonContainer> muonCont(m_recoMuKey);
+    SG::ReadHandle<xAOD::MuonContainer> muonCont(m_recoMuKey, ctx);
     if (!muonCont.isValid()) {
       ATH_MSG_WARNING("Unable to retrieve input muon container " << m_recoMuKey.key());
       return StatusCode::FAILURE;
     }
 
     ATH_MSG_DEBUG("Successfully retrieved muon collection");
-    if(fillAssocMap(metMap,muonCont.cptr()).isFailure()) {
+    if(fillAssocMap(metMap,muonCont.cptr(), ctx).isFailure()) {
       ATH_MSG_WARNING("Unable to fill map with muon container " << m_recoMuKey.key());
       return StatusCode::FAILURE;
     }
 
-    SG::ReadHandle<xAOD::TauJetContainer> tauCont(m_recoTauKey);
+    SG::ReadHandle<xAOD::TauJetContainer> tauCont(m_recoTauKey, ctx);
     if (!tauCont.isValid()) {
       ATH_MSG_WARNING("Unable to retrieve input tau container " << m_recoTauKey.key());
       return StatusCode::FAILURE;
     }
     ATH_MSG_DEBUG("Successfully retrieved tau collection");
-    if(fillAssocMap(metMap,tauCont.cptr()).isFailure()) {
+    if(fillAssocMap(metMap,tauCont.cptr(), ctx).isFailure()) {
       ATH_MSG_WARNING("Unable to fill map with tau container " << m_recoTauKey.key());
       return StatusCode::FAILURE;
     }
 
-    if( computeSoftTerms(metCont,metMap).isFailure() ) {
+    if( computeSoftTerms(metCont,metMap, ctx).isFailure() ) {
       ATH_MSG_WARNING("Unable to build truth core soft terms.");
       return StatusCode::FAILURE;      
     }
@@ -143,10 +141,10 @@ namespace met {
   //*********************************************************************************************************
   // Build jet and soft contributions
 
-  StatusCode METTruthAssociator::associateJets(xAOD::MissingETAssociationMap* metMap) const
+  StatusCode METTruthAssociator::associateJets(xAOD::MissingETAssociationMap* metMap, const EventContext& ctx) const
   {
     // Retrieve the jet container
-    SG::ReadHandle<xAOD::JetContainer> jetCont(m_recoJetKey);
+    SG::ReadHandle<xAOD::JetContainer> jetCont(m_recoJetKey, ctx);
     if (!jetCont.isValid()) {
       ATH_MSG_WARNING("Unable to retrieve input jet container " << m_recoJetKey.key());
       return StatusCode::FAILURE;
@@ -196,7 +194,7 @@ namespace met {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode METTruthAssociator::computeSoftTerms(xAOD::MissingETContainer* metCont, xAOD::MissingETAssociationMap* metMap) const
+  StatusCode METTruthAssociator::computeSoftTerms(xAOD::MissingETContainer* metCont, xAOD::MissingETAssociationMap* metMap, const EventContext& ctx) const
   {
     // Add MET terms to the container
     // Always do this in order that the terms exist even if the method fails
@@ -210,7 +208,7 @@ namespace met {
     ATH_MSG_VERBOSE("Added core terms.");
 
     // Retrieve the truth container
-    SG::ReadHandle<xAOD::TruthEventContainer> truthEventCont(m_truthEventKey);
+    SG::ReadHandle<xAOD::TruthEventContainer> truthEventCont(m_truthEventKey, ctx);
     if (!truthEventCont.isValid()) {
       ATH_MSG_WARNING("Unable to retrieve input truthEvent container " << m_truthEventKey.key());
       return StatusCode::FAILURE;
@@ -254,13 +252,13 @@ namespace met {
   //*********************************************************************************************************
   // Get constituents
   StatusCode METTruthAssociator::extractTruthParticles(const xAOD::IParticle* obj,
-						       std::vector<const xAOD::IParticle*>& truthlist) const
+						       std::vector<const xAOD::IParticle*>& truthlist, const EventContext& ctx) const
   {
     switch(obj->type()) {
     case xAOD::Type::Electron:
-      return extractTruthFromElectron(obj,truthlist);
+      return extractTruthFromElectron(obj,truthlist, ctx);
     case xAOD::Type::Photon:
-      return extractTruthFromPhoton(obj,truthlist);
+      return extractTruthFromPhoton(obj,truthlist, ctx);
     case xAOD::Type::Muon:
       return extractTruthFromMuon(obj,truthlist);
     case xAOD::Type::Tau:
@@ -274,7 +272,7 @@ namespace met {
   }
 
   StatusCode METTruthAssociator::extractTruthFromElectron(const xAOD::IParticle* obj,
-						      std::vector<const xAOD::IParticle*>& truthlist) const
+                                                          std::vector<const xAOD::IParticle*>& truthlist, const EventContext& ctx) const
   {
     const xAOD::Electron* el = static_cast<const xAOD::Electron*>(obj);
     // El --> TruthParticles
@@ -290,7 +288,7 @@ namespace met {
     // }
 
     // Retrieve the truth container
-    SG::ReadHandle<xAOD::TruthEventContainer> truthEventCont(m_truthEventKey);
+    SG::ReadHandle<xAOD::TruthEventContainer> truthEventCont(m_truthEventKey, ctx);
     if (!truthEventCont.isValid()) {
       ATH_MSG_WARNING("Unable to retrieve input truthEvent container " << m_truthEventKey.key());
       return StatusCode::SUCCESS;
@@ -355,7 +353,7 @@ namespace met {
   }
 
   StatusCode METTruthAssociator::extractTruthFromPhoton(const xAOD::IParticle* obj,
-						      std::vector<const xAOD::IParticle*>& truthlist) const
+                                                        std::vector<const xAOD::IParticle*>& truthlist, const EventContext& ctx) const
   {
     const xAOD::Photon* ph = static_cast<const xAOD::Photon*>(obj);
     // Ph --> TruthParticles
@@ -384,7 +382,7 @@ namespace met {
     // }
 
     // Retrieve the truth container
-    SG::ReadHandle<xAOD::TruthEventContainer> truthEventCont(m_truthEventKey);
+    SG::ReadHandle<xAOD::TruthEventContainer> truthEventCont(m_truthEventKey, ctx);
     if (!truthEventCont.isValid()) {
       ATH_MSG_WARNING("Unable to retrieve input truthEvent container " << m_truthEventKey.key());
       return StatusCode::SUCCESS;
@@ -484,7 +482,7 @@ namespace met {
   // Override fill map method to use the extracted truth particles
 
   StatusCode METTruthAssociator::fillAssocMap(xAOD::MissingETAssociationMap* metMap,
-					      const xAOD::IParticleContainer* hardObjs) const
+					      const xAOD::IParticleContainer* hardObjs, const EventContext& ctx) const
   //					 std::vector<const xAOD::IParticle*>& mutracks)
   {
     std::vector<const IParticle*> constlist;
@@ -499,7 +497,7 @@ namespace met {
       if(obj->pt()<5e3 && obj->type()!=xAOD::Type::Muon) continue;
       constlist.clear();
       ATH_MSG_VERBOSE( "Object type, pt, eta, phi = " << obj->type() << ", " << obj->pt() << ", " << obj->eta() << "," << obj->phi() );
-      ATH_CHECK( this->extractTruthParticles(obj,constlist) );
+      ATH_CHECK( this->extractTruthParticles(obj,constlist, ctx) );
 
       // MissingETBase::Types::constvec_t chrgvec;
       // MissingETBase::Types::constvec_t truthvec;

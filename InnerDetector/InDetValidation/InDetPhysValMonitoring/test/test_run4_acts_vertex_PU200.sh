@@ -9,7 +9,7 @@
 
 lastref_dir=last_results
 dcubeXml=dcube_IDPVMPlots_ACTS_VERTEX_ITk.xml
-input_rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1
+input_rdo=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_RUN4[0])")
 n_events=100
 
 # search in $DATAPATH for matching file
@@ -35,9 +35,11 @@ run () {
 }
 
 ignore_pattern=""
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 
 run "Reconstruction-acts" \
-    Reco_tf.py --CA \
+    Reco_tf.py \
+    --conditionsTag "default:${conditionsTag}" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsLegacyWorkflowFlags" \
     --ignorePatterns "${ignore_pattern}" \
     --inputRDOFile ${input_rdo} \
@@ -65,7 +67,8 @@ if [ $reco_rc != 0 ]; then
 fi
 
 run "Reconstruction-athena" \
-    Reco_tf.py --CA \
+    Reco_tf.py \
+    --conditionsTag "default:${conditionsTag}" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --inputRDOFile ${input_rdo} \
     --outputAODFile AOD.athena.root \

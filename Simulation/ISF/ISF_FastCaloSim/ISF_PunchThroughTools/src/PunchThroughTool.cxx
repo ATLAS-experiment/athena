@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -31,6 +31,9 @@
 
 // CLHEP
 #include "CLHEP/Random/RandFlat.h"
+
+#include "XMLCoreParser/XMLCoreParser.h"
+#include "XMLCoreParser/XMLCoreNode.h"
 
 // ROOT
 #include "TFile.h"
@@ -761,61 +764,48 @@ std::vector<T> str_to_list(const std::string_view str)
     return tokens;
 }
 
-int ISF::PunchThroughTool::passedParamIterator(int pid, double eta, const std::vector<std::map<std::string, std::string>> &mapvect) const
+int ISF::PunchThroughTool::passedParamIterator(int pid, double eta, const std::vector<InfoMap> &mapvect) const
 {
     //convert the pid to absolute value and string for query
     int pidStrSingle = std::abs(pid);
     //STEP 1
     //filter items matching pid first
 
-    for (unsigned int i = 0; i < mapvect.size(); i++){
-        const std::string &pidStr = mapvect[i].at("pidStr");
-        auto v = str_to_list<int>(pidStr);
-        if(std::find(v.begin(), v.end(),pidStrSingle)==v.end()) continue;
-        const std::string &etaMinsStr = mapvect[i].at("etaMins");
-        const std::string &etaMaxsStr = mapvect[i].at("etaMaxs");
-        std::vector<double> etaMinsVect = str_to_list<double>(etaMinsStr);
-        std::vector<double> etaMaxsVect = str_to_list<double>(etaMaxsStr);
-        assert(etaMaxsVect.size() == etaMinsVect.size());
-        for (unsigned int j = 0; j < etaMinsVect.size(); j++){ // assume size etaMinsVect == etaMaxsVect
-          double etaMinToCompare = etaMinsVect[j];
-          double etaMaxToCompare = etaMaxsVect[j];
-          if((eta >= etaMinToCompare) && (eta < etaMaxToCompare)){
-            //PASS CONDITION
-            //then choose the passing one and note it's iterator
-            return (i); //in case more than 1 match (ambiguous case)
-          }
+    for (int i = 0; const InfoMap& m : mapvect) {
+      ++i;
+      const std::vector<int>& v = m.pidStr;
+      if(std::find(v.begin(), v.end(),pidStrSingle)==v.end()) continue;
+      assert(m.etaMaxs.size() == m.etaMins.size());
+      for (unsigned int j = 0; j < m.etaMins.size(); j++){ // assume size etaMinsVect == etaMaxsVect
+        double etaMinToCompare = m.etaMins[j];
+        double etaMaxToCompare = m.etaMaxs[j];
+        if((eta >= etaMinToCompare) && (eta < etaMaxToCompare)){
+          //PASS CONDITION
+          //then choose the passing one and note it's iterator
+          return i-1; //in case more than 1 match (ambiguous case)
         }
+      }
     }
     return 0;
 }
 
-std::vector<std::map<std::string, std::string>> ISF::PunchThroughTool::getInfoMap(const std::string& mainNode, const std::string &xmlFilePath){
-    std::vector<std::map<std::string, std::string>>  xml_info;
-    xmlDocPtr doc = xmlParseFile( xmlFilePath.c_str() );
+ISF::PunchThroughTool::InfoMap::InfoMap (const XMLCoreNode& node)
+  : name (node.get_attrib ("name")),
+    etaMins (str_to_list<double> (node.get_attrib ("etaMins"))),
+    etaMaxs (str_to_list<double> (node.get_attrib ("etaMaxs"))),
+    pidStr (str_to_list<int> (node.get_attrib ("pidStr")))
+{
+}
 
-    //check info first
-    for( xmlNodePtr nodeRoot = doc->children; nodeRoot != nullptr; nodeRoot = nodeRoot->next) {
-        if (xmlStrEqual( nodeRoot->name, BAD_CAST mainNode.c_str() )) {
-            for( xmlNodePtr nodeRootChild = nodeRoot->children; nodeRootChild != nullptr; nodeRootChild = nodeRootChild->next ) {
-                if (xmlStrEqual( nodeRootChild->name, BAD_CAST "info" )) {
-                    if (nodeRootChild->children != NULL) {
-                        for( xmlNodePtr infoNode = nodeRootChild->children; infoNode != nullptr; infoNode = infoNode->next) {
-                            if(xmlStrEqual( infoNode->name, BAD_CAST "item" )){
-                                std::map<std::string, std::string>  xml_info_item;
-                                xml_info_item.insert({ "name", (const char*) xmlGetProp( infoNode, BAD_CAST "name" ) });
-                                xml_info_item.insert({ "etaMins", (const char*) xmlGetProp( infoNode, BAD_CAST "etaMins" ) });
-                                xml_info_item.insert({ "etaMaxs", (const char*) xmlGetProp( infoNode, BAD_CAST "etaMaxs" ) });
-                                xml_info_item.insert({ "pidStr", (const char*) xmlGetProp( infoNode, BAD_CAST "pidStr" ) });
-                                xml_info.push_back(xml_info_item);                                
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return xml_info;  
+auto ISF::PunchThroughTool::getInfoMap(const std::string& mainNode, const XMLCoreNode& doc) -> std::vector<InfoMap>
+{
+  std::vector<InfoMap>  xml_info;
+
+  for (const XMLCoreNode* node : doc.get_children (mainNode + "/info/item")) {
+    xml_info.emplace_back(*node);
+  }
+
+  return xml_info;  
 }
 
 std::vector<double> ISF::PunchThroughTool::inversePCA(int pcaCdfIterator, std::vector<double> &variables) const
@@ -829,131 +819,82 @@ std::vector<double> ISF::PunchThroughTool::inversePCA(int pcaCdfIterator, std::v
 
 StatusCode ISF::PunchThroughTool::initializeInversePCA(const std::string & inversePCAConfigFile){
 
-    xmlDocPtr doc = xmlParseFile( inversePCAConfigFile.c_str() );
+    XMLCoreParser p;
+    std::unique_ptr<XMLCoreNode> doc = p.parse (inversePCAConfigFile);
 
     ATH_MSG_INFO( "[ punchthrough ] Loading inversePCA: " << inversePCAConfigFile);
 
     //check info first
-    m_xml_info_pca = getInfoMap("PCAinverse",inversePCAConfigFile);
+    m_xml_info_pca = getInfoMap("PCAinverse", *doc);
 
-    //do the saving
+    auto getRow = [] (const XMLCoreNode* node,
+                      const std::string& attrib,
+                      int imax)
+      -> std::vector<double>
+    {
+      std::vector<double> row;
+      for (int i = 0; i <= imax; ++i) {
+        // Dynamically create property name
+        std::string propName = attrib + std::to_string(i);
+        row.push_back (node->get_double_attrib (propName));
+      }
+      return row;
+    };
+
     for (unsigned int i = 0; i < m_xml_info_pca.size(); i++) {
-        std::vector<std::vector<double>> PCA_matrix;
-        ATH_MSG_DEBUG( "[ punchthrough ] m_xml_info_pca[" << i << "].at('name') = " << m_xml_info_pca[i].at("name"));
+      std::vector<std::vector<double>> PCA_matrix;
 
-        for( xmlNodePtr nodeRoot = doc->children; nodeRoot != nullptr; nodeRoot = nodeRoot->next) {
-            if (xmlStrEqual( nodeRoot->name, BAD_CAST "PCAinverse" )) {
-                for( xmlNodePtr nodePCAinverse = nodeRoot->children; nodePCAinverse != nullptr; nodePCAinverse = nodePCAinverse->next ) {
-
-                    if (xmlStrEqual( nodePCAinverse->name, BAD_CAST m_xml_info_pca[i].at("name").c_str() )) {
-                        if (nodePCAinverse->children != NULL) {
-                            for( xmlNodePtr pcaNode = nodePCAinverse->children; pcaNode != nullptr; pcaNode = pcaNode->next) {
-
-                                if (xmlStrEqual( pcaNode->name, BAD_CAST "PCAmatrix" )) {
-                                    std::vector<double> PCA_matrix_row;
-                                    PCA_matrix_row.push_back( atof( (const char*) xmlGetProp( pcaNode, BAD_CAST "comp_0" ) ) );
-                                    PCA_matrix_row.push_back( atof( (const char*) xmlGetProp( pcaNode, BAD_CAST "comp_1" ) ) );
-                                    PCA_matrix_row.push_back( atof( (const char*) xmlGetProp( pcaNode, BAD_CAST "comp_2" ) ) );
-                                    PCA_matrix_row.push_back( atof( (const char*) xmlGetProp( pcaNode, BAD_CAST "comp_3" ) ) );
-                                    PCA_matrix_row.push_back( atof( (const char*) xmlGetProp( pcaNode, BAD_CAST "comp_4" ) ) );
-                                    PCA_matrix.push_back(PCA_matrix_row);          
-                                }
-                                else if (xmlStrEqual( pcaNode->name, BAD_CAST "PCAmeans" )) {
-                                    std::vector<double> PCA_means_row;
-                                    PCA_means_row.push_back( atof( (const char*) xmlGetProp( pcaNode, BAD_CAST "mean_0" ) ) );
-                                    PCA_means_row.push_back( atof( (const char*) xmlGetProp( pcaNode, BAD_CAST "mean_1" ) ) );
-                                    PCA_means_row.push_back( atof( (const char*) xmlGetProp( pcaNode, BAD_CAST "mean_2" ) ) );
-                                    PCA_means_row.push_back( atof( (const char*) xmlGetProp( pcaNode, BAD_CAST "mean_3" ) ) );
-                                    PCA_means_row.push_back( atof( (const char*) xmlGetProp( pcaNode, BAD_CAST "mean_4" ) ) );
-                                    m_PCA_means.push_back(PCA_means_row);  
-                                }
-
-                            }
-
-                        }
-                    }
-
-                }
-            }
+      if (const XMLCoreNode* node = doc->get_child ("PCAinverse/" + m_xml_info_pca[i].name)) {
+        for (const XMLCoreNode* matrix : node->get_children ("PCAmatrix")) {
+          PCA_matrix.push_back(getRow(matrix, "comp_", 4));
         }
-        m_inverse_PCA_matrix.push_back(PCA_matrix);
+        for (const XMLCoreNode* means : node->get_children ("PCAmeans")) {
+          m_PCA_means.push_back(getRow(means, "mean_", 4));
+        }
+      }
+
+      m_inverse_PCA_matrix.push_back(std::move(PCA_matrix));
     }
     
     return StatusCode::SUCCESS;
 }
 
 StatusCode ISF::PunchThroughTool::initializeInverseCDF(const std::string & inverseCdfConfigFile){
-    std::map<double, double>  variable0_inverse_cdf_row;
-    std::map<double, double>  variable1_inverse_cdf_row;
-    std::map<double, double>  variable2_inverse_cdf_row;
-    std::map<double, double>  variable3_inverse_cdf_row;
-    std::map<double, double>  variable4_inverse_cdf_row;
-
     //parse xml that contains config for inverse CDF for each of punch through particle kinematics
-
-    xmlDocPtr doc = xmlParseFile( inverseCdfConfigFile.c_str() );
+    XMLCoreParser p;
+    std::unique_ptr<XMLCoreNode> doc = p.parse (inverseCdfConfigFile);
 
     ATH_MSG_INFO( "[ punchthrough ] Loading inverse CDF: " << inverseCdfConfigFile);
 
     //check info first
-    m_xml_info_cdf = getInfoMap("CDFMappings",inverseCdfConfigFile);
+    m_xml_info_cdf = getInfoMap("CDFMappings", *doc);
 
-    //do the saving
     for (unsigned int i = 0; i < m_xml_info_cdf.size(); i++) {
-        ATH_MSG_DEBUG( "[ punchthrough ] m_xml_info_cdf[" << i << "].at('name') = " << m_xml_info_cdf[i].at("name"));
+      ATH_MSG_DEBUG( "[PunchThroughG4Tool] m_xml_info_cdf[" << i << "].name = " << m_xml_info_cdf[i].name);
 
-        for( xmlNodePtr nodeRoot = doc->children; nodeRoot != nullptr; nodeRoot = nodeRoot->next) {
-            if (xmlStrEqual( nodeRoot->name, BAD_CAST "CDFMappings" )) {
-                for( xmlNodePtr typeMappings = nodeRoot->children; typeMappings != nullptr; typeMappings = typeMappings->next ) {
-                    if (xmlStrEqual( typeMappings->name, BAD_CAST m_xml_info_cdf[i].at("name").c_str() )) {
-                        if (typeMappings->children != NULL) {
-                            for( xmlNodePtr nodeMappings = typeMappings->children; nodeMappings != nullptr; nodeMappings = nodeMappings->next) {
-
-                                if (xmlStrEqual( nodeMappings->name, BAD_CAST "variable0" )) {
-                                    variable0_inverse_cdf_row = getVariableCDFmappings(nodeMappings);
-                                }
-                                else if (xmlStrEqual( nodeMappings->name, BAD_CAST "variable1" )) {
-                                    variable1_inverse_cdf_row = getVariableCDFmappings(nodeMappings);
-                                }
-                                else if (xmlStrEqual( nodeMappings->name, BAD_CAST "variable2" )) {
-                                    variable2_inverse_cdf_row = getVariableCDFmappings(nodeMappings);
-                                }
-                                else if (xmlStrEqual( nodeMappings->name, BAD_CAST "variable3" )) {
-                                    variable3_inverse_cdf_row = getVariableCDFmappings(nodeMappings);
-                                }
-                                else if (xmlStrEqual( nodeMappings->name, BAD_CAST "variable4" )) {
-                                    variable4_inverse_cdf_row = getVariableCDFmappings(nodeMappings);
-                                }
-                            }
-
-                        }
-                    }
-                }
-            }
-        }
-        m_variable0_inverse_cdf.push_back(variable0_inverse_cdf_row);
-        m_variable1_inverse_cdf.push_back(variable1_inverse_cdf_row);
-        m_variable2_inverse_cdf.push_back(variable2_inverse_cdf_row);
-        m_variable3_inverse_cdf.push_back(variable3_inverse_cdf_row);
-        m_variable4_inverse_cdf.push_back(variable4_inverse_cdf_row);
+      if (const XMLCoreNode* node = doc->get_child ("CDFMappings/" + m_xml_info_cdf[i].name)) {
+        m_variable0_inverse_cdf.push_back(getVariableCDFmappings (node->get_child("variable0")));
+        m_variable1_inverse_cdf.push_back(getVariableCDFmappings (node->get_child("variable1")));
+        m_variable2_inverse_cdf.push_back(getVariableCDFmappings (node->get_child("variable2")));
+        m_variable3_inverse_cdf.push_back(getVariableCDFmappings (node->get_child("variable3")));
+        m_variable4_inverse_cdf.push_back(getVariableCDFmappings (node->get_child("variable4")));
+      }
     }
 
     return StatusCode::SUCCESS;
 }
 
-std::map<double, double> ISF::PunchThroughTool::getVariableCDFmappings(xmlNodePtr& nodeParent){
+std::map<double, double>
+ISF::PunchThroughTool::getVariableCDFmappings(const XMLCoreNode* node){
 
     std::map<double, double>  mappings;
 
-    for( xmlNodePtr node = nodeParent->children; node != nullptr; node = node->next ) {
-        //Get min and max values that we normalise values to
-        if (xmlStrEqual( node->name, BAD_CAST "CDFmap" )) {
-            double ref = atof( (const char*) xmlGetProp( node, BAD_CAST "ref" ) );
-            double quant = atof( (const char*) xmlGetProp( node, BAD_CAST "quant" ) );
-
-            mappings.insert(std::pair<double, double>(ref, quant) );
-
-        }
+    if (node) {
+      for (const XMLCoreNode* child : node->get_children ("CDFmap")) {
+        double ref = child->get_double_attrib ("ref");
+        double quant = child->get_double_attrib ("quant");
+        mappings[ref] = quant;
+      }
     }
 
     return mappings;

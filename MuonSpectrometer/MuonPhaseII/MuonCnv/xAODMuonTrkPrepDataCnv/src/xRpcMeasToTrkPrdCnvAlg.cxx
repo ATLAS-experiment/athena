@@ -11,14 +11,14 @@
 #include "MuonReadoutGeometry/RpcReadoutElement.h"
 
 namespace MuonR4{
-    StatusCode xRpcMeasToRpcTrkPrdCnvAlg::initialize() {
+    StatusCode xRpcMeasToTrkPrdCnvAlg::initialize() {
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_readKey.initialize());
         ATH_CHECK(m_writeKey.initialize());
         ATH_CHECK(m_detMgrKey.initialize());
         return StatusCode::SUCCESS;
     }
-    StatusCode xRpcMeasToRpcTrkPrdCnvAlg::execute(const EventContext& ctx) const {
+    StatusCode xRpcMeasToTrkPrdCnvAlg::execute(const EventContext& ctx) const {
         const xAOD::RpcMeasurementContainer* measContainer{nullptr};
         ATH_CHECK(SG::get(measContainer, m_readKey, ctx));
 

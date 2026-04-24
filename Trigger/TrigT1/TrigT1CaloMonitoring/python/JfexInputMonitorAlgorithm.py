@@ -20,7 +20,7 @@ def JfexInputMonitoringConfig(flags):
 
         #jfex emulated input: EmulatedTowers
         from L1CaloFEXAlgos.FexEmulatedTowersConfig import jFexEmulatedTowersCfg
-        result.merge(jFexEmulatedTowersCfg(flags))    
+        result.merge(jFexEmulatedTowersCfg(flags))
     
 
     # get any algorithms

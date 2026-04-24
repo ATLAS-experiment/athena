@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESS_TOOLS_TAUXVECTOR_H
 #define XAODROOTACCESS_TOOLS_TAUXVECTOR_H
@@ -70,6 +70,16 @@ namespace xAOD {
                                SG::IAuxStore& srcStore) override;
 
       /// @}
+
+     /**
+      * @brief Perform post-read processing on this auxiliary variable.
+      * @param ctx The current event context.
+      *
+      * This is a no-op; we can't implement this for types that don't
+      * have compile-time information available.
+      */
+     virtual void toTransient (const EventContext& ctx) override;
+
 
   protected:
      /// Return a span object describing the current vector.

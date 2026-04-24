@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAHDFSTREAMTOOL_H
@@ -13,7 +13,9 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "AthenaKernel/IAthenaIPCTool.h"
+#include "AthenaKernel/InputFileIncidentGuard.h"
 
+#include <optional>
 #include <string>
 
 // Forward declarations.
@@ -85,6 +87,7 @@ private:
    mutable long long unsigned int m_event_iter;
    bool m_isClient;
    ServiceHandle<IIncidentSvc> m_incidentSvc;
+   mutable std::optional<InputFileIncidentGuard> m_inputFileGuard;
 };
 
 #endif

@@ -1,18 +1,17 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGTAUHYPO_TrigTauTrackRoiUpdater_H
 #define TRIGTAUHYPO_TrigTauTrackRoiUpdater_H
 
-#include <iostream>
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 
 #include "xAODTracking/TrackParticleContainer.h"
 
-#include "TrigSteeringEvent/TrigRoiDescriptor.h"
+#include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 
 /**
  * @class TrigTauTrackRoiUpdater

@@ -17,8 +17,8 @@ if [ -z ${ATLAS_REFERENCE_DATA+x} ]; then
 fi
 
 events=25
-HITS_File="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8481_s4149/HITS.33605501._000106.pool.root.1"
-RDO_BKG_File="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/RDO_BKG/ATLAS-P2-RUN4-03-00-00/RUN4_presampling.mu200.withSuperCell.50events.RDO.pool.root"
+HITS_File=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.HITS_RUN4[0])")
+RDO_BKG_File=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_BKG_RUN4[0])")
 OverlayOutFile="RUN4_ttbar.mu200.overlay.RDO.pool.root"
 
 conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
@@ -28,7 +28,6 @@ Overlay_tf.py \
 --CA \
 --conditionsTag ${conditions} \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
---geometryVersion ATLAS-P2-RUN4-03-00-00 \
 --inputHITSFile ${HITS_File} \
 --inputRDO_BKGFile ${RDO_BKG_File} \
 --maxEvents ${events} \

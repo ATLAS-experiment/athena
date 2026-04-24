@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -123,8 +123,13 @@ void testTileCalibDrawerFltV200 ATLAS_NOT_THREAD_SAFE () {
 int main ATLAS_NOT_THREAD_SAFE () {
 
 
-  testTileCalibDrawerFltV100();
-  testTileCalibDrawerFltV200();
+  try {
+    testTileCalibDrawerFltV100();
+    testTileCalibDrawerFltV200();
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
 
   return 0;
 }

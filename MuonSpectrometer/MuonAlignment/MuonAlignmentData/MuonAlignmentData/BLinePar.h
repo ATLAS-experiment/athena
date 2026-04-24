@@ -8,7 +8,7 @@
 #include "MuonAlignmentData/MuonAlignmentPar.h"
 #include <array>
 #include <limits>
-#include <iostream>
+#include <iosfwd>
 #include <algorithm>
 
 class BLinePar : public MuonAlignmentPar {

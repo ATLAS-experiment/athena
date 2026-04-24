@@ -24,20 +24,20 @@ RoIBResult_PERS* RoIBResultCnv::createPersistent( ROIB::RoIBResult* transObj ) {
  * Function reading a version of RoIBResult from POOL and converting it to
  * a transient ROIB::RoIBResult object.
  */
-ROIB::RoIBResult* RoIBResultCnv::createTransient() {
+ROIB::RoIBResult* RoIBResultCnv::createTransient(const Token* token) {
 
    static const pool::Guid p1_guid( "A9FF18A0-E5A2-4F24-82C7-605CAA9EA1F8" );
    static const pool::Guid p0_guid( "E9F89B95-329A-4FF1-9110-4CE48D1D7176" );
 
-   if( this->compareClassGuid( p1_guid ) ) {
+   if( this->compareClassGuid(token,  p1_guid ) ) {
 
-      std::unique_ptr< RoIBResult_p1 > pers_ref( this->poolReadObject< RoIBResult_p1 >() );
+      std::unique_ptr< RoIBResult_p1 > pers_ref( this->poolReadObject< RoIBResult_p1 >(token) );
       MsgStream log( this->msgSvc(), "RoIBResultCnv" );
       return m_converter.createTransient( pers_ref.get(), log );
 
-   } else if( this->compareClassGuid( p0_guid ) ) {
+   } else if( this->compareClassGuid(token,  p0_guid ) ) {
 
-      return this->poolReadObject< ROIB::RoIBResult >();
+      return this->poolReadObject< ROIB::RoIBResult >(token);
 
    }
 

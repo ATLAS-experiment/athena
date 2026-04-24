@@ -40,7 +40,7 @@ public:
 
 protected:
   virtual TileMuFeature_PERS  *createPersistent(TileMuFeature *transObj);
-  virtual TileMuFeature       *createTransient();
+  virtual TileMuFeature       *createTransient(const Token* token);
 };
 
 

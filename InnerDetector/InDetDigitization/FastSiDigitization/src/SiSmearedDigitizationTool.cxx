@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////
@@ -28,9 +28,6 @@
 #include "CLHEP/Random/RandGauss.h"
 #include "CLHEP/Random/RandLandau.h"
 #include "CLHEP/Vector/ThreeVector.h"
-
-// DataHandle
-#include "StoreGate/DataHandle.h"
 
 // Pile-up
 #include "PileUpTools/PileUpMergeSvc.h"

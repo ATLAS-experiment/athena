@@ -27,7 +27,10 @@ endif()
 
 # Generate and install the EventIndex proto file(s).
 if( Protobuf_FOUND )
-   protobuf_generate_python( PROTO_PYS "protocolB/EventIndex.proto" )
+   protobuf_generate(
+     LANGUAGE python
+     OUT_VAR PROTO_PYS
+     PROTOS "protocolB/EventIndex.proto" )
    set( _eiPythonFile
       "${CMAKE_PYTHON_OUTPUT_DIRECTORY}/EventIndexProducer/EventIndex_pb2.py" )
    add_custom_command(
@@ -88,3 +91,12 @@ atlas_add_test( EventPicking_ESD_run3_data22
                 LOG_SELECT_PATTERN "^[0-9]+ [0-9]+$"
                 PRIVATE_WORKING_DIRECTORY
                 PROPERTIES TIMEOUT 900 )
+
+# tests that should not run in AthGeneration, AthSimulation or analysis releases
+if( NOT GENERATIONBASE AND NOT SIMULATIONBASE AND NOT XAOD_ANALYSIS )
+    atlas_add_test( EventPicking_RAW_run2_data15
+                    SCRIPT test/EventPicking_RAW_run2_data15.sh "${CMAKE_CURRENT_SOURCE_DIR}"
+                    LOG_SELECT_PATTERN "^[0-9]+ [0-9]+$"
+                    PRIVATE_WORKING_DIRECTORY
+                    PROPERTIES TIMEOUT 900 )
+endif()

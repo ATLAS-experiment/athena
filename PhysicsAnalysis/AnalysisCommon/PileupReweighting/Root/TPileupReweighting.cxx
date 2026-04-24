@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /******************************************************************************
@@ -1090,7 +1090,9 @@ Int_t CP::TPileupReweighting::Initialize() {
          }
       }
    }
-
+   if (totalData == 0.){ //should be impossible
+     Error("Initialize", "totalData is still zero.");
+   }
    if(m_ignoreBadChannels && unrepDataByChannel[-1] && totalData && (unrepDataByChannel[-1]/totalData)>m_unrepDataTolerance) {
       Warning("Initialize","There is %f%% unrepresented data and 'IgnoreBadChannels' property is set to true. Will start ignoring channels until this is below the tolerance (%f%%)", 100.*(unrepDataByChannel[-1]/totalData),100.*m_unrepDataTolerance);
       //remove channels one-by-one until we are under tolerance
@@ -1285,22 +1287,26 @@ Int_t CP::TPileupReweighting::Initialize() {
       }
    }
    //double totalData =  (m_unrepresentedDataAction==1) ? (m_periods[-1]->sumOfWeights[-1]+unrepDataByChannel[-1]) : m_periods[-1]->sumOfWeights[-1];
-
+   if (totalData == 0){
+     Error("Initialize", "totalData is zero.");
+     throw std::runtime_error("totalData is zero after summing. This should never happen.");
+   }
    if(ignoredData>0.) Warning("Initialize", "Period Assignments missed %f%% data",100.*ignoredData/totalData);
-
-
-
    if(unrepDataByChannel[-1]) {
       double frac = unrepDataByChannel[-1]/totalData;
       if( frac  > m_unrepDataTolerance) {
-               Error("Initialize", "%f%% unrepresented data, which suggests something is wrong with your prw config. Try EnableDebugging(true) to investigate",100.* (unrepDataByChannel[-1]/totalData));
+        Error("Initialize", "%f%% unrepresented data, which suggests something is wrong with your prw config. Try EnableDebugging(true) to investigate",100.* (unrepDataByChannel[-1]/totalData));
       }
       if(m_unrepresentedDataAction==1) {
          Warning("Initialize","has %f%% unrepresented data. This was removed (UnrepresentedDataAction=1)",100.*frac);
       }  else if(m_unrepresentedDataAction==2) {
          Warning("Initialize","has %f%% unrepresented data. This was kept in (UnrepresentedDataAction=2)",100.*frac);
       } else if(m_unrepresentedDataAction==3) {
-         Warning("Initialize","has %f%% unrepresented data. This was reassigned (UnrepresentedDataAction=3)",100.*frac);
+         if(frac >= m_unrepDataWarningThreshold) {
+            Warning("Initialize","has %f%% unrepresented data."
+                    " This was reassigned (UnrepresentedDataAction=3)",
+                    100.*frac);
+         }
       } else if(m_unrepresentedDataAction==0) {
          Error("Initialize","has %f%% unrepresented data:",100.*frac);
          //print the report of which channels caused it

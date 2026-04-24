@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCablingData/MuonMDT_CablingMap.h"
@@ -420,7 +420,7 @@ bool MuonMDT_CablingMap::getStationCode(const CablingData& map_data,
         log << MSG::ERROR
             << "getstationCode() -- Could not find HashId for module: "
             << map_data << endmsg;
-        elementId.show();
+        log << elementId << endmsg;
         return false;
     }
     return true;
@@ -449,7 +449,7 @@ bool MuonMDT_CablingMap::getMultiLayerCode(const CablingData& map_data,
         log << MSG::ERROR
             << "getMultiLayerCode() -- Could not find HashId for module: "
             << map_data << endmsg;
-        elementId.show();
+        log << elementId << endmsg;
         return false;
     }
     /// In Run1, all chambers had only one CSM. To maintain backward
@@ -459,7 +459,7 @@ bool MuonMDT_CablingMap::getMultiLayerCode(const CablingData& map_data,
         log << MSG::ERROR
             << "getMultiLayerCode() -- Could not find HashId for module: "
             << map_data << endmsg;
-        elementId.show();
+        log << elementId << endmsg;
         return false;
     }
     return true;

@@ -1,10 +1,11 @@
 /*
- * Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TrigEFMissingET/PufitUtils.h"
 #include <algorithm>
 #include <numeric>
+#include <stdexcept>
 
 namespace HLT
 {
@@ -84,6 +85,10 @@ namespace HLT
           ++n;
           sum += tower.sumEt();
           squaredSum += tower.sumEt() * tower.sumEt();
+        }
+        //if n is still zero here, something went very wrong
+        if (n == 0)[[unlikely]]{
+          throw std::runtime_error("unmaskedMeanAndVariance: n is zero in denominator.");
         }
         mean = sum / n;
         // Note that this could result in catastrophic cancellation in some cases.

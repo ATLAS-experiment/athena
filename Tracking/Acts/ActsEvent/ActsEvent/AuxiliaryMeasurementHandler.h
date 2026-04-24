@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ActsEvent_AuxiliaryMeasurementHandler_H
 #define ActsEvent_AuxiliaryMeasurementHandler_H
@@ -9,6 +9,7 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/WriteHandle.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
+#include "Acts/Utilities/Result.hpp"
 
 #include <unordered_map>
 
@@ -28,8 +29,11 @@ namespace ActsTrk{
             template <class PropOwner> 
                 AuxiliaryMeasurementHandler(PropOwner* owner);
             /** @brief Initialize the write handle keys.
-             *  @param preFix: Common prefix to be put in front of all keys */
-            StatusCode initialize(const std::string& preFix);
+             *  @param preFix: Common prefix to be put in front of all keys
+             *  @param used: Flag indicating whether the auxiliary keys are used at all */
+            StatusCode initialize(const std::string& preFix,
+                                  bool used = true);
+
             /** @brief Helper struct to create a new pseudo measurement.*/
             class MeasurementProvider {
                 public:
@@ -59,45 +63,70 @@ namespace ActsTrk{
                      *         track surface container. The latter is used to simultaenously
                      *         fill the surfaces with the pseduo measurements
                      *  @param ctx: EventContext to put the container into StoreGate
-                     *  @param parent: Pointer to the Utils class instantiating the object
-                     *  @param surfaceBackend: Reference to the surface container into which
-                     *                         all surfaces are stored. */
+                     *  @param gctx: The geometry context to access the surface's location
+                     *  @param parent: Pointer to the handler class instantiating the object */
                     MeasurementProvider(const EventContext& ctx,
-                                      const AuxiliaryMeasurementHandler* parent,
-                                      xAOD::TrackSurfaceContainer& surfaceBackend);
+                                        const Acts::GeometryContext& gctx,
+                                        const AuxiliaryMeasurementHandler* parent);
                     /** @brief Setup method to record the Auxiliary measurement containers into StoreGate */
                     StatusCode setupContainers();
+                    /** @brief */
+                    template<typename AuxCont_t, typename Cont_t>
+                        StatusCode recordContainer(SG::WriteHandle<Cont_t>& handle);
+
 
                     const EventContext& m_ctx;
+                    const Acts::GeometryContext m_gctx;
                     const AuxiliaryMeasurementHandler* m_parent{};
-                    xAOD::TrackSurfaceContainer& m_surfaceContainer;
                     /** @brief Abrivation of the WriteHandle */
                     using WriteHandle_t = SG::WriteHandle<xAOD::AuxiliaryMeasurementContainer>;
+                    using SurfaceHandle_t = SG::WriteHandle<xAOD::TrackSurfaceContainer>;
                     WriteHandle_t m_handle1D{m_parent->m_writeKey1D, m_ctx};
                     WriteHandle_t m_handle2D{m_parent->m_writeKey2D, m_ctx};
                     WriteHandle_t m_handle3D{m_parent->m_writeKey3D, m_ctx};
+                    SurfaceHandle_t m_surfaceContainer{m_parent->m_surfaceKey, m_ctx};
                     /** @brief List of precached surfaces */
                     std::unordered_map<SurfacePtr_t, const xAOD::TrackSurface*> m_cachedSurfs{};
 
             };
-        /** @brief Creates a new MeasurementProvider and triggers the write of the
-         *         container backend to StoreGate. The user needs to provide a
-         *         reference to a mutable xAOD::TrackSurfaceContainer where the 
-         *         persistified surfaces are appended to. The client needs to ensure
-         *         that the lifetime of the surface container prevails the provider's 
-         *         lifetime.
-         *  @param ctx: EventContext to write the containers to store gate
-         *  @param surfaceBackend: Reference to a mutable track surface container. */
-        MeasurementProvider makeHandle(const EventContext& ctx,
-                                       xAOD::TrackSurfaceContainer& surfaceBackend) const;
+
+            enum class HandleStatus: std::uint8_t{
+                ok = 0,
+                emptyKey = 1,
+                recordFail = 2,
+            };
+            using HandleReturn_t = Acts::Result<MeasurementProvider, HandleStatus>;
+           
+            /** @brief Creates a new MeasurementProvider and triggers the write of the
+             *         container backend to StoreGate. The user needs to provide a
+             *         reference to a mutable xAOD::TrackSurfaceContainer where the 
+             *         persistified surfaces are appended to. The client needs to ensure
+             *         that the lifetime of the surface container prevails the provider's 
+             *         lifetime.
+             *  @param ctx: EventContext to write the containers to store gate
+             *  @param gctx: The geometry context to place the surface in space */
+            HandleReturn_t makeHandle(const EventContext& ctx,
+                                      const Acts::GeometryContext& gctx) const;
 
         private:
             using Key_t = SG::WriteHandleKey<xAOD::AuxiliaryMeasurementContainer>;
-            MsgStream& m_msg;
+            /// @brief Lambda to access the parent's msg stream 
+            std::function<MsgStream&(const MSG::Level)> m_msgPrinter{};
+            /// @brief Lambda to return the msg level from the parent's msg stream
+            std::function<bool(const MSG::Level)> m_msgLevel{};
+            /// @brief Key to write the 1D measurements
             Key_t m_writeKey1D;
+            /// @brief Key to write the 2D measurements
             Key_t m_writeKey2D;
+            /// @brief Key to write the 2D + time measurements
             Key_t m_writeKey3D;
-            GeometryContext m_gctx{};
+            /// @brief Key to write the surfaces associated to the measurements
+            SG::WriteHandleKey<xAOD::TrackSurfaceContainer> m_surfaceKey;
+            /// @brief Return the reference to the msg logging stream
+            /// @param lvl: Logging level to be applied
+            MsgStream& msg(const MSG::Level lvl) const;
+            /// @brief Returns whether the stream satisfies the logging level
+            bool msgLvl(const MSG::Level lvl) const;
     };
 }
 #include "ActsEvent/AuxiliaryMeasurementHandler.icc"

@@ -20,7 +20,7 @@ class PyEventInfo(Alg):
         self.evt_info = kwargs.get('evt_info', None)
         self.is_mc  = kwargs.get('is_mc', False) # default value
         self.output = kwargs.get('output')
-        self.prefix = kwargs.get('prefix')
+        self.prefix = kwargs.get('prefix', '')
 
     # Initialize the algorithm
     def initialize(self):
@@ -82,7 +82,7 @@ class PyEventInfo(Alg):
     def finalize(self):
         for run, event in zip(self.info['run_number'], self.info['event_number'], strict=True):
             # Changed in version 3.10: Added the strict argument.
-            print(f"{'' if self.prefix is None else self.prefix}{run:d} {event:d}",
+            print(f"{self.prefix}{run:d} {event:d}",
                   file=self.output)
         return StatusCode.Success
 
@@ -91,17 +91,18 @@ def main(args=None):
     import sys
     import argparse
     parser = argparse.ArgumentParser(description='Output run number (mc channel number in case of Monte Carlo),'
-                                     ' event number of events in input (POOL/BS) file(s).')
+                                     ' event number of events in input (POOL/BS) file(s).',
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--inputFiles', required=True,
                         help='input (POOL/BS) file(s) separated with commas')
-    parser.add_argument('--outputFile',
+    parser.add_argument('--outputFile', default='-',
                         help='output text file containing <run number> <event number> record(s) (one per line);'
-                        ' if is -, write output on standard output (default: -)')
-    parser.add_argument('--prefix',
+                        ' if is -, write output on standard output')
+    parser.add_argument('--prefix', default='',
                         help='prefix to print in front of each line of output')
     args = parser.parse_args(args=args)
 
-    if args.outputFile is None or args.outputFile == "-":
+    if args.outputFile == "-":
         output = sys.stdout
         opened = False
     else:
@@ -111,15 +112,75 @@ def main(args=None):
     # Setup configuration logging
     from AthenaCommon.Logging import logging
     log = logging.getLogger('EventInfo')
-    log.setLevel(logging.ERROR)
 
-    log.info('== Listing EventInfo for events from POOL/BS files (the CA Configuration)')
+    from os.path import expandvars, expanduser
+    args.inputFiles = [expandvars(expanduser(fn)) for fn in args.inputFiles.split(',')]
+
+    log.info(f"input files: {",".join(repr(fn) for fn in args.inputFiles)}")
+    log.info(f"output file: {args.outputFile!r}")
+    log.info(f"prefix: {args.prefix!r}")
+
+    from PyUtils.MetaReader import read_metadata
+    logging.getLogger('MetaReader').setLevel(logging.WARNING)
+    metadata = read_metadata(args.inputFiles[0], mode='tiny')[args.inputFiles[0]]
+
+    if metadata['file_type'] == 'BS':
+        # run directly AtlListBSEvents
+        import subprocess
+        cmd = ["AtlListBSEvents", "-l"]
+        cmd.extend(args.inputFiles)
+        try:
+            log.info("running")
+            log.debug(f"... {cmd=}")
+            log.info("   ...")
+            proc = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        except OSError as err:
+            log.error(err)
+            return err.errno
+        except subprocess.CalledProcessError as err:
+            log.error(f"{err}\nstderr={err.stderr!r}\nstdout={err.stdout!r}")
+            return err.returncode
+        else:
+            from collections import defaultdict
+            info = defaultdict(list)
+
+            indexprefix = "Index="
+            runprefix = "Run="
+            runoff = len(runprefix)
+            eventprefix = "Event="
+            eventoff = len(eventprefix)
+            for line in proc.stdout.splitlines():
+                match line.split():
+                    case [Index, Run, Event, _, _, *_] if Index.startswith(indexprefix):
+                        if Run.startswith(runprefix) and Event.startswith(eventprefix):
+                            try:
+                                run = int(Run[runoff:])
+                                event = int(Event[eventoff:])
+                            except ValueError:
+                                log.warning(f"could not parse {line=}")
+                            else:
+                                log.debug(f"parsed {run=} {event=}")
+                                info['run_number'].append(run)
+                                info['event_number'].append(event)
+                        else:
+                            log.warning(f"could not parse {line=}")
+
+            for run, event in zip(info['run_number'], info['event_number'], strict=True):
+                # Changed in version 3.10: Added the strict argument.
+                print(f"{args.prefix}{run:d} {event:d}",
+                      file=output)
+        finally:
+            if opened: output.close()
+
+        return 0
+
+    log.info('== Listing EventInfo for events from POOL files (the CA Configuration)')
 
     # Set the configuration flags
     log.info('== Setting ConfigFlags')
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    flags.Input.Files = args.inputFiles.split(',')
+    flags.Input.Files = args.inputFiles
 
     import AthenaCommon.Constants as Lvl
     flags.Exec.OutputLevel=Lvl.WARNING

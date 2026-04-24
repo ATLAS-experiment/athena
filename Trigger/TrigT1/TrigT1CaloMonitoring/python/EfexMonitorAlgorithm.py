@@ -9,14 +9,14 @@ def EfexMonitoringConfig(inputFlags):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
 
-    # add algorithm to the helper
+    # add algorithm
     result.addEventAlgo( CompFactory.EfexMonitorAlgorithm('EfexMonAlg',
                                                   PackageName='EfexMonitor',
                                                   LowPtCut = 0.0,
                                                   HiPtCut = 15000.0,
                                                   eFexEMTobKeyList = ['L1_eEMRoI', 'L1_eEMxRoI'],
                                                   eFexTauTobKeyList = ['L1_eTauRoI', 'L1_eTauxRoI']
-                                                  ) )
+                                                  ))
 
     return result
 
@@ -342,4 +342,6 @@ if __name__=='__main__':
 
     nevents=10
     cfg.run(nevents)
+
+
 

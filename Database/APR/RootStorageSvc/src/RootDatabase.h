@@ -15,7 +15,7 @@
 #include "GaudiKernel/SmartIF.h"
 #include "StorageSvc/IDbDatabase.h"
 #include "StorageSvc/DbDatabase.h"
-#include "POOLCore/DbPrint.h"
+#include "StorageSvc/DbPrint.h"
 
 #include <set>
 #include <map>
@@ -86,8 +86,6 @@ namespace pool  {
     int		        m_branchOffsetTabLen;
     /// Name of tree with cache
     std::string   m_treeNameWithCache;
-    /// Default tree cache learn events
-    int           m_defTreeCacheLearnEvents;
     /// Flag to enable/disable buffered RNTuple writing
     int           m_rntBufferedWriteEnabled;
     /// Flag to enable/disable RNTupleReader metrics

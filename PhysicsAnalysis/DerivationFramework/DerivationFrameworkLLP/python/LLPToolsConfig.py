@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #==============================================================================
 # Provides configs for the tools used for LLP Derivations
@@ -33,6 +33,14 @@ def JetLargeD0TrackParticleThinningCfg(flags, name, **kwargs):
     JetLargeD0TrackParticleThinning = CompFactory.DerivationFramework.JetLargeD0TrackParticleThinning
     acc.addPublicTool(JetLargeD0TrackParticleThinning(name, **kwargs),
                       primary = True)
+    return acc
+
+def TauLRTThinningCfg(flags, name, **kwargs):
+    """configure tau thinning"""
+
+    acc = ComponentAccumulator()
+    TauLRTThinningTool = CompFactory.DerivationFramework.TauLRTThinningTool
+    acc.addPublicTool(TauLRTThinningTool(name, **kwargs), primary=True)
     return acc
 
 # RC jet substructure computation tool
@@ -177,7 +185,7 @@ def LLP1TriggerSkimmingToolCfg(flags, name, TriggerListsHelper, **kwargs):
 
     trig_EJ_Run3 = ["HLT_j200_0eta180_emergingPTF0p08dR1p2_a10sd_cssk_pf_jes_ftf_preselj200_L1J100", "HLT_j460_a10r_L1J100", "HLT_j460_a10r_L1jJ160", "HLT_j200_0eta180_emergingPTF0p08dR1p2_a10sd_cssk_pf_jes_ftf_preselj200_L1gLJ140p0ETA25","HLT_j200_0eta180_emergingPTF0p08dR1p2_a10sd_cssk_pf_jes_ftf_preselj200_L1SC111-CjJ40","HLT_j200_0eta180_emergingPTF0p08dR1p2_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160","HLT_j200_0eta180_emergingPTF0p08dR1p2_a10sd_cssk_pf_jes_ftf_preselj200_L1SC175-SCjJ10"]
     trig_VBF_2018 =["HLT_j55_gsc80_bmv2c1070_split_j45_gsc60_bmv2c1085_split_j45_320eta490", "HLT_j45_gsc55_bmv2c1070_split_2j45_320eta490_L1J25.0ETA23_2J15.31ETA49", "HLT_j80_0eta240_j60_j45_320eta490_AND_2j35_gsc45_bmv2c1070_split", "HLT_ht300_2j40_0eta490_invm700_L1HT150-J20s5.ETA31_MJJ-400-CF_AND_2j35_gsc45_bmv2c1070_split", "HLT_j70_j50_0eta490_invm1100j70_dphi20_deta40_L1MJJ-500-NFF"]
-    trig_VBF_Run3 = ["HLT_j70_j50a_j0_DJMASS1000j50dphi200x400deta_L1MJJ500NFF","HLT_j70_j50a_j0_DJMASS1000j50dphi200x400deta_L1jMJJ-500-NFF"] 
+    trig_VBF_Run3 = ["HLT_j70_j50a_j0_DJMASS1000j50dphi200x400deta_L1MJJ-500-NFF","HLT_j70_j50a_j0_DJMASS1000j50dphi200x400deta_L1jMJJ-500-NFF"] 
     trig_dispjet_Run3 = ["HLT_j180_hitdvjet260_tight_L1J100", "HLT_j180_dispjet50_3d2p_dispjet50_1p_L1J100", "HLT_j180_2dispjet50_3d2p_L1J100","HLT_j180_2dispjet50_3d2p_L1jJ160", "HLT_j180_dispjet50_3d2p_dispjet50_1p_L1jJ160", "HLT_j180_dispjet90_x3d1p_L1jJ160", "HLT_j180_dispjet100_x3d1p_L1jJ160", "HLT_j180_2dispjet50_3d2p_L1J100", "HLT_j180_dispjet50_3d2p_dispjet50_1p_L1J100", "HLT_j180_dispjet90_x3d1p_L1J100", "HLT_j180_dispjet90_x3d1p_L1J100", "HLT_j180_dispjet100_x3d1p_L1J100", "HLT_j180_2dispjet50_2p_L1jJ160", "HLT_j180_2dispjet50_2p_L1J100"]
     trig_dedx_Run3 = ["HLT_xe80_tcpufit_dedxtrk25_medium_L1XE50", "HLT_xe80_tcpufit_dedxtrk50_medium_L1XE50", "HLT_xe80_tcpufit_dedxtrk25_medium_L1XE55", "HLT_xe80_tcpufit_dedxtrk50_medium_L1XE55"]
     trig_dt_Run3 = ["HLT_xe80_tcpufit_distrk20_tight_L1XE50", "HLT_xe80_tcpufit_distrk20_medium_L1XE50", "HLT_xe80_tcpufit_distrk20_tight_L1XE55", "HLT_xe80_tcpufit_distrk20_medium_L1XE55"]
@@ -259,8 +267,25 @@ def ZeroPixelHitMuonMergerAlgCfg(flags, name='LLP1_MuonZPHMergingAlg', **kwargs)
 
 def LRTElectronMergerAlg(flags, name="LLP1_ElectronLRTMergingAlg", **kwargs):
     acc = ComponentAccumulator()
-    alg = CompFactory.CP.ElectronLRTMergingAlg(name, **kwargs)
-    acc.addEventAlgo(alg, primary=True)
+    prompt = kwargs.setdefault ('PromptElectronLocation', 'Electrons')
+    lrt = kwargs.setdefault ('LRTElectronLocation', 'LRTElectrons')
+    ExtraInputs = kwargs.setdefault ('ExtraInputs', [])
+    from IsolationAlgs.DerivationTrackIsoConfig import iso_vars
+    ExtraInputs += [('xAOD::IParticleContainer', f'{prompt}.{v}')
+                    for v in iso_vars()]
+    ExtraInputs += [('xAOD::IParticleContainer', f'{lrt}.{v}')
+                    for v in iso_vars()]
+    ExtraInputs += [
+             ('xAOD::IParticleContainer', f'{lrt}.core57cellsEnergyCorrection'),
+             ('xAOD::IParticleContainer', f'{lrt}.ptcone20'),
+             ('xAOD::IParticleContainer', f'{lrt}.neflowisol20'),
+             ('xAOD::IParticleContainer', f'{prompt}.neflowisol20'),
+        ]
+    alg = CompFactory.CP.ElectronLRTMergingAlg \
+        (name,
+         **kwargs)
+    acc.addEventAlgo(alg,
+                     primary=True)
     return acc
 
 # Photon IsEM setup for LLP1
@@ -441,6 +466,9 @@ def LRTElectronLHSelectorsCfg(flags):
 # RecoverZeroPixelHitMuons setup
 def RecoverZeroPixelHitMuonsCfg(flags):
     acc = ComponentAccumulator()
-    acc.addEventAlgo(CompFactory.RecoverZeroPixelHitMuons(name="RecoverZeroPixelHitMuons"))
+    from IsolationAlgs.DerivationTrackIsoConfig import iso_vars
+    ExtraInputs = [('xAOD::IParticleContainer', 'Muons.' + v)
+                   for v in iso_vars()]
+    acc.addEventAlgo(CompFactory.RecoverZeroPixelHitMuons(name="RecoverZeroPixelHitMuons", ExtraInputs=ExtraInputs))
     
     return acc 

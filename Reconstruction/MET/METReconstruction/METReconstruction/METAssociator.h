@@ -39,14 +39,10 @@
 #include "xAODPFlow/PFO.h"
 #include "xAODPFlow/FlowElementContainer.h"
 
-namespace InDet {
-  class IInDetTrackSelectionTool;
-}
- 
-namespace xAOD {
-  class ITrackIsolationTool;
-  class ICaloTopoClusterIsolationTool;
-}
+// Tool interface headers
+#include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
+#include "RecoToolInterfaces/ITrackIsolationTool.h"
+#include "RecoToolInterfaces/ICaloTopoClusterIsolationTool.h"
 
 namespace met {
   class METAssociator
@@ -75,23 +71,23 @@ namespace met {
 
     // AsgTool Handles
     virtual StatusCode initialize() override;
-    virtual StatusCode execute (xAOD::MissingETContainer* metCont, xAOD::MissingETAssociationMap* metMap) const override;
+    virtual StatusCode execute (xAOD::MissingETContainer* metCont, xAOD::MissingETAssociationMap* metMap, const EventContext& ctx) const override;
 
     ///////////////////////////////////////////////////////////////////
     // Protected methods:
     ///////////////////////////////////////////////////////////////////
     protected:
 
-    ToolHandle<InDet::IInDetTrackSelectionTool> m_trkseltool;
-    ToolHandle<xAOD::ITrackIsolationTool> m_trkIsolationTool;
-    ToolHandle<xAOD::ICaloTopoClusterIsolationTool> m_caloIsolationTool;
+    ToolHandle<InDet::IInDetTrackSelectionTool> m_trkseltool{this, "TrackSelectorTool", ""};
+    ToolHandle<xAOD::ITrackIsolationTool> m_trkIsolationTool{this, "TrackIsolationTool",  ""};
+    ToolHandle<xAOD::ICaloTopoClusterIsolationTool> m_caloIsolationTool{this, "CaloIsolationTool", ""};
 
-    std::string m_neutralFELinksKey; 
-    std::string m_chargedFELinksKey; 
-    std::string m_neutralPFOLinksKey; 
-    std::string m_chargedPFOLinksKey; 
-    bool m_usePFOLinks; 
-    bool m_useFELinks; 
+    Gaudi::Property<std::string> m_neutralFELinksKey{this, "NeutralFELinksKey", "neutralGlobalFELinks"};
+    Gaudi::Property<std::string> m_chargedFELinksKey{this, "ChargedFELinksKey", "chargedGlobalFELinks"};
+    Gaudi::Property<std::string> m_neutralPFOLinksKey{this, "NeutralPFOLinksKey", "neutralpfoLinks"};
+    Gaudi::Property<std::string> m_chargedPFOLinksKey{this, "ChargedPFOLinksKey", "chargedpfoLinks"};
+    Gaudi::Property<bool> m_usePFOLinks{this, "UsePFOLinks", false};
+    Gaudi::Property<bool> m_useFELinks{this, "UseFELinks", false};
 
     SG::ReadHandleKey<xAOD::VertexContainer>  m_pvcollKey{this,"PrimVxColl","PrimaryVertices","Primary Vertex Collection"};
     SG::ReadHandleKey<xAOD::IParticleContainer>  m_clcollKey{this,"ClusColl","CaloCalTopoClusters","Topo cluster Collection"};
@@ -100,40 +96,40 @@ namespace met {
     SG::ReadHandleKey<xAOD::FlowElementContainer>  m_fecollKey{this,"FlowElementCollection","","FlowElement Collection (overrides PFO if not empty)"};
     SG::ReadHandleKey<xAOD::IParticleContainer>  m_hybridContKey{this,"HybridKey","","Hybrid Collection"};
 
+    SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_UEcorrPtDecorKey{this, "UEcorrPtDecorKey",  "", "UE correction for each lepton"};
+
     //for HR implementation migrated from release 21.2
     Gaudi::Property<bool> m_recoil{this, "HRecoil", false, ""};
 
-    bool m_pflow;
-    bool m_useTracks;
-    bool m_useRapidity;
-    bool m_useIsolationTools = false;
-    bool m_useModifiedClus;
-    bool m_weight_charged_pfo = false;
-    bool m_cleanChargedPFO;
+    Gaudi::Property<bool> m_pflow{this, "PFlow", false};
+    Gaudi::Property<bool> m_useTracks{this, "UseTracks", true};
+    Gaudi::Property<bool> m_useRapidity{this, "UseRapidity", false};
+    Gaudi::Property<bool> m_useModifiedClus{this, "UseModifiedClus", false};
+    Gaudi::Property<bool> m_cleanChargedPFO{this, "CleanCPFO", true};
 
-    bool m_skipconst;
-    std::string m_forcoll;
-    double m_foreta;
+    Gaudi::Property<bool> m_skipconst{this, "IgnoreJetConst", false};
+    Gaudi::Property<std::string> m_forcoll{this, "ForwardColl", ""};
+    Gaudi::Property<double> m_foreta{this, "ForwardDef", 2.5};
 
-    double m_cenTrackPtThr;
-    double m_forTrackPtThr;
+    Gaudi::Property<double> m_cenTrackPtThr{this, "CentralTrackPtThr", 30e+3};
+    Gaudi::Property<double> m_forTrackPtThr{this, "ForwardTrackPtThr", 30e+3};
 
 
 
     // reconstruction process to be defined in the individual tools
     // pure virtual -- we have no default
-    virtual StatusCode executeTool(xAOD::MissingETContainer* metCont, xAOD::MissingETAssociationMap* metMap) const = 0;
-    StatusCode retrieveConstituents(met::METAssociator::ConstitHolder& constits) const;
+    virtual StatusCode executeTool(xAOD::MissingETContainer* metCont, xAOD::MissingETAssociationMap* metMap, const EventContext& ctx) const = 0;
+    StatusCode retrieveConstituents(met::METAssociator::ConstitHolder& constits, const EventContext& ctx) const;
 
     bool acceptTrack (const xAOD::TrackParticle* trk, const xAOD::Vertex* pv) const;
     bool isGoodEoverP(const xAOD::TrackParticle* trk) const;
 
     virtual StatusCode fillAssocMap(xAOD::MissingETAssociationMap* metMap,
-                                    const xAOD::IParticleContainer* hardObjs) const;
+                                    const xAOD::IParticleContainer* hardObjs, const EventContext& ctx) const;
     virtual StatusCode extractPFO(const xAOD::IParticle* obj,
                                   std::vector<const xAOD::IParticle*>& pfolist,
                                   const met::METAssociator::ConstitHolder& constits,
-                                  std::map<const xAOD::IParticle*,MissingETBase::Types::constvec_t> &momenta) const = 0;
+                                  std::map<const xAOD::IParticle*,MissingETBase::Types::constvec_t> &momenta, const EventContext& ctx) const = 0;
 
     //Get UE correction for HR implementation using METMaker
     StatusCode GetUEcorr(const met::METAssociator::ConstitHolder& constits,
@@ -147,7 +143,7 @@ namespace met {
     virtual StatusCode extractFE(const xAOD::IParticle* obj,
                                  std::vector<const xAOD::IParticle*>& felist,
                                  const met::METAssociator::ConstitHolder& constits,
-                                 std::map<const xAOD::IParticle*,MissingETBase::Types::constvec_t> &momenta) const = 0;
+                                 std::map<const xAOD::IParticle*,MissingETBase::Types::constvec_t> &momenta, const EventContext& ctx) const = 0;
 
     //HR implementation dealing with FEs instead of PFOs
     virtual StatusCode extractFEHR(const xAOD::IParticle* /*obj*/,
@@ -163,7 +159,7 @@ namespace met {
                                      const met::METAssociator::ConstitHolder& constits) const = 0;
     virtual StatusCode extractTopoClusters(const xAOD::IParticle* obj,
                                            std::vector<const xAOD::IParticle*>& tclist,
-                                           const met::METAssociator::ConstitHolder& constits) const = 0;
+                                           const met::METAssociator::ConstitHolder& constits, const EventContext& ctx) const = 0;
     static inline bool greaterPt(const xAOD::IParticle* part1, const xAOD::IParticle* part2) {
       return part1->pt()>part2->pt();
     }

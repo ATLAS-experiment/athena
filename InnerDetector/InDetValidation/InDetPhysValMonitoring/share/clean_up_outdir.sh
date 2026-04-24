@@ -35,7 +35,7 @@ skip_files=(
 )
 
 if [[ $rmOutput == true ]]; then
-    for item in {art_core,*.root}; do
+    for item in {art_core_0,*.root}; do
         [[ -e "$item" ]] || continue
         remove=true
         for pat in "${skip_files[@]}"; do

@@ -1,13 +1,14 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <cmath>
+
 
 #include "Variable.h"
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TProfile.h"
+#include <cmath>
 
 Variable::Variable(const std::string& name, TH1* cacheHistoPtr, VariableType type) :
   m_name(name),
@@ -73,7 +74,12 @@ StatusCode Variable::fill(float xvalue, float yvalue, float weight) {
       TH2F* th2f = dynamic_cast<TH2F*>(m_cacheHistoPtr);
       if (th2f == nullptr){
         // Cast failed - should be TProfile
-        dynamic_cast<TProfile*>(m_cacheHistoPtr)->Fill(xvalue * m_oneOverDenominator, yvalue * m_oneOverDenominator, weight);
+        auto p = dynamic_cast<TProfile*>(m_cacheHistoPtr);
+        if (p){
+          p->Fill(xvalue * m_oneOverDenominator, yvalue * m_oneOverDenominator, weight);
+        } else {
+          return StatusCode::FAILURE;
+        }
       } else {
         th2f->Fill(xvalue * m_oneOverDenominator, yvalue * m_oneOverDenominator, weight);
       }
@@ -125,7 +131,12 @@ StatusCode Variable::endEvent() {
       TH2F* th2f = dynamic_cast<TH2F*>(m_cacheHistoPtr);
       if (th2f == nullptr){
         // Cast failed - should be TProfile
-        dynamic_cast<TProfile*>(m_cacheHistoPtr)->Fill(m_xaccumulator * m_oneOverDenominator, m_yaccumulator, m_weight);
+        auto p = dynamic_cast<TProfile*>(m_cacheHistoPtr);
+        if (p){
+          p->Fill(m_xaccumulator * m_oneOverDenominator, m_yaccumulator, m_weight);
+        } else {
+          return StatusCode::FAILURE;
+        }
       } else {
         th2f->Fill(m_xaccumulator * m_oneOverDenominator, m_yaccumulator, m_weight);
       }

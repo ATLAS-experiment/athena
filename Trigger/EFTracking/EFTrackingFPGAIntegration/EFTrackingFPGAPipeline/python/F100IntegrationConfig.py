@@ -157,6 +157,12 @@ def FPGADataPreparation(flags,runStandalone=False): # thsi is used to run the F1
     kwargs = {}
     kwargs.setdefault('FPGAThreads', flags.Concurrency.NumThreads)
     acc = ComponentAccumulator()
+    
+    from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
+    acc.merge(ITkPixelReadoutGeometryCfg(flags))
+    from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
+    acc.merge(ITkStripReadoutGeometryCfg(flags))
+    
     acc.merge(F100DataEncodingCfg(flags))
     
     if(flags.FPGADataPrep.doCodeType == "F1X0"):

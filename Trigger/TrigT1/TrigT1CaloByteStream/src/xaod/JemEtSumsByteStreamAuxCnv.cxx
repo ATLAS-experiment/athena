@@ -58,7 +58,7 @@ JemEtSumsByteStreamAuxCnv::JemEtSumsByteStreamAuxCnv(ISvcLocator* svcloc) :
 {
 }
 
-const CLID& JemEtSumsByteStreamAuxCnv::classID() {
+CLID JemEtSumsByteStreamAuxCnv::classID() {
   return ClassID_traits<xAOD::JEMEtSumsAuxContainer>::ID();
 }
 

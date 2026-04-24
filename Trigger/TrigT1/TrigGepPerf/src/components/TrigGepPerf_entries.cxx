@@ -38,3 +38,6 @@ DECLARE_COMPONENT(GepTowersAlg)
 #include "../GepEratioAlg.h"
 DECLARE_COMPONENT(GepEMEratioAlg)
 DECLARE_COMPONENT(GepTauEratioAlg)
+
+#include "../GepEtaSoftKillerAlg.h"
+DECLARE_COMPONENT(GepEtaSoftKillerAlg)

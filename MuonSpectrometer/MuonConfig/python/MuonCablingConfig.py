@@ -14,12 +14,14 @@ def NRPCCablingConfigCfg(flags, name = "MuonNRPC_CablingAlg", **kwargs):
         cablingFolder = "/RPC/NCABLING/JSON" if flags.Input.isMC else "/RPC/Onl/NCABLING/JSON"
         cablingTag = "RpcNcablingJson-RUN3-09"
         from AthenaConfiguration.Enums import LHCPeriod
-        if flags.Muon.usePhaseIIGeoSetup and flags.Input.isMC:  
-            if flags.GeoModel.Run <= LHCPeriod.Run3:   
-                cablingTag = "RpcNcablingJson-RUN3-FantasyCabling-5"
-            else:
+        if flags.Muon.usePhaseIIGeoSetup:  
+            if flags.GeoModel.Run <= LHCPeriod.Run3:
+                if flags.Input.isMC:   
+                    cablingTag = "RpcNcablingJson-RUN3-FantasyCabling-5"
+                else:
+                    cablingTag = "RpcNcablingJson-RUN3-FantasyHybridCabling-1"
+            elif flags.Input.isMC: #Run4 MC
                 cablingTag = "RpcNcablingJson-RUN4-FantasyCabling-8"
-
         result.merge(addFolders(flags, [cablingFolder], detDb=dbName, className='CondAttrListCollection', tag=cablingTag))
         kwargs.setdefault("MapFolders",  cablingFolder)
     
@@ -59,21 +61,10 @@ def RPCLegacyCablingConfigCfg(flags):
     return acc
 
 
-def MuonTGC_CablingSvcCfg(flags):
-    acc = ComponentAccumulator()
-
-    svc = CompFactory.MuonTGC_CablingSvc()
-    svc.databaseASDtoPPdiff = 'ASD2PP_diff_12_OFL.db' if flags.Input.isMC else 'ASD2PP_diff_12_ONL.db'
-    acc.addService(svc, primary = True)
-
-    return acc
-
-
 def TGCCablingConfigCfg(flags, name="TgcCablingCondAlg", **kwargs):
     acc = ComponentAccumulator()
     if not flags.Detector.GeometryTGC: return acc
 
-    acc.merge(MuonTGC_CablingSvcCfg(flags))
     kwargs.setdefault("databaseASDtoPPdiff", 'ASD2PP_diff_12_OFL.db' if flags.Input.isMC else 'ASD2PP_diff_12_ONL.db')
     the_alg = CompFactory.Muon.TgcCablingCondAlg(name, **kwargs)
     acc.addCondAlgo(the_alg, primary = True)

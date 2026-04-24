@@ -44,9 +44,10 @@ StatusCode TrigBtagEmulationTool::initialize() {
     ATH_CHECK( addEmulatedChain(chain_name, definition) );
   }
 
-  m_dl2 = std::make_unique<FlavorTagDiscriminants::DL2HighLevel>("BTagging/20210519r22/dl1d/antikt4empflow/network.json",
-								 FlavorTagDiscriminants::FlipTagConfig::STANDARD,
-								 m_remapping.value());
+  if (m_LHCPeriod == 3) 
+    m_dl2 = std::make_unique<FlavorTagDiscriminants::DL2HighLevel>("BTagging/20210519r22/dl1d/antikt4empflow/network.json",
+								   FlavorTagDiscriminants::FlipTagConfig::STANDARD,
+								   m_remapping.value());
   
   return StatusCode::SUCCESS;
 }

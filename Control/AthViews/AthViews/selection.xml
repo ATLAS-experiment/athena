@@ -1,6 +1,0 @@
-<lcgdict>
-
-   <!-- Used by Views as decoration -->
-   <class name="std::vector<ElementLink<TrigRoiDescriptorCollection>>" />
-
-</lcgdict>

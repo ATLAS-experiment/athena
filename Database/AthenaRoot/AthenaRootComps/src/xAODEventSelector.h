@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // xAODEventSelector.h 
@@ -22,6 +22,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "AthenaKernel/IEvtSelectorSeek.h"
 #include "AthenaKernel/IAddressProvider.h"
+#include "AthenaKernel/InputFileIncidentGuard.h"
 
 #include "PoolSvc/IPoolSvc.h"
 
@@ -29,6 +30,7 @@
 
 #include "xAODTEvent.h"
 
+#include <optional>
 #include <unordered_map>
 
 // Forward declaration
@@ -69,6 +71,7 @@ class ATLAS_NOT_THREAD_SAFE xAODEventSelector :
 
   // Athena hooks
   virtual StatusCode initialize() override;
+  virtual StatusCode stop() override;
   virtual StatusCode finalize() override;
 
   virtual void handle(const Incident& incident) override;
@@ -237,6 +240,9 @@ class ATLAS_NOT_THREAD_SAFE xAODEventSelector :
   bool m_printPerfStats = false; //should we monitor the touched input branches?
 
   bool m_printEventProxyWarnings = true;
+
+  /// RAII guard: guarantees a matching EndInputFile for every BeginInputFile
+  mutable std::optional<InputFileIncidentGuard> m_inputFileGuard;
 
 #ifndef XAOD_ANALYSIS
   //these are here just for compatibility with RecExCommon ... we were trying to use this selector in recexcommon jobs for a bit

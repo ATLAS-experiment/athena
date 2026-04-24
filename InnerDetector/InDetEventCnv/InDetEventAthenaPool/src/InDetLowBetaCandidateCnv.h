@@ -29,7 +29,7 @@ protected:
 
   InDetLowBetaCandidate_PERS*  createPersistent(InDet::InDetLowBetaCandidate* transCont);
 
-  InDet::InDetLowBetaCandidate*       createTransient ();
+  InDet::InDetLowBetaCandidate*       createTransient(const Token* token);
 
  private:
 

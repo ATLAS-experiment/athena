@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -43,7 +43,7 @@ void copyAuxStoreThinned (const SG::IConstAuxStore& orig,
 /**
  * @brief Helper method to apply lossy float compression
  * @param dst Pointer to the start of the vector's data
- * @param idst Index of first element in vector
+ * @param dst_index Index of first element in vector
  * @param n Number of elements to process.
  * @param eltSize Element size for the auxid
  * @param typeName Type name for the auxid

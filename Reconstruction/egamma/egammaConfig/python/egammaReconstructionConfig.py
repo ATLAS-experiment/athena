@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 """ Instantiate the EGamma reconstruction.
 """
@@ -21,24 +21,26 @@ def egammaReconstructionCfg(flags, name="egammaReconstruction"):
 
     # Add e/gamma tracking algorithms
     if flags.Egamma.doTracking:
-        
+
         if flags.Acts.GsfRefitActs:
-            
-            # === TODO === : Acts EM extrapolator is missing.
-            
-            # from egammaAlgs.egammaSelectedTrackCopyConfig import (
-            #     egammaSelectedTrackCopyCfg)
-            # acc.merge(egammaSelectedTrackCopyCfg(flags))
-            
+            if flags.Acts.extrapolateElectronsLegacy or not flags.Acts.TrackingGeometry.UseBlueprint:
+                from egammaAlgs.egammaSelectedTrackCopyConfig import (
+                    egammaSelectedTrackCopyCfg)
+                acc.merge(egammaSelectedTrackCopyCfg(flags))
+            else:
+                from egammaAlgs.ActsEgammaSelectedTrackCopyConfig import (
+                    ActsEgammaSelectedTrackCopyCfg)
+                acc.merge(ActsEgammaSelectedTrackCopyCfg(flags))
+
             from egammaAlgs.ActsEMBremCollectionBuilderConfig import (
                 ActsEMBremCollectionBuilderCfg)
             acc.merge(ActsEMBremCollectionBuilderCfg(flags))
-            
+
         else:
             from egammaAlgs.egammaSelectedTrackCopyConfig import (
                 egammaSelectedTrackCopyCfg)
             acc.merge(egammaSelectedTrackCopyCfg(flags))
-            
+
             from egammaAlgs.EMBremCollectionBuilderConfig import (
                 EMBremCollectionBuilderCfg)
             acc.merge(EMBremCollectionBuilderCfg(flags))

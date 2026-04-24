@@ -2,7 +2,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import BeamType
 from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow, AntiKt4LCTopo, AntiKt4EMTopo, AntiKt4Truth
-from JetRecConfig.StandardLargeRJets import AntiKt10LCTopo_noVR, AntiKt10UFOCSSKSoftDrop_trigger
+from JetRecConfig.StandardLargeRJets import AntiKt10LCTopo_tau, AntiKt10UFOCSSKSoftDrop_trigger
 from JetRecConfig.JetRecConfig import JetRecCfg
 
 def addTruthPileupJetsToOutputCfg(flags, toAOD=True, toESD=True):
@@ -39,7 +39,7 @@ def addJetsToOutputCfg(flags,jetdefs, toAOD=True, toESD=True):
 
     for jetdef in jetdefs:
         jetList += [ f"xAOD::JetContainer#{jetdef.fullname()}" ,
-                     f"xAOD::JetAuxContainer#{jetdef.fullname()}Aux.-PseudoJet"]
+                     f"xAOD::JetAuxContainer#{jetdef.fullname()}Aux.-PseudoJet.-numConstit"]
         # Not sure if this trigger special AuxContainer is obsolete in Run3 ?
         # if trigger:
         #   auxprefix = "Trig"
@@ -50,8 +50,6 @@ def addJetsToOutputCfg(flags,jetdefs, toAOD=True, toESD=True):
                 "xAOD::EventShapeAuxInfo#Kt4EMPFlowEventShapeAux.",
                 "xAOD::EventShape#Kt4EMPFlowNeutEventShape",
                 "xAOD::EventShapeAuxInfo#Kt4EMPFlowNeutEventShapeAux.",
-                "xAOD::EventShape#Kt4EMPFlowPUSBEventShape",
-                "xAOD::EventShapeAuxInfo#Kt4EMPFlowPUSBEventShapeAux.",
                 "xAOD::EventShape#Kt4EMTopoOriginEventShape",
                 "xAOD::EventShapeAuxInfo#Kt4EMTopoOriginEventShapeAux.",
                 "xAOD::EventShape#Kt4LCTopoOriginEventShape",
@@ -69,7 +67,7 @@ def JetRecoSteeringCfg(flags):
     result = ComponentAccumulator()
     
     # the Standard list of jets to run :
-    jetdefs = [AntiKt4EMTopo, AntiKt4EMPFlow, AntiKt4LCTopo, AntiKt4Truth, AntiKt10LCTopo_noVR, AntiKt10UFOCSSKSoftDrop_trigger]
+    jetdefs = [AntiKt4Truth, AntiKt4EMTopo, AntiKt4EMPFlow, AntiKt4LCTopo, AntiKt10LCTopo_tau, AntiKt10UFOCSSKSoftDrop_trigger]
 
     # We're in Reco job : propagate this info to the runIII jet config
     # (see JetConfigFlags.py for motivations on this way of doing)
@@ -82,7 +80,7 @@ def JetRecoSteeringCfg(flags):
 
     if flags.Output.doWriteAOD and flags.Jet.WriteToAOD:
         result.merge(addJetsToOutputCfg(flags, jetdefs, toAOD=True, toESD=False))
-    if flags.Output.doWriteESD:
+    if flags.Output.doWriteESD and flags.Jet.WriteToESD:
         jetdefs.remove(AntiKt10UFOCSSKSoftDrop_trigger)
         result.merge(addJetsToOutputCfg(flags, jetdefs, toAOD=False, toESD=True))
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -421,16 +421,21 @@ int main() {
   ctx.setExtension( Atlas::ExtendedEventContext(&*conditionStore) );
   Gaudi::Hive::setCurrentContext(ctx);
 
-  initTileTestCondtions(TILE_TEST_CONDITION, OBJ_VERSION, ctx);
-  initTilePulseTestCondtions(TILE_PULSE_TEST_CONDITION, PULSE_OBJ_VERSION, ctx);
+  try {
+    initTileTestCondtions(TILE_TEST_CONDITION, OBJ_VERSION, ctx);
+    initTilePulseTestCondtions(TILE_PULSE_TEST_CONDITION, PULSE_OBJ_VERSION, ctx);
 
-  initTileTestCondData<TileTiming>(TILE_TIMING_TEST_CONDITION, OBJ_VERSION, ctx);
+    initTileTestCondData<TileTiming>(TILE_TIMING_TEST_CONDITION, OBJ_VERSION, ctx);
 
-  testTileCondToolTiming(svcLoc);
-  testTileCondToolAutoCr(svcLoc);
-  testTileCondToolPulseShape(svcLoc, ctx);
-  testTileCondToolDspThreshold(svcLoc);
-  testTileCondToolIntegrator(svcLoc);
+    testTileCondToolTiming(svcLoc);
+    testTileCondToolAutoCr(svcLoc);
+    testTileCondToolPulseShape(svcLoc, ctx);
+    testTileCondToolDspThreshold(svcLoc);
+    testTileCondToolIntegrator(svcLoc);
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
 
   return 0;
 }

@@ -15,17 +15,17 @@
 HGTD_ALTIROC_RDO_ContainerCnv::HGTD_ALTIROC_RDO_ContainerCnv(ISvcLocator* svcloc)
   : HGTD_ALTIROC_RDO_ContainerCnvBase_t(svcloc) {}
 
-HGTD_ALTIROC_RDO_Container* HGTD_ALTIROC_RDO_ContainerCnv::createTransient() {
+HGTD_ALTIROC_RDO_Container* HGTD_ALTIROC_RDO_ContainerCnv::createTransient(const Token* token) {
 
   static const pool::Guid p1_guid(
     "2EE1819F-7EFE-ACB8-5D5F-9EFBFAEBC11E"); // with HGTD_ALTIROC_RDO_p1
-  ATH_MSG_DEBUG("createTransient(): main converter");
+  ATH_MSG_DEBUG("createTransient(const Token* token): main converter");
 
   HGTD_ALTIROC_RDO_Container* trans_cont(0);
-  if (compareClassGuid(p1_guid)) {
-    ATH_MSG_DEBUG("createTransient(): T/P version 1 detected");
+  if (compareClassGuid(token, p1_guid)) {
+    ATH_MSG_DEBUG("createTransient(const Token* token): T/P version 1 detected");
     std::unique_ptr<HGTD_ALTIROC_RDO_Container_PERS_t> pers_cont(
-      poolReadObject<HGTD_ALTIROC_RDO_Container_PERS_t>());
+      poolReadObject<HGTD_ALTIROC_RDO_Container_PERS_t>(token));
 
     trans_cont = m_converter.createTransient(pers_cont.get(), msg());
 

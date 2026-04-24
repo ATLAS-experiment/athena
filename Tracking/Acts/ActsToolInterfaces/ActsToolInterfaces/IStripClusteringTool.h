@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTOOLINTERFACES_ISTRIPSTRIPCLUSTERINGTOOL_H
@@ -15,6 +15,7 @@
 #include <xAODInDetMeasurement/StripClusterContainer.h>
 #include <xAODInDetMeasurement/StripClusterAuxContainer.h>
 #include <Acts/Clusterization/Clusterization.hpp>
+#include <any>
 
 namespace ActsTrk {
 
@@ -52,10 +53,14 @@ public:
        Acts::Ccl::ClusteringData& data,
 	     std::vector<ClusterCollection>& collection) const = 0;
   
+  virtual std::any makeVars (SG::AuxVectorData& cont) const = 0;
+
   virtual StatusCode
   makeClusters(const EventContext& ctx,
 	       ClusterCollection& cluster,
 	       const InDetDD::SiDetectorElement& element,
+               size_t icluster,
+               std::any& vars,
 	       typename ClusterContainer::iterator itrContainer) const = 0;
 };
   

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONVALR4_MuonHoughTransformTester_H
@@ -9,6 +9,7 @@
 #include "AthenaBaseComps/AthHistogramAlgorithm.h"
 
 #include "StoreGate/ReadHandleKeyArray.h"
+#include "StoreGate/ReadDecorHandleKeyArray.h"
 
 // EDM includes 
 #include "xAODMuonSimHit/MuonSimHitContainer.h"
@@ -59,9 +60,9 @@ namespace MuonValR4{
 
   private:
     std::vector<ObjectMatching> matchWithTruth(const ActsTrk::GeometryContext& gctx,
-                                               const xAOD::MuonSegmentContainer* truthSegments,
-                                               const MuonR4::SegmentSeedContainer* seedContainer,
-                                               const MuonR4::SegmentContainer* segmentContainer) const;
+                                               const MuonR4::SegmentSeedContainer& seedContainer,
+                                               const xAOD::MuonSegmentContainer& segmentContainer,
+                                               const xAOD::MuonSegmentContainer* truthSegments) const;
     /** @brief Calculates how many measurements from the segment fit have the same drift sign
      *          as when evaluated with the truth parameters
      *  @param gctx: Geometry context to fetch the alignment constants
@@ -94,14 +95,21 @@ namespace MuonValR4{
     // // output tree - allows to compare the sim and fast-digitised hits
     MuonVal::MuonTesterTree m_tree{"MuonEtaHoughTest","MuonEtaHoughTransformTest"}; 
 
-    // MDT sim hits in xAOD format 
+    /** @brief Key to the truth segment */
     SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_truthSegmentKey {this, "TruthSegmentKey","MuonTruthSegments", "truth segment container"};
-                                                          
-    SG::ReadHandleKeyArray<MuonR4::SegmentSeedContainer> m_inHoughSegmentSeedKeys{this, "SegmentSeedKeys", {"MuonHoughStationSegmentSeeds"}};
-    SG::ReadHandleKeyArray<MuonR4::SegmentContainer> m_inSegmentKeys{this, "SegmentKeys", {"R4MuonSegments"}};
-
-
-    SG::ReadHandleKey<MuonR4::SpacePointContainer> m_spKey{this, "SpacePointKey", "MuonSpacePoints"};
+    /** @brief Declare the dependencies on the decorations */
+    SG::ReadDecorHandleKeyArray<xAOD::MuonSegmentContainer> m_truthSegLinkKeys{this, "TruthSegLinkKeys", {}};
+    /** @brief Name of the decorations for the truth segment */
+    Gaudi::Property<std::vector<std::string>> m_truthLinks{this, "TruthSegLinks", {"simHitLinks", "truthParticleLink"}};
+    /** @brief Key to the xAOD::MuonSegment container */
+    SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_recoSegKey{this, "SegmentKey", "MuonSegmentsFromR4"};
+    /** @brief name of the truth link decorations for the reco segment container */
+    Gaudi::Property<std::vector<std::string>> m_recoSegLinks{this, "RecoSegLinks", {"truthSegmentLink", "truthParticleLink"}};
+    /** @brief List of the two segment seed containers from which the segments are buiit (Complets the pattern finding step) */
+    SG::ReadHandleKeyArray<MuonR4::SegmentSeedContainer> m_patternSeedKeys{this, "SegmentSeedKeys", {"MuonHoughStationSegmentSeeds"}};
+    /** @brief List of the space point containers in the event legacy + NSW containers */
+    SG::ReadHandleKeyArray<MuonR4::SpacePointContainer> m_spKeys{this, "SpacePointKeys", {"MuonSpacePoints"}};
+    /** @brief Tracking geometry context */
     SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
@@ -167,6 +175,9 @@ namespace MuonValR4{
     MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMDTHits{m_tree.newScalar<unsigned short>("genNMdtHits",0)};
     MuonVal::ScalarBranch<unsigned short>& m_out_gen_nTGCHits{m_tree.newScalar<unsigned short>("genNTgcHits",0)};
     MuonVal::ScalarBranch<unsigned short>& m_out_gen_nNswHits{m_tree.newScalar<unsigned short>("genNNswHits",0)};
+    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMmHits{m_tree.newScalar<unsigned short>("genNMmHits",0)};
+    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nSTGCHits{m_tree.newScalar<unsigned short>("genNsTgcHits",0)};
+    
     // truth segment size in the y direction
     MuonVal::ScalarBranch<float>& m_out_gen_minYhit{m_tree.newScalar<float>("genMinYhit", 1.0)}; 
     MuonVal::ScalarBranch<float>& m_out_gen_maxYhit{m_tree.newScalar<float>("genMaxYhit", -1.0)};
@@ -199,8 +210,13 @@ namespace MuonValR4{
     MuonVal::VectorBranch<unsigned short>& m_out_seed_nMdt{m_tree.newVector<unsigned short>("seedNMdtHits", 0)}; 
     MuonVal::VectorBranch<unsigned short>& m_out_seed_nRpc{m_tree.newVector<unsigned short>("seedNRpcHits", 0)}; 
     MuonVal::VectorBranch<unsigned short>& m_out_seed_nTgc{m_tree.newVector<unsigned short>("seedNTgcHits", 0)}; 
-    MuonVal::VectorBranch<unsigned short>& m_out_seed_nsTgc{m_tree.newVector<unsigned short>("seedNsTgcHits", 0)};
-    MuonVal::VectorBranch<unsigned short>& m_out_seed_nMm{m_tree.newVector<unsigned short>("seedNMmHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_nsTgcStrip{m_tree.newVector<unsigned short>("seedNsTgcStripHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_nsTgcWire{m_tree.newVector<unsigned short>("seedNsTgcWireHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_nsTgcPad{m_tree.newVector<unsigned short>("seedNsTgcPadHits", 0)};
+    
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_nMmEta{m_tree.newVector<unsigned short>("seedNMmHitsEta", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_nMmStereo{m_tree.newVector<unsigned short>("seedNMmHitsStereo", 0)};
+    
 
     /// @brief Labelled hits from the pattern visualization tool
     MuonVal::VectorBranch<unsigned short>& m_out_seed_nTrueHits{m_tree.newVector<unsigned short>("seedNTrueHits", 0)};

@@ -85,7 +85,6 @@ def _createJsonMenuFiles(run, lb, crestServer: str | None = None) -> dict[str, i
 # This interprets the Trigger.triggerConfig flag according to
 # https://twiki.cern.ch/twiki/bin/view/Atlas/TriggerConfigFlag#triggerConfig_in_Run_3
 def getTrigConfigFromFlag( flags ):
-    flags.dump("Input", evaluate=True)
     # run and lb are only needed if source is DB
     run: int = flags.Input.RunNumbers[0] if flags.Input.RunNumbers else -1
     lb: int = flags.Input.LumiBlockNumbers[0] if flags.Input.LumiBlockNumbers else 0

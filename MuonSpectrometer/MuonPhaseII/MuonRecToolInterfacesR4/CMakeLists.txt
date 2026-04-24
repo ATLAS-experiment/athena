@@ -15,6 +15,6 @@ atlas_add_library( MuonRecToolInterfacesR4
                    INTERFACE
                    PUBLIC_HEADERS MuonRecToolInterfacesR4
                    LINK_LIBRARIES ${extra_libs} AthenaBaseComps AthenaKernel GaudiKernel GeoModelUtilities ActsEventLib
-                                  GeoPrimitives Identifier TrkEventPrimitives MuonSpacePoint MuonPatternEvent)
+                                  GeoPrimitives Identifier TrkEventPrimitives MuonSpacePoint MuonPatternEvent MuonFastRecoEvent)
 
 

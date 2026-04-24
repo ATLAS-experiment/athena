@@ -11,6 +11,8 @@
 #include "AssociationUtils/TauJetOverlapTool.h"
 #include "AssociationUtils/TauAntiTauJetOverlapTool.h"
 #include "AssociationUtils/OverlapRemovalGenUseAlg.h"
+#include "AssociationUtils/FEAssociationTool.h"
+#include "AssociationUtils/FEAssociationAlg.h"
 
 #ifndef XAOD_STANDALONE
 #include "../OverlapRemovalTestAlg.h"
@@ -33,6 +35,8 @@ DECLARE_COMPONENT( ORUtils::TauLooseMuOverlapTool )
 DECLARE_COMPONENT( ORUtils::TauJetOverlapTool )
 DECLARE_COMPONENT( ORUtils::TauAntiTauJetOverlapTool )
 DECLARE_COMPONENT( OverlapRemovalGenUseAlg )
+DECLARE_COMPONENT( ORUtils::FEAssociationTool )
+DECLARE_COMPONENT( ORUtils::FEAssociationAlg )  
 
 #ifndef XAOD_STANDALONE
 DECLARE_COMPONENT( OverlapRemovalTestAlg )

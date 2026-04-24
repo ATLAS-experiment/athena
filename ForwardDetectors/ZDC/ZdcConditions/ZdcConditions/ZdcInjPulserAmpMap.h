@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef _ZDCINJPULSERAMPMAP_H
@@ -90,6 +90,7 @@ private:
     if (!m_validJSon) {
       throw std::runtime_error("Invalid Injected Pulser configuration");
     }
+    //coverity[MISSING_LOCK]
     if (!token.isValid() || size_t(token.value()) >= m_activeConfigs.size()) {
       throw std::runtime_error("Invalid Injected Pulser configuration");
     }

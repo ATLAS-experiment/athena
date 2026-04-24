@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfHLTData/HLTStreamTag.h"
@@ -57,7 +57,8 @@ TrigConf::HLTStreamTag::print(const std::string& indent, unsigned int /*detail*/
 
 std::ostream &
 TrigConf::operator<<(std::ostream & o, const TrigConf::HLTStreamTag & st) {
-   int dp = o.precision();
+   const std::streamsize dp = o.precision();
+   const std::ios::fmtflags oldFlags = o.flags();
    o << "HLTStreamTag "
      << "stream: '"   << st.m_stream 
      << "' type: '"   << st.m_type
@@ -66,6 +67,7 @@ TrigConf::operator<<(std::ostream & o, const TrigConf::HLTStreamTag & st) {
    o.setf(std::ios::fixed, std::ios::floatfield); 
    o << "' prescale: " << st.m_prescale
      << std::endl;
+   o.flags(oldFlags);
    o.precision(dp);
    return o;
 }

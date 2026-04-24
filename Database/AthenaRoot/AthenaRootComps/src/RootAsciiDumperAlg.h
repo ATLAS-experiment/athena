@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // RootAsciiDumperAlg.h 
@@ -18,6 +18,8 @@
 
 // FrameWork includes
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "xAODEventInfo/EventInfo.h"
 
 namespace Athena {
 
@@ -30,13 +32,11 @@ class RootAsciiDumperAlg
   /////////////////////////////////////////////////////////////////// 
  public: 
 
-  // Copy constructor: 
-
-  /// Constructor with parameters: 
-  RootAsciiDumperAlg( const std::string& name, ISvcLocator* pSvcLocator );
+  /// Inherited constructor.
+  using ::AthAlgorithm::AthAlgorithm;
 
   /// Destructor: 
-  virtual ~RootAsciiDumperAlg(); 
+  virtual ~RootAsciiDumperAlg() = default;
 
   // Assignment operator: 
   //RootAsciiDumperAlg &operator=(const RootAsciiDumperAlg &alg); 
@@ -63,29 +63,39 @@ class RootAsciiDumperAlg
   RootAsciiDumperAlg();
 
   /// ASCII output file name
-  std::string m_ofname;
+  StringProperty m_ofname
+    { this, "AsciiFileName", "d3pd.ascii",
+      "Name of the ascii file where the content of the "
+      "ROOT n-tuple file will be dumped." };
 
   /// file handle to the ASCII output file
-  int m_ofd{-1};
+  int m_ofd = -1;
   
   /// number of entries processed so-far
-  uint64_t m_nentries{};
+  uint64_t m_nentries = 0;
 
   /// run number
-  const uint32_t* m_runnbr{};
+  SG::ReadHandleKey<uint32_t> m_runnbr
+    { this, "RunNumber", "RunNumber", "handle to the run-nbr in event (read)" };
 
   /// event number
-  const uint32_t* m_evtnbr{};
+  SG::ReadHandleKey<uint32_t> m_evtnbr
+    { this, "EventNumber", "EventNumber", "handle to the evt-nbr in event (read)" };
 
   /// number of electrons
-  const int32_t* m_el_n{};
+  SG::ReadHandleKey<int32_t> m_el_n
+    { this, "el_n", "el_n", "handle to the nbr of electrons in event (read)" };
 
   /// eta of electrons
-  const std::vector<float> *m_el_eta;
+  SG::ReadHandleKey<std::vector<float> > m_el_eta
+    { this, "el_eta", "el_eta", "handle to the eta of electrons in event (read)" };
 
   /// jetcone dR
-  const std::vector<std::vector<float> > *m_el_jetcone_dr;
+  SG::ReadHandleKey<std::vector<std::vector<float> > > m_el_jetcone_dr
+    { this, "el_jetcone_dr", "el_jetcone_dr", "handle to the jetcone-dR of electrons in event (read)" };
 
+  SG::ReadHandleKey<xAOD::EventInfo> m_eiKey
+    { this, "eiKey", "EventInfo", "" };
 }; 
 
 // I/O operators

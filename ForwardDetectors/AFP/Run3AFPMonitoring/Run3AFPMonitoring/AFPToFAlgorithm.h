@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AFPTOFALGORITHM_H
@@ -26,21 +26,18 @@ public:
 
 private:
 	std::map<std::string,int> m_StationNamesGroup;
-	std::map<std::string,int> m_TrainsToFGroup;
-	std::map<std::string,std::map<std::string,int>> m_BarsInTrainsA;
-	std::map<std::string,std::map<std::string,int>> m_BarsInTrainsC;
+	std::map<std::string,std::map<std::string,std::map<std::string,int>>> m_BarsInTrains;
 	std::map<std::string,int> m_GroupChanCombDeltaT;
+	std::map<std::string,std::map<std::string,int>> m_SideTrainGroup;
+	std::map<std::string,int> m_SideGroup;
 	SG::ReadHandleKey<xAOD::AFPToFHitContainer> m_afpToFHitContainerKey;
 	SG::ReadHandleKey<xAOD::AFPTrackContainer> m_afpTrackContainerKey;
 	SG::ReadCondHandleKey<BunchCrossingCondData> m_bunchCrossingKeyToF{this, "BunchCrossingKey", "BunchCrossingData", "Key BunchCrossing CDO" };
 
 protected:
-	// Only 0 and 3 are ToF stations (farAside and farCside)
 	std::vector<std::string> m_stationNamesToF = { "farAside", "nearAside" , "nearCside" , "farCside" };
-	std::vector<std::string> m_trainsToF = { "train0", "train1" , "train2" , "train3" };
-	
-	std::vector<std::string> m_trainsToFA = { "T0", "T1" , "T2" , "T3" };
-	std::vector<std::string> m_trainsToFC = { "T0", "T1" , "T2" , "T3" };
+	std::vector<std::string> m_sidesToF = { "sideA", "sideC" };
+	std::vector<std::string> m_trainsToF = { "T0", "T1" , "T2" , "T3" };
 	std::vector<std::string> m_barsToF = { "A", "B" , "C" , "D" };
 
 	std::vector<std::string> m_chanComb = {
@@ -50,4 +47,3 @@ protected:
 		"3AB", "3AC", "3AD", "3BC", "3BD", "3CD"};
 };
 #endif
-

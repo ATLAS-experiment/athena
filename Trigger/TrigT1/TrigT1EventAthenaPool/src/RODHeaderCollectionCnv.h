@@ -35,7 +35,7 @@ public:
 protected:
   
   virtual RODHeaderCollection_PERS*   createPersistent (RODHeaderCollection* transCont);
-  virtual RODHeaderCollection*        createTransient ();
+  virtual RODHeaderCollection*        createTransient(const Token* token);
 
 private:
   

@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file  CaloUtils/CaloVertexedCell_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -165,8 +163,13 @@ int main()
 
   CaloTester tester;
   assert(tester.record_mgr());
-  CaloDetDescrElement* dde = make_dd (tester);
-  test1 (dde);
+  try {
+    CaloDetDescrElement* dde = make_dd (tester);
+    test1 (dde);
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
   return 0;
 }
 

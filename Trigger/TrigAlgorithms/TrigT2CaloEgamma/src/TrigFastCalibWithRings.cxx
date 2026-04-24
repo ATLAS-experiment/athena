@@ -30,7 +30,7 @@ StatusCode TrigFastCalibWithRings::execute() const {
 
 bool TrigFastCalibWithRings::checkRings(const EventContext& ctx ) const {
    SG::ReadHandle<xAOD::TrigRingerRingsContainer> rgCont( m_ringerKey, ctx);
-   if (rgCont.isValid()){
+   if (!rgCont.isValid()){
     ATH_MSG_DEBUG("No valid Ringer Container");
     return false;
    }

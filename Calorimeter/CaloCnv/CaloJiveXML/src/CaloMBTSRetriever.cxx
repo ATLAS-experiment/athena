@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloMBTSRetriever.h"
@@ -21,36 +21,7 @@
 namespace JiveXML {
 
   /**
-   * This is the standard AthAlgTool constructor
-   * @param type   AlgTool type name
-   * @param name   AlgTool instance name
-   * @param parent AlgTools parent owning this tool
-   **/
-  CaloMBTSRetriever::CaloMBTSRetriever(const std::string& type,const std::string& name,const IInterface* parent):
-    AthAlgTool(type,name,parent),
-    m_tileTBID(nullptr)
-  {
-    //Only declare the interface
-    declareInterface<IDataRetriever>(this);
-
-    declareProperty("MBTSThreshold", m_mbtsThreshold = 0.05);
-    declareProperty("RetrieveMBTS" , m_mbts = true);
-    declareProperty("DoMBTSDigits",  m_mbtsdigit=false);
-    declareProperty("DoMBTSCellDetails",  m_mbtsCellDetails = false);
-
-    // TileDigitsContainer names: {"TileDigitsCnt","TileDigitsFlt"};
-    declareProperty("TileDigitsContainer" ,m_sgKeyTileDigits = "",
-        "Input collection to retrieve Tile digits, used when doTileDigit is True");
-
-    // TileRawChannelContainer names: {"TileRawChannelOpt2","TileRawChannelOpt","TileRawChannelFixed",
-    //                                 "TileRawChannelFitCool","TileRawChannelFit",
-    //                                 "TileRawChannelCnt","TileRawChannelFlt"};
-    declareProperty("TileRawChannelContainer" ,m_sgKeyTileRawChannel = "",
-        "Input collection to retrieve Tile raw channels, used when DoMBTSCellDetails is True.");
-  }
-
-  /**
-   * Initialise the ToolSvc
+   * Initialise the Tool
    */
 
   StatusCode CaloMBTSRetriever::initialize() {

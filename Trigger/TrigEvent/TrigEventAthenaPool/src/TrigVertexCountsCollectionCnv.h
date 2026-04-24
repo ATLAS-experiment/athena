@@ -43,7 +43,7 @@ public:
    
 protected:
    virtual TrigVertexCountsCollection_PERS *createPersistent( TrigVertexCountsCollection *transObj);
-   virtual TrigVertexCountsCollection      *createTransient();
+   virtual TrigVertexCountsCollection      *createTransient(const Token* token);
   
  private:
    

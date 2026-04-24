@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_IDDetDescrCnv.h"
@@ -124,7 +124,7 @@ TRT_IDDetDescrCnv::storageType()
 }
 
 //--------------------------------------------------------------------
-const CLID& 
+CLID
 TRT_IDDetDescrCnv::classID() { 
     return ClassID_traits<TRT_ID>::ID(); 
 }

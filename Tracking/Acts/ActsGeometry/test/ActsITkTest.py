@@ -34,6 +34,7 @@ flags.Exec.MaxEvents = 10
 
 flags.Acts.TrackingGeometry.UseBlueprint = args.gen3
 
+
 flags.lock()
 flags.dump()
 
@@ -55,10 +56,16 @@ alg = ActsExtrapolationAlgCfg(flags,
                               OutputLevel=INFO,
                               NParticlesPerEvent = int(100),
                               WritePropStep = True,
+                              WriteMaterialTracks = True,
                               EtaRange = [-5, 5],
                               PtRange = [20, 100])
 
 acc.merge(alg)
+
+from ActsConfig.ActsMaterialConfig import MaterialTrackWriterCfg
+acc.merge(MaterialTrackWriterCfg(flags, FileName="material-tracks-test.root",
+                                 MaterialTrackCollectionKey="MaterialTracks"))
+
 acc.printConfig()
 sc = acc.run()
 

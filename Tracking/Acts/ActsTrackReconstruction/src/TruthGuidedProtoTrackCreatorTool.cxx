@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
   */
 
 #include "src/TruthGuidedProtoTrackCreatorTool.h"
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
-#include "TruthUtils/AtlasPID.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 
 ActsTrk::TruthGuidedProtoTrackCreatorTool::TruthGuidedProtoTrackCreatorTool(const std::string& type, 
@@ -139,11 +139,11 @@ ActsTrk::TruthGuidedProtoTrackCreatorTool::makeDummyParams (const HepMC::ConstGe
   // A real track finder would do something more reasonable here. 
   params << 0., 0.,
         truthParticle->momentum().phi(), truthParticle->momentum().theta(),
-        static_cast<float>(::charge(truthParticle)) / (truthParticle->momentum().e()), 0.;
+        static_cast<float>(MC::charge(truthParticle)) / (truthParticle->momentum().e()), 0.;
  
 
   // Covariance - let's be honest and say we have no clue ;-) 
-  Acts::BoundSquareMatrix cov = Acts::BoundSquareMatrix::Identity();
+  Acts::BoundMatrix cov = Acts::BoundMatrix::Identity();
   cov *= 100000; 
 
   // some ACTS paperwork 
@@ -151,7 +151,7 @@ ActsTrk::TruthGuidedProtoTrackCreatorTool::makeDummyParams (const HepMC::ConstGe
   float mass = Trk::ParticleMasses::mass[hypothesis] * Acts::UnitConstants::MeV;
   Acts::PdgParticle absPdg = Acts::makeAbsolutePdgParticle(Acts::ePionPlus);
   Acts::ParticleHypothesis actsHypothesis{
-    absPdg, mass, Acts::AnyCharge{static_cast<float>(::charge(truthParticle))}};
+    absPdg, mass, static_cast<float>(MC::charge(truthParticle))};
 
   return std::make_unique<Acts::BoundTrackParameters>(actsSurface, params,
                                     cov, actsHypothesis);

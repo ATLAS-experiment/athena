@@ -103,15 +103,15 @@ int CscIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     m_str_impl = region.implementation(m_CHANNEL_INDEX);
 
     ATH_MSG_DEBUG(" CSC decode index and bit fields for each level: " << std::endl
-                                                                      << " muon        " << m_muon_impl.show_to_string() << std::endl
-                                                                      << " station     " << m_sta_impl.show_to_string() << std::endl
-                                                                      << " eta         " << m_eta_impl.show_to_string() << std::endl
-                                                                      << " phi         " << m_phi_impl.show_to_string() << std::endl
-                                                                      << " technology  " << m_tec_impl.show_to_string() << std::endl
-                                                                      << " cham layer  " << m_cla_impl.show_to_string() << std::endl
-                                                                      << " layer       " << m_lay_impl.show_to_string() << std::endl
-                                                                      << " phi         " << m_mea_impl.show_to_string() << std::endl
-                                                                      << " strip       " << m_str_impl.show_to_string());
+                                                                      << " muon        " << m_muon_impl << std::endl
+                                                                      << " station     " << m_sta_impl << std::endl
+                                                                      << " eta         " << m_eta_impl << std::endl
+                                                                      << " phi         " << m_phi_impl << std::endl
+                                                                      << " technology  " << m_tec_impl << std::endl
+                                                                      << " cham layer  " << m_cla_impl << std::endl
+                                                                      << " layer       " << m_lay_impl << std::endl
+                                                                      << " phi         " << m_mea_impl << std::endl
+                                                                      << " strip       " << m_str_impl);
 
     /**
      * Build multirange for the valid set of identifiers

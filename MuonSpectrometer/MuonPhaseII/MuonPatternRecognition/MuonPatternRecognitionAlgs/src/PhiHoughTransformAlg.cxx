@@ -187,6 +187,42 @@ std::unique_ptr<SegmentSeed>
 
 } 
 
+std::unique_ptr<SegmentSeed> 
+        PhiHoughTransformAlg::buildPhiLessSeed(const ActsTrk::GeometryContext& gctx,
+                                               const HoughMaximum& etaMax) const {
+    if (!m_refinePhiLessWithBS) {
+        return std::make_unique<SegmentSeed>(etaMax);
+    } 
+    
+    
+    const double tanBeta = etaMax.tanBeta();
+    const double iceptY = etaMax.interceptY();
+   
+    double iceptX{0.}, tanAlpha{0.};
+    unsigned counts{0};
+
+    const Amg::Vector3D bsPos = etaMax.parentBucket()->msSector()->globalToLocalTransform(gctx).translation();
+    
+    for (const SpacePoint* sp : etaMax.getHitsInMax()) {
+        const double spTanAlpha = houghTanAlpha(bsPos - sp->localPosition());
+        const double spX = HoughHelpers::Phi::houghParamStrip(spTanAlpha, sp);
+        if (sp->type() == xAOD::UncalibMeasType::TgcStripType) {
+            iceptX = sp->localPosition().x();
+            tanAlpha = spTanAlpha;
+            iceptX = spX;
+            counts = 1;
+            break;
+        }
+        iceptX += spX;
+        tanAlpha+=spTanAlpha;
+        ++counts;
+    }
+    tanAlpha /= counts;
+    iceptX /= counts;
+    auto hits = etaMax.getHitsInMax();
+    return std::make_unique<SegmentSeed>(tanBeta, iceptY, tanAlpha, iceptX, etaMax.getCounts(),
+                                         std::move(hits), etaMax.parentBucket());
+}
 
 StatusCode PhiHoughTransformAlg::execute(const EventContext& ctx) const {
    
@@ -248,7 +284,7 @@ StatusCode PhiHoughTransformAlg::execute(const EventContext& ctx) const {
             }
             // otherwise we have no phi-solution, and we fall back to writing a 1D eta-maximum 
             else{ 
-                writeMaxima->push_back(std::make_unique<SegmentSeed>(*max)); 
+                writeMaxima->push_back(buildPhiLessSeed(*gctx, *max)); 
             }
         }   
     }

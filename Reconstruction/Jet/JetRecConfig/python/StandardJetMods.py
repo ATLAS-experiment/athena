@@ -25,6 +25,8 @@ from .JetDefinition import JetModifier
 from .Utilities import ldict
 from .StandardJetConstits import inputsFromContext
 
+from JetRecConfig.JetRecCommon import isMC
+
 stdJetModifiers = ldict()
 
 ########################################################################
@@ -65,6 +67,19 @@ except ModuleNotFoundError:
     jetlog.info("No JetMomentTools pakage found (expected in AthGeneration or analysis releases). Some jet calculations will be disabled.")
     pass
 
+try:
+    from JetCalibTools import JetCalibToolsCfg
+    stdJetModifiers.update(
+        CalibNew = JetModifier("JetCalibTool","jetcalib_jetcoll_calibseq",
+                               createfn=JetCalibToolsCfg.defineJetCalibTool,
+                               prereqs=lambda mod,jetdef : JetCalibToolsCfg.getJetCalibToolPrereqs(jetdef,mod)+[inputsFromContext("Vertices")])
+    )
+except ModuleNotFoundError:
+    from AthenaCommon import Logging
+    jetlog = Logging.logging.getLogger('JetStandardMods')
+    jetlog.info("No JetMomentTools pakage found (expected in AthGeneration or analysis releases). Some jet calculations will be disabled.")
+    pass
+
 # TBD:
 # All items below in principle will support decoration mode, rather
 # than only non-const modification. Mode of operation should be
@@ -76,12 +91,6 @@ except ModuleNotFoundError:
 # can assign the right name to the c++ tool.
 def _jetname(jetdef,modspec):
     return jetdef.fullname()
-
-def isMC(flags):
-    """A simple filter function for  testing if we're running in MC
-    returns (bool, str) where the str contains an explanation of why the bool is False.
-    (probably worth re-allocating somehere else)"""
-    return flags.Input.isMC or flags.Overlay.DataOverlay, "Input file is not MC"
 
 
 def _constitContainername(jetdef,modspec):
@@ -192,6 +201,10 @@ try:
                                        prereqs=["ghost:Truth"],
                                        JetContainer = _jetname
                                        ),
+
+        numConstit = JetModifier("JetNumConstitTool", "numConstit",
+                                 JetContainer = _jetname,
+                                 ),
 
         # *******************
         # Isolation variables

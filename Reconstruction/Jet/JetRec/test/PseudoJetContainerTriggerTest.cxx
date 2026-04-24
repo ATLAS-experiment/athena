@@ -3,6 +3,8 @@
 */
 
 #include "CxxUtils/checker_macros.h"
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
+
 #include "JetRec/IParticleExtractor.h"
 #include "JetRec/PseudoJetContainer.h"
 #include "xAODBase/IParticleContainer.h"

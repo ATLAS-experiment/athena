@@ -39,7 +39,7 @@ public:
 protected:
   virtual HGTD_ClusterContainer_PERS*
   createPersistent(HGTD_ClusterContainer* transCont) override;
-  virtual HGTD_ClusterContainer* createTransient() override;
+  virtual HGTD_ClusterContainer* createTransient(const Token* token) override;
 
 private:
   HGTD_ClusterContainerCnv_p1 m_converter_p1;

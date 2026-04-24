@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -13,7 +13,6 @@
 #include "TileGeoG4SD/TileGeoG4LookupBuilder.hh"
 
 #include "StoreGate/StoreGateSvc.h"
-#include "StoreGate/DataHandle.h"
 #include "GeoModelUtilities/GeoModelExperiment.h"
 
 #include "TileGeoG4SD/TileGeoG4Lookup.hh"
@@ -107,7 +106,7 @@ TileGeoG4Section* TileGeoG4LookupBuilder::GetSection(TileDddbManager::TileSectio
   if (m_sectionMap) {
     auto it = std::as_const(*m_sectionMap).find(key);
     if (it != std::as_const(*m_sectionMap).end()) {
-      return it->second;
+      return it->second.get();
     }
   }
   return 0;
@@ -324,7 +323,6 @@ void TileGeoG4LookupBuilder::CreateGeoG4Sections(bool is_tb) {
     abort();
   }
 
-  TileGeoG4Section* section;
   TileGeoG4Sample* sample;
   TileGeoG4Cell* cell;
 
@@ -489,7 +487,7 @@ void TileGeoG4LookupBuilder::CreateGeoG4Sections(bool is_tb) {
       m_dbManager->SetCurrentSection(key + 10);
     else
       m_dbManager->SetCurrentSection(key);
-    section = new TileGeoG4Section(m_verboseLevel);
+    auto section = std::make_unique<TileGeoG4Section>(m_verboseLevel);
 
     section->nrOfModules = nModules;
     section->nrOfPeriods = m_dbManager->TILBnperiod();
@@ -548,7 +546,7 @@ void TileGeoG4LookupBuilder::CreateGeoG4Sections(bool is_tb) {
       }
     }
 
-    m_sectionMap->operator[](key) = section;
+    m_sectionMap->operator[](key) = std::move(section);
     sectionCells.clear();
 
   }

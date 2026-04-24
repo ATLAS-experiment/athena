@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENASERVICES_ATHENAEVENTLOOPMGR_H
@@ -209,9 +209,6 @@ private:
   time_t m_lastTime{};
 
   bool m_liteLoop;
-
-  StoreGateSvc* eventStore() const;
-
   bool m_doChrono = false;
   ServiceHandle<IChronoStatSvc> m_chronoStatSvc;
   ServiceHandle<Athena::IConditionsCleanerSvc> m_conditionsCleaner;

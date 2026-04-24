@@ -1,13 +1,15 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_DIGITIZATION_TRTDIGCONDFAKEMAP_H
 #define TRT_DIGITIZATION_TRTDIGCONDFAKEMAP_H
 
 #include "TRTDigCondBase.h"
-#include "CLHEP/Random/RandomEngine.h"
 
+namespace CLHEP{
+  class HepRandomEngine;
+}
 /**
  * "Fake" straw map until "real" map is known.
  */
@@ -19,13 +21,13 @@ public:
                      const InDetDD::TRT_DetectorManager*,
                      const TRT_ID* trt_id,
                      int UseGasMix,
-                     ToolHandle<ITRT_StrawStatusSummaryTool> sumTool
+                     ToolHandle<ITRT_StrawStatusSummaryTool> & sumTool
                      );
 
 protected:
 
   void setStrawStateInfo(Identifier& TRT_Identifier,
-                         const double& strawlength,
+                         double strawlength,
                          double& noiselevel,
                          double& relative_noiseamplitude,
                          CLHEP::HepRandomEngine *rndmEngine);

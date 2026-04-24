@@ -110,44 +110,6 @@ const TGCModuleId* TGCCabling::getSLBFromReadout(TGCId::SideType side,
         .first->second.get();
 }
 
-// readout ID -> RxID
-int TGCCabling::getRxIdFromReadout(TGCId::SideType side, int rodId, int sswId,
-                                   int sbLoc) const {
-    int rxId = -1;
-
-    // ROD Module
-    int readoutSector = rodId - 1;  // rodID = 1..12
-    TGCModuleROD rod(side, readoutSector);
-
-    // SSW Module
-    TGCModuleMap sswMap = getModule(rod, TGCModuleId::SSW);
-    if (sswMap.empty()) {
-        return rxId;
-    }
-
-    std::unique_ptr<TGCModuleId> ssw = sswMap.popModule(sswId);
-    if (!ssw) {
-        return rxId;  // Do not need to delete ssw here.
-                      // We can delete ssw but nothing will be done.
-    }
-
-    // SLB Module
-    TGCModuleMap slbMap = getModule(*ssw, TGCModuleId::SLB);
-
-    if (slbMap.empty()) {
-        return rxId;
-    }
-
-    for (auto& [id, module] : slbMap) {
-        auto slb = dynamic_cast<TGCModuleSLB*>(module.get());
-        if (slb && slb->getSBLoc() == sbLoc) {
-            rxId = id;
-            break;
-        }
-    }
-    return rxId;
-}
-
 // SSW ID/Rx ID -> SLB Module
 std::unique_ptr<TGCModuleId> TGCCabling::getSLBFromRxId(TGCId::SideType side,
                                                         int rodId, int sswId,
@@ -384,36 +346,6 @@ bool TGCCabling::getReadoutFromLowPtCoincidence(TGCId::SideType side, int rodId,
     }
 
     channel = slbin->getChannel();
-
-    return true;
-}
-
-// readout channel -> coincidence channel
-bool TGCCabling::getLowPtCoincidenceFromReadout(TGCId::SideType side, int rodId,
-                                                int sswId, int sbLoc,
-                                                int channel, int& block,
-                                                int& pos, bool middle) const {
-
-    const TGCModuleId* slb = getSLBFromReadout(side, rodId, sswId, sbLoc);
-    if (!slb) {
-        return 0;
-    }
-
-    TGCChannelSLBIn slbin(slb->getSideType(), slb->getModuleType(),
-                          slb->getRegionType(), slb->getSector(), slb->getId(),
-                          channel);
-    if (!slbin.isValid()) {
-        return false;
-    }
-
-    std::unique_ptr<TGCChannelId> slbout =
-        getChannel(slbin, TGCChannelId::ChannelIdType::SLBOut, middle);
-    if (!slbout) {
-        return false;
-    }
-
-    block = slbout->getBlock();
-    pos = slbout->getChannel();
 
     return true;
 }

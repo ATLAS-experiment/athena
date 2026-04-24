@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -21,16 +21,21 @@
 int main(/*int argc, char* argv[]*/) //unused variable warnings!!
 {
     Info(MSGSOURCE, "Configuring the ElectronPhotonVariableCorrectionTool");
-    asg::StandaloneToolHandle<IElectronPhotonShowerShapeFudgeTool> myTool("ElectronPhotonVariableCorrectionTool/myTool");
-    myTool.setProperty("ConfigFile", "EGammaVariableCorrection/EGammaVariableCorrectionTool_ExampleConf.conf").ignore();
-    if(myTool.initialize() != StatusCode::SUCCESS)
-    {
+    try {
+      asg::StandaloneToolHandle<IElectronPhotonShowerShapeFudgeTool> myTool("ElectronPhotonVariableCorrectionTool/myTool");
+      myTool.setProperty("ConfigFile", "EGammaVariableCorrection/EGammaVariableCorrectionTool_ExampleConf.conf").ignore();
+      if(myTool.initialize() != StatusCode::SUCCESS)
+      {
         Error(MSGSOURCE, "Unable to initialize the ElectronPhotonVariableCorrectionTool!");
         return 1;
-    }
-    else
-    {
+      }
+      else
+      {
         Info(MSGSOURCE, "Initialized the ElectronPhotonVariableCorrectionTool!");
+      }
+    } catch (const std::exception& e) {
+      std::cerr << "exception: " << e.what() << "\n";
+      return 1;
     }
     
 

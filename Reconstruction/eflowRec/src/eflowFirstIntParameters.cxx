@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -16,7 +16,6 @@ CREATED:  18th Aug, 2005
 #include "eflowCaloRegions.h"
 #include "eflowEEtaBinnedParameters.h"
 #include "eflowFirstIntParameters.h"
-#include <iostream>
 
 const int eflowFirstIntParameters::m_nShapeParams = 4;
 

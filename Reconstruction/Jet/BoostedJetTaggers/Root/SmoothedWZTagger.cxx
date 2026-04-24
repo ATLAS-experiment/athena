@@ -175,6 +175,10 @@ StatusCode SmoothedWZTagger::initialize() {
   m_decAcceptKey = m_containerName + "." + m_decorationName + "_" + m_decAcceptKey.key();
   ATH_CHECK( m_decAcceptKey.initialize() );
 
+  m_decValidKinRangeKey = m_containerName + "." + m_decorationName + "_" + m_decValidKinRangeKey.key();
+  ATH_CHECK(m_decValidKinRangeKey.initialize());
+  ATH_MSG_INFO("  " << m_decValidKinRangeKey.key() << " : pass kinematic range");
+
 #ifndef XAOD_STANDALONE
   if (m_suppressOutputDependence) {
     renounce(m_decPassMassKey);
@@ -189,9 +193,6 @@ StatusCode SmoothedWZTagger::initialize() {
     renounce(m_decCutNtrkKey);
   }
 #endif
-
-  m_decAcceptKey = m_containerName + "." + m_decorationName + "_" + m_decAcceptKey.key();
-  ATH_CHECK( m_decAcceptKey.initialize() );
   
   return StatusCode::SUCCESS;
 
@@ -199,45 +200,15 @@ StatusCode SmoothedWZTagger::initialize() {
 
 StatusCode SmoothedWZTagger::tag( const xAOD::Jet& jet ) const {
 
+  ATH_MSG_DEBUG("Obtaining tag result   " << jet.pt() << "   " << jet.m());
+
+  return StatusCode::SUCCESS;
+
+}
+
+StatusCode SmoothedWZTagger::decorate( const xAOD::JetContainer& jets ) const {
+
   ATH_MSG_DEBUG( "Obtaining Smooth WZ result" );
-
-  /// Create asg::AcceptData object
-  asg::AcceptData acceptData( &m_acceptInfo );
-
-  /// Reset the AcceptData cut results
-  ATH_CHECK( resetCuts( acceptData ) );
-
-  /// Check basic kinematic selection
-  ATH_CHECK( checkKinRange( jet, acceptData ) );
-
-  /// Get the relevant attributes of the jet
-  /// Mass and pt - note that this will depend on the configuration of the calibration used
-  float jet_pt   = jet.pt()/1000.0;
-  float jet_mass = jet.m()/1000.0;
-
-  /// Calculate NSubjettiness and ECF ratios
-  calculateJSSRatios(jet);
-
-  /// Get D2 value
-  static const SG::AuxElement::ConstAccessor<float> D2("D2");
-  float jet_d2 = D2(jet);
-
-  /// Get Score value
-  static const SG::AuxElement::ConstAccessor<float> Score(m_decorationName + "_ConstScore");
-  float jet_score = m_useScore ? Score(jet) : -99;
-
-  /// Evaluate the values of the upper and lower mass bounds and the d2 cut
-  float cut_mass_low (-99), cut_mass_high (-99), cut_d2 (-99);
-  if(!m_useScore){
-    cut_mass_low  = m_funcMassCutLow ->Eval(jet_pt);
-    cut_mass_high = m_funcMassCutHigh->Eval(jet_pt);
-    cut_d2        = m_funcD2Cut      ->Eval(jet_pt);
-  }
-
-  /// Evaluate the values of the lower score cut
-  float cut_score = m_useScore ? m_funcScoreCut -> Eval(jet_pt) : -99;
-
-  /// Decorate the cut values
 
   /// Create WriteDecorHandles
   SG::WriteDecorHandle<xAOD::JetContainer, char> decPassMass(m_decPassMassKey);
@@ -248,114 +219,153 @@ StatusCode SmoothedWZTagger::tag( const xAOD::Jet& jet ) const {
   SG::WriteDecorHandle<xAOD::JetContainer, float> decCutMHigh(m_decCutMHighKey);
   SG::WriteDecorHandle<xAOD::JetContainer, float> decCutD2(m_decCutD2Key);
   SG::WriteDecorHandle<xAOD::JetContainer, float> decCutScore(m_decCutScoreKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decValidJetContent(m_decValidJetContentKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decValidEventContent(m_decValidEventContentKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decPassNtrk(m_decPassNtrkKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decCutNtrk(m_decCutNtrkKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decAccept(m_decAcceptKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decValidKinRange(m_decValidKinRangeKey);
 
-  /// Decorate values
-  decCutMLow(jet) = cut_mass_low;
-  decCutMHigh(jet) = cut_mass_high;
-  decCutD2(jet) = cut_d2;
-  decCutScore(jet) = cut_score;
+  /// Create asg::AcceptData object
+  asg::AcceptData acceptData( &m_acceptInfo );
 
-  /// Evaluate the cut criteria on mass and d2
-  ATH_MSG_VERBOSE( "Cut Values : MassWindow = [" << cut_mass_low << "," << cut_mass_high << "], D2Cut = " << cut_d2 );
-  ATH_MSG_VERBOSE( "Cut Values : JetMass = " << jet_mass << ", D2 = " << jet_d2 );
-  ATH_MSG_VERBOSE( "Cut Values : score = " << jet_score);
+  /// Reset the AcceptData cut results
+  ATH_CHECK( resetCuts( acceptData ) );
 
-  if ( jet_mass >= cut_mass_low ) acceptData.setCutResult( "PassMassLow", true );
+  // compute JSS variables
+  decorateJSSRatios(jets);
 
-  if ( jet_mass <= cut_mass_high ) acceptData.setCutResult( "PassMassHigh", true );
+  // loop over jets
+  for(const xAOD::Jet* jet : jets){
 
-  if ( jet_d2 < cut_d2 ) acceptData.setCutResult( "PassD2", true );
+    /// Check basic kinematic selection
+    bool pass_kin_range = passKinRange(*jet);
+    decValidKinRange(*jet) = pass_kin_range;
 
-  if ( jet_score > cut_score ) acceptData.setCutResult( "PassScore", true );
+    /// Get the relevant attributes of the jet
+    /// Mass and pt - note that this will depend on the configuration of the calibration used
+    float jet_pt   = jet -> pt()/1000.0;
+    float jet_mass = jet -> m()/1000.0;
 
-  decPassMass(jet) = acceptData.getCutResult( "PassMassLow" ) && acceptData.getCutResult( "PassMassHigh" );
-  decPassD2(jet) = acceptData.getCutResult( "PassD2" );
-  decPassScore(jet) = acceptData.getCutResult( "PassScore" );
+    /// Get D2 value
+    static const SG::AuxElement::ConstAccessor<float> D2("D2");
+    float jet_d2 = D2(*jet);
 
-  bool passCuts = acceptData.getCutResult( "PassMassLow" ) && acceptData.getCutResult( "PassMassHigh" );
-  passCuts = passCuts && acceptData.getCutResult( "PassD2" );
+    /// Get Score value
+    static const SG::AuxElement::ConstAccessor<float> Score(m_decorationName + "_ConstScore");
+    float jet_score = m_useScore ? Score(*jet) : -99;
 
-  /// Check if it's a smooth three-variable tagger (ntrk)
-  if ( m_useNtrk ) {
+    /// Evaluate the values of the upper and lower mass bounds and the d2 cut
+    float cut_mass_low (-99), cut_mass_high (-99), cut_d2 (-99);
+    if(!m_useScore){
+      cut_mass_low  = m_funcMassCutLow ->Eval(jet_pt);
+      cut_mass_high = m_funcMassCutHigh->Eval(jet_pt);
+      cut_d2        = m_funcD2Cut      ->Eval(jet_pt);
+    }
 
-    float cut_ntrk = m_funcNtrkCut->Eval(jet_pt);
-
-    /// Decorate Ntrk cut value
-
-    /// Create WriteDecorHandles
-    SG::WriteDecorHandle<xAOD::JetContainer, char> decValidJetContent(m_decValidJetContentKey);
-    SG::WriteDecorHandle<xAOD::JetContainer, char> decValidEventContent(m_decValidEventContentKey);
-    SG::WriteDecorHandle<xAOD::JetContainer, char> decPassNtrk(m_decPassNtrkKey);
-    SG::WriteDecorHandle<xAOD::JetContainer, float> decCutNtrk(m_decCutNtrkKey);
+    /// Evaluate the values of the lower score cut
+    float cut_score = m_useScore ? m_funcScoreCut -> Eval(jet_pt) : -99;
 
     /// Decorate values
-    decCutNtrk(jet) = cut_ntrk;
+    decCutMLow(*jet) = cut_mass_low;
+    decCutMHigh(*jet) = cut_mass_high;
+    decCutD2(*jet) = cut_d2;
+    decCutScore(*jet) = cut_score;
 
-    int pv_location = findPV();
+    /// Evaluate the cut criteria on mass and d2
+    ATH_MSG_DEBUG( "Cut Values : MassWindow = [" << cut_mass_low << "," << cut_mass_high << "], D2Cut = " << cut_d2 );
+    ATH_MSG_DEBUG( "Cut Values : JetMass = " << jet_mass << ", D2 = " << jet_d2 );
+    ATH_MSG_DEBUG( "Cut Values : score = " << jet_score);
 
-    if(pv_location != -1){
-      int jet_ntrk = GetUnGroomTracks(jet, pv_location);
-      if(jet_ntrk>=0){
-        if ( jet_ntrk < cut_ntrk ) acceptData.setCutResult( "PassNtrk", true );
-        decPassNtrk(jet) = acceptData.getCutResult( "PassNtrk" );
-        passCuts = passCuts && acceptData.getCutResult( "PassNtrk" );
-      }
-      else{
-        acceptData.setCutResult( "ValidJetContent", false );
-        decValidJetContent(jet) = false;
-        return StatusCode::FAILURE;
-      }
-    }
-    else {
-      acceptData.setCutResult( "ValidEventContent", false );
-    }
+    if ( jet_mass >= cut_mass_low ) acceptData.setCutResult( "PassMassLow", true );
 
-    decValidJetContent(jet) = acceptData.getCutResult( "ValidJetContent" );
-    decValidEventContent(jet) = acceptData.getCutResult( "ValidEventContent" );
+    if ( jet_mass <= cut_mass_high ) acceptData.setCutResult( "PassMassHigh", true );
 
-  }
+    if ( jet_d2 < cut_d2 ) acceptData.setCutResult( "PassD2", true );
 
-  /// check if it is a 1D score tagger
-  if(m_useScore){
-    passCuts = acceptData.getCutResult( "PassScore" );
-  }
+    if ( jet_score > cut_score ) acceptData.setCutResult( "PassScore", true );
 
-  /// Decorate jet with tagging summary
-  decTagged(jet) = passCuts;
+    decPassMass(*jet) = acceptData.getCutResult( "PassMassLow" ) && acceptData.getCutResult( "PassMassHigh" );
+    decPassD2(*jet) = acceptData.getCutResult( "PassD2" );
+    decPassScore(*jet) = acceptData.getCutResult( "PassScore" );
 
-  /// Get enum to decorate acceptData state if only using 2-var tagger
-  TagResult::TypeEnum myCutResultForSF = TagResult::UNKNOWN;
-  if ( !m_useNtrk && !m_useScore ) {
-    /// Pass mass cut
-    if ( acceptData.getCutResult("PassMassLow") && acceptData.getCutResult("PassMassHigh") ) {
-      if ( acceptData.getCutResult("PassD2") ) {
-        myCutResultForSF = TagResult::passMpassD2_2Var;
+    bool passCuts = acceptData.getCutResult( "PassMassLow" ) && acceptData.getCutResult( "PassMassHigh" );
+    passCuts = passCuts && acceptData.getCutResult( "PassD2" );
+
+    /// Check if it's a smooth three-variable tagger (ntrk)
+    if ( m_useNtrk ) {
+
+      float cut_ntrk = m_funcNtrkCut->Eval(jet_pt);
+
+      /// Decorate Ntrk cut value
+
+      /// Decorate values
+      decCutNtrk(*jet) = cut_ntrk;
+
+      int pv_location = findPV();
+
+      if(pv_location != -1){
+        int jet_ntrk = GetUnGroomTracks(*jet, pv_location);
+        if(jet_ntrk>=0){
+          if ( jet_ntrk < cut_ntrk ) acceptData.setCutResult( "PassNtrk", true );
+          decPassNtrk(*jet) = acceptData.getCutResult( "PassNtrk" );
+          passCuts = passCuts && acceptData.getCutResult( "PassNtrk" );
+        }
+        else{
+          acceptData.setCutResult( "ValidJetContent", false );
+          decValidJetContent(*jet) = false;
+          return StatusCode::FAILURE;
+        }
       }
       else {
-        myCutResultForSF = TagResult::passMfailD2_2Var;
+        acceptData.setCutResult( "ValidEventContent", false );
       }
+
+      decValidJetContent(*jet) = acceptData.getCutResult( "ValidJetContent" );
+      decValidEventContent(*jet) = acceptData.getCutResult( "ValidEventContent" );
+
     }
-    /// Fail mass cut
-    else {
-      if ( acceptData.getCutResult("PassD2") ) {
-        myCutResultForSF = TagResult::failMpassD2_2Var;
+
+    /// check if it is a 1D score tagger
+    if(m_useScore){
+      passCuts = acceptData.getCutResult( "PassScore" );
+    }
+
+    /// Decorate jet with tagging summary
+    decTagged(*jet) = passCuts;
+
+    /// Get enum to decorate acceptData state if only using 2-var tagger
+    TagResult::TypeEnum myCutResultForSF = TagResult::UNKNOWN;
+    if ( !m_useNtrk && !m_useScore ) {
+      /// Pass mass cut
+      if ( acceptData.getCutResult("PassMassLow") && acceptData.getCutResult("PassMassHigh") ) {
+        if ( acceptData.getCutResult("PassD2") ) {
+          myCutResultForSF = TagResult::passMpassD2_2Var;
+        }
+        else {
+          myCutResultForSF = TagResult::passMfailD2_2Var;
+        }
       }
+      /// Fail mass cut
       else {
-        myCutResultForSF = TagResult::failMfailD2_2Var;
+        if ( acceptData.getCutResult("PassD2") ) {
+          myCutResultForSF = TagResult::failMpassD2_2Var;
+        }
+        else {
+          myCutResultForSF = TagResult::failMfailD2_2Var;
+        }
       }
     }
-  }
 
-  /// Get SF weight
-  ATH_CHECK( getWeight( jet, (bool)acceptData, acceptData ) );
+    /// Get SF weight
+    ATH_CHECK( getWeight( *jet, (bool)acceptData, acceptData ) );
 
-  if ( m_calcSF ) {
+    if ( m_calcSF ) {
 
-    /// Create WriteDecorHandles
-    SG::WriteDecorHandle<xAOD::JetContainer, float> decAccept(m_decAcceptKey);
+      /// Decorate values
+      decAccept(*jet) = myCutResultForSF;
 
-    /// Decorate values
-    decAccept(jet) = myCutResultForSF;
+    }
 
   }
 

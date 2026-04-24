@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -86,7 +86,7 @@ namespace LArSamples
       bool add(const Residual& residual) { m_residuals.push_back(residual); return true; }
 
       bool medianVars(TVectorD& medians, TVectorD& widths) const;
-      Residuals* truncate(double nWidthsRes, double nWidthsTime = -1, unsigned int nMax = 0) const;
+      std::unique_ptr<Residuals> truncate(double nWidthsRes, double nWidthsTime = -1, unsigned int nMax = 0) const;
 
       ResidualCalculator* calculator(bool weigh = false) const;
       
@@ -125,7 +125,7 @@ namespace LArSamples
 
       bool append(const ResidualCalculator& other);
 
-      ShapeErrorData* shapeErrorData() const;
+      std::unique_ptr<ShapeErrorData> shapeErrorData() const;
       TString description() const;
       
       int run(unsigned int i) const { return m_runs[i]; }

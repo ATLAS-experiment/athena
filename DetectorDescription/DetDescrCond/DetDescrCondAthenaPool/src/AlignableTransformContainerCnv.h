@@ -31,7 +31,7 @@ public:
     AlignableTransformContainerCnv (ISvcLocator* svcloc) : AlignableTransformContainerCnvBase(svcloc) {}
 protected:
     virtual AlignableTransform_PERS*   createPersistent (AlignableTransform_TRANS* transObj);
-    virtual AlignableTransform_TRANS*  createTransient ();
+    virtual AlignableTransform_TRANS*  createTransient (const Token* token);
 };
 
 #endif

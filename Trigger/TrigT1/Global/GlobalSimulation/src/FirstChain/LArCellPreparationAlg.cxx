@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 /*
@@ -12,6 +12,7 @@
 
 #include "PathResolver/PathResolver.h"
 #include "CaloEvent/CaloCell.h"
+#include "CaloIdentifier/CaloIdManager.h"
 #include "xAODEventInfo/EventInfo.h"
 
 #include "TMath.h"
@@ -32,6 +33,9 @@ namespace GlobalSim {
     CHECK(m_caloCellsKey.initialize());
     CHECK(m_LArCellContainerKey.initialize());
 
+     // retrieve ID helper
+    ATH_CHECK(detStore()->retrieve(m_calocell_id, "CaloCell_ID"));
+    
     ATH_CHECK(m_totalNoiseKey.initialize());
 
     ATH_MSG_INFO("Active energy encoding scheme for LAr cells is " << m_numberOfEnergyBits.value() << " energy bits with " << m_valueLSB.value() << " MeV for the least significant bit and a gain factor of " << m_valueGainFactor.value());
@@ -150,7 +154,7 @@ namespace GlobalSim {
     for(const auto *cell: cells){
 
         int cell_id = (cell->ID().get_identifier32()).get_compact();
-
+	
         auto gblLArCell_itr = m_gblLArCellMap.find(cell_id);
         if (gblLArCell_itr == m_gblLArCellMap.end()) continue;
 
@@ -169,6 +173,7 @@ namespace GlobalSim {
         gblLArCell.setEnergy(gep_energy.first, std::move(gep_energy.second));
         gblLArCell.setSigma(sigma);
         gblLArCell.setPosition(cell->eta(), cell->phi());
+	gblLArCell.setSize(cell->caloDDE()->deta(), cell->caloDDE()->dphi());
         gblLArCell.setSampling(cell->caloDDE()->getSampling());
         gblLArCell.setLayer(cell->caloDDE()->getLayer());
 
@@ -199,9 +204,11 @@ namespace GlobalSim {
             inOverflow = true;
         }
 
-        for (auto& gblLArCell : cells)
-            gblLArCellContainer->push_back(std::move(gblLArCell));
-
+        for (auto& gblLArCell : cells){
+	    IdentifierHash hashId=m_calocell_id->calo_cell_hash(static_cast<Identifier>(gblLArCell.getID()));
+            gblLArCellContainer->push_back(std::move(gblLArCell),hashId);
+	}
+	
         gblLArCellContainer->setFeb2Flags(feb2Name, inOverflow, inError);
     }
     ATH_MSG_DEBUG("Global is receiving a total of " << gblLArCellContainer->size() << " LAr cells in this event");

@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "egammaUtils/egammaCopyTrackParticleInfo.h"
@@ -70,7 +70,10 @@ egammaCopyTrackParticleInfo::copy(xAOD::TrackParticle& created,
 
   if (toCopy.doHGTD) {
     created.setHasValidTime(original.hasValidTime());
-    created.setTime(original.time());
+    static const SG::AuxElement::Accessor<float> time("time");
+    created.setTime(time(original));
+    static const SG::AuxElement::Accessor<float> timeRes("timeResolution");
+    created.setTimeResolution(timeRes(original));
   }
 
   if (toCopy.isRefitted) {

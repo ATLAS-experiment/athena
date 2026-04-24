@@ -51,7 +51,7 @@ public:
 protected:
   
    virtual TrigEFBjetContainer_PERS *createPersistent( TrigEFBjetContainer *transObj);
-   virtual TrigEFBjetContainer      *createTransient();
+   virtual TrigEFBjetContainer      *createTransient(const Token* token);
    
   private:
    TrigEFBjetContainerCnv_impl* m_impl;   

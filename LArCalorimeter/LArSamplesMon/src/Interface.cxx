@@ -111,9 +111,9 @@ unsigned int Interface::size() const
 }
 
 
-const History* Interface::getCellHistory(unsigned int i) const 
+std::unique_ptr<const History> Interface::getCellHistory(unsigned int i) const
 { 
-  const History* history = accessor().getCellHistory(i);
+  std::unique_ptr<const History> history = accessor().getCellHistory(i);
   if (history) {
     history->setShapeErrorGetter(m_shapeErrorGetter);
     history->setInterface(this);
@@ -121,9 +121,9 @@ const History* Interface::getCellHistory(unsigned int i) const
   return history;
 }
 
-const History* Interface::getSCHistory(unsigned int i) const 
+std::unique_ptr<const History> Interface::getSCHistory(unsigned int i) const
 { 
-  const History* history = accessor().getSCHistory(i);
+  std::unique_ptr<const History> history = accessor().getSCHistory(i);
   if (history) {
     history->setInterface(this);
   }
@@ -131,7 +131,7 @@ const History* Interface::getSCHistory(unsigned int i) const
 }
 
 
-const History* Interface::cellHistory(unsigned int i) const 
+const History* Interface::cellHistory(unsigned int i) const
 { 
   const History* history = accessor().cellHistory(i);
   if (history) {
@@ -142,7 +142,7 @@ const History* Interface::cellHistory(unsigned int i) const
 }
 
 
-const CellInfo* Interface::getCellInfo(unsigned int i) const 
+std::unique_ptr<const CellInfo> Interface::getCellInfo(unsigned int i) const
 { 
   return accessor().getCellInfo(i);
 }
@@ -328,7 +328,7 @@ bool Interface::filterAndMerge(const TString& listFileName, const TString& outFi
   if (!mt){
     return 0;
   } 
-  std::vector<MultiTreeAccessor*> filtered_mts = mt->filterComponents(filterList, tweak);
+  std::vector<std::unique_ptr<MultiTreeAccessor> > filtered_mts = mt->filterComponents(filterList, tweak);
   if (filtered_mts.size() != filterList.size()){
     return 0;
   } 
@@ -342,7 +342,6 @@ bool Interface::filterAndMerge(const TString& listFileName, const TString& outFi
       files.push_back(((const TreeAccessor*)&filtered_mts[f]->accessor(i))->fileName());
       cout << "Added " << files.back() << endl;
     }
-    delete filtered_mts[f];
     std::unique_ptr<const Interface> filtered_multi = open(files);
     //
     std::vector<const Interface*> justOne { filtered_multi.get() };
@@ -408,7 +407,7 @@ std::unique_ptr<Interface> Interface::refit(const TString& newFileName, Chi2Para
 HistoryIterator Interface::findEtaPhi(CaloId calo, short layer, short iEta, short iPhi, short region) const
 {
   for (unsigned int i = 0; i < nChannels(); i++) {
-    const CellInfo* info = cellInfo(i);
+    std::unique_ptr<const CellInfo> info = cellInfo(i);
     if (!info) continue;
     if (!Id::matchCalo(info->calo(), calo)) continue;
     if (info->layer()  != layer) continue;
@@ -425,7 +424,7 @@ HistoryIterator Interface::findEtaPhi(CaloId calo, short layer, short iEta, shor
 HistoryIterator Interface::findFebChannel(CaloId calo, short feb, short channel) const
 {
   for (unsigned int i = 0; i < nChannels(); i++) {
-    const CellInfo* info = cellInfo(i);
+    std::unique_ptr<const CellInfo> info = cellInfo(i);
     if (!info) continue;
     if (!Id::matchCalo(info->calo(), calo)) continue;
     if (info->feb()     != feb)     continue;
@@ -440,7 +439,7 @@ HistoryIterator Interface::findFebChannel(CaloId calo, short feb, short channel)
 HistoryIterator Interface::findFTSlotChannel(CaloId calo, short ft, short slot, short channel) const
 {
   for (unsigned int i = 0; i < nChannels(); i++) {
-    const CellInfo* info = cellInfo(i);
+    std::unique_ptr<const CellInfo> info = cellInfo(i);
     if (!info) continue;
     if (!Id::matchCalo(info->calo(), calo))    continue;
     if (ft >= 0      && info->feedThrough() != ft)      continue;
@@ -724,12 +723,11 @@ bool Interface::ShowStats(const TString& varList, const TString& sel, bool withE
 bool Interface::neighbors(const CellInfo& cell, double dRCut, std::vector<unsigned int>& hashes) const
 {
   for (unsigned int i = 0; i < nChannels(); i++) {
-    const CellInfo* otherCell = cellInfo(i);
+    std::unique_ptr<const CellInfo> otherCell = cellInfo(i);
     if (!otherCell) continue;
-    if (cell.position().DeltaR(otherCell->position()) > dRCut) { delete otherCell; continue; }
+    if (cell.position().DeltaR(otherCell->position()) > dRCut) continue;
     //cout << "Adding hash = " << i << " " << otherCell->location(3) << endl;
     hashes.push_back(i);
-    delete otherCell;
   }  
   return true;
 }
@@ -737,7 +735,7 @@ bool Interface::neighbors(const CellInfo& cell, double dRCut, std::vector<unsign
 
 bool Interface::firstNeighbors(unsigned int hash, std::vector<unsigned int>& hashes, short layer) const
 {
-  const CellInfo* cell = cellInfo(hash);
+  std::unique_ptr<const CellInfo> cell = cellInfo(hash);
   if (!cell) return true;
   if (!Id::matchCalo(cell->calo(), HEC)) return false; // for now!  
   if (layer < 0) return true;
@@ -748,23 +746,23 @@ bool Interface::firstNeighbors(unsigned int hash, std::vector<unsigned int>& has
     cache.first = true;
   }
   for (unsigned int h : cache.second) {
-    const CellInfo* info = cellInfo(h);
+    std::unique_ptr<const CellInfo> info = cellInfo(h);
     if (!info) continue;
     if (info->layer() == layer) hashes.push_back(h);
-    delete info;
   }
   return true;
 }
 
 
-bool Interface::data(const std::vector<unsigned int>& hashes,const EventData& event, std::vector<const Data*>& data) const
+bool Interface::data(const std::vector<unsigned int>& hashes,const EventData& event,
+                     std::vector<std::unique_ptr<const Data> >& data) const
 {
   if (hashes != m_neighborHistoryPos) {
     m_neighborHistories.clear();
     m_neighborHistoryPos.clear();
     for (std::vector<unsigned int>::const_iterator hash = hashes.begin(); hash != hashes.end(); ++hash) {
-      const History* history = AbsLArCells::newCellHistory(*hash);// bypasses history caching in order not to invalidate cell
-      m_neighborHistories.emplace_back(history);
+      std::unique_ptr<const History> history = AbsLArCells::newCellHistory(*hash);// bypasses history caching in order not to invalidate cell
+      m_neighborHistories.emplace_back(std::move(history));
       m_neighborHistoryPos.push_back(*hash);
     }
   }
@@ -772,7 +770,7 @@ bool Interface::data(const std::vector<unsigned int>& hashes,const EventData& ev
   for (const std::unique_ptr<const History>& history : m_neighborHistories) {
     if (!history) continue;
     const Data* dataForEvent = history->data_for_event(event);
-    if (dataForEvent) data.push_back(new Data(*dataForEvent));
+    if (dataForEvent) data.push_back(std::make_unique<Data>(*dataForEvent));
   }
   return true;
 }

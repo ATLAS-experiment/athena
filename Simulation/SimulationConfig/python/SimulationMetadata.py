@@ -3,6 +3,7 @@
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.Enums import FlagEnum, ProductionStep
 from AthenaKernel.EventIdOverrideConfig import getMinMaxRunNumbers
+from SimulationConfig.SimEnums import InDetParameterization
 
 folderName = "/Simulation/Parameters"
 
@@ -34,6 +35,9 @@ def collectSimulationMetadata(flags):
                 continue
             if "FastCalo.ParamsInputFilename" in flag and not flags.Sim.ISF.Simulator.usesFastCaloSim():
                 # This flag is only written to metadata when FastCaloSim/FastCaloGAN is enabled
+                continue
+            if "InDetParameterization" in flag and flags.Sim.InDetParameterization is not InDetParameterization.FatrasG4:
+                # This flag is only written to metadata when FatrasG4 is enabled
                 continue
             if "SimplifiedGeoPath" in flag and not flags.Sim.SimplifiedGeoPath:
                 # This flag is only written to metadata in case the FastCaloSim simplified geometry path is set

@@ -214,9 +214,7 @@ def sct_conf_defects(d, i, runNumber):
 
 def sct_perlb_defects(d, i, runNumber):
     pairs = [('InnerDetector/SCT/Summary/SCT_LinksWithLinkLevelErrorsVsLbs',
-              'SCT_PERIOD_ERR_GT40', lambda _: _ > 80),
-             ('InnerDetector/SCT/Summary/SCT_LinksWithRODLevelErrorsVsLbs',
-              'SCT_ROD_OUT', lambda _: _ >= 1)]
+              'SCT_PERIOD_ERR_GT40', lambda _: _ > 80)]
 
     rv = []
     bad_lbs = {}

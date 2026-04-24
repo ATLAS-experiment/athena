@@ -73,8 +73,6 @@ class LArG4SDTool : public SensitiveDetectorBase
   const LArHEC_ID*      m_larHecID{nullptr};
   const CaloDM_ID*      m_caloDmID{nullptr};
 
-  /// Helper function for matching strings with wildcards
-  bool match(const char *first, const char * second) const;
 
 };
 

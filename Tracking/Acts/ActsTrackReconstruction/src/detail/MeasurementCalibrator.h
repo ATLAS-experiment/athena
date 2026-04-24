@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MEASUREMENTCALIBRATOR2_H
@@ -14,7 +14,7 @@
 #include "xAODInDetMeasurement/HGTDCluster.h"
 
 #include "Acts/EventData/MultiTrajectory.hpp"
-#include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/EventData/BoundTrackParameters.hpp"
 #include "Acts/Geometry/GeometryIdentifier.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Surfaces/SurfaceBounds.hpp"
@@ -105,6 +105,7 @@ namespace ActsTrk {
       using PixelCalibrator = Acts::Delegate<
          std::pair<PixelPos, PixelCov>(const Acts::GeometryContext&,
                                        const Acts::CalibrationContext&,
+                                       const Acts::Surface&,
                                        const xAOD::PixelCluster &,
                                        const Acts::BoundTrackParameters &)>;
 
@@ -113,6 +114,7 @@ namespace ActsTrk {
       using StripCalibrator = Acts::Delegate<
          std::pair<StripPos, StripCov>(const Acts::GeometryContext&,
                                        const Acts::CalibrationContext&,
+                                       const Acts::Surface&,
                                        const xAOD::StripCluster &,
                                        const Acts::BoundTrackParameters &)>;
       using hgtdPos = xAOD::MeasVector<3>;
@@ -120,6 +122,7 @@ namespace ActsTrk {
       using HGTDCalibrator = Acts::Delegate<
          std::pair<hgtdPos, hgtdCov>(const Acts::GeometryContext&,
                                        const Acts::CalibrationContext&,
+                                       const Acts::Surface&,
                                        const xAOD::HGTDCluster &,
                                        const Acts::BoundTrackParameters &)>;
 
@@ -177,6 +180,7 @@ namespace ActsTrk {
       std::pair<xAOD::MeasVector<Dim>, xAOD::MeasMatrix<Dim>>
       passthrough([[maybe_unused]] const Acts::GeometryContext& gctx,
                   [[maybe_unused]] const Acts::CalibrationContext& cctx,
+                  [[maybe_unused]] const Acts::Surface& surface,
                   const Cluster &cluster,
                   const Acts::BoundTrackParameters &) const
       {

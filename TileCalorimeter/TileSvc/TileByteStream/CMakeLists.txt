@@ -58,6 +58,12 @@ atlas_add_test( TileMuRcvContByteStreamRead_test
    PROPERTIES TIMEOUT 500
    POST_EXEC_SCRIPT noerror.sh )
 
+
+atlas_add_test( TileRawChannel2Bytes5_test
+                SOURCES test/TileRawChannel2Bytes5_test.cxx
+                LINK_LIBRARIES TileByteStreamLib 
+                POST_EXEC_SCRIPT nopost.sh)
+                
 atlas_add_test( TileRawChannel2Bytes4_test
                 SOURCES test/TileRawChannel2Bytes4_test.cxx
                 LINK_LIBRARIES TileByteStreamLib )

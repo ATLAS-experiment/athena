@@ -25,7 +25,7 @@ protected:
 public:
   PRD_MultiTruthCollectionCnv(ISvcLocator*);
 protected:
-  virtual PRD_MultiTruthCollection* createTransient();
+  virtual PRD_MultiTruthCollection* createTransient(const Token* token);
   virtual PRD_MultiTruthCollectionPERS* createPersistent(PRD_MultiTruthCollection*);
 private:
   PRD_MultiTruthCollectionCnv_p1 m_converter_p1;

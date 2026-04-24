@@ -44,6 +44,7 @@
 #include <AsgAnalysisAlgorithms/PDFinfoAlg.h>
 #include <AsgAnalysisAlgorithms/PDFReweightAlg.h>
 #include <AsgAnalysisAlgorithms/PMGTruthWeightAlg.h>
+#include <AsgAnalysisAlgorithms/RNtupleTreeMakerAlg.h>
 #include <AsgAnalysisAlgorithms/SysTruthWeightAlg.h>
 #include <AsgAnalysisAlgorithms/SysListDumperAlg.h>
 #include <AsgAnalysisAlgorithms/SystObjectLinkerAlg.h>
@@ -96,6 +97,7 @@ DECLARE_COMPONENT (CP::PileupReweightingAlg)
 DECLARE_COMPONENT (CP::PDFinfoAlg)
 DECLARE_COMPONENT (CP::PDFReweightAlg)
 DECLARE_COMPONENT (CP::PMGTruthWeightAlg)
+DECLARE_COMPONENT (CP::RNtupleTreeMakerAlg)
 DECLARE_COMPONENT (CP::SysTruthWeightAlg)
 DECLARE_COMPONENT (CP::SysListDumperAlg)
 DECLARE_COMPONENT (CP::SystObjectLinkerAlg)

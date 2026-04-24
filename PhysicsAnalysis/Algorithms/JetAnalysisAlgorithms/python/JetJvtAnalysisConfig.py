@@ -4,7 +4,7 @@
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
-
+from AthenaCommon.Logging import logging
 
 class JetJvtAnalysisConfig (ConfigBlock) :
     """the ConfigBlock for the JVT sequence"""
@@ -13,6 +13,8 @@ class JetJvtAnalysisConfig (ConfigBlock) :
         super (JetJvtAnalysisConfig, self).__init__ ()
         self.setBlockName('JVT')
         self.addDependency('OverlapRemoval', required=False)
+        self.addDependency('EventSelection', required=False)
+        self.addDependency('EventSelectionMerger', required=False)
         self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.")
@@ -27,6 +29,9 @@ class JetJvtAnalysisConfig (ConfigBlock) :
         return self.containerName + self.postfix
 
     def makeAlgs (self, config) :
+
+        log = logging.getLogger('JetJvtAnalysisConfig')
+        log.warning("The JVT block is deprecated and its functionality has been moved to the (F)JVTWorkingPoint blocks.")
 
         if config.dataType() is DataType.Data: return
 

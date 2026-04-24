@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
@@ -7,7 +7,6 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "StoreGate/StoreGateSvc.h"
-#include "StoreGate/DataHandle.h"
 #include "CSC_Digitization/CscDigitizationTool.h"
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandFlat.h"
@@ -268,8 +267,7 @@ FillCollectionWithNewDigitEDM(csc_newmap& data_SampleMap,
       ATH_MSG_ERROR ( "Unable to get CSC hash id from CSC Digit collection "
                       << "context begin_index = " << cscContext.begin_index()
                       << " context end_index  = " << cscContext.end_index()
-                      << " the identifier is " );
-      elementId.show();
+                      << " the identifier is \n" << elementId);
     }
 
 
@@ -412,8 +410,7 @@ FillCollectionWithOldDigitEDM(csc_map& data_map, std::map<IdentifierHash,deposit
       ATH_MSG_ERROR ( "Unable to get CSC hash id from CSC Digit collection "
                       << "context begin_index = " << cscContext.begin_index()
                       << " context end_index  = " << cscContext.end_index()
-                      << " the identifier is " );
-      elementId.show();
+                      << " the identifier is \n"<< elementId );
     }
 
     if (prevId != elementId) {

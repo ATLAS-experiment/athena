@@ -19,7 +19,7 @@ TrigL2BjetContainer_PERS * TrigL2BjetContainerCnv::createPersistent( TrigL2BjetC
 }
 
 //* createTransient *//
-TrigL2BjetContainer * TrigL2BjetContainerCnv::createTransient() {
+TrigL2BjetContainer * TrigL2BjetContainerCnv::createTransient(const Token* token) {
 
   MsgStream mlog(msgSvc(), "TrigL2BjetContainerConverter" );
   
@@ -31,26 +31,26 @@ TrigL2BjetContainer * TrigL2BjetContainerCnv::createTransient() {
   static const pool::Guid p0_guid( "B4842D15-7BFB-476E-8C68-F2F38E588380" );
   static const pool::Guid p0_guid2( "F6ACED03-42F3-4192-A4E2-47FA9A9B9D49" );
   
-  if( compareClassGuid( p3_guid ) ){
-         std::unique_ptr< TrigL2BjetContainer_p3 > col_vect( poolReadObject< TrigL2BjetContainer_p3 >() );
+  if( compareClassGuid(token,  p3_guid ) ){
+         std::unique_ptr< TrigL2BjetContainer_p3 > col_vect( poolReadObject< TrigL2BjetContainer_p3 >(token) );
          //         std::cout << "Reading IMFC p3" << std::endl;
          return m_converter.createTransient( col_vect.get(), mlog ) ;
 
-  } else if ( compareClassGuid( tlp2_guid ) ) {
+  } else if ( compareClassGuid(token,  tlp2_guid ) ) {
     
-         std::unique_ptr< TrigL2BjetContainer_tlp2 > col_vect( poolReadObject< TrigL2BjetContainer_tlp2 >() );
+         std::unique_ptr< TrigL2BjetContainer_tlp2 > col_vect( poolReadObject< TrigL2BjetContainer_tlp2 >(token) );
          //  std::cout << "Reading IMFC tlp2" << std::endl;
          return m_converter2.createTransient( col_vect.get(), mlog );
 
-  } else if ( compareClassGuid( tlp1_guid ) ) {
+  } else if ( compareClassGuid(token,  tlp1_guid ) ) {
     
-         std::unique_ptr< TrigL2BjetContainer_tlp1 > col_vect( poolReadObject< TrigL2BjetContainer_tlp1 >() );
+         std::unique_ptr< TrigL2BjetContainer_tlp1 > col_vect( poolReadObject< TrigL2BjetContainer_tlp1 >(token) );
          //  std::cout << "Reading IMFC tlp1" << std::endl;
          return m_converter1.createTransient( col_vect.get(), mlog );
     
-  } else if( compareClassGuid( p0_guid ) || compareClassGuid( p0_guid2 ) ) {
+  } else if( compareClassGuid(token,  p0_guid ) || compareClassGuid(token,  p0_guid2 ) ) {
     
-    return poolReadObject< TrigL2BjetContainer >();
+    return poolReadObject< TrigL2BjetContainer >(token);
     
   } else  throw std::runtime_error( "Unsupported persistent version of TrigL2BjetContainer" );
   

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGSTORAGEDEF_MERGEPACKS
@@ -18,12 +18,6 @@
 #include "TrigStorageDefinitions/TrigBphysicsEvent.h"
 
 
-#define TYPEMAPCLASS(name)\
-struct class_##name{\
-  typedef TypeInfo_##name map;\
-  static const std::string package_name;\
-};
-
 TYPEMAPCLASS(TrigBphysicsEvent)
 TYPEMAPCLASS(TrigMonitoringEvent)
 TYPEMAPCLASS(TrigTopoEvent)
@@ -37,18 +31,17 @@ TYPEMAPCLASS(TrigSteeringEvent)
 
    
 struct TypeInfo_EDM {
-typedef  HLT::TypeInformation::newlist
-::add<class_TrigBphysicsEvent>    ::go
-::add<class_TrigMonitoringEvent>  ::go
-::add<class_TrigCombinedEvent>    ::go
-::add<class_TrigCaloEvent>        ::go
-::add<class_TrigTopoEvent>        ::go
-::add<class_TrigParticle>         ::go
-::add<class_TrigMissingEtEvent>   ::go
-::add<class_TrigMuonEvent>        ::go
-::add<class_TrigInDetEvent>       ::go
-::add<class_TrigSteeringEvent>    ::go
-::done map;
+  using map = HLT::TypeInformation::List<>
+    ::join<class_TrigBphysicsEvent::map>
+    ::join<class_TrigMonitoringEvent::map>
+    ::join<class_TrigCombinedEvent::map>
+    ::join<class_TrigCaloEvent::map>
+    ::join<class_TrigTopoEvent::map>
+    ::join<class_TrigParticle::map>
+    ::join<class_TrigMissingEtEvent::map>
+    ::join<class_TrigMuonEvent::map>
+    ::join<class_TrigInDetEvent::map>
+    ::join<class_TrigSteeringEvent::map>;
 };
 
 #endif

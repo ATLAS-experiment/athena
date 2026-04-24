@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: AuxStoreAccessorMacros.h 633587 2014-12-04 09:09:41Z ssnyder $
@@ -36,11 +36,11 @@
 #define AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(CL, TYPE, NAME, \
                                              SETTER)         \
    TYPE CL::NAME() const {                                   \
-      static const Accessor< TYPE > acc( #NAME );            \
+      static const SG::Accessor< TYPE > acc( #NAME );         \
       return acc( *this );                                   \
    }                                                         \
    void CL::SETTER( TYPE value ) {                           \
-      static const Accessor< TYPE > acc( #NAME );            \
+      static const SG::Accessor< TYPE > acc( #NAME );         \
       acc( *this ) = value;                                  \
       return;                                                \
    }
@@ -58,7 +58,7 @@
 ///
 #define AUXSTORE_PRIMITIVE_GETTER(CL, TYPE, NAME ) \
    TYPE CL::NAME() const {                         \
-      static const Accessor< TYPE > acc( #NAME );  \
+      static const SG::Accessor< TYPE > acc( #NAME );    \
       return acc( *this );                         \
    }
 
@@ -74,15 +74,52 @@
 /// @param NAME The name of the auxiliary variable
 /// @param SETTER The name of the "setter function"
 ///
-#define AUXSTORE_OBJECT_SETTER_AND_GETTER(CL, TYPE, NAME, SETTER) \
-   const TYPE& CL::NAME() const {                                 \
-      static const Accessor< TYPE > acc( #NAME );                 \
-      return acc( *this );                                        \
-   }                                                              \
-   void CL::SETTER( const TYPE& value ) {                         \
-      static const Accessor< TYPE > acc( #NAME );                 \
-      acc( *this ) = value;                                       \
-      return;                                                     \
+/// If TYPE is an instance of SG::JaggedVecElt<T>, then accessors will
+/// be generated handling jagged vector variables.  In that case, the
+/// read accessor will return type SG::ConstAccessor<T>::const_reference_type
+/// (which is the same as SG::ConstAccessor<T>::const_reference_type), and
+/// the write accessor will take type std::span<const T>.
+///
+/// If TYPE is an instance of SG::PackedLink<T>, then accessors will
+/// be generated handling packed link variables.  In that case, the
+/// read accessor will return type ElementLink<T>, and
+/// the write accessor will take type const ElementLink<T>&.
+///
+#define AUXSTORE_OBJECT_SETTER_AND_GETTER(CL, TYPE, NAME, SETTER)           \
+   AUXSTORE_OBJECT_SETTER_AND_GETTER_VARNAME(CL, TYPE, NAME, SETTER, NAME)
+
+
+/// Macro creating the accessors of complex auxiliary properties,
+/// allowing specifying the variable name.
+///
+/// This macro should be used in the same way as the
+/// AUXSTORE_PRIMITIVE_SETTER_AND_GETTER one. However in contrary to that
+/// one, it assumes that the type given to it is heavy enough that it should
+/// be passed around using constant references instead of by value.
+///
+/// @param CL The name of the xAOD class
+/// @param TYPE The (complex) type name
+/// @param NAME The name of the auxiliary variable
+/// @param SETTER The name of the "setter function"
+/// @param VARNAME The auxiliary variable name.
+///
+/// If TYPE is an instance of SG::JaggedVecElt<T>, then accessors will
+/// be generated handling jagged vector variables.  In that case, the
+/// read accessor will return type SG::ConstAccessor<T>::const_reference_type
+/// (which is the same as SG::ConstAccessor<T>::const_reference_type), and
+/// the write accessor will take type std::span<const T>.
+///
+/// If TYPE is an instance of SG::PackedLink<T>, then accessors will
+/// be generated handling packed link variables.  In that case, the
+/// read accessor will return type ElementLink<T>, and
+/// the write accessor will take type const ElementLink<T>&.
+///
+#define AUXSTORE_OBJECT_SETTER_AND_GETTER_VARNAME(CL, TYPE, NAME, SETTER, VARNAME) \
+   AUXSTORE_OBJECT_GETTER_VARNAME(CL, TYPE, NAME, VARNAME)                  \
+   void CL::SETTER( typename SG::Accessor< TYPE >::rhs_const_reference_type value ) { \
+      static const SG::Accessor< TYPE > acc( #VARNAME );                    \
+      acc( *this ) = value;                                                 \
+      return;                                                               \
    }
 
 
@@ -100,7 +137,7 @@
 ///
 # define AUXSTORE_OBJECT_MOVE(CL, TYPE, NAME, SETTER)             \
    void CL::SETTER( typename SG::AuxDataTraits<TYPE>::element_type&& value ) { \
-      static const Accessor< TYPE > acc( #NAME );                 \
+      static const SG::Accessor< TYPE > acc( #NAME );             \
       acc( *this ) = std::move(value);                            \
       return;                                                     \
    }
@@ -116,11 +153,44 @@
 /// @param TYPE The (complex) type name
 /// @param NAME The name of the auxiliary variable
 ///
+/// If TYPE is an instance of SG::JaggedVecElt<T>, then an accessor will
+/// be generated handling jagged vector variables, returning type
+/// SG::ConstAccessor<T>::const_reference_type (which is the same as
+/// SG::ConstAccessor<T>::const_reference_type).
+///
+/// If TYPE is an instance of SG::PackedLink<T>, then an accessor will
+/// be generated handling packed link variables, returning type
+/// ElementLink<T>.
+///
 #define AUXSTORE_OBJECT_GETTER(CL, TYPE, NAME )    \
-   const TYPE& CL::NAME() const {                  \
-      static const Accessor< TYPE > acc( #NAME );  \
-      return acc( *this );                         \
-   }
+   AUXSTORE_OBJECT_GETTER_VARNAME(CL, TYPE, NAME, NAME)
+
+/// Macro creating the reader function for a complex auxiliary property
+/// allowing specifying the variable name.
+///
+/// Just like AUXSTORE_OBJECT_SETTER_AND_GETTER, this macro also handles
+/// an auxiliary property that should be passed around using constant
+/// references.
+///
+/// @param CL The name of the xAOD class
+/// @param TYPE The (complex) type name
+/// @param NAME The name of the auxiliary variable
+/// @param VARNAME The auxiliary variable name.
+///
+/// If TYPE is an instance of SG::JaggedVecElt<T>, then an accessor will
+/// be generated handling jagged vector variables, returning type
+/// SG::ConstAccessor<T>::const_reference_type (which is the same as
+/// SG::ConstAccessor<T>::const_reference_type).
+///
+/// If TYPE is an instance of SG::PackedLink<T>, then an accessor will
+/// be generated handling packed link variables, returning type
+/// ElementLink<T>.
+///
+#define AUXSTORE_OBJECT_GETTER_VARNAME(CL, TYPE, NAME, VARNAME)             \
+   typename SG::ConstAccessor< TYPE >::const_reference_type CL::NAME() const { \
+      static const SG::ConstAccessor< TYPE > acc( #VARNAME );               \
+      return acc( *this );                                                  \
+   }                                                                        \
 
 /// Macro creating a getter function with a type conversion
 ///
@@ -139,7 +209,7 @@
 #define AUXSTORE_PRIMITIVE_GETTER_WITH_CAST(CL, PERSTYPE, TRANSTYPE,    \
                                             NAME)                       \
    TRANSTYPE CL::NAME() const {                                         \
-      static const Accessor< PERSTYPE > acc( #NAME );                   \
+      static const SG::Accessor< PERSTYPE > acc( #NAME );               \
       return static_cast< TRANSTYPE >( acc( *this ) );                  \
    }
 
@@ -160,7 +230,7 @@
 #define AUXSTORE_PRIMITIVE_SETTER_WITH_CAST(CL, PERSTYPE, TRANSTYPE,  \
                                             NAME, SETTER)             \
    void CL::SETTER( TRANSTYPE value ) {                               \
-      static const Accessor< PERSTYPE > acc( #NAME );                 \
+      static const SG::Accessor< PERSTYPE > acc( #NAME );             \
       acc( *this ) = static_cast< PERSTYPE >( value );                \
       return;                                                         \
    }

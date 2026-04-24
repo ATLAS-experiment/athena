@@ -1,16 +1,14 @@
 /*
- Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef MUONEFFICIENCYCORRECTIONS_UTILFUNCTIONS_H
 #define MUONEFFICIENCYCORRECTIONS_UTILFUNCTIONS_H
 
-#include <string>
-#include <vector>
-#include <functional>
-#include <memory>
+
 #include <TH1.h>
-#include <AsgTools/AsgTool.h>
+#include <string>
+#include <memory>
 
 namespace CP {
     /// Removes beginning and trailing white spaces from a string

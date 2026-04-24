@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "FPGATrackSimMergeOutputsAlg.h"
 #include "FPGATrackSimAlgorithms/FPGATrackSimOverlapRemovalTool.h"
@@ -49,18 +49,18 @@ StatusCode FPGATrackSimMergeOutputsAlg::initialize()
     if (!foundDP) { // only needed for one file
       m_dataprep_tree = (TTree*)(m_files[ifile]->Get("FPGATrackSimDataPrepTree"));
       if (m_dataprep_tree) {
-        if (m_dataprep_tree->GetEntries() > 0) {
-          foundDP = true;
-          m_dataprep = new FPGATrackSimLogicalEventInputHeader();
-          
-          TBranch *dpb = m_dataprep_tree->GetBranch("LogicalEventInputHeader_PostCluster");
-          if (!dpb) {
-            ATH_MSG_ERROR("Could not get LogicalEventInputHeader_PostCluster file " << m_inpaths[ifile]);
-            return StatusCode::FAILURE;
-          }
-          dpb->SetAddress(&m_dataprep);
-          m_dataprep_tree->SetBranchStatus("LogicalEventInputHeader_Pre*",0);      
-        }
+	if (m_dataprep_tree->GetEntries() > 0) {
+	  foundDP = true;
+	  m_dataprep = new FPGATrackSimLogicalEventInputHeader();
+	  
+	  TBranch *dpb = m_dataprep_tree->GetBranch("LogicalEventInputHeader_PostCluster");
+	  if (!dpb) {
+	    ATH_MSG_ERROR("Could not get LogicalEventInputHeader_PostCluster file " << m_inpaths[ifile]);
+	    return StatusCode::FAILURE;
+	  }
+	  dpb->SetAddress(&m_dataprep);
+	  m_dataprep_tree->SetBranchStatus("LogicalEventInputHeader_Pre*",0);      
+	}
       }
     }
 
@@ -71,21 +71,21 @@ StatusCode FPGATrackSimMergeOutputsAlg::initialize()
     for (unsigned iregion = 0; iregion < N; iregion++) {
       m_trees[ifile][iregion] = (TTree*)(m_files[ifile]->Get(Form("FPGATrackSimLogicalEventTree_reg%d",iregion)));
       if (!m_trees[ifile][iregion]) {
-        continue;
+	continue;
       }
       else if (regionsFound[iregion]) {
-        ATH_MSG_ERROR("Found two files with region number " << iregion << " and I do not know which one to use!");
-        return StatusCode::FAILURE;
+	ATH_MSG_ERROR("Found two files with region number " << iregion << " and I do not know which one to use!");
+	return StatusCode::FAILURE;
       }
       else {
-	      regionsFound[iregion] = true;
+	regionsFound[iregion] = true;
       }
 
       m_eventOutputHeaders[ifile][iregion] = new FPGATrackSimLogicalEventOutputHeader();
       TBranch *b = m_trees[ifile][iregion]->GetBranch("LogicalEventOutputHeader");
       if (!b) {
-	      ATH_MSG_ERROR("Could not get LogicalEventOutputHeader in file " << m_inpaths[ifile]);
-	      return StatusCode::FAILURE;
+	ATH_MSG_ERROR("Could not get LogicalEventOutputHeader in file " << m_inpaths[ifile]);
+	return StatusCode::FAILURE;
       }
       b->SetAddress(&m_eventOutputHeaders[ifile][iregion]);      
 
@@ -118,7 +118,7 @@ StatusCode FPGATrackSimMergeOutputsAlg::execute() {
 
   // get the hits
   ATH_CHECK(FPGAHits_Handle.record (std::make_unique<FPGATrackSimHitCollection>()));
-  m_dataprep_tree->GetEntry(m_evtloop); 
+  m_dataprep_tree->GetEntry(m_evtlooptree); 
   for (const auto & tower : m_dataprep->towers()) {    
     const std::vector<FPGATrackSimHit> hits = tower.hits();
     for (auto& hit : hits) {
@@ -129,11 +129,11 @@ StatusCode FPGATrackSimMergeOutputsAlg::execute() {
   for (unsigned ivec = 0; ivec < m_eventOutputHeaders.size(); ivec++) {
     for (unsigned iregion = 0; iregion < N; iregion++) {
       if (!m_trees[ivec][iregion]) continue;
-      if (m_evtloop >= m_trees[ivec][iregion]->GetEntries()) {
+      if (m_evtlooptree >= m_trees[ivec][iregion]->GetEntries()) {
 	ATH_MSG_ERROR("Tried reading in more events than the tree had available!");
 	return StatusCode::FAILURE;
       }
-      m_trees[ivec][iregion]->GetEntry(m_evtloop);
+      m_trees[ivec][iregion]->GetEntry(m_evtlooptree);
       // Time to load up these tracks! Only bother using ones that already passed OLR
       std::vector<FPGATrackSimTrack> const tracks = m_eventOutputHeaders[ivec][iregion]->getFPGATrackSimTracks_1st();
       m_alltracks += tracks.size();
@@ -142,14 +142,22 @@ StatusCode FPGATrackSimMergeOutputsAlg::execute() {
       }
     }
   }
-  
+
   // Now run overlap removal on all the tracks that already passed overlap removal between other regions
   ATH_CHECK(m_overlapRemovalTool->runOverlapRemoval(*FPGATracks));
+
+  if (m_SortTracks) {
+    std::sort(FPGATracks->begin(), FPGATracks->end(),
+	      [] (FPGATrackSimTrack const& a, FPGATrackSimTrack const& b) {return (a.getChi2() < b.getChi2() ); });    
+  }
+  
   for (const auto &track : *FPGATracks) {
     if (track.passedOR()) m_tracksPassOR++;
   }
   // Increase evtloop
-  m_evtloop++;
+  ++m_evtloop;
+  ++m_evtlooptree;
+  
   return StatusCode::SUCCESS;
 }
 

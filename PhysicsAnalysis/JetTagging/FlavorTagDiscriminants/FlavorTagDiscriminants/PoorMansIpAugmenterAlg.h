@@ -46,6 +46,10 @@ namespace FlavorTagDiscriminants {
 
     // Decorators for tracks
     Gaudi::Property< std::string > m_prefix{this,"prefix","poboyIp_",""};
+    Gaudi::Property< bool > m_d0_modification{this,"d0_modification",false,
+    "If true, d0 is corrected relative to the beamspot using the primary vertex "
+    "(x,y) position. If false, d0 is left unmodified (existing PoorMansIp behaviour). "
+    "In both cases, z0 is made relative to the beamspot."}; 
 
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_d0_sigma {
       this, "d0Uncertainty", "d0Uncertainty", "d0Uncertainty of tracks"};

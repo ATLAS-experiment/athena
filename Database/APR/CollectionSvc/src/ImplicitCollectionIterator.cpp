@@ -27,14 +27,15 @@ pool::ImplicitCollectionIterator::~ImplicitCollectionIterator()
 bool
 pool::ImplicitCollectionIterator::next()
 {
-   if( m_token ) {
-      m_token->release();
-      m_token = 0;
-   }
-   if( m_tokenIterator )
-      m_token = m_tokenIterator->next();
-   return (m_token!=0);
+  if( m_token ) {
+     m_token->release();
+     m_token = 0;
+  }
+  if( m_tokenIterator )
+     m_token = m_tokenIterator->next();
+  return m_token != nullptr;
 }
+
 
 Token*
 pool::ImplicitCollectionIterator::token() const
@@ -53,9 +54,11 @@ pool::ImplicitCollectionIterator::currentRow() const
 bool
 pool::ImplicitCollectionIterator::seek(std::size_t position)
 {
-  // We'll have to do a next() to read the event.
-  // So subtract one here to compensate for that.
-  return m_tokenIterator->seek(position - 1);
+  if( m_token ) {
+    m_token->release();
+    m_token = nullptr;
+  }
+  return m_tokenIterator->seek(position);
 }
 
 

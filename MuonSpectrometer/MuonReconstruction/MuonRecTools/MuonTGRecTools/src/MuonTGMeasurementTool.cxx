@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGRecTools/MuonTGMeasurementTool.h"
@@ -657,7 +657,6 @@ const Trk::RIO_OnTrack* Muon::MuonTGMeasurementTool::measToLayer(const Trk::Laye
         //
         double locLay = A_ND * rio->localParameters()[Trk::locR] + locWire[1];
         // create (fake!) rio ( rio image on TG layer )
-        IdentifierHash idHash(0);
         const MuonGM::MdtReadoutElement* mdtROE = MuonDetMgr->getMdtReadoutElement(id);
         auto cov = Amg::MatrixX();
         cov = A_ND * A_ND * rio->localCovariance();

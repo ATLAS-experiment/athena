@@ -10,10 +10,11 @@
 
 #include <format>
 
+
 namespace MuonR4 {
 
     std::ostream& operator<<(std::ostream& ostr, const MuonR4::MsTrackSeed& seed) {
-      ostr<<"MS Track seed @"<<Amg::toString(seed.position())<<", sector: "<<seed.sector()<<std::endl;
+      ostr<<"MS Track seed @"<<Amg::toString(seed.position())<<", sector: "<<seed.sector() << ", location: "<< Acts::toUnderlying(seed.location())<< std::endl;
       using namespace Muon::MuonStationIndex;
       for (const xAOD::MuonSegment* seg : seed.segments()) {
         ostr<<"  **** "<< printID(*seg)

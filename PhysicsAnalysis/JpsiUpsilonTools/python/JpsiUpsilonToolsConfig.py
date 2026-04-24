@@ -15,8 +15,6 @@ def PrimaryVertexRefittingToolCfg(flags, **kwargs):
 #A setup with nice friendly defaults
 def JpsiFinderCfg(flags,name="JpsiFinder", **kwargs):
     acc = ComponentAccumulator()
-    kwargs.setdefault("useV0Fitter", False)
-    kwargs.setdefault("V0VertexFitterTool", None)
     if "TrkVertexFitterTool" not in kwargs:
         from TrkConfig.TrkVKalVrtFitterConfig import BPHY_TrkVKalVrtFitterCfg
         kwargs.setdefault("TrkVertexFitterTool", acc.addPublicTool(acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags))))

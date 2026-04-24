@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_BADLARRETRIEVER_H
@@ -36,35 +36,33 @@ namespace JiveXML{
    *    - location in phi and eta
    *    - identifier and energy of each cell 
    */
-  class BadLArRetriever : virtual public IDataRetriever,
-                                   public AthAlgTool {
+  class BadLArRetriever : public extends<AthAlgTool, IDataRetriever> {
     
     public:
-      
-      /// Standard Constructor
-      BadLArRetriever(const std::string& type,const std::string& name,const IInterface* parent);
+
+      using base_class::base_class;
       
       /// Retrieve all the data
-      virtual StatusCode retrieve(ToolHandle<IFormatTool> &FormatTool); 
+      virtual StatusCode retrieve(ToolHandle<IFormatTool> &FormatTool) override; 
       const DataMap getBadLArData(const CaloCellContainer* cellContainer);
 
       /// Return the name of the data type
-      virtual std::string dataTypeName() const { return "BadLAr"; };
+      virtual std::string dataTypeName() const override{ return "BadLAr"; };
 
       ///Default AthAlgTool methods
-      StatusCode initialize();
+      virtual StatusCode initialize() override;
 
     private:
-      const CaloCell_ID*   m_calocell_id;
+      const CaloCell_ID*   m_calocell_id{};
       SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
     
       /// for properties
       SG::ReadHandleKey<CaloCellContainer> m_sgKey{this, "StoreGateKey", "AllCalo", "Name of the CaloCellContainer"};
-      double m_cellThreshold;
-      int m_cellEnergyPrec;
-      bool m_lar;
-      bool m_doBadLAr;
-      bool m_cellConditionCut; 
+      Gaudi::Property<double> m_cellThreshold{this, "LArlCellThreshold", 50.};
+      Gaudi::Property<int> m_cellEnergyPrec{this, "CellEnergyPrec", 3};
+      Gaudi::Property<bool> m_lar{this, "RetrieveLAr", true};
+      Gaudi::Property<bool> m_doBadLAr{this, "DoBadLAr", false};
+      Gaudi::Property<bool> m_cellConditionCut{this, "CellConditionCut", false};
   };
 }
 #endif

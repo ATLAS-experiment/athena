@@ -27,16 +27,17 @@ namespace columnar
 
     AccessorTemplate (ColumnarTool<CM>& columnBase,
                       const std::string& name,
-                      ColumnInfo&& info = {})
+                      ColumnAccessorOptions&& options = {})
       : m_columnBase (&columnBase),
         m_name (name)
     {
       if (!name.empty())
         columnBase.setContainerUserName (CI::idName, name);
       m_offsetsData = std::make_unique<ColumnAccessorDataArray> (&m_offsetsIndex, &m_offsetsData, &typeid (ColumnarOffsetType), ColumnAccessMode::input);
-      info.offsetName = (CI::perEventRange ? numberOfEventsName : "");
+      auto info = options.makeColumnInfo();
+      info.offsetName = (CI::perEventRange ? eventContextCIName : "");
       info.isOffset = true;
-      columnBase.addColumn (std::string (CI::idName), m_offsetsData.get(), std::move(info));
+      columnBase.addColumn (std::string (CI::idName), m_offsetsData.get(), std::move (info));
     }
 
     AccessorTemplate (AccessorTemplate&& that)
@@ -55,35 +56,35 @@ namespace columnar
     AccessorTemplate (const AccessorTemplate&) = delete;
     AccessorTemplate& operator = (const AccessorTemplate&) = delete;
 
-    ObjectRange<CI,CM> operator() (ObjectId<ContainerId::eventContext,CM> eventId) const
+    ObjectRange<CI,CM> operator() (ObjectId<EventContextDef,CM> eventId) const
       requires (CI::perEventRange)
     {
-      auto *offsets = static_cast<const ColumnarOffsetType*>(eventId.getData()[m_offsetsIndex]);
-      return ObjectRange<CI,CM> (eventId.getData(), offsets[eventId.getIndex()], offsets[eventId.getIndex() + 1]);
+      auto *offsets = static_cast<const ColumnarOffsetType*>(eventId.getDataArea()[m_offsetsIndex]);
+      return ObjectRange<CI,CM> (eventId.getDataArea(), offsets[eventId.getIndex()], offsets[eventId.getIndex() + 1]);
     }
 
-    ObjectRange<CI,CM> operator() (ObjectRange<ContainerId::eventContext,CM> eventRange) const
+    ObjectRange<CI,CM> operator() (ObjectRange<EventContextDef,CM> eventRange) const
       requires (CI::perEventRange)
     {
-      auto *offsets = static_cast<const ColumnarOffsetType*>(eventRange.getData()[m_offsetsIndex]);
-      return ObjectRange<CI,CM> (eventRange.getData(), offsets[eventRange.beginIndex()], offsets[eventRange.endIndex()]);
+      auto *offsets = static_cast<const ColumnarOffsetType*>(eventRange.getDataArea()[m_offsetsIndex]);
+      return ObjectRange<CI,CM> (eventRange.getDataArea(), offsets[eventRange.beginIndex()], offsets[eventRange.endIndex()]);
     }
 
-    ObjectId<CI,CM> operator() (ObjectId<ContainerId::eventContext,CM> eventId) const
+    ObjectId<CI,CM> operator() (ObjectId<EventContextDef,CM> eventId) const
       requires (CI::perEventId)
     {
-      return ObjectId<CI,CM> (eventId.getData(), eventId.getIndex());
+      return ObjectId<CI,CM> (eventId.getDataArea(), eventId.getIndex());
     }
 
-    ObjectRange<CI,CM> operator() (ObjectRange<ContainerId::eventContext,CM> eventRange) const
+    ObjectRange<CI,CM> operator() (ObjectRange<EventContextDef,CM> eventRange) const
       requires (CI::perEventId)
     {
-      return ObjectRange<CI,CM> (eventRange.getData(), eventRange.beginIndex(), eventRange.endIndex());
+      return ObjectRange<CI,CM> (eventRange.getDataArea(), eventRange.beginIndex(), eventRange.endIndex());
     }
 
-    [[nodiscard]] bool isAvailable (ObjectId<ContainerId::eventContext,CM> eventId) const noexcept
+    [[nodiscard]] bool isAvailable (ObjectId<EventContextDef,CM> eventId) const noexcept
     {
-      auto *offsets = static_cast<const ColumnarOffsetType*>(eventId.getData()[m_offsetsIndex]);
+      auto *offsets = static_cast<const ColumnarOffsetType*>(eventId.getDataArea()[m_offsetsIndex]);
       return offsets != nullptr;
     }      
 

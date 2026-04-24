@@ -48,6 +48,10 @@ NswCalibDbTimeChargeData::setData(CalibDataType type,
     const int array_idx = identToModuleIdx(chnlId);   
     ATH_MSG_VERBOSE("Set "<<(type == CalibDataType::PDO  ? "PDO" : "TDO")<<" calibration constants for channel "
                 <<m_idHelperSvc->toString(chnlId)<<", slot: "<< array_idx<<", "<<constants);
+    if (array_idx < 0){
+      ATH_MSG_ERROR("Array index is negative in setData.");
+      return;
+    }
     CalibModule& calib_mod = calibMap.at(array_idx);
     const unsigned channel = (m_idHelperSvc->isMM(chnlId) ?
                                     m_idHelperSvc->mmIdHelper().channel(chnlId) :

@@ -80,6 +80,9 @@ def PoolReadCfg(flags):
     if flags.MP.UseSharedReader or flags.MP.UseSharedWriter:
         from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolSharedIOCnvSvcCfg
         result.merge(AthenaPoolSharedIOCnvSvcCfg(flags, InputPoolAttributes=["DatabaseName = '*'; ContainerName = 'CollectionTree'; TREE_CACHE = '-1'"]))
+    elif flags.PoolSvc.PersSvcPerInputType: # Switch off caching when using many TFiles
+        from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
+        result.merge(AthenaPoolCnvSvcCfg(flags, InputPoolAttributes=["DatabaseName = '*'; ContainerName = 'CollectionTree'; TREE_CACHE = '0'"]))
     else:
         from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
         result.merge(AthenaPoolCnvSvcCfg(flags, InputPoolAttributes=["DatabaseName = '*'; ContainerName = 'CollectionTree'; TREE_CACHE = '-1'"]))
@@ -104,6 +107,11 @@ def PoolReadCfg(flags):
         evSel = CompFactory.DoubleEventSelectorAthenaPool("EventSelector",
                                                           CollectionType="RootCollection",
                                                           InputCollections=flags.Input.Files)
+        if flags.Common.isOverlay and flags.Overlay.DataOverlay:
+            evSel.OverrideRunNumber = True
+            evSel.RunNumber = flags.Input.RunNumbers[0]
+            evSel.FirstLB = flags.Input.LumiBlockNumbers[0]
+            evSel.InitialTimeStamp = flags.Input.TimeStamps[0]
 
         # Overlay background RDOs are primary input
         evSel.SkipEvents = skipEventsSecondary

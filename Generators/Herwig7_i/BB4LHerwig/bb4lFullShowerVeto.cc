@@ -3,7 +3,7 @@
 // This is the implementation of the non-inlined, non-templated member
 // functions of the bb4lFullShowerVeto class.
 // Copyright (C) 2017, 2024 Silvia Ferrario Ravasio, Tomas Jezo
-// inspred by Contrib/ShowrVeto/NonBShowerVeto.cc file
+// inspired by Contrib/ShowrVeto/NonBShowerVeto.cc file
 //
 
 #include "bb4lFullShowerVeto.h"
@@ -131,7 +131,8 @@ bool bb4lFullShowerVeto::vetoShower () {
     mbg2 = pow(pbg[3],2);
     for (int i=0; i<3; ++i) mbg2-=pow(pbg[i],2);
     double Pinitial = sqrt(1.0 -2*(mw2+mbg2)/mt2+pow((mw2-mbg2)/mt2,2))/(mbg2-mb2);
-
+    //random number function not being used for crypto, so safe here
+    //coverity[dont_call]
     double r = ((double) rand() / (RAND_MAX));
 
     if(r > Pfinal/Pinitial)

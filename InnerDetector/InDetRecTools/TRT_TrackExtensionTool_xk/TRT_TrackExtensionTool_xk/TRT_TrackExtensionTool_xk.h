@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -180,8 +180,6 @@ namespace InDet{
       // Methods
       ///////////////////////////////////////////////////////////////////
 
-      void       magneticFieldInit();
-      StatusCode magneticFieldInit(IOVSVC_CALLBACK_ARGS);
       bool isGoodExtension(const EventContext& ctx,
                            const Trk::TrackParameters *,
                            InDet::TRT_TrackExtensionTool_xk::EventData &event_data,

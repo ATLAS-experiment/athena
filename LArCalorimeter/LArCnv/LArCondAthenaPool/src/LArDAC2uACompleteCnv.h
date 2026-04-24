@@ -25,7 +25,7 @@ protected:
 public:
     LArDAC2uACompleteCnv (ISvcLocator* svcloc) : LArDAC2uACompleteCnvBase(svcloc) {}
 protected:
-    virtual LArConditionsSubset<LArSingleFloatP>*  createTransient ();
+    virtual LArConditionsSubset<LArSingleFloatP>*  createTransient(const Token* token);
     LArConditionsSubset<LArSingleFloatP>*          createTransient(LArConditionsSubset<LArDAC2uAP>* orig);
 };
 

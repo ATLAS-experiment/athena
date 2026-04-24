@@ -341,6 +341,7 @@ enum ESModel {
   es2024_Run3_ofc0_v0,  // for run 3 data recorded with LAR OFC(mu=0), based on es2017_R21_ofc0_v1 
                         //  with extra uncertainty   (preliminary recommendation)
   es2024_Run3_v0,       // Run3 intermediate recommendation (based on 2022 and 2023 high mu data)
+  es2025_Run3_GNN_v0,   // Run3 recommendation using GNN calibration for 2015 data (preliminary)
   UNDEFINED
 
 };

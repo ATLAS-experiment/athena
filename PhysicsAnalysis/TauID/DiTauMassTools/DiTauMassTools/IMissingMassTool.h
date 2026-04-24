@@ -40,15 +40,6 @@ class IMissingMassTool : public virtual asg::IAsgTool
 				    const xAOD::IParticle* part2,
 				    const xAOD::MissingET* met,
 				    const int & njets)=0;
-  
-  virtual void calculate(const xAOD::EventInfo & ei, 
-			 const PtEtaPhiMVector & vis_tau1,
-			 const PtEtaPhiMVector & vis_tau2,
-			 const int & tau1_decay_type,
-			 const int & tau2_decay_type,
-			 const xAOD::MissingET & met,
-			 const int & njets)=0;
-
 
   virtual double GetFitStatus(const int method)=0;
   virtual double GetFittedMass(const int method)=0;

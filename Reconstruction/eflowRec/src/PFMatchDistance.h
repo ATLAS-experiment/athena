@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -9,8 +9,8 @@
  *      Author: tlodd
  */
 
-#ifndef PFMATCHDISTANCE_H_
-#define PFMATCHDISTANCE_H_
+#ifndef EFLOWREC_PFMATCHDISTANCE_H
+#define EFLOWREC_PFMATCHDISTANCE_H
 
 #include "PFMatchInterfaces.h"
 
@@ -67,4 +67,4 @@ public:
 
 }
 
-#endif /* PFMATCHDISTANCE_H_ */
+#endif /* EFLOWREC_PFMATCHDISTANCE_H */

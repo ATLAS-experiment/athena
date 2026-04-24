@@ -201,7 +201,7 @@ template <>
 template <typename PrdType>
     void SpacePointMakerAlg::fillUncombinedSpacePoints(const ActsTrk::GeometryContext& gctx,
                                                        const Amg::Transform3D& sectorTrans,
-                                                       const PrdVec_t<PrdType*>& prdsToFill,
+                                                       const PrdVec_t<const PrdType*>& prdsToFill,
                                                        std::vector<SpacePoint>& outColl) const {
     if (prdsToFill.empty()) {
         return;
@@ -218,11 +218,19 @@ template <typename PrdType>
         allSpArePhi = refMeas->measuresPhi();
         const auto& stripLayout = refMeas->readoutElement()->sensorLayout(refMeas->layerHash());
         const auto& design = stripLayout->design(allSpArePhi);
-        sensorDir = toSectorTrans.rotation() * stripLayout->to3D(design.stripDir(), allSpArePhi);
-        toNextSen = toSectorTrans.rotation() * stripLayout->to3D(design.stripNormal(), allSpArePhi);
+        sensorDir = toSectorTrans.linear() * stripLayout->to3D(design.stripDir(), allSpArePhi);
+        toNextSen = toSectorTrans.linear() * stripLayout->to3D(design.stripNormal(), allSpArePhi);
+        ATH_MSG_VERBOSE("Fill space points for "<<m_idHelperSvc->toString(refMeas->identify())
+            <<" -> sensor: "<<Amg::toString(sensorDir)<<", "<<Amg::toString(toNextSen));
+    } else if constexpr (std::is_same_v<PrdType, xAOD::sTgcMeasurement>){
+        allSpArePhi  = refMeas->channelType() == xAOD::sTgcMeasurement::sTgcChannelTypes::Wire;
+        const auto& stripLayout = refMeas->readoutElement()->stripLayer(refMeas->measurementHash());
+        const auto& design = stripLayout.design(allSpArePhi);
+        sensorDir = toSectorTrans.linear() * stripLayout.to3D(design.stripDir(), allSpArePhi);
+        toNextSen = toSectorTrans.linear() * stripLayout.to3D(design.stripNormal(), allSpArePhi);
     } else {
-        sensorDir = toSectorTrans.rotation().col(Amg::y);
-        toNextSen = toSectorTrans.rotation().col(Amg::x); 
+        sensorDir = toSectorTrans.linear().col(Amg::y);
+        toNextSen = toSectorTrans.linear().col(Amg::x); 
     }
     outColl.reserve(outColl.size() + prdsToFill.size());
     for (const PrdType* prd: prdsToFill) {
@@ -231,8 +239,8 @@ template <typename PrdType>
             if (allSpArePhi) {
                 const auto& stripLayout = refMeas->readoutElement()->sensorLayout(refMeas->layerHash());
                 const auto& radialDesign = static_cast<const MuonGMR4::RadialStripDesign&>(stripLayout->design(allSpArePhi));
-                toNextSen = toSectorTrans.rotation() * stripLayout->to3D(radialDesign.stripNormal(prd->channelNumber()), allSpArePhi);
-                sensorDir = toSectorTrans.rotation() * stripLayout->to3D(radialDesign.stripDir(prd->channelNumber()), allSpArePhi);
+                toNextSen = toSectorTrans.linear() * stripLayout->to3D(radialDesign.stripNormal(prd->channelNumber()), allSpArePhi);
+                sensorDir = toSectorTrans.linear() * stripLayout->to3D(radialDesign.stripDir(prd->channelNumber()), allSpArePhi);
             }
         }
         newSp.setPosition(toSectorTrans * prd->localMeasurementPos());
@@ -319,8 +327,8 @@ template <typename ContType>
                 Amg::Transform3D toChamberTrans{toChamberTransform(*gctx, sectorTrans, *prd)};
                 SpacePoint& sp{pointsInChamb.etaHits.emplace_back(prd)};
                 sp.setPosition(toChamberTrans*prd->localMeasurementPos());
-                sp.setDirection(toChamberTrans.rotation().col(Amg::z),
-                                toChamberTrans.rotation().col(Amg::y));
+                sp.setDirection(toChamberTrans.linear().col(Amg::z),
+                                toChamberTrans.linear().col(Amg::y));
                 std::array<double, 3> cov{Acts::filledArray<double,3>(0.)};
                 cov[Acts::toUnderlying(CovIdx::etaCov)] = prd->driftRadiusCov();
                 cov[Acts::toUnderlying(CovIdx::phiCov)] = Acts::square(sensorHalfLength(*prd));
@@ -358,11 +366,16 @@ template <typename ContType>
                               std::is_same_v<xAOD::TgcStripContainer, ContType>) {
                     const auto& stripLayout = firstEta->readoutElement()->sensorLayout(firstEta->layerHash());
                     const auto& design = stripLayout->design();
-                    sensorDir = toSectorTrans.rotation() * stripLayout->to3D(design.stripDir(), false);
-                    toNextDir = toSectorTrans.rotation() * stripLayout->to3D(design.stripNormal(), false);
-                } else {
-                    toNextDir = toSectorTrans.rotation().col(Amg::x);
-                    sensorDir = toSectorTrans.rotation().col(Amg::y);
+                    sensorDir = toSectorTrans.linear() * stripLayout->to3D(design.stripDir(), false);
+                    toNextDir = toSectorTrans.linear() * stripLayout->to3D(design.stripNormal(), false);
+                } else if constexpr (std::is_same_v<xAOD::sTgcMeasContainer, ContType>){
+                    const auto& stripLayout = firstEta->readoutElement()->stripLayer(firstEta->measurementHash());
+                    const auto& design = stripLayout.design(false);
+                    sensorDir = toSectorTrans.linear() * stripLayout.to3D(design.stripDir(), false);
+                    toNextDir = toSectorTrans.linear() * stripLayout.to3D(design.stripNormal(), false);
+                }  else {
+                    ATH_MSG_ERROR("Unsupported container type");
+                    return StatusCode::FAILURE;
                 }               
                 
                 using namespace Acts::detail::LineHelper;
@@ -376,7 +389,7 @@ template <typename ContType>
                             } 
                             const auto& stripLay = phiHits[phiP]->readoutElement()->sensorLayout(phiHits[phiP]->layerHash());
                             const auto& radialDesign = static_cast<const MuonGMR4::RadialStripDesign&>(stripLay->design(true));
-                            toNextDir = toSectorTrans.rotation() * stripLay->to3D(radialDesign.stripDir(phiHits[phiP]->channelNumber()), true);
+                            toNextDir = toSectorTrans.linear() * stripLay->to3D(radialDesign.stripDir(phiHits[phiP]->channelNumber()), true);
                         }
                         
                         SpacePoint& newSp = pointsInChamb.etaHits.emplace_back(etaHits[etaP], phiHits[phiP]);
@@ -389,6 +402,15 @@ template <typename ContType>
                         auto cov = Acts::filledArray<double, 3>(0.);
                         cov[Acts::toUnderlying(CovIdx::etaCov)] = etaHits[etaP]->template localCovariance<1>()[0];
                         cov[Acts::toUnderlying(CovIdx::phiCov)] = phiHits[phiP]->template localCovariance<1>()[0];
+                        ///
+                        if constexpr(std::is_same_v<xAOD::TgcStripContainer, ContType>) {
+                            const auto& stripLay = phiHits[phiP]->readoutElement()->sensorLayout(phiHits[phiP]->layerHash());
+                            const auto& radialDesign = static_cast<const MuonGMR4::RadialStripDesign&>(stripLay->design(true));
+                            const Amg::Vector2D planePos = stripLay->to2D(toSectorTrans.inverse()*spIsect.position(), true);
+                            cov[Acts::toUnderlying(CovIdx::phiCov)] =
+                                Acts::square(radialDesign.stripPitch(phiHits[phiP]->channelNumber(), planePos)) / 12.;
+                        }
+
                         newSp.setCovariance(std::move(cov));
                         ATH_MSG_VERBOSE("Created new space point "<<newSp);
                     }

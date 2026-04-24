@@ -20,6 +20,7 @@ from DerivationFrameworkEGamma.TriggerContent import (
     ExtraContainersTrigger,
     ExtraContainersElectronTrigger,
     JPsiTriggers,
+    JPsiDelayedTriggers,
 )
 
 
@@ -54,12 +55,19 @@ def EGAM2SkimmingToolCfg(flags):
     elif flags.Trigger.EDMVersion == 3:
         MenuType = "Run3"
 
+    triggersHLTonly = []
     if MenuType:
         triggers = JPsiTriggers[MenuType]
+        print("Input trigger stream is:  ", flags.Input.TriggerStream)
+        if flags.Input.TriggerStream in ("physics_BphysDelayed", "BphysLS") or flags.Input.isMC:
+            triggers += JPsiDelayedTriggers[MenuType]
+            if MenuType == "Run2":
+                triggersHLTonly = triggers
         print("EGAM2 trigger skimming list (OR): ", triggers)
 
         EGAM2_TriggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(
-            name="EGAM2_TriggerSkimmingTool", TriggerListOR=triggers
+            # passing also TriggerListORHLTOnly is required by Run2 Beex triggers
+            name="EGAM2_TriggerSkimmingTool", TriggerListOR=triggers, TriggerListORHLTOnly=triggersHLTonly
         )
         acc.addPublicTool(EGAM2_TriggerSkimmingTool)
         skimmingTools += [EGAM2_TriggerSkimmingTool]

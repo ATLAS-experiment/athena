@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigSerializeTP )
@@ -11,7 +11,7 @@ atlas_add_library( TrigSerializeTPLib
                    src/*.cxx
                    PUBLIC_HEADERS TrigSerializeTP
                    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                   LINK_LIBRARIES AthenaBaseComps AthenaKernel GaudiKernel
+                   LINK_LIBRARIES AthenaBaseComps AthenaKernel CxxUtils GaudiKernel
                    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} )
 
 atlas_add_component( TrigSerializeTP

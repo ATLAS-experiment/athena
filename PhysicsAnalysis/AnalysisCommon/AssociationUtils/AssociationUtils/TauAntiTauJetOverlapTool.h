@@ -147,10 +147,10 @@ namespace ORUtils
       std::unique_ptr<IParticleAssociator> m_dRMatcher;
 
       /// Decoration helper for the IDed taus
-      std::unique_ptr<OverlapDecorationHelper<columnar::ContainerId::particle2>> m_tauDecHelper;
+      std::unique_ptr<OverlapDecorationHelper<columnar::Particle2Def>> m_tauDecHelper;
 
       /// Decoration helper for the anti-taus
-      std::unique_ptr<OverlapDecorationHelper<columnar::ContainerId::particle2>> m_antiTauDecHelper;
+      std::unique_ptr<OverlapDecorationHelper<columnar::Particle2Def>> m_antiTauDecHelper;
 
       std::string m_antiTauEventCategoryDecorName;
 

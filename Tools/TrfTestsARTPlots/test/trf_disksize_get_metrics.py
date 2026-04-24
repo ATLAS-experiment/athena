@@ -1,12 +1,10 @@
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 import ROOT
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import re
 import awkward as ak
 import uproot
 import os
-import warnings
+import re
 
 class Units(object):
     kb = 1024.0
@@ -176,7 +174,7 @@ def add_container_info(data):
       data=pd.concat([data, new_cont], ignore_index=True)
    else:
        data.loc[data['branch'] == contname, ["vars", "diskSize", "totalbytes"]] += [1, row.diskSize, row.totalbytes] 
-       data.loc[data['branch'] == contname, "subbranches"] = data.loc[data['branch'] == contname, "subbranches"].apply(lambda x: x + [row.branch] if isinstance(x, list) else [row.branch])
+       data.loc[data['branch'] == contname, "subbranches"] = data.loc[data['branch'] == contname, "subbranches"].apply(lambda x, row=row: x + [row.branch] if isinstance(x, list) else [row.branch])
    if row.items=="n/a":
         data.loc[data['branch'] == contname, "typeName"] = "n/a"
    elif pd.to_numeric(row.items, errors="coerce") > 1:

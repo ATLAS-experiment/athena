@@ -19,8 +19,8 @@
 #include "AthenaKernel/CLASS_DEF.h"
 
 #include <string>
-#include <assert.h>
-#include <algorithm>
+#include <vector>
+#include <algorithm> //std::lower_bound
 
 class IdDictDictionary;
 
@@ -262,15 +262,17 @@ private:
     hash_vec                    m_next_phi_wafer_vec;
     hash_vec                    m_prev_eta_wafer_vec;
     hash_vec                    m_next_eta_wafer_vec;
-
-    IdDictFieldImplementation   m_indet_impl;
-    IdDictFieldImplementation   m_hgtd_impl;
-    IdDictFieldImplementation   m_ec_impl;
-    IdDictFieldImplementation   m_layer_impl;
-    IdDictFieldImplementation   m_phi_mod_impl;
-    IdDictFieldImplementation   m_eta_mod_impl;
-    IdDictFieldImplementation   m_phi_index_impl;
-    IdDictFieldImplementation   m_eta_index_impl;
+    
+    enum Implementations{kIndet, kHgtd, kEc,  kLayer,
+     kPhiMod,  kEtaMod, kPhiIndex, kEtaIndex, 
+     nImplementations };
+    static constexpr std::array<std::string_view, nImplementations> m_implNames{
+     "indet", "hgtd", "ec",  "layer", 
+     "phi_mod",  "eta_mod",  "phi_index",
+     "eta_index"
+   };
+   //
+   std::array<IdDictFieldImplementation, nImplementations> m_impl;
 
 };
 
@@ -294,12 +296,12 @@ HGTD_ID::wafer_id ( int endcap,
     Identifier result((Identifier::value_type)0);
 
     // Pack fields independently
-    m_indet_impl.pack    (indet_field_value(), result);
-    m_hgtd_impl.pack     (hgtd_field_value(),  result);
-    m_ec_impl.pack       (endcap,              result);
-    m_layer_impl.pack    (layer,               result);
-    m_phi_mod_impl.pack  (phi_module,          result);
-    m_eta_mod_impl.pack  (eta_module,          result);
+    m_impl[kIndet].pack    (indet_field_value(), result);
+    m_impl[kHgtd].pack     (hgtd_field_value(),  result);
+    m_impl[kEc].pack       (endcap,              result);
+    m_impl[kLayer].pack    (layer,               result);
+    m_impl[kPhiMod].pack  (phi_module,          result);
+    m_impl[kEtaMod].pack  (eta_module,          result);
 
     // Do checks
     if(m_do_checks) {
@@ -314,8 +316,8 @@ inline Identifier
 HGTD_ID::wafer_id ( const Identifier& pixel_id ) const
 {
     Identifier result(pixel_id);
-    m_phi_index_impl.reset      (result);
-    m_eta_index_impl.reset      (result);
+    m_impl[kPhiIndex].reset      (result);
+    m_impl[kEtaIndex].reset      (result);
     return (result);
 }
 
@@ -338,14 +340,14 @@ HGTD_ID::pixel_id ( int endcap,
 
     // Build identifier
     Identifier result((Identifier::value_type)0);
-    m_indet_impl.pack          (indet_field_value(), result);
-    m_hgtd_impl.pack           (hgtd_field_value(),  result);
-    m_ec_impl.pack             (endcap,              result);
-    m_layer_impl.pack          (layer,               result);
-    m_phi_mod_impl.pack        (phi_module,          result);
-    m_eta_mod_impl.pack        (eta_module,          result);
-    m_phi_index_impl.pack      (phi_index,           result);
-    m_eta_index_impl.pack      (eta_index,           result);
+    m_impl[kIndet].pack          (indet_field_value(), result);
+    m_impl[kHgtd].pack           (hgtd_field_value(),  result);
+    m_impl[kEc].pack             (endcap,              result);
+    m_impl[kLayer].pack          (layer,               result);
+    m_impl[kPhiMod].pack        (phi_module,          result);
+    m_impl[kEtaMod].pack        (eta_module,          result);
+    m_impl[kPhiIndex].pack      (phi_index,           result);
+    m_impl[kEtaIndex].pack      (eta_index,           result);
 
     if(m_do_checks) {
 
@@ -393,10 +395,10 @@ HGTD_ID::pixel_id ( const Identifier& wafer_id,
                     int eta_index) const
 {
     Identifier result(wafer_id);
-    m_phi_index_impl.reset     (result);
-    m_eta_index_impl.reset     (result);
-    m_phi_index_impl.pack      (phi_index, result);
-    m_eta_index_impl.pack      (eta_index, result);
+    m_impl[kPhiIndex].reset     (result);
+    m_impl[kEtaIndex].reset     (result);
+    m_impl[kPhiIndex].pack      (phi_index, result);
+    m_impl[kEtaIndex].pack      (eta_index, result);
     return (result);
 }
 
@@ -439,7 +441,7 @@ HGTD_ID::base_bit ( ) const
     // TODO: determine if anything needs to change here (implementation ported from PixelID)
     // TODO: e.g. m_eta_index_impl is still lowest field base, but where does the 32 come from? 32 bits?
     // TODO: also understand what's happening
-    int base = static_cast<int>(m_eta_index_impl.shift()); // lowest field base
+    int base = static_cast<int>(m_impl[kEtaIndex].shift()); // lowest field base
     return (base > 32) ? 32 : base;
     // max base is 32 so we can still read old strip id's and differences
     // from non-SLHC releases.
@@ -467,42 +469,42 @@ HGTD_ID::pixel_context  () const
 inline int
 HGTD_ID::endcap       (const Identifier& id) const
 {
-    return (m_ec_impl.unpack(id));
+    return (m_impl[kEc].unpack(id));
 }
 
 //----------------------------------------------------------------------------
 inline int
 HGTD_ID::layer       (const Identifier& id) const
 {
-    return (m_layer_impl.unpack(id));
+    return (m_impl[kLayer].unpack(id));
 }
 
 //----------------------------------------------------------------------------
 inline int
 HGTD_ID::phi_module       (const Identifier& id) const
 {
-    return (m_phi_mod_impl.unpack(id));
+    return (m_impl[kPhiMod].unpack(id));
 }
 
 //----------------------------------------------------------------------------
 inline int
 HGTD_ID::eta_module       (const Identifier& id) const
 {
-    return (m_eta_mod_impl.unpack(id));
+    return (m_impl[kEtaMod].unpack(id));
 }
 
 //----------------------------------------------------------------------------
 inline int
 HGTD_ID::phi_index       (const Identifier& id) const
 {
-    return (m_phi_index_impl.unpack(id));
+    return (m_impl[kPhiIndex].unpack(id));
 }
 
 //----------------------------------------------------------------------------
 inline int
 HGTD_ID::eta_index       (const Identifier& id) const
 {
-    return (m_eta_index_impl.unpack(id));
+    return (m_impl[kEtaIndex].unpack(id));
 }
 
 #endif // HGTD_IDENTIFIER_HGTD_ID_H

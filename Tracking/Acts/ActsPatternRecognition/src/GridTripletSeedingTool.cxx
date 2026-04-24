@@ -233,7 +233,7 @@ StatusCode GridTripletSeedingTool::initialize() {
   m_tripletFinderCfg.impactMax = m_impactMax;
   m_tripletFinderCfg.helixCutTolerance = 1.;
   m_tripletFinderCfg.toleranceParam = m_toleranceParam;
-
+  m_tripletFinderCfg.cotThetaDiffMax = m_maxStripDeltaCotTheta;
   m_filterCfg.deltaInvHelixDiameter = m_deltaInvHelixDiameter;
   m_filterCfg.deltaRMin = m_deltaRMin;
   m_filterCfg.compatSeedWeight = m_compatSeedWeight;
@@ -273,6 +273,9 @@ StatusCode GridTripletSeedingTool::initialize() {
   m_filterCfg.maxSeedsPerSpMConf = m_maxSeedsPerSpMConf;
   m_filterCfg.maxQualitySeedsPerSpMConf = m_maxQualitySeedsPerSpMConf;
   m_filterCfg.useDeltaRinsteadOfTopRadius = m_useDeltaRorTopRadius;
+  m_filterCfg.absDeltaEtaWeightFactor = m_absDeltaEtaWeightFactor;
+  m_filterCfg.absDeltaEtaMinImpact = m_absDeltaEtaMinImpact;
+
 
   m_finder = Acts::TripletSeeder(logger().cloneWithSuffix("Finder"));
 
@@ -383,7 +386,7 @@ std::pair<float, float> GridTripletSeedingTool::retrieveRadiusRangeForMiddle(
   return {m_rRangeMiddleSP[zBin][0], m_rRangeMiddleSP[zBin][1]};
 }
 
-StatusCode GridTripletSeedingTool::createSeeds2(
+StatusCode GridTripletSeedingTool::createSeeds(
     const EventContext& ctx,
     const std::vector<const xAOD::SpacePointContainer*>& spacePointCollections,
     const Eigen::Vector3f& beamSpotPos, float bFieldInZ,
@@ -425,24 +428,21 @@ StatusCode GridTripletSeedingTool::createSeeds2(
   }
 
   for (std::size_t i = 0; i < grid.numberOfBins(); ++i) {
-    std::ranges::sort(grid.at(i), [&](const Acts::SpacePointIndex2& a,
-                                      const Acts::SpacePointIndex2& b) {
-      return selectedSpacePointsR[a] < selectedSpacePointsR[b];
-    });
+    std::ranges::sort(
+        grid.at(i), [&](Acts::SpacePointIndex2 a, Acts::SpacePointIndex2 b) {
+          return selectedSpacePointsR[a] < selectedSpacePointsR[b];
+        });
   }
 
   Acts::SpacePointContainer2 selectedSpacePoints;
   selectedSpacePoints.createColumns(
-      Acts::SpacePointColumns::XY |
-      Acts::SpacePointColumns::ZR | Acts::SpacePointColumns::VarianceZ |
-      Acts::SpacePointColumns::VarianceR);
+      Acts::SpacePointColumns::CopyFromIndex |
+      Acts::SpacePointColumns::PackedXY | Acts::SpacePointColumns::PackedZR |
+      Acts::SpacePointColumns::VarianceZ | Acts::SpacePointColumns::VarianceR);
   if (m_useDetailedDoubleMeasurementInfo) {
     selectedSpacePoints.createColumns(Acts::SpacePointColumns::Strip);
   }
   selectedSpacePoints.reserve(grid.numberOfSpacePoints());
-  seedContainer.spacePoints().reserve(grid.numberOfSpacePoints());
-  std::vector<Acts::SpacePointIndex2> copyFromIndices;
-  copyFromIndices.reserve(grid.numberOfSpacePoints());
   std::vector<Acts::SpacePointIndexRange2> gridSpacePointRanges;
   gridSpacePointRanges.reserve(grid.numberOfBins());
   for (std::size_t i = 0; i < grid.numberOfBins(); ++i) {
@@ -450,8 +450,8 @@ StatusCode GridTripletSeedingTool::createSeeds2(
     for (const Acts::SpacePointIndex2 spIndex : grid.at(i)) {
       const xAOD::SpacePoint* sp = selectedXAODSpacePoints[spIndex];
 
-      seedContainer.spacePoints().push_back(sp);
       auto newSp = selectedSpacePoints.createSpacePoint();
+      newSp.copyFromIndex() = spIndex;
       newSp.xy() =
           std::array<float, 2>{static_cast<float>(sp->x() - beamSpotPos[0]),
                                static_cast<float>(sp->y() - beamSpotPos[1])};
@@ -478,15 +478,12 @@ StatusCode GridTripletSeedingTool::createSeeds2(
         newSp.topStripCenter() = std::array<float, 3>{
             topStripCenter.x(), topStripCenter.y(), topStripCenter.z()};
       }
-
-      copyFromIndices.push_back(spIndex);
     }
     std::uint32_t end = selectedSpacePoints.size();
     gridSpacePointRanges.emplace_back(begin, end);
   }
 
   // clear temporary
-  selectedXAODSpacePoints = {};
   selectedSpacePointsR = {};
 
   ACTS_VERBOSE("Number of space points after selection "
@@ -591,15 +588,20 @@ StatusCode GridTripletSeedingTool::createSeeds2(
            topQuality <= seedQuality;
   };
 
-  seedContainer.reserve(tmpSeedContainer.size());
+  seedContainer.reserve(seedContainer.size() + tmpSeedContainer.size());
 
-  // Select the seeds
+  // Select and convert the seeds
   for (Acts::MutableSeedProxy2 seed : tmpSeedContainer) {
     if (m_seedQualitySelection && !selectionFunction(seed)) {
       continue;
     }
 
-    seedContainer.push_back(seed);
+    seedContainer.push_back(
+        Acts::ConstSeedProxy2(seed), [&](const Acts::SpacePointIndex2 spIndex) {
+          const Acts::SpacePointIndex2 originalIndex =
+              selectedSpacePoints.at(spIndex).copyFromIndex();
+          return selectedXAODSpacePoints[originalIndex];
+        });
   }
 
   return StatusCode::SUCCESS;

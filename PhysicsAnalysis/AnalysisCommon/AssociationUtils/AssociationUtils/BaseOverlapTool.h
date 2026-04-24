@@ -125,12 +125,12 @@ namespace ORUtils
       std::unique_ptr<BaseAccessors> m_baseAccessors {std::make_unique<BaseAccessors> (this)};
 
       /// Helper for handling input/output decorations
-      std::unique_ptr<OverlapDecorationHelper<columnar::ContainerId::particle1>> m_decHelper1;
-      std::unique_ptr<OverlapDecorationHelper<columnar::ContainerId::particle2>> m_decHelper2;
+      std::unique_ptr<OverlapDecorationHelper<columnar::Particle1Def>> m_decHelper1;
+      std::unique_ptr<OverlapDecorationHelper<columnar::Particle2Def>> m_decHelper2;
 
       /// Helper for linking overlap objects
-      std::unique_ptr<OverlapLinkHelper<columnar::ContainerId::particle1>> m_objLinkHelper1;
-      std::unique_ptr<OverlapLinkHelper<columnar::ContainerId::particle2>> m_objLinkHelper2;
+      std::unique_ptr<OverlapLinkHelper<columnar::Particle1Def>> m_objLinkHelper1;
+      std::unique_ptr<OverlapLinkHelper<columnar::Particle2Def>> m_objLinkHelper2;
 
       /// @}
 

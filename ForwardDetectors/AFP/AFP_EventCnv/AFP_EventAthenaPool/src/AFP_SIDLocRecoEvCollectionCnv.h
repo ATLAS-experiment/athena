@@ -29,7 +29,7 @@ public:
 protected:
 
   AFP_SIDLocRecoEvCollection_PERS*  createPersistent (AFP_SIDLocRecoEvCollection *transCont);
-  AFP_SIDLocRecoEvCollection*       createTransient ();
+  AFP_SIDLocRecoEvCollection*       createTransient(const Token* token);
     
  };
  

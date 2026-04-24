@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 /*
@@ -44,21 +44,26 @@ main()
   using namespace asg::msgUserCode;
   ANA_CHECK_SET_TYPE(int);
 
-  asg::StandaloneToolHandle<IAsgElectronEfficiencyCorrectionTool> tool(
-    "AsgElectronEfficiencyCorrectionTool/ElectronEffCorrection");
-  ANA_CHECK(tool.setProperty("CorrelationModel", "FULL") &&
-            tool.setProperty("ForceDataType", 1) &&
-            tool.setProperty("IdKey", "Medium") && tool.retrieve());
+  try {
+    asg::StandaloneToolHandle<IAsgElectronEfficiencyCorrectionTool> tool(
+      "AsgElectronEfficiencyCorrectionTool/ElectronEffCorrection");
+    ANA_CHECK(tool.setProperty("CorrelationModel", "FULL") &&
+              tool.setProperty("ForceDataType", 1) &&
+              tool.setProperty("IdKey", "Medium") && tool.retrieve());
 
-  asg::StandaloneToolHandle<IAsgElectronEfficiencyCorrectionTool> eccTool;
-  eccTool.setTypeAndName(
-    "CP::ElectronChargeEfficiencyCorrectionTool/ElectronChargeCorrection");
-  ANA_CHECK(
-    eccTool.setProperty(
-      "CorrectionFileName",
-      "ElectronEfficiencyCorrection/2015_2016/rel20.7/Moriond_February2017_v1/"
-      "charge_misID/ChargeCorrectionSF.Medium_FixedCutTight.root") &&
-    eccTool.retrieve());
+    asg::StandaloneToolHandle<IAsgElectronEfficiencyCorrectionTool> eccTool;
+    eccTool.setTypeAndName(
+      "CP::ElectronChargeEfficiencyCorrectionTool/ElectronChargeCorrection");
+    ANA_CHECK(
+      eccTool.setProperty(
+        "CorrectionFileName",
+        "ElectronEfficiencyCorrection/2015_2016/rel20.7/Moriond_February2017_v1/"
+        "charge_misID/ChargeCorrectionSF.Medium_FixedCutTight.root") &&
+      eccTool.retrieve());
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
 
   return 0;
 }

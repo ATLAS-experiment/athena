@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "CxxUtils/checker_macros.h"
 
@@ -23,7 +23,7 @@ HistogramFactory::HistogramFactory(const ServiceHandle<ITHistSvc>& histSvc,
   // The Gaudi/offline THistSvc does not delete objects on de-registration,
   // but the online TrigMonTHistSvc does. We detect the latter case by checking
   // the existence of one of its properties.
-  SmartIF<IProperty> hs{histSvc.get()};
+  SmartIF<const IProperty> hs{histSvc.get()};
   if (hs && hs->hasProperty("IncludeName")) {
     m_deleteOnRemove = false;
   }

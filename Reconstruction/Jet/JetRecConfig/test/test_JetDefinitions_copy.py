@@ -13,7 +13,7 @@ from PyUtils.moduleExists import moduleExists
 from JetRecConfig.JetDefinition import JetDefinition
 from JetRecConfig.JetGrooming import GroomingDefinition
 from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow, AntiKt4TruthDressedWZ, AntiKt4EMPFlowCSSKNoPtCut, AntiKt4PV0Track, AntiKtVR30Rmax4Rmin02PV0Track, AntiKt4TruthGENWZ
-from JetRecConfig.StandardLargeRJets import AntiKt10LCTopo_withmoms, AntiKt10LCTopoTrimmed, AntiKt10UFOCSSK, AntiKt10UFOCSSKSoftDrop, AntiKt10TruthDressedWZSoftDrop
+from JetRecConfig.StandardLargeRJets import AntiKt10LCTopo_withmoms, AntiKt10LCTopoTrimmed, AntiKt10UFOCSSK, AntiKt10UFOCSSKSoftDrop, AntiKt10TruthDressedWZSoftDrop, AntiKt10TruthGENWZ
 from JetRecConfig.DependencyHelper import solveDependencies, solveGroomingDependencies
 
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -32,11 +32,11 @@ class TestJetDef(unittest.TestCase):
         
         # Start with specific truth jet configs only for AthGeneration
         cls.smallRdefs = [AntiKt4TruthGENWZ]
-        cls.largeRdefs = [AntiKt10TruthDressedWZSoftDrop]
+        cls.largeRdefs = [AntiKt10TruthGENWZ]
         # If in a release that supports reco, add the reco collections
         if moduleExists('JetMomentTools'):
             cls.smallRdefs += [AntiKt4EMPFlow, AntiKt4EMPFlowCSSKNoPtCut, AntiKt4PV0Track, AntiKtVR30Rmax4Rmin02PV0Track, AntiKt4TruthDressedWZ]
-            cls.largeRdefs += [AntiKt10LCTopo_withmoms, AntiKt10LCTopoTrimmed, AntiKt10UFOCSSK, AntiKt10UFOCSSKSoftDrop]
+            cls.largeRdefs += [AntiKt10LCTopo_withmoms, AntiKt10LCTopoTrimmed, AntiKt10UFOCSSK, AntiKt10UFOCSSKSoftDrop, AntiKt10TruthDressedWZSoftDrop]
 
         cls.flags = initConfigFlags()
         cls.flags.Input.Files=[]

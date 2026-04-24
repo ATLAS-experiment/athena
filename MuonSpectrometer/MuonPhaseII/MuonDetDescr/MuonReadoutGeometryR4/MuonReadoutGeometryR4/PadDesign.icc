@@ -87,7 +87,7 @@ namespace MuonGMR4 {
             }
         }
         else {
-            ATH_MSG_WARNING("The failed Hit: "<< Amg::toString(hitPos, 2) << " is outside the trapezoid bounds. "<< "HitY: " << hitY);
+            ATH_MSG_DEBUG("The failed Hit: "<< Amg::toString(hitPos, 2) << " is outside the trapezoid bounds. "<< "HitY: " << hitY);
         }
         /// Variables to store padPhi information
         double padPhiDouble{0.};

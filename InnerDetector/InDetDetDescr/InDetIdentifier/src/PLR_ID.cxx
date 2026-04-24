@@ -9,6 +9,7 @@
 
 
 #include "InDetIdentifier/PLR_ID.h"
+#include "PixelOutputFormatting.h"
 #include "IdDict/IdDictDictionary.h"
 #include "IdDict/IdDictField.h"
 #include "IdDict/IdDictMgr.h"
@@ -18,10 +19,9 @@
 #include <algorithm>
 #include <iostream>
 
+using InDetIdentifierPkg::formatOutput;
 
-
-
-PLR_ID::PLR_ID(): PixelID(){
+PLR_ID::PLR_ID(const std::string & name, const std::string & group): PixelID(name, group){
   // changes compared to PixelID:
   m_BARREL_EC_INDEX = 3;
   m_LAYER_DISK_INDEX = 4;
@@ -304,8 +304,8 @@ PLR_ID::initLevelsFromDict(void) {
   
   ATH_MSG_DEBUG("decode index and bit fields for each level:");
   ATH_MSG_DEBUG("indet          " << m_impl[kIndet].show_to_string());
-  ATH_MSG_DEBUG("lumi           " << m_lumi_impl.show_to_string());
-  ATH_MSG_DEBUG("plr            " << m_plr_impl.show_to_string());
+  ATH_MSG_DEBUG("lumi           " << m_lumi_impl);
+  ATH_MSG_DEBUG("plr            " << m_plr_impl);
   ATH_MSG_DEBUG("bec            " << m_impl[kBec].show_to_string());
   ATH_MSG_DEBUG("bec_shift      " << m_impl[kBecShift].show_to_string());
   ATH_MSG_DEBUG("lay_disk       " << m_impl[kLayDisk].show_to_string());
@@ -320,117 +320,48 @@ PLR_ID::initLevelsFromDict(void) {
 
 
 
-
-  std::cout << "indet " << m_impl[kIndet].decode_index() << " "
-            << (std::string) m_impl[kIndet].ored_field() << " "
-            << std::hex << m_impl[kIndet].mask() << " "
-            << m_impl[kIndet].zeroing_mask() << " "
-            << std::dec << m_impl[kIndet].shift()
-            << " " << m_impl[kIndet].bits() << " " << m_impl[kIndet].bits_offset() << " ";
-  m_impl[kIndet].ored_field().show();
-  std::cout << "lumi " << m_lumi_impl.decode_index() << " "
-            << (std::string) m_lumi_impl.ored_field() << " "
-            << std::hex << m_lumi_impl.mask() << " "
-            << m_lumi_impl.zeroing_mask() << " "
-            << std::dec << m_lumi_impl.shift()
-            << " " << m_lumi_impl.bits() << " " << m_lumi_impl.bits_offset() << " ";
-  m_lumi_impl.ored_field().show();
-  std::cout << "plr " << m_plr_impl.decode_index() << " "
-            << (std::string) m_plr_impl.ored_field() << " "
-            << std::hex << m_plr_impl.mask() << " "
-            << m_plr_impl.zeroing_mask() << " "
-            << std::dec << m_plr_impl.shift()
-            << " " << m_plr_impl.bits() << " " << m_plr_impl.bits_offset() << " ";
-  m_plr_impl.ored_field().show();
-  std::cout << "bec " << m_impl[kBec].decode_index() << " "
-            << (std::string) m_impl[kBec].ored_field() << " "
-            << std::hex << m_impl[kBec].mask() << " "
-            << m_impl[kBec].zeroing_mask() << " "
-            << std::dec << m_impl[kBec].shift()
-            << " " << m_impl[kBec].bits() << " " << m_impl[kBec].bits_offset() << " ";
-  m_impl[kBec].ored_field().show();
-  std::cout << "bec_shift " << m_impl[kBecShift].decode_index() << " "
-            << (std::string) m_impl[kBecShift].ored_field() << " "
-            << std::hex << m_impl[kBecShift].mask() << " "
-            << m_impl[kBecShift].zeroing_mask() << " "
-            << std::dec << m_impl[kBecShift].shift()
-            << " " << m_impl[kBecShift].bits() << " " << m_impl[kBecShift].bits_offset() << " ";
-  m_impl[kBecShift].ored_field().show();
-  std::cout << "lay_disk " << m_impl[kLayDisk].decode_index() << " "
-            << (std::string) m_impl[kLayDisk].ored_field() << " "
-            << std::hex << m_impl[kLayDisk].mask() << " "
-            << m_impl[kLayDisk].zeroing_mask() << " "
-            << std::dec << m_impl[kLayDisk].shift()
-            << " " << m_impl[kLayDisk].bits() << " " << m_impl[kLayDisk].bits_offset() << " ";
-  m_impl[kLayDisk].ored_field().show();
-  std::cout << "lay_disk_shift " << m_impl[kLayDiskShift].decode_index() << " "
-            << (std::string) m_impl[kLayDiskShift].ored_field() << " "
-            << std::hex << m_impl[kLayDiskShift].mask() << " "
-            << m_impl[kLayDiskShift].zeroing_mask() << " "
-            << std::dec << m_impl[kLayDiskShift].shift()
-            << " " << m_impl[kLayDiskShift].bits() << " " << m_impl[kLayDiskShift].bits_offset() << " ";
-  m_impl[kLayDiskShift].ored_field().show();
-  std::cout << "phi_mod " << m_impl[kPhiMod].decode_index() << " "
-            << (std::string) m_impl[kPhiMod].ored_field() << " "
-            << std::hex << m_impl[kPhiMod].mask() << " "
-            << m_impl[kPhiMod].zeroing_mask() << " "
-            << std::dec << m_impl[kPhiMod].shift()
-            << " " << m_impl[kPhiMod].bits() << " " << m_impl[kPhiMod].bits_offset() << " ";
-  m_impl[kPhiMod].ored_field().show();
-  std::cout << "phi_mod_shift " << m_impl[kPhiModShift].decode_index() << " "
-            << (std::string) m_impl[kPhiModShift].ored_field() << " "
-            << std::hex << m_impl[kPhiModShift].mask() << " "
-            << m_impl[kPhiModShift].zeroing_mask() << " "
-            << std::dec << m_impl[kPhiModShift].shift()
-            << " " << m_impl[kPhiModShift].bits() << " " << m_impl[kPhiModShift].bits_offset() << " ";
-  m_impl[kPhiModShift].ored_field().show();
-  std::cout << "eta_mod " << m_impl[kEtaMod].decode_index() << " "
-            << (std::string) m_impl[kEtaMod].ored_field() << " "
-            << std::hex << m_impl[kEtaMod].mask() << " "
-            << m_impl[kEtaMod].zeroing_mask() << " "
-            << std::dec << m_impl[kEtaMod].shift()
-            << " " << m_impl[kEtaMod].bits() << " " << m_impl[kEtaMod].bits_offset() << " ";
-  m_impl[kEtaMod].ored_field().show();
-  std::cout << "eta_mod_shift " << m_impl[kEtaModShift].decode_index() << " "
-            << (std::string) m_impl[kEtaModShift].ored_field() << " "
-            << std::hex << m_impl[kEtaModShift].mask() << " "
-            << m_impl[kEtaModShift].zeroing_mask() << " "
-            << std::dec << m_impl[kEtaModShift].shift()
-            << " " << m_impl[kEtaModShift].bits() << " " << m_impl[kEtaModShift].bits_offset() << " ";
-  m_impl[kEtaModShift].ored_field().show();
-  std::cout << "phi_index " << m_impl[kPhiIndex].decode_index() << " "
-            << (std::string) m_impl[kPhiIndex].ored_field() << " "
-            << std::hex << m_impl[kPhiIndex].mask() << " "
-            << m_impl[kPhiIndex].zeroing_mask() << " "
-            << std::dec << m_impl[kPhiIndex].shift()
-            << " " << m_impl[kPhiIndex].bits() << " " << m_impl[kPhiIndex].bits_offset() << " ";
-  m_impl[kPhiIndex].ored_field().show();
-  std::cout << "eta_index " << m_impl[kEtaIndex].decode_index() << " "
-            << (std::string) m_impl[kEtaIndex].ored_field() << " "
-            << std::hex << m_impl[kEtaIndex].mask() << " "
-            << m_impl[kEtaIndex].zeroing_mask() << " "
-            << std::dec << m_impl[kEtaIndex].shift()
-            << " " << m_impl[kEtaIndex].bits() << " " << m_impl[kEtaIndex].bits_offset() << " ";
-  m_impl[kEtaIndex].ored_field().show();
-  std::cout << "bec_eta_mod " << m_impl[kBecEtaMod].decode_index() << " "
-            << (std::string) m_impl[kBecEtaMod].ored_field() << " "
-            << std::hex << m_impl[kBecEtaMod].mask() << " "
-            << m_impl[kBecEtaMod].zeroing_mask() << " "
-            << std::dec << m_impl[kBecEtaMod].shift()
-            << " " << m_impl[kBecEtaMod].bits() << " " << m_impl[kBecEtaMod].bits_offset() << " ";
-  m_impl[kBecEtaMod].ored_field().show();
-
-
-  std::cout << "PLR_ID::initLevelsFromDict - found levels " << std::endl;
-  std::cout << "subdet        " << m_INDET_INDEX << std::endl;
-  std::cout << "part          " << m_LUMI_INDEX << std::endl;
-  std::cout << "plr           " << m_PLR_INDEX << std::endl;
-  std::cout << "barrel_endcap " << m_BARREL_EC_INDEX << std::endl;
-  std::cout << "layer or disk " << m_LAYER_DISK_INDEX << std::endl;
-  std::cout << "phi_module    " << m_PHI_MODULE_INDEX << std::endl;
-  std::cout << "eta_module    " << m_ETA_MODULE_INDEX << std::endl;
-  std::cout << "phi_index     " << m_PHI_INDEX_INDEX << std::endl;
-  std::cout << "eta_index     " << m_ETA_INDEX_INDEX << std::endl;
+  if (msgLvl(MSG::DEBUG)){ 
+    msg() <<formatOutput("indet ", m_impl[kIndet]);
+    m_impl[kIndet].ored_field().show(msg());
+    msg() <<formatOutput("lumi ", m_lumi_impl);
+    m_lumi_impl.ored_field().show(msg());
+    msg() <<formatOutput("plr ", m_plr_impl);
+    m_plr_impl.ored_field().show(msg());
+    msg() <<formatOutput("bec ", m_impl[kBec]);
+    m_impl[kBec].ored_field().show(msg());
+    msg() <<formatOutput("bec_shift " , m_impl[kBecShift]);
+    m_impl[kBecShift].ored_field().show(msg());
+    msg() <<formatOutput("lay_disk " , m_impl[kLayDisk]);
+    m_impl[kLayDisk].ored_field().show(msg());
+    msg() <<formatOutput("lay_disk_shift " , m_impl[kLayDiskShift]);
+    m_impl[kLayDiskShift].ored_field().show(msg());
+    msg() <<formatOutput("phi_mod ", m_impl[kPhiMod]);
+    m_impl[kPhiMod].ored_field().show(msg());
+    msg() <<formatOutput("phi_mod_shift ", m_impl[kPhiModShift]);
+    m_impl[kPhiModShift].ored_field().show(msg());
+    msg() <<formatOutput("eta_mod " , m_impl[kEtaMod]);
+    m_impl[kEtaMod].ored_field().show(msg());
+    msg() <<formatOutput("eta_mod_shift " , m_impl[kEtaModShift]);
+    m_impl[kEtaModShift].ored_field().show(msg());
+    msg() <<formatOutput("phi_index " , m_impl[kPhiIndex]);
+    m_impl[kPhiIndex].ored_field().show(msg());
+    msg() <<formatOutput("eta_index " , m_impl[kEtaIndex]) ;
+    m_impl[kEtaIndex].ored_field().show(msg());
+    msg() <<formatOutput("bec_eta_mod " , m_impl[kBecEtaMod]) ;
+    m_impl[kBecEtaMod].ored_field().show(msg());
+  
+  
+    msg() << "PLR_ID::initLevelsFromDict - found levels \n" ;
+    msg() << "subdet        " << m_INDET_INDEX<< "\n";
+    msg() << "part          " << m_LUMI_INDEX<< "\n";
+    msg() << "plr           " << m_PLR_INDEX<< "\n";
+    msg() << "barrel_endcap " << m_BARREL_EC_INDEX<< "\n";
+    msg() << "layer or disk " << m_LAYER_DISK_INDEX<< "\n";
+    msg() << "phi_module    " << m_PHI_MODULE_INDEX<< "\n";
+    msg() << "eta_module    " << m_ETA_MODULE_INDEX<< "\n";
+    msg() << "phi_index     " << m_PHI_INDEX_INDEX<< "\n";
+    msg() << "eta_index     " << m_ETA_INDEX_INDEX<< "\n";
+  }
 
   return(0);
 }

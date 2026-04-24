@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HiveAlgV.h"
@@ -28,18 +28,18 @@ StatusCode HiveAlgV::initialize() {
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-StatusCode HiveAlgV::execute() {
+StatusCode HiveAlgV::execute(const EventContext& ctx) const {
 
   ATH_MSG_DEBUG("execute " << name());
  
   sleep();
 
   if (m_writeFirst) {
-    ATH_CHECK(write());
-    ATH_CHECK(read());
+    ATH_CHECK(write(ctx));
+    ATH_CHECK(read(ctx));
   } else {
-    ATH_CHECK(read());
-    ATH_CHECK(write());
+    ATH_CHECK(read(ctx));
+    ATH_CHECK(write(ctx));
   }
 
   return StatusCode::SUCCESS;
@@ -47,9 +47,9 @@ StatusCode HiveAlgV::execute() {
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 StatusCode
-HiveAlgV::read() const {
+HiveAlgV::read(const EventContext& ctx) const {
   StatusCode sc { StatusCode::SUCCESS };
-  std::vector< SG::ReadHandle<HiveDataObj> > rhv = m_rhv.makeHandles();
+  std::vector< SG::ReadHandle<HiveDataObj> > rhv = m_rhv.makeHandles(ctx);
   for (auto &hnd : rhv) {
     if (!hnd.isValid()) {
       ATH_MSG_ERROR ("Could not retrieve HiveDataObj with key " << hnd.key());
@@ -63,8 +63,8 @@ HiveAlgV::read() const {
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 StatusCode
-HiveAlgV::write() {
-  std::vector< SG::WriteHandle<HiveDataObj> > whv = m_whv.makeHandles();
+HiveAlgV::write(const EventContext& ctx) const {
+  std::vector< SG::WriteHandle<HiveDataObj> > whv = m_whv.makeHandles(ctx);
   for (auto &hnd : whv) {
     ATH_CHECK(hnd.record(std::make_unique<HiveDataObj>( 10101 )));
     ATH_MSG_INFO("  write: " << hnd.key() << " = " << hnd->val() );

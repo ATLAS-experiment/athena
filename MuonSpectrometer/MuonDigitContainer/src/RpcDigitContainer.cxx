@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // MuonDigitContainer.cxx
@@ -37,11 +37,16 @@ RpcDigitContainer::~RpcDigitContainer() = default;
 
 //**********************************************************************
 
- const CLID& RpcDigitContainer::classID()    
+CLID RpcDigitContainer::classID()
 {
   return ClassID_traits<RpcDigitContainer>::ID();       
-  //      static const CLID CLID_RpcDigitContainer= 4192; 
-  //      return  CLID_RpcDigitContainer ; 
+}
+
+
+const CLID& RpcDigitContainer::clID() const
+{
+  static const CLID cid = classID();
+  return cid;
 }
 
 

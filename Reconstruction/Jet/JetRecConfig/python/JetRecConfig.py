@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 """
 JetRecConfig: A helper module for configuring jet reconstruction     
@@ -271,7 +271,7 @@ def getPseudoJetAlgs(jetdef):
 _mergedPJContainers = dict()
 def mergedPJId(pjList):
     """returns a simple unique ID for the list of PseudoJet container in pjList"""
-    t = tuple(str(n) for n in pjList) # make sure it is string (it can be DataHandle in old style config)
+    t = tuple(str(n) for n in pjList) # make sure it is string (it could have been a handle in old style config)
     currentSize = len(_mergedPJContainers)
     return str(_mergedPJContainers.setdefault(t, currentSize))
 

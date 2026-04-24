@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagInference/GNNDataLoader.h"
@@ -9,14 +9,15 @@ FlavorTagInference::GNNDataLoader::GNNDataLoader(ISaltModelPtr saltModel, const 
   m_gnn_options(gnn_options)
   {
     // Create configuration objects for data preprocessing.
-    auto [inputs_config, constituents_configs, fo] = 
+    auto [inputs_config, constituents_configs, fo] =
         dataprep::createGetterConfig<
-            SaltModelGraphConfig::GraphConfig, 
+            SaltModelGraphConfig::GraphConfig,
             SaltModelGraphConfig::OutputNodeConfig
         > (
-            graph_config, 
-            m_gnn_options.flip_config, 
-            m_gnn_options.variable_remapping
+            graph_config,
+            m_gnn_options.flip_config,
+            m_gnn_options.variable_remapping,
+            saltModel->getModelName()
         );
     auto salt_model_version = saltModel->getSaltModelVersion();
 
@@ -24,7 +25,8 @@ FlavorTagInference::GNNDataLoader::GNNDataLoader(ISaltModelPtr saltModel, const 
       switch (config.type){
       using enum ConstituentsType;
       case TRACK:
-        addVectorLoader(getVecInputName(salt_model_version, config), std::make_shared<TracksLoader>(config, fo));
+        addVectorLoader(getVecInputName(salt_model_version, config),
+            std::make_shared<TracksLoader>(config, fo));
         break;
       case FLOW_ELEMENT:
         addVectorLoader(getVecInputName(salt_model_version, config), std::make_shared<FlowElementsLoader>(config, fo));
@@ -34,6 +36,15 @@ FlavorTagInference::GNNDataLoader::GNNDataLoader(ISaltModelPtr saltModel, const 
         break;
       case ELECTRON:
         addVectorLoader(getVecInputName(salt_model_version, config), std::make_shared<ElectronsLoader>(config, fo));
+        break;
+      case MUON:
+        addVectorLoader(getVecInputName(salt_model_version, config), std::make_shared<MuonsLoader>(config, fo));
+        break;
+      case CALO_CLUSTER:
+        addVectorLoader(getVecInputName(salt_model_version, config), std::make_shared<CaloClusterLoader>(config, fo));
+        break;
+      case TOWER:
+        addVectorLoader(getVecInputName(salt_model_version, config), std::make_shared<TowerLoader>(config, fo));
         break;
       default:
         throw std::runtime_error("Unknown constituent type");

@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef PFTRACKSELECTOR_H
-#define PFTRACKSELECTOR_H
+#ifndef EFLOWREC_PFTRACKSELECTOR_H
+#define EFLOWREC_PFTRACKSELECTOR_H
 
 /** Algorithm which will select tracks for downstream algorithms to use within eflowRec */
 
@@ -10,8 +10,8 @@
 
 #include "AthenaMonitoringKernel/Monitored.h"
 
-#include "StoreGate/DataHandle.h"
-#include "StoreGate/ReadCondHandleKey.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteHandleKey.h"
 
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
@@ -33,7 +33,7 @@ public:
   /** Default destructor */
   ~PFTrackSelector(){};
 
-  /** Gaudi AthAlgorithm hooks */
+  /** Gaudi AthReentrantAlgorithm hooks */
   StatusCode initialize();
   StatusCode execute(const EventContext& ctx) const;
   StatusCode finalize();
@@ -43,10 +43,10 @@ private:
   bool selectTrack(const xAOD::TrackParticle& track) const;
 
   /** check if track belongs to an electron */
-  bool isElectron(const xAOD::TrackParticle* track) const;
+  bool isElectron(const xAOD::TrackParticle* track, const xAOD::ElectronContainer* electronContainer) const;
 
   /** check if track belongs to an muon */
-  bool isMuon(const xAOD::TrackParticle* track) const;
+  bool isMuon(const xAOD::TrackParticle* track, const xAOD::MuonContainer* muonContainer) const;
 
   /** ReadHandleKey for the TrackParticleContainer to be used as input */
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_tracksReadHandleKey{

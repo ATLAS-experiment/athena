@@ -77,7 +77,7 @@ namespace GlobalSim {
 
     for (const auto& feb2Key : gblLArCells.getFeb2Keys()) {
 
-        const std::vector<GlobalLArCell*>& cells = gblLArCells.getCellsForFeb2(feb2Key);
+        const std::vector<std::shared_ptr<GlobalLArCell>>& cells = gblLArCells.getCellsForFeb2(feb2Key);
         std::bitset<FEB2_BITSTREAM_SIZE> input_bitstream = assembleBitsetForFeb2(cells, 
             gblLArCells.getMaxCellsPerFeb2(), 
             gblLArCells.feb2InOverflow(feb2Key), 
@@ -107,11 +107,11 @@ namespace GlobalSim {
 
 
   // Function that assembles the bitstream from each FEB2
-  std::bitset<LArCellMuxAlg::FEB2_BITSTREAM_SIZE> LArCellMuxAlg::assembleBitsetForFeb2(const std::vector<GlobalSim::GlobalLArCell*>& cells, std::size_t maxCells,  bool inOverflow, bool inError, uint32_t bcid) const {
+  std::bitset<LArCellMuxAlg::FEB2_BITSTREAM_SIZE> LArCellMuxAlg::assembleBitsetForFeb2(const std::vector<std::shared_ptr<GlobalSim::GlobalLArCell>>& cells, std::size_t maxCells,  bool inOverflow, bool inError, uint32_t bcid) const {
 
       // Sort cells based on channel number
-      std::vector<const GlobalSim::GlobalLArCell*> sortedCells(cells.begin(), cells.end());
-      std::sort(sortedCells.begin(), sortedCells.end(), [](const auto* a, const auto* b) {
+      std::vector<std::shared_ptr<GlobalSim::GlobalLArCell>> sortedCells(cells.begin(), cells.end());
+      std::sort(sortedCells.begin(), sortedCells.end(), [](auto a, auto b) {
           return a->getChannel() < b->getChannel();
       });
 
@@ -127,7 +127,7 @@ namespace GlobalSim {
 
       for (std::size_t i = 0; i < sortedCells.size(); ++i) {
 
-          const auto* cell = sortedCells[i];
+          auto cell = sortedCells[i];
 
           // 2sigma mask by channel
           mask_twoSigma[cell->getChannel()] = true;

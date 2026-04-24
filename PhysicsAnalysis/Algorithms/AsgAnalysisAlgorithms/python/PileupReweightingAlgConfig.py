@@ -30,15 +30,18 @@ def McEventWeightCfg(flags, name="MyWeights", **kwargs):
 
 def PileupReweightingToolCfg(flags, name="PileupReweightingTool", commonPRW=True, **kwargs):
     acc = ComponentAccumulator()
-    from Campaigns.Utils import getMCCampaign
-    campaign = getMCCampaign(flags.Input.Files)
+    if "LumiCalcFiles" not in kwargs or "ConfigFiles" not in kwargs:
+        from Campaigns.Utils import getMCCampaign
+        campaign = getMCCampaign(flags.Input.Files)
 
-    from PileupReweighting.AutoconfigurePRW import defaultConfigFiles,getConfigurationFiles,getLumicalcFiles
-    kwargs.setdefault("LumiCalcFiles", getLumicalcFiles(campaign))
-    if commonPRW:
-        kwargs.setdefault("ConfigFiles", defaultConfigFiles(campaign))
-    else:
-        kwargs.setdefault("ConfigFiles", getConfigurationFiles(files=flags.Input.Files))
+        from PileupReweighting.AutoconfigurePRW import defaultConfigFiles, getConfigurationFiles, getLumicalcFiles
+        if "LumiCalcFiles" not in kwargs:
+            kwargs.setdefault("LumiCalcFiles", getLumicalcFiles(campaign))
+        if "ConfigFiles" not in kwargs:
+            if commonPRW:
+                kwargs.setdefault("ConfigFiles", defaultConfigFiles(campaign))
+            else:
+                kwargs.setdefault("ConfigFiles", getConfigurationFiles(files=flags.Input.Files))
 
     acc.setPrivateTools(CompFactory.CP.PileupReweightingTool(**kwargs))
     return acc
@@ -52,14 +55,17 @@ def PileupReweightingAlgCfg(flags, name="PileupReweightingAlg", **kwargs):
     return acc
 
 
-def PileupReweightingProviderToolCfg(flags, name="auto", **kwargs):
+def PileupReweightingProviderToolCfg(flags, name="PileupReweightingProviderTool"):
     acc = ComponentAccumulator()
-    kwargs.setdefault("WeightTool", acc.addPublicTool(acc.popToolsAndMerge(McEventWeightCfg(flags))))
-    kwargs.setdefault("ConfigFiles", [])
-    kwargs.setdefault("LumiCalcFiles", [])
-    kwargs.setdefault("DataScaleFactor", 1.0)
-    kwargs.setdefault("DataScaleFactorUP", 0.)
-    kwargs.setdefault("DataScaleFactorDOWN", 0.)
-    kwargs.setdefault("PeriodAssignments", [])
-    acc.setPrivateTools(acc.popToolsAndMerge(PileupReweightingToolCfg(flags, name, **kwargs)))
+    arguments = {
+        "WeightTool": acc.addPublicTool(acc.popToolsAndMerge(McEventWeightCfg(flags))),
+        "ConfigFiles": [],
+        "LumiCalcFiles": [],
+        "DataScaleFactor": 1.0,
+        "DataScaleFactorUP": 0.,
+        "DataScaleFactorDOWN": 0.,
+        "PeriodAssignments": []
+    }
+
+    acc.setPrivateTools(acc.popToolsAndMerge(PileupReweightingToolCfg(flags, name, **arguments)))
     return acc

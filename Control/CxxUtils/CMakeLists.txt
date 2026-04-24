@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CxxUtils )
@@ -138,7 +138,7 @@ atlas_add_test( exctrace2_test
 atlas_add_test( stringUtilsTest
                 SOURCES test/StringUtils_test.cxx
                 LINK_LIBRARIES CxxUtils
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
 
 
 atlas_add_test( CachedValueTiming_test
@@ -151,7 +151,7 @@ atlas_add_test( close_to_zero_test
   SOURCES test/close_to_zero_test.cxx
   LINK_LIBRARIES CxxUtils
   PROPERTIES TIMEOUT 300
-  POST_EXEC_SCRIPT nopost.sh )
+  POST_EXEC_SCRIPT noerror.sh )
 
 
 # Set up the "simple" tests:

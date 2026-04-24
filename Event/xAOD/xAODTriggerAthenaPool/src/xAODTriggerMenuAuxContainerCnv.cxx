@@ -17,10 +17,10 @@ xAODTriggerMenuAuxContainerCnv( ISvcLocator* svcLoc )
 }
 
 xAOD::TriggerMenuAuxContainer*
-xAODTriggerMenuAuxContainerCnv::createTransientWithKey (const std::string& key) {
+xAODTriggerMenuAuxContainerCnv::createTransientWithKey (const Token* token, const std::string& key) {
 
   std::unique_ptr<xAOD::TriggerMenuAuxContainer_v1> obj
-    { xAODTriggerMenuAuxContainerCnvBase::createTransientWithKey (key) };
+    { xAODTriggerMenuAuxContainerCnvBase::createTransientWithKey (token, key) };
 
   size_t sz = obj->smk.size();
 

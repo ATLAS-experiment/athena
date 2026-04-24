@@ -218,7 +218,7 @@ def _getRawChannelContainer(prevFlags):
 
 
 def getRawChannelContainerOptATLAS(flags):
-     if not (flags.Input.isMC or flags.Overlay.DataOverlay) and flags.Input.Format is Format.BS:
+     if not flags.Overlay.DataOverlay and flags.Input.Files and flags.Input.Format is Format.BS:
           return 'TileRawChannelFixed'
      else:
           return 'TileRawChannelCnt'

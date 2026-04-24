@@ -8,6 +8,7 @@
 #include <cstdio>
 #include <cstring>
 #include <iomanip>
+#include <iostream>
 #include <charconv>
 #include <stdexcept>
 #include <ranges>

@@ -154,7 +154,7 @@ def MM_OverlayDigitizationBasicCfg(flags, **kwargs):
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         if flags.Muon.usePhaseIIGeoSetup:
             acc.merge(SGInputLoaderCfg(flags,["xAOD::MuonSimHitContainer#xMmSimHits",
-                                              "xAOD::muonSimHitAuxConatiner#xMmSimHitsAux."]))
+                                              "xAOD::MuonSimHitAuxContainer#xMmSimHitsAux."]))
         else:
             acc.merge(SGInputLoaderCfg(flags, ["MMSimHitCollection#MM_Hits"]))
 

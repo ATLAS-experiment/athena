@@ -23,7 +23,6 @@ namespace ActsTrk::detail{
   StatusCode StripCalibratorImpl<traj_t>::initialize()
   {
     ATH_MSG_DEBUG("Initializing " << AthAlgTool::name() << " ...");
-    ATH_CHECK(m_stripDetEleCollKey.initialize());
 
     ATH_MSG_DEBUG(AthAlgTool::name() << " successfully initialized");
 
@@ -36,27 +35,15 @@ namespace ActsTrk::detail{
   }
 
   template <typename traj_t>
-  const InDetDD::SiDetectorElement& StripCalibratorImpl<traj_t>::getDetectorElement(xAOD::DetectorIDHashType id) const
+  const InDetDD::SiDetectorElement& StripCalibratorImpl<traj_t>::getDetectorElement(const Acts::Surface &surface) const
   {
-    const InDetDD::SiDetectorElement* element=nullptr;
-    SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> stripDetEleHandle(
-                                                                               m_stripDetEleCollKey,
-                                                                               Gaudi::Hive::currentContext());
-
-    const InDetDD::SiDetectorElementCollection* detElements(*stripDetEleHandle);
-
-    if (!stripDetEleHandle.isValid() or detElements == nullptr) {
-      ATH_MSG_ERROR(m_stripDetEleCollKey.fullKey() << " is not available.");
+    const ActsDetectorElement* detElem = dynamic_cast<const ActsDetectorElement*>(surface.surfacePlacement());
+    const InDetDD::SiDetectorElement *siDetElement = detElem ? dynamic_cast<const InDetDD::SiDetectorElement *>(detElem->upstreamDetectorElement()) : nullptr;
+    if (!siDetElement) {
+        ATH_MSG_ERROR("Surface without associated SI detector element");
+        throw std::runtime_error("SiDetectorElement is NULL");
     }
-    else {
-         element = detElements->getDetectorElement(id);
-    }
-    if (element == nullptr) {
-      ATH_MSG_ERROR("No element corresponding to hash " << id << " for " << m_stripDetEleCollKey.fullKey());
-      throw std::runtime_error("SiDetectorElement is NULL");
-    }
-
-    return *element;
+    return *siDetElement;
   }
 
   template <typename traj_t>
@@ -93,8 +80,8 @@ namespace ActsTrk::detail{
       const xAOD::StripCluster& cluster,
       const TrackStateProxy& /*state*/) const
   {
-      const InDetDD::SiDetectorElement &detElement = getDetectorElement(cluster.identifierHash());
-      return calibrate(gctx, cctx, cluster, detElement);
+     //      const InDetDD::SiDetectorElement &detElement = getDetectorElement(state.referenceSurface());
+      return calibrate(gctx, cctx, cluster);
   }
 
   template <typename traj_t>
@@ -103,11 +90,12 @@ namespace ActsTrk::detail{
   StripCalibratorImpl<traj_t>::calibrate(
       const Acts::GeometryContext& gctx,
       const Acts::CalibrationContext& cctx,
+      [[maybe_unused]] const Acts::Surface& surface,
       const xAOD::StripCluster& cluster,
       const Acts::BoundTrackParameters& /*bound_parameters*/) const
   {
-      const InDetDD::SiDetectorElement &detElement = getDetectorElement(cluster.identifierHash());
-      return calibrate(gctx, cctx, cluster, detElement);
+     //      const InDetDD::SiDetectorElement &detElement = getDetectorElement(surface);
+      return calibrate(gctx, cctx, cluster);
   }
 
   template <typename traj_t>
@@ -116,8 +104,7 @@ namespace ActsTrk::detail{
   StripCalibratorImpl<traj_t>::calibrate(
       const Acts::GeometryContext& /*gctx*/,
       const Acts::CalibrationContext& /*cctx*/,
-      const xAOD::StripCluster& cluster,
-      const InDetDD::SiDetectorElement& /*detElement*/) const
+      const xAOD::StripCluster& cluster) const
   {
       Pos pos = cluster.template localPosition<1>();
       Cov cov = cluster.template localCovariance<1>();
@@ -152,6 +139,7 @@ void StripCalibratorImpl<traj_t>::connectStripCalibrator(IOnBoundStateCalibrator
                 typename StripCalibratorImpl<traj_t>::Cov>
       (StripCalibratorImpl<traj_t>:: *)(const Acts::GeometryContext&,
                                         const Acts::CalibrationContext&,
+                                        const Acts::Surface &,
                                         const xAOD::StripCluster&,
                                         const Acts::BoundTrackParameters&) const;
 

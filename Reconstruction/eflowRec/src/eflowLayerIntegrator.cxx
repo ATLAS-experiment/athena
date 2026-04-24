@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -103,11 +103,11 @@ void eflowLayerIntegrator::resetAllClustersIntegralForNewTrack(const eflowTrackC
   /* Calculate the caloDepthArray */
   double em2Eta = trackCalo.getEM2eta();
   if (!m_isHLLHC) {
-    if ( fabs(em2Eta) > 2.5 ) em2Eta = 2.49;  //sometimes track extrapolator returns e.g. 2.51 for em2Eta, which causes depth array to be filled with zeroes.
+    if ( std::fabs(em2Eta) > 2.5 ) em2Eta = 2.49;  //sometimes track extrapolator returns e.g. 2.51 for em2Eta, which causes depth array to be filled with zeroes.
   }
   else{
     if(em2Eta<-998.) em2Eta = trackCalo.getFCAL0eta();
-    if ( fabs(em2Eta) > 4.0 ) { em2Eta = 3.99; }   //sometimes track extrapolator returns e.g. 4.01 for em2Eta, which causes depth array to be filled with zeroes.
+    if ( std::fabs(em2Eta) > 4.0 ) { em2Eta = 3.99; }   //sometimes track extrapolator returns e.g. 4.01 for em2Eta, which causes depth array to be filled with zeroes.
   }
 
   m_caloModel.calcDepthArray(em2Eta, 1.0e-4);
@@ -213,9 +213,9 @@ void eflowLayerIntegrator::measureCell(const CaloCell* cell, const eflowTrackCal
 
   const double dEta = cell->eta() - extrapTrackEta;
   const double dPhi = xAOD::P4Helpers::deltaPhi(cell->phi(), extrapTrackPhi);
-  const double dr = sqrt(dEta * dEta + dPhi * dPhi);
+  const double dr = std::sqrt(dEta * dEta + dPhi * dPhi);
 
-  if ( fabs(dr - std::max(etaWidth, phiWidth)) <= m_rMax || dr <= m_rMax ) {
+  if ( std::fabs(dr - std::max(etaWidth, phiWidth)) <= m_rMax || dr <= m_rMax ) {
 
     eflowRange etaRange(dEta - etaWidth/2.0, dEta + etaWidth/2.0);
     eflowRange phiRange(dPhi - phiWidth/2.0, dPhi+phiWidth/2.0);

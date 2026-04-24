@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # Slimmed DAOD_PHYSLITE.py for Run 3 trigger-object level analyses (TLAs)
 # It contains minimal variables needed for the Run 3 ISR+DiJet TLA searches
@@ -42,10 +42,6 @@ def TLA2KernelCfg(flags, name='TLA2Kernel', **kwargs):
     from DerivationFrameworkTLA.TLACommonConfig import TLACommonAugmentationsCfg
     acc.merge(TLACommonAugmentationsCfg(flags, prefix="TLA2_", TriggerListsHelper = kwargs['TriggerListsHelper']))
 
-    # Jets
-    from DerivationFrameworkJetEtMiss.JetCommonConfig import JetCommonCfg
-    acc.merge(JetCommonCfg(flags))
-
     from DerivationFrameworkInDet.InDetToolsConfig import InDetTrackSelectionToolWrapperCfg
     DFCommonTrackSelection = acc.getPrimaryAndMerge(InDetTrackSelectionToolWrapperCfg(
         flags,
@@ -74,7 +70,7 @@ def TLA2KernelCfg(flags, name='TLA2Kernel', **kwargs):
         SGKey                   = "Electrons",
         InDetTrackParticlesKey  = "InDetTrackParticles"))
 
-    TLA2_thinning_expression = "InDetTrackParticles.DFTLA2Loose && ( abs(InDetTrackParticles.d0) < 5.0*mm ) && ( abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm )"
+    TLA2_thinning_expression = ""
 
     TLA2Akt4JetTPThinningTool  = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(
         flags,
@@ -149,9 +145,9 @@ def TLA2Cfg(flags):
     # Extra content
     if flags.Input.isMC:
         TLA2SlimmingHelper.ExtraVariables += [
-            "AntiKt4EMTopoJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
+            "AntiKt4EMTopoJets.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
             
-            "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
+            "AntiKt4EMPFlowJets.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
             
             "TruthPrimaryVertices.t.x.y.z",
                                                         
@@ -159,9 +155,7 @@ def TLA2Cfg(flags):
         ]
     else:
         TLA2SlimmingHelper.ExtraVariables += [
-            "AntiKt4EMTopoJets.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1",
-            
-            "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_truthjet_nCharged.HECQuality.TrackSumMass.PSFrac.TrackSumPt.SumPtChargedPFOPt1000.EMFrac.Width.JetEMScaleMomentum_pt.JetEMScaleMomentum_eta.TracksForBTagging.SumPtTrkPt1000.TrackWidthPt500",
+            "AntiKt4EMPFlowJets.HECQuality.TrackSumMass.PSFrac.TrackSumPt.SumPtChargedPFOPt1000.EMFrac.Width.JetEMScaleMomentum_pt.JetEMScaleMomentum_eta.TracksForBTagging.SumPtTrkPt1000.TrackWidthPt500",
                                                                     
             "EventInfo.hardScatterVertexLink.timeStampNSOffset",
 
@@ -171,7 +165,7 @@ def TLA2Cfg(flags):
     TLA2SlimmingHelper.AllVariables = [
         # store event shape variables to get full objects (also included by jet CP content)
         "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape", # EMTopo and EMPFlow event shapes
-        "Kt4EMPFlowPUSBEventShape","Kt4EMPFlowNeutEventShape", # newer event shapes for testing (e.g. if offline jet calibration changes)
+        "Kt4EMPFlowNeutEventShape", # new event shape used for Run 3 offline calibration
         # store muon segments in case they are needed for offline jet calibrations
         "MuonSegments",
     ]

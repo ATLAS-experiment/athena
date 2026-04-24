@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "XMLCoreParser/XMLCoreParser.h" 
@@ -39,42 +39,42 @@ public:
 
 void 
 ExpatCoreParser::start (void* user_data, const char* el, const char** attr){
-  ExpatCoreParser& me = *reinterpret_cast<ExpatCoreParser*> (user_data);
+  auto& me = *reinterpret_cast<ExpatCoreParser*> (user_data);
   me.do_start (el, attr);
 }
 
 void 
 ExpatCoreParser::end (void* user_data, const char* el){
-  ExpatCoreParser& me = *reinterpret_cast<ExpatCoreParser*> (user_data);
+  auto& me = *reinterpret_cast<ExpatCoreParser*> (user_data);
   me.do_end (el);
 }
 
 void 
 ExpatCoreParser::char_data (void* user_data, const XML_Char* s, int len){
-  ExpatCoreParser& me = *reinterpret_cast<ExpatCoreParser*> (user_data);
+  auto& me = *reinterpret_cast<ExpatCoreParser*> (user_data);
   me.do_char_data (s, len);
 }
 
 void 
 ExpatCoreParser::default_handler (void* user_data, const XML_Char* s, int len){
-  ExpatCoreParser& me = *reinterpret_cast<ExpatCoreParser*> (user_data);
+  auto& me = *reinterpret_cast<ExpatCoreParser*> (user_data);
   me.do_default_handler (s, len);
 }
 
 void 
 ExpatCoreParser::comment (void* user_data, const XML_Char* s){
-  ExpatCoreParser& me = *reinterpret_cast<ExpatCoreParser*> (user_data);
+  auto& me = *reinterpret_cast<ExpatCoreParser*> (user_data);
   me.do_comment (s);
 }
 
 int 
 ExpatCoreParser::external_entity (XML_Parser parser,
-				      const XML_Char* context,
-				      const XML_Char* /*base*/,
-				      const XML_Char* systemId,
-				      const XML_Char* /*publicId*/){
+                                  const XML_Char* context,
+                                  const XML_Char* /*base*/,
+                                  const XML_Char* systemId,
+                                  const XML_Char* /*publicId*/){
   void* user_data = XML_GetUserData (parser);
-  ExpatCoreParser& me = *reinterpret_cast<ExpatCoreParser*> (user_data);
+  auto& me = *reinterpret_cast<ExpatCoreParser*> (user_data);
   return (me.do_external_entity (parser, context, systemId));
 }
   
@@ -100,14 +100,14 @@ ExpatCoreParser::register_text_entity (const std::string& name, const std::strin
 
 void 
 ExpatCoreParser::entity (void* /*userData*/,
-			      const XML_Char* entityName,
-			      int is_parameter_entity,
-			      const XML_Char* value,
-			      int value_length,
-			      const XML_Char* base,
-			      const XML_Char* systemId,
-			      const XML_Char* publicId,
-			      const XML_Char* /*notationName*/){
+                         const XML_Char* entityName,
+                         int is_parameter_entity,
+                         const XML_Char* value,
+                         int value_length,
+                         const XML_Char* base,
+                         const XML_Char* systemId,
+                         const XML_Char* publicId,
+                         const XML_Char* /*notationName*/){
   if (!base) base = "none";
   if (!systemId) systemId = "none";
   if (!publicId) publicId = "none";
@@ -127,7 +127,7 @@ ExpatCoreParser::entity (void* /*userData*/,
   }
 }
 
-std::unique_ptr<CoreParser::DOMNode> 
+std::unique_ptr<XMLCoreNode>
 ExpatCoreParser::get_document (){
   return std::move(m_top);
 }
@@ -138,24 +138,31 @@ ExpatCoreParser::ExpatCoreParser (const std::string& prefix)
     m_prefix (prefix){
 }
 
-void 
-ExpatCoreParser::do_start (const char* el, const char** attr){
-  int i;
-  std::map <std::string, std::string> a;
+XMLCoreNode*
+ExpatCoreParser::add_node (std::unique_ptr<XMLCoreNode> node)
+{
   if (!m_top){
-    m_top = std::make_unique<CoreParser::DOMNode> ();
+    m_top = std::make_unique<XMLCoreNode> (XMLCoreNode::DOCUMENT_NODE);
     m_last = m_top.get();
   }
-  CoreParser::DOMNode* node = new CoreParser::DOMNode (CoreParser::DOMNode::ELEMENT_NODE, el, m_last);
+
+  return m_last->add_child (std::move(node));
+}
+
+void
+ExpatCoreParser::do_start (const char* el, const char** attr){
+  auto node = std::make_unique<XMLCoreNode> (XMLCoreNode::ELEMENT_NODE, el);
+
   if (ExpatCoreParserDebugger::debug ()) {
     std::cout << "ExpatCoreParser::do_start> el=" << el << " top=" << m_top.get() << " last=" << m_last << " node=" << node << std::endl; 
   }
-  m_last = node;
-  for (i = 0; attr[i]; i += 2) {
+  for (int i = 0; attr[i]; i += 2) {
     const char* name = attr[i];
     const char* value = attr[i+1];
-    node->m_attributes[name] = value;
+    node->set_attrib (name, value);
   }
+
+  m_last = add_node (std::move(node));
 }
 
 void 
@@ -163,7 +170,7 @@ ExpatCoreParser::do_end (const char* el){
   if (ExpatCoreParserDebugger::debug ()){
     std::cout << "ExpatCoreParser::do_end> el=" << el << std::endl; 
   }
-  m_last = m_last->m_parent;
+  m_last = m_last->get_parent();
 }
 
 void 
@@ -175,6 +182,9 @@ ExpatCoreParser::do_char_data (const XML_Char* s, int len){
   if (ExpatCoreParserDebugger::debug ()) {
     std::cout << "ExpatCoreParser::do_char_data> [" << temp << "]" << std::endl;
   }
+
+  auto node = std::make_unique<XMLCoreNode> (XMLCoreNode::TEXT_NODE, "", temp);
+  add_node (std::move(node));
 }
 
 void 
@@ -190,17 +200,12 @@ ExpatCoreParser::do_default_handler (const XML_Char* s, int len){
   
 void 
 ExpatCoreParser::do_comment (const XML_Char* s){
-  if (!m_top)  {
-    m_top = std::make_unique<CoreParser::DOMNode> ();
-    m_last = m_top.get();
-  }
-  CoreParser::DOMNode* node = new CoreParser::DOMNode (CoreParser::DOMNode::COMMENT_NODE, s, m_last);
+  auto node = std::make_unique<XMLCoreNode> (XMLCoreNode::COMMENT_NODE, "", s);
   if (ExpatCoreParserDebugger::debug ()) {
     std::cout << "ExpatCoreParser::do_comment> s=" << s << " top=" << m_top.get() << " last=" << m_last << " node=" << node << std::endl; 
   }
-  // Node is owned by m_last.
-  // cppcheck-suppress memleak
-  node = nullptr;
+
+  add_node (std::move(node));
 }
 
 int 
@@ -335,7 +340,8 @@ ExpatCoreParser::generic_text_parse (XML_Parser p, const std::string& text){
 
 int 
 ExpatCoreParser::do_external_entity (XML_Parser parser,
-					 const XML_Char* context, const XML_Char* systemId){
+                                     const XML_Char* context,
+                                     const XML_Char* systemId){
   std::string context_str;
   if (context == 0) context_str = "none";
   else context_str = context;
@@ -403,7 +409,7 @@ ExpatCoreParser::find_text_entity (const std::string& name){
   } 
 } 
 
-std::unique_ptr<CoreParser::DOMNode>
+std::unique_ptr<XMLCoreNode>
 ExpatCoreParser::parse (const std::string& file_name){
   std::string name = file_name;
   std::string::size_type pos = file_name.rfind ('/');
@@ -419,6 +425,21 @@ ExpatCoreParser::parse (const std::string& file_name){
     std::abort();
   }
   int result = me.generic_parse (p, name);
+  XML_ParserFree (p);
+  if (result == 0) return nullptr;
+  return me.get_document ();
+}
+
+
+std::unique_ptr<XMLCoreNode>
+ExpatCoreParser::parse_string (const std::string& text){
+  ExpatCoreParser me ("");
+  XML_Parser p = XML_ParserCreate (NULL);
+  if (!p)  {
+    std::cout << "ExpatCoreParser::Couldn't allocate memory for parser" << std::endl;
+    std::abort();
+  }
+  int result = me.generic_text_parse (p, text);
   XML_ParserFree (p);
   if (result == 0) return nullptr;
   return me.get_document ();

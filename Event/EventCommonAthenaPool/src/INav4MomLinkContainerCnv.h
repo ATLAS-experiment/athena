@@ -51,7 +51,7 @@ protected:
   virtual INav4MomLinkContainer_PERS*   createPersistent ( INav4MomLinkContainer* transCont );
 
   /** Member method to create the transient version */
-  virtual INav4MomLinkContainer*        createTransient ();
+  virtual INav4MomLinkContainer*        createTransient(const Token* token);
 
   /** Create the t/p converter */
   INav4MomLinkContainerCnv_p1 m_TPConverter;

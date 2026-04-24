@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "jSuperCellTowerMapper.h"
@@ -997,6 +997,7 @@ int jSuperCellTowerMapper::FindAndConnectTower(std::unique_ptr<jTowerContainer> 
             layer = 1;
             break;
         }
+        //coverity[DEADCODE]
         default: {
             break;
         }

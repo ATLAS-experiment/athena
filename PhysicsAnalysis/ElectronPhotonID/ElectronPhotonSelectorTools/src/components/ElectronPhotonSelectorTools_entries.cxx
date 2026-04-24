@@ -10,7 +10,9 @@
 #include "ElectronPhotonSelectorTools/AsgForwardElectronCalibrationTool.h"
 #include "ElectronPhotonSelectorTools/AsgForwardElectronSelectorTool.h"
 #include "ElectronPhotonSelectorTools/ForwardElectronToolsTestAlg.h"
-
+#include "ElectronPhotonSelectorTools/AsgPhotonBDTSelector.h"
+#include "ElectronPhotonSelectorTools/PhotonBDTCalculator.h"
+#include "ElectronPhotonSelectorTools/PhotonSingleBDTCalculator.h"
 
 // Project include(s).
 #include "AsgTools/AsgComponentFactories.h"
@@ -27,3 +29,6 @@ DECLARE_COMPONENT( AsgElectronSelectorTool )
 DECLARE_COMPONENT( AsgForwardElectronCalibrationTool )
 DECLARE_COMPONENT( AsgForwardElectronSelectorTool )
 DECLARE_COMPONENT( ForwardElectronToolsTestAlg )
+DECLARE_COMPONENT( PhotonIDBDT::AsgPhotonBDTSelector )
+DECLARE_COMPONENT( PhotonIDBDT::PhotonBDTCalculator )
+DECLARE_COMPONENT( PhotonIDBDT::PhotonSingleBDTCalculator )

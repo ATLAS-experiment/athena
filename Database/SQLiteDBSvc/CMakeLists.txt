@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( SQLiteDBSvc )
@@ -10,7 +10,8 @@ find_package( SQLite3 )
 atlas_add_library( SQLiteDBSvcLib
    src/Statement.cxx
    PUBLIC_HEADERS SQLiteDBSvc
-   LINK_LIBRARIES GaudiKernel SQLite::SQLite3 )
+   INCLUDE_DIRS ${SQLite3_INCLUDE_DIRS}
+   LINK_LIBRARIES GaudiKernel ${SQLite3_LIBRARIES} )
 
 
 atlas_add_component( SQLiteDBSvc

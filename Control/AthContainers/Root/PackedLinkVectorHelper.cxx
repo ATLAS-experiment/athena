@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/tools/PackedLinkVectorHelper.h
@@ -23,8 +23,8 @@ namespace SG::detail {
  *              May be modified if the vector grows.
  * @param sg The @c IProxyDict of the current store.
  *           May be null to use the global, thread-local default.
- * @param initFunc Function to initialize a @c DataLink to a given
- *                 hashed key.
+ * @param initLinkFunc Function to initialize a @c DataLink to a given
+ *                     hashed key.
  *
  * Searches for a @c DataLinkBase matching @c sgkey in the linked vector.
  * If not found, then a new entry is added.
@@ -73,8 +73,8 @@ PackedLinkVectorHelperBase::findCollectionBase (LinkedVector& linkedVec,
  * @param sg The @c IProxyDict of the current store.
  *           If null, take it from the links in @c srcDlinks,
  *           or use the global, thread-local default.
- * @param initFunc Function to initialize a @c DataLink to a given
- *                 hashed key.
+ * @param initLinkFunc Function to initialize a @c DataLink to a given
+ *                     hashed key.
  *
  * To be used after links have been copied/moved from one container
  * to another.  The collection indices are updated to be appropriate
@@ -119,8 +119,8 @@ PackedLinkVectorHelperBase::updateLinksBase (IAuxTypeVector& linkedVec,
  * @param sg The @c IProxyDict of the current store.
  *           If null, take it from the links in @c srcDlinks,
  *           or use the global, thread-local default.
- * @param initFunc Function to initialize a @c DataLink to a given
- *                 hashed key.
+ * @param initLinkFunc Function to initialize a @c DataLink to a given
+ *                     hashed key.
  *
  * Returns true if it is known that the payload of the linked vector
  * has not moved.  (If this is false, any caches/iterators must be assumed

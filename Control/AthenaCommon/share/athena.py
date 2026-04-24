@@ -85,6 +85,10 @@ import AthenaCommon.AthOptionsParser as aop
 aop.enable_athenaCLI()
 opts = aop.parse(legacy_args=True)
 
+### set ROOT batch mode
+from PyUtils.Helpers import ROOTSetup
+ROOTSetup(batch = not opts.interactive)
+
 ### inspect first script or pickle to determine legacy/CA mode
 if opts.scripts:
    from AthenaCommon.Utils.unixtools import FindFile

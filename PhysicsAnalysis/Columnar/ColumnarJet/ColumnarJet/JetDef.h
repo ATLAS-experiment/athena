@@ -13,27 +13,24 @@
 
 namespace columnar
 {
-  namespace ContainerId
+  struct JetDef : RegularContainerId<xAOD::Jet,xAOD::JetContainer>
   {
-    struct jet : regularCIBase<xAOD::Jet,xAOD::JetContainer>
-    {
-      static constexpr std::string_view idName = "jet";
-    };
-    using mutableJet = mutableCI<jet>;
-  }
+    static constexpr std::string_view idName = "jet";
+  };
+  using MutableJetDef = MutableContainerId<JetDef>;
 
-  using JetRange = ObjectRange<ContainerId::jet>;
-  using JetId = ObjectId<ContainerId::jet>;
-  using OptJetId = OptObjectId<ContainerId::jet>;
-  template<typename CT,typename CM=ColumnarModeDefault> using JetAccessor  = AccessorTemplate<ContainerId::jet,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using JetDecorator = AccessorTemplate<ContainerId::jet,CT,ColumnAccessMode::output,CM>;
+  using JetRange = ObjectRange<JetDef>;
+  using JetId = ObjectId<JetDef>;
+  using OptJetId = OptObjectId<JetDef>;
+  template<typename CT,typename CM=ColumnarModeDefault> using JetAccessor  = AccessorTemplate<JetDef,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using JetDecorator = AccessorTemplate<JetDef,CT,ColumnAccessMode::output,CM>;
 
-  using MutableJetRange = ObjectRange<ContainerId::mutableJet>;
-  using MutableJetId = ObjectId<ContainerId::mutableJet>;
-  using OptMutableJetId = OptObjectId<ContainerId::mutableJet>;
-  template<typename CT,typename CM=ColumnarModeDefault> using MutableJetAccessor  = AccessorTemplate<ContainerId::mutableJet,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using MutableJetDecorator = AccessorTemplate<ContainerId::mutableJet,CT,ColumnAccessMode::output,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using MutableJetUpdater = AccessorTemplate<ContainerId::mutableJet,CT,ColumnAccessMode::update,CM>;
+  using MutableJetRange = ObjectRange<MutableJetDef>;
+  using MutableJetId = ObjectId<MutableJetDef>;
+  using OptMutableJetId = OptObjectId<MutableJetDef>;
+  template<typename CT,typename CM=ColumnarModeDefault> using MutableJetAccessor  = AccessorTemplate<MutableJetDef,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using MutableJetDecorator = AccessorTemplate<MutableJetDef,CT,ColumnAccessMode::output,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using MutableJetUpdater = AccessorTemplate<MutableJetDef,CT,ColumnAccessMode::update,CM>;
 }
 
 #endif

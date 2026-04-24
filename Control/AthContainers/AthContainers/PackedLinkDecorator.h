@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/PackedLinkDecorator.h
@@ -113,6 +113,13 @@ public:
 
   /// Type referencing an item.
   using reference_type = ELProxy;
+
+  /// Type referencing an item.
+  using const_reference_type = element_type;
+
+  /// A const reference type that can appear on the RHS of an assignment
+  /// to an application of a Decorator of this type.
+  using rhs_const_reference_type = const Link_t&;
 
   /// Not supported.
   using container_pointer_type = void;
@@ -322,7 +329,7 @@ protected:
    * @brief Constructor.
    * @param name Name of this aux variable.
    * @param clsname The name of its associated class.  May be blank.
-   * @param flags Optional flags qualifying the type.  See AuxTypeRegsitry.
+   * @param flags Optional flags qualifying the type.  See AuxTypeRegistry.
    *
    * The name -> auxid lookup is done here.
    */
@@ -689,7 +696,7 @@ protected:
    * @brief Constructor.
    * @param name Name of this aux variable.
    * @param clsname The name of its associated class.  May be blank.
-   * @param flags Optional flags qualifying the type.  See AuxTypeRegsitry.
+   * @param flags Optional flags qualifying the type.  See AuxTypeRegistry.
    *
    * The name -> auxid lookup is done here.
    */

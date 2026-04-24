@@ -7,7 +7,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "InDetIdentifier/PixelID.h"
-#include "InDetReadoutGeometry/SiDetectorElementCollection.h"
+#include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "PixelConditionsData/ITkPixelOfflineCalibData.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "InDetCondTools/ISiLorentzAngleTool.h"
@@ -39,6 +39,7 @@ namespace ActsTrk::detail {
     
     std::pair<Pos, Cov> calibrate(const Acts::GeometryContext&,
                                   const Acts::CalibrationContext&,
+                                  const Acts::Surface&,
                                   const xAOD::PixelCluster&,
                                   const Acts::BoundTrackParameters&) const;
     
@@ -52,7 +53,7 @@ namespace ActsTrk::detail {
     
     using error_data_t = typename std::remove_pointer_t<decltype(std::declval<calib_data_t>().getClusterErrorData())>;
     
-    const InDetDD::SiDetectorElement& getDetectorElement(xAOD::DetectorIDHashType id) const;
+     const InDetDD::SiDetectorElement& getDetectorElement(const Acts::Surface &surface) const;
     
     std::pair<typename AnalogueClusteringToolImpl<calib_data_t, traj_t>::Pos,
               typename AnalogueClusteringToolImpl<calib_data_t, traj_t>::Cov>
@@ -63,7 +64,9 @@ namespace ActsTrk::detail {
               const std::pair<float, float>& angles) const;
     
     std::pair<float, float>
-    anglesOfIncidence(const InDetDD::SiDetectorElement& element,
+    anglesOfIncidence(const Acts::GeometryContext& gctx,
+                      const Acts::Surface &surface,
+                      const InDetDD::SiDetectorElement& element,
                       const Acts::Vector3& direction) const;
     
     
@@ -83,11 +86,7 @@ namespace ActsTrk::detail {
                       const InDetDD::SiDetectorElement& element,
                       const std::pair<float, float>& angles,
                       const xAOD::PixelCluster& cluster) const;
-    
-    SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey {this, "DetEleCollKey", "",
-      "Key of SiDetectorElementCollection for Pixel"
-    };
-    
+
     SG::ReadCondHandleKey<calib_data_t> m_clusterErrorKey {this, "PixelOfflineCalibData", "ITkPixelOfflineCalibData",
       "Calibration data for pixel clusters"
     };  

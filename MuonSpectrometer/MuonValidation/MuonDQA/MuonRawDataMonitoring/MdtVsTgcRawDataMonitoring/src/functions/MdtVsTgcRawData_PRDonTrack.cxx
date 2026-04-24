@@ -197,9 +197,7 @@ MdtVsTgcRawDataValAlg::CheckTGConTrack(std::vector<SegmTrack> (&matchedSegments)
 	//const Trk::RIO_OnTrack* rio = dynamic_cast<const Trk::RIO_OnTrack*>(m);
 	const Muon::CompetingMuonClustersOnTrack* crot = dynamic_cast<const Muon::CompetingMuonClustersOnTrack*>(m);
 	if(crot) { 
-	  const std::vector<const Muon::MuonClusterOnTrack*> mc_list = crot->containedROTs();
-	  for(unsigned int iROT=0; iROT< mc_list.size(); iROT++){
-	   const Muon::MuonClusterOnTrack * rio = mc_list[iROT];
+	  for(const auto& rio : crot->containedROTs()){
 	   //const Trk::RIO_OnTrack* rio = crot->rioOnTrack(iROT);
 	   Identifier id = rio->identify();
 	   int stationName = int(m_idHelperSvc->mdtIdHelper().stationName(id));

@@ -42,7 +42,7 @@ protected:
   
   /** Build the transient representation from a persistent one
    */
-  virtual RecoTimingObj* createTransient();
+  virtual RecoTimingObj* createTransient(const Token* token);
 
  private:
   

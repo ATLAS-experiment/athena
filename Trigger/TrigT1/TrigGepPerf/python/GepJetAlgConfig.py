@@ -15,7 +15,7 @@ def GepJetAlgCfg(
         wta_inf_buffer=False,
         wta_max_const_n=205,
         wta_max_seed_sorting_n=50,
-        wta_jet_dR2=0.16,
+        wta_jet_dR=0.4,
         wta_block_n=4,
         OutputLevel=None):
     
@@ -38,7 +38,7 @@ def GepJetAlgCfg(
                                 WTASeedEtCut=wta_min_seed_et,
                                 WTAMaxConstN=wta_max_const_n,
                                 WTAMaxSeedSortingN=wta_max_seed_sorting_n,
-                                WTAJet_dR2=wta_jet_dR2,
+                                WTAJet_dR=wta_jet_dR,
                                 WTASeedCleaningName=wta_seed_cleaning_name,
                                 WTABlockN=wta_block_n)
 

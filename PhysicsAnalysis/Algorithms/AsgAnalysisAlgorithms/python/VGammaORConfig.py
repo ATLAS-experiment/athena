@@ -1,8 +1,9 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
-from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
-from AthenaCommon.Logging import logging
+from AnalysisAlgorithmsConfig.ConfigAccumulator import (
+    DataType, VGammaORSkipWarning)
+import warnings
 
 class VGammaORBlock(ConfigBlock):
 
@@ -11,7 +12,7 @@ class VGammaORBlock(ConfigBlock):
         self.addOption("dR_lepton_photon_cuts", [0.0, 0.05, 0.075, 0.1, 0.125, 0.15, 0.2], type=list,
                        info=r"list of cuts on $\Delta R$ between the leptons and the photon.")
         self.addOption("photon_pT_cuts", [10e3], type=list,
-                       info=r"list of  $p_\mathrm{T}$ cuts (in MeV) on the photon.")
+                       info=r"list of $p_\mathrm{T}$ cuts (in MeV) on the photon.")
         self.addOption("noFilter", False, type=bool,
                        info="do not apply an event filter, i.e. setting it to `False` "
                        "removes events not passing the overlap removal. If set to `True`, "
@@ -31,11 +32,15 @@ class VGammaORBlock(ConfigBlock):
 
     def makeAlgs(self, config):
 
-        log = logging.getLogger('VGammaORBlock')
 
         if config.dataType() is DataType.Data: return
         if config.dsid() not in self.keepInOverlap and config.dsid() not in self.removeInOverlap:
-            log.warning(f"CP::VGammaORAlg --> this sample has DSID {config.dsid()}, which is not set up for overlap removal. Will skip the configuration of the algorithm!")
+            warnings.warn_explicit(
+                f"CP::VGammaORAlg --> this sample has DSID {config.dsid()}"
+                ", which is not set up for overlap removal."
+                " Will skip the configuration of the algorithm!",
+                VGammaORSkipWarning,
+                filename='', lineno=0)
             return
 
         alg = config.createAlgorithm('CP::VGammaORAlg', 'VGammaORAlg')

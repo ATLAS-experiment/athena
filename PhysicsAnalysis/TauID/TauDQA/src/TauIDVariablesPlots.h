@@ -16,7 +16,7 @@ namespace Tau{
 class TauIDVariablesPlots: public PlotBase {
   public:
     TauIDVariablesPlots(PlotBase *pParent, const std::string& sDir, const std::string& sTauJetContainerName);
-    virtual ~TauIDVariablesPlots();
+    virtual ~TauIDVariablesPlots() = default;
 
     void fill(const xAOD::TauJet& tau, float weight);
 

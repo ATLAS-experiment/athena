@@ -2,6 +2,8 @@
 atlas_subdir( HGTDMapping )
 
 find_package( ROOT COMPONENTS Core PyROOT Tree MathCore Hist RIO pthread )
+find_package( Boost COMPONENTS unit_test_framework )
+
 # Add the shared library:
 atlas_add_library (HGTDMappingLib
             HGTDMapping/*.h src/*.cxx

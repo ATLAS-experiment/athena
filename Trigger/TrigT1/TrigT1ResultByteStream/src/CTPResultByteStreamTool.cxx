@@ -72,6 +72,10 @@ StatusCode CTPResultByteStreamTool::convertFromBS(const std::vector<const ROBF*>
   uint32_t formatVersion = rob->rod_version();
   uint32_t L1ID = rob->rod_lvl1_id();
   uint32_t sourceID = rob->rod_source_id();
+  uint32_t bcid = rob->rod_bc_id();
+  uint32_t trigType = rob->rod_lvl1_trigger_type();
+  uint32_t runNum = rob->rod_run_no();
+  uint32_t evtType = rob->rod_detev_type();
 
   //
   // Trailer information
@@ -147,12 +151,13 @@ StatusCode CTPResultByteStreamTool::convertFromBS(const std::vector<const ROBF*>
   CTPResultUtils::initialize(*result, ctpVersionNumber, vDataWords, nExtraWords);
   
   // Initialize the remaining words
-  result->setHeader(headerMarker, formatVersion, sourceID, L1ID);       // Header words
-  result->setTrailer(ndata, errStatus, statInfo);                       // Trailer words
-  result->setL1AcceptBunchPosition(CTPfragment::lvl1AcceptBunch(rob));  // L1A bunch position
-  result->setTurnCounter(CTPfragment::turnCounter(rob));                // Turn counter
+  result->setHeader(headerMarker, formatVersion, sourceID, L1ID, runNum, bcid, trigType, evtType);  // Header words
+  result->setTrailer(ndata, errStatus, statInfo);                                                   // Trailer words
+  result->setL1AcceptBunchPosition(CTPfragment::lvl1AcceptBunch(rob));                              // L1A bunch position
+  result->setTurnCounter(CTPfragment::turnCounter(rob));                                            // Turn counter
 
   // Record result
+  ATH_MSG_DEBUG(CTPResultUtils::print(*result));
   SG::WriteHandle<xAOD::CTPResult> ctpResultWriteHandle = SG::makeHandle( m_outKeyCTPResult, eventContext );
   ATH_CHECK( ctpResultWriteHandle.record( std::move(result), std::move(resultAux) ));
   ATH_MSG_DEBUG("Created xAOD::CTPResult from bytestream");
@@ -244,6 +249,10 @@ StatusCode CTPResultByteStreamTool::convertToBS(std::vector<WROBF*>& vrobf, cons
   vrobf.push_back(newRobFragment(eventContext, result->sourceID(), rodSize, data, m_detEvType));
   OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment* rob = vrobf.back();
   rob->rod_minor_version(result->headerFormatVersion() & 0xffffu);
+  rob->rod_bc_id(result->BCID());
+  rob->rod_lvl1_type(result->triggerType());
+  rob->rod_run_no(result->runNumber());
+  rob->rod_lvl1_id(result->L1ID());
 
   ATH_MSG_DEBUG("Encoded xAOD::CTPResult to bytestream");
 

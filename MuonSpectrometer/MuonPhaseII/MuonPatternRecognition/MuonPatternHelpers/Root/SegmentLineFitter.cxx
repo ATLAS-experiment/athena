@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Compile this file assuming that FP operations may trap.
@@ -10,6 +10,7 @@ CXXUTILS_TRAPPING_FP;
 #include <MuonPatternHelpers/SegmentLineFitter.h>
 #include <MuonPatternEvent/SegmentFitterEventData.h>
 
+#include <MuonSpacePoint/SpacePointHelpers.h>
 #include <MuonSpacePoint/CalibratedSpacePoint.h>
 #include <MuonSpacePoint/SpacePointPerLayerSorter.h>
 
@@ -33,23 +34,9 @@ namespace MuonR4::SegmentFit{
     using Result_t = SegmentLineFitter::Result_t;
 
     namespace {
-        /** @brief Returns whether the hit suitable for to be used in the fit
-         *  @param hit: Reference to the calibrated space point of interest */
-        bool isGoodHit(const MuonR4::CalibratedSpacePoint& hit) {
-            using enum MuonR4::CalibratedSpacePoint::State;
-            return hit.fitState() == Valid;
-        }
-        /** @brief Returns whether the hit is a muon precision hit */
-        bool isPrecisionHit(const MuonR4::CalibratedSpacePoint& hit) {
-            using enum xAOD::UncalibMeasType;
-            return isGoodHit(hit) && (
-                /// Valid Mdt or micromegas are always precision hits
-                hit.type() == MdtDriftCircleType || hit.type() == MMClusterType ||
-                /// Only consider the stgc strips a precision measurement
-                (hit.type() == sTgcStripType && 
-                static_cast<const xAOD::sTgcMeasurement*>(hit.spacePoint()->primaryMeasurement())->channelType() ==
-                sTgcIdHelper::sTgcChannelTypes::Strip)
-            );
+
+        constexpr double calcRedChi2(const Result_t& result) {
+            return result.nDoF > 0ul ? result.chi2 / result.nDoF : result.chi2;
         }
         /** @brief Counts the number of precision hits
          *  @param hits: Collection of hit participating in the segment fit */
@@ -142,6 +129,7 @@ namespace MuonR4::SegmentFit{
                 <<toString(startPars) <<", plane location: "<<Amg::toString(localToGlobal)<<std::endl
                 <<hitStream.str());
         }
+
         FitOpts_t fitOpts{};
         Result_t result{};
         fitOpts.calibContext = cctx;
@@ -161,7 +149,7 @@ namespace MuonR4::SegmentFit{
         /// Fit the measurements
         result = m_fitter.fit(std::move(fitOpts));
         /// Convert back to athena time units
-        if (m_fitter.config().fitT0){
+        if (m_fitter.config().fitT0) {
             result.parameters[t0idx] = ActsTrk::timeToAthena(result.parameters[t0idx]);
             result.covariance(t0idx, t0idx) = Acts::square(ActsTrk::timeToAthena(1.)) * result.covariance(t0idx, t0idx);
             for (ParamDefs p : {ParamDefs::x0, ParamDefs::y0, ParamDefs::phi, ParamDefs::theta}) {
@@ -170,7 +158,13 @@ namespace MuonR4::SegmentFit{
                 result.covariance(pidx, t0idx) = ActsTrk::timeToAthena(result.covariance(pidx, t0idx));
             }
         }
-        centerAlongWire(result);
+        /// Cache the chi2 terms of the measurements w.r.t. the segment
+        {
+            const auto[segPos, segDir] = makeLine(result.parameters);
+            for (Hit_t& hit : result.measurements) {
+                hit->setChi2Term(SeedingAux::chi2Term(segPos, segDir, *hit));
+            }
+        }
         return result;
     }
     std::unique_ptr<Segment>
@@ -193,7 +187,9 @@ namespace MuonR4::SegmentFit{
             auto seedCopy = convertToSegment(localToGlobal, parent, copy(segFit));
             m_cfg.visionTool->visualizeSegment(ctx, *seedCopy, "Intermediate fit"); 
         }
-        if (!removeOutliers(cctx, *parent, localToGlobal, segFit)) {
+        if (!removeOutliers(cctx, *parent, localToGlobal,
+                            segFit.converged? segFit.parameters : startPars,
+                            segFit)) {
             return nullptr;
         }          
         if (!plugHoles(cctx, *parent, localToGlobal, segFit)) {           
@@ -240,23 +236,23 @@ namespace MuonR4::SegmentFit{
     bool SegmentLineFitter::removeOutliers(const Acts::CalibrationContext& cctx,
                                            const SegmentSeed& seed,
                                            const Amg::Transform3D& localToGlobal,
+                                           const LinePar_t& startPars,
                                            Result_t& fitResult) const {
       
 
         if (countPrecHits(fitResult.measurements) < m_cfg.nPrecHitCut || fitResult.nDoF == 0
             || fitResult.nIter > m_fitter.config().maxIter) {
                 for(const auto& meas : fitResult.measurements){
-                    ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": Measurement from fitresult is" << (*meas));
+                    ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": Measurement from fit result is" << (*meas));
                 }
             ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__ 
                             <<": No degree of freedom available. What shall be removed?!. nDoF: "
                             <<fitResult.nDoF<<", n-meas: "<<countPrecHits(fitResult.measurements));
             return false;
         }
-        if (fitResult.converged && fitResult.chi2 / std::max(fitResult.nDoF, 1ul) < m_cfg.outlierRemovalCut) {
+        if (fitResult.converged && calcRedChi2(fitResult) < m_cfg.outlierRemovalCut) {
             ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__ <<": The segment "<<toString(fitResult.parameters)
-                          <<" is already of good quality "<<fitResult.chi2 / std::max(fitResult.nDoF, 1ul)
-                          <<". Don't remove outliers");
+                          <<" is already of good quality "<< calcRedChi2(fitResult)<<". Don't remove outliers");
             return true;
         }
         if (fitResult.nDoF == 0u){
@@ -270,19 +266,20 @@ namespace MuonR4::SegmentFit{
         if (m_cfg.doBeamSpot) {
             removeBeamSpot(fitResult.measurements);
         }
-        const auto [segPos, segDir] = makeLine(fitResult.parameters);
+
         /** Next sort the measurements by ascending chi2 */
         std::ranges::sort(fitResult.measurements,
-                [&segPos, &segDir](const HitVec_t::value_type& a, const HitVec_t::value_type& b){
-                    const double chiSqA = isGoodHit(*a) ? SeedingAux::chi2Term(segPos, segDir, *a) : 0.;
-                    const double chiSqB = isGoodHit(*b) ? SeedingAux::chi2Term(segPos, segDir, *b) : 0.;
+                [](const HitVec_t::value_type& a, const HitVec_t::value_type& b){
+                    const double chiSqA = isGoodHit(*a) ? a->chi2Term() : 0.;
+                    const double chiSqB = isGoodHit(*b) ? b->chi2Term() : 0.;
                     return chiSqA < chiSqB;                   
                 });
         fitResult.measurements.back()->setFitState(HitState::Outlier);
+        ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<" Mark "<<(*fitResult.measurements.back())<<" as outlier");
 
         /** Refit the segment line without the measurement */
-        Result_t newAttempt = callLineFit(cctx, fitResult.parameters, 
-                                          localToGlobal, std::move(fitResult.measurements));
+        Result_t newAttempt = callLineFit(cctx, startPars, localToGlobal, 
+                                          std::move(fitResult.measurements));
         if (newAttempt.converged) {
             newAttempt.nIter+=fitResult.nIter;
             fitResult = std::move(newAttempt);
@@ -295,12 +292,14 @@ namespace MuonR4::SegmentFit{
             fitResult.nIter+=newAttempt.nIter;
             fitResult.measurements = std::move(newAttempt.measurements);
         }
-        return removeOutliers(cctx, seed, localToGlobal, fitResult);
+        return removeOutliers(cctx, seed, localToGlobal,
+                              fitResult.converged ? fitResult.parameters : startPars, 
+                              fitResult);
     }
 
     void SegmentLineFitter::eraseWrongHits(Result_t& candidate) const {
         auto [segPos, segDir] = makeLine(candidate.parameters); 
-        cleanStripLayers(segPos, segDir, candidate.measurements);
+        cleanStripLayers(candidate.measurements);
         candidate.measurements.erase(std::remove_if(candidate.measurements.begin(), 
                                                     candidate.measurements.end(),
             [&](const HitVec_t::value_type& hit){
@@ -320,12 +319,10 @@ namespace MuonR4::SegmentFit{
                 return false;
             }), candidate.measurements.end());
     }
-    inline void SegmentLineFitter::cleanStripLayers(const Amg::Vector3D& linePos,
-                                                    const Amg::Vector3D& lineDir,
-                                                    HitVec_t& hits) const {
+    inline void SegmentLineFitter::cleanStripLayers(HitVec_t& hits) const {
         const SpacePointPerLayerSorter sorter{};
         /// We need to sort out strip hits on the same layer
-        std::ranges::sort(hits, [&sorter, &linePos, &lineDir](const Hit_t&a ,const Hit_t& b){
+        std::ranges::sort(hits, [&](const Hit_t&a ,const Hit_t& b){
             if (a->isStraw() || b->isStraw()) {
                 return !a->isStraw();
             }
@@ -338,9 +335,25 @@ namespace MuonR4::SegmentFit{
             if (lay_a != lay_b) {
                 return lay_a < lay_b;
             }
-            return SeedingAux::chi2Term(linePos, lineDir, *a) <
-                   SeedingAux::chi2Term(linePos, lineDir, *b);
+            const double chi2a = a->chi2Term();
+            const double chi2b = b->chi2Term();
+            /* Do not accept pad hits even though they've smaller chi2
+             * than the neighbouring strip */
+            if (a->type() == xAOD::UncalibMeasType::sTgcStripType) {
+                const auto* sTgcA = static_cast<const xAOD::sTgcMeasurement*>(a->spacePoint()->primaryMeasurement());
+                const auto* sTgcB = static_cast<const xAOD::sTgcMeasurement*>(b->spacePoint()->primaryMeasurement());
+                if (sTgcA->channelType() == xAOD::sTgcMeasurement::sTgcChannelTypes::Pad &&
+                    sTgcB->channelType() == xAOD::sTgcMeasurement::sTgcChannelTypes::Strip) {
+                    return chi2b > m_cfg.recoveryPull;
+                } else if (sTgcB->channelType() == xAOD::sTgcMeasurement::sTgcChannelTypes::Pad &&
+                           sTgcA->channelType() == xAOD::sTgcMeasurement::sTgcChannelTypes::Strip) {
+                    return chi2a < m_cfg.recoveryPull;
+                }
+            }
+            return chi2a < chi2b;
         });
+
+        ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__ <<": Check for duplicate strip hits");
         /// Loop over the hits to mark the less compatible hits on the layer as outlier
         for (HitVec_t::iterator itr = hits.begin(); itr != hits.end(); ++itr) {
             const Hit_t& hit_a{*itr};
@@ -355,22 +368,40 @@ namespace MuonR4::SegmentFit{
             ///
             for (HitVec_t::iterator itr2 = itr + 1; itr2 != hits.end(); ++itr2) {
                 const Hit_t& hit_b{*itr2};
-                if (hit_b->type() == xAOD::UncalibMeasType::Other) {
+                if (hit_b->type() == xAOD::UncalibMeasType::Other ||
+                    hit_b->fitState() == HitState::Duplicate) {
                     continue;
                 }
                 if (lay_a != sorter.sectorLayerNum(*hit_b->spacePoint())) {
                     break;
                 }
                 /// Both hits measure eta. They've been sorted by lower chi2 -> reject b
-                if ( (hit_a->measuresEta() && hit_b->measuresEta()) ||
-                     (hit_a->measuresPhi() && hit_b->measuresPhi())) {
-                    ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__ <<": Reject "
-                        <<m_cfg.idHelperSvc->toString(hit_b->spacePoint()->identify()) <<" in favour of "
-                        <<m_cfg.idHelperSvc->toString(hit_a->spacePoint()->identify()));
+                if ((hit_a->measuresEta() && hit_b->measuresEta()) ||
+                    (hit_a->measuresPhi() && hit_b->measuresPhi())) {
+                    ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__ <<": Duplicate hit on same layer"<<std::endl
+                        <<" -- reject: "<<(*hit_b)<<std::endl
+                        <<" -- accept: "<<(*hit_a));
                     hit_b->setFitState(HitState::Duplicate);
                 }
             }
         }
+    }
+
+    inline bool SegmentLineFitter::betterResult(const Result_t& newResult, const Result_t& oldResult) const {
+        if (!newResult.converged) {
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" The new result did not converge");
+            return false;
+        }
+        const double redChi2New = calcRedChi2(newResult);
+        const double redChi2Old = calcRedChi2(oldResult);
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" Compare results -- old chi2: "<<redChi2Old<<", nDoF: "
+                    <<oldResult.nDoF<<" vs. new chi2: "<<redChi2New<<", nDoF: "<<newResult.nDoF
+                    <<" -- outlier removal: "<<m_cfg.outlierRemovalCut);
+        if (newResult.nDoF == oldResult.nDoF) {
+            return redChi2New < redChi2Old;
+        }
+        return (redChi2New < m_cfg.outlierRemovalCut && newResult.nDoF > oldResult.nDoF) ||
+               (redChi2New > m_cfg.outlierRemovalCut && redChi2New < redChi2Old);
     }
     bool SegmentLineFitter::plugHoles(const Acts::CalibrationContext& cctx,
                                       const SegmentSeed& seed,
@@ -378,8 +409,7 @@ namespace MuonR4::SegmentFit{
                                       Result_t& toRecover) const {
         /** We've the first estimator of the segment fit */
         ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__ <<": segment "<<toString(toRecover.parameters)
-                        <<", chi2: "<<toRecover.chi2 /std::max(toRecover.nDoF, 1ul)
-                        <<", nDoF: "<<toRecover.nDoF);
+                        <<", chi2: "<< calcRedChi2(toRecover) <<", nDoF: "<<toRecover.nDoF);
         /** Setup a map to replace space points if they better suite */
         
  
@@ -393,7 +423,7 @@ namespace MuonR4::SegmentFit{
         
         const double timeOff = toRecover.parameters[toUnderlying(ParamDefs::t0)];
         HitVec_t candidateHits{};
-        bool hasCandidate{false};
+        std::size_t hasCandidate{0};
         const auto [locPos, locDir] = makeLine(toRecover.parameters);
 
          /// Loop over all hits in the parent bucket
@@ -417,7 +447,7 @@ namespace MuonR4::SegmentFit{
                 if (!hit->measuresEta() && 
                     std::abs(hit->sensorDirection().dot(hit->localPosition() - 
                         SeedingAux::extrapolateToPlane(locPos,locDir, *hit))) >
-                        std::sqrt(hit->covariance()[toUnderlying(AxisDefs::etaCov)])){
+                        1.1*std::sqrt(hit->covariance()[toUnderlying(AxisDefs::etaCov)])){
                     continue;
                 }
                 /// Use the pull of the uncalibrated measurement to estimate whether 
@@ -428,14 +458,16 @@ namespace MuonR4::SegmentFit{
                 }
             }
             calibHit = m_cfg.calibrator->calibrate(ctx, hit.get(), locPos, locDir, ActsTrk::timeToActs(timeOff));
-            pull = std::sqrt(SeedingAux::chi2Term(locPos, locDir, *calibHit));
-            if (pull <= m_cfg.recoveryPull) {
-                hasCandidate |= calibHit->fitState() == HitState::Valid;
+            calibHit->setChi2Term(SeedingAux::chi2Term(locPos, locDir, *calibHit));
+            if (calibHit->chi2Term() <= Acts::square(m_cfg.recoveryPull)) {
+                hasCandidate += calibHit->fitState() == HitState::Valid;
+                ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": Candidate hit for recovery "
+                            <<(*calibHit));
             } else {
                 calibHit->setFitState(HitState::Outlier);
+                ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": Outlier hit "
+                            <<(*calibHit)<<" -> limit: "<<m_cfg.recoveryPull);
             }
-            ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": Candidate hit for recovery "
-                    <<seed.msSector()->idHelperSvc()->toString(hit->identify())<<", pull: "<<pull);
             candidateHits.push_back(std::move(calibHit));                
         }
         /** No extra hit has been found */
@@ -447,6 +479,7 @@ namespace MuonR4::SegmentFit{
             eraseWrongHits(toRecover);
             return toRecover.nDoF > 0;
         }
+        ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": Found "<<hasCandidate<<" space points for recovery. ");
 
 
         HitVec_t copied = copy(toRecover.measurements);
@@ -460,80 +493,64 @@ namespace MuonR4::SegmentFit{
                              std::make_move_iterator(copied.begin()), 
                              std::make_move_iterator(copied.end()));
 
-        cleanStripLayers(locPos, locDir, candidateHits);
+        cleanStripLayers(candidateHits);
+
         Result_t recovered = callLineFit(cctx, toRecover.parameters, localToGlobal, 
                                          std::move(candidateHits));
-        if (!recovered.converged) {
-            return false;
-        }
-        /** Nothing has been recovered. Just bail out */
-        if (recovered.nDoF <= toRecover.nDoF) {
-            for (HitVec_t::value_type& hit : copiedCandidates) {
-                hit->setFitState(HitState::Outlier);
-                toRecover.measurements.push_back(std::move(hit));
-            }
-            eraseWrongHits(toRecover);
-            return true;
-        }
-        std::vector<const CalibratedSpacePoint*> stripOutliers{};
-        stripOutliers.reserve(toRecover.measurements.size());
-        ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<":  Before - chi2: "<<toRecover.chi2
-                      <<", nDoF "<<toRecover.nDoF<<" <=> after recovery - chi2: "
-                      <<recovered.chi2<<", nDoF: "<<recovered.nDoF);
-        
-        double redChi2 = recovered.chi2 / std::max(recovered.nDoF, 1ul);
+       
         /// If the chi2 is less than 5, no outlier rejection is launched. 
         /// So also accept any recovered segment below that threshold
-        if (redChi2 < m_cfg.outlierRemovalCut || 
-            toRecover.nDoF == 0 || redChi2 < toRecover.chi2 / toRecover.nDoF) {
-            ATH_MSG_VERBOSE("Accept segment with recovered "<<(recovered.nDoF  - toRecover.nDoF)<<" hits.");
+        if (betterResult(recovered, toRecover)) {
+            ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": Accept segment with recovered "
+                            <<(recovered.nDoF  - toRecover.nDoF)<<" extra nDoF.");
             recovered.nIter += toRecover.nIter;
             toRecover = std::move(recovered);
-            /** Next check whether the recovery made measurements marked as outlier feasable 
-             *  the hole recovery*/
-            unsigned recovLoop{0u};
-            while (++recovLoop <= m_cfg.nRecoveryLoops) {                
+
+            std::vector<const CalibratedSpacePoint*> stripOutliers{};
+            stripOutliers.reserve(toRecover.measurements.size());
+            /** Next check whether the recovery made measurements marked 
+             *  as outlier feasable to the hole recovery*/
+            unsigned recovLoop{(copiedCandidates.size() != hasCandidate)*m_cfg.nRecoveryLoops};
+            while (++recovLoop <= m_cfg.nRecoveryLoops) {   
+                ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": Enter recovery loop "<<recovLoop<<".");
                 copied = copy(toRecover.measurements);
+                // Remove the beamspot
                 if (m_cfg.doBeamSpot) {
                     removeBeamSpot(copied);
                 }
-                const auto [beforePos, beforeDir] = makeLine(toRecover.parameters);
-
+                // Check whether an outlier can be lifted to on-track
                 for (HitVec_t::value_type& copyHit : copied) {
                     if (copyHit->fitState() != HitState::Outlier) {
                         continue;
                     }
-                    if (std::sqrt(SeedingAux::chi2Term(beforePos, beforeDir, *copyHit)) < m_cfg.recoveryPull) {
+                    if (copyHit->chi2Term() < Acts::square(m_cfg.recoveryPull)) {
+                        ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": Try to recover outlier "<<(*copyHit));
                         copyHit->setFitState(HitState::Valid);
                         stripOutliers.push_back(copyHit.get());
                     } 
                 }
                 // Nothing to recover
                 if (stripOutliers.empty()) {
+                    ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": No additional measurement found");
                     break;
                 }
-                cleanStripLayers(beforePos, beforeDir, copied);
+                // Ensure that only one hit per layer is fit
+                cleanStripLayers(copied);
                 // Recovery turned out to be duplicates on the same layer
                 if (std::ranges::none_of(stripOutliers,[](const CalibratedSpacePoint* sp){
                         return sp->fitState() == HitState::Valid;
                     })) {
+                    ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": Outliers turned out to be duplicates.");
                     break;
                 }
+                ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": Start fit without the outliers.");
                 stripOutliers.clear();
                 recovered = callLineFit(cctx, toRecover.parameters, localToGlobal, std::move(copied));
-                if (!recovered.converged) {
+                if (!betterResult(recovered, toRecover)) {
                     break;
                 }
-                if (recovered.nDoF <= toRecover.nDoF) {
-                    break;
-                }
-                redChi2 = recovered.chi2 / std::max(recovered.nDoF, 1ul);
-                if (redChi2 <  m_cfg.outlierRemovalCut || redChi2 < toRecover.chi2 / toRecover.nDoF) {
-                    recovered.nIter += toRecover.nIter;
-                    toRecover = std::move(recovered);
-                } else {
-                    break;
-                }
+                recovered.nIter += toRecover.nIter;
+                toRecover = std::move(recovered);
             }
         } else{
             for (HitVec_t::value_type& hit : copiedCandidates) {
@@ -543,21 +560,6 @@ namespace MuonR4::SegmentFit{
         }
         eraseWrongHits(toRecover);
         return true;
-    }
-    void SegmentLineFitter::centerAlongWire(Result_t& result) const {
-        if (std::ranges::any_of(result.measurements,[](const Hit_t& h){
-                return h->measuresPhi();
-            })) {
-            ATH_MSG_VERBOSE("The segment has phi measurements. No centering needed");
-            return;
-        }
-        double avgX{0.};
-        const double nHits = result.measurements.size();
-        std::ranges::for_each(result.measurements, [&avgX, nHits](const Hit_t& hit) {
-            return avgX += hit->localPosition().x() / nHits;
-        });
-        result.parameters[toUnderlying(ParamDefs::x0)] = avgX;
-    }
-         
+    }        
    
 }

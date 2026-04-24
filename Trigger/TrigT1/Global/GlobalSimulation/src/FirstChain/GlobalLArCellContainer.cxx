@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GlobalLArCellContainer.h"
@@ -62,19 +62,20 @@ namespace GlobalSim {
 
 
   // Reimplementation of the push_back function to fill GlobalLArCells
-  void GlobalLArCellContainer::push_back(const GlobalLArCell& theCell) {
+  void GlobalLArCellContainer::push_back(const GlobalLArCell& theCell, IdentifierHash hashId) {
     auto cell = std::make_unique<GlobalLArCell>(theCell);
     auto* cellPtr = cell.get();
     DataVector<GlobalLArCell>::push_back(std::move(cell));
 
-    m_feb2ToCells[cellPtr->getFEB2()].push_back(cellPtr);
+    m_feb2ToCells[cellPtr->getFEB2()].push_back(std::make_shared<GlobalLArCell>(*cellPtr));
+    m_hashToCells.insert({hashId, std::make_shared<GlobalLArCell>(*cellPtr)});
   }
 
 
   // Function to get all GlobalLArCells for a given FEB2 name
-  const std::vector<GlobalLArCell*>& GlobalLArCellContainer::getCellsForFeb2(const std::string& feb2) const {
+  const std::vector<std::shared_ptr<GlobalLArCell>>& GlobalLArCellContainer::getCellsForFeb2(const std::string& feb2) const {
 
-      static const std::vector<GlobalLArCell*> emptyCellVector; // fallback if not found
+      static const std::vector<std::shared_ptr<GlobalLArCell>> emptyCellVector; // fallback if not found
       auto it = m_feb2ToCells.find(feb2);
 
       if (it != m_feb2ToCells.end()) {
@@ -84,6 +85,18 @@ namespace GlobalSim {
       return emptyCellVector;
   }
 
+  // Function to get all GlobalLArCells for a given IdentifierHash
+  const std::shared_ptr<GlobalLArCell> GlobalLArCellContainer::getCellFromHash(IdentifierHash hashId) const {
+
+      const std::shared_ptr<GlobalLArCell> emptyCell;// fallback if not found
+      auto it = m_hashToCells.find(hashId);
+
+      if (it != m_hashToCells.end()) {
+          return it->second;
+      }
+
+      return emptyCell;
+  }
 
   // Function to get ordered list of FEB2s for a given MUX name
   const std::vector<std::string>& GlobalLArCellContainer::getOrderedFeb2sForMux(const std::string& mux) const {

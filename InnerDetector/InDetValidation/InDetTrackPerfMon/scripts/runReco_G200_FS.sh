@@ -65,10 +65,22 @@ cd G-200
 mkdir build
 cd build
 #
-cmake ../traccc-athena
+
+if [ -z "$CUDACXX" ] && type -t nvcc >/dev/null; then
+  export CUDACXX=$(type -p nvcc)
+fi
+
+echo "CUDACXX=$CUDACXX"
+echo "PANDA_RESOURCE=$PANDA_RESOURCE"
+if [ -n "$CUDACXX" ]; then
+  "$CUDACXX" --version
+fi
+
+cmake ../traccc-athena -DTRACCC_USE_SYSTEM_ACTS=ON
 rc=$?
 echo "G-200 cmake result: $rc"
-if [ $rc != 0 ]; then exit $rc; fi
+### Let's see if we can continue, even with a cmake error...
+# if [ $rc != 0 ]; then exit $rc; fi
 #
 make -j4
 rc=$?
@@ -82,11 +94,21 @@ export `grep CMAKE_PREFIX_PATH envlog.log`
 cd ../..
 ##
 
+## get the input files and update the config
+# don't try to make a variable for the data path unless you really like playing with sed
+# the data tarfile contains a whole bunch of directories we don't want, so transform to flat
+mkdir ITk_data
+cd ITk_data
+tar jxvf /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetTrackPerfMon/GPU_EFTracking/GPU.tar.bz2 --transform='s/.*\///'
+cd ..
+PIPELINE_CONFIG_FILE=G-200/traccc-athena/EFTracking/python/TrackingAlgConfig.py
+sed -i -e 's/^inputDirectory.*$/import os\ninputDirectory = os.getcwd() + \"\/ITk_data\/\"/g' ${PIPELINE_CONFIG_FILE}
+sed -i -e 's/^pipeline.*$/pipeline = \"g200\"/g' ${PIPELINE_CONFIG_FILE}
+
 ## running reconstruction
 Reco_tf.py --CA \
     --maxEvents ${nEvents} \
-    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
-    --postInclude 'EFTracking.TrackingAlgConfig.TrackingAlgCfg' \
+    --postInclude 'EFTracking.TrackingAlgConfig.g2xxAlgCfg,ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
     --steering 'doRAWtoALL' \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD}

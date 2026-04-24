@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -19,7 +19,6 @@
 #include "InDetRecToolInterfaces/ISiZvertexMaker.h"
 #include "InDetRecToolInterfaces/IInDetEtaDependentCutsSvc.h"
 #include "IRegionSelector/IRegSelTool.h"
-#include "StoreGate/DataHandle.h"
 #include "TrkCaloClusterROI/ROIPhiRZContainer.h"
 #include "TrkExInterfaces/IPatternParametersPropagator.h"
 #include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"

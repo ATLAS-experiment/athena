@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCONF_SEQ_H
@@ -13,25 +13,25 @@
    object TrigMonSeq and sequence configuration.
 */
 
+// Local
+#include "TrigMonitoringEvent/TrigConfAlg.h"
 // Framework
 #include "AthenaKernel/CLASS_DEF.h"
 
 // C/C++
-#include <iostream>
+#include <iosfwd>
 #include <stdint.h>
 #include <string>
 #include <vector>
 
-// Local
-#include "TrigMonitoringEvent/TrigConfAlg.h"
+
 
 class TrigConfSeq
 {
  public:
   
-  TrigConfSeq();
+  TrigConfSeq() = default;
   TrigConfSeq(unsigned int id, unsigned int index, const std::string &name);
-  ~TrigConfSeq() {}
 
   void clearStrings();
 
@@ -60,14 +60,15 @@ class TrigConfSeq
   bool matchAlgName(const std::string &aname) const;
   bool matchAlgType(const std::string &atype) const;
   
-  void print(std::ostream &os = std::cout) const;
+  void print(std::ostream &os) const;
+  void print() const;
   
  private:
   
   std::string               m_output_te_name;   // Name  of output TE
-  uint16_t                  m_output_te_index;  // Index of output TE (in current configuration)
-  uint32_t                  m_output_te_id;     // Id    of output TE
-  uint32_t                  m_topo_te;          // Id of topo start TE
+  uint16_t                  m_output_te_index{};  // Index of output TE (in current configuration)
+  uint32_t                  m_output_te_id{};     // Id    of output TE
+  uint32_t                  m_topo_te{};          // Id of topo start TE
   std::vector<TrigConfAlg>  m_alg;              // List of children algorithms
   std::vector<uint32_t>     m_input_te;         // Id list of input TEs
 };

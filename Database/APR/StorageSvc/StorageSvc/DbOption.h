@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: DbOption.h 726071 2016-02-25 09:23:05Z krasznaa $
 //====================================================================
 //  DbOption class definitions
 //--------------------------------------------------------------------
@@ -34,16 +33,9 @@ namespace pool  {
     * @author  M.Frank
     * @version 1.0
     */
-  class DbOption    {
+  class DbOption {
   public:
-    /** @union Value DbOption.h StorageSvc/DbOption.h
-      *
-      * Description:
-      * Definition an option value.
-      *
-      * @author  M.Frank
-      * @version 1.0
-      */
+
     union Value  {
       long long int     val_long;
       int               val_int;
@@ -51,8 +43,9 @@ namespace pool  {
       void*             val_pvoid;
       char*             val_pchar;
     };
+
     /// Buffer holding option value
-    Value             m_value{};
+    Value             m_value {};
     /// Option data type
     DbColumn::Type    m_type;
     /// Option name identifier
@@ -60,41 +53,42 @@ namespace pool  {
     /// Optional identifier
     std::string       m_opt;
 
-    /// Set the option value
-    StatusCode i_setValue(const std::type_info& typ, const void* value);
-    /// Set the option value
-    StatusCode i_getValue(const std::type_info& typ, void* value) const;
-
   public:
     /// Initializing constructor 
     template <class T> DbOption(const std::string& nam, 
                                 const std::string& opt, 
                                 T value)
     : m_type(DbColumn::UNKNOWN), m_name(nam), m_opt(opt)
-    { i_setValue(typeid(T), &value).ignore();               }
+    { i_setValue(typeid(T), &value).ignore(); }
+
     /// Initializing constructor with type definition
-    DbOption(const std::string& nam, const std::string& opt="");
-    /// Default copy constructor
-    /// Standard destructor
-    virtual ~DbOption()                 {                   }
+    DbOption(const std::string& nam, const std::string& opt="")
+    : m_type(DbColumn::UNKNOWN), m_name(nam), m_opt(opt)
+    { }
+
     /// Access to column name
     const std::string& option() const   { return m_opt;     }
     /// Access to column name
     const std::string& name() const     { return m_name;    }
     /// Integer type identifier
     DbColumn::Type type() const         { return m_type;    }
+
     /// Set the option value
-    template<class T> StatusCode _setValue(T value)
-    { return i_setValue(typeid(T), &value);                 }
+    template<class T> StatusCode setValue(T value)
+    { return i_setValue(typeid(T), &value); }
+
+    /// Read the option value
+    template<class T> StatusCode getValue(T& value) const
+    { return i_getValue(typeid(T), &value); }
+
     /// Set the option value
-    template<class T> StatusCode _getValue(T& value) const
-    { return i_getValue(typeid(T), &value);                 }
+    StatusCode i_setValue(const std::type_info& typ, const void* value);  
+
+    /// Read the option value
+    StatusCode i_getValue(const std::type_info& typ, void* value) const;
+
     /// Access to OS independent type name
-    std::string typeName() const;
-    /// Set the option value
-    StatusCode setValue(DbColumn::Type typ, const void* value);
-    /// Set the option value
-    StatusCode getValue(DbColumn::Type typ, void* value) const;
+    std::string typeName() const { return DbColumn::typeName(m_type); }
   };
 }       // End namespace pool
 #endif  // POOL_DbOption_H

@@ -45,13 +45,16 @@ l1seeds = { 'low'  : \
                 'L1_jJ90_DETA20-jJ90J',\
                 'L1_LFV-MU5VF',\
                 'L1_MU5VF_jJ80',\
-                'L1_cTAU30M_3DR35-MU8F-eTAU30',\
                 'L1_eTAU60',\
-                'L1_jXE70',
-                'L1_3jJ40p0ETA25',
-                'L1_2cTAU50M_DPHI-2eTAU50',
-                'L1_ADVAEL',
-            ]
+                'L1_jXE70',\
+                'L1_3jJ40p0ETA25',\
+                'L1_2cTAU50M_DPHI-2eTAU50',\
+                'L1_ADVAEL',\
+                #'L1_gXENC100',
+                'L1_cXE100',\
+                'L1_ADBDTL',\
+                'L1_ARTEMISL',\
+               ]
 }
 
 

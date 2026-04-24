@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+set -eu
+
+ftag-test-metadata -m 10 \
+  --h5-output test.h5 \
+  --json-output test.json \
+  --h5-hists-output test-hists.h5
+hdf5-merge-nolock --overwrite test-hists.h5 test-hists.h5 \
+  -o merged-hists.h5

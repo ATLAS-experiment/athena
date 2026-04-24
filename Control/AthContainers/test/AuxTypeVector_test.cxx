@@ -412,11 +412,48 @@ void test3()
 }
 
 
+#ifndef XAOD_STANDALONE
+// Test toTransient.
+class TTest
+{
+public:
+  size_t m_evtnum = 0;
+};
+namespace SG {
+template <> class ToTransient<std::vector<TTest> > {
+public:
+  static void toTransient (std::vector<TTest>& v, const EventContext& ctx)
+  {
+    for (TTest& e : v) {
+      e.m_evtnum = ctx.evt();
+    }
+  }
+};
+}
+#endif
+void test4()
+{
+  std::cout << "test4\n";
+
+#ifndef XAOD_STANDALONE
+  SG::AuxTypeVector<TTest> tvec (123, 3, 3, false);
+  assert (tvec.vec()[0].m_evtnum == 0);
+  assert (tvec.vec()[2].m_evtnum == 0);
+
+  EventContext ctx (321);
+  tvec.toTransient (ctx);
+  assert (tvec.vec()[0].m_evtnum == 321);
+  assert (tvec.vec()[2].m_evtnum == 321);
+#endif
+}
+
+
 int main()
 {
   std::cout << "AuxTypeVector_test\n";
   test1();
   test2();
   test3();
+  test4();
   return 0;
 }

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 def FullListOfSmartContainers(flags=None):
 
@@ -14,6 +14,7 @@ def FullListOfSmartContainers(flags=None):
       "DiTauJetsLowPt",
       "TauJets_MuonRM",
       "TauJets_EleRM",
+      "TauJetsLRT",
       "MET_Baseline_AntiKt4EMTopo",
       "MET_Baseline_AntiKt4EMPFlow",
       "AntiKt2TruthJets",
@@ -23,16 +24,10 @@ def FullListOfSmartContainers(flags=None):
       "AntiKt10TruthJets",
       "AntiKt10TruthWZJets",
       "AntiKt10LCTopoJets",
-      "AntiKt10TrackCaloClusterJets",
       "AntiKt10UFOCSSKJets",
-      "AntiKt10UFOCHSJets",
-      "AntiKt10TruthTrimmedPtFrac5SmallR20Jets",
-      "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
-      "AntiKt10TrackCaloClusterTrimmedPtFrac5SmallR20Jets",
       "AntiKt10TruthSoftDropBeta100Zcut10Jets",
       "AntiKt10TruthDressedWZSoftDropBeta100Zcut10Jets",
       "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
-      "AntiKt10UFOCHSSoftDropBeta100Zcut10Jets",
       "AntiKt4LCTopoJets",
       "AntiKt4EMTopoJets",
       "AntiKt4EMPFlowJets",

@@ -29,7 +29,7 @@ public:
     LArAutoCorrMCCnv (ISvcLocator* svcloc) : LArAutoCorrMCCnvBase(svcloc) {}
 protected:
     virtual LArAutoCorrPersType*   createPersistent (LArAutoCorrTransType* transObj);
-    virtual LArAutoCorrTransType*  createTransient ();
+    virtual LArAutoCorrTransType*  createTransient(const Token* token);
     LArAutoCorrTransType*          createTransient(LArConditionsSubset<LArAutoCorrP>* orig);
 };
 

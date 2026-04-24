@@ -79,7 +79,7 @@ PFLeptonSelector::selectElectrons(
           else
             ATH_MSG_WARNING(
               "Do not have valid WriteHandle for ElectronContainer with name: " << selectedElectronsWriteHandle.key());
-          if (true == m_storeLeptonCells)
+          if (m_storeLeptonCells)
             this->storeElectronCells(*theElectron, leptonCaloCellsWriteHandle);
         } // mediumPP
       }   // 10GeV pt cut
@@ -132,7 +132,7 @@ PFLeptonSelector::selectMuons(SG::WriteHandle<ConstDataVector<xAOD::MuonContaine
         else
           ATH_MSG_WARNING(
             "Do not have valid WriteHandle for MuonContainer with name: " << selectedMuonsWriteHandle.key());
-        if (true == m_storeLeptonCells)
+        if (m_storeLeptonCells)
           this->storeMuonCells(*theMuon, leptonCaloCellsWriteHandle);
       } // combined muons
     }   // Medium muons
@@ -194,7 +194,7 @@ PFLeptonSelector::recordLeptonContainers(
     return sc;
   }
 
-  if (true == m_storeLeptonCells) {
+  if (m_storeLeptonCells) {
 
     //record the cell container
     sc =  leptonCaloCellsWriteHandle.record(std::make_unique<ConstDataVector<CaloCellContainer> >(SG::VIEW_ELEMENTS));

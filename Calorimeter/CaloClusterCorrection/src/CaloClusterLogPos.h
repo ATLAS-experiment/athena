@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: CaloClusterLogPos.h,v 1.3 2009-04-22 17:26:21 ssnyder Exp $
@@ -44,8 +44,6 @@
  *         (419-443) 1993. eqn 14.
  */
 
-class CaloCell_ID;
-
 class CaloClusterLogPos : public CaloClusterProcessor
 {
 
@@ -65,8 +63,7 @@ class CaloClusterLogPos : public CaloClusterProcessor
 
  private:
   // property: offset for the logarithmic weighting
-  double m_offset;
-  
+  Gaudi::Property<double> m_offset{this, "LogPosOffset", 4.7};
 };
 
 

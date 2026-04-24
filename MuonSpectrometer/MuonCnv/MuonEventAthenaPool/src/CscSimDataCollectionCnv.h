@@ -28,7 +28,7 @@ public:
     CscSimDataCollectionCnv(ISvcLocator* svcloc);
     virtual ~CscSimDataCollectionCnv();
     virtual CscSimDataCollection_PERS*   createPersistent (CscSimDataCollection* transCont);
-    virtual CscSimDataCollection*        createTransient ();
+    virtual CscSimDataCollection*        createTransient(const Token* token);
 
 private:
     CscSimDataCollectionCnv_p1    m_TPConverter_p1;

@@ -36,7 +36,7 @@ McEventCollectionCnv::createPersistent( McEventCollection* transCont )
   return persObj; 
 }
 
-McEventCollection* McEventCollectionCnv::createTransient() 
+McEventCollection* McEventCollectionCnv::createTransient(const Token* token) 
 {
    MsgStream msg( msgSvc(), "McEventCollectionConverter" );
 
@@ -57,47 +57,47 @@ McEventCollection* McEventCollectionCnv::createTransient()
       msg << MSG::DEBUG << "Pile run, disable datapool for McEventCollection " << endmsg;
    }
 
-   if ( compareClassGuid(tr_guid) ) {
+   if ( compareClassGuid(token, tr_guid) ) {
 
      // regular object from before the T/P separation
-     return poolReadObject<McEventCollection>();
+     return poolReadObject<McEventCollection>(token);
 
-   } else if ( compareClassGuid(p1_guid) ) {
+   } else if ( compareClassGuid(token, p1_guid) ) {
 
-      std::unique_ptr<McEventCollection_p1> persObj( poolReadObject<McEventCollection_p1>() );
+      std::unique_ptr<McEventCollection_p1> persObj( poolReadObject<McEventCollection_p1>(token) );
       McEventCollectionCnv_p1 cnv;
       transObj = cnv.createTransient( persObj.get(), msg );
-   } else if ( compareClassGuid(p2_guid) ) {
+   } else if ( compareClassGuid(token, p2_guid) ) {
 
-      std::unique_ptr<McEventCollection_p2> persObj( poolReadObject<McEventCollection_p2>() );
+      std::unique_ptr<McEventCollection_p2> persObj( poolReadObject<McEventCollection_p2>(token) );
       McEventCollectionCnv_p2 cnv;
       transObj = cnv.createTransient( persObj.get(), msg );
-   } else if ( compareClassGuid(p3_guid) ) {
+   } else if ( compareClassGuid(token, p3_guid) ) {
 
-      std::unique_ptr<McEventCollection_p3> persObj( poolReadObject<McEventCollection_p3>() );
+      std::unique_ptr<McEventCollection_p3> persObj( poolReadObject<McEventCollection_p3>(token) );
       McEventCollectionCnv_p3 cnv;
       transObj = cnv.createTransient( persObj.get(), msg ); 
-   } else if ( compareClassGuid(p4_guid) ) {
+   } else if ( compareClassGuid(token, p4_guid) ) {
 
-      std::unique_ptr<McEventCollection_p4> persObj( poolReadObject<McEventCollection_p4>() );
+      std::unique_ptr<McEventCollection_p4> persObj( poolReadObject<McEventCollection_p4>(token) );
       McEventCollectionCnv_p4 cnv;
       if(isPileup) cnv.setPileup();
       transObj = cnv.createTransient( persObj.get(), msg );
-   } else if ( compareClassGuid(p5_guid) ) {
+   } else if ( compareClassGuid(token, p5_guid) ) {
 
-      std::unique_ptr<McEventCollection_p5> persObj( poolReadObject<McEventCollection_p5>() );
+      std::unique_ptr<McEventCollection_p5> persObj( poolReadObject<McEventCollection_p5>(token) );
       McEventCollectionCnv_p5 cnv;
       if(isPileup) cnv.setPileup();
       transObj = cnv.createTransient( persObj.get(), msg );
-   } else if ( compareClassGuid(p6_guid) ) {
+   } else if ( compareClassGuid(token, p6_guid) ) {
 
-      std::unique_ptr<McEventCollection_p6> persObj( poolReadObject<McEventCollection_p6>() );
+      std::unique_ptr<McEventCollection_p6> persObj( poolReadObject<McEventCollection_p6>(token) );
       McEventCollectionCnv_p6 cnv;
       if(isPileup) cnv.setPileup();
       transObj = cnv.createTransient( persObj.get(), msg );
-   } else if ( compareClassGuid(p7_guid) ) {
+   } else if ( compareClassGuid(token, p7_guid) ) {
 
-      std::unique_ptr<McEventCollection_p7> persObj( poolReadObject<McEventCollection_p7>() );
+      std::unique_ptr<McEventCollection_p7> persObj( poolReadObject<McEventCollection_p7>(token) );
       McEventCollectionCnv_p7 cnv;
       if(isPileup) cnv.setPileup();
       transObj = cnv.createTransient( persObj.get(), msg );

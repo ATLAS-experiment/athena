@@ -10,7 +10,7 @@
 
 lastref_dir=last_results
 dcubeXml=dcube_IDPVMPlots_ACTS_R22.xml
-rdo_23p0=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1
+rdo=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_RUN4[0])")
 nEvents=20
 
 # search in $DATAPATH for matching file
@@ -38,11 +38,13 @@ run () {
 # Run ACTS Reco
 export ATHENA_CORE_NUMBER=8
 
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+
 run "Reconstruction-acts" \
-    Reco_tf.py --CA \
-    --inputRDOFile ${rdo_23p0} \
+    Reco_tf.py \
+    --inputRDOFile ${rdo} \
     --outputAODFile AOD.acts.root \
-    --steering doRAWtoALL \
+    --conditionsTag "default:${conditionsTag}" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsLegacyWorkflowFlags" \
     --preExec "flags.Reco.EnableHGTDExtension=False;flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;" \
     --maxEvents ${nEvents} \
@@ -60,10 +62,10 @@ fi
 
 # Run Athena Reco
 run "Reconstruction-athena" \
-    Reco_tf.py --CA \
-    --inputRDOFile ${rdo_23p0} \
+    Reco_tf.py \
+    --inputRDOFile ${rdo} \
     --outputAODFile AOD.athena.root \
-    --steering doRAWtoALL \
+    --conditionsTag "default:${conditionsTag}" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --postInclude "InDetConfig.InDetPrepRawDataFormationConfig.ITkInDetToXAODClusterConversionCfg,InDetConfig.SiSpacePointFormationConfig.InDetToXAODSpacePointConversionCfg,ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg" \
     --preExec "flags.Reco.EnableHGTDExtension=False;flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;" \

@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
 #
 # File: TileRecUtils/python/TileDQstatusAlgTestConfig.py
 # Author: sss
@@ -176,6 +176,7 @@ class RecordAlg (Alg):
                     hwid = ROOT.HWIdentifier (addr)
                     chan = ROOT.TileRawChannel (hwid, *data)
                 coll.push_back (chan)
+                ROOT.SetOwnership (chan, False)
 
             cont.addCollection (coll, ROOT.IdentifierHash(icoll))
             ROOT.SetOwnership (coll, False)
@@ -214,6 +215,7 @@ class RecordAlg (Alg):
             for idig in range(ndig):
                 dig = ROOT.TileDigits(ROOT.HWIdentifier(), digits)
                 coll.push_back (dig)
+                ROOT.SetOwnership (dig, False)
 
             cont.addCollection (coll, ROOT.IdentifierHash (hashFunc(id)))
             ROOT.SetOwnership (coll, False)
@@ -232,6 +234,7 @@ class RecordAlg (Alg):
             v[0] = (23 << 8)
             elem = ROOT.TileBeamElem (ROOT.Identifier(), v)
             coll.push_back (elem)
+            ROOT.SetOwnership (elem, False)
 
         elif frag == DIGI_PAR_FRAG:
             coll.setRODBCID (11)
@@ -247,6 +250,7 @@ class RecordAlg (Alg):
                 hwid = id(cha)
                 elem = ROOT.TileBeamElem (hwid, cha + 100)
                 coll.push_back (elem)
+                ROOT.SetOwnership (elem, False)
 
             hwid = id(15)
             v = getattr(ROOT,'vector<unsigned>')()
@@ -257,6 +261,7 @@ class RecordAlg (Alg):
             v[2] = 0x08070605
             elem = ROOT.TileBeamElem (hwid, v)
             coll.push_back (elem)
+            ROOT.SetOwnership (elem, False)
 
         elif frag == LASER_OBJ_FRAG:
             coll.setRODBCID (11)

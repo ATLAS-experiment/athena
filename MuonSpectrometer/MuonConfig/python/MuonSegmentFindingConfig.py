@@ -389,10 +389,9 @@ def MuonLayerHoughAlgCfg(flags, name = "MuonLayerHoughAlg", **kwargs):
     if not flags.Detector.EnableTGC:
         kwargs.setdefault("TgcPrepDataContainer", "")
 
-    kwargs.setdefault('TgcPrepDataContainer', 'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
     kwargs.setdefault("CscPrepDataContainer", "CSC_Clusters" if flags.Detector.EnableCSC else "")
     kwargs.setdefault("sTgcPrepDataContainer", "STGC_Measurements" if flags.Detector.EnablesTGC else "")
-    kwargs.setdefault('TgcPrepDataContainer', 'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
+    kwargs.setdefault('TgcPrepDataContainer', 'TGC_MeasurementsAllBCs')
     kwargs.setdefault("MMPrepDataContainer", "MM_Measurements" if flags.Detector.EnableMM else "")
     
     kwargs.setdefault("PrintSummary", flags.Muon.printSummary)
@@ -438,7 +437,7 @@ def MuonPatternCalibrationCfg(flags, name="MuonPatternCalibration", **kwargs):
     
     kwargs.setdefault('ClusterCreator', result.popToolsAndMerge(MuonClusterOnTrackCreatorCfg(flags)))
     kwargs.setdefault("Printer", result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags) ))
-    kwargs.setdefault('TgcPrepDataContainer', 'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
+    kwargs.setdefault('TgcPrepDataContainer', 'TGC_MeasurementsAllBCs')
 
     if flags.Beam.Type is BeamType.Cosmics:
         kwargs.setdefault("AngleCutPhi", 1e9)

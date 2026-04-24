@@ -61,18 +61,18 @@ T_AthenaPoolxAODCnv<XAOD, TPCNVS...>::createPersistentWithKey( XAOD* trans,
  */
 template <class XAOD, class ... TPCNVS>
 XAOD*
-T_AthenaPoolxAODCnv<XAOD, TPCNVS...>::createTransientWithKey (const std::string& key)
+T_AthenaPoolxAODCnv<XAOD, TPCNVS...>::createTransientWithKey (const Token* token, const std::string& key)
 {
   AthenaPoolCnvSvc::debugCreateTransient (ClassID_traits<XAOD>::ID());
   XAOD* c = nullptr;
 
-  if ( this->compareClassGuid( m_guid ) ) {
+  if ( this->compareClassGuid(token,  m_guid ) ) {
     // It's the latest version, read it directly:
-    c = this->template poolReadObject< XAOD >();
+    c = this->template poolReadObject< XAOD >(token);
   }
   else {
     // Try a converter.
-    c = m_tpcnvs.createTransient (*this, key, this->msg()).release();
+    c = m_tpcnvs.createTransient (*this, token, key, this->msg()).release();
   }
 
   if (c) {
@@ -86,6 +86,6 @@ T_AthenaPoolxAODCnv<XAOD, TPCNVS...>::createTransientWithKey (const std::string&
 
   // Didn't recognize the GUID.
   AthenaPoolCnvSvc::throwExcUnsupportedVersion (typeid(XAOD),
-                                                this->m_i_poolToken->classID());
+                                                token->classID());
   return 0;
 }

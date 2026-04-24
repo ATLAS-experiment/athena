@@ -9,6 +9,8 @@ class SSVWeightsAlgConfig(ConfigBlock):
 
     def __init__ (self) :
         super (SSVWeightsAlgConfig, self).__init__ ()
+        self.addDependency('EventSelection', required=False)
+        self.addDependency('EventSelectionMerger', required=False)
         self.addOption('jets', None, type = str, info = "jet container that will be used to define the good SSVs (ΔR(SSV,jet)>0.6) and the truth b-hadrons in acceptance (ΔR(truthBh,jet)>0.6) and that will be used to count the number of b-jets for b-jet based SSV weight calculation")
         self.addOption('electrons', None, type = str, info = "electron container that will be used to define the good SSVs (ΔR(SSV,electron)>0.2)")
         self.addOption('muons', None, type = str,  info = "muon container that will be used to define the good SSVs (ΔR(SSV,muon)>0.2)")
@@ -69,4 +71,4 @@ class SSVWeightsAlgConfig(ConfigBlock):
             config.addOutputVar('EventInfo', 'P_ineff_pt_eta_based_%SYS%', 'P_ineff_pt_eta_based')
             config.addOutputVar('EventInfo', 'P_fake_pileup_bjet_based_%SYS%', 'P_fake_pileup_bjet_based')
             config.addOutputVar('EventInfo', 'P_fake_pileup_based_linearfit_%SYS%', 'P_fake_pileup_based_linearfit')
-            config.addOutputVar('EventInfo', 'P_fake_pileup_based_binned_%SYS%', 'P_fake_pileup_based_binned') 
+            config.addOutputVar('EventInfo', 'P_fake_pileup_based_binned_%SYS%', 'P_fake_pileup_based_binned')

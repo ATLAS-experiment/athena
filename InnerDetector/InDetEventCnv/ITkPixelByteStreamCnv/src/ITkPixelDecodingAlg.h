@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ITKPIXEL_DECODINGALG_H
@@ -18,8 +18,6 @@
 #include "itksw/pix/endec/DecCore.hpp"
 #include <chrono>
 
-
-using namespace itksw::pix::endec;
 
 //class PixelID;
 
@@ -44,7 +42,7 @@ class ITkPixelDecodingAlg : public AthReentrantAlgorithm
 
     SG::ReadCondHandleKey<ITkPixelCablingData> m_pixelCablingKey{this, "PixelCablingKey", "ITkPixelCablingData", "Cond Key of Pixel Cabling"};
 
-    SG::WriteHandleKey<PixelRDO_Container> m_pixelRDOKey{this,    "pixelRDOKey", "PixelRDOs", "StoreGate Key of Pixel RDOs"};
+    SG::WriteHandleKey<PixelRDO_Container> m_pixelRDOKey{this,    "pixelRDOKey", "ITkPixelRDOs", "StoreGate Key of Pixel RDOs"};
     
     std::vector<uint32_t> m_sourceIDs;
 
@@ -86,6 +84,7 @@ namespace PixelCallbacks{
                 const auto waferHash = m_idHelper->wafer_hash(m_identifier);
                 if (m_rdoContainer->indexFind(waferHash) == m_rdoContainer->end()){
                     m_rdoCollection = std::make_unique<PixelRDO_Collection>(waferHash);
+                    m_rdoCollection->setIdentifier(m_identifier);
                     m_rdoCollection->reserve(1000);
                 }
                 else {

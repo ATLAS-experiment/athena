@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Test of P1+Tier0 workflow, runs athenaHLT with PhysicsP1_pp_run3_v1 menu followed by offline reco and monitoring (incl. EDM)
 # art-type: grid
@@ -51,7 +51,10 @@ filter_bs.input = ''
 filter_bs.args = '-s FTagPEBTLA ' + '`find . -name "*_HLTMPPy_output.*.data"`'
 
 # Tier-0 reco step (BS->AOD)
-tlarecoPreExec = f"flags.Trigger.triggerMenuSetup=\'{triggermenu}\';"
+tlarecoPreExec = ';'.join([f"flags.Trigger.triggerMenuSetup=\'{triggermenu}\'",
+                           "flags.Trigger.CTP.UseEDMxAOD=False",
+                           "flags.Trigger.CTP.UseRoibROB=True",
+                           ])
 
 tlareco = ExecStep.ExecStep('Tier0Reco')
 tlareco.type = 'Reco_tf'
@@ -61,7 +64,7 @@ tlareco.input = ''
 tlareco.explicit_input = True
 tlareco.args = '--inputBSFile=' + find_file('*.physics_FTagPEBTLA*._athenaHLT*.data')  # output of the previous step
 tlareco.args += ' --outputDAOD_TLAFTAGPEBFile=DAOD_TLAFTAGPEB.pool.root'
-tlareco.args += f' --conditionsTag="{defaultConditionsTags.RUN3_DATA}" --geometryVersion=\'ATLAS-R3S-2021-03-02-00\''
+tlareco.args += f' --conditionsTag="{defaultConditionsTags.RUN3_DATA25}" --geometryVersion=\'ATLAS-R3S-2021-03-02-00\''
 tlareco.args += ' --preExec="{:s}"'.format(tlarecoPreExec)
 
 # The full test

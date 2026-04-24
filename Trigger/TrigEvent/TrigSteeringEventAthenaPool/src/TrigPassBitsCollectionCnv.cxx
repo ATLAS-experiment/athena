@@ -31,16 +31,16 @@ TrigPassBitsCollection_PERS * TrigPassBitsCollectionCnv::createPersistent( TrigP
 
 
 //createTransient
-TrigPassBitsCollection * TrigPassBitsCollectionCnv::createTransient()
+TrigPassBitsCollection * TrigPassBitsCollectionCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "TrigPassBitsCollectionConverter" );
   
   static const pool::Guid p1_guid( "E6E4F396-D696-4C1C-A0C4-7766E0AF9BB5" );
 
   //  TrigPassBitsCollection *p_collection = 0;
-  if( compareClassGuid( p1_guid ) )     
+  if( compareClassGuid(token,  p1_guid ) )     
   {
-         std::unique_ptr< TrigPassBitsCollection_p1 > col_vect( poolReadObject< TrigPassBitsCollection_p1 >() );
+         std::unique_ptr< TrigPassBitsCollection_p1 > col_vect( poolReadObject< TrigPassBitsCollection_p1 >(token) );
          return m_impl->m_TPconverter_p1.createTransient( col_vect.get(), mlog ) ;
   }
   else  throw std::runtime_error( "Unsupported persistent version of TrigPassBitsCollection" );

@@ -29,15 +29,15 @@ def MuonHoughTransformTesterCfg(flags, name = "MuonHoughTransformTester", **kwar
     result = ComponentAccumulator()
     kwargs.setdefault("isMC", flags.Input.isMC)
     seedKeys = []
-    segmentKeys = []
+    spKeys = []
     if flags.Detector.GeometryMDT or flags.Detector.GeometryRPC or flags.Detector.GeometryTGC:
         seedKeys+=["MuonHoughStationSegmentSeeds"]
-        segmentKeys+=["R4MuonSegments"]
+        spKeys+=["MuonSpacePoints"]
     if flags.Detector.GeometryMM or flags.Detector.GeometrysTGC:
         seedKeys+=["MuonNswSegmentSeeds"]
-        segmentKeys+=["MuonNswSegments"]
+        spKeys+=["NSWSpacePoints"]
     kwargs.setdefault("SegmentSeedKeys", seedKeys)
-    kwargs.setdefault("SegmentKeys", segmentKeys)
+    kwargs.setdefault("SpacePointKeys", spKeys)
 
     theAlg = CompFactory.MuonValR4.MuonHoughTransformTester(name, **kwargs) 
     result.addEventAlgo(theAlg, primary=True)
@@ -91,9 +91,9 @@ def LegacyMuonRecoChainCfg(flags):
                                          SegmentKey="MuonSegments", SegmentLinkKey="HabemusZ"))
 
     from MuonObjectMarker.ObjectMarkerConfig import MuonSegmentFitParDecorAlgCfg
-    result.merge(MuonSegmentFitParDecorAlgCfg(flags, name="SegmentParDecorAlgMuonSegments", 
+    result.merge(MuonSegmentFitParDecorAlgCfg(flags, name="MuonSegmentDecorAlg_MuonSegments", 
                                              SegmentKey="MuonSegments"))
-    result.merge(MuonSegmentFitParDecorAlgCfg(flags, name="SegmentParDecorAlgUnAssoc", 
+    result.merge(MuonSegmentFitParDecorAlgCfg(flags, name="MuonSegmentDecorAlg_UnAssocMuonSegments", 
                                               SegmentKey="UnAssocMuonSegments"))
 
     if flags.Input.isMC:

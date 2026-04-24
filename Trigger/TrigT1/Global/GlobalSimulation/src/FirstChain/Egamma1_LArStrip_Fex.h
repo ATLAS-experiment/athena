@@ -45,7 +45,7 @@ namespace GlobalSim {
     
     ToolHandle<ICaloCellsProducer> m_cellProducer{this,
 	"caloCellProducer",
-	"EMB1CellFromCaloCells",
+	"EMBE1CellFromCaloCells",
 	"AlgTool to provide a vector of CaloCells"
 	};
 
@@ -54,7 +54,7 @@ namespace GlobalSim {
     ToolHandle<eFexRoIAlgTool>
     m_roiAlgTool{this,
 		 "roiAlgTool",
-		 "EMB1CellFromCaloCells",
+		 "EMBE1CellFromCaloCells",
 		 "AlgTool to provide a vector<const xAOD::eFexEMRoI*>"};
 
     Gaudi::Property<bool> m_dump {

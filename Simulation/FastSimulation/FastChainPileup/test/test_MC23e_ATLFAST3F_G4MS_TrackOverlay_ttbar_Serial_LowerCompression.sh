@@ -61,7 +61,6 @@ then
       --conditionsTag "default:${conditions}" \
       --geometryVersion "default:${geometry}" \
       --preExec 'RAWtoALL:flags.Reco.EnableTrackOverlay=True; flags.TrackOverlay.MLThreshold=0.95;' 'RDOtoRDOTrigger:flags.Overlay.doTrackOverlay=True;'\
-      --postExec 'RAWtoALL:from AthenaCommon.ConfigurationShelve import saveToAscii;saveToAscii("RAWtoALL_config.txt")' \
       --athenaopts "all:--threads=1" \
       --imf False
      rec=$?

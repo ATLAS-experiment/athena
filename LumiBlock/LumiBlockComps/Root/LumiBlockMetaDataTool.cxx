@@ -138,6 +138,11 @@ StatusCode LumiBlockMetaDataTool::metaDataStop()
       m_cacheSuspectOutputRangeContainer.push_back(std::move(iovr));
     }
     m_cacheInputRangeContainer.clear();
+    for (const auto range : m_cacheSuspectInputRangeContainer) {
+      auto iovr = std::make_unique<xAOD::LumiBlockRange>(*range);
+      m_cacheSuspectOutputRangeContainer.push_back(std::move(iovr));
+    }
+    m_cacheSuspectInputRangeContainer.clear();
   }
   
   ATH_CHECK( finishUp() );

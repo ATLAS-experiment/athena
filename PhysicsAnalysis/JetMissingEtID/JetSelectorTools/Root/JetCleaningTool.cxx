@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /******************************************************************************
@@ -156,15 +156,8 @@ asg::AcceptData JetCleaningTool::accept( const int isJetClean, const int fmaxInd
     //Loose/tight cleaning taken from decoration
     //=============================================================
     if(isJetClean==0) return acceptData;
-    else{
-        acceptData.setCutResult( "Cleaning", true );
-        return acceptData;
-    }
-
-    // We should never arrive here!
-    ATH_MSG_ERROR( "Unknown cut name: " << getCutName( m_cutLevel ) << " in JetCleaningTool" );
+    acceptData.setCutResult( "Cleaning", true );
     return acceptData;
-
 }
 //===============================================================
 // Calculate tight cleaning from loose decoration + variables
@@ -192,13 +185,8 @@ asg::AcceptData JetCleaningTool::accept( const int isJetClean,
     if(isJetClean==0) return acceptData;  //fails Loose cleaning
     else if (fmax<DBL_MIN) return acceptData;
     else if(std::fabs(eta)<2.4 && chf/fmax<0.1) return acceptData;
-    else{
-        acceptData.setCutResult( "Cleaning", true );
-        return acceptData;
-    }
-
-    // We should never arrive here!
-    ATH_MSG_ERROR( "Unknown cut name: " << getCutName( m_cutLevel ) << " in JetCleaningTool" );
+    //
+    acceptData.setCutResult( "Cleaning", true );
     return acceptData;
 
 }

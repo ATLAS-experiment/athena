@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRUTH_PARENT_DECORATOR_ALG
 #define TRUTH_PARENT_DECORATOR_ALG
@@ -10,6 +10,10 @@
 #include "xAODBase/IParticleContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "StoreGate/WriteDecorHandleKeyArray.h"
+
+#include <atomic>
+#include <vector>
+#include <map>
 
 struct MatchedParent;
 

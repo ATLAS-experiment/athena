@@ -28,9 +28,9 @@ namespace columnar
 {
   // Type aliases for ColumnarModeArray (hardcoded for this test)
   using MyTool = ColumnarTool<ColumnarModeArray>;
-  template<typename CT> using MyAccessor = AccessorTemplate<ContainerId::particle,CT,ColumnAccessMode::input,ColumnarModeArray>;
-  template<typename CT> using MyDecorator = AccessorTemplate<ContainerId::particle,CT,ColumnAccessMode::output,ColumnarModeArray>;
-  template<typename CT> using MyUpdater = AccessorTemplate<ContainerId::particle,CT,ColumnAccessMode::update,ColumnarModeArray>;
+  template<typename CT> using MyAccessor = AccessorTemplate<ParticleDef,CT,ColumnAccessMode::input,ColumnarModeArray>;
+  template<typename CT> using MyDecorator = AccessorTemplate<ParticleDef,CT,ColumnAccessMode::output,ColumnarModeArray>;
+  template<typename CT> using MyUpdater = AccessorTemplate<ParticleDef,CT,ColumnAccessMode::update,ColumnarModeArray>;
 
 
   // ==========================================================================
@@ -214,6 +214,36 @@ namespace columnar
     // Second tool with input access should work
     ToolColumnVectorMap wrapper2{header, tool2};
     EXPECT_FALSE(header.getColumn(ptIndex).readOnly); // should stay read-write
+  }
+
+
+  TEST (ColumnVectorWrapperTest, MultiTool_VariantLinkKeyRename)
+  {
+    // Two key columns for the same variant link but with different targets
+    // should be auto-renamed rather than throwing an error
+    ColumnInfo key1;
+    key1.name = "myLink.keys";
+    key1.type = &typeid(unsigned);
+    key1.keyColumnForVariantLink = "myLink";
+    key1.variantLinkTargetNames = {"ContainerA", "ContainerB"};
+
+    ColumnInfo key2;
+    key2.name = "myLink.keys";
+    key2.type = &typeid(unsigned);
+    key2.keyColumnForVariantLink = "myLink";
+    key2.variantLinkTargetNames = {"ContainerC", "ContainerD"};
+
+    ColumnVectorHeader header;
+    std::size_t idx1 = header.addColumn(key1);
+    std::size_t idx2 = header.addColumn(key2);
+
+    // Should get distinct indices
+    EXPECT_NE(idx1, idx2);
+
+    // Both should be present in getAllColumnInfo
+    auto allInfo = header.getAllColumnInfo();
+    EXPECT_TRUE(allInfo.count("myLink.keys") > 0);
+    EXPECT_TRUE(allInfo.count("myLink.keys.1") > 0);
   }
 }
 

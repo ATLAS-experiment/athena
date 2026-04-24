@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1RESULTBYTESTREAM_L1TRIGGERRESULTBYTESTREAMCNV_H
@@ -44,7 +44,7 @@ public:
   /// Storage type used by this converter
   static long storageType();
   /// CLID of the class of the L1TriggerResult converted by this converter (xAOD::TrigCompositeContainer)
-  static const CLID& classID();
+  static CLID classID();
 
   long repSvcType() const override { return i_repSvcType(); } //!< return repSvcType
 
@@ -61,6 +61,9 @@ private:
   ToolHandle<IL1TriggerByteStreamTool> m_muonEncoderToolDaq{"MuonRoIByteStreamTool/L1MuonBSEncoderToolDAQ"};
   /// Encoder tool for CTP result
   ToolHandle<IL1TriggerByteStreamTool> m_ctpResultEncoderTool{"CTPResultByteStreamTool/CTPResultBSEncoderTool"};
+  /// eFEX tool
+  ToolHandle<IL1TriggerByteStreamTool> m_efexEncoderTool{"eFexByteStreamTool/eFexBSEncoderTool"};
+  
   // Placeholder for other L1 xAOD outputs:
   // - L1Topo result
   // - L1Calo (Run3) RoIs

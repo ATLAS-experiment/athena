@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -9,8 +9,8 @@
  *      Author: tlodd
  */
 
-#ifndef PFMATCHPOSITION_H_
-#define PFMATCHPOSITION_H_
+#ifndef EFLOWREC_PFMATCHPOSITION_H
+#define EFLOWREC_PFMATCHPOSITION_H
 
 #include <vector>
 
@@ -122,4 +122,4 @@ public:
 
 }
 
-#endif /* PFMATCHPOSITION_H_ */
+#endif /* EFLOWREC_PFMATCHPOSITION_H */

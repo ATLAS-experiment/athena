@@ -15,6 +15,7 @@
 #include <ColumnarInterfaces/IColumnarTool.h>
 #include <ColumnarInterfaces/ColumnInfo.h>
 #include <ColumnarToolWrapper/ToolColumnVectorMap.h>
+#include <ColumnarToolWrapper/ColumnarToolHelpers.h>
 #include <PATInterfaces/ISystematicsTool.h>
 #include <PATInterfaces/SystematicSet.h>
 #include <PATInterfaces/SystematicsUtil.h>
@@ -88,18 +89,7 @@ namespace columnar
       if (m_tool == nullptr)
         preinitialize ();
       {
-        auto columnInfo = m_tool->getColumnInfo ();
-        for (auto& [from, to] : renames)
-        {
-          for (auto& column : columnInfo)
-          {
-            if (column.name.starts_with (from) && (column.name.size() == from.size() || column.name[from.size()] == '.'))
-            {
-              std::string newName = to + column.name.substr (from.size());
-              m_tool->renameColumn (column.name, newName);
-            }
-          }
-        }
+        columnar::renameContainers(*m_tool, renames);
       }
       if (m_toolWrapper)
       {
@@ -147,6 +137,18 @@ namespace columnar
       if (!m_columns)
         throw std::runtime_error ("tool not initialized");
       m_columns->setColumnVoid (m_toolWrapper->getColumnIndex (name), size, dataPtr, type, isConst);
+    }
+
+    /// get a column pointer by name; returns {size, ptr, type_info}
+    [[nodiscard]] std::tuple<std::size_t, const void*, const std::type_info*>
+    getColumnVoid (const std::string& name) const
+    {
+      if (!m_columns)
+        throw std::runtime_error ("tool not initialized");
+      const std::size_t index = m_toolWrapper->getColumnIndex (name);
+      const std::type_info* type = m_columnHeader->getColumn (index).type;
+      auto [size, ptr] = m_columns->getColumnVoid (index, type, true);
+      return {size, ptr, type};
     }
 
     /// call the tool and reset the columns

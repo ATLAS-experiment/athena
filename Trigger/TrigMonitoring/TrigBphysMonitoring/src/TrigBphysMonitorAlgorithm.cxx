@@ -126,6 +126,17 @@ StatusCode TrigBphysMonitorAlgorithm::fillChains(const EventContext& ctx) const 
     }
   }
   
+  for(const auto& monitoredChain : m_ChainNames_Bhh) {
+    ATH_MSG_DEBUG("Process chain " << monitoredChain);
+    if( !isChainPassed(monitoredChain) ) {
+      ATH_MSG_DEBUG("Chain " << monitoredChain << " is not passed");
+      continue;
+    }
+    if(fillBhhChainHists(ctx, monitoredChain).isFailure()) {
+      ATH_MSG_ERROR(Form("Problems filling %s chain histograms", monitoredChain.c_str()));
+    }
+  }
+  
   return StatusCode::SUCCESS;
 }
 
@@ -209,6 +220,31 @@ StatusCode TrigBphysMonitorAlgorithm::fillDielectronChainHists(const EventContex
       ATH_MSG_ERROR(Form("Problems filling muon histograms for %s chain",chainName.c_str()));
     }
   }
+  return StatusCode::SUCCESS;
+}
+
+StatusCode TrigBphysMonitorAlgorithm::fillBhhChainHists(const EventContext& ctx, const std::string& chainName) const {
+  ATH_MSG_DEBUG("Filling  " << chainName << " chain histograms");
+  
+  std::string monGroupName = std::string("Chain_")+chainName;
+  auto monGroup = getGroup(monGroupName);
+    
+  if (fillChainGenericHists(ctx, monGroup, chainName).isFailure()) {
+    ATH_MSG_ERROR(Form("Problems filling generic histograms for %s chain",chainName.c_str()));
+  }
+  
+  std::vector< TrigCompositeUtils::LinkInfo<xAOD::TrigBphysContainer> > chainFeatureContainer = getTrigDecisionTool()->features<xAOD::TrigBphysContainer>(chainName, TrigDefs::Physics);
+  for (const auto& featLinkInfo: chainFeatureContainer){
+    ATH_CHECK(featLinkInfo.isValid());
+    const auto featLink = featLinkInfo.link;
+    if (fillBphysObjectHists(monGroup, featLink, "B").isFailure()) {
+      ATH_MSG_ERROR(Form("Problems filling bphys object histograms for %s chain",chainName.c_str()));
+    }
+    if (fillTrigBmumuxTrkHists(monGroup, featLink, 0).isFailure()) { // same logic as for Bmumux, but start from 1st track - there are no muons
+      ATH_MSG_ERROR(Form("Problems filling muon histograms for %s chain",chainName.c_str()));
+    }
+  }
+  
   return StatusCode::SUCCESS;
 }
 

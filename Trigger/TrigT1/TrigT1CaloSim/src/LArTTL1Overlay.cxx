@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArTTL1Overlay.h"
@@ -48,26 +48,11 @@ StatusCode LArTTL1Overlay::execute(const EventContext& ctx) const
 void LArTTL1Overlay::groupTowers(const LArTTL1Container *towers,
                                  std::map<Identifier, std::vector<const LArTTL1*>> &towerMap) const
 {
-  for (const LArTTL1 *tower : *towers) {
+  for (const LArTTL1* tower : *towers) {
+    auto [it, inserted] = towerMap.try_emplace(tower->ttOfflineID());
+    it->second.push_back(tower);
+  }
 
-    // Obtain identifier
-    Identifier id = tower->ttOfflineID();
-
-    // Does this tower already exist?
-    std::map<Identifier, std::vector<const LArTTL1*>>::iterator test = towerMap.find( id );
-    // If already exists, add tower to location
-    if (test != towerMap.end()) {
-      // Add this pointer to the vector
-      test->second.push_back(tower);
-    }
-    // Otherwise create new entry in the map
-    else {
-      std::vector<const LArTTL1*> towers;
-      towers.push_back(tower);
-      towerMap.emplace(id, towers);
-    }
-
-  } // end for loop
 }
 
 /// Main algorithm execute

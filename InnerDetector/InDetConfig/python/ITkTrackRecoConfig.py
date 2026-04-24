@@ -21,10 +21,6 @@ def CombinedTrackingPassFlagSets(flags):
     from TrkConfig.TrkConfigFlags import TrackingComponent
     validation_configurations = {
         TrackingComponent.ActsValidateClusters : "ActsValidateClusters",
-        TrackingComponent.ActsValidateSpacePoints : "ActsValidateSpacePoints",
-        TrackingComponent.ActsValidateSeeds : "ActsValidateSeeds",
-        TrackingComponent.ActsValidateConversionSeeds : "ActsValidateConversionSeeds",
-        TrackingComponent.ActsValidateLargeRadiusSeeds: "ActsValidateLargeRadiusSeeds",
         TrackingComponent.ActsValidateLargeRadiusStandalone: "ActsValidateLargeRadiusStandalone",
         TrackingComponent.ActsValidateTracks : "ActsValidateTracks",
         TrackingComponent.ActsValidateAmbiguityResolution : "ActsValidateAmbiguityResolution",
@@ -63,8 +59,7 @@ def CombinedTrackingPassFlagSets(flags):
             "Tracking.ITkGNNPass")]
         
     # Acts Conversion Pass
-    if flags.Detector.EnableCalo and flags.Acts.doITkConversion and \
-       TrackingComponent.ActsValidateConversionSeeds not in flags.Tracking.recoChain:
+    if flags.Detector.EnableCalo and flags.Acts.doITkConversion:
         flags_set += [flags.cloneAndReplace(
             "Tracking.ActiveConfig",
             "Tracking.ITkActsConversionPass")]
@@ -510,8 +505,15 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
     result = ComponentAccumulator()
     
     if flags.Input.Format is Format.BS:
-        # TODO: ITk BS providers
-        raise RuntimeError("ByteStream inputs not supported")
+        if flags.Detector.EnableITkPixel:
+            from ITkPixelByteStreamCnv.ITkPixelByteStreamCnvConfig import ITkPixelDecodingAlgCfg
+            result.merge( ITkPixelDecodingAlgCfg(flags) )
+
+        if flags.Detector.EnableITkStrip:
+            from ITkStripsByteStreamCnv.ITkStripByteStreamCnvConfig import ITkStripRawDataProviderCfg
+            result.merge(ITkStripRawDataProviderCfg(flags))
+
+
 
     # Get all the requested tracking passes
     flags_set = CombinedTrackingPassFlagSets(flags)

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "SegmentFitParDecorAlg.h"
 
@@ -10,10 +10,11 @@
 #include "xAODMuonPrepData/UtilFunctions.h"
 #include "MuonReadoutGeometryR4/SpectrometerSector.h"
 #include "TrkCompetingRIOsOnTrack/CompetingRIOsOnTrack.h"
+#include "xAODMuonViews/ChamberViewer.h"
+
 namespace MuonR4 {
     using namespace SegmentFit;
     using SegPars = xAOD::MeasVector<Acts::toUnderlying(ParamDefs::nPars)>;
-    using TechIdx_t = Muon::MuonStationIndex::TechnologyIndex;
 
     StatusCode SegmentFitParDecorAlg::initialize() {
         ATH_CHECK(m_idHelperSvc.retrieve());
@@ -29,61 +30,21 @@ namespace MuonR4 {
         ATH_CHECK(m_keyMM.initialize(!m_keyMM.empty()));
         return StatusCode::SUCCESS;
     }
-   StatusCode SegmentFitParDecorAlg::fetchMeasurement(const EventContext& ctx,
-                                                      const MeasKey_t& key,
-                                                      const Identifier& measId,
-                                                      const xAOD::UncalibratedMeasurement*& meas) const {
-        const PrdCont_t* cont{nullptr};
-        ATH_CHECK(SG::get(cont, key, ctx));
-        if (!cont) {
-            ATH_MSG_VERBOSE("No container key given");
-            return StatusCode::SUCCESS;
-        }
-        for (const xAOD::UncalibratedMeasurement* inCont : *cont) {
-            if (xAOD::identify(inCont) == measId) {
-                meas = inCont;
-                break;
-            }
-        }
-        if (!meas) {
-            ATH_MSG_WARNING("Failed to find the hit "<<m_idHelperSvc->toString(measId));
-        }
-        return StatusCode::SUCCESS;
-    }
-    StatusCode SegmentFitParDecorAlg::addLink(const EventContext& ctx,
-                                              const Identifier& rotId,
-                                              PrdLinkVec& prdLinks) const {
-        const xAOD::UncalibratedMeasurement* prd{nullptr};
-        switch(m_idHelperSvc->technologyIndex(rotId)){
-            case TechIdx_t::MDT:
-                ATH_CHECK(fetchMeasurement(ctx, m_keyMdt, rotId, prd));
-                break;
-            case TechIdx_t::RPC:
-                ATH_CHECK(fetchMeasurement(ctx, m_keyRpc, rotId, prd));
-                break;
-            case TechIdx_t::TGC:
-                ATH_CHECK(fetchMeasurement(ctx, m_keyTgc, rotId, prd));
-                break;
-            case TechIdx_t::MM:
-                ATH_CHECK(fetchMeasurement(ctx, m_keyMM, rotId, prd));
-                break;
-            case TechIdx_t::STGC:
-                ATH_CHECK(fetchMeasurement(ctx, m_keysTgc, rotId, prd));
-                break;
+    const SegmentFitParDecorAlg::MeasKey_t& 
+          SegmentFitParDecorAlg::fetchKey(const TechIdx_t idx) const {
+        switch (idx) {
+             using enum TechIdx_t;
+            case MDT: return m_keyMdt;
+            case RPC: return m_keyRpc;
+            case TGC: return m_keyTgc;
+            case MM: return m_keyMM;
+            case STGC: return m_keysTgc;
             default:
-                break;
-        };
-        if (!prd) {
-            return StatusCode::SUCCESS;
+                THROW_EXCEPTION("Invalid technology index "<<idx);
         }
-        ATH_MSG_VERBOSE("Link new measurement "<<m_idHelperSvc->toString(rotId));
-        PrdLink_t link{*static_cast<const PrdCont_t*>(prd->container()), 
-                        prd->index()};
-        prdLinks.push_back(std::move(link));
-        return StatusCode::SUCCESS;
+        return m_keyMdt;
     }
-
-
+   
     StatusCode SegmentFitParDecorAlg::execute(const EventContext& ctx) const {
         const xAOD::MuonSegmentContainer* segmentContainer{nullptr};
         const ActsTrk::GeometryContext* gctx{nullptr};
@@ -96,21 +57,63 @@ namespace MuonR4 {
         for (const xAOD::MuonSegment* seg : *segmentContainer) {
             PrdLinkVec& prdLinks{prdLinkDecor(*seg)};
             const Trk::Segment* trkSeg{*seg->muonSegment()};
-
+            
+            std::array<std::vector<Identifier>, toInt(TechIdx_t::TechnologyIndexMax)> idsPerTech{};
+            /// Sort first all measurement Identifiers by technology index
+            auto appendId = [&] (const Identifier& id) {
+                idsPerTech[toInt(m_idHelperSvc->technologyIndex(id))].push_back(id);
+            };
             for (const Trk::MeasurementBase* meas : trkSeg->containedMeasurements()) {
-                const auto* rot = dynamic_cast<const Trk::RIO_OnTrack*>(meas);
-                if (rot) {
-                    ATH_CHECK(addLink(ctx, rot->identify(), prdLinks));
-                    continue;
-                }
-                const auto* cRot = dynamic_cast<const Trk::CompetingRIOsOnTrack*>(meas);
-                if (cRot) {                    
+                if (const auto* rot = dynamic_cast<const Trk::RIO_OnTrack*>(meas)) {
+                    appendId(rot->identify());
+                } else if (const auto* cRot = dynamic_cast<const Trk::CompetingRIOsOnTrack*>(meas)){
                     for (unsigned int r = 0 ; r < cRot->numberOfContainedROTs(); ++r){
-                        ATH_CHECK(addLink(ctx, cRot->rioOnTrack(r).identify(), prdLinks));
+                        appendId(cRot->rioOnTrack(r).identify());
                     }
                 }
             }
-            const MuonGMR4::SpectrometerSector* chamber = m_detMgr->getSectorEnvelope(xAOD::identify(*prdLinks.front()));
+            for (std::vector<Identifier>& ids : idsPerTech) {
+                if (ids.empty()) {
+                    continue;
+                }
+                std::ranges::sort(ids,[this](const Identifier& a, const Identifier& b){
+                    return m_idHelperSvc->detElementHash(a) < m_idHelperSvc->detElementHash(b);
+                });
+                const MeasKey_t& key = fetchKey(m_idHelperSvc->technologyIndex(ids.front()));
+                if (key.empty()) {
+                    ATH_MSG_ERROR("The key for technology "<<m_idHelperSvc->technologyIndex(ids.front())
+                                <<" is empty");
+                    return StatusCode::FAILURE;
+                }
+                const xAOD::MuonMeasurementContainer* container{nullptr};
+                ATH_CHECK(SG::get(container, key, ctx));
+                xAOD::ChamberViewer viewer{*container};
+                if (!viewer.loadView(m_idHelperSvc->detElementHash(ids.front()))){
+                    ATH_MSG_ERROR("Cannot find a xAOD view for "<<m_idHelperSvc->toStringDetEl(ids.front()));
+                    return StatusCode::FAILURE;
+                }
+                for (const Identifier& id : ids) {
+                    const IdentifierHash dHash = m_idHelperSvc->detElementHash(id);
+                    while(viewer.at(0)->identifierHash() != dHash) {
+                        if (!viewer.next()) {
+                            ATH_MSG_ERROR("Cannot find a xAOD view for "
+                                <<m_idHelperSvc->toStringDetEl(id));
+                        }
+                    }
+                    const auto itr = std::ranges::find_if(viewer,[&id](const xAOD::MuonMeasurement* meas){
+                        return meas->identify() == id;
+                    });
+                    if (itr == viewer.end()) {
+                        ATH_MSG_ERROR("Cannot find measurement "<<m_idHelperSvc->toString(id));
+                        return StatusCode::FAILURE;
+                    }
+                    const auto* m{*itr};
+                    prdLinks.emplace_back(container, m->index());
+                }
+            }
+            const MuonGMR4::SpectrometerSector* chamber = m_detMgr->getSectorEnvelope(seg->chamberIndex(),
+                                                                                      seg->sector(),
+                                                                                      seg->etaIndex());
             const Amg::Transform3D globToLoc{chamber->globalToLocalTransform(*gctx)};
 
             SegPars& locPars{parDecor(*seg)};

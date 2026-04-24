@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # Steering script for IDPVM ART Run 4 configuration, ITK only FastTracking recontruction, acts activated
 
@@ -34,10 +34,13 @@ run () {
     return $rc
 }
 
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+
 # Run with Athena
 run "Reconstruction-athena" \
     Reco_tf.py \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
+    --conditionsTag "default:${conditionsTag}" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingRecoPreInclude" \
     --preExec "flags.Tracking.doITkFastTracking=True; \
     	       flags.Tracking.writeExtendedSi_PRDInfo=True; \
 	       flags.Tracking.doStoreSiSPSeededTracks=True; \
@@ -72,7 +75,8 @@ fi
 # Run with ACTS
 run "Reconstruction-acts" \
     Reco_tf.py \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
+    --conditionsTag "default:${conditionsTag}" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingRecoPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
     --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
     	       flags.Tracking.ITkActsPass.storeSiSPSeededTracks=True;" \
     --inputRDOFile ${ArtInFile} \

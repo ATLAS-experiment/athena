@@ -16,6 +16,7 @@
 #include "xAODJet/JetContainer.h"
 #include "InDetTrackSystematicsTools/InDetTrackSystematicsTool.h"
 
+#include <mutex>
 #include <string>
 
 class TH1;
@@ -54,6 +55,10 @@ namespace InDet {
     // right now this returns a bool; if we want to implement the ASG selection tool interface then this will need to change to a TAccept
     virtual bool accept( const xAOD::TrackParticle*, const xAOD::Jet* ) const override;
     virtual bool accept( const xAOD::TrackParticle*, const xAOD::JetContainer* ) const override;
+    /// Reentrant accept (see IJetTrackFilterTool)
+    virtual bool accept(const xAOD::TrackParticle*,
+                        const xAOD::JetContainer*,
+                        const CP::SystematicSet& syst) const override;
 
     /// returns: whether the tool is affected by the systematic
     virtual bool isAffectedBySystematic( const CP::SystematicVariation& ) const override;
@@ -71,6 +76,7 @@ namespace InDet {
     Gaudi::Property<int> m_seed{this, "Seed", 0,
       "Seed used to initialize the RNG"};
     std::unique_ptr<TRandom3> m_rnd; //!
+    mutable std::mutex m_rndMutex; //!
     Gaudi::Property<double> m_deltaR{this, "DeltaR", 0.1,
       "Delta-R cut in which to apply jet-track efficiency rejection"};
     Gaudi::Property<double> m_minJetPt{this, "minJetPt", 200000.,

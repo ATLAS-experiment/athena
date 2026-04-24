@@ -41,7 +41,7 @@ public:
 protected:
   TrigRoiDescriptor_PERS*  createPersistent(TrigRoiDescriptor* transObj);
 
-  TrigRoiDescriptor*       createTransient ();
+  TrigRoiDescriptor*       createTransient(const Token* token);
 
  private:
 

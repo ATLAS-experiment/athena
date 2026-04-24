@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainersInterfaces/IAuxTypeVector.h
@@ -21,6 +21,9 @@
 #include <cstddef>
 #include <memory>
 #include <typeinfo>
+
+
+class EventContext;
 
 
 namespace SG {
@@ -171,6 +174,19 @@ public:
    */
   virtual bool setOption (const AuxDataOption& /*option*/)
   { return false; }
+
+
+
+  /**
+   * @brief Perform post-read processing on this auxiliary variable.
+   * @param ctx The current event context.
+   *
+   * Some object types require some processing after being read before
+   * they are usable.  This can be indicated by specializing SG::ToTransient
+   * for the vector type containing the variable.  This method will call
+   * such a ToTransient method on the contents, if one is defined.
+   */
+  virtual void toTransient (const EventContext& ctx) = 0;
 
 
   /**

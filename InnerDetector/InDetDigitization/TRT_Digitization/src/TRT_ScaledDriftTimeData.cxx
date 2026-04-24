@@ -16,7 +16,7 @@
 
 //______________________________________________________________________________
 TRT_ScaledDriftTimeData::TRT_ScaledDriftTimeData(std::unique_ptr<ITRT_DriftTimeData> pOriginalData,//Assumes ownership of pOriginalData!!
-                                                 const double& scaleFactor)
+                                                 double scaleFactor)
   : m_pOriginalData(std::move(pOriginalData)), m_scaleFactor(scaleFactor) {}
 
 //______________________________________________________________________________
@@ -29,11 +29,11 @@ double TRT_ScaledDriftTimeData::MaxTabulatedField() const {
 }
 
 //______________________________________________________________________________
-double TRT_ScaledDriftTimeData::DriftTimeAtNoField(const double& dist) const {
+double TRT_ScaledDriftTimeData::DriftTimeAtNoField(double dist) const {
   return m_pOriginalData->DriftTimeAtNoField(dist) * m_scaleFactor;
 }
 
 //______________________________________________________________________________
-double TRT_ScaledDriftTimeData::DriftTimeAtMaxField(const double& dist) const {
+double TRT_ScaledDriftTimeData::DriftTimeAtMaxField(double dist) const {
   return m_pOriginalData->DriftTimeAtMaxField(dist) * m_scaleFactor;
 }

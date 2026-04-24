@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigBSExtraction/TrigBStoxAODTool.h"
@@ -100,21 +100,21 @@
 #include "xAODBTagging/BTaggingContainer.h"
 #include "TrigParticle/TrigEFBjetContainer.h"
 
-template<typename element,typename list,int index> struct get_strictly_feat{
-  static const bool result = HLT::TypeInformation::at<list,index>::type::list_of_features::template has<element>::result;
-};
+namespace {
+  /// Helper for EDM search
+  template <typename T, typename Element>
+  struct MatchFeaturesStrict {
+    static constexpr bool value = Element::list_of_features::template has<T>;
+  };
 
-template<class T, class EDMLIST = TypeInfo_EDM> struct known{
-  typedef typename master_search<typename EDMLIST::map,
-				 get_strictly_feat,T>::result::search_result search_result;
-  static const bool value = !std::is_same<HLT::TypeInformation::ERROR_THE_FOLLOWING_TYPE_IS_NOT_KNOWN_TO_THE_EDM<T>,search_result>::value;
-};
-
-
-template<typename T, bool = known<T>::value> struct getCLID;
-template<typename T> struct getCLID<T,true>{static int ID(){return ClassID_traits<T>::ID();}};
-template<typename T> struct getCLID<T,false>{static int ID(){return -1;}};
-
+  /// Get CLID for type T if known to Trigger EDM
+  template<typename T>
+  constexpr int getCLID() {
+    constexpr bool known = TypeInfo_EDM::map::template has<T, MatchFeaturesStrict>;
+    if constexpr (known) return ClassID_traits<T>::ID();
+    else                 return -1;
+  }
+}
 
 namespace BStoXAODHelper{
 
@@ -177,15 +177,15 @@ namespace BStoXAODHelper{
   //this is the most vanilla case
   template<typename AOD,typename XAOD, typename CnvTool>
   struct DefaultHelper : public ToolHolder<CnvTool> {
-    typedef typename Container2Aux<XAOD>::type xAODAux;
+    using xAODAux = Container2Aux_t<XAOD>;
     
     DefaultHelper(const ToolHandle<CnvTool>& tool) : ToolHolder<CnvTool>(tool){;}
 
-    CLID AODContainerClid(){return getCLID<AOD>::ID();}    
-    CLID xAODContainerClid(){return getCLID<XAOD>::ID();}
+    CLID AODContainerClid(){return getCLID<AOD>();}
+    CLID xAODContainerClid(){return getCLID<XAOD>();}
 
-    CLID AODElementClid(){return getCLID<typename Container2Object<AOD>::type>::ID();}    
-    CLID xAODElementClid(){return getCLID<typename Container2Object<XAOD>::type>::ID();}
+    CLID AODElementClid(){return getCLID<Container2Object_t<AOD>>();}
+    CLID xAODElementClid(){return getCLID<Container2Object_t<XAOD>>();}
 
     virtual StatusCode help(const std::string& label, const std::string& newLabel){
       typedef IHelper IH;
@@ -273,11 +273,11 @@ namespace BStoXAODHelper{
   struct MuonHelper : public ToolHolder<ITrigMuonEFInfoToMuonCnvTool> {
     MuonHelper(const ToolHandle<ITrigMuonEFInfoToMuonCnvTool>& tool) : ToolHolder(tool){;}
 
-    CLID AODContainerClid(){return getCLID<TrigMuonEFInfoContainer>::ID();}
-    CLID xAODContainerClid(){return getCLID<xAOD::MuonContainer>::ID();}
+    CLID AODContainerClid(){return getCLID<TrigMuonEFInfoContainer>();}
+    CLID xAODContainerClid(){return getCLID<xAOD::MuonContainer>();}
 
-    CLID AODElementClid(){return getCLID<Container2Object<TrigMuonEFInfoContainer>::type>::ID();}
-    CLID xAODElementClid(){return getCLID<Container2Object<xAOD::MuonContainer>::type >::ID();}
+    CLID AODElementClid(){return getCLID<Container2Object_t<TrigMuonEFInfoContainer>>();}
+    CLID xAODElementClid(){return getCLID<Container2Object_t<xAOD::MuonContainer>>();}
 
     virtual StatusCode help(const std::string& label, const std::string& newLabel){
       xAOD::MuonContainer* xaodMuon = this->m_sg->tryRetrieve<xAOD::MuonContainer>(format<xAOD::MuonContainer>(newLabel));
@@ -408,8 +408,8 @@ TrigBStoxAODTool::TrigBStoxAODTool(const std::string& type, const std::string& n
   declareProperty("caloClusterTool", m_caloClusterTool);
   declareProperty("trigPassBitsTool", m_trigPassBitsTool);
 
-  m_CLID_xAODPhotonContainer = getCLID<xAOD::PhotonContainer>::ID();
-  m_CLID_xAODElectronContainer = getCLID<xAOD::ElectronContainer>::ID();
+  m_CLID_xAODPhotonContainer = getCLID<xAOD::PhotonContainer>();
+  m_CLID_xAODElectronContainer = getCLID<xAOD::ElectronContainer>();
 }
 
 TrigBStoxAODTool::~TrigBStoxAODTool() {
@@ -497,7 +497,7 @@ StatusCode TrigBStoxAODTool::initialize(){
 
   m_helpers.insert( std::pair<CLID,BStoXAODHelper::DefaultHelper<
 		    TrigTrackCountsCollection,xAOD::TrigTrackCountsContainer,xAODMaker::ITrigTrackCountsCnvTool>* >
-		    (getCLID<TrigTrackCountsCollection>::ID(), 
+		    (getCLID<TrigTrackCountsCollection>(),
 		     new BStoXAODHelper::DefaultHelper<
 		     TrigTrackCountsCollection,xAOD::TrigTrackCountsContainer,xAODMaker::ITrigTrackCountsCnvTool>(m_trigTrackCtsTool)) );
 

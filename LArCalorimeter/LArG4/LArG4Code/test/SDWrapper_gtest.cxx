@@ -87,13 +87,13 @@ TEST_F(SDWrappertest, EndOfAthenaEvent)
   double l_energy = 1.0;
   double l_time = 1.0;//define actual parameter for the LArHit object named hit
   LArHit hit(id, l_energy, l_time);//declare a LArHit object, which is essentially a hit
-  LArG4SimpleSD::hits_t* hits = new LArG4SimpleSD::hits_t();//define a hit container hits
+  std::unique_ptr<LArG4SimpleSD::hits_t> hits = std::make_unique<LArG4SimpleSD::hits_t>();//define a hit container hits
   hits->insert(&hit);//insert a hit into the hit container hits, which will be used by a std::unique_ptr<LArG4SimpleSD> object p
 
-  DerivedILArCalculatorSvcForTest* calc = new DerivedILArCalculatorSvcForTest();//use the derived ILArCalculatorSvc class since ILArCalculatorSvc is abstact and can not be instantiated
-  auto p = std::make_unique<LArG4SimpleSD>("name", calc);//instantiate a LArG4SimpleSD object and wrap it in std::unique_ptr<LArG4SimpleSD> object p
-  p.get()->setupHelpers(&m_EM, &m_FCAL, &m_HEC);//add helpers(&m_EM, &m_FCAL, &m_HEC), which can convert a set of numbers stored in LArG4Identifier object into a compact number stored in a Identifier object 
-  p.get()->m_timeBins.insert( std::pair<G4int, LArG4SimpleSD::hits_t*>(0,hits) );//insert the hit container hits into the container of hit container
+  std::unique_ptr<DerivedILArCalculatorSvcForTest> calc = std::make_unique<DerivedILArCalculatorSvcForTest>();//use the derived ILArCalculatorSvc class since ILArCalculatorSvc is abstact and can not be instantiated
+  auto p = std::make_unique<LArG4SimpleSD>("name", calc.get());//instantiate a LArG4SimpleSD object and wrap it in std::unique_ptr<LArG4SimpleSD> object p
+  p.get()->setupHelpers(&m_EM, &m_FCAL, &m_HEC);//add helpers(&m_EM, &m_FCAL, &m_HEC), which can convert a set of numbers stored in LArG4Identifier object into a compact number stored in a Identifier object
+  p.get()->m_timeBins.insert( std::pair<G4int, LArG4SimpleSD::hits_t*>(0,hits.release()) );//insert the hit container hits into the container of hit container
 
   sd5.m_sdList.push_back( p.get() );//insert the std::unique_ptr<LArG4SimpleSD> object p into the container m_sdList
   sd5.EndOfAthenaEvent();//invoke the tested member function, which will put the hit in another container m_hitColl. Next few lines will test if the hit was placed well
@@ -152,4 +152,3 @@ int main( int argc, char** argv ) {
   return RUN_ALL_TESTS();
 
 }
-

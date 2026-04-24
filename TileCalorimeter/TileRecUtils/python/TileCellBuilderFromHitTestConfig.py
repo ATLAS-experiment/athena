@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
 #
 # File: TileRecUtils/python/TileCellBuilderFromHitTestConfig.py
 # Author: scott snyder
@@ -201,7 +201,7 @@ class TestAlg (Alg):
             
         self.record_hits (hits, rctype, bsflags, 'TileHitCnt')
 
-        ccc = ROOT.CaloCellContainer()
+        ccc = ROOT.CaloCellContainer(ROOT.SG.VIEW_ELEMENTS)
         if not tool.process (ccc, self.getContext()):
             return StatusCode.Failure
 
@@ -227,6 +227,7 @@ class TestAlg (Alg):
                 adc_id = idHelper.adc_id (*addr)
                 hit = ROOT.TileHit (adc_id, *data)
                 coll.push_back (hit)
+                ROOT.SetOwnership (hit, False)
 
             cont.addCollection (coll, ROOT.IdentifierHash(icoll))
             ROOT.SetOwnership (coll, False)

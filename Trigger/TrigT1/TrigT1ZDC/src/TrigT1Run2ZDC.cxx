@@ -1,11 +1,14 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#include <fstream>
-#include <stdexcept>
-#include <bitset>
+
 #include "TrigT1Run2ZDC.h"
 #include "AthContainers/ConstAccessor.h"
+#include <fstream>
+#include <bitset>
+#include <vector>
+#include <iomanip>
+
 
 using json = nlohmann::json;
 
@@ -45,15 +48,17 @@ namespace LVL1 {
 
    // Will eventually obtain LUTs from COOL, for now obtain them from calibration area
    // A data member to hold the side A LUT values
+   //coverity[STACK_USE]
    std::array<unsigned int, 4096> sideALUT = data["LucrodHighGain"]["LUTs"]["sideA"];
    // A data member to hold the side C LUT values
+   //coverity[STACK_USE]
    std::array<unsigned int, 4096> sideCLUT = data["LucrodHighGain"]["LUTs"]["sideC"];
    // A data member to hold the Combined LUT values
    std::array<unsigned int, 256> combLUT = data["LucrodHighGain"]["LUTs"]["comb"];
 
    // Construct Simulation Objects
    m_modInputs_p = std::make_shared<ZDCTriggerSim::ModuleAmplInputsFloat>(ZDCTriggerSim::ModuleAmplInputsFloat(convfact));
-   m_simTrig = std::make_shared<ZDCTriggerSimModuleAmpls>(ZDCTriggerSimModuleAmpls(sideALUT, sideCLUT, combLUT));
+   m_simTrig = std::make_shared<ZDCTriggerSimModuleAmpls>(std::move(sideALUT), std::move(sideCLUT), std::move(combLUT));
 
    ATH_MSG_DEBUG("TrigT1Run2ZDC initilized");
    return StatusCode::SUCCESS;

@@ -36,7 +36,6 @@ run () {
 
 run "Simulation" \
     Sim_tf.py \
-    --CA \
     --conditionsTag "default:${conditions}" \
     --simulator 'FullG4MT' \
     --postInclude 'default:PyJobTransforms.UseFrontier' \
@@ -50,7 +49,6 @@ run "Simulation" \
 
 run "Digitization"\
     Digi_tf.py \
-    --CA \
     --conditionsTag "default:${conditions}" \
     --digiSeedOffset1 170 --digiSeedOffset2 170 \
     --geometryVersion "default:${geometry}" \
@@ -64,10 +62,8 @@ run "Digitization"\
 
 run "Reconstruction" \
     Reco_tf.py \
-    --CA \
     --inputRDOFile RDO.root \
     --outputAODFile AOD.root \
-    --steering doRAWtoALL \
     --preInclude InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude \
     --preExec "flags.Tracking.useITkFTF=True;flags.Tracking.doITkFastTracking=True;flags.Tracking.ITkFTFPass.useTracklets=True;flags.Tracking.ITkFTFPass.useTrigRoadPredictor=True;flags.Tracking.ITkFTFPass.useTrigTrackFollowing=True"
 

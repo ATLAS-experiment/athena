@@ -46,6 +46,8 @@ def getTapisSession(flags):
             yearStr = "2023"
         elif flags.Input.MCCampaign == Campaign.MC23e:
             yearStr = "2024"
+        elif flags.Input.MCCampaign == Campaign.MC23g:
+            yearStr = "2025"
 
     session_files = {
         "2015": "TriggerAPISessions/tapis_data15_13TeV_20190708_PHYS_StandardGRL_All_Good_25ns.json",
@@ -56,12 +58,13 @@ def getTapisSession(flags):
         "2022": "TriggerAPISessions/tapis_data22_13p6TeV_20230207_PHYS_StandardGRL_All_Good_25ns.json",
         "2023": "TriggerAPISessions/tapis_data23_13p6TeV_20230828_PHYS_StandardGRL_All_Good_25ns.json",
         "2024": "TriggerAPISessions/tapis_data24_13p6TeV_20241118_PHYS_StandardGRL_All_Good_25ns.json",
+        "2025": "TriggerAPISessions/tapis_data25_13p6TeV_20260129_PHYS_StandardGRL_All_Good_25ns.json",
     }
 
     if yearStr in session_files:
         return TriggerAPISession(json=session_files[yearStr])
 
-    # Otherwise: data24, MC23e, phase-II. Base this on the menu from the AOD.
+    # Otherwise: future data/MC or phase-II. Base this on the menu from the AOD.
     if flags.Input.Format == Format.POOL:
         return TriggerAPISession(file=flags.Input.Files[0])
 
@@ -135,12 +138,13 @@ class TriggerListsHelper:
 
             # TriggerAPI Session based trigger lists
             session = getTapisSession(self.flags)
-            lf = 0.8 # Prescale weighted life fraction of the GRL's LBs 
+            lf = 0.75 # Prescale weighted life fraction of the GRL's LBs 
             api_trigger_names = set()
             api_trigger_names = session.getLowestUnprescaled(triggerType=TriggerType.el, livefraction=lf).union(api_trigger_names)
             api_trigger_names = session.getLowestUnprescaled(triggerType=TriggerType.mu, livefraction=lf).union(api_trigger_names)
             api_trigger_names = session.getLowestUnprescaled(triggerType=TriggerType.g, livefraction=lf).union(api_trigger_names)
             api_trigger_names = session.getLowestUnprescaled(triggerType=TriggerType.tau, livefraction=lf).union(api_trigger_names)
+            api_trigger_names = session.getLowestUnprescaled(triggerType=TriggerType.xe, livefraction=lf).union(api_trigger_names)
             ## Add Run 2 cross-triggers for some sets
             api_trigger_names = session.getLowestUnprescaled(triggerType=[TriggerType.el,  TriggerType.mu], livefraction=lf).union(api_trigger_names)
             api_trigger_names = session.getLowestUnprescaled(triggerType=[TriggerType.el,  TriggerType.tau], livefraction=lf).union(api_trigger_names)

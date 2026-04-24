@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/CombinedShapeErrorGetter.h"
@@ -13,23 +13,20 @@ using std::endl;
 using namespace LArSamples;
 
 
-ShapeErrorData* CombinedShapeErrorGetter::shapeErrorData(unsigned int hash, CaloGain::CaloGain gain, const Residual* /*toExclude*/) const
+std::unique_ptr<ShapeErrorData> CombinedShapeErrorGetter::shapeErrorData(unsigned int hash, CaloGain::CaloGain gain, const Residual* /*toExclude*/) const
 {
   TVectorD offsets(32);
   CovMatrix errors(32);
-  ShapeErrorData* sed = nullptr;
+  std::unique_ptr<ShapeErrorData> sed;
   for (const AbsShapeErrorGetter* getter : m_getters) {
-    const ShapeErrorData* other = getter->shapeErrorData(hash, gain);
+    std::unique_ptr<const ShapeErrorData> other = getter->shapeErrorData(hash, gain);
     if (!other) continue;
     if (!sed) 
-      sed = new ShapeErrorData(*other);
+      sed = std::make_unique<ShapeErrorData>(*other);
     else {
-      ShapeErrorData* newSed = sed->add(*other);
-      delete sed;
-      sed = newSed;
+      sed = sed->add(*other);
       if (!sed) return nullptr;
     }
-    delete other;
   }
   return sed;
 }

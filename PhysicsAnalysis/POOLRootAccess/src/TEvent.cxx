@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "POOLRootAccess/TEvent.h"
@@ -192,6 +192,10 @@ int TEvent::getEntry( long entry ) {
    setActive();
    if (m_evtProcessor == nullptr) {
      m_evtProcessor = dynamic_cast<IEventProcessor*>(&*m_evtLoop);
+   }
+   if (!m_evtProcessor){
+     std::cout << "m_evtProcessor is still nullptr" << std::endl;
+     return -1;
    }
    StatusCode out = m_evtProcessor->nextEvent(entry+1);
    m_curEntry = entry;

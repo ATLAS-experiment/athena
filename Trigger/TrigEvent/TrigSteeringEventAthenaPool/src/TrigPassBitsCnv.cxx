@@ -20,14 +20,14 @@ TrigPassBits_PERS* TrigPassBitsCnv::createPersistent(TrigPassBits* transObj) {
 }
 
 //createTransient
-TrigPassBits* TrigPassBitsCnv::createTransient() {
+TrigPassBits* TrigPassBitsCnv::createTransient(const Token* token) {
     MsgStream mlog(msgSvc(), "TrigPassBitsConverter" );
 
     static const pool::Guid p1_guid("391FFE21-5D82-471E-9FFC-B77150142B8F");
 
-    if( compareClassGuid(p1_guid) ) {
+    if( compareClassGuid(token, p1_guid) ) {
 
-      std::unique_ptr< TrigPassBits_p1 > col_vect( poolReadObject< TrigPassBits_p1 >() );
+      std::unique_ptr< TrigPassBits_p1 > col_vect( poolReadObject< TrigPassBits_p1 >(token) );
       TrigPassBitsCnv_p1 converter;
       return converter.createTransient( col_vect.get(), mlog );
 

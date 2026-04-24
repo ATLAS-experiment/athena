@@ -83,14 +83,19 @@ ActsTrk::HoughVtxFinderTool::findVertex(const EventContext &ctx,
                                             << vertexFinder->config().defVtxPosition[1] << ", "
                                             << vertexFinder->config().defVtxPosition[2]);
 
-  std::vector<SpacePoint> spacePointVector;
-  spacePointVector.reserve(spacePointContainer.size());
+  Acts::SpacePointContainer2 spacePoints(Acts::SpacePointColumns::X | 
+                                          Acts::SpacePointColumns::Y |
+                                          Acts::SpacePointColumns::Z);
+  spacePoints.reserve(spacePointContainer.size(), 0);
   for (const auto sp : spacePointContainer) {
-    spacePointVector.emplace_back(sp);
+    auto newSp = spacePoints.createSpacePoint();
+    newSp.x() = sp->x();
+    newSp.y() = sp->y();
+    newSp.z() = sp->z();
   }
 
-  ATH_MSG_DEBUG("Number of input space points: " << spacePointVector.size());
-  auto vtx = vertexFinder->find(spacePointVector);
+  ATH_MSG_DEBUG("Number of input space points: " << spacePoints.size());
+  auto vtx = vertexFinder->find(spacePoints);
 
   if (vtx.ok()) {
     ATH_MSG_DEBUG("Vertex position: " << (*vtx)[0] << ", " << (*vtx)[1] << ", " << (*vtx)[2]);

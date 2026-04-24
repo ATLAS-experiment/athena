@@ -3,8 +3,8 @@
 */
 
 #include "TgcRODReadOut.h"
-
 #include "AthenaKernel/getMessageSvc.h"
+#include "GaudiKernel/MsgStream.h"
 #include "TgcSlbData.h"
 
 // destructor
@@ -413,7 +413,7 @@ StatusCode Muon::TgcRODReadOut::decodeRodToRdo(
     for (; vDataIndex < firstRawDataIndex + sizeRawData; ++vDataIndex) {
         if (t_debug) {
             log << MSG::DEBUG << "Tgc BS Raw:" << vDataIndex << ":  "
-                << std::hex << vData[vDataIndex] << endmsg;
+                << std::hex << vData[vDataIndex] << std::dec<< endmsg;
         }
 
         // header check
@@ -650,7 +650,7 @@ StatusCode Muon::TgcRODReadOut::decodeRodToRdo(
         log << MSG::DEBUG << n_vCh
             << "words of were recorded in TgcRdo container" << endmsg;
     }
-
+    log<<std::dec; //restore ostream format
     return StatusCode::SUCCESS;
 }
 

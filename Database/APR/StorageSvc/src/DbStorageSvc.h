@@ -1,15 +1,14 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef POOL_DBSTORAGESVC_H
 #define POOL_DBSTORAGESVC_H
 
 // Framework include files
-#include "StorageSvc/DbSession.h"
 #include "StorageSvc/DbDomain.h"
 #include "StorageSvc/IStorageSvc.h"
-#include "POOLCore/DbPrint.h"
+#include "StorageSvc/DbPrint.h"
 
 /*
  *   POOL namespace declaration
@@ -18,8 +17,9 @@ namespace pool  {
 
   // Forward declarations
   class DbOption;
+  class IOODatabase;
 
-  /** @class DbStorageSvc DbStorageSvc.h POOLCore/DbStorageSvc.h
+  /** @class DbStorageSvc DbStorageSvc.h StorageSvc/DbStorageSvc.h
     *
     * The DbStorageSvc class is able to handle user request for
     *     - transient objects to become persistent and
@@ -29,7 +29,7 @@ namespace pool  {
     *
     * This functionality is defined in the IDbStorageSvc interface and 
     * implemented in the DbStorageSvc class. Please refer to the header
-    * file POOLCore/IDbStorageSvc for further details.
+    * file StorageSvc/IStorageSvc for further details.
     *
     * @author  Markus Frank
     * @version 1.0
@@ -42,14 +42,15 @@ namespace pool  {
     std::string         m_name;
     /// Reference counter                          
     unsigned int        m_refCount;
-    /// Database session handle
-    DbSession           m_sesH;
     /// Database domain handle
     DbDomain            m_domH;
     /// Property: AgeLimit indicating the maximal allowed age of files
     int                 m_ageLimit;
     /// Technology type
     DbType              m_type;
+    /// Loaded StorageSvc implementation type (for m_type)
+    IOODatabase*        m_implementation;
+
   public:
 
     /// Standard Constructor: Constructs an object of type DbStorageSvc.
@@ -63,17 +64,6 @@ namespace pool  {
 
     DbStorageSvc (const DbStorageSvc&) = delete;
     DbStorageSvc& operator= (const DbStorageSvc&) = delete;
-
-    /// Label of the specific class
-    static const char* catalogLabel()  {   return "pool_DbStorageSvc";       }
-
-    /// Database session handle
-    DbSession& sessionHdl()                               {   return m_sesH;  }
-    /// Database domain handle
-    DbDomain& domainHdl()                                 {   return m_domH;  }
-
-    /// IInterface implementation: Query interfaces of Interface
-    virtual StatusCode queryInterface(const Guid& riid, void** ppvUnknown) override final;
 
     /// IInterface implementation: Reference Interface instance               
     virtual unsigned int addRef() override final;
@@ -171,46 +161,31 @@ namespace pool  {
       *                         READ, NEW/CREATE/WRITE, UPDATE, RECREATE
       * @param    tech     [IN] Flag indicating the technology type of the
       *                         Database  the user  wants to connect to.
-      * @param    session [OUT] Token or handle to the Database session.
-      *                         This handle may later be used to open a
-      *                         new Database connection.
       *
       * @return                 StatusCode code indicating success or failure.
       */
-    virtual StatusCode startSession(int                 mode,
-                                    int                 tech,
-                                    SessionH&           session) override final;
+    virtual StatusCode startSession(int mode, int tech) override final;
 
     /// End the Database session.
     /** The  request to end a Database session requires, that all pending 
       * Transactions and connections are closed. Otherwise internally the
       * close will be forced and  potentially data on pending Transactions
-      * will be lost. The token will be invalidated may not be used at any 
-      * longer once the session ended.
-      *
-      * @param    session  [IN] Handle to the Database 
-      *                         session. This handle was retrieved when 
-      *                         starting the session. 
+      * will be lost.
       *
       * @return                 StatusCode code indicating success or failure.
       */
-    virtual StatusCode endSession(  const SessionH       session) override final;
+    virtual StatusCode endSession() override final
+    { return m_domH.close(); }
 
     /// Check the existence of a logical Database unit.
-    /** 
-      *
-      * @param    sessionH [IN] Session context to be used to open the Database.
-      * @param    mode     [IN] Flag to indicate the accessmode of the session.
-      *                         READ, NEW/CREATE/WRITE, UPDATE, RECREATE.
+    /**
       * @param    refDB   [I/O] Descriptor of the Database to be opened. 
       *                         On successful return the Database handle is
       *                         valid.
       *
       * @return                 StatusCode code indicating success or failure.
       */
-    virtual StatusCode existsConnection(const SessionH        sessionH,
-                                        int                   mode,
-                                        const FileDescriptor& refDB) override final;
+    virtual StatusCode existsConnection(const FileDescriptor& refDB) override final;
 
     /// Connect to a logical Database unit.
     /** A connection is equivalent to the triple (OCISession, OCIServer, 
@@ -219,7 +194,6 @@ namespace pool  {
       * such as root, MS Access, ODBC/Text etc., this is involves the 
       * opening of the requested file.
       *
-      * @param    sessionH [IN] Session context to be used to open the Database.
       * @param    mode     [IN] Flag to indicate the accessmode of the session.
       *                         READ, NEW/CREATE/WRITE, UPDATE, RECREATE.
       * @param    refDB   [I/O] Descriptor of the Database to be opened. 
@@ -228,9 +202,7 @@ namespace pool  {
       *
       * @return                 StatusCode code indicating success or failure.
       */
-    virtual StatusCode connect( const SessionH      sessionH,
-                                int                 mode,
-                                FileDescriptor&     refDB) override final;
+    virtual StatusCode connect(int mode, FileDescriptor& refDB) override final;
 
     /// Disconnect from a logical Database unit.
     /** The  request for disconnect requires, that all pending Transactions
@@ -272,7 +244,7 @@ namespace pool  {
       *
       * @return                 StatusCode code indicating success or failure.
       */
-    virtual StatusCode endTransaction( ConnectionH conn,
+    virtual StatusCode endTransaction( FileDescriptor& refDB,
                                        Transaction::Action typ) override final;
 
     /// Access options for a given database domain.
@@ -282,13 +254,12 @@ namespace pool  {
       * Note: The options depend on the underlying implementation
       * and are not normalized.
       *
-      *  @param   sessionH  [IN] Session context to be used to open the Database.
       *  @param   opt       [IN] Reference to option object.
       *
       *  @return StatusCode code indicating success or failure.  
       */
-    virtual StatusCode getDomainOption(const SessionH  sessionH,
-                                       DbOption&       opt) override final;
+    virtual StatusCode getDomainOption(DbOption& opt) override final
+    { return m_domH.getOption(opt); }
 
     /// Set options for a given database domain.
     /** Domain options are global options, which refer to the
@@ -297,13 +268,17 @@ namespace pool  {
       * Note: The options depend on the underlying implementation
       * and are not normalized.
       *
-      *  @param   sessionH  [IN] Session context to be used to open the Database.
       *  @param   opt       [IN] Reference to option object.
       *
       *  @return StatusCode code indicating success or failure.
       */
-    virtual StatusCode setDomainOption(const SessionH  sessionH, 
-                                       const DbOption& opt) override final;
+    virtual StatusCode setDomainOption(const DbOption& opt) override final
+    { return m_domH.setOption(opt); }
+
+  private:
+    /// Access technology implementations
+    IOODatabase* db();
+
   };
 }       // End namespace pool
 #endif  // POOL_DBSTORAGESVC_H

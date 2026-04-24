@@ -31,8 +31,8 @@ namespace ActsTrk::detail {
                         const xAOD::UncalibratedMeasurementContainer &clusterContainer,
                         const DetectorElementToActsGeometryIdMap &detectorElementToGeoid,
                         const MeasurementIndex *measurementIndex = nullptr);
-    MeasurementRangeListFlat setMeasurementRangesForced(const ActsTrk::Seed &seed,
-                                                        const MeasurementIndex &measurementIndex) const;
+    std::unique_ptr<MeasurementRangeListFlat> createMeasurementRangesForced(const ActsTrk::Seed &seed,
+                                                                            const MeasurementIndex &measurementIndex) const;
     MeasurementRange markSurfaceInsensitive(const Acts::GeometryIdentifier &identifier);
 
     inline const MeasurementRangeList &measurementRanges() const;

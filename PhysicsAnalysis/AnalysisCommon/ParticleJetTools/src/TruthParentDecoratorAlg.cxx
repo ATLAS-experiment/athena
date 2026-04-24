@@ -1,14 +1,15 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "TruthParentDecoratorAlg.h"
 
 #include "StoreGate/WriteDecorHandle.h"
 #include "TruthUtils/HepMCHelpers.h"
 
-#include "TruthUtils/HepMCHelpers.h"
-
 #include <format>
+#include <limits>
+#include <set>
+#include <stdexcept>
 
 // structure to hold info on a matched parent particle
 struct MatchedParent
@@ -32,13 +33,13 @@ namespace {
     parent_mask_t mask = 0x0;
     for (const auto& match: matches) {
       constexpr size_t max_idx = std::numeric_limits<decltype(mask)>::digits;
-      if (match.parent_index > max_idx) {
+      if (match.parent_index >= max_idx) {
         throw std::runtime_error(
           "parent index overflowed the match mask "
           "[index: "  + std::to_string(match.parent_index) +
           " , max_mask: " + std::to_string(max_idx) + "]");
       }
-      mask |= (0x1u << match.parent_index);
+      mask |= (parent_mask_t{1} << match.parent_index);
     }
     return mask;
   }
@@ -458,10 +459,10 @@ void TruthParentDecoratorAlg::addTruthContainer(Barcodex& barcodex,IPMap& ipmap,
   // this determines if a cascade vertex should be saved or not
   auto cascadeWants = [
     &targid,
-    b=m_add_b,
-    c=m_add_c,
-    vsl=m_veto_soft_lepton,
-    vsc=m_veto_soft_charm
+    &b=m_add_b,
+    &c=m_add_c,
+    &vsl=m_veto_soft_lepton,
+    &vsc=m_veto_soft_charm
     ] (const xAOD::TruthParticle* p) {
     if (int n_parents = p->nParents(); n_parents == 1) {
       if (vsl && isSoftLepton(p)) return false;

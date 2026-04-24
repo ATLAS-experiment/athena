@@ -334,7 +334,7 @@ StatusCode LArDigits2Ntuple::execute()
       ATH_MSG_WARNING( "Unable to retrieve LArAccumulatedDigitContainer with key " << m_accContKey << " from DetectorStore. " );
       return StatusCode::SUCCESS;
     } else
-      ATH_MSG_DEBUG( "Got LArAccumulatedDigitContainer with key " << m_accContKey.key() );
+      ATH_MSG_DEBUG( "Got LArAccumulatedDigitContainer with key " << m_accContKey.key() << " size: " << hdlDigit->size());
  
     const LArAccumulatedDigitContainer DigitContainer = *hdlDigit;
  

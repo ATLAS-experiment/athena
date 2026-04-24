@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_CLASS_DEF_H
@@ -70,7 +70,7 @@
     typedef std::is_base_of<DataObject, NAME> isDObj_t;                 \
     static const bool s_isDataObject = isDObj_t::value;                 \
     typedef std::true_type has_classID_tag;                             \
-    static const CLID& ID ATLAS_CHECK_THREAD_SAFETY () { static const CLID c(CID); return  c; }    \
+    static constexpr CLID ID ATLAS_CHECK_THREAD_SAFETY () { return CID; }    \
     static const char* typeNameString ATLAS_CHECK_THREAD_SAFETY () {    \
       return #NAME;                                                     \
     }									\
@@ -105,8 +105,8 @@
     typedef std::is_base_of<DataObject, ARG1, ARG2 > isDObj_t;          \
     static const bool s_isDataObject = isDObj_t::value;                 \
     typedef std::true_type has_classID_tag;                             \
-    static const CLID& ID ATLAS_CHECK_THREAD_SAFETY () {                \
-      static const CLID c(CID); return  c;                              \
+    static constexpr CLID ID ATLAS_CHECK_THREAD_SAFETY () {             \
+      return  CID;                                                      \
     }									\
     static const char* typeNameString ATLAS_CHECK_THREAD_SAFETY () {    \
       return #ARG1 "," #ARG2;                                           \

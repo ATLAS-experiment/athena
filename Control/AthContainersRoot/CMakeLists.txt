@@ -1,4 +1,4 @@
-#Copyright (C) 2020, 2022, 2023 CERN for the benefit of the ATLAS collaboration
+#Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthContainersRoot )
@@ -26,7 +26,7 @@ atlas_add_test( RootAuxVectorFactory_test
                 SOURCES
                 test/RootAuxVectorFactory_test.cxx
                 INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers CxxUtils RootUtils AthContainersRoot )
+                LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers SGTools CxxUtils RootUtils AthContainersRoot )
 
 
 atlas_add_test( getDynamicAuxID_test

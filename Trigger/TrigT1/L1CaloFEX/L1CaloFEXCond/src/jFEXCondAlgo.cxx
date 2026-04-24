@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //             Interface for jFEXCondAlgo - Tool to read the COOL DB for jFEX
@@ -157,34 +157,27 @@ StatusCode jFEXCondAlgo::execute(const EventContext& ctx) const {
                 const std::string s((char*)blob.startingAddress(),blob.size());
                 nlohmann::json attrList = nlohmann::json::parse(s);
 
-                try {
-
-                    //checking if all the string are present in the json file
-                    bool allitemsPresent = true;
-                    for(const auto & name:myStrings ) {
-                        allitemsPresent = allitemsPresent && attrList.contains(name);
-                    }
-                    if(allitemsPresent) {
-                        PileUpCorrectionJet              = (bool) attrList[myStrings.at( 0)];
-                        PileUpCorrectionMET              = (bool) attrList[myStrings.at( 1)];
-                        PileUpThresholdLowEm             = (int)  attrList[myStrings.at( 2)];
-                        PileUpThresholdHighEm            = (int)  attrList[myStrings.at( 3)];
-                        PileUpThresholdLowHadLar         = (int)  attrList[myStrings.at( 4)];
-                        PileUpThresholdHighHadLar        = (int)  attrList[myStrings.at( 5)];
-                        PileUpThresholdLowHadHecOverlap  = (int)  attrList[myStrings.at( 6)];
-                        PileUpThresholdHighHadHecOverlap = (int)  attrList[myStrings.at( 7)];
-                        PileUpThresholdLowHadTrex        = (int)  attrList[myStrings.at( 8)];
-                        PileUpThresholdHighHadTrex       = (int)  attrList[myStrings.at( 9)];
-                        PileUpThresholdLowFcal           = (int)  attrList[myStrings.at(10)];
-                        PileUpThresholdHighFcal          = (int)  attrList[myStrings.at(11)];
-
-                    }
-                    else {
-                        throw (uint16_t) itr->first;
-                    }
+                //checking if all the string are present in the json file
+                bool allitemsPresent = true;
+                for(const auto & name:myStrings ) {
+                    allitemsPresent = allitemsPresent && attrList.contains(name);
                 }
-                catch(uint16_t errTower) {
-                    ATH_MSG_DEBUG("Loading Pileup values for jFEX ID A:"<<errTower <<". Some towers are not used anymore. Skipping");
+                if(allitemsPresent) {
+                    PileUpCorrectionJet              = (bool) attrList[myStrings.at( 0)];
+                    PileUpCorrectionMET              = (bool) attrList[myStrings.at( 1)];
+                    PileUpThresholdLowEm             = (int)  attrList[myStrings.at( 2)];
+                    PileUpThresholdHighEm            = (int)  attrList[myStrings.at( 3)];
+                    PileUpThresholdLowHadLar         = (int)  attrList[myStrings.at( 4)];
+                    PileUpThresholdHighHadLar        = (int)  attrList[myStrings.at( 5)];
+                    PileUpThresholdLowHadHecOverlap  = (int)  attrList[myStrings.at( 6)];
+                    PileUpThresholdHighHadHecOverlap = (int)  attrList[myStrings.at( 7)];
+                    PileUpThresholdLowHadTrex        = (int)  attrList[myStrings.at( 8)];
+                    PileUpThresholdHighHadTrex       = (int)  attrList[myStrings.at( 9)];
+                    PileUpThresholdLowFcal           = (int)  attrList[myStrings.at(10)];
+                    PileUpThresholdHighFcal          = (int)  attrList[myStrings.at(11)];
+                }
+                else {
+                    ATH_MSG_DEBUG("Loading Pileup values for jFEX ID A:"<<itr->first <<". Some towers are not used anymore. Skipping");
                 }
             }
         }
@@ -255,43 +248,30 @@ StatusCode jFEXCondAlgo::execute(const EventContext& ctx) const {
 
 
                 //Trying to update Noise cut values
-                try {
-
-                    bool allitemsPresent = true;
-                    for(const auto & name:myStringsNoise ) {
-                        allitemsPresent = allitemsPresent && attrList.contains(name);
-                    }
-
-                    if( allitemsPresent ) {
-                        NoiseCuts[ (uint16_t) itr->first ]= { {(uint16_t) attrList[myStringsNoise.at(0)],(uint16_t) attrList[myStringsNoise.at(1)],(uint16_t) attrList[myStringsNoise.at(2)],(uint16_t) attrList[myStringsNoise.at(3)]} };
-                    }
-                    else {
-                        throw (uint16_t) itr->first;
-                    }
+                bool allitemsPresent = true;
+                for(const auto & name:myStringsNoise ) {
+                    allitemsPresent = allitemsPresent && attrList.contains(name);
                 }
-                catch(uint16_t errTower) {
-                    ATH_MSG_DEBUG("Loading Pileup values for jFEX ID B:"<<errTower <<". Some towers are not used anymore. Skipping");
+
+                if( allitemsPresent ) {
+                    NoiseCuts[ (uint16_t) itr->first ]= { {(uint16_t) attrList[myStringsNoise.at(0)],(uint16_t) attrList[myStringsNoise.at(1)],(uint16_t) attrList[myStringsNoise.at(2)],(uint16_t) attrList[myStringsNoise.at(3)]} };
+                }
+                else {
+                    ATH_MSG_DEBUG("Loading Pileup values for jFEX ID B:"<<itr->first <<". Some towers are not used anymore. Skipping");
                     NoiseCuts[ (uint16_t) itr->first ] = {0, 0, 0, 0};
                 }
 
                 //Trying to update the PileUp values
-                //Some jTower are expected to throw and exception, wrong in DB
-                try {
-
-                    bool allitemsPresent = true;
-                    for(const auto & name:myStringsPileup ) {
-                        allitemsPresent = allitemsPresent && attrList.contains(name);
-                    }
-
-                    if( allitemsPresent ) {
-                        PileUpWeight[ (uint16_t) itr->first ]= { {(uint16_t) attrList[myStringsPileup.at(0)],(uint16_t) attrList[myStringsPileup.at(1)],(uint16_t) attrList[myStringsPileup.at(2)],(uint16_t) attrList[myStringsPileup.at(3)]} };
-                    }
-                    else {
-                        throw (uint16_t) itr->first;
-                    }
+                allitemsPresent = true;
+                for(const auto & name:myStringsPileup ) {
+                    allitemsPresent = allitemsPresent && attrList.contains(name);
                 }
-                catch(uint16_t errTower) {
-                    ATH_MSG_DEBUG("Loading Pileup values for jFEX ID C:"<<errTower <<". Some towers are not used anymore. Skipping");
+
+                if( allitemsPresent ) {
+                    PileUpWeight[ (uint16_t) itr->first ]= { {(uint16_t) attrList[myStringsPileup.at(0)],(uint16_t) attrList[myStringsPileup.at(1)],(uint16_t) attrList[myStringsPileup.at(2)],(uint16_t) attrList[myStringsPileup.at(3)]} };
+                }
+                else {
+                    ATH_MSG_DEBUG("Loading Pileup values for jFEX ID C:"<<itr->first <<". Some towers are not used anymore. Skipping");
                     PileUpWeight[ (uint16_t) itr->first ] = {0, 0, 0, 0};
                 }
             }

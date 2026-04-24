@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -90,12 +90,14 @@ StatusCode DerivationFramework::DiphotonVertexDecorator::addBranches(const Event
   // Decorate the vertices with the NN score
   ATH_MSG_DEBUG("PhotonVertexSelection returns vertex " << newPV << " " << (newPV? Form(" with z = %g", newPV->z()) : "") );
   // Create shallow copy of the PrimaryVertices container
-  std::pair< xAOD::VertexContainer*, xAOD::ShallowAuxContainer* > HggPV = xAOD::shallowCopyContainer( *PV );
+  std::pair< std::unique_ptr<xAOD::VertexContainer>,
+             std::unique_ptr<xAOD::ShallowAuxContainer> > HggPV =
+    xAOD::shallowCopyContainer( *PV, ctx );
   HggPV.second->setShallowIO(false);
 
   SG::WriteHandle<xAOD::VertexContainer> vertexContainer(m_diphotonVertexKey, ctx);
-  ATH_CHECK(vertexContainer.recordNonConst(std::unique_ptr< xAOD::VertexContainer >(HggPV.first),
-                                           std::unique_ptr< xAOD::ShallowAuxContainer >(HggPV.second)));
+  ATH_CHECK(vertexContainer.recordNonConst(std::move(HggPV.first),
+                                           std::move(HggPV.second)));
 
 
   static const SG::Accessor<float> vertexScoreAcc("vertexScore");
@@ -108,7 +110,7 @@ StatusCode DerivationFramework::DiphotonVertexDecorator::addBranches(const Event
     //loop over vertex container; shallow copy has the same order
     for (unsigned int iPV=0; iPV<PV->size(); iPV++) {
       const auto *vx = PV->at(iPV);
-      auto yyvx = (HggPV.first)->at(iPV);
+      auto yyvx = vertexContainer->at(iPV);
       //reset vertex type
       if (vx == newPV) {
         //is this the diphoton primary vertex returned from the tool?
@@ -134,8 +136,8 @@ StatusCode DerivationFramework::DiphotonVertexDecorator::addBranches(const Event
   else {
     //no vertex returned by photonVertexSelectionTool, decorate default PV with fit information
     xAOD::VertexContainer::iterator yyvx_itr;
-    xAOD::VertexContainer::iterator yyvx_end = (HggPV.first)->end();
-    for(yyvx_itr = (HggPV.first)->begin(); yyvx_itr != yyvx_end; ++yyvx_itr ) {
+    xAOD::VertexContainer::iterator yyvx_end = vertexContainer->end();
+    for(yyvx_itr = vertexContainer->begin(); yyvx_itr != yyvx_end; ++yyvx_itr ) {
       if ( (*yyvx_itr)->vertexType()==xAOD::VxType::PriVtx ) {
         vertexScoreAcc(**yyvx_itr) = -9999;
         vertexFailTypeAcc(**yyvx_itr) = vertexFailType;

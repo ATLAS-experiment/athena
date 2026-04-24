@@ -7,6 +7,7 @@ atlas_subdir( TrigGepPerf )
 # For example, you can set these flags based on some conditions or manually
 # Here we manually define FLOATING_POINT_SIMULATION
 add_definitions(-DFLOATING_POINT_SIMULATION)
+# add_definitions(-DINTEGER_SIMULATION)
 # add_definitions(-DBITWISE_SIMULATION)
 
 # External package dependencies:
@@ -15,7 +16,7 @@ find_package( ROOT COMPONENTS Core Math Physics )
 atlas_add_library( TrigGepPerfLib
                    src/*.cxx
                    PUBLIC_HEADERS TrigGepPerf
-                   LINK_LIBRARIES AthContainers AthLinks AthenaKernel xAODTrigger CaloDetDescrLib CaloIdentifier TrigT1Interfaces TrigEFMissingETLib xAODEventInfo xAODJet
+                   LINK_LIBRARIES AthContainers AthLinks AthenaKernel xAODTrigger CaloDetDescrLib CaloGeoHelpers CaloIdentifier TrigT1Interfaces TrigEFMissingETLib xAODEventInfo xAODJet
                    PRIVATE_LINK_LIBRARIES GaudiKernel PathResolver )
 
 atlas_add_component( TrigGepPerf 

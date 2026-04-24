@@ -58,7 +58,7 @@ CmxCpTobByteStreamAuxCnv::CmxCpTobByteStreamAuxCnv(ISvcLocator* svcloc) :
 {
 }
 
-const CLID& CmxCpTobByteStreamAuxCnv::classID() {
+CLID CmxCpTobByteStreamAuxCnv::classID() {
   return ClassID_traits<xAOD::CMXCPTobAuxContainer>::ID();
 }
 

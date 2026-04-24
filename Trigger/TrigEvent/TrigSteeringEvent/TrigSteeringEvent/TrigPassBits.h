@@ -1,17 +1,15 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#pragma once
-#ifndef TrigSteeringEvent_TrigPassBits_h
-#define TrigSteeringEvent_TrigPassBits_h
+#ifndef TRIGSTEERINGEVENT_TRIGPASSBITS_H
+#define TRIGSTEERINGEVENT_TRIGPASSBITS_H
 
 #include <vector>
 #include <algorithm>
 #include <stdexcept>
 
 #include "xAODCore/CLASS_DEF.h"
-// TrigPassBitsCollection is included at the end (required by Trigger EDM schema)
 
 
 class TrigPassBits {
@@ -89,7 +87,6 @@ namespace HLT {
   }
 } // eof HLT namespace
 
-#include "TrigSteeringEvent/TrigPassBitsCollection.h"
 
 #endif // TrigSteeringEvent_TrigPassBits_h
 

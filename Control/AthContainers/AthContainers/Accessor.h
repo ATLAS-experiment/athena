@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/Accessor.h
@@ -69,6 +69,11 @@ class Accessor
 public:
   /// Type referencing an item.
   using reference_type = typename AuxDataTraits<T, ALLOC>::reference_type;
+
+  /// A const reference type that can appear on the RHS of an assignment
+  /// to an application of an Accessor of this type.
+  using rhs_const_reference_type =
+    typename ConstAccessor<T, ALLOC>::const_reference_type;
 
   /// Type the user sees.
   using element_type = typename AuxDataTraits<T, ALLOC>::element_type;
@@ -150,7 +155,7 @@ public:
 
 
   /**
-   * @brief Get a span over the auxilary data array.
+   * @brief Get a span over the auxiliary data array.
    * @param container The container from which to fetch the variable.
    */
   span

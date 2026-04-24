@@ -17,6 +17,7 @@ class PrimaryPassConfig(FlagEnum):
     HIP = 'HIP'
     MinBias = 'MinBias'
     Default = 'Main'
+    Acts = 'Acts'
 
 
 class ITkPrimaryPassConfig(FlagEnum):
@@ -52,10 +53,6 @@ class TrackingComponent(FlagEnum):
     ActsHeavyIon = "ActsHeavyIon"
     # Validation options
     ActsValidateClusters = "ActsValidateClusters"
-    ActsValidateSpacePoints = "ActsValidateSpacePoints"
-    ActsValidateSeeds = "ActsValidateSeeds"
-    ActsValidateConversionSeeds = "ActsValidateConversionSeeds"
-    ActsValidateLargeRadiusSeeds = "ActsValidateLargeRadiusSeeds"
     ActsValidateLargeRadiusStandalone = "ActsValidateLargeRadiusStandalone"
     ActsValidateTracks = "ActsValidateTracks"
     ActsValidateAmbiguityResolution = "ActsValidateAmbiguityResolution"
@@ -442,8 +439,8 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.doITkFastTracking", False)
 
     # Turn running of Conversion second tracking pass on and off
-    icf.addFlag("Tracking.doITkConversion",
-                lambda prevFlags: not prevFlags.Tracking.doITkFastTracking)
+    icf.addFlag("Tracking.doITkConversion", lambda prevFlags: (
+        not prevFlags.Tracking.doITkFastTracking and prevFlags.Detector.EnableCalo))
 
     # Allows TrigFastTrackFinder to be run as an offline algorithm by replacing
     # SiSPSeededTrackFinder
@@ -476,6 +473,8 @@ def createTrackingConfigFlags():
         createTRTTrackingPassFlags, createTRTStandaloneTrackingPassFlags)
 
     def primaryPass(flags):
+        if TrackingComponent.ActsChain in flags.Tracking.recoChain:
+            return PrimaryPassConfig.Acts
         if flags.Beam.Type is BeamType.Cosmics:
             return PrimaryPassConfig.Cosmics
         elif flags.Reco.EnableHI:
@@ -594,20 +593,19 @@ def createTrackingConfigFlags():
         createActsConversionTrackingPassFlags,
         createActsLowPtTrackingPassFlags,
         createActsValidateClustersTrackingPassFlags,
-        createActsValidateSpacePointsTrackingPassFlags,
-        createActsValidateSeedsTrackingPassFlags,
-        createActsValidateConversionSeedsTrackingPassFlags,
-        createActsValidateLargeRadiusSeedsTrackingPassFlags,
         createActsValidateLargeRadiusStandaloneTrackingPassFlags,
         createActsValidateTracksTrackingPassFlags,
         createActsValidateAmbiguityResolutionTrackingPassFlags,
         createActsHeavyIonTrackingPassFlags,
         createEFValidateF100TrackingPassFlags,
-        createEFValidateF150TrackingPassFlags
+        createEFValidateF150TrackingPassFlags,
+        createACTSInnerDetectorTrackingPassFlags
     )
 
     icf.addFlagsCategory ("Tracking.ITkActsPass",
                           createActsTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ActsPass",
+                          createACTSInnerDetectorTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsLegacyPass",
                           createActsLegacyTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsLargeRadiusPass",
@@ -618,14 +616,6 @@ def createTrackingConfigFlags():
                           createActsLowPtTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsValidateClustersPass",
                           createActsValidateClustersTrackingPassFlags, prefix=True)
-    icf.addFlagsCategory ("Tracking.ITkActsValidateSpacePointsPass",
-                          createActsValidateSpacePointsTrackingPassFlags, prefix=True)
-    icf.addFlagsCategory ("Tracking.ITkActsValidateSeedsPass",
-                          createActsValidateSeedsTrackingPassFlags, prefix=True)
-    icf.addFlagsCategory ("Tracking.ITkActsValidateConversionSeedsPass",
-                          createActsValidateConversionSeedsTrackingPassFlags, prefix=True)
-    icf.addFlagsCategory ("Tracking.ITkActsValidateLargeRadiusSeedsPass",
-                          createActsValidateLargeRadiusSeedsTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsValidateLargeRadiusStandalonePass",
                           createActsValidateLargeRadiusStandaloneTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsValidateTracksPass",

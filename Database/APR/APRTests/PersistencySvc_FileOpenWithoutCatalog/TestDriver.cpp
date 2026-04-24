@@ -20,7 +20,6 @@
 #include "PersistencySvc/IDatabase.h"
 #include "PersistencySvc/IContainer.h"
 #include "PersistencySvc/ITokenIterator.h"
-#include "PersistencySvc/IPersistencySvc.h"
 
 #include "StorageSvc/DbType.h"
 
@@ -54,16 +53,16 @@ pool::TestDriver::write()
   catalog.registerPFN(m_fileName, ROOT_StorageType.storageName(), fid);
 
   std::cout << "Creating the persistency service" << std::endl;
-  std::unique_ptr< pool::IPersistencySvc > persistencySvc( pool::IPersistencySvc::create(catalog) );
+  auto dbsession = pool::PersistencySvc::createSession(catalog);
 
   // Set up the policy.
   pool::DatabaseConnectionPolicy policy;
   policy.setWriteModeForNonExisting( pool::DatabaseConnectionPolicy::CREATE );
   policy.setWriteModeForExisting( pool::DatabaseConnectionPolicy::OVERWRITE );
-  persistencySvc->session().setDefaultConnectionPolicy( policy );
+  dbsession->setDefaultConnectionPolicy( policy );
 
   // Start an update transaction
-  if ( ! ( persistencySvc->session().transaction().start( pool::ITransaction::UPDATE ) ) ) {
+  if( !dbsession->start( pool::ITransaction::UPDATE ) ) {
     throw std::runtime_error( "Could not start an update transaction" );
   }
 
@@ -83,7 +82,7 @@ pool::TestDriver::write()
     SimpleTestClass* object_SimpleTestClass = new SimpleTestClass();
     v_simpleTestClass.push_back( object_SimpleTestClass );
     object_SimpleTestClass->setNonZero();
-    Token* token_SimpleTestClass = persistencySvc->registerForWrite( placementHint_SimpleTestClass,
+    Token* token_SimpleTestClass = dbsession->registerForWrite( placementHint_SimpleTestClass,
 									   object_SimpleTestClass,
 									   class_SimpleTestClass );
     if ( ! token_SimpleTestClass ) {
@@ -96,7 +95,7 @@ pool::TestDriver::write()
 
   // Committing the transaction
   std::cout << "Committing the transaction." << std::endl;
-  if ( ! persistencySvc->session().transaction().commit() ) {
+  if( !dbsession->transaction().commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
 
@@ -118,16 +117,16 @@ pool::TestDriver::read(const std::string& fileName, pool::DatabaseSpecification:
   catalog.start();
 
   std::cout << "Creating the persistency service" << std::endl;
-  std::unique_ptr< pool::IPersistencySvc > persistencySvc( pool::IPersistencySvc::create(catalog) );
+  auto dbsession = pool::PersistencySvc::createSession(catalog);
 
   // Starting a read transaction
-  if ( ! persistencySvc->session().transaction().start( pool::ITransaction::READ ) ) {
+  if( !dbsession->start( pool::ITransaction::READ ) ) {
     throw std::runtime_error( "Could not start a read transaction." );
   }
 
   // Opening a database
   const auto & fname = (fileName.empty()? m_fileName : fileName);
-  auto db = persistencySvc->session().databaseHandle(fname, nameType);
+  auto db = dbsession->databaseHandle(fname, nameType);
   if( ! db ) {
     throw std::runtime_error( "Could not retrieve a database handle" );
   }
@@ -167,7 +166,7 @@ pool::TestDriver::read(const std::string& fileName, pool::DatabaseSpecification:
   }
 
   std::cout << "Committing the transaction." << std::endl;
-  if ( ! persistencySvc->session().transaction().commit() ) {
+  if( !dbsession->transaction().commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
 

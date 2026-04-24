@@ -11,6 +11,7 @@
 
 #include <AsgMessaging/MessageCheck.h>
 #include <AsgMessaging/StatusCode.h>
+#include <SystematicsHandles/AthenaDependencyHelpers.h>
 #include <SystematicsHandles/ISystematicsSvc.h>
 #include <SystematicsHandles/SysListHandle.h>
 
@@ -24,8 +25,7 @@ namespace CP
   SysReadHandle (T2 *owner, const std::string& propertyName,
                  const std::string& propertyValue,
                  const std::string& propertyDescription)
-    : AsgMessagingForward (owner), m_inputName (propertyValue)
-    , m_evtStoreGetter ([owner] () {return &*owner->evtStore();})
+    : SysReadHandle (propertyValue, owner)
   {
     owner->declareProperty (propertyName, m_inputName, propertyDescription);
   }
@@ -34,7 +34,13 @@ namespace CP
   SysReadHandle (const std::string &inputName, T2 *owner)
     : AsgMessagingForward (owner), m_inputName(inputName)
     , m_evtStoreGetter ([owner] () {return &*owner->evtStore();})
-  {}
+  {
+#ifndef XAOD_STANDALONE
+    m_addAlgDependency = [owner](const DataObjID& id, Gaudi::DataHandle::Mode mode) {
+      owner->addDependency(id, mode);
+    };
+#endif
+  }
 
 
   template<typename T> bool SysReadHandle<T> ::
@@ -143,6 +149,25 @@ namespace CP
     if (!m_evtStore)
       m_evtStore = m_evtStoreGetter();
 
+    ANA_CHECK (addDecorationDependency(svc, "", false));
+
     return StatusCode::SUCCESS;
+  }
+
+
+
+  template<typename T> StatusCode SysReadHandle<T> ::
+  addDecorationDependency (const ISystematicsSvc& svc, const std::string& decoName, bool decoWrite)
+  {
+#ifdef XAOD_STANDALONE
+    (void) svc;
+    (void) decoName;
+    (void) decoWrite;
+    return StatusCode::SUCCESS;
+#else
+    const CLID clid = detail::getClidForDependency<T>("", decoName, decoWrite);
+    ANA_CHECK (detail::addSysDependency(msg(), svc, m_addAlgDependency, clid, m_inputName, Gaudi::DataHandle::Reader, decoName, decoWrite));
+    return StatusCode::SUCCESS;
+#endif
   }
 }

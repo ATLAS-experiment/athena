@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( DataModelTestDataWrite )
@@ -8,7 +8,7 @@ atlas_add_library( DataModelTestDataWriteLib
                    src/*.cxx
                    PUBLIC_HEADERS DataModelTestDataWrite
                    LINK_LIBRARIES AthContainers AthLinks AthenaKernel DataModelAthenaPoolLib DataModelTestDataCommonLib TrigNavigationLib xAODCore
-                   PRIVATE_LINK_LIBRARIES AthContainersInterfaces AthenaBaseComps GaudiKernel StoreGateLib TrigSteeringEvent )
+                   PRIVATE_LINK_LIBRARIES AthContainersInterfaces AthenaBaseComps GaudiKernel StoreGateLib TrigSteeringEvent TrigStorageDefinitions )
 
 atlas_add_component( DataModelTestDataWrite
                      src/components/*.cxx

@@ -412,6 +412,8 @@ def IDTIDECfg(flags):
     IDTIDESlimmingHelper.AppendToDictionary.update({
         "Kt4EMPFlowEventShape": "xAOD::EventShape",
         "Kt4EMPFlowEventShapeAux": "xAOD::EventShapeAuxInfo",
+        "Kt4EMPFlowNeutEventShape": "xAOD::EventShape",
+        "Kt4EMPFlowNeutEventShapeAux": "xAOD::EventShapeAuxInfo",
         "PrimaryVertices": "xAOD::VertexContainer",
         "PrimaryVerticesAux": "xAOD::VertexAuxContainer",
         "InDetTrackParticlesClusterAssociations": "xAOD::TrackParticleClusterAssociationContainer",
@@ -424,7 +426,7 @@ def IDTIDECfg(flags):
     ExtraVariables += ["TauJets.ABS_ETA_LEAD_TRACK.ClusterTotalEnergy.ClustersMeanCenterLambda.ClustersMeanEMProbability.ClustersMeanFirstEngDens.ClustersMeanPresamplerFrac.ClustersMeanSecondLambda.EMFracFixed.LeadClusterFrac.NNDecayMode.NNDecayModeProb_1p0n.NNDecayModeProb_1p1n.NNDecayModeProb_1pXn.NNDecayModeProb_3p0n.NNDecayModeProb_3pXn.PFOEngRelDiff.PanTau_DecayModeExtended.UpsilonCluster.absipSigLeadTrk.chargedFELinks.etHotShotWin.etHotShotWinOverPtLeadTrk.etaCombined.hadLeakFracFixed.leadTrackProbHT.mCombined.mu.nConversionTracks.nFakeTracks.nModifiedIsolationTracks.nVtxPU.neutralFELinks.passThinning.phiCombined.ptCombined.ptIntermediateAxisEM.rho"]
     ExtraVariables += ["PrimaryVertices.sumPt2.x.y.z"]
 
-    AllVariables += ["Kt4EMPFlowEventShape",
+    AllVariables += ["Kt4EMPFlowEventShape", "Kt4EMPFlowNeutEventShape",
                      "InDetTrackParticlesClusterAssociations",
                      "AntiKt4EMTopoJets", "AntiKt4EMPFlowJets"]
 

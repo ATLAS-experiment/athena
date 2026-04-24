@@ -7,9 +7,9 @@
 #include "xAODMuonPrepData/versions/CombinedMuonStrip_v1.h"
 
 #include "AthLinks/ElementLink.h"
-#include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
+#include "xAODMuonPrepData/MuonMeasurementContainer.h"
 namespace {
-    using Link_t = ElementLink<xAOD::UncalibratedMeasurementContainer>;
+    using Link_t = ElementLink<xAOD::MuonMeasurementContainer>;
     static const SG::Accessor<Link_t> acc_primLink{"MuonStripLink1"};
     static const SG::Accessor<Link_t> acc_secondLink{"MuonStripLink2"};
 
@@ -24,13 +24,13 @@ namespace xAOD {
         }
         return xAOD::UncalibMeasType::nTypes;
     }
-    const xAOD::UncalibratedMeasurement* CombinedMuonStrip_v1::primaryStrip() const {
+    const xAOD::MuonMeasurement* CombinedMuonStrip_v1::primaryStrip() const {
         if (acc_primLink.isAvailable(*this) && acc_primLink(*this).isValid()) {
               return *acc_primLink(*this);
         }
         return nullptr;
     }
-     const xAOD::UncalibratedMeasurement* CombinedMuonStrip_v1::secondaryStrip() const {
+     const xAOD::MuonMeasurement* CombinedMuonStrip_v1::secondaryStrip() const {
 
         if (acc_secondLink.isAvailable(*this) && acc_secondLink(*this).isValid()) {
               return *acc_secondLink(*this);
@@ -38,14 +38,35 @@ namespace xAOD {
         return nullptr;
     }
 
-    void CombinedMuonStrip_v1::setPrimaryStrip(const xAOD::UncalibratedMeasurement* meas) {
+    void CombinedMuonStrip_v1::setPrimaryStrip(const xAOD::MuonMeasurement* meas) {
         assert(meas != nullptr);
-        const auto* cont = static_cast<const xAOD::UncalibratedMeasurementContainer*>(meas->container());
+        const auto* cont = static_cast<const xAOD::MuonMeasurementContainer*>(meas->container());
         acc_primLink(*this) = Link_t{*cont, meas->index()};
     }
-    void CombinedMuonStrip_v1::setSecondaryStrip(const xAOD::UncalibratedMeasurement* meas){
+    void CombinedMuonStrip_v1::setSecondaryStrip(const xAOD::MuonMeasurement* meas){
         assert(meas != nullptr);
-        const auto* cont = static_cast<const xAOD::UncalibratedMeasurementContainer*>(meas->container());
+        const auto* cont = static_cast<const xAOD::MuonMeasurementContainer*>(meas->container());
         acc_secondLink(*this) = Link_t{*cont, meas->index()};
     }
+
+    const MuonGMR4::MuonReadoutElement* CombinedMuonStrip_v1::readoutElement() const {
+        const  xAOD::MuonMeasurement*  strip =  primaryStrip();
+        return strip ? strip->readoutElement() : nullptr;
+    }
+    std::uint8_t CombinedMuonStrip_v1::measuresPhi() const {
+        return 1;
+    }
+    IdentifierHash CombinedMuonStrip_v1::measurementHash() const {
+        const  xAOD::MuonMeasurement*  strip =  primaryStrip();
+        return strip ? strip->measurementHash() : IdentifierHash{};
+    }
+    IdentifierHash CombinedMuonStrip_v1::layerHash() const {
+        const  xAOD::MuonMeasurement*  strip =  primaryStrip();
+        return strip ? strip->layerHash() : IdentifierHash{}; 
+    }
+      Amg::Vector3D CombinedMuonStrip_v1::localMeasurementPos() const {
+            Amg::Vector3D pos{Amg::Vector3D::Zero()};
+            pos.block<2,1>(0,0) = xAOD::toEigen(localPosition<2>());
+            return pos;
+      }
 }

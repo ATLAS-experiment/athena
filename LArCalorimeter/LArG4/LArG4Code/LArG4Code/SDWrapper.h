@@ -22,6 +22,7 @@ class LArG4SimpleSD;
 class LArHitContainer;
 class LArG4CalibSD;
 class CaloCalibrationHitContainer;
+class SrCaloCalibrationHitContainer;
 
 
 namespace LArG4
@@ -99,6 +100,10 @@ namespace LArG4
         /// A fastsim SD name that I do not own but invoke in order to
         /// share my hit container. For now I'm assuming there is only one.
         std::string m_fastSimSDName;
+
+        std::string m_srHitCollName; /// Name of the SR hit collection
+        SG::WriteHandle< SrCaloCalibrationHitContainer > m_srHitColl;
+
 
     }; // class SDWrapper
 

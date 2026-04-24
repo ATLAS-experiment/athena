@@ -42,7 +42,7 @@ HLT::HLTResultByteStreamCnv::HLTResultByteStreamCnv(ISvcLocator* svcloc) :
 /**
    CLID
 */
-const CLID& HLT::HLTResultByteStreamCnv::classID()
+CLID HLT::HLTResultByteStreamCnv::classID()
 {
   return ClassID_traits<HLT::HLTResult>::ID() ;
 }

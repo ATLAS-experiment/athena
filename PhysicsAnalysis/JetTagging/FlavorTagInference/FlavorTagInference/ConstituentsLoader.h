@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
   This is a virtual class to represent loader of any type of constituents.
   It defines the interface for loading constituents from a jet 
@@ -42,6 +42,7 @@ namespace FlavorTagInference {
         DIPS_LOOSE_202102,
         LOOSE_202102_NOIP,
         R22_DEFAULT,
+        R22_BJR,
         R22_LOOSE,
         TAUTRACK_CLASSIFIED
     };
@@ -52,6 +53,9 @@ namespace FlavorTagInference {
         ELECTRON,
         TAUTRACK,
         TAUCLUSTER,
+        MUON,
+        CALO_CLUSTER,
+        TOWER,
         UNKNOWN
     };
 
@@ -85,7 +89,8 @@ namespace FlavorTagInference {
             {
             };
             virtual ~IConstituentsLoader() = default;
-            virtual std::tuple<Inputs, std::vector<const xAOD::IParticle*>> getData(const xAOD::IParticle& jet) const = 0;
+            virtual Inputs getData(const xAOD::IParticle& jet) const = 0;
+            virtual void setDefaults(const xAOD::IParticle&) const {}
             virtual const FTagDataDependencyNames& getDependencies() const = 0;
             virtual const std::set<std::string>& getUsedRemap() const = 0;
             virtual const std::string& getName() const = 0;

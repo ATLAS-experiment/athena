@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONSEGMENTCNV_SEGMENTFITPARDECORALG_H
 #define MUONSEGMENTCNV_SEGMENTFITPARDECORALG_H
@@ -12,11 +12,12 @@
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
 #include "xAODMuon/MuonSegmentContainer.h"
-#include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
+#include "xAODMuonPrepData/MuonMeasurementContainer.h"
 namespace MuonR4{
-    /** @brief Algorithm to decorate the segment fit parameters in the chamber's frame onto the xAOD::MuonSegment
-      *        Additionally, the ElementLinks to the associated measurements are decorated. For the latter,
-      *        the Identifiers from the associated Trk::Segment are exploited. */
+    /** @brief Algorithm to decorate the local segment parameters onto the xAOD::MuonSegments
+     *         produced by the legacy muon reconstruction chain. Additionally, the links to the
+     *         uncalibrated muon measurements are appended using the Identifiers of the RIO_OnTrack
+     *         objects of the associated Trk::MuonSegment */
     class SegmentFitParDecorAlg : public AthReentrantAlgorithm{
         public:
             using AthReentrantAlgorithm::AthReentrantAlgorithm;
@@ -24,29 +25,16 @@ namespace MuonR4{
             virtual StatusCode initialize() override final;
             virtual StatusCode execute(const EventContext& ctx) const override final;
         private:
-            using PrdCont_t = xAOD::UncalibratedMeasurementContainer;
-            using PrdLink_t = ElementLink<PrdCont_t>;
+            using PrdCont_t = xAOD::MuonMeasurementContainer;
+            using PrdLink_t = ElementLink<xAOD::UncalibratedMeasurementContainer>;
             using PrdLinkVec = std::vector<PrdLink_t>;    
             using MeasKey_t = SG::ReadHandleKey<PrdCont_t>;
-            
-            /** @brief Tries to load the PrdCont_t from StoreGate and then to find the uncalibrated measurement
-             *         with the same Identifier as the parsed one
-             * @param ctx: EventContext to ease the access to StoreGate
-             * @param key: Key of the container to fetch the measurement from
-             * @param measId: Identifier of the measurement to find
-             * @param meas: Reference to output pointer to which the found prd is assigned */
-            StatusCode fetchMeasurement(const EventContext& ctx,
-                                        const MeasKey_t& key,
-                                        const Identifier& measId,
-                                        const xAOD::UncalibratedMeasurement*& meas) const;
-            /** @brief Tries to add the Link to the uncalibrated measurement corresponding to the passed ROT id
-              * @param ctx: EventContext to ease the access to StoreGate
-              * @param rotId: Identifier to link
-              * @param prdLink: Reference to the target vector to which the new link is appended */
-            StatusCode addLink(const EventContext& ctx,
-                               const Identifier& rotId,
-                                PrdLinkVec& prdLinks) const;
+            using TechIdx_t = Muon::MuonStationIndex::TechnologyIndex;
 
+            /** @brief Fetch the read handle key to the Muon measurement container
+             *  @param idx: The technology index indicating which key should be returned */
+            const MeasKey_t& fetchKey(const TechIdx_t idx) const;
+            
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", 
                                                                 "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
             

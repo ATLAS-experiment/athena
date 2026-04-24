@@ -45,12 +45,23 @@ if (NOT COLUMNAR_ANALYSIS)
       PRIVATE_WORKING_DIRECTORY
    )
 
-   atlas_add_test( TestCPRunMultiMuon
-   SCRIPT CPRun.py --input-list $ASG_TEST_FILE_RUN3_MC --text-config AnalysisAlgorithmsConfig/test_configuration_multi_muon.yaml -e 150
-   POST_EXEC_SCRIPT nopost.sh
-   PROPERTIES
-      TIMEOUT 1000
-      PRIVATE_WORKING_DIRECTORY
-   )
+   if( NOT XAOD_STANDALONE )
+      set (MT_TEST_OPTIONS --test-mt-dependencies 4)
+      atlas_add_test( TestCPRunPhysliteLike
+      SCRIPT CPRun.py --input-list $ASG_TEST_FILE_RUN3_MC --text-config AnalysisAlgorithmsConfig/test_configuration_physlite_like.yaml -e 1000 ${MT_TEST_OPTIONS}
+      POST_EXEC_SCRIPT nopost.sh
+      PROPERTIES
+         TIMEOUT 1000
+         PRIVATE_WORKING_DIRECTORY
+      )
+
+      atlas_add_test( TestCPRunPhysliteLikePhyslite
+      SCRIPT CPRun.py --input-list $ASG_TEST_FILE_LITE_RUN3_MC --text-config AnalysisAlgorithmsConfig/test_configuration_physlite_like.yaml -e 1000 ${MT_TEST_OPTIONS}
+      POST_EXEC_SCRIPT nopost.sh
+      PROPERTIES
+         TIMEOUT 1000
+         PRIVATE_WORKING_DIRECTORY
+      )
+   endif()
 
 endif()

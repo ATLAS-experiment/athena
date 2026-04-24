@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AsgDataHandles/WriteDecorHandle.h
@@ -57,6 +57,9 @@ public:
   /// Pointer into the vector holding an aux data item.
   typedef typename accessor_t::container_pointer_type
     container_pointer_type;
+
+  /// Span of aux data items.
+  using span = typename accessor_t::span;
 
   /**
    * @brief Constructor from a WriteDecorHandleKey.
@@ -143,22 +146,32 @@ public:
   reference_type operator() (const AuxElement& e);
 
 
-//   /**
-//    * @brief Fetch the variable for one element, as a reference.
-//    * @param index The index of the desired element.
-//    *
-//    * This looks up the variable in the object referenced by this handle.
-//    * For a standalone object, pass an index of 0.
-//    */
-//   reference_type operator() (size_t index);
+  /**
+   * @brief Fetch the variable for one element, as a reference.
+   * @param index The index of the desired element.
+   *
+   * This looks up the variable in the object referenced by this handle.
+   * For a standalone object, pass an index of 0.
+   */
+  reference_type operator() (size_t index);
 
 
-//   /**
-//    * @brief Get a pointer to the start of the auxiliary data array,
-//    *        for the referenced object.
-//    */
-//   container_pointer_type
-//   getDecorationArray();
+  /**
+   * @brief Get a pointer to the start of the auxiliary data array,
+   *        for the referenced object.
+   */
+  template <class POINTER_TYPE = container_pointer_type>
+  requires (!std::is_void_v<POINTER_TYPE>)
+  POINTER_TYPE
+  getDecorationArray();
+
+
+  /**
+   * @brief Get a span over the auxilary data array,
+   *        for the referenced object.
+   */
+  span
+  getDecorationSpan();
 
 
   /**
@@ -186,7 +199,7 @@ public:
   std::string decorKey() const;
 
 
-// private:
+private:
 //   /**
 //    * @brief Retrieve an object from StoreGate.
 //    * @param quiet If true, suppress failure messages.
@@ -197,48 +210,30 @@ public:
 //   virtual void* typeless_dataPointer_impl (bool quiet) override;
 
 
-  /**
-   * @brief Test to see if this variable exists in the store,
-   *        for the referenced object.
+  /** 
+   * @brief Return the referenced object as a @c SG::AuxVectorData.
    *        Specialization for the case of a standalone object
    *        (@c T derives from @c SG::AuxElement).
    */
-  bool isAvailable (std::true_type);
+  const SG::AuxVectorData* vectorData (std::true_type);
 
 
-  /**
-   * @brief Test to see if this variable exists in the store,
-   *        for the referenced object.
+  /** 
+   * @brief Return the referenced object as a @c SG::AuxVectorData.
    *        Specialization for the case of a container
    *        (@c T does not derive from @c SG::AuxElement).
    */
-  bool isAvailable (std::false_type);
+  const SG::AuxVectorData* vectorData (std::false_type);
 
 
-//   /** 
-//    * @brief Return the referenced object as a @c SG::AuxVectorData.
-//    *        Specialization for the case of a standalone object
-//    *        (@c T derives from @c SG::AuxElement).
-//    */
-//   const SG::AuxVectorData* vectorData (std::true_type);
-
-
-//   /** 
-//    * @brief Return the referenced object as a @c SG::AuxVectorData.
-//    *        Specialization for the case of a container
-//    *        (@c T does not derive from @c SG::AuxElement).
-//    */
-//   const SG::AuxVectorData* vectorData (std::false_type);
-
-
-//   /** 
-//    * @brief Return the referenced object as a @c SG::AuxVectorData.
-//    *
-//    * If @c T is a container object, then this should be the object itself.
-//    * But if it is a standalone object, deriving from @c SG::AuxElement,
-//    * then we need to call container() on the object.
-//    */
-//   const SG::AuxVectorData* vectorData();
+  /** 
+   * @brief Return the referenced object as a @c SG::AuxVectorData.
+   *
+   * If @c T is a container object, then this should be the object itself.
+   * But if it is a standalone object, deriving from @c SG::AuxElement,
+   * then we need to call container() on the object.
+   */
+  const SG::AuxVectorData* vectorData();
 
 
   /// Name of the decoration alias: CONT.DECOR.

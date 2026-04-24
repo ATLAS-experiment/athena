@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -23,12 +23,13 @@
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthContainers/DataVector.h"
 #include "TrigMissingEtEvent/TrigMissingEtComponent.h"
-#include "GaudiKernel/MsgStream.h"
 
 #include <vector>
 #include <string>
 #include <map>
-#include <math.h>
+#include <cmath>
+
+class MsgStream;
 
 /** Class for LVL2/EF MissingET trigger */
 
@@ -36,12 +37,11 @@ class TrigMissingET{
   
  public:
 /** default constructor */
-  TrigMissingET();
+  TrigMissingET() = default;
 /** constructor (input is number of auxiliary components; if n==0 is like default) */
-  TrigMissingET(unsigned char n); //<! 
+  explicit TrigMissingET(unsigned char n); //<! 
   TrigMissingET(std::vector< TrigMissingEtComponent >&& compVec);
-/** destructor */
-  ~TrigMissingET();
+
 
 /** reset contents */
   void clear();
@@ -57,9 +57,9 @@ class TrigMissingET{
 /** sum of |E| */
   float sumE()  const { return m_sum_e; }
 /** (modulus of) transverse energy */
-  float et()    const { return sqrt(m_ex*m_ex+m_ey*m_ey); }
+  float et()    const { return std::sqrt(m_ex*m_ex+m_ey*m_ey); }
 /** (modulus of) energy */
-  float e()     const { return sqrt(m_ex*m_ex+m_ey*m_ey+m_ez*m_ez); }
+  float e()     const { return std::sqrt(m_ex*m_ex+m_ey*m_ey+m_ez*m_ez); }
 
 /** event flag: 0 (default) means OK */
   int getFlag() const {return m_flag;}
@@ -150,19 +150,19 @@ class TrigMissingET{
  private:
 
 /** Basic information: Ex component */
-  float m_ex;
+  float m_ex{};
 /** Basic information: Ey component */
-  float m_ey;
+  float m_ey{};
 /** Basic information: Ez component */
-  float m_ez;
+  float m_ez{};
 /** Basic information: scalar sum of Et */
-  float m_sum_et;
+  float m_sum_et{};
 /** Basic information: scalar sum of E */
-  float m_sum_e;
+  float m_sum_e{};
 /** Basic information: event status flag: 0 (default) means OK */
-  int   m_flag;
+  int   m_flag{};
 /** Basic information: RoIword */
-  long  m_roiWord;
+  long  m_roiWord{};
 
 /** Auxiliary information:
     components from different calo layers and muons */

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONSEGMENTCNV_XAODSEGMENTCNVALG_H
 #define MUONSEGMENTCNV_XAODSEGMENTCNVALG_H
@@ -15,6 +15,7 @@
 #include "xAODMuon/MuonSegmentContainer.h"
 #include "xAODMuonPrepData/CombinedMuonStripContainer.h"
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h" 
+#include "ActsEvent/AuxiliaryMeasurementHandler.h"
 
 namespace MuonR4{
     /** @brief The xAODSegmentCnvAlg takes MuonR4::Segments and converts them into a
@@ -48,6 +49,10 @@ namespace MuonR4{
             DecorKey_t m_parentSegKey{this, "ParentSegmentKey", m_writeKey, "parentSegment"};
             /** @brief Auxiliary container to model two measurements in the same gas gap as a single track state */
             SG::WriteHandleKey<xAOD::CombinedMuonStripContainer> m_combMeasKey{this, "combinedPrdKey", "CombinedMuonPrds"};
+            /** @brief Handler to parse the auxiliary beam spot constaint */
+            ActsTrk::AuxiliaryMeasurementHandler m_auxMeasProv{this};
+            /** @brief Flag to convert the beamspot constaint as well */
+            Gaudi::Property<bool> m_convertBeamSpot{this, "convertBeamSpot", false};
     };
 }
 #endif

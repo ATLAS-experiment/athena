@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CopySCT_ClusterContainer.h"
@@ -50,6 +50,7 @@ StatusCode CopySCT_ClusterContainer::execute(const EventContext& ctx) const
   for(const InDet::SCT_ClusterCollection* col : *inputContainer){
     InDet::SCT_ClusterCollection* newCol=new InDet::SCT_ClusterCollection(col->identifyHash());
     newCol->setIdentifier(col->identify());
+    newCol->reserve(col->size());
     for(const InDet::SCT_Cluster* clus : *col){
       newCol->push_back(std::make_unique<InDet::SCT_Cluster>(*clus));
     }

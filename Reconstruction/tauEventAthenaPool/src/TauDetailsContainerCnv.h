@@ -29,7 +29,7 @@ public:
         TauDetailsContainerCnv( ISvcLocator* svcloc );
 protected:
         virtual TauDetailsContainer_PERS *createPersistent( Analysis :: TauDetailsContainer *transCont );
-        virtual Analysis :: TauDetailsContainer *createTransient();
+        virtual Analysis :: TauDetailsContainer *createTransient(const Token* token);
 };
 
 inline TauDetailsContainerCnv :: TauDetailsContainerCnv( ISvcLocator* svcLocator ):

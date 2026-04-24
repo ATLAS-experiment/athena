@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STRINGUTILS_H
@@ -10,6 +10,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <stdexcept>
 
 namespace FlavorTagInference {
 namespace str{

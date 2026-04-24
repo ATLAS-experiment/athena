@@ -75,8 +75,8 @@ namespace CP
   StatusCode SelectionReadAccessorInvert ::
   fillSystematics (const ISystematicsSvc& svc,
                    const std::vector<CP::SystematicSet>& sysList,
-                   const std::string& objectName)
+                   ISysObjectHandleBase& objectHandle)
   {
-    return m_base->fillSystematics (svc, sysList, objectName);
+    return m_base->fillSystematics (svc, sysList, objectHandle);
   }
 }

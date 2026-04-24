@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTOOLINTERFACES_ITRACKPARAMESTIMATIONTOOL_H
@@ -12,7 +12,7 @@
 #include "ActsEvent/SeedContainer.h"
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Definitions/TrackParametrization.hpp"
-#include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/EventData/BoundTrackParameters.hpp"
 
 // Others
 #include <array>

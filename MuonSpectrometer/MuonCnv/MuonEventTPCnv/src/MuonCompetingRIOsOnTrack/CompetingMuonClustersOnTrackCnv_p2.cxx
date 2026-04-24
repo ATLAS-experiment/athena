@@ -19,12 +19,12 @@ CompetingMuonClustersOnTrackCnv_p2::persToTrans( const Muon::CompetingMuonCluste
                                                        Muon::CompetingMuonClustersOnTrack *transObj, 
                                                        MsgStream &log )
 {
-  auto containedChildRots = std::make_unique<std::vector< const Muon::MuonClusterOnTrack * > >();
-
+  std::vector<std::unique_ptr<const Muon::MuonClusterOnTrack>> containedChildRots{};
+ 
   for (const TPObjRef& ref : persObj->m_containedChildRots) {
     ITPConverterFor<Trk::MeasurementBase>  *rotCnv = nullptr;
     const Muon::MuonClusterOnTrack* mcot = dynamic_cast<const Muon::MuonClusterOnTrack*>(createTransFromPStore(&rotCnv, ref, log));
-    containedChildRots->push_back( mcot );
+    containedChildRots.emplace_back( mcot );
   }
    
   Trk::Surface* associatedSurface = this->createTransFromPStore( &m_surfCnv, persObj->m_associatedSurface, log );
@@ -32,7 +32,7 @@ CompetingMuonClustersOnTrackCnv_p2::persToTrans( const Muon::CompetingMuonCluste
   *transObj = Muon::CompetingMuonClustersOnTrack (Trk::LocalParameters(),
                                                   Amg::MatrixX(),
                                                   associatedSurface,
-                                                  std::move(*containedChildRots),
+                                                  std::move(containedChildRots),
                                                   {} // assgnProb
                                                   );
 
@@ -46,9 +46,9 @@ CompetingMuonClustersOnTrackCnv_p2::transToPers( const Muon::CompetingMuonCluste
 {
   persObj->m_competingROT = baseToPersistent( &m_cRotCnv,  transObj, log );
 
-  for (const Muon::MuonClusterOnTrack* p : transObj->containedROTs()) {
+  for (const auto& p : transObj->containedROTs()) {
     ITPConverterFor<Trk::MeasurementBase>  *rotCnv = nullptr;
-    persObj->m_containedChildRots.push_back( toPersistent(&rotCnv, p, log) );
+    persObj->m_containedChildRots.push_back( toPersistent(&rotCnv, p.get(), log) );
   }
     
   persObj->m_associatedSurface     = toPersistent(&m_surfCnv, transObj->associatedSurfaceRaw(), log);

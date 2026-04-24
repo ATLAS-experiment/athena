@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONSTATIONINDEX_MUONSTATIONINDEX_H
@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <stdint.h>
+#include <iosfwd>
 
 namespace Muon {
   namespace MuonStationIndex {
@@ -73,6 +74,9 @@ namespace Muon {
     /** convert DetectorRegionIndex + LayerIndex into StIndex */
     StIndex toStationIndex( DetectorRegionIndex region, LayerIndex layer );
 
+    /** convert ChamberIndex + etaSign into DetectorRegionIndex */
+    DetectorRegionIndex toDetectorRegionIndex( ChIndex index, int8_t etaSign );
+
     /** convert DetectorRegionIndex + LayerIndex + isSmall into ChIndex */
     ChIndex toChamberIndex( DetectorRegionIndex region, LayerIndex layer, bool isSmall ) ;
 
@@ -106,19 +110,36 @@ namespace Muon {
     /** create a hash out of region and layer */
     unsigned int sectorLayerHash( DetectorRegionIndex detectorRegionIndex, LayerIndex layerIndex );
 
+    /** create a hash out of chamber index and detector region */
+    unsigned int regionChambernHash( DetectorRegionIndex regionIdx, ChIndex chamberIdx );
+
     /** maximum create a hash out of region and layer */
     constexpr unsigned int sectorLayerHashMax() {
        return toInt(DetectorRegionIndex::DetectorRegionIndexMax)*toInt(LayerIndex::LayerIndexMax);
     }
+    /** maximum create a hash out of chamber and region index */
+    constexpr unsigned int regionChamberHashMax() {
+      return toInt(DetectorRegionIndex::DetectorRegionIndexMax)*toInt(ChIndex::ChIndexMax);
 
+    }
     /** decompose the hash into Region and Layer */
     std::pair<DetectorRegionIndex,LayerIndex> decomposeSectorLayerHash( unsigned int hash );
+
+    /** decompose the hash into Region and Chamber */
+    std::pair<DetectorRegionIndex, ChIndex> decomposeRegionChamberHash( unsigned int hash );
 
     /** return total number of sectors */
     constexpr unsigned numberOfSectors() { return 16; }
     
     /** convert ChIndex name string to enum */
     ChIndex chIndex( const std::string& index );
+
+    std::ostream& operator<<(std::ostream& ostr, const StIndex stIdx);
+    std::ostream& operator<<(std::ostream& ostr, const ChIndex chIdx);
+    std::ostream& operator<<(std::ostream& ostr, const PhiIndex phiIdx);
+    std::ostream& operator<<(std::ostream& ostr, const DetectorRegionIndex detIdx);
+    std::ostream& operator<<(std::ostream& ostr, const LayerIndex layIdx);
+    std::ostream& operator<<(std::ostream& ostr, const TechnologyIndex techIdx);
 
   }
 }

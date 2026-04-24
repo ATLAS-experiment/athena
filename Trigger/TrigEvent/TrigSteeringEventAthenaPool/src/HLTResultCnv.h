@@ -49,7 +49,7 @@ protected:
 
   virtual HLTResult_PERS* createPersistent (HLT::HLTResult* transCont);
 
-  virtual HLT::HLTResult* createTransient ();
+  virtual HLT::HLTResult* createTransient(const Token* token);
 
  private:
 

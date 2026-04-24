@@ -8,15 +8,17 @@ def GfexInputMonitoringConfig(flags):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
 
-    # for input monitoring we will require the emulated gFexTowers (built from supercells)
-    from L1CaloFEXAlgos.FexEmulatedTowersConfig import gFexEmulatedTowersCfg
-    result.merge(gFexEmulatedTowersCfg(flags,name="L1_gFexEmulatedTowers"))
 
 
     # use L1Calo's special MonitoringCfgHelper
     from AthenaConfiguration.ComponentFactory import CompFactory
     from TrigT1CaloMonitoring.LVL1CaloMonitoringConfig import L1CaloMonitorCfgHelper
     helper = L1CaloMonitorCfgHelper(flags,CompFactory.GfexInputMonitorAlgorithm,'GfexInputMonAlg')
+
+    # for input monitoring we will require the emulated gFexTowers (built from supercells)
+    from L1CaloFEXAlgos.FexEmulatedTowersConfig import gFexEmulatedTowersCfg
+    result.merge(gFexEmulatedTowersCfg(flags,name="L1_gFexEmulatedTowers"))
+
 
     # add any steering
     groupName = 'GfexInputMonitor' # the monitoring group name is also used for the package name

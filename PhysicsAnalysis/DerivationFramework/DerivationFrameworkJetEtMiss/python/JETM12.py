@@ -5,7 +5,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import MetadataCategory
+from AthenaConfiguration.Enums import MetadataCategory, LHCPeriod
 
 # Main algorithm config
 def JETM12SkimmingToolCfg(flags):
@@ -34,6 +34,10 @@ def JETM12SkimmingToolCfg(flags):
     trackRequirements = '(InDetTrackParticles.pt > 6.*GeV && '+tracks+' )'
     trackRequirementsMu = '(InDetTrackParticles.pt > 40.*GeV && '+tracks+' )'
     jetRequirementsTtbar = '(AntiKt4EMPFlowJets.pt > 18*GeV && log(AntiKt4EMPFlowJets.GN2v01_pb/(0.2*AntiKt4EMPFlowJets.GN2v01_pc + (1.-0.2-0.01)*AntiKt4EMPFlowJets.GN2v01_pu + 0.01*AntiKt4EMPFlowJets.GN2v01_ptau))>=0.844)'
+    # Drop FTAG requirement for Run 4 as WPs are not available
+    # Should ultimately be reworked into a precomputed flag with an FTAG tool rather than hardcoding the FTAG discriminant cut
+    if flags.GeoModel.Run >= LHCPeriod.Run4:
+        jetRequirementsTtbar = '(AntiKt4EMPFlowJets.pt > 18*GeV)'
 
     trackRequirementsNoIso = '(InDetTrackParticles.pt > 10.*GeV && abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm )'
 

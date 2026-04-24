@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
  
 #ifndef GLOBALSIM_GLOBALLARCELLCONTAINER_H
@@ -8,6 +8,8 @@
 #include "AthContainers/DataVector.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include "GlobalLArCell.h"
+
+#include "Identifier/IdentifierHash.h"
 
 #include <map>
 
@@ -41,7 +43,7 @@ namespace GlobalSim {
     GlobalLArCellContainer(const GlobalLArCellContainer& other);
 
     /** @brief Reimplementation of the push_back function to fill LArCells */
-    void push_back(const GlobalLArCell& theCell);
+    void push_back(const GlobalLArCell& theCell, IdentifierHash hashId);
 
     /** @brief Function to return the full list of FEB2 names */
     const std::unordered_set<std::string>& getFeb2Keys() const { return m_feb2Keys; };
@@ -50,7 +52,10 @@ namespace GlobalSim {
     const std::unordered_set<std::string>& getMuxKeys() const { return m_muxKeys; };
 
     /** @brief Function to get all GlobalLArCells for a given FEB2 name */
-    const std::vector<GlobalLArCell*>& getCellsForFeb2(const std::string& feb2) const;
+    const std::vector<std::shared_ptr<GlobalLArCell>>& getCellsForFeb2(const std::string& feb2) const;
+
+    /** @brief Function to get all GlobalLArCells for a given hash identifier */
+    const std::shared_ptr<GlobalLArCell> getCellFromHash(IdentifierHash hashId) const;
 
     /** @brief Function to get ordered list of FEB2s for a given MUX name */
     const std::vector<std::string>& getOrderedFeb2sForMux(const std::string& mux) const;
@@ -90,13 +95,15 @@ namespace GlobalSim {
     /** @brief vector of all MUX names */
     std::unordered_set<std::string> m_muxKeys;
     /** @brief map which keeps track of which cells are associated with which FEB2 */
-    std::map<std::string, std::vector<GlobalLArCell*>> m_feb2ToCells;
+    std::map<std::string, std::vector<std::shared_ptr<GlobalLArCell>>> m_feb2ToCells;
     /** @brief map which holds the ordered list of FEB2s for each MUX */
     std::map<std::string, std::vector<std::string>> m_muxToFeb2Ordered;
     /** @brief map which acts as lookuptable to get the associated MUX from a FEB2 name */
     std::map<std::string, std::string> m_feb2ToMux;
     /** @brief Maximum number of cells per FEB2 in given energy encoding scheme */
     std::size_t m_maxCellsPerFeb2 = 0;
+    /** @brief map for fast look up of cells */
+    std::map<IdentifierHash, std::shared_ptr<GlobalLArCell>> m_hashToCells;
 
   };
 

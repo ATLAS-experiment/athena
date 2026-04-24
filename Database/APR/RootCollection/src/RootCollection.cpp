@@ -41,21 +41,21 @@ namespace pool {
 
   namespace RootCollection {
 
-     RootCollection::RootCollection(
-            const pool::CollectionDescription* description,
-            pool::ICollection::OpenMode mode,
-            pool::ISession* )
-        : APRMessaging( "RootCollection"),
-         m_description( *description ),
-         m_name( description->name() ),
-         m_fileName( description->connection() ),
-         m_mode( mode ),
-         m_file( 0 ),
-         m_tree( 0 ),
-         m_session( 0 ),
-         m_open( false ) {
-        RootCollection::open();
-     }
+     RootCollection::RootCollection( const pool::CollectionDescription* description,
+                                     pool::ICollection::OpenMode mode,
+                                     pool::PersistencySvc::ISession* session )
+         : APRMessaging( "RootCollection"),
+           m_description( *description ),
+           m_name( description->name() ),
+           m_fileName( description->connection() ),
+           m_mode( mode ),
+           m_file( 0 ),
+           m_tree( 0 ),
+           m_session( session ),
+           m_open( false ) 
+      {
+         RootCollection::open();
+      }
 
 
      RootCollection::~RootCollection() {
@@ -377,7 +377,7 @@ namespace pool {
        return m_description;
     }
 
-    ICollectionCursor& RootCollection::cursor() {
+    std::unique_ptr<ICollectionCursor> RootCollection::cursor() {
        if( !m_open ) {
           throw std::runtime_error( "Attempt to get cursor for a closed collection. (APR: \" RootCollection::cursor \" from \" RootCollection \")" );
        }
@@ -385,13 +385,13 @@ namespace pool {
        // Create collection row buffer
        pool::CollectionRowBuffer collectionRowBuffer;
        this->initNewRow(collectionRowBuffer);
-       ICollectionCursor* cursor = nullptr;
+       std::unique_ptr<ICollectionCursor> cursor;
        if ( m_tree ) {
-          cursor = new TTreeCollectionCursor( m_description, collectionRowBuffer, m_tree );
+           cursor = std::make_unique<TTreeCollectionCursor>( m_description, collectionRowBuffer, m_tree );
        } else if ( m_reader ) {
-          cursor = new RNTupleCollectionCursor( m_description, collectionRowBuffer, m_reader.get() );
+           cursor = std::make_unique<RNTupleCollectionCursor>( m_description, collectionRowBuffer, m_reader.get() );
        }
-       return *cursor;
+       return cursor;
     }
   }
 }

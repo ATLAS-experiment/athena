@@ -24,20 +24,20 @@ MuCTPI_RDO_PERS* MuCTPI_RDOCnv::createPersistent( MuCTPI_RDO* transObj ) {
  * Function reading a version of MuCTPI_RDO from POOL and converting it to
  * a transient MuCTPI_RDO object.
  */
-MuCTPI_RDO* MuCTPI_RDOCnv::createTransient() {
+MuCTPI_RDO* MuCTPI_RDOCnv::createTransient(const Token* token) {
 
    static const pool::Guid p1_guid( "406BC4C7-56B6-4956-A66A-B749BCD35009" );
    static const pool::Guid p0_guid( "5BE3FA7E-CC70-4842-A095-CA046164764D" );
 
-   if( this->compareClassGuid( p1_guid ) ) {
+   if( this->compareClassGuid(token,  p1_guid ) ) {
 
-      std::unique_ptr< MuCTPI_RDO_p1 > pers_ref( this->poolReadObject< MuCTPI_RDO_p1 >() );
+      std::unique_ptr< MuCTPI_RDO_p1 > pers_ref( this->poolReadObject< MuCTPI_RDO_p1 >(token) );
       MsgStream log( this->msgSvc(), "MuCTPI_RDOCnv" );
       return m_converter.createTransient( pers_ref.get(), log );
 
-   } else if( this->compareClassGuid( p0_guid ) ) {
+   } else if( this->compareClassGuid(token,  p0_guid ) ) {
 
-      return this->poolReadObject< MuCTPI_RDO >();
+      return this->poolReadObject< MuCTPI_RDO >(token);
 
    }
 

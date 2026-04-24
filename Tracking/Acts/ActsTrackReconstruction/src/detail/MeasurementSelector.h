@@ -25,7 +25,7 @@
 // for BaseTypes
 #include "Acts/EventData/TrackStateProxy.hpp"
 #include "Acts/Utilities/CalibrationContext.hpp"
-#include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/EventData/BoundTrackParameters.hpp"
 
 // for MeasurementSizeMax
 #include "Acts/EventData/MultiTrajectory.hpp"
@@ -491,6 +491,7 @@ protected:
          } else {
             matching_measurement.m_measurement = preCalibrator(geometryContext,
                                                                calibrationContext,
+                                                               surface,
                                                                derived().forwardToCalibrator(measurement),
                                                                derived().boundParams(boundState));
             matching_measurement.m_chi2 = computeChi2(matching_measurement.m_measurement.first,
@@ -552,6 +553,7 @@ protected:
             // apply the calibration
             calibrated_measurement = postCalibrator(geometryContext,
                                                     calibrationContext,
+                                                    surface,
                                                     derived().forwardToCalibrator(a_selected_measurement.m_sourceLink.value()),
                                                     derived().boundParams(boundState));
             // update chi2 using calibrated measurement
@@ -866,6 +868,7 @@ struct MeasurementSelectorBaseImpl : public MeasurementSelectorWithDispatch<NMea
                   typename MeasurementSelectorTraits<derived_t>::template PreSelectionMeasurementCovariance<DIM> >
                 (const Acts::GeometryContext&,
                  const Acts::CalibrationContext&,
+                 const Acts::Surface&,
                  const measurement_t &,
                  const typename MeasurementSelectorTraits<derived_t>::BoundTrackParameters &)>;
 
@@ -877,6 +880,7 @@ struct MeasurementSelectorBaseImpl : public MeasurementSelectorWithDispatch<NMea
                   typename MeasurementSelectorTraits<derived_t>::template CalibratedMeasurementCovariance<DIM> >
                 (const Acts::GeometryContext&,
                  const Acts::CalibrationContext&,
+                 const Acts::Surface&,
                  const measurement_t &,
                  const typename MeasurementSelectorTraits<derived_t>::BoundTrackParameters &)>;
 

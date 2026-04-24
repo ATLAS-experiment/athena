@@ -100,7 +100,7 @@ namespace MuonGM {
         const MuonReadoutElement* getMuonReadoutElement(int jobIndex) const;
         MuonReadoutElement* getMuonReadoutElement(int jobIndex);
         
-        
+        std::vector<const MuonReadoutElement*> getReadoutElements() const;
         GeoAlignableTransform* getComponentAlTransf(int jobIndex) const;
         
         inline int nMuonReadoutElements() const;

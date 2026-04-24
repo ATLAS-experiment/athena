@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARG4BARREL_CurrMap_h
@@ -25,8 +25,8 @@ class CurrMap {
     float GetCurr2(int ix,int iy) const {return m_curr2[iy*m_nx+ix];}
     void GetAll(double x, double y, double* gap, double* curr0,double* curr1,double* curr2) const;
   private:
-    CurrMap(const CurrMap&);//coverity issue fix. Declared, but not implemented
-    CurrMap& operator=(const CurrMap&);//coverity issue fix. Declared, but not implemented
+    CurrMap(const CurrMap&) = delete;
+    CurrMap& operator=(const CurrMap&) = delete;
     int m_nx,m_ny;
     float m_xmin,m_xmax,m_dx,m_ymin,m_ymax,m_dy;
     float *m_gap,*m_curr0,*m_curr1,*m_curr2;

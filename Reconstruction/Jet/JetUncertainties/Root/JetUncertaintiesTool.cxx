@@ -129,7 +129,7 @@ JetUncertaintiesTool::JetUncertaintiesTool(const std::string& name)
         ATH_MSG_ERROR(Form("Failed to pre-set applySystematicVariation to no variation"));
 }
 
-JetUncertaintiesTool::JetUncertaintiesTool(const JetUncertaintiesTool& toCopy)
+JetUncertaintiesTool::JetUncertaintiesTool(const JetUncertaintiesTool& toCopy) ATLAS_CTORDTOR_NOT_THREAD_SAFE
     : asg::AsgTool(toCopy.m_name+"_copy")
     , m_isInit(toCopy.m_isInit)
     , m_name(toCopy.m_name+"_copy")
@@ -1669,7 +1669,7 @@ bool JetUncertaintiesTool::getValidity(size_t index, const xAOD::Jet& jet, const
 {
     return getValidity(index,jet,eInfo,CompScaleVar::UNKNOWN);
 }
-bool JetUncertaintiesTool::getValidity(size_t index, const xAOD::Jet& jet, const CompScaleVar::TypeEnum scaleVar) const
+bool JetUncertaintiesTool::getValidity ATLAS_NOT_THREAD_SAFE (size_t index, const xAOD::Jet& jet, const CompScaleVar::TypeEnum scaleVar) const
 {
     const xAOD::EventInfo* eInfo = getDefaultEventInfo();
     if (!eInfo) return false;
@@ -1719,7 +1719,7 @@ double JetUncertaintiesTool::getUncertainty(size_t index, const xAOD::Jet& jet, 
 {
     return getUncertainty(index,jet,eInfo,CompScaleVar::UNKNOWN);
 }
-double JetUncertaintiesTool::getUncertainty(size_t index, const xAOD::Jet& jet, const CompScaleVar::TypeEnum scaleVar) const
+double JetUncertaintiesTool::getUncertainty ATLAS_NOT_THREAD_SAFE (size_t index, const xAOD::Jet& jet, const CompScaleVar::TypeEnum scaleVar) const
 {
     const xAOD::EventInfo* eInfo = getDefaultEventInfo();
     if (!eInfo) return JESUNC_ERROR_CODE;
@@ -1773,7 +1773,7 @@ bool JetUncertaintiesTool::getValidUncertainty(size_t index, double& unc, const 
 {
     return getValidUncertainty(index, unc, jet, eInfo, CompScaleVar::UNKNOWN);
 }
-bool JetUncertaintiesTool::getValidUncertainty(size_t index, double& unc, const xAOD::Jet& jet, const CompScaleVar::TypeEnum scaleVar) const
+bool JetUncertaintiesTool::getValidUncertainty ATLAS_NOT_THREAD_SAFE (size_t index, double& unc, const xAOD::Jet& jet, const CompScaleVar::TypeEnum scaleVar) const
 {
     const xAOD::EventInfo* eInfo = getDefaultEventInfo();
     if (!eInfo) return false;
@@ -2041,12 +2041,12 @@ std::vector<std::string> JetUncertaintiesTool::getComponentNamesInCategory(const
 //                                              //
 //////////////////////////////////////////////////
 
-TH2D* JetUncertaintiesTool::getPtCorrelationMatrix(const int numBins, const double minPt, const double maxPt, const double valEta)
+TH2D* JetUncertaintiesTool::getPtCorrelationMatrix ATLAS_NOT_THREAD_SAFE (const int numBins, const double minPt, const double maxPt, const double valEta)
 {
     return getPtCorrelationMatrix(numBins,minPt,maxPt,valEta,valEta);
 }
 
-TH2D* JetUncertaintiesTool::getPtCorrelationMatrix(const int numBins, const double minPt, const double maxPt, const double valEta1, const double valEta2)
+TH2D* JetUncertaintiesTool::getPtCorrelationMatrix ATLAS_NOT_THREAD_SAFE (const int numBins, const double minPt, const double maxPt, const double valEta1, const double valEta2)
 {
     if (!m_isInit)
     {
@@ -2061,12 +2061,12 @@ TH2D* JetUncertaintiesTool::getPtCorrelationMatrix(const int numBins, const doub
     return new TH2D(*corrMat.getMatrix());
 }
 
-TH2D* JetUncertaintiesTool::getEtaCorrelationMatrix(const int numBins, const double minEta, const double maxEta, const double valPt)
+TH2D* JetUncertaintiesTool::getEtaCorrelationMatrix ATLAS_NOT_THREAD_SAFE (const int numBins, const double minEta, const double maxEta, const double valPt)
 {
     return getEtaCorrelationMatrix(numBins,minEta,maxEta,valPt,valPt);
 }
 
-TH2D* JetUncertaintiesTool::getEtaCorrelationMatrix(const int numBins, const double minEta, const double maxEta, const double valPt1, const double valPt2)
+TH2D* JetUncertaintiesTool::getEtaCorrelationMatrix ATLAS_NOT_THREAD_SAFE (const int numBins, const double minEta, const double maxEta, const double valPt1, const double valPt2)
 {
     if (!m_isInit)
     {
@@ -2087,7 +2087,7 @@ TH2D* JetUncertaintiesTool::getEtaCorrelationMatrix(const int numBins, const dou
 //                                              //
 //////////////////////////////////////////////////
 
-CP::CorrectionCode JetUncertaintiesTool::applyCorrection(xAOD::Jet& jet) const
+CP::CorrectionCode JetUncertaintiesTool::applyCorrection ATLAS_NOT_THREAD_SAFE (xAOD::Jet& jet) const
 {
     const xAOD::EventInfo* eInfo = getDefaultEventInfo();
     if (!eInfo) return CP::CorrectionCode::Error;
@@ -2273,7 +2273,7 @@ CP::CorrectionCode JetUncertaintiesTool::applyCorrection(xAOD::Jet& jet, const x
     return CP::CorrectionCode::Ok;
 }
 
-CP::CorrectionCode JetUncertaintiesTool::correctedCopy(const xAOD::Jet& input, xAOD::Jet*& output) const
+CP::CorrectionCode JetUncertaintiesTool::correctedCopy ATLAS_NOT_THREAD_SAFE (const xAOD::Jet& input, xAOD::Jet*& output) const
 {
     const xAOD::EventInfo* eInfo = getDefaultEventInfo();
     if (!eInfo) return CP::CorrectionCode::Error;
@@ -2294,7 +2294,7 @@ CP::CorrectionCode JetUncertaintiesTool::correctedCopy(const xAOD::Jet& input, x
     return CP::CorrectionCode::Ok;
 }
 
-CP::CorrectionCode JetUncertaintiesTool::applyContainerCorrection(xAOD::JetContainer& inputs) const
+CP::CorrectionCode JetUncertaintiesTool::applyContainerCorrection ATLAS_NOT_THREAD_SAFE (xAOD::JetContainer& inputs) const
 {
     const xAOD::EventInfo* eInfo = getDefaultEventInfo();
     if (!eInfo) return CP::CorrectionCode::Error;
@@ -2315,7 +2315,23 @@ CP::CorrectionCode JetUncertaintiesTool::applyContainerCorrection(xAOD::JetConta
     return result;
 }
 
-const xAOD::EventInfo* JetUncertaintiesTool::getDefaultEventInfo() const
+CP::CorrectionCode JetUncertaintiesTool::applyContainerCorrection(
+    xAOD::JetContainer& inputs, const CP::SystematicSet& syst) const
+{
+    std::lock_guard<std::mutex> lock(m_reentrantMutex);
+    JetUncertaintiesTool* nc_this ATLAS_THREAD_SAFE =
+      const_cast<JetUncertaintiesTool*>(this);
+    if (nc_this->applySystematicVariation(syst) != StatusCode::SUCCESS)
+        return CP::CorrectionCode::Error;
+    const xAOD::EventInfo* eInfo = nullptr;
+    if (evtStore()->retrieve(eInfo, "EventInfo").isFailure()) {
+        ATH_MSG_ERROR("Failed to retrieve EventInfo in applyContainerCorrection");
+        return CP::CorrectionCode::Error;
+    }
+    return applyContainerCorrection(inputs, *eInfo);
+}
+
+const xAOD::EventInfo* JetUncertaintiesTool::getDefaultEventInfo ATLAS_NOT_THREAD_SAFE () const
 {
     // Define static EventInfo objects
     // Unfortunately this is messy, but needed as we are caching across tool calls

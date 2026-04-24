@@ -149,6 +149,17 @@ namespace MuonR4{
              *         (Coord system where the parameter are expressed)
              *  @param segment: Reference to the segment of interest */
             const MuonGMR4::SpectrometerSector* envelope(const xAOD::MuonSegment& segment) const;
+            /** @brief Ensure that the parsed sector number is following the MS sector schema
+             *         0 is mapped to 16 and 17 is mapped to 1.
+             *  @param sector: Calculated sector number */
+            static int ringSector(const int sector);
+            /** @brief Maps the sector 33 -> 0 to close the extended MS symmetry ring 
+             *  @param sector: Calculated sector number */
+            static int ringOverlap(const int sector);
+            /** @brief Print the sector projector
+             *  @param proj: Enum indicating whether the angle at the left/right overlap or
+             *               sector center shall be returned */
+            static std::string to_string(const SectorProjector proj);
         private:
             /** @brief Calculates the radius of the bending circle from three points using the 
              *         sagitta. If one point is not defined, the origin is inserted instead.

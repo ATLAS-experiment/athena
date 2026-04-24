@@ -46,6 +46,10 @@ class TauThinningAlg : public AthReentrantAlgorithm
   Gaudi::Property<bool> m_doVertexCorrection
     { this, "VertexCorrection", true, "Tau vertex correction" };
 
+  // save only tracks passing quality requirements
+  Gaudi::Property<bool> m_saveOnlyGoodTracks
+    { this, "SaveOnlyGoodTracks", false, "Option to save only tracks passing quality requirements"};	    
+
   // Name of the stream being thinned
   StringProperty m_streamName
     { this, "StreamName", "StreamAOD", "Name of the stream being thinned" };

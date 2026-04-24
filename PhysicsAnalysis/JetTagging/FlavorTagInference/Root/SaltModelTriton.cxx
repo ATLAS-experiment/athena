@@ -2,7 +2,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "SaltModelTriton.h"
+#include "FlavorTagInference/SaltModelTriton.h"
 #include "FlavorTagInference/SaltModelGraphConfig.h"
 #include "FlavorTagInference/SaltModelOutput.h"
 #include "CxxUtils/checker_macros.h"
@@ -81,12 +81,14 @@ namespace FlavorTagInference {
 				   , float client_timeout
 				   , int port
 				   , const std::string& url
-				   , bool useSSL)
+				   , bool useSSL
+				   , const std::string& bearer)
     : m_model_name(model_name)
     , m_clientTimeout(client_timeout)
     , m_port(port)
     , m_url(url)
     , m_useSSL(useSSL)
+    , m_bearer(bearer)
     //load the onnx model to memory using the path m_path_to_onnx
   {
     std::unique_ptr< Ort::Env > env = std::make_unique<Ort::Env>(ORT_LOGGING_LEVEL_FATAL, "");
@@ -232,6 +234,9 @@ namespace FlavorTagInference {
     // perform the inference
     tc::InferResult* rawResultPtr = nullptr;
     tc::Headers http_headers;
+    if (!m_bearer.empty()) {
+      http_headers["authorization"] = "Bearer " + m_bearer;
+    }
     grpc_compression_algorithm compression_algorithm = grpc_compression_algorithm::GRPC_COMPRESS_NONE;
 
     auto client = getClient();

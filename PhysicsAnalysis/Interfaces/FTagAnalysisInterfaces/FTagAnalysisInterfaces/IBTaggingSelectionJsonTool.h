@@ -22,8 +22,8 @@ class IBTaggingSelectionJsonTool : virtual public asg::IAsgTool {
 
     public:
     virtual int accept( const xAOD::Jet& jet ) const = 0;
-    // the following funciton is only for Xbb calibration team, for physics analyses, please use the one above.
-    virtual int accept(double pt, double eta, double mass, double tagger_discriminant) const = 0;
+    // the following function is only for Xbb calibration team, for physics analyses, please use the one above.
+    virtual int acceptOnlyForXbbCalibrationUsage(double pt, double eta, double mass, double tagger_discriminant) const = 0;
 
     virtual double getTaggerDiscriminant ( const xAOD::Jet& jet ) const = 0;
 

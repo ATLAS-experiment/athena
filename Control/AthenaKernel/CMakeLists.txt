@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthenaKernel )
@@ -143,3 +143,8 @@ atlas_add_test( ILockableTool_test
 atlas_add_test( CondObjDeleter_test
   SOURCES test/CondObjDeleter_test.cxx
   LINK_LIBRARIES AthenaKernel )
+
+atlas_add_test( InputFileIncidentGuard_test
+  SOURCES test/InputFileIncidentGuard_test.cxx
+  LINK_LIBRARIES AthenaKernel GaudiKernel TestTools
+  POST_EXEC_SCRIPT noerror.sh )

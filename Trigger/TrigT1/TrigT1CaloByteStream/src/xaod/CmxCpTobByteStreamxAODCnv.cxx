@@ -40,7 +40,7 @@ CmxCpTobByteStreamxAODCnv::CmxCpTobByteStreamxAODCnv(ISvcLocator* svcloc) :
 
 // CLID
 
-const CLID& CmxCpTobByteStreamxAODCnv::classID() {
+CLID CmxCpTobByteStreamxAODCnv::classID() {
   return ClassID_traits<xAOD::CMXCPTobContainer>::ID();
 }
 

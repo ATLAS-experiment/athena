@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # STDM6.py - derivation dedicated for the special runs at low mu (AFP analysis)
 
 # Based on PHYS derivation:
@@ -212,10 +212,7 @@ def STDM6CoreCfg(flags, name_tag='STDM6', StreamName='StreamDAOD_STDM6', Trigger
                                            "TauJets",
                                            "TauJets_MuonRM",
                                            "DiTauJets",
-                                           "DiTauJetsLowPt",
-                                           "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
-                                           "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
-                                          ]
+                                           "DiTauJetsLowPt"]
     if TauJets_EleRM_in_input:
         STDM6SlimmingHelper.SmartCollections.append("TauJets_EleRM")
 
@@ -235,7 +232,7 @@ def STDM6CoreCfg(flags, name_tag='STDM6', StreamName='StreamDAOD_STDM6', Trigger
     # additional contenct from JET-M1
     # Maciej LewickiL: I'd rather keep it the way it is because it will be easier to keep up with any future changes in JET-M1
     STDM6SlimmingHelper.AllVariables += ["MuonSegments", "EventInfo",
-                                         "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape","Kt4EMPFlowNeutEventShape","Kt4UFOCSSKEventShape","Kt4UFOCSSKNeutEventShape",
+                                         "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowNeutEventShape","Kt4UFOCSSKEventShape","Kt4UFOCSSKNeutEventShape",
                                          "AntiKt4EMPFlowJets"]
 
     excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
@@ -250,26 +247,24 @@ def STDM6CoreCfg(flags, name_tag='STDM6', StreamName='StreamDAOD_STDM6', Trigger
     STDM6SlimmingHelper.StaticContent = StaticContent
 
     # Extra content
-    STDM6SlimmingHelper.ExtraVariables += ["AntiKt4EMTopoJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
-                                              "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.isJvtHS.isJvtPU",
-                                              "TruthPrimaryVertices.t.x.y.z",
-                                              "InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers",
-                                              "EventInfo.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ.HF_Classification.HF_SimpleClassification",
-                                              "TauJets.dRmax.etOverPtLeadTrk",
-                                              "TauJets_MuonRM.dRmax.etOverPtLeadTrk",
-                                              "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET.ex.ey",
-                                              "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_mht.ex.ey"]
+    STDM6SlimmingHelper.ExtraVariables += ["AntiKt4EMTopoJets.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.constituentLinks",
+                                           "AntiKt4EMPFlowJets.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.isJvtHS.isJvtPU",
+                                           "TruthPrimaryVertices.t.x.y.z",
+                                           "InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers",
+                                           "EventInfo.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ.HF_Classification.HF_SimpleClassification",
+                                           "TauJets.dRmax.etOverPtLeadTrk",
+                                           "TauJets_MuonRM.dRmax.etOverPtLeadTrk",
+                                           "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET.ex.ey",
+                                           "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_mht.ex.ey"]
     if TauJets_EleRM_in_input:
         STDM6SlimmingHelper.ExtraVariables += ["TauJets_EleRM.dRmax.etOverPtLeadTrk"]
 
     # additional content from JET-M1
     # Maciej Lewicki: I'd rather keep it the way it is because it will be easier to keep up with any future changes in JET-M1
-    STDM6SlimmingHelper.ExtraVariables  += ["AntiKt4EMTopoJets.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1",
-                                           "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1",
-                                           "AntiKt4EMPFlowJets.passOnlyBJVT.DFCommonJets_bJvt.isJvtHS.isJvtPU",
-                                           "InDetTrackParticles.truthMatchProbability",
-                                           "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.zg.rg.NumTrkPt1000.TrackWidthPt1000.GhostMuonSegmentCount.EnergyPerSampling.GhostTrack",
-                                           "AntiKt10UFOCSSKJets.NumTrkPt1000.TrackWidthPt1000.GhostMuonSegmentCount.EnergyPerSampling.GhostTrack"]
+    STDM6SlimmingHelper.ExtraVariables  += ["AntiKt4EMPFlowJets.passOnlyBJVT.DFCommonJets_bJvt.isJvtHS.isJvtPU",
+                                            "InDetTrackParticles.truthMatchProbability",
+                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.zg.rg.NumTrkPt1000.TrackWidthPt1000.GhostMuonSegmentCount.EnergyPerSampling.GhostTrack",
+                                            "AntiKt10UFOCSSKJets.NumTrkPt1000.TrackWidthPt1000.GhostMuonSegmentCount.EnergyPerSampling.GhostTrack"]
 
 
     # FTAG Xbb extra content
@@ -297,14 +292,14 @@ def STDM6CoreCfg(flags, name_tag='STDM6', StreamName='StreamDAOD_STDM6', Trigger
         STDM6SlimmingHelper.AllVariables += ['TruthHFWithDecayParticles','TruthHFWithDecayVertices','TruthCharm','TruthPileupParticles','InTimeAntiKt4TruthJets','OutOfTimeAntiKt4TruthJets']
         STDM6SlimmingHelper.AllVariables += ["TruthEvents", "TruthParticles", "TruthVertices", "AntiKt4TruthJets","AntiKt4TruthWZJets"]
         STDM6SlimmingHelper.ExtraVariables += ["Electrons.TruthLink",
-                                              "Muons.TruthLink",
-                                              "Photons.TruthLink",
-                                              "AntiKt4EMTopoJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
-                                              "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
-                                              "TruthPrimaryVertices.t.x.y.z",
-                                              "InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers",
-                                              "PrimaryVertices.x.y.z.covariance.trackWeights.vertexType.sumPt2",
-                                              ]
+                                               "Muons.TruthLink",
+                                               "Photons.TruthLink",
+                                               "AntiKt4EMTopoJets.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
+                                               "AntiKt4EMPFlowJets.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
+                                               "TruthPrimaryVertices.t.x.y.z",
+                                               "InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers",
+                                               "PrimaryVertices.x.y.z.covariance.trackWeights.vertexType.sumPt2",
+                                               ]
 
         # Maciej Lewicki: coming from the JET-M1 derivation
         STDM6SlimmingHelper.SmartCollections += ["AntiKt4TruthWZJets"]

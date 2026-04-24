@@ -85,9 +85,13 @@ if (NOT XAOD_STANDALONE)
     src/CountIParticleAlg.cxx
     src/CountTrackParticleAlg.cxx
     src/FTagGhostLeptonAssociationAlg.cxx
+    src/JetLeptonDecayLabelAlg.cxx
+    src/CaloChargedFlowDecoratorAlg.cxx
+    src/JetCalibrationDecoratorAlg.cxx
+    src/TruthTauDecoratorAlg.cxx
     ${athena_only_algs}
     src/components/FlavorTagDiscriminants_entries.cxx
-    LINK_LIBRARIES FlavorTagDiscriminants RoiDescriptor ${athena_only_libs}
+    LINK_LIBRARIES FlavorTagDiscriminants RoiDescriptor xAODPFlow xAODCaloEvent xAODCore xAODTruth TauAnalysisToolsLib TruthUtils ${athena_only_libs}
     )
 
   # Suppress spurious warnings seen in the LTO build originating in

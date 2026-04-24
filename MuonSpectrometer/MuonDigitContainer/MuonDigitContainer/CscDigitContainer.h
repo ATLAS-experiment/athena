@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // CscDigitContainer.h
@@ -59,13 +59,10 @@ public:
 
   // IdentifiableContainer is still a DataObject
   // Put CLID here. 
-  static const CLID& classID();
+  static CLID classID();
 
    /** return class ID */
-   virtual const CLID& clID() const
-    {
-      return classID(); 
-    }
+   virtual const CLID& clID() const override;
 
  private:
 

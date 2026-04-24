@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # The name of the package:
 atlas_subdir( xAODRootAccess )
@@ -105,7 +105,6 @@ _add_test( ut_xaodrootaccess_tauxvector_test )
 _add_test( ut_xaodrootaccess_tauxvectorfactory_test )
 _add_test( ut_xaodrootaccess_tauxstore_test )
 _add_test( ut_xaodrootaccess_tauxstore_insertmove_test )
-_add_test( ut_xaodrootaccess_tfileaccesstracer_test )
 _add_test( ut_xaodrootaccess_tfilemerger_test )
 _add_test( ut_xaodrootaccess_rauxstore_test )
 atlas_add_test( ut_xaodrootaccess_tpystore_test

@@ -69,9 +69,7 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
        useCombinedMeasurement      = False, # Only takes effect if combOnly=True
        muonCollectionKey           = mainMuonInput,
        TrackParticleCollection     = mainIDInput,
-       useV0Fitter                 = False,                   # if False a TrkVertexFitterTool will be used
        TrkVertexFitterTool         = vkalvrt,
-       V0VertexFitterTool          = None,
        TrackSelectorTool           = trackselect,
        VertexPointEstimator        = vpest,
        useMCPCuts                  = False )

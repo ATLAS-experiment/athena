@@ -3,115 +3,151 @@
 """
 Run material mapping
 """
-
-from argparse import ArgumentParser
 from AthenaCommon.Logging import log
-from AthenaConfiguration.AllConfigFlags import initConfigFlags
-from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
-# Argument parsing
-parser = ArgumentParser("RunMaterialMapping.py")
-parser.add_argument("detectors", metavar="detectors", type=str, nargs="*",
-                    help="Specify the list of detectors")
-parser.add_argument("--localgeo", default=False, action="store_true",
-                    help="Use local geometry Xml files")
-parser.add_argument("--geoModelSqLiteFile", default = "", help="Read geometry from sqlite file")
-parser.add_argument("-V", "--verboseAccumulators", default=False,
-                    action="store_true",
-                    help="Print full details of the AlgSequence")
-parser.add_argument("-S", "--verboseStoreGate", default=False,
-                    action="store_true",
-                    help="Dump the StoreGate(s) each event iteration")
-parser.add_argument("--maxEvents",default=10, type=int,
-                    help="The number of events to run. 0 skips execution")
-parser.add_argument("--skipEvents",default=0, type=int,
-                    help="The number of events to skip")
-parser.add_argument("--geometrytag",default="ATLAS-P2-RUN4-03-00-00", type=str,
-                    help="The geometry tag to use")
-parser.add_argument("--inputFile",
-                    required=True, type=str,
-                    help="Input files to be used for the mapping procedure. They must contain the material track information, which was previously produced with the 'RunGeantinoMaterialTrackProduction.py'")
-args = parser.parse_args()
+def SetupArgParser():
+    from argparse import ArgumentParser
+    import sys
+    # Argument parsing
+    parser = ArgumentParser("RunMaterialMapping.py")
+    parser.add_argument("detectors", metavar="detectors", type=str, nargs="*",
+                        help="Specify the list of detectors")
+    parser.add_argument("--localgeo", default=False, action="store_true",
+                        help="Use local geometry Xml files")
+    parser.add_argument("--geoModelSqLiteFile", default = "", help="Read geometry from sqlite file")
+    parser.add_argument("-V", "--verboseAccumulators", default=False,
+                        action="store_true",
+                        help="Print full details of the AlgSequence")
+    parser.add_argument("-S", "--verboseStoreGate", default=False,
+                        action="store_true",
+                        help="Dump the StoreGate(s) each event iteration")
+    parser.add_argument("--maxEvents",default=-1, type=int,
+                        help="The number of events to run. 0 skips execution")
+    parser.add_argument("--skipEvents",default=0, type=int,
+                        help="The number of events to skip")
+    parser.add_argument("--batchSize", default=1000, type = int, 
+                        help="Number of Material events per host event")
+    parser.add_argument("--treeName", help="Name of the input tree in the file",
+                        default="material-tracks", type=str)
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    parser.add_argument("--geometrytag",default=defaultGeometryTags.RUN4, type=str,
+                        help="The geometry tag to use")
+    parser.add_argument("--inputFiles", type=str, nargs="+",
+                        default=[],
+                        help="Input files to be used for the mapping procedure. They must contain the material track information, which was previously produced with the 'RunGeantinoMaterialTrackProduction.py'")
+    return parser
+
+def assembleFiles(fileArgs):
+    from os import path, listdir
+    outList = []
+    for fileArg in fileArgs:
+        if path.isdir(fileArg):
+            outList += [ f"{fileArg}/{y}" for y in listdir(fileArg) ]
+        else:
+            if fileArg[fileArg.rfind(".")+1 :] not in ["txt", "conf"]:
+                 outList+=[fileArg]
+            else:
+                with open(fileArg) as inStream:
+                   outList+=[ line.strip() for line in inStream if line[0]!='#'] 
+
+    return outList
 
 
-# Some info about the job
-print("----RunMaterialMapping for ITk geometry----")
-print()
-print("Using Geometry Tag: "+args.geometrytag)
-if args.localgeo:
-    print("...overridden by local Geometry Xml files")
-print("Input material track file:"+args.inputFile)
-if not args.detectors:
-    print("Running complete detector")
-else:
-    print("Running with: {}".format(", ".join(args.detectors)))
-print()
+if __name__ == "__main__":
 
-# Configure
-flags = initConfigFlags()
-if args.localgeo:
-    flags.ITk.Geometry.AllLocal = True
+    args = SetupArgParser().parse_args()
 
-flags.Input.Files = []
-flags.Input.isMC=True
-flags.GeoModel.AtlasVersion = args.geometrytag
-flags.IOVDb.GlobalTag = "OFLCOND-SIM-00-00-00"
-flags.GeoModel.Align.Dynamic = False
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
-# This should run serially
-flags.Concurrency.NumThreads = 1
-flags.Concurrency.NumConcurrentEvents = 1
+    # Some info about the job
+    print("----RunMaterialMapping for ITk geometry----")
+    print()
+    print("Using Geometry Tag: "+args.geometrytag)
+    if args.localgeo:
+        print("...overridden by local Geometry Xml files")
+    print("Input material track file:\n{files}".format(files = "  -- \n".join(args.inputFiles)))
+    if not args.detectors:
+        print("Running complete detector")
+    else:
+        print("Running with: {}".format(", ".join(args.detectors)))
+    print()
 
-from AthenaConfiguration.DetectorConfigFlags import getEnabledDetectors, setupDetectorFlags
-from AthenaConfiguration.AutoConfigFlags import getDefaultDetectors
+    # Configure
+    flags = initConfigFlags()
+    if args.localgeo:
+        flags.ITk.Geometry.AllLocal = True
+    from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITestDefaults, configureDefaultTagsCfg
+    flags.Input.Files = MuonPhaseIITestDefaults.EVGEN_PG
+    flags.Input.isMC=True
+    flags.GeoModel.AtlasVersion = args.geometrytag
+    flags.IOVDb.GlobalTag = "OFLCOND-SIM-00-00-00"
+    flags.GeoModel.Align.Dynamic = False
 
-if args.geoModelSqLiteFile:
-     flags.GeoModel.SQLiteDB = True
-     flags.GeoModel.SQLiteDBFullPath = args.geoModelSqLiteFile
-     # hack to set Run4 for running on muon dead material geometry
-     from AthenaConfiguration.Enums import LHCPeriod
-     flags.GeoModel.Run = LHCPeriod.Run4
-else:
-    defaultDetectors = ['ITkPixel', 'ITkStrip']
-    detectors = args.detectors if 'detectors' in args and args.detectors else defaultDetectors
-    detectors.append('Bpipe')  # always run with beam pipe
-    setupDetectorFlags(flags, detectors, toggle_geometry=True)
+    # This should run serially
+    flags.Concurrency.NumThreads = 1
+    flags.Concurrency.NumConcurrentEvents = 1
+    flags.Exec.FPE= 500
+    flags.Exec.EventPrintoutInterval = 500
+    if args.maxEvents > 0:
+        procHostEvents = int(args.maxEvents / args.batchSize) + 2
+        flags.Exec.MaxEvents = procHostEvents
+    from AthenaConfiguration.DetectorConfigFlags import getEnabledDetectors, setupDetectorFlags
+    from AthenaConfiguration.AutoConfigFlags import getDefaultDetectors
+    
+    ### Don't setup the active muon material in the Acts tracking goemerty
+    ### but the passive material representing the coils etc.
+    flags.Muon.trackGeometryActiveMaterial= False
+    flags.Muon.trackGeometryPassiveMaterial= True
 
-flags.Acts.TrackingGeometry.UseBlueprint = True
+    if args.geoModelSqLiteFile:
+         flags.GeoModel.SQLiteDB = True
+         flags.GeoModel.SQLiteDBFullPath = args.geoModelSqLiteFile
+         # hack to set Run4 for running on muon dead material geometry
+         from AthenaConfiguration.Enums import LHCPeriod
+         flags.GeoModel.Run = LHCPeriod.Run4
+         configureDefaultTagsCfg(flags)
+    else:
+        defaultDetectors = ['ITkPixel', 'ITkStrip']
+        detectors = args.detectors if 'detectors' in args and args.detectors else defaultDetectors
+        detectors.append('Bpipe')  # always run with beam pipe
+        setupDetectorFlags(flags, detectors, toggle_geometry=True)
 
-flags.Exec.SkipEvents = args.skipEvents
+    flags.Acts.TrackingGeometry.UseBlueprint = True
 
-log.debug('Lock config flags now.')
-flags.lock()
+    #flags.Exec.SkipEvents = args.skipEvents
+    
+    log.debug('Lock config flags now.')
+    flags.lock()
 
-# Construct our accumulator to run
-acc = MainServicesCfg(flags)
+    # Construct our accumulator to run
+    acc = MainServicesCfg(flags)
 
-### setup dumping of additional information
-if args.verboseAccumulators:
-  acc.printConfig(withDetails=True)
-if args.verboseStoreGate:
-  acc.getService("StoreGateSvc").Dump = True
+    acc.getService("MessageSvc").verboseLimit = 10000000
+    acc.getService("MessageSvc").debugLimit = 10000000
+    acc.getService("MessageSvc").errorLimit = 10000000
 
-log.debug('Dumping of ConfigFlags now.')
-flags.dump()
 
-from ActsConfig.ActsMaterialConfig import MaterialTrackReaderCfg
-import glob
-acc.merge(MaterialTrackReaderCfg(flags,
-                                 FileNames=glob.glob(args.inputFile)))
+    ### setup dumping of additional information
+    if args.verboseAccumulators: acc.printConfig(withDetails=True)
+    if args.verboseStoreGate: acc.getService("StoreGateSvc").Dump = True
 
-from ActsConfig.ActsMaterialConfig import MaterialMappingCfg
-acc.merge(MaterialMappingCfg(flags))
+    log.debug('Dumping of ConfigFlags now.')
+    flags.dump()
 
-from ActsConfig.ActsMaterialConfig import MaterialTrackWriterCfg
-acc.merge(MaterialTrackWriterCfg(flags, name="MappedMaterialTrackWriter", FileName="material-tracks-mapped.root",
-                                 MaterialTrackCollectionKey="OutputMappedMaterialTracks"))
-acc.merge(MaterialTrackWriterCfg(flags, name="UnmappedMaterialTrackWriter", FileName="material-tracks-unmapped.root",
-                                 MaterialTrackCollectionKey="OutputUnmappedMaterialTracks"))
+    from ActsConfig.ActsMaterialConfig import MaterialTrackReaderCfg, MaterialMappingCfg
 
-acc.printConfig(withDetails = True, summariseProps = True)
+    acc.merge(MaterialTrackReaderCfg(flags, 
+                                     maxEvents =  args.maxEvents if args.maxEvents > 0 else sys.maxsize,
+                                     skipEvents = args.skipEvents,
+                                     batchSize = args.batchSize,
+                                     FileNames=assembleFiles(args.inputFiles),
+                                     TreeName=args.treeName))
 
-acc.run(maxEvents=args.maxEvents)
+    acc.merge(MaterialMappingCfg(flags, 
+                                 StoreTracks=False))
+
+    from MuonConfig.MuonConfigUtils import executeTest, setupHistSvcCfg
+    executeTest(acc)    
 
 

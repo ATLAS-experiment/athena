@@ -59,12 +59,14 @@ namespace DerivationFramework {
       // Declare a set of functions to change cuts on the particles:
       //  -jetPtCut:                Save a given float value as a cut on the pt of the jets.
       //  -jetEtaCut:               Save a given float value as a cut on the eta of the jets.
-      //  -leadingHadronPtCut:      Save a given float value as a cut on the pt of the leading hadron.
+      //  -leadingBHadronPtCut:      Save a given float value as a cut on the pt of the leading B-hadron.
+      //  -leadingCHadronPtCut:      Save a given float value as a cut on the pt of the leading C-hadron.
       //  -leadingHadronPtRatioCut: Save a given float value as a cut on the ratio between the pt of the leading hadron and the pt of its associated jet.
 
       inline void jetPtCut(float a){m_jetPtCut=a;}
       inline void jetEtaCut(float a){m_jetEtaCut=a;}
-      inline void leadingHadronPtCut(float a){m_leadingHadronPtCut=a;}
+      inline void leadingBHadronPtCut(float a){m_leadingBHadronPtCut=a;}
+      inline void leadingCHadronPtCut(float a){m_leadingCHadronPtCut=a;}
       inline void leadingHadronPtRatioCut(float a){m_leadingHadronPtRatioCut=a;}
 
       // Declare the following set of functions to compute the classifier:
@@ -90,12 +92,14 @@ namespace DerivationFramework {
       // Declare a set of float variables to save the cuts on the particles:
       //  -m_jetPtCut:                Cut on the pt of the jets.
       //  -m_jetEtaCut:               Cut on the eta of the jets.
-      //  -m_leadingHadronPtCut:      Cut on the pt of the leading hadron.
+      //  -m_leadingBHadronPtCut:      Cut on the pt of the leading B-hadron.
+      //  -m_leadingCHadronPtCut:      Cut on the pt of the leading C-hadron.
       //  -m_leadingHadronPtRatioCut: Cut on the ratio between the pt of the leading hadron and the pt of its associated jet.
 
       Gaudi::Property<float> m_jetPtCut{this, "jetPtCut", 15000., "Cut on the jets pt that are considered to compute the HF classification."};
       Gaudi::Property<float> m_jetEtaCut{this, "jetEtaCut", 2.5, "Cut on the jets eta that are considered to compute the HF classification."};
-      Gaudi::Property<float> m_leadingHadronPtCut{this, "leadingHadronPtCut", 5000., "Cut on the hadrons that are considered to compute the HF classification."};
+      Gaudi::Property<float> m_leadingBHadronPtCut{this, "leadingBHadronPtCut", 5000., "Cut on the B-hadrons that are considered to compute the HF classification."};
+      Gaudi::Property<float> m_leadingCHadronPtCut{this, "leadingCHadronPtCut", 5000., "Cut on the C-hadrons that are considered to compute the HF classification."};
       Gaudi::Property<float> m_leadingHadronPtRatioCut{this, "leadingHadronPtRatioCut", -1., "Cut on the ratio between the pt of the leading hadron matched to a jet and the jet pt."};
       
   }; 

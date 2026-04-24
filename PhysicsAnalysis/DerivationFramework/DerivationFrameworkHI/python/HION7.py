@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # HION7.py 
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -19,7 +19,9 @@ def PhysAugmentationsHION7Cfg(flags):
             AddStandardTruthContentsCfg,
             AddHFAndDownstreamParticlesCfg,
             AddMiniTruthCollectionLinksCfg,
-            AddPVCollectionCfg)
+            AddPVCollectionCfg,
+            TruthClassificationAugmentationsCfg)
+        acc.merge(TruthClassificationAugmentationsCfg(flags))
         from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthCharmToolCfg
         PhysCommonTruthCharmTool = acc.getPrimaryAndMerge(DFCommonTruthCharmToolCfg(
             flags,
@@ -77,7 +79,7 @@ def getDFJets(flags):
 
 #########################################################################################
 #Skiming
-def HION7SkimmingToolCfg(flags):
+def HION7SkimmingToolCfg(flags, format="HION7"):
     """Configure the example skimming tool"""
     acc = ComponentAccumulator()
     JetColl = flags.HeavyIon.HIJetPrefix
@@ -85,32 +87,62 @@ def HION7SkimmingToolCfg(flags):
     ExtraData += ['xAOD::JetContainer/'+JetColl+'AntiKt2HIJets']
     ExtraData += ['xAOD::JetContainer/'+JetColl+'AntiKt4HIJets']
 
-    acc.addSequence( seqAND("HION7Sequence") )
-    acc.getSequence("HION7Sequence").ExtraDataForDynamicConsumers = ExtraData
-    acc.getSequence("HION7Sequence").ProcessDynamicDataDependencies = True
-    
-    expression = ""
+    acc.addSequence( seqAND(format+"Sequence") )
+    acc.getSequence(format+"Sequence").ExtraDataForDynamicConsumers = ExtraData
+    acc.getSequence(format+"Sequence").ProcessDynamicDataDependencies = True
+
     #Trigger selection
+    filterList = []
     from DerivationFrameworkHI import ListTriggers
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import xAODStringSkimmingToolCfg
     from CoolConvUtilities.ParticleTypeUtil import getTypeForRun
     info=getTypeForRun(flags.Input.RunNumbers[0])
     isSmallSystem = False
     if (info.getBeam1Type() < 11) or (info.getBeam2Type() < 11):
         isSmallSystem = True
-    if not flags.Input.isMC and not flags.Overlay.DataOverlay:
-        print('project: ', flags.Input.ProjectName,', isSmallSystem: ', isSmallSystem)
-        TriggerDict = ListTriggers.GetTriggers(flags.Input.ProjectName, isSmallSystem)
-        for i, key in enumerate(TriggerDict):
-            expression = expression + '(' + key + ' && count('+JetColl+'AntiKt4HIJets.pt >' + str(TriggerDict[key]) + '*GeV) >=1 ) ' + '|| (' + key + ' && count('+JetColl+'AntiKt2HIJets.pt >' + str(TriggerDict[key]) + '*GeV) >=1 ) '
-            if not i == len(TriggerDict) - 1:
-                expression = expression + ' || '
-    else:
-        expression = expression + 'count('+JetColl+'AntiKt2HIJets.pt > 15000) > 1 || count('+JetColl+'AntiKt4HIJets.pt > 15000) > 1'
 
-    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
-        xAODStringSkimmingToolCfg)
-    acc.addPublicTool(acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
-        flags, name = "HION7StringSkimmingTool", expression = expression)), primary = True)
+
+    if not flags.Input.isMC and not flags.Overlay.DataOverlay:
+        print('project: ', flags.Input.ProjectName,
+              ', isSmallSystem: ', isSmallSystem)
+        TriggerDict = ListTriggers.GetTriggers(flags.Input.ProjectName, isSmallSystem)
+        for key in TriggerDict:
+            filterList_trig = []
+            expression = (
+                'count('+JetColl+'AntiKt4HIJets.pt >' + str(TriggerDict[key]) + '*GeV) >=1  ||  ' +
+                'count('+JetColl+'AntiKt2HIJets.pt >' + str(TriggerDict[key]) + '*GeV) >=1 ')
+
+            StringSkimmingTool = acc.addPublicTool(acc.getPrimaryAndMerge(
+                xAODStringSkimmingToolCfg(
+                    flags, name = format+"StringSkimmingTool_"+key,
+                    expression = expression)), primary = True)
+            filterList_trig += [StringSkimmingTool]
+
+            TriggerSkimmingTool = (
+                CompFactory.DerivationFramework.TriggerSkimmingTool(
+                    name = format+"TriggerSkimmingTool_"+key,
+                    TriggerListOR = [key]))
+            acc.addPublicTool(TriggerSkimmingTool)
+            filterList_trig += [TriggerSkimmingTool]
+
+            SkimmingTool_trig  = (
+                CompFactory.DerivationFramework.FilterCombinationAND(
+                    name=format+"SkimmingTool_trig_"+key,
+                    FilterList=filterList_trig))
+            acc.addPublicTool(SkimmingTool_trig)
+            filterList += [SkimmingTool_trig]
+
+    else:
+        expression = ('count('+JetColl+'AntiKt2HIJets.pt > 15000) > 1 || ' +
+                      'count('+JetColl+'AntiKt4HIJets.pt > 15000) > 1')
+        StringSkimmingTool = acc.addPublicTool(acc.getPrimaryAndMerge(
+            xAODStringSkimmingToolCfg(flags, name = format+"StringSkimmingTool",
+                                      expression = expression)), primary = True)
+        filterList += [StringSkimmingTool]
+
+    SkimmingTool = CompFactory.DerivationFramework.FilterCombinationOR(
+        name=format+"SkimmingTool", FilterList=filterList)
+    acc.addPublicTool(SkimmingTool, primary = True)
 
     return(acc)                             
 
@@ -166,6 +198,7 @@ def HION7KernelCfg(flags, name='HION7Kernel', **kwargs):
     acc = ComponentAccumulator()
 
     acc.merge(PhysAugmentationsHION7Cfg(flags))
+    acc.merge(getDFJets(flags))
 #########################################################################################
 #Thinning
     from CoolConvUtilities.ParticleTypeUtil import getTypeForRun
@@ -239,7 +272,6 @@ def HION7Cfg(flags):
     acc = ComponentAccumulator()
 
     JetColl = flags.HeavyIon.HIJetPrefix
-    acc.merge(getDFJets(flags))
 
     acc.merge(HION7KernelCfg(flags, name="HION7Kernel",StreamName = "StreamDAOD_HION7"))
 
@@ -259,17 +291,17 @@ def HION7Cfg(flags):
     if flags.Input.isMC:
         AllVars += ListSlimming.HION7AllVarTruthContent()
         if flags.HeavyIon.doHIBTagging:
-            FtagBaseContent.add_truth_to_SlimmingHelper(HION7SlimmingHelper)
+            FtagBaseContent.add_truth_to_slimming_helper(HION7SlimmingHelper)
     if flags.HeavyIon.doHIBTagging:
-        from DerivationFrameworkFlavourTag.FtagBaseContent import addCommonAugmentation
-        addCommonAugmentation(flags, acc, HION7SlimmingHelper, JetColl+"AntiKt4HIJets")
+        from DerivationFrameworkFlavourTag.FtagBaseContent import add_common_augmentation
+        add_common_augmentation(flags, acc, HION7SlimmingHelper, JetColl+"AntiKt4HIJets")
         AllVars += ListSlimming.HION7AllVarFromFTAG1()
         # update AppendToDictionary
         extra_AppendToDictionary = {}
-        FtagBaseContent.update_AppendToDictionary_in_SlimmingHelper(HION7SlimmingHelper, flags, extra_AppendToDictionary)
+        FtagBaseContent.update_append_to_dictionary_in_slimming_helper(flags, HION7SlimmingHelper, extra_AppendToDictionary)
         # Add ExtraVariables
         ExtraVars += ListSlimming.HION7ExtraVarForBtag(JetColl)
-        FtagBaseContent.add_ExtraVariables_to_SlimmingHelper(HION7SlimmingHelper, flags)
+        FtagBaseContent.add_extra_variables_to_slimming_helper(flags, HION7SlimmingHelper)
 
     HION7SlimmingHelper.ExtraVariables = ExtraVars
     HION7SlimmingHelper.AllVariables = AllVars

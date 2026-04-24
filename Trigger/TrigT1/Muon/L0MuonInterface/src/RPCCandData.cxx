@@ -2,6 +2,8 @@
    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "L0MuonInterface/RPCCandData.h"
+#include <algorithm>
+#include <stdexcept>
 
 namespace L0Muon
 {
@@ -25,25 +27,34 @@ namespace L0Muon
       return;
     }
     /// convert z position to binary
-    m_zPos[index] = (uint16_t)(zPos / s_zPosRange * (float)s_zPosBitRange);
+
+    m_zPos[index] = static_cast<uint16_t>(std::round((zPos + s_zPosRange) / (2.0f * s_zPosRange) * static_cast<float>(s_zPosBitRange)));
+
+   
   }
   void RPCCandData::setCoinType(uint8_t coinType)
   {
     /// convert the coincidence type to binary
-    m_coinType = (uint8_t)(coinType / s_coinTypeRange * (float)s_coinTypeBitRange);
-  }
+    m_coinType = static_cast<uint8_t>(coinType / s_coinTypeRange * static_cast<float>(s_coinTypeBitRange));
+    }
+
 
   float RPCCandData::zPos(int index) const
-  {
-    if (index < 0 || index > 3)
-    {
-      return 0.0;
-    }
-    return (float)m_zPos[index] / (float)s_zPosBitRange * s_zPosRange;
+{
+  if (index < 0 || index > 3) {
+    return 0.0;
   }
+
+  if (m_zPos[index] == 0xffff) {
+    return -999.f;
+  }
+  return static_cast<float>(m_zPos[index]) / static_cast<float>(s_zPosBitRange) * 2.0f * s_zPosRange - s_zPosRange;
+}
+
   uint8_t RPCCandData::coinType() const
   {
-    return (uint8_t)(m_coinType / s_coinTypeRange * (float)s_coinTypeBitRange);
+    return static_cast<uint8_t>(m_coinType / s_coinTypeRange * static_cast<float>(s_coinTypeBitRange));
   }
   
 }
+

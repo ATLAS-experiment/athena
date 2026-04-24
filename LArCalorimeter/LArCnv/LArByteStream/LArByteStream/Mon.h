@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -13,13 +13,14 @@
 #define MON_H
 #include <map>
 #include "LArByteStream/LArLATOMEDecoder.h"
+class IMessageSvc;
 
 #define MON_HEADER_SIZE 18
 /** @brief Tool to store LATOME mon header and footer data.*/
 class Mon
 {
  public:
-  Mon();
+  Mon(IMessageSvc* msgSvc);
   ~Mon();
   void fillPacketInfo(uint32_t word);
   void fillHeaderSize(uint32_t word);
@@ -49,6 +50,8 @@ class Mon
   int nthMONHWordPacketDetermined = 3;
   std::array<uint32_t, MON_HEADER_SIZE> headerRef = {0, 0, 0xFF1234FF, 0, 0xDEADBEEF, MON_HEADER_SIZE, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   std::array<uint32_t, 2> trailerRef = {0xC0FFEE00, 0xAAAAAAAA};
+
+  MsgStream m_logstr;
 };
 
 #endif // MON_H

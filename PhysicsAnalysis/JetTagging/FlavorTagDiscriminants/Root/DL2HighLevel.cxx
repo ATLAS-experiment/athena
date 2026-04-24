@@ -40,7 +40,7 @@ namespace FlavorTagDiscriminants {
       throw std::logic_error("DL2 doesn't support multiple inputs");
     }
     auto [input_config, constituents_configs, options] = dataprep::createGetterConfig<lwt::GraphConfig, lwt::OutputNodeConfig>(
-      config, flip_config, std::move(remap_scalar));
+      config, flip_config, std::move(remap_scalar), "");
     options.default_output_value = default_output_value;
 
     m_dl2.reset(

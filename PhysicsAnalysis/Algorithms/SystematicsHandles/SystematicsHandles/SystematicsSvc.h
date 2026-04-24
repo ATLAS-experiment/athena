@@ -53,6 +53,8 @@ namespace CP
                   const std::string& toName) const override;
     virtual std::string
     getCopySource (const std::string& toName) const override;
+    virtual std::vector<std::string>
+    getObjectDecorations (const std::string& name) const override;
     virtual StatusCode
     makeSystematicsName (std::string& result,
                          const std::string& name,

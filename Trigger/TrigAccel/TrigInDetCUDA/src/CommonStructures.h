@@ -1,15 +1,20 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGINDETCUDA_COMMON_H
 #define TRIGINDETCUDA_COMMON_H
-typedef struct gpuParameters {
-  int m_nSMX;
-  int m_nNUM_SMX_CORES;
-  int m_nNUM_TRIPLET_BLOCKS;
-} GPU_PARAMETERS;
 
 #include <tbb/tick_count.h>
+#include <memory>
+
+class WorkTimeStampQueueImpl;
+
+typedef struct gpuParameters {
+  int m_nSMX{};
+  int m_nNUM_SMX_CORES{};
+  int m_nNUM_TRIPLET_BLOCKS{};
+} GPU_PARAMETERS;
+
 
 class WorkTimeStamp {
 public:
@@ -21,9 +26,8 @@ public:
   tbb::tick_count m_time;
 };
 
-class WorkTimeStampQueueImpl;
-class WorkTimeStampQueue
-{
+
+class WorkTimeStampQueue{
 public:
   WorkTimeStampQueue();
   ~WorkTimeStampQueue();

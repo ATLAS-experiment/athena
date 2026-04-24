@@ -41,7 +41,8 @@ protected:
                             const std::string& key) override;
 
   virtual Trk::MaterialStepCollection*
-  createTransientWithKey (const std::string& key) override;
+  createTransientWithKey ( const Token* token,
+                           const std::string& key) override;
 
   
  private:

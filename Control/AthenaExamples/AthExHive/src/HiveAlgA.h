@@ -32,7 +32,7 @@ public:
   // Define the initialize and execute  methods:
   
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
   
 private:
 

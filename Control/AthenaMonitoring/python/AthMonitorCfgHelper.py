@@ -33,12 +33,12 @@ class AthMonitorCfgHelper(object):
         self.monSeq = AthSequencer('AthMonSeq_' + monName)
         self.monSeq.StopOverride=True
         self.resobj = ComponentAccumulator()
-        self.resobj.addSequence(self.monSeq)
+        # self.resobj.addSequence(self.monSeq) - postpone adding sequence unless actually adding an alg
         if self.flags.DQ.useTrigger:
             from .TriggerInterface import TrigDecisionToolCfg
             self.resobj.merge(TrigDecisionToolCfg(flags))
 
-    def addAlgorithm(self, algClassOrObj, name = None, addFilterTools = [], *args, **kwargs):
+    def addAlgorithm(self, algClassOrObj, name = None, addFilterTools = [], addToSubSequence=True, *args, **kwargs):
         '''
         Instantiate/add a monitoring algorithm
 
@@ -48,6 +48,8 @@ class AthMonitorCfgHelper(object):
                          the name argument is required.
         name -- the name of the algorithm to create. Required when passing a Configurable class object
                 as algClassOrObj.  No effect if a Configurable instance is passed.
+        addToSubSequence -- if the algorithm should be added to a subsequence in the component accumulator,
+                            or just to the top level sequence.
         *args, **kwargs -- additional arguments will be forwarded to the Configurable constructor if
                            a Configurable class object is passed. No effect if a Configurable instance
                            is passed.
@@ -92,8 +94,12 @@ class AthMonitorCfgHelper(object):
                 raise ValueError(f'Object {obj} passed to addFilterTools is not a ComponentAccumulator or an AlgTool')
             algObj.FilterTools += [filter]
 
-
-        self.resobj.addEventAlgo(algObj, sequenceName=self.monSeq.name)
+        if addToSubSequence:
+            if self.resobj.getSequence(self.monSeq.name) is None:
+                self.resobj.addSequence(self.monSeq) # add the sequence now
+            self.resobj.addEventAlgo(algObj, sequenceName=self.monSeq.name)
+        else:
+            self.resobj.addEventAlgo(algObj) # not bothering with subsequences
         return algObj
 
     def addGroup(self, alg, name, topPath='', defaultDuration='run'):

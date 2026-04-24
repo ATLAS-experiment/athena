@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -32,7 +32,7 @@ public:
   // Define the initialize, execute and finalize methods:
   
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
   virtual StatusCode finalize() override;
   
 private:
@@ -44,7 +44,7 @@ private:
   // context specific data: which hides an array structure behind a simple
   // interface, keeping separate versions of the data for each concurrent
   // event (slot)
-  Gaudi::Hive::ContextSpecificData<int> m_di;
+  mutable Gaudi::Hive::ContextSpecificData<int> m_di ATLAS_THREAD_SAFE;
 
 };
 #endif

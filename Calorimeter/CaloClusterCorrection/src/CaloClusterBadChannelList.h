@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOCLUSTERCORRECTION_CALOCLUSTERBADCHANNELLIST_H
@@ -42,7 +42,8 @@ class CaloClusterBadChannelList : public CaloClusterCorrection
  private:
 
   // If true, the total cluster energy is set to the sum of all layer energies.
- ToolHandle<ICaloBadChanTool> m_badChannelTool;
+  ToolHandle<ICaloBadChanTool> m_badChannelTool{this, "badChannelTool", "CaloBadChanTool"
+      , "Tool handle for bad channel"};
 
 };
 

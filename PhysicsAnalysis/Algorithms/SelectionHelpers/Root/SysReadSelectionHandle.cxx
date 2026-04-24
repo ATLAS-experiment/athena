@@ -31,7 +31,7 @@ namespace CP
 
 
   StatusCode SysReadSelectionHandle ::
-  initialize (SysListHandle& sysListHandle, const ISysHandleBase& objectHandle)
+  initialize (SysListHandle& sysListHandle, ISysObjectHandleBase& objectHandle)
   {
     if (m_selection.empty())
     {
@@ -51,7 +51,7 @@ namespace CP
 
 
   StatusCode SysReadSelectionHandle ::
-  initialize (SysListHandle& sysListHandle, const ISysHandleBase& objectHandle, SG::AllowEmptyEnum)
+  initialize (SysListHandle& sysListHandle, ISysObjectHandleBase& objectHandle, SG::AllowEmptyEnum)
   {
     if (!empty())
       return initialize (sysListHandle, objectHandle);
@@ -68,16 +68,6 @@ namespace CP
   empty () const noexcept
   {
     return m_selection.empty();
-  }
-
-
-
-  std::string SysReadSelectionHandle ::
-  getNamePattern () const
-  {
-    // So far it is undefined what to return here.  I'll fill this in
-    // once there is a reason for it to be one or the other.
-    return "";
   }
 
   const std::string& SysReadSelectionHandle ::
@@ -100,7 +90,7 @@ namespace CP
                    const CP::SystematicSet& /*fullAffecting*/,
                    const std::vector<CP::SystematicSet>& sysList)
   {
-    ANA_CHECK (m_accessor->fillSystematics (svc, sysList, m_objectHandle->getNamePattern()));
+    ANA_CHECK (m_accessor->fillSystematics (svc, sysList, *m_objectHandle));
     return StatusCode::SUCCESS;
   }
 }

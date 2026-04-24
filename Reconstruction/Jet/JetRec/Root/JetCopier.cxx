@@ -9,6 +9,7 @@
 #include "xAODJet/JetAuxContainer.h"
 #include "xAODBase/IParticleHelpers.h"
 #include "xAODCore/ShallowCopy.h"
+#include "AthContainers/CurrentContext.h"
 
 using xAOD::JetContainer;
 
@@ -91,18 +92,16 @@ std::pair<std::unique_ptr<xAOD::JetContainer>,std::unique_ptr<SG::IAuxStore> > J
 
   ATH_MSG_DEBUG("Shallow-copying jets");
 
-  std::pair<xAOD::JetContainer*,xAOD::ShallowAuxContainer*> shallowcopy = xAOD::shallowCopyContainer(*inputJetsHandle);
+  std::pair<std::unique_ptr<xAOD::JetContainer>,
+            std::unique_ptr<xAOD::ShallowAuxContainer> > shallowcopy =
+    xAOD::shallowCopyContainer(*inputJetsHandle, Gaudi::Hive::currentContext());
 
   shallowcopy.second->setShallowIO(m_shallowIO);
 
-  // Make sure that memory is managed safely
-  std::unique_ptr<xAOD::JetContainer> outjets(shallowcopy.first);
-  std::unique_ptr<xAOD::ShallowAuxContainer> shallowaux(shallowcopy.second);
-
   // Connect the copied jets to their originals
-  xAOD::setOriginalObjectLink(*inputJetsHandle, *outjets);
+  xAOD::setOriginalObjectLink(*inputJetsHandle, *shallowcopy.first);
 
-  return std::make_pair(std::move(outjets),std::move(shallowaux));
+  return shallowcopy;
 }
 
 std::pair<std::unique_ptr<xAOD::JetContainer>,std::unique_ptr<SG::IAuxStore> > JetCopier::DeepCopyJets() const {

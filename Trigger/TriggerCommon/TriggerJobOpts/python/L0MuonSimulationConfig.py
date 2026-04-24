@@ -55,7 +55,7 @@ def MuonBytestream2RdoConfig(flags):
     acc.addEventAlgo(cacheCreator)
     # for RPC
     RPCRodDecoder = CompFactory.Muon.RpcROD_Decoder(name = "RpcROD_Decoder" + postFix, NOBXS=flags.Trigger.L1MuonSim.RPCNBX)
-    MuonRpcRawDataProviderTool = CompFactory.Muon.RPC_RawDataProviderToolMT(name = "RPC_RawDataProviderToolMT" + postFix,
+    MuonRpcRawDataProviderTool = CompFactory.Muon.RPC_RawDataProviderTool(name = "RPC_RawDataProviderTool" + postFix,
                                                                              RpcContainerCacheKey = MuonCacheNames.RpcCache,
                                                                              WriteOutRpcSectorLogic = False,
                                                                              Decoder = RPCRodDecoder,
@@ -69,32 +69,36 @@ def MuonBytestream2RdoConfig(flags):
                                                                              TgcContainerCacheKey = MuonCacheNames.TgcCache,
                                                                              Decoder = TGCRodDecoder,
                                                                              RdoLocation = "TGCRDO_L1")
-    TgcRawDataProvider = CompFactory.Muon.TgcRawDataProvider(name = "TgcRawDataProvider" + postFix,
-                                                              ProviderTool = MuonTgcRawDataProviderTool)
+    TgcRawDataProvider = CompFactory.Muon.MuonRawDataProvider(name = f"TgcRawDataProvider{postFix}",
+                                                              ProviderTool = MuonTgcRawDataProviderTool,
+                                                              UseHashIds = True,
+                                                              DecodePerRoI = True)
     acc.addEventAlgo(TgcRawDataProvider)
     # for sTGC
     if flags.Detector.GeometrysTGC:
-        Muon__STGC_RawDataProviderToolMT=CompFactory.Muon.STGC_RawDataProviderToolMT
         from MuonConfig.MuonBytestreamDecodeConfig import sTgcRODDecoderCfg
-        MuonsTgcRawDataProviderTool = Muon__STGC_RawDataProviderToolMT(name    = "STGC_RawDataProviderToolMT"+postFix,
+        MuonsTgcRawDataProviderTool = CompFactory.Muon.STGC_RawDataProviderTool(name    = "STGC_RawDataProviderToolMT"+postFix,
                                                                        Decoder = acc.popToolsAndMerge(sTgcRODDecoderCfg(flags,
                                                                                                      name = "sTgcROD_Decoder"+postFix)),
                                                                        RdoLocation = "sTGCRDO_L1")
-        Muon__sTgcRawDataProvider=CompFactory.Muon.sTgcRawDataProvider
-        sTgcRawDataProvider = Muon__sTgcRawDataProvider(name       = "sTgcRawDataProvider"+postFix,
-                                                        ProviderTool = MuonsTgcRawDataProviderTool )
+        sTgcRawDataProvider = CompFactory.Muon.MuonRawDataProvider(name = f"sTgcRawDataProvider{postFix}",
+                                                        ProviderTool = MuonsTgcRawDataProviderTool,
+                                                        UseHashIds = False,
+                                                        DecodePerRoI = False)
         acc.addEventAlgo(sTgcRawDataProvider)
 
     # for MM
     if flags.Detector.GeometryMM:
         from MuonConfig.MuonBytestreamDecodeConfig import MmRDODDecoderCfg
-        Muon_MM_RawDataProviderToolMT = CompFactory.Muon.MM_RawDataProviderToolMT
-        MuonMmRawDataProviderTool = Muon_MM_RawDataProviderToolMT(name  = "MM_RawDataProviderToolMT"+postFix,
+        Muon_MM_RawDataProviderTool = CompFactory.Muon.MM_RawDataProviderTool
+        MuonMmRawDataProviderTool = Muon_MM_RawDataProviderTool(name  = "MM_RawDataProviderTool"+postFix,
                                                                   Decoder = acc.popToolsAndMerge(MmRDODDecoderCfg(flags,
                                                                                                  name="MM_RODDecoder"+postFix)),
                                                                   RdoLocation = "MMRDO_L1")
-        Muon__MmRawDataProvider = CompFactory.Muon.MM_RawDataProvider
-        MmRawDataProvider = Muon__MmRawDataProvider(name = "MmRawDataProvider"+postFix, ProviderTool = MuonMmRawDataProviderTool )
+        MmRawDataProvider = CompFactory.Muon.MuonRawDataProvider(name = f"MmRawDataProvider{postFix}",
+                                                                   ProviderTool = MuonMmRawDataProviderTool,
+                                                                   UseHashIds = False,
+                                                                   DecodePerRoI = False)
         acc.addEventAlgo(MmRawDataProvider)
 
     return acc
@@ -133,8 +137,11 @@ def MuonRdo2DigitConfig(flags):
 
     if flags.Input.Format is Format.POOL:
         rdoInputs = [
-            ('RpcPadContainer','RPCPAD'),
             ('TgcRdoContainer','TGCRDO')
+        ]
+        if "RPCPAD" in flags.Input.Collections:
+            rdoInputs += [
+            ('RpcPadContainer','RPCPAD')
         ]
         # Read MMRDO and sTGCRDO
         if flags.Detector.GeometrysTGC or flags.Detector.GeometryMM:
@@ -173,8 +180,11 @@ def NSWTriggerConfig(flags):
         rdoInputs = [
             ('McEventCollection','TruthEvent'), # for MM trigger
             ('TrackRecordCollection','MuonEntryLayer'), # for MM trigger
-            ('MuonSimDataCollection','sTGC_SDO') # for sTGC Pad trigger
         ]
+        if not flags.Muon.usePhaseIIGeoSetup:
+            rdoInputs += [
+                 ('MuonSimDataCollection','sTGC_SDO') # for sTGC Pad trigger
+            ]
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         acc.merge(SGInputLoaderCfg(flags, Load=rdoInputs))
 

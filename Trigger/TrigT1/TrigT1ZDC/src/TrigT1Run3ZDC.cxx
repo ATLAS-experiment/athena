@@ -1,15 +1,17 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "TrigT1Run3ZDC.h"
 
-#include <bitset>
-#include <fstream>
-#include <stdexcept>
+
 
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "ZdcConditions/ZdcLucrodMapRun3.h"
 #include "ZdcIdentifier/ZdcID.h"
+#include <bitset>
+#include <fstream>
+#include <array>
+#include <iostream>
 
 using json = nlohmann::json;
 
@@ -35,18 +37,22 @@ StatusCode TrigT1Run3ZDC::initialize() {
 
   // Will eventually obtain LUTs from COOL, for now obtain them from calibration
   // area A data member to hold the side A LUT values
+  //coverity[STACK_USE]
   std::array<unsigned int, 4096> sideALUTHG =
       data["LucrodHighGain"]["LUTs"]["sideA"];
   // A data member to hold the side C LUT values
+  //coverity[STACK_USE]
   std::array<unsigned int, 4096> sideCLUTHG =
       data["LucrodHighGain"]["LUTs"]["sideC"];
   // A data member to hold the Combined LUT values
   std::array<unsigned int, 256> combLUTHG =
       data["LucrodHighGain"]["LUTs"]["comb"];
   // area A data member to hold the side A LUT values
+  //coverity[STACK_USE]
   std::array<unsigned int, 4096> sideALUTLG =
       data["LucrodLowGain"]["LUTs"]["sideA"];
   // A data member to hold the side C LUT values
+  //coverity[STACK_USE]
   std::array<unsigned int, 4096> sideCLUTLG =
       data["LucrodLowGain"]["LUTs"]["sideC"];
   // A data member to hold the Combined LUT values
@@ -86,12 +92,12 @@ StatusCode TrigT1Run3ZDC::initialize() {
 
   // Construct Simulation Objects
   m_triggerSimHGPtr = std::make_shared<ZDCTriggerSimFADC>(
-      ZDCTriggerSimFADC(sideALUTHG, sideCLUTHG, combLUTHG, deriv2ndHGThresh,
-                        m_minSampleAna, m_maxSampleAna, m_baselineDelta));
+      sideALUTHG, sideCLUTHG, combLUTHG, deriv2ndHGThresh,
+                        m_minSampleAna, m_maxSampleAna, m_baselineDelta);
 
   m_triggerSimLGPtr = std::make_shared<ZDCTriggerSimFADC>(
-      ZDCTriggerSimFADC(sideALUTLG, sideCLUTLG, combLUTLG, deriv2ndLGThresh,
-                        m_minSampleAna, m_maxSampleAna, m_baselineDelta));
+      sideALUTLG, sideCLUTLG, combLUTLG, deriv2ndLGThresh,
+                        m_minSampleAna, m_maxSampleAna, m_baselineDelta);
 
   m_hgFADC_ptr =
       std::make_shared<ZDCTriggerSim::FADCInputs>(ZDCTriggerSim::FADCInputs());

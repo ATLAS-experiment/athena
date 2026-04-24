@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -30,8 +30,8 @@ namespace LArSamples {
     bool set(const TString& tweaks);
     bool findOption(TString& tweaks, const TString& option) const;
 
-    Data* tweak(const Data& data, int evtIndex = -1) const;
-    EventData* tweak(const EventData& eventData, int runIndex = -1) const;
+    std::unique_ptr<Data> tweak(const Data& data, int evtIndex = -1) const;
+    std::unique_ptr<EventData> tweak(const EventData& eventData, int runIndex = -1) const;
 
     void setNSamplesTrunctation(unsigned int n) { m_nSamplesTruncation = n; }
     void addSample(unsigned int n) { m_samples[n] = true; }

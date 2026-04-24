@@ -49,7 +49,6 @@ def TRUTH1Cfg(flags):
                                                'AntiKtVR30Rmax4Rmin02TruthChargedJets':'xAOD::JetContainer','AntiKtVR30Rmax4Rmin02TruthChargedJetsAux':'xAOD::JetAuxContainer',
                                                'AntiKt4TruthDressedWZJets':'xAOD::JetContainer','AntiKt4TruthDressedWZJetsAux':'xAOD::JetAuxContainer',
                                                'AntiKt10TruthJets':'xAOD::JetContainer','AntiKt10TruthJetsAux':'xAOD::JetAuxContainer',
-                                               'AntiKt10TruthTrimmedPtFrac5SmallR20Jets':'xAOD::JetContainer','AntiKt10TruthTrimmedPtFrac5SmallR20JetsAux':'xAOD::JetAuxContainer',
                                                'TruthLabelBHadronsFinal':'xAOD::TruthParticleContainer', 'TruthLabelBHadronsInitial':'xAOD::TruthParticleContainer',
                                                'TruthLabelTQuarksFinal':'xAOD::TruthParticleContainer', 'TruthLabelBQuarksFinal':'xAOD::TruthParticleContainer', 'TruthLabelCQuarksFinal':'xAOD::TruthParticleContainer',                                               
                                                'TruthLabelCHadronsFinal':'xAOD::TruthParticleContainer', 'TruthLabelCHadronsInitial':'xAOD::TruthParticleContainer',
@@ -76,8 +75,7 @@ def TRUTH1Cfg(flags):
                                           'TruthLabelZBosons']
     # Custom extra variables -- won't be overridden by the call below, just added to. Full lists for completeness.
     TRUTH1SlimmingHelper.ExtraVariables = ["AntiKtVR30Rmax4Rmin02TruthChargedJets.GhostHBosonsCount.GhostHBosonsPt.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.HadronConeExclTruthLabelID.PartonTruthLabelID.ConeExclBHadronsFinal.ConeExclCHadronsFinal.ConeExclTausFinal.constituentLinks",
-                                           "AntiKt4TruthDressedWZJets.GhostCHadronsFinalCount.GhostBHadronsFinalCount.pt.HadronConeExclTruthLabelID.PartonTruthLabelID.ConeExclBHadronsFinal.ConeExclCHadronsFinal.ConeExclTausFinal.constituentLinks",
-                                           "AntiKt10TruthTrimmedPtFrac5SmallR20Jets.pt.Tau1_wta.Tau2_wta.Tau3_wta.constituentLinks.D2"]
+                                           "AntiKt4TruthDressedWZJets.GhostCHadronsFinalCount.GhostBHadronsFinalCount.pt.HadronConeExclTruthLabelID.PartonTruthLabelID.ConeExclBHadronsFinal.ConeExclCHadronsFinal.ConeExclTausFinal.constituentLinks"]
 
     # Add standard content
     from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 def MuonChamberToolTestCfg(flags, name="MuonChamberToolTest", **kwargs):
@@ -15,7 +15,6 @@ if __name__=="__main__":
     parser = SetupArgParser()
 
     args = parser.parse_args()
-
      
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
@@ -24,7 +23,6 @@ if __name__=="__main__":
     flags, cfg = setupGeoR4TestCfg(args,flags)    
     ###
     cfg.merge(MuonChamberToolTestCfg(flags))
-    cfg.getService("MessageSvc").verboseLimit = 100000
     executeTest(cfg)
 
 

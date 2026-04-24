@@ -118,7 +118,7 @@ namespace columnar
     OptObjectId (std::nullopt_t) noexcept {}
 
     OptObjectId (ObjectId<CI,CM> val_object) noexcept
-      : m_data (val_object.getData()), m_index (val_object.getIndex())
+      : m_dataArea (val_object.getDataArea()), m_index (val_object.getIndex())
     {}
 
     // Whatever you do: Do not remove this function. Yes, it will always
@@ -150,12 +150,12 @@ namespace columnar
     [[nodiscard]] ObjectId<CI,CM> value () const {
       if (m_index == invalidObjectIndex)
         throw std::bad_optional_access();
-      return ObjectId<CI,CM> (m_data, m_index);}
+      return ObjectId<CI,CM> (m_dataArea, m_index);}
 
     [[nodiscard]] ObjectId<CI,CM> operator * () const {
       if (m_index == invalidObjectIndex)
         throw std::bad_optional_access();
-      return ObjectId<CI,CM> (m_data, m_index);}
+      return ObjectId<CI,CM> (m_dataArea, m_index);}
   
     [[nodiscard]] bool operator == (const OptObjectId<CI,CM>& that) const noexcept {
       return m_index == that.m_index;}
@@ -166,23 +166,23 @@ namespace columnar
     /// ============================
   public:
 
-    explicit OptObjectId (void **val_data, int val_index) noexcept
-      : m_data (val_data), m_index (val_index)
+    explicit OptObjectId (void **val_dataArea, int val_index) noexcept
+      : m_dataArea (val_dataArea), m_index (val_index)
     {}
 
-    explicit OptObjectId (void **val_data, unsigned val_index) noexcept
-      : m_data (val_data), m_index (val_index)
+    explicit OptObjectId (void **val_dataArea, unsigned val_index) noexcept
+      : m_dataArea (val_dataArea), m_index (val_index)
     {}
 
-    explicit OptObjectId (void **val_data, std::size_t val_index) noexcept
-      : m_data (val_data), m_index (val_index)
+    explicit OptObjectId (void **val_dataArea, std::size_t val_index) noexcept
+      : m_dataArea (val_dataArea), m_index (val_index)
     {}
 
     [[nodiscard]] std::size_t getIndex () const noexcept {
       return m_index;}
 
-    [[nodiscard]] void **getData () const noexcept {
-      return m_data;}
+    [[nodiscard]] void **getDataArea () const noexcept {
+      return m_dataArea;}
 
 
 
@@ -190,7 +190,7 @@ namespace columnar
     /// ===============
   private:
 
-    void **m_data = nullptr;
+    void **m_dataArea = nullptr;
     std::size_t m_index = invalidObjectIndex;
   };
 

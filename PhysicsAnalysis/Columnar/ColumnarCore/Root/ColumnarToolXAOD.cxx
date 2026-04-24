@@ -81,7 +81,7 @@ namespace columnar
   }
 
   void ColumnarTool<ColumnarModeXAOD> ::
-  callEvents (ObjectRange<ContainerId::eventContext,ColumnarModeXAOD> /*events*/) const
+  callEvents (ObjectRange<EventContextDef,ColumnarModeXAOD> /*events*/) const
   {
     throw std::runtime_error ("tool didn't implement callEvents");
   }

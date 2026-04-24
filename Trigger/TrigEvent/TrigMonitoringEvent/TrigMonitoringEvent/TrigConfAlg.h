@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCONF_ALG_H
@@ -17,7 +17,7 @@
 #include "AthenaKernel/CLASS_DEF.h"
 
 // C/C++
-#include <iostream>
+#include <iosfwd>
 #include <stdint.h>
 #include <string>
 #include <vector>
@@ -25,14 +25,14 @@
 class TrigConfAlg {
  public:
   
-  TrigConfAlg();
+  TrigConfAlg() = default;
   TrigConfAlg(const uint32_t index,
 	     const uint32_t position,
 	     const std::string& name,
 	     const std::string& type,
 	     const uint32_t name_id,
 	     const uint32_t type_id);
-  ~TrigConfAlg() {}
+ 
 
   void clearStrings();
   
@@ -44,14 +44,15 @@ class TrigConfAlg {
   uint32_t getNameId()   const { return m_name_id; }
   uint32_t getTypeId()   const { return m_type_id; }
   
-  void print(std::ostream &os = std::cout) const;
+  void print(std::ostream &os) const;
+  void print() const;//uses cout by default
   
  private:
   
-  uint16_t    m_index;     // Unique algorithm index in current configuration
-  uint8_t     m_position;  // Algorithm position within sequence
-  uint32_t    m_name_id;   // Hash id of name_alg
-  uint32_t    m_type_id;   // Hash id of type_alg
+  uint16_t    m_index{};     // Unique algorithm index in current configuration
+  uint8_t     m_position{};  // Algorithm position within sequence
+  uint32_t    m_name_id{};   // Hash id of name_alg
+  uint32_t    m_type_id{};   // Hash id of type_alg
   
   std::string m_name;      // Algorithm instance name
   std::string m_type;      // Algorithm base class name

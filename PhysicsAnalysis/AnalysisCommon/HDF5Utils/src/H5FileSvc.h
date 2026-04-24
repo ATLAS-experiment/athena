@@ -13,6 +13,7 @@
 
 namespace H5 {
   class H5File;
+  class Group;
 }
 
 class H5FileSvc : public extends<AthService, IH5GroupSvc>
@@ -24,7 +25,8 @@ public:
   virtual H5::Group* group() override;
 private:
 
-  std::unique_ptr<H5::H5File> m_file{nullptr};
+  std::unique_ptr<H5::H5File>  m_file      {nullptr};
+  std::unique_ptr<H5::Group>   m_root_group{nullptr};
   Gaudi::Property<std::string> m_file_path {this, "path", "", "path to file"};
 };
 

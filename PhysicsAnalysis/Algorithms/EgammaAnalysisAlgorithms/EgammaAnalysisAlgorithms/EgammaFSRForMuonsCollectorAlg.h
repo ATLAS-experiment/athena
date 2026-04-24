@@ -16,6 +16,8 @@
 #include <xAODBase/IParticleContainer.h>
 #include "xAODMuon/MuonContainer.h"
 #include <SystematicsHandles/SysReadHandle.h>
+#include <SystematicsHandles/SysWriteDecorHandle.h>
+#include <SelectionHelpers/SysReadSelectionHandle.h>
 
 
 namespace CP
@@ -38,8 +40,6 @@ namespace CP
 
         Gaudi::Property<float> m_dRMax{this, "deltaR_Max", 0.2, "DeltaR max for accepting a particle when comparing to compareParticles"};
 
-        Gaudi::Property<std::string> m_passWPorFSRName{this, "passWPorFSRName", "passWPorFSR", "Name for decoration for electron or photon which either passes their corresponding WP selection or the dR selection for a muon FSR."};
-
         /// \brief the systematics list we run
         SysListHandle m_systematicsList {this};
 
@@ -47,12 +47,13 @@ namespace CP
 
         SysReadHandle<xAOD::MuonContainer> m_muonContKey{this, "MuonContKey", "AnalysisMuons", "Muons to compare with for selecting FSR"};
 
-        Gaudi::Property<std::string> m_selectionName {this, "selectionDecoration", "", "the decoration for the combined WP and FSR selection"};
+        /// \brief the input WP selection to combine with FSR
+        SysReadSelectionHandle m_wpSelection{this, "wpSelection", "", "the input WP selection to OR with FSR"};
+
+        /// \brief the output combined WP||FSR selection
+        SysWriteDecorHandle<char> m_outputDec{this, "selectionDecoration", "", "the output combined WP||FSR selection"};
 
         Gaudi::Property<bool> m_vetoFSR {this, "vetoFSR", false, "boolean to revert FSR logic to rather veto FSR electrons or photons"};
-
-        /// Decorator for electron or photon working point - used to add additional el/ph
-        std::unique_ptr<SG::Decorator<char> > m_wpDec;
 
     };
 }

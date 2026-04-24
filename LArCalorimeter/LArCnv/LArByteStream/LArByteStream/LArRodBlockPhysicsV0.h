@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARBYTESTREAM_LARRODBLOCKPYSICSV0_H
@@ -37,7 +37,6 @@
 #include "AthenaKernel/getMessageSvc.h"
 
 
-//#define LARBSDBGOUTPUT
 #ifdef  LARBSDBGOUTPUT
 #define LARBSDBG(text) m_logstr<<MSG::DEBUG<<text<<endmsg
 #else
@@ -48,7 +47,7 @@ class LArRodBlockPhysicsV0 : public LArRodBlockStructure
 {
 public:
   // constructor
-  LArRodBlockPhysicsV0();
+  LArRodBlockPhysicsV0(IMessageSvc* msgSvc);
 
 protected:
   // ----------------- Header words indexes -----------------
@@ -73,10 +72,9 @@ protected:
   };
 
  public:
-  std::string BlockType() { return std::string("RodBlockPhysicsV0");}
+  static std::string BlockType() { return std::string("RodBlockPhysicsV0");}
   // ----------------- Encoding methods -----------------
   // Never to be used while decoding!
-  //virtual void buildHeader();
   virtual void initializeFragment(std::vector<uint32_t>& fragment);
   virtual void initializeFEB(const uint32_t id);
   virtual void setNumberOfSamples(const uint8_t n);
@@ -104,9 +102,6 @@ protected:
   virtual inline int getNextEnergy(int& channelNumber, int32_t& energy, int32_t& time,int32_t& quality,uint32_t& gain);
   virtual int  getNextRawData(int& channelNumber, std::vector<short>& samples, uint32_t& gain);
 
-  // ----------------- Printing methods -----------------
-  // print the full ROD fragment
-  //virtual void dumpFragment();
   virtual inline  uint32_t  hasPhysicsBlock() const {return LE_getHeader16(LowEBlkOffset)+LE_getHeader16(HighEBlkOffset);} ;
   virtual inline  uint32_t  hasRawDataBlock() const {return LE_getHeader16(RawDataBlkOffset);} ;
 
@@ -131,15 +126,11 @@ protected:
   //Number of flagging words at the beginning of Block 2, 3, and 4 (Depends on the number of channels)
   unsigned short m_NFlaggingWords; 
 
-  //LArCablingService* m_cablingSvc; 
   const LArOnlineID* m_onlineHelper;
   static const uint32_t m_DummyBitMap[4];
   //Private functions:
   inline int FebToRodChannel(int ch) const;
   void setNextEnergy(const int32_t energy, const int32_t time, const int32_t quality, const uint32_t gain);
-
-  // log message 
-  MsgStream m_logstr ; 
 };
 
 inline int LArRodBlockPhysicsV0::FebToRodChannel(int ch) const
@@ -172,7 +163,6 @@ inline int LArRodBlockPhysicsV0::getNextEnergy(int& channelNumber,int32_t& energ
        time*=-1;
      gain=(gtQ >> 14);
      m_HighEIndex++;
-     //std::cout << "Reading Raw data form High E block. E=" << energy << " Q=" << quality << std::endl;
     }
   else //Data in low energy block
     {if (!m_LowEPtr)
@@ -182,20 +172,7 @@ inline int LArRodBlockPhysicsV0::getNextEnergy(int& channelNumber,int32_t& energ
      time=0;
      quality=-1;
      m_LowEIndex++;
-     //std::cout << "*** Reading Raw data form Low E block. E=" << energy << std::endl;
     }
-  /*
-   if (energy>10000000)
-     std::cout << " Read: Large E found. E=" << energy
-		 << " t=" << time 
-		 << " Q=" << quality 
-		 << " G=" << gain 
-		 << " channel Number=" << channelNumber 
-		 << " LowEIndex=" << m_LowEIndex
-		 << " HighEIndex="<<m_HighEIndex << std::endl;
-   else
-     std::cout << "Read energy" << std::endl;
-  */
   return 1;
 }
 

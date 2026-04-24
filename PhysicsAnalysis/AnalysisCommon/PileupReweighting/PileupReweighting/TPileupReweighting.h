@@ -341,6 +341,7 @@ namespace CP {
       Bool_t m_ignoreFilePeriods;
       TTree *m_metadatatree;
       Double_t m_unrepDataTolerance;
+      Double_t m_unrepDataWarningThreshold{0.0};
       Bool_t m_doGlobalDataWeight; //used in GetDataWeight to flag mu-independent version
       Bool_t m_doPrescaleWeight = false;
       Int_t m_lumicalcRunNumberOffset; //used for 'faking' a lumicalc file for run2
@@ -380,8 +381,14 @@ public:
             }
          }
          void getTriggers(std::vector<TString>& s) {
-            if(trig1==0&&trig2==0&&val.Length()>0) s.push_back(val);
-            else { trig1->getTriggers(s); trig2->getTriggers(s); }
+            if(trig1==0 && trig2==0 && val.Length()>0){ 
+              s.push_back(val);
+            } else { 
+              if (trig1 && trig2) {
+                trig1->getTriggers(s); 
+                trig2->getTriggers(s); 
+              }
+            }
          }
          
          long getBits(const TPileupReweighting* tool) {
@@ -475,6 +482,7 @@ public:
          m_ignoreBadChannels = in->m_ignoreBadChannels;
          m_unrepresentedDataAction = in->m_unrepresentedDataAction;
          m_unrepDataTolerance= in->m_unrepDataTolerance;
+         m_unrepDataWarningThreshold = in->m_unrepDataWarningThreshold;
       }
 
       ClassDef(TPileupReweighting,0)

@@ -8,7 +8,7 @@
 
 #include "Identifier/Identifier32.h"
 #include <string>
-#include <iostream>
+#include <iosfwd>
 
 class MsgStream;
 /*
@@ -107,7 +107,7 @@ public:
     std::string  getString() const;
 
     /// Print out in hex form
-    void show (std::ostream & out = std::cout) const;
+    void show (std::ostream & out) const;
     void show (MsgStream & out) const;
 
 private:

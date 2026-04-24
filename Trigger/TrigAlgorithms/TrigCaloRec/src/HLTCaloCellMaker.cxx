@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /*
  *   */
@@ -67,6 +67,8 @@ StatusCode HLTCaloCellMaker::execute( const EventContext& context ) const {
     auto clET = Monitored::Collection ("Cells_eT",*cdv,getCellPt);
     auto clEta = Monitored::Collection ("Cells_eta",*cdv,&CaloCell::eta);
     auto clPhi = Monitored::Collection ("Cells_phi",*cdv,&CaloCell::phi);
+    //loop only executes once, so coverity complains; suppress this as 'intentional'
+    //coverity[UNREACHABLE]
     for( const TrigRoiDescriptor* roiDescriptor : *roiCollection) {
       ATH_MSG_DEBUG ( "Running on RoI " << *roiDescriptor<< " FS="<<roiDescriptor->isFullscan());
       if ( roiDescriptor->isFullscan() ) {

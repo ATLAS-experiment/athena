@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cstdio> // For sprintf on gcc45
@@ -8,9 +8,7 @@
 #include <string>
 
 #include "PersistentDataModel/Token.h"
-
-#include "POOLCore/SystemTools.h"
-
+#include "StorageSvc/SimpleUtilityBase.h"
 #include "CollectionSvc/ICollection.h"
 #include "CollectionSvc/CollectionDescription.h"
 #include "CollectionSvc/CollectionService.h"
@@ -29,7 +27,7 @@ using namespace pool;
 //coverity[root_function]
 int main(int , char** )
 {
-  SystemTools::initGaudi();
+  SimpleUtilityBase::initGaudi();
   
   const string collConnection = "Collection";
   const pool::DbType collWriteType = pool::ROOTTREE_StorageType.type();

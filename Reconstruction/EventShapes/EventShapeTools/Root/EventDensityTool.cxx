@@ -105,7 +105,7 @@ StatusCode EventDensityTool::initialize() {
   if(!m_inPJKey.key().empty() && m_trigPJGet.empty()) {
     ATH_CHECK( m_inPJKey.initialize() );
   }
-  // { FIXME: To be removed when trigger moves to DataHandles fully
+  // { FIXME: To be removed when trigger moves to handles fully
   else if(m_inPJKey.key().empty() && !m_trigPJGet.empty()) {
     ATH_CHECK( m_trigPJGet.retrieve() );
   }
@@ -159,7 +159,7 @@ StatusCode EventDensityTool::fillEventShape(xAOD::EventShape *eventShape) const 
     }
     return fillEventShape(eventShape, *(h_in->casVectorPseudoJet()));
   }
-  // { FIXME: To be removed when trigger moves to DataHandles fully
+  // { FIXME: To be removed when trigger moves to handles fully
   else if(m_inPJKey.key().empty() && !m_trigPJGet.empty()) {
     const PseudoJetVector& ppjv = *(m_trigPJGet->get());
     // !!! FIXME !!! Downgraded ERROR to WARNING and no FAILURE

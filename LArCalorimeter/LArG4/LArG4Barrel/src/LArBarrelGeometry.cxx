@@ -104,6 +104,19 @@ namespace LArG4 {
       if (m_detectorName.empty()) m_ecamName  = "LAr::EMB::ECAM";
       else                        m_ecamName  = m_detectorName+"::LAr::EMB::ECAM";
 
+      // Validate SR granularity properties against bit-packing constraints
+      if (m_nBinsEtaSR <= 0 || m_nBinsEtaSR > 64) {
+        ATH_MSG_ERROR("nBinsEtaSR must be in range [1, 64], got " << m_nBinsEtaSR);
+        return StatusCode::FAILURE;
+      }
+      if (m_nBinsPhiSR <= 0 || m_nBinsPhiSR > 64) {
+        ATH_MSG_ERROR("nBinsPhiSR must be in range [1, 64], got " << m_nBinsPhiSR);
+        return StatusCode::FAILURE;
+      }
+      if (m_nBinsRadiusSR <= 0 || m_nBinsRadiusSR > 8) {
+        ATH_MSG_ERROR("nBinsRadiusSR must be in range [1, 8], got " << m_nBinsRadiusSR);
+        return StatusCode::FAILURE;
+      }
 
       return StatusCode::SUCCESS;
     }
@@ -1030,9 +1043,9 @@ namespace LArG4 {
       }
     
       // --- Super-Resolution granularity (bins within cell) ---
-      const int nBinsEtaSR = 16; // 3 bits
-      const int nBinsPhiSR = 16; // 2 bits
-      const int nBinsRadiusSR = 5; // 3 bits
+      const int nBinsEtaSR = m_nBinsEtaSR;
+      const int nBinsPhiSR = m_nBinsPhiSR;
+      const int nBinsRadiusSR = m_nBinsRadiusSR;
     
       double delta_eta_SR = delta_eta / nBinsEtaSR;
       double delta_phi_SR = phiGranularity / nBinsPhiSR;

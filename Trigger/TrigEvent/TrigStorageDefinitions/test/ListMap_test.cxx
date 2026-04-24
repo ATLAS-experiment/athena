@@ -1,58 +1,47 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
+/// Test of type registration and query
+
 #include "TrigStorageDefinitions/TypeInformation.h"
-#include <typeinfo>
-#include <iostream>
 #include "TrigStorageDefinitions/EDM_TypeInformation.h"
-
-#define LISTSIZE(name)\
-std::cout << #name << " size: " << TypeInfo_##name::last_index + 1 << std::endl;
+#include "TrigStorageDefinitions/EDM_TypeInfoMethods.h"
 
 
+// Declare testing types
 HLT_BEGIN_TYPE_REGISTRATION
-     HLT_REGISTER_TYPE(struct ObjectA,struct ObjectA,struct ContainerA)
-     HLT_REGISTER_TYPE(struct ObjectB,struct ObjectB,struct ContainerB,struct AuxContainerB)
+     HLT_REGISTER_TYPE(struct ObjectA, struct ObjectA, struct ContainerA)
+     HLT_REGISTER_TYPE(struct ObjectB, struct ObjectB, struct ContainerB, struct AuxContainerB)
+     HLT_REGISTER_TYPE(struct ObjectB, struct ObjectB2, struct ContainerB, struct AuxContainerB)
 HLT_END_TYPE_REGISTRATION(Test)
 
-
-#define TYPEMAPCLASS(name)\
-struct class_##name{\
-  typedef TypeInfo_##name map;\
-  static const std::string package_name;\
-};\
-
+// Declare testing EDM map
 TYPEMAPCLASS(Test)
 
-//preemt definitions
-#define TRIGSTORAGEDEF_MERGEPACKS
-
 struct TypeInfo_EDM {
-typedef  HLT::TypeInformation::newlist
-::add<class_Test>  ::go
-::done map;
+  using map = class_Test::map;
 };
 
-#include "TrigStorageDefinitions/EDM_TypeInfo.h"
 
+// Just a "compilation test"
+int main() {
 
-struct AuxContainerB{};
+  static_assert(std::is_same_v< Object2Container_t<ObjectA, TypeInfo_EDM>, ContainerA >);
+  static_assert(std::is_same_v< Container2Object_t<ContainerA, TypeInfo_EDM>, ObjectA >);
+  static_assert(std::is_same_v< Container2Aux_t<ContainerA, TypeInfo_EDM>, HLT::TypeInformation::no_aux >);
+  static_assert(std::is_same_v< Container2Aux_t<ContainerB, TypeInfo_EDM>, AuxContainerB >);
+  static_assert(std::is_same_v< Features2Container_t<ObjectA, TypeInfo_EDM>, ContainerA >);
+  static_assert(std::is_same_v< Features2Object_t<ObjectA, TypeInfo_EDM>, ObjectA >);
 
+  using featuresA = Object2Features_t<ObjectA, TypeInfo_EDM>;
+  static_assert(featuresA::size == 1);  // one feature
+  static_assert(std::is_same_v< featuresA::at<0>, ObjectA >);
 
-
-
-
-int main(){
-  std::cout << "ListMap_test" << std::endl;
-      
-
-  std::cout << typeid(Container2Aux<ContainerB,TypeInfo_EDM>::type).name() << std::endl;
-  std::cout << typeid(Container2Aux<ContainerA,TypeInfo_EDM>::type).name() << std::endl;
-
-  
+  using featuresB = Object2Features_t<ObjectB, TypeInfo_EDM>;
+  static_assert(featuresB::size == 2);  // two features
+  static_assert(std::is_same_v< featuresB::at<0>, ObjectB >);
+  static_assert(std::is_same_v< featuresB::at<1>, ObjectB2 >);
 
   return 0;
 }
-
-//run unit test with cmt make check

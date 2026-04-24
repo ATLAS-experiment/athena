@@ -556,7 +556,7 @@ std::vector<std::vector<int>> FPGATrackSimHoughTransformTool::lineGenLay(const s
                 unsigned end_phi0_bins_first_sector = m_phi0_bins_first_sector + static_cast <unsigned>(pp * m_phi0Bins_bit / m_pipes_phi0);
 
                 for (unsigned j = start_phi0_bins_first_sector; j < end_phi0_bins_first_sector; j++) {
-                    double d_c1 = m_bitwise_qApt_conv * bins_x_new[j] / m_DBinQApt_bit_int;
+                    double d_c1 = static_cast<double>(m_bitwise_qApt_conv) * static_cast<double>(bins_x_new[j]) / static_cast<double>(m_DBinQApt_bit_int);
                     int64_t c2 = (static_cast<int64_t>(d_c1) - static_cast<int64_t>(d_phi_conv_over_DBinQApt)) * static_cast<int64_t>(d_one_over_r_by_const) / m_one_r_const_twoexp_post_conv;
                     int64_t c3 = (static_cast<int64_t>(d_c1) - static_cast<int64_t>(d_phi_conv_over_DBinQApt)) * static_cast<int64_t>(d_one_over_r_by_const);
                     

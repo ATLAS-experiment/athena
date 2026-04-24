@@ -58,10 +58,6 @@ namespace FlavorTagInference {
     FTagDataDependencyNames getDependencies() const;
 
   private:
-    // type definitions for ONNX output decorators
-    using TPC = xAOD::TrackParticleContainer;
-    using TrackLinks = std::vector<ElementLink<TPC>>;
-
     template<typename T>
     using Dec = SG::AuxElement::Decorator<T>;
 
@@ -72,7 +68,8 @@ namespace FlavorTagInference {
       Decs<float> jetFloat;
       Decs<std::vector<char>> jetVecChar;
       Decs<std::vector<float>> jetVecFloat;
-      Decs<TrackLinks> jetTrackLinks;
+      Decs<std::vector<int>> jetVecInt;
+      Decs<std::vector<float>> jetVecTruncFloat;
       Decs<char> trackChar;
       Decs<float> trackFloat;
     };
@@ -86,6 +83,8 @@ namespace FlavorTagInference {
     GNNDataLoader m_dataLoader;
 
     Decorators m_decorators;
+    std::vector<float> m_truncFloatScales; // per-entry scale for jetVecTruncFloat
+    std::vector<std::pair<int,int>> m_truncFloatBits;  // (exp_bits, man_bits) per VECTRUNCFLOAT output
     std::vector<std::pair<Dec<float>, float>> m_defaultValues;
     bool m_defaultZeroTracks;
   };

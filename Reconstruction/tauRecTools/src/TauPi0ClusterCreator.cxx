@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -40,20 +40,16 @@ StatusCode TauPi0ClusterCreator::executePi0ClusterCreator(xAOD::TauJet& tau,
     const xAOD::PFO* shotPFO = tau.shotPFO(index);
     shotPFOs.push_back(shotPFO);
   }
-  
-  // Map shot to the pi0 cluster 
-  std::map<unsigned, const xAOD::CaloCluster*> shotToClusterMap = getShotToClusterMap(shotPFOs, pi0ClusterContainer, tau);
 
   // We will always perform the vertex correction
   const xAOD::Vertex* vertex = tau.vertex();
-  
+
   // Tau custom PFO reconstruction is only used in offline reconstrution
   TLorentzVector tauAxis = tauRecTools::getTauAxis(tau);
 
-  // Loop over custom pi0 clusters, and create neutral PFOs
-  for (const xAOD::CaloCluster* cluster: pi0ClusterContainer) {
-    // correct pi0 clusters w.r.t. the tau vertex
-    TLorentzVector clusterP4;
+  // Preselect the pi0s clusters
+  std::vector<const xAOD::CaloCluster*> good_pi0s;
+  for (TLorentzVector clusterP4;const xAOD::CaloCluster* cluster: pi0ClusterContainer){
     if (vertex) {
       xAOD::CaloVertexedTopoCluster vertexedCluster(*cluster, vertex->position());
       clusterP4 = vertexedCluster.p4();
@@ -61,10 +57,25 @@ StatusCode TauPi0ClusterCreator::executePi0ClusterCreator(xAOD::TauJet& tau,
     else {
       clusterP4 = cluster->p4();
     }
-
     // Clusters must have enough energy, and within 0.4 cone of the tau candidate
-    if ((clusterP4.Pt() < m_clusterEtCut) || (clusterP4.DeltaR(tauAxis) > m_maxDeltaRJetClust))   continue;
+    if ((clusterP4.Pt() < m_clusterEtCut) || (clusterP4.DeltaR(tauAxis) > m_maxDeltaRJetClust))   continue; 	  
 
+    good_pi0s.push_back(cluster);
+  } 
+
+  // Map shot to the pi0 cluster 
+  std::map<unsigned, const xAOD::CaloCluster*> shotToClusterMap = getShotToClusterMap(shotPFOs, good_pi0s);
+
+  // Loop over preselected pi0 clusters, and create neutral PFOs
+  for (TLorentzVector clusterP4;const xAOD::CaloCluster* cluster: good_pi0s){
+    if (vertex) {
+      xAOD::CaloVertexedTopoCluster vertexedCluster(*cluster, vertex->position());
+      clusterP4 = vertexedCluster.p4();
+    }
+    else {
+      clusterP4 = cluster->p4();
+    }
+ 
     // Create the neutral PFOs
     xAOD::PFO* neutralPFO = new xAOD::PFO();
     neutralPFOContainer.push_back(neutralPFO);
@@ -129,8 +140,7 @@ StatusCode TauPi0ClusterCreator::executePi0ClusterCreator(xAOD::TauJet& tau,
 
 
 std::map<unsigned, const xAOD::CaloCluster*> TauPi0ClusterCreator::getShotToClusterMap(const std::vector<const xAOD::PFO*>& shotPFOs,
-										       const xAOD::CaloClusterContainer& pi0ClusterContainer,
-										       const xAOD::TauJet &tau) const {
+		                                                                       std::vector<const xAOD::CaloCluster*>& goodPi0s) const {
   std::map<unsigned, const xAOD::CaloCluster*> shotToClusterMap;
   for (unsigned index = 0; index < shotPFOs.size(); ++index) {
     const xAOD::PFO* shotPFO = shotPFOs.at(index);
@@ -140,31 +150,15 @@ std::map<unsigned, const xAOD::CaloCluster*> TauPi0ClusterCreator::getShotToClus
       ATH_MSG_WARNING("Couldn't find seed hash. Set it to -1, no cluster will be associated to shot.");
     }
     const IdentifierHash seedHash = static_cast<const IdentifierHash>(seedHashInt);
-
-    // We will always perform the vertex correction
-    const xAOD::Vertex* vertex = tau.vertex();
-  
-    // Tau custom PFO reconstruction is only used in offline reconstrution
-    TLorentzVector tauAxis = tauRecTools::getTauAxis(tau);
-    
+   
     float weightInCluster = -1.;
     float weightInPreviousCluster = -1;
     
     // Loop over custom pi0 clusters, and map shot to the cluster
-    for (const xAOD::CaloCluster* cluster: pi0ClusterContainer) {
-      // custom clusters could be correctd directly using the tau vertex
-      TLorentzVector clusterP4; 
-      if (vertex) {
-        xAOD::CaloVertexedTopoCluster vertexedCluster(*cluster, vertex->position());
-        clusterP4 = vertexedCluster.p4();
-      }
-      else {
-        clusterP4 = cluster->p4();
-      }
-      
-      weightInCluster = -1.;
-      if ((clusterP4.Et() < m_clusterEtCut) || (clusterP4.DeltaR(tauAxis) > m_maxDeltaRJetClust)) continue;
-        
+    for (const xAOD::CaloCluster* cluster: goodPi0s){
+
+      weightInCluster = -1.; 	    
+
       const CaloClusterCellLink* cellLinks = cluster->getCellLinks();
       CaloClusterCellLink::const_iterator cellLink = cellLinks->begin();
       for (; cellLink != cellLinks->end(); ++cellLink) {
@@ -194,7 +188,7 @@ std::map<unsigned, const xAOD::CaloCluster*> TauPi0ClusterCreator::getShotToClus
         if (weightInCluster > weightInPreviousCluster) {
 	  shotToClusterMap[index] = cluster;
         }
-        // FIXME: why break here ? Should loop all the cluster, and find the largest weight
+	
         break;
       }
     }

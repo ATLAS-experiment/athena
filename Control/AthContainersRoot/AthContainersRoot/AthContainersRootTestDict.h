@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainersRoot/AthContainersRootTestDict.h
@@ -17,6 +17,7 @@
 #include "AthContainersRoot/test/Foo.h"
 #include "AthContainers/tools/AuxTypeVectorFactory.h"
 #include "AthLinks/ElementLink.h"
+#include "AthLinks/DataLink.h"
 #include <vector>
 
 
@@ -37,6 +38,9 @@ template class std::vector<AthContainersRootTest::Foo*>;
 template class ElementLink<std::vector<AthContainersRootTest::Foo*> >;
 template class std::vector<ElementLink<std::vector<AthContainersRootTest::Foo*> > >;
 template class std::vector<std::vector<ElementLink<std::vector<AthContainersRootTest::Foo*> > > >;
+template class DataLink<std::vector<AthContainersRootTest::Foo*> >;
+template class std::vector<DataLink<std::vector<AthContainersRootTest::Foo*> > >;
+template class std::vector<std::vector<DataLink<std::vector<AthContainersRootTest::Foo*> > > >;
 
 template class std::vector<AthContainersRootTest::Foo>;
 template class ElementLink<std::vector<AthContainersRootTest::Foo> >;

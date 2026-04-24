@@ -31,9 +31,9 @@ getInputAffecting (const ISystematicsSvc& svc,
 StatusCode SelectionAccessorExprNot ::
 fillSystematics (const ISystematicsSvc& svc,
                  const std::vector<CP::SystematicSet>& sysList,
-                 const std::string& objectName)
+                 ISysObjectHandleBase& objectHandle)
 {
-  return m_child->fillSystematics (svc, sysList, objectName);
+  return m_child->fillSystematics (svc, sysList, objectHandle);
 }
 
 }  // namespace CP

@@ -3,33 +3,22 @@
 */
 
 #include "xAODInDetMeasurement/Utilities.h"
+#include <numeric>
 
 namespace xAOD::xAODInDetMeasurement::Utilities {
 
   float computeTotalCharge( const SG::AuxElement& cluster) {
     static const SG::AuxElement::Accessor<std::vector<float> > chargesAcc("chargeList");
     assert( chargesAcc.isAvailable( cluster ) );
-    return xAOD::xAODInDetMeasurement::Utilities::computeTotalCharge( chargesAcc(cluster) );
-  }
-
-  float computeTotalCharge( const std::vector<float>& charges) {
-    float totalCharge = 0.f;
-    for (float charge : charges)
-      totalCharge += charge;
-    return totalCharge;
+    const std::vector<float>& charges = chargesAcc(cluster);
+    return std::accumulate(charges.begin(), charges.end(), 0.);
   }
 
   int computeTotalToT( const SG::AuxElement& cluster) {
     static const SG::AuxElement::Accessor< std::vector<int> > totsAcc("totList");
     assert( totsAcc.isAvailable( cluster ) );
-    return xAOD::xAODInDetMeasurement::Utilities::computeTotalToT( totsAcc(cluster) );
-  }
-
-  int computeTotalToT( const std::vector<int>& tots) {
-    int totalToT = 0;
-    for (int tot : tots)
-      totalToT += tot;
-    return totalToT;
+    const std::vector<int>& tots = totsAcc(cluster);
+    return std::accumulate(tots.begin(), tots.end(), 0);
   }
 
 }

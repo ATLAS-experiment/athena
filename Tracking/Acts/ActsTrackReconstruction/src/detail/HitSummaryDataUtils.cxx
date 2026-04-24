@@ -12,8 +12,7 @@
 
 namespace ActsTrk::detail {
 
-  void gatherTrackSummaryData(const ActsTrk::TrackContainer &tracksContainer,
-                              const typename ActsTrk::TrackContainer::ConstTrackProxy &track,
+  void gatherTrackSummaryData(const typename ActsTrk::TrackContainer::ConstTrackProxy &track,
                               const std::array<const InDetDD::SiDetectorElementCollection *,
 			      to_underlying(xAOD::UncalibMeasType::nTypes)> &siDetEleColl,
                               const std::array<unsigned short, to_underlying(xAOD::UncalibMeasType::nTypes)>
@@ -30,7 +29,7 @@ namespace ActsTrk::detail {
      param_state_idx_out.clear();
 
      const auto lastMeasurementIndex = track.tipIndex();
-     tracksContainer.trackStateContainer().visitBackwards(
+     track.container().trackStateContainer().visitBackwards(
           lastMeasurementIndex,
           [&siDetEleColl,
            &measurement_to_summary_type,

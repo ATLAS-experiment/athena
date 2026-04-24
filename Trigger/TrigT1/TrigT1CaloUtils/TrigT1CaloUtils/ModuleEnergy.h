@@ -12,13 +12,14 @@
 #ifndef MODULEENERGY_H
 #define MODULEENERGY_H
 
-#include <map>
-#include <vector>
-//#include "GaudiKernel/ServiceHandle.h"
+
 #include "xAODTrigL1Calo/JetElement.h"
 #include "TrigT1CaloUtils/JetElementKey.h"
 #include "TrigT1CaloUtils/JetEnergyModuleKey.h"
 #include "TrigT1Interfaces/Coordinate.h"
+
+#include <map>
+#include <vector>
 
 /**LVL1 namespace.
 This belongs to the TrigT1Calo  simulation.

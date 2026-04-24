@@ -55,19 +55,34 @@ def fromRunArgs(runArgs):
           fw=5
        else:   
           fw=runinfo.FWversion()
-          for i in range(0,len(runinfo.streamTypes())):
-             if runinfo.streamTypes()[i] ==  "SelectedEnergy":
-                   flags.LArShapeDump.rawSCKey = "SC_ET_ID"
-                   flags.LArShapeDump.nrawSC = runinfo.streamLengths()[i]
-             elif runinfo.streamTypes()[i] ==  "Energy":
-                   flags.LArShapeDump.rawSCKey = "SC_ET"
-                   flags.LArShapeDump.nrawSC = runinfo.streamLengths()[i]
-             elif runinfo.streamTypes()[i] ==  "RawADC":
-                   flags.LArShapeDump.digitsKeySC="SC"
-                   flags.LArShapeDump.ndigitsSC = runinfo.streamLengths()[i]
-             elif runinfo.streamTypes()[i] ==  "ADC":
-                   flags.LArShapeDump.digitsKeySC="SC_ADC_BAS"
-                   flags.LArShapeDump.ndigitsSC = runinfo.streamLengths()[i]
+          if hasattr(runArgs,"doPEBStream") and runArgs.doPEBStream:
+             for i in range(0,len(runinfo.streamTypesPEB())):
+                if runinfo.streamTypesPEB()[i] ==  "SelectedEnergy":
+                      flags.LArShapeDump.rawSCKey = "SC_ET_ID"
+                      flags.LArShapeDump.nrawSC = runinfo.streamLengthsPEB()[i]
+                elif runinfo.streamTypesPEB()[i] ==  "Energy":
+                      flags.LArShapeDump.rawSCKey = "SC_ET"
+                      flags.LArShapeDump.nrawSC = runinfo.streamLengthsPEB()[i]
+                elif runinfo.streamTypesPEB()[i] ==  "RawADC":
+                      flags.LArShapeDump.digitsKeySC="SC"
+                      flags.LArShapeDump.ndigitsSC = runinfo.streamLengthsPEB()[i]
+                elif runinfo.streamTypesPEB()[i] ==  "ADC":
+                      flags.LArShapeDump.digitsKeySC="SC_ADC_BAS"
+                      flags.LArShapeDump.ndigitsSC = runinfo.streamLengthsPEB()[i]
+          else:
+             for i in range(0,len(runinfo.streamTypes())):
+                if runinfo.streamTypes()[i] ==  "SelectedEnergy":
+                      flags.LArShapeDump.rawSCKey = "SC_ET_ID"
+                      flags.LArShapeDump.nrawSC = runinfo.streamLengths()[i]
+                elif runinfo.streamTypes()[i] ==  "Energy":
+                      flags.LArShapeDump.rawSCKey = "SC_ET"
+                      flags.LArShapeDump.nrawSC = runinfo.streamLengths()[i]
+                elif runinfo.streamTypes()[i] ==  "RawADC":
+                      flags.LArShapeDump.digitsKeySC="SC"
+                      flags.LArShapeDump.ndigitsSC = runinfo.streamLengths()[i]
+                elif runinfo.streamTypes()[i] ==  "ADC":
+                      flags.LArShapeDump.digitsKeySC="SC_ADC_BAS"
+                      flags.LArShapeDump.ndigitsSC = runinfo.streamLengths()[i]
 
     # To respect --athenaopts 
     flags.fillFromArgs()

@@ -37,6 +37,10 @@ if __name__ == '__main__':
                             help='Fill also SC info (default: True)', group='LArCAF_tf',
                             default=trfArgClasses.argBool(True))
 
+    trf.parser.add_argument('--doPEBStream', type=trfArgClasses.argFactory(trfArgClasses.argBool),
+                             help='Force the PEB stream processing (using different receipe from RunLog)', group='LArCAF_tf',
+                             default=trfArgClasses.argBool(False)) 
+
     trf.parseCmdLineArgs(sys.argv[1:])
     trf.execute()
     trf.generateReport()

@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagInference/ConstituentsLoader.h"
@@ -75,8 +75,6 @@ namespace {
     }
     return config;
   }
-}
-
   ConstituentsInputConfig get_hits_input_config(
     const std::string& name,
     const std::vector<std::string>& input_variables,
@@ -94,7 +92,7 @@ namespace {
     return config;
   }
 
-  ConstituentsInputConfig get_electron_input_config(
+  ConstituentsInputConfig get_lepton_input_config(
     const std::string& name,
     const std::vector<std::string>& input_variables,
     const TypeRegexes& type_regexes,
@@ -104,17 +102,18 @@ namespace {
     config.name = name;
     config.order = ConstituentsSortOrder::PT_DESCENDING;
     config.selection = str::match_first(select_regexes, name,
-                                  "electron selection matching");
+                                  "lepton selection matching");
     for (const auto& varname: input_variables) {
       InputVariableConfig input;
       input.name = varname;
       input.type = str::match_first(type_regexes, input.name,
-                                "electron type matching");
+                                "lepton type matching");
       input.flip_sign = false;
       config.inputs.push_back(std::move(input));
     }
     return config;
   }
+}
 
 namespace FlavorTagInference {
     //
@@ -130,11 +129,30 @@ namespace FlavorTagInference {
           // default electron variables
           {"(deltaEta1|deltaPhiRescaled2|Rhad|Rhad1|"
                "Eratio|weta2|Rphi|Reta|wtots1|f1|f3|pt|eta|phi)"_r, ConstituentsEDMType::FLOAT},
-          // custom variables
-          {"(ftag_.*|ptfrac|ptrel|dr|"
-               "et|deltaPOverP|ptVarCone30OverPt|energyOverP)"_r, ConstituentsEDMType::CUSTOM_GETTER},
+          // truth labels
+          {"ftagTruth.*"_r, ConstituentsEDMType::INT},
+          // custom variables that require special computation
+          {"(ftag_et|ftag_deltaPOverP|ftag_energyOverP|ftag_ptVarCone30OverPt|"
+               "ptfrac|ptrel|dr|et|deltaPOverP|ptVarCone30OverPt|energyOverP)"_r, ConstituentsEDMType::CUSTOM_GETTER},
+          // ftag_ float decorations (SoftElectronDecoratorAlg, ElectronGSFTrackDecoratorAlg)
+          {"ftag_.*"_r, ConstituentsEDMType::FLOAT},
           // variables extracted from the corresponding track
           {"(numberOf.*|d0.*|abs_eta|qOverP|eProbabilityHT)"_r, ConstituentsEDMType::CUSTOM_GETTER}
+      };
+      TypeRegexes muon_type_regexes {
+          // default muon variables
+          {"(pt|eta|phi|momentumBalanceSignificance|"
+               "scatteringNeighbourSignificance|scatteringCurvatureSignificance|"
+               "segmentDelta.*|EnergyLoss|ParamEnergyLoss.*|MeasEnergyLoss.*|"
+               "CaloMuonScore)"_r, ConstituentsEDMType::FLOAT},
+          {"(quality)"_r, ConstituentsEDMType::UCHAR},
+          // custom variables
+          {"(ptfrac|ptrel|dr|qOverPratio)"_r, ConstituentsEDMType::CUSTOM_GETTER},
+          // variables extracted from the corresponding track
+          {"(^.*)?(D|Z)0.*"_r, ConstituentsEDMType::CUSTOM_GETTER},
+          {"(numberOf.*|expect.*|eProbabilityHT|qOverP)"_r, ConstituentsEDMType::CUSTOM_GETTER},
+          // Extra variables for bJR4 that use primary track associated to muon instead of ID track
+          {"(d0|z0SinTheta|theta|qOverP)(RelativeToBeamspot)?(Variance)?(_MuonPrimaryTrack)?"_r, ConstituentsEDMType::CUSTOM_GETTER}
       };
       TypeRegexes hits_type_regexes {
           // hits variables
@@ -144,6 +162,7 @@ namespace FlavorTagInference {
       TypeRegexes flow_type_regexes {
           // FlowElement variables
           // ConstituentsEDMType picked correspond to the first matching regex
+          {"(eta|phi)"_r, ConstituentsEDMType::FLOAT},
           {"(pt|deta|dphi|dr|energy|isCharged)"_r, ConstituentsEDMType::CUSTOM_GETTER}
       };
       TypeRegexes trk_type_regexes {
@@ -151,6 +170,7 @@ namespace FlavorTagInference {
           // definition in 21p9, recomputed here with customGetter to reuse
           // existing training
           // ConstituentsEDMType picked correspond to the first matching regex
+          {"ftagTruth.*"_r, ConstituentsEDMType::INT},
           {"numberOf.*21p9"_r, ConstituentsEDMType::CUSTOM_GETTER},
           {"numberOf.*"_r, ConstituentsEDMType::UCHAR},
           {"btagIp_(d0|z0SinTheta)Uncertainty"_r, ConstituentsEDMType::FLOAT},
@@ -189,7 +209,13 @@ namespace FlavorTagInference {
 
       // For now we have only one selection for electrons
       SelRegexes electron_select_regexes {
-        {".*_r22default.*"_r, ConstituentsSelection::R22_DEFAULT}
+        {".*_r22default.*"_r, ConstituentsSelection::R22_DEFAULT},
+        {".*_r22bjr.*"_r, ConstituentsSelection::R22_BJR}
+      };
+      // And one for muons
+      SelRegexes muon_select_regexes {
+        {".*_r22default.*"_r, ConstituentsSelection::R22_DEFAULT},
+        {".*_r22bjr.*"_r, ConstituentsSelection::R22_BJR}
       };
       
       if (name.find("tracks") != std::string::npos){
@@ -222,16 +248,49 @@ namespace FlavorTagInference {
         config.output_name = "hits";
       }
       else if (name.find("electrons") != std::string::npos){
-        config = get_electron_input_config(
+        config = get_lepton_input_config(
           name, input_variables,
           electron_type_regexes,
           electron_select_regexes);
         config.type = ConstituentsType::ELECTRON;
         config.output_name = "electrons";
       }
+      else if (name.find("muons") != std::string::npos){
+        config = get_lepton_input_config(
+          name, input_variables,
+          muon_type_regexes,
+          muon_select_regexes);
+        config.type = ConstituentsType::MUON;
+        config.output_name = "muons";
+      }
+      else if (name.find("clusters") != std::string::npos
+               && name.find("taucluster") == std::string::npos){
+        TypeRegexes cluster_type_regexes {
+            // All CaloCluster variables are handled by custom getters:
+            // moments, kinematics, samplings, flags, and IParticle vars
+            {".*"_r, ConstituentsEDMType::CUSTOM_GETTER}
+        };
+        config = get_flow_input_config(
+          name, input_variables,
+          cluster_type_regexes);
+        config.type = ConstituentsType::CALO_CLUSTER;
+        config.output_name = "clusters";
+      }
+      else if (name.find("towers") != std::string::npos){
+        // Towers are CaloCluster objects accessed via GhostTower links.
+        // All variables are custom getters (same as clusters).
+        TypeRegexes tower_type_regexes {
+            {".*"_r, ConstituentsEDMType::CUSTOM_GETTER}
+        };
+        config = get_flow_input_config(
+          name, input_variables,
+          tower_type_regexes);
+        config.type = ConstituentsType::TOWER;
+        config.output_name = "towers";
+      }
       else{
         throw std::runtime_error(
-          "Unknown constituent type: " + name + ". Only tracks, flows, hits and electrons are supported."
+          "Unknown constituent type: " + name + ". Only tracks, flows, hits, electrons, muons, clusters and towers are supported."
           );
       }
       return config;

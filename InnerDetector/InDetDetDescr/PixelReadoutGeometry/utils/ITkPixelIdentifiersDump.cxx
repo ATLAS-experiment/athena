@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -65,19 +65,25 @@ int main(int argc, char *argv[])
        << "eta" << "\t"
        << "FEs" << std::endl;
 
-  for (unsigned int moduleHash{}; moduleHash < pixelID->wafer_hash_max(); moduleHash++) {
-    IdentifierHash wafer_hash = IdentifierHash(moduleHash);
-    Identifier wafer_id = pixelID->wafer_id(wafer_hash);
-    const InDetDD::SiDetectorElement *element = elements->getDetectorElement(wafer_hash);
-    const InDetDD::PixelModuleDesign *p_design = static_cast<const InDetDD::PixelModuleDesign*>(&element->design());
+  try {
+    for (unsigned int moduleHash{}; moduleHash < pixelID->wafer_hash_max(); moduleHash++) {
+      IdentifierHash wafer_hash = IdentifierHash(moduleHash);
+      Identifier wafer_id = pixelID->wafer_id(wafer_hash);
+      const InDetDD::SiDetectorElement *element = elements->getDetectorElement(wafer_hash);
+      const InDetDD::PixelModuleDesign *p_design = static_cast<const InDetDD::PixelModuleDesign*>(&element->design());
 
-    fout << moduleHash << "\t"
-         << wafer_id.get_compact() << "\t"
-         << pixelID->barrel_ec(wafer_id) << "\t"
-         << pixelID->layer_disk(wafer_id) << "\t"
-         << pixelID->phi_module(wafer_id) << "\t"
-         << pixelID->eta_module(wafer_id) << "\t"
-         << p_design->numberOfCircuits() << std::endl;
+      fout << moduleHash << "\t"
+           << wafer_id.get_compact() << "\t"
+           << pixelID->barrel_ec(wafer_id) << "\t"
+           << pixelID->layer_disk(wafer_id) << "\t"
+           << pixelID->phi_module(wafer_id) << "\t"
+           << pixelID->eta_module(wafer_id) << "\t"
+           << p_design->numberOfCircuits() << std::endl;
+    }
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    fout.close();
+    return 1;
   }
 
   fout.close();

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # @file PyUtils.scripts.diff_root_files
 # @purpose check that 2 ROOT files have same content (containers and sizes).
@@ -595,6 +595,19 @@ def main(args):
                 except StopIteration:
                     return None
 
+                # entry is a tuple with these contents:
+                #  entry[0]: Name of the tree being read
+                #  entry[1]: Index of the current event in the tree
+                #  entry[2]: Leaf being dumped, split at periods.
+                #    So for a variable of an xAOD object, entry[2][0]
+                #    is the aux container name (ending in 'Aux.') and
+                #    entry[2][1] is the variable name.
+                #  entry[3]: The value of the variable.
+                #    For an xAOD variable, this will typically be a std::vector.
+
+                #if entry[2][0].find('xAOD::TrackParticleAuxContainer_v5_HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Bphysics_FTFAux') >= 0:
+                #    print ('aaa', entry)
+
                 entry2_orig = entry[2][0]
                 if isinstance(fold.obj, root.TTree):
                     entry[2][0] = entry[2][0].rstrip('.\0')  # clean branch name
@@ -603,24 +616,25 @@ def main(args):
                 if leaves_prefix:
                     entry[2][0] = entry[2][0].replace(leaves_prefix, '')
 
-                # Calling leafname_fromdump is expensive.  When we can,
-                # try to make the skip decision using just the first element
-                # in entry[2].  skip_dict maps from entry[2] values to either
-                # -1 if some branch with this entry prefix is being skipped
-                # or the event index at which we first saw this value.
-                # If we get to a different index and no branches with
-                # this prefix have been skipped, then we can assume that
-                # none of them are.
-                skip = skip_dict.setdefault (entry2_orig, entry[1])
-                if skip > 0 and skip != entry[1]:
-                    # Old entry --- we can assume no skipping.
+                # Check whether we should skip this leaf, memoizing
+                # the result.
+                # Earlier we tried to do this by looking at only the first
+                # element of entry[2].  On the first event we would record
+                # whether any leaves were skipped for this branch, so on
+                # subsequent events we can quickly test that no leaves
+                # were skipped.  However, that turned out not to work
+                # because for xAOD variables that are vectors (and are
+                # thus stored as nested vectors), we don't see them at all
+                # if the container is empty.
+                # So instead just memoize the result of skip_leaf.
+                leafname = leafname_fromdump(entry)
+                skip = skip_dict.setdefault (entry2_orig, None)
+                if skip is None:
+                    skip = skip_leaf(leafname, skip_leaves)
+                if not skip:
                     return entry
-
-                if not skip_leaf(leafname_fromdump(entry), skip_leaves):
-                    return entry
-                skip_dict[entry2_orig] = -1
-                msg.debug('SKIP: {}'.format(leafname_fromdump(entry)))
-            pass
+                msg.debug('SKIP: {}'.format(leafname))
+            return None
 
         read_old = True
         read_new = True

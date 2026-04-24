@@ -21,7 +21,7 @@ TileMuFeatureContainer_PERS * TileMuFeatureContainerCnv::createPersistent( TileM
 }//end of create persistent method
 
 //createTransient
-TileMuFeatureContainer * TileMuFeatureContainerCnv::createTransient()
+TileMuFeatureContainer * TileMuFeatureContainerCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "TileMuFeatureContainerConverter" );
   
@@ -31,17 +31,17 @@ TileMuFeatureContainer * TileMuFeatureContainerCnv::createTransient()
   static const pool::Guid tlp1_guid( "4684172D-3590-4464-BCA6-477725ADD755" );
   static const pool::Guid p0_guid( "8B428EC4-339C-4517-A047-C0F5F98B820B" );
   
-  if( compareClassGuid( p2_guid ) ){
-         std::unique_ptr< TileMuFeatureContainer_p2 > col_vect( poolReadObject< TileMuFeatureContainer_p2 >() );
+  if( compareClassGuid(token,  p2_guid ) ){
+         std::unique_ptr< TileMuFeatureContainer_p2 > col_vect( poolReadObject< TileMuFeatureContainer_p2 >(token) );
          return m_converter.createTransient( col_vect.get(), mlog ) ;
 
-    }else  if( compareClassGuid( tlp1_guid ) ) {
-         std::unique_ptr< TileMuFeatureContainer_tlp1 > col_vect( poolReadObject< TileMuFeatureContainer_tlp1 >() );
+    }else  if( compareClassGuid(token,  tlp1_guid ) ) {
+         std::unique_ptr< TileMuFeatureContainer_tlp1 > col_vect( poolReadObject< TileMuFeatureContainer_tlp1 >(token) );
          return m_converter1.createTransient( col_vect.get(), mlog );
       
-    }else if( compareClassGuid( p0_guid ) ){
+    }else if( compareClassGuid(token,  p0_guid ) ){
       
-      return poolReadObject< TileMuFeatureContainer >();
+      return poolReadObject< TileMuFeatureContainer >(token);
       
     }else  throw std::runtime_error( "Unsupported persistent version of TileMuFeatureContainer" );
   

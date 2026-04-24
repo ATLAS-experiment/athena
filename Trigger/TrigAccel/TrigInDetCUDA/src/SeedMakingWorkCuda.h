@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGINDETCUDA_SEEDMAKINGWORKCUDA_H
@@ -37,12 +37,12 @@ private:
     }
   };
   
-  unsigned int m_workId;
-  SeedMakingDeviceContext* m_context;  
+  unsigned int m_workId{};
+  SeedMakingDeviceContext* m_context{};  
   std::shared_ptr<TrigAccel::OffloadBuffer> m_input, m_output;
-  WorkTimeStampQueue* m_timeLine;
+  WorkTimeStampQueue* m_timeLine{};
 
-  float m_CovMS, m_ptCoeff, m_minPt2, m_ptCoeff2, m_maxD0; 
+  float m_CovMS{}, m_ptCoeff{}, m_minPt2{}, m_ptCoeff2{}, m_maxD0{}; 
 };
 
 class SeedMakingWorkCudaManaged : public TrigAccel::Work{
@@ -67,10 +67,10 @@ private:
     }
   };
   
-  unsigned int m_workId;
-  SeedMakingManagedDeviceContext* m_context;  
+  unsigned int m_workId{};
+  SeedMakingManagedDeviceContext* m_context{};  
   std::shared_ptr<TrigAccel::OffloadBuffer> m_input, m_output;
-  WorkTimeStampQueue* m_timeLine;
+  WorkTimeStampQueue* m_timeLine{};
 
   float m_CovMS{}, m_ptCoeff{}, m_minPt2{}, m_ptCoeff2{}, m_maxD0{}; 
 };

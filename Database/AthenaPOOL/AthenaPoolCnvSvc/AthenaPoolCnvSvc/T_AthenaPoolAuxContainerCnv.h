@@ -71,7 +71,7 @@ public:
    * Returns a newly-allocated transient object.
    * Errors are reported by raising exceptions.
    */
-  virtual AUXSTORE* createTransientWithKey (const std::string& key) override;
+  virtual AUXSTORE* createTransientWithKey (const Token* token, const std::string& key) override;
 
   
 private:

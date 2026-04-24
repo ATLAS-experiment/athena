@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # Unit test for the xAOD::TPyEvent class.
 #
@@ -119,7 +119,7 @@ def main():
                 newMu = ROOT.xAOD.Muon()
                 cMuons.push_back( newMu )
                 newMu.setP4( mu.pt(), mu.eta(), mu.phi() )
-                pass
+                ROOT.SetOwnership (newMu, False)
             pass
 
         # Print how many central muons got selected:

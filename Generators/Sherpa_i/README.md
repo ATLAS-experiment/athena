@@ -57,6 +57,10 @@ Notes for running with input tarball:
 
 A tool to automatically generate the input tarball for a given Sherpa JO is provided within the Sherpa_i interface and is available as `sherpaTarCreator.py` after asetup. Documentation can be [found in git](python/sherpaTarCreator/).
 
+## BSM simulations using UFO models
+
+Sherpa has an interface that enables the use of so-called UFO (Universal Feynrules Output) models to generate events based on the model's extension of the Standard Model. In order to make the UFO model usable for Sherpa, it needs to first be compiled using the `Sherpa-generate-model` script. For more information, please see the more [detailed documentation](share/example/bsm_with_ufo_models/README.md).
+
 # Some practical information for users
 
 ## MC event weight

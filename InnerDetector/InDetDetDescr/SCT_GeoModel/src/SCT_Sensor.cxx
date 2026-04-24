@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <utility>
@@ -146,15 +146,14 @@ SCT_Sensor::makeDesign()
 GeoVPhysVol * 
 SCT_Sensor::build(SCT_Identifier id)
 {
-    GeoFullPhysVol * sensor;
-    if(m_sqliteReader){
-        
-      std::string key="Sensor_Side#"+std::to_string(id.getSide())+"_"+std::to_string(id.getBarrelEC())+"_"+std::to_string(id.getLayerDisk())+"_"+std::to_string(id.getEtaModule())+"_"+std::to_string(id.getPhiModule());
-
-      sensor=(*m_mapFPV)[key];
-        
-    }
-    else sensor= new GeoFullPhysVol(m_logVolume);
+  GeoFullPhysVol * sensor{};
+  if(m_sqliteReader){
+    std::string key=std::format("Sensor_Side#{}_{}_{}_{}_{}",id.getSide(),id.getBarrelEC(),id.getLayerDisk(),id.getEtaModule(),id.getPhiModule());
+    sensor=(*m_mapFPV)[key];
+  }
+  else {
+    sensor= new GeoFullPhysVol(m_logVolume);
+  }
   
   // Make detector element and add to collection
   // Only do so if we have a valid id helper.

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TOYCONVERSION_TOYCONVERTER_H
@@ -33,7 +33,7 @@ public:
     return StatusCode::SUCCESS;
   }
 
-  static const CLID& classID() { return ClassID_traits<DATA>::ID(); }
+  static CLID classID() { return ClassID_traits<DATA>::ID(); }
 
   virtual long int repSvcType() const override;
   static long int storageType();

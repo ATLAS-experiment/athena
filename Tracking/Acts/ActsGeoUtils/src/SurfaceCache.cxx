@@ -14,7 +14,10 @@ namespace ActsTrk{
 
   const TransformCache* SurfaceCache::transformCache() const { return m_transformCache; }
   const Acts::Transform3& SurfaceCache::localToGlobalTransform(const Acts::GeometryContext& anygctx) const  {
-    return m_transformCache->localToGlobalTransform(anygctx);
+    return m_transformCache->getTransform(anygctx);
+  }
+  const Amg::Transform3D& SurfaceCache::localToGlobalTransform(const DetectorAlignStore* store) const {
+    return m_transformCache->getTransform(store);
   }
   const Acts::Surface& SurfaceCache::surface() const  { 
     if (!m_surface) THROW_EXCEPTION("Surface has not been set before");

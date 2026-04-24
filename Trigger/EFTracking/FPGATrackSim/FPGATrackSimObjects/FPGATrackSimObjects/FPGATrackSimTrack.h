@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGFPGATrackSimOBJECTS_FPGATrackSimTRACK_H
@@ -8,18 +8,28 @@
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "FPGATrackSimObjects/FPGATrackSimMultiTruth.h"
 #include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
-#include <vector>
-#include <iosfwd>
-#include <cmath>
+
 
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "TObject.h"
+
+#include <vector>
+#include <iosfwd>
+#include <cmath>
+#include <algorithm> //count_if
+#include <memory>
+#include <limits>
 
 class FPGATrackSimTrack {
 
  public:
 
   FPGATrackSimTrack() = default;
+  
+  FPGATrackSimTrack(const FPGATrackSimTrack&) = default;
+  FPGATrackSimTrack& operator=(const FPGATrackSimTrack&) = default;
+  FPGATrackSimTrack(FPGATrackSimTrack&&)  = default;
+  FPGATrackSimTrack& operator=(FPGATrackSimTrack&&)  = default;
   virtual ~FPGATrackSimTrack();
 
   TrackCorrType getTrackCorrType() const { return m_trackCorrType; }
@@ -51,6 +61,10 @@ class FPGATrackSimTrack {
   unsigned getHoughXBin() const { return m_xBin; }
   unsigned getHoughYBin() const { return m_yBin; }
 
+  // gets the number of non-null hits
+  int getNHits() const { return std::count_if(m_hit_ptrs.begin(), m_hit_ptrs.end(), [](const std::shared_ptr<const FPGATrackSimHit>& hit) { return hit && hit->isReal();});}
+  layer_bitmask_t getHitMask() const;
+
   int   getNMissing() const { return m_nmissing; } // missing coordinates
   unsigned int getTypeMask() const { return m_typemask; }
   unsigned int getHitMap() const { return m_hitmap; } // coordinate mask!!
@@ -62,7 +76,25 @@ class FPGATrackSimTrack {
   unsigned long barcode() const { return getBarcode(); }
   float getBarcodeFrac() const { return m_barcode_frac; }
   //Should be passed as const ref to avoid excessive copying.
-  const std::vector <FPGATrackSimHit>& getFPGATrackSimHits() const { return m_hits; }
+
+
+  // Returns the persistent hits stored in this track (for ROOT output only)
+  const std::vector<FPGATrackSimHit>& getFPGATrackSimHits() const { return m_hits; }
+
+  // Returns shared_ptrs to the active hits (SG or internal copies) - use this for runtime processing
+  const std::vector<std::shared_ptr<const FPGATrackSimHit>>& getFPGATrackSimHitPtrs() const {
+    return m_hit_ptrs;
+  }
+
+  // Copy hits for persistency and update pointers to internal storage
+  void persistifyHits() {
+    if (m_hit_ptrs.empty()) return;
+    m_hits.clear();
+    m_hits.reserve(m_hit_ptrs.size());
+    for (const auto& hit : m_hit_ptrs) {
+      if (hit) m_hits.push_back(*hit);
+    }
+  }
   std::vector<float> getCoords(unsigned ilayer) const;
   // helper function to calculate coordinates for the methods based in idealized detector geometry. See https://cds.cern.ch/record/2633242
   // in the delta global phis method, the coordinates are the ideal z, and the delta global phis.
@@ -122,7 +154,7 @@ class FPGATrackSimTrack {
 
   void calculateTruth(); // this will calculate the above quantities based on the hits
   void setNLayers(int); //Reset/resize the track hits vector
-  void setFPGATrackSimHit(unsigned i, const FPGATrackSimHit& hit);
+  void setFPGATrackSimHit(unsigned i, std::shared_ptr<const FPGATrackSimHit> hit);
   void setPars(FPGATrackSimTrackPars const& pars)
   {
     setQOverPt(pars.qOverPt);
@@ -188,8 +220,11 @@ class FPGATrackSimTrack {
   unsigned m_xBin = 0;
   unsigned m_yBin = 0;
 
-  std::vector<FPGATrackSimHit> m_hits; //[m_nlayers] hits associated to the track
+  std::vector<FPGATrackSimHit> m_hits; // persistent storage of hits (copies from SG or internal storage)
 
+  // hit pointers for runtime processing; these will point to SG hits as non-owning shared_ptr or to the internal storage hits (owning shared_ptr) if synthetic hits are created internally or real hits are modified (e.g. (re)-mapped)
+  std::vector<std::shared_ptr<const FPGATrackSimHit>> m_hit_ptrs; //! transient
+  
   // bin ID. Just store this as a vector<unsigned>.
   std::vector<unsigned> m_binIdx;
 

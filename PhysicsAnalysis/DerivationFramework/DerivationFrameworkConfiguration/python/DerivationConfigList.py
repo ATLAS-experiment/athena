@@ -67,6 +67,7 @@ from DerivationFrameworkBPhys.BPHY6 import BPHY6Cfg
 from DerivationFrameworkBPhys.BPHY10 import BPHY10Cfg
 from DerivationFrameworkBPhys.BPHY12 import BPHY12Cfg
 from DerivationFrameworkBPhys.BPHY13 import BPHY13Cfg
+from DerivationFrameworkBPhys.BPHY14 import BPHY14Cfg
 from DerivationFrameworkBPhys.BPHY15 import BPHY15Cfg
 from DerivationFrameworkBPhys.BPHY16 import BPHY16Cfg
 from DerivationFrameworkBPhys.BPHY18 import BPHY18Cfg
@@ -75,6 +76,7 @@ from DerivationFrameworkBPhys.BPHY22 import BPHY22Cfg
 from DerivationFrameworkBPhys.BPHY23 import BPHY23Cfg
 from DerivationFrameworkBPhys.BPHY24 import BPHY24Cfg
 from DerivationFrameworkBPhys.BPHY25 import BPHY25Cfg
+from DerivationFrameworkBPhys.BPHY26 import BPHY26Cfg
 from DerivationFrameworkBPhys.BPHY28 import BPHY28Cfg
 
 # STDM derivations
@@ -109,6 +111,7 @@ from DerivationFrameworkFlavourTag.FTAGXBB import FTAGXBBCfg
 from DerivationFrameworkFlavourTag.FTAG4 import FTAG4Cfg
 from DerivationFrameworkFlavourTag.FTAG5 import FTAG5Cfg
 from DerivationFrameworkFlavourTag.FTAGPU import FTAGPUCfg
+from DerivationFrameworkFlavourTag.FTAG1LITE import FTAG1LITECfg
 
 # Jet/Etmiss derivations
 # JETM1: dijet for MC calibrations, JER, MJB, eta-intercalibration
@@ -127,6 +130,10 @@ from DerivationFrameworkJetEtMiss.JETM7 import JETM7Cfg
 from DerivationFrameworkJetEtMiss.JETM12 import JETM12Cfg
 # JETM42: MC only - Upgrade studies format
 from DerivationFrameworkJetEtMiss.JETM42 import JETM42Cfg
+
+
+#Top derivations
+from DerivationFrameworkTop.TOPQ7 import TOPQ7Cfg
 
 # Trigger derivations
 # TRIG8: ID trigger performance (extra trigger info eg online tracks and RoIs [idperf chain skimming])
@@ -169,21 +176,22 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg','TE
            'TRUTH0Cfg','TRUTH1Cfg','TRUTH3Cfg',
            'PHYSCfg','PHYSLITECfg','SKIMCfg',
            'PHYSVALCfg',
-           'FTAG1Cfg', 'FTAG2Cfg', 'FTAG3Cfg', 'FTAG4Cfg', 'FTAG5Cfg', 'FTAGXBBCfg', 'FTAGPUCfg',
+           'FTAG1Cfg', 'FTAG2Cfg', 'FTAG3Cfg', 'FTAG4Cfg', 'FTAG5Cfg', 'FTAGXBBCfg', 'FTAGPUCfg', 'FTAG1LITECfg',
            'HIGG1D1Cfg', 'HIGG9D1Cfg', 'HIGG1D2Cfg',
            'LLP1Cfg', 'LLJ1Cfg',
            'SUSY20Cfg',
            'IDTR2Cfg',
            'BPHY1Cfg','BPHY2Cfg', 'BPHY3Cfg', 'BPHY4Cfg', 'BPHY5Cfg',
            'BPHY6Cfg',
-           'BPHY10Cfg', 'BPHY12Cfg', 'BPHY13Cfg', 'BPHY15Cfg',
+           'BPHY10Cfg', 'BPHY12Cfg', 'BPHY13Cfg', 'BPHY14Cfg', 'BPHY15Cfg',
            'BPHY16Cfg', 'BPHY18Cfg',
-           'BPHY21Cfg', 'BPHY22Cfg', 'BPHY23Cfg', 'BPHY24Cfg', 'BPHY25Cfg', 'BPHY28Cfg',
+           'BPHY21Cfg', 'BPHY22Cfg', 'BPHY23Cfg', 'BPHY24Cfg', 'BPHY25Cfg', 'BPHY26Cfg', 'BPHY28Cfg',
            'STDM6Cfg', 'STDM7Cfg','STDM13Cfg','STDM16Cfg','STDM17Cfg',
            'TCAL1Cfg', 'TCAL2Cfg',
            'EGAM1Cfg', 'EGAM2Cfg', 'EGAM3Cfg', 'EGAM4Cfg', 'EGAM5Cfg',
            'EGAM7Cfg', 'EGAM8Cfg', 'EGAM9Cfg', 'EGAM10Cfg', 'EGAM11Cfg', 'EGAM12Cfg',
            'JETM1Cfg','JETM2Cfg','JETM3Cfg','JETM4Cfg','JETM5Cfg','JETM7Cfg','JETM12Cfg','JETM42Cfg',
+           'TOPQ7Cfg',
            'TRIG8Cfg',"TRIG9Cfg","TRIG10Cfg",'L1CALO1Cfg',
            'MUON1Cfg','MUON5Cfg',
            'TLA0Cfg', 'TLA1Cfg', 'TLA2Cfg',

@@ -1,12 +1,12 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODMUONPREPDATA_RPCSTRIP2DCONTAINER_H
 #define XAODMUONPREPDATA_RPCSTRIP2DCONTAINER_H
 
-#include "xAODMuonPrepData/RpcStrip2DFwd.h"
 #include "xAODMuonPrepData/RpcStrip2D.h"
+#include "xAODMuonPrepData/RpcMeasurementContainer.h"
 
 namespace xAOD{
    using RpcStrip2DContainer_v1 = DataVector<RpcStrip2D_v1>;

@@ -21,16 +21,15 @@ class MdtDriftCircleAuxContainer_v1 : public AuxContainerBase {
    private:
     /// @name Defining Mdt Drift Circle parameters
     /// @{
-    std::vector<DetectorIdentType> identifier{};
     std::vector<DetectorIDHashType> identifierHash{};
     std::vector<PosAccessor<1>::element_type> localPosition{};
     std::vector<CovAccessor<1>::element_type> localCovariance{};
 
-    std::vector<int16_t> tdc{};
-    std::vector<int16_t> adc{};
-    std::vector<uint16_t> driftTube{};
-    std::vector<uint8_t> tubeLayer{};
-    std::vector<uint8_t> status{};
+    std::vector<std::int16_t> tdc{};
+    std::vector<std::int16_t> adc{};
+    std::vector<std::uint16_t> driftTube{};
+    std::vector<std::uint8_t> tubeLayer{};
+    std::vector<std::uint8_t> status{};
     /// @}
 };
 }  // namespace xAOD

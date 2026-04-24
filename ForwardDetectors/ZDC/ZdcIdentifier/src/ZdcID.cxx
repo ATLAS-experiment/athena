@@ -187,12 +187,12 @@ ZdcID::initLevelsFromDict()
     m_channel_impl  = region.implementation(m_CHANNEL_INDEX);
 
     ATH_MSG_DEBUG("decode index and bit fields for each level:");
-    ATH_MSG_DEBUG("forward  " << m_forward_impl.show_to_string());
-    ATH_MSG_DEBUG("zdc      " << m_zdc_impl.show_to_string());
-    ATH_MSG_DEBUG("side     " << m_side_impl.show_to_string());
-    ATH_MSG_DEBUG("module   " << m_module_impl.show_to_string());
-    ATH_MSG_DEBUG("type     " << m_type_impl.show_to_string());
-    ATH_MSG_DEBUG("channel  " << m_channel_impl.show_to_string());
+    ATH_MSG_DEBUG("forward  " << m_forward_impl);
+    ATH_MSG_DEBUG("zdc      " << m_zdc_impl);
+    ATH_MSG_DEBUG("side     " << m_side_impl);
+    ATH_MSG_DEBUG("module   " << m_module_impl);
+    ATH_MSG_DEBUG("type     " << m_type_impl);
+    ATH_MSG_DEBUG("channel  " << m_channel_impl);
     
     return (0);
 

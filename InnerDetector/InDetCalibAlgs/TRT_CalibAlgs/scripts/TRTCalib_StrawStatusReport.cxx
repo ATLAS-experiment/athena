@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // updated by Leigh Schaefer <leigh.schaefer@cern.ch> April 2017
@@ -105,12 +105,17 @@ int main(int argc, char **argv)
               << std::endl;
 
     simpleAnalysis(filename);
-    if (onlyMaskBoards)
-    {
+    if (onlyMaskBoards){
+      try{
         printAthenaBoardsOnly(run);
-    }
-    else
-    {
+      } catch (const std::exception& e) {
+        std::cerr<< "Exception in printAthenaBoardsOnly: " << e.what()<<std::endl;
+        exit(1);
+      } catch (...) {
+        std::cerr<<"Unknown exception in printAthenaBoardsOnly"<<std::endl;
+        exit(1);
+      }
+    } else {
         printAthena(run);
         reportResults(filename, run);
     }

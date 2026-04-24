@@ -42,7 +42,7 @@ namespace JetPileupTag {
             return StatusCode::FAILURE;
         }
 
-     
+
         // Determine which NNJVT configuration to use based on the flag
         std::string configDir;
         std::string paramFileName;
@@ -60,7 +60,7 @@ namespace JetPileupTag {
             cutFileName = m_NNCutFileName;
         }
 
-    
+
         // Use the Path Resolver to find the jvt file and retrieve the likelihood histogram
         std::string configPath = PathResolverFindCalibFile(configDir+"/"+paramFileName);
         ATH_MSG_INFO("Reading JVT NN file from: " << paramFileName);
@@ -78,9 +78,17 @@ namespace JetPileupTag {
         lwt::GraphConfig cfg = lwt::parse_json_graph( fconfig );
 
         // Determine which NN input features to use based on the flag
-        std::vector<std::string> inputs = m_useTrkAugNN
-            ? std::vector<std::string>{"pt", "eta", "NumTrkPt1000_vx0", "TrackWidthPt1000_vx0", "RPtTrkPt500_vx0", "DNumTrkPt1000_vx1", "DTrackWidthPt1000_vx1", "DRPtTrkPt500_vx1"}
-            : std::vector<std::string>{"Rpt", "JVFCorr", "ptbin", "etabin"};
+        std::vector<std::string> inputs;
+        if (m_useTrkAugNN) {
+            // Input features are identical between offline and HLT but the model files for HLT use a different naming convention
+            if (paramFileName.find("HLT") != std::string::npos)
+                inputs = std::vector<std::string>{"pt", "eta", "NumTrkPt1000_vx0", "TrackWidthPt1000_vx0", "RPtTrkPt500_vx0", "DNumTrkPt1000_vx1", "DTrackWidthPt1000_vx1", "DRPtTrkPt500_vx1"};
+            else
+                inputs = std::vector<std::string>{"pt", "eta", "SumPtTrkOrderedNumTrkPt1000_vx0", "SumPtTrkOrderedTrackWidthPt1000_vx0", "SumPtTrkOrderedRPtTrkPt500_vx0", "DNumTrkPt1000_vx1", "DTrackWidthPt1000_vx1", "DRPtTrkPt500_vx1"};
+        }
+        else {
+            inputs = std::vector<std::string>{"Rpt", "JVFCorr", "ptbin", "etabin"};
+        }
 
         // FastGraph is initialised with the order in which inputs will be
         // provided, to avoid map lookup
@@ -114,7 +122,7 @@ namespace JetPileupTag {
         if (!m_rptKey.empty())
             m_rptKey = m_jetContainerName + "." + m_rptKey.key();
         if (!m_passJvtKey.empty())
-            m_passJvtKey = m_jetContainerName + "." + m_passJvtKey.key();    
+            m_passJvtKey = m_jetContainerName + "." + m_passJvtKey.key();
         m_rptPerVertexKey = m_jetContainerName + "." + m_rptPerVertexKey.key();
         m_DtrkWidthKey = m_jetContainerName + "." + m_DtrkWidthKey.key();
         m_DnumTrkKey = m_jetContainerName + "." + m_DnumTrkKey.key();
@@ -143,10 +151,10 @@ namespace JetPileupTag {
                 renounce(m_DtrkWidthKey);
                 renounce(m_DnumTrkKey);
                 renounce(m_DrptPerVertexKey);
-                renounce(m_TrkWidthSortedKey);  
+                renounce(m_TrkWidthSortedKey);
                 renounce(m_NumTrkSortedKey);
-            }    
-       
+            }
+
         }
     #endif
 
@@ -171,15 +179,15 @@ namespace JetPileupTag {
 
 
     float JetVertexNNTagger::evaluateJvt(const std::vector<float>& features) const
-    {   
+    {
         std::vector<double> features_double(features.begin(), features.end());
 
         // Convert inputs to lwt::VectorX format
         lwt::VectorX<double> inputvals = lwt::build_vector(features_double);
-        
+
         // Wrap inputs into a vector of scalars as required by FastGraph
         std::vector<lwt::VectorX<double>> scalars{inputvals};
-        
+
         // Compute the output using the NN model
         lwt::VectorX<double> output = m_lwnn->compute(scalars);
 
@@ -222,7 +230,7 @@ namespace JetPileupTag {
         // Handle cases with only one vertex
         if (jet_sumpt_per_vertex.size() <= 1) {
             ATH_MSG_VERBOSE("Only one vertex available. Returning the single vertex index.");
-            return { HS_index }; 
+            return { HS_index };
         }
 
         std::vector<std::pair<float, size_t>> pairedValues;
@@ -232,7 +240,7 @@ namespace JetPileupTag {
                 pairedValues.emplace_back(jet_sumpt_per_vertex[i], i);
             }
         }
-  
+
         ATH_MSG_VERBOSE("Finished creating paired values, now sorting them by sumpt values.");
 
 
@@ -242,17 +250,17 @@ namespace JetPileupTag {
 		          return a.first > b.first;  // Sort in descending order of sumpt
 		      });
 
-        
+
         ATH_MSG_VERBOSE("Sorting complete. Extracting indices now.");
 
         std::vector<size_t> resorted_vertex_indices;
-    
+
         // insert HS vertex index at position 0
-        resorted_vertex_indices.push_back(HS_index);  
+        resorted_vertex_indices.push_back(HS_index);
 
         // Extract indices from the sorted pairedValues
         for (const auto& pair : pairedValues) {
-            resorted_vertex_indices.push_back(pair.second);  
+            resorted_vertex_indices.push_back(pair.second);
         }
 
         ATH_MSG_VERBOSE("Finished extracting indices. Returning the final resorted indices vector.");
@@ -263,7 +271,7 @@ namespace JetPileupTag {
 
 
     JetVertexNNTagger::OrderedTrackMoment JetVertexNNTagger::get_sorted_track_moments(
-        const TrackMomentStruct& moment, const std::vector<size_t>& resorted_vertex_indices, float jetPt, float invalidRpt) const 
+        const TrackMomentStruct& moment, const std::vector<size_t>& resorted_vertex_indices, float jetPt, float invalidRpt) const
             {
                 std::vector<OrderedTrackMoment> orderedMoments;
 
@@ -271,19 +279,19 @@ namespace JetPileupTag {
                 std::vector<float> trkWidth_sorted;
                 std::vector<float> rpt_sorted;
 
-  
+
                 if (resorted_vertex_indices.empty()) {
                     ATH_MSG_WARNING("resorted_vertex_indices is empty, returning empty moment.");
-                    return {}; 
+                    return {};
                 }
 
                 // Loop through each vertex index
                 for (size_t i = 0; i < resorted_vertex_indices.size(); ++i) {
-                    size_t original_index = resorted_vertex_indices[i];  
+                    size_t original_index = resorted_vertex_indices[i];
 
                     if (original_index >= moment.numTrk.size()) {
                         ATH_MSG_WARNING("Index out of range in resorted_vertex_indices: " << original_index);
-                        continue; 
+                        continue;
                     }
 
                     // Add the sorted values for each vertex
@@ -310,14 +318,14 @@ namespace JetPileupTag {
         return oss.str();
     }
 
-    // calculate difference between jet moments for the leading and subleading vertices 
+    // calculate difference between jet moments for the leading and subleading vertices
 
 
     JetVertexNNTagger::DTrackMomentStruct JetVertexNNTagger::calculatePerVertexDifferences(
-        const OrderedTrackMoment& sortedTrackMoments, size_t numVertices) const 
+        const OrderedTrackMoment& sortedTrackMoments, size_t numVertices) const
     {
 
-  
+
         // Ensure there are enough vertices for computation
         if (sortedTrackMoments.numTrk.empty() || numVertices <= 1) {
             ATH_MSG_WARNING("Moments are empty or numVertices is too small, returning empty struct.");
@@ -368,15 +376,15 @@ namespace JetPileupTag {
 
         SG::WriteDecorHandle<xAOD::JetContainer, float> jvtHandle(m_jvtKey);
         SG::WriteDecorHandle<xAOD::JetContainer, char>  passJvtHandle(m_passJvtKey);
-        
+
 
         std::unique_ptr<TrkAugHandleHolder> trkAugHandleHolder;
         std::unique_ptr<ClassicHandleHolder> classicHandleHolder;
 
         if (m_useTrkAugNN) {
             trkAugHandleHolder = std::make_unique<TrkAugHandleHolder>(
-                m_trkWidthKey, m_sumPtTrkKey, m_numTrkKey, 
-                m_DtrkWidthKey, m_DnumTrkKey, m_DrptPerVertexKey, 
+                m_trkWidthKey, m_sumPtTrkKey, m_numTrkKey,
+                m_DtrkWidthKey, m_DnumTrkKey, m_DrptPerVertexKey,
                 m_rptPerVertexKey, m_TrkWidthSortedKey, m_NumTrkSortedKey
             );
         } else {
@@ -396,12 +404,12 @@ namespace JetPileupTag {
             float rpt = invalidRpt;
             char passJvt = invalidPassJvt;
 
-            // consider only leading numVertices for difference calucations. 
+            // consider only leading numVertices for difference calucations.
             //Vertices ordered acccording to descending SumTrkPt_vxi, for i>0. SumTrkPt_vx0 is for HS vertex.
-            size_t numVertices = 4; 
+            size_t numVertices = 4;
 
             std::vector<float> sortedTrkWidthVec, rptVec, dTrkWidthVec, dRptVec;
-            std::vector<int> sortedNumTrkVec, dNumTrkVec;  
+            std::vector<int> sortedNumTrkVec, dNumTrkVec;
 
             if (HSvertex->vertexType() == xAOD::VxType::PriVtx) {
 
@@ -426,7 +434,7 @@ namespace JetPileupTag {
                     std::vector<float> sumpttrk = trkAugHandleHolder->sumPtTrkHandle(*jet);
 
 
-                    
+
                     //TrackMomentStruct trackMoment(numtrk, trkwidth, sumpttrk);
 
                     ATH_MSG_VERBOSE("Before sorting:");
@@ -473,17 +481,17 @@ namespace JetPileupTag {
                         ATH_MSG_VERBOSE("Defining NNJVT features");
 
                         // Use Track-Augmented NN features
-                        features = { static_cast<float>(jet->pt()), 
-                                    static_cast<float>(jet->eta()), 
-                                    static_cast<float>(sortedTrackMoments.numTrk[0]), 
+                        features = { static_cast<float>(jet->pt()),
+                                    static_cast<float>(jet->eta()),
+                                    static_cast<float>(sortedTrackMoments.numTrk[0]),
                                     sortedTrackMoments.trkWidth[0],
-                                    sortedTrackMoments.rpt[0], 
-                                    static_cast<float>(differences.dNumTrk[0]), 
-                                    differences.dTrkWidth[0], 
+                                    sortedTrackMoments.rpt[0],
+                                    static_cast<float>(differences.dNumTrk[0]),
+                                    differences.dTrkWidth[0],
                                     differences.dRpt[0] };
-                                    
+
                         ATH_MSG_VERBOSE("Using Track-Augmented NN features: "
-                            << "jet_pt = " << jet->pt() 
+                            << "jet_pt = " << jet->pt()
                             << ", jet_eta = " << jet->eta()
                             << ", numtrk_sorted[0] = " << sortedTrackMoments.numTrk[0]
                             << ", trkwidth_sorted[0] = " << sortedTrackMoments.trkWidth[0]
@@ -547,7 +555,7 @@ namespace JetPileupTag {
 
                 }
 
-                
+
 
 
             }
@@ -574,4 +582,4 @@ namespace JetPileupTag {
     }
 }
 
- 
+

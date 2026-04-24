@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArByteStream/LArRawChannelContByteStreamCnv.h"
@@ -29,7 +29,7 @@ LArRawChannelContByteStreamCnv::LArRawChannelContByteStreamCnv(ISvcLocator* svcl
   m_contSize(0)
 {}
 
-const CLID& LArRawChannelContByteStreamCnv::classID(){
+CLID LArRawChannelContByteStreamCnv::classID(){
   return ClassID_traits<LArRawChannelContainer>::ID() ;
 }
 

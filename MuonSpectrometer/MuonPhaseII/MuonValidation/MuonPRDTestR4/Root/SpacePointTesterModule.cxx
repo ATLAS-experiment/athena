@@ -25,9 +25,10 @@ namespace MuonValR4{
             return insert_itr.first->second;
         }
         
-        m_spPos.push_back(spacePoint.localPosition());
+        m_spLocPos.push_back(spacePoint.localPosition());
         m_driftR.push_back(spacePoint.driftRadius());
-
+        const ActsTrk::GeometryContext& gctx{getGeoCtx(Gaudi::Hive::currentContext())};
+        m_spGlobPos.push_back(spacePoint.msSector()->localToGlobalTransform(gctx)*spacePoint.localPosition());
 
         const auto& cov{spacePoint.covariance()};
         using CovIdx = MuonR4::SpacePoint::CovIdx;
@@ -62,7 +63,7 @@ namespace MuonValR4{
                                         idHelper.gasGap(id));
                     m_channel.push_back(idHelper.channel(id));
                     if (spacePoint.secondaryMeasurement()) {
-                        phiChannel = idHelper.channel(xAOD::identify(spacePoint.secondaryMeasurement()));
+                        phiChannel = idHelper.channel(spacePoint.secondaryMeasurement()->identify());
                     }
                 }
                 break;
@@ -71,7 +72,7 @@ namespace MuonValR4{
                     m_layer.push_back(idHelper.gasGap(id));
                     m_channel.push_back(idHelper.channel(id));
                     if (spacePoint.secondaryMeasurement()) {
-                        phiChannel = idHelper.channel(xAOD::identify(spacePoint.secondaryMeasurement()));
+                        phiChannel = idHelper.channel(spacePoint.secondaryMeasurement()->identify());
                     }
                 }
                 break;
@@ -80,7 +81,7 @@ namespace MuonValR4{
                     m_layer.push_back( (idHelper.multilayer(id) -1) * 4 + idHelper.gasGap(id));
                     m_channel.push_back(idHelper.channel(id));
                     if (spacePoint.secondaryMeasurement()) {
-                        phiChannel = idHelper.channel(xAOD::identify(spacePoint.secondaryMeasurement()));
+                        phiChannel = idHelper.channel(spacePoint.secondaryMeasurement()->identify());
                     }
                 }
                 break;

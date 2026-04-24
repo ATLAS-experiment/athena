@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CaloIdentifier/src/Tile_Base_ID.cxx
@@ -1712,14 +1712,14 @@ int Tile_Base_ID::initLevelsFromDict (const std::string& group_name)
   m_adc_impl     = region.implementation(m_ADC_INDEX);
 
   ATH_MSG_DEBUG("initLevelsFromDict decode index and bit fields for each level: "             );
-  ATH_MSG_DEBUG(" system   [" << m_SYSTEM_INDEX   << "]  " << m_system_impl.show_to_string()  );
-  ATH_MSG_DEBUG(" section  [" << m_SECTION_INDEX  << "]  " << m_section_impl.show_to_string() );
-  ATH_MSG_DEBUG(" side     [" << m_SIDE_INDEX     << "]  " << m_side_impl.show_to_string()    );
-  ATH_MSG_DEBUG(" module   [" << m_MODULE_INDEX   << "]  " << m_module_impl.show_to_string()  );
-  ATH_MSG_DEBUG(" tower    [" << m_TOWER_INDEX    << "]  " << m_tower_impl.show_to_string()   );
-  ATH_MSG_DEBUG(" sampling [" << m_SAMPLE_INDEX   << "]  " << m_sample_impl.show_to_string()  );
-  ATH_MSG_DEBUG(" pmt      [" << m_PMT_INDEX      << "]  " << m_pmt_impl.show_to_string()     );
-  ATH_MSG_DEBUG(" adc      [" << m_ADC_INDEX      << "]  " << m_adc_impl.show_to_string()     );
+  ATH_MSG_DEBUG(" system   [" << m_SYSTEM_INDEX   << "]  " << m_system_impl  );
+  ATH_MSG_DEBUG(" section  [" << m_SECTION_INDEX  << "]  " << m_section_impl );
+  ATH_MSG_DEBUG(" side     [" << m_SIDE_INDEX     << "]  " << m_side_impl    );
+  ATH_MSG_DEBUG(" module   [" << m_MODULE_INDEX   << "]  " << m_module_impl  );
+  ATH_MSG_DEBUG(" tower    [" << m_TOWER_INDEX    << "]  " << m_tower_impl   );
+  ATH_MSG_DEBUG(" sampling [" << m_SAMPLE_INDEX   << "]  " << m_sample_impl  );
+  ATH_MSG_DEBUG(" pmt      [" << m_PMT_INDEX      << "]  " << m_pmt_impl     );
+  ATH_MSG_DEBUG(" adc      [" << m_ADC_INDEX      << "]  " << m_adc_impl     );
 
   return(0) ;
 }

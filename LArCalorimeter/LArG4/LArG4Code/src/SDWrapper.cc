@@ -10,6 +10,7 @@
 // Project includes
 #include "LArSimEvent/LArHitContainer.h"
 #include "CaloSimEvent/CaloCalibrationHitContainer.h"
+#include "CaloSimEvent/SrCaloCalibrationHitContainer.h"
 
 // Local includes
 #include "LArG4Code/LArG4SimpleSD.h"
@@ -31,7 +32,10 @@ namespace LArG4
         m_hitCollName(hitCollectionName),
         m_hitColl(hitCollectionName),
         m_deadHitCollName(deadHitCollectionName),
-        m_deadHitColl(deadHitCollectionName)
+        m_deadHitColl(deadHitCollectionName),
+        m_srHitCollName("SR_" + hitCollectionName),
+        m_srHitColl(m_srHitCollName)
+
     {}
 
     //-------------------------------------------------------------------------
@@ -81,6 +85,15 @@ namespace LArG4
         }
         m_deadHitColl = std::make_unique<HitContainerType>(m_deadHitCollName);
       }
+      // Initialize SR container for CalibSD
+      if(!m_srHitCollName.empty() && !m_srHitColl.isValid()) {
+        if(verboseLevel >= 5) {
+          G4cout << GetName() << " \tDEBUG\t" << "Initializing SR hit container: "
+                 << m_srHitCollName << G4endl;
+        }
+        m_srHitColl = std::make_unique<SrCaloCalibrationHitContainer>(m_srHitCollName);
+      }
+
     }
 
     //-------------------------------------------------------------------------
@@ -148,9 +161,21 @@ namespace LArG4
         }
         deadHitCollPtr = &*m_deadHitColl;
       }
+
+      SrCaloCalibrationHitContainer* srHitCollPtr(nullptr);
+      if(!m_srHitCollName.empty()) {
+        if(!m_srHitColl.isValid()) {
+          G4cerr << GetName() << " \tERROR\t" << "SR Hit collection WriteHandle is "
+                  << "invalid!" << G4endl;
+          throw std::runtime_error("Invalid SR hit container WriteHandle: " +
+                                    m_srHitColl.name());
+        }
+        srHitCollPtr = &*m_srHitColl;
+      }
+
       // Loop over each SD and fill the container
       for(auto& sd : m_sdList) {
-        sd->EndOfAthenaEvent( &*m_hitColl, deadHitCollPtr );
+        sd->EndOfAthenaEvent( &*m_hitColl, deadHitCollPtr, srHitCollPtr );
       }
       // Gather frozen shower hits
       if(!m_fastSimSDName.empty()) {

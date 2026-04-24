@@ -6,6 +6,7 @@
 #define LARCALIBUTILS_LARPARABOLAPEAKRECOTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
+#include <vector>
 
 /**
   @brief Given a set of multiple samples, this class finds a peak using Parabola fit.
@@ -52,11 +53,10 @@ class LArParabolaPeakRecoTool: public AthAlgTool
  private:
 
   // jobOptions for bias correction 
-  bool m_correctBias;
+  bool m_correctBias{true};
   std::string m_fileShapeName, m_fileADCcorName;
 
   // file and tables for corrections
-  FILE* m_fileShape = nullptr, *m_fileADCcor = nullptr;
   float m_QT_Shape[4][26]{};
   float m_QT_ADCcor[4][25]{};
 };

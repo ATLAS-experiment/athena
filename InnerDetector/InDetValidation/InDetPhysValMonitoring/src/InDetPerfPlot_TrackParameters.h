@@ -22,11 +22,11 @@
 ///class holding Pt plots for Inner Detector RTT Validation and implementing fill methods
 class InDetPerfPlot_TrackParameters: public InDetPlotBase {
 public:
-  InDetPerfPlot_TrackParameters(InDetPlotBase* pParent, const std::string& dirName, bool isITk);
+  InDetPerfPlot_TrackParameters(InDetPlotBase* pParent, const std::string& dirName, bool hasHGTDReco);
   void fill(const xAOD::TrackParticle& particle, float weight);
   void fill(const xAOD::TruthParticle& particle, float weight);
 private:
-  bool m_isITk{false};
+  bool m_hasHGTDReco{false};
 
   TH1* m_reco_d0{};
   TH1* m_reco_z0{};
@@ -55,6 +55,7 @@ private:
   TH1* m_truth_lowpt{};
   TH1* m_truth_prodR{};
   TH1* m_truth_prodZ{};
+  TH1* m_truth_time{};
 
   TH2* m_reco_pt_vs_eta{};
   TH2* m_reco_phi_vs_eta{};

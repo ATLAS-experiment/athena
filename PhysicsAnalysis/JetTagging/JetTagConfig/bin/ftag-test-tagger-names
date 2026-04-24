@@ -4,7 +4,7 @@
 Test that taggers follow flavor tagging naming conventions
 """
 
-from FlavorTagInference.FlavorTagNNConfig import getModifierSet
+from FlavorTagInference.FlavorTagNNConfig import getDependencySet
 
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.Enums import LHCPeriod, ProductionStep
@@ -46,7 +46,7 @@ def run():
                 # we assume a format ending with name/jetcol/network.onnx
                 tagger_name = fold.split('/')[-3]
                 verb_out.write(f'tagger {tagger_name}\n')
-                modset = getModifierSet(tagger_name)
+                modset = getDependencySet(tagger_name)
                 verb_out.write(f'mods: {modset}\n')
     return 0
 

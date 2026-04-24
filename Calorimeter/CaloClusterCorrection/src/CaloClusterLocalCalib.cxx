@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloClusterCorrection/CaloClusterLocalCalib.h"
@@ -18,17 +18,8 @@ using xAOD::CaloCluster;
 CaloClusterLocalCalib::CaloClusterLocalCalib(const std::string& type,
 					     const std::string& name,
 					     const IInterface* parent)
-  :CaloClusterProcessor(type, name, parent),
-   m_classificationTool(this),
-   m_calibTools(this),
-   m_absOpt(false)
+  : CaloClusterProcessor(type, name, parent)
 {
-  m_recoStatus.resize(0);
-  declareProperty ("ClusterClassificationTool",m_classificationTool);
-  declareProperty ("LocalCalibTools",m_calibTools) ;
-  declareProperty ("ClusterRecoStatus",m_recoStatus) ;
-  //Use weighting of negative clusters?
-  declareProperty ("WeightingOfNegClusters",m_absOpt) ;  
 }
 
 

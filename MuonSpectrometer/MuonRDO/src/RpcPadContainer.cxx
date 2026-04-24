@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/Bootstrap.h"
@@ -25,9 +25,16 @@ RpcPadContainer::RpcPadContainer( RpcPad_Cache* cache)
 
 //**********************************************************************
 
-const CLID& RpcPadContainer::classID()
+CLID RpcPadContainer::classID()
 {
   return ClassID_traits<RpcPadContainer>::ID();       
+}
+
+
+const CLID& RpcPadContainer::clID() const
+{
+  static const CLID cid = classID();
+  return cid;
 }
 
 

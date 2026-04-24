@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthContainers/DataVector.icc
@@ -1074,8 +1074,8 @@ DataVector<T, BASE>::push_back(value_type pElem)
   testInsert ("push_back");
   this->m_pCont.push_back(static_cast<typename PtrVector::value_type>(pElem));
   SG::AuxVectorBase::resize<DataVector> (this->size());
-  if (pElem)
-    this->moveAux (this->size()-1, pElem, false, true);
+  if (pElem && this->trackIndices())
+    this->moveAuxNoClear (this->size()-1, pElem);
   return pElem;
 }
 
@@ -1105,8 +1105,8 @@ DataVector<T, BASE>::push_back(std::unique_ptr<base_value_type> pElem)
   value_type ptr = pElem.release();
   this->m_pCont.push_back(ptr);
   SG::AuxVectorBase::resize<DataVector> (this->size());
-  if (ptr)
-    this->moveAux (this->size()-1, ptr, false, true);
+  if (ptr && this->trackIndices())
+    this->moveAuxNoClear (this->size()-1, ptr);
   return ptr;
 }
 
@@ -1134,6 +1134,7 @@ DataVector<T, BASE>::push_new(size_type n, F alloc) -> size_type
 {
   // Ensure we're not being called via a base class.
   testInsert ("push_new");
+  bool trackIndices = this->trackIndices();
 
   size_t sz = this->m_pCont.size();
   this->m_pCont.resize (sz + n);
@@ -1141,7 +1142,9 @@ DataVector<T, BASE>::push_new(size_type n, F alloc) -> size_type
   for (size_t i = 0; i < n; i++) {
     T* p = alloc();
     this->m_pCont[sz+i] = p;
-    this->moveAux (sz+i, p, false, true);
+    if (trackIndices) {
+      this->moveAuxNoClear (sz+i, p);
+    }
   }
   return sz;
 }
@@ -1220,7 +1223,8 @@ DataVector<T, BASE>::insert(iterator position,
   value_type ptr = pElem.release();
   iterator ret (this->m_pCont.insert(position.base(), ptr), this);
   this->shift (ret - this->begin(), 1);
-  this->moveAux (ret-this->begin(), ptr, false, true);
+  if (this->trackIndices())
+    this->moveAuxNoClear (ret-this->begin(), ptr);
   return ret;
 }
 
@@ -2907,8 +2911,8 @@ DATAVECTOR::push_back(value_type pElem)
   testInsert ("push_back");
   m_pCont.push_back(pElem);
   SG::AuxVectorBase::resize<DataVector> (this->size());
-  if (pElem)
-    this->moveAux (this->size()-1, pElem, false, true);
+  if (pElem && this->trackIndices())
+    this->moveAuxNoClear (this->size()-1, pElem);
   return pElem;
 }
 
@@ -2938,8 +2942,8 @@ DATAVECTOR::push_back(std::unique_ptr<base_value_type> pElem)
   value_type ptr = pElem.release();
   m_pCont.push_back(ptr);
   SG::AuxVectorBase::resize<DataVector> (this->size());
-  if (ptr)
-    this->moveAux (this->size()-1, ptr, false, true);
+  if (ptr && this->trackIndices())
+    this->moveAuxNoClear (this->size()-1, ptr);
   return ptr;
 }
 
@@ -2967,6 +2971,7 @@ DATAVECTOR::push_new(size_type n, F alloc) -> size_type
 {
   // Ensure we're not being called via a base class.
   testInsert ("push_new");
+  bool trackIndices = this->trackIndices();
 
   size_t sz = this->m_pCont.size();
   this->m_pCont.resize (sz + n);
@@ -2974,7 +2979,9 @@ DATAVECTOR::push_new(size_type n, F alloc) -> size_type
   for (size_t i = 0; i < n; i++) {
     T* p = alloc();
     this->m_pCont[sz+i] = p;
-    this->moveAux (sz+i, p, false, true);
+    if (trackIndices) {
+      this->moveAuxNoClear (sz+i, p);
+    }
   }
   return sz;
 }
@@ -3024,7 +3031,8 @@ DATAVECTOR::insert(iterator position, value_type pElem)
   testInsert ("insert");
   iterator ret (m_pCont.insert(position.base(), pElem), this);
   this->shift (ret - this->begin(), 1);
-  this->moveAux (ret-this->begin(), pElem, false, true);
+  if (this->trackIndices())
+    this->moveAuxNoClear (ret-this->begin(), pElem);
   return ret;
 }
 
@@ -3054,7 +3062,8 @@ DATAVECTOR::insert(iterator position, std::unique_ptr<base_value_type> pElem)
   value_type ptr = pElem.release();
   iterator ret (m_pCont.insert(position.base(), ptr), this);
   this->shift (ret - this->begin(), 1);
-  this->moveAux (ret-this->begin(), ptr, false, true);
+  if (this->trackIndices())
+    this->moveAuxNoClear (ret-this->begin(), ptr);
   return ret;
 }
 

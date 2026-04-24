@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef TRIGL0GEPPERF_GEPPI0ALG_H
@@ -36,8 +36,8 @@
 #include "CaloEvent/CaloCellContainer.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
 
-#include "Identifier/Identifier.h"
 #include <vector>
+#include <atomic>
 
 class GepPi0Alg: public AthReentrantAlgorithm { 
  public:

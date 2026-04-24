@@ -44,13 +44,12 @@ export ATHENA_CORE_NUMBER=1
 
 run "RAWtoALL" Reco_tf.py \
   --athenaMPEventsBeforeFork "1" \
-  --autoConfiguration "everything" \
   --conditionsTag "all:${default_condition}" \
   --digiSteeringConf "StandardInTimeOnlyTruth" \
   --geometryVersion "all:${default_geometry}" \
   --multithreaded "True" \
   --postInclude "all:PyJobTransforms.UseFrontier" \
-  --preInclude "all:Campaigns.PhaseIIPileUp1" \
+  --preInclude "all:Campaigns.MC23PhaseIIPileUp1" \
   --inputHITSFile ${HSHitsFile} \
   --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles} \
   --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles} \

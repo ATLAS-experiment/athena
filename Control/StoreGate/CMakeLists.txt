@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( StoreGate )
@@ -44,7 +44,6 @@ set( _hivePatterns "JobOptionsSvc +INFO|StoreGateSvc.*DEBUG|HiveMgrSvc +DEBUG" )
 _add_test( ActiveStore_test )
 _add_test( SGTiming_test LOG_IGNORE_PATTERN "${_hivePatterns}|rec:|averages" )
 _add_test( SGHive_test LOG_IGNORE_PATTERN "DataObject @0x|${_hivePatterns}" )
-_add_test( DataHandle_test LOG_IGNORE_PATTERN "this proxy 0x" )
 _add_test( SGIterator_test )
 _add_test( KeyConcept_test )
 _add_test( ClearStore_test LOG_IGNORE_PATTERN "0x[0-9a-fA-F]{4,}" )

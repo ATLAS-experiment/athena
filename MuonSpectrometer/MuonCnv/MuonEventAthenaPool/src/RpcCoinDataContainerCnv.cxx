@@ -41,14 +41,14 @@ Muon::RpcCoinDataContainerCnv_p1::PERS*    RpcCoinDataContainerCnv::createPersis
     return rpc_p;
 }
 
-Muon::RpcCoinDataContainer* RpcCoinDataContainerCnv::createTransient() {
+Muon::RpcCoinDataContainer* RpcCoinDataContainerCnv::createTransient(const Token* token) {
     MsgStream log(msgSvc(), "RpcCoinDataContainerCnv" );
     static const pool::Guid   p1_guid("AF0DB103-E825-45E5-9C29-9C32342756DD"); 
-    if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(): main converter"<<endmsg;
+    if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(const Token* token): main converter"<<endmsg;
     Muon::RpcCoinDataContainer* p_collection(nullptr);
-    if( compareClassGuid(p1_guid) ) {
-        if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(): T/P version 1 detected"<<endmsg;
-        std::unique_ptr< Muon::RpcCoinDataContainerCnv_p1::PERS >   col_vect( poolReadObject< Muon::RpcCoinDataContainerCnv_p1::PERS >() );
+    if( compareClassGuid(token, p1_guid) ) {
+        if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(const Token* token): T/P version 1 detected"<<endmsg;
+        std::unique_ptr< Muon::RpcCoinDataContainerCnv_p1::PERS >   col_vect( poolReadObject< Muon::RpcCoinDataContainerCnv_p1::PERS >(token) );
         if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Delegate TP converter " << endmsg;
         p_collection = m_converter_p1.createTransient( col_vect.get(), log );
     } else {

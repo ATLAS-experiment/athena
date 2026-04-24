@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file xAODCore/JaggedVec.h
@@ -21,7 +21,7 @@
 #include "xAODCore/tools/JaggedVecPersVector.h"
 
 
-// Macro for declaring a packed link variable.  This should be used
+// Macro for declaring a jagged vector variable.  This should be used
 // in the definition for the container class.  For example, this:
 //   <code>
 //     AUXVAR_JAGGEDVEC_DECL( int, intVec );

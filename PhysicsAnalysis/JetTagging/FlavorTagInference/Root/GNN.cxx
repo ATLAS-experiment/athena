@@ -3,10 +3,10 @@
 */
 
 #include "FlavorTagInference/GNN.h"
+#include "FlavorTagInference/FPCompressionUtils.h"
 #include "FlavorTagInference/SaltModel.h"
 #include "FlavorTagInference/GNNOptions.h"
 #include "FlavorTagInference/StringUtils.h"
-
 #include "xAODJet/JetContainer.h"
 
 #include "PathResolver/PathResolver.h"
@@ -99,7 +99,8 @@ namespace FlavorTagInference {
       dec(i_jet) = v;
     }
     // for some networks we need to set a lot of empty vectors as well
-    if (m_saltModel->getSaltModelVersion() == SaltModelVersion::V1) {
+    if (m_saltModel->getSaltModelVersion() == SaltModelVersion::V1
+     || m_saltModel->getSaltModelVersion() == SaltModelVersion::V2) {
       // vector outputs, e.g. track predictions
       for (const auto& dec: m_decorators.jetVecChar) {
         dec.second(i_jet) = {};
@@ -107,7 +108,13 @@ namespace FlavorTagInference {
       for (const auto& dec: m_decorators.jetVecFloat) {
         dec.second(i_jet) = {};
       }
-      for (const auto& dec: m_decorators.jetTrackLinks) {
+      for (const auto& [name, loader] : m_dataLoader.vectorVarLoaders) {
+        loader->setDefaults(i_jet);
+      }
+      for (const auto& dec: m_decorators.jetVecInt) {
+        dec.second(i_jet) = {};
+      }
+      for (const auto& dec: m_decorators.jetVecTruncFloat) {
         dec.second(i_jet) = {};
       }
     }
@@ -117,8 +124,6 @@ namespace FlavorTagInference {
     /* Main function for decorating a i_jet object with GNN outputs. */
     SaltModelData salt_model_data = m_dataLoader.loadInputs(&i_jet);
     // DumpGnnInputs(salt_model_data.gnn_inputs);
-    auto input_tracks = salt_model_data.constituents.at("track_features");
-
 
     // run inference
     // -------------
@@ -141,7 +146,8 @@ namespace FlavorTagInference {
       }
     }
     // the new metadata format supports writing aux tasks
-    else if (m_saltModel->getSaltModelVersion() == SaltModelVersion::V1) {
+    else if (m_saltModel->getSaltModelVersion() == SaltModelVersion::V1
+          || m_saltModel->getSaltModelVersion() == SaltModelVersion::V2) {
       // float outputs, e.g. i_jet probabilities
       for (const auto& dec: m_decorators.jetFloat) {
         dec.second(i_jet) = out_f.at(dec.first);
@@ -153,19 +159,24 @@ namespace FlavorTagInference {
       for (const auto& dec: m_decorators.jetVecFloat) {
         dec.second(i_jet) = out_vf.at(dec.first);
       }
-
-      // decorate links to the input tracks to the b-tagging object
-      for (const auto& dec: m_decorators.jetTrackLinks) {
-        TrackLinks links;
-        for (const xAOD::IParticle* it: input_tracks) {
-          TrackLinks::value_type link;
-          const auto* itc = dynamic_cast<const xAOD::TrackParticleContainer*>(
-            it->container());
-          link.toIndexedElement(*itc, it->index());
-          links.push_back(link);
-        }
-        dec.second(i_jet) = links;
+      for (const auto& dec: m_decorators.jetVecInt) {
+        const auto& floats = out_vf.at(dec.first);
+        std::vector<int> ints(floats.begin(), floats.end());
+        dec.second(i_jet) = ints;
       }
+      for (size_t idx = 0; idx < m_decorators.jetVecTruncFloat.size(); ++idx) {
+        const auto& dec = m_decorators.jetVecTruncFloat[idx];
+        const auto& floats = out_vf.at(dec.first);
+        const float scale = m_truncFloatScales[idx];
+        const int E = m_truncFloatBits[idx].first;
+        const int M = m_truncFloatBits[idx].second;
+        std::vector<float> truncated(floats.size());
+        for (size_t i = 0; i < floats.size(); ++i) {
+          truncated[i] = FPCompressionUtils::truncateToFloat(floats[i] * scale, E, M);
+        }
+        dec.second(i_jet) = truncated;
+      }
+
     }
     else {
       throw std::logic_error("unsupported ONNX metadata version");
@@ -215,23 +226,17 @@ namespace FlavorTagInference {
         case SaltModelOutput::OutputType::VECFLOAT:
           m_decorators.jetVecFloat.emplace_back(outNode.name, Dec<std::vector<float>>(dec_name));
           break;
+        case SaltModelOutput::OutputType::VECINT:
+          m_decorators.jetVecInt.emplace_back(outNode.name, Dec<std::vector<int>>(dec_name));
+          break;
+        case SaltModelOutput::OutputType::VECTRUNCFLOAT:
+          m_decorators.jetVecTruncFloat.emplace_back(outNode.name, Dec<std::vector<float>>(dec_name));
+          m_truncFloatScales.push_back(outNode.scale);
+          m_truncFloatBits.emplace_back(outNode.exp_bits, outNode.man_bits);
+          break;
         default:
           throw std::logic_error("Unknown output data type");
       }
-    }
-
-    // Create decorators for links to the input tracks
-    if (!m_decorators.jetVecChar.empty() || !m_decorators.jetVecFloat.empty()) {
-      std::string name = m_saltModel->getModelName() + "_TrackLinks";
-
-      // modify the deco name if we're using flip taggers
-      if (options.flip != FlipTagConfig::STANDARD) {
-        name = str::sub_first(flip_converters, name, context);
-      }
-
-      name = str::remapName(name, remap, usedRemap);
-      deps.bTagOutputs.insert(name);
-      m_decorators.jetTrackLinks.emplace_back(name, Dec<TrackLinks>(name));
     }
 
     return std::make_tuple(deps, usedRemap);

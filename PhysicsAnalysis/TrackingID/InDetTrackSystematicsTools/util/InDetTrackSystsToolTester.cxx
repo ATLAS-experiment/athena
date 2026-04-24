@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // System includes:
@@ -22,6 +22,7 @@
 // EDM includes:
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/TrackParticleContainer.h"
+#include "AthContainers/CurrentContext.h"
 
 // Local include(s):
 #include "InDetTrackSystematicsTools/InDetTrackSmearingTool.h"
@@ -189,8 +190,10 @@ int main( int argc, char* argv[] ) {
         CHECK( event.retrieve( jets, jetCollectionName ) );
       }
 
-      std::pair< xAOD::TrackParticleContainer*, xAOD::ShallowAuxContainer* > ParticlesID_shallowCopy = xAOD::shallowCopyContainer( *ParticlesID );
-      for ( xAOD::TrackParticle* trkCpy : *(ParticlesID_shallowCopy.first) ) {
+      std::pair< std::unique_ptr<xAOD::TrackParticleContainer>,
+                 std::unique_ptr<xAOD::ShallowAuxContainer> > ParticlesID_shallowCopy =
+        xAOD::shallowCopyContainer( *ParticlesID, Gaudi::Hive::currentContext() );
+      for ( xAOD::TrackParticle* trkCpy : *ParticlesID_shallowCopy.first ) {
 
          if ( isSim ) {
            if ( !filterTool.accept(trkCpy) ) continue;
@@ -239,10 +242,6 @@ int main( int argc, char* argv[] ) {
          z0_diff->Fill( z0d );
          qOverP_diff->Fill( qOverPd );
       }
-
-      delete ParticlesID_shallowCopy.first;
-      delete ParticlesID_shallowCopy.second;
-
    }
    
    outfile->Write();

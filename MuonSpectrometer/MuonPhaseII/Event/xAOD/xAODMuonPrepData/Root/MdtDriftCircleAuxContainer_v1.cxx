@@ -15,7 +15,6 @@ namespace xAOD {
 MdtDriftCircleAuxContainer_v1::MdtDriftCircleAuxContainer_v1()
     : AuxContainerBase() {
     /// Identifier variable hopefully unique
-    AUX_VARIABLE(identifier);
     AUX_VARIABLE(identifierHash);
   
     AUX_MEASUREMENTVAR(localPosition, 1)

@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
-#ifndef _INC_BASE_INTERPOLATED_E_ETA_BIN_SYSTEM_
-#define _INC_BASE_INTERPOLATED_E_ETA_BIN_SYSTEM_
+#ifndef EFLOWREC_EFLOWEETABINBASE_H
+#define EFLOWREC_EFLOWEETABINBASE_H
 
 /********************************************************************
 

@@ -8,7 +8,7 @@ atlas_subdir( SystematicsHandles )
 atlas_add_library( SystematicsHandlesLib
    SystematicsHandles/*.h SystematicsHandles/*.icc Root/*.cxx
    PUBLIC_HEADERS SystematicsHandles
-   LINK_LIBRARIES AsgTools PATInterfaces AnaAlgorithmLib xAODBase xAODCore AthContainers xAODEventInfo
+   LINK_LIBRARIES AsgTools PATInterfaces AnaAlgorithmLib xAODBase xAODCore AthContainers xAODEventInfo xAODMissingET
    AsgServicesLib AsgDataHandlesLib CxxUtils
    PRIVATE_LINK_LIBRARIES RootCoreUtils
    xAODJet xAODMuon xAODEgamma xAODTau )

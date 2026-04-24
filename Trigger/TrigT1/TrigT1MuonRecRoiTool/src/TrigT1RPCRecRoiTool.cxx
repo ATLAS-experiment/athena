@@ -197,6 +197,9 @@ namespace LVL1 {
       return false;
     }
     
+    if (!checkRPCId(EtaLowBorder_id, *muonMgr) || !checkRPCId(EtaHighBorder_id, *muonMgr)) {
+        return false;
+    }
   
     const MuonGM::RpcReadoutElement* EtaLowBorder_descriptor =
       muonMgr->getRpcReadoutElement(EtaLowBorder_id);
@@ -254,6 +257,9 @@ namespace LVL1 {
       return false;
     }
 
+    if (!checkRPCId(EtaLowBorder_id, *muonMgr) || !checkRPCId(EtaHighBorder_id, *muonMgr)) {
+        return false;
+    }
     const MuonGM::RpcReadoutElement* EtaLowBorder_descriptor =
       muonMgr->getRpcReadoutElement(EtaLowBorder_id);
     if(EtaLowBorder_descriptor==nullptr){
@@ -279,6 +285,21 @@ namespace LVL1 {
     }
     return true;
   }
-  
+
+bool TrigT1RPCRecRoiTool::checkRPCId(const Identifier& id, const MuonGM::MuonDetectorManager& muonMgr) const 
+{
+    const int detEleHash = static_cast<int>(m_idHelperSvc->detElementHash(id));
+    const int maxHash = static_cast<int>(muonMgr.nRpcRE());
+    if (detEleHash < 0 || detEleHash >= maxHash) {
+        ATH_MSG_WARNING("Legacy cabling produced invalid RPC id: "<<m_idHelperSvc->toString(id) << " with hash: " << detEleHash << ". Valid range is [0, " << maxHash-1 << "].");
+        return false;
+    }
+    const MuonGM::RpcReadoutElement* reEle = muonMgr.getRpcReadoutElement(id);
+    if (m_idHelperSvc->rpcIdHelper().doubletPhi(id) > reEle->NphiStripPanels()) {
+        ATH_MSG_WARNING("Legacy cabling produced invalid RPC id: "<<m_idHelperSvc->toString(id) << " , dbPhi out of range [1, " << reEle->NphiStripPanels() << "]:");
+        return false;
+    }
+    return true;
+};
   
 }

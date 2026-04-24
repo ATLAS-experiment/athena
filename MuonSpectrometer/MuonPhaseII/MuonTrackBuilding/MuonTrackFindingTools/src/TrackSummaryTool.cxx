@@ -37,25 +37,24 @@ namespace MuonR4 {
                     status = Stat_t::Hole;
                 }
                 if (state.hasUncalibratedSourceLink()) {
-                    const auto* meas = xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());
-                    // for the combined sTgc space point we have to fill the primary and secodnray measuremment seperately to resolve the strip/pad/wire combinations
-                    if(meas->type() == xAOD::UncalibMeasType::sTgcStripType && meas->numDimensions() == 0){
-                        const auto* combinedMeas = static_cast<const xAOD::CombinedMuonStrip*>(meas);
-                        incrementSummary(xAOD::identify(combinedMeas->primaryStrip()), status, combinedMeas->primaryStrip()->numDimensions(), summary);
-                        incrementSummary(xAOD::identify(combinedMeas->secondaryStrip()), status, combinedMeas->secondaryStrip()->numDimensions(), summary);
+                    const auto* uncalib = dynamic_cast<const xAOD::MuonMeasurement*>(xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink()));
+                    // for the combined sTgc space point we have to fill the primary and secondary measuremment seperately to resolve the strip/pad/wire combinations
+                    if(uncalib->type() == xAOD::UncalibMeasType::sTgcStripType && uncalib->numDimensions() == 0){
+                        const auto* combinedMeas = dynamic_cast<const xAOD::CombinedMuonStrip*>(uncalib);
+                        incrementSummary(combinedMeas->primaryStrip()->identify(), status, combinedMeas->primaryStrip()->numDimensions(), summary);
+                        incrementSummary(combinedMeas->secondaryStrip()->identify(), status, combinedMeas->secondaryStrip()->numDimensions(), summary);
                         
                     } else {
-                        incrementSummary(xAOD::identify(meas), status, meas->numDimensions(), summary);
+                        incrementSummary(uncalib->identify(), status, uncalib->numDimensions(), summary);
                     }
                 } else if (state.hasReferenceSurface()) {
                     const Acts::Surface& surf{state.referenceSurface()};
                     /// Surface is not active
-                    const Acts::SurfacePlacementBase* detEl = surf.surfacePlacement();
+                    const auto* detEl = dynamic_cast<const ActsTrk::IDetectorElementBase*>(surf.surfacePlacement());
                     if (!detEl) {
                         return;
                     }
-                    incrementSummary(static_cast<const ActsTrk::IDetectorElementBase*>(detEl)->identify(),
-                                     status, 1, summary);
+                    incrementSummary(detEl->identify(), status, 1, summary);
                 }
         });
         ATH_MSG_DEBUG("Obtained track summary from track with "<<Acts::toString(trackProxy.fourMomentum())
@@ -98,13 +97,21 @@ namespace MuonR4 {
                 cat1 = Cat_t::TriggerEta;
             }
         } else if (techIdx == TechIdx::STGC) {
-            if(m_idHelperSvc->stgcIdHelper().channelType(hitId) == sTgcIdHelper::sTgcChannelTypes::Pad){
-                cat1 = Cat_t::sTgcPad;
-            } else if (m_idHelperSvc->stgcIdHelper().channelType(hitId) == sTgcIdHelper::sTgcChannelTypes::Wire){
-                cat1 = Cat_t::TriggerPhi;
-            } else if (m_idHelperSvc->stgcIdHelper().channelType(hitId) == sTgcIdHelper::sTgcChannelTypes::Strip){
-                cat1 = Cat_t::Precision;
-            }
+            switch(m_idHelperSvc->stgcIdHelper().channelType(hitId)) {
+                case sTgcIdHelper::sTgcChannelTypes::Pad:{
+                    cat1 = Cat_t::sTgcPad;
+                    break;
+                } case sTgcIdHelper::sTgcChannelTypes::Wire: {
+                    cat1 = Cat_t::TriggerPhi;
+                    break;
+                }  case sTgcIdHelper::sTgcChannelTypes::Strip:{
+                    cat1 = Cat_t::Precision;
+                    break;
+                } default: {
+                    ATH_MSG_ERROR(__FILE__ << ":" << __LINE__ << " Unknown stgc channel type");
+                    break;
+                }
+            }            
         } else {
             ATH_MSG_ERROR(__FILE__ << ":" << __LINE__ << "  Unkown technology index "<<static_cast<int>(techIdx));
             return;
@@ -136,15 +143,15 @@ namespace MuonR4 {
                 const std::size_t nHits = nMeasurements(*seg);
                 for (std::size_t hit = 0; hit < nHits; ++hit) {
                     Stat_t state = isOutlierMeasurement(*seg, hit) ? Stat_t::Outlier : Stat_t::OnTrack;
-                    const auto * meas = getMeasurement(*seg, hit);
+                    const auto* uncalibMeas = dynamic_cast<const xAOD::MuonMeasurement*>(getMeasurement(*seg, hit));
                     // for the combined sTgc space point we have to fill the primary and secodnray measuremment seperately to resolve the strip/pad/wire combinations
-                    if(meas->type() == xAOD::UncalibMeasType::sTgcStripType && meas->numDimensions() == 0){
-                        const auto* combinedMeas = static_cast<const xAOD::CombinedMuonStrip*>(meas);
-                        incrementSummary(xAOD::identify(combinedMeas->primaryStrip()), state, combinedMeas->primaryStrip()->numDimensions(), summary);
-                        incrementSummary(xAOD::identify(combinedMeas->secondaryStrip()), state, combinedMeas->secondaryStrip()->numDimensions(), summary);
+                    if(uncalibMeas->type() == xAOD::UncalibMeasType::sTgcStripType && uncalibMeas->numDimensions() == 0){
+                        const auto* combinedMeas = static_cast<const xAOD::CombinedMuonStrip*>(uncalibMeas);
+                        incrementSummary(combinedMeas->primaryStrip()->identify(), state, combinedMeas->primaryStrip()->numDimensions(), summary);
+                        incrementSummary(combinedMeas->secondaryStrip()->identify(), state, combinedMeas->secondaryStrip()->numDimensions(), summary);
                         
                     } else {
-                        incrementSummary(xAOD::identify(meas), state, meas->numDimensions(), summary);
+                        incrementSummary(uncalibMeas->identify(), state, uncalibMeas->numDimensions(), summary);
                     }
                 }
             }

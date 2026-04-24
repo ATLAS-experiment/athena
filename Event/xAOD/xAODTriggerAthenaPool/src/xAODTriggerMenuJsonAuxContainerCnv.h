@@ -34,7 +34,7 @@ protected:
 
    /// Function reading in the object from the input file
    virtual xAOD::TriggerMenuJsonAuxContainer*
-   createTransientWithKey( const std::string& key ) override;
+   createTransientWithKey( const Token* token, const std::string& key ) override;
 
 }; // class xAODTriggerMenuJsonAuxContainerCnv
 

@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/AuxElement.icc
@@ -674,6 +674,20 @@ inline
 void AuxElement::setNonConstStore (SG::IAuxStore* store)
 {
   setStore (store);
+}
+
+
+/**
+ * @brief Return true if this object has an associated store.
+ *
+ * This will be true for either a private or standalone store.
+ */
+inline
+bool AuxElement::hasStore() const
+{
+  if (havePrivateData())
+    return m_container->hasStore();
+  return false;
 }
 
 

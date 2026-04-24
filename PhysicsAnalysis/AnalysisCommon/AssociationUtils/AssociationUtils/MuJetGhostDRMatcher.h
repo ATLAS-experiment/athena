@@ -57,7 +57,7 @@ namespace ORUtils
       std::unique_ptr<IParticleAssociator> m_drMatcher;
 
       /// IDTrack type
-      using MyTrackDef = columnar::VariantContainerId<columnar::ContainerId::track0,columnar::ContainerId::track0, columnar::ContainerId::track1>;
+      using MyTrackDef = columnar::VariantContainerId<columnar::Track0Def,columnar::Track0Def, columnar::Track1Def>;
 
       columnar::Particle1Accessor<columnar::ObjectLink<MyTrackDef>> m_muonTrkAcc {*this, "inDetTrackParticleLink"};
 

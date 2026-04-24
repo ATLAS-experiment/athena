@@ -22,6 +22,3 @@ atlas_add_component( BeamHaloGenerator
                      src/components/*.cxx
                      LINK_LIBRARIES BeamHaloGeneratorLib )
 
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
-

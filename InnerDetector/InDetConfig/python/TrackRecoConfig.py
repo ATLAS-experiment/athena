@@ -817,7 +817,11 @@ def InDetTrackRecoCfg(flags):
     if flags.Detector.GeometryITk:
         from InDetConfig.ITkTrackRecoConfig import ITkTrackRecoCfg
         return ITkTrackRecoCfg(flags)
-
+    # Bypass to ACTS Inner Detector config
+    from TrkConfig.TrkConfigFlags import TrackingComponent
+    if TrackingComponent.ActsChain in flags.Tracking.recoChain:
+        from InDetConfig.ActsTrackRecoConfig import ActsTrackRecoCfg
+        return ActsTrackRecoCfg(flags)
     """Configures complete ID tracking """
     result = ComponentAccumulator()
     result.merge(InDetPreProcessingCfg(flags))

@@ -99,6 +99,14 @@ def getEFInterfaceSvc(flags, name='EFInterfaceSvc'):
         NumEvents    = ef.NumEvents,
         SkipEvents   = ef.SkipEvents,
         RunNumber    = ef.RunNumber,
+        T0ProjectTag = ef.T0ProjectTag,
+        BeamType     = ef.BeamType,
+        BeamEnergy   = ef.BeamEnergy,
+        TriggerType  = ef.TriggerType,
+        Stream       = ef.Stream,
+        Lumiblock    = ef.Lumiblock,
+        DetMask      = ef.DetMask,
+        EFDFInterfaceLibraryName = ef.LibraryName,
         )
 
 def TrigByteStreamCfg(flags, type_names=[]):

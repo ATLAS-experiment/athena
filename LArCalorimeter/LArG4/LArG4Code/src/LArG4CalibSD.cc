@@ -13,6 +13,8 @@
 #include "CaloIdentifier/LArHEC_ID.h"
 #include "CaloIdentifier/CaloDM_ID.h"
 #include "CaloSimEvent/CaloCalibrationHitContainer.h"
+#include "CaloSimEvent/SrCaloCalibrationHitContainer.h"
+
 
 #include "G4RunManager.hh"
 #include "MCTruth/AtlasG4EventUserInfo.h"
@@ -53,12 +55,18 @@ G4bool LArG4CalibSD::ProcessHits(G4Step* a_step,G4TouchableHistory*)
   // happens, it means that the geometry definitions in the
   // detector-construction routine and the calculator do not agree.)
   LArG4Identifier identifier;
+  LArG4Identifier identifier_sr;
   std::vector<G4double>  energies;
 
-  if(!(m_calculator->Process(a_step, identifier, energies))) {
-    m_numberInvalidHits++;
+  if (!(m_calculator->Process(a_step, identifier, identifier_sr, energies, LArG4::kEnergyAndID))) {
     return false;
   }
+
+  // Process SR hit if provided
+  // Probably want to add a flag to enable/disable this
+  if(identifier_sr != LArG4Identifier()) {
+      SrHit(identifier, identifier_sr, energies, m_calibrationHitsSr);
+    }
 
   if(m_id_helper) {
     Identifier id = this->ConvertID( identifier );
@@ -66,7 +74,7 @@ G4bool LArG4CalibSD::ProcessHits(G4Step* a_step,G4TouchableHistory*)
       return SimpleHit( identifier, energies, m_deadCalibrationHits );
     }
   }
-  return SimpleHit( identifier, energies, m_calibrationHits );
+  return SimpleHit( identifier , energies, m_calibrationHits );
 }
 
 G4bool LArG4CalibSD::SimpleHit( const LArG4Identifier& a_ident , const std::vector<double>& energies, m_calibrationHits_t& calibrationHits ){
@@ -164,42 +172,187 @@ G4bool LArG4CalibSD::SpecialHit(G4Step* a_step,
                                 const std::vector<G4double>& a_energies)
 {
   LArG4Identifier identifier;
+  LArG4Identifier identifier_sr;
   std::vector<G4double>  vtmp;
 
   // If we can't calculate the identifier, something is wrong.
-  if (!(m_calculator->Process( a_step, identifier, vtmp, LArG4::kOnlyID))) return false;
+  if (!(m_calculator->Process(a_step, identifier, identifier_sr, vtmp, LArG4::kOnlyID))) {
+    return false;
+}
+  if (identifier_sr != LArG4Identifier()) {
+      SrHit(identifier, identifier_sr, a_energies, m_calibrationHitsSr);
+    }
+  else {
+    // G4cout << "SpecialHit: No SR identifier provided." << G4endl;
+  }
 
   return SimpleHit( identifier , a_energies, m_calibrationHits );
 } 
- 
 
-void LArG4CalibSD::EndOfAthenaEvent( CaloCalibrationHitContainer * hitContainer, CaloCalibrationHitContainer * deadHitContainer )
+G4bool LArG4CalibSD::SrHit(const LArG4Identifier& a_ident, const LArG4Identifier& sr_id, 
+                           const std::vector<double>& energies, m_calibrationHits_t& calibrationHitsSr)
 {
-  if(verboseLevel>4) {
-    G4cout << "EndOfAthenaEvent: " << SensitiveDetectorName << " m_deadCalibrationHits.size() = " << m_deadCalibrationHits.size() << G4endl;
+  // Get particle ID (same as in SimpleHit)
+  int particleID{HepMC::UNDEFINED_ID};
+  int particleUID{HepMC::UNDEFINED_ID};
+  if(m_doPID) {
+    AtlasG4EventUserInfo* atlasG4EvtUserInfo = dynamic_cast<AtlasG4EventUserInfo*>(
+    G4RunManager::GetRunManager()->GetCurrentEvent()->GetUserInformation());
+    if(atlasG4EvtUserInfo) {
+      particleID = HepMC::barcode(atlasG4EvtUserInfo->GetCurrentPrimaryGenParticle());
+      particleUID = HepMC::uniqueID(atlasG4EvtUserInfo->GetCurrentPrimaryGenParticle());
+    }
   }
-  if(hitContainer) {
-    // Loop through the hits...
-    for(auto *hit : m_calibrationHits) {
-      // Because of the design, we are sure this is going into the right hit container
-      // Can we actually do this with move?
-      hitContainer->push_back(hit);
-    } // End of loop over hits
+
+  Identifier sr_id_converted = ConvertSRID(sr_id, a_ident);
+
+  // Skip trivially small energy deposits (same as in SimpleHit, but with a looser threshold)
+  if(energies[0]+energies[1]+energies[3] < 0.00001*CLHEP::eV && std::abs(energies[2]) < 0.00001*CLHEP::eV) {
+    return true;
   }
-  // Clean up
-  m_calibrationHits.clear();
-  if(deadHitContainer) {
-    // Loop through the hits...
-    for(auto *hit : m_deadCalibrationHits) {
-      // Because of the design, we are sure this is going into the right hit container
-      // Can we actually do this with move?
-      deadHitContainer->push_back(hit);
-    } // End of loop over hits
+
+  CaloCalibrationHit* hit = new CaloCalibrationHit(sr_id_converted,
+                          energies[0],
+                          energies[1],
+                          energies[2],
+                          energies[3],
+                          particleID,
+                          particleUID);
+
+  // Look for the key in the hitCollection (this is a binary search).
+  auto bookmark = calibrationHitsSr.lower_bound(hit);
+
+  if (bookmark == calibrationHitsSr.end() ||
+      !(*bookmark)->Equals(hit)) {
+    // We haven't had a hit in this readout cell before.  Add it
+    // to our set.
+    if (calibrationHitsSr.empty() ||
+        bookmark == calibrationHitsSr.begin()) {
+    // Insert the hit before the first entry in the map.
+      calibrationHitsSr.insert(hit);
+    } else {
+      // We'just done a binary search of hitCollection, so we should use
+      // the results of that search to speed up the insertion of a new
+      // hit into the map.  The "insert" method is faster if the new
+      // entry is right _after_ the bookmark.  If we left bookmark
+      // unchanged, the new entry would go right _before_ the
+      // bookmark.  We therefore want to decrement the bookmark from
+      // the lower_bound search.
+              
+      calibrationHitsSr.insert(--bookmark, hit);
+    }
+    } else {
+      // Update the existing hit.
+      (*bookmark)->Add(hit);
+          
+      // We don't need our previously-created hit anymore.
+      delete hit;
+    }
+      // G4cout << "Full ID" << std::hex << sr_id_converted.get_compact() << std::dec << G4endl;
+      return true;
   }
-  // Clean up
-  m_deadCalibrationHits.clear();
+
+
+Identifier LArG4CalibSD::ConvertSRID(const LArG4Identifier& sr_id, const LArG4Identifier& lr_id) const
+{
+    // First convert the LR ID to a standard Identifier
+
+    // G4cout << "Lr_id" << std::hex << lr_id[0] << std::dec << G4endl;
+    Identifier base_id = ConvertID(lr_id);
+
+    // Print the base ID for debugging
+    // G4cout << "ConvertSRID: Base ID = " << std::hex << base_id.get_compact() << std::dec << G4endl;
+    
+    // If base conversion failed, we can't proceed
+    if (!base_id.is_valid()){
+      Identifier wrong_id = Identifier();
+      wrong_id.set_literal(0xffffffffffffffff);
+      return wrong_id;
+    }
+    
+    // Create a value containing the SR ID in the lower 32 bits
+    Identifier::value_type sr_value = static_cast<Identifier::value_type>(sr_id[0] & 0xFFFF);
+
+    // G4cout << "ConvertSRID: SR ID = " << std::hex << sr_value << std::dec << G4endl;
+    
+    // Combine the base ID (upper 32 bits) with the SR ID (lower 32 bits)
+    // First clear any lower 32 bits that might be present
+    Identifier::value_type combined_value = (base_id.get_compact() & 0xFFFFFFFF00000000ULL) | sr_value;
+
+    // Create a new identifier with the combined value
+    Identifier result;
+
+    result.set_literal(combined_value);
+    
+
+    // G4cout << "ConvertSRID: Result ID = " << std::hex << result2.get_compact() << std::dec << G4endl;
+    // // Print the result
+    // G4cout << "ConvertSRID: Combined ID = " << result.get_compact() << G4endl;
+    return result;
 }
 
+void LArG4CalibSD::EndOfAthenaEvent(CaloCalibrationHitContainer* hitContainer, 
+                  CaloCalibrationHitContainer* deadHitContainer)
+{
+  G4cout << "EndOfAthenaEvent: " << SensitiveDetectorName << " m_deadCalibrationHits.size() = " 
+        << m_deadCalibrationHits.size() << G4endl;
+
+  // Process regular hits
+  if (hitContainer) {
+    for (auto* hit : m_calibrationHits) {
+      hitContainer->push_back(hit);
+    }
+  }
+  m_calibrationHits.clear();
+
+  // Process dead material hits  
+  if (deadHitContainer) {
+    for (auto* hit : m_deadCalibrationHits) {
+      deadHitContainer->push_back(hit);
+    }
+  }
+  m_deadCalibrationHits.clear();
+
+  if (!m_calibrationHitsSr.empty()) {
+    G4cout << "WARNING: " << m_calibrationHitsSr.size() << " SR hits discarded (no SR container provided)" << G4endl;
+    for (auto* hit : m_calibrationHitsSr) {
+      delete hit;  // Clean up memory
+    }
+  }
+  m_calibrationHitsSr.clear();
+}
+
+void LArG4CalibSD::EndOfAthenaEvent(CaloCalibrationHitContainer* hitContainer, 
+                                    CaloCalibrationHitContainer* deadHitContainer,
+                                    SrCaloCalibrationHitContainer* srHitContainer)
+{
+  // Process regular hits
+  if (hitContainer) {
+    for (auto* hit : m_calibrationHits) {
+      hitContainer->push_back(hit);
+    }
+  }
+  m_calibrationHits.clear();
+
+  // Process dead material hits
+  if (deadHitContainer) {
+    for (auto* hit : m_deadCalibrationHits) {
+      deadHitContainer->push_back(hit);
+    }
+  }
+  m_deadCalibrationHits.clear();
+
+  if (srHitContainer) {    
+    for (auto* hit : m_calibrationHitsSr) {
+      srHitContainer->push_back(hit);
+    }
+  } else if (!m_calibrationHitsSr.empty()) {
+    for (auto* hit : m_calibrationHitsSr) {
+      delete hit;  // Clean up memory
+    }
+  }
+  m_calibrationHitsSr.clear();
+}
 
 Identifier LArG4CalibSD::ConvertID(const LArG4Identifier& a_ident) const
 {

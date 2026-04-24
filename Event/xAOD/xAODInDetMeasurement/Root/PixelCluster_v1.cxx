@@ -68,34 +68,13 @@ AUXSTORE_OBJECT_SETTER_AND_GETTER(xAOD::PixelCluster_v1, std::vector<int>, totLi
 
 AUXSTORE_OBJECT_MOVE(xAOD::PixelCluster_v1, std::vector<int>, totList, setToTlist)
 
-AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(xAOD::PixelCluster_v1, int, totalToT,
-				     setTotalToT)
-
 AUXSTORE_OBJECT_SETTER_AND_GETTER(xAOD::PixelCluster_v1, std::vector<float>, chargeList,
 				  setChargelist)
 
 AUXSTORE_OBJECT_MOVE(xAOD::PixelCluster_v1, std::vector<float>, chargeList, setChargelist)
 
-AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(xAOD::PixelCluster_v1, float, totalCharge,
-				     setTotalCharge)
-
 AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(xAOD::PixelCluster_v1, float, energyLoss,
                                      setEnergyLoss)
-
-AUXSTORE_PRIMITIVE_GETTER_WITH_CAST(xAOD::PixelCluster_v1, char, bool, isSplit)
-AUXSTORE_PRIMITIVE_SETTER_WITH_CAST(xAOD::PixelCluster_v1, char, bool, isSplit,
-                                    setIsSplit)
-
-void xAOD::PixelCluster_v1::setSplitProbabilities(float prob1, float prob2) {
-    static const SG::AuxElement::Accessor<float> prob1Acc("splitProbability1");
-    prob1Acc(*this) = prob1;
-    static const SG::AuxElement::Accessor<float> prob2Acc("splitProbability2");
-    prob2Acc(*this) = prob2;
-}
-
-AUXSTORE_PRIMITIVE_GETTER(xAOD::PixelCluster_v1, float, splitProbability1)
-
-AUXSTORE_PRIMITIVE_GETTER(xAOD::PixelCluster_v1, float, splitProbability2)
 
 AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(xAOD::PixelCluster_v1, int, lvl1a,
                                      setLVL1A)

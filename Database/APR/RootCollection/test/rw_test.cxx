@@ -108,7 +108,7 @@ TestDriver::read ATLAS_NOT_THREAD_SAFE ()
      throw std::runtime_error( "Could not create a rootCollection object" );
   }
 
-  pool::ICollectionCursor* cursor1_ptr = &collection->cursor();
+  std::unique_ptr<pool::ICollectionCursor> cursor1_ptr = collection->cursor();
   pool::ICollectionCursor& cursor1 = *cursor1_ptr;
   cout << "Iterating over collection..." << endl;
   int counter = 0;
@@ -128,7 +128,6 @@ TestDriver::read ATLAS_NOT_THREAD_SAFE ()
      counter++;
   }
   std::cout << counter << " records read back" << std::endl;
-  delete cursor1_ptr;
 
   collection->close();
   delete collection;

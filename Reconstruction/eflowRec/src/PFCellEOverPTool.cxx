@@ -59,20 +59,34 @@ StatusCode PFCellEOverPTool::initialize(){
     ATH_MSG_ERROR("Could not bin boundaries in json file: " << energyBinBoundaries);
     return StatusCode::FAILURE;
   }
-  //remove the last bin boundary - the e/p derivation code measures e/p in an energy range and our json
-  //contains the bin boundaries as usded by the e/p derivation code:
-  //https://gitlab.cern.ch/atlas-jetetmiss/pflow/commontools/EOverPTools/-/blob/0dee81d8823be1fd725af2cfe62391bcb904b683/EoverpNtupleAnalysis/Run_EoverP_Comparison.py#L100
-  //But e.g if the last pair if boundaries are 40 and 100 GeV we measure e/p between those values, but we 
-  //want to allow any track with e > 40 GeV to find an e/p reference value.
-  //Note the same issue cannot occur for eta, calo layer or first interaction region bins
-  //because there is a hard upper limit from the detector geometry - so a track can never
-  //e.g have an eta above the final eta bin boundary
+
+  //The e/p (mean, sigma) parameters are binned in track energy, track eta, calorimeter LHED and are derived using:
+  //https://gitlab.cern.ch/atlas-jetetmiss/pflow/commontools/EOverPTools/-/blob/main/EoverpNtupleAnalysis/Run_EoverP_Comparison.py?ref_type=heads
+
+
+  //The cell ordering parameters (norm1, sigma1, norm2, sigma2) are binned in the same way, and also in calo layer and are derived using:
+  //https://gitlab.cern.ch/atlas-jetetmiss/pflow/commontools/EOverPTools/-/blob/main/EoverpNtupleAnalysis/CellOrdering_Cpp.cxx?ref_type=heads
+
+  //The energy bins have a special treatment - if e.g if the last pair if boundaries are 40 and 100 GeV we measure e/p between those values, but we 
+  //want to allow any track with e > 40 GeV to find an e/p reference value. Thus we remove the last bin boundary for the energy bins.
+
   m_energyBinLowerBoundaries.pop_back(); 
+
+  //We have to be careful with the eta bins. In this tool we don't want to use the last boundary value, because in this tool
+  //each eta bin value corresponds to the lower bin boundary and clearly you cannot move beyond the edge of the ID/ITK acceptance, 
+  //so there is nothing to look up for the final bin. However in eflowEEtaBinnedParameters the same array is used to check the range
+  //in which an eta value falls. Thus we keep the final eta bin boundary in the array, but we have to be careful when looping over eta 
+  //bins to not try to look up values for the final bin boundary value.
+
   filledBins = fillBinValues(m_etaBinLowerBoundaries, json_binBoundaries, etaBinBoundaries);
   if (!filledBins) {
     ATH_MSG_ERROR("Could not bin boundaries in json file: " << etaBinBoundaries);
     return StatusCode::FAILURE;
   }
+
+  //The final two arrays correspond to specific calorimeter layes to look up parameters for, so this is like a key to look up
+  //rather than comparing a value to bin boundaries as is done for track energy and track eta.
+
   filledBins = fillBinValues(m_firstIntBinLowerBoundaries, json_binBoundaries, firstIntBinBoundaries);
   if (!filledBins) {
     ATH_MSG_ERROR("Could not bin boundaries in json file: " << firstIntBinBoundaries);
@@ -123,6 +137,7 @@ StatusCode PFCellEOverPTool::fillBinnedParameters(eflowEEtaBinnedParameters *bin
       std::string currentEBin = currentEBinStream.str();
       int etaBinCounter = -1;
       for (auto thisEtaBin : m_etaBinLowerBoundaries){
+        if (thisEtaBin == m_etaBinLowerBoundaries.back()) continue; //the last eta bin boundary is just used to define the upper edge of the final eta bin, so we don't need to fill parameters for it
         etaBinCounter++;
         std::stringstream currentEtaBinStream;
         currentEtaBinStream << std::fixed << std::setprecision(1) << thisEtaBin;

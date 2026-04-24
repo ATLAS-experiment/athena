@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_CALOCLUSTERRETRIEVER_H
@@ -32,28 +32,28 @@ namespace JiveXML{
    *    - Cells: numCells: number of cells in each cluster, and
    *             cells: compact identifier code of each cell 
    */
-  class CaloClusterRetriever : virtual public IDataRetriever,
-                                   public AthAlgTool {
+  class CaloClusterRetriever : public extends<AthAlgTool,IDataRetriever> {
     
     public:
-      
-      /// Standard Constructor
-      CaloClusterRetriever(const std::string& type,const std::string& name,const IInterface* parent);
+      using base_class::base_class;
       
       /// Retrieve all the data
-      virtual StatusCode retrieve(ToolHandle<IFormatTool> &FormatTool); 
+      virtual StatusCode retrieve(ToolHandle<IFormatTool> &FormatTool) override;
       const DataMap getData(const xAOD::CaloClusterContainer*);
 
       /// Return the name of the data type
-      virtual std::string dataTypeName() const { return "Cluster"; };
+      virtual std::string dataTypeName() const override { return "Cluster"; };
 	
       ///Default AthAlgTool methods
-      StatusCode initialize();
+      virtual StatusCode initialize() override;
 
     private:
-      SG::ReadHandleKey<xAOD::CaloClusterContainer> m_sgKeyFavourite{this, "StoreGateKey", "egammaClusters", "Name of the CaloClusterContainer"};
-      std::vector<std::string> m_otherKeys;
-      bool m_doWriteHLT;
+      SG::ReadHandleKey<xAOD::CaloClusterContainer> m_sgKeyFavourite{this
+	  , "FavouriteClusterCollection", "egammaClusters", "Collection to be first in output, shown in Atlantis without switching"};
+      Gaudi::Property<std::vector<std::string>> m_otherKeys{this
+	, "OtherClusterCollections", {}, "Other collections to be retrieved. If list left empty, all available retrieved"};
+      Gaudi::Property<bool> m_doWriteHLT{this
+	, "DoWriteHLT", false, "Ignore HLTAutokey object by default"};
   };
 }
 #endif

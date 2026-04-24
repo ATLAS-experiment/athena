@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_HIGG1D1.py
 # This defines DAOD_HIGG1D1, an unskimmed DAOD format for Run 3.
@@ -29,14 +29,6 @@ def HIGG1D1KernelCfg(flags, name='HIGG1D1Kernel', **kwargs):
     #CustomJetsConfig
     acc.merge(HIGG1D1CustomJetsCfg(flags))
     acc.merge(HIGG1D1CustomJetsCleaningCfg(flags))
-
-    # Reorder event cleaning / decoration locking to run at this
-    # point in the algorithm sequence. 
-    # See comments in JetCommonConfig.AddEventCleanFlagsCfg.
-    seq = acc.getSequence('AthAlgSeq')
-    cleanSeqs = [acc.getSequence ('EventCleanSeq'),
-                 acc.getSequence ('EventCleanLockSeq')]
-    seq.Members = [a for a in seq.Members if a not in cleanSeqs] + cleanSeqs
 
     from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
     acc.merge(FlavorTaggingCfg(flags, 'AntiKt4EMPFlowCustomVtxJets', 'HggPrimaryVertices', trackAugmenterPrefix='btagIpHgg_'))
@@ -268,13 +260,12 @@ def HIGG1D1Cfg(flags):
                                               "InDetTrackParticles",
                                               "AntiKt4EMTopoJets",
                                               "AntiKt4EMPFlowJets",
-
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
                                               "MET_Baseline_AntiKt4EMTopo",
                                               "MET_Baseline_AntiKt4EMPFlow",
                                               "TauJets",
                                               "DiTauJets",
-                                              "DiTauJetsLowPt",
-                                              "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets"]
+                                              "DiTauJetsLowPt"]
     
     excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
     StaticContent = []
@@ -361,8 +352,8 @@ def HIGG1D1Cfg(flags):
         HIGG1D1SlimmingHelper.ExtraVariables += ["Electrons.TruthLink",
                                                  "Muons.TruthLink",
                                                  "Photons.TruthLink",
-                                                 "AntiKt4EMTopoJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
-                                                 "AntiKt4EMPFlowJets.QGTransformer_ConstScore.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
+                                                 "AntiKt4EMTopoJets.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
+                                                 "AntiKt4EMPFlowJets.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
                                                  "TruthPrimaryVertices.t.x.y.z",
                                                  "EventInfo.DFCommonJetsCustomVtx_eventClean_LooseBad.DFCommonJetsCustomVtx_eventClean_TightBad.hardScatterVertexLink.timeStampNSOffset",
                                                  "TauJets.dRmax.etOverPtLeadTrk"]

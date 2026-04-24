@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -42,6 +42,10 @@ VolumeTreeNavigator::VolumeTreeNavigator(const G4Step* aStep) :
   m_preStepPoint = aStep->GetPreStepPoint();
   m_postStepPoint = aStep->GetPostStepPoint();
   m_preHistory = dynamic_cast<const G4TouchableHistory*>(m_preStepPoint->GetTouchable());
+  if (not m_preHistory){
+    ATH_MSG_ERROR("Dynamic cast failed in VolumeTreeNavigator::VolumeTreeNavigator");
+    return;
+  }
   m_preDepth = m_preHistory->GetHistoryDepth();
   m_stepNo = m_track->GetCurrentStepNumber();
 

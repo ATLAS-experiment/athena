@@ -30,6 +30,7 @@
 <!ENTITY THETARES "0.04">
 <!ENTITY PHIRES "0.04">
 <!ENTITY Z0SINRES "2.5">
+<!ENTITY TIMERES "0.1">
 
 <!-- bins for parameters -->
 <!ENTITY D0PARA "20.0">

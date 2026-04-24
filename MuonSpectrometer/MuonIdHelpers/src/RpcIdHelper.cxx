@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonIdHelpers/RpcIdHelper.h"
@@ -112,17 +112,17 @@ int RpcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     m_str_impl = region.implementation(m_CHANNEL_INDEX);
 
     ATH_MSG_DEBUG(" RPC decode index and bit fields for each level: " << std::endl
-                                                                      << " muon        " << m_muon_impl.show_to_string() << std::endl
-                                                                      << " station     " << m_sta_impl.show_to_string() << std::endl
-                                                                      << " eta         " << m_eta_impl.show_to_string() << std::endl
-                                                                      << " phi         " << m_phi_impl.show_to_string() << std::endl
-                                                                      << " technology  " << m_tec_impl.show_to_string() << std::endl
-                                                                      << " TR          " << m_dbr_impl.show_to_string() << std::endl
-                                                                      << " TZ          " << m_dbz_impl.show_to_string() << std::endl
-                                                                      << " TPHI        " << m_dbp_impl.show_to_string() << std::endl
-                                                                      << " gas gap     " << m_gap_impl.show_to_string() << std::endl
-                                                                      << " phi         " << m_mea_impl.show_to_string() << std::endl
-                                                                      << " strip       " << m_str_impl.show_to_string());
+                                                                      << " muon        " << m_muon_impl << std::endl
+                                                                      << " station     " << m_sta_impl << std::endl
+                                                                      << " eta         " << m_eta_impl << std::endl
+                                                                      << " phi         " << m_phi_impl << std::endl
+                                                                      << " technology  " << m_tec_impl << std::endl
+                                                                      << " TR          " << m_dbr_impl << std::endl
+                                                                      << " TZ          " << m_dbz_impl << std::endl
+                                                                      << " TPHI        " << m_dbp_impl << std::endl
+                                                                      << " gas gap     " << m_gap_impl << std::endl
+                                                                      << " phi         " << m_mea_impl << std::endl
+                                                                      << " strip       " << m_str_impl);
 
     //
     // Build multirange for the valid set of identifiers
@@ -766,7 +766,6 @@ int RpcIdHelper::init_detectorElement_hashes() {
     m_st_BIL = stationNameIndex("BIL");
 
     // detector element hash
-    IdContext context = detectorElement_context();
     unsigned int nids = 0;
     std::set<Identifier> ids;
     for (unsigned int i = 0; i < m_full_detectorElement_range.size(); ++i) {

@@ -1,6 +1,6 @@
 // emacs: this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //
 //   @file    TrigRoiDescriptor.h        
@@ -21,24 +21,16 @@
 #define TRIGSTEERINGEVENT_TRIGROIDESCRIPTOR_H
 
 #include <stdint.h>
-#include <map>
-#include <ostream>
-
-// can we leave this in for standalone running?
-// #ifndef XAOD_STANDALONE
-// #include "AthenaKernely/CLASS_DEF.h"
-// #include "GaudiKernel/MsgStream.h"
-
-#include "xAODCore/CLASS_DEF.h"
-
-// #endif
+#include <vector>
+#include <iosfwd>
 
 #include "RoiDescriptor/RoiDescriptor.h"
 
+#include "xAODCore/CLASS_DEF.h"
 
 
 /**
- * @brief Describes the Region of Ineterest geometry
+ * @brief Describes the Region of Interest geometry
  *  It has basically 9 parameters
  *
  * -# zed : z position of RoI
@@ -50,7 +42,7 @@
  * -# eta : pseudo-rapidity of RoI at zed
  * -# etaPlus  : pseudo-rapidity at zedPlus
  * -# etaMinus : pseudo-rapidity at zedMinus
- * \warning An attempt to cnstruct the objects of this calss with phi0 out of allowed range reasults in throwing exception
+ * \warning An attempt to construct the objects of this class with phi0 out of allowed range results in throwing exception
  */
 
 class TrigRoiDescriptor : public RoiDescriptor {
@@ -126,6 +118,8 @@ public:
   TrigRoiDescriptor& operator=( const IRoiDescriptor& roi );
 
   TrigRoiDescriptor& operator=( const TrigRoiDescriptor& roi );
+  
+  TrigRoiDescriptor& operator=( TrigRoiDescriptor&& roi ) = default;
 
   // Destructor
   virtual ~TrigRoiDescriptor();
@@ -142,8 +136,6 @@ protected:
   unsigned int m_roiId;         //!< RoI number
   unsigned int m_roiWord;       //!< lvl1 RoI word from which this RoI was initially constructed
 
-  std::vector<uint32_t> m_serialized;
-
 };
 
 
@@ -151,16 +143,6 @@ std::string str( const TrigRoiDescriptor& d );                           //<! pr
 std::ostream& operator<<( std::ostream& m, const TrigRoiDescriptor& d ); //<! printing helper (wraps above)
 
 
-// can this be left in or should it be removed?
-// #ifndef XAOD_STANDALONE
 CLASS_DEF(TrigRoiDescriptor, 6455, 1)
-// #endif
-
-/// why is this included here? can't packages which need both 
-/// include it explicitly? 
-#include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 
 #endif // TRIGROIDESCRIPTOR_H
-
-
-// #endif //XAOD_ANALYSIS

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # Configuration of SiClusterizationTool package
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -215,14 +215,38 @@ def LWTNNCondAlgCfg(flags, name="LWTNNCondAlg", **kwargs):
     return acc
 
 
+def OnnxNNCondAlgCfg(flags, name="OnnxNNCondAlg", **kwargs):
+    from AthOnnxComps.OnnxRuntimeSvcConfig import OnnxRuntimeSvcCfg
+    acc = OnnxRuntimeSvcCfg(flags)
+    kwargs.setdefault("WriteKey", "PixelClusterNNONNX")
+    acc.addCondAlgo(CompFactory.InDet.OnnxNNCondAlg(name, **kwargs))
+    return acc
+
+
 def NnClusterizationFactoryCfg(flags, name="NnClusterizationFactory", **kwargs):
     from PixelConditionsAlgorithms.PixelConditionsConfig import (
         PixelChargeCalibCondCfg)
     acc = PixelChargeCalibCondCfg(flags)
 
+    useONNX = kwargs.pop("useONNX", False)
+
     if flags.GeoModel.Run is LHCPeriod.Run1:
         acc.merge(PixelClusterNnCondAlgCfg(flags))
         acc.merge(PixelClusterNnWithTrackCondAlgCfg(flags))
+    elif useONNX:
+        onnxKwargs = {}
+        for key in ["NumberNetworkPath", "PositionNetwork1Path",
+                     "PositionNetwork2Path", "PositionNetwork3Path"]:
+            if key in kwargs:
+                onnxKwargs[key] = kwargs.pop(key)
+        missing = [key for key in ["NumberNetworkPath", "PositionNetwork1Path",
+                                    "PositionNetwork2Path", "PositionNetwork3Path"]
+                   if key not in onnxKwargs]
+        if missing:
+            raise ValueError(
+                f"NnClusterizationFactoryCfg: missing required ONNX network paths when "
+                f"useONNX=True: {missing}")
+        acc.merge(OnnxNNCondAlgCfg(flags, **onnxKwargs))
     else:
         acc.merge(LWTNNCondAlgCfg(flags))
 
@@ -248,8 +272,12 @@ def NnClusterizationFactoryCfg(flags, name="NnClusterizationFactory", **kwargs):
         "PixelClusterNNWithTrack" if flags.GeoModel.Run is LHCPeriod.Run1
         else ""))
     kwargs.setdefault("NnCollectionJSONReadKey", (
-        "" if flags.GeoModel.Run is LHCPeriod.Run1
+        "" if (flags.GeoModel.Run is LHCPeriod.Run1 or useONNX)
         else "PixelClusterNNJSON"))
+
+    kwargs.setdefault("useONNX", useONNX)
+    kwargs.setdefault("NnCollectionONNXReadKey",
+                      "PixelClusterNNONNX" if useONNX else "")
 
     acc.setPrivateTools(
         CompFactory.InDet.NnClusterizationFactory(name, **kwargs))

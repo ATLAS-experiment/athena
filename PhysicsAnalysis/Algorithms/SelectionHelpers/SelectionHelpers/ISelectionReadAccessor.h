@@ -16,6 +16,7 @@ class StatusCode;
 
 namespace CP
 {
+  class ISysObjectHandleBase;
   class ISystematicsSvc;
   class SystematicSet;
 
@@ -74,7 +75,7 @@ namespace CP
     virtual StatusCode
     fillSystematics (const ISystematicsSvc& svc,
                      const std::vector<CP::SystematicSet>& sysList,
-                     const std::string& objectName) = 0;
+                     ISysObjectHandleBase& objectHandle) = 0;
   };
 
 

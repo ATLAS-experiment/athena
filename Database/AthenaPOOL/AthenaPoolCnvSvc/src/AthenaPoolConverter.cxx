@@ -18,11 +18,11 @@
 #include "PersistentDataModel/TokenAddress.h"
 #include "StorageSvc/DbType.h"
 #include "StorageSvc/APRDefaults.h"
+
 #include <format>
 
 //__________________________________________________________________________
 AthenaPoolConverter::~AthenaPoolConverter() {
-   delete m_i_poolToken; m_i_poolToken = nullptr;
 }
 //__________________________________________________________________________
 StatusCode AthenaPoolConverter::initialize() {
@@ -81,8 +81,6 @@ StatusCode AthenaPoolConverter::createObj(IOpaqueAddress* pAddr, DataObject*& pO
    }
    ATH_MSG_VERBOSE("createObj: " << tokAddr->getToken()->toString() << ", CTX=" << tokAddr->ipar()[0]
                    << ", auxStr=" << tokAddr->getToken()->auxString() );
-   std::lock_guard<CallMutex> lock(m_conv_mut);
-   m_i_poolToken = tokAddr->getToken();
    try {
       std::string key = pAddr->par()[1];
       if (!PoolToDataObject(pObj, tokAddr->getToken(), key).isSuccess()) {
@@ -99,7 +97,6 @@ StatusCode AthenaPoolConverter::createObj(IOpaqueAddress* pAddr, DataObject*& pO
    if (ownTokAddr) {
       delete tokAddr; tokAddr = nullptr;
    }
-   m_i_poolToken = nullptr;
    if (pObj == nullptr) {
       return StatusCode::FAILURE;
    }
@@ -110,16 +107,6 @@ StatusCode AthenaPoolConverter::createRep(DataObject* pObj, IOpaqueAddress*& pAd
    const SG::DataProxy* proxy = dynamic_cast<SG::DataProxy*>(pObj->registry());
    if (proxy == nullptr) {
       ATH_MSG_ERROR("AthenaPoolConverter CreateRep failed to cast DataProxy, key = " << pObj->name());
-      return StatusCode::FAILURE;
-   }
-   try {
-      std::lock_guard<CallMutex> lock(m_conv_mut);
-      if (!DataObjectToPers(pObj, pAddr).isSuccess()) {
-         ATH_MSG_ERROR("CreateRep failed, key = " << pObj->name());
-         return StatusCode::FAILURE;
-      }
-   } catch (std::exception& e) {
-      ATH_MSG_ERROR("createRep - caught exception: " << e.what());
       return StatusCode::FAILURE;
    }
    const CLID clid = proxy->clID();
@@ -136,7 +123,6 @@ StatusCode AthenaPoolConverter::createRep(DataObject* pObj, IOpaqueAddress*& pAd
 }
 //__________________________________________________________________________
 StatusCode AthenaPoolConverter::fillRepRefs(IOpaqueAddress* pAddr, DataObject* pObj) {
-   std::lock_guard<CallMutex> lock(m_conv_mut);
    try {
       if (!DataObjectToPool(pAddr, pObj).isSuccess()) {
          ATH_MSG_ERROR("FillRepRefs failed, key = " << pObj->name());
@@ -161,11 +147,6 @@ AthenaPoolConverter::AthenaPoolConverter(const CLID& myCLID, ISvcLocator* pSvcLo
   m_detStore("DetectorStore", name ? name : "AthenaPoolConverter"),
   m_athenaPoolCnvSvc(pSvcLocator && pSvcLocator->existsService("AthenaPoolSharedIOCnvSvc") ? "AthenaPoolSharedIOCnvSvc" : "AthenaPoolCnvSvc", name ? name : "AthenaPoolConverter"),
   m_poolSvc("PoolSvc", name ? name : "AthenaPoolConverter"),
-  m_classDesc(),
-  m_className(),
-  m_classDescs(),
-  m_dataObject(nullptr),
-  m_i_poolToken(nullptr),
   m_defContainerType(0) {
 }
 //__________________________________________________________________________
@@ -247,12 +228,8 @@ Placement AthenaPoolConverter::setPlacementWithType(const std::string& tname, co
    return(placement);
 }
 //__________________________________________________________________________
-const DataObject* AthenaPoolConverter::getDataObject() const {
-   return(m_dataObject);
-}
-//__________________________________________________________________________
-bool AthenaPoolConverter::compareClassGuid(const Guid &guid) const {
-   return(m_i_poolToken ? (guid == m_i_poolToken->classID()) : false);
+bool AthenaPoolConverter::compareClassGuid(const Token* token, const Guid &guid) const {
+   return(token ? (guid == token->classID()) : false);
 }
 //__________________________________________________________________________
 StatusCode AthenaPoolConverter::cleanUp(const std::string& /*output*/) {

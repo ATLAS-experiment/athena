@@ -1,15 +1,19 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "FlavorTagInference/BTagTrackIpAccessor.h"
 #include "FlavorTagInference/CustomGetterUtils.h"
 
+#include "xAODMuon/Muon.h"
 #include "xAODTracking/TrackParticleFwd.h"
 #include <xAODPFlow/FlowElement.h>
 #include "AthContainers/AuxElement.h"
 #include "xAODTracking/TrackMeasurementValidation.h"
 #include "xAODEgamma/Electron.h"
+#include "xAODMuon/Muon.h"
+#include "xAODCaloEvent/CaloCluster.h"
 
+#include <limits>
 #include <optional>
 #include <TVector3.h>
 #include "GeoPrimitives/GeoPrimitives.h"
@@ -39,6 +43,9 @@ namespace {
     }
     if (name == "mass") {
       return [](const xAOD::IParticle& j) -> float {return j.m();};
+    }
+    if (name == "phi") {
+      return [](const xAOD::IParticle& j) -> float {return j.phi();};
     }
 
     throw std::logic_error("no match for custom getter " + name);
@@ -89,6 +96,37 @@ namespace {
         return sequence;
       }
   };
+
+  template <typename F>
+  SequenceGetterFunc<xAOD::Muon> muonPrimaryTrackGetter(F getter)
+  {
+    using Mu = xAOD::Muon;
+    using Jet = xAOD::IParticle;
+
+    return CustomSeqGetter<Mu>([getter](const Mu& mu, const Jet&) -> double {
+      const xAOD::TrackParticle* track = mu.primaryTrackParticle();
+      if (!track) {
+        return std::numeric_limits<double>::quiet_NaN();
+      }
+      return static_cast<double>(getter(*track));
+    });
+  }
+
+  template <typename F>
+  SequenceGetterFunc<xAOD::Muon> muonIdTrackGetter(F getter)
+  {
+    using Mu = xAOD::Muon;
+    using Jet = xAOD::IParticle;
+
+    return CustomSeqGetter<Mu>([getter](const Mu& mu, const Jet& jet) -> double {
+      const xAOD::TrackParticle* track =
+        mu.trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+      if (!track) {
+        return std::numeric_limits<double>::quiet_NaN();
+      }
+      return getter(jet, {track}).front();
+    });
+  }
 
   // Getters from xAOD::TrackParticle with IP dependencies
   std::optional<SequenceGetterFunc<xAOD::TrackParticle>>
@@ -173,6 +211,12 @@ namespace {
     using Tp = xAOD::TrackParticle;
     using Jet = xAOD::IParticle;
 
+    if (name == "eProbabilityHT") {
+      SG::AuxElement::ConstAccessor<float> eprob_acc(name);
+      return CustomSeqGetter<Tp>([eprob_acc](const Tp& tp, const Jet&) {
+        return eprob_acc(tp);
+      });
+    }
     if (name == "qOverP") {
       return CustomSeqGetter<Tp>([](const Tp& p, const Jet&) {
         return p.qOverP(); 
@@ -188,6 +232,11 @@ namespace {
           return std::sqrt(tp.definingParametersCovMatrixDiagVec().at(3));
       });
     }
+    if (name == "thetaVariance") {
+      return CustomSeqGetter<Tp>([](const Tp& tp, const Jet&) {
+          return tp.definingParametersCovMatrixDiagVec().at(3);
+      });
+    }
     if (name == "qOverPUncertainty") {
       return CustomSeqGetter<Tp>([](const Tp& tp, const Jet&) {
           return std::sqrt(tp.definingParametersCovMatrixDiagVec().at(4));
@@ -198,9 +247,19 @@ namespace {
           return tp.z0();
       });
     }
+    if (name == "z0SinThetaRelativeToBeamspot") {
+      return CustomSeqGetter<Tp>([](const Tp& tp, const Jet&) {
+          return tp.z0() * std::sin(tp.theta());
+      });
+    }
     if (name == "d0RelativeToBeamspot") {
       return CustomSeqGetter<Tp>([](const Tp& tp, const Jet&) {
           return tp.d0();
+      });
+    }
+    if (name == "d0RelativeToBeamspotVariance") {
+      return CustomSeqGetter<Tp>([](const Tp& tp, const Jet&) {
+          return tp.definingParametersCovMatrixDiagVec().at(0);
       });
     }
     if (name == "d0RelativeToBeamspotSignificance") {
@@ -260,8 +319,8 @@ namespace {
         return barrel_hits(tp) + endcap_hits(tp);
       });
     }
-    const std::regex number_match("numberOf.*");
-    if (std::regex_match(name, number_match)){ 
+    const std::regex number_match("(numberOf|expect).*");
+    if (std::regex_match(name, number_match)){
       SG::AuxElement::ConstAccessor<unsigned char> pix_hits(name);
       return CustomSeqGetter<Tp>([pix_hits](const Tp& tp, const Jet&) {
         return pix_hits(tp);
@@ -486,13 +545,6 @@ namespace {
         return p.caloCluster()->e() * std::abs(p.trackParticle()->qOverP());
       });
     }
-    if (name == "eProbabilityHT") {
-      return CustomSeqGetter<El>([](const El& p, const Jet&) {
-        float eprob = 0.0;
-        p.trackParticle()->summaryValue(eprob, xAOD::eProbabilityHT);
-        return eprob;
-      });
-    }
     auto track_getter_no_ipdep = getterFromTracksNoIpDep(name);
     if (track_getter_no_ipdep) {
       auto f = *track_getter_no_ipdep;
@@ -507,6 +559,170 @@ namespace {
         return f(j, {p.trackParticle()})[0];
       });
     }
+    return std::nullopt;
+  }
+
+  // Getters from xAOD::Muon
+  std::optional<SequenceGetterFunc<xAOD::Muon>> getterFromMuons(
+      const std::string& name, const std::string& prefix
+  ) {
+    using Jet = xAOD::IParticle;
+    using Mu = xAOD::Muon;
+
+    if (name == "qOverPratio") {
+      return CustomSeqGetter<Mu>([](const Mu& p, const Jet&) -> double {
+        auto track = p.trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+        if ( !track ) { return -9999.0; }
+        auto ms_track = p.trackParticle(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle);
+        if ( !ms_track ) { return -9999.0; }
+        return track->qOverP() / ms_track->qOverP();
+      });
+    }
+
+    auto track_getter_no_ipdep = getterFromTracksNoIpDep(name);
+    if ( track_getter_no_ipdep ) {
+      auto f = *track_getter_no_ipdep;
+      return CustomSeqGetter<Mu>([f](const Mu& p, const Jet& j) -> double {
+        return f(j, {p.trackParticle(xAOD::Muon::InnerDetectorTrackParticle)})[0];
+      });
+    }
+    
+    auto track_getter_ipdep = getterFromTracksWithIpDep(name, prefix);
+    if ( track_getter_ipdep ) {
+      auto f = *track_getter_ipdep;
+      return CustomSeqGetter<Mu>([f](const Mu& p, const Jet& j) -> double {
+        return f(j, {p.trackParticle(xAOD::Muon::InnerDetectorTrackParticle)})[0];
+      });
+    }
+
+    // Special case of track-dependent variables that use the primary track instead of the ID track
+    const std::string suffix = "_MuonPrimaryTrack";
+    if (name.size() > suffix.size() && name.compare(name.size() - suffix.size(), suffix.size(), suffix) == 0) {
+      auto extracted_name = name.substr(0, name.size() - suffix.size());
+      auto primary_track_getter = getterFromTracksNoIpDep(extracted_name);
+      if ( primary_track_getter ) {
+        auto f = *primary_track_getter;
+        return CustomSeqGetter<Mu>([f](const Mu& p, const Jet& j) -> double {
+          return f(j, {p.trackParticle(xAOD::Muon::Primary)})[0];
+        });
+      }
+    }
+
+    return std::nullopt;
+  }
+
+  // Getters from xAOD::CaloCluster
+  std::optional<SequenceGetterFunc<xAOD::CaloCluster>>
+  getterFromCaloClusters(const std::string& name)
+  {
+    using CC = xAOD::CaloCluster;
+    using Jet = xAOD::IParticle;
+
+    // 16 moments via retrieveMoment
+    static const std::map<std::string, xAOD::CaloCluster::MomentType> momentMap = {
+        {"ENG_BAD_CELLS", xAOD::CaloCluster::ENG_BAD_CELLS},
+        {"ISOLATION", xAOD::CaloCluster::ISOLATION},
+        {"CENTER_MAG", xAOD::CaloCluster::CENTER_MAG},
+        {"CELL_SIGNIFICANCE", xAOD::CaloCluster::CELL_SIGNIFICANCE},
+        {"ENG_FRAC_MAX", xAOD::CaloCluster::ENG_FRAC_MAX},
+        {"LATERAL", xAOD::CaloCluster::LATERAL},
+        {"SIGNIFICANCE", xAOD::CaloCluster::SIGNIFICANCE},
+        {"LONGITUDINAL", xAOD::CaloCluster::LONGITUDINAL},
+        {"ENG_POS", xAOD::CaloCluster::ENG_POS},
+        {"EM_PROBABILITY", xAOD::CaloCluster::EM_PROBABILITY},
+        {"CENTER_LAMBDA", xAOD::CaloCluster::CENTER_LAMBDA},
+        {"SECOND_LAMBDA", xAOD::CaloCluster::SECOND_LAMBDA},
+        {"FIRST_ENG_DENS", xAOD::CaloCluster::FIRST_ENG_DENS},
+        {"SECOND_R", xAOD::CaloCluster::SECOND_R},
+        {"AVG_LAR_Q", xAOD::CaloCluster::AVG_LAR_Q},
+        {"MASS", xAOD::CaloCluster::MASS},
+    };
+    auto mom_it = momentMap.find(name);
+    if (mom_it != momentMap.end()) {
+      auto moment_type = mom_it->second;
+      return CustomSeqGetter<CC>([moment_type](const CC& c, const Jet&) {
+        double val = 0;
+        c.retrieveMoment(moment_type, val);
+        return val;
+      });
+    }
+
+    // 6 kinematics via direct methods
+    if (name == "rawPhi") {
+      return CustomSeqGetter<CC>([](const CC& c, const Jet&) {
+        return c.rawPhi();
+      });
+    }
+    if (name == "calPhi") {
+      return CustomSeqGetter<CC>([](const CC& c, const Jet&) {
+        return c.calPhi();
+      });
+    }
+    if (name == "rawEta") {
+      return CustomSeqGetter<CC>([](const CC& c, const Jet&) {
+        return c.rawEta();
+      });
+    }
+    if (name == "calEta") {
+      return CustomSeqGetter<CC>([](const CC& c, const Jet&) {
+        return c.calEta();
+      });
+    }
+    if (name == "rawE") {
+      return CustomSeqGetter<CC>([](const CC& c, const Jet&) {
+        return c.rawE();
+      });
+    }
+    if (name == "calE") {
+      return CustomSeqGetter<CC>([](const CC& c, const Jet&) {
+        return c.calE();
+      });
+    }
+
+    // 22 samplings via eSample
+    using CS = xAOD::CaloCluster::CaloSample;
+    static const std::map<std::string, CS> sampleMap = {
+        {"PreSamplerB", CS::PreSamplerB},
+        {"EMB1", CS::EMB1},
+        {"EMB2", CS::EMB2},
+        {"EMB3", CS::EMB3},
+        {"PreSamplerE", CS::PreSamplerE},
+        {"EME1", CS::EME1},
+        {"EME2", CS::EME2},
+        {"EME3", CS::EME3},
+        {"HEC0", CS::HEC0},
+        {"HEC1", CS::HEC1},
+        {"HEC2", CS::HEC2},
+        {"HEC3", CS::HEC3},
+        {"TileBar0", CS::TileBar0},
+        {"TileBar1", CS::TileBar1},
+        {"TileBar2", CS::TileBar2},
+        {"TileGap1", CS::TileGap1},
+        {"TileGap2", CS::TileGap2},
+        {"TileGap3", CS::TileGap3},
+        {"TileExt0", CS::TileExt0},
+        {"TileExt1", CS::TileExt1},
+        {"TileExt2", CS::TileExt2},
+        {"FCAL0", CS::FCAL0},
+        {"FCAL1", CS::FCAL1},
+        {"FCAL2", CS::FCAL2},
+    };
+    auto samp_it = sampleMap.find(name);
+    if (samp_it != sampleMap.end()) {
+      auto sample = samp_it->second;
+      return CustomSeqGetter<CC>([sample](const CC& c, const Jet&) {
+        return c.eSample(sample);
+      });
+    }
+
+    // 1 flag: usedInChargedFlow
+    if (name == "usedInChargedFlow") {
+      SG::AuxElement::ConstAccessor<int> accInFlow("usedInChargedFlow");
+      return CustomSeqGetter<CC>([accInFlow](const CC& c, const Jet&) {
+        return accInFlow.isAvailable(c) ? static_cast<double>(accInFlow(c)) : 0.0;
+      });
+    }
+
     return std::nullopt;
   }
 }
@@ -545,10 +761,22 @@ namespace {
       }
 
       if constexpr (std::is_same_v<T, xAOD::Electron>) {
-        if (auto getterdep = getterFromDecoratedElectrons(name)) {;
+        if (auto getterdep = getterFromDecoratedElectrons(name)) {
           return {getterdep->first, getterdep->second};
         }
         if (auto getter = getterFromElectrons(name, prefix)){
+          return {*getter, {}};
+        }
+      }
+
+      if constexpr (std::is_same_v<T, xAOD::Muon>) {
+        if (auto getter = getterFromMuons(name, prefix)){
+          return {*getter, {}};
+        }
+      }
+
+      if constexpr (std::is_same_v<T, xAOD::CaloCluster>) {
+        if (auto getter = getterFromCaloClusters(name)){
           return {*getter, {}};
         }
       }
@@ -607,8 +835,7 @@ namespace {
             NamedSeqGetter<unsigned char, T>(cfg.name), {cfg.name}
           };
         case ConstituentsEDMType::CUSTOM_GETTER: {
-          return getNamedCustomSeqGetter(
-            cfg.name, options.track_prefix);
+          return getNamedCustomSeqGetter(cfg.name, prefix);
         }
         default: {
           throw std::logic_error("Unknown EDM type for constituent.");
@@ -689,11 +916,13 @@ namespace {
     }
 
 
-    // Explicit instantiations of supported types (IParticle, FlowElement, TrackParticle, TrackMeasurementValidation, Electron)
+    // Explicit instantiations of supported types (IParticle, FlowElement, TrackParticle, TrackMeasurementValidation, Electron, Muon, CaloCluster)
     template class SeqGetter<xAOD::IParticle>;
     template class SeqGetter<xAOD::FlowElement>;
     template class SeqGetter<xAOD::TrackParticle>;
     template class SeqGetter<xAOD::TrackMeasurementValidation>;
     template class SeqGetter<xAOD::Electron>;
+    template class SeqGetter<xAOD::Muon>;
+    template class SeqGetter<xAOD::CaloCluster>;
   }
 }

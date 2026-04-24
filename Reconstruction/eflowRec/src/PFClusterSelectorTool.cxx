@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "eflowRecCluster.h"
@@ -15,7 +15,7 @@ PFClusterSelectorTool::PFClusterSelectorTool(const std::string& type,const std::
 StatusCode PFClusterSelectorTool::initialize(){
 
   ATH_CHECK(m_caloClustersReadHandleKey.initialize());
-  if(!m_caloCalClustersReadHandleKey.key().empty()) {
+  if(!m_caloCalClustersReadHandleKey.empty()) {
     ATH_CHECK(m_caloCalClustersReadHandleKey.initialize());
   }
 
@@ -43,14 +43,14 @@ PFClusterSelectorTool::execute(
   }
 
   const xAOD::CaloClusterContainer* calclusters = nullptr;
-  if (!m_caloCalClustersReadHandleKey.key().empty()) {
+  if (!m_caloCalClustersReadHandleKey.empty()) {
     SG::ReadHandle<xAOD::CaloClusterContainer> caloCalClustersReadHandle(m_caloCalClustersReadHandleKey);
     calclusters = caloCalClustersReadHandle.get();
   }
 
   SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
   ATH_CHECK(caloMgrHandle.isValid());
-  
+
   /* Fill the vector of eflowRecClusters */
   unsigned int nClusters = caloClustersReadHandle->size();
   for (unsigned int iCluster = 0; iCluster < nClusters; ++iCluster) {
@@ -70,7 +70,7 @@ PFClusterSelectorTool::execute(
       std::string::size_type pos = decorHandleName.find(".");
       std::string decorName = decorHandleName.substr(pos+1);
 
-      SG::AuxElement::Accessor< std::vector< std::pair<unsigned int, double> > > accessor(decorName);
+      SG::Accessor< std::vector< std::pair<unsigned int, double> > > accessor(decorName);
       accessor(*theCaloClusterContainer[iCluster]) = accessor(*caloClustersReadHandle->at(iCluster));
     }
 
@@ -87,8 +87,8 @@ StatusCode PFClusterSelectorTool::finalize(){
 
 void
 PFClusterSelectorTool::retrieveLCCalCellWeight(
-  const double& energy,
-  const unsigned& index,
+  double energy,
+  unsigned index,
   std::map<IdentifierHash, double>& cellsWeight,
   const xAOD::CaloClusterContainer& caloCalClustersContainer,
   const CaloDetDescrManager& calo_dd_man) const
@@ -100,11 +100,11 @@ PFClusterSelectorTool::retrieveLCCalCellWeight(
    * function */
   const xAOD::CaloCluster* matchedCalCluster = caloCalClustersContainer.at(index);
   if (matchedCalCluster){
-    if (!(fabs(energy - matchedCalCluster->rawE()) < 0.001)) {
+    if (!(std::fabs(energy - matchedCalCluster->rawE()) < 0.001)) {
       matchedCalCluster = nullptr;
       for (const auto *iCalCalCluster : caloCalClustersContainer) {
         matchedCalCluster = iCalCalCluster;
-        if (fabs(energy - matchedCalCluster->rawE()) < 0.001) {
+        if (std::fabs(energy - matchedCalCluster->rawE()) < 0.001) {
 	        break;
 	      }
       }

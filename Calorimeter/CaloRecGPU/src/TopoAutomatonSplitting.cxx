@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -73,7 +73,7 @@ StatusCode TopoAutomatonSplitting::initialize_non_CUDA()
       }
   };
 
-
+  //cppcheck-suppress internalAstError
   auto process_sampling = [&get_option_from_string](const std::vector<std::string> & sampling_names, std::string & invalid_names, PackType & sampling_option)
   {
     sampling_option = 0;

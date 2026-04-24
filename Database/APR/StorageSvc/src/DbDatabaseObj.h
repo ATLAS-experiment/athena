@@ -21,7 +21,7 @@
 #include "StorageSvc/DbDomain.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbContainer.h"
-#include "POOLCore/DbPrint.h"
+#include "StorageSvc/DbPrint.h"
 
 // STL include files
 #include <map>

@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARBYTESTREAM_LARRODBLOCKCALIBRATIONV0_H
@@ -53,7 +53,7 @@ class LArRodBlockCalibrationV0 : public LArRodBlockTransparentV0<DSPHEADER>
 {
 public:
   // constructor
-  LArRodBlockCalibrationV0() : LArRodBlockTransparentV0<DSPHEADER>()
+  LArRodBlockCalibrationV0(IMessageSvc* msgSvc) : LArRodBlockTransparentV0<DSPHEADER>(msgSvc)
     {};
  
  public:
@@ -96,7 +96,6 @@ inline void LArRodBlockCalibrationV0<DSPHEADER>::setDelay(const uint16_t delayVa
 template<class DSPHEADER>
 inline void LArRodBlockCalibrationV0<DSPHEADER>::setDAC(const uint16_t dacValue)
 {this->setHeader16(DSPHEADER::Dac,dacValue);
-//std::cout << "Set DAC-Value to " << dacValue << std::endl;
 }
 
 
@@ -105,7 +104,7 @@ inline void  LArRodBlockCalibrationV0<DSPHEADER>::setPulsed(const unsigned chann
 { 
 #ifdef LARBYTESTREAMRODBLOCK_CHCKBOUNDARIES
   if (channelNumber>=128) {
-    std::cout << "Error WRITE BEYOND ARRAY BONDARY!" << std::endl;
+    m_logstr << MSG::ERROR << "Error WRITE BEYOND ARRAY BOUNDARY!" << endmsg;
     std::abort();
   }
 #endif

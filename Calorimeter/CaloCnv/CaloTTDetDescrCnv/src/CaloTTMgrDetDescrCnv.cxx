@@ -1,14 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
  Calo Trigger Tower Manager converter package
  --------------------------------------------
  ***************************************************************************/
-
-//<doc><file>	$Id: CaloTTMgrDetDescrCnv.cxx,v 1.21 2008-12-14 01:56:04 ssnyder Exp $
-//<version>	$Name: not supported by cvs2svn $
 
 
 #include "CaloTTMgrDetDescrCnv.h"
@@ -86,7 +83,6 @@ CaloTTMgrDetDescrCnv::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pObj)
     pObj = SG::asStorable(caloTTMgr);
 
     // Get idhelper from detector store and add to mgr
-    //const DataHandle<CaloLVL1_ID> lvl1_id;
     const CaloLVL1_ID* lvl1_id = nullptr;
     ATH_CHECK(detStore()->retrieve(lvl1_id, "CaloLVL1_ID"));
     caloTTMgr->set_helper(lvl1_id);
@@ -291,7 +287,7 @@ CaloTTMgrDetDescrCnv::storageType()
 }
 
 //--------------------------------------------------------------------
-const CLID& 
+CLID
 CaloTTMgrDetDescrCnv::classID() { 
     return ClassID_traits<CaloTTDescrManager>::ID(); 
 }

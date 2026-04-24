@@ -46,6 +46,8 @@ private:
   SG::ReadHandleKey<CaloCellContainer>          m_caloCellInputContainer       {this,"Key_caloCellInputContainer",       "AllCalo",           "input calo cell container key"};
   SG::ReadCondHandleKey<CaloDetDescrManager>    m_caloMgrKey                   {this,"CaloDetDescrManager",              "CaloDetDescrManager"                               };
   SG::ReadHandleKey<xAOD::CaloClusterContainer> m_removedClusterInputContainer {this,"Key_RemovedClusterInputContainer", "",                   "input removed cluster key"   };
+
+
 };
  
 

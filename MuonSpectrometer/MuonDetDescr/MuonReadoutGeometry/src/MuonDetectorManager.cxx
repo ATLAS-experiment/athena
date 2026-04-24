@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
@@ -29,6 +29,16 @@ namespace {
     template <typename read_out> void fillCache(std::vector<std::unique_ptr<read_out>>& array) {
         for (std::unique_ptr<read_out>& ele : array) {
             if (ele) ele->fillCache();
+        }
+    }
+    template <typename read_out>
+    void unpackSmartPtr(const std::vector<std::unique_ptr<read_out>>& array,
+                        std::vector<const MuonGM::MuonReadoutElement*>& unpacked) {
+        unpacked.reserve(array.size() + unpacked.capacity());
+        for (const auto& ptr : array){
+            if (ptr) {
+                unpacked.push_back(ptr.get());
+            }
         }
     }
 }
@@ -694,5 +704,15 @@ namespace MuonGM {
     void MuonDetectorManager::setCutoutsFlag(int flag) { m_includeCutouts = flag; }
     void MuonDetectorManager::setCutoutsBogFlag(int flag) { m_includeCutoutsBog = flag; }
 
+    std::vector<const MuonReadoutElement*> MuonDetectorManager::getAllReadoutElements() const {
+        std::vector<const MuonReadoutElement*> res{};
+        unpackSmartPtr(m_mdtArray, res);
+        unpackSmartPtr(m_rpcArray, res);
+        unpackSmartPtr(m_tgcArray, res);
+        unpackSmartPtr(m_stgArray, res);
+        unpackSmartPtr(m_mmcArray, res);
+        unpackSmartPtr(m_cscArray, res);
+        return res;
+    }
 
 }  // namespace MuonGM

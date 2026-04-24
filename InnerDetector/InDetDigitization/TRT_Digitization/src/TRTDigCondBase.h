@@ -110,9 +110,9 @@ public:
    * @param lowthreshold:   low threshold discriminator setting
    * @param noiseamplitude: noise amplitude
    */
-  void setRefinedStrawParameters( const int& hitID,
-                                  const double& lowthreshold,
-                                  const double& noiseamplitude );
+  void setRefinedStrawParameters( int hitID,
+                                  double lowthreshold,
+                                  double noiseamplitude );
 
 protected:
 
@@ -130,7 +130,7 @@ protected:
    *                                 Should never be put to zero!
    */
   virtual void setStrawStateInfo(Identifier& TRT_Identifier,
-                                 const double& strawlength,
+                                 double strawlength,
                                  double& noiselevel,
                                  double& relative_noiseamplitude,
                                  CLHEP::HepRandomEngine *rndmEngine) = 0;
@@ -230,9 +230,9 @@ inline bool TRTDigCondBase::getNextStraw( int& hitID,
 }
 
 //___________________________________________________________________________
-inline void TRTDigCondBase::setRefinedStrawParameters( const int& hitID,
-                                                       const double& lowthreshold,
-                                                       const double& noiseamplitude ) {
+inline void TRTDigCondBase::setRefinedStrawParameters( int hitID,
+                                                       double lowthreshold,
+                                                       double noiseamplitude ) {
   //we might have the iterator cached already (fixme... nah)
   if (hitID == m_all_it_hitid_to_StrawState_previous->first) {
     m_all_it_hitid_to_StrawState_previous->second.lowthreshold = lowthreshold;

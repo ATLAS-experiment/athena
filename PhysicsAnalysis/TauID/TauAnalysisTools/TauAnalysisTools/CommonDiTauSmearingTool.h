@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLS_COMMONDITAUSMEARINGTOOL_H
@@ -22,7 +22,6 @@
 // Local include(s):
 #include "TauAnalysisTools/Enums.h"
 #include "TauAnalysisTools/IDiTauSmearingTool.h"
-#include "TauAnalysisTools/CommonSmearingTool.h"
 #include "TauAnalysisTools/CommonDiTauEfficiencyTool.h"
 #include "TauAnalysisTools/HelperFunctions.h"
 
@@ -32,8 +31,8 @@ namespace TauAnalysisTools
 {
 
 class CommonDiTauSmearingTool
-  : public CommonSmearingTool
-  , public virtual IDiTauSmearingTool
+  : public virtual IDiTauSmearingTool
+  , public asg::AsgMetadataTool
 {
   /// Create a proper constructor for Athena
   ASG_TOOL_CLASS( CommonDiTauSmearingTool, TauAnalysisTools::IDiTauSmearingTool )
@@ -42,31 +41,55 @@ public:
 
   CommonDiTauSmearingTool(const std::string& sName);
 
-  virtual StatusCode initialize() override;
+  virtual StatusCode initialize();
 
   /// Apply the correction on a modifiable object
-  using CommonSmearingTool::applyCorrection;
-  virtual CP::CorrectionCode applyCorrection( xAOD::DiTauJet& xDiTau ) override;
+  virtual CP::CorrectionCode applyCorrection( xAOD::DiTauJet& xDiTau ) const;
   /// Create a corrected copy from a constant ditau
-  using CommonSmearingTool::correctedCopy;
   virtual CP::CorrectionCode correctedCopy( const xAOD::DiTauJet& xDiTau,
-      xAOD::DiTauJet*& xDiTauCopy) override;
+      xAOD::DiTauJet*& xDiTauCopy) const;
 
+  /// returns: whether this tool is affected by the given systematics
+  virtual bool isAffectedBySystematic( const CP::SystematicVariation& systematic ) const;
+
+  /// returns: the list of all systematics this tool can be affected by
+  virtual CP::SystematicSet affectingSystematics() const;
+
+  /// returns: the list of all systematics this tool recommends to use
+  virtual CP::SystematicSet recommendedSystematics() const;
+
+  /// configure this tool for the given list of systematic variations.  any
+  /// requested systematics that are not affecting this tool will be silently ignored
+  virtual StatusCode applySystematicVariation ( const CP::SystematicSet& sSystematicSet);
 
 protected:
 
   std::map<std::string, TH3*> m_mDTSF;
+  std::unordered_map < CP::SystematicSet, std::string > m_mSystematicSets;
+  const CP::SystematicSet* m_sSystematicSet;
+  std::map<std::string, int> m_mSystematics;
+  std::map<std::string, std::string> m_mSystematicsHistNames;
+
   double (*m_fX)(const xAOD::DiTauJet& xDiTau);
   double (*m_fY)(const xAOD::DiTauJet& xDiTau);
   double (*m_fZ)(const xAOD::DiTauJet& xDiTau);
 
   template<class T>
   void ReadInputs(TFile* fFile, std::map<std::string, T>& mMap);
-  using CommonSmearingTool::getValue;
   virtual CP::CorrectionCode getValue(const std::string& sHistName,
                                       const xAOD::DiTauJet& xDiTau,
                                       double& dCorrectionFactor) const;
   void generateSystematicSets();
+
+  Gaudi::Property<std::string> m_sInputFilePath{this, "InputFilePath", ""};
+  Gaudi::Property<bool> m_bSkipTruthMatchCheck{this, "SkipTruthMatchCheck", false};
+
+  bool m_bIsData;
+
+  TruthMatchedParticleType m_eCheckTruth;
+  CP::SystematicSet m_sAffectingSystematics;
+  CP::SystematicSet m_sRecommendedSystematics;
+
 
 };
 } // namespace TauAnalysisTools

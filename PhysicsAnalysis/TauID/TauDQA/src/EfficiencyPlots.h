@@ -15,7 +15,7 @@ namespace Tau{
 class EfficiencyPlots: public PlotBase {
 public:
   EfficiencyPlots(PlotBase *pParent, const std::string& sDir, std::string sTauJetContainerName);
-  virtual ~EfficiencyPlots();
+  virtual ~EfficiencyPlots() = default;
   
   void fill(const xAOD::TauJet& tau, float weight, float avg_mu);
 
