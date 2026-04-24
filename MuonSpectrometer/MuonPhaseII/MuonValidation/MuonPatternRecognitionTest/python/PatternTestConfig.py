@@ -91,9 +91,9 @@ def LegacyMuonRecoChainCfg(flags):
                                          SegmentKey="MuonSegments", SegmentLinkKey="HabemusZ"))
 
     from MuonObjectMarker.ObjectMarkerConfig import MuonSegmentFitParDecorAlgCfg
-    result.merge(MuonSegmentFitParDecorAlgCfg(flags, name="SegmentParDecorAlgMuonSegments", 
+    result.merge(MuonSegmentFitParDecorAlgCfg(flags, name="MuonSegmentDecorAlg_MuonSegments", 
                                              SegmentKey="MuonSegments"))
-    result.merge(MuonSegmentFitParDecorAlgCfg(flags, name="SegmentParDecorAlgUnAssoc", 
+    result.merge(MuonSegmentFitParDecorAlgCfg(flags, name="MuonSegmentDecorAlg_UnAssocMuonSegments", 
                                               SegmentKey="UnAssocMuonSegments"))
 
     if flags.Input.isMC:
