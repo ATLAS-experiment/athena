@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #==============================================================
 # Job options file for the AFP_SiClusterTools package
@@ -19,7 +19,7 @@ def AFP_SiClusterTools_Cfg(flags, kwargs={}):
         clusterNeighbour = CompFactory.AFPSiClusterAllNeighbours("AFPSiClusterAllNeighbours", neighbourhoodType="X")
         
         rowColToLocal = CompFactory.AFPSiRowColToLocalCSTool("AFPSiRowColToLocalCSTool")
-        
+
         acc = ComponentAccumulator()                                              
         if flags.Input.isMC:
                 # if other tags are desired, they can be set also in postExec
@@ -29,8 +29,8 @@ def AFP_SiClusterTools_Cfg(flags, kwargs={}):
                 siLocAlignTool  = CompFactory.getComp("AFP::SiLocAlignDBTool")("SiLocAlignDBTool",  loc_align_key="/FWD/AFP/Align/Local")
                 siGlobAlignTool = CompFactory.getComp("AFP::SiGlobAlignDBTool")("SiGlobAlignDBTool",glob_align_key="/FWD/AFP/Align/Global")
         else:
-                acc.merge(addFolders(flags, "/FWD/Onl/AFP/Align/Local<tag>AFPAlignLoc-03</tag>",  'FWD_ONL', className='CondAttrListCollection', db='CONDBR2'))
-                acc.merge(addFolders(flags, "/FWD/Onl/AFP/Align/Global<tag>AFPAlignGlob-03</tag>",'FWD_ONL', className='CondAttrListCollection', db='CONDBR2'))
+                acc.merge(addFolders(flags, "/FWD/Onl/AFP/Align/Local",  'FWD_ONL', className='CondAttrListCollection', db='CONDBR2'))
+                acc.merge(addFolders(flags, "/FWD/Onl/AFP/Align/Global",'FWD_ONL', className='CondAttrListCollection', db='CONDBR2'))
                 
                 siLocAlignTool  = CompFactory.getComp("AFP::SiLocAlignDBTool")("SiLocAlignDBTool",  loc_align_key="/FWD/Onl/AFP/Align/Local")
                 siGlobAlignTool = CompFactory.getComp("AFP::SiGlobAlignDBTool")("SiGlobAlignDBTool",glob_align_key="/FWD/Onl/AFP/Align/Global")
