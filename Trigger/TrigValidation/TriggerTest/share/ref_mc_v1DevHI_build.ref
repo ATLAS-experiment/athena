@@ -2333,6 +2333,20 @@ HLT_noalg_L1AFP_A_AND_C:
   eventCount: 0
 HLT_noalg_L1AFP_A_OR_C:
   eventCount: 0
+HLT_noalg_L1AFP_OR_TRT_VZDC_A_VZDC_C_VjTE200:
+  eventCount: 0
+HLT_noalg_L1AFP_OR_TRT_ZDC_XOR_VjTE200:
+  eventCount: 0
+HLT_noalg_L1AFP_OR_VZDC_A_VZDC_C_VjTE200:
+  eventCount: 0
+HLT_noalg_L1AFP_OR_VjTE200:
+  eventCount: 0
+HLT_noalg_L1AFP_OR_ZDC_XOR_VjTE200:
+  eventCount: 0
+HLT_noalg_L1ESP_AFP_OR_jJ5p30ETA49_VZDC_A_VZDC_C_VjTE200:
+  eventCount: 0
+HLT_noalg_L1ESP_AFP_OR_jJ5p30ETA49_ZDC_XOR_VjTE200:
+  eventCount: 0
 HLT_noalg_L1MBTS_2_UNPAIRED_ISO:
   eventCount: 0
 HLT_noalg_L1MU3V:
