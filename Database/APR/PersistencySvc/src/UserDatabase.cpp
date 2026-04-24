@@ -17,7 +17,7 @@
 
 static const std::string& emptyString = "";
 
-pool::PersistencySvc::UserDatabase::UserDatabase( pool::PersistencySvc::UserSession& session,
+pool::UserDatabase::UserDatabase( pool::UserSession& session,
                                                   const std::string& name,
                                                   const pool::DatabaseSpecification::NameType nameType ):
   APRMessaging("PersistencySvc::UserDB"),                                                  
@@ -40,18 +40,18 @@ pool::PersistencySvc::UserDatabase::UserDatabase( pool::PersistencySvc::UserSess
 }
 
 
-pool::PersistencySvc::UserDatabase::~UserDatabase()
+pool::UserDatabase::~UserDatabase()
 {}
 
 
-pool::PersistencySvc::DatabaseHandler&
-pool::PersistencySvc::UserDatabase::databaseHandler()
+pool::DatabaseHandler&
+pool::UserDatabase::databaseHandler()
 {
   return *m_databaseHandler;
 }
 
 void
-pool::PersistencySvc::UserDatabase::connectForRead()
+pool::UserDatabase::connectForRead()
 {
   if( !m_databaseHandler && m_transactionType != pool::ITransaction::INACTIVE ) {
     // Check if the database is already connected
@@ -85,7 +85,7 @@ pool::PersistencySvc::UserDatabase::connectForRead()
       };
 
       // Now we have all the usefull information to open the file.
-      pool::PersistencySvc::MicroSessionManager& sessionManager = m_session.microSessionManager( m_technology );
+      pool::MicroSessionManager& sessionManager = m_session.microSessionManager( m_technology );
       long accessMode = pool::READ;
       if ( m_transactionType == pool::ITransaction::UPDATE &&
            m_policy.readMode() == pool::DatabaseConnectionPolicy::UPDATE ) {
@@ -109,7 +109,7 @@ pool::PersistencySvc::UserDatabase::connectForRead()
 
 
 void
-pool::PersistencySvc::UserDatabase::connectForWrite()
+pool::UserDatabase::connectForWrite()
 {
   if( !m_databaseHandler && m_transactionType != pool::ITransaction::INACTIVE ) {
     if ( m_transactionType != pool::ITransaction::UPDATE ) {
@@ -205,7 +205,7 @@ pool::PersistencySvc::UserDatabase::connectForWrite()
 
 
 void
-pool::PersistencySvc::UserDatabase::disconnect()
+pool::UserDatabase::disconnect()
 {
   if ( m_databaseHandler ) {
     m_session.microSessionManager( m_technology ).disconnect( m_databaseHandler );
@@ -215,14 +215,14 @@ pool::PersistencySvc::UserDatabase::disconnect()
 
 
 pool::IDatabase::OpenMode
-pool::PersistencySvc::UserDatabase::openMode() const
+pool::UserDatabase::openMode() const
 {
   return m_openMode;
 }
 
 
 const std::string&
-pool::PersistencySvc::UserDatabase::fid()
+pool::UserDatabase::fid()
 {
   if ( m_databaseHandler ) return m_databaseHandler->fid();
   else {
@@ -280,7 +280,7 @@ pool::PersistencySvc::UserDatabase::fid()
 
 
 const std::string&
-pool::PersistencySvc::UserDatabase::pfn()
+pool::UserDatabase::pfn()
 {
   if( m_databaseHandler )  return m_databaseHandler->pfn();
   if( m_nameType == pool::DatabaseSpecification::PFN )  return m_name;
@@ -309,7 +309,7 @@ pool::PersistencySvc::UserDatabase::pfn()
 
 
 bool
-pool::PersistencySvc::UserDatabase::setTechnology( long technology )
+pool::UserDatabase::setTechnology( long technology )
 {
   if ( m_alreadyConnected ) return false;
   else {
@@ -322,14 +322,14 @@ pool::PersistencySvc::UserDatabase::setTechnology( long technology )
 
 
 long
-pool::PersistencySvc::UserDatabase::technology() const
+pool::UserDatabase::technology() const
 {
   return m_technology;
 }
 
 
 std::vector< std::string >
-pool::PersistencySvc::UserDatabase::containers()
+pool::UserDatabase::containers()
 {
   std::vector< std::string > containers;
   if ( m_databaseHandler ) {
@@ -340,7 +340,7 @@ pool::PersistencySvc::UserDatabase::containers()
 
 
 pool::IContainer*
-pool::PersistencySvc::UserDatabase::containerHandle( const std::string& name )
+pool::UserDatabase::containerHandle( const std::string& name )
 {
   pool::IContainer* container = 0;
   if ( m_databaseHandler ) {
@@ -351,7 +351,7 @@ pool::PersistencySvc::UserDatabase::containerHandle( const std::string& name )
 
 
 bool
-pool::PersistencySvc::UserDatabase::checkInRegistry()
+pool::UserDatabase::checkInRegistry()
 {
   // Check first if the database is already connected.
   switch( m_nameType ) {
@@ -386,28 +386,28 @@ pool::PersistencySvc::UserDatabase::checkInRegistry()
 
 
 void
-pool::PersistencySvc::UserDatabase::setTechnologyIdentifier( const std::string& sTechnology )
+pool::UserDatabase::setTechnologyIdentifier( const std::string& sTechnology )
 {
   m_technology = pool::DbType::getType( sTechnology ).majorType();
 }
 
 
 const pool::ITechnologySpecificAttributes&
-pool::PersistencySvc::UserDatabase::technologySpecificAttributes() const
+pool::UserDatabase::technologySpecificAttributes() const
 {
   return static_cast< const pool::ITechnologySpecificAttributes& >( *this );
 }
 
 
 pool::ITechnologySpecificAttributes&
-pool::PersistencySvc::UserDatabase::technologySpecificAttributes()
+pool::UserDatabase::technologySpecificAttributes()
 {
   return static_cast< pool::ITechnologySpecificAttributes& >( *this );
 }
 
 
 bool
-pool::PersistencySvc::UserDatabase::attributeOfType( const std::string& attributeName,
+pool::UserDatabase::attributeOfType( const std::string& attributeName,
                                                      void* data,
                                                      const std::type_info& typeInfo,
                                                      const std::string& option )
@@ -418,7 +418,7 @@ pool::PersistencySvc::UserDatabase::attributeOfType( const std::string& attribut
 
 
 bool
-pool::PersistencySvc::UserDatabase::setAttributeOfType( const std::string& attributeName,
+pool::UserDatabase::setAttributeOfType( const std::string& attributeName,
                                                         const void* data,
                                                         const std::type_info& typeInfo,
                                                         const std::string& option )

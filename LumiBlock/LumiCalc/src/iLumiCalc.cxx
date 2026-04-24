@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "iLumiCalc.h"
@@ -9,7 +9,6 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 #include "CollectionSvc/CollectionService.h"
 #include "CollectionSvc/ICollection.h"
-#include "StorageSvc/DbType.h"
 
 #include "DataModelRoot/RootType.h"
 

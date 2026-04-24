@@ -26,7 +26,7 @@
 namespace pool {
    class IContainer;
    class IDatabase;
-   namespace PersistencySvc { class ISession; }
+   class ISession;
 }
 
 
@@ -220,7 +220,7 @@ private: // data
    coral::Context*                                   m_context{nullptr};
    bool                                              m_shareCat{false};
    pool::IFileCatalog*                               m_catalog{nullptr};
-   std::vector<pool::PersistencySvc::ISession*>      m_dbSessionVec;
+   std::vector<pool::ISession*>      m_dbSessionVec;
    std::vector<CallMutex*>                           m_pers_mut;
    std::map<std::string, unsigned int>               m_inputContextLabel;
    std::map<std::string, unsigned int>               m_outputContextLabel;

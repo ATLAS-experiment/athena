@@ -17,7 +17,7 @@
 #include <exception>
 #include <memory>
 
-pool::PersistencySvc::DatabaseHandler::DatabaseHandler( pool::IStorageSvc& storageSvc,
+pool::DatabaseHandler::DatabaseHandler( pool::IStorageSvc& storageSvc,
                                                         long technology,
                                                         const std::string& fid,
                                                         const std::string& pfn,
@@ -32,7 +32,7 @@ pool::PersistencySvc::DatabaseHandler::DatabaseHandler( pool::IStorageSvc& stora
   }
 }
 
-pool::PersistencySvc::DatabaseHandler::~DatabaseHandler()
+pool::DatabaseHandler::~DatabaseHandler()
 {
    int mode = 0;
    if( m_storageSvc.openMode(m_fileDescriptor, mode).isSuccess() ) {
@@ -42,7 +42,7 @@ pool::PersistencySvc::DatabaseHandler::~DatabaseHandler()
 
 
 bool
-pool::PersistencySvc::DatabaseHandler::commitTransaction()
+pool::DatabaseHandler::commitTransaction()
 {
    return m_storageSvc.endTransaction( m_fileDescriptor, Transaction::TRANSACT_COMMIT ).isSuccess() &&
           m_storageSvc.endTransaction( m_fileDescriptor, Transaction::TRANSACT_FLUSH ).isSuccess();
@@ -50,20 +50,20 @@ pool::PersistencySvc::DatabaseHandler::commitTransaction()
 
 
 bool
-pool::PersistencySvc::DatabaseHandler::commitAndHoldTransaction()
+pool::DatabaseHandler::commitAndHoldTransaction()
 {
    return m_storageSvc.endTransaction( m_fileDescriptor, Transaction::TRANSACT_COMMIT ).isSuccess();
 }
 
 
 bool
-pool::PersistencySvc::DatabaseHandler::disconnectTransaction()
+pool::DatabaseHandler::disconnectTransaction()
 {
    return ( m_storageSvc.disconnect( m_fileDescriptor ).isSuccess() );
 }
 
 std::vector< std::string >
-pool::PersistencySvc::DatabaseHandler::containers()
+pool::DatabaseHandler::containers()
 {
    std::vector< std::string > result;
    std::vector<const Token*> containerTokens;
@@ -81,14 +81,14 @@ pool::PersistencySvc::DatabaseHandler::containers()
 }
 
 pool::IContainer*
-pool::PersistencySvc::DatabaseHandler::container( const std::string& containerName )
+pool::DatabaseHandler::container( const std::string& containerName )
 {
    // Check the existence of a given container.
    std::vector< std::string > allContainers = this->containers();
    for ( std::vector< std::string >::const_iterator iName = allContainers.begin();
          iName != allContainers.end(); ++iName ) {
       if ( *iName == containerName ) {
-         return new pool::PersistencySvc::Container( m_fileDescriptor,
+         return new pool::Container( m_fileDescriptor,
                                                      m_technology,
                                                      containerName );
       }
@@ -98,35 +98,35 @@ pool::PersistencySvc::DatabaseHandler::container( const std::string& containerNa
 
 
 const std::string&
-pool::PersistencySvc::DatabaseHandler::pfn() const
+pool::DatabaseHandler::pfn() const
 {
   return m_fileDescriptor.PFN();
 }
 
 
 const std::string&
-pool::PersistencySvc::DatabaseHandler::fid() const
+pool::DatabaseHandler::fid() const
 {
   return m_fileDescriptor.FID();
 }
 
 
 long
-pool::PersistencySvc::DatabaseHandler::technology() const
+pool::DatabaseHandler::technology() const
 {
   return m_technology;
 }
 
 
 long
-pool::PersistencySvc::DatabaseHandler::accessMode() const
+pool::DatabaseHandler::accessMode() const
 {
   return m_accessMode;
 }
 
 
 Token*
-pool::PersistencySvc::DatabaseHandler::writeObject( const std::string& containerName,
+pool::DatabaseHandler::writeObject( const std::string& containerName,
                                                     long minorTechnology,
                                                     const void* object,
                                                     const RootType& type )
@@ -155,7 +155,7 @@ pool::PersistencySvc::DatabaseHandler::writeObject( const std::string& container
 
 
 void*
-pool::PersistencySvc::DatabaseHandler::readObject( const Token& token, void* object )
+pool::DatabaseHandler::readObject( const Token& token, void* object )
 {
   void* result( object );
 
@@ -173,7 +173,7 @@ pool::PersistencySvc::DatabaseHandler::readObject( const Token& token, void* obj
 
 
 bool
-pool::PersistencySvc::DatabaseHandler::attribute( const std::string& attributeName,
+pool::DatabaseHandler::attribute( const std::string& attributeName,
                                                   void* data,
                                                   const std::type_info& typeInfo,
                                                   const std::string& option )
@@ -186,7 +186,7 @@ pool::PersistencySvc::DatabaseHandler::attribute( const std::string& attributeNa
 
 
 bool
-pool::PersistencySvc::DatabaseHandler::setAttribute( const std::string& attributeName,
+pool::DatabaseHandler::setAttribute( const std::string& attributeName,
                                                      const void* data,
                                                      const std::type_info& typeInfo,
                                                      const std::string& option )

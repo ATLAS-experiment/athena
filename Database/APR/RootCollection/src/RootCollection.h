@@ -28,7 +28,7 @@ namespace ROOT {
 
 namespace pool {
 
-   namespace PersistencySvc { class ISession; }
+   class ISession;
 
    namespace RootCollection {
 
@@ -51,7 +51,7 @@ namespace pool {
       class RootCollection :  public ICollection, public APRMessaging {
 
      public:
-	typedef Gaudi::PluginService::Factory<ICollection*( const CollectionDescription*, ICollection::OpenMode, PersistencySvc::ISession*)> Factory;
+	typedef Gaudi::PluginService::Factory<ICollection*( const CollectionDescription*, ICollection::OpenMode, ISession*)> Factory;
 
         /// Constructor
         /// @param description The description of the collection, including name and connection
@@ -59,7 +59,7 @@ namespace pool {
         /// @param session If you want to access the referenced objects you have to provide an ISession
         RootCollection(  const pool::CollectionDescription* description,
                          pool::ICollection::OpenMode mode,
-                         pool::PersistencySvc::ISession* session );
+                         pool::ISession* session );
 
         /// Destructor
         ~RootCollection();
@@ -105,7 +105,7 @@ namespace pool {
         std::unique_ptr<ROOT::RNTupleReader> m_reader;
         std::unique_ptr<ROOT::RNTupleWriter> m_rntupleWriter;
 
-        PersistencySvc::ISession*            m_session;
+        ISession*                            m_session;
         bool                                 m_open;
 
         SmartIF<IFileMgr>                    m_fileMgr;

@@ -12,7 +12,7 @@
 
 #include <exception>
 
-pool::PersistencySvc::TokenIterator::TokenIterator( FileDescriptor& fileDescriptor,
+pool::TokenIterator::TokenIterator( FileDescriptor& fileDescriptor,
                                                     const std::string& containerName) :
   m_container( nullptr ), m_refToken ( nullptr )
 {
@@ -26,7 +26,7 @@ pool::PersistencySvc::TokenIterator::TokenIterator( FileDescriptor& fileDescript
    }
 }
 
-pool::PersistencySvc::TokenIterator::~TokenIterator()
+pool::TokenIterator::~TokenIterator()
 {
   delete m_container; m_container = nullptr;
   m_refToken->release(); m_refToken = nullptr;
@@ -34,7 +34,7 @@ pool::PersistencySvc::TokenIterator::~TokenIterator()
 
 
 Token*
-pool::PersistencySvc::TokenIterator::next()
+pool::TokenIterator::next()
 {
   Token::OID_t linkH(m_refToken->oid());
   if( !m_container->next(linkH).isSuccess() ) return nullptr;
@@ -45,14 +45,14 @@ pool::PersistencySvc::TokenIterator::next()
 
 
 std::size_t
-pool::PersistencySvc::TokenIterator::size()
+pool::TokenIterator::size()
 {
   return m_container->size();
 }
 
 
 bool
-pool::PersistencySvc::TokenIterator::seek(std::size_t position)
+pool::TokenIterator::seek(std::size_t position)
 {
   if( position >= size() ) return false;
   // go to position-1, so that the next call to next() will return the Token at <position>

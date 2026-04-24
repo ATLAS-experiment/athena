@@ -14,7 +14,7 @@
 #include "GaudiKernel/StatusCode.h"
 #include <exception>
 
-pool::PersistencySvc::MicroSessionManager::MicroSessionManager( pool::PersistencySvc::DatabaseRegistry& registry,
+pool::MicroSessionManager::MicroSessionManager( pool::DatabaseRegistry& registry,
                                                                 long technology ):
   m_registry( registry ),
   m_storageSvc( 0 ),
@@ -29,7 +29,7 @@ pool::PersistencySvc::MicroSessionManager::MicroSessionManager( pool::Persistenc
 }
 
 
-pool::PersistencySvc::MicroSessionManager::~MicroSessionManager()
+pool::MicroSessionManager::~MicroSessionManager()
 {
   this->disconnectAll();
   m_storageSvc->release();
@@ -37,7 +37,7 @@ pool::PersistencySvc::MicroSessionManager::~MicroSessionManager()
 
 
 bool
-pool::PersistencySvc::MicroSessionManager::connect( ITransaction::Type transType )
+pool::MicroSessionManager::connect( ITransaction::Type transType )
 {
   if( !m_inSession ) {
     long mode = (transType == ITransaction::UPDATE) ? pool::UPDATE : pool::READ;
@@ -47,8 +47,8 @@ pool::PersistencySvc::MicroSessionManager::connect( ITransaction::Type transType
 }
 
 
-pool::PersistencySvc::DatabaseHandler*
-pool::PersistencySvc::MicroSessionManager::connect( ITransaction::Type transType,
+pool::DatabaseHandler*
+pool::MicroSessionManager::connect( ITransaction::Type transType,
                                                     const std::string& fid,
                                                     const std::string& pfn,
                                                     long accessMode )
@@ -64,9 +64,9 @@ pool::PersistencySvc::MicroSessionManager::connect( ITransaction::Type transType
     }
   }
 
-  pool::PersistencySvc::DatabaseHandler* db = 0;
+  pool::DatabaseHandler* db = 0;
   try {
-    db = new pool::PersistencySvc::DatabaseHandler( *m_storageSvc,
+    db = new pool::DatabaseHandler( *m_storageSvc,
                                                     m_technology,
                                                     fid,
                                                     pfn,
@@ -86,9 +86,9 @@ pool::PersistencySvc::MicroSessionManager::connect( ITransaction::Type transType
 
 
 void
-pool::PersistencySvc::MicroSessionManager::disconnect( pool::PersistencySvc::DatabaseHandler* database )
+pool::MicroSessionManager::disconnect( pool::DatabaseHandler* database )
 {
-  std::set< pool::PersistencySvc::DatabaseHandler* >::iterator idb = m_databaseHandlers.find( database );
+  std::set< pool::DatabaseHandler* >::iterator idb = m_databaseHandlers.find( database );
   if ( idb != m_databaseHandlers.end() ) {
     m_registry.deregisterDatabaseHandler( *idb );
     delete *idb;
@@ -102,10 +102,10 @@ pool::PersistencySvc::MicroSessionManager::disconnect( pool::PersistencySvc::Dat
 
 
 bool
-pool::PersistencySvc::MicroSessionManager::disconnectAll()
+pool::MicroSessionManager::disconnectAll()
 {
   bool ret = true;
-  for ( std::set< pool::PersistencySvc::DatabaseHandler* >::iterator idb = m_databaseHandlers.begin();
+  for ( std::set< pool::DatabaseHandler* >::iterator idb = m_databaseHandlers.begin();
         idb != m_databaseHandlers.end(); ++idb ) {
     m_registry.deregisterDatabaseHandler( *idb );
     ret = (*idb)->disconnectTransaction();
@@ -122,14 +122,14 @@ pool::PersistencySvc::MicroSessionManager::disconnectAll()
 
 
 long
-pool::PersistencySvc::MicroSessionManager::technology() const
+pool::MicroSessionManager::technology() const
 {
   return m_technology;
 }
 
 
 std::string
-pool::PersistencySvc::MicroSessionManager::fidForPfn( const std::string& pfn )
+pool::MicroSessionManager::fidForPfn( const std::string& pfn )
 {
   if ( m_databaseHandlers.empty() ) {
     long mode = pool::READ;
@@ -159,7 +159,7 @@ pool::PersistencySvc::MicroSessionManager::fidForPfn( const std::string& pfn )
 }
 
 bool
-pool::PersistencySvc::MicroSessionManager::attributeOfType( const std::string& attributeName,
+pool::MicroSessionManager::attributeOfType( const std::string& attributeName,
                                                             void* data,
                                                             const std::type_info& typeInfo,
                                                             const std::string& option )
@@ -173,7 +173,7 @@ pool::PersistencySvc::MicroSessionManager::attributeOfType( const std::string& a
 }
 
 bool
-pool::PersistencySvc::MicroSessionManager::setAttributeOfType( const std::string& attributeName,
+pool::MicroSessionManager::setAttributeOfType( const std::string& attributeName,
                                                                const void* data,
                                                                const std::type_info& typeInfo,
                                                                const std::string& option )
