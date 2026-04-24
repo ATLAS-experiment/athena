@@ -6,6 +6,10 @@ def MuonBlueprintNodeBuilderCfg(flags, name = "MuonBlueprintNodeBuilder", **kwar
     result = ComponentAccumulator()
     from MuonGeoModelR4.MuonGeoModelConfig import MuonGeoModelCfg
     result.merge(MuonGeoModelCfg(flags))
+
+    kwargs.setdefault("AssignActiveMaterial", flags.Muon.trackGeometryActiveMaterial)
+    kwargs.setdefault("BuildPassiveVolumes", flags.Muon.trackGeometryPassiveMaterial)
+
     the_tool = CompFactory.ActsTrk.MuonBlueprintNodeBuilder(name, **kwargs)
     result.setPrivateTools(the_tool)
     return result

@@ -49,8 +49,6 @@ namespace ActsTrk {
             std::size_t m_nTreeEntries{0ul};
             /// The current processed tree entry
             std::size_t m_currEntry{0ul};
-            /// The current processed tree event
-            std::uint32_t m_currEvent{std::numeric_limits<std::uint32_t>::max()};
             /// The number of processed tree events
             std::size_t m_procEvents{0ul};
             /// The list of input filenames
