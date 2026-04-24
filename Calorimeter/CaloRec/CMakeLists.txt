@@ -63,7 +63,7 @@ atlas_add_test( CaloBCIDLumiCondAlgConfig_test
 atlas_add_test( CaloTopoCluster_test
                 SCRIPT python -m CaloRec.CaloTopoClusterConfig
                 PROPERTIES TIMEOUT 300
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
 
 
 atlas_add_test( CaloCellContainerAliasAlg_test
