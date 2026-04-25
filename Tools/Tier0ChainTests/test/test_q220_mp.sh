@@ -21,7 +21,7 @@ Reco_tf.py \
 --athenaopts='--nprocs=2' \
 --maxEvents=500 \
 --preExec='pass' \
---conditionsTag 'all:CONDBR2-BLKPA-RUN2-11' \
+--conditionsTag 'all:CONDBR2-BLKPA-RUN2-12' \
 --outputAODFile=AOD.pool.root --outputESDFile=ESD.pool.root --imf False
 
 

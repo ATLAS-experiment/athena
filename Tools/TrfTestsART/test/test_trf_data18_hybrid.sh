@@ -17,7 +17,7 @@ timeout 64800 Reco_tf.py --CA \
   --athenaopts="--nprocs=2 --threads=4" \
   --preExec 'all:flags.DQ.Steering.doHLTMon=False; flags.Exec.FPE=10;' \
   --autoConfiguration='everything' \
-  --conditionsTag 'all:CONDBR2-BLKPA-RUN2-11' --geometryVersion='default:ATLAS-R2-2016-01-00-01' \
+  --conditionsTag 'all:CONDBR2-BLKPA-RUN2-12' --geometryVersion='default:ATLAS-R2-2016-01-00-01' \
   --runNumber='357750' --maxEvents='100'
 
 rc1=$?
