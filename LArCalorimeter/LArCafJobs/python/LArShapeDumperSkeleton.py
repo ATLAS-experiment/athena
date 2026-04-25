@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import sys
 
@@ -38,6 +38,10 @@ def fromRunArgs(runArgs):
     flags.Trigger.L1.doMuon=False
     flags.Trigger.L1.doCalo=False
     flags.Trigger.L1.doTopo=False
+
+    # LArShapeDumper uses RoIB ROB.
+    flags.Trigger.CTP.UseEDMxAOD = False
+    flags.Trigger.CTP.UseRoibROB = True
 
     if hasattr(runArgs,"outputNTUP_HECNOISEFile"):
         flags.LArShapeDump.HECNoiseNtup=runArgs.outputNTUP_HECNOISEFile

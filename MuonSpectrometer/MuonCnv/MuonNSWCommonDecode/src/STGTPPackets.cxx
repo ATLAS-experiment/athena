@@ -114,6 +114,8 @@ size_t Muon::nsw::STGTPPadPacket::Size(const int ver){
 }
 Muon::nsw::STGTPPadPacket::STGTPPadPacket(const std::vector<uint32_t>& payload, const int ver=1) {
   size_t packet_size_w = Size(ver);
+
+
   if (std::size(payload) != packet_size_w) {
     throw std::runtime_error(
 			     Muon::nsw::format("Packet vector has size {} instead of expected size {}", std::size(payload), packet_size_w));
@@ -244,12 +246,10 @@ size_t Muon::nsw::STGTPStripPacket::Size(const int ver){
 
 Muon::nsw::STGTPStripPacket::STGTPStripPacket(const std::vector<uint32_t>& payload, const int ver) {
   size_t packet_size_w = Size(ver);
-
   if (std::size(payload) != packet_size_w) {
     throw std::runtime_error(
                              Muon::nsw::format("Strip packet vector has size {} instead of expected size {}", std::size(payload), packet_size_w));
   }
-
   const auto packets = std::span{payload.data(), std::size(payload)};
   auto readPointer = std::size_t{0};
   auto decode = [&packets](std::size_t& readPointer, const std::size_t size) {
@@ -257,8 +257,7 @@ Muon::nsw::STGTPStripPacket::STGTPStripPacket(const std::vector<uint32_t>& paylo
   };
 
   // Skip padding (70 bits)
-  decode(readPointer, Muon::nsw::STGTPStrips::size_padding);
-
+   readPointer +=  Muon::nsw::STGTPStrips::size_padding;
   // Decode 112 strips (6 bits each)
   for (std::size_t i = Muon::nsw::STGTPStrips::num_strips; i > 0; --i) {
     const auto index = i - 1;

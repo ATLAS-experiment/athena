@@ -399,14 +399,14 @@ StatusCode eFexByteStreamTool::convertToBS(std::vector<OFFLINE_FRAGMENTS_NAMESPA
     for(auto& key : m_eEMReadKeys) {
         SG::ReadHandle emTobs(key, eventContext);
         CHECK(emTobs.isValid());
-        for (const auto &tob: *emTobs) {
+        for (const xAOD::eFexEMRoI_v1* tob: *emTobs) {
             f.addTob(*tob, f.numSlices / 2 /*sliceNumber .. central is always "half"*/);
         }
     }
     for(auto& key : m_eTAUReadKeys) {
         SG::ReadHandle tauTobs(key,eventContext);
         CHECK( tauTobs.isValid() );    
-        for(const auto& tob : *tauTobs) {
+        for(const xAOD::eFexTauRoI_v1* tob : *tauTobs) {
             f.addTob(*tob, f.numSlices/2 /*sliceNumber .. central is always "half"*/);
         }
     }

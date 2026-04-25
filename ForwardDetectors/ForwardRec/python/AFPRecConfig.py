@@ -1,6 +1,6 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # file   AFPRecConfig.py
 # author Petr Balek <petr.balek@cern.ch>
@@ -94,6 +94,7 @@ def AFPRecCfg(flags):
 
 if __name__ == "__main__":
 
+
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.Scheduler.CheckDependencies = True
@@ -102,14 +103,16 @@ if __name__ == "__main__":
     flags.Scheduler.ShowControlFlow = True
     flags.Scheduler.EnableVerboseViews = True
     
-    flags.Input.Files = ["/afs/cern.ch/work/p/pbalek/public/data17_13TeV.00338480.physics_Main.daq.RAW/data17_13TeV.00338480.physics_Main.daq.RAW._lb0275._SFO-7._0007.data"]
-    
     flags.Output.doWriteAOD = True
     flags.Output.AODFileName = "AOD.pool.root"
     flags.Exec.MaxEvents = 500
     flags.Concurrency.NumThreads = 4
+
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags
+    from AthenaConfiguration.Enums import LHCPeriod
  
     flags.fillFromArgs() # enable unit tests to switch only parts of reco: python -m HIRecConfig.HIRecConfig HeavyIon.doGlobal = 0 and so on
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA if flags.GeoModel.Run is LHCPeriod.Run3 and not flags.Input.isMC else defaultConditionsTags.autoconfigure(flags)
     flags.lock()
     flags.dump()
     
