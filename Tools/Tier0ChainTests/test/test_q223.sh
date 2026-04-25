@@ -30,7 +30,7 @@ Reco_tf.py \
 --preExec  'pass' \
 --postExec 'pass' \
 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/q223_input_data18/data18_comm.00353055.physics_MinBias.daq.RAW._lb0062._SFO-2._0001.data \
---conditionsTag='CONDBR2-BLKPA-RUN2-11' \
+--conditionsTag='CONDBR2-BLKPA-RUN2-12' \
 --geometryVersion='ATLAS-R2-2016-01-00-01' \
 --maxEvents=500 \
 --outputAODFile=AOD.pool.root --outputESDFile=ESD.pool.root --outputHISTFile=myHIST.root --imf False
