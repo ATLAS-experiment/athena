@@ -13,7 +13,7 @@
 
 Reco_tf.py \
 --AMI=q442 \
---conditionsTag 'all:CONDBR2-BLKPA-RUN2-12' \
+--conditionsTag 'all:CONDBR2-BLKPA-RUN2-13' \
 --CA "True" \
 --preExec "all:flags.DQ.Steering.doHLTMon=False" \
 --athenaopts='--threads=8' \
