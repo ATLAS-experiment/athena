@@ -18,7 +18,7 @@
 Reco_tf.py \
 --CA \
 --AMI=q220 \
---conditionsTag 'all:CONDBR2-BLKPA-RUN2-12' \
+--conditionsTag 'all:CONDBR2-BLKPA-RUN2-13' \
 --athenaopts='--threads=8' \
 --preExec='pass' \
 --maxEvents=800 \
