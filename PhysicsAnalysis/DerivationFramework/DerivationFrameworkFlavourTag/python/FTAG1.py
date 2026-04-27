@@ -119,7 +119,6 @@ def FTAG1CoreCfg(
 
     # FTAG1-specific all-variable content
     ftag1_slimming_helper.AllVariables += [
-        "InDetLargeD0TrackParticles",
         "AntiKt4EMPFlowJets",
         "AntiKt4LCTopoJets",
         "CaloCalFwdTopoTowers",
