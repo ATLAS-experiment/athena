@@ -38,8 +38,8 @@ def LArReadCellsCfg(flags):
     flags.dump()
     dumperAlg=CompFactory.LArReadCells("LArReadCells")
     dumperAlg.output = flags.LArShapeDump.outputNtup
-    dumperAlg.etCut = -1500.
-    dumperAlg.etCut2 = -1500.
+    dumperAlg.etCut = flags.LArShapeDump.energyCut
+    dumperAlg.etCut2 = flags.LArShapeDump.energySCCut
 
     result.addEventAlgo(dumperAlg)
 
@@ -106,7 +106,7 @@ def LArReadSCCfg(flags):
     dumperAlg.SCContainerKey = "SCell"
     if flags.LArShapeDump.doSCReco:
        dumperAlg.SCRecoContainerKey = "SCell_RECO"
-    dumperAlg.etCut = -1500.
+    dumperAlg.etCut = flags.LArShapeDump.energyCut
 
     result.addEventAlgo(dumperAlg)
 

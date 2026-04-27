@@ -34,6 +34,12 @@ if __name__ == '__main__':
     trf.parser.add_argument('--doReco', type=trfArgClasses.argFactory(trfArgClasses.argBool),
                                            default=trfArgClasses.argBool(False))
 
+    trf.parser.add_argument('--etCut', type=trfArgClasses.argFactory(trfArgClasses.argFloat),
+                                           default=trfArgClasses.argFloat(-1500.))
+
+    trf.parser.add_argument('--etCut2', type=trfArgClasses.argFactory(trfArgClasses.argFloat),
+                                           default=trfArgClasses.argFloat(-1500.))
+
     trf.parseCmdLineArgs(sys.argv[1:])
     trf.execute()
     trf.generateReport()
