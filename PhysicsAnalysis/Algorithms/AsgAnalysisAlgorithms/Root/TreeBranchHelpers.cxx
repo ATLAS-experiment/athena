@@ -376,12 +376,16 @@ namespace CP
           SG::ConstAccessor<char> {nominalAuxName};
         else if (typeName == "float")
           SG::ConstAccessor<float> {nominalAuxName};
+        else if (typeName == "double")
+          SG::ConstAccessor<double> {nominalAuxName};
         else if (typeName == "int")
           SG::ConstAccessor<int> {nominalAuxName};
         else if (typeName == "unsigned")
           SG::ConstAccessor<unsigned> {nominalAuxName};
         else if (typeName == "unsigned_char")
           SG::ConstAccessor<unsigned char> {nominalAuxName};
+        else if (typeName == "unsigned_long")
+          SG::ConstAccessor<unsigned long> {nominalAuxName};
         else if (typeName == "unsigned_long_long")
           SG::ConstAccessor<unsigned long long> {nominalAuxName};
         else if (typeName == "int8")
