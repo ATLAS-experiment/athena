@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloCellPedCorrCondAlg.h"
 #include "CaloCondBlobObjs/CaloCondBlobFlt.h"
 #include "CaloCondBlobObjs/CaloCondUtils.h"
+#include "CaloIdentifier/CaloCell_ID.h"
 
 StatusCode CaloCellPedCorrCondAlg::initialize() {
 

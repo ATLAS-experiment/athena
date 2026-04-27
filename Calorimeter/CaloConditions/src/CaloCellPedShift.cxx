@@ -1,5 +1,5 @@
 #include "CaloConditions/CaloCellPedShift.h"
-
+#include "CaloIdentifier/CaloCell_ID.h"
 
 CaloCellPedShift::CaloCellPedShift(const CaloCell_ID* cellid) {
 
