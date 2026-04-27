@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthAllocators/src/ArenaHeapAllocator.cxx
@@ -206,6 +206,8 @@ void ArenaHeapAllocator::slowClear()
         ++pi;
       }
       else {
+        //'clear' is checked for validity by the caller
+        //coverity[NULL_FIELD:FALSE]
         clear (ptr);
       }
     }
