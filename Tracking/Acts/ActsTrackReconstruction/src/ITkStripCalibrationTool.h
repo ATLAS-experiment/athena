@@ -5,17 +5,17 @@
 #ifndef ACTSTRACKRECONSTRUCTION_ITKSTRIPCALIBRATIONTOOL_H
 #define ACTSTRACKRECONSTRUCTION_ITKSTRIPCALIBRATIONTOOL_H
 
-#include "src/detail/StripCalibratorImpl.h"
+#include "src/detail/StripCalibratorToolImpl.h"
 #include "src/detail/Definitions.h"
 
 namespace ActsTrk {
 
   class ITkStripCalibrationTool :
-    public detail::StripCalibratorImpl<detail::RecoTrackStateContainer> {
+    public detail::StripCalibratorToolImpl<detail::RecoTrackStateContainer> {
   public:
     using traj_t = detail::RecoTrackStateContainer;
     
-    using detail::StripCalibratorImpl<traj_t>::StripCalibratorImpl;
+    using detail::StripCalibratorToolImpl<traj_t>::StripCalibratorToolImpl;
   };
   
 } // namespace ActsTrk

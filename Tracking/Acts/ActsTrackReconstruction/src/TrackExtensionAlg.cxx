@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "src/TrackExtensionAlg.h"
 #include "src/TrackFindingAlg.h"
@@ -175,6 +175,7 @@ namespace ActsTrk{
     options.targetSurface = perigeeSurface.get();                  
 
     auto calibrator = detail::OnTrackCalibrator<detail::RecoTrackStateContainer>(
+       context,
        m_trackingGeometryTool.get(),
        m_pixelCalibTool,
        m_stripCalibTool,

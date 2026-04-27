@@ -24,7 +24,9 @@
 
 // ActsTrk
 #include "ActsToolInterfaces/IFitterTool.h"
-#include "ActsToolInterfaces/IOnTrackCalibratorTool.h"
+#include "ActsToolInterfaces/IPixelOnTrackCalibratorTool.h"
+#include "ActsToolInterfaces/IStripOnTrackCalibratorTool.h"
+#include "ActsToolInterfaces/IHGTDOnTrackCalibratorTool.h"
 #include "IMeasurementSelector.h"
 
 // Athena
@@ -90,9 +92,9 @@ namespace ActsTrk {
     ToolHandle<ActsTrk::TrackStatePrinterTool> m_trackStatePrinter{this, "TrackStatePrinter", "", "optional track state printer"};
     ToolHandle<ActsTrk::IActsToTrkConverterTool > m_ATLASConverterTool{this, "ATLASConverterTool", ""};
     ToolHandle<ActsTrk::IFitterTool> m_fitterTool{this, "FitterTool", "", "Fitter Tool for Seeds"};
-    ToolHandle<ActsTrk::IOnTrackCalibratorTool<detail::RecoTrackStateContainer>> m_pixelCalibTool{this, "PixelCalibrator", "", "Opt. pixel measurement calibrator"};
-    ToolHandle<ActsTrk::IOnTrackCalibratorTool<detail::RecoTrackStateContainer>> m_stripCalibTool{this, "StripCalibrator", "", "Opt. strip measurement calibrator"};
-    ToolHandle<ActsTrk::IOnTrackCalibratorTool<detail::RecoTrackStateContainer>> m_hgtdCalibTool{this, "HGTDCalibrator", "", "Opt. HGTD measurement calibrator"};
+    ToolHandle<ActsTrk::IPixelOnTrackCalibratorTool<detail::RecoTrackStateContainer>> m_pixelCalibTool{this, "PixelCalibrator", "", "Opt. pixel measurement calibrator"};
+    ToolHandle<ActsTrk::IStripOnTrackCalibratorTool<detail::RecoTrackStateContainer>> m_stripCalibTool{this, "StripCalibrator", "", "Opt. strip measurement calibrator"};
+    ToolHandle<ActsTrk::IHGTDOnTrackCalibratorTool<detail::RecoTrackStateContainer>> m_hgtdCalibTool{this, "HGTDCalibrator", "", "Opt. HGTD measurement calibrator"};
 
     SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackContainerKey{this, "ACTSTracksLocation", "", "Output track collection (ActsTrk variant)"};
     ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper{this};
@@ -184,11 +186,13 @@ namespace ActsTrk {
     /**
      * @brief Setup and attach measurement selector to KF options
      *
+     * @param ctx the current event context
      * @param measurements measurements container used in MeasurementSelector
      * @param options Kalman filter options
      * @return unique_ptr to MeasurementSelector
      */
     [[nodiscard]] std::unique_ptr<ActsTrk::IMeasurementSelector> setMeasurementSelector(
+        const EventContext &ctx,
         const detail::TrackFindingMeasurements &measurements,
         TrackFinderOptions &options) const;
 
@@ -199,7 +203,8 @@ namespace ActsTrk {
      * @param measurements <easurements container used in MeasurementSelector
      * @param pSurface Raw pointer to perigee surface
      */
-    TrackFindingDefaultOptions getDefaultOptions(const DetectorContextHolder &detContext,
+    TrackFindingDefaultOptions getDefaultOptions(const EventContext &ctx,
+                                                 const DetectorContextHolder &detContext,
                                                  const detail::TrackFindingMeasurements &measurements,
                                                  const Acts::PerigeeSurface* pSurface) const;
 

@@ -17,51 +17,53 @@
 
 namespace ActsTrk {
 
-class IOnBoundStateCalibratorTool : virtual public IAlgTool {
-public:
-   DeclareInterfaceID(IOnBoundStateCalibratorTool, 1, 0);
+   class ClusterCalibratorBase {
+   public:
+      virtual ~ClusterCalibratorBase() {}
+   };
 
-      using PixelPos = xAOD::MeasVector<2>;
-      using PixelCov = xAOD::MeasMatrix<2>;
-      // @TODO should pass through bound state
-      using PixelCalibrator = Acts::Delegate<
-         std::pair<PixelPos, PixelCov>(const Acts::GeometryContext&,
-                                       const Acts::CalibrationContext&,
-                                       const Acts::Surface&,
-                                       const xAOD::PixelCluster &,
-                                       const Acts::BoundTrackParameters &)>;
+   /// @brief Base class of a InDet calibrator object
+   ///
+   /// the calibrator will be used to produce the calibrated position and uncertainty of a cluster
+   template <typename cluster_t, std::size_t DIM>
+   class OnBoundStateCalibratorBase : public ClusterCalibratorBase {
+   public:
+      using ClusterType = cluster_t;
+      static constexpr std::size_t ClusterDIM = DIM;
+      using Pos = xAOD::MeasVector<DIM>;
+      using Cov = xAOD::MeasMatrix<DIM>;
+      using Calibrator = Acts::Delegate<
+         std::pair<Pos, Cov>(const Acts::GeometryContext&,
+                             const Acts::CalibrationContext&,
+                             const Acts::Surface&,
+                             const cluster_t &,
+                             const Acts::BoundTrackParameters &)>;
 
-      using StripPos = xAOD::MeasVector<1>;
-      using StripCov = xAOD::MeasMatrix<1>;
-      using StripCalibrator = Acts::Delegate<
-         std::pair<StripPos, StripCov>(const Acts::GeometryContext&,
-                                       const Acts::CalibrationContext&,
-                                       const Acts::Surface&,
-                                       const xAOD::StripCluster &,
-                                       const Acts::BoundTrackParameters &)>;
+      /// Connect this calibrator to the provided delegate.
+      virtual void connectCalibrator(Calibrator &calibrator) const =0;
+   };
 
-      using HgtdPos = xAOD::MeasVector<3>;
-      using HgtdCov = xAOD::MeasMatrix<3>;
-      using HGTDCalibrator = Acts::Delegate<
-         std::pair<HgtdPos, HgtdCov>(const Acts::GeometryContext&,
-                                       const Acts::CalibrationContext&,
-                                       const Acts::Surface&,
-                                       const xAOD::HGTDCluster &,
-                                       const Acts::BoundTrackParameters &)>;
+   /// @brief interface of a tool to create a calibrator for a certain cluster type.
+   template <typename cluster_t, std::size_t DIM>
+   class IOnBoundStateCalibratorTool : virtual public IAlgTool {
+   public:
+      /// Create a calibrator object for the given event.
+      virtual std::unique_ptr<OnBoundStateCalibratorBase<cluster_t, DIM>> create(const EventContext &ctx) const = 0;
 
+      /// @return true if the calibration should only be applied after measurement selection e.g.
+      ///     because it is already too slow to apply it already during measurement selection.
+      virtual bool calibrateAfterMeasurementSelection() const =0;
+   };
 
-      // @TODO should pass through bound state
-
-      PixelCalibrator pixelCalibrator;
-      StripCalibrator stripCalibrator;
-      HGTDCalibrator hgtdCalibrator;
-
-   virtual void connectPixelCalibrator([[maybe_unused]] PixelCalibrator &calibrator) const {}
-   virtual void connectStripCalibrator([[maybe_unused]] StripCalibrator &calibrator) const {}
-   virtual void connectHGTDCalibrator([[maybe_unused]] HGTDCalibrator &calibrator) const {}
-
-   virtual bool calibrateAfterMeasurementSelection() const =0;
-};
+   namespace traits {
+      /// Helper struct to get the correct types for a certain cluster
+      template <typename T, std::size_t DIM>
+      struct Calibrator {
+         using ToolInterface = IOnBoundStateCalibratorTool<T,DIM>;
+         // @TODO remove:
+         //         using Calibrator = OnBoundStateCalibratorBase<T,DIM>;
+      };
+   }
 
 } // namespace ActsTrk
 

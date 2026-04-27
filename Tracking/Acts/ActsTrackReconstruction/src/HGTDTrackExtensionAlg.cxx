@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTDTrackExtensionAlg.cxx
  *
@@ -230,7 +230,8 @@ StatusCode HGTDTrackExtensionAlg::execute(const EventContext& ctx) const
 					    m_trackFinder->ckfExtensions,
 					    plainOptions);
 
-  auto calibrator = detail::OnTrackCalibrator<detail::RecoTrackStateContainer>(m_trackingGeometryTool.get(),
+  auto calibrator = detail::OnTrackCalibrator<detail::RecoTrackStateContainer>(ctx,
+                                                                               m_trackingGeometryTool.get(),
 									       m_pixelCalibTool,
 									       m_stripCalibTool,
 									       m_hgtdCalibTool);

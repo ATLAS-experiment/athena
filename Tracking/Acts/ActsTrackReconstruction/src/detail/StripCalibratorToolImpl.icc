@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 */
 
-#ifndef STRIPCALIBRATORIMPL_ICC
-#define STRIPCALIBRATORIMPL_ICC
+#ifndef STRIPCALIBRATORTOOLIMPL_ICC
+#define STRIPCALIBRATORTOOLIMPL_ICC
 
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "SCT_ReadoutGeometry/StripStereoAnnulusDesign.h"
@@ -13,14 +13,14 @@
 namespace ActsTrk::detail{
 
   template <typename traj_t>
-  StripCalibratorImpl<traj_t>::StripCalibratorImpl(const std::string& type,
+  StripCalibratorToolImpl<traj_t>::StripCalibratorToolImpl(const std::string& type,
                                                    const std::string& name,
                                                    const IInterface* parent)
     : base_class(type, name, parent)
   {}
 
   template <typename traj_t>
-  StatusCode StripCalibratorImpl<traj_t>::initialize()
+  StatusCode StripCalibratorToolImpl<traj_t>::initialize()
   {
     ATH_MSG_DEBUG("Initializing " << AthAlgTool::name() << " ...");
 
@@ -35,7 +35,7 @@ namespace ActsTrk::detail{
   }
 
   template <typename traj_t>
-  const InDetDD::SiDetectorElement& StripCalibratorImpl<traj_t>::getDetectorElement(const Acts::Surface &surface) const
+  const InDetDD::SiDetectorElement& StripCalibrator<traj_t>::getDetectorElement(const Acts::Surface &surface) const
   {
     const ActsDetectorElement* detElem = dynamic_cast<const ActsDetectorElement*>(surface.surfacePlacement());
     const InDetDD::SiDetectorElement *siDetElement = detElem ? dynamic_cast<const InDetDD::SiDetectorElement *>(detElem->upstreamDetectorElement()) : nullptr;
@@ -47,21 +47,21 @@ namespace ActsTrk::detail{
   }
 
   template <typename traj_t>
-  std::optional<float> StripCalibratorImpl<traj_t>::getCorrectedError(const xAOD::StripCluster& cluster) const
+  std::optional<float> StripCalibrator<traj_t>::getCorrectedError(const xAOD::StripCluster& cluster) const
   {
     std::optional<float> errX {std::nullopt};
-    if (not m_correctCovariance) {
+    if (not m_options.m_correctCovariance) {
       return errX;
     }
 
     Cov cov = cluster.template localCovariance<1>();
     int nrows = cluster.channelsInPhi();
 
-    if (m_errorStrategy == 0 ) {
+    if (m_options.m_errorStrategy == 0 ) {
       
       errX = std::sqrt(cov(0,0));
       
-    } else if (m_errorStrategy == 1 ) {
+    } else if (m_options.m_errorStrategy == 1 ) {
       
       errX = std::sqrt(cov(0,0)) / nrows;
       
@@ -72,22 +72,22 @@ namespace ActsTrk::detail{
   }
 
   template <typename traj_t>
-  std::pair<typename StripCalibratorImpl<traj_t>::Pos,
-            typename StripCalibratorImpl<traj_t>::Cov>
-  StripCalibratorImpl<traj_t>::calibrate(
+  std::pair<typename StripCalibrator<traj_t>::Pos,
+            typename StripCalibrator<traj_t>::Cov>
+  StripCalibrator<traj_t>::calibrate(
       const Acts::GeometryContext& gctx,
       const Acts::CalibrationContext& cctx,
       const xAOD::StripCluster& cluster,
-      const TrackStateProxy& /*state*/) const
+      const StripCalibrator<traj_t>::TrackStateProxy& /*state*/) const
   {
      //      const InDetDD::SiDetectorElement &detElement = getDetectorElement(state.referenceSurface());
       return calibrate(gctx, cctx, cluster);
   }
 
   template <typename traj_t>
-  std::pair<typename StripCalibratorImpl<traj_t>::Pos,
-            typename StripCalibratorImpl<traj_t>::Cov>
-  StripCalibratorImpl<traj_t>::calibrate(
+  std::pair<typename StripCalibrator<traj_t>::Pos,
+            typename StripCalibrator<traj_t>::Cov>
+  StripCalibrator<traj_t>::calibrate(
       const Acts::GeometryContext& gctx,
       const Acts::CalibrationContext& cctx,
       [[maybe_unused]] const Acts::Surface& surface,
@@ -99,9 +99,9 @@ namespace ActsTrk::detail{
   }
 
   template <typename traj_t>
-  std::pair<typename StripCalibratorImpl<traj_t>::Pos,
-            typename StripCalibratorImpl<traj_t>::Cov>
-  StripCalibratorImpl<traj_t>::calibrate(
+  std::pair<typename StripCalibrator<traj_t>::Pos,
+            typename StripCalibrator<traj_t>::Cov>
+  StripCalibrator<traj_t>::calibrate(
       const Acts::GeometryContext& /*gctx*/,
       const Acts::CalibrationContext& /*cctx*/,
       const xAOD::StripCluster& cluster) const
@@ -119,39 +119,37 @@ namespace ActsTrk::detail{
   }
 
   template <typename traj_t>
-  void StripCalibratorImpl<traj_t>::connect(OnTrackCalibrator<traj_t>& calibrator) const
+  void StripCalibrator<traj_t>::connectOnTrackCalibrator(typename StripCalibrator<traj_t>::BASE::OnTrackCalibrator& stripCalibrator) const
   {
     using CalibFuncPtr_t =
-    std::pair<typename StripCalibratorImpl<traj_t>::Pos, typename StripCalibratorImpl<traj_t>::Cov>
-      (StripCalibratorImpl<traj_t>:: *)(const Acts::GeometryContext&,
-                                        const Acts::CalibrationContext&,
-                                        const xAOD::StripCluster&,
-                                        const TrackStateProxy&) const;
+      std::pair<typename StripCalibrator<traj_t>::Pos, typename StripCalibrator<traj_t>::Cov>
+        (StripCalibrator<traj_t>:: *)(const Acts::GeometryContext&,
+                                      const Acts::CalibrationContext&,
+                                      const xAOD::StripCluster&,
+                                      const StripCalibrator<traj_t>::TrackStateProxy&) const;
 
-   calibrator.stripCalibrator. template connect<static_cast<CalibFuncPtr_t>(&StripCalibratorImpl<traj_t>::calibrate)>(this);
-}
+    stripCalibrator. template connect<static_cast<CalibFuncPtr_t>(&StripCalibrator<traj_t>::calibrate)>(this);
+  }
 
-template <typename traj_t>
-void StripCalibratorImpl<traj_t>::connectStripCalibrator(IOnBoundStateCalibratorTool::StripCalibrator& stripCalibrator) const
-{
-   using CalibFuncPtr_t =
-      std::pair<typename StripCalibratorImpl<traj_t>::Pos,
-                typename StripCalibratorImpl<traj_t>::Cov>
-      (StripCalibratorImpl<traj_t>:: *)(const Acts::GeometryContext&,
-                                        const Acts::CalibrationContext&,
-                                        const Acts::Surface &,
-                                        const xAOD::StripCluster&,
-                                        const Acts::BoundTrackParameters&) const;
+  template <typename traj_t>
+  void StripCalibrator<traj_t>::connectCalibrator(StripOnBoundStateCalibratorBase::Calibrator& stripCalibrator) const
+  {
+    using CalibFuncPtr_t =
+      std::pair<typename StripCalibrator<traj_t>::Pos,
+                typename StripCalibrator<traj_t>::Cov>
+        (StripCalibrator<traj_t>:: *)(const Acts::GeometryContext&,
+                                      const Acts::CalibrationContext&,
+                                      const Acts::Surface &,
+                                      const xAOD::StripCluster&,
+                                      const Acts::BoundTrackParameters&) const;
 
-   stripCalibrator.template connect<static_cast<CalibFuncPtr_t>(&StripCalibratorImpl<traj_t>::calibrate)>(this);
-}
+    stripCalibrator.template connect<static_cast<CalibFuncPtr_t>(&StripCalibrator<traj_t>::calibrate)>(this);
+  }
 
-template <typename traj_t>
-bool StripCalibratorImpl<traj_t>::calibrateAfterMeasurementSelection() const
-{ return m_postCalibration.value(); }
-    
-  
-  
+  template <typename traj_t>
+  bool StripCalibratorToolImpl<traj_t>::calibrateAfterMeasurementSelection() const
+  { return m_postCalibration.value(); }
+
 } // namespace ActsTrk::detail
 
 #endif
