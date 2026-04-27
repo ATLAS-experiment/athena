@@ -219,8 +219,7 @@ def BPHY10Cfg(flags):
 
         BPHY10_cascadeCheck = CompFactory.DerivationFramework.AnyVertexSkimmingTool(
             "BPHY10_AnyVertexSkimmingTool",
-            VertexContainerNames =CascadeCollections,
-            UseHandles = True )
+            VertexContainerNames =CascadeCollections )
         BPHY10SkimmingOR = CompFactory.DerivationFramework.FilterCombinationOR(
             "BPHY10SkimmingOR",
             FilterList = [BPHY10_cascadeCheck, BPHY10_SelectBdJpsiKstEvent])
