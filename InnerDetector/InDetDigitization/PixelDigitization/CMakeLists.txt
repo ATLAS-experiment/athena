@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PixelDigitization )
@@ -19,19 +19,19 @@ atlas_add_test( BichselData_test
    SOURCES test/BichselData_test.cxx  src/BichselData.cxx src/PixelDigitizationUtilities.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
    LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils PixelConditionsData
-   POST_EXEC_SCRIPT "nopost.sh" )
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( PixelDigitizationUtilities_test
    SOURCES test/PixelDigitizationUtilities_test.cxx src/PixelDigitizationUtilities.cxx src/BichselData.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
    LINK_LIBRARIES ${Boost_LIBRARIES} GaudiKernel AthenaKernel CxxUtils TestTools PathResolver PixelConditionsData
-   POST_EXEC_SCRIPT "nopost.sh" )
+   POST_EXEC_SCRIPT noerror.sh )
    
 atlas_add_test( PixelNoiseFunctions_test
    SOURCES test/PixelNoiseFunctions_test.cxx src/PixelNoiseFunctions.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
    LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} CxxUtils TestTools PixelConditionsData SiDigitization
-   POST_EXEC_SCRIPT "nopost.sh" )
+   POST_EXEC_SCRIPT noerror.sh )
 
 
 
