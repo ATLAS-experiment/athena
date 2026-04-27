@@ -8,7 +8,7 @@
 
 export ATHENA_CORE_NUMBER=8
 
-athena ZdcRec/ZdcRecConfig.py --CA --filesInput=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ZdcRec/data18_hi.00367365.calibration_zdcCalib.daq.RAW._lb0000._SFO-5._0002.data --evtMax=10
+athena ZdcRec/ZdcRecConfig.py --filesInput=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ZdcRec/data18_hi.00367365.calibration_zdcCalib.daq.RAW._lb0000._SFO-5._0002.data --evtMax=10
 
 #Remember retval of transform as art result
 RES=$?
