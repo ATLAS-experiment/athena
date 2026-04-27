@@ -14,42 +14,34 @@
 #define EVENTCOMMONTPCNV_ERROR_MATRIX_COMPRESSOR_H
   
 #include <vector>
-#include <iostream>
+#include <bit>
+#include <cstdint>
 
 
 class DecoderFloat_IEEE754
 {
 
-union FloatLongIntUnion
-{
-  float f;
-  unsigned int l;
-};
-
  public:
-  DecoderFloat_IEEE754()
-    {
-      m_data.f=0.0;
-    }
-  ~DecoderFloat_IEEE754() {};
+ 
   void setF(float f) 
     {
-      m_data.f=f;
+      m_data=std::bit_cast<std::uint32_t>(f);
     }
   float getF()
     {
-      if(m_data.l==(unsigned int)0x80000000)
-	return 0.0;
+      auto myUint = m_data;
+      if(myUint==0x80000000u)
+	      return 0.0;
       else
-	return m_data.f;
+	return std::bit_cast<float>(m_data);
     }
   void setL( int l)
     {
-      m_data.l=l;
+      m_data=l;
     }
   unsigned int getL()
     {
-      return m_data.l;
+      return m_data;
     }
   void print();
   short int getExponent();
@@ -57,7 +49,7 @@ union FloatLongIntUnion
   void setExponent(short int);
   void setSign(int);
 
-  FloatLongIntUnion m_data;
+  std::uint32_t m_data{};
 };
 
 class FloatRep
@@ -71,22 +63,18 @@ public:
   ~FloatRep(){};
   float restore()
     {
-      union FL {
-	float m_f;
-	unsigned int m_l;
-      } decoder;
+      
 
       if((m_mant==0)&&(m_sign!=0))
 	return 0.0;
 
-      unsigned int buf=0x00000000;
+      std::uint32_t buf=0x00000000u;
 
       buf = m_mant;
       buf = buf | (m_exp << 23);
       if (m_sign!=0)
-	buf = buf | 0x80000000;
-      decoder.m_l=buf;
-      return decoder.m_f;
+	      buf = buf | 0x80000000u;
+      return std::bit_cast<float>(buf);
     }
   char sign() const
     {
@@ -114,9 +102,9 @@ public:
     }
 
 private:
-  char m_sign;
-  unsigned int m_exp;
-  unsigned int m_mant;
+  char m_sign{};
+  std::uint32_t m_exp{};
+  std::uint32_t m_mant{};
 };
 
 
@@ -150,15 +138,15 @@ class Triplet {
   bool compressFR(const std::vector<FloatRep>&,std::vector<unsigned short>&);
   bool restoreFR(const std::vector<unsigned short>&,std::vector<FloatRep>&);
 
-  short int m_biases[6];
-  short int m_limits[2];
-  double m_scales[5];
+  short int m_biases[6]{};
+  short int m_limits[2]{};
+  double m_scales[5]{};
 
-  int m_bitStrip;
+  int m_bitStrip{};
 
  private:
   DecoderFloat_IEEE754 m_decoder;
-  unsigned int m_srcMasks[16];
+  unsigned int m_srcMasks[16]{};
   std::vector<Triplet> m_tripVec;
 };
 
