@@ -1,44 +1,55 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
+#include <utility> // for declval
 
 
 namespace ActsTrk::detail {
   
   template <typename traj_t>
-  OnTrackCalibrator<traj_t> OnTrackCalibrator<traj_t>::NoCalibration(const ActsTrk::ITrackingGeometryTool* trackGeoTool)
-  {
-    ToolHandle<IOnTrackCalibratorTool<traj_t>> null(nullptr);
-    return OnTrackCalibrator<traj_t>(trackGeoTool, null, null, null);
+  template <typename T_CalibratorToolHandle, typename T_Delegate>
+  void OnTrackCalibrator<traj_t>::connectPassThrough(T_Delegate &delegate) {
+     using CalibratorBase_t = typename decltype( std::declval<T_CalibratorToolHandle>()->createOnTrackCalibrator(std::declval<EventContext>()) )::element_type;
+     delegate.template connect<&OnTrackCalibrator<traj_t>::passthrough<CalibratorBase_t::ClusterDIM,
+                                                                       typename CalibratorBase_t::ClusterType>>(this);
   }
-  
   template <typename traj_t>
-  OnTrackCalibrator<traj_t>::OnTrackCalibrator(const ActsTrk::ITrackingGeometryTool* trackGeoTool,
-                 const ToolHandle<IOnTrackCalibratorTool<traj_t>>& pixelTool,
-                 const ToolHandle<IOnTrackCalibratorTool<traj_t>>& stripTool,
-                 const ToolHandle<IOnTrackCalibratorTool<traj_t>>& hgtdTool)
-    : m_surfAcc{trackGeoTool} {
-    if (pixelTool.isEnabled()) {
-      pixelTool->connect(*this);
-    } else {
-      pixelCalibrator.template connect<&OnTrackCalibrator<traj_t>::passthrough<2, xAOD::PixelCluster>>(this);
-    }
-    
-    if (stripTool.isEnabled()) {
-      stripTool->connect(*this);
-    } else {
-      stripCalibrator.template connect<&OnTrackCalibrator<traj_t>::passthrough<1, xAOD::StripCluster>>(this);
-    }
-    if (hgtdTool.isEnabled()) {
-      hgtdTool->connect(*this);
-    } else {
-  // cppcheck-suppress missingReturn; false positive
-        hgtdCalibrator.template connect<&OnTrackCalibrator<traj_t>::passthrough<3, xAOD::HGTDCluster>>(this);
-    }
+  template <typename T_CalibratorToolHandle, typename T_Delegate>
+  void OnTrackCalibrator<traj_t>::connect(const EventContext &ctx,
+                                          const T_CalibratorToolHandle &calibrator_tool,
+                                          T_Delegate &delegate ) {
+     if (calibrator_tool.isEnabled()) {
+        auto calibrator = calibrator_tool->createOnTrackCalibrator(ctx);
+        calibrator->connectOnTrackCalibrator(delegate);
+        m_calibrators.push_back(std::move(calibrator));
+     } else {
+        connectPassThrough<T_CalibratorToolHandle>(delegate);
+     }
   }
-  
+
+  template <typename traj_t>
+  OnTrackCalibrator<traj_t>::OnTrackCalibrator(const ActsTrk::ITrackingGeometryTool* trackGeoTool)
+    : m_surfAcc{trackGeoTool} {
+    connectPassThrough<ToolHandle<ActsTrk::IPixelOnTrackCalibratorTool<traj_t> > >(pixelCalibrator);
+    connectPassThrough<ToolHandle<ActsTrk::IStripOnTrackCalibratorTool<traj_t> > >(stripCalibrator);
+    connectPassThrough<ToolHandle<ActsTrk::IHGTDOnTrackCalibratorTool<traj_t> >  >(hgtdCalibrator);
+  }
+
+  template <typename traj_t>
+  OnTrackCalibrator<traj_t>::OnTrackCalibrator(const EventContext &ctx,
+                 const ActsTrk::ITrackingGeometryTool* trackGeoTool,
+                 const ToolHandle<IPixelOnTrackCalibratorTool<traj_t>>& pixelTool,
+                 const ToolHandle<IStripOnTrackCalibratorTool<traj_t>>& stripTool,
+                 const ToolHandle<IHGTDOnTrackCalibratorTool<traj_t>>& hgtdTool)
+    : m_surfAcc{trackGeoTool} {
+    assert( m_calibrators.capacity() >= 3); // if capacity was constexpr should turn into static_assert
+    connect(ctx,pixelTool,pixelCalibrator);
+    connect(ctx,stripTool,stripCalibrator);
+    connect(ctx,hgtdTool,hgtdCalibrator);
+  }
+
   template <typename traj_t>
   void OnTrackCalibrator<traj_t>::calibrate(const Acts::GeometryContext& geoctx,
                                             const Acts::CalibrationContext& cctx,

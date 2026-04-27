@@ -292,7 +292,8 @@ namespace ActsTrk
     // Perform the track finding for all initial parameters.
     for (std::size_t icontainer = 0; icontainer < seedContainers.size(); ++icontainer)
       {
-        ATH_CHECK(findTracks(detContext,
+        ATH_CHECK(findTracks(ctx,
+                             detContext,
                              measurements,
                              measurementIndex,
                              sharedHits,
@@ -431,7 +432,8 @@ namespace ActsTrk
   // === findTracks ==========================================================
 
   StatusCode
-  TrackFindingAlg::findTracks(const DetectorContextHolder& detContext,
+  TrackFindingAlg::findTracks(const EventContext &ctx,
+                              const DetectorContextHolder& detContext,
                               const detail::TrackFindingMeasurements &measurements,
                               const detail::MeasurementIndex &measurementIndex,
                               detail::SharedHitCounter &sharedHits,
@@ -448,7 +450,7 @@ namespace ActsTrk
   {
     ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
 
-    auto [options, secondOptions, measurementSelector] = getDefaultOptions(detContext, measurements, &pSurface);
+    auto [options, secondOptions, measurementSelector] = getDefaultOptions(ctx, detContext, measurements, &pSurface);
 
     // ActsTrk::MutableTrackContainer tracksContainerTemp;
     Acts::VectorTrackContainer trackBackend;

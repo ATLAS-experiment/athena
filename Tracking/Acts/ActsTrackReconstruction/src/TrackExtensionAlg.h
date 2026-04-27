@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ACTSTRACKRECONSTRUCTION_TRACKEXTENSIONALG_H
 #define ACTSTRACKRECONSTRUCTION_TRACKEXTENSIONALG_H
@@ -20,7 +20,9 @@
 #include "ActsEvent/ProtoTrackCollection.h"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
-#include "ActsToolInterfaces/IOnTrackCalibratorTool.h"
+#include "ActsToolInterfaces/IPixelOnTrackCalibratorTool.h"
+#include "ActsToolInterfaces/IStripOnTrackCalibratorTool.h"
+#include "ActsToolInterfaces/IHGTDOnTrackCalibratorTool.h"
 #include "ActsToolInterfaces/IFitterTool.h"
 
 // Athena
@@ -76,13 +78,13 @@ class TrackExtensionAlg : public AthReentrantAlgorithm {
       this, "TrackingGeometryTool", ""};
   ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{
       this, "ExtrapolationTool", ""};
-  ToolHandle<ActsTrk::IOnTrackCalibratorTool<detail::RecoTrackStateContainer>>
+  ToolHandle<ActsTrk::IPixelOnTrackCalibratorTool<detail::RecoTrackStateContainer>>
       m_pixelCalibTool{this, "PixelCalibrator", "",
                        "Opt. pixel measurement calibrator"};
-  ToolHandle<ActsTrk::IOnTrackCalibratorTool<detail::RecoTrackStateContainer>>
+  ToolHandle<ActsTrk::IStripOnTrackCalibratorTool<detail::RecoTrackStateContainer>>
       m_stripCalibTool{this, "StripCalibrator", "",
                        "Opt. strip measurement calibrator"};
-  ToolHandle<ActsTrk::IOnTrackCalibratorTool<detail::RecoTrackStateContainer>>
+  ToolHandle<ActsTrk::IHGTDOnTrackCalibratorTool<detail::RecoTrackStateContainer>>
       m_hgtdCalibTool{this, "HGTDCalibrator", "",
                        "Opt. HGTD measurement calibrator"};                       
   ToolHandle<ActsTrk::TrackStatePrinterTool> m_trackStatePrinter{

@@ -181,10 +181,12 @@ namespace ActsTrk {
   }
 
   std::unique_ptr<ActsTrk::IMeasurementSelector> TrackFindingBaseAlg::setMeasurementSelector(
+      const EventContext &ctx,
       const detail::TrackFindingMeasurements &measurements,
       TrackFinderOptions &options) const {
 
     std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector = ActsTrk::detail::getMeasurementSelector(
+        ctx,
         m_pixelCalibTool.isEnabled() ? &(*m_pixelCalibTool) : nullptr,
         m_stripCalibTool.isEnabled() ? &(*m_stripCalibTool) : nullptr,
         m_hgtdCalibTool.isEnabled() ? &(*m_hgtdCalibTool) : nullptr,
@@ -200,6 +202,7 @@ namespace ActsTrk {
   }
 
   TrackFindingBaseAlg::TrackFindingDefaultOptions TrackFindingBaseAlg::getDefaultOptions(
+      const EventContext &ctx,
       const DetectorContextHolder &detContext,
       const detail::TrackFindingMeasurements &measurements,
       const Acts::PerigeeSurface* pSurface) const {
@@ -212,7 +215,7 @@ namespace ActsTrk {
     TrackFinderOptions options(detContext.geometry, detContext.magField, detContext.calib,
                                trackFinder().ckfExtensions, plainOptions, pSurface);
 
-    std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector = setMeasurementSelector(measurements, options);
+    std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector = setMeasurementSelector(ctx, measurements, options);
 
     Acts::PropagatorPlainOptions plainSecondOptions{detContext.geometry, detContext.magField};
     plainSecondOptions.maxSteps = m_maxPropagationStep;

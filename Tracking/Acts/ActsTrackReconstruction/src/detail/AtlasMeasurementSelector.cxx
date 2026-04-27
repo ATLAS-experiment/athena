@@ -403,9 +403,10 @@ namespace {
 
 namespace ActsTrk::detail {
 // return a configured, wrapper for the measurement selector
-std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector(const ActsTrk::IOnBoundStateCalibratorTool *pixelOnTrackCalibratorTool,
-                                                                       const ActsTrk::IOnBoundStateCalibratorTool *stripOnTrackCalibratorTool,
-                                                                       const ActsTrk::IOnBoundStateCalibratorTool *hgtdOnTrackCalibratorTool,
+std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector(const EventContext &ctx,
+                                                                       const ActsTrk::IPixelOnBoundStateCalibratorTool *pixelOnTrackCalibratorTool,
+                                                                       const ActsTrk::IStripOnBoundStateCalibratorTool *stripOnTrackCalibratorTool,
+                                                                       const ActsTrk::IHGTDOnBoundStateCalibratorTool *hgtdOnTrackCalibratorTool,
                                                                        const ActsTrk::detail::MeasurementRangeList &measurementRanges,
                                                                        const std::vector<float> &etaBinsf,
                                                                        const std::vector<std::pair<float, float> > &chi2CutOffOutlier,
@@ -413,7 +414,8 @@ std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector(const Act
                                                                        double edge_hole_border_width) {
 
     // set calibrators per measurement container type (order does not matter);
-    ActsTrk::MeasurementCalibrator atl_measurement_calibrator(pixelOnTrackCalibratorTool,
+    ActsTrk::MeasurementCalibrator atl_measurement_calibrator(ctx,
+                                                              pixelOnTrackCalibratorTool,
                                                               stripOnTrackCalibratorTool,
                                                               hgtdOnTrackCalibratorTool);
     using AtlMeasurementSelectorCuts = AtlasMeasurementSelectorCuts;
