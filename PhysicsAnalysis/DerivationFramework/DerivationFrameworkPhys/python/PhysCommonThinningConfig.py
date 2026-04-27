@@ -37,7 +37,11 @@ def PhysCommonThinningCfg(flags, StreamName = "StreamDAOD_PHYS", **kwargs):
 
     # Tau-related containers: taus, tau tracks and associated ID tracks, neutral PFOs, secondary vertices
     if "TauJetThinningToolName" in kwargs:
-        tau_thinning_expression = f"TauJets.pt >= {flags.Tau.MinPtDAOD} && TauJets.nTracks <= {flags.Tau.MaxTracksDAOD}"
+        if "PHYSLITE" in StreamName:
+            tau_thinning_expression = f"TauJets.pt >= {flags.Tau.MinPtLITE} && (TauJets.nTracks == 1 || TauJets.nTracks == 3) && abs(TauJets.charge) == 1"
+        else:    
+            tau_thinning_expression = f"TauJets.pt >= {flags.Tau.MinPtDAOD} && TauJets.nTracks <= {flags.Tau.MaxTracksDAOD}"
+
         acc.merge(TauThinningCfg(flags,
             name                 = kwargs['TauJetThinningToolName'],
             StreamName           = StreamName,
