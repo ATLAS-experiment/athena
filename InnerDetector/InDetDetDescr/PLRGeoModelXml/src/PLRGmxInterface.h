@@ -5,6 +5,7 @@
 #ifndef PLRGEOMODELXML_PLRGMXINTERFACE_H
 #define PLRGEOMODELXML_PLRGMXINTERFACE_H
 
+#include "RDBAccessSvc/IRDBAccessSvc.h"
 #include <PixelGeoModelXml/PixelGmxInterface.h>
 
 #include <map>
@@ -36,6 +37,8 @@ public:
                          std::map<std::string, int> &index,
                          int sequentialId,
                          GeoVFullPhysVol *fpv) override final;
+
+  virtual void buildReadoutGeometryFromSqlite(IRDBAccessSvc * RDBAccessSvc, GeoModelIO::ReadGeoModel* sqlreader);
 
 private:
   void makePLRModule(const std::string& typeName,
