@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ITkPixelCabling )
@@ -27,7 +27,7 @@ atlas_add_test( ITkPixelOnlineId_test
   test/ITkPixelOnlineId_test.cxx 
   INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}  
   LINK_LIBRARIES ${Boost_LIBRARIES} ITkPixelCablingLib
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
 
 atlas_add_test( ITkPixelCablingData_test	
@@ -35,7 +35,7 @@ atlas_add_test( ITkPixelCablingData_test
   test/ITkPixelCablingData_test.cxx 
   INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}  
   LINK_LIBRARIES ${Boost_LIBRARIES} ITkPixelCablingLib
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
 
 atlas_add_test( ITkPixelCablingAlg_test	
@@ -45,5 +45,5 @@ atlas_add_test( ITkPixelCablingAlg_test
   LINK_LIBRARIES ${Boost_LIBRARIES} TestTools AthenaBaseComps GaudiKernel
     PathResolver StoreGateLib Identifier IdDictParser ITkPixelCablingLib
     InDetIdentifier
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
