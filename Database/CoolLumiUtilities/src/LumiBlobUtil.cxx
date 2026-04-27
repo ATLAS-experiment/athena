@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CoolLumiUtilities/LumiBlobUtil.h"
@@ -10,6 +10,7 @@
 #include <cmath>
 #include <vector>
 #include <cstdint>
+#include <bit>
 
 LumiBlobUtil::LumiBlobUtil() {
   // Clear vectors                                                                                       
@@ -252,15 +253,10 @@ LumiBlobUtil::unpack(const cool::Float &ARI, const coral::Blob &blobBC, const st
       if (y==0) {
         for (unsigned int i =0; i<PV.size(); i++) {
           BCID = PV[i];
-          union {
-            unsigned int i;
-            float f;
-          } cnv;
           const unsigned int * y40 = reinterpret_cast<const unsigned int*> (k);
           for (unsigned int j = BCIDold; j <= BCID; j++, y40++) {
             if (j==BCID) {
-              cnv.i = *y40;
-              tmk = cnv.f;
+              auto tmk = std::bit_cast<float>(*y40);
               BV = ARI*tmk/fact;
               m_bunchLumis.push_back(BV);
 	      AB1 += BV;
@@ -278,14 +274,10 @@ LumiBlobUtil::unpack(const cool::Float &ARI, const coral::Blob &blobBC, const st
 	//	std::cout << AB1 << std::endl;
       }        //This ends y=0   
       if (y==1) {
-        union {
-          unsigned int i;
-          float f;
-        } cnv;
+       
         const unsigned int * y41 = reinterpret_cast<const unsigned int*> (k);
         for (unsigned int i = 0; i < ((blobBC.size()-1)/x); i++, y41++) {
-          cnv.i = *y41;
-          BV = cnv.f;
+          auto BV = std::bit_cast<float>(*y41);
           m_bunchLumis.push_back(BV);
           AB1 +=  BV;
         }
@@ -296,18 +288,14 @@ LumiBlobUtil::unpack(const cool::Float &ARI, const coral::Blob &blobBC, const st
         const uint16_t* k4 = reinterpret_cast<const uint16_t*> (k);
         unsigned int len = *k4;
         k4++;
-        union {
-          unsigned int i;
-          float f;
-        } cnv;
+        
         const unsigned int* y42 = reinterpret_cast<const unsigned int*> (k+2*(1+len));
         for (unsigned int i = 0; i<len; i++, k4++) {
           BCID = *k4;
 
           for (unsigned int j=BCIDold; j<=(BCID); j++, y42++) {
             if (j==BCID) {
-              cnv.i = *y42;
-              BV = cnv.f;
+              auto BV = std::bit_cast<float>(*y42);
               m_bunchLumis.push_back(BV);
               AB1 +=  BV;
             }

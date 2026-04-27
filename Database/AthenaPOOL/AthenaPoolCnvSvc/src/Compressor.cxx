@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -12,27 +12,25 @@
  */
 
 #include "AthenaPoolCnvSvc/Compressor.h"
+#include <bit>
 using namespace std;
 
 // ---------- STANDARD
 void Compressor::reduceToUS(const std::vector<float> &vf, std::vector<unsigned short> &vc ){
 	constexpr unsigned int max_short_flt = 0x7f7f7fff;
-	union {unsigned int u;float f;} m;
 	vc.reserve(vf.size());
 	for (const auto& value : vf){
-		m.f = value;
-		if ( (m.u & 0x7fffffff) > max_short_flt) vc.push_back (m.u>>16);
-		else vc.push_back((m.u+0x8000)>>16);
+		auto u = std::bit_cast<unsigned int>(value);
+		if ( (u & 0x7fffffff) > max_short_flt) vc.push_back (u>>16);
+		else vc.push_back((u+0x8000)>>16);
 	}
 }
 
 void Compressor::expandFromUStoFloat(const std::vector<unsigned short> &vc, std::vector<float> &vf){
-	union {unsigned int u;float f;} m;
 	vf.reserve(vc.size());
 	for (const auto& value : vc){
-		unsigned int ui(value << 16);
-		m.u = ui;
-		vf.push_back(m.f);
+		unsigned int u(value << 16);
+		vf.push_back(std::bit_cast<float>(u));
 	}
 }
 
@@ -59,10 +57,7 @@ void Compressor::reduce(const std::vector<float> &vf, std::vector<unsigned int> 
 	if(m_sign) 
 		rems>>=(bshift+1); 
 	else 
-		rems>>=bshift;
-	
-	union {unsigned int u;float f;} m;
-		
+		rems>>=bshift;		
 	
 	if (m_bitStrip){
 		int F=32; 
@@ -70,9 +65,9 @@ void Compressor::reduce(const std::vector<float> &vf, std::vector<unsigned int> 
 		if (m_sign) L=m_bits-1; else L=m_bits;
 		unsigned int CUR=0; int IN=0;
 		for (const auto& value : vf){
-			m.f = value;
-			if ( (m.u & 0x7fffffff) > vmax) IN=m.u>>bshift;
-			else IN=(m.u+rounding)>>bshift;
+			auto u = std::bit_cast<unsigned int>(value);
+			if ( (u & 0x7fffffff) > vmax) IN=u>>bshift;
+			else IN=(u+rounding)>>bshift;
 			
 			IN&=rems; 
 			
@@ -101,8 +96,7 @@ void Compressor::reduce(const std::vector<float> &vf, std::vector<unsigned int> 
 	}
 	else
 		for (const auto& value : vf){
-			m.f = value;
-			vi.push_back(m.u);
+			vi.push_back(std::bit_cast<unsigned int>(value));
 			}
 	
 	return;
@@ -134,15 +128,13 @@ void Compressor::expandToFloat(const std::vector<unsigned int> & vi, std::vector
 	unsigned int V=0xffffffff>>(32-L); unsigned int R=0;
 	unsigned int ui(*i);
 
-	union {unsigned int u;float f;} m;
 	
 	while (vecs){
 		FP = CP + L;	// Future point = Current point + lenght 
 		if (FP<=32){	// all of it is inside this integer 
 			R = ( ui >> (32-FP) ) & V;
 			R <<= bshift;
-			m.u=R;
-			vf.push_back(m.f); 
+			vf.push_back(std::bit_cast<float>(R)); 
                         if (FP < 32)
                           CP=FP;
                         else {
@@ -159,8 +151,7 @@ void Compressor::expandToFloat(const std::vector<unsigned int> & vi, std::vector
 			R |=  ui >> (32-REM) ;
 			R <<= bshift;
 			if (m_sign) R &= 0x7fffffff;
-			m.u=R;
-			vf.push_back(m.f);  
+			vf.push_back(std::bit_cast<float>(R));  
 			CP = REM;	// move Current point
 		}
 		--vecs;
