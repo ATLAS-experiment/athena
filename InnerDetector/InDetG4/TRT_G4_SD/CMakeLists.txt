@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TRT_G4_SD )
@@ -24,14 +24,14 @@ atlas_add_library( TRT_G4_SD
 # Test(s) in the package:
 atlas_add_test( TRT_G4_SDToolConfig_test
                 SCRIPT test/TRT_G4_SDToolConfig_test.py
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( TRTSensitiveDetector_gtest
                 SOURCES
                 test/TRTSensitiveDetector_gtest.cxx
                 INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS}
                 LINK_LIBRARIES ${GEANT4_LIBRARIES} ${GTEST_LIBRARIES} CxxUtils G4AtlasToolsLib InDetSimEvent MCTruth StoreGateLib TestTools TRT_G4_SDLib TRT_G4Utilities
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 # Turn on/off LTO for all targets in the package.
 set_target_properties(
