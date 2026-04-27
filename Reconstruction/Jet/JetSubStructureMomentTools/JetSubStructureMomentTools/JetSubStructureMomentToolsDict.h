@@ -31,4 +31,5 @@
 #include "JetSubStructureMomentTools/KtMassDropTool.h"
 #include "JetSubStructureMomentTools/QwTool.h"
 #include "JetSubStructureMomentTools/SubjetRecorderTool.h"
+#include "JetSubStructureMomentTools/LundVariablesTool.h"
 #endif
