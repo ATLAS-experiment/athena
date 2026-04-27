@@ -8,7 +8,7 @@ def PatternVisualizationToolCfg(flags, name="PatternVisualizationTool", **kwargs
     result = ComponentAccumulator()
     from MuonConfig.MuonDataPrepConfig import PrimaryMeasContNamesCfg
     kwargs.setdefault("PrdContainer", PrimaryMeasContNamesCfg(flags))
-    if flags.Input.isMC:
+    if flags.Muon.setupTruthAlgorithms:
         from MuonObjectMarker.ObjectMarkerConfig import TruthMeasMarkerAlgCfg
         markerAlg = result.getPrimaryAndMerge(TruthMeasMarkerAlgCfg(flags))
         kwargs.setdefault("TruthSegDecors", [markerAlg.SegmentLinkKey])
@@ -96,7 +96,7 @@ def LegacyMuonRecoChainCfg(flags):
     result.merge(MuonSegmentFitParDecorAlgCfg(flags, name="MuonSegmentDecorAlg_UnAssocMuonSegments", 
                                               SegmentKey="UnAssocMuonSegments"))
 
-    if flags.Input.isMC:
+    if flags.Muon.setupTruthAlgorithms:
         from MuonTruthAlgsR4.MuonTruthAlgsConfig import RecoSegmentTruthAssocCfg
         result.merge(RecoSegmentTruthAssocCfg(flags,
                                               name="TrkMuonSegmentsTruthMatchingAlg",
@@ -145,7 +145,7 @@ def MuonR4PatternRecoChainCfg(flags):
     from MuonObjectMarker.ObjectMarkerConfig import MuonSegmentFitParDecorAlgCfg
     result.merge(MuonSegmentFitParDecorAlgCfg(flags, name="MuonSegmentParDecorAlgHougR4", 
                                               SegmentKey="MuonSegmentsFromHoughR4"))
-    if flags.Input.isMC:
+    if flags.Muon.setupTruthAlgorithms:
         from MuonTruthAlgsR4.MuonTruthAlgsConfig import RecoSegmentTruthAssocCfg
         result.merge(RecoSegmentTruthAssocCfg(flags,
                                               name="MuonSegmentsFromHoughR4TruthMatching",

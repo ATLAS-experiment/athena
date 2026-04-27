@@ -167,5 +167,6 @@ def MuonTruthAlgsCfg(flags, useSDO=True, recoAssoc = True):
     ### from MuonConfig.MuonTruthAlgsConfig import MuonTruthAddTrackRecordsAlgCfg
     ### result.merge(MuonTruthAddTrackRecordsAlgCfg(flags))
     result.merge(TruthSegmentToTruthPartAssocCfg(flags))
-
+    from MuonObjectMarker.ObjectMarkerConfig import TruthMeasMarkerAlgCfg
+    result.merge(TruthMeasMarkerAlgCfg(flags))
     return result
