@@ -334,6 +334,7 @@ namespace Analysis {
                            xAOD::BTagging& BTag,
                            const std::string &jetName) const
   {
+    const EventContext& ctx{Gaudi::Hive::currentContext()};
     ATH_MSG_VERBOSE("#BTAG# m_impactParameterView = " << m_impactParameterView );
     /** author to know which jet algorithm: */
     std::string author = jetName;
@@ -493,7 +494,7 @@ namespace Analysis {
       /** use new Tool for "unbiased" IP estimation */
       std::unique_ptr<Trk::ImpactParametersAndSigma> myIPandSigma = nullptr;
       if (m_trackToVertexIPEstimator) { 
-        myIPandSigma = m_trackToVertexIPEstimator->estimate(trk, &priVtx, m_unbiasIPEstimation);
+        myIPandSigma = m_trackToVertexIPEstimator->estimate(ctx, trk, &priVtx, m_unbiasIPEstimation);
       }
       if(0==myIPandSigma) {
         ATH_MSG_WARNING("#BTAG# IPTAG: trackToVertexIPEstimator failed !");
@@ -508,14 +509,14 @@ namespace Analysis {
       double signOfIP(1.);
       if (m_impactParameterView=="2D" || m_impactParameterView=="1D" ||
          ( m_impactParameterView=="3D" && m_use2DSignForIP3D)  ) {
-        signOfIP=m_trackToVertexIPEstimator->get2DLifetimeSignOfTrack(trk->perigeeParameters(),
+        signOfIP=m_trackToVertexIPEstimator->get2DLifetimeSignOfTrack(ctx, trk->perigeeParameters(),
                                                                       unit, priVtx);
       }
       if (m_impactParameterView=="3D" && !m_use2DSignForIP3D) {
-        signOfIP=m_trackToVertexIPEstimator->get3DLifetimeSignOfTrack(trk->perigeeParameters(),
+        signOfIP=m_trackToVertexIPEstimator->get3DLifetimeSignOfTrack(ctx, trk->perigeeParameters(),
                                                                       unit, priVtx);
       }
-      double signOfZIP = m_trackToVertexIPEstimator->getZLifetimeSignOfTrack(trk->perigeeParameters(),
+      double signOfZIP = m_trackToVertexIPEstimator->getZLifetimeSignOfTrack(ctx, trk->perigeeParameters(),
                                                                              unit, priVtx);
 
       if (m_useD0SignForZ0) signOfZIP = signOfIP;

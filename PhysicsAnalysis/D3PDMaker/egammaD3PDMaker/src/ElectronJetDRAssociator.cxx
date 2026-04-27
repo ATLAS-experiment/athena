@@ -227,8 +227,8 @@ ElectronJetDRAssociator::findSignedIPAndPTRelEleJetPair (const xAOD::Electron* e
 
   PTRel= track->p4().Perp (j0->p4().Vect());
 
-  CLHEP::Hep3Vector jetDirection( (j0)->px(), (j0)->py(), (j0)->pz());
-  CLHEP::Hep3Vector unit = jetDirection.unit();
+  Amg::Vector3D jetDirection( (j0)->px(), (j0)->py(), (j0)->pz());
+  Amg::Vector3D unit = jetDirection.unit();
 
   if (!evtStore()->contains<xAOD::VertexContainer>(m_vertexContainerName))
     return StatusCode::SUCCESS;
@@ -251,7 +251,7 @@ ElectronJetDRAssociator::findSignedIPAndPTRelEleJetPair (const xAOD::Electron* e
   }
 
   signedIP = m_trackToVertexIPEstimator->get2DLifetimeSignOfTrack
-    (track->perigeeParameters(), unit, *vx);
+    (Gaudi::Hive::currentContext(), track->perigeeParameters(), unit, *vx);
     
   return StatusCode::SUCCESS;
 }

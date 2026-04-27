@@ -51,7 +51,7 @@ StatusCode TauTrackFinder::initialize() {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 StatusCode TauTrackFinder::executeTrackFinder(xAOD::TauJet& pTau, xAOD::TauTrackContainer& tauTrackCon) const {
-  
+  const EventContext &ctx = Gaudi::Hive::currentContext();
   std::vector<const xAOD::TrackParticle*> tauTracks;
   std::vector<const xAOD::TrackParticle*> wideTracks;
   std::vector<const xAOD::TrackParticle*> otherTracks;
@@ -313,7 +313,7 @@ StatusCode TauTrackFinder::executeTrackFinder(xAOD::TauJet& pTau, xAOD::TauTrack
     // in the trigger, z0sintheta and corresponding significance are meaningless if we use the beamspot
     if(vxcand) {
       std::unique_ptr<const Trk::ImpactParametersAndSigma> myIPandSigma 
-	= std::unique_ptr<const Trk::ImpactParametersAndSigma>(m_trackToVertexIPEstimator->estimate(track->track(), vxcand));
+	= std::unique_ptr<const Trk::ImpactParametersAndSigma>(m_trackToVertexIPEstimator->estimate(ctx, track->track(), vxcand));
       
       if(myIPandSigma) {
 	dec_d0TJVA(*track) = myIPandSigma->IPd0;
