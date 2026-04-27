@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration -->
+<!-- Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration -->
 <!-- Smart pointer dictionaries for xAOD container type: @_type@ -->
 
 <class name="SG::BaseInfo<@_type@>" />
@@ -18,3 +18,11 @@
 <class name="SG::AuxTypeVectorFactoryImpl<std::vector<ElementLink<@_type@> > >" />
 
 <class name="DataVectorBase<@_type@::base_value_type>" />
+
+
+<!-- Extra dictionaries needed to avoid cling assertion failures in the
+     dbg build with ROOT 6.38.04. See ATEAM-1143. -->
+<class name="std::allocator<ElementLink<@_type@> >" />
+<class name="std::allocator<std::vector<ElementLink<@_type@> > >" />
+<class name="std::_Vector_base<ElementLink<@_type@>, std::allocator<ElementLink<@_type@> > >" />
+<class name="std::_Vector_base<std::vector<ElementLink<@_type@> >, std::allocator<std::vector<ElementLink<@_type@> > > >" />
