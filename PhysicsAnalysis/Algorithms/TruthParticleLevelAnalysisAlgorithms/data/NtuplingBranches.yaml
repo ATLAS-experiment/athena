@@ -73,6 +73,35 @@ ParticleLevelTausBlock:
   - name: uid
     description: the original ID from HepMC (no systematics)
     toggled_by: saveUID
+  - name: pdgId
+    description: PDG ID of particle (no systematics)
+  - name: numCharged
+    description: number of charged particles in tau decay (no systematics)
+  - name: pt_vis
+    description: visible $p_\mathrm{T}$ of tau decay (no systematics)
+  - name: eta_vis
+    description: visible $\eta$ of tau decay (no systematics)
+  - name: phi_vis
+    description: visible $\phi$ of tau decay (no systematics)
+  - name: m_vis
+    description: visible $m$ of tau decay (no systematics)
+  - name: pt_vis_dressed
+    description: dressed visible $p_\mathrm{T}$ of tau decay (no systematics)
+  - name: eta_vis_dressed
+    description: dressed visible $\eta$ of tau decay (no systematics)
+  - name: phi_vis_dressed
+    description: dressed visible $\phi$ of tau decay (no systematics)
+  - name: m_vis_dressed
+    description: dressed visible $m$ of tau decay (no systematics)
+  - name: pt_invis
+    description: invisible $p_\mathrm{T}$ of tau decay (no systematics)
+  - name: eta_invis
+    description: invisible $\eta$ of tau decay (no systematics)
+  - name: phi_invis
+    description: invisible $\phi$ of tau decay (no systematics)
+  - name: m_invis
+    description: invisible $m$ of tau decay (no systematics)
+
 
 ParticleLevelResonancesBlock:
   - name: pt

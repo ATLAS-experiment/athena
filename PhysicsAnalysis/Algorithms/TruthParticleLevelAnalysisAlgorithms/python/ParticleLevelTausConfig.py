@@ -62,8 +62,23 @@ class ParticleLevelTausBlock(ConfigBlock):
                 ['e', 'e', 'float'],
                 ['charge', 'charge', 'float'],
                 ['IsHadronicTau', 'IsHadronicTau', 'char'],
+                ['pdgId', 'pdgId', 'int'],
+                ['numCharged', 'numCharged', 'unsigned_long'],                
                 ['classifierParticleType', 'type', 'unsigned'],
                 ['classifierParticleOrigin', 'origin', 'unsigned'],
+                ['pt_vis', 'pt_vis', 'double'],
+                ['eta_vis', 'eta_vis', 'double'],
+                ['phi_vis', 'phi_vis', 'double'],
+                ['m_vis', 'm_vis', 'double'],
+                ['pt_vis_dressed', 'pt_vis_dressed', 'float'],
+                ['eta_vis_dressed', 'eta_vis_dressed', 'float'],
+                ['phi_vis_dressed', 'phi_vis_dressed', 'float'],
+                ['m_vis_dressed', 'm_vis_dressed', 'float'],
+                ['pt_invis', 'pt_invis', 'double'],
+                ['eta_invis', 'eta_invis', 'double'],
+                ['phi_invis', 'phi_invis', 'double'],
+                ['m_invis', 'm_invis', 'double'],
+                
             ]
             if self.saveUID:
                 outputVars += [['uid', 'uid', 'int']]
