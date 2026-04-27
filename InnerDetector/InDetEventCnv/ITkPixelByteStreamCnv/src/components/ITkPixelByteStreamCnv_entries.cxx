@@ -6,6 +6,7 @@
 #include "src/ITkPixelEncodingTool.h"
 #include "src/ITkPixelHitSortingTool.h"
 #include "src/ITkPixelDecodingAlg.h"
+#include "src/ITkPixelDecodingPhaseIIRDOAlg.h"
 #include "src/ITkPixelRawContBytestreamCnv.h"
 #include "src/ITkPixelTranslatorAlg.h"
 #include "src/ITkPixelCnvTool.h"
@@ -19,6 +20,7 @@ DECLARE_COMPONENT( ITkPixelEncodingAlg )
 DECLARE_COMPONENT( ITkPixelEncodingTool )
 DECLARE_COMPONENT( ITkPixelHitSortingTool)
 DECLARE_COMPONENT( ITkPixelDecodingAlg )
+DECLARE_COMPONENT( ITkPixelDecodingPhaseIIRDOAlg )
 DECLARE_COMPONENT( ITkPixelTranslatorAlg )
 DECLARE_COMPONENT( ITkPixelCnvTool )
 DECLARE_COMPONENT( ITkPixelDataRateMonTool )
