@@ -21,7 +21,6 @@
 #include "CoralBase/AttributeSpecification.h"
 
 #include <stdexcept>
-#include <string>
 #include <format>
 
 RDBRecord::RDBRecord(const coral::AttributeList& attList
@@ -45,27 +44,26 @@ RDBRecord::~RDBRecord()
 }
 
 template<typename T>
-const T& RDBRecord::getGeneric(const std::string& fieldName) const
+const T& RDBRecord::getGeneric(std::string_view fieldName) const
 {
   std::string name =std::format("{}.{}", m_tableName, fieldName);
   FieldName2ListIndex::const_iterator it = m_name2Index.find(name);
   if(it==m_name2Index.end()) {
-    throw std::runtime_error( "Wrong name for the field " + m_tableName+"."+fieldName);
+    throw std::runtime_error(std::format("Wrong name for the field {}", name));  
   }
 
   const coral::AttributeList& values = *m_values;
   const auto &itr = values[it->second];
   if(itr.specification().type()==typeid(T)) {
     return itr.data<T>();
-  }
-  else {
-    throw std::runtime_error( "Field " + fieldName + " is NOT a type of " + typeid(T).name());
+  } else {
+    throw std::runtime_error(std::format("Field {} is NOT a type of {}", fieldName, typeid(T).name()));  
   }
 }
 
-RDBRecord::FieldName2ListIndex::const_iterator RDBRecord::getItr(const std::string& fieldName) const
+RDBRecord::FieldName2ListIndex::const_iterator RDBRecord::getItr(std::string_view fieldName) const
 {
-  std::string name =std::format("{}.{}", m_tableName, fieldName);
+  const std::string name = std::format("{}.{}", m_tableName, fieldName);
   FieldName2ListIndex::const_iterator it = m_name2Index.find(name);
   if(it==m_name2Index.end()) {
     throw std::runtime_error( "Wrong name for the field " + name);
@@ -73,18 +71,18 @@ RDBRecord::FieldName2ListIndex::const_iterator RDBRecord::getItr(const std::stri
   return it;
 }
 
-RDBRecord::FieldName2ListIndex::const_iterator RDBRecord::getItr(const std::string& fieldName, int index) const
+RDBRecord::FieldName2ListIndex::const_iterator RDBRecord::getItr(std::string_view fieldName, int index) const
 {
-  std::string name =std::format("{}.{}_{}", m_tableName, fieldName, index);
+  const std::string name =std::format("{}.{}_{}", m_tableName, fieldName, index);
   FieldName2ListIndex::const_iterator it = m_name2Index.find(name);
   if(it==m_name2Index.end()) {
-    throw std::runtime_error("Wrong name for the array field " + m_tableName+"."+fieldName + " or index=" + std::to_string(index) + " is out of range");
+    throw std::runtime_error(std::format("Wrong name for the array field {}.{} or index={} is out of range.",m_tableName,fieldName,index));
   }
   return it;
 }
 
 
-bool RDBRecord::isFieldNull(const std::string& fieldName) const 
+bool RDBRecord::isFieldNull(std::string_view fieldName) const 
 {
   auto it = getItr(fieldName);
 
@@ -92,7 +90,7 @@ bool RDBRecord::isFieldNull(const std::string& fieldName) const
   return values[it->second].isNull();
 }
 
-int RDBRecord::getInt(const std::string& fieldName) const
+int RDBRecord::getInt(std::string_view fieldName) const
 {
   auto it = getItr(fieldName);
   const coral::AttributeList& values = *m_values;
@@ -104,11 +102,11 @@ int RDBRecord::getInt(const std::string& fieldName) const
     return (int)item.data<long>();
   }
   else {
-    throw std::runtime_error( "Field " + fieldName + " is NOT of integer type\n");
+    throw std::runtime_error( std::format("Field {} is NOT of integer type", fieldName));
   }
 }
 
-long RDBRecord::getLong(const std::string& fieldName) const
+long RDBRecord::getLong(std::string_view fieldName) const
 {
   auto it = getItr(fieldName);
   const coral::AttributeList& values = *m_values;
@@ -123,26 +121,26 @@ long RDBRecord::getLong(const std::string& fieldName) const
     return (long)item.data<long long>();
   }
   else {
-    throw std::runtime_error( "Field " + fieldName + " is NOT of long type");
+    throw std::runtime_error( std::format("Field {} is NOT of long type",fieldName));
   }
 }
 
-double RDBRecord::getDouble(const std::string& fieldName) const
+double RDBRecord::getDouble(std::string_view fieldName) const
 {
   return getGeneric<double>(fieldName);
 }
 
-float RDBRecord::getFloat(const std::string& fieldName) const
+float RDBRecord::getFloat(std::string_view fieldName) const
 {
   return getGeneric<float>(fieldName);
 }
 
-const std::string& RDBRecord::getString(const std::string& fieldName) const
+const std::string& RDBRecord::getString(std::string_view fieldName) const
 {
   return getGeneric<std::string>(fieldName);
 }
 
-int RDBRecord::getInt(const std::string& fieldName, unsigned int index) const
+int RDBRecord::getInt(std::string_view fieldName, unsigned int index) const
 {
   auto it = getItr(fieldName, index);
   const coral::AttributeList& values = *m_values;
@@ -154,11 +152,11 @@ int RDBRecord::getInt(const std::string& fieldName, unsigned int index) const
     return (int)item.data<long>();
   }
   else {
-    throw std::runtime_error( "Field " + fieldName + " is NOT of integer type\n");
+    throw std::runtime_error( std::format("Field {} is NOT of integer type", fieldName));
   }
 }
 
-long RDBRecord::getLong(const std::string& fieldName, unsigned int index) const
+long RDBRecord::getLong(std::string_view fieldName, unsigned int index) const
 {
   auto it = getItr(fieldName, index);
   const coral::AttributeList& values = *m_values;
@@ -170,11 +168,11 @@ long RDBRecord::getLong(const std::string& fieldName, unsigned int index) const
     return (long)item.data<int>();
   }
   else {
-    throw std::runtime_error( "Field " + fieldName + " is NOT of long type");
+    throw std::runtime_error( std::format("Field {} is NOT of long type", fieldName));
   }
 }
 
-double RDBRecord::getDouble(const std::string& fieldName, unsigned int index) const
+double RDBRecord::getDouble(std::string_view fieldName, unsigned int index) const
 {
   auto it = getItr(fieldName, index);
   const coral::AttributeList& values = *m_values;
@@ -183,11 +181,11 @@ double RDBRecord::getDouble(const std::string& fieldName, unsigned int index) co
     return item.data<double>();
   }
   else {
-    throw std::runtime_error( "Field " + fieldName + " is NOT of double type");
+    throw std::runtime_error( std::format("Field {} is NOT of double type",fieldName));
   }
 }
 
-float RDBRecord::getFloat(const std::string& fieldName, unsigned int index) const
+float RDBRecord::getFloat(std::string_view fieldName, unsigned int index) const
 {
   auto it = getItr(fieldName, index);
   const coral::AttributeList& values = *m_values;
@@ -196,11 +194,11 @@ float RDBRecord::getFloat(const std::string& fieldName, unsigned int index) cons
     return item.data<float>();
   }
   else {
-    throw std::runtime_error( "Field " + fieldName + " is NOT of float type");
+    throw std::runtime_error( std::format("Field {} is NOT of float type", fieldName));
   }
 }
 
-const std::string& RDBRecord::getString(const std::string& fieldName, unsigned int index) const
+const std::string& RDBRecord::getString(std::string_view fieldName, unsigned int index) const
 {
   auto it = getItr(fieldName, index);
   const coral::AttributeList& values = *m_values;
@@ -209,7 +207,7 @@ const std::string& RDBRecord::getString(const std::string& fieldName, unsigned i
     return item.data<std::string>();
   }
   else {
-    throw std::runtime_error( "Field " + fieldName + " is NOT of string type");
+    throw std::runtime_error( std::format("Field {} is NOT of string type", fieldName));
   }
 }
 

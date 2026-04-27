@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -16,6 +16,7 @@
 #include <iomanip>
 #include <stdexcept>
 #include <sstream>
+#include <format>
 
 SqliteRecord::SqliteRecord(SqliteInpDef_ptr def)
   : m_def(std::move(def))
@@ -26,14 +27,14 @@ SqliteRecord::~SqliteRecord()
 {
 }
 
-bool SqliteRecord::isFieldNull(const std::string& field) const 
+bool SqliteRecord::isFieldNull(std::string_view  field) const 
 {
   if(m_record.find(field)!=m_record.end()) return false;
-  if(m_def->find(field)==m_def->end()) throw std::runtime_error( "Wrong name for the field "+ field);
+  if(m_def->find(field)==m_def->end()) throw std::runtime_error( std::format("Wrong name for the field {}",field));
   return true;
 }
 
-int SqliteRecord::getInt(const std::string& field) const
+int SqliteRecord::getInt(std::string_view  field) const
 {
   auto [recIt,checkCode] = checkField(field,SQLITEINP_INT);
   if(checkCode==FIELD_CHECK_OK) {
@@ -43,13 +44,13 @@ int SqliteRecord::getInt(const std::string& field) const
   return 0;
 }
 
-long SqliteRecord::getLong(const std::string& field) const
+long SqliteRecord::getLong(std::string_view  field) const
 {
   // Our database does not support LONG data types at this moment
   return (long)getInt(field);
 }
 
-double SqliteRecord::getDouble(const std::string& field) const
+double SqliteRecord::getDouble(std::string_view  field) const
 {
   auto [recIt,checkCode] = checkField(field,SQLITEINP_DOUBLE);
   if(checkCode==FIELD_CHECK_OK) {
@@ -59,13 +60,13 @@ double SqliteRecord::getDouble(const std::string& field) const
   return 0.;
 }
 
-float SqliteRecord::getFloat(const std::string& field) const
+float SqliteRecord::getFloat(std::string_view  field) const
 {
   // SQLite stores REAL as double
   return (float)getDouble(field);
 }
 
-const std::string& SqliteRecord::getString(const std::string& field) const
+const std::string&  SqliteRecord::getString(std::string_view  field) const
 {
   auto [recIt,checkCode] = checkField(field,SQLITEINP_STRING);
   if(checkCode==FIELD_CHECK_OK) {
@@ -75,37 +76,35 @@ const std::string& SqliteRecord::getString(const std::string& field) const
   throw std::runtime_error("Unexpected error in SqliteRecord::getString()");
 }
 
-int SqliteRecord::getInt(const std::string& field, unsigned int index) const
+int SqliteRecord::getInt(std::string_view  field, unsigned int index) const
 {
-  return getInt(field + "_" + std::to_string(index));
+  return getInt(std::format("{}_{}", field, index));
 }
 
-long SqliteRecord::getLong(const std::string& field, unsigned int index) const
+long SqliteRecord::getLong(std::string_view  field, unsigned int index) const
 {
-  return getLong(field + "_" + std::to_string(index));
+  return getLong(std::format("{}_{}", field, index));
 }
 
-double SqliteRecord::getDouble(const std::string& field, unsigned int index) const
+double SqliteRecord::getDouble(std::string_view  field, unsigned int index) const
 {
-  return getDouble(field + "_" + std::to_string(index));
+  return getDouble(std::format("{}_{}", field, index));
 }
 
-float SqliteRecord::getFloat(const std::string& field, unsigned int index) const
+float SqliteRecord::getFloat(std::string_view  field, unsigned int index) const
 {
-  return getFloat(field + "_" + std::to_string(index));
+  return getFloat(std::format("{}_{}", field, index));
 }
 
-const std::string& SqliteRecord::getString(const std::string& field, unsigned int index) const
+const std::string&  SqliteRecord::getString(std::string_view  field, unsigned int index) const
 {
-  return getString(field + "_" + std::to_string(index));
+  return getString(std::format("{}_{}", field, index));
 }
 
-void SqliteRecord::addValue(const std::string& field
-			    , SqliteInp value)
+void SqliteRecord::addValue(std::string_view  field, SqliteInp value)
 {
-  auto [it,result] = m_record.insert(std::pair(field,value));
-  if(!result) throw std::runtime_error("Unexpected error when adding new value for the field " + 
-				       field + ". Duplicate field name?");
+  auto [it,result] = m_record.emplace(std::string{field}, std::move(value));
+  if(!result) throw std::runtime_error(std::format("Unexpected error when adding new value for the field {}. Duplicate field name?", field)); 
 }
 
 void SqliteRecord::dump() const
@@ -132,19 +131,19 @@ void SqliteRecord::dump() const
     case SQLITEINP_FLOAT:
       std::cout << "float) : ";
       if (fieldNull) {
-	std::cout << "NULL";
+	      std::cout << "NULL";
       }
       else {
-	std::cout << std::setprecision(10) << std::get<float>(recIt->second) << "]";
+	      std::cout << std::setprecision(10) << std::get<float>(recIt->second) << "]";
       }
       break;
     case SQLITEINP_DOUBLE:
       std::cout << "double) : ";
       if (fieldNull) {
-	std::cout << "NULL";
+	      std::cout << "NULL";
       }
       else {
-	std::cout << std::setprecision(10) << std::get<double>(recIt->second) << "]";
+	      std::cout << std::setprecision(10) << std::get<double>(recIt->second) << "]";
       }
       break;
     case SQLITEINP_STRING:
@@ -155,4 +154,20 @@ void SqliteRecord::dump() const
     }
   }
   std::cout << std::endl;
+}
+
+void 
+SqliteRecord::handleError(std::string_view  field, FieldCheckCode checkCode) const
+{
+  switch(checkCode) {
+  case FIELD_CHECK_BAD_NAME:
+    throw std::runtime_error( std::format("handleError: Wrong name for the field {}",field));
+  case FIELD_CHECK_BAD_TYPE:
+    throw std::runtime_error( std::format("handleError: Wrong data type requested for the field {}",field));
+  case FIELD_CHECK_NULL_VAL:
+    throw std::runtime_error( std::format("handleError: {} is NULL", field));
+  default:
+    break;
+  }
+  return;
 }
