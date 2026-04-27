@@ -13,7 +13,7 @@ def DAOD_TLA_OutputCfg(flags,additional_items=[]):
     acc = ComponentAccumulator()
 
     from TrigEDMConfig.TriggerEDM import getTriggerEDMList
-    edmList = getTriggerEDMList(flags, key=flags.Trigger.ESDEDMSet)
+    edmList = getTriggerEDMList(flags, key=flags.Trigger.AODEDMSet)
 
     ItemList = []
     for edmType, edmKeys in edmList.items():
