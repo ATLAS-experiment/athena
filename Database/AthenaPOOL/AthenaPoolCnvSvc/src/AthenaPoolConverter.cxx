@@ -160,8 +160,8 @@ Placement AthenaPoolConverter::setPlacementWithType(const std::string& tname, co
    placement.setFileName(outputConnectionSpec);
 
    // Override streaming parameters from StreamTool if requested.
-   std::string containerPrefix{APRDefaults::getEventDataName()};
-   std::string dhContainerPrefix{APRDefaults::getDataHeaderName()};
+   std::string containerPrefix{APRDefaults::WriteConfig::getEventDataName()};
+   std::string dhContainerPrefix{APRDefaults::WriteConfig::getDataHeaderName()};
    std::string containerName{""};
    std::string containerNameHint{""};
    std::string branchNameHint{""};
@@ -203,7 +203,7 @@ Placement AthenaPoolConverter::setPlacementWithType(const std::string& tname, co
    // AttributeList - writing attributes separately to EventTag container group
    else if ( tname.starts_with(APRDefaults::EventTagTypeName) ) {
       containerName = std::format("{}({})",
-         APRDefaults::getEventTagName(),
+         APRDefaults::WriteConfig::getEventTagName(),
          key);
    }
    // all other object types

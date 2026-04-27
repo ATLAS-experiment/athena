@@ -48,8 +48,8 @@ StatusCode AthenaPoolCnvSvc::initialize() {
       return(StatusCode::FAILURE);
    }
    // Global POOL container naming scheme
-   if (auto scheme = APRDefaults::parseNamingScheme(m_containerNamingSchemeProp.value())) {
-      APRDefaults::setNamingScheme(*scheme);
+   if (auto scheme = APRDefaults::WriteConfig::parseNamingScheme(m_containerNamingSchemeProp.value())) {
+      APRDefaults::WriteConfig::setNamingScheme(*scheme);
    } else {
       ATH_MSG_ERROR(std::format("Invalid PoolContainerNamingScheme: {}, see APRDefaults.h for the full list.", m_containerNamingSchemeProp.value()));
       return StatusCode::FAILURE;

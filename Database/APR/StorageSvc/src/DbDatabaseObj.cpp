@@ -444,6 +444,19 @@ StatusCode DbDatabaseObj::open()   {
               m_paramMap[num] = fid;
             }
           }
+          // Now set the DataHeader and EventTag container names if we're in read mode
+          if ( mode()&pool::READ )  {
+            ParamMap::const_iterator it = m_paramMap.find(APRDefaults::ParamsKeyDataHeader);
+            if ( it != m_paramMap.end() )  {
+              APRDefaults::ReadConfig::setDataHeaderName(name(), (*it).second);
+              ATH_MSG_DEBUG("Set DataHeader name for FID " << name() << " to " << (*it).second);
+            }
+            it = m_paramMap.find(APRDefaults::ParamsKeyEventTag);
+            if ( it != m_paramMap.end() )  {
+              APRDefaults::ReadConfig::setEventTagName(name(), (*it).second);
+              ATH_MSG_DEBUG("Set EventTag name for FID " << name() << " to " << (*it).second);
+            }
+          }
         }
         if ( mode()&pool::CREATE || mode()&pool::UPDATE)  {
           std::string par_val;
@@ -462,24 +475,16 @@ StatusCode DbDatabaseObj::open()   {
               ATH_MSG_ERROR("Failed to write parameter POOL_VSN.");
             }
           }
-          if ( !param("POOL_CONTAINERNAME_EVENTDATA", par_val).isSuccess() )  {
-            if ( !addParam("POOL_CONTAINERNAME_EVENTDATA", APRDefaults::getEventDataName()).isSuccess() )  {
-              ATH_MSG_ERROR("Failed to write parameter POOL_CONTAINERNAME_EVENTDATA.");
+          if ( !param(APRDefaults::ParamsKeyEventTag, par_val).isSuccess() )  {
+            if ( !addParam(APRDefaults::ParamsKeyEventTag, APRDefaults::WriteConfig::getEventTagName()).isSuccess() )  {
+              ATH_MSG_ERROR("Failed to write parameter " << APRDefaults::ParamsKeyEventTag);
+              return StatusCode::FAILURE;
             }
           }
-          if ( !param("POOL_CONTAINERNAME_EVENTTAG", par_val).isSuccess() )  {
-            if ( !addParam("POOL_CONTAINERNAME_EVENTTAG", APRDefaults::getEventTagName()).isSuccess() )  {
-              ATH_MSG_ERROR("Failed to write parameter POOL_CONTAINERNAME_EVENTTAG.");
-            }
-          }
-          if ( !param("POOL_CONTAINERNAME_DATAHEADER", par_val).isSuccess() )  {
-            if ( !addParam("POOL_CONTAINERNAME_DATAHEADER", APRDefaults::getDataHeaderName()).isSuccess() )  {
-              ATH_MSG_ERROR("Failed to write parameter POOL_CONTAINERNAME_DATAHEADER.");
-            }
-          }
-          if ( !param("POOL_CONTAINERNAME_METADATA", par_val).isSuccess() )  {
-            if ( !addParam("POOL_CONTAINERNAME_METADATA", APRDefaults::getMetaDataName()).isSuccess() )  {
-              ATH_MSG_ERROR("Failed to write parameter POOL_CONTAINERNAME_METADATA.");
+          if ( !param(APRDefaults::ParamsKeyDataHeader, par_val).isSuccess() )  {
+            if ( !addParam(APRDefaults::ParamsKeyDataHeader, APRDefaults::WriteConfig::getDataHeaderName()).isSuccess() )  {
+              ATH_MSG_ERROR("Failed to write parameter " << APRDefaults::ParamsKeyDataHeader);
+              return StatusCode::FAILURE;
             }
           }
         }
@@ -507,6 +512,7 @@ StatusCode DbDatabaseObj::close()  {
     remove(curr).ignore();
   }
   clearEntries();
+  APRDefaults::ReadConfig::clearDatabase(name());
   m_dom.remove(this).ignore();
   return sc;
 }
