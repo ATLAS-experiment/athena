@@ -8,7 +8,7 @@
 #include <string>
 #include <array>
 #include <iostream>
-
+#include <CxxUtils/StringUtils.h>
 #include "CoolKernel/DatabaseId.h"
 #include "CoolKernel/Exception.h"
 #include "CoolKernel/IDatabaseSvc.h"
@@ -945,22 +945,6 @@ createLocalCopyStructure(const Folder & sourceFolder, const DbConnection & write
   return destfl;
 }
 
-std::vector<std::string> &
-split(const std::string &s, char delim, std::vector<std::string> &elems) {
-    std::stringstream ss(s);
-    std::string item;
-    while (std::getline(ss, item, delim)) {
-        elems.push_back(item);
-    }
-    return elems;
-}
-std::vector<std::string> 
-split(const std::string &s, char delim) {
-    std::vector<std::string> elems;
-    split(s, delim, elems);
-    return elems;
-}
-
 int main(int argc, const char * argv[]) {
   int retcode=0;
   //http://coolcherrypy.cern.ch:8080/cooldb/ATLAS_COOLPROD/ATLAS_COOLOFL_SCT/OFLP200/SCT/DAQ/Configuration/Chip/tags
@@ -1143,7 +1127,7 @@ xmllint --format 'http://coolcherrypy.cern.ch:8080/cooldb/ATLAS_COOLPROD/ATLAS_C
    std::cout<<"running with default argument "<<iovString<<std::endl;
   }
   
-  std::vector<std::string> splitString=split(iovString,'-');
+  std::vector<std::string> splitString=CxxUtils::tokenize(iovString,'-');
   if (splitString.size()!=2) exit(-1);
   std::cout<<"From "<<splitString[0]<<" to "<<splitString[1]<<std::endl;
   const cool::ValidityKey since = std::stoll(splitString[0]);
