@@ -124,7 +124,7 @@ StatusCode LundVariablesTool::decorate(const xAOD::JetContainer& jets) const {
   return StatusCode::SUCCESS;
 }
 
-std::vector<LundVariablesTool::Declustering> LundVariablesTool::getLundVar( std::vector<fastjet::PseudoJet> v_jcs)
+std::vector<LundVariablesTool::Declustering> LundVariablesTool::getLundVar( std::vector<fastjet::PseudoJet> v_jcs, bool do_primaryLund)
 {
   fastjet::JetDefinition jd(fastjet::cambridge_algorithm, 1.0);
   std::vector<LundVariablesTool::Declustering> result;
@@ -144,6 +144,10 @@ std::vector<LundVariablesTool::Declustering> LundVariablesTool::getLundVar( std:
     bool thisJHasParents = thisJ.has_parents(pJLeft, pJRight);
 
     if (!thisJHasParents){
+      /// PrimaryLundJetPlane
+      /// Always follow the harder split along the LundGraph
+      /// When thisJ has no parents, it moves to the next LundJetPlane
+      if (do_primaryLund) return result;
       continue;
     }
 

@@ -27,7 +27,7 @@ class LundVariablesTool : public asg::AsgTool, virtual public IJetDecorator {
       int idp1 = -1, idp2 = -1;
     };
 
-    static std::vector<Declustering> getLundVar(std::vector<fastjet::PseudoJet> v_jcs);
+    static std::vector<Declustering> getLundVar(std::vector<fastjet::PseudoJet> v_jcs, bool do_primaryLund = false);
 
     private:
      std::string m_prefix;

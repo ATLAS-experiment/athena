@@ -12,6 +12,7 @@
 <class name="KTSplittingScaleTool"/>
 <class name="KtDeltaRTool"/>
 <class name="KtMassDropTool"/>
+<class name="LundVariablesTool"/>
 <class name="NSubjettinessRatiosTool"/>
 <class name="NSubjettinessTool"/>
 <class name="PlanarFlowTool"/>
