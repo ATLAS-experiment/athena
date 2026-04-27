@@ -1710,6 +1710,12 @@ HLT_mb_sp_vpix60_hi_FgapAC5_L1eTAU2_VjTE200_EMPTY:
   eventCount: 0
 HLT_mb_sptrk_L11ZDC_A_1ZDC_C_VjTE200:
   eventCount: 0
+HLT_mb_sptrk_L1AFP_A_OR_C_EMPTY:
+  eventCount: 0
+HLT_mb_sptrk_L1AFP_A_OR_C_UNPAIRED_ISO:
+  eventCount: 0
+HLT_mb_sptrk_L1AFP_A_OR_C_UNPAIRED_NONISO:
+  eventCount: 0
 HLT_mb_sptrk_L1AFP_OR_VjTE200:
   eventCount: 0
 HLT_mb_sptrk_L1MBTS_1_1_VjTE50:
@@ -2332,6 +2338,12 @@ HLT_noalg_L12MU3V:
 HLT_noalg_L1AFP_A_AND_C:
   eventCount: 0
 HLT_noalg_L1AFP_A_OR_C:
+  eventCount: 0
+HLT_noalg_L1AFP_A_OR_C_EMPTY:
+  eventCount: 0
+HLT_noalg_L1AFP_A_OR_C_UNPAIRED_ISO:
+  eventCount: 0
+HLT_noalg_L1AFP_A_OR_C_UNPAIRED_NONISO:
   eventCount: 0
 HLT_noalg_L1AFP_OR_TRT_VZDC_A_VZDC_C_VjTE200:
   eventCount: 0

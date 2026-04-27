@@ -655,10 +655,6 @@ def getPhysicsHISignatures():
         ChainProp(name='HLT_mb_excl_1trk5_pt1_L1DPHI-2eTAU1_VjTE200',          l1SeedThresholds=['FSNOSEED'],stream=[UPCStream],groups=MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_mb_excl_1trk5_pt1_L123INVM-27DPHI-2eTAU1_VjTE200', l1SeedThresholds=['FSNOSEED'],stream=[UPCStream],groups=MinBiasGroup+SupportPhIGroup),
 
-        # AFP
-        ChainProp(name='HLT_noalg_L1AFP_A_OR_C',  l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup),
-        ChainProp(name='HLT_noalg_L1AFP_A_AND_C', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup),
-
         # ATR-32660
         ChainProp(name='HLT_mb_sptrk_pt0p8_sp_vpix800_trk2_L1AFP_OR_VZDC_A_VZDC_C_VjTE200',     l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_mb_sptrk_pt0p8_sp_vpix800_trk2_L1AFP_OR_TRT_VZDC_A_VZDC_C_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
@@ -666,6 +662,10 @@ def getPhysicsHISignatures():
         ChainProp(name='HLT_mb_sptrk_pt0p8_sp_vpix800_trk2_L1AFP_OR_TRT_ZDC_XOR_VjTE200',       l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
 
         ChainProp(name='HLT_mb_sptrk_L1AFP_OR_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
+
+        ChainProp(name='HLT_mb_sptrk_L1AFP_A_OR_C_EMPTY',           l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup),
+        ChainProp(name='HLT_mb_sptrk_L1AFP_A_OR_C_UNPAIRED_ISO',    l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup),
+        ChainProp(name='HLT_mb_sptrk_L1AFP_A_OR_C_UNPAIRED_NONISO', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup),
     ]
 
     chains['HeavyIon'] += [
@@ -766,7 +766,11 @@ def getPhysicsHISignatures():
         ChainProp(name='HLT_noalg_L1ZDC_HELT35_jTEFWD2600',  l1SeedThresholds=['FSNOSEED'], stream=[UCCStream], groups=['PS:NoBulkMCProd']+SupportPhIGroup),
         ChainProp(name='HLT_noalg_L1ZDC_HELT50_jTEFWD2600',  l1SeedThresholds=['FSNOSEED'], stream=[UCCStream], groups=['PS:NoBulkMCProd']+SupportPhIGroup),
 
-        # AFP streamers
+        # AFP
+        ChainProp(name='HLT_noalg_L1AFP_A_OR_C',  l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup),
+        ChainProp(name='HLT_noalg_L1AFP_A_AND_C', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup),
+
+        # AFP streamers (ATR-32660)
         ChainProp(name='HLT_noalg_L1ESP_AFP_OR_jJ5p30ETA49_VZDC_A_VZDC_C_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_noalg_L1ESP_AFP_OR_jJ5p30ETA49_ZDC_XOR_VjTE200',       l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_noalg_L1AFP_OR_VZDC_A_VZDC_C_VjTE200',                 l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
@@ -774,6 +778,11 @@ def getPhysicsHISignatures():
         ChainProp(name='HLT_noalg_L1AFP_OR_ZDC_XOR_VjTE200',                       l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_noalg_L1AFP_OR_TRT_ZDC_XOR_VjTE200',                   l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_noalg_L1AFP_OR_VjTE200',                               l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
+
+        # AFP background streamers (ATR-32660)
+        ChainProp(name='HLT_noalg_L1AFP_A_OR_C_EMPTY',           l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup),
+        ChainProp(name='HLT_noalg_L1AFP_A_OR_C_UNPAIRED_ISO',    l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup),
+        ChainProp(name='HLT_noalg_L1AFP_A_OR_C_UNPAIRED_NONISO', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup),
     ]
 
     #---- heavy ion EB chains
