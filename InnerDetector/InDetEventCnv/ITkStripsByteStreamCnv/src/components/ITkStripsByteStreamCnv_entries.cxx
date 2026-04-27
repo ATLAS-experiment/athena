@@ -20,3 +20,6 @@ DECLARE_COMPONENT( ITkStripRawDataProviderTool )
 #include "../ITkStripRawContByteStreamToolProviderTool.h"
 DECLARE_COMPONENT( ITkStripRawContByteStreamToolProviderTool )
 
+#include "../ITkStripDataRateMonTool.h"
+DECLARE_COMPONENT( ITkStripDataRateMonTool )
+

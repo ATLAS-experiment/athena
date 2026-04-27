@@ -11,6 +11,8 @@
 #include "ITkStripCabling/IITkStripCablingTool.h"
 #include "GaudiKernel/ToolHandle.h"
 
+#include "ITkStripDataRateMonTool.h"
+
 #include <set>
 #include <atomic>
 
@@ -154,6 +156,8 @@ ITkStripsRodEncoder : public extends<AthAlgTool, IITkStripsRodEncoder>{
                                          "ITkStripCablingTool", 
                                          "ITkStripCablingTool", 
                                          "Tool to retrieve ITkStrips Cabling"};
+  
+  ToolHandle<ITkStripDataRateMonTool> m_dataRateMonTool{this, "DataRateMonitoringTool", "", "Monitoring tool for data rate evaluation"};  
 
   /** Identifier helper class for the ITkStrips subdetector that creates compact Identifier objects and 
       IdentifierHash or hash IDs. Also allows decoding of these IDs. */
