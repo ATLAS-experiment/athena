@@ -20,8 +20,6 @@ TrigInDetModuleCuda::TrigInDetModuleCuda() : m_maxDevice(0), m_dumpTimeLine(fals
 
   m_h_detmodel = 0;
 
-  m_maxDevice = GPUHelpers::getNumberOfGPUs();
-
   for(unsigned int i=0;i<getProvidedAlgs().size();i++) {
     m_workItemCounters[i] = 0;
   }
@@ -55,7 +53,7 @@ TrigInDetModuleCuda::~TrigInDetModuleCuda() {
 }
 
 bool TrigInDetModuleCuda::configure() {
-
+  m_maxDevice = GPUHelpers::getNumberOfGPUs();
   if(m_maxDevice == 0) {
      std::cout<<"No CUDA devices found"<<std::endl;
      return false;

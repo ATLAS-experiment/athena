@@ -5,7 +5,9 @@
 // Local include(s).
 #include "../KernelRunnerSvc.h"
 #include "../StreamPoolSvc.h"
+#include "../GPUSystemInfoSvc.h"
 
 // Declare the component(s) to Gaudi.
 DECLARE_COMPONENT( AthCUDA::KernelRunnerSvc )
 DECLARE_COMPONENT( AthCUDA::StreamPoolSvc )
+DECLARE_COMPONENT( AthCUDA::GPUSystemInfoSvc )
