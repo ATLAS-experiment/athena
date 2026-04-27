@@ -76,7 +76,7 @@ StatusCode EtaHoughTransformAlg::execute(const EventContext& ctx) const {
     ATH_CHECK(SG::get(spacePoints, m_spacePointKey, ctx));
 
     // book the output container
-    SG::WriteHandle<EtaHoughMaxContainer> writeMaxima(m_maxima, ctx);
+    SG::WriteHandle writeMaxima(m_maxima, ctx);
     ATH_CHECK(writeMaxima.record(std::make_unique<EtaHoughMaxContainer>()));
 
     const ActsTrk::GeometryContext* gctx{nullptr};
