@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PixelConditionsAlgorithms )
@@ -20,28 +20,28 @@ atlas_add_test( StringUtilities_test
   SOURCES test/StringUtilities_test.cxx src/StringUtilities.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES}
-  POST_EXEC_SCRIPT "nopost.sh"
+  POST_EXEC_SCRIPT noerror.sh
 )
 
 atlas_add_test( PixelModuleConfigCondAlg_test
   SOURCES test/PixelModuleConfigCondAlg_test.cxx src/PixelModuleConfigCondAlg.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} 
   LINK_LIBRARIES ${Boost_LIBRARIES} TestTools AthenaBaseComps GaudiKernel AthenaPoolUtilities PixelConditionsData PathResolver StoreGateLib
-  POST_EXEC_SCRIPT "nopost.sh"
+  POST_EXEC_SCRIPT noerror.sh
 )
 
 atlas_add_test( PixelConfigCondAlg_test
   SOURCES test/PixelConfigCondAlg_test.cxx src/PixelConfigCondAlg.cxx src/StringUtilities.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} 
   LINK_LIBRARIES ${Boost_LIBRARIES} TestTools AthenaBaseComps GaudiKernel AthenaPoolUtilities PixelConditionsData PathResolver StoreGateLib
-  POST_EXEC_SCRIPT "nopost.sh"
+  POST_EXEC_SCRIPT noerror.sh
 )
 
 atlas_add_test( ITkPixChargeCalibAlg_test
   SOURCES test/ITkPixChargeCalibAlg_test.cxx src/ITkPixChargeCalibAlg.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} 
   LINK_LIBRARIES ${Boost_LIBRARIES} TestTools AthenaBaseComps GaudiKernel AthenaPoolUtilities PixelConditionsData PathResolver StoreGateLib
-  POST_EXEC_SCRIPT "nopost.sh"
+  POST_EXEC_SCRIPT noerror.sh
 )
 
 # Install files from the package:
