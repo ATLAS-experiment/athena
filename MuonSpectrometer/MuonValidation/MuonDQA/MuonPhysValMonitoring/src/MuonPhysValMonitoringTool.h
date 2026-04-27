@@ -176,7 +176,6 @@ namespace MuonPhysValMonitoring {
                                                                           const xAOD::TruthParticleContainer* muonTruthContainer);
         MuonPhysValMonitoringTool::MUCATEGORY getMuonTruthCategory(const xAOD::IParticle* prt);
         bool passesAcceptanceCuts(const xAOD::IParticle* prt);
-        void SplitString(TString x, const TString& delim, std::vector<TString>& v);
 
         // Hists
         std::vector<std::unique_ptr<MuonValidationPlots>> m_muonValidationPlots;
