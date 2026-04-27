@@ -245,8 +245,7 @@ def BPHY22Cfg(flags):
     
     if not isSimulation: #Only Skim Data
         BPHY22_SelectBMuDxEvent = CompFactory.DerivationFramework.AnyVertexSkimmingTool("BPHY22_AnyVertexSkimmingTool",
-                                                                        VertexContainerNames =CascadeCollections,
-                                                                        UseHandles = True )
+                                                                        VertexContainerNames =CascadeCollections )
         acc.addPublicTool(BPHY22_SelectBMuDxEvent)
 
         #====================================================================
