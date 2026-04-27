@@ -42,11 +42,9 @@ EmptyPoolFile.root                                  DEBUG --> Access   DbContain
 ##Params                                            DEBUG    attributes# = 1
 ##Params                                            DEBUG Opened container ##Params of type ROOT_Tree
 EmptyPoolFile.root                                  DEBUG --->Reading Param:PFN=[EmptyPoolFile.root]
-EmptyPoolFile.root                                  DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTDATA=[CollectionTree]
 EmptyPoolFile.root                                  DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTTAG=[POOLCollectionTree]
 EmptyPoolFile.root                                  DEBUG --->Reading Param:POOL_CONTAINERNAME_DATAHEADER=[POOLContainer]
-EmptyPoolFile.root                                  DEBUG --->Reading Param:POOL_CONTAINERNAME_METADATA=[MetaData]
-##Params                                            DEBUG No objects passing selection criteria... Container has 8 Entries in total.
+##Params                                            DEBUG No objects passing selection criteria... Container has 6 Entries in total.
 EventSelector                                       DEBUG No events found in: EmptyPoolFile.root skipped!!!
 RootDatabase                                        DEBUG Closing DB EmptyPoolFile.root
 EventSelector                                       DEBUG Try item: "SimplePoolFile1.root" from the collection list.
@@ -77,11 +75,9 @@ SimplePoolFile1.root                                DEBUG --> Access   DbContain
 ##Params                                            DEBUG    attributes# = 1
 ##Params                                            DEBUG Opened container ##Params of type ROOT_Tree
 SimplePoolFile1.root                                DEBUG --->Reading Param:PFN=[SimplePoolFile1.root]
-SimplePoolFile1.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTDATA=[CollectionTree]
 SimplePoolFile1.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTTAG=[POOLCollectionTree]
 SimplePoolFile1.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_DATAHEADER=[POOLContainer]
-SimplePoolFile1.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_METADATA=[MetaData]
-##Params                                            DEBUG No objects passing selection criteria... Container has 8 Entries in total.
+##Params                                            DEBUG No objects passing selection criteria... Container has 6 Entries in total.
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] POOLContainer(DataHeader)
 POOLContainer(DataHeader)                           DEBUG Opening
 POOLContainer(DataHeader)                           DEBUG    attributes# = 1
@@ -131,11 +127,9 @@ EmptyPoolFile.root                                  DEBUG --> Access   DbContain
 ##Params                                            DEBUG    attributes# = 1
 ##Params                                            DEBUG Opened container ##Params of type ROOT_Tree
 EmptyPoolFile.root                                  DEBUG --->Reading Param:PFN=[EmptyPoolFile.root]
-EmptyPoolFile.root                                  DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTDATA=[CollectionTree]
 EmptyPoolFile.root                                  DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTTAG=[POOLCollectionTree]
 EmptyPoolFile.root                                  DEBUG --->Reading Param:POOL_CONTAINERNAME_DATAHEADER=[POOLContainer]
-EmptyPoolFile.root                                  DEBUG --->Reading Param:POOL_CONTAINERNAME_METADATA=[MetaData]
-##Params                                            DEBUG No objects passing selection criteria... Container has 8 Entries in total.
+##Params                                            DEBUG No objects passing selection criteria... Container has 6 Entries in total.
 EventSelector                                       DEBUG No events found in: EmptyPoolFile.root skipped!!!
 MetaDataSvc                                         DEBUG handle() BeginInputFile for EmptyPoolFile.root
 MetaDataSvc                                         DEBUG initInputMetaDataStore: file name EmptyPoolFile.root
@@ -194,11 +188,9 @@ SimplePoolFile1.root                                DEBUG --> Access   DbContain
 ##Params                                            DEBUG    attributes# = 1
 ##Params                                            DEBUG Opened container ##Params of type ROOT_Tree
 SimplePoolFile1.root                                DEBUG --->Reading Param:PFN=[SimplePoolFile1.root]
-SimplePoolFile1.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTDATA=[CollectionTree]
 SimplePoolFile1.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTTAG=[POOLCollectionTree]
 SimplePoolFile1.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_DATAHEADER=[POOLContainer]
-SimplePoolFile1.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_METADATA=[MetaData]
-##Params                                            DEBUG No objects passing selection criteria... Container has 8 Entries in total.
+##Params                                            DEBUG No objects passing selection criteria... Container has 6 Entries in total.
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] POOLContainer(DataHeader)
 POOLContainer(DataHeader)                           DEBUG Opening
 POOLContainer(DataHeader)                           DEBUG    attributes# = 1
@@ -609,11 +601,9 @@ EmptyPoolFile.root                                  DEBUG --> Access   DbContain
 ##Params                                            DEBUG    attributes# = 1
 ##Params                                            DEBUG Opened container ##Params of type ROOT_Tree
 EmptyPoolFile.root                                  DEBUG --->Reading Param:PFN=[EmptyPoolFile.root]
-EmptyPoolFile.root                                  DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTDATA=[CollectionTree]
 EmptyPoolFile.root                                  DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTTAG=[POOLCollectionTree]
 EmptyPoolFile.root                                  DEBUG --->Reading Param:POOL_CONTAINERNAME_DATAHEADER=[POOLContainer]
-EmptyPoolFile.root                                  DEBUG --->Reading Param:POOL_CONTAINERNAME_METADATA=[MetaData]
-##Params                                            DEBUG No objects passing selection criteria... Container has 8 Entries in total.
+##Params                                            DEBUG No objects passing selection criteria... Container has 6 Entries in total.
 EventSelector                                       DEBUG No events found in: EmptyPoolFile.root skipped!!!
 MetaDataSvc                                         DEBUG handle() BeginInputFile for EmptyPoolFile.root
 MetaDataSvc                                         DEBUG initInputMetaDataStore: file name EmptyPoolFile.root
@@ -664,11 +654,9 @@ SimplePoolFile2.root                                DEBUG --> Access   DbContain
 ##Params                                            DEBUG    attributes# = 1
 ##Params                                            DEBUG Opened container ##Params of type ROOT_Tree
 SimplePoolFile2.root                                DEBUG --->Reading Param:PFN=[SimplePoolFile2.root]
-SimplePoolFile2.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTDATA=[CollectionTree]
 SimplePoolFile2.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTTAG=[POOLCollectionTree]
 SimplePoolFile2.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_DATAHEADER=[POOLContainer]
-SimplePoolFile2.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_METADATA=[MetaData]
-##Params                                            DEBUG No objects passing selection criteria... Container has 8 Entries in total.
+##Params                                            DEBUG No objects passing selection criteria... Container has 6 Entries in total.
 SimplePoolFile2.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] POOLContainer(DataHeader)
 POOLContainer(DataHeader)                           DEBUG Opening
 POOLContainer(DataHeader)                           DEBUG    attributes# = 1
@@ -1394,11 +1382,9 @@ SimplePoolFile3.root                                DEBUG --> Access   DbContain
 ##Params                                            DEBUG    attributes# = 1
 ##Params                                            DEBUG Opened container ##Params of type ROOT_Tree
 SimplePoolFile3.root                                DEBUG --->Reading Param:PFN=[SimplePoolFile3.root]
-SimplePoolFile3.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTDATA=[CollectionTree]
 SimplePoolFile3.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTTAG=[POOLCollectionTree]
 SimplePoolFile3.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_DATAHEADER=[POOLContainer]
-SimplePoolFile3.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_METADATA=[MetaData]
-##Params                                            DEBUG No objects passing selection criteria... Container has 8 Entries in total.
+##Params                                            DEBUG No objects passing selection criteria... Container has 6 Entries in total.
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] POOLContainer(DataHeader)
 POOLContainer(DataHeader)                           DEBUG Opening
 POOLContainer(DataHeader)                           DEBUG    attributes# = 1

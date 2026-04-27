@@ -39,11 +39,9 @@ SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContain
 ##Params                                            DEBUG    attributes# = 1
 ##Params                                            DEBUG Opened container ##Params of type ROOT_Tree
 SimplePoolFile_xAOD.root                            DEBUG --->Reading Param:PFN=[SimplePoolFile_xAOD.root]
-SimplePoolFile_xAOD.root                            DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTDATA=[CollectionTree]
 SimplePoolFile_xAOD.root                            DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTTAG=[POOLCollectionTree]
 SimplePoolFile_xAOD.root                            DEBUG --->Reading Param:POOL_CONTAINERNAME_DATAHEADER=[POOLContainer]
-SimplePoolFile_xAOD.root                            DEBUG --->Reading Param:POOL_CONTAINERNAME_METADATA=[MetaData]
-##Params                                            DEBUG No objects passing selection criteria... Container has 8 Entries in total.
+##Params                                            DEBUG No objects passing selection criteria... Container has 6 Entries in total.
 SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] POOLContainer(DataHeader)
 POOLContainer(DataHeader)                           DEBUG Opening
 POOLContainer(DataHeader)                           DEBUG    attributes# = 1
@@ -97,11 +95,9 @@ SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContain
 ##Params                                            DEBUG    attributes# = 1
 ##Params                                            DEBUG Opened container ##Params of type ROOT_Tree
 SimplePoolFile_xAOD.root                            DEBUG --->Reading Param:PFN=[SimplePoolFile_xAOD.root]
-SimplePoolFile_xAOD.root                            DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTDATA=[CollectionTree]
 SimplePoolFile_xAOD.root                            DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTTAG=[POOLCollectionTree]
 SimplePoolFile_xAOD.root                            DEBUG --->Reading Param:POOL_CONTAINERNAME_DATAHEADER=[POOLContainer]
-SimplePoolFile_xAOD.root                            DEBUG --->Reading Param:POOL_CONTAINERNAME_METADATA=[MetaData]
-##Params                                            DEBUG No objects passing selection criteria... Container has 8 Entries in total.
+##Params                                            DEBUG No objects passing selection criteria... Container has 6 Entries in total.
 SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] POOLContainer(DataHeader)
 POOLContainer(DataHeader)                           DEBUG Opening
 POOLContainer(DataHeader)                           DEBUG    attributes# = 1

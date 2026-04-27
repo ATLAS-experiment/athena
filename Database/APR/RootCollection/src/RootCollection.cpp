@@ -248,13 +248,23 @@ namespace pool {
       if( m_mode == ICollection::READ ) {
          // Find the right EventTag in the file
          std::string eventTagName, className;
-         for ( auto scheme : APRDefaults::getAllNamingSchemes() ) {
-            if ( auto* key = m_file->GetKey( APRDefaults::getEventTagName(scheme) ) ) {
-               eventTagName = key->GetName();
-               className = key->GetClassName();
-               break;
-            }
+         /*
+         APRDefaults::ReadConfig is set up in DbDabaseObj when we open an input file for reading.
+         However, RootCollection doesn't go through DbDatabaseObj, and operates independently.
+         Therefore, getEventTagName here will return the C++ default, which is the historical name.
+         As a workaround, we look for the presence of the canonical name by-hand but this is not ideal.
+         A better solution would be to remove code/logic duplication in RootCollection and make it go
+         through the same code path as the rest. Then the workaround can be removed.
+         */
+         if ( auto* key = m_file->GetKey( APRDefaults::ReadConfig::getEventTagName("").c_str() ) ) {
+            eventTagName = key->GetName();
+            className = key->GetClassName();
          }
+         else if ( auto* key = m_file->GetKey( APRDefaults::WriteConfig::ContainerNames::Canonical::EventTag ) ) {
+            eventTagName = key->GetName();
+            className = key->GetClassName();
+         }
+
          // retrieve the TTree from file
          if ( !eventTagName.empty() && className.find("TTree") != std::string::npos ) {
            m_tree = m_file->Get<TTree>( eventTagName.c_str() );
@@ -337,7 +347,7 @@ namespace pool {
 
       if( m_mode == ICollection::CREATE_AND_OVERWRITE ) {
         // Get the EventTag name
-        std::string eventTagName = APRDefaults::getEventTagName();
+        std::string eventTagName = APRDefaults::WriteConfig::getEventTagName();
         if ( m_description.type().exactMatch(pool::ROOTTREE_StorageType.type()) ) {
           // create a new TTree
           m_tree = new TTree(eventTagName.c_str(), m_name.c_str());

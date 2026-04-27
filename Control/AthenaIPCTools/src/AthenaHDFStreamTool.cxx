@@ -190,8 +190,8 @@ StatusCode AthenaHDFStreamTool::putObject(const void* source, std::size_t nbytes
       H5::DataSpace filespace(1, ds_size, maxdim);
       H5::DSetCreatPropList ds_prop;
       hsize_t chunkdim[1] = {nbytes};
-      if( ds_name.starts_with(APRDefaults::getEventDataName()) ||
-          ds_name.starts_with(APRDefaults::getEventTagName()) ) {
+      if( ds_name.starts_with(APRDefaults::WriteConfig::getEventDataName()) ||
+          ds_name.starts_with(APRDefaults::WriteConfig::getEventTagName()) ) {
          if (nbytes < 512) {
             chunkdim[0] = 4096;
          } else if (nbytes < 16 * 512) {
