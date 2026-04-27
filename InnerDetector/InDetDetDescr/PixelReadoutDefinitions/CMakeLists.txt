@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PixelReadoutDefinitions )
@@ -14,4 +14,4 @@ atlas_add_test( PixelReadoutDefinitions_test
   SOURCES test/PixelReadoutDefinitions_test.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} PixelReadoutDefinitionsLib
-  POST_EXEC_SCRIPT "nopost.sh" )
+  POST_EXEC_SCRIPT noerror.sh )
