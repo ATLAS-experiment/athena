@@ -30,6 +30,8 @@ def ITkTrigTrackSeedingToolStandaloneCfg(flags: AthConfigFlags, **kwargs) -> Com
   kwargs.setdefault("UseGPU", flags.Trigger.InDetTracking.doGPU)
 
   if flags.Trigger.InDetTracking.doGPU:
+    from AthCUDAServices.AthCUDAServicesConfig import GPUSystemInfoSvcCfg
+    acc.merge(GPUSystemInfoSvcCfg(flags))
     inDetAccelSvc = CompFactory.TrigInDetAccelerationSvc("TrigInDetAccelerationSvc")
     inDetAccelSvc.useITkGeometry = True # Allows to read and export the ITk geometry
     acc.addService(inDetAccelSvc)

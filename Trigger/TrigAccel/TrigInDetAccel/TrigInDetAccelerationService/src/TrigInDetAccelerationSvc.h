@@ -19,6 +19,8 @@
 #include "TrigAccelEvent/WorkFactory.h"
 #include "TrigAccelEvent/Module.h"
 
+#include "AthCUDAInterfaces/IGPUSystemInfoSvc.h"
+
 #include<vector>
 #include<map>
 #include<cstring>
@@ -47,6 +49,7 @@ class TrigInDetAccelerationSvc : public extends<AthService, ITrigInDetAccelerati
   virtual size_t getMiddleLayersSize() const override {return m_middleSpacePointLayers.size();};
 
  private:   
+  StatusCode initializeWorkFactory(); 
 
   struct PhiEtaHash {
 
@@ -77,6 +80,7 @@ class TrigInDetAccelerationSvc : public extends<AthService, ITrigInDetAccelerati
   TrigAccel::Module* m_module;
   ServiceHandle<StoreGateSvc> m_detStore; 
   ServiceHandle<StoreGateSvc> m_evtStore;   
+  ServiceHandle<AthCUDA::IGPUSystemInfoSvc> m_cudaCheckSvc;
 
   bool m_factoryConfigured;
 
@@ -91,6 +95,7 @@ class TrigInDetAccelerationSvc : public extends<AthService, ITrigInDetAccelerati
   std::vector<short> m_layerInfo[3];
 
   mutable std::mutex m_workMutex;
+         
 };
 
 
