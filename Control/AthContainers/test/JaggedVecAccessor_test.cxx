@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/JaggedVecAccessor_test.cxx
@@ -443,11 +443,36 @@ void test2()
   assert (vfloatEQ (pvec, {1.5, 9.5, 20.5, 21.5, 22.5, 3.5, 4.5, 5.5}));
 }
 
+
+// Performance test for forward filling.
+void test_forward_fill (size_t n)
+{
+  std::cout << "forward_fill\n";
+
+  if (n == 0) n = 100000;
+
+  using Payload = int;
+  using Elt = SG::JaggedVecElt<Payload>;
+  SG::Accessor<Elt> jtypi ("jtypi");
+
+  SG::AuxVectorBase v (n);
+  SG::AuxStoreInternal store;
+  v.setStore (&store);
+
+  std::vector<int> tmp {0, 1};
+  SG::Accessor<Elt>::span sp = jtypi.getDataSpan (v);
+  for (size_t i = 0; i < n; i++) {
+    sp[i] = tmp;
+  }
+}
+
+
 //coverity[root_function]
-int main()
+int main (int argc, char** argv)
 {
   std::cout << "AthContainers/JaggedVecAccessor_test\n";
   test1();
   test2();
+  test_forward_fill (argc >= 2 ? atoi(argv[1]) : 0);
   return 0;
 }
