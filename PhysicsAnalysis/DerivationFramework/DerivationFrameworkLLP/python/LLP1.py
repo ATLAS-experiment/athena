@@ -1054,7 +1054,8 @@ def LLP1Cfg(flags):
                                         "DisappearingSCT_MSOSs",
                                         "LowPtRoISCT_MSOSs",
                                         "LVL1MuonRoIs",
-                                        "NCB_MuonSegments"]
+                                        "NCB_MuonSegments",
+                                        "HLT_MuRoICluster_Composites"]
     if flags.Tracking.doLargeD0:
         LLP1SlimmingHelper.AllVariables += ["MuonSegments_LRT",
                                            "CombinedMuonsLRTTrackParticles",
