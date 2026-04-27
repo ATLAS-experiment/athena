@@ -72,8 +72,8 @@ void JaggedVecProxyBase::adjust1 (size_t elt_index, index_type index, int n_add)
   // First the element that we're modifying...
   e = JaggedVecEltBase (end + n_add);
   // .. then all the remaining elements.
-  std::ranges::for_each (m_elts | std::views::drop (elt_index+1),
-                         JaggedVecEltBase::Shift (n_add));
+  std::for_each (m_elts.begin() + elt_index+1, m_elts.end(),
+                 JaggedVecEltBase::Shift (n_add));
 }
 
 
