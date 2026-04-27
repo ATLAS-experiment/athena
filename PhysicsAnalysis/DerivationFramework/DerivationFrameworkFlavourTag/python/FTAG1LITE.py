@@ -90,9 +90,6 @@ JET_COLLECTIONS = {
         "passthrough_json": PASSTHROUGH_JSON_SMALL,
         "ghost_muons": True,
         "soft_electron_selection": True,
-        # FlavorTaggingCfg schedules electron association for small-R when the
-        # NN modset contains "E" — no need to schedule it again here.
-        "needs_electron_association": False,
     },
     "large": {
         "name": "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
@@ -103,10 +100,6 @@ JET_COLLECTIONS = {
         "passthrough_json": PASSTHROUGH_JSON_LARGE,
         "ghost_muons": True,
         "soft_electron_selection": True,
-        # FlavorTaggingCfg does NOT schedule electron association for large-R
-        # (GN3x modset lacks "E"). We must schedule it explicitly so that
-        # FTagElectrons is available for SoftElectronSelectionAlg.
-        "needs_electron_association": True,
     },
 }
 
@@ -303,19 +296,13 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
     )
 
     # ── Soft electron selection (per-collection) ──
-    # Apply TDD's 14 selection cuts at derivation time using the ftag_
-    # decorations from SoftElectronDecoratorAlg (not caloCluster).
-    # Writes GhostFTagSelectedElectrons on each jet.  TDD reads these
-    # pre-selected links directly, so egammaClusters can be dropped.
-    # For large-R, FlavorTaggingCfg doesn't schedule electron association
-    # (no "E" modset), so we schedule FTagElectronAssociationCfg first.
+    # This module gets added automatically if we have any taggers which use
+    # electron inputs. For upgrade samples, this is not currently the case,
+    # and so the module is scheduled here.
     from FlavorTagDiscriminants.FTagElectronAssociationConfig import FTagElectronAssociationCfg
     for cfg in JET_COLLECTIONS.values():
-        if cfg["needs_electron_association"]:
-            # Only needed when FlavorTaggingCfg didn't already schedule electron
-            # association (i.e. large-R GN3x without "E" modset).
-            acc.merge(FTagElectronAssociationCfg(flags, cfg["name"]))
         if cfg["soft_electron_selection"]:
+            acc.merge(FTagElectronAssociationCfg(flags, cfg["name"]))
             acc.addEventAlgo(
                 CompFactory.FlavorTagJetDecorators.SoftElectronSelectionAlg(
                     f"SoftElectronSelectionAlg_{cfg['name']}",
