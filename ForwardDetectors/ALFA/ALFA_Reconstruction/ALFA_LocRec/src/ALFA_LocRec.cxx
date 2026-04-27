@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_LocRec.h"
@@ -677,7 +677,10 @@ void ALFA_LocRec::SaveGeometry()
 StatusCode ALFA_LocRec::ExecuteRecoMethod(const std::string& strAlgo, const eRPotName eRPName, const std::list<MDHIT> &ListMDHits, const std::list<ODHIT> &ListODHits)
 {
 	ATH_MSG_DEBUG("begin ALFA_LocRec::ExecuteRecoMethod()");
-
+	if (eRPName < 1){
+	    ATH_MSG_ERROR("ALFA_LocRec::ExecuteRecoMethod called with invalid detector enum");
+	    return StatusCode::FAILURE;
+	}
 	StatusCode sc = StatusCode::SUCCESS;
 	ODRESULT ODResults;
 	std::list<ODRESULT> listODResults;
