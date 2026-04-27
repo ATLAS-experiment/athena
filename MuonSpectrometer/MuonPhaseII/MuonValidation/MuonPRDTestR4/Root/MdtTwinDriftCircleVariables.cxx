@@ -31,8 +31,7 @@ namespace MuonValR4{
         }
         /// Then parse the rest. If there's any
         for (const xAOD::MdtTwinDriftCircle* dc : *inContainer) {
-            const MuonGMR4::MdtReadoutElement* re = dc->readoutElement();
-            const Identifier id{re->measurementId(dc->measurementHash())};
+            const Identifier id{dc->identify()};
             if ((m_applyFilter && !m_filteredChamb.count(idHelperSvc()->chamberId(id))) ||
                 m_idOutIdxMap.find(id) != m_idOutIdxMap.end()){
                 ATH_MSG_VERBOSE("Skip "<<idHelperSvc()->toString(id));
@@ -55,8 +54,7 @@ namespace MuonValR4{
     }
     unsigned int MdtTwinDriftCircleVariables::push_back(const xAOD::MdtTwinDriftCircle& dc){
         m_applyFilter = true;
-        const MuonGMR4::MdtReadoutElement* re = dc.readoutElement();
-        const Identifier id{re->measurementId(dc.measurementHash())};
+        const Identifier id{dc.identify()};
         
         const auto insert_itr = m_idOutIdxMap.insert(std::make_pair(id, m_idOutIdxMap.size()));
         if (insert_itr.second) {
@@ -67,7 +65,7 @@ namespace MuonValR4{
     void MdtTwinDriftCircleVariables::dump(const ActsTrk::GeometryContext& gctx,
                                            const xAOD::MdtTwinDriftCircle& dc) {
         const MuonGMR4::MdtReadoutElement* re = dc.readoutElement();
-        const Identifier id{re->measurementId(dc.measurementHash())};
+        const Identifier id{dc.identify()};
     
 
         ATH_MSG_VERBOSE("Filling information for "<<idHelperSvc()->toString(id));
