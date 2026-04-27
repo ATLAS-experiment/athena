@@ -64,7 +64,8 @@ namespace Trk{
 						     const xAOD::VertexContainer* primaryVertexContainer, unsigned int index) const{
     
     // TODO: do we want to doRemoval here? (I have it as false for now) 
-    std::unique_ptr<ImpactParametersAndSigma> ip =  m_ipEstimator->estimate(track, track, (*primaryVertexContainer)[index], false);
+    std::unique_ptr<ImpactParametersAndSigma> ip =  m_ipEstimator->estimate(Gaudi::Hive::currentContext(),
+          track, track, (*primaryVertexContainer)[index], false);
     
     bool pileup = false;
   

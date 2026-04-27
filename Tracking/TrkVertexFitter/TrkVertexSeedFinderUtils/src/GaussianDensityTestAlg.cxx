@@ -328,7 +328,7 @@ GaussianDensityTestAlg::findTruth(double mode,
     v.setFitQuality(0., 0.);
 
     double significance = 0.0;
-    std::unique_ptr<ImpactParametersAndSigma> ipas = m_ipEstimator->estimate( params, &v );
+    std::unique_ptr<ImpactParametersAndSigma> ipas = m_ipEstimator->estimate(Gaudi::Hive::currentContext(), params, &v );
     if ( ipas != nullptr )
     {  
       if ( ipas->sigmad0 > 0 && ipas->sigmaz0 > 0)

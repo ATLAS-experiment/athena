@@ -1737,11 +1737,11 @@ StatusCode IDPerfMonZmumu::FillRecParametersTP(const xAOD::TrackParticle* trackp
   if (m_doIP && vertex != nullptr && m_trackToVertexIPEstimator){
     std::unique_ptr<Trk::ImpactParametersAndSigma> iPandSigma(nullptr);
     ATH_MSG_DEBUG("-- using the trackToVertexIPEstimator --");
-    
+    const EventContext &ctx = Gaudi::Hive::currentContext();
     //Calling the estimate(trackp,newtrackp,vertex,doRemoval)
     //The first track is used to unbias the vertex, the second to get the extrapolation
-    if (!m_skipMS) iPandSigma = m_trackToVertexIPEstimator->estimate(trackp_for_unbias, trackp, vertex, m_doRemoval);
-    else iPandSigma = m_trackToVertexIPEstimator->estimate(trackp, vertex);
+    if (!m_skipMS) iPandSigma = m_trackToVertexIPEstimator->estimate(ctx, trackp_for_unbias, trackp, vertex, m_doRemoval);
+    else iPandSigma = m_trackToVertexIPEstimator->estimate(ctx, trackp, vertex);
     ATH_MSG_DEBUG("return from the trackToVertexIPEstimator->estimate()");
     
     if( !iPandSigma ){
@@ -1909,8 +1909,8 @@ StatusCode IDPerfMonZmumu::FillRecParameters (const Trk::Track* track, const xAO
 
   if(m_doIP && vertex){ //I assume that the vertex is the same of the original track
     std::unique_ptr<Trk::ImpactParametersAndSigma> iPandSigma(nullptr);
-    if (!m_skipMS) iPandSigma = m_trackToVertexIPEstimator->estimate(trk_for_unbiasPerigee,trkPerigee,vertex,m_doRemoval);
-    else iPandSigma = m_trackToVertexIPEstimator->estimate(trkPerigee,vertex);
+    if (!m_skipMS) iPandSigma = m_trackToVertexIPEstimator->estimate(ctx, trk_for_unbiasPerigee,trkPerigee,vertex,m_doRemoval);
+    else iPandSigma = m_trackToVertexIPEstimator->estimate(ctx, trkPerigee,vertex);
     if( iPandSigma==0 ){
       ATH_MSG_WARNING ("FillRecParameters::trackToVertexIPEstimator failed !");
       return StatusCode::FAILURE;

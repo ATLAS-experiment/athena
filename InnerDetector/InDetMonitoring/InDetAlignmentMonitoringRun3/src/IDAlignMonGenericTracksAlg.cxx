@@ -326,7 +326,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     if (m_doIP){
 
       //Get unbiased impact parameter
-      if (pvtx) myIPandSigma = m_trackToVertexIPEstimator->estimate(trksItr->perigeeParameters(), pvtx, true);
+      if (pvtx) myIPandSigma = m_trackToVertexIPEstimator->estimate(ctx, trksItr->perigeeParameters(), pvtx, true);
     } 
     
     if (covariance == nullptr) {

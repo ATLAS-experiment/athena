@@ -225,7 +225,7 @@ namespace Trk
 
     std::unique_ptr<const Trk::ImpactParametersAndSigma> ipas;
     if (constraint != nullptr && constraint->covariancePosition()(0,0)!=0) {
-      ipas = std::unique_ptr<const Trk::ImpactParametersAndSigma> (m_IPEstimator->estimate (&iTrk, constraint));
+      ipas = std::unique_ptr<const Trk::ImpactParametersAndSigma> (m_IPEstimator->estimate (Gaudi::Hive::currentContext(), &iTrk, constraint));
     }
 
     std::pair<double, double> z0AndWeight;
