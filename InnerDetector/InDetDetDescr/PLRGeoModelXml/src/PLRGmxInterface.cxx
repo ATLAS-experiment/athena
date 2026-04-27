@@ -10,10 +10,18 @@
 #include <InDetSimEvent/SiHitIdHelper.h>
 #include <PixelReadoutGeometry/PixelDetectorManager.h>
 #include <PixelReadoutGeometry/PixelModuleDesign.h>
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "ReadoutGeometryBase/PixelDiodeTree.h"
 #include "ReadoutGeometryBase/PixelDiodeTreeBuilder.h"
 #include <ReadoutGeometryBase/SiCommonItems.h>
 #include <InDetGeoModelUtils/WaferTree.h>
+
+#include <RDBAccessSvc/IRDBAccessSvc.h>
+#include <RDBAccessSvc/IRDBRecord.h>
+#include <RDBAccessSvc/IRDBRecordset.h>
+#include <GeoModelRead/ReadGeoModel.h>
+#include <GeoModelKernel/GeoFullPhysVol.h>
+
 
 
 namespace InDetDD
@@ -145,6 +153,74 @@ void PLRGmxInterface::addSensor(const std::string& typeName,
 
   return;
 }
+
+
+void PLRGmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccessSvc,GeoModelIO::ReadGeoModel* sqlreader){
+
+    const std::array<std::string,1> sensorTypes{"SingleChip_RD53"};
+    const std::array<std::string,17> ParamNames{"circuitsPerEta", "circuitsPerPhi", "thickness", "is3D", "rows", "columns", "pitchEta", "pitchPhi", "pitchEtaLong", "pitchPhiLong", "pitchEtaEnd", "pitchPhiEnd", "nPhiLongPerSide", "nEtaLongPerSide", "nPhiEndPerSide", "nEtaEndPerSide", "detectorType"};
+    
+    for(const std::string & sType:sensorTypes){
+
+      IRDBRecordset_ptr PLR_module = rdbAccessSvc->getRecordsetPtr(sType,"");
+
+      if(PLR_module->size() != 0){
+
+        for (const auto& typeParams : *PLR_module){
+          std::map<std::string,std::string> PLR_moduleMap;
+
+          for(const std::string & paramName:ParamNames){
+            std::string paramValue = typeParams->getString(paramName);
+            PLR_moduleMap[paramName] = std::move(paramValue);
+          }
+          std::string sensorName = typeParams->getString("SensorType");
+          addSensorType(sType, sensorName, PLR_moduleMap);
+        } 
+      } else ATH_MSG_WARNING("Could not retrieve "<<sType<<" table");
+    }
+
+    //Now, loop over the FullPhysVols and create the SiDetectorElements
+    //lots of string parsing...
+    const std::array<std::string,5> fields{"barrel_endcap","layer_wheel","phi_module","eta_module","side"}; 
+    //First, find which name the tables are in the file under (depends upon the plugin used to create the input file)
+    //sort these in order of precedence - ITkPlugin, then ITkPixelPlugin, then GeoModelXMLPlugin
+    const std::array<std::string,3> publishers({"ITk","ITkPixel","GeoModelXML"});
+    //The below is a map of string keys which will contain all the Identifier/DetElement relevant info, and the associated FullPhysVol
+    // (once filled from the published table in the SQLite)
+    std::map<std::string, GeoFullPhysVol*> mapFPV;
+    for (auto & iPub : publishers){
+      //setting the "checkTable" option to true, so that an empty map will be returned if not found and we can try the next one
+      mapFPV = sqlreader->getPublishedNodes<std::string, GeoFullPhysVol*>(iPub,true);
+      if (!mapFPV.empty()) {
+        ATH_MSG_INFO("Using FPV tables from publisher "<<iPub);
+        break;
+      }
+    }
+    if (mapFPV.empty()) ATH_MSG_ERROR("Could not find any FPV tables under the expected names: "<<publishers);
+
+    for (const auto&[fullPhysVolInfoString, fullPhysVolPointer] : mapFPV){
+        //find the name of the corresponding detector design type
+        size_t startRG = fullPhysVolInfoString.find("PLR_");
+        if(startRG==std::string::npos){
+          ATH_MSG_DEBUG("GeoFullPhysVol "<<fullPhysVolInfoString<<" does not have the expected format. Skipping");
+          continue;
+        } 
+        std::string typeName = fullPhysVolInfoString.substr(startRG);
+        std::map<std::string, int> index;
+        for (const std::string & field:fields){
+          size_t first = fullPhysVolInfoString.find(field+"_");
+          size_t last = fullPhysVolInfoString.find('_',first+field.size()+1); //start looking only after end of first delimiter (plus 1 for the "_" appended) ends
+          if(first==std::string::npos || last==std::string::npos){
+            ATH_MSG_WARNING("Could not extract "<<field<<" from "<<fullPhysVolInfoString<<". Skipping");
+            continue;
+          } 
+          std::string strNew = fullPhysVolInfoString.substr(first+field.size()+1,last-(first+field.size()+1));
+          index[field] = std::stoi(strNew);
+        }
+      addSensor(typeName,index,0,fullPhysVolPointer);
+    }
+}
+
 
 
 void PLRGmxInterface::makePLRModule(const std::string &typeName,
