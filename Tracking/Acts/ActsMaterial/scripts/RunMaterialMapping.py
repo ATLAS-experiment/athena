@@ -18,6 +18,7 @@ def SetupArgParser():
     parser.add_argument("-V", "--verboseAccumulators", default=False,
                         action="store_true",
                         help="Print full details of the AlgSequence")
+    parser.add_argument("--storeTracks", default = False, help="Store the mapped and unmapped geantino tracks" )
     parser.add_argument("-S", "--verboseStoreGate", default=False,
                         action="store_true",
                         help="Dump the StoreGate(s) each event iteration")
@@ -137,6 +138,7 @@ if __name__ == "__main__":
 
     from ActsConfig.ActsMaterialConfig import MaterialTrackReaderCfg, MaterialMappingCfg
 
+    import sys
     acc.merge(MaterialTrackReaderCfg(flags, 
                                      maxEvents =  args.maxEvents if args.maxEvents > 0 else sys.maxsize,
                                      skipEvents = args.skipEvents,
@@ -145,7 +147,7 @@ if __name__ == "__main__":
                                      TreeName=args.treeName))
 
     acc.merge(MaterialMappingCfg(flags, 
-                                 StoreTracks=False))
+                                 StoreTracks=args.storeTracks))
 
     from MuonConfig.MuonConfigUtils import executeTest, setupHistSvcCfg
     executeTest(acc)    
