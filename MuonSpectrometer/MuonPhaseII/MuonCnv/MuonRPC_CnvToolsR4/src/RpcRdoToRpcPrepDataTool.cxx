@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "RpcRdoToRpcPrepDataTool.h"
 
@@ -9,7 +9,15 @@
 #include <xAODMuonPrepData/RpcStrip2DAuxContainer.h>
 #include <xAODMuonPrepData/RpcStripAuxContainer.h>
 #include <xAODMuonPrepData/RpcMeasurement.h>
+#include <xAODMuonViews/FillContainer.h>
 #include <MuonIdHelpers/IdentifierByDetElSorter.h>
+
+using Strip2DFiller_t = xAOD::FillContainer<xAOD::RpcStrip2DContainer,
+                                            xAOD::RpcStrip2DAuxContainer>;
+
+using Strip1DFiller_t = xAOD::FillContainer<xAOD::RpcStripContainer,
+                                            xAOD::RpcStripAuxContainer>;
+
 
 
 namespace MuonR4{
@@ -62,18 +70,9 @@ namespace MuonR4{
             sortedRdos[offId][stripSide] = rdo;
         }
 
-        SG::WriteHandle stripHandle{m_writeKey, ctx};
-        ATH_CHECK(stripHandle.record(std::make_unique<xAOD::RpcStripContainer>(),
-                                     std::make_unique<xAOD::RpcStripAuxContainer>()));
-
-        SG::WriteHandle<xAOD::RpcStrip2DContainer> strip2DHandle{};
-        if (!m_writeKeyBI.empty()) {
-            strip2DHandle =  SG::WriteHandle{m_writeKeyBI, ctx};
-            ATH_CHECK(strip2DHandle.record(std::make_unique<xAOD::RpcStrip2DContainer>(),
-                                           std::make_unique<xAOD::RpcStrip2DAuxContainer>()));
-
-        }
-
+        Strip1DFiller_t stripHandle{};
+        Strip2DFiller_t strip2DHandle{};
+   
         const RpcIdHelper& idHelper{m_idHelperSvc->rpcIdHelper()};
         
         auto setMeasValues = [&idHelper,this](xAOD::RpcMeasurement* outputMeas,
@@ -138,6 +137,9 @@ namespace MuonR4{
             strip->setMeasurement<1>(0, lPos, lCov);
             setMeasValues(strip, rdoPairs[0] ? rdoPairs[0] : rdoPairs[1], offId);
         }
+
+        ATH_CHECK(stripHandle.record(m_writeKey, ctx));
+        ATH_CHECK(strip2DHandle.record(m_writeKeyBI, ctx));
         return StatusCode::SUCCESS;
     
     }
