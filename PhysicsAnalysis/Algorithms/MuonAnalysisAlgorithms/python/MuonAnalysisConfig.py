@@ -232,6 +232,8 @@ class MuonWorkingPointSelectionConfig (ConfigBlock) :
         self.addOption ('excludeNSWFromPrecisionLayers', False, type=bool,
             info="only for testing purposes, turn on to ignore NSW hits and "
             "fix a crash with older derivations (p-tag <p5834).")
+        self.addOption('useLRT', False, type=bool,
+            info="whether to enable LRT handling in CP::MuonSelectionTool")
     
     def instanceName (self) :
         if self.postfix is not None:
@@ -288,6 +290,7 @@ class MuonWorkingPointSelectionConfig (ConfigBlock) :
         config.addPrivateTool( 'selectionTool', 'CP::MuonSelectionTool' )
         alg.selectionTool.MuQuality = quality
         alg.selectionTool.IsRun3Geo = config.geometry() >= LHCPeriod.Run3
+        alg.selectionTool.UseLRT = self.useLRT
         if config.geometry() is LHCPeriod.Run4:
             log.warning("Disabling NSW hits for Run4 geometry")
             alg.selectionTool.ExcludeNSWFromPrecisionLayers = True
