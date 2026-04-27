@@ -107,6 +107,10 @@ ITkStripsRodEncoder::initialize() {
       m_swapModuleID.insert(sctDetElement->identify());
     }
   }
+
+  if (not m_dataRateMonTool.empty())
+      ATH_CHECK(m_dataRateMonTool.retrieve());
+  
   ATH_MSG_DEBUG("Initialization was successful");
   return StatusCode::SUCCESS;
 }
@@ -114,11 +118,14 @@ ITkStripsRodEncoder::initialize() {
 
 
 void
-ITkStripsRodEncoder::fillROD(std::vector<uint32_t>& vec32Data, const uint32_t& /*robID*/,
+ITkStripsRodEncoder::fillROD(std::vector<uint32_t>& vec32Data, const uint32_t& robID,
                              const std::vector<const SCT_RDORawData*>& vecRDOs) const {
   //code to be filled here
 
   std::unordered_map<uint32_t, std::vector<std::bitset<256>>> allStripData;
+  std::unordered_map<uint32_t, IdentifierHash> keyToHash;  
+
+  IdentifierHash offlineHash = 0;
   
   for (const auto& rdo : vecRDOs) {
     int barrelEC = getBarrelEC(rdo);
@@ -150,13 +157,15 @@ ITkStripsRodEncoder::fillROD(std::vector<uint32_t>& vec32Data, const uint32_t& /
       if(eta_mod>=0 && eta_mod<=9) eta_group = static_cast<uint8_t>(std::floor(eta_mod / 4));
       else if(eta_mod>=10 && eta_mod<=13) eta_group = static_cast<uint8_t>(std::floor((eta_mod+2)/4));
       else if(eta_mod>13) eta_group = static_cast<uint8_t>(std::floor((eta_mod-6)/2));      
-    }
-    
+    }    
 
     uint8_t chips_per_module = (strip_max + 1) / 128;
     uint32_t key = hccKey(barrelEC, side, disk, phi_mod, eta_mod, eta_group);
+
+    offlineHash = m_itkStripsID->wafer_hash(offlineID(rdo));
+    keyToHash.insert({key,offlineHash});
     
-    ATH_MSG_DEBUG("barrel: "<< barrelEC<<" sideAC: " << (uint32_t)sideAC << " disk: "<<(uint32_t)disk << " side: " << (uint32_t)side <<" phi_mod: "<<(uint32_t)phi_mod << " eta_mod: " << eta_mod << " eta group: "<<(uint32_t)eta_group << " chips per module: " << (uint32_t)chips_per_module);
+    ATH_MSG_DEBUG("barrel: "<< barrelEC<<" sideAC: " << (uint32_t)sideAC << " disk: "<<(uint32_t)disk << " side: " << (uint32_t)side <<" phi_mod: "<<(uint32_t)phi_mod << " eta_mod: " << eta_mod << " eta group: "<<(uint32_t)eta_group << " chips per module: " << (uint32_t)chips_per_module << " " << (uint32_t)robID << " " << (uint32_t)m_itkStripsID->wafer_hash(offlineID(rdo)));
     
     ATH_MSG_DEBUG("key: " << std::bitset<32>(key));
     auto& StripData = allStripData[key];
@@ -233,6 +242,11 @@ ITkStripsRodEncoder::fillROD(std::vector<uint32_t>& vec32Data, const uint32_t& /
     vectorSize   = vec8Data.size();
     
     ATH_MSG_DEBUG("vec8Data size: " << vec8Data.size() << " size: " << size-1);
+    packFragments(vec8Data,vec32Data);
+    if (not m_dataRateMonTool.empty()) {
+      m_dataRateMonTool->fill(keyToHash[key], vec32Data, allStripData[key]);
+    }
+    vec32Data.clear();
   }
 
   //Update BCID and L0Tag counters
@@ -241,9 +255,10 @@ ITkStripsRodEncoder::fillROD(std::vector<uint32_t>& vec32Data, const uint32_t& /
 
   ATH_MSG_DEBUG("vec8Data size: " << vec8Data.size());
 
-  packFragments(vec8Data,vec32Data);
-  for(auto &word: vec32Data){
-    ATH_MSG_DEBUG("32-bit word: " << std::bitset<32>(word));
+  packFragments(vec8Data,vec32Data);  
+
+  for(auto &word: vec32Data){    
+    ATH_MSG_DEBUG("32-bit word: " << std::bitset<32>(word));    
   }
   return;
 }
