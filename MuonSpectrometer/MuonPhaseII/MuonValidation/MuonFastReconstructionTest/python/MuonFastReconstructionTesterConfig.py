@@ -7,7 +7,7 @@ def FastRecoVisualizationToolCfg(flags, name="FastRecoVisualizationTool", **kwar
     result = ComponentAccumulator()
     from MuonConfig.MuonDataPrepConfig import PrimaryMeasContNamesCfg
     kwargs.setdefault("PrdContainer", PrimaryMeasContNamesCfg(flags))
-    if flags.Input.isMC:
+    if flags.Muon.setupTruthAlgorithms:
         from MuonObjectMarker.ObjectMarkerConfig import TruthMeasMarkerAlgCfg
         markerAlg = result.getPrimaryAndMerge(TruthMeasMarkerAlgCfg(flags))
         kwargs.setdefault("TruthSegDecors", [markerAlg.SegmentLinkKey])

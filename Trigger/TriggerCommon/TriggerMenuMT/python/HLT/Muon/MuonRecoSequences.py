@@ -364,9 +364,6 @@ def muEFSARecoSequenceCfg( flags, RoIs, name, useBucketFilter=False):
             acc.merge(GEN_AOD2xAODCfg(flags))
             from MuonTruthAlgsR4.MuonTruthAlgsConfig import MuonTruthAlgsCfg
             acc.merge(MuonTruthAlgsCfg(flags))
-            from MuonObjectMarker.ObjectMarkerConfig import TruthMeasMarkerAlgCfg
-            acc.merge(TruthMeasMarkerAlgCfg(flags))
-
         # Schedule muon EF reco
         from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg
         acc.merge( MuonSpacePointFormationCfg( flags, suffix =f'_{name}' ) )
