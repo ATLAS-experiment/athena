@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //===================================================================
@@ -212,20 +212,11 @@ void ROBDataProviderSvc::setNextEvent( const EventContext& context, const RawEve
    // set flag for masking L2/EF module ID, this is only necessary for the separate L2 and EF systems from Run 1 
    m_maskL2EFModuleID = (re->nlvl2_trigger_info() != 0);
 
-   // get all the ROBFragments
-   constexpr size_t MAX_ROBFRAGMENTS = 4096;
-   std::vector<OFFLINE_FRAGMENTS_NAMESPACE::PointerType> robF(MAX_ROBFRAGMENTS);
-   OFFLINE_FRAGMENTS_NAMESPACE::PointerType rePointer;
-   re->start(rePointer);
-   size_t robcount = re->children(robF.data(), MAX_ROBFRAGMENTS);
-   if (robcount == MAX_ROBFRAGMENTS) {
-      ATH_MSG_ERROR("ROB buffer overflow");
-   }
    // loop over all ROBs
-   for (size_t irob = 0; irob < robcount; irob++) {
+   auto iter = re->child_iter();
+   while (OFFLINE_FRAGMENTS_NAMESPACE::PointerType fp = iter.next()) {
       // add to the map
-      //const ROBF* rob = new ROBF(robF[irob]);
-      std::unique_ptr<const ROBF> rob=std::make_unique<const ROBF>(robF[irob]);
+      auto rob = std::make_unique<const ROBF>(fp);
       uint32_t id =  rob->source_id();
       // mask off the module ID for L2 and EF result for Run 1 data
       if ( (eformat::helper::SourceIdentifier(id).module_id() != 0) &&

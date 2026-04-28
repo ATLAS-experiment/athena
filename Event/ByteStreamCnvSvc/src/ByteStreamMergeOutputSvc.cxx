@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ByteStreamMergeOutputSvc.h"
@@ -53,35 +53,23 @@ bool  ByteStreamMergeOutputSvc::putEvent(const RawEvent* newEvent) {
    ATH_MSG_DEBUG("athena BS size = " << 4 * newEvent->fragment_size_word());
 
    // do the merge...
-   // get all the ROBFragments
-   const size_t MAX_ROBFRAGMENTS = 2048;
-   std::vector<OFFLINE_FRAGMENTS_NAMESPACE::PointerType> orgRobF(MAX_ROBFRAGMENTS);
-   std::vector<OFFLINE_FRAGMENTS_NAMESPACE::PointerType> newRobF(MAX_ROBFRAGMENTS);
-   size_t orgrobcount = orgEvent->children(orgRobF.data(), MAX_ROBFRAGMENTS);
-   if (orgrobcount == MAX_ROBFRAGMENTS) {
-      ATH_MSG_ERROR("ROB buffer overflow");
-      return false;
-   }
-   size_t newrobcount = newEvent->children(newRobF.data(),MAX_ROBFRAGMENTS);
-   if (newrobcount == MAX_ROBFRAGMENTS) {
-      ATH_MSG_ERROR("ROB buffer overflow");
-      return false;
-   }
 
    ROBMAP robsToAdd;
    // loop over all ROBs
-   for (size_t irob = 0; irob < orgrobcount; ++irob) {
-      ROBF* rob = new ROBF(orgRobF[irob]);
+   auto orgIter = orgEvent->child_iter();
+   while (OFFLINE_FRAGMENTS_NAMESPACE::PointerType fp = orgIter.next()) {
+      ROBF* rob = new ROBF(fp);
       robsToAdd[reducedROBid(rob->source_id())] = rob;
       ATH_MSG_DEBUG("original ROBFragment, src ID = " << std::hex << rob->source_id());
    }
    // now add/overwrite with newly created robs
-   for (size_t irob = 0; irob < newrobcount; ++irob) {
-      ROBF* rob = new ROBF(newRobF[irob]);
+   auto newIter = newEvent->child_iter();
+   while (OFFLINE_FRAGMENTS_NAMESPACE::PointerType fp = newIter.next()) {
+      ROBF* rob = new ROBF(fp);
       ROBMAP::const_iterator it = robsToAdd.find(reducedROBid(rob->source_id()));
       if (it != robsToAdd.end()) {
-	 delete it->second;
-	 ATH_MSG_DEBUG("overwriting ROBFragment with src ID = " << std::hex << rob->source_id());
+        delete it->second;
+        ATH_MSG_DEBUG("overwriting ROBFragment with src ID = " << std::hex << rob->source_id());
       }
       robsToAdd[reducedROBid(rob->source_id())] = rob;
       ATH_MSG_DEBUG("new ROBFragment, src ID = " << std::hex << rob->source_id());
