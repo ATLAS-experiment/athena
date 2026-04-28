@@ -74,7 +74,7 @@ StatusCode LArOFC2Ntuple::stop() {
   }
 
   unsigned cellCounter=0;  
-  auto maxgain = CaloGain::LARNGAIN;
+  auto maxgain = m_NGains.value();
   if(m_isSC) maxgain=CaloGain::LARMEDIUMGAIN;
 
   for ( int igain=CaloGain::LARHIGHGAIN; 

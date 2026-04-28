@@ -124,7 +124,9 @@ StatusCode LArCond2NtupleBase::initialize() {
     }
   }
 
-  ATH_CHECK( m_BCKey.initialize() );
+  if (m_BCKey.key().empty()) m_addBC=false;
+
+  ATH_CHECK( m_BCKey.initialize(m_addBC) );
   /// do we need both of them at some point when data has both SC and cells?
   ATH_CHECK( m_cablingSCKey.initialize(m_isSC) );
   ATH_CHECK( m_calibMapSCKey.initialize(m_addCalib && m_isSC) );
@@ -289,7 +291,7 @@ bool LArCond2NtupleBase::fillFromIdentifier(const HWIdentifier& hwid) {
 
  ATH_MSG_VERBOSE("Starting fillFromIdentifier");
  const LArBadChannelCont *bcCont = nullptr;
- if ( m_addBC ) {
+ if ( m_addBC) {
    SG::ReadCondHandle<LArBadChannelCont> readHandle{m_BCKey};
    bcCont =*readHandle;
    if( !bcCont) {

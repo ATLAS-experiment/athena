@@ -87,7 +87,7 @@ StatusCode LArPhysWaves2Ntuple::stop()
 	ATH_MSG_INFO( "Read const LArPhysWaveContainer from StoreGate! key= "  << key );
     }
     
-    for (unsigned igain=CaloGain::LARHIGHGAIN;igain<CaloGain::LARNGAIN ;++igain){
+    for (int igain=CaloGain::LARHIGHGAIN;igain<m_NGains.value() ;++igain){
       for (const HWIdentifier chid: m_onlineId->channel_range()) {
 	m_gain=(long)igain;
 	const LArPhysWave& wave=physWaveContainer->get(chid,igain);
@@ -104,7 +104,7 @@ StatusCode LArPhysWaves2Ntuple::stop()
     }//end loop over gains
 
     if (m_addCorrUndo) {
-      for (unsigned igain=CaloGain::LARHIGHGAIN;igain<CaloGain::LARNGAIN ;++igain) {
+      for (int igain=CaloGain::LARHIGHGAIN;igain<m_NGains ;++igain) {
 	LArPhysWaveContainer::ConstCorrectionIt itUndo=physWaveContainer->undoCorrBegin(igain);
 	LArPhysWaveContainer::ConstCorrectionIt itUndo_e=physWaveContainer->undoCorrEnd(igain);
 	for(;itUndo!=itUndo_e;itUndo++) {
