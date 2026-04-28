@@ -18,4 +18,4 @@ atlas_add_dictionary( InDetRawDataDict
 atlas_add_test( PhaseIIInDetRawDataContainer_test
    SOURCES test/PhaseIIInDetRawDataContainer_test.cxx
    LINK_LIBRARIES InDetRawData
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
