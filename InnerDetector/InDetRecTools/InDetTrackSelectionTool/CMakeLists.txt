@@ -54,6 +54,7 @@ if( XAOD_STANDALONE )
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
       LINK_LIBRARIES ${ROOT_LIBRARIES} xAODRootAccess
       InDetTrackSelectionToolLib
-      POST_EXEC_SCRIPT nopost.sh
+      LOG_IGNORE_PATTERN "Could not get summary type"
+      POST_EXEC_SCRIPT noerror.sh
       PROPERTIES TIMEOUT 600 )
 endif()
