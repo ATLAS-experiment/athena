@@ -7,7 +7,8 @@
 # art-include: 24.0/Athena
 # art-athena-mt: 8
 
-timeout 64800 Reco_tf.py --CA\
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN2_DATA)")
+timeout 64800 Reco_tf.py \
   --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/data18_13TeV.00357750.physics_Main.daq.RAW/data18_13TeV.00357750.physics_Main.daq.RAW._lb0114._SFO-5._0003.data \
   --outputAODFile=myAOD.pool.root \
   --outputHISTFile=myHIST.root \
@@ -17,7 +18,7 @@ timeout 64800 Reco_tf.py --CA\
   --multithreaded='True' \
   --preExec 'all:flags.DQ.Steering.doHLTMon=False; flags.Exec.FPE=10;' \
   --autoConfiguration='everything' \
-  --conditionsTag 'all:CONDBR2-BLKPA-RUN2-13' --geometryVersion='default:ATLAS-R2-2016-01-00-01' \
+  --conditionsTag "${conditions}" --geometryVersion='default:ATLAS-R2-2016-01-00-01' \
   --runNumber='357750' --maxEvents='-1'
 
 rc1=$?
