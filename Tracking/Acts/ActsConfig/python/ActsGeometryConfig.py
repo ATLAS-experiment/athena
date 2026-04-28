@@ -79,9 +79,11 @@ def ActsTrackingGeometrySvcCfg(flags,
       subDetectors += ["Muon"]
       from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
       acc.merge(MuonGeoModelCfg(flags))
-      from ActsMuonDetector.ActsMuonDetectorCfg import MuonBlueprintNodeBuilderCfg
+      from ActsMuonDetector.ActsMuonDetectorCfg import MuonBlueprintNodeBuilderCfg, MuonMaterialDecoratorToolCfg
       blueprintTools += [acc.popToolsAndMerge(MuonBlueprintNodeBuilderCfg(flags))]
-        # also Calo needs to be added
+      if False and flags.Muon.trackGeometryPassiveMaterial:
+         refineTools+= [acc.popToolsAndMerge(MuonMaterialDecoratorToolCfg(flags))]
+        
 
   if flags.Detector.GeometryITkPixel:
     subDetectors += ["ITkPixel"]
