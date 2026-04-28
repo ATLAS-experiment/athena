@@ -68,7 +68,7 @@ foreach( name
       LINK_LIBRARIES
       AtlasHepMCLib IdDict IdDictParser InDetEventAthenaPool TruthUtils TestTools CxxUtils PersistentDataModel
       ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/share"
-      POST_EXEC_SCRIPT nopost.sh )
+      POST_EXEC_SCRIPT noerror.sh )
    set_target_properties ( InDetEventAthenaPool_${name} PROPERTIES ENABLE_EXPORTS True )
 
 endforeach()
