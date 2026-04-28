@@ -263,6 +263,11 @@ class InDetTrackWorkingPointConfig (ConfigBlock):
             "For an overview of available cuts, see twiki.cern.ch/twiki/bin/viewauth/"
             "AtlasProtected/InDetTrackSelectionTool#List_of_possible_cuts.",
             expertMode=True)
+        self.addOption ('vertexContainer', None, type=str,
+            info="A vertex collection to be used by the additionalCuts. The leading "
+            "primary vertex is passed to the selectionTool to calculate the distance "
+            "in the maxZ0 cuts.",
+            expertMode=True)
         self.addOption ('runTruthFilter', True, type=bool,
             info="whether to run the `TruthFilterTool`. This tool is only compatible "
             "with the cut levels `Loose` and `TightPrimary`.")
@@ -330,9 +335,13 @@ class InDetTrackWorkingPointConfig (ConfigBlock):
             log.warning('Using cut level: \"' + self.cutLevel + '\" that is not '
                         'meant for general use, but only expert studies.')
             alg.selectionTool.CutLevel = self.cutLevel
+
         if self.additionalCuts:
             for cutName, value in self.additionalCuts.items():
                 setattr(alg.selectionTool, cutName, value)
+        if self.vertexContainer is not None:
+            alg.vertices = self.vertexContainer
+
         # Set up the truth filtering algorithm:
         if config.dataType() is not DataType.Data:
             if self.runTruthFilter:
