@@ -1,7 +1,6 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
 #include "StripClusteringTool.h"
 
 
@@ -11,6 +10,8 @@
 #include <SCT_ReadoutGeometry/SCT_ModuleSideDesign.h>
 #include <SCT_ReadoutGeometry/StripStereoAnnulusDesign.h>
 #include <TrkSurfaces/Surface.h>
+#include "xAODCore/VariableStruct.h"
+#include "xAODInDetMeasurement/JaggedVecEltCache.h"
 
 #include <algorithm>
 #include <cmath>
@@ -76,13 +77,18 @@ StatusCode StripClusteringTool::initialize()
     return StatusCode::SUCCESS;
 }
 
+struct StripAuxDataCache : xAOD::VariableStruct {
+   StripAuxDataCache(SG::AuxVectorData& cont, unsigned int n_cluster_rdos)
+      : xAOD::VariableStruct(cont),
+        rdoList(cont, xAOD::StripCluster::rdoListAcc(), n_cluster_rdos)
+   {}
+   xAOD::xAODInDetMeasurement::Utilities::JaggedVecEltCache<Identifier::value_type> rdoList;
+};
+
 std::any StripClusteringTool::createEventDataCache(xAOD::StripClusterContainer& cont,
                                                    std::size_t nClusterRDOs) const
 {
-   auto *store = cont.getStore();
-   assert(store);
-   store->getData(xAOD::StripCluster::rdoListAcc().linkedAuxid(),0u, nClusterRDOs);
-   return std::any();
+   return std::any (StripAuxDataCache (cont, nClusterRDOs));
 }
 
 StatusCode StripClusteringTool::decodeTimeBins()
@@ -166,7 +172,7 @@ StripClusteringTool::makeClusters(const EventContext& ctx,
 				  typename IStripClusteringTool::ClusterCollection& clusters,
 				  const InDetDD::SiDetectorElement& element,
                                   size_t /*icluster*/,
-                                  std::any& /*vars*/,
+                                  std::any& cache,
 				  typename ClusterContainer::iterator itrContainer) const
 {
     const IdentifierHash idHash = element.identifyHash();
@@ -181,6 +187,9 @@ StripClusteringTool::makeClusters(const EventContext& ctx,
       : static_cast<const InDetDD::StripStereoAnnulusDesign&>(element.design()).phiPitchPhi();
     Eigen::Matrix<float,1,1> localCov(pitch * pitch * ONE_TWELFTH);
 
+    StripAuxDataCache* auxDataCache = std::any_cast<StripAuxDataCache> (&cache);
+    if (!auxDataCache) throw std::bad_any_cast();
+
     for (typename IStripClusteringTool::Cluster& cl : clusters) {
       try {
 	xAOD::StripCluster *xaodCluster = *itrContainer;
@@ -190,7 +199,8 @@ StripClusteringTool::makeClusters(const EventContext& ctx,
 			      *m_stripID,
 			      element,
 			      design,
-			      *xaodCluster));
+			      *xaodCluster,
+			      *auxDataCache));
 	++itrContainer;
       } catch (const std::exception& e) {
 	ATH_MSG_FATAL("Exception thrown while creating xAOD::StripCluster:"
@@ -313,7 +323,8 @@ StripClusteringTool::makeCluster(Cluster &cluster,
 				 const StripID& stripID,
 				 const InDetDD::SiDetectorElement& element,
 				 const InDetDD::SiDetectorDesign& design,
-				 xAOD::StripCluster& cl) const
+				 xAOD::StripCluster& cl,
+				 StripAuxDataCache &auxDataCache) const
 {
     std::size_t size = cluster.ids.size();
     
@@ -355,7 +366,15 @@ StripClusteringTool::makeCluster(Cluster &cluster,
     cl.globalPosition() = globalPos;     
     
     cl.setChannelsInPhi(size);
-    cl.setRDOlist(std::move(cluster.ids));
+
+    unsigned int icluster=cl.index();
+    unsigned int n_rdos = auxDataCache.rdoList.getBeginIndex(icluster);
+    for (size_t i = 0; i < cluster.ids.size(); i++) {
+       Identifier id(cluster.ids[i]);
+       auxDataCache.rdoList.setValue(n_rdos,id.get_compact());
+       ++n_rdos;
+    }
+    auxDataCache.rdoList.updateEndIndex(icluster,n_rdos);
     
     return StatusCode::SUCCESS;
 }

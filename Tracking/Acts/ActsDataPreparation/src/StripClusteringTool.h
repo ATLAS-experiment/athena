@@ -21,7 +21,7 @@
 #include <xAODInDetMeasurement/StripClusterContainer.h>
 
 namespace ActsTrk {
-
+struct StripAuxDataCache;
 
 class StripClusteringTool : public extends<AthAlgTool, IStripClusteringTool> {
 public:
@@ -77,7 +77,8 @@ private:
 			   const StripID& stripID,
 			   const InDetDD::SiDetectorElement& element,
 			   const InDetDD::SiDetectorDesign& design,
-			   xAOD::StripCluster& container) const;
+			   xAOD::StripCluster& container,
+			   StripAuxDataCache& auxDataCache) const;
 
     StringProperty m_timeBinStr{this, "timeBins", ""};
 
