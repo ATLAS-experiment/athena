@@ -17,12 +17,12 @@
 #include "GaudiKernel/ISvcLocator.h"
 #include <iostream>
 
-
 namespace {
-union ShortLong {
-  uint16_t s[2];
-  uint32_t l;
-};
+  std::uint32_t
+  pack_words(const std::uint16_t low, const std::uint16_t high){
+    return static_cast<std::uint32_t>(low) |
+           (static_cast<std::uint32_t>(high) << 16);
+  }
 }
 
 LArRodBlockPhysicsV6::LArRodBlockPhysicsV6(IMessageSvc* msgSvc)
@@ -809,11 +809,11 @@ void LArRodBlockPhysicsV6::finalizeFEB()
   {
     unsigned int imax = n/2;
     for(unsigned int i=0;i<imax;i++){
-      ShortLong to_push{};
-      to_push.s[0] = m_TimeQualityBlock[i*2];
-      to_push.s[1] = m_TimeQualityBlock[i*2+1];
-      m_vFragment->push_back(to_push.l);
-      sum+=to_push.l;
+      const std::uint32_t to_push = pack_words(
+      m_TimeQualityBlock[i * 2],
+      m_TimeQualityBlock[i * 2 + 1]);
+      m_vFragment->push_back(to_push);
+      sum += to_push;
     }
   }
   // Now include digits
@@ -823,12 +823,14 @@ void LArRodBlockPhysicsV6::finalizeFEB()
     if ( m_DigitsEncode.size() & 0x1 ) m_DigitsEncode.push_back(0x0);
     unsigned int imax=m_DigitsEncode.size()/2;
     for(unsigned int i=0;i<imax;i++){
-      // Better by-swap
-      ShortLong to_push{};
-      to_push.s[1]=m_DigitsEncode[i*2];
-      to_push.s[0]=m_DigitsEncode[i*2+1];
-      m_vFragment->push_back(to_push.l);
-      sum+=to_push.l;
+      // Preserve old ShortLong order:
+      //   s[1] = m_DigitsEncode[i * 2]
+      //   s[0] = m_DigitsEncode[i * 2 + 1]
+      const std::uint32_t to_push = pack_words(
+      m_DigitsEncode[i * 2 + 1],
+      m_DigitsEncode[i * 2]);
+      m_vFragment->push_back(to_push);
+      sum += to_push;
     }
     setHeader16(ResultsDim2,m_DigitsEncode.size()/2);
     setHeader16(ResultsOff2,18+size_of_block);
