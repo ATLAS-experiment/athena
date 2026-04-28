@@ -5,12 +5,16 @@
 #ifndef XMLCOREPARSER_EXPATCOREPARSER_H
 #define XMLCOREPARSER_EXPATCOREPARSER_H
 
-#include <expat.h>
-#include <map>
-#include <mutex>
-#include <memory>
 #include "XMLCoreParser/XMLCoreNode.h"
 #include "CxxUtils/checker_macros.h"
+
+#include <expat.h>
+#include <iosfwd>
+#include <map>
+#include <string>
+#include <mutex>
+#include <memory>
+
 
 class ExpatCoreParser
 {
@@ -27,6 +31,7 @@ public:
 private:
 
   ExpatCoreParser (const std::string& prefix);
+  void configure_parser(XML_Parser p);
   XMLCoreNode* add_node (std::unique_ptr<XMLCoreNode> node);
   void do_start (const char* el, const char** attr);
   void do_end (const char* el);
@@ -35,40 +40,24 @@ private:
   void do_comment (const XML_Char* s);
   int generic_parse (XML_Parser p, const std::string& file_name);
   int generic_text_parse (XML_Parser p, const std::string& text);
-  int do_external_entity (XML_Parser parser,
-			  const XML_Char* context,
-			  const XML_Char* systemId);
-
+  int stream_parse(XML_Parser p, std::istream& is, const std::string & source_name = {});
+  int do_external_entity (XML_Parser parser, const XML_Char* context, const XML_Char* systemId);
   static void start (void* /*user_data*/, const char* el, const char** attr);
   static void end (void* /*user_data*/, const char* el);
   static void char_data (void* /*user_data*/, const XML_Char* s, int len);
   static void default_handler (void* /*user_data*/, const XML_Char* s, int len);
   static void comment (void* /*userData*/, const XML_Char* s);
-  static int external_entity (XML_Parser parser,
-			      const XML_Char* context,
-			      const XML_Char* /*base*/,
-			      const XML_Char* systemId,
+  static int external_entity (XML_Parser parser, const XML_Char* context,
+			      const XML_Char* /*base*/, const XML_Char* systemId, 
 			      const XML_Char* /*publicId*/);
-  static void entity (void* userData,
-		      const XML_Char* entityName,
-		      int is_parameter_entity,
-		      const XML_Char* value,
-		      int value_length,
-		      const XML_Char* base,
-		      const XML_Char* systemId,
-		      const XML_Char* publicId,
-		      const XML_Char* /*notationName*/);
   std::unique_ptr<XMLCoreNode> get_document ();
-
   static const std::string& find_external_entity (const std::string& name);
   static const std::string& find_text_entity (const std::string& name);
-
+  static const std::string& find_entity (const std::string& name, const ExternalEntityMap & mapChoice);
   void clean ();
-
   std::unique_ptr<XMLCoreNode> m_top;
-  XMLCoreNode* m_last;
+  XMLCoreNode* m_last{};
   std::string m_prefix;
-
   static std::mutex s_mutex;
   typedef std::lock_guard<std::mutex> lock_t;
   static ExternalEntityMap s_entities ATLAS_THREAD_SAFE;
