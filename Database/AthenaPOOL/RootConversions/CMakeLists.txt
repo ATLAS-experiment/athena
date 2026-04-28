@@ -10,6 +10,7 @@ find_package( ROOT COMPONENTS RIO Tree Core )
 atlas_add_library( RootConversions
                    src/*.cxx
                    PUBLIC_HEADERS RootConversions
+                   LINK_LIBRARIES CxxUtils
                    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} RootUtils )
 
