@@ -27,6 +27,7 @@
 #include "G4Neutron.hh"
 
 #include "CxxUtils/checker_macros.h"
+#include "CxxUtils/fpcompare.h"
 
 // System includes
 #include <memory>
@@ -77,7 +78,7 @@ namespace G4UA
 
     // Neutron Russian Roulette
     if (m_config.applyNRR && isNeutron(track) &&
-        track->GetWeight() < m_config.russianRouletteNeutronWeight && // do not re-Roulette particles
+        CxxUtils::fpcompare::equal(track->GetWeight(), 1.0) && // do not re-Roulette particles
         track->GetKineticEnergy() < m_config.russianRouletteNeutronThreshold) {
       // shoot random number
       if ( CLHEP::RandFlat::shoot() > m_oneOverWeightNeutron ) {
@@ -95,7 +96,7 @@ namespace G4UA
     // Photon Russian Roulette
     if (m_config.applyPRR && isGamma(track) && track->GetOriginTouchable() &&
         track->GetOriginTouchable()->GetVolume()->GetName().substr(0, 3) == "LAr" && // only for photons created in LAr
-        track->GetWeight() < m_config.russianRoulettePhotonWeight && // do not re-Roulette particles
+        CxxUtils::fpcompare::equal(track->GetWeight(), 1.0) && // do not re-Roulette particles
         track->GetKineticEnergy() < m_config.russianRoulettePhotonThreshold) {
       // shoot random number
       if ( CLHEP::RandFlat::shoot() > m_oneOverWeightPhoton ) {
