@@ -44,4 +44,6 @@ def xAODUncalibMeasPrepCfg(flags):
     if flags.Muon.setupTruthAlgorithms:
         from MuonTruthAlgsR4.MuonTruthAlgsConfig import MuonTruthAlgsCfg
         result.merge(MuonTruthAlgsCfg(flags))
+        from MuonObjectMarker.ObjectMarkerConfig import TruthMeasMarkerAlgCfg
+        result.merge(TruthMeasMarkerAlgCfg(flags))
     return result
