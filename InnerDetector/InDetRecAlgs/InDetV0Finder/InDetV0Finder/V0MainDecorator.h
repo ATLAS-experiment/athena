@@ -32,7 +32,7 @@ namespace InDet
     DoubleProperty m_masse{this, "masse", ParticleConstants::electronMassInMeV};          //!< electron mass (0.510999 MeV)
     DoubleProperty m_massK0S{this, "massK0s", ParticleConstants::KZeroMassInMeV};       //!< Kshort mass (497.672 MeV)
     DoubleProperty m_massLambda{this, "massLambda", ParticleConstants::lambdaMassInMeV}; //!< Lambda mass (1115.68 MeV)
-    ToolHandle<Trk::V0Tools> m_V0Tools {this, "V0Tools", "Trk::V0Tools", "V0 tools to calculate things like Lxy"};
+    PublicToolHandle<Trk::V0Tools> m_V0Tools {this, "V0Tools", "Trk::V0Tools", "V0 tools to calculate things like Lxy"};
     StatusCode initKey(const std::string&, SG::WriteDecorHandleKey<xAOD::VertexContainer> &decokey) const;
     
     Gaudi::Property<std::string>   m_v0Key

@@ -445,7 +445,7 @@ namespace DerivationFramework {
     m_constrMuPi(false),
     m_chi2cut(-1.0),
     m_iVertexFitter("Trk::TrkVKalVrtFitter"),
-    m_pvRefitter("Analysis::PrimaryVertexRefitter", this),
+    m_pvRefitter("Analysis::PrimaryVertexRefitter"),
     m_V0Tools("Trk::V0Tools"),
     m_CascadeTools("DerivationFramework::CascadeTools")
     {

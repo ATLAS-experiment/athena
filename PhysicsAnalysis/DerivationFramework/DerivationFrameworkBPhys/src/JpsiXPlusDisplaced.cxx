@@ -150,7 +150,7 @@ namespace DerivationFramework {
     m_iVertexFitter("Trk::TrkVKalVrtFitter"),
     m_iV0Fitter("Trk::V0VertexFitter"),
     m_iGammaFitter("Trk::TrkVKalVrtFitter"),
-    m_pvRefitter("Analysis::PrimaryVertexRefitter", this),
+    m_pvRefitter("Analysis::PrimaryVertexRefitter"),
     m_V0Tools("Trk::V0Tools"),
     m_trackToVertexTool("Reco::TrackToVertex"),
     m_trkSelector("InDet::TrackSelectorTool"),

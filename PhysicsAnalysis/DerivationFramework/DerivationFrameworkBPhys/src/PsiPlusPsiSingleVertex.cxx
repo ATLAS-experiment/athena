@@ -68,7 +68,7 @@ namespace DerivationFramework {
     m_constrPsi2(false),
     m_chi2cut(-1.0),
     m_iVertexFitter("Trk::TrkVKalVrtFitter"),
-    m_pvRefitter("Analysis::PrimaryVertexRefitter", this),
+    m_pvRefitter("Analysis::PrimaryVertexRefitter"),
     m_V0Tools("Trk::V0Tools")
   {
     declareProperty("Psi1Vertices",               m_vertexPsi1ContainerKey);

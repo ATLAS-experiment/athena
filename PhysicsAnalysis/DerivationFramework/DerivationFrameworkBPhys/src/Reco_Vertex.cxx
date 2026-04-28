@@ -22,9 +22,9 @@ namespace DerivationFramework {
       const std::string& n,
       const IInterface* p) : 
     base_class(t,n,p),
-    m_v0Tools("Trk::V0Tools", this),
+    m_v0Tools("Trk::V0Tools"),
     m_SearchTool("",this),
-    m_pvRefitter("Analysis::PrimaryVertexRefitter", this)
+    m_pvRefitter("Analysis::PrimaryVertexRefitter")
   {
     
     // Declare tools    
