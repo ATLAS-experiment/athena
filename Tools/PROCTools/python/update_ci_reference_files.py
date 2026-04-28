@@ -380,6 +380,10 @@ def handle_shared_refs():
     # Tests that are allowed to use the same reference. The key is the test that uses the
     # reference of its value.
     shared_refs = {
+        'CITest_DerivationRun2Data_PHYS_MT-test': 'CITest_DerivationRun2Data_PHYS-test',
+        'CITest_DerivationRun2MC_PHYS_MT-test': 'CITest_DerivationRun2MC_PHYS-test',
+        'CITest_DerivationRun3Data_PHYS_MT-test': 'CITest_DerivationRun3Data_PHYS-test',
+        'CITest_DerivationRun3MC_PHYS_MT-test': 'CITest_DerivationRun3MC_PHYS-test',
         'CITest_DerivationRun2Data_PHYSLITE_MT-test': 'CITest_DerivationRun2Data_PHYSLITE-test',
         'CITest_DerivationRun2MC_PHYSLITE_MT-test': 'CITest_DerivationRun2MC_PHYSLITE-test',
         'CITest_DerivationRun3Data_PHYSLITE_MT-test': 'CITest_DerivationRun3Data_PHYSLITE-test',
