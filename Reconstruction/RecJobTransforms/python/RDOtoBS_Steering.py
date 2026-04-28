@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import LHCPeriod
 
@@ -90,6 +90,13 @@ def RDOtoBS_Steering(flags):
         # itemList += ["Muon::MM_RawDataContainer#*"]
         # sTGC -- no converter?
         # itemList += ["Muon::STGC_RawDataContainer#*"]
+
+    # MC EventInfo encoding (for MC ByteStream)
+    if flags.Input.isMC:
+        from ByteStreamCnvSvc.ByteStreamConfig import MCEventInfoByteStreamToolCfg
+        mcEventInfoTool = acc.popToolsAndMerge(MCEventInfoByteStreamToolCfg(flags, writeBS=True))
+        acc.addPublicTool(mcEventInfoTool)
+        itemList += ["xAOD::EventAuxInfo#*"]
 
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamWriteCfg
     acc.merge(ByteStreamWriteCfg(flags, itemList))
