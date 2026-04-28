@@ -4,7 +4,8 @@
 #
 
 # Convenience cache variable(s).
-set( ATLAS_POWHEGVER "08-12" CACHE STRING "Version of the Powheg configuration files" )
+string(REPLACE "." "-" COMPILEBOX_LCGVERSION_DASH "${COMPILEBOX_LCGVERSION}")
+set( ATLAS_POWHEGVER "${COMPILEBOX_LCGVERSION_DASH}" CACHE STRING "Version of the Powheg configuration files" )
 
 # Reset the environment variable as a first step.
 set( POWHEGENVIRONMENT_ENVIRONMENT )
