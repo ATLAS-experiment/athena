@@ -9,8 +9,13 @@ def MuonBlueprintNodeBuilderCfg(flags, name = "MuonBlueprintNodeBuilder", **kwar
 
     kwargs.setdefault("AssignActiveMaterial", flags.Muon.trackGeometryActiveMaterial)
     kwargs.setdefault("BuildPassiveVolumes", flags.Muon.trackGeometryPassiveMaterial)
-
     the_tool = CompFactory.ActsTrk.MuonBlueprintNodeBuilder(name, **kwargs)
     result.setPrivateTools(the_tool)
     return result
 
+def MuonMaterialDecoratorToolCfg(flags, name = "MuonMaterialDecoratorTool", **kwargs):    
+    kwargs.setdefault('MuonMaterialDbFile', flags.Acts.TrackingGeometry.MuonMaterialMapFile)
+    result = ComponentAccumulator()
+    the_tool = CompFactory.MuonGMR4.MuonMaterialDecoratorTool(name, **kwargs)
+    result.setPrivateTools(the_tool)
+    return result

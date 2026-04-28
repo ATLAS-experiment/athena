@@ -113,6 +113,7 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.TrackingGeometry.PassiveITkStripBarrelLayerRadii', [480., 665., 880.])
     actscf.addFlag('Acts.TrackingGeometry.PassiveITkStripBarrelLayerHalflengthZ', [1370., 1370., 1370.])
     actscf.addFlag('Acts.TrackingGeometry.PassiveITkStripBarrelLayerThickness', [1., 1., 1.])
+    actscf.addFlag('Acts.TrackingGeometry.MuonMaterialMapFile', '')
 
     # Monitoring
     actscf.addFlag('Acts.doMonitoring', False)
