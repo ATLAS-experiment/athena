@@ -13,6 +13,7 @@ timeout 64800 Reco_tf.py \
   --outputHISTFile="myHIST.root" \
   --outputDAOD_IDTIDEFile="myDAOD_IDTIDE.pool.root" \
   --outputDAOD_L1CALO1File="myDAOD_L1CALO1.pool.root" \
+  --outputDAOD_TRIG8File="myDAOD_TRIG8.pool.root" \
   --outputDESDM_MCPFile="myDESDM_MCP.pool.root" \
   --outputDESDM_EXOTHIPFile="myDESDM_EXOTHIP.pool.root" \
   --outputDRAW_EGZFile="myDRAW_EGZ.data" \
@@ -34,7 +35,7 @@ fpeStat=$?
 
 echo "art-result: ${fpeStat} FPEs in logfiles"
 
-files=( myAOD.pool.root myHIST.root myDAOD_IDTIDE.pool.root myDAOD_L1CALO1.pool.root myDESDM_MCP.pool.root myDESDM_EXOTHIP.pool.root myDRAW_EGZ.data myDRAW_TAULH.data myDRAW_ZMUMU.data )
+files=( myAOD.pool.root myHIST.root myDAOD_IDTIDE.pool.root myDAOD_L1CALO1.pool.root myDESDM_MCP.pool.root myDESDM_EXOTHIP.pool.root myDRAW_EGZ.data myDRAW_TAULH.data myDRAW_ZMUMU.data myDAOD_TRIG8.pool.root )
 for i in "${files[@]}"
 do
     if [ -f "$i" ]; then
