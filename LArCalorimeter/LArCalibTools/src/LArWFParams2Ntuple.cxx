@@ -176,7 +176,7 @@ StatusCode LArWFParams2Ntuple::stop() {
 
 
 
-  for(long igain=CaloGain::LARHIGHGAIN; igain<CaloGain::LARNGAIN; igain++) {
+  for(long igain=CaloGain::LARHIGHGAIN; igain<m_NGains.value(); igain++) {
     for (const HWIdentifier hwid: m_onlineId->channel_range()) {
 
      //Initialize variables to 'errorcode'

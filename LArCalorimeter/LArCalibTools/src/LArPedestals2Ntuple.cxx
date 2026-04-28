@@ -74,7 +74,7 @@ StatusCode LArPedestals2Ntuple::stop()
 
 
  unsigned cellCounter=0;
- auto maxgain = CaloGain::LARNGAIN;
+ unsigned maxgain = m_NGains;
  if(m_isSC) maxgain=CaloGain::LARMEDIUMGAIN;
 
  for(long igain=CaloGain::LARHIGHGAIN; igain<maxgain; igain++) {

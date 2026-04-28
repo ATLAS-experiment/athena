@@ -166,7 +166,7 @@ StatusCode LArCaliWaves2Ntuple::stop ATLAS_NOT_THREAD_SAFE ()
     }// end if applyCorr
 
     
-    for (unsigned igain=CaloGain::LARHIGHGAIN;igain<CaloGain::LARNGAIN ;++igain){
+    for (int igain=CaloGain::LARHIGHGAIN;igain<m_NGains.value() ;++igain){
       for (const HWIdentifier chid: m_onlineId->channel_range()) {
 	m_gain=(long)igain;
 	const LArCaliWaveVec& cwv = caliWaveContainer->get(chid,igain);
@@ -191,7 +191,7 @@ StatusCode LArCaliWaves2Ntuple::stop ATLAS_NOT_THREAD_SAFE ()
 
 
     if (m_addCorrUndo) {
-      for (unsigned igain=CaloGain::LARHIGHGAIN;igain<CaloGain::LARNGAIN ;++igain) {
+      for (int igain=CaloGain::LARHIGHGAIN;igain<m_NGains.value();++igain) {
 	LArCaliWaveContainer::ConstCorrectionIt itUndo=caliWaveContainer->undoCorrBegin(igain);
 	LArCaliWaveContainer::ConstCorrectionIt itUndo_e=caliWaveContainer->undoCorrEnd(igain);
 	for(;itUndo!=itUndo_e;itUndo++) {

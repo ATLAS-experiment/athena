@@ -256,7 +256,7 @@ StatusCode LArParams2Ntuple::stop() {
   // first, scan all complete data structures to collect a map of channels
   //
 
-  int nGains = (int)CaloGain::LARNGAIN ;
+  int nGains = m_NGains.value() ;
 
   m_dump_flags_map.resize(nGains) ;  // map of channels to be dumped; resized to host 3 gains
 
@@ -536,7 +536,7 @@ StatusCode LArParams2Ntuple::scanReadoutChannels( const DATA*& data_object ) {
 
   ATH_MSG_VERBOSE("... " << dataName << " retrieved");
 
-  unsigned nGains = (int)CaloGain::LARNGAIN ;
+  unsigned nGains = m_NGains.value() ;
   if ( ! useGain ) nGains = 1 ;  // data are gain-independent
 
   for ( unsigned gain=0 ; gain<nGains ; gain++) {

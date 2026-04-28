@@ -26,7 +26,7 @@ StatusCode LArADC2MeV2Ntuple::stop() {
   ATH_CHECK(m_nt->addItem("Xi",coeffIndex,0,3));   
   ATH_CHECK(m_nt->addItem("X",coeffIndex,coeffs));
   ATH_CHECK(m_nt->addItem("gain",gain,0,3)); 
-  for(long igain=CaloGain::LARHIGHGAIN; igain<CaloGain::LARNGAIN; igain++) {
+  for(long igain=CaloGain::LARHIGHGAIN; igain<m_NGains; igain++) {
      for (const HWIdentifier hwid: m_onlineId->channel_range()) {
           auto adc2mevCoeff=adc2MEV->ADC2MEV(hwid,igain);
           if (adc2mevCoeff.size()>0) {
