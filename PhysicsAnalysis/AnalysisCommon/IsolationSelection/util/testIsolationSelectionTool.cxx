@@ -28,6 +28,7 @@
 #include <iostream>
 #include <cmath>
 #include <ctime>
+#include "CxxUtils/checker_macros.h"
 
 #include "IsolationSelection/IsolationSelectionTool.h"
 #include "IsolationSelection/IsolationLowPtPLVTool.h"
@@ -36,12 +37,18 @@ ANA_MSG_HEADER(Test)
 ANA_MSG_SOURCE(Test, "testIsolationSelectionTool")
 using namespace Test;
 
-std::string MuonIso(""), ElectronIso(""), PhotonIso("");
+std::string MuonIso ATLAS_THREAD_SAFE = "";
+std::string ElectronIso ATLAS_THREAD_SAFE = "";
+std::string PhotonIso ATLAS_THREAD_SAFE = "";
 
-float MuonPt(0),  ElectronPt(0),  PhotonPt(0);
-float MuonEta(0), ElectronEta(0), PhotonEta(0);
+float MuonPt ATLAS_THREAD_SAFE = 0;
+float ElectronPt ATLAS_THREAD_SAFE = 0;
+float PhotonPt ATLAS_THREAD_SAFE = 0;
+float MuonEta ATLAS_THREAD_SAFE = 0;
+float ElectronEta ATLAS_THREAD_SAFE = 0;
+float PhotonEta ATLAS_THREAD_SAFE = 0;
 
-StatusCode setConfigWP(TString conf){
+StatusCode setConfigWP(TString conf) ATLAS_NOT_THREAD_SAFE {
   TEnv env;
   if(env.ReadFile(conf, kEnvAll) != 0){
     ANA_MSG_INFO("Cannot read config file " << conf);
@@ -64,7 +71,7 @@ StatusCode setConfigWP(TString conf){
   return StatusCode::SUCCESS;
 }
 
-int main( int argc, char* argv[] ){
+int main( int argc, char* argv[] ) ATLAS_NOT_THREAD_SAFE {
   ANA_CHECK_SET_TYPE (int);
 
   // The application's name:
@@ -79,7 +86,8 @@ int main( int argc, char* argv[] ){
   // Initialize the application:
   ANA_CHECK( xAOD::Init( APP_NAME ) );
   auto start = std::time(nullptr);
-  ANA_MSG_INFO("Initialized " << std::ctime(&start));
+  char tbuf_start[26]; ::ctime_r(&start, tbuf_start);
+  ANA_MSG_INFO("Initialized " << tbuf_start);
 
   // Open the input file:
   const TString fileName = argv[ 2 ];
@@ -183,7 +191,8 @@ int main( int argc, char* argv[] ){
   } // end loop over events
 
   auto end = std::time(nullptr);
-  ANA_MSG_INFO(Form("Ran on %i event for testing %s",(int)entries, std::ctime(&end)));
+  char tbuf_end[26]; ::ctime_r(&end, tbuf_end);
+  ANA_MSG_INFO(Form("Ran on %i event for testing %s",(int)entries, tbuf_end));
 
   return EXIT_SUCCESS;
 }

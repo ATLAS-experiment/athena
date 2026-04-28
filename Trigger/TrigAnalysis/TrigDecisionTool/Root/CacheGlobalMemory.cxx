@@ -324,7 +324,9 @@ bool Trig::CacheGlobalMemory::assert_decision() const {
 #else
     if ( contains_xAOD_decision ){
       ATH_MSG_INFO("SG contains xAOD decision, use DecisionUnpackerStandalone");
-      m_unpacker = std::make_unique<DecisionUnpackerStandalone>(m_decisionKeyPtr, m_run2NavigationKeyPtr);
+      m_unpacker = std::make_unique<DecisionUnpackerStandalone>(
+          CxxUtils::as_const_ptr(m_decisionKeyPtr),
+          CxxUtils::as_const_ptr(m_run2NavigationKeyPtr));
     }
 #endif
 

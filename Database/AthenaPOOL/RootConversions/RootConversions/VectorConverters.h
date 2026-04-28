@@ -22,6 +22,7 @@
 #ifndef ROOTCONVERSIONS_VECTORCONVERTERS_H
 #define ROOTCONVERSIONS_VECTORCONVERTERS_H
 
+#include "CxxUtils/checker_macros.h"
 
 namespace RootConversions {
 
@@ -35,7 +36,7 @@ class VectorConverters
 {
 public:
   /// Register all CLHEP converters.
-  static void initialize();
+  static void initialize() ATLAS_NOT_THREAD_SAFE;
 };
 
 
