@@ -117,6 +117,33 @@ def AddTauIDDecorationCfg(flags, **kwargs):
 
     return acc
 
+
+def AddTauTESCompatibilityDecorationCfg(flags, **kwargs):
+    """Decorate taus with a flag to check if Calo and MVA TES are compatible """
+
+    acc = ComponentAccumulator()
+
+    import tauRec.TauToolHolder as tauTools
+
+    tauCombinedTESTool = acc.popToolsAndMerge(tauTools.TauCombinedTESCfg(
+            flags,
+            ))
+
+    acc.addPublicTool(tauCombinedTESTool)
+    kwargs.setdefault("TauCombinedTESTool", tauCombinedTESTool)
+    kwargs.setdefault("TauContainerName", "TauJets")
+    
+    prefix = kwargs["TauContainerName"]
+    TauCombinedTESWrapper = CompFactory.DerivationFramework.TauCombinedTESWrapper
+    TauCombinedTESKernel = CompFactory.DerivationFramework.CommonAugmentation
+    
+    TauCombinedTESWrapper = TauCombinedTESWrapper( name = f"{prefix}_TauCombinedTES", **kwargs )                                     
+    acc.addPublicTool(TauCombinedTESWrapper)
+    acc.addEventAlgo(TauCombinedTESKernel(name              = "TauCombinedTESKernel",
+                                          AugmentationTools = [TauCombinedTESWrapper]))
+    return acc
+    
+
 # Attach displaced Tau ID scores
 def AddTauIDDisplacedDecorationCfg(flags, **kwargs):
     """Decorate displaced tau ID scores and working points. Follows AddTauIDDisplacedDecorationCfg()"""

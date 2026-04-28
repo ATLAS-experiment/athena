@@ -65,7 +65,7 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
     acc.merge(EGammaCommonCfg(flags))
     # Jets, di-taus, tau decorations, flavour tagging, MET association
     from DerivationFrameworkJetEtMiss.JetCommonConfig import JetCommonCfg
-    from DerivationFrameworkTau.TauCommonConfig import (AddMuonRemovalTauAODReRecoAlgCfg, AddTauIDDecorationCfg)
+    from DerivationFrameworkTau.TauCommonConfig import (AddMuonRemovalTauAODReRecoAlgCfg, AddTauIDDecorationCfg, AddTauTESCompatibilityDecorationCfg)
     from DerivationFrameworkTau.DiTauCommonConfig import (AddDiTauLowPtCfg, AddDiTauChargeDecoratorCfg, AddDiTauIDDecorationCfg)
     from DerivationFrameworkJetEtMiss.METCommonConfig import METCommonCfg 
     from DerivationFrameworkJetEtMiss.METCommonConfig import HadRecoilMETCfg
@@ -79,11 +79,15 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
     # eVeto WP and DeepSet ID for taus and muon-subtracted taus
     acc.merge(AddTauIDDecorationCfg(flags, TauContainerName="TauJets"))
     acc.merge(AddTauIDDecorationCfg(flags, TauContainerName="TauJets_MuonRM"))
+    # add TES compatibility check for taus
+    acc.merge(AddTauTESCompatibilityDecorationCfg(flags, TauContainerName="TauJets"))
+    acc.merge(AddTauTESCompatibilityDecorationCfg(flags, TauContainerName="TauJets_MuonRM"))
     # add ID score for ditau
     acc.merge(AddDiTauIDDecorationCfg(flags, DiTauContainerName="DiTauJets"))
     # for AOD produced before 24.0.17, the electron removal tau is not available
     if flags.Tau.TauEleRM_isAvailable:
         acc.merge(AddTauIDDecorationCfg(flags, TauContainerName="TauJets_EleRM"))
+        acc.merge(AddTauTESCompatibilityDecorationCfg(flags, TauContainerName="TauJets_EleRM"))
     # ditau Charge
     acc.merge(AddDiTauChargeDecoratorCfg(flags, DiTauContainerName="DiTauJets"))
     acc.merge(AddDiTauChargeDecoratorCfg(flags, DiTauContainerName="DiTauJetsLowPt"))
