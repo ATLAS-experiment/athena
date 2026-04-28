@@ -930,13 +930,13 @@ def TauAODSelectorCfg(flags):
 
 ########################################################################
 # TauCombinedTES
-def TauCombinedTESCfg(flags):
-    result = ComponentAccumulator()    
+def TauCombinedTESCfg(flags, **kwargs):
+    result = ComponentAccumulator()  
     _name = flags.Tau.ActiveConfig.prefix + 'TauCombinedTES'
+    kwargs.setdefault("WeightFileName", flags.Tau.CombinedTESConfig)
 
     TauCombinedTES = CompFactory.getComp("TauCombinedTES")
-    myTauCombinedTES = TauCombinedTES(name = _name,
-                                      WeightFileName = flags.Tau.CombinedTESConfig)
+    myTauCombinedTES = TauCombinedTES(name = _name, **kwargs)
 
     result.setPrivateTools(myTauCombinedTES)
     return result

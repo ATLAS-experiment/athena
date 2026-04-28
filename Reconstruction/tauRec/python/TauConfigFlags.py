@@ -3,7 +3,7 @@
 import unittest
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 import AthenaCommon.SystemOfUnits as Units
-from AthenaConfiguration.Enums import LHCPeriod
+from AthenaConfiguration.Enums import LHCPeriod, ProductionStep
 
 def createTauConfigFlags():
     tau_cfg = AthConfigFlags()
@@ -42,7 +42,7 @@ def createTauConfigFlags():
     tau_cfg.addFlag("Tau.tauRecToolsCVMFSPath", "tauRecTools/R22_preprod")
     tau_cfg.addFlag("Tau.tauRNNTrackClassConfig", lambda prevFlags: "RNNTrackClassifier_2021-07-19_14-25-14_90_25_30.json" if prevFlags.GeoModel.Run <= LHCPeriod.Run3 else "Run4/RNNTrackClassifier_v1.json")
     tau_cfg.addFlag("Tau.CalibrateLCConfig", "CaloTES_R22_Round2.5.root")
-    tau_cfg.addFlag("Tau.CombinedTESConfig", "CombinedTES_R22_Round2.5.root")
+    tau_cfg.addFlag("Tau.CombinedTESConfig", lambda prevFlags: "CombinedTES_R22_Round2.5_v2.root" if prevFlags.Common.ProductionStep is ProductionStep.Derivation else "CombinedTES_R22_Round2.5.root")
     tau_cfg.addFlag("Tau.MvaTESConfig0p", "MvaTES_0p_R23.root")
     tau_cfg.addFlag("Tau.MvaTESConfig", "MvaTES_R23.root")
     tau_cfg.addFlag("Tau.MinPt0p", 9.25*Units.GeV)
