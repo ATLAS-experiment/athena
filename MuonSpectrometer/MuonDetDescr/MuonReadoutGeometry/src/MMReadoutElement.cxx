@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -148,14 +148,17 @@ namespace MuonGM {
         const char sector_l = getStationName()[2];
         IRDBRecordset_ptr wmmRec = accessSvc->getRecordsetPtr("WMM","","");
         for (unsigned int ind = 0; ind < wmmRec->size(); ind++) {
-            std::string WMM_TYPE       = (*wmmRec)[ind]->getString("WMM_TYPE");               
-            if (sector_l != WMM_TYPE[4]){ 
+            std::string WMM_TYPE = (*wmmRec)[ind]->getString("WMM_TYPE");
+            if (WMM_TYPE.size()<=12) {
+                THROW_EXCEPTION_MM("Malformed WMM_TYPE = " << WMM_TYPE);
+            }
+            if (sector_l != WMM_TYPE[4]) {
                 continue;
             }
-            if (std::abs(getStationEta())!=(int) (WMM_TYPE[6]-'0')) {
+            if (std::abs(getStationEta()) != static_cast<int>(WMM_TYPE[6]-'0')) {
                 continue;
             }
-            if (m_ml != (int) (WMM_TYPE[12]-'0')){
+            if (m_ml != static_cast<int>(WMM_TYPE[12]-'0')){
                 continue;
             }
             const double Tck = (*wmmRec)[ind]->getDouble("Tck");                    
