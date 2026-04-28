@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackSelectionTool/InDetTrackSelectionTool.h"
@@ -1204,7 +1204,7 @@ void InDet::InDetTrackSelectionTool::setCutLevelPrivate(InDet::CutLevel level, b
       m_minNBothInnermostLayersHits = -1;
       m_maxNInnermostLayerSharedHits = LOCAL_MAX_INT;
       m_useMinBiasInnermostLayersCut = 0;
-      m_useHILoosePixModInnermostLayersCut = 0;
+      m_useHILoosePixModInnermostLayersCut = false;
       m_minNPixelHits = -1;
       m_minNPixelHitsPhysical = -1;
       m_maxNPixelSharedHits = LOCAL_MAX_INT;
@@ -1452,7 +1452,7 @@ void InDet::InDetTrackSelectionTool::setCutLevelPrivate(InDet::CutLevel level, b
     // HILoosePixMod is similar to HILoose, but with a modified hit cut on the innermost layers
     setCutLevelPrivate(CutLevel::NoCut, overwrite);
     if (overwrite || m_maxAbsEta >= LOCAL_MAX_DOUBLE) m_maxAbsEta = 2.5;
-    if (overwrite || m_useHILoosePixModInnermostLayersCut >= 0) m_useHILoosePixModInnermostLayersCut = 1;
+    if (overwrite) m_useHILoosePixModInnermostLayersCut = true;
     if (overwrite || m_minNPixelHits < 0) m_minNPixelHits = 1;
     if (overwrite || m_vecPtCutoffsForSctHitsCut.empty()) m_vecPtCutoffsForSctHitsCut = std::vector<double>({0.0, 300.0, 400.0});
     if (overwrite || m_vecMinNSctHitsAbovePt.empty()) m_vecMinNSctHitsAbovePt = std::vector<int>({2, 4, 6});
