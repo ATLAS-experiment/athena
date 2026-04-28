@@ -384,10 +384,15 @@ namespace TrackingUtilities {
     int channelsPhi = 1;
     int channelsEta = 1;
     InDet::SiWidth width( Amg::Vector2D(channelsPhi, channelsEta), Amg::Vector2D(phiWidth, etaWidth) );
+    std::vector<Identifier> rdo_list;
+    rdo_list.reserve(xaodCluster.rdoList().size());
+    for (const Identifier::value_type rdo_id_value : xaodCluster.rdoList()) {
+       rdo_list.emplace_back(rdo_id_value);
+    }
 
     indetCluster = new ::HGTD_Cluster(id,
 				      localPosition,
-				      std::vector<Identifier>(xaodCluster.rdoList()),
+				      std::move(rdo_list),
 				      width,
 				      &element,
 				      std::move(errorMatrix),

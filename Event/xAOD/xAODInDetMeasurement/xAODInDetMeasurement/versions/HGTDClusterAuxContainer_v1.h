@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -11,7 +11,9 @@
 #include "Identifier/Identifier.h"
 #include "Identifier/IdentifierHash.h"
 #include "xAODCore/AuxContainerBase.h"
+#include "xAODCore/JaggedVec.h"
 #include "xAODMeasurementBase/MeasurementDefs.h"
+#include "AthContainers/JaggedVecAccessor.h"
 
 
 namespace xAOD {
@@ -32,8 +34,8 @@ namespace xAOD {
 
         /// @name Defining HGTD cluster parameters
         /// @{
-        std::vector<std::vector<Identifier::value_type> > rdoList;
-        std::vector<std::vector<int> > totList;
+        AUXVAR_JAGGEDVEC_DECL(Identifier::value_type,rdoListjv);
+        AUXVAR_JAGGEDVEC_DECL(int,totListjv);
 
     };
 }
