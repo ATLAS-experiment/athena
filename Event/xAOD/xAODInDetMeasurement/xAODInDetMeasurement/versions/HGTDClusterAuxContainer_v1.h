@@ -34,8 +34,8 @@ namespace xAOD {
 
         /// @name Defining HGTD cluster parameters
         /// @{
-        AUXVAR_JAGGEDVEC_DECL(Identifier::value_type,rdoListjv);
-        AUXVAR_JAGGEDVEC_DECL(int,totListjv);
+        AUXVAR_JAGGEDVEC_DECL(Identifier::value_type,rdoList);
+        AUXVAR_JAGGEDVEC_DECL(int,totList);
 
     };
 }

@@ -10,7 +10,7 @@
 static const SG::AuxElement::Accessor<std::array<float, 3> > globalPosAcc(
     "globalPosition");
 const SG::AuxElement::Accessor<SG::JaggedVecElt<Identifier::value_type> >
-    xAOD::PixelCluster_v1::s_rdoListAcc("rdoListjv");
+    xAOD::PixelCluster_v1::s_rdoListAcc("rdoList");
 
 xAOD::ConstVectorMap<3> xAOD::PixelCluster_v1::globalPosition() const {
     const auto& values = globalPosAcc(*this);
@@ -40,7 +40,7 @@ void xAOD::PixelCluster_v1::setRDOlist(const std::vector<Identifier>& rdoList) {
 }
 
 const SG::AuxElement::Accessor<SG::JaggedVecElt<int> >
-    xAOD::PixelCluster_v1::s_totListAcc("totListjv");
+    xAOD::PixelCluster_v1::s_totListAcc("totList");
 
 void xAOD::PixelCluster_v1::setToTlist(const std::vector<int>& tots) {
    s_totListAcc.set(*this,tots);
@@ -50,7 +50,7 @@ void xAOD::PixelCluster_v1::setToTlist(std::span<int> tots) {
    s_totListAcc.set(*this,tots);
 }
 const SG::AuxElement::Accessor<SG::JaggedVecElt<float> >
-    xAOD::PixelCluster_v1::s_chargeListAcc("chargeListjv");
+    xAOD::PixelCluster_v1::s_chargeListAcc("chargeList");
 
 void xAOD::PixelCluster_v1::setChargelist(const std::vector<float>& charges) {
    s_chargeListAcc.set(*this,charges);

@@ -34,7 +34,7 @@ class StripClusterAuxContainer_v1 : public AuxContainerBase {
     /// @name Defining strip cluster parameters
     /// @{
     std::vector<PosAccessor<3>::element_type> globalPosition;
-    AUXVAR_JAGGEDVEC_DECL(Identifier::value_type,rdoListjv);
+    AUXVAR_JAGGEDVEC_DECL(Identifier::value_type,rdoList);
     std::vector<int> channelsInPhi;
     /// @}
 };
