@@ -71,9 +71,9 @@ namespace DerivationFramework {
 
         SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo_key{this, "EventInfo", "EventInfo", "Input event information"};
         ToolHandle < Trk::TrkVKalVrtFitter >             m_iVertexFitter;
-        ToolHandle < Analysis::PrimaryVertexRefitter >   m_pvRefitter;
-        ToolHandle < Trk::V0Tools >                      m_V0Tools;
-        ToolHandle < DerivationFramework::CascadeTools > m_CascadeTools;
+        PublicToolHandle < Analysis::PrimaryVertexRefitter >   m_pvRefitter;
+        PublicToolHandle < Trk::V0Tools >                      m_V0Tools;
+        PublicToolHandle < DerivationFramework::CascadeTools > m_CascadeTools;
         ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};
 
         bool        m_refitPV;

@@ -33,9 +33,9 @@ namespace DerivationFramework {
     private:
       /** tools
        */
-      ToolHandle<Trk::V0Tools>                    m_v0Tools;
+      PublicToolHandle<Trk::V0Tools>                    m_v0Tools;
       ToolHandle<Analysis::ICandidateSearch>      m_SearchTool;
-      ToolHandle<Analysis::PrimaryVertexRefitter> m_pvRefitter;
+      PublicToolHandle<Analysis::PrimaryVertexRefitter> m_pvRefitter;
       SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo_key{this, "EventInfo", "EventInfo", "Input event information"};
       /** job options
        */

@@ -119,11 +119,11 @@ namespace DerivationFramework {
     ToolHandle < Trk::TrkVKalVrtFitter >             m_iVertexFitter;
     ToolHandle < Trk::TrkV0VertexFitter >            m_iV0Fitter;
     ToolHandle < Trk::IVertexFitter >                m_iGammaFitter;
-    ToolHandle < Analysis::PrimaryVertexRefitter >   m_pvRefitter;
-    ToolHandle < Trk::V0Tools >                      m_V0Tools;
+    PublicToolHandle < Analysis::PrimaryVertexRefitter >   m_pvRefitter;
+    PublicToolHandle < Trk::V0Tools >                      m_V0Tools;
     ToolHandle < Reco::ITrackToVertex >              m_trackToVertexTool;
     ToolHandle < Trk::ITrackSelectorTool >           m_v0TrkSelector;
-    ToolHandle < DerivationFramework::CascadeTools > m_CascadeTools;
+    PublicToolHandle < DerivationFramework::CascadeTools > m_CascadeTools;
     ToolHandle < InDet::VertexPointEstimator >       m_vertexEstimator;
     ToolHandle < Trk::IExtrapolator >                m_extrapolator;
 

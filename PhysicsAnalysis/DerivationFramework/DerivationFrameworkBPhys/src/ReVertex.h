@@ -75,8 +75,8 @@ private:
     double m_totalMassConst{};
     std::vector<std::string> m_hypoNames;
 
-    ToolHandle<Trk::V0Tools>                    m_v0Tools;
-    ToolHandle<Analysis::PrimaryVertexRefitter> m_pvRefitter;
+    PublicToolHandle<Trk::V0Tools>                    m_v0Tools;
+    PublicToolHandle<Analysis::PrimaryVertexRefitter> m_pvRefitter;
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo_key{this, "EventInfo", "EventInfo", "Input event information"};
     int         m_PV_max{};
     int         m_DoVertexType{};
