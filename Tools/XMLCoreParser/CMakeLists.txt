@@ -12,6 +12,7 @@ atlas_add_library( XMLCoreParser
                    src/XMLCoreParser.cxx
                    src/XMLCoreNode.cxx
                    src/ExpatCoreParser.cxx
+                   src/XMLParserUtilities.cxx
                    PUBLIC_HEADERS XMLCoreParser
                    PRIVATE_INCLUDE_DIRS ${EXPAT_INCLUDE_DIRS}
                    PRIVATE_LINK_LIBRARIES ${EXPAT_LIBRARIES} CxxUtils )
@@ -50,10 +51,16 @@ atlas_add_test( XMLCoreNode_test
                 LINK_LIBRARIES ${EXPAT_LIBRARIES} ${Boost_LIBRARIES} PathResolver XMLCoreParser TestTools
                 POST_EXEC_SCRIPT noerror.sh )
 
+atlas_add_test( XMLParserUtilities_test
+                SOURCES src/xmlFileExists.cxx test/XMLParserUtilities_test.cxx 
+                INCLUDE_DIRS ${EXPAT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
+                LINK_LIBRARIES ${EXPAT_LIBRARIES} ${Boost_LIBRARIES} PathResolver XMLCoreParser TestTools
+                POST_EXEC_SCRIPT nopost.sh )
 
 atlas_add_executable( texpat
                       src/texpat.cxx
                       src/ExpatCoreParser.cxx
+                      src/XMLParserUtilities.cxx
                       src/XMLCoreNode.cxx
                       INCLUDE_DIRS ${EXPAT_INCLUDE_DIRS}
                       LINK_LIBRARIES ${EXPAT_LIBRARIES}  CxxUtils XMLCoreParser
