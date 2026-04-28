@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODINDETMEASUREMENT_VERSIONS_PIXELCLUSTERAUXCONTAINER_V1_H
@@ -10,7 +10,9 @@
 #include "Identifier/Identifier.h"
 #include "Identifier/IdentifierHash.h"
 #include "xAODCore/AuxContainerBase.h"
+#include "xAODCore/JaggedVec.h"
 #include "xAODMeasurementBase/MeasurementDefs.h"
+#include "AthContainers/JaggedVecAccessor.h"
 
 namespace xAOD {
 /// Auxiliary store for pixel clusters
@@ -32,12 +34,12 @@ class PixelClusterAuxContainer_v1 : public AuxContainerBase {
     /// @name Defining pixel cluster parameters
     /// @{
     std::vector<PosAccessor<3>::element_type> globalPosition;
-    std::vector<std::vector<Identifier::value_type> > rdoList;
+    AUXVAR_JAGGEDVEC_DECL(Identifier::value_type,rdoListjv);
     std::vector<int> channelsInPhi;
     std::vector<int> channelsInEta;
     std::vector<float> widthInEta;
-    std::vector<std::vector<int> > totList;
-    std::vector<std::vector<float> > chargeList;
+    AUXVAR_JAGGEDVEC_DECL(int,totListjv);
+    AUXVAR_JAGGEDVEC_DECL(float,chargeListjv);
     std::vector<float> energyLoss;
     std::vector<int> lvl1a;
     /// @}

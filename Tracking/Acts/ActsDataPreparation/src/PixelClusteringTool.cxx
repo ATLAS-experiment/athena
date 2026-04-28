@@ -78,9 +78,6 @@ PixelClusteringTool::makeCluster(PixelClusteringTool::Cluster &cluster,
   Amg::Vector2D pos_acc(0,0);
   int tot_acc = 0;
 
-  std::vector<float> chargeList;
-  if (calibData) chargeList.reserve(cluster.ids.size());
-  
   InDetDD::PixelDiodeTree::CellIndexType rowmax = std::numeric_limits<InDetDD::PixelDiodeTree::CellIndexType>::min();
   InDetDD::PixelDiodeTree::CellIndexType colmax = std::numeric_limits<InDetDD::PixelDiodeTree::CellIndexType>::min();
   InDetDD::PixelDiodeTree::CellIndexType rowmin = std::numeric_limits<InDetDD::PixelDiodeTree::CellIndexType>::max();
@@ -92,6 +89,9 @@ PixelClusteringTool::makeCluster(PixelClusteringTool::Cluster &cluster,
 
   // We temporary comment this since it is not used
   // bool hasGanged = false;
+  unsigned int n_rdos = (icluster> 0 ?  clusterVars.rdoList[icluster-1].end() : 0u);
+  assert( icluster==0 || clusterVars.totList[icluster-1].end()==n_rdos );
+  assert( icluster==0 || calibData==nullptr || clusterVars.chargeList[icluster-1].end()==n_rdos );
 
   IdentifierHash moduleHash = element->identifyHash();
 
@@ -131,7 +131,6 @@ PixelClusteringTool::makeCluster(PixelClusteringTool::Cluster &cluster,
               moduleHash,
               feValue,
               tot);
-        chargeList.push_back(charge);
       } else {
         charge = calibData->getCharge(diode_type,
                                       moduleHash,
@@ -142,9 +141,12 @@ PixelClusteringTool::makeCluster(PixelClusteringTool::Cluster &cluster,
         if (design.getReadoutTechnology() != InDetDD::PixelReadoutTechnology::RD53 && (moduleHash < 12 or moduleHash > 2035)) {
           charge = tot/8.0*(8000.0-1200.0)+1200.0;
         }
-        chargeList.push_back(charge);
       }
+      clusterVars.chargeListPayload[n_rdos]=charge;
     }
+    clusterVars.rdoListPayload[n_rdos]=id.get_compact();
+    clusterVars.totListPayload[n_rdos]=tot;
+    ++n_rdos;
     
     const InDetDD::PixelDiodeTree::CellIndexType &row = diode_idx[0];
     const InDetDD::PixelDiodeTree::CellIndexType &col = diode_idx[1];
@@ -225,9 +227,10 @@ PixelClusteringTool::makeCluster(PixelClusteringTool::Cluster &cluster,
   xAOD::VectorMap<2>(clusterVars.localPositionDim2[icluster].data()) = localPosition;
   xAOD::MatrixMap<2>(clusterVars.localCovarianceDim2[icluster].data()) = localCovariance;
   clusterVars.identifier[icluster] = cluster.ids.front();
-  clusterVars.rdoList[icluster] = std::move(cluster.ids);
+  clusterVars.rdoList[icluster] = n_rdos;
   xAOD::VectorMap<3>(clusterVars.globalPosition[icluster].data()) = globalPos.cast<float>();
-  clusterVars.totList[icluster] = std::move(cluster.tots);
+  clusterVars.totList[icluster] = n_rdos;
+  clusterVars.chargeList[icluster] = (calibData ? n_rdos : 0u);
   clusterVars.lvl1a[icluster] = cluster.lvl1min;
   clusterVars.channelsInPhi[icluster] = rowWidth;
   clusterVars.channelsInEta[icluster] = colWidth;
@@ -266,7 +269,7 @@ PixelClusteringTool::clusterize(const EventContext& /*ctx*/,
 std::any PixelClusteringTool::createEventDataCache(xAOD::PixelClusterContainer& cont,
                                                    [[maybe_unused]] std::size_t nClusterRDOs) const
 {
-  return std::any (xAOD::PixelCluster::ClusterVars (cont));
+  return std::any (xAOD::PixelCluster::ClusterVars (cont, nClusterRDOs));
 }
 
 

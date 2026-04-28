@@ -52,13 +52,16 @@ AnalogueClusteringCalibrator<calib_data_t, traj_t>::getCentroid(
   }
 
   // if weighted position, we need to compute the centroid
-  const std::vector<Identifier>& rdos = cluster.rdoList();
+  SG::ConstAccessor<SG::JaggedVecElt<Identifier::value_type> >::element_type
+     rdos = cluster.rdoList();
     
   int rowmin = std::numeric_limits<int>::max();
   int rowmax = std::numeric_limits<int>::min();
   int colmin = std::numeric_limits<int>::max();
   int colmax = std::numeric_limits<int>::min();
-  for (const Identifier& rid : rdos) {
+  // convert Identifier::value_type into Identifier
+  for (Identifier::value_type rid_value : rdos) {
+    Identifier rid(rid_value);
     int row = this->pixelID().phi_index(rid);
     rowmin = std::min(row, rowmin);
     rowmax = std::max(row, rowmax);
