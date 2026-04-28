@@ -30,40 +30,47 @@ namespace Hgtd {
 }
 
 namespace ActsTrk {
+class HgtdAuxDataCache;
 
 class HgtdTimedClusteringTool :
     public extends<AthAlgTool, IHGTDClusteringTool> {
 public:
-  struct Cluster {
-    std::vector<Identifier> ids;
-    std::vector<int> tots;
-    std::vector<double> times;
-  };
-  
+
   using Cell = Hgtd::UnpackedHgtdRDO;
   using CellCollection = std::vector<Cell>;
-  using ClusterCollection = std::vector<Cluster>;
-  
+  using Cluster = IHGTDClusteringTool::Cluster;
+  using ClusterCollection = IHGTDClusteringTool::ClusterCollection;
+
 public:
     HgtdTimedClusteringTool(const std::string& type,
 			    const std::string& name,
 			    const IInterface* parent);
 
     virtual StatusCode initialize() override;
+
     virtual StatusCode clusterize(const EventContext& ctx,
-				  const RawDataCollection& RDOs,
-				  ClusterContainer& container) const override;
-          
+                                  const RawDataCollection& RDOs,
+                                  std::vector<ClusterCollection>& collection) const override;
+
     virtual StatusCode clusterize(const EventContext& ctx,
-          const HGTD_ALTIROC_RDO_Collection& RDOs,
-          ClusterContainer& container) const override;
-    
+                                  const HGTD_ALTIROC_RDO_Collection& RDOs,
+                                  std::vector<ClusterCollection>& collection) const override;
+
+    virtual std::any createEventDataCache(xAOD::HGTDClusterContainer& cont,
+                                          std::size_t nClusterRDOs) const override;
+
+    virtual StatusCode makeClusters(const EventContext& ctx,
+                                    const ClusterCollection& clusters,
+                                    xAOD::HGTDClusterContainer& container,
+                                    size_t& icluster,
+                                    std::any& cache) const override;
+
 private:
   // N.B. the cluster is added to the container
   StatusCode makeCluster(const EventContext& ctx,
 			 const typename HgtdTimedClusteringTool::Cluster &cluster,
-			 xAOD::HGTDCluster& xaodcluster) const;
-  
+			 xAOD::HGTDCluster& xaodcluster,
+                         HgtdAuxDataCache*cache) const;
 
 private:
     const HGTD_DetectorManager* m_hgtd_det_mgr{nullptr};

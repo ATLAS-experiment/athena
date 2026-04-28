@@ -49,19 +49,24 @@ namespace ActsTrk {
     ATH_CHECK(clusterContainer.record(std::make_unique<xAOD::HGTDClusterContainer>(),
 				      std::make_unique<xAOD::HGTDClusterAuxContainer>()));
 
+    unsigned int nRDOs=0;
+    unsigned int nClusters=0;
+    std::vector<IHGTDClusteringTool::ClusterCollection> clusterCollection;
     if (m_use_altiroc_rdo){
       SG::ReadHandle<HGTD_ALTIROC_RDO_Container> rdoContainer = SG::makeHandle(m_altiroc_rdo_rh_key, ctx);
       if (!rdoContainer.isValid()) {
           ATH_MSG_ERROR("Failed to retrieve HGTD ALTIROC RDO container");
           return StatusCode::FAILURE;
       }
-        
+
+      clusterCollection.reserve(rdoContainer->size());
       for (const auto rdoCollection : *rdoContainer) {
           if (rdoCollection->empty()) {
               continue;
           }
-          m_stat[kNRdo] += rdoCollection->size();
-          ATH_CHECK(m_clusteringTool->clusterize(ctx, *rdoCollection, *clusterContainer));  
+          nRDOs+=rdoCollection->size();
+          ATH_CHECK(m_clusteringTool->clusterize(ctx, *rdoCollection, clusterCollection));
+          nClusters += clusterCollection.back().size();
       }
 
     } else {
@@ -71,16 +76,32 @@ namespace ActsTrk {
           return StatusCode::FAILURE;
       }
         
+      clusterCollection.reserve(rdoContainer->size());
       for (const auto rdoCollection : *rdoContainer) {
           if (rdoCollection->empty()) {
               continue;
           }
-          m_stat[kNRdo] += rdoCollection->size();
-          ATH_CHECK(m_clusteringTool->clusterize(ctx, *rdoCollection, *clusterContainer));  
+          nRDOs+=rdoCollection->size();
+          ATH_CHECK(m_clusteringTool->clusterize(ctx, *rdoCollection, clusterCollection));
+          nClusters += clusterCollection.back().size();
       }
-          
     }
+
+    clusterContainer->push_new(nClusters, []() {return new xAOD::HGTDCluster;});
+    std::any cache = m_clusteringTool->createEventDataCache(*clusterContainer,nRDOs);
+
+    std::size_t icluster=0;
+    for (std::size_t icollection=0u; icollection<clusterCollection.size(); ++icollection) {
+       ATH_CHECK( m_clusteringTool->makeClusters(ctx,
+                                                 clusterCollection[icollection],
+                                                 *clusterContainer,
+                                                 icluster,
+                                                 cache));
+       icluster += clusterCollection[icollection].size();
+    }
+    assert( clusterContainer->size() == icluster);
     
+    m_stat[kNRdo] += nRDOs;
     m_stat[kNClusters] += clusterContainer->size();
     ATH_MSG_DEBUG("Clusters produced size: "<<clusterContainer->size());  
     return StatusCode::SUCCESS;
