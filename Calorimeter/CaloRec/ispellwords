@@ -176,7 +176,6 @@ FCbit
 LArRawChannel
 emCellsMergerTool
 TopoCluster
-CaloCellRescaler
 reCaloDDE
 ToolWithConstants
 ElementLinks
@@ -783,7 +782,6 @@ ntilee
 nsize
 ntp
 netap
-CaloCellRandomizer
 CaloDetDescr
 LArDigitization
 CLHEP
@@ -802,7 +800,6 @@ pions
 reffile
 CaloInfo
 CaloClusters
-theCaloCellRandomizer
 caloNum
 QGSP
 param
