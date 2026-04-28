@@ -1,9 +1,12 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef ATHEXCUDA_TRACKPARTICLECALIBRATOREXAMPLEALG_H
 #define ATHEXCUDA_TRACKPARTICLECALIBRATOREXAMPLEALG_H
+
+// Local include(s).
+#include "TrackParticleContainer.h"
 
 // Framework include(s).
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -53,6 +56,10 @@ class TrackParticleCalibratorExampleAlg : public AthReentrantAlgorithm {
       "The output track particle container"};
 
 };  // class LinearTransformTaskExampleAlg
+
+/// Perform the transformation on an NVIDIA GPU
+StatusCode calibrateOnGPU(const TrackParticleContainer::const_view& input,
+                          TrackParticleContainer::view& output);
 
 }  // namespace AthCUDAExamples
 
