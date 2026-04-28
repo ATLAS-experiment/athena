@@ -167,7 +167,6 @@ float interpolate (const CaloRec::Array<2>& a,
   // Note that the order doesn't matter.
   // Reserve two extra points in case we end up adding some.
   npts = ihi - ilo;
-  assert(npts >= 0);
   std::vector<float> t;
   //coverity[INTEGER_OVERFLOW]
   t.reserve (npts+2);
