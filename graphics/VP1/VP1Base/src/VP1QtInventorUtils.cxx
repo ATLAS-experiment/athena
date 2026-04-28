@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -42,13 +42,13 @@
 #include <QDir>
 #include <QTime>
 #include <QBuffer>
-#include <QByteArray>
 #include <QTextStream>
 #include <QSlider>
 #include <QGLFormat>
 #include <QtCoreVersion>
 
 #include <iostream>
+#include <bit>
 namespace{
   unsigned char *
   ucharAddress(auto * pv){
@@ -134,34 +134,27 @@ public:
 
 	static ImageRec *ImageOpen(const char *fileName)
 	{
-		union {
-			int testWord;
-			char testByte[4];
-		} endianTest;
+		
 		ImageRec *image;
-		int swapFlag;
-
-		endianTest.testWord = 1;
-		if (endianTest.testByte[0] == 1) {
-			swapFlag = 1;
-		} else {
-			swapFlag = 0;
-		}
-
+		const bool swapFlag = std::endian::native == std::endian::little;
 		image = (ImageRec *)malloc(sizeof(ImageRec));
-		if (image == NULL) {
+		if (!image) {
 			fprintf(stderr, "Out of memory!\n");
 			exit(1);
 		}
-		if ((image->file = fopen(fileName, "rb")) == NULL) {
+		if (!(image->file = fopen(fileName, "rb"))) {
 			perror(fileName);
+			free(image);
 			exit(1);
 		}
 
 		int bytesRead = fread(image, 1, 12, image->file);
         
-    if (!bytesRead) {
+    if (bytesRead != 12) {
       fprintf(stderr, "fread failed!\n");
+      fclose(image->file);
+      free(image);
+      return nullptr;
     }
     //what are reasonable limits on x,y,zsize?
        
@@ -172,7 +165,7 @@ public:
 			image->imagic = CxxUtils::byteswap (image->imagic);
 			image->type   = CxxUtils::byteswap (image->type);
 			image->dim    = CxxUtils::byteswap (image->dim);
-			image->xsize  = CxxUtils::byteswap (image->zsize);
+			image->xsize  = CxxUtils::byteswap (image->xsize);
 			image->ysize  = CxxUtils::byteswap (image->ysize);
 			image->zsize  = CxxUtils::byteswap (image->zsize);
 		}
@@ -247,7 +240,7 @@ public:
 				int okread = fread(image->tmp, 1, (unsigned int)image->rowSize[y+z*image->ysize],
 						image->file);
 
-                if( !okseek || !okread ) VP1Msg::messageDebug("fseek or fread failed!!");
+                if (okseek != 0 || okread == 0)  VP1Msg::messageDebug("fseek or fread failed!!");
 
 				iPtr = image->tmp;
 				oPtr = buf;
@@ -294,7 +287,7 @@ public:
 		image = ImageOpen(name);
 
 		if(!image)
-			return NULL;
+			return nullptr;
         
 		(*width)=image->xsize;
 		(*height)=image->ysize;
