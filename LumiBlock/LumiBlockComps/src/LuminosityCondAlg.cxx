@@ -160,7 +160,7 @@ LuminosityCondAlg::execute (const EventContext& ctx) const
                       const auto& chanAttrs = chanItem.value();
                       if (chanAttrs.contains("BeamIntensityPattern")) {
                         sbunches = chanAttrs["BeamIntensityPattern"].get<std::string>();
-                        ATH_MSG_INFO("Read BeamIntensityPattern from ByteStream metadata");
+                        ATH_MSG_DEBUG("Read BeamIntensityPattern from ByteStream metadata");
                         break;
                       }
                     }
