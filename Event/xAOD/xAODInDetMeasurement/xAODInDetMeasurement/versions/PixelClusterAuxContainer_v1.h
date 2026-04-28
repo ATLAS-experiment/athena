@@ -34,12 +34,12 @@ class PixelClusterAuxContainer_v1 : public AuxContainerBase {
     /// @name Defining pixel cluster parameters
     /// @{
     std::vector<PosAccessor<3>::element_type> globalPosition;
-    AUXVAR_JAGGEDVEC_DECL(Identifier::value_type,rdoListjv);
+    AUXVAR_JAGGEDVEC_DECL(Identifier::value_type,rdoList);
     std::vector<int> channelsInPhi;
     std::vector<int> channelsInEta;
     std::vector<float> widthInEta;
-    AUXVAR_JAGGEDVEC_DECL(int,totListjv);
-    AUXVAR_JAGGEDVEC_DECL(float,chargeListjv);
+    AUXVAR_JAGGEDVEC_DECL(int,totList);
+    AUXVAR_JAGGEDVEC_DECL(float,chargeList);
     std::vector<float> energyLoss;
     std::vector<int> lvl1a;
     /// @}

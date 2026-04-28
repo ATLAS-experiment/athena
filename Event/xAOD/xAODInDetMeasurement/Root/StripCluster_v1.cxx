@@ -10,7 +10,7 @@
 static const SG::AuxElement::Accessor<std::array<float, 3> > globalPosAcc(
     "globalPosition");
 const SG::AuxElement::Accessor<SG::JaggedVecElt<Identifier::value_type> >
-    xAOD::StripCluster_v1::s_rdoListAcc("rdoListjv");
+    xAOD::StripCluster_v1::s_rdoListAcc("rdoList");
 
 xAOD::ConstVectorMap<3> xAOD::StripCluster_v1::globalPosition() const {
     const auto& values = globalPosAcc(*this);
