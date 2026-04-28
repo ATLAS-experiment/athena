@@ -49,7 +49,6 @@ StatusCode JetTruthLabelingTool::initialize(){
   /// Ghost Association values
   m_useGhostJetMatch = false;
   m_recoGhostFrac = 0.75;
-
   /// Hard-code some values for R10TruthLabel_R21Consolidated                                                                                                                                             
   /// Functionality to customize labeling will be added later
   if(m_truthLabelConfig == TruthLabelConfiguration::R21Consolidated) {
@@ -449,8 +448,10 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
           if (m_useGhostJetMatch) {
               // GA matching. Upper bound applied for completeness, but realistically not needed.
               if ((ghostPtFraction >= m_recoGhostFrac) && (ghostPtFraction <= (2 - m_recoGhostFrac))) {
-                  matchTruthJet = truthJet;
-                  ghostFracNominal = ghostPtFraction;
+                  if (std::abs(1 - ghostPtFraction) < std::abs(1 - ghostFracNominal)) {
+                      matchTruthJet = truthJet;
+                      ghostFracNominal = ghostPtFraction;
+                  }
               }
           }
           else {
@@ -462,6 +463,7 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
                   }
               }
           }
+
       }
     }
 
