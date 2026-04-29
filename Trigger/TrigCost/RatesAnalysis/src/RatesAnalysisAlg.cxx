@@ -635,6 +635,17 @@ StatusCode RatesAnalysisAlg::execute() {
   ATH_MSG_VERBOSE("Executing " << name() << " on event " << m_eventCounter << "...");
   if (m_eventCounter++ == 0) { // First time in execute loop - cannot access TDT before this.
     ATH_CHECK( populateTriggers() );
+    if (!m_configSvc.empty() && m_configSvc.isValid()) {
+      m_metadataMasterKey = m_configSvc->masterKey();
+      m_metadataHLTPSK    = m_configSvc->hltPrescaleKey();
+      m_metadataL1PSK     = m_configSvc->lvl1PrescaleKey();
+
+      ATH_MSG_INFO("Cached metadata trigger keys: SMK="
+                   << m_metadataMasterKey
+                   << " L1PSK=" << m_metadataL1PSK
+                   << " HLTPSK=" << m_metadataHLTPSK);
+      m_metadataKeysCached = true;
+    }    
   }
 
   // Get event characteristics
@@ -925,6 +936,13 @@ void RatesAnalysisAlg::writeMetadata() {
   if(!m_enhancedBiasRatesTool->isMC()){
   	bunchGroups = m_enhancedBiasRatesTool->getBunchGroups();
   }
+
+  if (m_metadataKeysCached) {
+    masterKey       = m_metadataMasterKey;
+    hltPrescaleKey  = m_metadataHLTPSK;
+    lvl1PrescaleKey = m_metadataL1PSK;
+  }
+
   if(!m_configSvc.empty() && m_configSvc.isValid() ){
     if  ((bunchGroups.size() == 0 || std::all_of(bunchGroups.begin(), bunchGroups.end(), [](int i) { return i==0; }) ) && (!m_enhancedBiasRatesTool->isMC())) {
       const TrigConf::L1BunchGroupSet& bgs = m_configSvc->l1BunchGroupSet(Gaudi::Hive::currentContext());
@@ -932,9 +950,11 @@ void RatesAnalysisAlg::writeMetadata() {
         bunchGroups.push_back(bgs.getBunchGroup(i)->size());
       }
     }
-    masterKey = m_configSvc->masterKey();
-    hltPrescaleKey = m_configSvc->hltPrescaleKey();
-    lvl1PrescaleKey = m_configSvc->lvl1PrescaleKey();
+    if (!m_metadataKeysCached){
+      masterKey = m_configSvc->masterKey();
+      hltPrescaleKey = m_configSvc->hltPrescaleKey();
+      lvl1PrescaleKey = m_configSvc->lvl1PrescaleKey();
+    }
   }
 
 	  
