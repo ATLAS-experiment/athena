@@ -113,5 +113,5 @@ foreach( header AddDVProxy AuxContainerBase AuxSelection AuxCompression BaseInfo
    atlas_add_test( inc_${header}
       SOURCES test/inc_${header}.cxx
       LINK_LIBRARIES xAODCore
-      POST_EXEC_SCRIPT nopost.sh )
+      POST_EXEC_SCRIPT noerror.sh )
 endforeach()
