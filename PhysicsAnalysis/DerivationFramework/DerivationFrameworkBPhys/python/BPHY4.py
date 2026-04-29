@@ -20,7 +20,8 @@ def BPHY4Cfg(flags):
     acc.addPublicTool(V0Tools)
     trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(flags, BPHYDerivationName))
     acc.addPublicTool(trackselect)
-
+    PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
+    acc.addPublicTool(PVrefit)
     BPHY4FourMuonTool = CompFactory.DerivationFramework.FourMuonTool(
             name                        = "BPHY4FourMuonTool",
             ptCut                       = 2500.0,
@@ -35,7 +36,7 @@ def BPHY4Cfg(flags):
             name                    = "BPHY4_Reco_4mu",
             FourMuonTool            = BPHY4FourMuonTool,
             V0Tools                 = V0Tools,
-            PVRefitter              = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+            PVRefitter              = PVrefit,
             PairContainerName       = "BPHY4Pairs",
             QuadrupletContainerName = "BPHY4Quads",
             PVContainerName         = "PrimaryVertices",
