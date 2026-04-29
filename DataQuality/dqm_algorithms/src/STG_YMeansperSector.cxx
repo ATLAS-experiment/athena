@@ -85,28 +85,29 @@ namespace dqm_algorithms {
                 float Meanhigh = 0.0;
                 float redMean = 0.0;
                 if (Ybins < 15) {
-                 Meanlow = dqm_algorithms::tools::GetFirstFromMap( "MeanL", config.getParameters(), 3.5);
-                 Meanhigh = dqm_algorithms::tools::GetFirstFromMap( "MeanH", config.getParameters(), 5.5);
-                 redMean = dqm_algorithms::tools::GetFirstFromMap( "MeanRed", config.getParameters(), 9.0);
+                 Meanlow = dqm_algorithms::tools::GetFirstFromMap( "MeanL", config.getParameters(), -85.5);
+                 Meanhigh = dqm_algorithms::tools::GetFirstFromMap( "MeanH", config.getParameters(), 85.5);
+                 redMean = dqm_algorithms::tools::GetFirstFromMap( "MeanRed", config.getParameters(), 125.0);
                  
                  
                 } else if (Ybins > 100) {
-                 Meanlow = dqm_algorithms::tools::GetFirstFromMap( "MeanL", config.getParameters(), -7.5);
-                 Meanhigh = dqm_algorithms::tools::GetFirstFromMap( "MeanH", config.getParameters(), 17.5);
-                 redMean = dqm_algorithms::tools::GetFirstFromMap( "MeanRed", config.getParameters(), 50.0);
+                 Meanlow = dqm_algorithms::tools::GetFirstFromMap( "MeanL", config.getParameters(), -150.5);
+                 Meanhigh = dqm_algorithms::tools::GetFirstFromMap( "MeanH", config.getParameters(), 150.5);
+                 redMean = dqm_algorithms::tools::GetFirstFromMap( "MeanRed", config.getParameters(), 200.0);
+                }
+		else {
+                	Meanlow = dqm_algorithms::tools::GetFirstFromMap( "MeanL", config.getParameters(), -115.5);
+                	Meanhigh = dqm_algorithms::tools::GetFirstFromMap( "MeanH", config.getParameters(), 115.5);
+                	redMean = dqm_algorithms::tools::GetFirstFromMap( "MeanRed", config.getParameters(),150.0);
                 } 
 
-	        float MeanY[36];
+	        std::vector<float> MeanY(Xbins, 0.0);
                 bool redflag = false;
                 bool yellowflag = false;
                 bool greenflag = false;
                 int Passed=0;
                 for (int i = 1; i <= Xbins; i++) {
                  MeanY[i]=h2->GetBinContent(i);
-                 if (MeanY[i]==0) {
-                    Passed = Passed +1;
-                    continue;
-                 }
                  if (MeanY[i] > Meanlow && MeanY[i] < Meanhigh) Passed = Passed +1;
                  if (abs(MeanY[i]) > abs(redMean))  redflag=true;
                 }
@@ -119,8 +120,8 @@ namespace dqm_algorithms {
                 catch ( dqm_core::Exception & ex ) {
                  throw dqm_core::BadConfig( ERS_HERE, name, ex.what(), ex );
                 }
-                if (Passed -2 > gthreshold && not redflag) greenflag=true;
-                else if (Passed -2 > rthreshold && not redflag) yellowflag=true;
+                if (Passed > gthreshold && not redflag) greenflag=true;
+                else if (Passed > rthreshold && not redflag) yellowflag=true;
                 else redflag=true;
                 if ( greenflag ) {
                  result->status_ = dqm_core::Result::Green;
@@ -129,7 +130,7 @@ namespace dqm_algorithms {
                 } else {
                   result->status_ = dqm_core::Result::Red;
                 }
-
+		
 		return result;
 	}
 	
