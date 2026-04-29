@@ -132,9 +132,9 @@ int main( int argc, char* argv[] ) ATLAS_NOT_THREAD_SAFE {
   ANA_CHECK( IsoSelectionTool_lowPt.setProperty("OutputLevel", MSG::DEBUG) );
   ANA_CHECK( IsoSelectionTool_lowPt.initialize() );
 
-  std::string m_sgKeyPhotons("Photons");
-  std::string m_sgKeyElectrons("Electrons");
-  std::string m_sgKeyMuons("Muons");
+  std::string sgKeyPhotons("Photons");
+  std::string sgKeyElectrons("Electrons");
+  std::string sgKeyMuons("Muons");
 
   // Loop over the events:
   for( Long64_t entry(0); entry<entries; entry++ ) {
@@ -142,7 +142,7 @@ int main( int argc, char* argv[] ) ATLAS_NOT_THREAD_SAFE {
     event.getEntry( entry );
 
     const xAOD::PhotonContainer* photons(nullptr);
-    ANA_CHECK( event.retrieve(photons,m_sgKeyPhotons) );
+    ANA_CHECK( event.retrieve(photons,sgKeyPhotons) );
     ANA_MSG_INFO(" Number of pre-selected photons: " << (int)photons->size());
 
     for (auto ph : *photons) {
@@ -157,7 +157,7 @@ int main( int argc, char* argv[] ) ATLAS_NOT_THREAD_SAFE {
     }
 
     const xAOD::ElectronContainer* electrons(nullptr);
-    ANA_CHECK( event.retrieve(electrons,m_sgKeyElectrons) );
+    ANA_CHECK( event.retrieve(electrons,sgKeyElectrons) );
     ANA_MSG_INFO(" Number of pre-selected electrons: " << (int)electrons->size());
 
     for (auto el : *electrons) {
@@ -173,7 +173,7 @@ int main( int argc, char* argv[] ) ATLAS_NOT_THREAD_SAFE {
     }
 
     const xAOD::MuonContainer* muons(nullptr);
-    ANA_CHECK( event.retrieve(muons,m_sgKeyMuons) );
+    ANA_CHECK( event.retrieve(muons,sgKeyMuons) );
     ANA_MSG_INFO(" Number of pre-selected muons: " << (int)muons->size());
 
     for (auto mu : *muons) {

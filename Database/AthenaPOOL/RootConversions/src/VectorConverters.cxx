@@ -20,7 +20,6 @@
 #ifdef XAOD_ANALYSIS
 #include "TError.h"
 #endif
-#include "CxxUtils/checker_macros.h"
 
 
 namespace RootConversions {
@@ -29,13 +28,12 @@ namespace RootConversions {
 /**
  * @brief Register standard vector converters.
  */
-void VectorConverters::initialize() ATLAS_NOT_THREAD_SAFE
+void VectorConverters::initialize()
 {
 #ifdef XAOD_ANALYSIS
 // initialize() is called once during single-threaded job setup.
-Int_t& gEIL ATLAS_THREAD_SAFE = gErrorIgnoreLevel;
-long tmpError = gEIL;
-gEIL = kError; //silences warnings about duplicate entries from vector.dll and vector-bool.dll
+long tmpError = gErrorIgnoreLevel;
+gErrorIgnoreLevel = kError; //silences warnings about duplicate entries from vector.dll and vector-bool.dll
 #endif
   TConverterRegistry::Instance()->AddStreamerConverter
     ("vector<double>", "vector<float>",
@@ -71,7 +69,7 @@ gEIL = kError; //silences warnings about duplicate entries from vector.dll and v
      new RootConversions::VectorConverter<unsigned int,ULong64_t>
        ("unsigned int"));
 #ifdef XAOD_ANALYSIS
-gEIL = tmpError;
+gErrorIgnoreLevel = tmpError;
 #endif
 }
 
