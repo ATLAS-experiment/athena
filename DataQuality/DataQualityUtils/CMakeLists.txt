@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( DataQualityUtils )
@@ -93,7 +93,7 @@ atlas_add_alias( CreateMDTConfig_chambers "CreateMDTConfig_chambers.sh" )
 atlas_add_test( physval_make_web_display_test
     SCRIPT physval_make_web_display.py /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/AthDataQuality/example_root/Data.root
     PROPERTIES TIMEOUT 300
-    POST_EXEC_SCRIPT nopost.sh
+    POST_EXEC_SCRIPT noerror.sh
 )
 
 atlas_add_test( physval_make_web_display_test2
@@ -103,7 +103,7 @@ atlas_add_test( physval_make_web_display_test2
         --startpath eb1 \
         --refstartpath ref1:eb1"
     PROPERTIES TIMEOUT 300
-    POST_EXEC_SCRIPT nopost.sh
+    POST_EXEC_SCRIPT noerror.sh
 )
 
 atlas_add_test( han_results_print_test
