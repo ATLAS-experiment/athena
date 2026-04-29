@@ -91,25 +91,29 @@ StatusCode IOVDbMetaDataTool::initialize()
       std::string paramName = key.substr(colonPos + 1);
       folderPayloads[folderName][paramName] = value;
     }
-
+    // before going into loop, prepare these strings
+    static const std::string beginRunKey{"beginRun"};
+    static const std::string endRunKey{"endRun"};
+    static const std::string specType{"string"};
+    //
+    //..and this predicate when building an AttributeListSpecification
+    const auto isIOVKey = [](const std::string& key) {
+      return key == beginRunKey || key == endRunKey;
+    };
     ATH_MSG_DEBUG("Processing " << folderPayloads.size() << " folder(s) for direct payload registration");
-
     for (const auto& [folderName, parameters] : folderPayloads) {
-      // Extract beginRun and endRun from parameters
-      if (!parameters.contains("beginRun") || !parameters.contains("endRun")) {
+      //will use these twice, so only search once and cache them
+      auto beginRunItr = parameters.find(beginRunKey);
+      auto endRunItr = parameters.find(endRunKey);
+      if ( (beginRunItr == parameters.end()) || (endRunItr == parameters.end()) ) {
         ATH_MSG_ERROR("Payload for folder " << folderName << " missing beginRun or endRun");
         return StatusCode::FAILURE;
       }
+      // Extract beginRun and endRun from parameters
+      unsigned int beginRun = std::stoul(beginRunItr->second);
+      unsigned int endRun = std::stoul(endRunItr->second);
 
-      unsigned int beginRun = std::stoul(parameters.at("beginRun"));
-      unsigned int endRun = std::stoul(parameters.at("endRun"));
-
-      // Create filtered parameters map without beginRun/endRun
-      std::map<std::string, std::string> filteredParams;
-      std::ranges::copy_if(parameters, std::inserter(filteredParams, filteredParams.end()),
-                           [](const auto& p) { return p.first != "beginRun" && p.first != "endRun"; });
-
-      ATH_MSG_DEBUG("Registering folder " << folderName << " with " << filteredParams.size()
+      ATH_MSG_DEBUG("Registering folder " << folderName << " with " << parameters.size() - 2
                     << " parameters, IOV [" << beginRun << ", " << endRun << "]");
 
       ATH_CHECK(registerFolder(folderName));
@@ -118,13 +122,17 @@ StatusCode IOVDbMetaDataTool::initialize()
       // Note: AttributeListSpecification has protected destructor, must use new
       // The AttributeList constructor with 'true' takes ownership and will call release()
       coral::AttributeListSpecification* spec = new coral::AttributeListSpecification();
-      for (const auto& [key, value] : filteredParams) {
-        spec->extend(key, "string");
+      for (const auto& [key, value] : parameters) {
+        if (!isIOVKey(key)) {
+          spec->extend(key, specType);
+        }
       }
 
       coral::AttributeList attrList(*spec, true);
-      for (const auto& [key, value] : filteredParams) {
-        attrList[key].setValue(value);
+      for (const auto& [key, value] : parameters) {
+        if (!isIOVKey(key)) {
+          attrList[key].setValue(value);
+        }
       }
 
       auto payload = std::make_unique<CondAttrListCollection>(true);
