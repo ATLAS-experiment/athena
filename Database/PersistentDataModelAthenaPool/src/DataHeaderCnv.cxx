@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file DataHeaderCnv.cxx
@@ -374,14 +374,15 @@ StatusCode DataHeaderCnv::DataObjectToPool(IOpaqueAddress* pAddr, DataObject* pO
 
    const coral::AttributeList* list = obj->getAttributeList();
    if (list != nullptr) {
+      static const std::string attributeListStr{"AttributeList"};
       obj->setEvtRefTokenStr(dh_token->toString());
-      Placement attr_placement = this->setPlacementWithType("AttributeList", "Token", *pAddr->par());
+      Placement attr_placement = this->setPlacementWithType(attributeListStr, "Token", *pAddr->par());
       const Token* ref_token = m_athenaPoolCnvSvc->registerForWrite(&attr_placement,
 	      obj->getEvtRefTokenStr().c_str(),
 	      RootType("Token"));
       delete ref_token; ref_token = nullptr;
       for (coral::AttributeList::const_iterator iter = list->begin(), last = list->end(); iter != last; ++iter) {
-         attr_placement = this->setPlacementWithType("AttributeList", (*iter).specification().name(), *pAddr->par());
+         attr_placement = this->setPlacementWithType(attributeListStr, (*iter).specification().name(), *pAddr->par());
          const Token* attr_token = m_athenaPoolCnvSvc->registerForWrite(&attr_placement,
 	         (*iter).addressOfData(),
                  RootType((*iter).specification().type()) );
