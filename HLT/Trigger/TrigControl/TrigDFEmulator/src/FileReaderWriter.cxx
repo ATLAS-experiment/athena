@@ -58,7 +58,7 @@ DFEF::FileReaderWriter::FileReaderWriter(const boost::property_tree::ptree &args
     std::string streamName = "SingleStream";
     std::string stream = run_params.get("stream", "");
     unsigned int lumiBlockNumber = run_params.get("lumiblock", 0);;
-    std::string applicationName = std::string("DFEF_") + m_outFileName;
+    std::string applicationName = m_outFileName;
 
     std::vector<std::string> fmdStrings = {};
 
