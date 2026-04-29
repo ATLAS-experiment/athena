@@ -1,20 +1,28 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
  * Major updates:
  * - 2022 Jan, Riccardo Maria Bianchi <riccardo.maria.bianchi@cern.ch>
  *             Added visualization for Calorimeters' sim hits
+ * - 2026 Apr, Riccardo Maria Bianchi <riccardo.maria.bianchi@cern.ch>
+ *             Added ITk simHits
  *
  */
 #include "VP1SimHitSystems/VP1SimHitSystem.h"
 #include "ui_simhitcontrollerform.h"
 
 #include "VP1Utils/VP1SGContentsHelper.h"
+#include "VP1Utils/VP1JobConfigInfo.h"
+#include "VP1Base/VP1Msg.h"
 #include "VP1UtilsCoinSoQt/VP1ColorUtils.h"
 
 #include "StoreGate/StoreGateSvc.h"
+#include "StoreGate/ReadHandleKey.h"
+
+#include "AthenaBaseComps/AthMessaging.h"
+#include "AthenaBaseComps/AthCheckMacros.h"
 
 #include "InDetSimEvent/SiHitCollection.h"
 #include "InDetSimEvent/TRTUncompressedHitCollection.h"
@@ -134,10 +142,13 @@ QWidget* VP1SimHitSystem::buildController()
 void VP1SimHitSystem::systemcreate(StoreGateSvc* detstore)
 {
   // Populate Color Map
-  m_clockwork->colorMap.insert("Pixel",SbColor(0,0,1));
-  m_clockwork->colorMap.insert("SCT",SbColor(1,1,1)); // white
-  m_clockwork->colorMap.insert("ITkPixel",SbColor(1,1,1)); // white
-  m_clockwork->colorMap.insert("ITkStrip",SbColor(1,1,1)); // white
+  if (VP1JobConfigInfo::hasITkGeometry()) {
+    m_clockwork->colorMap.insert("ITkPixel",SbColor(1,1,1)); // white
+    m_clockwork->colorMap.insert("ITkStrip",SbColor(1,1,1)); // white
+  } else {
+    m_clockwork->colorMap.insert("Pixel",SbColor(0,0,1));
+    m_clockwork->colorMap.insert("SCT",SbColor(1,1,1)); // white
+  }
   m_clockwork->colorMap.insert("TRT",SbColor(1,0,0)); // red
   m_clockwork->colorMap.insert("MDT",SbColor(.98,.8,.21));
   m_clockwork->colorMap.insert("RPC",SbColor(0,.44,.28));
@@ -274,7 +285,56 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
   sw->addChild(material);
 
   // Take hits from SG
-  if(detector=="Pixel")
+  if(detector=="ITkPixel")
+  {
+    //
+    // ITkPixel:
+    //
+    const SiHitCollection* p_collection = nullptr;
+    if(sg->retrieve(p_collection,"ITkPixelHits")==StatusCode::SUCCESS)
+    {
+      for (const SiHit& hit : *p_collection)
+      {
+        GeoSiHit ghit(hit);
+        if(!ghit) continue;
+        HepGeom::Point3D<double> u = ghit.getGlobalPosition();
+        hitVtxProperty->vertex.set1Value(hitCount++,u.x(),u.y(),u.z());
+      }
+    }
+    else
+      message("Unable to retrieve ITkPixel Hits");
+
+    SG::ReadHandleKey<SiHitCollection> hitsContainerKey {"ITkPixelHits"};
+    // Initialize keys
+    //ATH_CHECK(hitsContainerKey.initialize());
+    hitsContainerKey.initialize();
+    const EventContext&ctx {Gaudi::Hive::currentContext()};
+    const SiHitCollection* hitCollection{nullptr};
+    //ATH_CHECK(SG::get(hitCollection, hitsContainerKey, ctx));
+    SG::get(hitCollection, hitsContainerKey, ctx);
+    std::cout << "Event contains " << hitCollection->size() << " entries in " << hitsContainerKey.key() << std::endl;
+
+  }
+  else if(detector=="ITkStrip")
+  {
+    //
+    // ITkStrip:
+    //
+    const SiHitCollection* p_collection = nullptr;
+    if(sg->retrieve(p_collection,"ITkStripHits")==StatusCode::SUCCESS)
+    {
+      for (const SiHit& hit : *p_collection)
+      {
+        GeoSiHit ghit(hit);
+        if(!ghit) continue;
+        HepGeom::Point3D<double> u = ghit.getGlobalPosition();
+        hitVtxProperty->vertex.set1Value(hitCount++,u.x(),u.y(),u.z());
+      }
+    }
+    else
+      message("Unable to retrieve ITkStrip Hits");
+  }
+  else if(detector=="Pixel")
   {
     //
     // Pixel:
@@ -557,6 +617,8 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
         else
           message("Unable to retrieve Simulation Hits from "+key);
         }
+  } else {
+      VP1Msg::messageWarningRed("WARNING! Retrieval of Sim Hits not defined for the detector: " + detector, this);
   }
 
   // Add to the switch

@@ -141,14 +141,14 @@
             </item><item>
              <widget class="QCheckBox" name="chbxITkPixelHits">
               <property name="text">
-               <string>Pixel Hits</string>
+               <string>ITkPixel Sim Hits</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QCheckBox" name="chbxITkStripHits">
               <property name="text">
-               <string>SCT Hits</string>
+               <string>ITkStrip Sim Hits</string>
               </property>
              </widget>
             </item>
