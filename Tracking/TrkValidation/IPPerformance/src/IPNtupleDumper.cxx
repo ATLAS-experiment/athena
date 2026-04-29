@@ -1,4 +1,3 @@
-
 #include "IPPerformance/EventSelectorAlg.h"
 
 #include "IPPerformance/ReturnCheck.h"
@@ -21,27 +20,21 @@
 // Local include(s):
 #include "TrackVertexAssociationTool/TrackVertexAssociationTool.h"
 
-
 IPNtupleDumper::IPNtupleDumper(const std::string& name, ISvcLocator* pSvcLocator) 
 : AthAlgorithm(name, pSvcLocator)
 {
-  //m_name = name;
-  m_histOutput         = "IPNtupleDumper";
-  //m_inJetContainer     = "AntiKt4TruthJets_Selected";
   m_TruthPtCut         = 500.;
   m_TruthEtaCut        = 2.5;
   m_TruthMatchProb     = 0.5;
   m_doTightTruthMatch  = true;
   m_doGhostAssociation = true;
   m_vtxContainer       = "PrimaryVertices";
-  derivationName     = ""; // MVGR: Due to a mismatch between the derivation name when using or not the CA (IDTIDE vs. IDTIDE1), the derivation name is now obtained automatically using the function "GetDerivationName" 
   m_deltaRCut          = 0.4;
   m_IPhistos           = nullptr;
-
+  
 }
 
 IPNtupleDumper ::~IPNtupleDumper() {}
-
 
 StatusCode IPNtupleDumper :: initialize ()
 {
@@ -55,30 +48,29 @@ StatusCode IPNtupleDumper :: initialize ()
   // you create here won't be available in the output if you have no
   // input events.
 
-  Info("initialize()", "Initializing IPNtupleDumper..." );
+  ATH_MSG_INFO("initialize(): Initializing IPNtupleDumper..." );
 
   if (m_jetKey.empty()) {
-    Info("IPNtupleDumper::configure()","InputJetContainer is empty!");
+    ATH_MSG_INFO("IPNtupleDumper::configure(): InputJetContainer is empty!");
     return StatusCode::FAILURE;
   }
-  Info("IPNtupleDumper::configure()","InputJetContainer: %s", m_jetKey.key());
+  ATH_MSG_INFO("IPNtupleDumper::configure(): InputJetContainer: "<< m_jetKey.key());
   ATH_CHECK( m_jetKey.initialize() );
   ATH_CHECK( m_jetConstitScalePtKey.initialize() );
 
 
   if (m_trackKey.empty()) {
-    Info("IPNtupleDumper::configure()","InputTrackContainer is empty!");
+    ATH_MSG_INFO("IPNtupleDumper::configure(): InputTrackContainer is empty!");
     return StatusCode::FAILURE;
   }
-  Info("IPNtupleDumper::configure()","InputTrackContainer: %s", m_trackKey.key());
+  ATH_MSG_INFO("IPNtupleDumper::configure(): InputTrackContainer: "<< m_trackKey.key());
   ATH_CHECK( m_trackKey.initialize() );
 
   if (m_vtxContainer.empty()) {
-    Info("IPNtupleDumper::configure()","InputVertexContainer is empty!");
+    ATH_MSG_INFO("IPNtupleDumper::configure(): InputVertexContainer is empty!");
     return StatusCode::FAILURE;
   }
-  Info("IPNtupleDumper::configure()","InputVertexContainer: %s", m_vtxContainer.c_str());
-
+  ATH_MSG_INFO("IPNtupleDumper::configure(): InputVertexContainer: "<< m_vtxContainer);
 
   //Track to vertex tool
   ANA_CHECK(m_trktovxtool.retrieve());
@@ -90,55 +82,67 @@ StatusCode IPNtupleDumper :: initialize ()
   ANA_MSG_INFO( "   pt cut: " << m_TruthPtCut );
   ANA_MSG_INFO( "   eta cut: " << m_TruthEtaCut );
   ANA_MSG_INFO( "   truth matching probability: " << m_TruthMatchProb );
-  m_truthhelper = new TrackTruthHelpers(m_TruthPtCut,m_TruthEtaCut,m_TruthMatchProb);
   
   if(!m_isMC) ATH_CHECK( m_trigDecTool.retrieve());
   ServiceHandle<ITHistSvc> histSvc ("THistSvc","IPNtupleDumper");
   ATH_CHECK( histSvc.retrieve() );
   if (!m_ipSaveHistosOnly) {
-    t1 = new TTree("IPtree", "IPtree");
-    SetBranches(t1);
-    ANA_CHECK( histSvc->regTree("/MYSTREAM/IPtree",t1));
+    m_t1 = new TTree("IPtree", "IPtree");
+    SetBranches(m_t1);
+    ANA_CHECK( histSvc->regTree("/MYSTREAM/IPtree",m_t1));
     
-    h_SumOfEventWeights = new TH1D("h_SumOfEventWeights", "", 2, 0.5, 1.5);
-    ANA_CHECK( histSvc->regHist("/MYSTREAM/h_SumOfEventWeights",h_SumOfEventWeights));
+    m_h_SumOfEventWeights = new TH1D("h_SumOfEventWeights", "", 2, 0.5, 1.5);
+    ANA_CHECK( histSvc->regHist("/MYSTREAM/h_SumOfEventWeights",m_h_SumOfEventWeights));
   }
   else{ // Set up all the tools needed for IP studies
 
-    Info("histInitialize()", "Initializing IPhistos class");
+    ATH_MSG_INFO("histInitialize(): Initializing IPhistos class");
     m_IPhistos = std::make_unique<IPhistos>("default_");
-    Info("histInitialize()", "Saving additonal IP histograms? %s", std::to_string(m_ipSaveAdditionalHistos).c_str());
+    ATH_MSG_INFO("histInitialize(): Saving additonal IP histograms? "<<m_ipSaveAdditionalHistos);
     m_IPhistos->SaveAdditionalHistos(m_ipSaveAdditionalHistos);
-    Info("histInitialize()", "Defining 3D histograms");
-    m_IPhistos->Define3DHistos();
+    ATH_MSG_INFO("histInitialize(): Defining 3D histograms");
+    m_IPhistos->define3DHistos();
     for (const auto& histEntry : m_IPhistos->get3DHistos()) {
-        const std::string& histName = histEntry.first;
-        TH3D* hist = histEntry.second;
-	ANA_CHECK( histSvc->regHist("/MYSTREAM/"+histName,hist));
+      const std::string& histName = histEntry.first;
+      TH3D* hist = histEntry.second;
+      ANA_CHECK( histSvc->regHist("/MYSTREAM/"+histName,hist));
     }
-    Info("histInitialize()", "Defining 2D histograms");
-    m_IPhistos->Define2DHistos();
+    ATH_MSG_INFO("histInitialize(): Defining 2D histograms");
+    m_IPhistos->define2DHistos();
     for (const auto& histEntry : m_IPhistos->get2DHistos()) {
-        const std::string& histName = histEntry.first;
-        TH2D* hist = histEntry.second;
-        ANA_CHECK( histSvc->regHist("/MYSTREAM/"+histName,hist));
+      const std::string& histName = histEntry.first;
+      TH2D* hist = histEntry.second;
+      ANA_CHECK( histSvc->regHist("/MYSTREAM/"+histName,hist));
     }
 
-    Info("histInitialize()", "Booking histograms");
+    ATH_MSG_INFO("histInitialize(): Booking histograms");
     m_IPhistos->BookHistograms();
     for(const auto& histvector : m_IPhistos->get1Dvector()) {
-       for(const auto& hist: histvector) {
-          const std::string& histName = hist->GetName();
-          ANA_CHECK( histSvc->regHist("/MYSTREAM/"+histName,hist));
-       }
+      for(const auto& hist: histvector) {
+        const std::string& histName = hist->GetName();
+        ANA_CHECK( histSvc->regHist("/MYSTREAM/"+histName,hist));
+      }
     }
-
-    Info("histInitialize()", "Histograms booked successfully!");
+    ATH_MSG_INFO("histInitialize(): Histograms booked successfully!");
 
   }
+  // ===== IDTIDE =====
+  ATH_CHECK(m_d0_IDTIDE_key.initialize());
+  ATH_CHECK(m_z0_IDTIDE_key.initialize());
+  ATH_CHECK(m_d0Sigma_IDTIDE_key.initialize());
+  ATH_CHECK(m_z0Sigma_IDTIDE_key.initialize());
+  ATH_CHECK(m_PVd0Sigma_IDTIDE_key.initialize());
+  ATH_CHECK(m_PVz0Sigma_IDTIDE_key.initialize());
+
+  // ===== IDTIDE1 =====
+  ATH_CHECK(m_d0_IDTIDE1_key.initialize());
+  ATH_CHECK(m_z0_IDTIDE1_key.initialize());
+  ATH_CHECK(m_d0Sigma_IDTIDE1_key.initialize());
+  ATH_CHECK(m_z0Sigma_IDTIDE1_key.initialize());
+  ATH_CHECK(m_PVd0Sigma_IDTIDE1_key.initialize());
+  ATH_CHECK(m_PVz0Sigma_IDTIDE1_key.initialize());
 
   return StatusCode::SUCCESS;
-
 }
 
 
@@ -155,9 +159,8 @@ StatusCode IPNtupleDumper :: finalize ()
   // merged. This is different from histFinalize() in that it only
   // gets called on worker nodes that processed input events.
 
-  Info("finalize()", "Deleting tool instances...");
+  ATH_MSG_INFO("finalize(): Deleting tool instances...");
 
-  if (m_truthhelper) delete m_truthhelper;
   m_trackselectionTools.clear();
 
   return StatusCode::SUCCESS;
@@ -167,17 +170,17 @@ StatusCode IPNtupleDumper :: finalize ()
 StatusCode IPNtupleDumper :: execute () 
 {
   const EventContext& ctx = Gaudi::Hive::currentContext();
-
+  ATH_MSG_INFO("DEBUG KEY = " << m_d0_IDTIDE_key.key());
   //Retrieve event Info
   const xAOD::EventInfo* evtInfo = 0;
   if (!evtStore()->retrieve(evtInfo,"EventInfo").isSuccess()) {
-    Error("execute()","Failed to retrieve event info. Exiting.");
+    ATH_MSG_ERROR("execute(): Failed to retrieve event info. Exiting.");
     return StatusCode::FAILURE;
   }
   
   // Check if we are running on MC
   m_isMC = evtInfo->eventType( xAOD::EventInfo::IS_SIMULATION );
-  Info("initialize()", "Is MC? %i", static_cast<int>(m_isMC) );
+  ATH_MSG_INFO("initialize(): Is MC? :"<<m_isMC);
 
   // Set event weight to MC event weight on MC
   if( m_isMC ) evtW = evtInfo->mcEventWeight();
@@ -186,7 +189,7 @@ StatusCode IPNtupleDumper :: execute ()
   // Retrieve vertices 
   const xAOD::VertexContainer* vtxContainer = 0;
   if (!evtStore()->retrieve(vtxContainer,m_vtxContainer).isSuccess()) {
-    Error("execute()","Failed to retrieve vertex container. Exiting.");
+    ATH_MSG_ERROR("execute(): Failed to retrieve vertex container. Exiting.");
     return StatusCode::FAILURE;
   }
   // Sanity check
@@ -226,20 +229,12 @@ StatusCode IPNtupleDumper :: execute ()
   // MVGR : Retrieve AntiKt4EMPFlowJets. These are needed for weight corrections when using Run-3 data, as skimming in Run-3 no longer relies in EMTopoJets
   const xAOD::JetContainer* inAntiKt4EMPFlowJets = 0; 
   if (!evtStore()->retrieve(inAntiKt4EMPFlowJets, "AntiKt4EMPFlowJets").isSuccess()){ //retrieve the jets
-    Error("execute()", "Failed to retrieve AntiKt4EMPFlowJets Container. Exiting.");
-    return StatusCode::FAILURE;
-  }
-
-  // MVGR: Get the Derivation Name
-  derivationName = GetDerivationName(recoTracksSelected.cptr());
-  if (derivationName == ""){
-    Error("execute()", "Could not find the derivation name from the output. Exiting.");
+    ATH_MSG_ERROR("execute(): Failed to retrieve AntiKt4EMPFlowJets Container. Exiting.");
     return StatusCode::FAILURE;
   }
   
-  // Check for the decorations. If not available exit. 
-  if (!CheckForAvailableDecorations(recoTracksSelected.cptr(), derivationName)) {
-    Error("execute()","IP decorations not available. Exiting.");
+  if (!CheckIPDecorations(ctx)) {
+    ATH_MSG_ERROR("execute(): IP decorations not available. Exiting.");
     return StatusCode::FAILURE;
   }
 
@@ -397,7 +392,7 @@ StatusCode IPNtupleDumper :: execute ()
   // MVGR ==========
   const xAOD::JetContainer* inAntiKt4EMTopoJets = 0;
   if (!evtStore()->retrieve(inAntiKt4EMTopoJets, "AntiKt4EMTopoJets").isSuccess()){ // Retrieve AntiKtEMTopoJets directly from input
-    Error("execute()", "Failed to retrieve AntiKt4EMTopoJets Container. Exiting.");
+    ATH_MSG_ERROR("execute(): Failed to retrieve AntiKt4EMTopoJets Container. Exiting.");
     return StatusCode::FAILURE;
   }
   for (auto jet : *inAntiKt4EMTopoJets) {
@@ -408,12 +403,12 @@ StatusCode IPNtupleDumper :: execute ()
   // MVGR ==============
 
   if (!m_ipSaveHistosOnly) {  
-    t1->Fill();
-    h_SumOfEventWeights->Fill(1.0, evtW);
+    m_t1->Fill();
+    m_h_SumOfEventWeights->Fill(1.0, evtW);
   }
   else {
     if (FillIPHistograms() != StatusCode::SUCCESS) {
-      Error("execute()", "Failed to fill IP histograms. Exiting.");
+      ATH_MSG_ERROR("execute(): Failed to fill IP histograms. Exiting.");
       return StatusCode::FAILURE;
     };
   }
@@ -579,53 +574,114 @@ void IPNtupleDumper::ResetVars()
     
 }
 
-bool IPNtupleDumper::CheckForAvailableDecorations(const xAOD::TrackParticleContainer* trkC, const std::string& derivationName ) 
+StatusCode IPNtupleDumper::CheckIPDecorations(const EventContext& ctx)
 {
+  // ===== IDTIDE =====
+  SG::ReadDecorHandle<xAOD::TrackParticleContainer, float> d0_IDTIDE(m_d0_IDTIDE_key, ctx);
+  SG::ReadDecorHandle<xAOD::TrackParticleContainer, float> z0_IDTIDE(m_z0_IDTIDE_key, ctx);
+  SG::ReadDecorHandle<xAOD::TrackParticleContainer, float> d0Sigma_IDTIDE(m_d0Sigma_IDTIDE_key, ctx);
+  SG::ReadDecorHandle<xAOD::TrackParticleContainer, float> z0Sigma_IDTIDE(m_z0Sigma_IDTIDE_key, ctx);
+  SG::ReadDecorHandle<xAOD::TrackParticleContainer, float> PVd0Sigma_IDTIDE(m_PVd0Sigma_IDTIDE_key, ctx);
+  SG::ReadDecorHandle<xAOD::TrackParticleContainer, float> PVz0Sigma_IDTIDE(m_PVz0Sigma_IDTIDE_key, ctx);
 
-  bool available = false;
-  
-  xAOD::TrackParticleContainer::const_iterator trk = trkC->begin(); 
-  static const SG::Accessor<float> mAcc_unbias_d0(derivationName + "_unbiased_d0");
-  static const SG::Accessor<float> mAcc_unbias_z0(derivationName + "_unbiased_z0");
-  static const SG::Accessor<float> mAcc_unbias_d0Sigma(derivationName + "_unbiased_d0Sigma");
-  static const SG::Accessor<float> mAcc_unbias_z0Sigma(derivationName + "_unbiased_z0Sigma");
-  static const SG::Accessor<float> mAcc_unbias_PVd0Sigma(derivationName + "_unbiased_PVd0Sigma");
-  static const SG::Accessor<float> mAcc_unbias_PVz0Sigma(derivationName + "_unbiased_PVz0Sigma");
+  bool hasIDTIDE =
+    d0_IDTIDE.isAvailable() &&
+    z0_IDTIDE.isAvailable();
+    d0Sigma_IDTIDE.isAvailable() &&
+    z0Sigma_IDTIDE.isAvailable() &&
+    PVd0Sigma_IDTIDE.isAvailable() &&
+    PVz0Sigma_IDTIDE.isAvailable();
+  // ===== IDTIDE1 =====
+  SG::ReadDecorHandle<xAOD::TrackParticleContainer, float> d0_IDTIDE1(m_d0_IDTIDE1_key, ctx);
+  SG::ReadDecorHandle<xAOD::TrackParticleContainer, float> z0_IDTIDE1(m_z0_IDTIDE1_key, ctx);
+  SG::ReadDecorHandle<xAOD::TrackParticleContainer, float> d0Sigma_IDTIDE1(m_d0Sigma_IDTIDE1_key, ctx);
+  SG::ReadDecorHandle<xAOD::TrackParticleContainer, float> z0Sigma_IDTIDE1(m_z0Sigma_IDTIDE1_key, ctx);
+  SG::ReadDecorHandle<xAOD::TrackParticleContainer, float> PVd0Sigma_IDTIDE1(m_PVd0Sigma_IDTIDE1_key, ctx);
+  SG::ReadDecorHandle<xAOD::TrackParticleContainer, float> PVz0Sigma_IDTIDE1(m_PVz0Sigma_IDTIDE1_key, ctx);
 
-  if (mAcc_unbias_d0.isAvailable(**trk) &&
-      mAcc_unbias_z0.isAvailable(**trk) &&
-      mAcc_unbias_d0Sigma.isAvailable(**trk) &&
-      mAcc_unbias_z0Sigma.isAvailable(**trk) &&
-      mAcc_unbias_PVd0Sigma.isAvailable(**trk) &&
-      mAcc_unbias_PVz0Sigma.isAvailable(**trk) )
-    available = true;
+  bool hasIDTIDE1 =
+    d0_IDTIDE1.isAvailable() &&
+    z0_IDTIDE1.isAvailable();
+    d0Sigma_IDTIDE1.isAvailable() &&
+    z0Sigma_IDTIDE1.isAvailable() &&
+    PVd0Sigma_IDTIDE1.isAvailable() &&
+    PVz0Sigma_IDTIDE1.isAvailable();
 
-    
-  return available;
-   
+  if (!hasIDTIDE && !hasIDTIDE1) {
+    ATH_MSG_ERROR("No valid IP decorations found!");
+    return StatusCode::FAILURE;
+  }
+
+  if (hasIDTIDE && hasIDTIDE1) {
+    ATH_MSG_WARNING("Both IDTIDE and IDTIDE1 found, using IDTIDE");
+  }
+
+  m_useIDTIDE = hasIDTIDE;
+
+  return StatusCode::SUCCESS;
 }
 
-std::string IPNtupleDumper::GetDerivationName(const xAOD::TrackParticleContainer* trkC) // We will get the derivation name from the variables in the output
-{ 
-  
-  xAOD::TrackParticleContainer::const_iterator trk = trkC->begin();
-  static const SG::Accessor<float> mAcc_IDTIDE("IDTIDE_unbiased_d0");
-  static const SG::Accessor<float> mAcc_IDTIDE1("IDTIDE1_unbiased_d0");
 
-  //if( (*trk)->isAvailable<float>("IDTIDE_unbiased_d0") ){
-  if(mAcc_IDTIDE.isAvailable(**trk)){
-    return "IDTIDE";
-  }
-  //else if( (*trk)->isAvailable<float>("IDTIDE1_unbiased_d0") ){
-  else if(mAcc_IDTIDE1.isAvailable(**trk)){
-    return "IDTIDE1";
-  }
-  else{
-    return "";
+bool IPNtupleDumper::isPrimary(const xAOD::TrackParticle* track) const
+{
+  //Get associated truth particle
+  const xAOD::TruthParticle* truth =  truthParticle( track );
+  if( !truth  ){
+    return false;
   }
 
+  //Is the this a primary truth particle?
+  if (!isPrimaryParticle( truth ))
+    return false;
+
+  // Don't use tracks with low truth math probability
+  TruthMatchProbabilityCut truthMatchProbabilityCut(m_TruthMatchProb);
+  if( !truthMatchProbabilityCut.accept(track, NULL) )
+    return false;
+  return true;
 }
 
+bool IPNtupleDumper::isPrimaryParticle(const xAOD::TruthParticle* truth) const
+{
+  //Check to see if its a stable particle
+  if( truth->status() != 1 )
+    return false;
+
+  //Clearly for tracking we don't care about Neutrals
+  if( const_cast<xAOD::TruthParticle*>(truth)->isNeutral() )
+    return false;
+
+  //Barcode of zero indicates there was no truth paticle found for this track
+  if( truth->barcode() == 0 || truth->barcode() >= 200e3)
+    return false;
+
+  //Particle is in phase space
+  if( !passAcceptance(truth) )
+    return false;
+
+  //Particle is not a strange baryon
+  if( truth->isStrangeBaryon() )
+    return false;
+
+  return true;
+}
+
+const xAOD::TruthParticle* IPNtupleDumper::truthParticle(const xAOD::TrackParticle *track) const
+{
+  typedef ElementLink< xAOD::TruthParticleContainer > Link_t;
+  static const SG::Accessor<Link_t> mAcc_link("truthParticleLink");
+  const Link_t& link = mAcc_link(*track);
+  if( ! link.isValid() ) {
+    return 0;
+  }
+
+  return *link;
+}
+
+bool IPNtupleDumper::passAcceptance(const xAOD::TruthParticle* truth) const
+{
+  return ( truth->pt() > m_TruthPtCut and std::fabs(truth->eta()) < m_TruthEtaCut );
+}
 
 void IPNtupleDumper::TrackToJetDeltaRAssociation(const xAOD::TrackParticle* trk, const xAOD::JetContainer* jets, float dRcut,float& deltaR, float& pT, float& Etajet, int &JVTjet) 
 {
@@ -695,10 +751,7 @@ bool IPNtupleDumper::ProcessTrack_DeltaR(const xAOD::TrackParticle* track, const
   bool hasMatch = false;
   bool hasMatchFirst = false;
   int count_vtx = 0;
-
-  for (xAOD::VertexContainer::const_iterator vtx_itr = vtxCont->begin(); vtx_itr != vtxCont->end(); ++vtx_itr) {
-
-    const xAOD::Vertex * vtx = dynamic_cast<const xAOD::Vertex *>(*vtx_itr);
+  for (const xAOD::Vertex* vtx : *vtxCont) {
     count_vtx++;
 
     hasMatch = m_trktovxtool->isCompatible(*(track), *(vtx));
@@ -708,14 +761,14 @@ bool IPNtupleDumper::ProcessTrack_DeltaR(const xAOD::TrackParticle* track, const
 
   // Remove tracks without associated vertices
   if( !hasMatch ) {
-    Warning("IPNtupleDumper::ProcessTrack", "No vertex found for track.");
+    Warning("IPNtupleDumper::ProcessTrack_DeltaR", "No vertex found for track.");
     return false;
   }
 
   // Remove tracks not associated to first primary vertex
   // KB: assume this is the vertex of the jet --> is there a way of checking this on the fly?
   if ( !(hasMatchFirst) ) {
-    Warning("IPNtupleDumper::ProcessTrack", "Track not associated to primary vertex.");
+    Warning("IPNtupleDumper::ProcessTrack_DeltaR", "Track not associated to primary vertex.");
     return false;
   }
   
@@ -750,14 +803,14 @@ bool IPNtupleDumper::ProcessTrack_GhostAssoc(const xAOD::TrackParticle* track, c
     }
     // Remove tracks without associated vertices
     if( !hasMatch ) {
-      Warning("IPNtupleDumper::ProcessTrack", "No vertex found for track.");
+      Warning("IPNtupleDumper::ProcessTrack_GhostAssoc", "No vertex found for track.");
       return false;
     }
 
     // Remove tracks not associated to first primary vertex
     // KB: assume this is the vertex of the jet --> is there a way of checking this on the fly?
     if ( !(hasMatchFirst) ){
-      Warning("IPNtupleDumper::ProcessTrack", "Track not associated to primary vertex.");
+      Warning("IPNtupleDumper::ProcessTrack_GhostAssoc", "Track not associated to primary vertex.");
       return false;
     }
 
@@ -774,23 +827,30 @@ bool IPNtupleDumper::ProcessTrack_GhostAssoc(const xAOD::TrackParticle* track, c
 
 void IPNtupleDumper::FillTreeVariables(const xAOD::TrackParticle* track,float deltaR_trk_jet,float pTjet,float Etajet,bool JVTjet) 
 {
-          
+  const EventContext& ctx = Gaudi::Hive::currentContext();
   uint8_t selBits = 0x0;
  
-  static const SG::Accessor<float> mAcc_d0PV(derivationName + "_unbiased_d0");   
-  static const SG::Accessor<float> mAcc_z0PV(derivationName + "_unbiased_z0");   
-  static const SG::Accessor<float> mAcc_d0SigmaPV(derivationName + "_unbiased_d0Sigma");   
-  static const SG::Accessor<float> mAcc_z0SigmaPV(derivationName + "_unbiased_z0Sigma");   
-  static const SG::Accessor<float> mAcc_d0PVSigmaPV(derivationName + "_unbiased_PVd0Sigma");   
-  static const SG::Accessor<float> mAcc_z0PVSigmaPV(derivationName + "_unbiased_PVz0Sigma");   
-    
-  float d0PV        = mAcc_d0PV(*track); 
-  float z0PV        = mAcc_z0PV(*track); 
-  float d0SigmaPV   = mAcc_d0SigmaPV(*track); 
-  float z0SigmaPV   = mAcc_z0SigmaPV(*track); 
-  float d0PVSigmaPV = mAcc_d0PVSigmaPV(*track); 
-  float z0PVSigmaPV = mAcc_z0PVSigmaPV(*track);
- 
+  SG::ReadDecorHandle<xAOD::TrackParticleContainer, float> d0_IDTIDE(m_d0_IDTIDE_key, ctx);
+  SG::ReadDecorHandle<xAOD::TrackParticleContainer, float> z0_IDTIDE(m_z0_IDTIDE_key, ctx);
+  SG::ReadDecorHandle<xAOD::TrackParticleContainer, float> d0Sigma_IDTIDE(m_d0Sigma_IDTIDE_key, ctx);
+  SG::ReadDecorHandle<xAOD::TrackParticleContainer, float> z0Sigma_IDTIDE(m_z0Sigma_IDTIDE_key, ctx);
+  SG::ReadDecorHandle<xAOD::TrackParticleContainer, float> PVd0Sigma_IDTIDE(m_PVd0Sigma_IDTIDE_key, ctx);
+  SG::ReadDecorHandle<xAOD::TrackParticleContainer, float> PVz0Sigma_IDTIDE(m_PVz0Sigma_IDTIDE_key, ctx);
+
+  // ===== IDTIDE1 =====
+  SG::ReadDecorHandle<xAOD::TrackParticleContainer, float> d0_IDTIDE1(m_d0_IDTIDE1_key, ctx);
+  SG::ReadDecorHandle<xAOD::TrackParticleContainer, float> z0_IDTIDE1(m_z0_IDTIDE1_key, ctx);
+  SG::ReadDecorHandle<xAOD::TrackParticleContainer, float> d0Sigma_IDTIDE1(m_d0Sigma_IDTIDE1_key, ctx);
+  SG::ReadDecorHandle<xAOD::TrackParticleContainer, float> z0Sigma_IDTIDE1(m_z0Sigma_IDTIDE1_key, ctx);
+  SG::ReadDecorHandle<xAOD::TrackParticleContainer, float> PVd0Sigma_IDTIDE1(m_PVd0Sigma_IDTIDE1_key, ctx);
+  SG::ReadDecorHandle<xAOD::TrackParticleContainer, float> PVz0Sigma_IDTIDE1(m_PVz0Sigma_IDTIDE1_key, ctx);
+
+  float d0PV        = m_useIDTIDE ? d0_IDTIDE(*track)        : d0_IDTIDE1(*track);
+  float z0PV        = m_useIDTIDE ? z0_IDTIDE(*track)        : z0_IDTIDE1(*track);
+  float d0SigmaPV   = m_useIDTIDE ? d0Sigma_IDTIDE(*track)   : d0Sigma_IDTIDE1(*track);
+  float z0SigmaPV   = m_useIDTIDE ? z0Sigma_IDTIDE(*track)   : z0Sigma_IDTIDE1(*track);
+  float d0PVSigmaPV = m_useIDTIDE ? PVd0Sigma_IDTIDE(*track) : PVd0Sigma_IDTIDE1(*track);
+  float z0PVSigmaPV = m_useIDTIDE ? PVz0Sigma_IDTIDE(*track) : PVz0Sigma_IDTIDE1(*track); 
   
   for (unsigned int i_selTool = 0; i_selTool<m_trackselectionTools.size(); i_selTool++) {
     if (m_trackselectionTools[i_selTool]->accept(track))
@@ -802,11 +862,11 @@ void IPNtupleDumper::FillTreeVariables(const xAOD::TrackParticle* track,float de
 
   if (m_isMC) {
     
-    const xAOD::TruthParticle* truth_p = nullptr;
+    const xAOD::TruthParticle* truth_p = getTrackTruthLink(track);
     if (m_doTightTruthMatch){
-      truth_p = getAssociatedPrimaryTruth(track);
+      if(!isPrimary(track)) truth_p = nullptr; // function isPrimary to be defined in this file
     }
-    else truth_p = getTrackTruthLink(track);
+
 
     if (truth_p){ 
       trk_truth_pt.push_back(truth_p->pt());
@@ -945,11 +1005,6 @@ void IPNtupleDumper::FillTreeVariables(const xAOD::TrackParticle* track,float de
 
 }
 
-// This should eventually return a bool..
-// TODO:Remove hardcoding
-// from: https://acode-browser2.usatlas.bnl.gov/lxr/source/r21/atlas/Reconstruction/MET/METUtilities/Root/METMaker.cxx
-// cuts from:
-// https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/BTaggingBenchmarksRelease21
 bool IPNtupleDumper::PassJVTCut(const xAOD::Jet* jet) 
 {
   if (jet->pt() < 60000 && fabs(jet->eta() < 2.4)) {
@@ -961,8 +1016,6 @@ bool IPNtupleDumper::PassJVTCut(const xAOD::Jet* jet)
       else
         return 1;
     }
-    //else
-    //Warning("PassJVTCut()","Couldn't retrieve Jvt");
   }
   //If the jet is not decorated with jvt, or jetpT>60 GeV
   return -1;
@@ -989,22 +1042,6 @@ const xAOD::TruthParticle* IPNtupleDumper::getTrackTruthLink(const xAOD::TrackPa
 // Alternative track-truth matching based on TrackTruthHelper
 // See the following talk for different track-truh-matching approaches
 // https://indico.cern.ch/event/795039/contributions/3391771/attachments/1857138/3050771/TruthTrackFTAGWS.pdf
-const xAOD::TruthParticle* IPNtupleDumper::getAssociatedPrimaryTruth(const xAOD::TrackParticle* track) const
-{
-
-  const xAOD::TruthParticle* truth = nullptr;
-  
-  // Check if the track particle originated from a primary charged particle 
-  // within detector acceptance and with good truth match probability
-  if (m_truthhelper->isPrimary( track )){
-  //@TODO for just test 
-  //if (true){
-    truth = m_truthhelper->truthParticle( track );
-  }
-
-  return truth;
-
-}
 
 StatusCode IPNtupleDumper::FillIPHistograms() 
 {

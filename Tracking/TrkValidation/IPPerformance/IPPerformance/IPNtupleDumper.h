@@ -22,7 +22,6 @@
 #include "InDetTrackSystematicsTools/InDetTrackBiasingTool.h"
 
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "IPPerformance/TrackTruthHelper.h"
 #include "IPPerformance/ReturnCheck.h"
 #include "GaudiKernel/ToolHandle.h"
 #ifndef __MAKECINT__
@@ -41,6 +40,24 @@
 // IP studies
 #include "IPPerformance/IPhistos.h"
 
+class TruthMatchProbabilityCut {
+ protected:
+  double m_truthmatchprobabilitycut;
+ public:
+ TruthMatchProbabilityCut(double truthmatchprobabilitycut = 0.5) :
+  m_truthmatchprobabilitycut (truthmatchprobabilitycut) {};
+  bool accept(const xAOD::TrackParticle* track, const xAOD::Vertex*) const {
+    static const SG::Accessor<float> mAcc_truthMatchProbability("truthMatchProbability");
+    if( !mAcc_truthMatchProbability(*track)) {
+      Warning("TruthMatchProbabilityCut()", "Track Particle has no MatchProb! Is this data?" );
+      return true;
+    }
+    const SG::Accessor<float> mAcc_truthProb("truthMatchProbability");
+    const float truthProb = mAcc_truthProb(*track);
+    return ( truthProb >= m_truthmatchprobabilitycut );
+  }
+};
+
 class IPNtupleDumper : public AthAlgorithm
 {
 
@@ -57,8 +74,24 @@ public:
   std::string m_vtxContainer;                     //! vtx container name
   SG::ReadHandleKey<xAOD::JetContainer> m_jetKey{this, "JetsKey", "AntiKt4EMTopoJets_Selected"};
   SG::ReadDecorHandleKey<xAOD::JetContainer> m_jetConstitScalePtKey{this, "JetConstitScalePt", m_jetKey, "JetConstitScaleMomentum_pt"};
- 
-  std::string m_histOutput;                       //! output file name
+
+  // IDTIDE
+  SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_d0_IDTIDE_key{this, "d0IDTIDEKey", m_trackKey, "IDTIDE_unbiased_d0", ""};
+  SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_z0_IDTIDE_key{this, "z0IDTIDEKey", m_trackKey, "IDTIDE_unbiased_z0", ""};
+  SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_d0Sigma_IDTIDE_key{this, "d0SigmaIDTIDEKey", m_trackKey, "IDTIDE_unbiased_d0Sigma", ""};
+  SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_z0Sigma_IDTIDE_key{this, "z0SigmaIDTIDEKey", m_trackKey, "IDTIDE_unbiased_z0Sigma", ""};
+  SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_PVd0Sigma_IDTIDE_key{this, "PVd0SigmaIDTIDEKey", m_trackKey, "IDTIDE_unbiased_PVd0Sigma", ""};
+  SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_PVz0Sigma_IDTIDE_key{this, "PVz0SigmaIDTIDEKey", m_trackKey, "IDTIDE_unbiased_PVz0Sigma", ""};
+
+  // IDTIDE1
+  SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_d0_IDTIDE1_key{this, "d0IDTIDE1Key", m_trackKey, "IDTIDE1_unbiased_d0", ""};
+  SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_z0_IDTIDE1_key{this, "z0IDTIDE1Key", m_trackKey, "IDTIDE1_unbiased_z0", ""};
+  SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_d0Sigma_IDTIDE1_key{this, "d0SigmaIDTIDE1Key", m_trackKey, "IDTIDE1_unbiased_d0Sigma", ""};
+  SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_z0Sigma_IDTIDE1_key{this, "z0SigmaIDTIDE1Key", m_trackKey, "IDTIDE1_unbiased_z0Sigma", ""};
+  SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_PVd0Sigma_IDTIDE1_key{this, "PVd0SigmaIDTIDE1Key", m_trackKey, "IDTIDE1_unbiased_PVd0Sigma", ""};
+  SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_PVz0Sigma_IDTIDE1_key{this, "PVz0SigmaIDTIDE1Key", m_trackKey, "IDTIDE1_unbiased_PVz0Sigma", ""};
+  bool m_useIDTIDE = false;
+
   std::string derivationName;                   //! derivation name for the IP decorations
   Gaudi::Property<float> m_TruthPtCut{this, "TruthPtCut", 500, "Limit to do track-jet association"};
   Gaudi::Property<float> m_TruthEtaCut{this, "TruthEtaCut", 2.5, "Limit to do track-jet association"};
@@ -67,32 +100,26 @@ public:
   Gaudi::Property<bool>  m_doGhostAssociation{this, "DoGhostAssociation", true, "RetrieveTracks via ghostAssociation (true) or deltaR matching (false)"};
   Gaudi::Property<float> m_deltaRCut{this, "DeltaRCut", 0.4, "DeltaR cut for matching"};
 
-  Gaudi::Property<bool> m_ipHLTcorrection{this,"ipHLTcorrection",false,"Flags to HLTcorrection"}; // Passed as a flag in the runAnalysis command line. Include or not HLT prescale correction in data weights.
+  Gaudi::Property<bool> m_ipHLTcorrection{this,"ipHLTcorrection",true,"Flags to HLTcorrection"}; // Passed as a flag in the runAnalysis command line. Include or not HLT prescale correction in data weights.
 
   // Flags and variables used for IP studies 
-  Gaudi::Property<bool> m_ipSaveHistosOnly{this, "ipSaveHistosOnly", false, "Flag to save histograms only"};   // Passed as a flag in the runAnalysis command line. Save the IP histograms only without dumping an IP ntuple.
+  Gaudi::Property<bool> m_ipSaveHistosOnly{this, "ipSaveHistosOnly", true, "Flag to save histograms only"};   // Passed as a flag in the runAnalysis command line. Save the IP histograms only without dumping an IP ntuple.
 
-  Gaudi::Property<bool> m_ipSaveAdditionalHistos{this,"ipSaveAdditionalHistos",false,"Flag to save AdditionalHistos"};
+  Gaudi::Property<bool> m_ipSaveAdditionalHistos{this,"ipSaveAdditionalHistos",true,"Flag to save AdditionalHistos"};
   std::unique_ptr<IPhistos> m_IPhistos;           //!
   // variables that don't get filled at submission time should be
   // protected from being send from the submission node to the worker
   // node (done by the //!)
 
 
-  int m_eventCounter;     //!
   Gaudi::Property<bool> m_isMC{this, "isMC", false, " whether the data is Monte Carlo"};
-  TrackTruthHelpers* m_truthhelper; //!
-  ToolHandleArray<InDet::IInDetTrackSelectionTool> m_trackselectionTools{this, "trackSelTools", {}};
+  //TrackTruthHelpers* m_truthhelper; //!
+  ToolHandleArray<InDet::IInDetTrackSelectionTool> m_trackselectionTools{this, "trackSelectionTools", {}};
   ToolHandle<CP::TrackVertexAssociationTool>    m_trktovxtool{this,"trktovxtool","CP::TrackVertexAssociationTool"};
   
-  TTree *t1; //!
+  TTree *m_t1; //!
   
-  TH1D* h_SumOfEventWeights = nullptr; //! //MVGR: to help getting total SumOfWeights of MC slices
-  TH1D* h_jetPt; //!  //no use
-  TH1D* h_jetPt_passSel; //!
-  TH2D* h_rtrack; //!
-  TH2D* h_ntrack; //!
-  TH1D* h_pTratio; //!
+  TH1D* m_h_SumOfEventWeights = nullptr; //! //MVGR: to help getting total SumOfWeights of MC slices
 
   public:
   
@@ -110,7 +137,9 @@ public:
   void SetBranches(TTree* t);
   void ResetVars();
   bool CheckForAvailableDecorations(const xAOD::TrackParticleContainer* trkC, const std::string& m_derivationName);
-
+  StatusCode CheckIPDecorations(const EventContext& ctx);
+  const xAOD::TruthParticle* truthParticle(const xAOD::TrackParticle* ) const;
+  bool passAcceptance(const xAOD::TruthParticle* truth) const;
   std::string GetDerivationName(const xAOD::TrackParticleContainer* trkC);
   
   void TrackToJetDeltaRAssociation(const xAOD::TrackParticle* trk, const xAOD::JetContainer* jets, float dRcut,float& deltaR, float& pT, float& Etajet, int& JVTjet);
@@ -139,6 +168,9 @@ public:
   const xAOD::TruthParticle* getTrackTruthLink(const xAOD::TrackParticle* track)  const ;
     
   const xAOD::TruthParticle* getAssociatedPrimaryTruth(const xAOD::TrackParticle* track)  const;
+
+  bool isPrimary(const xAOD::TrackParticle* track) const;
+  bool isPrimaryParticle(const xAOD::TruthParticle* truth) const;
   
   //========Tree Output Branches=======
   
@@ -219,7 +251,6 @@ public:
   std::vector<float> trk_truth_z0; //!
 
   //For the systematics
-  //InDet::InDetTrackTruthFilterTool *m_truthFilterTool; //!
   ToolHandle<InDet::InDetTrackTruthFilterTool>    m_truthFilterTool{this,"truthFilterTool","InDet::InDetTrackTruthFilterTool"};
   //===================================
   

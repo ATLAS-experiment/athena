@@ -193,7 +193,7 @@ void IPhistos::BuildAxesMap()
 
 } // End of BuildAxesMap()
 
-void IPhistos::Define3DHistos()
+void IPhistos::define3DHistos()
 {
   
   std::string h_name = "";
@@ -225,9 +225,9 @@ void IPhistos::Define3DHistos()
     }
   }
 
-} // End of Define3DHistos()
+} // End of define3DHistos()
 
-void IPhistos::Define2DHistos()
+void IPhistos::define2DHistos()
 {
 
   std::string h_name = "";
@@ -260,7 +260,7 @@ void IPhistos::Define2DHistos()
     } // Additional histos
   } // categories
 
-} // End of Define2DHistos()
+} // End of define2DHistos()
 
 void IPhistos::BookHistograms()
 {

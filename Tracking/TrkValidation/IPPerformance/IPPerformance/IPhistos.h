@@ -12,9 +12,9 @@ class IPhistos : public BaseHistos
   
   IPhistos(const std::string& inputName);  
 
-  void Define3DHistos() override;
-  void Define2DHistos() override;
-  void Define1DHistos() override {};
+  void define3DHistos() override;
+  void define2DHistos() override;
+  void define1DHistos() override {};
   std::vector<std::vector<TH1D*>> get1Dvector() {
 	  return m_1D;
   };

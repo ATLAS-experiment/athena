@@ -3,7 +3,6 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaCommon.Logging import logging
-#from SimulationConfig.SimEnums import SimulationFlavour
 def EventSelectorAlgCfg(flags, name="EventSelectorAlg", **kwargs):
 
     acc = ComponentAccumulator()
@@ -16,34 +15,39 @@ def EventSelectorAlgCfg(flags, name="EventSelectorAlg", **kwargs):
 
 def JetCalibratorCfg(flags, name="JetCalibrator", **kwargs):
     acc = ComponentAccumulator()
-    jct = CompFactory.JetCalibrationTool()
-    #jct.name="jetCalibration"
-    jct.JetCollection = "AntiKt4EMTopo"
-    #jct.ConfigFile = "JES_MC16Recommendation_Consolidated_EMTopo_Apr2019_Rel21.config"
+    from JetCalibTools.JetCalibToolsConfig import defineJetCalibTool
     config = "JES_MC16Recommendation_Consolidated_EMTopo_Apr2019_Rel21.config"
     if flags.Input.isMC:
         if not flags.Sim.ISF.Simulator.isFullSim():
             config = "JES_MC16Recommendation_AFII_EMTopo_Apr2019_Rel21.config"
-    jct.ConfigFile = config
-
-    jct.CalibArea = "00-04-82"
     if flags.Input.isMC:
-        jct.CalibSequence = "JetArea_Residual_EtaJES_GSC_Smear"
+        CalibSequence = "JetArea_Residual_EtaJES_GSC_Smear"
     else:
-        jct.CalibSequence = "JetArea_Residual_EtaJES_GSC_Insitu"
-        
-    jct.IsData = not flags.Input.isMC
-    #jct.RhoKey = "auto"
-    #jct.PrimaryVerticesContainerName = "PrimaryVertices"
-    #jct.GSCDepth = "auto"
-    jct.OutputLevel = logging.INFO
+        CalibSequence = "JetArea_Residual_EtaJES_GSC_Insitu"
+    jct = defineJetCalibTool(jetcollection="AntiKt4EMTopo",context="AnalysisLatest",configfile=config,calibarea="00-04-82",calibseq=CalibSequence,data_type = "mc" if flags.Input.isMC else "data",rhoname="auto", pvname="PrimaryVertices", gscdepth="auto")
 
-    jetCleaningTool = CompFactory.JetCleaningTool()
-    jetCleaningTool.CutLevel = "LooseBad"
-    #this tool is not used
-    jvt = CompFactory.JetVertexTaggerTool()
-    jvt.JetContainer="Jets_Calib" #TOBE checked
-    jvt.JVTFileName = "JetMomentTools/JVTlikelihood_20140805.root"
+    #jct = CompFactory.JetCalibrationTool()
+    #jct.JetCollection = "AntiKt4EMTopo"
+    #config = "JES_MC16Recommendation_Consolidated_EMTopo_Apr2019_Rel21.config"
+    #if flags.Input.isMC:
+     #   if not flags.Sim.ISF.Simulator.isFullSim():
+      #      config = "JES_MC16Recommendation_AFII_EMTopo_Apr2019_Rel21.config"
+    #jct.ConfigFile = config
+
+    #jct.CalibArea = "00-04-82"
+    #if flags.Input.isMC:
+     #   jct.CalibSequence = "JetArea_Residual_EtaJES_GSC_Smear"
+    #else:
+     #   jct.CalibSequence = "JetArea_Residual_EtaJES_GSC_Insitu"
+        
+    #jct.IsData = not flags.Input.isMC
+    #jct.OutputLevel = logging.INFO
+
+    from JetSelectorTools.JetSelectorToolsConfig import JetCleaningToolCfg
+    jetCleaningTool = acc.popToolsAndMerge(JetCleaningToolCfg(flags,name="JetCleaningTool",jetdef="AntiKt4EMTopoJets",cleaningLevel="LooseBad",useDecorations=True))
+
+    #jetCleaningTool = CompFactory.JetCleaningTool()
+    #jetCleaningTool.CutLevel = "LooseBad"
 
     jetUncertaintiesTool = CompFactory.JetUncertaintiesTool()
     #the following parameters have to be configured here 
@@ -60,7 +64,6 @@ def JetCalibratorCfg(flags, name="JetCalibrator", **kwargs):
     jetCalibrator.jetCalibration = jct
     jetCalibrator.JESUncertTool = jetUncertaintiesTool 
     jetCalibrator.jetCleaning = jetCleaningTool 
-    jetCalibrator.JVTTool = jvt 
 
     acc.addEventAlgo(jetCalibrator)
     return acc
@@ -68,9 +71,12 @@ def JetCalibratorCfg(flags, name="JetCalibrator", **kwargs):
 
 def JetSelectorCfg(flags,name="JetSelector", **kwargs):
     acc = ComponentAccumulator()
-    jetCleaningTool = CompFactory.JetCleaningTool()
-    jetCleaningTool.CutLevel = "LooseBad"
-    jetCleaningTool.DoUgly = False
+
+    #jetCleaningTool = CompFactory.JetCleaningTool()
+    #jetCleaningTool.CutLevel = "LooseBad"
+    #jetCleaningTool.DoUgly = False
+    from JetSelectorTools.JetSelectorToolsConfig import JetCleaningToolCfg
+    jetCleaningTool = acc.popToolsAndMerge(JetCleaningToolCfg(flags,name="JetCleaningTool",jetdef="AntiKt4EMTopoJets",cleaningLevel="LooseBad",useDecorations=True))
 
     jetSelector = CompFactory.JetSelector("JetSelector", **kwargs)
     jetSelector.jetCleaning = jetCleaningTool
@@ -90,14 +96,14 @@ def IPNtupleDumperCfg(flags,name="IPNtupleDumper", **kwargs):
     if "trktovxtool" not in kwargs:
         from TrackVertexAssociationTool.TrackVertexAssociationToolConfig import TTVAToolCfg
         kwargs.setdefault("trktovxtool", acc.popToolsAndMerge(
-            TTVAToolCfg(flags, WorkingPoint="Prompt_MaxWeight")))
+            TTVAToolCfg(flags,name="TTVATool", WorkingPoint="Prompt_MaxWeight")))
 
     if "trigDecTool" not in kwargs:
         from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
         kwargs.setdefault("trigDecTool", acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags)))
 
     if "trackSelectionTools" not in kwargs:
-        from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        from InDetConfig.InDetTrackSelectionToolConfig import (
             InDetTrackSelectionTool_LoosePrimary_Cfg, InDetTrackSelectionTool_TightPrimary_Cfg)
         kwargs.setdefault("trackSelectionTools", [
             acc.popToolsAndMerge(InDetTrackSelectionTool_LoosePrimary_Cfg(flags)),

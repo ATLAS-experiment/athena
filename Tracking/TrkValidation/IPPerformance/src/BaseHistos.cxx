@@ -8,23 +8,23 @@ BaseHistos::BaseHistos(std::string inputName)
   m_name = inputName; 
 }
 
-TH1D* BaseHistos::plot1D(std::string name,std::string xtitle, int nbinsX, double xmin, double xmax) {
+TH1D* BaseHistos::plot1D(const std::string& name,const std::string& xtitle, int nbinsX, double xmin, double xmax) {
   TH1D* h= new TH1D(name.c_str(),name.c_str(),nbinsX,xmin,xmax);
   h->GetXaxis()->SetTitle(xtitle.c_str());
   h->Sumw2();
   return h;
 }
 
-TH1D* BaseHistos::plot1D(std::string name,std::string xtitle, int nbinsX, double* axisX) {
+TH1D* BaseHistos::plot1D(const std::string& name,const std::string& xtitle, int nbinsX, double* axisX) {
   TH1D* h= new TH1D(name.c_str(),name.c_str(),nbinsX,axisX);
   h->GetXaxis()->SetTitle(xtitle.c_str());
   h->Sumw2();
   return h;
 }
 
-TH2D* BaseHistos::plot2D(std::string name,
-                         std::string xtitle, int nbinsX, double xmin, double xmax,
-                         std::string ytitle, int nbinsY, double ymin, double ymax) {
+TH2D* BaseHistos::plot2D(const std::string& name,
+                         const std::string& xtitle, int nbinsX, double xmin, double xmax,
+                         const std::string& ytitle, int nbinsY, double ymin, double ymax) {
   
   TH2D* h = new TH2D(name.c_str(),name.c_str(),
                      nbinsX,xmin,xmax,
@@ -36,9 +36,9 @@ TH2D* BaseHistos::plot2D(std::string name,
 }
 
 
-TH2D* BaseHistos::plot2D(std::string name,
-                         std::string xtitle, int nbinsX, double* axisX,
-                         std::string ytitle, int nbinsY, double* axisY) {
+TH2D* BaseHistos::plot2D(const std::string& name,
+                         const std::string& xtitle, int nbinsX, double* axisX,
+                         const std::string& ytitle, int nbinsY, double* axisY) {
 
   TH2D * h = new TH2D(name.c_str(),name.c_str(),
                       nbinsX,axisX,
@@ -49,9 +49,9 @@ TH2D* BaseHistos::plot2D(std::string name,
   return h;
 }
 
-TH2D* BaseHistos::plot2D(std::string name,
-                         std::string xtitle, int nbinsX, const double* axisX,
-                         std::string ytitle, int nbinsY, const double* axisY) {
+TH2D* BaseHistos::plot2D(const std::string& name,
+                         const std::string& xtitle, int nbinsX, const double* axisX,
+                         const std::string& ytitle, int nbinsY, const double* axisY) {
 
   TH2D * h = new TH2D(name.c_str(),name.c_str(),
                       nbinsX,axisX,
@@ -62,9 +62,9 @@ TH2D* BaseHistos::plot2D(std::string name,
   return h;
 }
 
-TH2D* BaseHistos::plot2D(std::string name,
-                         std::string xtitle, int nbinsX, double* axisX,
-                         std::string ytitle, int nbinsY, double  ymin, double ymax) {
+TH2D* BaseHistos::plot2D(const std::string& name,
+                         const std::string& xtitle, int nbinsX, double* axisX,
+                         const std::string& ytitle, int nbinsY, double  ymin, double ymax) {
 
   TH2D * h = new TH2D(name.c_str(),name.c_str(),
                       nbinsX,axisX,
@@ -75,10 +75,10 @@ TH2D* BaseHistos::plot2D(std::string name,
   return h;
 }
 
-TH3D*  BaseHistos::plot3D(std::string name,
-                          std::string xtitle, int nbinsX, double* axisX,
-                          std::string ytitle, int nbinsY, double* axisY,
-                          std::string ztitle, int nbinsZ, double* axisZ) {
+TH3D*  BaseHistos::plot3D(const std::string& name,
+                          const std::string& xtitle, int nbinsX, double* axisX,
+                          const std::string& ytitle, int nbinsY, double* axisY,
+                          const std::string& ztitle, int nbinsZ, double* axisZ) {
   
   TH3D* h = new TH3D(name.c_str(),name.c_str(),
                      nbinsX,axisX,
@@ -92,10 +92,10 @@ TH3D*  BaseHistos::plot3D(std::string name,
   return h;
 }
 
-TH3D*  BaseHistos::plot3D(std::string name,
-                          std::string xtitle, int nbinsX, double* axisX,
-                          std::string ytitle, int nbinsY, double* axisY,
-                          std::string ztitle, int nbinsZ, double zmin, double zmax) {
+TH3D*  BaseHistos::plot3D(const std::string& name,
+                          const std::string& xtitle, int nbinsX, double* axisX,
+                          const std::string& ytitle, int nbinsY, double* axisY,
+                          const std::string& ztitle, int nbinsZ, double zmin, double zmax) {
   
   double xlow = axisX[0];
   double xup  = axisX[nbinsX];
@@ -113,10 +113,10 @@ TH3D*  BaseHistos::plot3D(std::string name,
   return h;
 }
 
-TH3D*  BaseHistos::plot3D(std::string name,
-                          std::string xtitle, int nbinsX, double xmin, double xmax,
-                          std::string ytitle, int nbinsY, double ymin, double ymax,
-                          std::string ztitle, int nbinsZ, double zmin, double zmax) {
+TH3D*  BaseHistos::plot3D(const std::string& name,
+                          const std::string& xtitle, int nbinsX, double xmin, double xmax,
+                          const std::string& ytitle, int nbinsY, double ymin, double ymax,
+                          const std::string& ztitle, int nbinsZ, double zmin, double zmax) {
   
   TH3D* h = new TH3D(name.c_str(),name.c_str(),
          nbinsX,xmin,xmax,

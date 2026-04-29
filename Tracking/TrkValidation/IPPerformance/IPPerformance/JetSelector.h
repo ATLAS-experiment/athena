@@ -37,19 +37,13 @@ private:
 
   int m_pvLocation;       //!
 
-  bool m_isTruthjet;                //!
-  bool m_isEMjet;                //!
-  bool m_isLCjet;                //!
- 
   // obtain StoreGateSvc
   StoreGateSvc* m_storeGate = nullptr;
 
    // cutflow
   TH1D* m_jet_cutflowHist;  //!
   TH1D* m_cutflowHist;          //!
-  int   m_cutflow_bin;          //!
 
-  //JetCleaningTool          * m_jetCleaning;    //!
   ToolHandle<JetCleaningTool>   m_jetCleaning{this,"jetCleaning","JetCleaningTool"};
   /* object-level cutflow */
   
@@ -74,13 +68,11 @@ public:
   virtual StatusCode execute ();
   virtual StatusCode finalize ();
 
-  // these are the functions not inherited from Algorithm
-
   // added functions not from Algorithm
   // why does this need to be virtual?
   virtual int PassCuts( const xAOD::Jet* jet );
   void CleanJets(const xAOD::JetContainer* cleanJetcopy , JetCleaningTool* m_jetCleaning);
-	int getPrimaryVertexLocation(const xAOD::VertexContainer* vertexContainer);
+  int getPrimaryVertexLocation(const xAOD::VertexContainer* vertexContainer);
 
 };
 
