@@ -80,17 +80,17 @@ namespace dqm_algorithms {
                 float Meanhigh;
                 float redMean;
                 if (Xbins > 100) {
-                 Meanlow = dqm_algorithms::tools::GetFirstFromMap( "MeanL", config.getParameters(), mean_global-12.5);
-                 Meanhigh = dqm_algorithms::tools::GetFirstFromMap( "MeanH", config.getParameters(), mean_global+12.5);
-                 redMean = dqm_algorithms::tools::GetFirstFromMap( "MeanRed", config.getParameters(), mean_global+30.0);     
+                 Meanlow = dqm_algorithms::tools::GetFirstFromMap( "MeanL", config.getParameters(), mean_global-50.5);
+                 Meanhigh = dqm_algorithms::tools::GetFirstFromMap( "MeanH", config.getParameters(), mean_global+50.5);
+                 redMean = dqm_algorithms::tools::GetFirstFromMap( "MeanRed", config.getParameters(), mean_global+100.0);     
                 } else if (Xbins < 15) {
-                 Meanlow = dqm_algorithms::tools::GetFirstFromMap( "MeanL", config.getParameters(), mean_global-50.0);
-                 Meanhigh = dqm_algorithms::tools::GetFirstFromMap( "MeanH", config.getParameters(), mean_global+50.0);
-                 redMean = dqm_algorithms::tools::GetFirstFromMap( "MeanRed", config.getParameters(), mean_global+75.0);
+                 Meanlow = dqm_algorithms::tools::GetFirstFromMap( "MeanL", config.getParameters(), mean_global-150.0);
+                 Meanhigh = dqm_algorithms::tools::GetFirstFromMap( "MeanH", config.getParameters(), mean_global+150.0);
+                 redMean = dqm_algorithms::tools::GetFirstFromMap( "MeanRed", config.getParameters(), mean_global+200.0);
                 } else {
-                 Meanlow = dqm_algorithms::tools::GetFirstFromMap( "MeanL", config.getParameters(), mean_global-25.0);
-                 Meanhigh = dqm_algorithms::tools::GetFirstFromMap( "MeanH", config.getParameters(), mean_global+25.0);
-                 redMean = dqm_algorithms::tools::GetFirstFromMap( "MeanRed", config.getParameters(), mean_global+50.0);
+                 Meanlow = dqm_algorithms::tools::GetFirstFromMap( "MeanL", config.getParameters(), mean_global-100.0);
+                 Meanhigh = dqm_algorithms::tools::GetFirstFromMap( "MeanH", config.getParameters(), mean_global+100.0);
+                 redMean = dqm_algorithms::tools::GetFirstFromMap( "MeanRed", config.getParameters(), mean_global+150.0);
                 } 
 
                 std::vector<float> MeanX(Ybins, 0.0);
@@ -105,7 +105,7 @@ namespace dqm_algorithms {
                     Passed = Passed +1;
                     continue;
                  }
-                 if (MeanX[i] > Meanlow && MeanX[i] < Meanhigh) Passed = Passed +1;
+                 else if (MeanX[i] > Meanlow && MeanX[i] < Meanhigh) Passed = Passed +1;
                  if (abs(MeanX[i]-mean_global) > abs(redMean-mean_global))  redflag=true;
                 }
                 double gthreshold;
@@ -127,7 +127,7 @@ namespace dqm_algorithms {
                 } else {
                   result->status_ = dqm_core::Result::Red;
                 }
-                result->tags_["Xbins"] = Xbins;
+                result->tags_["Ybins"] = Ybins;
                 result->tags_["Passed"] = Passed;
                 result->tags_["MeanGlobal"] = mean_global;
     return result;
