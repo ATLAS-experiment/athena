@@ -22,6 +22,8 @@
 #include "CoolKernel/StorageType.h"
 #include "CoolKernel/ConstRecordAdapter.h"
 
+#include <iostream>
+
 ClassImp(dqutils::CoolRpc)
 
 namespace dqutils {
@@ -204,7 +206,7 @@ namespace dqutils {
 
   std::string
   CoolRpc::
-   dumpField(cool::ChannelId channelId, std::string field) {
+   dumpField(cool::ChannelId channelId, const std::string & field) {
     std::string result = "";
     try {
       cool::ChannelSelection selection = cool::ChannelSelection(channelId);

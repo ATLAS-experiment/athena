@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DataQualityUtils/MonitoringFile.h"
@@ -37,6 +37,10 @@
 #include "TTreeReaderArray.h"
 
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
+
+namespace{
+  const std::string emptyStr;
+}
 
 ClassImp(dqutils::MonitoringFile)
 
@@ -86,7 +90,7 @@ namespace dqutils {
 
     ~histCollection();
 
-    void addDirectory(TDirectory* dir, const std::string& dirName, const std::string& filename = "");
+    void addDirectory(TDirectory* dir, const std::string& dirName, const std::string& filename = emptyStr);
     size_t size() { return m_data.size(); };
     void print();
     void write();  // Destructive method, will delete internal data after writing
@@ -1116,12 +1120,7 @@ namespace dqutils {
 
       std::string idirName = idir->first;
       std::cout << "Checking " << idirName << "\n" << std::flush;
-      // std::string::size_type j = idirName.find( "L1Calo/1_PPr_EmFADCTiming" );
-      // if( j != std::string::npos ) {
-      //   std::cerr << "Skipping directory \"" << idirName << "\"\n";
-      //   std::cerr << std::flush;
-      //   continue;
-      // }
+
 
       if (!dirHasHistogramsInMetadata(idir->second)) {
         continue;
@@ -1143,7 +1142,7 @@ namespace dqutils {
       std::string idirName = idir->first;
       std::cout << "Processing " << idirName << "\n" << std::flush;
 
-      TDirectory* toDir = createDir(outdirmap, outfile.get(), "", idirName);
+      TDirectory* toDir = createDir(outdirmap, outfile.get(), emptyStr, idirName);
       if (toDir == 0) {
         std::cerr << "MonitoringFile::copyHistograms(): "
                   << "Directory \'" << idirName << "\' not created in output file\n";

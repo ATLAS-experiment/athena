@@ -18,9 +18,8 @@ namespace cool {
 #endif
 
 
-#include <iostream>
-#include <string>
-#include <cstdlib>
+
+
 
 #include <TObject.h>
 
@@ -38,24 +37,10 @@ namespace cool {
 
 #include "CxxUtils/checker_macros.h"
 
-#include <sstream>
-#include <fstream>
-#include <TCanvas.h>
-#include <TDirectory.h>
-#include <TFile.h>
-#include <TGraph.h>
-#include <TGraphErrors.h>
-#include <TH1.h>
-#include <TH2.h>
-#include <TIterator.h>
-#include <TKey.h>
-#include <TLegend.h>
-#include <TProfile.h>
-#include <TROOT.h>
-#include <TStyle.h>
-#include <TLatex.h>
-#include <TMath.h>
-#include <TTree.h>
+#include <string>
+
+class TGraphErrors;
+class TCanvas;
 
 namespace coral {
   class AttributeList;
@@ -110,8 +95,8 @@ namespace dqutils {
     virtual ~HistogramDataCOOL ();
 
     // Methods of "interest". To insert a status flag you can use either ChannelId or ChannelName.
-    void dump(cool::ChannelSelection selection, std::string tag_name);
-    std::string dumpHisto(cool::ChannelId channelId, std::string field, std::string tag_name);
+    void dump(cool::ChannelSelection selection, const std::string & tag_name);
+    std::string dumpHisto(cool::ChannelId channelId, const std::string &field, const std::string &tag_name);
     int dumpCode(const std::string& channelName, const std::string& tag_name);
     void dumpall(const std::string& tag_name);
 
@@ -119,8 +104,8 @@ namespace dqutils {
                  const std::string& algo,
                  int entries, float par1, float par2, float par3, float par4, float par5,
                  const std::string& tag_name);
-    void insertH(std::string channelName, int code, std::string algo, int entries, float par1, float par2, float par3,
-                 float par4, float par5, std::string tag_name);
+    void insertH(const std::string & channelName, int code, const std::string & algo, int entries, float par1, float par2, float par3,
+                 float par4, float par5, const std::string & tag_name);
 
     virtual void ntupleDB(int HistoId, const std::string& nameHisto, const std::string& configuration, int Irun,
                           int Frun);

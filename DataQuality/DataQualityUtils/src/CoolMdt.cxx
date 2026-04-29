@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 //*************************************************
@@ -21,6 +21,8 @@
 #include "CoolKernel/IDatabaseSvc.h"
 #include "CoolKernel/StorageType.h"
 #include "CoolKernel/ConstRecordAdapter.h"
+
+#include <iostream>
 
 ClassImp(dqutils::CoolMdt)
 
@@ -233,8 +235,8 @@ namespace dqutils {
 
   std::string
   CoolMdt::
-   dumpField(cool::ChannelId channelId, std::string field) {
-    std::string result = "";
+   dumpField(cool::ChannelId channelId, const std::string & field) {
+    std::string result;
     try {
       cool::ChannelSelection selection = cool::ChannelSelection(channelId);
       cool::IObjectIteratorPtr objects = m_coolFolder->browseObjects(m_since, m_until, selection, "");

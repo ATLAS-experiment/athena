@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 // **********************************************************************
@@ -9,8 +9,7 @@
 
 #include "DataQualityUtils/MonitoringFile.h"
 
-#include <cmath>
-#include <vector>
+
 
 #include <TCanvas.h>
 #include <TF1.h>
@@ -20,6 +19,50 @@
 #include <TKey.h>
 #include <TMath.h>
 #include <TProfile.h>
+#include <cmath>
+#include <vector>
+#include <array>
+
+namespace{
+  // ----- list the histograms for offline efficiencies -----
+  // word of warning: hardcoded maximum of 3 in the efficiency functions
+  //                  if you add stages, increase the size of histo_matrix
+  //                  or histo_tensor respectively!
+  // note: offline effs use "egEt", "egEta" etc., this is hardcoded in the
+  //       variable name formation in the offl. eff function.
+  // finally: use std::vector<std::string> varname = {"Et", "Eta", "Phi"}
+  //          if we're ever going to use C++11 around this place...
+  
+  static const std::vector<std::string> varName = {
+    "Et",
+    "Eta",
+    "Phi",
+  };
+  
+  // ----- chain stages for relative effs -----
+  // word of warning: hardcoded maximum of 5 in the efficiency functions
+  //                  if you add stages, increase the size of histo_matrix
+  //                  or histo_tensor respectively!
+  // finally: use std::vector<std::string> phoStage = {"L1", "L2Calo", "EFCalo"}
+  //          and std::vector<std::string> phoStage = {"L1", "L2Calo", "L2ID", "EFCalo", "EFID"}
+  //          if we're ever going to use C++11 around this place...
+  
+  //photons
+  static const std::vector<std::string> phoStage = {
+    "L1",
+    "L2Calo",
+    "EFCalo",
+  };
+  
+  //electrons
+  static const std::vector<std::string> eleStage = {
+    "L1",
+    "L2Calo",
+    "L2ID",
+    "EFCalo",
+    "EFID",
+  };
+}
 
 namespace dqutils {
   //--------------------------------------------------------------------------------
@@ -107,45 +150,7 @@ namespace dqutils {
         return;
       }
 
-      // ----- list the histograms for offline efficiencies -----
-      // word of warning: hardcoded maximum of 3 in the efficiency functions
-      //                  if you add stages, increase the size of histo_matrix
-      //                  or histo_tensor respectively!
-      // note: offline effs use "egEt", "egEta" etc., this is hardcoded in the
-      //       variable name formation in the offl. eff function.
-      // finally: use std::vector<std::string> varname = {"Et", "Eta", "Phi"}
-      //          if we're ever going to use C++11 around this place...
-
-      static const std::vector<std::string> varName = {
-        "Et",
-        "Eta",
-        "Phi",
-      };
-
-      // ----- chain stages for relative effs -----
-      // word of warning: hardcoded maximum of 5 in the efficiency functions
-      //                  if you add stages, increase the size of histo_matrix
-      //                  or histo_tensor respectively!
-      // finally: use std::vector<std::string> phoStage = {"L1", "L2Calo", "EFCalo"}
-      //          and std::vector<std::string> phoStage = {"L1", "L2Calo", "L2ID", "EFCalo", "EFID"}
-      //          if we're ever going to use C++11 around this place...
-
-      //photons
-      static const std::vector<std::string> phoStage = {
-        "L1",
-        "L2Calo",
-        "EFCalo",
-      };
-
-      //electrons
-      static const std::vector<std::string> eleStage = {
-        "L1",
-        "L2Calo",
-        "L2ID",
-        "EFCalo",
-        "EFID",
-      };
-
+     
       // ----- loop over directories (i.e. trigger chains) ------
       TIter next_trig(egammamonDir->GetListOfKeys());
       TKey* key_trig(0);
