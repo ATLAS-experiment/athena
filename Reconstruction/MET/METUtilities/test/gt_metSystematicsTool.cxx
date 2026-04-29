@@ -38,9 +38,9 @@ namespace met {
   public:
 
     METSystTest() :
-      tool(toolname)
+      m_tool(toolname)
     {
-      tool.msg().setLevel(MSG::WARNING);
+      m_tool.msg().setLevel(MSG::WARNING);
     }
 
 //     void SetUpFileInput() {
@@ -65,56 +65,56 @@ namespace met {
 //     std::unique_ptr<POOL::TEvent> event;
 // #endif
 
-    met::METSystematicsTool tool;
+    met::METSystematicsTool m_tool;
 
   }; // METSystTest
 
   TEST_F( METSystTest,  TestDefaultHistosFilled ){
-    ASSERT_TRUE(tool.initialize().isSuccess());
+    ASSERT_TRUE(m_tool.initialize().isSuccess());
 
-    ASSERT_TRUE(tool.m_trk_shiftpara_pthard_njet_mu!=nullptr);
-    ASSERT_TRUE(tool.m_trk_resopara_pthard_njet_mu !=nullptr);
-    ASSERT_TRUE(tool.m_trk_resoperp_pthard_njet_mu !=nullptr);
-    ASSERT_TRUE(tool.m_jet_systRpt_pt_eta      ==nullptr);
+    ASSERT_TRUE(m_tool.m_trk_shiftpara_pthard_njet_mu!=nullptr);
+    ASSERT_TRUE(m_tool.m_trk_resopara_pthard_njet_mu !=nullptr);
+    ASSERT_TRUE(m_tool.m_trk_resoperp_pthard_njet_mu !=nullptr);
+    ASSERT_TRUE(m_tool.m_jet_systRpt_pt_eta      ==nullptr);
   }
 
   TEST_F( METSystTest,  TestJetTrkHistosFilled ){
-    ASSERT_TRUE(tool.setProperty("ConfigPrefix", "METUtilities/data16_13TeV/rec_Dec16v1"));
-    ASSERT_TRUE(tool.setProperty("ConfigSoftTrkFile","") );
-    ASSERT_TRUE(tool.setProperty("ConfigJetTrkFile" ,"JetTrackSyst.config"));
-    ASSERT_TRUE(tool.initialize().isSuccess());
+    ASSERT_TRUE(m_tool.setProperty("ConfigPrefix", "METUtilities/data16_13TeV/rec_Dec16v1"));
+    ASSERT_TRUE(m_tool.setProperty("ConfigSoftTrkFile","") );
+    ASSERT_TRUE(m_tool.setProperty("ConfigJetTrkFile" ,"JetTrackSyst.config"));
+    ASSERT_TRUE(m_tool.initialize().isSuccess());
 
-    ASSERT_TRUE(tool.m_trk_shiftpara_pthard_njet_mu==nullptr);
-    ASSERT_TRUE(tool.m_trk_resopara_pthard_njet_mu ==nullptr);
-    ASSERT_TRUE(tool.m_trk_resoperp_pthard_njet_mu ==nullptr);
-    ASSERT_TRUE(tool.m_jet_systRpt_pt_eta      !=nullptr);
+    ASSERT_TRUE(m_tool.m_trk_shiftpara_pthard_njet_mu==nullptr);
+    ASSERT_TRUE(m_tool.m_trk_resopara_pthard_njet_mu ==nullptr);
+    ASSERT_TRUE(m_tool.m_trk_resoperp_pthard_njet_mu ==nullptr);
+    ASSERT_TRUE(m_tool.m_jet_systRpt_pt_eta      !=nullptr);
   }
 
   TEST_F( METSystTest,  TestAddAffectingSystematic ){
-    ASSERT_TRUE(tool.initialize().isSuccess());
+    ASSERT_TRUE(m_tool.initialize().isSuccess());
 
-    CP::SystematicSet recSys =  tool.recommendedSystematics();
+    CP::SystematicSet recSys =  m_tool.recommendedSystematics();
 
     CP::SystematicVariation test("testSystematic");//recommendedSystematic
 
-    ASSERT_TRUE( !tool.isAffectedBySystematic(test) );
-    ASSERT_TRUE( tool.addAffectingSystematic(test , true /*recommended */) );
-    ASSERT_TRUE( tool.isAffectedBySystematic(test) );
+    ASSERT_TRUE( !m_tool.isAffectedBySystematic(test) );
+    ASSERT_TRUE( m_tool.addAffectingSystematic(test , true /*recommended */) );
+    ASSERT_TRUE( m_tool.isAffectedBySystematic(test) );
   }
 
   TEST_F( METSystTest,  TestProjectST ){
-    ASSERT_TRUE(tool.initialize().isSuccess());
+    ASSERT_TRUE(m_tool.initialize().isSuccess());
 
     met::missingEt yaxisSoftTerm (0., 15., 50.);
     met::missingEt xaxisHardTerm (10., 0., 50.);
 
-    met::missingEt proj = tool.projectST(yaxisSoftTerm, xaxisHardTerm);
+    met::missingEt proj = m_tool.projectST(yaxisSoftTerm, xaxisHardTerm);
 
     EXPECT_FLOAT_EQ(proj.mpx, yaxisSoftTerm.mpx);
     EXPECT_FLOAT_EQ(proj.mpy, (-1)*yaxisSoftTerm.mpy ); //in this case, our "projection" will do a reflection over the x (ptHard) axis
     EXPECT_FLOAT_EQ(proj.sumet, yaxisSoftTerm.sumet);
 
-    met::missingEt projectBack = tool.projectST(proj, xaxisHardTerm);
+    met::missingEt projectBack = m_tool.projectST(proj, xaxisHardTerm);
 
     EXPECT_FLOAT_EQ( projectBack.mpx, yaxisSoftTerm.mpx );
     EXPECT_FLOAT_EQ( projectBack.mpy, yaxisSoftTerm.mpy );
@@ -123,29 +123,29 @@ namespace met {
   }
 
   TEST_F( METSystTest,  TestProjectST2 ){
-    ASSERT_TRUE(tool.initialize().isSuccess());
+    ASSERT_TRUE(m_tool.initialize().isSuccess());
 
     met::missingEt yaxisSoftTerm (0., 15., 50.);
     met::missingEt xaxisHardTerm (10., 0., 50.);
 
-    met::missingEt proj = tool.variedSoftTerm(yaxisSoftTerm, xaxisHardTerm, 0., 0.);
+    met::missingEt proj = m_tool.variedSoftTerm(yaxisSoftTerm, xaxisHardTerm, 0., 0.);
     EXPECT_FLOAT_EQ( proj.mpx  , yaxisSoftTerm.mpx );
     EXPECT_FLOAT_EQ( proj.mpy  , yaxisSoftTerm.mpy );
     EXPECT_FLOAT_EQ( proj.sumet, yaxisSoftTerm.sumet );
 
     double shift = 1.;
-    proj = tool.variedSoftTerm(yaxisSoftTerm, xaxisHardTerm, shift, 0.); //
+    proj = m_tool.variedSoftTerm(yaxisSoftTerm, xaxisHardTerm, shift, 0.); //
     EXPECT_FLOAT_EQ( proj.mpx  , (yaxisSoftTerm.mpx+shift) );
     EXPECT_FLOAT_EQ( proj.mpy  ,  yaxisSoftTerm.mpy );
     EXPECT_FLOAT_EQ( proj.sumet,  yaxisSoftTerm.sumet );
   }
 
   TEST_F( METSystTest,  TestNoConfigFiles ){
-    ASSERT_TRUE(  tool.setProperty("ConfigSoftTrkFile","") );
-    ASSERT_TRUE(  tool.setProperty("ConfigJetTrkFile",""));
-    ASSERT_TRUE(  tool.setProperty("ConfigSoftCaloFile",""));
+    ASSERT_TRUE(  m_tool.setProperty("ConfigSoftTrkFile","") );
+    ASSERT_TRUE(  m_tool.setProperty("ConfigJetTrkFile",""));
+    ASSERT_TRUE(  m_tool.setProperty("ConfigSoftCaloFile",""));
 
-    ASSERT_TRUE(tool.initialize().isSuccess());
+    ASSERT_TRUE(m_tool.initialize().isSuccess());
   }
 
   ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -156,27 +156,27 @@ namespace met {
   // TEST_F( METSystTest,  TestGetEventInfo)   {
   //   SetUpFileInput();
 
-  //   ASSERT_TRUE( tool.initialize().isSuccess());
+  //   ASSERT_TRUE( m_tool.initialize().isSuccess());
 
-  //   ASSERT_NE( tool.getDefaultEventInfo(), nullptr );
+  //   ASSERT_NE( m_tool.getDefaultEventInfo(), nullptr );
   // }
 
   //  TEST_F( METSystTest,  TestNoCollection ){
-  //    ASSERT_TRUE(tool.initialize().isSuccess());
+  //    ASSERT_TRUE(m_tool.initialize().isSuccess());
   //    MissingET softMET("softMet", MissingETBase::Source::softEvent());
   //    MissingETAssociationHelper metHelper;
-  //    ASSERT_FALSE( asg::CheckHelper<CP::CorrectionCode>::isSuccess( tool.applyCorrection(softMET, metHelper) ) ) ; //this should fail because the softMET isn't owned by a collection, so we can't applyCorrection on it
+  //    ASSERT_FALSE( asg::CheckHelper<CP::CorrectionCode>::isSuccess( m_tool.applyCorrection(softMET, metHelper) ) ) ; //this should fail because the softMET isn't owned by a collection, so we can't applyCorrection on it
   //  }
 
   //  TEST_F( METSystTest,  TestNonSoftTermFailure ){//test source checking
 
-  //    ASSERT_TRUE(tool.initialize().isSuccess());
+  //    ASSERT_TRUE(m_tool.initialize().isSuccess());
 
   //    MissingET jetMET(10., 15., 20., "jetMet", MissingETBase::Source::jet());
   //    MissingET jetMETCopy(jetMET);
   //    MissingETAssociationHelper metHelper;
 
-  //    EXPECT_FALSE( asg::CheckHelper<CP::CorrectionCode>::isSuccess( tool.applyCorrection(jetMET, metHelper) ));//we fail because our object is jetMet
+  //    EXPECT_FALSE( asg::CheckHelper<CP::CorrectionCode>::isSuccess( m_tool.applyCorrection(jetMET, metHelper) ));//we fail because our object is jetMet
   //    EXPECT_EQ( jetMETCopy, jetMET ); //if we fail, we don't change our object
   //    EXPECT_EQ( jetMET.source(), MissingETBase::Source::jet() );//check we don't change the source
 
@@ -185,7 +185,7 @@ namespace met {
   // TEST_F( METSystTest,  TestSoftTermSuccess ){
   //   SetUpFileInput();
 
-  //   ASSERT_TRUE(tool.initialize().isSuccess());
+  //   ASSERT_TRUE(m_tool.initialize().isSuccess());
 
   //   MissingETContainer testMETcont;
   //   MissingETAuxContainer testMETcontAux;
@@ -198,12 +198,12 @@ namespace met {
   //   ASSERT_EQ( testMETcont.at(0), myObj );//passes
   //   ASSERT_EQ( testMETcont.size(), 1 ); //one element passes
 
-  //   ASSERT_TRUE( asg::CheckHelper<CP::CorrectionCode>::isSuccess( tool.applyCorrection(*myObj) ) );//this time, we should pass because our object is owned
+  //   ASSERT_TRUE( asg::CheckHelper<CP::CorrectionCode>::isSuccess( m_tool.applyCorrection(*myObj) ) );//this time, we should pass because our object is owned
   // }
 
   // TEST_F( METSystTest,  TestCorrectedCopy ){
   //   SetUpFileInput();
-  //   ASSERT_TRUE(tool.initialize().isSuccess());
+  //   ASSERT_TRUE(m_tool.initialize().isSuccess());
 
   //   MissingETContainer    testMETcont;
   //   MissingETAuxContainer testMETcontAux;
@@ -217,18 +217,18 @@ namespace met {
   //   ASSERT_EQ( testMETcont.size(), 1 ); //one element passes
 
   //   MissingET* correctedCopy = nullptr;
-  //   ASSERT_TRUE( asg::CheckHelper<CP::CorrectionCode>::isSuccess( tool.correctedCopy(*myObj, correctedCopy) ) );
+  //   ASSERT_TRUE( asg::CheckHelper<CP::CorrectionCode>::isSuccess( m_tool.correctedCopy(*myObj, correctedCopy) ) );
   //   ASSERT_NE( correctedCopy, nullptr);
 
   // }
 
   // TEST_F( METSystTest,  TestSoftTrkPtHardScale ){
   //   SetUpFileInput();
-  //   ASSERT_TRUE(tool.initialize().isSuccess());
+  //   ASSERT_TRUE(m_tool.initialize().isSuccess());
 
   //   CP::SystematicVariation softTrk_ScaleUp("MET_SoftTrk_ScaleUp");
   //   CP::SystematicSet applySys(softTrk_ScaleUp.name());
-  //   ASSERT_TRUE(  tool.applySystematicVariation(applySys ) );
+  //   ASSERT_TRUE(  m_tool.applySystematicVariation(applySys ) );
 
   //   MissingETContainer    testMETcont;
   //   MissingETAuxContainer testMETcontAux;
@@ -243,10 +243,10 @@ namespace met {
   //   myObj->setSumet(20.);
 
   //   MissingET * correctedCopy = nullptr;
-  //   ASSERT_TRUE( asg::CheckHelper<CP::CorrectionCode>::isSuccess( tool.correctedCopy(*myObj, correctedCopy) ) );
+  //   ASSERT_TRUE( asg::CheckHelper<CP::CorrectionCode>::isSuccess( m_tool.correctedCopy(*myObj, correctedCopy) ) );
 
   //   ASSERT_NE(correctedCopy, nullptr);
-  //   ASSERT_TRUE( asg::CheckHelper<CP::CorrectionCode>::isSuccess( tool.applyCorrection(*myObj) ) );
+  //   ASSERT_TRUE( asg::CheckHelper<CP::CorrectionCode>::isSuccess( m_tool.applyCorrection(*myObj) ) );
 
   //   EXPECT_FLOAT_EQ( correctedCopy->mpx()  , myObj->mpx() );
   //   EXPECT_FLOAT_EQ( correctedCopy->mpy()  , myObj->mpy() );
@@ -257,11 +257,11 @@ namespace met {
 
   // TEST_F( METSystTest,  TestSoftTrkPtHardResoPara ){
   //   SetUpFileInput();
-  //   ASSERT_TRUE(tool.initialize().isSuccess());
+  //   ASSERT_TRUE(m_tool.initialize().isSuccess());
 
   //   CP::SystematicVariation softTrk_ResoPara("MET_SoftTrk_ResoPara");
   //   CP::SystematicSet applySys(softTrk_ResoPara.name());
-  //   ASSERT_TRUE(  tool.applySystematicVariation(applySys ) );
+  //   ASSERT_TRUE(  m_tool.applySystematicVariation(applySys ) );
 
   //   MissingETContainer    testMETcont;
   //   MissingETAuxContainer testMETcontAux;
@@ -276,12 +276,12 @@ namespace met {
   //   myObj->setSumet(20.);
 
   //   MissingET * correctedCopy = nullptr;
-  //   tool.setRandomSeed(199);
-  //   ASSERT_TRUE( asg::CheckHelper<CP::CorrectionCode>::isSuccess( tool.correctedCopy(*myObj, correctedCopy) ) );
+  //   m_tool.setRandomSeed(199);
+  //   ASSERT_TRUE( asg::CheckHelper<CP::CorrectionCode>::isSuccess( m_tool.correctedCopy(*myObj, correctedCopy) ) );
   //   ASSERT_NE( correctedCopy, nullptr );
 
-  //   tool.setRandomSeed(199);//reset the random seed to redo the same calculation
-  //   ASSERT_TRUE( asg::CheckHelper<CP::CorrectionCode>::isSuccess( tool.applyCorrection(*myObj) ) );
+  //   m_tool.setRandomSeed(199);//reset the random seed to redo the same calculation
+  //   ASSERT_TRUE( asg::CheckHelper<CP::CorrectionCode>::isSuccess( m_tool.applyCorrection(*myObj) ) );
 
   //   EXPECT_FLOAT_EQ( correctedCopy->mpx()  , myObj->mpx() );
   //   EXPECT_FLOAT_EQ( correctedCopy->mpy()  , myObj->mpy() );
@@ -293,11 +293,11 @@ namespace met {
 
   // TEST_F( METSystTest,  TestSoftTrkPtHardResoPerp ){
   //   SetUpFileInput();
-  //   ASSERT_TRUE(tool.initialize().isSuccess());
+  //   ASSERT_TRUE(m_tool.initialize().isSuccess());
 
   //   CP::SystematicVariation softTrk_ResoPerp("MET_SoftTrk_ResoPerp");
   //   CP::SystematicSet applySys(softTrk_ResoPerp.name());
-  //   ASSERT_TRUE(  tool.applySystematicVariation(applySys ) );
+  //   ASSERT_TRUE(  m_tool.applySystematicVariation(applySys ) );
 
   //   MissingETContainer    testMETcont;
   //   MissingETAuxContainer testMETcontAux;
@@ -313,12 +313,12 @@ namespace met {
 
   //   MissingET * correctedCopy = nullptr;
 
-  //   tool.setRandomSeed(199);
-  //   ASSERT_TRUE( asg::CheckHelper<CP::CorrectionCode>::isSuccess( tool.correctedCopy(*myObj, correctedCopy) ) );
+  //   m_tool.setRandomSeed(199);
+  //   ASSERT_TRUE( asg::CheckHelper<CP::CorrectionCode>::isSuccess( m_tool.correctedCopy(*myObj, correctedCopy) ) );
   //   ASSERT_NE( correctedCopy, nullptr );
 
-  //   tool.setRandomSeed(199);//reset the random seed to redo the same calculation
-  //   ASSERT_TRUE(asg::CheckHelper<CP::CorrectionCode>::isSuccess( tool.applyCorrection(*myObj) ) );
+  //   m_tool.setRandomSeed(199);//reset the random seed to redo the same calculation
+  //   ASSERT_TRUE(asg::CheckHelper<CP::CorrectionCode>::isSuccess( m_tool.applyCorrection(*myObj) ) );
 
   //   EXPECT_FLOAT_EQ( correctedCopy->mpx()  , myObj->mpx() );
   //   EXPECT_FLOAT_EQ( correctedCopy->mpy()  , myObj->mpy() );
@@ -330,11 +330,11 @@ namespace met {
 
   // TEST_F( METSystTest,  TestSoftCaloPtScale ){
   //   SetUpFileInput();
-  //   ASSERT_TRUE(tool.initialize().isSuccess());
+  //   ASSERT_TRUE(m_tool.initialize().isSuccess());
 
   //   CP::SystematicVariation softCalo_scaleUp("MET_SoftCalo_ScaleUp");
   //   CP::SystematicSet recSys(softCalo_scaleUp.name());
-  //   ASSERT_TRUE(  tool.applySystematicVariation(recSys) );
+  //   ASSERT_TRUE(  m_tool.applySystematicVariation(recSys) );
 
   //   MissingETContainer   testMETcont;
   //   MissingETAuxContainer testMETcontAux;
@@ -349,10 +349,10 @@ namespace met {
   //   myObj->setSumet(20.);
 
   //   MissingET * correctedCopy = nullptr;
-  //   ASSERT_TRUE( asg::CheckHelper<CP::CorrectionCode>::isSuccess( tool.correctedCopy(*myObj, correctedCopy) ) );
+  //   ASSERT_TRUE( asg::CheckHelper<CP::CorrectionCode>::isSuccess( m_tool.correctedCopy(*myObj, correctedCopy) ) );
 
   //   ASSERT_NE( correctedCopy, nullptr );
-  //   ASSERT_TRUE( asg::CheckHelper<CP::CorrectionCode>::isSuccess( tool.applyCorrection(*myObj) ) );
+  //   ASSERT_TRUE( asg::CheckHelper<CP::CorrectionCode>::isSuccess( m_tool.applyCorrection(*myObj) ) );
   //   EXPECT_FLOAT_EQ( correctedCopy->mpx()  , myObj->mpx() );
   //   EXPECT_FLOAT_EQ( correctedCopy->mpy()  , myObj->mpy() );
   //   EXPECT_FLOAT_EQ( correctedCopy->sumet(), myObj->sumet());
@@ -362,12 +362,12 @@ namespace met {
 
   // TEST_F( METSystTest,  TestJetTrackMET ){
   //   SetUpFileInput();
-  //   ASSERT_TRUE(tool.setProperty("ConfigJetTrkFile" ,"JetTrackSyst.config") );
-  //   ASSERT_TRUE(tool.initialize().isSuccess());
+  //   ASSERT_TRUE(m_tool.setProperty("ConfigJetTrkFile" ,"JetTrackSyst.config") );
+  //   ASSERT_TRUE(m_tool.initialize().isSuccess());
 
   //   CP::SystematicVariation jetTrk_scaleUp("MET_JetTrk_ScaleUp");
   //   CP::SystematicSet recSys(jetTrk_scaleUp.name());
-  //   ASSERT_TRUE(  tool.applySystematicVariation(recSys));
+  //   ASSERT_TRUE(  m_tool.applySystematicVariation(recSys));
 
   //   MissingETContainer    testMETcont;
   //   MissingETAuxContainer testMETcontAux;
@@ -382,10 +382,10 @@ namespace met {
   //   myObj->setSumet(20.);
 
   //   MissingET * correctedCopy = nullptr;
-  //   ASSERT_TRUE( tool.correctedCopy(*myObj, correctedCopy));
+  //   ASSERT_TRUE( m_tool.correctedCopy(*myObj, correctedCopy));
 
   //   ASSERT_NE( correctedCopy, nullptr );
-  //   ASSERT_TRUE( asg::CheckHelper<CP::CorrectionCode>::isSuccess( tool.applyCorrection(*myObj) ) );
+  //   ASSERT_TRUE( asg::CheckHelper<CP::CorrectionCode>::isSuccess( m_tool.applyCorrection(*myObj) ) );
   //   EXPECT_FLOAT_EQ( correctedCopy->mpx()  , myObj->mpx() );
   //   EXPECT_FLOAT_EQ( correctedCopy->mpy()  , myObj->mpy() );
   //   EXPECT_FLOAT_EQ( correctedCopy->sumet(), myObj->sumet() );
@@ -397,14 +397,14 @@ namespace met {
   // //todo reinclude this when we have the files in PathResolver space
   // TEST_F( METSystTest,  TestPrecommendationFiles) {
   //   SetUpFileInput();
-  //   ASSERT_TRUE(  tool.setProperty("ConfigPrefix", "METUtilities/data16_13TeV/rec_July16v1/"));
-  //   // ASSERT_TRUE(  tool.setProperty("ConfigSoftTrkFile","TrackSoftTerms.config") );
+  //   ASSERT_TRUE(  m_tool.setProperty("ConfigPrefix", "METUtilities/data16_13TeV/rec_July16v1/"));
+  //   // ASSERT_TRUE(  m_tool.setProperty("ConfigSoftTrkFile","TrackSoftTerms.config") );
 
-  //   ASSERT_TRUE(  tool.initialize().isSuccess() ) ;
+  //   ASSERT_TRUE(  m_tool.initialize().isSuccess() ) ;
 
   //   CP::SystematicVariation softCalo_scaleUp("MET_SoftCalo_ScaleUp");
   //   CP::SystematicSet recSys(softCalo_scaleUp.name());
-  //   ASSERT_TRUE(  tool.applySystematicVariation(recSys) );
+  //   ASSERT_TRUE(  m_tool.applySystematicVariation(recSys) );
 
   //   MissingETContainer    testMETcont;
   //   MissingETAuxContainer testMETcontAux;
@@ -419,10 +419,10 @@ namespace met {
   //   myObj->setSumet(20.);
 
   //   MissingET * correctedCopy = nullptr;
-  //   ASSERT_TRUE( asg::CheckHelper<CP::CorrectionCode>::isSuccess( tool.correctedCopy(*myObj, correctedCopy) ) );
+  //   ASSERT_TRUE( asg::CheckHelper<CP::CorrectionCode>::isSuccess( m_tool.correctedCopy(*myObj, correctedCopy) ) );
 
   //   ASSERT_NE(correctedCopy, nullptr);
-  //   ASSERT_TRUE( asg::CheckHelper<CP::CorrectionCode>::isSuccess( tool.applyCorrection(*myObj) ) );
+  //   ASSERT_TRUE( asg::CheckHelper<CP::CorrectionCode>::isSuccess( m_tool.applyCorrection(*myObj) ) );
   //   EXPECT_FLOAT_EQ( correctedCopy->mpx()  , myObj->mpx() );
   //   EXPECT_FLOAT_EQ( correctedCopy->mpy()  , myObj->mpy() );
   //   EXPECT_FLOAT_EQ( correctedCopy->sumet(), myObj->sumet() );

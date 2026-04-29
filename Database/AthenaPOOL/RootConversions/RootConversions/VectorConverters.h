@@ -32,11 +32,11 @@ namespace RootConversions {
  *
  * This is a class rather than a free function so that it can be autoloaded.
  */
-class VectorConverters
+class ATLAS_NOT_THREAD_SAFE VectorConverters
 {
 public:
   /// Register all CLHEP converters.
-  static void initialize() ATLAS_NOT_THREAD_SAFE;
+  static void initialize();
 };
 
 

@@ -138,7 +138,7 @@ namespace ST {
 
 
   //  class SUSYObjDef;
-  class SUSYObjDef_xAOD : public virtual ISUSYObjDef_xAODTool,
+  class ATLAS_NOT_THREAD_SAFE SUSYObjDef_xAOD : public virtual ISUSYObjDef_xAODTool,
 			  public asg::AsgMetadataTool {
 
     // Create a proper constructor for Athena

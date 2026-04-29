@@ -37,9 +37,9 @@ namespace met {
   public:
 
     METMakerTest() :
-      tool(toolname)
+      m_tool(toolname)
     {
-      tool.msg().setLevel(MSG::WARNING);
+      m_tool.msg().setLevel(MSG::WARNING);
     }
 
 //     void SetUpFileInput() {
@@ -64,13 +64,13 @@ namespace met {
 //     std::unique_ptr<POOL::TEvent> event;
 // #endif
 
-    met::METMaker tool;
+    met::METMaker m_tool;
 
   }; // METMakerTest
 
   TEST_F( METMakerTest, TestInitialize ){
-    ASSERT_TRUE(tool.setProperty("JetContainer", "dummyjets") == StatusCode::SUCCESS);
-    ASSERT_TRUE(tool.initialize().isSuccess());
+    ASSERT_TRUE(m_tool.setProperty("JetContainer", "dummyjets") == StatusCode::SUCCESS);
+    ASSERT_TRUE(m_tool.initialize().isSuccess());
   }
 
   ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -81,7 +81,7 @@ namespace met {
   // TEST_F( METMakerTest, TestSourceTrackMet ){
   //   SetUpFileInput();
 
-  //   ASSERT_TRUE(tool.initialize().isSuccess());
+  //   ASSERT_TRUE(m_tool.initialize().isSuccess());
 
   //   // Create a MissingETContainer with its aux store
   //   MissingETContainer    newMetContainer;
@@ -91,16 +91,16 @@ namespace met {
   //   std::string const jetType = "AntiKt4EMTopo";
 
   //   const JetContainer* calibJets = nullptr;
-  //   ASSERT_TRUE( tool.evtStore()->retrieve(calibJets, jetType + "Jets").isSuccess() );
+  //   ASSERT_TRUE( m_tool.evtStore()->retrieve(calibJets, jetType + "Jets").isSuccess() );
 
   //   const MissingETAssociationMap* metMap = nullptr;
-  //   ASSERT_TRUE( tool.evtStore()->retrieve(metMap, "METAssoc_" + jetType).isSuccess() );
+  //   ASSERT_TRUE( m_tool.evtStore()->retrieve(metMap, "METAssoc_" + jetType).isSuccess() );
   //   metMap->resetObjSelectionFlags();
 
   //   const MissingETContainer* coreMet  = nullptr;
-  //   ASSERT_TRUE( tool.evtStore()->retrieve(coreMet, "MET_Core_" + jetType).isSuccess() );
+  //   ASSERT_TRUE( m_tool.evtStore()->retrieve(coreMet, "MET_Core_" + jetType).isSuccess() );
 
-  //   ASSERT_TRUE( tool.rebuildTrackMET("RefJetTrk",
+  //   ASSERT_TRUE( m_tool.rebuildTrackMET("RefJetTrk",
   // 				      "PVSoftTrk",
   // 				      &newMetContainer,
   // 				      calibJets,
