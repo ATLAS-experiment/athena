@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Test of cosmic P1+Tier0 workflow, runs athenaHLT with Cosmic_run3_v1 menu followed by offline reco and monitoring
 # art-type: grid
@@ -21,6 +21,7 @@
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 from TrigValTools.TrigValSteering.Common import find_file
+from TrigP1Test.TrigP1TestSteps import filterBS
 from AthenaConfiguration.TestDefaults import defaultConditionsTags
 
 # Specify trigger menu once here:
@@ -41,12 +42,7 @@ hlt.flags = [f'Trigger.triggerMenuSetup="{triggermenu}"',
 hlt.args = '-o output'
 
 # Extract the physics_Main stream out of the BS file with many streams
-filter_bs = ExecStep.ExecStep('FilterBS')
-filter_bs.type = 'other'
-filter_bs.executable = 'trigbs_extractStream.py'
-filter_bs.input = ''
-filter_bs.args = '-l 0' # data_cos input includes files from multiple LBs, see ATR-26461
-filter_bs.args += ' -s Main ' + find_file('*_HLTMPPy_output.*.data')
+filter_bs = filterBS('Main', extra_args='-l 0')  # data_cos input includes files from multiple LBs, see ATR-26461
 
 # Tier-0 reco step (BS->AOD)
 tzrecoPreExec = ' '.join([
@@ -81,7 +77,7 @@ tzreco.concurrent_events = 4
 tzreco.input = ''
 tzreco.explicit_input = True
 tzreco.max_events = 2000
-tzreco.args = '--inputBSFile=' + find_file('*.physics_Main*._athenaHLT*.data')  # output of the previous step
+tzreco.args = '--inputBSFile=' + find_file('*.physics_Main.*.data')  # output of the previous step
 tzreco.args += ' --outputAODFile=AOD.pool.root'
 tzreco.args += ' --outputHISTFile=ExampleMonitorOutput.root'
 tzreco.args += ' --geometryVersion=\'ATLAS-R3S-2021-03-02-00\''
