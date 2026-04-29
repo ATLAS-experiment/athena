@@ -535,8 +535,8 @@ StatusCode SpacePointMakerAlg::loadContainerAndSort(const EventContext& ctx,
                     return false;
                 }
                 //ignore combinations where the wire and the strip are not crossing
-                //check if the projection of the crossing point is within the bounds of the layer 
-                auto crossPoint = strip->localMeasurementPos() + wire->localMeasurementPos();                      
+                //check if the projection of the crossing point is within the bounds of the layer
+                Amg::Vector3D crossPoint = strip->localMeasurementPos() + wire->localMeasurementPos();
                 const Acts::Surface& surf = readoutElement->surface(strip->layerHash());                        
                 return surf.insideBounds(crossPoint.block<2,1>(0,0)); 
             });
