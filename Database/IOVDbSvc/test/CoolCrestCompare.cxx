@@ -32,6 +32,8 @@
 #include "CoralBase/AttributeListException.h"
 
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
+// coverity[+UNNECESSARY_STRING_COPY]
+
 class CoolCrestCompare{
 private:
   ServiceHandle<IMessageSvc> m_msgSvc;

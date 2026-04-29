@@ -661,7 +661,7 @@ StatusCode IOVDbSvc::signalBeginRun(const IOVTime& beginRunTime,
     const_cast<pool::IFileCatalog*>(m_h_poolSvc->catalog());
   catalog->commit();
   catalog->start(); 
-
+  static const std::string preLoadProxyStr{"preLoadProxy"};
   for (const auto & pThisConnection : m_connections){
     // only access connections which are actually in use - avoids waking up
     // the default DB connection if it is not being used
@@ -677,7 +677,7 @@ StatusCode IOVDbSvc::signalBeginRun(const IOVTime& beginRunTime,
         folder->printCache();
         cool::ValidityKey vkey=folder->iovTime(m_iovTime);
         {
-          Gaudi::Guards::AuditorGuard auditor(std::string("FldrCache:")+folder->folderName(), auditorSvc(), "preLoadProxy");
+          Gaudi::Guards::AuditorGuard auditor(std::string("FldrCache:")+folder->folderName(), auditorSvc(), preLoadProxyStr);
           if (!folder->loadCacheIfDbChanged(vkey, m_globalTag, dbconn, m_h_IOVSvc)) {
             ATH_MSG_ERROR( "Problem RELOADING: " << folder->folderName());
             return StatusCode::FAILURE;
