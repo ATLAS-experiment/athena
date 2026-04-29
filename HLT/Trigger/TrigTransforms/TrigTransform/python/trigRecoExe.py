@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # @brief: Trigger executor to call base transforms
 # @details: Based on athenaExecutor with some modifications
@@ -174,8 +174,7 @@ class trigRecoExecutor(athenaExecutor):
         # The following is needed to avoid conflicts in finding BS files prduced by running the HLT step
         # and those already existing in the working directory
         if 'BS' in self.conf.dataDictionary or 'DRAW_TRIGCOST' in self.conf.dataDictionary or 'HIST_DEBUGSTREAMMON' in self.conf.dataDictionary:
-            # expected string based on knowing that the format will be of form: ####._HLTMPPy_####.data
-            expectedOutputFileName = '*_HLTMPPy_*.data'
+            expectedOutputFileName = '*_HLTMPPy_RAW.pool.root.*.data'
             # list of filenames of files matching expectedOutputFileName
             matchedOutputFileNames = self._findOutputFiles(expectedOutputFileName)
             # check there are no file matches
@@ -303,8 +302,7 @@ class trigRecoExecutor(athenaExecutor):
             msg.warning('trigbs_extractStream.py returned error (%s) no split BS file created', splitStreamFailure)
             return 1
         else:
-            # know that the format will be of the form ####._athenaHLT.####.data
-            expectedStreamFileName = '*_athenaHLT*.data'
+            expectedStreamFileName = '*._HLTMPPy_RAW._*.data'
             # list of filenames of files matching expectedStreamFileName
             matchedOutputFileName = self._findOutputFiles(expectedStreamFileName)
             if(len(matchedOutputFileName)):
@@ -440,8 +438,7 @@ class trigRecoExecutor(athenaExecutor):
         if self._rc != 0:
             msg.error('HLT step failed (with status %s) so skip BS filename check', self._rc)
         elif 'BS' in self.conf.dataDictionary or 'DRAW_TRIGCOST' in self.conf.dataDictionary or 'HIST_DEBUGSTREAMMON' in self.conf.dataDictionary:
-            # expected string based on knowing that the format will be of form: ####._HLTMPPy_####.data
-            expectedOutputFileName = '*_HLTMPPy_*.data'
+            expectedOutputFileName = '*_HLTMPPy_RAW.pool.root.*.data'
             # list of filenames of files matching expectedOutputFileName
             matchedOutputFileNames = self._findOutputFiles(expectedOutputFileName)
 
