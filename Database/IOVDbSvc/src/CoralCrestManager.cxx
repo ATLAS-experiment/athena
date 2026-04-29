@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 // @file CoralCrestManager.cxx
 // Implementation for CrestFunctions utilities
@@ -21,6 +21,7 @@
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
+namespace{
   const std::map<std::string, cool::StorageType::TypeId> typeCorrespondance={
       {"Bool", cool::StorageType::Bool},
       {"UChar",cool::StorageType::UChar},
@@ -41,7 +42,9 @@
       {"Blob16M", cool::StorageType::Blob16M},
       {"Blob128M", cool::StorageType::Blob128M}
     };
-
+    
+    const std::string colonDelimiter{" : "};
+}
  CoralCrestManager::CoralCrestManager(const std::string & crest_path, const std::string & crestTag):m_crestTag(crestTag){ //AthMessaging("CoralCrestManager")
     if(crest_path.length()==0)
       return;
@@ -325,8 +328,7 @@
         std::ostringstream os;
         attr[0].toOutputStream(os);
         auto str=os.str();
-        const std::string del(" : ");
-        const auto separatorPosition = str.find(del);
+        const auto separatorPosition = str.find(colonDelimiter);
         const std::string payloadOnly=str.substr(separatorPosition+3);
         res<<"\""<<payloadOnly<<"\"";
         break;

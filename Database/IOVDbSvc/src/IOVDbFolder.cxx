@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // IOVDbFolder.cxx - helper class for IOVDbSvc to manage folder & data cache
@@ -1061,6 +1061,7 @@ IOVDbFolder::addMetaAttrList(const coral::AttributeList& atrlist,
 
 bool 
 IOVDbFolder::addMetaAttrListColl(const CondAttrListCollection* coll) {
+  if (!coll) return false;
   // send given payload to folder metadata
   // make a new CondAttrListCollection for the payload
   CondAttrListCollection* flmdColl=new CondAttrListCollection(*coll);
