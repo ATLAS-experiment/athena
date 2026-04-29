@@ -29,11 +29,12 @@ StatusCode SqliteReadSvc::finalize()
   return StatusCode::SUCCESS;
 }
 
-bool SqliteReadSvc::connect(const std::string& connName)
+bool SqliteReadSvc::connect(std::string_view connName)
 {
   std::lock_guard<std::mutex> guard(m_sessionMutex);
+  const std::string connNameStr{connName};
   if(!m_db) {
-    int res = sqlite3_open(connName.c_str(), &m_db);
+    int res = sqlite3_open(connNameStr.c_str(), &m_db);
     if (res != SQLITE_OK) {
       ATH_MSG_FATAL("Failed to open " << connName << ". " << sqlite3_errmsg(m_db));
       return false;
@@ -42,13 +43,13 @@ bool SqliteReadSvc::connect(const std::string& connName)
   return true;
 }
 
-bool SqliteReadSvc::disconnect(const std::string&)
+bool SqliteReadSvc::disconnect(std::string_view)
 {
   // Dummy implementation
   return true;
 }
 
-bool SqliteReadSvc::shutdown(const std::string&)
+bool SqliteReadSvc::shutdown(std::string_view)
 {
   std::lock_guard<std::mutex> guard(m_sessionMutex);
   if(m_db) {
@@ -59,10 +60,10 @@ bool SqliteReadSvc::shutdown(const std::string&)
 }
 
 
-IRDBRecordset_ptr SqliteReadSvc::getRecordsetPtr(const std::string& node
-						, const std::string& 
-						, const std::string& 
-						, const std::string& )
+IRDBRecordset_ptr SqliteReadSvc::getRecordsetPtr(std::string_view node
+						, std::string_view 
+						, std::string_view
+						, std::string_view )
 {
   ATH_MSG_DEBUG("Getting RecordsetPtr with key " << node);
 
@@ -77,11 +78,11 @@ IRDBRecordset_ptr SqliteReadSvc::getRecordsetPtr(const std::string& node
     ATH_MSG_DEBUG("Reusing an existing recordset");
     return itRecordset->second;
   }
-
+  const std::string nodeStr{node};
   SqliteRecordset* recConcrete = new SqliteRecordset();
-  recConcrete->getData(m_db,node);
+  recConcrete->getData(m_db,nodeStr);
   IRDBRecordset_ptr rec(recConcrete);
-  m_recordsets.emplace(node,rec);
+  m_recordsets.emplace(nodeStr,rec);
   return rec;
 }
 
