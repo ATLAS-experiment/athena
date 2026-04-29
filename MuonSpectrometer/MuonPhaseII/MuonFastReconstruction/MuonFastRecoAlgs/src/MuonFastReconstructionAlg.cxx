@@ -24,23 +24,47 @@ StatusCode FastReconstructionAlg::initialize() {
     ATH_CHECK(m_visionTool.retrieve(EnableTool{!m_visionTool.empty()}));
 
     GlobalPatternFinder::Config patCfg{};
+    patCfg.useMdtHits = m_useMdtHits;
+    patCfg.seedFromMdt = m_seedFromMdt;
     patCfg.thetaSearchWindow = m_thetaSearchWindow;
-    patCfg.maxMissedLayerHits = m_maxMissedLayerHits;
     patCfg.baseRWindow = m_baseRWindow;
-    patCfg.minZDiff4Line = m_minZDiff4Line;
-    patCfg.minRDiff4Line = m_minRDiff4Line;
     patCfg.phiTolerance = m_phiTolerance;
     patCfg.minBendingTriggerHits = m_minBendingTriggerHits;
     patCfg.minBendingPrecisionHits = m_minBendingPrecisionHits;
-    patCfg.useMdtHits = m_useMdtHits;
-    patCfg.seedFromMdt = m_seedFromMdt;
+    patCfg.minPhiHits = m_minPhiHits;
+    patCfg.meanNormRes2Cut = m_meanNormRes2Cut;
     patCfg.maxSeedAttempts = m_maxSeedAttempts;
+    patCfg.maxMissedLayerHits = m_maxMissedLayerHits;
+    patCfg.minLayerSeparation = m_minLayerSeparation;
+    patCfg.precisionWeight = m_precisionWeight;
+    patCfg.hitScoreSaturation = m_hitScoreSaturation;
+    patCfg.residualPenalty = m_residualPenalty;
+    patCfg.phiBonusSaturation = m_phiBonusSaturation;
+
     if (m_seedFromInner) {
         patCfg.layerSeedings.push_back(LayerIndex::Inner);
     }
     patCfg.visionTool = m_visionTool.get();
     patCfg.idHelperSvc = m_idHelperSvc.get();
     m_globPatFinder = std::make_unique<GlobalPatternFinder>(name(), std::move(patCfg));
+
+    //Print Configuration
+    ATH_MSG_DEBUG(" Configuration:\n"
+            << " Theta search window [rad]: " << m_thetaSearchWindow << "\n"
+            << " Base R window [mm]: " << m_baseRWindow << "\n"
+            << " Max missed layer hits: " << m_maxMissedLayerHits << "\n"
+            << " Min layer separation [mm]: " << m_minLayerSeparation << "\n"
+            << " Phi tolerance [rad]: " << m_phiTolerance << "\n"
+            << " Min bending trigger hits: " << m_minBendingTriggerHits << "\n"
+            << " Min bending precision hits: " << m_minBendingPrecisionHits << "\n"
+            << " Min phi hits: " << m_minPhiHits << "\n"
+            << " Seed from inner: " << m_seedFromInner << "\n"
+            << " Use MDT hits: " << m_useMdtHits << "\n"
+            << " Seed from MDT: " << m_seedFromMdt << "\n"
+            << " Max seed attempts: " << m_maxSeedAttempts << "\n"
+            << " Hit score saturation: " << m_hitScoreSaturation << "\n"
+            << " Residual penalty: " << m_residualPenalty << "\n"
+            << " Phi bonus saturation: " << m_phiBonusSaturation);
 
     return StatusCode::SUCCESS;
 }
