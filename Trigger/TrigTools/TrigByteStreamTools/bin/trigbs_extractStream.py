@@ -1,6 +1,6 @@
 #!/usr/bin/env tdaq_python
 
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # select events for a given stream name from an input file and write them in an outfile
 # the output file obeys the conventions used by the SFO in P1
@@ -101,7 +101,7 @@ def peb_writer():
   # extract some parameters from meta-data 
   projectTag      = dr.projectTag()
   lumiBlockNumber = dr.lumiblockNumber()
-  applicationName = 'athenaHLT'
+  applicationName = dr.appName()
   streamType      = 'unknown' # the real stream type will be extracted from the matching stream tag
   if df.hasValidCore() :
     productionStep  = df.productionStep()
@@ -262,6 +262,7 @@ def peb_writer():
         totalEvents_out += 1
 
   # print final statistics
+  logging.info('Input file(s)                             = %s ', extra)
   logging.info('Total number of events processed          = %d ', totalEvents_in)
   logging.info('Number of events skipped at the beginning = %d ', totalEvents_skipped)
   logging.info('Number of events written to output file   = %d ', totalEvents_out)

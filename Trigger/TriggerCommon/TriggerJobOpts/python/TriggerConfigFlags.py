@@ -306,6 +306,7 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag("Trigger.Online.useEFByteStreamSvc", False,
                   help='use online EF ByteStream services')
     flags.addFlag('Trigger.Online.EFInterface.Files', [])
+    flags.addFlag('Trigger.Online.EFInterface.OutputFileName', '')
     flags.addFlag('Trigger.Online.EFInterface.LoopFiles', False)
     flags.addFlag('Trigger.Online.EFInterface.NumEvents', -1)
     flags.addFlag('Trigger.Online.EFInterface.SkipEvents', 0)

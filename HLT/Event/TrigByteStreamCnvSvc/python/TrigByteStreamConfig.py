@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -95,7 +95,8 @@ def getEFInterfaceSvc(flags, name='EFInterfaceSvc'):
     return CompFactory.EFInterfaceSvc(
         name,
         Files        = ef.Files,
-        LoopOverFiles= ef.LoopFiles,
+        OutputFileName = ef.OutputFileName,
+        LoopOverFiles = ef.LoopFiles,
         NumEvents    = ef.NumEvents,
         SkipEvents   = ef.SkipEvents,
         RunNumber    = ef.RunNumber,
