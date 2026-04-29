@@ -69,6 +69,8 @@ def BPHY1Kernel(flags):
            useMCPCuts                  = False )
 
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
+    PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
+    acc.addPublicTool(PVrefit)
     BPHY1_Reco_mumu = CompFactory.DerivationFramework.Reco_Vertex(
             name                   = "BPHY1_Reco_mumu",
             VertexSearchTool       = BPHY1JpsiFinder,
@@ -80,7 +82,7 @@ def BPHY1Kernel(flags):
             V0Tools                = V0Tools,
             RelinkTracks  =  toRelink,
             RelinkMuons   =  MuonReLink,
-            PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+            PVRefitter             = PVrefit,
             DoVertexType           = 7)
 
     BPHY1_Select_Jpsi2mumu =CompFactory.DerivationFramework.Select_onia2mumu(
