@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
     
 #include "MuonCalibSegmentCreator/MuonSegmentReader.h"
@@ -420,7 +420,8 @@ void MuonSegmentReader::storeMeasurement(const EventContext& ctx, const MuonGM::
           }
           else {
             m_trkTriggerHit_time.push_back(0);
-            m_trkTriggerHit_gPos.push_back(Amg::Vector3D::Zero());
+            Amg::Vector3D zero = Amg::Vector3D::Zero();
+            m_trkTriggerHit_gPos.push_back(zero);
           }
         } // tgc case
         else if (m_MuonIdHelper->isRpc(crot_id))  {
@@ -434,13 +435,15 @@ void MuonSegmentReader::storeMeasurement(const EventContext& ctx, const MuonGM::
           }
           else    {
           m_trkTriggerHit_time.push_back(0);
-          m_trkTriggerHit_gPos.push_back(Amg::Vector3D::Zero());
+          Amg::Vector3D zero = Amg::Vector3D::Zero();
+          m_trkTriggerHit_gPos.push_back(zero);
           } // rpc case
         } // rpc case
         else {
           m_trkTriggerHit_type.push_back(0);
           m_trkTriggerHit_time.push_back(0);
-          m_trkTriggerHit_gPos.push_back(Amg::Vector3D::Zero());
+          Amg::Vector3D zero = Amg::Vector3D::Zero();
+          m_trkTriggerHit_gPos.push_back(zero);
         }
       } // end of crots loop
     }  // end of crot check
