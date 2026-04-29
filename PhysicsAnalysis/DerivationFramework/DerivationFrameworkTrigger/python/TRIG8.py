@@ -10,13 +10,15 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import MetadataCategory
+from AthenaConfiguration.Enums import MetadataCategory, Format
 
 
 # Main algorithm config
 def TRIG8KernelCfg(flags, name='TRIG8Kernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for TRIG8"""
     acc = ComponentAccumulator()
+
+    is_bs = flags.Input.Format is Format.BS
 
     # Augmentations
 
@@ -49,9 +51,10 @@ def TRIG8KernelCfg(flags, name='TRIG8Kernel', **kwargs):
 
     augmentationTools = [ ]
 
-    # Common augmentations
-    from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
-    acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
+    if not is_bs:
+        # Common augmentations for AOD to DAOD
+        from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
+        acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
     if flags.Tracking.doLargeD0:
         # LRT Egamma
