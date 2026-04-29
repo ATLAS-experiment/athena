@@ -74,9 +74,9 @@ def JetTrackFilterToolCfg(flags, name="JetTrackFilterTool", **kwargs):
         # 2022/23 (MC23a/d): https://indico.cern.ch/event/1531052/#38-flost-update
         if flags.Input.MCCampaign in [Campaign.MC23a, Campaign.MC23d]:
             kwargs.setdefault("FLostUncertainty", 0.24)
-        # *Preliminary* 2024 (MC23e): https://indico.cern.ch/event/1643176/#42-flost
+        # 2024 (MC23e): https://indico.cern.ch/event/1662051/#46-update-on-2024-flost-measur
         elif flags.Input.MCCampaign is Campaign.MC23e:
-            kwargs.setdefault("FLostUncertainty", 0.50)
+            kwargs.setdefault("FLostUncertainty", 0.32)
         else:
             raise ValueError(f"JetTrackFilterTool: Recommendations not yet available for campaign {flags.Input.MCCampaign}! Please check the configuration and contact Tracking CP if you believe this message is in error.")
     # Run 2 (MC20)
