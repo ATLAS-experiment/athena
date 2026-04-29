@@ -1,7 +1,6 @@
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
-// $Id$
 /**
  * @file LArRawConditions/test/LArConditionsContainerDB_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -14,6 +13,25 @@
 #include <vector>
 #include <iostream>
 #include <cassert>
+
+
+void test1a (LArConditionsContainerDB<int>& db1)
+{
+  LArConditionsContainerDB<int>::iterator it1 = db1.begin(nullptr);
+  assert (it1 == db1.begin(nullptr));
+  assert (it1 != db1.end(nullptr));
+  assert (*it1 == 412);
+  LArConditionsContainerDB<int>::iterator it2 = ++it1;
+  assert (it1 == it2);
+  assert (*it1 == 456);
+  assert (*it2 == 456);
+  *it1 = 999;
+  assert (*it2 == 999);
+  LArConditionsContainerDB<int>::iterator it3 = it1++;
+  assert (it1 != it3);
+  assert (*it1 == 467);
+  assert (*it3 == 999);
+}
 
 
 void test1()
@@ -138,22 +156,7 @@ void test1()
     }
   }
 
-  {
-    LArConditionsContainerDB<int>::iterator it1 = db1.begin(nullptr);
-    assert (it1 == db1.begin(nullptr));
-    assert (it1 != db1.end(nullptr));
-    assert (*it1 == 412);
-    LArConditionsContainerDB<int>::iterator it2 = ++it1;
-    assert (it1 == it2);
-    assert (*it1 == 456);
-    assert (*it2 == 456);
-    *it1 = 999;
-    assert (*it2 == 999);
-    LArConditionsContainerDB<int>::iterator it3 = it1++;
-    assert (it1 != it3);
-    assert (*it1 == 467);
-    assert (*it3 == 999);
-  }
+  test1a (db1);
 }
 
 
