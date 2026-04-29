@@ -22,13 +22,7 @@ namespace cool {
 }
 #endif
 
-
-#include <iostream>
-#include <string>
-#include <cstdlib>
-
-#include <TObject.h>
-
+#include "TObject.h"
 //CORAL API include files
 #include "CoralBase/AttributeList.h"
 
@@ -41,26 +35,7 @@ namespace cool {
 #include "CoolKernel/RecordSpecification.h"
 #include "CoolKernel/ChannelSelection.h"
 
-
-
-#include <sstream>
-#include <fstream>
-#include <TCanvas.h>
-#include <TDirectory.h>
-#include <TFile.h>
-#include <TGraph.h>
-#include <TGraphErrors.h>
-#include <TH1.h>
-#include <TH2.h>
-#include <TIterator.h>
-#include <TKey.h>
-#include <TLegend.h>
-#include <TProfile.h>
-#include <TROOT.h>
-#include <TStyle.h>
-#include <TLatex.h>
-#include <TMath.h>
-#include <TTree.h>
+#include <string>
 
 
 namespace coral {
@@ -128,7 +103,7 @@ namespace dqutils {
 
 
     void dump(cool::ChannelSelection selection);
-    std::string dumpField(cool::ChannelId channelId, std::string field);
+    std::string dumpField(cool::ChannelId channelId, const std::string & field);
     int dumpCode(const std::string& channelName);
 
     void dumpall();

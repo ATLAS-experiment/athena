@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 /* HLTCalo Post Processing Method: to produce eta phi map of the average hit energy in each bin, made
@@ -36,12 +36,7 @@ namespace dqutils {
         continue;
       }
 
-      std::string run_dir2 = run_dir;
-
-      // all merged root files have the structure "rootfile.root:/run_NNNNNNN"
-      // use that to extract run number
-      //int run_number = atoi( (run_dir2.substr(4, run_dir2.size()-4 )).c_str() );
-      //run_number=run_number;
+      
 
       // begin HLTMET
       // note 1: prefix all dirs and hists with '/'
