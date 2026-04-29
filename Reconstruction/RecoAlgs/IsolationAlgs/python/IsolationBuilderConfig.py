@@ -19,6 +19,8 @@ def egIsolationCfg(flags, name='egIsolation', noCalo=False, **kwargs):
         pref = 'Ph'
     elif name.find('electron') >= 0:
         suff = 'electron'
+        if name.find('LRT') >= 0:
+            suff += 'LRT'
         pref = 'El'
     else:
         mlog.error('Name '+name+' should contain electron or photon')
@@ -70,7 +72,7 @@ def egIsolationCfg(flags, name='egIsolation', noCalo=False, **kwargs):
 
     return acc
 
-def muIsolationCfg(flags, name='muIsolation', noCalo=False, **kwargs):
+def muIsolationCfg(flags, name='muonIsolationBuilder', noCalo=False, **kwargs):
 
     mlog = logging.getLogger(name)
     mlog.info('Starting '+name+' configuration')
@@ -120,9 +122,8 @@ def muIsolationCfg(flags, name='muIsolation', noCalo=False, **kwargs):
     kwargs['MuIsoTypes'] = isoType
     kwargs['MuCorTypes'] = isoCor
     kwargs['MuCorTypesExtra'] = isoExCor
-    kwargs['name'] = 'muonIsolationBuilder'
     
-    acc.addEventAlgo(CompFactory.IsolationBuilder(**kwargs))
+    acc.addEventAlgo(CompFactory.IsolationBuilder(name=name,**kwargs))
 
     mlog.info("muon isolation configured")
 
