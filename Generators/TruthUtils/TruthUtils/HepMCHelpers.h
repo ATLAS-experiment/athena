@@ -48,10 +48,10 @@ namespace MC
 #include "AtlasPID.h"
 
   /// @brief Identify if the particle with given PDG ID would not interact with the detector, i.e. not a neutrino or WIMP
-  template <class T> inline bool isInteracting(const T& p) { return isStrongInteracting<T>(p) || isEMInteracting<T>(p) || isGeantino<T>(p); }
+  template <class T> inline bool isInteracting(const T& p) { return isStrongInteracting(p) || isEMInteracting(p) || isGeantino(p); }
 
   /// @brief Identify if the particle with given PDG ID would produce ID tracks but not shower in the detector if stable
-  template <class T> inline  bool isChargedNonShowering(const T& p) { return (isMuon<T>(p) || isSUSY<T>(p)); }
+  template <class T> inline  bool isChargedNonShowering(const T& p) { return (isMuon(p) || isSUSY(p)); }
 
   /// @brief Identify if the particle is beam particle
   template <class T> inline bool isBeam(const T& p)  { return HepMC::status(p)%HepMC::SIM_STATUS_THRESHOLD == 4;}
@@ -66,27 +66,27 @@ namespace MC
   template <class T> inline bool isFinalState(const T& p)   { return HepMC::status(p)%HepMC::SIM_STATUS_THRESHOLD == 1 && !p->end_vertex();}
 
   /// @brief Identify if the particle is physical, i.e. is stable or decayed 
-  template <class T> inline bool isPhysical(const T& p) { return isStable<T>(p) || isDecayed<T>(p); }
+  template <class T> inline bool isPhysical(const T& p) { return isStable(p) || isDecayed(p); }
 
   /// @brief Determine if the particle is stable at the generator (not det-sim) level,
-  template <class T> inline bool isGenStable(const T& p) { return isStable<T>(p) && !HepMC::is_simulation_particle<T>(p);}
+  template <class T> inline bool isGenStable(const T& p) { return isStable(p) && !HepMC::is_simulation_particle(p);}
 
   /// @brief Identify if the particle is considered stable at the post-detector-sim stage
-  template <class T> inline bool isSimStable(const T& p) { return  isStable<T>(p) &&  !p->end_vertex() && HepMC::is_simulation_particle<T>(p);}
+  template <class T> inline bool isSimStable(const T& p) { return  isStable(p) &&  !p->end_vertex() && HepMC::is_simulation_particle(p);}
 
   /// @brief Identify if the particle could interact with the detector during the simulation, e.g. not a neutrino or WIMP
-  template <class T> inline bool isSimInteracting(const T& p) { return isGenStable<T>(p) && isInteracting<T>(p);}
+  template <class T> inline bool isSimInteracting(const T& p) { return isGenStable(p) && isInteracting(p);}
 
   /// @brief Identify if particle is satble or decayed in simulation. + a pathological case of decayed particle w/o end vertex.
   /// The decayed particles w/o end vertex might occur in case of simulation of long lived particles in Geant stripped off the decay products. 
   /// I.e. those particles should be re-decayed later.
   template <class T> inline bool isStableOrSimDecayed(const T& p) {
     const auto vertex = p->end_vertex();
-    return ( isStable<T>(p) || (isDecayed<T>(p) && (!vertex || HepMC::is_simulation_vertex(vertex))));
+    return ( isStable(p) || (isDecayed(p) && (!vertex || HepMC::is_simulation_vertex(vertex))));
   }
 
   /// @brief Identify a photon with zero energy. Probably a workaround for a generator bug.
-  template <class T> inline bool isZeroEnergyPhoton(const T&  p) { return isPhoton<T>(p) && p->e() == 0;}
+  template <class T> inline bool isZeroEnergyPhoton(const T&  p) { return isPhoton(p) && p->e() == 0;}
 
   /// @brief Identify a special non-interacting particles.
   template <class T> inline bool isSpecialNonInteracting(const T& p) {
