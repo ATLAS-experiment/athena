@@ -53,6 +53,7 @@ if __name__=="__main__":
                                               default=False, action='store_true')
     parser.add_argument("--vTune", help="If set to true, the code is profiled with VTune (With the proper command!)",
                                               default=False, action='store_true')
+
     parser.set_defaults(outRootFile="FastRecoTester.root")
     from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITestDefaults
     parser.set_defaults(inputFile = MuonPhaseIITestDefaults.HITS_PG_R3)
@@ -67,7 +68,7 @@ if __name__=="__main__":
 
     flags, cfg = setupGeoR4TestCfg(args,flags)
   
-    #cfg.getService("MessageSvc").setVerbose = ["MuonFastReconstructionAlg"]
+    #cfg.getService("MessageSvc").setVerbose = ["MuonFastReconstructionAlg", "MuonFastRecoTester"]
     if args.vTune:
         from PerfMonVTune.PerfMonVTuneConfig import VTuneProfilerServiceCfg
         cfg.merge(VTuneProfilerServiceCfg(flags))
@@ -100,8 +101,7 @@ if __name__=="__main__":
                                   outStream="MuonEtaHoughTransformTest"))
         from MuonPatternRecognitionTest.PatternTestConfig import MuonHoughTransformTesterCfg, PatternVisualizationToolCfg
         cfg.merge(MuonHoughTransformTesterCfg(flags,  
-                                              name = "MuonHoughTransformTester", 
-                                              SpacePointKey = "MuonSpacePointsFastReco" if args.useFastRecoSpacePoints else "MuonSpacePoints",
+                                              name = "MuonHoughTransformTester",
                                               writeSpacePoints = False,
                                               VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, CanvasLimits =0))))
         

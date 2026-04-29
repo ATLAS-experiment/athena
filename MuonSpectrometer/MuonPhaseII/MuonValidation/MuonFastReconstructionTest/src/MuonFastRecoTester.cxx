@@ -8,9 +8,12 @@
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
 #include "MuonSpacePoint/SpacePointHelpers.h"
 #include "MuonStationIndex/MuonStationIndex.h"
+#include "MuonDetDescrUtils/MuonSectorMapping.h"
 #include "CxxUtils/phihelper.h"
 
 namespace {
+    static const Muon::MuonSectorMapping sectorMap{};
+
     void resize_all (const std::size_t nEle, const std::size_t size, auto&&... vecs) {
         for (std::size_t idx = 0; idx < nEle; ++idx) {
             (vecs[idx].resize(size), ...);
@@ -25,19 +28,19 @@ namespace MuonValR4 {
     constexpr std::size_t s_nStations {Acts::toUnderlying(StIndex::StIndexMax)};
     using simHitSet = std::unordered_set<const xAOD::MuonSimHit*>;
     using TruthParticleMap = std::map<const xAOD::TruthParticle*, std::vector<simHitSet>>;
-    std::optional<std::size_t> isTruthMatched (const SpacePoint* sp,
+    std::optional<std::size_t> isTruthMatched (const xAOD::MuonMeasurement& meas,
                                                const TruthParticleMap& truthHits) {
-        for (const xAOD::MuonSimHit* hit : getMatchingSimHits(std::vector<const SpacePoint*>{sp})) {
-            std::size_t idx{0};
-            for (const auto& [tp, truthHitSets] : truthHits) {
-                for (const simHitSet& truthHitSet : truthHitSets) {
-                    if (truthHitSet.count(hit)) {
-                        if (tp) return idx;
-                        else return truthHits.size(); // Pileup muon
-                    }
+        const xAOD::MuonSimHit* hit {getTruthMatchedHit(meas)};
+        if (!hit) return std::nullopt;
+        std::size_t idx{0};
+        for (const auto& [tp, truthHitSets] : truthHits) {
+            for (const simHitSet& truthHitSet : truthHitSets) {
+                if (truthHitSet.count(hit)) {
+                    if (tp) return idx;
+                    else return truthHits.size(); // Pileup muon
                 }
-                if (tp) ++idx;
             }
+            if (tp) ++idx;
         }
         return std::nullopt;
     };
@@ -87,11 +90,7 @@ namespace MuonValR4 {
             m_tree.disableBranch(m_pat_nTruthNonPrecMeas.name());
             m_tree.disableBranch(m_pat_nTruthPrecMeas.name());
             m_tree.disableBranch(m_pat_nTruthPhiMeas.name());
-            m_tree.disableBranch(m_pat_nAllTruthNonPrecMeas.name());
-            m_tree.disableBranch(m_pat_nAllTruthPrecMeas.name());
-            m_tree.disableBranch(m_pat_nAllTruthPhiMeas.name());
             m_tree.disableBranch(m_pat_MatchedToTruth.name());
-            m_tree.disableBranch(m_pat_nTruthparticles.name());
         }
         if (!m_isSeededReco) {
             m_tree.disableBranch(m_roi_EtaMin.name());
@@ -141,7 +140,7 @@ namespace MuonValR4 {
                     <<", Rois: "<<(roiCollection ? roiCollection->size() : -1));
 
         const TruthParticleMap truthMap{fillTruthMap(readTruthSegments, roiCollection)};
-        fillTruthInfo(truthMap, readTruthSegments);
+        fillTruthInfo(truthMap, {spContainer, NSWspContainer});
         fillRoIInfo(roiCollection);
 
         if (m_writeSpacePoints) {
@@ -175,41 +174,121 @@ namespace MuonValR4 {
 
         TruthParticleMap truthMap{};
         for (const xAOD::MuonSegment* truth : *truthSegments) {
-            if (!truth) continue;
             const xAOD::TruthParticle* tp = getTruthMatchedParticle(*truth);
             // In case of seeded reco, we only save truth particles that are in the RoIs
-            if (m_isSeededReco && tp && roiCollection && !isInROI(tp)){
-                continue;
-            }
-            truthMap[tp].push_back(getMatchingSimHits(*truth));
+            if (!m_isSeededReco || !tp || isInROI(tp)){
+                truthMap[tp].push_back(getMatchingSimHits(*truth));
+            }    
         }
         return truthMap;
     }
     void MuonFastRecoTester::fillTruthInfo(const TruthParticleMap& truthHits,
-                                           const xAOD::MuonSegmentContainer* truthSegments) {
+                                           const std::vector<const MuonR4::SpacePointContainer*>& spContainers) {
         if (!m_isMC || truthHits.empty()) return;
         resize_all(truthHits.size(), s_nStations, 
                    m_gen_nNonPrecMeas, m_gen_nPrecMeas, m_gen_nPhiMeas);
+        using enum measType;
+        using LayerBookeeper = std::unordered_map<const MuonGMR4::SpectrometerSector*, std::set<unsigned>>;
+        using MeasBookeeper = std::array<std::vector<const SpacePoint*>, Acts::toUnderlying(nTypes)>;
+        /** Track which layers already have a spacepoint to avoid double counting. This is done per station. */
+        MeasBookeeper measInStation{};
+        LayerBookeeper seenEtaLayers{};
+        LayerBookeeper seenPhiLayers{};
+
+        auto processMeas = [&truthHits, &measInStation, &seenEtaLayers, &seenPhiLayers, this]
+                    (const SpacePoint* sp, const measType type, const bool process2Dmeas, const int tpIdx, const std::size_t stIdx) {
+            /** Select the measurement type */
+            const bool isPrec {MuonR4::isPrecisionHit(*sp)};
+            if ((type == Prec && !isPrec) || 
+                (type == NonPrec && (isPrec || !sp->measuresEta())) || (type == Phi && sp->measuresEta())) {
+                return;
+            }
+            /* Check if the hit has already been counted, i.e. duplicated hits. Needed for precision hits, since we can have multiple on the same layer */
+            std::vector<const SpacePoint*>& outCont {measInStation[Acts::toUnderlying(type)]};
+            if (std::ranges::find_if(outCont, [sp](const SpacePoint* s) { 
+                    return s->primaryMeasurement() == sp->primaryMeasurement(); }) != outCont.end()) {
+                return;
+            }
+            /** Select the truth particle */
+            if (isTruthMatched(*sp->primaryMeasurement(), truthHits) != tpIdx) return;
+ 
+            const bool isDoubleMatched {sp->dimension() == 2u && sp->secondaryMeasurement() && isTruthMatched(*sp->secondaryMeasurement(), truthHits) == tpIdx};
+            if (process2Dmeas && !isDoubleMatched) return;
+
+            /* Check if we have already measurements in the same layer, except for precision hits */
+            const unsigned layNum {m_spSorter.sectorLayerNum(*sp)};
+            ATH_MSG_VERBOSE("---> "<<(isPrec ? "Prec" : (type == NonPrec ? "Trig" : "Phi "))<< " " << *sp << " in sector "<<sp->msSector()->identString() << " lay "<<layNum);
+            if (sp->measuresEta()) {
+                const bool isSeenLayer {seenEtaLayers[sp->msSector()].count(layNum) > 0};
+                if (isSeenLayer && !sp->isStraw()) return;
+                if (!isSeenLayer) seenEtaLayers[sp->msSector()].insert(layNum);
+     
+                auto& measCounter = isPrec ? m_gen_nPrecMeas : m_gen_nNonPrecMeas;
+                ++measCounter[tpIdx][stIdx];
+
+                // Eta hit can also have phi measurements. For combined spacepoints, need to be check the secondaty measurements. No need for 2D spacepoints.
+                if (sp->measuresPhi() && isDoubleMatched) {
+                    seenPhiLayers[sp->msSector()].insert(layNum);
+                    ++m_gen_nPhiMeas[tpIdx][stIdx];
+                    measInStation[Acts::toUnderlying(Phi)].push_back(sp);
+                }
+            } else {
+                if (seenPhiLayers[sp->msSector()].count(layNum) > 0) return;
+                seenPhiLayers[sp->msSector()].insert(layNum);
+                ++m_gen_nPhiMeas[tpIdx][stIdx];
+            }
+            outCont.push_back(sp);
+        };
+
         int tpIdx{-1};
         for (const auto& [tp, _] : truthHits) {
-            // We skip pileup muons
             if(!tp) continue;
-            
             m_gen_Eta.push_back(tp->eta());
             m_gen_Phi.push_back(tp->phi());
             m_gen_Pt.push_back(tp->pt());
             m_gen_Q.push_back(tp->charge());
-
             ++tpIdx;
-            for (const auto& segment : *truthSegments) {
-                if (!segment) continue;
-                if (getTruthMatchedParticle(*segment) != tp) continue;
-                const auto StIdx {Acts::toUnderlying(toStationIndex(segment->chamberIndex()))};
-                m_gen_nNonPrecMeas[tpIdx][StIdx] += segment->nTrigEtaLayers();
-                m_gen_nPrecMeas[tpIdx][StIdx] += segment->nPrecisionHits();
-                m_gen_nPhiMeas[tpIdx][StIdx] += segment->nPhiLayers();
-            }
-        }
+            // Save the sectors compatible for the tp
+            std::vector<int> sectors{};
+            sectorMap.getSectors(tp->phi(), sectors);
+            const int side {tp->eta() > 0 ? 1 : -1};
+            /** Filling truth hit counts. We cannot use directly the segments because we have sim hits 
+             *  that haven't made it into spacepoints due to inefficiencies */
+            ATH_MSG_VERBOSE("tp: " << tpIdx << ", Eta: " << tp->eta() << ", Phi: " << tp->phi() << ", Pt [GeV]: " << tp->pt() * 1e-3 << ", Q: " << tp->charge());
+            for (std::size_t stIdx = 0; stIdx < s_nStations; ++stIdx) {
+                ATH_MSG_VERBOSE("\tStation "<< stName(static_cast<StIndex>(stIdx)) << ": matched hits before layer deduplication: ");
+                // Clear the bookkeeping structures for the new station
+                for (auto& vec : measInStation) vec.clear();
+                seenEtaLayers.clear();
+                seenPhiLayers.clear();
+                // We fill per measurement type, so we give priority to precision hits if they are in the same layer as trigger hits, e.g. sTGCs
+                for (const measType type : {Prec, NonPrec, Phi}) {
+                    // We fill first 2D measurements and then 1D ones
+                    for (const bool process2Dmeas : {true, false}) {
+                        for (const auto& spContainer : spContainers) {
+                            if (!spContainer) continue;
+                            for (const SpacePointBucket* bucket : *spContainer) {
+                                /** Select the buckets in this station */
+                                if (static_cast<std::size_t>(m_idHelperSvc->stationIndex(bucket->front()->identify())) != stIdx) continue;
+                                /** Geometric (sanity) check: sector & side */
+                                if (bucket->msSector()->side() != side ||
+                                    std::ranges::none_of(sectors, [&](int s){ return bucket->msSector()->sector() == s; })) {
+                                    continue;
+                                }
+                                for (const auto& sp : *bucket) {
+                                    /* Process first the precision hits, 2D measurements first and then 1D */
+                                    processMeas(sp.get(), type, process2Dmeas, tpIdx, stIdx);
+                                }
+                            } // End loop over buckets
+                        } // End loop over containers
+                    } // End loop over "process2Dmeas" flag
+                } // End loop over measurement types
+                ATH_MSG_VERBOSE("\t after deduplication: N trig/Prec/phi meas: " 
+                               << static_cast<std::size_t>(m_gen_nNonPrecMeas[tpIdx][stIdx]) << "/" 
+                               << static_cast<std::size_t>(m_gen_nPrecMeas[tpIdx][stIdx]) << "/" 
+                               << static_cast<std::size_t>(m_gen_nPhiMeas[tpIdx][stIdx]));
+            } // End loop over stations      
+        } // End loop over truth particles
     }
     void MuonFastRecoTester::fillRoIInfo(const TrigRoiDescriptorCollection* roiCollection) {
         if (!m_isSeededReco || !roiCollection || roiCollection->empty()) return;
@@ -232,9 +311,10 @@ namespace MuonValR4 {
         if (!spc) return;
         for (const SpacePointBucket* bucket : *spc) {
             for (const auto& sp : *bucket) {
-                spTypeBranch.push_back(MuonR4::isPrecisionHit(*sp) ? 2 : (sp->measuresEta() ? 1 : 3));
+                measType type {MuonR4::isPrecisionHit(*sp) ? measType::Prec : (sp->measuresEta() ? measType::NonPrec : measType::Phi)};
+                spTypeBranch.push_back(Acts::toUnderlying(type));
                 if(!m_isMC) continue;
-                if (const auto tpIdx {isTruthMatched(sp.get(), truthHits)}; tpIdx.has_value()) {
+                if (const auto tpIdx {isTruthMatched(*sp->primaryMeasurement(), truthHits)}; tpIdx.has_value()) {
                     unsigned treeIdx = spTester.push_back(*sp);
                     spMatchedToTruthBranch[tpIdx.value()].push_back(treeIdx);
                 }
@@ -263,10 +343,15 @@ namespace MuonValR4 {
         if (m_isMC) {
             resize_all(patternCont->size(), s_nStations,
                         m_pat_nTruthNonPrecMeas, m_pat_nTruthPrecMeas, m_pat_nTruthPhiMeas,
-                        m_pat_nAllTruthNonPrecMeas, m_pat_nAllTruthPrecMeas, m_pat_nAllTruthPhiMeas);
+                        m_pat_nMisTruthNonPrecMeas, m_pat_nMisTruthPrecMeas, m_pat_nMisTruthPhiMeas);
         }
+        auto isSecondaryMatched = [&truthHits](const SpacePoint* sp, std::size_t tpIdx) {
+            return sp->secondaryMeasurement() && isTruthMatched(*sp->secondaryMeasurement(), truthHits) == tpIdx;
+        };
         std::size_t patternIdx{0};
         for (const GlobalPattern* pattern : *patternCont) {
+            // We define a map of truth particles and associated hits for the current pattern, so we can determine the main truth particle is multiple are associated
+            std::unordered_map<std::size_t, std::vector<const SpacePoint*>> patternTruthHits{};
 
             const std::vector<StIndex> stations {pattern->getStations()};
             for (const StIndex station : stations) {
@@ -274,17 +359,38 @@ namespace MuonValR4 {
                     updatePatHitInfo(ePatBranchType::eReco, patternIdx, station, sp);
 
                     if (!m_isMC) continue;
-                    if (const auto tpIdx {isTruthMatched(sp, truthHits)}; tpIdx.has_value()) {
+                    if (const auto tpIdx {isTruthMatched(*sp->primaryMeasurement(), truthHits)}; tpIdx.has_value()) {
                         // By convention, if truth particle index is equal to the size of the truth map, it means it's a pileup particle
-                        updatePatHitInfo(tpIdx.value() < truthHits.size() ? ePatBranchType::eTruth : ePatBranchType::ePileup, 
-                                  patternIdx, station, sp);
-                        // Save the matched truth particle index in the tree, either is a signal or pileup particle
-                        auto& matchedTPs = m_pat_MatchedToTruth[patternIdx];
-                        if (std::ranges::find(matchedTPs, tpIdx.value()) == matchedTPs.end()) {
-                            matchedTPs.push_back(tpIdx.value());
+                        if (*tpIdx >= truthHits.size() ) {
+                            updatePatHitInfo(ePatBranchType::ePileup, patternIdx, station, sp, isSecondaryMatched(sp, *tpIdx));
+                        } else {
+                            patternTruthHits[*tpIdx].push_back(sp);
                         }
                     }
                 }
+            }
+            if (!patternTruthHits.empty()) {
+                // Sort the TPs by number of matched hits and define the main truth particle as the one with the most hits in the pattern
+                std::vector<std::size_t> sortedTPs {};
+                std::ranges::transform(patternTruthHits, std::back_inserter(sortedTPs), [](const auto& pair){ return pair.first; });
+                std::ranges::sort(sortedTPs, [&patternTruthHits](const auto& a, const auto& b){
+                    return patternTruthHits.at(a).size() > patternTruthHits.at(b).size();
+                });
+                const auto mainTP = sortedTPs.front();
+                for (const SpacePoint* sp : patternTruthHits[mainTP]) {
+                    const StIndex station {m_idHelperSvc->stationIndex(sp->identify())};
+                    updatePatHitInfo(ePatBranchType::eTruth, patternIdx, station, sp, isSecondaryMatched(sp, mainTP));
+                }
+                // Add truth hits that are matched to other truth particles than the main one
+                for (const auto& [tpIdx, hits] : patternTruthHits) {
+                    if (tpIdx == mainTP) continue;
+                    for (const SpacePoint* sp : hits) {
+                        const StIndex station {m_idHelperSvc->stationIndex(sp->identify())};
+                        updatePatHitInfo(ePatBranchType::eMismatched, patternIdx, station, sp, isSecondaryMatched(sp, tpIdx));
+                    }
+                }
+                // Save the matched truth particle index in the tree, either is a signal or pileup particle
+                std::ranges::transform(sortedTPs, std::back_inserter(m_pat_MatchedToTruth[patternIdx]), [](const auto& tp){ return tp; });
             }
             // Loop over the space point containers to count the number of hits in the buckets crossed by the pattern
             for (const SpacePointContainer* spContainer : spContainers) {
@@ -292,28 +398,21 @@ namespace MuonValR4 {
                 for (const SpacePointBucket* bucket : *spContainer) {
                     bool bucketInPattern{false};
                     const StIndex bucketStation {m_idHelperSvc->stationIndex(bucket->front()->identify())};
-                    std::vector<const SpacePoint*> allHits{}, allTruthHits{};
+                    std::vector<const SpacePoint*> allHits{};
                     
                     for (const auto& sp : *bucket) {
                         if (isInPattern(sp.get(), bucketStation, *pattern)) {
                             bucketInPattern = true;
                         }
                         allHits.push_back(sp.get());
-                        if (m_isMC && isTruthMatched(sp.get(), truthHits).has_value()) {
-                            allTruthHits.push_back(sp.get());
-                        }
                     }
                     if (bucketInPattern) {
                         for (const SpacePoint* sp : allHits) {
                             updatePatHitInfo(ePatBranchType::eAll, patternIdx, bucketStation, sp);
                         }
-                        for (const SpacePoint* sp : allTruthHits) {
-                            updatePatHitInfo(ePatBranchType::eAllTruth, patternIdx, bucketStation, sp);
-                        }
                     }
                 }
             }
-
             m_pat_Eta.push_back(-std::log(std::tan(pattern->theta()/2.)));
             m_pat_phi.push_back(pattern->phi());
             m_pat_sector1.push_back(pattern->sector());
@@ -322,49 +421,72 @@ namespace MuonValR4 {
             m_pat_side.push_back(pattern->hitsInStation(stations.front()).front()->msSector()->side());
             m_pat_nStations.push_back(stations.size());
 
-            if(m_isMC) {
-                m_pat_nTruthparticles.push_back(std::ranges::count_if(m_pat_MatchedToTruth[patternIdx], 
-                    [&truthHits](unsigned char tpIdx){ return tpIdx < truthHits.size(); }));
+            if (msgLevel(MSG::VERBOSE)) {
+                const auto mainTP {m_pat_MatchedToTruth[patternIdx].size() > 0 ? static_cast<int>(m_pat_MatchedToTruth[patternIdx].front()) : -1};
+                unsigned nPrecHits{0}, nNonPrecHits{0}, nPhiHits{0};
+                unsigned gen_nPrecHits{0}, gen_nNonPrecHits{0}, gen_nPhiHits{0};
+                for (std::size_t stIdx = 0; stIdx < s_nStations; ++stIdx) {
+                    nPrecHits += static_cast<unsigned>(m_pat_nTruthPrecMeas[patternIdx][stIdx]);
+                    nNonPrecHits += static_cast<unsigned>(m_pat_nTruthNonPrecMeas[patternIdx][stIdx]);
+                    nPhiHits += static_cast<unsigned>(m_pat_nTruthPhiMeas[patternIdx][stIdx]);
+                    if (mainTP < 0) continue;
+                    gen_nPrecHits += static_cast<unsigned>(m_gen_nPrecMeas[mainTP][stIdx]);
+                    gen_nNonPrecHits += static_cast<unsigned>(m_gen_nNonPrecMeas[mainTP][stIdx]);
+                    gen_nPhiHits += static_cast<unsigned>(m_gen_nPhiMeas[mainTP][stIdx]);
+                }
+                ATH_MSG_VERBOSE("Pat #" << patternIdx<< ": " << *pattern << "mainTP: "<<std::to_string(mainTP)
+                    <<", nTruthMatchedHits Trig: "<<nNonPrecHits<<" / "<<gen_nNonPrecHits<<", Prec: "<<nPrecHits<<" / "<<gen_nPrecHits<<", Phi: "<<nPhiHits<<" / "<<gen_nPhiHits);
             }
             patternIdx++;
         }
                                  
     }
 
-    void MuonFastRecoTester::updatePatHitInfo(ePatBranchType type, 
+    void MuonFastRecoTester::updatePatHitInfo(const ePatBranchType type, 
                                               const std::size_t patIdx,
                                               const Muon::MuonStationIndex::StIndex hitSt,
-                                              const MuonR4::SpacePoint* sp) {
+                                              const MuonR4::SpacePoint* sp,
+                                              const bool isSecondaryMatched) {
         using enum ePatBranchType;
-        const bool isPrec = MuonR4::isPrecisionHit(*sp);
-        const bool isTriggerEta = !isPrec && sp->measuresEta();
+        const bool isTruthInfo = (type == ePatBranchType::eTruth || type == ePatBranchType::eMismatched);
+        const auto updateCounts = [&](unsigned char& nonPrecCount, 
+                                      unsigned char& precCount, 
+                                      unsigned char& phiCount) {
+            if (sp->measuresEta()) {
+                if (MuonR4::isPrecisionHit(*sp)) precCount++;
+                else nonPrecCount++;
+                if (type == ePatBranchType::eTruth) {
+                    ATH_MSG_VERBOSE("---> "<<(MuonR4::isPrecisionHit(*sp) ? "Prec" : "Trig")<< " " << *sp << " in sector "<<sp->msSector()->identString() << " lay "<<m_spSorter.sectorLayerNum(*sp));
+                }
+            }
+            if (sp->measuresPhi() && (!isTruthInfo || isSecondaryMatched)) {
+                ++phiCount;
+                if (type == ePatBranchType::eTruth) {
+                    ATH_MSG_VERBOSE("---> "<<"Phi  " << *sp << " in sector "<<sp->msSector()->identString() << " lay "<<m_spSorter.sectorLayerNum(*sp));
+                }
+            }
+        };
         const auto stIdx = Acts::toUnderlying(hitSt);
-        
         switch (type) {
             case eReco:
-                m_pat_nNonPrecMeas[patIdx][stIdx] += isTriggerEta;
-                m_pat_nPrecMeas[patIdx][stIdx] += isPrec;
-                m_pat_nPhiMeas[patIdx][stIdx] += sp->measuresPhi();
+                updateCounts(m_pat_nNonPrecMeas[patIdx][stIdx], 
+                    m_pat_nPrecMeas[patIdx][stIdx], m_pat_nPhiMeas[patIdx][stIdx]);
                 return;
             case eTruth:
-                m_pat_nTruthNonPrecMeas[patIdx][stIdx] += isTriggerEta;
-                m_pat_nTruthPrecMeas[patIdx][stIdx] += isPrec;
-                m_pat_nTruthPhiMeas[patIdx][stIdx] += sp->measuresPhi();
+                updateCounts(m_pat_nTruthNonPrecMeas[patIdx][stIdx], 
+                    m_pat_nTruthPrecMeas[patIdx][stIdx], m_pat_nTruthPhiMeas[patIdx][stIdx]);
+                return;
+            case eMismatched:
+                updateCounts(m_pat_nMisTruthNonPrecMeas[patIdx][stIdx], 
+                    m_pat_nMisTruthPrecMeas[patIdx][stIdx], m_pat_nMisTruthPhiMeas[patIdx][stIdx]);
                 return;
             case eAll:
-                m_pat_nAllNonPrecMeas[patIdx][stIdx] += isTriggerEta;
-                m_pat_nAllPrecMeas[patIdx][stIdx] += isPrec;
-                m_pat_nAllPhiMeas[patIdx][stIdx] += sp->measuresPhi();
+                updateCounts(m_pat_nAllNonPrecMeas[patIdx][stIdx], 
+                    m_pat_nAllPrecMeas[patIdx][stIdx], m_pat_nAllPhiMeas[patIdx][stIdx]);
                 return;
             case ePileup:
-                m_pat_nPileupNonPrecMeas[patIdx][stIdx] += isTriggerEta;
-                m_pat_nPileupPrecMeas[patIdx][stIdx] += isPrec;
-                m_pat_nPileupPhiMeas[patIdx][stIdx] += sp->measuresPhi();
-                return;
-            case eAllTruth:
-                m_pat_nAllTruthNonPrecMeas[patIdx][stIdx] += isTriggerEta;
-                m_pat_nAllTruthPrecMeas[patIdx][stIdx] += isPrec;
-                m_pat_nAllTruthPhiMeas[patIdx][stIdx] += sp->measuresPhi();
+                updateCounts(m_pat_nPileupNonPrecMeas[patIdx][stIdx], 
+                    m_pat_nPileupPrecMeas[patIdx][stIdx], m_pat_nPileupPhiMeas[patIdx][stIdx]);
                 return;
         }
     }

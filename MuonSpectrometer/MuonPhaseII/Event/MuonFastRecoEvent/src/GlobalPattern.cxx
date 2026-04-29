@@ -33,7 +33,8 @@ double GlobalPattern::sectorPhi() const {
 }
 
 void GlobalPattern::print(std::ostream& ostr) const {
-    ostr<<"SpacePoint Pattern, Sector: "<< sector() << "  & " <<  (isSectorOverlap() ? std::to_string(secondarySector()) : "-")<< " Sector Phi: "<<sectorPhi()<<", theta: "<<theta()
+    ostr<<"SpacePoint Pattern, Sector: "<< sector() << "  & " <<  (isSectorOverlap() ? std::to_string(secondarySector()) : "-")
+                                        <<", theta: "<<theta() << ", Phi: "<<phi()<< " Sector Phi: "<<sectorPhi()
         <<", nPrecisionHits: "<<nPrecisionHits()<<", nEtaNonPrecisionHits: "<<nEtaNonPrecisionHits()<<", nPhiHits: "<<nPhiHits()
         <<", mean normalized residual squared: "<<meanNormResidual2();    
     ostr<<", Hit per station: \n";

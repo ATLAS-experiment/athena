@@ -118,9 +118,22 @@ namespace MuonValR4 {
             return;
         }
         /** Loop over the pattern visual objects. We make a plot for every combination of bucket and pattern */
+        unsigned sPatIdx{0u}, fPatIdx{0u}, oPatIdx{0u};
         for (PatternHitVisualInfo& patVisual : patternVisualVec) {
             PrimitiveVec primitivesCopy {clone(primitives)};
-            plotPatternBuckets(ctx, extraLabel, std::move(patVisual), std::move(primitivesCopy));
+            std::string label {};
+            switch(patVisual.status) {
+                case PatternHitVisualInfo::PatternStatus::eSuccessful:
+                    label = std::format("s{}_{}", sPatIdx++, extraLabel);
+                    break;
+                case PatternHitVisualInfo::PatternStatus::eFailed:
+                    label = std::format("f{}_{}", fPatIdx++, extraLabel);
+                    break;
+                case PatternHitVisualInfo::PatternStatus::eOverlap:
+                    label = std::format("o{}_{}", oPatIdx++, extraLabel);
+                    break;
+            }
+            plotPatternBuckets(ctx, label, std::move(patVisual), std::move(primitivesCopy));
         }
     }
     void FastRecoVisualizationTool::plotPatternBuckets(const EventContext& ctx,
