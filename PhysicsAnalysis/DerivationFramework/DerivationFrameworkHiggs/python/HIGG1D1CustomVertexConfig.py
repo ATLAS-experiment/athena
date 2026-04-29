@@ -1,21 +1,7 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-
-
-def PrimaryVertexRefittingToolCfg(flags, **kwargs):
-    """ PV refitting tool """
-    acc = ComponentAccumulator() 
-
-    if "TrackToVertexIPEstimator" not in kwargs:
-        from TrkConfig.TrkVertexFitterUtilsConfig import (
-            TrackToVertexIPEstimatorCfg)
-        kwargs.setdefault("TrackToVertexIPEstimator", acc.popToolsAndMerge(
-            TrackToVertexIPEstimatorCfg(flags)))
-
-    acc.setPrivateTools(CompFactory.Analysis.PrimaryVertexRefitter(**kwargs))
-    return acc
 
 def ZeeVertexRefittingToolCfg(
         flags, name="HIGG1D1_ZeeVertexRefitterTool", **kwargs):
@@ -25,6 +11,8 @@ def ZeeVertexRefittingToolCfg(
     import AthenaCommon.SystemOfUnits as Units
 
     if "PrimaryVertexRefitterTool" not in kwargs:
+        from JpsiUpsilonTools.JpsiUpsilonToolsConfig import (
+            PrimaryVertexRefittingToolCfg)
         kwargs.setdefault("PrimaryVertexRefitterTool", acc.popToolsAndMerge(
             PrimaryVertexRefittingToolCfg(flags)))
 
