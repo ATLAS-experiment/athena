@@ -6,6 +6,7 @@
 #include "HGTD_ReadoutGeometry/HGTD_DetectorElement.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "ActsInterop/TableUtils.h"
+#include "AthAllocators/DataPool.h"
 
 namespace ActsTrk {
 
@@ -46,7 +47,7 @@ namespace ActsTrk {
     auto mon = Monitored::Group( m_monTool, timer );
       
     SG::WriteHandle<xAOD::HGTDClusterContainer> clusterContainer = SG::makeHandle(m_clusterContainerKey, ctx);
-    ATH_CHECK(clusterContainer.record(std::make_unique<xAOD::HGTDClusterContainer>(),
+    ATH_CHECK(clusterContainer.record(std::make_unique<xAOD::HGTDClusterContainer>(SG::VIEW_ELEMENTS, SG::ALWAYS_TRACK_INDICES),
 				      std::make_unique<xAOD::HGTDClusterAuxContainer>()));
 
     unsigned int nRDOs=0;
@@ -87,7 +88,8 @@ namespace ActsTrk {
       }
     }
 
-    clusterContainer->push_new(nClusters, []() {return new xAOD::HGTDCluster;});
+    DataPool<xAOD::HGTDCluster> pool (nClusters);
+    clusterContainer->push_new(nClusters, [&pool]() {return pool.nextElementPtr();});
     std::any cache = m_clusteringTool->createEventDataCache(*clusterContainer,nRDOs);
 
     std::size_t icluster=0;
