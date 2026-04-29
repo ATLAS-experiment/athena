@@ -101,9 +101,8 @@ def checkNTupleEventWise(ntuple, printInterval = 150000):
     return 0
 
 def checkNTupleFieldWise(ntuple):
-    """Bulk read each top level field cluster by cluster.
+    """For each cluster, bulk read each top level field.
     """
-    from array import array
     from ROOT import RException
 
     try:
@@ -120,19 +119,20 @@ def checkNTupleFieldWise(ntuple):
         fieldZero = model.GetConstFieldZero()
         subFields = fieldZero.GetConstSubfields()
         msg.debug(f"Top level fields number {subFields.size()}")
-        for field in subFields:
-            msg.debug(f"fieldName={field.GetFieldName()} typeName={field.GetTypeName()}")
-            bulk = model.CreateBulk(field.GetFieldName())
-
-            for clusterDescriptor in descriptor.GetClusterIterable():
-                clusterIndex = ROOT.RNTupleLocalIndex(clusterDescriptor.GetId(), 0)
-                size = int(clusterDescriptor.GetNEntries())
-                maskReq = array('b', (True for i in range(size)))
-                msg.debug(f"    cluster #{clusterIndex.GetClusterId()}"
+        for clusterDescriptor in descriptor.GetClusterIterable():
+            size = int(clusterDescriptor.GetNEntries())
+            if msg.isEnabledFor(logging.DEBUG):
+                msg.debug(f"    cluster #{clusterDescriptor.GetId()}"
                           f" firstEntryIndex={clusterDescriptor.GetFirstEntryIndex()}"
                           f" nEntries={size}")
-                values = bulk.ReadBulk(clusterIndex, maskReq, size)
-                msg.debug(f"        values array at {values}")
+            clusterRange = ROOT.RNTupleLocalRange(clusterDescriptor.GetId(), 0, size)
+            for field in subFields:
+                if msg.isEnabledFor(logging.DEBUG):
+                    msg.debug(f"fieldName={field.GetFieldName()} typeName={field.GetTypeName()}")
+                bulk = model.CreateBulk(field.GetFieldName())
+                values = bulk.ReadBulk(clusterRange)
+                if msg.isEnabledFor(logging.DEBUG):
+                    msg.debug(f"        values array at {values}")
 
     except RException as err:
         from traceback import format_exception
