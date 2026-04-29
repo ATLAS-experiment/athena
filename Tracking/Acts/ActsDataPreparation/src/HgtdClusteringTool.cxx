@@ -110,7 +110,7 @@ namespace ActsTrk {
       float yWidth = 1.3;
       cov_matrix(0,0) = xWidth * xWidth / 12; // i.e. Cov XX
       cov_matrix(1,1) = yWidth * yWidth / 12; // i.e. Cov YY
-      float time_of_arrival_err = 0.035*CLHEP::c_light;;
+      float time_of_arrival_err = 0.035*CLHEP::c_light;
       cov_matrix(2,2) = time_of_arrival_err * time_of_arrival_err; // i.e. Cov TT
 
       std::vector<Identifier> rdo_list = {rdo_id};
