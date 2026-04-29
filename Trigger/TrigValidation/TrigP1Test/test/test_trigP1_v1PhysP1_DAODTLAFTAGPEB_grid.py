@@ -62,7 +62,7 @@ tlareco.threads = 8
 tlareco.concurrent_events = 8
 tlareco.input = ''
 tlareco.explicit_input = True
-tlareco.args = '--inputBSFile=' + find_file('*.physics_FTagPEBTLA*._athenaHLT*.data')  # output of the previous step
+tlareco.args = '--inputBSFile=' + find_file('*.physics_FTagPEBTLA.*.data')  # output of the previous step
 tlareco.args += ' --outputDAOD_TLAFTAGPEBFile=DAOD_TLAFTAGPEB.pool.root'
 tlareco.args += f' --conditionsTag="{defaultConditionsTags.RUN3_DATA25}" --geometryVersion=\'ATLAS-R3S-2021-03-02-00\''
 tlareco.args += ' --preExec="{:s}"'.format(tlarecoPreExec)

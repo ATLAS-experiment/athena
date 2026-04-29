@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -203,7 +203,7 @@ class TrigTZReco(ExecStep):
         self.input = ''
         self.explicit_input = True
         self.max_events = -1
-        self.args = '--inputBSFile=' + find_file('*.physics_Main*._athenaHLT*.data')  # output of the previous step
+        self.args = '--inputBSFile=' + find_file('*.physics_Main.*.data')  # output of the previous step
         self.args += ' --outputAODFile=AOD.pool.root'
         self.args += f' --conditionsTag="{defaultConditionsTags.RUN3_DATA23}" --geometryVersion=\'ATLAS-R3S-2021-03-02-00\''
         self.args += ' --preExec="{:s}"'.format(tzrecoPreExec)
