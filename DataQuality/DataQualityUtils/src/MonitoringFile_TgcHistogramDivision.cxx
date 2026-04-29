@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -33,6 +33,19 @@
 #include "TCanvas.h"
 #include "TBranch.h"
 #include "TGraphAsymmErrors.h"
+
+namespace{
+  const std::string smuid[2] = {
+    "_Muid", "_Staco"
+  };
+  const std::string spna[3] = {
+    "_Posi", "_Nega", ""
+  };
+  
+  const std::string sbc[3] = {
+    "_Previous", "", "_Next"
+  };
+}
 
 namespace dqutils {
   void
@@ -156,10 +169,7 @@ namespace dqutils {
           }
           mf.Write();
 
-          //efficiency map for current, previous and next.
-          std::string sbc[3] = {
-            "_Previous", "", "_Next"
-          };
+          
           for (int bc = 0; bc < 3; bc++) {
             ss.str("");
             ss << sws[ws] << "Efficiency_Map" << sbc[bc] << sac[ac];
@@ -258,16 +268,7 @@ namespace dqutils {
         tgc_dir + "TGCEA/", tgc_dir + "TGCEC/"
       };
 
-      std::string smuid[2] = {
-        "_Muid", "_Staco"
-      };
-      std::string spna[3] = {
-        "_Posi", "_Nega", ""
-      };
-
-      std::string sbc[3] = {
-        "_Previous", "", "_Next"
-      };
+      
 
       for (int ac = 0; ac < 2; ac++) {
         std::string eff_dir = tgc_sub_dir[ac] + "Eff/";

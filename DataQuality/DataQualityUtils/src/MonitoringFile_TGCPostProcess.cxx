@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -390,6 +390,11 @@ namespace dqutils {
      */
     TIter next_run(mf.GetListOfKeys());
     TKey* key_run(0);
+    static const std::string type[17] = {
+        "_F_T1", "_E4_T3", "_E3_T6", "_E2_T7", "_E1_T8",
+        "_F_T2", "_E5_T4", "_E4_T6", "_E3_T7", "_E2_T8", "_E1_T9",
+        "_F_T2", "_E5_T5", "_E4_T6", "_E3_T7", "_E2_T8", "_E1_T9"
+    };
     while ((key_run = dynamic_cast<TKey*> (next_run())) != 0) {
       if (!key_run->IsFolder()) continue;
       std::string run_dir = key_run->GetName();
@@ -421,11 +426,7 @@ namespace dqutils {
       std::string schambersummary[2][2];//[ac][ws]
       TH1F* chambersummary[2][2];//
 
-      std::string type[17] = {
-        "_F_T1", "_E4_T3", "_E3_T6", "_E2_T7", "_E1_T8",
-        "_F_T2", "_E5_T4", "_E4_T6", "_E3_T7", "_E2_T8", "_E1_T9",
-        "_F_T2", "_E5_T5", "_E4_T6", "_E3_T7", "_E2_T8", "_E1_T9"
-      };
+      
 
       //get summary histograms
       for (int ws = 0; ws < 2; ws++) {

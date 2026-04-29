@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 /* HLTMET Post Processing Method: In the HLT/MET[Mon/Mon_allCells/Mon_FEB]/DQPlots directory, there are
@@ -56,21 +56,16 @@ namespace dqutils {
 
       TDirectory* tdir_run = dynamic_cast<TDirectory*>(key_run);
 
-      std::string run_dir2 = run_dir;
-
-      // all merged root files have the structure "rootfile.root:/run_NNNNNNN"
-      // use that to extract run number
-      //int run_number = atoi( (run_dir2.substr(4, run_dir2.size()-4 )).c_str() );
-      //run_number=run_number;
+     
 
       // begin HLTMET
       // note 1: prefix all dirs and hists with '/'
       // note 2: missing dir => return
       // note 3: missing hist => continue
-      std::string hlt_top = run_dir + "/HLT"; // toplevel
-      std::string met_efdir = "/EFMissingET_Fex"; // EF dir
-      std::string met_l2dir = "/L2MissingET_Fex"; // L2 dir
-      std::string dqflag_dir = "/DQFlags"; // DQ flags dir
+      static const std::string hlt_top = run_dir + "/HLT"; // toplevel
+      static const std::string met_efdir = "/EFMissingET_Fex"; // EF dir
+      static const std::string met_l2dir = "/L2MissingET_Fex"; // L2 dir
+      static const std::string dqflag_dir = "/DQFlags"; // DQ flags dir
 
       std::vector<std::string> met_fexs, met_l2hists, met_efhists;
       // expect the following fex dirs
@@ -97,7 +92,7 @@ namespace dqutils {
       met_efhists.push_back("/compN_EF_MET_status");
 
       std::vector<std::string> lbnDirs;
-      std::string lbn_dqhist = "/trmet_lbn_flag";
+      static const std::string lbn_dqhist = "/trmet_lbn_flag";
       size_t lbn_range = HLTMETGetDQLBNRange(tdir_run, lbnDirs);
 
       //std::cout << "lbn_range = " << lbn_range << std::endl;
