@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( xAODEventInfoCnv )
@@ -45,30 +45,30 @@ atlas_add_test( EvenInfoCnvConfigTest
                 SCRIPT test/EventInfoCnv_test.py ${_extraFlags}
                 PROPERTIES TIMEOUT 300
                 PRIVATE_WORKING_DIRECTORY
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( EvenInfoCnvConfigTestMT
                 SCRIPT test/EventInfoCnv_test.py -n 25 -t 3 ${_extraFlags}
                 PROPERTIES TIMEOUT 300
                 PRIVATE_WORKING_DIRECTORY
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 if( NOT SIMULATIONBASE AND NOT GENERATIONBASE AND NOT XAOD_ANALYSIS )
    atlas_add_test( EventInfoOverlayConfigTest
                    SCRIPT test/EventInfoOverlay_test.py
                    PROPERTIES TIMEOUT 300
                    PRIVATE_WORKING_DIRECTORY
-                   POST_EXEC_SCRIPT nopost.sh )
+                   POST_EXEC_SCRIPT noerror.sh )
 
    atlas_add_test( EventInfoOverlayConfigTestMT
                    SCRIPT test/EventInfoOverlay_test.py -n 25 -t 3
                    PROPERTIES TIMEOUT 300
                    PRIVATE_WORKING_DIRECTORY
-                   POST_EXEC_SCRIPT nopost.sh )
+                   POST_EXEC_SCRIPT noerror.sh )
 
    atlas_add_test( EventInfoOverlayLegacyConfigTest
                    SCRIPT test/EventInfoOverlayLegacy_test.py
                    PROPERTIES TIMEOUT 300
                    PRIVATE_WORKING_DIRECTORY
-                   POST_EXEC_SCRIPT nopost.sh )
+                   POST_EXEC_SCRIPT noerror.sh )
 endif()
