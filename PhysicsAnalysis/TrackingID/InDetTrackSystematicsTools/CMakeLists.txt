@@ -20,7 +20,8 @@ if( NOT XAOD_STANDALONE )
       src/*.h src/*.cxx src/components/*.cxx
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
       LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps AsgTools xAODCore
-      xAODTracking InDetTrackSystematicsToolsLib )
+      xAODTracking xAODJet StoreGateLib AthLinks
+      InDetTrackSystematicsToolsLib )
 else()
    atlas_add_component( InDetTrackSystematicsTools
       src/components/*.cxx
@@ -47,6 +48,22 @@ atlas_add_executable( graph_to_function
    LINK_LIBRARIES ${ROOT_LIBRARIES} )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+
+if( NOT XAOD_STANDALONE )
+   atlas_install_scripts( test/test_TrackSmearingAlg.py test/test_JetTrackFilteringAlg.py )
+
+   atlas_add_test( TrackSmearingAlg
+      SCRIPT test_TrackSmearingAlg.py
+      POST_EXEC_SCRIPT nopost.sh
+      PRIVATE_WORKING_DIRECTORY
+      PROPERTIES TIMEOUT 300 )
+
+   atlas_add_test( JetTrackFilteringAlg
+      SCRIPT test_JetTrackFilteringAlg.py
+      POST_EXEC_SCRIPT nopost.sh
+      PRIVATE_WORKING_DIRECTORY
+      PROPERTIES TIMEOUT 300 )
+endif()
 
 # This will allow us to put files into data/ to test new calibration files
 # Uncomment this line after putting test files into data/, then run "make" again to install.

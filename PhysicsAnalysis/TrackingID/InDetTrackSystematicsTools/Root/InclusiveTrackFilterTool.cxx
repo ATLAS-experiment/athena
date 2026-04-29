@@ -4,6 +4,7 @@
 
 #include "InDetTrackSystematicsTools/InclusiveTrackFilterTool.h"
 #include "xAODTracking/TrackParticleContainer.h"
+#include "xAODTracking/TrackingPrimitives.h"
 #include "AthContainers/ConstAccessor.h"
 #include "CxxUtils/checker_macros.h"
 
@@ -56,7 +57,7 @@ namespace InDet {
     static const SG::ConstAccessor<unsigned long> patternRecoInfoAcc ("patternRecoInfo");
     if (patternRecoInfoAcc.isAvailable(*track) ) {
       const std::bitset<xAOD::NumberOfTrackRecoInfo> patternReco = track->patternRecoInfo();
-      if(not patternReco.test(49)) {
+      if(not patternReco.test(xAOD::SiSpacePointsSeedMaker_LargeD0)) {
         ATH_MSG_DEBUG( "Applying LRT uncertainties to non-LRT track! Skipping" );
         return true;
       }
