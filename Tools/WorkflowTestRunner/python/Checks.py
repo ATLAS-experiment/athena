@@ -107,7 +107,8 @@ class FrozenTier0PolicyCheck(WorkflowCheck):
 
     def __init__(self, setup: TestSetup, input_format: str, max_events: int) -> None:
         super().__init__(setup)
-        self.format = input_format
+        self.multithreaded = input_format.endswith("_MT")
+        self.format = input_format.removesuffix("_MT")
         self.max_events = str(max_events)
         self.detailed_comparison = setup.detailed_comparison
 
@@ -116,8 +117,9 @@ class FrozenTier0PolicyCheck(WorkflowCheck):
         self.logger.info(f"Running {test.ID} Frozen Tier0 Policy Check on {self.format} for {self.max_events} events")
 
         diff_rules_path: Path = self.setup.diff_rules_path
-        diff_rules_exclusion_filename: str = f"{test.ID}_{self.format}_diff-exclusion-list.txt"
-        diff_rules_interest_filename: str = f"{test.ID}_{self.format}_diff-interest-list.txt"
+        suffix = "_MT" if self.multithreaded else ""
+        diff_rules_exclusion_filename: str = f"{test.ID}{suffix}_{self.format}_diff-exclusion-list.txt"
+        diff_rules_interest_filename: str = f"{test.ID}{suffix}_{self.format}{suffix}_diff-interest-list.txt"
         diff_rules_file = None
 
         file_name = f"my{self.format}.pool.root"
