@@ -138,6 +138,19 @@
                <string>SCT Hits</string>
               </property>
              </widget>
+            </item><item>
+             <widget class="QCheckBox" name="chbxITkPixelHits">
+              <property name="text">
+               <string>Pixel Hits</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="chbxITkStripHits">
+              <property name="text">
+               <string>SCT Hits</string>
+              </property>
+             </widget>
             </item>
             <item>
              <widget class="QCheckBox" name="chbxTRTHits">

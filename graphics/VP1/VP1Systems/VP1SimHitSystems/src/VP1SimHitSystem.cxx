@@ -99,8 +99,13 @@ QWidget* VP1SimHitSystem::buildController()
   ui.setupUi(controller);
 
   // Populate Check Box Names Map
-  m_clockwork->checkBoxNamesMap.insert(ui.chbxPixelHits,"Pixel");
-  m_clockwork->checkBoxNamesMap.insert(ui.chbxSCTHits,"SCT");
+  if (VP1JobConfigInfo::hasITkGeometry()) {
+    m_clockwork->checkBoxNamesMap.insert(ui.chbxITkPixelHits,"ITkPixel");
+    m_clockwork->checkBoxNamesMap.insert(ui.chbxITkStripHits,"ITkStrip");
+  } else {
+    m_clockwork->checkBoxNamesMap.insert(ui.chbxPixelHits,"Pixel");
+    m_clockwork->checkBoxNamesMap.insert(ui.chbxSCTHits,"SCT");
+  }
   m_clockwork->checkBoxNamesMap.insert(ui.chbxTRTHits,"TRT");
   m_clockwork->checkBoxNamesMap.insert(ui.chbxMDTHits,"MDT");
   m_clockwork->checkBoxNamesMap.insert(ui.chbxRPCHits,"RPC");
@@ -131,6 +136,8 @@ void VP1SimHitSystem::systemcreate(StoreGateSvc* detstore)
   // Populate Color Map
   m_clockwork->colorMap.insert("Pixel",SbColor(0,0,1));
   m_clockwork->colorMap.insert("SCT",SbColor(1,1,1)); // white
+  m_clockwork->colorMap.insert("ITkPixel",SbColor(1,1,1)); // white
+  m_clockwork->colorMap.insert("ITkStrip",SbColor(1,1,1)); // white
   m_clockwork->colorMap.insert("TRT",SbColor(1,0,0)); // red
   m_clockwork->colorMap.insert("MDT",SbColor(.98,.8,.21));
   m_clockwork->colorMap.insert("RPC",SbColor(0,.44,.28));
