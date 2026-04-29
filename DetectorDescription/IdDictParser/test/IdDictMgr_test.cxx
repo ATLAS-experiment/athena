@@ -38,7 +38,7 @@ private:
     std::streambuf * m_old;
 };
 
-static const std::string sctDictFilename{"InDetIdDictFiles/IdDictInnerDetector_ITK-P2-RUN4-03-00-00.xml"};
+static const std::string sctDictFilename{"IdDictInnerDetector.xml"};
 
 
 // Return pairs of system,path pairs for all IdDict xml files
