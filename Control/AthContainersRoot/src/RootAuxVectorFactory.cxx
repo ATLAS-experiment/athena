@@ -289,12 +289,8 @@ bool RootAuxVector::shift (size_t pos, ptrdiff_t offs)
  * @param src_n Number of elements to insert.
  * @param srcStore The source store.
  *
- * @c beg and @c end define a range of container elements, with length
- * @c len defined by the difference of the pointers divided by the
- * element size.
- *
- * The size of the container will be increased by @c len, with the elements
- * starting at @c pos copied to @c pos+len.
+ * The size of the container will be increased by @c src_n, with the elements
+ * starting at @c pos copied to @c pos+src_n.
  *
  * The contents of the source range will then be moved to our vector
  * starting at @c pos.  This will be done via move semantics if possible;
