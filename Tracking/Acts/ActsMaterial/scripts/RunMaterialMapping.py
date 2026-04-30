@@ -39,7 +39,8 @@ def SetupArgParser():
     parser.add_argument("-V", "--verboseAccumulators", default=False,
                         action="store_true",
                         help="Print full details of the AlgSequence")
-    parser.add_argument("--storeTracks", default = False, help="Store the mapped and unmapped geantino tracks" )
+    parser.add_argument("--storeTracks", default = False, action="store_true", 
+                        help="Store the mapped and unmapped geantino tracks" )
     parser.add_argument("-S", "--verboseStoreGate", default=False,
                         action="store_true",
                         help="Dump the StoreGate(s) each event iteration")
