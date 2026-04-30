@@ -30,7 +30,7 @@ namespace DerivationFramework {
         TauJets_LepRMParticleThinning(const std::string& t, const std::string& n, const IInterface* p);
         virtual StatusCode initialize() override;
         virtual StatusCode finalize() override;
-        virtual StatusCode doThinning() const override;
+        virtual StatusCode doThinning(const EventContext& ctx) const override;
 
     private:
         mutable std::atomic<unsigned int> m_ntot_taus {0};

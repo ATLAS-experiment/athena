@@ -42,9 +42,8 @@ StatusCode DerivationFramework::TauThinningTool::finalize()
 }
 
 
-StatusCode DerivationFramework::TauThinningTool::doThinning() const
+StatusCode DerivationFramework::TauThinningTool::doThinning(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // retrieve containers and thin them
   SG::ThinningHandle<xAOD::TauJetContainer> taus(m_taus, ctx);

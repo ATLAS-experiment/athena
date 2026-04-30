@@ -65,9 +65,8 @@ StatusCode DerivationFramework::JetLargeD0TrackParticleThinning::finalize()
 }
 
 // The thinning itself
-StatusCode DerivationFramework::JetLargeD0TrackParticleThinning::doThinning() const
+StatusCode DerivationFramework::JetLargeD0TrackParticleThinning::doThinning(const EventContext& ctx) const
 {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     
     // Retrieve main TrackParticle collection
     SG::ThinningHandle<xAOD::TrackParticleContainer> importedTrackParticles

@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ViewContainerThinning.cxx 
@@ -29,10 +29,10 @@ namespace DerivationFramework {
 
   template <class T>
   StatusCode
-  ViewContainerThinning::doThinningT (const SG::ThinningHandleKey<T>& key,
+  ViewContainerThinning::doThinningT (const EventContext& ctx,
+                                      const SG::ThinningHandleKey<T>& key,
                                       const SG::ReadHandleKey<T>& viewKey) const
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     SG::ThinningHandle<T> sourceCont (key, ctx);
     SG::ReadHandle<T>     viewCont   (viewKey, ctx);
@@ -73,19 +73,19 @@ namespace DerivationFramework {
 
 
 
-  StatusCode ViewContainerThinning::doThinning() const
+  StatusCode ViewContainerThinning::doThinning(const EventContext& ctx) const
   {
 
     if (!m_trackParticleKey.empty()) {
-      ATH_CHECK( doThinningT (m_trackParticleKey, m_trackParticleViewKey) );
+      ATH_CHECK( doThinningT (ctx, m_trackParticleKey, m_trackParticleViewKey) );
     }
 
     if (!m_caloClusterKey.empty()) {
-      ATH_CHECK( doThinningT (m_caloClusterKey, m_caloClusterViewKey) );
+      ATH_CHECK( doThinningT (ctx, m_caloClusterKey, m_caloClusterViewKey) );
     }
 
     if (!m_truthParticleKey.empty()) {
-      ATH_CHECK( doThinningT (m_truthParticleKey, m_truthParticleViewKey) );
+      ATH_CHECK( doThinningT (ctx, m_truthParticleKey, m_truthParticleViewKey) );
     }
     return StatusCode::SUCCESS;
   }

@@ -29,7 +29,7 @@ namespace DerivationFramework {
 
     virtual StatusCode initialize() override;
     virtual StatusCode finalize() override final;
-    virtual StatusCode doThinning() const override final;
+    virtual StatusCode doThinning(const EventContext& ctx) const override final;
 
   protected:
     virtual std::vector<int> updateMask(const xAOD::TrackParticleContainer*) const;

@@ -66,9 +66,8 @@ StatusCode DerivationFramework::TauTrackParticleThinning::finalize()
 }
 
 // The thinning itself
-StatusCode DerivationFramework::TauTrackParticleThinning::doThinning() const
+StatusCode DerivationFramework::TauTrackParticleThinning::doThinning(const EventContext& ctx) const
 {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     
     // Retrieve main TrackParticle collection
     SG::ThinningHandle<xAOD::TrackParticleContainer> importedTrackParticles

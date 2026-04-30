@@ -64,8 +64,7 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode TriggerTowerThinningAlg::doThinning() const{
-    const EventContext& ctx = Gaudi::Hive::currentContext();
+  StatusCode TriggerTowerThinningAlg::doThinning(const EventContext& ctx) const{
 
     // Create the mask to be used for thinning
     std::vector<bool> mask;

@@ -39,7 +39,7 @@ namespace DerivationFramework {
     virtual ~PixeldEdxTrackParticleThinning() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode finalize() override;
-    virtual StatusCode doThinning() const override;
+    virtual StatusCode doThinning(const EventContext& ctx) const override;
 
   private:
 

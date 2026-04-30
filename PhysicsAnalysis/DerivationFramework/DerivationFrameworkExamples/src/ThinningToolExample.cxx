@@ -38,9 +38,8 @@ StatusCode DerivationFramework::ThinningToolExample::finalize()
 
 
 // The thinning itself
-StatusCode DerivationFramework::ThinningToolExample::doThinning() const
+StatusCode DerivationFramework::ThinningToolExample::doThinning(const EventContext& ctx) const
 {
-      const EventContext& ctx = Gaudi::Hive::currentContext();
 
       // Get the track container
       SG::ThinningHandle<xAOD::TrackParticleContainer> tracks (m_inDetSGKey, ctx);

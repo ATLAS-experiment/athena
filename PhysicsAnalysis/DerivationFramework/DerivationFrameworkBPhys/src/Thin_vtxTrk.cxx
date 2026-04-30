@@ -85,9 +85,8 @@ StatusCode DerivationFramework::Thin_vtxTrk::finalize()
 }
 
 // The thinning itself
-StatusCode DerivationFramework::Thin_vtxTrk::doThinning() const
+StatusCode DerivationFramework::Thin_vtxTrk::doThinning(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   // Retrieve main TrackParticle collection
   SG::ThinningHandle<xAOD::TrackParticleContainer> importedTrackParticles(m_trackParticleContainerName, ctx);
   
