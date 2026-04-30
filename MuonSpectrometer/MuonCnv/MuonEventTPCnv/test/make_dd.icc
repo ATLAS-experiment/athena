@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file MuonEventTPCnv/test/make_dd.icc
@@ -254,7 +254,7 @@ MuonGM::MuonDetectorManager&  init_cs (GeoFullPhysVol& pvol1,
                                    EventIDBase::UNDEFNUM,
                                    EventIDBase::UNDEFNUM,
                                    100000));
-  StatusCode sc = cc->insert (range, std::move (muo_dd));
+  StatusCode sc = cc->insert (range, std::move (muo_dd), ctx);
   assert (sc.isSuccess());
 
   if (condStore->record (std::move (cc), "MuonDetectorManager").isFailure()) std::abort();
