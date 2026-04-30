@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**@class MuonSegmentRegionRecoveryTool
@@ -139,12 +139,12 @@ namespace Muon {
         ToolHandle<Rec::ICombinedMuonTrackFitter> m_builder{this, "Builder", ""};
         ToolHandle<Trk::ITrackFitter> m_fitter{this, "Fitter", "Trk::GlobalChi2Fitter/MCTBSLFitter"};
         ToolHandle<IMuonHitSummaryTool> m_hitSummaryTool{this, "HitSummaryTool", "Muon::MuonHitSummaryTool/MuonHitSummaryTool"};
-        ToolHandle<IRegSelTool> m_regsel_mdt{this, "MDTRegionSelector", "RegSelTool/RegSelTool_MDT"};
-        ToolHandle<IRegSelTool> m_regsel_csc{this, "CSCRegionSelector", "RegSelTool/RegSelTool_CSC"};
-        ToolHandle<IRegSelTool> m_regsel_rpc{this, "RPCRegionSelector", "RegSelTool/RegSelTool_RPC"};
-        ToolHandle<IRegSelTool> m_regsel_tgc{this, "TGCRegionSelector", "RegSelTool/RegSelTool_TGC"};
-        ToolHandle<IRegSelTool> m_regsel_stgc{this, "STGCRegionSelector", "RegSelTool/RegSelTool_STGC"};
-        ToolHandle<IRegSelTool> m_regsel_mm{this, "MMRegionSelector", "RegSelTool/RegSelTool_MM"};
+        ToolHandle<IRegSelTool> m_regsel_mdt{this, "MDTRegionSelector", ""};
+        ToolHandle<IRegSelTool> m_regsel_csc{this, "CSCRegionSelector", ""};
+        ToolHandle<IRegSelTool> m_regsel_rpc{this, "RPCRegionSelector", ""};
+        ToolHandle<IRegSelTool> m_regsel_tgc{this, "TGCRegionSelector", ""};
+        ToolHandle<IRegSelTool> m_regsel_stgc{this, "STGCRegionSelector", ""};
+        ToolHandle<IRegSelTool> m_regsel_mm{this, "MMRegionSelector", ""};
         PublicToolHandle<MuonEDMPrinterTool> m_printer{this, "EDMPrinter", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};
         ToolHandle<Trk::IExtendedTrackSummaryTool> m_trackSummaryTool{this, "TrackSummaryTool", "MuonTrackSummaryTool"};
 
