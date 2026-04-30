@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -186,7 +186,7 @@ private:
 
     bool m_atlas_ready{false};
     bool isATLASReady() const { return m_atlas_ready; }
-    void setIsATLASReady();
+    void setIsATLASReady(const EventContext& ctx);
 
     int cachedTubeMax(const Identifier& id) const;
     int cachedTubeLayerMax(const Identifier& id) const;

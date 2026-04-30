@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
@@ -79,7 +79,7 @@ StatusCode AthMonitorAlgorithm::execute( const EventContext& ctx ) const {
     // Checks that all of the  DQ filters are passed. If any one of the filters
     // fails, return SUCCESS code and do not fill the histograms with the event.
     for ( const auto& filterItr : m_DQFilterTools ) {
-        if (!filterItr->accept()) {
+        if (!filterItr->accept(ctx)) {
             ATH_MSG_DEBUG("Event rejected due to filter tool.");
             return StatusCode::SUCCESS;
         }
@@ -228,7 +228,7 @@ bool AthMonitorAlgorithm::trigChainsArePassed( const std::vector<std::string>& v
 }
 
 
-float AthMonitorAlgorithm::lbAverageInteractionsPerCrossing (const EventContext& ctx /*= Gaudi::Hive::currentContext()*/) const
+float AthMonitorAlgorithm::lbAverageInteractionsPerCrossing (const EventContext& ctx) const
 {
     if (!m_lumiDataKey.empty()) {
         SG::ReadCondHandle<LuminosityCondData> lumi (m_lumiDataKey, ctx);
@@ -240,7 +240,7 @@ float AthMonitorAlgorithm::lbAverageInteractionsPerCrossing (const EventContext&
 }
 
 
-float AthMonitorAlgorithm::lbInteractionsPerCrossing (const EventContext& ctx /*= Gaudi::Hive::currentContext()*/) const
+float AthMonitorAlgorithm::lbInteractionsPerCrossing (const EventContext& ctx) const
 {
     if (!m_lumiDataKey.empty()) {
         SG::ReadCondHandle<LuminosityCondData> lumi (m_lumiDataKey, ctx);
@@ -256,7 +256,7 @@ float AthMonitorAlgorithm::lbInteractionsPerCrossing (const EventContext& ctx /*
 }
 
 
-float AthMonitorAlgorithm::lbAverageLuminosity (const EventContext& ctx /*= Gaudi::Hive::currentContext()*/) const
+float AthMonitorAlgorithm::lbAverageLuminosity (const EventContext& ctx) const
 {
     if (!m_lumiDataKey.empty()) {
         SG::ReadCondHandle<LuminosityCondData> lumi (m_lumiDataKey, ctx);
@@ -268,7 +268,7 @@ float AthMonitorAlgorithm::lbAverageLuminosity (const EventContext& ctx /*= Gaud
 }
 
 
-float AthMonitorAlgorithm::lbLuminosityPerBCID (const EventContext& ctx /*= Gaudi::Hive::currentContext()*/) const
+float AthMonitorAlgorithm::lbLuminosityPerBCID (const EventContext& ctx) const
 {
     if (!m_lumiDataKey.empty()) {
         SG::ReadCondHandle<LuminosityCondData> lumi (m_lumiDataKey, ctx);
@@ -280,7 +280,7 @@ float AthMonitorAlgorithm::lbLuminosityPerBCID (const EventContext& ctx /*= Gaud
 }
 
 
-float AthMonitorAlgorithm::lbAverageLivefraction (const EventContext& ctx /*= Gaudi::Hive::currentContext()*/) const
+float AthMonitorAlgorithm::lbAverageLivefraction (const EventContext& ctx) const
 {
     if (m_environment == Environment_t::online
         || m_dataType == DataType_t::monteCarlo) {
@@ -297,7 +297,7 @@ float AthMonitorAlgorithm::lbAverageLivefraction (const EventContext& ctx /*= Ga
 }
 
 
-float AthMonitorAlgorithm::livefractionPerBCID (const EventContext& ctx /*= Gaudi::Hive::currentContext()*/) const
+float AthMonitorAlgorithm::livefractionPerBCID (const EventContext& ctx) const
 {
     if (m_environment == Environment_t::online
         || m_dataType == DataType_t::monteCarlo) {
@@ -314,7 +314,7 @@ float AthMonitorAlgorithm::livefractionPerBCID (const EventContext& ctx /*= Gaud
 }
 
 
-double AthMonitorAlgorithm::lbLumiWeight (const EventContext& ctx /*= Gaudi::Hive::currentContext()*/) const
+double AthMonitorAlgorithm::lbLumiWeight (const EventContext& ctx) const
 {
     if (!m_lumiDataKey.empty()) {
         return (lbAverageLuminosity(ctx)*lbDuration(ctx))*lbAverageLivefraction(ctx);
@@ -325,7 +325,7 @@ double AthMonitorAlgorithm::lbLumiWeight (const EventContext& ctx /*= Gaudi::Hiv
 }
 
 
-double AthMonitorAlgorithm::lbDuration (const EventContext& ctx /*= Gaudi::Hive::currentContext()*/) const
+double AthMonitorAlgorithm::lbDuration (const EventContext& ctx) const
 {
     if ( m_environment == Environment_t::online
          || m_dataType == DataType_t::monteCarlo ) {

@@ -26,7 +26,6 @@ atlas_add_library(
         TrigAnalysisInterfaces
         TrigDecisionInterface
         TrigDecisionToolLib
-        TrigNavToolsLib
     PRIVATE_LINK_LIBRARIES
         ${CORAL_LIBRARIES}
         AthenaKernel

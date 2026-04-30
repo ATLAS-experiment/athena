@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ManagedMonitorToolBase_CXX
@@ -900,7 +900,7 @@ fillHists()
      ToolHandleArray<IDQFilterTool>::const_iterator ifilter(m_DQFilterTools.begin()), filterend(m_DQFilterTools.end());
      for (; filterresult && (ifilter != filterend);
    	  ++ifilter) {
-       filterresult = (filterresult && (*ifilter)->accept());
+       filterresult = (filterresult && (*ifilter)->accept(Gaudi::Hive::currentContext()));
      }
    }
    
@@ -1689,7 +1689,7 @@ preSelector()
 // Average mu, i.e. <mu>
 float
 ManagedMonitorToolBase::
-lbAverageInteractionsPerCrossing (const EventContext& ctx /*= Gaudi::Hive::currentContext()*/) const
+lbAverageInteractionsPerCrossing (const EventContext& ctx) const
 {
     if (!m_lumiDataKey.empty()) {
         SG::ReadCondHandle<LuminosityCondData> lumi (m_lumiDataKey, ctx);
@@ -1705,7 +1705,7 @@ lbAverageInteractionsPerCrossing (const EventContext& ctx /*= Gaudi::Hive::curre
 // Instantaneous number of interactions, i.e. mu
 float
 ManagedMonitorToolBase::
-lbInteractionsPerCrossing (const EventContext& ctx /*= Gaudi::Hive::currentContext()*/) const
+lbInteractionsPerCrossing (const EventContext& ctx) const
 {
     if (!m_lumiDataKey.empty()) {
         SG::ReadCondHandle<LuminosityCondData> lumi (m_lumiDataKey, ctx);
@@ -1725,7 +1725,7 @@ lbInteractionsPerCrossing (const EventContext& ctx /*= Gaudi::Hive::currentConte
 // Average luminosity (in ub-1 s-1 => 10^30 cm-2 s-1)
 float
 ManagedMonitorToolBase::
-lbAverageLuminosity (const EventContext& ctx /*= Gaudi::Hive::currentContext()*/) const
+lbAverageLuminosity (const EventContext& ctx) const
 {
     if (!m_lumiDataKey.empty()) {
         SG::ReadCondHandle<LuminosityCondData> lumi (m_lumiDataKey, ctx);
@@ -1741,7 +1741,7 @@ lbAverageLuminosity (const EventContext& ctx /*= Gaudi::Hive::currentContext()*/
 // Instantaneous luminosity
 float
 ManagedMonitorToolBase::
-lbLuminosityPerBCID (const EventContext& ctx /*= Gaudi::Hive::currentContext()*/) const
+lbLuminosityPerBCID (const EventContext& ctx) const
 {
     if (!m_lumiDataKey.empty()) {
         SG::ReadCondHandle<LuminosityCondData> lumi (m_lumiDataKey, ctx);
@@ -1758,7 +1758,7 @@ lbLuminosityPerBCID (const EventContext& ctx /*= Gaudi::Hive::currentContext()*/
 // Average luminosity livefraction
 float
 ManagedMonitorToolBase::
-lbAverageLivefraction (const EventContext& ctx /*= Gaudi::Hive::currentContext()*/) const
+lbAverageLivefraction (const EventContext& ctx) const
 {
     if (m_environment == AthenaMonManager::online)
         return 1.0;
@@ -1777,7 +1777,7 @@ lbAverageLivefraction (const EventContext& ctx /*= Gaudi::Hive::currentContext()
 // Live Fraction per Bunch Crossing ID
 float
 ManagedMonitorToolBase::
-livefractionPerBCID (const EventContext& ctx /*= Gaudi::Hive::currentContext()*/) const
+livefractionPerBCID (const EventContext& ctx) const
 {
     if (m_environment == AthenaMonManager::online)
         return 1.0;
@@ -1796,7 +1796,7 @@ livefractionPerBCID (const EventContext& ctx /*= Gaudi::Hive::currentContext()*/
 // Average Integrated Luminosity Live Fraction
 double
 ManagedMonitorToolBase::
-lbLumiWeight (const EventContext& ctx /*= Gaudi::Hive::currentContext()*/) const
+lbLumiWeight (const EventContext& ctx) const
 {
     if (!m_lumiDataKey.empty()) {
         return (lbAverageLuminosity(ctx)*lbDuration(ctx))*lbAverageLivefraction(ctx);
@@ -1812,7 +1812,7 @@ lbLumiWeight (const EventContext& ctx /*= Gaudi::Hive::currentContext()*/) const
 // Luminosity block time (in seconds)
 double
 ManagedMonitorToolBase::
-lbDuration (const EventContext& ctx /*= Gaudi::Hive::currentContext()*/) const
+lbDuration (const EventContext& ctx) const
 {
     if ( m_environment == AthenaMonManager::online ) {
         return m_defaultLBDuration;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaMonitoring/AthenaMonManager.h"
@@ -25,8 +25,6 @@
 #include "AthenaMonitoring/ManagedMonitorToolBase.h"
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
 #include "CxxUtils/checker_macros.h"
-
-#include "TrigNavTools/TrigNavigationThinningSvcMutex.h"
 
 #include <limits.h>
 #include <vector>
@@ -479,16 +477,6 @@ execute()
     Imp::HistLeakChecker lc(m_d);
     if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "AthenaMonManager::execute():" << endmsg;
 
-    // This is legacy R2 monitoring.
-    // We only permit serial access (over all slots) to both HLT monitoring AND navigation thinning, as both use the same underlying thread un-safe navigation tool
-    // All of these elements are deprecated for R3 and are in the process of being replaced. 
-    std::unique_lock<std::mutex> hltLock(TrigNavigationThinningSvcMutex::s_mutex, std::defer_lock);
-    if (name() == "HLTMonManager") {
-        ATH_MSG_DEBUG("HLTMonManager is obtaining the TrigNavigationThinningSvc lock in slot " 
-            << Gaudi::Hive::currentContext().slot() << " for event " << Gaudi::Hive::currentContext().eventID().event_number() );
-        hltLock.lock();
-    }
-
     StatusCode sc;
 
     ToolHandleArray<IMonitorToolBase>::iterator monToolsEnd = m_monTools.end();
@@ -546,7 +534,6 @@ execute()
     }
     if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "  --> Exiting successfully" << endmsg;
 
-    ATH_MSG_DEBUG(name() << " is releasing the TrigNavigationThinningSvc lock");
     return StatusCode::SUCCESS;
 }
 

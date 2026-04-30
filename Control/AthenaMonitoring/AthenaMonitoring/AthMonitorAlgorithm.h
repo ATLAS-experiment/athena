@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -283,42 +283,42 @@ public:
     /**
      * Calculate the average mu, i.e. <mu>.
      */
-    virtual float lbAverageInteractionsPerCrossing( const EventContext& ctx = Gaudi::Hive::currentContext() ) const;
+    virtual float lbAverageInteractionsPerCrossing( const EventContext& ctx ) const;
 
     /**
      * Calculate instantaneous number of interactions, i.e. mu.
      */
-    virtual float lbInteractionsPerCrossing( const EventContext& ctx = Gaudi::Hive::currentContext() ) const;
+    virtual float lbInteractionsPerCrossing( const EventContext& ctx ) const;
 
     /**
      * Calculate average luminosity (in ub-1 s-1 => 10^30 cm-2 s-1).
      */
-    virtual float lbAverageLuminosity( const EventContext& ctx = Gaudi::Hive::currentContext() ) const;
+    virtual float lbAverageLuminosity( const EventContext& ctx ) const;
 
     /**
      * Calculate the instantaneous luminosity per bunch crossing.
      */
-    virtual float lbLuminosityPerBCID( const EventContext& ctx = Gaudi::Hive::currentContext() ) const;
+    virtual float lbLuminosityPerBCID( const EventContext& ctx ) const;
 
     /**
      *  Calculate the duration of the luminosity block (in seconds)
      */
-    virtual double lbDuration( const EventContext& ctx = Gaudi::Hive::currentContext() ) const;
+    virtual double lbDuration( const EventContext& ctx ) const;
 
     /**
      * Calculate the average luminosity livefraction
      */
-    virtual float lbAverageLivefraction( const EventContext& ctx = Gaudi::Hive::currentContext() ) const;
+    virtual float lbAverageLivefraction( const EventContext& ctx ) const;
 
     /**
      * Calculate the live fraction per bunch crossing ID.
      */
-    virtual float livefractionPerBCID( const EventContext& ctx = Gaudi::Hive::currentContext() ) const;
+    virtual float livefractionPerBCID( const EventContext& ctx ) const;
 
     /**
      * Calculate the average integrated luminosity multiplied by the live fraction.
      */
-    virtual double lbLumiWeight( const EventContext& ctx = Gaudi::Hive::currentContext() ) const;
+    virtual double lbLumiWeight( const EventContext& ctx ) const;
 
     /** @} */ // end of lumi group
 

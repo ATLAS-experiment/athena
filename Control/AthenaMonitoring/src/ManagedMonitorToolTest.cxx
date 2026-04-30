@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -253,7 +253,7 @@ ManagedMonitorToolTest::
 fillHistograms()
 {
       // Fill average mu per bunch crossing
-      double lumiPerBCID = lbAverageInteractionsPerCrossing();
+      double lumiPerBCID = lbAverageInteractionsPerCrossing(Gaudi::Hive::currentContext());
       if (lumiPerBCID < 0) {
           // no luminosity information or EnableLumi is set to False in the config
           ATH_MSG_INFO("No luminosity information available or EnableLumi = False");

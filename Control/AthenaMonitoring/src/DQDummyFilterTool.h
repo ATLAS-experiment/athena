@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DQDUMMYFILTERTOOL_H
@@ -18,7 +18,7 @@ class DQDummyFilterTool :  public AthAlgTool, virtual public IDQFilterTool   {
         
   virtual ~DQDummyFilterTool () override;
         
-  virtual bool accept() const override;
+  virtual bool accept(const EventContext& ctx) const override;
 
 };
 

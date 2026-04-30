@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DQEVENTFLAGFILTERTOOL_H
@@ -22,7 +22,7 @@ class DQEventFlagFilterTool :  public AthAlgTool, virtual public IDQFilterTool  
         
   virtual StatusCode initialize() override;
 
-  virtual bool accept() const override;
+  virtual bool accept(const EventContext& ctx) const override;
 
  private:
   Gaudi::Property<bool> m_alwaysReturnTrue{this, "alwaysReturnTrue", false};

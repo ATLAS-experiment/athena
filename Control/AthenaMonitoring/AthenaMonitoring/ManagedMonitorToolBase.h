@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ManagedMonitorToolBase_H
@@ -615,49 +615,49 @@ class ManagedMonitorToolBase : public AthAlgTool, virtual public IMonitorToolBas
        * Average mu, i.e. \<mu\>
        *
        */
-       virtual float lbAverageInteractionsPerCrossing (const EventContext& ctx = Gaudi::Hive::currentContext()) const;
+       virtual float lbAverageInteractionsPerCrossing (const EventContext& ctx) const;
 
       /**
        * Instantaneous number of interactions, i.e. mu
        *
        */
-       virtual float lbInteractionsPerCrossing (const EventContext& ctx = Gaudi::Hive::currentContext()) const;
+       virtual float lbInteractionsPerCrossing (const EventContext& ctx) const;
 
       /**
        * Average luminosity (in ub-1 s-1 => 10^30 cm-2 s-1)
        *
        */
-       virtual float lbAverageLuminosity (const EventContext& ctx = Gaudi::Hive::currentContext()) const;
+       virtual float lbAverageLuminosity (const EventContext& ctx) const;
 
       /**
        * Instantaneous luminosity
        *
        */
-       virtual float lbLuminosityPerBCID (const EventContext& ctx = Gaudi::Hive::currentContext()) const;
+       virtual float lbLuminosityPerBCID (const EventContext& ctx) const;
 
       /**
        *  Luminosity block time (in seconds)
        *
        */
-       virtual double lbDuration (const EventContext& ctx = Gaudi::Hive::currentContext()) const;
+       virtual double lbDuration (const EventContext& ctx) const;
 
       /**
        * Average luminosity livefraction
        *
        */
-       virtual float lbAverageLivefraction (const EventContext& ctx = Gaudi::Hive::currentContext()) const;
+       virtual float lbAverageLivefraction (const EventContext& ctx) const;
 
       /**
        * Livefraction per bunch crossing ID
        *
        */
-       virtual float livefractionPerBCID (const EventContext& ctx = Gaudi::Hive::currentContext()) const;
+       virtual float livefractionPerBCID (const EventContext& ctx) const;
 
       /**
        * Average Integrated Luminosity Live Fraction
        *
        */
-       virtual double lbLumiWeight (const EventContext& ctx = Gaudi::Hive::currentContext()) const;
+       virtual double lbLumiWeight (const EventContext& ctx) const;
 
 
    protected:

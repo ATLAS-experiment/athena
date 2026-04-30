@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArRawChannelMonAlg.h"
@@ -168,7 +168,7 @@ StatusCode LArRawChannelMonAlg::fillHistograms(const EventContext &ctx) const
   const bool is_atlas_ready = std::all_of(
       m_atlasReady_tools.begin(),
       m_atlasReady_tools.end(),
-      [](auto &f) { return f->accept(); });
+      [&ctx](auto &f) { return f->accept(ctx); });
 
   SG::ReadHandle<xAOD::EventInfo> event_info{GetEventInfo(ctx)};
   int bcid{0}, lumi_block{0};
