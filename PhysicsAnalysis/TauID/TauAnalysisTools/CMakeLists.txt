@@ -59,7 +59,7 @@ if( NOT XAOD_STANDALONE )
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
       LINK_LIBRARIES ${ROOT_LIBRARIES} AthAnalysisBaseCompsLib POOLRootAccessLib
       GaudiKernel AsgTools xAODTau TauAnalysisToolsLib CxxUtils ColumnarCoreLib ColumnarTauLib ColumnarEventInfoLib
-      POST_EXEC_SCRIPT nopost.sh )
+      POST_EXEC_SCRIPT noerror.sh )
 endif()
 
 # Install files from the package:
