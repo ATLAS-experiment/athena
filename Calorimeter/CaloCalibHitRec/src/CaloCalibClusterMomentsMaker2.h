@@ -319,41 +319,91 @@ class CaloCalibClusterMomentsMaker2: public AthAlgTool, virtual public CaloClust
   }
 
  private:
-  std::vector<std::string> m_momentsNames;
-  moment_name_vector m_validNames;
-  moment_name_set m_validMoments;
-  std::vector<std::string> m_momentsNamesAOD;
-  std::set<xAOD::CaloCluster::MomentType> m_momentsAOD;
-  SG::ReadHandleKeyArray<CaloCalibrationHitContainer> m_CalibrationHitContainerNames;
-  SG::ReadHandleKeyArray<CaloCalibrationHitContainer> m_DMCalibrationHitContainerNames;
+  // Properties
+  SG::ReadHandleKeyArray<CaloCalibrationHitContainer> m_CalibrationHitContainerNames{this, "CalibrationHitContainerNames", {}};
+  SG::ReadHandleKeyArray<CaloCalibrationHitContainer> m_DMCalibrationHitContainerNames{this, "DMCalibrationHitContainerNames", {}};
   SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthParticleContainerKey{this,"TruthParticles","TruthParticles","ReadHandleKey for truth particle container"};
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloDetDescrMgrKey{this,"CaloDetDescrManager", "CaloDetDescrManager"};
-  const CaloCell_ID* m_calo_id;
-  const CaloDM_ID* m_caloDM_ID;
-  const CaloDmDescrManager* m_caloDmDescrManager;
-  int m_n_phi_out;
-  int m_n_eta_out;
-  double m_out_phi_max;
-  double m_out_eta_max;
-  double m_rmaxOut[3];
+  
+  Gaudi::Property<std::vector<std::string>> m_momentsNames{this, "MomentsNames", {}};
+  Gaudi::Property<int> m_MatchDmType{this, "MatchDmType", kMatchDmLoose};
+  Gaudi::Property<bool> m_useParticleID{this, "UseParticleID", true};
+
+  // Name(s) of Moments which can be stored on the AOD - all others go to ESD
+  Gaudi::Property<std::vector<std::string>> m_momentsNamesAOD {this, "AODMomentsNames",
+							       {"ENG_CALIB_TOT"
+								, "ENG_CALIB_OUT_L"
+								, "ENG_CALIB_OUT_M"
+								, "ENG_CALIB_OUT_T"
+								, "ENG_CALIB_EMB0"
+								, "ENG_CALIB_EME0"
+								, "ENG_CALIB_TILEG3"
+								, "ENG_CALIB_DEAD_TOT"
+								, "ENG_CALIB_DEAD_EMB0"
+								, "ENG_CALIB_DEAD_TILE0"
+								, "ENG_CALIB_DEAD_TILEG3"
+								, "ENG_CALIB_DEAD_EME0"
+								, "ENG_CALIB_DEAD_HEC0"
+								, "ENG_CALIB_DEAD_FCAL"
+								, "ENG_CALIB_DEAD_LEAKAGE"
+								, "ENG_CALIB_DEAD_UNCLASS"
+								, "ENG_CALIB_FRAC_EM"
+								, "ENG_CALIB_FRAC_HAD"
+								, "ENG_CALIB_FRAC_REST"
+							       }
+  };
+
+
+  // Name(s) of Moments to calculate
+  moment_name_vector m_validNames{std::make_pair(std::string("ENG_CALIB_TOT"), xAOD::CaloCluster::ENG_CALIB_TOT)
+    , std::make_pair(std::string("ENG_CALIB_OUT_L"), xAOD::CaloCluster::ENG_CALIB_OUT_L)
+    , std::make_pair(std::string("ENG_CALIB_OUT_M"), xAOD::CaloCluster::ENG_CALIB_OUT_M)
+    , std::make_pair(std::string("ENG_CALIB_OUT_T"), xAOD::CaloCluster::ENG_CALIB_OUT_T)
+    , std::make_pair(std::string("ENG_CALIB_EMB0"), xAOD::CaloCluster::ENG_CALIB_EMB0)
+    , std::make_pair(std::string("ENG_CALIB_EME0"), xAOD::CaloCluster::ENG_CALIB_EME0)
+    , std::make_pair(std::string("ENG_CALIB_TILEG3"), xAOD::CaloCluster::ENG_CALIB_TILEG3)
+    , std::make_pair(std::string("ENG_CALIB_DEAD_TOT"), xAOD::CaloCluster::ENG_CALIB_DEAD_TOT)
+    , std::make_pair(std::string("ENG_CALIB_DEAD_EMB0"), xAOD::CaloCluster::ENG_CALIB_DEAD_EMB0)
+    , std::make_pair(std::string("ENG_CALIB_DEAD_TILE0"), xAOD::CaloCluster::ENG_CALIB_DEAD_TILE0)
+    , std::make_pair(std::string("ENG_CALIB_DEAD_TILEG3"), xAOD::CaloCluster::ENG_CALIB_DEAD_TILEG3)
+    , std::make_pair(std::string("ENG_CALIB_DEAD_EME0"), xAOD::CaloCluster::ENG_CALIB_DEAD_EME0)
+    , std::make_pair(std::string("ENG_CALIB_DEAD_HEC0"), xAOD::CaloCluster::ENG_CALIB_DEAD_HEC0)
+    , std::make_pair(std::string("ENG_CALIB_DEAD_FCAL"), xAOD::CaloCluster::ENG_CALIB_DEAD_FCAL)
+    , std::make_pair(std::string("ENG_CALIB_DEAD_LEAKAGE"), xAOD::CaloCluster::ENG_CALIB_DEAD_LEAKAGE)
+    , std::make_pair(std::string("ENG_CALIB_DEAD_UNCLASS"), xAOD::CaloCluster::ENG_CALIB_DEAD_UNCLASS)
+    , std::make_pair(std::string("ENG_CALIB_FRAC_EM"), xAOD::CaloCluster::ENG_CALIB_FRAC_EM)
+    , std::make_pair(std::string("ENG_CALIB_FRAC_HAD"), xAOD::CaloCluster::ENG_CALIB_FRAC_HAD)
+    , std::make_pair(std::string("ENG_CALIB_FRAC_REST"), xAOD::CaloCluster::ENG_CALIB_FRAC_REST)
+  };
+
+  moment_name_set m_validMoments;
+
+  std::set<xAOD::CaloCluster::MomentType> m_momentsAOD;
+  const CaloCell_ID* m_calo_id{};
+  const CaloDM_ID* m_caloDM_ID{};
+  const CaloDmDescrManager* m_caloDmDescrManager{};
+  int m_n_phi_out{127};
+  int m_n_eta_out{127};
+  double m_out_phi_max{M_PI};
+  double m_out_eta_max{6};
+  double m_rmaxOut[3] = {1.0, 0.5, 0.3};
   std::array<std::vector<std::vector<CalibHitIPhiIEtaRange> >, 3> m_i_phi_eta;
-  mutable std::atomic<bool> m_foundAllContainers{};
+  mutable std::atomic<bool> m_foundAllContainers{false};
   enum keys_dm_energy_sharing {kMatchDmOff, kMatchDmLoose, kMatchDmMedium, kMatchDmTight};
   enum keys_calib_frac_origin {kCalibFracEM, kCalibFracHAD, kCalibFracREST, kCalibFracMax};
-  bool m_doDeadEnergySharing;
-  bool m_doOutOfClusterL;
-  bool m_doOutOfClusterM;
-  bool m_doOutOfClusterT;
-  bool m_doDeadL;
-  bool m_doDeadM;
-  bool m_doDeadT;
-  bool m_useParticleID;
-  bool m_doCalibFrac;
-  float m_energyMin;
-  float m_energyMinCalib;
-  float m_apars_alpha;
-  float m_apars_r0;
-  int m_MatchDmType;
+  bool m_doDeadEnergySharing{false};
+  bool m_doOutOfClusterL{false};
+  bool m_doOutOfClusterM{false};
+  bool m_doOutOfClusterT{false};
+  bool m_doDeadL{false};
+  bool m_doDeadM{false};
+  bool m_doDeadT{false};
+
+  bool m_doCalibFrac{false};
+  float m_energyMin{200*CLHEP::MeV};
+  float m_energyMinCalib{20*CLHEP::MeV};
+  float m_apars_alpha{0.5};
+  float m_apars_r0{0.2};
 
   static double angle_mollier_factor(double x);
 };
