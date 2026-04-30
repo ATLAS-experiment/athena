@@ -21,15 +21,20 @@ namespace xAOD {
  *         a passed WriteHandle key object */
 namespace detail{
     /** @brief Define that the templated class needs to inherit from the AuxContainerBase class */
-     template <typename AuxCont_t> concept AuxContainerConcept = std::is_base_of_v<xAOD::AuxContainerBase, AuxCont_t>;
+     template <typename AuxCont_t> concept AuxContainerConcept = std::is_base_of_v<xAOD::AuxContainerBase, AuxCont_t>
+                                                              || std::is_same_v<AuxCont_t, void*>;
+    /** @brief Define a data vector*/
+    template<typename Cont_t> concept DataVectorConcept = 
+        std::is_same_v<Cont_t, DataVector<typename Cont_t::base_value_type>>;
     /** @brief Define the primary container */
-    template <typename Cont_t> concept PrimaryContainerConcept = requires(const Cont_t& container) {
+    template <typename Cont_t> concept PrimaryContainerConcept = DataVectorConcept<Cont_t> 
+                                                              && requires(const Cont_t& container) {
         requires std::is_base_of_v<SG::AuxElement, typename Cont_t::base_value_type>;
-        requires std::is_same_v<Cont_t, DataVector<typename Cont_t::base_value_type>>;
     };
 }
 
-template <detail::PrimaryContainerConcept Cont_t, 
+
+template <detail::DataVectorConcept Cont_t, 
           detail::AuxContainerConcept AuxCont_t>
 class FillContainer {
     public:
@@ -37,7 +42,11 @@ class FillContainer {
         using WriteHandle_t = SG::WriteHandle<Cont_t>;
         /** @brief default constructor */
         FillContainer() {
-            m_cont->setStore(m_auxCont.get());
+            static_assert( (detail::PrimaryContainerConcept<Cont_t> && !std::is_same_v<AuxCont_t, void*>) ||
+                           (detail::DataVectorConcept<Cont_t> && std::is_same_v<AuxCont_t, void*>));
+            if constexpr(!std::is_same_v<AuxCont_t, void*>) {
+                m_cont->setStore(m_auxCont.get());
+            }
         }
 
         /** @brief Move constructor */
@@ -46,7 +55,7 @@ class FillContainer {
         FillContainer& operator=(FillContainer&& other) = default;
         /** @brief get operator */
         Cont_t* get() const { 
-            if (!m_writeHandle) {
+            if (!hasHandle()) {
                 return m_cont.get();
             }
             WriteHandle_t& handle ATLAS_THREAD_SAFE{*m_writeHandle};
@@ -65,14 +74,18 @@ class FillContainer {
             if (key.empty()) {
                 return StatusCode::SUCCESS;
             }
-            if (m_writeHandle) {
+            if (hasHandle()) {
                 MsgStream msg{Athena::getMessageSvc(), "FillContainer"};
                 msg<<MSG::ERROR<<__func__<<"() - "<<__LINE__<<": Write handle under key "
                     <<m_writeHandle->key()<<" already exists."<<endmsg;
                 return StatusCode::FAILURE;
             }
             m_writeHandle = std::make_unique<WriteHandle_t>(key, ctx);
-            return m_writeHandle->record(std::move(m_cont), std::move(m_auxCont));
+            if constexpr(!std::is_same_v<AuxCont_t, void*>) {
+                return m_writeHandle->record(std::move(m_cont), std::move(m_auxCont));
+            } else {
+                return m_writeHandle->record(std::move(m_cont));
+            }
         }
         /** @brief Record the container to store gate using the passed write handle
          *         key. If the key is empty nothing is written
@@ -83,24 +96,30 @@ class FillContainer {
             if (key.empty()) {
                 return StatusCode::SUCCESS;
             }
-            if (m_writeHandle) {
+            if (hasHandle()) {
                 MsgStream msg{Athena::getMessageSvc(), "FillContainer"};
                 msg<<MSG::ERROR<<__func__<<"() - "<<__LINE__<<": Write handle under key "
                     <<m_writeHandle->key()<<" already exists."<<endmsg;
                 return StatusCode::FAILURE;
             }
             m_writeHandle = std::make_unique<WriteHandle_t>(key, ctx);
-            return m_writeHandle->record(std::move(m_cont), std::move(m_auxCont));
+            if constexpr(!std::is_same_v<AuxCont_t, void*>) {
+                return m_writeHandle->recordNonConst(std::move(m_cont), std::move(m_auxCont));
+            } else {
+                return m_writeHandle->recordNonConst(std::move(m_cont));
+            }
         }
         /** @brief Returns the reference to the active write handle. Throws an 
          *         exception if the handle has not been instantiated yet. */
         WriteHandle_t& getHandle() {
-            if (!m_writeHandle) {
+            if (!hasHandle()) {
                 THROW_EXCEPTION("The write handle has not been initialized. Please call record or"
                               <<" recordNonConst before calling getHandle()");
             }
             return *m_writeHandle;
         }
+        /** @brief Returns whether the record function has been called */
+        bool hasHandle() const { return m_writeHandle != nullptr; }
     private:
         /** @brief Unique pointer to the container type */
         std::unique_ptr<Cont_t> m_cont{std::make_unique<Cont_t>()};
