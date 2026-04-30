@@ -307,9 +307,57 @@ StatusCode gFexTowerSummer::gtReconstructABC(const EventContext& ctx,
       (XFPGA == 1) ? LVL1::gFEXPos::BCALO_TYPE[iFiber] : LVL1::gFEXPos::CCALO_TYPE[iFiber]; 
 
     // saturation
+    // TODO: Route saturation to the correct column based on detector type,
+    // matching the firmware behaviour in tbuilder_sat.vhd.
+    // For regular EM/HAD (types 0, 1), ntower is a tower index (0-383) and
+    // saturation goes to the tower's natural column.
+    // For extended (types 2, 3) and overlap HEC (type 6), ntower is a row
+    // index (0-31) and saturation must go to the special column:
+    //   FPGA A: extended -> col 0, overlap HEC -> col 4
+    //   FPGA B: extended -> col 11, overlap HEC -> col 7
+    // Also skip HEC regular (type 11) saturation for FPGA B to match
+    // the firmware bug in tbuilder_mapper.vhd pFPGA_B SAT_LOW_HEC.
     bool fiberSaturation = (bool)(gfexFiberTower->isSaturated());
     if (fiberSaturation) {
-      saturationData[ntower] = fiberSaturation;
+      if (XFPGA < 2) {
+        // FPGA A and B: route by detector type
+        switch (dataType) {
+          case 0:  // EM
+          case 1:  // TREX / HAD
+            saturationData[ntower] = true;
+            break;
+          case 11: // HEC regular
+            // FPGA-B FW bug: SAT_LOW_HEC checks wrong type, never fires
+            if (XFPGA != 1) {
+              saturationData[ntower] = true;
+            }
+            break;
+          case 2:  // extended EMEC
+          case 3:  // extended HEC
+            {
+              int extCol = (XFPGA == 0) ? 0 : 11;
+              int extTower = ntower * 12 + extCol;
+              if (extTower >= 0 && extTower < 384) {
+                saturationData[extTower] = true;
+              }
+            }
+            break;
+          case 6:  // overlap HEC
+            {
+              int olapCol = (XFPGA == 0) ? 4 : 7;
+              int olapTower = ntower * 12 + olapCol;
+              if (olapTower >= 0 && olapTower < 384) {
+                saturationData[olapTower] = true;
+              }
+            }
+            break;
+          default:
+            break;
+        }
+      } else {
+        // FPGA C: simple saturation routing
+        saturationData[ntower] = true;
+      }
     }
 
     // Get the MLE from the EDM (stored as float)
@@ -618,15 +666,19 @@ void gFexTowerSummer::undoMLE(int &datumPtr ) const{
   } 
   **/
   else if( ( oth0) & (  oth1 ) & ( oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 ) & (! oth6 )  ) {
+    // cppcheck-suppress shiftNegativeLHS; well-defined in c++20
     dout = r3conv >>1;
   }  
   else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (! oth4 ) & (! oth5 ) & (! oth6 )  ) {
+    // cppcheck-suppress shiftNegativeLHS; well-defined in c++20
     dout = r4conv >>1;
   }  
   else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (  oth4 ) & (! oth5 ) & (! oth6 ) ) {
+    // cppcheck-suppress shiftNegativeLHS; well-defined in c++20
     dout = r5conv >>1;
   } 
   else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (  oth4 ) & ( oth5 ) & (! oth6 ) ) {
+    // cppcheck-suppress shiftNegativeLHS; well-defined in c++20
     dout = r6conv >>1;
   }  
   else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (  oth4 ) & (  oth5 ) & ( oth6 )  ) {

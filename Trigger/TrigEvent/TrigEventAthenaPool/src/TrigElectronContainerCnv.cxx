@@ -17,7 +17,7 @@ TrigElectronContainer_PERS* TrigElectronContainerCnv::createPersistent(TrigElect
 }
 
 //create transient
-TrigElectronContainer* TrigElectronContainerCnv::createTransient() 
+TrigElectronContainer* TrigElectronContainerCnv::createTransient(const Token* token) 
 {
     MsgStream mlog(msgSvc(), "TrigElectronContainerConverter" );
     mlog << MSG::DEBUG << "TrigElectronContainerCnv::createTransient" << endmsg;
@@ -28,25 +28,25 @@ TrigElectronContainer* TrigElectronContainerCnv::createTransient()
     static const pool::Guid p0_guid2("2F97E0FB-7C93-4616-B322-1A01BF65D331");
     static const pool::Guid p0_guid1("EA6EA1A5-16FC-4DBF-896E-D933B25E65E0");
 
-    if( compareClassGuid( p3_guid ) ){
-       std::unique_ptr< TrigElectronContainer_p3 > col_vect( poolReadObject< TrigElectronContainer_p3 >() );
+    if( compareClassGuid(token,  p3_guid ) ){
+       std::unique_ptr< TrigElectronContainer_p3 > col_vect( poolReadObject< TrigElectronContainer_p3 >(token) );
        //         std::cout << "Reading IMFC p3" << std::endl;
        return m_converter.createTransient( col_vect.get(), mlog ) ;
 
-    } else if ( compareClassGuid(tlp2_guid) ) {
+    } else if ( compareClassGuid(token, tlp2_guid) ) {
 
-      std::unique_ptr< TrigElectronContainer_tlp2 >   col_vect( poolReadObject< TrigElectronContainer_tlp2 >() );
+      std::unique_ptr< TrigElectronContainer_tlp2 >   col_vect( poolReadObject< TrigElectronContainer_tlp2 >(token) );
       return m_converter_tlp2.createTransient( col_vect.get(), mlog );
       
-    } else if ( compareClassGuid(tlp1_guid) ) {
+    } else if ( compareClassGuid(token, tlp1_guid) ) {
 
-      std::unique_ptr< TrigElectronContainer_tlp1 >   col_vect( poolReadObject< TrigElectronContainer_tlp1 >() );
+      std::unique_ptr< TrigElectronContainer_tlp1 >   col_vect( poolReadObject< TrigElectronContainer_tlp1 >(token) );
       return m_converter_tlp1.createTransient( col_vect.get(), mlog );
       
-    } else if ( compareClassGuid(p0_guid1) || compareClassGuid(p0_guid2) ) {
+    } else if ( compareClassGuid(token, p0_guid1) || compareClassGuid(token, p0_guid2) ) {
       
       // old version from before TP separation, just return it
-      return poolReadObject<TrigElectronContainer>();
+      return poolReadObject<TrigElectronContainer>(token);
       
     }  else {
       

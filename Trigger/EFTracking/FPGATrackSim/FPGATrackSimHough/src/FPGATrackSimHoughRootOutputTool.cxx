@@ -249,7 +249,7 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<FPGATrack
     FPGATrackSimMultiTruth::Weight tfrac;
 
     // Collect truth tracks' 2nd stage hits
-    for (auto hit : hits_2nd) {
+    for (const auto &hit : hits_2nd) {
       // Only write out hits belonging to the truth track
       if (hit->getBarcode() == track.getBarcode()) {
 
@@ -434,12 +434,13 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<FPGATrack
     m_phi = road.getHoughX();
     m_invpt = road.getHoughY();
     m_subregion = road.getRegion();
-    std::vector<FPGATrackSimHit> hits = road.getFPGATrackSimHits();
+    std::vector<std::shared_ptr<const FPGATrackSimHit>> hits = road.getFPGATrackSimHitPtrs();
 
 
     // Add the hits from each combination to the tree
-    for (FPGATrackSimHit hit : hits) {
-
+    for (const auto& hitPtr : hits) {
+      const FPGATrackSimHit& hit = *hitPtr;
+      
       m_realHit.push_back(hit.isReal());
       if (hit.getHitType() == HitType::spacepoint) {
         m_isSP.push_back(true);
@@ -467,14 +468,13 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<FPGATrack
       }
 
       target_r = m_SUBREGIONMAP->getAvgRadius(0, hit.getLayer());
-      std::shared_ptr<const FPGATrackSimHit> hit_ptr = std::make_shared<const FPGATrackSimHit>(hit);
       std::vector<float> idealized_coords = computeIdealCoords(hit, m_invpt, hit.getGPhi(), target_r, true, TrackCorrType::None);
 
       m_x.push_back(hit.getX());
       m_y.push_back(hit.getY());
       m_z.push_back(hit.getZ());
-      m_volumeID.push_back(getVolumeID(*hit_ptr));
-      m_custom_layerID.push_back(getFineID(*hit_ptr));
+      m_volumeID.push_back(getVolumeID(hit));
+      m_custom_layerID.push_back(getFineID(hit));
       m_layerID.push_back(hit.getLayerDisk(true));
       m_etaID.push_back(hit.getEtaModule(true));
 

@@ -50,6 +50,7 @@
 /// helper struct - steer the configuration from the parent tool's side 
 struct InDetRttPlotConfig{
   bool isITk{false};
+  bool hasHGTDReco{false};
 
   /// Plots for (selected) tracks, not necessarily truth matched
   bool doTrackParameters{true}; 
@@ -175,6 +176,7 @@ private:
   std::unique_ptr<InDetPerfPlot_HitResidual> m_hitResidualPlot;
   std::unique_ptr<InDetPerfPlot_HitEfficiency> m_hitEffPlot;
   std::unique_ptr<InDetPerfPlot_FakeRate> m_fakePlots;
+  std::unique_ptr<InDetPerfPlot_FakeRate> m_fakePlotsTotal;
   std::unique_ptr<InDetPerfPlot_FakeRate> m_missingTruthFakePlots;
   std::unique_ptr<InDetPerfPlot_Resolution> m_resolutionPlotPrim;
   std::unique_ptr<InDetPerfPlot_Resolution> m_resolutionPlotPrim_truthFromB;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <chrono>
@@ -51,11 +51,13 @@ int main (int argc, char *argv []) {
       for (size_t i=0; i<N; i++) HLTUtils::file2hashes(filename);
     };
     if (nthreads==0) {
+      //coverity[TAINTED_SCALAR]
       run();
     }
     else {
       std::cout << "Launching " << nthreads << " threads reading file each "
                 << N << " times" << std::endl;
+      //coverity[TAINTED_SCALAR]
       std::vector<std::thread> threads;
       for (size_t i = 0; i<nthreads; ++i) threads.emplace_back(run);
       for (auto& thr : threads)           thr.join();

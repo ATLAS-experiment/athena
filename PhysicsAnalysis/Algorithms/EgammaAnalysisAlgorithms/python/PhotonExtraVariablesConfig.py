@@ -9,6 +9,8 @@ class PhotonExtraVariablesBlock(ConfigBlock):
 
     def __init__(self):
         super(PhotonExtraVariablesBlock, self).__init__()
+        self.addDependency('EventSelection', required=False)
+        self.addDependency('EventSelectionMerger', required=False)
         self.addOption('containerName', None, type=str, info='the input photon container.')
 
     def instanceName (self) :

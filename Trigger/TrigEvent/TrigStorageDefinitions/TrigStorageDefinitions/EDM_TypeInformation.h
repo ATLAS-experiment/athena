@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -10,29 +10,27 @@
 #include "AthLinks/DataLink.h"
 #include "TrigStorageDefinitions/TypeInformation.h"
 
-#define HLT_BEGIN_TYPE_REGISTRATION typedef HLT::TypeInformation::newlist::
+#define HLT_BEGIN_TYPE_REGISTRATION typedef HLT::TypeInformation::List<>
 
-//clever macro overloading from http://stackoverflow.com/questions/16683146/can-macros-be-overloaded-by-number-of-arguments?rq=1
+/// Helper to handle variable number of arguments
+#define _HLT_REGISTER_INTERNAL(OBJECT, FEATURE, CONTAINER, ...) \
+  ::merge<HLT::TypeInformation::TypeInfo<OBJECT, HLT::TypeInformation::List<FEATURE>, CONTAINER __VA_OPT__(, ) __VA_ARGS__>>
 
-#define CAT( A, B ) A ## B
-#define SELECT( NAME, NUM ) CAT( NAME ## _, NUM )
+/**
+ * Register an HLT type with optional Aux container.
+ *
+ * HLT_REGISTER_TYPE(OBJECT, FEATURE, CONTAINER [, AUX])
+ */
+#define HLT_REGISTER_TYPE(OBJECT, FEATURE, CONTAINER, ...) \
+  _HLT_REGISTER_INTERNAL(OBJECT, FEATURE, CONTAINER __VA_OPT__(, ) __VA_ARGS__)
 
-#define GET_COUNT( _1, _2, _3, _4, _5, _6, COUNT, ... ) COUNT
-#define VA_SIZE( ... ) GET_COUNT( __VA_ARGS__, 6, 5, 4, 3, 2, 1 )
-
-#define VA_SELECT( NAME, ... ) SELECT( NAME, VA_SIZE(__VA_ARGS__) )(__VA_ARGS__)
+#define HLT_END_TYPE_REGISTRATION(name) TypeInfo_##name;
 
 
-#define HLT_REGISTER_IMPL_3(OBJECT,FEATURE,CONTAINER)                \
-  addWithChecking<HLT::TypeInformation::type_info<OBJECT ,HLT::TypeInformation::list<FEATURE ,HLT::\
-    TypeInformation::nil>,CONTAINER > > ::go::
-
-#define HLT_REGISTER_IMPL_4(OBJECT,FEATURE,CONTAINER,AUX)                \
-  addWithChecking<HLT::TypeInformation::type_info<OBJECT ,HLT::TypeInformation::list<FEATURE ,HLT::\
-    TypeInformation::nil>,CONTAINER,AUX> > ::go::
-
-#define HLT_REGISTER_TYPE(...) VA_SELECT(HLT_REGISTER_IMPL,__VA_ARGS__)
-
-#define HLT_END_TYPE_REGISTRATION(name) done TypeInfo_##name;
+/**
+ * Register a type map for a package.
+ */
+#define TYPEMAPCLASS(name) \
+  struct class_##name { using map = TypeInfo_##name; };
 
 #endif

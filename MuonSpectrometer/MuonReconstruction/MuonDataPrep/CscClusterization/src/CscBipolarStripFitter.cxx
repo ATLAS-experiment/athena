@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // CscBipolarStripFitter.cxx
@@ -79,8 +79,7 @@ Result CscBipolarStripFitter::fit(const ChargeList &chgs, double period, Identif
     IdentifierHash stripHash;
     if (m_phelper->get_channel_hash(stripId, stripHash)) {
         ATH_MSG_WARNING("Unable to get CSC striphash id "
-                        << " the identifier is ");
-        stripId.show();
+                        << " the identifier is \n" << stripId);
     }
     ATH_MSG_DEBUG("CalibCscStripFitter:: " << stripId << "  " << (unsigned int)stripHash);
 

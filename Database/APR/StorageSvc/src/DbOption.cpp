@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -35,199 +35,158 @@ namespace {
   }
 }
 
-/// Initializing constructor with type definition
-DbOption::DbOption(const std::string& nam, const std::string& opt)
-: m_type(DbColumn::UNKNOWN), m_name(nam), m_opt(opt)
-{
-}
-
-/// Access to OS independent type name
-std::string DbOption::typeName() const  {
-  return DbColumn::typeName(m_type);
-}
 
 /// Set the option value
 StatusCode DbOption::i_setValue(const std::type_info& typ, const void* value)  {
-  if ( typ == typeid(bool) )
-    return setValue(DbColumn::BOOL, value);
-  else if ( typ == typeid(char) )
-    return setValue(DbColumn::CHAR, value);
-  else if ( typ == typeid(signed char) )
-    return setValue(DbColumn::CHAR, value);
-  else if ( typ == typeid(unsigned char) )
-    return setValue(DbColumn::UCHAR, value);
-  else if ( typ == typeid(short) )
-    return setValue(DbColumn::SHORT, value);
-  else if ( typ == typeid(signed short) )
-    return setValue(DbColumn::SHORT, value);
-  else if ( typ == typeid(unsigned short) )
-    return setValue(DbColumn::USHORT, value);
-  else if ( typ == typeid(int) )
-    return setValue(DbColumn::INT, value);
-  else if ( typ == typeid(signed int) )
-    return setValue(DbColumn::INT, value);
-  else if ( typ == typeid(unsigned int) )
-    return setValue(DbColumn::UINT, value);
-  else if ( typ == typeid(long) )
-    return setValue(DbColumn::LONG, value);
-  else if ( typ == typeid(signed long) )
-    return setValue(DbColumn::LONG, value);
-  else if ( typ == typeid(unsigned long) )
-    return setValue(DbColumn::ULONG, value);
-  else if ( typ == typeid(long long int) )
-    return setValue(DbColumn::LONGLONG, value);
-  else if ( typ == typeid(unsigned long long int) )
-    return setValue(DbColumn::ULONGLONG, value);
-  else if ( typ == typeid(double) )
-    return setValue(DbColumn::DOUBLE, value);
-  else if ( typ == typeid(float) )
-    return setValue(DbColumn::FLOAT, value);
-  else if ( typ == typeid(void*) )
-    return setValue(DbColumn::ANY, value);
-  else if ( typ == typeid(const void*) )
-    return setValue(DbColumn::ANY, value);
-  else if ( typ == typeid(char*) )
-    return setValue(DbColumn::NTCHAR, value);
-  else if ( typ == typeid(const char*) )
-    return setValue(DbColumn::NTCHAR, value);
-  else
-    std::cout << "DbOption::getValue> unknown data type" << std::endl;
-  return StatusCode::FAILURE;
-}
-
-/// Set the option value
-StatusCode DbOption::i_getValue(const std::type_info& typ, void* value) const {
-  //const char* n = typ.name();
-  if ( typ == typeid(bool) )
-    return getValue(DbColumn::BOOL, value);
-  else if ( typ == typeid(char) )
-    return getValue(DbColumn::CHAR, value);
-  else if ( typ == typeid(signed char) )
-    return getValue(DbColumn::CHAR, value);
-  else if ( typ == typeid(unsigned char) )
-    return getValue(DbColumn::UCHAR, value);
-  else if ( typ == typeid(short) )
-    return getValue(DbColumn::SHORT, value);
-  else if ( typ == typeid(signed short) )
-    return getValue(DbColumn::SHORT, value);
-  else if ( typ == typeid(unsigned short) )
-    return getValue(DbColumn::USHORT, value);
-  else if ( typ == typeid(int) )
-    return getValue(DbColumn::INT, value);
-  else if ( typ == typeid(signed int) )
-    return getValue(DbColumn::INT, value);
-  else if ( typ == typeid(unsigned int) )
-    return getValue(DbColumn::UINT, value);
-  else if ( typ == typeid(long) )
-    return getValue(DbColumn::LONG, value);
-  else if ( typ == typeid(signed long) )
-    return getValue(DbColumn::LONG, value);
-  else if ( typ == typeid(unsigned long) )
-    return getValue(DbColumn::ULONG, value);
-  else if ( typ == typeid(long long int) )
-    return getValue(DbColumn::LONGLONG, value);
-  else if ( typ == typeid(unsigned long long int) )
-    return getValue(DbColumn::ULONGLONG, value);
-  else if ( typ == typeid(double) )
-    return getValue(DbColumn::DOUBLE, value);
-  else if ( typ == typeid(float) )
-    return getValue(DbColumn::FLOAT, value);
-  else if ( typ == typeid(void*) )
-    return getValue(DbColumn::ANY, value);
-  else if ( typ == typeid(const void*) )
-    return getValue(DbColumn::ANY, value);
-  else if ( typ == typeid(char*) )
-    return getValue(DbColumn::NTCHAR, value);
-  else if ( typ == typeid(const char*) )
-    return getValue(DbColumn::NTCHAR, value);
-  else
-    std::cout << "DbOption::getValue> unknown data type" << std::endl;
-  return StatusCode::FAILURE;
-}
-
-/// Set the option value
-StatusCode DbOption::setValue(DbColumn::Type typ, const void* value) {
-  m_type = typ;
-  switch(type())   {
-  case DbColumn::UCHAR:
-    return Marshal<unsigned char,int>::get(value,&m_value.val_int);
-  case DbColumn::USHORT:
-    return Marshal<unsigned short,int>::get(value,&m_value.val_int);
-  case DbColumn::UINT:
-    return Marshal<unsigned int,int>::get(value,&m_value.val_int);
-  case DbColumn::ULONG:
-    return Marshal<unsigned long,int>::get(value,&m_value.val_int);
-  case DbColumn::ULONGLONG:
-    return Marshal<long long int,unsigned long long int>::get(value,&m_value.val_long);
-  case DbColumn::CHAR:
-    return Marshal<char,int>::get(value,&m_value.val_int);
-  case DbColumn::SHORT:
-    return Marshal<short,int>::get(value,&m_value.val_int);
-  case DbColumn::INT:
-    return Marshal<int,int>::get(value,&m_value.val_int);
-  case DbColumn::LONG:
-    return Marshal<long,int>::get(value,&m_value.val_int);
-  case DbColumn::LONGLONG:
-    return Marshal<long long int,long long int>::get(value,&m_value.val_long);
-  case DbColumn::BOOL:
+  if( typ == typeid(bool) ) {
+    m_type = DbColumn::BOOL;
     m_value.val_int = *(bool*)value ? 1 : 0;
     return StatusCode::SUCCESS;
-  case DbColumn::FLOAT:
-    return Marshal<float,double>::get(value,&m_value.val_double);
-  case DbColumn::DOUBLE:
-    return Marshal<double,double>::get(value,&m_value.val_double);
-  case DbColumn::NTCHAR:
-    m_value.val_pchar = *(char**)value;
-    return StatusCode::SUCCESS;
-  case DbColumn::POINTER:
-  case DbColumn::ANY:
+  }
+  else if( typ == typeid(char) ) {
+    m_type = DbColumn::CHAR;
+    return Marshal<char,int>::get(value, &m_value.val_int);
+  }
+  else if( typ == typeid(signed char) ) {
+    m_type = DbColumn::CHAR;
+    return Marshal<signed char,int>::get(value, &m_value.val_int);
+  }
+  else if( typ == typeid(unsigned char) ) {
+    m_type = DbColumn::UCHAR;
+    return Marshal<unsigned char,int>::get(value, &m_value.val_int);
+  }
+  else if( typ == typeid(short) ) {
+    m_type = DbColumn::SHORT;
+    return Marshal<short,int>::get(value, &m_value.val_int);
+  }
+  else if( typ == typeid(unsigned short) ) {
+    m_type = DbColumn::USHORT;
+    return Marshal<unsigned short,int>::get(value, &m_value.val_int);
+  }
+  else if( typ == typeid(int) ) {
+    m_type = DbColumn::INT;
+    return Marshal<int,int>::get(value, &m_value.val_int);
+  }
+  else if( typ == typeid(unsigned int) ) {
+    m_type = DbColumn::UINT;
+    return Marshal<unsigned int,int>::get(value, &m_value.val_int);
+  }
+  else if( typ == typeid(long) ) {
+    m_type = DbColumn::LONG;
+    return Marshal<long,int>::get(value, &m_value.val_int);
+  }
+  else if( typ == typeid(unsigned long) ) {
+    m_type = DbColumn::ULONG;
+    return Marshal<unsigned long,int>::get(value, &m_value.val_int);
+  }
+  else if( typ == typeid(long long) ) {
+    m_type = DbColumn::LONGLONG;
+    return Marshal<long long,long long>::get(value, &m_value.val_long);
+  }
+  else if( typ == typeid(unsigned long long) ) {
+    m_type = DbColumn::ULONGLONG;
+    return Marshal<unsigned long long,long long>::get(value, &m_value.val_long);
+  }
+  else if( typ == typeid(double) ) {
+    m_type = DbColumn::DOUBLE;
+    return Marshal<double,double>::get(value, &m_value.val_double);
+  }
+  else if( typ == typeid(float) ) {
+    m_type = DbColumn::FLOAT;
+    return Marshal<float,double>::get(value, &m_value.val_double);
+  }
+  else if( typ == typeid(void*) or typ == typeid(const void*) ) {
+    m_type = DbColumn::ANY;
     m_value.val_pvoid = *(void**)value;
     return StatusCode::SUCCESS;
-  case DbColumn::UNKNOWN:
-  default:
-    std::cout << "DbOption::setValue> unknown data type" << std::endl;
   }
+  else if( typ == typeid(char*) or typ == typeid(const char*) ) {
+    m_type = DbColumn::NTCHAR;
+    m_value.val_pchar = *(char**)value;
+    return StatusCode::SUCCESS;
+  }
+  else
+    std::cout << "DbOption::setValue> unsupported data type: " << typ.name() << std::endl;
   return StatusCode::FAILURE;
 }
 
-/// Set the option value
-StatusCode DbOption::getValue(DbColumn::Type /*typ*/, void* value) const  {
-  switch(type())   {
-  case DbColumn::UCHAR:
-    return Marshal<int, unsigned char>::get(&m_value.val_int, value);
-  case DbColumn::USHORT:
-    return Marshal<int, unsigned short>::get(&m_value.val_int, value);
-  case DbColumn::UINT:
-    return Marshal<int, unsigned int>::get(&m_value.val_int, value);
-  case DbColumn::ULONG:
-    return Marshal<int, unsigned long>::get(&m_value.val_int, value);
-  case DbColumn::ULONGLONG:
-    return Marshal<long long int, unsigned long long int>::get(&m_value.val_int, value);
-  case DbColumn::CHAR:
-    return Marshal<int, char>::get(&m_value.val_int, value);
-  case DbColumn::SHORT:
-    return Marshal<int, short>::get(&m_value.val_int, value);
-  case DbColumn::INT:
-    return Marshal<int, int>::get(&m_value.val_int, value);
-  case DbColumn::LONG:
-    return Marshal<int, long>::get(&m_value.val_int, value);
-  case DbColumn::LONGLONG:
-    return Marshal<long long int, long long int>::get(&m_value.val_int, value);
-  case DbColumn::BOOL:
-    *(bool*)value = m_value.val_int == 1;
+
+/// Read the option value
+StatusCode DbOption::i_getValue(const std::type_info& typ, void* value) const {
+  if( typ == typeid(bool) ) {
+    *(bool*)value = (bool)m_value.val_int;
     return StatusCode::SUCCESS;
-  case DbColumn::FLOAT:
-    return Marshal<double, float>::get(&m_value.val_int, value);
-  case DbColumn::DOUBLE:
-    return Marshal<double, double>::get(&m_value.val_int, value);
-  case DbColumn::NTCHAR:
-  case DbColumn::POINTER:
-  case DbColumn::ANY:
-    *(void**)value = m_value.val_pvoid;
-    return StatusCode::SUCCESS;
-  case DbColumn::UNKNOWN:
-  default:
-    std::cout << "DbOption::getValue> unknown data type" << std::endl;
   }
+  else if( typ == typeid(char) ) {
+    if( m_type == DbColumn::CHAR )
+      return Marshal<int, char>::get(&m_value.val_int, value);
+  }
+  else if( typ == typeid(signed char) ) {
+    if( m_type == DbColumn::CHAR )
+      return Marshal<int, signed char>::get(&m_value.val_int, value);
+  }
+  else if( typ == typeid(unsigned char) ) {
+    if( m_type == DbColumn::UCHAR )
+      return Marshal<int, unsigned char>::get(&m_value.val_int, value);
+  }
+  else if( typ == typeid(short) ) {
+    if( m_type == DbColumn::SHORT )
+      return Marshal<int, short>::get(&m_value.val_int, value);
+  }
+  else if( typ == typeid(unsigned short) ) {
+    if( m_type == DbColumn::USHORT )
+      return Marshal<int, unsigned short>::get(&m_value.val_int, value);
+  }
+  else if( typ == typeid(int) ) {
+    if( m_type == DbColumn::INT or m_type == DbColumn::SHORT )
+      return Marshal<int, int>::get(&m_value.val_int, value);
+  }
+  else if( typ == typeid(unsigned int) ) {
+    if( m_type == DbColumn::UINT or m_type == DbColumn::USHORT )
+      return Marshal<int, unsigned int>::get(&m_value.val_int, value);
+  }
+  else if( typ == typeid(long) ) {
+    if( m_type == DbColumn::LONG or m_type == DbColumn::INT or m_type == DbColumn::SHORT )
+      return Marshal<int, long>::get(&m_value.val_int, value);
+  }
+  else if( typ == typeid(unsigned long) ) {
+    if( m_type == DbColumn::ULONG or m_type == DbColumn::UINT or m_type == DbColumn::USHORT )
+      return Marshal<int, unsigned long>::get(&m_value.val_int, value);
+  }
+  else if( typ == typeid(long long int) ) {
+    if( m_type == DbColumn::LONGLONG )
+      return Marshal<long long, long long>::get(&m_value.val_long, value);
+    if( m_type == DbColumn::LONG or m_type == DbColumn::INT or m_type == DbColumn::SHORT )
+      return Marshal<int, long long>::get(&m_value.val_int, value);
+  }
+  else if( typ == typeid(unsigned long long int) ) {
+    if( m_type == DbColumn::ULONGLONG )
+      return Marshal<long long, unsigned long long>::get(&m_value.val_long, value);
+    if( m_type == DbColumn::LONG or m_type == DbColumn::INT or m_type == DbColumn::SHORT )
+      return Marshal<int, unsigned long long>::get(&m_value.val_int, value);
+  }
+  else if( typ == typeid(double) ) {
+    if( m_type == DbColumn::DOUBLE or m_type == DbColumn::FLOAT )
+      return Marshal<double, double>::get(&m_value.val_double, value);
+  }
+  else if( typ == typeid(float) ) {
+    if( m_type == DbColumn::FLOAT )
+      return Marshal<double, float>::get(&m_value.val_double, value);
+  }
+  else if( typ == typeid(void*) or typ == typeid(const void*) ) {
+    if( m_type == DbColumn::ANY ) {
+      *(void**)value = m_value.val_pvoid;
+      return StatusCode::SUCCESS;
+    }
+  }
+  else if( typ == typeid(char*) or typ == typeid(const char*) ) {
+    if( m_type == DbColumn::NTCHAR ) {
+      *(void**)value = m_value.val_pchar;
+      return StatusCode::SUCCESS;
+    }
+  }
+  else
+    std::cout << "DbOption::getValue(): datatype mismatch - option type is: " 
+              << DbColumn::typeName(m_type) << ", requested type is: " << typ.name() << std::endl;
   return StatusCode::FAILURE;
 }

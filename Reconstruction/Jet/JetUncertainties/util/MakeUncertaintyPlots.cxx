@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetUncertainties/JetUncertaintiesTool.h"
@@ -1553,7 +1553,7 @@ void MakeUncertaintyPlots(const TString& outFile,TCanvas* canvas,const std::vect
 }
 
 
-int main (int argc, char* argv[])
+int domain (int argc, char* argv[])
 {
     if (argc != 7 && argc != 8)
     {
@@ -1582,9 +1582,16 @@ int main (int argc, char* argv[])
     std::vector<TString> configs   = jet::utils::vectorize<TString>(argv[4],";");
     std::vector<TString> compSets  = jet::utils::vectorize<TString>(argv[5],"@");
     std::vector<TString> labelSets = jet::utils::vectorize<TString>(argv[6],"@");
-    if (argc == 8) optHelper.Initialize(jet::utils::vectorize<TString>(argv[7],";"));
-    else           optHelper.Initialize(std::vector<TString>());
-    
+    try{
+      if (argc == 8) optHelper.Initialize(jet::utils::vectorize<TString>(argv[7],";"));
+      else           optHelper.Initialize(std::vector<TString>());
+    } catch (const std::exception& e) {
+      std::cerr<<"Exception in optHelper.Initialize: " << e.what()<<std::endl;
+      exit(1);
+    } catch (...) {
+      std::cerr<<"Unknown exception in optHelper.Initialize"<<std::endl;
+      exit(1);
+    }
     StatusCode::enableFailure();
   
     bool doComparison = false;
@@ -1911,4 +1918,15 @@ int main (int argc, char* argv[])
     }
 
     return 0;
+}
+
+
+int main (int argc, char* argv[])
+{
+  try {
+    return domain(argc, argv);
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
 }

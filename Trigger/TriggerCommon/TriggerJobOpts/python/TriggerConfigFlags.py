@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import os
 
@@ -21,7 +21,7 @@ def trigGlobalTag(flags):
     """Return global conditions data to be used in the HLT. Return None to indicate that
     no trigger-specific tag is required. Used for IOVDb.GlobalTag in AllConfigFlags.py.
     """
-    return None if flags.Input.isMC else 'CONDBR2-HLTP-2025-01'
+    return None if flags.Input.isMC else 'CONDBR2-HLTP-2026-01'
 
 def trigGeoTag(flags):
     """Return geometry tag to be used in the HLT. Returns None to indicate that
@@ -310,6 +310,15 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.Online.EFInterface.NumEvents', -1)
     flags.addFlag('Trigger.Online.EFInterface.SkipEvents', 0)
     flags.addFlag('Trigger.Online.EFInterface.RunNumber', 0)
+    flags.addFlag('Trigger.Online.EFInterface.T0ProjectTag', '')
+    flags.addFlag('Trigger.Online.EFInterface.BeamType', 0)
+    flags.addFlag('Trigger.Online.EFInterface.BeamEnergy', 0)
+    flags.addFlag('Trigger.Online.EFInterface.TriggerType', 0)
+    flags.addFlag('Trigger.Online.EFInterface.Stream', '')
+    flags.addFlag('Trigger.Online.EFInterface.Lumiblock', 0)
+    flags.addFlag('Trigger.Online.EFInterface.DetMask', '00000000000000000000000000000000')
+    flags.addFlag('Trigger.Online.EFInterface.LibraryName', 'TrigDFEmulator',
+                  help='Name of the EFDF interface shared library to load')
     
     flags.addFlag('Trigger.Online.useOnlineTHistSvc', False,
                   help='use online THistSvc')

@@ -7,6 +7,8 @@
 
 #include "GaudiKernel/MsgStream.h"
 #include <format>
+#include <iostream>
+
 
 
 std::string Identifier32::getString() const{

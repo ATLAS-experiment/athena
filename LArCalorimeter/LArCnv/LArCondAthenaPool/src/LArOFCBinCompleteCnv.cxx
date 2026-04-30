@@ -18,11 +18,11 @@ LArOFCBinPersType* LArOFCBinCompleteCnv::createPersistent (LArOFCBinTransType* t
     return persObj; 
 }
 
-LArOFCBinTransType* LArOFCBinCompleteCnv::createTransient () {
+LArOFCBinTransType* LArOFCBinCompleteCnv::createTransient(const Token* token) {
   static const pool::Guid p1_guid("E7E2E993-4AF2-4782-9B8B-7668434CBAEC");
-  if( compareClassGuid(p1_guid) ) {
+  if( compareClassGuid(token, p1_guid) ) {
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<LArOFCBinPersType> col_vect( poolReadObject<LArOFCBinPersType>() );
+    std::unique_ptr<LArOFCBinPersType> col_vect( poolReadObject<LArOFCBinPersType>(token) );
     MsgStream log(msgSvc(), "LArOFCBinCompleteCnv" ); 
     //log << MSG::INFO << "Reading LArOFCBinSubset_p1" << endmsg; 
     return m_TPconverter.createTransient( col_vect.get(), log );

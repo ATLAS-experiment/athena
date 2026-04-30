@@ -22,6 +22,9 @@
 
 #include "InDetConversionFinderTools/VertexPointEstimator.h"
 #include "xAODBPhys/BPhysHelper.h"
+#include "StoreGate/WriteHandleKey.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadDecorHandleKeyArray.h"
 
 #include "TLorentzVector.h"
 
@@ -50,26 +53,21 @@ class BPhysBGammaFinder : public extends<AthAlgTool, IAugmentationTool> {
         StatusCode finalize() override;
 
         virtual StatusCode addBranches(const EventContext& ctx) const override;
-        TVector3 trackMomentum(const xAOD::Vertex * vxCandidate, int trkIndex) const;
+        TVector3 trackMomentum(const xAOD::Vertex & vxCandidate, int trkIndex) const;
 
     private:
 
-        std::vector<std::string> m_BVertexCollectionsToCheck;
-        std::vector<std::string> m_passFlagsToCheck;
+        SG::ReadHandleKeyArray<xAOD::VertexContainer> m_BVertexCollectionsToCheck;
+        SG::ReadDecorHandleKeyArray<xAOD::VertexContainer> m_passFlagsToCheck;
 
         ToolHandle <Trk::V0Tools> m_v0Tools;
         ToolHandle <Trk::IVertexFitter> m_vertexFitter;
         ToolHandle <InDet::VertexPointEstimator> m_vertexEstimator;
 
-        std::string m_inputTrackParticleContainerName;
-        std::string m_inputLowPtTrackContainerName;
-        std::string m_conversionContainerName;
+        SG::ReadHandleKey<xAOD::TrackParticleContainer> m_inputTrackParticleContainerName;
+        SG::ReadHandleKey<xAOD::TrackParticleContainer> m_inputLowPtTrackContainerName;
+        SG::WriteHandleKey<xAOD::VertexContainer> m_conversionContainerName;
 
-        float m_maxDistBetweenTracks;
-        float m_maxDeltaCotTheta;
-
-        bool m_requireDeltaQ;
-        bool m_use_low_pT;
         float m_maxDeltaQ;
         float m_Chi2Cut;
         float m_maxGammaMass;

@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagInference/DataPrepUtilities.h"
@@ -135,9 +135,11 @@ namespace FlavorTagInference {
     : track_prefix ("btagIp_"),
       flip (FlipTagConfig::STANDARD),
       track_link_name ("BTagTrackToJetAssociator"),
+      object_link_prefix (""),
       default_output_value (NAN),
       invalid_ip_key ("invalidIp"),
-      electron_link_name("FTagElectrons")
+      electron_link_name("FTagElectrons"),
+      muon_link_name("FTagMuons")
   {
   }
 
@@ -237,7 +239,8 @@ namespace FlavorTagInference {
       FTagOptions>
     createGetterConfig( GraphConfig& config,
       FlipTagConfig flip_config,
-      std::map<std::string, std::string> remap_scalar
+      std::map<std::string, std::string> remap_scalar,
+      const std::string& object_link_prefix
     ){
 
       // we rewrite the inputs if we're using flip taggers
@@ -260,9 +263,11 @@ namespace FlavorTagInference {
         {"(rnnip|iprnn|(?:dips|DIPS)[^_]*)(flip)?_p(b|c|u|tau)"_r, EDMType::FLOAT},
         {"(JetFitter|SV1|JetFitterSecondaryVertex)(Flip)?_[Nn].*"_r, EDMType::INT},
         {"(JetFitter|SV1|JetFitterSecondaryVertex).*"_r, EDMType::FLOAT},
+        {"EtaJES_GSC_(pt|eta|phi|mass)"_r, EDMType::FLOAT},
         {"(log_)?pt|abs_eta|eta|phi|energy|mass"_r, EDMType::CUSTOM_GETTER},
         {"softMuon_p[bcu]"_r, EDMType::FLOAT},
         {"softMuon_.*"_r, EDMType::FLOAT},
+        {".*"_r, EDMType::FLOAT},  // catch-all: arbitrary float decorations
       };
 
       StringRegexes default_flag_regexes{
@@ -280,9 +285,11 @@ namespace FlavorTagInference {
         {"((?:dips|DIPS)[^_]*)_.*"_r, "$1_isDefaults"},
         {"rnnipflip_.*"_r, "rnnipflip_isDefaults"},
         {"iprnn_.*"_r, ""},
+        {"EtaJES_GSC_(pt|eta|phi|mass)"_r, ""},
         {"smt_.*"_r, "softMuon_isDefaults"},
         {"softMuon_.*"_r, "softMuon_isDefaults"},
-        {"((log_)?pt|abs_eta|eta|phi|energy|mass)"_r, ""}}; // no default for custom cases
+        {"((log_)?pt|abs_eta|eta|phi|energy|mass)"_r, ""}, // no default for custom cases
+        {".*"_r, ""}}; // catch-all: no default flag for arbitrary variables
 
       std::vector<FTagInputConfig> input_config;
       for (auto& node: config.inputs){
@@ -337,6 +344,18 @@ namespace FlavorTagInference {
       if (auto h = remap_scalar.extract(options.electron_link_name)) {
         options.electron_link_name = h.mapped();
       }
+      if (auto h = remap_scalar.extract(options.muon_link_name)) {
+        options.muon_link_name = h.mapped();
+      }
+      {
+        std::string link_prefix = object_link_prefix;
+        if (flip_config != FlipTagConfig::STANDARD) {
+          std::string ctx = "building negative tag b-tagger";
+          link_prefix = str::sub_first(
+              flip_converters, link_prefix, ctx);
+        }
+        options.object_link_prefix = link_prefix;
+      }
       options.flip = flip_config;
       options.remap_scalar = remap_scalar;
       return std::make_tuple(input_config, constituent_configs, options);
@@ -356,10 +375,39 @@ namespace FlavorTagInference {
       std::vector<std::pair<std::string, internal::VarFromJet>> varsFromJet;
 
       for (const auto& input: inputs) {
-        if (input.type != EDMType::CUSTOM_GETTER) {
-          throw std::runtime_error("Unsupported input type");
-        } else {
+        if (input.type == EDMType::FLOAT) {
+          SG::AuxElement::ConstAccessor<float> acc(input.name);
+          deps.bTagInputs.insert(input.name);
+          if (input.default_flag.size() == 0 || input.name == input.default_flag) {
+            internal::VarFromJet getter =
+              [name=input.name, acc](const xAOD::IParticle& j) -> internal::NamedVar {
+                const float value = acc(j);
+                if (std::isnan(value)) {
+                  throw std::runtime_error("Found NAN value for '" + name + "'.");
+                }
+                return {name, value};
+              };
+            varsFromJet.push_back(std::make_pair(input.name, getter));
+          } else {
+            SG::AuxElement::ConstAccessor<char> default_flag(input.default_flag);
+            internal::VarFromJet getter =
+              [name=input.name, acc, default_flag](const xAOD::IParticle& j) -> internal::NamedVar {
+                const float value = acc(j);
+                const bool is_default = default_flag(j);
+                if (std::isnan(value) && !is_default) {
+                  throw std::runtime_error(
+                    "Found NAN value for '" + name
+                    + "'. This is only allowed when using a default"
+                    " value for this input");
+                }
+                return {name, is_default ? NAN : value};
+              };
+            varsFromJet.push_back(std::make_pair(input.name, getter));
+          }
+        } else if (input.type == EDMType::CUSTOM_GETTER) {
           varsFromJet.push_back(std::make_pair(input.name, getter_utils::namedCustomJetGetter(input.name)));
+        } else {
+          throw std::runtime_error("Unsupported input type");
         }
         if (input.default_flag.size() > 0) {
           deps.bTagInputs.insert(input.default_flag);
@@ -478,10 +526,11 @@ namespace FlavorTagInference {
     std::vector<FTagInputConfig>,
     std::vector<ConstituentsInputConfig>,
     FTagOptions>
-  createGetterConfig<lwt::GraphConfig, lwt::OutputNodeConfig>( 
+  createGetterConfig<lwt::GraphConfig, lwt::OutputNodeConfig>(
     lwt::GraphConfig& config,
     FlipTagConfig flip_config,
-    std::map<std::string, std::string> remap_scalar
+    std::map<std::string, std::string> remap_scalar,
+    const std::string& object_link_prefix
   );
 
   template
@@ -489,10 +538,11 @@ namespace FlavorTagInference {
     std::vector<FTagInputConfig>,
     std::vector<ConstituentsInputConfig>,
     FTagOptions>
-  createGetterConfig<SaltModelGraphConfig::GraphConfig, SaltModelGraphConfig::OutputNodeConfig>( 
+  createGetterConfig<SaltModelGraphConfig::GraphConfig, SaltModelGraphConfig::OutputNodeConfig>(
     SaltModelGraphConfig::GraphConfig& config,
     FlipTagConfig flip_config,
-    std::map<std::string, std::string> remap_scalar
+    std::map<std::string, std::string> remap_scalar,
+    const std::string& object_link_prefix
   );
 
   template
@@ -537,4 +587,3 @@ namespace FlavorTagInference {
   } // end of datapre namespace
 
 } // end of FlavorTagInference namespace
-

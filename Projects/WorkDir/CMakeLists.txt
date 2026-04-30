@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # Project file for building a selected set of packages against an
 # installed ATLAS release/nightly.
@@ -60,6 +60,21 @@ unset( _defaultParentProject )
 # we use the QUIET keyword.
 find_package( AtlasCMake QUIET )
 
+# Set up any additional languages that may be available.
+include( CheckLanguage )
+check_language( Fortran )
+if( CMAKE_Fortran_COMPILER )
+   enable_language( Fortran )
+endif()
+check_language( CUDA )
+if( CMAKE_CUDA_COMPILER )
+   enable_language( CUDA )
+endif()
+check_language( HIP )
+if( CMAKE_HIP_COMPILER )
+   enable_language( HIP )
+endif()
+
 # Potentially override the Acts package to use a local checkout.
 include(${CMAKE_CURRENT_SOURCE_DIR}/ActsOverride.cmake)
 
@@ -75,21 +90,6 @@ project( WorkDir VERSION ${${ATLAS_PROJECT}_VERSION} LANGUAGES C CXX )
 if( "${CMAKE_BUILD_TYPE}" STREQUAL "Release" )
    set( CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING
       "Build mode for the release" FORCE )
-endif()
-
-# Set up any additional languages that may be available.
-include( CheckLanguage )
-check_language( Fortran )
-if( CMAKE_Fortran_COMPILER )
-   enable_language( Fortran )
-endif()
-check_language( CUDA )
-if( CMAKE_CUDA_COMPILER )
-   enable_language( CUDA )
-endif()
-check_language( HIP )
-if( CMAKE_HIP_COMPILER )
-   enable_language( HIP )
 endif()
 
 # Set up where to find the AthenaPoolUtilitiesTest CMake code.

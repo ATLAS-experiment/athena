@@ -34,7 +34,7 @@ public:
 protected:
   
   virtual CMMJetHitsCollection_PERS*   createPersistent (CMMJetHitsCollection* transCont);
-  virtual CMMJetHitsCollection*        createTransient ();
+  virtual CMMJetHitsCollection*        createTransient(const Token* token);
 
 private:
   

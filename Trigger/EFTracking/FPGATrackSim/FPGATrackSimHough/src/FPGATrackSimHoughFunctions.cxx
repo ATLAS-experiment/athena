@@ -1,12 +1,23 @@
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "FPGATrackSimHough/FPGATrackSimHoughFunctions.h"
+
+#include "FPGATrackSimObjects/FPGATrackSimRoad.h"
+#include "FPGATrackSimObjects/FPGATrackSimHit.h"
+#include "FPGATrackSimObjects/FPGATrackSimTrack.h"
 #include "FPGATrackSimObjects/FPGATrackSimFunctions.h"
-#include <stdexcept>
+
+#include "FPGATrackSimMaps/FPGATrackSimPlaneMap.h"
+#include "FPGATrackSimMaps/FPGATrackSimRegionMap.h"
+
+#include "AthenaMonitoringKernel/Monitored.h"
 
 #include <AsgMessaging/MessageCheck.h>
+
+#include <stdexcept>
+
 using namespace asg::msgUserCode;
 
 // EPSILON for hit position float comparisons
@@ -158,10 +169,15 @@ int findNonOverlapHits(const FPGATrackSimTrack& Track1, const FPGATrackSimTrack&
   int nonOverlapHits=0;
 
   // Loop through all layers
-  for(unsigned int i = 0; i < Track1.getFPGATrackSimHits().size(); ++i)
+  const auto& hits1 = Track1.getFPGATrackSimHitPtrs();
+  const auto& hits2 = Track2.getFPGATrackSimHitPtrs();
+  
+  for(size_t i = 0; i < hits1.size() && i < hits2.size(); ++i)
   {
-    const FPGATrackSimHit& hit1 = Track1.getFPGATrackSimHits().at(i);
-    const FPGATrackSimHit& hit2 = Track2.getFPGATrackSimHits().at(i);
+    if (!hits1[i] || !hits2[i]) throw std::runtime_error("Null hit pointer in findNonOverlapHits: hit is null, tracks should not have unassigned layers");
+    
+    const FPGATrackSimHit& hit1 = *hits1[i];
+    const FPGATrackSimHit& hit2 = *hits2[i];
     //  First make sure we are looking at real hits
     if(!hit1.isReal() || !hit2.isReal())
     {
@@ -209,9 +225,12 @@ void findMinChi2MaxHit(const std::vector<int>& duplicates, std::vector<FPGATrack
   for(auto dup: duplicates)
   {
     float t_chi2 = RMtracks.at(dup).getChi2ndof();
-    int t_nhitlayers = RMtracks.at(dup).getFPGATrackSimHits().size(); 
-    for(auto& hit : RMtracks.at(dup).getFPGATrackSimHits())
+    const auto& hits = RMtracks.at(dup).getFPGATrackSimHitPtrs();
+    int t_nhitlayers = hits.size(); 
+    for(const auto& hit_ptr : hits)
     {
+      if (!hit_ptr) throw std::runtime_error("Null hit pointer in findMinChi2MaxHit: hit is null");
+      const auto& hit = *hit_ptr;
       ANA_MSG_DEBUG("Real hit info = " << hit);
       ANA_MSG_DEBUG("Real hit info (global) = Gphi= " << hit.getGPhi() << " Z=" << hit.getZ() << " R=" << hit.getR() << " chi2=" << t_chi2);
 
@@ -258,15 +277,20 @@ void findMinChi2MaxHit(const std::vector<int>& duplicates, std::vector<FPGATrack
 int findNCommonHits_v2(const FPGATrackSimTrack& Track1, const FPGATrackSimTrack& Track2)
 {
   int nCommHits = 0;
-  std::vector<uint8_t> hit2_matched(Track2.getFPGATrackSimHits().size(), 0);
+  const auto& hits1 = Track1.getFPGATrackSimHitPtrs();
+  const auto& hits2 = Track2.getFPGATrackSimHitPtrs();
+  std::vector<uint8_t> hit2_matched(hits2.size(), 0);
 
-  for (const auto& hit1 : Track1.getFPGATrackSimHits())
+  for (const auto& hit1_ptr : hits1)
   {
-    if (!hit1.isReal()) continue; // Skip if hit1 is not real
+    if (!hit1_ptr) throw std::runtime_error("Null hit pointer in findNCommonHits_v2: hit1 is null");
+    if (!hit1_ptr->isReal()) continue; // Skip if hit1 is not real
+    const auto& hit1 = *hit1_ptr;
 
-    for (size_t j = 0; j < Track2.getFPGATrackSimHits().size(); ++j)
+    for (size_t j = 0; j < hits2.size(); ++j)
     {
-      const auto& hit2 = Track2.getFPGATrackSimHits()[j];
+      if (!hits2[j]) throw std::runtime_error("Null hit pointer in findNCommonHits_v2: hit2 is null");
+      const auto& hit2 = *hits2[j];
 
       if (hit2_matched[j]) continue; // already used this hit
       else if (!hit2.isReal()) continue; // Check if hit is missing
@@ -306,15 +330,20 @@ int findNCommonHits_v2(const FPGATrackSimTrack& Track1, const FPGATrackSimTrack&
 int findNCommonHitsGlobal(const FPGATrackSimTrack& Track1, const FPGATrackSimTrack& Track2)
 {
   int nCommHits = 0;
-  std::vector<uint8_t> hit2_matched(Track2.getFPGATrackSimHits().size(), 0);
+  const auto& hits1 = Track1.getFPGATrackSimHitPtrs();
+  const auto& hits2 = Track2.getFPGATrackSimHitPtrs();
+  std::vector<uint8_t> hit2_matched(hits2.size(), 0);
 
-  for (const auto& hit1 : Track1.getFPGATrackSimHits())
+  for (const auto& hit1_ptr : hits1)
   {
-    if (!hit1.isReal()) continue; // Skip if hit1 is not real
+    if (!hit1_ptr) throw std::runtime_error("Null hit pointer in findNCommonHitsGlobal: hit1 is null, tracks should not have unassigned layers");
+    if (!hit1_ptr->isReal()) continue; // Skip if hit1 is not real
+    const auto& hit1 = *hit1_ptr;
 
-    for (size_t j = 0; j < Track2.getFPGATrackSimHits().size(); ++j)
+    for (size_t j = 0; j < hits2.size(); ++j)
     {
-      const auto& hit2 = Track2.getFPGATrackSimHits()[j];
+      if (!hits2[j]) throw std::runtime_error("Null hit pointer in findNCommonHitsGlobal: hit2 is null, tracks should not have unassigned layers");
+      const auto& hit2 = *hits2[j];
 
       if (hit2_matched[j]) continue; // already used this hit
       else if (!hit2.isReal()) continue; // Check if hit is missing
@@ -355,10 +384,14 @@ int findNCommonHits(const FPGATrackSimTrack& Track1, const FPGATrackSimTrack& Tr
   int nCommHits=0;
 
   // Loop through all layers
-  for(unsigned int i = 0; i < Track1.getFPGATrackSimHits().size(); ++i)
+  const auto& hits1 = Track1.getFPGATrackSimHitPtrs();
+  const auto& hits2 = Track2.getFPGATrackSimHitPtrs();
+  
+  for(unsigned int i = 0; i < hits1.size() && i < hits2.size(); ++i)
   {
-    const FPGATrackSimHit& hit1 = Track1.getFPGATrackSimHits().at(i);
-    const FPGATrackSimHit& hit2 = Track2.getFPGATrackSimHits().at(i);
+    if (!hits1[i] || !hits2[i]) throw std::runtime_error("Null hit pointer in findNCommonHits: tracks should not have unassigned layers");
+    const FPGATrackSimHit& hit1 = *hits1.at(i);
+    const FPGATrackSimHit& hit2 = *hits2.at(i);
 
     // Check if hit is missing
     if(!hit1.isReal() || !hit2.isReal())
@@ -410,7 +443,7 @@ void getMissingInfo(const FPGATrackSimRoad & road, int & nMissing, bool & missPi
     unsigned int wclayers = road.getWCLayers();
     for (unsigned layer = 0; layer < FPGATrackSimMapping->PlaneMap_1st(subregion)->getNLogiLayers(); layer++)
     {
-        int nHits = road.getHits(layer).size();
+        int nHits = road.getHitPtrs(layer).size();
         if (nHits==0)
         {
             if (idealCoordFitType == TrackCorrType::None && ((wclayers >> layer) & 1))
@@ -505,23 +538,25 @@ void makeTrackCandidates(const FPGATrackSimRoad & road, const FPGATrackSimTrack 
                     newhit.setLayer(layer);
                 }
 
-                track_cands[icomb].setFPGATrackSimHit(layer, newhit);
+                track_cands[icomb].setFPGATrackSimHit(layer, std::make_shared<FPGATrackSimHit>(newhit));
             }
             else
             {
-                const std::shared_ptr<const FPGATrackSimHit> hit = road.getHits(layer)[hit_indices[layer]];
+                const std::shared_ptr<const FPGATrackSimHit> hit = road.getHitPtrs(layer)[hit_indices[layer]];
                 // If this is an outer spacepoint, and it is not the same as the inner spacepoint, reject it.
                 // Here we "reject" it by marking the candidate as "invalid", to be rejected later.
                 // That require another field on the track object, but it avoids having to change the sizes
                 // of arrays computed above.
                 if (hit->getHitType() == HitType::spacepoint && (hit->getPhysLayer(true) % 2) == 1) {
                     if (layer == 0) throw (std::out_of_range("makeTrackCandidates: Attempt to access vector at element -1"));
-                    const FPGATrackSimHit & inner_hit = track_cands[icomb].getFPGATrackSimHits().at(layer - 1);
+                    auto inner_hit_ptr = track_cands[icomb].getFPGATrackSimHitPtrs().at(layer - 1);
+                    if (!inner_hit_ptr) throw std::runtime_error("Null inner hit pointer in makeTrackCandidates: inner layer should have a hit when comparing spacepoints");
+                    const FPGATrackSimHit & inner_hit = *inner_hit_ptr;
                     if ((abs(hit->getX() - inner_hit.getX()) > EPSILON) || (abs(hit->getY() - inner_hit.getY()) > EPSILON) || (abs(hit->getZ() - inner_hit.getZ()) > EPSILON)) {
                         track_cands[icomb].setValidCand(false);
                     }
                 }
-                track_cands[icomb].setFPGATrackSimHit(layer, *hit);
+                track_cands[icomb].setFPGATrackSimHit(layer, std::move(hit));
             }
         }
     }
@@ -721,22 +756,24 @@ void roadsToTrack(std::vector<FPGATrackSimRoad>& roads, std::vector<FPGATrackSim
                     newhit.setLayer(layer);
                 }
 
-                track_cands[existing_size + icomb].setFPGATrackSimHit(layer, newhit);
+                track_cands[existing_size + icomb].setFPGATrackSimHit(layer, std::make_shared<FPGATrackSimHit>(newhit));
             }
             else
             {
-                const std::shared_ptr<const FPGATrackSimHit> hit = road.getHits(layer)[hit_indices[layer]];
+                const std::shared_ptr<const FPGATrackSimHit> hit = road.getHitPtrs(layer)[hit_indices[layer]];
                 // If this is an outer spacepoint, and it is not the same as the inner spacepoint, reject it.
                 // Here we "reject" it by marking the candidate as "invalid", to be rejected later.
                 // That require another field on the track object, but it avoids having to change the sizes
                 // of arrays computed above.
                 if (hit->getHitType() == HitType::spacepoint && (hit->getPhysLayer() % 2) == 1 && (layer>0)) {
-                    const FPGATrackSimHit inner_hit = track_cands[existing_size + icomb].getFPGATrackSimHits().at(layer - 1);
-                    if ((hit->getX() != inner_hit.getX()) || (hit->getY() != inner_hit.getY()) || (hit->getZ() != inner_hit.getZ())) {
+                    auto inner_hit_ptr = track_cands[existing_size + icomb].getFPGATrackSimHitPtrs().at(layer - 1);
+                    if (!inner_hit_ptr) throw std::runtime_error("Null inner hit pointer in roadsToTrack: inner layer should have a hit when comparing spacepoints");
+                    const FPGATrackSimHit & inner_hit = *inner_hit_ptr;
+                    if ((std::abs(hit->getX() - inner_hit.getX()) > EPSILON) || (std::abs(hit->getY() - inner_hit.getY()) > EPSILON) || (std::abs(hit->getZ() - inner_hit.getZ()) > EPSILON)) {
                         track_cands[existing_size + icomb].setValidCand(false);
                     }
                 }
-                track_cands[existing_size + icomb].setFPGATrackSimHit(layer, *hit);
+                track_cands[existing_size + icomb].setFPGATrackSimHit(layer, std::move(hit));
             }
         }
       }

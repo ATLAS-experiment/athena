@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonCalibStreamCnv/EventInfoMuonCalibStreamCnv.h"
 
@@ -34,7 +34,7 @@ EventInfoMuonCalibStreamCnv::EventInfoMuonCalibStreamCnv(ISvcLocator *svcloc) :
     m_dataProvider("MuonCalibStreamDataProviderSvc", "EventInfoMuonCalibStreamCnv")
 {}
 
-const CLID &EventInfoMuonCalibStreamCnv::classID() { return ClassID_traits<xAOD::EventInfo>::ID(); }
+CLID EventInfoMuonCalibStreamCnv::classID() { return ClassID_traits<xAOD::EventInfo>::ID(); }
 
 StatusCode EventInfoMuonCalibStreamCnv::initialize() {
     ATH_MSG_DEBUG("Initialize EventInfoMuonCalibStreamCnv");

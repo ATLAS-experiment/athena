@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EVENTSELECTORATHENAPOOL_H
@@ -26,10 +26,13 @@
 #include "AthenaPoolCnvSvc/IAthenaPoolCnvSvc.h"
 #include "AthenaBaseComps/AthService.h"
 
+#include "AthenaKernel/InputFileIncidentGuard.h"
+
 #include <map>
 #include <atomic>
 #include <cstdint>
 #include <memory>
+#include <optional>
 
 // Forward declarations
 class IIncidentSvc;
@@ -162,8 +165,6 @@ private: // internal member functions
    std::unique_ptr<PoolCollectionConverter> getCollectionCnv(bool throwIncidents = false) const;
    /// Search for event with number evtNum.
    int findEvent(int evtNum) const;
-   /// Fires the EndInputFile incident (if there is an open file) at end of selector
-   void fireEndFileIncidents(bool isLastFile) const;
 
 private: // data
    EventContextAthenaPool*         m_endIter{};
@@ -172,6 +173,8 @@ private: // data
    mutable pool::ICollectionCursor* m_headerIterator ATLAS_THREAD_SAFE {};
    mutable Guid m_guid ATLAS_THREAD_SAFE {};
    mutable std::map<SG::SourceID, int> m_activeEventsPerSource ATLAS_THREAD_SAFE;
+   /// RAII guard: guarantees a matching EndInputFile for every BeginInputFile.
+   mutable std::optional<InputFileIncidentGuard> m_inputFileGuard ATLAS_THREAD_SAFE;
 
    ServiceHandle<IAthenaPoolCnvSvc> m_athenaPoolCnvSvc{this, "ConversionService", "AthenaPoolCnvSvc", ""};
    ServiceHandle<IIncidentSvc> m_incidentSvc{this, "IncidentSvc", "IncidentSvc", ""};

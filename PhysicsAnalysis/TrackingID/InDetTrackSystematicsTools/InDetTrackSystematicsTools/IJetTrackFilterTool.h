@@ -31,7 +31,13 @@ namespace InDet {
 
     virtual bool accept( const xAOD::TrackParticle*, const xAOD::Jet* ) const = 0;
     virtual bool accept( const xAOD::TrackParticle*, const xAOD::JetContainer* ) const = 0;
-      
+
+    /// Reentrant accept: applies @p syst without mutating shared state.
+    /// Requires applySystematicVariation(@p syst) during initialize().
+    virtual bool accept(const xAOD::TrackParticle*,
+                        const xAOD::JetContainer*,
+                        const CP::SystematicSet& syst) const = 0;
+
     // implement the CP::ISystematicTool interface
       
     /// returns: whether the tool is affected by the systematic

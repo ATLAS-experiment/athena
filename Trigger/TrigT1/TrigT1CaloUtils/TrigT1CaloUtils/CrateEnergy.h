@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           CrateEnergy.h  -  description
@@ -16,6 +16,7 @@
 
 #include "TrigT1CaloUtils/ModuleEnergy.h"
 #include "TrigT1CaloEvent/EnergyCMXData.h"
+#include <cstdint>
 
 
 /**LVL1 namespace.

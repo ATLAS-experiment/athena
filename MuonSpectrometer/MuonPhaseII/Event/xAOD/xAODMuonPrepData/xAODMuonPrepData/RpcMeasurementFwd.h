@@ -4,7 +4,7 @@
 #ifndef XAODMUONPREPDATA_RpcMeasurementFWD_H
 #define XAODMUONPREPDATA_RpcMeasurementFWD_H
 
-
+#include "xAODMuonPrepData/MuonMeasurementFwd.h"
 /** @brief Forward declaration of the xAOD::RpcMeasurement */
 namespace xAOD{
    class RpcMeasurement_v1;

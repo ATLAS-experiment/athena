@@ -35,7 +35,7 @@ int main(int, char**)
   road.setRoadID(roadid);
   std::cout << "road id = " << road.getRoadID() << std::endl;
   for (unsigned i = 0; i < 8; i++) {
-    const std::vector<std::shared_ptr<const FPGATrackSimHit>> returned_hits = road.getHits(i);
+    const std::vector<std::shared_ptr<const FPGATrackSimHit>> returned_hits = road.getHitPtrs(i);
     std::cout << "layer = " << returned_hits[0]->getLayer() << " and phi = " << returned_hits[0]->getPhiIndex() << 
       " and eta = " << returned_hits[0]->getEtaIndex() << std::endl;
   }

@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // McAodValidationAlg.h 
@@ -11,12 +11,12 @@
 #ifndef MCPARTICLEALGS_MCAODVALIDATIONALG_H 
 #define MCPARTICLEALGS_MCAODVALIDATIONALG_H 
 
-// STL includes
-#include <string>
-
 // FrameWork includes
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/ToolHandle.h" //for ToolHandleArray
+
+// STL includes
+#include <string>
 
 // Forward declaration
 class ITruthParticleValidationTool;
@@ -29,21 +29,17 @@ class McAodValidationAlg : public AthAlgorithm
   /////////////////////////////////////////////////////////////////// 
  public: 
 
-  // Copy constructor: 
-
   /// Constructor with parameters: 
   McAodValidationAlg( const std::string& name, ISvcLocator* pSvcLocator );
 
   /// Destructor: 
   virtual ~McAodValidationAlg(); 
 
-  // Assignment operator: 
-  //McAodValidationAlg &operator=(const McAodValidationAlg &alg); 
 
   // Athena algorithm's Hooks
-  virtual StatusCode  initialize();
-  virtual StatusCode  execute();
-  virtual StatusCode  finalize();
+  virtual StatusCode  initialize() override;
+  virtual StatusCode  execute() override;
+  virtual StatusCode  finalize() override;
 
   /////////////////////////////////////////////////////////////////// 
   // Protected methods: 

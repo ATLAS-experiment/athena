@@ -59,8 +59,8 @@ class GepJetAlg: public ::AthReentrantAlgorithm {
   Gaudi::Property<float> m_WTASeedEtCut{this, "WTASeedEtCut", 5.0,
       "Minimum Et for a tower to be considered as a seed"};
 
-  Gaudi::Property<float> m_WTAJet_dR2{this, "WTAJet_dR2", 0.16,
-      "Jet area for merging constituents"};
+  Gaudi::Property<float> m_WTAJet_dR{this, "WTAJet_dR", 0.4,
+      "Jet radius to determine TOB-Jet association"};
 
   Gaudi::Property<unsigned int> m_WTAMaxConstN{this, "WTAMaxConstN", 205,
       "Maximum number of constituents per jet"};

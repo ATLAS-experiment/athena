@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HiveAlgL3.h"
@@ -11,14 +11,10 @@
 HiveAlgL3::HiveAlgL3( const std::string& name, 
                       ISvcLocator* pSvcLocator ) : 
   ::HiveAlgBase( name, pSvcLocator )
-  ,m_udh1("l1")
 {
-  
-  declareProperty("Key_U1",m_udh1);
-
 }
 
-HiveAlgL3::~HiveAlgL3() {}
+HiveAlgL3::~HiveAlgL3() = default;
 
 StatusCode HiveAlgL3::initialize() {
   ATH_MSG_DEBUG("initialize " << name());
@@ -28,18 +24,13 @@ StatusCode HiveAlgL3::initialize() {
   return HiveAlgBase::initialize();
 }
 
-StatusCode HiveAlgL3::finalize() {
-  ATH_MSG_DEBUG("finalize " << name());
-  return StatusCode::SUCCESS;
-}
-
-StatusCode HiveAlgL3::execute() {
+StatusCode HiveAlgL3::execute(const EventContext& ctx) const{
 
   ATH_MSG_DEBUG("execute " << name());
 
   sleep();
 
-  SG::UpdateHandle<HiveDataObj> udh1( m_udh1 );
+  SG::UpdateHandle<HiveDataObj> udh1{m_udh1, ctx};
 
   udh1->val( udh1->val() + 1);
 

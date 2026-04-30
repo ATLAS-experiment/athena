@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_DIGITIZATION_TRTELECTRONICSPROCESSING_H
@@ -34,7 +34,7 @@ public:
     /**
      * Create deposit
      */
-    Deposit(const double& e, const double& t): m_energy(e), m_time(t) {}
+    Deposit(double e, double t): m_energy(e), m_time(t) {}
 
     double energy() const { return m_energy; } /**< Get energy of deposit */
     double time() const { return m_time; }     /**< Get time of deposit */
@@ -61,10 +61,10 @@ public:
    * @param highthreshold:  discriminator value, high threshold
    */
   void ProcessDeposits( const std::vector<Deposit>&,
-                        const int& hitID,
+                        int hitID,
                         TRTDigit& outdigit,
                         double lowthreshold,
-                        const double& noiseamplitude,
+                        double noiseamplitude,
                         int strawGasType,
                         CLHEP::HepRandomEngine* rndmEngine,
                         CLHEP::HepRandomEngine* elecNoiseRndmEngine,
@@ -111,8 +111,8 @@ private:
    * @param lowthreshold:   low threshold discriminator setting
    * @param highthreshold: high threshold discriminator setting
    */
-  void DiscriminatorResponse(const double& lowthreshold,
-                             const double& highthreshold);
+  void DiscriminatorResponse(double lowthreshold,
+                             double highthreshold);
 
   /**
    * Encode 27 bit digit from discriminator response

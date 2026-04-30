@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONRECTOOLINTERFACESR4_IPATTERNVISUALIZATIONTOOL_H
 #define MUONRECTOOLINTERFACESR4_IPATTERNVISUALIZATIONTOOL_H
@@ -11,7 +11,7 @@
 #include <MuonTrackEvent/MsTrackSeed.h>
 #include <memory>
 
-#include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/EventData/BoundTrackParameters.hpp"
 class EventContext;
 class TObject;
 

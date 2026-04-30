@@ -1,9 +1,13 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigTRTHTHCounter.h"
 #include "AthenaMonitoringKernel/Monitored.h"
+#include "TrigSteeringEvent/TrigRoiDescriptor.h"
+
+#include <cmath>
+#include <memory>
 
 //Function to calculate distance for road algorithm
 float dist2COR(float R, float phi1, float phi2){

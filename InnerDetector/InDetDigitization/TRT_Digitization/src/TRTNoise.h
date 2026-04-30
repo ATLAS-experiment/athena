@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_DIGITIZATION_TRTNOISE_H
@@ -144,8 +144,8 @@ private:
   /** Pool of noise digits for noise in unhit straws */
   std::vector<unsigned int> m_digitPool;
 
-  double simulateNoiseFrequency( const unsigned int& totalNumberOfTests,
-                                 const double& electronicsNoiseAmplitude,
+  double simulateNoiseFrequency( unsigned int totalNumberOfTests,
+                                 double electronicsNoiseAmplitude,
                                  double lowthreshold = -1.0 );
 
   /**
@@ -157,10 +157,10 @@ private:
    * @param min_x:     lowest tabulated @a x value
    * @param max_x:     highest tabulated @a x value
    */
-  static float useLookupTable(const float& x,
-                       const std::vector<float>& y_given_x,
-                       const float & min_x,
-                       const float & max_x);
+  static float useLookupTable(float x,
+			      const std::vector<float>& y_given_x,
+			      float min_x,
+			      float max_x);
 
   /**
    * Invert look-up-table: Go from tabulated @a y values vs. equidistantly
@@ -174,11 +174,11 @@ private:
    * @param max_y:     higher @a y value (output)
    */
   static void makeInvertedLookupTable( const std::vector<float>& y_given_x,
-                                const float & min_x,
-                                const float & max_x,
-                                std::vector<float>& x_given_y,
-                                float & min_y,
-                                float & max_y );
+				       float min_x,
+				       float max_x,
+				       std::vector<float>& x_given_y,
+				       float & min_y,
+				       float & max_y );
   /**
    * Refined noise treatment by allowing for event-by-event fluctuations in
    * the low threshold settings. This is done by smearing of a LUT giving noise
@@ -197,12 +197,12 @@ private:
    * @param number_new_bins: LUT is expanded to this number of bins (input)
    */
   static void evolve_LT2AmpVsNL_to_include_LTfluct( std::vector<float>& nl_given_lt2na,
-                                             const float & min_lt2na,
-                                             const float & max_lt2na,
-                                             const float relativeLTFluct,
-                                             float & new_min_lt2na,
-                                             float & new_max_lt2na,
-                                             const unsigned int& number_new_bins );
+						    float min_lt2na,
+						    float max_lt2na,
+						    float relativeLTFluct,
+						    float & new_min_lt2na,
+						    float & new_max_lt2na,
+						    unsigned int number_new_bins );
 
   Identifier getStrawIdentifier (int hitID);
 

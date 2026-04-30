@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/UniformShapeErrorGetter.h"
@@ -12,7 +12,8 @@ using std::endl;
 
 using namespace LArSamples;
 
-ShapeErrorData* UniformShapeErrorGetter::shapeErrorData(unsigned int /*hash*/, CaloGain::CaloGain /*gain*/, const Residual* /*toExclude*/) const
+std::unique_ptr<ShapeErrorData>
+UniformShapeErrorGetter::shapeErrorData(unsigned int /*hash*/, CaloGain::CaloGain /*gain*/, const Residual* /*toExclude*/) const
 {
   TVectorD xi(32);
   TVectorD xip(32);
@@ -22,5 +23,5 @@ ShapeErrorData* UniformShapeErrorGetter::shapeErrorData(unsigned int /*hash*/, C
   for (unsigned int i = 0; i < 32; i++)
     xiErr(i, i) = TMath::Power(m_k, 2); 
 
-  return new ShapeErrorData(xi, xip, xiErr, xipErr);
+  return std::make_unique<ShapeErrorData>(xi, xip, xiErr, xipErr);
 }

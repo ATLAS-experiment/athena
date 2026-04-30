@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthenaBaseComps )
@@ -58,7 +58,8 @@ atlas_add_test( AthAlgStartVisitor_test
 atlas_add_test( AthCheckedComponent_test
    SOURCES test/AthCheckedComponent_test.cxx
    LINK_LIBRARIES GaudiKernel TestTools AthenaBaseComps
-   POST_EXEC_SCRIPT nopost.sh )
+   LOG_IGNORE_PATTERN "No job properties|FAILURE: isConfigured"
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( AthCommonDataStore_test
    SOURCES test/AthCommonDataStore_test.cxx

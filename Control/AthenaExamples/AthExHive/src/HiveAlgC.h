@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
  * @file  HiveAlgC.h
- * @brief Simple Algorithm that reads a DataHandle created by HiveAlgA, and
+ * @brief Simple Algorithm that reads an object created by HiveAlgA, and
  * writes two more.
  */
 
@@ -30,11 +30,11 @@ public:
   // Define the initialize and execute methods:
   
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
   
 private:
 
-  // By default, this DataHandle is created by HiveAlgA
+  // By default, this object is created by HiveAlgA
   SG::ReadHandleKey<HiveDataObj>  m_rdh1 {this, "Key_R1", "a1", "read handle key 1"};
   
   SG::WriteHandleKey<HiveDataObj> m_wrh1{ this, "Key_W1", "c1", "write handle key 1"};

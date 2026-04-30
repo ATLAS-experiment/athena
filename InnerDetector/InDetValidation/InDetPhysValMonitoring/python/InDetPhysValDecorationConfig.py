@@ -100,6 +100,7 @@ def ParameterErrDecoratorAlgCfg(
     '''
     create decoration algorithm which decorates track particles with the uncertainties of the track parameters.
     '''
+    kwargs.setdefault("TrackParticleContainerName", "InDetTrackParticles")
     acc = ComponentAccumulator()
     acc.addEventAlgo(CompFactory.ParameterErrDecoratorAlg(name, **kwargs))
     return acc
@@ -120,6 +121,9 @@ def InDetPhysValTruthDecoratorAlgCfg(
     if flags.Detector.GeometryITk:
         kwargs.setdefault("PixelClusterContainerName", "ITkPixelMeasurements")
         kwargs.setdefault("SCTClusterContainerName", "ITkStripMeasurements")
+    else: # A temporary solution until we have ACTS Run 3 dedeicated one
+        kwargs.setdefault("PixelClusterContainerName", "PixelMeasurements")
+        kwargs.setdefault("SCTClusterContainerName", "SCT_Measurements")
 
     kwargs.setdefault('TruthParticleIndexDecoration',
                       'origTruthIndex' if flags.PhysVal.IDPVM.doTechnicalEfficiency else '')
@@ -165,7 +169,7 @@ def AddDecoratorCfg(flags, **kwargs):
     '''
     acc = ComponentAccumulator()
 
-    acc.merge(TrackDecoratorsCfg(flags))
+    acc.merge(TrackDecoratorsCfg(flags, **kwargs))
 
     if flags.Tracking.doTruth:
         from BeamSpotConditions.BeamSpotConditionsConfig import (
@@ -191,7 +195,7 @@ def AddGSFTrackDecoratorAlgCfg(flags, **kwargs):
                 flags, TrackParticleContainerName=col))
 
 
-def AddDecoratorIfNeededCfg(flags):
+def AddDecoratorIfNeededCfg(flags, **kwargs):
     '''
      Add the InDet decoration algorithm if it has not been ran yet.
     '''
@@ -202,6 +206,6 @@ def AddDecoratorIfNeededCfg(flags):
         print('DEBUG addDecoratorIfNeeded ? Stage is too early or too late for running the decoration. Needs reconstructed tracks. Try again during next stage ?')
         return acc
 
-    acc.merge(AddDecoratorCfg(flags))
+    acc.merge(AddDecoratorCfg(flags, **kwargs))
 
     return acc

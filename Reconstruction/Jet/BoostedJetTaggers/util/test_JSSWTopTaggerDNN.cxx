@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -34,7 +34,7 @@ ANA_MSG_HEADER(Test)
 ANA_MSG_SOURCE(Test, "BoostedJetTaggers")
 using namespace Test;
 
-int main( int argc, char* argv[] ) {
+int test1( int argc, char* argv[] ) {
 
   ANA_CHECK_SET_TYPE (int); // makes ANA_CHECK return ints if exiting function
 
@@ -225,7 +225,7 @@ int main( int argc, char* argv[] ) {
   static const SG::ConstAccessor<float> acc_efficiency(tagger+"_efficiency");
   static const SG::ConstAccessor<float> acc_effSF(tagger+"_effSF");
 
-  static const SG::ConstAccessor<int> acc_truthLabel("R10TruthLabel_R21Precision_2022v1");
+  static const SG::ConstAccessor<int> acc_truthLabel("R10TruthLabel_R22v1");
 
   std::cout << "Total Events in File : " << entries << std::endl;
 
@@ -329,3 +329,13 @@ int main( int argc, char* argv[] ) {
 
 }
 
+
+int main (int argc, char* argv[])
+{
+  try {
+    return test1(argc, argv);
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
+}

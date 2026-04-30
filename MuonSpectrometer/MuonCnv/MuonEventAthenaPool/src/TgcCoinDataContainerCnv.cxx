@@ -38,25 +38,25 @@ TgcCoinDataContainer_PERS*    TgcCoinDataContainerCnv::createPersistent (Muon::T
     return pixdc_p;
 }
 
-Muon::TgcCoinDataContainer* TgcCoinDataContainerCnv::createTransient() {
+Muon::TgcCoinDataContainer* TgcCoinDataContainerCnv::createTransient(const Token* token) {
     static const pool::Guid   p0_guid("F81C4564-B1C5-4053-A6F6-E0ED77907BE5"); // before t/p split
     static const pool::Guid   p1_guid("C312D3F5-60DB-41D5-895B-9FD4EF443E0B"); // with TgcCoinData_tlp1
     static const pool::Guid   p2_guid("524775D8-A66F-4AD3-912E-7D05389C1011"); // with TgcCoinData_tlp2
     static const pool::Guid   p3_guid("95BF89C7-1FFC-464F-A14D-742F9E874E56"); // with TgcCoinData_tlp3
     Muon::TgcCoinDataContainer* p_collection(nullptr);
-    if( compareClassGuid(p3_guid) ) {
-        poolReadObject< TgcCoinDataContainer_PERS >( m_TPConverter_tlp3 );
+    if( compareClassGuid(token, p3_guid) ) {
+        poolReadObject< TgcCoinDataContainer_PERS >( m_TPConverter_tlp3, token );
         p_collection = m_TPConverter_tlp3.createTransient( msg() );
     }
-    else if( compareClassGuid(p2_guid) ) {
-        poolReadObject< TgcCoinDataContainer_PERS >( m_TPConverter_tlp2 );
+    else if( compareClassGuid(token, p2_guid) ) {
+        poolReadObject< TgcCoinDataContainer_PERS >( m_TPConverter_tlp2, token );
         p_collection = m_TPConverter_tlp2.createTransient( msg() );
     }
-    else if( compareClassGuid(p1_guid) ) {
-        poolReadObject< Muon::TgcCoinDataContainer_tlp1 >( m_TPConverter_tlp1 );
+    else if( compareClassGuid(token, p1_guid) ) {
+        poolReadObject< Muon::TgcCoinDataContainer_tlp1 >( m_TPConverter_tlp1, token );
         p_collection = m_TPConverter_tlp1.createTransient( msg() );
     }
-    else if( compareClassGuid(p0_guid) ) {
+    else if( compareClassGuid(token, p0_guid) ) {
         throw std::runtime_error("Not currently supporting reading non TP-split CoinDatas");
     }
     else {

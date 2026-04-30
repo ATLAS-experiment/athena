@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file DVLIterator_test.cxx
@@ -16,6 +16,7 @@
 #include "AthContainers/exceptions.h"
 #include <vector>
 #include <list>
+#include <iostream>
 #include <cassert>
 
 
@@ -314,6 +315,11 @@ void test1()
 
 int main()
 {
-  test1();
+  try {
+    test1();
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
   return 0;
 }

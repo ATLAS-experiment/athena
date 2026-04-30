@@ -2,6 +2,7 @@
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from tauRec.TauConfigFlags import createTauConfigFlags
+from TriggerMenuMT.HLT.Tau.TauConfigurationTools import getHitZVariables
 
 def createTrigTauConfigFlags():
     flags = AthConfigFlags()
@@ -16,6 +17,22 @@ def createTrigTauConfigFlags():
 
     # BRT TES pT calibration for all tau triggers
     flags.Trigger.Offline.Tau.MvaTESConfig = 'OnlineMvaTES_BRT_MC23a_v2.weights.root'
+
+
+    #####################################################################################
+    # HitZ network (_hitzperf/cut chains only)
+    #####################################################################################
+    # Using ONNX inference
+
+    flags.addFlag('Trigger.Offline.Tau.HitZ.ONNXConfig', 'TauHitZ_v0p1/network.onnx')
+    flags.addFlag('Trigger.Offline.Tau.HitZ.MaxHits', 200)
+    # Use the Tau and Jet nodes as the z and sigma output variables
+    flags.addFlag('Trigger.Offline.Tau.HitZ.NodeNameTau', 'HitZ_z0') # z-position regression mean
+    flags.addFlag('Trigger.Offline.Tau.HitZ.OutputPTau', getHitZVariables('HitZ')[0])
+    flags.addFlag('Trigger.Offline.Tau.HitZ.NodeNameJet', 'HitZ_z0_stddev') # z-position regression sigma
+    flags.addFlag('Trigger.Offline.Tau.HitZ.OutputPJet', getHitZVariables('HitZ')[1])
+    flags.addFlag('Trigger.Offline.Tau.HitZ.OutputDiscriminant', -1) # Disable
+    flags.addFlag('Trigger.Offline.Tau.HitZ.DefaultMaxZ0Sigma', 10)
 
 
     #####################################################################################
@@ -74,6 +91,32 @@ def createTrigTauConfigFlags():
         'Medium': (0.65, 0.97, 0.92), 
         'Tight': (0.50, 0.94, 0.80),
     })
+
+
+    #####################################################################################
+    # GNTauExt Dev1 ID (loose/mediumGNTauDev1/... chains)
+    #####################################################################################
+    # Using ONNX inference
+
+    flags.addFlag('Trigger.Offline.Tau.GNTauDev1.ONNXConfig', 'HLTGNTauExt_v0p1/network.onnx')
+    flags.addFlag('Trigger.Offline.Tau.GNTauDev1.MaxTracks', 10)
+    flags.addFlag('Trigger.Offline.Tau.GNTauDev1.MaxClusters', 30)
+    flags.addFlag('Trigger.Offline.Tau.GNTauDev1.NodeNameTau', 'GNTauExt_phadtau')
+    flags.addFlag('Trigger.Offline.Tau.GNTauDev1.NodeNameJet', 'GNTauExt_pbkg')
+    flags.addFlag('Trigger.Offline.Tau.GNTauDev1.OutputDiscriminant', 1) # 0: -log(PJet), 1: PTau
+    flags.addFlag('Trigger.Offline.Tau.GNTauDev1.ScoreFlatteningConfig', ['HLTGNTauExt_v0p1/flattening_map_0p.root', 'HLTGNTauExt_v0p1/flattening_map_1p.root', 'HLTGNTauExt_v0p1/flattening_map_mp.root'])
+    flags.addFlag('Trigger.Offline.Tau.GNTauDev1.TargetWPs', {
+        # Target efficiencies (0P, 1P, MP) for each WP
+        'Loose': (0.86, 0.98, 0.93), 
+        'Medium': (0.62, 0.96, 0.91), 
+
+        'LooseVar1': (0.88, 0.97, 0.92), 
+        'MediumVar1': (0.64, 0.95, 0.90), 
+
+        'LooseVar2': (0.87, 0.98, 0.94), 
+        'MediumVar2': (0.63, 0.96, 0.92), 
+    })
+
 
     return flags
 

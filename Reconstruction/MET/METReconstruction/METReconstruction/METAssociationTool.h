@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // METAssociationTool.h 
@@ -24,7 +24,6 @@
 #include "AsgTools/ToolHandle.h"
 #include "AsgTools/AsgTool.h"
 #include "CxxUtils/checker_macros.h"
-#include "StoreGate/DataHandle.h"
 
 
 // METRecoInterface includes
@@ -77,7 +76,7 @@ namespace met{
 
     // AsgTool Hooks
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() const override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
     virtual StatusCode finalize() override;
 
     /////////////////////////////////////////////////////////////////// 
@@ -89,7 +88,7 @@ namespace met{
     METAssociationTool();
 
     // Run the MET tools here
-    StatusCode buildMET(xAOD::MissingETContainer* metCont, xAOD::MissingETAssociationMap* metMap) const;
+    StatusCode buildMET(xAOD::MissingETContainer* metCont, xAOD::MissingETAssociationMap* metMap, const EventContext& ctx) const;
 
     // Data members
     Gaudi::Property<std::string> m_metSuffix{this, "METSuffix", "AntiKt4LCTopo", "MET suffix"};

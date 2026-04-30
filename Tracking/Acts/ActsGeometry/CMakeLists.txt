@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ActsGeometry )
@@ -18,9 +18,9 @@ atlas_add_library( ActsGeometryLib
                    src/ActsStrawLayerBuilder.cxx
                    src/ActsHGTDLayerBuilder.cxx
                    src/ActsTrackingGeometrySvc.cxx
-                   src/SimpleCylinderDetBuilderTool.cxx
                    src/ItkBlueprintNodeBuilder.cxx    
-                   src/CaloBlueprintNodeBuilder.cxx              
+                   src/CaloBlueprintNodeBuilder.cxx
+                   src/TrackingGeoAlignVisitor.cxx
                    src/util/*.cxx
                    PUBLIC_HEADERS ActsGeometry
                    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS}
@@ -72,7 +72,6 @@ atlas_add_component( ActsGeometry
                      LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} ${GEOMODEL_LIBRARIES} ${ROOT_LIBRARIES}
                      ActsGeometryInterfacesLib
                      ActsGeometryLib
-                     ActsEventLib
                      ActsInteropLib
                      EventPrimitives
                      GeoPrimitives

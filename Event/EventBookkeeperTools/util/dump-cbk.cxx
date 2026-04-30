@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Setup for reading ATLAS data
@@ -46,7 +46,7 @@ int main(int argc, char **argv)
   ANA_MSG_INFO("Using POOL access");
 #endif
 
-  xAOD::TFileAccessTracer::enableDataSubmission(false);
+  xAOD::TFileAccessTracer::instance().enableDataSubmission(false);
 
   ANA_MSG_INFO("Reading file:" << inputFile);
 

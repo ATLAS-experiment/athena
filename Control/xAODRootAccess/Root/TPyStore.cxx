@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s).
@@ -105,7 +105,7 @@ StatusCode TPyStore::pyRecord(void* obj, const std::string& key,
 
   // Simply forward the call to the appropriate function from the base
   // class.
-  static constexpr bool IS_OWNER = true;
+  static constexpr bool IS_OWNER = false;
   static constexpr bool IS_CONST = false;
   RETURN_CHECK("xAOD::TPyStore::pyRecord",
                TStore::record(obj, key, type, IS_OWNER, IS_CONST));

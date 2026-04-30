@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainersInterfaces/test/IAuxTypeVector_test.cxx
@@ -23,18 +23,20 @@ class TestAuxVector
 {
 public:
   TestAuxVector() : SG::IAuxTypeVector (1, false) {}
-  virtual std::unique_ptr<SG::IAuxTypeVector> clone() const { std::abort(); }
-  virtual void* toPtr() { std::abort(); }
-  virtual const void* toPtr() const { std::abort(); }
-  virtual void* toVector() { std::abort(); }
-  virtual size_t size() const { std::abort(); }
-  virtual bool resize (size_t) { std::abort(); }
-  virtual void reserve (size_t){ std::abort(); }
-  virtual bool shift (size_t, ptrdiff_t){ std::abort(); }
+  virtual std::unique_ptr<SG::IAuxTypeVector> clone() const override { std::abort(); }
+  virtual void* toPtr() override { std::abort(); }
+  virtual const void* toPtr() const override { std::abort(); }
+  virtual void* toVector() override { std::abort(); }
+  virtual size_t size() const override { std::abort(); }
+  virtual bool resize (size_t) override { std::abort(); }
+  virtual void reserve (size_t) override { std::abort(); }
+  virtual bool shift (size_t, ptrdiff_t) override { std::abort(); }
   virtual bool insertMove (size_t, void*, size_t, size_t,
-                           SG::IAuxStore&){ std::abort(); }
-  virtual SG::AuxDataSpanBase getDataSpanImpl() const
+                           SG::IAuxStore&)  override{ std::abort(); }
+  virtual SG::AuxDataSpanBase getDataSpanImpl() const override
   { ++xx; return SG::AuxDataSpanBase (&xx, 1); }
+
+  virtual void toTransient (const EventContext& /*ctx*/) override {}
 
   using SG::IAuxTypeVector::storeDataSpan;
   using SG::IAuxTypeVector::resetDataSpan;

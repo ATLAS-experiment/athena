@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOUTILS_CALOCLUSTERCELLWEIGHTCALIB_H
@@ -31,6 +31,17 @@ public:
   using CaloClusterProcessor::execute;
   virtual StatusCode execute(const EventContext& ctx,
                              xAOD::CaloCluster* theCluster) const override;
+
+protected:
+
+  /*! @brief Negative signal handling: positive signal tag */
+  static constexpr std::string s_posName = "Signal";
+  /*! @brief Negative signal handling: absolute signal tag */
+  static constexpr std::string s_absName = "AbsSignal";
+  /*! @brief Negative signal handling: raw signal tag */
+  static constexpr std::string s_rawName = "RawSignal";
+  /*! @brief Negative signal handling:  default tag */
+  static constexpr std::string s_defName = s_absName;
   
 protected:
   /*! @brief Property controlling negative signal handling
@@ -46,7 +57,7 @@ protected:
    *  following a strategy very similar to the direction calculation 
    *  performed during cluster formation.
    */
-  std::string m_directionCalculation;
+  Gaudi::Property<std::string> m_directionCalculation{this, "Direction", s_defName};
 
   /*! @brief Property controlling calibration of noise clusters
    *
@@ -55,7 +66,7 @@ protected:
    *  @param true (default) means noise clusters are treated as all others
    *  @param false means noise clusters are not calibrated at all
    */
-  bool m_calibNoiseLikeAll;
+  Gaudi::Property<bool> m_calibNoiseLikeAll{this, "BelowThresholdLikeAll", true};
 
   /*! @brief Property controlling calibration method for noise clusters
    *
@@ -66,10 +77,10 @@ protected:
    *               clusters
    *   @param false uses @c AbsSignal calibration for noise clusters.
    */
-  std::string m_noiseDirectionCalculation;
+  Gaudi::Property<std::string> m_noiseDirectionCalculation{this, "BelowThresholdDirection", s_defName};
 
   /*! @brief Energy threshold for direction calculation */
-  double m_eThreshold;
+  Gaudi::Property<double> m_eThreshold{this, "EnergyThreshold", 0.};
 
   /*! @brief Flag to ignore geometrical cell weights in clusters
    *
@@ -81,22 +92,10 @@ protected:
    *  Note that using the geometrical weights requires this tool to run
    *  before the Local Hadronic calibration tools.
    */
-  bool m_ignoreGeoWghts;
+  Gaudi::Property<bool> m_ignoreGeoWghts{this, "IgnoreGeoWeights", false};
 
   /*! @brief Handle for cell weight tool */
-  ToolHandle<ICellWeightTool> m_cellWeight;
-
-protected:
-
-  /*! @brief Negative signal handling:  default tag */
-  static const std::string m_defName;
-  /*! @brief Negative signal handling: positive signal tag */
-  static const std::string m_posName;
-  /*! @brief Negative signal handling: absolute signal tag */
-  static const std::string m_absName;
-  /*! @brief Negative signal handling: raw signal tag */
-  static const std::string m_rawName; 
-
+  ToolHandle<ICellWeightTool> m_cellWeight{this, "CellSignalWeightTool", {}};
 
 protected:
 
@@ -158,10 +157,10 @@ protected:
   StatusCode f_dirAbsNW(xAOD::CaloCluster* pClus) const;
 
   /*! @brief Pointer to direction calculation implementation */
-  CALCULATOR m_calc;
+  CALCULATOR m_calc{nullptr};
 
   /*! @brief Pointer to direction calculation for noise clusters */
-  CALCULATOR m_calc_noise;
+  CALCULATOR m_calc_noise{nullptr};
 
 protected:
 

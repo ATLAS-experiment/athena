@@ -84,7 +84,7 @@ namespace ActsTrk {
   }
 
   bool SeedsToTrackParamsAlg::shouldReverseSearch(const ActsTrk::Seed& seed) const {
-    const auto& bottom_sp = seed.sp().front();
+    const xAOD::SpacePoint* bottom_sp = seed.sp().front();
 
     const double r = bottom_sp->radius();
     const double z = std::abs(bottom_sp->z());

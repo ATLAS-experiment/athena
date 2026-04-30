@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCSEnergyAndHitGANV2.h"
@@ -139,8 +139,10 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
     ATH_MSG_WARNING("GAN not loaded correctly.");
     return false;
   }
-
-  const TFCSGANEtaSlice::NetworkOutputs &outputs =
+  // This lock is an attempt to fix ATLASSIM-7031. remove if not necessary
+  // Hold until NetworkOutputs goes out of scope
+  std::scoped_lock lock(m_mutex);
+  TFCSGANEtaSlice::NetworkOutputs outputs =
       m_slice->GetNetworkOutputs(truth, extrapol, simulstate);
   ATH_MSG_VERBOSE("network outputs size: " << outputs.size());
 
@@ -694,7 +696,7 @@ void TFCSEnergyAndHitGANV2::test_path(const std::string &path,
   delete fGAN;
 }
 
-int TFCSEnergyAndHitGANV2::GetBinsInFours(double const &bins) {
+int TFCSEnergyAndHitGANV2::GetBinsInFours(double const bins) {
   if (bins < 4)
     return 4;
   else if (bins < 8)
@@ -712,7 +714,7 @@ int TFCSEnergyAndHitGANV2::GetAlphaBinsForRBin(const TAxis *x, int ix,
     ATH_MSG_DEBUG("yBinNum is special value 32");
     const double widthX = x->GetBinWidth(ix);
     const double radious = x->GetBinCenter(ix);
-    double circumference = radious * 2 * TMath::Pi();
+    double circumference = radious * 2. * TMath::Pi();
     if (m_param.IsSymmetrisedAlpha()) {
       circumference = radious * TMath::Pi();
     }

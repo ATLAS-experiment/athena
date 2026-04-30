@@ -26,6 +26,7 @@ class AtlasDetectorID;
 class ILArCalibCalculatorSvc; 
 
 class CaloCalibrationHitContainer;
+class SrCaloCalibrationHitContainer;
 
 
 /// @class LArG4CalibSD
@@ -55,8 +56,11 @@ public:
   G4bool ProcessHits(G4Step* a_step,G4TouchableHistory*) override;
 
   /// End of athena event processing
-  void EndOfAthenaEvent( CaloCalibrationHitContainer* hitContainer, CaloCalibrationHitContainer* deadHitContainer=nullptr );
-
+  void EndOfAthenaEvent( CaloCalibrationHitContainer* hitContainer, CaloCalibrationHitContainer* deadHitContainer=nullptr);
+ 
+  /// End of athena event processing with dedicated SR container
+  void EndOfAthenaEvent( CaloCalibrationHitContainer* hitContainer, CaloCalibrationHitContainer* deadHitContainer, SrCaloCalibrationHitContainer* srHitContainer);
+  
   /// Sets the ID helper pointers
   void setupHelpers( const LArEM_ID* EM ,
                      const LArFCAL_ID* FCAL ,
@@ -94,6 +98,7 @@ protected:
   /// Constructs the calibration hit and saves it to the set
   G4bool SimpleHit( const LArG4Identifier& a_ident, const std::vector<double>& energies, m_calibrationHits_t& calibrationHits );
 
+  G4bool SrHit( const LArG4Identifier& a_ident, const LArG4Identifier& sr_id, const std::vector<double>& energies, m_calibrationHits_t& calibrationHitsSr );  
   /// Member variable - the calculator we'll use
   ILArCalibCalculatorSvc * m_calculator;
 
@@ -108,16 +113,20 @@ protected:
 
   /// The actual set of dead material calibration hits
   m_calibrationHits_t m_deadCalibrationHits;
+    
+  /// The actual set of Sr calibration hits
+  m_calibrationHits_t m_calibrationHitsSr;
 
   /// Helper function for making "real" identifiers from LArG4Identifiers
   Identifier ConvertID(const LArG4Identifier& a_ident) const;
 
+  Identifier ConvertSRID(const LArG4Identifier& sr_id, const LArG4Identifier& lr_id) const;
   /// Pointers to the identifier helpers
   const LArEM_ID*       m_larEmID;
   const LArFCAL_ID*     m_larFcalID;
   const LArHEC_ID*      m_larHecID;
   const CaloDM_ID*      m_caloDmID;
   const AtlasDetectorID* m_id_helper;
-};
+  };
 
 #endif

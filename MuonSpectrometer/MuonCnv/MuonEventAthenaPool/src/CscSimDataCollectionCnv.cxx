@@ -28,35 +28,35 @@ CscSimDataCollection_PERS*    CscSimDataCollectionCnv::createPersistent (CscSimD
     return pixdc_p;
 }
 
-CscSimDataCollection* CscSimDataCollectionCnv::createTransient() {
+CscSimDataCollection* CscSimDataCollectionCnv::createTransient(const Token* token) {
     MsgStream log(msgSvc(), "CscSimDataCollectionCnv" );
     static const pool::Guid   p0_guid("250EC949-F98B-4F74-9034-178847D1B622");
     static const pool::Guid   p1_guid("DD2A8397-4435-4DA2-AD14-ADD7294694B2");
     static const pool::Guid   p2_guid("023993E1-BAAA-4F36-8CD4-8F03E3983E8D");
     static const pool::Guid   p3_guid("018F5280-E75C-7B27-9881-75B356B2A282");
-    ATH_MSG_DEBUG("createTransient(): main converter");
+    ATH_MSG_DEBUG("createTransient(const Token* token): main converter");
     CscSimDataCollection* p_collection(nullptr);
-    if( compareClassGuid(p3_guid) ) {
-      ATH_MSG_DEBUG("createTransient(): T/P version 3 detected");
-      std::unique_ptr< Muon::CscSimDataCollection_p3 >   col_vect( this->poolReadObject< Muon::CscSimDataCollection_p3 >() );
+    if( compareClassGuid(token, p3_guid) ) {
+      ATH_MSG_DEBUG("createTransient(const Token* token): T/P version 3 detected");
+      std::unique_ptr< Muon::CscSimDataCollection_p3 >   col_vect( this->poolReadObject< Muon::CscSimDataCollection_p3 >(token) );
       p_collection = m_TPConverter_p3.createTransient( col_vect.get(), log );
     }
   //----------------------------------------------------------------
-    else if( compareClassGuid(p2_guid) ) {
-      ATH_MSG_DEBUG("createTransient(): T/P version 2 detected");
-      std::unique_ptr< Muon::CscSimDataCollection_p2 >   col_vect( this->poolReadObject< Muon::CscSimDataCollection_p2 >() );
+    else if( compareClassGuid(token, p2_guid) ) {
+      ATH_MSG_DEBUG("createTransient(const Token* token): T/P version 2 detected");
+      std::unique_ptr< Muon::CscSimDataCollection_p2 >   col_vect( this->poolReadObject< Muon::CscSimDataCollection_p2 >(token) );
       p_collection = m_TPConverter_p2.createTransient( col_vect.get(), log );
     }
   //----------------------------------------------------------------
-    else if( compareClassGuid(p1_guid) ) {
-      ATH_MSG_DEBUG("createTransient(): T/P version 1 detected");
-      std::unique_ptr< Muon::CscSimDataCollection_p1 >   col_vect( this->poolReadObject< Muon::CscSimDataCollection_p1 >() );
+    else if( compareClassGuid(token, p1_guid) ) {
+      ATH_MSG_DEBUG("createTransient(const Token* token): T/P version 1 detected");
+      std::unique_ptr< Muon::CscSimDataCollection_p1 >   col_vect( this->poolReadObject< Muon::CscSimDataCollection_p1 >(token) );
       p_collection = m_TPConverter_p1.createTransient( col_vect.get(), log );
     }
   //----------------------------------------------------------------
-    else if( compareClassGuid(p0_guid) ){
-       if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(): Old input file"<<std::endl;
-       std::unique_ptr< CscSimDataCollection >   col_vect( poolReadObject< CscSimDataCollection >() );
+    else if( compareClassGuid(token, p0_guid) ){
+       if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(const Token* token): Old input file"<<std::endl;
+       std::unique_ptr< CscSimDataCollection >   col_vect( poolReadObject< CscSimDataCollection >(token) );
        p_collection = col_vect.release();
     }
   //----------------------------------------------------------------

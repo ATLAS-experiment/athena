@@ -339,10 +339,10 @@ def ITkCosmicsScoringToolCfg(flags, name='ITkCosmicsScoringTool', **kwargs):
     acc = ComponentAccumulator()
 
     kwargs.setdefault("nWeightedClustersMin",
-                      flags.Tracking.ActiveConfig.nWeightedClustersMin)
+                      flags.Tracking.ActiveConfig.nWeightedClustersMin[0])
     kwargs.setdefault("minTRTHits", 0)
-    kwargs.setdefault("maxZImp", flags.Tracking.ActiveConfig.maxZImpact)
+    kwargs.setdefault("maxZImp", flags.Tracking.ActiveConfig.maxZImpact[0])
 
     acc.setPrivateTools(CompFactory.InDet.InDetCosmicScoringTool(
-        name+flags.ITk.Tracking.ActiveConfig.extension, **kwargs))
+        name+flags.Tracking.ActiveConfig.extension, **kwargs))
     return acc

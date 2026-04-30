@@ -10,8 +10,37 @@ from pathlib import PurePath
 from warnings import warn
 import re
 
-def addAndReturnSharingSvc(flags, ca):
-    svc = CompFactory.FlavorTagInference.NNSharingSvc('FTagNNSharingSvc')
+_onnx_to_triton_map = {
+    "BTagging/20250527/GN3V01/antikt4empflow/network.onnx"           : "BTagging_network_93a858f5c730",
+    "BTagging/20231205/GN2v01/antikt4empflow/network_fold0.onnx"     : "BTagging_network_fold0_4812578c733e",
+    "BTagging/20231205/GN2v01/antikt4empflow/network_fold1.onnx"     : "BTagging_network_fold1_9280d77c131c",
+    "BTagging/20231205/GN2v01/antikt4empflow/network_fold2.onnx"     : "BTagging_network_fold2_25c6ad03db10",
+    "BTagging/20231205/GN2v01/antikt4empflow/network_fold3.onnx"     : "BTagging_network_fold3_0558b4924c49",
+    "BTagging/20250213/GN3V00/antikt4empflow/network.onnx"           : "BTagging_network_cce6be90efd1",
+    "BTagging/20250213/GN3PflowMuonsV00/antikt4empflow/network.onnx" : "BTagging_network_d2138c4252e6",
+    "BTagging/20240925/GN2Xv02/antikt10ufo/network.onnx"             : "BTagging_network_09c2dddf15bf",
+    "BTagging/20250310/GN2XTauV00/antikt10ufo/network.onnx"          : "BTagging_network_e8d5e9a3059b",
+    "BTagging/20250912/GN3XPV01/antikt10ufo/network.onnx"            : "BTagging_network_08105bb8c1d6",
+    "BTagging/20250912/GN3EPCLV01/antikt4empflow/network.onnx"       : "BTagging_network_8085e6c5717c",
+    # "BTagging/20230705/gn2xv01/antikt10ufo/network.onnx"           : "BTagging_network_9f8aadb82b76", # This model is commented out because at the time of submitting, it did not work on Triton. The code falls back to direct ONNX reading
+    "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20_CSSKUFO_bJR10v00Ext_20250212.onnx"  : "JetCalibTools_bbJESJMS_calibFactor_80138d800ac5",
+    "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20MC23_CSSKUFO_bJR10v01_20250212.onnx" : "JetCalibTools_bbJESJMS_calibFactor_fefb85f452f9",
+}
+# NNFiles should be a list of paths to NN files. master switch for using Triton for NN inference is 
+# flags.BTagging.UseTriton. If all of the files are in _onnx_to_triton_map, then the returned 
+# sharing service will be configured to use Triton. Otherwise it will fall back to ONNX.
+def addAndReturnSharingSvc(flags, ca, NNFiles):
+    if flags.BTagging.UseTriton and set(NNFiles).issubset(set(_onnx_to_triton_map.keys())):
+        svc = CompFactory.FlavorTagInference.NNSharingTritonSvc(
+            'FTagNNSharingTritonSvc',
+            TritonPathsMap = _onnx_to_triton_map,
+            TritonTimeout = 0.0,
+            TritonPort = 443,
+            TritonUrl = 'iaasdemo.ml4phys.com',
+            TritonUseSSL = True,
+        )
+    else:
+        svc = CompFactory.FlavorTagInference.NNSharingOnnxSvc('FTagNNSharingOnnxSvc')
     ca.addService(svc)
     return svc
 
@@ -54,11 +83,14 @@ def GNNToolCfg(flags, NNFile, **options):
         defout = {}
     defkey = 'defaultOutputValues'
     options[defkey] = defout | options.get(defkey, {})
-
     gnntool = CompFactory.FlavorTagInference.GNNTool(
         name='decorator',
         nnFile=NNFile,
-        nnSharingService=addAndReturnSharingSvc(flags, acc),
+        nnSharingService=addAndReturnSharingSvc(
+            flags = flags, 
+            ca = acc, 
+            NNFiles=[NNFile],
+        ),
         **options)
 
     acc.setPrivateTools(gnntool)
@@ -167,11 +199,12 @@ def MultifoldGNNCfg(
         remapping={},
         useBTaggingObject=None,
         tag_requirements=set(),
-        defaultOutputValues={},
         foldHashName='jetFoldRankHash',
         electrons='',
+        muons='',
         suffix='',
 ):
+
     common = commonpath(nnFilePaths)
     nn_name = '_'.join(PurePath(common).with_suffix('').parts)
     algname = 'FtagNN_{jc}_{tc}_{nn}_{fc}{dz}'.format(
@@ -210,8 +243,11 @@ def MultifoldGNNCfg(
     toolargs = dict(
         flipTagConfig=FlipConfig,
         variableRemapping=remapping,
-        nnSharingService=addAndReturnSharingSvc(flags, acc),
-        defaultOutputValues=defaultOutputValues,
+        nnSharingService=addAndReturnSharingSvc(
+            flags = flags, 
+            ca = acc, 
+            NNFiles=nnFilePaths,
+        ),
         defaultZeroTracks=default_zero_tracks,
     )
 
@@ -221,11 +257,16 @@ def MultifoldGNNCfg(
     # and also don't use multifold (for now). So doing it this way
     # lets us support large-R and small-R jets in the same function.
     if len(nnFilePaths) == 1:
+        nn_filepath = nnFilePaths[0]
         Tool = CompFactory.FlavorTagInference.GNNTool
+        path_defaults = _defaultsFromPaths(nnFilePaths)
+
         bonusargs = dict(
             name='unifold',
-            nnFile=nnFilePaths[0]
+            nnFile=nn_filepath,
         )
+        if nn_filepath in path_defaults:
+            bonusargs['defaultOutputValues'] = path_defaults[nn_filepath]
 
     else:
         Tool = CompFactory.FlavorTagInference.MultifoldGNNTool
@@ -248,6 +289,7 @@ def MultifoldGNNCfg(
             container=container,
             constituentContainer=TrackCollection,
             electronContainer=electrons,
+            muonContainer=muons,
             decorator=Tool(**toolargs, **bonusargs),
             undeclaredReadDecorKeys=veto_list,
         )
@@ -285,72 +327,168 @@ def _defaultsFromPaths(nn_paths):
             'GN2v01_ptau': 0.713035464,
         }
     ]
+
+    GN2HLv01_fold_defaults = [
+        {
+            'GN2HLv01_pb':  0.514302135,
+            'GN2HLv01_pc':  0.068148732,
+            'GN2HLv01_pu':  0.012127459,
+            'GN2HLv01_ptau':  0.40542167,
+        }
+    ]
+
     defaults = {}
     fold_re = re.compile('network_fold([0-9]+)')
     for path in nn_paths:
         if '/GN2v01/' in path:
             fold = int(fold_re.search(path).group(1))
             defaults[path] = gn2v01_fold_defaults[fold]
+        if '/GN2HL/' in path:
+            defaults[path] = GN2HLv01_fold_defaults[0]
     return defaults
 
 
-def getModifierSet(tagger_name):
+def getDependencySet(tagger_name: str, override: set[str] | None = None) -> set[str]:
+    """Return the dependency modifier set for a given tagger.
+
+    The tagger naming convention encodes which additional physics inputs
+    or decorations are required to run a particular flavour-tagging model.
+    This function translates the tagger name into the corresponding set
+    of dependency modifier characters.
+
+    Each modifier indicates that certain reconstructed objects or
+    decorations must be available in the event before the tagger can run.
+
+    The currently defined modifier characters are:
+
+    - ``X`` : Xbb-style tagger for large-R jets.
+    - ``L`` : Track-Lepton decoration (generic lepton-related information).
+    - ``E`` : Electron inputs associated to the jet.
+    - ``M`` : Muon inputs associated to the jet.
+
+    Parameters
+    ----------
+    tagger_name : str
+        Name of the flavour-tagging model (e.g. ``"GN3EPCLV01"``).
+    override : set[str] | None, optional
+        Override the hardcoded list of tagger names and dependencies
+        and simply return the set which is provided here. This is a
+        dev option and should not be used in the main inference. 
+        By default None
+
+    Returns
+    -------
+    set[str]
+        Set of dependency modifier characters describing the inputs
+        required by the tagger.
+
+    Raises
+    ------
+    KeyError
+        If the provided ``tagger_name`` is not present in the internal
+        tagger dependency registry.
     """
-    Translate tagger name into a list of dependencies
-    """
-    # Tagger should be of of the form GN<N><mods>V<M> where:
-    # - N is the major version number
-    # - mods specify the inputs we run on
-    # - M is the minor version number
-    tagparse = re.compile('(GN|gn)([0-9])(.*)([vV])([0-9]+)')
-    if not (matches := tagparse.match(tagger_name)):
-        raise ValueError(f"can't parse {tagger_name}")
-    pfx, major, mods, verchar, minor = matches.groups()
-    modset = set()
 
-    # first handle the pre-GN3 taggers, things were not well specified
-    # at this point
-    if int(major) < 3:
-        if "Muon" in mods:
-            modset.add("M")
-        if "Electrons" in mods:
-            modset.add("L")
-        # GN2X also used leponID
-        if "X" in mods:
-            if int(minor) == 2 or "Tau" in mods:
-                modset.add("L")
-        return modset
+    # Check for override
+    if override:
+        return override
 
-    # 2025-10-13: also one special case for GN3PflowMuonsV00, which
-    # was defined before we had any convention here. The tagger and
-    # this exception should ideally be removed soon
-    if tagger_name == "GN3PflowMuonsV00":
-        return {"L", "P"}
+    # Define the dependencies of each tagger in a dict
+    tagger_dep_dict: dict[str, set[str]] = {
+        # Small-R jet taggers
+        "GN2v01": {},
+        "GN3V00": {},
+        "GN3MuonsV00": {"L"},
+        "GN3PflowV00": {"P"},
+        "GN3PflowMuonsV00": {"L"},
+        "GN3PflowMuonsChargeV00": {"L"},
+        "GN3PflowMuonsElectronsHybridV00": {"L", "E"},
+        "GN3V01": {"L", "E"},
+        "GN3EPCLV01": {"E", "L"},
+        "GN3V02": {"E", "M"},
 
-    # See the documentation in
-    # https://ftag.docs.cern.ch/reco_algs/taggers/deploy/#naming-conventions
-    # or
-    # https://gitlab.cern.ch/atlas-flavor-tagging-tools/algorithms/ftag-docs/-/blob/64c70e9770d03a2545271150e163699905d1cba8/docs/reco_algs/taggers/deploy.md#modifiers
+        # Run 4 small-R jet taggers
+        "GN2HL": {},
 
-    if verchar != "V":
-        raise ValueError(
-            f"tagger {tagger_name} should use a uppercase V as the version")
-    if pfx != "GN":
-        raise ValueError(f"Tagger {tagger_name} should start with GN prefix")
-
-    modsetparse = re.compile("[A-Z]")
-    modset = set(modsetparse.findall(mods))
-
-    allowed_mods = {
-        "X", # Xbb tagger
-        "L", # lepton decoration
-        "E", # Electrons
-        "P", # Particle Flow
-        "C", # Charge Tagger (optional, no useful effects)
-        "H", # Hybrid model (optional, no useful effects)
+        # Large-R jet taggers
+        "gn2xv00": {"X"},
+        "gn2xv01": {"X"},
+        "gn2xwithmassv00": {"X"},
+        "GN2Xv02": {"X", "L"},
+        "GN2Xv00": {"X"},
+        "GN2XTauV00": {"X", "L"},
+        "GN3XV00": {"X"},
+        "GN3XPV01": {"X"},
     }
-    if baddies := modset - allowed_mods:
-        raise ValueError(
-            f"found forbidden modifiers {baddies} in {tagger_name}"
+
+    if tagger_name not in tagger_dep_dict:
+        available = ", ".join(sorted(tagger_dep_dict))
+        raise KeyError(
+            f"Unknown tagger '{tagger_name}'. Available taggers are: {available}\n\n"
+            "Please check the name and add the tagger to the dict in getDependencySet "
+            "if it is a newly deployed tagger!"
         )
-    return modset
+    return tagger_dep_dict[tagger_name]
+
+
+def PassThroughModelCfg(flags, JetCollection,
+                        TrackCollection='InDetTrackParticles',
+                        variableRemapping=None,
+                        electrons='Electrons',
+                        muons='',
+                        jsonPath=None):
+    """Configure a pass-through model for jet and constituent variables.
+
+    jsonPath: PathResolver-resolvable path (relative to DATAPATH) or an
+    absolute path to the PassThrough JSON. If falsy (None/""), returns
+    an empty ComponentAccumulator.  Callers must pass the path
+    explicitly; the derivation config owns which JSON to use (e.g.
+    FTAG1LITE's small-R vs large-R).
+
+    The JSON may specify scalar jet_variables and/or constituent
+    variables (tracks, electrons, muons, flows). Constituent loading
+    uses the existing GNN loader infrastructure (TracksLoader,
+    ElectronsLoader, MuonsLoader, FlowElementsLoader).
+
+    variableRemapping: dict mapping default link names to actual names,
+        e.g. {"BTagTrackToJetAssociator": "GhostTrack",
+               "FTagElectrons": "GhostFTagSelectedElectrons",
+               "FTagMuons": "GhostFTagMuons"}
+    """
+    json_path = jsonPath
+    if not json_path:
+        return ComponentAccumulator()
+
+    acc = ComponentAccumulator()
+    FTI = CompFactory.FlavorTagInference
+
+    remap = variableRemapping or {}
+
+    # Unique svc/tool names per jet collection so multiple instances
+    # can coexist (e.g. small-R + large-R running side-by-side).
+    svc = FTI.PassThroughModelSvc(
+        f'FTagPassThroughSvc_{JetCollection}',
+        JsonFile=json_path,
+        VariableRemapping=remap,
+    )
+    acc.addService(svc)
+
+    tool = FTI.GNNTool(
+        name=f'passthrough_decorator_{JetCollection}',
+        nnFile='passthrough',
+        nnSharingService=svc,
+        variableRemapping=remap,
+    )
+
+    acc.addEventAlgo(
+        FTI.JetTagDecoratorAlg(
+            name=f'FtagPassThrough_{JetCollection}_Jet',
+            container=JetCollection,
+            constituentContainer=TrackCollection,
+            electronContainer=electrons,
+            muonContainer=muons,
+            decorator=tool,
+        )
+    )
+
+    return acc

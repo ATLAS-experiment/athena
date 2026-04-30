@@ -5,6 +5,7 @@
 #define L0MuonInterface_RPCCANDDATA_H
 
 #include "L0MuonInterface/ICandData.h"
+#include <array>
 
 namespace L0Muon
 {
@@ -28,11 +29,10 @@ namespace L0Muon
     Quality quality() const { return m_quality; }
     float zPos(int index) const;
     uint8_t coinType() const;
-
+    
     void setQuality(Quality quality) { m_quality = quality; }
     void setZPos(float zPos, int index);
     void setCoinType(uint8_t coinType);
-
     /// range of the RPC hits z positions
     static constexpr float s_zPosRange = 12500.0;
     /// range of the coincidence type value
@@ -47,7 +47,8 @@ namespace L0Muon
     /// quality of the candidate
     Quality m_quality{0};
     /// Z positions of the RPC hits
-    uint16_t m_zPos[4]{0, 0, 0, 0};
+    std::array<uint16_t,4> m_zPos{0, 0, 0, 0};
+
     /// coincidence type
     uint8_t m_coinType{0};
     

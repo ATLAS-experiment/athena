@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TgcDigitizationTool.h"
@@ -346,8 +346,7 @@ StatusCode TgcDigitizationTool::digitizeCore(const EventContext& ctx) {
                         "Unable to get TGC hash id from TGC Digit collection "
                         << "context begin_index = " << tgcContext.begin_index()
                         << " context end_index  = " << tgcContext.end_index()
-                        << " the identifier is ");
-                    elemId.show();
+                        << " the identifier is \n" << elemId);
                 }
 
                 // make new TgcDigit and record it in StoreGate

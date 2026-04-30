@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#pragma once
-#ifndef TrigSteeringEvent_RobRequestInfo_h
-#define TrigSteeringEvent_RobRequestInfo_h
+#ifndef TRIGSTEERINGEVENT_ROBREQUESTINFO_H
+#define TRIGSTEERINGEVENT_ROBREQUESTINFO_H
 
 #include <vector>
 #include <stdint.h>

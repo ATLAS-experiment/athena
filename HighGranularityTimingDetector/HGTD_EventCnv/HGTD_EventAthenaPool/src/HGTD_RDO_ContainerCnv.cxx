@@ -14,17 +14,17 @@
 HGTD_RDO_ContainerCnv::HGTD_RDO_ContainerCnv(ISvcLocator* svcloc)
   : HGTD_RDO_ContainerCnvBase_t(svcloc) {}
 
-HGTD_RDO_Container* HGTD_RDO_ContainerCnv::createTransient() {
+HGTD_RDO_Container* HGTD_RDO_ContainerCnv::createTransient(const Token* token) {
 
   static const pool::Guid p1_guid(
     "C25315CC-F0A2-43D6-8F42-012BE34B0107"); // with HGTD_RDO_p1
-  ATH_MSG_DEBUG("createTransient(): main converter");
+  ATH_MSG_DEBUG("createTransient(const Token* token): main converter");
 
   HGTD_RDO_Container* trans_cont(0);
-  if (compareClassGuid(p1_guid)) {
-    ATH_MSG_DEBUG("createTransient(): T/P version 1 detected");
+  if (compareClassGuid(token, p1_guid)) {
+    ATH_MSG_DEBUG("createTransient(const Token* token): T/P version 1 detected");
     std::unique_ptr<HGTD_RDO_Container_PERS_t> pers_cont(
-      poolReadObject<HGTD_RDO_Container_PERS_t>());
+      poolReadObject<HGTD_RDO_Container_PERS_t>(token));
 
     trans_cont = m_converter.createTransient(pers_cont.get(), msg());
 

@@ -7,7 +7,6 @@
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "ReadoutGeometryBase/SiLocalPosition.h"
 
-#include "TruthUtils/AtlasPID.h"
 #include "TruthUtils/HepMCHelpers.h"
 
 #include "TTree.h"
@@ -180,7 +179,7 @@ StatusCode HGTD_RDOAnalysis::execute() {
 bool HGTD_RDOAnalysis::isHSGoodParticle(HepMC::ConstGenParticlePtr particlePtr,const HepMC::GenEvent* hardScatterGenEvent, float min_pt_cut) {
   bool decision = false;
   if( MC::isGenStable(particlePtr) and
-      isCharged(particlePtr) and
+      MC::isCharged(particlePtr) and
       particlePtr->momentum().perp() >= min_pt_cut and
       particlePtr->momentum().eta() < 4.0 and
       particlePtr->parent_event() == hardScatterGenEvent)

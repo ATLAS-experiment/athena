@@ -28,7 +28,7 @@ public:
   TBTDCRawContCnv (ISvcLocator* svcloc) : TBTDCRawContCnvBase(svcloc) {}
 protected:
   virtual TBTDCRawCont_PERS*   createPersistent (TBTDCRawCont* transCont);
-  virtual TBTDCRawCont*        createTransient ();
+  virtual TBTDCRawCont*        createTransient(const Token* token);
 
   TBTDCRawContCnv_p1  m_TPConverter;
 };

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLS_DITAUSMEARINGTOOL_H
@@ -41,10 +41,10 @@ public:
   virtual StatusCode initialize() override;
 
   /// Apply the correction on a modifyable object
-  virtual CP::CorrectionCode applyCorrection( xAOD::DiTauJet& xDiTau ) override;
+  virtual CP::CorrectionCode applyCorrection( xAOD::DiTauJet& xDiTau ) const override;
   /// Create a corrected copy from a constant ditau
   virtual CP::CorrectionCode correctedCopy( const xAOD::DiTauJet& input,
-      xAOD::DiTauJet*& output ) override;
+      xAOD::DiTauJet*& output ) const override;
 
   /// returns: whether this tool is affected by the given systematis
   virtual bool isAffectedBySystematic( const CP::SystematicVariation& systematic ) const override;

@@ -97,6 +97,10 @@ StatusCode TauThinningAlg::execute (const EventContext& ctx) const
     
     // keep tau tracks
     for (const xAOD::TauTrack* track : tau->allTracks()) {
+ 
+      if( m_saveOnlyGoodTracks && (!(track->flag(xAOD::TauJetParameters::passTrkSelector)))) 
+	 continue;     
+
       tauTracks.keep(track->index());
     }
 

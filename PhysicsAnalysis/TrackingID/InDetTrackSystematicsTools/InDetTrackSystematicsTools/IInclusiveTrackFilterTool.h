@@ -28,9 +28,14 @@ namespace InDet {
       
   public:
     ASG_TOOL_INTERFACE( InDet::IInclusiveTrackFilterTool )
-	
+
     virtual bool accept( const xAOD::TrackParticle* ) const = 0;
-      
+
+    /// Reentrant accept: applies @p syst without mutating shared state.
+    /// Requires applySystematicVariation(@p syst) during initialize().
+    virtual bool accept( const xAOD::TrackParticle*,
+                         const CP::SystematicSet& syst ) const = 0;
+
   }; // class IInclusiveTrackFilterTool
 
 } // namespace InDet

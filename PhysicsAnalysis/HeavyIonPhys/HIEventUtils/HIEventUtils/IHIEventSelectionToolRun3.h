@@ -38,25 +38,27 @@ constexpr unsigned int bit(int n) {
 // never change bits assignment, feel free to add
 enum class SelectionMask : unsigned int {
   NoEventError = bit(0),
-  PUFCalVsNTrackLoose = bit(1),
-  PUFCalVsNTrackNominal = bit(2),
-  PUFCalVsNTrackTight = bit(3),
-  PUFCalVsNTrackAny =
-      PUFCalVsNTrackLoose | PUFCalVsNTrackNominal | PUFCalVsNTrackTight,
-  PUFCalVsZDCLoose = bit(4),
-  PUFCalVsZDCNominal = bit(5),
-  PUFCalVsZDCTight = bit(6),
-  PUFCalVsZDCAny = PUFCalVsZDCLoose | PUFCalVsZDCNominal | PUFCalVsZDCTight,
-  PUOOSingleVertexNominal = bit(7),
-  PUZDCPresampler = bit(8),
+  NoPUFCalVsNTrackLoose = bit(1),
+  NoPUFCalVsNTrackNominal = bit(2),
+  NoPUFCalVsNTrackTight = bit(3),
+  NoPUFCalVsNTrackAny =
+      NoPUFCalVsNTrackLoose | NoPUFCalVsNTrackNominal | NoPUFCalVsNTrackTight,
+  NoPUFCalVsZDCLoose = bit(4),
+  NoPUFCalVsZDCNominal = bit(5),
+  NoPUFCalVsZDCTight = bit(6),
+  NoPUFCalVsZDCAny =
+      NoPUFCalVsZDCLoose | NoPUFCalVsZDCNominal | NoPUFCalVsZDCTight,
+  NoPUOOSingleVertexNominal = bit(7),
+  NoPUZDCPresampler = bit(8), // at the moment there is only one cut (shall we have Nominal Loose & Tight)
 
   // default cuts for PB
-  PBDefault = NoEventError | PUFCalVsNTrackLoose | PUFCalVsZDCLoose | PUZDCPresampler,
+  PBDefault = NoEventError | NoPUFCalVsZDCLoose |
+              NoPUZDCPresampler,  // | NoPUFCalVsNTrackLoose , this needs to be added again when we have cut values
   // default cuts for OO
-  OODefault = NoEventError | PUOOSingleVertexNominal | PUFCalVsNTrackLoose
+  OODefault = NoEventError | NoPUOOSingleVertexNominal | NoPUFCalVsNTrackLoose |
+              NoPUFCalVsZDCLoose
 
 };
-
 
 std::string toString(SelectionMask);
 
@@ -72,42 +74,58 @@ class IHIEventSelectionToolRun3 : public virtual asg::IAsgTool {
   /// @return true if no error
   virtual bool noDetectorError(const xAOD::EventInfo* eventInfo) const = 0;
 
-  /// @brief true if this is pileup event
+  /// @brief true if this is NOT pileup event
   /// It computes necessary quantities and invokes method defined next to
   /// perform actual selection
-  virtual bool puZDCvsFCal(HI::IonDataType when,
-                           const xAOD::HIEventShapeContainer* es,
-                           const xAOD::ZdcModuleContainer* zdcModules,
-                           HI::PileupVariation variation) const = 0;
+  virtual bool noPUZDCvsFCal(HI::IonDataType when,
+                             const xAOD::HIEventShapeContainer* es,
+                             const xAOD::ZdcModuleContainer* zdcModules,
+                             HI::PileupVariation variation) const = 0;
 
-  /// @brief true if this is pileup event
-  virtual bool puZDCvsFCal(
+  virtual float fcalEt(HI::IonDataType when,
+                       const xAOD::HIEventShapeContainer* es) const = 0;
+
+  virtual float zdcE(HI::IonDataType when,
+                     const xAOD::ZdcModuleContainer* zdcModules) const = 0;
+
+  /// @brief true if this is NOT pileup event
+  virtual bool noPUZDCvsFCal(
       IonDataType dataType, float fcalEt, float zdcE,
       PileupVariation variation = PileupVariation::Nominal) const = 0;
 
-  /// @brief true if this is pileup event
+  /// @brief true if this is NOT pileup event
   /// The fool performs track selection
-  virtual bool puFCalVsNtracks(
+  virtual bool noPUFCalVsNtracks(
       IonDataType dataType, const xAOD::HIEventShapeContainer* es,
       const xAOD::TrackParticleContainer* tracks,
       const xAOD::VertexContainer* vertices,
       PileupVariation variation = PileupVariation::Nominal) const = 0;
 
-  virtual bool puFCalVsNtracks(
+  virtual int nTrk(IonDataType dataType,
+                   const xAOD::TrackParticleContainer* tracks,
+                   const xAOD::VertexContainer* vertices) const = 0;
+
+  virtual bool noPUFCalVsNtracks(
       IonDataType dataType, float fcalEt, int ntrk,
       PileupVariation variation = PileupVariation::Nominal) const = 0;
 
-  /// @brief true if this is not pileup event
-  virtual bool puZDCPresampler(HI::IonDataType when,
-                               const xAOD::ZdcModuleContainer* zdcModules,
-                               HI::PileupVariation variation) const = 0;
-  virtual bool puZDCPresampler(
+  /// @brief true if this is NOT pileup event
+  virtual bool noPUZDCPresampler(HI::IonDataType when,
+                                 const xAOD::ZdcModuleContainer* zdcModules,
+                                 HI::PileupVariation variation) const = 0;
+  virtual bool noPUZDCPresampler(
       IonDataType dataType, float presamplerA, float presamplerC,
       PileupVariation variation = PileupVariation::Nominal) const = 0;
 
-  /// @brief true if this is pileup event
-  virtual bool puOOVertexCuts(IonDataType dataType,
-                              const xAOD::VertexContainer* vertices) const = 0;
+  /// @brief  obtain presampler amplitudes
+  /// @param zdcModules
+  /// @return A & C side sums
+  virtual std::pair<float, float> ZDCPresamplerAmps(
+      const xAOD::ZdcModuleContainer* zdcModules) const = 0;
+
+  /// @brief true if this is NOT pileup event
+  virtual bool noPUOOVertexCuts(
+      IonDataType dataType, const xAOD::VertexContainer* vertices) const = 0;
 
   /// @brief translates info in EV into HI data type
   virtual IonDataType toDataType(const xAOD::EventInfo* eventInfo) const = 0;

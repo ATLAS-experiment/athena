@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -73,11 +73,9 @@ ZdcByteStreamCnv::~ZdcByteStreamCnv()
 
 
 //==================================================================================================
-const CLID& ZdcByteStreamCnv::classID()
+CLID ZdcByteStreamCnv::classID()
 {
-  //std::cout << "In ZdcByteStreamCnv::classID()" << std::endl;
   return ClassID_traits<ZdcDigitsCollection>::ID();
-  //return ClassID_traits<xAOD::TriggerTowerContainer>::ID();
 }
 //==================================================================================================
 

@@ -54,17 +54,8 @@ if __name__ == "__main__":
     cfg.merge(MuonSpacePointFormationCfg(flags))
     
     from MuonInference.InferenceConfig import GraphBucketFilterToolCfg, GraphInferenceAlgCfg
-    bucketTool = cfg.popToolsAndMerge(
-        GraphBucketFilterToolCfg(
-            flags, 
-            )
-    )
-    cfg.merge(
-        GraphInferenceAlgCfg(
-            flags,
-            InferenceTools=[bucketTool],
-        )
-    )
+    bucketTool = cfg.popToolsAndMerge(GraphBucketFilterToolCfg(flags))
+    cfg.merge(GraphInferenceAlgCfg(flags, InferenceTools=[bucketTool]))
 
     from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
     cfg.merge(MuonPatternRecognitionCfg(flags))

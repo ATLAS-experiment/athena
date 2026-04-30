@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "PFSimulateTruthShowerTool.h"
 
@@ -28,13 +28,25 @@ StatusCode PFSimulateTruthShowerTool::finalize(){
 
 void PFSimulateTruthShowerTool::simulateShower(eflowCaloObject& thisEFlowCaloObject) const{
 
+  SG::ReadHandle<CaloCalibrationHitContainer> tileActiveCaloCalibrationHitReadHandle(m_tileActiveCaloCalibrationHitReadHandleKey);
+  if (!tileActiveCaloCalibrationHitReadHandle.isValid()){
+    ATH_MSG_WARNING("TileActiveCaloCalibrationHitReadHandle is not valid");
+    return;
+  }
+
+  SG::ReadHandle<CaloCalibrationHitContainer> lArActiveCaloCalibrationHitReadHandle(m_lArActiveCaloCalibrationHitReadHandleKey);
+  if (!lArActiveCaloCalibrationHitReadHandle.isValid()){
+    ATH_MSG_WARNING("lArActiveCaloCalibrationHitReadHandle is not valid");
+    return;
+  }
+
     for (unsigned int trackCounter = 0; trackCounter < thisEFlowCaloObject.nTracks();trackCounter++){
         
         eflowRecTrack* thisTrack = thisEFlowCaloObject.efRecTrack(trackCounter);
 
         typedef ElementLink<xAOD::TruthParticleContainer> TruthLink;
 
-        const static SG::AuxElement::Accessor<TruthLink> truthLinkAccessor("truthParticleLink");
+        const static SG::Accessor<TruthLink> truthLinkAccessor("truthParticleLink");
         //if truthLink not valid don't print a WARNING because this is an expected condition as discussed here:
         //https://indico.cern.ch/event/795039/contributions/3391771/attachments/1857138/3050771/TruthTrackFTAGWS.pdf
         TruthLink truthLink = truthLinkAccessor(*(thisTrack->getTrack()));
@@ -44,27 +56,12 @@ void PFSimulateTruthShowerTool::simulateShower(eflowCaloObject& thisEFlowCaloObj
         //get uniqueID of particle
         const int uniqueID = (*truthLink)->uid();
 
-        SG::ReadHandle<CaloCalibrationHitContainer> tileActiveCaloCalibrationHitReadHandle(m_tileActiveCaloCalibrationHitReadHandleKey);
-        if (!tileActiveCaloCalibrationHitReadHandle.isValid()){
-            ATH_MSG_WARNING("TileActiveCaloCalibrationHitReadHandle is not valid");
-            return;
-        }
-
-        SG::ReadHandle<CaloCalibrationHitContainer> lArActiveCaloCalibrationHitReadHandle(m_lArActiveCaloCalibrationHitReadHandleKey);
-        if (!lArActiveCaloCalibrationHitReadHandle.isValid()){
-            ATH_MSG_WARNING("lArActiveCaloCalibrationHitReadHandle is not valid");
-            return;
-        }
-
         std::map<Identifier,double> identifierToTruthEnergyMap;
 
         for (auto thisCalibHit : *tileActiveCaloCalibrationHitReadHandle) this->fillMap(identifierToTruthEnergyMap,uniqueID,*thisCalibHit);
         for (auto thisCalibHit : *lArActiveCaloCalibrationHitReadHandle) this->fillMap(identifierToTruthEnergyMap,uniqueID,*thisCalibHit);
 
         //find the matched clusters
-        std::vector<eflowRecCluster*> matchedClusters;
-        for (auto thisLink : thisTrack->getClusterMatches()) matchedClusters.push_back(thisLink->getCluster());
-
         for (auto thisLink : thisTrack->getClusterMatches()){
             for (auto thisCell : *(thisLink->getCluster()->getCluster()->getOwnCellLinks())){
                 //look up the truth energy for this cell

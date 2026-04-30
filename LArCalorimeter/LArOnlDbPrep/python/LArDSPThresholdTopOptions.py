@@ -2,9 +2,9 @@
 
 tagList = [
            'LARConfigurationDSPThresholdFlatTemplates-Qt1sigma-samp1sigma',
-           'LARConfigurationDSPThresholdFlatTemplates-Qt1.5sigma-samp1.5sigma',
            'LARConfigurationDSPThresholdFlatTemplates-Qt2sigma-samp2sigma',
            'LARConfigurationDSPThresholdFlatTemplates-Qt3sigma-samp3sigma',
+           'LARConfigurationDSPThresholdFlatTemplates-Qt4sigma-samp4sigma',
            'LARConfigurationDSPThresholdFlatTemplates-Qt5sigma-samp5sigma',
            'LARConfigurationDSPThresholdFlatTemplates-Qt3sigmamuPileup-samp3sigmamuPileup',
            'LARConfigurationDSPThresholdFlatTemplates-Qt4sigmamuPileup-samp4sigmamuPileup',
@@ -13,7 +13,7 @@ tagList = [
 
 
 def LArDSPThresholdCfg(flags,tag="",ModeType="noise",RunSince=0,fill=True,
-                       Sampval=0, Qtval=0, Samppileup=False, Qtpileup=False):
+                       Sampval=0, Qtval=0, Samppileup=False, Qtpileup=False,scale=0.):
 
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     cfg=LArGMCfg(flags)
@@ -46,6 +46,7 @@ def LArDSPThresholdCfg(flags,tag="",ModeType="noise",RunSince=0,fill=True,
     theLArDSPThresholdFillAlg.MaskBadChannels=True
     theLArDSPThresholdFillAlg.ProblemsToMask=[ "highNoiseHG","highNoiseMG","highNoiseLG" ]
     theLArDSPThresholdFillAlg.NameOfSet=setName
+    theLArDSPThresholdFillAlg.ScaleIW=scale
 
     if ModeType=="fixed":
        theLArDSPThresholdFillAlg.tQThreshold=Qtval
@@ -113,6 +114,7 @@ if __name__ == "__main__":
     parser.add_argument('--sqlite', dest='sql', default="", help='Sqlite file with noise folder')
     parser.add_argument('-a','--localnoise', dest='localnoise', default=False, action="store_true", help='read the noise from local sqlite')
     parser.add_argument('-l','--localpileup', dest='localpileup', default=False, action="store_true", help='read the pileup from local sqlite')
+    parser.add_argument('--scaleIW', dest='scaleIW', default=0., help='scale ther IW')
 
     args = parser.parse_args()
     if help in args and args.help is not None and args.help:
@@ -189,7 +191,7 @@ if __name__ == "__main__":
     flags.Detector.EnableMuon=False
     flags.Detector.EnableForward=False
 
-    flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2024-03'
+    flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2026-01'
 
     flags.Debug.DumpDetStore=True
     flags.Debug.DumpEvtStore=True
@@ -212,7 +214,7 @@ if __name__ == "__main__":
     cfg=MainServicesCfg(flags)
 
     cfg.merge(LArDSPThresholdCfg(flags,tag=tagstr,ModeType="noise",RunSince=0,fill=True,
-                Sampval=SampVal, Qtval=QtVal, Samppileup=SampPileup, Qtpileup=QtPileup))
+                Sampval=SampVal, Qtval=QtVal, Samppileup=SampPileup, Qtpileup=QtPileup,scale=float(args.scaleIW)))
 
     from IOVDbSvc.IOVDbSvcConfig import addOverride        
     if args.pileuptag!="":

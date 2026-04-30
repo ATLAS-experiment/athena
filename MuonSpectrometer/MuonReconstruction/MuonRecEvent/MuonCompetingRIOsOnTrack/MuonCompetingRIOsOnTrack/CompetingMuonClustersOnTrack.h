@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -59,14 +59,14 @@ public:
   friend class CompetingMuonClustersOnTrackTool;
 
   /** Default Constructor for POOL */
-  CompetingMuonClustersOnTrack();
+  CompetingMuonClustersOnTrack() = default;
   /** Copy Constructor */
   CompetingMuonClustersOnTrack(const CompetingMuonClustersOnTrack& compROT);
+  /** Move constructor */
+  CompetingMuonClustersOnTrack(CompetingMuonClustersOnTrack&& compROT) = default;
   /** Assignment operator */
-  CompetingMuonClustersOnTrack& operator=(
-    const CompetingMuonClustersOnTrack& compROT);
-  CompetingMuonClustersOnTrack& operator=(
-    CompetingMuonClustersOnTrack&& compROT) noexcept;
+  CompetingMuonClustersOnTrack& operator=(const CompetingMuonClustersOnTrack& compROT) noexcept;
+  CompetingMuonClustersOnTrack& operator=(CompetingMuonClustersOnTrack&& compROT) noexcept = default;
 
   /** Constructor with all parameters: PLEASE do not use directly,
   but call Muon::CompetingMuonClustersOnTrackTool, otherwise inconsistency of
@@ -78,7 +78,7 @@ public:
   child ROTs
   */
   CompetingMuonClustersOnTrack(
-    std::vector<const MuonClusterOnTrack*>&& childrots,
+    std::vector<std::unique_ptr<const MuonClusterOnTrack>>&& childrots,
     std::vector<AssignmentProb>&& assgnProb);
 
   /** constructor taking the local parameters + error matrix + associated
@@ -97,11 +97,11 @@ public:
     Trk::LocalParameters&& locPars,
     Amg::MatrixX&& error,
     const Trk::Surface* assSurf,
-    std::vector<const MuonClusterOnTrack*>&& childrots,
+    std::vector<std::unique_ptr<const MuonClusterOnTrack>>&& childrots,
     std::vector<AssignmentProb>&& assgnProb);
 
   /** Destructor */
-  virtual ~CompetingMuonClustersOnTrack();
+  virtual ~CompetingMuonClustersOnTrack() = default;
 
   /** needed to avoid excessive RTTI*/
   CompetingMuonClustersOnTrack* clone() const;
@@ -120,7 +120,7 @@ public:
 
   /** returns the vector of SCT_ClusterOnTrack objects .
   - specific for this CompetingMuonClustersOnTrack: MuonClusterOnTrack */
-  const std::vector<const MuonClusterOnTrack*>& containedROTs() const;
+  const std::vector<std::unique_ptr<const MuonClusterOnTrack>>& containedROTs() const;
 
   /** returns the RIO_OnTrack (also known as ROT) objects depending on the
    * integer*/
@@ -134,14 +134,11 @@ public:
   std::ostream& dump(std::ostream& out) const;
 
 private:
-  /** private method to clear the Trk::RIO_OnTrack vector */
-  void clearChildRotVector();
-
   /** The global Position */
-  CxxUtils::CachedUniquePtr<const Amg::Vector3D> m_globalPosition;
+  CxxUtils::CachedUniquePtr<const Amg::Vector3D> m_globalPosition{};
 
   /** The vector of contained Muon::MuonClusterOnTrack objects */
-  std::vector<const MuonClusterOnTrack*> m_containedChildRots;
+  std::vector<std::unique_ptr<const MuonClusterOnTrack>> m_containedChildRots{};
 
   /** Have all the contained ROTs a common associated surface?
   If withNonVanishingAssignProb==true just the ROTs with non-vanishing
@@ -164,8 +161,7 @@ CompetingMuonClustersOnTrack::associatedSurface() const
   if (m_associatedSurface) {
     return *m_associatedSurface;
   }
-  return (
-    (*(std::as_const(m_containedChildRots).begin()))->associatedSurface());
+  return m_containedChildRots.front()->associatedSurface();
 }
 
 inline const Trk::Surface*
@@ -180,16 +176,15 @@ CompetingMuonClustersOnTrack::numberOfContainedROTs() const
   return m_containedChildRots.size();
 }
 
-inline const std::vector<const MuonClusterOnTrack*>&
-CompetingMuonClustersOnTrack::containedROTs() const
-{
+inline const std::vector<std::unique_ptr<const MuonClusterOnTrack>>&
+CompetingMuonClustersOnTrack::containedROTs() const{
   return m_containedChildRots;
 }
 
 inline const MuonClusterOnTrack&
 CompetingMuonClustersOnTrack::rioOnTrack(unsigned int indx) const
 {
-  return *std::as_const(m_containedChildRots)[indx];
+  return *m_containedChildRots.at(indx).get();
 }
 
 inline const Amg::Vector3D&

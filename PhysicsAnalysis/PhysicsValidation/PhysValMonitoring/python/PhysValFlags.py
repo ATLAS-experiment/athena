@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 def createPhysValConfigFlags():
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
@@ -23,8 +23,10 @@ def createPhysValConfigFlags():
     icf.addFlag("PhysVal.doLLPSecVtx", False)
     icf.addFlag("PhysVal.doLLPSecVtxLeptons", False)
 
-    icf.addFlag("PhysVal.GRLs", ['GRL2015', 'GRL2016', 'GRL2017_Triggerno17e33prim', 'GRL2018_Triggerno17e33prim',
-                'GRL2022', 'GRL2023', 'GRL2024'], help='List of GRL names to be used by PhysVal.')
+    icf.addFlag("PhysVal.GRLs", [
+        'GRL2015', 'GRL2016', 'GRL2017_Triggerno17e33prim', 'GRL2018_Triggerno17e33prim',
+        'GRL2022', 'GRL2023', 'GRL2024', 'GRL2025'],
+                help='List of GRL names to be used by PhysVal.')
     icf.addFlag("PhysVal.applyAllDataCleaning", False,
                 help='Apply all data cleaning cuts, (applyGRL, applyEventStatusSelection, and Photon OQ).')
     icf.addFlag("PhysVal.applyGRL", False,

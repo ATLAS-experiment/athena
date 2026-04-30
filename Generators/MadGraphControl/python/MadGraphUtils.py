@@ -38,8 +38,8 @@ MADGRAPH_COMMAND_STACK = []
 import shutil
 
 
-from MadGraphControl.MadGraphUtilsHelpers import checkSettingExists,checkSetting,checkSettingIsTrue,get_runArgs_info,error_check,setup_path_protection,get_mg5_version
-from MadGraphControl.MadGraphSystematicsUtils import setup_pdf_and_systematic_weights
+from MadGraphControl.MadGraphUtilsHelpers import error_check,get_mg5_version
+from MadGraphControl.MadGraphSystematicsUtils import systematics_run_card_options,get_pdf_and_systematic_settings
 from MadGraphControl.MadGraphParamHelpers import check_PMG_updates
 
 def stack_subprocess(command,**kwargs):
@@ -103,7 +103,7 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
 
     
     # Just in case
-    setup_path_protection()
+    my_MGC_instance.setup_path_protection()
     
     # Set consistent mode and number of jobs
     mode = 0
@@ -353,7 +353,7 @@ def generate_from_gridpack(runArgs=None, extlhapath=None, gridpack_compile=None,
     beamEnergy,random_seed = get_runArgs_info(runArgs)
 
     # Just in case
-    setup_path_protection()
+    my_MGC_instance.setup_path_protection()
 
     isNLO = my_MGC_instance.isNLO 
 
@@ -415,13 +415,12 @@ def generate_from_gridpack(runArgs=None, extlhapath=None, gridpack_compile=None,
 
     if isNLO:
         #turn off systematics for gridpack generation and store settings for standalone run
-        run_card_dict= my_MGC_instance.runCardDict 
         systematics_settings=None
-        if checkSetting('systematics_program','systematics',run_card_dict):
-            if not checkSettingIsTrue('store_rwgt_info',run_card_dict):
+        if my_MGC_instance.runCardDict.get('systematics_program',None) == 'systematics':
+            if not my_MGC_instance.runCardDict.get('store_rwgt_info',None):
                 raise RuntimeError('Trying to run NLO systematics but reweight info not stored')
-            if checkSettingExists('systematics_arguments',run_card_dict):
-                systematics_settings=MadGraphControl.MadGraphSystematicsUtils.parse_systematics_arguments(run_card_dict['systematics_arguments'])
+            if 'systematics_arguments' in my_MGC_instance.runCardDict:
+                systematics_settings=MadGraphControl.MadGraphSystematicsUtils.parse_systematics_arguments(my_MGC_instance.runCardDict['systematics_arguments'])
             else:
                 systematics_settings={}
             mglog.info('Turning off systematics for now, running standalone later')
@@ -583,6 +582,16 @@ def setupFastjet(process_dir=None):
 
     return
 
+def get_runArgs_info(runArgs):
+    """This is a temporary function that returns the beam energy and random seed from runArgs, 
+    as more functions move to the MGControl class this will not be necessary
+    """
+    global my_MGC_instance # noqa: F824
+    #check if the function has already been called
+    if my_MGC_instance.beamEnergy == 0: #if beamEnergy is 0, it hasn't been set yet so we will call the class function.
+        my_MGC_instance.get_runArgs_info(runArgs)
+    #return the beam energy and the random seeed
+    return my_MGC_instance.beamEnergy, my_MGC_instance.random_seed
 
 
 def setupLHAPDF(process_dir=None, extlhapath=None, allow_links=True):
@@ -1188,14 +1197,35 @@ def arrange_output(process_dir=MADGRAPH_GRIDPACK_LOCATION,lhe_version=None,saveP
         outputDS = runArgs.outputTXTFile
     else:
         outputDS = 'tmp_LHE_events.tar.gz'
+        if hasattr(runArgs, "avoidExtracting") and runArgs.avoidExtracting:
+            outputDS = 'tmp_LHE_events.gz'
 
-    mglog.info('Moving file over to '+outputDS.split('.tar.gz')[0]+'.events')
+    outputStem = outputDS
+    if '.tar.gz' in outputDS:
+        outputStem = outputDS.split('.tar.gz')[0]
+    elif '.tgz' in outputDS:
+        outputStem = outputDS.split('.tgz')[0]
+    elif '.gz' in outputDS:
+        outputStem = outputDS.split('.gz')[0]
+    else:
+        mglog.warning(f'Could not figure out what output file type {outputDS} refers to')
+        outputStem = outputDS.split('.')[0]
+    outputStem += '.events'
 
-    shutil.move(os.getcwd()+'/events.lhe',outputDS.split('.tar.gz')[0]+'.events')
+    mglog.info('Moving file over to '+outputStem)
+    shutil.move(os.getcwd()+'/events.lhe',outputStem)
 
-    mglog.info('Re-zipping into dataset name '+outputDS)
-    rezip = stack_subprocess(['tar','cvzf',outputDS,outputDS.split('.tar.gz')[0]+'.events'])
-    rezip.wait()
+    if '.tar.gz' in outputDS or '.tgz' in outputDS:
+        mglog.info('Re-zipping + tarring into dataset name '+outputDS)
+        rezip = stack_subprocess(['tar','cvzf',outputDS,outputStem])
+        rezip.wait()
+    elif '.gz' in outputDS:
+        mglog.info('Re-zipping into dataset name '+outputDS)
+        rezip = stack_subprocess(['gzip',outputStem])
+        rezip.wait()
+        shutil.move(outputStem+'.gz',outputDS)
+    else:
+        mglog.info(f'Could not understand output type for {outputDS} - will leave uncompressed')
 
     if not saveProcDir:
         mglog.info('Removing the process directory')
@@ -1755,3 +1785,51 @@ def fix_fks_makefile(process_dir):
             fout.write(line)
     fin.close()
     fout.close()
+
+#==================================================================================
+# this function is called during build_run card to check the consistency of user-provided arguments with the inlude
+# and throw errors, warnings, or corrects the input as is appropriate
+def setup_pdf_and_systematic_weights(the_base_fragment,extras,isNLO):
+    ### options in run cards that affect PDF and systematics weights behavior
+    global my_MGC_instance # noqa: F824
+    
+    ### set all relevant keys to lowercase and clean them up
+    list = []
+    tmp_dict = {}
+    for k in extras:
+        k_clean=k.lower().replace("'",'').replace('"','')
+        if k_clean!=k and k_clean in systematics_run_card_options(isNLO):
+            list.append(k)
+            tmp_dict[k_clean] = extras[k]
+    # Removing systematics with incorrect formatting 
+    for o in list:
+        if o in extras:
+            extras.pop(o,None)
+    # Adding cleaned up systematics into dictionary
+    extras.update(tmp_dict)
+    ### Check compatibility of user setting and base fragment inclusion
+    if my_MGC_instance.base_fragment_setup_check(the_base_fragment,extras,isNLO):
+        return
+    # if something is set that contradicts the base fragment: bad!
+    for o in systematics_run_card_options(isNLO):
+        if o in extras:
+            mglog.warning('You tried to set "'+str(o)+'" by hand, but you should trust the base fragment with the following options: '+', '.join(systematics_run_card_options(isNLO)))
+            mglog.info('We will update "'+str(o))
+
+    new_settings=get_pdf_and_systematic_settings(the_base_fragment,isNLO)
+    ### backup extras (user set parameters for run_card)
+    user_set_extras=dict(extras)
+    for s in new_settings:
+        if s is not None:
+            extras[s]=new_settings[s]
+
+    ### Make sure everything has been set
+    mglog.info('PDF and scale settings were set as follows:')
+    for p in systematics_run_card_options(isNLO):
+        user_set='not set'
+        if p in user_set_extras:
+            user_set=str(user_set_extras[p])
+        new_value='not set'
+        if p in extras:
+            new_value=str(extras[p])   
+        mglog.info('MadGraphUtils set '+str(p)+' to "'+new_value+'", was set to "'+user_set+'"')

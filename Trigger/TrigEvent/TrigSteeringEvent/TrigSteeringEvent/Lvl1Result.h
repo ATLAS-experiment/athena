@@ -1,9 +1,7 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#pragma once
-// -*- C++ -*-
 /**********************************************************************************
  * @Project: HLT
  * @Package: TrigSteeringEvent
@@ -14,17 +12,17 @@
  * @author Nicolas Berger  <Nicolas.Berger@cern.ch>  - CERN
  * @author Till Eifert     <Till.Eifert@cern.ch>     - U. of Geneva, Switzerland
  * @author Ricardo Goncalo <Jose.Goncalo@cern.ch>    - Royal Holloway, U. of London
- *
- * File and Version Information:
- * $Id: Lvl1Result.h,v 1.8 2008-05-15 19:17:06 eifert Exp $
  **********************************************************************************/
 
-#ifndef TRIGSTEERINGEVENT_Lvl1Result_H
-#define TRIGSTEERINGEVENT_Lvl1Result_H
+#ifndef TRIGSTEERINGEVENT_LVL1RESULT_H
+#define TRIGSTEERINGEVENT_LVL1RESULT_H
 
-#include <stdint.h>
 #include "xAODCore/CLASS_DEF.h"
 #include "TrigSteeringEvent/Lvl1Item.h"
+
+#include <stdint.h>
+#include <vector>
+
 
 namespace LVL1CTP {
 

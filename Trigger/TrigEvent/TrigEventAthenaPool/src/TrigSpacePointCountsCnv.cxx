@@ -25,7 +25,7 @@ TrigSpacePointCounts_PERS* TrigSpacePointCountsCnv::createPersistent(TrigSpacePo
 }
 
 
-TrigSpacePointCounts* TrigSpacePointCountsCnv::createTransient() {
+TrigSpacePointCounts* TrigSpacePointCountsCnv::createTransient(const Token* token) {
   MsgStream mlog(msgSvc(), "TrigSpacePointCountsConverter" );
 
   mlog << MSG::DEBUG << "TrigSpacePointCountsCnv::createTransient " << endmsg;
@@ -35,21 +35,21 @@ TrigSpacePointCounts* TrigSpacePointCountsCnv::createTransient() {
   static const pool::Guid p1_guid("8BF48F79-C6C2-4AA7-8180-16BC6C39280F");
   static const pool::Guid p0_guid("1BCAD9FD-DAFE-4E50-9A37-C75E822E6D02");
  
-  if(compareClassGuid(p3_guid)) {
-    std::unique_ptr<TrigSpacePointCounts_p3 > pers_ptr( poolReadObject< TrigSpacePointCounts_p3 >() );
+  if(compareClassGuid(token, p3_guid)) {
+    std::unique_ptr<TrigSpacePointCounts_p3 > pers_ptr( poolReadObject< TrigSpacePointCounts_p3 >(token) );
     return m_converter_p3.createTransient( pers_ptr.get(), mlog );
   } 
-  if(compareClassGuid(p2_guid)) {
-    std::unique_ptr<TrigSpacePointCounts_p2 > pers_ptr( poolReadObject< TrigSpacePointCounts_p2 >() );
+  if(compareClassGuid(token, p2_guid)) {
+    std::unique_ptr<TrigSpacePointCounts_p2 > pers_ptr( poolReadObject< TrigSpacePointCounts_p2 >(token) );
     return m_converter_p2.createTransient( pers_ptr.get(), mlog );
   } 
-  if(compareClassGuid(p1_guid)) {
-    std::unique_ptr<TrigSpacePointCounts_p1 > pers_ptr( poolReadObject< TrigSpacePointCounts_p1 >() );
+  if(compareClassGuid(token, p1_guid)) {
+    std::unique_ptr<TrigSpacePointCounts_p1 > pers_ptr( poolReadObject< TrigSpacePointCounts_p1 >(token) );
     return m_converter_p1.createTransient( pers_ptr.get(), mlog );
   }
-  else if( compareClassGuid(p0_guid) ) {
+  else if( compareClassGuid(token, p0_guid) ) {
     // old version from before TP separation, just return it
-    return this->poolReadObject<TrigSpacePointCounts>();
+    return this->poolReadObject<TrigSpacePointCounts>(token);
   }  
   else {
     throw std::runtime_error("Unsupported persistent version");

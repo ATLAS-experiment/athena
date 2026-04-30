@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //             Interface for gFEXCondAlgo - Tool to read the COOL DB for gFEX
@@ -90,23 +90,19 @@ StatusCode gFEXCondAlgo::execute(const EventContext& ctx) const {
                 nlohmann::json attrList = nlohmann::json::parse(s);
 
                 // Trying to update Noise cut values
+                bool allitemsPresent = true;
+                for(const auto & name:myStringsNoise ) {
+                    allitemsPresent = allitemsPresent && attrList.contains(name);
+                }
 
-                    bool allitemsPresent = true;
-                    for(const auto & name:myStringsNoise ) {
-                        allitemsPresent = allitemsPresent && attrList.contains(name);
-                    }
-
-                    if( allitemsPresent ) {
-                        writeDBTool->set_Aslopes(attrList["Aslopes"]);
-                        writeDBTool->set_Bslopes(attrList["Bslopes"]);
-                        writeDBTool->set_Cslopes(attrList["Cslopes"]);
-                        writeDBTool->set_AnoiseCuts(attrList["AnoiseCuts"]);
-                        writeDBTool->set_BnoiseCuts(attrList["BnoiseCuts"]);
-                        writeDBTool->set_CnoiseCuts(attrList["CnoiseCuts"]);                      
-                    }
-                    else {
-                        throw (int16_t) itr->first;
-                    }
+                if( allitemsPresent ) {
+                    writeDBTool->set_Aslopes(attrList["Aslopes"]);
+                    writeDBTool->set_Bslopes(attrList["Bslopes"]);
+                    writeDBTool->set_Cslopes(attrList["Cslopes"]);
+                    writeDBTool->set_AnoiseCuts(attrList["AnoiseCuts"]);
+                    writeDBTool->set_BnoiseCuts(attrList["BnoiseCuts"]);
+                    writeDBTool->set_CnoiseCuts(attrList["CnoiseCuts"]);
+                }
             }
         }
         else {

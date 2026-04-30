@@ -6,7 +6,10 @@ from AthenaCommon.SystemOfUnits import GeV
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
 from TriggerMenuMT.HLT.Tau.TauConfigurationTools import getChainIDConfigName
-from .TrigTauHypoMonitoring import getTrigTauPrecisionIDHypoToolMonitoring, getTrigTauPrecisionDiKaonHypoToolMonitoring
+from .TrigTauHypoMonitoring import (
+    getTrigTauPrecisionIDHypoToolMonitoring, getTrigTauPrecisionDiKaonHypoToolMonitoring,
+    getTrigTauCaloHitsIDHypoToolMonitoring
+)
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger('TrigHLTTauHypoTool')
@@ -58,10 +61,15 @@ class TauCuts:
                 id_wp = self._chain_part['selection'].removesuffix(self._id).lower()
 
                 # Check for a perf selection specifier
-                sfx = id_wp[-2:]
-                if sfx in ['np', 'pc', 'pi']: id_wp = id_wp[:-2]
-                if sfx in ['np', 'pi']: self._do_perfcore = False
-                if sfx in ['np', 'pc']: self._do_perfiso = False
+                if id_wp.endswith('noperf'):
+                    id_wp = id_wp.removesuffix('noperf')
+                    self._do_perfcore = self._do_perfiso = False
+                elif id_wp.endswith('perfcore'):
+                    id_wp = id_wp.removesuffix('perfcore')
+                    self._do_perfiso = False
+                elif id_wp.endswith('perfiso'):
+                    id_wp = id_wp.removesuffix('perfiso')
+                    self._do_perfcore = False
 
                 # Find the matching WP with the correct casing
                 def find_wp(wp: str, fail: bool = True) -> str:
@@ -137,15 +145,15 @@ def TrigTauPrecisionIDHypoToolFromDict(flags: AthConfigFlags, chainDict: dict[st
             if tau_id in ['MesonCuts']: continue
 
             # We can only have at most one alg. using the built-in TauJet RNN score variables
-            if useBuiltInTauJetRNNScore(tau_id, precision_seq_name):
+            if useBuiltInTauJetRNNScore(tau_id):
                 if used_builtin_rnnscore:
                     raise ValueError('Cannot have two TauID algorithms with scores stored in the built-in TauJet RNN score variables')
                 used_builtin_rnnscore = True
 
-            id_score_monitoring[tau_id] = getTauIDScoreVariables(tau_id, precision_seq_name)
+            id_score_monitoring[tau_id] = getTauIDScoreVariables(tau_id)
                 
     else:
-        if useBuiltInTauJetRNNScore(identification, precision_seq_name):
+        if useBuiltInTauJetRNNScore(identification):
             # To support the legacy tracktwoMVA/LLP/LRT chains, only in those cases we store the
             # ID score and passed WPs in the native TauJet variables
             currentHypo.IDMethod = 1 # TauJet built-in RNN score
@@ -154,7 +162,7 @@ def TrigTauPrecisionIDHypoToolFromDict(flags: AthConfigFlags, chainDict: dict[st
             currentHypo.IDMethod = 2 # Use decorators
 
         # Monitor this algorithm only
-        id_score_monitoring[identification] = getTauIDScoreVariables(identification, precision_seq_name)
+        id_score_monitoring[identification] = getTauIDScoreVariables(identification)
 
     # For any triggers following the tracktwoMVA reconstruction (2023+ DeepSet and GNTau)
     if chainPart['reconstruction'] == 'tracktwoMVA':
@@ -246,6 +254,69 @@ def TrigTauTrackingHypoToolFromDict(flags: AthConfigFlags, chainDict: dict[str, 
 
     from AthenaConfiguration.ComponentFactory import CompFactory
     currentHypo = CompFactory.TrigTauTrackingHypoTool(name)
+
+    return currentHypo
+
+
+
+#============================================================================================
+# CaloHits step hypothesis tool
+#============================================================================================
+def TrigTauCaloHitsHypoToolFromDict(flags: AthConfigFlags, chainDict: dict[str, Any]):
+    name = chainDict['chainName']
+    chain_part = chainDict['chainParts'][0]
+
+    # Setup the Hypothesis tool
+    from AthenaConfiguration.ComponentFactory import CompFactory
+    currentHypo = CompFactory.TrigTauPrecisionIDHypoTool(
+        name,
+        HighPtSelectionIDThr=200*GeV,
+        HighPtSelectionJetThr=430*GeV,
+    )
+
+    id_score_monitoring = {}
+
+    from TriggerMenuMT.HLT.Tau.TauConfigurationTools import getChainCaloHitsPreselConfigName, getTauIDScoreVariables
+    id = getChainCaloHitsPreselConfigName(flags, chain_part)
+    if id == 'idperf':
+        currentHypo.AcceptAll = True
+
+        # Monitor all the included algorithms
+        from TriggerMenuMT.HLT.Tau.TauConfigurationTools import getChainPrecisionSeqName, getCaloHitsPreselAlgs
+        algs = getCaloHitsPreselAlgs(flags, getChainPrecisionSeqName(chain_part, True), getChainPrecisionSeqName(chain_part))
+        if algs:
+            for tau_id in algs:
+                id_score_monitoring[tau_id] = getTauIDScoreVariables(tau_id)
+
+    else:
+        currentHypo.IDMethod = 2 # Use decorators
+
+        id_wp = chain_part['calohitsPresel'].removesuffix(id).lower()
+
+        # Find the matching WP with the correct casing
+        def find_wp(wp: str, fail: bool = True) -> str:
+            for twp in getattr(flags.Trigger.Offline.Tau, id).TargetWPs.keys():
+                if twp.lower() == wp: return twp
+            else:
+                if fail: ValueError(f'Cannot find the "{id}" WP "{wp}"')
+                else: return ''
+
+        # Standard preselection WP
+        currentHypo.IDWP = find_wp(id_wp)
+                
+        # High-pT ID WP
+        if id_wp.startswith('medium'): currentHypo.HighPtIDWP = find_wp(f'loose{id_wp[6:]}', True)
+        elif id_wp.startswith('tight'): currentHypo.HighPtIDWP = find_wp(f'loose{id_wp[5:]}', True)
+
+        # Monitor this algorithm only
+        id_score_monitoring[id] = getTauIDScoreVariables(id)
+
+    # Only monitor chains with the 'tauMon:online' groups
+    if 'tauMon:online' in chainDict['monGroups']:
+        currentHypo.MonTool = getTrigTauCaloHitsIDHypoToolMonitoring(flags, name, id_score_monitoring.keys())
+
+    # TauID Score monitoring
+    currentHypo.MonitoredIDScores = id_score_monitoring
 
     return currentHypo
 

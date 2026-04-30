@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARBYTESTREAM_LARRODBLOCKPHYSICSV5_H
@@ -19,14 +19,8 @@
 #include "CaloIdentifier/CaloGain.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "LArIdentifier/LArOnlineID.h"
+class IMessageSvc;
 
-//#define LARBSDBGOUTPUT
-#ifdef LARBSDBGOUTPUT
-#define MYLEVEL (MSG::FATAL)
-#define LARBSDBG(text) logstr<<MYLEVEL<<text<<endmsg
-#else
-#define LARBSDBG(text)
-#endif
 
 class LArRodBlockPhysicsV5 : public LArRodBlockStructure
 {
@@ -56,10 +50,10 @@ public:
     endtag          //This tag needs to be an odd number, see *) for constructor
   };
   // constructor
-  LArRodBlockPhysicsV5();
+  LArRodBlockPhysicsV5(IMessageSvc* msgSvc);
  
   // ------ Identify RodBlockStructure -------
-  std::string BlockType() { return std::string("RodBlockPhysicsV5");}
+  static std::string BlockType() { return std::string("RodBlockPhysicsV5");}
  public:
   // ----------------- Decoding methods -----------------
   // Never to be used while encoding!
@@ -80,9 +74,6 @@ public:
   virtual uint16_t getCtrl2(uint32_t adc) const;
   virtual uint16_t getCtrl3(uint32_t adc) const;
   virtual uint32_t getStatus() const;
-
-  //virtual uint32_t onlineCheckSum() const;
-  //virtual uint32_t offlineCheckSum() const;
 
   virtual inline  uint32_t  hasCalibBlock()   const {return 0;} ; 
   virtual inline  uint32_t  hasPhysicsBlock() const {return getHeader16(ResultsOff1);} ;
@@ -157,8 +148,6 @@ private:
 
   //For fixed gain mode
   int m_fixedGain;
-  // If one needs to use a log output not only for MSG::DEBUG
-  //MsgStream *m_logstr;
   uint16_t m_numberHotCell = 0U;
   uint16_t m_numberHotCellOffTime; 
   // Needs one threshold to send time/quality another for samples
@@ -191,12 +180,8 @@ inline uint16_t LArRodBlockPhysicsV5::getFirstSampleIndex() const
 
 inline int LArRodBlockPhysicsV5::getNextEnergy(int& channelNumber,int32_t& energy,int32_t& time,int32_t& quality, uint32_t& gain)
 {
-  #ifdef LARBSDBGOUTPUT
-  MsgStream logstr(Athena::getMessageSvc(), BlockType());
-  #endif
-
-  LARBSDBG("in LArRodBlockPhysicsV5::getNextEnergy.");
-  LARBSDBG("m_channelsPerFEB=" << m_channelsPerFEB);
+  m_logstr << MSG::DEBUG << "in LArRodBlockPhysicsV5::getNextEnergy." << endmsg;
+  m_logstr << MSG::DEBUG << "m_channelsPerFEB=" << m_channelsPerFEB << endmsg;
   if (m_EnergyIndex>=m_channelsPerFEB)                       // Already beyond maximal number of channels
     return 0;
   if (!m_EnergyPointer)                                               // No data block present
@@ -204,48 +189,6 @@ inline int LArRodBlockPhysicsV5::getNextEnergy(int& channelNumber,int32_t& energ
  
   unsigned rodChannelNumber=m_EnergyIndex;      // Index of Channel in ROD-Block
   channelNumber=((rodChannelNumber&0xe)<<2) + ((rodChannelNumber&0x1)<<6) + (rodChannelNumber>>4);    //channel number of the FEB
-  //channelNumber=(rodChannelNumber>>4) + ((rodChannelNumber&0xf)<<3);    //channel number of the FEB
-
-//  if(channelNumber==0) {
-//    int size = getNumberOfWords();
-//    int off1 = getHeader16(ResultsOff1)-8;
-//    int dim1 = getHeader16(ResultsDim1);
-//    int off2 = getHeader16(ResultsOff2)-8;
-//    int dim2 = getHeader16(ResultsDim2);
-//    int off3 = getHeader16(RawDataBlkOff)-8;
-//    int dim3 = getHeader16(RawDataBlkDim);
-//    
-//    for(int i=0;i<size;i++) {
-//      if(i==0)
-//	std::cout << std::hex << i << " : NWTot       " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-//      else if(i==1)
-//	std::cout << std::hex << i << " : FEBid       " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-//      else if(i==2)
-//	std::cout << std::hex << i << " : FEBsn       " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-//      else if(i==3)
-//	std::cout << std::hex << i << " : Block1      " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-//      else if(i==4)
-//	std::cout << std::hex << i << " : Block2      " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-//      else if(i==5)
-//	std::cout << std::hex << i << " : Block3      " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-//      else if(i==6)
-//	std::cout << std::hex << i << " : Status      " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-//      else if(i==7)
-//	std::cout << std::hex << i << " : Gain/Sample " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-//      else if(i==8)
-//	std::cout << std::hex << i << " : 1st/FebConf " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-//      else if(i==9)
-//	std::cout << std::hex << i << " : InFPGA      " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-//      else if (i>=off1 && i<off1+dim1)
-//	std::cout << std::hex << i << " : results1    " << i-off1 << " " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-//      else if (i>=off2 && i<off2+dim2)
-//	std::cout << std::hex << i << " : results2    " << i-off2 << " " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-//      else if (i>=off3 && i<off3+dim3)
-//	std::cout << std::hex << i << " : raw data    " << i-off3 << " " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-//      else 
-//	std::cout << std::hex << i << " " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-//    }
-//  }
 
   // get information available for all cells
   // Energy on a 16 bit word and decode ranges
@@ -254,7 +197,7 @@ inline int LArRodBlockPhysicsV5::getNextEnergy(int& channelNumber,int32_t& energ
   uint16_t range;          // 2 bits range
   uint16_t  sign;
 
-  LARBSDBG("-------->>>> in LArRodBlockPhysicsV5::getNextEnergy : decode energy.....");
+  m_logstr << MSG::DEBUG <<  "-------->>>> in LArRodBlockPhysicsV5::getNextEnergy : decode energy....." << "\n";
   // decode energy
   if(m_EnergyIndex & 0x1) encodedEnergy = m_EnergyPointer[m_EnergyIndex-1]; // Big/Little Endien stuff
   else                    encodedEnergy = m_EnergyPointer[m_EnergyIndex+1]; // Big/Little Endien stuff
@@ -287,7 +230,7 @@ inline int LArRodBlockPhysicsV5::getNextEnergy(int& channelNumber,int32_t& energ
       quality = m_TimeQualityPointer[m_TimeQualityIndex++]; 
 
 #ifdef LARBSDBGOUTPUT
-      logstr << MYLEVEL <<"This cell has time and Quality information "<<endmsg;
+      m_logstr << MSG::DEBUG <<"This cell has time and Quality information "<<endmsg;
 #endif
     }
   else  // Data has no Time and Quality information
@@ -298,9 +241,9 @@ inline int LArRodBlockPhysicsV5::getNextEnergy(int& channelNumber,int32_t& energ
 
 
 #ifdef LARBSDBGOUTPUT
-  logstr << MYLEVEL <<"Range = "<<range<<endmsg;
-  logstr << MYLEVEL <<"Sign = "<<sign<<endmsg;
-  logstr << MYLEVEL <<" Encoded Energy ="<< MSG::hex << encodedEnergy << MSG::dec << " E=" << energy
+  m_logstr << MSG::DEBUG <<"Range = "<<range<<endmsg;
+  m_logstr << MSG::DEBUG <<"Sign = "<<sign<<endmsg;
+  m_logstr << MSG::DEBUG <<" Encoded Energy ="<< MSG::hex << encodedEnergy << MSG::dec << " E=" << energy
 	 << " t=" << time 
 	 << " Q=" << quality 
 	 << " G=" << gain 
@@ -333,8 +276,8 @@ inline uint32_t  LArRodBlockPhysicsV5::getVROBFebId()
 {
   m_ROB_to_decode--;
   if ( m_ROB_to_decode>=0 ) {
-  	m_virtualROBPointerLocal = m_virtualROBPointer;
-  	m_virtualROBPointer+=m_virtualROBJump;
+    m_virtualROBPointerLocal = m_virtualROBPointer;
+    m_virtualROBPointer+=m_virtualROBJump;
   } else m_virtualROBPointerLocal=0;
   if(m_virtualROBPointerLocal) return (m_virtualROBPointerLocal[0]);
   return 0;
@@ -363,47 +306,40 @@ inline int32_t  LArRodBlockPhysicsV5::getVROBEz() const
 
 inline int LArRodBlockPhysicsV5::FebToRodChannel(int ch) const
 {
-return ( (ch&0x7) << 4) | ( (ch&0x38) >>2 ) | ((ch&0x40)>>6);
-
+  return ( (ch&0x7) << 4) | ( (ch&0x38) >>2 ) | ((ch&0x40)>>6);
 }
 
 inline void LArRodBlockPhysicsV5::setE(unsigned index, double E){ 
 
-        union {
-          int32_t i;
-          uint16_t us[2];
-        } conv;
-        conv.i = static_cast<int32_t>(E);
-        // Write as multiplication, not as left shift, since left-shifting
-        // a negative number is undefined in C++.
-        // Compiles to the same code on x86_64.
-        conv.i *= (1<<9);
-        if ( m_TimeQualityBlock.size()>=6 ){
-                m_TimeQualityBlock[index]=conv.us[0];
-                m_TimeQualityBlock[index+1]=conv.us[1];
-        }
+  union {
+    int32_t i;
+    uint16_t us[2];
+  } conv;
+  conv.i = static_cast<int32_t>(E);
+  // Write as multiplication, not as left shift, since left-shifting
+  // a negative number is undefined in C++.
+  // Compiles to the same code on x86_64.
+  conv.i *= (1<<9);
+  if ( m_TimeQualityBlock.size()>=6 ){
+    m_TimeQualityBlock[index]=conv.us[0];
+    m_TimeQualityBlock[index+1]=conv.us[1];
+  }
 }
 
 
 inline void LArRodBlockPhysicsV5::setEx(double Ex){ 
-        setE (0, Ex);
+  setE (0, Ex);
 }
 
 
 inline void LArRodBlockPhysicsV5::setEy(double Ey){
-        setE (2, Ey);
+  setE (2, Ey);
 }
 
 
 inline void LArRodBlockPhysicsV5::setEz(double Ez){
-        setE (4, Ez);
+  setE (4, Ez);
 }
 
-
-
-#ifdef LARBSDBGOUTPUT
-#undef LARBSDBGOUTPUT
-#endif
-#undef LARBSDBG
 
 #endif

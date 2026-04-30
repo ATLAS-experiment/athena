@@ -17,7 +17,7 @@ NumJetVarTool::NumJetVarTool(const std::string & type, const std::string & name 
 
 StatusCode NumJetVarTool::initialize() {
 
-  ATH_MSG_INFO("Counting number of jets with PtCut: "<<m_ptCut<<", EtCut: "<<m_etCut<<", EtaMin: "<<m_etaMin<<", EtaMax: "<<m_etaMax);
+  ATH_MSG_DEBUG("Counting number of jets with PtCut: "<<m_ptCut<<", EtCut: "<<m_etCut<<", EtaMin: "<<m_etaMin<<", EtaMax: "<<m_etaMax);
 
   return StatusCode::SUCCESS;
 

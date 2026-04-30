@@ -8,12 +8,13 @@ NSW_PadTriggerDataContainer::NSW_PadTriggerDataContainer()
 NSW_PadTriggerDataContainer::NSW_PadTriggerDataContainer(unsigned int hashMax)
     : IdentifiableContainer<NSW_PadTriggerData>(hashMax) { }
 
-const CLID& NSW_PadTriggerDataContainer::classID() {
+CLID NSW_PadTriggerDataContainer::classID() {
     return ClassID_traits<NSW_PadTriggerDataContainer>::ID();
 }
 
 const CLID& NSW_PadTriggerDataContainer::clID() const {
-    return classID();
+  static const CLID cid = classID();
+  return cid;
 }
 
 std::string NSW_PadTriggerDataContainer::string() const {

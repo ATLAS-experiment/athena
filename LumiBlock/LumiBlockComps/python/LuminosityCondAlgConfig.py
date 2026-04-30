@@ -60,13 +60,16 @@ def luminosityCondAlgMCCfg (flags, name, result):
         from DigitizationConfig.DigitizationParametersConfig import readDigitizationParameters
         result.merge(readDigitizationParameters(flags))
         digitizationFolderKey = '/Digitization/Parameters'
+        bsMetadataKey = ''
     else:
         # For ByteStream input, don't use conditions folder - will read from BS metadata
         digitizationFolderKey = ''
+        bsMetadataKey = 'MetaDataStore+ByteStreamMetadata'
 
     return { 'LuminosityFolderInputKey' : '',
              'DigitizationFolderInputKey' : digitizationFolderKey,
              'OnlineLumiCalibrationInputKey' : '',
+             'ByteStreamMetadataKey': bsMetadataKey,
              'BunchLumisInputKey' : '',
              'BunchGroupInputKey' : '',
              'FillParamsInputKey' : '',

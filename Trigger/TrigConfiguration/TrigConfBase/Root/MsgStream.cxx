@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -30,9 +30,8 @@ namespace {
 
   /// Helper to get MessageSvc if running in athena environment
   static IMessageSvc* getMessageSvc() {
-    static IMessageSvc* const msgsvc =
-      Athena::getMessageSvc!=nullptr ? Athena::getMessageSvc(/*quiet=*/true) : nullptr;
-    return msgsvc;
+    //coverity[BAD_COMPARE]
+    return Athena::getMessageSvc ? Athena::getMessageSvc(/*quiet=*/true) : nullptr;
   }
 
   static const char* const levelNames[MSGTC::NUM_LEVELS] =
@@ -45,7 +44,8 @@ MsgStreamTC::MsgStreamTC(const std::string& name) :
       m_name(name)
 {
   // Initialize our own OutputLevel to the global one from the MessageSvc
-  m_level = (Athena::outputLevel!=nullptr) ? MSGTC::Level(Athena::outputLevel(getMessageSvc(), m_name)) : MSGTC::INFO;
+  //coverity[BAD_COMPARE]
+  m_level = Athena::outputLevel ? MSGTC::Level(Athena::outputLevel(getMessageSvc(), m_name)) : MSGTC::INFO;
 }
 
 // Set message level of stream

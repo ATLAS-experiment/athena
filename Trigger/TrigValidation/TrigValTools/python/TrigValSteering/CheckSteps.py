@@ -624,7 +624,7 @@ class MessageCountStep(Step):
     def __init__(self, name='MessageCount'):
         super(MessageCountStep, self).__init__(name)
         self.executable = 'messageCounter.py'
-        self.log_regex = r'(athena\.(?!.*tail).*log$|athenaHLT:.*\.out$|^log\.(.*to.*|Derivation))'
+        self.log_regex = r'(athena\.(?!.*tail).*log$|athenaHLT:.*\.out$|athenaEF\..*\.log$|^log\.(.*to.*|Derivation))'
         self.skip_logs = []
         self.start_pattern = r'(HltEventLoopMgr|AthenaHiveEventLoopMgr).*INFO Starting loop on events'
         self.end_pattern = r'(HltEventLoopMgr.*INFO All events processed|AthenaHiveEventLoopMgr.*INFO.*Loop Finished)'
@@ -770,8 +770,8 @@ def default_check_steps(test, checkfile_input='AOD.pool.root,ESD.pool.root,RDO_T
         log_to_check = reco_tf_logmerge.merged_name
         check_steps.append(reco_tf_logmerge)
 
-    # Histogram merging for athenaHLT forks
-    num_athenaHLT_steps = sum([1 for step in test.exec_steps if step.type == 'athenaHLT'])
+    # Histogram merging for athenaHLT/athenaEF forks
+    num_athenaHLT_steps = sum([1 for step in test.exec_steps if step.type in ('athenaHLT', 'athenaEF')])
     if num_athenaHLT_steps > 0:
         histmerge = RootMergeStep('HistMerge')
         histmerge.merged_file = 'expert-monitoring.root'

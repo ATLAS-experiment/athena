@@ -60,6 +60,8 @@ class RadialStripDesign: public StripDesign {
         double stripLength(int stripNumb) const override;
         /// Returns the pitch of the radial strip evaluated at the strip center
         double stripPitch(int stripNumb) const;
+        /// Returns the pitch of the radial strip evaluated at the local position
+        double stripPitch(int stripNumb, const Amg::Vector2D& extPos) const;
     private:
         CheckVector2D leftInterSect(int stripNum, bool uncapped = false) const override final;
         CheckVector2D rightInterSect(int stripNum, bool uncapped = false) const override final;

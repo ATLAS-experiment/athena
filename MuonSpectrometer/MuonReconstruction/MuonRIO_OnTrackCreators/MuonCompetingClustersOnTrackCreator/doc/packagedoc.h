@@ -4,14 +4,19 @@
 
 /**
 
-@page MuonCompetingClustersOnTrackCreator_page 
+@page MuonCompetingClustersOnTrackCreator_page
 
-@section MuonCompetingClustersOnTrackCreator_MuonCompetingClustersOnTrackCreatorDocIntro Overview
+@section
+MuonCompetingClustersOnTrackCreator_MuonCompetingClustersOnTrackCreatorDocIntro
+Overview
 
-The package contains several tool to create MuonCompetingClustersOnTrack objects.
+The package contains several tool to create MuonCompetingClustersOnTrack
+objects.
 
 
-@section MuonCompetingClustersOnTrackCreator_MuonCompetingClustersOnTrackCreatorDocMgr Package Managers
-The MuonCompetingClustersOnTrackCreator package is currently maintained by Niels van Eldik.
+@section
+MuonCompetingClustersOnTrackCreator_MuonCompetingClustersOnTrackCreatorDocMgr
+Package Managers The MuonCompetingClustersOnTrackCreator package is currently
+maintained by Niels van Eldik.
 
 */

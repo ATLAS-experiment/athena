@@ -26,7 +26,7 @@ class SrCaloCalibrationHitContainerCnv
  protected:
   SrCaloCalibrationHitContainer_PERS* createPersistent(
       SrCaloCalibrationHitContainer* transCont);
-  SrCaloCalibrationHitContainer* createTransient();
+  SrCaloCalibrationHitContainer* createTransient(const Token* token);
 };
 
 #endif

@@ -28,7 +28,7 @@ public:
 protected:
    
    virtual TrigRNNOutputContainer_PERS *createPersistent( TrigRNNOutputContainer *transObj);
-   virtual TrigRNNOutputContainer      *createTransient();
+   virtual TrigRNNOutputContainer      *createTransient(const Token* token);
 
 private:
    TrigRNNOutputContainerCnv_tlp1   m_converter_tlp1;

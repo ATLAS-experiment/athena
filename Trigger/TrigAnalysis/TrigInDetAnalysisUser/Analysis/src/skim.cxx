@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    Mon 30 Jan 2012 18:43:21 CET 
  **
- **     Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 // cppcheck-suppress-file stlIfStrFind; cannot use C++20 starts_with in this standalone code
@@ -138,7 +138,6 @@ int main(int argc, char** argv) {
 	else { 
 	  std::cerr << "more than one file specified: " << arg << std::endl;
 	  return usage(-2);
-	  infile=std::move(arg);
 	}
       }
     }
@@ -282,9 +281,9 @@ int main(int argc, char** argv) {
 	if ( frac > 0 ) est = t/frac - t;
 	
 	double eventsps = 1000*i/t;
-
+  // (1000*(i+1)/entries)) is implicitly unsigned division; make this clear with a cast
 	std::printf( "\r%c    %6.2lf %%     time: %6.2lf s    remaining %6.2lf s   (%u at %5.2lf ps) ", 
-		     cck[ii%4], ((1000*(i+1)/entries)*0.1), t*0.001, est*0.001, i, eventsps );   
+		     cck[ii%4], (static_cast<unsigned>((1000*(i+1)/entries))*0.1), t*0.001, est*0.001, i, eventsps );   
 
 	std::fflush(stdout);
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArByteStream/LArRawDataContByteStreamTool.h"
@@ -117,7 +117,6 @@ LArRawDataContByteStreamTool::WriteLArDigits(const LArDigitContainer* digitCont,
    ATH_MSG_DEBUG ( "This instance of LArRodBlockStructure can't hold LArDigits!" );
    return StatusCode::FAILURE;
  }
- //prepareWriting();
  fea.setRodMinorVersion(m_RodBlockVersion);
  fea.setDetEvtType(m_DSPRunMode);
  ATH_MSG_DEBUG ( "Setting Detector Event Type to " << m_DSPRunMode 
@@ -189,8 +188,6 @@ LArRawDataContByteStreamTool::WriteLArDigits(const LArDigitContainer* digitCont,
    ((*it).second).fillROD(*theROD,msg(), **noise, m_nfebsigma ) ; 
  } 
  ATH_MSG_DEBUG ( "Filled " << mapEncoder.size() << " Rod Blocks" );
- // Finally, fill full event
- //fea.fill(re,log); 
  return StatusCode::SUCCESS;
 }
 
@@ -217,7 +214,6 @@ LArRawDataContByteStreamTool::WriteLArCalibDigits(const LArCalibDigitContainer* 
    ATH_MSG_DEBUG ( "This instance of LArRodBlockStructure can't hold LArCalibDigits!" );
    return StatusCode::FAILURE;
  }
- //prepareWriting(); 
  fea.setRodMinorVersion(m_RodBlockVersion);
  fea.setDetEvtType(m_DSPRunMode);
  ATH_MSG_DEBUG ( "Setting Detector Event Type to " << m_DSPRunMode 
@@ -327,25 +323,12 @@ LArRawDataContByteStreamTool::WriteLArRawChannels(const LArRawChannelContainer* 
                                                     **onOffMapping,
                                                     blstruct.get()).first->second; };
 
- //LArRodEncoder* Encoder = NULL;
- //uint32_t last_reid(0x0);
- //unsigned n=0; //For debug only
  ATH_MSG_DEBUG(" number of LArRawChannel container "<< channelCont->size() );
  for(; it!=it_e; ++it){
      const LArRawChannel& rawChan = *it; 
      HWIdentifier  chid = rawChan.channelID() ; 
      uint32_t reid      = hid2re.getRodID( **febRodMapping, chid ); 
 
-/*
-     if ( reid != last_reid ) {
-	last_reid = reid;
-	// The guy does not exist
-	// This will create it
-	getEncoder(reid).add(&rawChan);
-	// This will get its address
-	Encoder = &(mapEncoder[reid]);
-     } else Encoder->add(&rawChan) ; // Encoder already there
-*/
      getEncoder(reid).add (&rawChan);
    } 
    // I may want to also include the digits
@@ -430,36 +413,36 @@ LArRawDataContByteStreamTool::makeRodBlockStructure() const
 
   case 2:  //Transparent mode, DSP just copies FEB-data                                            
     ATH_MSG_DEBUG ( "Set Rod Block Type to LArRodBlockTransparent (#2)" );
-    return std::make_unique<LArRodBlockTransparentV0<LArRodBlockHeaderTransparentV0> >();
+    return std::make_unique<LArRodBlockTransparentV0<LArRodBlockHeaderTransparentV0> >(this->msgSvc().get());
     break;
 
   case 7: //Calibration mode
     ATH_MSG_DEBUG ( "Set Rod Block Type to LArRodBlockCalibration (#7)" );
-    return std::make_unique<LArRodBlockCalibrationV0<LArRodBlockHeaderCalibrationV0> >();
+    return std::make_unique<LArRodBlockCalibrationV0<LArRodBlockHeaderCalibrationV0> >(this->msgSvc().get());
     break;
 
   case 4: //Physics assembly mode
     if ( m_RodBlockVersion == 10 ){
       ATH_MSG_DEBUG ( "Set Rod Block Type to LArRodBlockPhysics (#5)" );
-      return std::make_unique<LArRodBlockPhysicsV5>();
+      return std::make_unique<LArRodBlockPhysicsV5>(this->msgSvc().get());
     }
     else if ( m_RodBlockVersion == 12 ){
       ATH_MSG_DEBUG ( "Set Rod Block Type to LArRodBlockPhysics (#6)" );
-      return std::make_unique<LArRodBlockPhysicsV6>();
+      return std::make_unique<LArRodBlockPhysicsV6>(this->msgSvc().get());
     }
     else {
       ATH_MSG_DEBUG ( "Set Rod Block Type to LArRodBlockPhysics (#4)" );
-      return std::make_unique<LArRodBlockPhysicsV0>();
+      return std::make_unique<LArRodBlockPhysicsV0>(this->msgSvc().get());
     }
     break;
 
   case 5: //Physics assembly mode
     ATH_MSG_DEBUG ( "Set Rod Block Type to LArRodBlockPhysics (#5)" );
-    return std::make_unique<LArRodBlockPhysicsV3>();
+    return std::make_unique<LArRodBlockPhysicsV3>(this->msgSvc().get());
 
   default:
     ATH_MSG_WARNING ( "DSP runmode " << m_DSPRunMode << " is unknown. Using physics assembly mode (#4) by default" );
-    return std::make_unique<LArRodBlockPhysicsV0>();
+    return std::make_unique<LArRodBlockPhysicsV0>(this->msgSvc().get());
   }
 }
 

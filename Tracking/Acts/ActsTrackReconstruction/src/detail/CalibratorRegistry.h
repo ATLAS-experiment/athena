@@ -27,6 +27,7 @@ struct CalibratorRegistry {
       std::pair<Measurement<DIM>,MeasurementCovariance<DIM> >
                 (const Acts::GeometryContext&,
                  const Acts::CalibrationContext&,
+                 const Acts::Surface &,
                  const measurement_t &,
                  const bound_track_parameters_t &)>;
 

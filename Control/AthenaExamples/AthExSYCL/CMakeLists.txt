@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Set the name of the package.
 atlas_subdir( AthExSYCL )
@@ -14,6 +14,7 @@ if( NOT CMAKE_SYCL_COMPILER )
 endif()
 
 # Enable SYCL as a language.
+list( APPEND CMAKE_MODULE_PATH "${vecmem_CMAKE_DIR}/sycl" )
 enable_language( SYCL )
 
 # Add a component library that has some SYCL code in it.

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IOVSVC_IOVSVC_H
@@ -16,34 +16,26 @@
  *
  *****************************************************************************/
 
+#include "IOVEntry.h"
+
 #include "AthenaBaseComps/AthService.h"
+#include "AthenaKernel/IIOVSvc.h"
+#include "AthenaKernel/IOVTime.h"
+#include "IOVSvc/IIOVSvcTool.h"
+
 #include "GaudiKernel/StatusCode.h"
 #include "GaudiKernel/ClassID.h"
-#include "GaudiKernel/MsgStream.h"
-#include "SGTools/DataProxy.h"
-#include "AthenaKernel/IIOVSvc.h"
-#include "IOVEntry.h"
-#include "SGTools/CallBackID.h"
-#include "AthenaKernel/IOVTime.h"
-#include "AthenaKernel/IOVSvcDefs.h"
-#include "IOVSvc/IIOVSvcTool.h"
-#include <set>
-#include <map>
-#include <list>
-#include <string>
-#include <mutex>
-
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ICondSvc.h"
 
+#include <map>
+#include <string>
+#include <mutex>
 
 
 class StoreGateSvc;
 class IClassIDSvc;
-class IProxyDict;
 class IToolSvc;
-class CallBackID;
-class CBTree;
 
 namespace SG {
   class TransientAddress;
@@ -55,34 +47,15 @@ class IOVSvc: public extends<AthService, IIOVSvc>
 public:
 
   IOVSvc( const std::string& name, ISvcLocator* svc );
-  virtual ~IOVSvc();
 
   virtual StatusCode initialize() override;
   virtual StatusCode reinitialize() override;
-  virtual StatusCode finalize() override;
 
   virtual StatusCode createIOVTool( const std::string& storeName ) override;
   virtual std::vector<std::string> getStoreNames() const override;
 
-  /// register callback functions
-  virtual
-  StatusCode regFcn(SG::DataProxy *dp, const CallBackID& c, 
-                    const IOVSvcCallBackFcn& fcn, bool trigger=false) override;
-
-  virtual
-  StatusCode regFcn(const CallBackID& c1,
-                    const CallBackID& c2, const IOVSvcCallBackFcn& fcn2, 
-                    bool trigger) override;
-
-  virtual
-  StatusCode regFcn(const std::string& toolName,
-                    const CallBackID& c2, const IOVSvcCallBackFcn& fcn2,
-                    bool trigger) override;
-
   /// Update Range from dB
-  virtual StatusCode setRange(const CLID& clid, const std::string& key, 
-                              IOVRange&) override;
-  virtual StatusCode setRange(const CLID& clid, const std::string& key, 
+  virtual StatusCode setRange(const CLID& clid, const std::string& key,
                               IOVRange& io,
                               const std::string& storeName) override;
 
@@ -139,12 +112,6 @@ public:
   virtual StatusCode preLoadDataTAD( const SG::TransientAddress *,
                                      const std::string& storeName ) override;
 
-  /// return list of tools (or functions) that have been triggered by key
-  /// will return FAILURE if no tools found, or no key found
-  virtual StatusCode getTriggeredTools(const std::string& key,
-                                       std::set<std::string>& tools,
-                                       const std::string& storeName) override;
-
   virtual void resetAllProxies() override;
 
   virtual void ignoreProxy(const CLID& clid, const std::string& key,
@@ -161,24 +128,23 @@ private:
                         bool createIF=true );
   IIOVSvcTool* getTool( const CLID& clid, const std::string& key) const;
   IIOVSvcTool* getTool( SG::DataProxy* proxy ) const;
-  IIOVSvcTool* getTool( const CallBackID& c1 ) const;
-  IIOVSvcTool* getTool( const IAlgTool* ia ) const;
   std::string fullProxyName( const SG::DataProxy* proxy ) const;
   std::string fullProxyName( const CLID& clid, const std::string& key ) const;
-  
 
-  typedef std::map< std::string, IIOVSvcTool* > toolMap;
-  toolMap m_toolMap;
-
-
-  BooleanProperty m_preLoadRanges, m_preLoadData, m_partialPreLoadData, m_preLoadExtensibleFolders;
-  BooleanProperty m_sortKeys, m_forceReset;
-  std::string m_updateInterval;
+  Gaudi::Property<bool> m_preLoadRanges{this, "preLoadRanges", false};
+  Gaudi::Property<bool> m_preLoadData{this, "preLoadData", false};
+  Gaudi::Property<bool> m_partialPreLoadData{this, "partialPreloadData", true};
+  Gaudi::Property<bool> m_preLoadExtensibleFolders{this, "preLoadExtensibleFolders", true};
+  Gaudi::Property<bool> m_sortKeys{this, "sortKeys", true};
+  Gaudi::Property<bool> m_forceReset{this, "forceResetAtBeginRun", false};
+  Gaudi::Property<std::string> m_updateInterval{this, "updateInterval", "Event"};
 
   ServiceHandle<IToolSvc> p_toolSvc;
   ServiceHandle<IClassIDSvc> p_CLIDSvc;
   ServiceHandle<StoreGateSvc> p_sgs, p_detStore;
   ServiceHandle<ICondSvc> p_condSvc;
+
+  std::map< std::string, IIOVSvcTool* > m_toolMap;
 
   // Recursive because createCondObj dereferences a DataProxy, which can
   // eventually recursively call back to IOVSvc.

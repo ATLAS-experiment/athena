@@ -1,5 +1,5 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-from SimulationConfig.SimEnums import CalibrationRun, CavernBackground, LArParameterization, SimulationFlavour
+from SimulationConfig.SimEnums import CalibrationRun, CavernBackground, InDetParameterization, LArParameterization, SimulationFlavour
 
 
 def getDetectorsFromRunArgs(flags, runArgs):
@@ -91,6 +91,9 @@ def enableFastCaloSim(flags):
     # Set simulator name as metadata
     flags.Sim.ISF.Simulator = SimulationFlavour.ATLFAST3MT
 
+def enableFatrasG4(flags):
+    # Set InDetParametrization to FatrasG4
+    flags.Sim.InDetParameterization = InDetParameterization.FatrasG4
 
 def useVerboseTracking(flags):
     # Use verbose G4 tracking

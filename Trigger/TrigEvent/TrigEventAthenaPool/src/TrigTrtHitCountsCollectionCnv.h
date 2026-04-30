@@ -29,7 +29,7 @@ public:
 protected:
    
    virtual TrigTrtHitCountsCollection_PERS *createPersistent( TrigTrtHitCountsCollection *transObj);
-   virtual TrigTrtHitCountsCollection      *createTransient();
+   virtual TrigTrtHitCountsCollection      *createTransient(const Token* token);
 
 private:
    TrigTrtHitCountsCollectionCnv_tlp1 m_converter_tlp1;

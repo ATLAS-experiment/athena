@@ -83,7 +83,6 @@ if __name__ == "__main__": # typically not needed in top level script
     flags.Trigger.enableL1CaloPhase1 = True
     flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2023-01'
 
-    import argparse
     parser = flags.getArgumentParser()
     parser.add_argument('--systemVersion', default='phaseI', help="legacy or phaseI (default: %(default)s)")
     parser.add_argument('--streamName', default='physics_Mistimed', help="stream name (default: %(default)s)")

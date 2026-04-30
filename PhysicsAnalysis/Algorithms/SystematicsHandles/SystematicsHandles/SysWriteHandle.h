@@ -27,7 +27,7 @@ namespace CP
   /// \brief a data handle for writing systematics varied input data
 
   template<typename T,typename Aux = void> class SysWriteHandle final
-    : public ISysHandleBase, public asg::AsgMessagingForward
+    : public ISysObjectHandleBase, public asg::AsgMessagingForward
   {
     //
     // public interface
@@ -109,6 +109,8 @@ namespace CP
     fillSystematics (const ISystematicsSvc& svc,
                      const CP::SystematicSet& fullAffecting,
                      const std::vector<CP::SystematicSet>& sysList) override;
+    virtual StatusCode
+    addDecorationDependency (const ISystematicsSvc& svc, const std::string& decoName, bool decoWrite) override;
 
 
 
@@ -119,6 +121,10 @@ namespace CP
     /// \brief the output name we use
   private:
     std::string m_outputName;
+
+    /// \brief the explicit list of type names for output dependencies
+  private:
+    std::string m_outputType;
 
     /// \brief the cache of names we use
   private:
@@ -143,6 +149,15 @@ namespace CP
     /// algorithm instead.
   private:
     std::function<StoreType*()> m_evtStoreGetter;
+
+#ifndef XAOD_STANDALONE
+    /// \brief a function to add a data dependency to the parent algorithm
+    ///
+    /// This wraps the owner's addDependency call and is used by
+    /// addDecorationDependency to register MT dependencies.
+  private:
+    std::function<void(const DataObjID&, Gaudi::DataHandle::Mode)> m_addAlgDependency;
+#endif
   };
 }
 

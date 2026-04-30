@@ -1,25 +1,30 @@
+/*
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+
 #ifndef WTAConeMaker_h
 #define WTAConeMaker_h
 
 #include <iostream>
 #include <algorithm>
 #include <map>
+#include "./WTAFixedInt.hpp"
 #include "./WTAObject.h" // Use the WTATrigObj
 
 class WTAParameters{ // Stores common WTAParameters, should be a protected variable of WTAConeMaker class
     public:
-        WTAParameters(IntOrFloat const_et_cut = 2000, IntOrFloat seed_et_cut = 5000, IntOrFloat jet_dr2 = R2PAR, 
+        WTAParameters(pt_t const_et_cut = 2000, pt_t seed_et_cut = 5000, tech_t jet_dR = R_PAR, 
         unsigned int max_const_n = 250, unsigned int max_seed_sorting_n = 50, unsigned int max_seed_n = 10, unsigned int max_const_per_jet_n = 99, 
         bool add_const_first = true) : // Takes 8 arguments, sets 9 parameters!
-            m_ConstEtCut(const_et_cut), m_SeedEtCut(seed_et_cut), m_Jet_dR2(jet_dr2), m_Iso_dR2(jet_dr2),
+            m_ConstEtCut(const_et_cut), m_SeedEtCut(seed_et_cut), m_Jet_dR(jet_dR), m_Iso_dR(jet_dR),
             m_MaxConstN(max_const_n), m_MaxSeedSortingN(max_seed_sorting_n), m_MaxSeedN(max_seed_n), m_MaxConstPerJetN(max_const_per_jet_n), 
             m_AddConstFirst(add_const_first), m_max_input_towers(6400)
             {}; // Constructor
 
-        void SetConstEtCut(IntOrFloat ConstEtCut){m_ConstEtCut = ConstEtCut;};
-        void SetSeedEtCut(IntOrFloat SeedEtCut){m_SeedEtCut = SeedEtCut;};
-        void SetIso_dR2(IntOrFloat Iso_dR2){m_Iso_dR2 = Iso_dR2;}; // Default is jet_are = Iso_dR2. Use this for different Isolation condition
-        void SetJet_dR2(IntOrFloat Jet_dR2){m_Jet_dR2 = Jet_dR2;};
+        void SetConstEtCut(pt_t ConstEtCut){m_ConstEtCut = ConstEtCut;};
+        void SetSeedEtCut(pt_t SeedEtCut){m_SeedEtCut = SeedEtCut;};
+        void SetIso_dR(tech_t Iso_dR){m_Iso_dR = Iso_dR;}; // Default is Jet_dR = Iso_dR. Use this for different Isolation condition
+        void SetJet_dR(tech_t Jet_dR){m_Jet_dR = Jet_dR;};
         void SetMaxConstN(int MaxConstN){m_MaxConstN = MaxConstN;};
         void SetMaxSeedSortingN(int MaxSeedSortingN){m_MaxSeedSortingN = MaxSeedSortingN;};
         void SetMaxSeedN(int MaxSeedN){m_MaxSeedN = MaxSeedN;};
@@ -27,10 +32,10 @@ class WTAParameters{ // Stores common WTAParameters, should be a protected varia
         void SetAddConstFirst(bool add_const_first){m_AddConstFirst = add_const_first;};
         void SetMaxInputTowers(int max_input_towers){m_max_input_towers = max_input_towers;}
 
-        IntOrFloat GetConstEtCut(){return m_ConstEtCut;};
-        IntOrFloat GetSeedEtCut(){return m_SeedEtCut;};
-        IntOrFloat GetIso_dR2(){return m_Iso_dR2;};
-        IntOrFloat GetJet_dR2(){return m_Jet_dR2;};
+        pt_t GetConstEtCut(){return m_ConstEtCut;};
+        pt_t GetSeedEtCut(){return m_SeedEtCut;};
+        tech_t GetIso_dR(){return m_Iso_dR;};
+        tech_t GetJet_dR(){return m_Jet_dR;};
         unsigned int GetMaxConstN(){return m_MaxConstN;};
         unsigned int GetMaxSeedSortingN(){return m_MaxSeedSortingN;};
         unsigned int GetMaxSeedN(){return m_MaxSeedN;};
@@ -39,10 +44,10 @@ class WTAParameters{ // Stores common WTAParameters, should be a protected varia
         unsigned int GetMaxInputTowers(){return m_max_input_towers;}
 
     private:
-        IntOrFloat m_ConstEtCut; // What's integer unit of the GeV?
-        IntOrFloat m_SeedEtCut;
-        IntOrFloat m_Jet_dR2; // Merge Constituents < m_Jet_dR2
-        IntOrFloat m_Iso_dR2; // Merge Seeds < m_Iso_dR2
+        pt_t m_ConstEtCut; // See WTASimTypes for LSB
+        pt_t m_SeedEtCut;
+        tech_t m_Jet_dR; // Merge Constituents < m_Jet_dR
+        tech_t m_Iso_dR; // Merge Seeds < m_Iso_dR
         unsigned int m_MaxConstN; // Can take maximum 240 topotowers, and then separate them into two lists
         unsigned int m_MaxSeedSortingN;
         unsigned int m_MaxSeedN;
@@ -72,14 +77,15 @@ class WTAConeMaker{
         const std::vector<WTAJet>& GetSeedList() const {return m_SeedList;};
         std::vector<int> GetAssociateBits(WTATrigObj incoming_seed, int& max_pt_index); // Common seed-SeedList asso.bits
 
-        std::vector<WTATrigObj> LoadInputs(const std::vector<IntOrFloat>& ptVec, const std::vector<IntOrFloat>& etaVec, const std::vector<IntOrFloat>& phiVec, const std::vector<IntOrFloat>& mVec);
+        std::vector<WTATrigObj> LoadInputs(const std::vector<pt_t>& ptVec, const std::vector<eta_t>& etaVec, const std::vector<phi_t>& phiVec, const std::vector<m_t>& mVec);
         virtual void FillLists(const std::vector<WTATrigObj>& InputTowers); // Overwritten in the 2Pass
-        void InitiateInputs(const std::vector<IntOrFloat>& ptVec, const std::vector<IntOrFloat>& etaVec, const std::vector<IntOrFloat>& phiVec, const std::vector<IntOrFloat>& mVec); // LoadInputs() + FillLists()
+        void InitiateInputs(const std::vector<pt_t>& ptVec, const std::vector<eta_t>& etaVec, const std::vector<phi_t>& phiVec, const std::vector<m_t>& mVec); // LoadInputs() + FillLists()
         void InitiateInputs(const std::vector<WTATrigObj>& InputTowers); // LoadInputs() + FillLists()
 
         void InsertToConstList(const WTATrigObj& obj);
         virtual void SeedCleaning(); // Do baseline cleaning
         virtual void MergeConstsToSeeds(); // Can be overwritten
+        void CreateERingInfo();
 
         void SetDEBUG(){m_DEBUG = true;}; // Printout for debug
         void SetVERBOSE(){m_DEBUG = true; m_VERBOSE = true;};
@@ -98,7 +104,7 @@ class WTAConeMaker{
 
 };
 
-inline std::vector<WTATrigObj> WTAConeMaker::LoadInputs(const std::vector<IntOrFloat>& ptVec, const std::vector<IntOrFloat>& etaVec, const std::vector<IntOrFloat>& phiVec, const std::vector<IntOrFloat>& mVec)
+inline std::vector<WTATrigObj> WTAConeMaker::LoadInputs(const std::vector<pt_t>& ptVec, const std::vector<eta_t>& etaVec, const std::vector<phi_t>& phiVec, const std::vector<m_t>& mVec)
 {
     std::vector<WTATrigObj> input_towers;
     unsigned int tower_n = ptVec.size();
@@ -133,7 +139,7 @@ inline void WTAConeMaker::FillLists(const std::vector<WTATrigObj>& InputTowers) 
     if(m_ConstituentList.size() > MaxConstN)m_ConstituentList.resize(MaxConstN); // Resize lists accordingly
 }
 
-inline void WTAConeMaker::InitiateInputs(const std::vector<IntOrFloat>& ptVec, const std::vector<IntOrFloat>& etaVec, const std::vector<IntOrFloat>& phiVec, const std::vector<IntOrFloat>& mVec)
+inline void WTAConeMaker::InitiateInputs(const std::vector<pt_t>& ptVec, const std::vector<eta_t>& etaVec, const std::vector<phi_t>& phiVec, const std::vector<m_t>& mVec)
 {
     std::vector<WTATrigObj> InputTowers = LoadInputs(ptVec, etaVec, phiVec, mVec);
     FillLists(InputTowers);
@@ -211,11 +217,16 @@ inline std::vector<int> WTAConeMaker::GetAssociateBits(WTATrigObj tower, int& Ma
 {
     int jet_N = m_SeedList.size();
     std::vector<int> associate_bit(jet_N, 0);
-    IntOrFloat MaxPt = tower.pt(); MaxPtIndex = -1;
+    pt_t MaxPt = tower.pt(); MaxPtIndex = -1;
     for(int j = 0; j < jet_N; j++)
     {
-        if(m_VERBOSE)std::cout << "deta, dphi, dR2 = " << tower.d_eta(m_SeedList.at(j)) << " , " << tower.d_phi_MPI_PI(m_SeedList.at(j)) << " , " << tower.dR2(m_SeedList.at(j)) << std::endl;
-        if(tower.IsAssocdR(m_SeedList.at(j), m_WTAConeMakerParameter.GetIso_dR2())) // e.g) dR2 < 0.16, association
+        if(m_VERBOSE)
+#ifdef FLOATING_POINT_SIMULATION
+            std::cout << "deta, dphi = " << tower.d_eta(m_SeedList.at(j)) << " , " << tower.d_phi_MPI_PI(m_SeedList.at(j)) << std::endl;
+#else
+            std::cout << "deta, dphi = " << tower.d_eta(m_SeedList.at(j)) << " , " << tower.d_phi_MPI_PI(m_SeedList.at(j)) << std::endl;
+#endif
+        if(tower.IsAssocdR(m_SeedList.at(j), m_WTAConeMakerParameter.GetIso_dR())) // e.g) dR < 0.4, association
         {
             associate_bit.at(j) = 1;
             if(m_SeedList.at(j).pt() > MaxPt)
@@ -285,14 +296,21 @@ inline void WTAConeMaker::MergeConstsToSeeds()
     {
         for(unsigned int j = 0; j < m_SeedList.size(); j++) // Assume Seeds are pT sorted, WTA means more energetic jet eats constituent first
         {
-            IntOrFloat dR2 = constituent.dR2(m_SeedList.at(j));
-            if(dR2 != 0 && constituent.IsAssocdR(m_SeedList.at(j), m_WTAConeMakerParameter.GetJet_dR2())) // Thistime, the condition is m_Jet_dR2, the usual R2Par, **WARNING: dR2!=0 IS TEMPORARY, NEED TO KNOW TOPOTOWER CREATION
+            if(constituent.IsAssocdR(m_SeedList.at(j), m_WTAConeMakerParameter.GetJet_dR())) // Thistime, the condition is m_Jet_dR, the usual R_PAR
             {
                 m_SeedList.at(j).MergeConstituent(constituent);
                 ResizeThisJetConstituents(m_SeedList.at(j)); // Check JetConstituent N
                 break; // Break the jet loop, move to the next constituent
             }
         }
+    }
+}
+
+inline void WTAConeMaker::CreateERingInfo()
+{
+    for(auto& jet: m_SeedList)
+    {
+        jet.CreateERingInfo();
     }
 }
 

@@ -31,6 +31,7 @@ namespace LArG4 {
       virtual ~LocalCalibrationCalculator() = default;
 
       virtual G4bool Process (const G4Step* step, LArG4Identifier & identifier,
+                              LArG4Identifier & identifier_sr,
                               std::vector<G4double> & energies,
                               const eCalculatorProcessing process = kEnergyAndID) const override final;
    private:

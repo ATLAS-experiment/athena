@@ -45,7 +45,7 @@ TrigL2BphysContainer_PERS * TrigL2BphysContainerCnv::createPersistent( TrigL2Bph
  
 
 //createTransient
-TrigL2BphysContainer * TrigL2BphysContainerCnv::createTransient()
+TrigL2BphysContainer * TrigL2BphysContainerCnv::createTransient(const Token* token)
 {
   m_impl->m_log << MSG::DEBUG
                 << "TrigL2BphysContainerCnv::createTransient called" << endmsg;
@@ -56,19 +56,19 @@ TrigL2BphysContainer * TrigL2BphysContainerCnv::createTransient()
   static const pool::Guid p0_guid2( "390F41C1-CCFA-4A1D-B046-F9F462FD64D0" );
  
   TrigL2BphysContainer *p_collection = 0;
-  if( compareClassGuid( tlp2_guid ) ) {
+  if( compareClassGuid(token,  tlp2_guid ) ) {
     
-    poolReadObject< TrigL2BphysContainer_PERS >(m_impl->m_TPConverter);
+    poolReadObject< TrigL2BphysContainer_PERS >(m_impl->m_TPConverter, token);
     p_collection = m_impl->m_TPConverter.createTransient( m_impl->m_log );
     m_impl->m_log << MSG::DEBUG<< "TrigL2BphysContainerCnv_tlp2" << endmsg;
-  } else if( compareClassGuid( tlp1_guid ) ) {
+  } else if( compareClassGuid(token,  tlp1_guid ) ) {
     TrigL2BphysContainerCnv_tlp1  tlp1_Converter;
-    poolReadObject< TrigL2BphysContainer_tlp1 >(tlp1_Converter);
+    poolReadObject< TrigL2BphysContainer_tlp1 >(tlp1_Converter, token);
     p_collection = tlp1_Converter.createTransient( m_impl->m_log );
     
-  } else if( compareClassGuid( p0_guid ) || compareClassGuid( p0_guid2 ) ){
+  } else if( compareClassGuid(token,  p0_guid ) || compareClassGuid(token,  p0_guid2 ) ){
 	
-    p_collection = poolReadObject< TrigL2BphysContainer >();
+    p_collection = poolReadObject< TrigL2BphysContainer >(token);
     
   }else  throw std::runtime_error( "Unsupported persistent version of TrigL2BphysContainer" );
      

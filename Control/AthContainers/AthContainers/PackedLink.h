@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/PackedLink.h
@@ -28,11 +28,11 @@
  *    AUXVAR_PACKEDLINKVEC_DECL (std::vector, Container, cvec);
  *  };
  @endcode
- * This will declare the auxilary variable @c clink to be a packed
- * link to elements of @c Container, and @c cvec to ba a vector
+ * This will declare the auxiliary variable @c clink to be a packed
+ * link to elements of @c Container, and @c cvec to be a vector
  * of such packed links.
  *
- * Packed link variables are accessed using @c Accesor classes as usual,
+ * Packed link variables are accessed using @c Accessor classes as usual,
  * where the type is given as @c SG::PackedLink<Container>.  So one
  * can write, for example,
  *@code

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //============================================================================
@@ -70,7 +70,7 @@ namespace DerivationFramework {
     AthAlgTool(t,n,p),
     m_cutFlowSvc("CutFlowSvc/CutFlowSvc", n),
     m_ctbasename(n),
-    m_bid(0), m_bidisset(false) {
+    m_bidisset(false) {
 
     ATH_MSG_DEBUG("Calling constructor with parameters");
 
@@ -129,16 +129,9 @@ namespace DerivationFramework {
 
     CutIdentifier id = getCounterIdByName(name);
     if ( id < 1 ) {
-      std::string fullname = m_ctbasename + "_" + name;
-      if ( ! m_bidisset ) {
-        throw std::runtime_error("cutFlowSvc()->registerFilter is no longer supported. code an alternative here");
-	//id = cutFlowSvc()->registerFilter(fullname, "N/A");
-	m_bid = id;
-      } else {
-        throw std::runtime_error("cutFlowSvc()->registerCut is no longer supported. code an alternative here");
-	//id = cutFlowSvc()->registerCut(fullname, "N/A", m_bid);
-      }
-      m_mctn[name] = id;
+      const std::string method = m_bidisset ? "registerCut" : "registerFilter";
+      const std::string msg = "cutFlowSvc()->" + method + " is no longer supported. code an alternative here";
+      throw std::runtime_error(msg);      
     }
     return id;
   }

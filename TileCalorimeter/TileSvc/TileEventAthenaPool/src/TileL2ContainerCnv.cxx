@@ -33,7 +33,7 @@ TileL2ContainerCnv::createPersistent( TileL2Container* transCont )
   return persObj; 
 }
 
-TileL2Container* TileL2ContainerCnv::createTransient() {
+TileL2Container* TileL2ContainerCnv::createTransient(const Token* token) {
 
   MsgStream msg( msgSvc(), "TileL2ContainerCnv" );
 
@@ -43,21 +43,21 @@ TileL2Container* TileL2ContainerCnv::createTransient() {
   static const pool::Guid p1_guid("FE877FF9-475D-42D9-8DC3-CABD220BFD27");
   static const pool::Guid p2_guid("3283BF32-0B18-408F-9B46-6A1B26B37D5C");
 
-  if ( compareClassGuid(tr_guid) ) {
+  if ( compareClassGuid(token, tr_guid) ) {
 
     // regular object from before the T/P separation
-    return poolReadObject<TileL2Container>();
+    return poolReadObject<TileL2Container>(token);
 
-  } else if ( compareClassGuid(p1_guid) ) {
+  } else if ( compareClassGuid(token, p1_guid) ) {
 
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<TileL2Container_p1> persObj( poolReadObject<TileL2Container_p1>() );
+    std::unique_ptr<TileL2Container_p1> persObj( poolReadObject<TileL2Container_p1>(token) );
     TileL2ContainerCnv_p1 cnv;
     transObj = cnv.createTransient( persObj.get(), msg );
-  } else if ( compareClassGuid(p2_guid) ) {
+  } else if ( compareClassGuid(token, p2_guid) ) {
 
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<TileL2Container_p2> persObj( poolReadObject<TileL2Container_p2>() );
+    std::unique_ptr<TileL2Container_p2> persObj( poolReadObject<TileL2Container_p2>(token) );
     TileL2ContainerCnv_p2 cnv;
     transObj = cnv.createTransient( persObj.get(), msg );
   } else {

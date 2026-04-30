@@ -73,7 +73,8 @@ namespace JetTagDQA{
       TH1* m_jet_phi = nullptr;
 
       // muon vars
-      TH1* m_muon_pT_frac = nullptr;
+      TH1* m_leading_muon_pT_frac = nullptr;
+      TH1* m_subleading_muon_pT_frac = nullptr;
 
       // truth info
       TH1* m_truthLabel = nullptr;
@@ -438,7 +439,7 @@ namespace JetTagDQA{
       TH1* m_GN2v01_pc = nullptr;
       TH1* m_GN2v01_pu = nullptr;
       TH1* m_GN2v01_ptau = nullptr;
-
+      
       TH1* m_GN3XPV01_phtautauhad = nullptr;
       TH1* m_GN3XPV01_phbb = nullptr;
       TH1* m_GN3XPV01_phcc = nullptr;

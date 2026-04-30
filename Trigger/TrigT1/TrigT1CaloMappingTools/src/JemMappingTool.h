@@ -1,17 +1,16 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1CALOMAPPINGTOOLS_JEMMAPPINGTOOL_H
 #define TRIGT1CALOMAPPINGTOOLS_JEMMAPPINGTOOL_H
 
-#include <map>
-#include <utility>
-#include <vector>
+
 
 #include "AthenaBaseComps/AthAlgTool.h"
-
 #include "TrigT1CaloToolInterfaces/IL1CaloMappingTool.h"
+
+#include <vector>
 
 class IInterface;
 class StatusCode;

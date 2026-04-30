@@ -91,6 +91,7 @@ ATHENA_CORE_NUMBER=${threads} Reco_tf.py --CA \
     --skipEvents ${skipEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateF150Flags' \
     --preExec "flags.Tracking.ITkActsValidateF150Pass.doFPGATrackSim=False;\
+                flags.Tracking.ITkActsValidateF150Pass.doActsSpacePoint=True;\
                 flags.Tracking.doPixelDigitalClustering=True;\
                 flags.Concurrency.NumConcurrentEvents=${threads};flags.Concurrency.NumThreads=${threads};\
                 flags.Tracking.ITkActsValidateF150Pass.storeTrackSeeds=${doSeeds};\

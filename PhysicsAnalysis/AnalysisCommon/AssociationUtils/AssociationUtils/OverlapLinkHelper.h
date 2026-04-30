@@ -63,7 +63,7 @@ namespace ORUtils
       // however, at the same time having a variant link here also means
       // I can point to either of my two containers without extra
       // effort.
-      using LTDef = columnar::VariantContainerId<columnar::ContainerId::particle1,columnar::ContainerId::particle1,columnar::ContainerId::particle2>;
+      using LTDef = columnar::VariantContainerId<columnar::Particle1Def,columnar::Particle1Def,columnar::Particle2Def>;
 
       /// Object link decorator
       columnar::ColumnDecorator<CI,columnar::ObjectLink<LTDef>> m_linkDecorator;

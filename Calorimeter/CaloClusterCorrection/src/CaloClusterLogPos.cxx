@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloClusterLogPos.h"
@@ -14,10 +14,8 @@ using CLHEP::deg;
 CaloClusterLogPos::CaloClusterLogPos(const std::string& type,
 				     const std::string& name,
 				     const IInterface* parent)
-  :CaloClusterProcessor(type, name, parent),
-   m_offset(4.7)
+  : CaloClusterProcessor(type, name, parent)
 {
-  declareProperty ("LogPosOffset",m_offset) ;
 }
 
 

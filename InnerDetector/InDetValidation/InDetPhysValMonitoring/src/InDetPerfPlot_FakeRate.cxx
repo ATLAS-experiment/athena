@@ -11,7 +11,7 @@
 #include <regex>
 using namespace IDPVM;
 
-InDetPerfPlot_FakeRate::InDetPerfPlot_FakeRate(InDetPlotBase* pParent, const std::string& sDir, bool useUnlinked) :
+InDetPerfPlot_FakeRate::InDetPerfPlot_FakeRate(InDetPlotBase* pParent, const std::string& sDir, FakeRateCategory fakeRateCategory) :
   InDetPlotBase(pParent, sDir),
   m_fakerate_vs_eta{},
   m_fakerate_vs_pt{},
@@ -20,16 +20,16 @@ InDetPerfPlot_FakeRate::InDetPerfPlot_FakeRate(InDetPlotBase* pParent, const std
   m_fakerate_vs_d0{},
   m_fakerate_vs_z0{},
   m_fakerate_vs_mu{},
-  m_useUnlinked{useUnlinked} {
+  m_fakeRateCategory{fakeRateCategory} {
   // nop
 }
 
-void unlinked_ylabel(TEfficiency *teff)
+void unlinked_ylabel(TEfficiency *teff, const std::string& replacement)
 {
     if (teff) {
-	std::string title = std::regex_replace(teff->GetTitle(), std::regex("linked"), "unlinked");
+	std::string title = std::regex_replace(teff->GetTitle(), std::regex("linked"), replacement);
 	std::string xlabel = teff->GetTotalHistogram()->GetXaxis()->GetTitle();
-	std::string ylabel = std::regex_replace(teff->GetTotalHistogram()->GetYaxis()->GetTitle(), std::regex("linked"), "unlinked");
+	std::string ylabel = std::regex_replace(teff->GetTotalHistogram()->GetYaxis()->GetTitle(), std::regex("linked"), replacement);
 	std::string s = title + ";" + xlabel + ";" + ylabel;
 	teff->SetTitle(s.c_str());
     }
@@ -38,22 +38,36 @@ void unlinked_ylabel(TEfficiency *teff)
 void
 InDetPerfPlot_FakeRate::initializePlots() {
 
-  book(m_fakerate_vs_eta, "fakerate_vs_eta");
-  book(m_fakerate_vs_pt, "fakerate_vs_pt");
-  book(m_fakerate_vs_lowpt, "fakerate_vs_lowpt");
-  book(m_fakerate_vs_phi, "fakerate_vs_phi");
-  book(m_fakerate_vs_d0, "fakerate_vs_d0");
-  book(m_fakerate_vs_z0, "fakerate_vs_z0");
-  book(m_fakerate_vs_mu, "fakerate_vs_mu");
+  if(m_fakeRateCategory == FakeRateCategory::Total){
+    std::string nameOverride = "_total";
+    book(m_fakerate_vs_eta, "fakerate_vs_eta", "fakerate_vs_eta"+nameOverride);
+    book(m_fakerate_vs_pt, "fakerate_vs_pt", "fakerate_vs_pt"+nameOverride);
+    book(m_fakerate_vs_lowpt, "fakerate_vs_lowpt", "fakerate_vs_lowpt"+nameOverride);
+    book(m_fakerate_vs_phi, "fakerate_vs_phi", "fakerate_vs_phi"+nameOverride);
+    book(m_fakerate_vs_d0, "fakerate_vs_d0", "fakerate_vs_d0"+nameOverride);
+    book(m_fakerate_vs_z0, "fakerate_vs_z0", "fakerate_vs_z0"+nameOverride);
+    book(m_fakerate_vs_mu, "fakerate_vs_mu", "fakerate_vs_mu"+nameOverride);
+  }
+  else{
+    book(m_fakerate_vs_eta, "fakerate_vs_eta");
+    book(m_fakerate_vs_pt, "fakerate_vs_pt");
+    book(m_fakerate_vs_lowpt, "fakerate_vs_lowpt");
+    book(m_fakerate_vs_phi, "fakerate_vs_phi");
+    book(m_fakerate_vs_d0, "fakerate_vs_d0");
+    book(m_fakerate_vs_z0, "fakerate_vs_z0");
+    book(m_fakerate_vs_mu, "fakerate_vs_mu");
+  }
 
-  if (m_useUnlinked) {
-      unlinked_ylabel(m_fakerate_vs_eta);
-      unlinked_ylabel(m_fakerate_vs_pt);
-      unlinked_ylabel(m_fakerate_vs_lowpt);
-      unlinked_ylabel(m_fakerate_vs_phi);
-      unlinked_ylabel(m_fakerate_vs_d0);
-      unlinked_ylabel(m_fakerate_vs_z0);
-      unlinked_ylabel(m_fakerate_vs_mu);
+  
+  if (m_fakeRateCategory != FakeRateCategory::Linked) {
+    std::string replacement = (m_fakeRateCategory==FakeRateCategory::Unlinked)? "unlinked" : "";
+      unlinked_ylabel(m_fakerate_vs_eta, replacement);
+      unlinked_ylabel(m_fakerate_vs_pt, replacement);
+      unlinked_ylabel(m_fakerate_vs_lowpt, replacement);
+      unlinked_ylabel(m_fakerate_vs_phi, replacement);
+      unlinked_ylabel(m_fakerate_vs_d0, replacement);
+      unlinked_ylabel(m_fakerate_vs_z0, replacement);
+      unlinked_ylabel(m_fakerate_vs_mu, replacement);
   }
 }
 

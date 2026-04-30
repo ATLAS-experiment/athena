@@ -4,6 +4,7 @@
 from glob import glob
 from AthenaConfiguration.ComponentFactory import CompFactory
 import AthenaCommon.SystemOfUnits as Units
+from InDetPhysValMonitoring.InDetPhysValMonitoringConfig import HardScatterStrategy
 
 def GetCustomAthArgs():
     from argparse import ArgumentParser
@@ -112,7 +113,7 @@ flags.PhysVal.IDPVM.maxProdVertRadius = MyArgs.maxProdVertRadius
 flags.PhysVal.IDPVM.minProdVertRadius = MyArgs.minProdVertRadius
 flags.PhysVal.IDPVM.minAbsD0 = MyArgs.minAbsD0
 flags.PhysVal.IDPVM.ancestorIDs = MyArgs.ancestorIDList
-flags.PhysVal.IDPVM.hardScatterStrategy = int(MyArgs.hardScatterStrategy)
+flags.PhysVal.IDPVM.hardScatterStrategy = HardScatterStrategy(int(MyArgs.hardScatterStrategy))
 flags.PhysVal.IDPVM.jetsNameForHardScatter = MyArgs.jetsNameForHardScatter
 flags.PhysVal.IDPVM.truthMinPt = MyArgs.truthMinPt
 flags.PhysVal.IDPVM.GRL = MyArgs.GRL
@@ -134,7 +135,7 @@ flags.Exec.SkipEvents = MyArgs.skipEvents
 flags.Exec.MaxEvents = MyArgs.maxEvents
 
 # force the vertex for hgg case
-if flags.PhysVal.IDPVM.hardScatterStrategy == 3:
+if flags.PhysVal.IDPVM.hardScatterStrategy == HardScatterStrategy.HYY:
     flags.PhysVal.IDPVM.PrimaryVertexContainer = 'HggPrimaryVertices'
 
 if MyArgs.OnlyTrackingPreInclude:

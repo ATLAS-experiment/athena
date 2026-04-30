@@ -32,7 +32,7 @@ public:
     LArShapeCompleteCnv (ISvcLocator* svcloc) : LArShapeCompleteCnvBase(svcloc) {}
 protected:
     virtual LArShapePersType2*   createPersistent (LArShapeTransType2* transObj);
-    virtual LArShapeTransType2*  createTransient ();
+    virtual LArShapeTransType2*  createTransient(const Token* token);
     LArShapeTransType1*          createTransient(LArConditionsSubset<LArShapeP>* orig);
 };
 

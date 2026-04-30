@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -129,7 +129,7 @@ HGTD_IDDetDescrCnv::storageType()
 }
 
 //--------------------------------------------------------------------
-const CLID&
+CLID
 HGTD_IDDetDescrCnv::classID() {
     return ClassID_traits<HGTD_ID>::ID();
 }

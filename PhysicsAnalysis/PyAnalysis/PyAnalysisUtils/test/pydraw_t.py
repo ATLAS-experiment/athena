@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #
 # File: pydraw_t.py
@@ -643,6 +643,44 @@ def _regr_scan():
          1       12
          1       13
          1       14
+    True
+    >>> scan("tt[0:1].foo$i; > scan.out")
+    def _loopfunc(_i, _ev, _print = _print):
+      _e_foo = _ev.foo
+      for _it_i_foo in _e_foo:
+        _print (_i, (_it_i_foo))
+    <BLANKLINE>
+    True
+    >>> scan("tt[0:1].foo$i; >>scan.out")
+    def _loopfunc(_i, _ev, _print = _print):
+      _e_foo = _ev.foo
+      for _it_i_foo in _e_foo:
+        _print (_i, (_it_i_foo))
+    <BLANKLINE>
+    True
+    >>> print(open('scan.out').read())
+         0        0
+         0        1
+         0        2
+         0        3
+         0        4
+         0        0
+         0        1
+         0        2
+         0        3
+         0        4
+    <BLANKLINE>
+    >>> scan("tt[0:1].foo$i:chr(ord('a')+foo$i)")
+    def _loopfunc(_i, _ev, _print = _print):
+      _e_foo = _ev.foo
+      for _it_i_foo in _e_foo:
+        _print (_i, (_it_i_foo),(chr(ord('a')+_it_i_foo)))
+    <BLANKLINE>
+         0        0        a
+         0        1        b
+         0        2        c
+         0        3        d
+         0        4        e
     True
     """
 

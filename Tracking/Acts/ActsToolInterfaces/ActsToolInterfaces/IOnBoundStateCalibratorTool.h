@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
   */
 #ifndef ACTSTOOLINTERFACES_IONBOUNDSTATECALIBRATORTOOL_H
 #define ACTSTOOLINTERFACES_IONBOUNDSTATECALIBRATORTOOL_H
@@ -9,7 +9,7 @@
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Utilities/CalibrationContext.hpp"
 #include "Acts/Utilities/Delegate.hpp"
-#include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/EventData/BoundTrackParameters.hpp"
 
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
@@ -27,6 +27,7 @@ public:
       using PixelCalibrator = Acts::Delegate<
          std::pair<PixelPos, PixelCov>(const Acts::GeometryContext&,
                                        const Acts::CalibrationContext&,
+                                       const Acts::Surface&,
                                        const xAOD::PixelCluster &,
                                        const Acts::BoundTrackParameters &)>;
 
@@ -35,6 +36,7 @@ public:
       using StripCalibrator = Acts::Delegate<
          std::pair<StripPos, StripCov>(const Acts::GeometryContext&,
                                        const Acts::CalibrationContext&,
+                                       const Acts::Surface&,
                                        const xAOD::StripCluster &,
                                        const Acts::BoundTrackParameters &)>;
 
@@ -43,6 +45,7 @@ public:
       using HGTDCalibrator = Acts::Delegate<
          std::pair<HgtdPos, HgtdCov>(const Acts::GeometryContext&,
                                        const Acts::CalibrationContext&,
+                                       const Acts::Surface&,
                                        const xAOD::HGTDCluster &,
                                        const Acts::BoundTrackParameters &)>;
 

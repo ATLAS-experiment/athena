@@ -46,7 +46,7 @@ public:
 protected:
   
   virtual TileTrackMuFeatureContainer_PERS *createPersistent( TileTrackMuFeatureContainer *transObj);
-  virtual TileTrackMuFeatureContainer      *createTransient();
+  virtual TileTrackMuFeatureContainer      *createTransient(const Token* token);
 
 private:
   TileTrackMuFeatureContainerCnv_tlp1   m_converter1;

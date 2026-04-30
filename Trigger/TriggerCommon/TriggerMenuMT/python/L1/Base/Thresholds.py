@@ -1016,7 +1016,7 @@ class ZeroBiasThresholdTopo( Threshold ):
 class TEThreshold( Threshold ):
 
     def __init__(self, name, ttype, mapping = -1):
-        super(TEThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype.startswith('gTE') or ttype.startswith('gESPRESSO') or ttype.startswith('jTE') else 2)
+        super(TEThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype.startswith('gTE') or ttype.startswith('gESPRESSO') or ttype.startswith('gRISTRETTO') or ttype.startswith('jTE') else 2)
         self.xe = None
 
     def setTE(self, xe):

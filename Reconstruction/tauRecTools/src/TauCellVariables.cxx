@@ -22,10 +22,6 @@ StatusCode TauCellVariables::execute(xAOD::TauJet& pTau) const {
   double sumCellET12 = 0.;
   double sumEMCellET = 0.;
   double sumHadCellET = 0.;
-  double EMRadius = 0.;
-  double HadRadius = 0.;
-
-  std::vector<double> cellRingEnergys(7,0.);
 
   int numCells = 0;
   std::bitset<200000> cellSeen;
@@ -82,22 +78,12 @@ StatusCode TauCellVariables::execute(xAOD::TauJet& pTau) const {
         // Most energy of neutral particles are deposited in the first two EM laywers
         // The third layer is regarded as HAD layber
         if (isEMLayer(calo)) {
-          EMRadius += dR*cellET;
           sumEMCellET += cellET;
         } // end of EM cells
         else { 
-            HadRadius += dR*cellET;
             sumHadCellET += cellET;
         } // end of HAD cells
       } // end of dR <  m_cellCone
-
-      if (dR < 0.05) cellRingEnergys[0] += cellET;
-      if (dR >= 0.05 && dR < 0.075) cellRingEnergys[1] += cellET;
-      if (dR >= 0.075 && dR < 0.1) cellRingEnergys[2] += cellET;
-      if (dR >= 0.1 && dR < 0.125) cellRingEnergys[3] += cellET;
-      if (dR >= 0.125 && dR < 0.15) cellRingEnergys[4] += cellET;
-      if (dR >= 0.15 && dR < 0.2) cellRingEnergys[5] += cellET;
-      if (dR >= 0.2 && dR < 0.4) cellRingEnergys[6] += cellET;
     } // end of loop over cells
   } // end of loop over clusters
 
@@ -106,13 +92,6 @@ StatusCode TauCellVariables::execute(xAOD::TauJet& pTau) const {
   pTau.setDetail(xAOD::TauJetParameters::numCells ,  static_cast<int>  (numCells));
   pTau.setDetail(xAOD::TauJetParameters::etEMAtEMScale , static_cast<float>( sumEMCellET ));
   pTau.setDetail(xAOD::TauJetParameters::etHadAtEMScale , static_cast<float>( sumHadCellET ));
-  pTau.setDetail(xAOD::TauJetParameters::cellBasedEnergyRing1 , static_cast<float>( cellRingEnergys[0] ));
-  pTau.setDetail(xAOD::TauJetParameters::cellBasedEnergyRing2 , static_cast<float>( cellRingEnergys[1] ));
-  pTau.setDetail(xAOD::TauJetParameters::cellBasedEnergyRing3 , static_cast<float>( cellRingEnergys[2] ));
-  pTau.setDetail(xAOD::TauJetParameters::cellBasedEnergyRing4 , static_cast<float>( cellRingEnergys[3] ));
-  pTau.setDetail(xAOD::TauJetParameters::cellBasedEnergyRing5 , static_cast<float>( cellRingEnergys[4] ));
-  pTau.setDetail(xAOD::TauJetParameters::cellBasedEnergyRing6 , static_cast<float>( cellRingEnergys[5] ));
-  pTau.setDetail(xAOD::TauJetParameters::cellBasedEnergyRing7 , static_cast<float>( cellRingEnergys[6] ));
 
   // take care of the variables with division
   // -- fraction of cell energy within [0,0.1] and [0.1,0.2]
@@ -124,24 +103,6 @@ StatusCode TauCellVariables::execute(xAOD::TauJet& pTau) const {
     pTau.setDetail(xAOD::TauJetParameters::centFrac , static_cast<float>( 0.0 ));
     pTau.setDetail(xAOD::TauJetParameters::isolFrac , static_cast<float>( -1.0 ));
   }
-  
-  // -- cell weighted radius of EM cells
-  if (std::abs(sumEMCellET) > 1e-6) {
-    EMRadius = EMRadius / sumEMCellET;
-  } 
-  else {
-    EMRadius = -1.0;
-  }
-  pTau.setDetail(xAOD::TauJetParameters::EMRadius , static_cast<float>( EMRadius ));
-  
-  // -- cell weighted radius of HAD cells
-  if (std::abs(sumHadCellET) > 1e-6) {
-    HadRadius = HadRadius / sumHadCellET;
-  } 
-  else {
-    HadRadius = -1.0;
-  }
-  pTau.setDetail(xAOD::TauJetParameters::hadRadius , static_cast<float>( HadRadius ));
  
   return StatusCode::SUCCESS;
 }

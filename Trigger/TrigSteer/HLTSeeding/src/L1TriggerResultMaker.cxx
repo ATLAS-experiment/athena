@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L1TriggerResultMaker.h"
 #include "L1TopoAlgorithms/cTauMultiplicity.h"
 #include "xAODTrigger/eFexTauRoIAuxContainer.h"
 #include "xAODTrigger/TrigCompositeAuxContainer.h"
+#include <limits>
 
 namespace {
   template<class T> void makeLink(const SG::ReadHandleKey<T>& rhk,
@@ -75,7 +76,7 @@ StatusCode L1TriggerResultMaker::execute(const EventContext& eventContext) const
   l1trHandle->push_back(std::make_unique<xAOD::TrigComposite>());
 
   // For all RoI types, find it in the event store and link to the L1TriggerResult
-  auto retrieveAndLink = [this, &eventContext, &l1trHandle](auto key) -> StatusCode {
+  auto retrieveAndLink = [this, &eventContext, &l1trHandle](const auto &key) -> StatusCode {
     // Skip disabled inputs
     if (key.empty()) {return StatusCode::SUCCESS;}
     // Retrieve the L1 xAOD container to verify it exists

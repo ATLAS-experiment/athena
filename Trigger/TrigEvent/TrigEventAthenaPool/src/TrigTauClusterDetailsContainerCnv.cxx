@@ -19,7 +19,7 @@ TrigTauClusterDetailsContainer_PERS * TrigTauClusterDetailsContainerCnv::createP
 }//end of create persistent method
 
 //createTransient
-TrigTauClusterDetailsContainer * TrigTauClusterDetailsContainerCnv::createTransient()
+TrigTauClusterDetailsContainer * TrigTauClusterDetailsContainerCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "TrigTauClusterDetailsContainerConverter" );
   
@@ -28,14 +28,14 @@ TrigTauClusterDetailsContainer * TrigTauClusterDetailsContainerCnv::createTransi
   static const pool::Guid p2_guid( "AAEE63E0-BA47-45AD-AC28-E07EC68812C4" );
   static const pool::Guid tlp1_guid( "D7DA2036-9F38-4060-A5C9-75C72AF104C4" );
 
-  if( compareClassGuid( p2_guid ) ){
-         std::unique_ptr< TrigTauClusterDetailsContainer_p2 > col_vect( poolReadObject< TrigTauClusterDetailsContainer_p2 >() );
+  if( compareClassGuid(token,  p2_guid ) ){
+         std::unique_ptr< TrigTauClusterDetailsContainer_p2 > col_vect( poolReadObject< TrigTauClusterDetailsContainer_p2 >(token) );
          //std::cout << "Reading TTCD p2" << std::endl;
          return m_converter.createTransient( col_vect.get(), mlog ) ;
 
-    }else if( compareClassGuid( tlp1_guid ) )     
+    }else if( compareClassGuid(token,  tlp1_guid ) )     
     {
-        std::unique_ptr< TrigTauClusterDetailsContainer_tlp1 > col_vect( poolReadObject< TrigTauClusterDetailsContainer_tlp1 >() );
+        std::unique_ptr< TrigTauClusterDetailsContainer_tlp1 > col_vect( poolReadObject< TrigTauClusterDetailsContainer_tlp1 >(token) );
         //std::cout << "Reading TTCD tlp1" << std::endl;
         return m_converter1.createTransient( col_vect.get(), mlog );
    

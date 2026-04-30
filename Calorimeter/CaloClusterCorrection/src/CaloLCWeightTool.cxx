@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -29,32 +29,7 @@
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "xAODCaloEvent/CaloClusterKineHelper.h"
 
-CaloLCWeightTool::CaloLCWeightTool(const std::string& type,
-				   const std::string& name,
-				   const IInterface* parent)
-  : AthAlgTool(type,name,parent),
-    m_key("HadWeights"),
-    m_signalOverNoiseCut(2),
-    m_useHadProbability(false),
-    m_interpolate(false),
-    m_calo_id(nullptr)
-{
-
-  declareInterface<IClusterCellWeightTool>(this);
-  declareProperty("CorrectionKey",m_key);
-  // Minimal Signal Over Noise (|E|/sigma) level for cells 
-  declareProperty("SignalOverNoiseCut",m_signalOverNoiseCut);
-  // Use EM_PROBABILITY Moment to apply relative weights
-  declareProperty("UseHadProbability",m_useHadProbability);
-  // Use Interpolation or not
-  declareProperty("Interpolate",m_interpolate);
-  m_interpolateDimensionNames.resize(3);
-  m_interpolateDimensionNames[0] = "DIMW_ETA";
-  m_interpolateDimensionNames[1] = "DIMW_ENER";
-  m_interpolateDimensionNames[2] = "DIMW_EDENS";
-  declareProperty("InterpolateDimensionNames", m_interpolateDimensionNames);
-  declareProperty("UpdateSamplingVars",m_updateSamplingVars=false);
-}
+CaloLCWeightTool::~CaloLCWeightTool() = default;
 
 StatusCode CaloLCWeightTool::initialize()
 {
@@ -233,8 +208,3 @@ StatusCode CaloLCWeightTool::weight(xAOD::CaloCluster *theCluster, const EventCo
 
   return StatusCode::SUCCESS;
 }
-
-CaloLCWeightTool::~CaloLCWeightTool()
-= default;
-
-

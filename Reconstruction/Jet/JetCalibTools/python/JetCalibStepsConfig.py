@@ -276,7 +276,7 @@ generatorDic = {
     "Pythia8": ["Pythia", "dipole", "cluster"]
 }
 
-def calibConfigToToolList(flags, **configDict):
+def calibConfigToToolList(flags, forceCalibSeq, calibSeq, **configDict):
     """
     Returns a list of instantiated tools for each of the calibration steps. 
     The order of the steps is determined by the InScale and OutScale properties given in the config.
@@ -352,34 +352,37 @@ def calibConfigToToolList(flags, **configDict):
     if not foundCS:
         raise JetCalibConfigError('At least one step must have InScale = JetConstitScaleMomentum')
 
-    def findNextSteps(ordered_tools=[], ordered_step_names=[], startScale = "JetConstitScaleMomentum"):
+    def findNextSteps(ordered_tools=[], ordered_step_names=[], startScale = "JetConstitScaleMomentum", calibSeq = ""):
         ''' Recursively add tools to ordered_tools based on in/out scale '''
         for step in toolDic:
+            if forceCalibSeq:
+                if step not in calibSeq:
+                    continue
             if toolDic[step][0].InScale == startScale:
                 ordered_tools += toolDic[step]
                 ordered_step_names.append(step)
-                ordered_tools, ordered_step_names = findNextSteps(ordered_tools, ordered_step_names, toolDic[step][-1].OutScale)
+                ordered_tools, ordered_step_names = findNextSteps(ordered_tools, ordered_step_names, toolDic[step][-1].OutScale, calibSeq)
 
         return ordered_tools, ordered_step_names
 
-    ordered_tools, ordered_step_names = findNextSteps([], [])
+    ordered_tools, ordered_step_names = findNextSteps([], [], "JetConstitScaleMomentum", calibSeq)
 
     # Check we've got all the steps
     for step in toolDic:
-        if step not in ordered_step_names:
+        if step not in ordered_step_names and not forceCalibSeq:
             raise JetCalibConfigError(f'Could not place calib step {step} - have you set InScale and OutScale correctly?')
 
     jcslog.info(f'Ordered jet calib steps: {"->".join(ordered_step_names)}')
 
     return ordered_tools
 
-def calibToolFromConfigFile(flags, configFile, name = "jetcalib"):
+def calibToolFromConfigFile(flags, configFile, name = "jetcalib", forceCalibSeq = False, calibSeq = ""):
 
     configDic = load_yaml_cfg(configFile)
 
     globalSettings = configDic.pop('Global',{})
 
-    calibTool = CompFactory.JetCalibTool(name, CalibSteps=calibConfigToToolList(flags, **configDic), **globalSettings)
+    calibTool = CompFactory.JetCalibTool(name, CalibSteps=calibConfigToToolList(flags, forceCalibSeq, calibSeq, **configDic), **globalSettings)
     return calibTool
 
 def load_yaml_cfg(configFile):

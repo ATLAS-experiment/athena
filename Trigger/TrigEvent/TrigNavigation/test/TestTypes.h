@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGNAVIGATION_TESTTYPES_H
@@ -7,8 +7,8 @@
 
 #include "AthContainers/AuxElement.h"
 #include "AthContainers/ViewVector.h"
+#include "TrigStorageDefinitions/EDM_TypeInformation.h"
 #include "xAODCore/AuxContainerBase.h"
-
 
 #define TRIGSTORAGEDEF_MERGEPACKS
 #include "TrigNavigation/TypeRegistration.h"
@@ -84,18 +84,10 @@ HLT_BEGIN_TYPE_REGISTRATION
   HLT_REGISTER_TYPE(class TestD, class TestDContainer, class TestDContainer)
 HLT_END_TYPE_REGISTRATION(TrigNavigationUnitTest)
 
-#define LTYPEMAPCLASS(name)\
-  struct class_##name{\
-    typedef TypeInfo_##name map;\
-    static const std::string package_name;\
-  };
-
-LTYPEMAPCLASS(TrigNavigationUnitTest)
+TYPEMAPCLASS(TrigNavigationUnitTest)
 
 struct TypeInfo_EDM {
-  typedef  HLT::TypeInformation::newlist
-  ::add<class_TrigNavigationUnitTest>  ::go
-  ::done map;
+  using map = class_TrigNavigationUnitTest::map;
 };
 REGISTER_PACKAGE_WITH_NAVI(TrigNavigationUnitTest)
 

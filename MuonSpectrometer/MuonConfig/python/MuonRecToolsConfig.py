@@ -16,7 +16,7 @@ def MuonEDMPrinterToolCfg(flags, name="MuonEDMPrinterTool", **kwargs):
     if not flags.Detector.EnableRPC:
          kwargs.setdefault("RpcPrdCollection", "")
         
-    kwargs.setdefault('TgcPrdCollection', 'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
+    kwargs.setdefault('TgcPrdCollection', 'TGC_MeasurementsAllBCs')
 
     from TrkConfig.TrkResidualPullCalculatorConfig import ResidualPullCalculatorCfg
     kwargs.setdefault("ResidualPullCalculator", result.popToolsAndMerge(ResidualPullCalculatorCfg(flags)))
@@ -97,7 +97,7 @@ def MuonSeededSegmentFinderCfg(flags,name="MuonSeededSegmentFinder", **kwargs):
         kwargs.setdefault("MMPrepDataContainer","")
     
   
-    kwargs.setdefault('TgcPrepDataContainer', 'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
+    kwargs.setdefault('TgcPrepDataContainer', 'TGC_MeasurementsAllBCs')
     
     muon_seeded_segment_finder = CompFactory.Muon.MuonSeededSegmentFinder(name, **kwargs)
     result.setPrivateTools(muon_seeded_segment_finder)

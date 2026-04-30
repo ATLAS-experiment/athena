@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1RESULTBYTESTREAM_ROIBRESULTBYTESTREAMCNV_ICC
@@ -35,7 +35,7 @@ RoIBResultByteStreamCnv< ROBF >::RoIBResultByteStreamCnv( ISvcLocator* svcloc )
  * is for (RoIBResult).
  */
 template< class ROBF >
-const CLID& RoIBResultByteStreamCnv< ROBF >::classID(){
+CLID RoIBResultByteStreamCnv< ROBF >::classID(){
   return ClassID_traits< ROIB::RoIBResult >::ID();
 }
 

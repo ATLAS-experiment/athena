@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // +======================================================================+
@@ -265,6 +265,7 @@ StatusCode LArSCL1Maker::execute(const EventContext& context) const {
   const auto* larnoise = this->retrieve(context, m_noiseSCKey);
   const auto* autoCorrNoise = this->retrieve(context, m_autoCorrNoiseSCKey);
   const auto* adc2mev = this->retrieve(context, m_adc2mevSCKey);
+  const auto* shapes = this->retrieve(context, m_shapesKey);
 
   SG::WriteHandle<LArDigitContainer> scContainerHandle(m_sLArDigitsContainerKey,
                                                        context);
@@ -354,7 +355,7 @@ StatusCode LArSCL1Maker::execute(const EventContext& context) const {
       factor = (adc2mev->ADC2MEV(hwSC, scGain))[1];
       factor = 1.0 / fracS->FSAMPL(hwSC) / factor;
 
-      ConvertHits2Samples(context, hwSC, scGain, timeE, samples);
+      ConvertHits2Samples(shapes, hwSC, scGain, timeE, samples);
 
       std::vector<float>& vec = scFloatContainerTmp.at(scHWHash);
       if (!alreadyThere[scHWHash]) {
@@ -471,7 +472,7 @@ void LArSCL1Maker::printConditions(const HWIdentifier& /*hwSC*/) {
 }
 
 void LArSCL1Maker::ConvertHits2Samples(
-    const EventContext& context, const HWIdentifier& hwSC,
+    const ILArShape* shapes, const HWIdentifier& hwSC,
     CaloGain::CaloGain igain,
     const std::vector<std::pair<float, float> >& TimeE,
     std::vector<float>& samples) const {
@@ -487,7 +488,6 @@ void LArSCL1Maker::ConvertHits2Samples(
 
   // ........ retrieve data (1/2) ................................
   //
-  const auto* shapes = this->retrieve(context, m_shapesKey);
   ILArShape::ShapeRef_t Shape = shapes->Shape(hwSC, igain);
   ILArShape::ShapeRef_t ShapeDer = shapes->ShapeDer(hwSC, igain);
 

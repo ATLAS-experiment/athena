@@ -97,7 +97,6 @@ if [ $sim_tf_exit_code -eq 0 ]  ;then
    --inputRDOFile    $rdo \
    --outputAODFile   $aod \
    --conditionsTag   default:$conditionsTag \
-   --steering        doRAWtoALL \
    --checkEventCount False \
    --ignoreErrors    True \
    --maxEvents       -1

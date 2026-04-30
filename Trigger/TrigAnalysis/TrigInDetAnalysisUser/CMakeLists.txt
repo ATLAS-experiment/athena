@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigInDetAnalysisUser )
@@ -11,7 +11,7 @@ atlas_disable_as_needed()
 # Libraries in the package:
 atlas_add_root_dictionary( Resplot
    ResplotDictSource
-   ROOT_HEADERS Resplot/src/Resplot.h
+   ROOT_HEADERS Resplot/src/Resplot.h Resplot/src/LinkDef.h
    EXTERNAL_PACKAGES ROOT )
 
 atlas_add_library( Resplot

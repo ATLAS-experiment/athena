@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 if __name__ == "__main__":
@@ -15,7 +15,8 @@ if __name__ == "__main__":
     # for debugging
     #from AthenaCommon.Constants import DEBUG
     #flags.Exec.OutputLevel=DEBUG
-    
+
+    flags.fillFromArgs()
     flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg

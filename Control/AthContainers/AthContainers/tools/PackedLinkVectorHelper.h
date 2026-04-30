@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/tools/PackedLinkVectorHelper.h
@@ -159,8 +159,8 @@ public:
    *              May be modified if the vector grows.
    * @param sg The @c IProxyDict of the current store.
    *           May be null to use the global, thread-local default.
-   * @param initFunc Function to initialize a @c DataLink to a given
-   *                 hashed key.
+   * @param initLinkFunc Function to initialize a @c DataLink to a given
+   *                     hashed key.
    *
    * Searches for a @c DataLinkBase matching @c sgkey in the linked vector.
    * If not found, then a new entry is added.
@@ -190,8 +190,8 @@ public:
    * @param sg The @c IProxyDict of the current store.
    *           If null, take it from the links in @c srcDlinks,
    *           or use the global, thread-local default.
-   * @param initFunc Function to initialize a @c DataLink to a given
-   *                 hashed key.
+   * @param initLinkFunc Function to initialize a @c DataLink to a given
+   *                     hashed key.
    *
    * To be used after links have been copied/moved from one container
    * to another.  The collection indices are updated to be appropriate
@@ -217,8 +217,8 @@ public:
    * @param sg The @c IProxyDict of the current store.
    *           If null, take it from the links in @c srcDlinks,
    *           or use the global, thread-local default.
-   * @param initFunc Function to initialize a @c DataLink to a given
-   *                 hashed key.
+   * @param initLinkFunc Function to initialize a @c DataLink to a given
+   *                     hashed key.
    *
    * Returns true if it is known that the payload of the linked vector
    * has not moved.  (If this is false, any caches/iterators must be assumed
@@ -367,7 +367,7 @@ public:
 
 
   /**
-   * @brief Assign a range of @c ElementLink to a vector of @c Packedlink.
+   * @brief Assign a range of @c ElementLink to a vector of @c PackedLink.
    * @param vect The vector of @c PackedLink to which to assign.
    * @param linkedVec Interface for the linked vector of DataLinks.
    * @param dlinks Span over the link vector, as @c DataLinkBase.
@@ -385,7 +385,7 @@ public:
 
 
   /**
-   * @brief Insert a range of @c ElementLink into a vector of @c Packedlink.
+   * @brief Insert a range of @c ElementLink into a vector of @c PackedLink.
    * @param vect The vector of @c PackedLink to which to assign.
    * @param pos The position at which to do the insertion.
    * @param linkedVec Interface for the linked vector of DataLinks.

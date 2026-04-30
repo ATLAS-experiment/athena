@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "XMLCoreParser/XMLCoreParser.h" 
@@ -23,31 +23,6 @@ namespace{
 }
 
 #include "ExpatCoreParser.h"
-
-
-XMLCoreNode&  XMLCoreNode::operator= (const XMLCoreNode& other)  {
-  if (this != &other) {
-    if (m_owns) delete m_node;
-    m_node = other.m_node;
-    m_owns = false;
-  }
-  return *this;
-}
-    
-XMLCoreNode&  XMLCoreNode::operator= (XMLCoreNode&& other)  {
-  if (this != &other) {
-    if (m_owns) delete m_node;
-    m_node = other.m_node;
-    m_owns = other.m_owns;
-    other.m_node = nullptr;
-    other.m_owns = false;
-  }
-  return *this;
-}
-
-XMLCoreNode::~XMLCoreNode(){
-  if (m_owns) delete m_node;
-}
 
 
 /* 
@@ -107,18 +82,9 @@ XMLCoreFactory::do_comment (XMLCoreParser& /*parser*/, const std::string& /*comm
   }
 } 
  
-int 
-XMLCoreFactory::attribute_number (const XMLCoreNode& node) { 
-  const CoreParser::DOMNamedNodeMap& attrs = node.get_node ().get_attributes(); 
-  return (attrs.size ()); 
-} 
- 
 bool 
-XMLCoreFactory::has_attribute (const XMLCoreNode& node, const std::string& name) { 
-  const CoreParser::DOMNamedNodeMap& attrs = node.get_node ().get_attributes(); 
-  CoreParser::DOMNamedNodeMap::const_iterator it = attrs.find (name);
-  if (it == attrs.end ()) return (false);
-  return (true); 
+XMLCoreFactory::has_attribute (const XMLCoreNode& node, const std::string& name) {
+  return node.has_attrib (name);
 } 
  
 int 
@@ -155,35 +121,13 @@ XMLCoreFactory::get_value (const XMLCoreNode& node, const std::string& name) {
   if (XMLCoreParserDebugger::debug ()){
     std::cout << "XMLCoreFactory::get_value> name=" << name << std::endl; 
   }
-  const CoreParser::DOMNamedNodeMap& attrs = node.get_node ().get_attributes(); 
-  CoreParser::DOMNamedNodeMap::const_iterator it = attrs.find (name);
-  if (it == attrs.end ()) return ("");
-  std::string result = (*it).second;
+  std::string result;
+  if (node.has_attrib (name))
+    result = node.get_attrib (name);
   if (XMLCoreParserDebugger::debug ()) {
     std::cout << "XMLCoreFactory::get_value>2 value=" << result << std::endl; 
   }
   return (result); 
-} 
- 
-std::string 
-XMLCoreFactory::get_name (const XMLCoreNode& node) { 
-  return node.get_node().get_name (); 
-} 
-
-int 
-XMLCoreFactory::sibling_number (const XMLCoreNode& node) {
-  return node.get_node ().sibling_number (); 
-}
- 
-std::string 
-XMLCoreFactory::get_name (const XMLCoreNode& node, int index) { 
-  const CoreParser::DOMNamedNodeMap& attrs = node.get_node ().get_attributes(); 
-  CoreParser::DOMNamedNodeMap::const_iterator it;
-  for (it = attrs.begin (); (index > 0) && (it != attrs.end ()); ++it){
-    --index;
-  }
-  if (it == attrs.end ()) return ("");
-  return it->first; 
 } 
  
 std::string 
@@ -268,17 +212,30 @@ class DummyFactory : public XMLCoreFactory{
 }; 
 
  
-XMLCoreNode 
+std::unique_ptr<XMLCoreNode>
 XMLCoreParser::parse (const std::string& file_name) {
   m_level = 0;
-  std::unique_ptr<CoreParser::DOMNode> doc = ExpatCoreParser::parse (file_name);
+  std::unique_ptr<XMLCoreNode> doc = ExpatCoreParser::parse (file_name);
   if (XMLCoreParserDebugger::debug ()){
     if (doc != nullptr) doc->print ("============ ALL =============");
   }
   if (not doc){
     throw std::runtime_error("XMLCoreParser: no such file ["+file_name+"]");
   }
-  return XMLCoreNode (std::move (doc));
+  return doc;
+}
+
+std::unique_ptr<XMLCoreNode>
+XMLCoreParser::parse_string (const std::string& text) {
+  m_level = 0;
+  std::unique_ptr<XMLCoreNode> doc = ExpatCoreParser::parse_string (text);
+  if (XMLCoreParserDebugger::debug ()){
+    if (doc != nullptr) doc->print ("============ ALL =============");
+  }
+  if (not doc){
+    throw std::runtime_error("XMLCoreParser: cannot parse string");
+  }
+  return doc;
 }
 
 void 
@@ -287,24 +244,20 @@ XMLCoreParser::visit (const std::string& file_name) {
       std::cout << "XMLCoreParser::visit file_name " 
                 << file_name << std::endl; 
   }
-  XMLCoreNode n = parse (file_name);
+  std::unique_ptr<XMLCoreNode> n = parse (file_name);
   if (XMLCoreParserDebugger::debug ()){
-    const CoreParser::DOMNode& node = n.get_node();
-    const CoreParser::DOMNode* nptr = &node;
-    std::cout << "XMLCoreParser::visit node=" << nptr << std::endl; 
+    std::cout << "XMLCoreParser::visit node=" << n.get() << std::endl;
   }
-  visit (n);
+  visit (*n);
 } 
  
 void 
-XMLCoreParser::visit (const XMLCoreNode& core_node){ 
+XMLCoreParser::visit (const XMLCoreNode& node){
   // Get the name and value out for convenience 
-  const CoreParser::DOMNode& node = core_node.get_node ();
-  const CoreParser::DOMNode* nptr = &node;
   const std::string& nodeName = node.get_name(); 
   const std::string& nodeValue = node.get_value(); 
   if (XMLCoreParserDebugger::debug ()){
-    std::cout << "XMLCoreParser::visit node(" << nptr << ") " << nodeName << std::endl; 
+    std::cout << "XMLCoreParser::visit node(" << &node << ") " << nodeName << std::endl;
   }
   XMLCoreFactory* factory = find_factory (nodeName); 
   if (XMLCoreParserDebugger::debug ()){
@@ -312,52 +265,51 @@ XMLCoreParser::visit (const XMLCoreNode& core_node){
   }
 
   switch (node.get_type()) { 
-    case CoreParser::DOMNode::DOCUMENT_NODE : { 
-	    const CoreParser::DOMSiblings& siblings = node.get_siblings ();
-      for (const CoreParser::DOMNode* child : siblings) {
-          XMLCoreNode n (child);
-          visit (n); 
-      } 
-        break; 
+  case XMLCoreNode::DOCUMENT_NODE : {
+    std::vector<const XMLCoreNode*> children = node.get_children();
+    for (const XMLCoreNode* child : children) {
+      visit (*child);
     } 
-    case CoreParser::DOMNode::ELEMENT_NODE : { 
-      if (XMLCoreParserDebugger::debug ()){
-          std::cout << "XMLCoreParser::visit ELEMENT_NODE " 
-                    << " factory=" << factory 
-                    << std::endl; 
-      }
-      if (factory != 0){
-        factory->start (*this, core_node);
-      } else {
-        std::cerr << "XMLCoreParser> Cannot find factory for element " 
-                  << nodeName << std::endl;
-        register_factory (nodeName, std::make_unique<DummyFactory>());
-      }
-	    const CoreParser::DOMSiblings& siblings = node.get_siblings ();
-      for (const CoreParser::DOMNode* child : siblings) {
-        XMLCoreNode n (child);
-        visit (n); 
-      } 
-      if (factory != 0) factory->end (*this, core_node); 
-      break; 
-    } 
-    case CoreParser::DOMNode::COMMENT_NODE : { 
-      if (factory != 0) factory->comment (*this, nodeValue); 
-      break; 
-    } 
-    case CoreParser::DOMNode::ENTITY_NODE:{
-      std::cout << "ENTITY_NODE " << nodeValue << std::endl;
-      break;
+    break;
+  }
+  case XMLCoreNode::ELEMENT_NODE : {
+    if (XMLCoreParserDebugger::debug ()){
+      std::cout << "XMLCoreParser::visit ELEMENT_NODE "
+                << " factory=" << factory
+                << std::endl;
     }
-    case CoreParser::DOMNode::ENTITY_REFERENCE_NODE:{
-      std::cout << "ENTITY_REFERENCE_NODE " << nodeValue << std::endl;
-      break;
+    if (factory != 0){
+      factory->start (*this, node);
+    } else {
+      std::cerr << "XMLCoreParser> Cannot find factory for element "
+                << nodeName << std::endl;
+      register_factory (nodeName, std::make_unique<DummyFactory>());
     }
-    default: {
-      std::cerr << "Unrecognized node type = " << (long) node.get_type() << std::endl; 
-      break; 
+    std::vector<const XMLCoreNode*> children = node.get_children();
+    for (const XMLCoreNode* child : children) {
+      visit (*child);
     }
-  } 
+    if (factory != 0) factory->end (*this, node);
+    break;
+  }
+  case XMLCoreNode::COMMENT_NODE : {
+    if (factory != 0) factory->comment (*this, nodeValue);
+    break;
+  }
+  case XMLCoreNode::ENTITY_NODE:{
+    std::cout << "ENTITY_NODE " << nodeValue << std::endl;
+    break;
+  }
+  case XMLCoreNode::ENTITY_REFERENCE_NODE:{
+    std::cout << "ENTITY_REFERENCE_NODE " << nodeValue << std::endl;
+    break;
+  }
+  case XMLCoreNode::TEXT_NODE:
+    break;
+  default:
+    std::cerr << "Unrecognized node type = " << (long) node.get_type() << std::endl;
+    break;
+  }
   if (XMLCoreParserDebugger::debug ()){
       std::cout << "XMLCoreParser::visit-2" << std::endl; 
   }

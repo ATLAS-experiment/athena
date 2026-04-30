@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTRIGCOINDATA_TGCCOINDATACONTAINER_H
@@ -11,7 +11,7 @@
 
 namespace Muon {
     
-typedef MuonCoinDataContainer< TgcCoinDataCollection > TgcCoinDataContainer;
+using TgcCoinDataContainer = MuonCoinDataContainer< TgcCoinDataCollection >;
 
 }
 

@@ -3,13 +3,17 @@
 */
 #include "./GepCellTowerAlg.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
+#include "CaloGeoHelpers/CaloSampling.h"
 #include "xAODCaloEvent/CaloClusterAuxContainer.h"
 #include "xAODCaloEvent/CaloTower.h"
 #include "xAODCaloEvent/CaloTowerContainer.h"
 #include "xAODCaloEvent/CaloTowerAuxContainer.h"
 
 GepCellTowerAlg::GepCellTowerAlg( const std::string& name, ISvcLocator* pSvcLocator ) : 
-   AthReentrantAlgorithm( name, pSvcLocator ){
+   AthReentrantAlgorithm( name, pSvcLocator ),
+   m_minEt(0.)
+{
+   declareProperty("minEt", m_minEt);
 }
 
 
@@ -69,6 +73,10 @@ StatusCode GepCellTowerAlg::execute(const EventContext& context) const {
   int nTowers = customTowers->nTowers();
   cell_ids.resize(nTowers);
 
+  std::vector<std::vector<float>> layerEnergies;
+  layerEnergies.resize(nTowers);
+  for (int iTower=0; iTower < nTowers; ++iTower) layerEnergies[iTower].resize((int)CaloSampling::Unknown);
+  
   for (int iTower=0; iTower < nTowers; ++iTower) {
       auto tower = std::make_unique<xAOD::CaloTower>();
       customTowers->push_back(std::move(tower));
@@ -77,7 +85,6 @@ StatusCode GepCellTowerAlg::execute(const EventContext& context) const {
 
   // Single loop over cells to accumulate energy into the correct tower
   for (const auto& cell : cells) {
-      if (cell.sigma < 2) continue;
       if (cell.isBadCell()) continue;
 
       int idx = customTowers->index(cell.eta,cell.phi);
@@ -86,6 +93,7 @@ StatusCode GepCellTowerAlg::execute(const EventContext& context) const {
       // 4-vector with the eta and phi set to the center point of the tower
       // Effectively accumulating the et of the tower's constituent cells
       customTowers->at(idx)->addEnergy(cell.et);
+      layerEnergies[idx][cell.sampling] += cell.et;
       cell_ids[idx].push_back(cell.id);
   }
 
@@ -94,7 +102,7 @@ StatusCode GepCellTowerAlg::execute(const EventContext& context) const {
     auto p4 = tower->p4();
     // This is equivalent to checking the et of the tower 
     // since e() is the sum of the et of all constituent cells
-    if ( p4.E() == 0 ) continue;
+    if ( p4.E() <= m_minEt ) continue;
 
     // store the calCluster to fix up the Aux container:
     auto *ptr = h_outputCaloClusters->push_back(std::make_unique<xAOD::CaloCluster>());
@@ -117,6 +125,30 @@ StatusCode GepCellTowerAlg::execute(const EventContext& context) const {
     ptr->setPhi(phi);
     ptr->setTime(0);
 
+    ptr->setRawE(e);
+    ptr->setRawEta(eta);
+    ptr->setRawPhi(phi);
+    ptr->setRawM(0.0);
+
+    // add all the layer energies to the cluster
+    // these are stored alongside a sampling pattern
+    // the tower eta are used to convert the transverse
+    // energies into E per layer.
+    //Set Sampling pattern:
+    uint32_t samplingPattern=0;
+    for(int i=0;i<(int)CaloSampling::Unknown;i++) {
+      if (layerEnergies[tower->index()].at(i)!=0) samplingPattern |= (0x1U<<i);
+    }
+    //Clear sampling data (if there is any)
+    ptr->clearSamplingData();
+    ptr->setSamplingPattern(samplingPattern);
+
+    //fill the actual sampling energies
+    for(int i=0;i<(int)CaloSampling::Unknown;i++) {
+      CaloSampling::CaloSample sampling_i = static_cast<CaloSampling::CaloSample>(i);
+      if (layerEnergies[tower->index()].at(i)!=0) ptr->setEnergy(sampling_i, layerEnergies[tower->index()].at(i) * std::cosh(eta));
+    }
+    
     auto cccl = std::make_unique<CaloClusterCellLink>();
 
     for (auto cell_id : cell_ids[tower->index()])

@@ -8,36 +8,12 @@
 #ifndef COLUMNAR_INTERFACES_I_COLUMNAR_TOOL_H
 #define COLUMNAR_INTERFACES_I_COLUMNAR_TOOL_H
 
+#include <ColumnarInterfaces/ColumnarDef.h>
 #include <string>
 #include <vector>
 
 namespace columnar
 {
-  /// @brief the type used for the size and offsets in the columnar data
-  ///
-  /// @todo This type still needs to be adjusted to match whatever uproot
-  /// uses for its offset maps.
-  using ColumnarOffsetType = std::size_t;
-
-  /// @brief the value for an invalid element index
-  ///
-  /// This is mostly used for invalid element links
-  inline constexpr ColumnarOffsetType invalidObjectIndex = static_cast<ColumnarOffsetType>(-1);
-
-
-  /// @brief the name used for the column containing the number of
-  /// events
-  ///
-  /// Essentially this shows up in a large number of places, and I'm not
-  /// sure what the best name for it is.  I'm currently using
-  /// "EventInfo", because technically it is the number of `EventInfo`
-  /// objects the data has.  I'm pretty sure that this will be confusing
-  /// to many people.
-  ///
-  /// @todo Find a better name than "EventInfo".
-  inline const std::string numberOfEventsName = "EventInfo";
-
-
   struct ColumnInfo;
 
 

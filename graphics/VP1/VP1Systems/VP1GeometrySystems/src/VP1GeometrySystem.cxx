@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////
@@ -430,8 +430,8 @@ QWidget * VP1GeometrySystem::buildController()
    */
 
   if (VP1JobConfigInfo::hasITkGeometry()) {
-    m_d->addSubSystem( VP1GeoFlags::Pixel,"ITkPixel", "", "ITkPixel");
-    m_d->addSubSystem( VP1GeoFlags::SCT,"ITkStrip", "", "ITkStrip");
+    m_d->addSubSystem( VP1GeoFlags::ITkPixel,"ITkPixel", "", "ITkPixel");
+    m_d->addSubSystem( VP1GeoFlags::ITkStrip,"ITkStrip", "", "ITkStrip");
   } else {
     m_d->addSubSystem( VP1GeoFlags::Pixel,"Pixel");
     m_d->addSubSystem( VP1GeoFlags::SCT,"SCT");
@@ -2247,10 +2247,11 @@ QStringList VP1GeometrySystem::Imp::stationInfo(const MuonGM::MuonStation* stati
 void VP1GeometrySystem::autoAdaptPixelsOrSCT(bool pixel,bool brl, bool ecA, bool ecC, bool bcmA, bool bcmC)
 {
     #ifndef BUILDVP1LIGHT
-      if (!(pixel?VP1JobConfigInfo::hasPixelGeometry():VP1JobConfigInfo::hasSCTGeometry()))
+      if (!( pixel ? (VP1JobConfigInfo::hasPixelGeometry()||VP1JobConfigInfo::hasITkGeometry()) : (VP1JobConfigInfo::hasSCTGeometry()||VP1JobConfigInfo::hasITkGeometry()) ))
         return;
     #endif
-  VP1GeoFlags::SubSystemFlag subSysFlag(pixel?VP1GeoFlags::Pixel:VP1GeoFlags::SCT);
+  //VP1GeoFlags::SubSystemFlag subSysFlag( pixel ? VP1GeoFlags::Pixel : VP1GeoFlags::SCT );
+  VP1GeoFlags::SubSystemFlag subSysFlag( pixel ? VP1GeoFlags::ITkPixel : VP1GeoFlags::ITkStrip );
 
   bool bcm(bcmA||bcmC);
   bool ec(ecA||ecC);

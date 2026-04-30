@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -10,13 +10,11 @@
  *     Author: L. Miller
  */
 
-#ifndef PFTAUFLOWELEMENTASSOC_H
-#define PFTAUFLOWELEMENTASSOC_H
+#ifndef EFLOWREC_PFTAUFLOWELEMENTASSOC_H
+#define EFLOWREC_PFTAUFLOWELEMENTASSOC_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "StoreGate/DataHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
 
 #include "xAODPFlow/FlowElementContainer.h"
@@ -66,4 +64,4 @@ private:
 
 };
 
-#endif // PFTAUFLOWELEMENTASSOC_H
+#endif // EFLOWREC_PFTAUFLOWELEMENTASSOC_H

@@ -19,7 +19,6 @@ def ActsAnalogueClusteringToolCfg(flags,
     
     kwargs.setdefault('UseWeightedPosition', flags.Acts.Clusters.UseWeightedPosition)
     kwargs.setdefault("PerformCovarianceCalibration", flags.Acts.OnTrackCalibration.performCovarianceCalibration)
-    kwargs.setdefault("DetEleCollKey", "ITkPixelDetectorElementCollection")
     kwargs.setdefault("PixelOfflineCalibData", "ITkPixelOfflineCalibData")
     kwargs.setdefault("errorStrategy", PixelErrorStrategy.PITCH.value if flags.Acts.Clusters.UsePixelBroadErrors
                       else PixelErrorStrategy.CALIBRATED.value)
@@ -48,8 +47,6 @@ def ActsStripCalibrationToolCfg(flags,
 
     from ActsConfig.ActsConfigFlags import StripClusteringErrorMode,StripErrorStrategy
     
-    
-    kwargs.setdefault("DetEleCollKey", "ITkStripDetectorElementCollection")
     kwargs.setdefault("PerformCovarianceCalibration", True)
     kwargs.setdefault("errorStrategy", StripErrorStrategy.PITCH.value if flags.Acts.Clusters.StripClusteringErrorMode == StripClusteringErrorMode.WIDTH
                       else StripErrorStrategy.CLUSTERING.value)

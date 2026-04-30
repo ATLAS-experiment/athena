@@ -41,7 +41,7 @@ public:
 protected:
   TrigRNNOutput_PERS*  createPersistent(TrigRNNOutput* transCont);
 
-  TrigRNNOutput*       createTransient ();
+  TrigRNNOutput*       createTransient(const Token* token);
 
  private:
   TrigRNNOutputCnv_impl* m_impl;

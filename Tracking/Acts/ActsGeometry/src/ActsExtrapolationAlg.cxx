@@ -107,11 +107,11 @@ StatusCode ActsExtrapolationAlg::execute(const EventContext &ctx) const {
     Acts::BoundVector pars;
     // cppcheck-suppress constStatement; will be able to initialize this directly with eigen 3.4
     pars << d0, z0, phi, theta, qop, t;
-    std::optional<Acts::BoundSquareMatrix> cov = std::nullopt;
+    std::optional<Acts::BoundMatrix> cov = std::nullopt;
 
     if (charge != 0.) {
       // Perigee, no alignment -> default geo context
-      Acts::GenericBoundTrackParameters startParameters(std::move(surface), std::move(pars), std::move(cov), Acts::ParticleHypothesis::pion());
+      Acts::BoundTrackParameters startParameters(std::move(surface), std::move(pars), std::move(cov), Acts::ParticleHypothesis::pion());
       auto result = m_extrapolationTool->propagationSteps(ctx, startParameters);
       if (!result.ok()) {
         ATH_MSG_WARNING("Extrapolation tool failed to extrapolate the track: "

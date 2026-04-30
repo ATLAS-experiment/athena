@@ -13,3 +13,9 @@ DSID,generator-version pairs...
 # aMcAtNlo+Pythia8 tZq
 545027,aMcAtNlo,3.5.1.atlas3,Pythia8,309,EvtGen,2.1.1
 545028,aMcAtNlo,3.5.1.atlas3,Pythia8,309,EvtGen,2.1.1
+# ttbar+bb Herwig7
+601668_e8555,Powheg,06-03,Herwig7,7.2.3p2,EvtGen,2.1.1
+603905_e8555,Powheg,06-03,Herwig7,7.2.3p2,EvtGen,2.1.1
+603906_e8555,Powheg,06-03,Herwig7,7.2.3p2,EvtGen,2.1.1
+603905_e8590,Powheg,07-09,Herwig7,7.2.3p2,EvtGen,2.2.1
+603906_e8590,Powheg,07-09,Herwig7,7.2.3p2,EvtGen,2.2.1

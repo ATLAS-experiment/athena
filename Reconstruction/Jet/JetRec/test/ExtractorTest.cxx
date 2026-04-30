@@ -1,6 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
+
+#include "CxxUtils/checker_macros.h"
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 #include "JetRec/IParticleExtractor.h"
 #include "xAODJet/Jet.h"
@@ -9,7 +12,6 @@
 #ifndef GENERATIONBASE
 #include "xAODJet/JetTrigAuxContainer.h"
 #endif
-#include "CxxUtils/checker_macros.h"
 #include "SGTools/TestStore.h" 
 
 #include "gtest/gtest.h"

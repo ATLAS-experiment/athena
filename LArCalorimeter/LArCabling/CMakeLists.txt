@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( LArCabling )
@@ -29,7 +29,7 @@ atlas_install_joboptions( share/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} --extend-ign
 atlas_install_runtime( share/FEBtoRODfred_v10.data )
 
 if( NOT SIMULATIONBASE AND NOT GENERATIONBASE )
-  atlas_add_test( LArCablingConfig    SCRIPT python -m LArCabling.LArCablingConfig POST_EXEC_SCRIPT nopost.sh )
+  atlas_add_test( LArCablingConfig    SCRIPT python -m LArCabling.LArCablingConfig POST_EXEC_SCRIPT noerror.sh )
   atlas_add_test( LArIdCablingTest SCRIPT python -m LArCabling.LArIdCablingTest POST_EXEC_SCRIPT noerror.sh )
   atlas_add_test( LArIdCablingTestSC SCRIPT python -m LArCabling.LArIdCablingTest --SC POST_EXEC_SCRIPT noerror.sh )
 endif()

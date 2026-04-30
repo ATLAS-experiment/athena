@@ -35,7 +35,7 @@ public:
 protected:
 
   virtual TriggerTowerCollection_PERS*   createPersistent (TriggerTowerCollection* transCont);
-  virtual TriggerTowerCollection*        createTransient ();
+  virtual TriggerTowerCollection*        createTransient(const Token* token);
 
 private:
   

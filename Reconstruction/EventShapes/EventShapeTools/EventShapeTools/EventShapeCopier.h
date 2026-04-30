@@ -1,7 +1,7 @@
 // EventDensityTool.h    -*- C++ -*- 
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -58,7 +58,7 @@ public:
   /// to schedule an Athena algorithm (see python/EventDensityConfig).
   void renameEventDensities();
 protected:
-  // DataHandles
+  // Handles
   SG::ReadHandleKey<xAOD::EventShape>       m_outputEventShapeIn;
   SG::ReadHandleKey<xAOD::EventShape>       m_inputEventShape;
   SG::WriteHandleKey<xAOD::EventShape>      m_outputEventShape;

@@ -84,7 +84,8 @@ namespace ActsTrk
                         std::size_t& ntracks,
                         std::size_t iseed,
                         std::size_t category_i,
-                        const char *seedType) const;
+                        const char *seedType,
+                        std::optional<std::vector<unsigned int>>& trackCategories) const;
 
     StatusCode storeTrackCollectionToStoreGate(const EventContext& ctx,
                                                Acts::VectorTrackContainer&& originalTrackBackend,
@@ -176,7 +177,8 @@ namespace ActsTrk
                const char *seedType,
                EventStats &event_stat,
                std::vector<int>* destiny,
-               const Acts::PerigeeSurface& pSurface) const;
+               const Acts::PerigeeSurface& pSurface,
+               std::optional<std::vector<unsigned int>>& trackCategories) const;
 
     // Create tracks from one seed's CKF result, appending to tracksContainer
     void storeSeedInfo(const detail::RecoTrackContainer &tracksContainer,

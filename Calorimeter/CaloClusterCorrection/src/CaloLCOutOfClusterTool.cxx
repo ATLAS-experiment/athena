@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -30,38 +30,8 @@
 
 using xAOD::CaloCluster;
 
-CaloLCOutOfClusterTool::CaloLCOutOfClusterTool(const std::string& type,
-					       const std::string& name,
-					       const IInterface* parent)
-  : AthAlgTool(type,name,parent),
-    m_key("OOCCorrection"),
-    m_useEmProbability(false),
-    m_useHadProbability(false),
-    m_interpolate(false)
-
-{ 
-
-  declareInterface<IClusterCellWeightTool>(this);
-  m_invalidSamplingNames.resize(3);
-
-  m_invalidSamplingNames[0] = "PreSamplerB";
-  m_invalidSamplingNames[1] = "PreSamplerE";
-  m_invalidSamplingNames[2] = "TileGap3";
-
-  declareProperty("CorrectionKey",m_key);
-  declareProperty("UseEmProbability",m_useEmProbability);
-  declareProperty("UseHadProbability",m_useHadProbability);
-  declareProperty("InvalidSamplings",m_invalidSamplingNames);
-
-  // Use Interpolation or not
-  declareProperty("Interpolate",m_interpolate);
-  m_interpolateDimensionNames.resize(3);
-  m_interpolateDimensionNames[0] = "DIMO_ENER";
-  m_interpolateDimensionNames[1] = "DIMO_ETA";
-  m_interpolateDimensionNames[2] = "DIMO_LAMBDA";
-  declareProperty("InterpolateDimensionNames", m_interpolateDimensionNames);
-  declareProperty("UpdateSamplingVars",m_updateSamplingVars=false);
-}
+CaloLCOutOfClusterTool::~CaloLCOutOfClusterTool()
+= default;
 
 StatusCode CaloLCOutOfClusterTool::initialize()
 {
@@ -292,8 +262,3 @@ StatusCode CaloLCOutOfClusterTool::weight(CaloCluster *theCluster, const EventCo
   }
   return StatusCode::SUCCESS;
 }
-
-CaloLCOutOfClusterTool::~CaloLCOutOfClusterTool()
-= default;
-
-

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -9,8 +9,8 @@
  *      Author: tlodd
  */
 
-#ifndef PFMATCHER_H_
-#define PFMATCHER_H_
+#ifndef EFLOWREC_PFMATCHER_H
+#define EFLOWREC_PFMATCHER_H
 
 #include "PFMatchInterfaces.h"
 #include <algorithm>
@@ -148,4 +148,4 @@ std::vector<MatchDistance> TrackClusterMatcher::bestMatches(ITrack* track, std::
 
 }
 
-#endif /* PFMATCHER_H_ */
+#endif /* EFLOWREC_PFMATCHER_H */

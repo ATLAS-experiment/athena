@@ -22,8 +22,8 @@ StripRDO_Container_PERS* PhaseIIStripRawDataContainerCnv::createPersistent(Phase
   persObj->m_collections.reserve( transCont->size() );
   unsigned int n_rdos=0;
   auto rdo_container_collection_proxy = PhaseII::makeRawDataCollectionProxy(*transCont);
-  using StripRawDataContainerProxy = PhaseII::StripRawDataContainerCollectionTypes<>::RawDataContainerProxy;
-  using StripRawDataProxy = PhaseII::StripRawDataContainerCollectionTypes<>::RawDataProxy;
+  using StripRawDataContainerProxy = PhaseII::StripRawDataTypeTraits<>::RawDataContainerProxy;
+  using StripRawDataProxy = PhaseII::StripRawDataTypeTraits<>::RawDataProxy;
   // convert element index and count total number of elements in all containers.
   for (StripRawDataContainerProxy module_rdo_container_proxy : rdo_container_collection_proxy) {
      if (!module_rdo_container_proxy.empty()) {
@@ -81,15 +81,15 @@ StripRDO_Container_PERS* PhaseIIStripRawDataContainerCnv::createPersistent(Phase
   return persObj.release();
 }
 
-PhaseIIStripRawDataContainer* PhaseIIStripRawDataContainerCnv::createTransient() {
+PhaseIIStripRawDataContainer* PhaseIIStripRawDataContainerCnv::createTransient(const Token* token) {
   //  @TODO support  p0_guid 7F2C09B6-0B47-4957-8BBA-EDC665A290AC i.e. initial container
   //  @TOOD support TP1_guid DA76970C-E019-43D2-B2F9-25660DCECD9D i.e. t/p separated version with InDetRawDataContainer_p1
   static const pool::Guid   SCT_TP4_guid("6C7540BE-E85C-4777-BC1C-A9FF11460F54"); // for t/p separated version with SCT_RawDataContainer_p4
 
-  if( compareClassGuid(SCT_TP4_guid) ) {
-     std::unique_ptr< SCT_RawDataContainer_p4 >   persCont( poolReadObject< SCT_RawDataContainer_p4 >() );
+  if( compareClassGuid(token, SCT_TP4_guid) ) {
+     std::unique_ptr< SCT_RawDataContainer_p4 >   persCont( poolReadObject< SCT_RawDataContainer_p4 >(token) );
     std::unique_ptr<PhaseIIStripRawDataContainer> transCont(std::make_unique<PhaseIIStripRawDataContainer>(m_idHelper->wafer_hash_max(),
-                                                                                                           1 /* one slot */ ));
+                                                                                                           1 /* one container only */ ));
 
     PhaseII::StripRawDataContainer::ERawDataType type = PhaseII::StripRawDataContainer::UNKNOWN;
     if (persCont->m_sct3data.size() != 0){
@@ -113,12 +113,12 @@ PhaseIIStripRawDataContainer* PhaseIIStripRawDataContainerCnv::createTransient()
        n_rdos_total += n_rdos;
     }
 
-    using RangeBeginIndex_t = decltype(PhaseII::DataRange::m_beginIndex);
-    using RangeSize_t = decltype(PhaseII::DataRange::m_n);
-    using ContainerIndex_t = decltype(PhaseII::DataRange::m_containerIndex);
-    constexpr ContainerIndex_t slot_i=0u;
+    using RangeBeginIndex_t = PhaseII::DataRange::RangeBeginIndex_t;
+    using RangeSize_t = PhaseII::DataRange::RangeSize_t;
+    using ContainerIndex_t = PhaseII::DataRange::ContainerIndex_t;
+    constexpr ContainerIndex_t container_i=0u;
 
-    PhaseII::StripRawDataContainer &rdo_container_dest = transCont->data(slot_i);
+    PhaseII::StripRawDataContainer &rdo_container_dest = transCont->data(container_i);
     rdo_container_dest.reserve(n_rdos_total);
     assert(persCont->m_rawdata.size() == n_rdos_total);
 
@@ -130,7 +130,7 @@ PhaseIIStripRawDataContainer* PhaseIIStripRawDataContainerCnv::createTransient()
           // @TODO should use the ContainerRangeGuard, and the convenience method addDataForModule
           PhaseII::DataRange new_range( static_cast<RangeBeginIndex_t>(rdo_container_dest.size()),
                                         static_cast<RangeSize_t>(0u) ,
-                                        slot_i);
+                                        container_i);
           for (unsigned int rdo_i = a_collection.m_begin; rdo_i < a_collection.m_end; ++rdo_i) {
              assert( rdo_i < persCont->m_rawdata.size() );
              Identifier strip_id(persCont->m_rawdata[rdo_i].m_rdoId);
@@ -148,7 +148,7 @@ PhaseIIStripRawDataContainer* PhaseIIStripRawDataContainerCnv::createTransient()
 
           assert( static_cast<std::size_t>(rdo_container_dest.size() - new_range.beginIndex()) < std::numeric_limits<RangeSize_t>::max() );
           // update the number of elements in this range.
-          new_range.m_n  = static_cast<RangeSize_t>( rdo_container_dest.size() - new_range.beginIndex());
+          new_range.setSize(static_cast<RangeSize_t>( rdo_container_dest.size() - new_range.beginIndex()));
           // register the new hit range
           n_rejected_ranges += !(transCont->registerOrEraseNewData( a_collection.m_hashId, new_range));
           // since only this converter registers ranges in this container, the just added range of elements should never be erased:
@@ -164,7 +164,7 @@ PhaseIIStripRawDataContainer* PhaseIIStripRawDataContainerCnv::createTransient()
           // @TODO should use the ContainerRangeGuard, and the convenience method addDataForModule
           PhaseII::DataRange new_range( static_cast<RangeBeginIndex_t>(rdo_container_dest.size()),
                                         static_cast<RangeSize_t>(0u) ,
-                                        slot_i);
+                                        container_i);
           for (unsigned int rdo_i = a_collection.m_begin; rdo_i < a_collection.m_end; ++rdo_i) {
              assert( rdo_i < persCont->m_sct3data.size() );
              const SCT3_RawData_p4 &persObj=persCont->m_sct3data[rdo_i];
@@ -188,7 +188,14 @@ PhaseIIStripRawDataContainer* PhaseIIStripRawDataContainerCnv::createTransient()
 
           assert( static_cast<std::size_t>(rdo_container_dest.size() - new_range.beginIndex()) < std::numeric_limits<RangeSize_t>::max() );
           // update the number of elements in this range.
-          new_range.m_n  = static_cast<RangeSize_t>( rdo_container_dest.size() - new_range.beginIndex());
+          std::size_t capped_size = rdo_container_dest.size() - new_range.beginIndex();
+          if (capped_size >= std::numeric_limits<PhaseII::DataRange::RangeSize_t>::max()) {
+             ATH_MSG_WARNING( "Too many RDOs registered for module hash " << a_collection.m_hashId
+                              << " : " << capped_size << " !< " << std::numeric_limits<PhaseII::DataRange::RangeSize_t>::max()
+                              << ". Elements above maximum possible size will not be accessible.");
+             capped_size =std::numeric_limits<PhaseII::DataRange::RangeSize_t>::max();
+          }
+          new_range.setSize( static_cast<RangeSize_t>( capped_size) );
           // register the new hit range
           n_rejected_ranges += !(transCont->registerOrEraseNewData( a_collection.m_hashId, new_range));
           // since only this converter registers ranges in this container, the just added range of elements should never be erased:

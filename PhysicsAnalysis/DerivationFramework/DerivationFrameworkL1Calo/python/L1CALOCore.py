@@ -740,6 +740,12 @@ def addGfexTOBs(slimminghelper, allVariables, postFix = ""):
          "L1_gFexSRJetRoI"+postFix+"Aux" : "xAOD::gFexJetRoIAuxContainer",
          "L1_gScalarEJwoj"+postFix : "xAOD::gFexGlobalRoIContainer",
          "L1_gScalarEJwoj"+postFix+"Aux" : "xAOD::gFexGlobalRoIAuxContainer",
+         "L1_gEspresso"+postFix : "xAOD::gFexGlobalRoIContainer",
+         "L1_gEspresso"+postFix+"Aux" : "xAOD::gFexGlobalRoIAuxContainer",
+         "L1_gRistretto"+postFix : "xAOD::gFexGlobalRoIContainer",
+         "L1_gRistretto"+postFix+"Aux" : "xAOD::gFexGlobalRoIAuxContainer",
+         "L1_gScalarEJwojOutOfTime"+postFix : "xAOD::gFexGlobalRoIContainer",
+         "L1_gScalarEJwojOutOfTime"+postFix+"Aux" : "xAOD::gFexGlobalRoIAuxContainer",
          "L1_gFexLRJetRoI"+postFix : "xAOD::gFexJetRoIContainer",
          "L1_gFexLRJetRoI"+postFix+"Aux" : "xAOD::gFexJetRoIAuxContainer",
          "L1_gMETComponentsJwoj"+postFix : "xAOD::gFexGlobalRoIContainer",
@@ -755,6 +761,9 @@ def addGfexTOBs(slimminghelper, allVariables, postFix = ""):
                      "L1_gFexLRJetRoI" + postFix,
                      "L1_gMETComponentsJwoj" + postFix,
                      "L1_gMHTComponentsJwoj" + postFix,
-                     "L1_gMSTComponentsJwoj" + postFix]
+                     "L1_gMSTComponentsJwoj" + postFix,
+                     "L1_gEspresso" + postFix,
+                     "L1_gRistretto" + postFix,
+                     "L1_gScalarEJwojOutOfTime" + postFix]
 
     return slimminghelper, allVariables

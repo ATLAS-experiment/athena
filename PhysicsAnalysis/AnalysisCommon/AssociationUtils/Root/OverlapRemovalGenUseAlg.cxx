@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM includes
@@ -52,10 +52,15 @@ StatusCode OverlapRemovalGenUseAlg::initialize()
   }
   
   m_jetKey.declareOutput(m_overlapLabel);
+  m_jetKey.declareOutput(m_selectionLabel);
   m_electronKey.declareOutput(m_overlapLabel);
+  m_electronKey.declareOutput(m_selectionLabel);
   m_photonKey.declareOutput(m_overlapLabel);
+  m_photonKey.declareOutput(m_selectionLabel);
   m_muonKey.declareOutput(m_overlapLabel);
+  m_muonKey.declareOutput(m_selectionLabel);
   m_tauKey.declareOutput(m_overlapLabel);
+  m_tauKey.declareOutput(m_selectionLabel);
   ATH_CHECK(m_jetKey.initialize());
   ATH_CHECK(m_electronKey.initialize());
   ATH_CHECK(m_muonKey.initialize());
@@ -155,6 +160,17 @@ StatusCode OverlapRemovalGenUseAlg::execute()
         if(taus) printObjects(*taus, "tau");
         if(photons) printObjects(*photons, "pho");
     }
+
+    // Lock the decorations that we wrote.
+    auto lockDecors = [&] (const auto& handler) {
+      handler.template lockDecor<char> (m_selectionLabel, ctx);
+      handler.template lockDecor<char> (m_overlapLabel, ctx);
+    };
+    lockDecors (m_electronKey);
+    lockDecors (m_muonKey);
+    lockDecors (m_photonKey);
+    lockDecors (m_jetKey);
+    lockDecors (m_tauKey);
 
     return StatusCode::SUCCESS;
 }

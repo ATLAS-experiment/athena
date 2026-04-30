@@ -52,7 +52,15 @@ def legacyReleaseDataSampleGeneratorOverrides():
             versions = {}
             for i in range(1, len(line), 2):
                 versions[line[i]] = line[i+1] if line[i+1] != "None" else None
-            data[int(line[0])] = versions
+            
+            dsid_info = line[0].split("_")
+            dsid = int(dsid_info[0])
+            if dsid not in data:
+                data[dsid] = {}
+            if len(dsid_info) == 1:
+                data[dsid]["any"] = versions
+            else:
+                data[dsid][dsid_info[1]] = versions
     return data
 
 def generatorsGetInitialVersionedDictionary(generators):
@@ -100,7 +108,14 @@ def GeneratorVersioningFixCfg(flags):
         if v is None and k not in ignoredGenerators:
             missingVersion = True
 
-    if not missingVersion:
+    # Fix specific samples directly
+    releaseDataSampleGeneratorOverridesDict = legacyReleaseDataSampleGeneratorOverrides()
+    overrides = None
+    if flags.Input.MCChannelNumber and flags.Input.MCChannelNumber in releaseDataSampleGeneratorOverridesDict:
+        overrides = releaseDataSampleGeneratorOverridesDict[flags.Input.MCChannelNumber]
+        log.warning("Found generator overrides for sample with DSID %d", flags.Input.MCChannelNumber)
+
+    if not missingVersion and not overrides:
         return ComponentAccumulator()
 
     log.info("At least one MC generator is missing version information. Attempting to fix...")
@@ -111,10 +126,15 @@ def GeneratorVersioningFixCfg(flags):
     if tags and tags[0].startswith("e"):
         tag = tags[0]
 
-    # Fix specific samples directly
-    releaseDataSampleGeneratorOverridesDict = legacyReleaseDataSampleGeneratorOverrides()
-    if flags.Input.MCChannelNumber and flags.Input.MCChannelNumber in releaseDataSampleGeneratorOverridesDict:
-        overrides = releaseDataSampleGeneratorOverridesDict[flags.Input.MCChannelNumber]
+    # First check if we are fixing samples directly
+    if overrides:
+        if "any" in overrides:
+            overrides = overrides["any"]
+        else:
+            overrides = overrides.get(tag, {})
+
+    # Check again if e-tag matches and overrides are not empty
+    if overrides:
         log.warning(f"Overriding generators to {'+'.join(overrides.keys())}.")
         generatorsData = {}
         for generator, version in overrides.items():

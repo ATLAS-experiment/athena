@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <memory>
@@ -68,7 +68,7 @@ StatusCode JetClusterer::initialize()
   cs.inclusive_jets(m_ptmin);
   m_isVariableR = m_minrad >= 0.0 && m_massscale >= 0.0;
 
-  // Input DataHandles
+  // Input handles
   if (!m_finalPseudoJets.empty())
   {
     ATH_MSG_WARNING("A non-empty value was found for the FinalPseudoJets WriteHandleKey -- this will be ignored!");

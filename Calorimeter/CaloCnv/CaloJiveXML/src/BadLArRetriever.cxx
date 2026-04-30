@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BadLArRetriever.h"
@@ -22,29 +22,7 @@ using Athena::Units::GeV;
 namespace JiveXML {
 
   /**
-   * This is the standard AthAlgTool constructor
-   * @param type   AlgTool type name
-   * @param name   AlgTool instance name
-   * @param parent AlgTools parent owning this tool
-   **/
-  BadLArRetriever::BadLArRetriever(const std::string& type,const std::string& name,const IInterface* parent):
-    AthAlgTool(type,name,parent),
-    m_calocell_id(nullptr)
-  {
-    //Only declare the interface
-    declareInterface<IDataRetriever>(this);
-
-    declareInterface<IDataRetriever>(this);
-    declareProperty("LArlCellThreshold", m_cellThreshold = 50.);
-    declareProperty("RetrieveLAr" , m_lar = true);
-    declareProperty("DoBadLAr",     m_doBadLAr = false);
-    declareProperty("CellConditionCut", m_cellConditionCut = false);
-
-    declareProperty("CellEnergyPrec", m_cellEnergyPrec = 3);
-  }
-
-  /**
-   * Initialise the ToolSvc
+   * Initialise the Tool
    */
 
   StatusCode BadLArRetriever::initialize() {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetUncertainties/JetUncertaintiesTool.h"
@@ -47,7 +47,7 @@ void setJetKinematics(xAOD::Jet& jet, double pt, double eta, double phi, double 
     scaleCombTop.setAttribute(jet, xAOD::JetFourMom_t(pt,eta,phi,mass));
 }
 
-int main (int argc, char* argv[])
+int test1 (int argc, char* argv[])
 {
     StatusCode::enableFailure();
     jet::OptionHelper optHelper;
@@ -74,9 +74,17 @@ int main (int argc, char* argv[])
     TString config     = argv[4];
     TString component  = argv[5];
     TString isDataStr  = argv[6];
-    if (argc == 8) optHelper.Initialize(jet::utils::vectorize<TString>(argv[7],";"));
-    else           optHelper.Initialize(std::vector<TString>());
-
+    try{
+      if (argc == 8) optHelper.Initialize(jet::utils::vectorize<TString>(argv[7],";"));
+      else           optHelper.Initialize(std::vector<TString>());
+    } catch (const std::exception& e) {
+      std::cerr<<"Exception in optHelper.Initialize: " << e.what()<<std::endl;
+      exit(1);
+    } catch (...) {
+      std::cerr<<"Unknown exception in optHelper.Initialize"<<std::endl;
+      exit(1);
+    }
+   
     if (!outFile.EndsWith(".pdf"))
     {
         printf("Only pdf output files are currently supported\n");
@@ -279,4 +287,15 @@ int main (int argc, char* argv[])
     canvas.Print(outFile+"]");
 
     return 0;
+}
+
+
+int main (int argc, char* argv[])
+{
+  try {
+    return test1(argc, argv);
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
 }

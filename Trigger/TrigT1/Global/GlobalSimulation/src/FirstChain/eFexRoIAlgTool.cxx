@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "./eFexRoIAlgTool.h"
@@ -45,15 +45,13 @@ namespace GlobalSim {
      */
     
  
-    auto roiSelector = [&etMin=m_etMin](const auto& roi) {
+    auto roiSelector = [&etMin=m_etMin,
+			&etaMin=m_etaMin,
+			&etaMax=m_etaMax](const auto& roi) {
 
-      // fiducial cut values
-      constexpr double eta_out_fid{1.4};
-      constexpr double eta_in_fid{0.2};
-      
       auto abs_eta = std::abs(roi->eta());
-      return (eta_in_fid <= abs_eta) and
-	(abs_eta < eta_out_fid) and
+      return (etaMin <= abs_eta) and
+	(abs_eta < etaMax) and
 	(roi->et() > etMin);
     };
 

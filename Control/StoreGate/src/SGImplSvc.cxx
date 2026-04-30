@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef DEBUG_SGIMPL
@@ -495,29 +495,6 @@ bool SGImplSvc::isSymLinked(const CLID& linkID, DataProxy* dp)
 {        
   return (0 != dp) ? dp->transientID(linkID) : false;        
 }
-
-
-StatusCode 
-SGImplSvc::regFcn( const CallBackID& c1,
-                   const CallBackID& c2,
-                   const IOVSvcCallBackFcn& fcn,
-                   bool trigger)
-{
-  lock_t lock (m_mutex);
-  return ( m_pIOVSvc->regFcn(c1,c2,fcn,trigger) );
-}
-
-
-StatusCode 
-SGImplSvc::regFcn( const std::string& toolName,
-                   const CallBackID& c2,
-                   const IOVSvcCallBackFcn& fcn,
-                   bool trigger)
-{
-  lock_t lock (m_mutex);
-  return ( m_pIOVSvc->regFcn(toolName,c2,fcn,trigger) );
-}
-
 
 //////////////////////////////////////////////////////////////////
 // Dump Contents in store:
@@ -1351,71 +1328,6 @@ void SGImplSvc::emptyTrash() {
   }
 }
 
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-bool SGImplSvc::bindHandleToProxy(const CLID& id, const string& key,
-                                  IResetable* ir, DataProxy *&dp) 
-{
-  lock_t lock (m_mutex);
-
-  dp = m_pStore->proxy (id, key);
-  if (dp == nullptr && m_pPPS != nullptr) {
-    dp = m_pPPS->retrieveProxy(id, key, *m_pStore);
-  }
-
-  if (0 == dp) return false;
-
-  if (! dp->bindHandle(ir) ) {
-    fatal() << "DataHandle at " << hex << ir << dec 
-            << " already bound to DataProxy with key " << ir->key() 
-            << ". Cannot bind to proxy " << dp->name() << " as well\n"
-            << "        You have probably registered multiple callbacks via regFcn with the same DataHandle using different keys (DataProxies)\n"
-            << endmsg;
-    return false;
-  }
-    
-  //already done in DataHandleBase::setState  dp->addRef();
-
-#ifndef NDEBUG
-  SG_MSG_DEBUG(" Bound handle " << MSG::hex << ir << " to proxy " 
-               << dp << MSG::dec); 
-#endif
-  return true;
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-bool SGImplSvc::bindHandleToProxyAndRegister (const CLID& id, const std::string& key,
-                                              IResetable* ir, SG::DataProxy *&dp) 
-{
-  lock_t lock (m_mutex);
-  bool ret = bindHandleToProxy (id, key, ir, dp);
-  if (ret) {
-    StatusCode sc = m_pIOVSvc->regProxy(dp,key);
-    if (sc.isFailure()) return false;
-  }
-  return true;
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-bool SGImplSvc::bindHandleToProxyAndRegister (const CLID& id, const std::string& key,
-                                              IResetable* ir, SG::DataProxy *&dp,
-                                              const CallBackID& c,
-                                              const IOVSvcCallBackFcn& fcn,
-                                              bool trigger)
-{
-  lock_t lock (m_mutex);
-  bool ret = bindHandleToProxy (id, key, ir, dp);
-  if (ret) {
-    StatusCode sc = m_pIOVSvc->regProxy(dp,key);
-    if (sc.isFailure()) return false;
-    sc = m_pIOVSvc->regFcn(dp,c,fcn,trigger);
-    if (sc.isFailure()) return false;
-  }
-  return true;
-}
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

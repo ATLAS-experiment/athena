@@ -1,17 +1,16 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  TrigTauCaloRoiUpdater_H
 #define  TrigTauCaloRoiUpdater_H
 
-#include <iostream>
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 #include "xAODCaloEvent/CaloClusterContainer.h"
 
-#include "TrigSteeringEvent/TrigRoiDescriptor.h"
+#include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 
 /**
  * @class TrigTauCaloRoiUpdater

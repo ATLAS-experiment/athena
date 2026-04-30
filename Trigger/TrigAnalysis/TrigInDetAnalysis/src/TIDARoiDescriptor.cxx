@@ -88,7 +88,8 @@ TIDARoiDescriptor::TIDARoiDescriptor( double eta,  double etaMinus,   double eta
 	       phi, phiMinus, phiPlus,
 	       zed, zedMinus, zedPlus ), 
      m_fullscan(false),
-     m_l1Id(0), m_roiId(0), m_roiWord(0)
+     m_l1Id(0), m_roiId(0), m_roiWord(0),
+     m_cached(false), m_dphi(0)
 { 
   // calculate z limits at radius maxRadius
 
@@ -162,6 +163,28 @@ TIDARoiDescriptor& TIDARoiDescriptor::operator= (const TIDARoiDescriptor& a)
   }
   return *this;
 }
+
+TIDARoiDescriptor& TIDARoiDescriptor::operator=(TIDARoiDescriptor&& a) noexcept {
+  if (this != &a) {
+    TObject::operator=(a);  // TObject may not have a move assignment
+    m_params         = std::move(a.m_params);
+    m_fullscan       = a.m_fullscan;
+    m_l1Id           = a.m_l1Id;
+    m_roiId          = a.m_roiId;
+    m_roiWord        = a.m_roiWord;
+    m_rois           = std::move(a.m_rois);
+    m_cached         = a.m_cached;
+    m_dphi           = a.m_dphi;
+    m_zedPlusR       = a.m_zedPlusR;
+    m_zedMinusR      = a.m_zedMinusR;
+    m_rPlusZed       = a.m_rPlusZed;
+    m_rMinusZed      = a.m_rMinusZed;
+    m_tanthetaPlus   = a.m_tanthetaPlus;
+    m_tanthetaMinus  = a.m_tanthetaMinus;
+  }
+  return *this;
+}
+
 
 
 TIDARoiDescriptor::~TIDARoiDescriptor() { }

@@ -33,6 +33,7 @@ for line in lines:
     ## getting histo
     inFile.cd()
     obj = inFile.Get( href )
+    if not obj: continue
     obj.SetDirectory(0)
 
     ## writing histo

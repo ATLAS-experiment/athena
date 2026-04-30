@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 ################################################################################
 # Package: MuonVisualizationHelpersR4
 ################################################################################
@@ -15,7 +15,7 @@ atlas_add_library( MuonVisualizationHelpersR4
                   PUBLIC_HEADERS MuonVisualizationHelpersR4
                   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                   LINK_LIBRARIES ${ROOT_LIBRARIES} MuonPatternEvent MuonSpacePoint GeoPrimitives
-                  PRIVATE_LINK_LIBRARIES MuonTrackEvent)
+                  PRIVATE_LINK_LIBRARIES MuonTrackEvent ActsCalibratorsLib)
               
 
 atlas_add_component( MuonVisualHelpersR4

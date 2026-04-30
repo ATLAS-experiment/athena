@@ -17,7 +17,7 @@
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbAccessObj.h"
 #include "StorageSvc/DbContainer.h"
-#include "POOLCore/DbPrint.h"
+#include "StorageSvc/DbPrint.h"
 /*
  *  POOL namespace declaration
  */

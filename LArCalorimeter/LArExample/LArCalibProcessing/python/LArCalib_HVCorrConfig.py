@@ -5,7 +5,7 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.MainServicesConfig import MainEvgenServicesCfg
 
-def HVCorrConfig(flags,outputName="hvcorr",runOut=0, lbOut=0):
+def HVCorrConfig(flags,outputName="hvcorr",runOut=0, lbOut=0, voltages=[], currents=[], isHI=False, hipatch=1.0):
 
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     result=LArGMCfg(flags)
@@ -14,14 +14,17 @@ def HVCorrConfig(flags,outputName="hvcorr",runOut=0, lbOut=0):
     from LArCalibUtils.LArHVScaleConfig import LArHVScaleCfg
 
     result.merge(LArHVScaleCfg(flags))
-    result.getCondAlgo("LArHVCondAlg").UndoOnlineHVCorr=False
-    result.getCondAlgo("LArHVCondAlg").keyOutputCorr="NewLArHVScaleCorr"
+    alg = result.getCondAlgo("LArHVCondAlg")
+    alg.UndoOnlineHVCorr=False
+    alg.keyOutputCorr="NewLArHVScaleCorr"
+    alg.fixCurrent = currents
+    alg.fixHV = voltages
 
     from LArCabling.LArCablingConfig import LArOnOffIdMappingSCCfg
     result.merge(LArOnOffIdMappingSCCfg(flags))
     result.addEventAlgo(CompFactory.LArHVCorrToSCHVCorr(ContainerKey="NewLArHVScaleCorr",OutputKey="NewSCLArHVScaleCorr",
                                                         OutputFolder="/LAR/ElecCalibFlatSC/HVScaleCorrNew",
-                                                        IsHeavyIons=False,  PatchInHeavyIons=1.0,
+                                                        IsHeavyIons=isHI,  PatchInHeavyIons=hipatch,
                                                         PhysicsWeights="TrigT1CaloCalibUtils/HVcorrPhysicsWeights.txt"))
 
     #The LArHVCorrMaker creates a flat blob in a CondAttrListCollection
@@ -62,17 +65,27 @@ def HVCorrConfig(flags,outputName="hvcorr",runOut=0, lbOut=0):
 
 
 if __name__=="__main__":
+    import itertools
+    import re
     import sys
     from time import time,strptime
     from calendar import timegm
     import argparse
-    parser= argparse.ArgumentParser(description="Recalclulate HV corrections based on DCS values")
+    parser= argparse.ArgumentParser(description="Recalculate HV corrections based on DCS values")
     parser.add_argument('datestamp',help="time specification like 2007-05-25:14:01:00")
     parser.add_argument('Run',type=int, nargs='?', default=0,help="IOV start (run-number)")
     parser.add_argument('LB',type=int, nargs='?', default=0,help="IOV start (run-number)")
-    parser.add_argument('-g', '--globaltag', type=str, help="Geometry Tag ")
+    parser.add_argument('-g', '--globaltag', type=str, help="Global conditions Tag ")
     parser.add_argument('-o', '--output',type=str,default="hvcorr",help="name stub for root and sqlite output files")
     parser.add_argument('-l','--olevel',type=int, default=3,help="OutputLevel")
+    parser.add_argument('-V','--voltage',type=str, default=[], action='append', nargs=1,
+                        help="use -V \"<ID> <HV>\" to set the voltage for this line instead of reading it from DCS")
+    parser.add_argument('-I','--current',type=str, default=[], action='append', nargs=1,
+                        help="use -I \"<ID> <current>\" to set the current for this line instead of reading it from DCS")
+    parser.add_argument('-s', '--sqlite',type=str,default="",help="name of sqlite file to be used instead of COOL")
+    parser.add_argument('--isHI', dest='hi', default=False, help='is for HI ?', action='store_true')
+
+    parser.add_argument('--patchHI',dest='patchhi',type=float, default=1.4,help="Ptching value for HI")
                         
     args = parser.parse_args()
     try:
@@ -103,7 +116,12 @@ if __name__=="__main__":
     pass
      
     print("Output IOV will be from run %i lumiblock %i to INF" % (args.Run,args.LB))
-
+    args.voltage = list(itertools.chain.from_iterable(args.voltage))
+    args.current = list(itertools.chain.from_iterable(args.current))
+    for x in args.voltage + args.current:
+        if re.match(r"\d+\s+\d+\.?\d*", x) is None:
+            print("ERROR: invalid voltage/current specification, should be of the form \"<line ID> <HV>\"")
+            sys.exit(-1)
     outputName=args.output
 
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
@@ -118,15 +136,18 @@ if __name__=="__main__":
     ConfigFlags.Input.TimeStamps=[TimeStamp]
     ConfigFlags.Input.Files=[]
     ConfigFlags.IOVDb.DatabaseInstance="CONDBR2"
-    ConfigFlags.IOVDb.DBConnection="sqlite://;schema="+outputName+".sqlite;dbname=CONDBR2"
+    ConfigFlags.IOVDb.DBConnection="sqlite://;schema="+outputName+".db;dbname=CONDBR2"
+    if len(args.sqlite)>0:
+       ConfigFlags.IOVDb.SqliteInput=args.sqlite
+       ConfigFlags.IOVDb.SqliteFolders=("/LAR/ElecCalibFlat/HVScaleCorr",)
     ConfigFlags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
     ConfigFlags.Exec.OutputLevel=args.olevel
     ConfigFlags.lock()
     cfg=MainEvgenServicesCfg(ConfigFlags)
     #First LB not set by McEventSelectorCfg, set it here:
     cfg.getService("EventSelector").FirstLB=ConfigFlags.Input.LumiBlockNumbers[0]
-    cfg.merge(HVCorrConfig(ConfigFlags,outputName,args.Run,args.LB))
-    
+    cfg.merge(HVCorrConfig(ConfigFlags, outputName, runOut=args.Run, lbOut=args.LB,
+                           voltages=args.voltage, currents=args.current,isHI=args.hi,hipatch=args.patchhi))
     
     print("Start running...")
     import sys

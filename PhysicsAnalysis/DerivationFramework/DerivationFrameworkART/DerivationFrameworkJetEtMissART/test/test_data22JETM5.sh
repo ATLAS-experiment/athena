@@ -3,6 +3,7 @@
 # art-include: main/Athena
 # art-description: DAOD building JETM5 data22
 # art-type: grid
+# art-memory: 4096
 # art-output: *.pool.root
 # art-output: checkFile*.txt
 # art-output: checkxAOD*.txt

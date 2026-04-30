@@ -27,18 +27,17 @@ StatusCode gFEXaltMetAlgo::initialize(){
 
 }
 
-
 void gFEXaltMetAlgo::setAlgoConstant(std::vector<int>&& A_thr,
                                      std::vector<int>&& B_thr,
+                                     std::vector<int>&& C_thr,
                                      const int rhoPlusThr) {
     m_etaThr[0] = std::move(A_thr);
     m_etaThr[1] = std::move(B_thr);
+    m_etaThr[2] = std::move(C_thr);   // <-- NEW
     m_rhoPlusThr = rhoPlusThr;
 }
 
-
-
-void gFEXaltMetAlgo::altMetAlgo(const gTowersCentral &Atwr, const gTowersCentral &Btwr,
+void gFEXaltMetAlgo::altMetAlgo(const gTowersCentral &Atwr, const gTowersCentral &Btwr, const gTowersCentral &Ctwr,
                                 std::array<uint32_t, 4> & outTOB) const {
 
   //FPGA A observables
@@ -59,6 +58,15 @@ void gFEXaltMetAlgo::altMetAlgo(const gTowersCentral &Atwr, const gTowersCentral
   int B_sumEt_nc = 0x0;
   int B_sumEt_rms = 0x0;
 
+  // FPGA C observables
+  int C_MET_x_nc = 0x0;
+  int C_MET_y_nc = 0x0;
+  int C_MET_x_rms = 0x0;
+  int C_MET_y_rms = 0x0;
+  
+  int C_sumEt_nc = 0x0;
+  int C_sumEt_rms = 0x0;  
+
   //Global observables
   int MET_x_nc = 0x0;
   int MET_y_nc = 0x0;
@@ -73,27 +81,33 @@ void gFEXaltMetAlgo::altMetAlgo(const gTowersCentral &Atwr, const gTowersCentral
 
   metFPGA(Atwr, A_MET_x_nc, A_MET_y_nc, 0);
   metFPGA(Btwr, B_MET_x_nc, B_MET_y_nc, 1);
+  metFPGA(Ctwr, C_MET_x_nc, C_MET_y_nc, 2);   // FPGA_NO = 2
 
-  metTotal(A_MET_x_nc, A_MET_y_nc, B_MET_x_nc, B_MET_y_nc, MET_x_nc, MET_y_nc, MET_nc);
+  metTotal(A_MET_x_nc, A_MET_y_nc, B_MET_x_nc, B_MET_y_nc, C_MET_x_nc, C_MET_y_nc, MET_x_nc, MET_y_nc, MET_nc);
 
   int A_rho{get_rho(Atwr)};
   int B_rho{get_rho(Btwr)};
+  int C_rho{get_rho(Ctwr)};
   int A_sigma{3*get_sigma(Atwr)};
   int B_sigma{3*get_sigma(Btwr)};
+  int C_sigma{3*get_sigma(Ctwr)};
 
   rho_MET(Atwr, A_MET_x_rms, A_MET_y_rms, A_rho, A_sigma);
   rho_MET(Btwr, B_MET_x_rms, B_MET_y_rms, B_rho, B_sigma);
+  rho_MET(Ctwr, C_MET_x_rms, C_MET_y_rms, C_rho, C_sigma);
 
-  metTotal(A_MET_x_rms, A_MET_y_rms, B_MET_x_rms, B_MET_y_rms, MET_x_rms, MET_y_rms, MET_rms);
+  metTotal(A_MET_x_rms, A_MET_y_rms, B_MET_x_rms, B_MET_y_rms, C_MET_x_rms, C_MET_y_rms, MET_x_rms, MET_y_rms, MET_rms);  
 
   A_sumEt_nc = sumEtFPGAnc(Atwr, 0);
   B_sumEt_nc = sumEtFPGAnc(Btwr, 1);
-  total_sumEt_nc = sumEt(A_sumEt_nc, B_sumEt_nc);
+  C_sumEt_nc = sumEtFPGAnc(Ctwr, 2);
+  total_sumEt_nc = sumEt(A_sumEt_nc, B_sumEt_nc, C_sumEt_nc);
   total_sumEt_nc = total_sumEt_nc/4;
 
   A_sumEt_rms = sumEtFPGArms(Atwr, A_sigma);
   B_sumEt_rms = sumEtFPGArms(Btwr, B_sigma);
-  total_sumEt_rms = sumEt(A_sumEt_rms, B_sumEt_rms);
+  C_sumEt_rms = sumEtFPGArms(Ctwr, C_sigma);
+  total_sumEt_rms = sumEt(A_sumEt_rms, B_sumEt_rms, C_sumEt_rms);
   total_sumEt_rms = total_sumEt_rms/4;
   //Define a vector to be filled with all the TOBs of one event
 
@@ -137,29 +151,47 @@ void gFEXaltMetAlgo::altMetAlgo(const gTowersCentral &Atwr, const gTowersCentral
 
 }
 
-
-
 void gFEXaltMetAlgo::metFPGA(const gTowersCentral &twrs, int & MET_x, int & MET_y, const unsigned short FPGA_NO) const {
-
+    static const int s_cosLUT[32] = {
+         31, 30, 29, 26, 22, 17, 12,  6,
+          0, -6,-12,-17,-22,-26,-29,-30,
+        -31,-30,-29,-26,-22,-17,-12, -6,
+          0,  6, 12, 17, 22, 26, 29, 30
+    };
+    static const int s_sinLUT[32] = {
+          0,  6, 12, 17, 22, 26, 29, 30,
+         31, 30, 29, 26, 22, 17, 12,  6,
+          0, -6,-12,-17,-22,-26,-29,-30,
+        -31,-30,-29,-26,-22,-17,-12, -6
+    };
+    
     int rows = twrs.size();
     int cols = twrs[0].size();
-    for( int irow = 0; irow < rows; irow++ ){
-        for(int jcolumn = 0; jcolumn<cols; jcolumn++){
-        bool filter{twrs[irow][jcolumn] > m_etaThr[FPGA_NO][jcolumn]};
-        MET_x += filter ? (twrs[irow][jcolumn])*cosLUT(irow, 5) : 0;
-        MET_y += filter ? (twrs[irow][jcolumn])*sinLUT(irow, 5) : 0;
-
+    
+    for (int irow = 0; irow < rows; irow++) {
+        int etasum = 0;
+        for (int jcolumn = 0; jcolumn < cols; jcolumn++) {
+	    int tower_et = twrs[irow][jcolumn] & ~3;  // Clear 2 LSBs
+            if (tower_et > m_etaThr[FPGA_NO][jcolumn]) {
+                etasum += tower_et;
+            }
+        }
+        MET_x += etasum * s_cosLUT[irow];
+        MET_y += etasum * s_sinLUT[irow];
     }
-  }
+    
+    MET_x >>= 5;
+    MET_y >>= 5;
 }
 
 
 inline void gFEXaltMetAlgo::metTotal(const int A_MET_x, const int A_MET_y,
                                      const int B_MET_x, const int B_MET_y,
+                                     const int C_MET_x, const int C_MET_y,
                                      int & MET_x, int & MET_y, int & MET) const {
 
-  MET_x = A_MET_x + B_MET_x;
-  MET_y = A_MET_y + B_MET_y;
+  MET_x = A_MET_x + B_MET_x + C_MET_x;
+  MET_y = A_MET_y + B_MET_y + C_MET_y;
 
   if (MET_x < -0x0007FF) MET_x = -0x0007FF;
   if (MET_y < -0x0007FF) MET_y = -0x0007FF;
@@ -249,12 +281,9 @@ int gFEXaltMetAlgo::sumEtFPGArms(const gTowersCentral &twrs, const int sigma) co
     return partial_sumEt;
 }
 
-
-int gFEXaltMetAlgo::sumEt(const int A_sumEt, const int B_sumEt) const {
-
-  return A_sumEt + B_sumEt;
+int gFEXaltMetAlgo::sumEt(const int A_sumEt, const int B_sumEt, const int C_sumEt) const {
+    return A_sumEt + B_sumEt + C_sumEt;
 }
-
 
 //----------------------------------------------------------------------------------
 // bitwise simulation of sine LUT in firmware
@@ -266,7 +295,6 @@ float gFEXaltMetAlgo::sinLUT(const unsigned int phiIDX, const unsigned int aw) c
   float rsin = std::sin(rad);
   return rsin;
 }
-
 
 //----------------------------------------------------------------------------------
 // bitwise simulation cosine LUT in firmware

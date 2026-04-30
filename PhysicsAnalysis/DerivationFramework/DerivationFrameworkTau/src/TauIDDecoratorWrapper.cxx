@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkTau/TauIDDecoratorWrapper.h"
@@ -75,7 +75,7 @@ namespace DerivationFramework {
     }
 
     // create shallow copy
-    auto shallowCopy = xAOD::shallowCopyContainer (*tauContainer);
+    auto shallowCopy = xAOD::shallowCopyContainer (*tauContainer, ctx);
 
     for (auto tau : *shallowCopy.first) {
 
@@ -106,9 +106,6 @@ namespace DerivationFramework {
         dec(*xTau) = WPAcc(*tau);
       }
     }
-
-    delete shallowCopy.first;
-    delete shallowCopy.second;
 
     // add TauAnalysisTool MuonOLR
     SG::ReadHandle<xAOD::MuonContainer> muonReadHandle(m_muonContainerKey, ctx);

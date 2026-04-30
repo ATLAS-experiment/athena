@@ -89,7 +89,7 @@ def moduleDefect(bec=[-2,2],
     cornerDefectNCornerFractions: if cornerDefectParam is not None the fractions of 1 to 4 corners to have a defect if the module
                                   has such defects.
     '''
-    if len(fractionsOfNDefects)+2==len(probability) or len(fractionsOfNDefects) == 0:
+    if len(fractionsOfNDefects)+2==len(probability) or ( len(fractionsOfNDefects) == 0 and len(probability)==2) :
         # if there only fractionsOfNDefects for the group defects but not the cell defects
         # then assume that each cell defect is only a cell defect not a defect of n-cells
         # in consecutive rows

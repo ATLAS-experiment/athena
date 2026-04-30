@@ -12,14 +12,15 @@ def CSC_OverlayAlgCfg(flags, name="CscOverlay", **kwargs):
     """Return a ComponentAccumulator for CSCOverlay algorithm"""
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}CSCRDO")
+    kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}CSCRDO" if not flags.Overlay.IgnoreBkgInputs else "")
     kwargs.setdefault("SignalInputKey", f"{flags.Overlay.SigPrefix}CSCRDO")
     kwargs.setdefault("OutputKey", "CSCRDO")
 
     kwargs.setdefault("isDataOverlay", not flags.Input.isMC)
 
-    from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-    acc.merge(SGInputLoaderCfg(flags, [f'CscRawDataContainer#{kwargs["BkgInputKey"]}']))
+    if kwargs["BkgInputKey"]:
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'CscRawDataContainer#{kwargs["BkgInputKey"]}']))
 
     from MuonConfig.MuonCalibrationConfig import CscCalibToolCfg
     kwargs.setdefault("CalibTool", acc.popToolsAndMerge(CscCalibToolCfg(flags)))

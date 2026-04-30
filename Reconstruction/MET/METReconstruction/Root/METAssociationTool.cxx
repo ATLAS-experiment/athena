@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // METAssociationTool.cxx 
@@ -62,9 +62,9 @@ namespace met {
       ATH_MSG_INFO("Tool configured to build MET with names:");
       ATH_MSG_INFO("   Core container  ==> " << coreName);
       ATH_MSG_INFO("   Association map ==> " << mapName);
-      ATH_CHECK( m_coreKey.assign(coreName) );
+      ATH_CHECK( m_coreKey.assign(coreName) ); // FIXME properties should be properly assigned during the configuration
       ATH_CHECK( m_coreKey.initialize() );
-      ATH_CHECK( m_mapKey.assign(mapName) );
+      ATH_CHECK( m_mapKey.assign(mapName) ); // FIXME properties should be properly assigned during the configuration
       ATH_CHECK( m_mapKey.initialize() );
     }
 
@@ -73,24 +73,23 @@ namespace met {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode METAssociationTool::execute() const
+  StatusCode METAssociationTool::execute(const EventContext& ctx) const
   {
-
     //this section has had a very big re-write, after discussions with TJK...
     ATH_MSG_DEBUG ("In execute: " << name() << "...");
 
     //Create map and core containers
 
-    auto metHandle = SG::makeHandle (m_coreKey);
+    auto metHandle = SG::makeHandle (m_coreKey, ctx);
     ATH_CHECK( metHandle.record (std::make_unique<xAOD::MissingETContainer>(), std::make_unique<xAOD::MissingETAuxContainer>()) );
     xAOD::MissingETContainer* metCont=metHandle.ptr();
 
-    auto metMapHandle = SG::makeHandle (m_mapKey);
+    auto metMapHandle = SG::makeHandle (m_mapKey, ctx);
     ATH_CHECK( metMapHandle.record (std::make_unique<xAOD::MissingETAssociationMap>(), std::make_unique<xAOD::MissingETAuxAssociationMap>()) );
     xAOD::MissingETAssociationMap* metMap=metMapHandle.ptr();
 
 
-    if( buildMET(metCont, metMap).isFailure() ) {
+    if( buildMET(metCont, metMap, ctx).isFailure() ) {
       ATH_MSG_DEBUG("Failed in MissingET reconstruction");
       return StatusCode::SUCCESS;
     }
@@ -113,13 +112,13 @@ namespace met {
   // Protected methods: 
   /////////////////////////////////////////////////////////////////// 
 
-  StatusCode METAssociationTool::buildMET(xAOD::MissingETContainer* metCont, xAOD::MissingETAssociationMap* metMap) const
+  StatusCode METAssociationTool::buildMET(xAOD::MissingETContainer* metCont, xAOD::MissingETAssociationMap* metMap, const EventContext& ctx) const
   {
 
 
     // Run the MET reconstruction tools in sequence
     for(auto tool : m_metAssociators) {
-      if (tool->execute(metCont,metMap).isFailure()){
+      if (tool->execute(metCont,metMap,ctx).isFailure()){
         ATH_MSG_WARNING("Failed to execute tool: " << tool->name());
         return StatusCode::FAILURE;
       }

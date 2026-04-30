@@ -17,3 +17,5 @@ atlas_add_component( TriggerAnalysisAlgorithms
    LINK_LIBRARIES TriggerAnalysisAlgorithmsLib )
 
 atlas_install_python_modules( python/*.py )
+
+atlas_install_data( data/* )

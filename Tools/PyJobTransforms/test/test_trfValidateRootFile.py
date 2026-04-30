@@ -58,5 +58,11 @@ class trfValidateRootFiletest(unittest.TestCase):
         rc = checkFile(self.fname, 'basket', requireTree=False)
         self.assertEqual(rc, 0)
 
+    def test_checkNTupleEventWise(self):
+        from PyJobTransforms.trfValidateRootFile import checkFile
+
+        rc = checkFile(self.fname, "event", requireTree=False)
+        self.assertEqual(rc, 0)
+
 if __name__ == '__main__':
     unittest.main()

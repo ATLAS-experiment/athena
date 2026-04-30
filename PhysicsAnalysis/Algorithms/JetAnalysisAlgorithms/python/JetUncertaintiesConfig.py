@@ -1,13 +1,14 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
-from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+from AnalysisAlgorithmsConfig.ConfigAccumulator import (
+    DataType, JetUncertaintyWarning)
 from AthenaConfiguration.Enums import LHCPeriod
-from AthenaCommon.Logging import logging
 import re
+import warnings
 
 
 class JetUncertaintiesConfig (ConfigBlock) :
@@ -23,7 +24,7 @@ class JetUncertaintiesConfig (ConfigBlock) :
             noneAction='error',
             info="the type of jet input. Refer to the corresponding small- or large-R jet options.")
         self.addOption('analysisJetSelection', '', type=str,
-            info="the jet selection to use to calculate N jets for an analysis specific "
+            info="the jet selection to use when calculating the jet multiplicity for an analysis specific "
             "jet flavor composition uncertainty. Of the form `jvt_selection,as_char&&passesOR,as_char...`.")
         self.addOption('analysisFile', '', type=str,
             info="the file containing gluon fraction histograms needed to calculate an analysis specific "
@@ -38,7 +39,7 @@ class JetUncertaintiesConfig (ConfigBlock) :
         self.addOption ('systematicsModelJMS', "Full", type=str,
             info="the NP reduction scheme to use for JMS: `Full`, `Simple`.")
         self.addOption ('runJERsystematicsOnData', False, type=bool,
-            info="whether to run the `All`/`Full` JER model variations also on data samples",
+            info="whether to run the `All`/`Full` JER model variations also on data samples.",
             expertMode=True)
         # Uncertainties tool options
         self.addOption ('uncertToolConfigPath', None, type=str,
@@ -169,8 +170,6 @@ class JetUncertaintiesConfig (ConfigBlock) :
         # We do this separately from the tool declaration, as we may need to set uo
         # two such tools, but they have to be private.
 
-        log = logging.getLogger('LargeRJetAnalysisConfig')
-
         # Config file:
         config_file = None
         if self.systematicsModelJER in ["Simple", "Full"] and self.systematicsModelJMS in ["Simple", "Full"]:
@@ -187,7 +186,9 @@ class JetUncertaintiesConfig (ConfigBlock) :
             if config.geometry() in [LHCPeriod.Run2, LHCPeriod.Run3]:
                 config_file = "rel22/Summer2025_PreRec/" + config_file
             else:
-                log.warning("Uncertainties for UFO jets are not for Run 4!")
+                warnings.warn_explicit(
+                    "Uncertainties for UFO jets are not for Run 4!",
+                    JetUncertaintyWarning, filename='', lineno=0)
 
         # Calibration area:
         calib_area = None
@@ -228,7 +229,7 @@ class JetUncertaintiesConfig (ConfigBlock) :
         jetUncertaintiesAlg.uncertaintiesTool.JetDefinition = jetCollectionName[:-4]
         jetUncertaintiesAlg.uncertaintiesTool.ConfigFile = configFile
         from PathResolver import PathResolver
-        if self.analysisFile is not None:
+        if self.analysisFile:
           jetUncertaintiesAlg.uncertaintiesTool.AnalysisFile = PathResolver.FindCalibFile(self.analysisFile)
         if calibArea is not None:
             jetUncertaintiesAlg.uncertaintiesTool.CalibArea = calibArea
@@ -286,6 +287,12 @@ class JetUncertaintiesConfig (ConfigBlock) :
             alg.jetsOut = config.copyName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
 
+            # Additional decorations
+            alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'AsgEnergyDecoratorAlg' )
+            alg.particles = config.readName (self.containerName)
+
+            config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
+
         elif (radius == 10):
             if self.jetInput == "UFO" and config.dataType() in [DataType.FullSim, DataType.FastSim]:
                 alg = config.createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg' )
@@ -319,3 +326,4 @@ class JetUncertaintiesConfig (ConfigBlock) :
                 alg.jetsOut = config.copyName (self.containerName)
                 alg.preselection = config.getPreselection (self.containerName, '')
                 config.addSelection (self.containerName, '', 'outOfValidity')
+

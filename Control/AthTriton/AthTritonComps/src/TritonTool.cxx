@@ -1,96 +1,209 @@
 // Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
+// Local include(s).
 #include "AthTritonComps/TritonTool.h"
 
+// Project include(s).
+#include "AthenaBaseComps/AthMessaging.h"
+
+// External include(s).
+#include <grpc_client.h>
+#include <grpc_service.pb.h>
+
+// System include(s).
+#include <cassert>
+#include <cstring>
+#include <string>
+#include <vector>
+
+/// Shorthand for the Triton client namespace
 namespace tc = triton::client;
 
-AthInfer::TritonTool::TritonTool( const std::string& type,
-                                 const std::string& name,
-                                 const IInterface* parent)
-    : base_class(type, name, parent)
-{
-    declareInterface<AthInfer::IAthInferenceTool>(this);
-}
+/// Helper macro to check Triton client return codes
+#define TRITON_CHECK(EXP)                           \
+  do {                                              \
+    const tc::Error err = EXP;                      \
+    if (!err.IsOk()) {                              \
+      ATH_MSG_ERROR("Failed to execute: " << #EXP); \
+      return StatusCode::FAILURE;                   \
+    }                                               \
+  } while (false)
 
-StatusCode AthInfer::TritonTool::initialize() {
+namespace AthInfer {
 
-    m_options = std::make_unique<tc::InferOptions>(m_modelName.value());
-    m_options->model_version_ = m_modelVersion;
-    m_options->client_timeout_ = m_clientTimeout;
+/// DType traits for Triton
+template <typename T>
+struct TritonDType;
+template <>
+struct TritonDType<float> {
+  static constexpr const char* value = "FP32";
+};
+template <>
+struct TritonDType<int64_t> {
+  static constexpr const char* value = "INT64";
+};
 
-    return getClient()? StatusCode::SUCCESS : StatusCode::FAILURE;
-}
+struct TritonTool::Impl : public AthMessaging {
 
-tc::InferenceServerGrpcClient* AthInfer::TritonTool::getClient() const {
+  // Inherit the constructor(s) from AthMessaging
+  using AthMessaging::AthMessaging;
+
+  StatusCode getClient(tc::InferenceServerGrpcClient*& client,
+                       const std::string& url, int port, bool useSSL) const {
+
     thread_local std::unique_ptr<tc::InferenceServerGrpcClient> threadClient;
     if (!threadClient) {
-        std::string url = m_url.value() + ":" + std::to_string(m_port); // always use the gRPC port
 
-        bool verbose = false;
+      const std::string urlAndPort =
+          url + ":" + std::to_string(port);  // always use the gRPC port
 
-        tc::Error err = tc::InferenceServerGrpcClient::Create(&threadClient, url, verbose, m_useSSL);
-        if (!err.IsOk()) {
-            ATH_MSG_ERROR("Failed to create Triton gRPC client for model: " + m_modelName.value() + " at url: " + url);
-            ATH_MSG_ERROR("useSSL is set to: " + std::to_string(m_useSSL));
-            ATH_MSG_ERROR("Error message: " + err.Message());
-            return nullptr;
-        }
+      constexpr bool verbose = false;
+      TRITON_CHECK(tc::InferenceServerGrpcClient::Create(
+          &threadClient, urlAndPort, verbose, useSSL));
 
-        ATH_MSG_INFO("Triton client created for model: "+ m_modelName.value() + " at url: "+ url);
-
+      ATH_MSG_INFO("Triton client created for url: " << urlAndPort);
     }
-    return threadClient.get();
-}
+    client = threadClient.get();
 
-StatusCode AthInfer::TritonTool::inference(InputDataMap& inputData, OutputDataMap& outputData) const {
-
-    // Create the tensor for the input data.
-    // Use shared_ptr to manage the memory of the InferInput objects.
-    std::vector<std::shared_ptr<tc::InferInput> > inputs_;
-    inputs_.reserve(inputData.size());
-
-    for (auto& [inputName, inputInfo]: inputData) {
-        const std::vector<int64_t>& inputShape = inputInfo.first;
-        const auto& variant = inputInfo.second;
-
-        const auto status = std::visit([&](const auto& dataVec) {
-            using T = std::decay_t<decltype(dataVec[0])>;
-            return prepareInput<T>(inputName, inputShape, dataVec, inputs_);
-        }, variant);
-
-        if (status != StatusCode::SUCCESS) return status;
-    }
-
-   // construct raw points for inference
-    std::vector<tc::InferInput*> rawInputs;
-    for (auto& input: inputs_) {
-        rawInputs.push_back(input.get());
-    }
-
-    // perform the inference.
-    tc::InferResult* rawResultPtr = nullptr;
-    tc::Headers http_headers;
-    grpc_compression_algorithm compression_algorithm =
-        grpc_compression_algorithm::GRPC_COMPRESS_NONE;
-
-    FAIL_IF_ERR(
-     getClient()->Infer(
-        &rawResultPtr, *m_options, rawInputs, {}, http_headers, compression_algorithm),
-        "unable to run model "+ m_modelName.value() + " error: " + err.Message()
-    );
-
-    std::shared_ptr<tc::InferResult> results(rawResultPtr);
-
-    // Get the result of the inference.
-    for (auto& [outputName, outputInfo]: outputData) {
-        auto& variant = outputInfo.second;
-
-        const auto status = std::visit([&](auto& dataVec) {
-            using T = std::decay_t<decltype(dataVec[0])>;
-            return extractOutput<T>(outputName, results, dataVec);
-        }, variant);
-
-        if (status != StatusCode::SUCCESS) return status;
-    }
     return StatusCode::SUCCESS;
+  }
+
+  template <typename T>
+  StatusCode prepareInput(
+      const std::string& name, const std::vector<int64_t>& shape,
+      const std::vector<T>& data,
+      std::vector<std::unique_ptr<tc::InferInput>>& inputs) const {
+
+    const char* dtype = TritonDType<T>::value;
+    tc::InferInput* rawInputPtr = nullptr;
+
+    // create the InferInput object with the predefined name, shape, and data
+    // type.
+    TRITON_CHECK(tc::InferInput::Create(&rawInputPtr, name, shape, dtype));
+    assert(rawInputPtr != nullptr);
+
+    // Append tensor values for this input from a byte array.
+    // Note: The vector is not copied and so it must not be modified or
+    // destroyed until this input is no longer needed (that is until the Infer()
+    // call(s) that use the input have completed). Multiple calls can be made to
+    // this API to keep adding tensor data for this input. The data will be
+    // delivered in the order it was added.
+    std::unique_ptr<tc::InferInput> input{rawInputPtr};
+    TRITON_CHECK(input->AppendRaw(reinterpret_cast<const uint8_t*>(data.data()),
+                                  data.size() * sizeof(T)));
+
+    inputs.push_back(std::move(input));
+    return StatusCode::SUCCESS;
+  }
+
+  template <typename T>
+  StatusCode extractOutput(const std::string& name,
+                           const tc::InferResult& result,
+                           std::vector<T>& outputVec) const {
+
+    const uint8_t* rawData = nullptr;
+    size_t size = 0;
+
+    // Get access to the buffer holding raw results of specified output returned
+    // by the server. Note: the buffer is owned by InferResult instance. Users
+    // can copy out the data if required to extend the lifetime.
+    TRITON_CHECK(result.RawData(name, &rawData, &size));
+
+    outputVec.resize(size / sizeof(T));
+    std::memcpy(outputVec.data(), rawData, size);
+    return StatusCode::SUCCESS;
+  }
+
+  std::unique_ptr<tc::InferOptions> m_options;
+
+};  // struct TritonTool::Impl
+
+TritonTool::TritonTool(const std::string& type, const std::string& name,
+                       const IInterface* parent)
+    : base_class(type, name, parent) {}
+
+TritonTool::~TritonTool() = default;
+
+StatusCode TritonTool::initialize() {
+
+  // Set up the implementation object.
+  m_impl = std::make_unique<Impl>(name() + "::Impl");
+  m_impl->m_options = std::make_unique<tc::InferOptions>(m_modelName.value());
+  m_impl->m_options->model_version_ = m_modelVersion;
+  m_impl->m_options->client_timeout_ = m_clientTimeout;
+
+  // Make sure already during initialization that a client can be created.
+  tc::InferenceServerGrpcClient* dummyClient = nullptr;
+  ATH_CHECK(m_impl->getClient(dummyClient, m_url, m_port, m_useSSL));
+
+  // Return gracefully.
+  return StatusCode::SUCCESS;
 }
+
+StatusCode AthInfer::TritonTool::inference(InputDataMap& inputData,
+                                           OutputDataMap& outputData) const {
+
+  assert(m_impl);
+
+  // Create the tensor for the input data.
+  // Use shared_ptr to manage the memory of the InferInput objects.
+  std::vector<std::unique_ptr<tc::InferInput>> inputs;
+  inputs.reserve(inputData.size());
+
+  for (auto& [inputName, inputInfo] : inputData) {
+
+    const std::vector<int64_t>& inputShape = inputInfo.first;
+    const DataVariant& variant = inputInfo.second;
+
+    ATH_CHECK(std::visit(
+        [&](const auto& dataVec) {
+          using T = std::decay_t<decltype(dataVec[0])>;
+          return m_impl->prepareInput<T>(inputName, inputShape, dataVec,
+                                         inputs);
+        },
+        variant));
+  }
+
+  // construct raw points for inference
+  std::vector<tc::InferInput*> rawInputs;
+  for (auto& input : inputs) {
+    rawInputs.push_back(input.get());
+  }
+
+  // Get the triton client object.
+  tc::InferenceServerGrpcClient* client = nullptr;
+  ATH_CHECK(m_impl->getClient(client, m_url, m_port, m_useSSL));
+  assert(client != nullptr);
+
+  // perform the inference.
+  tc::InferResult* rawResultPtr = nullptr;
+  tc::Headers http_headers;
+  grpc_compression_algorithm compression_algorithm =
+      grpc_compression_algorithm::GRPC_COMPRESS_NONE;
+
+  TRITON_CHECK(client->Infer(&rawResultPtr, *(m_impl->m_options), rawInputs, {},
+                             http_headers, compression_algorithm));
+  assert(rawResultPtr != nullptr);
+
+  std::unique_ptr<tc::InferResult> results(rawResultPtr);
+
+  // Get the result of the inference.
+  for (auto& [outputName, outputInfo] : outputData) {
+
+    DataVariant& variant = outputInfo.second;
+
+    ATH_CHECK(std::visit(
+        [&](auto& dataVec) {
+          using T = std::decay_t<decltype(dataVec[0])>;
+          return m_impl->extractOutput<T>(outputName, *results, dataVec);
+        },
+        variant));
+  }
+
+  // Return gracefully.
+  return StatusCode::SUCCESS;
+}
+
+void TritonTool::print() const {}
+
+}  // namespace AthInfer

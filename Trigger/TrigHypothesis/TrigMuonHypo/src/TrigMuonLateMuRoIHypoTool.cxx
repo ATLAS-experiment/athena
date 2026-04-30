@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigMuonLateMuRoIHypoTool.h"
+#include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 
 class ISvcLocator;
 TrigMuonLateMuRoIHypoTool::TrigMuonLateMuRoIHypoTool(const std::string & type, const std::string & name, const IInterface* parent):

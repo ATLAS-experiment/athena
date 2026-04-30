@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 
 /**
@@ -23,11 +23,6 @@
 using CLHEP::pi;
 
 namespace {
-    // Helper to wrap a raw pointer as a non-owning shared_ptr<const FPGATrackSimHit>
-    inline std::shared_ptr<const FPGATrackSimHit> makeNonOwningHitPtr(const FPGATrackSimHit* hit) {
-        return std::shared_ptr<const FPGATrackSimHit>(hit, [](const FPGATrackSimHit*){});
-    }
-
     // Helper to create spatial hash key from coordinates for strip matching
     inline long makeCoordinatesKey(float x, float y, float z, float gridSize = 1.0f) {
         int ix = static_cast<int>(std::floor(x / gridSize));
@@ -83,8 +78,8 @@ namespace {
 
     // Spatial index for fast hit lookup
     struct HitSpatialIndex {
-        std::unordered_map<long, std::vector<const FPGATrackSimHit*>> fineIDToHits;
-        std::unordered_map<long, std::vector<const FPGATrackSimHit*>> coordToHits;
+        std::unordered_map<long, std::vector<std::shared_ptr<const FPGATrackSimHit>>> fineIDToHits;
+        std::unordered_map<long, std::vector<std::shared_ptr<const FPGATrackSimHit>>> coordToHits;
 
         void build(const std::vector<std::shared_ptr<const FPGATrackSimHit>>& hits) {
             fineIDToHits.clear();
@@ -98,21 +93,21 @@ namespace {
                 // For fineID index we can just skip second half of strip SPs since they get added via the first half
                 if (!(hitPtr->getHitType() == HitType::spacepoint && (hitPtr->getPhysLayer(true) % 2 == 1))) {
                     long fineID = getFineID(*hitPtr);
-                    fineIDToHits[fineID].push_back(hitPtr.get());
+                    fineIDToHits[fineID].push_back(hitPtr);
                 }
 
                 // For coordinate index we include all hits since we need to find strip SP pairs
                 long coordKey = makeCoordinatesKey(hitPtr->getX(), hitPtr->getY(), hitPtr->getZ());
-                coordToHits[coordKey].push_back(hitPtr.get());
+                coordToHits[coordKey].push_back(hitPtr);
             }
         }
 
-        const std::vector<const FPGATrackSimHit*>* getHits(long fineID) const {
+        const std::vector<std::shared_ptr<const FPGATrackSimHit>>* getHits(long fineID) const {
             auto it = fineIDToHits.find(fineID);
             return (it != fineIDToHits.end()) ? &(it->second) : nullptr;
         }
 
-        const std::vector<const FPGATrackSimHit*>* getHitsByCoord(float x, float y, float z) const {
+        const std::vector<std::shared_ptr<const FPGATrackSimHit>>* getHitsByCoord(float x, float y, float z) const {
             long coordKey = makeCoordinatesKey(x, y, z);
             auto it = coordToHits.find(coordKey);
             return (it != coordToHits.end()) ? &(it->second) : nullptr;
@@ -195,12 +190,16 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
         if (track.passedOR() == 0) {
             continue;
         }
-        const std::vector<FPGATrackSimHit> hitsOnTrack = track.getFPGATrackSimHits();
+        const auto& hitsOnTrack = track.getFPGATrackSimHitPtrs();
         miniRoad road;
         float pt = track.getPt();
 
-        for (const auto &thit : hitsOnTrack) {
-            road.addHit(std::make_shared<const FPGATrackSimHit>(thit)); // add all hits, we check if WC later
+        for (const auto& hit_ptr : hitsOnTrack) {
+            if (!hit_ptr) {
+                ATH_MSG_ERROR("Null hit pointer in track");
+                return StatusCode::FAILURE;
+            }
+            road.addHit(hit_ptr); // shared_ptr already points to active hit
         }
 
         if (m_debugEvent) {
@@ -384,19 +383,20 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
             if (candidateHits) {
                 listofHitsFound.reserve(candidateHits->size());
 
-                for (const FPGATrackSimHit* hit : *candidateHits) {
+                for (const auto& hit_ptr : *candidateHits) {
+                    const auto& hit = *hit_ptr;
                     // Apply direction filter
-                    const float hitr = hit->getR();
+                    const float hitr = hit.getR();
                     if (m_doOutsideIn && hitr > lastHitR) continue;
                     if (!m_doOutsideIn && hitr < lastHitR) continue;
 
                     if(m_debugEvent) {
-                        ATH_MSG_DEBUG("In the hit loop hit at x: " << hit->getX() << " y " << hit->getY() << " z " << hit->getZ() << " phi " << hit->getGPhi());
+                        ATH_MSG_DEBUG("In the hit loop hit at x: " << hit.getX() << " y " << hit.getY() << " z " << hit.getZ() << " phi " << hit.getGPhi());
                     }
 
                     // Check if hit is within window
-                    const double hitz = hit->getZ();
-                    const double hitphi = hit->getGPhi();
+                    const double hitz = hit.getZ();
+                    const double hitphi = hit.getGPhi();
 
                     const double dr = abs(hitr - predr);
                     const double dz = abs(hitz - predz);
@@ -409,28 +409,29 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                     if (!inWindow) continue;
 
                     // Only create shared_ptr when hit passes all filters
-                    std::vector<std::shared_ptr<const FPGATrackSimHit>> theseHits{ makeNonOwningHitPtr(hit) };
+                    std::vector<std::shared_ptr<const FPGATrackSimHit>> theseHits{ hit_ptr };
                     hitsInWindow = hitsInWindow + 1;
 
                     // Handle strip space points
-                    if(hit->isStrip()) {
-                        if (hit->getHitType() == HitType::spacepoint) {
+                    if(hit.isStrip()) {
+                        if (hit.getHitType() == HitType::spacepoint) {
                             // Use spatial index for strip matching
                             const float EPSILON = 0.00001f;
-                            const float searchX = hit->getX();
-                            const float searchY = hit->getY();
-                            const float searchZ = hit->getZ();
-                            const auto searchHash = hit->getIdentifierHash();
+                            const float searchX = hit.getX();
+                            const float searchY = hit.getY();
+                            const float searchZ = hit.getZ();
+                            const auto searchHash = hit.getIdentifierHash();
                             bool found = false;
 
                             const auto* coordCandidates = hitIndex.getHitsByCoord(searchX, searchY, searchZ);
                             if (coordCandidates) {
-                                for (const FPGATrackSimHit* candidateHit : *coordCandidates) {
-                                    if (candidateHit->getIdentifierHash() != searchHash &&
-                                        abs(candidateHit->getX() - searchX) < EPSILON &&
-                                        abs(candidateHit->getY() - searchY) < EPSILON &&
-                                        abs(candidateHit->getZ() - searchZ) < EPSILON) {
-                                        theseHits.push_back(makeNonOwningHitPtr(candidateHit));
+                                for (const auto& candidateHitPtr : *coordCandidates) {
+                                    const auto& candidateHit = *candidateHitPtr;
+                                    if (candidateHit.getIdentifierHash() != searchHash &&
+                                        abs(candidateHit.getX() - searchX) < EPSILON &&
+                                        abs(candidateHit.getY() - searchY) < EPSILON &&
+                                        abs(candidateHit.getZ() - searchZ) < EPSILON) {
+                                        theseHits.push_back(candidateHitPtr);
                                         found = true;
                                         break;
                                     }
@@ -935,7 +936,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::getPredictedHitBatched(const s
             output[2] *= getZScale();
         }
         
-        batchOutputTensors.push_back(output);
+        batchOutputTensors.push_back(std::move(output));
     }
 
     return StatusCode::SUCCESS;

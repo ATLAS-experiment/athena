@@ -82,7 +82,7 @@ namespace columnar
     std::vector<ColumnarOffsetType> numEvents;
     numEvents.push_back (0);
     numEvents.push_back (offsets.size()-1);
-    toolHandle.setColumn (numberOfEventsName, numEvents.size(), numEvents.data());
+    toolHandle.setColumn (eventRangeColumnName, numEvents.size(), numEvents.data());
 
     // call the tool
     toolHandle.call();

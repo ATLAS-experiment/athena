@@ -40,10 +40,10 @@ class IExtrapolator;
 class InDetPerfPlot_Resolution: public InDetPlotBase {
 public:
   enum Param {
-    D0, Z0, QOVERP, QOVERPT, THETA, PHI, PT, Z0SIN, NPARAMS
+    D0, Z0, QOVERP, QOVERPT, THETA, PHI, PT, Z0SIN, TIME, NPARAMS
   };
 
-  InDetPerfPlot_Resolution(InDetPlotBase* pParent, const std::string& dirName, bool d0Only=false);
+  InDetPerfPlot_Resolution(InDetPlotBase* pParent, const std::string& dirName, bool d0Only=false, bool hasHGTDReco=false);
 
   void fill(const xAOD::TrackParticle& trkprt, const xAOD::TruthParticle& truthprt, float weight);
   void fill(const xAOD::TrackParticle& trkprt, float weight);
@@ -54,6 +54,7 @@ public:
   }
 
 private:
+
   // defining global eta binning for resolution plots
   static const int m_nResHist = 4;
 
@@ -75,13 +76,14 @@ private:
 
   float m_LowPtBins[m_nLowPtBins + 1]{};
    
-  std::string m_paramProp[NPARAMS] = { "d0", "z0", "qoverp", "ptqopt", "theta", "phi", "pt", "z0sin" }; 
+  std::string m_paramProp[NPARAMS] = { "d0", "z0", "qoverp", "ptqopt", "theta", "phi", "pt", "z0sin", "time" };
  
   IDPVM::ResolutionHelper m_resolutionHelper;
   IDPVM::ResolutionHelper::methods m_resolutionMethod;
 
   bool m_d0Only = false;
-  
+  bool m_hasHGTDReco = false;
+
   bool m_primTrk;
   bool m_secdTrk;
   bool m_allTrk;

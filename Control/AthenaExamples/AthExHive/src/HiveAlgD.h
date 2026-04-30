@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -30,11 +30,11 @@ public:
   // Define the initialize and execute methods:
   
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
   
 private:
 
-  // By default this DataHandle is created by HiveAlgA
+  // By default this object is created by HiveAlgA
   SG::ReadHandleKey<HiveDataObj>  m_rdh1 {this, "Key_R1", "a2", "Read key 1"};
   
   SG::WriteHandleKey<HiveDataObj> m_wrh1 {this, "Key_W1", "d1", "Write key 1"};

@@ -10,8 +10,8 @@ def AddDiTauLowPtCfg(flags, **kwargs):
     acc = ComponentAccumulator()
 
     from JetRecConfig.JetRecConfig import JetRecCfg
-    from JetRecConfig.StandardLargeRJets import AntiKt10LCTopo
-    acc.merge(JetRecCfg(flags,AntiKt10LCTopo))
+    from JetRecConfig.StandardLargeRJets import AntiKt10LCTopo_tau
+    acc.merge(JetRecCfg(flags,AntiKt10LCTopo_tau))
 
     from DiTauRec.DiTauBuilderConfig import DiTauBuilderCfg
     acc.merge(DiTauBuilderCfg(flags, name="DiTauLowPtBuilder", doLowPt=True))

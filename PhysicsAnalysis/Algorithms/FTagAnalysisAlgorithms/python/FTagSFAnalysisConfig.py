@@ -36,6 +36,9 @@ class FTagJetSFBlock(ConfigBlock):
     """the ConfigBlock for the FTAG scale factor per jet"""
     def __init__(self):
         super(FTagJetSFBlock, self).__init__()
+        self.setBlockName('FTagJetSF')
+        self.addDependency('EventSelection', required=False)
+        self.addDependency('EventSelectionMerger', required=False)
         self.addOption('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.")
@@ -87,7 +90,7 @@ class FTagJetSFBlock(ConfigBlock):
             "eigenvector decomposition exclusion lists.")
         self.addOption ('savePerJetSF', False, type=bool,
             info="whether or not to save the per-jet FTAG SF as output variable.")
-        self.addOption ('triggerChainsPerYear', {}, type=None,
+        self.addOption ('triggerChainsPerYear', {}, type=dict,
             info="a dictionary with key (string) the year and value (list of "
             "strings) the trigger chains.")
         self.addOption ('includeAllYearsPerRun', False, type=bool,
@@ -169,7 +172,7 @@ class FTagJetSFBlock(ConfigBlock):
         if self.bTagCalibFile is not None :
             bTagCalibFile = self.bTagCalibFile
         else:
-            bTagCalibFile = getRecommendedBTagCalib(config.geometry())
+            bTagCalibFile = getRecommendedBTagCalib(config.geometry(), self.btagWP)
 
         DSID = "default"
         if config.dataType() is not DataType.Data:
@@ -270,7 +273,10 @@ class FTagEventSFBlock(ConfigBlock):
 
     def __init__(self):
         super(FTagEventSFBlock, self).__init__()
+        self.addDependency('FTagJetSF', required=True)
         self.addDependency('OverlapRemoval', required=False)
+        self.addDependency('EventSelection', required=False)
+        self.addDependency('EventSelectionMerger', required=False)
         self.addOption('containerName', '', type=str,
             noneAction='error',
             info="the input jet container with a possible selection, in the format "
@@ -286,7 +292,7 @@ class FTagEventSFBlock(ConfigBlock):
             info="the flavour tagging WP.")
         self.addOption('btagger', "GN2v01", type=str,
             info="the flavour tagging algorithm: `DL1dv01`, `GN2v01`.")
-        self.addOption ('triggerChainsPerYear', {}, type=None,
+        self.addOption ('triggerChainsPerYear', {}, type=dict,
             info="a dictionary with key (string) the year and value (list of "
             "strings) the trigger chains.")
         self.addOption ('includeAllYearsPerRun', False, type=bool,

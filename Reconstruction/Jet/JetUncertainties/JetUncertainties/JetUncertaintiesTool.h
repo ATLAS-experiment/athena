@@ -10,6 +10,7 @@
 #include "AsgTools/AsgTool.h"
 #include "CxxUtils/checker_macros.h"
 
+#include <mutex>
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -38,8 +39,7 @@ namespace xAOD
     class ShallowAuxContainer;
 }
 
-// Not thread-safe due to use of statics and TRandom3
-class ATLAS_NOT_THREAD_SAFE JetUncertaintiesTool : virtual public ICPJetUncertaintiesTool,
+class JetUncertaintiesTool : virtual public ICPJetUncertaintiesTool,
                                                    public asg::AsgTool
 {
     ASG_TOOL_CLASS(JetUncertaintiesTool,ICPJetUncertaintiesTool)
@@ -47,7 +47,7 @@ class ATLAS_NOT_THREAD_SAFE JetUncertaintiesTool : virtual public ICPJetUncertai
     public:
         // Constructor/destructor
         JetUncertaintiesTool(const std::string& name = "JetUncertaintiesTool");
-        JetUncertaintiesTool(const JetUncertaintiesTool& toCopy);
+        JetUncertaintiesTool(const JetUncertaintiesTool& toCopy) ATLAS_CTORDTOR_NOT_THREAD_SAFE;
         virtual ~JetUncertaintiesTool();
 
         // Pre-initialization methods
@@ -113,19 +113,19 @@ class ATLAS_NOT_THREAD_SAFE JetUncertaintiesTool : virtual public ICPJetUncertai
 
         // Inherited methods from IJetUncertaintiesTool to implement
         // Retrieve uncertainty and validity information for a given component
-        virtual bool   getValidity(size_t index, const xAOD::Jet& jet) const;
+        virtual bool   getValidity ATLAS_NOT_THREAD_SAFE (size_t index, const xAOD::Jet& jet) const;
         virtual bool   getValidity(size_t index, const xAOD::Jet& jet, const xAOD::EventInfo& eInfo) const;
-        virtual bool   getValidity(size_t index, const xAOD::Jet& jet, const jet::CompScaleVar::TypeEnum scaleVar) const;
+        virtual bool   getValidity ATLAS_NOT_THREAD_SAFE (size_t index, const xAOD::Jet& jet, const jet::CompScaleVar::TypeEnum scaleVar) const;
         virtual bool   getValidity(size_t index, const xAOD::Jet& jet, const xAOD::EventInfo& eInfo, const jet::CompScaleVar::TypeEnum scaleVar) const;
 
-        virtual double getUncertainty(size_t index, const xAOD::Jet& jet) const;
+        virtual double getUncertainty ATLAS_NOT_THREAD_SAFE (size_t index, const xAOD::Jet& jet) const;
         virtual double getUncertainty(size_t index, const xAOD::Jet& jet, const xAOD::EventInfo& eInfo) const;
-        virtual double getUncertainty(size_t index, const xAOD::Jet& jet, const jet::CompScaleVar::TypeEnum scaleVar) const;
+        virtual double getUncertainty ATLAS_NOT_THREAD_SAFE (size_t index, const xAOD::Jet& jet, const jet::CompScaleVar::TypeEnum scaleVar) const;
         virtual double getUncertainty(size_t index, const xAOD::Jet& jet, const xAOD::EventInfo& eInfo, const jet::CompScaleVar::TypeEnum scaleVar) const;
 
-        virtual bool   getValidUncertainty(size_t index, double& unc, const xAOD::Jet& jet) const;
+        virtual bool   getValidUncertainty ATLAS_NOT_THREAD_SAFE (size_t index, double& unc, const xAOD::Jet& jet) const;
         virtual bool   getValidUncertainty(size_t index, double& unc, const xAOD::Jet& jet, const xAOD::EventInfo& eInfo) const;
-        virtual bool   getValidUncertainty(size_t index, double& unc, const xAOD::Jet& jet, const jet::CompScaleVar::TypeEnum scaleVar) const;
+        virtual bool   getValidUncertainty ATLAS_NOT_THREAD_SAFE (size_t index, double& unc, const xAOD::Jet& jet, const jet::CompScaleVar::TypeEnum scaleVar) const;
         virtual bool   getValidUncertainty(size_t index, double& unc, const xAOD::Jet& jet, const xAOD::EventInfo& eInfo, const jet::CompScaleVar::TypeEnum scaleVar) const;
 
         virtual double getNormalizedCaloMassWeight(const xAOD::Jet& jet) const;
@@ -136,12 +136,15 @@ class ATLAS_NOT_THREAD_SAFE JetUncertaintiesTool : virtual public ICPJetUncertai
 
         // Inherited methods from CP::IJetUncertaintiesTool to implement
         // Apply a systematic variation or get a new copy
-        virtual CP::CorrectionCode applyCorrection(xAOD::Jet& jet) const;
+        virtual CP::CorrectionCode applyCorrection ATLAS_NOT_THREAD_SAFE (xAOD::Jet& jet) const;
         virtual CP::CorrectionCode applyCorrection(xAOD::Jet& jet, const xAOD::EventInfo& eInfo) const;
-        virtual CP::CorrectionCode correctedCopy(const xAOD::Jet& input, xAOD::Jet*& output) const;
+        virtual CP::CorrectionCode correctedCopy ATLAS_NOT_THREAD_SAFE (const xAOD::Jet& input, xAOD::Jet*& output) const;
         virtual CP::CorrectionCode correctedCopy(const xAOD::Jet& input, xAOD::Jet*& output, const xAOD::EventInfo& eInfo) const;
-        virtual CP::CorrectionCode applyContainerCorrection(xAOD::JetContainer& inputs) const;
+        virtual CP::CorrectionCode applyContainerCorrection ATLAS_NOT_THREAD_SAFE (xAOD::JetContainer& inputs) const;
         virtual CP::CorrectionCode applyContainerCorrection(xAOD::JetContainer& inputs, const xAOD::EventInfo& eInfo) const;
+        virtual CP::CorrectionCode applyContainerCorrection(
+            xAOD::JetContainer& inputs,
+            const CP::SystematicSet& syst) const;
 
     
         // Inherited methods from CP::ISystematicsTool to implement
@@ -155,20 +158,24 @@ class ATLAS_NOT_THREAD_SAFE JetUncertaintiesTool : virtual public ICPJetUncertai
         
         // Retrieve the correlation matrix for the loaded configuration
         // Returns NULL on failure
-        virtual TH2D* getPtCorrelationMatrix(   const int numBins,
+        virtual TH2D* getPtCorrelationMatrix ATLAS_NOT_THREAD_SAFE (
+                                                const int numBins,
                                                 const double minPt,
                                                 const double maxPt,
                                                 const double valEta );
-        virtual TH2D* getPtCorrelationMatrix(   const int numBins,
+        virtual TH2D* getPtCorrelationMatrix ATLAS_NOT_THREAD_SAFE (
+                                                const int numBins,
                                                 const double minPt,
                                                 const double maxPt,
                                                 const double valEta1,
                                                 const double valEta2);
-        virtual TH2D* getEtaCorrelationMatrix(  const int numBins,
+        virtual TH2D* getEtaCorrelationMatrix ATLAS_NOT_THREAD_SAFE (
+                                                const int numBins,
                                                 const double minEta,
                                                 const double maxEta,
                                                 const double valPt  );
-        virtual TH2D* getEtaCorrelationMatrix(  const int numBins,
+        virtual TH2D* getEtaCorrelationMatrix ATLAS_NOT_THREAD_SAFE (
+                                                const int numBins,
                                                 const double minEta,
                                                 const double maxEta,
                                                 const double valPt1,
@@ -226,7 +233,8 @@ class ATLAS_NOT_THREAD_SAFE JetUncertaintiesTool : virtual public ICPJetUncertai
  
         // Smearing information
         long long int m_userSeed;
-        mutable TRandom3 m_rand; // mutable as this we want to call in a const function (everything else is fixed, the random generator is modifiable)
+        mutable TRandom3 m_rand ATLAS_THREAD_SAFE; // protected by m_reentrantMutex in the execute path
+        mutable std::mutex m_reentrantMutex;
         bool m_isData;
         jet::ResolutionHelper* m_resHelper;
 
@@ -240,7 +248,7 @@ class ATLAS_NOT_THREAD_SAFE JetUncertaintiesTool : virtual public ICPJetUncertai
         StatusCode addUncertaintyGroup    (const jet::ConfigHelper& helper);
         StatusCode addUncertaintyComponent(const jet::ConfigHelper& helper);
         jet::UncertaintyComponent* buildUncertaintyComponent(const jet::ComponentHelper& component) const;
-        const xAOD::EventInfo* getDefaultEventInfo() const;
+        const xAOD::EventInfo* getDefaultEventInfo ATLAS_NOT_THREAD_SAFE () const;
         StatusCode checkIndexInput(const size_t index) const;
         double getSmearingFactor(const xAOD::Jet& jet, const jet::CompScaleVar::TypeEnum smearType, const double variation) const;
         double getNominalResolution(const xAOD::Jet& jet, const jet::CompScaleVar::TypeEnum smearType, const jet::JetTopology::TypeEnum topology, const bool readMC) const;

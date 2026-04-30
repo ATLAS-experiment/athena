@@ -109,11 +109,11 @@ class ITkTrigSequence(InnerTrackerTrigSequence):
 
     if not self.flags.Tracking.ActiveConfig.doZFinderOnly:
       self.lastTrkCollection = self.flags.Tracking.ActiveConfig.trkTracks_FTF
-      from xAODTrackingCnv.xAODTrackingCnvConfig import ITkTrackParticleCnvAlgCfg
-      acc.merge(ITkTrackParticleCnvAlgCfg(self.flags,
-                                          name = "ITkTrigTrackParticleCnvAlg"+signature,
-                                          TrackContainerName = self.lastTrkCollection,
-                                          xAODTrackParticlesFromTracksContainerName = self.flags.Tracking.ActiveConfig.tracks_FTF))
+      from xAODTrackingCnv.xAODTrackingCnvConfig import TrigITkTrackParticleCnvAlgCfg
+      acc.merge(TrigITkTrackParticleCnvAlgCfg(self.flags,
+                                              name = "ITkTrigTrackParticleCnvAlg"+signature,
+                                              TrackContainerName = self.lastTrkCollection,
+                                              xAODTrackParticlesFromTracksContainerName = self.flags.Tracking.ActiveConfig.tracks_FTF))
     
     return acc
 
@@ -148,9 +148,9 @@ class ITkTrigSequence(InnerTrackerTrigSequence):
 
     acc = ComponentAccumulator()
 
-    from xAODTrackingCnv.xAODTrackingCnvConfig import ITkTrackParticleCnvAlgCfg
+    from xAODTrackingCnv.xAODTrackingCnvConfig import TrigITkTrackParticleCnvAlgCfg
     prefix = "ITk"
-    acc.merge(ITkTrackParticleCnvAlgCfg(
+    acc.merge(TrigITkTrackParticleCnvAlgCfg(
       self.flags,
       name = prefix+'xAODParticleCreatorAlg'+self.flags.Tracking.ActiveConfig.input_name+'_IDTrig',
       TrackContainerName = self.lastTrkCollection,

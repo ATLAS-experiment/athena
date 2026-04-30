@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GLOBALSIM_EFEXROIALGTOOL_H
@@ -46,7 +46,19 @@ namespace GlobalSim {
       "etMin",
       0.,
       "selection Et min"};
+
+    Gaudi::Property<double> m_etaMin {
+      this,
+      "etaMin",
+      0.,
+      "selection Eta max"};
     
+    Gaudi::Property<double> m_etaMax {
+      this,
+      "etaMax",
+      5.,
+      "selection Eta max"};
+
   };
 }
 #endif

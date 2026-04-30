@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -116,11 +116,11 @@ double eflowDepthCalculator::lengthThroughBox(double theta, double zMin, double 
     thetaBottomLeft = M_PI / 2.0;
   }
   else {
-    thetaTopLeft = atan(rMax / zMin);
-    thetaBottomLeft = atan(rMin / zMin);
+    thetaTopLeft = std::atan(rMax / zMin);
+    thetaBottomLeft = std::atan(rMin / zMin);
   }
-  thetaBottomRight = atan(rMin / zMax);
-  thetaTopRight = atan(rMax / zMax);
+  thetaBottomRight = std::atan(rMin / zMax);
+  thetaTopRight = std::atan(rMax / zMax);
 
 
   if (theta > thetaTopLeft || theta <= thetaBottomRight) {
@@ -151,23 +151,23 @@ double eflowDepthCalculator::lengthThroughBox(double theta, double zMin, double 
 
 const double* eflowDepthCalculator::calcDepthArray(double eta, double filler)
 {
-  static const double thetaTileExtBottomRight = atan( m_tileExtLayerR[0] / m_tileExtZmax );
-  static const double thetaEMBbottomRight = atan( m_EMBlayerR[0] / m_EMBzMax );
-  static const double thetaEMEtopLeft = atan( m_EMErMax / m_EMElayerZ[0] );
-  static const double thetaHECtopLeft = atan( m_HECrMax / m_HEClayerZ[0] );
-  static const double thetaFCALtopLeft = atan( m_FCALrMax / m_FCALlayerZ[0] );
-  static const double preEMBbottomRight = m_preEMBat0eta / sin(thetaEMBbottomRight);
-  static const double etaEMBbottomRight = fabs( log(tan(thetaEMBbottomRight / 2)) );
+  static const double thetaTileExtBottomRight = std::atan( m_tileExtLayerR[0] / m_tileExtZmax );
+  static const double thetaEMBbottomRight = std::atan( m_EMBlayerR[0] / m_EMBzMax );
+  static const double thetaEMEtopLeft = std::atan( m_EMErMax / m_EMElayerZ[0] );
+  static const double thetaHECtopLeft = std::atan( m_HECrMax / m_HEClayerZ[0] );
+  static const double thetaFCALtopLeft = std::atan( m_FCALrMax / m_FCALlayerZ[0] );
+  static const double preEMBbottomRight = m_preEMBat0eta / std::sin(thetaEMBbottomRight);
+  static const double etaEMBbottomRight = std::fabs( std::log(std::tan(thetaEMBbottomRight / 2)) );
 
   for (int i = 0; i <= m_nDepth; i++)  m_layerDepth[i] = 0.0;
-  eta = fabs(eta);
+  eta = std::fabs(eta);
 
   if (eta >= 4.0) {
     return nullptr;
   }
   else {
-    const double theta = 2.0 * atan( exp(-eta) );
-    const double sinTheta = sin(theta);
+    const double theta = 2.0 * std::atan( std::exp(-eta) );
+    const double sinTheta = std::sin(theta);
 
     if (theta > thetaEMBbottomRight) {
       m_layerDepth[EMB1] = m_preEMBat0eta / sinTheta;
@@ -256,5 +256,3 @@ const double* eflowDepthCalculator::calcDepthArray(double eta, double filler)
   
   return m_layerDepth;
 }
-
-

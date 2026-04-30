@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import LHCPeriod, ProductionStep
@@ -81,8 +81,12 @@ def getNNs(flags):
     '''
 
     # dummy for now
-    caldir = 'BTagging/20231205/GN2v01/antikt4empflow'
-    pf_nns = [f'{caldir}/network_fold{n}.onnx' for n in range(4)]
+    ak4_nns = []
+    if flags.GeoModel.Run >= LHCPeriod.Run4:
+        ak4_nns = ["BTagging/20260308/GN2HL/antikt4emtopo/network.onnx"]
+    else:
+        caldir = 'BTagging/20231205/GN2v01/antikt4empflow'
+        ak4_nns = [f'{caldir}/network_fold{n}.onnx' for n in range(4)]
 
     # We can save our results to the jet container, rather than the b-tagging container
     # but this functionality is not yet setup for non multi-fold taggers. The easiest (/hackiest)
@@ -114,7 +118,7 @@ def getNNs(flags):
     return {
         'AntiKt4EMPFlowJets': [
             {
-                'folds': pf_nns,
+                'folds': ak4_nns,
                 'hash': 'jetFoldHash',
                 'cone_association': True,
             },
@@ -122,14 +126,14 @@ def getNNs(flags):
         ],
         'AntiKt4EMTopoJets': [
             {
-                'folds': pf_nns,
+                'folds': ak4_nns,
                 'hash': 'jetFoldHash',
                 'cone_association': True,
             },
         ],
         'AntiKt4EMPFlowCustomVtxJets': [
             {
-                'folds': pf_nns,
+                'folds': ak4_nns,
                 'hash': 'jetFoldHash',
                 'cone_association': True
             },
@@ -137,7 +141,7 @@ def getNNs(flags):
         ],
         'AntiKt4EMPFlowByVertexJets': [
             {
-                'folds': pf_nns,
+                'folds': ak4_nns,
                 'hash': 'jetFoldHash',
                 'cone_association': True
             }
@@ -147,7 +151,7 @@ def getNNs(flags):
         ],
         'DFAntiKt4HIJets': [
             {
-                'folds': pf_nns,
+                'folds': ak4_nns,
                 'hash': 'jetFoldHash',
                 'cone_association': True
             }
@@ -213,5 +217,11 @@ def createBTaggingConfigFlags():
     #  - folds: list of NNs to run
     #  - remapping (optional): any variable remapping
     btagcf.addFlag("BTagging.NNs", getNNs)
+    btagcf.addFlag("BTagging.AK4TaggerName", lambda pcf: (
+        "GN2HLv01" if pcf.GeoModel.Run>=LHCPeriod.Run4 else "GN2v01"))
+
+    # master switch for using Triton for NN inference.
+    # see athena/PhysicsAnalysis/JetTagging/FlavorTagInference/python/FlavorTagNNConfig.py
+    btagcf.addFlag("BTagging.UseTriton", False)
 
     return btagcf

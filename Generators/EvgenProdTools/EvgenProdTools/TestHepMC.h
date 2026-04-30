@@ -45,7 +45,7 @@ public:
   double      m_cm_energy, m_cme_diff;
   double      m_energy_diff, m_max_energy_diff;
   bool        m_dumpEvent, m_allowMissingXSec;
-  double      m_max_dist_trans, m_max_dist, m_min_tau, m_nonG4_energy_threshold;
+  double      m_min_dist_trans, m_max_dist_trans, m_max_dist, m_min_tau, m_nonG4_energy_threshold;
   double      m_eff_warn_threshold, m_eff_fail_threshold, m_tau_eff_threshold;
   double      m_accur_margin;
   bool m_doHist;

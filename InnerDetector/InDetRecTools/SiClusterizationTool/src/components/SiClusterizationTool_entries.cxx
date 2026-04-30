@@ -14,6 +14,7 @@
 #include "../LWTNNCondAlg.h"
 #include "../TTrainedNetworkCondAlg.h"
 #include "../HitsToxAODCopier.h"
+#include "../OnnxNNCondAlg.h"
 
 DECLARE_COMPONENT( InDet::PixelRDOTool )
 DECLARE_COMPONENT( InDet::MergedPixelsTool )
@@ -30,7 +31,4 @@ DECLARE_COMPONENT( InDet::TruthPixelClusterSplitter )
 DECLARE_COMPONENT( InDet::TruthClusterizationFactory )
 DECLARE_COMPONENT( InDet::TruthPixelClusterSplitProbTool )
 DECLARE_COMPONENT( InDet::HitsToxAODCopier )
-
-
-  
-
+DECLARE_COMPONENT( InDet::OnnxNNCondAlg )

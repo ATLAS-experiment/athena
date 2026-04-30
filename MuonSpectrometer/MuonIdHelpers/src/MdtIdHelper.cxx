@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonIdHelpers/MdtIdHelper.h"
@@ -50,7 +50,7 @@ int MdtIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
         m_DETECTORELEMENT_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'multiLayer' field ");
-        status = 1;
+        return 1;
     }
 
     field = m_dict->find_field("tubeLayer");
@@ -58,7 +58,7 @@ int MdtIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
         m_TUBELAYER_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'tubeLayer' field ");
-        status = 1;
+        return 1;
     }
 
     field = m_dict->find_field("tube");
@@ -66,7 +66,7 @@ int MdtIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
         m_CHANNEL_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'tube' field ");
-        status = 1;
+        return 1;
     }
 
     // save an index to the first region of mdt
@@ -86,15 +86,14 @@ int MdtIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     m_lay_impl = region.implementation(m_TUBELAYER_INDEX);
     m_tub_impl = region.implementation(m_CHANNEL_INDEX);
 
-    ATH_MSG_DEBUG(" MDT decode index and bit fields for each level: " << std::endl
-                                                                      << " muon        " << m_muon_impl.show_to_string() << std::endl
-                                                                      << " station     " << m_sta_impl.show_to_string() << std::endl
-                                                                      << " eta         " << m_eta_impl.show_to_string() << std::endl
-                                                                      << " phi         " << m_phi_impl.show_to_string() << std::endl
-                                                                      << " technology  " << m_tec_impl.show_to_string() << std::endl
-                                                                      << " multilayer  " << m_mla_impl.show_to_string() << std::endl
-                                                                      << " layer       " << m_lay_impl.show_to_string() << std::endl
-                                                                      << " tube        " << m_tub_impl.show_to_string() << std::endl);
+    ATH_MSG_DEBUG(" MDT decode index and bit fields for each level: " << "\n muon        " << m_muon_impl 
+                                                                      << "\n station     " << m_sta_impl 
+                                                                      << "\n eta         " << m_eta_impl 
+                                                                      << "\n phi         " << m_phi_impl 
+                                                                      << "\n technology  " << m_tec_impl 
+                                                                      << "\n multilayer  " << m_mla_impl 
+                                                                      << "\n layer       " << m_lay_impl 
+                                                                      << "\n tube        " << m_tub_impl <<"\n");
 
     /**
      * Build multirange for the valid set of identifiers
@@ -196,21 +195,21 @@ int MdtIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
     if (m_full_module_range.size() == 0) {
         ATH_MSG_ERROR("MDT MultiRange ID is empty for modules");
-        status = 1;
+        return 1;
     }
 
     /// test to see that the detector element multi range is not empty
 
     if (m_full_detectorElement_range.size() == 0) {
         ATH_MSG_ERROR("MDT MultiRange ID is empty for detector elements");
-        status = 1;
+        return 1;
     }
 
     /// test to see that the tube multi range is not empty
 
     if (m_full_channel_range.size() == 0) {
         ATH_MSG_ERROR("MDT MultiRange ID is empty for channels");
-        status = 1;
+        return 1;
     }
 
     // To speed up the range scans needed by the MinMax functions,

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "XMLCoreParser/XMLCoreParser.h" 
@@ -11,16 +11,16 @@ public:
 
   void do_start (XMLCoreParser& /*parser*/, const XMLCoreNode& node)
       {
-        std::string node_name = get_name (node);
+        std::string node_name = node.get_name();
 
         std::cout << "Printer factory::do_start>" << node_name << std::endl;
         
           // Output any attributes on this element
 
-        int count = attribute_number (node);
-        for (int i = 0; i < count; i++)
+        size_t count = node.n_attribs();
+        for (size_t i = 0; i < count; i++)
           {
-            std::string name = get_name (node, i);
+            std::string name = node.get_attrib_name (i);
             std::cout << "  " << name << "=\"";
             
             std::string value = get_value (node, name);

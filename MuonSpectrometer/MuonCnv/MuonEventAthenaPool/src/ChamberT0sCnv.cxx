@@ -17,12 +17,12 @@ ChamberT0s_PERS* ChamberT0sCnv::createPersistent(Muon::ChamberT0s* transObj) {
     return persObj;
 }
    
-Muon::ChamberT0s* ChamberT0sCnv::createTransient() {
+Muon::ChamberT0s* ChamberT0sCnv::createTransient(const Token* token) {
     using namespace Muon;
     static const pool::Guid   p1_guid("67E3F1AE-6254-4B29-8D61-5F17D0C19BB2");
-    if( compareClassGuid(p1_guid) ) {
+    if( compareClassGuid(token, p1_guid) ) {
         // using unique_ptr ensures deletion of the persistent object
-        std::unique_ptr< ChamberT0s_p1 > col_vect( poolReadObject< ChamberT0s_p1 >() );
+        std::unique_ptr< ChamberT0s_p1 > col_vect( poolReadObject< ChamberT0s_p1 >(token) );
         MsgStream log(msgSvc(), "MuonChamberT0sConverter_p1" );
         //log << MSG::DEBUG << "Reading ChamberT0s_p1" << endmsg;
         return TPconverter_p1.createTransientConst( col_vect.get(), log );

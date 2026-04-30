@@ -88,12 +88,17 @@ namespace FlavorTagDiscriminants {
       this, "useBarcode", false, "use barcode rather than UID"
     };
 
-    // Accessors
-    template <typename T> using Acc = SG::AuxElement::ConstAccessor<T>;
-    Acc<unsigned int> m_classifierParticleType{"classifierParticleType"};
-    Acc<ElementLink<xAOD::TruthParticleContainer>> m_truthParticleLink{"truthParticleLink"};
+    // Read accessors declared as handle keys for MT scheduling
+    SG::ReadDecorHandleKey< xAOD::ElectronContainer > m_truthParticleLinkKey {
+      this, "truthParticleLinkKey", "Electrons.truthParticleLink",
+        "Truth particle link on electrons"};
+    SG::ReadDecorHandleKey< xAOD::TruthParticleContainer > m_classifierParticleTypeKey {
+      this, "classifierParticleTypeKey", "TruthParticles.classifierParticleType",
+        "Classifier particle type on truth particles"};
     // ATLASRECTS-8290: this is for backward compatability, remove eventually
-    Acc<int> m_uid{"uid"};
+    SG::ReadDecorHandleKey< xAOD::TruthParticleContainer > m_uidKey {
+      this, "uidKey", "TruthParticles.uid",
+        "UniqueID on truth particles"};
   };
 }
 

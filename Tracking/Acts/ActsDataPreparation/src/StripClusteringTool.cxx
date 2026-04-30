@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StripClusteringTool.h"
@@ -13,6 +13,7 @@
 #include <TrkSurfaces/Surface.h>
 
 #include <algorithm>
+#include <cmath>
 #include <stdexcept>
 
 
@@ -154,6 +155,8 @@ StatusCode
 StripClusteringTool::makeClusters(const EventContext& ctx,
 				  typename IStripClusteringTool::ClusterCollection& clusters,
 				  const InDetDD::SiDetectorElement& element,
+                                  size_t /*icluster*/,
+                                  std::any& /*vars*/,
 				  typename ClusterContainer::iterator itrContainer) const
 {
     const IdentifierHash idHash = element.identifyHash();
@@ -233,6 +236,64 @@ computePosition(const StripClusteringTool::Cluster& cluster,
 			  std::move(posG));
 }
 
+static
+InDetDD::SiLocalPosition
+computeCentrePosition(const StripClusteringTool::Cluster& cluster,
+                      std::size_t size,
+                      const IStripClusteringTool::IDHelper& stripID,
+                      const InDetDD::SiDetectorDesign& design)
+{   // For Inner Detector SCT, compute the local position of the cluster center using the strip positions.
+    Identifier ids_front(cluster.ids.front());
+    Identifier ids_back(cluster.ids.back());
+    InDetDD::SiCellId frontId = stripID.strip(ids_front);
+    InDetDD::SiLocalPosition pos = design.localPositionOfCell(frontId);
+    if (size > 1) {
+      InDetDD::SiCellId backId = stripID.strip(ids_back);
+      InDetDD::SiLocalPosition backPos = design.localPositionOfCell(backId);
+      pos = 0.5 * (pos + backPos);
+    }
+    return pos;
+}
+
+static
+float computeRotatedLocalCov(float localCov,
+                                                const InDetDD::SiDetectorElement& element,
+                                                const InDetDD::SiDetectorDesign& design,
+                                                const StripClusteringTool::Cluster& cluster,
+                                                std::size_t size,
+                                                const IStripClusteringTool::IDHelper& stripID,
+                                                float localPos)
+{   // For Inner Detector SCT, in the case of endcap modules, rotate the local covariance to account for the stereo angle.
+    const bool rotate = (design.shape() == InDetDD::Trapezoid || design.shape() == InDetDD::Annulus);
+    if (!rotate) {
+      return localCov;
+    }
+
+    const auto* sctDesign = dynamic_cast<const InDetDD::SCT_ModuleSideDesign*>(&design);
+    if (sctDesign == nullptr) {
+      return localCov;
+    }
+
+    const InDetDD::SiLocalPosition centrePos = computeCentrePosition(cluster, size, stripID, design);
+    const auto ends = sctDesign->endsOfStrip(centrePos);
+    const double stripL = std::abs(ends.first.xEta() - ends.second.xEta());
+    const double iphipitch = 1. / element.phiPitch();
+    const Amg::Vector2D localPos2D{localPos, 0.0};
+    const double w = element.phiPitch(localPos2D) * iphipitch;
+
+    const double sn = element.sinStereoLocal(localPos2D);
+    const double sn2 = sn * sn;
+    const double cs2 = 1. - sn2;
+    const double v0 = localCov * w * w;
+    const double v1 = stripL * stripL * ONE_TWELFTH;
+
+    const float rotatedCov = cs2 * v0 + sn2 * v1;
+    // copied from InDet::SCT_ClusteringTool, but in ACTS-based tracking, SCT cov is 1-dimensional, just keep the rotatedCov(0,0) for the moment
+    // rotatedCov(0,1) = rotatedCov = sn * sqrt(cs2) * (v0 - v1);
+    // rotatedCov(1,1) = sn2 * v0 + cs2 * v1;
+    return rotatedCov;
+}
+
 
 // N.B. the cluster is added to the container
 StatusCode
@@ -272,7 +333,11 @@ StripClusteringTool::makeCluster(Cluster &cluster,
         localCov *= size*size;
       
     }
-    
+
+    if (not m_isITk) {
+      localCov(0,0) = computeRotatedLocalCov(localCov(0,0), element, design, cluster, size, stripID, localPos(0,0));
+    }
+
     cl.setMeasurement<1>(element.identifyHash(), localPos, localCov);
     cl.setIdentifier( cluster.ids.front() );
 

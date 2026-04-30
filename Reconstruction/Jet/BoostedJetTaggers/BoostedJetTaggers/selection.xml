@@ -4,6 +4,7 @@
   <class name="SmoothedTopTagger" />
   <class name="JSSWTopTaggerDNN" />
   <class name="JSSWTopTaggerANN" />
+  <class name="LundNetTagger" />
   <class name="JetQGTagger" />
   <class name="CP::JetQGTaggerBDT" />
   <class name="BJT::qgTagger" />

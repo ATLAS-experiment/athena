@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TokenIterator.h"
@@ -16,8 +16,7 @@ pool::PersistencySvc::TokenIterator::TokenIterator( FileDescriptor& fileDescript
                                                     const std::string& containerName) :
   m_container( nullptr ), m_refToken ( nullptr )
 {
-   pool::DatabaseConnection* connection = fileDescriptor.dbc();
-   DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
+   DbDatabase dbH( fileDescriptor.dbc()->handle() );
    if ( dbH.isValid() )  {
       m_refToken = new Token(dbH.cntToken(containerName));
       m_container = new DbContainer(m_refToken->technology());
@@ -29,8 +28,8 @@ pool::PersistencySvc::TokenIterator::TokenIterator( FileDescriptor& fileDescript
 
 pool::PersistencySvc::TokenIterator::~TokenIterator()
 {
-  delete m_container;
-  delete m_refToken;
+  delete m_container; m_container = nullptr;
+  m_refToken->release(); m_refToken = nullptr;
 }
 
 
@@ -38,9 +37,10 @@ Token*
 pool::PersistencySvc::TokenIterator::next()
 {
   Token::OID_t linkH(m_refToken->oid());
-  if ( ! m_container->next(linkH).isSuccess() ) return 0;
+  if( !m_container->next(linkH).isSuccess() ) return nullptr;
   m_refToken->oid() = linkH;
-  return new Token(m_refToken); // FIXME, PvG: Think about a const version keeping ownership
+  m_refToken->addRef();
+  return m_refToken;
 }
 
 
@@ -54,6 +54,8 @@ pool::PersistencySvc::TokenIterator::size()
 bool
 pool::PersistencySvc::TokenIterator::seek(std::size_t position)
 {
-  m_refToken->oid().second = int(position);
+  if( position >= size() ) return false;
+  // go to position-1, so that the next call to next() will return the Token at <position>
+  m_refToken->oid().second = int(position-1);
   return true;
 }

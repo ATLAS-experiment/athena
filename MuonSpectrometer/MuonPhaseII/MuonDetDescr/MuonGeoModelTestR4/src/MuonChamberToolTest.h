@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONGEOMODELTESTR4_MUONCHAMBERTOOLTEST_H
 #define MUONGEOMODELTESTR4_MUONCHAMBERTOOLTEST_H
@@ -41,20 +41,24 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
         /** @brief Returns the  edge points from a trapezoidal / cuboid /diamond volume */
         std::vector<Amg::Vector3D> cornerPoints(const ActsTrk::GeometryContext& gctx, const Acts::Volume& volume) const;
         std::array<Amg::Vector3D, 8> cornerPoints(const ActsTrk::GeometryContext& gctx, const Acts::StrawSurface& surface) const;
-        std::array<Amg::Vector3D, 4> cornerPoints(const ActsTrk::GeometryContext& gctx, const Acts::PlaneSurface&) const;
-        
+        std::array<Amg::Vector3D, 4> cornerPoints(const ActsTrk::GeometryContext& gctx, const Acts::PlaneSurface& surface) const;        
         
         void saveEnvelope(const ActsTrk::GeometryContext& gctx,
                           const std::string& envName,
                           const Acts::Volume& envelopeVol,
-                          const std::vector<const MuonGMR4::MuonReadoutElement*>& assocRE,
-                          const std::vector<std::shared_ptr<Acts::Volume>>& subVolumes={}) const;
+                          const std::vector<const Acts::Surface*>& assocSurfaces,
+                          const std::vector<const Acts::Volume*>& subVolumes={}) const;
+
+        StatusCode checkPortals(const ActsTrk::GeometryContext& gctx,
+                                const Acts::TrackingVolume& volume) const;
+                                
         /** @brief Check whether the chamber envelopes are consistent */
         StatusCode checkChambers(const ActsTrk::GeometryContext& gctx) const;
         /** @brief Check envelopes */
         StatusCode checkEnvelopes(const ActsTrk::GeometryContext& gctx) const;
         /** @brief Check tracking geometry volumes */
-        StatusCode checkTrackingGeometry(const ActsTrk::GeometryContext& gctx, std::shared_ptr<const Acts::TrackingGeometry>& trackingGeometry) const;
+        StatusCode checkTrackingGeometry(const ActsTrk::GeometryContext& gctx, 
+                                         const Acts::TrackingGeometry& trackingGeometry) const;
         /** @brief Checks whether the readout elements of an enevelope are completely embedded into the envelope */
         template <class EnvelopeType>
           StatusCode allReadoutInEnvelope(const ActsTrk::GeometryContext& ctx,
@@ -135,7 +139,7 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
 
         ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc","ActsTrackingGeometrySvc"};
         /** @brief Number of points to scan along the lines between two volume corners to check whether they belong to an another volume */
-        Gaudi::Property<unsigned> m_overlapSamples{this, "overlapSamples", 100};
+        Gaudi::Property<unsigned> m_overlapSamples{this, "overlapSamples", 50};
         /** @brief Name of the chamber output obj file */
         Gaudi::Property<std::string> m_overlapChambObj{this, "chamberOverlapFile", "OverlapingChambers.obj"};
         /** @brief The overlap of chamber volumes does not lead to a failure. In fact, the overlap between the T4 & BIS78 chambers

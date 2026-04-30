@@ -18,6 +18,13 @@
 namespace CP
 {
 
+  JetCalibrationAlg ::
+  JetCalibrationAlg (const std::string& name, ISvcLocator* pSvcLocator)
+    : EL::AnaAlgorithm (name, pSvcLocator)
+  {
+    declareProperty ("calibrationTool", m_calibrationTool, "The calibration tool we apply");
+  }
+
   StatusCode JetCalibrationAlg ::
   initialize ()
   {

@@ -56,7 +56,7 @@ protected:
   
   /** Build the transient representation from a persistent one
    */
-  virtual CaloRingsContainer* createTransient();
+  virtual CaloRingsContainer* createTransient(const Token* token);
 
 };
 

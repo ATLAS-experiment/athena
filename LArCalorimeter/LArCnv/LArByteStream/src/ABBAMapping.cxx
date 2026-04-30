@@ -1,17 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArByteStream/ABBAMapping.h"
+#include "GaudiKernel/MsgStream.h"
 
 
 typedef std::map<int, HWIdentifier> abba_map;
-
-// Version from Adriana
-/*void add_to_map(abba_map* map, int key, long value) {
-  HWIdentifier identifier((HWIdentifier::value_type) value);
-  (*map)[key] = identifier;
-}*/
 
 void add_to_map_2(abba_map* map, long value, int key) {
   HWIdentifier identifier((HWIdentifier::value_type) (value<<32));
@@ -19,7 +14,7 @@ void add_to_map_2(abba_map* map, long value, int key) {
 }
 
 
-void ABBAMapping::fill(abba_map *toFill, int iphi) {
+void ABBAMapping::fill(abba_map *toFill, int iphi, MsgStream& log) {
   if (iphi == 19) {
     add_to_map_2(toFill, 961127936, 0);
     add_to_map_2(toFill, 961126912, 1);
@@ -166,8 +161,6 @@ void ABBAMapping::fill(abba_map *toFill, int iphi) {
     add_to_map_2(toFill, 961111552, 157);
     add_to_map_2(toFill, 961108480, 158);
     add_to_map_2(toFill, 961109504, 159);
-    
-    std::cout << "iphi19 filled" << std::endl;
   } else if (iphi == 18) {
     add_to_map_2(toFill, 961127424, 0);
     add_to_map_2(toFill, 961126400, 1);
@@ -314,8 +307,6 @@ void ABBAMapping::fill(abba_map *toFill, int iphi) {
     add_to_map_2(toFill, 961143808, 157);
     add_to_map_2(toFill, 961140736, 158);
     add_to_map_2(toFill, 961141760, 159);
-    
-    std::cout << "iphi18 filled" << std::endl;
   } else if (iphi == 21) {
     add_to_map_2(toFill, 961556992, 0);
     add_to_map_2(toFill, 961558016, 1);
@@ -457,8 +448,6 @@ void ABBAMapping::fill(abba_map *toFill, int iphi) {
     add_to_map_2(toFill, 961648128, 157);
     add_to_map_2(toFill, 961651200, 158);
     add_to_map_2(toFill, 961652224, 159);
-    
-    std::cout << "iphi21 filled" << std::endl;
   } else if (iphi == 20) {
     add_to_map_2(toFill, 961556480, 0);
     add_to_map_2(toFill, 961557504, 1);
@@ -601,300 +590,7 @@ void ABBAMapping::fill(abba_map *toFill, int iphi) {
     add_to_map_2(toFill, 961648640, 157);
     add_to_map_2(toFill, 961645568, 158);
     add_to_map_2(toFill, 961644544, 159);
-    
-    std::cout << "iphi20 filled" << std::endl;
   } else {
-    std::cout << "iphi not known..." << std::endl;
+    log << MSG::ERROR << "iphi " << iphi << " not known..." << endmsg;
   }
 }
-
-/*
-  else if (iphi == 21) {
-    add_to_map_2(toFill, 961548800, 0);
-    add_to_map_2(toFill, 961549824, 1);
-    add_to_map_2(toFill, 961550848, 2);
-    add_to_map_2(toFill, 961551872, 3);
-    add_to_map_2(toFill, 961544704, 4);
-    add_to_map_2(toFill, 961545728, 5);
-    add_to_map_2(toFill, 961546752, 6);
-    add_to_map_2(toFill, 961547776, 7);
-    add_to_map_2(toFill, 961684992, 8);
-    add_to_map_2(toFill, 961686016, 9);
-    add_to_map_2(toFill, 961682944, 10);
-    add_to_map_2(toFill, 961683968, 11);
-    add_to_map_2(toFill, 961680896, 12);
-    add_to_map_2(toFill, 961681920, 13);
-    add_to_map_2(toFill, 961678848, 14);
-    add_to_map_2(toFill, 961679872, 15);
-    add_to_map_2(toFill, 961567232, 16);
-    add_to_map_2(toFill, 961566208, 17);
-    add_to_map_2(toFill, 961563136, 18);
-    add_to_map_2(toFill, 961562112, 19);
-    add_to_map_2(toFill, 961565184, 20);
-    add_to_map_2(toFill, 961564160, 21);
-    add_to_map_2(toFill, 961561088, 22);
-    add_to_map_2(toFill, 961560064, 23);
-    add_to_map_2(toFill, 961623552, 24);
-    add_to_map_2(toFill, 961622528, 25);
-    add_to_map_2(toFill, 961627648, 26);
-    add_to_map_2(toFill, 961626624, 27);
-    add_to_map_2(toFill, 961621504, 28);
-    add_to_map_2(toFill, 961620480, 29);
-    add_to_map_2(toFill, 961625600, 30);
-    add_to_map_2(toFill, 961624576, 31);
-    add_to_map_2(toFill, 961575424, 32);
-    add_to_map_2(toFill, 961574400, 33);
-    add_to_map_2(toFill, 961571328, 34);
-    add_to_map_2(toFill, 961570304, 35);
-    add_to_map_2(toFill, 961573376, 36);
-    add_to_map_2(toFill, 961572352, 37);
-    add_to_map_2(toFill, 961569280, 38);
-    add_to_map_2(toFill, 961568256, 39);
-    add_to_map_2(toFill, 961635840, 40);
-    add_to_map_2(toFill, 961634816, 41);
-    add_to_map_2(toFill, 961631744, 42);
-    add_to_map_2(toFill, 961630720, 43);
-    add_to_map_2(toFill, 961633792, 44);
-    add_to_map_2(toFill, 961632768, 45);
-    add_to_map_2(toFill, 961629696, 46);
-    add_to_map_2(toFill, 961628672, 47);
-    add_to_map_2(toFill, 961583616, 48);
-    add_to_map_2(toFill, 961582592, 49);
-    add_to_map_2(toFill, 961579520, 50);
-    add_to_map_2(toFill, 961578496, 51);
-    add_to_map_2(toFill, 961581568, 52);
-    add_to_map_2(toFill, 961580544, 53);
-    add_to_map_2(toFill, 961577472, 54);
-    add_to_map_2(toFill, 961576448, 55);
-    add_to_map_2(toFill, 961644032, 56);
-    add_to_map_2(toFill, 961643008, 57);
-    add_to_map_2(toFill, 961639936, 58);
-    add_to_map_2(toFill, 961638912, 59);
-    add_to_map_2(toFill, 961641984, 60);
-    add_to_map_2(toFill, 961640960, 61);
-    add_to_map_2(toFill, 961637888, 62);
-    add_to_map_2(toFill, 961636864, 63);
-    add_to_map_2(toFill, 961587712, 64);
-    add_to_map_2(toFill, 961586688, 65);
-    add_to_map_2(toFill, 961591808, 66);
-    add_to_map_2(toFill, 961590784, 67);
-    add_to_map_2(toFill, 961585664, 68);
-    add_to_map_2(toFill, 961584640, 69);
-    add_to_map_2(toFill, 961589760, 70);
-    add_to_map_2(toFill, 961588736, 71);
-    add_to_map_2(toFill, 961645056, 72);
-    add_to_map_2(toFill, 961646080, 73);
-    add_to_map_2(toFill, 961649152, 74);
-    add_to_map_2(toFill, 961650176, 75);
-    add_to_map_2(toFill, 961647104, 76);
-    add_to_map_2(toFill, 961648128, 77);
-    add_to_map_2(toFill, 961651200, 78);
-    add_to_map_2(toFill, 961652224, 79);
-    add_to_map_2(toFill, 961556992, 80);
-    add_to_map_2(toFill, 961558016, 81);
-    add_to_map_2(toFill, 961559040, 82);
-    add_to_map_2(toFill, 961552896, 84);
-    add_to_map_2(toFill, 961553920, 85);
-    add_to_map_2(toFill, 961554944, 86);
-    add_to_map_2(toFill, 961555968, 87);
-    add_to_map_2(toFill, 961691136, 90);
-    add_to_map_2(toFill, 961689088, 92);
-    add_to_map_2(toFill, 961690112, 93);
-    add_to_map_2(toFill, 961687040, 94);
-    add_to_map_2(toFill, 961688064, 95);
-    add_to_map_2(toFill, 961595904, 96);
-    add_to_map_2(toFill, 961594880, 97);
-    add_to_map_2(toFill, 961600000, 98);
-    add_to_map_2(toFill, 961598976, 99);
-    add_to_map_2(toFill, 961593856, 100);
-    add_to_map_2(toFill, 961592832, 101);
-    add_to_map_2(toFill, 961597952, 102);
-    add_to_map_2(toFill, 961596928, 103);
-    add_to_map_2(toFill, 961660416, 104);
-    add_to_map_2(toFill, 961659392, 105);
-    add_to_map_2(toFill, 961656320, 106);
-    add_to_map_2(toFill, 961655296, 107);
-    add_to_map_2(toFill, 961658368, 108);
-    add_to_map_2(toFill, 961657344, 109);
-    add_to_map_2(toFill, 961654272, 110);
-    add_to_map_2(toFill, 961653248, 111);
-    add_to_map_2(toFill, 961604096, 112);
-    add_to_map_2(toFill, 961603072, 113);
-    add_to_map_2(toFill, 961608192, 114);
-    add_to_map_2(toFill, 961607168, 115);
-    add_to_map_2(toFill, 961602048, 116);
-    add_to_map_2(toFill, 961601024, 117);
-    add_to_map_2(toFill, 961606144, 118);
-    add_to_map_2(toFill, 961605120, 119);
-    add_to_map_2(toFill, 961668608, 120);
-    add_to_map_2(toFill, 961667584, 121);
-    add_to_map_2(toFill, 961664512, 122);
-    add_to_map_2(toFill, 961663488, 123);
-    add_to_map_2(toFill, 961666560, 124);
-    add_to_map_2(toFill, 961665536, 125);
-    add_to_map_2(toFill, 961662464, 126);
-    add_to_map_2(toFill, 961661440, 127);
-    add_to_map_2(toFill, 961616384, 128);
-    add_to_map_2(toFill, 961615360, 129);
-    add_to_map_2(toFill, 961612288, 130);
-    add_to_map_2(toFill, 961611264, 131);
-    add_to_map_2(toFill, 961614336, 132);
-    add_to_map_2(toFill, 961613312, 133);
-    add_to_map_2(toFill, 961610240, 134);
-    add_to_map_2(toFill, 961609216, 135);
-    add_to_map_2(toFill, 961676800, 136);
-    add_to_map_2(toFill, 961675776, 137);
-    add_to_map_2(toFill, 961672704, 138);
-    add_to_map_2(toFill, 961671680, 139);
-    add_to_map_2(toFill, 961674752, 140);
-    add_to_map_2(toFill, 961673728, 141);
-    add_to_map_2(toFill, 961670656, 142);
-    add_to_map_2(toFill, 961669632, 143);
-    
-    std::cout << "iphi21 filled" << std::endl;
-  } else if (iphi == 20) {
-    add_to_map_2(toFill, 961550336, 0);
-    add_to_map_2(toFill, 961551360, 1);
-    add_to_map_2(toFill, 961548288, 2);
-    add_to_map_2(toFill, 961549312, 3);
-    add_to_map_2(toFill, 961546240, 4);
-    add_to_map_2(toFill, 961547264, 5);
-    add_to_map_2(toFill, 961544192, 6);
-    add_to_map_2(toFill, 961545216, 7);
-    add_to_map_2(toFill, 961684480, 8);
-    add_to_map_2(toFill, 961685504, 9);
-    add_to_map_2(toFill, 961682432, 10);
-    add_to_map_2(toFill, 961683456, 11);
-    add_to_map_2(toFill, 961680384, 12);
-    add_to_map_2(toFill, 961681408, 13);
-    add_to_map_2(toFill, 961678336, 14);
-    add_to_map_2(toFill, 961679360, 15);
-    add_to_map_2(toFill, 961562624, 16);
-    add_to_map_2(toFill, 961561600, 17);
-    add_to_map_2(toFill, 961566720, 18);
-    add_to_map_2(toFill, 961565696, 19);
-    add_to_map_2(toFill, 961560576, 20);
-    add_to_map_2(toFill, 961559552, 21);
-    add_to_map_2(toFill, 961564672, 22);
-    add_to_map_2(toFill, 961563648, 23);
-    add_to_map_2(toFill, 961627136, 24);
-    add_to_map_2(toFill, 961626112, 25);
-    add_to_map_2(toFill, 961623040, 26);
-    add_to_map_2(toFill, 961622016, 27);
-    add_to_map_2(toFill, 961625088, 28);
-    add_to_map_2(toFill, 961624064, 29);
-    add_to_map_2(toFill, 961620992, 30);
-    add_to_map_2(toFill, 961619968, 31);
-    add_to_map_2(toFill, 961570816, 32);
-    add_to_map_2(toFill, 961569792, 33);
-    add_to_map_2(toFill, 961574912, 34);
-    add_to_map_2(toFill, 961573888, 35);
-    add_to_map_2(toFill, 961568768, 36);
-    add_to_map_2(toFill, 961567744, 37);
-    add_to_map_2(toFill, 961572864, 38);
-    add_to_map_2(toFill, 961571840, 39);
-    add_to_map_2(toFill, 961631232, 40);
-    add_to_map_2(toFill, 961630208, 41);
-    add_to_map_2(toFill, 961635328, 42);
-    add_to_map_2(toFill, 961634304, 43);
-    add_to_map_2(toFill, 961629184, 44);
-    add_to_map_2(toFill, 961628160, 45);
-    add_to_map_2(toFill, 961633280, 46);
-    add_to_map_2(toFill, 961632256, 47);
-    add_to_map_2(toFill, 961579008, 48);
-    add_to_map_2(toFill, 961577984, 49);
-    add_to_map_2(toFill, 961583104, 50);
-    add_to_map_2(toFill, 961582080, 51);
-    add_to_map_2(toFill, 961576960, 52);
-    add_to_map_2(toFill, 961575936, 53);
-    add_to_map_2(toFill, 961581056, 54);
-    add_to_map_2(toFill, 961580032, 55);
-    add_to_map_2(toFill, 961643520, 56);
-    add_to_map_2(toFill, 961642496, 57);
-    add_to_map_2(toFill, 961639424, 58);
-    add_to_map_2(toFill, 961638400, 59);
-    add_to_map_2(toFill, 961641472, 60);
-    add_to_map_2(toFill, 961640448, 61);
-    add_to_map_2(toFill, 961637376, 62);
-    add_to_map_2(toFill, 961636352, 63);
-    add_to_map_2(toFill, 961591296, 64);
-    add_to_map_2(toFill, 961590272, 65);
-    add_to_map_2(toFill, 961587200, 66);
-    add_to_map_2(toFill, 961586176, 67);
-    add_to_map_2(toFill, 961589248, 68);
-    add_to_map_2(toFill, 961588224, 69);
-    add_to_map_2(toFill, 961585152, 70);
-    add_to_map_2(toFill, 961584128, 71);
-    add_to_map_2(toFill, 961651712, 72);
-    add_to_map_2(toFill, 961650688, 73);
-    add_to_map_2(toFill, 961647616, 74);
-    add_to_map_2(toFill, 961646592, 75);
-    add_to_map_2(toFill, 961649664, 76);
-    add_to_map_2(toFill, 961648640, 77);
-    add_to_map_2(toFill, 961645568, 78);
-    add_to_map_2(toFill, 961644544, 79);
-    add_to_map_2(toFill, 961556480, 80);
-    add_to_map_2(toFill, 961557504, 81);
-    add_to_map_2(toFill, 961558528, 82);
-    add_to_map_2(toFill, 961552384, 84);
-    add_to_map_2(toFill, 961553408, 85);
-    add_to_map_2(toFill, 961554432, 86);
-    add_to_map_2(toFill, 961555456, 87);
-    add_to_map_2(toFill, 961690624, 88);
-    add_to_map_2(toFill, 961691648, 89);
-    add_to_map_2(toFill, 961686528, 92);
-    add_to_map_2(toFill, 961687552, 93);
-    add_to_map_2(toFill, 961688576, 94);
-    add_to_map_2(toFill, 961689600, 95);
-    add_to_map_2(toFill, 961595392, 96);
-    add_to_map_2(toFill, 961594368, 97);
-    add_to_map_2(toFill, 961599488, 98);
-    add_to_map_2(toFill, 961598464, 99);
-    add_to_map_2(toFill, 961593344, 100);
-    add_to_map_2(toFill, 961592320, 101);
-    add_to_map_2(toFill, 961597440, 102);
-    add_to_map_2(toFill, 961596416, 103);
-    add_to_map_2(toFill, 961652736, 104);
-    add_to_map_2(toFill, 961653760, 105);
-    add_to_map_2(toFill, 961656832, 106);
-    add_to_map_2(toFill, 961657856, 107);
-    add_to_map_2(toFill, 961654784, 108);
-    add_to_map_2(toFill, 961655808, 109);
-    add_to_map_2(toFill, 961658880, 110);
-    add_to_map_2(toFill, 961659904, 111);
-    add_to_map_2(toFill, 961607680, 112);
-    add_to_map_2(toFill, 961606656, 113);
-    add_to_map_2(toFill, 961603584, 114);
-    add_to_map_2(toFill, 961602560, 115);
-    add_to_map_2(toFill, 961605632, 116);
-    add_to_map_2(toFill, 961604608, 117);
-    add_to_map_2(toFill, 961601536, 118);
-    add_to_map_2(toFill, 961600512, 119);
-    add_to_map_2(toFill, 961664000, 120);
-    add_to_map_2(toFill, 961662976, 121);
-    add_to_map_2(toFill, 961668096, 122);
-    add_to_map_2(toFill, 961667072, 123);
-    add_to_map_2(toFill, 961661952, 124);
-    add_to_map_2(toFill, 961660928, 125);
-    add_to_map_2(toFill, 961666048, 126);
-    add_to_map_2(toFill, 961665024, 127);
-    add_to_map_2(toFill, 961615872, 128);
-    add_to_map_2(toFill, 961614848, 129);
-    add_to_map_2(toFill, 961611776, 130);
-    add_to_map_2(toFill, 961610752, 131);
-    add_to_map_2(toFill, 961613824, 132);
-    add_to_map_2(toFill, 961612800, 133);
-    add_to_map_2(toFill, 961609728, 134);
-    add_to_map_2(toFill, 961608704, 135);
-    add_to_map_2(toFill, 961676288, 136);
-    add_to_map_2(toFill, 961675264, 137);
-    add_to_map_2(toFill, 961672192, 138);
-    add_to_map_2(toFill, 961671168, 139);
-    add_to_map_2(toFill, 961674240, 140);
-    add_to_map_2(toFill, 961673216, 141);
-    add_to_map_2(toFill, 961670144, 142);
-    add_to_map_2(toFill, 961669120, 143);
-    
-    std::cout << "iphi20 filled" << std::endl;
-  }
-*/

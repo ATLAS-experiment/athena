@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <IsolationTool/IsolationHelper.h>
 #include <xAODPrimitives/tools/getIsolationAccessor.h>
 #include <xAODPrimitives/tools/getIsolationCorrectionAccessor.h>
 #include <xAODPrimitives/IsolationHelpers.h>
+#include "AthContainers/CurrentContext.h"
 
 #ifndef XAOD_ANALYSIS
 #include "TrkParameters/TrackParameters.h"
@@ -117,9 +118,11 @@ namespace CP {
 	bool IsolationHelper::updateIsolation(xAOD::MuonContainer*& copy,xAOD::ShallowAuxContainer*& copyaux, std::vector<xAOD::Iso::IsolationType>& types, xAOD::Iso::IsolationCaloCorrectionBitset corrMask, std::string muonkey, bool recordSG) const {
 		const xAOD::MuonContainer* muons(nullptr);
 		ATH_CHECK( evtStore()->retrieve(muons,muonkey), false );
-		std::pair<xAOD::MuonContainer*,xAOD::ShallowAuxContainer*> shallowcopy = xAOD::shallowCopyContainer(*muons);
-		copy = shallowcopy.first;
-		copyaux = shallowcopy.second;
+                std::pair<std::unique_ptr<xAOD::MuonContainer>,
+                          std::unique_ptr<xAOD::ShallowAuxContainer> >  shallowcopy =
+                  xAOD::shallowCopyContainer(*muons, Gaudi::Hive::currentContext());
+		copy = shallowcopy.first.get();
+		copyaux = shallowcopy.second.get();
 
 		for(auto par: *copy){
 			for(auto type: types){
@@ -137,8 +140,8 @@ namespace CP {
         }
 
 			if(recordSG) {
-			ATH_CHECK( evtStore()->record(shallowcopy.first, "IsoFixed_"+muonkey), false );
-			ATH_CHECK( evtStore()->record(shallowcopy.second,"IsoFixed_"+muonkey+"Aux."), false );
+                          ATH_CHECK( evtStore()->record(std::move(shallowcopy.first), "IsoFixed_"+muonkey), false );
+                          ATH_CHECK( evtStore()->record(std::move(shallowcopy.second),"IsoFixed_"+muonkey+"Aux."), false );
 		}
 		return true;
 	}

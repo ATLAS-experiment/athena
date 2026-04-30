@@ -15,7 +15,6 @@
 #include "AthenaBaseComps/AthCheckMacros.h"
 #include "AthenaBaseComps/AthMessaging.h"
 #include "StoreGate/StoreGateSvc.h"
-#include "DataModelRoot/RootType.h"
 #include "AthenaPoolCnvSvc/IAthenaPoolCleanUp.h"
 #include "PoolSvc/IPoolSvc.h"
 
@@ -83,11 +82,6 @@ protected:
    AthenaPoolConverter(const CLID& id, ISvcLocator* pSvcLocator,
                        const char* name = nullptr);
 
-   /// Convert an object into Persistent.
-   /// @param pObj [IN] pointer to the transient object.
-   /// @param key [IN] StoreGate key (string) - placement hint to generate POOL container name
-   virtual StatusCode DataObjectToPers(DataObject* pObj, IOpaqueAddress*& pAddr) = 0;
-
    /// Write an object into POOL.
    /// @param pObj [IN] pointer to the transient object.
    /// @param key [IN] StoreGate key (string) - placement hint to generate POOL container name
@@ -107,24 +101,12 @@ protected:
    /// Set POOL placement hint; pure virtual method implemented by classes templated by type
    virtual Placement setPlacement(const std::string& key, const std::string& output) = 0;
 
-   /// @return data object from the converter.
-   virtual const DataObject* getDataObject() const;
-
-   bool compareClassGuid(const Guid &guid) const;
+   bool compareClassGuid(const Token* token, const Guid &guid) const;
 
 protected: // data
    ServiceHandle<StoreGateSvc> m_detStore;
    ServiceHandle<IAthenaPoolCnvSvc> m_athenaPoolCnvSvc;
    ServiceHandle<IPoolSvc> m_poolSvc;
-   RootType              m_classDesc;
-
-   typedef std::map<std::string, RootType>            ClassMap;
-   typedef ClassMap::const_iterator                   ClassMapIt;
-   std::string           m_className;
-   ClassMap              m_classDescs;
-
-   const DataObject*     m_dataObject;
-   const Token*          m_i_poolToken;
 
    typedef std::mutex CallMutex;
    CallMutex m_conv_mut;

@@ -9,8 +9,21 @@
 /**
    Definition of track truth origin types
  */
-namespace InDet {
 
+namespace InDet {
+  namespace ExclusiveOrigin {
+    enum ExclusiveOrigin : int {
+      Pileup         = 0,
+      Fake           = 1,
+      Primary        = 2,
+      FromB          = 3,
+      FromBC         = 4,
+      FromC          = 5,
+      FromTau        = 6,
+      OtherSecondary = 7
+    };
+  } // namespace ExclusiveOrigin
+  
   namespace TrkOrigin {
 
     enum OriginType {
@@ -154,20 +167,35 @@ namespace InDet {
       return true;
     }
 
+    inline int getTrkOrigin(int exclusiveOrigin) {
+      /*
+        input is exclusive origin enum value
+        Here we convert from exclusive origin (used by ftag) to trk origin (bitmask used by track truth tools) 
+      */
+      switch (exclusiveOrigin) {
+        case ExclusiveOrigin::Pileup:
+          return (0x1 << Pileup);
+        case ExclusiveOrigin::Fake:
+          return (0x1 << Fake);
+        case ExclusiveOrigin::FromB:
+          return (0x1 << BHadronDecay);
+        case ExclusiveOrigin::FromBC:
+          return (0x1 << BHadronDecay) | (0x1 << DHadronDecay);
+        case ExclusiveOrigin::FromC:
+          return (0x1 << DHadronDecay);
+        case ExclusiveOrigin::FromTau:
+          return (0x1 << TauDecay);
+        case ExclusiveOrigin::OtherSecondary:
+          return (0x1 << StrangeMesonDecay) | (0x1 << StrangeBaryonDecay) | (0x1 << GammaConversion) | (0x1 << HadronicInteraction) | (0x1 << OtherDecay) | (0x1 << OtherSecondary);
+        case ExclusiveOrigin::Primary:
+          return 0; // primary tracks have no bits set
+        default:
+          return (0x1 << OtherOrigin);
+      }
+    }
   } // namespace TrkOrigin
 
   namespace ExclusiveOrigin {
-    enum ExclusiveOrigin {
-      Pileup         = 0,
-      Fake           = 1,
-      Primary        = 2,
-      FromB          = 3,
-      FromBC         = 4,
-      FromC          = 5,
-      FromTau        = 6,
-      OtherSecondary = 7
-    };
-
     inline int getExclusiveOrigin(int origin) {
       /*
         The input origin is a bitwise flag.

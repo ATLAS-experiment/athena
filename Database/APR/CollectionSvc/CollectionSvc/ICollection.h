@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef COLLECTIONSVC_ICOLLECTION_H
 #define COLLECTIONSVC_ICOLLECTION_H
 
 #include <string>
+#include <memory>
 
 namespace pool {
 
@@ -44,7 +45,7 @@ namespace pool {
     virtual const CollectionDescription& description() const = 0;
 
     /// Returns an cursor for the collection.
-    virtual ICollectionCursor& cursor() = 0;
+    virtual std::unique_ptr<ICollectionCursor> cursor() = 0;
     
     /// Empty destructor.
     virtual ~ICollection() = default;

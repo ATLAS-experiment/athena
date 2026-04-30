@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_PUNCHTHROUGHTOOLS_SRC_PUNCHTHROUGHTOOL_H
@@ -27,13 +27,7 @@
 
 #include "AtlasHepMC/GenEvent_fwd.h"
 
-//libXML
-#include <libxml/xmlmemory.h>
-#include <libxml/parser.h>
-#include <libxml/tree.h>
-#include <libxml/xmlreader.h>
-#include <libxml/xpath.h>
-#include <libxml/xpathInternals.h>
+class XMLCoreNode;
 
 /*-------------------------------------------------------------------------
  *  Forward declarations
@@ -69,6 +63,16 @@ namespace ISF {
     const ISF::ISFParticleVector* computePunchThroughParticles(const ISF::ISFParticle &isfp, const TFCSSimulationState& simulstate, CLHEP::HepRandomEngine* rndmEngine) const;
 
   private:
+    struct InfoMap
+    {
+      InfoMap (const XMLCoreNode& node);
+
+      std::string name;
+      std::vector<double> etaMins;
+      std::vector<double> etaMaxs;
+      std::vector<int> pidStr;
+    };
+
     /*---------------------------------------------------------------------
      *  Private member functions
      *---------------------------------------------------------------------*/
@@ -127,16 +131,16 @@ namespace ISF {
     double interpolateEta(const double &eta, CLHEP::HepRandomEngine* rndmEngine) const;
 
     //get the infoMap from xml file based on the xmlpathname and also name of mainNode
-    std::vector<std::map<std::string,std::string>> getInfoMap(const std::string& mainNode, const std::string &xmlFilePath);
+    std::vector<InfoMap> getInfoMap(const std::string& mainNode, const XMLCoreNode& doc);
 
     //decide the pca / cdf part to read based on pdgId and eta
-    int passedParamIterator(int pid, double eta, const std::vector<std::map<std::string,std::string>> &mapvect) const;
+    int passedParamIterator(int pid, double eta, const std::vector<InfoMap> &mapvect) const;
 
     //load inverse quantile transformer from XML
     StatusCode initializeInverseCDF(const std::string & quantileTransformerConfigFile);
 
     //get CDF mapping for individual XML node
-    static std::map<double, double> getVariableCDFmappings(xmlNodePtr& nodeParent);
+    static std::map<double, double> getVariableCDFmappings(const XMLCoreNode* node);
 
     //load inverse PCA from XML
     StatusCode initializeInversePCA(const std::string & inversePCAConfigFile);
@@ -207,8 +211,8 @@ namespace ISF {
     std::vector<std::vector<double>> m_PCA_means;
 
     /** infoMaps */
-    std::vector<std::map<std::string, std::string>> m_xml_info_pca;
-    std::vector<std::map<std::string, std::string>> m_xml_info_cdf;
+    std::vector<InfoMap> m_xml_info_pca;
+    std::vector<InfoMap> m_xml_info_cdf;
 
     /** (vector of map) for CDF mappings */
     std::vector<std::map<double, double>>  m_variable0_inverse_cdf;

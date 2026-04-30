@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -26,7 +26,7 @@
 #include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "TrkExAlgs/PropResultRootWriterSvc.h"
-#include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/EventData/BoundTrackParameters.hpp"
 // STL
 #include <memory>
 #include <vector>
@@ -102,7 +102,7 @@ namespace Trk
         /** Parameter getter */
         Acts::BoundVector parameters() const {return m_params->parameters();}
         /** Covariance getter */
-        const std::optional<Acts::BoundSquareMatrix>& covariance() const {return m_params->covariance();}
+        const std::optional<Acts::BoundMatrix>& covariance() const {return m_params->covariance();}
 
       private:
         /** The Acts track parameters */

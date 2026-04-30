@@ -10,8 +10,10 @@
 
 lastref_dir=last_results
 dcubeXml=dcube_IDPVMPlots_HGTD.xml
-rdo_23p0=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1
+rdo=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_RUN4[0])")
 nEvents=20
+
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 
 # search in $DATAPATH for matching file
 dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXml -print -quit 2>/dev/null)
@@ -40,10 +42,10 @@ run () {
 # Run reconstruction with Athena HGTD clustering and converting HGTD clusters into xAOD format
 export ATHENA_CORE_NUMBER=8
 run "Reconstruction-athena" \
-    Reco_tf.py --CA \
-    --inputRDOFile ${rdo_23p0} \
+    Reco_tf.py \
+    --inputRDOFile ${rdo} \
     --outputAODFile AOD.athena.root \
-    --steering doRAWtoALL \
+    --conditionsTag "default:${conditionsTag}" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --postInclude "InDetConfig.InDetPrepRawDataFormationConfig.HGTDInDetToXAODClusterConversionCfg,ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg" \
     --preExec "flags.Reco.EnableHGTDExtension=True;flags.Acts.EDM.PersistifyClusters=True" \
@@ -52,6 +54,9 @@ run "Reconstruction-athena" \
     --multithreaded
 
 reco_rc=$?
+
+mv log.RAWtoALL log.RAWtoALL.athena
+
 if [ $reco_rc != 0 ]; then
     exit $reco_rc
 fi
@@ -69,10 +74,10 @@ if [ $reco_rc != 0 ]; then
 fi
 
 run "Reconstruction-acts" \
-    Reco_tf.py --CA \
-    --inputRDOFile ${rdo_23p0} \
+    Reco_tf.py \
+    --inputRDOFile ${rdo} \
     --outputAODFile AOD.acts.root \
-    --steering doRAWtoALL \
+    --conditionsTag "default:${conditionsTag}" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --postInclude "ActsConfig.ActsClusterizationConfig.ActsHgtdClusterizationAlgCfg,ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg" \
     --preExec "flags.Reco.EnableHGTDExtension=True;flags.Acts.EDM.PersistifyClusters=True" \
@@ -81,6 +86,9 @@ run "Reconstruction-acts" \
     --multithreaded
 
 reco_rc=$?
+
+mv log.RAWtoALL log.RAWtoALL.acts
+
 if [ $reco_rc != 0 ]; then
     exit $reco_rc
 fi
@@ -98,21 +106,24 @@ if [ $reco_rc != 0 ]; then
 fi
 
 run "Reconstruction-acts-timedclustering" \
-    Reco_tf.py --CA \
-	   --inputRDOFile ${rdo_23p0} \
-	   --outputAODFile AOD.acts.timed.root \
-	   --steering doRAWtoALL \
-	   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
-	   --postInclude "ActsConfig.ActsClusterizationConfig.ActsHgtdClusterizationAlgCfg,ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg" \
-	   --preExec "flags.Reco.EnableHGTDExtension=True; \
-    	       	      flags.Acts.EDM.PersistifyClusters=True; \
-	       	      from HGTD_Config.HGTD_ConfigFlags import ClusteringStrategy; \
-	       	      flags.HGTD.Acts.ClusteringStrategy=ClusteringStrategy.MultiPad; " \
-	   --maxEvents ${nEvents} \
-	   --perfmon fullmonmt \
-	   --multithreaded
+    Reco_tf.py \
+    --inputRDOFile ${rdo} \
+    --outputAODFile AOD.acts.timed.root \
+    --conditionsTag "default:${conditionsTag}" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
+    --postInclude "ActsConfig.ActsClusterizationConfig.ActsHgtdClusterizationAlgCfg,ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg" \
+    --preExec "flags.Reco.EnableHGTDExtension=True; \
+    	       flags.Acts.EDM.PersistifyClusters=True; \
+	       from HGTD_Config.HGTD_ConfigFlags import ClusteringStrategy; \
+	       flags.HGTD.Acts.ClusteringStrategy=ClusteringStrategy.MultiPad; " \
+    --maxEvents ${nEvents} \
+    --perfmon fullmonmt \
+    --multithreaded
 
 reco_rc=$?
+
+mv log.RAWtoALL log.RAWtoALL.acts-timedclus
+
 if [ $reco_rc != 0 ]; then
     exit $reco_rc
 fi

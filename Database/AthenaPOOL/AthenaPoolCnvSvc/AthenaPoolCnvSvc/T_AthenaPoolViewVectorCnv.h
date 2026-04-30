@@ -89,7 +89,7 @@ public:
    * Returns a newly-allocated transient object.
    * Errors are reported by raising exceptions.
    */
-  virtual trans_t* createTransient() override;
+  virtual trans_t* createTransient(const Token* token) override;
 
   
 private:

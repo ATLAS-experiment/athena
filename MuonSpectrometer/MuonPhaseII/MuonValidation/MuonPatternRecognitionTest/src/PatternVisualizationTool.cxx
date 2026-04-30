@@ -113,26 +113,6 @@ namespace MuonValR4 {
         }
         return truthSegs;
     }
-    // void PatternVisualizationTool::drawPrimitives(const TCanvas& can, PrimitiveVec& primitives) const {
-    //     const double yLow = can.GetPad(0)->GetUymin();
-    //     const double yHigh = can.GetPad(0)->GetUymax();
-    //     for (auto& prim : primitives) {
-    //         const TObject &primRef = *prim;
-    //         if (typeid(primRef) == typeid(TLine)){
-    //             TLine* line = static_cast<TLine*>(prim.get());
-    //             const Amg::Vector3D linePoint{line->GetX1(), line->GetY1(), 0.};
-    //             const Amg::Vector3D lineDir = Amg::Vector3D{(line->GetX2() - line->GetX1()) / (line->GetY2() - line->GetY1()), 1.,0.}.unit();
-                
-    //             const Amg::Vector3D newHigh = linePoint + Amg::intersect<3>(linePoint, lineDir, Amg::Vector3D::UnitY(), yHigh).value_or(0.) * lineDir;
-    //             const Amg::Vector3D newLow = linePoint + Amg::intersect<3>(linePoint, lineDir, Amg::Vector3D::UnitY(), yLow).value_or(0.) * lineDir;
-    //             line->SetX1(newLow.x());
-    //             line->SetY1(newLow.y());
-    //             line->SetX2(newHigh.x());
-    //             line->SetY2(newHigh.y());
-    //         }
-    //         prim->Draw();
-    //     }
-    // }
     void PatternVisualizationTool::visualizeAccumulator(const EventContext& ctx,
                                                         const MuonR4::HoughPlane& accumulator,
                                                         const Acts::HoughTransformUtils::HoughAxisRanges& axisRanges,
@@ -408,103 +388,6 @@ namespace MuonValR4 {
             canvas->add(drawLabel(makeLabel(segPars),0.25, 0.91));
         }
     }
-
-    void PatternVisualizationTool::visualizeSegmentsMeasurementsObj(const EventContext& ctx, 
-                                                                    const MuonR4::Segment& segment,
-                                                                    const std::string& extraLabel) const {
-                                                                      
-        const ActsTrk::GeometryContext* geoCtx{nullptr};
-        if (!SG::get(geoCtx, m_geoCtxKey, ctx).isSuccess()) {
-            return;
-        }
-        Acts::ObjVisualization3D visualHelper{};
-        const MuonR4::Segment::MeasVec& measurements{segment.measurements()};  
-        drawObjHits(*geoCtx, measurements, visualHelper);
-        const SpacePoint* sp = measurements.front()->type() != xAOD::UncalibMeasType::Other ? measurements.front()->spacePoint() : 
-                               measurements[1]->spacePoint();
-        auto chamberId = sp->identify();
-
-        //draw also the segment line in the same obj and in the end write the obj file with the visualHelper
-        double pathLength{1.*Gaudi::Units::m};      
-        Acts::GeometryView3D::drawSegment(visualHelper,
-                                         segment.position() + 0.5* pathLength * segment.direction(),
-                                         segment.position() - 0.5* pathLength  * segment.direction(),
-                                         Acts::s_viewLine);
-        std::string fileName = std::format("Event_{:}_chamber_{:}_{:}",  
-                           ctx.eventID().event_number(), m_idHelperSvc->toStringChamber(chamberId), extraLabel);
-        visualHelper.write(fileName + ".obj");   
-                                                                        
-    }
-
-    void PatternVisualizationTool::visualizeSegmentsMeasurementsObj(const EventContext& ctx,
-                                                                    const MuonR4::Segment::MeasVec& measVec,        
-                                                                    const std::string& extraLabel) const {
-        const ActsTrk::GeometryContext* geoCtx{nullptr};
-        if (!SG::get(geoCtx, m_geoCtxKey, ctx).isSuccess()) {
-            return;
-        }
-
-        Acts::ObjVisualization3D visualHelper{};
-        drawObjHits(*geoCtx, measVec, visualHelper);
-        const SpacePoint* sp = measVec.front()->type() != xAOD::UncalibMeasType::Other ? measVec.front()->spacePoint() : 
-                               measVec[1]->spacePoint();
-        auto chamberId = sp->identify();
-        std::string fileName = std::format("Event_{:}_chamber_{:}_{:}",  
-                           ctx.eventID().event_number(), m_idHelperSvc->toStringChamber(chamberId), extraLabel);
-        visualHelper.write(fileName + ".obj");        
-    }
-
-    void PatternVisualizationTool::drawObjHits(const ActsTrk::GeometryContext& geoCtx,
-                                               const MuonR4::Segment::MeasVec& measVec, 
-                                               Acts::ObjVisualization3D& visualHelper) const {
-
-
-        const SpacePoint* sp = measVec.front()->type() != xAOD::UncalibMeasType::Other ? measVec.front()->spacePoint() : 
-                               measVec[1]->spacePoint();
-      
-        const MuonGMR4::SpectrometerSector* msSector  = sp->msSector();  
-        const Amg::Transform3D& locToGlob = msSector->localToGlobalTransform(geoCtx); 
-        using CovIdx = SpacePoint::CovIdx;
-        double dX{0.}, dY{0.};
-
-        for(const auto& meas : measVec){
-          
-            //if this is a 2D measurement visualize it as the spacepoint
-                      
-            if(meas->dimension() == 2){
-                //handle straw surfaces
-                if(meas->isStraw()){                   
-                    const double dR = meas->type() == xAOD::UncalibMeasType::Other ? std::sqrt(meas->covariance()[Acts::toUnderlying(CovIdx::etaCov)]):
-                    meas->driftRadius();
-                    const double hZ = std::sqrt(meas->covariance()[Acts::toUnderlying(CovIdx::phiCov)]);
-                    auto bounds = std::make_unique<Acts::LineBounds>(dR, hZ);
-                    Amg::Vector3D globalPos = locToGlob* meas->localPosition();    
-                    const Acts::Transform3 trf = Acts::Transform3(
-                    Acts::Translation3(globalPos) *locToGlob.rotation());                    
-                    auto surface = Acts::Surface::makeShared<Acts::StrawSurface>(trf, std::move(bounds));    
-                    Acts::GeometryView3D::drawSurface(visualHelper, *surface, geoCtx.context());    
-                    continue;                
-                }
-                
-                dX = std::sqrt(meas->covariance()[Acts::toUnderlying(CovIdx::phiCov)]);
-                dY = std::sqrt(meas->covariance()[Acts::toUnderlying(CovIdx::etaCov)]);
-                auto bounds = std::make_unique<Acts::RectangleBounds>(dX, dY);               
-                Amg::Vector3D globalPos = locToGlob* meas->localPosition();    
-                const Acts::Transform3 trf = Acts::Transform3(
-                Acts::Translation3(globalPos) *locToGlob.rotation());   
-               
-                auto surf = Acts::Surface::makeShared<Acts::PlaneSurface>(trf,std::move(bounds));
-                Acts::GeometryView3D::drawSurface(visualHelper, *surf, geoCtx.context());          
-            }else{
-            if(meas->type() == xAOD::UncalibMeasType::Other){
-                continue;
-            }
-            const SpacePoint* underlyingSp{meas->spacePoint()};
-            MuonValR4::drawMeasurement(geoCtx, underlyingSp->primaryMeasurement(), visualHelper); 
-            } 
-        }
-    }
-   
 
     template<class SpacePointType>        
         const SpacePoint* 

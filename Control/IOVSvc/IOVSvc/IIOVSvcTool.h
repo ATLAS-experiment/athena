@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IOVSVC_IIOVSVCTOOL_H
@@ -12,8 +12,6 @@
 #include <memory>
 #include <set>
 #include "GaudiKernel/ClassID.h"
-#include "AthenaKernel/IOVSvcDefs.h"
-#include "SGTools/CallBackID.h"
 
 class IOVRange;
 class IOVTime;
@@ -31,19 +29,6 @@ public:
   virtual void setStoreName(const std::string& storeName) = 0;
   virtual const std::string& getStoreName() const = 0;
 
-  // register callback functions
-  virtual StatusCode regFcn(SG::DataProxy *dp, const CallBackID& c, 
-                            const IOVSvcCallBackFcn& fcn, bool trigger) = 0;
-
-  virtual StatusCode regFcn(const CallBackID& c1,
-                            const CallBackID& c2, 
-                            const IOVSvcCallBackFcn& fcn2, 
-                            bool trigger) = 0;
-  
-  virtual StatusCode regFcn(const IAlgTool* ia,
-                            const CallBackID& c2, const IOVSvcCallBackFcn& fcn2,
-                            bool trigger) = 0;
-  
   // Update Range from dB
   virtual StatusCode setRange(const CLID& clid, const std::string& key, 
                               IOVRange&) = 0;
@@ -89,15 +74,8 @@ public:
   // supply a list of TADs whose data will be preloaded
   virtual StatusCode preLoadDataTAD( const SG::TransientAddress * ) = 0;
 
-  // return list of tools (or functions) that have been triggered by key
-  // will return FAILURE if no tools found, or no key found
-  virtual StatusCode getTriggeredTools(const std::string& key,
-                                       std::set<std::string>& tools) = 0;
-
   virtual bool holdsProxy( SG::DataProxy* proxy ) const = 0;
   virtual bool holdsProxy( const CLID& clid, const std::string& key ) const = 0;
-  virtual bool holdsCallback( const CallBackID& ) const = 0;
-  virtual bool holdsAlgTool( const IAlgTool* ia ) const = 0;
 
   virtual void resetAllProxies() = 0;
 

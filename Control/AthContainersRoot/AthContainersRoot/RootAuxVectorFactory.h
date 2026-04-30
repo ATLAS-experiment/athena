@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainersRoot/RootAuxVectorFactory.h
@@ -38,7 +38,7 @@ class RootAuxVectorFactory;
  * This is used for the case when we need to manipulate an aux data vector
  * present in an input data file but we have neither a proper template
  * instantiation for the factory (because the variable was never explicitly
- * referenced), nor can we find a dictionary entry for the factory.j
+ * referenced), nor can we find a dictionary entry for the factory.
  *
  * This implementation works by relying entirely on the root
  * dictionary information.
@@ -219,6 +219,18 @@ public:
    * I/O will use the type found from the variable registry.
    */
   virtual const std::type_info* objType() const override;
+
+
+  /**
+   * @brief Perform post-read processing on this auxiliary variable.
+   * @param ctx The current event context.
+   *
+   * Some object types require some processing after being read before
+   * they are usable.  This can be indicated by specializing SG::ToTransient
+   * for the vector type containing the variable.  This method will call
+   * such a ToTransient method on the contents, if one is defined.
+   */
+  virtual void toTransient (const EventContext& ctx) override;
 
 
 protected:
@@ -464,6 +476,19 @@ public:
   virtual std::string tiAllocName() const override;
 
 
+  /**
+   * @brief Perform post-read processing for one variable.
+   * @param ctx The current event context.
+   * @param vec The variable to process.
+   *
+   * Some object types require some processing after being read before
+   * they are usable.  This can be indicated by specializing SG::ToTransient
+   * for the vector type containing the variable.  This method will call
+   * such a ToTransient method on the contents, if one is defined.
+   */
+  void toTransient (const EventContext& ctx, RootAuxVector& vec) const;
+
+
 private:
   /// Helper for copy; returns a pointer to the first destination object,
   /// or nullptr if the destination was cleared rather than copied.
@@ -485,8 +510,11 @@ private:
   /// Wrapper for the ROOT type of the element.
   RootUtils::Type m_type;
 
-  /// Flag to tell whether we need to do thinning.
-  enum { NONE, ELEMENT_LINK, ELEMENT_LINK_VECTOR, ELEMENT_LINK_NONPOINTER} m_isEL;
+  /// Flag to tell whether we need to do thinning / toTrasnsient.
+  enum { NONE,
+         ELEMENT_LINK, ELEMENT_LINK_VECTOR, ELEMENT_LINK_NONPOINTER,
+         DATA_LINK,    DATA_LINK_VECTOR,
+  } m_isEL;
 };
 
 

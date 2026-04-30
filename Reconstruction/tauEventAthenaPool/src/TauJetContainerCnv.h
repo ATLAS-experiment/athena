@@ -33,7 +33,7 @@ public:
         TauJetContainerCnv( ISvcLocator* svcloc );
 protected:
         virtual TauJetContainer_PERS *createPersistent( Analysis :: TauJetContainer *transCont );
-        virtual Analysis :: TauJetContainer *createTransient();
+        virtual Analysis :: TauJetContainer *createTransient(const Token* token);
 };
 
 inline TauJetContainerCnv :: TauJetContainerCnv( ISvcLocator* svcLocator ):

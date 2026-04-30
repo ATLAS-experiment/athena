@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/MonitorBase.h"
@@ -31,17 +31,17 @@ using std::endl;
 using namespace LArSamples;
 
 
-const History* MonitorBase::getCellHistory(unsigned int i) const 
+std::unique_ptr<const History> MonitorBase::getCellHistory(unsigned int i) const
 { 
   return interface().getCellHistory(i); 
 }
 
-const History* MonitorBase::getSCHistory(unsigned int i) const 
+std::unique_ptr<const History> MonitorBase::getSCHistory(unsigned int i) const
 { 
   return interface().getSCHistory(i); 
 }
 
-const CellInfo* MonitorBase::getCellInfo(unsigned int i) const 
+std::unique_ptr<const CellInfo> MonitorBase::getCellInfo(unsigned int i) const
 { 
   return interface().getCellInfo(i);
 }

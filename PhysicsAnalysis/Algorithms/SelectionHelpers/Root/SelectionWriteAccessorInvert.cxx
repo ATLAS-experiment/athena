@@ -58,8 +58,8 @@ namespace CP
   fillSystematics (const ISystematicsSvc& svc,
                    const CP::SystematicSet& fullAffecting,
                    const std::vector<CP::SystematicSet>& sysList,
-                   const std::string& objectName)
+                   ISysObjectHandleBase& objectHandle)
   {
-    return m_base->fillSystematics (svc, fullAffecting, sysList, objectName);
+    return m_base->fillSystematics (svc, fullAffecting, sysList, objectHandle);
   }
 }

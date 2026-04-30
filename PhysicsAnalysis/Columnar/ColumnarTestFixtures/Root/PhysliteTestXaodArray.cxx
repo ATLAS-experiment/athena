@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -25,6 +25,7 @@
 #include <xAODEgamma/PhotonContainer.h>
 #include <xAODEventInfo/EventInfo.h>
 #include <xAODMuon/MuonContainer.h>
+#include <AthContainers/CurrentContext.h>
 
 #include <AsgTesting/UnitTest.h>
 #include <xAODRootAccess/TEvent.h>
@@ -74,7 +75,7 @@ namespace columnar
 
       struct ColumnDataXAEventInfo final : public IColumnReaderXA, asg::AsgMessaging
       {
-        std::string m_name = "EventInfo";
+        std::string m_name {eventRangeColumnName};
         unsigned index = 0;
         std::array<ColumnarOffsetType, 2> data = {0, 1};
         const xAOD::EventInfo* eventInfo = nullptr;
@@ -154,13 +155,13 @@ namespace columnar
             std::string shallowName = containerName + "_shallowCopy";
             std::string shallowAuxName = shallowName + "Aux.";
             benchmarkShallowCopy.startTimer ();
-            auto shallowCopy = xAOD::shallowCopyContainer (*object);
+            auto shallowCopy = xAOD::shallowCopyContainer (*object, Gaudi::Hive::currentContext());
             benchmarkShallowCopy.stopTimer ();
             benchmarkShallowRegister.startTimer ();
-            ATH_CHECK (store.record (shallowCopy.first, shallowName));
-            ATH_CHECK (store.record (shallowCopy.second, shallowAuxName));
+            object = shallowCopy.first.get();
+            ATH_CHECK (store.record (std::move(shallowCopy.first), shallowName));
+            ATH_CHECK (store.record (std::move(shallowCopy.second), shallowAuxName));
             benchmarkShallowRegister.stopTimer ();
-            object = shallowCopy.first;
           }
           return StatusCode::SUCCESS;
         }
@@ -338,10 +339,10 @@ namespace columnar
         {
           if (*data.info.type != typeid(ColumnarOffsetType))
             throw std::runtime_error ("unexpected type for offset column: " + name + " " + data.info.type->name());
-          if (name == numberOfEventsName)
+          if (name == eventRangeColumnName)
           {
             data.reader = std::make_shared<TestUtils::ColumnDataXAEventInfo> (data.info);
-          } else if (data.info.offsetName == numberOfEventsName)
+          } else if (data.info.offsetName == eventRangeColumnName)
           {
             if (name == "AnalysisMuons")
               data.reader = std::make_shared<TestUtils::ColumnDataXARetrieve<xAOD::MuonContainer>> (data.info, userConfiguration);

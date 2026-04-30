@@ -31,7 +31,7 @@ RecMuCTPIByteStreamCnv::RecMuCTPIByteStreamCnv( ISvcLocator* svcloc )
  * Function telling the framework the Class ID of the object that this converter
  * is for (CTP_RIO).
  */
-const CLID& RecMuCTPIByteStreamCnv::classID() {
+CLID RecMuCTPIByteStreamCnv::classID() {
 
   return ClassID_traits< MuCTPI_RIO >::ID();
 

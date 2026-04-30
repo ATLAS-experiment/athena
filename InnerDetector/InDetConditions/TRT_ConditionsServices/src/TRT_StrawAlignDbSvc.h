@@ -14,7 +14,6 @@
 #include "AthenaBaseComps/AthService.h"
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "StoreGate/DataHandle.h"
 #include "InDetIdentifier/TRT_ID.h"
 #include "TRT_ConditionsServices/ITRT_StrawAlignDbSvc.h"
 #include "TRT_ConditionsData/StrawDxContainer.h"
@@ -99,9 +98,6 @@ class TRT_StrawAlignDbSvc: public extends<AthService, ITRT_StrawAlignDbSvc>
   const TRT_ID* m_trtid;              //!> id helper
   const InDetDD::TRT_DetectorManager* m_trtman; //!> detector manager
   
-  // pointers to calibration data
-  const DataHandle<StrawDxContainer> m_dxcontainer ; //!> persistifiable container
-
   ToolHandle<IAthenaOutputStreamTool> m_streamer; //!> OutputStreamTool
 
 };
@@ -119,15 +115,10 @@ inline const TRT_StrawAlignDbSvc::StrawDxContainer*
 TRT_StrawAlignDbSvc::getConstDxContainer() const
 {
   const StrawDxContainer* rc = nullptr;
-  if (m_dxcontainer.isValid())
-    rc = m_dxcontainer.cptr();
-  else {
-    if (m_detStore->retrieve (rc, m_par_dxcontainerkey).isFailure()) {
-      ATH_MSG_ERROR("Cannot retrieve " << m_par_dxcontainerkey);
-    }
+  if (m_detStore->retrieve (rc, m_par_dxcontainerkey).isFailure()) {
+    ATH_MSG_ERROR("Cannot retrieve " << m_par_dxcontainerkey);
   }
   return rc;
-  return const_cast<StrawDxContainer*>(rc) ; 
 }
 
 inline TRTCond::ExpandedIdentifier 

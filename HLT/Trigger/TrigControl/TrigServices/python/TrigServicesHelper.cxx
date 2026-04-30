@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -183,7 +183,7 @@ public:
 
     // Call prepareForRun
     std::cout << "TrigServicesHelper: Calling prepareForRun on " << event_loop_name << std::endl;
-    StatusCode sc ATLAS_THREAD_SAFE = evtLoopMgr->prepareForRun(pt);
+    StatusCode sc = evtLoopMgr->prepareForRun(pt);
 
     if (sc.isFailure()) {
       std::cerr << "TrigServicesHelper: prepareForRun failed" << std::endl;

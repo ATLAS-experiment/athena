@@ -14,7 +14,7 @@ TileRawChannelContainer_PERS* TileRawChannelContainerCnv::createPersistent(TileR
     return persObj;
 }
 
-TileRawChannelContainer* TileRawChannelContainerCnv::createTransient() {
+TileRawChannelContainer* TileRawChannelContainerCnv::createTransient(const Token* token) {
     MsgStream mlog(msgSvc(), "TileRawChannelContainerConverter" );
     TileRawChannelContainerCnv_p1   converter_p1;
 
@@ -23,13 +23,13 @@ TileRawChannelContainer* TileRawChannelContainerCnv::createTransient() {
     static const pool::Guid   p1_guid("BF727F06-9F94-4989-9C1F-9E59023988EA");
     static const pool::Guid   p0_guid("E18095F6-01D9-4E8B-AD51-A8628F92E7FF");
 
-    if( this->compareClassGuid(p1_guid)) {
-        std::unique_ptr< TileRawChannelContainer_p1 >   cont( this->poolReadObject< TileRawChannelContainer_p1 >() );
+    if( this->compareClassGuid(token, p1_guid)) {
+        std::unique_ptr< TileRawChannelContainer_p1 >   cont( this->poolReadObject< TileRawChannelContainer_p1 >(token) );
         trans_cont = converter_p1.createTransient( cont.get(), mlog );
     }
-    else if( this->compareClassGuid(p0_guid)) {
+    else if( this->compareClassGuid(token, p0_guid)) {
         // old version from before TP separation
-        TileRawChannelCollectionVec* rdoV = this->poolReadObject<TileRawChannelCollectionVec>();
+        TileRawChannelCollectionVec* rdoV = this->poolReadObject<TileRawChannelCollectionVec>(token);
         bool lDebug = (mlog.level()<=MSG::DEBUG);
 
         if (lDebug) 

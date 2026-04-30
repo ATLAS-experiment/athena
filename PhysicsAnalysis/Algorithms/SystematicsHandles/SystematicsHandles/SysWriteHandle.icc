@@ -10,6 +10,7 @@
 //
 
 #include <AsgMessaging/MessageCheck.h>
+#include <SystematicsHandles/AthenaDependencyHelpers.h>
 
 //
 // method implementations
@@ -21,10 +22,11 @@ namespace CP
   SysWriteHandle (T2 *owner, const std::string& propertyName,
                  const std::string& propertyValue,
                  const std::string& propertyDescription)
-    : AsgMessagingForward (owner), m_outputName (propertyValue)
-    , m_evtStoreGetter ([owner] () {return &*owner->evtStore();})
+    : SysWriteHandle (propertyValue, owner)
   {
     owner->declareProperty (propertyName, m_outputName, propertyDescription);
+    owner->declareProperty (propertyName + "Type", m_outputType,
+                            "an explicit type name for output dependencies");
   }
 
 
@@ -33,6 +35,11 @@ namespace CP
     : AsgMessagingForward (owner), m_outputName (outputName)
     , m_evtStoreGetter ([owner] () {return &*owner->evtStore();})
   {
+#ifndef XAOD_STANDALONE
+    m_addAlgDependency = [owner](const DataObjID& id, Gaudi::DataHandle::Mode mode) {
+      owner->addDependency(id, mode);
+    };
+#endif
   }
 
 
@@ -160,6 +167,27 @@ namespace CP
       m_outputNameCache.emplace (sys, newName);
     }
     ANA_CHECK (svc.setObjectSystematics (m_outputName, fullAffecting));
+
+    ANA_CHECK (addDecorationDependency(svc, "", false));
+
     return StatusCode::SUCCESS;
+  }
+
+
+
+  template<typename T,typename Aux>
+  StatusCode SysWriteHandle<T,Aux> ::
+  addDecorationDependency (const ISystematicsSvc& svc, const std::string& decoName, bool decoWrite)
+  {
+#ifdef XAOD_STANDALONE
+    (void) svc;
+    (void) decoName;
+    (void) decoWrite;
+    return StatusCode::SUCCESS;
+#else
+    const CLID clid = detail::getClidForDependency<T>(m_outputType, decoName, decoWrite);
+    ANA_CHECK (detail::addSysDependency(msg(), svc, m_addAlgDependency, clid, m_outputName, Gaudi::DataHandle::Writer, decoName, decoWrite));
+    return StatusCode::SUCCESS;
+#endif
   }
 }

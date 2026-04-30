@@ -1,10 +1,15 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
+from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
 from AthenaCommon.SystemOfUnits	import GeV
 from AthenaConfiguration.Enums import LHCPeriod
-from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+from AnalysisAlgorithmsConfig.ConfigAccumulator import (
+    DataType, ElectronEfficiencyCorrelationWarning,
+    Run4FallbackWarning, TestingOnlyWarning,
+    Run2OnlyFeatureWarning, TriggerSFWarning)
+import warnings
 from TrackingAnalysisAlgorithms.TrackingAnalysisConfig import InDetTrackCalibrationConfig
 from TrigGlobalEfficiencyCorrection.TriggerLeg_DictHelpers import TriggerDict, MapKeysDict
 from AthenaCommon.Logging import logging
@@ -15,11 +20,11 @@ from xAODEgamma.xAODEgammaParameters import xAOD
 import PATCore.ParticleDataType
 
 
-class ElectronCalibrationConfig (ConfigBlock) :
+class ElectronMomentumCalibrationConfig (ConfigBlock) :
     """the ConfigBlock for the electron four-momentum correction"""
 
     def __init__ (self) :
-        super (ElectronCalibrationConfig, self).__init__ ()
+        super (ElectronMomentumCalibrationConfig, self).__init__ ()
         self.setBlockName('Electrons')
         self.addOption ('inputContainer', '', type=str,
             info="the name of the input electron container. If left empty, automatically defaults "
@@ -44,9 +49,9 @@ class ElectronCalibrationConfig (ConfigBlock) :
             expertMode=True)
         self.addOption ('recalibratePhyslite', True, type=bool,
             info="whether to run the `CP::EgammaCalibrationAndSmearingAlg` on "
-            "PHYSLITE derivations")
+            "PHYSLITE derivations.")
         self.addOption ('minPt', 4.5*GeV, type=float,
-            info="the minimum pT cut to apply to calibrated electrons.")
+            info=r"the minimum $p_\mathrm{T}$ cut (in MeV) to apply to calibrated electrons.")
         self.addOption ('maxEta', 2.47, type=float,
             info=r"maximum electron $\vert\eta\vert$.")
         self.addOption ('forceFullSimConfigForP4', False, type=bool,
@@ -63,21 +68,17 @@ class ElectronCalibrationConfig (ConfigBlock) :
             "slower first step only has to be run once, while the second is run "
             "once per systematic. ATLASG-2358.",
             expertMode=True)
-        self.addOption ('runTrackBiasing', False, type=bool,
-            info="EXPERIMENTAL: This enables the `InDetTrackBiasingTool`, for "
-            "tracks associated to electrons. The tool does not have Run 3 "
-            "recommendations yet.",
-            expertMode=True)
         self.addOption ('decorateTruth', False, type=bool,
             info="decorate truth particle information on the reconstructed one.")
         self.addOption ('decorateCaloClusterEta', False, type=bool,
             info=r"decorate the calo cluster $\eta$.")
-        self.addOption ('writeTrackD0Z0', False, type = bool,
-            info=r"save the $d_0$ significance and $z_0\sin\theta$ variables.")
         self.addOption ('decorateEmva', False, type=bool,
             info="decorate `E_mva_only` on the electrons (needed for columnar tools/PHYSLITE).")
         self.addOption ('decorateSamplingPattern', False, type=bool,
             info="decorate `samplingPattern` on the clusters (meant for PHYSLITE).")
+        self.addOption ('addGlobalFELinksDep', False, type=bool,
+            info="whether to add dependencies for the global FE links (needed for PHYSLITE production)",
+            expertMode=True)
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -88,7 +89,6 @@ class ElectronCalibrationConfig (ConfigBlock) :
 
         Factoring this out into its own function, as we want to
         instantiate it in multiple places"""
-        log = logging.getLogger('ElectronCalibrationConfig')
 
         # Set up the calibration and smearing algorithm:
         alg = config.createAlgorithm( 'CP::EgammaCalibrationAndSmearingAlg', name )
@@ -103,7 +103,9 @@ class ElectronCalibrationConfig (ConfigBlock) :
             elif config.geometry() is LHCPeriod.Run3:
                 alg.calibrationAndSmearingTool.ESModel = 'es2024_Run3_v0'
             elif config.geometry() is LHCPeriod.Run4:
-                log.warning("No ESModel set for Run4, using Run 3 model instead")
+                warnings.warn_explicit(
+                    "No ESModel set for Run4, using Run 3 model instead",
+                    Run4FallbackWarning, filename='', lineno=0)
                 alg.calibrationAndSmearingTool.ESModel = 'es2024_Run3_v0'
             else:
                 raise ValueError (f"Can't set up the ElectronCalibrationConfig with {config.geometry().value}, "
@@ -122,11 +124,12 @@ class ElectronCalibrationConfig (ConfigBlock) :
 
     def makeAlgs (self, config) :
 
-        log = logging.getLogger('ElectronCalibrationConfig')
-
         if self.forceFullSimConfigForP4:
-            log.warning("You are running ElectronCalibrationConfig forcing full sim config")
-            log.warning(" This is only intended to be used for testing purposes")
+            warnings.warn_explicit(
+                "You are running ElectronCalibrationConfig forcing full sim"
+                " config. This is only intended to be used for testing"
+                " purposes.",
+                TestingOnlyWarning, filename='', lineno=0)
 
         inputContainer = "AnalysisElectrons" if config.isPhyslite() else "Electrons"
         if self.inputContainer:
@@ -149,6 +152,19 @@ class ElectronCalibrationConfig (ConfigBlock) :
             alg = config.createAlgorithm( 'CP::AsgShallowCopyAlg', 'ElectronShallowCopyAlg' )
             alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)
+            alg.outputType = 'xAOD::ElectronContainer'
+            decorationList = ['DFCommonElectronsLHLoose',
+                              'neflowisol20',
+                              'ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt500',
+                              'ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt500',
+                              'ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr',
+                              'ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr',
+                              'topoetcone20_CloseByCorr','DFCommonAddAmbiguity']
+            if self.addGlobalFELinksDep:
+                decorationList += ['neutralGlobalFELinks', 'chargedGlobalFELinks']
+            if config.dataType() is not DataType.Data:
+                decorationList += ['TruthLink']
+            alg.declareDecorations = decorationList
 
         # Set up the eta-cut on all electrons prior to everything else
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronEtaCutAlg' )
@@ -165,6 +181,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
 
         # Select electrons only with good object quality.
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronObjectQualityAlg' )
+        config.setExtraInputs ({('xAOD::EventInfo', 'EventInfo.RandomRunNumber')})
         alg.selectionDecoration = 'goodOQ' + self.postfix + ',as_bits'
         config.addPrivateTool( 'selectionTool', 'CP::EgammaIsGoodOQSelectionTool' )
         alg.selectionTool.Mask = xAOD.EgammaParameters.BADCLUSELECTRON
@@ -234,20 +251,13 @@ class ElectronCalibrationConfig (ConfigBlock) :
             alg.isolationCorrectionTool.CorrFile = "IsolationCorrections/v6/isolation_ptcorrections_rel22_mc20.root"
             alg.egammas = config.readName (self.containerName)
             alg.egammasOut = config.copyName (self.containerName)
+            alg.egammasType = 'xAOD::ElectronContainer'
             alg.preselection = config.getPreselection (self.containerName, '')
         else:
-            log.warning("You are not applying the isolation corrections")
-            log.warning("This is only intended to be used for testing purposes")
-
-        # Additional decorations
-        if self.writeTrackD0Z0:
-            alg = config.createAlgorithm( 'CP::AsgLeptonTrackDecorationAlg',
-                                          'LeptonTrackDecorator' )
-            if config.dataType() is not DataType.Data:
-                if self.runTrackBiasing:
-                    InDetTrackCalibrationConfig.makeTrackBiasingTool(config, alg)
-                InDetTrackCalibrationConfig.makeTrackSmearingTool(config, alg)
-            alg.particles = config.readName (self.containerName)
+            warnings.warn_explicit(
+                "You are not applying the isolation corrections."
+                " This is only intended to be used for testing purposes.",
+                TestingOnlyWarning, filename='', lineno=0)
 
         alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' )
         alg.particles = config.readName(self.containerName)
@@ -259,13 +269,6 @@ class ElectronCalibrationConfig (ConfigBlock) :
         config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
         config.addOutputVar (self.containerName, 'caloClusterEnergyReso_%SYS%', 'caloClusterEnergyReso', noSys=True)
 
-        if self.writeTrackD0Z0:
-            config.addOutputVar (self.containerName, 'd0_%SYS%', 'd0')
-            config.addOutputVar (self.containerName, 'd0sig_%SYS%', 'd0sig')
-            config.addOutputVar (self.containerName, 'z0_%SYS%', 'z0')
-            config.addOutputVar (self.containerName, 'z0sintheta_%SYS%', 'z0sintheta')
-            config.addOutputVar (self.containerName, 'z0sinthetasig_%SYS%', 'z0sinthetasig')
-
         # decorate truth information on the reconstructed object:
         if self.decorateTruth and config.dataType() is not DataType.Data:
             config.addOutputVar (self.containerName, "truthType", "truth_type", noSys=True, auxType='int')
@@ -276,13 +279,55 @@ class ElectronCalibrationConfig (ConfigBlock) :
             config.addOutputVar (self.containerName, "firstEgMotherTruthType", "truth_firstEgMotherTruthType", noSys=True, auxType='int')
 
 
-class ElectronWorkingPointConfig (ConfigBlock) :
-    """the ConfigBlock for the electron working point
-
-    This may at some point be split into multiple blocks (29 Aug 22)."""
+class ElectronIPCalibrationConfig (ConfigBlock) :
+    """the ConfigBlock for the electron impact parameter correction"""
 
     def __init__ (self) :
-        super (ElectronWorkingPointConfig, self).__init__ ()
+        super (ElectronIPCalibrationConfig, self).__init__ ()
+        self.setBlockName('ElectronIPCalibration')
+        self.addDependency('Electrons', required=True)
+        self.addDependency('ElectronWorkingPointSelection', required=False)
+        self.addOption ('containerName', '', type=str,
+            noneAction='error',
+            info="the name of the output container after calibration.")
+        self.addOption ('postfix', '', type=str,
+            info="a postfix to apply to decorations and algorithm names. Typically "
+            "not needed here since the calibration is common to all electrons.")
+        self.addOption ('runTrackBiasing', False, type=bool,
+            info="This enables the `InDetTrackBiasingTool`, for "
+            "tracks associated to electrons")
+        self.addOption ('writeTrackD0Z0', False, type = bool,
+            info=r"save the $d_0$ significance and $z_0\sin\theta$ variables.")
+
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName + self.postfix
+
+    def makeAlgs (self, config) :
+
+        # Additional decorations
+        if self.writeTrackD0Z0:
+            alg = config.createAlgorithm( 'CP::AsgLeptonTrackDecorationAlg',
+                                          'LeptonTrackDecorator' )
+            if config.dataType() is not DataType.Data:
+                if self.runTrackBiasing:
+                    InDetTrackCalibrationConfig.makeTrackBiasingTool(config, alg)
+                InDetTrackCalibrationConfig.makeTrackSmearingTool(config, alg)
+            alg.particles = config.readName (self.containerName)
+
+            config.addOutputVar (self.containerName, 'd0_%SYS%', 'd0')
+            config.addOutputVar (self.containerName, 'd0sig_%SYS%', 'd0sig')
+            config.addOutputVar (self.containerName, 'z0_%SYS%', 'z0')
+            config.addOutputVar (self.containerName, 'z0sintheta_%SYS%', 'z0sintheta')
+            config.addOutputVar (self.containerName, 'z0sinthetasig_%SYS%', 'z0sinthetasig')
+
+
+class ElectronWorkingPointSelectionConfig (ConfigBlock) :
+    """the ConfigBlock for the electron working point selection"""
+
+    def __init__ (self) :
+        super (ElectronWorkingPointSelectionConfig, self).__init__ ()
+        self.setBlockName('ElectronWorkingPointSelection')
         self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.")
@@ -296,11 +341,11 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         self.addOption ('trackSelection', True, type=bool,
             info="whether or not to set up an instance of "
             "`CP::AsgLeptonTrackSelectionAlg`, with the recommended $d_0$ and "
-            r"$z_0\sin\theta$ cuts")
+            r"$z_0\sin\theta$ cuts.")
         self.addOption ('maxD0Significance', 5, type=float,
             info="maximum $d_0$ significance used for the track selection.")
         self.addOption ('maxDeltaZ0SinTheta', 0.5, type=float,
-            info=r"maximum $z_0\sin\theta$ in mm used for the track selection.")
+            info=r"maximum $z_0\sin\theta$ (in mm) used for the track selection.")
         self.addOption ('identificationWP', None, type=str,
             info="the ID WP to use. Supported ID WPs: `TightLH`, "
             "`MediumLH`, `LooseBLayerLH`, `TightDNN`, `MediumDNN`, `LooseDNN`, "
@@ -316,7 +361,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             "`Veto`, `MatConv`, `GammaStar`.")
         self.addOption ('addSelectionToPreselection', True, type=bool,
             info="whether to retain only electrons satisfying the working point "
-            "requirements")
+            "requirements.")
         self.addOption ('closeByCorrection', False, type=bool,
             info="whether to use close-by-corrected isolation working points.")
         self.addOption ('recomputeID', False, type=bool,
@@ -330,29 +375,14 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             "the purpose of FSR corrections to these muons. Expert feature "
             "requested by the H4l analysis running on PHYSLITE.",
             expertMode=True)
-        self.addOption ('noEffSF', False, type=bool,
-            info="disables the calculation of efficiencies and scale factors. "
-            "Experimental! only useful to test a new WP for which scale "
-            "factors are not available.",
+        self.addOption ('muonsForFSRSelection', None, type=str,
+            info="the name of the muon container to use for the FSR selection. "
+            "If not specified, AnalysisMuons is used.",
             expertMode=True)
-        self.addOption ('saveDetailedSF', True, type=bool,
-            info="save all the independent detailed object scale factors.")
-        self.addOption ('saveCombinedSF', False, type=bool,
-            info="save the combined object scale factor.")
-        self.addOption ('forceFullSimConfig', False, type=bool,
-            info="whether to force the tool to use the configuration meant for "
-            "full simulation samples. Only for testing purposes.")
-        self.addOption ('correlationModelId', 'SIMPLIFIED', type=str,
-            info="the correlation model to use for ID scale factors. "
-            "Supported models: `SIMPLIFIED`, `FULL`, `TOTAL`, `TOYS`.")
-        self.addOption ('correlationModelIso', 'SIMPLIFIED', type=str,
-            info="the correlation model to use for isolation scale factors, "
-            "Supported models: `SIMPLIFIED`, `FULL`, `TOTAL`, `TOYS`.")
-        self.addOption ('correlationModelReco', 'SIMPLIFIED', type=str,
-            info="the correlation model to use for reconstruction scale factors. "
-            "Supported models: `SIMPLIFIED`, `FULL`, `TOTAL`, `TOYS`.")
-        self.addOption('addChargeMisIDSF', False, type=bool,
-            info="adds scale factors for charge-misID.")
+        self.addOption ('mainElectronContainer', None, type=str,
+            info="the name of the main electron container to use for the SiHit selection. "
+            "If not specified, this defaults to AnalysisElectrons.",
+            expertMode=True)
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -362,19 +392,13 @@ class ElectronWorkingPointConfig (ConfigBlock) :
 
     def makeAlgs (self, config) :
 
-        log = logging.getLogger('ElectronWorkingPointConfig')
-
-        if self.forceFullSimConfig:
-            log.warning("You are running ElectronWorkingPointConfig forcing full sim config")
-            log.warning("This is only intended to be used for testing purposes")
-
         selectionPostfix = self.selectionName
         if selectionPostfix != '' and selectionPostfix[0] != '_' :
             selectionPostfix = '_' + selectionPostfix
 
         # The setup below is inappropriate for Run 1
         if config.geometry() is LHCPeriod.Run1:
-            raise ValueError ("Can't set up the ElectronWorkingPointConfig with %s, there must be something wrong!" % config.geometry().value)
+            raise ValueError ("Can't set up the ElectronWorkingPointSelectionConfig with %s, there must be something wrong!" % config.geometry().value)
 
         postfix = self.postfix
         if postfix is None :
@@ -471,8 +495,10 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         if alg is not None:
             alg.particles = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-            config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
-                                 preselection=self.addSelectionToPreselection)
+            # Don't register WP selection here if FSR enabled - FSR algorithm will create combined selection
+            if not self.doFSRSelection:
+                config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
+                                     preselection=self.addSelectionToPreselection)
 
         # maintain order of selections
         if 'SiHit' in self.identificationWP:
@@ -481,6 +507,10 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             selDec = 'siHitEvtHasLeptonPair' + selectionPostfix + ',as_char'
             algDec.selectionName     = selDec.split(",")[0]
             algDec.ElectronContainer = config.readName (self.containerName)
+            if self.muonsForFSRSelection is not None:
+                algDec.AnalMuonContKey = config.readName (self.muonsForFSRSelection)
+            if self.mainElectronContainer is not None:
+                algDec.AnalElectronContKey = config.readName (self.mainElectronContainer)
             # Set flag to only collect SiHit electrons for events with an electron or muon pair to minimize size increase from SiHit electrons
             algDec.RequireTwoLeptons = True
             config.addSelection (self.containerName, self.selectionName, selDec,
@@ -531,16 +561,29 @@ class ElectronWorkingPointConfig (ConfigBlock) :
 
         # Set up the FSR selection
         if self.doFSRSelection :
-            # save the flag set for the WP
-            wpFlag = alg.selectionDecoration.split(",")[0]
+            # wpSelection needs the type suffix so SysReadSelectionHandle knows the type
+            # selectionDecoration needs name only for SysWriteDecorHandle
+            wpDecoration = alg.selectionDecoration
+            wpDecorationName = wpDecoration.split(',')[0]
+            # Insert FSR before the postfix (e.g., selectSiHit_SiHits -> selectSiHitFSR_SiHits)
+            underscorePos = wpDecorationName.index('_')
+            outputDecorationName = wpDecorationName[:underscorePos] + 'FSR' + wpDecorationName[underscorePos:]
             alg = config.createAlgorithm( 'CP::EgammaFSRForMuonsCollectorAlg', 'EgammaFSRForMuonsCollectorAlg' )
-            alg.selectionDecoration = wpFlag
+            alg.wpSelection = wpDecoration  # Input: read the WP selection (with type suffix)
+            alg.selectionDecoration = outputDecorationName  # Output: combined WP||FSR (or WP&&!FSR for vetoFSR) (name only)
             alg.ElectronOrPhotonContKey = config.readName (self.containerName)
+            if self.muonsForFSRSelection is not None:
+                alg.MuonContKey = config.readName (self.muonsForFSRSelection)
             # For SiHit electrons, set flag to remove FSR electrons.
             # For standard electrons, FSR electrons need to be added as they may be missed by the standard selection.
             # For SiHit electrons FSR electrons are generally always selected, so they should be removed since they will be in the standard electron container.
             if 'SiHit' in self.identificationWP:
                 alg.vetoFSR = True
+
+            # Register the FSR COMBINED selection
+            config.addSelection (self.containerName, self.selectionName,
+                                 alg.selectionDecoration + ',as_char',
+                                 preselection=self.addSelectionToPreselection)
 
         # Set up the isolation selection algorithm:
         if self.isolationWP != 'NonIso' :
@@ -557,7 +600,10 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                                  preselection=self.addSelectionToPreselection)
 
         if self.chargeIDSelectionRun2 and config.geometry() >= LHCPeriod.Run3:
-            log.warning("ECIDS is only available for Run 2 and will not have any effect in Run 3.")
+            warnings.warn_explicit(
+                "ECIDS is only available for Run 2 and will not have any"
+                " effect in Run 3.",
+                Run2OnlyFeatureWarning, filename='', lineno=0)
 
         # Select electrons only if they don't appear to have flipped their charge.
         if self.chargeIDSelectionRun2 and config.geometry() < LHCPeriod.Run3:
@@ -582,6 +628,90 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
                                  preselection=self.addSelectionToPreselection)
 
+
+class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
+    """the ConfigBlock for the electron working point efficiency computation"""
+
+    def __init__(self) :
+        super (ElectronWorkingPointEfficiencyConfig, self).__init__ ()
+        self.setBlockName('ElectronWorkingPointEfficiency')
+        self.addDependency('ElectronWorkingPointSelection', required=True)
+        self.addDependency('EventSelection', required=False)
+        self.addDependency('EventSelectionMerger', required=False)
+        self.addOption ('containerName', '', type=str,
+            noneAction='error',
+            info="the name of the input container.")
+        self.addOption ('selectionName', '', type=str,
+            noneAction='error',
+            info="the name of the electron selection to define (e.g. `tight` or "
+            "`loose`).")
+        self.addOption ('postfix', None, type=str,
+            info="a postfix to apply to decorations and algorithm names. "
+            "Typically not needed here as `selectionName` is used internally.")
+        self.addOption ('identificationWP', None, type=str,
+            info="the ID WP to use. Supported ID WPs: `TightLH`, "
+            "`MediumLH`, `LooseBLayerLH`, `TightDNN`, `MediumDNN`, `LooseDNN`, "
+            "`TightNoCFDNN`, `MediumNoCFDNN`, `VeryLooseNoCF97DNN`, `NoID`.",
+            expertMode=["NoID"])
+        self.addOption ('isolationWP', None, type=str,
+            info="the isolation WP to use. Supported isolation WPs: "
+            "`HighPtCaloOnly`, `Loose_VarRad`, `Tight_VarRad`, `TightTrackOnly_"
+            "VarRad`, `TightTrackOnly_FixedRad`, `NonIso`.")
+        self.addOption ('noEffSF', False, type=bool,
+            info="disables the calculation of efficiencies and scale factors. "
+            "Experimental! only useful to test a new WP for which scale "
+            "factors are not available.",
+            expertMode=True)
+        self.addOption ('chargeIDSelectionRun2', False, type=bool,
+            info="whether to run the ECIDS tool. Only available for Run 2.")
+        self.addOption ('saveDetailedSF', True, type=bool,
+            info="save all the independent detailed object scale factors.")
+        self.addOption ('saveCombinedSF', False, type=bool,
+            info="save the combined object scale factor.")
+        self.addOption ('forceFullSimConfig', False, type=bool,
+            info="whether to force the tool to use the configuration meant for "
+            "full simulation samples. Only for testing purposes.")
+        self.addOption ('correlationModelId', 'SIMPLIFIED', type=str,
+            info="the correlation model to use for ID scale factors. "
+            "Supported models: `SIMPLIFIED`, `FULL`, `TOTAL`, `TOYS`.")
+        self.addOption ('correlationModelIso', 'SIMPLIFIED', type=str,
+            info="the correlation model to use for isolation scale factors, "
+            "Supported models: `SIMPLIFIED`, `FULL`, `TOTAL`, `TOYS`.")
+        self.addOption ('correlationModelReco', 'SIMPLIFIED', type=str,
+            info="the correlation model to use for reconstruction scale factors. "
+            "Supported models: `SIMPLIFIED`, `FULL`, `TOTAL`, `TOYS`.")
+        self.addOption('addChargeMisIDSF', False, type=bool,
+            info="adds scale factors for charge-misID.")
+
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        if self.postfix is not None :
+            return self.containerName + '_' + self.selectionName + self.postfix
+        return self.containerName + '_' + self.selectionName
+
+    def makeAlgs (self, config) :
+
+        if self.forceFullSimConfig:
+            warnings.warn_explicit(
+                "You are running ElectronWorkingPointSelectionConfig forcing"
+                " full sim config. This is only intended to be used for"
+                " testing purposes.",
+                TestingOnlyWarning, filename='', lineno=0)
+
+        selectionPostfix = self.selectionName
+        if selectionPostfix != '' and selectionPostfix[0] != '_' :
+            selectionPostfix = '_' + selectionPostfix
+
+        # The setup below is inappropriate for Run 1
+        if config.geometry() is LHCPeriod.Run1:
+            raise ValueError ("Can't set up the ElectronWorkingPointSelectionConfig with %s, there must be something wrong!" % config.geometry().value)
+
+        postfix = self.postfix
+        if postfix is None :
+            postfix = self.selectionName
+        if postfix != '' and postfix[0] != '_' :
+            postfix = '_' + postfix
+
         correlationModels = ["SIMPLIFIED", "FULL", "TOTAL", "TOYS"]
         map_file = 'ElectronEfficiencyCorrection/2015_2025/rel22.2/2025_Run2Rel22_Recommendation_v3/map1.txt' \
                    if config.geometry() is LHCPeriod.Run2 else \
@@ -604,8 +734,11 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                 raise ValueError('Invalid correlation model for reconstruction efficiency, '
                                  f'has to be one of: {", ".join(correlationModels)}')
             if config.geometry() >= LHCPeriod.Run3 and self.correlationModelReco != "TOTAL":
-                log.warning("Only TOTAL correlation model is currently supported "
-                            "for reconstruction efficiency correction in Run 3.")
+                warnings.warn_explicit(
+                    "Only TOTAL correlation model is currently supported "
+                    "for reconstruction efficiency correction in Run 3.",
+                    ElectronEfficiencyCorrelationWarning,
+                    filename='', lineno=0)
                 alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
             else:
                 alg.efficiencyCorrectionTool.CorrelationModel = self.correlationModelReco
@@ -669,8 +802,11 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                 raise ValueError('Invalid correlation model for isolation efficiency, '
                                  f'has to be one of: {", ".join(correlationModels)}')
             if self.correlationModelIso != 'TOTAL':
-                log.warning("Only TOTAL correlation model is currently supported "
-                      "for isolation efficiency correction in Run 3.")
+                warnings.warn_explicit(
+                    "Only TOTAL correlation model is currently supported "
+                    "for isolation efficiency correction in Run 3.",
+                    ElectronEfficiencyCorrelationWarning,
+                    filename='', lineno=0)
             alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
             if config.dataType() is DataType.FastSim:
                 alg.efficiencyCorrectionTool.ForceDataType = (
@@ -725,11 +861,13 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                                      'ecids_effSF' + postfix)
             sfList += [alg.scaleFactorDecoration]
 
-        if self.addChargeMisIDSF and config.dataType() is not DataType.Data and not self.noEffSF:
-            if config.geometry() >= LHCPeriod.Run3:
-                raise ValueError('Run 3 does not yet have charge mis-ID correction, '
-                                 'please disable it by setting `noEffSF` to False.')
+        if self.addChargeMisIDSF and config.dataType() is not DataType.Data and not self.noEffSF and config.geometry() >= LHCPeriod.Run3:
+            warnings.warn_explicit(
+                "Charge mis-ID SFs are only available for Run 2 and will not"
+                " have any effect in Run 3.",
+                Run2OnlyFeatureWarning, filename='', lineno=0)
 
+        elif self.addChargeMisIDSF and config.dataType() is not DataType.Data and not self.noEffSF and config.geometry() < LHCPeriod.Run3:
             alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
                                           'ElectronEfficiencyCorrectionAlgMisid' )
             config.addPrivateTool( 'efficiencyCorrectionTool',
@@ -773,14 +911,13 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             alg.outScaleFactor = 'effSF' + postfix + '_%SYS%'
             config.addOutputVar (self.containerName, alg.outScaleFactor, 'effSF' + postfix)
 
-
-
 class ElectronTriggerAnalysisSFBlock (ConfigBlock):
 
     def __init__ (self) :
         super (ElectronTriggerAnalysisSFBlock, self).__init__ ()
-
-        self.addOption ('triggerChainsPerYear', {}, type=None,
+        self.addDependency('EventSelection', required=False)
+        self.addDependency('EventSelectionMerger', required=False)
+        self.addOption ('triggerChainsPerYear', {}, type=dict,
                         info="a dictionary with key (string) the year and value (list of "
                         "strings) the trigger chains.")
         self.addOption ('electronID', '', type=str,
@@ -860,8 +997,11 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
             triggerChainsPerYear_Run3 = {}
             for year, chains in self.triggerChainsPerYear.items():
                 if not chains:
-                    log.warning("No trigger chains configured for year %s. "
-                                "Assuming this is intended, no Electron trigger SF will be computed.", year)
+                    warnings.warn_explicit(
+                        f"No trigger chains configured for year {year}."
+                        " Assuming this is intended, no Electron trigger SF"
+                        " will be computed.",
+                        TriggerSFWarning, filename='', lineno=0)
                     continue
 
                 chains_split = [chain.replace("HLT_", "").replace(" || ", "_OR_") for chain in chains]
@@ -968,3 +1108,13 @@ class ElectronLRTMergedConfig (ConfigBlock) :
         alg.LRTElectronLocation = self.inputLRTElectrons
         alg.OutputCollectionName = self.containerName
         alg.CreateViewCollection = False
+
+@groupBlocks
+def ElectronCalibration(seq):
+    seq.append(ElectronMomentumCalibrationConfig())
+    seq.append(ElectronIPCalibrationConfig())
+
+@groupBlocks
+def ElectronWorkingPoint(seq):
+    seq.append(ElectronWorkingPointSelectionConfig())
+    seq.append(ElectronWorkingPointEfficiencyConfig())

@@ -1,3 +1,7 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+
 #include "PFSubtractionEnergyRatioCalculator.h"
 
 #include "GaudiKernel/IMessageSvc.h"
@@ -19,7 +23,7 @@ PFSubtractionEnergyRatioCalculator::calculateSubtractedEnergyRatios(
 
   ATH_MSG_DEBUG("Setting subtracted energy ratios here");
   
-  for (auto thisCluster: clusterSubtractionList) {
+  for (const auto& thisCluster: clusterSubtractionList) {
     ATH_MSG_DEBUG("Cluster energies are " << thisCluster.first->e() << " and " << clusterEnergyMap[thisCluster.first]);
 
     //clusterEnergyMap[thisCluster.first can be zero, but this is only a problem if thisCluster.first.e() < 0 - this can happen if a cluster starts with E =0 
@@ -55,7 +59,7 @@ PFSubtractionEnergyRatioCalculator::calculateSubtractedEnergyRatiosForAnnih(
 
   ATH_MSG_DEBUG("Setting subtracted energy ratios for annih here");
 
-  for (auto thisCluster: clusterSubtractionList) {
+  for (const auto& thisCluster: clusterSubtractionList) {
     ATH_MSG_DEBUG("Cluster energies are " << thisCluster.first->e() << " and " << clusterEnergyMap[thisCluster.first]);
 
     //The energy can be zero if we previously "annihiliated" this cluster because we will have already set the energy to zero.

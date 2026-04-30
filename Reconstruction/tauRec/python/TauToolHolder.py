@@ -11,7 +11,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
-from AthenaConfiguration.Enums import ProductionStep
+from AthenaConfiguration.Enums import ProductionStep, LHCPeriod
 from AthenaCommon.SystemOfUnits import GeV, deg
 
 ########################################################################
@@ -91,6 +91,12 @@ def TauTrackFinderCfg(flags):
     from TrkConfig.TrkVertexFitterUtilsConfig import AtlasTrackToVertexIPEstimatorCfg
     from InDetConfig.InDetTrackSelectorToolConfig import TauRecInDetTrackSelectorToolCfg
 
+    _LargeD0TrackInputContainer = (flags.Tau.ActiveConfig.LargeD0TrackCollection if flags.Tau.associateLRT else "")
+
+    # Manually setting for TauLRT reco
+    if flags.Tau.ActiveConfig.inTauLRT:
+        _LargeD0TrackInputContainer = flags.Tau.ActiveConfig.LargeD0TrackCollection
+
     TauTrackFinder = CompFactory.getComp("TauTrackFinder")
     TauTrackFinder = TauTrackFinder(name = _name,
                                     MaxJetDrTau = 0.2,
@@ -104,7 +110,7 @@ def TauTrackFinderCfg(flags):
                                     ghostTrackDR = flags.Tau.ghostTrackDR,
                                     Key_jetContainer = (flags.Tau.ActiveConfig.SeedJetCollection if flags.Tau.useGhostTracks else ""),
                                     Key_trackPartInputContainer = flags.Tau.ActiveConfig.TrackCollection,
-                                    Key_LargeD0TrackInputContainer = (flags.Tau.ActiveConfig.LargeD0TrackCollection if flags.Tau.associateLRT else ""),
+                                    Key_LargeD0TrackInputContainer = _LargeD0TrackInputContainer,
                                     TrackToVertexIPEstimator = result.popToolsAndMerge(AtlasTrackToVertexIPEstimatorCfg(flags)),
                                     inEleRM = flags.Tau.ActiveConfig.inTauEleRM,
     )
@@ -165,13 +171,20 @@ def TauTrackRNNClassifierCfg(flags):
     cppyy.load_library('libxAODTau_cDict')
 
     _classifyLRT = True
+    _classifyLRTWithDedicated = flags.Tau.classifyLRTWithDedicated
     if flags.Tau.associateLRT and not flags.Tau.classifyLRT:
         _classifyLRT = False
+
+    # Manually setting for TauLRT reco
+    if flags.Tau.ActiveConfig.inTauLRT:
+        _classifyLRT = True
+        _classifyLRTWithDedicated = True
+
 
     myTauTrackClassifier = TauTrackRNNClassifier( name = _name,
                                                   Classifiers = [ result.popToolsAndMerge(TauTrackRNNCfg(flags)) ],
                                                   classifyLRT = _classifyLRT,
-                                                  classifyLRTWithDedicated = flags.Tau.classifyLRTWithDedicated)
+                                                  classifyLRTWithDedicated = _classifyLRTWithDedicated)
 
     result.setPrivateTools(myTauTrackClassifier)
     return result
@@ -257,7 +270,7 @@ def Pi0ClusterFinderCfg(flags):
     _name = flags.Tau.ActiveConfig.prefix + 'Pi0ClusterFinder'
 
     TauPi0CreateROI = CompFactory.getComp("TauPi0CreateROI")
-    
+
     myTauPi0CreateROI = TauPi0CreateROI(
         name                             = _name,
         Key_caloCellInputContainer       = "AllCalo",
@@ -621,7 +634,8 @@ def TauCommonCalcVarsCfg(flags):
     _name = flags.Tau.ActiveConfig.prefix + 'TauCommonCalcVars'
 
     TauCommonCalcVars = CompFactory.getComp("TauCommonCalcVars")
-    TauCommonCalcVars = TauCommonCalcVars(name = _name)
+    TauCommonCalcVars = TauCommonCalcVars(name = _name,
+                                          doRun4 = flags.GeoModel.Run > LHCPeriod.Run3)
     
     result.setPrivateTools(TauCommonCalcVars)
     return result
@@ -633,7 +647,8 @@ def TauSubstructureCfg(flags):
     _name = flags.Tau.ActiveConfig.prefix + 'TauSubstructure'
 
     TauSubstructureVariables = CompFactory.getComp("TauSubstructureVariables")
-    TauSubstructureVariables = TauSubstructureVariables(  name = _name )
+    TauSubstructureVariables = TauSubstructureVariables(  name = _name,
+                                                          doRun4 = flags.GeoModel.Run > LHCPeriod.Run3) 
 
     result.setPrivateTools(TauSubstructureVariables)
     return result
@@ -678,7 +693,8 @@ def TauIDVarCalculatorCfg(flags):
 
     TauIDVarCalculator = CompFactory.getComp("TauIDVarCalculator")    
     myTauIDVarCalculator = TauIDVarCalculator(name=_name,
-                                              VertexCorrection = flags.Tau.doVertexCorrection)
+                                              VertexCorrection = flags.Tau.doVertexCorrection,
+                                              doRun4 = flags.GeoModel.Run > LHCPeriod.Run3)
 
     result.setPrivateTools(myTauIDVarCalculator)
     return result
@@ -788,6 +804,26 @@ def TauWPDecoratorGNNCfg(flags, version, tauContainerName=""):
                                       NewScoreName = flags.Tau.GNTauTransScoreName[version],
                                       DefineWPs = True)
     result.setPrivateTools(myTauWPDecorator)
+    return result
+
+def TauGNNDisplacedEvaluatorCfg(flags, tauContainerName=""):
+    # Displaced TauGNNEvaluator tool setup
+    result = ComponentAccumulator()
+
+    TauGNNEvaluator = CompFactory.TauGNNEvaluator(
+        name = flags.Tau.ActiveConfig.prefix + 'TauDisplacedGNN',
+        NetworkFileInclusive = flags.Tau.TauDisplacedGNNConfig[0],
+        OutputVarname = "GNdTauScore",
+        OutputPTau = "GNdTauProbTau",
+        OutputPJet = "GNdTauProbJet",
+        MaxClusterDR = 15.0,
+        MinTauPt = flags.Tau.MinPtDAOD,
+        VertexCorrection = flags.Tau.doVertexCorrection,
+        NodeNameTau="GNdTauv3_pb",
+        NodeNameJet="GNdTauv3_pu",
+        TauContainerName = tauContainerName,
+    )
+    result.setPrivateTools(TauGNNEvaluator)
     return result
 
 def TauEleRNNEvaluatorCfg(flags, applyLooseTrackSel=False):

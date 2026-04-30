@@ -36,6 +36,10 @@ namespace LVL1 {
       bool etaDimHigh(const TrigT1MuonRecRoiData& data, double& etaMin, double& etaMax) const override;
       
   private:
+      // Helper function to check whether the given Identifier is valid. It is needed when running on Phase2 geometry,
+      // since we are using the old RPC cabling instead of the new one.
+      bool checkRPCId(const Identifier& id, const MuonGM::MuonDetectorManager& muonMgr) const;
+
       BooleanProperty m_useRun3Config{this,"UseRun3Config",false,"use Run 3 config"};
       BooleanProperty m_useConditionData{this,"UseConditionData",true,"use condition data"};
       ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};

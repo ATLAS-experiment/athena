@@ -39,15 +39,17 @@ namespace LArSamples {
    
       /** @brief Constructor  */
       History(const HistoryContainer& container, 
-              const std::vector<const EventData*>& eventData, unsigned int hash, 
+              std::vector<std::unique_ptr<const EventData> >&& eventData, unsigned int hash,
               const AbsShapeErrorGetter* shapeErrorGetter = 0);
 
-      History(const std::vector<const Data*>& data, const CellInfo& info, const std::vector<const EventData*>& eventData, 
+      History(std::vector<std::unique_ptr<const Data> >&& data,
+              const CellInfo& info,
+              std::vector<std::unique_ptr<const EventData> >&& eventData,
               unsigned int hash, const AbsShapeErrorGetter* shapeErrorGetter = 0);
       
       virtual ~History();
 
-      HistoryContainer* dissolve();
+      std::unique_ptr<HistoryContainer> dissolve();
 
       unsigned int nData() const { return m_data.size(); }
       const Data* data(unsigned int i) const;
@@ -56,10 +58,12 @@ namespace LArSamples {
 
       const CellInfo* cellInfo() const { return &m_cellInfo; }
     
-      const std::vector<const EventData*>& eventData() const { return m_eventData; }
+      const std::vector<std::unique_ptr<const EventData> >& eventData() const { return m_eventData; }
       
-      bool sum(SimpleShape*& sum, SimpleShape*& reference) const;              
-      bool allShape(GraphShape*& allData, SimpleShape*& allRef) const;
+      bool sum(std::unique_ptr<SimpleShape>& sum,
+               std::unique_ptr<SimpleShape>& reference) const;
+      bool allShape(std::unique_ptr<GraphShape>& allData,
+                    std::unique_ptr<SimpleShape>& allRef) const;
       double allChi2(Chi2Params pars) const;
     
       // helpers
@@ -67,9 +71,9 @@ namespace LArSamples {
       double chi2_k(int i, double k, int lwb = -1, int upb = -1, int chi2Params = DefaultChi2) const;
       double maxChi2(int lwb = -1, int upb = -1, int chi2Params = DefaultChi2) const;
       
-      OFC* ofc(unsigned int i, int lwb = -1, int upb = -1, double time = Definitions::none, bool useCorrs = true) const;
-      History* refit(Chi2Params pars = DefaultChi2) const;
-      History* adjust() const;
+      std::unique_ptr<OFC> ofc(unsigned int i, int lwb = -1, int upb = -1, double time = Definitions::none, bool useCorrs = true) const;
+      std::unique_ptr<History> refit(Chi2Params pars = DefaultChi2) const;
+      std::unique_ptr<History> adjust() const;
       std::unique_ptr<History> filter(const TString& cuts) const;
       
       bool refVal(unsigned int i, unsigned int sample, double& val, double& err) const;
@@ -79,16 +83,17 @@ namespace LArSamples {
       
       TString description(unsigned int verbosity = 1) const;
       
-      SimpleShape* referenceShape(unsigned int k, double adcMax = -1, double time = Definitions::none, 
+      std::unique_ptr<SimpleShape> referenceShape(unsigned int k, double adcMax = -1, double time = Definitions::none,
                                   bool samplesOnly = false) const;
                                   
-      SimpleShape* deltaShape(unsigned int k, int lwb = -1, int upb = -1) const;
+      std::unique_ptr<SimpleShape> deltaShape(unsigned int k, int lwb = -1, int upb = -1) const;
       
       unsigned int hash() const { return m_hash; }
+      //cppcheck-suppress danglingLifetime
       void setShapeErrorGetter(const AbsShapeErrorGetter* err) const { m_shapeErrorGetter = err; }
       const AbsShapeErrorGetter* shapeErrorGetter() const { return m_shapeErrorGetter; }
-      const ShapeErrorData* shapeErrorData(CaloGain::CaloGain gain, ShapeErrorType shapeErrorType = BestShapeError, const Residual* res = 0) const;
-      const ScaledErrorData* scaledErrorData(unsigned int i, double adcMax = -1, double time = Definitions::none, ShapeErrorType shapeErrorType = BestShapeError) const;
+      std::unique_ptr<const ShapeErrorData> shapeErrorData(CaloGain::CaloGain gain, ShapeErrorType shapeErrorType = BestShapeError, const Residual* res = 0) const;
+      std::unique_ptr<const ScaledErrorData> scaledErrorData(unsigned int i, double adcMax = -1, double time = Definitions::none, ShapeErrorType shapeErrorType = BestShapeError) const;
 
       bool residualOffset(unsigned int i, short sample, double& offset, double adcMax = -1, double time = Definitions::none) const;
       bool residualError(unsigned int i, short sample1, short sample2, double& offset, double adcMax = -1, double time = Definitions::none) const;
@@ -98,9 +103,9 @@ namespace LArSamples {
       bool drawAllWithReference(bool refit = false) const;
       bool drawResiduals(int k = -1, bool errors = true, bool rescale = true) const;
       
-      Averager* calculatePedestal(int i) const;
-      Residual* residual(unsigned int k, bool correct = true, bool zeroTime = false) const;
-      Residuals* residuals(CaloGain::CaloGain gain = CaloGain::LARNGAIN, double absResTrunc = -1, bool correct = true, bool zeroTime = false) const;
+      std::unique_ptr<Averager> calculatePedestal(int i) const;
+      std::unique_ptr<Residual> residual(unsigned int k, bool correct = true, bool zeroTime = false) const;
+      std::unique_ptr<Residuals> residuals(CaloGain::CaloGain gain = CaloGain::LARNGAIN, double absResTrunc = -1, bool correct = true, bool zeroTime = false) const;
 
       double upstreamEnergy(unsigned int k) const;
       double chi2Anomaly(double chi2Cut, unsigned int nDof = 3) const;
@@ -109,9 +114,9 @@ namespace LArSamples {
       
     private:
       
-     std::vector<const Data*> m_data;
+     std::vector<std::unique_ptr<const Data> > m_data;
      CellInfo m_cellInfo;
-     std::vector<const EventData*> m_eventData;
+     std::vector<std::unique_ptr<const EventData> > m_eventData;
      unsigned int m_hash;
      mutable const AbsShapeErrorGetter* m_shapeErrorGetter;
      mutable const Interface* m_interface = nullptr;

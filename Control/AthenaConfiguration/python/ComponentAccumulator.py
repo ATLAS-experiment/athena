@@ -1,5 +1,5 @@
 
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import GaudiConfig2
 from GaudiKernel.DataHandle import DataHandle
@@ -967,11 +967,14 @@ class ComponentAccumulator(AccumulatorCachable):
 
 
     def createApp(self):
+        # Set ROOT batch mode
+        from PyUtils.Helpers import ROOTSetup
+        ROOTSetup(batch = not self.interactive)
+
         # Create the Gaudi object early.
         # Without this here, pyroot can sometimes get confused
         # and report spurious type mismatch errors about this object.
         import ROOT
-        ROOT.gROOT.SetBatch(True)
         ROOT.Gaudi
 
         appPropsToSet, mspPropsToSet, bshPropsToSet = self.gatherProps()

@@ -74,6 +74,7 @@ namespace TCS {
       const gTETOB & gte() const { return m_gte[0]; }
       const jXETOB & cxe() const { return m_cxe[0]; }
       const gTETOB & gespresso() const { return m_gespresso[0]; }
+      const gTETOB & gristretto() const { return m_gristretto[0]; }
       uint32_t run_number()        const { return m_runNo; }
       uint32_t event_number()      const { return m_evtNo; }
       uint32_t lumi_block()        const { return m_lumiB; }
@@ -109,6 +110,7 @@ namespace TCS {
       bool overflowFromgTEInput   () const { return m_overflowFromgTEInput   ; }
       bool overflowFromcXEInput   () const { return m_overflowFromcXEInput   ; }
       bool overflowFromgESPRESSOInput   () const { return m_overflowFromgESPRESSOInput   ; }
+      bool overflowFromgRISTRETTOInput   () const { return m_overflowFromgRISTRETTOInput   ; }
       bool overflowFromMuonInput  () const { return m_overflowFromMuonInput  ; }
       bool overflowFromLateMuonInput  () const { return m_overflowFromLateMuonInput  ; }
       bool overflowFromMuonNextBCInput  () const { return m_overflowFromMuonNextBCInput  ; }
@@ -145,6 +147,7 @@ namespace TCS {
       StatusCode setgTE(const gTETOB & gTE);
       StatusCode setcXE(const jXETOB & cXE);
       StatusCode setgESPRESSO(const gTETOB & gESPRESSO);
+      StatusCode setgRISTRETTO(const gTETOB & gRISTRETTO);
       StatusCode setEventInfo(const uint32_t runNo, const uint32_t evtNo, const uint32_t lumiB, const uint32_t BCID);
       /** @defgroup groupOverflowSetters
        *  @brief setter function for overflow bits
@@ -178,6 +181,7 @@ namespace TCS {
       void setOverflowFromgTEInput(bool v);
       void setOverflowFromcXEInput(bool v);
       void setOverflowFromgESPRESSOInput(bool v);
+      void setOverflowFromgRISTRETTOInput(bool v);
       void setOverflowFromMuonInput  (bool v);
       void setOverflowFromLateMuonInput  (bool v);
       void setOverflowFromMuonNextBCInput  (bool v);
@@ -219,22 +223,23 @@ namespace TCS {
       MuonTOBArray      m_muons;
       LateMuonTOBArray  m_lateMuons;
       MuonNextBCTOBArray  m_muonsNextBC;
-      MetTOBArray       m_met;      // will have size 1
-      jXETOBArray       m_jxe;      // will have size 1
-      jXETOBArray       m_jxec;     // will have size 1
-      jXETOBArray       m_jxeperf;  // will have size 1
-      jTETOBArray       m_jte;      // will have size 1
-      jTETOBArray       m_jtec;     // will have size 1
-      jTETOBArray       m_jtefwd;   // will have size 1
-      jTETOBArray       m_jtefwda;  // will have size 1
-      jTETOBArray       m_jtefwdc;  // will have size 1
-      gXETOBArray       m_gxejwoj;  // will have size 1
-      gXETOBArray       m_gxenc;    // will have size 1
-      gXETOBArray       m_gxerho;   // will have size 1
-      gXETOBArray       m_gmht;     // will have size 1
-      gTETOBArray       m_gte;      // will have size 1
-      jXETOBArray       m_cxe;      // will have size 1
-      gTETOBArray       m_gespresso;// will have size 1
+      MetTOBArray       m_met;       // will have size 1
+      jXETOBArray       m_jxe;       // will have size 1
+      jXETOBArray       m_jxec;      // will have size 1
+      jXETOBArray       m_jxeperf;   // will have size 1
+      jTETOBArray       m_jte;       // will have size 1
+      jTETOBArray       m_jtec;      // will have size 1
+      jTETOBArray       m_jtefwd;    // will have size 1
+      jTETOBArray       m_jtefwda;   // will have size 1
+      jTETOBArray       m_jtefwdc;   // will have size 1
+      gXETOBArray       m_gxejwoj;   // will have size 1
+      gXETOBArray       m_gxenc;     // will have size 1
+      gXETOBArray       m_gxerho;    // will have size 1
+      gXETOBArray       m_gmht;      // will have size 1
+      gTETOBArray       m_gte;       // will have size 1
+      jXETOBArray       m_cxe;       // will have size 1
+      gTETOBArray       m_gespresso; // will have size 1
+      gTETOBArray       m_gristretto;// will have size 1
 
       uint32_t m_runNo {0};
       uint32_t m_evtNo {0};
@@ -269,6 +274,7 @@ namespace TCS {
       bool m_overflowFromgTEInput { false };
       bool m_overflowFromcXEInput { false };
       bool m_overflowFromgESPRESSOInput { false };
+      bool m_overflowFromgRISTRETTOInput { false };
       bool m_overflowFromMuonInput { false };
       bool m_overflowFromLateMuonInput { false };
       bool m_overflowFromMuonNextBCInput { false };

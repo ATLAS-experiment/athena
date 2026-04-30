@@ -1,11 +1,14 @@
-#ifndef PFNEUTRALFLOWELEMENTCREATORALGORITHM_H
-#define PFNEUTRALFLOWELEMENTCREATORALGORITHM_H
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+
+#ifndef EFLOWREC_PFNEUTRALFLOWELEMENTCREATORALGORITHM_H
+#define EFLOWREC_PFNEUTRALFLOWELEMENTCREATORALGORITHM_H
 
 #include "eflowCaloObject.h"
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "StoreGate/DataHandle.h"
 
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODPFlow/FlowElement.h"

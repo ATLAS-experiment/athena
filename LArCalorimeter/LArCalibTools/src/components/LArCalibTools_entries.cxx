@@ -14,6 +14,7 @@
 #include "LArCalibTools/LArParams2Ntuple.h"
 #include "LArCalibTools/LArPhysWaveFromTuple.h"
 #include "LArCalibTools/LArPhysWaveFromStdNtuple.h"
+#include "LArCalibTools/LArPhysWaveFromAscii.h"
 #include "LArCalibTools/LArShapeFromStdNtuple.h"
 #include "LArCalibTools/LArAutoCorrFromStdNtuple.h"
 #include "LArCalibTools/LArParamsFromStdNtuple.h"
@@ -87,6 +88,7 @@ DECLARE_COMPONENT( LArWFParams2Ntuple )
 DECLARE_COMPONENT( LArParams2Ntuple )
 DECLARE_COMPONENT( LArPhysWaveFromTuple )
 DECLARE_COMPONENT( LArPhysWaveFromStdNtuple )
+DECLARE_COMPONENT( LArPhysWaveFromAscii )
 DECLARE_COMPONENT( LArShapeFromStdNtuple )
 DECLARE_COMPONENT( LArAutoCorrFromStdNtuple )
 DECLARE_COMPONENT( LArParamsFromStdNtuple )

@@ -23,12 +23,11 @@
  */
 namespace pool    {
 
+  class DbConnection;
   // as from IFileCatalog
   typedef std::string FileID;
-  typedef class DatabaseConnection *ConnectionH;
-  typedef const DatabaseConnection *ConstConnectionH;
 
-  /** @class FileDescriptor FileDescriptor.h POOLCore/FileDescriptor.h
+  /** @class FileDescriptor FileDescriptor.h StorageSvc/FileDescriptor.h
     *
     * Description:
     *
@@ -45,7 +44,7 @@ namespace pool    {
     /// Physical file name
     std::string       m_PFN;
     /// Handle to the Database connection
-    ConnectionH       m_DBC;
+    DbConnection*       m_DBC;
 
   public:
     /// Standard Constructor
@@ -74,10 +73,10 @@ namespace pool    {
     void setFID(const FileID& val)          { m_FID = val;        }
     
     /// Access to file descriptor (READ)
-    ConnectionH dbc()                       { return m_DBC;       }
-    ConstConnectionH dbc()  const           { return m_DBC;       }
+    DbConnection* dbc()                     { return m_DBC;       }
+    const DbConnection* dbc()  const        { return m_DBC;       }
     /// Access to file descriptor (WRITE)
-    void setDbc(ConnectionH val)            { m_DBC = val;        }
+    void setDbc(DbConnection* val)          { m_DBC = val;        }
   };
 }       // End namespace pool
 #endif  // POOL_FILEDESCRIPTOR_H

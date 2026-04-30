@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -15,9 +15,8 @@
 #ifndef TRIGT2CALOCOMMON_LARRODIDHASH_H
 #define TRIGT2CALOCOMMON_LARRODIDHASH_H
 
-
 #include <vector> 
-#include <map>
+#include <unordered_map>
 
 class HWIdentifier;
 
@@ -28,31 +27,30 @@ class LArRodIdHash  {
  public:
 
   /** definition of ID type */
-  typedef unsigned int ID; 
+  using ID = unsigned int;
 
   /** Initialize. Here real map is built */
   void initialize(int offset, const std::vector<HWIdentifier>& roms ); 
 
-  /**Convert ID to int */
-  int operator() (const ID& id) const ;
+  /** convert ID to index
+   *  throws std::out_of_range if not found */
+  size_t operator() (ID id) const ;
 
-  /**return maximum number of IDs */
-  int max() const; 
+  /** return maximum number of IDs */
+  size_t max() const { return m_int2id.size(); }
 
   /** reverse conversion */
-  ID identifier(int i) const;   
+  ID identifier(size_t i) const { return m_int2id[i]; }
 
   /** return  offset */
-  int offset() const ;
+  int offset() const { return m_offset; }
 
  private:
-  /** total number of IDs */
-  int m_size{0};  // total number of IDs
 
-  /** test beam flag */
-  std::map<unsigned int, int> m_lookup ;
+  /** lookup map */
+  std::unordered_map<ID, size_t> m_lookup ;
 
-  /** reverse look up */ 
+  /** reverse lookup */
   std::vector<ID> m_int2id;
 
   int m_offset{0};

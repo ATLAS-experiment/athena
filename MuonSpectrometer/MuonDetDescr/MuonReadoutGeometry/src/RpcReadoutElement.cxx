@@ -64,7 +64,7 @@ namespace MuonGM {
         bool notintheribs = !inTheRibs();
         if ((doubletPhi != m_dbPhi && NphiStripPanels() == 1 && notintheribs) ||
             (NphiStripPanels() != 1 && (doubletPhi < 1 || doubletPhi > NphiStripPanels()))) {
-            THROW_EXCEPTION_RE("doublet Z"<<doubletPhi<<" outside range 1-"<<NphiStripPanels()<<" with doubletZ: "<<m_dbPhi);
+            THROW_EXCEPTION_RE("doublet Phi "<<doubletPhi<<" outside range 1-"<<NphiStripPanels()<<" with doublet Phi: "<<m_dbPhi);
         }
         if (strip < 1 || strip > Nstrips(measphi)) {
             THROW_EXCEPTION_RE("strip "<<strip<<" outside range 1-"<<Nstrips(measphi)<<" for measphi="<<measphi);

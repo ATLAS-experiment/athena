@@ -85,6 +85,7 @@ Py:ComponentAccumulator    INFO      * Load: {('AthenaAttributeList', '/Digitiza
 Py:ComponentAccumulator    INFO  \__ LuminosityCondAlg (cond alg)
 Py:ComponentAccumulator    INFO      * BunchGroupInputKey: ''
 Py:ComponentAccumulator    INFO      * BunchLumisInputKey: ''
+Py:ComponentAccumulator    INFO      * ByteStreamMetadataKey: ''
 Py:ComponentAccumulator    INFO      * DigitizationFolderInputKey: '/Digitization/Parameters'
 Py:ComponentAccumulator    INFO      * FillParamsInputKey: ''
 Py:ComponentAccumulator    INFO      * IsMC: True

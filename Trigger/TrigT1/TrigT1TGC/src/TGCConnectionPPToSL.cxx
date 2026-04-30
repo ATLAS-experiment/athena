@@ -77,6 +77,8 @@ bool TGCConnectionPPToSL::readData(TGCRegionType type)
 	std::istringstream infileStr2(buf);
         int id, port;
 	infileStr2 >> id >> port;
+	//j is unlikely to overflow
+	//coverity[INTEGER_OVERFLOW]
 	m_HPBToSL.setId(itype, j, id);
 	//coverity[TAINTED_SCALAR]
 	m_HPBToSL.setSLPortToHPB(itype, id, port);

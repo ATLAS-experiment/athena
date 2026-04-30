@@ -15,18 +15,6 @@ namespace {
     constexpr double inDeg(const double a) {
         return a / 1._degree;
     }
-    /** @brief Ensure that the parsed sector number is following the MS sector schema
-     *         0 is mapped to 16 and 17 is mapped to 1.
-     *  @param sector: Calculated sector number */
-    constexpr int ringSector(const int sector) {
-        constexpr int nSectors = Muon::MuonStationIndex::numberOfSectors();
-        return sector == 0 ?  nSectors : (sector > nSectors ? 1 : sector); 
-    }
-    /** @brief Maps the sector 33 -> 0 to close the extended MS symmetry ring  */
-    constexpr int ringOverlap(const int sector) {
-        constexpr int nSectors = 2*Muon::MuonStationIndex::numberOfSectors();
-        return  sector > nSectors ? 1 : sector;
-    }
     /** @brief Average position */
     void average(const Amg::Vector3D& segPos, std::optional<Amg::Vector3D>& posSlot) {
         if (!posSlot) {
@@ -62,7 +50,7 @@ namespace {
 namespace MuonR4{
     using SearchTree_t = MsTrackSeeder::SearchTree_t;
     using SectorProjector = MsTrackSeeder::SectorProjector;
-    std::string to_string(const SectorProjector proj){
+    std::string MsTrackSeeder::to_string(const SectorProjector proj){
         using enum SectorProjector;
         switch (proj) {
             case leftOverlap: 
@@ -74,6 +62,14 @@ namespace MuonR4{
             default:
                 return "";
         }
+    }
+    int MsTrackSeeder::ringSector(const int sector) {
+        constexpr int nSectors = Muon::MuonStationIndex::numberOfSectors();
+        return sector == 0 ?  nSectors : (sector > nSectors ? 1 : sector); 
+    }
+    int MsTrackSeeder::ringOverlap(const int sector) {
+        constexpr int nSectors = 2*Muon::MuonStationIndex::numberOfSectors();
+        return  sector > nSectors ? 1 : sector;
     }
 
     MsTrackSeeder::MsTrackSeeder(const std::string& msgName, Config&& cfg):
@@ -157,14 +153,22 @@ namespace MuonR4{
  
         const Amg::Vector2D projPos{pos.perp(), pos.z()};
         const Amg::Vector2D projDir{dir.perp(), dir.z()};
+
+        ATH_MSG_VERBOSE( "segment position:" << segment.position() << ", direction: " << segment.direction() );
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Express segment in @"<<Amg::toString(pos)
+                        <<", direction: "<<Amg::toString(dir)<< " sector projector: " << Acts::toUnderlying(proj) << " location: " << Acts::toUnderlying(loc));
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Projected position onto sector: "<<Amg::toString(projPos)
+                        <<", projected direction: "<<Amg::toString(projDir));
  
         double lambda{0.};
         if (Location::Barrel == loc) {
             lambda = Amg::intersect<2>(projPos, projDir, Amg::Vector2D::UnitX(), 
                                         m_cfg.barrelRadius).value_or(10. * Gaudi::Units::km);
+                                        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Intersect with barrel at radius: "<<m_cfg.barrelRadius<<" --> "<<Amg::toString(projPos + lambda * projDir));
         } else {
             lambda = Amg::intersect<2>(projPos, projDir, Amg::Vector2D::UnitY(), 
                                        Acts::copySign(m_cfg.endcapDiscZ, projPos[1])).value_or(10. * Gaudi::Units::km);
+                                       ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Intersect with endcap at z: "<<Acts::copySign(m_cfg.endcapDiscZ, projPos[1])<<" --> "<<Amg::toString(projPos + lambda * projDir));
         }
         return projPos + lambda * projDir;  
     }
@@ -404,6 +408,7 @@ namespace MuonR4{
              *  just mirrored at the overlap between sector 1 -> 16 */
             const Segment* recoSeedCandidate = detailedSegment(*seedCandidate);
              if (!m_cfg.selector->passSeedingQuality(ctx, *recoSeedCandidate)){
+                ATH_MSG_VERBOSE("Segment "<<print(*seedCandidate)<<" does not pass the seeding quality.");
                 continue;
             }
             /** Define the search range. */    
@@ -438,8 +443,12 @@ namespace MuonR4{
                         if (itr == newSeed.segments().end()){
                             ATH_MSG_VERBOSE("Add segment "<<print(*extendWithMe)<<" to seed.");
                             newSeed.addSegment(extendWithMe);
-                        } else if (reducedChi2(**itr) > reducedChi2(*extendWithMe) &&
+                        }
+                        else if (reducedChi2(**itr) > reducedChi2(*extendWithMe) &&
                                      (*itr)->nPhiLayers() <= extendWithMe->nPhiLayers()) {
+
+                             ATH_MSG_VERBOSE("Replace segment "<<print(**itr)<<" with "<<print(*extendWithMe)
+                                             <<" on seed due to better chi2.");
                             newSeed.replaceSegment(*itr, extendWithMe);
                         }
             });
@@ -448,6 +457,9 @@ namespace MuonR4{
                 continue;
             }
             newSeed.addSegment(seedCandidate);
+
+            //Check if we have multiple segments from the same station, if so split the seed and create duplicate seeds
+
             /** Calculate the seed's position */
             const double r = newSeed.location() == Location::Barrel ? m_cfg.barrelRadius 
                                                                     : coords[Acts::toUnderlying(ePosOnCylinder)];
@@ -498,6 +510,8 @@ namespace MuonR4{
                 }
                 return false;
             });
+
+        ATH_MSG_VERBOSE("Found in total "<<outputSeeds->size()<<" after overlap removal");
         return outputSeeds;
     } 
 }

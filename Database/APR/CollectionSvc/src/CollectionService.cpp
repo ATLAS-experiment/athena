@@ -13,7 +13,6 @@
 
 using namespace std;
 using namespace pool;
-namespace pool { class ISession; }
 
 pool::ICollection*
 pool::CollectionService::create( const pool::CollectionDescription& description )

@@ -21,8 +21,6 @@
 
 #include "CollectionSvc/CollectionService.h"
 
-#include "POOLCore/DbPrint.h"
-#include "PersistencySvc/IPersistencySvc.h"
 #include "PersistencySvc/ISession.h"
 #include "PersistencySvc/IDatabase.h"
 #include "PersistencySvc/IContainer.h"
@@ -31,6 +29,7 @@
 #include "PersistencySvc/DatabaseConnectionPolicy.h"
 #include "PersistencySvc/IFileCatalog.h"
 #include "StorageSvc/DbType.h"
+#include "StorageSvc/DbPrint.h"
 
 #include "RelationalAccess/ConnectionService.h"
 #include "RelationalAccess/IConnectionServiceConfiguration.h"
@@ -174,7 +173,7 @@ StatusCode PoolSvc::io_reinit() {
 //__________________________________________________________________________
 StatusCode PoolSvc::setupPersistencySvc() {
    clearState();
-   ATH_MSG_INFO("Setting up APR FileCatalog and Streams");
+   ATH_MSG_INFO("Setting up FileCatalog and Streams");
    m_catalog = createCatalog();
    if (m_catalog != nullptr) {
       m_catalog->start();
@@ -183,9 +182,9 @@ StatusCode PoolSvc::setupPersistencySvc() {
       return(StatusCode::FAILURE);
    }
    // Setup a persistency services
-   m_persistencySvcVec.push_back(pool::IPersistencySvc::create(*m_catalog).release()); // Read Service
+   m_dbSessionVec.push_back(pool::PersistencySvc::createSession(*m_catalog).release()); // Read Service
    m_pers_mut.push_back(new CallMutex);
-   if (!m_persistencySvcVec[IPoolSvc::kInputStream]->session().technologySpecificAttributes(pool::ROOT_StorageType.type()).setAttribute<bool>("ENABLE_THREADSAFETY", true)) {
+   if (!m_dbSessionVec[IPoolSvc::kInputStream]->technologySpecificAttributes(pool::ROOT_StorageType.type()).setAttribute<bool>("ENABLE_THREADSAFETY", true)) {
       ATH_MSG_FATAL("Failed to enable thread safety in ROOT via PersistencySvc.");
       return(StatusCode::FAILURE);
    }
@@ -194,7 +193,7 @@ StatusCode PoolSvc::setupPersistencySvc() {
       ATH_MSG_FATAL("Failed to connect Input PersistencySvc.");
       return(StatusCode::FAILURE);
    }
-   m_persistencySvcVec.push_back(pool::IPersistencySvc::create(*m_catalog).release()); // Write Service
+   m_dbSessionVec.push_back(pool::PersistencySvc::createSession(*m_catalog).release()); // Write Service
    m_pers_mut.push_back(new CallMutex);
    pool::DatabaseConnectionPolicy policy;
    policy.setWriteModeForNonExisting(pool::DatabaseConnectionPolicy::CREATE);
@@ -202,8 +201,8 @@ StatusCode PoolSvc::setupPersistencySvc() {
    if (m_fileOpen.value() == "update") {
       policy.setWriteModeForExisting(pool::DatabaseConnectionPolicy::UPDATE);
    }
-   m_persistencySvcVec[IPoolSvc::kOutputStream]->session().setDefaultConnectionPolicy(policy);
-   if (!m_persistencySvcVec[IPoolSvc::kOutputStream]->session().technologySpecificAttributes(pool::ROOT_StorageType.type()).setAttribute<int>("DEFAULT_CONTAINER_TYPE", pool::DbType::getType(m_defaultContainerType).type())) {
+   m_dbSessionVec[IPoolSvc::kOutputStream]->setDefaultConnectionPolicy(policy);
+   if (!m_dbSessionVec[IPoolSvc::kOutputStream]->technologySpecificAttributes(pool::ROOT_StorageType.type()).setAttribute<int>("DEFAULT_CONTAINER_TYPE", pool::DbType::getType(m_defaultContainerType).type())) {
       ATH_MSG_FATAL("Failed to set ROOT default container type via PersistencySvc.");
       return(StatusCode::FAILURE);
    }
@@ -214,7 +213,7 @@ StatusCode PoolSvc::setupPersistencySvc() {
 StatusCode PoolSvc::start() {
    // Switiching on ROOT implicit multi threading for AthenaMT
    if (m_useROOTIMT && Gaudi::Concurrency::ConcurrencyFlags::numThreads() > 1) {
-      if (!m_persistencySvcVec[IPoolSvc::kInputStream]->session().technologySpecificAttributes(pool::ROOT_StorageType.type()).setAttribute<int>("ENABLE_IMPLICITMT", Gaudi::Concurrency::ConcurrencyFlags::numThreads() - 1)) {
+      if (!m_dbSessionVec[IPoolSvc::kInputStream]->technologySpecificAttributes(pool::ROOT_StorageType.type()).setAttribute<int>("ENABLE_IMPLICITMT", Gaudi::Concurrency::ConcurrencyFlags::numThreads() - 1)) {
          ATH_MSG_FATAL("Failed to enable implicit multithreading in ROOT via PersistencySvc.");
          return(StatusCode::FAILURE);
       }
@@ -226,7 +225,7 @@ StatusCode PoolSvc::start() {
 StatusCode PoolSvc::stop() {
    ATH_MSG_VERBOSE("stop()");
    bool retError = false;
-   for (unsigned int contextId = 0, imax = m_persistencySvcVec.size(); contextId < imax; contextId++) {
+   for (unsigned int contextId = 0, imax = m_dbSessionVec.size(); contextId < imax; contextId++) {
       if (!disconnect(contextId).isSuccess()) {
          ATH_MSG_FATAL("Cannot disconnect Stream: " << contextId);
          retError = true;
@@ -239,10 +238,10 @@ StatusCode PoolSvc::stop() {
 void PoolSvc::clearState() {
    std::lock_guard<CallMutex> lock(m_pool_mut);
    // Cleanup persistency service
-   for (const auto& persistencySvc : m_persistencySvcVec) {
-      delete persistencySvc;
+   for (const auto& dbSession : m_dbSessionVec) {
+      delete dbSession;
    }
-   m_persistencySvcVec.clear();
+   m_dbSessionVec.clear();
    for (const auto& persistencyMutex : m_pers_mut) {
       delete persistencyMutex;
    }
@@ -263,8 +262,8 @@ StatusCode PoolSvc::finalize() {
 //__________________________________________________________________________
 StatusCode PoolSvc::io_finalize() {
    ATH_MSG_INFO("I/O finalization...");
-   for (size_t i = 0; i < m_persistencySvcVec.size(); i++) {
-      if (m_persistencySvcVec[i]->session().defaultConnectionPolicy().writeModeForNonExisting() != pool::DatabaseConnectionPolicy::RAISE_ERROR &&
+   for (size_t i = 0; i < m_dbSessionVec.size(); i++) {
+      if (m_dbSessionVec[i]->defaultConnectionPolicy().writeModeForNonExisting() != pool::DatabaseConnectionPolicy::RAISE_ERROR &&
 	      !disconnect(i).isSuccess()) {
          ATH_MSG_WARNING("Cannot disconnect output Stream " << i);
       }
@@ -284,13 +283,13 @@ Token* PoolSvc::registerForWrite(const Placement* placement,
       } else if (auxString.compare(0, 8, "[CLABEL=") == 0) {
          contextId = this->getOutputContext(auxString);
       }
-      if (contextId >= m_persistencySvcVec.size()) {
+      if (contextId >= m_dbSessionVec.size()) {
          ATH_MSG_WARNING("registerForWrite: Using default output Stream instead of id = " << contextId);
          contextId = IPoolSvc::kOutputStream;
       }
    }
    std::lock_guard<CallMutex> lock(*m_pers_mut[contextId]);
-   Token* token = m_persistencySvcVec[contextId]->registerForWrite(*placement, obj, classDesc);
+   Token* token = m_dbSessionVec[contextId]->registerForWrite(*placement, obj, classDesc);
    if (token == nullptr) {
       ATH_MSG_WARNING("Cannot write object: " << placement->containerName());
    }
@@ -306,7 +305,7 @@ void PoolSvc::setObjPtr(void*& obj, const Token* token) {
       } else if (auxString.compare(0, 8, "[CLABEL=") == 0) {
          contextId = this->getInputContext(auxString);
       }
-      if (contextId >= m_persistencySvcVec.size()) {
+      if (contextId >= m_dbSessionVec.size()) {
          ATH_MSG_WARNING("setObjPtr: Using default input Stream instead of id = " << contextId);
          contextId = IPoolSvc::kInputStream;
       }
@@ -314,7 +313,7 @@ void PoolSvc::setObjPtr(void*& obj, const Token* token) {
    ATH_MSG_VERBOSE("setObjPtr: token=" << token->toString() << ", auxString=" << auxString << ", contextID=" << contextId);
    // Get Context ID/label from Token
    std::lock_guard<CallMutex> lock(*m_pers_mut[contextId]);
-   obj = m_persistencySvcVec[contextId]->readObject(*token, obj);
+   obj = m_dbSessionVec[contextId]->readObject(*token, obj);
    std::map<unsigned int, unsigned int>::const_iterator maxFileIter = m_contextMaxFile.find(contextId);
    if (maxFileIter != m_contextMaxFile.end() && maxFileIter->second > 0) {
       m_guidLists[contextId].remove(token->dbID());
@@ -338,8 +337,8 @@ unsigned int PoolSvc::getOutputContext(const std::string& label) {
    if (contextIter != m_outputContextLabel.end()) {
       return(contextIter->second);
    }
-   const unsigned int id = m_persistencySvcVec.size();
-   m_persistencySvcVec.push_back(pool::IPersistencySvc::create(*m_catalog).release());
+   const unsigned int id = m_dbSessionVec.size();
+   m_dbSessionVec.push_back(pool::PersistencySvc::createSession(*m_catalog).release());
    m_pers_mut.push_back(new CallMutex);
    pool::DatabaseConnectionPolicy policy;
    policy.setWriteModeForNonExisting(pool::DatabaseConnectionPolicy::CREATE);
@@ -347,8 +346,8 @@ unsigned int PoolSvc::getOutputContext(const std::string& label) {
    if (m_fileOpen.value() == "update") {
       policy.setWriteModeForExisting(pool::DatabaseConnectionPolicy::UPDATE);
    }
-   m_persistencySvcVec[id]->session().setDefaultConnectionPolicy(policy);
-   if (!m_persistencySvcVec[id]->session().technologySpecificAttributes(pool::ROOT_StorageType.type()).setAttribute<int>("DEFAULT_CONTAINER_TYPE", pool::DbType::getType(m_defaultContainerType).type())) {
+   m_dbSessionVec[id]->setDefaultConnectionPolicy(policy);
+   if (!m_dbSessionVec[id]->technologySpecificAttributes(pool::ROOT_StorageType.type()).setAttribute<int>("DEFAULT_CONTAINER_TYPE", pool::DbType::getType(m_defaultContainerType).type())) {
       ATH_MSG_WARNING("Failed to set ROOT default container type via PersistencySvc for id " << id);
       return(IPoolSvc::kOutputStream);
    }
@@ -367,8 +366,8 @@ unsigned int PoolSvc::getInputContext(const std::string& label, unsigned int max
          return(contextIter->second);
       }
    }
-   const unsigned int id = m_persistencySvcVec.size();
-   m_persistencySvcVec.push_back( pool::IPersistencySvc::create(*m_catalog).release() );
+   const unsigned int id = m_dbSessionVec.size();
+   m_dbSessionVec.push_back( pool::PersistencySvc::createSession(*m_catalog).release() );
    m_pers_mut.push_back(new CallMutex);
    if (!connect(pool::ITransaction::READ, id).isSuccess()) {
       ATH_MSG_WARNING("Failed to connect Input PersistencySvc: " << id);
@@ -446,7 +445,7 @@ pool::ICollection* PoolSvc::createCollection(const std::string& connection,
 		unsigned int contextId) const {
    ATH_MSG_DEBUG("createCollection() type=" << collectionType.storageName() << ", connection=" << connection
                  << ", name=" << collectionName << ", contextID=" << contextId);
-   if (contextId >= m_persistencySvcVec.size()) {
+   if (contextId >= m_dbSessionVec.size()) {
       ATH_MSG_WARNING("createCollection: Using default input Stream instead of id = " << contextId);
       contextId = IPoolSvc::kInputStream;
    }
@@ -490,11 +489,11 @@ pool::ICollection* PoolSvc::createCollection(const std::string& connection,
    pool::CollectionService collSvc ATLAS_THREAD_SAFE = pool::CollectionService();
    pool::ICollection* collPtr ATLAS_THREAD_SAFE = nullptr;
 
-   // Try to open APR EventTags Collection in the input file
+   // Try to open EventTags Collection in the input file
    std::scoped_lock sc_lock(m_pool_mut);
    std::string error_text;
    try {
-      collPtr = collSvc.open(collectionName, collectionType, connection, &m_persistencySvcVec[contextId]->session());
+      collPtr = collSvc.open(collectionName, collectionType, connection, m_dbSessionVec[contextId]);
    } catch (std::exception &e) {
       collPtr = nullptr;
       error_text = e.what();
@@ -504,7 +503,7 @@ pool::ICollection* PoolSvc::createCollection(const std::string& connection,
       if (dbH != nullptr && !dbH->fid().empty()) {
          return(nullptr); // no events
       }
-      throw std::runtime_error( "Failed to open APR Collection: " + error_text  + ", PoolSvc::createCollection");
+      throw std::runtime_error( "Failed to open Collection: " + error_text  + ", PoolSvc::createCollection");
    }
    if (insertFile && m_attemptCatalogPatch.value()) {
       std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);
@@ -537,8 +536,8 @@ void PoolSvc::patchCatalog(const std::string& pfn, pool::IDatabase& dbH) const {
 }
 //__________________________________________________________________________
 Token* PoolSvc::getToken(const std::string& connection,
-	const std::string& collection,
-	const unsigned long ientry) const {
+	                      const std::string& collection,
+	                      const unsigned long ientry) const {
    std::lock_guard<CallMutex> lock(*m_pers_mut[IPoolSvc::kInputStream]);
    std::unique_ptr<pool::IDatabase> dbH = getDbHandle(IPoolSvc::kInputStream, connection);
    if (dbH == nullptr) {
@@ -551,41 +550,37 @@ Token* PoolSvc::getToken(const std::string& connection,
    if (contH == nullptr) {
       return(nullptr);
    }
-   pool::ITokenIterator* tokenIter = contH->tokens();
-   Token* thisToken = tokenIter->next();
-   for (unsigned long ipos = 0; ipos < ientry; ipos++) {
-      delete thisToken; thisToken = tokenIter->next();
-   }
-   delete tokenIter; tokenIter = nullptr;
-   return(thisToken);
+   auto tokenIter = std::unique_ptr<pool::ITokenIterator>(contH->tokens());
+   // the Token returned by the iterator has the refCount already increased
+   return tokenIter->seek(ientry)? tokenIter->next() : nullptr;
 }
 //__________________________________________________________________________
 StatusCode PoolSvc::connect(pool::ITransaction::Type type, unsigned int contextId) {
    if (type != pool::ITransaction::READ) {
-      if (contextId >= m_persistencySvcVec.size()) {
+      if (contextId >= m_dbSessionVec.size()) {
          ATH_MSG_WARNING("connect: Using default output Stream instead of id = " << contextId);
          contextId = IPoolSvc::kOutputStream;
       }
    } else {
-      if (contextId > m_persistencySvcVec.size()) {
+      if (contextId > m_dbSessionVec.size()) {
          ATH_MSG_WARNING("connect: Using default input Stream instead of id = " << contextId);
          contextId = IPoolSvc::kInputStream;
-      } else if (contextId == m_persistencySvcVec.size()) {
+      } else if (contextId == m_dbSessionVec.size()) {
          ATH_MSG_INFO("Connecting to InputStream for: " << contextId);
          contextId = this->getInputContext("");
       }
    }
-   if (contextId >= m_persistencySvcVec.size()) {
+   if (contextId >= m_dbSessionVec.size()) {
       return(StatusCode::FAILURE);
    }
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
-   pool::IPersistencySvc* persSvc = m_persistencySvcVec[contextId];
+   auto session = m_dbSessionVec[contextId];
    // Connect to a logical database using the pre-defined technology and dbID
-   if (persSvc->session().transaction().isActive()) {
+   if (session->transaction().isActive()) {
       return(StatusCode::SUCCESS);
    }
-   if (!persSvc->session().transaction().start(type)) {
-      ATH_MSG_ERROR("connect failed persSvc = " << persSvc << " type = " << type);
+   if (!session->start(type)) {
+      ATH_MSG_ERROR("connect failed session = " << session << " type = " << type);
       return(StatusCode::FAILURE);
    }
 
@@ -593,32 +588,32 @@ StatusCode PoolSvc::connect(pool::ITransaction::Type type, unsigned int contextI
 }
 //__________________________________________________________________________
 StatusCode PoolSvc::commit(unsigned int contextId) const {
-   if (contextId >= m_persistencySvcVec.size()) {
+   if (contextId >= m_dbSessionVec.size()) {
       return(StatusCode::FAILURE);
    }
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
-   pool::IPersistencySvc* persSvc = m_persistencySvcVec[contextId];
-   if (persSvc != nullptr && persSvc->session().transaction().isActive()) {
-      if (!persSvc->session().transaction().commit()) {
-         ATH_MSG_ERROR("POOL commit failed " << persSvc);
+   auto session = m_dbSessionVec[contextId];
+   if (session != nullptr && session->transaction().isActive()) {
+      if (!session->commit()) {
+         ATH_MSG_ERROR("POOL commit failed " << session);
          return(StatusCode::FAILURE);
       }
-      if (persSvc->session().transaction().type() == pool::ITransaction::READ) {
-         persSvc->session().disconnectAll();
+      if (session->transaction().type() == pool::ITransaction::READ) {
+         session->disconnectAll();
       }
    }
    return(StatusCode::SUCCESS);
 }
 //__________________________________________________________________________
 StatusCode PoolSvc::commitAndHold(unsigned int contextId) const {
-   if (contextId >= m_persistencySvcVec.size()) {
+   if (contextId >= m_dbSessionVec.size()) {
       return(StatusCode::FAILURE);
    }
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
-   pool::IPersistencySvc* persSvc = m_persistencySvcVec[contextId];
-   if (persSvc != nullptr && persSvc->session().transaction().isActive()) {
-      if (!persSvc->session().transaction().commitAndHold()) {
-         ATH_MSG_ERROR("POOL commitAndHold failed " << persSvc);
+   pool::PersistencySvc::ISession* session = m_dbSessionVec[contextId];
+   if (session != nullptr && session->transaction().isActive()) {
+      if (!session->commitAndHold()) {
+         ATH_MSG_ERROR("POOL commitAndHold failed " << session);
          return(StatusCode::FAILURE);
       }
    }
@@ -627,17 +622,17 @@ StatusCode PoolSvc::commitAndHold(unsigned int contextId) const {
 //__________________________________________________________________________
 StatusCode PoolSvc::disconnect(unsigned int contextId) const {
    ATH_MSG_DEBUG("Disconnect request for contextId=" << contextId);
-   if (contextId >= m_persistencySvcVec.size()) {
+   if (contextId >= m_dbSessionVec.size()) {
       return(StatusCode::SUCCESS);
    }
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
-   pool::IPersistencySvc* persSvc = m_persistencySvcVec[contextId];
-   if (persSvc != nullptr && persSvc->session().transaction().isActive()) {
+   pool::PersistencySvc::ISession* session = m_dbSessionVec[contextId];
+   if (session != nullptr && session->transaction().isActive()) {
       if (!commit(contextId).isSuccess()) {
-         ATH_MSG_ERROR("disconnect failed to commit " << persSvc);
+         ATH_MSG_ERROR("disconnect failed to commit " << session);
          return(StatusCode::FAILURE);
       }
-      if (persSvc->session().disconnectAll()) {
+      if (session->disconnectAll()) {
          ATH_MSG_DEBUG("Disconnected PersistencySvc session");
       } else {
          ATH_MSG_ERROR("disconnect failed to diconnect PersistencySvc");
@@ -648,7 +643,7 @@ StatusCode PoolSvc::disconnect(unsigned int contextId) const {
 }
 //__________________________________________________________________________
 StatusCode PoolSvc::disconnectDb(const std::string& connection, unsigned int contextId) const {
-   if (contextId >= m_persistencySvcVec.size()) {
+   if (contextId >= m_dbSessionVec.size()) {
       return(StatusCode::SUCCESS);
    }
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
@@ -669,19 +664,19 @@ StatusCode PoolSvc::getAttribute(const std::string& optName,
 		std::string& data,
 		long tech,
 		unsigned int contextId) const {
-   if (contextId >= m_persistencySvcVec.size()) {
+   if (contextId >= m_dbSessionVec.size()) {
       ATH_MSG_WARNING("getAttribute: Using default input Stream instead of id = " << contextId);
       contextId = IPoolSvc::kInputStream;
    }
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
-   pool::ISession& sesH = m_persistencySvcVec[contextId]->session();
+   pool::ISession* sesH = m_dbSessionVec[contextId];
    std::ostringstream oss;
    if (data == "DbLonglong") {
-      oss << std::dec << sesH.technologySpecificAttributes(tech).attribute<long long int>(optName);
+      oss << std::dec << sesH->technologySpecificAttributes(tech).attribute<long long int>(optName);
    } else if (data == "double") {
-      oss << std::dec << sesH.technologySpecificAttributes(tech).attribute<double>(optName);
+      oss << std::dec << sesH->technologySpecificAttributes(tech).attribute<double>(optName);
    } else {
-      oss << std::dec << sesH.technologySpecificAttributes(tech).attribute<int>(optName);
+      oss << std::dec << sesH->technologySpecificAttributes(tech).attribute<int>(optName);
    }
    data = oss.str();
    ATH_MSG_INFO("Domain attribute [" << optName << "]" << ": " << data);
@@ -701,7 +696,7 @@ StatusCode PoolSvc::getAttribute(const std::string& optName,
       return(StatusCode::FAILURE);
    }
    if (dbH->openMode() == pool::IDatabase::CLOSED) {
-      if (m_persistencySvcVec[contextId]->session().defaultConnectionPolicy().writeModeForNonExisting() != pool::DatabaseConnectionPolicy::RAISE_ERROR) {
+      if (m_dbSessionVec[contextId]->defaultConnectionPolicy().writeModeForNonExisting() != pool::DatabaseConnectionPolicy::RAISE_ERROR) {
          dbH->setTechnology(tech);
          dbH->connectForWrite();
       } else {
@@ -743,19 +738,19 @@ StatusCode PoolSvc::setAttribute(const std::string& optName,
 		const std::string& data,
 		long tech,
 		unsigned int contextId) const {
-   if (contextId >= m_persistencySvcVec.size()) {
+   if (contextId >= m_dbSessionVec.size()) {
       ATH_MSG_WARNING("setAttribute: Using default output Stream instead of id = " << contextId);
       contextId = IPoolSvc::kOutputStream;
    }
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
-   pool::ISession& sesH = m_persistencySvcVec[contextId]->session();
+   pool::ISession* sesH = m_dbSessionVec[contextId];
    if (data[data.size() - 1] == 'L') {
-      if (!sesH.technologySpecificAttributes(tech).setAttribute<long long int>(optName, atoll(data.c_str()))) {
+      if (!sesH->technologySpecificAttributes(tech).setAttribute<long long int>(optName, atoll(data.c_str()))) {
          ATH_MSG_DEBUG("Failed to set POOL property, " << optName << " to " << data);
          return(StatusCode::FAILURE);
       }
    } else {
-      if (!sesH.technologySpecificAttributes(tech).setAttribute<int>(optName, atoi(data.c_str()))) {
+      if (!sesH->technologySpecificAttributes(tech).setAttribute<int>(optName, atoi(data.c_str()))) {
          ATH_MSG_DEBUG("Failed to set POOL property, " << optName << " to " << data);
          return(StatusCode::FAILURE);
       }
@@ -769,7 +764,7 @@ StatusCode PoolSvc::setAttribute(const std::string& optName,
 		const std::string& dbName,
 		const std::string& contName,
 		unsigned int contextId) const {
-   if (contextId >= m_persistencySvcVec.size()) {
+   if (contextId >= m_dbSessionVec.size()) {
       ATH_MSG_WARNING("setAttribute: Using default output Stream instead of id = " << contextId);
       contextId = IPoolSvc::kOutputStream;
    }
@@ -780,7 +775,7 @@ StatusCode PoolSvc::setAttribute(const std::string& optName,
       return(StatusCode::FAILURE);
    }
    if (dbH->openMode() == pool::IDatabase::CLOSED) {
-      if (m_persistencySvcVec[contextId]->session().defaultConnectionPolicy().writeModeForNonExisting() != pool::DatabaseConnectionPolicy::RAISE_ERROR) {
+      if (m_dbSessionVec[contextId]->defaultConnectionPolicy().writeModeForNonExisting() != pool::DatabaseConnectionPolicy::RAISE_ERROR) {
          dbH->setTechnology(tech);
          dbH->connectForWrite();
       } else {
@@ -790,7 +785,7 @@ StatusCode PoolSvc::setAttribute(const std::string& optName,
    bool retError = false;
    std::string objName;
    bool hasTTreeName = (contName.length() > 6 && contName.compare(0, 6, "TTree=") == 0);
-   if (contName.empty() || hasTTreeName || m_persistencySvcVec[contextId]->session().defaultConnectionPolicy().writeModeForNonExisting() == pool::DatabaseConnectionPolicy::RAISE_ERROR) {
+   if (contName.empty() || hasTTreeName || m_dbSessionVec[contextId]->defaultConnectionPolicy().writeModeForNonExisting() == pool::DatabaseConnectionPolicy::RAISE_ERROR) {
       objName = hasTTreeName ? contName.substr(6) : contName;
       if( !isNumber(data) ) {
          retError = dbH->technologySpecificAttributes().setAttribute(optName, data.c_str(), objName);
@@ -937,30 +932,30 @@ PoolSvc::~PoolSvc() {
 }
 //__________________________________________________________________________
 std::unique_ptr<pool::IDatabase> PoolSvc::getDbHandle(unsigned int contextId, const std::string& dbName) const {
-   if (contextId >= m_persistencySvcVec.size()) {
+   if (contextId >= m_dbSessionVec.size()) {
       ATH_MSG_WARNING("getDbHandle: Using default input Stream instead of id = " << contextId);
       contextId = IPoolSvc::kInputStream;
    }
-   pool::ISession& sesH = m_persistencySvcVec[contextId]->session();
-   if (!sesH.transaction().isActive()) {
+   pool::ISession* sesH = m_dbSessionVec[contextId];
+   if (!sesH->transaction().isActive()) {
       pool::ITransaction::Type transMode = pool::ITransaction::READ;
-      if (m_persistencySvcVec[contextId]->session().defaultConnectionPolicy().writeModeForNonExisting() != pool::DatabaseConnectionPolicy::RAISE_ERROR) {
+      if (m_dbSessionVec[contextId]->defaultConnectionPolicy().writeModeForNonExisting() != pool::DatabaseConnectionPolicy::RAISE_ERROR) {
          transMode = pool::ITransaction::UPDATE;
       }
       ATH_MSG_DEBUG("Start transaction, type = " << transMode);
-      if (!sesH.transaction().start(transMode)) {
+      if (!sesH->transaction().start(transMode)) {
          ATH_MSG_WARNING("Failed to start transaction, type = " << transMode);
          return(nullptr);
       }
    }
    if (dbName.compare(0, 4,"PFN:") == 0) {
-      return sesH.databaseHandle(dbName.substr(4), pool::DatabaseSpecification::PFN);
+      return sesH->databaseHandle(dbName.substr(4), pool::DatabaseSpecification::PFN);
    } else if (dbName.compare(0, 4, "LFN:") == 0) {
-      return sesH.databaseHandle(dbName.substr(4), pool::DatabaseSpecification::LFN);
+      return sesH->databaseHandle(dbName.substr(4), pool::DatabaseSpecification::LFN);
    } else if (dbName.compare(0, 4,"FID:") == 0) {
-      return sesH.databaseHandle(dbName.substr(4), pool::DatabaseSpecification::FID);
+      return sesH->databaseHandle(dbName.substr(4), pool::DatabaseSpecification::FID);
    } 
-   return sesH.databaseHandle(dbName, pool::DatabaseSpecification::PFN);
+   return sesH->databaseHandle(dbName, pool::DatabaseSpecification::PFN);
 }
 //__________________________________________________________________________
 std::unique_ptr<pool::IContainer> PoolSvc::getContainerHandle(pool::IDatabase* dbH, const std::string& contName) const {

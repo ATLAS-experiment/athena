@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file
@@ -16,7 +16,6 @@
 #include <JiveXMLServer/JiveXMLServer.h>
 
 //tdaq includes
-#include <cmdl/cmdargs.h>
 #include <ipc/core.h>
 #include <ers/ers.h>
 
@@ -26,10 +25,6 @@
  */
 int main(int argc, char ** argv)
 {
-
-  // Declare arguments
-  CmdArgStr partition_name('p', "partition", "partition-name", "The name of the partition in which to run the server");
-  
   // Initialise IPC
   try {
      IPCCore::init(argc,argv);
@@ -37,16 +32,8 @@ int main(int argc, char ** argv)
      ers::fatal( ex );
   }
 
-  // Declare command object and its argument-iterator
-  CmdLine cmd(*argv, &partition_name, NULL);
-  cmd.description("Standalone JiveXML server using ONCRPC (SunRPC)");
-  CmdArgvIter arg_iter(--argc, ++argv);
-
-  // Parse arguments
-  cmd.parse(arg_iter);
-
   //Say hello
-  ERS_INFO("Starting JiveXML server in partition: "<< partition_name );
+  ERS_INFO("Starting JiveXML server");
   
   //Create the object and start the server
   JiveXML::JiveXMLServer server;

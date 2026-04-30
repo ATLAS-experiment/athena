@@ -26,7 +26,10 @@ if ktdurham is not None:
 if flavourScheme not in [4,5]:
     raise RuntimeError('flavourScheme must be 4 or 5.')
 
+# Adjust the PDF and any MG settings for 4FS or 5FS
+# In the pre-include we import the 5FS fragment, so just need to reset it for 4FS
 if flavourScheme == 4:
+    from MadGraphControl.MadGraph_NNPDF30NLOnf4_Base_Fragment import *
     run_settings.update({
         'pdgs_for_merging_cut': '1, 2, 3, 4, 21' # Terrible default in MG
     })

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBCALOCONDITIONS_ITBCALOPOSTOOL
@@ -27,16 +27,16 @@ public:
     DeclareInterfaceID(ITBCaloPosTool, 1 , 0);
 
     ///  access eta value 
-    virtual double  eta () = 0 ;
+    virtual double  eta () const = 0 ;
 
     ///  access eta value 
-    virtual double  theta () = 0 ;
+    virtual double  theta () const = 0 ;
 
     ///  access eta value 
-    virtual double  z () = 0 ;
+    virtual double  z () const = 0 ;
 
     ///  access delta value 
-    virtual double  delta () = 0 ;
+    virtual double  delta () const = 0 ;
 
 
 };

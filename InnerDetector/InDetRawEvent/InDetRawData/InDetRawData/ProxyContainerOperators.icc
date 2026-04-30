@@ -1,0 +1,30 @@
+template <class Container,
+          class T_Derived,
+          class ElementProxy>
+typename Utils::ProxyIterator<Container,T_Derived,ElementProxy>::difference_type
+operator-(const Utils::ProxyIterator<Container,T_Derived,ElementProxy> &a,
+          const Utils::ProxyIterator<Container,T_Derived,ElementProxy> &b)
+requires (Utils::hasAddition< typename Utils::ProxyIterator<Container,T_Derived,ElementProxy>::element_index_t > )
+{
+   return a.index() - b.index();
+}
+
+// template <Utils::AccessPolicy iteratorAccessPolicy, typename ...T_Args>
+// auto operator+(const typename Utils::ContainerProxy<T_Args...>::template iterator_for_ranges<iteratorAccessPolicy> &a,
+//                unsigned int offset)
+//    requires (Utils::hasAddition< typename Utils::ContainerProxy<T_Args...>::ElementIndexType > )
+// {
+//    using container_proxy_iterator = typename Utils::ContainerProxy<T_Args...>::template iterator_for_ranges<iteratorAccessPolicy>;
+//    return container_proxy_iterator(&a.container(), a.index() + offset);
+// }
+
+template <class Container,
+          class T_Derived,
+          class ElementProxy>
+Utils::ProxyIterator<Container,T_Derived,ElementProxy>
+operator+(const Utils::ProxyIterator<Container,T_Derived,ElementProxy> &a,
+          unsigned int offset)
+requires (Utils::hasAddition< typename Utils::ProxyIterator<Container,T_Derived,ElementProxy>::element_index_t > )
+{
+   return Utils::ProxyIterator<Container,T_Derived,ElementProxy>(&a.container(), a.index() + offset);
+}

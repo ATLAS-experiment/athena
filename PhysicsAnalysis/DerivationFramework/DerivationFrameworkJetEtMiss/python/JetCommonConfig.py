@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #==============================================================================
 # Contains the configuration for common jet reconstruction + decorations
@@ -33,12 +33,12 @@ def StandardJetsInDerivCfg(ConfigFlags):
     acc = ComponentAccumulator()
 
     AntiKt4EMTopo_deriv = AntiKt4EMTopo.clone(
-        modifiers = AntiKt4EMTopo.modifiers+("JetPtAssociation","QGTagging")
+        modifiers = AntiKt4EMTopo.modifiers+("JetPtAssociation",)
     )
 
     AntiKt4EMPFlow_deriv = AntiKt4EMPFlow.clone(
         ghostdefs = AntiKt4EMPFlow.ghostdefs+["UnAssocMuonSegment"],
-        modifiers = AntiKt4EMPFlow.modifiers+("JetPtAssociation","QGTagging","fJVT","NNJVT","CaloEnergiesClus","JetPileupLabel","qgtransformer")
+        modifiers = AntiKt4EMPFlow.modifiers+("JetPtAssociation","fJVT","NNJVT","CaloEnergiesClus","JetPileupLabel","qgtransformer")
     )
 
     AntiKt10UFOCSSKSoftDrop_deriv = AntiKt10UFOCSSKSoftDrop.clone(
@@ -93,10 +93,6 @@ def AddSidebandEventShapeCfg(ConfigFlags):
     for a in constit_algs:
         acc.addEventAlgo(a)
 
-    #Sideband definition
-    acc.addEventAlgo(getConstitPJGAlg(cst.GPFlow, suffix='PUSB'))
-    acc.addEventAlgo(buildEventShapeAlg(cst.GPFlow, '', suffix = 'PUSB' ))
-
     #New "sideband" definition when using CHS based on TTVA
     acc.addEventAlgo(getConstitPJGAlg(cst.GPFlow, suffix='Neut'))
     acc.addEventAlgo(buildEventShapeAlg(cst.GPFlow, '', suffix = 'Neut' ))
@@ -123,7 +119,7 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
     acc.merge(AddJvtDecorationAlgCfg(ConfigFlags, algName="JvtPassDecorAlg", jetContainer='AntiKt4EMPFlow'))
 
     from DerivationFrameworkTau.TauCommonConfig import AddTauAugmentationCfg
-    acc.merge(AddTauAugmentationCfg(ConfigFlags, wp="RNNLoose"))
+    acc.merge(AddTauAugmentationCfg(ConfigFlags, wp="GNTauLoose"))
     acc.addSequence(CompFactory.AthSequencer('EventCleanSeq', Sequential=True))
 
     # Overlap for EMTopo
@@ -131,7 +127,7 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
     inputLabel_legacy = 'selected_eventClean_EMTopo'
     outputLabel_legacy = 'DFCommonJets_passOR_EMTopo'
     bJetLabel = '' #default
-    tauLabel = 'DFTauRNNLoose'
+    tauLabel = 'DFTauGNTauLoose'
     orTool_legacy = acc.popToolsAndMerge(OverlapRemovalToolCfg(ConfigFlags,inputLabel=inputLabel_legacy,outputLabel=outputLabel_legacy,bJetLabel=bJetLabel))
     algOR_legacy = CompFactory.OverlapRemovalGenUseAlg('OverlapRemovalGenUseAlg_EMTopo',
                                                 JetKey="AntiKt4EMTopoJets",
@@ -141,7 +137,7 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
                                                 TauLabel=tauLabel,
                                                 BJetLabel=bJetLabel
                                                 )
-    acc.addEventAlgo(algOR_legacy, 'EventCleanSeq')
+    acc.addEventAlgo(algOR_legacy)
 
     # Overlap for EMPFlow
     inputLabel = 'selected_eventClean_EMPFlow'
@@ -153,12 +149,12 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
                                                 OverlapRemovalTool=orTool,
                                                 TauLabel=tauLabel,
                                                 BJetLabel=bJetLabel)
-    acc.addEventAlgo(algOR, 'EventCleanSeq')
+    acc.addEventAlgo(algOR)
 
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
     from DerivationFrameworkMuons.MuonsToolsConfig import MuonJetDrToolCfg
     muonJetDrTool = acc.getPrimaryAndMerge(MuonJetDrToolCfg(ConfigFlags, "MuonJetDrTool"))
-    acc.addEventAlgo(CommonAugmentation("DFCommonMuonsKernel2", AugmentationTools = [muonJetDrTool]), 'EventCleanSeq')
+    acc.addEventAlgo(CommonAugmentation("DFCommonMuonsKernel2", AugmentationTools = [muonJetDrTool]))
 
     from JetSelectorTools.JetSelectorToolsConfig import EventCleaningToolCfg,JetCleaningToolCfg
     
@@ -206,7 +202,7 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
                                                              EventCleanPrefix=prefix,
                                                              CleaningLevel=cleaningLevel,
                                                              doEvent=True) # Only store event-level flags for Loose and LooseLLP
-            acc.addEventAlgo(eventCleanAlg_legacy, 'EventCleanSeq')
+            acc.addEventAlgo(eventCleanAlg_legacy)
 
         ## For PFlow
         if doEvent_PFlow:
@@ -228,7 +224,7 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
                                                              EventCleanPrefix=prefix,
                                                              CleaningLevel=cleaningLevel,
                                                              doEvent=True) # for PFlow we use Loose and Tight
-            acc.addEventAlgo(eventCleanAlg, 'EventCleanSeq')
+            acc.addEventAlgo(eventCleanAlg)
 
     return acc
 

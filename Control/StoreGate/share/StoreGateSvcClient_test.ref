@@ -163,17 +163,12 @@ StoreGateSvc         DEBUG Retrieved non-const pointer to object pCreateFoo1  of
 *** StoreGateSvcClient_test testCreate OK ***
 
 
-*** StoreGateSvcClient_test bind BEGINS ***
- object modifiable when retrieved
-*** StoreGateSvcClient_test bind OK ***
-
-
 Testing dump: 
  -------->>
 StoreGateSvc_Impl: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
 StoreGateSvc_Impl: SGImplSvc()::dump() which is NOT LOADED 
 StoreGateSvc_Impl: Found 1 proxy for ClassID 8100 (Base): 
-StoreGateSvc_Impl: Found 17 proxies for ClassID 8101 (Foo): 
+StoreGateSvc_Impl: Found 16 proxies for ClassID 8101 (Foo): 
 StoreGateSvc_Impl: flags: (INVALID, UNLOCKED, reset ) --- data:        0x0 --- key: silly
 StoreGateSvc_Impl: <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
 

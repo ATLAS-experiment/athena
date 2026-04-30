@@ -71,6 +71,10 @@ namespace CP
     virtual std::string
     getCopySource (const std::string& toName) const = 0;
 
+    /// @brief get all decorations known for the given object
+    virtual std::vector<std::string>
+    getObjectDecorations (const std::string& name) const = 0;
+
     /// \brief make the name for the given systematics
     virtual StatusCode
     makeSystematicsName (std::string& result,

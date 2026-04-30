@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ToyDetectorFactory.h"
@@ -7,7 +7,6 @@
 
 #ifndef BUILDVP1LIGHT
     #include "StoreGate/StoreGateSvc.h"
-    #include "StoreGate/DataHandle.h"
     #include "GeoModelInterfaces/StoredMaterialManager.h"
 #endif
 

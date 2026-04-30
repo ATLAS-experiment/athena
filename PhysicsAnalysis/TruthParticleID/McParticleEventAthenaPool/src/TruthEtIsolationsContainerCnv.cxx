@@ -50,7 +50,7 @@ TruthEtIsolationsContainerCnv::createPersistent(TruthEtIsolationsContainer* tran
   return pers; 
 }
 
-TruthEtIsolationsContainer* TruthEtIsolationsContainerCnv::createTransient() 
+TruthEtIsolationsContainer* TruthEtIsolationsContainerCnv::createTransient(const Token* token) 
 {
    MsgStream msg( msgSvc(), "TruthEtIsolationsContainerCnv" );
 
@@ -59,9 +59,9 @@ TruthEtIsolationsContainer* TruthEtIsolationsContainerCnv::createTransient()
    //static pool::Guid tr_guid("003AE8C0-B033-4470-9F3D-869724F34E48");
    static const pool::Guid p1_guid("EB6EC9D5-4D99-4565-9E4A-65BE1C21B35D");
 
-   if ( compareClassGuid(p1_guid) ) {
+   if ( compareClassGuid(token, p1_guid) ) {
      
-     std::unique_ptr<TruthEtIsolationsContainer_p1> pers( poolReadObject<TruthEtIsolationsContainer_p1>() );
+     std::unique_ptr<TruthEtIsolationsContainer_p1> pers( poolReadObject<TruthEtIsolationsContainer_p1>(token) );
      TruthEtIsolationsContainerCnv_p1 cnv;
      trans = cnv.createTransient( pers.get(), msg );
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AsgDataHandles/ReadDecorHandle.h"
@@ -116,7 +116,7 @@ StatusCode Pileup1DResidualCalibStep::calibrate(xAOD::JetContainer& jetCont) con
   double NPV = JetCalibUtils::countNPV(*PVCont);
 
   SG::ReadHandle<xAOD::EventShape> eventShape(m_rhoKey);
-  CHECK_THEN_ERROR( ! eventShape.isValid() , "Could not retrieve xAOD::EventShape DataHandle : "<< m_rhoKey.key());
+  CHECK_THEN_ERROR( ! eventShape.isValid() , "Could not retrieve xAOD::EventShape : "<< m_rhoKey.key());
   double rho=0;
   CHECK_THEN_ERROR( ! eventShape->getDensity(xAOD::EventShape::Density, rho ),
 		  "Could not retrieve xAOD::EventShape::Density from xAOD::EventShape "<< m_rhoKey.key() );

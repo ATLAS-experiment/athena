@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -54,6 +54,12 @@ PileupReweightingTool::PileupReweightingTool( const std::string& name ) :CP::TPi
    declareProperty("Prefix",m_prefix="","Prefix to attach to all decorations ... only used in the 'apply' method");
    declareProperty("UnrepresentedDataAction",m_unrepresentedDataAction=3,"1 = remove unrepresented data, 2 = leave it there, 3 = reassign it to nearest represented bin");
    declareProperty("UnrepresentedDataThreshold",m_unrepDataTolerance=0.05,"When unrepresented data is above this level, will require the PRW config file to be repaired");
+   declareProperty("UnrepresentedDataWarningThreshold",
+                   m_unrepDataWarningThreshold=0.0,
+                   "Suppress the unrepresented-data WARNING when the"
+                   " unrepresented fraction is below this value."
+                   " Default 0 means always warn (preserving the"
+                   " existing behaviour).");
    declareProperty("UseMultiPeriods",m_useMultiPeriods=true,"If true, will try to treat each mc runNumber in a single mc dataset (channel) as a modelling a distinct period of data taking");
    declareProperty("UseRunDependentPrescaleWeight",m_useRunDependentPrescaleWeight=false,"If true, prescale weights in the getCombinedWeight method with Trigger string are determined with the specific random run number");
    declareProperty("DataScaleFactor",m_dataScaleFactorX=1./1.03);
@@ -62,7 +68,7 @@ PileupReweightingTool::PileupReweightingTool( const std::string& name ) :CP::TPi
    declareProperty("DataScaleFactorUP",m_upVariation=1./0.99,"Set to a value representing the 'up' fluctuation - will report a PRW_DATASF uncertainty to Systematic Registry");
    declareProperty("DataScaleFactorDOWN",m_downVariation=1./1.07,"Set to a value representing the 'down' fluctuation - will report a PRW_DATASF uncertainty to Systematic Registry");
    declareProperty("VaryRandomRunNumber",m_varyRunNumber=false,"If true, then when doing systematic variations, RandomRunNumber will fluctuate as well. Off by default as believed to lead to overestimated uncertainties");
-   declareProperty("PeriodAssignments", m_customPeriods={284500,222222,324300,300000,324300,344495,310000,344496,367384,410000,422633,440613,450000,450360,461002,470000,472553,999999}, "Specify period number assignments to run numbers ranges - this is usually an expert option");
+   declareProperty("PeriodAssignments", m_customPeriods={284500,222222,324300,300000,324300,344495,310000,344496,367384,410000,422633,440613,450000,450360,461002,470000,473235,486706,495000,497924,999999}, "Specify period number assignments to run numbers ranges - this is usually an expert option");
    declareProperty("GRLTool", m_grlTool, "If you provide a GoodRunsListSelectionTool, any information from lumicalc files will be automatically filtered" );
    declareProperty("TrigDecisionTool",m_tdt, "When using the getDataWeight method, the TDT will be used to check decisions before prescale. Alternatively do expert()->SetTriggerBit('trigger',0) to flag which triggers are not fired before prescale (assumed triggers are fired if not specified)");
 
@@ -155,12 +161,17 @@ float PileupReweightingTool::getCorrectedAverageInteractionsPerCrossing( const x
 }
      
 float PileupReweightingTool::getCorrectedActualInteractionsPerCrossing( const xAOD::EventInfo& eventInfo, bool includeDataScaleFactor ) { 
+   float result = 1.;
+   const float actualInteractions = eventInfo.actualInteractionsPerCrossing();
    if(eventInfo.eventType(xAOD::EventInfo::IS_SIMULATION)) {
-      return eventInfo.actualInteractionsPerCrossing(); //no correction needed for MC
+      return actualInteractions; //no correction needed for MC
    }
    float correctedMu = CP::TPileupReweighting::GetLumiBlockMu(eventInfo.runNumber(),eventInfo.lumiBlock());
    if(correctedMu<0) return correctedMu; //will be -1
-   return eventInfo.actualInteractionsPerCrossing() * (correctedMu/eventInfo.averageInteractionsPerCrossing()) * ( (includeDataScaleFactor) ? m_activeTool->GetDataScaleFactor() : 1.); 
+   if ( const auto avg = eventInfo.averageInteractionsPerCrossing(); avg != 0.){
+     result =  actualInteractions * (correctedMu/avg) * ( (includeDataScaleFactor) ? m_activeTool->GetDataScaleFactor() : 1.); 
+   } 
+   return result;
 }
 
 

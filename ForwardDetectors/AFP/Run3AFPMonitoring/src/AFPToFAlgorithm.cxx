@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 *
 *
 *	AFPToFAlgorithm
@@ -29,11 +29,10 @@ StatusCode AFPToFAlgorithm::initialize() {
 	using namespace Monitored;
 
 	m_StationNamesGroup = buildToolMap<int>(m_tools,"AFPToFTool", m_stationNamesToF);
-	m_TrainsToFGroup    = buildToolMap<int>(m_tools, "AFPToFTool", m_trainsToF);
-	m_BarsInTrainsA     = buildToolMap<std::map<std::string,int>>(m_tools, "AFPToFTool", m_trainsToFA, m_barsToF);
-	m_BarsInTrainsC     = buildToolMap<std::map<std::string,int>>(m_tools,"AFPToFTool", m_trainsToFC, m_barsToF);
+	m_BarsInTrains      = buildToolMap<std::map<std::string,std::map<std::string,int>>>(m_tools, "AFPToFTool", m_sidesToF, m_trainsToF, m_barsToF);
 	m_GroupChanCombDeltaT    = buildToolMap<int>(m_tools, "AFPToFTool", m_chanComb);
-
+	m_SideTrainGroup    = buildToolMap<std::map<std::string,int>>(m_tools, "AFPToFTool", m_sidesToF, m_trainsToF);
+	m_SideGroup         = buildToolMap<int>(m_tools, "AFPToFTool", m_sidesToF);
 
 	// We must declare to the framework in initialize what SG objects we are going to use
 	SG::ReadHandleKey<xAOD::AFPToFHitContainer> afpToFHitContainerKey("AFPToFHits");
@@ -53,6 +52,8 @@ StatusCode AFPToFAlgorithm::fillHistograms( const EventContext& ctx ) const {
 	using namespace Monitored;
 
 	const unsigned NTRAINS = 4;
+	const unsigned NBARS = 4;
+	const unsigned NSIDES = 2;
 	enum { FRONT, MIDDLE, END, NPOS } position = NPOS;
 		
 	auto bcidAllToF     = Monitored::Scalar<int>("bcidAllToF", 0);
@@ -64,93 +65,36 @@ StatusCode AFPToFAlgorithm::fillHistograms( const EventContext& ctx ) const {
 	// Declare the quantities which should be monitored
 	auto lb             = Monitored::Scalar<int>("lb", 0);
 	auto nTofHits       = Monitored::Scalar<int>("nTofHits", 1);
-	auto numberOfHit_S0 = Monitored::Scalar<int>("numberOfHit_S0", 0); 
-	auto numberOfHit_S3 = Monitored::Scalar<int>("numberOfHit_S3", 0);
 	auto trainID        = Monitored::Scalar<int>("trainID", 0); 
 	auto barInTrainID   = Monitored::Scalar<int>("barInTrainID", 0); 
-	auto barInTrainAllA = Monitored::Scalar<int>("barInTrainAllA", 0);
-	auto barInTrainIDA  = Monitored::Scalar<int>("barInTrainIDA", 0); 
-	auto barInTrainAllC = Monitored::Scalar<int>("barInTrainAllC", 0);
-	auto barInTrainIDC  = Monitored::Scalar<int>("barInTrainIDC", 0);
 	
-	auto ToFHits_sideA      = Monitored::Scalar<int>("ToFHits_sideA", 0);
-	auto ToFHits_sideC      = Monitored::Scalar<int>("ToFHits_sideC", 0);
 	auto ToFHits_MU_Weight  = Monitored::Scalar<float>("ToFHits_MU_Weight", 0.0);
 	auto muPerBXToF         = Monitored::Scalar<float>("muPerBXToF", 0.0);
-	
-	auto lbAToF           = Monitored::Scalar<int>("lbAToF", 0);
-	auto lbCToF           = Monitored::Scalar<int>("lbCToF", 0);
-	auto lbAToF_Weight    = Monitored::Scalar<float>("lbAToF_Weight", 0.0);
-	auto lbCToF_Weight    = Monitored::Scalar<float>("lbCToF_Weight", 0.0);
 
-	auto lbAToFEvents     = Monitored::Scalar<int>("lbAToFEvents", 0);
-	auto lbCToFEvents     = Monitored::Scalar<int>("lbCToFEvents", 0);
+	auto numberOfHit      = Monitored::Scalar<int>("numberOfHit", 0);
+	auto barInTrainIDSide = Monitored::Scalar<int>("barInTrainIDSide", 0);
+	auto barInTrainAll    = Monitored::Scalar<int>("barInTrainAll", 0);
+	auto ToFHits_side     = Monitored::Scalar<int>("ToFHits_side", 0);
+
 	auto lbAandCToFEvents = Monitored::Scalar<int>("lbAandCToFEvents", 0);
-	
-	// FME histograms quantites (side A)
+	Monitored::Scalar<int> lbToFEvents[NSIDES] =
+	  { Monitored::Scalar<int>("lbAToFEvents", 0),
+	    Monitored::Scalar<int>("lbCToFEvents", 0) };
 
-	Monitored::Scalar<int> lbAToF_T[NTRAINS] =
-	  { Monitored::Scalar<int>("lbAToF_T0", 0),
-	    Monitored::Scalar<int>("lbAToF_T1", 0),
-	    Monitored::Scalar<int>("lbAToF_T2", 0),
-	    Monitored::Scalar<int>("lbAToF_T3", 0) };
-	
-	auto lbAToF_TAll_Weight = Monitored::Scalar<float>("lbAToF_TAll_Weight", 1);
-	
-	Monitored::Scalar<int> lbAToF_TP[NTRAINS][NPOS] =
-	  { { Monitored::Scalar<int>("lbAToF_T0_Front", 0),
-	      Monitored::Scalar<int>("lbAToF_T0_Middle", 0),
-	      Monitored::Scalar<int>("lbAToF_T0_End", 0) },
-	    { Monitored::Scalar<int>("lbAToF_T1_Front", 0),
-	      Monitored::Scalar<int>("lbAToF_T1_Middle", 0),
-	      Monitored::Scalar<int>("lbAToF_T1_End", 0) },
-	    { Monitored::Scalar<int>("lbAToF_T2_Front", 0),
-	      Monitored::Scalar<int>("lbAToF_T2_Middle", 0),
-	      Monitored::Scalar<int>("lbAToF_T2_End", 0) },
-	    { Monitored::Scalar<int>("lbAToF_T3_Front", 0),
-	      Monitored::Scalar<int>("lbAToF_T3_Middle", 0),
-	      Monitored::Scalar<int>("lbAToF_T3_End", 0) } };
-
-	Monitored::Scalar<float> lbAToF_TWeight[NPOS] =
-	  { Monitored::Scalar<float>("lbAToF_TFront_Weight", 1),
-	    Monitored::Scalar<float>("lbAToF_TMiddle_Weight", 1),
-	    Monitored::Scalar<float>("lbAToF_TEnd_Weight", 1) };
-	 
-	// FME histograms quantites (side C)
-	
-	Monitored::Scalar<int> lbCToF_T[NTRAINS] =
-	  { Monitored::Scalar<int>("lbCToF_T0", 0),
-	    Monitored::Scalar<int>("lbCToF_T1", 0),
-	    Monitored::Scalar<int>("lbCToF_T2", 0),
-	    Monitored::Scalar<int>("lbCToF_T3", 0) };
-	
-	auto lbCToF_TAll_Weight = Monitored::Scalar<float>("lbCToF_TAll_Weight", 1);
-	
-	Monitored::Scalar<int> lbCToF_TP[NTRAINS][NPOS] =
-	  { { Monitored::Scalar<int>("lbCToF_T0_Front", 0),
-	      Monitored::Scalar<int>("lbCToF_T0_Middle", 0),
-	      Monitored::Scalar<int>("lbCToF_T0_End", 0) },
-	    { Monitored::Scalar<int>("lbCToF_T1_Front", 0),
-	      Monitored::Scalar<int>("lbCToF_T1_Middle", 0),
-	      Monitored::Scalar<int>("lbCToF_T1_End", 0) },
-	    { Monitored::Scalar<int>("lbCToF_T2_Front", 0),
-	      Monitored::Scalar<int>("lbCToF_T2_Middle", 0),
-	      Monitored::Scalar<int>("lbCToF_T2_End", 0) },
-	    { Monitored::Scalar<int>("lbCToF_T3_Front", 0),
-	      Monitored::Scalar<int>("lbCToF_T3_Middle", 0),
-	      Monitored::Scalar<int>("lbCToF_T3_End", 0) } };
-
-	Monitored::Scalar<float> lbCToF_TWeight[NPOS] =
-	  { Monitored::Scalar<float>("lbCToF_TFront_Weight", 1),
-	    Monitored::Scalar<float>("lbCToF_TMiddle_Weight", 1),
-	    Monitored::Scalar<float>("lbCToF_TEnd_Weight", 1) };
+	// per-mu TH1F variables
+	auto lbToFTrainAll       = Monitored::Scalar<int>("lbToFTrainAll", 0);
+	auto weightToFTrainAll   = Monitored::Scalar<float>("weightToFTrainAll", 0.0);
+	auto lbToFTrainFront     = Monitored::Scalar<int>("lbToFTrainFront", 0);
+	auto weightToFTrainFront = Monitored::Scalar<float>("weightToFTrainFront", 0.0);
+	auto lbToFTrainMiddle    = Monitored::Scalar<int>("lbToFTrainMiddle", 0);
+	auto weightToFTrainMiddle = Monitored::Scalar<float>("weightToFTrainMiddle", 0.0);
+	auto lbToFTrainEnd       = Monitored::Scalar<int>("lbToFTrainEnd", 0);
+	auto weightToFTrainEnd   = Monitored::Scalar<float>("weightToFTrainEnd", 0.0);
+	auto lbToFBar            = Monitored::Scalar<int>("lbToFBar", 0);
+	auto lbToFBar_Weight     = Monitored::Scalar<float>("lbToFBar_Weight", 0.0);
 
 	SG::ReadHandle<xAOD::EventInfo> eventInfo = GetEventInfo(ctx);
 	lb                = eventInfo->lumiBlock();
-	lbAToF            = eventInfo->lumiBlock();
-	lbCToF            = eventInfo->lumiBlock();
-	lbAToFEvents      = eventInfo->lumiBlock();
-	lbCToFEvents      = eventInfo->lumiBlock();
 	lbAandCToFEvents  = eventInfo->lumiBlock();
 	muPerBXToF        = lbAverageInteractionsPerCrossing(ctx);
 
@@ -158,20 +102,19 @@ StatusCode AFPToFAlgorithm::fillHistograms( const EventContext& ctx ) const {
 	  ATH_MSG_DEBUG("AverageInteractionsPerCrossing is 0, forcing to 1.0");
 	  muPerBXToF=1.0;
 	}
-	
 
-	ToFHits_MU_Weight       = 1/muPerBXToF;
-	lbAToF_Weight           = 1/muPerBXToF;
-	lbCToF_Weight           = 1/muPerBXToF;
-	lbAToF_TAll_Weight      = 1/muPerBXToF;
-	lbCToF_TAll_Weight      = 1/muPerBXToF;
-	lbAToF_TWeight[FRONT]   = 1/muPerBXToF;
-	lbAToF_TWeight[MIDDLE]  = 1/muPerBXToF;
-	lbAToF_TWeight[END]     = 1/muPerBXToF;
-	lbCToF_TWeight[FRONT]   = 1/muPerBXToF;
-	lbCToF_TWeight[MIDDLE]  = 1/muPerBXToF;
-	lbCToF_TWeight[END]     = 1/muPerBXToF;
-	
+	ToFHits_MU_Weight     = 1/muPerBXToF;
+	lbToFBar_Weight       = 1/muPerBXToF;
+	weightToFTrainAll     = 1/muPerBXToF;
+	weightToFTrainFront   = 1/muPerBXToF;
+	weightToFTrainMiddle  = 1/muPerBXToF;
+	weightToFTrainEnd     = 1/muPerBXToF;
+
+	for(unsigned int s = 0; s < NSIDES; s++)
+	{
+		lbToFEvents[s] = eventInfo->lumiBlock();
+	}
+
 	fill("AFPToFTool", lb, muPerBXToF);
 
 	// BCX handler
@@ -225,72 +168,72 @@ StatusCode AFPToFAlgorithm::fillHistograms( const EventContext& ctx ) const {
 
 	int eventsInStations[4] = {};
 
+	// hit counts per event for TProfile 
+	unsigned int totalHitsPerTrainAll[NSIDES][NTRAINS] = {};
+	unsigned int totalHitsPerTrainFME[NSIDES][NTRAINS][NPOS] = {};
+	unsigned int totalHitsPerBar[NSIDES][NTRAINS][NBARS] = {};
+	unsigned int totalStationHits[NSIDES] = {};
+
 	for(const xAOD::AFPToFHit *hitsItr: *afpToFHitContainer)
 	{
-		trainID = hitsItr->trainID();
-		barInTrainID = hitsItr->barInTrainID();
-		++eventsInStations[hitsItr->stationID()];
-
-		if(hitsItr->isSideA())
+		if (hitsItr->stationID()<4 && hitsItr->stationID()>=0 && hitsItr->trainID()<4 && hitsItr->trainID()>=0 && hitsItr->barInTrainID()<4 && hitsItr->barInTrainID()>=0)
 		{
-			numberOfHit_S0 = hitsItr->trainID();
-			fill("AFPToFTool", numberOfHit_S0);
-			
-			barInTrainIDA = hitsItr->barInTrainID();
-			fill(m_tools[m_TrainsToFGroup.at(m_trainsToF.at(hitsItr->trainID()))], barInTrainIDA);
-			barInTrainAllA = (hitsItr->trainID()*4)+barInTrainIDA;
-			fill("AFPToFTool", barInTrainAllA);
-			
-			ToFHits_sideA = eventInfo->lumiBlock();
-			fill("AFPToFTool", ToFHits_sideA, ToFHits_MU_Weight);
-		}
-		else if(hitsItr->isSideC())
-		{
-			numberOfHit_S3 = hitsItr->trainID();
-			fill("AFPToFTool", numberOfHit_S3);
-			
-			barInTrainIDC = hitsItr->barInTrainID();
-			fill(m_tools[m_TrainsToFGroup.at(m_trainsToF.at(hitsItr->trainID()))], barInTrainIDC);
-			barInTrainAllC = (hitsItr->trainID()*4)+barInTrainIDC;
-			fill("AFPToFTool", barInTrainAllC);
-			
-			ToFHits_sideC = eventInfo->lumiBlock();
-			fill("AFPToFTool", ToFHits_sideC, ToFHits_MU_Weight);
-		}
+			trainID = hitsItr->trainID();
+			barInTrainID = hitsItr->barInTrainID();
+			++eventsInStations[hitsItr->stationID()];
 
-		if(hitsItr->isSideA() || hitsItr->isSideC())
-		{
-			auto& lbToF_T = hitsItr->isSideA() ? lbAToF_T : lbCToF_T;
-			auto& lbToF_TP = hitsItr->isSideA() ? lbAToF_TP : lbCToF_TP;
-			auto& lbToF_TAll_Weight = hitsItr->isSideA() ? lbAToF_TAll_Weight : lbCToF_TAll_Weight;
-			auto& lbToF_TWeight = hitsItr->isSideA() ? lbAToF_TWeight : lbCToF_TWeight;
+			// Only process ToF stations: 0 (farAside) and 3 (farCside)
+			if(hitsItr->stationID() != 0 && hitsItr->stationID() != 3)
+				continue;
 
+			int side = (hitsItr->stationID() == 3) ? 1 : 0;
 			unsigned int train = hitsItr->trainID();
-			if(train < NTRAINS)
-			{
-				lbToF_T[train] = eventInfo->lumiBlock();
-				fill("AFPToFTool", lbToF_T[train], lbToF_TAll_Weight);
+			unsigned int bar = hitsItr->barInTrainID();
 
-				if(position != NPOS)
-				{
-					lbToF_TP[train][position] = eventInfo->lumiBlock();
-					fill("AFPToFTool", lbToF_TP[train][position], lbToF_TWeight[position]);
-				}
-			}
-		}
+			numberOfHit = train;
+			fill(m_tools[m_SideGroup.at(m_sidesToF.at(side))], numberOfHit);
 
-		if (hitsItr->stationID() == 0 || hitsItr->stationID() == 3)
-		{
+			barInTrainIDSide = bar;
+			fill(m_tools[m_SideTrainGroup.at(m_sidesToF.at(side)).at(m_trainsToF.at(train))], barInTrainIDSide);
+
+			barInTrainAll = train * 4 + bar;
+			fill(m_tools[m_SideGroup.at(m_sidesToF.at(side))], barInTrainAll);
+
+			ToFHits_side = eventInfo->lumiBlock();
+			fill(m_tools[m_SideGroup.at(m_sidesToF.at(side))], ToFHits_side, ToFHits_MU_Weight);
+
 			fill(m_tools[m_StationNamesGroup.at(m_stationNamesToF.at(hitsItr->stationID()))], barInTrainID, trainID);
-			
-			if(hitsItr->stationID() == 0)	// farAside
+
+			// per-mu TH1F per-bar
+			lbToFBar = eventInfo->lumiBlock();
+			fill(m_tools[m_BarsInTrains.at(m_sidesToF.at(side)).at(m_trainsToF.at(train)).at(m_barsToF.at(bar))], lbToFBar, lbToFBar_Weight);
+
+			// Accumulate counts for TProfile
+			++totalStationHits[side];
+			++totalHitsPerTrainAll[side][train];
+			if(bar < NBARS) ++totalHitsPerBar[side][train][bar];
+			if(position != NPOS) ++totalHitsPerTrainFME[side][train][position];
+
+			// per-mu TH1F: fill per-train
+			lbToFTrainAll = eventInfo->lumiBlock();
+			fill(m_tools[m_SideTrainGroup.at(m_sidesToF.at(side)).at(m_trainsToF.at(train))], lbToFTrainAll, weightToFTrainAll);
+
+			if(position == FRONT)
 			{
-				fill(m_tools[m_BarsInTrainsA.at(m_trainsToFA.at(hitsItr->trainID())).at(m_barsToF.at(hitsItr->barInTrainID()))], lbAToF, lbAToF_Weight);
+				lbToFTrainFront = eventInfo->lumiBlock();
+				fill(m_tools[m_SideTrainGroup.at(m_sidesToF.at(side)).at(m_trainsToF.at(train))], lbToFTrainFront, weightToFTrainFront);
 			}
-			else	// farCside
+			else if(position == MIDDLE)
 			{
-				fill(m_tools[m_BarsInTrainsC.at(m_trainsToFC.at(hitsItr->trainID())).at(m_barsToF.at(hitsItr->barInTrainID()))], lbCToF, lbCToF_Weight);
+				lbToFTrainMiddle = eventInfo->lumiBlock();
+				fill(m_tools[m_SideTrainGroup.at(m_sidesToF.at(side)).at(m_trainsToF.at(train))], lbToFTrainMiddle, weightToFTrainMiddle);
 			}
+			else if(position == END)
+			{
+				lbToFTrainEnd = eventInfo->lumiBlock();
+				fill(m_tools[m_SideTrainGroup.at(m_sidesToF.at(side)).at(m_trainsToF.at(train))], lbToFTrainEnd, weightToFTrainEnd);
+			}
+
 		}
 	}
 	
@@ -301,12 +244,69 @@ StatusCode AFPToFAlgorithm::fillHistograms( const EventContext& ctx ) const {
 		
 		if(eventsInStations[0] > 0)
 		{
-			fill("AFPToFTool", lbAToFEvents);
+			fill("AFPToFTool", lbToFEvents[0]);
 		}
 		if(eventsInStations[3] > 0)
 		{
-			fill("AFPToFTool", lbCToFEvents);
+			fill("AFPToFTool", lbToFEvents[1]);
 		}
+	}
+
+	// per-event TProfile per-train 
+	auto lbToFPerEvent        = Monitored::Scalar<int>("lbToFPerEvent", eventInfo->lumiBlock());
+	auto hitsPerTrainAllPP    = Monitored::Scalar<float>("hitsPerTrainAllPP", 0.0);
+	auto lbToFPerEventFront   = Monitored::Scalar<int>("lbToFPerEventFront", eventInfo->lumiBlock());
+	auto hitsPerTrainFrontPP  = Monitored::Scalar<float>("hitsPerTrainFrontPP", 0.0);
+	auto lbToFPerEventMiddle  = Monitored::Scalar<int>("lbToFPerEventMiddle", eventInfo->lumiBlock());
+	auto hitsPerTrainMiddlePP = Monitored::Scalar<float>("hitsPerTrainMiddlePP", 0.0);
+	auto lbToFPerEventEnd     = Monitored::Scalar<int>("lbToFPerEventEnd", eventInfo->lumiBlock());
+	auto hitsPerTrainEndPP    = Monitored::Scalar<float>("hitsPerTrainEndPP", 0.0);
+
+	for(unsigned int side = 0; side < NSIDES; side++)
+	{
+		for(unsigned int train = 0; train < NTRAINS; train++)
+		{
+			hitsPerTrainAllPP = totalHitsPerTrainAll[side][train] / muPerBXToF;
+			fill(m_tools[m_SideTrainGroup.at(m_sidesToF.at(side)).at(m_trainsToF.at(train))], lbToFPerEvent, hitsPerTrainAllPP);
+
+			hitsPerTrainFrontPP = totalHitsPerTrainFME[side][train][FRONT] / muPerBXToF;
+			if(position == FRONT)
+				fill(m_tools[m_SideTrainGroup.at(m_sidesToF.at(side)).at(m_trainsToF.at(train))], lbToFPerEventFront, hitsPerTrainFrontPP);
+
+			hitsPerTrainMiddlePP = totalHitsPerTrainFME[side][train][MIDDLE] / muPerBXToF;
+			if(position == MIDDLE)
+				fill(m_tools[m_SideTrainGroup.at(m_sidesToF.at(side)).at(m_trainsToF.at(train))], lbToFPerEventMiddle, hitsPerTrainMiddlePP);
+
+			hitsPerTrainEndPP = totalHitsPerTrainFME[side][train][END] / muPerBXToF;
+			if(position == END)
+				fill(m_tools[m_SideTrainGroup.at(m_sidesToF.at(side)).at(m_trainsToF.at(train))], lbToFPerEventEnd, hitsPerTrainEndPP);
+		}
+	}
+
+	// per-event TProfile per-bar
+	auto lbToFBarPerEvent  = Monitored::Scalar<int>("lbToFBarPerEvent", eventInfo->lumiBlock());
+	auto hitsPerBarPP      = Monitored::Scalar<float>("hitsPerBarPP", 0.0);
+
+	for(unsigned int side = 0; side < NSIDES; side++)
+	{
+		for(unsigned int train = 0; train < NTRAINS; train++)
+		{
+			for(unsigned int bar = 0; bar < NBARS; bar++)
+			{
+				hitsPerBarPP = totalHitsPerBar[side][train][bar] / muPerBXToF;
+				fill(m_tools[m_BarsInTrains.at(m_sidesToF.at(side)).at(m_trainsToF.at(train)).at(m_barsToF.at(bar))], lbToFBarPerEvent, hitsPerBarPP);
+			}
+		}
+	}
+
+	// per-event TProfile station-level
+	auto lbToFStationPerEvent  = Monitored::Scalar<int>("lbToFStationPerEvent", eventInfo->lumiBlock());
+	auto hitsPerStationPP      = Monitored::Scalar<float>("hitsPerStationPP", 0.0);
+
+	for(unsigned int side = 0; side < NSIDES; side++)
+	{
+		hitsPerStationPP = totalStationHits[side] / muPerBXToF;
+		fill(m_tools[m_SideGroup.at(m_sidesToF.at(side))], lbToFStationPerEvent, hitsPerStationPP);
 	}
 
 	return fillHistograms_crossBarDeltaT(*afpTrackContainer, *afpToFHitContainer);
@@ -350,7 +350,7 @@ StatusCode AFPToFAlgorithm::fillHistograms_crossBarDeltaT(
 		// Ignore hits with an impossible origin
 		if (hitsItr->stationID() != 0 && hitsItr->stationID() != 3)
 			continue;
-		if (channel >= 16) continue;
+		if (train < 0 || train >= 4 || bar < 0 || bar >= 4) continue;
 		if (channel_present[side][channel])
 			multihit[side] = true;
 		channel_present[side][channel] = true;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUCOMMONCALCVARS_H
@@ -30,7 +30,8 @@ public:
 
 private:
  
-    Gaudi::Property<int> m_isolationTrackType{this, "isolationTrackType", xAOD::TauJetParameters::modifiedIsolationTrack};  
+    Gaudi::Property<int>  m_isolationTrackType{this, "isolationTrackType", xAOD::TauJetParameters::modifiedIsolationTrack};  
+    Gaudi::Property<bool> m_doRun4{this, "doRun4", false};
 
 };
 

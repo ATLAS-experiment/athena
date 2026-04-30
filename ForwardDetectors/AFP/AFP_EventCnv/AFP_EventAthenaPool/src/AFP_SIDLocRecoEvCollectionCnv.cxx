@@ -15,7 +15,7 @@ AFP_SIDLocRecoEvCollection_PERS* AFP_SIDLocRecoEvCollectionCnv::createPersistent
 }
 
 
-AFP_SIDLocRecoEvCollection* AFP_SIDLocRecoEvCollectionCnv::createTransient() {
+AFP_SIDLocRecoEvCollection* AFP_SIDLocRecoEvCollectionCnv::createTransient(const Token* token) {
     MsgStream mlog(msgSvc(), "AFP_SIDLocRecoEvCollectionConverter" );
     
     AFP_SIDLocRecoEvCollectionCnv_p1   TPConverter_p1;
@@ -25,8 +25,8 @@ AFP_SIDLocRecoEvCollection* AFP_SIDLocRecoEvCollectionCnv::createTransient() {
     //GUID of persistence collection class (see selection.xml in AFP_EventTPCnv, class item AFP_SIDLocRecoEvCollection_p1)
     static const pool::Guid p1_guid ("D0C144F2-E82E-44B3-84BC-22C7D10F262E");
     
-    if( this->compareClassGuid(p1_guid)) {
-         std::unique_ptr< AFP_SIDLocRecoEvCollection_p1 >   col_vect( this->poolReadObject< AFP_SIDLocRecoEvCollection_p1 >() );
+    if( this->compareClassGuid(token, p1_guid)) {
+         std::unique_ptr< AFP_SIDLocRecoEvCollection_p1 >   col_vect( this->poolReadObject< AFP_SIDLocRecoEvCollection_p1 >(token) );
         trans_cont = TPConverter_p1.createTransient( col_vect.get(), mlog );
     }
  

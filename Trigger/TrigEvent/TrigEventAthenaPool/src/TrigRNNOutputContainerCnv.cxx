@@ -20,7 +20,7 @@ TrigRNNOutputContainer_PERS * TrigRNNOutputContainerCnv::createPersistent( TrigR
  
 
 //createTransient
-TrigRNNOutputContainer * TrigRNNOutputContainerCnv::createTransient()
+TrigRNNOutputContainer * TrigRNNOutputContainerCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "TrigRNNOutputContainerConverter" );
   
@@ -30,16 +30,16 @@ TrigRNNOutputContainer * TrigRNNOutputContainerCnv::createTransient()
   static const pool::Guid tlp1_guid("86A89E9D-F776-DE11-B65D-000423DD5A1A");
   static const pool::Guid p2_guid("B10FA1AF-F38F-4025-83C4-3A83A3F3AE71");
 
-  if( compareClassGuid( p2_guid ) ){
-      std::unique_ptr< TrigRNNOutputContainer_p2 > col_vect( poolReadObject< TrigRNNOutputContainer_p2 >() );
+  if( compareClassGuid(token,  p2_guid ) ){
+      std::unique_ptr< TrigRNNOutputContainer_p2 > col_vect( poolReadObject< TrigRNNOutputContainer_p2 >(token) );
       //         std::cout << "Reading IMFC p2" << std::endl;
       return m_converter.createTransient( col_vect.get(), mlog ) ;
-  } else if ( compareClassGuid( tlp1_guid ) ) {
-      std::unique_ptr< TrigRNNOutputContainer_tlp1 > col_vect( poolReadObject< TrigRNNOutputContainer_tlp1 >() );
+  } else if ( compareClassGuid(token,  tlp1_guid ) ) {
+      std::unique_ptr< TrigRNNOutputContainer_tlp1 > col_vect( poolReadObject< TrigRNNOutputContainer_tlp1 >(token) );
       return m_converter_tlp1.createTransient( col_vect.get(), mlog );
-  } else if (compareClassGuid(tr_guid)) {
+  } else if (compareClassGuid(token, tr_guid)) {
       // regular object from before the T/P separation
-      return poolReadObject<TrigRNNOutputContainer>();
+      return poolReadObject<TrigRNNOutputContainer>(token);
   } else
       throw std::runtime_error( "Unsupported persistent version of TrigRNNOutputContainer" );
    

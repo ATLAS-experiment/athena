@@ -14,7 +14,6 @@ The following is an example on how to dump the training / evaluation data to ACO
 RDO_FILENAME=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1
 
 Reco_tf.py \
-         --CA 'all:True' --autoConfiguration 'everything' \
          --conditionsTag 'all:OFLCOND-MC21-SDR-RUN4-02' \
          --geometryVersion 'all:ATLAS-P2-RUN4-03-00-00' \
          --multithreaded 'True' \
@@ -43,7 +42,6 @@ function gnn_tracking() {
     #--skipEvents 44
 
     Reco_tf.py \
-        --CA 'all:True' --autoConfiguration 'everything' \
         --conditionsTag 'all:OFLCOND-MC21-SDR-RUN4-02' \
         --geometryVersion 'all:ATLAS-P2-RUN4-03-00-00' \
         --multithreaded 'True' \

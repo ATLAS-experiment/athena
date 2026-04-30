@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -21,24 +21,39 @@ namespace BJT{
 
       ATH_MSG_INFO("Initializing BoostedJetTaggerAlg");
 
-      // Read input handles
-      ATH_CHECK(m_jets.initialize());
+      // Read input handler
+      ATH_CHECK(m_jets.initialize(m_systematicsList));
       
-      // jet tagger
+      // Intialise syst list
+      ANA_CHECK(m_systematicsList.initialize());
+
+      // jet tagger tool
       ATH_CHECK(m_tagger.retrieve());
+      if(m_scalefactor)
+        ATH_CHECK(m_scalefactor.retrieve());
 
       return StatusCode::SUCCESS;
     }
 
     StatusCode BoostedJetTaggerAlg::execute(){
-              
-        // Retrieve inputs
-        SG::ReadHandle<xAOD::JetContainer> jets(m_jets);
 
-        // jet tagger
+      for (const auto& sys : m_systematicsList.systematicsVector()){
+
+        // Retrieve inputs
+        const xAOD::JetContainer *jets = nullptr;
+        ANA_CHECK(m_jets.retrieve(jets, sys));
+
+        // jet tagger WP tool
         ATH_CHECK(m_tagger -> decorate(*jets));
 
-        return StatusCode::SUCCESS;
+        // scale factors tool
+        if(m_scalefactor)
+          ATH_CHECK(m_scalefactor -> decorate(*jets));
+
+      }
+
+      return StatusCode::SUCCESS;
+
     }
 
 }

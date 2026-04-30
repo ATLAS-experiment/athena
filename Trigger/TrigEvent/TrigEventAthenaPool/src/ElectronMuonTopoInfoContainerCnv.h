@@ -29,7 +29,7 @@ protected:
  
    
    virtual ElectronMuonTopoInfoContainer_PERS *createPersistent( ElectronMuonTopoInfoContainer *transObj);
-   virtual ElectronMuonTopoInfoContainer      *createTransient();
+   virtual ElectronMuonTopoInfoContainer      *createTransient(const Token* token);
 
 private:
    ElectronMuonTopoInfoContainerCnv_p1 m_converter;

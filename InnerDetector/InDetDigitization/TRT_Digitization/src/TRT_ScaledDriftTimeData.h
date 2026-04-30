@@ -24,14 +24,14 @@ class TRT_ScaledDriftTimeData : public ITRT_DriftTimeData {
 
 public:
   // //NB: Assumes ownership of pOriginalData!!
-  TRT_ScaledDriftTimeData( std::unique_ptr<ITRT_DriftTimeData> pOriginalData, const double& scaleFactor );
+  TRT_ScaledDriftTimeData( std::unique_ptr<ITRT_DriftTimeData> pOriginalData, double scaleFactor );
 
   ~TRT_ScaledDriftTimeData();
 
   //Interface implementation
   double MaxTabulatedField() const;
-  double DriftTimeAtNoField(const double& distance) const;
-  double DriftTimeAtMaxField(const double& distance) const;
+  double DriftTimeAtNoField(double distance) const;
+  double DriftTimeAtMaxField(double distance) const;
 
 private:
 

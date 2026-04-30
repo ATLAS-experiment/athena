@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCID_H
@@ -9,7 +9,7 @@ namespace MuonTGC_Cabling {
 
 class TGCId {
    public:
-    enum class IdType { NoIdType, Channel, Module, MaxIdType };
+    enum class IdType { NoIdType, Channel, Module };
 
    public:
     TGCId(IdType vtype = IdType::NoIdType);
@@ -44,6 +44,7 @@ class TGCId {
     static constexpr int N_RODS = 12;
 
     enum SideType { NoSideType = -1, Aside, Cside, MaxSideType };
+    enum class StationType { NoStationType, M1, M2, M3, M4 };
     enum ModuleType {
         NoModuleType = -1,
         WD,
@@ -66,6 +67,7 @@ class TGCId {
 
     IdType getIdType() const;
     SideType getSideType() const;
+    StationType getStation() const;
     ModuleType getModuleType() const;
     SignalType getSignalType() const;
     MultipletType getMultipletType() const;
@@ -76,7 +78,6 @@ class TGCId {
     virtual int getSectorInOctant() const;
     virtual int getSectorModule() const;
 
-    int getStation() const;
     int getOctant() const;
     virtual int getSector() const;
     int getChamber() const;
@@ -95,12 +96,12 @@ class TGCId {
 
    public:
     void setSideType(SideType side);
+    virtual void setStation(StationType vstation);
     void setModuleType(ModuleType module);
     void setSignalType(SignalType signal);
     void setMultipletType(MultipletType multiplet);
     void setRegionType(RegionType region);
 
-    virtual void setStation(int vstation);
     virtual void setOctant(int voctant);
     virtual void setSector(int vsector);
     virtual void setChamber(int chamber);
@@ -113,12 +114,12 @@ class TGCId {
 
    protected:
     SideType m_side{NoSideType};
+    StationType m_station{StationType::NoStationType};
     ModuleType m_module{NoModuleType};
     SignalType m_signal{NoSignalType};
     MultipletType m_multiplet{NoMultipletType};
     RegionType m_region{NoRegionType};
 
-    int m_station{-1};
     int m_octant{-1};
     int m_sector{-1};
     int m_chamber{-1};
@@ -134,6 +135,9 @@ inline TGCId::IdType TGCId::getIdType() const {
 inline TGCId::SideType TGCId::getSideType() const {
     return m_side;
 }
+inline TGCId::StationType TGCId::getStation() const {
+    return m_station;
+}
 inline TGCId::ModuleType TGCId::getModuleType() const {
     return m_module;
 }
@@ -147,9 +151,6 @@ inline TGCId::RegionType TGCId::getRegionType() const {
     return m_region;
 }
 
-inline int TGCId::getStation() const {
-    return m_station;
-}
 inline int TGCId::getOctant() const {
     return m_octant;
 }

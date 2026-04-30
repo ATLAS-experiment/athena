@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HiveAlgL2.h"
@@ -11,14 +11,10 @@
 HiveAlgL2::HiveAlgL2( const std::string& name, 
                       ISvcLocator* pSvcLocator ) : 
   ::HiveAlgBase( name, pSvcLocator )
-  ,m_udh1("l1")
 {
-  
-  declareProperty("Key_U1",m_udh1);
-
 }
 
-HiveAlgL2::~HiveAlgL2() {}
+HiveAlgL2::~HiveAlgL2() = default;
 
 StatusCode HiveAlgL2::initialize() {
   ATH_MSG_DEBUG("initialize " << name());
@@ -29,18 +25,13 @@ StatusCode HiveAlgL2::initialize() {
   return HiveAlgBase::initialize();
 }
 
-StatusCode HiveAlgL2::finalize() {
-  ATH_MSG_DEBUG("finalize " << name());
-  return StatusCode::SUCCESS;
-}
-
-StatusCode HiveAlgL2::execute() {
+StatusCode HiveAlgL2::execute(const EventContext& ctx) const {
 
   ATH_MSG_DEBUG("execute " << name());
 
   sleep();
 
-  SG::ReadHandle<HiveDataObj> rdh1( m_rdh1 );
+  SG::ReadHandle<HiveDataObj> rdh1{m_rdh1, ctx};
   if (!rdh1.isValid()) {
     ATH_MSG_ERROR ("Could not retrieve HiveDataObj with key " << rdh1.key());
     return StatusCode::FAILURE;
@@ -48,12 +39,10 @@ StatusCode HiveAlgL2::execute() {
 
   ATH_MSG_INFO("  read: " << rdh1.key() << " = " << rdh1->val() );
   
-  SG::UpdateHandle<HiveDataObj> udh1( m_udh1 );
+  SG::UpdateHandle<HiveDataObj> udh1{m_udh1, ctx};
 
   udh1->val( udh1->val() + 1);
 
-  //  wrh1 = std::make_unique< HiveDataObj >( HiveDataObj(rdh1->val()+1) );
-  
   ATH_MSG_INFO("  update: " << udh1.key() << " = " << udh1->val() );
 
   return StatusCode::SUCCESS;

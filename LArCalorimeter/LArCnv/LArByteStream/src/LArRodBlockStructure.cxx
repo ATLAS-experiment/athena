@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Implementation of LArRODBlockStructure class
@@ -13,13 +13,10 @@
 #include "LArRawEvent/LArCalibDigit.h"
 #include "LArRawEvent/LArAccumulatedCalibDigit.h"
 
-//uint32_t LArRodBlockStructure::FebToOfflineGainMap[3]={2,1,0};
-//uint32_t LArRodBlockStructure::OfflineToFebGainMap[3]={2,1,0};
-// uint32_t LArRodBlockStructure::m_RawToOfflineGainMap[4]={0, 0, 1,2};
-// uint32_t LArRodBlockStructure::m_OfflineToRawGainMap[3]={1,2,3};
 const uint32_t LArRodBlockStructure::m_RawToOfflineGainMap[4]={0, 2, 1,0};
 const uint32_t LArRodBlockStructure::m_OfflineToRawGainMap[3]={3,2,1};
-LArRodBlockStructure::LArRodBlockStructure()
+LArRodBlockStructure::LArRodBlockStructure(IMessageSvc* msgSvc,
+                                           const std::string& blockType)
   : m_Ex(0),
     m_Ey(0),
     m_Ez(0),
@@ -27,9 +24,9 @@ LArRodBlockStructure::LArRodBlockStructure()
     m_iHeadBlockSize(0),
     m_error_next_feb(false),
     m_virtualROBJump(0),
-    m_ROB_to_decode(0)
+    m_ROB_to_decode(0),
+    m_logstr(msgSvc, blockType)
 {
-  
   m_channelsPerFEB=128;
   m_RodBlockSize=0;
   m_FebBlockSize=0;
@@ -56,100 +53,87 @@ LArRodBlockStructure::~LArRodBlockStructure()
 //Error reporting for not implemented methods
 void LArRodBlockStructure::setDAC(const uint16_t)
 {
- std::cout << "Error: Function setDAC not implemented in this instance of LArRodBlockStructure!\n";
- return;
+  m_logstr << MSG::ERROR << "Error: Function setDAC not implemented in this instance of LArRodBlockStructure!" << endmsg;
 }
 
 void LArRodBlockStructure::setDelay(const uint16_t)
 {
- std::cout << "Error: Function setDelay not implemented in this instance of LArRodBlockStructure!\n";
- return;
+  m_logstr << MSG::ERROR << "Error: Function setDelay not implemented in this instance of LArRodBlockStructure!" << endmsg;
 }
 
 void LArRodBlockStructure::setPulsed (const unsigned)
 {
- std::cout << "Error: Function setPulsed not implemented in this instance of LArRodBlockStructure!\n";
- return;
+  m_logstr << MSG::ERROR << "Error: Function setPulsed not implemented in this instance of LArRodBlockStructure!" << endmsg;
 }
 
 void LArRodBlockStructure::setNTrigger (const uint16_t)
 {
- std::cout << "Error: Function setNTrigger not implemented in this instance of LArRodBlockStructure!\n";
- return;
+  m_logstr << MSG::ERROR << "Error: Function setNTrigger not implemented in this instance of LArRodBlockStructure!" << endmsg;
 }
 
 void  LArRodBlockStructure::concatinateFEBs()
 {
- std::cout << "Error: Function concatinateFEBs not implemented in this instance of LArRodBlockStructure!\n";
- return;
+  m_logstr << MSG::ERROR << "Error: Function concatinateFEBs not implemented in this instance of LArRodBlockStructure!" << endmsg;
 }
 
 
 int   LArRodBlockStructure::getNextRawData(int&, std::vector<short>&, uint32_t&)
 {
- std::cout << "Error: Function getNextRawData not implemented in this instance of LArRodBlockStructure!\n";
- return 0;
+  m_logstr << MSG::ERROR << "Error: Function getNextRawData not implemented in this instance of LArRodBlockStructure!" << endmsg;
+  return 0;
 }
 
 int   LArRodBlockStructure::getNextAccumulatedCalibDigit(int&, std::vector < uint64_t >&, std::vector < uint64_t >& , uint32_t&, uint32_t&)
 {
- std::cout << "Error: Function getNextAccumulatedCalibDigit not implemented in this instance of LArRodBlockStructure!\n";
- return 0;
+  m_logstr << MSG::ERROR << "Error: Function getNextAccumulatedCalibDigit not implemented in this instance of LArRodBlockStructure!" << endmsg;
+  return 0;
 }
 
 int   LArRodBlockStructure::getNextAccumulatedDigit(int&, std::vector<uint64_t>&, std::vector < uint64_t >& , uint32_t&)
 {
- std::cout << "Error: Function getNextAccumulatedDigit not implemented in this instance of LArRodBlockStructure!\n";
- return 0;
+  m_logstr << MSG::ERROR << "Error: Function getNextAccumulatedDigit not implemented in this instance of LArRodBlockStructure!" << endmsg;
+  return 0;
 }
 
 void LArRodBlockStructure::setNextEnergy(const int, const int32_t, const int32_t, const int32_t, const uint32_t)
 {
- std::cout << "Error: Function setNextEnergy not implemented in this instance of LArRodBlockStructure!\n";
- return;
+  m_logstr << MSG::ERROR << "Error: Function setNextEnergy not implemented in this instance of LArRodBlockStructure!" << endmsg;
 }
 
 
 void LArRodBlockStructure::setRawData(const int , const std::vector<short>& , const uint32_t)
 {
- std::cout << "Error: Function setRawData not implemented in this instance of LArRodBlockStructure!\n";
- return;
+  m_logstr << MSG::ERROR << "Error: Function setRawData not implemented in this instance of LArRodBlockStructure!" << endmsg;
 }
 
 
 void LArRodBlockStructure::setEtQ(const int, const int32_t, const int32_t, const int32_t, const uint32_t)
 {
- std::cout << "Error: Function setEtQ not implemented in this instance of LArRodBlockStructure!\n";
- return;
+  m_logstr << MSG::ERROR << "Error: Function setEtQ not implemented in this instance of LArRodBlockStructure!" << endmsg;
 }
 
 void LArRodBlockStructure::setRawDataFixed(const int , const std::vector<short>&, const uint32_t )
 {
- std::cout << "Error: Function setRawDataFixed not implemented in this instance of LArRodBlockStructure!\n";
- return;
+  m_logstr << MSG::ERROR << "Error: Function setRawDataFixed not implemented in this instance of LArRodBlockStructure!" << endmsg;
 }
 
 void LArRodBlockStructure::setNumberOfSamples(const uint8_t)
 {
- std::cout << "Error: Function setNumberOfSamples not implemented in this instance of LArRodBlockStructure!\n";
- return;
+  m_logstr << MSG::ERROR << "Error: Function setNumberOfSamples not implemented in this instance of LArRodBlockStructure!" << endmsg;
 }
 
 void LArRodBlockStructure::setNumberOfGains(const uint8_t )
 {
- std::cout << "Error: Function setNumberOfGains not implemented in this instance of LArRodBlockStructure!\n";
- return;
+  m_logstr << MSG::ERROR << "Error: Function setNumberOfGains not implemented in this instance of LArRodBlockStructure!" << endmsg;
 }
 
 void LArRodBlockStructure::setTDCPhase(const uint8_t)
 {
- std::cout << "Error: Function setTDCPhase not implemented in this instance of LArRodBlockStructure!\n";
- return;
+  m_logstr << MSG::ERROR << "Error: Function setTDCPhase not implemented in this instance of LArRodBlockStructure!" << endmsg;
 }
 uint8_t LArRodBlockStructure::getTDCPhase() const
 {
- std::cout << "Error: Function getTDCPhase not implemented in this instance of LArRodBlockStructure!\n";
- return 0;
+  return 0;
 }
 
 uint32_t LArRodBlockStructure::onlineCheckSum() const
@@ -174,51 +158,43 @@ uint32_t LArRodBlockStructure::offlineCheckSum() const
 
 void LArRodBlockStructure::dumpFragment()
 {
- std::cout << "Error: Function dumpFragment() not implemented in this instance of LArRodBlockStructure!\n";
- return;
+  m_logstr << MSG::ERROR << "Error: Function dumpFragment() not implemented in this instance of LArRodBlockStructure!" << endmsg;
 }
 
 
 void LArRodBlockStructure::initializeFEB(const uint32_t)
 {
- std::cout << "Error: Function initializeFEB not implemented in this instance of LArRodBlockStructure!\n";
- return;
+  m_logstr << MSG::ERROR << "Error: Function initializeFEB not implemented in this instance of LArRodBlockStructure!" << endmsg;
 }
 
 void LArRodBlockStructure::initializeFragment(std::vector<uint32_t>& )
 {
- std::cout << "Error: Function initializeFragment not implemented in this instance of LArRodBlockStructure!\n";
- return;
+  m_logstr << MSG::ERROR << "Error: Function initializeFragment not implemented in this instance of LArRodBlockStructure!" << endmsg;
 }
 
 void LArRodBlockStructure::finalizeFEB()
 {
- std::cout << "Error: Function finalizeFEB not implemented in this instance of LArRodBlockStructure!\n";
- return;
+  m_logstr << MSG::ERROR << "Error: Function finalizeFEB not implemented in this instance of LArRodBlockStructure!" << endmsg;
 }
 
 void  LArRodBlockStructure::setEx(const double)
 {
- // Do not set anything
- return;
+  // Do not set anything
 }
 
 void  LArRodBlockStructure::setEy(const double)
 {
- // Do not set anything
- return;
+  // Do not set anything
 }
 
 void  LArRodBlockStructure::setEz(const double)
 {
- // Do not set anything
- return;
+  // Do not set anything
 }
 
 void  LArRodBlockStructure::setSumE(const double)
 {
- // Do not set anything
- return;
+  // Do not set anything
 }
 
 int  LArRodBlockStructure::setGain(const int)
@@ -228,19 +204,19 @@ int  LArRodBlockStructure::setGain(const int)
 
 //Default instances of sort-method. Default is to leave things unsorted.
 void  LArRodBlockStructure::sortDataVector(std::vector<const LArRawChannel*>& )
-{return;}
+{}
 
 void  LArRodBlockStructure::sortDataVector( std::vector<const LArDigit*>& )
-{return;}
+{}
 
 void  LArRodBlockStructure::sortDataVector( std::vector<const LArCalibDigit*>& )
-{return;}
+{}
 
 void  LArRodBlockStructure::sortDataVector( std::vector<const LArAccumulatedCalibDigit*>& )
-{return;}
+{}
 
 void  LArRodBlockStructure::sortDataVector( std::vector<const LArAccumulatedDigit*>& )
-{return;}
+{}
 
 uint32_t LArRodBlockStructure::getNumberOfSamples()  const { return 0; }
 uint32_t LArRodBlockStructure::getNumberOfGains()  const { return 0; }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKEVENTCNVTOOLS_ITRKEVENTCNVTOOL
@@ -70,7 +70,7 @@ class ITrkEventCnvTool : virtual public IAlgTool
         
         /** Take the passed RoT and prepare the PRD ElementLink for writing to disk.
         The procedure should be:
-          - Get DataHandles to all IDC containers in the event
+          - Get all IDC containers in the event
           - See if collection storing the linked PRD is part of the container
           - If so, check that the pointer of the PRD matches that in the container
           - Then set strings and index.

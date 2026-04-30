@@ -21,7 +21,11 @@ def InDetPixelPrepDataToxAODCfg(flags, name='InDetPixelPrepDataToxAOD', **kwargs
     acc.merge(PixelDCSCondHVAlgCfg(flags))
 
     from InDetConfig.PixelCalibAlgsConfig import PixelChargeToTConversionCfg
-    acc.merge(PixelChargeToTConversionCfg(flags))
+    acc.merge(PixelChargeToTConversionCfg(
+        flags, 
+        # Remap the cluster container to the name used by PixelPrepDataToxAOD
+        PixelClusterContainer=kwargs.get('SiClusterContainer', 'PixelClusters')
+    ))
 
     if "PixelConditionsSummaryTool" not in kwargs:
         from PixelConditionsTools.PixelConditionsSummaryConfig import PixelConditionsSummaryCfg
@@ -31,8 +35,8 @@ def InDetPixelPrepDataToxAODCfg(flags, name='InDetPixelPrepDataToxAOD', **kwargs
         from SiLorentzAngleTool.PixelLorentzAngleConfig import PixelLorentzAngleToolCfg
         kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(PixelLorentzAngleToolCfg(flags)))
 
-    kwargs.setdefault("UseTruthInfo", flags.InDet.doTruth)
-    if flags.InDet.doTruth:
+    useTruth = kwargs.setdefault("UseTruthInfo", flags.InDet.doTruth)
+    if useTruth:
         # need to decorate truth particles and clusters with same unique identified
         # which is the origin truth particle index
         acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
@@ -86,11 +90,17 @@ def ITkPixelPrepDataToxAODCfg(flags, name='ITkPixelPrepDataToxAOD', **kwargs):
     acc.merge(ITkPixelDCSCondStatusAlgCfg(flags))
     acc.merge(ITkPixelDCSCondTempAlgCfg(flags))
     acc.merge(ITkPixelDCSCondHVAlgCfg(flags))
+
+    kwargs.setdefault("SiClusterContainer", "ITkPixelClusters")
     
     from TrkConfig.TrkConfigFlags import TrackingComponent
     if TrackingComponent.AthenaChain in flags.Tracking.recoChain:
         from InDetConfig.PixelCalibAlgsConfig import ITkPixelChargeToTConversionCfg
-        acc.merge(ITkPixelChargeToTConversionCfg(flags))
+        acc.merge(ITkPixelChargeToTConversionCfg(
+            flags,
+            # Remap the cluster container to the name used by PixelPrepDataToxAOD
+            PixelClusterContainer=kwargs['SiClusterContainer']
+        ))
 
     if "PixelConditionsSummaryTool" not in kwargs:
         from PixelConditionsTools.ITkPixelConditionsSummaryConfig import ITkPixelConditionsSummaryCfg
@@ -100,8 +110,8 @@ def ITkPixelPrepDataToxAODCfg(flags, name='ITkPixelPrepDataToxAOD', **kwargs):
         from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import ITkPixelLorentzAngleToolCfg
         kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkPixelLorentzAngleToolCfg(flags)))
 
-    kwargs.setdefault("UseTruthInfo", flags.ITk.doTruth)
-    if flags.ITk.doTruth:
+    useTruth = kwargs.setdefault("UseTruthInfo", flags.ITk.doTruth)
+    if useTruth:
         # need to decorate truth particles and clusters with same unique identified
         # which is the origin truth particle index
         acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
@@ -115,7 +125,6 @@ def ITkPixelPrepDataToxAODCfg(flags, name='ITkPixelPrepDataToxAOD', **kwargs):
     kwargs.setdefault("PixelDCSStatusCondData", "ITkPixelDCSStatusCondData")
     kwargs.setdefault("ReadKeyTemp", "ITkPixelDCSTempCondData")
     kwargs.setdefault("ReadKeyHV", "ITkPixelDCSHVCondData")    
-    kwargs.setdefault("SiClusterContainer", "ITkPixelClusters")
     kwargs.setdefault("MC_SDOs", "ITkPixelSDO_Map")
     kwargs.setdefault("MC_Hits", "ITkPixelHits")
     kwargs.setdefault("PRD_MultiTruth", "PRD_MultiTruthITkPixel")
@@ -133,8 +142,8 @@ def ITkPixelPrepDataToxAOD_ExtraTruthCfg(flags, name='ITkPixelPrepDataToxAOD_Ext
 def InDetSCT_PrepDataToxAODCfg(flags, name='InDetSCTPrepDataToxAOD', **kwargs):
     from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
     acc = SCT_ReadoutGeometryCfg(flags)
-    kwargs.setdefault("UseTruthInfo", flags.InDet.doTruth)
-    if flags.InDet.doTruth:
+    useTruth = kwargs.setdefault("UseTruthInfo", flags.InDet.doTruth)
+    if useTruth:
         # need to decorate truth particles and clusters with same unique identified
         # which is the origin truth particle index
         acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
@@ -167,8 +176,8 @@ def ITkStripPrepDataToxAODCfg(flags, name='ITkStripPrepDataToxAOD', **kwargs):
     kwargs.setdefault("SctxAodContainer", "ITkStripMeasurements")
     kwargs.setdefault("SctxAodOffset", "ITkStripClustersOffsets")
     kwargs.setdefault("SCTDetEleCollKey", "ITkStripDetectorElementCollection")
-    kwargs.setdefault("UseTruthInfo", flags.ITk.doTruth)
-    if flags.ITk.doTruth:
+    useTruth = kwargs.setdefault("UseTruthInfo", flags.ITk.doTruth)
+    if useTruth:
         # need to decorate truth particles and clusters with same unique identified
         # which is the origin truth particle index
         acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
@@ -258,5 +267,33 @@ def ITkPrepDataToxAODCfg(flags):
             acc.merge(ITkStripPrepDataToxAOD_ExtraTruthCfg(flags))
         else :
             acc.merge(ITkStripPrepDataToxAODCfg(flags))
+
+    return acc
+
+def ActsPrepDataToxAODCfg(flags,
+                             *,
+                             PixelClusterContainer: str = "PixelClusters",
+                             StripClusterContainer: str = "SCT_Clusters",
+                             PixelMeasurementContainer: str = "PixelMeasurements",
+                             StripMeasurementContainer: str = "SCT_Measurements",
+                             TrackParticles: list[str] = None) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    # need to decorate truth particles and clusters with same unique identified
+    # which is the origin truth particle index
+    if not flags.Tracking.doTruth:
+        return acc
+
+    acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
+
+    from ActsConfig.ActsObjectDecorationConfig import ActsInDetPixelClusterTruthDecoratorAlgCfg,ActsInDetStripClusterTruthDecoratorAlgCfg
+    acc.merge(ActsInDetPixelClusterTruthDecoratorAlgCfg(flags,
+                                                   ClusterContainer = PixelClusterContainer,
+                                                   MeasurementContainer = PixelMeasurementContainer,
+                                                   TrackParticles = TrackParticles))
+    acc.merge(ActsInDetStripClusterTruthDecoratorAlgCfg(flags,
+                                                   ClusterContainer = StripClusterContainer,
+                                                   MeasurementContainer = StripMeasurementContainer,
+                                                   TrackParticles = TrackParticles))
 
     return acc

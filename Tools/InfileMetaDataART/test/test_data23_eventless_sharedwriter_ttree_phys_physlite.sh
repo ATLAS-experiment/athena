@@ -16,8 +16,6 @@
 #    writer with eventless worker
 #    - data23: productionRelease, dataType
 # 2. dataYear field is absent from output of shared writer when eventless worker
-# 3. SuspectLumiBlocks is included in metadata_items for output of data23 with
-#    shared writer
 ##################################################################################
 
 NEVENTS="2"
@@ -108,8 +106,7 @@ acmd diff-root \
 echo "art-result: $? diff PHYSLITE sharedWriter EventlessWorker";
 
 # Metadata diff
-### SuspectLumiBlocks seems to be added to metadata_items when running with sharedWriter, ignore it for now
-METADATA_FIELDS_TO_IGNORE="file_size file_guid auto_flush .*eventTypes metadata_items"
+METADATA_FIELDS_TO_IGNORE="file_size file_guid auto_flush .*eventTypes"
 METADATA_FIELDS_TO_IGNORE_EVENTLESS="file_size file_guid auto_flush .*eventTypes metadata_items"
 
 ### Ignore FileMetaData fields that are not set correctly when eventless worker is involved (to be removed when fixed)

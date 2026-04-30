@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetIdentifier/SCT_ID.h"
@@ -218,20 +218,18 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
 
     ATH_MSG_DEBUG("Reached Level "<<maxLevel<<" after GNN iterations");
 
-    std::vector<std::tuple<float, int, std::vector<unsigned int> > > vSeedCandidates;
+    std::vector<std::pair<float, std::vector<unsigned int> > > vSeedCandidates;
 
     extractSeedsFromTheGraph(maxLevel, graphStats.first, vSP.size(), edgeStorage, vSeedCandidates);
 
     if (vSeedCandidates.empty()) return seedStats;
 
     for(const auto& seed : vSeedCandidates) {
-
-      if (std::get<1>(seed) != 0) continue;//identified as a clone of a better candidate
       
       unsigned int lastIdx = output.size();
-      output.emplace_back(std::get<0>(seed));
+      output.emplace_back(seed.first);
       
-      for(const auto& sp_idx : std::get<2>(seed)) {
+      for(const auto& sp_idx : seed.second) {
 	output[lastIdx].addSpacePoint(vSP[sp_idx]);
       }
     }

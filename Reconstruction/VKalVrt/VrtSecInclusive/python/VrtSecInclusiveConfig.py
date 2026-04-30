@@ -1,6 +1,6 @@
 """Define method to configure VrtSecInclusive algorithm
 
-Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -69,6 +69,10 @@ def VrtSecInclusiveCfg(flags, name="VrtSecInclusive", **kwargs):
     kwargs.setdefault("mergeByShufflingAllowance"              , 10.)
     kwargs.setdefault("associatePtCut"                         , 1000.)
     kwargs.setdefault("associateMinDistanceToPV"               , 2.)
+
+    if flags.Concurrency.NumThreads > 0:
+        # Needed as VrtSecInclusive is not currently reentrant
+        kwargs.setdefault("Cardinality", flags.Concurrency.NumThreads)
 
     acc.addEventAlgo(CompFactory.VKalVrtAthena.VrtSecInclusive(name, **kwargs))
     return acc

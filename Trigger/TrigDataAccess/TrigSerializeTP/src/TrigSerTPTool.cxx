@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 
 // ROOT include(s):
 #include <TClass.h>
@@ -22,22 +20,13 @@ TrigSerTPTool::TrigSerTPTool( const std::string& type,
                               const std::string& name,
                               const IInterface* parent) :
    AthAlgTool( type, name, parent ),
-   m_msgsvcTP( "", name ),
    m_dictSvc( "AthDictLoaderSvc", name ),
    m_useAthDictLoader( true ),
-   m_online( false ),
    m_tpcnvsvc( "AthTPCnvSvc", name ) {
 
    declareInterface< TrigSerTPTool >( this );
 
    declareProperty( "TPMap", m_TPmap, "map of T->P classes" );
-   declareProperty( "ActiveClasses", m_activeClasses,
-                    "allows to skip classes not relevant in the current "
-                    "trigger level" );
-   declareProperty( "debuggingMsgSvc", m_msgsvcTP,
-                    "an instance of the messageSvc for debugging purposes" );
-   declareProperty( "onlineMode", m_online,
-                    "simpler setup for running online" );
    declareProperty( "useAthDictLoader", m_useAthDictLoader,
                     "use AthDictLoaderSvc instead of plain ROOT" );
 }
@@ -46,19 +35,6 @@ StatusCode TrigSerTPTool::initialize(){
 
    // Greet the user:
    ATH_MSG_INFO( "Initializing" );
-
-   // Retrieve a custom message service:
-   if( ! m_msgsvcTP.empty() ) {
-      if( m_msgsvcTP.retrieve().isFailure() ) {
-         ATH_MSG_INFO( "Could not retrieve a separate MsgSvc for "
-                       "the T/P debugging" );
-      } else {
-         ATH_MSG_DEBUG( "Using " << m_msgsvcTP << " for debugging" );
-         IMessageSvc* msvc = m_msgsvcTP.operator->();
-         m_logTP = std::make_unique< MsgStream >( msvc,
-                                                  "TrigSerTPTool-T/P" );
-      }
-   }
 
    // Retrieve the used services:
    ATH_CHECK( m_dictSvc.retrieve() );
@@ -142,7 +118,7 @@ void* TrigSerTPTool::convertTP( const std::string &clname, void *ptr,
    // Do the conversion:
    ATH_MSG_DEBUG( "invoking TP for " << clname  << " at " << ptr );
    try {
-      cnvtr->transToPersUntyped( ptr, persptr, m_logTP ? *m_logTP : msg() );
+      cnvtr->transToPersUntyped( ptr, persptr, msg() );
       persName = std::move(persname);
       pers = persptr;
       ATH_MSG_DEBUG( "succeeded at " << persptr  );
@@ -194,7 +170,7 @@ void* TrigSerTPTool::convertPT( const std::string &persName, void *pers,
    // Do the conversion:
    ATH_MSG_DEBUG( "invoking PT for " << transName );
    try {
-      cnvtr->persToTransWithKeyUntyped( pers, trans, "", m_logTP ? *m_logTP : msg() );
+      cnvtr->persToTransWithKeyUntyped( pers, trans, "", msg() );
       ATH_MSG_DEBUG( " succeeded at " << trans );
    }
    catch (const std::runtime_error& e){

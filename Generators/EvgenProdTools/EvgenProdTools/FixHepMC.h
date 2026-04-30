@@ -56,6 +56,7 @@ private:
   std::string m_forced_momentum{""}; // Force momentum unit for the event
   std::string m_forced_length{""}; // Force length unit for the event
   bool m_unitsFix;    // Attempt to identify and fix momentum units problems
+  bool m_setHasCycles; //! Tell HEPMC3 that there are cycles (loops) in these events
   //@}
 
   /// @name Cleaned-particle counters

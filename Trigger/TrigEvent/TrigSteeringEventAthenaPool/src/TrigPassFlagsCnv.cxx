@@ -22,7 +22,7 @@ TrigPassFlags_PERS* TrigPassFlagsCnv::createPersistent(TrigPassFlags* transObj) 
 }
 
 //createTransient
-TrigPassFlags* TrigPassFlagsCnv::createTransient() {
+TrigPassFlags* TrigPassFlagsCnv::createTransient(const Token* token) {
     MsgStream mlog(msgSvc(), "TrigPassFlagsConverter" );
 
     if(mlog.level()<=MSG::DEBUG)
@@ -31,9 +31,9 @@ TrigPassFlags* TrigPassFlagsCnv::createTransient() {
     static const pool::Guid p1_guid("1FA7E531-B1F9-4EC5-9BD1-FD19CE7368B6");
 
 
-    if( compareClassGuid(p1_guid) ) {
+    if( compareClassGuid(token, p1_guid) ) {
 
-      std::unique_ptr< TrigPassFlags_p1 > col_vect( poolReadObject< TrigPassFlags_p1 >() );
+      std::unique_ptr< TrigPassFlags_p1 > col_vect( poolReadObject< TrigPassFlags_p1 >(token) );
       TrigPassFlagsCnv_p1 converter;
       return converter.createTransient( col_vect.get(), mlog );
 

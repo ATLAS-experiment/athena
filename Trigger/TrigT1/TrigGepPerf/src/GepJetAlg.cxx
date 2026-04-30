@@ -88,10 +88,19 @@ StatusCode GepJetAlg::execute(const EventContext& context) const {
 
     auto WTAConeJetMaker = std::make_unique<Gep::WTAConeJetMaker>(); // Default parameters for now
 
-    WTAConeJetMaker->m_GEPWTAParameters.SetConstEtCut(m_WTAConstEtCut * Athena::Units::GeV); // Set ConstEtCut to 2GeV
-    WTAConeJetMaker->m_GEPWTAParameters.SetSeedEtCut(m_WTASeedEtCut * Athena::Units::GeV); // Set SeedEtCut to 5GeV by default
-    WTAConeJetMaker->m_GEPWTAParameters.SetJet_dR2(m_WTAJet_dR2);
-    WTAConeJetMaker->m_GEPWTAParameters.SetIso_dR2(m_WTAJet_dR2); // Default is Jet_dR2 = Iso_dR2
+    #ifdef FLOATING_POINT_SIMULATION
+      WTAConeJetMaker->m_GEPWTAParameters.SetConstEtCut(m_WTAConstEtCut * Athena::Units::GeV); // Set ConstEtCut to 2GeV
+      WTAConeJetMaker->m_GEPWTAParameters.SetSeedEtCut(m_WTASeedEtCut * Athena::Units::GeV); // Set SeedEtCut to 5GeV by default
+      WTAConeJetMaker->m_GEPWTAParameters.SetJet_dR(m_WTAJet_dR);
+      WTAConeJetMaker->m_GEPWTAParameters.SetIso_dR(m_WTAJet_dR); // Default is Jet_dR = Iso_dR
+    #else
+      // float to int/bitwise conversion
+      WTAConeJetMaker->m_GEPWTAParameters.SetConstEtCut(static_cast<unsigned int>(m_WTAConstEtCut * Athena::Units::GeV / LSB)); // Set ConstEtCut to 8 bits, LSB = 250 MeV
+      WTAConeJetMaker->m_GEPWTAParameters.SetSeedEtCut(static_cast<unsigned int>(m_WTASeedEtCut * Athena::Units::GeV / LSB)); // Set SeedEtCut to 20 bits by default
+      WTAConeJetMaker->m_GEPWTAParameters.SetJet_dR(static_cast<unsigned int>(m_WTAJet_dR * 10));
+      WTAConeJetMaker->m_GEPWTAParameters.SetIso_dR(static_cast<unsigned int>(m_WTAJet_dR * 10));
+    #endif
+
     WTAConeJetMaker->m_GEPWTAParameters.SetMaxConstN(m_WTAMaxConstN);
     WTAConeJetMaker->m_GEPWTAParameters.SetMaxSeedSortingN(m_WTAMaxSeedSortingN);
     WTAConeJetMaker->SetBlockN(m_WTABlockN);
@@ -141,6 +150,17 @@ StatusCode GepJetAlg::execute(const EventContext& context) const {
     p_xAODJet->setAttribute("SeedEta", gjet.seedEta); // < gep attributes
     p_xAODJet->setAttribute("SeedPhi", gjet.seedPhi); //
     p_xAODJet->setAttribute("SeedEt", gjet.seedEt); //
+    p_xAODJet->setAttribute("Ring0_Et", gjet.ring0_Et);
+    p_xAODJet->setAttribute("Ring1_Et", gjet.ring1_Et);
+    p_xAODJet->setAttribute("Ring2_Et", gjet.ring2_Et);
+    p_xAODJet->setAttribute("Ring3_Et", gjet.ring3_Et);
+    p_xAODJet->setAttribute("Ring4_Et", gjet.ring4_Et);
+    p_xAODJet->setAttribute("Total_TobN", gjet.total_TobN);
+    p_xAODJet->setAttribute("Ring0_TobN", gjet.ring0_TobN);
+    p_xAODJet->setAttribute("Ring1_TobN", gjet.ring1_TobN);
+    p_xAODJet->setAttribute("Ring2_TobN", gjet.ring2_TobN);
+    p_xAODJet->setAttribute("Ring3_TobN", gjet.ring3_TobN);
+    p_xAODJet->setAttribute("Ring4_TobN", gjet.ring4_TobN);
 
     for (const auto& i: gjet.constituentsIndices) {
       p_xAODJet->addConstituent(clusters.at(i));

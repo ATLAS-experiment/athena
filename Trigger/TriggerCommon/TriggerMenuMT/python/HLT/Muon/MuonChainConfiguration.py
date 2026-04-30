@@ -80,8 +80,15 @@ class MuonChainConfiguration(ChainConfigurationBase):
                 muCombStep = 'getmuMSEmpty'
                 efCBStep = None
 
+        useNewFast = 'newFast' in self.chainPart['l2AlgInfo']
+        L2SAStep = 'getmuFast'
+        if useNewFast:
+            # TEMPORARY: the new Fast is scheduled in the EFSA until development is finalized. Then it will be moved to the L2 step
+            L2SAStep = 'getmuFastEmpty' 
+            muCombStep = 'getmuMSEmpty'
+
         stepDictionary = {            
-            "":['getmuFast', muCombStep, 'getmuEFSA',efCBStep, isoStep], #RoI-based triggers
+            "":[L2SAStep, muCombStep, 'getmuEFSA',efCBStep, isoStep], #RoI-based triggers
             "noL1":['getFSmuEFSA'] if doMSonly else ['getFSmuEFSA', 'getFSmuEFCB'], #full scan triggers
             "lateMu":['getLateMuRoI','getLateMu'], #late muon triggers
             "muoncalib":['getmuFast'], #calibration
@@ -139,7 +146,10 @@ class MuonChainConfiguration(ChainConfigurationBase):
 
     # --------------------
     def getmuEFSA(self, flags, is_probe_leg=False):
-        return self.getStep(flags, 'muEFSA',[ muEFSASequenceGenCfg], is_probe_leg=is_probe_leg)
+        useBucketFilter = 'mlbkt' in self.chainPart['addInfo']
+        useNewFast = 'newFast' in self.chainPart['l2AlgInfo']
+        step_name = f'muEFSA{"_newFast" if useNewFast else ""}{"_mlbkt" if useBucketFilter else ""}'
+        return self.getStep(flags, step_name, [muEFSASequenceGenCfg], is_probe_leg=is_probe_leg, useBucketFilter=useBucketFilter, useNewFast=useNewFast)
 
     # --------------------
     def getmuEFCB(self, flags, is_probe_leg=False):

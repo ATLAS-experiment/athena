@@ -43,7 +43,7 @@ namespace FlavorTagInference {
       public:
         ConstituentLoaderTauHit(const ConstituentsInputConfig& cfg, const std::string& hits_key);
 
-        std::tuple<Inputs, std::vector<const xAOD::IParticle*>> getData(const xAOD::IParticle& p) const override ;
+        Inputs getData(const xAOD::IParticle& p) const override;
 
         inline const std::string& getName() const override { return m_name; }
         inline const ConstituentsType& getType() const override { return m_config.type; }

@@ -145,13 +145,16 @@ def LArPileUpToolCfg(flags, name="LArPileUpTool", **kwargs):
 
     if flags.Common.isOverlay:
         kwargs.setdefault("OnlyUseContainerName", False)
-        if flags.Input.isMC:
+        if flags.Overlay.IgnoreBkgInputs:
+            kwargs.setdefault("InputDigitContainer", "")
+        elif flags.Input.isMC:
             kwargs.setdefault("InputDigitContainer", f"{flags.Overlay.BkgPrefix}LArDigitContainer_MC")
         else:
             kwargs.setdefault("InputDigitContainer", f"{flags.Overlay.BkgPrefix}LArDigitContainer_data")
 
-        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-        acc.merge(SGInputLoaderCfg(flags, [f'LArDigitContainer#{kwargs["InputDigitContainer"]}']))
+        if kwargs["InputDigitContainer"]:
+            from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+            acc.merge(SGInputLoaderCfg(flags, [f'LArDigitContainer#{kwargs["InputDigitContainer"]}']))
     else:
         kwargs.setdefault("OnlyUseContainerName", flags.Digitization.PileUp)
     LArPileUpTool = CompFactory.LArPileUpTool

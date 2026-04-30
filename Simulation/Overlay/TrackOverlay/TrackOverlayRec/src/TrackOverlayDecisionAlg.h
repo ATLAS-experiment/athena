@@ -1,21 +1,21 @@
 /*
- *   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  *   */
 
 #ifndef TRACKOVERLAYREC_TRACKOVERLAYDECISIONALG_H
 #define TRACKOVERLAYREC_TRACKOVERLAYDECISIONALG_H
 
-// STL includes
-#include <string>
+
 // FrameWork includes
-#include "StoreGate/ReadHandle.h"
-#include "GaudiKernel/ToolHandle.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
+
+#include "StoreGate/ReadHandleKey.h"
+#include "GaudiKernel/ToolHandle.h"
+#include "Gaudi/Property.h"
 #include <EventBookkeeperTools/FilterReporterParams.h>
 // local includes
 #include "TrkTruthTrackInterfaces/IAthSelectionTool.h"
-//#gaudi includes
-#include "GaudiKernel/ToolHandle.h"
+
 //
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthEventContainer.h"
@@ -23,6 +23,15 @@
 //ONNX Runtime include(s)
 #include <onnxruntime_cxx_api.h>
 #include "AthOnnxInterfaces/IOnnxRuntimeSvc.h"
+
+// STL includes
+#include <string>
+#include <tuple>
+#include <vector>
+#include <cstdint> //uint64_t
+#include <memory> 
+#include <cmath>  //M_PI etc
+
 namespace  TrackOverlayDecisionAlg{
   const double M_TWOPI = 2.0 * M_PI;
   // Calculate constants only once for feature scaling

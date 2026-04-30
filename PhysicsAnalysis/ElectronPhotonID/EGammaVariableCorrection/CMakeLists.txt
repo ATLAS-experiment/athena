@@ -13,7 +13,7 @@ atlas_add_library( EGammaVariableCorrectionLib
    Root/*.cxx
    PUBLIC_HEADERS EGammaVariableCorrection
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} ${Boost_LIBRARIES} AsgTools EgammaAnalysisInterfacesLib EgammaAnalysisHelpersLib
+   LINK_LIBRARIES ${ROOT_LIBRARIES} ${Boost_LIBRARIES} AsgTools EgammaAnalysisInterfacesLib EgammaAnalysisHelpersLib AthOnnxInterfaces AthContainers AsgDataHandlesLib xAODEventInfo
    PRIVATE_LINK_LIBRARIES PathResolver xAODEgamma xAODEventShape)
 
 if( NOT XAOD_STANDALONE )
@@ -51,7 +51,7 @@ atlas_add_executable( Test_ElectronPhotonVariableCorrectionTool_DictionaryToolHa
    LINK_LIBRARIES ${ROOT_LIBRARIES} EGammaVariableCorrectionLib)
 
 # Install files from the package:
-atlas_install_data( data/*.conf )
+atlas_install_data( data/NF/*.conf )
 
 # Install python modules
 atlas_install_python_modules( python/*.py )

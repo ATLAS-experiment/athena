@@ -1,24 +1,20 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
-
-################################################################################
-# Package: MuonInference
-################################################################################
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MuonInference )
 
 
-find_package( onnxruntime REQUIRED)
+find_package( onnxruntime )
 find_package( fmt )
 
 atlas_add_component(    MuonInference
-                        src/components/*.cxx src/*.cxx 
-                        INCLUDE_DIRS ${FMT_INCLUDE_DIRS}
+                        src/components/*.cxx src/*.cxx
+                        INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS} ${FMT_INCLUDE_DIRS}
                         LINK_LIBRARIES  AthenaKernel StoreGateLib  PathResolver
-                                        AthenaBaseComps GeoPrimitives MuonIdHelpersLib  
+                                        AthenaBaseComps GeoPrimitives MuonIdHelpersLib
                                         MuonSimEvent xAODMuonSimHit  MdtCalibInterfacesLib
                                         xAODMuonPrepData MuonSpacePoint xAODMuon MuonTesterTreeLib
-                                        MuonPatternEvent MuonPatternHelpers MuonPatternHelpers 
+                                        MuonPatternEvent MuonPatternHelpers MuonPatternHelpers
                                         MuonInferenceInterfaces
                                         AthOnnxInterfaces  ${ONNXRUNTIME_LIBRARIES} ${FMT_LIBRARIES}
                     )

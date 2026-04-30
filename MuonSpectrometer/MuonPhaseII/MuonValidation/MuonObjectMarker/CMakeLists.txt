@@ -13,7 +13,7 @@ atlas_add_component( MuonObjectMarker
                      LINK_LIBRARIES AthenaKernel StoreGateLib MuonTruthHelpers
                                     xAODMuonSimHit xAODMuonPrepData MuonPatternEvent MuonPatternHelpers MuonSegment
                                     DerivationFrameworkMuonsLib MuonReadoutGeometryR4 xAODMuon xAODMuonSimHit
-                                    TrkCompetingRIOsOnTrack)
+                                    TrkCompetingRIOsOnTrack xAODMuonViews)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

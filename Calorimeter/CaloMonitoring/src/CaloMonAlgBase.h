@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOMONITORING_CALOMONALGBASE
@@ -11,31 +11,31 @@
 #include "LArRecEvent/LArCollisionTime.h"
 
 class CaloMonAlgBase : public AthMonitorAlgorithm {
- public:
+public:
   
    CaloMonAlgBase(const std::string& name, ISvcLocator* pSvcLocator);
 
-   virtual ~CaloMonAlgBase(){};   
+   virtual ~CaloMonAlgBase() = default;
 
-   virtual StatusCode initialize();
+   virtual StatusCode initialize() override;
 
    StatusCode checkFilters(bool &ifPass, bool &passBeamBackgroundRemoval, const std::string &MonGroupName, const EventContext &ctx) const; 
    
- private:
+private:
   // LArCollisionTime name
   SG::ReadHandleKey<LArCollisionTime> m_LArCollisionTimeKey{this,"LArCollisionTimeKey","LArCollisionTime"};
   SG::ReadHandleKey<BeamBackgroundData>  m_beamBackgroundKey{this,"BeamBackgroundKey","CSCBackgroundForCaloMon"};
 
   // Handles on filtering tools
-  bool m_useBadLBTool;
-  ToolHandle<IDQFilterTool> m_BadLBTool{this, "DQBadLBFilterTool","DQBadLBFilterTool"};
-  bool m_useReadyFilterTool;
-  ToolHandle<IDQFilterTool> m_ReadyFilterTool{this, "DQAtlasReadyFilterTool", "DQAtlasReadyFilterTool"};
+  Gaudi::Property<bool> m_useBadLBTool{this, "useBadLBTool", false};
+  ToolHandle<IDQFilterTool> m_BadLBTool{this, "BadLBTool","DQBadLBFilterTool"};
+  Gaudi::Property<bool> m_useReadyFilterTool{this, "useReadyFilterTool", true};
+  ToolHandle<IDQFilterTool> m_ReadyFilterTool{this, "ReadyFilterTool", "DQAtlasReadyFilterTool"};
 
-  bool m_useLArNoisyAlg;
+  Gaudi::Property<bool> m_useLArNoisyAlg{this, "useLArNoisyAlg", false};
   //bool m_useTriggerFilter;
-  bool m_useCollisionFilterTool;
-  bool m_useBeamBackgroundRemoval;
+  Gaudi::Property<bool> m_useCollisionFilterTool{this, "useLArCollisionFilterTool", true};
+  Gaudi::Property<bool> m_useBeamBackgroundRemoval{this, "useBeamBackgroundRemoval", false};
 
 protected:
 
@@ -54,8 +54,6 @@ protected:
   enum LayerEnumNoSides{EMBPNS=0, EMB1NS, EMB2NS, EMB3NS, HEC0NS, HEC1NS, HEC2NS, HEC3NS,
 			EMECPNS,EMEC1NS,EMEC2NS,EMEC3NS,FCAL1NS,FCAL2NS,FCAL3NS,MAXLYRNS};
 
-
-
   //Mapping of CaloCell nomencature to CaloCellMonitoring nomencature
   const std::map<unsigned,LayerEnumNoSides> m_caloSamplingToLyrNS{ 
     {CaloSampling::PreSamplerB, EMBPNS},{CaloSampling::EMB1,EMB1NS},{CaloSampling::EMB2,EMB2NS},{CaloSampling::EMB3,EMB3NS},         //LAr Barrel
@@ -63,11 +61,6 @@ protected:
     {CaloSampling::HEC0,HEC0NS}, {CaloSampling::HEC1,HEC1NS}, {CaloSampling::HEC2,HEC2NS}, {CaloSampling::HEC3,HEC3NS},              //Hadronic endcap
     {CaloSampling::FCAL0,FCAL1NS}, {CaloSampling::FCAL1,FCAL2NS}, {CaloSampling::FCAL2,FCAL3NS}                                      //FCAL
   };
-
-
-
-
 };
-
 
 #endif 

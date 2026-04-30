@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file T_AthenaPoolCustCnv.icc
@@ -26,7 +26,7 @@
 template <class TRANS, class PERS>
 T_AthenaPoolCustCnv<TRANS, PERS>::T_AthenaPoolCustCnv(ISvcLocator* pSvcLocator,
                                                       const char* name /*= nullptr*/)
-  : T_AthenaPoolCnvBase<TRANS>(pSvcLocator, name) {
+  : T_AthenaPoolCnvBase<TRANS>(pSvcLocator, name), m_className(), m_classDescs() {
 }
 //______________________________________________________________________________
 template <class TRANS, class PERS>
@@ -40,7 +40,7 @@ StatusCode T_AthenaPoolCustCnv<TRANS, PERS>::initialize() {
 }
 //__________________________________________________________________________
 template <class TRANS, class PERS>
-const CLID& T_AthenaPoolCustCnv<TRANS, PERS>::classID() {
+CLID T_AthenaPoolCustCnv<TRANS, PERS>::classID() {
    return(ClassID_traits<TRANS>::ID());
 }
 //__________________________________________________________________________
@@ -56,28 +56,25 @@ template <class P>
 StatusCode T_AthenaPoolCustCnv<TRANS, PERS>::objectToPool(P* pObj, std::unique_ptr<Token>& token, const std::string& key, const std::string& output) {
    const static std::string className = ClassName<P>::name();
    // Check dictionary
+   std::lock_guard<AthenaPoolConverter::CallMutex> lock(this->m_conv_mut);
    // Allow for multiple class names
-   if (this->m_className != className) {
-      this->m_className = className;
+   if (m_className != className) {
+      m_className = className;
       // Different class name - get description
-      auto itClass = this->m_classDescs.find(className);
-      if (itClass == this->m_classDescs.end()) {
+      auto itClass = m_classDescs.find(className);
+      if (itClass == m_classDescs.end()) {
          // For new class names, check dictionary
-         this->m_classDesc = RootType( typeid(P) );
-         this->m_classDescs[className] = this->m_classDesc;
-      } else {
-         // Set to correct class description
-         this->m_classDesc = (*itClass).second;
+         m_classDescs[className] = RootType( typeid(P) );
       }
    }
    Placement placement = setPlacementForP(*pObj, key, output);
-   token.reset (this->m_athenaPoolCnvSvc->registerForWrite(&placement, pObj, this->m_classDesc));
+   token.reset(this->m_athenaPoolCnvSvc->registerForWrite(&placement, pObj, m_classDescs[m_className]));
    return(StatusCode::SUCCESS);
 }
 //__________________________________________________________________________
 template <class TRANS, class PERS>
 template <class P>
-StatusCode T_AthenaPoolCustCnv<TRANS, PERS>::poolToObject(const Token*& token, P*& pObj) {
+StatusCode T_AthenaPoolCustCnv<TRANS, PERS>::poolToObject(const Token* token, P*& pObj) {
    pObj = nullptr;
    void* voidPtr = nullptr;
    try {
@@ -88,20 +85,13 @@ StatusCode T_AthenaPoolCustCnv<TRANS, PERS>::poolToObject(const Token*& token, P
                                                "pooltoObject",
                                                ex,
                                                typeid(P),
-                                               token->toString());
+                                               token != nullptr ? token->toString() : "");
    }
    if (voidPtr == nullptr) {
       ATH_MSG_ERROR("poolToObject: Could not get object for Token = " << (token != nullptr ? token->toString() : ""));
       return(StatusCode::FAILURE);
    }
    pObj = reinterpret_cast<P*>(voidPtr);
-   return(StatusCode::SUCCESS);
-}
-//__________________________________________________________________________
-template <class TRANS, class PERS>
-StatusCode T_AthenaPoolCustCnv<TRANS, PERS>::DataObjectToPers(DataObject* pObj, IOpaqueAddress*& /*pAddr*/) {
-   const std::string className = ClassName<TRANS>::name();
-   ATH_MSG_DEBUG("Called DataObjectToPers for " << pObj << ": " << className << ", with key " << pObj->name());
    return(StatusCode::SUCCESS);
 }
 //__________________________________________________________________________
@@ -116,9 +106,12 @@ StatusCode T_AthenaPoolCustCnv<TRANS, PERS>::DataObjectToPool(IOpaqueAddress* pA
       ATH_MSG_ERROR("failed to cast to T for class (type/key) " << className << "/" << pObj->name());
       return(StatusCode::FAILURE);
    }
-   if (!transToPers(obj, persObj).isSuccess()) {
-      ATH_MSG_ERROR("Failed to convert to persistent DataType for class (type/key) " << className << "/" << pObj->name());
-      return(StatusCode::FAILURE);
+   {
+      std::lock_guard<AthenaPoolConverter::CallMutex> lock(this->m_conv_mut);
+      if (!transToPers(obj, persObj).isSuccess()) {
+         ATH_MSG_ERROR("Failed to convert to persistent DataType for class (type/key) " << className << "/" << pObj->name());
+         return(StatusCode::FAILURE);
+      }
    }
    std::unique_ptr<Token> token;
    StatusCode status = objectToPool<PERS>(persObj, token, pObj->name(), *pAddr->par());
@@ -149,31 +142,23 @@ T_AthenaPoolCustCnv<TRANS, PERS>::PoolToDataObject(DataObject*& pObj,
       ATH_MSG_ERROR("Failed to read persistent DataType");
       return(StatusCode::FAILURE);
    }
-   if (!persToTrans(transObj, obj).isSuccess()) {
-      delete transObj; transObj = nullptr;
-      delete obj; obj = nullptr;
-      ATH_MSG_ERROR("Failed to convert to transient DataType");
-      return(StatusCode::FAILURE);
+   {
+      std::lock_guard<AthenaPoolConverter::CallMutex> lock(this->m_conv_mut);
+      if (!persToTrans(transObj, obj).isSuccess()) {
+         delete transObj; transObj = nullptr;
+         delete obj; obj = nullptr;
+         ATH_MSG_ERROR("Failed to convert to transient DataType");
+         return(StatusCode::FAILURE);
+      }
    }
    delete obj; obj = nullptr;
    pObj = SG::asStorable(transObj);
    return(StatusCode::SUCCESS);
 }
 //__________________________________________________________________________
-// Set the token (in std::string representation) and classID for
-// the object that will be read next.  Required by compareClassGuid()
-template <class TRANS, class PERS>
-inline void T_AthenaPoolCustCnv<TRANS, PERS>::setToken(const std::string& token_str) {
-   delete this->m_i_poolToken; this->m_i_poolToken = nullptr;
-   Token* token = new Token;
-   token->fromString(token_str);
-   this->m_i_poolToken = token; token = nullptr;
-   m_classID = this->m_i_poolToken->classID();
-}
-//__________________________________________________________________________
 // Compare POOL class GUID with the one from object being read
-// To be used in createTransient()
+// To be used in createTransient(const Token* token)
 template <class TRANS, class PERS>
-inline bool T_AthenaPoolCustCnv<TRANS, PERS>::compareClassGuid(const pool::Guid &guid) const {
-   return(guid == m_classID);
+inline bool T_AthenaPoolCustCnv<TRANS, PERS>::compareClassGuid(const Token* token, const pool::Guid &guid) const {
+   return(token ? (guid == token->classID()) : false);
 }

@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef PFMOMENTCALCULATORTOOL_H
-#define PFMOMENTCALCULATORTOOL_H
+#ifndef EFLOWREC_PFMOMENTCALCULATORTOOL_H
+#define EFLOWREC_PFMOMENTCALCULATORTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"

@@ -37,6 +37,7 @@ namespace LVL1 {
 
       StatusCode fillTE(TCS::TopoInputEvent& inputEvent) const;
       StatusCode fillGESPRESSO(TCS::TopoInputEvent& inputEvent) const;
+      StatusCode fillGRISTRETTO(TCS::TopoInputEvent& inputEvent) const;
       
       ToolHandle<GenericMonitoringTool> m_monTool {this, "MonTool", "", "Monitoring tool to create online histograms"};
 
@@ -49,8 +50,8 @@ namespace LVL1 {
       SG::ReadHandleKey<xAOD::gFexGlobalRoIContainer> m_gXERHO_EDMKey {this, "gMETComponentsRmsKey", "L1_gMETComponentsRms", "gFEX RHO ROI EDM"};
 
       SG::ReadHandleKey<xAOD::gFexGlobalRoIContainer> m_gTE_EDMKey {this, "gScalarEJwojKey", "L1_gScalarEJwoj", "gFEX TE EDM"};
-      SG::ReadHandleKey<xAOD::gFexGlobalRoIContainer> m_gESPRESSO_EDMKey {this, "gEspressoKey", "L1_gEspresso", "gFEX gESPRESSO EDM"}; //TODO: update to actual default key once implemented on gFEX side!
-
+      SG::ReadHandleKey<xAOD::gFexGlobalRoIContainer> m_gESPRESSO_EDMKey {this, "gEspressoKey", "L1_gEspresso", "gFEX gESPRESSO EDM"}; 
+      SG::ReadHandleKey<xAOD::gFexGlobalRoIContainer> m_gRISTRETTO_EDMKey {this, "gRistrettoKey", "L1_gRistretto", "gFEX gRISTRETTO EDM"}; //TODO: verify actual default key once implemented on gFEX side!
       // gFex to L1Topo conversion factors
       static const int m_EtJet_conversion;
       static const double m_EtGlobal_conversion;

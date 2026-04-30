@@ -35,7 +35,7 @@ public:
 protected:
 
   virtual JetElementCollection_PERS*   createPersistent (JetElementCollection* transCont);
-  virtual JetElementCollection*        createTransient ();
+  virtual JetElementCollection*        createTransient(const Token* token);
 
 private:
   

@@ -35,33 +35,33 @@ StatusCode SCT_ClusterContainerCnv::initialize() {
 }
 
 
-InDet::SCT_ClusterContainer* SCT_ClusterContainerCnv::createTransient() {
+InDet::SCT_ClusterContainer* SCT_ClusterContainerCnv::createTransient(const Token* token) {
   //  MsgStream log(msgSvc(), "SCT_ClusterContainerCnv" );
   static const pool::Guid   p0_guid("A180F372-0D52-49C3-8AA0-0939CB0B8179"); // before t/p split
   static const pool::Guid   p1_guid("657F6546-F5CD-4166-9567-16AD9C96D286"); // with SCT_Cluster_tlp1
   static const pool::Guid   p2_guid("ECE7D831-0F31-4E6F-A6BE-2ADDE90083BA"); // with SCT_Cluster_p2
   static const pool::Guid   p3_guid("623F5836-369F-4A94-9DD4-DAD728E93C13"); // with SCT_Cluster_p3
 
-  //ATH_MSG_DEBUG("createTransient(): main converter");
+  //ATH_MSG_DEBUG("createTransient(const Token* token): main converter");
   InDet::SCT_ClusterContainer* p_collection(nullptr);
-  if ( compareClassGuid(p3_guid) ) {
-    //ATH_MSG_DEBUG("createTransient(): T/P version 3 detected");
-    std::unique_ptr< SCT_ClusterContainer_PERS >  p_coll( poolReadObject< SCT_ClusterContainer_PERS >() );
+  if ( compareClassGuid(token, p3_guid) ) {
+    //ATH_MSG_DEBUG("createTransient(const Token* token): T/P version 3 detected");
+    std::unique_ptr< SCT_ClusterContainer_PERS >  p_coll( poolReadObject< SCT_ClusterContainer_PERS >(token) );
     p_collection = m_TPConverter_p3.createTransient( p_coll.get(), msg() );
    
-  } else if ( compareClassGuid(p1_guid) ) {
-    //ATH_MSG_DEBUG("createTransient(): T/P version 1 detected");
-    std::unique_ptr< InDet::SCT_ClusterContainer_tlp1 >  p_coll( poolReadObject< InDet::SCT_ClusterContainer_tlp1 >() );
+  } else if ( compareClassGuid(token, p1_guid) ) {
+    //ATH_MSG_DEBUG("createTransient(const Token* token): T/P version 1 detected");
+    std::unique_ptr< InDet::SCT_ClusterContainer_tlp1 >  p_coll( poolReadObject< InDet::SCT_ClusterContainer_tlp1 >(token) );
     p_collection = m_TPConverter.createTransient( p_coll.get(), msg() );
 
-  } else if ( compareClassGuid(p2_guid) ) {
-    //ATH_MSG_DEBUG("createTransient(): T/P version 2 detected");
-    std::unique_ptr< InDet::SCT_ClusterContainer_p2 >  p_coll( poolReadObject< InDet::SCT_ClusterContainer_p2 >() );
+  } else if ( compareClassGuid(token, p2_guid) ) {
+    //ATH_MSG_DEBUG("createTransient(const Token* token): T/P version 2 detected");
+    std::unique_ptr< InDet::SCT_ClusterContainer_p2 >  p_coll( poolReadObject< InDet::SCT_ClusterContainer_p2 >(token) );
     p_collection = m_TPConverter_p2.createTransient( p_coll.get(), msg() );
 
-  } else if ( compareClassGuid(p0_guid) ) {
-    //ATH_MSG_DEBUG("createTransient(): Old input file");
-    std::unique_ptr< SCT_ClusterContainer_p0 >  col_vect( poolReadObject< SCT_ClusterContainer_p0 >() );
+  } else if ( compareClassGuid(token, p0_guid) ) {
+    //ATH_MSG_DEBUG("createTransient(const Token* token): Old input file");
+    std::unique_ptr< SCT_ClusterContainer_p0 >  col_vect( poolReadObject< SCT_ClusterContainer_p0 >(token) );
     p_collection = m_converter_p0.createTransient( col_vect.get(), msg() );
 
   } else {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iomanip>
@@ -13,19 +13,6 @@ RPCtrigDataObject::RPCtrigDataObject(int num,const std::string& name) :
 RPCtrigDataObject::RPCtrigDataObject(int num,const char* name) : 
     BaseObject(Data,name),m_number(num) {}
 
-RPCtrigDataObject::RPCtrigDataObject(const RPCtrigDataObject& obj) :
-    BaseObject(Data,obj.name())
-{
-    m_number = obj.number();
-}
-
-RPCtrigDataObject
-RPCtrigDataObject::operator=(const RPCtrigDataObject& obj)
-{
-    static_cast<BaseObject&>(*this) = static_cast<const BaseObject&>(obj);
-    m_number = obj.number();
-    return*this;
-}
 
 void 
 RPCtrigDataObject::Print(ostream& stream,bool detail) const

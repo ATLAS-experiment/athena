@@ -16,8 +16,37 @@ TauGNNEvaluator::TauGNNEvaluator(const std::string &name):
 TauGNNEvaluator::~TauGNNEvaluator() {}
 
 StatusCode TauGNNEvaluator::initialize() {
-  ATH_MSG_INFO("Initializing TauGNNEvaluator with "<<m_max_tracks.value()<<" tracks, "<<m_max_clusters<<" clusters, and "<<m_max_hits<<" hits...");
+  if(m_output_discriminant < Discriminant::Disabled || m_output_discriminant > Discriminant::PTau) {
+    ATH_MSG_FATAL("Invalid TauGNNEvaluator discriminant setting: " << m_output_discriminant);
+  }
 
+  if(!m_tauContainerName.empty()) {
+    // We should move to using WriteDecorHandles in the future, but for now
+    // we create keys to enforce data-dependencies in the scheduler
+
+    if(m_output_discriminant != Discriminant::Disabled) {
+      m_scoreHandleKey = m_tauContainerName + "." + m_output_varname;
+      ATH_CHECK(m_scoreHandleKey.initialize());
+    }
+
+    m_pTauHandleKey = m_tauContainerName + "." + m_output_ptau;
+    ATH_CHECK(m_pTauHandleKey.initialize());
+
+    m_pJetHandleKey = m_tauContainerName + "." + m_output_pjet;
+    ATH_CHECK(m_pJetHandleKey.initialize());
+  }
+
+  if(!m_tauContainerName.empty() && !m_hitsHandleKey.empty()) {
+    m_hits_decor_name = m_hitsHandleKey.key();
+    m_hitsHandleKey = m_tauContainerName + "." + m_hitsHandleKey.key();
+    ATH_CHECK(m_hitsHandleKey.initialize());
+  } else if (m_max_hits > 0) {
+    ATH_MSG_ERROR("TauContainerName and HitsHandleKey must be provided to read hits for the GNN evaluation");
+    return StatusCode::FAILURE;
+  }
+
+
+  ATH_MSG_INFO("Initializing TauGNNEvaluator with "<<m_max_tracks.value()<<" tracks, "<<m_max_clusters<<" clusters, and "<<m_max_hits<<" hits...");
   // We can either use an inclussive GNN (e.g. Offline GNTauv0), or a prong-dependent GNN (e.g. HLT GNTau), not both!
   
   if(!m_weightfile_inclusive.empty()) { // Prong-inclusive network
@@ -53,35 +82,6 @@ StatusCode TauGNNEvaluator::initialize() {
     ATH_MSG_INFO("Loading 3-prong TauID GNN");
     m_net_3p = load_network(m_weightfile_3p);
     if(!m_net_3p) return StatusCode::FAILURE;
-  }
-
-  if(m_output_discriminant < Discriminant::Disabled || m_output_discriminant > Discriminant::PTau) {
-    ATH_MSG_FATAL("Invalid TauGNNEvaluator discriminant setting: " << m_output_discriminant);
-  }
-
-  if(!m_tauContainerName.empty()) {
-    // We should move to using WriteDecorHandles in the future, but for now
-    // we create keys to enforce data-dependencies in the scheduler
-
-    if(m_output_discriminant != Discriminant::Disabled) {
-      m_scoreHandleKey = m_tauContainerName + "." + m_output_varname;
-      ATH_CHECK(m_scoreHandleKey.initialize());
-    }
-
-    m_pTauHandleKey = m_tauContainerName + "." + m_output_ptau;
-    ATH_CHECK(m_pTauHandleKey.initialize());
-
-    m_pJetHandleKey = m_tauContainerName + "." + m_output_pjet;
-    ATH_CHECK(m_pJetHandleKey.initialize());
-  }
-
-  if(!m_tauContainerName.empty() && !m_hitsHandleKey.empty()) {
-    m_hits_decor_name = m_hitsHandleKey.key();
-    m_hitsHandleKey = m_tauContainerName + "." + m_hitsHandleKey.key();
-    ATH_CHECK(m_hitsHandleKey.initialize());
-  } else if (m_max_hits > 0) {
-    ATH_MSG_ERROR("TauContainerName and HitsHandleKey must be provided to read hits for the GNN evaluation");
-    return StatusCode::FAILURE;
   }
 
   return StatusCode::SUCCESS;
@@ -128,7 +128,6 @@ StatusCode TauGNNEvaluator::execute(xAOD::TauJet &tau) const {
   const SG::Accessor<float> output(m_output_varname);
   const SG::Accessor<float> out_ptau(m_output_ptau);
   const SG::Accessor<float> out_pjet(m_output_pjet);
-  const SG::Decorator<char> out_trkclass("GNTau_TrackClass");
   // Set default score and overwrite later
   if(m_output_discriminant != Discriminant::Disabled) output(tau) = -1111.0f;
   out_ptau(tau) = -1111.0f;

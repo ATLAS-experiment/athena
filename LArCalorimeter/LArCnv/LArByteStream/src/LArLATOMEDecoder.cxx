@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #define DETAIL_DUMP_ON false
@@ -9,13 +9,28 @@
 #include "LArByteStream/LArLATOMEDecoder.h"
 
 #include <byteswap.h>
-
+#include "eformat/Issue.h"
+#include "eformat/index.h" // for helper
 #include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/MsgStream.h"
+#include "ByteStreamData/RawEvent.h"
+
 #include "LArByteStream/LATOMEMapping.h"
 #include "LArByteStream/Mon.h"
 #include "LArIdentifier/LArOnline_SuperCellID.h"
+#include "LArRecConditions/LArCalibLineMapping.h"
+
+#include "LArRawEvent/LArDigitContainer.h"
 #include "LArRawConditions/LArCalibParams.h"
+
+#include "LArRawEvent/LArSCDigit.h"
+#include "LArRawEvent/LArAccumulatedDigitContainer.h"
+#include "LArRawEvent/LArAccumulatedCalibDigitContainer.h"
+#include "LArCabling/LArLATOMEMapping.h"
+
+
+
+
 
 static const InterfaceID IID_ILArLATOMEDecoder("LArLATOMEDecoder", 1, 0);
 
@@ -154,6 +169,7 @@ LArLATOMEDecoder::EventProcess::EventProcess(const LArLATOMEDecoder* decoderInpu
   m_region = 0;
   m_nStreams = 0;
   m_streamNumber = 0;
+  m_at0at1Swap = 0;
   m_at0typeRec = (Word)MonDataType::Invalid;
   m_at1typeRec = (Word)MonDataType::Invalid;
   m_at0type = (Word)MonDataType::Invalid;
@@ -273,6 +289,7 @@ unsigned int LArLATOMEDecoder::EventProcess::decodeHeader(const uint32_t* p, uns
   ATH_MSG_DEBUG(" nPackets: " << m_nPackets << " iPacket: " << m_iPacket << " nWordsPerPacket: " << m_nWordsPerPacket << " monHeaderSize: " << m_monHeaderSize);
 
   /// now these are taken from the ROD header but the word are still here (maybe we will use them for something else)
+  std::ignore = compareOrSet(m_at0at1Swap, (bswap_32(p[8 + offset])>>30) & 0x1, m_headerDecoded);
   if (!compareOrSet(m_at0typeRec, bswap_32(p[9 + offset]), m_headerDecoded))
     monheadererror |= (1 << monheadererrorbit++);
   if (!compareOrSet(m_at1typeRec, bswap_32(p[12 + offset]), m_headerDecoded))
@@ -302,8 +319,8 @@ unsigned int LArLATOMEDecoder::EventProcess::decodeHeader(const uint32_t* p, uns
   if (!compareOrSet(m_nsc6, (bswap_32(p[17]) >> 16) & 0xff, m_headerDecoded))
     monheadererror |= (1 << monheadererrorbit++);
 
-  ATH_MSG_DEBUG(" at0type " << m_at0typeRec << " at1type " << m_at1typeRec << " at0nBC " << m_at0nBC << " at1nBC " << m_at1nBC << " at0BC " << m_at0BC
-                            << " at1BC " << m_at1BC << " nsc1 " << m_nsc1 << " nsc2 " << m_nsc2 << " nsc3 " << m_nsc3 << " nsc4 " << m_nsc4 << " nsc5 "
+  ATH_MSG_DEBUG("m_at0at1Swap: " << m_at0at1Swap << " at0type " << m_at0typeRec << " at1type " << m_at1typeRec << " at0nBC " << m_at0nBC << " at1nBC " << m_at1nBC << " at0BC " << m_at0BC                          
+  << " at1BC " << m_at1BC << " nsc1 " << m_nsc1 << " nsc2 " << m_nsc2 << " nsc3 " << m_nsc3 << " nsc4 " << m_nsc4 << " nsc5 "
                             << m_nsc5 << " nsc6 " << m_nsc6);
 
   if (monheadererror) {
@@ -428,19 +445,8 @@ void LArLATOMEDecoder::EventProcess::decodeChannel(unsigned int& wordshift, unsi
 
 void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, const LArLATOMEMapping* map, const LArOnOffIdMapping* onoffmap,
                                                     const LArCalibLineMapping* clmap) {
-  // Mon* mon = new Mon;
-
   /// some of this info should be used in the LatomeHeader class and for cross checks also (same as for the mon header)
-  // const unsigned int rod_Size_words = robFrag->rod_ndata();
-  // const unsigned int rob_Size_words = robFrag->payload_size_word();
   const unsigned int sourceID = robFrag->rob_source_id();
-  // const unsigned int rod_fragment_size_word = robFrag->rod_fragment_size_word();
-  // const unsigned int rod_header_size_word = robFrag->rod_header_size_word();
-  // const unsigned int rod_trailer_size_word = robFrag->rod_trailer_size_word();
-  // const unsigned int rod_bc_id = robFrag->rod_bc_id();
-  // const unsigned int rod_nstatus = robFrag->rod_nstatus();
-  // const unsigned int rod_status_position = robFrag->rod_status_position();
-  // const uint32_t* rod_start = robFrag->rod_start();
   m_l1ID = robFrag->rod_lvl1_id();
   m_ROBFragSize = robFrag->rod_ndata();
   const uint32_t* p = robFrag->rod_data();
@@ -450,6 +456,8 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
     ATH_MSG_DEBUG("Empty fragment, skip ");
     return;
   }
+  unsigned int offset = decodeHeader(p, 0);
+
   m_latomeBCID = robFrag->rod_bc_id();
   const uint32_t* rod_status = robFrag->rod_status();
   const unsigned int rod_nstatus = robFrag->rod_nstatus();
@@ -461,6 +469,12 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
     uint32_t status8 = rod_status[8];
     m_at0type = status8 & 0x3;
     m_at1type = (status8 >> 2) & 0x3;
+    ATH_MSG_DEBUG("before swap: m_at0type " << m_at0type << ", m_at1type " << m_at1type << "swap value " << m_at0at1Swap);
+    if(m_at0at1Swap==1){
+      std::swap(m_at0type, m_at1type);
+      ATH_MSG_DEBUG("after swap: m_at0type " << m_at0type << "m_at1type " << m_at1type);
+  }
+
   }
   m_nthLATOME = robFrag->rod_source_id();
   m_LATOMEFW = rod_status[3] & 0x0fff;
@@ -490,7 +504,8 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
 
   ////lets first decode the mon header in the first packet and get the info.
 
-  unsigned int offset = decodeHeader(p, 0);
+
+  //unsigned int offset = decodeHeader(p, 0);
   if (offset > m_ROBFragSize) {
     ATH_MSG_WARNING("Data corruption, offset found at pos 0 (" << offset << ") is larger than the ROB fragment size (" << m_ROBFragSize << "). Ignoring data.");
     return;
@@ -524,6 +539,7 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
       ATH_MSG_WARNING("Data corruption, offset found at pos 0 (" << offset << ") is larger than the ROB fragment size (" << m_ROBFragSize << "). Ignoring data.");
       return;
     }
+
     offset = decodeHeader(p, offset);
     if (offset > m_ROBFragSize) {
       ATH_MSG_WARNING("Data corruption, offset found at pos 0 (" << offset << ") is larger than the ROB fragment size (" << m_ROBFragSize << "). Ignoring data.");
@@ -550,6 +566,7 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
   if (m_packetEnd[m_nPackets - 1] + m_monTrailerSize != n) {
     ATH_MSG_WARNING("problem in packet size loop " << m_packetEnd[m_nPackets - 1] << " != " << n);
   }
+
 
   std::vector<unsigned int> timeslot_nsc = {m_nsc1, m_nsc2, m_nsc3, m_nsc4, m_nsc5, m_nsc6};
   std::vector<unsigned int> bc_size;

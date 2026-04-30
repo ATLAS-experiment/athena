@@ -40,7 +40,7 @@ public:
   {}
 protected:
   virtual PixelRDO_Container_PERS*   createPersistent (PixelRDO_Container* transCont) override;
-  virtual PixelRDO_Container* createTransient () override;
+  virtual PixelRDO_Container* createTransient(const Token* token) override;
 
   // Must initialize ID helpers
   virtual StatusCode initialize() override;

@@ -84,12 +84,12 @@ class TriggerAnalysisSFBlock(ConfigBlock):
         self.addDependency('Taus', required=False)
         self.addDependency('OverlapRemoval', required=False)
 
-        self.addOption ('triggerChainsPerYear', {}, type=None,
+        self.addOption ('triggerChainsPerYear', {}, type=dict,
             info="a dictionary with key (string) the year and value (list of "
             "strings) the trigger chains. You can also use `||` within a string "
             "to enforce an OR of triggers without looking up the individual "
             "triggers. Used for both trigger selection and SFs.")
-        self.addOption ('multiTriggerChainsPerYear', {}, type=None,
+        self.addOption ('multiTriggerChainsPerYear', {}, type=dict,
             info="a dictionary with key (string) a trigger set name and value a "
             "`triggerChainsPerYear` dictionary, following the previous convention. "
             "Relevant for analyses using different triggers in different categories, "
@@ -132,7 +132,7 @@ class TriggerAnalysisSFBlock(ConfigBlock):
             "trigger legs.")
         self.addOption ('separateChainMatching', False, type=bool,
             info="store the matching status for each trigger separately.")
-        self.addOption ('triggerMatchingChainsPerYear', {}, type=None,
+        self.addOption ('triggerMatchingChainsPerYear', {}, type=dict,
             info="a dictionary with key (string) the year and value (list of "
             "strings) the trigger chains.")
         self.addOption("includeAllYearsPerRun", False, type=bool,
@@ -192,6 +192,7 @@ class TriggerAnalysisSFBlock(ConfigBlock):
 
         alg.matchingTool = '%s/%s' % ( matchingTool.getType(), matchingTool.getName() )
         alg.isRun3Geo = config.geometry() is LHCPeriod.Run3
+        alg.campaign = config.campaign().value
         alg.numberOfToys = self.numberOfToys
         alg.scaleFactorDecoration = 'globalTriggerEffSF' + triggerSuffix + self.postfix + '_%SYS%'
         alg.matchingDecoration = 'globalTriggerMatch' + triggerSuffix + self.postfix + '_%SYS%'

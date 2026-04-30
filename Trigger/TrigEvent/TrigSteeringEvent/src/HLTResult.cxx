@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigSteeringEvent/HLTResult.h"
@@ -72,6 +72,7 @@ HLTResult::HLTResult(HLTResult&& rhs)
 }
 
 // unifying assignment operator
+//coverity[PASS_BY_VALUE]
 HLTResult& HLTResult::operator=(HLTResult rhs)
 {
   swap(*this, rhs);

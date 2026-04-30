@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from JetRecConfig.StandardJetConstits import stdConstitDic as cst
 from .JetDefinition import  JetDefinition
@@ -29,7 +29,8 @@ flavourghosts = [ "BHadronsFinal","CHadronsFinal",
 standardrecomods = (
     "Sort",
     "Width",
-    "ConstitFourMom"
+    "ConstitFourMom",
+    "numConstit"
 )
 
 ufo_dnn_moments = ("CaloEnergiesLargeR","ConstitFrac","groomMRatio")
@@ -38,8 +39,8 @@ clustermods      = ("ECPSFrac","ClusterMoments",)
 truthmods        = ("PartonTruthLabel",)
 pflowmods        = ()
 
-truthlabels = ("JetTaggingTruthLabel:R10TruthLabel_R21Consolidated","JetTaggingTruthLabel:R10TruthLabel_R21Precision","JetTaggingTruthLabel:R10TruthLabel_R21Precision_2022v1","JetTaggingTruthLabel:R10TruthLabel_R22v1")
-truthlabels_SD = ("JetTaggingTruthLabel:R10TruthLabel_R21Precision","JetTaggingTruthLabel:R10TruthLabel_R21Precision_2022v1","JetTaggingTruthLabel:R10TruthLabel_R22v1", "JetTaggingTruthLabel:R10WZTruthLabel_R22v1")
+truthlabels = ("JetTaggingTruthLabel:R10TruthLabel_R22v1",)
+truthlabels_SD = ("JetTaggingTruthLabel:R10TruthLabel_R21Precision_2022v1","JetTaggingTruthLabel:R10TruthLabel_R22v1","JetTaggingTruthLabel:R10WZTruthLabel_R22v1")
 
 substrmods = ("nsubjettiness", "nsubjettinessR", "ktsplitter",
               "ecorr", "ecorrR", "qw",
@@ -57,7 +58,7 @@ ufo_softdrop_mods = ("planarflow","angularity","comshapes","ktdr","ecorrgeneral"
 
 AntiKt10LCTopo = JetDefinition("AntiKt",1.0,cst.LCTopoOrigin,
                                ghostdefs = standardghosts+flavourghosts+["AntiKtVR30Rmax4Rmin02PV0TrackJets"] ,
-                               modifiers = ("Sort", "Filter:50000","TrackMoments","JetGhostLabel"),
+                               modifiers = ("Sort", "Filter:50000","TrackMoments","JetGhostLabel","numConstit"),
                                standardRecoMode = True,
                                ghostarea = 0.,
                                lock = True
@@ -68,8 +69,17 @@ AntiKt10LCTopo_noVR = AntiKt10LCTopo.clone(
     ghostdefs = standardghosts+flavourghosts
 )
 
+# Jet collection specifically for tau CP without modifiers, ghosts, ...
+AntiKt10LCTopo_tau = JetDefinition("AntiKt",1.0,cst.LCTopoOrigin,
+                                   ghostdefs = ["Track"],
+                                   modifiers = ("Sort", "Filter:50000","numConstit"),
+                                   standardRecoMode = True,
+                                   ghostarea = 0.,
+                                   lock = True
+)
+
 AntiKt10LCTopo_withmoms = AntiKt10LCTopo.clone(
-    modifiers = ("Sort", "Filter:50000", "Width", "TrackMoments", "TrackSumMoments","JetDeltaRLabel:5000")+clustermods+truthmods,
+    modifiers = ("Sort", "Filter:50000", "Width", "TrackMoments", "TrackSumMoments","JetDeltaRLabel:5000","numConstit")+clustermods+truthmods,
     # NOT all moments from old AntiKt10LCTopo config here yet. 
 )
 
@@ -81,7 +91,7 @@ AntiKt10LCTopoTrimmed = JetTrimming(AntiKt10LCTopo,
 
 AntiKt10LCTopoTrimmed_trigger = JetTrimming(AntiKt10LCTopo_noVR,
                                             #A filter of 1 GeV is applied before the calibration to remove jets with zero constituents after trimming
-                                            modifiers = ("Filter:1000","Calib:CombinedMass:mc","Filter:50000","Sort","ConstitFourMom"),
+                                            modifiers = ("Filter:1000","Calib:CombinedMass:mc","Filter:50000","Sort","ConstitFourMom","numConstit"),
                                             PtFrac = 0.05, RClus = 0.2,
 )
 
@@ -97,28 +107,28 @@ AntiKt10UFOCHS = JetDefinition("AntiKt",1.0,cst.UFO,
 
 AntiKt10UFOCSSK = JetDefinition("AntiKt",1.0,cst.UFOCSSK,
                                 ghostdefs = standardghosts+flavourghosts+["AntiKtVR30Rmax4Rmin02PV0TrackJets"] ,
-                                modifiers = ("Sort", "Filter:50000","TrackMoments","JetGhostLabel","PartonTruthLabel"),
+                                modifiers = ("Sort", "Filter:50000","TrackMoments","JetGhostLabel","PartonTruthLabel","numConstit"),
                                 standardRecoMode = True,
                                 ghostarea = 0.,                                
                                 )
 
 AntiKt10UFOCSSK_noElectrons = JetDefinition("AntiKt",1.0,cst.UFOCSSK_noElectrons,
                                             ghostdefs = standardghosts+flavourghosts+["AntiKtVR30Rmax4Rmin02PV0TrackJets"],
-                                            modifiers = ("Sort", "Filter:50000","TrackMoments","JetGhostLabel","PartonTruthLabel"),
+                                            modifiers = ("Sort", "Filter:50000","TrackMoments","JetGhostLabel","PartonTruthLabel","numConstit"),
                                             standardRecoMode = True,
                                             ghostarea = 0.,                                            
                                             )
 
 AntiKt10UFOCSSK_noMuons = JetDefinition("AntiKt",1.0,cst.UFOCSSK_noMuons,
                                         ghostdefs = standardghosts+flavourghosts+["AntiKtVR30Rmax4Rmin02PV0TrackJets"],
-                                        modifiers = ("Sort", "Filter:50000","TrackMoments","JetGhostLabel","PartonTruthLabel"),
+                                        modifiers = ("Sort", "Filter:50000","TrackMoments","JetGhostLabel","PartonTruthLabel","numConstit"),
                                         standardRecoMode = True,
                                         ghostarea = 0.,                                        
                                         )
 
 AntiKt10UFOCSSK_noLeptons = JetDefinition("AntiKt",1.0,cst.UFOCSSK_noLeptons,
                                           ghostdefs = standardghosts+flavourghosts+["AntiKtVR30Rmax4Rmin02PV0TrackJets"],
-                                          modifiers = ("Sort", "Filter:50000","TrackMoments","JetGhostLabel","PartonTruthLabel"),
+                                          modifiers = ("Sort", "Filter:50000","TrackMoments","JetGhostLabel","PartonTruthLabel","numConstit"),
                                           standardRecoMode = True,
                                           ghostarea = 0.,                                          
                                           )
@@ -149,7 +159,7 @@ AntiKt10UFOCSSKSoftDrop_noLeptons = JetSoftDrop(AntiKt10UFOCSSK_noLeptons,
 
 AntiKt10UFOCSSKSoftDrop_trigger = JetSoftDrop(AntiKt10UFOCSSK,
                                               #A filter of 1 GeV is applied before the calibration to remove jets with zero constituents after the soft drop alg is applied
-                                              modifiers = ("Filter:1000","Calib:SoftDrop:mc","Filter:50000","Sort","ConstitFourMom"),
+                                              modifiers = ("Filter:1000","Calib:SoftDrop:mc","Filter:50000","Sort","ConstitFourMom","numConstit"),
                                               Beta = 1., ZCut= 0.1,
                                               )
 
@@ -157,45 +167,45 @@ AntiKt10UFOCSSKSoftDrop_trigger = JetSoftDrop(AntiKt10UFOCSSK,
 
 AntiKt10Truth = JetDefinition("AntiKt",1.0,cst.Truth,
                                ghostdefs = flavourghosts , 
-                               modifiers = ("Sort", "Filter:50000","ktsplitter","JetGhostLabel"),
+                               modifiers = ("Sort", "Filter:50000","ktsplitter","JetGhostLabel","numConstit"),
                                standardRecoMode = True,
                                ghostarea = 0.,                               
                                lock = True
 )
 
 AntiKt10TruthTrimmed = JetTrimming(AntiKt10Truth,
-                                   modifiers = ("Sort","JetGhostLabel")+substrmods+truthmods,
+                                   modifiers = ("Sort","JetGhostLabel","numConstit")+substrmods+truthmods,
                                    PtFrac = 0.05, RClus = 0.2,                                    
                                    )
 
 AntiKt10TruthSoftDrop = JetSoftDrop(AntiKt10Truth,
-                                    modifiers = ("Sort","JetGhostLabel")+substrmods+truthmods,
+                                    modifiers = ("Sort","JetGhostLabel","numConstit")+substrmods+truthmods,
                                     Beta = 1., ZCut= 0.1,
                                     )
 
 
 AntiKt10TruthWZ = JetDefinition("AntiKt",1.0, cst.TruthWZ,
                                 ghostdefs = flavourghosts,
-                                modifiers = ("Sort", "Filter:50000","ktsplitter","JetGhostLabel"),
+                                modifiers = ("Sort", "Filter:50000","ktsplitter","JetGhostLabel","numConstit"),
                                 standardRecoMode = True,
                                 ghostarea = 0.,                                
                                 lock = True,
 )
 
 AntiKt10TruthWZSoftDrop = JetSoftDrop(AntiKt10TruthWZ,
-                                      modifiers = ("Sort","JetGhostLabel")+substrmods+truthmods,
+                                      modifiers = ("Sort","JetGhostLabel","numConstit")+substrmods+truthmods,
                                       Beta = 1., ZCut= 0.1,
 )
 
 AntiKt10TruthDressedWZ = JetDefinition("AntiKt",1.0,cst.TruthDressedWZ,
                                        ghostdefs = flavourghosts ,
-                                       modifiers = ("Sort", "Filter:50000","ktsplitter","JetGhostLabel"),
+                                       modifiers = ("Sort", "Filter:50000","ktsplitter","JetGhostLabel","numConstit"),
                                        standardRecoMode = True,
                                        lock = True
 )
 
 AntiKt10TruthDressedWZSoftDrop = JetSoftDrop(AntiKt10TruthDressedWZ,
-                                             modifiers = ("Sort","JetGhostLabel")+substrmods+truthmods,
+                                             modifiers = ("Sort","JetGhostLabel","numConstit")+substrmods+truthmods,
                                              Beta = 1., ZCut= 0.1,
 )
 

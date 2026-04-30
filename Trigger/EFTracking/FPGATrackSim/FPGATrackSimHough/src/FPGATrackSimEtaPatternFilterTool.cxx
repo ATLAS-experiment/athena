@@ -202,7 +202,7 @@ void FPGATrackSimEtaPatternFilterTool::resetCounters()
 void FPGATrackSimEtaPatternFilterTool::addHitsToMap(const FPGATrackSimRoad &r)
 {
     for (unsigned lyr = 0; lyr < m_nLayers; lyr++)
-        for (auto & hit : r.getHits(lyr))
+        for (auto & hit : r.getHitPtrs(lyr))
             if (hit->getHitType() != HitType::wildcard)
             {
                 ModuleId mod = { hit->getDetType(), hit->getDetectorZone(), (int)(hit->getEtaModule()) };

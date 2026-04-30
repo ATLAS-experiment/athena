@@ -12,10 +12,6 @@ namespace Tau{
     m_sTauJetContainerName(sTauJetContainerName)
   {
   }
-	
-  TauParticleFlowPlots::~TauParticleFlowPlots()
-  {
-  }
 
   void TauParticleFlowPlots::initializePlots(){
 

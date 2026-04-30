@@ -52,7 +52,7 @@ protected:
   
   /** Build the transient representation from a persistent one
    */
-  virtual MissingEtTruth* createTransient();
+  virtual MissingEtTruth* createTransient(const Token* token);
 
 };
 

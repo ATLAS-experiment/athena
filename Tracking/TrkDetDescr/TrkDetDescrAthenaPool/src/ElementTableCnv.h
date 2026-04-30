@@ -32,7 +32,7 @@ public:
   ElementTableCnv( ISvcLocator *svcloc );
 protected:
   virtual ElementTable_PERS* createPersistentWithKey( Trk::ElementTable *transCont, const std::string& key) override;
-  virtual Trk::ElementTable* createTransientWithKey (const std::string& key) override;
+  virtual Trk::ElementTable* createTransientWithKey ( const Token* token, const std::string& key) override;
  
 
 private:

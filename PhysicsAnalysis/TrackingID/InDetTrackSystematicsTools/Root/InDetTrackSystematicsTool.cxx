@@ -96,6 +96,29 @@ namespace InDet {
     return it_syst != m_activeSysts->end();
   }
 
+  const CP::SystematicSet*
+  InDetTrackSystematicsTool::getFilteredSysts(
+      const CP::SystematicSet& syst) const
+  {
+    // m_sysFilterMap is populated during initialize() (single-threaded)
+    // and is read-only during execute(), so no lock is required.
+    auto it = m_sysFilterMap.find(syst);
+    if (it == m_sysFilterMap.end()) {
+      ATH_MSG_ERROR( "Systematic set '" << syst.name()
+          << "' was not pre-registered. "
+          "Call applySystematicVariation() during initialize()." );
+      return nullptr;
+    }
+    return &it->second;
+  }
+
+  bool InDetTrackSystematicsTool::isActive(
+      TrackSystematic syst, const CP::SystematicSet& filtered) const
+  {
+    return filtered.find(InDet::TrackSystematicMap.at(syst))
+        != filtered.end();
+  }
+
   std::unique_ptr<TFile> InDetTrackSystematicsTool::getFile(const std::string& filename) const
   {
     // now the files are stored in the calibration area

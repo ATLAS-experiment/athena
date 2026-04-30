@@ -21,20 +21,19 @@ class RpcStrip2DAuxContainer_v1 : public AuxContainerBase {
    private:
     /// @name Defining Rpc strip parameter
     /// @{
-    std::vector<DetectorIdentType> identifier{};
     std::vector<DetectorIDHashType> identifierHash{};
     std::vector<PosAccessor<2>::element_type> localPosition{};
     std::vector<CovAccessor<2>::element_type> localCovariance{};
 
     std::vector<float> time{};
     std::vector<float> timeCovariance{};
-    std::vector<uint32_t> triggerInfo{}; // FIXME - how big do we need this to be?
-    std::vector<uint8_t> ambiguityFlag{};
+    std::vector<std::uint32_t> triggerInfo{}; // FIXME - how big do we need this to be?
+    std::vector<std::uint8_t> ambiguityFlag{};
     std::vector<float> timeOverThreshold{};
 
-    std::vector<uint16_t> channelNumber{};
-    std::vector<uint8_t> gasGap{};
-    std::vector<uint8_t> doubletPhi{};
+    std::vector<std::uint16_t> channelNumber{};
+    std::vector<std::uint8_t> gasGap{};
+    std::vector<std::uint8_t> doubletPhi{};
     /// @}
 };
 }  // namespace xAOD

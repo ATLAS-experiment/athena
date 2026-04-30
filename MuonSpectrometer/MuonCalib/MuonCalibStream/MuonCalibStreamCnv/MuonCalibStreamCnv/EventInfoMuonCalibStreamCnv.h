@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONCALIBSTREAMCNVSVC_EVENTINFOMUONCALIBSTREAMCNV_H
 #define MUONCALIBSTREAMCNVSVC_EVENTINFOMUONCALIBSTREAMCNV_H
@@ -26,7 +26,7 @@ public:
     /// Storage type and class ID
     virtual long repSvcType() const { return MuonCalibStreamAddress::storageType(); }
     static long storageType() { return MuonCalibStreamAddress::storageType(); }
-    static const CLID &classID();
+    static CLID classID();
 
     EventInfoMuonCalibStreamCnv(ISvcLocator *svcloc);
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
   This is a subclass of IConstituentsLoader. It is used to load the TauTracks from the tau 
   and extract their features for the NN evaluation.
@@ -147,7 +147,7 @@ namespace FlavorTagInference {
       public:
         ConstituentLoaderTauTrack(const ConstituentsInputConfig& cfg);
 
-        std::tuple<Inputs, std::vector<const xAOD::IParticle*>> getData(const xAOD::IParticle& p) const override ;
+        Inputs getData(const xAOD::IParticle& p) const override;
         const FTagDataDependencyNames& getDependencies() const override;
         const std::set<std::string>& getUsedRemap() const override;
         const std::string& getName() const override;
@@ -166,6 +166,7 @@ namespace FlavorTagInference {
             {"trackPhi",                        TauTrackVars::trackPhi},
             {"pt_tau_log",                      TauTrackVars::pt_tau_log},
             {"pt_jetseed_log",                  TauTrackVars::pt_jetseed_log},
+            {"qOverP",                          TauTrackVars::qOverP},
             {"d0_abs_log",                      TauTrackVars::d0_abs_log},
             {"z0sinThetaTJVA_abs_log",          TauTrackVars::z0sinThetaTJVA_abs_log},
             {"z0sinthetaTJVA",                  TauTrackVars::z0sinthetaTJVA},
@@ -179,7 +180,9 @@ namespace FlavorTagInference {
             {"nInnermostPixelHits",             TauTrackVars::nInnermostPixelHits},
             {"numberOfInnermostPixelLayerHits", TauTrackVars::numberOfInnermostPixelLayerHits},
             {"nPixelHits",                      TauTrackVars::nPixelHits},
+            {"numberOfPixelHits",               TauTrackVars::numberOfPixelHits},
             {"nSCTHits",                        TauTrackVars::nSCTHits},
+            {"numberOfSCTHits",                 TauTrackVars::numberOfSCTHits},
             {"nIBLHitsAndExp",                  TauTrackVars::nIBLHitsAndExp},
             {"nPixelHitsPlusDeadSensors",       TauTrackVars::nPixelHitsPlusDeadSensors},
             {"nSCTHitsPlusDeadSensors",         TauTrackVars::nSCTHitsPlusDeadSensors},

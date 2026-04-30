@@ -279,7 +279,7 @@ namespace met {
 
     columnar::MutableMetAccessor<columnar::ObjectColumn> m_outputMetHandle {*this, "OutputMET"};
     columnar::Met1Accessor<columnar::ObjectColumn> m_inputMetHandle {*this, "METCore", {.addMTDependency=true}};
-    columnar::ColumnAccessor<columnar::ContainerId::metAssociation,columnar::ObjectColumn> m_metAssocHandle {*this, "MetAssoc", {.addMTDependency=true}};
+    columnar::ColumnAccessor<columnar::MetAssociationDef,columnar::ObjectColumn> m_metAssocHandle {*this, "MetAssoc", {.addMTDependency=true}};
     columnar::ParticleAccessor<columnar::ObjectColumn> m_particlesHandle {*this, "Particles"};
     columnar::JetAccessor<columnar::ObjectColumn> m_jetsHandle {*this, "Jets"};
     columnar::ElectronAccessor<columnar::ObjectColumn> m_electronsHandle {*this, "Electrons"};
@@ -287,12 +287,12 @@ namespace met {
     columnar::MuonAccessor<columnar::ObjectColumn> m_muonsHandle {*this, "Muons"};
 
     columnar::MutableMetAccessor<std::string> m_outputMetNameAcc {*this, "name"};
-    columnar::MetHelpers::MapLookupAccessor<columnar::ContainerId::mutableMet> m_outputMetMapAcc {*this};
-    columnar::MetHelpers::MetMomentumAccessors<columnar::ContainerId::mutableMet> m_outputMetMomAcc {*this};
+    columnar::MetHelpers::MapLookupAccessor<columnar::MutableMetDef> m_outputMetMapAcc {*this};
+    columnar::MetHelpers::MetMomentumAccessors<columnar::MutableMetDef> m_outputMetMomAcc {*this};
 
     columnar::Met1Accessor<std::string> m_inputMetNameAcc {*this, "name"};
-    columnar::MetHelpers::MapLookupAccessor<columnar::ContainerId::met1> m_inputMetMapAcc {*this};
-    columnar::MetHelpers::MetMomentumAccessors<columnar::ContainerId::met1> m_inputMetMomAcc {*this};
+    columnar::MetHelpers::MapLookupAccessor<columnar::Met1Def> m_inputMetMapAcc {*this};
+    columnar::MetHelpers::MetMomentumAccessors<columnar::Met1Def> m_inputMetMomAcc {*this};
     columnar::Met1Accessor<MissingETBase::Types::bitmask_t> m_inputMetSourceAcc {*this, "source"};
 
     columnar::MetAssocationAccessors<> m_assocAcc {*this};
@@ -301,11 +301,11 @@ namespace met {
     Gaudi::Property<std::string> m_inputPreselectionName {this, "inputPreselection", ""};
     std::optional<columnar::ParticleAccessor<char>> m_inputPreselectionAcc;
     columnar::ParticleAccessor<columnar::RetypeColumn<xAOD::Muon::MuonType,std::uint16_t>> m_inputMuonTypeAcc {*this, "muonType", {.isOptional = true}};
-    columnar::MetHelpers::ObjectTypeAccessor<columnar::ContainerId::particle> m_inputObjTypeAcc {*this, "objectType"};
+    columnar::MetHelpers::ObjectTypeAccessor<columnar::ParticleDef> m_inputObjTypeAcc {*this, "objectType"};
 
     columnar::MetHelpers::ObjectWeightDecorator<> m_outputMetWeightDecRegular {*this, "", true};
 
-    columnar::MetHelpers::InputMomentumAccessors<columnar::ContainerId::jet> m_jetMomAcc {*this};
+    columnar::MetHelpers::InputMomentumAccessors<columnar::JetDef> m_jetMomAcc {*this};
     columnar::JetAccessor<float> m_acc_emf {*this, "EMFrac"};
     columnar::JetAccessor<float> m_acc_psf {*this, "PSFrac"};
     columnar::JetAccessor<float> m_acc_width {*this, "Width"};
@@ -313,12 +313,12 @@ namespace met {
     columnar::JetAccessor<std::vector<float>> m_acc_trksumpt {*this, "SumPtTrkPt500"};
     columnar::JetAccessor<std::vector<float>> m_acc_sampleE {*this, "EnergyPerSampling"};
         
-    std::optional<columnar::MetHelpers::InputMomentumAccessors<columnar::ContainerId::jet>> m_jetConstitScaleMomAcc;
-    std::optional<columnar::MetHelpers::InputMomentumAccessors<columnar::ContainerId::jet>> m_jetConstitScaleMomFixedAcc;
+    std::optional<columnar::MetHelpers::InputMomentumAccessors<columnar::JetDef>> m_jetConstitScaleMomAcc;
+    std::optional<columnar::MetHelpers::InputMomentumAccessors<columnar::JetDef>> m_jetConstitScaleMomFixedAcc;
     std::optional<columnar::JetAccessor<char>> m_acc_jetRejectionDec;
 
-    columnar::MetHelpers::ObjectWeightDecorator<columnar::ContainerId::mutableMet,columnar::ContainerId::jet> m_jetOutputMetWeightDecRegular {*this, "", true};
-    columnar::MetHelpers::ObjectWeightDecorator<columnar::ContainerId::mutableMet,columnar::ContainerId::jet> m_jetOutputMetWeightDecSoft {*this, "Soft", false};
+    columnar::MetHelpers::ObjectWeightDecorator<columnar::MutableMetDef,columnar::JetDef> m_jetOutputMetWeightDecRegular {*this, "", true};
+    columnar::MetHelpers::ObjectWeightDecorator<columnar::MutableMetDef,columnar::JetDef> m_jetOutputMetWeightDecSoft {*this, "Soft", false};
 
     columnar::ElectronAccessor<columnar::RetypeColumn<double,float>> m_electronPtAcc {*this, "pt"};
 

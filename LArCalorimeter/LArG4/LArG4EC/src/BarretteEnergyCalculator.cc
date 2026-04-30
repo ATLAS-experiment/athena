@@ -721,8 +721,9 @@ G4bool EnergyCalculator::FindDMIdentifier_Barrett(const G4Step* step, std::vecto
   //  hdata[0].id = m_supportCalculator->identifier();
   //  return validid;
   hdata[0].id = LArG4Identifier();
+  LArG4Identifier identifier_sr = LArG4Identifier();
   std::vector<G4double> tmpv;
-  return m_supportCalculator->Process(step, hdata[0].id, tmpv, LArG4::kOnlyID );
+  return m_supportCalculator->Process(step, hdata[0].id, identifier_sr, tmpv, LArG4::kOnlyID );
 }
 
 G4double EnergyCalculator::_AdjustedPhiOfPoint_Barrett(const G4ThreeVector& p, G4double PhiStartOfPhiDiv) const {

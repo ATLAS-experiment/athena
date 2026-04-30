@@ -49,7 +49,7 @@ protected:
   
   /** Build the transient representation from a persistent one
    */
-  virtual TileL2Container* createTransient();
+  virtual TileL2Container* createTransient(const Token* token);
 
 };
 

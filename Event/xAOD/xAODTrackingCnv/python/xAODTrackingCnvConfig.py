@@ -157,10 +157,10 @@ def TrigTrackParticleCnvAlgCfg(flags, name="TrigTrackParticleCnvAlg",
     
     if flags.Detector.GeometryITk:
         name = name.replace("InDet", "ITk")
-        return ITkTrackParticleCnvAlgCfg(flags, name,
-                                         ClusterSplitProbabilityName,
-                                         AssociationMapName,
-                                         **kwargs)
+        return TrigITkTrackParticleCnvAlgCfg(flags, name,
+                                             ClusterSplitProbabilityName,
+                                             AssociationMapName,
+                                             **kwargs)
 
     kwargs.setdefault("ConvertTracks", True)
     kwargs.setdefault("ConvertTrackParticles", False)
@@ -316,6 +316,53 @@ def ITkTrackParticleCnvAlgCfg(flags, name="ITkTrackParticleCnvAlg",
                 isActsAmbi = isActsAmbi)))
 
     if flags.Tracking.doTruth:
+        kwargs.setdefault("TrackTruthContainerName",
+                          kwargs["TrackContainerName"]+"TruthCollection")
+        kwargs.setdefault("AddTruthLink", True)
+        if "MCTruthClassifier" not in kwargs:
+            from MCTruthClassifier.MCTruthClassifierConfig import MCTruthClassifierCfg
+            kwargs.setdefault("MCTruthClassifier", result.popToolsAndMerge(
+                MCTruthClassifierCfg(flags)))
+    else:
+        kwargs.setdefault("AddTruthLink", False)
+
+    result.addEventAlgo(CompFactory.xAODMaker.TrackParticleCnvAlg(name, **kwargs))
+    return result
+
+def TrigITkTrackParticleCnvAlgCfg(flags, name="ITkTrackParticleCnvAlg",
+                                  ClusterSplitProbabilityName = "",
+                                  AssociationMapName = "",
+                                  isActsAmbi: bool = False,
+                                  **kwargs):
+    result = ComponentAccumulator()
+
+    kwargs.setdefault("ConvertTracks", True)
+    kwargs.setdefault("ConvertTrackParticles", False)
+    kwargs.setdefault("TrackContainerName", "CombinedITkTracks")
+    kwargs.setdefault("xAODTrackParticlesFromTracksContainerName", "InDetTrackParticles")
+    
+    if flags.Tracking.ActiveConfig.perigeeExpression == "Vertex":
+        kwargs.setdefault('PrimaryVerticesName', 'PrimaryVertices')
+    
+    if "TrackParticleCreator" not in kwargs:
+        from TrkConfig.TrkParticleCreatorConfig import ITkTrackParticleCreatorToolCfg
+        kwargs.setdefault("TrackParticleCreator", result.popToolsAndMerge(
+            ITkTrackParticleCreatorToolCfg(
+                flags,
+                name = kwargs["xAODTrackParticlesFromTracksContainerName"] \
+                + "CreatorTool",
+                ClusterSplitProbabilityName = ClusterSplitProbabilityName if not isActsAmbi else "",
+                AssociationMapName = AssociationMapName)))
+
+    if "TrackCollectionCnvTool" not in kwargs:
+        result.addPublicTool(kwargs["TrackParticleCreator"])
+        kwargs.setdefault("TrackCollectionCnvTool", result.popToolsAndMerge(
+            ITkTrackCollectionCnvToolCfg(
+                flags,
+                TrackParticleCreator = kwargs["TrackParticleCreator"],
+                isActsAmbi = isActsAmbi)))
+
+    if flags.Tracking.ActiveConfig.doTruth:
         kwargs.setdefault("TrackTruthContainerName",
                           kwargs["TrackContainerName"]+"TruthCollection")
         kwargs.setdefault("AddTruthLink", True)

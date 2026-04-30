@@ -5,9 +5,8 @@
 #include <memory>
 
 #include "CxxUtils/checker_macros.h"
-#include "PersistencySvc/SimpleUtilityBase.h"
 #include "PersistencySvc/IFileCatalog.h"
-#include "POOLCore/SystemTools.h"
+#include "StorageSvc/SimpleUtilityBase.h"
 
 using namespace pool;
 
@@ -27,7 +26,9 @@ private:
 
 InsertFileToCatalogApplication::InsertFileToCatalogApplication( int argc, char* argv[] )
       : SimpleUtilityBase( argc, argv )
-{ }
+{
+   initGaudi();
+}
 
    
 bool
@@ -88,7 +89,6 @@ InsertFileToCatalogApplication::printSyntax()
 
 int main ATLAS_NOT_THREAD_SAFE ( int argc, char* argv[] )
 {
-   SystemTools::initGaudi();
    InsertFileToCatalogApplication	app( argc, argv );
    return app.run();
 }

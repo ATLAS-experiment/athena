@@ -52,19 +52,8 @@ namespace CP
 
 
 
-  template<typename T> std::string SysWriteDecorHandle<T> ::
-  getNamePattern () const
-  {
-    // So far it is undefined what to return here, it could either be
-    // "decorName" or "objectName.decorName".  I'll fill this in once
-    // there is a reason for it to be one or the other.
-    return "";
-  }
-
-
-
   template<typename T> StatusCode SysWriteDecorHandle<T> ::
-  initialize (SysListHandle& sysListHandle, const ISysHandleBase& objectHandle)
+  initialize (SysListHandle& sysListHandle, ISysObjectHandleBase& objectHandle)
   {
     if (m_objectHandle != nullptr)
     {
@@ -78,7 +67,7 @@ namespace CP
 
 
   template<typename T> StatusCode SysWriteDecorHandle<T> ::
-  initialize (SysListHandle& sysListHandle, const ISysHandleBase& objectHandle, SG::AllowEmptyEnum)
+  initialize (SysListHandle& sysListHandle, ISysObjectHandleBase& objectHandle, SG::AllowEmptyEnum)
   {
     if (!empty())
       return initialize (sysListHandle, objectHandle);
@@ -93,6 +82,14 @@ namespace CP
   {
     const auto& data = getData (sys);
     return std::get<0> (data);
+  }
+
+
+
+  template<typename T> const std::string& SysWriteDecorHandle<T> ::
+  getDecorName () const noexcept
+  {
+    return m_decorName;
   }
 
 
@@ -140,6 +137,7 @@ namespace CP
       m_dataCache.emplace (sys, std::make_tuple (newName, newName));
     }
     ANA_CHECK (svc.setDecorSystematics (m_objectHandle->getNamePattern(), m_decorName, fullAffecting));
+    ANA_CHECK (m_objectHandle->addDecorationDependency (svc, m_decorName, true));
     return StatusCode::SUCCESS;
   }
 

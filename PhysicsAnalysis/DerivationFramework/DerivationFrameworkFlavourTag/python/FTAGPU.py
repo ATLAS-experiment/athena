@@ -11,7 +11,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory
 from DerivationFrameworkFlavourTag.FtagBaseContent import (
-    addCommonAugmentation
+    add_common_augmentation
 )
 #skimming tool
 def FTAGPUSkimmingToolCfg(flags):
@@ -114,7 +114,7 @@ def FTAGPUCfg(flags):
 
     from DerivationFrameworkFlavourTag import FtagBaseContent
 
-    addCommonAugmentation(flags, acc, FTAGPUSlimmingHelper)
+    add_common_augmentation(flags, acc, FTAGPUSlimmingHelper)
 
     FTAGPUSlimmingHelper.SmartCollections = ["AntiKt4EMPFlowJets",
                                             "AntiKt4TruthJets",
@@ -131,7 +131,7 @@ def FTAGPUCfg(flags):
     
     # Add truth containers
     if flags.Input.isMC:
-        FtagBaseContent.add_truth_to_SlimmingHelper(FTAGPUSlimmingHelper)
+        FtagBaseContent.add_truth_to_slimming_helper(FTAGPUSlimmingHelper)
         if flags.Trigger.EDMVersion == 3:
             # Add truth labels to Run 3 trigger jets
             from DerivationFrameworkFlavourTag.FtagDerivationConfig import HLTJetFTagDecorationCfg

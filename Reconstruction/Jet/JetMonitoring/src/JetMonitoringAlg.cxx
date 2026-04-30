@@ -31,9 +31,9 @@ StatusCode JetMonitoringAlg::initialize() {
   ATH_CHECK( m_jetFillerTools.retrieve() );
 
   // print out what we have 
-  ATH_MSG_INFO( "Scheduled Histo fillers/selectors : ");
+  ATH_MSG_DEBUG( "Scheduled Histo fillers/selectors : ");
   for(const auto& t: m_jetFillerTools){
-    ATH_MSG_INFO( "--> "<< t->name() );
+    ATH_MSG_DEBUG( "--> "<< t->name() );
   }
   
   return AthMonitorAlgorithm::initialize();
@@ -92,15 +92,15 @@ StatusCode JetMonitoringAlg::fillHistograms( const EventContext& ctx ) const {
     }
 
     // Apply more up-to-date jet calibrations for offline jet DQ monitoring
-    auto shallowCopy = xAOD::shallowCopyContainer( *jets );
+    auto [shallowCont, shallowContAux] = xAOD::shallowCopyContainer( *jets, ctx );
     if(!m_calibrationTool.empty()){
-      ANA_CHECK (m_calibrationTool->applyCalibration(*shallowCopy.first));
+      ANA_CHECK (m_calibrationTool->applyCalibration(*shallowCont.get()));
     }
 
     // call each histograming tool on the container
     for(const auto& t: m_jetFillerTools){
       ATH_MSG_DEBUG( " now run "<< t->name() );
-      ATH_CHECK( t->processJetContainer(*this, *shallowCopy.first, ctx) );
+      ATH_CHECK( t->processJetContainer(*this, *shallowCont.get(), ctx) );
     }
  }
   return StatusCode::SUCCESS;

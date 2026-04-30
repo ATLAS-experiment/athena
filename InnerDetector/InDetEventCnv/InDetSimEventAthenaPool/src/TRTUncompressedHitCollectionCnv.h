@@ -39,7 +39,7 @@ public:
         T_AthenaPoolCustomCnv<TRTUncompressedHitCollection, TRT_HitCollection_PERS >( svcloc) {}
 protected:
   TRT_HitCollection_PERS*  createPersistent(TRTUncompressedHitCollection* transCont);
-  TRTUncompressedHitCollection*       createTransient ();
+  TRTUncompressedHitCollection*       createTransient(const Token* token);
 };
 
 #endif // INDETSIMEVENTATHENAPOOL_TRT_HITCOLLECTIONCNV_H

@@ -288,11 +288,9 @@ void Muon::MuonTrackSummaryHelperTool::addDetailedTrackSummary(const Trk::Track&
                 id = crot->containedROTs().front()->identify();
 
                 // count layers in competing rot
-                std::vector<const Muon::MuonClusterOnTrack*>::const_iterator cl_it = crot->containedROTs().begin();
-                std::vector<const Muon::MuonClusterOnTrack*>::const_iterator cl_it_end = crot->containedROTs().end();
-                for (; cl_it != cl_it_end; ++cl_it) {
+                for (const auto& cl_it : crot->containedROTs()) {
                     // get layer Identifier and insert it into set
-                    Identifier layId = m_idHelperSvc->layerId((*cl_it)->identify());
+                    Identifier layId = m_idHelperSvc->layerId(cl_it->identify());
                     layIds.insert(layId);
                     if (m_idHelperSvc->isCsc(id)) {
                         const Muon::CscClusterOnTrack* cscClus = dynamic_cast<const Muon::CscClusterOnTrack*>(rot);

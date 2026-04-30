@@ -40,7 +40,7 @@ public:
   SCT_ClusterContainerCnv (ISvcLocator* svcloc);
 protected:
   virtual SCT_ClusterContainer_PERS*   createPersistent (InDet::SCT_ClusterContainer* transCont) override;
-  virtual InDet::SCT_ClusterContainer* createTransient () override;
+  virtual InDet::SCT_ClusterContainer* createTransient(const Token* token) override;
 
   // Must initialize ID helpers
   virtual StatusCode initialize() override;

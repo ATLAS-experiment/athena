@@ -31,16 +31,16 @@ TrigPassFlagsCollection_PERS * TrigPassFlagsCollectionCnv::createPersistent( Tri
 
 
 //createTransient
-TrigPassFlagsCollection * TrigPassFlagsCollectionCnv::createTransient()
+TrigPassFlagsCollection * TrigPassFlagsCollectionCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "TrigPassFlagsCollectionConverter" );
   
   static const pool::Guid p1_guid( "7DE670AF-A256-4E8E-BC44-1CA30810F294" );
 
   //  TrigPassFlagsCollection *p_collection = 0;
-  if( compareClassGuid( p1_guid ) )     
+  if( compareClassGuid(token,  p1_guid ) )     
   {
-         std::unique_ptr< TrigPassFlagsCollection_p1 > col_vect( poolReadObject< TrigPassFlagsCollection_p1 >() );
+         std::unique_ptr< TrigPassFlagsCollection_p1 > col_vect( poolReadObject< TrigPassFlagsCollection_p1 >(token) );
          return m_impl->m_TPconverter_p1.createTransient( col_vect.get(), mlog ) ;
   }
   else  throw std::runtime_error( "Unsupported persistent version of TrigPassFlagsCollection" );

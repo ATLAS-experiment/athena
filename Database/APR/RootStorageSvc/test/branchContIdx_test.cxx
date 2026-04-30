@@ -23,7 +23,7 @@
 #include "StorageSvc/Shape.h"
 #include "StorageSvc/IStorageSvc.h"
 #include "StorageSvc/FileDescriptor.h"
-#include "StorageSvc/DatabaseConnection.h"
+#include "StorageSvc/DbConnection.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbString.h"
@@ -83,18 +83,15 @@ void test(const DbType storageType, const std::string& filename) {
    }
    storSvc->addRef();
    cout << "Start WRITE session" << endl;
-   pool::Session* sessionHandle = 0;
-   if ( ! ( storSvc->startSession( pool::RECREATE, storageType.type(), sessionHandle ).isSuccess() ) ) {
+   if( !storSvc->startSession( pool::RECREATE, storageType.type() ).isSuccess() ) {
       throw std::runtime_error( "Could not start a session." );
    }
 
    cout << "Session connect" << endl;
    pool::FileDescriptor fd( filename, filename );
-   if ( ! ( storSvc->connect( sessionHandle, pool::RECREATE, fd ).isSuccess() ) ) {
+   if ( ! ( storSvc->connect( pool::RECREATE, fd ).isSuccess() ) ) {
       throw std::runtime_error( "Could not start a connection." );
    }
-   pool::DatabaseConnection* connection = fd.dbc();
-
    // Retrieve DbString dictionary
    RootType class_String ( "pool::DbString" );
    if ( ! class_String ) {
@@ -113,12 +110,12 @@ void test(const DbType storageType, const std::string& filename) {
 
    // Set container for master index (enables index synchronization between TTrees)
    DbOption masterIdxOpt("INDEX_MASTER", "", "*");
-   DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
+   DbDatabase dbH( fd.dbc()->handle() );
    if( !dbH.setOption(masterIdxOpt).isSuccess() ) {
      throw std::runtime_error( "Could not set master index option" );
    }
    // Commit here to test empty commits
-   if( ! ( storSvc->endTransaction( connection, pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
+   if( ! ( storSvc->endTransaction( fd, pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
       throw std::runtime_error( "Empty commit FAILED" );
    }
 
@@ -132,7 +129,7 @@ void test(const DbType storageType, const std::string& filename) {
    };
 
    auto Commit = [&](const int) {
-      if( ! ( storSvc->endTransaction( connection, pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
+      if( ! ( storSvc->endTransaction( fd, pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
          throw std::runtime_error( "Commit FAILED" );
       }
    };
@@ -163,7 +160,7 @@ void test(const DbType storageType, const std::string& filename) {
    if( !storSvc->disconnect( fd ).isSuccess() ) {
       throw std::runtime_error( "Could not disconnect." );
    }
-   if( !storSvc->endSession( sessionHandle ).isSuccess() ) {
+   if( !storSvc->endSession().isSuccess() ) {
       throw std::runtime_error( "Could not end correctly the session." );
    }
 
@@ -187,11 +184,10 @@ void test(const DbType storageType, const std::string& filename) {
 
    // ===============    READ back
    cout << endl << "Starting READ" << endl;
-   sessionHandle = nullptr;
-   if( !storSvc->startSession( pool::READ, storageType.type(), sessionHandle ).isSuccess() ) {
+   if( !storSvc->startSession( pool::READ, storageType.type()).isSuccess() ) {
       throw std::runtime_error( "Could not start the read session." );
    }
-   if( !storSvc->connect( sessionHandle, pool::READ, fd ).isSuccess() ) {
+   if( !storSvc->connect( pool::READ, fd ).isSuccess() ) {
       throw std::runtime_error( "Could not start a read connection." );
    }
    // get shape again
@@ -232,7 +228,7 @@ void test(const DbType storageType, const std::string& filename) {
    if( !storSvc->disconnect( fd ).isSuccess() ) {
       throw std::runtime_error( "Could not disconnect." );
    }
-   if( !storSvc->endSession( sessionHandle ).isSuccess() ) {
+   if( !storSvc->endSession().isSuccess() ) {
       throw std::runtime_error( "Could not end correctly the session." );
    }
    storSvc->release();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloAddCellPedShift.h"
@@ -97,6 +97,10 @@ StatusCode CaloAddCellPedShift::stop()
 
   if (!m_fname.empty()) {
     FILE* finput = fopen(m_fname.value().c_str(),"r");
+    if (!finput) {
+      ATH_MSG_ERROR("Cannot open file "<< m_fname<<" for writing");
+      return StatusCode::FAILURE;
+    }
     ATH_MSG_INFO ( " opened file " << m_fname );
     int bec;
     int pos_neg;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMPARAMETRIZATION_CALOCELLCONTAINERSD_H
@@ -13,15 +13,16 @@
 #include "CaloInterface/ICaloCellMakerTool.h"
 /* CaloCellContainer include */
 #include "CaloEvent/CaloCellContainer.h"
-
+#include <string>
 
 class G4TouchableHistory;
 class TFCSSimulationState;
+class EventContext;
 
 class CaloCellContainerSD : public G4VSensitiveDetector
 {
 public:
-  CaloCellContainerSD(const std::string& name, const std::string& CaloCellContainerName, PublicToolHandle<ICaloCellMakerTool> FastHitConvertTool);
+  CaloCellContainerSD(const std::string& name, const std::string& CaloCellContainerName, const PublicToolHandle<ICaloCellMakerTool> & FastHitConvertTool);
   ~CaloCellContainerSD() {}
 
   // Start of *ATHENA* event

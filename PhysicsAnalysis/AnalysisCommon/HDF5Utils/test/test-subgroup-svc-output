@@ -1,0 +1,12 @@
+#!/bin/bash
+set -e
+output=$(h5ls -r test_groups.h5)
+for path in "/" "/group_a" "/group_a/subgroup_b" "/group_c"; do
+    if ! echo "$output" | grep -qF "$path"; then
+        echo "FAIL: missing expected path $path in HDF5 file"
+        echo "actual output:"
+        echo "$output"
+        exit 1
+    fi
+done
+echo "PASS: all expected groups present"

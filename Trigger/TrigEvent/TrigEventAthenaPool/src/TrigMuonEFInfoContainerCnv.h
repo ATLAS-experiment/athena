@@ -41,7 +41,7 @@ public:
   
 protected:
   virtual TrigMuonEFInfoContainer_PERS *createPersistent( TrigMuonEFInfoContainer *transObj);
-  virtual TrigMuonEFInfoContainer      *createTransient();
+  virtual TrigMuonEFInfoContainer      *createTransient(const Token* token);
   
  
  private:

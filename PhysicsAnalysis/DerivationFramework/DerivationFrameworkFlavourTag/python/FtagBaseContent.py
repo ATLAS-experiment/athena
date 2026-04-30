@@ -1,218 +1,369 @@
 """
-Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
 
 FtagBaseContent.py
-This module contains common configuration used by PHYSVAL, FTAG1 and FTAG2.
+
+Common configuration shared by PHYSVAL, FTAG1, and FTAG2.
+
 Most of the configuration of which variables to save is handled by the
-smart slimming lists, whhich are defined in BTaggingContent.py. New variables
-should be added there, not here.
+smart slimming lists defined in BTaggingContent.py. New variables should
+generally be added there rather than in this module.
 """
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from DerivationFrameworkEGamma.ElectronsCPDetailedContent import GSFTracksCPDetailedContent
+from DerivationFrameworkFlavourTag.FlowEnergyDecoratorConfig import FlowEnergyDecoratorCfg
 from DerivationFrameworkFlavourTag.FtagDerivationConfig import (
-    ParentDecoratorCfg, trackTruthDecorator
+    ParentDecoratorCfg,
+    trackTruthDecorator,
+    truthVertexDecorator,
+)
+from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
+from DerivationFrameworkPhys.TriggerMatchingCommonConfig import (
+    AddRun2TriggerMatchingToSlimmingHelper,
 )
 from JetTagDerivationUtils.JetMatchingConfig import JetMatchingCfg
+from ParticleJetTools.FtagLargeRJetTruthLabelConfig import FtagLargeRJetTruthLabelCfg
+from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import (
+    AddRun3TrigNavSlimmingCollectionsToSlimmingHelper,
+)
 
-from DerivationFrameworkFlavourTag.FlowEnergyDecoratorConfig import FlowEnergyDecoratorCfg
 
-## Common items used in PHYSVAL, FTAG1 and FTAG2
-PHYSVAL_FTAG1_FTAG2_SmartCollections = [
-    "Electrons",
-    "Muons",
-    "PrimaryVertices",
-    "InDetTrackParticles",
-    "AntiKt4EMPFlowJets",
-    "AntiKt4TruthJets",
-    "MET_Baseline_AntiKt4EMPFlow",
-    "TauJets",
-]
+if TYPE_CHECKING:
+    from AthenaConfiguration.AthConfigFlags import AthConfigFlags
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
+    from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
 
-PHYSVAL_FTAG1_FTAG2_AllVariables = [
-    "EventInfo",
-    "PrimaryVertices",
-    "InDetTrackParticles",
-    "TruthBottom", "TruthElectrons","TruthMuons","TruthTaus",
-]
 
-PHYSVAL_FTAG1_FTAG2_mc_AppendToDictionary = {}
+def update_append_to_dictionary_in_slimming_helper(
+    flags: AthConfigFlags,
+    slimming_helper: SlimmingHelper,
+    extra_append_to_dictionary: dict[str, str] | None = None,
+) -> None:
+    """Update ``AppendToDictionary`` in the slimming helper."""
 
-PHYSVAL_FTAG1_FTAG2_ExtraVariables = [
-    "AntiKt10UFOCSSKJetsAux.GhostTrack",
-    "AntiKt10TruthTrimmedPtFrac5SmallR20Jets.Tau1_wta.Tau2_wta.Tau3_wta.D2.GhostBHadronsFinalCount",
-    "Electrons.TruthLink",
-    "Muons.TruthLink.segmentDeltaPhi.segmentDeltaEta.ParamEnergyLoss.ParamEnergyLossSigmaPlus.ParamEnergyLossSigmaMinus.MeasEnergyLoss.MeasEnergyLossSigma",
-    "Photons.TruthLink",
-    "AntiKt2PV0TrackJets.pt.eta.phi.m",
-    "AntiKt4EMTopoJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.PartonTruthLabelID.GhostBHadronsFinalPt",
-    "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.DFCommonJets_fJvt.GhostBHadronsFinalPt.SumPtChargedPFOPt1000.SumPtTrkPt1000.TrackSumMass.TrackSumPt.TrackWidthPt500.TracksForBTagging.JetEMScaleMomentum_pt.JetEMScaleMomentum_eta.HECQuality.GhostHBosonsPt.GNNVerticesLink.InclusiveGNNVerticesLink",
-    "TruthPrimaryVertices.t.x.y.z",
-    "TauNeutralParticleFlowObjects.pt.eta.phi.m.bdtPi0Score.nPi0Proto",
-    "TauChargedParticleFlowObjects.pt.eta.phi.m",
-    "MET_Track.sumet",
-]
+    if extra_append_to_dictionary is None:
+        extra_append_to_dictionary = {}
 
-excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
-PHYSVAL_FTAG1_FTAG2_StaticContent = []
-PHYSVAL_FTAG1_FTAG2_StaticContent += ["xAOD::VertexContainer#SoftBVrtClusterTool_Tight_Vertices"]
-PHYSVAL_FTAG1_FTAG2_StaticContent += ["xAOD::VertexAuxContainer#SoftBVrtClusterTool_Tight_VerticesAux." + excludedVertexAuxData]
-PHYSVAL_FTAG1_FTAG2_StaticContent += ["xAOD::VertexContainer#SoftBVrtClusterTool_Medium_Vertices"]
-PHYSVAL_FTAG1_FTAG2_StaticContent += ["xAOD::VertexAuxContainer#SoftBVrtClusterTool_Medium_VerticesAux." + excludedVertexAuxData]
-PHYSVAL_FTAG1_FTAG2_StaticContent += ["xAOD::VertexContainer#SoftBVrtClusterTool_Loose_Vertices"]
-PHYSVAL_FTAG1_FTAG2_StaticContent += ["xAOD::VertexAuxContainer#SoftBVrtClusterTool_Loose_VerticesAux." + excludedVertexAuxData]
-
-## Common functions used in PHYSVAL, FTAG1 and FTAG2
-def update_AppendToDictionary_in_SlimmingHelper(SlimmingHelper, flags, extra_AppendToDictionary={}):
     if flags.BTagging.RunNewVrtSecInclusive:
-        SlimmingHelper.AppendToDictionary.update({'NVSI_SecVrt_Tight' : 'xAOD::VertexContainer','NVSI_SecVrt_TightAux' : 'xAOD::VertexAuxContainer',
-                                                       'NVSI_SecVrt_Medium' : 'xAOD::VertexContainer','NVSI_SecVrt_MediumAux' : 'xAOD::VertexAuxContainer',
-                                                       'NVSI_SecVrt_Loose' : 'xAOD::VertexContainer','NVSI_SecVrt_LooseAux' : 'xAOD::VertexAuxContainer'})
+        slimming_helper.AppendToDictionary.update(
+            {
+                "NVSI_SecVrt_Tight": "xAOD::VertexContainer",
+                "NVSI_SecVrt_TightAux": "xAOD::VertexAuxContainer",
+                "NVSI_SecVrt_Medium": "xAOD::VertexContainer",
+                "NVSI_SecVrt_MediumAux": "xAOD::VertexAuxContainer",
+                "NVSI_SecVrt_Loose": "xAOD::VertexContainer",
+                "NVSI_SecVrt_LooseAux": "xAOD::VertexAuxContainer",
+            }
+        )
 
-    if len(extra_AppendToDictionary)>0:
-        SlimmingHelper.AppendToDictionary.update(extra_AppendToDictionary)
+    if extra_append_to_dictionary:
+        slimming_helper.AppendToDictionary.update(extra_append_to_dictionary)
 
-def add_static_content_to_SlimmingHelper(SlimmingHelper, flags, extra_StaticContent=[]):
-    all_StaticContent = PHYSVAL_FTAG1_FTAG2_StaticContent
-    excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
+
+def add_static_content_to_slimming_helper(
+    flags: AthConfigFlags,
+    slimming_helper: SlimmingHelper,
+    extra_static_content: list[str] | None = None,
+) -> None:
+    """Add common ``StaticContent`` in the slimming helper."""
+
+    if extra_static_content is None:
+        extra_static_content = []
+
+    excl_vertex_aux_data: str = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
+    all_static_content = [
+        "xAOD::VertexContainer#SoftBVrtClusterTool_Tight_Vertices",
+        (
+            "xAOD::VertexAuxContainer#SoftBVrtClusterTool_Tight_VerticesAux."
+            f"{excl_vertex_aux_data}"
+        ),
+        "xAOD::VertexContainer#SoftBVrtClusterTool_Medium_Vertices",
+        (
+            "xAOD::VertexAuxContainer#SoftBVrtClusterTool_Medium_VerticesAux."
+            f"{excl_vertex_aux_data}"
+        ),
+        "xAOD::VertexContainer#SoftBVrtClusterTool_Loose_Vertices",
+        (
+            "xAOD::VertexAuxContainer#SoftBVrtClusterTool_Loose_VerticesAux."
+            f"{excl_vertex_aux_data}"
+        ),
+    ]
+
     if flags.BTagging.GNNVertexFitter:
-        all_StaticContent += ["xAOD::VertexContainer#GNNVertices"]
-        all_StaticContent += ["xAOD::VertexAuxContainer#GNNVerticesAux."+excludedVertexAuxData]
-        all_StaticContent += ["xAOD::VertexContainer#InclusiveGNNVertices"]
-        all_StaticContent += ["xAOD::VertexAuxContainer#InclusiveGNNVerticesAux."+excludedVertexAuxData]
+        all_static_content += [
+            "xAOD::VertexContainer#GNNVertices",
+            f"xAOD::VertexAuxContainer#GNNVerticesAux.{excl_vertex_aux_data}",
+            "xAOD::VertexContainer#InclusiveGNNVertices",
+            ("xAOD::VertexAuxContainer#InclusiveGNNVerticesAux." f"{excl_vertex_aux_data}"),
+        ]
+
     if flags.BTagging.RunNewVrtSecInclusive:
-        excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
-        all_StaticContent += ["xAOD::VertexContainer#NVSI_SecVrt_Loose", "xAOD::VertexContainer#NVSI_SecVrt_Medium", "xAOD::VertexContainer#NVSI_SecVrt_Tight"]
-        all_StaticContent += ["xAOD::VertexAuxContainer#NVSI_SecVrt_LooseAux."+excludedVertexAuxData]
-        all_StaticContent += ["xAOD::VertexAuxContainer#NVSI_SecVrt_MediumAux."+excludedVertexAuxData ]
-        all_StaticContent += ["xAOD::VertexAuxContainer#NVSI_SecVrt_TightAux."+excludedVertexAuxData]
-    if len(extra_StaticContent) > 0:
-        all_StaticContent += extra_StaticContent
-    SlimmingHelper.StaticContent = all_StaticContent
+        all_static_content += [
+            "xAOD::VertexContainer#NVSI_SecVrt_Loose",
+            "xAOD::VertexContainer#NVSI_SecVrt_Medium",
+            "xAOD::VertexContainer#NVSI_SecVrt_Tight",
+            ("xAOD::VertexAuxContainer#NVSI_SecVrt_LooseAux." f"{excl_vertex_aux_data}"),
+            ("xAOD::VertexAuxContainer#NVSI_SecVrt_MediumAux." f"{excl_vertex_aux_data}"),
+            ("xAOD::VertexAuxContainer#NVSI_SecVrt_TightAux." f"{excl_vertex_aux_data}"),
+        ]
 
-def add_truth_to_SlimmingHelper(SlimmingHelper):
-    from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
-    if len(PHYSVAL_FTAG1_FTAG2_mc_AppendToDictionary)>0:
-        SlimmingHelper.AppendToDictionary.update(PHYSVAL_FTAG1_FTAG2_mc_AppendToDictionary)
-    addTruth3ContentToSlimmerTool(SlimmingHelper)
-    SlimmingHelper.AllVariables += ['TruthHFWithDecayParticles','TruthHFWithDecayVertices','TruthCharm','TruthPileupParticles','InTimeAntiKt4TruthJets','OutOfTimeAntiKt4TruthJets']
+    if extra_static_content:
+        all_static_content += list(extra_static_content)
 
-def add_ExtraVariables_to_SlimmingHelper(SlimmingHelper, flags):
-    SlimmingHelper.ExtraVariables += PHYSVAL_FTAG1_FTAG2_ExtraVariables
-    from DerivationFrameworkEGamma.ElectronsCPDetailedContent import GSFTracksCPDetailedContent
-    SlimmingHelper.ExtraVariables += GSFTracksCPDetailedContent
+    slimming_helper.StaticContent = all_static_content
+
+
+def add_truth_to_slimming_helper(slimming_helper: SlimmingHelper) -> None:
+    """Add common truth content to the slimming helper."""
+
+    # Get TRUTH3 content
+    addTruth3ContentToSlimmerTool(slimming_helper)
+
+    # Add all variabes for certain truth containers
+    slimming_helper.AllVariables += [
+        "TruthHFWithDecayParticles",
+        "TruthHFWithDecayVertices",
+        "TruthCharm",
+        "TruthPileupParticles",
+        "InTimeAntiKt4TruthJets",
+        "OutOfTimeAntiKt4TruthJets",
+    ]
+
+
+def add_extra_variables_to_slimming_helper(
+    flags: AthConfigFlags,
+    slimming_helper: SlimmingHelper,
+) -> None:
+    """Add extra FTAG variables to the slimming helper."""
+
+    slimming_helper.ExtraVariables += [
+        "AntiKt10UFOCSSKJetsAux.GhostTrack",
+        "Electrons.TruthLink",
+        (
+            "Muons.TruthLink.segmentDeltaPhi.segmentDeltaEta."
+            "ParamEnergyLoss.ParamEnergyLossSigmaPlus.ParamEnergyLossSigmaMinus."
+            "MeasEnergyLoss.MeasEnergyLossSigma"
+        ),
+        "Photons.TruthLink",
+        "AntiKt2PV0TrackJets.pt.eta.phi.m",
+        "AntiKt4EMTopoJets.PartonTruthLabelID.GhostBHadronsFinalPt",
+        (
+            "AntiKt4EMPFlowJets."
+            "DFCommonJets_fJvt."
+            "GhostBHadronsFinalPt."
+            "SumPtChargedPFOPt1000."
+            "SumPtTrkPt1000."
+            "TrackSumMass."
+            "TrackSumPt."
+            "TrackWidthPt500."
+            "TracksForBTagging."
+            "JetEMScaleMomentum_pt."
+            "JetEMScaleMomentum_eta."
+            "HECQuality."
+            "GhostHBosonsPt."
+            "GNNVerticesLink."
+            "InclusiveGNNVerticesLink"
+        ),
+        "TruthPrimaryVertices.t.x.y.z",
+        "TauNeutralParticleFlowObjects.pt.eta.phi.m.bdtPi0Score.nPi0Proto",
+        "TauChargedParticleFlowObjects.pt.eta.phi.m",
+        "MET_Track.sumet",
+    ]
+
+    # Add GSF Track content
+    slimming_helper.ExtraVariables += GSFTracksCPDetailedContent
+
     if flags.BTagging.GNNVertexFitter:
-        SlimmingHelper.ExtraVariables += ["AntiKt4EMPFlowJets.GNNVerticesLink.InclusiveGNNVerticesLink"]
-
-## Common function used in FTAG1 and FTAG2
-def trigger_setup(SlimmingHelper, option=''):
-    SlimmingHelper.IncludeTriggerNavigation = False
-    SlimmingHelper.IncludeJetTriggerContent = False
-    SlimmingHelper.IncludeMuonTriggerContent = False
-    SlimmingHelper.IncludeEGammaTriggerContent = False
-    SlimmingHelper.IncludeTauTriggerContent = False
-    SlimmingHelper.IncludeEtMissTriggerContent = False
-    SlimmingHelper.IncludeBJetTriggerContent = False
-    SlimmingHelper.IncludeBPhysTriggerContent = False
-    SlimmingHelper.IncludeMinBiasTriggerContent = False
-    if option == 'FTAG1':
-        SlimmingHelper.IncludeJetTriggerContent = True
-    if option == 'FTAG2':
-        SlimmingHelper.IncludeTriggerNavigation = True
-        SlimmingHelper.IncludeMuonTriggerContent = True
-        SlimmingHelper.IncludeEGammaTriggerContent = True
-        SlimmingHelper.IncludeBJetTriggerContent = True
-        SlimmingHelper.IncludeBPhysTriggerContent = True
-    if option == 'FTAG3':
-        SlimmingHelper.IncludeJetTriggerContent = True
-        SlimmingHelper.FinalItemList.append('xAOD::JetContainer#HLT_xAOD__JetContainer_a4tcemsubjesFS')
-        SlimmingHelper.FinalItemList.append('xAOD::JetTrigAuxContainer#HLT_xAOD__JetContainer_a4tcemsubjesFSAux.')
-        SlimmingHelper.FinalItemList.append('xAOD::JetContainer#HLT_xAOD__JetContainer_a4tcemsubjesISFS')
-        SlimmingHelper.FinalItemList.append('xAOD::JetTrigAuxContainer#HLT_xAOD__JetContainer_a4tcemsubjesISFSAux.')
-        SlimmingHelper.FinalItemList.append('xAOD::JetContainer#HLT_xAOD__JetContainer_a10tclcwsubjesFS')
-        SlimmingHelper.FinalItemList.append('xAOD::JetTrigAuxContainer#HLT_xAOD__JetContainer_a10tclcwsubjesFSAux.')
-        SlimmingHelper.FinalItemList.append('xAOD::JetContainer#HLT_xAOD__JetContainer_a10ttclcwjesFS')
-        SlimmingHelper.FinalItemList.append('xAOD::JetTrigAuxContainer#HLT_xAOD__JetContainer_a10ttclcwjesFSAux.')
-    if option == 'FTAG5':
-        SlimmingHelper.IncludeTriggerNavigation = True
-        SlimmingHelper.IncludeJetTriggerContent = True
+        slimming_helper.ExtraVariables += [
+            "AntiKt4EMPFlowJets.GNNVerticesLink.InclusiveGNNVerticesLink"
+        ]
 
 
-def trigger_matching(SlimmingHelper, TriggerListsHelper, ConfigFlags):
-    # Run 2
-    if ConfigFlags.Trigger.EDMVersion == 2:
-        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = SlimmingHelper,
-                                               OutputContainerPrefix = "TrigMatch_",
-                                               TriggerList = TriggerListsHelper.Run2TriggerNamesTau)
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = SlimmingHelper,
-                                               OutputContainerPrefix = "TrigMatch_",
-                                               TriggerList = TriggerListsHelper.Run2TriggerNamesNoTau)
-    # Run 3, or Run 2 with navigation conversion
-    if ConfigFlags.Trigger.EDMVersion == 3 or (ConfigFlags.Trigger.EDMVersion == 2 and ConfigFlags.Trigger.doEDMVersionConversion):
-        from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
-        AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(SlimmingHelper)
+def add_baseline_slimming_smartcollections(slimming_helper: SlimmingHelper) -> None:
+    """Add baseline smart collections to the slimming helper."""
 
-def add_baseline_slimming_smartcollections(SlimmingHelper):
-    SlimmingHelper.SmartCollections += PHYSVAL_FTAG1_FTAG2_SmartCollections
-
-def add_baseline_slimming_allvariables(SlimmingHelper):
-    SlimmingHelper.AllVariables += PHYSVAL_FTAG1_FTAG2_AllVariables
+    slimming_helper.SmartCollections += [
+        "Electrons",
+        "Muons",
+        "PrimaryVertices",
+        "InDetTrackParticles",
+        "AntiKt4EMPFlowJets",
+        "AntiKt4TruthJets",
+        "MET_Baseline_AntiKt4EMPFlow",
+        "TauJets",
+    ]
 
 
-def _int_labels(flags):
+def add_baseline_slimming_allvariables(slimming_helper: SlimmingHelper) -> None:
+    """Add baseline all-variable collections to the slimming helper."""
+
+    slimming_helper.AllVariables += [
+        "EventInfo",
+        "PrimaryVertices",
+        "InDetTrackParticles",
+        "TruthBottom",
+        "TruthElectrons",
+        "TruthMuons",
+        "TruthTaus",
+    ]
+
+
+def trigger_setup(slimming_helper: SlimmingHelper) -> None:
+    """Configure trigger content flags for FTAG derivations."""
+
+    # Deactivate trigger content
+    slimming_helper.IncludeTriggerNavigation = False
+    slimming_helper.IncludeJetTriggerContent = False
+    slimming_helper.IncludeMuonTriggerContent = False
+    slimming_helper.IncludeEGammaTriggerContent = False
+    slimming_helper.IncludeTauTriggerContent = False
+    slimming_helper.IncludeEtMissTriggerContent = False
+    slimming_helper.IncludeBJetTriggerContent = False
+    slimming_helper.IncludeBPhysTriggerContent = False
+    slimming_helper.IncludeMinBiasTriggerContent = False
+
+    # Activate only JetTriggerContent
+    slimming_helper.IncludeJetTriggerContent = True
+
+
+def trigger_matching(
+    flags: AthConfigFlags,
+    slimming_helper: SlimmingHelper,
+    trigger_lists_helper: TriggerListsHelper,
+) -> None:
+    """Configure trigger matching and trigger-navigation slimming."""
+    if flags.Trigger.EDMVersion == 2:
+        AddRun2TriggerMatchingToSlimmingHelper(
+            SlimmingHelper=slimming_helper,
+            OutputContainerPrefix="TrigMatch_",
+            TriggerList=trigger_lists_helper.Run2TriggerNamesTau,
+        )
+        AddRun2TriggerMatchingToSlimmingHelper(
+            SlimmingHelper=slimming_helper,
+            OutputContainerPrefix="TrigMatch_",
+            TriggerList=trigger_lists_helper.Run2TriggerNamesNoTau,
+        )
+
+    if flags.Trigger.EDMVersion == 3 or (
+        flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion
+    ):
+        AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(slimming_helper)
+
+
+def _get_truth_label_names(flags: AthConfigFlags) -> list[str]:
+    """Return internal truth-label names to copy for jet matching."""
     if not flags.Input.isMC:
         return []
-    algs = ['HadronConeExcl', 'HadronGhost']
-    types = ['Extended', '']
-    return [f'{a}{e}TruthLabelID' for a in algs for e in types]
+
+    algorithms = ["HadronConeExcl", "HadronGhost"]
+    suffixes = ["Extended", ""]
+    return [f"{algorithm}{suffix}TruthLabelID" for algorithm in algorithms for suffix in suffixes]
 
 
-def _match_vars(flags, source):
-    labels = _int_labels(flags)
-    allvars = [f'{l}From{source}' for l in labels]
-    allvars += [f'delta{v}To{source}' for v in ['R', 'Pt']]
-    return allvars
+def _get_matching_variable_names(flags: AthConfigFlags, source: str) -> list[str]:
+    """Return jet-matching extra variable names for a given source."""
+    labels = _get_truth_label_names(flags)
+    variables = [f"{label}From{source}" for label in labels]
+    variables += [f"delta{var}To{source}" for var in ["R", "Pt"]]
+    return variables
 
 
-def addCommonAugmentation(flags, cfg, helper, target = "AntiKt4EMPFlowJets"):
-    """add content common to all ftag derivations"""
+def add_truth_vertex_decorations(
+    flags: AthConfigFlags,
+    acc: ComponentAccumulator,
+    slimming_helper: SlimmingHelper,
+    target: str = "AntiKt4EMPFlowJets",
+    large_r_jet_collection: str | None = None,
+) -> None:
+    """Schedule truth-vertex decorators and add their slimming variables.
 
-    cfg.merge(
+    Opt-in per derivation (e.g. FTAG1) rather than common, because not every
+    derivation wants the truth-vertex content.
+    """
+    if not flags.Input.isMC:
+        return
+
+    jet_collections = [(target, 0.4)]
+    if large_r_jet_collection is not None:
+        jet_collections.append((large_r_jet_collection, 1.0))
+
+    acc.merge(truthVertexDecorator(flags, jet_collections=jet_collections))
+
+    # TruthParticles is in AllVariables so its decorations are saved automatically
+    slimming_helper.ExtraVariables += [
+        "InDetTrackParticles.ftagTrackDecayVertexID"
+        ".ftagTrackDecayVertexType"
+        ".ftagTrackDecaySimpleVertexType"
+        ".trackPDGID.trackParentPDGID",
+    ]
+    for jet_container, _ in jet_collections:
+        slimming_helper.ExtraVariables += [
+            jet_container
+            + (
+                ".ftagJetNumBVertices"
+                ".ftagJetNumCVertices"
+                ".ftagJetNumTauVertices"
+                ".ftagJetNumStrangeVertices"
+                ".ftagJetNumPionVertices"
+                ".ftagJetNumMaterialIntVertices"
+                ".ftagJetNumOtherVertices"
+                ".ftagJetNumVertices"
+            )
+        ]
+
+
+def add_common_augmentation(
+    flags: AthConfigFlags,
+    acc: ComponentAccumulator,
+    slimming_helper: SlimmingHelper,
+    target: str = "AntiKt4EMPFlowJets",
+) -> None:
+    """Add augmentation common to all FTAG derivations."""
+    acc.merge(
         JetMatchingCfg(
             flags,
             target=target,
-            ints_to_copy=_int_labels(flags),
+            ints_to_copy=_get_truth_label_names(flags),
         )
     )
-    helper.ExtraVariables +=  [
-        '.'.join([target] + _match_vars(flags, target))
+
+    slimming_helper.ExtraVariables += [
+        ".".join([target] + _get_matching_variable_names(flags, target))
     ]
 
     if not flags.Input.isMC:
         return
 
-    # add track truth info
-    cfg.merge(trackTruthDecorator(flags))
-
-    # match jets to the parent particles
-    cfg.merge(
+    acc.merge(trackTruthDecorator(flags))
+    acc.merge(
         ParentDecoratorCfg(
             flags,
             targetContainer=target,
             prefix="PFlow",
-            matchDeltaR=0.3
+            matchDeltaR=0.3,
         )
     )
-    # todo add large-R jets
-    truth_labels = [
-        *[f"nTopTo{p}Children" for p in "BW"],
-        *[f"parent{p}ParentsMask" for p in ["Higgs", "Z", "Scalar", "Top"]],
-    ]
 
-    helper.ExtraVariables += ['.'.join([target] + truth_labels)]
-
+    # FTAG simplified large-R jet truth labelling (see https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/AnalysisCommon/ParticleJetTools/ParticleJetTools/FtagLargeRJetLabelEnum.h?ref_type=heads)
+    # Skipped for heavy-ion derivations which do not build this jet collection
     if not flags.HeavyIon.isDerivation:
-        # add flow energy decorator
-        cfg.merge(
-            FlowEnergyDecoratorCfg(
+        acc.merge(
+            FtagLargeRJetTruthLabelCfg(
+                flags,
+                jetCollection="AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
             )
         )
+
+    truth_labels = [
+        *[f"nTopTo{particle}Children" for particle in "BW"],
+        *[f"parent{particle}ParentsMask" for particle in ["Higgs", "Z", "Scalar", "Top"]],
+    ]
+    slimming_helper.ExtraVariables += [".".join([target] + truth_labels)]
+
+    if not flags.HeavyIon.isDerivation:
+        acc.merge(FlowEnergyDecoratorCfg())

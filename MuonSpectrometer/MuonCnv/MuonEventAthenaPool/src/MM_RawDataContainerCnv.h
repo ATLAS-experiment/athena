@@ -24,7 +24,7 @@ public:
     virtual ~MM_RawDataContainerCnv();
     
     virtual MM_RawDataContainer_PERS*   createPersistent (Muon::MM_RawDataContainer* transCont);
-    virtual Muon::MM_RawDataContainer*  createTransient ();
+    virtual Muon::MM_RawDataContainer*  createTransient(const Token* token);
 
     // Must initialize ID helpers
     virtual StatusCode initialize();

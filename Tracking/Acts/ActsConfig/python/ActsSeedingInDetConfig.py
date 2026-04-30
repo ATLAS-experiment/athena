@@ -86,7 +86,7 @@ def ActsInDetPixelSeedingToolCfg(flags,
     kwargs.setdefault("seedConfirmation" , True) 
     kwargs.setdefault("seedConfirmationInFilter", False) 
 
-    acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name, **kwargs))
+    acc.setPrivateTools(CompFactory.ActsTrk.GridTripletSeedingTool(name, **kwargs))
     return acc
 
 def ActsInDetStripSeedingToolCfg(flags,
@@ -171,7 +171,7 @@ def ActsInDetStripSeedingToolCfg(flags,
     kwargs.setdefault("seedConfForwardMaxZOrigin", 200.0 * ActsUnits.mm)
     kwargs.setdefault("seedConfForwardMinImpact", 1.0 * ActsUnits.mm)
 
-    acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name, **kwargs))
+    acc.setPrivateTools(CompFactory.ActsTrk.GridTripletSeedingTool(name, **kwargs))
     return acc
 
 # ACTS algorithm using Athena objects upstream
@@ -203,7 +203,7 @@ def ActsInDetPixelSeedingAlgCfg(flags,
     if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
         pass
 
-    acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlg(name, **kwargs))
+    acc.addEventAlgo(CompFactory.ActsTrk.GenericSeedingAlg(name, **kwargs))
     return acc
 
 
@@ -232,7 +232,7 @@ def ActsInDetStripSeedingAlgCfg(flags,
     if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
         pass
 
-    acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlg(name, **kwargs))
+    acc.addEventAlgo(CompFactory.ActsTrk.GenericSeedingAlg(name, **kwargs))
     return acc
 
 

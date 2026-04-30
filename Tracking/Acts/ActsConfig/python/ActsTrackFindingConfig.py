@@ -110,7 +110,7 @@ def ActsMainTrackFindingAlgCfg(flags,
     
     kwargs.setdefault("refitSeeds", seedOrder(flags, pixel=[False], strip=[False]))
     kwargs.setdefault("doTwoWay", flags.Acts.doTwoWayCKF)
-    kwargs.setdefault("autoReverseSearch", flags.Acts.autoReverseSearchCKF)
+    kwargs.setdefault("autoReverseSearch", flags.Tracking.ActiveConfig.autoReverseSearch)
     # forceTrackOnSeed isn't effective with secondary passes, which will have removed most/all of the seed measurements from the measurement containers.
     kwargs.setdefault("forceTrackOnSeed", flags.Acts.forceTrackOnSeed and not flags.Tracking.ActiveConfig.isSecondaryPass)
 
@@ -155,7 +155,7 @@ def ActsMainTrackFindingAlgCfg(flags,
     ### kwargs.setdefault("maxSharedHits", tolist(flags.Tracking.ActiveConfig.maxShared))
 
     # GBTS produces much purer seeds, so the branch stopper selections aren't needed with GBTS seeds.
-    if flags.Acts.SeedingStrategy not in (SeedingStrategy.Gbts2, SeedingStrategy.Gbts):
+    if flags.Acts.SeedingStrategy not in (SeedingStrategy.GbtsFtf, SeedingStrategy.Gbts):
         kwargs.setdefault("ptMinMeasurements", seedOrder(flags, pixel=[3], strip=[6]))
         kwargs.setdefault("absEtaMaxMeasurements", seedOrder(flags, pixel=[3], strip=[999999]))
     
@@ -461,6 +461,53 @@ def ActsAmbiguityResolutionCfg(flags,
 
     return acc
 
+def ActsTrackToTrackParticleCnvToolCfg(flags,
+                                       name: str = "ActsTrackToTrackParticleCnvTool",
+                                       **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    # To produce AtlasFieldCacheCondObj
+    from MagFieldServices.MagFieldServicesConfig import (
+        AtlasFieldCacheCondAlgCfg)
+    acc.merge(AtlasFieldCacheCondAlgCfg(flags))
+
+    if 'ExtrapolationTool' not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+        kwargs.setdefault('ExtrapolationTool', acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags)) )
+
+    kwargs.setdefault('FirstAndLastParameterOnly',True)
+    kwargs.setdefault('ComputeExpectedLayerPattern',True)
+
+    det_elements=[]
+    element_types=[]
+    if flags.Detector.EnableITkPixel:
+        from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
+        acc.merge(ITkPixelReadoutGeometryCfg(flags))
+        det_elements += ['ITkPixelDetectorElementCollection']
+        element_types += [1]
+    if flags.Detector.EnableITkStrip:
+        from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
+        acc.merge(ITkStripReadoutGeometryCfg(flags))
+        det_elements += ['ITkStripDetectorElementCollection']
+        element_types += [2]
+    if flags.Detector.EnablePixel:
+        from PixelGeoModel.PixelGeoModelConfig import PixelReadoutGeometryCfg
+        acc.merge(PixelReadoutGeometryCfg(flags))
+        det_elements += ['PixelDetectorElementCollection']
+        element_types += [1]
+    if flags.Detector.EnableSCT:
+        from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
+        acc.merge(SCT_ReadoutGeometryCfg(flags))
+        det_elements += ['SCT_DetectorElementCollection']
+        element_types += [2]
+
+    kwargs.setdefault('SiDetectorElementCollections',det_elements)
+    kwargs.setdefault('SiDetEleCollToMeasurementType',element_types)
+
+    acc.setPrivateTools(CompFactory.ActsTrk.TrackToTrackParticleCnvTool(name, **kwargs))
+    return acc
+
+
 def ActsTrackToTrackParticleCnvAlgCfg(flags,
                                       name: str = "ActsTrackToTrackParticleCnvAlg",
                                       **kwargs) -> ComponentAccumulator:
@@ -470,27 +517,27 @@ def ActsTrackToTrackParticleCnvAlgCfg(flags,
     from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
     acc.merge(BeamSpotCondAlgCfg(flags))
 
-    if 'ExtrapolationTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-        kwargs.setdefault('ExtrapolationTool', acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags)) )
+    # Configure TrackToTrackParticleConvTool
+    tool_kwargs = {}
+    if "ExtrapolationTool" in kwargs:
+        tool_kwargs["ExtrapolationTool"] = kwargs.pop("ExtrapolationTool")
+    if "FirstAndLastParameterOnly" in kwargs:
+        tool_kwargs["FirstAndLastParameterOnly"] = kwargs.pop("FirstAndLastParameterOnly")
+    if "ComputeExpectedLayerPattern" in kwargs:
+        tool_kwargs["ComputeExpectedLayerPattern"] = kwargs.pop("ComputeExpectedLayerPattern")
+    if "SiDetectorElementCollections" in kwargs:
+        tool_kwargs["SiDetectorElementCollections"] = kwargs.pop("SiDetectorElementCollections")
+    if "SiDetEleCollToMeasurementType" in kwargs:
+        tool_kwargs["SiDetEleCollToMeasurementType"] = kwargs.pop("SiDetEleCollToMeasurementType")
+
+    if 'TrackToTrackParticleCnvTool' not in kwargs:
+        kwargs['TrackToTrackParticleCnvTool'] = acc.popToolsAndMerge(
+            ActsTrackToTrackParticleCnvToolCfg(flags, **tool_kwargs))
 
     kwargs.setdefault('BeamSpotKey', 'BeamSpotData')
-    kwargs.setdefault('FirstAndLastParameterOnly',True)
-    kwargs.setdefault('ComputeExpectedLayerPattern',True)
-
-    det_elements=[]
-    element_types=[]
-    if flags.Detector.EnableITkPixel:
-        det_elements += ['ITkPixelDetectorElementCollection']
-        element_types += [1]
-    if flags.Detector.EnableITkStrip:
-        det_elements += ['ITkStripDetectorElementCollection']
-        element_types += [2]
-
-    kwargs.setdefault('SiDetectorElementCollections',det_elements)
-    kwargs.setdefault('SiDetEleCollToMeasurementType',element_types)
     kwargs.setdefault("PerigeeExpression", flags.Tracking.perigeeExpression)
     kwargs.setdefault('VertexContainerKey', 'PrimaryVertices')
+
     acc.addEventAlgo(
         CompFactory.ActsTrk.TrackToTrackParticleCnvAlg(name, **kwargs))
 

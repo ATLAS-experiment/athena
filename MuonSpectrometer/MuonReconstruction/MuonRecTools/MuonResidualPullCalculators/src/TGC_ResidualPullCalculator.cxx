@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TGC_ResidualPullCalculator.h"
@@ -8,13 +8,6 @@
 #include "MuonReadoutGeometry/TgcReadoutElement.h"
 #include "MuonCompetingRIOsOnTrack/CompetingMuonClustersOnTrack.h"
 #include "EventPrimitives/EventPrimitives.h"
-
-//================ Constructor =================================================
-
-Muon::TGC_ResidualPullCalculator::TGC_ResidualPullCalculator(const std::string& t, const std::string& n, const IInterface* p) :
-    AthAlgTool(t,n,p) {
-  declareInterface<IResidualPullCalculator>(this);
-}
 
 //================ Initialisation =================================================
 
@@ -37,8 +30,7 @@ Muon::TGC_ResidualPullCalculator::residuals(
   if (!rot) {
     const Muon::CompetingMuonClustersOnTrack* muonCompClusters =
       dynamic_cast<const Muon::CompetingMuonClustersOnTrack*>(measurement);
-    if (muonCompClusters) rot = muonCompClusters->containedROTs().empty() ? nullptr :
-      muonCompClusters->containedROTs().front();
+    if (muonCompClusters) rot = muonCompClusters->containedROTs().empty() ? nullptr : &muonCompClusters->rioOnTrack(0);
   }
   if (!trkPar || !rot) {
     if( !trkPar ) ATH_MSG_WARNING ("No TrackParameters, cannot calculate residual/pull ");
@@ -106,7 +98,7 @@ std::optional<Trk::ResidualPull> Muon::TGC_ResidualPullCalculator::residualPull(
     const Muon::CompetingMuonClustersOnTrack* muonCompClusters =
       dynamic_cast<const Muon::CompetingMuonClustersOnTrack*>(measurement);
     if (muonCompClusters) rot = muonCompClusters->containedROTs().empty() ? nullptr :
-      muonCompClusters->containedROTs().front();
+      muonCompClusters->containedROTs().front().get();
   }
   if (!trkPar || !rot) {
     if( !trkPar ) ATH_MSG_WARNING ("No TrackParameters, cannot calculate residual/pull ");

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // VKalVrt.h
@@ -54,6 +54,8 @@
 #include <deque>
 #include <functional>
 #include <optional>
+#include <map>
+#include <cstdint> //for uint8_t
 
 
 /** Forward declarations **/
@@ -89,164 +91,160 @@ namespace VKalVrtAthena {
     VrtSecInclusive(const std::string& name, ISvcLocator* pSvcLocator);
 
     /** Default Destructor */
-    ~VrtSecInclusive();
+    virtual ~VrtSecInclusive() override;
 
-    virtual StatusCode initialize();
-    virtual StatusCode finalize();
-    virtual StatusCode execute();
+    virtual StatusCode initialize() override;
+    virtual StatusCode execute() override;
     virtual StatusCode initEvent();
 
   private:
-
+    StatusCode defineDummyCollections(const EventContext& ctx);
+    StatusCode dummyVertexContainer(const EventContext& ctx,
+				    const SG::WriteHandleKey<xAOD::VertexContainer>& handleKey);
     /////////////////////////////////////////////////////////
     //
     //  Member Variables
     //
 
-    struct JobProperties {
-      // JO: GeoModel
-      int    geoModel;
+    // JO: GeoModel
+    Gaudi::Property<int> m_geoModel{this, "GeoModel", VKalVrtAthena::GeoModel::Run2};
 
-      std::string          TrackLocation;
-      std::string          MuonLocation;
-      std::string          ElectronLocation;
-      std::string          PrimVrtLocation;
-      std::string          truthParticleContainerName;
-      std::string          mcEventContainerName;
-      std::string          augVerString;
-      std::string          truthParticleFilter;
+    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrackLocation{this, "TrackLocation", "InDetTrackParticles"};
+    SG::ReadHandleKey<xAOD::MuonContainer> m_MuonLocation{this, "MuonLocation",  "Muons"};
+    SG::ReadHandleKey<xAOD::ElectronContainer> m_ElectronLocation{this, "ElectronLocation", "Electrons"};
+    SG::ReadHandleKey<xAOD::VertexContainer> m_PrimVrtLocation{this, "PrimVrtLocation", "PrimaryVertices"};
+    Gaudi::Property<std::string> m_truthParticleContainerName{this, "McParticleContainer", "TruthParticles"};
+    Gaudi::Property<std::string> m_mcEventContainerName{this, "MCEventContainer", "TruthEvents"};
+    Gaudi::Property<std::string> m_augVerString{this, "AugmentingVersionString", "_VSI"};
+    Gaudi::Property<std::string> m_truthParticleFilter{this, "TruthParticleFilter", "Rhadron"};// Either "", "Kshort", "Rhadron", "HNL", "HadInt", "Bhadron"
 
-      std::string all2trksVerticesContainerName;
-      std::string secondaryVerticesContainerName;
+    Gaudi::Property<std::string> m_all2trksVerticesContainerName{this, "All2trkVerticesContainerName", "All2TrksVertices"};
+    Gaudi::Property<std::string> m_secondaryVerticesContainerName{this, "SecondaryVerticesContainerName", "SecondaryVertices"};
 
-      // common feature flags
-      bool   doTruth;
-      bool   FillHist;
-      bool   FillNtuple;
-      bool   FillIntermediateVertices;
-      bool   doIntersectionPos;
-      bool   doMapToLocal;
-      bool   extrapPV; //extrapolate reco and prim truth trks to PV (for testing only)
+    // common feature flags
+    Gaudi::Property<bool> m_doTruth{this, "DoTruth", false};
+    Gaudi::Property<bool> m_FillHist{this, "FillHist", false};
+    Gaudi::Property<bool> m_FillNtuple{this, "FillNtuple", false};
+    Gaudi::Property<bool> m_FillIntermediateVertices{this, "FillIntermediateVertices", false};
+    Gaudi::Property<bool> m_doIntersectionPos{this, "DoIntersectionPos", false};
+    Gaudi::Property<bool> m_doMapToLocal{this, "DoMapToLocal", false};
+    Gaudi::Property<bool> m_extrapPV{this, "ExtrapPV", false}; //extrapolate reco and prim truth trks to PV (for testing only)
 
-      bool   passThroughTrackSelection;
+    Gaudi::Property<bool> m_passThroughTrackSelection{this, "PassThroughTrackSelection", false };
 
-      bool   doFastMode; // flag for running in rapid finder mode instead of using graph
+    Gaudi::Property<bool> m_doFastMode{this, "DoFastMode", false}; // flag for running in rapid finder mode instead of using graph
 
-      // track selection conditions
-      unsigned int SelTrkMaxCutoff;
-      bool  SAloneTRT;
+    // track selection conditions
+    Gaudi::Property<unsigned int> m_SelTrkMaxCutoff{this, "SelTrkMaxCutoff", 50}; // max number of tracks
+    Gaudi::Property<bool> m_SAloneTRT{this, "DoSAloneTRT", false}; // SAlone = "standalone"
 
-      /* impact parameters */
-      bool   do_PVvetoCut;
-      bool   do_d0Cut;
-      bool   do_z0Cut;
-      bool   do_d0errCut;
-      bool   do_z0errCut;
-      bool   do_d0signifCut;
-      bool   do_z0signifCut;
+    /* impact parameters */
+    Gaudi::Property<bool> m_do_PVvetoCut{this, "do_PVvetoCut", true};
+    Gaudi::Property<bool> m_do_d0Cut{this, "do_d0Cut", true};
+    Gaudi::Property<bool> m_do_z0Cut{this, "do_z0Cut", true};
+    Gaudi::Property<bool> m_do_d0errCut{this, "do_d0errCut", false};
+    Gaudi::Property<bool> m_do_z0errCut{this, "do_z0errCut", false};
+    Gaudi::Property<bool> m_do_d0signifCut{this, "do_d0signifCut", false};
+    Gaudi::Property<bool> m_do_z0signifCut{this, "do_z0signifCut", false};
 
-      bool   ImpactWrtBL;
-      double d0TrkPVDstMinCut;
-      double d0TrkPVDstMaxCut;
-      double d0TrkPVSignifCut;
-      double z0TrkPVDstMinCut;
-      double z0TrkPVDstMaxCut;
-      double z0TrkPVSignifCut;
-      double d0TrkErrorCut;
-      double z0TrkErrorCut;
-      double twoTrkVtxFormingD0Cut;
+    Gaudi::Property<bool> m_ImpactWrtBL{this, "ImpactWrtBL", true}; // false option is going to be deprecated
+    Gaudi::Property<double> m_d0TrkPVDstMinCut{this, "a0TrkPVDstMinCut", 0. }; // in [mm]
+    Gaudi::Property<double> m_d0TrkPVDstMaxCut{this, "a0TrkPVDstMaxCut", 1000.}; // in [mm]
+    Gaudi::Property<double> m_d0TrkPVSignifCut{this, "a0TrkPVSignifCut", 0.}; // in [mm]
+    Gaudi::Property<double> m_z0TrkPVDstMinCut{this, "zTrkPVDstMinCut", 0.}; // in [mm]
+    Gaudi::Property<double> m_z0TrkPVDstMaxCut{this, "zTrkPVDstMaxCut", 1000.}; // in [mm]
+    Gaudi::Property<double> m_z0TrkPVSignifCut{this, "zTrkPVSignifCut", 0.}; // in unit of sigma
+    Gaudi::Property<double> m_d0TrkErrorCut{this, "TrkA0ErrCut", 10000}; // in [mm]
+    Gaudi::Property<double> m_z0TrkErrorCut{this, "TrkZErrCut", 20000}; // in [mm]
+    Gaudi::Property<double> m_twoTrkVtxFormingD0Cut{this, "twoTrkVtxFormingD0Cut", 1.}; // in [mm]
 
-      /* pT anc chi2 */
-      double TrkChi2Cut;
-      double TrkPtCut;
+    /* pT anc chi2 */
+    Gaudi::Property<double> m_TrkChi2Cut{this, "TrkChi2Cut", 3.}; // in terms of chi2 / ndof
+    Gaudi::Property<double> m_TrkPtCut{this, "TrkPtCut", 1000.}; // low pT threshold. in [MeV]
 
-      /* hit requirements */
-      bool doTRTPixCut; // Kazuki
-      int  CutSctHits;
-      int  CutPixelHits;
-      int  CutSiHits;
-      int  CutBLayHits;
-      int  CutSharedHits;
-      int  CutTRTHits; // Kazuki
-      int  CutTightSCTHits;
-      int  CutTightTRTHits;
+    /* hit requirements */
+    Gaudi::Property<bool> m_doTRTPixCut{this, "doTRTPixCut", false, "mode for R-hadron displaced vertex"}; // Kazuki
+    Gaudi::Property<int> m_CutSctHits{this, "CutSctHits", 0};
+    Gaudi::Property<int> m_CutPixelHits{this, "CutPixelHits", 0};
+    Gaudi::Property<int> m_CutSiHits{this, "CutSiHits", 0};
+    Gaudi::Property<int> m_CutBLayHits{this, "CutBLayHits", 0};
+    Gaudi::Property<int> m_CutSharedHits{this, "CutSharedHits", 0};
+    Gaudi::Property<int> m_CutTRTHits{this, "CutTRTHits", 0}; // Kazuki
+    Gaudi::Property<int> m_CutTightSCTHits{this, "CutTightSCTHits", 7};
+    Gaudi::Property<int> m_CutTightTRTHits{this, "CutTightTRTHits", 20};
 
-      /* track extrpolator; 1==VKalGetImpact, 2==m_trackToVertexTool*/
-      int trkExtrapolator;
+    /* track extrpolator{this, }; 1==VKalGetImpact, 2==m_trackToVertexTool*/
+    Gaudi::Property<int> m_trkExtrapolator{this, "TrkExtrapolator", 2};
 
-      // Vertex reconstruction
-      bool   doPVcompatibilityCut;
-      bool   doTightPVcompatibilityCut;
-      bool   removeFakeVrt;
-      bool   removeFakeVrtLate;
-      bool   doReassembleVertices;
-      bool   doMergeByShuffling;
-      bool   doSuggestedRefitOnMerging;
-      bool   doMagnetMerging;
-      bool   doWildMerging;
-      bool   doMergeFinalVerticesDistance; // Kazuki
-      bool   doAssociateNonSelectedTracks;
-      bool   doFinalImproveChi2;
-      double pvCompatibilityCut;
-      double SelVrtChi2Cut;
-      double VertexMergeFinalDistCut; // Kazuki
-      double VertexMergeFinalDistScaling;
-      double VertexMergeCut;
-      double TrackDetachCut;
+    // Vertex reconstruction
+    Gaudi::Property<bool> m_doPVcompatibilityCut{this, "DoPVcompatibility", true};
+    Gaudi::Property<bool> m_doTightPVcompatibilityCut{this, "DoTightPVcompatibility", false};
+    Gaudi::Property<bool> m_removeFakeVrt{this, "RemoveFake2TrkVrt", true};
+    Gaudi::Property<bool> m_removeFakeVrtLate{this, "DoDelayedFakeReject", false};
+    Gaudi::Property<bool> m_doReassembleVertices{this, "doReassembleVertices", false};
+    Gaudi::Property<bool> m_doMergeByShuffling{this, "doMergeByShuffling", false};
+    Gaudi::Property<bool> m_doSuggestedRefitOnMerging{this, "doSuggestedRefitOnMerging", true};
+    Gaudi::Property<bool> m_doMagnetMerging{this, "doMagnetMerging", true}; // sub-option of doMergeByShuffling-2
+    Gaudi::Property<bool> m_doWildMerging{this, "doWildMerging", true}; // sub-option of doMergeByShuffling-3
+    Gaudi::Property<bool> m_doMergeFinalVerticesDistance{this, "doMergeFinalVerticesDistance", false}; // Kazuki
+    Gaudi::Property<bool> m_doAssociateNonSelectedTracks{this, "doAssociateNonSelectedTracks", false};
+    Gaudi::Property<bool> m_doFinalImproveChi2{this, "doFinalImproveChi2", false};
+    Gaudi::Property<double> m_pvCompatibilityCut{this, "PVcompatibilityCut", -20.}; // in [mm]
+    Gaudi::Property<double> m_SelVrtChi2Cut{this, "SelVrtChi2Cut", 4.5}; // in terms of chi2 / ndof
+    Gaudi::Property<double> m_VertexMergeFinalDistCut{this, "VertexMergeFinalDistCut", 1.}; // in [mm] // Kazuki
+    Gaudi::Property<double> m_VertexMergeFinalDistScaling{this, "VertexMergeFinalDistScaling", 0.}; // in [1/mm]
+    Gaudi::Property<double> m_VertexMergeCut{this, "VertexMergeCut", 3};
+    Gaudi::Property<double> m_TrackDetachCut{this, "TrackDetachCut", 6};
 
-      bool   doTwoTrSoftBtag;
-      double twoTrVrtAngleCut;
-      double twoTrVrtMinDistFromPV;
+    Gaudi::Property<bool> m_doTwoTrSoftBtag{this, "DoTwoTrSoftBtag", false};
+    Gaudi::Property<double> m_twoTrVrtAngleCut{this, "TwoTrVrtAngleCut", -10};
+    Gaudi::Property<double> m_twoTrVrtMinDistFromPV{this, "TwoTrVrtMinDistFromPVCut", 0.};
 
-      // When truncateWrkVertices set to true, maxWrkVertices is the maximum
-      // number of potential vertices to process, used to truncate the list
-      // in rare caes where several thousands are found, to avoid algorithm
-      // timeout issues
-      bool   truncateWrkVertices;
-      size_t maxWrkVertices;
+    // When truncateWrkVertices set to true, maxWrkVertices is the maximum
+    // number of potential vertices to process, used to truncate the list
+    // in rare caes where several thousands are found, to avoid algorithm
+    // timeout issues
+    Gaudi::Property<bool> m_truncateWrkVertices{this, "TruncateListOfWorkingVertices", true};
+    Gaudi::Property<size_t> m_maxWrkVertices{this, "MaxNumberOfWorkingVertices", 1500};
 
-      double associateMinDistanceToPV;
-      double associateMaxD0Signif;
-      double associateMaxZ0Signif;
-      double associatePtCut;
-      double associateChi2Cut;
+    Gaudi::Property<double> m_associateMinDistanceToPV{this, "associateMinDistanceToPV", 0.5};
+    Gaudi::Property<double> m_associateMaxD0Signif{this, "associateMaxD0Signif", 5.}; // wrt. DV in unit of sigma
+    Gaudi::Property<double> m_associateMaxZ0Signif{this, "associateMaxZ0Signif", 5.}; // wrt. DV in unit of sigma
+    Gaudi::Property<double> m_associatePtCut{this, "associatePtCut", 0.}; // in [MeV]
+    Gaudi::Property<double> m_associateChi2Cut{this, "associateChi2Cut", 20.};
 
-      double reassembleMaxImpactParameterD0;
-      double reassembleMaxImpactParameterZ0;
-      double mergeByShufflingMaxSignificance;
-      double mergeByShufflingAllowance;
+    Gaudi::Property<double> m_reassembleMaxImpactParameterD0{this, "reassembleMaxImpactParameterD0",  1.}; // wrt. DV in [mm]
+    Gaudi::Property<double> m_reassembleMaxImpactParameterZ0{this, "reassembleMaxImpactParameterZ0",  5.}; // wrt. DV in [mm]
+    Gaudi::Property<double> m_mergeByShufflingMaxSignificance{this, "mergeByShufflingMaxSignificance", 100.}; // in unit of sigma
+    Gaudi::Property<double> m_mergeByShufflingAllowance{this, "mergeByShufflingAllowance", 4.}; // in unit of sigma
 
-      double improveChi2ProbThreshold;
+    Gaudi::Property<double> m_improveChi2ProbThreshold{this, "improveChi2ProbThreshold", 1.e-4};
 
-      // vertexing using muons (test implementation)
-      bool doSelectTracksFromMuons;
-      bool doRemoveCaloTaggedMuons;
-      bool doSelectTracksFromElectrons;
-      bool doSelectIDAndGSFTracks;
-      bool doRemoveNonLeptonVertices;
+    // vertexing using muons (test implementation)
+    Gaudi::Property<bool> m_doSelectTracksFromMuons{this, "doSelectTracksFromMuons", false};
+    Gaudi::Property<bool> m_doRemoveCaloTaggedMuons{this, "doRemoveCaloTaggedMuons", false};
+    Gaudi::Property<bool> m_doSelectTracksFromElectrons{this, "doSelectTracksFromElectrons", false};
+    Gaudi::Property<bool> m_doSelectIDAndGSFTracks{this, "doSelectIDAndGSFTracks", false};
+    Gaudi::Property<bool> m_doRemoveNonLeptonVertices{this, "doRemoveNonLeptonVertices", false};
 
-      // vertexing using disapperaing track
-      bool doDisappearingTrackVertexing;
-      double twoTrVrtMaxPerigeeDist;
-      double twoTrVrtMinRadius;
+    // vertexing using disapperaing track
+    Gaudi::Property<bool> m_doDisappearingTrackVertexing{this, "doDisappearingTrackVertexing", false};
+    Gaudi::Property<double> m_twoTrVrtMaxPerigeeDist{this, "twoTrVrtMaxPerigeeDist", 50}; // in [mm]
+    Gaudi::Property<double> m_twoTrVrtMinRadius{this, "twoTrVrtMinRadius", 50}; // in [mm]
 
-      // When doSelectTracksWithLRTCuts is set to true, the addtional track cuts
-      // be applied to the selected tracks to reduce the number of fake tracks in
-      // the selected track collected. These cuts are inspired by the improvments that
-      // were implmented for LRT Run 3.
-      bool doSelectTracksWithLRTCuts ;
+    // When doSelectTracksWithLRTCuts is set to true, the addtional track cuts
+    // be applied to the selected tracks to reduce the number of fake tracks in
+    // the selected track collected. These cuts are inspired by the improvments that
+    // were implmented for LRT Run 3.
+    Gaudi::Property<bool> m_doSelectTracksWithLRTCuts {this, "doSelectTracksWithLRTCuts", false};
 
-      // Additional dressing option
-      bool doAugmentDVimpactParametersToMuons;     // potentially useful for DV + muon search
-      bool doAugmentDVimpactParametersToElectrons; // potentially useful for analyses involving electrons
+    // Additional dressing option
+    Gaudi::Property<bool> m_doAugmentDVimpactParametersToMuons{this, "doAugmentDVimpactParametersToMuons", false};     // potentially useful for DV + muon search
+    Gaudi::Property<bool> m_doAugmentDVimpactParametersToElectrons{this, "doAugmentDVimpactParametersToElectrons", false}; // potentially useful for analyses involving electrons
 
-      // MC truth
-      double               mcTrkResolution;
-      double               TruthTrkLen;
-
-    };
-
-    struct JobProperties m_jp;
+    // MC truth
+    Gaudi::Property<double> m_mcTrkResolution{this, "MCTrackResolution", 0.06}; // see getTruth for explanation
+    Gaudi::Property<double> m_TruthTrkLen{this, "TruthTrkLen", 1000}; // in [mm]
 
     // Indicates give-up modes during vertexing
     // 0 if no errors occured
@@ -257,8 +255,8 @@ namespace VKalVrtAthena {
     int m_vertexingStatus = 0;
 
     // xAOD Accessors
-    const xAOD::VertexContainer*  m_primaryVertices;
-    const xAOD::Vertex*           m_thePV;
+    const xAOD::VertexContainer* m_primaryVertices{};
+    const xAOD::Vertex* m_thePV{};
     std::vector<const xAOD::TrackParticle*> m_selectedTracks;
     std::vector<const xAOD::TrackParticle*> m_associatedTracks;
     std::vector<const xAOD::TrackParticle*> m_leptonicTracks;
@@ -269,24 +267,24 @@ namespace VKalVrtAthena {
     //  Athena JobOption Properties
     //
 
-    ToolHandle <Trk::ITrkVKalVrtFitter>        m_fitSvc;       // VKalVrtFitter tool
-    ToolHandle <Trk::ITruthToTrack>            m_truthToTrack; // tool to create trkParam from genPart
+    ToolHandle <Trk::ITrkVKalVrtFitter> m_fitSvc{this, "VertexFitterTool", "Trk::TrkVKalVrtFitter", " Private TrkVKalVrtFitter"};       // VKalVrtFitter tool
+    PublicToolHandle <Trk::ITruthToTrack> m_truthToTrack{this, "TruthToTrack", "Trk::TruthToTrack/InDetTruthToTrack"}; // tool to create trkParam from genPart
 
     /** get a handle on the Track to Vertex tool */
-    ToolHandle< Reco::ITrackToVertex >         m_trackToVertexTool;
-    ToolHandle<Trk::ITrackToVertexIPEstimator> m_trackToVertexIPEstimatorTool;
-    ToolHandle<Trk::IExtrapolator>             m_extrapolator;
-    ToolHandle<Trk::IVertexMapper>             m_vertexMapper;
+    PublicToolHandle< Reco::ITrackToVertex > m_trackToVertexTool{this, "TrackToVertexTool", "Reco::TrackToVertex"};
+    PublicToolHandle<Trk::ITrackToVertexIPEstimator> m_trackToVertexIPEstimatorTool{this, "TrackToVertexIPEstimatorTool", "Trk::TrackToVertexIPEstimator/TrackToVertexIPEstimator"};
+    PublicToolHandle<Trk::IExtrapolator> m_extrapolator{this, "Extrapolator", "Trk::Extrapolator/AtlasExtrapolator"};
+    PublicToolHandle<Trk::IVertexMapper> m_vertexMapper{this, "VertexMapper", ""};
 
     /** Condition service **/
     ToolHandle<IInDetConditionsTool> m_pixelCondSummaryTool{this, "PixelConditionsSummaryTool", "PixelConditionsSummaryTool", "Tool to retrieve Pixel Conditions summary"};
     ToolHandle<IInDetConditionsTool> m_sctCondSummaryTool{this, "InDetSCT_ConditionsSummaryTool", "SCT_ConditionsSummaryTool/InDetSCT_ConditionsSummaryTool", "Tool to retrieve SCT conditions summary"};
 
-    const AtlasDetectorID* m_atlasId = nullptr;
-    const PixelID* m_pixelId = nullptr;
-    const SCT_ID*  m_sctId = nullptr;
+    const AtlasDetectorID* m_atlasId{};
+    const PixelID* m_pixelId{};
+    const SCT_ID*  m_sctId{};
 
-    std::string m_checkPatternStrategy;
+    Gaudi::Property<std::string> m_checkPatternStrategy{this, "CheckHitPatternStrategy", "Classical", "Either Classical or Extrapolation"};
     using PatternStrategyFunc = bool (VrtSecInclusive::*) ( const xAOD::TrackParticle *trk, const Amg::Vector3D& vertex );
     std::map<std::string, PatternStrategyFunc> m_patternStrategyFuncs;
 
@@ -298,8 +296,12 @@ namespace VKalVrtAthena {
 
     /** Read/Write Handle Keys **/
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this,"EventInfoKey", "EventInfo", "EventInfo name"};
-    SG::WriteDecorHandleKey<xAOD::EventInfo> m_vertexingStatusKey;
-
+    SG::WriteHandleKey<xAOD::VertexContainer> m_vertexKey {this, "VertexKey", "", "Vertex key"};
+    SG::WriteHandleKey<xAOD::VertexContainer> m_twoTrksVertexKey {this, "TwoTracksVertexKey", "", "Two Tracks Vertex key"};
+    std::map<std::string, SG::WriteHandleKey<xAOD::VertexContainer>> m_intermediateVertexKey;
+    
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_vertexingStatusKey {this, "VertexingStatusKey", m_eventInfoKey, ""};
+    
     using IPDecoratorType = SG::AuxElement::Decorator< std::vector< std::vector<float> > >;
     std::vector< IPDecoratorType > m_ipDecors;
 
@@ -312,7 +314,7 @@ namespace VKalVrtAthena {
     //
 
     // The standard AANT, CollectionTree, is bare bones
-    TTree      *m_tree_Vert;
+    TTree      *m_tree_Vert{};
     std::unique_ptr<NtupleVars> m_ntupleVars;
 
     // Histograms for stats
@@ -337,7 +339,7 @@ namespace VKalVrtAthena {
     StatusCode fillAANT_SecondaryVertices( xAOD::VertexContainer* );
 
     //
-    struct WrkVrt { 
+    struct WrkVrt {
       bool isGood = false;                            //! flagged true for good vertex candidates
       std::deque<long int> selectedTrackIndices;      //! list if indices in TrackParticleContainer for selectedBaseTracks
       std::deque<long int> associatedTrackIndices;    //! list if indices in TrackParticleContainer for associatedTracks
@@ -381,12 +383,12 @@ namespace VKalVrtAthena {
 
     /** select tracks which become seeds for vertex finding */
     void selectTrack( const xAOD::TrackParticle* );
-    StatusCode selectTracksInDet();
-    StatusCode selectTracksFromMuons();
-    StatusCode selectTracksFromElectrons();
-    StatusCode selectInDetAndGSFTracks();
+    StatusCode selectTracksInDet(const EventContext& ctx);
+    StatusCode selectTracksFromMuons(const EventContext& ctx);
+    StatusCode selectTracksFromElectrons(const EventContext& ctx);
+    StatusCode selectInDetAndGSFTracks(const EventContext& ctx);
 
-    using TrackSelectionAlg = StatusCode (VrtSecInclusive::*)();
+    using TrackSelectionAlg = StatusCode (VrtSecInclusive::*)(const EventContext&);
     std::vector<TrackSelectionAlg> m_trackSelectionAlgs;
 
     /** track selection */
@@ -408,25 +410,25 @@ namespace VKalVrtAthena {
     bool selectTrack_LRTR3Cut        ( const xAOD::TrackParticle* ) const;
 
     /** related to the graph method and verte finding */
-    StatusCode extractIncompatibleTrackPairs( std::vector<WrkVrt>* );
-    StatusCode findNtrackVertices(std::vector<WrkVrt>* );
-    StatusCode rearrangeTracks( std::vector<WrkVrt>* );
+    StatusCode extractIncompatibleTrackPairs( const EventContext& ctx, std::vector<WrkVrt>* );
+    StatusCode findNtrackVertices( const EventContext& ctx, std::vector<WrkVrt>* );
+    StatusCode rearrangeTracks( const EventContext& ctx, std::vector<WrkVrt>* );
 
     /** attempt to merge vertices when all tracks of a vertex A is close to vertex B in terms of impact parameter */
-    StatusCode reassembleVertices( std::vector<WrkVrt>* );
+    StatusCode reassembleVertices( const EventContext& ctx, std::vector<WrkVrt>* );
 
     /** attempt to merge splitted vertices when they are significantly distant
         due to the long-tail behavior of the vertex reconstruction resolution */
-    StatusCode mergeByShuffling( std::vector<WrkVrt>* );
+    StatusCode mergeByShuffling( const EventContext& ctx, std::vector<WrkVrt>* );
 
     /** attempt to merge vertices by lookng at the distance between two vertices */
-    StatusCode mergeFinalVertices( std::vector<WrkVrt>* ); // Kazuki
+    StatusCode mergeFinalVertices( const EventContext& ctx, std::vector<WrkVrt>* ); // Kazuki
 
     /** in addition to selected tracks, associate as much tracks as possible */
-    StatusCode associateNonSelectedTracks( std::vector<WrkVrt>* );
+    StatusCode associateNonSelectedTracks( const EventContext& ctx, std::vector<WrkVrt>* );
 
     /** finalization of the vertex and store to xAOD::VertexContainer */
-    StatusCode refitAndSelectGoodQualityVertices( std::vector<WrkVrt>* );
+    StatusCode refitAndSelectGoodQualityVertices( const EventContext& ctx, std::vector<WrkVrt>* );
 
     /** get secondary vertex impact parameters **/
     bool getSVImpactParameters(const xAOD::TrackParticle* trk, const Amg::Vector3D& vertex, std::vector<double>& impactParameters, std::vector<double>& impactParErrors);
@@ -434,7 +436,7 @@ namespace VKalVrtAthena {
     enum TrkParameter    { k_d0=0, k_z0=1, k_theta=2, k_phi=3, k_qOverP=4 ,k_nTP=5 };
     enum TrkParameterUnc { k_d0d0=0, k_z0z0=1, k_nTPU=2 };
 
-    using vertexingAlg = StatusCode (VrtSecInclusive::*)( std::vector<WrkVrt>* );
+    using vertexingAlg = StatusCode (VrtSecInclusive::*)( const EventContext&, std::vector<WrkVrt>* );
     std::vector< std::pair<std::string, vertexingAlg> > m_vertexingAlgorithms;
     unsigned m_vertexingAlgorithmStep = 0U;
 
@@ -459,8 +461,8 @@ namespace VKalVrtAthena {
     double improveVertexChi2( WrkVrt& );
 
     static void removeTrackFromVertex(std::vector<WrkVrt>*,
-                               std::vector< std::deque<long int> > *,
-             const long int & ,const long int & );
+                                      std::vector< std::deque<long int> > *,
+                                      const long int & ,const long int & );
 
     StatusCode disassembleVertex(std::vector<WrkVrt> *, const unsigned& vertexIndex );
 
@@ -481,7 +483,7 @@ namespace VKalVrtAthena {
 
     /** returns the pair of vertices that give minimum in terms of some observable (e.g. distance, significance) */
     double findMinVerticesPair( std::vector<WrkVrt>*, std::pair<unsigned, unsigned>&, const AlgForVerticesPair& );
-    
+
     /** returns the next pair of vertices that give next-to-minimum distance significance */
     static double findMinVerticesNextPair( std::vector<WrkVrt>*, std::pair<unsigned, unsigned>& );
 
@@ -547,7 +549,8 @@ namespace VKalVrtAthena {
     template<class Track> void setIntersection(Track *trk, IntersectionPos *bec, const Trk::Perigee* per);
 
     /** monitor the intermediate status of vertexing */
-    StatusCode monitorVertexingAlgorithmStep( std::vector<WrkVrt>*, const std::string& name, bool final = false );
+    StatusCode monitorVertexingAlgorithmStep( const EventContext& ctx,
+					      std::vector<WrkVrt>*, const std::string& name, bool final = false );
 
     ////////////////////////////////////////////////////////////////////////////////////////
     //
@@ -575,14 +578,15 @@ namespace VKalVrtAthena {
     /** lock decorations at the end of the algorithm */
     void lockTrackDecorations( const xAOD::TrackParticle* trk, bool onlySelection ) const;
     void lockLeptonDecorations( const SG::AuxVectorData* cont ) const;
-    StatusCode lockTrackDecorations( bool onlySelection ) const;
+    StatusCode lockTrackDecorations( bool onlySelection, const EventContext& ctx ) const;
 
+    std::unordered_map<std::string, bool> m_vertexCollectionsDefinitions;
   };
 
 } // end of namespace bracket
 
 
-// This header file contains the definition of member templates
+  // This header file contains the definition of member templates
 #include "details/Utilities.h"
 
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir(ActsEventCnv)
@@ -25,6 +25,8 @@ atlas_add_component(ActsEventCnv
     InDetRIO_OnTrack
     MuonReadoutGeometry
     MuonReadoutGeometryR4
+    MuonRecToolInterfaces
+    MuonRIO_OnTrack
     StoreGateLib
     TrkEventPrimitives
     TrkExUtils
@@ -35,15 +37,16 @@ atlas_add_component(ActsEventCnv
     TrkTrack
     xAODInDetMeasurement
     xAODMeasurementBase
+    xAODMuonPrepData
     xAODTracking)
 
 atlas_add_test(ActsEventCnvTrackTest
     SCRIPT test/testTrackConversion.py
-    PROPERTIES TIMEOUT 900
+    PROPERTIES TIMEOUT 1200
     POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test(ActsEventCnvMuonTrackTest
     SCRIPT test/testMuonTrackConversion.py
-    PROPERTIES TIMEOUT 900
+    PROPERTIES TIMEOUT 1200
     LOG_IGNORE_PATTERN "WARNING FPE"  # ignore FPEs from AtasTrackingGeometryConversion
     POST_EXEC_SCRIPT noerror.sh)

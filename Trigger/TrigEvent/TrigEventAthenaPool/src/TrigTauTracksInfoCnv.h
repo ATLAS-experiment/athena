@@ -40,7 +40,7 @@ class TrigTauTracksInfoCnv : public T_AthenaPoolCustomCnv<TrigTauTracksInfo, Tri
 
   TrigTauTracksInfo_PERS*  createPersistent(TrigTauTracksInfo* transCont);
 
-  TrigTauTracksInfo*       createTransient ();
+  TrigTauTracksInfo*       createTransient (const Token* token);
 
  private:
 

@@ -278,7 +278,6 @@ namespace ActsTrk::detail {
    };
  
    /** Helper to gather track summary information from the track states of the specified track
-    * @param tracksContainer the Acts track container
     * @param track a track of the given acts track container for which the summary information is to be gathered
     * @param siDetEleColl array of SiDetectorElement collections per measurement type.
     * @param measurement_to_summary_type a LUT to map measurement types to the corresponding summary type for the measurement counts
@@ -287,8 +286,7 @@ namespace ActsTrk::detail {
     * @param param_state_idx_out output vector to be filled with the state index of all track states which are not holes.
     * @param special_hit_counts_out arrays to count holes (and @TODO dead sensors) per measurement type.
     */
-   void gatherTrackSummaryData(const ActsTrk::TrackContainer &tracksContainer,
-                               const typename ActsTrk::TrackContainer::ConstTrackProxy &track,
+   void gatherTrackSummaryData(const typename ActsTrk::TrackContainer::ConstTrackProxy &track,
                                const std::array<const InDetDD::SiDetectorElementCollection *,
                                                 to_underlying(xAOD::UncalibMeasType::nTypes)> &siDetEleColl,
                                const std::array<unsigned short,to_underlying(xAOD::UncalibMeasType::nTypes)>

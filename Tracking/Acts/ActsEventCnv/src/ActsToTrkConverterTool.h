@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSEVENTCNV_ActsToTrkConverterTool_H
@@ -27,7 +27,7 @@
 // PACKAGE
 #include "ActsToolInterfaces/IActsToTrkConverterTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
-#include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/EventData/BoundTrackParameters.hpp"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 
 namespace ActsTrk {
@@ -112,7 +112,11 @@ private:
   Gaudi::Property<bool> m_extractMuonSurfaces{
      this, "ExtractMuonSurfaces", false,
      "If True, use the MuonDetectorManager to extract the Muon surfaces"};
-  
+
+  Gaudi::Property<bool> m_convertMuons{
+    this, "ConvertMuonTracks", false,
+    "If True, use the muon as ParticleHypothesis"};
+
   ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
   
   /** @brief Detector manager to fetch the legacy Trk surfaces */

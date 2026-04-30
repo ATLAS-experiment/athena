@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HiveAlgC.h"
@@ -26,13 +26,13 @@ StatusCode HiveAlgC::initialize() {
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-StatusCode HiveAlgC::execute() {
+StatusCode HiveAlgC::execute(const EventContext& ctx) const {
 
   ATH_MSG_DEBUG("execute " << name());
 
   sleep();
 
-  SG::ReadHandle<HiveDataObj> rdh1( m_rdh1 );
+  SG::ReadHandle<HiveDataObj> rdh1{m_rdh1, ctx};
   if (!rdh1.isValid()) {
     ATH_MSG_ERROR ("Could not retrieve HiveDataObj with key " << rdh1.key());
     return StatusCode::FAILURE;
@@ -40,10 +40,10 @@ StatusCode HiveAlgC::execute() {
 
   ATH_MSG_INFO("  read: " << rdh1.key() << " = " << rdh1->val() );
   
-  SG::WriteHandle<HiveDataObj> wrh1( m_wrh1 );
+  SG::WriteHandle<HiveDataObj> wrh1{m_wrh1, ctx};
   ATH_CHECK(wrh1.record(std::make_unique< HiveDataObj >(30000 + rdh1->val() )));
 
-  SG::WriteHandle<HiveDataObj> wrh2( m_wrh2 );
+  SG::WriteHandle<HiveDataObj> wrh2{m_wrh2, ctx};
   ATH_CHECK(wrh2.record(std::make_unique< HiveDataObj >(30001)));
   
   ATH_MSG_INFO("  write: " << wrh1.key() << " = " << wrh1->val() );

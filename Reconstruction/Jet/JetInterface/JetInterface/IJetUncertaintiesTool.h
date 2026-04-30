@@ -6,6 +6,7 @@
 #define JETUNCERTAINTIES_IJETUNCERTAINTIESTOOL_H
 
 #include "AsgTools/IAsgTool.h"
+#include "CxxUtils/checker_macros.h"
 
 #include "xAODJet/Jet.h"
 #include "xAODJet/JetContainer.h"
@@ -47,11 +48,12 @@ class IJetUncertaintiesTool : virtual public asg::IAsgTool
         virtual bool getComponentScalesTau32(const size_t index)   const = 0;
 
         // Retrieve uncertainty and validity information for a given component
-        virtual bool   getValidity(size_t index, const xAOD::Jet& jet) const = 0;
+        // Overloads without EventInfo use a cached default — not thread-safe.
+        virtual bool   getValidity ATLAS_NOT_THREAD_SAFE (size_t index, const xAOD::Jet& jet) const = 0;
         virtual bool   getValidity(size_t index, const xAOD::Jet& jet, const xAOD::EventInfo& eInfo) const = 0;
-        virtual double getUncertainty(size_t index, const xAOD::Jet& jet) const = 0;
+        virtual double getUncertainty ATLAS_NOT_THREAD_SAFE (size_t index, const xAOD::Jet& jet) const = 0;
         virtual double getUncertainty(size_t index, const xAOD::Jet& jet, const xAOD::EventInfo& eInfo) const = 0;
-        virtual bool   getValidUncertainty(size_t index, double& unc, const xAOD::Jet& jet) const = 0;
+        virtual bool   getValidUncertainty ATLAS_NOT_THREAD_SAFE (size_t index, double& unc, const xAOD::Jet& jet) const = 0;
         virtual bool   getValidUncertainty(size_t index, double& unc, const xAOD::Jet& jet, const xAOD::EventInfo& eInfo) const = 0;
 
 

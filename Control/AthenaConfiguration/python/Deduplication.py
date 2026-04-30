@@ -1,15 +1,12 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # Functions used by the ComponentAccumulator to de-duplicate components.
 #
 
 from AthenaConfiguration.DebuggingContext import raiseWithCurrentContext
-from AthenaCommon.Logging import logging
 
 class DeduplicationFailed(RuntimeError):
     pass
-
-_msg = logging.getLogger('ComponentAccumulator')
 
 
 def deduplicate(newComp, compList):
@@ -32,12 +29,10 @@ def deduplicate(newComp, compList):
 
             # We found a service of the same type and name and could reconcile the two instances.
             # Overwrite the component in the list with the new (merged) component.
-            _msg.verbose("Reconciled configuration of component %s", comp.name)
             compList[idx] = newComp
             return False
 
     # No component of the same type and name found, simply append
-    _msg.debug("Adding component %s/%s to the job", newComp.__cpp_type__, newComp.name)
     compList.append(newComp)
     return True
 

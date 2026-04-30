@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import HIMode
@@ -10,6 +10,8 @@ def createJetConfigFlags():
 
     flags.addFlag("Jet.doUpstreamDependencies", False)
     flags.addFlag("Jet.WriteToAOD", 
+                  lambda prevFlags: prevFlags.Reco.HIMode in [HIMode.HI,HIMode.UPC,HIMode.HIP] )
+    flags.addFlag("Jet.WriteToESD",
                   lambda prevFlags: prevFlags.Reco.HIMode in [HIMode.HI,HIMode.UPC,HIMode.HIP] )
     flags.addFlag("Jet.useCalibJetThreshold", True)
 

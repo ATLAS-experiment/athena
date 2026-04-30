@@ -18,6 +18,7 @@
 #include "MMLoadVariables.h"
 #include "MMT_Diamond.h"
 
+#include "MuonCondData/NswDcsDbData.h"
 #include "MuonDigitContainer/MmDigitContainer.h"
 #include "MuonDigitContainer/MmDigit.h"
 #include "GeneratorObjects/McEventCollection.h"
@@ -43,6 +44,7 @@ namespace NSWL1 {
     SG::ReadHandleKey<TrackRecordCollection> m_keyMuonEntryLayer{this,"MuonEntryLayer","MuonEntryLayer","Location of MuonEntryLayer"};
     SG::ReadHandleKey<MmDigitContainer> m_keyMmDigitContainer{this,"MmDigitContainer","MM_DIGITS","Location of MmDigitContainer"};
     SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detectorManagerKey {this, "DetectorManagerKey", "MuonDetectorManager", "Key of MuonDetectorManager condition data"};
+    SG::ReadCondHandleKey<NswDcsDbData> m_dcsKey{this, "DCSDataKey", "NswDcsDbData", "Read key for the NSW DCS data"};
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
     Gaudi::Property<bool>  m_isMC            {this, "IsMC",         true, "This is MC"};

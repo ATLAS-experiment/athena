@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 // Local includes
@@ -30,10 +30,10 @@ ANA_MSG_SOURCE(testEgEfficiencyCorr, "")
 }
 
 int
-main(int argc, char* argv[])
+test1(int argc, char* argv[])
 {
 
-  xAOD::TFileAccessTracer::enableDataSubmission(false);
+  xAOD::TFileAccessTracer::instance().enableDataSubmission(false);
   // The application's name:
   const char* APP_NAME = argv[0];
 
@@ -135,3 +135,13 @@ main(int argc, char* argv[])
   return 0;
 }
 
+
+int main (int argc, char *argv[])
+{
+  try {
+    return test1(argc, argv);
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
+}

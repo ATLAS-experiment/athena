@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from FTagAnalysisAlgorithms.FTagHelpers import getRecommendedBTagCalib
@@ -167,7 +167,7 @@ class KLFitterBlock(ConfigBlock):
                 jetCollection = config.originalName(self.jets.split(".")[0])
                 alg.btagEffTool.JetAuthor = jetCollection
                 alg.btagEffTool.ScaleFactorFileName = (
-                    getRecommendedBTagCalib(config.geometry())
+                    getRecommendedBTagCalib(config.geometry(), self.btagWP)
                     if self.bTagCDIFile is None
                     else self.bTagCDIFile
                 )

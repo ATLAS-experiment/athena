@@ -15,7 +15,7 @@
 
 namespace columnar
 {
-  using MuonTrackDef = columnar::VariantContainerId<columnar::ContainerId::track0,columnar::ContainerId::track0,columnar::ContainerId::track3,columnar::ContainerId::track1,columnar::ContainerId::track2>;
+  using MuonTrackDef = columnar::VariantContainerId<columnar::Track0Def,columnar::Track0Def,columnar::Track3Def,columnar::Track1Def,columnar::Track2Def>;
 }
 
 #endif

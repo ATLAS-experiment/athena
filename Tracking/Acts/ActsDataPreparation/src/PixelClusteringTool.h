@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRK_DATAPREPARATION_PIXEL_CLUSTERING_TOOL_H
@@ -32,10 +32,14 @@ public:
                Acts::Ccl::ClusteringData& data,
                std::vector<ClusterCollection>& collection) const override;
   
+    virtual std::any makeVars (SG::AuxVectorData& cont) const override;
+
     virtual StatusCode
     makeClusters(const EventContext& ctx,
                  typename IPixelClusteringTool::ClusterCollection& clusters,
                  const InDetDD::SiDetectorElement& element,
+                 size_t icluster,
+                 std::any& vars,
 		 typename ClusterContainer::iterator itrContainer) const override;
   
     virtual StatusCode initialize() override;
@@ -50,7 +54,8 @@ private:
 			 const PixelChargeCalibCondData *calibData,
 			 const PixelChargeCalibCondData::CalibrationStrategy calibStrategy,
 			 double lorentz_shift,
-			 xAOD::PixelCluster& container) const;
+                         size_t icluster,
+                         xAOD::PixelCluster::ClusterVars& clusterVars) const;
 
   typename IPixelClusteringTool::CellCollection
   unpackRDOs(const RawDataCollection& RDOs,

@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef EFLOWDATABASE_H
-#define EFLOWDATABASE_H
+#ifndef EFLOWREC_EFLOWDATABASE_H
+#define EFLOWREC_EFLOWDATABASE_H
 
 /********************************************************************
 

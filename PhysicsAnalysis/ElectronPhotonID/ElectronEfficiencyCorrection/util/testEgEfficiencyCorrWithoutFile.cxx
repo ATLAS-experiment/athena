@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 // System include(s):
@@ -32,7 +32,7 @@ ANA_MSG_SOURCE(msgSelectorCheck, "")
 }
 
 int
-main(int argc, char* argv[])
+test1(int argc, char* argv[])
 {
   StatusCode::enableFailure();
   using namespace asg::msgSelectorCheck;
@@ -191,4 +191,15 @@ main(int argc, char* argv[])
                                << totalPos << " - " << totalNeg << " <===");
 
   return 0;
+}
+
+
+int main (int argc, char *argv[])
+{
+  try {
+    return test1(argc, argv);
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
 }

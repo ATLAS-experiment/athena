@@ -21,6 +21,56 @@
 
 namespace columnar
 {
+  struct ColumnAccessorOptions final
+  {
+    /// @brief whether this replaces another column
+    ///
+    /// For corrections it is quite typical that a column is meant to
+    /// replace another column.  In columnar land we will create
+    /// genuinely new columns, in xAOD land we will usually overwrite
+    /// the content of those columns.  This member is used to indicate
+    /// which column gets replaced.
+    std::string replacesColumn {};
+
+
+    /// @brief whether this column is optional
+    ///
+    /// Essentially this indicates that the column can be skipped, and
+    /// the tool will check whether the column is present before trying
+    /// to use it.  This allows to adapt the tool somewhat to different
+    /// environments.
+    ///
+    /// The downside here is that overall this is still a bit ambiguous,
+    /// i.e. whoever links up the columns needs to decide whether it is
+    /// needed.  For columns that are not in the input file that's easy,
+    /// there is no choice but omitting them.  However, some columns
+    /// only exist as a backup option for other columns, and ideally we
+    /// don't want to load the backup columns when the main columns are
+    /// missing.  So either that needs to be set during configuration,
+    /// or we need to add more meta-information for that case, or the
+    /// user needs to do something smart (i.e. manual) in their code.
+    bool isOptional = false;
+
+
+    /// @brief whether to add data dependencies in AthenaMT
+    ///
+    /// In AthenaMT we need to track data dependencies between
+    /// algorithms, but we usually only want to use a subset of the data
+    /// dependencies used in columnar code. This flag indicates that
+    /// this accessor should be added as a data dependency in AthenaMT.
+    bool addMTDependency = false;
+
+    ColumnInfo makeColumnInfo () const
+    {
+      ColumnInfo info;
+      info.replacesColumn = replacesColumn;
+      info.isOptional = isOptional;
+      return info;
+    }
+  };
+
+
+
   template<ColumnAccessMode CAM> struct ColumnAccessModeTraits;
 
   template<> struct ColumnAccessModeTraits<ColumnAccessMode::input>
@@ -40,6 +90,72 @@ namespace columnar
     template<typename T> using XAODAccessor = SG::Accessor<T>;
     template<typename T> using ColumnType = T;
   };
+
+
+
+  namespace detail
+  {
+    /// @brief the backend implementation for @ref AccessorTemplate
+    ///
+    /// The main difference here is that this class doesn't have a
+    /// `ContainerId` template parameter, as that is (normally) only
+    /// needed in the constructor. So the needed information can just be
+    /// passed in there.
+    ///
+    /// The @ref AccessorTemplate class will mostly wrap this class and
+    /// adds the `ContainerId` template parameter and do all the necessary
+    /// static type checking to ensure that each accessor is only used
+    /// with the right objects. There are still some more specialized
+    /// accessor implementations that integrate more closely with the
+    /// `ContainerId`.
+    ///
+    /// @par CT the column type
+    /// @par CAM the column access mode
+    /// @par CM the columnar mode
+
+    template<typename CT,ColumnAccessMode CAM,ColumnarMode CM> class ContainerFreeAccessor final
+    {
+    public:
+      static constexpr bool isDefined = false;
+    };
+
+
+
+    /// @brief a help implementation of @ref AccessorTemplate that
+    /// handles type conversions
+    ///
+    /// The idea is that some column accessors are best defined in terms
+    /// of e.g. the underlying column is an `int`, but we need to
+    /// represent it as a different type (e.g. an `enum` or an
+    /// `ObjectId`) to the user.
+    ///
+    /// The main reason for having this is separate from
+    /// `ContainerFreeAccessor` is that this allows to handle modes with
+    /// nested `std::vector` columns correctly. Essentially I need to be
+    /// able to define the column as `std::vector<MemoryType>` and then
+    /// convert it to something that behaves like `std::span<const CT>>`.
+
+    template<typename CT,ColumnarMode CM> class MemoryAccessor final
+    {
+    public:
+      static constexpr bool isDefined = false;
+    };
+
+
+
+    template<typename CT,ColumnarMode CM>
+      requires ((std::is_integral_v<CT> || std::is_floating_point_v<CT>) && !std::is_same_v<CT,bool>)
+    class MemoryAccessor<CT,CM> final
+    {
+    public:
+      static constexpr bool isDefined = true;
+      static constexpr bool viewIsReference = true;
+      static constexpr bool hasSetter = false;
+      using MemoryType = CT;
+
+      static void updateColumnInfo (ColumnInfo& /*info*/) {}
+    };
+  }
 
 
 
@@ -81,36 +197,6 @@ namespace columnar
   template<ContainerIdConcept CI,typename CT,ColumnAccessMode CAM,typename CM> class AccessorTemplate;
 
 
-  /// @brief a trait class to provide information about the column type
-  ///
-  /// This sort of steers the behavior of the accessors and the various
-  /// template specializations.  It provides both information the
-  /// various specializatons can use in their `requires` clauses, as
-  /// well as helpers for the accessors to use in their implementation.
-  ///
-  /// @warn Users are neither meant to use this class nor to specialize
-  /// it.  This is an internal class that is used for defining the
-  /// accessors and may change without notice.
-  template<typename CT,typename CM>
-  struct ColumnTypeTraits final
-  {
-    static constexpr bool isNativeType = false;
-    static constexpr bool useConvertInput = false;
-    static constexpr bool useConvertWithDataInput = false;
-    static ColumnInfo& updateColumnInfo (ColumnarTool<CM>& /*columnBase*/, ColumnInfo& info) {return info;}
-  };
-
-  template<typename CT,typename CM>
-    requires ((std::is_integral_v<CT> || std::is_floating_point_v<CT>) && !std::is_same_v<CT,bool>)
-  struct ColumnTypeTraits<CT,CM> final
-  {
-    using ColumnType = CT;
-    static constexpr bool isNativeType = true;
-    static constexpr bool useConvertInput = false;
-    static constexpr bool useConvertWithDataInput = false;
-    static ColumnInfo& updateColumnInfo (ColumnarTool<CM>& /*columnBase*/, ColumnInfo& info) {return info;}
-  };
-
   /// @brief a type wrapper to force @ref AccessorTemplate to treat the
   /// type as native
   ///
@@ -118,15 +204,20 @@ namespace columnar
   /// that we don't want users to use because they are not portable.
   /// The main example being ElementLink which only exists in xAOD mode.
   template<typename CT> struct NativeColumn final {};
-  template<typename CT,typename CM>
-  struct ColumnTypeTraits<NativeColumn<CT>,CM> final
+  namespace detail
   {
-    using ColumnType = CT;
-    static constexpr bool isNativeType = true;
-    static constexpr bool useConvertInput = false;
-    static constexpr bool useConvertWithDataInput = false;
-    static ColumnInfo& updateColumnInfo (ColumnarTool<CM>& /*columnBase*/, ColumnInfo& info) {return info;}
-  };
+    template<typename CT,ColumnarMode CM>
+    class MemoryAccessor<NativeColumn<CT>,CM> final
+    {
+    public:
+      static constexpr bool isDefined = true;
+      static constexpr bool viewIsReference = true;
+      static constexpr bool hasSetter = false;
+      using MemoryType = CT;
+
+      static void updateColumnInfo (ColumnInfo& /*info*/) {}
+    };
+  }
 
 
   /// @brief a type wrapper to make @ref AccessorTemplate convert the
@@ -140,102 +231,24 @@ namespace columnar
     static_assert (!std::is_const_v<UT>, "UT must not be const");
   };
 
-  template<typename UT,typename CT,typename CM>
-  struct ColumnTypeTraits<RetypeColumn<UT,CT>,CM> final
+  namespace detail
   {
-    using ColumnType = CT;
-    using UserType = UT;
-    static constexpr bool isNativeType = false;
-    static constexpr bool useConvertInput = true;
-    static constexpr bool useConvertWithDataInput = false;
-    static ColumnInfo& updateColumnInfo (ColumnarTool<CM>& /*columnBase*/, ColumnInfo& info) {return info;}
-    static UT convertInput (const CT& value) {return UT (value);}
-  };
-
-
-
-  // the accessor specialization for type conversions
-  template<ContainerIdConcept CI,typename CT,typename CM>
-    requires (CI::regularObjectId && (ColumnTypeTraits<CT,CM>::useConvertInput || ColumnTypeTraits<CT,CM>::useConvertWithDataInput))
-  class AccessorTemplate<CI,CT,ColumnAccessMode::input,CM> final
-  {
-  public:
-
-    using ColumnType = typename ColumnTypeTraits<CT,CM>::ColumnType;
-    using UserType = typename ColumnTypeTraits<CT,CM>::UserType;
-
-    AccessorTemplate () = default;
-
-    AccessorTemplate (ColumnarTool<CM>& columnBase, const std::string& name, ColumnInfo&& info = {})
-      : m_base (columnBase, name, std::move (ColumnTypeTraits<CT,CM>::updateColumnInfo(columnBase, info)))
-    {}
-
-    [[nodiscard]] decltype(auto) operator () (ObjectId<CI,CM> id) const noexcept
+    template<typename UT,typename CT,ColumnarMode CM>
+    class MemoryAccessor<RetypeColumn<UT,CT>,CM> final
     {
-      if constexpr (ColumnTypeTraits<CT,CM>::useConvertWithDataInput)
-        return ColumnTypeTraits<CT,CM>::convertInput (id.getData(), m_base(id));
-      else
-        return ColumnTypeTraits<CT,CM>::convertInput (m_base(id));
-    }
+    public:
+      static constexpr bool isDefined = true;
+      static constexpr bool viewIsReference = false;
+      static constexpr bool hasSetter = false;
+      using MemoryType = CT;
 
-    [[nodiscard]] bool isAvailable (ObjectId<CI,CM> id) const noexcept
-    {
-      return m_base.isAvailable (id);
-    }
-
-    [[nodiscard]] std::optional<UserType> getOptional (ObjectId<CI,CM> id) const
-    {
-      if (m_base.isAvailable (id))
-        return operator()(id);
-      else
-        return std::nullopt;
-    }
-
-  private:
-    AccessorTemplate<CI,ColumnType,ColumnAccessMode::input,CM> m_base;
-  };
-
-
-
-  // the accessor specialization for type conversions
-  template<ContainerIdConcept CI,typename CT,typename CM>
-    requires (CI::regularObjectId && ColumnTypeTraits<CT,CM>::useConvertOutput)
-  class AccessorTemplate<CI,CT,ColumnAccessMode::output,CM> final
-  {
-  public:
-
-    using ColumnType = typename ColumnTypeTraits<CT,CM>::ColumnType;
-    using UserType = typename ColumnTypeTraits<CT,CM>::UserType;
-
-    AccessorTemplate () = default;
-
-    AccessorTemplate (ColumnarTool<CM>& columnBase, const std::string& name, ColumnInfo&& info = {})
-      : m_base (columnBase, name, std::move (ColumnTypeTraits<CT,CM>::updateColumnInfo(columnBase, info)))
-    {}
-
-    template<typename T>
-      requires requires(T value) {ColumnTypeTraits<CT,CM>::convertOutput (value);}
-    void set (ObjectId<CI,CM> id, T&& value) const noexcept
-    {
-      m_base(id) = ColumnTypeTraits<CT,CM>::convertOutput (std::forward<T>(value));
-    }
-
-    [[nodiscard]] bool isAvailable (ObjectId<CI,CM> id) const noexcept
-    {
-      return m_base.isAvailable (id);
-    }
-
-    [[nodiscard]] std::optional<UserType> getOptional (ObjectId<CI,CM> id) const
-    {
-      if (m_base.isAvailable (id))
-        return operator()(id);
-      else
-        return std::nullopt;
-    }
-
-  private:
-    AccessorTemplate<CI,ColumnType,ColumnAccessMode::output,CM> m_base;
-  };
+      static void updateColumnInfo (ColumnInfo& /*info*/) {}
+      static auto makeViewer (auto&&)
+      {
+        return [] (const auto& value) {return static_cast<UT>(value);};
+      }
+    };
+  }
 
 
 
@@ -249,9 +262,9 @@ namespace columnar
   /// it should also make the code a little more efficient.
 
   template<ContainerIdConcept CI,typename CT,ColumnAccessMode CAM,typename CM>
-  void resetAccessor (AccessorTemplate<CI,CT,CAM,CM>& accessor, ColumnarTool<CM>& columnBase, const std::string& name, ColumnInfo&& info = {})
+  void resetAccessor (AccessorTemplate<CI,CT,CAM,CM>& accessor, ColumnarTool<CM>& columnBase, const std::string& name, ColumnAccessorOptions&& options = {})
   {
-    accessor = AccessorTemplate<CI,CT,CAM,CM> (columnBase, name, std::move (info));
+    accessor = AccessorTemplate<CI,CT,CAM,CM> (columnBase, name, std::move (options));
   }
 
 

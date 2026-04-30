@@ -920,14 +920,10 @@ MuonEDMPrinterTool::printData(const Trk::MeasurementBase& measurement) const
             unsigned int                                  nhits   = 0;
             std::set<Identifier>                          layers;
             std::vector<double>                           rpcTimes;
-            const std::vector<const MuonClusterOnTrack*>& rots = crot->containedROTs();
-            nhits                                              = rots.size();
-            rpcTimes.reserve(nhits);
-            std::vector<const MuonClusterOnTrack*>::const_iterator itR = rots.begin(), itR_end = rots.end();
-            for (; itR != itR_end; ++itR) {
-                Identifier layerId = m_idHelperSvc->layerId((*itR)->identify());
+            for (const auto &iRot :crot->containedROTs()) {
+                Identifier layerId = m_idHelperSvc->layerId(iRot->identify());
                 layers.insert(layerId);
-                const RpcClusterOnTrack* rpc    = dynamic_cast<const RpcClusterOnTrack*>(*itR);
+                const RpcClusterOnTrack* rpc    = dynamic_cast<const RpcClusterOnTrack*>(iRot.get());
                 const RpcPrepData*       rpcPRD = rpc ? rpc->prepRawData() : nullptr;
                 if (rpcPRD) rpcTimes.push_back(rpcPRD->time());
             }

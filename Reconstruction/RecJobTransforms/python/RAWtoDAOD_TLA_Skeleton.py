@@ -132,6 +132,7 @@ def fromRunArgs(runArgs):
         ],
         'DarkJetPEBTLA': [],
         'EgammaPEBTLA': [],
+        'MuonDS': [],
     }[flags.Trigger.AODEDMSet]
     from TLARecoConfig.DAOD_TLA_OutputConfig import DAOD_TLA_OutputCfg
     cfg.merge( DAOD_TLA_OutputCfg(flags, additional_output_items) )

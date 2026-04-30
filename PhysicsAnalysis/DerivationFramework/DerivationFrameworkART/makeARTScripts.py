@@ -10,14 +10,15 @@ formatList = ["PHYSVAL","PHYS","PHYSLITE",
               "JETM1","JETM2","JETM3","JETM4","JETM5","JETM12",
               "IDTR2",
               "EGAM1","EGAM2","EGAM3","EGAM4","EGAM5","EGAM7","EGAM8","EGAM9","EGAM10",
-              "FTAG1","FTAG2","FTAG3","FTAG4","FTAG5","FTAGPU","FTAGXBB",
-              "BPHY1","BPHY2","BPHY3","BPHY4","BPHY5","BPHY6","BPHY10","BPHY12","BPHY15","BPHY16","BPHY18","BPHY21","BPHY22",
+              "FTAG1","FTAG1LITE","FTAG2","FTAG3","FTAG4","FTAG5","FTAGPU","FTAGXBB",
+              "BPHY1","BPHY2","BPHY3","BPHY4","BPHY5","BPHY6","BPHY10","BPHY12","BPHY14","BPHY15","BPHY16","BPHY18","BPHY21","BPHY22",
               "BPHY23","BPHY24",
               "STDM6","STDM7","STDM13","STDM16","STDM17",
               "SUSY20",
               "TRIG8","TRIG9","TRIG10",
               "MUON1", "MUON5",
-              "TCAL1"
+              "TCAL1",
+              "TOPQ7"
 ]
 
 truthFormatList = ["TRUTH0", "TRUTH1", "TRUTH3"]
@@ -49,6 +50,7 @@ def generateText(formatName,label,inputFile,isTruth,isMC,nEvents):
    outputFile.write("# art-include: main/Athena"+"\n")
    outputFile.write("# art-description: DAOD building "+formatName+" "+label+"\n")
    outputFile.write("# art-type: grid"+"\n")
+   outputFile.write("# art-memory: 4096"+"\n")
    outputFile.write("# art-output: *.pool.root"+"\n")
    outputFile.write("# art-output: checkFile*.txt"+"\n")
    outputFile.write("# art-output: checkxAOD*.txt"+"\n")

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MuonDetectorManager_H
@@ -95,6 +95,8 @@ namespace MuonGM {
         const TgcReadoutElement* getTgcReadoutElement(const IdentifierHash& id) const;  //!< access via detector-element hash id
         const CscReadoutElement* getCscReadoutElement(const IdentifierHash& id) const;  //!< access via detector-element hash id
 
+        std::vector<const MuonReadoutElement*> getAllReadoutElements() const;
+      
         inline unsigned int nMuonStation() const;  //!< Number of MuonStations
 
         inline unsigned int nMdtRE() const;   //!< Number of Mdt ReadoutElements

@@ -1,5 +1,6 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import ProductionStep
 from LArBadChannelTool.LArBadChannelConfig import LArBadFebCfg
 from AthenaCommon.Logging import logging
 from OutputStreamAthenaPool.OutputStreamConfig import addToESD
@@ -46,6 +47,7 @@ def LArFebErrorSummaryMakerCfg(flags):
 
     acc.addEventAlgo(CompFactory.LArFebErrorSummaryMaker("LArFebErrorSummaryMaker",CheckAllFEB=bCheckAllFEB,
                                          WriteKey="StoreGateSvc+LArFebErrorSummary",
+                                         EventInfoKey=f"{flags.Overlay.BkgPrefix}EventInfo" if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing else "EventInfo",
                                          MaskFebScacStatus = lMaskFebScacStatus, MaskFebEvtId = lMaskFebEvtId,
                                          minFebInError=minErrFeb
                                          #MaskFebZeroSample = lMaskFebZeroSample,

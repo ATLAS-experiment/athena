@@ -121,7 +121,10 @@ InDetPhysValMonitoringTool::initialize() {
   ATH_CHECK(m_truthSelectionTool.retrieve(EnableTool {not m_truthParticleName.key().empty()} ));
   ATH_CHECK(m_vtxValidTool.retrieve(EnableTool {m_useVertexTruthMatchTool}));
   ATH_CHECK(m_trackTruthOriginTool.retrieve( EnableTool {m_doTruthOriginPlots} ));
-  ATH_CHECK(m_hardScatterSelectionTool.retrieve());
+  if (not m_vertexContainerName.key().empty()) 
+  {
+  ATH_CHECK(m_hardScatterSelectionTool.retrieve());    
+  }
   ATH_CHECK(m_grlTool.retrieve(EnableTool{m_useGRL}));
 
   ATH_MSG_DEBUG("m_useVertexTruthMatchTool ====== " <<m_useVertexTruthMatchTool);
@@ -193,6 +196,7 @@ InDetRttPlotConfig InDetPhysValMonitoringTool::getFilledPlotConfig() const{
   rttConfig.detailLevel = m_detailLevel; 
 
   rttConfig.isITk = m_isITk;
+  rttConfig.hasHGTDReco = m_hasHGTDReco;
 
   rttConfig.doTrkInJetPlots = m_doTrackInJetPlots;
   rttConfig.doTrkInJetPlots_fake = m_doTrackInJetPlots;

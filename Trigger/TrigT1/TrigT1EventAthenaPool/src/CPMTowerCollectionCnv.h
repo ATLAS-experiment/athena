@@ -35,7 +35,7 @@ public:
 protected:
   
   virtual CPMTowerCollection_PERS*   createPersistent (CPMTowerCollection* transCont);
-  virtual CPMTowerCollection*        createTransient ();
+  virtual CPMTowerCollection*        createTransient(const Token* token);
 
 private:
   

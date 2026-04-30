@@ -1,11 +1,9 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #include "Run2toRun3ConvertersL1.h"
-#include <numeric>
-#include <unordered_set>
-#include <boost/tokenizer.hpp>
-#include <tuple>
-#include <stdexcept>
+
+#include "TrigConfL1Data/CTPConfig.h"
+#include "L1TopoConfig/L1TopoMenu.h"
 
 #include "TrigConfData/L1BunchGroupSet.h"
 #include "TrigConfData/DataStructure.h"
@@ -13,6 +11,7 @@
 #include "TrigConfData/L1Menu.h"
 #define BOOST_BIND_GLOBAL_PLACEHOLDERS // Needed to silence Boost pragma message
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/tokenizer.hpp>
 #include "TrigConfL1Data/CTPConfig.h"
 #include "TrigConfL1Data/TriggerThreshold.h"
 #include "TrigConfL1Data/TriggerItem.h"
@@ -28,6 +27,16 @@
 #include "TrigConfIO/JsonFileWriterL1.h"
 
 #include <nlohmann/json.hpp>
+#include <vector>
+#include <numeric>
+#include <map>
+#include <unordered_set>
+#include <tuple>
+#include <stdexcept>
+#include <cctype> //std::isdigit
+#include <algorithm> //std::sort
+#include <fstream> //std::ofstream
+#include <sstream> //std::stringstream
 
 using json = nlohmann::json; // to be changed to ordered_json
 using ptree = boost::property_tree::ptree;
@@ -46,7 +55,7 @@ namespace {
       }
       // build tokens with separators ()&|! and <space>. Keeps all separators except <space> in the list of tokens 
       for ( auto & tok : boost::tokenizer<boost::char_separator<char> > (item->definition(), boost::char_separator<char>(" ", "()&|!")) ) {
-         if(isdigit(tok[0])) {
+         if(std::isdigit(tok[0])) {
             // replace by threshold
             int idx = std::stoi(tok);
             const TrigConf::TriggerItemNode* node = nodeMap[idx];
@@ -163,6 +172,7 @@ convertRun2L1MenuToRun3(const TrigConf::CTPConfig* ctpConfig, const TXC::L1TopoM
          for (const TrigConf::TriggerThresholdValue *tv : sourceThr->thresholdValueVector())
          {
             auto cl = dynamic_cast<const TrigConf::ClusterThresholdValue *>(tv);
+            if (not cl) continue;
             json jtv;
             jtv["value"] = static_cast<unsigned int>(tv->ptcut());
             std::string isobits = "00000";
@@ -186,6 +196,7 @@ convertRun2L1MenuToRun3(const TrigConf::CTPConfig* ctpConfig, const TXC::L1TopoM
       else if (thrType == "TAU")
       {
          auto cl = dynamic_cast<const TrigConf::ClusterThresholdValue*>(sourceThr->triggerThresholdValue(0,0));
+         if (not cl) continue;
          int ptCut = (int)cl->ptcut();
          thr["value"] = ptCut;
          std::string isobits = "00000";
@@ -205,6 +216,7 @@ convertRun2L1MenuToRun3(const TrigConf::CTPConfig* ctpConfig, const TXC::L1TopoM
          for (const TrigConf::TriggerThresholdValue *tv : sourceThr->thresholdValueVector())
          {
             auto jetThrVal = dynamic_cast<const TrigConf::JetThresholdValue *>(sourceThr->triggerThresholdValue(0, 0));
+            if (not jetThrVal) continue;
             json jtv;
             jtv["value"] = static_cast<unsigned int>(tv->ptcut());
             jtv["etamin"] = tv->etamin();

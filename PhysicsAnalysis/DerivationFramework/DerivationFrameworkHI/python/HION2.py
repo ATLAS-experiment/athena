@@ -93,6 +93,13 @@ def HION2KernelCfg(flags, name='HION2Kernel', **kwargs):
 def HION2Cfg(flags):
     
     acc = ComponentAccumulator()
+    from CoolConvUtilities.ParticleTypeUtil import getTypeForRun
+    whatCollided = getTypeForRun(flags.Input.RunNumbers[0])
+    if whatCollided is not None:
+        if whatCollided.getBeam1Type() in [8,10]: #oxygen-oxygen and neon-neon
+            from HIEventUtils.HIEventSelectionRun3Config import HIEventSelectionRun3Cfg
+            acc.merge(HIEventSelectionRun3Cfg(flags))
+
     acc.merge(HION2KernelCfg(flags, name="HION2Kernel",StreamName = "StreamDAOD_HION2"))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg

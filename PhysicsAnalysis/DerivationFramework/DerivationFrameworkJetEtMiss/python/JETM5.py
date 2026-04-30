@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_JETM5.py
 #====================================================================
@@ -136,7 +136,8 @@ def JETM5Cfg(flags):
                                         "UFOCSSK"]
 
 
-    JETM5SlimmingHelper.ExtraVariables  += ["AntiKt4EMPFlowJets.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1"]
+    JETM5SlimmingHelper.ExtraVariables  += ["AntiKt4EMPFlowJets.constituentLinks",
+                                            "AntiKt4EMTopoJets.constituentLinks"]
 
     if flags.Input.isMC:
         JETM5SlimmingHelper.AppendToDictionary.update({'TruthParticles': 'xAOD::TruthParticleContainer',

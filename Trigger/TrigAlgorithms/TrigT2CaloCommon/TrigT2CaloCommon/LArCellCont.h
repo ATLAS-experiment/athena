@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -12,64 +12,66 @@
  PURPOSE:  Container with statically allocated LArCellCollections.
 	   To be prepared in the Algorithm initialize and kept up
 	   to algorithm finalize.
- *******************************************************************/
+*******************************************************************/
 
 #ifndef TRIGT2CALOCOMMON_LARCELLCONT_H
 #define TRIGT2CALOCOMMON_LARCELLCONT_H
 
-#include "LArRecEvent/LArCellCollection.h"
 #include "TrigT2CaloCommon/LArRodIdHash.h"
-#include "LArByteStream/Hid2RESrcID.h"
+
 #include "Identifier/HWIdentifier.h"
-#include "xAODEventInfo/EventInfo.h"
-#include "LArRawConditions/LArMCSym.h"
-#include "LArRecConditions/LArFebRodMapping.h"
+#include "LArByteStream/Hid2RESrcID.h"
 #include "LArCabling/LArOnOffIdMapping.h"
+#include "LArRawConditions/LArMCSym.h"
 #include "LArRecConditions/LArBadChannelCont.h"
+#include "LArRecConditions/LArFebRodMapping.h"
+#include "LArRecEvent/LArCellCollection.h"
+#include "xAODEventInfo/EventInfo.h"
 
 #include <vector>
+#include <map>
+#include <cstdint> //uint32_t
 
 class ILArBadFebMasker;
 class CaloBCIDAverage;
 class LArRoIMap;
-class LArOnOffIdMapping;
 class CaloDetDescrManager;
 
 /** Class which contains statically allocated LArCellCollections */
 class LArCellCont : public std::vector<LArCellCollection*>
 {
 
- public:
+public:
 
   /** Identifiable definition to be compatible with LArCellIDC */
   typedef LArCellCollection IDENTIFIABLE;
 
   /** Constructor. Does not do anything. Check initialize. */
-  LArCellCont( ) ;
+  LArCellCont( ) = default;
 
   /** @brief Finds a collection by its LArReadoutModuleID
-  *   @param[in] ReadOut Module ID
-  *   @return @c const_iterator to a pointer to LArCellCollection.
-  */
+   *  @param[in] ReadOut Module ID
+   *  @return @c const_iterator to a pointer to LArCellCollection.
+   */
   const std::vector<LArCellCollection*>::const_iterator
-		find(const HWIdentifier& id) const ;
-  /** @brief Finds a collection by its ROD ID
-  *   @param[in] Read Out ID as provided by RegionSelector.
-  *   @return @c const_iterator to a pointer to LArCellCollection.
-  */
-  const std::vector<LArCellCollection*>::const_iterator
-		find(const unsigned int& id) ;
-  /** @brief Each Collection contains data from 2 FEBs.
-  *   @return for each collection the ID of the second FEB.
-  */
-  HWIdentifier findsec(const unsigned int& id) const ;
-  /** method to apply correction based on the luminosity
-  *  to the energy
-  */
-  void applyBCIDCorrection(const unsigned int& rodid);
+  find(const HWIdentifier& id) const ;
 
-  /** destructor */
-  virtual ~LArCellCont() { };
+  /** @brief Finds a collection by its ROD ID
+   *  @param[in] Read Out ID as provided by RegionSelector.
+   *  @return @c const_iterator to a pointer to LArCellCollection.
+   */
+  const std::vector<LArCellCollection*>::const_iterator
+  find(unsigned int id) ;
+
+  /** @brief Each Collection contains data from 2 FEBs.
+   *  @return for each collection the ID of the second FEB.
+   */
+  HWIdentifier findsec(unsigned int id) const ;
+
+  /** method to apply correction based on the luminosity
+   *  to the energy
+   */
+  void applyBCIDCorrection(unsigned int rodid);
 
   /** initialize method. Builds all cells and collections. */
   StatusCode initialize( const LArRoIMap& roiMap,
@@ -95,39 +97,39 @@ class LArCellCont : public std::vector<LArCellCollection*>
 
 private:    
 
-	/** Hash ID Identifier mapping to collection index. */
-	LArRodIdHash m_hash;
-	/** Hardware to Source ID conversion */
-	Hid2RESrcID m_conv;
-	/** FEB Hardware Identifier for second FEBs in a
-	    Collection */
-	std::vector<HWIdentifier> m_second;
-	/** eventNumber of a given Collection */
-	std::vector<unsigned int> m_eventNumber ;
-	/** this event number */
-	unsigned int m_event;
-	/** One needs to destroy the TT vectors */
-	std::vector<DataVector<LArCell>*> m_vecs;
+  /** Hash ID Identifier mapping to collection index. */
+  LArRodIdHash m_hash;
+  /** Hardware to Source ID conversion */
+  Hid2RESrcID m_conv;
+  /** FEB Hardware Identifier for second FEBs in a
+      Collection */
+  std::vector<HWIdentifier> m_second;
+  /** eventNumber of a given Collection */
+  std::vector<unsigned int> m_eventNumber ;
+  /** this event number */
+  unsigned int m_event{0};
+  /** One needs to destroy the TT vectors */
+  std::vector<DataVector<LArCell>*> m_vecs;
 
-	/** A tool to help mask cells */
-	//const ILArBadChannelMasker  *m_masker;
-	/** A tool to help mask febs */
-	const ILArBadFebMasker *m_badFebMasker = nullptr;
-	/** List of Missing ROBs to be disabled at the RS */
-	std::vector<uint32_t> m_MissingROBs;
-	/** hash references to BCID */
-	std::vector< std::vector<int> > m_hashSym;
-	/** corrections for a given BCID */
-	std::vector<float> m_corrBCID;
-	/** index table */
-	std::map<HWIdentifier,int> m_indexset;
-        /** current lumi_block */
-        float m_lumi_block;
-	unsigned int m_bcid;
-	EventIDBase::event_number_t m_bcidEvt;
+  /** A tool to help mask cells */
+  //const ILArBadChannelMasker  *m_masker;
+  /** A tool to help mask febs */
+  const ILArBadFebMasker *m_badFebMasker = nullptr;
+  /** List of Missing ROBs to be disabled at the RS */
+  std::vector<uint32_t> m_MissingROBs;
+  /** hash references to BCID */
+  std::vector< std::vector<int> > m_hashSym;
+  /** corrections for a given BCID */
+  std::vector<float> m_corrBCID;
+  /** index table */
+  std::map<HWIdentifier, size_t> m_indexset;
+  /** current lumi_block */
+  unsigned int m_lumi_block{0};
+  unsigned int m_bcid{5000};
+  EventIDBase::event_number_t m_bcidEvt{5000};
 	
-	/** flag to only update cache when trying to apply corrections */
-	bool m_BCIDcache;
+  /** flag to only update cache when trying to apply corrections */
+  bool m_BCIDcache{false};
 };
 
 #endif

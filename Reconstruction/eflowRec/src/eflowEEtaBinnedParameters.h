@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef EFLOWBINNEDPARAMETERS_H
-#define EFLOWBINNEDPARAMETERS_H
+#ifndef EFLOWREC_EFLOWBINNEDPARAMETERS_H
+#define EFLOWREC_EFLOWBINNEDPARAMETERS_H
 
 /********************************************************************
 

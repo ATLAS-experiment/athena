@@ -1,0 +1,10 @@
+{
+    "TrkAnaOffl" : {
+        "enabled" : true,
+        "TestType"  : "Offline",
+        "RefType"   : "Truth",
+        "MatchingType"  : "TruthMatch",
+        "plotHitsOnTracksExpert" : true,
+        "unlinkedAsFakes" : false
+    }
+}

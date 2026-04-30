@@ -10,6 +10,15 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from enum import IntEnum
+
+
+class HardScatterStrategy(IntEnum):
+    SUM_PT2 = 0
+    SUM_PT = 1
+    SUM_PTW = 2
+    GNN = 3
+    HYY = 4
 
 
 def extractCollectionPrefix(track_collection_name):
@@ -92,7 +101,8 @@ def GoodRunsListSelectionToolCfg(flags, **kwargs):
         '2018': cvmfs + ''.join(GRLDict['GRL2018_Triggerno17e33prim']),
         '2022': cvmfs + ''.join(GRLDict['GRL2022']),
         '2023': cvmfs + ''.join(GRLDict['GRL2023']),
-        '2024': cvmfs + ''.join(GRLDict['GRL2024'])
+        '2024': cvmfs + ''.join(GRLDict['GRL2024']),
+        '2025': cvmfs + ''.join(GRLDict['GRL2025'])
     }
 
     acc.setPrivateTools(CompFactory.GoodRunsListSelectionTool(
@@ -118,9 +128,10 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
 
     acc.merge(HistogramDefinitionSvcCfg(flags))
     kwargs.setdefault('VertexContainerName', flags.PhysVal.IDPVM.PrimaryVertexContainer)
+    hs_strategy = HardScatterStrategy(flags.PhysVal.IDPVM.hardScatterStrategy)
     
     # if we are running with sumpT(w) hard scatter selection, we need to schedule jet finding
-    if flags.PhysVal.IDPVM.hardScatterStrategy in [2, 3]:
+    if hs_strategy in [HardScatterStrategy.SUM_PTW, HardScatterStrategy.GNN]:
 
         from InDetPhysValMonitoring.addRecoJetsConfig import (
             AddRecoJetsIfNotExistingCfg)
@@ -128,13 +139,13 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
             flags, flags.PhysVal.IDPVM.jetsNameForHardScatter))
 
     # if we are running with the GNN hard scatter selection, we need to schedule the dependencies
-    if flags.PhysVal.IDPVM.hardScatterStrategy == 3:
+    if hs_strategy == HardScatterStrategy.GNN:
         from InDetConfig.InDetGNNHardScatterSelectionConfig import (
             GNNSequenceCfg)
         acc.merge(GNNSequenceCfg(flags))
 
     # if we are running with the HGam hard scatter selection, we need to schedule the NN
-    if flags.PhysVal.IDPVM.hardScatterStrategy == 4:
+    if hs_strategy == HardScatterStrategy.HYY:
         from DerivationFrameworkHiggs.HIGG1D1CustomVertexConfig import DiPhotonVertexCfg
         acc.merge(DiPhotonVertexCfg(flags))
 
@@ -169,7 +180,7 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
             kwargs.setdefault("TruthSelectionTool", acc.popToolsAndMerge(
                 InDetRttTruthSelectionToolCfg(flags)))
 
-        doHyyHSSelection = flags.PhysVal.IDPVM.hardScatterStrategy == 4
+        doHyyHSSelection = hs_strategy == HardScatterStrategy.HYY
         if 'hardScatterSelectionTool' not in kwargs:
             from InDetConfig.InDetHardScatterSelectionToolConfig import (
                 InDetHardScatterSelectionToolCfg)
@@ -177,7 +188,7 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
                 InDetHardScatterSelectionToolCfg(
                     flags,
                     RedoHardScatter=not doHyyHSSelection,
-                    SelectionMode=flags.PhysVal.IDPVM.hardScatterStrategy,
+                    SelectionMode=hs_strategy,
                     # make sure the HS selection tool picks up the correct jets
                     JetContainer=flags.PhysVal.IDPVM.jetsNameForHardScatter,
                     VertexContainer=flags.PhysVal.IDPVM.PrimaryVertexContainer
@@ -230,6 +241,9 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
         # Disable vertex container for now
         kwargs.setdefault("doTRTExtensionPlots", False)
         kwargs.setdefault("isITk", True)
+
+    if flags.Reco.EnableHGTDExtension:
+        kwargs.setdefault("hasHGTDReco", True)
 
     if flags.PhysVal.IDPVM.doTechnicalEfficiency:
         kwargs.setdefault("fillTechnicalEfficiency", True)

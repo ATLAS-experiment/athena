@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "CaloCalibHitRec/CalibHitToCaloCellTool.h"
-
+#include "CalibHitToCaloCellTool.h"
 
 // Calo include
 #include "CaloIdentifier/CaloDM_ID.h"
@@ -23,38 +22,15 @@
 #include "TileEvent/TileCell.h"
 #include "TruthUtils/HepMCHelpers.h"
 
+#include <memory>
+
 CalibHitToCaloCellTool::CalibHitToCaloCellTool(const std::string& t, const std::string& n, const IInterface* p)
-  : AthAlgTool(t,n,p),
-    m_caloGain((int)CaloGain::LARLOWGAIN),
-    m_caloCell_Tot("TotalCalibCell"), m_caloCell_Vis("VisCalibCell"), 
-    m_caloCell_Em(""), m_caloCell_NonEm("")
+  : AthAlgTool(t,n,p)
 {
   declareInterface<CalibHitToCaloCellTool>(this);
-
-  declareProperty("CaloGain", m_caloGain);
-  declareProperty("CalibHitContainers", m_calibHitContainerNames);
- 
-  declareProperty("CellTotEne",    m_caloCell_Tot);
-  declareProperty("CellVisEne",    m_caloCell_Vis);
-  declareProperty("CellEmEne",     m_caloCell_Em);
-  declareProperty("CellNonEmEne",  m_caloCell_NonEm);
-  declareProperty("DoTile",        m_doTile=false);
-
-  declareProperty("OutputCellContainerName", m_outputCellContainerName = "TruthCells");
-  declareProperty("OutputClusterContainerName", m_outputClusterContainerName = "TruthClusters");
-  
-  m_tileActiveHitCnt   = "TileCalibHitActiveCell";
-  m_tileInactiveHitCnt = "TileCalibHitInactiveCell";
-  m_tileDMHitCnt       = "TileCalibHitDeadMaterial";
-  m_larActHitCnt   = "LArCalibrationHitActive";
-  m_larInactHitCnt = "LArCalibrationHitInactive";
-  m_larDMHitCnt    = "LArCalibrationHitDeadMaterial";
-
 }
 
-
 CalibHitToCaloCellTool::~CalibHitToCaloCellTool() = default;
-
 
 ////////////////   INITIALIZE   ///////////////////////
 StatusCode CalibHitToCaloCellTool::initialize() 
@@ -82,7 +58,6 @@ StatusCode CalibHitToCaloCellTool::initialize()
 }
 
 
-/////////////////   EXECUTE   //////////////////////
 StatusCode CalibHitToCaloCellTool::processCalibHitsFromParticle() const
 {
   ATH_MSG_DEBUG("in calibHitToCaloCellTool");
@@ -90,9 +65,6 @@ StatusCode CalibHitToCaloCellTool::processCalibHitsFromParticle() const
   SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
   ATH_CHECK(caloMgrHandle.isValid());
   const CaloDetDescrManager* caloDDMgr = *caloMgrHandle;
-
-  //CaloCellContainer* truthCells[3];                                                                                                                                                                       
-  //xAOD::CaloClusterContainer* truthClusters[3];                                                                                                                                                           
   
   std::vector<SG::WriteHandle<CaloCellContainer> > truthCells;
   std::vector<SG::WriteHandle<xAOD::CaloClusterContainer> > truthClusters;
@@ -134,10 +106,10 @@ StatusCode CalibHitToCaloCellTool::processCalibHitsFromParticle() const
   
   std::vector<Identifier> ID;
 
-
-  std::vector<CaloCell*> CellsEtot;
-  std::vector<CaloCell*> CellsEvis;
-  std::vector<CaloCell*> CellsEem;
+  using CellPtr = std::unique_ptr<CaloCell>;
+  std::vector<CellPtr> CellsEtot;
+  std::vector<CellPtr> CellsEvis;
+  std::vector<CellPtr> CellsEem;
   	    
   int nhitsInactive = 0;
 
@@ -172,19 +144,19 @@ StatusCode CalibHitToCaloCellTool::processCalibHitsFromParticle() const
       //check if this ID is LAr or Tile
       if(m_caloCell_ID->is_lar(id)) {
 	ATH_MSG_VERBOSE( "Found LAr cell" );	
-	const CaloDetDescrElement* caloDDE = caloDDMgr->get_element(id);	  
-	CellsEtot.push_back(new LArCell(caloDDE, id, Etot, 0., 0, 0, (CaloGain::CaloGain)m_caloGain)) ;
-	CellsEvis.push_back(new LArCell(caloDDE, id, Evis, 0., 0, 0, (CaloGain::CaloGain)m_caloGain));
-	CellsEem.push_back(new LArCell(caloDDE, id, Eem, 0., 0, 0, (CaloGain::CaloGain)m_caloGain)); 
+	const CaloDetDescrElement* caloDDE = caloDDMgr->get_element(id);
+	CellsEtot.push_back(CellPtr{new LArCell(caloDDE, id, Etot, 0., 0, 0, (CaloGain::CaloGain)m_caloGain.value())});
+	CellsEvis.push_back(CellPtr{new LArCell(caloDDE, id, Evis, 0., 0, 0, (CaloGain::CaloGain)m_caloGain.value())});
+	CellsEem.push_back(CellPtr{new LArCell(caloDDE, id, Eem, 0., 0, 0, (CaloGain::CaloGain)m_caloGain.value())});
 	ID.push_back(id);
 	++nchan;
       }
       else if(m_caloCell_ID->is_tile(id)) {
 	ATH_MSG_VERBOSE( "Found Tile cell" );
 	const CaloDetDescrElement* caloDDE = caloDDMgr->get_element(id);
-	CellsEtot.push_back(new TileCell(caloDDE, id, Etot, 0., 0, 0, (CaloGain::CaloGain)m_caloGain)) ;
-	CellsEvis.push_back(new TileCell(caloDDE, id, Evis, 0., 0, 0, (CaloGain::CaloGain)m_caloGain));
-	CellsEem.push_back(new TileCell(caloDDE, id, Eem, 0., 0, 0, (CaloGain::CaloGain)m_caloGain)); 
+	CellsEtot.push_back(CellPtr{new TileCell(caloDDE, id, Etot, 0., 0, 0, (CaloGain::CaloGain)m_caloGain.value())});
+	CellsEvis.push_back(CellPtr{new TileCell(caloDDE, id, Evis, 0., 0, 0, (CaloGain::CaloGain)m_caloGain.value())});
+	CellsEem.push_back(CellPtr{new TileCell(caloDDE, id, Eem, 0., 0, 0, (CaloGain::CaloGain)m_caloGain.value())});
 	ID.push_back(id);
 	++nchan;
       }
@@ -207,9 +179,9 @@ StatusCode CalibHitToCaloCellTool::processCalibHitsFromParticle() const
   
   for(int itr=0; itr!=nchan; itr++) {
     if(m_caloCell_ID->is_em(CellsEtot[itr]->ID())) {
-      truthCells[CalibHitUtils::EnergyTotal]->push_back(CellsEtot[itr]);
-      truthCells[CalibHitUtils::EnergyVisible]->push_back(CellsEvis[itr]);
-      truthCells[CalibHitUtils::EnergyEM]->push_back(CellsEem[itr]);
+      truthCells[CalibHitUtils::EnergyTotal]->push_back(std::move(CellsEtot[itr]));
+      truthCells[CalibHitUtils::EnergyVisible]->push_back(std::move(CellsEvis[itr]));
+      truthCells[CalibHitUtils::EnergyEM]->push_back(std::move(CellsEem[itr]));
       ++em_nchan;
     }
   }
@@ -219,9 +191,9 @@ StatusCode CalibHitToCaloCellTool::processCalibHitsFromParticle() const
 
   for(int itr=0; itr!=nchan; itr++)  {
     if(m_caloCell_ID->is_hec(CellsEtot[itr]->ID())) {
-      truthCells[CalibHitUtils::EnergyTotal]->push_back(CellsEtot[itr]);
-      truthCells[CalibHitUtils::EnergyVisible]->push_back(CellsEvis[itr]);
-      truthCells[CalibHitUtils::EnergyEM]->push_back(CellsEem[itr]);
+      truthCells[CalibHitUtils::EnergyTotal]->push_back(std::move(CellsEtot[itr]));
+      truthCells[CalibHitUtils::EnergyVisible]->push_back(std::move(CellsEvis[itr]));
+      truthCells[CalibHitUtils::EnergyEM]->push_back(std::move(CellsEem[itr]));
       ++hec_nchan;
     }
   }
@@ -231,9 +203,9 @@ StatusCode CalibHitToCaloCellTool::processCalibHitsFromParticle() const
 
   for(int itr=0; itr!=nchan; itr++) {
     if(m_caloCell_ID->is_fcal(CellsEtot[itr]->ID())) {
-      truthCells[CalibHitUtils::EnergyTotal]->push_back(CellsEtot[itr]);
-      truthCells[CalibHitUtils::EnergyVisible]->push_back(CellsEvis[itr]);
-      truthCells[CalibHitUtils::EnergyEM]->push_back(CellsEem[itr]);
+      truthCells[CalibHitUtils::EnergyTotal]->push_back(std::move(CellsEtot[itr]));
+      truthCells[CalibHitUtils::EnergyVisible]->push_back(std::move(CellsEvis[itr]));
+      truthCells[CalibHitUtils::EnergyEM]->push_back(std::move(CellsEem[itr]));
       ++fcal_nchan;
     }
   }
@@ -243,9 +215,9 @@ StatusCode CalibHitToCaloCellTool::processCalibHitsFromParticle() const
 
   for(int itr=0; itr!=nchan; itr++) {
     if((m_caloCell_ID->is_tile(CellsEtot[itr]->ID()))) {
-      truthCells[CalibHitUtils::EnergyTotal]->push_back(CellsEtot[itr]);
-      truthCells[CalibHitUtils::EnergyVisible]->push_back(CellsEvis[itr]);
-      truthCells[CalibHitUtils::EnergyEM]->push_back(CellsEem[itr]);
+      truthCells[CalibHitUtils::EnergyTotal]->push_back(std::move(CellsEtot[itr]));
+      truthCells[CalibHitUtils::EnergyVisible]->push_back(std::move(CellsEvis[itr]));
+      truthCells[CalibHitUtils::EnergyEM]->push_back(std::move(CellsEem[itr]));
       ++tile_nchan;
     }
   }
@@ -287,12 +259,3 @@ StatusCode CalibHitToCaloCellTool::processCalibHitsFromParticle() const
   ATH_MSG_DEBUG("execute() completed successfully" );
   return StatusCode::SUCCESS;
 }
-
-
-/////////////////   FINALIZE   //////////////////////
-StatusCode CalibHitToCaloCellTool::finalize()
-{
-  ATH_MSG_INFO("finalize() successfully" );
-  return StatusCode::SUCCESS;
-}
-

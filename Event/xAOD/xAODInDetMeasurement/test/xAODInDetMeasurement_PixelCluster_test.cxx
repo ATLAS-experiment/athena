@@ -62,7 +62,6 @@ void fill( xAOD::PixelCluster& pixelCluster) {
 
     pixelCluster.globalPosition() = globalPosition;
     pixelCluster.setToTlist(tots);
-    pixelCluster.setTotalToT( xAOD::xAODInDetMeasurement::Utilities::computeTotalToT(tots) );
     pixelCluster.setChannelsInPhiEta(3, 2);
     pixelCluster.setWidthInEta(0.05);
 
@@ -78,7 +77,7 @@ void print ( const xAOD::PixelCluster& pixelCluster) {
     std::cout << " ----------PIXEL CLUSTER INFO ----------- " << std::endl;
     std::cout << "Global Position = " << pixelCluster.globalPosition() << std::endl;
     std::cout << "RDOs = " << pixelCluster.rdoList() << std::endl;
-    std::cout << "ToTs = " << pixelCluster.totList() << " with total ToT = " << pixelCluster.totalToT() << std::endl;
+    std::cout << "ToTs = " << pixelCluster.totList() << " with total ToT = " <<  xAOD::xAODInDetMeasurement::Utilities::computeTotalToT(pixelCluster) << std::endl;
     std::cout << "Dimensions = " << pixelCluster.channelsInPhi() << ", " << pixelCluster.channelsInEta() << std::endl;
     std::cout << "Width = " << pixelCluster.widthInEta() << std::endl;
 

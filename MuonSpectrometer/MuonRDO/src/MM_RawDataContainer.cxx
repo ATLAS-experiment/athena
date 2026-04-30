@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonRDO/MM_RawDataContainer.h"
@@ -24,9 +24,16 @@ Muon::MM_RawDataContainer::MM_RawDataContainer(MM_RawDataCollection_Cache* cache
 // Destructor.
 Muon::MM_RawDataContainer::~MM_RawDataContainer() = default;
 
-const CLID& Muon::MM_RawDataContainer::classID()    
+CLID Muon::MM_RawDataContainer::classID()
 {
   return ClassID_traits<MM_RawDataContainer>::ID();       
+}
+
+
+const CLID& Muon::MM_RawDataContainer::clID() const
+{
+  static const CLID cid = classID();
+  return cid;
 }
 
 

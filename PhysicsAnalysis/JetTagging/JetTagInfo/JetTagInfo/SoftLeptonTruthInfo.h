@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGINFO_SOFTLEPTONTRUTHINFO_H
@@ -17,20 +17,14 @@ namespace Analysis
 class SoftLeptonTruthInfo : public BaseTagInfo
 {
 public:
-    /** default constructor */
-    SoftLeptonTruthInfo();
-
+    SoftLeptonTruthInfo() = default;
     /** constructor with info type */
     SoftLeptonTruthInfo(const TagInfoType&);
-    
-    /** copy destructor */
-    SoftLeptonTruthInfo(const SoftLeptonTruthInfo& SoftLeptonTruthInfo);
-    
-    /** assigenment operator */
-    SoftLeptonTruthInfo &operator= (const SoftLeptonTruthInfo& rhs);
-
-    /** default destructor */
-    virtual ~SoftLeptonTruthInfo();
+    SoftLeptonTruthInfo(const SoftLeptonTruthInfo& SoftLeptonTruthInfo) = default;
+    SoftLeptonTruthInfo &operator= (const SoftLeptonTruthInfo& rhs) = default;
+    SoftLeptonTruthInfo(SoftLeptonTruthInfo&& SoftLeptonTruthInfo) noexcept = default;
+    SoftLeptonTruthInfo &operator= (SoftLeptonTruthInfo&& rhs) noexcept = default;
+    virtual ~SoftLeptonTruthInfo() = default;
     
     /** clone method */
     virtual SoftLeptonTruthInfo* clone() const;
@@ -47,7 +41,7 @@ public:
 
 private:
 
-    std::vector<SLTrueInfo> m_sltrueinfo;
+    std::vector<SLTrueInfo> m_sltrueinfo{};
 
 }; // End class
 

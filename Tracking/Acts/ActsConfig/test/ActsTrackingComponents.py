@@ -25,8 +25,6 @@ if __name__ == "__main__":
                       "ActsLargeRadius",
                       "ActsHeavyIon",
                       "ActsValidateClusters",
-                      "ActsValidateSpacePoints",
-                      "ActsValidateSeeds",
                       "ActsValidateTracks",
                       "ActsValidateAmbiguityResolution"]
 
@@ -45,6 +43,5 @@ if __name__ == "__main__":
     printConfiguration(current_flags)
 
     # Test workflow with Conversion pass
-    flags.Acts.doITkConversion = True
     current_flags = deduceConfiguration(flags, "ActsConversion")
     printConfiguration(current_flags)

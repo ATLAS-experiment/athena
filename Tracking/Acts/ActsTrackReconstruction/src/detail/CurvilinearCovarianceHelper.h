@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRK_CURVILINEARCOVARIANCEHELPER_H
 #define ACTSTRK_CURVILINEARCOVARIANCEHELPER_H
 
 #include "Acts/Geometry/GeometryContext.hpp"
-#include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/EventData/BoundTrackParameters.hpp"
 #include "Acts/Propagator/detail/JacobianEngine.hpp"
 
 namespace ActsTrk::detail {

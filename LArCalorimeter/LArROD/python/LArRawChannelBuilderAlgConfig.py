@@ -1,6 +1,6 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import LHCPeriod, ProductionStep
+from AthenaConfiguration.Enums import LHCPeriod, ProductionStep, Format
 from LArRecUtils.LArADC2MeVCondAlgConfig import LArADC2MeVCondAlgCfg
 from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBCfg
 from LArRecUtils.LArRecUtilsConfig import LArOFCCondAlgCfg
@@ -15,7 +15,7 @@ def LArRawChannelBuilderAlgCfg(flags, **kwargs):
     obj = "AthenaAttributeList"
     dspkey = 'Run2DSPThresholdsKey'
     from IOVDbSvc.IOVDbSvcConfig import addFolders
-    if flags.Input.isMC:
+    if flags.Input.isMC and flags.Input.Format != Format.BS:
         # need OFC configuration, which includes appropriate ElecCalibDb
         acc.merge(LArOFCCondAlgCfg(flags))
         kwargs.setdefault("LArRawChannelKey", "LArRawChannels")
@@ -36,7 +36,10 @@ def LArRawChannelBuilderAlgCfg(flags, **kwargs):
             kwargs.setdefault("LArDigitKey", "LArDigitContainer_MC")
     else:
         acc.merge(LArElecCalibDBCfg(flags,("OFC","Shape","Pedestal")))
-        if flags.Overlay.DataOverlay:
+        if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing:
+            kwargs.setdefault("LArDigitKey", f"{flags.Overlay.BkgPrefix}LArDigitContainer_data")
+            kwargs.setdefault("LArRawChannelKey", "LArRawChannels_FromDigits")
+        elif flags.Overlay.DataOverlay:
             kwargs.setdefault("LArDigitKey", "LArDigitContainer_MC")
             kwargs.setdefault("LArRawChannelKey", "LArRawChannels")
         else:

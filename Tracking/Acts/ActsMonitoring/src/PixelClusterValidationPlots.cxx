@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/PixelClusterValidationPlots.h"
 #include "InDetMeasurementUtilities/Helpers.h"
+#include "xAODInDetMeasurement/Utilities.h"
 
 namespace ActsTrk {
 
@@ -141,8 +142,8 @@ namespace ActsTrk {
       m_eta_barrel->Fill(globalPosition.eta(), beamSpotWeight);
       m_perp_barrel->Fill(globalPosition.perp(), beamSpotWeight);
       
-      m_total_charge_barrel->Fill(cluster->totalCharge(), beamSpotWeight);
-      m_total_tot_barrel->Fill(cluster->totalToT(), beamSpotWeight);
+      m_total_charge_barrel->Fill( xAOD::xAODInDetMeasurement::Utilities::computeTotalCharge(*cluster), beamSpotWeight);
+      m_total_tot_barrel->Fill( xAOD::xAODInDetMeasurement::Utilities::computeTotalToT(*cluster), beamSpotWeight);
 
       m_omega_x_barrel->Fill(omegax, beamSpotWeight);
       m_omega_y_barrel->Fill(omegay, beamSpotWeight);
@@ -187,8 +188,8 @@ namespace ActsTrk {
       m_eta_endcap->Fill(globalPosition.eta(), beamSpotWeight);
       m_perp_endcap->Fill(globalPosition.perp(), beamSpotWeight);
 
-      m_total_charge_endcap->Fill(cluster->totalCharge(), beamSpotWeight);
-      m_total_tot_endcap->Fill(cluster->totalToT(), beamSpotWeight);
+      m_total_charge_endcap->Fill( xAOD::xAODInDetMeasurement::Utilities::computeTotalCharge(*cluster), beamSpotWeight);
+      m_total_tot_endcap->Fill( xAOD::xAODInDetMeasurement::Utilities::computeTotalToT(*cluster), beamSpotWeight);
 
       m_omega_x_endcap->Fill(omegax, beamSpotWeight);
       m_omega_y_endcap->Fill(omegay, beamSpotWeight);

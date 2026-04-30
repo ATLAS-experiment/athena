@@ -56,7 +56,7 @@ def TruthHitAssociationCfg(flags):
         else:
             simHits = "sTGC_SDO"
         result.merge(MeasToSimHitAssocAlgCfg(flags,
-                                             name=f"{cont_name}PrepDataToSimHitAssoc",
+                                             name=f"Muon{cont_name}ToSimHitAssoc",
                                              SimHits = simHits,
                                              Measurements=cont_name))
     return result
@@ -65,31 +65,31 @@ def SimHitToTruthPartAlgCfg(flags, useSDO = False):
     result = ComponentAccumulator()
     if flags.Detector.GeometryMDT: 
         container = "xMdtSimHits" if not useSDO else "MDT_SDO"
-        the_alg = CompFactory.MuonR4.SimHitToTruthPartAssocAlg("MuonMdtSimHitToTruthMappingAlg",
+        the_alg = CompFactory.MuonR4.SimHitToTruthPartAssocAlg("MuonMdtSimHitToTruthParticleAssoc",
                                                         SimHitContainer = container, 
                                                         HitIdDecoration = "truthMdtHits")
         result.addEventAlgo(the_alg)
     if flags.Detector.GeometryRPC:
         container = "xRpcSimHits" if not useSDO else "RPC_SDO"
-        the_alg = CompFactory.MuonR4.SimHitToTruthPartAssocAlg("MuonRpcSimHitToTruthMappingAlg",
+        the_alg = CompFactory.MuonR4.SimHitToTruthPartAssocAlg("MuonRpcSimHitToTruthParticleAssoc",
                                                         SimHitContainer = container, 
                                                         HitIdDecoration = "truthRpcHits")
         result.addEventAlgo(the_alg)
     if flags.Detector.GeometryTGC: 
         container = "xTgcSimHits" if not useSDO else "TGC_SDO"
-        the_alg = CompFactory.MuonR4.SimHitToTruthPartAssocAlg("MuonTgcSimHitToTruthMappingAlg",
+        the_alg = CompFactory.MuonR4.SimHitToTruthPartAssocAlg("MuonTgcSimHitToTruthParticleAssoc",
                                                         SimHitContainer = container,
                                                         HitIdDecoration = "truthTgcHits")
         result.addEventAlgo(the_alg)       
     if flags.Detector.GeometryMM: 
         container = "xMmSimHits" if not useSDO else "MM_SDO"
-        the_alg = CompFactory.MuonR4.SimHitToTruthPartAssocAlg("MuonMmSimHitToTruthMappingAlg",
+        the_alg = CompFactory.MuonR4.SimHitToTruthPartAssocAlg("MuonMmSimHitToTruthParticleAssoc",
                                                         SimHitContainer = container, 
                                                         HitIdDecoration = "truthMMHits")
         result.addEventAlgo(the_alg) 
     if flags.Detector.GeometrysTGC: 
         container = "xStgcSimHits" if not useSDO else "sTGC_SDO"
-        the_alg = CompFactory.MuonR4.SimHitToTruthPartAssocAlg("MuonsTGCSimHitToTruthMappingAlg",
+        the_alg = CompFactory.MuonR4.SimHitToTruthPartAssocAlg("MuonsTGCSimHitToTruthParticleAssoc",
                                                         SimHitContainer = container, 
                                                         HitIdDecoration = "truthStgcHits")
         result.addEventAlgo(the_alg) 
@@ -151,7 +151,7 @@ def TrackToTruthPartAssocCfg(flags, **kwargs):
 @AccumulatorCache
 def MuonTruthAlgsCfg(flags, useSDO=True, recoAssoc = True):
     result = ComponentAccumulator()
-    if not flags.Input.isMC:
+    if not flags.Muon.setupTruthAlgorithms:
         return result
     if useSDO and recoAssoc:
         result.merge(TruthHitAssociationCfg(flags))

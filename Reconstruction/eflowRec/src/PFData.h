@@ -1,5 +1,9 @@
-#ifndef PFDATA_H
-#define PFDATA_H
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+
+#ifndef EFLOWREC_PFDATA_H
+#define EFLOWREC_PFDATA_H
 
 #include "EtaPhiLUT.h"
 

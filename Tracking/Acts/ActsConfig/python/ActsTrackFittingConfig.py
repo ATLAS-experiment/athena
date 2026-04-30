@@ -14,8 +14,12 @@ def ActsFitterCfg(flags,
     fitterKind = flags.Acts.trackFitterType  if fitterKind is None else fitterKind
 
     if flags.Acts.fitFromPRD:       
-        from TrkConfig.TrkRIO_OnTrackCreatorConfig import ITkRotCreatorCfg
-        kwargs.setdefault('RotCreatorTool', acc.popToolsAndMerge(ITkRotCreatorCfg(flags)))
+        if flags.Detector.GeometryITk:
+            from TrkConfig.TrkRIO_OnTrackCreatorConfig import ITkRotCreatorCfg
+            kwargs.setdefault('RotCreatorTool', acc.popToolsAndMerge(ITkRotCreatorCfg(flags)))
+        elif flags.Detector.GeometryID:
+            from TrkConfig.TrkRIO_OnTrackCreatorConfig import InDetRotCreatorCfg
+            kwargs.setdefault('RotCreatorTool', acc.popToolsAndMerge(InDetRotCreatorCfg(flags)))
 
 
     # Make sure this is set correctly!

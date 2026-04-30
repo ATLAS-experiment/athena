@@ -90,7 +90,7 @@ def PassBackG4TrackProcessorUserActionToolCfg(flags, name="PassBackG4TrackProces
 
 def ATLFAST_G4TrackProcessorUserActionToolCfg(flags, name="ATLFAST_G4TrackProcessorUserActionTool", **kwargs):
     result = ComponentAccumulator()
-    if flags.Sim.ISF.Simulator in [SimulationFlavour.PassBackG4MT, SimulationFlavour.ATLFASTIIMT, SimulationFlavour.ATLFAST3MT, SimulationFlavour.ATLFAST3MT_QS]:
+    if flags.Sim.ISF.Simulator in [SimulationFlavour.PassBackG4MT, SimulationFlavour.ATLFASTIIMT, SimulationFlavour.ATLFAST3MT, SimulationFlavour.ATLFAST3MT_QS, SimulationFlavour.ATLFAST3F_ACTSMT]:
         kwargs.setdefault("ParticleBroker", "")
     elif flags.Sim.ISF.Simulator in [SimulationFlavour.ATLFASTIIF_G4MS, SimulationFlavour.ATLFAST3F_G4MS]:
         kwargs.setdefault("ParticleBroker", result.getPrimaryAndMerge(ATLFAST_ParticleBrokerSvcCfg(flags)))

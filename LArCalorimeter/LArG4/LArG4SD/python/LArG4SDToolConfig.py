@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -11,18 +11,39 @@ def LArActiveSensitiveDetectorToolCfg(flags, name="LArActiveSensitiveDetector", 
     result = ComponentAccumulator()
 
     ## Main configuration
-    if flags.GeoModel.AtlasVersion not in ["tb_LArH6_2003","tb_LArH6_2002"]:
+    ## Configuration when the EMEC is described with the custom solid implementation
+    if flags.GeoModel.AtlasVersion not in ["tb_LArH6_2003","tb_LArH6_2002"] and not flags.GeoModel.EMECStandard:
         kwargs.setdefault("StacVolumes",["LArMgr::LAr::EMB::STAC"])
         kwargs.setdefault("PresamplerVolumes",["LArMgr::LAr::Barrel::Presampler::Module"])
         kwargs.setdefault("NegIWVolumes",["LArMgr::LAr::EMEC::Neg::InnerWheel"])
         kwargs.setdefault("NegOWVolumes",["LArMgr::LAr::EMEC::Neg::OuterWheel"])
         kwargs.setdefault("NegBOBarretteVolumes",["LArMgr::LAr::EMEC::Neg::BackOuterBarrette::Module::Phidiv"])
-    if flags.GeoModel.AtlasVersion!="tb_LArH6_2003":
+    if flags.GeoModel.AtlasVersion!="tb_LArH6_2003" and not flags.GeoModel.EMECStandard:
         kwargs.setdefault("PosIWVolumes",["LArMgr::LAr::EMEC::Pos::InnerWheel"])
         kwargs.setdefault("PosOWVolumes",["LArMgr::LAr::EMEC::Pos::OuterWheel"])
         kwargs.setdefault("PosBOBarretteVolumes",["LArMgr::LAr::EMEC::Pos::BackOuterBarrette::Module::Phidiv"])
         kwargs.setdefault("PresVolumes", ["LArMgr::LAr::Endcap::Presampler::LiquidArgon"])
         kwargs.setdefault("SliceVolumes",["LArMgr::LAr::HEC::Module::Depth::Slice"])
+
+    # If the EMEC is described with standard G4 shapes (G4GenericTrap) add the corresponding Slices volumes to the SD definition
+    if flags.GeoModel.AtlasVersion not in ["tb_LArH6_2003","tb_LArH6_2002"] and flags.GeoModel.EMECStandard:
+        kwargs.setdefault("StacVolumes",["LArMgr::LAr::EMB::STAC"])
+        kwargs.setdefault("PresamplerVolumes",["LArMgr::LAr::Barrel::Presampler::Module"])
+        kwargs.setdefault("NegIWVolumes",["LArMgr::LAr::EMEC::Neg::InnerWheel",
+                                          "LArMgr::LAr::EMEC::Neg::InnerWheel::Slice*"])
+        kwargs.setdefault("NegOWVolumes",["LArMgr::LAr::EMEC::Neg::OuterWheel",
+                                          "LArMgr::LAr::EMEC::Neg::OuterWheel::Slice*"]) 
+        kwargs.setdefault("NegBOBarretteVolumes",["LArMgr::LAr::EMEC::Neg::BackOuterBarrette::Module::Phidiv"])
+    
+    if flags.GeoModel.AtlasVersion!="tb_LArH6_2003" and flags.GeoModel.EMECStandard:
+        kwargs.setdefault("PosIWVolumes",["LArMgr::LAr::EMEC::Pos::InnerWheel",
+                                         "LArMgr::LAr::EMEC::Pos::InnerWheel::Slice*"])
+        kwargs.setdefault("PosOWVolumes",["LArMgr::LAr::EMEC::Pos::OuterWheel",
+                                          "LArMgr::LAr::EMEC::Pos::OuterWheel::Slice*"])
+        kwargs.setdefault("PosBOBarretteVolumes",["LArMgr::LAr::EMEC::Pos::BackOuterBarrette::Module::Phidiv"])
+        kwargs.setdefault("PresVolumes", ["LArMgr::LAr::Endcap::Presampler::LiquidArgon"])
+        kwargs.setdefault("SliceVolumes",["LArMgr::LAr::HEC::Module::Depth::Slice"])
+
     if flags.GeoModel.AtlasVersion not in ["tb_LArH6_2002"]:
         kwargs.setdefault("FCAL1Volumes",["LArMgr::LAr::FCAL::Module1::Gap"])
         kwargs.setdefault("FCAL2Volumes",["LArMgr::LAr::FCAL::Module2::Gap"])
@@ -30,7 +51,7 @@ def LArActiveSensitiveDetectorToolCfg(flags, name="LArActiveSensitiveDetector", 
     # Running PID calibration hits?
     kwargs.setdefault("ParticleID",flags.Sim.ParticleID)
     # No effect currently
-    kwargs.setdefault("OutputCollectionNames", ["LArCalibrationHitActive"])
+    kwargs.setdefault("OutputCollectionNames", ["LArCalibrationHitActive", "SR_LArCalibrationHitActive"])
 
     from LArG4Barrel.LArG4BarrelConfig import BarrelCalibrationCalculatorCfg, BarrelPresamplerCalibrationCalculatorCfg
     kwargs.setdefault("EMBPSCalibrationCalculator",
@@ -331,7 +352,8 @@ def LArHECSensitiveDetectorCfg(flags, name="LArHECSensitiveDetector", **kwargs):
 def LArInactiveSensitiveDetectorToolCfg(flags, name="LArInactiveSensitiveDetector", **kwargs):
     result = ComponentAccumulator()
     ## Main configuration
-    if flags.GeoModel.AtlasVersion not in ["tb_LArH6_2003","tb_LArH6_2002"]:
+    # Configuration when the EMEC is described with the custom solid implementation
+    if flags.GeoModel.AtlasVersion not in ["tb_LArH6_2003","tb_LArH6_2002"] and not flags.GeoModel.EMECStandard:
         kwargs.setdefault("BarrelPreVolumes",["LArMgr::LAr::Barrel::Presampler::Cathode*",
                                               "LArMgr::LAr::Barrel::Presampler::Anode*",
                                               "LArMgr::LAr::Barrel::Presampler::Prep*"])
@@ -393,7 +415,7 @@ def LArInactiveSensitiveDetectorToolCfg(flags, name="LArInactiveSensitiveDetecto
                                              "LArMgr::LAr::HEC::Module::Depth::Slice::TieRod",
                                              "LArMgr::LAr::HEC::Module::Depth::Slice::Electrode::Copper",
                                              "LArMgr::LAr::HEC::Module::Depth::Slice::Electrode"])
-    if flags.GeoModel.AtlasVersion=="tb_LArH6_2002":
+    if flags.GeoModel.AtlasVersion=="tb_LArH6_2002" and not flags.GeoModel.EMECStandard:
         kwargs.setdefault("ECPosInVolumes", ["LArMgr::LAr::EMEC::Pos::InnerWheel::Absorber",
                                              "LArMgr::LAr::EMEC::Pos::InnerWheel::Electrode"])
         kwargs.setdefault("ECPosOutVolumes",["LArMgr::LAr::EMEC::Pos::OuterWheel::Electrode",
@@ -402,6 +424,80 @@ def LArInactiveSensitiveDetectorToolCfg(flags, name="LArInactiveSensitiveDetecto
                                              "LArMgr::LAr::HEC::Module::Depth::Slice::Electrode",
                                              "LArMgr::LAr::HEC::Module::Depth::Slice::Electrode::Copper",
                                              "LArMgr::LAr::HEC::Module::Depth::Slice::TieRod"])
+     
+    # If the EMEC is described with standard G4 shapes (G4GenericTrap) add the corresponding Slices volumes to the SD definition
+    if flags.GeoModel.AtlasVersion not in ["tb_LArH6_2003","tb_LArH6_2002"] and flags.GeoModel.EMECStandard:
+        kwargs.setdefault("BarrelPreVolumes",["LArMgr::LAr::Barrel::Presampler::Cathode*",
+                                              "LArMgr::LAr::Barrel::Presampler::Anode*",
+                                              "LArMgr::LAr::Barrel::Presampler::Prep*"])
+        kwargs.setdefault("BarrelVolumes",["LArMgr::LAr::EMB::*::Straight",
+                                           "LArMgr::LAr::EMB::*::*Fold"])
+        kwargs.setdefault("ECPosInVolumes", ["LArMgr::LAr::EMEC::Pos::InnerWheel::Absorber*",
+                                             "LArMgr::LAr::EMEC::Pos::InnerWheel::Electrode*",
+                                             "LArMgr::LAr::EMEC::Pos::InnerWheel::Glue*",
+                                             "LArMgr::LAr::EMEC::Pos::InnerWheel::Lead*",
+                                             "LArMgr::LAr::EMEC::Pos::InnerCone::Absorber",
+                                             "LArMgr::LAr::EMEC::Pos::InnerCone::Electrode",
+                                             "LArMgr::LAr::EMEC::Pos::InnerCone::Glue",
+                                             "LArMgr::LAr::EMEC::Pos::InnerCone::Lead",
+                                             "LArMgr::LAr::EMEC::Pos::InnerSlice*::Absorber",
+                                             "LArMgr::LAr::EMEC::Pos::InnerSlice*::Electrode",
+                                             "LArMgr::LAr::EMEC::Pos::InnerSlice*::Glue",
+                                             "LArMgr::LAr::EMEC::Pos::InnerSlice*::Lead"])
+        kwargs.setdefault("ECPosOutVolumes",["LArMgr::LAr::EMEC::Pos::OuterWheel::Lead*",
+                                             "LArMgr::LAr::EMEC::Pos::OuterWheel::Glue*",
+                                             "LArMgr::LAr::EMEC::Pos::OuterWheel::Electrode*",
+                                             "LArMgr::LAr::EMEC::Pos::OuterWheel::Absorber*",
+                                             "LArMgr::LAr::EMEC::Pos::Outer*Cone::Lead",
+                                             "LArMgr::LAr::EMEC::Pos::Outer*Cone::Glue",
+                                             "LArMgr::LAr::EMEC::Pos::Outer*Cone::Electrode",
+                                             "LArMgr::LAr::EMEC::Pos::Outer*Cone::Absorber",
+                                             "LArMgr::LAr::EMEC::Pos::OuterSlice*::Lead",
+                                             "LArMgr::LAr::EMEC::Pos::OuterSlice*::Glue",
+                                             "LArMgr::LAr::EMEC::Pos::OuterSlice*::Electrode",
+                                             "LArMgr::LAr::EMEC::Pos::OuterSlice*::Absorber"])
+        kwargs.setdefault("ECNegInVolumes", ["LArMgr::LAr::EMEC::Neg::InnerWheel::Absorber*",
+                                             "LArMgr::LAr::EMEC::Neg::InnerWheel::Electrode*",
+                                             "LArMgr::LAr::EMEC::Neg::InnerWheel::Glue*",
+                                             "LArMgr::LAr::EMEC::Neg::InnerWheel::Lead*",
+                                             "LArMgr::LAr::EMEC::Neg::InnerCone::Absorber",
+                                             "LArMgr::LAr::EMEC::Neg::InnerCone::Electrode",
+                                             "LArMgr::LAr::EMEC::Neg::InnerCone::Glue",
+                                             "LArMgr::LAr::EMEC::Neg::InnerCone::Lead",
+                                             "LArMgr::LAr::EMEC::Neg::InnerSlice*::Absorber",
+                                             "LArMgr::LAr::EMEC::Neg::InnerSlice*::Electrode",
+                                             "LArMgr::LAr::EMEC::Neg::InnerSlice*::Glue",
+                                             "LArMgr::LAr::EMEC::Neg::InnerSlice*::Lead"])
+        kwargs.setdefault("ECNegOutVolumes",["LArMgr::LAr::EMEC::Neg::OuterWheel::Lead*",
+                                             "LArMgr::LAr::EMEC::Neg::OuterWheel::Glue*",
+                                             "LArMgr::LAr::EMEC::Neg::OuterWheel::Electrode*",
+                                             "LArMgr::LAr::EMEC::Neg::OuterWheel::Absorber*",
+                                             "LArMgr::LAr::EMEC::Neg::Outer*Cone::Lead",
+                                             "LArMgr::LAr::EMEC::Neg::Outer*Cone::Glue",
+                                             "LArMgr::LAr::EMEC::Neg::Outer*Cone::Electrode",
+                                             "LArMgr::LAr::EMEC::Neg::Outer*Cone::Absorber",
+                                             "LArMgr::LAr::EMEC::Neg::OuterSlice*::Lead",
+                                             "LArMgr::LAr::EMEC::Neg::OuterSlice*::Glue",
+                                             "LArMgr::LAr::EMEC::Neg::OuterSlice*::Electrode",
+                                             "LArMgr::LAr::EMEC::Neg::OuterSlice*::Absorber"])
+        #kwargs.setdefault("HECVolumes",["LAr::HEC::Inactive"])
+        #kwargs.setdefault("HECLocalVolumes",["LAr::HEC::Local::Inactive"])
+        kwargs.setdefault("HECWheelVolumes",["LArMgr::LAr::HEC::Module::Depth::Absorber::TieRod",
+                                             "LArMgr::LAr::HEC::Module::Depth::Slice::TieRodDead",
+                                             "LArMgr::LAr::HEC::Module::Depth::Absorber",
+                                             "LArMgr::LAr::HEC::Module::Depth::Slice::TieRod",
+                                             "LArMgr::LAr::HEC::Module::Depth::Slice::Electrode::Copper",
+                                             "LArMgr::LAr::HEC::Module::Depth::Slice::Electrode"])
+    if flags.GeoModel.AtlasVersion=="tb_LArH6_2002" and flags.GeoModel.EMECStandard:
+        kwargs.setdefault("ECPosInVolumes", ["LArMgr::LAr::EMEC::Pos::InnerWheel::Absorber*",
+                                             "LArMgr::LAr::EMEC::Pos::InnerWheel::Electrode*"])
+        kwargs.setdefault("ECPosOutVolumes",["LArMgr::LAr::EMEC::Pos::OuterWheel::Electrode*",
+                                             "LArMgr::LAr::EMEC::Pos::OuterWheel::Absorber*"])
+        kwargs.setdefault("HECWheelVolumes",["LArMgr::LAr::HEC::Module::Depth::Absorber",
+                                             "LArMgr::LAr::HEC::Module::Depth::Slice::Electrode",
+                                             "LArMgr::LAr::HEC::Module::Depth::Slice::Electrode::Copper",
+                                             "LArMgr::LAr::HEC::Module::Depth::Slice::TieRod"])
+
     if flags.GeoModel.AtlasVersion!="tb_LArH6_2002":
         kwargs.setdefault("FCAL1Volumes",["LArMgr::LAr::FCAL::Module1::CableTrough",
                                           "LArMgr::LAr::FCAL::Module1::Absorber"])
@@ -411,6 +507,7 @@ def LArInactiveSensitiveDetectorToolCfg(flags, name="LArInactiveSensitiveDetecto
         kwargs.setdefault("FCAL3Volumes",["LArMgr::LAr::FCAL::Module3::CableTrough",
                                           "LArMgr::LAr::FCAL::Module3::Absorber",
                                           "LArMgr::LAr::FCAL::Module3::Rod"])
+
     # Running PID calibration hits?
     kwargs.setdefault("ParticleID",flags.Sim.ParticleID)
     # No effect currently

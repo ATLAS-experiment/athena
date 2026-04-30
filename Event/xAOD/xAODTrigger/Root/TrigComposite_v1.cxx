@@ -14,13 +14,16 @@
 
 #include "TrigNavStructure/StringSerializer.h"
 
+#include "xAODHIEvent/HIEventShapeContainer.h"
+#include "xAODTrigMissingET/TrigMissingETContainer.h"
+
 // Local include(s):
 #include "xAODTrigger/versions/TrigComposite_v1.h"
+#include "xAODTrigger/TrigCompositeContainer.h"
 
 #ifndef XAOD_STANDALONE
 #include "AthenaKernel/BaseInfo.h"
 #endif
-
 
 namespace xAOD {
 
@@ -287,8 +290,13 @@ namespace xAOD {
       return false;
    }
 
-   bool TrigComposite_v1::derivesFromIParticle(const CLID clid [[maybe_unused]]) const {
+   bool TrigComposite_v1::derivesFromIParticle(const CLID clid) const {
+     // Explicit checks (mostly for AnalysisBase). Hard code any CLIDs which may cause issues.
+     if (clid == ClassID_traits<xAOD::HIEventShapeContainer>::ID()) return false;
+     if (clid == ClassID_traits<xAOD::TrigMissingETContainer>::ID()) return false;
+     if (clid == ClassID_traits<xAOD::TrigCompositeContainer>::ID()) return false; // Used by some legs as a dummy feature
 #ifndef XAOD_STANDALONE
+     // If in an Athena build we can perform a more thorough inheritance check
      const SG::BaseInfoBase* bib = SG::BaseInfoBase::find (clid);
      if (bib) {
        return bib->is_base (ClassID_traits< xAOD::IParticleContainer >::ID());

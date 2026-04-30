@@ -37,6 +37,7 @@ namespace ActsTrk::detail {
 
     std::pair<Pos, Cov> calibrate(const Acts::GeometryContext&,
                                   const Acts::CalibrationContext&,
+                                  const Acts::Surface&,
                                   const xAOD::StripCluster&,
                                   const Acts::BoundTrackParameters&) const;
 
@@ -48,20 +49,15 @@ namespace ActsTrk::detail {
 
   private:
 
-    const InDetDD::SiDetectorElement& getDetectorElement(xAOD::DetectorIDHashType id) const;
-    
+    const InDetDD::SiDetectorElement& getDetectorElement(const Acts::Surface &surface) const;
+
     std::pair<typename StripCalibratorImpl<traj_t>::Pos,
               typename StripCalibratorImpl<traj_t>::Cov>
     calibrate(const Acts::GeometryContext&,
               const Acts::CalibrationContext&,
-              const xAOD::StripCluster&,
-              const InDetDD::SiDetectorElement&) const;
+              const xAOD::StripCluster&) const;
 
     std::optional<float> getCorrectedError(const xAOD::StripCluster& cluster) const;
-
-    SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_stripDetEleCollKey {this, "DetEleCollKey", "",
-      "Key of SiDetectorElementCollection for Strip"
-    };
 
     Gaudi::Property<bool> m_postCalibration{this, "CalibrateAfterMeasurementSelection", false};
     Gaudi::Property<bool> m_correctCovariance{this, "PerformCovarianceCalibration", true};

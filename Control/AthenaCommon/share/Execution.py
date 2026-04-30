@@ -26,6 +26,22 @@ for script in opts.scripts:
          traceback.print_exc()
 
       if not opts.interactive:
+
+         # --- Start of CA-in-Legacy warning check ---
+         if opts.scripts:
+             try:
+                 with open(opts.scripts[0], 'r') as f:
+                     script_content = f.read(5000) #limit on large files
+                     if "ComponentAccumulator" in script_content or "ConfigFlags" in script_content:
+                         log.warning("The script '%s' appears to use ComponentAccumulator syntax,", opts.scripts[0])
+                         log.warning("but athena.py is executing it in Legacy mode.")
+                         log.warning("FIX: Add '#!/usr/bin/env athena.py' as the first line of your script.")
+             except Exception:
+                 # We wrap this in a try/except to ensure a file-read error 
+                 # doesn't prevent the actual job from attempting to run.
+                 pass
+         # --- End of warning check ---
+
        # additional processing to get right error codes
          import AthenaCommon.ExitCodes as ExitCodes
          if isinstance( e, IncludeError ):

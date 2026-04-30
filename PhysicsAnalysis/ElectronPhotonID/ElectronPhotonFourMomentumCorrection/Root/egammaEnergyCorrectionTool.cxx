@@ -768,7 +768,8 @@ int egammaEnergyCorrectionTool::initialize() {
              m_esmodel == egEnergyCorr::es2022_R22_PRE or
              m_esmodel == egEnergyCorr::es2023_R22_Run2_v0 or
              m_esmodel == egEnergyCorr::es2023_R22_Run2_v1 or
-             m_esmodel == egEnergyCorr::es2024_Run3_v0) {  // add release 21
+             m_esmodel == egEnergyCorr::es2024_Run3_v0 or
+             m_esmodel == egEnergyCorr::es2025_Run3_GNN_v0) {  // add release 21
                                                                // here for now
     m_use_etaCalo_scales = true;
     m_use_new_resolution_model = true;

@@ -1,19 +1,24 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsCPContent = [
 "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
+"AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAux.pt.eta.phi.m.numConstit.Parent",
 "AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAux.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m",
-"AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAux.ECF1.ECF2.ECF3.Tau1_wta.Tau2_wta.Tau3_wta.Tau4_wta.Split12.Split23.Qw.D2.C2.PlanarFlow.FoxWolfram2.FoxWolfram0.Angularity.Aplanarity.KtDR.ZCut12",
-"AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAux.ThrustMaj.L2.L3",
+"AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAux.DetectorEta.DetectorY",
+"AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAux.ECF1.ECF2.ECF3.Tau1_wta.Tau2_wta.Tau3_wta.Tau4_wta.Split12.Split23.Qw.D2.C2.PlanarFlow.FoxWolfram2.FoxWolfram0.Angularity.Aplanarity.KtDR.ZCut12.ThrustMaj.L2.L3",
 "AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAux.EMFracCaloBased.EM3FracCaloBased.Tile0FracCaloBased.EffNClustsCaloBased.groomMRatio.NeutralEFrac.ChargePTFrac.ChargeMFrac.Width",
-"AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAux.Parent.DetectorEta.DetectorY",
 "AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAux.GhostCHadronsFinalCount.GhostBHadronsFinalCount",
-"AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAux.R10TruthLabel_R21Precision.R10TruthLabel_R21Precision_2022v1.R10TruthLabel_R22v1",
+"AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAux.R10TruthLabel_R21Precision_2022v1.R10TruthLabel_R22v1",
 "AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAux.bJR10v00_mass.bJR10v00_pt.bJR10v00Ext_mass.bJR10v00Ext_pt.bJR10v01_mass.bJR10v01_pt",
+"AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAux.TopTransformer_ConstScore.WTransformer_ConstScore.WTransformer_massdec_ConstScore",
 "AntiKt10UFOCSSKJets",
-"AntiKt10UFOCSSKJetsAux.NumTrkPt500.GhostAntiKtVR30Rmax4Rmin02PV0TrackJets.PartonTruthLabelID",
+"AntiKt10UFOCSSKJetsAux.pt.eta.phi.m.numConstit",
+"AntiKt10UFOCSSKJetsAux.GhostAntiKtVR30Rmax4Rmin02PV0TrackJets",
+"AntiKt10UFOCSSKJetsAux.NumTrkPt500.PartonTruthLabelID",
 "AntiKt10TruthSoftDropBeta100Zcut10Jets",
-"AntiKt10TruthSoftDropBeta100Zcut10JetsAux.pt.eta.phi.m.Parent.D2.Tau1_wta.Tau2_wta.Tau3_wta.Qw.GhostCHadronsFinalCount.GhostBHadronsFinalCount",
+"AntiKt10TruthSoftDropBeta100Zcut10JetsAux.pt.eta.phi.m.Parent.numConstit",
+"AntiKt10TruthSoftDropBeta100Zcut10JetsAux.D2.Tau1_wta.Tau2_wta.Tau3_wta.Qw",
+"AntiKt10TruthSoftDropBeta100Zcut10JetsAux.GhostCHadronsFinalCount.GhostBHadronsFinalCount",
 "AntiKt10TruthJets",
-"AntiKt10TruthJetsAux.pt.eta.phi.m.Split12.Split23.GhostCHadronsFinalCount.GhostBHadronsFinalCount"
+"AntiKt10TruthJetsAux.pt.eta.phi.m.numConstit.Split12.Split23.GhostCHadronsFinalCount.GhostBHadronsFinalCount"
 ]

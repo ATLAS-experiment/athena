@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # single mu HITS
 input_hits=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-04-00-00/mc21_14TeV.900495.PG_single_muonpm_Pt10_etaFlatnp0_43.simul.HITS.e8481_s4494/*
@@ -34,7 +34,6 @@ Reco_tf.py \
     --inputHITSFile ${input_hits} \
     --outputRDOFile RDO.pool.root \
     --maxEvents ${n_events} \
-    --autoConfiguration "everything" \
     --conditionsTag "${default_condition}" \
     --geometryVersion "${default_geometry}" \
     --preInclude "Campaigns.PhaseIINoPileUp,InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \

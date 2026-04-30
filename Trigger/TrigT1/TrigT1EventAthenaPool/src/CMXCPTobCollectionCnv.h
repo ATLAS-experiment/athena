@@ -35,7 +35,7 @@ public:
 protected:
   
   virtual CMXCPTobCollection_PERS*   createPersistent (CMXCPTobCollection* transCont);
-  virtual CMXCPTobCollection*        createTransient ();
+  virtual CMXCPTobCollection*        createTransient(const Token* token);
 
 private:
   

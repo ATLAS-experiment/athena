@@ -50,8 +50,6 @@ def BPHY22Cfg(flags):
           useCombinedMeasurement     = False, # Only takes effect if combOnly=True
           muonCollectionKey          = "Muons",
           TrackParticleCollection    = "InDetTrackParticles",
-          V0VertexFitterTool         = None,             # V0 vertex fitter
-          useV0Fitter                = False,                   # if False a TrkVertexFitterTool will be used
           TrkVertexFitterTool        = vkalvrt,        # VKalVrt vertex fitter
           TrackSelectorTool          = trackselect,
           VertexPointEstimator       = vpest,
@@ -84,8 +82,6 @@ def BPHY22Cfg(flags):
            useCombinedMeasurement     = False, # Only takes effect if combOnly=True
            muonCollectionKey          = "Muons",
            TrackParticleCollection    = "InDetTrackParticles",
-           V0VertexFitterTool         = None,             # V0 vertex fitter
-           useV0Fitter                = False,                   # if False a TrkVertexFitterTool will be used
            TrkVertexFitterTool        = vkalvrt,        # VKalVrt vertex fitter
            TrackSelectorTool          = trackselect,
            VertexPointEstimator       = vpest,

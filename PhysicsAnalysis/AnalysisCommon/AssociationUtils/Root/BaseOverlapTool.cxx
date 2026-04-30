@@ -38,19 +38,19 @@ namespace ORUtils
                   " UserPrio " << m_enableUserPrio);
 
     // Initialize the decoration helper
-    m_decHelper1 = std::make_unique<OverlapDecorationHelper<columnar::ContainerId::particle1>>
+    m_decHelper1 = std::make_unique<OverlapDecorationHelper<columnar::Particle1Def>>
       (m_inputLabel, m_outputLabel, m_outputPassValue);
     addSubtool(*m_decHelper1);
-    m_decHelper2 = std::make_unique<OverlapDecorationHelper<columnar::ContainerId::particle2>>
+    m_decHelper2 = std::make_unique<OverlapDecorationHelper<columnar::Particle2Def>>
       (m_inputLabel, m_outputLabel, m_outputPassValue);
     addSubtool(*m_decHelper2);
 
     // Initialize the obj-link helper
     if(m_linkOverlapObjects)
     {
-      m_objLinkHelper1 = std::make_unique<OverlapLinkHelper<columnar::ContainerId::particle1>>("overlapObject");
+      m_objLinkHelper1 = std::make_unique<OverlapLinkHelper<columnar::Particle1Def>>("overlapObject");
       addSubtool(*m_objLinkHelper1);
-      m_objLinkHelper2 = std::make_unique<OverlapLinkHelper<columnar::ContainerId::particle2>>("overlapObject");
+      m_objLinkHelper2 = std::make_unique<OverlapLinkHelper<columnar::Particle2Def>>("overlapObject");
       addSubtool(*m_objLinkHelper2);
     }
 

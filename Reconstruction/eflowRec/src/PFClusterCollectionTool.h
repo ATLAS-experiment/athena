@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef PFCLUSTERCOLLECTIONTOOL_H
-#define PFCLUSTERCOLLECTIONTOOL_H
+#ifndef EFLOWREC_PFCLUSTERCOLLECTIONTOOL_H
+#define EFLOWREC_PFCLUSTERCOLLECTIONTOOL_H
 
 #include "IPFClusterCollectionTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"

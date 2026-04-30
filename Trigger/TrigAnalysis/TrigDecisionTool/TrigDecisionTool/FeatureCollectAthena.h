@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS // Full Athena only
@@ -20,8 +20,8 @@
  *
  ***********************************************************************************/
 
+#include <concepts>
 #include <string>
-#include <set>
 #include <type_traits>
 
 #include "AthContainers/ConstDataVector.h"
@@ -31,6 +31,7 @@
 #include "TrigDecisionTool/Conditions.h"
 #include "TrigDecisionTool/TDTUtilities.h"
 #include "TrigDecisionTool/ClassTraits.h"
+#include "TrigDecisionTool/Feature.h"
 
 #include "TrigSteeringEvent/TrigPassBits.h"
 #include "TrigSteeringEvent/TrigPassFlags.h"
@@ -57,9 +58,6 @@
 
 #include "TrigStorageDefinitions/EDM_TypeInfo.h"
 
-
-#include "TrigDecisionTool/Feature.h"
-
 namespace Trig {
 
   /**
@@ -68,209 +66,133 @@ namespace Trig {
   
   namespace FeatureAccessImpl {
     // function declaration (see cxx for the deifinition) wanted to have this freedom in case of patches needed
-    const TrigPassBits* getBits(size_t sz, const HLT::TriggerElement* te, const std::string& label, const HLT::NavigationCore* navigation );
+    const TrigPassBits* getBits(size_t sz, const HLT::TriggerElement* te,
+                                const std::string& label, const HLT::NavigationCore* navigation );
 
-    const TrigPassFlags* getFlags(size_t sz, const HLT::TriggerElement* te, const std::string& label, const HLT::NavigationCore* navigation );
-  
+    const TrigPassFlags* getFlags(size_t sz, const HLT::TriggerElement* te,
+                                  const std::string& label, const HLT::NavigationCore* navigation );
 
-    // compile time check if the type T displays type ElementProxy (this is specific to the DataVectors only)
+    // Detect DataVector type by existence of ElementProxy
     template<typename T>
-    struct isDataVector {
-    private:
-      // these types are defined such that with the sizeof() function they can be evaluated at compile time
-      typedef char true_type;
-      struct false_type { char dummy[2]; };
-
-      // using SFINAE 
-      template<typename U> static true_type trait_test_helper(typename U::ElementProxy*); // if U::ElementProxy does not exist, SFINAE means that this is not substituded
-      template<typename U> static false_type  trait_test_helper(...);
-    public:
-      static const bool value=sizeof(trait_test_helper<T>(0))==sizeof(true_type); // evaluated at compule time
+    concept isDataVector = requires {
+      typename T::ElementProxy;
     };
-  
 
-    // is not substituded for DataVectors
     template<class T>
-    const typename std::enable_if<!isDataVector<T>::value, T>::type* 
-    use_or_construct(const T* source, const HLT::TriggerElement*, const std::string&, unsigned int, const HLT::NavigationCore*  ) {
-      return source;
-    }
+    const T* use_or_construct(const T* source, const HLT::TriggerElement* te, const std::string& label,
+                              unsigned int condition, const HLT::NavigationCore* navigation ) {
 
-    // is substituded for DataVectors
-    template<class T>
-    const typename
-    std::enable_if<isDataVector<T>::value, T>::type*
-    use_or_construct(const T* source, const HLT::TriggerElement* te, const std::string& label, unsigned int condition, const HLT::NavigationCore* navigation ) {
-
-      const TrigPassBits* bits(0);
-      if ( condition == TrigDefs::Physics ) {// only passing objects
-        bits = getBits(source->size(), te, label , navigation);
+      if constexpr(!isDataVector<T>) {
+        return source;
       }
-      if ( bits ) { // the actual filtering
-        auto destination = new ConstDataVector<T>(SG::VIEW_ELEMENTS);
-
-        for(const typename T::base_value_type *obj : *source) {
-          if ( HLT::isPassing(bits, obj, source)  ) // if bits are missing or obj is realy marked as passing
-            destination->push_back(obj);
+      else {
+        const TrigPassBits* bits{nullptr};
+        if ( condition == TrigDefs::Physics ) {// only passing objects
+          bits = getBits(source->size(), te, label , navigation);
         }
-        return destination->asDataVector();
+        if ( bits ) { // the actual filtering
+          auto destination = new ConstDataVector<T>(SG::VIEW_ELEMENTS);
+
+          for(const typename T::base_value_type *obj : *source) {
+            if ( HLT::isPassing(bits, obj, source)  ) // if bits are missing or obj is realy marked as passing
+              destination->push_back(obj);
+          }
+          return destination->asDataVector();
+        }
+        return source;
       }
-      // else
-      return source;
     }
   
-  
 
-
-    // 
-    template<class T, class CONT, bool flatten, class LINK> struct insert_and_flatten;
-
-    // The specialization below is for the case that requested and stored are the same types
-    // It means that requested type is egamma_container and stored is egamma_container
-    // or the requested is TrigRoiDescriptor and stored is TrigRoiDescriptor.
-    // The actual data storage may be yet diferent of course. In the second case it is TrigRoiDescriptorCollection.
+    // The "flatten" option is for the case that requested and stored are the same types
+    // (e.g. requested is egamma_container and stored is egamma_container or
+    // requested is TrigRoiDescriptor and stored is TrigRoiDescriptor).
+    // The actual data storage may be yet different. In the second case it is TrigRoiDescriptorCollection.
     // Here we have two cases, if the requested object is DataVector and the Physics flag is requested 
-    // we need to do the additional filtering. We guess that this is the case sniffing the object T a bit with the has_traits template.
-    // This filtering is done as follows. New container is created with in the VIEW_ELEMENTS mode and only selected objects are inserted into it.
+    // we need to do the additional filtering. We guess that this is the case by sniffing the object T
+    // with the has_traits template. This filtering is done as follows. New container is created with
+    // the VIEW_ELEMENTS mode and only selected objects are inserted into it.
 
-    template<class T, class STORED,class LINK>
-    struct insert_and_flatten<T,STORED, false, LINK> {
-      static void do_it(std::vector<Trig::Feature<T> >& destination, const STORED* source, const HLT::TriggerElement* te, const std::string& label,
-			unsigned int condition, const HLT::NavigationCore* navigation, const LINK& lnk) {
+    template<class T, class STORED, bool flatten, class LINK>
+    void insert_and_flatten(std::vector<Trig::Feature<T> >& destination, const STORED* source,
+                            const HLT::TriggerElement* te, const std::string& label,
+                            unsigned int condition, const HLT::NavigationCore* navigation, const LINK& lnk) {
 
-	const T* possibly_reduced_possibly_container = use_or_construct<T>(source, te, label, condition, navigation);
-	destination.push_back(Trig::Feature<T>(possibly_reduced_possibly_container, te, label, possibly_reduced_possibly_container != source,lnk)); // by 2nd to the last arg == true tell the Feature<T> to delete container at deletion
+      if constexpr(flatten) {
+        const TrigPassBits* bits{nullptr};
+        if ( condition == TrigDefs::Physics ) {// only passing objects
+          bits = getBits(source->size(), te, label , navigation);
+        }
+
+        for(const T* obj : *source) {
+          if ( bits==nullptr || HLT::isPassing(bits, obj, source)  ) {// if no bits or obj is marked as passing
+            destination.push_back(Trig::Feature<T>(obj, te, label,
+                                                   false,  // do not delete
+                                                   ElementLink<typename LINK::value_type>(obj,*source)));
+          }
+        }
       }
-    };
+      else {
+        const T* possibly_reduced_container = use_or_construct<T>(source, te, label, condition, navigation);
 
-
-    //
-    template<class T, class CONT, class LINK>
-    struct insert_and_flatten<T, CONT, true, LINK> {
-      static void do_it(std::vector<Trig::Feature<T> >& destination, const CONT* source, const HLT::TriggerElement* te, const std::string& label, 
-			unsigned int condition, const HLT::NavigationCore* navigation,const LINK& /*lnk*/) {
-
-	//std::cout << "insert_and_flatten<true> " << label << " of container of size " << source->size() <<  std::endl;
-      
-	const TrigPassBits* bits(0);
-	if ( condition == TrigDefs::Physics ) {// only passing objects
-	  //std::cout << "asking for bits for " << label << std::endl;
-	  bits =getBits(source->size(), te, label , navigation);
-	}
-      
-	for(const T* obj : *source) {	
-	  if ( bits==0 || HLT::isPassing(bits, obj, source)  ) {// if bits are missing or obj is realy marked as passing
-	    //std::cout << "Pushing back new feature with obj " << obj << std::endl;
-	    destination.push_back(Trig::Feature<T>(obj, te, label,false,ElementLink<typename LINK::value_type>(obj,*source)));
-	  }
-	}
+        destination.push_back(Trig::Feature<T>(possibly_reduced_container, te, label,
+                                               // true: Feature<T> deletes container at deletion
+                                               possibly_reduced_container != source,
+                                               lnk));
       }
-    };
-  
-    template<class LINK, bool is_container> struct print_features;
+    }
 
-    template<class LINK> struct print_features<LINK,true>{
-      typedef const typename LINK::value_type* ptr_type;
-      static ptr_type get_ptr(const LINK& link){return link.cptr();}
-      static void do_it(const LINK& link, bool /*do_flatten*/){
-	//std::cout << "container at" << link.cptr() << " has size " << link.cptr()->size() << std::endl;
-	for(unsigned int j=0;j<link.cptr()->size();++j){
-	  //std::cout << "  ----element " << j << ": " << link.cptr()->at(j) << std::endl;
-	}
-	//std::cout << " .. flatten ? " << (do_flatten ? "yes" : "no") << std::endl;
-      }
-    };
-  
-    template<class LINK> struct print_features<LINK,false>{
-      typedef typename LINK::ElementType ptr_type;
-      static ptr_type get_ptr(const LINK& link){return *link;}
-      static void do_it(const LINK& /*link*/,bool /*do_flatten*/){
-	//std::cout << "link to element " << *link << std::endl;
-	//std::cout << " .. flatten ? " << (do_flatten ? "yes" : "no") << std::endl;
-      }
-    };
-
-    struct true_type{};  //different
-    struct false_type{}; //types, so we can overload
-    template <bool retrieve> struct get_type;
-    template <> struct get_type<true>{typedef true_type type;};
-    template <> struct get_type<false>{typedef false_type type;};
-  
     template<class REQUESTED,class EDMLIST>
     struct get_links {
-      get_links():m_te(nullptr),
-		  m_data(nullptr),
-		  m_condition(0),
-		  m_navigation(nullptr),
-		  m_result(),
-		  m_sourceTE(0)
-      {}//empty ctor but need to initialize reference member
-      get_links( const HLT::TriggerElement* te, 
-		 std::vector<Trig::Feature<REQUESTED> >* data, 
-		 const std::string& label, unsigned int condition,
-		 const std::string& teName, 
-		 const HLT::NavigationCore* navigation,
-		 bool* result, 
-		 const HLT::TriggerElement** sourceTE):
-	m_te(te), m_data(data), m_label(label), m_condition(condition), m_teName(teName), m_navigation(navigation), m_result(result), m_sourceTE(sourceTE){}
-    
-    
+
       template<class FEATURE>
-      void do_it() {
-	//std::cout << "TrigDecisionTool::Feature::get_links: getting links from navi for element in feature list: " << ClassID_traits<FEATURE>::typeName() << std::endl;
-	//std::cout << "TrigDecisionTool::Feature::get_links:                      type originally  requested is: " << ClassID_traits<REQUESTED>::typeName() << std::endl;
+      void operator()() {
 
-	typedef typename Features2Container<FEATURE,EDMLIST>::type container_type;
-	typedef typename Features2Object<FEATURE,EDMLIST>::type object_type;
+        using container_type = Features2Container_t<FEATURE,EDMLIST>;
+        using object_type = Features2Object_t<FEATURE,EDMLIST>;
+        using link_type = Features2LinkHelper_t<FEATURE,container_type>;
 
-	const bool do_flatten  = (! std::is_same<REQUESTED,container_type>::value) && std::is_same<FEATURE,container_type>::value;
-	const bool do_retrieve = ! (std::is_same<REQUESTED,container_type>::value && std::is_same<FEATURE,object_type>::value);
-	// std::cout << "flatten? (case when requested type is element of feature type) : "  << (do_flatten ? "yes" : "no") << std::endl;
-	// std::cout << "retrieve? (don't retrueve when requested type in container but stored type is element): " << (do_retrieve ? "yes" : "no") << std::endl;
-	_do_it<FEATURE,do_flatten>(typename get_type<do_retrieve>::type());
+        constexpr bool do_flatten  = (! std::is_same_v<REQUESTED,container_type>) && std::is_same_v<FEATURE,container_type>;
+        constexpr bool do_retrieve = ! (std::is_same_v<REQUESTED,container_type> && std::is_same_v<FEATURE,object_type>);
+
+        if constexpr( !do_retrieve ) {
+          // no retrieve -> do nothing
+        }
+        else {
+          // do retrieve
+          std::string sourceLabel;
+          link_type link;
+          const bool new_result = m_navigation->getRecentFeatureDataOrElementLink( m_te, link, m_label, *m_sourceTE, sourceLabel );
+
+          if (new_result) {
+            if (m_teName.empty() || m_teName == Trig::getTEName(**m_sourceTE)) {
+              if (link.cptr()) {
+                // Helper to deref link
+                auto get_ptr = [](const auto& link) {
+                  if constexpr(std::is_same_v<FEATURE,container_type>)
+                    return link.cptr();
+                  else
+                    return *link;
+                };
+
+                insert_and_flatten<REQUESTED,FEATURE,do_flatten,link_type>
+                  (*m_data, get_ptr(link),
+                   *m_sourceTE, sourceLabel, m_condition, m_navigation,link);
+              }
+            }
+          }
+          *m_result = *m_result && new_result;
+        }
       }
 
-      template<class FEATURE,bool do_flatten>
-      void _do_it(false_type dummy = false_type()) {(void)dummy;/* do nothing */;}
-    
-      template<class FEATURE,bool do_flatten>
-      void _do_it(true_type /*dummy*/ = true_type()) {
-
-	//const HLT::TriggerElement* sourceTE(0);
-	std::string sourceLabel;
-
-	typedef typename Features2Container<FEATURE,EDMLIST>::type container_type;
-	//typedef typename Features2Object<FEATURE,EDMLIST>::type object_type;
-	typedef typename Features2LinkHelper<FEATURE,container_type>::type link_type;
-
-	//std::cout << "TrigDecisionTool::Feature::get_links: link_type is: " << typeid(link_type).name() << std::endl;
-
-
-      
-	link_type link;
-	bool new_result = m_navigation->getRecentFeatureDataOrElementLink( m_te, link, m_label, *m_sourceTE, sourceLabel );
-
-	if (new_result) {
-	  if (m_teName == "" || m_teName == Trig::getTEName(**m_sourceTE)) {
-	    if (link.cptr()) {   
-	      //std::cout << "TrigDecisionTool::Feature::get_links: actually we got a feature here" << std::endl;
-	      insert_and_flatten<REQUESTED,FEATURE, do_flatten,link_type>::do_it(*m_data,
-										 print_features<link_type,std::is_same<FEATURE,container_type>::value>::get_ptr(link),
-										 *m_sourceTE, sourceLabel, m_condition, m_navigation,link);
-	    }
-	  }
-	}
-	*m_result = *m_result && new_result;
-      }
-
-      const HLT::TriggerElement* m_te;
-      std::vector<Trig::Feature<REQUESTED> >* m_data;
+      const HLT::TriggerElement* m_te{nullptr};
+      std::vector<Trig::Feature<REQUESTED> >* m_data{nullptr};
       const std::string m_label;
-      unsigned int m_condition;
+      unsigned int m_condition{0};
       std::string m_teName;
-      const HLT::NavigationCore* m_navigation;
-      bool* m_result;
-      const HLT::TriggerElement** m_sourceTE;
+      const HLT::NavigationCore* m_navigation{nullptr};
+      bool* m_result{nullptr};
+      const HLT::TriggerElement** m_sourceTE{0};
     };
 
     /**
@@ -278,40 +200,36 @@ namespace Trig {
      * It has (thanks to the ClassTraits) functionality to flatten containers of containers.
      **/
     template<class T>
-    void collect(const HLT::TriggerElement* te, std::vector<Trig::Feature<T> >& data, const std::string& label, unsigned int condition, 
-		 const std::string& teName, const HLT::TrigNavStructure* navstructure) {
+    void collect(const HLT::TriggerElement* te, std::vector<Trig::Feature<T> >& data,
+                 const std::string& label, unsigned int condition, const std::string& teName,
+                 const HLT::TrigNavStructure* navstructure) {
 
       auto navigation = dynamic_cast<const HLT::NavigationCore*>(navstructure);
 
-      //std::cout << "Collecting " << label << " for TE " << te << std::endl;
+      if (condition == TrigDefs::Physics && !te->getActiveState() ) return;
 
-      if (condition == TrigDefs::Physics && !te->getActiveState() ) return;    
-      const HLT::TriggerElement* sourceTE(0);
-      std::string sourceLabel;
-
-
+      const HLT::TriggerElement* sourceTE{};
       bool result = true;
 #ifndef __GCCXML__
-      //typedef typename Features2Container<T>::type container_type;
-      typedef typename Features2Object<T>::type object_type;
-      typedef typename Object2Features<object_type>::type feature_list;
-      get_links<T,TypeInfo_EDM> link_getter( te, &data, label, condition, teName, navigation, &result, &sourceTE);
-      HLT::TypeInformation::for_each_type<feature_list,get_links<T,TypeInfo_EDM> >::do_it(&link_getter);
+      using object_type = Features2Object_t<T>;
+      using feature_list = Object2Features_t<object_type>;
+      get_links<T,TypeInfo_EDM> link_getter{te, &data, label, condition, teName, navigation, &result, &sourceTE};
+      feature_list::for_each(link_getter);
 #endif
 
-      if (result){/*do nothing anymore*/
+      if (result){
+        /*do nothing anymore*/
       } else {
-	// getRecentFeature returned false -> bifurcation?
-	const std::vector<HLT::TriggerElement*> bif_tes = navigation->getDirectPredecessors(sourceTE);
-	if ( bif_tes.size() <= 1 ) {
-	  return; // that means it is plain error (it will be printed by the Navigation)
-	} else {
-	  // bifurcation point
-	  for( const HLT::TriggerElement* predecesor_te : bif_tes ) 
-	    collect(predecesor_te, data, label, condition, teName, navigation); 
-	}
+        // getRecentFeature returned false -> bifurcation?
+        const std::vector<HLT::TriggerElement*> bif_tes = navigation->getDirectPredecessors(sourceTE);
+        if ( bif_tes.size() <= 1 ) {
+          return; // that means it is plain error (it will be printed by the Navigation)
+        } else {
+          // bifurcation point
+          for( const HLT::TriggerElement* predecesor_te : bif_tes )
+            collect(predecesor_te, data, label, condition, teName, navigation);
+        }
       }
-      //std::cout << "Size after collecting " << data.size() << std::endl;
     }
   
 
@@ -340,34 +258,34 @@ namespace Trig {
     // ==============
 
     // access by container, stored as container
-    template<class CONT> TrigPassFlags
-    build_flags (const typename std::enable_if<isDataVector<CONT>::value, CONT>::type *orig_cont, const CONT* cont, const TrigPassFlags * orig_tpf) {
+    template<isDataVector CONT> TrigPassFlags
+    build_flags (const CONT *orig_cont, const CONT* cont, const TrigPassFlags * orig_tpf) {
+
       TrigPassFlags tpf(cont->size(), orig_tpf->flagSize());
 
       if(orig_cont->size() != orig_tpf->size()) {
-	//std::cout << "WARNING: original constainer size (" << orig_cont->size() << ") different for size of TrigPassFlags (" << orig_tpf->size() << ")." << std::endl;
-	return tpf;
+        //std::cout << "WARNING: original constainer size (" << orig_cont->size() << ") different for size of TrigPassFlags (" << orig_tpf->size() << ")." << std::endl;
+        return tpf;
       }
 
       unsigned int currentPos=0;
       for(const typename CONT::base_value_type* obj : *cont) {
-	typename CONT::const_iterator orig_obj = std::find(orig_cont->begin(),orig_cont->end(),obj);
+        const auto orig_obj = std::find(orig_cont->begin(),orig_cont->end(),obj);
 
-	if(orig_obj == orig_cont->end()) {
-	  //std::cout << "WARNING: object in reduced container can' be found in original." << std::endl;
-	} else {
-	  size_t idx = orig_obj-orig_cont->begin();
-	  tpf.setFlag(currentPos, orig_tpf->getFlag(idx));
-	}
-	currentPos++;
+        if(orig_obj == orig_cont->end()) {
+          //std::cout << "WARNING: object in reduced container can' be found in original." << std::endl;
+        } else {
+          size_t idx = orig_obj-orig_cont->begin();
+          tpf.setFlag(currentPos, orig_tpf->getFlag(idx));
+        }
+        currentPos++;
       }
 
       return tpf;
     }
 
-
     template<class T> TrigPassFlags
-    build_flags (const typename std::enable_if<!isDataVector<T>::value, T>::type *orig, const T* feature, const TrigPassFlags * orig_tpf) {
+    build_flags (const T *orig, const T* feature, const TrigPassFlags * orig_tpf) {
       if(orig != feature) return TrigPassFlags(); // a problem TODO: print a ERROR
 
       TrigPassFlags tpf(1, orig_tpf->flagSize());
@@ -375,66 +293,41 @@ namespace Trig {
       return tpf;
     }
 
-
-
     // access by single object, stored as container
     template<class T, class STORED> TrigPassFlags
     build_flags2(const STORED* orig_cont, const T* obj, const TrigPassFlags * orig_tpf)
     {
       if(orig_cont->size() != orig_tpf->size()) {
-	//std::cout << "WARNING: original constainer size (" << orig_cont->size() << ") different for size of TrigPassFlags (" << orig_tpf->size() << ")." << std::endl;
-	return TrigPassFlags();
+        //std::cout << "WARNING: original constainer size (" << orig_cont->size() << ") different for size of TrigPassFlags (" << orig_tpf->size() << ")." << std::endl;
+        return TrigPassFlags();
       }
 
       TrigPassFlags tpf(1, orig_tpf->flagSize());
 
-      typename STORED::const_iterator orig_obj = std::find(orig_cont->begin(),orig_cont->end(), obj);
+      const auto orig_obj = std::find(orig_cont->begin(),orig_cont->end(), obj);
 
       if(orig_obj == orig_cont->end()) {
-	//std::cout << "WARNING: object in reduced container can' be found in original." << std::endl;
+        //std::cout << "WARNING: object in reduced container can' be found in original." << std::endl;
       } else {
-	size_t idx = orig_obj-orig_cont->begin();
-	tpf.setFlag(0, orig_tpf->getFlag(idx));
+        size_t idx = orig_obj-orig_cont->begin();
+        tpf.setFlag(0, orig_tpf->getFlag(idx));
       }
       return tpf;
     }
 
-
-
-
-
-    template<class T, class STORED, bool same> struct getFlagsHelper;
-
-    // partial specialization for T==STORED
-    template<class T, class STORED> struct getFlagsHelper<T, STORED, true> {
-      static TrigPassFlags do_build(const STORED* orig_feat, const T* feat, const TrigPassFlags * orig_tpf) {
-	return build_flags(orig_feat, feat, orig_tpf);
-      }
-    };
-
-
-    // partial specialization for T!=STORED
-    template<class T, class STORED> struct getFlagsHelper<T, STORED, false> {
-      static TrigPassFlags do_build(const STORED* orig_feat, const T* feat, const TrigPassFlags * orig_tpf) {
-	return build_flags2(orig_feat, feat, orig_tpf);
-      }
-    };
-
-
-
-
-
     template<class T> TrigPassFlags
     getFlags(const Trig::Feature<T>& f, const TrigPassFlags *orig_tpf, HLT::NavigationCore* navigation ) {
 
-      typedef typename TrigDec::ClassTraits<T>::type STORED;
+      using STORED = TrigDec::ClassTraits<T>::type;
 
-      const STORED* orig(0);
-      const HLT::TriggerElement* sourceTE(0);
-      std::string sourceLabel("");
+      const STORED* orig{};
+      const HLT::TriggerElement* sourceTE{};
+      std::string sourceLabel;
       if (navigation->getRecentFeature(f.te(), orig, f.label(), sourceTE, sourceLabel)) {
-	TrigPassFlags tpf = getFlagsHelper<T,STORED, std::is_same<T,STORED>::value>::do_build(orig, f.cptr(), orig_tpf);
-	return tpf;
+        if constexpr (std::is_same_v<T,STORED>)
+          return build_flags(orig, f.cptr(), orig_tpf);
+        else
+          return build_flags2(orig, f.cptr(), orig_tpf);
       }
       return TrigPassFlags();
 

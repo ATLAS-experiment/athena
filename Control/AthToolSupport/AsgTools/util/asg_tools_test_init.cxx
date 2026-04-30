@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -38,8 +38,10 @@ int main (int argc, char *argv [])
       ANA_MSG_ERROR ("argument doesn't match name=value syntax: \"" << arg << "\"");
       return -1;
     }
+    //cppcheck-suppress throwInEntryPoint
     ANA_CHECK (tool.setProperty (arg.substr (0, split), arg.substr (split + 1)));
   }
+  //cppcheck-suppress throwInEntryPoint
   ANA_CHECK (tool.initialize());
   ANA_MSG_INFO ("successfully initialized tool");
   return 0;

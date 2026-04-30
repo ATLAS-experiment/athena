@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
- Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 #ifndef ATHLINKS_DATALINK_H
 #define ATHLINKS_DATALINK_H
@@ -16,6 +16,7 @@ extern "C" {
 #include "AthLinks/DataLinkBase.h"
 
 // Forward declaration(s):
+class EventContext;
 namespace xAOD {
    class TVirtualEvent;
 }
@@ -72,6 +73,10 @@ public:
 
    /// Constructor receiving a pointer to the target object
    DataLink( const_pointer data, xAOD::TVirtualEvent* event = 0 );
+
+   /// Constructor receiving a pointer to the target object
+   /// and a dummy EventContext
+   DataLink( const_pointer data, const EventContext& );
 
    /// Constructor receiving a user-readable ID for the target object
    DataLink( const ID_type& id, xAOD::TVirtualEvent* event = 0 );

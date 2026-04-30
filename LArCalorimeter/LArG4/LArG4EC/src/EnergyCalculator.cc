@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // EnergyCalculator
@@ -38,6 +38,7 @@
 #include <cmath>
 #include <cassert>
 #include <string>
+#include <string_view>
 
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "RDBAccessSvc/IRDBRecord.h"
@@ -67,7 +68,7 @@
 
 #include "EnergyCalculator.h"
 #include "AthenaKernel/Units.h"
-
+#include <format>
 
 #define MSG_VECTOR(v) "(" << v.x() << ", " << v.y() << ", " << v.z() << ")"
 
@@ -175,12 +176,8 @@ void EnergyCalculator::CorrectionTypeHandler(Gaudi::Details::PropertyBase&)
     case 8: m_correction_type=EMEC_ECOR_CHCL1; break;
     default:
       {
-        std::ostringstream merr;
-        merr <<
-          "EnergyCalculator::CorrectionTypeHandler FATAL: invalid EnergyCorrection_t specified "
-             << m_corrProp.value();
-        std::cerr << merr.str() << std::endl;
-        throw GaudiException(merr.str(), "EnergyCalculator::CorrectionTypeHandler", StatusCode::FAILURE);
+        throw GaudiException(std::format("EnergyCalculator::CorrectionTypeHandler FATAL: invalid EnergyCorrection_t specified {}",m_corrProp.value())
+                            , "EnergyCalculator::CorrectionTypeHandler", StatusCode::FAILURE);
       }
     }
 }
@@ -211,12 +208,8 @@ void EnergyCalculator::SolidTypeHandler(Gaudi::Details::PropertyBase&)
     case 19: m_solidtype = LArG4::OuterLeadWheel; break;
     default:
       {
-        std::ostringstream merr;
-        merr <<
-          "EnergyCalculator::SolidTypeHandler FATAL: invalid LArWheelCalculator_t specified "
-             << m_solidtypeProp.value();
-        std::cerr << merr.str() << std::endl;
-        throw GaudiException(merr.str(), "EnergyCalculator::SolidTypeHandler", StatusCode::FAILURE);
+        throw GaudiException(std::format("EnergyCalculator::SolidTypeHandler FATAL: invalid LArWheelCalculator_t specified {}",
+                                m_solidtypeProp.value()), "EnergyCalculator::SolidTypeHandler", StatusCode::FAILURE);
       }
     }
 }
@@ -265,24 +258,15 @@ StatusCode EnergyCalculator::initialize()
   }
 
   for(int i = 0; i < 7; i ++){
-    std::ostringstream A0STR;
-    A0STR << "_" << i;
-    const std::string A0 = A0STR.str();
-    const std::string colName = "ZIW" + A0;
+    const std::string colName = std::format("ZIW_{}", i);
     m_ziw[i] = (*emecSamplingSep)[0]->getDouble(colName)*CLHEP::cm;
   }
   for(int i = 0; i < 44; i ++){
-    std::ostringstream A0STR;
-    A0STR << "_" << i;
-    const std::string A0 = A0STR.str();
-    const std::string colName = "ZSEP12" + A0;
+    const std::string colName = std::format("ZSEP12_{}", i);
     m_zsep12[i] = (*emecSamplingSep)[0]->getDouble(colName)*CLHEP::cm;
   }
   for(int i = 0; i < 22; i ++){
-    std::ostringstream A0STR;
-    A0STR << "_" << i;
-    const std::string A0 = A0STR.str();
-    const std::string colName = "ZSEP23" + A0;
+    const std::string colName = std::format("ZSEP23_{}", i);
     m_zsep23[i] = (*emecSamplingSep)[0]->getDouble(colName)*CLHEP::cm;
   }
 
@@ -600,14 +584,43 @@ G4bool EnergyCalculator::FindIdentifier_Default(
   G4AffineTransform transf;
 
   int profundis=pre_step_point->GetTouchable()->GetHistoryDepth();
-#if G4VERSION_NUMBER < 1100
-  if (preStepVolume->GetName().contains("Slice"))
-#else
-  if (G4StrUtil::contains(preStepVolume->GetName(),"Slice"))
-#endif
-        transf=pre_step_point->GetTouchable()->GetHistory()->GetTransform(profundis-1);
+
+  const G4String &name = preStepVolume->GetName();
+  std::string_view namesv(name);
+
+  auto matches_pattern = [](std::string_view text, std::string_view prefix) -> bool {
+    size_t pos = text.find(prefix);
+    if (pos == std::string_view::npos)
+        return false;
+    size_t digit_start = pos+prefix.size();
+    return (digit_start + 1 < text.size() && 
+            std::isdigit(static_cast<unsigned char>(text[digit_start])) &&
+            std::isdigit(static_cast<unsigned char>(text[digit_start + 1])));
+  };
+
+  static constexpr std::array<std::pair<std::string_view, int>,5> patterns = {{
+    {"Slice",     1},
+    {"Electrode", 2},
+    {"Absorber",  2},
+    {"Glue",      3},
+    {"Lead",      4}
+  }};
+  
+
+  int offset = 0;
+  for (const auto& [prefix, val] : patterns) {
+	  // Regex: *Slice[0-9]{2}, *Electrode[0-9]{2}, etc.
+    if (matches_pattern(namesv, prefix)) {
+        offset = val;
+        break;
+    }
+  }
+
+  if (offset > 0) {
+	  transf = pre_step_point->GetTouchable()->GetHistory()->GetTransform(profundis - offset);
+  }  
   else
-        transf=pre_step_point->GetTouchable()->GetHistory()->GetTopTransform();
+	  transf=pre_step_point->GetTouchable()->GetHistory()->GetTopTransform();
 
   const G4AffineTransform transformation=transf;
 
@@ -626,6 +639,7 @@ G4bool EnergyCalculator::FindIdentifier_Default(
 
   G4int compartment = 0;
 
+  
   if(lwc()->GetisInner())
     {
       G4int ipad = G4int((eta - 2.5) / 0.1);
@@ -704,33 +718,33 @@ G4bool EnergyCalculator::FindIdentifier_Default(
   // overall geom param.:
 
   //   G4double WheelThickness    =  514.*CLHEP::mm;
-  static const G4double rOuterCutoff      = 2034.*CLHEP::mm;
-  static const G4double gapBetweenWheels  =    3.*CLHEP::mm;
-  static const G4double eta_hi = 3.2;
-  static const G4double eta_mid= 2.5;
-  static const G4double eta_low= 1.375;
+  constexpr G4double rOuterCutoff      = 2034.*CLHEP::mm;
+  constexpr G4double gapBetweenWheels  =    3.*CLHEP::mm;
+  constexpr G4double eta_hi = 3.2;
+  constexpr G4double eta_mid= 2.5;
+  constexpr G4double eta_low= 1.375;
 
   // specific param of electrode design;
 
-  static const G4double WidthofHVBus           = 2.5*CLHEP::mm;
-  static const G4double WidthofKaptonGap       = 1.0*CLHEP::mm;
-  static const G4double WidthofKaptonGapinS1   = 0.5*CLHEP::mm;
-  static const G4double WidthofKaptonGapatEdge = 2.*CLHEP::mm;
-  static const G4double zStartofIW   =   4.*CLHEP::mm;   // what follows measured by hand
-  static const G4double zStartofC7   =   8.4*CLHEP::mm;
-  static const G4double zStartofC3   =   7.8*CLHEP::mm;
-  static const G4double  zEndofC8e2  =   4.5*CLHEP::mm;
-  static const G4double  zEndofC9e19 =  30.*CLHEP::mm;
-  static const G4double   r0aofC9e18 = 743.1*CLHEP::mm;
-  static const G4double   r0cofC9e18 = 751.1*CLHEP::mm;
-  static const G4double  zSepofC9e18 =  14.*CLHEP::mm;
-  static const G4double    txofC9e18 =   0.48;
+  constexpr G4double WidthofHVBus           = 2.5*CLHEP::mm;
+  constexpr G4double WidthofKaptonGap       = 1.0*CLHEP::mm;
+  constexpr G4double WidthofKaptonGapinS1   = 0.5*CLHEP::mm;
+  constexpr G4double WidthofKaptonGapatEdge = 2.*CLHEP::mm;
+  constexpr G4double zStartofIW   =   4.*CLHEP::mm;   // what follows measured by hand
+  constexpr G4double zStartofC7   =   8.4*CLHEP::mm;
+  constexpr G4double zStartofC3   =   7.8*CLHEP::mm;
+  constexpr G4double  zEndofC8e2  =   4.5*CLHEP::mm;
+  constexpr G4double  zEndofC9e19 =  30.*CLHEP::mm;
+  constexpr G4double   r0aofC9e18 = 743.1*CLHEP::mm;
+  constexpr G4double   r0cofC9e18 = 751.1*CLHEP::mm;
+  constexpr G4double  zSepofC9e18 =  14.*CLHEP::mm;
+  constexpr G4double    txofC9e18 =   0.48;
 
-  static const G4double DistMax              = WidthofHVBus+WidthofKaptonGap;
-  static const G4double DistMaxS1            = WidthofHVBus+WidthofKaptonGapinS1;
-  static const G4double DistMaxatEdgeinCrack = gapBetweenWheels/2.+WidthofKaptonGapatEdge+
+  constexpr G4double DistMax              = WidthofHVBus+WidthofKaptonGap;
+  constexpr G4double DistMaxS1            = WidthofHVBus+WidthofKaptonGapinS1;
+  constexpr G4double DistMaxatEdgeinCrack = gapBetweenWheels/2.+WidthofKaptonGapatEdge+
     WidthofHVBus+WidthofKaptonGap/2.;
-  static const G4double DistMinatEdgeinCrack =(gapBetweenWheels+WidthofKaptonGapatEdge)/2.;
+  constexpr G4double DistMinatEdgeinCrack =(gapBetweenWheels+WidthofKaptonGapatEdge)/2.;
 
   G4double dist,dist_min,dist_max,eta_min,eta_max;
 

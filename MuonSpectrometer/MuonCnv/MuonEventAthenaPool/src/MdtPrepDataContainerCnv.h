@@ -33,7 +33,7 @@ public:
     virtual ~MdtPrepDataContainerCnv();
     
     virtual MdtPrepDataContainer_PERS*   createPersistent (Muon::MdtPrepDataContainer* transCont);
-    virtual Muon::MdtPrepDataContainer*  createTransient ();
+    virtual Muon::MdtPrepDataContainer*  createTransient(const Token* token);
 
     // Must initialize ID helpers
     virtual StatusCode initialize();

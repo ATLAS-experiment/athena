@@ -10,8 +10,11 @@ namespace MuonCalib {
                                                  const Identifier& moduleID):
         m_moduleID{idHelperSvc->chamberId(moduleID)},
         m_idHelperSvc{idHelperSvc}{
-    m_nMl = static_cast<std::uint8_t>(m_idHelper.numberOfMultilayers(moduleID));
-    
+    const int nMl = m_idHelper.numberOfMultilayers(moduleID);
+    if (!std::in_range<std::uint8_t>(nMl)) {
+        throw std::runtime_error("Invalid number of multilayers for module");
+    }
+    m_nMl = static_cast<std::uint8_t>(nMl);
     const Identifier secondMl = m_idHelper.multilayerID(m_moduleID, m_nMl);
     m_nLayers = std::max(m_idHelper.tubeLayerMax(m_moduleID),
                          m_idHelper.tubeLayerMax(secondMl));

@@ -5,11 +5,11 @@
  **     @author  mark sutton
  **     @date    Tue 10 Nov 2009 10:05:35 GMT 
  **
- **     Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 /**
- * @brief Describes the Region of Ineterest geometry
+ * @brief Describes the Region of Interest geometry
  *  It has basically 8 parameters
  *
  * -# zed      : z position at beamline of RoI
@@ -21,7 +21,7 @@
  * -# eta      : pseudo-rapidity of centre of RoI at origin
  * -# etaPlus  : pseudo-rapidity at zed + zed half-width
  * -# etaMinus : pseudo-rapidity at zed - zed half-width
- * \warning An attempt to cnstruct the objects of this calss with phi0 out of allowed range reasults in throwing exception
+ * \warning An attempt to construct the objects of this class with phi0 out of allowed range results in throwing exception
  */
 
 
@@ -52,7 +52,7 @@ public:
    * @param eta eta of RoI
    * @param phi phi of RoI
    * @param zed zed of RoI
-   * and limits fir each
+   * and limits for each
    */
 
   TIDARoiDescriptor( double eta,  double etaMinus,   double etaPlus,
@@ -67,7 +67,7 @@ public:
    * @param eta eta of RoI
    * @param phi phi of RoI
    * @param zed zed of RoI
-   * and limits fir each
+   * and limits for each
    */
   TIDARoiDescriptor(unsigned l1id, int id, 
 		    double eta,  double etaMinus,   double etaPlus,
@@ -82,7 +82,7 @@ public:
    * @param eta eta of RoI
    * @param phi phi of RoI
    * @param zed zed of RoI
-   * and limits fir each
+   * and limits for each
    */
   TIDARoiDescriptor(unsigned roiWord, unsigned l1id, int id, 
 		    double eta,  double etaMinus,   double etaPlus,
@@ -97,10 +97,16 @@ public:
 
 
   /**
-   * @brief assignment
+   * @brief copy assignment
    * @param TIDARoiDescriptor
    */
   TIDARoiDescriptor& operator=( const TIDARoiDescriptor& r);
+  
+  /**
+   * @brief move assignment
+   * @param TIDARoiDescriptor
+   */
+  TIDARoiDescriptor& operator=( TIDARoiDescriptor && r) noexcept;
 
 
   // Destructor

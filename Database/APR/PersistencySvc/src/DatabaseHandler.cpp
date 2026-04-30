@@ -1,38 +1,33 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DatabaseHandler.h"
 #include "Container.h"
 #include "PersistentDataModel/Token.h"
 #include "StorageSvc/IStorageSvc.h"
-#include "StorageSvc/Transaction.h"
 #include "StorageSvc/Shape.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbOption.h"
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbConnection.h"
-#include "POOLCore/DbPrint.h"
+#include "StorageSvc/DbPrint.h"
 
 #include <exception>
 #include <memory>
 
 pool::PersistencySvc::DatabaseHandler::DatabaseHandler( pool::IStorageSvc& storageSvc,
-                                                        pool::Session* session,
                                                         long technology,
                                                         const std::string& fid,
                                                         const std::string& pfn,
                                                         long accessmode ):
   m_storageSvc( storageSvc ),
-  m_session( session ),
   m_fileDescriptor( fid, pfn ),
   m_technology( technology ),
   m_accessMode( accessmode )
 {
-  if ( ! m_storageSvc.connect( m_session,
-                               m_accessMode,
-                               m_fileDescriptor ).isSuccess() ) {
+  if ( ! m_storageSvc.connect( m_accessMode, m_fileDescriptor ).isSuccess() ) {
     throw std::runtime_error( "Could not connect to the database (APR: \" DatabaseHandler::DatabaseHandler \" from \" PersistencySvc \")" );
   }
 }
@@ -49,18 +44,15 @@ pool::PersistencySvc::DatabaseHandler::~DatabaseHandler()
 bool
 pool::PersistencySvc::DatabaseHandler::commitTransaction()
 {
-   return ( m_storageSvc.endTransaction( m_fileDescriptor.dbc(),
-                                         Transaction::TRANSACT_COMMIT ).isSuccess() &&
-            m_storageSvc.endTransaction( m_fileDescriptor.dbc(),
-                                         Transaction::TRANSACT_FLUSH ).isSuccess() );
+   return m_storageSvc.endTransaction( m_fileDescriptor, Transaction::TRANSACT_COMMIT ).isSuccess() &&
+          m_storageSvc.endTransaction( m_fileDescriptor, Transaction::TRANSACT_FLUSH ).isSuccess();
 }
 
 
 bool
 pool::PersistencySvc::DatabaseHandler::commitAndHoldTransaction()
 {
-   return ( m_storageSvc.endTransaction( m_fileDescriptor.dbc(),
-                                         Transaction::TRANSACT_COMMIT ).isSuccess() );
+   return m_storageSvc.endTransaction( m_fileDescriptor, Transaction::TRANSACT_COMMIT ).isSuccess();
 }
 
 
@@ -75,8 +67,7 @@ pool::PersistencySvc::DatabaseHandler::containers()
 {
    std::vector< std::string > result;
    std::vector<const Token*> containerTokens;
-   pool::DatabaseConnection* connection = m_fileDescriptor.dbc();
-   DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
+   DbDatabase dbH( m_fileDescriptor.dbc()->handle() );
    if( !dbH.containers(containerTokens, false).isSuccess() ) {
       DbPrint log( m_fileDescriptor.PFN() );
       log << MSG::ERROR << "Could not retrieve the list of containers." << endmsg;
@@ -188,10 +179,9 @@ pool::PersistencySvc::DatabaseHandler::attribute( const std::string& attributeNa
                                                   const std::string& option )
 {
   pool::DbOption databaseOption( attributeName, option );
-  pool::DatabaseConnection* connection = m_fileDescriptor.dbc();
-  DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
+  DbDatabase dbH( m_fileDescriptor.dbc()->handle() );
   if( !dbH.getOption(databaseOption).isSuccess() ) return false;
-  return databaseOption.i_getValue( typeInfo, data ).isSuccess();
+  return databaseOption.i_getValue(typeInfo, data).isSuccess();
 }
 
 
@@ -203,7 +193,6 @@ pool::PersistencySvc::DatabaseHandler::setAttribute( const std::string& attribut
 {
   pool::DbOption databaseOption( attributeName, option );
   if( !databaseOption.i_setValue( typeInfo, const_cast<void*>( data ) ).isSuccess() ) return false;
-  pool::DatabaseConnection* connection = m_fileDescriptor.dbc();
-  DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
+  DbDatabase dbH( m_fileDescriptor.dbc()->handle() );
   return dbH.setOption(databaseOption).isSuccess();
   }

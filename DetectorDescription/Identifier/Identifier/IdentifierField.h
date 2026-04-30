@@ -9,7 +9,7 @@
 #include <vector>
 #include <string>
 #include <stdexcept>
-#include <iostream>
+#include <iosfwd>
 #include <limits>
 #include <utility>
 #include <variant>
@@ -170,7 +170,7 @@ class IdentifierField
   operator std::string () const; 
   bool operator == (const IdentifierField& other) const; 
 
-  void show(std::ostream & out = std::cout) const;
+  void show(std::ostream & out) const;
   void show(MsgStream & out) const;
   
   /// Check mode - switch from enumerated to both_bounded if possible

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -641,6 +641,7 @@ G4ThreeVector G4ShiftedCone::ApproxSurfaceNormal( const G4ThreeVector& p ) const
 //    case kNEPhi:
 //      norm=G4ThreeVector(-std::sin(fSPhi+fDPhi), std::cos(fSPhi+fDPhi), 0) ;
 //      break ;
+    //coverity[DEADCODE]
     default:          // Should never reach this case...
       DumpInfo();
       G4Exception("G4ShiftedCone::ApproxSurfaceNormal()",
@@ -948,10 +949,6 @@ G4double G4ShiftedCone::DistanceToIn( const G4ThreeVector& p,
           }*/
         }
       }
-    }
-    else  //    travel || cone surface from its origin
-    {
-      sd = kInfinity ;
     }
   }
 

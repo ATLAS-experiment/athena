@@ -159,7 +159,8 @@ def filterBS(stream_name):
     filterStep.type = 'other'
     filterStep.executable = 'trigbs_extractStream.py'
     filterStep.input = ''
-    filterStep.args = '-s ' + stream_name + ' ' + find_file('*_HLTMPPy_output.*.data')
+    # Support output from both athenaHLT (HLTMPPy) and athenaEF (DFEF)
+    filterStep.args = '-s ' + stream_name + ' ' + find_file('*_HLTMPPy_output.*.data') + find_file('*_DFEF_athenaEF_output.*.data')
     return filterStep
 
 def decodeBS(stream_name, moduleID=0):

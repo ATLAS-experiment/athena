@@ -8,8 +8,7 @@
 #include "CollectionSvc/ICollection.h"
 #include "CollectionSvc/CollectionDescription.h"
 #include "CollectionSvc/CollectionRowBuffer.h"
-
-#include "POOLCore/DbPrint.h"
+#include "StorageSvc/DbPrint.h"
 
 #include "GaudiKernel/IFileMgr.h"
 #include "GaudiKernel/SmartIF.h"
@@ -29,7 +28,7 @@ namespace ROOT {
 
 namespace pool {
 
-   class ISession;
+   namespace PersistencySvc { class ISession; }
 
    namespace RootCollection {
 
@@ -52,7 +51,7 @@ namespace pool {
       class RootCollection :  public ICollection, public APRMessaging {
 
      public:
-	typedef Gaudi::PluginService::Factory<ICollection*( const CollectionDescription*, ICollection::OpenMode, ISession*)> Factory;
+	typedef Gaudi::PluginService::Factory<ICollection*( const CollectionDescription*, ICollection::OpenMode, PersistencySvc::ISession*)> Factory;
 
         /// Constructor
         /// @param description The description of the collection, including name and connection
@@ -60,7 +59,7 @@ namespace pool {
         /// @param session If you want to access the referenced objects you have to provide an ISession
         RootCollection(  const pool::CollectionDescription* description,
                          pool::ICollection::OpenMode mode,
-                         pool::ISession* );
+                         pool::PersistencySvc::ISession* session );
 
         /// Destructor
         ~RootCollection();
@@ -82,7 +81,7 @@ namespace pool {
         virtual const CollectionDescription& description() const final override;
 
         /// Returns a cursor for the collection.
-        virtual ICollectionCursor& cursor() final override;
+        virtual std::unique_ptr<ICollectionCursor> cursor() final override;
 
      private:
 
@@ -103,10 +102,10 @@ namespace pool {
         ICollection::OpenMode                m_mode;
         TFile*                               m_file;
         TTree*                               m_tree;
-	std::unique_ptr<ROOT::RNTupleReader> m_reader;
-	std::unique_ptr<ROOT::RNTupleWriter> m_rntupleWriter;
+        std::unique_ptr<ROOT::RNTupleReader> m_reader;
+        std::unique_ptr<ROOT::RNTupleWriter> m_rntupleWriter;
 
-        ISession*                            m_session;
+        PersistencySvc::ISession*            m_session;
         bool                                 m_open;
 
         SmartIF<IFileMgr>                    m_fileMgr;

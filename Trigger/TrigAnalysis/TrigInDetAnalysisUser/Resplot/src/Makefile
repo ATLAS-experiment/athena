@@ -104,6 +104,7 @@ LIBS += -L$(LIBDIR) -lResplot
 
 .SUFFIXES : .cc .cxx .c
 
+.PRECIOUS: $(SRCDIR)/%Dict.cxx
 
 # build executable: link
 
@@ -116,16 +117,9 @@ $(EXEDIR)/res :   $(OBJECTS) lib
 	$(CXX) $(LDFLAGS) -o $@ $(OBJECTS) $(LIBS) $(LIBS)   $(GLIBS)
 
 
-
-# $(SRCDIR)/*Dict.cxx : $(SRCDIR)/Resplot.cxx  $(INCDIR)/Resplot.h
-#	@echo rootcint -f $@ -c -I.. $(INCDIR)/Resplot.h
-#	@rootcint -f $@ -c -I.. $(INCDIR)/Resplot.h
-
-
-$(SRCDIR)/%Dict.cxx :  $(INCDIR)/%.h 
-	@echo rootcint  -f $@ -c -I.. -I$(INCDIR) $<
-	@rootcint       -f $@ -c -I.. -I$(INCDIR) $< 
-
+$(SRCDIR)/%Dict.cxx : $(INCDIR)/%.h $(INCDIR)/LinkDef.h
+	@echo rootcling -f $@ -c -I.. -I$(INCDIR) $^
+	@rootcling -f $@ -c -I.. -I$(INCDIR) $^
 
 # compile
 $(OBJDIR)/%.o : $(SRCDIR)/%.cxx 
@@ -168,7 +162,7 @@ $(LIBDIR)/libResplot.so : $(LOBJECTS)
 
 clean :
 	$(RM) -rf $(OBJDIR)/*.o  $(LIBDIR)/lib*.{a,so}  $(EXEDIR)/res
-	$(RM) -rf $(SRCDIR)/*LinkDef.{h,cxx} $(SRCDIR)/*~ $(INCDIR)/*~  $(SRCDIR)/*Dict.{h,cxx} $(INCDIR)/*Dict.{h,cxx}
+	$(RM) -rf $(SRCDIR)/*~   $(SRCDIR)/*.pcm   $(INCDIR)/*~  $(SRCDIR)/*Dict.{h,cxx} $(INCDIR)/*Dict.{h,cxx} 
 
 
 archive : 

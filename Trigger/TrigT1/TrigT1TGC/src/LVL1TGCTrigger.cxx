@@ -2,10 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// STL
-#include <sstream>
-#include <fstream>
-#include <vector>
+
 
 // TGC
 #include "TrigT1TGC/LVL1TGCTrigger.h"
@@ -43,6 +40,10 @@
 // DetMask stuff
 #include "eformat/DetectorMask.h"
 #include "eformat/SourceIdentifier.h"
+
+// STL
+#include <sstream>
+#include <fstream>
 
 namespace LVL1TGCTrigger {
 
@@ -690,10 +691,12 @@ void LVL1TGCTrigger::recordRdoHPT(const Muon::TgcCablingMap& cabling,
     // secId for TgcRawData
     //  0-3(EC), 0-1(FWD) for new TGCcabling (1/12sector)
     //  0-5(EC), 0-2(FWD) for new TGCcabling (octant)
-    if (isEndcap){
+    if (isEndcap &&  (coverageOfEndcapSector!=0)){
       secId = sectorId % coverageOfEndcapSector;
     } else {
-      secId = sectorId % coverageOfForwardSector;
+      if (coverageOfForwardSector != 0){
+        secId = sectorId % coverageOfForwardSector;
+      }
     }
     // phi=1-48(EC), 1-24(FWD) in detector ID scheme
     phi = (isEndcap ? (sectorId+46)%48+1 : (sectorId+23)%24+1);
@@ -963,10 +966,12 @@ void LVL1TGCTrigger::recordRdoSL(const Muon::TgcCablingMap& cabling,
                                      coverageOfForwardSector
                                      ) ;
     int secId = 0;
-    if (isEndcap){
+    if (isEndcap && (coverageOfEndcapSector != 0)){
       secId = sectorId % coverageOfEndcapSector;
     } else {
-      secId = sectorId % coverageOfForwardSector;
+      if (coverageOfForwardSector !=0 ){
+        secId = sectorId % coverageOfForwardSector;
+      }
     }
     
     // phi=1-48(EC), 1-24(FWD) in detector ID scheme

@@ -24,4 +24,6 @@ def createOverlayConfigFlags():
     flags.addFlag("Overlay.ExtraInputs", [("McEventCollection", "TruthEvent")])
     # track overlay flag
     flags.addFlag("Overlay.doTrackOverlay", False)
+    # Ignore background inputs
+    flags.addFlag("Overlay.IgnoreBkgInputs", False)
     return flags

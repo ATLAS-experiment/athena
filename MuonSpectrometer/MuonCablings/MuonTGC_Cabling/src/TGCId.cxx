@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCId.h"
@@ -108,18 +108,18 @@ void TGCId::setMultipletType(MultipletType v_multiplet) {
     }
 }
 
-void TGCId::setStation(int v_station) {
+void TGCId::setStation(StationType v_station) {
     m_station = v_station;
-    if (m_station == 0) {
+    if (m_station == StationType::M1) {
         setMultipletType(Triplet);
     }
-    if (m_station == 1) {
+    if (m_station == StationType::M2) {
         setMultipletType(Doublet);
     }
-    if (m_station == 2) {
+    if (m_station == StationType::M3) {
         setMultipletType(Doublet);
     }
-    if (m_station == 3) {
+    if (m_station == StationType::M4) {
         setMultipletType(Inner);
     }
 }

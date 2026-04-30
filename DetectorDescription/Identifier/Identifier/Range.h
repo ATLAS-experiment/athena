@@ -12,7 +12,7 @@
 #include <cassert>
 #include <stdexcept>
 #include <bit>
-#include <iostream>
+#include <iosfwd>
 class MsgStream;
  
 /** 
@@ -132,7 +132,7 @@ public:
   /// Check if two Ranges overlap. 
   bool overlaps_with (const Range& other) const; 
  
-  void show (std::ostream& s = std::cout) const; 
+  void show (std::ostream& s) const; 
   void show (MsgStream & s) const; 
  
   /// Produce a textual representation of the range using the input format 

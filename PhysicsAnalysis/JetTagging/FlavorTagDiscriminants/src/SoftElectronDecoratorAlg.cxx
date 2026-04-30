@@ -46,6 +46,8 @@ namespace FlavorTagDiscriminants {
     ATH_CHECK( m_dec_electron_z0.initialize() );
     ATH_CHECK( m_dec_electron_z0_significance.initialize() );
 
+    ATH_CHECK( m_pt_varcone30_key.initialize() );
+
     return StatusCode::SUCCESS;
   }
 
@@ -69,6 +71,8 @@ namespace FlavorTagDiscriminants {
     SG::WriteDecorHandle<EC, float> dec_electron_energyOverP(m_dec_electron_energyOverP, ctx);
     SG::WriteDecorHandle<EC, float> dec_electron_z0(m_dec_electron_z0, ctx);
     SG::WriteDecorHandle<EC, float> dec_electron_z0_significance(m_dec_electron_z0_significance, ctx);
+
+    SG::ReadDecorHandle<EC, float> pt_varcone30(m_pt_varcone30_key, ctx);
 
     // get the primary vertex
     const xAOD::Vertex* pv = primary(*primary_vertices);
@@ -97,7 +101,7 @@ namespace FlavorTagDiscriminants {
         el_z0_sig = el_z0 / std::sqrt(track->definingParametersCovMatrixDiagVec().at(1));
 
         // additional vars
-        el_iso_pt = m_pt_varcone30(*el) / el_pt;
+        el_iso_pt = pt_varcone30(*el) / el_pt;
         // tracking dnn
         unsigned int index;
         el_qoverp = track->qOverP();

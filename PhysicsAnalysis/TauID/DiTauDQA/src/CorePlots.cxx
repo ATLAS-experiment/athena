@@ -13,10 +13,6 @@ namespace DiTau{
   {
   }
 	
-  CorePlots::~CorePlots()
-  {
-  }
-
   void CorePlots::initializePlots(){
 
     pt       = Book1D("pt" , "DiTau pt; DiTau Transverse Momentum [GeV];Entries / 10 GeV",30,50.,350.);
@@ -38,8 +34,7 @@ namespace DiTau{
     sublead_subjet_eta = Book1D("sublead_subjet_eta", "DiTau subleading subjet eta; DiTau Subleading Subjet Pseudo-Rapidity;Entries / 0.05", 32, -3.2, 3.2);
     sublead_subjet_phi = Book1D("sublead_subjet_phi", "DiTau subleading subjet phi; DiTau Subleading Subjet Azimuthal Angle;Entries / 0.05", 32, -3.2, 3.2);
     sublead_subjet_ntracks = Book1D("sublead_subjet_ntracks", "DiTau subleading subjet ntracks; DiTau Subleading Subjet Number of Tracks; Entries", 8,0,8);  
-
-    omni_score = Book1D("OmniScore", "OmniScore;OmniScore; # DiTau", 50,0.,1.);    
+   
   }
 
   void CorePlots::fill(const xAOD::DiTauJet& ditau, float weight) {
@@ -99,11 +94,5 @@ namespace DiTau{
      sublead_subjet_phi->Fill(ditau.subjetPhi(1),weight);
      sublead_subjet_ntracks->Fill(subl_ntracks);
 
-     // omni score
-     static const SG::ConstAccessor<float> acc_OmniScore("omni_score");
-     if ( acc_OmniScore.isAvailable(ditau) ) {
-         float OmniScore = acc_OmniScore(ditau);
-	 omni_score->Fill(OmniScore, weight);
-     }
   }
 }

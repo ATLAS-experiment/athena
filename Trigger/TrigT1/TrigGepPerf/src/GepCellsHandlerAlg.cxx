@@ -178,11 +178,11 @@ StatusCode GepCellsHandlerAlg::execute(const EventContext& ctx) const {
     float electronicNoise = electronicNoiseCDO->getNoise(cell->ID(), cell->gain());
     float totalNoise = totalNoiseCDO->getNoise(cell->ID(), cell->gain());
    
-    // Only send positive-energy 2sigma cells to the GEP
-    const bool pass_2sigma = cell->energy() / totalNoise >= 2.0;
-    if (!pass_2sigma && !m_writeAllCells) continue;
+    // Only send positive-energy cells above the noise threshold to the GEP
+    const bool pass_sigma = cell->energy() / totalNoise >= m_noiseThreshold;
+    if (!pass_sigma && !m_writeAllCells) continue;
 
-    const double energy = m_cleanOutputCells && !pass_2sigma ? 0 : cell->energy();
+    const double energy = m_cleanOutputCells && !pass_sigma ? 0 : cell->energy();
 
     // GEP will only have ET available for LAr cells, so convert to energy from ET
     caloCell.offline_et = energy / TMath::CosH(cell->eta());
@@ -345,7 +345,7 @@ std::vector<unsigned int> GepCellsHandlerAlg::getNeighbours(const CaloCellContai
     if (neighbour) {
       neighbour_ids.push_back((neighbour->ID().get_identifier32()).get_compact());
     } else {
-      ATH_MSG_ERROR("Couldn't access neighbour #" << iNeighbour
+      ATH_MSG_WARNING("Couldn't access neighbour #" << iNeighbour
 		    << " for cell ID "
 		    << (acell->ID().get_identifier32()).get_compact());
     }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/AuxTypeRegistry.cxx
@@ -34,7 +34,7 @@ namespace SG {
  *
  * We split this off in order to reduce compile-time dependencies
  * on tbb and ConcurrentStrMap.  Since this can get accessed frequently,
- * but is a singleton, we don't use the more commom pimpl idiom.
+ * but is a singleton, we don't use the more common pimpl idiom.
  * Instead, we put the implementation stuff in a derived class.
  * The function that creates the singleton actually makes an instance
  * of the derived class, and we static_cast to the derived class

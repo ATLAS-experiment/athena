@@ -46,3 +46,5 @@ if(XAOD_ANALYSIS)
   atlas_install_python_modules( python/*.py )
 
 endif()
+
+atlas_install_data( data/* )

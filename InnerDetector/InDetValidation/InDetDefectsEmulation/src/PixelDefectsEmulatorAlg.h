@@ -21,6 +21,10 @@ namespace InDet {
          int row_index(const Identifier &rdoID) const { return m_idHelper->phi_index(rdoID); }
          int col_index(const Identifier &rdoID) const { return m_idHelper->eta_index(rdoID); }
 
+         unsigned int nConsecutiveRows([[maybe_unused]] const PixelRDORawData &rdo) const {
+            return 1;
+         }
+
          template <typename T_ModuleHelper>
          std::unique_ptr<Pixel1RawData> createNoiseHit(const T_ModuleHelper &helper, const Identifier &identifier, unsigned int cell_idx, unsigned int tot) {
             unsigned int row_aka_phi=cell_idx % helper.rows();

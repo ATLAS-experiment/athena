@@ -15,35 +15,35 @@ class OutputAnalysisConfig (ConfigBlock):
         self.addOption ('postfix', '', type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here.")
-        self.addOption ('vars', [], type=None,
+        self.addOption ('vars', [], type=list,
             info="a list of mappings (list of strings) between containers and "
             "decorations to output branches.")
-        self.addOption ('varsOnlyForMC', [], type=None,
+        self.addOption ('varsOnlyForMC', [], type=list,
             info="same as `vars`, but for MC-only variables so as to avoid a "
             "crash when running on data.")
-        self.addOption ('metVars', [], type=None,
+        self.addOption ('metVars', [], type=list,
             info="a list of mappings (list of strings) between containers "
             "and decorations to output branches. Specficially for MET "
             "variables, where only the final MET term is retained.")
-        self.addOption ('truthMetVars', [], type=None,
+        self.addOption ('truthMetVars', [], type=list,
             info="a list of mappings (list of strings) between containers "
             "and decorations to output branches for truth MET.")
-        self.addOption ('containers', {}, type=None,
+        self.addOption ('containers', {}, type=dict,
             info="a dictionary mapping prefixes (key) to container names "
             "(values) to be used when saving to the output tree. Branches "
             "are then of the form `prefix_decoration`.")
-        self.addOption ('containersFullMET', {}, type=None,
+        self.addOption ('containersFullMET', {}, type=dict,
             info="same as `containers`, but for MET containers that should be "
             "saved with all terms (as opposed to just the final term). This "
             "is useful for special studies. A container can appear both here and "
             "in containers (with different prefixes).")
-        self.addOption ('containersOnlyForMC', {}, type=None,
+        self.addOption ('containersOnlyForMC', {}, type=dict,
             info="same as `containers`, but for MC-only containers so as to avoid "
             "a crash when running on data.")
-        self.addOption ('containersOnlyForDSIDs', {}, type=None,
+        self.addOption ('containersOnlyForDSIDs', {}, type=dict,
             info="specify which DSIDs are allowed to produce a given container. "
             "This works like `onlyForDSIDs`: pass a list of DSIDs or regexps.")
-        self.addOption ('nonContainers', ['EventInfo'], type=None,
+        self.addOption ('nonContainers', ['EventInfo'], type=list,
             info="a list of container names that are not actual containers but should be treated as non-containers.")
         self.addOption ('treeName', 'analysis', type=str,
             info="name of the output TTree to save.")
@@ -58,13 +58,13 @@ class OutputAnalysisConfig (ConfigBlock):
         self.addOption ('storeSelectionFlags', True, type=bool,
             info="whether to store one branch for each object selection.")
         self.addOption ('selectionFlagPrefix', 'select', type=str,
-            info="the prefix used when naming selection branches")
-        self.addOption ('commands', [], type=None,
+            info="the prefix used when naming selection branches.")
+        self.addOption ('commands', [], type=list,
             info="a list of strings containing commands (regexp strings "
             "prefaced by the keywords `enable` or `disable`) to turn on/off the "
             "writing of branches to the output ntuple. If left empty, do not modify "
             "the scheduled output branches.")
-        self.addOption ('commandsOnlyForDSIDs', {}, type=None,
+        self.addOption ('commandsOnlyForDSIDs', {}, type=dict,
             info="a dictionary with individual DSIDs as keys, and a list of strings "
             "like for the `commands` option as items. These `commands` will only be run "
             "for the corresponding DSID.")
@@ -72,8 +72,11 @@ class OutputAnalysisConfig (ConfigBlock):
             info="If set to `True`, all branches will be given a systematics suffix, "
             "even if they have no systematics (beyond the nominal).")
         self.addOption ('skipRedundantSelectionFlags', True, type=bool,
-            info="remove the redundant `outputSelect` branches created by the `Thinning` step. "
-            "These could however be used to simplify downstream workflows, as in Easyjet.")
+            info="remove the redundant 'outputSelect' branches created by the Thinning step. "
+            "These could however be used to simplify downstream workflows, as in Easyjet. "
+            "The default is True.")
+        self.addOption ('outputFormat', 'TTree', type=str,
+            info="The output format. The default is 'TTree'.")
         self.addOption ('defaultBasketSize', None, type=int,
             info="default basket size for all branches in the output tree. "
             "If not set (the default), no basket size is configured and ROOT's "
@@ -280,6 +283,40 @@ class OutputAnalysisConfig (ConfigBlock):
                         branchDecl += f" metTerm={self.metTermName}"
                 myVars.add(branchDecl)
 
+        # Unified branch collection for all output formats
+        allBranches = set()
+        allBranches |= self.vars
+        allBranches |= autoVars
+        # Add MET branches
+        userMetVars = set()
+        if self.metVars:
+            for var in self.metVars:
+                userMetVars.add(var + " metTerm=" + self.metTermName)
+        allBranches |= userMetVars
+        allBranches |= autoMetVars
+        # Add truth MET branches (for MC)
+        userTruthMetVars = set()
+        if config.dataType() is not DataType.Data:
+            if self.truthMetVars:
+                for var in self.truthMetVars:
+                    userTruthMetVars.add(var + " metTerm=" + self.truthMetTermName)
+            allBranches |= userTruthMetVars
+            allBranches |= autoTruthMetVars
+
+        # Create the output algorithm based on outputFormat
+        if self.outputFormat == 'RNTuple':
+            alg = config.createAlgorithm('CP::RNtupleTreeMakerAlg', 'RNtupleMaker')
+            alg.TreeName = self.treeName
+            alg.RootStreamName = self.streamName
+            alg.OutputStreamName = self.streamName
+            alg.NonContainers = list(self.nonContainers)
+
+            branchList = list(allBranches)
+            branchList.sort(key=self.branchSortOrder)
+            alg.Branches = branchList
+
+            return
+
         # Add an ntuple dumper algorithm:
         treeMaker = config.createAlgorithm( 'CP::TreeMakerAlg', 'TreeMaker' )
         treeMaker.TreeName = self.treeName
@@ -291,17 +328,9 @@ class OutputAnalysisConfig (ConfigBlock):
             self.createOutputAlgs(config, 'NTupleMaker', self.vars | autoVars)
 
         if self.metVars or autoMetVars:
-            userMetVars = set ()
-            if self.metVars :
-                for var in self.metVars:
-                    userMetVars.add(var + " metTerm=" + self.metTermName)
             self.createOutputAlgs(config, 'MetNTupleMaker', userMetVars | autoMetVars)
 
         if config.dataType() is not DataType.Data and (self.truthMetVars or autoTruthMetVars):
-            userTruthMetVars = set ()
-            if self.truthMetVars :
-                for var in self.truthMetVars:
-                    userTruthMetVars.add(var + " metTerm=" + self.truthMetTermName)
             self.createOutputAlgs(config, 'TruthMetNTupleMaker', userTruthMetVars | autoTruthMetVars)
 
         treeFiller = config.createAlgorithm( 'CP::TreeFillerAlg', 'TreeFiller' )
@@ -330,7 +359,9 @@ class OutputAnalysisConfig (ConfigBlock):
             if containerName == 'EventInfo':
                 continue
 
-            selectionNames = config.getSelectionNames(containerName)
+            # Get the selection names, except the systematic-dependent version of the FTAG
+            # selection flag, as it's already saved as a systematic-independent output branch
+            selectionNames = config.getSelectionNames(containerName, excludeFrom={'ftag'})
             for selectionName in selectionNames:
                 # skip default selection
                 if selectionName == '':

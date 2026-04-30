@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -32,7 +32,7 @@ RecCTPByteStreamCnv::RecCTPByteStreamCnv( ISvcLocator* svcloc )
  * Function telling the framework the Class ID of the object that this converter
  * is for (CTP_RIO).
  */
-const CLID& RecCTPByteStreamCnv::classID() {
+CLID RecCTPByteStreamCnv::classID() {
 
   return ClassID_traits< CTP_RIO >::ID();
 

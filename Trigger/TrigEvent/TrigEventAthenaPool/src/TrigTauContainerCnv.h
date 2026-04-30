@@ -31,7 +31,7 @@ protected:
  
    
    virtual TrigTauContainer_PERS *createPersistent( TrigTauContainer *transObj);
-   virtual TrigTauContainer      *createTransient();
+   virtual TrigTauContainer      *createTransient(const Token* token);
 
 private:
    TrigTauContainerCnv_tlp1 m_converter_tlp1;

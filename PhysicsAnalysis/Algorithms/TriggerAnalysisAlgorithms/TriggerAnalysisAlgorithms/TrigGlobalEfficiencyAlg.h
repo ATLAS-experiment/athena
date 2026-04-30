@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina
@@ -17,7 +17,6 @@
 #include <AsgTools/PropertyWrapper.h>
 
 // Framework includes
-#include "AsgMessaging/AsgMessaging.h"
 #include <xAODEgamma/ElectronContainer.h>
 #include <xAODEgamma/PhotonContainer.h>
 #include <xAODMuon/MuonContainer.h>
@@ -136,6 +135,8 @@ namespace CP
     /// \brief RAII on-the-fly tool creation for photons
     std::vector<asg::AnaToolHandle<IAsgPhotonEfficiencyCorrectionTool> > m_photonToolsFactory;
 
+    /// \brief MC campaign
+    Gaudi::Property<std::string> m_campaign {this, "campaign", "", "the MC campaign to get the scale factors for"};
     /// \brief electron ID
     Gaudi::Property<std::string> m_electronID {this, "electronID", "", "electron ID WP"};
     /// \brief electron Isolation

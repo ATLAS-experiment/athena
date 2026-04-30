@@ -17,7 +17,7 @@ def LArRawDataReadingCfg(flags, **kwargs):
     if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing:
         kwargs.setdefault("LArDigitKey", f"{flags.Overlay.BkgPrefix}LArDigitContainer_data")
         kwargs.setdefault("LArFebHeaderKey", "LArFebHeader")
-    if flags.LAr.RawChannelSource is RawChannelSource.Calculated or flags.Overlay.DataOverlay:
+    elif flags.LAr.RawChannelSource is RawChannelSource.Calculated or flags.Overlay.DataOverlay:
         kwargs.setdefault("LArRawChannelKey", "")
 
     print('LArRawDataReadingCfg flags.LAr.RawChannelSource ',flags.LAr.RawChannelSource)

@@ -124,13 +124,30 @@ namespace Muon::MuonStationIndex{
       }
       return LayerIndex::LayerIndexMax;
    }
+   inline DetectorRegionIndex toDetectorRegionIndex(ChIndex index, int8_t etaSign){
+      if(isBarrel(index)){
+         return DetectorRegionIndex::Barrel;
+      }else if(etaSign>0){
+         return DetectorRegionIndex::EndcapA;
+      }else{
+         return DetectorRegionIndex::EndcapC;
+      }
+   }
    inline unsigned int sectorLayerHash(DetectorRegionIndex regionIdx, 
                                        LayerIndex layerIndex ){
       return toInt(regionIdx)*toInt(LayerIndex::LayerIndexMax) + toInt(layerIndex);
+   }
+   inline unsigned int regionChamberHash( DetectorRegionIndex regionIdx, ChIndex chamberIdx){
+      return toInt(regionIdx)*toInt(ChIndex::ChIndexMax) + toInt(chamberIdx);
    }
    inline std::pair< DetectorRegionIndex, LayerIndex > decomposeSectorLayerHash( unsigned int hash ) {
       assert(hash < sectorLayerHashMax());
       return std::make_pair( static_cast< DetectorRegionIndex >( hash / toInt(LayerIndex::LayerIndexMax) ),
                               static_cast< LayerIndex >( hash % toInt(LayerIndex::LayerIndexMax) ) );
    }   
+   inline std::pair< DetectorRegionIndex, ChIndex> decomposeRegionChamberHash( unsigned int hash ) {
+      assert( hash < regionChamberHashMax());
+      return std::make_pair( static_cast< DetectorRegionIndex >( hash / toInt(ChIndex::ChIndexMax) ),
+                              static_cast< ChIndex >( hash % toInt(ChIndex::ChIndexMax) ) );
+   }
 }

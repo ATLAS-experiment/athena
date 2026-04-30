@@ -1,9 +1,7 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#pragma once
-// emacs -*- c++ -*-
 #ifndef TRIGSTEERINGEVENT_GENERICRESULT_H
 #define TRIGSTEERINGEVENT_GENERICRESULT_H
 
@@ -15,8 +13,11 @@
  * @author Tomasz.Bold@cern.NSPMPLSch
  */
 
-#include <stdint.h>
 #include "xAODCore/CLASS_DEF.h"
+
+#include <stdint.h>
+#include <vector>
+
 
 class GenericResult {
  public:

@@ -59,13 +59,13 @@ StatusCode DiTauSmearingTool::initialize()
   return StatusCode::SUCCESS;
 }
 
-CP::CorrectionCode DiTauSmearingTool::applyCorrection( xAOD::DiTauJet& xDiTau )
+CP::CorrectionCode DiTauSmearingTool::applyCorrection( xAOD::DiTauJet& xDiTau ) const
 {
   return m_tCommonDiTauSmearingTool->applyCorrection(xDiTau);
 }
 
 CP::CorrectionCode DiTauSmearingTool::correctedCopy( const xAOD::DiTauJet& input,
-    xAOD::DiTauJet*& output )
+    xAOD::DiTauJet*& output ) const
 {
   return m_tCommonDiTauSmearingTool->correctedCopy(input, output);
 }

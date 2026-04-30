@@ -23,20 +23,20 @@ CaloTowerContainerCnv::CaloTowerContainerCnv(ISvcLocator* svcloc)
     CaloTowerContainerCnvBase(svcloc)
 {}
 
-CaloTowerContainer* CaloTowerContainerCnv::createTransient() {
+CaloTowerContainer* CaloTowerContainerCnv::createTransient(const Token* token) {
     const EventContext& ctx = Gaudi::Hive::currentContext();
     MsgStream log(msgSvc(), "CaloTowerContainerCnv::createTransient" );
     CaloTowerContainer* Cont = 0;
 
-    if (compareClassGuid(p0_guid)) {
-     if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Read version p0 of CaloTowerContainer. GUID=" 
-	 << m_classID.toString() << endmsg;
-     Cont=poolReadObject<CaloTowerContainer>();
+    if (compareClassGuid(token, p0_guid)) {
+     if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Read version p0 of CaloTowerContainer. token=" 
+	 << token->toString() << endmsg;
+     Cont=poolReadObject<CaloTowerContainer>(token);
     }
-    else if(compareClassGuid(p1_guid)) {
-      if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Read version p1 of CaloTowerContainer. GUID=" 
-	  << m_classID.toString() << endmsg;
-      CaloTowerContainerPERS* pers=poolReadObject<CaloTowerContainer_p1>();
+    else if(compareClassGuid(token, p1_guid)) {
+      if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Read version p1 of CaloTowerContainer. token=" 
+	  << token->toString() << endmsg;
+      CaloTowerContainerPERS* pers=poolReadObject<CaloTowerContainer_p1>(token);
       Cont=new CaloTowerContainer();
       m_converter.persToTrans(pers,Cont,log);
       delete pers;

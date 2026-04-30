@@ -26,7 +26,7 @@ public:
 
 protected:
   virtual TrigPassBitsCollection_PERS *createPersistent( TrigPassBitsCollection *transObj);
-  virtual TrigPassBitsCollection      *createTransient();
+  virtual TrigPassBitsCollection      *createTransient(const Token* token);
 
 private:
   std::unique_ptr<TrigPassBitsCollection_impl> m_impl;

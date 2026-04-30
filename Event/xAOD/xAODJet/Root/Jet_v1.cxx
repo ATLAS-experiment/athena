@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -107,6 +107,8 @@ namespace xAOD {
       constituentAcc( "constituentLinks" );
   static const SG::AuxElement::Accessor< std::vector< float> >
       constituentWeightAcc( "constituentWeights" );
+  /// The access for the number of constituents
+  static const SG::AuxElement::Accessor<int> numConstitAcc("numConstit");
 
   void Jet_v1::addConstituent( const ElementLink< IParticleContainer >& link,
                                float w ) {
@@ -151,8 +153,17 @@ namespace xAOD {
   }
 
   size_t Jet_v1::numConstituents() const {
-
-     return constituentAcc( *this ).size();
+    int numConstit = 0;
+    if(constituentAcc.isAvailable( *this )){
+      numConstit = constituentAcc( *this ).size();
+    }
+    else if(numConstitAcc.isAvailable( *this )){
+      numConstit = numConstitAcc( *this );
+    }
+    else{
+      throw std::runtime_error("numConstituents(): neither the aux data item `constituentLinks' nor `numConstit' of the jet is available.");
+    }
+    return numConstit;
   }
 
   const IParticle* Jet_v1::rawConstituent(size_t i) const {

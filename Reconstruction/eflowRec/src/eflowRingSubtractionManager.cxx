@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -21,19 +21,16 @@ CREATED:  18th Aug, 2005
 #include <cmath>
 #include <list>
 
-
-using std::vector;
-
 eflowRingSubtractionManager::eflowRingSubtractionManager() : m_ringThickness(eflowCalo::nRegions), m_fudgeMean(0), m_fudgeStdDev(-1) {}
 
-double eflowRingSubtractionManager::ringMeanRank(const vector<double>& p, double rMin, double rMax) {
+double eflowRingSubtractionManager::ringMeanRank(const std::vector<double>& p, double rMin, double rMax) {
 
   double x1 = 0.0;
   double x2 = 0.0;
 
   if (0 != p[1] && 0 != p[3]){
-    x1 = exp(-rMin / p[1]) - exp(-rMax / p[1]);
-    x2 = exp(-rMin / p[3]) - exp(-rMax / p[3]);
+    x1 = std::exp(-rMin / p[1]) - std::exp(-rMax / p[1]);
+    x2 = std::exp(-rMin / p[3]) - std::exp(-rMax / p[3]);
   }
 
   return (p[0] * p[1] * x1 + p[2] * p[3] * x2) / (rMax - rMin); // hard coded 4-param model for now
@@ -72,7 +69,7 @@ std::vector<eflowCaloENUM> eflowRingSubtractionManager::orderedLayersByShowerPar
   return orderedLayers;
 }
 
-void eflowRingSubtractionManager::setParameters(const eflowFirstIntParameters& param, const vector<double>& ringThickness) {
+void eflowRingSubtractionManager::setParameters(const eflowFirstIntParameters& param, const std::vector<double>& ringThickness) {
   /* Prepare a vector of calo layers which is ordered by the p0 parameter */
   std::vector<eflowCaloENUM> orderedLayers = orderedLayersByShowerParam(param, 0);
 

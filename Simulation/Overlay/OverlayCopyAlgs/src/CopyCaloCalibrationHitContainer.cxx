@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CopyCaloCalibrationHitContainer.h"
@@ -51,6 +51,7 @@ StatusCode CopyCaloCalibrationHitContainer::execute(const EventContext& ctx) con
   ATH_MSG_DEBUG("Recorded output CaloCalibrationHitContainer container " << outputContainer.name() << " in store " << outputContainer.store());
 
   // Copy signal CaloHits
+  outputContainer->reserve(signalContainer->size());
   for (const CaloCalibrationHit *record : *signalContainer) {
     outputContainer->push_back(new CaloCalibrationHit(*record));
   }

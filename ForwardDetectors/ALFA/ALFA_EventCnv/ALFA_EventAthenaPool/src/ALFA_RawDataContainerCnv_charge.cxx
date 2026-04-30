@@ -17,7 +17,7 @@ if (log.level()<=MSG::DEBUG) log << MSG::DEBUG << "Wrote persistent BCM RDO Cont
 
 }
 
-ALFA_RawDataContainer_charge* ALFA_RawDataContainerCnv_charge::createTransient() {
+ALFA_RawDataContainer_charge* ALFA_RawDataContainerCnv_charge::createTransient(const Token* token) {
   
   MsgStream log(msgSvc(), "ALFA_RawDataContainerCnv_charge");
 if (log.level()<=MSG::DEBUG) log << MSG::DEBUG << "In ALFA_RawDataContainerCnv_charge::createTransient" << endmsg;
@@ -27,9 +27,9 @@ if (log.level()<=MSG::DEBUG) log << MSG::DEBUG << "In ALFA_RawDataContainerCnv_c
 
 static const pool::Guid p1_guid("0C023583-E3D4-4C7D-9B20-B6B2A1018D2F");
 
-if (this->compareClassGuid(p1_guid)) {
+if (this->compareClassGuid(token, p1_guid)) {
 
-     std::unique_ptr< ALFA_RawDataContainer_charge_p1 > persCont(poolReadObject< ALFA_RawDataContainer_charge_p1 >());
+     std::unique_ptr< ALFA_RawDataContainer_charge_p1 > persCont(poolReadObject< ALFA_RawDataContainer_charge_p1 >(token));
 
      transCont = TPConverter_p1.createTransient(persCont.get(), log);
   }

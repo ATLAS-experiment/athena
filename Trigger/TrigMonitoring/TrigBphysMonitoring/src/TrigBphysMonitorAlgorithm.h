@@ -35,6 +35,7 @@ private:
   Gaudi::Property<std::vector<std::string>> m_ChainNames_MuMu{this, "ChainNames_MuMu", {}};
   Gaudi::Property<std::vector<std::string>> m_ChainNames_MuMuX{this, "ChainNames_MuMuX", {}};
   Gaudi::Property<std::vector<std::string>> m_ChainNames_ElEl{this, "ChainNames_ElEl", {}};
+  Gaudi::Property<std::vector<std::string>> m_ChainNames_Bhh{this, "ChainNames_Bhh", {}};
   
   Gaudi::Property<bool> m_requireExplicitESDecision{this, "requireExplicitESDecision", false};
   
@@ -57,6 +58,7 @@ private:
   StatusCode fillDimuonChainHists(const EventContext& ctx, const std::string& chainName) const;
   StatusCode fillBmumuxChainHists(const EventContext& ctx, const std::string& chainName) const;
   StatusCode fillDielectronChainHists(const EventContext& ctx, const std::string& chainName) const;
+  StatusCode fillBhhChainHists(const EventContext& ctx, const std::string& chainName) const;
   StatusCode fillChainGenericHists(const EventContext& /*ctx*/, const ToolHandle<GenericMonitoringTool>& currentMonGroup, const std::string& chainName) const;
   StatusCode fillBphysObjectHists(const ToolHandle<GenericMonitoringTool>& currentMonGroup, const ElementLink<xAOD::TrigBphysContainer>& bphysLink, const std::string& objStr) const;
   StatusCode fillTrigLeptonHists(const ToolHandle<GenericMonitoringTool>& currentMonGroup, const ElementLink<xAOD::TrigBphysContainer>& bphysLink, const std::string& name_prefix) const;

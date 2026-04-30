@@ -149,24 +149,26 @@ def defaultITkTrigTrackingFlags() -> AthConfigFlags:
   flags.doCaloSeededAmbiSi  = False
   flags.DoubletDR_Max       = 150.0
   flags.useTIDE_Ambi        = False  
-  flags.maxEta = 4.0
+  flags.maxEta              = 4.0
+
   return flags
 
 def defaultITkActsTrigTrackingFlags() -> AthConfigFlags:
-    flags = createActsTrackingPassFlags()
-    defaultTrigTrackingFlags(flags)
+  flags = createActsTrackingPassFlags()
+  defaultTrigTrackingFlags(flags)
+  
+  flags.minPT               = [0.9*Units.GeV, 0.4*Units.GeV, 0.4*Units.GeV]
+  flags.minClusters         = [9, 8, 7]
+  flags.doTRT               = False
+  flags.maxEta              = 4.0
+  flags.maxShared           = [2]
+  flags.maxHoles            = [1]
+  flags.maxPixelHoles       = [2]
+  flags.maxSctHoles         = [2]
+  flags.maxShared           = [2]
+  flags.maxDoubleHoles      = [1]
     
-    flags.minPT               = [0.9*Units.GeV, 0.4*Units.GeV, 0.4*Units.GeV]
-    flags.minClusters         = [9, 8, 7]
-    flags.doTRT = False
-    flags.maxEta = 4.0
-    flags.maxShared = [2]
-    flags.maxHoles = [1]
-    flags.maxPixelHoles = [2]
-    flags.maxSctHoles = [2]
-    flags.maxShared = [2]
-    flags.maxDoubleHoles = [1]
-    return flags
+  return flags
 
 def defaultModeTrigTrackingFlags(flags: AthConfigFlags) -> AthConfigFlags:
   return flags
@@ -186,6 +188,9 @@ def signatureTrigTrackingFlags(mode : str) -> AthConfigFlags:
     
     "tauCore"       : tauCore,
     "tauIso"        : tauIso,
+    "tauHitsHitZ"   : tauHitsHitZ,
+    "tauCoreHitZ"   : tauCoreHitZ,
+    "tauIsoHitZ"    : tauIsoHitZ,
     
     "diTau"         : diTau,
     
@@ -324,8 +329,18 @@ def muonIso(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   return flags
 
 @signatureActions
-def tauCore(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
+def tauHitsHitZ(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
+  # RoI used only for SP-formation (no tracking)
+
+  flags.input_name = instanceName
+  flags.name     = "tauHitsHitZ"
+  flags.suffix   = "TauHits"
+  flags.roi      = "HLT_Roi_TauHitsHitZ"
+  return flags
   
+@signatureActions
+def tauCore(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
+
   flags.input_name = instanceName
   flags.name     = "tauCore"
   flags.suffix   = "TauCore"
@@ -335,10 +350,18 @@ def tauCore(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
 
   flags.holeSearch_FTF = True
   return flags
+
+@signatureActions
+def tauCoreHitZ(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
+  flags = tauCore(flags, instanceName, recoMode)
+  flags.name     = "tauCoreHitZ"
+  flags.roi      = "HLT_Roi_TauCoreHitZ"
+  flags.zedHalfWidth   = 30.0
+  return flags
   
 @signatureActions
 def tauIso(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
-  
+
   flags.input_name = instanceName
   flags.name     = "tauIso"
   flags.suffix   = "TauIso"
@@ -352,6 +375,13 @@ def tauIso(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfig
   flags.electronPID    = False
   flags.pTmin          = 0.8*Units.GeV
   flags.minPT = tsetter(flags.minPT, flags.pTmin)
+  return flags
+
+@signatureActions
+def tauIsoHitZ(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
+  flags = tauIso(flags, instanceName, recoMode)
+  flags.name     = "tauIsoHitZ"
+  flags.roi      = "HLT_Roi_TauIsoHitZ"
   return flags
 
 @signatureActions
@@ -837,7 +867,8 @@ def derivedFromSignatureFlags(flags: AthConfigFlags, recoMode : str):
   flags.tracks_FTF    = collToRecordable(flags, f'HLT_IDTrack_{flags.suffix}_FTF')
   # ToDo: shouldn't be setting flags using this if type structures, the flags should be
   #       actually set somewhere in appropriate config functions
-  flags.tracks_IDTrig = collToRecordable(flags,"HLT_IDTrack_{}_IDTrig".format(flags.suffix if flags.input_name != "tauIso" else "Tau"))
+  flags.tracks_IDTrig = \
+    collToRecordable(flags,"HLT_IDTrack_{}_IDTrig".format(flags.suffix if flags.input_name not in ['tauIso', 'tauIsoHitZ'] else "Tau"))
 
   if recoMode == "Acts":
     flags.trkTracks_FTF     = f'HLT_Acts_{flags.suffix}_Tracks'
@@ -869,11 +900,11 @@ def collToRecordable(flags,name):
   firstStage = True if "FTF" in name else False
   record = True
   if firstStage:
-    if signature in ["minBias","minBiasPixel","bjetLRT",
+    if signature in ["tauHitsHitZ","minBias","minBiasPixel","bjetLRT",
                      "beamSpot","BeamSpot"]:
       record = False
   else:
-    if signature in ["tauCore","tauIso","tauIsoBDT",
+    if signature in ["tauHitsHitZ","tauCore","tauCoreHitZ","tauIso","tauIsoHitZ","tauIsoBDT",
                      "jet","fullScan","FS","jetSuper","bhh",
                      "beamSpot", "BeamSpot","beamSpotFS",
                      "bjetLRT","DJetLRT","DVtxLRT"]:
@@ -913,15 +944,21 @@ class FlagValuesTest(unittest.TestCase):
         from AthenaConfiguration.AllConfigFlags import initConfigFlags
         flags = initConfigFlags()
         flags.Trigger.InDetTracking.electron.pTmin=3.
-        self.newflags = flags.cloneAndReplace('Tracking.ActiveConfig', 'Trigger.InDetTracking.electron',  
+        flags.Trigger.ITkTracking.muonLRT.maxEta=5.
+        flags.Trigger.ITkTracking.jetSuper.minPT=[3.,2.,1.]
+        self.newflags1 = flags.cloneAndReplace('Tracking.ActiveConfig', 'Trigger.InDetTracking.electron',  
                                               keepOriginal = True)
-        self.newflags2 = flags.cloneAndReplace('Tracking.ActiveConfig', 'Trigger.InDetTracking.muonLRT',
+        self.newflags2 = flags.cloneAndReplace('Tracking.ActiveConfig', 'Trigger.ITkTracking.muonLRT',
+                                               keepOriginal = True)
+        self.newflags3 = flags.cloneAndReplace('Tracking.ActiveConfig', 'Trigger.ITkTracking.jetSuper',
                                                keepOriginal = True)
         
     def runTest(self):
-        self.assertEqual(self.newflags.Tracking.ActiveConfig.pTmin,  3.,             msg="Preset value lost")        
-        self.assertEqual(self.newflags.Tracking.ActiveConfig.input_name, "electron", msg="Incorrect config")
-        self.assertEqual(self.newflags2.Tracking.ActiveConfig.input_name, "muonLRT", msg="Incorrect config")
+        self.assertEqual(self.newflags1.Tracking.ActiveConfig.pTmin,  3.,             msg="Preset value lost")        
+        self.assertEqual(self.newflags1.Tracking.ActiveConfig.input_name, "electron", msg="Incorrect version of flags")
+        self.assertEqual(self.newflags2.Tracking.ActiveConfig.input_name, "muonLRT",  msg="Incorrect version of flags")
+        self.assertEqual(self.newflags2.Tracking.ActiveConfig.maxEta, 5.,             msg="Preset value lost")
+        self.assertEqual(self.newflags3.Tracking.ActiveConfig.minPT, [3.,2.,1.],      msg="Preset value lost")        
 
   
 if __name__ == "__main__":

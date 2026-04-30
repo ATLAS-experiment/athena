@@ -46,7 +46,7 @@ public:
     
 protected:
    virtual IsoMuonFeature_PERS* createPersistent( IsoMuonFeature *transObj);
-   virtual IsoMuonFeature* createTransient();
+   virtual IsoMuonFeature* createTransient(const Token* token);
  
  
  private:

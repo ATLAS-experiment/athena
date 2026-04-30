@@ -2,7 +2,7 @@
 Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "HDF5Utils/HdfTuple.h"
-#include "HDF5Utils/common.h"
+#include "HDF5Utils/WriterCommon.h"
 
 #include "H5Cpp.h"
 

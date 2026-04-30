@@ -432,12 +432,6 @@ def tauMonitoringConfig(inputFlags,tauContainer='TauJets',**kwargs):
             igroup.defineHistogram(namer('clustersPFOEngRelDiff','PFOEngRelDiff','Cluster',postfix), title='PFOEngRelDiff;PFOEngRelDiff;Entries',path=folder+"Cluster",
             xbins=20, xmin=-1.0, xmax=1.0 )
             #Calo Histograms
-            igroup.defineHistogram(namer('EMRadius','EMRadius','Calo',postfix), title='Uncalibrated EM Radius;EM Radius;Number Of Candidates',path=folder+"Calo",
-            xbins=50, xmin=0., xmax=1.2 )
-
-            igroup.defineHistogram(namer('hadRadius','hadRadius','Calo',postfix), title='Hadronic Radius of tau candidates;Hadronic Radius; Number Of Candidates',path=folder+"Calo",
-            xbins=50, xmin=0., xmax=1. )
-
             igroup.defineHistogram(namer('isolFrac','isolFrac','Calo',postfix), title='Isolation Fraction;Et Isolation Fraction;Number of Candidates',path=folder+"Calo",
             xbins=51, xmin=0.0, xmax=1.02 )
 

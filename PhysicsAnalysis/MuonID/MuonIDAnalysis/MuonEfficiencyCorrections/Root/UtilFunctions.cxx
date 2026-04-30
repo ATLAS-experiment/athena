@@ -1,10 +1,13 @@
 /*
- Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
-#include "TH1.h"
-#include "TLorentzVector.h" // needed for Warning()
+#include "MuonEfficiencyCorrections/UtilFunctions.h"
+#include "TError.h" // needed for Warning()
 #include <locale>
+#include <cstdlib> //std::rand
+#include <algorithm> //std::generate_n
+#include <cctype> //std::to_lower
 
 namespace CP{
 
@@ -15,6 +18,8 @@ namespace CP{
                 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                 "abcdefghijklmnopqrstuvwxyz";
             const size_t max_index = (sizeof(charset) - 1);
+            //we don't care that this is a weak (insecure) random number generator
+            //coverity[dont_call]
             return charset[rand() % max_index];
         };
         std::string str(length, 0);
@@ -48,7 +53,9 @@ namespace CP{
         // We do not really care about the name of the histogram at this stage... At only needs 
         // to be cloned
         std::unique_ptr<TH1> ptr ( dynamic_cast<TH1*>(H->Clone(RandomString(10).c_str())));
-        ptr->SetDirectory(0);
+        if (ptr) {
+          ptr->SetDirectory(0);
+        }
         return ptr;
     }
     bool isOverflowBin(const TH1 *Histo, int bin) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file T_AthenaPoolCnvBase.icc
@@ -27,7 +27,7 @@
 //__________________________________________________________________________
 template <class T>
 T_AthenaPoolCnvBase<T>::T_AthenaPoolCnvBase(ISvcLocator* svcloc,
-                                            const char* name /*= nullptr*/)
+                                            const char* name)
   : AthenaPoolConverter(classID(), svcloc, name) {
 }
 //______________________________________________________________________________
@@ -38,22 +38,17 @@ StatusCode T_AthenaPoolCnvBase<T>::initialize() {
       ATH_MSG_FATAL("Failed to initialize AthenaPoolConverter base class.");
       return(StatusCode::FAILURE);
    }
-   return(StatusCode::SUCCESS);
-}
-//__________________________________________________________________________
-template <class T>
-const CLID& T_AthenaPoolCnvBase<T>::classID() {
-   return(ClassID_traits<T>::ID());
-}
-//__________________________________________________________________________
-template <class T>
-StatusCode T_AthenaPoolCnvBase<T>::DataObjectToPers(DataObject* pObj, IOpaqueAddress*& /*pAddr*/) {
    const std::string className = ClassName<T>::name();
    if (!m_classDesc) {
-      ATH_MSG_DEBUG("Retrieve class description for class (type/key) " << className << "/" << pObj->name());
+      ATH_MSG_DEBUG("Retrieve class description for class " << className);
       m_classDesc = RootType( typeid(T) );
    }
    return(StatusCode::SUCCESS);
+}
+//__________________________________________________________________________
+template <class T>
+CLID T_AthenaPoolCnvBase<T>::classID() {
+   return(ClassID_traits<T>::ID());
 }
 //__________________________________________________________________________
 template <class T>
@@ -66,7 +61,8 @@ StatusCode T_AthenaPoolCnvBase<T>::DataObjectToPool(IOpaqueAddress* pAddr, DataO
       return(StatusCode::FAILURE);
    }
    Placement placement = setPlacement(pObj->name(), *pAddr->par());
-   std::unique_ptr<Token> token (m_athenaPoolCnvSvc->registerForWrite(&placement, obj, m_classDesc));
+   // No lock needed for m_classDesc, since set only in initialize()
+   std::unique_ptr<Token> token(m_athenaPoolCnvSvc->registerForWrite(&placement, obj, m_classDesc));
    // Null/empty token means ERROR
    if (token == nullptr || token->classID() == Guid::null()) {
       ATH_MSG_ERROR("failed to get Token for class (type/key) " << className << "/" << pObj->name());

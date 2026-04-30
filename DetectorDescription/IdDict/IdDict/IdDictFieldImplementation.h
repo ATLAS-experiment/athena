@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -75,6 +75,7 @@ public:
     int         unpack        (Identifier id) const;  // access to field value
     size_type   unpackToIndex (Identifier id) const;  // access to field index, i.e. from 0
     void        pack          (int value, Identifier& id) const; 
+    Identifier  new_pack      (int value) const; //pack to a new Identifier
     void        reset         (Identifier& id) const; // reset field bits 
 
     /// Accessors
@@ -182,6 +183,16 @@ inline void IdDictFieldImplementation::pack (int value, Identifier& id) const
     size_type index = (size_type)value;
     if (m_decode_index) index = m_ored_field.get_value_index (value); 
     id |= (index << m_shift); 
+}
+
+//-----------------------------------------------------------------
+inline Identifier IdDictFieldImplementation::new_pack (int value) const
+//-----------------------------------------------------------------
+{
+    // Pack value into this field
+    size_type index = (size_type)value;
+    if (m_decode_index) index = m_ored_field.get_value_index (value); 
+    return Identifier(index << m_shift); 
 }
 
 //-----------------------------------------------------------------

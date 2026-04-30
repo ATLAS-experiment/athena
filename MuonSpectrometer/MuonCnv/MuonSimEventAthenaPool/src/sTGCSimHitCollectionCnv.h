@@ -33,7 +33,7 @@ public:
     virtual ~sTGCSimHitCollectionCnv();
 
     virtual sTGCSimHitCollection_PERS*   createPersistent (sTGCSimHitCollection* transCont);
-    virtual sTGCSimHitCollection*        createTransient ();
+    virtual sTGCSimHitCollection*        createTransient(const Token* token);
 
 private:
     sTGCSimHitCollectionCnv_p1    m_TPConverter_p1;

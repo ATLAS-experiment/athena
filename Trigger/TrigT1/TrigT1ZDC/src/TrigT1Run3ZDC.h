@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TrigT1Run3ZDC/TrigT1Run3ZDC.h
@@ -15,8 +15,6 @@
 #ifndef TRIG_T1_RUN_3_ZDC_H
 #define TRIG_T1_RUN_3_ZDC_H
 
-#include <string>
-#include <vector>
 
 #include "AthContainers/DataVector.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -39,6 +37,10 @@
 #include "TrigT1Interfaces/ZdcCTP.h"
 #include "ZdcUtils/ZDCTriggerSim.h"
 #include "nlohmann/json.hpp"
+
+#include <string>
+#include <memory>
+
 
 namespace LVL1 {
 /** @brief level 1 ZDC trigger simulation */

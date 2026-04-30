@@ -1,12 +1,11 @@
 /*
- Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARRECUTILS_LARXTALKWEIGHTCONDALG_H
 #define LARRECUTILS_LARXTALKWEIGHTCONDALG_H
 
 #include "AthenaBaseComps/AthCondAlgorithm.h"
-#include "StoreGate/DataHandle.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "StoreGate/CondHandleKeyArray.h"
 #include "LArRecConditions/LArXTalkWeight.h"

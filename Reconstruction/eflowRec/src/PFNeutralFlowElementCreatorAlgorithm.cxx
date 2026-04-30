@@ -97,7 +97,7 @@ PFNeutralFlowElementCreatorAlgorithm::createNeutralFlowElement(
     }
     thisFE->setOtherObjectLinks(theClusters);
 
-    const static SG::AuxElement::Accessor<
+    const static SG::Accessor<
       ElementLink<xAOD::CaloClusterContainer>>
       accShowerSubtractedClusterLink("FEShowerSubtractedClusterLink");
     accShowerSubtractedClusterLink(*thisFE) =
@@ -131,10 +131,10 @@ PFNeutralFlowElementCreatorAlgorithm::createNeutralFlowElement(
     
     float layerEnergy_TileBar0 = cluster->eSample(xAOD::CaloCluster::CaloSample::TileBar0);
     float layerEnergy_TileExt0 = cluster->eSample(xAOD::CaloCluster::CaloSample::TileExt0);
-    const static SG::AuxElement::Accessor<float> accFloatTIle0E("LAYERENERGY_TILE0");
+    const static SG::Accessor<float> accFloatTIle0E("LAYERENERGY_TILE0");
     accFloatTIle0E(*thisFE) = layerEnergy_TileBar0 + layerEnergy_TileExt0;
 
-    const static SG::AuxElement::Accessor<float> accFloatTiming("TIMING");
+    const static SG::Accessor<float> accFloatTiming("TIMING");
     accFloatTiming(*thisFE) = cluster->time();
 
     if (m_addCPData){
@@ -147,11 +147,11 @@ PFNeutralFlowElementCreatorAlgorithm::createNeutralFlowElement(
         phi.push_back(cell->phi());
       }
 
-      std::pair<double,double> width = widthCalc.getPFClusterCoordinateWidth(eta,phi,cluster->eta(),cluster->phi(),theCellLinks->size());
-      const static SG::AuxElement::Accessor<float> accFloatWidthEta("ClusterWidthEta");
-      accFloatWidthEta(*thisFE) = width.first;
-      const static SG::AuxElement::Accessor<float> accFloatWidthPhi("ClusterWidthPhi");
-      accFloatWidthPhi(*thisFE) = width.second;
+      PFClusterWidth width = widthCalc.getPFClusterCoordinateWidth(eta,phi,cluster->eta(),cluster->phi(),theCellLinks->size());
+      const static SG::Accessor<float> accFloatWidthEta("ClusterWidthEta");
+      accFloatWidthEta(*thisFE) = width.etaVariance;
+      const static SG::Accessor<float> accFloatWidthPhi("ClusterWidthPhi");
+      accFloatWidthPhi(*thisFE) = width.phiVariance;
     }
  
   }//cluster loop

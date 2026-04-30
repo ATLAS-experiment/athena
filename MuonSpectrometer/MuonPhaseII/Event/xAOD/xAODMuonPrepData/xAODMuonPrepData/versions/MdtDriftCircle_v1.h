@@ -1,24 +1,24 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMUONPREPDATA_VERSION_MDTDRIFTCIRCLE_V1_H
 #define XAODMUONPREPDATA_VERSION_MDTDRIFTCIRCLE_V1_H
 
-#include "GeoPrimitives/GeoPrimitives.h"
-#include "Identifier/Identifier.h"
-#include "Identifier/IdentifierHash.h"
+#include "xAODMuonPrepData/versions/MuonMeasurement_v1.h"
 #include "MuonPrepRawData/MdtDriftCircleStatus.h"
-#include "xAODMeasurementBase/versions/UncalibratedMeasurement_v1.h"
-#include "CxxUtils/CachedValue.h"
-
-namespace MuonGMR4{
-    class MdtReadoutElement;
-}
+#include "MuonReadoutGeometryR4/MdtReadoutElement.h"
 
 namespace xAOD {
-/// https://gitlab.cern.ch/atlas/athena/-/blob/master/MuonSpectrometer/MuonReconstruction/MuonRecEvent/MuonPrepRawData/MuonPrepRawData/MdtPrepData.h
 
-class MdtDriftCircle_v1 : public UncalibratedMeasurement_v1 {
+/** @brief Representation of Mdt drift circle (DC) measurements. 
+ *         DC measurements consists of the raw tdc/adc values needed
+ *         for later calibration, 
+ *         the identifier fields tube layer, tube and the driftRadius
+ *         and its uncertainty stored as 1 dimensional localPosition and
+ *         covariance, respectively.
+ *          
+ */
+class MdtDriftCircle_v1 : public MuonMeasurement_v1 {
 
    public:
     using MdtDriftCircleStatus = ::Muon::MdtDriftCircleStatus;
@@ -31,26 +31,27 @@ class MdtDriftCircle_v1 : public UncalibratedMeasurement_v1 {
     xAOD::UncalibMeasType type() const override final {
         return xAOD::UncalibMeasType::MdtDriftCircleType;
     }
-    /** @brief: Returns the Athena identifier of the drift circle. It's constructed 
-     *          from the measurementHash which's passed to the associated readoutElement */
-    const Identifier& identify() const;
     /** @brief: Return the measurement's position vector in the local frame. If the
      *          measurement is an ordinary 1D drift circle, the Zero vector is returned.
      *          Otherwise the local position along z */
-    Amg::Vector3D localMeasurementPos() const;
+    Amg::Vector3D localMeasurementPos() const override final;
     /** @brief Override the dimensions to be 1. */
-    unsigned int numDimensions() const override { return 1; }
+    unsigned numDimensions() const override { return 1; }
     /** @brief Returns the TDC (typically range is 0 to 2500)*/
-    int16_t tdc() const;
+    std::int16_t tdc() const;
     /** @brief Returns the ADC (typically range is 0 to 250)*/
-    int16_t adc() const;
+    std::int16_t adc() const;
 
     /** @brief Returns the tube number of the measurement (1-120)*/
-    uint16_t driftTube() const;
+    std::uint16_t driftTube() const;
     /** @brief Returns the layer number of the measurement (1-4)*/
-    uint8_t tubeLayer() const;
+    std::uint8_t tubeLayer() const;
     /** @brief Returns the hash of the measurement channel (tube (x) layer) */
-    IdentifierHash measurementHash() const;
+    IdentifierHash measurementHash() const override final;
+    /** @brief Returns the layer hash of the tube layer */
+    IdentifierHash layerHash() const override final;
+    /** @brief Returns whether the drift circle measures phi */
+    std::uint8_t measuresPhi() const override final;
     /** @brief Returns the status of the measurement */
     MdtDriftCircleStatus status() const;
     /** @brief Returns the drift radius*/
@@ -63,13 +64,13 @@ class MdtDriftCircle_v1 : public UncalibratedMeasurement_v1 {
     /// Setter methods
 
     /** @brief Sets the TDC counts */
-    void setTdc(int16_t tdc);
+    void setTdc(std::int16_t tdc);
     /** @brief Sets the ADC counts */
-    void setAdc(int16_t adc);
+    void setAdc(std::int16_t adc);
     /** @brief Sets the tube number */
-    void setTube(uint16_t tube_n);
+    void setTube(std::uint16_t tube_n);
     /** @brief Sets the layer number */
-    void setLayer(uint8_t layer_n);
+    void setLayer(std::uint8_t layer_n);
     /** @brief Sets the status of the drift circle */
     void setStatus(MdtDriftCircleStatus st);
     /** @brief set the pointer to the MdtReadoutElement */
@@ -77,12 +78,7 @@ class MdtDriftCircle_v1 : public UncalibratedMeasurement_v1 {
     /** @brief Retrieve the associated MdtReadoutElement. 
         If the element has not been set before, it's tried to load it on the fly. 
         Exceptions are thrown if that fails as well */
-    const MuonGMR4::MdtReadoutElement* readoutElement() const;
-
-    private:
-        CxxUtils::CachedValue<const MuonGMR4::MdtReadoutElement *> m_readoutEle{};
-        CxxUtils::CachedValue<Identifier> m_identifier{};
-
+    virtual const MuonGMR4::MdtReadoutElement* readoutElement() const override final;
 };
 
 }  // namespace xAOD

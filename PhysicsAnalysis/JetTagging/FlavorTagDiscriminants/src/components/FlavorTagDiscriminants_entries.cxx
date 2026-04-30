@@ -16,34 +16,40 @@
 #include "FlavorTagDiscriminants/FTagGhostLeptonAssociationAlg.h"
 #include "FlavorTagDiscriminants/HitDecoratorAlg.h"
 #include "FlavorTagDiscriminants/JetHitAssociationAlg.h"
+#include "FlavorTagDiscriminants/JetLeptonDecayLabelAlg.h"
+#include "FlavorTagDiscriminants/CaloChargedFlowDecoratorAlg.h"
+#include "FlavorTagDiscriminants/JetCalibrationDecoratorAlg.h"
+#include "FlavorTagDiscriminants/TruthTauDecoratorAlg.h"
 
 #include "src/CountIParticleAlg.h"
 #include "src/CountTrackParticleAlg.h"
 
 
-using namespace FlavorTagDiscriminants;
-
-DECLARE_COMPONENT(VRJetOverlapDecoratorTool)
-DECLARE_COMPONENT(HbbTagTool)
-DECLARE_COMPONENT(DL2Tool)
-DECLARE_COMPONENT(PoorMansIpAugmenterAlg)
-DECLARE_COMPONENT(TrackLeptonDecoratorAlg)
-DECLARE_COMPONENT(TruthParticleDecoratorAlg)
-DECLARE_COMPONENT(TrackTruthDecoratorAlg)
-DECLARE_COMPONENT(SoftElectronDecoratorAlg)
-DECLARE_COMPONENT(SoftElectronTruthDecoratorAlg)
-DECLARE_COMPONENT(TrackClassifier)
+DECLARE_COMPONENT(FlavorTagDiscriminants::VRJetOverlapDecoratorTool)
+DECLARE_COMPONENT(FlavorTagDiscriminants::HbbTagTool)
+DECLARE_COMPONENT(FlavorTagDiscriminants::DL2Tool)
+DECLARE_COMPONENT(FlavorTagDiscriminants::PoorMansIpAugmenterAlg)
+DECLARE_COMPONENT(FlavorTagDiscriminants::TrackLeptonDecoratorAlg)
+DECLARE_COMPONENT(FlavorTagDiscriminants::TruthParticleDecoratorAlg)
+DECLARE_COMPONENT(FlavorTagDiscriminants::TrackTruthDecoratorAlg)
+DECLARE_COMPONENT(FlavorTagDiscriminants::SoftElectronDecoratorAlg)
+DECLARE_COMPONENT(FlavorTagDiscriminants::SoftElectronTruthDecoratorAlg)
+DECLARE_COMPONENT(FlavorTagDiscriminants::TrackClassifier)
 
 
-DECLARE_COMPONENT(GNNAuxTaskDecoratorAlg)
-DECLARE_COMPONENT(CountIParticleAlg)
-DECLARE_COMPONENT(CountTrackParticleAlg)
-DECLARE_COMPONENT(FTagGhostElectronAssociationAlg)
-DECLARE_COMPONENT(FTagGhostMuonAssociationAlg)
-DECLARE_COMPONENT(HitDecoratorAlg)
-DECLARE_COMPONENT(JetHitAssociationAlg)
+DECLARE_COMPONENT(FlavorTagDiscriminants::GNNAuxTaskDecoratorAlg)
+DECLARE_COMPONENT(FlavorTagDiscriminants::CountIParticleAlg)
+DECLARE_COMPONENT(FlavorTagDiscriminants::CountTrackParticleAlg)
+DECLARE_COMPONENT(FlavorTagDiscriminants::FTagGhostElectronAssociationAlg)
+DECLARE_COMPONENT(FlavorTagDiscriminants::FTagGhostMuonAssociationAlg)
+DECLARE_COMPONENT(FlavorTagDiscriminants::HitDecoratorAlg)
+DECLARE_COMPONENT(FlavorTagDiscriminants::JetHitAssociationAlg)
+DECLARE_COMPONENT(FlavorTagDiscriminants::JetLeptonDecayLabelAlg)
+DECLARE_COMPONENT(FlavorTagDiscriminants::CaloChargedFlowDecoratorAlg)
+DECLARE_COMPONENT(FlavorTagDiscriminants::JetCalibrationDecoratorAlg)
+DECLARE_COMPONENT(FlavorTagDiscriminants::TruthTauDecoratorAlg)
 
 #ifndef XAOD_ANALYSIS
 #include "FlavorTagDiscriminants/HitBeamSpotDataDecoratorAlg.h"
-DECLARE_COMPONENT(HitBeamSpotDataDecoratorAlg)
+DECLARE_COMPONENT(FlavorTagDiscriminants::HitBeamSpotDataDecoratorAlg)
 #endif

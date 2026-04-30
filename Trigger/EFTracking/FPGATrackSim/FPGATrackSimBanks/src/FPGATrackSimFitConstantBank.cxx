@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #include <Eigen/StdVector>
 #include "FPGATrackSimBanks/FPGATrackSimFitConstantBank.h"
@@ -42,15 +42,18 @@ FPGATrackSimFitConstantBank::FPGATrackSimFitConstantBank(FPGATrackSimPlaneMap co
     readHeader(geocfile);
     ATH_MSG_INFO("Settings: m_ncoords="<<m_ncoords<<" m_npars="<<m_npars);
     // Read the sector constants
+    //coverity[TAINTED_SCALAR]
     readSectorInfo(geocfile);
     // Pre-calculate the majority logic elements
     if (m_missingPlane == -1)
+      //coverity[TAINTED_SCALAR]
       calculateMajority();
     
     if (sizeof(float) * CHAR_BIT != 32)
       ATH_MSG_WARNING("Floating points on this computer are not 32 bit. This may cause a problem for the hardware agreement. Be careful!");
     
     setIdealCoordFit(true);
+    //coverity[TAINTED_SCALAR]
     prepareInvFitConstants();
   }
 }
@@ -86,6 +89,8 @@ void FPGATrackSimFitConstantBank::readHeader(std::ifstream & geocfile)
   m_nconstr = m_ncoords - m_npars;
   
   // Allocate the block of pointer per sector
+  //m_nsectors should be checked to be sane
+  //coverity[TAINTED_SCALAR]
   m_sector_good.resize(m_nsectors);
   m_fit_pars.resize(m_nsectors, 5, m_ncoords);
   m_fit_const.resize(m_nsectors, 5);
@@ -389,7 +394,9 @@ int FPGATrackSimFitConstantBank::missing_point_guess(sector_t sector, FPGATrackS
 	    /// we don't want to shift phi for the outer hits in a SP, so check that!
 	    float phishift = m_phiShift;
 	    int layer = m_pmap->getCoordLayer(col);
-	    FPGATrackSimHit hit = (track.getFPGATrackSimHits())[layer];
+	    auto hit_ptr = track.getFPGATrackSimHitPtrs()[layer];
+	    if (!hit_ptr) throw std::runtime_error("Null hit pointer in FPGATrackSimFitConstantBank: tracks should not have unassigned layers");
+	    FPGATrackSimHit hit = *hit_ptr;
 	    if (((hit.getPhysLayer() %2) == 1) && hit.getHitType() == HitType::spacepoint) phishift = 0.0;
 
             a[i] -= m_maj_kk(sector, col, missid[i])*(phishift+track.getPhiCoord(m_pmap->getCoordLayer(col)));
@@ -434,7 +441,7 @@ int FPGATrackSimFitConstantBank::missing_point_guess(sector_t sector, FPGATrackS
 	  newhit.setPhiIndex(missing_hits[m]);
 	}
 
-	track.setFPGATrackSimHit(missedplane, newhit);
+	track.setFPGATrackSimHit(missedplane, std::make_shared<FPGATrackSimHit>(newhit));
       }
       else if (m_pmap->getDim(m_pmap->getCoordLayer(missid[m])) == 2){
 
@@ -459,7 +466,7 @@ int FPGATrackSimFitConstantBank::missing_point_guess(sector_t sector, FPGATrackS
 	}
 	m++; //skip ahead
 
-	track.setFPGATrackSimHit(missedplane, newhit);
+	track.setFPGATrackSimHit(missedplane, std::make_shared<FPGATrackSimHit>(newhit));
       }
     }
 
@@ -477,20 +484,21 @@ void FPGATrackSimFitConstantBank::linfit_chisq(sector_t sector, FPGATrackSimTrac
         for (int coord = 0; coord < m_ncoords; coord++) {
 	  unsigned layer = m_pmap->getCoordLayer(coord);
 
-	  if (m_pmap->getDim(m_pmap->getCoordLayer(coord)) == 2) { // do two at a time if 2d, then skip ahead
-	    chi_component += m_kernel(sector, i, coord) * (m_phiShift+trk.getPhiCoord(layer));
-	    chi_component += m_kernel(sector, i, coord+1) * trk.getEtaCoord(layer);
-	    ++coord;
-	  }
-	  else { // strip coords	    
-	    /// we don't want to shift phi for the outer hits in a SP, so check that!
-	    float phishift = m_phiShift;
-	    FPGATrackSimHit hit = (trk.getFPGATrackSimHits())[layer];
-	    if (((hit.getPhysLayer() %2) == 1) && hit.getHitType() == HitType::spacepoint) phishift = 0.0;
-	    chi_component += m_kernel(sector, i, coord) * (phishift+trk.getPhiCoord(layer));
-	  }
-	}	
-	chi2 += chi_component * chi_component;
+    if (m_pmap->getDim(m_pmap->getCoordLayer(coord)) == 2) { // do two at a time if 2d, then skip ahead
+      chi_component += m_kernel(sector, i, coord) * (m_phiShift+trk.getPhiCoord(layer));
+      chi_component += m_kernel(sector, i, coord+1) * trk.getEtaCoord(layer);
+      ++coord;
+    }
+    else { // strip coords	    
+      /// we don't want to shift phi for the outer hits in a SP, so check that!
+      float phishift = m_phiShift;
+      auto hitPtr = trk.getFPGATrackSimHitPtrs()[layer];
+      if (!hitPtr) throw std::runtime_error("Null hit pointer in getAccumulatorTerm: tracks should not have unassigned layers");
+      if (((hitPtr->getPhysLayer() %2) == 1) && hitPtr->getHitType() == HitType::spacepoint) phishift = 0.0;
+      chi_component += m_kernel(sector, i, coord) * (phishift+trk.getPhiCoord(layer));
+    }
+  }	
+  chi2 += chi_component * chi_component;
 
     }
     trk.setChi2(chi2);
@@ -514,18 +522,19 @@ void FPGATrackSimFitConstantBank::linfit_pars_eval(sector_t sector, FPGATrackSim
 	
         for (int coord = 0; coord < m_ncoords; coord++) {
 
-	  /// we don't want to shift phi for the outer hits in a SP, so check that!
-	  float phishift = m_phiShift;
-	  int layer = m_pmap->getCoordLayer(coord);
-	  FPGATrackSimHit hit = (trk.getFPGATrackSimHits())[layer];
-	  if (((hit.getPhysLayer() %2) == 1) && hit.getHitType() == HitType::spacepoint) phishift = 0.0;
-	  
-	  pars[ip] += m_fit_pars(sector, ip, coord) * (phishift+trk.getPhiCoord(layer));
-	  if (m_pmap->getDim(m_pmap->getCoordLayer(coord)) == 2) { // do two at a time if 2d, then skip ahead
-	    pars[ip] += m_fit_pars(sector, ip, coord+1) * trk.getEtaCoord(layer);
-	    ++coord;
-	  }
-	}
+    /// we don't want to shift phi for the outer hits in a SP, so check that!
+    float phishift = m_phiShift;
+    int layer = m_pmap->getCoordLayer(coord);
+    auto hitPtr = trk.getFPGATrackSimHitPtrs()[layer];
+    if (!hitPtr) throw std::runtime_error("Null hit pointer in getTrackPars: tracks should not have unassigned layers");
+    if (((hitPtr->getPhysLayer() %2) == 1) && hitPtr->getHitType() == HitType::spacepoint) phishift = 0.0;
+    
+    pars[ip] += m_fit_pars(sector, ip, coord) * (phishift+trk.getPhiCoord(layer));
+    if (m_pmap->getDim(m_pmap->getCoordLayer(coord)) == 2) { // do two at a time if 2d, then skip ahead
+      pars[ip] += m_fit_pars(sector, ip, coord+1) * trk.getEtaCoord(layer);
+      ++coord;
+    }
+  }
     }
     
     trk.setQOverPt(pars[0]);
@@ -590,6 +599,6 @@ void FPGATrackSimFitConstantBank::invlinfit(sector_t sector, FPGATrackSimTrack &
 
 	++j; // skip a coordinate if doing two at once
       }
-      track.setFPGATrackSimHit(plane, hit);
+      track.setFPGATrackSimHit(plane, std::make_shared<FPGATrackSimHit>(std::move(hit)));
     }
 }

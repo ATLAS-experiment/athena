@@ -56,7 +56,7 @@ protected:
   
   /** Build the transient representation from a persistent one
    */
-  virtual TruthEtIsolationsContainer* createTransient();
+  virtual TruthEtIsolationsContainer* createTransient(const Token* token);
 
   /////////////////////////////////////////////////////////////////// 
   // Protected data: 

@@ -180,7 +180,7 @@ std::vector<EnhancedBiasWeightCompAlg::EBChainInfo> EnhancedBiasWeightCompAlg::g
 
         bool ebChainIsSeeded = false;
         // For chains with HLT seed discrimintaion check if one of the seeds could pass
-        if ((chainName.find("_eb_") != std::string::npos) && (!m_chainToHLTSeed.empty())){
+        if (((chainName.find("_eb_medium") != std::string::npos)|| (chainName.find("_eb_low") != std::string::npos)  ) && (!m_chainToHLTSeed.empty())){
             for (const std::string& l1Item : m_chainToHLTSeed.value().at(chainName)) {
                 if (m_tdt->isPassedBits(l1Item) & TrigDefs::L1_isPassedBeforePrescale) {
                     ebChainIsSeeded = true;

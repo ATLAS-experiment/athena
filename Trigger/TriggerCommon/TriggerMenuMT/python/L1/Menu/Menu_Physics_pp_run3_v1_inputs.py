@@ -120,10 +120,9 @@ def defineInputsMenu():
             # variable eEM  thresholds
             'eEM24VM', 'eEM26', 'eEM26L', 'eEM26M', 'eEM26T', 'eEM28M', 'eEM40L',
             #ATR-26979, eEMSPARE1 was replaced by eEM1, eEMSPARE2 was replaced by eEM2, decrement other eEMSPARE thresholds
-            'eEM1', 'eEM2',
+            'eEM1', 'eEM2', 'eEM3',
 
             # eEM thresholds for production
-            'eEMSPARE1',
 
             ('ZeroBiasA', 1)
         ],
@@ -244,6 +243,8 @@ def defineInputsMenu():
             ('jXE60',1), ('jXE70',1), ('jXE80',1), ('jXE90',1), ('jXE100',1), ('jXE110',1), ('jXE120',1), ('jXE500',1),
             # gXE
             ('gXEJWOJ60',1), ('gXEJWOJ70',1), ('gXEJWOJ80',1), ('gXEJWOJ100',1), ('gXEJWOJ110',1), ('gXEJWOJ120',1), ('gXEJWOJ500',1),
+            # gXENC
+            ('gXENC100',1), ('gXENC110',1),
             # cXE
             ('cXE100',1), ('cXE110',1),
             # gTE
@@ -256,7 +257,7 @@ def defineInputsMenu():
 
             # test thresholds
             ('jXEC100',1),
-            ('jTE200',1), ('jTEC200',1), ('jTEFWD100',1), ('jTEFWDA100',1), ('jTEFWDC100',1),
+            ('jTE200',1), ('jTEC200',1), ('jTEFWD100',1),
             #
             # additional heavy ion jTE items
             ('jTE3',1), ('jTE4',1), ('jTE10',1), ('jTE5',1), ('jTE20',1), ('jTE50',1),

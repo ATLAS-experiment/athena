@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGSERVICES_HLTEVENTLOOPMGR_H
@@ -23,7 +23,6 @@
 #include "AthenaKernel/EventContextClid.h"
 #include "AthenaKernel/Timeout.h"
 #include "AthenaMonitoringKernel/Monitored.h"
-#include "CxxUtils/checker_macros.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
@@ -95,7 +94,7 @@ public:
   /// @name State transitions of ITrigEventLoopMgr interface
   ///@{
   virtual StatusCode prepareForStart (const boost::property_tree::ptree &) override;
-  virtual StatusCode prepareForRun ATLAS_NOT_THREAD_SAFE (const boost::property_tree::ptree& pt) override;
+  virtual StatusCode prepareForRun(const boost::property_tree::ptree& pt) override;
   virtual StatusCode hltUpdateAfterFork(const boost::property_tree::ptree& pt) override;
   ///@}
 

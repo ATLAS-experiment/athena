@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARBYTESTREAM_LARRODBLOCKCALIBRATIONV1_H
@@ -70,10 +70,10 @@ public:
     endtag          //This tag needs to be an odd number, see *) for constructor
   };
   // constructor
-  LArRodBlockCalibrationV1();
+  LArRodBlockCalibrationV1(IMessageSvc* msgSvc);
  
   // ------ Identify RodBlockStructure -------
-  std::string BlockType() { return std::string("RodBlockCalibrationV1");}
+  static std::string BlockType() { return std::string("RodBlockCalibrationV1");}
  public:
   //void dumpFragment() { dumpFragment(m_FebBlock); }
   // ----------------- Encoding methods -----------------
@@ -99,9 +99,6 @@ public:
   virtual inline  uint32_t  hasRawDataBlock() const {return getHeader16(RawDataBlkOff);} ;
   virtual inline  uint32_t  hasControlWords() const {return getHeader16(RawDataBlkOff);} ;
 
-  // ----------------- Printing methods -----------------
-  // print the full ROD fragment
-  //virtual void dumpFragment();
 private:
   void clearBlocks();
   virtual void resetPointers();
@@ -138,7 +135,6 @@ inline uint32_t  LArRodBlockCalibrationV1::getFebConfig() const
 inline bool  LArRodBlockCalibrationV1::getPulsed(const unsigned channelNumber) const
 {
   int index=getHeader16(ResultsOff1);
-  //std::cout << " ===> in getPulsed " << std::hex << (m_FebBlock[index+IsPulsed/2]) << " " << (m_FebBlock[index+(IsPulsed/2+1)]) << " " << (m_FebBlock[index+(IsPulsed/2+2)]) << " " << (m_FebBlock[index+(IsPulsed/2+3)]) << " " << std::dec << channelNumber << " i=" << i << " ii=" << ii << std::endl;
   return getBit(m_FebBlock+index+IsPulsed/2,channelNumber);
 }
 

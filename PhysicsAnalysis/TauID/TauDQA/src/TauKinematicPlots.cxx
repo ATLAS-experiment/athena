@@ -15,10 +15,6 @@ TauKinematicPlots::TauKinematicPlots(PlotBase* pParent, const std::string& sDir,
 {
 }
 
-TauKinematicPlots::~TauKinematicPlots()
-{
-}
-
 void TauKinematicPlots::initializePlots()
 {
    pt  = Book1D("pt" , m_sParticleType+" pt;" +m_sParticleType+" Transverse Momentum [GeV];Entries / 1 GeV",25,0.,200);

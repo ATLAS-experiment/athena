@@ -9,26 +9,25 @@
 #define TRACKS_LOADER_H
 
 // local includes
-#include "FlavorTagInference/FlipTagEnums.h"
+
 
 #include "FlavorTagInference/ConstituentsLoader.h"
-#include "FlavorTagInference/DataPrepUtilities.h"
-#include "FlavorTagInference/BTagTrackIpAccessor.h"
 #include "FlavorTagInference/CustomGetterUtils.h"
 
 // EDM includes
 #include "xAODJet/Jet.h"
 
 // external libraries
-#include "lwtnn/lightweight_network_config.hh"
+//#include "lwtnn/lightweight_network_config.hh"
 
 // STL includes
+#include <memory>
 #include <string>
 #include <vector>
+#include <map>
+#include <set>
+#include <tuple>
 #include <functional>
-#include <exception>
-#include <type_traits>
-#include <regex>
 
 namespace FlavorTagInference {
     using Tracks = std::vector<const xAOD::TrackParticle*>;
@@ -44,8 +43,8 @@ namespace FlavorTagInference {
       public:
 
         TracksLoader(const ConstituentsInputConfig&, const FTagOptions& options);
-        std::tuple<Inputs, std::vector<const xAOD::IParticle*>> getData(
-          const xAOD::IParticle& jet ) const override;
+        Inputs getData(const xAOD::IParticle& jet) const override;
+        void setDefaults(const xAOD::IParticle& jet) const override;
         std::tuple<char, std::map<std::string, std::vector<double>>>  getDL2Data(
           const xAOD::IParticle& jet, 
           std::function<char(const Tracks&)> ip_checker) const;
@@ -70,6 +69,7 @@ namespace FlavorTagInference {
         using TPC = xAOD::TrackParticleContainer;
         using TrackLinks = std::vector<ElementLink<TPC>>;
         using PartLinks = std::vector<ElementLink<IPC>>;
+        using LinkDec = SG::AuxElement::Decorator<TrackLinks>;
 
         TrackSortVar trackSortVar(ConstituentsSortOrder, const FTagOptions&);
         std::pair<TrackFilter,std::set<std::string>> trackFilter(
@@ -84,6 +84,7 @@ namespace FlavorTagInference {
         TrackSequenceFilter m_trackFlipper;
         std::function<Tracks(const SG::AuxElement&)> m_associator;
         getter_utils::SeqGetter<xAOD::TrackParticle> m_seqGetter;
+        std::unique_ptr<LinkDec> m_linkDecorator;
     };
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef POOLSVC_H
@@ -26,7 +26,7 @@
 namespace pool {
    class IContainer;
    class IDatabase;
-   class IPersistencySvc;
+   namespace PersistencySvc { class ISession; }
 }
 
 
@@ -220,13 +220,13 @@ private: // data
    coral::Context*                                   m_context{nullptr};
    bool                                              m_shareCat{false};
    pool::IFileCatalog*                               m_catalog{nullptr};
-   std::vector<pool::IPersistencySvc*>               m_persistencySvcVec;
+   std::vector<pool::PersistencySvc::ISession*>      m_dbSessionVec;
    std::vector<CallMutex*>                           m_pers_mut;
    std::map<std::string, unsigned int>               m_inputContextLabel;
    std::map<std::string, unsigned int>               m_outputContextLabel;
    std::string                                       m_mainOutputLabel{};
    std::map<unsigned int, unsigned int>              m_contextMaxFile;
-   // Cache for open file guids for each m_persistencySvcVec member, protected by m_pers_mut
+   // Cache for open file guids for each m_dbsessionVec member, protected by m_pers_mut
    mutable std::map<unsigned int, std::list<Guid> >  m_guidLists ATLAS_THREAD_SAFE;
 
 private: // properties
@@ -264,13 +264,13 @@ private: // properties
    Gaudi::Property<std::string> m_defaultContainerType{this, "DefaultContainerType", "ROOTTREEINDEX"};
 
 private: // internal helper functions
-   // delete all APR::Persistency Services, Catalog, Mutexes and Indexes
+   // delete all Persistency Services, Catalog, Mutexes and Indexes
    void clearState();
 
    pool::IFileCatalog* createCatalog();
    void patchCatalog(const std::string& pfn, pool::IDatabase& dbH) const;
 
-   // setup APR persistency
+   // setup persistency
    StatusCode setupPersistencySvc();
 
    /// Get Database handle

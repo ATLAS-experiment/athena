@@ -11,7 +11,6 @@
 #include "MuonReadoutGeometry/RpcReadoutElement.h"
 #include "MuonTrigCoinData/RpcCoinDataContainer.h"
 #include "TrkSurfaces/Surface.h"
-#include "xAODMuonPrepData/RpcStripAuxContainer.h"
 #include "MuonIdHelpers/IdentifierByDetElSorter.h"
 #include "GeoModelKernel/throwExcept.h"
 using namespace MuonGM;
@@ -76,7 +75,6 @@ StatusCode RpcRdoToPrepDataToolMT::initialize() {
   ATH_CHECK(m_muDetMgrKey.initialize());
   ATH_CHECK(m_prdContainerCacheKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_coindataContainerCacheKey.initialize(SG::AllowEmpty));
-  ATH_CHECK(m_xAODKey.initialize(!m_xAODKey.empty()));
   m_spuriousHitCounter=0;
   return StatusCode::SUCCESS;
 }
@@ -161,40 +159,10 @@ StatusCode RpcRdoToPrepDataToolMT::provideEmptyContainer(const EventContext& ctx
 
 StatusCode RpcRdoToPrepDataToolMT::transferAndRecordPrepData(const EventContext& ctx, State& state) const {
 
-  SG::WriteHandle<xAOD::RpcStripContainer> writeHandleXAOD{};
-  if (!m_xAODKey.empty()) {
-    writeHandleXAOD = SG::WriteHandle{m_xAODKey, ctx};
-    ATH_CHECK(writeHandleXAOD.record(std::make_unique<xAOD::RpcStripContainer>(),
-                                     std::make_unique<xAOD::RpcStripAuxContainer>()));
-  }
-  const RpcIdHelper& idHelper{m_idHelperSvc->rpcIdHelper()};
   for (std::unique_ptr<RpcPrepDataCollection>& collection : state.rpcPrepDataCollections) {
     if (!collection || collection->empty()) {
         continue;
     }
-    if (!m_xAODKey.empty()) {
-      /// Before converting the PrepData into the xAOD container, sort them by detectorElement
-      /// allowing for ChamberView accesses layer
-      std::vector<const RpcPrepData*> sortMe{collection->begin(), collection->end()};
-      std::ranges::sort(sortMe, IdentifierByDetElSorter{m_idHelperSvc.get()});
-      for (const RpcPrepData* prd : sortMe) {
-        const Identifier id = prd->identify();
-        xAOD::RpcStrip* strip = writeHandleXAOD->push_back(std::make_unique<xAOD::RpcStrip>());
-        strip->setDoubletPhi(idHelper.doubletPhi(id));
-        strip->setGasGap(idHelper.gasGap(id));
-        strip->setMeasuresPhi(idHelper.measuresPhi(id));
-        strip->setChannelNumber(idHelper.channel(id));
-        strip->setAmbiguityFlag(prd->ambiguityFlag());
-        strip->setTimeOverThreshold(prd->timeOverThreshold());
-        strip->setTime(prd->time());
-        strip->setTimeCovariance(std::pow(m_stripTimeResolution, 2));
-        strip->setTriggerInfo(prd->triggerInfo());
-        xAOD::MeasVector<1> locPos{prd->localPosition().x()};
-        xAOD::MeasMatrix<1> locCov{prd->localCovariance()(0,0)};
-        strip->setMeasurement(m_idHelperSvc->detElementHash(id), std::move(locPos), std::move(locCov));
-      }
-    }
-    
     const IdentifierHash hash = collection->identifyHash();
     // If not present, get a write lock for the hash and move collection
     RpcPrepDataContainer::IDC_WriteHandle lock =  state.prepDataCont->getWriteHandle(hash);
@@ -319,9 +287,6 @@ StatusCode RpcRdoToPrepDataToolMT::decodeImpl(const EventContext& ctx, State& st
     ATH_MSG_DEBUG("Looking for pads IdHash to be decoded for the requested collection Ids");
     ATH_CHECK(rpcCabling->giveRDO_fromPRD(idVectToBeDecoded, rdoHashVec));
   }
-
-  /// RPC context
-  IdContext rpcContext = m_idHelperSvc->rpcIdHelper().module_context();
 
   // we come here if the rdo container is already in SG (for example in MC RDO!)
   ATH_MSG_DEBUG("Retrieving Rpc PAD container from the store");

@@ -1,23 +1,18 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id$
 #ifndef TRIGSERIALIZETP_TRIGSERTPTOOL_H
 #define TRIGSERIALIZETP_TRIGSERTPTOOL_H 1
 
 // System include(s):
 #include <string>
-#include <vector>
 #include <map>
-#include <memory>
 
 // Gaudi/Athena include(s):
 #include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/IMessageSvc.h"
 #include "AthenaKernel/IDictLoaderSvc.h"
 #include "AthenaKernel/ITPCnvSvc.h"
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -61,13 +56,9 @@ private:
    TClass* getClass( const std::string& clname ) const;
    CxxUtils::ClassName::Rules               m_clNameRules;
 
-   std::unique_ptr< MsgStream >             m_logTP;
-   std::map< std::string, std::string >     m_TPmap; //configure - lookup of 
-   std::vector< std::string >               m_activeClasses;
-   ServiceHandle< IMessageSvc >             m_msgsvcTP;
+   std::map< std::string, std::string >     m_TPmap; //configure - lookup of
    ServiceHandle< IDictLoaderSvc >          m_dictSvc;
    bool                                     m_useAthDictLoader;
-   bool                                     m_online;
    ServiceHandle< ITPCnvSvc >               m_tpcnvsvc;
    mutable std::mutex                               m_convertersCacheMutex;
    mutable std::map<std::string, ITPCnvBase*>       m_convertesCache ATLAS_THREAD_SAFE; 

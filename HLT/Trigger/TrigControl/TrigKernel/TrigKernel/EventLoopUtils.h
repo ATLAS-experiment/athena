@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGSERVICES_EVENTLOOPUTILS_H
 #define TRIGSERVICES_EVENTLOOPUTILS_H
+#include <atomic>
 #include <chrono>
 #include <condition_variable>
 #include <functional>
@@ -19,11 +20,11 @@ namespace HLT {
     /// Mutex used to notify the condition
     std::mutex m_mutex;
     /// The thread's inner while-loop condition variable
-    bool m_keepRunning{true};
+    std::atomic<bool> m_keepRunning{true};
     /// Flag whether the main loop of the thread has started and will listen to further notifications
-    bool m_started{false};
+    std::atomic<bool> m_started{false};
     /// Flag whether the main loop of the thread has finished
-    bool m_finished{false};
+    std::atomic<bool> m_finished{false};
     /// The callback executed in each step of the thread's inner while-loop
     std::function<void()> m_callback;
     /// If positive, call the callback periodically with this interval regardless of the m_cond

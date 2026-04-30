@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L1TopoMenuLoader.h"
@@ -21,6 +21,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <typeinfo>
+#include <set>
 
 using namespace std;
 bool TrigConf::L1TopoMenuLoader::load( TXC::L1TopoMenu& tcaTarget ) {
@@ -207,6 +208,7 @@ bool TrigConf::L1TopoMenuLoader::loadAllAlgsInput( std::map<uint, TXC::L1TopoCon
          // fill the alg
          int algoId = row0["TA2TI.TA2TI_ALGO_ID"].data<int>();
          auto match = idToAlgMap.find(algoId);
+         if (match == idToAlgMap.end()) continue;
          TXC::L1TopoConfigAlg & alg = match->second;
          alg.addInput(tai_name,tai_value,tai_pos);
      }
@@ -283,6 +285,7 @@ TrigConf::L1TopoMenuLoader::loadAllAlgsOutput( std::map<uint, TXC::L1TopoConfigA
          // fill the alg
          int algoId = row0["TA2TO.TA2TO_ALGO_ID"].data<int>();
          auto match = idToAlgMap.find(algoId);
+         if (match == idToAlgMap.end()) continue;
          TXC::L1TopoConfigAlg & alg = match->second;
          alg.addOutput(tao_name,tao_value,ta_bits,tao_bitname, tao_sel);
      }
@@ -359,6 +362,7 @@ TrigConf::L1TopoMenuLoader::loadAllAlgsRegister( std::map<uint, TXC::L1TopoConfi
          // fill the alg
          int algoId = row0["TA2TP.TA2TP_ALGO_ID"].data<int>();
          auto match = idToAlgMap.find(algoId);
+         if (match == idToAlgMap.end()) continue;
          TXC::L1TopoConfigAlg & alg = match->second;
          alg.addParameter(tp_name,to_string(tp_value),tp_pos, tp_sel);
      }
@@ -430,6 +434,7 @@ TrigConf::L1TopoMenuLoader::loadAllAlgsFixed( std::map<uint, TXC::L1TopoConfigAl
          // fill the alg
          int algoId = row0["TA2TG.TA2TG_ALGO_ID"].data<int>();
          auto match = idToAlgMap.find(algoId);
+         if (match == idToAlgMap.end()) continue;
          TXC::L1TopoConfigAlg & alg = match->second;
          alg.addFixedParameter(tg_name,tg_value);
      }

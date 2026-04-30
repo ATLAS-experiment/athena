@@ -16,7 +16,7 @@ LUCID_RawDataContainer_PERS* LUCID_RawDataContainerCnv::createPersistent(LUCID_R
   return persObj;
 }
 
-LUCID_RawDataContainer* LUCID_RawDataContainerCnv::createTransient() {
+LUCID_RawDataContainer* LUCID_RawDataContainerCnv::createTransient(const Token* token) {
   
   MsgStream mlog(msgSvc(), "LUCID_RawDataContainer");
 
@@ -29,12 +29,12 @@ LUCID_RawDataContainer* LUCID_RawDataContainerCnv::createTransient() {
   static const pool::Guid p0_guid("0C023583-E3D4-4C7D-9B20-B6B2A1018D2F");
   static const pool::Guid p1_guid("88937AAE-D299-4A80-8608-96EFB3068F9A");
 
-  if (this->compareClassGuid(p0_guid)) { // Before T/P separation
-    trans_cont = this->poolReadObject<LUCID_RawDataContainer>();
+  if (this->compareClassGuid(token, p0_guid)) { // Before T/P separation
+    trans_cont = this->poolReadObject<LUCID_RawDataContainer>(token);
   } 
-  else if (this->compareClassGuid(p1_guid)) { // First persistent version 
+  else if (this->compareClassGuid(token, p1_guid)) { // First persistent version 
     
-    std::unique_ptr< LUCID_RawDataContainer_p1 > col_vect( this->poolReadObject< LUCID_RawDataContainer_p1 >());
+    std::unique_ptr< LUCID_RawDataContainer_p1 > col_vect( this->poolReadObject< LUCID_RawDataContainer_p1 >(token));
     
     trans_cont = converter_p1.createTransient(col_vect.get(), mlog);
   }

@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: ut_PMGSherpaVjetsSysTool_test.cxx 2016-07-13 tripiana $
 
 // Tool include(s):
 #include "AsgTools/StandaloneToolHandle.h"
@@ -30,7 +28,7 @@
 
 using namespace asg::msgUserCode;
 
-int main() {
+int test1() {
 
    ANA_CHECK_SET_TYPE (int); //makes ANA_CHECK return ints if exiting function
 
@@ -80,4 +78,15 @@ int main() {
 #endif
    
    return 0; //zero = success
+}
+
+
+int main()
+{
+  try {
+    return test1();
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
 }

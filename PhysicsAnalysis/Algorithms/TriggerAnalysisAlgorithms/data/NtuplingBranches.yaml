@@ -1,0 +1,13 @@
+TriggerAnalysisBlock:
+  - name: trigPassed
+    description: whether a specific trigger is passed (no systematics)
+
+TriggerAnalysisSFBlock:
+  - name: globalTriggerMatch
+    description: whether the event passes trigger matching requirements
+  - name: globalTriggerEffSF
+    description: the event-level global trigger efficiency SF
+  - name: trigMatched
+    description: whether a specific trigger is matched (no systematics)
+    toggled_by: triggerMatchingChainsPerYear
+

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONCALIBSTREAM_TGCCALIBRAWDATAPROVIDER_H
 #define MUONCALIBSTREAM_TGCCALIBRAWDATAPROVIDER_H
@@ -16,7 +16,6 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/WriteHandle.h"
-#include "StoreGate/DataHandle.h"
 #include "xAODEventInfo/EventInfo.h"
 
 #include "MuonPrepRawData/MuonPrepDataContainer.h"

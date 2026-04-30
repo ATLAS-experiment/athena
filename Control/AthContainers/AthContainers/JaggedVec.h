@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/JaggedVec.h
@@ -15,7 +15,7 @@
  * This means that the auxiliary variable itself is stored as a nested
  * @c std::vector<std::vector<T> >.  This tends to be somewhat
  * inefficient in space, as well as being not so friendly if one wants
- * to share the data with heterogenous resources such as GPUs.
+ * to share the data with heterogeneous resources such as GPUs.
  *
  * A jagged vector flattens this structure.  The variable itself
  * contains simply a pair of indices into another, `linked', variable,
@@ -26,7 +26,7 @@
  * The usual way of declaring a jagged vector variable in an xAOD
  * container class is to use the macro defined in xAODCore/JaggedVec.h:
  *@code
- *  #include "xAODCore/PackedLink.h"
+ *  #include "xAODCore/JaggedVec.h"
  *  ...
  *  class FooAuxContainer_v1 : public xAOD::AuxContainerBase {
  *  ...

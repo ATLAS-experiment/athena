@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <vector>
@@ -36,7 +36,7 @@ L1TopoByteStreamxAODCnv::L1TopoByteStreamxAODCnv(ISvcLocator* svcloc)
 
 // CLID
 
-const CLID& L1TopoByteStreamxAODCnv::classID() {
+CLID L1TopoByteStreamxAODCnv::classID() {
   return ClassID_traits<xAOD::L1TopoRawDataContainer>::ID();
 }
 
@@ -62,6 +62,7 @@ StatusCode L1TopoByteStreamxAODCnv::createObj(IOpaqueAddress* pAddr,
   ByteStreamAddress* pBS_Addr = dynamic_cast<ByteStreamAddress*>(pAddr);
   CHECK(pBS_Addr != nullptr);
   // -------------------------------------------------------------------------
+  //coverity[FORWARD_NULL:FALSE]
   const std::string nm = *(pBS_Addr->par());
   const std::string nmAux = nm + "Aux.";
   ATH_MSG_DEBUG("Creating xAOD::L1TopoRawDataContainer interface objects '"

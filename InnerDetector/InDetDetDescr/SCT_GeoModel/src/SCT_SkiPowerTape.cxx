@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -26,10 +26,8 @@
 #include "GeoModelKernel/Units.h"
 #include "GeoModelKernel/GeoDefinitions.h"
 #include "GaudiKernel/SystemOfUnits.h"
-#include <iostream>
-#include <sstream>
 #include <cmath>
-
+#include <format>
 
 SCT_SkiPowerTape::SCT_SkiPowerTape(const std::string & name,
                                    const SCT_Ski * ski,
@@ -129,7 +127,7 @@ SCT_SkiPowerTape::build()
     // Create the tape
 
     // Label tape with M# at end of string
-    SCT_PowerTape powerTape(getName()+"PowerTapeM"+intToString(iModule + 1), tapeLength,
+    SCT_PowerTape powerTape(std::format("{}PowerTapeM{}",getName(),iModule + 1), tapeLength,
                             m_detectorManager, m_geometryManager, m_materials);
     
     // Calculate x position of tape. This will depend on the module number.

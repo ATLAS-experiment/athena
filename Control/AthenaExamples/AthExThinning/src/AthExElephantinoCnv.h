@@ -54,7 +54,7 @@ protected:
   
   /** Build the transient representation from a persistent one
    */
-  virtual AthExElephantino* createTransient();
+  virtual AthExElephantino* createTransient(const Token* token);
 
   /////////////////////////////////////////////////////////////////// 
   // Protected data: 

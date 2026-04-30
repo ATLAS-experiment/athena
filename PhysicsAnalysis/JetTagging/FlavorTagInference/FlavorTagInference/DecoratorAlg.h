@@ -8,6 +8,7 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 #include "xAODEgamma/ElectronContainer.h"
+#include "xAODMuon/MuonContainer.h"
 
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "StoreGate/ReadDecorHandleKey.h"
@@ -33,6 +34,10 @@ namespace FlavorTagInference {
       this, "electronContainer",
       "", "key for input electron container"
     };
+    SG::ReadHandleKey<xAOD::MuonContainer> m_muonKey{
+      this, "muonContainer",
+      "", "key for input muon container"
+    };
     Gaudi::Property<std::vector<std::string>> m_undeclaredReadDecorKeys {
       this, "undeclaredReadDecorKeys", {},
       "List of read handles that we don't read, e.g. static variables" };
@@ -44,6 +49,7 @@ namespace FlavorTagInference {
     std::vector<SG::ReadDecorHandleKey<CONTAINER>> m_aux;
     std::vector<SG::ReadDecorHandleKey<CONSTITUENTS>> m_constituentAux;
     std::vector<SG::ReadDecorHandleKey<xAOD::ElectronContainer>> m_electronAux;
+    std::vector<SG::ReadDecorHandleKey<xAOD::MuonContainer>> m_muonAux;
     std::vector<SG::WriteDecorHandleKey<CONTAINER>> m_decor;
 
     // aux ids (to lock)

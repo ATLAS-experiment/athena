@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -36,8 +36,8 @@ private:
 
    const static unsigned N=1280;
   
-   Gaudi::Property<std::vector<std::string>> m_inpaths {this, "InFileNames", {"."}, "input file paths"};
-  
+  Gaudi::Property<std::vector<std::string>> m_inpaths {this, "InFileNames", {"."}, "input file paths"};
+  Gaudi::Property<bool> m_SortTracks {this, "SortTracks", false, "If true, sort tracks before finalizing merging, based on track quality"};
   std::vector<TFile*> m_files; // vector of pointers to files
   std::vector<std::vector<TTree*>> m_trees; // vector of ttrees, first vector over the input files, second over the regions  
   std::vector<std::vector<FPGATrackSimLogicalEventOutputHeader*>> m_eventOutputHeaders; //vector of output headers from above trees
@@ -50,6 +50,8 @@ private:
   SG::WriteHandleKey<FPGATrackSimHitCollection> m_FPGAHitKey{this, "FPGATrackSimHitKey","FPGAHits", "FPGATrackSim Hits key"};
   ToolHandle<FPGATrackSimOverlapRemovalTool> m_overlapRemovalTool {this, "OverlapRemoval", "FPGATrackSimOverlapRemovalTool/FPGATrackSimOverlapRemovalTool_Last", "Last inter-region overlap removal tool"};
 
+  Gaudi::Property<unsigned> m_evtlooptree {this, "SkipWritingEvents", 0,  "Set to the number of events you want to skip at the start"};
+  
   double m_evtloop = 0; // for counting, make a double because will be for division
   unsigned long m_alltracks = 0;
   unsigned long m_tracksPassOR = 0;

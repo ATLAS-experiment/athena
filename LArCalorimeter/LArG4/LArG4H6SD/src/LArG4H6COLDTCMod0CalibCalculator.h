@@ -23,6 +23,7 @@ public:
   virtual ~LArG4H6COLDTCMod0CalibCalculator() = default;
 
   virtual G4bool Process(const G4Step*, LArG4Identifier & identifier,
+                         LArG4Identifier & identifier_sr,
                          std::vector<G4double> & energies,
                          const LArG4::eCalculatorProcessing p = LArG4::kEnergyAndID) const override final;
 

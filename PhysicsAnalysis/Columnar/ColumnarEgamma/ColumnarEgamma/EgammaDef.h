@@ -15,48 +15,45 @@
 
 namespace columnar
 {
-  namespace ContainerId
+  struct ElectronDef : RegularContainerId<xAOD::Electron,xAOD::ElectronContainer>
   {
-    struct electron : regularCIBase<xAOD::Electron,xAOD::ElectronContainer>
-    {
-      static constexpr std::string_view idName = "electron";
-    };
+    static constexpr std::string_view idName = "electron";
+  };
 
-    struct photon : regularCIBase<xAOD::Photon,xAOD::PhotonContainer>
-    {
-      static constexpr std::string_view idName = "photon";
-    };
+  struct PhotonDef : RegularContainerId<xAOD::Photon,xAOD::PhotonContainer>
+  {
+    static constexpr std::string_view idName = "photon";
+  };
 
-    struct egamma : regularCIBase<xAOD::Egamma,xAOD::EgammaContainer>
-    {
-      static constexpr std::string_view idName = "egamma";
-    };
-    using mutableEgamma = mutableCI<egamma>;
-  }
+  struct EgammaDef : RegularContainerId<xAOD::Egamma,xAOD::EgammaContainer>
+  {
+    static constexpr std::string_view idName = "egamma";
+  };
+  using MutableEgammaDef = MutableContainerId<EgammaDef>;
 
-  using ElectronRange = ObjectRange<ContainerId::electron>;
-  using ElectronId = ObjectId<ContainerId::electron>;
-  using OptElectronId = OptObjectId<ContainerId::electron>;
-  template<typename CT,typename CM=ColumnarModeDefault> using ElectronAccessor  = AccessorTemplate<ContainerId::electron,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using ElectronDecorator = AccessorTemplate<ContainerId::electron,CT,ColumnAccessMode::output,CM>;
+  using ElectronRange = ObjectRange<ElectronDef>;
+  using ElectronId = ObjectId<ElectronDef>;
+  using OptElectronId = OptObjectId<ElectronDef>;
+  template<typename CT,typename CM=ColumnarModeDefault> using ElectronAccessor  = AccessorTemplate<ElectronDef,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using ElectronDecorator = AccessorTemplate<ElectronDef,CT,ColumnAccessMode::output,CM>;
 
-  using PhotonRange = ObjectRange<ContainerId::photon>;
-  using PhotonId = ObjectId<ContainerId::photon>;
-  using OptPhotonId = OptObjectId<ContainerId::photon>;
-  template<typename CT,typename CM=ColumnarModeDefault> using PhotonAccessor  = AccessorTemplate<ContainerId::photon,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using PhotonDecorator = AccessorTemplate<ContainerId::photon,CT,ColumnAccessMode::output,CM>;
+  using PhotonRange = ObjectRange<PhotonDef>;
+  using PhotonId = ObjectId<PhotonDef>;
+  using OptPhotonId = OptObjectId<PhotonDef>;
+  template<typename CT,typename CM=ColumnarModeDefault> using PhotonAccessor  = AccessorTemplate<PhotonDef,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using PhotonDecorator = AccessorTemplate<PhotonDef,CT,ColumnAccessMode::output,CM>;
 
-  using EgammaRange = ObjectRange<ContainerId::egamma>;
-  using EgammaId = ObjectId<ContainerId::egamma>;
-  using OptEgammaId = OptObjectId<ContainerId::egamma>;
-  template<typename CT,typename CM=ColumnarModeDefault> using EgammaAccessor  = AccessorTemplate<ContainerId::egamma,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using EgammaDecorator = AccessorTemplate<ContainerId::egamma,CT,ColumnAccessMode::output,CM>;
+  using EgammaRange = ObjectRange<EgammaDef>;
+  using EgammaId = ObjectId<EgammaDef>;
+  using OptEgammaId = OptObjectId<EgammaDef>;
+  template<typename CT,typename CM=ColumnarModeDefault> using EgammaAccessor  = AccessorTemplate<EgammaDef,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using EgammaDecorator = AccessorTemplate<EgammaDef,CT,ColumnAccessMode::output,CM>;
 
-  using MutableEgammaRange = ObjectRange<ContainerId::mutableEgamma>;
-  using MutableEgammaId = ObjectId<ContainerId::mutableEgamma>;
-  using OptMutableEgammaId = OptObjectId<ContainerId::mutableEgamma>;
-  template<typename CT,typename CM=ColumnarModeDefault> using MutableEgammaAccessor  = AccessorTemplate<ContainerId::mutableEgamma,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using MutableEgammaDecorator = AccessorTemplate<ContainerId::mutableEgamma,CT,ColumnAccessMode::output,CM>;
+  using MutableEgammaRange = ObjectRange<MutableEgammaDef>;
+  using MutableEgammaId = ObjectId<MutableEgammaDef>;
+  using OptMutableEgammaId = OptObjectId<MutableEgammaDef>;
+  template<typename CT,typename CM=ColumnarModeDefault> using MutableEgammaAccessor  = AccessorTemplate<MutableEgammaDef,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using MutableEgammaDecorator = AccessorTemplate<MutableEgammaDef,CT,ColumnAccessMode::output,CM>;
 }
 
 #endif

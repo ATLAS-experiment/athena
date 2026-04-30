@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TESTDRIVER_H
@@ -8,7 +8,7 @@
 #include <vector>
 #include <string>
 #include "SimpleTestClass.h"
-#include "PersistencySvc/DatabaseSpecification.h"
+#include "PersistencySvc/IDatabase.h"
 
 class Token;
 

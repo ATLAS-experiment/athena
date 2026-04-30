@@ -1,12 +1,12 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 
 // Local include(s).
 #include "LinearTransformExampleAlg.h"
 
 // SYCL include(s).
-#include <CL/sycl.hpp>
+#include <sycl/sycl.hpp>
 
 // System include(s).
 #include <cmath>
@@ -26,27 +26,27 @@ namespace AthSYCL {
       }
 
       // Set up a SYCL buffer on top of this STL object.
-      cl::sycl::buffer< float > buffer( dummyArray.begin(), dummyArray.end() );
+      sycl::buffer< float > buffer( dummyArray.begin(), dummyArray.end() );
 
       // Set up the SYCL queue.
-      cl::sycl::queue queue;
-      cl::sycl::range< 1 > workItems( buffer.size() );
+      sycl::queue queue;
+      sycl::range< 1 > workItems( buffer.size() );
 
       // Let the user know what device the calculation is running on.
-      const cl::sycl::device& device = queue.get_device();
+      const sycl::device& device = queue.get_device();
       ATH_MSG_DEBUG( "Using device "
-                     << device.get_info< cl::sycl::info::device::name >()
+                     << device.get_info< sycl::info::device::name >()
                      << " ("
-                     << device.get_info< cl::sycl::info::device::version >()
+                     << device.get_info< sycl::info::device::version >()
                      << ")" );
 
       // Multiply these values using SYCL.
       static const float MULTIPLIER = 1.23f;
-      queue.submit( [&]( cl::sycl::handler& handler ) {
+      queue.submit( [&]( sycl::handler& handler ) {
             auto acc =
-               buffer.get_access< cl::sycl::access::mode::read_write >( handler );
+               buffer.get_access< sycl::access::mode::read_write >( handler );
             handler.parallel_for< class SYCLMultiply >( workItems,
-               [=]( cl::sycl::id< 1 > id ) {
+               [=]( sycl::id< 1 > id ) {
                   acc[ id ] *= MULTIPLIER;
                } );
          } );

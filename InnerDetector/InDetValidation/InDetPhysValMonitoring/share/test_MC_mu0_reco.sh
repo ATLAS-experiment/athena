@@ -85,7 +85,6 @@ case $ArtProcess in
       --inputRDOFile $x \
       --outputAODFile   physval.AOD.root \
       --conditionsTag   "default:${conditions}" \
-      --steering        doRAWtoALL \
       --checkEventCount False \
       --ignoreErrors    True \
       --maxEvents       -1 

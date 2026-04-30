@@ -4,8 +4,7 @@
 
 # use some helper functions from MadGraphUtils
 import ast
-from MadGraphControl.MadGraphUtilsHelpers import checkSetting,checkSettingExists
-from MadGraphControl.MadGraphUtils import get_lhapdf_id_and_name
+from MCJobOptionUtils.LHAPDFsupport import get_lhapdf_id_and_name
 
 from AthenaCommon import Logging
 mgsyslog = Logging.logging.getLogger('MadGraphSysUtils')
@@ -104,19 +103,19 @@ def get_pdf_and_systematic_settings(the_base_fragment,isNLO,useNLOotf=False):
     if useNLOotf:
         # pdf weights with NLO syntax
         if basefragment_settings['pdf_variations'] is not None and basefragment_settings['central_pdf'] in basefragment_settings['pdf_variations']:
-            runcard_settings['reweight_pdf']='True'
+            runcard_settings['reweight_PDF']='True'
         else:
-            runcard_settings['reweight_pdf']='False'
+            runcard_settings['reweight_PDF']='False'
         if basefragment_settings['pdf_variations'] is not None:
             for v in basefragment_settings['pdf_variations']:
                 if v==basefragment_settings['central_pdf']:
                     continue
                 runcard_settings['lhaid']+=' '+str(v)
-                runcard_settings['reweight_pdf']+=' True'
+                runcard_settings['reweight_PDF']+=' True'
         if basefragment_settings['alternative_pdfs'] is not None:
             for a in basefragment_settings['alternative_pdfs']:
                 runcard_settings['lhaid']+=' '+str(a)
-                runcard_settings['reweight_pdf']+=' False'           
+                runcard_settings['reweight_PDF']+=' False'
             
     else: #use the new python systematics module
         sys_pdfs=[]
@@ -129,7 +128,7 @@ def get_pdf_and_systematic_settings(the_base_fragment,isNLO,useNLOotf=False):
         if len(sys_pdfs)>0:
             runcard_systematics_arguments['pdf']=','.join(sys_pdfs)
         if isNLO:
-            runcard_settings['reweight_pdf']='False'
+            runcard_settings['reweight_PDF']='False'
             
 
     ### Set scale variations to be included as weights
@@ -158,85 +157,6 @@ def get_pdf_and_systematic_settings(the_base_fragment,isNLO,useNLOotf=False):
 
     return runcard_settings
 
-#==================================================================================
-# this function is called during build_run card to check the consistency of user-provided arguments with the inlude
-# and throw errors, warnings, or corrects the input as is appropriate
-def setup_pdf_and_systematic_weights(the_base_fragment,extras,isNLO):
-    ### options in run cards that affect PDF and systematics weights behavior
-
-    ### set all relevant keys to lowercase and clean them up
-    list = []
-    tmp_dict = {}
-    for k in extras:
-        k_clean=k.lower().replace("'",'').replace('"','')
-        if k_clean!=k and k_clean in systematics_run_card_options(isNLO):
-            list.append(k)
-            tmp_dict[k_clean] = extras[k]
-    # Removing systematics with incorrect formatting 
-    for o in list:
-        if o in extras:
-            extras.pop(o,None)
-    # Adding cleaned up systematics into dictionary
-    extras.update(tmp_dict)
-    ### Check compatibility of user setting and base fragment inclusion
-    if base_fragment_setup_check(the_base_fragment,extras,isNLO):
-        return
-    # if something is set that contradicts the base fragment: bad!
-    for o in systematics_run_card_options(isNLO):
-        if o in extras:
-            mgsyslog.warning('You tried to set "'+str(o)+'" by hand, but you should trust the base fragment with the following options: '+', '.join(systematics_run_card_options(isNLO)))
-            mgsyslog.info('We will update "'+str(o))
-
-    new_settings=get_pdf_and_systematic_settings(the_base_fragment,isNLO)
-    ### backup extras (user set parameters for run_card)
-    user_set_extras=dict(extras)
-    for s in new_settings:
-        if s is not None:
-            extras[s]=new_settings[s]
-
-    ### Make sure everything has been set
-    mgsyslog.info('PDF and scale settings were set as follows:')
-    for p in systematics_run_card_options(isNLO):
-        user_set='not set'
-        if p in user_set_extras:
-            user_set=str(user_set_extras[p])
-        new_value='not set'
-        if p in extras:
-            new_value=str(extras[p])   
-        mgsyslog.info('MadGraphUtils set '+str(p)+' to "'+new_value+'", was set to "'+user_set+'"')
-
-
-#==================================================================================
-# check whether a configuration is in agreement with base fragment
-# true if nothing needs to be done
-# false if still needs setup
-# error if inconsistent config
-def base_fragment_setup_check(the_base_fragment,extras,isNLO):
-    # no include: allow it (with warning), as long as lhapdf is used
-    # if not (e.g. because no choice was made and the internal pdf ise used): error
-    if the_base_fragment is None:
-        mgsyslog.warning('!!! No pdf base fragment was included in your job options. PDFs should be set with an include file. You might be unable to follow the PDF4LHC uncertainty prescription. Let\'s hope you know what you doing !!!')
-        if not checkSetting('pdlabel','lhapdf',extras)  or not checkSettingExists('lhaid',extras):
-            mgsyslog.warning('!!! No pdf base fragment was included in your job options and you did not specify a LHAPDF yourself -- in the future, this will cause an error !!!')
-            #TODO: in the future this should be an error
-            #raise RuntimeError('No pdf base fragment was included in your job options and you did not specify a LHAPDF yourself')
-        return True
-    else:
-        # if setting is already exactly as it should be -- great!
-        correct_settings=get_pdf_and_systematic_settings(the_base_fragment,isNLO)
-        
-        allgood=True
-        for s in correct_settings:
-            if s is None and s in extras:
-                allgood=False
-                break
-            if s not in extras or extras[s]!=correct_settings[s]:
-                allgood=False
-                break
-        if allgood:
-            return True
-    # no error but also nothing set
-    return False
 
 #==================================================================================
 # convert settings from the syscalc syntax to the new systematics syntax which is steered via "systematics_arguments"
@@ -308,6 +228,6 @@ def parse_systematics_argument(sys_arg):
 # these arguments steer systematics
 def systematics_run_card_options(isNLO):
     if isNLO:
-        return ['pdlabel','lhaid','reweight_pdf','reweight_scale','rw_rscale','rw_fscale','store_rwgt_info','systematics_arguments' ]
+        return ['pdlabel','lhaid','reweight_PDF','reweight_scale','rw_rscale','rw_fscale','store_rwgt_info','systematics_arguments' ]
     else:
         return  ['pdlabel','lhaid','use_syst','sys_scalefact','sys_pdf','systematics_arguments']

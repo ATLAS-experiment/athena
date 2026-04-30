@@ -47,13 +47,16 @@ def defineMenu():
         'L1_MU18VFCH', 'L1_MU8VF_2MU5VF', 
 
         # L1 items to seed low-mu calratio ATR-32297
-        'L1_eTAU40HT','L1_eTAU60HM',
+        # Items added for low-µ runs - removed for HI to make space
+        # 'L1_eTAU40HT','L1_eTAU60HM',
 
         ##
         # combined lepton (e and mu)
         # new calo
         #'L1_2eEM7', 'L1_2eEM15',
-        'L1_2eEM12', 'L1_2eEM18', 'L1_2eEM9',
+        'L1_2eEM12', 'L1_2eEM18',
+        # Items added for low-µ runs - removed for HI to make space
+        # 'L1_2eEM9',
 
         # ATR-32259: L1 items for L1BKeePrimary, L1BKeePrescaled
         'L1_2eEM10L_MU8F', 'L1_2eEM18M', 'L1_2eEM24L', 'L1_eEM18L_MU8F', 'L1_eEM24L_3eEM12L',
@@ -130,11 +133,19 @@ def defineMenu():
         'L1_jTE50_VjTE600',
         'L1_jTE50_VjTE200',
 
+        # CALMTEA version of some items needed for lowMu HLT menu and L1_ARTEMIS, will need to be removed to make room for jTEFWD items for HI menu below
+        # Commented out fot HI
+        # 'L1_CALMTEA_jJ10',
+        # 'L1_CALMTEA_jTE5',
+        # 'L1_CALMTEA_jTE10',
+        # 'L1_ARTEMISL',
+        # 'L1_ARTEMIST',
+
         # jTEFWD UCC seeds: ATR-30726
-        'L1_jTEFWD2600',
-        'L1_jTEFWD5600',
-        'L1_jTEFWD6300',
-        'L1_jTEFWD6600',
+        # 'L1_jTEFWD2600',
+        # 'L1_jTEFWD5600',
+        # 'L1_jTEFWD6300',
+        # 'L1_jTEFWD6600',
         'L1_ZDC_PU_jTEFWD5600',
         'L1_ZDC_PU_jTEFWD6300',
         'L1_ZDC_PU_jTEFWD6600',
@@ -160,6 +171,10 @@ def defineMenu():
 
         'L1_eTAU1',
         'L1_eTAU2', 'L1_eTAU2_VjTE200', 'L1_2eTAU2_VjTE200',
+
+        # Combined em - TE
+        # Items added for low-µ runs - removed for HI to make space
+        # 'L1_2eEM5_jTE200',
         
         #UPC - TRT,  phase-1 calo
         'L1_TRT_VjTE20', 'L1_TRT_VjTE50', 'L1_TRT_VjTE200', 'L1_TRT_ZDC_XOR_VjTE200', 'L1_TRT_1ZDC_NZDC_VjTE200',
@@ -363,7 +378,10 @@ def defineMenu():
         'L1_BPH-0M9-eEM9-eEM7_2MU3V', 'L1_BPH-2M9-2DR15-2MU5VF',
         'L1_BPH-0M9-eEM9-eEM7_MU5VF', 'L1_BPH-2M9-0DR15-2MU3V',
         'L1_BPH-2M9-0DR15-C-MU5VFMU3V', 'L1_BPH-2M9-0DR15-MU5VFMU3V',
-        'L1_BPH-2M9-0DR15-2MU3VF', 
+        'L1_BPH-2M9-0DR15-2MU3VF',
+        # Items added for low-µ runs - removed for HI to make space
+        # 'L1_BPH-7M11-25DR99-2MU3VF',
+        # 'L1_BPH-7M14-0DR25-MU5VFMU3VF',
 
         'L1_JPSI-1M5-eEM15',
         'L1_0DPHI32-2M5-eEM9M-eEM6M',
@@ -451,10 +469,10 @@ def defineMenu():
         'L1_CALMTEA_eEM2_VjTE200',
         'L1_CALMTEA_eTAU2_VjTE200',
 
-        'L1_MATCHA_eTAU2',
-        'L1_MATCHA_eTAU2_VjTE200',
-        'L1_MATCHA_eTAU2_EMPTY',
-        'L1_MATCHA_eTAU2_VjTE200_EMPTY',
+        # 'L1_MATCHA_eTAU2',
+        # 'L1_MATCHA_eTAU2_VjTE200',
+        # 'L1_MATCHA_eTAU2_EMPTY',
+        # 'L1_MATCHA_eTAU2_VjTE200_EMPTY',
 
         'L1_ESP_1ZDC_NZDC_jJ10_VjTE200',
         'L1_ESP_5ZDC_A_5ZDC_C_jJ10_VjTE200',
@@ -476,16 +494,35 @@ def defineMenu():
         'L1_ESP_ASYM2_ZDC_XOR_VjTE200',
         'L1_ESP_ASYM3_ZDC_XOR_VjTE200',
 
+        # 2026 pp low-µ
         # tau
         #ATR-32259: L1 items for L1BKeePrimary
         'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55', 'L1_cTAU30M_3DR35-MU8F-eTAU30', 
-        
+
         'L1_eEM22M_jMJJ-300',
 
         'L1_jMJJ-500-NFF', 'L1_jMJJ-700',
 
-        #ATR-32300
-        'L1_DY-BOX-2MU3VF', 'L1_DY-BOX-2MU5VF',
+        # ATR-32300
+        # Items added for low-µ runs - removed for HI to make space
+        # 'L1_DY-BOX-2MU3VF', 'L1_DY-BOX-2MU5VF',
+
+        # 2026 HI
+        'L1_eEM3',
+        'L1_eEM3_EMPTY',
+
+        'L1_eEM3_VjTE200_EMPTY',
+        'L1_CALMTEA_eEM3',
+        'L1_CALMTEA_eEM3_VjTE200',
+
+        # ATR-32660: AFP in HI
+        'L1_ESP_AFP_OR_jJ5p30ETA49_VZDC_A_VZDC_C_VjTE200',
+        'L1_ESP_AFP_OR_jJ5p30ETA49_ZDC_XOR_VjTE200',
+        'L1_AFP_OR_VZDC_A_VZDC_C_VjTE200',
+        'L1_AFP_OR_TRT_VZDC_A_VZDC_C_VjTE200',
+        'L1_AFP_OR_ZDC_XOR_VjTE200',
+        'L1_AFP_OR_TRT_ZDC_XOR_VjTE200',
+        'L1_AFP_OR_VjTE200',
     ]
 
 

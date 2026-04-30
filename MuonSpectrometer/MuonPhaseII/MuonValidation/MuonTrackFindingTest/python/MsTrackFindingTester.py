@@ -3,12 +3,16 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def MsTrackTesterCfg(flags, name = "MsTrackTester", **kwargs):
+def MsTrackTesterCfg(flags, name = "MsTrackTester", scheduleLegacy = True, **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("isMC", flags.Input.isMC)
     from MuonTrackFindingAlgs.TrackFindingConfig import SegmentSelectorCfg, TrackSummaryToolCfg
     kwargs.setdefault("SegmentSelectionTool", result.popToolsAndMerge(SegmentSelectorCfg(flags)))
     kwargs.setdefault("SummaryTool", result.popToolsAndMerge(TrackSummaryToolCfg(flags)))
+    if not scheduleLegacy:
+        kwargs.setdefault("LegacySegmentKey", "")
+        kwargs.setdefault("LegacyTrackKey", "")
+        kwargs.setdefault("LegacyMuonKey" , "")
     the_alg = CompFactory.MuonValR4.MsTrackTester(name= name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
@@ -35,6 +39,8 @@ if __name__=="__main__":
                                               default=False, action='store_true')
     parser.add_argument("--noPerfMon", help="If set to true, disable performance monitoring.",
                                               default=False, action='store_true')
+    parser.add_argument("--noLegacyChain", help="If set to true, the legacy chain is not scheduled",
+                                           default = False, action = 'store_true')
     parser.set_defaults(nEvents = -1)
   
     parser.set_defaults(outRootFile="MsTrkTester.root")
@@ -44,6 +50,7 @@ if __name__=="__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.PerfMon.doFullMonMT = not args.noPerfMon
+    flags.Trigger.Muon.useNewRegionSelector = False
     flags, cfg = setupGeoR4TestCfg(args,flags)
 
     cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
@@ -64,9 +71,11 @@ if __name__=="__main__":
     
     #### Schedule the legacy MS track building to compare the two reconstruction chains
     from MuonPatternRecognitionTest.PatternTestConfig import LegacyMuonRecoChainCfg
-    cfg.merge(LegacyMuonRecoChainCfg(flags))
 
-    cfg.merge(MsTrackTesterCfg(flags))
+    if not args.noLegacyChain:
+        cfg.merge(LegacyMuonRecoChainCfg(flags))
+
+    cfg.merge(MsTrackTesterCfg(flags, scheduleLegacy = not args.noLegacyChain))
 
     cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
                                     outStream="MuonEtaHoughTransformTest"))

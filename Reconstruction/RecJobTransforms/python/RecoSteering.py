@@ -22,6 +22,9 @@ def RecoSteering(flags):
             from xAODEventInfoCnv.xAODEventInfoCnvConfig import (
                 EventInfoBeamSpotDecoratorAlgCfg)
             acc.merge(EventInfoBeamSpotDecoratorAlgCfg(flags))
+        if flags.Input.isMC:
+            from LumiBlockComps.LumiBlockMuWriterConfig import LumiBlockMuWriterCfg
+            acc.merge(LumiBlockMuWriterCfg(flags))
         log.info("---------- Configured BS reading")
     else:
         from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
@@ -34,7 +37,7 @@ def RecoSteering(flags):
         log.info("---------- Configured POOL reading")
 
     acc.flagPerfmonDomain('Truth')
-    if flags.Input.isMC or flags.Overlay.DataOverlay:
+    if (flags.Input.isMC or flags.Overlay.DataOverlay) and flags.Input.Format!=Format.BS:
         # AOD2xAOD Truth conversion
         if flags.Output.doGEN_AOD2xAOD:
             from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg

@@ -307,6 +307,7 @@ class MetaDataSvc : public extends<::AthService,
   bool m_clearedInputDataStore{true};
   bool m_clearedOutputDataStore{false};
   bool m_allowMetaDataStop{false};
+  bool m_beginInputFileSeen{false};
   bool m_outputPrepared{false};
   std::map<std::string_view, CLID> m_persToClid{};
 

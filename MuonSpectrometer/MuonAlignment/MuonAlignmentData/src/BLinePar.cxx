@@ -3,6 +3,7 @@
 */
 
 #include "MuonAlignmentData/BLinePar.h"
+#include <iostream>
 std::ostream& operator<<(std::ostream& ostr, const BLinePar& par) {
   using Parameter = BLinePar::Parameter;
   ostr<<"Muon B-Line deformation AMDB id (name,eta,phi,job)=(";

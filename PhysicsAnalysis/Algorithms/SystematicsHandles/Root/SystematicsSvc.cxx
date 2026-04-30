@@ -14,6 +14,7 @@
 #include <AsgMessaging/MessageCheck.h>
 #include <PATInterfaces/MakeSystematicsVector.h>
 #include <RootCoreUtils/StringUtil.h>
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <regex>
@@ -215,6 +216,38 @@ namespace CP
       return "";
     else
       return iter->second;
+  }
+
+
+
+  std::vector<std::string> SystematicsSvc ::
+  getObjectDecorations (const std::string& name) const
+  {
+    std::vector<std::string> result;
+    std::unique_lock<std::mutex> lock (m_systematicsMutex);
+
+    // First get decorations from the copy source (if any)
+    auto iter = m_copies.find (name);
+    if (iter != m_copies.end())
+    {
+      const std::string copyName = iter->second;
+      lock.unlock();
+      result = getObjectDecorations (copyName);
+      lock.lock();
+    }
+
+    // Then add decorations registered directly on this object
+    const std::string prefix = name + ".";
+    for (const auto& entry : m_decorSystematics)
+    {
+      if (entry.first.compare(0, prefix.size(), prefix) == 0)
+      {
+        std::string decor = entry.first.substr(prefix.size());
+        if (std::find(result.begin(), result.end(), decor) == result.end())
+          result.push_back (std::move(decor));
+      }
+    }
+    return result;
   }
 
 

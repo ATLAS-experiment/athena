@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/debug.h
@@ -17,6 +17,7 @@
 #include "AthContainersInterfaces/IConstAuxStore.h"
 #include "AthContainers/AuxElement.h"
 #include "AthContainers/AuxVectorData.h"
+#include <iosfwd>
 
 
 namespace SGdebug {
@@ -44,9 +45,27 @@ void print_aux_var_name (SG::auxid_t id);
 /**
  * @brief Print the list of aux variables in a set.
  * @param auxids The set to print.
+ * @param decors Set of decorations.
+ * @param os Stream to which to print.
  */
 void print_aux_vars (const SG::auxid_set_t& auxids,
-                     const SG::auxid_set_t& decors = SG::auxid_set_t());
+                     const SG::auxid_set_t& decors,
+                     std::ostream& os);
+
+
+/**
+ * @brief Print the list of aux variables in a set.
+ * @param auxids The set to print.
+ */
+void print_aux_vars (const SG::auxid_set_t& auxids);
+
+
+/**
+ * @brief Print the list of aux variables handled by a store.
+ * @param store The store to dump.
+ * @param os Stream to which to print.
+ */
+void print_aux_vars (const SG::IConstAuxStore& store, std::ostream& os);
 
 
 /**
@@ -61,6 +80,14 @@ void print_aux_vars (const SG::IConstAuxStore& store);
  * @param store The store to dump.
  */
 void print_aux_vars (const SG::IConstAuxStore* store);
+
+
+/**
+ * @brief Print the list of aux variables associated with a container.
+ * @param vec The container to dump.
+ * @param os Stream to which to print.
+ */
+void print_aux_vars (const SG::AuxVectorData& vec, std::ostream& os);
 
 
 /**

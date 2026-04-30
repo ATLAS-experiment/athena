@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -47,7 +47,7 @@ MuCTPIByteStreamCnv::MuCTPIByteStreamCnv( ISvcLocator* svcloc )
  * Function telling the framework the Class ID of the object that this converter
  * is for (MuCTPI_RDO).
  */
-const CLID& MuCTPIByteStreamCnv::classID() {
+CLID MuCTPIByteStreamCnv::classID() {
 
   return ClassID_traits<MuCTPI_RDO>::ID();
 

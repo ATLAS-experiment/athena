@@ -45,6 +45,13 @@ namespace LArG4
   findLogicalVolumes(const std::vector<std::string>& patterns,
                      MsgStream& msg);
 
+  //---------------------------------------------------------------------------
+  /// @brief Helper function for matching strings with wildcards.
+  /// It's a iterative function that checks if two given strings match.
+  /// The first string may contain wildcard characters.
+  //---------------------------------------------------------------------------
+  bool matchStrings(std::string_view pattern, std::string_view text) noexcept;
+
 }
 
 #endif

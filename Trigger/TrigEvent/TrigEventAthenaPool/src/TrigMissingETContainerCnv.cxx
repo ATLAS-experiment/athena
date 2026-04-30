@@ -21,7 +21,7 @@ TrigMissingETContainer_PERS * TrigMissingETContainerCnv::createPersistent( TrigM
  
 
 //createTransient
-TrigMissingETContainer* TrigMissingETContainerCnv::createTransient()
+TrigMissingETContainer* TrigMissingETContainerCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "TrigMissingETContainerConverter" );
   
@@ -30,13 +30,13 @@ TrigMissingETContainer* TrigMissingETContainerCnv::createTransient()
   static const pool::Guid p3_guid( "F5C98A61-4F40-4FE6-A1A9-D5EF00FFFBF0" );
   static const pool::Guid tlp1_guid( "23EC84A7-8614-42D6-B82D-B0861D3CE08D" );
 
-  if( compareClassGuid( p3_guid ) ){
-         std::unique_ptr< TrigMissingETContainer_p3 > col_vect( poolReadObject< TrigMissingETContainer_p3 >() );
+  if( compareClassGuid(token,  p3_guid ) ){
+         std::unique_ptr< TrigMissingETContainer_p3 > col_vect( poolReadObject< TrigMissingETContainer_p3 >(token) );
          //         std::cout << "Reading IMFC p3" << std::endl;
          return m_converter.createTransient( col_vect.get(), mlog ) ;
 
-  } else if( compareClassGuid( tlp1_guid ) ) {
-        std::unique_ptr< TrigMissingETContainer_tlp1 > col_vect( poolReadObject< TrigMissingETContainer_tlp1 >() );
+  } else if( compareClassGuid(token,  tlp1_guid ) ) {
+        std::unique_ptr< TrigMissingETContainer_tlp1 > col_vect( poolReadObject< TrigMissingETContainer_tlp1 >(token) );
          //  std::cout << "Reading IMFC tlp1" << std::endl;
          return m_converter_tlp1.createTransient( col_vect.get(), mlog );
        

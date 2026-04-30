@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TestDriver.h"
@@ -15,13 +15,11 @@
 #include "StorageSvc/Shape.h"
 #include "StorageSvc/IStorageSvc.h"
 #include "StorageSvc/DbReflex.h"
-#include "StorageSvc/DatabaseConnection.h"
 #include "StorageSvc/DbConnection.h"
 #include "StorageSvc/FileDescriptor.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbContainer.h"
 #include "StorageSvc/DbType.h"
-#include "StorageSvc/pool.h"
 
 #include <stdexcept>
 #include <iostream>
@@ -52,17 +50,14 @@ TestDriver::testWriting()
     throw std::runtime_error( "Could not create a StorageSvc object" );
   }
   storSvc->addRef();
-  pool::Session* sessionHandle = 0;
-  if ( ! ( storSvc->startSession( pool::RECREATE, pool::ROOT_StorageType.type(), sessionHandle ).isSuccess() ) ) {
+  if( !storSvc->startSession( pool::RECREATE, pool::ROOT_StorageType.type() ).isSuccess() ) {
     throw std::runtime_error( "Could not start a session." );
   }
 
   pool::FileDescriptor fd( file, file );
-  if ( ! ( storSvc->connect( sessionHandle, pool::RECREATE, fd ).isSuccess() ) ) {
+  if ( ! ( storSvc->connect( pool::RECREATE, fd ).isSuccess() ) ) {
     throw std::runtime_error( "Could not start a connection." );
   }
-  pool::DatabaseConnection* connection = fd.dbc();
-
   // Retrieve the dictionary
   RootType class_TestClassWithTransients  ( "TestClassWithTransients" );
   if ( ! class_TestClassWithTransients ) {
@@ -114,7 +109,7 @@ TestDriver::testWriting()
   }
 
   // Closing the transaction.
-  if ( ! ( storSvc->endTransaction( connection, pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
+  if ( ! ( storSvc->endTransaction( fd, pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
     throw std::runtime_error( "Could not end a transaction." );
   }
 
@@ -130,7 +125,7 @@ TestDriver::testWriting()
   if ( ! ( storSvc->disconnect( fd ).isSuccess() ) ) {
     throw std::runtime_error( "Could not disconnect." );
   }
-  if ( ! ( storSvc->endSession( sessionHandle ).isSuccess() ) ) {
+  if( !storSvc->endSession().isSuccess() ) {
     throw std::runtime_error( "Could not end correctly the session." );
   }
   storSvc->release();
@@ -145,20 +140,18 @@ TestDriver::testReading()
     throw std::runtime_error( "Could not create a StorageSvc object" );
   }
   storSvc->addRef();
-  pool::Session* sessionHandle = 0;
-  if ( ! ( storSvc->startSession( pool::READ, pool::ROOT_StorageType.type(), sessionHandle ).isSuccess() ) ) {
+  if( !storSvc->startSession( pool::READ, pool::ROOT_StorageType.type() ).isSuccess() ) {
     throw std::runtime_error( "Could not start a session." );
   }
 
   pool::FileDescriptor fd( file, file );
-  if ( !storSvc->connect( sessionHandle, pool::READ, fd ).isSuccess() ) {
+  if ( !storSvc->connect( pool::READ, fd ).isSuccess() ) {
     throw std::runtime_error( "Could not start a connection." );
   }
 
   // Fetch the containers
   std::vector<const Token*> containerTokens;
-  pool::DatabaseConnection* connection = fd.dbc();
-  DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
+  DbDatabase dbH( fd.dbc()->handle() );
   if( !dbH.containers(containerTokens, false).isSuccess() or containerTokens.size() != 1 ) {
     throw std::runtime_error( "Could not fetch the containers" );
   }
@@ -237,7 +230,7 @@ TestDriver::testReading()
   }
 
   std::cout << "Closing the session" << std::endl;
-  if ( ! ( storSvc->endSession( sessionHandle ).isSuccess() ) ) {
+  if ( ! ( storSvc->endSession().isSuccess() ) ) {
     throw std::runtime_error( "Could not end correctly the session." );
   }
   storSvc->release();

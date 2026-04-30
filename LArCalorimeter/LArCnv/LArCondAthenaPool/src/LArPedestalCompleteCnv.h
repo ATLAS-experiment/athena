@@ -30,7 +30,7 @@ public:
     LArPedestalCompleteCnv (ISvcLocator* svcloc) : LArPedestalCompleteCnvBase(svcloc) {}
 protected:
     virtual LArPedPersType*   createPersistent (LArPedTransType* transObj);
-    virtual LArPedTransType*  createTransient ();
+    virtual LArPedTransType*  createTransient(const Token* token);
     LArPedTransType*          createTransient(LArConditionsSubset<LArPedestalP>* orig);
 };
 

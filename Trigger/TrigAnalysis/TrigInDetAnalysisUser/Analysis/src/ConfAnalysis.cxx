@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    $Id: ConfAnalysis.cxx 800361 2017-03-12 14:33:19Z 
  **
- **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -1346,12 +1346,16 @@ void ConfAnalysis::execute( const std::vector<TIDA::Track*>& reftracks,
     double dphit = reftracks[i]->dphi();
 
     //RoI variables
-    float droi_detat = groi->eta() - reftracks[i]->eta();
-    float droi_dphit = groi->phi() - reftracks[i]->phi();
-    if ( droi_dphit<-M_PI ) droi_dphit +=2*M_PI;
-    if ( droi_dphit>M_PI )  droi_dphit -=2*M_PI;
-    float droi_dRt = std::sqrt(droi_dphit*droi_dphit + droi_detat*droi_detat);
-
+    float droi_detat = 0.f;
+    float droi_dphit = 0.f;
+    float droi_dRt = 0.f;
+    if (groi){ //checked for null on line 1281
+      droi_detat = groi->eta() - reftracks[i]->eta();
+      droi_dphit = groi->phi() - reftracks[i]->phi();
+      if ( droi_dphit<-M_PI ) droi_dphit +=2*M_PI;
+      if ( droi_dphit>M_PI )  droi_dphit -=2*M_PI;
+      droi_dRt = std::sqrt(droi_dphit*droi_dphit + droi_detat*droi_detat);
+    }
     
     //    double dz0t = reftracks[i]->dz0()+((std::cos(phit)*m_xBeamReference + std::sin(phit)*m_yBeamReference)/std::tan(thetat));
     //    double dd0t = reftracks[i]->da0();

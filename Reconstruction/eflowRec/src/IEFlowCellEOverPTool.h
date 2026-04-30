@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef IEFLOWCELLEOVERPTOOL_H
-#define IEFLOWCELLEOVERPTOOL_H
+#ifndef EFLOWREC_IEFLOWCELLEOVERPTOOL_H
+#define EFLOWREC_IEFLOWCELLEOVERPTOOL_H
 
 /********************************************************************
 

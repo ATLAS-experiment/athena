@@ -111,14 +111,18 @@ if __name__ == "__main__":
     
     flags.fillFromArgs()
 
-    from FPGATrackSimConfTools import FPGATrackSimDataPrepConfig
-    flags = FPGATrackSimDataPrepConfig.FixITkMainPassFlags(flags)    
+    
+    from ActsConfig.ActsCIFlags import actsWorkflowFlags
+    actsWorkflowFlags(flags)
 
     flags.lock()
-
+    flags = flags.cloneAndReplace("Tracking.ActiveConfig", "Tracking.ITkActsPass")
+    
     acc=MainServicesCfg(flags)
     acc.store(open('FPGATrackSimMapMakerConfig.pkl','wb'))
     acc.merge(FPGATrackSimMapMakerCfg(flags))
+        
+    from FPGATrackSimConfTools import FPGATrackSimDataPrepConfig
     acc.merge(FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepSetup(flags,runReco=False))
     
 

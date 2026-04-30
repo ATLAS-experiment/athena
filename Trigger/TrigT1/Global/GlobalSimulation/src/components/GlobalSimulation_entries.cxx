@@ -6,7 +6,8 @@
 
 #include "../FirstChain/Egamma1_LArStrip_Fex.h"
 #include "../FirstChain/Egamma1_LArStrip_Fex_RowAware.h"
-#include "../FirstChain/EMB1CellsFromCaloCells.h"
+#include "../FirstChain/Egamma1_OnlineMapNbhood.h"
+#include "../FirstChain/EMBE1CellsFromCaloCells.h"
 #include "../FirstChain/eFexRoIAlgTool.h"
 #include "../FirstChain/Egamma1BDTAlgTool.h"
 #include "../FirstChain/Egamma1eRatioAlgTool.h"
@@ -20,12 +21,16 @@
 #include "../FirstChain/eEmMultTestBench.h"
 #include "../FirstChain/eEmMultTestComparator.h"
 
+#include "../FirstChain/PU1SuppTestBench.h"
+#include "../FirstChain/PU1SuppAlgTool.h"
+
 
 DECLARE_COMPONENT(GlobalSim::GlobalSimulationAlg)
 
 DECLARE_COMPONENT(GlobalSim::Egamma1_LArStrip_Fex)
 DECLARE_COMPONENT(GlobalSim::Egamma1_LArStrip_Fex_RowAware)
-DECLARE_COMPONENT(GlobalSim::EMB1CellsFromCaloCells)
+DECLARE_COMPONENT(GlobalSim::Egamma1_OnlineMapNbhood)
+DECLARE_COMPONENT(GlobalSim::EMBE1CellsFromCaloCells)
 DECLARE_COMPONENT(GlobalSim::eFexRoIAlgTool)
 DECLARE_COMPONENT(GlobalSim::Egamma1BDTAlgTool)
 DECLARE_COMPONENT(GlobalSim::Egamma1eRatioAlgTool)
@@ -39,3 +44,6 @@ DECLARE_COMPONENT(GlobalSim::eEmMultAlgTool)
 
 DECLARE_COMPONENT(GlobalSim::eEmMultTestBench)
 DECLARE_COMPONENT(GlobalSim::eEmMultTestComparator)
+
+DECLARE_COMPONENT(GlobalSim::PU1SuppTestBenchAlg)
+DECLARE_COMPONENT(GlobalSim::PU1SuppAlgTool)

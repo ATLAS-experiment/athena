@@ -14,7 +14,10 @@
 #include <SelectionHelpers/SysReadSelectionHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
 #include <SystematicsHandles/SysReadHandle.h>
+#include <SystematicsHandles/SysWriteDecorHandle.h>
+#include <xAODJet/JetContainer.h>
 #include <xAODTau/TauJetContainer.h>
+#include <xAODTruth/TruthParticleContainer.h>
 
 namespace CP
 {
@@ -47,6 +50,24 @@ namespace CP
   private:
     SysReadSelectionHandle m_preselection {
       this, "preselection", "", "the preselection to apply"};
+
+    /// \brief output decoration for truth matching flag
+  private:
+    SysWriteDecorHandle<char> m_isTruthMatchedDecor {
+      this, "isTruthMatchedDecoration", "IsTruthMatched",
+      "decoration for truth matching flag"};
+
+    /// \brief output decoration for truth jet link
+  private:
+    SysWriteDecorHandle<ElementLink<xAOD::JetContainer>> m_truthJetLinkDecor {
+      this, "truthJetLinkDecoration", "truthJetLink",
+      "decoration for truth jet link"};
+
+    /// \brief output decoration for truth particle link
+  private:
+    SysWriteDecorHandle<ElementLink<xAOD::TruthParticleContainer>> m_truthParticleLinkDecor {
+      this, "truthParticleLinkDecoration", "truthParticleLink",
+      "decoration for truth particle link"};
   };
 }
 

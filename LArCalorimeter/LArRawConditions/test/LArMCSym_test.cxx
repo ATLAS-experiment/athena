@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file LArRawConditions/test/LArMCSym_test.cxx
@@ -135,7 +135,12 @@ int main()
   // coverity[uncaught_except]
   LArOnlineIDTest larhelpers;
 
-  test1 (*helpers, larhelpers.onlineID());
+  try  {
+    test1 (*helpers, larhelpers.onlineID());
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
   return 0;
 }
 

@@ -39,7 +39,7 @@
 //       simulation of nucleus-nucleus interactions was implemented.
 // ------------------------------------------------------------
 
-#include <utility>
+
 
 #include "G4FTFModel2.hh"
 #include "G4ios.hh"
@@ -56,6 +56,8 @@
 #include "G4KineticTrack.hh"                                     // Uzhi Oct 2014
 
 #include "G4Version.hh" // For changes to interface pre,post 10.4
+#include <limits>
+#include <utility>
 
 //============================================================================
 
@@ -1639,10 +1641,13 @@ G4bool G4FTFModel2::AdjustNucleons( G4VSplitableHadron* SelectedAntiBaryon,
       #endif
 
       G4double Mt2 = sqr( TNucleonMass ) + PtNucleon.mag2();
-      G4double Pz = WplusProjectile*XplusNucleon/2.0 - Mt2/(2.0*WplusProjectile*XplusNucleon);
-      G4double E =  WplusProjectile*XplusNucleon/2.0 + Mt2/(2.0*WplusProjectile*XplusNucleon);
-      G4double YprojectileNucleon = 0.5 * std::log( (E + Pz)/(E - Pz) );
-
+      const auto denomProj = (2.0*WplusProjectile*XplusNucleon);
+      G4double YprojectileNucleon{std::numeric_limits<G4double>::max()};
+      if (denomProj != 0.)[[likely]]{
+        G4double Pz = WplusProjectile*XplusNucleon/2.0 - Mt2/(denomProj);
+        G4double E =  WplusProjectile*XplusNucleon/2.0 + Mt2/(denomProj);
+        YprojectileNucleon = 0.5 * std::log( (E + Pz)/(E - Pz) );
+      }
       #ifdef debugAdjust
       G4cout << "YpN Ypr YpN-Ypr " << " " << YprojectileNucleon << " " << YprojectileNucleus
              << " " << YprojectileNucleon - YprojectileNucleus << G4endl
@@ -2025,16 +2030,24 @@ G4bool G4FTFModel2::AdjustNucleons( G4VSplitableHadron* SelectedAntiBaryon,
 
       WplusProjectile = ( S + M2projectile - M2target + std::sqrt( DecayMomentum2 ) )/2.0/SqrtS;
       WminusTarget = SqrtS - M2projectile/WplusProjectile;
-
+      //
       G4double Mt2 = sqr( PNucleonMass ) + PtNucleonP.mag2();
-      G4double Pz = WplusProjectile*XplusNucleon/2.0 - Mt2/(2.0*WplusProjectile*XplusNucleon);
-      G4double E =  WplusProjectile*XplusNucleon/2.0 + Mt2/(2.0*WplusProjectile*XplusNucleon);
-      G4double YprojectileNucleon = 0.5 * std::log( (E + Pz)/(E - Pz) );
-
+      const auto denomProj = (2.0*WplusProjectile*XplusNucleon);
+      G4double YprojectileNucleon{std::numeric_limits<G4double>::max()};
+      if (denomProj != 0.)[[likely]]{
+        G4double Pz = WplusProjectile*XplusNucleon/2.0 - Mt2/denomProj;
+        G4double E =  WplusProjectile*XplusNucleon/2.0 + Mt2/denomProj;
+        YprojectileNucleon = 0.5 * std::log( (E + Pz)/(E - Pz) );
+      }
+      //
       Mt2 = sqr( TNucleonMass ) + PtNucleonT.mag2();
-      Pz = -WminusTarget*XminusNucleon/2.0 + Mt2/(2.0*WminusTarget*XminusNucleon);
-      E =   WminusTarget*XminusNucleon/2.0 + Mt2/(2.0*WminusTarget*XminusNucleon);
-      G4double YtargetNucleon = 0.5 * std::log( (E + Pz)/(E - Pz) );
+      const auto denom = (2.0*WminusTarget*XminusNucleon);
+      G4double YtargetNucleon{std::numeric_limits<G4double>::max()};
+      if (denom != 0.)[[likely]]{
+        G4double Pz = -WminusTarget*XminusNucleon/2.0 + Mt2/denom;
+        G4double E =   WminusTarget*XminusNucleon/2.0 + Mt2/denom;
+        YtargetNucleon = 0.5 * std::log( (E + Pz)/(E - Pz) );
+      }
 
       if ( std::abs( YtargetNucleon - YtargetNucleus ) > 2         ||
            std::abs( YprojectileNucleon - YprojectileNucleus ) > 2 ||
@@ -2156,11 +2169,7 @@ G4ExcitedStringVector* G4FTFModel2::BuildStrings() {
 
     for ( unsigned int ahadron = 0; ahadron < primaries.size(); ahadron++ ) {
       G4bool isProjectile( true );
-      //G4cout << "primaries[ahadron] " << primaries[ahadron] << G4endl;
-      //if ( primaries[ahadron]->GetStatus() <= 1 ) isProjectile=true;
       FirstString = 0; SecondString = 0;
-//      theExcitation->CreateStrings( primaries[ ahadron ], isProjectile,            // Uzhi Oct 2014
-//                                    FirstString, SecondString, theParameters );    // Uzhi Oct 2014
       if ( primaries[ahadron]->GetStatus() <= 1 )                                    // Uzhi Oct 2014 start
       {
        theExcitation->CreateStrings( primaries[ ahadron ], isProjectile,
@@ -2174,8 +2183,9 @@ G4ExcitedStringVector* G4FTFModel2::BuildStrings() {
                                   primaries[ahadron]->GetTimeOfCreation(),
                                   primaries[ahadron]->GetPosition(),   //FirstString->GetPosition(),
                                   ParticleMomentum);
-       if (FirstString) delete FirstString;
-       FirstString=new G4ExcitedString(aTrack); SecondString=0;
+       
+       FirstString = new G4ExcitedString(aTrack); 
+       SecondString = nullptr;
       }
       else {G4cout<<"Something wrong in FTF Model Build String" << G4endl;}          // Uzhi Oct 2014 end
 

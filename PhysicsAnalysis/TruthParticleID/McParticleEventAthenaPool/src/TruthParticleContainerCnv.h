@@ -59,7 +59,7 @@ protected:
   
   /** Build the transient representation from a persistent one
    */
-  virtual TruthParticleContainer* createTransient();
+  virtual TruthParticleContainer* createTransient(const Token* token);
 
   /////////////////////////////////////////////////////////////////// 
   // Protected data: 

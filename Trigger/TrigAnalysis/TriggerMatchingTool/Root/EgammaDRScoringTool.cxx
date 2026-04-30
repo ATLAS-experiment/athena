@@ -1,10 +1,10 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TriggerMatchingTool/EgammaDRScoringTool.h"
 #include "FourMomUtils/xAODP4Helpers.h"
-#include "xAODBase/ObjectType.h"
+#include "xAODBase/IParticle.h"
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODEgamma/Egamma.h"
 #include "AthContainers/ConstAccessor.h"
@@ -68,11 +68,10 @@ namespace Trig {
                         *dynamic_cast<const xAOD::Egamma &>(offline).caloCluster());
             default:
             {
-                std::ostringstream oss;
-                oss << "Not an egamma type: " << online.type();
-                throw std::runtime_error(oss.str());
+                std::string msg =  "Not an egamma type: " + std::to_string(online.type());
+                throw std::runtime_error(msg);
             }
         }
-        return -1;
+      
     }
 } //> end namespace Trig

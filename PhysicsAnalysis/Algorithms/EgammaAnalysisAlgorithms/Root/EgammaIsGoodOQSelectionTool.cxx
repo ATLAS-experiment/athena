@@ -5,6 +5,8 @@
 // Local include(s):
 #include "EgammaAnalysisAlgorithms/EgammaIsGoodOQSelectionTool.h"
 
+#include <xAODEventInfo/EventInfo.h>
+#include <AsgDataHandles/ReadDecorHandleKey.h>
 
 // System include(s):
 #include <iomanip>
@@ -59,6 +61,13 @@ namespace CP {
          return StatusCode::FAILURE;
       }
 
+#ifndef XAOD_STANDALONE
+      // Declare dependency on RandomRunNumber for MC (used by deadHVTool)
+      // Not doing this in the tool itself, since it is a public tool and
+      // for public tools the dependencies don't get properly propagated
+      SG::ReadDecorHandleKey<xAOD::EventInfo> randomRunNumberKey{ "EventInfo.RandomRunNumber" };
+      addDependency(randomRunNumberKey.fullKey(), Gaudi::DataHandle::Reader);
+#endif
 
       // Return gracefully.
       return StatusCode::SUCCESS;

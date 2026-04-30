@@ -10,7 +10,9 @@ atlas_add_component( MuonBucketDump
                      src/components/*.cxx
                      LINK_LIBRARIES  AthenaBaseComps GeoPrimitives MuonIdHelpersLib  MuonRecToolInterfacesR4
                                      xAODMuonSimHit StoreGateLib xAODMuonPrepData MuonSpacePoint xAODMuon MuonTesterTreeLib
-                                     MuonPatternEvent MuonTrackEvent MuonTruthHelpers MuonPRDTestR4Lib)
+                                     MuonPatternEvent MuonTrackEvent MuonTruthHelpers MuonPRDTestR4Lib
+                                     CaloEvent CaloIdentifier CaloDetDescrLib Identifier GeoPrimitives AthenaKernel
+                                     MuonInferenceInterfaces)
                                      
 atlas_install_python_modules( python/*.py)
 

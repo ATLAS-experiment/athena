@@ -1,10 +1,8 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Class header
-#include <utility>
-
 #include "ISF_FastCaloSimParametrization/CaloCellContainerSD.h"
 
 // Athena headers
@@ -12,13 +10,15 @@
 
 // FastCaloSim simulation include
 #include "ISF_FastCaloSimEvent/TFCSSimulationState.h"
+//
+#include <utility>
+#include <memory>
 
-
-CaloCellContainerSD::CaloCellContainerSD(const std::string& name, const std::string& CaloCellContainerName, PublicToolHandle<ICaloCellMakerTool> FastHitConvertTool)
+CaloCellContainerSD::CaloCellContainerSD(const std::string& name, const std::string& CaloCellContainerName, const PublicToolHandle<ICaloCellMakerTool> & FastHitConvertTool)
   : G4VSensitiveDetector( name ),
     m_EmptyCellBuilderTool("EmptyCellBuilderTool/EmptyCellBuilderTool"),
     m_caloCellContainer (CaloCellContainerName),
-    m_FastHitConvertTool (std::move(FastHitConvertTool))
+    m_FastHitConvertTool (FastHitConvertTool)
 {
   if(m_EmptyCellBuilderTool.retrieve().isFailure()) {
     G4Exception("CaloCellContainerSD", "FailedEmptyCellBuilderToolRetrieval", FatalException, "CaloCellContainerSD: Failed to retrieve the empty cell builder tool.");

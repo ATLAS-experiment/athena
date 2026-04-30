@@ -1,6 +1,6 @@
-CscRawDataProvider.CSC_RawDataProviderToolMT         INFO Retrieved service ServiceHandle('ROBDataProviderSvc')
-CscRawDataProvider.CSC_RawDataProviderToolMT         INFO Retrieved tool Decoder = PrivateToolHandle('Muon::CscROD_Decoder/CscROD_Decoder')
-CscRawDataProvider.CSC_RawDataProviderToolMT         INFO initialize() successful in CscRawDataProvider.CSC_RawDataProviderToolMT
+CscRawDataProvider.CSC_RawDataProviderTool           INFO Retrieved service RobProviderSvc = ServiceHandle('ROBDataProviderSvc')
+CscRawDataProvider.CSC_RawDataProviderTool           INFO Retrieved tool Decoder = PrivateToolHandle('Muon::CscROD_Decoder/CscROD_Decoder')
+CscRawDataProvider.CSC_RawDataProviderTool           INFO initialize() successful in CscRawDataProvider.CSC_RawDataProviderTool
 RpcROD_Decoder::printcheckformat                     INFO  ============ FINAL RPC DATA FORMAT STAT. =========== 
 RpcROD_Decoder::printcheckformat                     INFO  RX Header Errors.............0
 RpcROD_Decoder::printcheckformat                     INFO  RX SubHeader Errors..........0

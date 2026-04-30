@@ -43,7 +43,10 @@ class TestDetElement : public ActsTrk::IDetectorElement, public GeoVDetectorElem
             return 1;
         }
         const Amg::Transform3D& localToGlobalTransform(const Acts::GeometryContext& gctx) const override final {
-            return m_cache.localToGlobalTransform(gctx);
+            return m_cache.getTransform(gctx);
+        }
+        const Amg::Transform3D& localToGlobalTransform(const ActsTrk::DetectorAlignStore* store) const override final {
+            return m_cache.getTransform(store);
         }
         const Acts::Surface& surface() const override final  {
             static const std::shared_ptr<Acts::Surface> surf{};

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/DataVector_test.icc
@@ -128,11 +128,7 @@ auto allocate (DataVectorWithAlloc<DV>& dv, Args&&... args)
 
 
 template <class T, class DV, class... Args>
-// Shouldn't really need the enable_if here, but otherwise gcc8 complains
-// about ambiguities.  (gcc11 is ok.)
-//auto
-std::enable_if_t<std::is_same_v<DV, typename DV::base_data_vector> ||
-                 std::is_same_v<DV, ConstDataVector<typename DV::base_data_vector> >, T*>
+auto
 allocateT (DV& /*dv*/, Args&&... args)
 {
   return new T (std::forward<Args>(args)...);

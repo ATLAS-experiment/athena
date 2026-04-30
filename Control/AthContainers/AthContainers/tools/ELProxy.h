@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/tools/ELProxy.h
@@ -102,7 +102,7 @@ protected:
  * That means that the @c Accessor cannot return an @c ElementLink directly.
  * Rather, it needs to return a proxy object.  This proxy should both
  * be convertible to an @c ElementLink and be able to be assigned from
- * an @c ElementLnk.  In the latter case, it should then update the underlying
+ * an @c ElementLink.  In the latter case, it should then update the underlying
  * @c PackedLink value.
  *
  * This object can be used as such a proxy.  It holds a reference to the
@@ -192,7 +192,7 @@ public:
   bool operator== (const ELProxyT& p) const;
 
 
-  // nb. We don't proxy the implicit converison of ElementLink
+  // nb. We don't proxy the implicit conversion of ElementLink
   // to a pointer --- that can end up matching in places where we don't
   // want it to.
 

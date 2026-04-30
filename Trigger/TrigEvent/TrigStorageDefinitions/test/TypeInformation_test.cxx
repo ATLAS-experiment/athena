@@ -1,30 +1,22 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-//template<class T>
-//struct DataVector{};
 class TrigInDetTrack{};
 
 #include "TrigStorageDefinitions/TypeInformation.h"
-#include "TrigStorageDefinitions/EDM_TypeInformation.h"
-#include "TrigStorageDefinitions/EDM_TypeInfoMethods.h"
 #include "TrigStorageDefinitions/EDM_TypeInfo.h"
+
 #include <typeinfo>
 #include <iostream>
 
 class TrigInDetTrackCollection : public DataVector<TrigInDetTrack>{};
 
 int main(){
-  std::cout << "TypeInformation_test" << std::endl;
 
+  static_assert(std::is_same_v< Object2Container_t<TrigInDetTrack, TypeInfo_EDM>, TrigInDetTrackCollection >);
+  static_assert(std::is_same_v< Container2Aux_t<TrigInDetTrackCollection, TypeInfo_EDM>, TrigInDetTrackCollection >);
 
-  //typedef Object2Container<TrigInDetTrack,TypeInfo_EDM>::type container;
-
-  std::cout << typeid(Object2Container<TrigInDetTrack,TypeInfo_EDM>::type).name() << std::endl;
-  std::cout << typeid(Container2Aux<TrigInDetTrackCollection,TypeInfo_EDM>::type).name() << std::endl;
 
   return 0;
 }
-
-//run unit test with cmt make check

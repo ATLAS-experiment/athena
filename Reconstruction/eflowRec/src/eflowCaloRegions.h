@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
-#ifndef CALO_REGIONS_H
-#define CALO_REGIONS_H
+#ifndef EFLOWREC_EFLOWCALOREGIONS_H
+#define EFLOWREC_EFLOWCALOREGIONS_H
 
 /********************************************************************
 

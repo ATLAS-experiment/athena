@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ITKPIXV2QCOREENCODINGLUT_H
@@ -86,6 +86,8 @@ namespace ITkPixEncoding{
     //It could be prettified / optimized to fill in both LUTs in one go, but happens once per job and takes O(ms)
     //so no real gain there.
     inline auto create_lut_encode(bool length = false) {
+        //stack use is 262144 bytes in lut
+        //coverity[STACK_USE]
         std::array<uint32_t, LookUpTableSize> lut;
         lut[0] = 0;
         for (uint32_t i = 1; i < 1 << 16; i++) {
@@ -98,13 +100,17 @@ namespace ITkPixEncoding{
 
     //It could be prettified / optimized to fill in both LUTs in one go, but happens once per job and takes O(ms)
     //so no real gain there.
+    //constexpr complexity exceeds limit (coverity warning)
     template<std::size_t Length>
+    //coverity[expr_not_constant]
     constexpr auto LutLen = lut<Length>([](uint32_t i){
         uint32_t encoded;
         return encode(i, encoded);
     });
     
+    //constexpr complexity exceeds limit
     template<std::size_t Length>
+    //coverity[expr_not_constant]
     constexpr auto LutBTree = lut<Length>([](uint32_t i){
         uint32_t encoded;
         uint64_t len = encode(i, encoded);

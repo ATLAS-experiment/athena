@@ -64,10 +64,6 @@ SegmentCollection_PERS *
 SegmentCollectionCnv::createPersistent( Trk::SegmentCollection *transCont)
 {   
     std::string logname = "SegmentCollectionCnv";
-    if (const DataObject* dObj = getDataObject()) {
-      logname += dObj->name();
-    }
-
     MsgStream log (m_msgSvc, logname );
     return m_TPConverterForPER.createPersistent( transCont, log );
 }
@@ -76,7 +72,7 @@ SegmentCollectionCnv::createPersistent( Trk::SegmentCollection *transCont)
 //-----------------------------------------------------------------------------
 // Create transient collection
 //-----------------------------------------------------------------------------
-Trk::SegmentCollection *SegmentCollectionCnv::createTransient()
+Trk::SegmentCollection *SegmentCollectionCnv::createTransient(const Token* token)
 {
     m_log.setLevel( m_msgSvc->outputLevel() ); 
     static const pool::Guid tlp4_guid( "27FB33E0-3284-11E8-9390-0800271C02BC" );
@@ -87,24 +83,24 @@ Trk::SegmentCollection *SegmentCollectionCnv::createTransient()
 
     Trk::SegmentCollection *p_collection = nullptr;
 
-    if( compareClassGuid( tlp4_guid ) ) {
-       poolReadObject< SegmentCollection_PERS >( m_TPConverterForPER );
+    if( compareClassGuid(token,  tlp4_guid ) ) {
+       poolReadObject< SegmentCollection_PERS >( m_TPConverterForPER, token );
        p_collection = m_TPConverterForPER.createTransient( m_log );
-    } else if( compareClassGuid( tlp3_guid ) ) {
+    } else if( compareClassGuid(token,  tlp3_guid ) ) {
        initializeOldExtConverters();
-       poolReadObject< Trk::SegmentCollection_tlp3 >( m_TPConverter_tlp3 );
+       poolReadObject< Trk::SegmentCollection_tlp3 >( m_TPConverter_tlp3, token );
        p_collection = m_TPConverter_tlp3.createTransient( m_log );
-    } else if( compareClassGuid( tlp2_guid ) ) {
+    } else if( compareClassGuid(token,  tlp2_guid ) ) {
        initializeOldExtConverters();
-       poolReadObject< Trk::SegmentCollection_tlp2 >( m_TPConverter_tlp2 );
+       poolReadObject< Trk::SegmentCollection_tlp2 >( m_TPConverter_tlp2, token );
        p_collection = m_TPConverter_tlp2.createTransient( m_log );
-    } else if( compareClassGuid( tlp1_guid ) ) {
+    } else if( compareClassGuid(token,  tlp1_guid ) ) {
        initializeOldExtConverters();
-       poolReadObject< Trk::SegmentCollection_tlp1 >( m_TPConverter_tlp1 );
+       poolReadObject< Trk::SegmentCollection_tlp1 >( m_TPConverter_tlp1, token );
        p_collection = m_TPConverter_tlp1.createTransient( m_log );
     }
-    else if( compareClassGuid( p0_guid ) )  {
-       p_collection = poolReadObject< Trk::SegmentCollection >();
+    else if( compareClassGuid(token,  p0_guid ) )  {
+       p_collection = poolReadObject< Trk::SegmentCollection >(token);
     }
     else
         throw std::runtime_error( "Unsupported persistent version of Trk::SegmentCollection (unknown GUID)" );

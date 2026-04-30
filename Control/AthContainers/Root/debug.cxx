@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -59,32 +59,56 @@ void print_aux_var_name (SG::auxid_t id)
 /**
  * @brief Print the list of aux variables in a set.
  * @param auxids The set to print.
+ * @param decors Set of decorations.
+ * @param os Stream to which to print.
  */
 void print_aux_vars (const SG::auxid_set_t& auxids,
-                     const SG::auxid_set_t& decors /*= SG::auxid_set_t()*/)
+                     const SG::auxid_set_t& decors,
+                     std::ostream& os)
 {
   SG::AuxTypeRegistry& reg = SG::AuxTypeRegistry::instance();
   std::vector<SG::auxid_t> ids (auxids.begin(), auxids.end());
   std::sort (ids.begin(), ids.end());
 
   for (SG::auxid_t id : ids) {
-    std::cout << id << " "
-              << reg.getClassName(id) << "::" << reg.getName(id) << " "
-              << "[" << reg.getTypeName(id);
+    os << id << " "
+       << reg.getClassName(id) << "::" << reg.getName(id) << " "
+       << "[" << reg.getTypeName(id);
 
     SG::AuxVarFlags flags = reg.getFlags(id);
     if (flags & SG::AuxVarFlags::Atomic) {
-      std::cout << " (atomic)";
+      os << " (atomic)";
     }
     if (flags & SG::AuxVarFlags::Linked) {
-      std::cout << " (linked)";
+      os << " (linked)";
     }
     if (decors.test (id)) {
-      std::cout << " (decor)";
+      os << " (decor)";
     }
 
-    std::cout << "]\n";
+    os << "]\n";
   }
+}
+
+
+/**
+ * @brief Print the list of aux variables in a set.
+ * @param auxids The set to print.
+ */
+void print_aux_vars (const SG::auxid_set_t& auxids)
+{
+  print_aux_vars (auxids, SG::auxid_set_t(), std::cout);
+}
+
+
+/**
+ * @brief Print the list of aux variables handled by a store.
+ * @param store The store to dump.
+ * @param auxids The set to print.
+ */
+void print_aux_vars (const SG::IConstAuxStore& store, std::ostream& os)
+{
+  print_aux_vars (store.getAuxIDs(), store.getDecorIDs(), os);
 }
 
 
@@ -94,7 +118,7 @@ void print_aux_vars (const SG::auxid_set_t& auxids,
  */
 void print_aux_vars (const SG::IConstAuxStore& store)
 {
-  print_aux_vars (store.getAuxIDs(), store.getDecorIDs());
+  print_aux_vars (store, std::cout);
 }
 
 
@@ -111,10 +135,21 @@ void print_aux_vars (const SG::IConstAuxStore* store)
 /**
  * @brief Print the list of aux variables associated with a container.
  * @param vec The container to dump.
+ * @param os Stream to which to print.
+ */
+void print_aux_vars (const SG::AuxVectorData& vec, std::ostream& os)
+{
+  print_aux_vars (vec.getAuxIDs(), vec.getDecorIDs(), os);
+}
+
+
+/**
+ * @brief Print the list of aux variables associated with a container.
+ * @param vec The container to dump.
  */
 void print_aux_vars (const SG::AuxVectorData& vec)
 {
-  print_aux_vars (vec.getAuxIDs(), vec.getDecorIDs());
+  print_aux_vars (vec, std::cout);
 }
 
 
@@ -134,7 +169,7 @@ void print_aux_vars (const SG::AuxVectorData* vec)
  */
 void print_aux_vars (const SG::AuxElement& elt)
 {
-  print_aux_vars (elt.getAuxIDs(), elt.getDecorIDs());
+  print_aux_vars (elt.getAuxIDs(), elt.getDecorIDs(), std::cout);
 }
 
 

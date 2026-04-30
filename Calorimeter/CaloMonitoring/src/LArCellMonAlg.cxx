@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // NAME:     LArCellMonAlg.cxx
@@ -33,37 +33,7 @@ LArCellMonAlg::LArCellMonAlg(const std::string& name, ISvcLocator* pSvcLocator)
   :CaloMonAlgBase(name, pSvcLocator),
    m_LArOnlineIDHelper(nullptr)
 {    
-
-  // Trigger Awareness:
-  declareProperty("rndmTriggerNames", m_triggerNames[RNDM]);
-  declareProperty("caloTriggerNames",m_triggerNames[CALO]);
-  declareProperty("minBiasTriggerNames",m_triggerNames[MINBIAS]);
-  declareProperty("metTriggerNames",m_triggerNames[MET]);
-  declareProperty("miscTriggerNames",m_triggerNames[MISC]);
-  
-  // LAr Thresholdsd
-  // Em Barrel
-  declareProperty("EMBP_Thresh",m_thresholdsProp[EMBPNS]);
-  declareProperty("EMB1_Thresh",m_thresholdsProp[EMB1NS]);
-  declareProperty("EMB2_Thresh",m_thresholdsProp[EMB2NS]);
-  declareProperty("EMB3_Thresh",m_thresholdsProp[EMB3NS]);
-  // EM Endcap
-  declareProperty("EMECP_Thresh",m_thresholdsProp[EMECPNS]);
-  declareProperty("EMEC1_Thresh",m_thresholdsProp[EMEC1NS]);
-  declareProperty("EMEC2_Thresh",m_thresholdsProp[EMEC2NS]);
-  declareProperty("EMEC3_Thresh",m_thresholdsProp[EMEC3NS]);
-  // Hadronic Endcap
-  declareProperty("HEC0_Thresh",m_thresholdsProp[HEC0NS]);
-  declareProperty("HEC1_Thresh",m_thresholdsProp[HEC1NS]);
-  declareProperty("HEC2_Thresh",m_thresholdsProp[HEC2NS]);
-  declareProperty("HEC3_Thresh",m_thresholdsProp[HEC3NS]);
-  // Forward Calorimeters
-  declareProperty("FCAL1_Thresh",m_thresholdsProp[FCAL1NS]);
-  declareProperty("FCAL2_Thresh",m_thresholdsProp[FCAL2NS]);
-  declareProperty("FCAL3_Thresh",m_thresholdsProp[FCAL3NS]);
 }
-
-
 
 LArCellMonAlg::~LArCellMonAlg() = default;
 
@@ -457,7 +427,11 @@ StatusCode LArCellMonAlg::fillHistograms(const EventContext& ctx) const{
   bool ifPass = true;
   bool passBeamBackgroundRemoval = true;
   ATH_CHECK(checkFilters(ifPass,passBeamBackgroundRemoval,m_MonGroupName,ctx)); //Check ATLAS-Ready, beam-background, etc from base class
-  if(!ifPass) return StatusCode::SUCCESS;
+  //Continue if 'ifpass' set but also if we identified a background event (for the control plot)
+  if(!ifPass and not passBeamBackgroundRemoval==false) {
+    ATH_MSG_DEBUG("Event rejected by filters");
+    return StatusCode::SUCCESS;
+  }
 
   std::vector<threshold_t> thresholds = m_thresholds;
 

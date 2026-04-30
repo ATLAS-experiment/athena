@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -14,7 +14,6 @@
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbOption.h"
 #include "StorageSvc/DbTypeInfo.h"
-#include "StorageSvc/Transaction.h"
 
 // Local implementation files
 #include "RNTupleContainer.h"
@@ -369,25 +368,25 @@ StatusCode RNTupleContainer::getOption(DbOption& opt) {
         desc.auxdyn_reader->resetBytesRead();
       }
     }
-    return opt._setValue((int)m_ioBytes);
+    return opt.setValue((int)m_ioBytes);
   } else if (::toupper(n[0]) == 'T' and opt.name().length() > 9) {
     switch (::toupper(n[8])) {
       case 'E':
         if (!strcasecmp(n + 5, "ENTRIES"))
-          return opt._setValue(int(m_ntupleReader->GetNEntries()));
+          return opt.setValue(int(m_ntupleReader->GetNEntries()));
         break;
       case 'T':
         if (!strcasecmp(n + 5, "TOTAL_BYTES")) {
           // metrics must be enabled
           // MN: need to learn how to use Metrics
           // const Detail::RNTupleMetrics& metr = m_ntupleReader->GetMetrics();
-          return opt._setValue((double)0);
+          return opt.setValue((double)0);
         }
         break;
       case 'Z':
         if (!strcasecmp(n + 5, "ZIP_BYTES")) {
           // MN TODO
-          return opt._setValue(double(0));
+          return opt.setValue(double(0));
         }
         break;
     }
@@ -404,7 +403,7 @@ StatusCode RNTupleContainer::setOption(const DbOption& opt) {
         if (!strcasecmp(n + 8, "SOME_RNTUPLE_OPTION")) {
           // so far no real options to set
           int val = 1;
-          StatusCode sc = opt._getValue(val);
+          StatusCode sc = opt.getValue(val);
           if( sc.isSuccess() ) {
             ATH_MSG_VERBOSE("Setting SOME_RNTUPLE_OPTION to " << val);
           }

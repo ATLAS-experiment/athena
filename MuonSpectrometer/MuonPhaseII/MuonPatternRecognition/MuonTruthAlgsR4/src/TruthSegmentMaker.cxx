@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "TruthSegmentMaker.h"
 
@@ -13,8 +13,7 @@
 #include "MuonReadoutGeometryR4/MmReadoutElement.h"
 #include "MuonReadoutGeometryR4/SpectrometerSector.h"
 
-
-
+#include "MuonTruthHelpers/MuonSimHitHelpers.h"
 #include "TruthUtils/HepMCHelpers.h"
 
 #include "GaudiKernel/PhysicalConstants.h"
@@ -35,6 +34,10 @@ namespace MuonR4{
             ATH_MSG_ERROR("No simulated hit containers have been parsed to build the segments from ");
             return StatusCode::FAILURE;
         }
+        for (const auto& truthLink : m_readKeys) {
+            m_segLinkKeys.emplace_back(truthLink, m_segLinkKey);
+        }
+        ATH_CHECK(m_segLinkKeys.initialize());
         ATH_CHECK(m_mdtCalibKey.initialize(m_idHelperSvc->hasMDT()));
         ATH_CHECK(m_nswUncertKey.initialize(m_idHelperSvc->hasMM() || m_idHelperSvc->hasSTGC()));
         
@@ -331,7 +334,30 @@ namespace MuonR4{
                 constructSegmentFromHits(ctx, locToGlob, simHits, writerHolder);
             }
         }
+        ATH_CHECK(linkSegmentsToHits(ctx, *writeHandle));
         ATH_MSG_DEBUG("Constructed "<<writeHandle->size()<<" truth segments in total ");
+        return StatusCode::SUCCESS;
+    }
+    StatusCode TruthSegmentMaker::linkSegmentsToHits(const EventContext& ctx,
+                                                     const xAOD::MuonSegmentContainer& segments) const {
+        using SegLink_t = ElementLink<xAOD::MuonSegmentContainer>;
+        using DecorHandle_t = SG::WriteDecorHandle<xAOD::MuonSimHitContainer, SegLink_t>;
+        std::unordered_map<const SG::AuxVectorData*, DecorHandle_t> handleMap{};
+        for (const auto& decorKey : m_segLinkKeys) {
+            DecorHandle_t decorHandle{decorKey, ctx};
+            if (decorHandle->empty()) {
+                ATH_MSG_DEBUG("Don't setup a decoration handle for "<<decorKey.fullKey());
+                continue;
+            }
+            decorHandle(*decorHandle->front()) = SegLink_t{};
+            handleMap.insert(std::make_pair(decorHandle.cptr(), std::move(decorHandle)));
+        }
+        for (const xAOD::MuonSegment* segment: segments) {
+            SegLink_t segLink{&segments, segment->index()};
+            for (const xAOD::MuonSimHit* simHit : getMatchingSimHits(*segment)) {
+                handleMap.at(simHit->container())(*simHit) = segLink;
+            }
+        }
         return StatusCode::SUCCESS;
     }
 }

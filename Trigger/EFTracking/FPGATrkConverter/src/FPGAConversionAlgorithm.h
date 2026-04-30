@@ -50,7 +50,6 @@ protected: // was private
   SG::ReadHandleKey<FPGATrackSimHitCollection> m_FPGAHitKey{this, "FPGATrackSimHitKey","FPGAHits","FPGATrackSim Hits key"};
   SG::ReadHandleKey<FPGATrackSimRoadCollection> m_FPGARoadKey{this, "FPGATrackSimRoadKey","FPGARoads","FPGATrackSim Roads key"};
   SG::ReadHandleKey<FPGATrackSimTrackCollection> m_FPGATrackKey{this, "FPGATrackSimTrackKey","FPGATracks","FPGATrackSim Tracks key"};
-  SG::ReadHandleKey<FPGATrackSimHitContainer> m_FPGAHitInRoadsKey{this, "FPGATrackSimHitInRoadsKey","FPGAHitInRoads","FPGATrackSim Hit in Roads key"};
 
   SG::WriteHandleKey<xAOD::PixelClusterContainer> m_xAODPixelClusterFromFPGAClusterKey{this, "xAODPixelClusterFromFPGAClusterKey","xAODPixelClustersFromFPGACluster","FPGA->xAOD PixelClusters Container"};
   SG::WriteHandleKey<xAOD::StripClusterContainer> m_xAODStripClusterFromFPGAClusterKey{this, "xAODStripClusterFromFPGAClusterKey","xAODStripClustersFromFPGACluster","FPGA->xAOD StripClusters Container"};

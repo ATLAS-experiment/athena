@@ -152,7 +152,7 @@ public:
     a_ident.add(5);
     a_ident.add(6);
     hits.emplace_back(LArHitData{std::move(a_ident), 1, 1});
-
+    
     return true;
   }
 

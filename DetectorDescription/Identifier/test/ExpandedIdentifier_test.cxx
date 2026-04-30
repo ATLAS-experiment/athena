@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MAIN
@@ -54,8 +54,8 @@ BOOST_AUTO_TEST_CASE(ExpandedIdentifierConstructors){
   BOOST_CHECK_THROW(ExpandedIdentifier nonsense("piggy back"), std::invalid_argument);
   ExpandedIdentifier g(initialiserString);
   BOOST_CHECK_NO_THROW(ExpandedIdentifier h(g,3));
-  BOOST_CHECK_NO_THROW(ExpandedIdentifier h = g);
-  BOOST_CHECK_NO_THROW(ExpandedIdentifier i = std::move(g));
+  BOOST_CHECK_NO_THROW([[maybe_unused]] ExpandedIdentifier h = g);
+  BOOST_CHECK_NO_THROW([[maybe_unused]] ExpandedIdentifier i = std::move(g));
 }
 
 BOOST_AUTO_TEST_CASE(ExpandedIdentifierRepresentation){
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(ExpandedIdentifierRepresentation){
   boost::test_tools::output_test_stream output;
   {//scoped redirect of cout
     cout_redirect guard( output.rdbuf( ) );
-    g.show();
+    g.show(std::cout);
   }
   BOOST_CHECK( output.is_equal( "[-3.-2.-1.1.2.3]" ) );
   std::ostringstream s;

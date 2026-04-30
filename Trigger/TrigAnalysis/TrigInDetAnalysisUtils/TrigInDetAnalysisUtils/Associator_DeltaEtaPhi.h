@@ -8,8 +8,15 @@
  **     Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
  **/
 
+#if 0
+
 /// Fixme: needs to be replaced by something inheriting 
 ///        from BestMatcher
+
+
+/// ACTUALLY THIS SHOULT NOT BE USED
+
+
 
 
 #ifndef TrigInDetAnalysisUtils_Associator_DeltaEtaPhi_H
@@ -92,3 +99,4 @@ private:
 
 #endif  // TrigInDetAnalysisUtils_Associator_DeltaEtaPhi_H
 
+#endif

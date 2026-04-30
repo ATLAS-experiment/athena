@@ -397,19 +397,22 @@ StatusCode LArSC2Ntuple::execute()
   if (DigitContainer_next){
     if ( cellsno == 0 ){ 
       cellsno	   = DigitContainer_next->size();
-    }else	if(DigitContainer_next->size()	  != (unsigned)cellsno ){ ATH_MSG_ERROR(" NOOOOOOO! Different number of entries in DigitContainer_next"<< cellsno << " " << DigitContainer_next->size() );
+    }else	if(DigitContainer_next->size()	  != (unsigned)cellsno ){ ATH_MSG_WARNING(" NOOOOOOO! Different number of entries in DigitContainer_next"<< cellsno << " " << DigitContainer_next->size() );
+       return StatusCode::SUCCESS;
     }
   }
   if (etcontainer){
     if ( cellsno == 0 ){ 
       cellsno	   = etcontainer->size();
-    }else	if(etcontainer->size()  != (unsigned)cellsno ){ ATH_MSG_ERROR(" NOOOOOOO! Different number of entries in etcontainer"<< cellsno << " " << etcontainer->size() );
+    }else	if(etcontainer->size()  != (unsigned)cellsno ){ ATH_MSG_WARNING(" NOOOOOOO! Different number of entries in etcontainer"<< cellsno << " " << etcontainer->size() );
+       return StatusCode::SUCCESS;
     }
   }
   if (etcontainer_next){
     if ( cellsno == 0 ){ 
       cellsno	   = etcontainer_next->size();
-    }else	if(etcontainer_next->size()  != (unsigned)cellsno ){ ATH_MSG_ERROR(" NOOOOOOO! Different number of entries in etcontainer_next"<< cellsno << " " << etcontainer_next->size() );
+    }else	if(etcontainer_next->size()  != (unsigned)cellsno ){ ATH_MSG_WARNING(" NOOOOOOO! Different number of entries in etcontainer_next"<< cellsno << " " << etcontainer_next->size() );
+       return StatusCode::SUCCESS;
     }
   }
   unsigned	cellCounter	   = 0;

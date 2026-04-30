@@ -1,9 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArByteStream/LArLATOMEHeaderContByteStreamCnv.h"
 #include "LArByteStream/LArLATOMEDecoder.h"
+#include "LArRawEvent/LArLATOMEHeaderContainer.h"
+
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h" 
 #include "ByteStreamData/RawEvent.h" 
 #include "GaudiKernel/DataObject.h"
@@ -11,6 +13,7 @@
 #include "AthenaKernel/CLASS_DEF.h"
 // For LATOME while no Condition alg exists
 #include "LArLATOMEROBIDs.h"
+
 
 LArLATOMEHeaderContByteStreamCnv::LArLATOMEHeaderContByteStreamCnv(ISvcLocator* svcloc) :
   AthConstConverter(storageType(), classID(),svcloc,"LArLATOMEHeaderContByteStreamCnv"),
@@ -20,7 +23,7 @@ LArLATOMEHeaderContByteStreamCnv::LArLATOMEHeaderContByteStreamCnv(ISvcLocator* 
 
 LArLATOMEHeaderContByteStreamCnv::~LArLATOMEHeaderContByteStreamCnv() {}
 
-const CLID& LArLATOMEHeaderContByteStreamCnv::classID(){
+CLID LArLATOMEHeaderContByteStreamCnv::classID(){
   return ClassID_traits<LArLATOMEHeaderContainer>::ID() ;
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CalibCscStripFitter.h"
@@ -75,8 +75,7 @@ Result CalibCscStripFitter::fit(const ChargeList& chgs, double period, bool samp
     IdentifierHash stripHash;
     if (m_idHelperSvc->cscIdHelper().get_channel_hash(stripId, stripHash)) {
         ATH_MSG_WARNING("Unable to get CSC striphash id "
-                        << " the identifier is ");
-        stripId.show();
+                        << " the identifier is \n" << stripId);
     }
 
     int zsec = m_idHelperSvc->cscIdHelper().stationEta(stripId);

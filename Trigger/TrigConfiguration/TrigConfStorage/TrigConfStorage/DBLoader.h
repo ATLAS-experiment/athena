@@ -1,16 +1,18 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigConf_DBLoader
 #define TrigConf_DBLoader
 
-#include "TrigConfStorage/StorageMgr.h"
-#include "TrigConfStorage/ILoader.h"
-#include "RelationalAccess/ISessionProxy.h"
+
 #include "TrigConfBase/TrigConfMessaging.h"
+#include "TrigConfStorage/ILoader.h"
+#include "TrigConfStorage/StorageMgr.h"
+#include "RelationalAccess/ISessionProxy.h"
 
 #include <tuple>
+#include <string>
 
 namespace TrigConf {
 
@@ -32,9 +34,6 @@ namespace TrigConf {
 
       /**@brief destructor*/
       virtual ~DBLoader() override = default;
-
-      /**@brief access to output stream*/
-      //std::ostream & msg() { return m_storageMgr.msg(); }
 
       virtual void setLevel(MSGTC::Level lvl) override;
       virtual MSGTC::Level outputLevel() const override { return msg().level(); }

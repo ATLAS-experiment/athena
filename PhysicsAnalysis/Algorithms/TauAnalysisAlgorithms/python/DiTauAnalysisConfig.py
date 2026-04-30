@@ -1,7 +1,8 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
+from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 
 
@@ -20,6 +21,8 @@ class DiTauCalibrationConfig (ConfigBlock):
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here since the calibration is common to "
             "all ditau-jets.")
+        self.addOption ('quality', None, type=str,
+            info="the ID WP to use. Supported ID WPs: `Tight`, `Medium`,`Loose`,`NoID`.")
         self.addOption ('rerunTruthMatching', True, type=bool,
             info="whether to rerun truth matching (sets up an instance of "
             "`CP::DiTauTruthMatchingAlg`).")
@@ -108,13 +111,12 @@ class DiTauCalibrationConfig (ConfigBlock):
 
 
 
-class DiTauWorkingPointConfig (ConfigBlock) :
-    """the ConfigBlock for the tau working point
-
-    This may at some point be split into multiple blocks (16 Mar 22)."""
+class DiTauWorkingPointSelectionConfig (ConfigBlock) :
+    """the ConfigBlock for the tau working point selection"""
 
     def __init__ (self) :
-        super (DiTauWorkingPointConfig, self).__init__ ()
+        super (DiTauWorkingPointSelectionConfig, self).__init__ ()
+        self.setBlockName('DiTauWorkingPointSelection')
         self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.")
@@ -148,9 +150,13 @@ class DiTauWorkingPointConfig (ConfigBlock) :
         if postfix != '' and postfix[0] != '_' :
             postfix = '_' + postfix
 
-        inputfile = 'TauAnalysisAlgorithms/ditau_selection_highpt.conf'
         if "DiTauJetsLowPt" in self.containerName:
             inputfile = 'TauAnalysisAlgorithms/ditau_selection_lowpt.conf' 
+        else:
+            if 'NoID' in self.quality:
+                inputfile = 'TauAnalysisAlgorithms/ditau_selection_highpt.conf'
+            else: 
+                inputfile = 'TauAnalysisAlgorithms/ditau_selection_highpt_'+self.quality+'.conf'        
 
         # Set up the algorithm selecting taus:
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'DiTauSelectionAlg' )
@@ -161,6 +167,46 @@ class DiTauWorkingPointConfig (ConfigBlock) :
         alg.preselection = config.getPreselection (self.containerName, self.selectionName)
         config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
                              preselection=self.addSelectionToPreselection) 
+
+
+class DiTauWorkingPointEfficiencyConfig (ConfigBlock) :
+    """the ConfigBlock for the tau working point efficiency computation"""
+
+    def __init__ (self) :
+        super (DiTauWorkingPointEfficiencyConfig, self).__init__ ()
+        self.setBlockName('DiTauWorkingPointEfficiency')
+        self.addDependency('DiTauWorkingPointSelection', required=True)
+        self.addDependency('EventSelection', required=False)
+        self.addDependency('EventSelectionMerger', required=False)
+        self.addOption ('containerName', '', type=str,
+            noneAction='error',
+            info="the name of the input container.")
+        self.addOption ('selectionName', '', type=str,
+            noneAction='error',
+            info="the name of the ditau-jet selection to define (e.g. `tight` or "
+            "`loose`).")
+        self.addOption ('postfix', None, type=str,
+            info="a postfix to apply to decorations and algorithm names. "
+            "Typically not needed here as `selectionName` is used internally.")
+
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        if self.postfix is not None:
+            return self.containerName + '_' + self.selectionName + self.postfix
+        else:
+            return self.containerName + '_' + self.selectionName
+
+    def makeAlgs (self, config) :
+
+        selectionPostfix = self.selectionName
+        if selectionPostfix != '' and selectionPostfix[0] != '_' :
+            selectionPostfix = '_' + selectionPostfix
+          
+        postfix = self.postfix
+        if postfix is None :
+            postfix = self.selectionName
+        if postfix != '' and postfix[0] != '_' :
+            postfix = '_' + postfix
 
 
         # keep this commented out until TauCP won't provide official recommendations
@@ -180,3 +226,8 @@ class DiTauWorkingPointConfig (ConfigBlock) :
         #    config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
         #                         'effSF' + postfix)
 
+
+@groupBlocks
+def DiTauWorkingPoint(seq):
+    seq.append(DiTauWorkingPointSelectionConfig())
+    seq.append(DiTauWorkingPointEfficiencyConfig())

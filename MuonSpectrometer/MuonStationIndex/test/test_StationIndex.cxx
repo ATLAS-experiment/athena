@@ -123,7 +123,7 @@ int main (){
     for (int ch = toInt(ChIndex::ChUnknown) + 1; ch < toInt(ChIndex::ChIndexMax); ++ch){
         const auto chIdx = static_cast<ChIndex>(ch);
         const auto name = chName(chIdx);
-        PRINT_INFO("Test chamber index: "<<toInt(chIdx)<<" ("<<name<<").");
+        PRINT_INFO("Test chamber index: "<<toInt(chIdx)<<" ("<<chIdx<<").");
         if (!seenNames.insert(name).second){
             PRINT_ERROR("Chamber name "<<name<<" is duplciate. ");
             exit_code = EXIT_FAILURE;
@@ -134,11 +134,11 @@ int main (){
             exit_code = EXIT_FAILURE;
         }
         if ( (name[0] == 'B') != isBarrel(chIdx)){
-            PRINT_ERROR("Barrel/Endcap expectation of "<<name<<" is incorrect: "<<(isBarrel(chIdx) ? "si" : "no"));
+            PRINT_ERROR("Barrel/Endcap expectation of "<<chIdx<<" is incorrect: "<<(isBarrel(chIdx) ? "si" : "no"));
             exit_code = EXIT_FAILURE;  
         }
         if (chIndex(name) != chIdx) {
-            PRINT_ERROR("Backward <-> forward mapping of chIndex and name is wrong: "<<chName(chIndex(name))<<" expected: "<<name);
+            PRINT_ERROR("Backward <-> forward mapping of chIndex and name is wrong: "<<chName(chIndex(name))<<" expected: "<<chIdx);
             exit_code = EXIT_FAILURE;
         }
         auto stIdx = toStationIndex(chIdx);
@@ -150,7 +150,7 @@ int main (){
         if (backChFromSt != chIdx) {
             PRINT_ERROR("Backward <-> forward mapping of chIndex -> stIndex: "<<stName(stIdx)<<"("
                         <<toInt(stIdx)<<"),  small: "<<(isSmall(chIdx) ? "si" : "no")
-                        <<" -> chIndex: "<<chName(backChFromSt));
+                        <<" -> chIndex: "<<backChFromSt);
             exit_code = EXIT_FAILURE;
         }
     }
@@ -158,10 +158,9 @@ int main (){
     /// Test translation of the StationIndex -> chamber index using the is large flag
     for (StIndex st : {StIndex::BI, StIndex::BM, StIndex::BO, StIndex::BE, 
                      StIndex::EI, StIndex::EM, StIndex::EO, StIndex::EE}) {
-        const auto & name = stName(st);
-        PRINT_INFO("Test station index: "<<toInt(st)<<" ("<<name<<").");
-        if (name.size() != 2 || !seenNames.insert(name).second) {
-            PRINT_ERROR("Station name "<<name<<" does not have 2 characters or is already inserted");
+        PRINT_INFO("Test station index: "<<toInt(st)<<" ("<<st<<").");
+        if (stName(st).size() != 2 || !seenNames.insert(stName(st)).second) {
+            PRINT_ERROR("Station name "<<st<<" does not have 2 characters or is already inserted");
             exit_code = EXIT_FAILURE;
         }
         for (bool large : { false, true}) {
@@ -175,8 +174,8 @@ int main (){
                                  LayerIndex::Extended, LayerIndex::BarrelExtended}){
 
             const unsigned layHash = sectorLayerHash(detReg, layer);
-            PRINT_INFO("Test combination of "<<regionName(detReg)<<" ("<<toInt(detReg)<<") & "
-                        <<layerName(layer)<<"("<<toInt(layer)<<") -> hash: "<<layHash);
+            PRINT_INFO("Test combination of "<<detReg<<" ("<<toInt(detReg)<<") & "
+                        <<layer<<"("<<toInt(layer)<<") -> hash: "<<layHash);
             if (layHash >= sectorLayerHashMax()){
                 PRINT_ERROR("Hash exceeds maximum: "<<sectorLayerHashMax());
                 exit_code = EXIT_FAILURE;
@@ -184,17 +183,39 @@ int main (){
             /// Back conversion
             auto [detBack, layerBack] = decomposeSectorLayerHash(layHash);
             if ( (detBack != detReg) || (layerBack != layer)) {
-                PRINT_ERROR("Back conversion resulted in "<<regionName(detBack)<<" ("<<toInt(detBack)<<") & "
-                            <<layerName(layerBack)<<"("<<toInt(layerBack)<<") -> hash: "<<sectorLayerHash(detBack, layerBack));
+                PRINT_ERROR("Back conversion resulted in "<<detBack<<" ("<<toInt(detBack)<<") & "
+                            <<layerBack<<"("<<toInt(layerBack)<<") -> hash: "<<sectorLayerHash(detBack, layerBack));
                 exit_code = EXIT_FAILURE;
             }
             for (bool large: {false, true}) {
                 if (!checkRegionIdxToChIdx(detReg, layer,large)) {
                     PRINT_ERROR("Translation of large: "<<(large ? "si" : "no")
-                                <<" got assigned to: "<<chName(toChamberIndex(detReg, layer, !large)));
+                                <<" got assigned to: "<<toChamberIndex(detReg, layer, !large));
                     exit_code = EXIT_FAILURE;
                 }
            } 
+       }
+    }
+
+     for (DetectorRegionIndex detReg : {DetectorRegionIndex::EndcapA, DetectorRegionIndex::Barrel, DetectorRegionIndex::EndcapC}) {
+        for (ChIndex chIdx : {ChIndex::BIS, ChIndex::BIL, ChIndex::BMS, ChIndex::BML, ChIndex::BOS, ChIndex::BOL, ChIndex::BEE,
+                              ChIndex::EIS, ChIndex::EIL, ChIndex::EMS, ChIndex::EML, ChIndex::EOS, ChIndex::EOL, ChIndex::EES, 
+                              ChIndex::EEL, ChIndex::CSS, ChIndex::CSL}){
+
+            const unsigned hash = regionChamberHash(detReg, chIdx);
+            PRINT_INFO("Test combination of "<<detReg<<" ("<<toInt(detReg)<<") & "
+                        <<chName(chIdx)<<"("<<toInt(chIdx)<<") -> hash: "<<hash);
+            if (hash >= regionChamberHashMax()){
+                PRINT_ERROR("Hash exceeds maximum: "<<regionChamberHashMax());
+                exit_code = EXIT_FAILURE;
+            }
+            /// Back conversion
+            auto [detBack, chamberBack] = decomposeRegionChamberHash(hash);
+            if ( (detBack != detReg) || (chamberBack != chIdx)) {
+                PRINT_ERROR("Back conversion resulted in "<<detBack<<" ("<<toInt(detBack)<<") & "
+                            <<chamberBack<<"("<<toInt(chamberBack)<<") -> hash: "<<regionChamberHash(detBack, chamberBack));
+                exit_code = EXIT_FAILURE;
+            }
        }
     }
 

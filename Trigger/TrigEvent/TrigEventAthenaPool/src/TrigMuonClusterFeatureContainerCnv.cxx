@@ -33,7 +33,7 @@ TrigMuonClusterFeatureContainer_PERS * TrigMuonClusterFeatureContainerCnv::creat
 
 
 //createTransient
-TrigMuonClusterFeatureContainer * TrigMuonClusterFeatureContainerCnv::createTransient()
+TrigMuonClusterFeatureContainer * TrigMuonClusterFeatureContainerCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "TrigMuonClusterFeatureContainerConverter" );
   
@@ -43,14 +43,14 @@ TrigMuonClusterFeatureContainer * TrigMuonClusterFeatureContainerCnv::createTran
   static const pool::Guid p0_guid( "5B09201A-D1CD-43BA-A1B5-786189444579" );
   
   TrigMuonClusterFeatureContainer *p_collection = 0;
-  if( compareClassGuid( tlp1_guid ) )     
+  if( compareClassGuid(token,  tlp1_guid ) )     
     {
-      poolReadObject< TrigMuonClusterFeatureContainer_PERS >(*m_TPConverter);
+      poolReadObject< TrigMuonClusterFeatureContainer_PERS >(*m_TPConverter, token);
       p_collection = m_TPConverter->createTransient( m_log );
       
-    }else if( compareClassGuid( p0_guid ) ){
+    }else if( compareClassGuid(token,  p0_guid ) ){
       
-      p_collection = poolReadObject< TrigMuonClusterFeatureContainer >();
+      p_collection = poolReadObject< TrigMuonClusterFeatureContainer >(token);
       
     }else  throw std::runtime_error( "Unsupported persistent version of TrigMuonClusterFeatureContainer" );
   

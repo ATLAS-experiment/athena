@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -62,7 +62,7 @@ StatusCode ITkPixelRawContByteStreamCnv::createRepConst(DataObject* pObj, IOpaqu
     return StatusCode::SUCCESS;
 }
 
-const CLID& ITkPixelRawContByteStreamCnv::classID(){
+CLID ITkPixelRawContByteStreamCnv::classID(){
     
     return ClassID_traits<ITkPixelRDO_Container>::ID(); 
 }

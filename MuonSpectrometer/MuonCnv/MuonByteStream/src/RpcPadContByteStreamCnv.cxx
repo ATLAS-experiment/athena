@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonByteStream/RpcPadContByteStreamCnv.h"
@@ -15,7 +15,7 @@
 RpcPadContByteStreamCnv::RpcPadContByteStreamCnv(ISvcLocator* svcloc) :
     AthConstConverter(storageType(), classID(), svcloc, "RpcPadContByteStreamCnv"), m_tool("Muon::RpcPadContByteStreamTool") {}
 
-const CLID& RpcPadContByteStreamCnv::classID() { return ClassID_traits<RpcPadContainer>::ID(); }
+CLID RpcPadContByteStreamCnv::classID() { return ClassID_traits<RpcPadContainer>::ID(); }
 
 long RpcPadContByteStreamCnv::storageType() { return ByteStreamAddress::storageType(); }
 

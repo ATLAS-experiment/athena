@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AsgAnalysisInterfaces/IFakeBkgTool.h"
@@ -819,7 +819,7 @@ float Database::getWeightedAverage(const TH1* hist, const StringRef& xmlStream)
             sum += w * x;
             denom += w;
         }
-        avg = sum / denom;
+        if (denom > 0.) avg = sum / denom;
     }
     else avg = 1. / hist->GetBinContent(1); /// central value of the correction will be 1, but uncertainties may matter, so this is also a valid case
     if(!std::isnormal(avg) || avg<=0.) throw(XmlError(xmlStream) << "something bad happened when trying to compute the weighted average of histogram \"" 

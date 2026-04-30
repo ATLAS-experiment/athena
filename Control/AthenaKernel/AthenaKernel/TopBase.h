@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthenaKernel/TopBase.h
@@ -15,6 +15,7 @@
 
 
 #include "AthenaKernel/BaseInfo.h"
+#include "AthenaKernel/tools/safe_clid.h"
 #include <type_traits>
 
 
@@ -22,7 +23,8 @@ namespace SG {
 
 
 /**
- * @brief Calculate topmost base accessible via SG_BASES.
+ * @brief Calculate topmost base accessible via SG_BASES that also has
+ *        a defined CLID.
  *
  * For example, if we have
  *
@@ -31,23 +33,30 @@ namespace SG {
  *   SG_BASES(C3, C2);
  @endcode
  *
+ * with all three classes having CLIDs defined,
  * then TopBase<C1>::type, TopBase<C2>::type, and TopBase<C3>::type all yield @c C1.
+ *
+ * If, on the other hand, there is no CLID for C2, then TopBase<C3>::type
+ * will yield C3.
+ *
+ * For the use of this, see the comments for ReadDecorHandleKey.
  */
 template <class T>
 struct TopBase
 {
-  typedef typename SG::Bases<T>::bases::Base1 Base1;
+  using Base1 = typename SG::Bases<T>::bases::Base1;
   static const bool has_base = !std::is_same<Base1, SG::NoBase>::value;
-  typedef typename std::conditional<has_base,
-                                    typename TopBase<Base1>::type,
-                                    T>::type type;
+  static const bool base_has_clid = SG::safe_clid<Base1>();
+  using type = typename std::conditional<has_base && base_has_clid,
+                                         typename TopBase<Base1>::type,
+                                         T>::type;
 };
 
 
 template <>
 struct TopBase<SG::NoBase>
 {
-  typedef SG::NoBase type;
+  using type = SG::NoBase;
 };
 
 

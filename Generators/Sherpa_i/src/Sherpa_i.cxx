@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AtlasHepMC/GenEvent.h"
@@ -392,6 +392,8 @@ const std::string Atlas_RNG::GenerateUID() const {
                           'o', 'p', 'q', 'r', 's', 't', 'u',
                           'v', 'w', 'x', 'y', 'z' };
   for (size_t i = 0; i < 6; ++i) {
+    //insecure random number generator, but not being used for crypto
+    //coverity[dont_call]
     result += alphabet[rand() % nMax];
   }
   return result;

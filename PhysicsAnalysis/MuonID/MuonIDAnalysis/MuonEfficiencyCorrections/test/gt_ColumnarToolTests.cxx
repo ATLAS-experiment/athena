@@ -41,7 +41,7 @@ TEST_F (ColumnarMemoryTest, MuonEfficiencyScaleFactors)
 
   asg::AsgToolConfig toolConfig;
   toolConfig.setTypeAndName ("CP::MuonEfficiencyScaleFactors/" + makeUniqueName());
-  ASSERT_SUCCESS (toolConfig.setProperty ("CalibrationRelease", "230213_Preliminary_r22run2"));
+  ASSERT_SUCCESS (toolConfig.setProperty ("CalibrationRelease", "230213_Preliminary_r22run2_loosefix"));
   ToolHandle<asg::AsgTool> myToolHandle;
   std::shared_ptr<void> cleanup;
   ASSERT_SUCCESS (toolConfig.makeTool (myToolHandle, cleanup));
@@ -89,7 +89,7 @@ TEST_F (ColumnarMemoryTest, MuonEfficiencyScaleFactors_systematic)
 
   asg::AsgToolConfig toolConfig;
   toolConfig.setTypeAndName ("CP::MuonEfficiencyScaleFactors/" + makeUniqueName());
-  ASSERT_SUCCESS (toolConfig.setProperty ("CalibrationRelease", "230213_Preliminary_r22run2"));
+  ASSERT_SUCCESS (toolConfig.setProperty ("CalibrationRelease", "230213_Preliminary_r22run2_loosefix"));
   ToolHandle<asg::AsgTool> myToolHandle;
   std::shared_ptr<void> cleanup;
   ASSERT_SUCCESS (toolConfig.makeTool (myToolHandle, cleanup));
@@ -139,7 +139,7 @@ TEST_F (ColumnarMemoryTest, MuonEfficiencyScaleFactors_multiEvent)
 
   asg::AsgToolConfig toolConfig;
   toolConfig.setTypeAndName ("CP::MuonEfficiencyScaleFactors/" + makeUniqueName());
-  ASSERT_SUCCESS (toolConfig.setProperty ("CalibrationRelease", "230213_Preliminary_r22run2"));
+  ASSERT_SUCCESS (toolConfig.setProperty ("CalibrationRelease", "230213_Preliminary_r22run2_loosefix"));
   ToolHandle<asg::AsgTool> myToolHandle;
   std::shared_ptr<void> cleanup;
   ASSERT_SUCCESS (toolConfig.makeTool (myToolHandle, cleanup));
@@ -220,7 +220,7 @@ TEST_F (ColumnarPhysLiteTest, MuonEfficiencyScaleFactors)
 {
   asg::AsgToolConfig toolConfig;
   toolConfig.setTypeAndName ("CP::MuonEfficiencyScaleFactors/" + makeUniqueName());
-  ASSERT_SUCCESS (toolConfig.setProperty ("CalibrationRelease", "230213_Preliminary_r22run2"));
+  ASSERT_SUCCESS (toolConfig.setProperty ("CalibrationRelease", "230213_Preliminary_r22run2_loosefix"));
   ToolHandle<CP::MuonEfficiencyScaleFactors> myToolHandle;
   std::shared_ptr<void> cleanup;
   ASSERT_SUCCESS (toolConfig.makeTool (myToolHandle, cleanup));
@@ -235,7 +235,7 @@ TEST_F (ColumnarPhysLiteTest, MuonEfficiencyScaleFactors_systematics)
 {
   asg::AsgToolConfig toolConfig;
   toolConfig.setTypeAndName ("CP::MuonEfficiencyScaleFactors/" + makeUniqueName());
-  ASSERT_SUCCESS (toolConfig.setProperty ("CalibrationRelease", "230213_Preliminary_r22run2"));
+  ASSERT_SUCCESS (toolConfig.setProperty ("CalibrationRelease", "230213_Preliminary_r22run2_loosefix"));
   ToolHandle<CP::MuonEfficiencyScaleFactors> myToolHandle;
   std::shared_ptr<void> cleanup;
   ASSERT_SUCCESS (toolConfig.makeTool (myToolHandle, cleanup));

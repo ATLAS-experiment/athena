@@ -20,7 +20,6 @@ Tracking.ActiveConfig.doActsSeed         : False
 Tracking.ActiveConfig.doActsSpacePoint   : False
 Tracking.ActiveConfig.doActsToAthenaCluster : False
 Tracking.ActiveConfig.doActsToAthenaResolvedTrack : False
-Tracking.ActiveConfig.doActsToAthenaSeed : False
 Tracking.ActiveConfig.doActsToAthenaSpacePoint : False
 Tracking.ActiveConfig.doActsToAthenaTrack : False
 Tracking.ActiveConfig.doActsTrack        : False
@@ -49,7 +48,6 @@ Tracking.ActiveConfig.doActsSeed         : True
 Tracking.ActiveConfig.doActsSpacePoint   : True
 Tracking.ActiveConfig.doActsToAthenaCluster : False
 Tracking.ActiveConfig.doActsToAthenaResolvedTrack : False
-Tracking.ActiveConfig.doActsToAthenaSeed : False
 Tracking.ActiveConfig.doActsToAthenaSpacePoint : False
 Tracking.ActiveConfig.doActsToAthenaTrack : False
 Tracking.ActiveConfig.doActsTrack        : True
@@ -78,7 +76,6 @@ Tracking.ActiveConfig.doActsSeed         : True
 Tracking.ActiveConfig.doActsSpacePoint   : True
 Tracking.ActiveConfig.doActsToAthenaCluster : False
 Tracking.ActiveConfig.doActsToAthenaResolvedTrack : False
-Tracking.ActiveConfig.doActsToAthenaSeed : False
 Tracking.ActiveConfig.doActsToAthenaSpacePoint : False
 Tracking.ActiveConfig.doActsToAthenaTrack : False
 Tracking.ActiveConfig.doActsTrack        : True
@@ -107,7 +104,6 @@ Tracking.ActiveConfig.doActsSeed         : True
 Tracking.ActiveConfig.doActsSpacePoint   : True
 Tracking.ActiveConfig.doActsToAthenaCluster : False
 Tracking.ActiveConfig.doActsToAthenaResolvedTrack : False [function]
-Tracking.ActiveConfig.doActsToAthenaSeed : False
 Tracking.ActiveConfig.doActsToAthenaSpacePoint : False
 Tracking.ActiveConfig.doActsToAthenaTrack : True [function]
 Tracking.ActiveConfig.doActsTrack        : True
@@ -136,71 +132,12 @@ Tracking.ActiveConfig.doActsSeed         : False
 Tracking.ActiveConfig.doActsSpacePoint   : False
 Tracking.ActiveConfig.doActsToAthenaCluster : True
 Tracking.ActiveConfig.doActsToAthenaResolvedTrack : False
-Tracking.ActiveConfig.doActsToAthenaSeed : False
 Tracking.ActiveConfig.doActsToAthenaSpacePoint : False
 Tracking.ActiveConfig.doActsToAthenaTrack : False
 Tracking.ActiveConfig.doActsTrack        : False
 Flag categories that are redirected by the cloneAndReplace
 Tracking.ActiveConfig          points to Tracking.ITkActsValidateClustersPass 
 Tracking.ITkActsValidateClustersPass points to                        nothing 
-************************************************************************
-
-************************************************************************
-******************** Tracking reconstruction Config ********************
-                     Active Config is ActsValidateSpacePoints
-Tracking.ActiveConfig.doAthenaAmbiguityResolution : True
-Tracking.ActiveConfig.doAthenaCluster    : True
-Tracking.ActiveConfig.doAthenaSeed       : False
-Tracking.ActiveConfig.doAthenaSpacePoint : False
-Tracking.ActiveConfig.doAthenaToActsCluster : True
-Tracking.ActiveConfig.doAthenaToActsSpacePoint : False
-Tracking.ActiveConfig.doAthenaToActsTrack : False
-Tracking.ActiveConfig.doAthenaTrack      : True
-Flag categories that are redirected by the cloneAndReplace
-Tracking.ActiveConfig          points to Tracking.ITkActsValidateSpacePointsPass 
-Tracking.ITkActsValidateSpacePointsPass points to                        nothing 
-Tracking.ActiveConfig.doActsAmbiguityResolution : False
-Tracking.ActiveConfig.doActsCluster      : False
-Tracking.ActiveConfig.doActsSeed         : False
-Tracking.ActiveConfig.doActsSpacePoint   : True
-Tracking.ActiveConfig.doActsToAthenaCluster : False
-Tracking.ActiveConfig.doActsToAthenaResolvedTrack : False
-Tracking.ActiveConfig.doActsToAthenaSeed : True
-Tracking.ActiveConfig.doActsToAthenaSpacePoint : False
-Tracking.ActiveConfig.doActsToAthenaTrack : False
-Tracking.ActiveConfig.doActsTrack        : False
-Flag categories that are redirected by the cloneAndReplace
-Tracking.ActiveConfig          points to Tracking.ITkActsValidateSpacePointsPass 
-Tracking.ITkActsValidateSpacePointsPass points to                        nothing 
-************************************************************************
-
-************************************************************************
-******************** Tracking reconstruction Config ********************
-                     Active Config is ActsValidateSeeds
-Tracking.ActiveConfig.doAthenaAmbiguityResolution : True
-Tracking.ActiveConfig.doAthenaCluster    : True
-Tracking.ActiveConfig.doAthenaSeed       : False
-Tracking.ActiveConfig.doAthenaSpacePoint : True
-Tracking.ActiveConfig.doAthenaToActsCluster : False
-Tracking.ActiveConfig.doAthenaToActsSpacePoint : True
-Tracking.ActiveConfig.doAthenaToActsTrack : False
-Tracking.ActiveConfig.doAthenaTrack      : True
-Flag categories that are redirected by the cloneAndReplace
-Tracking.ActiveConfig          points to Tracking.ITkActsValidateSeedsPass 
-Tracking.ITkActsValidateSeedsPass points to                        nothing 
-Tracking.ActiveConfig.doActsAmbiguityResolution : False
-Tracking.ActiveConfig.doActsCluster      : False
-Tracking.ActiveConfig.doActsSeed         : False
-Tracking.ActiveConfig.doActsSpacePoint   : False
-Tracking.ActiveConfig.doActsToAthenaCluster : False
-Tracking.ActiveConfig.doActsToAthenaResolvedTrack : False
-Tracking.ActiveConfig.doActsToAthenaSeed : True
-Tracking.ActiveConfig.doActsToAthenaSpacePoint : False
-Tracking.ActiveConfig.doActsToAthenaTrack : False
-Tracking.ActiveConfig.doActsTrack        : False
-Flag categories that are redirected by the cloneAndReplace
-Tracking.ActiveConfig          points to Tracking.ITkActsValidateSeedsPass 
-Tracking.ITkActsValidateSeedsPass points to                        nothing 
 ************************************************************************
 
 ************************************************************************
@@ -223,7 +160,6 @@ Tracking.ActiveConfig.doActsSeed         : True
 Tracking.ActiveConfig.doActsSpacePoint   : True
 Tracking.ActiveConfig.doActsToAthenaCluster : False
 Tracking.ActiveConfig.doActsToAthenaResolvedTrack : False [function]
-Tracking.ActiveConfig.doActsToAthenaSeed : False
 Tracking.ActiveConfig.doActsToAthenaSpacePoint : False
 Tracking.ActiveConfig.doActsToAthenaTrack : True [function]
 Tracking.ActiveConfig.doActsTrack        : True
@@ -252,7 +188,6 @@ Tracking.ActiveConfig.doActsSeed         : False
 Tracking.ActiveConfig.doActsSpacePoint   : False
 Tracking.ActiveConfig.doActsToAthenaCluster : False
 Tracking.ActiveConfig.doActsToAthenaResolvedTrack : True
-Tracking.ActiveConfig.doActsToAthenaSeed : False
 Tracking.ActiveConfig.doActsToAthenaSpacePoint : False
 Tracking.ActiveConfig.doActsToAthenaTrack : False
 Tracking.ActiveConfig.doActsTrack        : False
@@ -281,7 +216,6 @@ Tracking.ActiveConfig.doActsSeed         : True
 Tracking.ActiveConfig.doActsSpacePoint   : True
 Tracking.ActiveConfig.doActsToAthenaCluster : False
 Tracking.ActiveConfig.doActsToAthenaResolvedTrack : True [function]
-Tracking.ActiveConfig.doActsToAthenaSeed : False
 Tracking.ActiveConfig.doActsToAthenaSpacePoint : False
 Tracking.ActiveConfig.doActsToAthenaTrack : False [function]
 Tracking.ActiveConfig.doActsTrack        : True
@@ -310,7 +244,6 @@ Tracking.ActiveConfig.doActsSeed         : True
 Tracking.ActiveConfig.doActsSpacePoint   : True
 Tracking.ActiveConfig.doActsToAthenaCluster : False
 Tracking.ActiveConfig.doActsToAthenaResolvedTrack : False
-Tracking.ActiveConfig.doActsToAthenaSeed : False
 Tracking.ActiveConfig.doActsToAthenaSpacePoint : False
 Tracking.ActiveConfig.doActsToAthenaTrack : False
 Tracking.ActiveConfig.doActsTrack        : True

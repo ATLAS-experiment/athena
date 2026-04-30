@@ -115,7 +115,7 @@ namespace columnar
 
     template<ContainerIdConcept CI2> requires (CI2::isMutable && std::is_same_v<typename CI2::constId,CI>)
     ObjectId (const ObjectId<CI2,CM>& that) noexcept
-      : m_data (that.getData()), m_index (that.getIndex())
+      : m_dataArea (that.getDataArea()), m_index (that.getIndex())
     {}
 
     ObjectId& operator = (const ObjectId<CI,CM>& that) noexcept = default;
@@ -138,15 +138,15 @@ namespace columnar
     /// ============================
   public:
 
-    explicit ObjectId (void **val_data, std::size_t val_index) noexcept
-      : m_data (val_data), m_index (val_index)
+    explicit ObjectId (void **val_dataArea, std::size_t val_index) noexcept
+      : m_dataArea (val_dataArea), m_index (val_index)
     {}
 
     [[nodiscard]] std::size_t getIndex () const noexcept {
       return m_index;}
 
-    [[nodiscard]] void **getData () const noexcept {
-      return m_data;}
+    [[nodiscard]] void **getDataArea () const noexcept {
+      return m_dataArea;}
 
 
 
@@ -154,7 +154,7 @@ namespace columnar
     /// ===============
   private:
 
-    void **m_data = nullptr;
+    void **m_dataArea = nullptr;
     std::size_t m_index = 0u;
   };
 

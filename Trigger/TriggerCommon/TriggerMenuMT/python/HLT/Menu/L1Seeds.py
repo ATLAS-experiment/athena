@@ -125,7 +125,9 @@ def getEBnoL1PSSeed(l1items, l1seedname):
             'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55', 'L1_eEM18M_2cTAU20M_jXE70',
             'L1_ZAFB-04DPHIM-eEM18M','L1_eEM18M_jEM25',
             'L1_jJ55p0ETA23_2jJ40p30ETA49','L1_jJ125p30ETA49','L1_3MU5VF',
-            'L1_eEM24L_3eEM12L', 'L1_LATE-MU8F_jJ90', 'L1_LATE-MU8F_jXE70'
+            'L1_eEM24L_3eEM12L', 'L1_LATE-MU8F_jJ90', 'L1_LATE-MU8F_jXE70',
+            'L1_110INVM150-eEM50s-eEM10s-2DISAMB-jJ60s'
+
         ],
         'PhysicsVeryHigh':
         [
@@ -137,7 +139,7 @@ def getEBnoL1PSSeed(l1items, l1seedname):
         ],
         'FIRSTEMPTY':
         [
-            'L1_jJ30_FIRSTEMPTY', 'L1_eTAU12_FIRSTEMPTY', 'L1_eEM9_FIRSTEMPTY'
+            'L1_jJ30_FIRSTEMPTY', 
         ],
         'UNPAIRED_ISO':
         [
@@ -178,6 +180,24 @@ def getL1LowLumi():
     ]
 
 #####################################
+
+def getL1BKeeLowMu():
+    return [
+        # Unprescaled
+        'L1_eEM15',
+        # 'L1_2eEM9',  # Added for low-µ runs - removed for HI to make space
+        'L1_JPSI-1M5-eEM9',
+        # Next Higher Thresholds for Buffer
+        'L1_eEM18',
+        'L1_2eEM12',
+        # Prescaled
+        'L1_eEM9',
+        'L1_eEM9_VjTE200',
+        # 'L1_2eEM5_jTE200'  # Added for low-µ runs - removed for HI to make space
+    ]
+
+#####################################
+
 def getL1BKeePrimary():
 
     return [
@@ -321,6 +341,7 @@ L1_multiseed_simple_getters = {
     'L1_Bkg': getL1BackgroundSeed,
     'L1_BS': getL1BSSeed,
     'L1_LowLumi': getL1LowLumi,
+    'L1_BKeeLowMu': getL1BKeeLowMu,
     'L1_BKeePrimary': getL1BKeePrimary,
     'L1_BKeePrimaryLegacy': getL1BKeePrimaryLegacy,
     'L1_BKeePrescaled': getL1BKeePrescaled,

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name.
 atlas_subdir( xAODCore )
@@ -25,7 +25,7 @@ atlas_add_library( xAODCore
    PUBLIC_HEADERS xAODCore
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AthLinks CxxUtils RootUtils
-   SGCoreLib ${extra_libs} )
+   SGCoreLib AthContainersInterfaces ${extra_libs} )
 
 atlas_add_dictionary( xAODCoreDict
    xAODCore/xAODCoreDict.h
@@ -80,12 +80,22 @@ atlas_add_test( ut_xaodcore_auxinfobase_test
    SOURCES test/ut_xaodcore_auxinfobase_test.cxx
    LINK_LIBRARIES AthContainers xAODCore TestTools )
 
+set(_ignoreArgs)
+if (XAOD_STANDALONE)
+   set(_ignoreArgs LOG_IGNORE_PATTERN
+       "DataLink::findIdentifier.*Event object is not available" )
+endif()
 atlas_add_test( ut_xaodcore_shallowcopy_test
    SOURCES test/ut_xaodcore_shallowcopy.cxx
-   LINK_LIBRARIES AthContainers AthLinks xAODCore )
+   LINK_LIBRARIES AthContainers xAODCore
+   ${_ignoreArgs} )
 
 atlas_add_test( ut_xaodcore_basecontainer_test
    SOURCES test/ut_xaodcore_basecontainer.cxx
+   LINK_LIBRARIES AthContainers xAODCore )
+
+atlas_add_test( ut_xaodcore_variablestruct_test
+   SOURCES test/ut_xaodcore_variablestruct_test.cxx
    LINK_LIBRARIES AthContainers xAODCore )
 
 atlas_add_test( auxbase_threading_test

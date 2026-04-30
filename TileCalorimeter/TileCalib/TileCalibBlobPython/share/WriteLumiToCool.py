@@ -1,6 +1,6 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # WriteLumiToCool.py
 # Sanya Solodkov <Sanya.Solodkov@cern.ch>
@@ -22,6 +22,7 @@ def usage():
     print ("-f, --folder=   specify folder to use e.g. /CALO/Ofl/Noise/PileUpNoiseLumi ")
     print ("-d, --dbname=   specify the database name e.g. OFLP200")
     print ("-S, --server=   specify server - ORACLE or FRONTIER, default is FRONTIER")
+    print ("-x, --txtfile=  specify the text file with the new lumi constants")
     print ("-v, --value=    specify new lumi value")
     print ("-V, --value2=   specify new valid flag")
     print ("-c, --channel=  specify COOL channel, by default COOL channels 0 and 1 are used")
@@ -29,8 +30,8 @@ def usage():
     print ("-l, --lumi=     specify lumiblock number for start of IOV, default is 0")
     print ("-u  --update    set this flag if output sqlite file should be updated, otherwise it'll be recreated")
 
-letters = "hi:o:t:f:d:S:v:V:c:r:l:u"
-keywords = ["help","infile=","outfile=","tag=","folder=","dbname=","server=","value=","value2=","channel=","run=","lumi=","update"]
+letters = "hi:o:t:f:d:S:x:v:V:c:r:l:u"
+keywords = ["help","infile=","outfile=","tag=","folder=","dbname=","server=","txtfile=","value=","value2=","channel=","run=","lumi=","update"]
 
 try:
     opts, extraparams = getopt.getopt(sys.argv[1:],letters,keywords)
@@ -46,8 +47,9 @@ tag         = ''
 folderPath = ''
 dbName      = 'CONDBR2'
 server      = ''
+txtFile     = ''
 value       = None
-value2      = 0
+value2      = None
 run         = -1
 lumi        = 0
 update      = False
@@ -75,6 +77,8 @@ for o, a in opts:
         lumi = int(a)
     elif o in ("-u","--update"):
         update = True
+    elif o in ("-x","--txtfile"):
+        txtFile = a
     elif o in ("-v","--value"):
         value = a
     elif o in ("-V","--value2"):
@@ -97,8 +101,8 @@ if len(tag)<1:
     raise Exception("Please, provide tag (e.g. --tag=RUN2-UPD4-04)")
 if len(dbName)<1:
     raise Exception("Please, provide dbname (e.g. --dbname=OFLP200 or --dbname=CONDBR2)")
-if value is None:
-    raise Exception("Please, provide value (e.g. --value=12345)")
+if not txtFile and value is None:
+    raise Exception("Please, provide input file (e.g. --txtfile=lumi.txt) or value (e.g. --value=12345)")
 if run<0:
     raise Exception("Please, provide run number (e.g. --run=123456)")
 
@@ -135,15 +139,8 @@ if len(folderPath)==0:
     else:
         folderPath = '/CALO/Ofl/Noise/PileUpNoiseLumi'
 
-if tag=='UPD1' or tag=='UPD4':
-    from TileCalibBlobPython import TileCalibTools
-    folderTag = TileCalibTools.getFolderTag(dbr, folderPath, tag )
-elif folderPath.startswith('/CALO/Ofl/Noise/PileUpNoiseLumi'):
-    folderTag = 'CALOOflNoisePileUpNoiseLumi-'+tag
-elif folderPath.startswith('/CALO/Noise/PileUpNoiseLumi'):
-    folderTag = 'CALONoisePileUpNoiseLumi-'+tag
-else:
-    folderTag = tag
+from TileCalibBlobPython import TileCalibTools
+folderTag = TileCalibTools.getFolderTag(dbr, folderPath, tag )
 
 #=== creating folder specifications
 spec = cool.RecordSpecification()
@@ -170,11 +167,42 @@ if update:
 else:
     folderW = dbw.createFolder(folderPath, folderSpec, folderDescr, True)
 
-newval1 = float(value)
-newval2 = int(value2)
 newiov = "[%d,%d] - infinity" % (run, lumi)
 since = CaloCondTools.iovFromRunLumi( run, lumi )
 until = CaloCondTools.iovFromRunLumi( CaloCondTools.MAXRUN, CaloCondTools.MAXLBK )
+
+input = {}
+for chan in channels:
+    input[chan] = ['keep','keep']
+    if value is not None:
+        input[chan][0] = value
+    if value2 is not None:
+        input[chan][1] = value2
+
+if len(txtFile):
+    try:
+        with open(txtFile,"r") as f:
+            allData = f.readlines()
+    except Exception:
+        print("\nCan not read input file %s" % (txtFile))
+        sys.exit(2)
+
+    for line in allData:
+        fields = line.strip().split()
+        #=== ignore empty and comment lines
+        if not len(fields):
+            continue
+        if fields[0].startswith("#"):
+            continue
+        try:
+            ind = 0
+            ch = int(fields[0])
+            for fld in fields[1:3]:
+                for chan in (channels if ch<0 else [ch]):
+                    input[chan][ind] = fld
+                ind += 1
+        except (TypeError,ValueError):
+            log.error(f"Can not process line '{line.strip()}' - skipping")
 
 for chan in channels:
     try:
@@ -189,6 +217,15 @@ for chan in channels:
         val2 = None
         oldiov = "[NaN,NaN] - (NaN,NaN)"
         #log.warning("IOV [%d,%d] was not found in input DB", run, lumi )
+
+    try:
+        newval1 = abs(float(input[chan][0]))
+    except (TypeError,ValueError):
+        newval1 = val1 if val1 is not None else 0.0
+    try:
+        newval2 = abs(int(float(input[chan][1])))
+    except (TypeError,ValueError):
+        newval2 = val2 if val2 is not None else 0
 
     print("COOL channel",chan,"old iov",oldiov," old values [",val1,",",val2,
           "]  new values [",newval1,",",newval2,"] new iov",newiov)

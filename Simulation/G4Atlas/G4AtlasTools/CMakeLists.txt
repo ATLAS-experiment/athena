@@ -20,18 +20,11 @@ file(GLOB ALL_SRC_LIB_FILES src/*.cxx src/*.cc)
 file(GLOB ALL_SRC_COMPONENT_FILES src/components/*.cxx)
 
 if( NOT SIMULATIONBASE )
-  message(STATUS "is NOT SIMULATIONBASE")
   find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
   find_package( lwtnn REQUIRED )
-  find_package( LibXml2 REQUIRED )
-  set(LIBXML_THREAD_ALLOC_ENABLED TRUE)
-  set(LIBXML_THREAD_ENABLED TRUE)
-  message(STATUS "LIBXML_THREAD_ALLOC_ENABLED: ${LIBXML_THREAD_ALLOC_ENABLED}")
-  message(STATUS "LIBXML_THREAD_ENABLED: ${LIBXML_THREAD_ENABLED}")
-  set( extra_incl ${ROOT_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS} ${LIBXML2_INCLUDE_DIRS} )
-  set( extra_lib ${ROOT_LIBRARIES} ${LWTNN_LIBRARIES} ${LIBXML2_LIBRARIES} PathResolver ISF_InterfacesLib )
+  set( extra_incl ${ROOT_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS} )
+  set( extra_lib ${ROOT_LIBRARIES} ${LWTNN_LIBRARIES} PathResolver ISF_InterfacesLib )
 else()
-  message(STATUS "is SIMULATIONBASE")
   # Filter out files that contain "PunchThrough" anywhere in their name
   list(FILTER ALL_SRC_LIB_FILES EXCLUDE REGEX "PunchThrough")
   list(FILTER ALL_SRC_COMPONENT_FILES EXCLUDE REGEX "PunchThrough")
@@ -46,7 +39,7 @@ atlas_add_library( G4AtlasToolsLib
                    PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
                    LINK_LIBRARIES ${XERCESC_LIBRARIES} ${GEANT4_LIBRARIES} ${TBB_LIBRARIES} AthenaBaseComps G4AtlasInterfaces HitManagement SubDetectorEnvelopesLib ${extra_lib}
-                   PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} CxxUtils GaudiKernel )
+                   PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} XMLCoreParser CxxUtils GaudiKernel )
 set_target_properties( G4AtlasToolsLib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 atlas_add_library( G4AtlasTools

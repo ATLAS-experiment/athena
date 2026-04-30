@@ -41,7 +41,7 @@ DBReplicaSvc                 0    INFO Read replica configuration from /home/sss
 DBReplicaSvc                 0    INFO No specific match for domain found - use default fallback
 DBReplicaSvc                 0    INFO Total of 1 servers found for host karma [atlas_dd ]
 PoolSvc                      0    INFO Successfully setup replica sorting algorithm
-PoolSvc                      0    INFO Setting up APR FileCatalog and Streams
+PoolSvc                      0    INFO Setting up FileCatalog and Streams
 PoolSvc                      0    INFO POOL WriteCatalog is file:xAODTestReadRename_catalog.xml
 DbSession                    0    INFO     Open     DbSession    
 Domain[ROOT_All]             0    INFO >   Access   DbDomain     READ      [ROOT_All] 

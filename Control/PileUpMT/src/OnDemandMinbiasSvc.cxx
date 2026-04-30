@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "OnDemandMinbiasSvc.h"
@@ -21,6 +21,7 @@
 #include "AthenaKernel/IProxyProviderSvc.h"
 #include "CxxUtils/FastReseededPRNG.h"
 #include "SGTools/CurrentEventStore.h"
+#include "StoreGate/ActiveStoreSvc.h"
 
 
 inline std::string CLIDToString(const CLID& clid) {

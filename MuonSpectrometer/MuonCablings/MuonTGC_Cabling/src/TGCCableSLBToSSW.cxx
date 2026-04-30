@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCCableSLBToSSW.h"
@@ -42,6 +42,8 @@ TGCCableSLBToSSW::TGCCableSLBToSSW(const std::string& filename)
     m_database[TGCId::Forward][SL] =
         std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB FSL");
 }
+
+TGCCableSLBToSSW::~TGCCableSLBToSSW() = default;
 
 TGCModuleMap TGCCableSLBToSSW::getModule(const TGCModuleId& moduleId) const {
 

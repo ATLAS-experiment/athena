@@ -11,9 +11,10 @@ StatusCode FPGATrackSimLLPRoadFilterTool::filterUsedHits( std::vector<FPGATrackS
                                               std::vector<std::shared_ptr<const FPGATrackSimHit>>& unusedHits ) {
     std::vector<FPGATrackSimHit> hitsInTracksVec;
     for (const auto& track : tracks) {
-        for (const FPGATrackSimHit& hit : track.getFPGATrackSimHits()) {
-            if (hit.isReal()) {
-                hitsInTracksVec.push_back(hit);
+        for (const auto& hit : track.getFPGATrackSimHitPtrs()) {
+            if (!hit) continue;
+            if (hit->isReal()) {
+                hitsInTracksVec.push_back(*hit);
             }
         }
     }

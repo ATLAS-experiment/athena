@@ -1,13 +1,12 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 AntiKt4EMPFlowJetsCPContent = [
 "Kt4EMPFlowEventShape",
 "Kt4EMPFlowEventShapeAux.Density",
-"Kt4EMPFlowPUSBEventShape",
-"Kt4EMPFlowPUSBEventShapeAux.Density",
 "Kt4EMPFlowNeutEventShape",
 "Kt4EMPFlowNeutEventShapeAux.Density",
 "AntiKt4EMPFlowJets",
+"AntiKt4EMPFlowJetsAux.pt.eta.phi.m.numConstit",
 "AntiKt4EMPFlowJetsAux.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m",
 "AntiKt4EMPFlowJetsAux.ActiveArea4vec_eta.ActiveArea4vec_m.ActiveArea4vec_phi.ActiveArea4vec_pt.DetectorEta.DetectorY",
 "AntiKt4EMPFlowJetsAux.NumTrkPt500.SumPtTrkPt500.NumChargedPFOPt500.SumPtChargedPFOPt500.NumTrkPt1000.NumChargedPFOPt1000.TrackWidthPt1000.ChargedPFOWidthPt1000",
@@ -16,6 +15,8 @@ AntiKt4EMPFlowJetsCPContent = [
 "AntiKt4EMPFlowJetsAux.EnergyPerSampling.FracSamplingMax.FracSamplingMaxIndex.Timing.N90Constituents",
 "AntiKt4EMPFlowJetsAux.DFCommonJets_jetClean_LooseBad.DFCommonJets_jetClean_TightBad",
 "AntiKt4EMPFlowJetsAux.PartonTruthLabelID.HadronConeExclExtendedTruthLabelID.HadronConeExclTruthLabelID",
+"AntiKt4EMPFlowJetsAux.QGTransformer_ConstScore",
+"AntiKt4EMPFlowJetsAux.R4TruthLabel",
 "PrimaryVertices",
-"PrimaryVerticesAux.vertexType" 
+"PrimaryVerticesAux.vertexType"
 ]

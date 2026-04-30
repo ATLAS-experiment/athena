@@ -36,7 +36,7 @@ IsoMuonFeatureCnv::createPersistent( IsoMuonFeature *transObj)
 //-----------------------------------------------------------------------------
 // Create transient 
 //-----------------------------------------------------------------------------
-IsoMuonFeature *IsoMuonFeatureCnv::createTransient()
+IsoMuonFeature *IsoMuonFeatureCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "IsoMuonFeatureConverter" );
   
@@ -47,13 +47,13 @@ IsoMuonFeature *IsoMuonFeatureCnv::createTransient()
   static const pool::Guid p1_guid("31A90EEE-AF5A-4CAF-9A83-F523D141C4CF");
   static const pool::Guid p0_guid("60ECF1E1-408A-43CA-9858-62AAFE8041FF");
 
-  if( compareClassGuid( p1_guid ) ) {
-    std::unique_ptr< IsoMuonFeature_tlp1 >   ptr_tlp1( this->poolReadObject< IsoMuonFeature_tlp1 >() );
+  if( compareClassGuid(token,  p1_guid ) ) {
+    std::unique_ptr< IsoMuonFeature_tlp1 >   ptr_tlp1( this->poolReadObject< IsoMuonFeature_tlp1 >(token) );
     transObj = m_TPConverter->createTransient( ptr_tlp1.get(), mlog );
   }
-  else if( compareClassGuid(p0_guid) ) {
+  else if( compareClassGuid(token, p0_guid) ) {
     // old version from before TP separation, just return it
-    transObj = this->poolReadObject<IsoMuonFeature>();
+    transObj = this->poolReadObject<IsoMuonFeature>(token);
   }  
   else {
     throw std::runtime_error("Unsupported persistent version");

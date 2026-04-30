@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTOOLINTERFACES_IPIXELPIXELCLUSTERINGTOOL_H
@@ -14,6 +14,7 @@
 #include "xAODInDetMeasurement/PixelClusterAuxContainer.h"
 #include "InDetReadoutGeometry/SiDetectorElementStatus.h"
 #include "Acts/Clusterization/Clusterization.hpp"
+#include <any>
 
 namespace ActsTrk {
 
@@ -54,11 +55,15 @@ public:
 	       const InDetDD::SiDetectorElement& element,
          Acts::Ccl::ClusteringData& data,
 	       std::vector<ClusterCollection>& collection) const = 0;
-  
+
+    virtual std::any makeVars (SG::AuxVectorData& cont) const = 0;
+
     virtual StatusCode
     makeClusters(const EventContext& ctx,
 		 ClusterCollection& cluster,
 		 const InDetDD::SiDetectorElement& element,
+                 size_t icluster,
+                 std::any& vars,
 		 typename ClusterContainer::iterator itrContainer) const = 0;
 };
 

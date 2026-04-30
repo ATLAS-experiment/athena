@@ -33,48 +33,6 @@ Description: RelativeDiffSyncClusters
 ---
 
 ##############################################################################
-############################### ToF histograms ###############################
-##############################################################################
-
-###### ToF hits divided by ToF events ######
-
-Input: [ 'AFP/ToF/StationHits/ToFHits_side(?P<side>A|C)', 'AFP/ToF/Events/lb(?P<side>A|C)ToFEvents' ]
-Output: [ 'AFP/ToF/PP/HitsByEvents/HitsByEvents_side{side}' ]
-Function: histgrinder.example.transform_function_divide_ROOT
-Description: HitsByEvents
-
----
-
-###### ToFHitsVsLbByEvents ######
-
-### Per bar ###
-
-Input: [ 'AFP/ToF/ToFHitsVsLb/side(?P<side>A|C)/lb(?P=side)ToF_(?P<train>T[0123])_(?P<bar>[ABCD])', 'AFP/ToF/Events/lb(?P<side>A|C)ToFEvents' ]
-Output: [ 'AFP/ToF/PP/ToFHitsVsLbByEvents/side{side}/lb{side}ToF_{train}_{bar}_Vs_Events' ]
-Function: histgrinder.example.transform_function_divide_ROOT
-Description: lbToF_train_bar_Vs_Events
-
----
-
-### Per train (A+B+C+D) ###
-
-# All
-Input: [ 'AFP/ToF/ToFHitsVsLb/side(?P<side>A|C)/All/lb(?P=side)ToF_(?P<train>T[0123])', 'AFP/ToF/Events/lb(?P<side>A|C)ToFEvents' ]
-Output: [ 'AFP/ToF/PP/ToFHitsVsLbByEvents/side{side}/All/lb{side}ToF_{train}_Vs_Events' ]
-Function: histgrinder.example.transform_function_divide_ROOT
-Description: lbToF_train_Vs_Events_All
-
----
-
-# Front, Middle, End
-Input: [ 'AFP/ToF/ToFHitsVsLb/side(?P<side>A|C)/(?P<fme>Front|Middle|End)/lb(?P=side)ToF_(?P<train>T[0123])_(?P=fme)', 'AFP/ToF/Events/lb(?P<side>A|C)ToFEvents' ]
-Output: [ 'AFP/ToF/PP/ToFHitsVsLbByEvents/side{side}/{fme}/lb{side}ToF_{train}_Vs_Events_{fme}' ]
-Function: histgrinder.example.transform_function_divide_ROOT
-Description: lbAToF_train_Vs_Events_FME
-
----
-
-##############################################################################
 ############################### ToF SiT histograms ###############################
 ##############################################################################
 

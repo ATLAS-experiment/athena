@@ -41,7 +41,7 @@ protected:
         createPersistent( Rec::MuonSpShowerContainer* transCont );
 
   /** Build the transient representation from a persistent one*/
-    virtual Rec::MuonSpShowerContainer* createTransient();
+    virtual Rec::MuonSpShowerContainer* createTransient(const Token* token);
 
 };
 

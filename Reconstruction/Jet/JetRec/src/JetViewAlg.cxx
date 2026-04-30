@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetViewAlg.cxx
@@ -15,7 +15,7 @@
 // Called before event loop
 StatusCode JetViewAlg::initialize() {
 
-  // Initialise DataHandleKeys so that the scheduler is aware of 
+  // Initialise HandleKeys so that the scheduler is aware of
   // data dependencies & products
   if(m_input.key().empty() || m_output.key().empty()) {
     ATH_MSG_ERROR("Input/output key(s) is/are blank!");

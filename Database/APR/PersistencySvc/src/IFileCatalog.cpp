@@ -9,11 +9,11 @@
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/IMessageSvc.h"
 
-#include <algorithm>
-#include "POOLCore/SystemTools.h"
 #include "PersistencySvc/IFileCatalog.h"
+#include "StorageSvc/DbPrint.h"
 
 #include <exception>
+#include <algorithm>
 
 using namespace pool;
 
@@ -23,10 +23,10 @@ pool::IFileCatalog::IFileCatalog()
     m_fc (m_mgr)
 {
    // set the output level of this service
-   setLevel( SystemTools::GetOutputLvl() );
+   setLevel( DbPrint::getOutputLvl() );
    // set the output level of the XMLCatalog component - works only if the Gaudi AppMgr was initialized
    Gaudi::svcLocator()->service<IMessageSvc>("MessageSvc")
-      ->setOutputLevel("XMLCatalog", SystemTools::GetOutputLvl() );
+      ->setOutputLevel("XMLCatalog", DbPrint::getOutputLvl() );
 }
 
 

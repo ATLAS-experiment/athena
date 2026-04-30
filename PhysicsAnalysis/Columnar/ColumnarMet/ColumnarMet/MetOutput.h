@@ -28,7 +28,7 @@ namespace columnar
     /// up to the user to make sure that for each term a different
     /// weight vector gets passed in.
 
-    template<ContainerIdConcept CI_MET=ContainerId::mutableMet,ContainerIdConcept CI_OBJ=ContainerId::particle,typename CM=ColumnarModeDefault> class ObjectWeightDecorator;
+    template<ContainerIdConcept CI_MET=MutableMetDef,ContainerIdConcept CI_OBJ=ParticleDef,typename CM=ColumnarModeDefault> class ObjectWeightDecorator;
 
 
     template<ContainerIdConcept CI_MET,ContainerIdConcept CI_OBJ> class ObjectWeightDecorator<CI_MET,CI_OBJ,ColumnarModeXAOD> final
@@ -67,7 +67,7 @@ namespace columnar
     /// container and then does the "right thing" to record the object
     /// weight based on the columnar mode.
 
-    template<ContainerIdConcept CI_MET=ContainerId::mutableMet,ContainerIdConcept CI_OBJ=ContainerId::particle,typename CM=ColumnarModeDefault> class ObjectWeightHandle;
+    template<ContainerIdConcept CI_MET=MutableMetDef,ContainerIdConcept CI_OBJ=ParticleDef,typename CM=ColumnarModeDefault> class ObjectWeightHandle;
 
     template<ContainerIdConcept CI_MET,ContainerIdConcept CI_OBJ> class ObjectWeightHandle<CI_MET,CI_OBJ,ColumnarModeXAOD> final
     {
@@ -77,11 +77,11 @@ namespace columnar
 
       using CM = ColumnarModeXAOD;
 
-      using iplink_t = MetDef::iplink_t;
+      using iplink_t = MetHelperDefs::iplink_t;
 
       ObjectWeightHandle (const asg::AsgTool& tool, const ObjectWeightDecorator<CI_MET,CI_OBJ,CM>& decorator, ObjectId<CI_MET,CM> met, const ObjectRange<CI_OBJ,CM>& container)
       {
-        using namespace MetDef;
+        using namespace MetHelperDefs;
 
         dec_constitObjLinks(met.getXAODObject()) = std::vector<iplink_t>(0);
         m_uniqueLinks = &dec_constitObjLinks(met.getXAODObject());

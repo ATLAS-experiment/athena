@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /* file contains the implementation for the AthenaHDFStreamTool class.
@@ -111,8 +111,7 @@ StatusCode AthenaHDFStreamTool::getLockedEvent(void** target, unsigned int&/* st
    const std::string dh_entry = "POOLContainer(DataHeader)_entry";
    H5::DataSet dataset = m_group->openDataSet(dh_entry);
    if (m_event_iter + 1 >= dataset.getInMemDataSize()/8) { // End of File
-      FileIncident endFileIncident(name(), "EndInputFile", "HDF:test.h5"); //FIXME, hardcoded filename
-      m_incidentSvc->fireIncident(endFileIncident);
+      m_inputFileGuard.reset(); // fires EndInputFile
       ATH_MSG_INFO("AthenaHDFStreamTool::getLockedEvent: no more events = " << m_event_iter);
       return(StatusCode::RECOVERABLE);
    }
@@ -143,8 +142,8 @@ StatusCode AthenaHDFStreamTool::lockEvent(long eventNumber) const {
    ATH_MSG_VERBOSE("AthenaHDFStreamTool::lockEvent: " << eventNumber);
    m_event_iter = eventNumber;
    if (eventNumber == 0) {
-      FileIncident beginFileIncident(name(), "BeginInputFile", "HDF:test.h5"); //FIXME, hardcoded filename
-      m_incidentSvc->fireIncident(beginFileIncident);
+      m_inputFileGuard = InputFileIncidentGuard::begin(*m_incidentSvc, name(),
+                              "HDF:test.h5", {}); //FIXME, hardcoded filename
    }
    return(StatusCode::SUCCESS);
 }

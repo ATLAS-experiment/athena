@@ -824,10 +824,14 @@ class AthConfigFlags(object):
             if parser.epilog is None: parser.epilog=""
             parser.epilog += "  Note: Specify additional flags in form <flagName>=<value>."
             subparsers = {"":[parser,parser.add_subparsers(help=argparse.SUPPRESS)]} # first is category's parser, second is subparsers (effectively the category's subcategories)
-            # silence logging while evaluating flags
+            # silence logging and ROOT errors while evaluating flags
             logging.root.setLevel(logging.ERROR)
             os.environ["TDAQ_ERS_WARNING"] = "null"
             os.environ["TDAQ_ERS_ERROR"] = "null"
+            import ROOT
+            ignoreLevel = ROOT.gErrorIgnoreLevel
+            ROOT.gErrorIgnoreLevel=ROOT.kFatal
+
             def getParser(category): # get parser for a given category
                 if category not in subparsers.keys():
                     cat1,cat2 = category.rsplit(".",1) if "." in category else ("",category)
@@ -859,6 +863,7 @@ class AthConfigFlags(object):
 
             parser._positionals.title = 'flags and positional arguments'
             parser.parse_known_args(argList + ["--help"])
+            ROOT.gErrorIgnoreLevel=ignoreLevel # this is quite unnecessary since we are about to exit, but people worry about touching msg levels
 
         self._args = args
 

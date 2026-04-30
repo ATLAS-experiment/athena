@@ -46,7 +46,7 @@ public:
 
    /// Function reading in the persistent object from disk
    virtual xAOD::TrigPassBitsContainer*
-   createTransientWithKey (const std::string& key) override final;
+   createTransientWithKey (const Token* token, const std::string& key) override final;
 };
 
 #endif // XAODTRIGGERATHENAPOOL_XAODTRIGPASSBITSCONTAINERCNV_H

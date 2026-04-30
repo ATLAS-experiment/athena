@@ -41,7 +41,7 @@ consumer_t getConsumers() {
   ADD(dtype);
   ADD(btype);
 #undef ADD
-  auto half = H5Utils::Compression::HALF_PRECISION;
+  H5Utils::Compression half = H5Utils::Compression::HALF_PRECISION;
   consumers.add("half" , [](const out_t& o) { return o.ftype; }, 0, half);
   consumers.add("dhalf", [](const out_t& o) { return o.dtype; }, 0, half);
   return consumers;

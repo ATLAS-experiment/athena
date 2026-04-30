@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AsgDataHandles )
@@ -24,6 +24,6 @@ atlas_add_library( AsgDataHandlesLib
    atlas_add_test( gt_AsgDataHandles
       SOURCES test/gt_AsgDataHandles.cxx
       LINK_LIBRARIES AsgDataHandlesLib AsgTestingLib xAODEgamma
-      POST_EXEC_SCRIPT nopost.sh )
+      POST_EXEC_SCRIPT noerror.sh )
 
 endif()

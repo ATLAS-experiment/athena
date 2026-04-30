@@ -218,7 +218,7 @@ namespace xAOD {
     * @brief Set the L1Accept bunch position.
     * @param pos Bunch position.
     */
-    void setL1AcceptBunchPosition(const uint32_t pos);
+    void setL1AcceptBunchPosition(uint32_t pos);
 
     /**
     * @brief Get the TIP words for all bunch crossings.

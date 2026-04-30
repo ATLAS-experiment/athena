@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArDigitRetriever.h"
@@ -25,40 +25,7 @@ using CLHEP::GeV;
 namespace JiveXML {
 
   /**
-   * This is the standard AthAlgTool constructor
-   * @param type   AlgTool type name
-   * @param name   AlgTool instance name
-   * @param parent AlgTools parent owning this tool
-   **/
-  LArDigitRetriever::LArDigitRetriever(const std::string& type,const std::string& name,const IInterface* parent):
-    AthAlgTool(type,name,parent),
-    m_calocell_id(nullptr)
-  {
-    //Only declare the interface
-    declareInterface<IDataRetriever>(this);
-   
-    m_doDigit = false;
-    m_inputdpd = false;
-    
-    declareProperty("CellThreshold", m_cellThreshold = 50.);
-    declareProperty("RetrieveLAr"  , m_lar  = true);
-    declareProperty("RetrieveHEC"  , m_hec  = true);
-    declareProperty("RetrieveFCAL" , m_fcal = true);
-    declareProperty("DoLArDigit",    m_doLArDigit = false);       
-    declareProperty("DoHECDigit",    m_doHECDigit = false); 
-    declareProperty("DoFCalDigit",   m_doFCalDigit = false);
-    declareProperty("CellEnergyPrec", m_cellEnergyPrec = 3);
-    declareProperty("CellTimePrec", m_cellTimePrec = 3);
-    
-// Check the cell conditions. Not present in MC data, so false by default. Switch to 'true'
-// for real (commissioning) cells.
-    declareProperty("CellConditionCut", m_cellConditionCut = false);
-    declareProperty("LArChannelsToIgnoreM5",  m_LArChannelsToIgnoreM5);
-    declareProperty("DoMaskLArChannelsM5", m_doMaskLArChannelsM5 = false);
-  }
-
-  /**
-   * Initialise the ToolSvc
+   * Initialise the Tool
    */
 
   StatusCode LArDigitRetriever::initialize() {

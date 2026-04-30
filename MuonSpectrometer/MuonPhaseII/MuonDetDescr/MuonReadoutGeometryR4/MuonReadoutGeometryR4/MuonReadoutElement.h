@@ -205,6 +205,7 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     /** @brief Returns whether the detector element is sensitive */
     virtual bool isSensitive() const final override { return true; }
 #endif
+    const Amg::Transform3D& localToGlobalTransform(const ActsTrk::DetectorAlignStore* store) const override final;
     /** @brief Returns the thickness in normal direction of the strip readout
      *         planes */
     virtual double thickness() const = 0;

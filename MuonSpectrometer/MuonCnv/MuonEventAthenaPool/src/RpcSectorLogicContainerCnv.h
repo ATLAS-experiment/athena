@@ -20,7 +20,7 @@ public:
   RpcSectorLogicContainerCnv (ISvcLocator* svcloc) : RpcSectorLogicContainerCnvBase(svcloc) {}
 protected:
   virtual PERS*   createPersistent (RpcSectorLogicContainer* transObj);
-  virtual RpcSectorLogicContainer*  createTransient ();
+  virtual RpcSectorLogicContainer*  createTransient(const Token* token);
 };
 
 #endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INCLUDE_PERSISTENCYSVC_MICROSESSIONMANAGER_H
@@ -9,13 +9,12 @@
 #include <set>
 
 #include "PersistencySvc/ITechnologySpecificAttributes.h"
+#include "PersistencySvc/ITransaction.h"
 
 namespace pool {
 
   // forward declarations
   class IStorageSvc;
-  class Session;
-  class ITransaction;
 
   namespace PersistencySvc {
 
@@ -34,14 +33,16 @@ namespace pool {
     class MicroSessionManager : virtual public ITechnologySpecificAttributes {
     public:
       /// Constructor
-      MicroSessionManager( DatabaseRegistry& registry,
-                           ITransaction& transaction,
-                           long technology );
+      MicroSessionManager( DatabaseRegistry& registry, long technology );
       /// Destructor
       virtual ~MicroSessionManager();
 
+      /// Connects to the storage service
+      bool connect( ITransaction::Type transType );
+
       /// Connects to a database.
-      DatabaseHandler* connect( const std::string& fid,
+      DatabaseHandler* connect( ITransaction::Type transType,
+                                const std::string& fid,
                                 const std::string& pfn,
                                 long accessMode );
 
@@ -72,9 +73,8 @@ namespace pool {
 
     private:
       DatabaseRegistry&          m_registry;
-      ITransaction&              m_transaction;
       IStorageSvc*               m_storageSvc;
-      Session*                   m_session;
+      bool                       m_inSession;
       long                       m_technology;
       std::set<DatabaseHandler*> m_databaseHandlers;
     };

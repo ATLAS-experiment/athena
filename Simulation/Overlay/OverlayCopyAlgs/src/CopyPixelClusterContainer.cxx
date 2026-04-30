@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CopyPixelClusterContainer.h"
@@ -50,6 +50,7 @@ StatusCode CopyPixelClusterContainer::execute(const EventContext& ctx) const
   for(const InDet::PixelClusterCollection* col : *inputContainer){
     InDet::PixelClusterCollection* newCol=new InDet::PixelClusterCollection(col->identifyHash());
     newCol->setIdentifier(col->identify());
+    newCol->reserve(col->size());
     for(const InDet::PixelCluster* clus : *col){
       newCol->push_back(std::make_unique<InDet::PixelCluster>(*clus));
     }

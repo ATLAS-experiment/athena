@@ -29,6 +29,8 @@ namespace ActsTrk {
 
       /// Returns the transformation stored in the TransformCache.
       const Acts::Transform3& localToGlobalTransform(const Acts::GeometryContext& gctx) const override final;
+      /** @brief  */
+      const Amg::Transform3D& localToGlobalTransform(const DetectorAlignStore* store) const override final;
 
       /// Returns the dereferenced pointer cache.
       const Acts::Surface& surface() const override final;

@@ -74,25 +74,22 @@ namespace CP
   public:
     explicit operator bool () const noexcept;
 
-    /// \brief get the name pattern before substitution
-    ///
-    /// This is not currently defined for decoration handles and made
-    /// private.
-  private:
-    virtual std::string getNamePattern () const override;
-
 
     /// \brief initialize this handle
     /// \{
   public:
-    StatusCode initialize (SysListHandle& sysListHandle, const ISysHandleBase& objectHandle);
-    StatusCode initialize (SysListHandle& sysListHandle, const ISysHandleBase& objectHandle, SG::AllowEmptyEnum);
+    StatusCode initialize (SysListHandle& sysListHandle, ISysObjectHandleBase& objectHandle);
+    StatusCode initialize (SysListHandle& sysListHandle, ISysObjectHandleBase& objectHandle, SG::AllowEmptyEnum);
     /// \}
 
 
     /// \brief get the name we retrieve from the event store
   public:
     const std::string& getName (const CP::SystematicSet& sys) const;
+
+    /// \brief get the decoration name we use
+  public:
+    const std::string& getDecorName () const noexcept;
 
 
     /// \brief set the object decoration for the given systematic
@@ -132,7 +129,7 @@ namespace CP
 
     /// \brief the object handle we use
   private:
-    const ISysHandleBase *m_objectHandle {nullptr};
+    ISysObjectHandleBase *m_objectHandle {nullptr};
 
     /// \brief the cache of names we use
   private:

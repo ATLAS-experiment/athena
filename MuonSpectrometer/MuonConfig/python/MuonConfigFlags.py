@@ -60,11 +60,21 @@ def createMuonConfigFlags():
                                                                                prevFlags.GeoModel.SQLiteDBFullPath)["Muon"]["useR4Plugin"] )
     
     mcf.addFlag("Muon.AlignedGeoTrfCacheMode",  GeoTrfCacheMode.FullCacheCond, type = GeoTrfCacheMode)
+    
+    ### Activate the material blending of the material inside the chambers 
+    ### on to the portal surfaces
+    mcf.addFlag("Muon.trackGeometryActiveMaterial", True)
+    ### Activate the auxiliary surfaces in the tracking geometry carrying the material
+    ### of the coils and the ATLAS support structure
+    mcf.addFlag("Muon.trackGeometryPassiveMaterial", True)
     # 1. Digitization
     mcf.addFlag("Muon.doFastMMDigitization", False)  ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
     mcf.addFlag("Muon.doFastsTGCDigitization",True) ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
 
-    
+    ### Setup the Phase II truth matching algorithms
+    mcf.addFlag("Muon.setupTruthAlgorithms", lambda prevFlags: prevFlags.Muon.usePhaseIIGeoSetup and \
+                                                               prevFlags.Input.isMC and \
+                                                               not prevFlags.Trigger.doHLT)
     # 2. Reco MuonRecFlags 
 
     #### If this flag is enabled, the phase II MS track 

@@ -27,7 +27,7 @@ TrigMissingET_PERS* TrigMissingETCnv::createPersistent(TrigMissingET* transObj) 
 }
 
 
-TrigMissingET* TrigMissingETCnv::createTransient() {
+TrigMissingET* TrigMissingETCnv::createTransient(const Token* token) {
   MsgStream mlog(msgSvc(), "TrigMissingETConverter" );
 
   mlog << MSG::DEBUG << "TrigMissingETCnv::createTransient " << endmsg;
@@ -36,23 +36,23 @@ TrigMissingET* TrigMissingETCnv::createTransient() {
   static const pool::Guid p1_guid("A65F0499-A789-4D66-9930-E8651FE91F8A");
   static const pool::Guid p0_guid("1403772C-7444-4340-930B-ABD51C243A09");
   
-  if( compareClassGuid(p2_guid) ) {
+  if( compareClassGuid(token, p2_guid) ) {
     
-    std::unique_ptr< TrigMissingET_p2 > col_vect( poolReadObject< TrigMissingET_p2 >() );
+    std::unique_ptr< TrigMissingET_p2 > col_vect( poolReadObject< TrigMissingET_p2 >(token) );
     TrigMissingETCnv_p2 converter;
     return converter.createTransient( col_vect.get(), mlog );
 
   }
-  else if( compareClassGuid(p1_guid) ) {
+  else if( compareClassGuid(token, p1_guid) ) {
     
-    std::unique_ptr< TrigMissingET_p1 > col_vect( poolReadObject< TrigMissingET_p1 >() );
+    std::unique_ptr< TrigMissingET_p1 > col_vect( poolReadObject< TrigMissingET_p1 >(token) );
     TrigMissingETCnv_p1 converter;
     return converter.createTransient( col_vect.get(), mlog );
 
   }
-  else if( compareClassGuid(p0_guid) ) {
+  else if( compareClassGuid(token, p0_guid) ) {
     // old version from before TP separation, just return it
-    return this->poolReadObject<TrigMissingET>();
+    return this->poolReadObject<TrigMissingET>(token);
   }  
   else {
     throw std::runtime_error("Unsupported persistent version");

@@ -34,7 +34,10 @@ set(FTISource
   Root/CustomGetterUtils.cxx
   Root/DataPrepUtilities.cxx
   Root/ElectronsLoader.cxx
+  Root/MuonsLoader.cxx
   Root/FlipTagEnums.cxx
+  Root/CaloClusterLoader.cxx
+  Root/TowerLoader.cxx
   Root/FlowElementsLoader.cxx
   Root/FTagDataDependencyNames.cxx
   Root/GNN.cxx
@@ -43,12 +46,14 @@ set(FTISource
   Root/GNNToolifiers.cxx
   Root/SaltModel.cxx
   Root/SaltModelOutput.cxx
-  Root/NNSharingSvc.cxx
+  Root/NNSharingOnnxSvc.cxx
   Root/StringUtils.cxx
   Root/TracksLoader.cxx
   Root/HitsLoader.cxx
   Root/SaltModelGraphConfig.cxx
   Root/GNNDataLoader.cxx
+  Root/PassThroughSaltModel.cxx
+  Root/PassThroughModelSvc.cxx
 )
 
 if (NOT XAOD_STANDALONE)
@@ -63,6 +68,7 @@ if (NOT XAOD_ANALYSIS)
   list(
     APPEND FTISource
     Root/SaltModelTriton.cxx
+    Root/NNSharingTritonSvc.cxx
     )
 endif()
 
@@ -86,6 +92,8 @@ atlas_add_library( FlavorTagInference
     xAODBTagging
     xAODEgamma
     xAODMuon
+    xAODCaloEvent
+    xAODPFlow
   )
 
 
