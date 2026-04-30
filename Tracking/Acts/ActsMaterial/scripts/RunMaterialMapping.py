@@ -41,6 +41,8 @@ def SetupArgParser():
                         help="Print full details of the AlgSequence")
     parser.add_argument("--storeTracks", default = False, action="store_true", 
                         help="Store the mapped and unmapped geantino tracks" )
+    parser.add_argument("--storeSurface", default = False, action="store_true", 
+                        help="Store the surface info on the mapped/unmapped tracks" )
     parser.add_argument("-S", "--verboseStoreGate", default=False,
                         action="store_true",
                         help="Dump the StoreGate(s) each event iteration")
@@ -98,6 +100,10 @@ if __name__ == "__main__":
     else:
         print("Running with: {}".format(", ".join(args.detectors)))
     print()
+
+    if args.storeSurface and not args.storeTracks:
+        print("Wrong configuration- I cannot store surface info without storing the geantino tracks!")
+        exit()
 
     # Configure
     flags = initConfigFlags()
@@ -164,7 +170,6 @@ if __name__ == "__main__":
     from ActsConfig.ActsMaterialConfig import MaterialTrackReaderCfg, MaterialMappingCfg
     import sys
 
-    import sys
     acc.merge(MaterialTrackReaderCfg(flags, 
                                      maxEvents =  args.maxEvents if args.maxEvents > 0 else sys.maxsize,
                                      skipEvents = args.skipEvents,
@@ -173,7 +178,8 @@ if __name__ == "__main__":
                                      TreeName=args.treeName))
 
     acc.merge(MaterialMappingCfg(flags, 
-                                 StoreTracks=args.storeTracks))
+                                 StoreTracks=args.storeTracks,
+                                 StoreSurfInfo=args.storeSurface))
 
     from MuonConfig.MuonConfigUtils import executeTest, setupHistSvcCfg
     if flags.Detector.GeometryMuon:
