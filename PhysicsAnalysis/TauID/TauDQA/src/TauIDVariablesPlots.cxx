@@ -24,7 +24,7 @@ void TauIDVariablesPlots::initializePlots(){
    m_tauIpSig      = Book1D("IpSig",m_sTauJetContainerName + " Tau lead track IP signif. ; IpSig; # Taus",30,-15.,15.);
    m_tauDRMax     = Book1D("DRMax",m_sTauJetContainerName + " Tau DR Max track-seed; DRMax; # Taus",20,0.,0.5);
    m_tauMtrks     = Book1D("Mtracks",m_sTauJetContainerName + " Tau tracks mass ; Mtrks; # Taus",50,-1.,10.);
-   m_SumPtTrkFrac = Book1D("SumPtTrkFrac",m_sTauJetContainerName + " Tau Sum PtTrk Frac ; SumPtTrkFrac; # Taus",100,-10.,20.);   
+   m_SumPtTrkFrac = Book1D("SumPtTrkFrac",m_sTauJetContainerName + " Tau Sum PtTrk Frac ; SumPtTrkFrac; # Taus",54,-0.04,1.04);   
    m_innerTrkAvgDist    = Book1D("innerTrkAvgDist",m_sTauJetContainerName + "Tau innerTrkAvgDist; innerTrkAvgDist; # of Taus",10,-0.2,.8);
    m_ptRatioEflowApprox = Book1D("ptRatioEflowApprox",m_sTauJetContainerName + "Tau ptRatioEflowApprox; ptRatioEflowApprox; # of Taus", 10, 0, 10);
    m_mEflowApprox       = Book1D("mEflowApprox",m_sTauJetContainerName + "Tau mEflowApprox; mEflowApprox; #Taus",30,0.0,3000.0);   
