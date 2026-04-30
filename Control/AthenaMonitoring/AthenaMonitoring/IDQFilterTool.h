@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDQFILTERTOOL_H
 #define IDQFILTERTOOL_H
 
 #include "GaudiKernel/IAlgTool.h"
+#include "GaudiKernel/EventContext.h"
 
 // Interface class for tools to be used in DQ tools to filter input
 // @author Peter Onyisi <ponyisi@cern.ch>
@@ -19,7 +20,7 @@ class IDQFilterTool : virtual public IAlgTool {
         static const InterfaceID& interfaceID();
         
         /**Pure virtual*/
-        virtual bool accept() const = 0;
+        virtual bool accept(const EventContext& ctx) const = 0;
 };
 
 inline const InterfaceID& IDQFilterTool::interfaceID()

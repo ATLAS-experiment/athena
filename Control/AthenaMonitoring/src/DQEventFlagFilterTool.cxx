@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DQEventFlagFilterTool.h"
@@ -23,11 +23,11 @@ StatusCode DQEventFlagFilterTool::initialize()
   return StatusCode::SUCCESS;
 }
 
-bool DQEventFlagFilterTool::accept() const {
+bool DQEventFlagFilterTool::accept(const EventContext& ctx) const {
   if (m_alwaysReturnTrue) {
     return true;
   } else {
-    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_EventInfoKey);
+    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_EventInfoKey, ctx);
     if (! eventInfo.isValid()) {
       ATH_MSG_ERROR("Cannot retrieve EventInfo object, returning false (or true if invert is set)");
       return m_invert;

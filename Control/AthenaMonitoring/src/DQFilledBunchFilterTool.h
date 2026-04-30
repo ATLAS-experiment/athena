@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DQFILLEDBUNCHFILTERTOOL_H
@@ -22,7 +22,7 @@ class DQFilledBunchFilterTool : public AthAlgTool, virtual public IDQFilterTool 
 
   virtual StatusCode initialize() override;
 
-  virtual bool accept() const override;
+  virtual bool accept(const EventContext& ctx) const override;
 
  private:
   bool m_alwaysReturnTrue;

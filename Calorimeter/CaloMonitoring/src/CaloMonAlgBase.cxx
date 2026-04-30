@@ -54,7 +54,7 @@ StatusCode CaloMonAlgBase::checkFilters(bool &ifPass, bool &passBeamBackgroundRe
 
   ifPass = 0;   
   if (m_useReadyFilterTool) {
-    if (m_ReadyFilterTool->accept()) {
+    if (m_ReadyFilterTool->accept(ctx)) {
       ifPass = 1;
       evtbin = 2;
       fill(MonGroupName,evtbin); //All events with ATLAS Ready
@@ -71,7 +71,7 @@ StatusCode CaloMonAlgBase::checkFilters(bool &ifPass, bool &passBeamBackgroundRe
   SG::ReadHandle<xAOD::EventInfo> eventInfo{GetEventInfo(ctx)};
 
   if (m_useBadLBTool) {
-    if (m_BadLBTool->accept()) { 
+    if (m_BadLBTool->accept(ctx)) {
       ifPass = ifPass && 1;
       if(ifPass) {evtbin=3; fill(MonGroupName,evtbin);} //All events with ATLAS Ready and Good LB
     }
