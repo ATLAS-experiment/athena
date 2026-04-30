@@ -32,7 +32,7 @@ namespace DerivationFramework {
       ~Thin_vtxTrk();
       StatusCode initialize();
       StatusCode finalize();
-      virtual StatusCode doThinning() const;
+      virtual StatusCode doThinning(const EventContext& ctx) const;
 
     private:
       StringProperty m_streamName{ this, "StreamName", "", "Name of the stream being thinned" };

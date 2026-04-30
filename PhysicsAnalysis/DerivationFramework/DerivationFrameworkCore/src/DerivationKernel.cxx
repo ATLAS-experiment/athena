@@ -209,7 +209,7 @@ StatusCode DerivationFramework::DerivationKernel::execute() {
 
   for (const auto &  thinningTool : m_thinningTools) {
     ATH_MSG_DEBUG("Entering " << thinningTool->name());
-    if ( thinningTool->doThinning().isFailure() ) {
+    if ( thinningTool->doThinning(ctx).isFailure() ) {
       ATH_MSG_ERROR("Thinning failed!");
       return StatusCode::FAILURE;
     }

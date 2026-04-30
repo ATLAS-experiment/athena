@@ -54,9 +54,8 @@ StatusCode DerivationFramework::TrackMeasurementThinning::finalize()
 }
 
 // The thinning itself
-StatusCode DerivationFramework::TrackMeasurementThinning::doThinning() const
+StatusCode DerivationFramework::TrackMeasurementThinning::doThinning(const EventContext& ctx) const
 {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // Get the cluster container
     SG::ThinningHandle<xAOD::TrackMeasurementValidationContainer> clusters

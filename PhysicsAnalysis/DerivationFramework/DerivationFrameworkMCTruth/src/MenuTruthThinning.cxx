@@ -182,9 +182,8 @@ StatusCode DerivationFramework::MenuTruthThinning::finalize()
 }
 
 // The thinning itself
-StatusCode DerivationFramework::MenuTruthThinning::doThinning() const
+StatusCode DerivationFramework::MenuTruthThinning::doThinning(const EventContext& ctx) const
 {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // Retrieve the truth collections
     SG::ThinningHandle<xAOD::TruthParticleContainer> importedTruthParticles

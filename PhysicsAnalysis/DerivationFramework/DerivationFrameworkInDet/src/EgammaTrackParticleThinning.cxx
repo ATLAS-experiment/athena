@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -105,9 +105,8 @@ DerivationFramework::EgammaTrackParticleThinning::finalize()
 
 // The thinning itself
 StatusCode
-DerivationFramework::EgammaTrackParticleThinning::doThinning() const
+DerivationFramework::EgammaTrackParticleThinning::doThinning(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::ThinningHandle<xAOD::TrackParticleContainer> importedGSFTrackParticles(
     m_gsfSGKey, ctx);
 
@@ -179,7 +178,7 @@ DerivationFramework::EgammaTrackParticleThinning::doThinning() const
     if (dynamic_cast<const xAOD::ElectronContainer*>(importedEgamma.cptr()) != nullptr)
       setElectronMasks(mask, gsfMask, egToCheck, tps, gsfs);
     else if (dynamic_cast<const xAOD::PhotonContainer*>(importedEgamma.cptr()) != nullptr)
-      setPhotonMasks(mask, gsfMask, egToCheck, tps, gsfs);
+      setPhotonMasks(ctx, mask, gsfMask, egToCheck, tps, gsfs);
     else
       ATH_MSG_WARNING("Input container is neither for Electrons, "
 		      "nor for Photons ??");
@@ -232,6 +231,7 @@ void DerivationFramework::EgammaTrackParticleThinning::clearGSFVtx(
 
 void
 DerivationFramework::EgammaTrackParticleThinning::setPhotonMasks(
+  const EventContext& ctx,
   std::vector<bool>& mask,
   std::vector<bool>& gsfMask,
   const xAOD::EgammaContainer* egammas,
@@ -245,7 +245,7 @@ DerivationFramework::EgammaTrackParticleThinning::setPhotonMasks(
   }
 
   SG::ThinningHandle<xAOD::VertexContainer> importedGSFConversionVtx(
-     m_gsfVtxSGKey, Gaudi::Hive::currentContext());
+     m_gsfVtxSGKey, ctx);
   const xAOD::VertexContainer* gsfVtxs = importedGSFConversionVtx.cptr();
   unsigned int nGSFVtx = gsfVtxs->size(), n_gsfVtx_pass = 0;
   std::vector<bool> gsfVtxMask(nGSFVtx,false);

@@ -56,9 +56,7 @@ namespace DerivationFramework
     }
 
     // The thinning itself
-    StatusCode DerivationFramework::HIJetTrackParticleThinningTool::doThinning() const {
-        // Get current event context
-        const EventContext& ctx = Gaudi::Hive::currentContext();
+    StatusCode DerivationFramework::HIJetTrackParticleThinningTool::doThinning(const EventContext& ctx) const {
 
         // Get TrackParticle collection
         SG::ThinningHandle<xAOD::TrackParticleContainer> tracks (m_inDetSGKey, ctx);

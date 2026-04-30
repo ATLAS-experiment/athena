@@ -69,9 +69,8 @@ StatusCode DerivationFramework::TauJets_LepRMParticleThinning::finalize()
 }
 
 // The thinning itself
-StatusCode DerivationFramework::TauJets_LepRMParticleThinning::doThinning() const
+StatusCode DerivationFramework::TauJets_LepRMParticleThinning::doThinning(const EventContext& ctx) const
 {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     // Retrieve main TrackParticle collection
     SG::ThinningHandle<xAOD::TrackParticleContainer> TrackParticles(m_inDetSGKey, ctx);
     if (!TrackParticles.isValid()) {
