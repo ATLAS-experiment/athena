@@ -133,8 +133,10 @@ StatusCode TrigInDetAccelerationSvc::initializeWorkFactory() {
 StatusCode TrigInDetAccelerationSvc::finalize() {
 
   delete m_pWF;
-
-  dlclose(m_libHandle);
+  // in HLTMPPU the worker factory is only initialized in workers
+  if (m_libHandle) {
+    dlclose(m_libHandle);
+  }
 
   return StatusCode::SUCCESS; 
 }
