@@ -313,7 +313,6 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
     else
       message("Unable to retrieve ITkPixel Hits");
 
-    }
   }
   else if(detector=="ITkStrip")
   {
