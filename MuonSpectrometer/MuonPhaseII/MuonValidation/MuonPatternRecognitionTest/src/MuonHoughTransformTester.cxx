@@ -18,6 +18,7 @@
 #include "MuonSpacePoint/SpacePointHelpers.h"
 
  #include "AthContainers/ConstDataVector.h"
+ #include "xAODTruth/xAODTruthHelpers.h"
 
 
 namespace {
@@ -261,7 +262,9 @@ namespace MuonValR4 {
     }                
     void MuonHoughTransformTester:: fillTruthInfo(const ActsTrk::GeometryContext& gctx,
                                                   const xAOD::MuonSegment* segment) {
-        if (!segment) return; 
+        if (!segment) {
+            return; 
+        }
         m_out_hasTruth = true; 
 
         const Amg::Vector3D segDir{segment->direction()};
@@ -314,6 +317,13 @@ namespace MuonValR4 {
         ATH_MSG_DEBUG("A true max on chamber index "<<m_out_chamberIndex.getVariable()<<" side "<<m_out_stationSide.getVariable()<<" phi "<<m_out_stationPhi.getVariable()<<" with "
                     <<m_out_gen_nMDTHits.getVariable()<<" MDT and "<<m_out_gen_nRPCHits.getVariable()+m_out_gen_nTGCHits.getVariable()<< " trigger hits is at "
                     <<m_out_gen_tantheta.getVariable()<<" and "<<m_out_gen_y0.getVariable()); 
+
+        const xAOD::TruthParticle* truthMuon = getTruthMatchedParticle(*segment);
+        if (truthMuon) {
+            using namespace xAOD::TruthHelpers;
+            m_out_gen_truthType   = getParticleTruthType(*truthMuon);
+            m_out_gen_truthOrigin = getParticleTruthOrigin(*truthMuon);
+        }
     }
     void MuonHoughTransformTester::fillBucketInfo(const SpacePointBucket& bucket) {
         m_out_bucketEnd = bucket.coveredMax();
@@ -553,7 +563,7 @@ namespace MuonValR4 {
             m_out_segment_nsTgcPadpHits.push_back(nStgcPadHits);
         
 
-	    m_out_segment_nTrueHits.push_back(nTrueHits);
+            m_out_segment_nTrueHits.push_back(nTrueHits);
             m_out_segment_nTruePrecHits.push_back(nTruePrecHits);
             m_out_segment_nTruePhiHits.push_back(nTruePhiHits);
             m_out_segment_nTrueEtaHits.push_back(nTrueEtaHits);
