@@ -145,7 +145,7 @@ def SetupVP1():
     )
     # Phase-II
     group.add_argument(
-        "--phaseII", action="store_true", help="Use this flag for running VP1 with PhaseII setup."
+        "--phaseII", action="store_true", help="Launch VP1 with the current default Run4 geometry tag for Phase-II [that is, it sets 'flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4']. It cannot be used when running VP1 on a data file, otherwise it interferes with the auto-configuration from the metadata stored in the file."
     )
     # Batch
     group.add_argument(
@@ -218,9 +218,8 @@ def SetupVP1():
     vp1_empty_input = False
     # This covers the use case where we launch VP1
     # without input files; e.g., to check the detector description
-    if (flags.Input.Files == [] or flags.Input.Files == [
-        "_ATHENA_GENERIC_INPUTFILE_NAME_"
-    ]) and not args.phaseII:
+    if (flags.Input.Files == [] or flags.Input.Files == ["_ATHENA_GENERIC_INPUTFILE_NAME_"]):
+      if not args.phaseII:
         from Campaigns.Utils import Campaign
         from AthenaConfiguration.TestDefaults import defaultGeometryTags
 
@@ -242,15 +241,13 @@ def SetupVP1():
         flags.Input.isMC = True
         flags.Input.MCCampaign = Campaign.Unknown
         flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
-    elif args.phaseII:
+      elif args.phaseII:
         _logger.verbose("Phase-II mode!")
         from Campaigns.Utils import Campaign
         from AthenaConfiguration.TestDefaults import defaultGeometryTags
         vp1_empty_input = True
         flags.Input.ProjectName = "mc21_14TeV"
         flags.Input.RunNumbers = [601229]
-        #flags.Input.ProjectName = "mc20_13TeV"
-        #flags.Input.RunNumbers = [330000]
         flags.Input.TimeStamps = [1]
         flags.Input.TypedCollections = []
 
@@ -259,7 +256,12 @@ def SetupVP1():
         flags.Input.isMC = True
         flags.Input.MCCampaign = Campaign.Unknown
         flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
+      else:
+          _logger.error("VP1: Run mode without input data file not defined!");
         
+    # Here we consider the use case where we launch VP1 
+    # with input data files 
+    # (such as ESD, HITS, RDO, or any other pool.root file)
     else:
         # Now just check file exists, or fail gracefully
         from os import path
