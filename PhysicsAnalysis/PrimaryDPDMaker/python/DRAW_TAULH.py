@@ -40,7 +40,7 @@ def DRAW_TAULHKernelCfg(flags, name='DRAW_TAULHKernel', **kwargs):
     from TauAnalysisTools.TauAnalysisToolsConfig import TauSelectionToolCfg
     TauSelectorMedium = acc.popToolsAndMerge(TauSelectionToolCfg(flags,
                                                                  name = 'TauSelectorMedium_TAULH',
-                                                                 ConfigPath = 'TauAnalysisAlgorithms/tau_selection_medium_noeleid.conf'))
+                                                                 ConfigPath = 'TauAnalysisAlgorithms/tau_selection_gntau_medium_noeleid.conf'))
     acc.addPublicTool(TauSelectorMedium)
 
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import AsgSelectionToolWrapperCfg
