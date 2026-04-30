@@ -106,6 +106,14 @@ QWidget* VP1SimHitSystem::buildController()
   Ui::SimHitControllerForm ui;
   ui.setupUi(controller);
 
+  // Show/Hide checkboxes
+  // based on geometry being used
+  ui.chbxITkPixelHits->setVisible(VP1JobConfigInfo::hasITkGeometry());
+  ui.chbxITkStripHits->setVisible(VP1JobConfigInfo::hasITkGeometry());
+  ui.chbxPixelHits->setVisible(VP1JobConfigInfo::hasPixelGeometry());
+  ui.chbxSCTHits->setVisible(VP1JobConfigInfo::hasSCTGeometry());
+  ui.chbxTRTHits->setVisible(VP1JobConfigInfo::hasTRTGeometry());
+
   // Populate Check Box Names Map
   if (VP1JobConfigInfo::hasITkGeometry()) {
     m_clockwork->checkBoxNamesMap.insert(ui.chbxITkPixelHits,"ITkPixel");
@@ -113,8 +121,8 @@ QWidget* VP1SimHitSystem::buildController()
   } else {
     m_clockwork->checkBoxNamesMap.insert(ui.chbxPixelHits,"Pixel");
     m_clockwork->checkBoxNamesMap.insert(ui.chbxSCTHits,"SCT");
+    m_clockwork->checkBoxNamesMap.insert(ui.chbxTRTHits,"TRT");
   }
-  m_clockwork->checkBoxNamesMap.insert(ui.chbxTRTHits,"TRT");
   m_clockwork->checkBoxNamesMap.insert(ui.chbxMDTHits,"MDT");
   m_clockwork->checkBoxNamesMap.insert(ui.chbxRPCHits,"RPC");
   m_clockwork->checkBoxNamesMap.insert(ui.chbxTGCHits,"TGC");
@@ -144,12 +152,12 @@ void VP1SimHitSystem::systemcreate(StoreGateSvc* detstore)
   // Populate Color Map
   if (VP1JobConfigInfo::hasITkGeometry()) {
     m_clockwork->colorMap.insert("ITkPixel",SbColor(1,1,1)); // white
-    m_clockwork->colorMap.insert("ITkStrip",SbColor(1,1,1)); // white
+    m_clockwork->colorMap.insert("ITkStrip",SbColor(VP1ColorUtils::getSbColorFromRGB(28, 162, 230))); // Carolina Blue
   } else {
     m_clockwork->colorMap.insert("Pixel",SbColor(0,0,1));
     m_clockwork->colorMap.insert("SCT",SbColor(1,1,1)); // white
+    m_clockwork->colorMap.insert("TRT",SbColor(1,0,0)); // red
   }
-  m_clockwork->colorMap.insert("TRT",SbColor(1,0,0)); // red
   m_clockwork->colorMap.insert("MDT",SbColor(.98,.8,.21));
   m_clockwork->colorMap.insert("RPC",SbColor(0,.44,.28));
   m_clockwork->colorMap.insert("TGC",SbColor(0,.631244,.748016));
@@ -300,6 +308,7 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
         HepGeom::Point3D<double> u = ghit.getGlobalPosition();
         hitVtxProperty->vertex.set1Value(hitCount++,u.x(),u.y(),u.z());
       }
+      std::cout << "Event contains " << p_collection->size() << " entries " << std::endl;
     }
     else
       message("Unable to retrieve ITkPixel Hits");
@@ -307,13 +316,14 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
     SG::ReadHandleKey<SiHitCollection> hitsContainerKey {"ITkPixelHits"};
     // Initialize keys
     //ATH_CHECK(hitsContainerKey.initialize());
-    hitsContainerKey.initialize();
-    const EventContext&ctx {Gaudi::Hive::currentContext()};
-    const SiHitCollection* hitCollection{nullptr};
-    //ATH_CHECK(SG::get(hitCollection, hitsContainerKey, ctx));
-    SG::get(hitCollection, hitsContainerKey, ctx);
-    std::cout << "Event contains " << hitCollection->size() << " entries in " << hitsContainerKey.key() << std::endl;
-
+    StatusCode sc = hitsContainerKey.initialize();
+    if (sc==StatusCode::SUCCESS) {
+        const EventContext&ctx {Gaudi::Hive::currentContext()};
+        const SiHitCollection* hitCollection{nullptr};
+        //ATH_CHECK(SG::get(hitCollection, hitsContainerKey, ctx));
+        SG::get(hitCollection, hitsContainerKey, ctx);
+        std::cout << "Event contains " << hitCollection->size() << " entries in " << hitsContainerKey.key() << std::endl;
+    }
   }
   else if(detector=="ITkStrip")
   {
