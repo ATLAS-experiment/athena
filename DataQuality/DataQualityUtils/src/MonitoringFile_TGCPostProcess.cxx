@@ -105,6 +105,20 @@ namespace dqutils {
      */
     TIter next_run(mf.GetListOfKeys());
     TKey* key_run(0);
+    static const std::string sac[2] = {
+        "_A", "_C"
+    };
+    static const std::string side[2] = {
+        "A", "C"
+    };
+    static const std::string sws[2] = {
+        "Wire_", "Strip_"
+    };
+    static const std::string type[17] = {
+        "_F_T1", "_E4_T3", "_E3_T6", "_E2_T7", "_E1_T8",
+        "_F_T2", "_E5_T4", "_E4_T6", "_E3_T7", "_E2_T8", "_E1_T9",
+        "_F_T2", "_E5_T5", "_E4_T6", "_E3_T7", "_E2_T8", "_E1_T9"
+      };
     while ((key_run = dynamic_cast<TKey*> (next_run())) != 0) {
       if (!key_run->IsFolder()) continue;
       std::string run_dir = key_run->GetName();
@@ -122,15 +136,7 @@ namespace dqutils {
         tgc_dir + "TGCEA/", tgc_dir + "TGCEC/"
       };
 
-      static const std::string sac[2] = {
-        "_A", "_C"
-      };
-      static const std::string side[2] = {
-        "A", "C"
-      };
-      static const std::string sws[2] = {
-        "Wire_", "Strip_"
-      };
+      
 
       std::stringstream ss;
 
@@ -141,11 +147,7 @@ namespace dqutils {
       std::string schambersummary[2][2];//[ac][ws]
       TH1F* chambersummary[2][2];//
 
-      std::string type[17] = {
-        "_F_T1", "_E4_T3", "_E3_T6", "_E2_T7", "_E1_T8",
-        "_F_T2", "_E5_T4", "_E4_T6", "_E3_T7", "_E2_T8", "_E1_T9",
-        "_F_T2", "_E5_T5", "_E4_T6", "_E3_T7", "_E2_T8", "_E1_T9"
-      };
+      
 
       //get summary histograms
       for (int ws = 0; ws < 2; ws++) {
@@ -633,6 +635,16 @@ namespace dqutils {
      */
     TIter next_run(mf.GetListOfKeys());
     TKey* key_run(0);
+    static const std::string type[6] = {
+        "_F_T2", "_E5_T5", "_E4_T6", "_E3_T7", "_E2_T8", "_E1_T9"
+    };
+    static const std::string sac[2] = {
+        "_A", "_C"
+    };
+
+    static const std::string ssllpt[2] = {
+        "SL_Timing", "Low_Pt_Timing"
+    };
     while ((key_run = dynamic_cast<TKey*> (next_run())) != 0) {
       if (!key_run->IsFolder()) continue;
       std::string run_dir = key_run->GetName();
@@ -648,22 +660,14 @@ namespace dqutils {
         tgc_dir + "TGCEA/", tgc_dir + "TGCEC/"
       };
 
-      static const std::string sac[2] = {
-        "_A", "_C"
-      };
-
-      static const std::string ssllpt[2] = {
-        "SL_Timing", "Low_Pt_Timing"
-      };
+      
 
       std::stringstream ss;
       //Summary histograms
       std::string schambertypesummary[6];//[station][eta]
       TH1F* chambertypesummary[6];//
 
-      std::string type[6] = {
-        "_F_T2", "_E5_T5", "_E4_T6", "_E3_T7", "_E2_T8", "_E1_T9"
-      };
+      
 
       for (int sllpt = 0; sllpt < 2; sllpt++) {//loop over SL/LPT
         for (int eta = 0; eta < 6; eta++) {
@@ -841,6 +845,15 @@ namespace dqutils {
      */
     TIter next_run(mf.GetListOfKeys());
     TKey* key_run(0);
+    static const std::string sac[2] = {
+        "_A", "_C"
+    };
+    static const std::string sws[2] = {
+        "Wire_", "Strip_"
+    };
+    static const std::string slay[7] = {
+        "1", "2", "3", "4", "5", "6", "7"
+    };
     while ((key_run = dynamic_cast<TKey*> (next_run())) != 0) {
       if (!key_run->IsFolder()) continue;
       std::string run_dir = key_run->GetName();
@@ -857,15 +870,7 @@ namespace dqutils {
         tgc_dir + "TGCEA/", tgc_dir + "TGCEC/"
       };
 
-      static const std::string sac[2] = {
-        "_A", "_C"
-      };
-      static const std::string sws[2] = {
-        "Wire_", "Strip_"
-      };
-      static const std::string slay[7] = {
-        "1", "2", "3", "4", "5", "6", "7"
-      };
+      
       std::stringstream ss;
 
       //get number of events processed

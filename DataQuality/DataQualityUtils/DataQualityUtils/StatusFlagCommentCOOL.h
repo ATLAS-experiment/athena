@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef dqutilsStatusFlagCommentCOOL_h
@@ -53,7 +53,7 @@ namespace dqutils {
   public:
     // Methods needed to come up to COOL framework.
     cool::RecordSpecification createSpec();
-    coral::AttributeList createPayload(int colourCode, float dfrac, float thrust, std::string& comment, const
+    coral::AttributeList createPayload(int colourCode, float dfrac, float thrust, const std::string& comment, const
                                        cool::RecordSpecification& spec);
 
     // Constructors and Destructors.
@@ -64,7 +64,7 @@ namespace dqutils {
     virtual ~StatusFlagCommentCOOL() {};
 
     // Methods of "interest". To insert a status flag you can use either ChannelId or ChannelName.
-    void insert(cool::ChannelId channelId, int code, float dfrac, float thrust, std::string comment,
+    void insert(cool::ChannelId channelId, int code, float dfrac, float thrust, const std::string & comment,
                 const std::string& tag_name);
     void insert(const std::string& channelName, int code, float dfrac, float thrust, const std::string& comment,
                 const std::string& tag_name);

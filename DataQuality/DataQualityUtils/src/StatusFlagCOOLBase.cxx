@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 // **********************************************************************
@@ -135,7 +135,7 @@ namespace dqutils {
 
   void
   StatusFlagCOOLBase::
-   dump(cool::ChannelSelection selection, std::string tag_name) {
+   dump(cool::ChannelSelection selection, const std::string & tag_name) {
     try {
       cool::IObjectIteratorPtr objects = m_coolFolder->browseObjects(m_since, m_until - 1, selection, tag_name);
       while (objects->goToNext()) {
@@ -150,7 +150,7 @@ namespace dqutils {
 
   std::string
   StatusFlagCOOLBase::
-   dumpField(cool::ChannelId channelId, std::string field, std::string tag_name) {
+   dumpField(cool::ChannelId channelId, const std::string & field, const std::string & tag_name) {
     std::string result = "";
     try {
       cool::ChannelSelection selection = cool::ChannelSelection(channelId);
