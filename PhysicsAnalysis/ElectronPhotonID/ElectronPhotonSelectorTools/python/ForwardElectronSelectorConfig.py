@@ -20,9 +20,9 @@ def AsgForwardElectronCalibrationToolCfg(flags, name="AsgForwardElectronCalibrat
     acc = ComponentAccumulator()
 
     kwargs.setdefault("ModelFiles", [
-        "ElectronPhotonSelectorTools/ForwardElectronCalibration/calibration_eta_2.5_2.7_DNN.json",
-        "ElectronPhotonSelectorTools/ForwardElectronCalibration/calibration_eta_2.7_3.2_DNN.json",
-        "ElectronPhotonSelectorTools/ForwardElectronCalibration/calibration_eta_3.2_4.0_DNN.json",
+        "ElectronPhotonSelectorTools/ForwardElectronCalibration/20260428/calibration_eta_2.5_2.7_DNN.json",
+        "ElectronPhotonSelectorTools/ForwardElectronCalibration/20260428/calibration_eta_2.7_3.2_DNN.json",
+        "ElectronPhotonSelectorTools/ForwardElectronCalibration/20260428/calibration_eta_3.2_4.0_DNN.json",
     ])
     kwargs.setdefault("pTMin", 10000.)   #  10 GeV in MeV
     kwargs.setdefault("pTMax", 255000.)  # 255 GeV in MeV
@@ -50,9 +50,9 @@ def AsgForwardElectronSelectorToolCfg(flags, name="AsgForwardElectronSelectorToo
     calibTool = acc.popToolsAndMerge(calibAcc)
 
     kwargs.setdefault("ModelFiles", [
-        "ElectronPhotonSelectorTools/ForwardElectronID/id_eta_2.5_2.7_DNN.json",
-        "ElectronPhotonSelectorTools/ForwardElectronID/id_eta_2.7_3.2_DNN.json",
-        "ElectronPhotonSelectorTools/ForwardElectronID/id_eta_3.2_4.0_DNN.json",
+        "ElectronPhotonSelectorTools/ForwardElectronSelector/20260428/id_eta_2.5_2.7_DNN.json",
+        "ElectronPhotonSelectorTools/ForwardElectronSelector/20260428/id_eta_2.7_3.2_DNN.json",
+        "ElectronPhotonSelectorTools/ForwardElectronSelector/20260428/id_eta_3.2_4.0_DNN.json",
     ])
     kwargs.setdefault("WorkingPoint",      workingPoint)
     kwargs.setdefault("CalibrationTool",   calibTool)
