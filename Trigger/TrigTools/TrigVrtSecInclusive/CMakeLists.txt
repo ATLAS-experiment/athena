@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigVrtSecInclusive )
@@ -10,8 +10,7 @@ find_package( ROOT COMPONENTS Core Tree MathCore Matrix )
 atlas_add_component( TrigVrtSecInclusive
                      src/*.cxx
                      src/components/*.cxx
-         PUBLIC_HEADERS TrigVrtSecInclusive
-         INCLUDE_DIRS   ${ROOT_INCLUDE_DIRS}
+                     INCLUDE_DIRS   ${ROOT_INCLUDE_DIRS}
                      LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps AthenaMonitoringKernelLib xAODRootAccess GaudiKernel TrigInDetEvent TrigInDetToolInterfacesLib TrkEventPrimitives TrkParameters TrkTrack TrkVKalVrtFitterLib xAODTracking TrkLinks TrkTrackLink TrkParticleBase TrkVKalVrtCore InDetConversionFinderToolsLib PathResolver )
 
 # Install files from the package:
