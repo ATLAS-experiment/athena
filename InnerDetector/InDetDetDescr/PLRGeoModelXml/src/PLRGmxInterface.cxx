@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PLRGmxInterface.h"
@@ -159,10 +159,10 @@ void PLRGmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccessSv
 
     const std::array<std::string,1> sensorTypes{"SingleChip_RD53"};
     const std::array<std::string,17> ParamNames{"circuitsPerEta", "circuitsPerPhi", "thickness", "is3D", "rows", "columns", "pitchEta", "pitchPhi", "pitchEtaLong", "pitchPhiLong", "pitchEtaEnd", "pitchPhiEnd", "nPhiLongPerSide", "nEtaLongPerSide", "nPhiEndPerSide", "nEtaEndPerSide", "detectorType"};
-    
+    static const std::string empty;
     for(const std::string & sType:sensorTypes){
 
-      IRDBRecordset_ptr PLR_module = rdbAccessSvc->getRecordsetPtr(sType,"");
+      IRDBRecordset_ptr PLR_module = rdbAccessSvc->getRecordsetPtr(sType,empty);
 
       if(PLR_module->size() != 0){
 

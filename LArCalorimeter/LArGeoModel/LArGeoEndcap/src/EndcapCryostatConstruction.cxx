@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // EndcapCryostatConstruction
@@ -761,7 +761,7 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::EndcapCryostatConstruction::createEnvelo
     IRDBRecordset_ptr mbtsTrds   = rdbAccessSvc->getRecordsetPtr("MBTSTrds", detectorKey, detectorNode);
 
     double zposMM = 0.;
-    std::map<std::string,unsigned> trdMap;  // Used in the new description only
+    std::map<std::string,unsigned, std::less<>> trdMap;  // Used in the new description only
     for(unsigned indTrd(0);indTrd<mbtsTrds->size();++indTrd) {
       const std::string& keyTrd = (*mbtsTrds)[indTrd]->getString("TRD");
       trdMap[keyTrd]=indTrd;
@@ -997,7 +997,7 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::EndcapCryostatConstruction::createEnvelo
 	GeoIntrusivePtr<GeoPhysVol>pvAirEnv{}, pvAluEnv{} , pvAirInAlu{};
 
 	// Build the air envelope first
-	std::map<std::string,unsigned>::const_iterator itTrdMap = trdMap.find("MBTSAirEnv");
+	auto itTrdMap = trdMap.find("MBTSAirEnv");
 	if(itTrdMap==trdMap.end())
 	  throw std::runtime_error("Error in EndcapCryostatConstruction, unable to get MBTS air envelope parameters from the database!");
 	const IRDBRecord* rec = (*mbtsTrds)[itTrdMap->second];

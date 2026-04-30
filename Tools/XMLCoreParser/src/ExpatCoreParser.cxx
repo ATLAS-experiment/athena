@@ -265,19 +265,22 @@ ExpatCoreParser::do_external_entity(XML_Parser parser, const XML_Char* context, 
   return generic_parse(p.get(), effectiveSystemId);
 }
 
-const std::string& 
+std::string 
 ExpatCoreParser::find_entity (const std::string& name, const ExternalEntityMap& mapChoice){ 
+  //lock is held here, doesn't need to be held by caller
   lock_t lock (s_mutex);
   ExternalEntityMap::const_iterator it = mapChoice.find(name); 
   return (it == mapChoice.end()) ? emptyString : it->second;
 }
-const std::string& 
-ExpatCoreParser::find_external_entity (const std::string& name){ 
+std::string 
+ExpatCoreParser::find_external_entity (const std::string& name){
+  //coverity[MISSING_LOCK:FALSE] 
   return find_entity(name, s_entities);
 } 
 
-const std::string& 
-ExpatCoreParser::find_text_entity (const std::string& name){ 
+std::string 
+ExpatCoreParser::find_text_entity (const std::string& name){
+  //coverity[MISSING_LOCK:FALSE]
   return find_entity(name, s_text_entities);
 } 
 

@@ -473,6 +473,7 @@ int main (int argc, char** argv)
   std::cout << "AthContainers/JaggedVecAccessor_test\n";
   test1();
   test2();
+  //coverity[TAINTED_SCALAR]
   test_forward_fill (argc >= 2 ? atoi(argv[1]) : 0);
   return 0;
 }
