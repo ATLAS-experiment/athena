@@ -313,16 +313,6 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
     else
       message("Unable to retrieve ITkPixel Hits");
 
-    SG::ReadHandleKey<SiHitCollection> hitsContainerKey {"ITkPixelHits"};
-    // Initialize keys
-    //ATH_CHECK(hitsContainerKey.initialize());
-    StatusCode sc = hitsContainerKey.initialize();
-    if (sc==StatusCode::SUCCESS) {
-        const EventContext&ctx {Gaudi::Hive::currentContext()};
-        const SiHitCollection* hitCollection{nullptr};
-        //ATH_CHECK(SG::get(hitCollection, hitsContainerKey, ctx));
-        SG::get(hitCollection, hitsContainerKey, ctx);
-        std::cout << "Event contains " << hitCollection->size() << " entries in " << hitsContainerKey.key() << std::endl;
     }
   }
   else if(detector=="ITkStrip")
