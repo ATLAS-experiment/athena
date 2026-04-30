@@ -8,6 +8,7 @@
 
 
 #include "MuonRDO/TgcL1Rdo.h"
+#include "MuonRDO/TgcStatusStructs.h"
 #include "MuonRDO/TgcL1RdoIdHash.h"
 #include "MuonRDO/TgcL1Rdo_Cache.h"
 #include "AthenaKernel/CLASS_DEF.h"
