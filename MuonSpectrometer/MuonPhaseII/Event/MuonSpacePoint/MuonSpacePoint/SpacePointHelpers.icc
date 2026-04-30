@@ -1,0 +1,24 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+#ifndef MUONSPACEPOINT_MUONSPACEPOINTHELPERS_ICC
+#define MUONSPACEPOINT_MUONSPACEPOINTHELPERS_ICC
+
+#include "MuonSpacePoint/SpacePointHelpers.h"
+
+#include <sstream>
+
+namespace MuonR4 {
+    template<Acts::Experimental::CompositeSpacePointContainer cont_t>
+    std::string print(const cont_t& container) {
+        std::stringstream sstr{};
+        unsigned idx{0};
+        sstr<<"Container has "<<container.size()<<" measurements:"<<std::endl;
+        for (const auto& sp : container) {
+            sstr<<"  ***"<<(++idx)<<") "<<(*sp)<<std::endl;
+        }        
+        return sstr.str();
+    } 
+}
+
+#endif
