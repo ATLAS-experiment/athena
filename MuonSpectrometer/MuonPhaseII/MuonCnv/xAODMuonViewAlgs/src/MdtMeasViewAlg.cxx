@@ -1,12 +1,14 @@
 
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtMeasViewAlg.h"
 
 #include <StoreGate/WriteHandle.h>
 #include <AthContainers/ConstDataVector.h>
+
+#include <ranges>
 
 namespace MuonR4 {
     StatusCode MdtMeasViewAlg::initialize() {
@@ -23,8 +25,12 @@ namespace MuonR4 {
         ATH_CHECK(SG::get(twinCircles, m_readKey2D, ctx));
 
         ConstDataVector<xAOD::MdtDriftCircleContainer> outContainer{SG::VIEW_ELEMENTS};
-        outContainer.insert(outContainer.end(), driftCircles->begin(), driftCircles->end());
-        outContainer.insert(outContainer.end(), twinCircles->begin(), twinCircles->end());
+        outContainer.reserve(driftCircles->size() + twinCircles->size());
+        std::merge(driftCircles->begin(), driftCircles->end(), twinCircles->begin(), twinCircles->end(),
+                   std::back_inserter(outContainer), 
+                    [](const xAOD::MdtDriftCircle*a, const xAOD::MdtDriftCircle* b){
+                        return a->identifierHash() < b->identifierHash(); 
+                    });
 
         SG::WriteHandle writeHandle{m_writeKey, ctx};
         ATH_CHECK(writeHandle.record(std::make_unique<xAOD::MdtDriftCircleContainer>(*outContainer.asDataVector())));

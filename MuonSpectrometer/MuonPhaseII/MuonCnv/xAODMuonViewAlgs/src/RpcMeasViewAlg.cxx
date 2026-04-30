@@ -1,8 +1,7 @@
 
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
 
 #include "RpcMeasViewAlg.h"
 
@@ -25,13 +24,12 @@ namespace MuonR4{
         ATH_CHECK(SG::get(bilStrips, m_readKeyBI, ctx));
 
         ConstDataVector<xAOD::RpcMeasurementContainer> outContainer{SG::VIEW_ELEMENTS};
-        if (legacyStrips) {
-            outContainer.insert(outContainer.end(), legacyStrips->begin(), legacyStrips->end());
-        }
-        if (bilStrips) {
-            outContainer.insert(outContainer.end(), bilStrips->begin(), bilStrips->end());
-        }
-        SG::WriteHandle<xAOD::RpcMeasurementContainer> writeHandle{m_writeKey, ctx};
+        std::merge(legacyStrips->begin(), legacyStrips->end(), bilStrips->begin(), bilStrips->end(),
+                   std::back_inserter(outContainer), 
+                    [](const xAOD::RpcMeasurement*a, const xAOD::RpcMeasurement* b){
+                        return a->identifierHash() < b->identifierHash(); 
+                    });
+        SG::WriteHandle writeHandle{m_writeKey, ctx};
         ATH_CHECK(writeHandle.record(std::make_unique<xAOD::RpcMeasurementContainer>(*outContainer.asDataVector())));
         return StatusCode::SUCCESS;
     } 

@@ -38,10 +38,10 @@ namespace MuonR4{
         }
         std::sort(outContainer.begin(), outContainer.end(), 
                   [](const xAOD::sTgcMeasurement* a, const xAOD::sTgcMeasurement* b){
-                    return a->identifier() < b->identifier();
+                    return a->identify() < b->identify();
                   });
         
-        SG::WriteHandle<xAOD::sTgcMeasContainer> writeHandle{m_writeKey, ctx};
+        SG::WriteHandle writeHandle{m_writeKey, ctx};
         ATH_CHECK(writeHandle.record(std::make_unique<xAOD::sTgcMeasContainer>(*outContainer.asDataVector())));
         return StatusCode::SUCCESS;
     }
