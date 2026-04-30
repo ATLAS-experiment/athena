@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TruthUtils )
@@ -12,7 +12,7 @@ endif()
 
 # Component(s) in the package:
 atlas_add_library( TruthUtils
-   Root/*.cxx
+   INTERFACE
    PUBLIC_HEADERS TruthUtils
    LINK_LIBRARIES  ${extra_libs}
    )
