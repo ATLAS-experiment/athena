@@ -20,6 +20,10 @@ namespace MuonR4 {
     /** @brief Returns whether the calibrated spacepoint is a precision hit (Mdt, micromegas, stgc strips)
      *  @param hit: Reference to the calibrated space point of interest */
     bool isPrecisionHit(const CalibratedSpacePoint& hit);
-    
+    /** @brief Print a space point container to string
+     *  @param container: Reference to the space point container to print */
+    template<Acts::Experimental::CompositeSpacePointContainer cont_t>
+    std::string print(const cont_t& container); 
 }
+#include "MuonSpacePoint/SpacePointHelpers.icc"
 #endif
