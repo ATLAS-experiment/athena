@@ -181,7 +181,7 @@ def ActsLargeRadiusStripSeedingToolCfg(flags,
     kwargs.setdefault("deltaRMinBottomSP", 50. * ActsUnits.mm)
     kwargs.setdefault("deltaRMaxBottomSP", 250. * ActsUnits.mm)
     kwargs.setdefault("deltaZMax", 850. * ActsUnits.mm)
-    kwargs.setdefault("cotThetaMax", 6.0)
+    kwargs.setdefault("cotThetaMax", 5.0)
     kwargs.setdefault("maxSeedsPerSpM", 1)
     kwargs.setdefault("maxStripDeltaCotTheta", 0.5)
     kwargs.setdefault("absDeltaEtaWeightFactor", 10.)
@@ -228,6 +228,28 @@ def ActsLargeRadiusStripSeedingToolCfg(flags,
       [400.0, 850.0],   # 1400, 2500
       [0.0, 0.0]        # 2500, 3000
     ])
+
+    kwargs.setdefault("seedConfirmation", True)
+    kwargs.setdefault("seedConfirmationInFilter", True)
+    kwargs.setdefault("zOriginWeightFactor", 1.)
+    kwargs.setdefault("maxSeedsPerSpMConf", 1)
+    kwargs.setdefault("maxQualitySeedsPerSpMConf", 1)
+    kwargs.setdefault("seedConfCentralZMin",              -1400. * ActsUnits.mm)
+    kwargs.setdefault("seedConfCentralZMax",               1400. * ActsUnits.mm)
+    kwargs.setdefault("seedConfCentralRMax",                140. * ActsUnits.mm)
+    kwargs.setdefault("seedConfCentralNTopLargeR",         1)
+    kwargs.setdefault("seedConfCentralNTopSmallR",         0)
+    kwargs.setdefault("seedConfCentralMinBottomRadius",      0. * ActsUnits.mm)
+    kwargs.setdefault("seedConfCentralMaxZOrigin",        1500. * ActsUnits.mm)
+    kwargs.setdefault("seedConfCentralMinImpact",          200. * ActsUnits.mm)
+    kwargs.setdefault("seedConfForwardZMin",              -3000. * ActsUnits.mm)
+    kwargs.setdefault("seedConfForwardZMax",               3000. * ActsUnits.mm)
+    kwargs.setdefault("seedConfForwardRMax",                140. * ActsUnits.mm)
+    kwargs.setdefault("seedConfForwardNTopLargeR",         1)
+    kwargs.setdefault("seedConfForwardNTopSmallR",         0)
+    kwargs.setdefault("seedConfForwardMinBottomRadius",    350. * ActsUnits.mm)
+    kwargs.setdefault("seedConfForwardMaxZOrigin",        1500. * ActsUnits.mm)
+    kwargs.setdefault("seedConfForwardMinImpact",          200. * ActsUnits.mm)
 
     return ActsStripSeedingToolCfg(flags, name, **kwargs)
 
