@@ -1,12 +1,7 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "../TilePaterMonTool.h"
-#include "../TileFatherMonTool.h"
-#include "../TileDigitsMonTool.h"
-#include "../TileRawChannelMonTool.h"
-#include "../TileCellNoiseMonTool.h"
 #include "../TileJetMonitorAlgorithm.h"
 #include "../TileDigitsFlxMonitorAlgorithm.h"
 #include "../TileDQFragMonitorAlgorithm.h"
@@ -31,11 +26,6 @@
 #include "../TileTBBeamMonitorAlgorithm.h"
 #include "../TileTBCellMonitorAlgorithm.h"
 
-DECLARE_COMPONENT( TileFatherMonTool )
-DECLARE_COMPONENT( TilePaterMonTool )
-DECLARE_COMPONENT( TileDigitsMonTool )
-DECLARE_COMPONENT( TileRawChannelMonTool )
-DECLARE_COMPONENT( TileCellNoiseMonTool )
 DECLARE_COMPONENT( TileJetMonitorAlgorithm )
 DECLARE_COMPONENT( TileDigitsFlxMonitorAlgorithm )
 DECLARE_COMPONENT( TileDQFragMonitorAlgorithm )
