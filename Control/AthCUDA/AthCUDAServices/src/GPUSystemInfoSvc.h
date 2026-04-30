@@ -25,7 +25,7 @@ namespace AthCUDA {
             virtual const std::vector<DeviceInfo>& getAvailableDevices() const override;
         private:
             std::vector<DeviceInfo> m_deviceInfo;
-            bool m_wasChecked;
+            bool m_wasChecked{};
             std::once_flag m_readDevicesOnceFlag;
 
             void readAvailableDevices();

@@ -59,14 +59,7 @@ namespace AthCUDA {
                     ATH_MSG_DEBUG("Error in cudaGetDeviceProperties for device " << i << " " << cudaErrorStr);
                     continue;
                 }
-
-                DeviceInfo info;
-                info.id = i;
-                info.name = prop.name;
-                info.smMajor = prop.major;
-                info.smMinor = prop.minor;
-
-                m_deviceInfo.push_back(info);
+                m_deviceInfo.emplace_back(i, prop.name, prop.major, prop.minor);
             }
 
 

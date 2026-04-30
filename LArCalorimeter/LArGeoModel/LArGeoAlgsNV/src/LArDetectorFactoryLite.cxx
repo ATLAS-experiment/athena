@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArDetectorFactoryLite.h"
@@ -164,7 +164,7 @@ void LArGeo::LArDetectorFactoryLite::create(GeoPhysVol* world)
   }
 
 
-  std::map<std::string,unsigned> trdMap;
+  std::map<std::string,unsigned, std::less<>> trdMap;
   for(unsigned indTrd(0);indTrd<mbtsTrds->size();++indTrd) {
     const std::string& keyTrd = (*mbtsTrds)[indTrd]->getString("TRD");
     trdMap[keyTrd]=indTrd;

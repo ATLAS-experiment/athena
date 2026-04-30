@@ -51,9 +51,9 @@ private:
 			      const XML_Char* /*base*/, const XML_Char* systemId, 
 			      const XML_Char* /*publicId*/);
   std::unique_ptr<XMLCoreNode> get_document ();
-  static const std::string& find_external_entity (const std::string& name);
-  static const std::string& find_text_entity (const std::string& name);
-  static const std::string& find_entity (const std::string& name, const ExternalEntityMap & mapChoice);
+  std::string find_external_entity (const std::string& name);
+  std::string find_text_entity (const std::string& name);
+  std::string find_entity (const std::string& name, const ExternalEntityMap & mapChoice);
   void clean ();
   std::unique_ptr<XMLCoreNode> m_top;
   XMLCoreNode* m_last{};
