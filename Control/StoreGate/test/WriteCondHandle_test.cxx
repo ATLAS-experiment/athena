@@ -313,6 +313,8 @@ void test2( StoreGateSvc* cs )
 {
   std::cout << "test2\n";
 
+  EventContext ctx(1, 1);
+
   SG::WriteCondHandleKey<MyObj>  k1 {"MyObj1"};
   SG::WriteCondHandleKey<MyObj2> k2 {"MyObj2"};
   SG::WriteCondHandleKey<MyObj3> k3 {"MyObj3"};
@@ -383,14 +385,14 @@ void test2( StoreGateSvc* cs )
   CondCont<MyObj3> *cc3;
   assert( cs->retrieve(cc3, k3.key()).isSuccess() );
   
-  assert( cc1->insert( r1_1, std::make_unique<MyObj>( MyObj(1) ) ).isSuccess() );
-  assert( cc1->insert( r1_2, std::make_unique<MyObj>( MyObj(2) ) ).isSuccess() );
-  assert( cc1->insert( r1_3, std::make_unique<MyObj>( MyObj(3) ) ).isSuccess() );
-  assert( cc2->insert( r2_1, std::make_unique<MyObj2>( MyObj2(21) ) ).isSuccess() );
-  assert( cc2->insert( r2_2, std::make_unique<MyObj2>( MyObj2(22) ) ).isSuccess() );
-  assert( cc3->insert( r3_1, std::make_unique<MyObj3>( MyObj3(131) ) ).isSuccess() );
-  assert( cc3->insert( r3_2, std::make_unique<MyObj3>( MyObj3(132) ) ).isSuccess() );
-  assert( cc3->insert( r3_3, std::make_unique<MyObj3>( MyObj3(133) ) ).isSuccess() );
+  assert( cc1->insert( r1_1, std::make_unique<MyObj>( MyObj(1) ), ctx ).isSuccess() );
+  assert( cc1->insert( r1_2, std::make_unique<MyObj>( MyObj(2) ), ctx ).isSuccess() );
+  assert( cc1->insert( r1_3, std::make_unique<MyObj>( MyObj(3) ), ctx ).isSuccess() );
+  assert( cc2->insert( r2_1, std::make_unique<MyObj2>( MyObj2(21) ), ctx ).isSuccess() );
+  assert( cc2->insert( r2_2, std::make_unique<MyObj2>( MyObj2(22) ), ctx ).isSuccess() );
+  assert( cc3->insert( r3_1, std::make_unique<MyObj3>( MyObj3(131) ), ctx ).isSuccess() );
+  assert( cc3->insert( r3_2, std::make_unique<MyObj3>( MyObj3(132) ), ctx ).isSuccess() );
+  assert( cc3->insert( r3_3, std::make_unique<MyObj3>( MyObj3(133) ), ctx ).isSuccess() );
 
   SG::ReadCondHandleKey<MyObj> rk1 {"MyObj1"};
   assert ( rk1.mode() == Gaudi::DataHandle::Reader);
@@ -417,7 +419,6 @@ void test2( StoreGateSvc* cs )
     SG::WriteCondHandle<MyDObj> we1(kDe1);
 
     EventIDBase now(0, EventIDBase::UNDEFEVT, 1);
-    EventContext ctx(1, 1);
     ctx.setEventID( now );
     ctx.setExtension( Atlas::ExtendedEventContext(&dumstore) );
     Gaudi::Hive::setCurrentContext(ctx);
