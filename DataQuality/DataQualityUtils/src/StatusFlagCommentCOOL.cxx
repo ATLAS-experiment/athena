@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 // **********************************************************************
@@ -57,7 +57,7 @@ namespace dqutils {
 
   coral::AttributeList
   StatusFlagCommentCOOL::
-   createPayload(int colourCode, float dfrac, float thrust, std::string& comment,
+   createPayload(int colourCode, float dfrac, float thrust, const std::string& comment,
                  const cool::RecordSpecification& spec) {
     coral::AttributeList payload = cool::Record(spec).attributeList();
     payload["Code"].data<cool::Int32>() = colourCode;
@@ -69,7 +69,7 @@ namespace dqutils {
 
   void
   StatusFlagCommentCOOL::
-   insert(cool::ChannelId channelId, int code, float dfrac, float thrust, std::string comment,
+   insert(cool::ChannelId channelId, int code, float dfrac, float thrust, const std::string & comment,
           const std::string& tag_name) {
     try {
       cool::RecordSpecification spec = this->createSpec();

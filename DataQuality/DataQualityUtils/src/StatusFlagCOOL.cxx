@@ -84,7 +84,7 @@ namespace dqutils {
 
   void
   StatusFlagCOOL::
-   insert(std::string channelName, int code, float dfrac, float thrust, const std::string& tag_name) {
+   insert(const std::string & channelName, int code, float dfrac, float thrust, const std::string& tag_name) {
     try {
       this->insert(this->getCoolFolder()->channelId(channelName), code, dfrac, thrust, tag_name);
     }
