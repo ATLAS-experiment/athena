@@ -53,88 +53,12 @@ using CLHEP::cm;
 CaloCalibClusterMomentsMaker2::CaloCalibClusterMomentsMaker2(const std::string& type, 
                                                              const std::string& name,
                                                              const IInterface* parent)
-  : AthAlgTool(type, name, parent), 
-    m_calo_id(nullptr),
-    m_caloDM_ID(nullptr),
-    m_caloDmDescrManager(nullptr),
-    m_useParticleID(true),
-    m_energyMin(200*MeV),
-    m_energyMinCalib(20*MeV),
-    m_apars_alpha(0.5),
-    m_apars_r0(0.2),
-    m_MatchDmType(kMatchDmLoose)
+  : AthAlgTool(type, name, parent)
 {
   declareInterface<CaloClusterCollectionProcessor>(this);
-  // Name(s) of Moments to calculate
-  declareProperty("MomentsNames", m_momentsNames);
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_TOT"), xAOD::CaloCluster::ENG_CALIB_TOT));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_OUT_L"), xAOD::CaloCluster::ENG_CALIB_OUT_L));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_OUT_M"), xAOD::CaloCluster::ENG_CALIB_OUT_M));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_OUT_T"), xAOD::CaloCluster::ENG_CALIB_OUT_T));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_EMB0"), xAOD::CaloCluster::ENG_CALIB_EMB0));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_EME0"), xAOD::CaloCluster::ENG_CALIB_EME0));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_TILEG3"), xAOD::CaloCluster::ENG_CALIB_TILEG3));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_DEAD_TOT"), xAOD::CaloCluster::ENG_CALIB_DEAD_TOT));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_DEAD_EMB0"), xAOD::CaloCluster::ENG_CALIB_DEAD_EMB0));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_DEAD_TILE0"), xAOD::CaloCluster::ENG_CALIB_DEAD_TILE0));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_DEAD_TILEG3"), xAOD::CaloCluster::ENG_CALIB_DEAD_TILEG3));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_DEAD_EME0"), xAOD::CaloCluster::ENG_CALIB_DEAD_EME0));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_DEAD_HEC0"), xAOD::CaloCluster::ENG_CALIB_DEAD_HEC0));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_DEAD_FCAL"), xAOD::CaloCluster::ENG_CALIB_DEAD_FCAL));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_DEAD_LEAKAGE"), xAOD::CaloCluster::ENG_CALIB_DEAD_LEAKAGE));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_DEAD_UNCLASS"), xAOD::CaloCluster::ENG_CALIB_DEAD_UNCLASS));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_FRAC_EM"), xAOD::CaloCluster::ENG_CALIB_FRAC_EM));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_FRAC_HAD"), xAOD::CaloCluster::ENG_CALIB_FRAC_HAD));
-  m_validNames.push_back(moment_name_pair(std::string("ENG_CALIB_FRAC_REST"), xAOD::CaloCluster::ENG_CALIB_FRAC_REST));
-
-  // Name(s) of Moments which can be stored on the AOD - all others go to ESD
-  m_momentsNamesAOD.emplace_back("ENG_CALIB_TOT");
-  m_momentsNamesAOD.emplace_back("ENG_CALIB_OUT_L");
-  m_momentsNamesAOD.emplace_back("ENG_CALIB_OUT_M");
-  m_momentsNamesAOD.emplace_back("ENG_CALIB_OUT_T");
-  m_momentsNamesAOD.emplace_back("ENG_CALIB_EMB0");
-  m_momentsNamesAOD.emplace_back("ENG_CALIB_EME0");
-  m_momentsNamesAOD.emplace_back("ENG_CALIB_TILEG3");
-  m_momentsNamesAOD.emplace_back("ENG_CALIB_DEAD_TOT");
-  m_momentsNamesAOD.emplace_back("ENG_CALIB_DEAD_EMB0");
-  m_momentsNamesAOD.emplace_back("ENG_CALIB_DEAD_TILE0");
-  m_momentsNamesAOD.emplace_back("ENG_CALIB_DEAD_TILEG3");
-  m_momentsNamesAOD.emplace_back("ENG_CALIB_DEAD_EME0");
-  m_momentsNamesAOD.emplace_back("ENG_CALIB_DEAD_HEC0");
-  m_momentsNamesAOD.emplace_back("ENG_CALIB_DEAD_FCAL");
-  m_momentsNamesAOD.emplace_back("ENG_CALIB_DEAD_LEAKAGE");
-  m_momentsNamesAOD.emplace_back("ENG_CALIB_DEAD_UNCLASS");
-  m_momentsNamesAOD.emplace_back("ENG_CALIB_FRAC_EM");
-  m_momentsNamesAOD.emplace_back("ENG_CALIB_FRAC_HAD");
-  m_momentsNamesAOD.emplace_back("ENG_CALIB_FRAC_REST");
-
-  declareProperty("AODMomentsNames", m_momentsNamesAOD);
-  declareProperty("CalibrationHitContainerNames", m_CalibrationHitContainerNames);
-  declareProperty("DMCalibrationHitContainerNames", m_DMCalibrationHitContainerNames);
-  m_n_phi_out = 127; // not more than 127 since we store indices (-127,...-1,0,...,126) and have 8 bits only
-  m_n_eta_out = 127;
-  m_out_phi_max = M_PI;
-  m_out_eta_max = 6;
-
-  m_rmaxOut[0] = 1.0;
-  m_rmaxOut[1] = 0.5; 
-  m_rmaxOut[2] = 0.3;
-
   for (int im = 0; im < 3; im++) {
     m_i_phi_eta[im].resize(m_n_eta_out);
   }
-  m_doDeadEnergySharing = false;
-  m_foundAllContainers = false;
-  m_doOutOfClusterL = false;
-  m_doOutOfClusterM = false;
-  m_doOutOfClusterT = false;
-  m_doDeadL = false;
-  m_doDeadM = false;
-  m_doDeadT = false;
-  m_doCalibFrac = false;
-
-  declareProperty("MatchDmType", m_MatchDmType);
-  declareProperty("UseParticleID", m_useParticleID);
 }
 
 
