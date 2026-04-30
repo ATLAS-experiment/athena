@@ -8,6 +8,7 @@
 #include "../ByteStreamEventStorageOutputSvc.h"
 #include "../ByteStreamOutputStreamCopyTool.h"
 #include "../ByteStreamMetadataTool.h"
+#include "../MCEventInfoByteStreamTool.h"
 
 DECLARE_COMPONENT( ByteStreamCnvSvc )
 DECLARE_COMPONENT( EventSelectorByteStream )
@@ -20,4 +21,5 @@ DECLARE_COMPONENT( ByteStreamEventStorageOutputSvc )
 
 DECLARE_COMPONENT( ByteStreamOutputStreamCopyTool )
 DECLARE_COMPONENT( ByteStreamMetadataTool )
+DECLARE_COMPONENT( MCEventInfoByteStreamTool )
 

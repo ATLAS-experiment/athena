@@ -3,7 +3,9 @@
 */
 
 #include "EventInfoByteStreamAuxCnv.h"
+#include "MCEventInfoByteStreamTool.h"
 #include "ByteStreamCnvSvcBase/ByteStreamCnvSvcBase.h"
+#include "ByteStreamCnvSvcBase/IByteStreamEventAccess.h"
 #include "ByteStreamCnvSvcBase/ByteStreamAddress.h"
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
 
@@ -86,10 +88,22 @@ StatusCode EventInfoByteStreamAuxCnv::initialize()
   if (sc.isSuccess()) {
     m_isCalibration = propIsCalibration.value();
     ATH_MSG_INFO("IsCalibration : " << m_isCalibration);
-  } 
+  }
   else {
     ATH_MSG_ERROR("Cannot get IsCalibration");
     return sc;
+  }
+
+  // Retrieve MC EventInfo decoder tool (optional - only needed for MC BS files)
+  if (m_isSimulation) {
+    if (m_mcEventInfoTool.retrieve().isFailure()) {
+      ATH_MSG_WARNING("Failed to retrieve MCEventInfoByteStreamTool - MC EventInfo will use default values");
+      m_mcEventInfoTool.disable();
+    } else {
+      ATH_MSG_DEBUG("MCEventInfoByteStreamTool retrieved successfully");
+    }
+  } else {
+    m_mcEventInfoTool.disable();
   }
 
   return StatusCode::SUCCESS;
@@ -191,8 +205,7 @@ StatusCode EventInfoByteStreamAuxCnv::createObj(IOpaqueAddress* pAddr, DataObjec
   evtInfo.setDetectorMask(detMask0,detMask1);
   evtInfo.setDetectorMaskExt(detMask2,detMask3);
 
-  // The following values were implicitly set by the BS converter of the legacy EventInfo
-  // Setting them here too
+  // Set default MC values (will be overwritten if MC ROB is present)
   evtInfo.setMCChannelNumber(0);
   evtInfo.setMCEventNumber(0);
   evtInfo.setMCEventWeights(std::vector<float>(1,1));
@@ -209,6 +222,28 @@ StatusCode EventInfoByteStreamAuxCnv::createObj(IOpaqueAddress* pAddr, DataObjec
     eventTypeBitmask |= xAOD::EventInfo::IS_CALIBRATION;
   }
   evtInfo.setEventTypeBitmask(eventTypeBitmask);
+
+  // Try to decode MC EventInfo from dedicated ROB fragment (for MC ByteStream files)
+  bool mcEventInfoDecoded = false;
+  if (m_isSimulation && m_mcEventInfoTool.isEnabled()) {
+    // Request the MC EventInfo ROB
+    std::vector<uint32_t> mcRobIds = m_mcEventInfoTool->robIds();
+    std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> mcRobFragments;
+    m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), mcRobIds, mcRobFragments, "EventInfoByteStreamAuxCnv");
+
+    if (!mcRobFragments.empty()) {
+      ATH_MSG_DEBUG("Found MC EventInfo ROB fragment, decoding...");
+      StatusCode sc = m_mcEventInfoTool->convertFromBS(mcRobFragments[0], evtInfo);
+      if (sc.isFailure()) {
+        ATH_MSG_WARNING("Failed to decode MC EventInfo from ROB fragment, using default values");
+      } else {
+        ATH_MSG_DEBUG("Successfully decoded MC EventInfo from ROB fragment");
+        mcEventInfoDecoded = true;
+      }
+    } else {
+      ATH_MSG_DEBUG("No MC EventInfo ROB fragment found, using default values");
+    }
+  }
 
   // Trigger Info
   const OFFLINE_FRAGMENTS_NAMESPACE::DataType* buffer;
@@ -244,7 +279,11 @@ StatusCode EventInfoByteStreamAuxCnv::createObj(IOpaqueAddress* pAddr, DataObjec
   }
 
   evtInfo.setStatusElement(statusElement);
-  evtInfo.setExtendedLevel1ID(extendedLevel1ID);
+  // Only set extendedLevel1ID from RawEvent header if MC EventInfo wasn't decoded
+  // (MC EventInfo ROB contains the original extendedLevel1ID value)
+  if (!mcEventInfoDecoded) {
+    evtInfo.setExtendedLevel1ID(extendedLevel1ID);
+  }
   evtInfo.setLevel1TriggerType(level1TriggerType);
   evtInfo.setStreamTags(streamTags);
 
@@ -252,7 +291,7 @@ StatusCode EventInfoByteStreamAuxCnv::createObj(IOpaqueAddress* pAddr, DataObjec
   evtInfo.setEventFlags(xAOD::EventInfo::Core, m_robDataProvider->getEventStatus(Gaudi::Hive::currentContext()));
   pObj = SG::asStorable(pEvtInfoAux);
 
-  ATH_MSG_DEBUG(" New xAOD::EventAuxInfo made, run/event= " << runNumber 
+  ATH_MSG_DEBUG(" New xAOD::EventAuxInfo made, run/event= " << runNumber
 		<< " " << eventNumber
 		<< " Time stamp  = " << ascTime(bc_time_sec) 
 		);
@@ -260,9 +299,40 @@ StatusCode EventInfoByteStreamAuxCnv::createObj(IOpaqueAddress* pAddr, DataObjec
   return StatusCode::SUCCESS;
 }
 
-StatusCode EventInfoByteStreamAuxCnv::createRep(DataObject* /*pObj*/, IOpaqueAddress*& /*pAddr*/) 
+StatusCode EventInfoByteStreamAuxCnv::createRep(DataObject* /*pObj*/, IOpaqueAddress*& /*pAddr*/)
 {
-  ATH_MSG_DEBUG("Nothing to be done for xAOD::EventAuxInfo createReps");
+  ATH_MSG_DEBUG("createRep for xAOD::EventAuxInfo");
+
+  // For MC ByteStream files, create the MC EventInfo ROB fragment
+  if (m_isSimulation && m_mcEventInfoTool.isEnabled()) {
+    ATH_MSG_DEBUG("Creating MC EventInfo ROB fragment for simulation");
+
+    // Get RawEventWrite via ByteStreamCnvSvc
+    SmartIF<IByteStreamEventAccess> byteStreamCnvSvc(service("ByteStreamCnvSvc"));
+    if (!byteStreamCnvSvc.isValid()) {
+      ATH_MSG_ERROR("Failed to retrieve ByteStreamCnvSvc");
+      return StatusCode::FAILURE;
+    }
+    RawEventWrite* re = byteStreamCnvSvc->getRawEvent();
+    if (!re) {
+      ATH_MSG_ERROR("Failed to get RawEventWrite");
+      return StatusCode::FAILURE;
+    }
+
+    // Create MC EventInfo ROB fragment
+    std::vector<OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment*> mcRobs;
+    ATH_CHECK(m_mcEventInfoTool->convertToBS(mcRobs, Gaudi::Hive::currentContext()));
+
+    // Append ROB fragments to the event
+    for (auto* rob : mcRobs) {
+      // Set LVL1 ID and trigger type from the full event
+      rob->rod_lvl1_id(re->lvl1_id());
+      rob->rod_lvl1_type(re->lvl1_trigger_type());
+      re->append(rob);
+      ATH_MSG_DEBUG("Added MC EventInfo ROB fragment to output event");
+    }
+  }
+
   return StatusCode::SUCCESS;
 }
 
