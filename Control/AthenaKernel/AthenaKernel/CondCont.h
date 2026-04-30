@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/CondCont.h
@@ -295,7 +295,7 @@ public:
   virtual
   StatusCode typelessInsert (const EventIDRange& r,
                              void* obj,
-                             const EventContext& ctx = Gaudi::Hive::currentContext()) = 0;
+                             const EventContext& ctx) = 0;
 
 
   /**
@@ -324,7 +324,7 @@ public:
    */
   virtual
   StatusCode erase (const EventIDBase& t,
-                    const EventContext& ctx = Gaudi::Hive::currentContext()) = 0;
+                    const EventContext& ctx) = 0;
 
 
   /**
@@ -368,7 +368,7 @@ public:
    * This would normally be done through RCU service.
    * Defined here for purposes of testing.
    */
-  void quiescent (const EventContext& ctx = Gaudi::Hive::currentContext());
+  void quiescent (const EventContext& ctx);
 
 
   /**
@@ -395,7 +395,7 @@ public:
    */
   virtual
   StatusCode extendLastRange (const EventIDRange& newRange,
-                              const EventContext& ctx = Gaudi::Hive::currentContext()) = 0;
+                              const EventContext& ctx) = 0;
 
 
   /**
@@ -555,7 +555,7 @@ protected:
    */
   StatusCode insertBase (const EventIDRange& r,
                          CondContSet::payload_unique_ptr t,
-                         const EventContext& ctx = Gaudi::Hive::currentContext());
+                         const EventContext& ctx);
 
 
   /**
@@ -564,7 +564,7 @@ protected:
    * @param ctx Event context for the current thread.
    */
   StatusCode eraseBase (const EventIDBase& t,
-                        const EventContext& ctx = Gaudi::Hive::currentContext());
+                        const EventContext& ctx);
 
 
   /**
@@ -579,7 +579,7 @@ protected:
    */
   StatusCode
   extendLastRangeBase (const EventIDRange& newRange,
-                       const EventContext& ctx = Gaudi::Hive::currentContext());
+                       const EventContext& ctx);
 
 
   /** 
@@ -739,7 +739,7 @@ public:
   virtual
   StatusCode typelessInsert (const EventIDRange& r,
                              void* obj,
-                             const EventContext& ctx = Gaudi::Hive::currentContext()) override final;
+                             const EventContext& ctx) override final;
 
 
   /**
@@ -768,7 +768,7 @@ public:
    */
   virtual
   StatusCode erase (const EventIDBase& t,
-                    const EventContext& ctx = Gaudi::Hive::currentContext()) override final;
+                    const EventContext& ctx) override final;
 
 
   /**
@@ -783,7 +783,7 @@ public:
    */
   virtual
   StatusCode extendLastRange (const EventIDRange& newRange,
-                              const EventContext& ctx = Gaudi::Hive::currentContext()) override final;
+                              const EventContext& ctx) override final;
 
 
 protected:
@@ -941,7 +941,7 @@ public:
    */
   StatusCode insert (const EventIDRange& r,
                      std::unique_ptr<T> obj,
-                     const EventContext& ctx = Gaudi::Hive::currentContext());
+                     const EventContext& ctx);
 
 
   /** 
@@ -1073,7 +1073,7 @@ public:
   virtual
   StatusCode typelessInsert (const EventIDRange& r,
                              void* obj,
-                             const EventContext& ctx = Gaudi::Hive::currentContext()) override final;
+                             const EventContext& ctx) override final;
 
 
   /**
@@ -1104,7 +1104,7 @@ public:
    */
   virtual
   StatusCode erase (const EventIDBase& t,
-                    const EventContext& ctx = Gaudi::Hive::currentContext()) override final;
+                    const EventContext& ctx) override final;
 
 
   /**
@@ -1121,7 +1121,7 @@ public:
    */
   virtual
   StatusCode extendLastRange (const EventIDRange& newRange,
-                              const EventContext& ctx = Gaudi::Hive::currentContext()) override final;
+                              const EventContext& ctx) override final;
 
 
 protected:
@@ -1157,7 +1157,7 @@ protected:
    */
   StatusCode insertMixed (const EventIDRange& r,
                           CondContBase::CondContSet::payload_unique_ptr t,
-                          const EventContext& ctx = Gaudi::Hive::currentContext());
+                          const EventContext& ctx);
 
 
   /** 
@@ -1292,7 +1292,7 @@ public:
    */
   StatusCode insert (const EventIDRange& r,
                      std::unique_ptr<T> obj,
-                     const EventContext& ctx = Gaudi::Hive::currentContext());
+                     const EventContext& ctx);
 
 
   /** 
