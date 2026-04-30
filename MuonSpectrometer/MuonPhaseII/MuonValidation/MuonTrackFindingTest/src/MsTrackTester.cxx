@@ -196,6 +196,8 @@ namespace MuonValR4 {
             m_tree.addBranch(m_truthSegs);
 
             m_truthTrks = std::make_unique<IParticleFourMomBranch>(m_tree, "TruthMuons");
+            m_truthTrks->addVariable<int>(-1, "truthOrigin");
+            m_truthTrks->addVariable<int>(-1, "truthType");
             m_tree.addBranch(m_truthTrks);
             m_trkTruthLinks.emplace_back(m_truthSegmentKey, "truthParticleLink");
             m_trkTruthLinks.emplace_back(m_truthKey, "truthSegmentLinks");

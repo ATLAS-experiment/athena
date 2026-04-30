@@ -168,7 +168,11 @@ namespace MuonValR4{
     MuonVal::ScalarBranch<float>& m_out_gen_tantheta{m_tree.newScalar<float>("genTanTheta", 0.0)}; 
     MuonVal::ScalarBranch<float>& m_out_gen_tanphi{m_tree.newScalar<float>("genTanPhi", 0.0)}; 
     MuonVal::ScalarBranch<float>& m_out_gen_x0{m_tree.newScalar<float>("genX0", 0.0)}; 
-    MuonVal::ScalarBranch<float>& m_out_gen_time{m_tree.newScalar<float>("genTime", 0.0)}; 
+    MuonVal::ScalarBranch<float>& m_out_gen_time{m_tree.newScalar<float>("genTime", 0.0)};
+
+    MuonVal::ScalarBranch<int>& m_out_gen_truthOrigin{m_tree.newScalar<int>("genTruthOrigin", -1)};
+    MuonVal::ScalarBranch<int>& m_out_gen_truthType{m_tree.newScalar<int>("genTruthType", -1)};
+    
     /** @brief Truth - hit count summary */
     MuonVal::ScalarBranch<unsigned short>& m_out_gen_nHits{m_tree.newScalar<unsigned short>("genNHits",0)};
     MuonVal::ScalarBranch<unsigned short>& m_out_gen_nRPCHits{m_tree.newScalar<unsigned short>("genNRpcHits",0)};
