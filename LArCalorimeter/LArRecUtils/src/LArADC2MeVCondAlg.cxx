@@ -1,12 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
 
 #include "LArADC2MeVCondAlg.h"
 #include "LArIdentifier/LArOnline_SuperCellID.h"
 #include "LArIdentifier/LArOnlineID.h"
-#include "CaloIdentifier/CaloGain.h"
 #include <memory>
 #include "GaudiKernel/EventIDRange.h"
 
@@ -23,7 +21,6 @@ StatusCode LArADC2MeVCondAlg::initialize() {
     m_larOnlineID=scidhelper; //cast to base-class
   }
   else {//regular cells
-    m_nGains=3;
     const LArOnlineID* idhelper;
     ATH_CHECK(detStore()->retrieve(idhelper,"LArOnlineID"));
     m_larOnlineID=idhelper; //cast to base-class
