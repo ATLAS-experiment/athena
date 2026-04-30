@@ -30,7 +30,9 @@ IDTIDE_AOD_EXCLUDED_AUXDATA = [
     'IDTIDE_unbiased_z0', 'IDTIDE_unbiased_z0Sigma',
     'IDTIDE_unbiased_z0SigmaSinTheta', 'IDTIDE_unbiased_z0SinTheta'
     ]
-
+IDTIDE_AOD_EXCLUDED_AUXDATA_TRUTH = [
+    'd0', 'z0', 'phi', 'theta', 'z0st', 'qOverP', 'prodR', 'prodZ', 'nSilHits'
+    ]
 
 def IDTIDEKernelCommonCfg(flags, name='IDTIDEKernel'):
     acc = ComponentAccumulator()
@@ -274,6 +276,12 @@ def IDTIDEKernelCfg(flags, StreamName=""):
     acc.addSequence(parAND(IDTIDEPostProcSequenceName),
                     parentName=IDTIDEPreselSequenceName)
 
+    if flags.Input.isMC:
+        from InDetPhysValMonitoring.InDetPhysValDecorationConfig import (
+            InDetPhysValTruthDecoratorAlgCfg)
+        acc.merge(InDetPhysValTruthDecoratorAlgCfg(flags),
+                  sequenceName=IDTIDEPostProcSequenceName)
+
     from DerivationFrameworkInDet.InDetToolsConfig import (
         DFInDetTSOSKernelCfg)
     acc.merge(DFInDetTSOSKernelCfg(flags),
@@ -302,6 +310,12 @@ def ITkTIDEKernelCfg(flags, StreamName=""):
     IDTIDEPostProcSequenceName='IDTIDEPostProcSequence'
     acc.addSequence(parAND(IDTIDEPostProcSequenceName),
                     parentName=IDTIDEPreselSequenceName)
+
+    if flags.Input.isMC:
+        from InDetPhysValMonitoring.InDetPhysValDecorationConfig import (
+            InDetPhysValTruthDecoratorAlgCfg)
+        acc.merge(InDetPhysValTruthDecoratorAlgCfg(flags),
+                  sequenceName=IDTIDEPostProcSequenceName)
 
     from DerivationFrameworkInDet.InDetToolsConfig import DFITkTSOSKernelCfg
     acc.merge(DFITkTSOSKernelCfg(flags),
