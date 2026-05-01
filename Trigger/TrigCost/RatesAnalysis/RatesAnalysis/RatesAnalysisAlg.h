@@ -296,6 +296,11 @@ class RatesAnalysisAlg: public ::AthAnalysisAlgorithm {
   uint32_t m_eventCounter; //!< Count how many events processed
   double m_weightedEventCounter; //!< Count how many weighted events were processed
 
+  uint32_t m_metadataMasterKey = 0; //! <smk read patched
+  uint32_t m_metadataHLTPSK    = 0; //! <hltpsk read patched
+  uint32_t m_metadataL1PSK     = 0; //! < l1psk read patched
+  bool     m_metadataKeysCached = false;  //! < patched key read 
+
   TH1D* m_scalingHist; //!< One-bin histogram to store the normalisation of the sample, for use in later combinations
   TH1D* m_bcidHist; //!< Histogram of the BCIDs distribution of the processing
 

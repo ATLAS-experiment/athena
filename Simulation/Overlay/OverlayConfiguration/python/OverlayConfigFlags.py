@@ -26,4 +26,6 @@ def createOverlayConfigFlags():
     flags.addFlag("Overlay.doTrackOverlay", False)
     # Ignore background inputs
     flags.addFlag("Overlay.IgnoreBkgInputs", False)
+    # Do not align TRT for data overlay
+    flags.addFlag("Overlay.DynamicAlignTRT", lambda prevFlags : prevFlags.GeoModel.Align.Dynamic and not prevFlags.Overlay.DataOverlay)
     return flags

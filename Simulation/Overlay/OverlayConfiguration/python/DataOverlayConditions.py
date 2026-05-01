@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import ProductionStep
 from IOVDbSvc.IOVDbSvcConfig import addOverride
@@ -15,6 +15,7 @@ def DataOverlayConditionsBaseCfg(flags):
     # Use MC alignment for InDet if dynamic alignment is off
     if not flags.GeoModel.Align.Dynamic:
         acc.merge(addOverride(flags, "/Indet/Align", tag="InDetAlign_MC15c", db="COOLOFL_INDET/OFLP200"))
+    if not flags.GeoModel.Align.Dynamic or not flags.Overlay.DynamicAlignTRT:
         acc.merge(addOverride(flags, "/TRT/Align", tag="TRTAlign_Nominal2", db="COOLOFL_TRT/OFLP200"))
 
     # Some conditions are split by fast chain (sim+digi+overlay) and reco steps

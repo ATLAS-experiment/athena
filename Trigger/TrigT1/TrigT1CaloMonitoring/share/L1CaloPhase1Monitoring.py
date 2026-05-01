@@ -618,9 +618,22 @@ if flags.Output.BSFileName != "":
   from TrigT1ResultByteStream.TrigT1ResultByteStreamConfig import L1TriggerByteStreamEncoderCfg
   cfg.merge(L1TriggerByteStreamEncoderCfg(flags))
 
+  # create A TrigCompositeContainer with the things we want to write out
+  algo = CompFactory.L1TriggerResultMaker("OutputBSTCCMaker",
+                                              MuRoIKeys=[],
+                                              eFexEMRoIKeys=[], eFexTauRoIKeys=[],
+                                              jFexFwdElRoIKeys=[], jFexTauRoIKeys = [],
+                                              jFexSRJetRoIKeys = [], jFexLRJetRoIKeys = [],
+                                              gFexSRJetRoIKeys = [], gFexLRJetRoIKeys = [],
+                                              cTauRoIKey = "", cjTauLinkKey = "", ThresholdPatternTools= [],
+                                              L1TriggerResultWHKey = "OutputBSTCC")
+  if flags.Trigger.L1.doeFex:
+    algo.eFexEMRoIKeys = ["L1_eEMRoI","L1_eEMxRoI"]  # will write these containers
+    algo.eFexTauRoIKeys = ["L1_eTauRoI","L1_eTauxRoI"]
+
+  cfg.addEventAlgo(algo)
   from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamWriteCfg
-  write = ByteStreamWriteCfg(flags, ["xAOD::TrigCompositeContainer#*"]) # using the current method of trigger encoder by requesting this object type
-  # note that have to have something producing the TrigCompositeContainer object otherwise no BS encoding
+  write = ByteStreamWriteCfg(flags, ["xAOD::TrigCompositeContainer#OutputBSTCC"])
   cfg.merge(write)
 
 if "MuonAlignmentCondAlg" in [a.name for a in cfg.getCondAlgos()]: cfg.getCondAlgo("MuonAlignmentCondAlg").OutputLevel=Constants.ERROR # this alg produces warnings every time, silence it!

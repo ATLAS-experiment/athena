@@ -43,49 +43,49 @@ private:
     "Key of the output L1 Trigger Result"};
 
   // Muon RoIs
-  SG::ReadHandleKey<xAOD::MuonRoIContainer> m_muRoIKey {
-    this, "MuRoIKey", "LVL1MuonRoIs",
-    "Key of the muon RoI container to be linked to L1 Trigger Result"};
+  SG::ReadHandleKeyArray<xAOD::MuonRoIContainer> m_muRoIKeys {
+    this, "MuRoIKeys", {"LVL1MuonRoIs"},
+    "Keys of the muon RoI container to be linked to L1 Trigger Result"};
 
   // eFex EM RoIs
-  SG::ReadHandleKey<xAOD::eFexEMRoIContainer> m_eFexEMRoIKey {
-    this, "eFexEMRoIKey", "L1_eEMRoI",
-    "Key of the eFex EM RoI container to be linked to L1 Trigger Result"};
+  SG::ReadHandleKeyArray<xAOD::eFexEMRoIContainer> m_eFexEMRoIKeys {
+    this, "eFexEMRoIKeys", {"L1_eEMRoI"},
+    "Keys of the eFex EM RoI container to be linked to L1 Trigger Result"};
 
   // eFex Tau RoIs
-  SG::ReadHandleKey<xAOD::eFexTauRoIContainer> m_eFexTauRoIKey {
-    this, "eFexTauRoIKey", "L1_eTauRoI",
-    "Key of the eFex Tau RoI container to be linked to L1 Trigger Result"};
+  SG::ReadHandleKeyArray<xAOD::eFexTauRoIContainer> m_eFexTauRoIKeys {
+    this, "eFexTauRoIKeys", {"L1_eTauRoI"},
+    "Keys of the eFex Tau RoI container to be linked to L1 Trigger Result"};
 
   // jFex Fwd El RoIs
-  SG::ReadHandleKey<xAOD::jFexFwdElRoIContainer> m_jFexFwdElRoIKey {
-          this, "jFexFwdElRoIKey", "L1_jFexFwdElRoI",
-          "Key of the jFex Fwd El RoI container to be linked to L1 Trigger Result"};
+  SG::ReadHandleKeyArray<xAOD::jFexFwdElRoIContainer> m_jFexFwdElRoIKeys {
+          this, "jFexFwdElRoIKeys", {"L1_jFexFwdElRoI"},
+          "Keys of the jFex Fwd El RoI container to be linked to L1 Trigger Result"};
 
   // jFex Tau RoIs
-  SG::ReadHandleKey<xAOD::jFexTauRoIContainer> m_jFexTauRoIKey {
-    this, "jFexTauRoIKey", "L1_jFexTauRoI",
-    "Key of the jFex Tau RoI container to be linked to L1 Trigger Result"};
+  SG::ReadHandleKeyArray<xAOD::jFexTauRoIContainer> m_jFexTauRoIKeys {
+    this, "jFexTauRoIKeys", {"L1_jFexTauRoI"},
+    "Keys of the jFex Tau RoI container to be linked to L1 Trigger Result"};
 
   // jFex small-R Jet RoIs
-  SG::ReadHandleKey<xAOD::jFexSRJetRoIContainer> m_jFexSRJetRoIKey {
-    this, "jFexSRJetRoIKey", "L1_jFexSRJetRoI",
-    "Key of the jFex small-R Jet RoI container to be linked to L1 Trigger Result"};
+  SG::ReadHandleKeyArray<xAOD::jFexSRJetRoIContainer> m_jFexSRJetRoIKeys {
+    this, "jFexSRJetRoIKeys", {"L1_jFexSRJetRoI"},
+    "Keys of the jFex small-R Jet RoI container to be linked to L1 Trigger Result"};
 
   // jFex large-R Jet RoIs
-  SG::ReadHandleKey<xAOD::jFexLRJetRoIContainer> m_jFexLRJetRoIKey {
-    this, "jFexLRJetRoIKey", "L1_jFexLRJetRoI",
-    "Key of the jFex large-R Jet RoI container to be linked to L1 Trigger Result"};
+  SG::ReadHandleKeyArray<xAOD::jFexLRJetRoIContainer> m_jFexLRJetRoIKeys {
+    this, "jFexLRJetRoIKeys", {"L1_jFexLRJetRoI"},
+    "Keys of the jFex large-R Jet RoI container to be linked to L1 Trigger Result"};
 
   // gFex small-R Jet RoIs
-  SG::ReadHandleKey<xAOD::gFexJetRoIContainer> m_gFexSRJetRoIKey {
-    this, "gFexSRJetRoIKey", "L1_gFexSRJetRoI",
-    "Key of the gFex small-R Jet RoI container to be linked to L1 Trigger Result"};
+  SG::ReadHandleKeyArray<xAOD::gFexJetRoIContainer> m_gFexSRJetRoIKeys {
+    this, "gFexSRJetRoIKeys", {"L1_gFexSRJetRoI"},
+    "Keys of the gFex small-R Jet RoI container to be linked to L1 Trigger Result"};
 
   // gFex large-R Jet RoIs
-  SG::ReadHandleKey<xAOD::gFexJetRoIContainer> m_gFexLRJetRoIKey {
-    this, "gFexLRJetRoIKey", "L1_gFexLRJetRoI",
-    "Key of the gFex large-R Jet RoI container to be linked to L1 Trigger Result"};
+  SG::ReadHandleKeyArray<xAOD::gFexJetRoIContainer> m_gFexLRJetRoIKeys {
+    this, "gFexLRJetRoIKeys", {"L1_gFexLRJetRoI"},
+    "Keys of the gFex large-R Jet RoI container to be linked to L1 Trigger Result"};
 
   // Key of the cTau container to create (if empty, cTau creation is disabled)
   SG::WriteHandleKey<xAOD::eFexTauRoIContainer> m_cTauRoIKey {

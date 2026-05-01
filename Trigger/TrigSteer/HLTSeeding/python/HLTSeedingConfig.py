@@ -244,22 +244,22 @@ def L1TriggerResultMakerCfg(flags):
 
     # Reset properties to empty by default and fill based on flags below
     l1trMaker = CompFactory.L1TriggerResultMaker(
-        MuRoIKey = "",
-        eFexEMRoIKey = "",
-        eFexTauRoIKey = "",
-        jFexFwdElRoIKey = "",
-        jFexTauRoIKey = "",
-        jFexSRJetRoIKey = "",
-        jFexLRJetRoIKey = "",
-        gFexSRJetRoIKey = "",
-        gFexLRJetRoIKey = "",
+        MuRoIKeys = [],
+        eFexEMRoIKeys = [],
+        eFexTauRoIKeys = [],
+        jFexFwdElRoIKeys = [],
+        jFexTauRoIKeys = [],
+        jFexSRJetRoIKeys = [],
+        jFexLRJetRoIKeys = [],
+        gFexSRJetRoIKeys = [],
+        gFexLRJetRoIKeys = [],
         cTauRoIKey = "",
         cjTauLinkKey = "",
         ThresholdPatternTools = [] )
 
     # Muon RoIs
     if flags.Trigger.L1.doMuon and flags.Trigger.enableL1MuonPhase1:
-        l1trMaker.MuRoIKey = "LVL1MuonRoIs"
+        l1trMaker.MuRoIKeys = ["LVL1MuonRoIs"]
         from TrigT1MuctpiPhase1.TrigT1MuctpiPhase1Config import TrigThresholdDecisionToolCfg
         l1trMaker.ThresholdPatternTools += [acc.popToolsAndMerge(TrigThresholdDecisionToolCfg(flags))]
     elif flags.Trigger.L1.doMuon and flags.Trigger.enableL0Muon:   # Run-4+
@@ -269,17 +269,17 @@ def L1TriggerResultMakerCfg(flags):
     # L1Calo RoIs
     if flags.Trigger.L1.doCalo and flags.Trigger.enableL1CaloPhase1:
         if flags.Trigger.L1.doeFex:
-            l1trMaker.eFexEMRoIKey = "L1_eEMRoI"
-            l1trMaker.eFexTauRoIKey = "L1_eTauRoI"
+            l1trMaker.eFexEMRoIKeys = ["L1_eEMRoI"]
+            l1trMaker.eFexTauRoIKeys = ["L1_eTauRoI"]
             l1trMaker.ThresholdPatternTools += [
                 CompFactory.eFexEMRoIThresholdsTool(),
                 CompFactory.eFexTauRoIThresholdsTool(),
             ]
         if flags.Trigger.L1.dojFex:
-            l1trMaker.jFexFwdElRoIKey = "L1_jFexFwdElRoI"
-            l1trMaker.jFexTauRoIKey = "L1_jFexTauRoI"
-            l1trMaker.jFexSRJetRoIKey = "L1_jFexSRJetRoI"
-            l1trMaker.jFexLRJetRoIKey = "L1_jFexLRJetRoI"
+            l1trMaker.jFexFwdElRoIKeys = ["L1_jFexFwdElRoI"]
+            l1trMaker.jFexTauRoIKeys = ["L1_jFexTauRoI"]
+            l1trMaker.jFexSRJetRoIKeys = ["L1_jFexSRJetRoI"]
+            l1trMaker.jFexLRJetRoIKeys = ["L1_jFexLRJetRoI"]
             l1trMaker.ThresholdPatternTools += [
                 CompFactory.jFexFwdElRoIThresholdsTool(),
                 CompFactory.jFexTauRoIThresholdsTool(),
@@ -287,8 +287,8 @@ def L1TriggerResultMakerCfg(flags):
                 CompFactory.jFexLRJetRoIThresholdsTool(),
             ]
         if flags.Trigger.L1.dogFex:
-            l1trMaker.gFexSRJetRoIKey = "L1_gFexSRJetRoI"
-            l1trMaker.gFexLRJetRoIKey = "L1_gFexLRJetRoI"
+            l1trMaker.gFexSRJetRoIKeys = ["L1_gFexSRJetRoI"]
+            l1trMaker.gFexLRJetRoIKeys = ["L1_gFexLRJetRoI"]
             l1trMaker.ThresholdPatternTools += [
                 CompFactory.gFexSRJetRoIThresholdsTool(),
                 CompFactory.gFexLRJetRoIThresholdsTool(),
