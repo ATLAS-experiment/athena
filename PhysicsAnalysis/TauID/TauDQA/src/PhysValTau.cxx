@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // PhysValTau.cxx 
@@ -68,7 +68,7 @@ StatusCode PhysValTau::bookHistograms()
   return StatusCode::SUCCESS;      
 }
 
-StatusCode PhysValTau::fillHistograms()
+StatusCode PhysValTau::fillHistograms(const EventContext& /*ctx*/)
 {
   ATH_MSG_DEBUG ("Filling hists " << name() << "...");
 

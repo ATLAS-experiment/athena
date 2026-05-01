@@ -136,7 +136,7 @@ namespace JetTagDQA {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode PhysValBTag::fillHistograms()
+  StatusCode PhysValBTag::fillHistograms(const EventContext& /*ctx*/)
   {
     ATH_MSG_DEBUG ("Filling hists " << name() << "...");
     

@@ -111,11 +111,10 @@ StatusCode EgammaPhysValMonitoringTool::bookHistograms()
 }
 
 
-StatusCode EgammaPhysValMonitoringTool::fillHistograms()
+StatusCode EgammaPhysValMonitoringTool::fillHistograms(const EventContext& ctx)
 {
   ATH_MSG_DEBUG("Filling hists " << name() << "...");
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::ReadHandle<xAOD::EventInfo> eventInfo(m_EventInfoContainerKey, ctx);
   ATH_CHECK(eventInfo.isValid());
 

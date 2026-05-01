@@ -211,9 +211,9 @@ int egammaMonToolBase::GetRegion(float eta)
   // Forward region not checked here! See GetForwardRegion()
 }
 
-StatusCode egammaMonToolBase::fillHistograms()
+StatusCode egammaMonToolBase::fillHistograms(const EventContext& /*ctx*/)
 {
-  ATH_MSG_DEBUG("egammaMonToolBase::fillHistograms()");
+  ATH_MSG_DEBUG("egammaMonToolBase::fillHistograms(const EventContext& ctx)");
 
   return StatusCode::SUCCESS;
 }

@@ -42,7 +42,7 @@ class MdtVsRpcRawDataValAlg : public ManagedMonitorToolBase {
     virtual ~MdtVsRpcRawDataValAlg() = default;
     StatusCode initialize();
     virtual StatusCode bookHistogramsRecurrent();
-    virtual StatusCode fillHistograms();
+    virtual StatusCode fillHistograms(const EventContext& ctx);
 
    private:
     // Private function to add the clusters to the ntuple

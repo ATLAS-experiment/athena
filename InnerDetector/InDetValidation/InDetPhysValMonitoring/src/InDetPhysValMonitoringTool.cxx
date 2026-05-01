@@ -321,13 +321,10 @@ InDetRttPlotConfig InDetPhysValMonitoringTool::getFilledPlotConfig() const{
 }
 
 StatusCode
-InDetPhysValMonitoringTool::fillHistograms() {
+InDetPhysValMonitoringTool::fillHistograms(const EventContext& ctx) {
   ATH_MSG_DEBUG("Filling hists " << name() << "...");
   // function object could be used to retrieve truth: IDPVM::CachedGetAssocTruth getTruth;
 
-  // Get the Event Context
-  const EventContext& ctx = Gaudi::Hive::currentContext();
-  
   // retrieve trackParticle container
   SG::ReadHandle<xAOD::TrackParticleContainer> trackHandle(m_trkParticleName, ctx);
   if (not trackHandle.isValid()) {

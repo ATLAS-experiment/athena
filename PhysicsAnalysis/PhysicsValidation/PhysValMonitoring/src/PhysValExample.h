@@ -53,7 +53,7 @@ class PhysValExample
   // Athena algtool's Hooks
   virtual StatusCode initialize();
   virtual StatusCode bookHistograms();
-  virtual StatusCode fillHistograms();
+  virtual StatusCode fillHistograms(const EventContext& ctx);
   virtual StatusCode procHistograms();
 
 

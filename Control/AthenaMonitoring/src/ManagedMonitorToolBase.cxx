@@ -22,6 +22,7 @@
 #include "StoreGate/ReadCondHandle.h"
 
 #include "Gaudi/Interfaces/IOptionsSvc.h"
+#include "GaudiKernel/EventContext.h"
 #include "GaudiKernel/IHistogramSvc.h"
 #include "GaudiKernel/IMessageSvc.h"
 #include "GaudiKernel/ISvcLocator.h"
@@ -737,7 +738,7 @@ bookHists()
 
 StatusCode
 ManagedMonitorToolBase::
-fillHists()
+fillHists(const EventContext& ctx)
 {
 
    if (m_d->m_warnAboutMissingInitialize) {
@@ -900,7 +901,7 @@ fillHists()
      ToolHandleArray<IDQFilterTool>::const_iterator ifilter(m_DQFilterTools.begin()), filterend(m_DQFilterTools.end());
      for (; filterresult && (ifilter != filterend);
    	  ++ifilter) {
-       filterresult = (filterresult && (*ifilter)->accept(Gaudi::Hive::currentContext()));
+       filterresult = (filterresult && (*ifilter)->accept(ctx));
      }
    }
    
@@ -912,7 +913,7 @@ fillHists()
        || (m_vTrigGroupNames.size()>0 && trigChainsArePassed(m_vTrigGroupNames))) ) {
      ATH_MSG_DEBUG("Passed trigger, presumably");
       m_d->benchPreFillHistograms();
-      fillHistograms().ignore();
+      fillHistograms(ctx).ignore();
       m_haveClearedLastEventBlock = true;
       m_d->benchPostFillHistograms();
       ++m_nEvents;
@@ -1302,7 +1303,7 @@ bookHistograms( )
 
 StatusCode
 ManagedMonitorToolBase::
-fillHistograms()
+fillHistograms(const EventContext& /*ctx*/)
 {
    return StatusCode::SUCCESS;
 }

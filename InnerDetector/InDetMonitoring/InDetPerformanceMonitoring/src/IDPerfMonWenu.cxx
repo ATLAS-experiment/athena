@@ -399,7 +399,7 @@ void IDPerfMonWenu::RegisterHisto(MonGroup& mon, TH2* histo, bool doSumw2) {
   }
 }
 
-StatusCode IDPerfMonWenu::fillHistograms()
+StatusCode IDPerfMonWenu::fillHistograms(const EventContext& /*ctx*/)
 {
   int nevents = (int) m_Nevents->GetEntries();
   const bool firstEvent{nevents == 1};

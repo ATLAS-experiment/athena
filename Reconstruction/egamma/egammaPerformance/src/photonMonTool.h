@@ -105,7 +105,7 @@ class photonMonTool : public egammaMonToolBase
   virtual StatusCode bookHistograms() override;
   virtual StatusCode bookHistogramsForOnePhotonType(photonHist& myHist);
 
-  virtual StatusCode fillHistograms() override;
+  virtual StatusCode fillHistograms(const EventContext& ctx) override;
   virtual StatusCode fillHistogramsForOnePhoton(xAOD::PhotonContainer::const_iterator g_iter, photonHist& myHist);
 
  protected:

@@ -152,22 +152,22 @@ StatusCode MdtVsTgcRawDataValAlg::bookHistogramsRecurrent(){
 
 
 /*----------------------------------------------------------------------------------*/
-StatusCode MdtVsTgcRawDataValAlg::fillHistograms(){
+StatusCode MdtVsTgcRawDataValAlg::fillHistograms(const EventContext& ctx){
 /*----------------------------------------------------------------------------------*/
   ATH_MSG_DEBUG( "MdtVsTgcRawDataValAlg::TGC RawData Monitoring Histograms being filled"  );
 
   //TGC PRD
-  SG::ReadHandle<Muon::TgcPrepDataContainer> tgc_prd_container(m_tgc_PrepDataContainerName);
+  SG::ReadHandle<Muon::TgcPrepDataContainer> tgc_prd_container(m_tgc_PrepDataContainerName, ctx);
   
   //TGC Coincidence
-  SG::ReadHandle<Muon::TgcCoinDataContainer> tgc_coin_container(m_tgc_CoinContainerName);
+  SG::ReadHandle<Muon::TgcCoinDataContainer> tgc_coin_container(m_tgc_CoinContainerName, ctx);
 
   ATH_MSG_DEBUG( "size of tgc container is " << tgc_coin_container -> size()  );
   
   //MDT PRD
-  SG::ReadHandle<Muon::MdtPrepDataContainer> mdt_prd_container(m_mdt_PrepDataContainerName);
+  SG::ReadHandle<Muon::MdtPrepDataContainer> mdt_prd_container(m_mdt_PrepDataContainerName, ctx);
 
-  SG::ReadHandle<xAOD::MuonSegmentContainer> mdt_segment_collection(m_mdt_SegmentCollectionName) ;
+  SG::ReadHandle<xAOD::MuonSegmentContainer> mdt_segment_collection(m_mdt_SegmentCollectionName, ctx) ;
   tgceffcalc(mdt_segment_collection.cptr(), tgc_prd_container.cptr());
   maphists(mdt_segment_collection.cptr(), tgc_prd_container.cptr());
 

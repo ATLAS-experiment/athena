@@ -54,7 +54,7 @@ StatusCode PhysValDiTau::bookHistograms()
   return StatusCode::SUCCESS;      
 }
 
-StatusCode PhysValDiTau::fillHistograms()
+StatusCode PhysValDiTau::fillHistograms(const EventContext& /*ctx*/)
 {
   ATH_MSG_DEBUG ("Filling hists " << name() << "...");
 

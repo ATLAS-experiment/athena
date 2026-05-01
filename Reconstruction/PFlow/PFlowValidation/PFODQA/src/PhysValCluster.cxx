@@ -34,9 +34,8 @@ StatusCode PhysValCluster::bookHistograms(){
    
 }
 
-StatusCode PhysValCluster::fillHistograms(){
+StatusCode PhysValCluster::fillHistograms(const EventContext& ctx){
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::ReadHandle<xAOD::EventInfo> evInfoHdl{m_eventInfoName, ctx}; 
   if(!evInfoHdl.isValid()){
      ATH_MSG_ERROR("Do not have EventInfo with key " << m_eventInfoName.key());
