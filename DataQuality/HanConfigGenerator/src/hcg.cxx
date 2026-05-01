@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //
 //   @file    hanconfig.cxx         
@@ -45,6 +45,8 @@
 
 #include "CxxUtils/checker_macros.h"
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // standalone app
+
+static const std::string delimiter("/");
 
 /// file names and file pointers
 std::vector<std::string> files;
@@ -337,7 +339,7 @@ std::vector<std::string> maphist( const std::vector<std::string>& v ) {
       std::string tmp = v[i];
       std::string path = chop( tmp, "Expert/" );
       path += "Chains/";
-      tmp = replace( tmp, "/", "__" );
+      tmp = replace( tmp, delimiter, "__" );
       path += tmp;
       mapped.push_back( std::move(path) );
     }
@@ -457,7 +459,7 @@ public:
     TList* tl  = gDirectory->GetListOfKeys();
     
     /// go through sub directories
-    
+    static const std::string runPrefix{"run_"};
     for ( int i=0 ; i<tl->GetSize() ; i++ ) { 
       
       TKey* tobj = (TKey*)tl->At(i);
@@ -469,8 +471,8 @@ public:
 	
 	std::string dir = tnd->GetName();
 
-	if ( contains( dir, "run_" ) ) {
-	  dir.erase( 0, std::string( "run_").size() ); 
+	if ( contains( dir, runPrefix ) ) {
+	  dir.erase( 0, runPrefix.size() ); 
 	  m_run = std::atoi( dir.c_str() );
 	  
 	  break;
@@ -597,9 +599,9 @@ public:
       
       if ( print && n.type()==node::DIRECTORY ) { 
 	if ( path=="" ) path += output_name;
-	else            path += "/" + output_name;
+	else            path += delimiter + output_name;
 	if ( rawpath=="" ) rawpath += n.name();
-	else               rawpath += "/" + n.name();
+	else               rawpath += delimiter + n.name();
       }
 
       //      std::cerr << "path " << path << "\tmatchdir " << matchdir( path ) << std::endl;
@@ -667,9 +669,9 @@ public:
             
       if ( print && n.type()==node::DIRECTORY ) { 
 	if ( path=="" ) path += output_name;
-	else            path += "/" + output_name;
+	else            path += delimiter + output_name;
 	if ( rawpath=="" ) rawpath += n.name();
-	else               rawpath += "/" + n.name();
+	else               rawpath += delimiter + n.name();
       }
 
       if ( found && ( dirs.size() &&  !matchdir( path ) && !matchdir( rawpath ) ) ) return;
@@ -702,7 +704,9 @@ public:
 	    (*outp) << space << "\t\t" << "output      \t= " << path << "\n";
 	    (*outp) << space << "\t\t" << "display     \t= StatBox\n";
 	    /// extra user specified tags
-	    for ( unsigned it=0 ; it<tags.size() ; it++ ) (*outp) << space << "\t\t" << replace(tags[it],"=","\t=") << "\n";
+	    static const std::string equalStr{"="};
+	    static const std::string tabEqualStr{"\t="};
+	    for ( unsigned it=0 ; it<tags.size() ; it++ ) (*outp) << space << "\t\t" << replace(tags[it],equalStr,tabEqualStr) << "\n";
 	    (*outp) << space << "\t"   << "}\n";
 
 	    //      TH1* ase = (TH1*)(n[i]->object());
@@ -764,7 +768,7 @@ void search( TDirectory* td, const std::string& s, std::string cwd, node* n ) {
 
   td->cd();
   
-  if ( cwd!="" ) cwd += "/";
+  if ( cwd!="" ) cwd += delimiter;
   cwd += td->GetName();
 
   node* np = n;
@@ -777,7 +781,7 @@ void search( TDirectory* td, const std::string& s, std::string cwd, node* n ) {
 
     std::string ase = matchcwdstr( cwd );
 
-    if ( (cwd+"/").find( ase+"/" )!=std::string::npos ) { 
+    if ( (cwd+delimiter).find( ase+delimiter )!=std::string::npos ) { 
     
       found_dir   = true;
       first_found = true;
@@ -795,7 +799,7 @@ void search( TDirectory* td, const std::string& s, std::string cwd, node* n ) {
 	  
 	  std::string sp = fitr->first; 
 	  
-	  while( sp.size() ) subpath.push_back( chop(sp,"/") ); 
+	  while( sp.size() ) subpath.push_back( chop(sp,delimiter) ); 
 	  
 	  for ( unsigned ip=0 ; ip<subpath.size()-1 ; ip++ ) { 
 	    //	    std::cerr << "subpath " << ip << " " << subpath[ip] << std::endl;
@@ -866,10 +870,10 @@ void search( TDirectory* td, const std::string& s, std::string cwd, node* n ) {
 
 	  /// get the full path to this object path relative to the file	  
 	  std::string subdir = cwd;
-	  chop( subdir, currentfile+"/" );
+	  chop( subdir, currentfile+delimiter );
 
 	  /// save the histograms in case we need to save the, later ...
-	  savedhistos.push_back( subdir+"/"+tobj->GetName() );
+	  savedhistos.push_back( subdir+delimiter+tobj->GetName() );
 
 	  /// keep the max number of entries updated
 	  if ( std::string(tobj->GetName())=="Chain" ) { 
@@ -986,7 +990,7 @@ int cost( std::vector<std::string>& files, node& n, const std::string& directory
 
       for ( unsigned ih=0 ; ih<savedhistos.size() ; ih++ ) { 
 	
-	std::vector<std::string> dirs = split( mapped[ih], "/" );
+	std::vector<std::string> dirs = split( mapped[ih], delimiter );
 
 	for ( unsigned jh=0 ; jh<dirs.size()-1 ; jh++ ) { 
 	  /// std::cerr << "\t" << dirs[jh] << std::endl;
@@ -1107,7 +1111,6 @@ int main(int argc, char** argv) {
 
   int offset = 1;
 
-
   for ( int i=1 ; i<argc ; i++ ) { 
     if      ( std::string(argv[i])=="-v" || std::string(argv[i])=="--verbose" ) verbose = true;
     else if ( std::string(argv[i])=="-o" ) {
@@ -1152,7 +1155,7 @@ int main(int argc, char** argv) {
 	  //	  std::cerr << "dirs " << argv[i] << std::endl;
 	  
 	  do { 
-	    subdirs.push_back( chop( tdir, "/" ) );
+	    subdirs.push_back( chop( tdir, delimiter ) );
 	    //   std::cerr << "chop  " << subdirs.back() << std::endl;
 	  }
 	  while ( tdir.size() ); 
