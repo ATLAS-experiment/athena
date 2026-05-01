@@ -3,7 +3,6 @@
 */
 
 #include "HiveAlgA.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 HiveAlgA::HiveAlgA( const std::string& name, 
 		    ISvcLocator* pSvcLocator ) : 
@@ -41,7 +40,7 @@ StatusCode HiveAlgA::execute(const EventContext& ctx) const {
 		 << " e: " << evt->eventNumber() );
   }
 
-  sleep();
+  sleep(ctx);
 
   unsigned int i = ctx.evt();
 

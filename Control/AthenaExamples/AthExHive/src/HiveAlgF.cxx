@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HiveAlgF.h"
@@ -33,7 +33,7 @@ StatusCode HiveAlgF::execute(const EventContext& ctx) const {
 
   ATH_MSG_DEBUG("execute " << name());
  
-  sleep();
+  sleep(ctx);
 
   SG::ReadHandle<HiveDataObj> rdh1{m_rdh1, ctx};
   if (!rdh1.isValid()) {

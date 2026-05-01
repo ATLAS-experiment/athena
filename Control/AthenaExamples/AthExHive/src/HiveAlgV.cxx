@@ -32,7 +32,7 @@ StatusCode HiveAlgV::execute(const EventContext& ctx) const {
 
   ATH_MSG_DEBUG("execute " << name());
  
-  sleep();
+  sleep(ctx);
 
   if (m_writeFirst) {
     ATH_CHECK(write(ctx));

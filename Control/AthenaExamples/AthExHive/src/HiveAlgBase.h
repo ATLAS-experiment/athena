@@ -38,7 +38,7 @@ public:
 protected:
 
   // cause Alg to sleep for time defined by "Time" Property
-  unsigned int sleep() const;
+  unsigned int sleep(const EventContext& ctx) const;
 
   // Handle to HiveExSvc, which accumulates how much time each Alg sleeps
   ServiceHandle<IHiveExSvc> m_hes{this,"HiveExSvc","HiveExSvc","Handle to HiveExSvc"};
