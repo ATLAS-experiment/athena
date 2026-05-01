@@ -22,7 +22,7 @@ StatusCode DerivationFramework::BoostedTTbarSkimmingToolAlg::finalize()
     return StatusCode::SUCCESS;
 }
 
-bool DerivationFramework::BoostedTTbarSkimmingToolAlg::eventPassesFilter() const
+bool DerivationFramework::BoostedTTbarSkimmingToolAlg::eventPassesFilter(const EventContext& /*ctx*/) const
 {
     ++m_ntot;
 

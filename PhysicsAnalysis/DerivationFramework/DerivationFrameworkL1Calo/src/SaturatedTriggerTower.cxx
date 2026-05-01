@@ -39,7 +39,7 @@ namespace DerivationFramework {
         return StatusCode::SUCCESS;
     }
     
-    bool SaturatedTriggerTower::eventPassesFilter() const
+    bool SaturatedTriggerTower::eventPassesFilter(const EventContext& /*ctx*/) const
     {
 	bool acceptEvent(false);
         

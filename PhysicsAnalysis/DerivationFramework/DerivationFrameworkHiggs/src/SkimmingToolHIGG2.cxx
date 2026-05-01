@@ -144,7 +144,7 @@ StatusCode DerivationFramework::SkimmingToolHIGG2::finalize()
 }
 
 // The filter itself
-bool DerivationFramework::SkimmingToolHIGG2::eventPassesFilter() const
+bool DerivationFramework::SkimmingToolHIGG2::eventPassesFilter(const EventContext& /*ctx*/) const
 {
   m_ntot++;
   bool acceptEvent(false);

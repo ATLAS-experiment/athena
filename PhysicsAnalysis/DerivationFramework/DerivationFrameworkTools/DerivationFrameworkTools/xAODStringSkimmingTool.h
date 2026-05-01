@@ -25,7 +25,7 @@ namespace DerivationFramework {
 
       StatusCode initialize();
       StatusCode finalize();
-      virtual bool eventPassesFilter() const;
+      virtual bool eventPassesFilter(const EventContext& ctx) const;
     private:
       std::string m_expression;
   };

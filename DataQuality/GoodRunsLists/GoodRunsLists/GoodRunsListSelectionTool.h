@@ -84,7 +84,7 @@ public:
 #ifndef XAOD_STANDALONE
    /// ISkimmingTool method:
    /// will retrieve eventInfo from storegate and use that with above methods
-   virtual bool eventPassesFilter() const;
+   virtual bool eventPassesFilter(const EventContext& ctx) const;
 #endif
    
    /// @}

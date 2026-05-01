@@ -54,7 +54,7 @@ StatusCode BCIDFilterTool::finalize()
 }
 
 // The filter itself
-bool BCIDFilterTool::eventPassesFilter() const
+bool BCIDFilterTool::eventPassesFilter(const EventContext& /*ctx*/) const
 {
      ++m_ntot;
 

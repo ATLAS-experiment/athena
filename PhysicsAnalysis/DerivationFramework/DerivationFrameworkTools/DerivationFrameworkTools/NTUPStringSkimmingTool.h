@@ -26,7 +26,7 @@ namespace DerivationFramework {
       NTUPStringSkimmingTool(const std::string& t, const std::string& n, const IInterface* p);
 
       virtual StatusCode initialize() override;
-      virtual bool eventPassesFilter() const override;
+      virtual bool eventPassesFilter(const EventContext& ctx) const override;
 
     private:
       std::string m_expression;
