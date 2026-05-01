@@ -166,6 +166,7 @@ float interpolate (const CaloRec::Array<2>& a,
   // t gets the x coordinates, d gets the y coordinates.
   // Note that the order doesn't matter.
   // Reserve two extra points in case we end up adding some.
+  assert(ihi >= ilo);
   npts = ihi - ilo;
   std::vector<float> t;
   //coverity[INTEGER_OVERFLOW]
