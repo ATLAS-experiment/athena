@@ -504,6 +504,14 @@ std::unique_ptr<DataObject> DataProxy::readData (objLock_t&, ErrNo* errNo)
     if (errNo && *errNo == RECURSIVEREAD) *errNo = ALLOK;
     return std::unique_ptr<DataObject>(obj);
   }
+  if (!address) {
+    MsgStream gLog(m_ims, "DataProxy");
+    gLog << MSG::ERROR
+         << "readData: no address for " << clID() << "/" << name()
+         << " but validAddress returned true.  You may be trying to retrieve"
+         << " alignments during initialization without having defined a campaign."
+         << endmsg;
+  }
   if (errNo) *errNo = CNVFAILED;
   return nullptr;
 }
