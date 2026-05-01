@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( LUCID_G4_SD )
@@ -25,7 +25,7 @@ atlas_add_library( LUCID_G4_SD
 atlas_add_test( LUCID_SensitiveDetector_gtest
                 SOURCES test/LUCID_SensitiveDetector_gtest.cxx
                 LINK_LIBRARIES LUCID_G4_SDLib G4AtlasToolsLib MCTruth TestTools CxxUtils
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 # Turn on/off LTO for all targets in the package.
 set_target_properties(
