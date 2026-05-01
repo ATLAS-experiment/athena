@@ -65,7 +65,7 @@ StatusCode JetMonitoringTool::bookHistograms()
   return StatusCode::SUCCESS;     
 }
 
-StatusCode JetMonitoringTool::fillHistograms()
+StatusCode JetMonitoringTool::fillHistograms(const EventContext& /*ctx*/)
 {
   ATH_MSG_DEBUG ("Filling hists " << name() << "...");
 

@@ -29,6 +29,7 @@
 
 #include "TrigDecisionInterface/ITrigDecisionTool.h"
 
+class EventContext;
 class IInterface;
 class ISvcLocator;//not needed
 class TGraph;
@@ -411,7 +412,7 @@ class ManagedMonitorToolBase : public AthAlgTool, virtual public IMonitorToolBas
        * calls procHists( bool, bool, bool ) and bookHists( bool, bool, bool ).
        */
 
-      virtual StatusCode fillHists();
+      virtual StatusCode fillHists(const EventContext& ctx);
 
       /**
        * Calls procHists( true, true, true ).
@@ -438,7 +439,7 @@ class ManagedMonitorToolBase : public AthAlgTool, virtual public IMonitorToolBas
        * An inheriting class should either override this function or fillHists().
        */
 
-      virtual StatusCode fillHistograms();
+      virtual StatusCode fillHistograms(const EventContext& ctx);
 
 
       /**

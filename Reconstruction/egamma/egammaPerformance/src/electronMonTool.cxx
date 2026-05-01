@@ -341,13 +341,11 @@ StatusCode electronMonTool::fillHistogramsForOneElectron(xAOD::ElectronContainer
     return StatusCode::SUCCESS;
 }
 
-StatusCode electronMonTool::fillHistograms() {
+StatusCode electronMonTool::fillHistograms(const EventContext& ctx) {
   ATH_MSG_DEBUG("electronMonTool::fillHistograms()");
   
   if (!hasGoodTrigger("single electron")) return StatusCode::SUCCESS; 
   
-  const EventContext& ctx = Gaudi::Hive::currentContext();
-
   //check whether Lar signalled event bad
   if(hasBadLar(ctx)) {
     ATH_MSG_DEBUG("electronMonTool::hasBadLar()");
@@ -379,7 +377,7 @@ StatusCode electronMonTool::fillHistograms() {
   }
 
   // Get electron container
-  SG::ReadHandle<xAOD::ElectronContainer> electron_container{m_ElectronContainer};
+  SG::ReadHandle<xAOD::ElectronContainer> electron_container{m_ElectronContainer, ctx};
   ATH_CHECK(electron_container.isValid());
 
   // Check that the auxiliary store association was made successfully:

@@ -295,7 +295,7 @@ namespace MuonPhysValMonitoring {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode MuonPhysValMonitoringTool::fillHistograms() {
+    StatusCode MuonPhysValMonitoringTool::fillHistograms(const EventContext& ctx) {
         ATH_MSG_DEBUG("Filling hists " << name() << "...");
         m_vMatchedTruthMuons.clear();
         m_vMatchedMuons.clear();
@@ -316,7 +316,6 @@ namespace MuonPhysValMonitoring {
         m_vRecoMuons_EffDen_CB.clear();
         m_vRecoMuons_EffDen_MS.clear();
 
-        const EventContext& ctx{Gaudi::Hive::currentContext()};
         const xAOD::EventInfo* eventInfo{nullptr};
         ATH_CHECK(retrieveContainer(ctx, m_eventInfo, eventInfo));
 

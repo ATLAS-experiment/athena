@@ -242,12 +242,12 @@ StatusCode DiMuMon::bookHistograms()
 }
 
 
-StatusCode DiMuMon::fillHistograms()
+StatusCode DiMuMon::fillHistograms(const EventContext& ctx)
 {
 
   const double muonMass = ParticleConstants::muonMassInMeV;
   //retrieve all muons
-  SG::ReadHandle<xAOD::MuonContainer> muons{m_muonCollection};
+  SG::ReadHandle<xAOD::MuonContainer> muons{m_muonCollection, ctx};
   if(!muons.isValid()){
     ATH_MSG_WARNING("Could not retrieve muon container");
     return StatusCode::FAILURE;

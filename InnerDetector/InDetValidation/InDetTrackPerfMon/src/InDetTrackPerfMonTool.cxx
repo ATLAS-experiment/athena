@@ -152,12 +152,12 @@ StatusCode IDTPM::InDetTrackPerfMonTool::bookHistograms()
 /// ------------------------------
 /// ------- fillHistograms -------
 /// ------------------------------
-StatusCode IDTPM::InDetTrackPerfMonTool::fillHistograms() {
+StatusCode IDTPM::InDetTrackPerfMonTool::fillHistograms(const EventContext& ctx) {
 
   ATH_MSG_DEBUG("Filling hists " << name() << " ...");
 
   /// Output TrackAnalysisInfo container writing
-  SG::WriteHandle< xAOD::BaseContainer > outTrkAnaInfoContHandle( m_trkAnaInfoKey );
+  SG::WriteHandle< xAOD::BaseContainer > outTrkAnaInfoContHandle( m_trkAnaInfoKey, ctx );
   if( m_writeOut ) {
     ATH_CHECK( outTrkAnaInfoContHandle.record(
                   std::make_unique< xAOD::BaseContainer >(),

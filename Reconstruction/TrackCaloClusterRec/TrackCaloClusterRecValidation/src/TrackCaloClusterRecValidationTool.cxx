@@ -130,10 +130,8 @@ TrackCaloClusterRecValidationTool::initialize()
 }
 
 StatusCode
-TrackCaloClusterRecValidationTool::fillHistograms()
+TrackCaloClusterRecValidationTool::fillHistograms(const EventContext& ctx)
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
-
   SG::ReadHandle<xAOD::EventInfo> evt(m_evt, ctx);
   if (!evt.isValid()) {
     ATH_MSG_FATAL("Unable to retrieve Event Info");

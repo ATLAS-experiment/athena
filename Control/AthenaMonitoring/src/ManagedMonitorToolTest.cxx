@@ -250,10 +250,10 @@ bookHistograms( )
 
 StatusCode
 ManagedMonitorToolTest::
-fillHistograms()
+fillHistograms(const EventContext& ctx)
 {
       // Fill average mu per bunch crossing
-      double lumiPerBCID = lbAverageInteractionsPerCrossing(Gaudi::Hive::currentContext());
+      double lumiPerBCID = lbAverageInteractionsPerCrossing(ctx);
       if (lumiPerBCID < 0) {
           // no luminosity information or EnableLumi is set to False in the config
           ATH_MSG_INFO("No luminosity information available or EnableLumi = False");

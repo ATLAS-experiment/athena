@@ -25,7 +25,7 @@ class ZeeTaPMonTool : public egammaMonToolBase
   
   virtual StatusCode initialize() override;
   virtual StatusCode bookHistograms() override;
-  virtual StatusCode fillHistograms() override;
+  virtual StatusCode fillHistograms(const EventContext& ctx) override;
   virtual StatusCode procHistograms() override;
      
  private:

@@ -114,7 +114,7 @@ namespace PhysVal {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode PhysValExample::fillHistograms()
+  StatusCode PhysValExample::fillHistograms(const EventContext& /*ctx*/)
   {
     ATH_MSG_DEBUG ("Filling hists " << name() << "...");
     

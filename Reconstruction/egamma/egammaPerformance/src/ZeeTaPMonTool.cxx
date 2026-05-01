@@ -153,13 +153,11 @@ StatusCode ZeeTaPMonTool::bookHistograms()
   return StatusCode::SUCCESS;
 }
 
-StatusCode ZeeTaPMonTool::fillHistograms()
+StatusCode ZeeTaPMonTool::fillHistograms(const EventContext& ctx)
 {
-  ATH_MSG_DEBUG("ZeeTaPMonTool::fillHistograms()");
+  ATH_MSG_DEBUG("ZeeTaPMonTool::fillHistograms(const EventContext& ctx)");
 
   if (!hasGoodTrigger("Zee T&P electron")) return StatusCode::SUCCESS; 
-
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   //check whether Lar signaled event bad
   if(hasBadLar(ctx)) {
@@ -182,7 +180,7 @@ StatusCode ZeeTaPMonTool::fillHistograms()
   }
   
   // Get electron container
-  SG::ReadHandle<xAOD::ElectronContainer> electron_container{m_ElectronContainer};
+  SG::ReadHandle<xAOD::ElectronContainer> electron_container{m_ElectronContainer, ctx};
   ATH_CHECK(electron_container.isValid());
 
   xAOD::ElectronContainer::const_iterator e_iter = electron_container->begin();

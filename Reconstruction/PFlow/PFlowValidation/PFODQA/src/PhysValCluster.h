@@ -22,7 +22,7 @@ class PhysValCluster : public ManagedMonitorToolBase {
   /** Standard AlgTool Functions */
   virtual StatusCode initialize();
   virtual StatusCode bookHistograms();
-  virtual StatusCode fillHistograms();
+  virtual StatusCode fillHistograms(const EventContext& ctx);
 
  private:
 

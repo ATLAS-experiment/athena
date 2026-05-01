@@ -465,6 +465,8 @@ StatusCode
 AthenaMonManager::
 execute()
 {
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+
     m_d->m_forkedProcess=false;
     pid_t currPID=getpid();
     //m_lastPID 0 means the execute method was not called yet. 
@@ -488,7 +490,7 @@ execute()
             bench_tmp.startMeasurement();
         if( tool->preSelector() ) {
 
-            sc = tool->fillHists();
+            sc = tool->fillHists(ctx);
 
             if( !sc.isSuccess() ) {
                 if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "IMonitorToolBase::fillHists() unsuccessful" << endmsg;
