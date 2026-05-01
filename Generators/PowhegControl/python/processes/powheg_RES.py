@@ -12,7 +12,7 @@ class PowhegRES(PowhegBase):
     @author James Robinson  <james.robinson@cern.ch>
     """
 
-    def __init__(self, base_directory, executable_name,warning_output = [], info_output = [], error_output = [], **kwargs):
+    def __init__(self, base_directory, executable_name,warning_output = [], info_output = [], error_output = [], powheg_executable="pwhg_main", **kwargs):
         """! Constructor.
 
         @param base_directory  path to PowhegBox code.
@@ -22,7 +22,7 @@ class PowhegRES(PowhegBase):
         @param error_output list of patterns which if found in the output will be treated as error in the log.
         @param info_output list of patterns which if found in the output will be treated as info in the log.
         """
-        super(PowhegRES, self).__init__(base_directory, "POWHEG-BOX-RES", executable_name, warning_output = warning_output, info_output = info_output, error_output = error_output, **kwargs)
+        super(PowhegRES, self).__init__(base_directory, "POWHEG-BOX-RES", executable_name, warning_output = warning_output, info_output = info_output, error_output = error_output, powheg_executable = powheg_executable, **kwargs)
 
     @property
     def default_PDFs(self):

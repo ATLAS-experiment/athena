@@ -8,7 +8,7 @@ from ..powheg_RES import PowhegRES
 logger = Logging.logging.getLogger("PowhegControl")
 
 
-class VV_pol(PowhegRES):
+class VV_pol_EFT(PowhegRES):
     """! Default Powheg configuration for W-boson pair production plus one jet using MiNNLOPS.
 
     Create a configurable object with all applicable Powheg options.
@@ -22,9 +22,9 @@ class VV_pol(PowhegRES):
         @param base_directory: path to PowhegBox code.
         @param kwargs          dictionary of arguments from Generate_tf.
         """
-        super(VV_pol, self).__init__(base_directory, "VV_pol", **kwargs)
+        super(VV_pol_EFT, self).__init__(base_directory, "VV_pol", powheg_executable = "pwhg_main_SM_ATGC_WARSAW",**kwargs)
         
-        os.environ['LD_LIBRARY_PATH'] = os.environ.get("RECOLA_SMPATH", "") + "/lib64/" + ":" + os.environ.get("RECOLA_SMPATH", "") + "/lib/" + ":" + os.environ.get("LD_LIBRARY_PATH", "")
+        os.environ['LD_LIBRARY_PATH'] = os.environ.get("RECOLA_SM_ATGC_WARSAW_PATH", "") + "/lib64/" + ":" + os.environ.get("RECOLA_SM_ATGC_WARSAW_PATH", "") + "/lib/" + ":" + os.environ.get("LD_LIBRARY_PATH", "")
 
         # Add parameter validation functions
         self.validation_functions.append("validate_process")
@@ -102,6 +102,16 @@ class VV_pol(PowhegRES):
         self.add_keyword("dpa", 1)
         self.add_keyword("pol1", 4, name="polarization")
         self.add_keyword("pol2", 4)
+        self.add_keyword("NP_POWER")
+        self.add_keyword("SUM_AMP")
+        self.add_keyword("CHBD6")
+        self.add_keyword("CHWD6")
+        self.add_keyword("CHWBD6")
+        self.add_keyword("CWD6")
+        self.add_keyword("CHBtilD6")
+        self.add_keyword("CHWtilD6")
+        self.add_keyword("CHWBtilD6")
+        self.add_keyword("CWtilD6")
         self.add_keyword("whichphsp", 2)
         self.add_keyword("qcdonly", 0)
         self.add_keyword("qedonly", 0)

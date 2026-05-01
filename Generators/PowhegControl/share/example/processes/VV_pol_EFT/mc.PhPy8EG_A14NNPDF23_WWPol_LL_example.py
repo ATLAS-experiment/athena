@@ -10,7 +10,7 @@ evgenConfig.contact = ["aonan.wang@cern.ch"]
 # --------------------------------------------------------------
 # Load ATLAS defaults for the Powheg WWj process
 # --------------------------------------------------------------
-include("PowhegControl/PowhegControl_VV_pol_Common.py")
+include("PowhegControl/PowhegControl_VV_pol_EFT_Common.py")
 
 # --------------------------------------------------------------
 # This is an example joboption to generate events with Powheg
@@ -101,6 +101,20 @@ PowhegConfig.polarization = "longit-longit"
 # 1: VV virtuality
 # --------------------------------------------------------------
 PowhegConfig.runningscale = "0"
+
+# --------------------------------------------------------------
+# EFT setup
+# --------------------------------------------------------------
+PowhegConfig.NP_POWER = "0"
+PowhegConfig.SUM_AMP = "0"
+PowhegConfig.CHBD6 = "0"
+PowhegConfig.CHWD6 = "0"
+PowhegConfig.CHWBD6 = "0"
+PowhegConfig.CWD6 = "0"
+PowhegConfig.CHBtilD6 = "0"
+PowhegConfig.CHWtilD6 = "0"
+PowhegConfig.CHWBtilD6 = "0"
+PowhegConfig.CWtilD6 = "0"
 
 # --------------------------------------------------------------
 # Generate events
