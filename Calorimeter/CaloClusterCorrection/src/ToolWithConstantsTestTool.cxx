@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CaloUtils/src/ToolWithConstantsTestTool.cxx
@@ -48,6 +48,7 @@ ToolWithConstantsTestTool::initialize()
                                               EventIDBase::UNDEFNUM,
                                               l); };
   auto range = [&](int l1, int l2) { return EventIDRange (lbn(l1), lbn(l2)); };
+  EventContext ctx;
 
   {
     auto tc = std::make_unique<CaloRec::ToolConstants>();
@@ -55,7 +56,7 @@ ToolWithConstantsTestTool::initialize()
     tc->clsname (name());
     tc->newrep (name(), "test.cb1", "0");
     tc->newrep (name(), "test.ca2", "[[4, 5], [10, 9], [2.5, 1]]");
-    ATH_CHECK( cc->insert (range(0, 1), std::move (tc)) );
+    ATH_CHECK( cc->insert (range(0, 1), std::move (tc), ctx) );
   }
 
   {
@@ -65,7 +66,7 @@ ToolWithConstantsTestTool::initialize()
     tc->newrep (name(), "test.cb1", "1");
     tc->newrep (name(), "test.ca1", "[10, 9, 8, 7]");
     tc->newrep (name(), "test.ca2", "[[14, 15], [1, 19], [12.5, 11]]");
-    ATH_CHECK( cc->insert (range(1, 2), std::move (tc)) );
+    ATH_CHECK( cc->insert (range(1, 2), std::move (tc), ctx) );
   }
 
   {
@@ -75,14 +76,14 @@ ToolWithConstantsTestTool::initialize()
     tc->newrep (name(), "test.cb1", "1");
     tc->newrep (name(), "test.caa", "[10, 9, 8, 7]");
     tc->newrep (name(), "test.ca2", "[[14, 15], [1, 19], [12.5, 11]]");
-    ATH_CHECK( cc->insert (range(2, 3), std::move (tc)) );
+    ATH_CHECK( cc->insert (range(2, 3), std::move (tc), ctx) );
   }
 
   {
     auto tc = std::make_unique<CaloRec::ToolConstants>();
     tc->version (2);
     tc->clsname (name());
-    ATH_CHECK( cc->insert (range(3, 4), std::move (tc)) );
+    ATH_CHECK( cc->insert (range(3, 4), std::move (tc), ctx) );
   }
 
   ATH_CHECK( condStore->record (std::move (cc), m_condKey) );
