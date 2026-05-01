@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AGDDControl/XMLHandler.h"
@@ -81,9 +81,9 @@ double XMLHandler::getAttributeAsDouble(AGDDController& c,
 {
         double res=0.;
         bool isPresent;
-        std::string temp=getAttribute(t, name,isPresent);
+        const std::string & temp=getAttribute(t, name,isPresent);
 	if (!isPresent) std::abort();
-        res=c.Evaluator().Eval(temp.c_str());
+        res=c.Evaluator().Eval(temp);
         return res;
 }
 int XMLHandler::getAttributeAsInt(AGDDController& c,
@@ -92,9 +92,9 @@ int XMLHandler::getAttributeAsInt(AGDDController& c,
 {
         int res=0;
         bool isPresent;
-        std::string temp=getAttribute(t, name,isPresent);
+        const std::string & temp=getAttribute(t, name,isPresent);
 	if (!isPresent) std::abort();
-        res=c.Evaluator().Eval(temp.c_str());
+        res=c.Evaluator().Eval(temp);
         return res;
 }
 std::vector<double> XMLHandler::getAttributeAsVector(AGDDController& c,
@@ -141,10 +141,10 @@ double XMLHandler::getAttributeAsDouble(AGDDController& c,
                                         const std::string& name, bool& isPresent) const
 {
 	double res=0.;
-	std::string temp=getAttribute(t, name,isPresent);
+	const std::string & temp=getAttribute(t, name,isPresent);
 	if (isPresent) 
 	{
-		res=c.Evaluator().Eval(temp.c_str());
+		res=c.Evaluator().Eval(temp);
 	}
 	return res;
 }
@@ -153,10 +153,10 @@ int XMLHandler::getAttributeAsInt(AGDDController& c,
                                   const std::string& name, bool& isPresent) const
 {
 	int res=0;
-	std::string temp=getAttribute(t, name,isPresent);
+	const std::string & temp=getAttribute(t, name,isPresent);
 	if (isPresent) 
 	{
-		res=c.Evaluator().Eval(temp.c_str());
+		res=c.Evaluator().Eval(temp);
 	}
 	return res;
 }
@@ -209,10 +209,10 @@ double XMLHandler::getAttributeAsDouble(AGDDController& c,
 {
 	bool isPresent;
 	double res=0.;
-	std::string temp=getAttribute(t, name,isPresent);
+	const std::string & temp=getAttribute(t, name,isPresent);
 	if (isPresent) 
 	{
-		res=c.Evaluator().Eval(temp.c_str());
+		res=c.Evaluator().Eval(temp);
 		return res;
 	}
 	return def;
@@ -223,10 +223,10 @@ int XMLHandler::getAttributeAsInt(AGDDController& c,
 {
 	bool isPresent;
 	int res=0;
-	std::string temp=getAttribute(t, name,isPresent);
+	const std::string & temp=getAttribute(t, name,isPresent);
 	if (isPresent) 
 	{
-		res=c.Evaluator().Eval(temp.c_str());
+		res=c.Evaluator().Eval(temp);
 		return res;
 	}
 	return def;
