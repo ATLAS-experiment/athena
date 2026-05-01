@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/ActsToTrkConvertorAlg.h"
@@ -112,7 +112,7 @@ namespace ActsTrk {
       std::vector<std::unique_ptr<const Acts::BoundTrackParameters>> actsSmoothedParam;
       tracks.trackStateContainer().visitBackwards(
           lastMeasurementIndex,
-          [this, &tgContext, &track, &finalTrajectory, &actsSmoothedParam, &numberOfDeadPixel, &numberOfDeadSCT](const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void
+          [this, &ctx, &tgContext, &track, &finalTrajectory, &actsSmoothedParam, &numberOfDeadPixel, &numberOfDeadSCT](const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void
           {
             // First only consider states with an associated detector element
             if (!state.hasReferenceSurface() || !state.referenceSurface().surfacePlacement())
@@ -184,13 +184,13 @@ namespace ActsTrk {
                 auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
                 assert( sl != nullptr);
                 const xAOD::UncalibratedMeasurement &uncalibMeas = getUncalibratedMeasurement(sl);
-		measState= makeRIO_OnTrack(uncalibMeas, *parm, false);
-		//muons have a secondary measurement when numDimensions=0
-		if(uncalibMeas.numDimensions()==0){
-		  measState2 = makeRIO_OnTrack(uncalibMeas, *parm, true);
-		  nMaxMeas=2;
-		}
-		ATH_MSG_DEBUG("Successfully used ATLASUncalibratedSourceLink");
+                measState= makeRIO_OnTrack(ctx, uncalibMeas, *parm, false);
+                //muons have a secondary measurement when numDimensions=0
+                if(uncalibMeas.numDimensions()==0){
+                  measState2 = makeRIO_OnTrack(ctx, uncalibMeas, *parm, true);
+                  nMaxMeas=2;
+                }
+                ATH_MSG_DEBUG("Successfully used ATLASUncalibratedSourceLink");
 
               } catch ( const std::bad_any_cast& ){
                 ATH_MSG_DEBUG("Not an ATLASUncalibSourceLink, trying ATLASSourceLink");
@@ -263,8 +263,10 @@ namespace ActsTrk {
     return StatusCode::SUCCESS;
   }
 
-  std::unique_ptr<Trk::MeasurementBase> ActsToTrkConvertorAlg::makeRIO_OnTrack(const xAOD::UncalibratedMeasurement &uncalibMeas,
-									       const Trk::TrackParameters &parm, bool getSecMeas) const
+  std::unique_ptr<Trk::MeasurementBase> ActsToTrkConvertorAlg::makeRIO_OnTrack(
+                                          const EventContext &ctx,
+                                          const xAOD::UncalibratedMeasurement &uncalibMeas,
+                                          const Trk::TrackParameters &parm, bool getSecMeas) const
   {
     const Trk::PrepRawData *rio = nullptr;
     const xAOD::UncalibMeasType measurementType = uncalibMeas.type();
@@ -332,7 +334,7 @@ namespace ActsTrk {
       {
 
 	const Muon::MdtPrepDataContainer* mdtPrds{nullptr};
-	StatusCode sc = SG::get(mdtPrds, m_keyMdt, Gaudi::Hive::currentContext());
+	StatusCode sc = SG::get(mdtPrds, m_keyMdt, ctx);
 	if(sc==StatusCode::FAILURE){
 	  ATH_MSG_WARNING("Could not retrieve MDT PRDs");
 	  return nullptr;
@@ -342,7 +344,7 @@ namespace ActsTrk {
       }
     else if(measurementType == xAOD::UncalibMeasType::RpcStripType){
       const Muon::RpcPrepDataContainer* rpcPrds{nullptr};
-      StatusCode sc = SG::get(rpcPrds, m_keyRpc, Gaudi::Hive::currentContext());
+      StatusCode sc = SG::get(rpcPrds, m_keyRpc, ctx);
       if(sc==StatusCode::FAILURE){
 	ATH_MSG_WARNING("Could not retrieve Rpc PRDs");
 	return nullptr;
@@ -350,16 +352,16 @@ namespace ActsTrk {
       if(getSecMeas){
 	auto combStrip = dynamic_cast<const xAOD::CombinedMuonStrip*>(&uncalibMeas);
 	auto prd = fetchPrd(xAOD::identify(combStrip->secondaryStrip()), rpcPrds);
-	return std::unique_ptr<Trk::MeasurementBase>(m_muonClusterCreator->correct(*prd, parm, Gaudi::Hive::currentContext()));
+	return std::unique_ptr<Trk::MeasurementBase>(m_muonClusterCreator->correct(*prd, parm, ctx));
       }
       else{
 	const Muon::RpcPrepData* rpc = fetchPrd(xAOD::identify(&uncalibMeas), rpcPrds);
-	return std::unique_ptr<Trk::MeasurementBase>(m_muonClusterCreator->correct(*rpc, parm, Gaudi::Hive::currentContext()));
+	return std::unique_ptr<Trk::MeasurementBase>(m_muonClusterCreator->correct(*rpc, parm, ctx));
       }
     }
     else if(measurementType == xAOD::UncalibMeasType::TgcStripType){
       const Muon::TgcPrepDataContainer* tgcPrds{nullptr};
-      StatusCode sc = SG::get(tgcPrds, m_keyTgc, Gaudi::Hive::currentContext());
+      StatusCode sc = SG::get(tgcPrds, m_keyTgc, ctx);
       if(sc==StatusCode::FAILURE){
 	ATH_MSG_WARNING("Could not retrieve Tgc PRDs");
 	return nullptr;
@@ -367,26 +369,26 @@ namespace ActsTrk {
       if(getSecMeas){
 	auto combStrip = dynamic_cast<const xAOD::CombinedMuonStrip*>(&uncalibMeas);
 	auto prd = fetchPrd(xAOD::identify(combStrip->secondaryStrip()),  tgcPrds);
-	return std::unique_ptr<Trk::MeasurementBase>(m_muonClusterCreator->correct(*prd, parm, Gaudi::Hive::currentContext()));
+	return std::unique_ptr<Trk::MeasurementBase>(m_muonClusterCreator->correct(*prd, parm, ctx));
       }
       else{
 	const Muon::TgcPrepData* tgc = fetchPrd(xAOD::identify(&uncalibMeas), tgcPrds);
-	return std::unique_ptr<Trk::MeasurementBase>(m_muonClusterCreator->correct(*tgc, parm, Gaudi::Hive::currentContext()));
+	return std::unique_ptr<Trk::MeasurementBase>(m_muonClusterCreator->correct(*tgc, parm, ctx));
       }
     }
     else if(measurementType == xAOD::UncalibMeasType::MMClusterType){
       const Muon::MMPrepDataContainer* mmPrds{nullptr};
-      StatusCode sc = SG::get(mmPrds, m_keyMm, Gaudi::Hive::currentContext());
+      StatusCode sc = SG::get(mmPrds, m_keyMm, ctx);
       if(sc==StatusCode::FAILURE){
 	ATH_MSG_WARNING("Could not retrieve MM PRDs");
 	return nullptr;
       }
       const Muon::MMPrepData* mm = fetchPrd(xAOD::identify(&uncalibMeas), mmPrds);
-      return std::unique_ptr<Trk::MeasurementBase>(m_muonClusterCreator->correct(*mm, parm, Gaudi::Hive::currentContext()));
+      return std::unique_ptr<Trk::MeasurementBase>(m_muonClusterCreator->correct(*mm, parm, ctx));
     }
     else if(measurementType == xAOD::UncalibMeasType::sTgcStripType){
       const Muon::sTgcPrepDataContainer* stgcPrds{nullptr};
-      StatusCode sc = SG::get(stgcPrds, m_keyStgc, Gaudi::Hive::currentContext());
+      StatusCode sc = SG::get(stgcPrds, m_keyStgc, ctx);
       if(sc==StatusCode::FAILURE){
 	ATH_MSG_WARNING("Could not retrieve sTgc PRDs");
 	return nullptr;
@@ -394,11 +396,11 @@ namespace ActsTrk {
       if(getSecMeas){
 	auto combStrip = dynamic_cast<const xAOD::CombinedMuonStrip*>(&uncalibMeas);
 	auto prd = fetchPrd(xAOD::identify(combStrip->secondaryStrip()), stgcPrds);
-	return std::unique_ptr<Trk::MeasurementBase>(m_muonClusterCreator->correct(*prd, parm, Gaudi::Hive::currentContext()));
+	return std::unique_ptr<Trk::MeasurementBase>(m_muonClusterCreator->correct(*prd, parm, ctx));
       }
       else{
 	const Muon::sTgcPrepData* prd = fetchPrd(xAOD::identify(&uncalibMeas), stgcPrds);
-	return std::unique_ptr<Trk::MeasurementBase>(m_muonClusterCreator->correct(*prd, parm, Gaudi::Hive::currentContext()));
+	return std::unique_ptr<Trk::MeasurementBase>(m_muonClusterCreator->correct(*prd, parm, ctx));
       }
     }
     else
@@ -410,7 +412,7 @@ namespace ActsTrk {
     ATH_MSG_DEBUG("use Trk::RIO_OnTrackCreator::correct to create corrected Trk::RIO_OnTrack");
     assert(!m_RotCreatorTool.empty());
     assert(rio != nullptr);
-    return std::unique_ptr<Trk::MeasurementBase>(m_RotCreatorTool->correct(*rio, parm, Gaudi::Hive::currentContext()));
+    return std::unique_ptr<Trk::MeasurementBase>(m_RotCreatorTool->correct(*rio, parm, ctx));
   }
 
   template <class PrdType> 

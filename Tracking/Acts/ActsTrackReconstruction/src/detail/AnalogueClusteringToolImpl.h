@@ -68,16 +68,19 @@ namespace ActsTrk::detail {
                const std::pair<float, float>& angles) const;
 
      std::pair<float, float>
-     anglesOfIncidence(const Acts::GeometryContext& gctx,
+     anglesOfIncidence(const EventContext& ctx,
+                       const Acts::GeometryContext& gctx,
                        const Acts::Surface &surface,
                        const InDetDD::SiDetectorElement& element,
                        const Acts::Vector3& direction) const;
 
-     std::pair<float, float> getCentroid(const xAOD::PixelCluster& cluster,
+     std::pair<float, float> getCentroid(const EventContext& ctx,
+                                         const xAOD::PixelCluster& cluster,
                                          const InDetDD::SiDetectorElement& element) const;
 
      std::pair<std::optional<float>, std::optional<float>>
-     getCorrectedPosition(const xAOD::PixelCluster& cluster,
+     getCorrectedPosition(const EventContext& ctx,
+                          const xAOD::PixelCluster& cluster,
                           const error_data_t& errorData,
                           const InDetDD::SiDetectorElement& element,
                           const std::pair<float, float>& angles) const;

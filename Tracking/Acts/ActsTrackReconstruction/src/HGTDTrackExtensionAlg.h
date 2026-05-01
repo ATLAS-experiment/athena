@@ -153,7 +153,7 @@ private:
     const Acts::TrackingGeometry* trackingGeometry,
     const Acts::GeometryContext& geoContext) const;
 
-    const xAOD::HGTDCluster* getHGTDClusterFromState(const ActsTrk::detail::RecoConstTrackStateContainerProxy& state) const;
+    const xAOD::HGTDCluster* getHGTDClusterFromState(const EventContext& ctx, const ActsTrk::detail::RecoConstTrackStateContainerProxy& state) const;
 
   Acts::CalibrationContext m_calibrationContext; 
 
