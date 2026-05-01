@@ -12,6 +12,7 @@
 #include <iosfwd>
 #include <map>
 #include <string>
+#include <string_view>
 #include <mutex>
 #include <memory>
 
@@ -22,7 +23,7 @@ public:
 
   typedef std::map <std::string, std::string> ExternalEntityMap; 
 
-  static std::unique_ptr<XMLCoreNode> parse (const std::string& file_name);
+  static std::unique_ptr<XMLCoreNode> parse (std::string_view file_name);
   static std::unique_ptr<XMLCoreNode> parse_string (const std::string& text);
 
   static void register_external_entity (const std::string& name, const std::string& file_name);  

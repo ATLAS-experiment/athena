@@ -43,7 +43,7 @@ public:
     virtual void generate_implementation (const IdDictMgr& idd,
                                           IdDictDictionary& dictionary,
                                           IdDictRegion& region,
-                                          const std::string& tag = "") override;
+                                          std::string_view tag = "") override;
     virtual void reset_implementation () override;
     virtual bool verify () const override;
     virtual Range build_range () const override;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDDICT_IdDictSubRegion_H
@@ -7,6 +7,7 @@
 
 #include "IdDict/IdDictRegion.h"
 
+#include <string_view>
 class IdDictMgr;
 class IdDictDictionary;
 
@@ -37,12 +38,12 @@ public:
     // as an arg with the method below
     virtual void generate_implementation (const IdDictMgr& idd,
                                           IdDictDictionary& dictionary,
-                                          const std::string& tag = "") override;
+                                          std::string_view tag = "") override;
     // Generate implementation - pass region to be filled for this subregion
     void generate_implementation (const IdDictMgr& idd,  
                                   IdDictDictionary& dictionary, 
                                   IdDictRegion& region,
-                                  const std::string& tag = "");  
+                                  std::string_view tag = "");  
     virtual void reset_implementation () override;
 
 

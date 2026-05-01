@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "IdDict/IdDictRegionEntry.h"
@@ -16,7 +16,7 @@ void IdDictRegionEntry::resolve_references(IdDictMgr& /*idd*/,
 void IdDictRegionEntry::generate_implementation(const IdDictMgr& /*idd*/,
                                                 IdDictDictionary& /*dictionary*/,
                                                 IdDictRegion& /*region*/,
-                                                const std::string& /*tag*/) {
+                                                std::string_view /*tag*/) {
 }
 
 void IdDictRegionEntry::reset_implementation() {

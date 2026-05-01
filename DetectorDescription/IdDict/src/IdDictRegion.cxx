@@ -137,7 +137,7 @@ IdDictRegion::resolve_references(IdDictMgr& idd, IdDictDictionary& dictionary) {
 void
 IdDictRegion::generate_implementation(const IdDictMgr& idd,
                                       IdDictDictionary& dictionary,
-                                      const std::string& tag) {
+                                      std::string_view tag) {
   if (Debugger::debug()) {
     std::cout << "IdDictRegion::generate_implementation>" << std::endl;
   }

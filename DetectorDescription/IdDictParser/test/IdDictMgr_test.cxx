@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @author Shaun Roe
@@ -39,7 +39,7 @@ private:
 };
 
 static const std::string sctDictFilename{"IdDictInnerDetector.xml"};
-
+static const std::string AtlasIdsFilename{"IdDictParser/ATLAS_IDS.xml"};
 
 // Return pairs of system,path pairs for all IdDict xml files
 // in DIR.
@@ -94,12 +94,13 @@ findXMLFiles (const std::string& dir)
 // Try to parse all IdDict XML files in DIR.
 bool
 parseXMLFiles (const std::string& dir)
-{
+{ 
+  
   for (const auto& [syst, path] : findXMLFiles (dir)) {
     std::cout << syst << " " << path << "\n";
     IdDictParser parser;
     parser.register_external_entity(syst, path);
-    BOOST_CHECK_NO_THROW( [[maybe_unused]] IdDictMgr & idd = parser.parse ("IdDictParser/ATLAS_IDS.xml"));
+    BOOST_CHECK_NO_THROW( [[maybe_unused]] IdDictMgr & idd = parser.parse (AtlasIdsFilename));
   }
   return true;
 }
@@ -111,7 +112,7 @@ BOOST_AUTO_TEST_SUITE(IdDictMgrTest)
   BOOST_AUTO_TEST_CASE(IdDictMgrFromParser){
     IdDictParser parser;
     parser.register_external_entity("InnerDetector", sctDictFilename);
-    BOOST_CHECK_NO_THROW( [[maybe_unused]] IdDictMgr & idd = parser.parse ("IdDictParser/ATLAS_IDS.xml"));
+    BOOST_CHECK_NO_THROW( [[maybe_unused]] IdDictMgr & idd = parser.parse (AtlasIdsFilename));
   }
   BOOST_AUTO_TEST_CASE(ParseAllXMLFiles){
     BOOST_CHECK( parseXMLFiles ("IdDictParser") );

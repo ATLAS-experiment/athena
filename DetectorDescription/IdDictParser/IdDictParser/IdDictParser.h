@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDDICTPARSER_IDDICTPARSER_H
@@ -8,6 +8,8 @@
 #include "XMLCoreParser/XMLCoreParser.h"  
 #include "IdDict/IdDictMgr.h"
 #include <memory>
+#include <string_view>
+
 class IdDictDictionary;
 class IdDictField;
 class IdDictRegion;
@@ -20,7 +22,7 @@ class IdDictParser : public XMLCoreParser
 public:  
   IdDictParser ();  
   ~IdDictParser ();
-  IdDictMgr& parse (const std::string& file_name, const std::string& tag = ""); 
+  IdDictMgr& parse (std::string_view file_name, std::string_view tag = ""); 
  
   IdDictMgr             m_idd; 
   std::unique_ptr<IdDictDictionary>  m_dictionary;

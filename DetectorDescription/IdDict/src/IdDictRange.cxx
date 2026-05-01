@@ -175,7 +175,7 @@ IdDictRange::resolve_references(IdDictMgr& /*idd*/,
 
 void
 IdDictRange::generate_implementation(const IdDictMgr& /*idd*/,
-                                     IdDictDictionary& dictionary, IdDictRegion& region, const std::string& /*tag*/) {
+                                     IdDictDictionary& dictionary, IdDictRegion& region, std::string_view /*tag*/) {
   // Add IdDictFieldImplementation to this region
 
   // NOTE: we DO NOT protect this method with
