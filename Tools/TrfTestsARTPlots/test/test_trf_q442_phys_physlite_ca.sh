@@ -9,9 +9,12 @@
 # art-output: generated_csv_files.tar.gz
 # art-html: dcube_physlite
 
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN2_DATA)")
+
 export ATHENA_CORE_NUMBER=8
 Reco_tf.py \
   --AMI q442 \
+  --conditionsTag "${conditions}" \
   --outputAODFile myAOD.pool.root \
   --athenaopts "RAWtoALL:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "AODtoDAOD:--threads=0 --nprocs=${ATHENA_CORE_NUMBER}" \
   --preExec 'flags.Exec.FPE=10' \
