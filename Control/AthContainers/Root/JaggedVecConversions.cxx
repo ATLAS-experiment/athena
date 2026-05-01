@@ -63,6 +63,22 @@ void JaggedVecProxyBase::adjust1 (size_t elt_index, index_type index, int n_add)
   size_t beg = e.begin(elt_index);
   size_t end = e.end();
 
+  // Backfill trailing zeros up to the current element if needed.
+  if (end == 0 && m_elts.back().end() == 0) {
+    if (size_t npayload = linkedVec->getDataSpan().size) {
+      Elt_t::Shift shift (npayload);
+      size_t i = elt_index;
+      while (m_elts[i].end() == 0) {
+        if (i == 0) break;
+        --i;
+      }
+      if (m_elts[i].end() != 0) {
+        std::fill (m_elts.data()+i+1, m_elts.data()+elt_index+1, Elt_t(m_elts[i].end()));
+        beg = end = npayload;
+      }
+    }
+  }
+
   // Shift the payload items.
   if (!linkedVec->shift (beg+index, n_add)) {
     m_container.clearCache (linkedVec->auxid());
@@ -71,9 +87,16 @@ void JaggedVecProxyBase::adjust1 (size_t elt_index, index_type index, int n_add)
   // Adjust the indices in the jagged vector elements.
   // First the element that we're modifying...
   e = JaggedVecEltBase (end + n_add);
-  // .. then all the remaining elements.
-  std::for_each (m_elts.begin() + elt_index+1, m_elts.end(),
-                 JaggedVecEltBase::Shift (n_add));
+  // .. then the remaining elements
+  JaggedVecEltBase::Shift shift (n_add);
+  for (auto pos = m_elts.begin() + elt_index+1; pos < m_elts.end(); ++pos)
+  {
+    if (pos->end() == 0 && (pos-1)->end() == linkedVec->getDataSpan().size) {
+      // Stop if we get to trailing zeros to avoid N^2 behavior.
+      break;
+    }
+    shift (*pos);
+  }
 }
 
 

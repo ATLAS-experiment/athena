@@ -142,7 +142,7 @@ void* AuxStoreInternal::getData (auxid_t auxid, size_t size, size_t capacity)
  *
  * For internal use.  The @c auxid must not already exist in the store.
  */
-void
+IAuxTypeVector*
 AuxStoreInternal::addVector (std::unique_ptr<IAuxTypeVector> vec,
                              bool isDecoration)
 {
@@ -176,6 +176,8 @@ AuxStoreInternal::addVector (std::unique_ptr<IAuxTypeVector> vec,
     std::atomic_thread_fence (std::memory_order_seq_cst);
   }
   addAuxID (auxid);
+
+  return m_vecs[auxid].get();
 }
 
 

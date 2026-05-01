@@ -13,6 +13,11 @@
 #include "AthContainers/AuxElement.h"
 #include "AthContainers/AuxStoreInternal.h"
 #include "AthContainers/exceptions.h"
+#ifndef XAOD_STANDALONE
+# include "AthContainers/tools/copyAuxStoreThinned.h"
+# include "AthenaKernel/ThinningDecisionBase.h"
+# include "AthenaKernel/ThinningInfo.h"
+#endif
 #include "TestTools/FLOATassert.h"
 #include "TestTools/expect_exception.h"
 #include <ranges>
@@ -464,6 +469,18 @@ void test_forward_fill (size_t n)
   for (size_t i = 0; i < n; i++) {
     sp[i] = tmp;
   }
+
+  // Also test copying with thinning for N^2 behavior.
+#ifndef XAOD_STANDALONE
+  SG::AuxStoreInternal copy;
+  SG::ThinningDecisionBase dec;
+  SG::ThinningInfo info;
+  info.m_decision = &dec;
+  dec.resize (n);
+  dec.thin (0);
+
+  SG::copyAuxStoreThinned (store, copy, &info);
+#endif
 }
 
 

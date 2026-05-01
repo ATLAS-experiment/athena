@@ -114,12 +114,12 @@ void test1a (const std::string& name)
   assert (*lv == makeTVec<T> ({0, 1, 2, 5, 6, 7, 8}));
 
   AuxStoreInternalTest store2;
-  std::unique_ptr<SG::IAuxTypeVector> payloadVec2 = r.makeVector (foo_payload_id, 0, 0);
-  auto lv2 = reinterpret_cast<std::vector<T>*>(payloadVec2->toVector());
+  std::unique_ptr<SG::IAuxTypeVector> payloadVec2_up = r.makeVector (foo_payload_id, 0, 0);
+  auto lv2 = reinterpret_cast<std::vector<T>*>(payloadVec2_up->toVector());
   std::vector<Elt> v2;
-  auto vh2 = std::make_unique<SG::JaggedVecVectorHolder<T> > (foo_id, &v2, payloadVec2.get(), false);
-  store2.addVector (std::move (vh2), false);
-  store2.addVector (std::move (payloadVec2), false);
+  auto vh2 = std::make_unique<SG::JaggedVecVectorHolder<T> > (foo_id, &v2, payloadVec2_up.get(), false);
+  (void)store2.addVector (std::move (vh2), false);
+  SG::IAuxTypeVector* payloadVec2 = store2.addVector (std::move (payloadVec2_up), false);
 
   v2.emplace_back (2); // 2
   v2.emplace_back (3); // 1
@@ -155,6 +155,187 @@ void test1a (const std::string& name)
   assert (lv->at(0) == 100);
   assert (lv->at(1) == 101);
   assert (*lv == makeTVec<T>({100, 101, 0, 1, 2, 102, 103, 104, 5, 6, 7, 8}));
+
+  // resize() with trailing zeros.
+  v.assign ({ 3, 5, 0, 0, 0});
+  payloadVec->resize (5);
+  for (size_t i = 0; i < 5; i++) {
+    lv->at(i) = makeT<T> (i+500);
+  }
+
+  vh.resize(4);
+  assert (v.size() == 4);
+  assert (lv->size() == 5);
+  assert (v[0] == Elt (3));
+  assert (v[1] == Elt (5));
+  assert (v[2] == Elt (0));
+  assert (v[3] == Elt (0));
+  assert (*lv == makeTVec<T>({500, 501, 502, 503, 504}));
+
+  vh.resize(6);
+  assert (v.size() == 6);
+  assert (lv->size() == 5);
+  assert (v[0] == Elt (3));
+  assert (v[1] == Elt (5));
+  assert (v[2] == Elt (5));
+  assert (v[3] == Elt (5));
+  assert (v[4] == Elt (5));
+  assert (v[5] == Elt (5));
+  assert (*lv == makeTVec<T>({500, 501, 502, 503, 504}));
+
+  v.assign ({ 0, 0, 3, 5, 0});
+  payloadVec->resize (5);
+  for (size_t i = 0; i < 5; i++) {
+    lv->at(i) = makeT<T> (i+500);
+  }
+  vh.resize(2);
+  assert (v.size() == 2);
+  assert (lv->size() == 0);
+  assert (v[0] == Elt (0));
+  assert (v[1] == Elt (0));
+
+  // shift() with trailing zeros.
+  v.assign ({ 3, 5, 0, 0, 0});
+  payloadVec->resize (5);
+  for (size_t i = 0; i < 5; i++) {
+    lv->at(i) = makeT<T> (i+500);
+  }
+
+  vh.shift (1, 1);
+  assert (v.size() == 6);
+  assert (payloadVec->size() == 5);
+  assert (v[0] == Elt (3));
+  assert (v[1] == Elt (3));
+  assert (v[2] == Elt (5));
+  assert (v[3] == Elt (5));
+  assert (v[4] == Elt (5));
+  assert (v[5] == Elt (5));
+
+  v.assign ({ 3, 5, 0, 0, 0});
+  vh.shift (1, -1);
+  assert (v.size() == 4);
+  assert (payloadVec->size() == 2);
+  assert (v[0] == Elt (2));
+  assert (v[1] == Elt (2));
+  assert (v[2] == Elt (2));
+  assert (v[3] == Elt (2));
+
+  // insertMove() with trailing zeros.
+  v.assign ({ 3, 5, 0, 0, 0});
+  payloadVec->resize (5);
+  for (size_t i = 0; i < 5; i++) {
+    lv->at(i) = makeT<T> (i+500);
+  }
+
+  v2.assign ({1, 2});
+  payloadVec2->resize (2);
+  for (size_t i = 0; i < 2; i++) {
+    lv2->at(i) = makeT<T> (i+600);
+  }
+  vh.insertMove (1, v2.data(), 0, 2, store2);
+  assert (v.size() == 7);
+  assert (payloadVec->size() == 7);
+  assert (v[0] == Elt (3));
+  assert (v[1] == Elt (4));
+  assert (v[2] == Elt (5));
+  assert (v[3] == Elt (7));
+  assert (v[4] == Elt (7));
+  assert (v[5] == Elt (7));
+  assert (v[6] == Elt (7));
+  assert (*lv == makeTVec<T> ({500, 501, 502, 600, 601, 503, 504}));
+
+  v.assign ({ 3, 5, 0, 0, 0});
+  payloadVec->resize (5);
+  for (size_t i = 0; i < 5; i++) {
+    lv->at(i) = makeT<T> (i+500);
+  }
+
+  v2.assign ({0, 1, 2, 0, 0});
+  payloadVec2->resize (2);
+  for (size_t i = 0; i < 2; i++) {
+    lv2->at(i) = makeT<T> (i+600);
+  }
+  vh.insertMove (3, v2.data(), 0, 2, store2);
+  assert (v.size() == 7);
+  assert (payloadVec->size() == 6);
+  assert (v[0] == Elt (3));
+  assert (v[1] == Elt (5));
+  assert (v[2] == Elt (5));
+  assert (v[3] == Elt (5));
+  assert (v[4] == Elt (6));
+  assert (v[5] == Elt (6));
+  assert (v[6] == Elt (6));
+  assert (*lv == makeTVec<T> ({500, 501, 502, 503, 504, 600}));
+
+  v.assign ({ 3, 5, 0, 0, 0});
+  payloadVec->resize (5);
+  for (size_t i = 0; i < 5; i++) {
+    lv->at(i) = makeT<T> (i+500);
+  }
+  vh.insertMove (3, v2.data(), 2, 2, store2);
+  assert (v.size() == 7);
+  assert (payloadVec->size() == 6);
+  assert (v[0] == Elt (3));
+  assert (v[1] == Elt (5));
+  assert (v[2] == Elt (5));
+  assert (v[3] == Elt (6));
+  assert (v[4] == Elt (6));
+  assert (v[5] == Elt (6));
+  assert (v[6] == Elt (6));
+  assert (*lv == makeTVec<T> ({500, 501, 502, 503, 504, 601}));
+
+
+  v.assign ({ 3, 5, 0, 0, 0});
+  payloadVec->resize (5);
+  for (size_t i = 0; i < 5; i++) {
+    lv->at(i) = makeT<T> (i+500);
+  }
+  vh.insertMove (3, v2.data(), 3, 2, store2);
+  assert (v.size() == 7);
+  assert (payloadVec->size() == 5);
+  assert (v[0] == Elt (3));
+  assert (v[1] == Elt (5));
+  assert (v[2] == Elt (5));
+  assert (v[3] == Elt (5));
+  assert (v[4] == Elt (5));
+  assert (v[5] == Elt (5));
+  assert (v[6] == Elt (5));
+  assert (*lv == makeTVec<T> ({500, 501, 502, 503, 504}));
+
+  v.assign ({ 3, 5, 0, 0, 0});
+  payloadVec->resize (5);
+  for (size_t i = 0; i < 5; i++) {
+    lv->at(i) = makeT<T> (i+500);
+  }
+  vh.insertMove (3, v2.data(), 0, 4, store2);
+  assert (v.size() == 9);
+  assert (payloadVec->size() == 7);
+  assert (v[0] == Elt (3));
+  assert (v[1] == Elt (5));
+  assert (v[2] == Elt (5));
+  assert (v[3] == Elt (5));
+  assert (v[4] == Elt (6));
+  assert (v[5] == Elt (7));
+  assert (v[6] == Elt (7));
+  assert (v[7] == Elt (7));
+  assert (v[8] == Elt (7));
+  assert (*lv == makeTVec<T> ({500, 501, 502, 503, 504, 600, 601}));
+
+  v.assign ({ 3, 5, 0, 0, 0});
+  payloadVec->resize (5);
+  for (size_t i = 0; i < 5; i++) {
+    lv->at(i) = makeT<T> (i+500);
+  }
+  vh.insertMove (3, v2.data(), 0, 1, store2);
+  assert (v.size() == 6);
+  assert (payloadVec->size() == 5);
+  assert (v[0] == Elt (3));
+  assert (v[1] == Elt (5));
+  assert (v[2] == Elt (5));
+  assert (v[3] == Elt (5));
+  assert (v[4] == Elt (5));
+  assert (v[5] == Elt (5));
+  assert (*lv == makeTVec<T> ({500, 501, 502, 503, 504}));
 }
 void test1()
 {
@@ -165,7 +346,7 @@ void test1()
 }
 
 
-// PackedLinkVector
+// JaggedVecVector
 template <class T>
 void test2a (const std::string& name)
 {

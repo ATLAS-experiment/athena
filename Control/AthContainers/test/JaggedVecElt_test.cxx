@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/JaggedVecElt_test.cxx
@@ -23,13 +23,16 @@ void test1()
   SG::JaggedVecElt<int> e1;
   assert (e1.end() == 0);
 
-  SG::JaggedVecElt<int> e2[2] (5, 7);
+  SG::JaggedVecElt<int> e2[3] (5, 7, 0);
   assert (e2[0].begin(0) == 0);
   assert (e2[0].end() == 5);
   assert (e2[0].size(0) == 5);
   assert (e2[1].begin(1) == 5);
   assert (e2[1].end() == 7);
   assert (e2[1].size(1) == 2);
+  assert (e2[2].begin(2) == 0);
+  assert (e2[2].end() == 0);
+  assert (e2[2].size(1) == 0);
 
   SG::JaggedVecElt<int> e3 (5);
 

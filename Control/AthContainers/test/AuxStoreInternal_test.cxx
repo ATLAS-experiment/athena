@@ -409,7 +409,7 @@ void test4()
   assert (s.size() == 0);
   auto vec1 = std::make_unique<SG::AuxTypeVector<int> > (ityp1, 10, 10, false);
   SG::IAuxTypeVector* vec1ptr = vec1.get();
-  s.addVector (std::move(vec1), false);
+  assert (s.addVector (std::move(vec1), false) == vec1ptr);
   assert (s.size() == 10);
   assert (s.getIOData(ityp1) == vec1ptr->toVector());
   assert (s.getData(ityp1) == vec1ptr->toPtr());
