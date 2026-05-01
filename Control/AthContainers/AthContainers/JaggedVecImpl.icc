@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/JaggedVecImpl.icc
@@ -30,13 +30,14 @@ JaggedVecEltBase::JaggedVecEltBase (index_type end)
 inline
 JaggedVecEltBase::index_type JaggedVecEltBase::begin (size_t elt_ndx) const
 {
-  // If the index is more than zero, return the end index from the
-  // element which is contiguously previous in memory.
-  if (elt_ndx > 0) {
-    return this[-1].m_end;
+  // Return 0 if we're looking at the first element, or our end index is 0.
+  if (elt_ndx == 0 || m_end == 0) [[unlikely]] {
+    return 0;
   }
-  // Otherwise this is the first element.  Return 0.
-  return 0;
+
+  // Normal case: returm the end index from the elemente which is
+  // contiguously previous in memory.
+  return this[-1].m_end;
 }
 
 

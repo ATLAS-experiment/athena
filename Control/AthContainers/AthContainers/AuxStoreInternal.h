@@ -426,8 +426,8 @@ protected:
    *
    * For internal use.  The @c auxid must not already exist in the store.
    */
-  void addVector (std::unique_ptr<IAuxTypeVector> vec,
-                  bool isDecoration);
+  IAuxTypeVector* addVector (std::unique_ptr<IAuxTypeVector> vec,
+                             bool isDecoration);
 
 
 private:

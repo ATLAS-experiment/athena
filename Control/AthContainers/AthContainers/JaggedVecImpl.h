@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/JaggedVecImpl.h
@@ -44,6 +44,11 @@ namespace SG {
  * done, since jagged vectors are accessed via the specialized @c Accessor
  * classes.
  *
+ * As an additional special case, if all trailing elements are empty, the
+ * end indicies may be given as 0.  This allows speeding up the case where
+ * one is filling a jagged vector from the start where the overall size
+ * has already been set.
+ *
  * This non-templated base class holds the actual data.  However,
  * users should use the @c JaggedVecElt<PAYLOAD> derived types, to allow
  * specifying the payload type.
@@ -64,7 +69,6 @@ public:
 
   /**
    * @brief Constructor.
-   * @param beg Index of the start of the range.
    * @param end Index of the end of the range.
    */
   JaggedVecEltBase (index_type end);

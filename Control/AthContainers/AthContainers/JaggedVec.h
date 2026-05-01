@@ -18,7 +18,7 @@
  * to share the data with heterogeneous resources such as GPUs.
  *
  * A jagged vector flattens this structure.  The variable itself
- * contains simply a pair of indices into another, `linked', variable,
+ * contains simply an index into another, `linked', variable,
  * which holds the items for all container elements in a single
  * contiguous block.  Specialized accessor classes allow one to treat
  * the data as if it were still a separate vector per element.

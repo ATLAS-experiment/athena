@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/tools/JaggedVecVector.h
@@ -114,12 +114,8 @@ public:
    * @param src_n Number of elements to insert.
    * @param srcStore The source store.
    *
-   * @c beg and @c end define a range of container elements, with length
-   * @c len defined by the difference of the pointers divided by the
-   * element size.
-   *
-   * The size of the container will be increased by @c len, with the elements
-   * starting at @c pos copied to @c pos+len.
+   * The size of the container will be increased by @c src_n, with the elements
+   * starting at @c pos copied to @c pos+src_n.
    *
    * The contents of the source range will then be moved to our vector
    * starting at @c pos.  This will be done via move semantics if possible;
@@ -134,6 +130,12 @@ public:
 
 
 protected:
+  /**
+   * @brief Fill in any trailing zeros at the end of this vector.
+   */
+  void fillTrailingZeros();
+
+
   /// Interface for the linked vector of DataLinks.
   IAuxTypeVector* m_linkedVec{};
 };
