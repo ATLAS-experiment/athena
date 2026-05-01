@@ -28,7 +28,7 @@ StatusCode HiveAlgL3::execute(const EventContext& ctx) const{
 
   ATH_MSG_DEBUG("execute " << name());
 
-  sleep();
+  sleep(ctx);
 
   SG::UpdateHandle<HiveDataObj> udh1{m_udh1, ctx};
 
