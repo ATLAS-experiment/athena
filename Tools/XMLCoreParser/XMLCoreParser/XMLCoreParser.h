@@ -7,6 +7,7 @@
 
 #include "XMLCoreParser/XMLCoreNode.h"
 #include <string>
+#include <string_view>
 #include <map>
 #include <memory>
 
@@ -45,9 +46,9 @@ protected:
 class XMLCoreParser { 
 public: 
 
-  std::unique_ptr<XMLCoreNode> parse (const std::string& file_name);
+  std::unique_ptr<XMLCoreNode> parse (std::string_view file_name);
   std::unique_ptr<XMLCoreNode> parse_string (const std::string& text);
-  void visit (const std::string& file_name); 
+  void visit (std::string_view file_name); 
  
   void register_default_factory (std::unique_ptr<XMLCoreFactory> factory); 
   void register_factory (const std::string& name,

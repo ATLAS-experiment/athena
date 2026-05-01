@@ -285,7 +285,7 @@ ExpatCoreParser::find_text_entity (const std::string& name){
 } 
 
 std::unique_ptr<XMLCoreNode>
-ExpatCoreParser::parse (const std::string& file_name){
+ExpatCoreParser::parse (std::string_view file_name){
   const std::filesystem::path path{file_name};
   ExpatCoreParser me{path.parent_path().string()};
   auto p = make_parser();

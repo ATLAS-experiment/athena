@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "IdDict/IdDictDictionary.h"
@@ -193,8 +193,8 @@ void IdDictDictionary::resolve_references(IdDictMgr& idd) {
   }
 }
 
-void IdDictDictionary::generate_implementation(const IdDictMgr& idd,
-                                               const std::string& tag) {
+void 
+IdDictDictionary::generate_implementation(const IdDictMgr& idd, std::string_view tag) {
   if (Debugger::debug()) {
     std::cout << "IdDictDictionary::generate_implementation>" << std::endl;
   }

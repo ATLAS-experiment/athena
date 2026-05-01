@@ -129,7 +129,7 @@ IdDictParser::IdDictParser () : XMLCoreParser () {
 IdDictParser::~IdDictParser () = default;
 
 IdDictMgr& 
-IdDictParser::parse (const std::string& file_name, const std::string& tag)  { 
+IdDictParser::parse (std::string_view file_name, std::string_view tag)  { 
   m_idd.clear (); 
   XMLCoreParser::visit (file_name);  
   if (Debugger::debug ()) { 
