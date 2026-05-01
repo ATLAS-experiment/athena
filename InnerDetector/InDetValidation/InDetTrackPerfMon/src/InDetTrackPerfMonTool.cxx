@@ -29,7 +29,7 @@
 ///----------------------------------------
 ///------- Parametrized constructor -------
 ///----------------------------------------
-InDetTrackPerfMonTool::InDetTrackPerfMonTool(
+IDTPM::InDetTrackPerfMonTool::InDetTrackPerfMonTool(
     const std::string& type,
     const std::string& name,
     const IInterface* parent ) :
@@ -40,13 +40,13 @@ InDetTrackPerfMonTool::InDetTrackPerfMonTool(
 ///----------------------------------
 ///------- Default destructor -------
 ///----------------------------------
-InDetTrackPerfMonTool::~InDetTrackPerfMonTool() = default;
+IDTPM::InDetTrackPerfMonTool::~InDetTrackPerfMonTool() = default;
 
 
 ///--------------------------
 ///------- Initialize -------
 ///--------------------------
-StatusCode InDetTrackPerfMonTool::initialize() {
+StatusCode IDTPM::InDetTrackPerfMonTool::initialize() {
 
   ATH_CHECK( ManagedMonitorToolBase::initialize() );
 
@@ -121,7 +121,7 @@ StatusCode InDetTrackPerfMonTool::initialize() {
 ///------------------------------
 ///------- bookHistograms -------
 ///------------------------------
-StatusCode InDetTrackPerfMonTool::bookHistograms()
+StatusCode IDTPM::InDetTrackPerfMonTool::bookHistograms()
 {
   ATH_MSG_DEBUG( "Booking plots" );
 
@@ -152,7 +152,7 @@ StatusCode InDetTrackPerfMonTool::bookHistograms()
 /// ------------------------------
 /// ------- fillHistograms -------
 /// ------------------------------
-StatusCode InDetTrackPerfMonTool::fillHistograms() {
+StatusCode IDTPM::InDetTrackPerfMonTool::fillHistograms() {
 
   ATH_MSG_DEBUG("Filling hists " << name() << " ...");
 
@@ -327,7 +327,7 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
 ///------------------------------
 ///------- procHistograms -------
 ///------------------------------
-StatusCode InDetTrackPerfMonTool::procHistograms() {
+StatusCode IDTPM::InDetTrackPerfMonTool::procHistograms() {
 
   ATH_MSG_DEBUG( "Finalizing plots" );
 
@@ -346,7 +346,7 @@ StatusCode InDetTrackPerfMonTool::procHistograms() {
 ///---------------------------
 ///----- loadCollections -----
 ///---------------------------
-StatusCode InDetTrackPerfMonTool::loadCollections( IDTPM::TrackAnalysisCollections& trkAnaColls ) {
+StatusCode IDTPM::InDetTrackPerfMonTool::loadCollections( IDTPM::TrackAnalysisCollections& trkAnaColls ) {
 
   ATH_MSG_DEBUG( "Loading collections" );
 

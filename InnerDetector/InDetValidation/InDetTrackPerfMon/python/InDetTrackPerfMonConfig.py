@@ -60,7 +60,7 @@ def PlotsDefinitionSvcCfg( flags, name="PlotsDefSvc", **kwargs ):
             PlotsDefReadToolCfg( flags ) ) )
 
     acc.addService(
-        CompFactory.PlotsDefinitionSvc( name, **kwargs ) )
+        CompFactory.IDTPM.PlotsDefinitionSvc( name, **kwargs ) )
     return acc
 
 
@@ -133,7 +133,7 @@ def TrackAnalysisDefinitionSvcCfg( flags, name="TrkAnaDefSvc", **kwargs ):
     kwargs.setdefault("EtaBins", flags.Tracking.ITkMainPass.etaBins if flags.Detector.GeometryITk else [-1, 9999.]) # for technical efficiencies
     kwargs.setdefault("MinSilHits", flags.Tracking.ITkMainPass.minClusters if flags.Detector.GeometryITk else [flags.Tracking.MainPass.minClusters]) # for technical efficiencies
 
-    trkAnaSvc = CompFactory.TrackAnalysisDefinitionSvc( name, **kwargs )
+    trkAnaSvc = CompFactory.IDTPM.TrackAnalysisDefinitionSvc( name, **kwargs )
     acc.addService( trkAnaSvc )
     return acc
 
@@ -246,7 +246,7 @@ def InDetTrackPerfMonToolCfg( flags, name="InDetTrackPerfMonTool", **kwargs ):
             kwargs.setdefault( "doMatch", True ) # = False by default
             kwargs.setdefault( "TrackMatchingTool", acc.popToolsAndMerge( matchToolCfg ) )
 
-    acc.setPrivateTools( CompFactory.InDetTrackPerfMonTool( name, **kwargs ) )
+    acc.setPrivateTools( CompFactory.IDTPM.InDetTrackPerfMonTool( name, **kwargs ) )
     return acc
 
 
