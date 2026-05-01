@@ -502,7 +502,7 @@ HGTDTrackExtensionAlg::TrackExtensionData HGTDTrackExtensionAlg::processTrackExt
                 }
                 
                 // Extract raw time from HGTD clusters
-                const xAOD::HGTDCluster* cluster = getHGTDClusterFromState(state);
+                const xAOD::HGTDCluster* cluster = getHGTDClusterFromState(ctx, state);
 
                 if (cluster) {
                   auto localPos = cluster->localPosition<3>();
@@ -816,7 +816,7 @@ std::pair<float, float> HGTDTrackExtensionAlg::correctTOF(
   return {correctedTime, measuredTimeErr};
 }
 
-const xAOD::HGTDCluster* HGTDTrackExtensionAlg::getHGTDClusterFromState(const ActsTrk::detail::RecoConstTrackStateContainerProxy& state) const {
+const xAOD::HGTDCluster* HGTDTrackExtensionAlg::getHGTDClusterFromState(const EventContext& ctx, const ActsTrk::detail::RecoConstTrackStateContainerProxy& state) const {
   if (state.hasUncalibratedSourceLink()) {
     auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
     assert( sl != nullptr);
@@ -839,9 +839,6 @@ const xAOD::HGTDCluster* HGTDTrackExtensionAlg::getHGTDClusterFromState(const Ac
         // Check if this is an HGTD surface
         if (isHGTDSurface(geoID)) {
           ATH_MSG_DEBUG("This is an HGTD surface with ID: " << geoID.volume() << ":" << geoID.layer());
-          
-          // Get the current context
-          EventContext ctx = Gaudi::Hive::currentContext();
           
           // Modern approach uses surface accessor instead of detector element map
           

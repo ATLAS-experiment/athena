@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSEVENTCNV_ACTSTOTRK_CONVERTER_ALG_H
@@ -39,7 +39,8 @@ namespace ActsTrk
                           ::TrackCollection &tracksContainer) const;
 
     std::unique_ptr<Trk::MeasurementBase>
-    makeRIO_OnTrack(const xAOD::UncalibratedMeasurement &uncalibMeas,
+    makeRIO_OnTrack(const EventContext &ctx,
+                    const xAOD::UncalibratedMeasurement &uncalibMeas,
                     const Trk::TrackParameters &parm, bool getSecMeas) const;
 
   private:
