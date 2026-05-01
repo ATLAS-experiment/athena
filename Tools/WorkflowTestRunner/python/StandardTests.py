@@ -263,8 +263,7 @@ class DerivationTest(WorkflowTest):
 
         self.output_checks = []
         for format in formats:
-            suffix = "_MT" if multithreaded else ""
-            self.output_checks.append(FrozenTier0PolicyCheck(setup, f"DAOD_{format}{suffix}", 10))
+            self.output_checks.append(FrozenTier0PolicyCheck(setup, f"DAOD_{format}", 10))
             self.output_checks.append(MetadataCheck(setup, f"DAOD_{format}"))
 
         super().__init__("_".join(test_def), run, type, steps, setup)
