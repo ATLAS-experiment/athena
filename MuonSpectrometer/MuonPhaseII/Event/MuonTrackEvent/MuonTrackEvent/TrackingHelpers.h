@@ -22,7 +22,6 @@ namespace MuonR4{
      *         segment is in the first BMS eta station on the A-side in sector 12
      *  @param seg: Reference to the segment from which the id should be printed */
     std::string printID(const xAOD::MuonSegment& seg);
-
     /** @brief Returns the number of associated Uncalibrated measurements
      *  @param segment: Reference to the segment of interest */
     std::size_t nMeasurements(const xAOD::MuonSegment& segment);
@@ -36,6 +35,10 @@ namespace MuonR4{
      *  @param n: Index of the measurement to retrieve */
     bool isOutlierMeasurement(const xAOD::MuonSegment& segment,
                               const std::size_t n);
+    
+    /** @brief Returns the identifier of the volume in which the surface is embedded
+     *  @param surface: Reference to the surface of interest */
+    Acts::GeometryIdentifier volumeId(const Acts::Surface& surface);
 
 }
 

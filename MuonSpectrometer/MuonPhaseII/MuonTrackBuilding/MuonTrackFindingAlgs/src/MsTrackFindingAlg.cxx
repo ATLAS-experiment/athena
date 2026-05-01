@@ -9,6 +9,7 @@
 #include "Acts/Surfaces/detail/PlanarHelper.hpp"
 
 
+#include "MuonReadoutGeometryR4/MuonDetectorDefs.h"
 #include "MuonTrackFindingTools/MsTrackSeeder.h"
 #include "ActsCalibBase/CalibrationContext.h"
 #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
@@ -35,7 +36,6 @@ namespace MuonR4{
         ATH_CHECK(m_msTrkSeedKey.initialize());
 
         ATH_CHECK(m_visualizationTool.retrieve(EnableTool{!m_visualizationTool.empty()}));
-
         ATH_CHECK(m_trackingGeometryTool.retrieve());
         ATH_CHECK(m_extrapolationTool.retrieve());
         ATH_CHECK(m_trackFitTool.retrieve());
@@ -148,7 +148,7 @@ std::pair<MsTrackFindingAlg::OptBoundPars_t,
         /// The middle or outer segment provide the phi information. Not so easy becasue we want to
         /// Take the y0 & precision direction from the inner segment but the phi & x0 from a straight
         /// line extrapolation onto the plane
-        if (false && refSeg != seed.segments().front()) {
+        if (refSeg != seed.segments().front()) {
             const MuonGMR4::SpectrometerSector* innerPlane = m_seeder->envelope(*seed.segments().front());
             const Acts::PlaneSurface& surf = innerPlane->surface();
             const Amg::Transform3D toInnerPlane = surf.localToGlobalTransform(tgContext).inverse();
@@ -168,21 +168,29 @@ std::pair<MsTrackFindingAlg::OptBoundPars_t,
                     Acts::makeDirectionFromAxisTangents(houghTanAlpha(locSeedDir),
                                                         houghTanBeta(innerSegDir));
             seedPos = surf.localToGlobalTransform(tgContext) * Amg::Vector3D{innerPars[Acts::toUnderlying(x0)],
-                                                                innerPars[Acts::toUnderlying(y0)], 0};
+                                                                             innerPars[Acts::toUnderlying(y0)], 0};
             seedDir = surf.localToGlobalTransform(tgContext).linear() * combSegDir;
         }
-        /// Create a surface which is shortly before the first measurement
-        const double propDistance = (xAOD::muonSurface(measurements[0]).center(tgContext) - 
-                                         seedPos).dot(seedDir) - 1.*Gaudi::Units::cm;
-        const Amg::Vector3D refPos  = seedPos + propDistance * seedDir;
-        auto target = Acts::Surface::makeShared<Acts::PerigeeSurface>(refPos);
         
-        auto fourPos = ActsTrk::convertPosToActs(refPos, refPos.mag() / Gaudi::Units::c_light);
+        /// Create a surface which is shortly before the first measurement
+        const Acts::GeometryIdentifier volId = volumeId(xAOD::muonSurface(measurements[0]));
+        /// Fetch the embedding volume
+        const Acts::TrackingVolume* volume = m_trackingGeometryTool->trackingGeometry()->findVolume(volId);
+
+        assert(volume != nullptr);
+
+        auto targetSurf = MuonGMR4::bottomBoundary(*volume)->getSharedPtr();
+        using namespace Acts::PlanarHelper;
+
+        auto pIsect = intersectPlane(seedPos, seedDir, 
+                                     targetSurf->localToGlobalTransform(tgContext).linear().col(2), 
+                                     targetSurf->center(tgContext));
+        
+        auto fourPos = ActsTrk::convertPosToActs(pIsect.position(), pIsect.position().mag() / Gaudi::Units::c_light);
         const double qOverP = 1./ m_seeder->estimateQtimesP(*tgContext.get<const ActsTrk::GeometryContext*>(),
                                                             *mfContext.get<const AtlasFieldCacheCondObj*>(), seed);
-        auto initialPars = Acts::BoundTrackParameters::create(tgContext, target, fourPos, 
-                                                              seedDir,
-                                                              ActsTrk::energyToActs(qOverP),
+        auto initialPars = Acts::BoundTrackParameters::create(tgContext, targetSurf, fourPos, 
+                                                              seedDir, ActsTrk::energyToActs(qOverP),
                                                               Acts::BoundMatrix::Identity(), 
                                                               Acts::ParticleHypothesis::muon());
         return std::make_pair(std::move(initialPars),  std::move(measurements));
