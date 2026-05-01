@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //====================================================================
 //    Root Database Container RNTuple implementation
@@ -72,8 +72,6 @@ class RNTupleContainer : public pool::DbContainerImp
   };
 
  private:
-   /// reference to exact type description
-   const pool::DbTypeInfo*  m_type{};
    /// List of field descriptors
    std::vector<FieldDesc>  m_fieldDescs;
    /// Parent Database handle

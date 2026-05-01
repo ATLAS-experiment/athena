@@ -314,7 +314,9 @@ StatusCode RootDatabase::close(DbAccessMode /* mode */ )  {
          ATH_MSG_DEBUG("I/O READ  Bytes: " << byteCount(READ_COUNTER)  << endmsg
                     << "I/O WRITE Bytes: " << byteCount(WRITE_COUNTER) << endmsg
                     << "I/O OTHER Bytes: " << byteCount(OTHER_COUNTER) );
-
+         // Clear the RNTuple reader/writer maps to release all references to the file before closing it
+         m_ntupleWriterMap.clear();
+         m_ntupleReaderMap.clear();
          if (!closed && m_fileMgr) {
             fclose_rc = m_fileMgr->close(m_file,"RootDatabase");
          }      
