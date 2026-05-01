@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ISF_FatrasTools )
@@ -22,6 +22,6 @@ foreach( name
                     SOURCES test/${name}.cxx
                     LINK_LIBRARIES AthenaKernel GaudiKernel ISF_FatrasInterfaces ISF_InterfacesLib TestTools TrkExInterfaces TrkGeometry TrkMaterialOnTrack
                     ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/share"
-                    POST_EXEC_SCRIPT nopost.sh
+                    POST_EXEC_SCRIPT noerror.sh
                     PROPERTIES TIMEOUT 300 )
 endforeach()
