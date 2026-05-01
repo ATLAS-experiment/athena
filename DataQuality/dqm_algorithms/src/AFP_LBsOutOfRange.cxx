@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "dqm_algorithms/AFP_LBsOutOfRange.h"
@@ -93,9 +93,10 @@ dqm_algorithms::AFP_LBsOutOfRange::fetchIOVs( uint32_t run, uint32_t channel ) {
             auto iterPtr      = folderPtr->browseObjects( runStartTime, runEndTime, cool::ChannelSelection( channel ) );
             uint64_t since = 0, until = 0;
             iovs.reserve( iterPtr->size() / 2 );
+            static const std::string inPhysicsStr{"inphysics"};
             while ( iterPtr->goToNext() ) {
                 auto& object   = iterPtr->currentRef();
-                auto inphysics = object.payload()[ "inphysics" ].data<cool::Bool>();
+                auto inphysics = object.payload()[ inPhysicsStr ].data<cool::Bool>();
                 if ( inphysics ) {
                     if ( since == 0 ) since = object.since();
                     until = object.until();
