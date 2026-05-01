@@ -56,7 +56,6 @@ const std::string RNTupleContainer::FieldDesc::typeName() {
 /// Standard constructor
 RNTupleContainer::RNTupleContainer(const std::string& name) :
    DbContainerImp(name),
-   m_type(nullptr),
    m_dbH(POOL_StorageType), m_rootDb(nullptr),
    m_ioBytes(0), m_isDirty(false),
    m_index(0), m_indexSize(0), m_indexBump(0), m_indexMulti( getpid() )
@@ -175,7 +174,6 @@ StatusCode RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
    ATH_MSG_DEBUG("Opened container " << m_name << " of type "
        << ROOTRNTUPLE_StorageType.storageName());
    m_dbH = dbH;
-   m_type = info;
    return StatusCode::SUCCESS;
 }
 
