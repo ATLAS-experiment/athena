@@ -53,6 +53,7 @@ from .VBF_ssWW import VBF_ssWW
 from .VBF_W import VBF_W
 from .VBF_Z import VBF_Z
 from .VV_pol import VV_pol
+from .VV_pol_EFT import VV_pol_EFT
 from .W import W
 from .Wbb import Wbb
 from .Wbbj import Wbbj
