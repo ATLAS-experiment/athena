@@ -1,5 +1,0 @@
-index_ref
-
-# Temporary until ATLASG-3096 is resolved
-AnalysisMuonsAuxDyn.DFCommonMuonPassIDCuts
-AnalysisMuonsAuxDyn.DFCommonMuonPassPreselection
