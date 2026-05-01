@@ -31,7 +31,7 @@ namespace {
   const SG::AuxElement::Accessor<uint64_t> acc_pileUpMixtureLow("pileUpMixtureIDLowBits");
   const SG::AuxElement::Accessor<uint64_t> acc_pileUpMixtureHigh("pileUpMixtureIDHighBits");
 }
-
+//coverity[UNCAUGHT_EXCEPT]
 int main() {
     std::cout << "MCEventInfoByteStreamTool_test\n";
 
