@@ -15,7 +15,7 @@
 /// -------------------
 /// --- Constructor ---
 /// -------------------
-PlotsDefinitionSvc::PlotsDefinitionSvc(
+IDTPM::PlotsDefinitionSvc::PlotsDefinitionSvc(
     const std::string& name, ISvcLocator* pSvcLocator ) :
         base_class( name, pSvcLocator ),
         m_plotsDefMap{}, m_nullDef()
@@ -26,7 +26,7 @@ PlotsDefinitionSvc::PlotsDefinitionSvc(
 /// ------------------
 /// --- initialize ---
 /// ------------------
-StatusCode PlotsDefinitionSvc::initialize() {
+StatusCode IDTPM::PlotsDefinitionSvc::initialize() {
 
   ATH_MSG_DEBUG( "Initialising " << name() );
 
@@ -60,7 +60,7 @@ StatusCode PlotsDefinitionSvc::initialize() {
 /// ----------------
 /// --- finalize ---
 /// ----------------
-StatusCode PlotsDefinitionSvc::finalize() {
+StatusCode IDTPM::PlotsDefinitionSvc::finalize() {
   ATH_MSG_DEBUG( "Finalized " << name() );
   return StatusCode::SUCCESS;
 }
@@ -69,7 +69,7 @@ StatusCode PlotsDefinitionSvc::finalize() {
 /// ------------------
 /// --- definition ---
 /// ------------------
-const IDTPM::SinglePlotDefinition& PlotsDefinitionSvc::definition(
+const IDTPM::SinglePlotDefinition& IDTPM::PlotsDefinitionSvc::definition(
     const std::string& identifier ) const
 {
   plotsDefMap_t::const_iterator map_it = m_plotsDefMap.find( identifier );
@@ -81,7 +81,7 @@ const IDTPM::SinglePlotDefinition& PlotsDefinitionSvc::definition(
 /// ------------------
 /// ----- update -----
 /// ------------------
-StatusCode PlotsDefinitionSvc::update(
+StatusCode IDTPM::PlotsDefinitionSvc::update(
     const IDTPM::SinglePlotDefinition& def )
 {
   ATH_MSG_DEBUG( "Adding new plot definition: " << def.identifier() );

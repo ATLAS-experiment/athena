@@ -26,9 +26,9 @@
 #include "../JsonPlotsDefReadTool.h"
 #include "../TrackAnalysisInfoWriteTool.h"
 
-DECLARE_COMPONENT( InDetTrackPerfMonTool )
-DECLARE_COMPONENT( TrackAnalysisDefinitionSvc )
-DECLARE_COMPONENT( PlotsDefinitionSvc )
+DECLARE_COMPONENT( IDTPM::InDetTrackPerfMonTool )
+DECLARE_COMPONENT( IDTPM::TrackAnalysisDefinitionSvc )
+DECLARE_COMPONENT( IDTPM::PlotsDefinitionSvc )
 DECLARE_COMPONENT( IDTPM::JsonPlotsDefReadTool )
 DECLARE_COMPONENT( IDTPM::TrackQualitySelectionTool )
 DECLARE_COMPONENT( IDTPM::VertexQualitySelectionTool )

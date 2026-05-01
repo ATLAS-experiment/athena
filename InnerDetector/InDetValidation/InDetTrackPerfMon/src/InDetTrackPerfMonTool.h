@@ -41,7 +41,8 @@
 #include <string>
 #include <vector>
 
-
+namespace IDTPM {
+  
 class InDetTrackPerfMonTool : public ManagedMonitorToolBase {
 
 public :
@@ -137,10 +138,12 @@ private :
     BooleanProperty m_writeOut{ this, "writeOut", false, "Write TrkAnaInfo Collection to AOD_IDTPM" };
 
     /// TrackAnalysisDefinitionSvc
-    SmartIF<ITrackAnalysisDefinitionSvc> m_trkAnaDefSvc;
+    SmartIF<IDTPM::ITrackAnalysisDefinitionSvc> m_trkAnaDefSvc;
 
     /// plots
     std::vector< std::unique_ptr< IDTPM::TrackAnalysisPlotsMgr > >  m_trkAnaPlotsMgrVec;
 };
 
+}
+  
 #endif
