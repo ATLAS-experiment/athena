@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
@@ -14,7 +14,7 @@ def TRT_GeoModelCfg(flags):
     from AthenaConfiguration.ComponentFactory import CompFactory
     trtDetectorTool = CompFactory.TRT_DetectorTool()
     trtDetectorTool.GeometryDBSvc = db.getPrimary()
-    trtDetectorTool.useDynamicAlignFolders = flags.GeoModel.Align.Dynamic
+    trtDetectorTool.useDynamicAlignFolders = flags.GeoModel.Align.Dynamic and flags.Overlay.DynamicAlignTRT
     # Use default TRT active gas in geo model unless in simulation.
     from AthenaConfiguration.Enums import LHCPeriod
     from AthenaConfiguration.Enums import Project, ProductionStep
@@ -51,7 +51,7 @@ def TRT_AlignmentCfg(flags):
     if flags.GeoModel.Align.LegacyConditionsAccess:  # revert to old style CondHandle in case of simulation
         from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline
         acc.merge(addFoldersSplitOnline(flags, "TRT", "/TRT/Onl/Calib/DX", "/TRT/Calib/DX"))
-        if flags.GeoModel.Align.Dynamic:
+        if flags.GeoModel.Align.Dynamic and flags.Overlay.DynamicAlignTRT:
             acc.merge(addFoldersSplitOnline(flags, "TRT", "/TRT/Onl/AlignL1/TRT", "/TRT/AlignL1/TRT"))
             acc.merge(addFoldersSplitOnline(flags, "TRT", "/TRT/Onl/AlignL2", "/TRT/AlignL2"))
         else:
