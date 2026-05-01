@@ -14,49 +14,41 @@ AGDDMaterialStore::AGDDMaterialStore():m_nrOfMaterials(0),m_nrOfElements(0)
 	m_theElements.clear();
 }
 
-void AGDDMaterialStore::RegisterElement(AGDDElement *el)
-{
-	if (m_theElements.find(el->GetName()) != m_theElements.end())
-	{
-		std::cout<<"Element "<<el->GetName()<<" already defined:skipping"<<std::endl;
-	}
-	else
-	{
-		m_nrOfElements++;
-		m_theElements[el->GetName()]=el;
-	}
+void
+AGDDMaterialStore::RegisterElement(AGDDElement* el){
+  const auto &[it, inserted] = m_theElements.try_emplace(el->GetName(), el);
+  if (!inserted) {
+    std::cout << "Element " << el->GetName()<< " already defined: skipping\n";
+    return;
+  }
+  ++m_nrOfElements;
 }
-void AGDDMaterialStore::RegisterMaterial(AGDDSimpleMaterial *mat)
-{
-	if (m_theMaterials.find(mat->GetName()) != m_theMaterials.end())
-	{
-		std::cout<<"Material "<<mat->GetName()<<" already defined:skipping"<<std::endl;
-	}
-	else
-	{
-		m_nrOfMaterials++;
-		m_theMaterials[mat->GetName()]=mat;
-	}
+void
+AGDDMaterialStore::RegisterMaterial(AGDDSimpleMaterial* mat){
+  const auto &[it, inserted] = m_theMaterials.try_emplace(mat->GetName(), mat);
+  if (!inserted) {
+    std::cout << "Material " << mat->GetName() << " already defined: skipping\n";
+    return;
+  }
+  ++m_nrOfMaterials;
 }
-AGDDSimpleMaterial* AGDDMaterialStore::GetMaterial(std::string mat)
-{
-	if (m_theMaterials.find(mat) != m_theMaterials.end())
-		return m_theMaterials[mat];
-	else
-	{
-		std::cout<<" Material "<<mat<<" not found!"<<std::endl;
-		return 0;
-	}
+
+AGDDSimpleMaterial*
+AGDDMaterialStore::GetMaterial(std::string_view mat){
+  const auto it = m_theMaterials.find(mat);
+  if (it == m_theMaterials.end()) {
+    std::cout << " Material " << mat << " not found!\n";
+    return nullptr;
+  }
+  return it->second;
 }
-AGDDElement* AGDDMaterialStore::GetElement(std::string el)
-{
-	if (m_theElements.find(el) != m_theElements.end())
-		return m_theElements[el];
-	else
-	{
+AGDDElement* AGDDMaterialStore::GetElement(std::string_view el){ 
+  const auto it = m_theElements.find(el);
+	if (it == m_theElements.end()){
 		std::cout<<" Element "<<el<<" not found!"<<std::endl;
-		return 0;
+		return nullptr;
 	}
+	return it->second;
 }
 
 void AGDDMaterialStore::PrintElementNames()
