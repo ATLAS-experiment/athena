@@ -76,19 +76,17 @@ def TrackIsolationCfg(ConfigFlags, TrackCollection="InDetTrackParticles", TrackS
     for WP in ['Nonprompt_All_MaxWeight', 'Tight']:
         for trackPt in 500, 1000:
             result.merge(MuonTrackIsolationDecorAlgCfg(ConfigFlags,
-                                                       name = "TrackIsoDecorAlg{container}{WP}{Pt}".format(container = TrackCollection,
-                                                                                                           WP = WP, Pt = trackPt),
+                                                       name = f"TrackIsoDecorAlg{TrackCollection}{WP}{trackPt}",
                                                        ttvaWP = WP,
                                                        trackPt = trackPt,
                                                        TrackCollection = TrackCollection,
                                                        TrackSelections = TrackSelections))
     result.merge(TrackCaloIsolationDecorAlgCfg(ConfigFlags,
-                                               name = "CaloIsoDecorAlg{container}".format(container = TrackCollection),
+                                               name = f"CaloIsoDecorAlg{TrackCollection}",
                                                TrackCollection = TrackCollection,
                                                TrackSelections = TrackSelections))
-    
     result.merge(TrackPflowIsolationDecorAlgCfg(ConfigFlags,
-                                               name = "PflowIsoDecorAlg{container}".format(container = TrackCollection),
+                                               name = f"PflowIsoDecorAlg{TrackCollection}",
                                                TrackCollection = TrackCollection,
                                                TrackSelections = TrackSelections))
     return result
