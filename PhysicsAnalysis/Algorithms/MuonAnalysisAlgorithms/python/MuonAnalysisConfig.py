@@ -83,7 +83,10 @@ class MuonMomentumCalibrationConfig (ConfigBlock):
             alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)
             alg.outputType = 'xAOD::MuonContainer'
-            decorationList = ['DFCommonJetDr','neflowisol20_CloseByCorr',
+            decorationList = ['DFCommonJetDr',
+                              'DFCommonMuonPassIDCuts',
+                              'DFCommonMuonPassPreselection',
+                              'neflowisol20_CloseByCorr',
                               'ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000_CloseByCorr',
                               'ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500_CloseByCorr',
                               'topoetcone20_CloseByCorr']
