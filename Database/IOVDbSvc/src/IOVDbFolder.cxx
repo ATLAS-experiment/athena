@@ -1018,7 +1018,7 @@ IOVDbFolder::resolveTag(const cool::IFolderPtr& fptr,const std::string& globalTa
       if (IOVDbNamespace::looksLikeMagicTag(restag) and not magicTag(restag)) return false;
       tag=std::move(restag);
     }catch (cool::Exception& e) {
-      ATH_MSG_ERROR( "Tag " << tag <<" cannot be resolved for folder " << m_foldername );
+      ATH_MSG_ERROR( "Tag " << tag <<" cannot be resolved for folder " << m_foldername << ": " << e.domain() << "/" << e.what() );
       return false;
     }
   }
