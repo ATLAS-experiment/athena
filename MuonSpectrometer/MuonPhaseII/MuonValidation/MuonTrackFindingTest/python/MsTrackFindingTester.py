@@ -56,18 +56,9 @@ if __name__=="__main__":
     cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
                                     outStream="MuonTrackTester"))
 
-    # cfg.getService("MessageSvc").setVerbose = ["MsTrackTester", "MSTrackFinderAlg", "MuonSegmentFittingAlg"]
-    from MuonConfig.MuonDataPrepConfig import xAODUncalibMeasPrepCfg
-    cfg.merge(xAODUncalibMeasPrepCfg(flags))
-    
-    from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg 
-    cfg.merge(MuonSpacePointFormationCfg(flags))
+    from MuonConfig.ReconstructionConfigR4 import MuonReconstructionConfig
+    cfg.merge(MuonReconstructionConfig(flags))
 
-    from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
-    cfg.merge(MuonPatternRecognitionCfg(flags))
-
-    from MuonTrackFindingAlgs.TrackFindingConfig import MSTrackFinderAlgCfg
-    cfg.merge(MSTrackFinderAlgCfg(flags))
     
     #### Schedule the legacy MS track building to compare the two reconstruction chains
     from MuonPatternRecognitionTest.PatternTestConfig import LegacyMuonRecoChainCfg

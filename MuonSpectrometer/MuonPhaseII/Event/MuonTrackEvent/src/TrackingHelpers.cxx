@@ -66,4 +66,7 @@ namespace MuonR4{
         }
         return out;
     }
+     Acts::GeometryIdentifier volumeId(const Acts::Surface& surface) {
+        return surface.geometryId().withSensitive(0).withBoundary(0);
+     }
 }
