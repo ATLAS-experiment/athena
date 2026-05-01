@@ -23,7 +23,7 @@ StatusCode DerivationFramework::SkimmingToolExample::finalize()
 
 
 // The filter itself
-bool DerivationFramework::SkimmingToolExample::eventPassesFilter() const
+bool DerivationFramework::SkimmingToolExample::eventPassesFilter(const EventContext& /*ctx*/) const
 {
   ++m_ntot;
 

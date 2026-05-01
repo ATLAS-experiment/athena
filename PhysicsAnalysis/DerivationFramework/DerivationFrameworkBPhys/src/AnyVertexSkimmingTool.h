@@ -15,7 +15,7 @@ namespace DerivationFramework {
     public:
       AnyVertexSkimmingTool(const std::string&, const std::string&, const IInterface*);
       StatusCode initialize() override;
-      virtual bool eventPassesFilter() const override;
+      virtual bool eventPassesFilter(const EventContext& ctx) const override;
       ~AnyVertexSkimmingTool();
     private:
        SG::ReadHandleKeyArray<xAOD::VertexContainer> m_keyArray {this, "VertexContainerNames", {} };

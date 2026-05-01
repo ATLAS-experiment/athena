@@ -18,8 +18,7 @@ StatusCode AnyVertexSkimmingTool::initialize(){
     return StatusCode::SUCCESS;
 }
 
-bool AnyVertexSkimmingTool::eventPassesFilter() const{
-       const EventContext& ctx = Gaudi::Hive::currentContext();
+bool AnyVertexSkimmingTool::eventPassesFilter(const EventContext& ctx) const{
        bool pass = false;
        for(auto key : m_keyArray){
           ATH_MSG_DEBUG("Key Checking: " << key.key());

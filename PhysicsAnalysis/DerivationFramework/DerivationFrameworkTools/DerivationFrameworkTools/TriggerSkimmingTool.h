@@ -21,7 +21,7 @@ namespace DerivationFramework {
     public: 
       TriggerSkimmingTool(const std::string& t, const std::string& n, const IInterface* p);
 
-      bool eventPassesFilter() const override;
+      bool eventPassesFilter(const EventContext& ctx) const override;
       StatusCode initialize() override;
 
     private:

@@ -23,7 +23,7 @@ namespace DerivationFramework {
 
       StatusCode initialize();
       StatusCode finalize();
-      virtual bool eventPassesFilter() const;
+      virtual bool eventPassesFilter(const EventContext& ctx) const;
 
     private:
       Gaudi::Property<unsigned int> m_prescale {this, "Prescale", 1};	

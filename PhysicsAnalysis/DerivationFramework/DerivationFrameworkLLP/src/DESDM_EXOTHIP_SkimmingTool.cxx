@@ -47,7 +47,7 @@ StatusCode DerivationFramework::DESDM_EXOTHIP_SkimmingTool::finalize() {
   return StatusCode::SUCCESS;
 }
 
-bool DerivationFramework::DESDM_EXOTHIP_SkimmingTool::eventPassesFilter() const{
+bool DerivationFramework::DESDM_EXOTHIP_SkimmingTool::eventPassesFilter(const EventContext& /*ctx*/) const{
   
   m_ntot++;
   

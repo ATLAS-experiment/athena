@@ -176,7 +176,7 @@ StatusCode DerivationFramework::DerivationKernel::execute() {
   // Loop over the filters
   for (const auto &  skimmingTool : m_skimmingTools) {
     ATH_MSG_DEBUG("Entering " << skimmingTool->name());
-    if (!(skimmingTool->eventPassesFilter())) {
+    if (!(skimmingTool->eventPassesFilter(ctx))) {
       acceptEvent=false;
       ATH_MSG_DEBUG("This event failed the " << skimmingTool->name() << " filter. Therefore it will not be recorded.");
       break;

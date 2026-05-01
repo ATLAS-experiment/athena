@@ -39,7 +39,7 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  bool xAODStringSkimmingTool::eventPassesFilter() const
+  bool xAODStringSkimmingTool::eventPassesFilter(const EventContext& /*ctx*/) const
   {
     return m_parser->evaluateAsBool();
   }

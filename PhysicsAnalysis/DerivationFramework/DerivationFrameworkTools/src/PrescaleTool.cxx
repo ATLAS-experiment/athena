@@ -36,9 +36,9 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  bool PrescaleTool::eventPassesFilter() const
+  bool PrescaleTool::eventPassesFilter(const EventContext& ctx) const
   {
-    return (Gaudi::Hive::currentContext().eventID().event_number() % m_prescale == 0);
+    return (ctx.eventID().event_number() % m_prescale == 0);
   }  
 
 }
