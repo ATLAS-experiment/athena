@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "dqm_algorithms/BinThresh.h"
@@ -18,6 +18,14 @@
 #include "dqm_core/Result.h"
 
 static dqm_algorithms::BinThresh staticInstance;
+namespace{
+  const std::string valueAllStr{"Value_All"};
+  const std::string typeValueStr{"TypeValue"};
+  const std::string publishStr{"Publish"};
+  const std::string typePublishStr{"TypePublish"};
+  const std::string useValueStr{"UseValue"};
+  const std::string binMinEntriesStr{"BinMinEntries"};
+}
 
 namespace dqm_algorithms {
 	
@@ -499,7 +507,7 @@ namespace dqm_algorithms {
 	
 	int BinThresh::Publish_GetFromMap(const std::map<std::string, double> & params)
 	{
-		std::map<std::string, double>::const_iterator it = params.find("Publish");
+		std::map<std::string, double>::const_iterator it = params.find(publishStr);
 		if ( it != params.end() ) {
 		        return((int) it->second);
 		}else {
@@ -509,7 +517,7 @@ namespace dqm_algorithms {
 	
 	int BinThresh::TypePublish_GetFromMap(const std::map<std::string, double> & params)
 	{
-		std::map<std::string, double>::const_iterator it = params.find("TypePublish");
+		std::map<std::string, double>::const_iterator it = params.find(typePublishStr);
 		if ( it != params.end() ) {
 			if ( it->second > 1.5 ) return(2);
 			else if ( it->second > 0.5 ) return(1);
@@ -521,7 +529,7 @@ namespace dqm_algorithms {
 	
 	int BinThresh::UseValue_GetFromMap(const std::map<std::string, double> & params)
 	{
-		std::map<std::string, double>::const_iterator it = params.find("UseValue");
+		std::map<std::string, double>::const_iterator it = params.find(useValueStr);
 		if ( it != params.end() ) {
 			return((int) it->second);
 		}else {
@@ -531,7 +539,7 @@ namespace dqm_algorithms {
 	
 	int BinThresh::TypeValue_GetFromMap(const std::map<std::string, double> & params)
 	{
-		std::map<std::string, double>::const_iterator it = params.find("TypeValue");
+		std::map<std::string, double>::const_iterator it = params.find(typeValueStr);
 		if ( it != params.end() ) {
 			if ( it->second > 0.5 ) return(1);
 			else return(0);
@@ -542,7 +550,7 @@ namespace dqm_algorithms {
 	
 	int BinThresh::BinMinEntries_GetFromMap(const std::map<std::string, double> & params)
 	{
-		std::map<std::string, double>::const_iterator it = params.find("BinMinEntries");
+		std::map<std::string, double>::const_iterator it = params.find(binMinEntriesStr);
 		if ( it != params.end() ) {
 			return((int) it->second);
 		}else {
@@ -565,8 +573,8 @@ namespace dqm_algorithms {
 		default_Limits.Mask = true;
 		
 		//Check for Value_All thresholds to use for all bins
-		warning_map_bin = warning_params.find("Value_All");
-		error_map_bin = error_params.find("Value_All");
+		warning_map_bin = warning_params.find(valueAllStr);
+		error_map_bin = error_params.find(valueAllStr);
 		if ( warning_map_bin != warning_params.end() && 
 			error_map_bin != error_params.end() ) {
 			default_Limits.WarningValue = warning_map_bin->second;
@@ -618,8 +626,8 @@ namespace dqm_algorithms {
 		default_Limits.Mask = true;
 		
 		//Check for Value_All thresholds to use for all bins
-		warning_map_bin = warning_params.find("Value_All");
-		error_map_bin = error_params.find("Value_All");
+		warning_map_bin = warning_params.find(valueAllStr);
+		error_map_bin = error_params.find(valueAllStr);
 		if ( warning_map_bin != warning_params.end() && 
 			error_map_bin != error_params.end() ) {
 			default_Limits.WarningValue = warning_map_bin->second;

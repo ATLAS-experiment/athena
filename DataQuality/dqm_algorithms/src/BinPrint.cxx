@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "dqm_algorithms/BinPrint.h"
@@ -18,6 +18,16 @@
 #include "dqm_core/Result.h"
 
 static dqm_algorithms::BinPrint staticInstance;
+
+namespace{
+  	  const std::string useValueStr{"UseValue"};
+  	  const std::string typeValueStr{"TypeValue"};
+  	  const std::string valueStr{"Value"};
+  	  const std::string useMaskValueStr{"UseMaskValue"};
+  	  const std::string maskValueStr{"MaskValue"};
+  	  const std::string unmaskAllStr{"UnMask_All"};
+  	  
+}
 
 namespace dqm_algorithms {
 	
@@ -282,7 +292,7 @@ namespace dqm_algorithms {
 	
 	int BinPrint::UseValue_GetFromMap(const std::map<std::string, double> & params)
 	{
-		std::map<std::string, double>::const_iterator it = params.find("UseValue");
+		std::map<std::string, double>::const_iterator it = params.find(useValueStr);
 		if ( it != params.end() ){     
 			return((int) it->second);
 		} else {
@@ -292,7 +302,7 @@ namespace dqm_algorithms {
 	
 	int BinPrint::TypeValue_GetFromMap(const std::map<std::string, double> & params)
 	{
-		std::map<std::string, double>::const_iterator it = params.find("TypeValue");
+		std::map<std::string, double>::const_iterator it = params.find(typeValueStr);
 		if ( it != params.end() ){     
 			return((int) it->second);
 		} else {
@@ -302,7 +312,7 @@ namespace dqm_algorithms {
 	
 	double BinPrint::Value_GetFromMap(const std::map<std::string, double> & params)
 	{
-		std::map<std::string, double>::const_iterator it = params.find("Value");
+		std::map<std::string, double>::const_iterator it = params.find(valueStr);
 		if ( it != params.end() ){     
 			return(it->second);
 		} else {
@@ -312,7 +322,7 @@ namespace dqm_algorithms {
 	
 	int BinPrint::UseMaskValue_GetFromMap(const std::map<std::string, double> & params)
 	{
-		std::map<std::string, double>::const_iterator it = params.find("UseMaskValue");
+		std::map<std::string, double>::const_iterator it = params.find(useMaskValueStr);
 		if ( it != params.end() ){     
 			return((int) it->second);
 		} else {
@@ -322,7 +332,7 @@ namespace dqm_algorithms {
 	
 	double BinPrint::MaskValue_GetFromMap(const std::map<std::string, double> & params)
 	{
-		std::map<std::string, double>::const_iterator it = params.find("MaskValue");
+		std::map<std::string, double>::const_iterator it = params.find(maskValueStr);
 		if ( it != params.end() ){     
 			return(it->second);
 		} else {
@@ -338,7 +348,7 @@ namespace dqm_algorithms {
 		bool default_Mask = true;
 		m_UnMask_All = -1;
 		//Get m_UnMask_All configuration
-		mask_map_bin = params.find("UnMask_All");
+		mask_map_bin = params.find(unmaskAllStr);
 		if ( mask_map_bin != params.end() ) {
 			if(mask_map_bin->second > 0.5) {
 				m_UnMask_All = (int) mask_map_bin->second;
@@ -368,7 +378,7 @@ namespace dqm_algorithms {
 		bool default_Mask = true;
 		m_UnMask_All = -1;
 		//Get m_UnMask_All configuration
-		mask_map_bin = params.find("UnMask_All");
+		mask_map_bin = params.find(unmaskAllStr);
 		if ( mask_map_bin != params.end() ) {
 			if(mask_map_bin->second > 0.5) {
 				m_UnMask_All = (int) mask_map_bin->second;
