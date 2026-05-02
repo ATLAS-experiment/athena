@@ -106,16 +106,17 @@ namespace ActsTrk {
     Gaudi::Property<bool> m_matchBeforeCreate {this, "matchBeforeCreate", true, "need to check what this does"};
     Gaudi::Property<bool> m_useOldTunings {this, "useOldTunings", false, "use the tunings for 900MeV cut"};
     Gaudi::Property<float> m_tau_ratio_cut {this, "cut_tau_ratio_max",0.007, "tau cut for doublets and triplets"}; 
-    Gaudi::Property<float> m_tau_ratio_precut {this, "precut_tau_ratio_max",0.009f, "not sure"}; 
+    Gaudi::Property<float> m_tau_ratio_precut {this, "precut_tau_ratio_max",0.009f, "used to reject edges early if matchBeforCreate is on"}; 
     Gaudi::Property<float> m_etaBinWidthOverride {this, "etaBinOverride", 0.0f, "apply custom binning for connections"};
     Gaudi::Property<float> m_nMaxPhiSlice {this, "nMaxPhiSlice",53, "used to calculate phi slices"}; 
     Gaudi::Property<bool> m_beamSpotCorrection {this, "beamSpotCorrection", true, "apply primary vertex corrections to spacepoints"};
     Gaudi::Property<float> m_minPt {this, "minPt", 1000.0, "Lower cutoff for seeds"};
     Gaudi::Property<float> m_phiSliceWidth {this, "phiSliceWidth",0, "initialised in loadSpacePoints function"};
-    Gaudi::Property<float> m_tau_ratio_corr{this, "tau_ratio_correction", 0.006, "not sure"};
-    Gaudi::Property<bool> m_validateTriplets{this, "ValidateTriplets", true, "not sure"};
-    Gaudi::Property<bool> m_useAdaptiveCuts{this, "UseAdaptiveCuts", true, "not sure"};
-
+    Gaudi::Property<float> m_tau_ratio_corr{this, "tau_ratio_correction", 0.006, "correction added to tau accpetance if candidate edge skips a layer"};
+    Gaudi::Property<bool> m_validateTriplets{this, "ValidateTriplets", true, "extra validation on pT and d0 performed to connected barrel edges"};
+    Gaudi::Property<bool> m_useAdaptiveCuts{this, "UseAdaptiveCuts", true, "allows for larger accpetance of candidate edges that skip layers"};
+    Gaudi::Property<bool> m_addTriplets{this, "addTriplets", false, "add seeds with three spacepoints in a defined eta region"};
+    Gaudi::Property<float> m_maxEtaAddTriplets{this, "maxEtaAddTriplets", 1.5, "eta region in which three sapcepoint seeds are allowed"};
     // BuildTheGraph() options
     Gaudi::Property<bool> m_useEtaBinning {this, "useEtaBinning",true, "bool to use eta binning from geometry structure"}; 
     Gaudi::Property<bool> m_doubletFilterRZ {this, "doubletFilterRZ",true, "bool applies new Z cuts on doublets"}; 
@@ -123,11 +124,11 @@ namespace ActsTrk {
     Gaudi::Property<int> m_nMaxEdges {this, "MaxEdges",3000000, " max number of Gbts edges/doublets"};
 
     // triplet validation options
-    Gaudi::Property<float> m_d0_max{this, "d0_max", 3.0, "not sure"};
+    Gaudi::Property<float> m_d0_max{this, "d0_max", 3.0, "maximum d0 value allowed when using validateTiplets"};
 
     // GbtsTrackingFilter
     Gaudi::Property<float> m_sigmaMS {this, "sigmaMS", 0.016, "process noise from multiple scattering"};
-    Gaudi::Property<float> m_radLen {this, "radLen", 0.025, "not sure"};
+    Gaudi::Property<float> m_radLen {this, "radLen", 0.025, "defines how much material scattering the kalman filter should take into account"};
     Gaudi::Property<float> m_sigma_x {this, "sigma_x", 0.08, "measurement resolution for residual on y direction"}; //was 0.22
     Gaudi::Property<float> m_sigma_y {this, "sigma_y", 0.25, "measurement resolution on r-z plane"};// was 1.7
     Gaudi::Property<float> m_weight_x {this, "weight_x", 0.5, "penalty weight for track"};
@@ -135,10 +136,10 @@ namespace ActsTrk {
     Gaudi::Property<float> m_maxDChi2_x {this, "maxDChi2_x", 5.0, "gate threshold for chi2 test"}; //was 35.0
     Gaudi::Property<float> m_maxDChi2_y {this, "maxDChi2_y", 6.0, "gate threshold for chi2 test"};//was 31.0
     Gaudi::Property<float> m_add_hit {this, "add_hit", 14.0, "reward added to tracks for each accepted hit before chi2"};
-    Gaudi::Property<float> m_max_curvature {this, "max_curvature", 1e-3f, "not sure"};
-    Gaudi::Property<float> m_max_z0 {this, "max_z0", 170.0, "not sure"};
-    Gaudi::Property<float> m_edge_mask_min_eta {this, "edge_mask_min_eta", 1.5, "not sure"};
-    Gaudi::Property<float> m_hit_share_threshold {this, "hit_share_threshold", 0.49, "not sure"};
+    Gaudi::Property<float> m_max_curvature {this, "max_curvature", 1e-3f, "maximum curvature allowed for candiadte tracklet"};
+    Gaudi::Property<float> m_max_z0 {this, "max_z0", 170.0, "maximum z0 allowed for candidate tracklet"};
+    Gaudi::Property<float> m_edge_mask_min_eta {this, "edge_mask_min_eta", 1.5, "minimum eta allowed for masking edges in graph so they are not used again"};
+    Gaudi::Property<float> m_hit_share_threshold {this, "hit_share_threshold", 0.49, "threshold of hits that are shared between seeds before one seed is labelled a clone"};
 
     // GbtsDataStorage
     Gaudi::Property<float> m_max_endcap_clusterwidth {this, "max_endcap_clusterwidth", 0.35, "discards any spacepoints which dr/dz cant be accurately modelled"};
