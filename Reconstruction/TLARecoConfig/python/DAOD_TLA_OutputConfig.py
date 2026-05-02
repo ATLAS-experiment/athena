@@ -24,8 +24,8 @@ def DAOD_TLA_OutputCfg(flags,additional_items=[]):
     ItemList += [ 'xAOD::TrigCompositeAuxContainer#*' ]
     ItemList += [ 'xAOD::TrigDecision#*' ]
     ItemList += [ 'xAOD::TrigDecisionAuxInfo#*' ]
-    ItemList += [ 'xAOD::TrigConfKeys#' ]
-    ItemList += [ 'xAOD::BunchConfKey#' ]
+    ItemList += [ 'xAOD::TrigConfKeys#*' ]
+    ItemList += [ 'xAOD::BunchConfKey#*' ]
     ItemList += additional_items
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
