@@ -230,7 +230,6 @@ InDetRttPlotConfig InDetPhysValMonitoringTool::getFilledPlotConfig() const{
   /// turn off truth if none is present
   if (m_truthParticleName.key().empty()){
     rttConfig.doFakePlots = false; 
-    rttConfig.doMissingTruthFakePlots = false; 
     rttConfig.doHitsFakeTracksPlots = false; 
     rttConfig.doHitsUnlinkedTracksPlots = false; 
     rttConfig.doEffPlots = false; 
@@ -260,7 +259,6 @@ InDetRttPlotConfig InDetPhysValMonitoringTool::getFilledPlotConfig() const{
     rttConfig.doHitsRecoTracksPlots = false;
     rttConfig.doTrtExtensionPlots = false;
     rttConfig.doFakePlots = false;
-    rttConfig.doMissingTruthFakePlots = false;
     rttConfig.doHitsFakeTracksPlots = false;
     rttConfig.doHitsUnlinkedTracksPlots = false;
     rttConfig.doVertexPlots = false;
