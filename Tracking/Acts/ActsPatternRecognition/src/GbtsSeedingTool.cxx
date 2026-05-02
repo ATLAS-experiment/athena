@@ -202,7 +202,8 @@ namespace ActsTrk {
     m_finderCfg.validateTriplets = m_validateTriplets;
     m_finderCfg.useAdaptiveCuts = m_useAdaptiveCuts;
     m_finderCfg.tauRatioCorr = m_tau_ratio_corr;
-
+    m_finderCfg.addTriplets = m_addTriplets;
+    m_finderCfg.maxAbsEtaAddTripelts = m_maxEtaAddTriplets;
     m_filterCfg.sigmaMS = m_sigmaMS;
     m_filterCfg.radLen = m_radLen;
     m_filterCfg.sigmaX = m_sigma_x;
@@ -240,7 +241,9 @@ namespace ActsTrk {
     ATH_MSG_DEBUG( "edgeMaskMinEta: " << m_finderCfg.edgeMaskMinEta);
     ATH_MSG_DEBUG( "hitShareThreshold: " << m_finderCfg.hitShareThreshold);
     ATH_MSG_DEBUG( "maxEndcapClusterWidth: " << m_finderCfg.maxEndcapClusterWidth);
-
+    ATH_MSG_DEBUG( "addTriplets: " << m_finderCfg.addTriplets);
+    ATH_MSG_DEBUG( "maxEtaAddTriplets " << m_finderCfg.maxAbsEtaAddTripelts);
+    
     ATH_MSG_DEBUG("===== GBTS filter config =====");
     ATH_MSG_DEBUG( "sigmaMS: " << m_filterCfg.sigmaMS);
     ATH_MSG_DEBUG( "radLen: " << m_filterCfg.radLen);
