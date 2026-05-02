@@ -7,7 +7,6 @@
 
 #include <inttypes.h>
 #include "MuonRDO/TgcRawData.h"
-#include "MuonRDO/TgcStatusStructs.h"
 #include "AthContainers/DataVector.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include "Identifier/IdentifierHash.h"
@@ -25,10 +24,68 @@ public:
     // typedef required by container
     typedef uint16_t ID;
     typedef TgcRawData DIGIT;
-    using Errors = MuonRDO::Errors;
-    using RodStatus = MuonRDO::RodStatus;
-    using LocalStatus = MuonRDO::LocalStatus;
+/*
+    enum
+    {
+        MAX_N_SIDE = 2, // A and C side
+        MAX_N_ROD  = 12, // max number of ROD in each side
+        MAX_ID = MAX_N_SIDE*MAX_N_ROD
+    };
+*/
+    struct Errors
+    {
+        unsigned badBcID:1;
+        unsigned badL1Id:1;
+        unsigned timedout:1;
+        unsigned badData:1;
+        unsigned overflow:1;
+    };
 
+    struct RodStatus
+    {
+        unsigned EC_RXsend:1; // Error in request to send an event via RXlink
+        unsigned EC_FELdown:1; // A Front End link has gone down - abandoned
+        unsigned EC_frame:1; // Invalid FE link framing words
+        unsigned EC_Glnk:1; // G-link error
+        unsigned EC_xor:1; // Invalid XOR event checksum
+        unsigned EC_ovfl:1; // Input FE event is too long or FE FIFO overflow
+        unsigned EC_timeout:1; // Timeout expired for at least one FE link
+        unsigned EC_xormezz:1; // Bad XOR checksum from mezz board
+        unsigned EC_wc0:1; // Event has WC=0
+        unsigned EC_L1ID:1; // L1ID mismatch (TTC EVID FIFO vs local).
+        unsigned EC_nohdr:1; // First word is not header
+        unsigned EC_rectype:1; // Unrecognized record type
+        unsigned EC_null:1; // Unexpected nulls in FE input
+        unsigned EC_order:1; // Word is out of order
+        unsigned EC_LDB:1; // Invalid or unexpected Local Data Block ID
+        unsigned EC_RXovfl:1; // RXfifo has overflowed
+        unsigned EC_SSWerr:1; // SSW reports T1C, NRC, T2C, or GlinkNoLock error
+        unsigned EC_sbid:1; // Illegal SB ID
+        unsigned EC_unxsbid:1; // Unexpected SB ID received
+        unsigned EC_dupsb:1; // SB ID is duplicated in the event
+        unsigned EC_ec4:1; // Unexpected SB L1 Event ID(lo 4)
+        unsigned EC_bc:1; // Unexpected SB BCID
+        unsigned EC_celladr:1; // Invalid cell address
+        unsigned EC_hitovfl:1; // Too many hits in event
+        unsigned EC_trgbit:1; // Unexpected trigger bits
+        unsigned EC_badEoE:1; // Bad End-of-event marker received, not 0xFCA
+        unsigned EC_endWCnot0:1; // WC not 0 after EoE marker
+        unsigned EC_noEoE:1; // No End-of-event marker received
+    };
+
+    struct LocalStatus
+    {
+        unsigned mergedHitBCs:1;
+        unsigned mergedTrackletBCs:1;
+        unsigned sortedHits:1;
+        unsigned sortedTracklets:1;
+        unsigned hasRoI:1;
+        unsigned fakeSsw:1;
+        unsigned fill1:10;
+    };
+
+    /* Constructors
+     */
     /**Default constructor*/
     TgcRdo();
 
@@ -104,7 +161,14 @@ public:
     }
     void setErrors(uint16_t data)
     {
-        m_errors = MuonRDO::setErrors(data);
+        // FIXME BUG: This is not portable!
+        //   The layout of bitfields in a structure is implementation-defined.
+        union cnvErrors {
+          uint16_t data;
+          Errors errors;
+        } cnv;
+        cnv.data = data;
+        m_errors = cnv.errors;
     }
 
     const RodStatus& rodStatus() const
@@ -113,7 +177,14 @@ public:
     }
     void setRodStatus(uint32_t data)
     {
-        m_rodStatus = MuonRDO::setRodStatus(data);
+        // FIXME BUG: This is not portable!
+        //   The layout of bitfields in a structure is implementation-defined.
+        union cnvRodStatus {
+          uint16_t data;
+          RodStatus rodStatus;
+        } cnv;
+        cnv.data = data;
+        m_rodStatus = cnv.rodStatus;
     }
 
     const LocalStatus& localStatus() const
@@ -122,7 +193,14 @@ public:
     }
     void setLocalStatus(uint32_t data)
     {
-        m_localStatus = MuonRDO::setLocalStatus(data);
+        // FIXME BUG: This is not portable!
+        //   The layout of bitfields in a structure is implementation-defined.
+        union cnvLocalStatus {
+          uint16_t data;
+          LocalStatus localStatus;
+        } cnv;
+        cnv.data = data;
+        m_localStatus = cnv.localStatus;
     }
 
     uint32_t orbit() const
@@ -175,9 +253,9 @@ private:
     uint16_t m_bcId = 0U;
     uint16_t m_l1Id = 0U;
 
-    MuonRDO::Errors      m_errors{};
-    MuonRDO::RodStatus   m_rodStatus{};
-    MuonRDO::LocalStatus m_localStatus{};
+    struct Errors      m_errors{};
+    struct RodStatus   m_rodStatus{};
+    struct LocalStatus m_localStatus{};
     uint32_t m_orbit = 0U;
 };
 
