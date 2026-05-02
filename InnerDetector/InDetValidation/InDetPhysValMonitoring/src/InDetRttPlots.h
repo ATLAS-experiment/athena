@@ -62,7 +62,6 @@ struct InDetRttPlotConfig{
 
   /// Fake plots (and unlinked) 
   bool doFakePlots{true}; 
-  bool doMissingTruthFakePlots{true}; 
   bool doHitsFakeTracksPlots{true};
   bool doHitsUnlinkedTracksPlots{true};
 
