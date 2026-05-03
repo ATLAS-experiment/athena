@@ -3,6 +3,8 @@
 # Declare the package name:
 atlas_subdir( AtlasDetDescr )
 
+find_package( Boost COMPONENTS unit_test_framework )
+
 # Component(s) in the package:
 atlas_add_library( AtlasDetDescr
                    src/AtlasDetectorID.cxx
@@ -23,4 +25,4 @@ atlas_add_test( AtlasDetectorID_test
                 test/AtlasDetectorID_test.cxx
                 INCLUDE_DIRS ${Boost_INCLUDE_DIRS}  
                 LINK_LIBRARIES  AtlasDetDescr IdDictParser ${Boost_LIBRARIES} 
-                POST_EXEC_SCRIPT "nopost.sh" )    
+                POST_EXEC_SCRIPT "nopost.sh" )
