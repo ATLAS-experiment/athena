@@ -9,4 +9,4 @@ for path in "/" "/group_a" "/group_a/subgroup_b" "/group_c"; do
         exit 1
     fi
 done
-echo "PASS: all expected groups present"
+#echo "PASS: all expected groups present"
