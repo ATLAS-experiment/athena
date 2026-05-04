@@ -21,7 +21,6 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "GaudiKernel/EventContext.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "CaloEvent/CaloCellClusterWeights.h"
 
 static const InterfaceID IID_CaloTowerCollectionProcessor ("CaloTowerCollectionProcessor", 1 , 0);

@@ -13,7 +13,6 @@
 
 #include "CaloUtils/CaloClusterProcessor.h"
 #include "CaloEvent/CaloClusterContainer.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 
 /**
