@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CaloD3PDMaker/src/CaloCellDetailsFillerTool.cxx
@@ -118,10 +118,9 @@ StatusCode CaloCellDetailsFillerTool::book()
 
 StatusCode CaloCellDetailsFillerTool::fill ( const CaloCell& c)
 {
+  const EventContext& ctx = Gaudi::Hive::currentContext();
   const CaloCell* cell = &c; 
-
-
-  Identifier id  = cell->ID(); 	      
+  const Identifier id  = cell->ID();
 
   if (m_savePosition) {
     *m_xCells = cell->x() ;
@@ -144,7 +143,7 @@ StatusCode CaloCellDetailsFillerTool::fill ( const CaloCell& c)
 
 
   if (m_saveId)       *m_offId = id.get_identifier32().get_compact()     ;
-  if (m_saveCellStatus)    *m_badCell = m_pb_tool->caloStatus(id).packedData() ;
+  if (m_saveCellStatus)    *m_badCell = m_pb_tool->caloStatus(ctx, id).packedData() ;
 
   if (!m_caloNoiseKey.empty()) {
     SG::ReadCondHandle<CaloNoise> caloNoise{m_caloNoiseKey};
