@@ -43,13 +43,11 @@ def TLA1KernelCfg(flags, name='TLA1Kernel', **kwargs):
     acc.merge(TLACommonAugmentationsCfg(flags, prefix="TLA1_", TriggerListsHelper = kwargs['TriggerListsHelper']))
     
     from DerivationFrameworkInDet.InDetToolsConfig import InDetTrackSelectionToolWrapperCfg
-    DFCommonTrackSelection = acc.getPrimaryAndMerge(InDetTrackSelectionToolWrapperCfg(
+    acc.merge(InDetTrackSelectionToolWrapperCfg(
         flags,
-        name           = "DFCommonTrackSelectionLoose",
+        name           = "TLA1CommonKernel",
         CutLevel       = "Loose",
         DecorationName = "DFTLA1Loose"))
-
-    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("TLA1CommonKernel", AugmentationTools = [DFCommonTrackSelection])) # TODO Migrate public tool to AthReentrantAlgorithm
 
     # Thinning tools...
     from DerivationFrameworkInDet.InDetToolsConfig import MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg, JetTrackParticleThinningCfg

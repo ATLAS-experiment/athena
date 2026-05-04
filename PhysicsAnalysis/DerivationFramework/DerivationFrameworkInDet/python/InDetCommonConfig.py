@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # ********************************************************************
 # InDetCommonConfig.py
@@ -34,12 +34,11 @@ def InDetCommonCfg(flags, **kwargs):
         # ====================================================================
         # LABELLING TRACKS WITH OUTCOME OF SELECTOR TOOL
         # ====================================================================
-        from DerivationFrameworkInDet.InDetToolsConfig import (
-            InDetTrackSelectionToolWrapperCfg)
-        DFCommonTrackSelection = acc.getPrimaryAndMerge(
+        from DerivationFrameworkInDet.InDetToolsConfig import InDetTrackSelectionToolWrapperCfg
+        acc.merge(
             InDetTrackSelectionToolWrapperCfg(
                 flags,
-                name           = "DFCommonTrackSelection",
+                name           = "InDetCommonKernelDFCommonTrackSelection",
                 CutLevel  = "TightPrimary",
                 DecorationName = "DFCommonTightPrimary"))
 
@@ -168,15 +167,13 @@ def InDetCommonCfg(flags, **kwargs):
             # =======================================
             # CREATE THE DERIVATION KERNEL ALGORITHM
             # =======================================
-            for tool in [DFCommonTrackSelection,
-                                   DFCommonZ0AtPV,
-                                   DFCommonUsedInFitDecorator,
-                                   DFCommonUsedInFitDecoratorLRT]:
+            for tool in [DFCommonZ0AtPV,
+                         DFCommonUsedInFitDecorator,
+                         DFCommonUsedInFitDecoratorLRT]:
                 acc.addEventAlgo(CommonAugmentation("InDetCommonKernel"+tool.name,
                                  AugmentationTools=[tool])) # TODO Migrate public tool to AthReentrantAlgorithm
         else:
-            AugTools = [DFCommonTrackSelection,
-                        DFCommonZ0AtPV,
+            AugTools = [DFCommonZ0AtPV,
                         DFCommonUsedInFitDecorator]
             if kwargs['AddPseudoTracks']:
                 AugTools += PseudoTrackDecorators

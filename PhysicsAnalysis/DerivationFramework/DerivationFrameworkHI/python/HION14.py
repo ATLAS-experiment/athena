@@ -35,32 +35,24 @@ def HION14GlobalAugmentationToolCfg(flags):
 
     return acc
 
-def HION14TightAugmentationToolCfg(flags):
+def HION14TightAugmentationCfg(flags):
     """Configure the example augmentation tool"""
     acc = ComponentAccumulator()
 
     # Configure track selection tools
     from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
         InDetTrackSelectionTool_HITight_Cfg )
-
-    HITightTrackSelector = acc.popToolsAndMerge(InDetTrackSelectionTool_HITight_Cfg(flags,
+    from DerivationFrameworkInDet.InDetToolsConfig import InDetTrackSelectionToolWrapperCfg
+    acc.merge(InDetTrackSelectionToolWrapperCfg(
+        flags,
+        name           = 'HION14TightDecorator',
+        DecorationName = 'HITight',
+        ContainerName="InDetTrackParticles",
+        TrackSelectionTool= acc.popToolsAndMerge(InDetTrackSelectionTool_HITight_Cfg(flags,
                                                                                     name="HITightTrackSelector",
                                                                                     minPt=100
-                                                                                    )
-                                                                                )
-
-    # Add track selection tools to the ComponentAccumulator
-    acc.addPublicTool(HITightTrackSelector)
-
-    # Adding the decoration for HITight
-    HITightDecorator = CompFactory.DerivationFramework.InDetTrackSelectionToolWrapper(name='HION14TighDecorator', 
-                                                                                    TrackSelectionTool=HITightTrackSelector, 
-                                                                                    DecorationName='HITight', 
-                                                                                    ContainerName="InDetTrackParticles"
-                                                                                    )
-    
-    # Merge the ComponentAccumulator returned by the decorator configuration
-    acc.addPublicTool(HITightDecorator, primary=True)
+                                                                                    )))
+              )
 
     return acc
 
@@ -136,9 +128,9 @@ def HION14KernelCfg(flags, name='HION14Kernel', **kwargs):
     ################################################################################
     # Merge the augmentation tools to the ComponetAccumlator
     globalAugmentationTool = acc.getPrimaryAndMerge(HION14GlobalAugmentationToolCfg(flags))
-    tightAugmentationTool = acc.getPrimaryAndMerge(HION14TightAugmentationToolCfg(flags))
+    acc.merge(HION14TightAugmentationCfg(flags))
     centralityAugmentatioTool = acc.getPrimaryAndMerge(HION14CentralityAugmentationToolCfg(flags))
-    augmentationTool = [globalAugmentationTool, tightAugmentationTool, centralityAugmentatioTool]
+    augmentationTool = [globalAugmentationTool, centralityAugmentatioTool]
 
     for tool in augmentationTools:
         acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))

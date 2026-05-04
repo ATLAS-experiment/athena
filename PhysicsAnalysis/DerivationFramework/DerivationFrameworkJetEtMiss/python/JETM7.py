@@ -31,13 +31,11 @@ def JETM7KernelCfg(flags, name='JETM7Kernel', **kwargs):
     acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
     from DerivationFrameworkInDet.InDetToolsConfig import InDetTrackSelectionToolWrapperCfg
-    DFCommonTrackSelection = acc.getPrimaryAndMerge(InDetTrackSelectionToolWrapperCfg(
+    DFCommonTrackSelection = acc.merge(InDetTrackSelectionToolWrapperCfg(
         flags,
         name           = "DFJETM7CommonTrackSelectionLoose",
         CutLevel       = "Loose",
         DecorationName = "DFJETM7Loose"))
-
-    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("JETM7CommonKernel", AugmentationTools = [DFCommonTrackSelection])) # TODO Migrate public tool to AthReentrantAlgorithm
 
     # Thinning tools...
     from DerivationFrameworkInDet.InDetToolsConfig import MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg, JetTrackParticleThinningCfg, TauTrackParticleThinningCfg

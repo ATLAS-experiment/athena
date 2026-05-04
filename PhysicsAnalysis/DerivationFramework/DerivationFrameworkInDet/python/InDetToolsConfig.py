@@ -432,7 +432,7 @@ def PseudoTrackSelectorCfg(flags, name, **kwargs):
             name, **kwargs))
     return acc
 
-# Tool for decorating tracks with the outcome of the track selector tool
+# Algorithm for decorating tracks with the outcome of the track selector tool
 
 
 def InDetTrackSelectionToolWrapperCfg(
@@ -448,9 +448,9 @@ def InDetTrackSelectionToolWrapperCfg(
                 flags, name="InDetTrackSelectionTool_"+CutLevel,
                 CutLevel=CutLevel)))
 
-    acc.addPublicTool(
+    acc.addEventAlgo(
         CompFactory.DerivationFramework.InDetTrackSelectionToolWrapper(
-            name, **kwargs), primary=True)
+            name, **kwargs))
     return acc
 
 # Tool for decorating the track and calo isolation

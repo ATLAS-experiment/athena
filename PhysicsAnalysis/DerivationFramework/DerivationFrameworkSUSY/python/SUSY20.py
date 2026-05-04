@@ -151,15 +151,13 @@ def SUSY20KernelCfg(flags, name = "SUSY20Kernel", **kwargs):
 	
 	# Track selection augmentation need for InDetTrackParticles thinning
 	from DerivationFrameworkInDet.InDetToolsConfig import InDetTrackSelectionToolWrapperCfg
-	SUSY20TrackSelection = acc.getPrimaryAndMerge(InDetTrackSelectionToolWrapperCfg(
+	acc.merge(InDetTrackSelectionToolWrapperCfg(
 		flags,
 		name           = "SUSY20TrackSelection",
+                CutLevel = "Loose",
 		ContainerName  = "InDetTrackParticles",
-		DecorationName = "DFLoose" 
+		DecorationName = "DFLoose"
 	))
-	SUSY20TrackSelection.TrackSelectionTool.CutLevel = "Loose"
-	acc.addPublicTool(SUSY20TrackSelection)
-	augmentationTools.append(SUSY20TrackSelection)
 
 	#
 	# Thinning tools
