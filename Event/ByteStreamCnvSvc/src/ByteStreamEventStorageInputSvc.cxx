@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ByteStreamEventStorageInputSvc.h"
@@ -352,7 +352,10 @@ ByteStreamEventStorageInputSvc::buildFragment(
       throw ByteStreamExceptions::badFragment();
     }
   }
-
+  if (!fragment){
+    ATH_MSG_ERROR("fragment is nullptr!");
+    throw ByteStreamExceptions::badFragment();
+  }
   // This is a FullEventFragment
   // make a new FEFrag in memory from it
   cache->eventStatus = 0;
