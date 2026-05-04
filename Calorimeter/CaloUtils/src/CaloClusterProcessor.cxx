@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2015 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -13,7 +13,6 @@
 
 #include "CaloUtils/CaloClusterProcessor.h"
 #include "CaloEvent/CaloClusterContainer.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 
 /**
