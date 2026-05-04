@@ -413,7 +413,7 @@ void test1 (const size_t nofc, const LArOnlineID& online_id)
   }
 }
 
-
+//coverity[UNCAUGHT_EXCEPT]
 int main()
 {
   std::cout << "CaloLumiConditions/CaloBCIDLumi_test\n";

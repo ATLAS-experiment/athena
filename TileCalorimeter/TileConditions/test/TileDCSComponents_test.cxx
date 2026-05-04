@@ -872,7 +872,7 @@ void testTileDCSTool(ISvcLocator* svcLoc) {
 }
 
 
-
+//coverity[UNCAUGHT_EXCEPT]
 int main() {
 
   std::ofstream jo(TILE_JO_NAME);

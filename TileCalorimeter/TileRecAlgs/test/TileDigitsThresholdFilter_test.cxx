@@ -191,7 +191,7 @@ void test1() {
 
 }
 
-
+//coverity[UNCAUGHT_EXCEPT]
 int main ATLAS_NOT_THREAD_SAFE (int /*argc*/, char** argv) {
 
   Athena_test::setupStoreGate (argv[0]);

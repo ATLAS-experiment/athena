@@ -400,7 +400,7 @@ void test1 (ISvcLocator* svcloc,
   assert (Athena_test::isEqual (out[20], 5756.6152));
 }
 
-
+//coverity[UNCAUGHT_EXCEPT]
 int main()
 {
   std::cout << "CaloRec/CaloBCIDLumiCondAlg_test\n";
