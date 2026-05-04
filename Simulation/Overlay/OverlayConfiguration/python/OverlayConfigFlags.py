@@ -5,6 +5,7 @@ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.AutoConfigFlags import GetFileMD
+from AthenaConfiguration.Enums import ProductionStep
 
 
 def createOverlayConfigFlags():
@@ -27,5 +28,6 @@ def createOverlayConfigFlags():
     # Ignore background inputs
     flags.addFlag("Overlay.IgnoreBkgInputs", False)
     # Do not align TRT for data overlay
-    flags.addFlag("Overlay.DynamicAlignTRT", lambda prevFlags : prevFlags.GeoModel.Align.Dynamic and not prevFlags.Overlay.DataOverlay)
+    flags.addFlag("Overlay.DynamicAlignTRT", lambda prevFlags : prevFlags.GeoModel.Align.Dynamic and \
+                                             (not prevFlags.Overlay.DataOverlay or prevFlags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing))
     return flags
