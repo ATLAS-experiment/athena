@@ -92,6 +92,11 @@ StatusCode LArCaliWaves2Ntuple::stop ATLAS_NOT_THREAD_SAFE ()
   }
 
   if (m_addCalib) {
+    sc=m_nt->addItem("isPulsed",m_isPulsed);
+    if (sc!=StatusCode::SUCCESS) {
+      ATH_MSG_ERROR( "addItem 'isPulsed' failed" );
+      return StatusCode::FAILURE;
+    }
     sc=m_nt->addItem("nPulsedCalibLines",m_nPulsedCalibLines,0,4);
     if (sc!=StatusCode::SUCCESS) {
       ATH_MSG_ERROR( "addItem 'nPulsedCalibLines' failed" );
@@ -253,7 +258,7 @@ bool LArCaliWaves2Ntuple::writeEntry(const HWIdentifier chid, const unsigned gai
   if ( !m_isSC && m_addCalib) {
     const std::vector<HWIdentifier>& calibLineV = clCont->calibSlotLine(chid);
     if ( !calibLineV.empty() ) {
-      ATH_MSG_DEBUG( "wave.getIsPulsedInt() " << wave.getIsPulsedInt()<<" : "<< calibLineV.size());
+      ATH_MSG_DEBUG( " chan: " << chid.get_identifier32().get_compact() <<  " wave.getIsPulsedInt() " << wave.getIsPulsedInt()<<" : "<< calibLineV.size());
       for(int i=0;i<4;i++) {
 	m_pulsedCalibLines[i] = NOT_VALID;
       }
@@ -261,10 +266,11 @@ bool LArCaliWaves2Ntuple::writeEntry(const HWIdentifier chid, const unsigned gai
       unsigned iCalibLine=0;
       m_nPulsedCalibLines=0;
       for(calibLineIt = calibLineV.begin(); calibLineIt != calibLineV.end();++calibLineIt) {
-	if ( (wave.getIsPulsedInt()>>iCalibLine) & 1 ){
+	if ( (wave.getIsPulsedInt()>>(15+iCalibLine+1)) & 1 ){
 	  m_pulsedCalibLines[iCalibLine] = m_onlineId->channel(*calibLineIt);
 	  if (m_pulsedCalibLines[iCalibLine]>=0) m_calibLine = m_onlineId->channel(*calibLineIt);
 	  m_nPulsedCalibLines++;
+          ATH_MSG_DEBUG(" iCalibLine: "<< iCalibLine << " CL: "<<m_pulsedCalibLines[iCalibLine]);
 	}
 	iCalibLine++;
       }
@@ -274,6 +280,7 @@ bool LArCaliWaves2Ntuple::writeEntry(const HWIdentifier chid, const unsigned gai
       m_nPulsedCalibLines = 0 ;
       m_pulsedCalibLines[0] = NOT_VALID;
     }
+    m_isPulsed=wave.getIsPulsedInt();
   }//end if !m_isSC && m_addCalib
 
   // Jitter
