@@ -24,7 +24,6 @@
 
 // FrameWork includes
 #include "Gaudi/Property.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/ThinningHandle.h"
 

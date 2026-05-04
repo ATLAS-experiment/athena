@@ -16,7 +16,6 @@
 #include "Gaudi/Property.h"
 // StoreGate
 #include "StoreGate/ThinningHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 
 #include "PrimaryDPDMaker/muonTrkTrackThinTool.h"

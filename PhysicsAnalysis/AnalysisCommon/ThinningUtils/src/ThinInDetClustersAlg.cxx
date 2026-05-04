@@ -19,7 +19,6 @@
 
 // FrameWork includes
 #include "Gaudi/Property.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "StoreGate/ThinningHandle.h"
 #include "ExpressionEvaluation/ExpressionParser.h"
 #include "ExpressionEvaluation/ExpressionParserUser.icc"

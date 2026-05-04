@@ -20,7 +20,6 @@
 #include <algorithm>
 
 // FrameWork includes
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "StoreGate/ThinningHandle.h"
 
 ///////////////////////////////////////////////////////////////////
