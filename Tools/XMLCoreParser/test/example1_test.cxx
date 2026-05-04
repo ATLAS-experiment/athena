@@ -5,7 +5,7 @@
 
 
 #include "XMLCoreParser/XMLCoreParser.h"
-
+//coverity[UNCAUGHT_EXCEPT]
 int main (int argc, char* argv[])
 {
   XMLCoreParser parser;

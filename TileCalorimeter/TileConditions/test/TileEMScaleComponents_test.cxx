@@ -519,7 +519,7 @@ void testTileCondToolEmscale(ISvcLocator* svcLoc, const EventContext& ctx) {
 
 }
 
-
+//coverity[UNCAUGHT_EXCEPT]
 int main ATLAS_NOT_THREAD_SAFE () {
 
 
