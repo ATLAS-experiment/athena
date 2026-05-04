@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ########################################################################
 #                                                                      #
@@ -274,6 +274,10 @@ def getJetTruthLabelToolPrereqs(jetdef, modspec):
             return ["input:AntiKt4TruthJets"]
             # return ["input:AntiKt4TruthDressedWZJets"]
             # Dressed option not working as of 2026-04-17, using regular.
+        elif modspec == "R10TruthLabel_R21Precision_2022v1":
+            return ["input:AntiKt10TruthJets"]
+        elif modspec == "R10TruthLabel_R22v1":
+            return ["input:AntiKt10TruthSoftDropBeta100Zcut10Jets"]
     return []
 
 
