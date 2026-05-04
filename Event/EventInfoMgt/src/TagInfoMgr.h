@@ -1,6 +1,6 @@
 //Dear emacs, this is -*-c++-*-
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EVENTINFOMGT_TAGINFOMGR_H
@@ -14,29 +14,28 @@
  * @author RD Schaffer <R.D.Schaffer@cern.ch>
  */
 
-//<<<<<< INCLUDES                                                       >>>>>>
-
+//inheritance includes
 #include "EventInfoMgt/ITagInfoMgr.h"
 #include "AthenaBaseComps/AthService.h"
-#include "GaudiKernel/Service.h"
+#include "GaudiKernel/IIncidentListener.h"
+//
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "AthenaKernel/IOVRange.h"
 #include "AthenaKernel/IIOVDbSvc.h"
-#include "GaudiKernel/MsgStream.h"
+
 #include "EventInfo/TagInfo.h"
 #include "IOVDbMetaDataTools/IIOVDbMetaDataTool.h"
 
 #include <map>
+#include <string>
 #include <set>
 #include <shared_mutex>
 
-//<<<<<< PUBLIC TYPES                                                   >>>>>>
-
+class MsgStream;
 class StoreGateSvc;
 class CondAttrListCollection;
 
-//<<<<<< CLASS DECLARATIONS                                             >>>>>>
 
 /**
  * @class TagInfoMgr
@@ -194,7 +193,5 @@ private:
 };
 
 
-//<<<<<< INLINE PUBLIC FUNCTIONS                                        >>>>>>
-//<<<<<< INLINE MEMBER FUNCTIONS                                        >>>>>>
 
 #endif // EVENTINFOMGT_TAGINFOMGR_H
