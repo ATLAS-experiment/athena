@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_WRITECONDHANDLE_H
@@ -190,7 +190,7 @@ namespace SG {
     }
     #endif
 
-    StatusCode sc = m_cc->insert(m_range, std::move(t));
+    StatusCode sc = m_cc->insert(m_range, std::move(t), m_ctx);
     // Preserve sc for return, since it may be DUPLICATE.
     if (sc.isFailure()) {
       MsgStream msg(Athena::getMessageSvc(), "WriteCondHandle");

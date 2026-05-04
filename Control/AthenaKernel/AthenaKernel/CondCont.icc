@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/CondCont.icc
@@ -244,7 +244,7 @@ CondCont<T>::~CondCont()
 template <typename T>
 StatusCode CondCont<T>::insert (const EventIDRange& r,
                                 std::unique_ptr<T> t,
-                                const EventContext& ctx /*= Gaudi::Hive::currentContext()*/)
+                                const EventContext& ctx)
 {
   if (this->clid() != ClassID_traits<CondCont<T> >::ID()) {
     this->insertError (ClassID_traits<CondCont<T> >::ID());
@@ -439,7 +439,7 @@ CondContMixed<T>::~CondContMixed()
 template <typename T>
 StatusCode CondContMixed<T>::insert (const EventIDRange& r,
                                      std::unique_ptr<T> t,
-                                     const EventContext& ctx /*= Gaudi::Hive::currentContext()*/)
+                                     const EventContext& ctx)
 {
   if (this->clid() != ClassID_traits<CondCont<T> >::ID()) {
     this->insertError (ClassID_traits<CondCont<T> >::ID());
