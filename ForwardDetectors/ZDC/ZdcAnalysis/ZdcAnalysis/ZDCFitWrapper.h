@@ -584,7 +584,7 @@ private:
   float m_tau1{0};
   float m_tau2{0};
   float m_timeCorr{0};
-  double m_norm;
+  double m_norm{};
   
   std::shared_ptr<TF1> m_expFermiFunc{0};
   std::shared_ptr<TF1> m_expFermiPreFunc{0};
@@ -785,11 +785,11 @@ public:
 class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiLinearFixedTaus : public ZDCFitWrapper
 {
 private:
-  float m_tau1;
-  float m_tau2;
+  float m_tau1{};
+  float m_tau2{};
 
-  float m_norm;
-  float m_timeCorr;
+  float m_norm{};
+  float m_timeCorr{};
 
   std::shared_ptr<TF1> m_expFermiFunc;
 
@@ -852,10 +852,10 @@ public:
 class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiLinearPrePulse : public ZDCPrePulseFitWrapper
 {
 private:
-  float m_tau1;
-  float m_tau2;
-  float m_norm;
-  float m_timeCorr;
+  float m_tau1{};
+  float m_tau2{};
+  float m_norm{};
+  float m_timeCorr{};
   std::shared_ptr<TF1> m_expFermiFunc;
 
 public:
@@ -967,10 +967,10 @@ public:
 class ATLAS_NOT_THREAD_SAFE ZDCFitComplexPrePulse : public ZDCPrePulseFitWrapper
 {
 private:
-  float m_tau1;
-  float m_tau2;
-  float m_norm;
-  float m_timeCorr;
+  float m_tau1{};
+  float m_tau2{};
+  float m_norm{};
+  float m_timeCorr{};
   std::shared_ptr<TF1> m_expFermiFunc;
 
 public:
@@ -1084,10 +1084,10 @@ public:
 class ATLAS_NOT_THREAD_SAFE ZDCFitGeneralPulse : public ZDCPrePulseFitWrapper
 {
 private:
-  float m_tau1;
-  float m_tau2;
-  float m_norm;
-  float m_timeCorr;
+  float m_tau1{};
+  float m_tau2{};
+  float m_norm{};
+  float m_timeCorr{};
   std::shared_ptr<TF1> m_expFermiFunc;
 
 public:

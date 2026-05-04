@@ -76,6 +76,7 @@ def addLArCalibFlags(flags, isSC=False):
     flags.addFlag("LArCalib.RTM.DumpResOscill",False)
 
     flags.addFlag("LArCalib.CaliWave.Nsteps",24)
+    flags.addFlag("LArCalib.CaliWave.NSubSteps",1)
     flags.addFlag("LArCalib.doOFCCali",True)
 
     flags.addFlag("LArCalib.OFC.Ncoll",0)

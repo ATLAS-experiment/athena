@@ -149,6 +149,14 @@ def fromRunArgs(runArgs):
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     cfg.merge(SetupMetaDataForStreamCfg(flags,'AOD'))
 
+    # Write stream metadata into TagInfo
+    from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg
+    cfg.merge(TagInfoMgrCfg(flags,
+                            tagValuePairs={
+                                "triggerStreamOfFile": ""
+                                if flags.Input.isMC
+                                else flags.Input.TriggerStream}))
+
     # Post-include
     processPostInclude(runArgs, flags, cfg)
 

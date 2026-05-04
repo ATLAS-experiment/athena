@@ -38,7 +38,7 @@ def patternToVars( Pattern):
         Pattern += [int(ptrns[i],16)]
     return DACs, Delays, Pattern
 
-def LArCalibDigitsMakerCfg(flags,DigitsKey=""):
+def LArCalibDigitsMakerCfg(flags,DigitsKey="",ntrigg=100,notrun=False):
     
     result = ComponentAccumulator()
     from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg,LArCalibIdMappingCfg
@@ -81,15 +81,17 @@ def LArCalibDigitsMakerCfg(flags,DigitsKey=""):
     
     print('CalibDigitsMakerConfig: ',DACs,' ',Delays,' ',Patterns)
     result.addEventAlgo(CompFactory.LArCalibDigitMaker("LArCalibDigitMaker", KeyList = [DigitsKey],
-                                                       NTrigger = 100, DAC = [DACs,DACs,DACs,DACs,DACs],
+                                                       NTrigger = ntrigg, DAC = [DACs,DACs,DACs,DACs,DACs],
                                                        Delay = Delays, Pattern = [Patterns,Patterns,Patterns,Patterns,Patterns], 
                                                        nPattern = [nPatterns,nPatterns,nPatterns,nPatterns,nPatterns],
-                                                       BoardIDs = Boards)) 
+                                                       BoardIDs = Boards,
+                                                       DontRun=notrun)) 
 
-    from AthenaCommon.SystemOfUnits import ns
-    scmap="LArOnOffIdMapSC" if flags.LArCalib.isSC else ""
-    scclmap="LArCalibIdMapSC" if flags.LArCalib.isSC else ""
-    result.addEventAlgo(CompFactory.LArCalibDigitsAccumulator("LArCalibDigitsAccumulator", KeyList = [DigitsKey],
+    if not notrun:
+       from AthenaCommon.SystemOfUnits import ns
+       scmap="LArOnOffIdMapSC" if flags.LArCalib.isSC else ""
+       scclmap="LArCalibIdMapSC" if flags.LArCalib.isSC else ""
+       result.addEventAlgo(CompFactory.LArCalibDigitsAccumulator("LArCalibDigitsAccumulator", KeyList = [DigitsKey],
                                                              LArAccuCalibDigitContainerName = "", 
                                                              CalibMapSCKey=scclmap, ScCablingKey=scmap,
                                                              DelayScale = (25./240.)*ns, SampleShift = 0,
