@@ -20,7 +20,6 @@
 #include "AthenaKernel/Units.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "CaloConditions/CaloNoise.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 #include <algorithm>
 #include <cmath>
