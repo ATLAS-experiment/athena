@@ -90,7 +90,7 @@ private:
   std::string m_tag;
   unsigned int m_Nsample{};
   unsigned int m_preSampleIdx{};
-  float m_freqMHz;
+  float m_freqMHz{};
   float m_deltaTSample{};
   int m_pedestal{};
   float m_gainHG{};

@@ -42,50 +42,50 @@ private:
 
   int m_eventCount{0};
 
-  ZDCModuleFloatArray m_HGGains;
-  ZDCModuleFloatArray m_pedestals;
+  ZDCModuleFloatArray m_HGGains{};
+  ZDCModuleFloatArray m_pedestals{};
 
   bool m_haveECalib{false};
   bool m_haveT0Calib{false};
-  std::array<std::array<std::unique_ptr<TSpline>, 4>, 2> m_LBDepEcalibSplines;
-  std::array<std::array<std::unique_ptr<TSpline>, 4>, 2> m_T0HGOffsetSplines;
-  std::array<std::array<std::unique_ptr<TSpline>, 4>, 2> m_T0LGOffsetSplines;
+  std::array<std::array<std::unique_ptr<TSpline>, 4>, 2> m_LBDepEcalibSplines{};
+  std::array<std::array<std::unique_ptr<TSpline>, 4>, 2> m_T0HGOffsetSplines{};
+  std::array<std::array<std::unique_ptr<TSpline>, 4>, 2> m_T0LGOffsetSplines{};
 
   // Transient data that is updated each LB or each event
   //
   int m_currentLB{-1};
-  ZDCModuleFloatArray m_currentECalibCoeff;
-  ZDCModuleFloatArray m_currentT0OffsetsHG;
-  ZDCModuleFloatArray m_currentT0OffsetsLG;
+  ZDCModuleFloatArray m_currentECalibCoeff{};
+  ZDCModuleFloatArray m_currentT0OffsetsHG{};
+  ZDCModuleFloatArray m_currentT0OffsetsLG{};
 
-  std::array<std::array<bool, 4>, 2> m_dataLoaded;
+  std::array<std::array<bool, 4>, 2> m_dataLoaded{};
 
   unsigned int m_moduleMask{0};
 
-  std::array<std::array<unsigned int, 4>, 2> m_moduleStatus;
-  std::array<std::array<float, 4>, 2> m_calibAmplitude;
-  std::array<std::array<float, 4>, 2> m_calibTime;
+  std::array<std::array<unsigned int, 4>, 2> m_moduleStatus{};
+  std::array<std::array<float, 4>, 2> m_calibAmplitude{};
+  std::array<std::array<float, 4>, 2> m_calibTime{};
 
-  std::array<float, 2> m_moduleSum;
-  std::array<float, 2> m_moduleSumErrSq;
-  std::array<float, 2> m_moduleSumPreSample;
-  std::array<float, 2> m_moduleSumBkgdFrac;
+  std::array<float, 2> m_moduleSum{};
+  std::array<float, 2> m_moduleSumErrSq{};
+  std::array<float, 2> m_moduleSumPreSample{};
+  std::array<float, 2> m_moduleSumBkgdFrac{};
 
-  std::array<float, 2> m_calibModuleSum;
-  std::array<float, 2> m_calibModuleSumErrSq;
-  std::array<float, 2> m_calibModSumBkgdFrac;
+  std::array<float, 2> m_calibModuleSum{};
+  std::array<float, 2> m_calibModuleSumErrSq{};
+  std::array<float, 2> m_calibModSumBkgdFrac{};
 
   bool m_haveNLcalib{false};
   std::array< std::array< std::array<float,6>, 3>, 2> m_NLcalibFactors; // 3 POL5s for each side
   
-  std::array<float, 2> m_NLcalibModuleSum;
-  std::array<float, 2> m_NLcalibModuleSumErrSq;
-  std::array<float, 2> m_NLcalibModSumBkgdFrac;
+  std::array<float, 2> m_NLcalibModuleSum{};
+  std::array<float, 2> m_NLcalibModuleSumErrSq{};
+  std::array<float, 2> m_NLcalibModSumBkgdFrac{};
 
-  std::array<float, 2> m_averageTime;
-  std::array<bool, 2> m_fail;
+  std::array<float, 2> m_averageTime{};
+  std::array<bool, 2> m_fail{};
 
-  std::array<std::array<float, 4>, 2> m_moduleAmpFractionLG;
+  std::array<std::array<float, 4>, 2> m_moduleAmpFractionLG{};
 
   void init();
   

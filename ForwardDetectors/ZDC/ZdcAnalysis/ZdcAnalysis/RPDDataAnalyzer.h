@@ -17,18 +17,18 @@
 namespace ZDC {
 
 struct RPDConfig {
-  unsigned int nSamples;
-  unsigned int nBaselineSamples;
-  unsigned int endSignalSample;
-  float pulse2ndDerivThresh;
-  float postPulseFracThresh;
-  unsigned int goodPulseSampleStart;
-  unsigned int goodPulseSampleStop;
-  float nominalBaseline;
-  float pileupBaselineSumThresh;
-  float pileupBaselineStdDevThresh;
-  unsigned int nNegativesAllowed;
-  unsigned int ADCOverflow;
+  unsigned int nSamples{};
+  unsigned int nBaselineSamples{};
+  unsigned int endSignalSample{};
+  float pulse2ndDerivThresh{};
+  float postPulseFracThresh{};
+  unsigned int goodPulseSampleStart{};
+  unsigned int goodPulseSampleStop{};
+  float nominalBaseline{};
+  float pileupBaselineSumThresh{};
+  float pileupBaselineStdDevThresh{};
+  unsigned int nNegativesAllowed{};
+  unsigned int ADCOverflow{};
 };
 
 class RPDDataAnalyzer {
