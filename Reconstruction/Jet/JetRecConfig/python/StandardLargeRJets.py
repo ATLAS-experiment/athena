@@ -211,6 +211,8 @@ AntiKt10TruthDressedWZSoftDrop = JetSoftDrop(AntiKt10TruthDressedWZ,
 
 # These jets may be used as input for the JetTruthLabelling, so they also need to be defined as constituents:
 registerAsInputConstit(AntiKt10TruthDressedWZSoftDrop)
+registerAsInputConstit(AntiKt10TruthSoftDrop)
+registerAsInputConstit(AntiKt10Truth)
 
 AntiKt10TruthGEN = JetDefinition("AntiKt",1.0, cst.TruthGEN,
                                 ptmin = 5000, 

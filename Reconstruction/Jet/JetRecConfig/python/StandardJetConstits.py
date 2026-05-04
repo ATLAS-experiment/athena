@@ -1,5 +1,5 @@
 
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 """
  StandardJetConstits: A module containing standard definitions for jet inputs : external container and 
@@ -78,7 +78,10 @@ def standardReco(input):
                 return None            
             from eflowRec.PFRun3Config import PFCfg
             return PFCfg(jetdef._cflags)
-        
+    elif input=="DressedWZ":
+        def f(jetdef,spec):
+            from DerivationFrameworkMCTruth.MCTruthCommonConfig import PreJetMCTruthAugmentationsCfg
+            return PreJetMCTruthAugmentationsCfg(jetdef._cflags,decorationDressing='dressedPhoton')
     else:
         f = doNothingFunc
         
@@ -311,7 +314,11 @@ _stdInputList = [
     # Similar configuration as for JetInputTruthParticlesNoWZ but with slightly
     # different photon dressing option
     JetInputExternal("JetInputTruthParticlesDressedWZ", xAODType.TruthParticle,
+                     prereqs = ["input:DressedObjects"],
                      algoBuilder = inputcfg.buildJetInputTruth, filterfn=isMC,specs="DressedWZ"),
+
+    # If jets are reconstructed standalone, the dressing decoration needs to be added
+    JetInputExternal("DressedObjects", "DressedObjects", algoBuilder = standardReco("DressedWZ")),
 
     # Truth particles from the hard scatter vertex prior to Geant4 simulation.
     # Only charged truth particles are used
