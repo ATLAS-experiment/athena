@@ -135,7 +135,7 @@ namespace ActsTrk
         rmTrack.first = {vertex, direction};
         rmTrack.second.materialInX0 = mInteraction.materialSlab.thicknessInX0();
         rmTrack.second.materialInL0 = mInteraction.materialSlab.thicknessInL0();
-        rmTrack.second.materialInteractions.push_back(mInteraction);
+        rmTrack.second.materialInteractions.push_back(std::move(mInteraction));
         m_rmtCollection->push_back(std::move(rmTrack));
     }
 }
