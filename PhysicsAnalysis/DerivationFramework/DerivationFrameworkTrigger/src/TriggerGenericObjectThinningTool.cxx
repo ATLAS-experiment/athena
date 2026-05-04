@@ -1,6 +1,5 @@
 #include "TriggerGenericObjectThinningTool.h"
 #include "StoreGate/ThinningHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 namespace DerivationFramework{
     bool TriggerGenericObjectThinningTool::eventPassedFilter() const

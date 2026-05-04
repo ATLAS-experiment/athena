@@ -10,7 +10,6 @@
 #include "DerivationFrameworkCalo/CaloClusterThinning.h"
 #include "ClustersInCone.h"
 
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/ThinningHandle.h"
 #include "xAODCaloEvent/CaloCluster.h"

@@ -19,7 +19,6 @@
 #include "AthenaKernel/errorcheck.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "StoreGate/ThinningHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 #include "TruthUtils/HepMCHelpers.h"
 #include <vector>

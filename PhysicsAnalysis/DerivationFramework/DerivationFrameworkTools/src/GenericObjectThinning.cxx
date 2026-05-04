@@ -10,7 +10,6 @@
 
 #include "DerivationFrameworkTools/GenericObjectThinning.h"
 #include "StoreGate/ThinningHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include <vector>
 #include <string>
 
