@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 /* -C++- */
@@ -17,12 +17,13 @@
  * $Id: PileUpEventInfo.h,v 1.9 2008-06-19 20:08:06 ketevi Exp $
  */
 
-#include <cassert>
+
 #include "EventInfo/EventInfo.h"
 #include "EventInfo/PileUpTimeEventIndex.h"
 #include "GaudiKernel/ClassID.h"
-
 #include <list>
+#include <memory>
+
 class StoreGateSvc;
 class MsgStream;
 

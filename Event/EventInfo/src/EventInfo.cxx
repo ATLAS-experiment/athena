@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 /**
@@ -11,12 +11,14 @@
  * $Id: EventInfo.cxx,v 1.14 2009-03-30 17:24:38 schaffer Exp $
  */
 
-#include <memory>
+
 
 #include "EventInfo/EventInfo.h"
 #include "EventInfo/EventID.h"
 #include "EventInfo/EventType.h"
 #include "EventInfo/TriggerInfo.h"
+
+#include <memory>
 
 EventInfo::EventInfo()
     : m_event_ID(std::make_unique<EventID>(0, 0)),
