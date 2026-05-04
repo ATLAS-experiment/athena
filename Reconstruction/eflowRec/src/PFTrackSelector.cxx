@@ -104,7 +104,7 @@ StatusCode PFTrackSelector::execute(const EventContext& ctx) const{
 
     /* Create the eflowRecCluster and put it in the container */
     unsigned int trackIndex  = thisTrack->index();
-    std::unique_ptr<eflowRecTrack> thisEFRecTrack  = std::make_unique<eflowRecTrack>(ElementLink<xAOD::TrackParticleContainer>(trkcont, trackIndex), m_theTrackExtrapolatorTool);
+    std::unique_ptr<eflowRecTrack> thisEFRecTrack  = std::make_unique<eflowRecTrack>(ctx, ElementLink<xAOD::TrackParticleContainer>(trkcont, trackIndex), m_theTrackExtrapolatorTool);
     thisEFRecTrack->setTrackId(trackIndex);
     eflowRecTracksWriteHandle->push_back(std::move(thisEFRecTrack));
 

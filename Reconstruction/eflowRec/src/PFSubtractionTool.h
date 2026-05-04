@@ -36,13 +36,13 @@ public:
   ~PFSubtractionTool();
 
   StatusCode initialize();
-  void execute(eflowCaloObjectContainer *theEflowCaloObjectContainer, eflowRecTrackContainer *recTrackContainer, eflowRecClusterContainer *recClusterContainer) const;
+  void execute(const EventContext& ctx, eflowCaloObjectContainer *theEflowCaloObjectContainer, eflowRecTrackContainer *recTrackContainer, eflowRecClusterContainer *recClusterContainer) const;
   StatusCode finalize();
 
 private:  
 
   /** This matches ID tracks and CaloClusters, and then creates eflowCaloObjects */
-  unsigned int matchAndCreateEflowCaloObj(PFData &data) const;
+  unsigned int matchAndCreateEflowCaloObj(const EventContext& ctx, PFData &data) const;
 
   void performSubtraction(unsigned int startingPoint,PFData &data) const;
   void performSubtraction(eflowCaloObject& thisEflowCaloObject) const;

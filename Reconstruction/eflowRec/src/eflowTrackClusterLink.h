@@ -20,7 +20,6 @@
 
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/EventContext.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 #include "CxxUtils/fpcompare.h"
 #include "eflowRecTrack.h"
@@ -43,7 +42,7 @@ public:
 
   static eflowTrackClusterLink* getInstance(eflowRecTrack* track,
                                             eflowRecCluster* cluster,
-                                            const EventContext& ctx = Gaudi::Hive::currentContext());
+                                            const EventContext& ctx);
 
   eflowRecCluster* getCluster() { return m_cluster; }
   const eflowRecCluster* getCluster() const { return m_cluster; }

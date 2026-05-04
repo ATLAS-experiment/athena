@@ -21,6 +21,7 @@ PURPOSE:  Calorimeter Object data class
 #include <cmath>
 #include "AthLinks/ElementLink.h"
 
+class EventContext;
 class eflowRecCluster;
 class eflowRecTrack;
 class eflowTrackClusterLink;
@@ -70,7 +71,7 @@ public:
   double getExpectedVariance() const;
   double getClusterEnergy() const ;
 
-  void simulateShower(eflowLayerIntegrator *integrator, const eflowEEtaBinnedParameters* binnedParameters,
+  void simulateShower(const EventContext& ctx, eflowLayerIntegrator *integrator, const eflowEEtaBinnedParameters* binnedParameters,
   const PFEnergyPredictorTool* energyP, bool useLegacyEnergyBinIndexing);
 
 private:

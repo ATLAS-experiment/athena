@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -59,7 +59,7 @@ StatusCode eflowTrackCaloExtensionTool::initialize() {
   return StatusCode::SUCCESS;
 }
 
-std::unique_ptr<eflowTrackCaloPoints> eflowTrackCaloExtensionTool::execute(const xAOD::TrackParticle* track) const {
+std::unique_ptr<eflowTrackCaloPoints> eflowTrackCaloExtensionTool::execute(const EventContext& ctx, const xAOD::TrackParticle* track) const {
 
   ATH_MSG_VERBOSE(" Now running eflowTrackCaloExtensionTool");
 
@@ -85,19 +85,17 @@ std::unique_ptr<eflowTrackCaloPoints> eflowTrackCaloExtensionTool::execute(const
   if (m_useOldCalo) {
     /* If CaloExtensionBuilder is unavailable, use the calo extension tool */
     ATH_MSG_VERBOSE("Using the CaloExtensionTool");
-    uniqueExtension = m_theTrackExtrapolatorTool->caloExtension(
-      Gaudi::Hive::currentContext(), *track);
+    uniqueExtension = m_theTrackExtrapolatorTool->caloExtension(ctx, *track);
     extension = uniqueExtension.get();
   } else {
     /*get the CaloExtension object*/
-    SG::ReadHandle<CaloExtensionCollection>  particleCache {m_ParticleCacheKey};
+    SG::ReadHandle<CaloExtensionCollection>  particleCache {m_ParticleCacheKey, ctx};
     ATH_MSG_VERBOSE("Using the CaloExtensionBuilder Cache");
     extension = (*particleCache)[index];
     ATH_MSG_VERBOSE("Getting element " << index << " from the particleCache");
     if( not extension ){
       ATH_MSG_VERBOSE("Cache does not contain a calo extension -> Calculating with the a CaloExtensionTool" );
-      uniqueExtension = m_theTrackExtrapolatorTool->caloExtension(
-        Gaudi::Hive::currentContext(), *track);
+      uniqueExtension = m_theTrackExtrapolatorTool->caloExtension(ctx, *track);
       extension = uniqueExtension.get();
     }
   }

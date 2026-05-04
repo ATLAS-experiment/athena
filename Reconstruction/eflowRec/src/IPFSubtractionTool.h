@@ -7,6 +7,7 @@
 
 #include "GaudiKernel/IAlgTool.h"
 
+class EventContext;
 class eflowCaloObjectContainer;
 class eflowRecTrackContainer;
 class eflowRecClusterContainer;
@@ -19,7 +20,7 @@ class IPFSubtractionTool : virtual public IAlgTool {
  public:
 
   /** Execute method to modify calorimeter clusters, when performing charegd shower subtraction procedures in particle flow  */
-  virtual void execute(eflowCaloObjectContainer*, eflowRecTrackContainer*, eflowRecClusterContainer*) const = 0;
+  virtual void execute(const EventContext& ctx, eflowCaloObjectContainer*, eflowRecTrackContainer*, eflowRecClusterContainer*) const = 0;
 
   DeclareInterfaceID(IPFSubtractionTool,1,0);
 
