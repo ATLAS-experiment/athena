@@ -11,7 +11,6 @@
 #include "DerivationFrameworkInDet/TrackMeasurementThinning.h"
 #include "StoreGate/ThinningHandle.h"
 #include "xAODTracking/TrackMeasurementValidationContainer.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include <vector>
 #include <string>
 

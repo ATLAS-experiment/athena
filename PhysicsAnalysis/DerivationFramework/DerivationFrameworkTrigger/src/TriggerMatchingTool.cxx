@@ -6,7 +6,6 @@
 #include "BuildCombinations.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/IIncidentSvc.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "xAODCore/AuxContainerBase.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "FourMomUtils/xAODP4Helpers.h"

@@ -17,7 +17,6 @@
 // FrameWork includes
 #include "StoreGate/ThinningHandle.h"
 #include "StoreGate/ReadHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"

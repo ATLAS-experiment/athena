@@ -13,7 +13,6 @@
 #include "xAODTruth/TruthVertexContainer.h"
 #include "xAODTruth/TruthEventContainer.h"
 #include "StoreGate/ThinningHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 #include "TruthUtils/HepMCHelpers.h"
 

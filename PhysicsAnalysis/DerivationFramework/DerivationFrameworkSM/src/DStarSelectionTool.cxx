@@ -9,7 +9,6 @@
 #include "DerivationFrameworkSM/DStarSelectionTool.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "StoreGate/ThinningHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "Gaudi/Property.h"
 
 #include "StoreGate/ReadHandle.h"

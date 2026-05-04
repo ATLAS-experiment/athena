@@ -19,7 +19,6 @@
 #include "TruthUtils/HepMCHelpers.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "StoreGate/ThinningHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "AthContainers/ConstAccessor.h"
 #include <vector>
 #include <string>

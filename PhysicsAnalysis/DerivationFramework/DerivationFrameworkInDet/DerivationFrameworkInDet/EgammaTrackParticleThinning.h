@@ -24,7 +24,6 @@
 
 #include "ExpressionEvaluation/ExpressionParserUser.h"
 
-#include "GaudiKernel/ThreadLocalContext.h"
 
 namespace DerivationFramework {
 

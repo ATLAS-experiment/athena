@@ -12,7 +12,6 @@
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODJet/Jet.h"
 
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "StoreGate/ThinningHandle.h"
 #include "xAODJet/JetConstituentVector.h"
 

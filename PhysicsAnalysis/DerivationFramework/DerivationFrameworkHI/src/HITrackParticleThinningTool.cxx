@@ -10,7 +10,6 @@
 #include "HITrackParticleThinningTool.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "StoreGate/ThinningHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 // need to find this for the new version
 #include "xAODTracking/VertexContainer.h"
