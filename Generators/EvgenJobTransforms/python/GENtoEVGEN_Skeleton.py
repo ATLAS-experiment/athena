@@ -21,6 +21,173 @@ from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, pr
 # Other imports that are needed
 import sys, os, re
 
+# Helper function to make symlinks
+def _mk_symlink(srcfile, dstfile):
+    if dstfile:
+        if os.path.exists(dstfile) and not os.path.samefile(dstfile, srcfile):
+            os.remove(dstfile)
+        if not os.path.exists(dstfile):
+            evgenLog.info(f"Symlinking {srcfile} to {dstfile}")
+            print (f"Symlinking {srcfile} to {dstfile}")
+            os.symlink(srcfile, dstfile)
+        else:
+            evgenLog.debug(f"Symlinking: {dstfile} is already the same as {srcfile}")
+
+
+# Helper functions for finding input file
+def _find_unique_file(pattern):
+    import glob
+    files = glob.glob(pattern)
+    # Check that there is exactly 1 match
+    if not files:
+        raise RuntimeError(f"No {pattern} file found")
+    elif len(files) > 1:
+        raise RuntimeError(f"More than one {pattern} file found")
+    return files[0]
+
+
+# This function merges a list of input LHE files into one output file.
+# The header is taken from the first file, but the number of events is
+# updated to equal the total number of events in all input files.
+def _merge_lhe_files(listOfFiles, outputFile):
+    if os.path.exists(outputFile):
+        print("outputFile", outputFile, "already exists. Will rename to", outputFile + ".OLD")
+        os.rename(outputFile, outputFile + ".OLD")
+
+    total_events = 0
+    for file in listOfFiles:
+        with open(file, "r") as f:
+            total_events += sum(1 for line in f if "</event>" in line)
+
+    wrote_header = False
+    with open(outputFile, "w") as output:
+        for file in listOfFiles:
+            inHeader = True
+            header = ""
+            print("*** Starting file", file)
+            with open(file, "r") as infile:
+                for line in infile:
+                    # Reading first event signals that we are done with all header information.
+                    if "<event" in line and inHeader:
+                        inHeader = False
+                        if not wrote_header:
+                            wrote_header = True
+                            output.write(header)
+                        output.write(line)
+                    # Each input file ends with "</LesHouchesEvents>". We only write it once at the end.
+                    elif not inHeader and "</LesHouchesEvents>" not in line:
+                        output.write(line)
+
+                    if inHeader:
+                        # Format for storing number of events differs in MG and Powheg.
+                        if "nevents" in line:
+                            # MG5 format is "n = nevents".
+                            parts = line.split("=")
+                            if parts:
+                                line = line.replace(parts[0], str(total_events), 1)
+                        elif "numevts" in line:
+                            # Powheg format is "numevts n".
+                            parts = line.split()
+                            if len(parts) > 1:
+                                line = line.replace(parts[1], str(total_events), 1)
+                        header += line
+
+        output.write("</LesHouchesEvents>\n")
+
+
+# Helper for handling input files
+def _handle_input_files(generators, flags):
+    from GeneratorConfig.GenConfigHelpers import gens_lhef
+
+    # Name of event files produced by various generators.
+    events_file_map = {
+        "Alpgen": "alpgen.unw_events",
+        "Protos": "protos.events",
+        "ProtosLHEF": "protoslhef.events",
+        "BeamHaloGenerator": "beamhalogen.events",
+        "HepMCAscii": "events.hepmc",
+        "ReadMcAscii": "events.hepmc",
+    }
+    eventsFile = None
+    for gen_name, out_file in events_file_map.items():
+        if gen_name in generators:
+            eventsFile = out_file
+            break
+    if eventsFile is None:
+        if gens_lhef(generators):
+            eventsFile = "events.lhe"
+        else:
+            raise RuntimeError(f"Unknown type of ME generator: {generators}")
+
+    genInputFiles = [f.strip() for f in flags.Generator.inputGeneratorFile.split(",") if f.strip()]
+    if not genInputFiles:
+        raise RuntimeError("Generator.inputGeneratorFile is empty while input handling is requested")
+
+    def _input_root(path, keep_suffix_after_underscore=False):
+        fname = os.path.basename(path)
+        if any(ext in fname for ext in (".tar.", ".tgz", ".gz")):
+            return re.split(r"\.tar\.|\.tgz|\.gz", fname, maxsplit=1)[0]
+        parts = fname.split("._", 1)
+        if keep_suffix_after_underscore and len(parts) > 1:
+            return parts[0] + "._" + parts[1].split(".", 1)[0]
+        return parts[0]
+
+    # If there is a single file, make a symlink. If multiple files, merge them into one output eventsFile.
+    if len(genInputFiles) == 1:
+        inputroot = _input_root(genInputFiles[0], keep_suffix_after_underscore=False)
+        if inputroot.endswith(".events"):
+            inputroot = inputroot[:-7]
+        realEventsFile = _find_unique_file(f"*{inputroot}.*ev*ts")
+        _mk_symlink(realEventsFile, eventsFile)
+        return
+
+    allFiles = []
+    for file in genInputFiles:
+        # Since we can have multiple files from the same task, include more of the filename
+        # to make the lookup unique in the plain-file case.
+        inputroot = _input_root(file, keep_suffix_after_underscore=True)
+        evgenLog.info("inputroot = %s", inputroot)
+        realEventsFile = _find_unique_file(f"*{inputroot}.*ev*ts")
+        # The only input format where merging is permitted is LHE.
+        with open(realEventsFile, "r") as f:
+            first_line = f.readline()
+            if "LesHouche" not in first_line:
+                raise RuntimeError(f"{realEventsFile} is NOT a LesHouche file")
+        allFiles.append(realEventsFile)
+    _merge_lhe_files(allFiles, eventsFile)
+
+    # counting the number of events in LHE input
+    eventsInLHE = 0
+    with open(eventsFile) as f:
+        for line in f:
+           eventsInLHE += line.count('/event')
+    return eventsInLHE
+
+
+# Helper function to validate and set sample properties
+def _validate_sample_properties(sample):
+    # Required fields with lightweight, explicit validators.
+    required_rules = {
+        "keywords": lambda v: isinstance(v, list) and len(v) > 0,
+        "contact": lambda v: isinstance(v, list) and len(v) > 0,
+        "nEventsPerJob": lambda v: v is not None,
+    }
+    for field, validator in required_rules.items():
+        value = getattr(sample, field, None)
+        if not validator(value):
+            raise RuntimeError(f"self.{field} should be set in Sample(EvgenConfig)")
+
+    input_files_per_job = getattr(sample, "inputFilesPerJob", 0)
+    me_generator = getattr(sample, "MEgenerator", None)
+
+    if input_files_per_job < 0:
+        raise RuntimeError("self.inputFilesPerJob should be >= 0 in Sample(EvgenConfig)")
+    if input_files_per_job > 0 and not me_generator:
+        raise RuntimeError("self.MEgenerator should be set when self.inputFilesPerJob > 0 in Sample(EvgenConfig)")
+    if input_files_per_job == 0 and me_generator:
+        raise RuntimeError("self.MEgenerator should be empty when self.inputFilesPerJob == 0 in Sample(EvgenConfig)")
+
+
 # Function that reads the jO and returns an instance of Sample(EvgenCAConfig)
 def setupSample(runArgs, flags):
     # Only permit one jobConfig argument for evgen
@@ -38,8 +205,8 @@ def setupSample(runArgs, flags):
     jofile = jofiles[0]
 
     # Perform consistency checks on the jO
-    from GeneratorConfig.GenConfigHelpers import checkJOConsistency, checkNEventsPerJob, checkKeywords, checkCategories
-    officialJO = checkJOConsistency(jofile)
+    from GeneratorConfig.GenConfigHelpers import checkNaming, checkNEventsPerJob, checkKeywords, checkCategories
+    checkNaming(jofile)
 
     # Import the jO as a module
     # We cannot do import BLAH directly since
@@ -75,27 +242,32 @@ def setupSample(runArgs, flags):
     # Set nEventsPerJob
     if not sample.nEventsPerJob:
         evgenLog.info("#############################################################")
-        evgenLog.info(" !!!! no sample.nEventsPerJob set !!!  The default 10000 used. !!! ")
+        evgenLog.info(" !!!! no sample.nEventsPerJob set !!!")
         evgenLog.info("#############################################################")
+        # We don't need to set the global flag because its default is 10000
     else:
         checkNEventsPerJob(sample)
         evgenLog.info(" nEventsPerJob = " + str(sample.nEventsPerJob))
         flags.Generator.nEventsPerJob = sample.nEventsPerJob
 
-    # Check if sample attributes have been properly set
+    # Validate all required/conditional sample metadata with explicit rules.
+    _validate_sample_properties(sample)
+
+    # Propagate optional sample values to global flags.
+    flags.Generator.inputFilesPerJob = sample.inputFilesPerJob
+    flags.Generator.MEgenerator = sample.MEgenerator or ""
+
+    # Print sample metadata in the log.
     for var, value in vars(sample).items():
-        if not value:
-            raise RuntimeError("self.{} should be set in Sample(EvgenConfig)".format(var))
-        else:
-            evgenLog.info("MetaData: {} = {}".format(var, value))
+        evgenLog.info("MetaData: {} = {}".format(var, value))
 
     # Keywords check
     if hasattr(sample, "keywords"):
-        checkKeywords(sample, evgenLog, officialJO)
+        checkKeywords(sample, evgenLog)
 
     # L1, L2 categories check
     if hasattr(sample, "categories"):
-        checkCategories(sample, evgenLog, officialJO)
+        checkCategories(sample, evgenLog)
 
     return sample
 
@@ -228,6 +400,13 @@ def fromRunArgs(runArgs):
         if hasattr(runArgs, "outputEVNTFile") and not hasattr(runArgs, "outputEVNT_PreFile"):
             raise RuntimeError("'EvtGen' found in job options name, please set '--steering=afterburn'")
 
+    # LHE input handling
+    if flags.Generator.inputFilesPerJob > 0:
+        if not flags.Generator.inputGeneratorFile:
+            raise RuntimeError(f"Sample sets inputFilesPerJob = {flags.Generator.inputFilesPerJob} but Gen_tf run without inputGeneratorFile")
+        else:
+            nEventsLHE = _handle_input_files(generators, flags)
+
     # Check black-list and purple-list
     blError = checkBlackList(athenaRel, generators, "black")
     plError = checkBlackList(athenaRel, generators, "purple")
@@ -251,7 +430,7 @@ def fromRunArgs(runArgs):
         cfg.merge(FixHepMCCfg(flags,
                               PurgeUnstableWithoutEndVtx=gens_purgenoendvtx(generatorsList)))
 
-    ## Sanity check the event record (not appropriate for all generators)
+    # Sanity check the event record (not appropriate for all generators)
     from GeneratorConfig.GenConfigHelpers import gens_testhepmc
     if gens_testhepmc(generators):
         from EvgenProdTools.EvgenProdToolsConfig import TestHepMCCfg
@@ -310,9 +489,11 @@ def fromRunArgs(runArgs):
     cfg.merge(TagInfoMgrCfg(flags, tagValuePairs=metadata))
 
     # Print metadata in the log
-    evgenLog.info(f"HepMC version {os.environ["HEPMCVER"]}")
-    evgenLog.info(f"MetaData: generatorTune = {cfg.getService("GeneratorInfoSvc").Tune}")
+    evgenLog.info(f"HepMC version {os.environ['HEPMCVER']}")
+    evgenLog.info(f"MetaData: generatorTune = {cfg.getService('GeneratorInfoSvc').Tune}")
     evgenLog.info("MetaData: generatorName = {}".format(generatorsWithVersion))
+    if flags.Generator.inputGeneratorFile:
+        print(f"MetaData: Number of input LHE events = {nEventsLHE}")
 
     # Configure output stream
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg

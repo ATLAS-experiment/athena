@@ -17,7 +17,10 @@ def createGeneratorConfigFlags():
     gencf.addFlag("Generator.inputGeneratorFile", '')
     
     # Number of input files per job
-    gencf.addFlag("Generator.inputFilesPerJob", 1)
+    gencf.addFlag("Generator.inputFilesPerJob", 0)
+
+    # Matrix element generator name for jobs using input LHE files
+    gencf.addFlag("Generator.MEgenerator", "")
     
     # Events per job
     gencf.addFlag("Generator.nEventsPerJob", 10000)

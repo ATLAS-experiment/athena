@@ -160,10 +160,8 @@ if len(jofiles) !=1:
     sys.exit(1)
 jofile = jofiles[0]
 joparts = (os.path.basename(jofile)).split(".")
-## Perform some consistency checks if this appears to be an "official" production JO
-officialJO = False
+## Perform some consistency checks 
 if joparts[0].startswith("mc") and all(c in string.digits for c in joparts[0][2:]):
-    officialJO = True
     ## Check that there are exactly 4 name parts separated by '.': MCxx, DSID, physicsShort, .py
     if len(joparts) != 3:
         evgenLog.error(jofile + " name format is wrong: must be of the form MC<xx>.<physicsShort>.py: please rename.")
@@ -188,7 +186,10 @@ if joparts[0].startswith("mc") and all(c in string.digits for c in joparts[0][2:
         check_naming(os.path.basename(jofile))
     else:
         evgenLog.warning("check_jo_consistency.py not found, will proceed without JOs consistency check")
-#        sys.exit(1)
+else:
+    evgenLog.error(jofile + " should be named mc.XXXXXX.*")
+    sys.exit(1)
+
 ## Include the JO fragment
 include(jofile)
 include("EvgenJobTransforms/LHEonly.py")
@@ -292,7 +293,7 @@ if not evgenConfig.keywords:
 ## Check that the keywords are in the list of allowed words (and exit if processing an official JO)
 if evgenConfig.keywords:
     from GeneratorConfig.GenConfigHelpers import checkKeywords
-    checkKeywords(evgenConfig, evgenLog, officialJO)
+    checkKeywords(evgenConfig, evgenLog)
 
 ## Check that the categories list is not empty:
 if not evgenConfig.categories:
@@ -334,8 +335,7 @@ if evgenConfig.categories:
                msg = "evgenConfig.categories contains non-standard category: %s. " % ", ".join(bad_cat)
                msg += "Please check the allowed categories list and fix."
                evgenLog.error(msg)
-               if officialJO:
-                   sys.exit(1)
+               sys.exit(1)
     else:
         evgenLog.warning("Could not find CategoryList.txt file %s in DATAPATH" % lkwfile)
 
