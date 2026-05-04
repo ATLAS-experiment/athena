@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKIEXTENDEDTRACKSUMMARYTOOL_H
 #define TRKIEXTENDEDTRACKSUMMARYTOOL_H
 
 #include "ITrackSummaryTool.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 
 namespace Trk {
 
