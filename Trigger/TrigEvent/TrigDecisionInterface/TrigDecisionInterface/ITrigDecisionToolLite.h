@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGDECISIONINTERFACE_ITRIGDECISIONTOOLLITE_H
@@ -58,12 +58,12 @@ namespace Trig {
       /// Obtain features from the navigation, as specified in the supplied feature request descriptor
       template<class CONTAINER>
       std::vector<TrigCompositeUtils::LinkInfo<CONTAINER>> 
-      features( const Trig::FeatureRequestDescriptor& frd, const EventContext& ctx = Gaudi::Hive::currentContext() ) const;
+      features( const Trig::FeatureRequestDescriptor& frd, const EventContext& ctx ) const;
 
       /// Obtain features from the navigation for the supplied chain, using default values for all other feature request descriptor parameters
       template<class CONTAINER>
       std::vector<TrigCompositeUtils::LinkInfo<CONTAINER>> 
-      features( const std::string& chain, const EventContext& ctx = Gaudi::Hive::currentContext() ) const;
+      features( const std::string& chain, const EventContext& ctx ) const;
 
     private:
       /// Internal type erased features call 
