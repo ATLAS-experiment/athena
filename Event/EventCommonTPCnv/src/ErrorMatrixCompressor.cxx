@@ -474,16 +474,9 @@ bool ErrorMatrixCompressor::restoreFR(const std::vector<unsigned short>& src, st
       int Np=(nFreeBits>nBitsToStore) ? nBitsToStore : nFreeBits;
       std::uint32_t tmp = buf;
       tmp = tmp >> (16-Np);
-      buf = ((buf << Np) & 0x0000FFFFu);
-      //printf("F=%d TS=%d Np=%d 0x%X 0x%X\n",nFreeBits,nBitsToStore,Np,tmp,buf);
       nBitsToStore-=Np;
-      //printf("Copy 0x%X ",destBuffer);
-      destBuffer = destBuffer << Np;
-      //printf("<< 0x%X ",destBuffer);
       destBuffer = destBuffer | tmp;
-      //printf(" | 0x%X\n",destBuffer);
       nFreeBits-=Np;
-      //printf("nR=%d\n",nRestored);
     }
   return true;
 }
