@@ -12,7 +12,6 @@
 #include "ByteStreamCnvSvcBase/IByteStreamEventAccess.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "AthenaKernel/SlotSpecificObj.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "GaudiKernel/ServiceHandle.h"
 
 #include <map>
