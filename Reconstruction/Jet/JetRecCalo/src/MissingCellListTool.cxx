@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // MissingCellListTool.cxx 
@@ -82,6 +82,8 @@ StatusCode MissingCellListTool::finalize()
 
 int MissingCellListTool::execute() const {
 
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+
   //cellset_t missingCells;
   auto badandmissingCellsGeomMap = std::make_unique<jet::CaloCellFastMap>();
   jet::cellset_t & badandmissingCells = badandmissingCellsGeomMap->cells();
@@ -101,12 +103,12 @@ int MissingCellListTool::execute() const {
   }
   // ---------------------------
 
-  SG::ReadCondHandle<CaloDetDescrManager> caloDetDescrMgrHandle {m_caloDetDescrMgrKey};
+  SG::ReadCondHandle<CaloDetDescrManager> caloDetDescrMgrHandle {m_caloDetDescrMgrKey, ctx};
   const CaloDetDescrManager* caloDDM = *caloDetDescrMgrHandle;
 
   if(m_addBadCells) {
     // (In run1 this part possibly added several times the same cell in the geometric map)
-    SG::ReadHandle<CaloCellContainer> cc (m_cells_name);
+    SG::ReadHandle<CaloCellContainer> cc (m_cells_name, ctx);
     if ( !cc.isValid() ) {
       ATH_MSG_ERROR("Unable to retrieve CaloCellContainer AllCalo from event store.");
       return 1;
@@ -130,7 +132,7 @@ int MissingCellListTool::execute() const {
       ATH_MSG_ERROR( "Bad TileBadChanTool !!!" );
       return 1;
     }
-    SG::ReadCondHandle<LArBadChannelCont> readHandle{m_BCKey};
+    SG::ReadCondHandle<LArBadChannelCont> readHandle{m_BCKey, ctx};
     const LArBadChannelCont *bcCont {*readHandle};
     if(!bcCont) {
       ATH_MSG_ERROR( "Do not have Bad chan container !!!" );
@@ -143,7 +145,7 @@ int MissingCellListTool::execute() const {
       // check if needs insertion.
       bool insert = false;
       if(calo_id->is_tile(*idItr)){
-        CaloBadChannel bc = tileTool->caloStatus(*idItr);
+        CaloBadChannel bc = tileTool->caloStatus(ctx, *idItr);
         insert =  (bc.packedData() & m_tileMaskBit) != 0 ;
       } else {
         LArBadChannel bc = bcCont->offlineStatus(*idItr);
@@ -169,7 +171,7 @@ int MissingCellListTool::execute() const {
 
   ATH_MSG( DEBUG ) << " total bad and missing "<< badandmissingCells.size() << "  "<< badandmissingCellsGeomMap->size() << endmsg;
 
-  SG::WriteHandle<jet::CaloCellFastMap> badCellMap(m_badCellMap_key);
+  SG::WriteHandle<jet::CaloCellFastMap> badCellMap(m_badCellMap_key, ctx);
   StatusCode sc = badCellMap.record(std::move(badandmissingCellsGeomMap));
   if (sc.isFailure()) {
     ATH_MSG_ERROR("Unable to record badandmissingCellsGeomMap in event store: "
