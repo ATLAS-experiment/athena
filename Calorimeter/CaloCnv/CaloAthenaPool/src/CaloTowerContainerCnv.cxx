@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloTowerContainerCnv.h"
@@ -117,8 +117,8 @@ CaloTowerContainer* CaloTowerContainerCnv::createTransient(const Token* token) {
              return 0;
 	    }
 	  }
-          if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<" Towers rebuild for EM and/or HEC "<<endmsg; 
-	  m_emHecTowerBldr->setCalos(EmHec); 
+	  if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<" Towers rebuild for EM and/or HEC "<<endmsg;
+	  m_emHecTowerBldr->setCalos(ctx, EmHec);
 	  StatusCode scemHec=m_emHecTowerBldr->execute(ctx, Cont);
 	  if (scemHec.isFailure()) {
 	    log<<MSG::ERROR<<" Towers rebuild for EM and/or HEC failed "<<endmsg; 
