@@ -19,8 +19,6 @@
 #include "Gaudi/Algorithm.h"
 #include "Gaudi/AsynchronousAlgorithm.h"
 
-// Framework includes
-#include "GaudiKernel/ThreadLocalContext.h"
 
 template <class BaseAlg>
 AthCommonReentrantAlgorithm<BaseAlg>::AthCommonReentrantAlgorithm( const std::string& name, 
