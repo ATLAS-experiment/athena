@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file Chi2Test_2D.cxx does Chi2Test on a 2D histogram, and also returns the positions of the highest outlying bins; returns dqm_core::Result
@@ -185,6 +185,9 @@ catch( dqm_core::Exception & ex ) {
   }
   
   double ndf=count_ndf-1;
+  if (ndf == 0){
+    throw dqm_core::BadConfig( ERS_HERE, name, "ndf is zero!" );
+  }
   double value=chisq/ndf;
   dqm_core::Result* result = new dqm_core::Result();
   //write out this chisq/ndf value to the website

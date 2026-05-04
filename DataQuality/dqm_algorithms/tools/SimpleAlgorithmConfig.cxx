@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file SimpleAlgorithmConfig  Defines the class SimpleAlgorithmConfig a concrete simple implementation of dqm_core::AlgorithmConfig
@@ -48,25 +48,25 @@ dqm_algorithms::tools::SimpleAlgorithmConfig::setReference(TObject* o)
 }
 
 void
-dqm_algorithms::tools::SimpleAlgorithmConfig::addParameter(std::string key, double value)
+dqm_algorithms::tools::SimpleAlgorithmConfig::addParameter(const std::string & key, double value)
 {
   m_parameters.insert( std::make_pair(key,value) );
 }
 
 void
-dqm_algorithms::tools::SimpleAlgorithmConfig::addGenericParameter(std::string key, std::string value)
+dqm_algorithms::tools::SimpleAlgorithmConfig::addGenericParameter(const std::string & key, const std::string & value)
 {
   m_generic_parameters.emplace( key, value );
 }
 
 void
-dqm_algorithms::tools::SimpleAlgorithmConfig::addGreenThreshold(std::string key, double value)
+dqm_algorithms::tools::SimpleAlgorithmConfig::addGreenThreshold(const std::string & key, double value)
 {
   m_green_thresholds.insert( std::make_pair(key,value) );
 }
 
 void
-dqm_algorithms::tools::SimpleAlgorithmConfig::addRedThreshold(std::string key, double value)
+dqm_algorithms::tools::SimpleAlgorithmConfig::addRedThreshold(const std::string & key, double value)
 {
   m_red_thresholds.insert( std::make_pair(key,value) );
 }
