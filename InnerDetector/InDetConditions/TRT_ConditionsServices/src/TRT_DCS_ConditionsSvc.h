@@ -19,7 +19,6 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ICondSvc.h"
 #include "StoreGate/ReadCondHandleKey.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "TRT_ConditionsServices/ITRT_HWMappingSvc.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "xAODEventInfo/EventInfo.h"

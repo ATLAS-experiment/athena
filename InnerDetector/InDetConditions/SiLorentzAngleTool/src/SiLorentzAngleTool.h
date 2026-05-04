@@ -11,7 +11,6 @@
 
 #include "InDetCondTools/ISiLorentzAngleTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"

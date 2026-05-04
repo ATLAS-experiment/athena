@@ -38,7 +38,6 @@
 
 // Gaudi includes
 #include "GaudiKernel/EventContext.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 //CondDB
 #include "StoreGate/ReadCondHandle.h"
