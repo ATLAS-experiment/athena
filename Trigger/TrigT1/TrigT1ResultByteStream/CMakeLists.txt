@@ -11,7 +11,7 @@ atlas_add_library( TrigT1ResultByteStreamLib
                    TrigT1ResultByteStream/*.h
                    INTERFACE
                    PUBLIC_HEADERS TrigT1ResultByteStream 
-                   LINK_LIBRARIES ByteStreamData GaudiKernel )
+                   LINK_LIBRARIES ByteStreamData GaudiKernel xAODTrigger )
 
 atlas_add_component( TrigT1ResultByteStream
                      src/*.cxx

@@ -174,7 +174,7 @@ StatusCode L1TriggerResultByteStreamCnv::createRep(DataObject* pObj, IOpaqueAddr
     
     // Encode payload trigger information of xAOD::CTPResult
     std::vector<WROBF*> ctpResultROBs; // Will just be one ROB in the vector
-    ATH_CHECK(m_ctpResultEncoderTool->convertToBS(ctpResultROBs, ctx)); // TODO: find a way to avoid ThreadLocalContext
+    ATH_CHECK(m_ctpResultEncoderTool->convertToBS(ctpResultROBs, l1TriggerResult, ctx)); // TODO: find a way to avoid ThreadLocalContext
     ATH_MSG_DEBUG(m_ctpResultEncoderTool->name() << " created " << ctpResultROBs.size() << " CTP ROB Fragments");
     for (WROBF* rob : ctpResultROBs) {
       printRob(*rob);
@@ -193,7 +193,7 @@ StatusCode L1TriggerResultByteStreamCnv::createRep(DataObject* pObj, IOpaqueAddr
   for (ToolHandle<IL1TriggerByteStreamTool>& tool : {std::reference_wrapper(m_muonEncoderTool), std::reference_wrapper(m_muonEncoderToolDaq), std::reference_wrapper(m_efexEncoderTool)}) {
     if (not tool.isEnabled()) {continue;}
     std::vector<WROBF*> muon_robs;
-    ATH_CHECK(tool->convertToBS(muon_robs, ctx)); // TODO: find a way to avoid ThreadLocalContext
+    ATH_CHECK(tool->convertToBS(muon_robs, l1TriggerResult, ctx)); // TODO: find a way to avoid ThreadLocalContext
     ATH_MSG_DEBUG(tool.name() << " created " << muon_robs.size() << " L1Muon ROB Fragments");
     for (WROBF* rob : muon_robs) {
       printRob(*rob);

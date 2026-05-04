@@ -382,7 +382,9 @@ std::array<uint16_t,4>  jFexInputByteStreamTool::Dataformat2 (uint32_t word0) co
 
 
 /// xAOD->BS conversion
-StatusCode jFexInputByteStreamTool::convertToBS(std::vector<WROBF*>& /*vrobf*/, const EventContext& /*eventContext*/) {
+StatusCode jFexInputByteStreamTool::convertToBS(std::vector<WROBF*>& /*vrobf*/,
+                                                const xAOD::TrigCompositeContainer* /*tc*/,
+                                                const EventContext& /*eventContext*/) {
     
 /*
     // Retrieve the RoI container
