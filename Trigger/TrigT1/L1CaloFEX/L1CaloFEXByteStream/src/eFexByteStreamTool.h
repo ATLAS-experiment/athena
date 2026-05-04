@@ -51,8 +51,10 @@ class eFexByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamTool> 
         /// BS->xAOD conversion
         virtual StatusCode convertFromBS(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vrobf, const EventContext& eventContext)const override;
 
-        /// xAOD->BS conversion
-        virtual StatusCode convertToBS(std::vector<OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment*>& vrobf, const EventContext& eventContext) override;
+        /// xAOD->BS conversion: reads the RoI containers reachable via the TrigCompositeContainer.
+        virtual StatusCode convertToBS(std::vector<OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment*>& vrobf,
+                                       const xAOD::TrigCompositeContainer* tc,
+                                       const EventContext& eventContext) override;
 
         /// Declare ROB IDs for conversion
         virtual const std::vector<uint32_t>& robIds() const override {
@@ -95,15 +97,6 @@ class eFexByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamTool> 
     // inputs (eTowers)
     SG::WriteHandleKey<xAOD::eFexTowerContainer> m_eTowerWriteKey {
             this, "eTowerContainerWriteKey", "", "Write handle key to ETower container for conversion from ByteStream"};
-
-    // Only read keys should be set to non-empty string in python configuration if the tool is in xAOD->BS mode of operation
-    SG::ReadHandleKeyArray<xAOD::eFexEMRoIContainer> m_eEMReadKeys {
-            this, "eEMContainerReadKeys", {}, "Read handle keys to eEM (x)TOB containers for conversion to ByteStream"};
-    SG::ReadHandleKeyArray<xAOD::eFexTauRoIContainer> m_eTAUReadKeys {
-            this, "eTAUContainerReadKeys", {}, "Read handle keys to eTAU (x)TOB containers for conversion to ByteStream"};
-
-
-
 
 
     std::unique_ptr<L1CaloBsDecoderRun3> m_decoder;

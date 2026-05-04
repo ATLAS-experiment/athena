@@ -768,7 +768,9 @@ int16_t gFexByteStreamTool::fillGlobal(const std::array<uint32_t, 3> &tob, const
 
 
 /// xAOD->BS conversion
-StatusCode gFexByteStreamTool::convertToBS(std::vector<WROBF*>& /*vrobf*/, const EventContext& /*eventContext*/) {
+StatusCode gFexByteStreamTool::convertToBS(std::vector<WROBF*>& /*vrobf*/,
+                                           const xAOD::TrigCompositeContainer* /*tc*/,
+                                           const EventContext& /*eventContext*/) {
 
     return StatusCode::SUCCESS;
     

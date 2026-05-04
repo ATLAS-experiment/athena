@@ -78,6 +78,7 @@ StatusCode ExampleL1TriggerByteStreamTool::convertFromBS(const std::vector<const
 
 /// xAOD->BS conversion
 StatusCode ExampleL1TriggerByteStreamTool::convertToBS(std::vector<WROBF*>& vrobf,
+                                                       const xAOD::TrigCompositeContainer* /*tc*/,
                                                        const EventContext& eventContext) {
   // Retrieve the RoI container
   auto muonRoIs = SG::makeHandle(m_roiReadKey, eventContext);

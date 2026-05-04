@@ -59,7 +59,9 @@ StatusCode L1TopoPhase1ByteStreamTool::convertFromBS(const std::vector<const ROB
 
 
 // xAOD->BS conversion
-StatusCode L1TopoPhase1ByteStreamTool::convertToBS(std::vector<WROBF*>& , const EventContext& ) {
+StatusCode L1TopoPhase1ByteStreamTool::convertToBS(std::vector<WROBF*>& ,
+                                                   const xAOD::TrigCompositeContainer* /*tc*/,
+                                                   const EventContext& ) {
   return StatusCode::FAILURE;
 }
 
