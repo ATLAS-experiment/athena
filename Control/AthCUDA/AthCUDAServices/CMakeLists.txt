@@ -3,6 +3,12 @@
 # Set the name of the package.
 atlas_subdir( AthCUDAServices )
 
+# Check if CUDA compilation is available.
+if( NOT CMAKE_CUDA_COMPILER )
+   message( STATUS "CUDA not available, not building package" )
+   return()
+endif()
+
 # External(s).
 find_package( TBB )
 find_package( CUDAToolkit )
