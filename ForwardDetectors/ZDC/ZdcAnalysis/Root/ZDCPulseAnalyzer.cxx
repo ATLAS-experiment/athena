@@ -168,7 +168,8 @@ ZDCPulseAnalyzer::ZDCPulseAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, const s
   m_tmin = -deltaTSample / 2;
   m_tmax = m_tmin + ((float) Nsample) * deltaTSample;
   m_defaultFitTMax = m_tmax;
-  
+  m_freqMHz = 1000./m_deltaTSample;
+   
   std::string histName = "ZDCFitHist" + tag;
   std::string histNameLGRefit = "ZDCFitHist" + tag + "_LGRefit";
 
