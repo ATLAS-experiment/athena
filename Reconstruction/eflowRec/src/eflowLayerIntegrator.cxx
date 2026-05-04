@@ -24,6 +24,7 @@ CREATED:  18th Aug, 2005
 #include "eflowRecTrack.h"
 #include "eflowRecCluster.h"
 
+#include "GaudiKernel/EventContext.h"
 #include "CaloDetDescr/CaloDetDescrElement.h"
 #include "CaloEvent/CaloCell.h"
 
@@ -136,10 +137,9 @@ void eflowLayerIntegrator::measureNewClus(const std::vector<xAOD::CaloCluster*>&
   }
 }
 
-void eflowLayerIntegrator::measureNewClus(const std::vector<eflowRecCluster*>& efRecClusters, eflowRecTrack* track) {
+void eflowLayerIntegrator::measureNewClus(const EventContext& ctx, const std::vector<eflowRecCluster*>& efRecClusters, eflowRecTrack* track) {
   resetAllClustersIntegralForNewTrack(track->getTrackCaloPoints());
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   for (eflowRecCluster* cluster : efRecClusters) {
     measureCluster(eflowTrackClusterLink::getInstance(track, cluster, ctx));
   }

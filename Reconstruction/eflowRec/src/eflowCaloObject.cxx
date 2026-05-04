@@ -21,6 +21,8 @@ CREATED:  22nd November, 2004
 #include "eflowRingSubtractionManager.h"
 #include "PFEnergyPredictorTool.h"
 
+#include "GaudiKernel/EventContext.h"
+
 eflowCaloObject::~eflowCaloObject() = default;
 
 void eflowCaloObject::addTrackClusterLinks(const std::vector<eflowTrackClusterLink*> &trackClusterLink) {
@@ -61,7 +63,7 @@ double eflowCaloObject::getClusterEnergy() const {
   return clusterEnergy;
 }
 
-void eflowCaloObject::simulateShower(eflowLayerIntegrator *integrator, const eflowEEtaBinnedParameters* binnedParameters,
+void eflowCaloObject::simulateShower(const EventContext& ctx, eflowLayerIntegrator *integrator, const eflowEEtaBinnedParameters* binnedParameters,
 const PFEnergyPredictorTool* energyP, bool useLegacyEnergyBinIndexing){
 
   for (auto *thisEfRecTrack : m_eflowRecTracks) {
@@ -86,7 +88,7 @@ const PFEnergyPredictorTool* energyP, bool useLegacyEnergyBinIndexing){
     }
 
     /* Determine the LFI */
-    integrator->measureNewClus(matchedClusters, thisEfRecTrack);
+    integrator->measureNewClus(ctx, matchedClusters, thisEfRecTrack);
     eflowFirstIntENUM j1st = integrator->getFirstIntLayer();
     
     /*Save j1st info */
@@ -140,7 +142,7 @@ const PFEnergyPredictorTool* energyP, bool useLegacyEnergyBinIndexing){
         //we use a larger cone of 0.2 for this
         std::vector<eflowRecCluster*> theBestEfRecClusters_02;
         for (eflowTrackClusterLink* thisLink : *bestClusters_02) if (thisLink->getCluster()->getCluster()->e() > 0.0) theBestEfRecClusters_02.push_back(thisLink->getCluster());
-        integrator->measureNewClus(theBestEfRecClusters_02, thisEfRecTrack);
+        integrator->measureNewClus(ctx, theBestEfRecClusters_02, thisEfRecTrack);
         j1st = integrator->getFirstIntLayer();
         cellSubtractionManager.getOrdering(binnedParameters, trackE, trackEM1eta, j1st,useLegacyEnergyBinIndexing);
         thisEfRecTrack->setEExpect(cellSubtractionManager.fudgeMean() * trackE, std::fabs(cellSubtractionManager.fudgeStdDev()*trackE)*std::fabs(cellSubtractionManager.fudgeStdDev()*trackE));

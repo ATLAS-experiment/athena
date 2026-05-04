@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "PFAlgorithm.h"
 #include "xAODCaloEvent/CaloClusterAuxContainer.h"
@@ -65,7 +65,7 @@ StatusCode PFAlgorithm::execute(const EventContext& ctx) const{
   t_subtract.start();
   /* Run the SubtractionTools */
   for (auto thisIPFSubtractionTool : m_IPFSubtractionTools){
-    thisIPFSubtractionTool->execute(theElowCaloObjectContainer,&localEFlowRecTrackContainer,&theEFlowRecClusterContainerReference);
+    thisIPFSubtractionTool->execute(ctx, theElowCaloObjectContainer,&localEFlowRecTrackContainer,&theEFlowRecClusterContainerReference);
   }
   t_subtract.stop();
 
@@ -87,7 +87,7 @@ StatusCode PFAlgorithm::execute(const EventContext& ctx) const{
 
   /* Run the other AglTools */
   for (auto thisIPFBaseTool :  m_IPFBaseTools){
-    ATH_CHECK(thisIPFBaseTool->execute(*theElowCaloObjectContainer));
+    ATH_CHECK(thisIPFBaseTool->execute(ctx, *theElowCaloObjectContainer));
   }
 
   auto mon = Monitored::Group(m_monTool, t_exec, t_subtract, N_efrClusters);

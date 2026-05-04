@@ -20,6 +20,7 @@ CREATED:  24th January, 2005
 #include "eflowCaloRegions.h"
 #include "xAODTracking/TrackParticle.h"
 
+class EventContext;
 class eflowTrackCaloPoints;
 
 /*
@@ -27,7 +28,7 @@ Pure virtual base class, inherits from IAlgTool. Defines execute method which ta
 */
 class eflowTrackExtrapolatorBaseAlgTool : virtual public IAlgTool {
  public:
-  virtual std::unique_ptr<eflowTrackCaloPoints> execute(const xAOD::TrackParticle* track) const = 0;  
+  virtual std::unique_ptr<eflowTrackCaloPoints> execute(const EventContext& ctx, const xAOD::TrackParticle* track) const = 0;
 };
 
 #endif

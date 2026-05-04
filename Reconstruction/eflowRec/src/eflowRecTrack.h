@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -45,7 +45,8 @@ This class extends the information about a xAOD::Track. It stores an ElementLink
 */
 class eflowRecTrack {
 public:
-  eflowRecTrack(const ElementLink<xAOD::TrackParticleContainer>& trackElemLink,
+  eflowRecTrack(const EventContext& ctx,
+                const ElementLink<xAOD::TrackParticleContainer>& trackElemLink,
                 const ToolHandle<eflowTrackExtrapolatorBaseAlgTool>& theTrackExtrapolatorTool);
   eflowRecTrack(const eflowRecTrack& originalEflowRecTrack);
   eflowRecTrack& operator = (const eflowRecTrack& originalEflowRecTrack);

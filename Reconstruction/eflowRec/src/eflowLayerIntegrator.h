@@ -21,6 +21,7 @@ CREATED:  18th Aug, 2005
 #include "eflowUtil.h"
 #include "xAODCaloEvent/CaloCluster.h"
 
+class EventContext;
 class CaloCell;
 class eflowRecCluster;
 class eflowRecTrack;
@@ -44,7 +45,7 @@ class eflowLayerIntegrator {
 
   void measureNewClus(const xAOD::CaloCluster* clus, const eflowTrackCaloPoints& trackCalo);
   void measureNewClus(eflowTrackClusterLink* trackClusterLink);
-  void measureNewClus(const std::vector<eflowRecCluster*>& efRecClusters, eflowRecTrack* track);
+  void measureNewClus(const EventContext& ctx, const std::vector<eflowRecCluster*>& efRecClusters, eflowRecTrack* track);
   void measureNewClus(const std::vector<xAOD::CaloCluster*>& clusVec, const eflowTrackCaloPoints& trackCalo);
 
   eflowFirstIntENUM getFirstIntLayer() const;
