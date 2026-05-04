@@ -16,7 +16,6 @@
 #include "AthAllocators/DataPool.h"
 
 // Gaudi includes
-#include "GaudiKernel/ThreadLocalContext.h"
 
 
 static const InterfaceID IID_ITileRawChannelBuilder("TileRawChannelBuilder", 1, 0);
