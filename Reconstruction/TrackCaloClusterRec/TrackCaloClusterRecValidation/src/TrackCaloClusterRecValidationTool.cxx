@@ -4,7 +4,6 @@
 #include "TrackCaloClusterRecValidationTool.h"
 //
 #include "GaudiKernel/SystemOfUnits.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "xAODJet/JetContainer.h"
 #include "xAODTruth/TruthParticle.h"
 
