@@ -308,7 +308,7 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
         HepGeom::Point3D<double> u = ghit.getGlobalPosition();
         hitVtxProperty->vertex.set1Value(hitCount++,u.x(),u.y(),u.z());
       }
-      std::cout << "Event contains " << p_collection->size() << " entries " << std::endl;
+      message("Event contains " + str(p_collection->size()) + " entries in ITkPixelHits");
     }
     else
       message("Unable to retrieve ITkPixel Hits");
@@ -329,6 +329,7 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
         HepGeom::Point3D<double> u = ghit.getGlobalPosition();
         hitVtxProperty->vertex.set1Value(hitCount++,u.x(),u.y(),u.z());
       }
+      message("Event contains " + str(p_collection->size()) + " entries in ITkStripHits");
     }
     else
       message("Unable to retrieve ITkStrip Hits");
