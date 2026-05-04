@@ -3,7 +3,6 @@
 */
 
 #include "StandardFieldSvc.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "StoreGate/ReadCondHandle.h"
 
 // Field map
