@@ -141,6 +141,48 @@ def Pythia8_A2_MSTW2008LO_Common_Cfg(flags, **kwargs):
     return ca
 
 
+def Pythia8_A14_NNPDF23LO_Common_Cfg(flags, **kwargs):
+    """
+    Fragment for setting up A14 tune with NNPDF23LO PDF
+    """
+    # Defaults
+    cmds = kwargs.get("Commands", [])
+    
+    # Tune parameters
+    cmds.extend([
+        "Tune:ee = 7", 
+        "Tune:pp = 14",
+        "SpaceShower:rapidityOrder = on",
+        "SigmaProcess:alphaSvalue = 0.140",
+        "SpaceShower:pT0Ref = 1.56",
+        "SpaceShower:pTmaxFudge = 0.91",
+        "SpaceShower:pTdampFudge = 1.05",
+        "SpaceShower:alphaSvalue = 0.127",
+        "TimeShower:alphaSvalue = 0.127",
+        "BeamRemnants:primordialKThard = 1.88",
+        "MultipartonInteractions:pT0Ref = 2.09",
+        "MultipartonInteractions:alphaSvalue = 0.126",
+        "PDF:pSet=LHAPDF6:NNPDF23_lo_as_0130_qed",
+        "ColourReconnection:range = 1.71"
+    ])
+
+    # Now call rapidity ordering
+    cmds = ensureRapidityOrderMPI(cmds)
+
+    # Update kwargs
+    kwargs["Commands"] = list(dict.fromkeys(cmds))
+
+    # Now get the base config
+    ca = Pythia8BaseCfg(flags, **kwargs)
+
+    # Broadcast tune to service
+    from GeneratorConfig.GeneratorInfoSvcConfig import GeneratorInfoSvcCfg
+    ca.merge(GeneratorInfoSvcCfg(flags, Tune="A14 NNPDF23LO"), sequenceName=EvgenSequence.Generator.value)
+
+    # Call the base config
+    return ca
+
+
 def Pythia8_A2_MSTW2008LO_EvtGen_Common_Cfg(flags, **kwargs):
     """
     Config for Py8 tune A2 with MSTW2008LO tune
@@ -153,6 +195,21 @@ def Pythia8_A2_MSTW2008LO_EvtGen_Common_Cfg(flags, **kwargs):
 
     # Add Pythia 8 to CA with correct tune settings
     ca = Pythia8_A2_MSTW2008LO_Common_Cfg(flags, **kwargs)
+
+    # Add EvtGen
+    ca.merge(Pythia8EvtGenBaseCfg(flags, **kwargs))
+
+    return ca
+
+
+def Pythia8_A14_NNPDF23LO_EvtGen_Common_Cfg(flags, **kwargs):
+    """
+    Config for setting up Py8 with A14 tune 
+    with EvtGen
+    """
+
+    # Add Pythia 8 to CA with correct tune settings
+    ca = Pythia8_A14_NNPDF23LO_Common_Cfg(flags, **kwargs)
 
     # Add EvtGen
     ca.merge(Pythia8EvtGenBaseCfg(flags, **kwargs))
@@ -175,3 +232,23 @@ def ensureRapidityOrderMPI(cmds):
             cmds.append(f"SpaceShower:rapidityOrderMPI = {val}")
             break
     return cmds
+
+
+def Pythia8_MadGraph_Cfg(flags, ShowerCfg=Pythia8BaseCfg, **kwargs):
+    """
+    Modular fragment for MadGraph LHE input in Pythia8.
+    The Pythia8_i algorithm is configured through ShowerCfg (defaults to
+    Pythia8BaseCfg) so tune/EvtGen fragments can be injected without
+    instantiating Pythia8_i twice.
+    """
+    # Set LHE file name (override with LHEFile="myfile.lhe" if needed).
+    kwargs.setdefault("LHEFile", "events.lhe")
+
+    # Configure Pythia8 through the selected shower fragment.
+    ca = ShowerCfg(flags, **kwargs)
+
+    # Announce MadGraph to service
+    from GeneratorConfig.GeneratorInfoSvcConfig import GeneratorInfoSvcCfg
+    ca.merge(GeneratorInfoSvcCfg(flags, Generators=["MadGraph"]), sequenceName=EvgenSequence.Generator.value)
+
+    return ca

@@ -10,9 +10,14 @@ class EvgenConfig():
     __slots__ = ()
  
     def __init__(self, flags):
+        # Values with invalid defaults - will throw if not implemented in jO
         self.keywords = []
         self.contact = []
         self.nEventsPerJob = None
+        # Optional values
+        self.inputFilesPerJob = 0
+        self.MEgenerator = None
+
 
     def setupFlags(self, flags):
         raise RuntimeError("setupFlags method needs to be implemented in Sample(EvgenConfig)")

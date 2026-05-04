@@ -201,7 +201,6 @@ jofile = jofiles[0]
 joparts = (os.path.basename(jofile)).split(".")
 
 if joparts[0].startswith("mc"): #and all(c in string.digits for c in joparts[0][2:]):
-    officialJO = True
     ## Check that there are exactly 3 name parts separated by '.': mc, physicsShort, .py
     if len(joparts) != 3:
         evgenLog.error(jofile + " name format is wrong: must be of the form mc.<physicsShort>.py: please rename.")
@@ -334,7 +333,7 @@ else:
 ## Check that the keywords are in the list of allowed words (and exit if processing an official JO)
 if evgenConfig.keywords:
     from GeneratorConfig.GenConfigHelpers import checkKeywords
-    checkKeywords(evgenConfig, evgenLog, officialJO)
+    checkKeywords(evgenConfig, evgenLog)
 
 ## Configure and schedule jet finding algorithms
 ## NOTE: This generates algorithms for jet containers defined in the user's JO fragment
