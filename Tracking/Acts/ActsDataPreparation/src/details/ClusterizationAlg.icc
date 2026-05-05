@@ -1,15 +1,42 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "xAODInDetMeasurement/ContainerAccessor.h"
 #include "ActsInterop/TableUtils.h"
 #include "AthAllocators/DataPool.h"
+#include <Acts/Clusterization/Clusterization.hpp>
 
 namespace {
    template <typename T>
    concept has_nRDOs = requires (T &&a) { a.nRDOs(); };
+
+   template <typename T_Tool>
+   concept newClusteringToolInterface = requires( T_Tool &&a,
+                                                 typename T_Tool::RDOContainer &&rdos,
+                                                 const std::vector<IdentifierHash> &listOfIds,
+                                                 const InDetDD::SiDetectorElementCollection &det_elements)
+      { a.countCells(rdos,listOfIds,det_elements); };
+
+   struct Empty {
+   };
+
+   template <typename T_Tool>
+   struct  TemporaryClusterContainer {
+      static auto make(unsigned int n_modules, unsigned int n_cluster_total, unsigned int n_rdos)
+         requires (newClusteringToolInterface<T_Tool>)
+      {
+         return typename T_Tool::CellContainer(n_modules, n_cluster_total, n_rdos);
+      }
+
+      static auto make(unsigned int n_modules, [[maybe_unused]] unsigned int n_cluster_total, [[maybe_unused]] unsigned int n_rdos)
+         requires (!newClusteringToolInterface<T_Tool>)
+      {
+         std::vector<typename T_Tool::ClusterCollection> cluster_collection;
+         cluster_collection.reserve(n_modules);
+         return cluster_collection;
+      }
+   };
 }
 
 namespace ActsTrk {
@@ -105,21 +132,46 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
 
   std::vector<const InDetDD::SiDetectorElement*> processedElements {};
   processedElements.reserve(elements->size());
-  std::vector<typename IClusteringTool::ClusterCollection> clusterCollection {};
-  clusterCollection.reserve(elements->size());
 
   std::vector<Cache_IDCLock> idclocks;
 
-  Acts::Ccl::ClusteringData data;
   
+  typename std::conditional<newClusteringToolInterface<IClusteringTool>, Empty, Acts::Ccl::ClusteringData>::type data;
+  unsigned int n_rdos_total=0u;
+  unsigned int n_cluster_total=0u;
+  unsigned int n_modules=0u;
+  if constexpr(newClusteringToolInterface<IClusteringTool>) {
+     // numbers not double counting corrected.
+     // So, in case of large overlap of ROIs, will overallocate
+     // the temporary cluster collection
+     for (const auto* roi : *roiCollection) {
+        // get list of ids
+        listOfIds.clear();
+        m_regionSelector->lookup(ctx)->HashIDList(*roi, listOfIds);
+        auto [roi_n_cluster, roi_n_rdos] = m_clusteringTool->countCells(*rdoContainer, listOfIds,*elements );
+        n_cluster_total += roi_n_cluster;
+        n_rdos_total += roi_n_rdos;
+        n_modules += listOfIds.size();
+     }
+  }
+  else {
+     n_modules=elements->size();
+  }
+  auto clusterCollection = TemporaryClusterContainer<IClusteringTool>::make(n_modules, n_cluster_total, n_rdos_total );
+
   // loop on ROIs
   unsigned int nClusterRDOs=0u;
   unsigned int nRDOs = 0u;
   std::size_t nClusters = 0ul;
+  bool request_id_list_again = roiCollection->size()!=1 || !newClusteringToolInterface<IClusteringTool>;
   for (const auto* roi : *roiCollection) {
     // get list of ids
-    listOfIds.clear();    
-    m_regionSelector->lookup(ctx)->HashIDList(*roi, listOfIds);
+    // if the roi collection contains a single element listOfIds
+    // already contains the result
+    if (request_id_list_again) {
+       listOfIds.clear();
+       m_regionSelector->lookup(ctx)->HashIDList(*roi, listOfIds);
+    }
 
     // loop on IDs
     for (const IdentifierHash& id : listOfIds) {      
@@ -157,22 +209,41 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
 	idclocks.push_back( std::move(cache_wh) );
       }
       // make ACTS clusters
+      if constexpr(newClusteringToolInterface<IClusteringTool>) {
+      ATH_CHECK( m_clusteringTool->clusterize(ctx,
+					      *rdos,
+					      *detEleStatus,
+					      *element,
+					      clusterCollection) );
+      }
+      else {
       ATH_CHECK( m_clusteringTool->clusterize(ctx,
 					      *rdos,
 					      *detEleStatus,
 					      *element,
                                               data,
 					      clusterCollection) );
-      if constexpr(has_nRDOs<typename IClusteringTool::ClusterCollection>) {
-         nClusterRDOs+=clusterCollection.back().nRDOs();
+      }
+      if constexpr(newClusteringToolInterface<IClusteringTool>) {
+         nClusterRDOs += rdos->size();
       }
       else {
-         nClusterRDOs += rdos->size();
+         if constexpr(has_nRDOs<typename IClusteringTool::ClusterCollection>) {
+            nClusterRDOs+=clusterCollection.back().nRDOs();
+         }
+         else {
+            nClusterRDOs += rdos->size();
+         }
       }
       nRDOs+=rdos->size();
 
       processedElements.push_back( element );
+      if constexpr(newClusteringToolInterface<IClusteringTool>) {
+         nClusters += clusterCollection.m_moduleClusterRange.back().nClusters();
+      }
+      else {
       nClusters += clusterCollection.back().size();
+      }
     } // loop on IDs
   } // loop on ROIs
 
@@ -187,13 +258,33 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
   DataPool<xAODCluster_t> pool (nClusters);
   clusterContainer->push_new(nClusters, [&pool]() {return pool.nextElementPtr();});
 
-  std::any vars = m_clusteringTool->createEventDataCache (*clusterHandle, nClusterRDOs);
+  std::any vars = m_clusteringTool->createEventDataCache (*clusterHandle,
+                                                          ( (newClusteringToolInterface<IClusteringTool>) ? n_rdos_total : nClusterRDOs));
 
   // Fill the collection to xAOD format, computing necessary quantities
   std::size_t xaodCounter = 0ul;
   typename ClusterContainer::iterator finalElement = clusterContainer->end();
+  assert( clusterCollection.size() == processedElements.size());
   for (std::size_t i(0); i<clusterCollection.size(); ++i) {
+    unsigned int n_new_clusters;
+    if constexpr(newClusteringToolInterface<IClusteringTool>) {
+    const InDetDD::SiDetectorElement* element = elements->getDetectorElement(clusterCollection.moduleClusterRange(i).idHash);
+
+    ATH_CHECK( m_clusteringTool->makeClusters(ctx,
+                                              *rdoContainer,
+                                              clusterCollection,
+                                              i,
+					      *element,
+                                              xaodCounter,
+                                              *clusterContainer,
+                                              vars) );
+    assert( i < clusterCollection.m_moduleClusterRange.size() ) ;
+    n_new_clusters=clusterCollection.m_moduleClusterRange[i].nClusters();
+
+    }
+    else {
     const InDetDD::SiDetectorElement* element = processedElements[i];
+
     typename IClusteringTool::ClusterCollection& actsClusters = clusterCollection[i];
 
     typename ClusterContainer::iterator itr = clusterContainer->begin() + xaodCounter;
@@ -201,23 +292,21 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
       ATH_MSG_ERROR("Inconsistent size of clusters");
       return StatusCode::FAILURE;
     }
-
     ATH_CHECK( m_clusteringTool->makeClusters(ctx,
 					      actsClusters,
 					      *element,
                                               xaodCounter,
                                               vars,
 					      itr) );
-    
+    n_new_clusters=actsClusters.size();
+    }
     if constexpr (useCache) {
-      // add to the cache
       ATH_CHECK(Cache::Helper<BaseClusterType>::insert(idclocks[i],
 						       clusterContainer,
 						       xaodCounter,
-						       xaodCounter + actsClusters.size()));
+						       xaodCounter + n_new_clusters));
     }
-
-    xaodCounter += actsClusters.size();
+    xaodCounter+=n_new_clusters;
   }
 
   m_stat[kNRdo] += nRDOs;
