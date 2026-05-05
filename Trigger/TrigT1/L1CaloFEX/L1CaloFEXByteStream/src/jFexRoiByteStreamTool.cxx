@@ -764,7 +764,9 @@ std::array<float,2> jFexRoiByteStreamTool::getEtaPhi  (unsigned int jfex, unsign
 }
 
 /// xAOD->BS conversion
-StatusCode jFexRoiByteStreamTool::convertToBS(std::vector<WROBF*>& /*vrobf*/, const EventContext& /*eventContext*/) {
+StatusCode jFexRoiByteStreamTool::convertToBS(std::vector<WROBF*>& /*vrobf*/,
+                                              const xAOD::TrigCompositeContainer* /*tc*/,
+                                              const EventContext& /*eventContext*/) {
     
 /*
     // Retrieve the RoI container
