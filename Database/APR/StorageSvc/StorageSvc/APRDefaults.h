@@ -43,7 +43,7 @@ namespace APRDefaults {
          struct Canonical {
             static constexpr const char* EventData  = "EventData";
             static constexpr const char* EventTag   = "EventTag";
-            static constexpr const char* DataHeader = "DataHeader";
+            static constexpr const char* DataHeader = "EventData";
             static constexpr const char* MetaData   = "MetaData";
          };
       }
