@@ -43,12 +43,7 @@ namespace FlavorTagDiscriminants {
       m_phiCalibKey, ctx);
 
     // Shallow-copy jets so calibration doesn't modify originals
-    std::pair<std::unique_ptr<xAOD::JetContainer>,
-              std::unique_ptr<xAOD::ShallowAuxContainer>> shallowCopy =
-      xAOD::shallowCopyContainer(*jets, ctx);
-    std::unique_ptr<xAOD::JetContainer>& copyUP = shallowCopy.first;
-    [[maybe_unused]] std::unique_ptr<xAOD::ShallowAuxContainer>& auxUP =
-      shallowCopy.second;
+    auto [copyUP, auxUP] = xAOD::shallowCopy(*jets, ctx);
 
     // Apply calibration to the copies
     ATH_CHECK(m_calibTool->modify(*copyUP));

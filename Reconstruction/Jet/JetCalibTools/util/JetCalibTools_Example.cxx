@@ -9,7 +9,7 @@
  *                                                                      *
  *  #   Date    Comments                   By                           *
  * -- -------- -------------------------- ----------------------------- *
- *  1 14/03/16  First Version              J. Bossio (jbossios@cern.ch) * 
+ *  1 14/03/16  First Version              J. Bossio (jbossios@cern.ch) *
 \************************************************************************/
 
 // System include(s):
@@ -103,11 +103,11 @@ int main(int argc, char* argv[]){
     }
 
     if ( opt.find("--sample=")   != std::string::npos ) sample = v[1];
-    
+
     if ( opt.find("--jetColl=")   != std::string::npos ) jetColl = v[1];
-    
+
     if ( opt.find("--jetCalibConfig=")   != std::string::npos ) jetCalibConfig = v[1];
-    
+
     if ( opt.find("--calibSeq=")   != std::string::npos ) calibSeq = v[1];
 
     if ( opt.find("--calibArea=")   != std::string::npos ) calibArea = v[1];
@@ -207,8 +207,8 @@ int main(int argc, char* argv[]){
     const xAOD::JetContainer* jets = nullptr;
     ANA_CHECK( event.retrieve( jets, jetColl + "Jets" ) );
 
-    // Shallow copy 
-    auto jets_shallowCopy = xAOD::shallowCopyContainer( *jets, Gaudi::Hive::currentContext() );
+    // Shallow copy
+    auto jets_shallowCopy = xAOD::shallowCopy( *jets );
 
     // Calibrate the shallow copy
     ANA_CHECK( jetCalibrationTool.applyCalibration( *jets_shallowCopy.first ) );

@@ -47,11 +47,12 @@ StatusCode testAthenaEgammaCalibTool::execute()
   const xAOD::ElectronContainer* electrons;
   ATH_CHECK( evtStore()->retrieve(electrons, m_sg_electrons) );
 
-  //Clone 
-  std::pair< xAOD::ElectronContainer*, xAOD::ShallowAuxContainer* > electrons_shallowCopy = xAOD::shallowCopyContainer( *electrons );
+  //Clone
+  xAOD::ShallowCopyResult_t<xAOD::ElectronContainer> electrons_shallowCopy = xAOD::shallowCopy( *electrons );
+  xAOD::ElectronContainer* elsCorr = electrons_shallowCopy.first.get();
   //Record in StoreGate
-  CHECK( evtStore()->record( electrons_shallowCopy.first, "ElectronCollectionCorr") );
-  CHECK( evtStore()->record( electrons_shallowCopy.second, "ElectronCollectionCorrAux.") );
+  CHECK( evtStore()->record( std::move(electrons_shallowCopy.first), "ElectronCollectionCorr") );
+  CHECK( evtStore()->record( std::move(electrons_shallowCopy.second), "ElectronCollectionCorrAux.") );
 
   //===========SYSTEMATICS
   const CP::SystematicRegistry& registry = CP::SystematicRegistry::getInstance();
@@ -60,33 +61,32 @@ StatusCode testAthenaEgammaCalibTool::execute()
   // this is the nominal set
   sysList.emplace_back();
 
-  ATH_MSG_INFO("SIZE of the systematics set:" << recommendedSystematics.size()); 
-   
+  ATH_MSG_INFO("SIZE of the systematics set:" << recommendedSystematics.size());
+
   for(const auto & recommendedSystematic : recommendedSystematics)
     {
       sysList.emplace_back();
       sysList.back().insert(recommendedSystematic);
     }
-   
+
   std::vector<CP::SystematicSet>::const_iterator sysListItr;
-  
+
   //Iterate over the shallow copy
-  xAOD::ElectronContainer* elsCorr = electrons_shallowCopy.first;
   xAOD::ElectronContainer::iterator el_it      = elsCorr->begin();
   xAOD::ElectronContainer::iterator el_it_last = elsCorr->end();
   unsigned int i = 0;
   for (; el_it != el_it_last; ++el_it, ++i) {
     xAOD::Electron* el = *el_it;
-    ATH_MSG_INFO("Electron " << i); 
-    ATH_MSG_INFO("xAOD/raw pt, eta, phi = " << el->pt() << ", " << el->eta() << ", " << el->phi()); 
-    
+    ATH_MSG_INFO("Electron " << i);
+    ATH_MSG_INFO("xAOD/raw pt, eta, phi = " << el->pt() << ", " << el->eta() << ", " << el->phi());
+
     if(m_EgammaCalibrationAndSmearingTool->applyCorrection(*el) != CP::CorrectionCode::Ok){
       ATH_MSG_WARNING("Cannot calibrate electron");
     }
-    ATH_MSG_INFO("Calibrated pt = " << el->pt()); 
-    
+    ATH_MSG_INFO("Calibrated pt = " << el->pt());
+
     //systematics
-    ATH_MSG_INFO("=============SYSTEMATICS CHECK NOW"); 
+    ATH_MSG_INFO("=============SYSTEMATICS CHECK NOW");
     for (sysListItr = sysList.begin(); sysListItr != sysList.end(); ++sysListItr)
       {
 	// Tell the calibration tool which variation to apply
@@ -97,25 +97,24 @@ StatusCode testAthenaEgammaCalibTool::execute()
 	//For now remove by hand the photon ones
 	TString syst_name = TString(sysListItr->name());
 	if(!syst_name.BeginsWith("EL") && !syst_name.BeginsWith("EG")) continue;
-           
-	if(m_EgammaCalibrationAndSmearingTool->applyCorrection(*el) != CP::CorrectionCode::Ok){ 
-	  ATH_MSG_WARNING("Cannot calibrate electron"); 
+
+	if(m_EgammaCalibrationAndSmearingTool->applyCorrection(*el) != CP::CorrectionCode::Ok){
+	  ATH_MSG_WARNING("Cannot calibrate electron");
 	}
 
-	ATH_MSG_INFO("Calibrated pt with systematic " << syst_name << " = " << el->pt()); 
+	ATH_MSG_INFO("Calibrated pt with systematic " << syst_name << " = " << el->pt());
       }
-	ATH_MSG_INFO("=============END SYSTEMATICS "); 
+	ATH_MSG_INFO("=============END SYSTEMATICS ");
   }
-  
+
   //test the correctedCopy method
-  for (; el_it != el_it_last; ++el_it) { 
-    xAOD::Electron *copy_el = nullptr; // new object 
-    if (m_EgammaCalibrationAndSmearingTool->correctedCopy( **el_it, copy_el) != CP::CorrectionCode::Ok){ 
-      ATH_MSG_WARNING("Could not apply correction to new electron object"); 
-      continue; 
+  for (; el_it != el_it_last; ++el_it) {
+    xAOD::Electron *copy_el = nullptr; // new object
+    if (m_EgammaCalibrationAndSmearingTool->correctedCopy( **el_it, copy_el) != CP::CorrectionCode::Ok){
+      ATH_MSG_WARNING("Could not apply correction to new electron object");
+      continue;
     }
   }
-  
+
   return StatusCode::SUCCESS;
 }
-

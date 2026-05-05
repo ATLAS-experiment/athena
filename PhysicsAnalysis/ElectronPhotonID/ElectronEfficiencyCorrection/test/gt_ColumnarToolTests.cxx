@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -104,10 +104,10 @@ public:
 
   virtual StatusCode copyRecord (EventStoreType& evtStore, const std::string& postfix) override
   {
-    auto [electronsCopy, electronsAuxCopy] = xAOD::shallowCopyContainer (*m_electrons);
-    m_electrons = electronsCopy;
-    ANA_CHECK (evtStore.record (electronsCopy, m_name + postfix));
-    ANA_CHECK (evtStore.record (electronsAuxCopy, m_name + postfix + "Aux."));
+    auto [electronsCopy, electronsAuxCopy] = xAOD::shallowCopy (*m_electrons);
+    m_electrons = electronsCopy.get();
+    ANA_CHECK (evtStore.record (std::move(electronsCopy), m_name + postfix));
+    ANA_CHECK (evtStore.record (std::move(electronsAuxCopy), m_name + postfix + "Aux."));
     return StatusCode::SUCCESS;
   }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ROOT include(s)
@@ -82,7 +82,7 @@ int main( int argc, char* argv[] )
     // Create a Store object for shallow copies
     xAOD::TStore* store = new xAOD::TStore();
 
-    
+
     // Decide how many events to run over
     Long64_t entries = event.getEntries();
     if(argc > 2) {
@@ -93,13 +93,13 @@ int main( int argc, char* argv[] )
     }
 
     // Must provide and egamma calib tool to the FSRTool
-    CP::EgammaCalibrationAndSmearingTool * energyRescaler = 
+    CP::EgammaCalibrationAndSmearingTool * energyRescaler =
         new CP::EgammaCalibrationAndSmearingTool("EgammaCalibrationAndSmearingTool");
     std::string esModel = "es2017_R21_v1";  // move to v1, 2018/09/04
     CHECK( energyRescaler->setProperty( "ESModel", esModel) );
     CHECK( energyRescaler->initialize() );
     ToolHandle<CP::IEgammaCalibrationAndSmearingTool> energyRescalerTool(energyRescaler->name());
-    
+
     // Create and configure the tool
     FSR::FsrPhotonTool fsrTool("FsrPhotonTool");
     CHECK( fsrTool.setProperty<double>("far_fsr_drcut", 0.12) );
@@ -107,14 +107,14 @@ int main( int argc, char* argv[] )
     CHECK( fsrTool.setProperty( "egCalibToolName", energyRescaler->name()) );
     CHECK( fsrTool.initialize() );
 
-    
+
     FSR::FsrCandidate candidate;
 
     // Loop over the events
     for(Long64_t entry = 0; entry < entries; ++entry) {
 
         store->clear(); // must clear store each event
-        
+
         // Tell the object which entry to look at
         event.getEntry(entry);
 
@@ -137,14 +137,13 @@ int main( int argc, char* argv[] )
         const xAOD::ElectronContainer* els = 0;
         CHECK( event.retrieve( els, "Electrons" ) );
 
-        std::pair< xAOD::ElectronContainer*, xAOD::ShallowAuxContainer* > electrons_shallowCopy =
-            xAOD::shallowCopyContainer( *els );
+        xAOD::ShallowCopyResult_t<xAOD::ElectronContainer> electrons_shallowCopy =
+            xAOD::shallowCopy( *els );
+        xAOD::ElectronContainer* elsCorr = electrons_shallowCopy.first.get();
 
         // Record then in the Store
-        CHECK( store->record( electrons_shallowCopy.first, "ElectronsCorr" ) );
-        CHECK( store->record( electrons_shallowCopy.second, "ElectronsCorrAux." ) );
-
-        xAOD::ElectronContainer* elsCorr = electrons_shallowCopy.first;
+        CHECK( store->record( std::move(electrons_shallowCopy.first), "ElectronsCorr" ) );
+        CHECK( store->record( std::move(electrons_shallowCopy.second), "ElectronsCorrAux." ) );
 
         // Must set links between shallow copy and original container
         if (!xAOD::setOriginalObjectLink( *els, *elsCorr )) {
@@ -156,20 +155,21 @@ int main( int argc, char* argv[] )
         const xAOD::PhotonContainer* phs = 0;
         CHECK( event.retrieve( phs, "Photons" ) );
 
-        std::pair< xAOD::PhotonContainer*, xAOD::ShallowAuxContainer* > photons_shallowCopy = 
-            xAOD::shallowCopyContainer( *phs );
+        xAOD::ShallowCopyResult_t<xAOD::PhotonContainer> photons_shallowCopy =
+            xAOD::shallowCopy( *phs );
+        xAOD::PhotonContainer* phsCorr = photons_shallowCopy.first.get();
 
         // Record then in the Store
-        CHECK( store->record( photons_shallowCopy.first, "PhotonsCorr" ) );
-        CHECK( store->record( photons_shallowCopy.second, "PhotonsCorrAux." ) );
-        xAOD::PhotonContainer* phsCorr = photons_shallowCopy.first;
+        CHECK( store->record( std::move(photons_shallowCopy.first), "PhotonsCorr" ) );
+        CHECK( store->record( std::move(photons_shallowCopy.second), "PhotonsCorrAux." ) );
+
         // Must set links between shallow copy and original container
         if (!xAOD::setOriginalObjectLink( *phs, *phsCorr )) {
             Error(APP_NAME, "Unable to setOriginalObjectLink for photon containers ");
             return 1;
         }
-        
-      
+
+
         //std::vector<const xAOD::Muon*> selectedMuons;
         double tmp_energy = -999.;
         double fsr_energy = 0.;
@@ -192,7 +192,7 @@ int main( int argc, char* argv[] )
             if (candidate.container == "photon" ) {
                 const xAOD::Photon* photon = dynamic_cast<const xAOD::Photon*>(candidate.particle);
                 if (photon) fsr_energy = photon->e();
-            } 
+            }
             else if (candidate.container == "electron" ) {
                 const xAOD::Electron* electron = dynamic_cast<const xAOD::Electron*>(candidate.particle);
                 if (electron) fsr_energy = electron->e();
@@ -211,7 +211,7 @@ int main( int argc, char* argv[] )
     }
 
     delete store;
-    
+
     return EXIT_SUCCESS;
 
 }

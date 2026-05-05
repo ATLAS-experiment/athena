@@ -35,7 +35,7 @@ namespace CP {
         CHECK(evtStore()->retrieve(muons, m_input_muons));
 
         // create a shallow copy container for the outputs
-        auto OutMuons = xAOD::shallowCopyContainer(*muons, Gaudi::Hive::currentContext());
+        auto OutMuons = xAOD::shallowCopy(*muons);
 
         for (xAOD::Muon* muon : *OutMuons.first) {
             m_tool->setQuality(*muon);

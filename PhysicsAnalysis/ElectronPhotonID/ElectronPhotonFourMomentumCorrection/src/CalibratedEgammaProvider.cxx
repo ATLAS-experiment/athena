@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
@@ -51,7 +51,7 @@ StatusCode CalibratedEgammaProvider::execute() {
     const xAOD::PhotonContainer* photons = dynamic_cast<const xAOD::PhotonContainer*>(egamma);
     xAOD::EgammaContainer* outcontainer{nullptr};
     if (electrons) {
-      std::pair<std::unique_ptr<xAOD::ElectronContainer>, std::unique_ptr<xAOD::ShallowAuxContainer>> output = xAOD::shallowCopyContainer(*electrons, ctx);
+      xAOD::ShallowCopyResult_t<xAOD::ElectronContainer> output = xAOD::shallowCopy(*electrons, ctx);
       if (!output.first || !output.second) {
             ATH_MSG_FATAL("Creation of shallow copy failed");
             return StatusCode::FAILURE;
@@ -61,7 +61,7 @@ StatusCode CalibratedEgammaProvider::execute() {
       ATH_CHECK(writeHandle.recordNonConst(std::move(output.first), std::move(output.second)));
 
     } else if (photons) {
-         std::pair<std::unique_ptr<xAOD::PhotonContainer>, std::unique_ptr<xAOD::ShallowAuxContainer>> output = xAOD::shallowCopyContainer(*photons, ctx);
+         xAOD::ShallowCopyResult_t<xAOD::PhotonContainer> output = xAOD::shallowCopy(*photons, ctx);
          if (!output.first || !output.second) {
                ATH_MSG_FATAL("Creation of shallow copy failed");
                return StatusCode::FAILURE;
@@ -77,7 +77,7 @@ StatusCode CalibratedEgammaProvider::execute() {
           ATH_MSG_ERROR("Failed to add original object links to shallow copy of " << m_inputKey);
           return StatusCode::FAILURE;
     }
-  
+
       for(xAOD::Egamma* iParticle : *outcontainer) {
             ATH_MSG_VERBOSE(" Old pt=" << iParticle->pt());
             if(m_tool->applyCorrection(*iParticle).code()==CorrectionCode::Error) return StatusCode::FAILURE;

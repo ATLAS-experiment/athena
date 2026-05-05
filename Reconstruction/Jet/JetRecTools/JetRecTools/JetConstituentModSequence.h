@@ -53,7 +53,7 @@ class JetConstituentModSequence: public asg::AsgTool, virtual public IJetExecute
   // Changed from IJetExecute
   ASG_TOOL_CLASS(JetConstituentModSequence, IJetExecuteTool)
   public:
-  JetConstituentModSequence(const std::string &name); // MEN: constructor 
+  JetConstituentModSequence(const std::string &name); // MEN: constructor
   StatusCode initialize();
   int execute() const;
 
@@ -66,15 +66,15 @@ protected:
   // P-A : the actual type
   // Define as a basic integer type because Gaudi
   // doesn't support arbitrary property types
-  unsigned short m_inputType; // 
-  
-  
+  unsigned short m_inputType; //
+
+
   ToolHandleArray<IJetConstituentModifier> m_modifiers{this , "Modifiers" , {} , "List of constit modifier tools."};
 
 #ifndef XAOD_ANALYSIS
   ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool","","Monitoring tool"};
 #endif
-  
+
   bool m_saveAsShallow = true;
 
   // note: not all keys will be used for a particular instantiation
@@ -128,24 +128,23 @@ JetConstituentModSequence::copyModRecord(const SG::ReadHandleKey<T>& inKey,
      optionally modify the elements of this container, and store.
      This puts a (modified) copy of the container  into storegate.
   */
-  
+
   auto inHandle = makeHandle(inKey, ctx);
   if(!inHandle.isValid()){
     ATH_MSG_WARNING("Unable to retrieve input container from " << inKey.key());
     return StatusCode::FAILURE;
   }
 
-  std::pair< std::unique_ptr<T>, std::unique_ptr<xAOD::ShallowAuxContainer> > newconstit =
-    xAOD::shallowCopyContainer(*inHandle, Gaudi::Hive::currentContext());
+  xAOD::ShallowCopyResult_t<T> newconstit = xAOD::shallowCopy(*inHandle);
   newconstit.second->setShallowIO(m_saveAsShallow);
 
   for (auto t : m_modifiers) {ATH_CHECK(t->process(newconstit.first.get()));}
 
   auto handle = makeHandle(outKey, ctx);
   ATH_CHECK(handle.record(std::move(newconstit.first), std::move(newconstit.second)));
-  
+
   xAOD::setOriginalObjectLink(*inHandle, *handle);
-  
+
   return StatusCode::SUCCESS;
 }
 
@@ -182,12 +181,12 @@ template<class T, class U> StatusCode JetConstituentModSequence::copyModRecordFl
         ATH_MSG_WARNING(" This event has no primary vertex container" );
         return StatusCode::FAILURE;
     }
-    
+
     const xAOD::VertexContainer* vertices = handle.cptr();
     if(vertices->empty()){
         ATH_MSG_WARNING(" Failed to retrieve valid primary vertex container" );
         return StatusCode::FAILURE;
-    } 
+    }
     numNeutralCopies = static_cast<unsigned>(vertices->size());
   }
 
@@ -195,8 +194,8 @@ template<class T, class U> StatusCode JetConstituentModSequence::copyModRecordFl
   // Charged elements
   SG::WriteHandle<T> outChargedHandle = makeHandle(outChargedKey, ctx);
 
-  std::pair<std::unique_ptr<T>, std::unique_ptr<xAOD::ShallowAuxContainer> > chargedCopy =
-    xAOD::shallowCopyContainer(*inChargedHandle, ctx);
+  xAOD::ShallowCopyResult_t<T> chargedCopy =
+    xAOD::shallowCopy(*inChargedHandle, ctx);
   chargedCopy.second->setShallowIO(m_saveAsShallow);
   xAOD::setOriginalObjectLink(*inChargedHandle, *chargedCopy.first);
 
@@ -209,8 +208,8 @@ template<class T, class U> StatusCode JetConstituentModSequence::copyModRecordFl
   // Shallow copy
   if (m_saveAsShallow){
 
-    std::pair<std::unique_ptr<T>, std::unique_ptr<xAOD::ShallowAuxContainer> > neutralCopy =
-      xAOD::shallowCopyContainer(*inNeutralHandle, ctx);
+    xAOD::ShallowCopyResult_t<T> neutralCopy =
+      xAOD::shallowCopy(*inNeutralHandle, ctx);
     neutralCopy.second->setShallowIO(true);
     xAOD::setOriginalObjectLink(*inNeutralHandle, *neutralCopy.first);
 
@@ -251,7 +250,7 @@ template<class T, class U> StatusCode JetConstituentModSequence::copyModRecordFl
   ATH_CHECK(outAllHandle.record(std::make_unique<T>(SG::VIEW_ELEMENTS)));
   (*outAllHandle).assign((*outNeutralHandle).begin(), (*outNeutralHandle).end());
   (*outAllHandle).insert((*outAllHandle).end(),
-      (*outChargedHandle).begin(), 
+      (*outChargedHandle).begin(),
       (*outChargedHandle).end());
 
   // 3. Now process modifications on all elements

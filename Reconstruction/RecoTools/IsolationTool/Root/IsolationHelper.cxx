@@ -91,7 +91,7 @@ namespace CP {
 		xAOD::Iso::IsolationCaloCorrectionBitset mask = 0;
 		xAOD::Iso::IsolationCaloCorrectionBitsetHelper::encode(corrs, mask);
 
-		return isolation(value, par, type, mask); 
+		return isolation(value, par, type, mask);
 	}
 
 	bool IsolationHelper::isolation(float& value, const xAOD::IParticle& par, xAOD::Iso::IsolationType type, const xAOD::Iso::IsolationCaloCorrectionBitset& corrMask) const {
@@ -101,7 +101,7 @@ namespace CP {
 		xAOD::Iso::IsolationCaloCorrectionBitset origMask = 0;
 		if(!correctionBitset(origMask, par, type)) return false;
 
-		if(origMask == corrMask) { 
+		if(origMask == corrMask) {
 			value=origValue;
 		} else{
 			float origCorr = 0;
@@ -118,9 +118,8 @@ namespace CP {
 	bool IsolationHelper::updateIsolation(xAOD::MuonContainer*& copy,xAOD::ShallowAuxContainer*& copyaux, std::vector<xAOD::Iso::IsolationType>& types, xAOD::Iso::IsolationCaloCorrectionBitset corrMask, std::string muonkey, bool recordSG) const {
 		const xAOD::MuonContainer* muons(nullptr);
 		ATH_CHECK( evtStore()->retrieve(muons,muonkey), false );
-                std::pair<std::unique_ptr<xAOD::MuonContainer>,
-                          std::unique_ptr<xAOD::ShallowAuxContainer> >  shallowcopy =
-                  xAOD::shallowCopyContainer(*muons, Gaudi::Hive::currentContext());
+      xAOD::ShallowCopyResult_t<xAOD::MuonContainer> shallowcopy =
+		  xAOD::shallowCopy(*muons);
 		copy = shallowcopy.first.get();
 		copyaux = shallowcopy.second.get();
 
@@ -177,7 +176,7 @@ namespace CP {
 		if (evtStore()->retrieve(edShape,esName).isFailure()) {
 			ATH_MSG_ERROR("Cannot retrieve density container " + esName + " for isolation correction. No ED correction");
 			return false;
-		} 
+		}
 
 		double rho = 0;
 		bool gotDensity = edShape->getDensity(xAOD::EventShape::Density,rho);

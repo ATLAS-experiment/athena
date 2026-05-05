@@ -13,7 +13,7 @@ StatusCode PFOClusterMLCorrectionAlgorithm::initialize()
   ATH_CHECK(m_chargedFEMLContainerWriteHandleKey.initialize());
   ATH_CHECK(m_neutralFEContainerReadHandleKey.initialize());
   ATH_CHECK(m_neutralFEMLContainerWriteHandleKey.initialize());
-  
+
   return StatusCode::SUCCESS;
 }
 
@@ -32,10 +32,9 @@ StatusCode PFOClusterMLCorrectionAlgorithm::shallowCopyChargedFEContainer(const 
   // Just a shallow copy, no modifications
   SG::ReadHandle<xAOD::FlowElementContainer> chargedFEContainerReadHandle(m_chargedFEContainerReadHandleKey, ctx);
 
-  std::pair<std::unique_ptr<xAOD::FlowElementContainer>,
-            std::unique_ptr<xAOD::ShallowAuxContainer> > shallowCopyPair =
-    xAOD::shallowCopyContainer(*chargedFEContainerReadHandle, ctx);
-  
+  xAOD::ShallowCopyResult_t<xAOD::FlowElementContainer> shallowCopyPair =
+    xAOD::shallowCopy(*chargedFEContainerReadHandle, ctx);
+
   SG::WriteHandle<xAOD::FlowElementContainer> chargedFEMLContainerWriteHandle(m_chargedFEMLContainerWriteHandleKey, ctx);
   ATH_CHECK(chargedFEMLContainerWriteHandle.record(std::move(shallowCopyPair.first), std::move(shallowCopyPair.second)));
 
@@ -43,16 +42,15 @@ StatusCode PFOClusterMLCorrectionAlgorithm::shallowCopyChargedFEContainer(const 
 }
 
 StatusCode PFOClusterMLCorrectionAlgorithm::shallowCopyAndModifyNeutralFEContainer(const EventContext &ctx) const {
-  
+
   // Shallow copy step
   SG::ReadHandle<xAOD::FlowElementContainer> neutralFEContainerReadHandle(m_neutralFEContainerReadHandleKey, ctx);
-  std::pair<std::unique_ptr<xAOD::FlowElementContainer>,
-            std::unique_ptr<xAOD::ShallowAuxContainer> > shallowCopyPair =
-    xAOD::shallowCopyContainer(*neutralFEContainerReadHandle, ctx);
+  xAOD::ShallowCopyResult_t<xAOD::FlowElementContainer> shallowCopyPair =
+    xAOD::shallowCopy(*neutralFEContainerReadHandle, ctx);
 
   // Modification step
   m_correctionTool->correctContainer(*shallowCopyPair.first);
-  
+
   // Registration of results step
   SG::WriteHandle<xAOD::FlowElementContainer> neutralFEMLContainerWriteHandle(m_neutralFEMLContainerWriteHandleKey, ctx);
   ATH_CHECK(neutralFEMLContainerWriteHandle.record(std::move(shallowCopyPair.first), std::move(shallowCopyPair.second)));
