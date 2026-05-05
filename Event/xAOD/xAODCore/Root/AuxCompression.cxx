@@ -47,9 +47,12 @@ namespace xAOD {
   /// @param fullset The variables to be compressed based on the rules received
   /// @returns The list of variables to be compressed per compression level
   ///
-  std::map< unsigned int, SG::auxid_set_t >
+  std::map< unsigned int, SG::auxid_set_t > 
   AuxCompression::getCompressedAuxIDs( const SG::auxid_set_t& fullset ) const {
-
+    //these are unnecessary if using a transparent comparitor in the set type
+    static const std::string hyphenStr{"-"};
+    static const std::string asteriskStr{"*"};
+    //
     // Create an empty result map
     std::map< unsigned int, SG::auxid_set_t > result;
 
@@ -58,21 +61,21 @@ namespace xAOD {
 
       // Set helper variables
       const unsigned int nmantissa = val.first;
-      const std::set< std::string > &names = val.second;
+      const std::set< std::string> &names = val.second;
 
       // Start from an empty list
       SG::auxid_set_t auxids;
 
       // Check the simplest case, nothing to be compressed
-      if( names.empty() || ( names.find("-") != names.end() ) ) {
+      if( names.empty() || ( names.find(hyphenStr) != names.end() ) ) {
         continue;
       }
 
       // Check that the user only put positive or negative selections on the
       // list. They can't be mixed.
       bool sub = false, add = false;
-      std::set< std::string >::const_iterator name_itr = names.begin();
-      std::set< std::string >::const_iterator name_end = names.end();
+      auto name_itr = names.begin();
+      auto name_end = names.end();
       for( ; name_itr != name_end; ++name_itr ) {
          if( ( *name_itr )[ 0 ] == '-' ) {
             sub = true;
@@ -102,7 +105,7 @@ namespace xAOD {
       }
 
       // Check if all floats are to be compressed
-      if( names.find("*") != names.end() ) {
+      if( names.find(asteriskStr) != names.end() ) {
         auxids = std::move(fauxids);
       }
       // Here comes the parsing either + or - as in AuxSelection that we follow closely

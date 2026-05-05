@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -707,7 +707,7 @@ namespace xAOD {
 
       // All the variables handled by the internal store are dynamic
       // if such a store exists:
-      if( m_storeIO ) {
+      if( m_storeIO && m_store) {
          // I mean, all the variables. Not just the ones reported as dynamic
          // by the internal object. Because the internal object may be something
          // that was put into this one in order to achieve data slimming.
@@ -727,7 +727,7 @@ namespace xAOD {
 
       // All the variables handled by the internal store are dynamic
       // if such a store exists:
-      if( m_storeIO ) {
+      if( m_storeIO && m_store) {
          // I mean, all the variables. Not just the ones reported as dynamic
          // by the internal object. Because the internal object may be something
          // that was put into this one in order to achieve data slimming.
