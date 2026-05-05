@@ -6,6 +6,7 @@
 #include <PixelReadoutGeometry/PixelModuleDesign.h>
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "InDetMeasurementUtilities/Helpers.h"
+#include "Acts/Surfaces/PlaneSurface.hpp"
 
 #include <stdexcept>
 
