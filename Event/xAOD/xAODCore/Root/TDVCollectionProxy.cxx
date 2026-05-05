@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -464,8 +464,15 @@ namespace xAOD {
                   cl->GetName() );
          return nullptr;
       }
-
+      /*
+       * CID 20575: (#1 of 1): String converted to C pointer then back to string 
+       * (UNNECESSARY_STRING_COPY)
+       * string_to_ptr_and_back: In eltname.c_str(), a C++ string is converted to 
+       * a C-style pointer, then passed to a function that uses this pointer to construct 
+       * one or more strings.
+      */
       // Find the container and element offsets.
+      //coverity[UNNECESSARY_STRING_COPY]
       FindOffsets( eltname.c_str(), fName );
 
       // Set up the element size.  No offset, since this isn't a map.

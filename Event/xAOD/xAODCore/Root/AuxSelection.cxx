@@ -1,12 +1,10 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: AuxSelection.cxx 653257 2015-03-11 11:26:15Z krasznaa $
 
-// System include(s):
-#include <iostream>
-#include <map>
+
 
 // EDM include(s):
 #include "AthContainers/AuxTypeRegistry.h"
@@ -15,6 +13,10 @@
 #include "xAODCore/AuxSelection.h"
 #include "CxxUtils/checker_macros.h"
 #include <mutex>
+
+// System include(s):
+#include <iostream>
+#include <map>
 
 namespace {
 
@@ -60,17 +62,17 @@ namespace xAOD {
    ///
    SG::auxid_set_t
    AuxSelection::getSelectedAuxIDs( const SG::auxid_set_t& fullset ) const {
-
+      static const std::string asteriskStr{"*"}; //..or use a transparent comparitor
       // Check for the simplest case... all variables selected:
-      if( m_names.empty() || ( m_names.find( "*" ) != m_names.end() ) ) {
+      if( m_names.empty() || ( m_names.find( asteriskStr ) != m_names.end() ) ) {
          return fullset;
       }
 
       // Start from an empty list:
       SG::auxid_set_t auxids;
-
+      static const std::string hyphenStr{"-"};
       // Check if everything should be disregarded:
-      if( m_names.find( "-" ) != m_names.end() ) {
+      if( m_names.find( hyphenStr ) != m_names.end() ) {
          return auxids;
       }
 
