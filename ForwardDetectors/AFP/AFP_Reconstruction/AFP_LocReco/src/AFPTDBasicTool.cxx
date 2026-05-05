@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @file   AFPTDBasicTool.cxx
@@ -122,6 +122,10 @@ StatusCode AFPTDBasicTool::reconstructTracks(std::unique_ptr<xAOD::AFPToFTrackCo
           TrSat++;
         }
       }
+    if (weight == 0.){
+      ATH_MSG_ERROR("weight is zero in time average calculation");
+      return StatusCode::FAILURE;
+    }
     // time average
     if( TrSize!=TrSat) TrTime /= weight;
     
