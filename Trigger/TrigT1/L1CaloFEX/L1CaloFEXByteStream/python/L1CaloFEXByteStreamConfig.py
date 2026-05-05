@@ -12,13 +12,8 @@ def eFexByteStreamToolCfg(flags, name, *, writeBS=False, TOBs=True, xTOBs=False,
 
   if writeBS:
     # write BS == read xAOD
-    # Note: this is currently unsupported!!!
-    if TOBs:
-      tool.eEMContainerReadKeys  += ["L1_eEMRoI"]
-      tool.eTAUContainerReadKeys  += ["L1_eTauRoI"]
-    if xTOBs:
-      tool.eEMContainerReadKeys += ["L1_eEMxRoI"]
-      tool.eTAUContainerReadKeys += ["L1_eTauxRoI"]
+    # Input RoI containers come from the TrigCompositeContainer passed by the
+    # Cnv at runtime, so no read-handle properties are needed here.
     tool.eEMContainerWriteKey  = ""
     tool.eTAUContainerWriteKey = ""
     efex_roi_moduleids = [0x1000,0x1100]

@@ -482,6 +482,7 @@ if(m_writeDecodedMuonRoIs){
 // xAOD->BS conversion
 // -----------------------------------------------------------------------------
 StatusCode MuonRoIByteStreamTool::convertToBS(std::vector<WROBF*>& vrobf,
+                                              const xAOD::TrigCompositeContainer* /*tc*/,
                                               const EventContext& eventContext) {
   // Retrieve the RoI containers and determine how many time slices will be encoded
   std::vector<SG::ReadHandle<xAOD::MuonRoIContainer>> handles = m_roiReadKeys.makeHandles(eventContext);

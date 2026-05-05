@@ -127,6 +127,7 @@ StatusCode RoIBResultByteStreamTool::initialize() {
 }
 
 StatusCode RoIBResultByteStreamTool::convertToBS(std::vector<OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment*>& vrobf,
+                                                 const xAOD::TrigCompositeContainer* /*tc*/,
                                                  const EventContext& eventContext) {
   auto roibResult = SG::makeHandle(m_roibResultReadKey, eventContext);
   ATH_CHECK(roibResult.isValid());

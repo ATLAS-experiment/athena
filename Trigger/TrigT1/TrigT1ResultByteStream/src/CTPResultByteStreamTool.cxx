@@ -169,7 +169,9 @@ StatusCode CTPResultByteStreamTool::convertFromBS(const std::vector<const ROBF*>
 // -----------------------------------------------------------------------------
 // xAOD->BS conversion
 // -----------------------------------------------------------------------------
-StatusCode CTPResultByteStreamTool::convertToBS(std::vector<WROBF*>& vrobf, const EventContext& eventContext) {
+StatusCode CTPResultByteStreamTool::convertToBS(std::vector<WROBF*>& vrobf,
+                                                const xAOD::TrigCompositeContainer* /*tc*/,
+                                                const EventContext& eventContext) {
 
   // Retrieve the xAOD::CTPResult object
   SG::ReadHandle<xAOD::CTPResult> result = SG::makeHandle<xAOD::CTPResult>(m_inKeyCTPResult, eventContext);
