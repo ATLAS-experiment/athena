@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GTowerRhoSubtractionAlg.h"
@@ -52,7 +52,7 @@ namespace LVL1
       ATH_MSG_ERROR("Failed to retrieve input towers " << m_inputKey.key());
       return StatusCode::FAILURE;
     }
-    auto [outputTowers, outputTowersAux] = xAOD::shallowCopyContainer(*inputTowers, ctx);
+    auto [outputTowers, outputTowersAux] = xAOD::shallowCopy(*inputTowers, ctx);
     xAOD::setOriginalObjectLink(*inputTowers, *outputTowers);
 
     // Split towers into FPGAs

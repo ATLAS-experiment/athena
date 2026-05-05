@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetRec/JetCopier.h"
@@ -92,9 +92,8 @@ std::pair<std::unique_ptr<xAOD::JetContainer>,std::unique_ptr<SG::IAuxStore> > J
 
   ATH_MSG_DEBUG("Shallow-copying jets");
 
-  std::pair<std::unique_ptr<xAOD::JetContainer>,
-            std::unique_ptr<xAOD::ShallowAuxContainer> > shallowcopy =
-    xAOD::shallowCopyContainer(*inputJetsHandle, Gaudi::Hive::currentContext());
+  xAOD::ShallowCopyResult_t<xAOD::JetContainer> shallowcopy =
+    xAOD::shallowCopy(*inputJetsHandle);
 
   shallowcopy.second->setShallowIO(m_shallowIO);
 

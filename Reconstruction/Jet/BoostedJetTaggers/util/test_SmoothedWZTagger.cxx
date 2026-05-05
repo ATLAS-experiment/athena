@@ -77,7 +77,7 @@ int test1( int argc, char* argv[] ) {
     options+=(argv[i]);
   }
 
-  if(options.find("-f")!=std::string::npos){    
+  if(options.find("-f")!=std::string::npos){
     for( int ipos=0; ipos<argc ; ipos++ ) {
       if(std::string(argv[ipos]).compare("-f")==0){
 	if( ipos+1 == argc || std::string(argv[ipos+1])[0]=='-' ) {
@@ -178,8 +178,8 @@ int test1( int argc, char* argv[] ) {
   Tree->Branch( "m", &m, "m/F" );
   Tree->Branch( "eta", &eta, "eta/F" );
   Tree->Branch( "eff", &eff, "eff/F" );
-  Tree->Branch( "effSF", &effSF, "effSF/F" );  
-  Tree->Branch( "sigeffSF", &sigeffSF, "sigeffSF/F" );  
+  Tree->Branch( "effSF", &effSF, "effSF/F" );
+  Tree->Branch( "sigeffSF", &sigeffSF, "sigeffSF/F" );
   Tree->Branch( "truthLabel", &truthLabel, "truthLabel/I" );
 
   std::unique_ptr<JetUncertaintiesTool> jetUncToolSF(new JetUncertaintiesTool(("JetUncProvider_SF")));
@@ -199,7 +199,7 @@ int test1( int argc, char* argv[] ) {
 	std::string sysPulled = sysName + pull;
 	jetUnc_sysSets.push_back(CP::SystematicSet(sysPulled));
       }
-    }  
+    }
   }
 
   ////////////////////////////////////////////
@@ -259,9 +259,7 @@ int test1( int argc, char* argv[] ) {
       continue ;
 
     // Loop over jet container
-    std::pair< xAOD::JetContainer*, xAOD::ShallowAuxContainer* > jets_shallowCopy = xAOD::shallowCopyContainer( *myJets );
-    std::unique_ptr<xAOD::JetContainer> shallowJets(jets_shallowCopy.first);
-    std::unique_ptr<xAOD::ShallowAuxContainer> shallowAux(jets_shallowCopy.second);
+    auto [shallowJets, shallowAux] = xAOD::shallowCopy( *myJets );
     for( xAOD::Jet* jetSC : *shallowJets ){
 
       ANA_CHECK( m_Tagger->tag( *jetSC ) );
@@ -303,8 +301,8 @@ int test1( int argc, char* argv[] ) {
 	    validForUncTool &= ( m/pt >= 0 && m/pt <= 1 );
 	    validForUncTool &= ( std::abs(eta) < 2 );
 	    std::cout << "Pass: " << pass << std::endl;
-	    std::cout << "Nominal SF=" << sf << " truthLabel=" << truthLabel << " (1: t->qqb) " 
-		      << effSF << " " << eff << " " << pass << std::endl;     
+	    std::cout << "Nominal SF=" << sf << " truthLabel=" << truthLabel << " (1: t->qqb) "
+		      << effSF << " " << eff << " " << pass << std::endl;
 	    if( validForUncTool ){
 	      for ( const CP::SystematicSet& sysSet : jetUnc_sysSets ){
 		ANA_CHECK( m_Tagger->tag( *jetSC ) );

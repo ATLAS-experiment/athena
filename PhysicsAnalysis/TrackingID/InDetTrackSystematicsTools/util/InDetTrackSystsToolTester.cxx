@@ -114,7 +114,7 @@ int main( int argc, char* argv[] ) {
 
    InDet::JetTrackFilterTool jetFilterTool( "JetTrackFilterTool" );
    CHECK( jetFilterTool.setProperty("trackOriginTool", trackTruthOriginToolHandle) );
-   
+
    // Not a realistic set of systematics - we just want to make sure they can all be applied without breaking the tools
    CP::SystematicSet systSet = {
      CP::SystematicVariation("TRK_RES_D0_MEAS", -1),
@@ -172,7 +172,7 @@ int main( int argc, char* argv[] ) {
    } else {
      isSim = ei->eventType( xAOD::EventInfo::IS_SIMULATION );
    }
-   
+
 
    int debugN = 8; // number of tracks to print debug output for
    // Loop over the events:
@@ -180,19 +180,18 @@ int main( int argc, char* argv[] ) {
 
       // Tell the object which entry to look at:
       event.getEntry( entry );
-    
+
       // Create a shallow copy of InDetTrackParticles:
       const xAOD::TrackParticleContainer* ParticlesID = nullptr;
       CHECK( event.retrieve( ParticlesID , "InDetTrackParticles" ) );
-   
+
       const xAOD::JetContainer* jets = nullptr;
       if (doTIDE) {
         CHECK( event.retrieve( jets, jetCollectionName ) );
       }
 
-      std::pair< std::unique_ptr<xAOD::TrackParticleContainer>,
-                 std::unique_ptr<xAOD::ShallowAuxContainer> > ParticlesID_shallowCopy =
-        xAOD::shallowCopyContainer( *ParticlesID, Gaudi::Hive::currentContext() );
+      xAOD::ShallowCopyResult_t<xAOD::TrackParticleContainer> ParticlesID_shallowCopy =
+        xAOD::shallowCopy( *ParticlesID );
       for ( xAOD::TrackParticle* trkCpy : *ParticlesID_shallowCopy.first ) {
 
          if ( isSim ) {
@@ -243,7 +242,7 @@ int main( int argc, char* argv[] ) {
          qOverP_diff->Fill( qOverPd );
       }
    }
-   
+
    outfile->Write();
 
    // testing smart slimming feature:

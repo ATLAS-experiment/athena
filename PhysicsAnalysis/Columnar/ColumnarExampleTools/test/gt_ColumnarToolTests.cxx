@@ -114,7 +114,7 @@ public:
 
   virtual StatusCode copyRecord (EventStoreType& evtStore, const std::string& postfix) override
   {
-    auto [jetsCopy, auxCopy] = xAOD::shallowCopyContainer (*m_jets, Gaudi::Hive::currentContext());
+    auto [jetsCopy, auxCopy] = xAOD::shallowCopy (*m_jets);
     m_jets = jetsCopy.get();
     ANA_CHECK (evtStore.record (std::move(jetsCopy), m_name + postfix));
     ANA_CHECK (evtStore.record (std::move(auxCopy), m_name + postfix + "Aux."));
@@ -324,7 +324,7 @@ public:
 
   virtual StatusCode copyRecord (EventStoreType& evtStore, const std::string& postfix) override
   {
-    auto [jetsCopy, auxCopy] = xAOD::shallowCopyContainer (*m_jets, Gaudi::Hive::currentContext());
+    auto [jetsCopy, auxCopy] = xAOD::shallowCopy (*m_jets);
     m_jets = jetsCopy.get();
     ATH_CHECK (evtStore.record (std::move(jetsCopy), m_name + postfix));
     ATH_CHECK (evtStore.record (std::move(auxCopy), m_name + postfix + "Aux."));
@@ -516,13 +516,11 @@ public:
 
   virtual StatusCode copyRecord (EventStoreType& evtStore, const std::string& postfix) override
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
-
-    auto [electronsCopy, electronsAuxCopy] = xAOD::shallowCopyContainer (*m_electrons, ctx);
+    auto [electronsCopy, electronsAuxCopy] = xAOD::shallowCopy (*m_electrons);
     m_electrons = electronsCopy.get();
     ANA_CHECK (evtStore.record (std::move(electronsCopy), m_electronName + postfix));
     ANA_CHECK (evtStore.record (std::move(electronsAuxCopy), m_electronName + postfix + "Aux."));
-    auto [muonsCopy, muonsAuxCopy] = xAOD::shallowCopyContainer (*m_muons, ctx);
+    auto [muonsCopy, muonsAuxCopy] = xAOD::shallowCopy (*m_muons);
     m_muons = muonsCopy.get();
     ANA_CHECK (evtStore.record (std::move(muonsCopy), m_muonName + postfix));
     ANA_CHECK (evtStore.record (std::move(muonsAuxCopy), m_muonName + postfix + "Aux."));
@@ -620,9 +618,7 @@ public:
 
   virtual StatusCode copyRecord (EventStoreType& evtStore, const std::string& postfix) override
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
-
-    auto [jetsCopy, jetsAuxCopy] = xAOD::shallowCopyContainer (*m_jets, ctx);
+    auto [jetsCopy, jetsAuxCopy] = xAOD::shallowCopy (*m_jets);
     m_jets = jetsCopy.get();
     ANA_CHECK (evtStore.record (std::move(jetsCopy), m_jetName + postfix));
     ANA_CHECK (evtStore.record (std::move(jetsAuxCopy), m_jetName + postfix + "Aux."));

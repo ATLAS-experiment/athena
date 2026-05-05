@@ -130,7 +130,7 @@ namespace ORUtils
     {
       const EventContext& ctx = Gaudi::Hive::currentContext();
 
-      auto [particles1Copy, aux1Copy] = xAOD::shallowCopyContainer (*m_particles1, ctx);
+      auto [particles1Copy, aux1Copy] = xAOD::shallowCopy (*m_particles1, ctx);
       m_particles1 = particles1Copy.get();
       ATH_CHECK (evtStore.record (std::move(particles1Copy), m_name1 + postfix));
       ATH_CHECK (evtStore.record (std::move(aux1Copy), m_name1 + postfix + "Aux."));
@@ -142,7 +142,7 @@ namespace ORUtils
           return StatusCode::SUCCESS;
         }
       }
-      auto [particles2Copy, aux2Copy] = xAOD::shallowCopyContainer (*m_particles2, ctx);
+      auto [particles2Copy, aux2Copy] = xAOD::shallowCopy (*m_particles2, ctx);
       m_particles2 = particles2Copy.get();
       ATH_CHECK (evtStore.record (std::move(particles2Copy), m_name2 + postfix));
       ATH_CHECK (evtStore.record (std::move(aux2Copy), m_name2 + postfix + "Aux."));
@@ -182,7 +182,7 @@ namespace ORUtils
     ASSERT_SUCCESS (tool->setProperty ("OutputPassValue", true));
     ASSERT_SUCCESS (tool->setProperty ("InputLabel", ""));
     ASSERT_SUCCESS (tool->initialize ());
-  
+
     std::string particles1 = "AnalysisJets";
     std::string particles2 = "AnalysisPhotons";
     CallXAODOverlapTool<xAOD::JetContainer,xAOD::PhotonContainer> callXAOD (*tool, particles1, particles2);
@@ -264,7 +264,7 @@ namespace ORUtils
     ASSERT_SUCCESS (tool->setProperty ("OutputPassValue", true));
     ASSERT_SUCCESS (tool->setProperty ("InputLabel", ""));
     ASSERT_SUCCESS (tool->initialize ());
-  
+
     std::string particles1 = "AnalysisJets";
     std::string particles2 = "AnalysisElectrons";
     CallXAODOverlapTool<xAOD::JetContainer,xAOD::ElectronContainer> callXAOD (*tool, particles1, particles2);
@@ -344,7 +344,7 @@ namespace ORUtils
     columnar::Track0Accessor<float> dummy0Acc {*tool, "phi"};
     columnar::Track1Accessor<float> dummy1Acc {*tool, "phi"};
     ASSERT_SUCCESS (tool->initialize ());
-  
+
     std::string particles1 = "AnalysisMuons";
     std::string particles2 = "AnalysisJets";
     CallXAODOverlapTool<xAOD::MuonContainer,xAOD::JetContainer> callXAOD (*tool, particles1, particles2);
@@ -369,7 +369,7 @@ namespace ORUtils
     columnar::Track0Accessor<float> dummy0Acc {*tool, "phi"};
     columnar::Track1Accessor<float> dummy1Acc {*tool, "phi"};
     ASSERT_SUCCESS (tool->initialize ());
-  
+
     std::string particles1 = "AnalysisMuons";
     std::string particles2 = "AnalysisJets";
     CallXAODOverlapTool<xAOD::MuonContainer,xAOD::JetContainer> callXAOD (*tool, particles1, particles2);
@@ -393,7 +393,7 @@ namespace ORUtils
     // not in actual use)
     columnar::TrackAccessor<float> dummy0Acc {*tool, "phi"};
     ASSERT_SUCCESS (tool->initialize ());
-  
+
     std::string particles1 = "AnalysisElectrons";
     std::string particles2 = "AnalysisElectrons";
     CallXAODOverlapTool<xAOD::ElectronContainer,xAOD::ElectronContainer> callXAOD (*tool, particles1, particles2);

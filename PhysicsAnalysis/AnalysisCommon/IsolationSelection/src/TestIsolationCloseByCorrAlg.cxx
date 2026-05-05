@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 // Local include(s):
@@ -60,9 +60,9 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
     template <class TARGET_TYPE, class CONT_TYPE, class COPY_TYPE>
-    StatusCode TestIsolationCloseByCorrAlg::loadContainer(const EventContext& ctx, 
+    StatusCode TestIsolationCloseByCorrAlg::loadContainer(const EventContext& ctx,
                                                           const SG::ReadHandleKey<CONT_TYPE>& key,
-                                                          std::pair<std::unique_ptr<COPY_TYPE>, 
+                                                          std::pair<std::unique_ptr<COPY_TYPE>,
                                                           std::unique_ptr<xAOD::ShallowAuxContainer>>& cont) const {
         if (key.empty()) {
             ATH_MSG_DEBUG("No key given. Assume it's no required to load the container");
@@ -73,8 +73,8 @@ namespace CP {
             ATH_MSG_FATAL("Failed to load container " << key.fullKey());
             return StatusCode::FAILURE;
         }
-        
-        cont = xAOD::shallowCopyContainer(dynamic_cast<const TARGET_TYPE&> (*readHandle),ctx);
+
+        cont = xAOD::shallowCopy(dynamic_cast<const TARGET_TYPE&> (*readHandle),ctx);
         if (!m_selDecorator && !m_isoDecorator) return StatusCode::SUCCESS;
         std::unique_ptr<COPY_TYPE>& elems = cont.first;
         for (auto part : *(elems.get()) ) {
@@ -132,7 +132,7 @@ namespace CP {
         // parse the associated muon clusters to the tool
         ClusterSet muon_clusters;
         PflowSet pflows;
-    
+
 
         /// If the track selection alg upstream is defined let's check whether the collection is complete
         TrackSet selected_trks{}, expected_trks{};
@@ -150,7 +150,7 @@ namespace CP {
             correction_tool()->loadAssociatedObjects(ctx, cache);
             expected_trks = std::move(cache.tracks);
             muon_clusters = std::move(cache.clusters);
-            pflows = std::move(cache.flows);          
+            pflows = std::move(cache.flows);
         }
 
         // Store everything in the final ntuples

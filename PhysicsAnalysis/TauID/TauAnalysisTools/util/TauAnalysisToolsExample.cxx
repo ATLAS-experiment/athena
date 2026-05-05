@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -56,7 +56,7 @@ using namespace TauAnalysisTools;
   else									\
     Warning("TauAnalysisToolsExample","%s container is not available", NAME);		\
   } while(false)							\
- 
+
 int main( int argc, char* argv[] )
 {
   StatusCode::enableFailure();
@@ -85,7 +85,7 @@ int main( int argc, char* argv[] )
 
   //Do the trigger efficiency tools, requires correct ilumicalc
   bool m_doTrigger =  bool(argc>4);
-  
+
   Info( "TauAnalysisToolsExample", "Opening output file: %s", sOutputFileName.Data() );
   std::unique_ptr< TFile > fOutputFile( TFile::Open( sOutputFileName, "RECREATE" ) );
   CHECK( fOutputFile.get() );
@@ -138,7 +138,7 @@ int main( int argc, char* argv[] )
   TauAnalysisTools::TauSmearingTool TauSmeTool( "TauSmearingTool" );
   TauSmeTool.msg().setLevel( MSG::DEBUG );
   CHECK(TauSmeTool.setProperty("RecommendationTag","2025-prerec"));
-  CHECK(TauSmeTool.setProperty("Campaign","mc23")); // can be also set to mc20 depending on the mc campaign 
+  CHECK(TauSmeTool.setProperty("Campaign","mc23")); // can be also set to mc20 depending on the mc campaign
   CHECK(TauSmeTool.initialize());
 
   // restructure all recommended systematic variations for smearing tool
@@ -157,7 +157,7 @@ int main( int argc, char* argv[] )
   CHECK(TauEffCorrTool.setProperty("JetIDLevel", static_cast<int>(TauAnalysisTools::JetID::JETIDRNNMEDIUM)));
   CHECK(TauEffCorrTool.setProperty("EfficiencyCorrectionTypes", static_cast<int>(TauAnalysisTools::EfficiencyCorrectionType::SFJetIDHadTau)));
   CHECK(TauEffCorrTool.setProperty("RecommendationTag","2025-prerec"));
-  CHECK(TauEffCorrTool.setProperty("Campaign", "mc23")); // can be also set to mc20 depending on the mc campaign 
+  CHECK(TauEffCorrTool.setProperty("Campaign", "mc23")); // can be also set to mc20 depending on the mc campaign
   CHECK(TauEffCorrTool.initialize());
 
   // restructure all recommended systematic variations for efficiency tools
@@ -181,7 +181,7 @@ int main( int argc, char* argv[] )
     CHECK(TauEffTrigTool.setProperty("EfficiencyCorrectionTypes", std::vector<int>({SFTriggerHadTau}) ));
     CHECK(TauEffTrigTool.setProperty("TriggerName", "HLT_tau25_mediumRNN_tracktwoMVA" ));
     CHECK(TauEffTrigTool.setProperty("JetIDLevel", static_cast<int>(JETIDRNNMEDIUM) ));
-    CHECK(TauEffTrigTool.setProperty("Campaign", "mc23a")); // can be also set to mc23d depending on the mc campaign 
+    CHECK(TauEffTrigTool.setProperty("Campaign", "mc23a")); // can be also set to mc23d depending on the mc campaign
     CHECK(TauEffTrigTool.initialize());
 
     vEfficiencyCorrectionsTriggerSystematicSet.push_back(CP::SystematicSet());
@@ -190,7 +190,7 @@ int main( int argc, char* argv[] )
       vEfficiencyCorrectionsTriggerSystematicSet.push_back(CP::SystematicSet());
       vEfficiencyCorrectionsTriggerSystematicSet.back().insert(SystematicsVariation);
     }
-  }  
+  }
   // ===========================================================================
   // TauTruthMatchingTool
   // ===========================================================================
@@ -228,13 +228,13 @@ int main( int argc, char* argv[] )
 
     //Check TauJet Container Name
     const char * m_tauJetContainerName = "TauJets";
-    if (xEvent.contains<xAOD::TauJetContainer>(m_tauJetContainerName)){			  
+    if (xEvent.contains<xAOD::TauJetContainer>(m_tauJetContainerName)){
       RETRIEVE(xAOD::TauJetContainer, xTauJetContainer, m_tauJetContainerName);
     }else{
       m_tauJetContainerName = "AnalysisTauJets";
       RETRIEVE(xAOD::TauJetContainer, xTauJetContainer, m_tauJetContainerName);
     }
-    std::pair< xAOD::TauJetContainer*, xAOD::ShallowAuxContainer* >xTauShallowContainer = xAOD::shallowCopyContainer(*xTauJetContainer);
+    xAOD::ShallowCopyResult_t<xAOD::TauJetContainer> xTauShallowContainer = xAOD::shallowCopy(*xTauJetContainer);
     if(iEntry==0){
       Info( "TauAnalysisToolsExample:: TauJetContainer = ",m_tauJetContainerName);
     }
@@ -313,7 +313,7 @@ int main( int argc, char* argv[] )
               sSystematicSet.name().c_str());
         }
       }
- 
+
       // Select "good" taus:
       if( ! TauSelTool->accept( *xTau ) ){
         Info( "TauAnalysisToolsExample",

@@ -463,9 +463,8 @@ TrackCaloClusterRecValidationTool::calibrateAndRecordShallowCopyJetCollection(co
 {
 
   // create a shallow copy of the jet container
-  std::pair<std::unique_ptr<xAOD::JetContainer>,
-            std::unique_ptr<xAOD::ShallowAuxContainer> > shallowCopy =
-    xAOD::shallowCopyContainer(*jetContainer, ctx);
+  xAOD::ShallowCopyResult_t<xAOD::JetContainer> shallowCopy =
+    xAOD::shallowCopy(*jetContainer, ctx);
 
   int pos = std::find(m_jetCalibrationCollections.begin(), m_jetCalibrationCollections.end(), name) -
             m_jetCalibrationCollections.begin();

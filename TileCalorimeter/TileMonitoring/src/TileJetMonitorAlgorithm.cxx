@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileJetMonitorAlgorithm.h"
@@ -45,7 +45,7 @@ StatusCode TileJetMonitorAlgorithm::initialize() {
 
   //=== cache pointers to cabling helpers
   m_cabling = cablingSvc->cablingService();
- 
+
   if (!m_cabling) {
     ATH_MSG_ERROR( "Pointer to TileCablingService is zero: " << m_cabling);
     return StatusCode::FAILURE;
@@ -62,7 +62,7 @@ StatusCode TileJetMonitorAlgorithm::initialize() {
     ATH_MSG_DEBUG("::initializing JVT updater");
     ATH_CHECK(m_jvt.retrieve());
     ATH_MSG_DEBUG("::initialized JVT updater");
-    
+
     ATH_MSG_DEBUG("::initializing JetCleaningTool");
     ATH_CHECK(m_jetCleaningTool.retrieve());
     ATH_CHECK(m_eventCleaningTool.retrieve());
@@ -91,7 +91,7 @@ StatusCode TileJetMonitorAlgorithm::initialize() {
   if (m_energyE4Min < 0) m_energyE4Min = m_energyE3Min;
   if (m_energyE4Max < 0) m_energyE4Max = m_energyE3Max;
   if (m_gainE4 < 0) m_gainE4 = m_gainE3;
-  
+
   return StatusCode::SUCCESS;
 }
 
@@ -148,14 +148,14 @@ StatusCode TileJetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
 }
 
 
-/*---------------------------------------------------------*/  
+/*---------------------------------------------------------*/
 StatusCode TileJetMonitorAlgorithm::fillTimeHistograms(const xAOD::Jet& jet, uint32_t lumiBlock, std::set<Identifier>& usedCells) const {
-/*---------------------------------------------------------*/  
+/*---------------------------------------------------------*/
 
   ATH_MSG_VERBOSE( "in fillTimeHistograms()" );
 
   if( jet.numConstituents() == 0 || !jet.getConstituents().isValid()) return StatusCode::SUCCESS;
-     
+
   int cellIndex(-1);
 
   ToolHandle<GenericMonitoringTool> tileJetChannTimeDQTool = getGroup("TileJetChanTimeDQ");
@@ -182,7 +182,7 @@ StatusCode TileJetMonitorAlgorithm::fillTimeHistograms(const xAOD::Jet& jet, uin
             // int module = m_tileID->module(id); // ranges 0..63
             auto module = Monitored::Scalar<int>("module", m_tileID->module(id));
             int sample = m_tileID->sample(id); // ranges 0..3 (A, BC, D, E)
-            int tower = m_tileID->tower(id); 
+            int tower = m_tileID->tower(id);
             int ros1 = 0;
             int ros2 = 0;
             int chan1 = -1;
@@ -193,7 +193,7 @@ StatusCode TileJetMonitorAlgorithm::fillTimeHistograms(const xAOD::Jet& jet, uin
             int gain2 = tilecell->gain2();
             unsigned int qbit1 = tilecell->qbit1();
             unsigned int qbit2 = tilecell->qbit2();
-            
+
             const CaloDetDescrElement * caloDDE = tilecell->caloDDE();
             IdentifierHash hash1 = caloDDE->onl1();
             if (hash1 != TileHWID::NOT_VALID_HASH) {
@@ -202,7 +202,7 @@ StatusCode TileJetMonitorAlgorithm::fillTimeHistograms(const xAOD::Jet& jet, uin
               chan1 = m_tileHWID->channel(adc_id);
               bad1 = m_tileBadChanTool->encodeStatus(m_tileBadChanTool->getAdcStatus(adc_id));
             }
-            
+
             // How is it here with partition? D0 spans two partitions....
             // It should be ok to treat it in this way:
             IdentifierHash hash2 = caloDDE->onl2();
@@ -217,7 +217,7 @@ StatusCode TileJetMonitorAlgorithm::fillTimeHistograms(const xAOD::Jet& jet, uin
             bool is_good2 = isGoodChannel(ros2, module, chan2, bad2, qbit2, id);
             float ene1 = is_good1 ? tilecell->ene1() : -1;
             float ene2 = is_good2 ? tilecell->ene2() : -1;
-            
+
             ATH_MSG_DEBUG(".... " << TileCalibUtils::getDrawerString(ros1, module)
                           << ", ch1 " << chan1
                           << ", ch2 " << chan2
@@ -229,7 +229,7 @@ StatusCode TileJetMonitorAlgorithm::fillTimeHistograms(const xAOD::Jet& jet, uin
             /*
               Now really fill the histograms time vs lumiblock and 1dim time
             */
-            
+
             // first channel
             if (is_good1 && matchesEnergyRange(sample, tower, ene1, gain1)) {
               if (m_do1DHistograms) {
@@ -305,19 +305,19 @@ StatusCode TileJetMonitorAlgorithm::fillTimeHistograms(const xAOD::Jet& jet, uin
               }
             }
 
-            /* 
+            /*
                Now filling the cell-based histograms,
-               HG-HG and LG-LG combinations only for normal cells, 
+               HG-HG and LG-LG combinations only for normal cells,
                also include E-cells
             */
             if ((is_good1) && (((is_good2) && (gain1 == gain2)) || (sample == TileID::SAMP_E)))   {
               // E-cells are read-out by one channel only, so is_good2 = false for E-cells
 
-              if (m_doEnergyDiffHistograms && (tilecell->energy() > m_energyDiffThreshold))  { 
+              if (m_doEnergyDiffHistograms && (tilecell->energy() > m_energyDiffThreshold))  {
                 // EneDiff histograms
 
                 int evenChannnel = (chan1 % 2 == 0) ? chan1 : chan2;
-                std::string name = TileCalibUtils::getDrawerString(ros1, module) + "_enediff_" 
+                std::string name = TileCalibUtils::getDrawerString(ros1, module) + "_enediff_"
                                    + gainName[gain1] + "_ch1_" + std::to_string(evenChannnel);
                 auto energyDifference = Monitored::Scalar<float>(std::move(name), tilecell->eneDiff() / tilecell->energy());
                 fill("TileJetEnergyDiff", energyDifference);
@@ -328,12 +328,12 @@ StatusCode TileJetMonitorAlgorithm::fillTimeHistograms(const xAOD::Jet& jet, uin
                 // cell-time histograms, only overall, require not affected channels
                 int index = findIndex(gain1, tilecell->energy());
                 ATH_MSG_DEBUG( "Filling in cell-time for " << TileCalibUtils::getDrawerString(ros1, module)
-                               << ", ch1 " << chan1  
-                               << ", ch2 " << chan2  
+                               << ", ch1 " << chan1
+                               << ", ch2 " << chan2
                                << ", ene " << tilecell->energy()
                                << ", index " << index
                                << ", time: " << tilecell->time());
-                  
+
                 // TD adding histograms per partition and per radial sampling
                 std::string name1("Cell_time_" + partitionName[ros1] + "_" + sampleName(ros1, sample, tower) + "_" + gainName[gain1] + "_slice_" + std::to_string(index));
                 auto cellTime1 = Monitored::Scalar<float>(std::move(name1), tilecell->time());
@@ -366,7 +366,7 @@ StatusCode TileJetMonitorAlgorithm::fillTimeHistograms(const xAOD::Jet& jet, uin
                   // TD adding energy profiles per partition and per radial sampling
                   std::string indexName1("index_" + partitionName[ros1] + "_" + sampleName(ros1, sample, tower) + "_" + gainName[gain1]);
                   auto energyIndex1 = Monitored::Scalar<float>(std::move(indexName1), index);
-                  
+
                   std::string energyName1("energy_" + partitionName[ros1] + "_" + sampleName(ros1, sample, tower) + "_" + gainName[gain1]);
                   auto cellEnergy1 = Monitored::Scalar<float>(std::move(energyName1), tilecell->energy());
 
@@ -440,7 +440,7 @@ StatusCode TileJetMonitorAlgorithm::fillTimeHistograms(const xAOD::Jet& jet, uin
   return StatusCode::SUCCESS;
 }
 
-/*---------------------------------------------------------*/  
+/*---------------------------------------------------------*/
 std::string TileJetMonitorAlgorithm::sampleName(const int ros, const int sample, const int tower) const {
 /*---------------------------------------------------------*/
   std::array<std::string, 3> sample_Name_LB{"A", "B", "D"};
@@ -537,15 +537,15 @@ std::string TileJetMonitorAlgorithm::cellName(const int ros, const int sample, c
   return c_name;
 }
 
-/*---------------------------------------------------------*/    
+/*---------------------------------------------------------*/
 bool TileJetMonitorAlgorithm::matchesEnergyRange(const int sample, const int tower, const float energy, const int gain) const {
-/*---------------------------------------------------------*/    
+/*---------------------------------------------------------*/
   /* Want to separate E-cells, D4 and C10 from the rest:
      ros: 1-2 LBA/LBC, 3-4 EBA/EBC
      sample: 0 = A, 1 = B/BC/C, D = 2, E = 3
      tower: 10 = E1, 11 = E2, 13 = E3, 14 = E4, 8 = D4, 9 = C10
      Nevertheless, C10 and D4 have the same limits, since these are ordinary cells
-  */    
+  */
   if (sample != TileID::SAMP_E) {
     return((energy > m_energyChanMin) && (energy < m_energyChanMax) && (gain == m_gain));
   } else {
@@ -583,14 +583,14 @@ bool TileJetMonitorAlgorithm::isGoodChannel(int ros, int module, int channel, ui
       ((qbit & TileCell::MASK_ALGO) == TileFragHash::OptFilterDsp)) // in DSP
 
     return false;
-  /* 
+  /*
    bad is the status in the DB (see http://alxr.usatlas.bnl.gov/lxr-stb6/source/atlas/TileCalorimeter/TileConditions/src/TileBadChanTool.cxx#390).
    Meaning:
    0 = good, 1 = noisy, 2 = affected, 3 = bad, 4 = otherwise
    */
   if (bad > 2) return false;
 
-  /* 
+  /*
      Now check for special C10, merged E1, E4'
      C10 spec is ok only if channel = 5 (i.e. pmt=6). The other is pmt=5
      E1 merged and E4' should be dropped if channel = 12 (i.e. pmt=13)
@@ -621,7 +621,7 @@ bool TileJetMonitorAlgorithm::isGoodEvent(const EventContext& ctx) const {
     return true;
   }
 
-  auto [jetsCopy, jetsCopyAux] = xAOD::shallowCopyContainer(*jetContainer,ctx);
+  auto [jetsCopy, jetsCopyAux] = xAOD::shallowCopy(*jetContainer,ctx);
   //std::unique_ptr< xAOD::JetContainer > jetsCopy(jetsSC.first);
   //std::unique_ptr< xAOD::ShallowAuxContainer > jetsCopyAux(jetsSC.second);
 
@@ -632,7 +632,7 @@ bool TileJetMonitorAlgorithm::isGoodEvent(const EventContext& ctx) const {
 
   int iJet = 0;
   for (auto jet : *jetsCopy) {
-    ATH_MSG_DEBUG("Jet " << iJet << ", pT " << jet->pt()/1000.0 << " GeV, eta " 
+    ATH_MSG_DEBUG("Jet " << iJet << ", pT " << jet->pt()/1000.0 << " GeV, eta "
                   << jet->eta());
     passJvt(*jet) = passesJvt(*jet);
     passOR(*jet) = true;
@@ -680,10 +680,10 @@ bool TileJetMonitorAlgorithm::isGoodJet(const xAOD::Jet& jet) const {
 unsigned int TileJetMonitorAlgorithm::findIndex(const int gain, const float energy) const {
 
   if (gain == 1) {
-    return (std::upper_bound(m_cellEnergyUpperLimitsHG.begin(), m_cellEnergyUpperLimitsHG.end(), energy) 
+    return (std::upper_bound(m_cellEnergyUpperLimitsHG.begin(), m_cellEnergyUpperLimitsHG.end(), energy)
             - m_cellEnergyUpperLimitsHG.begin());
   } else {
-    return (std::upper_bound(m_cellEnergyUpperLimitsLG.begin(), m_cellEnergyUpperLimitsLG.end(), energy) 
+    return (std::upper_bound(m_cellEnergyUpperLimitsLG.begin(), m_cellEnergyUpperLimitsLG.end(), energy)
             - m_cellEnergyUpperLimitsLG.begin());
   }
 

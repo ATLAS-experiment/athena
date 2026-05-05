@@ -15,7 +15,7 @@ L1JetCopyAlgorithm<T>::L1JetCopyAlgorithm( const std::string& name, ISvcLocator*
 
 template<typename T>
 StatusCode L1JetCopyAlgorithm<T>::initialize() {
-  
+
   ATH_MSG_INFO(" Initializing " << name());
   ATH_CHECK( m_jetInContainerKey.initialize() );
   ATH_CHECK( m_jetOutContainerKey.initialize() );
@@ -42,7 +42,7 @@ StatusCode L1JetCopyAlgorithm<T>::execute(const EventContext& ctx) const {
   ATH_MSG_DEBUG("Shallow-copying "<<m_jetInContainerKey);
   SG::WriteHandle<JetContainer> jetsOut(m_jetOutContainerKey,ctx);
 
-  auto [copiedjets, shallowaux] = xAOD::shallowCopyContainer(*inputJetsHandle, ctx);
+  auto [copiedjets, shallowaux] = xAOD::shallowCopy(*inputJetsHandle, ctx);
 
   if(copiedjets.get() == nullptr || shallowaux.get() == nullptr) {
       ATH_MSG_ERROR("Failed to make shallow copy of "<<m_jetInContainerKey<<".");

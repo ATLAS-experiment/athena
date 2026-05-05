@@ -78,7 +78,7 @@ StatusCode ParticleRemoverAlg::removeParticles( const std::vector<bool>& keepPar
     ATH_MSG_VERBOSE("Got input ShallowCopyContainer with name: " << m_inContNameList.at(contIdx));
 
     // Create the current shallow copy container
-    auto outContShallowCopy = xAOD::shallowCopyContainer( *outCont, ctx );
+    auto outContShallowCopy = xAOD::shallowCopy( *outCont, ctx );
 
     CONT* shallowCopy = outContShallowCopy.first.get();
     xAOD::ShallowAuxContainer* shallowAuxCopy = outContShallowCopy.second.get();

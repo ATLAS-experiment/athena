@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // This source file implements all of the functions related to Electrons
@@ -67,7 +67,7 @@ StatusCode SUSYObjDef_xAOD::MergeElectrons(const xAOD::ElectronContainer & elect
             ATH_MSG_DEBUG( "ELECTRON cl eta: "                                    << electron->caloCluster()->eta());
             ATH_MSG_DEBUG( "ELECTRON cl phi: "                                    << electron->caloCluster()->phi());
             continue;
-        // add electron into output 
+        // add electron into output
         } else {
             ATH_MSG_DEBUG( "Adding electron to output collection (isLRT?) : ("    << static_cast<int>(acc_isLRT(*electron)) << ")" );
             ATH_MSG_DEBUG( "ELECTRON cl eta: "                                    << electron->caloCluster()->eta());
@@ -80,7 +80,7 @@ StatusCode SUSYObjDef_xAOD::MergeElectrons(const xAOD::ElectronContainer & elect
               setOriginalObjectLink(*electron, *newElectron);
             }
 
-            outputCol->push_back(newElectron); 
+            outputCol->push_back(newElectron);
         }
     }
     return StatusCode::SUCCESS;
@@ -90,7 +90,7 @@ StatusCode SUSYObjDef_xAOD::MergeElectrons(const xAOD::ElectronContainer & elect
 StatusCode SUSYObjDef_xAOD::prepareLRTElectrons(const xAOD::ElectronContainer* inElectrons, xAOD::ElectronContainer* copy) const{
   for (const xAOD::Electron *electron: *inElectrons){
     const xAOD::TrackParticle* idtrack = electron->trackParticle();
-    
+
     // Save electron if the id track passes the LRT filter
     if ( acc_lrtFilter.isAvailable(*idtrack) )
     {
@@ -100,13 +100,13 @@ StatusCode SUSYObjDef_xAOD::prepareLRTElectrons(const xAOD::ElectronContainer* i
         // transfer original electron link
 
         setOriginalObjectLink(*electron, *copyElectron);
-        copy->push_back( std::move(copyElectron) );        
-      }  
-    } 
+        copy->push_back( std::move(copyElectron) );
+      }
+    }
     else // Keep electron if flag is not available
     {
       std::unique_ptr<xAOD::Electron> copyElectron = std::make_unique<xAOD::Electron>(*electron);
-      
+
       setOriginalObjectLink(*electron, *copyElectron);
       copy->push_back( std::move(copyElectron) );
     }
@@ -130,11 +130,11 @@ StatusCode SUSYObjDef_xAOD::GetElectrons(xAOD::ElectronContainer*& copy, xAOD::S
   ATH_CHECK( m_outElectronLocation.initialize() );
 
   if (bool(m_eleLRT) && !lrtelekey.empty() && evtStore()->contains<xAOD::ElectronContainer>(lrtelekey)){
-    ATH_MSG_DEBUG("Applying prompt/LRT electron OR procedure"); 
+    ATH_MSG_DEBUG("Applying prompt/LRT electron OR procedure");
 
     // First identify if merged container has already been made (for instances where GetElectrons() is called more than once)
     if (evtStore()->contains<xAOD::ElectronContainer>("StdWithLRTElectrons")) {
-      ATH_MSG_DEBUG("Merged prompt/LRT container already created in TStore");  
+      ATH_MSG_DEBUG("Merged prompt/LRT container already created in TStore");
     } else {
       ATH_MSG_DEBUG("Creating merged prompt/LRT container in TStore");
 
@@ -151,7 +151,7 @@ StatusCode SUSYObjDef_xAOD::GetElectrons(xAOD::ElectronContainer*& copy, xAOD::S
       // Check overlap between prompt and LRT collections
       std::set<const xAOD::Electron *> ElectronsToRemove;
       m_elecLRTORTool->checkOverlap(*prompt_electrons, *filtered_electrons, ElectronsToRemove);
-    
+
       // Decorate electrons with prompt/LRT
       for (const xAOD::Electron* el : *prompt_electrons)   dec_isLRT(*el) = 0;
       for (const xAOD::Electron* el : *filtered_electrons) dec_isLRT(*el) = 1;
@@ -162,12 +162,12 @@ StatusCode SUSYObjDef_xAOD::GetElectrons(xAOD::ElectronContainer*& copy, xAOD::S
       ATH_CHECK(MergeElectrons(*filtered_electrons, outputCol.get(), ElectronsToRemove ));
 
       // Save merged StdWithLRTElectrons container to TStore
-      ATH_CHECK(evtStore()->record(std::move(outputCol), m_outElectronLocation.key())); 
+      ATH_CHECK(evtStore()->record(std::move(outputCol), m_outElectronLocation.key()));
       ATH_CHECK(evtStore()->record(std::move(outputAuxCol), m_outElectronLocation.key() + "Aux.") );
     }
   } else if (!lrtelekey.empty()) {
     if(evtStore()->contains<xAOD::ElectronContainer>(lrtelekey) == false && bool(m_eleLRT) == true) ATH_MSG_WARNING("prompt/LRT OR procedure attempted but " << lrtelekey << " not in ROOT file, check config!");
-    ATH_MSG_DEBUG("Not applying prompt/LRT electron OR procedure"); 
+    ATH_MSG_DEBUG("Not applying prompt/LRT electron OR procedure");
   }
 
   if (m_isPHYSLITE && elekey.find("AnalysisElectrons")==std::string::npos){
@@ -178,9 +178,9 @@ StatusCode SUSYObjDef_xAOD::GetElectrons(xAOD::ElectronContainer*& copy, xAOD::S
   const xAOD::ElectronContainer* electrons = nullptr;
   if (bool(m_eleLRT) && evtStore()->contains<xAOD::ElectronContainer>(lrtelekey)){
       ATH_MSG_DEBUG("Using container: " << m_outElectronLocation.key());
-      ATH_CHECK( evtStore()->retrieve(electrons, m_outElectronLocation.key())); 
+      ATH_CHECK( evtStore()->retrieve(electrons, m_outElectronLocation.key()));
   }
-  else { 
+  else {
     if (copy==nullptr) { // empty container provided
         ATH_MSG_DEBUG("Empty container provided");
       if (containerToBeCopied != nullptr) {
@@ -195,12 +195,19 @@ StatusCode SUSYObjDef_xAOD::GetElectrons(xAOD::ElectronContainer*& copy, xAOD::S
   }
 
   if (copy==nullptr) { // empty container provided
-    std::pair<xAOD::ElectronContainer*, xAOD::ShallowAuxContainer*> shallowcopy = xAOD::shallowCopyContainer(*electrons);
-    copy = shallowcopy.first;
-    copyaux = shallowcopy.second;
+    xAOD::ShallowCopyResult_t<xAOD::ElectronContainer> shallowcopy = xAOD::shallowCopy(*electrons);
+    copy = shallowcopy.first.get();
+    copyaux = shallowcopy.second.get();
     bool setLinks = xAOD::setOriginalObjectLink(*electrons, *copy);
     if (!setLinks) {
       ATH_MSG_WARNING("Failed to set original object links on " << elekey);
+    }
+    if (recordSG) {
+      ATH_CHECK( evtStore()->record(std::move(shallowcopy.first), "STCalib" + elekey + m_currentSyst.name()) );
+      ATH_CHECK( evtStore()->record(std::move(shallowcopy.second), "STCalib" + elekey + m_currentSyst.name() + "Aux.") );
+    } else {
+      ATH_MSG_ERROR("Shallow copy not recorded in StoreGate!");
+      return StatusCode::FAILURE;
     }
   } else { // use the user-supplied collection instead
     ATH_MSG_DEBUG("Not retrieving electron collection, using existing one provided by user");
@@ -212,10 +219,6 @@ StatusCode SUSYObjDef_xAOD::GetElectrons(xAOD::ElectronContainer*& copy, xAOD::S
     this->IsSignalElectron(*electron, m_elePt, m_eled0sig, m_elez0, m_eleEta);
   }
 
-  if (recordSG) {
-    ATH_CHECK( evtStore()->record(copy, "STCalib" + elekey + m_currentSyst.name()) );
-    ATH_CHECK( evtStore()->record(copyaux, "STCalib" + elekey + m_currentSyst.name() + "Aux.") );
-  }
   return StatusCode::SUCCESS;
 }
 
@@ -295,7 +298,7 @@ StatusCode SUSYObjDef_xAOD::FillElectron(xAOD::Electron& input, float etcut, flo
     passBaseID = bool(m_elecSelLikelihoodBaseline->accept(&input));
   } else {
     if (m_acc_eleIdBaseline.isAvailable(input)) {
-      passBaseID = m_acc_eleIdBaseline(input); 
+      passBaseID = m_acc_eleIdBaseline(input);
     } else {
       ATH_MSG_VERBOSE ("DFCommonElectronsLHxxx variables are not found. Calculating the ID from LH tool..");
       passBaseID = bool(m_elecSelLikelihoodBaseline->accept(&input));
@@ -367,10 +370,10 @@ bool SUSYObjDef_xAOD::IsSignalElectron(const xAOD::Electron & input, float etcut
 
   if (m_eleIdExpert) {
     if ( !m_elecSelLikelihood.empty() && m_elecSelLikelihood->accept(&input) ) dec_passSignalID(input) = true;
-    } 
+    }
   else {
     if (m_acc_eleId.isAvailable(input)) {
-      dec_passSignalID(input) = m_acc_eleId(input); 
+      dec_passSignalID(input) = m_acc_eleId(input);
     } else {
       ATH_MSG_VERBOSE ("DFCommonElectronsLHxxx variables are not found. Calculating the ID from LH tool..");
       if ( !m_elecSelLikelihood.empty() && m_elecSelLikelihood->accept(&input) ) dec_passSignalID(input) = true;
@@ -560,7 +563,7 @@ double SUSYObjDef_xAOD::GetEleTriggerEfficiencySF(const xAOD::Electron& el, cons
   double trig_sf(1.);
 
   std::string single_str = "SINGLE_E";
-  std::string single_Run3 = "202";  
+  std::string single_Run3 = "202";
   std::string dilep_str  = "DI_E";
   std::string multi_str  = "MULTI_L";
 
@@ -592,7 +595,7 @@ double SUSYObjDef_xAOD::GetEleTriggerEfficiencySF(const xAOD::Electron& el, cons
 double SUSYObjDef_xAOD::GetEleTriggerEfficiency(const xAOD::Electron& el, const std::string& trigExpr) const {
 
   std::string single_str = "SINGLE_E";
-  std::string single_Run3 = "202";  
+  std::string single_Run3 = "202";
   std::string dilep_str  = "DI_E";
   std::string multi_str  = "MULTI_L";
 

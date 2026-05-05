@@ -311,7 +311,7 @@ StatusCode HIEventShapeJetIteration::getShapes(const xAOD::HIEventShapeContainer
 
   if(m_shallowCopy)
   {
-    auto shape_copy=xAOD::shallowCopyContainer(*input_shape, ctx);
+    auto shape_copy=xAOD::shallowCopy(*input_shape, ctx);
     output_shape=shape_copy.first.get();
     if(record)
     {

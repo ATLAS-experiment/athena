@@ -45,7 +45,7 @@ StatusCode xAODTestShallowCopyHVec::execute (const EventContext& ctx) const
 
   {
     SG::ReadHandle<DMTest::HVec> vec (m_readKey, ctx);
-    auto ret = xAOD::shallowCopyContainer (*vec, ctx);
+    auto ret = xAOD::shallowCopy (*vec, ctx);
 
     SG::WriteHandle<DMTest::HVec> copy (m_writeKey, ctx);
     ATH_CHECK( copy.record (std::move(ret.first), std::move(ret.second)) );
@@ -60,4 +60,3 @@ StatusCode xAODTestShallowCopyHVec::execute (const EventContext& ctx) const
 
 
 } // namespace DMTest
-

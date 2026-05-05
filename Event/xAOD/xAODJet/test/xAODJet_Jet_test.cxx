@@ -282,8 +282,7 @@ int testClusterConstituents ATLAS_NOT_THREAD_SAFE (xAOD::JetContainer& jetCont, 
 int testShallowCopy ATLAS_NOT_THREAD_SAFE (xAOD::JetContainer& jetCont){
   TEST_MSG("\n ---------------- testShallowCopy  ");
 
-  auto [shallowcopy, shallowcopyAux] = xAOD:: shallowCopyContainer( jetCont,
-                                                                    Gaudi::Hive::currentContext() );
+  auto [shallowcopy, shallowcopyAux] = xAOD:: shallowCopy( jetCont );
   xAOD::Jet * cjet = (*shallowcopy)[0];
   xAOD::Jet * jet = jetCont[0];
 

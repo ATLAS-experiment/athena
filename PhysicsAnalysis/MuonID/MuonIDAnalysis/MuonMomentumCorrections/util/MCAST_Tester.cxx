@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -78,7 +78,7 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i < argc; i++) { options += (argv[i]); }
 
     int Ievent = -1;
-    
+
     if (options.find("-event") != std::string::npos) {
         for (int ipos = 0; ipos < argc; ipos++) {
             if (std::string(argv[ipos]).compare("-event") == 0) {
@@ -281,9 +281,9 @@ int main(int argc, char* argv[]) {
         //::: Loop over systematics
         for (sysListItr = sysList.begin(); sysListItr != sysList.end(); ++sysListItr) {
             // create a shallow copy of the muons container
-            std::pair<xAOD::MuonContainer*, xAOD::ShallowAuxContainer*> muons_shallowCopy = xAOD::shallowCopyContainer(*muons);
+            xAOD::ShallowCopyResult_t<xAOD::MuonContainer> muons_shallowCopy = xAOD::shallowCopy(*muons);
 
-            xAOD::MuonContainer* muonsCorr = muons_shallowCopy.first;
+            xAOD::MuonContainer* muonsCorr = muons_shallowCopy.first.get();
 
             if (isDebug) {
                 Info(APP_NAME, "-----------------------------------------------------------");
@@ -360,11 +360,11 @@ int main(int argc, char* argv[]) {
                     CorrPtID = InnerDetectorPtAcc (*mu);
                     CorrPtMS = MuonSpectrometerPtAcc (*mu);
 
-                    
+
                     sysTreeMap[*sysListItr]->Fill();
                     //::: Delete the calibrated muon:
                     delete mu;
-                } 
+                }
                 else {
                     if (!corrTool->applyCorrection(*muon)) {
                         Error(APP_NAME, "Cannot really apply calibration nor smearing");
@@ -386,8 +386,6 @@ int main(int argc, char* argv[]) {
             }
             if (isDebug) Info(APP_NAME, "-----------------------------------------------------------");
 
-            delete muons_shallowCopy.first;
-            delete muons_shallowCopy.second;
         }
         //::: Close with a message:
         if (entry % 5 == 0)
@@ -401,7 +399,7 @@ int main(int argc, char* argv[]) {
     //::: Close output file
     outputFile->Close();
 
-    xAOD::IOStats::instance().stats().printSmartSlimmingBranchList(); 
+    xAOD::IOStats::instance().stats().printSmartSlimmingBranchList();
 
     //::: Return gracefully:
     return 0;

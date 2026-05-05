@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <format>
@@ -168,7 +168,7 @@ StatusCode DumpAllSystematics::initialize()
 
   if (m_particle_type == ParticleType::ELECTRON) ATH_MSG_INFO("dumping electrons");
   else if (m_particle_type == ParticleType::PHOTON) ATH_MSG_INFO("dumping photons");
-  
+
   // output configuration
   ServiceHandle<ITHistSvc> histSvc("THistSvc", name());
   CHECK(histSvc.retrieve());
@@ -211,7 +211,7 @@ StatusCode DumpAllSystematics::execute()
     const xAOD::ElectronContainer* electrons = nullptr;
     CHECK(evtStore()->retrieve(electrons, m_reco_container_name));
 
-    std::pair<xAOD::ElectronContainer*, xAOD::ShallowAuxContainer*> electrons_shallowCopy = xAOD::shallowCopyContainer(*electrons);
+    xAOD::ShallowCopyResult_t<xAOD::ElectronContainer> electrons_shallowCopy = xAOD::shallowCopy(*electrons);
     for (xAOD::Electron* el : *electrons_shallowCopy.first) {
       ATH_MSG_DEBUG("new electron eta: " << el->eta());
 
@@ -232,7 +232,7 @@ StatusCode DumpAllSystematics::execute()
     const xAOD::PhotonContainer* photons = nullptr;
     CHECK(evtStore()->retrieve(photons, m_reco_container_name));
 
-    std::pair<xAOD::PhotonContainer*, xAOD::ShallowAuxContainer*> photons_shallowCopy = xAOD::shallowCopyContainer(*photons);
+    xAOD::ShallowCopyResult_t<xAOD::PhotonContainer> photons_shallowCopy = xAOD::shallowCopy(*photons);
     for (xAOD::Photon* ph : *photons_shallowCopy.first) {
       ATH_MSG_DEBUG("new photon eta: " << ph->eta());
 
@@ -364,4 +364,3 @@ StatusCode DumpAllSystematics::do_energy(xAOD::Egamma& particle, int itool)
 
   return StatusCode::SUCCESS;
 }
- 

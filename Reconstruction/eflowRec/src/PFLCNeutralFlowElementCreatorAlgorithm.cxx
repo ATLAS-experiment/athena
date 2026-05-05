@@ -1,3 +1,7 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+
 #include "PFLCNeutralFlowElementCreatorAlgorithm.h"
 #include "xAODCore/ShallowCopy.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
@@ -17,9 +21,8 @@ StatusCode PFLCNeutralFlowElementCreatorAlgorithm::execute(const EventContext& c
   /* Create Neutral PFOs from all eflowCaloObjects */
   SG::ReadHandle<xAOD::FlowElementContainer> neutralFEContainerReadHandle(m_neutralFEContainerReadHandleKey,ctx);
 
-  std::pair< std::unique_ptr<xAOD::FlowElementContainer>,
-             std::unique_ptr<xAOD::ShallowAuxContainer> > shallowCopyPair =
-    xAOD::shallowCopyContainer(*neutralFEContainerReadHandle, ctx);
+  xAOD::ShallowCopyResult_t<xAOD::FlowElementContainer> shallowCopyPair =
+    xAOD::shallowCopy(*neutralFEContainerReadHandle, ctx);
 
   SG::WriteHandle<xAOD::FlowElementContainer> neutralFELCContainerWriteHandle(m_neutralFELCContainerWriteHandleKey,ctx);
   ATH_CHECK( neutralFELCContainerWriteHandle.record(std::move(shallowCopyPair.first),std::move(shallowCopyPair.second)));

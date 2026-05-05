@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "egammaTopoClusterCopier.h"
@@ -129,10 +129,8 @@ StatusCode egammaTopoClusterCopier::execute(const EventContext& ctx) const {
 
   // Create a shallow copy, the elements of this can be modified, but no need to
   // recreate the cluster.
-  std::pair<
-    std::unique_ptr<xAOD::CaloClusterContainer>,
-    std::unique_ptr<xAOD::ShallowAuxContainer>
-  > inputShallowcopy = xAOD::shallowCopyContainer(*inputTopoclusters, ctx);
+  xAOD::ShallowCopyResult_t<xAOD::CaloClusterContainer> inputShallowcopy =
+    xAOD::shallowCopy(*inputTopoclusters, ctx);
 
   ATH_CHECK(outputTopoclustersShallow.record(
     std::move(inputShallowcopy.first),
@@ -261,4 +259,3 @@ StatusCode egammaTopoClusterCopier::execute(const EventContext& ctx) const {
 
   return StatusCode::SUCCESS;
 }
-

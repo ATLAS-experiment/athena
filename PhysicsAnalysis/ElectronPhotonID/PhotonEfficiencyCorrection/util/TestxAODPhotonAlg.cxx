@@ -181,10 +181,10 @@ int main( int argc, char* argv[] ) {
 	ANA_CHECK( event.retrieve( photons, "Photons" ) );
 
 	//Clone
-	std::pair< xAOD::PhotonContainer*, xAOD::ShallowAuxContainer* > photons_shallowCopy = xAOD::shallowCopyContainer( *photons );
+	xAOD::ShallowCopyResult_t<xAOD::PhotonContainer> photons_shallowCopy = xAOD::shallowCopy( *photons );
 
 	//Iterate over the shallow copy
-    xAOD::PhotonContainer* phsCorr = photons_shallowCopy.first;
+    xAOD::PhotonContainer* phsCorr = photons_shallowCopy.first.get();
     xAOD::PhotonContainer::iterator ph_itr      = phsCorr->begin();
     xAOD::PhotonContainer::iterator ph_end      = phsCorr->end();
 

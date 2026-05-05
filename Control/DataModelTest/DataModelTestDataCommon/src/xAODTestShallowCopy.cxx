@@ -65,7 +65,7 @@ StatusCode xAODTestShallowCopy::initialize()
   ATH_CHECK( m_cinfoReadKeyBase.initialize( !m_cinfoReadKeyBase.empty() ) );
   ATH_CHECK( m_cinfoWriteKeyBase.initialize( !m_cinfoReadKeyBase.empty() ) );
   ATH_CHECK( m_cinfoDecorDepsBase.initialize( m_cinfoReadKeyBase, m_cinfoWriteKeyBase, !m_cinfoReadKeyBase.empty() ) );
-  
+
   if (m_ctrigReadKey.empty()) {
     m_ctrigWriteKey = "";
     m_ctrigAnInt10Key = "";
@@ -88,7 +88,7 @@ StatusCode xAODTestShallowCopy::execute (const EventContext& ctx) const
 
   if (!m_cvecReadKey.empty()) {
     SG::ReadHandle<CVec> vec (m_cvecReadKey, ctx);
-    auto ret = xAOD::shallowCopyContainer (*vec, ctx);
+    auto ret = xAOD::shallowCopy (*vec, ctx);
 
     SG::WriteHandle<DMTest::CVec> copy (m_cvecWriteKey, ctx);
     ATH_CHECK( copy.record (std::move(ret.first), std::move(ret.second)) );
@@ -102,7 +102,7 @@ StatusCode xAODTestShallowCopy::execute (const EventContext& ctx) const
 
   if (!m_cvecWDReadKey.empty()) {
     SG::ReadHandle<CVecWithData> vec (m_cvecWDReadKey, ctx);
-    auto ret = xAOD::shallowCopyContainer (*vec, ctx);
+    auto ret = xAOD::shallowCopy (*vec, ctx);
     ret.first->meta1 = vec->meta1;
 
     SG::WriteHandle<DMTest::CVecWithData> copy (m_cvecWDWriteKey, ctx);
@@ -117,7 +117,7 @@ StatusCode xAODTestShallowCopy::execute (const EventContext& ctx) const
 
   if (!m_cinfoReadKey.empty()) {
     SG::ReadHandle<DMTest::C> cinfo (m_cinfoReadKey, ctx);
-    auto ret = xAOD::shallowCopyObject (*cinfo, ctx);
+    auto ret = xAOD::shallowCopy (*cinfo, ctx);
 
     SG::WriteHandle<DMTest::C> copy (m_cinfoWriteKey, ctx);
     ATH_CHECK( copy.record (std::move(ret.first), std::move(ret.second)) );
@@ -134,7 +134,7 @@ StatusCode xAODTestShallowCopy::execute (const EventContext& ctx) const
 
   if (!m_ctrigReadKey.empty()) {
     SG::ReadHandle<CVec> ctrig (m_ctrigReadKey, ctx);
-    auto ret = xAOD::shallowCopyContainer (*ctrig, ctx);
+    auto ret = xAOD::shallowCopy (*ctrig, ctx);
 
     SG::WriteHandle<DMTest::CVec> copy (m_ctrigWriteKey, ctx);
     ATH_CHECK( copy.record (std::move(ret.first), std::move(ret.second)) );
@@ -151,4 +151,3 @@ StatusCode xAODTestShallowCopy::execute (const EventContext& ctx) const
 
 
 } // namespace DMTest
-

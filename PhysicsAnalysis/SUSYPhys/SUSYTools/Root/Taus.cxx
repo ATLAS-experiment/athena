@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // This source file implements all of the functions related to TauJets
@@ -35,7 +35,7 @@ StatusCode SUSYObjDef_xAOD::GetTaus(xAOD::TauJetContainer*& copy, xAOD::ShallowA
     ATH_MSG_ERROR("SUSYTools was not initialized!!");
     return StatusCode::FAILURE;
   }
-  
+
   if (m_isPHYSLITE && taukey.find("AnalysisTauJets")==std::string::npos){
     ATH_MSG_ERROR("You are running on PHYSLITE derivation. Please change the Taus container to 'AnalysisTauJets'");
     return StatusCode::FAILURE;
@@ -49,14 +49,21 @@ StatusCode SUSYObjDef_xAOD::GetTaus(xAOD::TauJetContainer*& copy, xAOD::ShallowA
     else {
       ATH_CHECK( evtStore()->retrieve(taus, taukey) );
     }
-    std::pair<xAOD::TauJetContainer*, xAOD::ShallowAuxContainer*> shallowcopy = xAOD::shallowCopyContainer(*taus);
-    copy = shallowcopy.first;
-    copyaux = shallowcopy.second;
+    xAOD::ShallowCopyResult_t<xAOD::TauJetContainer> shallowcopy = xAOD::shallowCopy(*taus);
+    copy = shallowcopy.first.get();
+    copyaux = shallowcopy.second.get();
     bool setLinks = xAOD::setOriginalObjectLink(*taus, *copy);
     if (!setLinks) {
       ATH_MSG_WARNING("Failed to set original object links on " << taukey);
     }
-  } else { // use the user-supplied collection instead 
+    if (recordSG) {
+      ATH_CHECK( evtStore()->record(std::move(shallowcopy.first), "STCalib" + taukey + m_currentSyst.name()) );
+      ATH_CHECK( evtStore()->record(std::move(shallowcopy.second), "STCalib" + taukey + m_currentSyst.name() + "Aux.") );
+    } else {
+      ATH_MSG_ERROR("Shallow copy not recorded in StoreGate!");
+      return StatusCode::FAILURE;
+    }
+  } else { // use the user-supplied collection instead
     ATH_MSG_DEBUG("Not retrieving tau collecton, using existing one provided by user");
     taus=copy;
   }
@@ -65,10 +72,7 @@ StatusCode SUSYObjDef_xAOD::GetTaus(xAOD::TauJetContainer*& copy, xAOD::ShallowA
     ATH_CHECK( this->FillTau(*tau) );
     this->IsSignalTau(*tau, m_tauPt, m_tauEta);
   }
-  if (recordSG) {
-    ATH_CHECK( evtStore()->record(copy, "STCalib" + taukey + m_currentSyst.name()) );
-    ATH_CHECK( evtStore()->record(copyaux, "STCalib" + taukey + m_currentSyst.name() + "Aux.") );
-  }
+
   return StatusCode::SUCCESS;
 }
 
@@ -89,10 +93,10 @@ StatusCode SUSYObjDef_xAOD::FillTau(xAOD::TauJet& input) {
       ATH_MSG_ERROR(" Tau smearing failed " );
     } else { ATH_MSG_VERBOSE("Tau smearing done"); }
   }
-  
+
   ATH_MSG_VERBOSE( "TAU pt after smearing " << input.pt()/1000. );
 
-  // if tauPrePtCut set, apply min pT cut here before calling tau selection tool 
+  // if tauPrePtCut set, apply min pT cut here before calling tau selection tool
   // (avoid exceptions when running on derivations with removed tracks for low-pT taus, e.g. HIGG4D2)
   if (input.pt() > m_tauPrePtCut) {
     dec_baseline(input) = bool(m_tauSelToolBaseline->accept( input ));
@@ -121,15 +125,15 @@ bool SUSYObjDef_xAOD::IsSignalTau(const xAOD::TauJet& input, float ptcut, float 
 
   if (!m_tauSelTool->accept( input )) return false;
 
-  dec_signal(input) = true; 
+  dec_signal(input) = true;
 
   return true;
 }
 
 
-double SUSYObjDef_xAOD::GetSignalTauSF(const xAOD::TauJet& tau, 
-                                      const bool idSF, 
-                                      const bool triggerSF, 
+double SUSYObjDef_xAOD::GetSignalTauSF(const xAOD::TauJet& tau,
+                                      const bool idSF,
+                                      const bool triggerSF,
                                       const std::string& trigExpr)
 {
   double sf(1.);
@@ -144,7 +148,7 @@ double SUSYObjDef_xAOD::GetSignalTauSF(const xAOD::TauJet& tau,
 
     if (triggerSF) {
       double trig_sf = GetTauTriggerEfficiencySF(tau, trigExpr);
-      
+
       if (trig_sf > -90) {
 	sf *= trig_sf;
 	ATH_MSG_VERBOSE(" Retrieved tau trig SF  " << trig_sf);
@@ -157,10 +161,10 @@ double SUSYObjDef_xAOD::GetSignalTauSF(const xAOD::TauJet& tau,
 }
 
 
-double SUSYObjDef_xAOD::GetSignalTauSFsys(const xAOD::TauJet& tau, 
+double SUSYObjDef_xAOD::GetSignalTauSFsys(const xAOD::TauJet& tau,
                                          const CP::SystematicSet& systConfig,
-                                         const bool idSF, 
-                                         const bool triggerSF, 
+                                         const bool idSF,
+                                         const bool triggerSF,
                                          const std::string& trigExpr)
 {
   double sf(1.);
@@ -173,8 +177,8 @@ double SUSYObjDef_xAOD::GetSignalTauSFsys(const xAOD::TauJet& tau,
     ret = tool->applySystematicVariation(systConfig);
     if (ret != StatusCode::SUCCESS) { ATH_MSG_ERROR("Cannot configure " << tool->name() << " for systematic var. " << systConfig.name()); }
   }
-  
-  sf *= GetSignalTauSF(tau, idSF, triggerSF, trigExpr);  
+
+  sf *= GetSignalTauSF(tau, idSF, triggerSF, trigExpr);
 
   //Roll back to default
   ret = m_tauEffTool->applySystematicVariation(m_currentSyst);
@@ -184,7 +188,7 @@ double SUSYObjDef_xAOD::GetSignalTauSFsys(const xAOD::TauJet& tau,
     ret = tool->applySystematicVariation(m_currentSyst);
     if (ret != StatusCode::SUCCESS) { ATH_MSG_ERROR("Cannot configure " << tool->name() << " back to default"); }
   }
-  
+
   dec_effscalefact(tau) = sf;
 
   return sf;
@@ -195,7 +199,7 @@ double SUSYObjDef_xAOD::GetTauTriggerEfficiencySF(const xAOD::TauJet& tau, const
 
   double eff(1.);
 
-  auto map_it = m_tau_trig_support.find(trigExpr); 
+  auto map_it = m_tau_trig_support.find(trigExpr);
   if (map_it == m_tau_trig_support.end()) {
     ATH_MSG_WARNING("The trigger item requested ("  << trigExpr << ") is not supported! Please check. Setting SF to 1.");
     return eff;
@@ -220,7 +224,7 @@ double SUSYObjDef_xAOD::GetTauTriggerEfficiencySF(const xAOD::TauJet& tau, const
     ATH_MSG_ERROR("Some problem found to retrieve SF for trigger item  requested ("  << trigExpr << ")");
     eff = -99;
   }
-  
+
   return eff;
 }
 
@@ -231,7 +235,7 @@ double SUSYObjDef_xAOD::GetTotalTauSF(const xAOD::TauJetContainer& taus, const b
 
   for (const xAOD::TauJet* tau : taus) {
     // check existence of OR information
-    if (!acc_passOR.isAvailable(*tau)) { 
+    if (!acc_passOR.isAvailable(*tau)) {
       ATH_MSG_WARNING("Tau does not have Overlap Removal decision set. You should only call GetTotalTauSF with taus that have been passed through OR. SF will NOT be applied!");
       break;
     }
