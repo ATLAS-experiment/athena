@@ -11,7 +11,6 @@ PURPOSE:  Performs Calo Extension for all selected tracks
  **********************************************************************/
 #include "CaloExtensionBuilderAlg.h"
 //
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 #include "VxVertex/RecVertex.h"
