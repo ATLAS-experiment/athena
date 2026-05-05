@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigDecision_TrigDecisionToolLite_h
@@ -18,7 +18,6 @@
  ***********************************************************************************/
 
 #include "AsgTools/AsgTool.h"
-#include "AsgTools/CurrentContext.h"
 #include <AsgTools/PropertyWrapper.h>
 #include "AsgDataHandles/ReadHandleKey.h"
 
@@ -46,7 +45,7 @@ namespace Trig {
      * @param[in] chain A HLT::Identifier wrapping a single HLT chain.
      * Only chains which are included in the trigger navigation payload of the file may be queried in this way.
      **/ 
-    virtual bool isPassed(const HLT::Identifier& chain, const EventContext& ctx = Gaudi::Hive::currentContext()) const final;
+    virtual bool isPassed(const HLT::Identifier& chain, const EventContext& ctx) const final;
 
     /**
      * @brief true if the given HLT chain passed for physics
@@ -54,14 +53,14 @@ namespace Trig {
      * Best performance is obtained by the caller using the HLT::Identifier method.
      * Only chains which are included in the trigger navigation payload of the file may be queried in this way.
      **/ 
-    virtual bool isPassed(const std::string& chain, const EventContext& ctx = Gaudi::Hive::currentContext()) const final;
+    virtual bool isPassed(const std::string& chain, const EventContext& ctx) const final;
 
     /**
      * @brief true if any of the given HLT chain passed for physics (logical OR)
      * @param[in] chains A vector of HLT::Identifier with each entry wrapping a single HLT chain.
      * Only chains which are included in the trigger navigation payload of the file may be queried in this way.
      **/ 
-    virtual bool isPassed(const std::vector<HLT::Identifier>& chains, const EventContext& ctx = Gaudi::Hive::currentContext()) const final;
+    virtual bool isPassed(const std::vector<HLT::Identifier>& chains, const EventContext& ctx) const final;
 
     /**
      * @brief true if any of the given HLT chain passed for physics (logical OR)
@@ -69,7 +68,7 @@ namespace Trig {
      * Best performance is obtained by the caller using the std::vector<HLT::Identifier> method.
      * Only chains which are included in the trigger navigation payload of the file may be queried in this way.
      **/ 
-    virtual bool isPassed(const std::vector<std::string>& chains, const EventContext& ctx = Gaudi::Hive::currentContext()) const final;
+    virtual bool isPassed(const std::vector<std::string>& chains, const EventContext& ctx) const final;
 
   private:
 
