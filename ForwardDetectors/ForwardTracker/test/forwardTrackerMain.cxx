@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ForwardTracker/BeamlineSetup.h"
@@ -19,6 +19,9 @@
 #include <vector>
 #include <stdexcept>
 
+
+//coverity[UNNECESSARY_STRING_COPY]
+//coverity[UNCAUGHT_EXCEPT]
 int main(int argc, char** argv) {
 
   namespace po = boost::program_options;

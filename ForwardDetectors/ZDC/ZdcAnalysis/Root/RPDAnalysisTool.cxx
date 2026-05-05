@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <AsgDataHandles/WriteDecorHandle.h>
@@ -170,6 +170,7 @@ void RPDAnalysisTool::reset() {
 }
 
 void RPDAnalysisTool::readAOD(xAOD::ZdcModuleContainer const& moduleContainer) {
+  static const std::string g0dataStr{"g0data"};
   // loop through ZDC modules to find those which are RPD channels
   for (auto const module : moduleContainer) {
     if (module->zdcType() != RPDUtils::ZDCModuleRPDType) {
@@ -183,7 +184,7 @@ void RPDAnalysisTool::readAOD(xAOD::ZdcModuleContainer const& moduleContainer) {
     // channel numbers are fixed in mapping in ZdcConditions, numbered 0-15
     unsigned int const channel = module->zdcChannel();
     ATH_MSG_DEBUG("RPD side " << side << " channel " << module->zdcChannel());
-    SG::ConstAccessor<std::vector<uint16_t>> accessor("g0data");
+    SG::ConstAccessor<std::vector<uint16_t>> accessor(g0dataStr);
     auto const& waveform = accessor(*module);
     m_dataAnalyzers.at(side)->loadChannelData(channel, waveform);
   }
