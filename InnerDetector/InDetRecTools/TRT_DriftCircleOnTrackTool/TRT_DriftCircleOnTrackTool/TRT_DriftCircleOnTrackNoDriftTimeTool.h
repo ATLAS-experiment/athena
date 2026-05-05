@@ -15,7 +15,6 @@
 #ifndef TRT_DriftCircleOnTrackNoDriftTimeTool_H
 #define TRT_DriftCircleOnTrackNoDriftTimeTool_H
 
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
 #include "InDetRIO_OnTrack/TRT_DriftCircleOnTrack.h"

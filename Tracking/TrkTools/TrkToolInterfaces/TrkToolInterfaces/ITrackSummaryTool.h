@@ -6,7 +6,6 @@
 #define TRKITRACKSUMMARYTOOL_H
 
 #include "GaudiKernel/EventContext.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "GaudiKernel/IAlgTool.h"
 #include "TrkTrackSummary/TrackSummary.h" 
 #include <memory>

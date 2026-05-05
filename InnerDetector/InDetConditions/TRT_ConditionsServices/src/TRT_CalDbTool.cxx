@@ -15,7 +15,6 @@
 #include <sstream>
 
 #include "GaudiKernel/IToolSvc.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "StoreGate/ReadCondHandle.h"
 
 

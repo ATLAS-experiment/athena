@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // IRIO_OnTrackCreator.h
@@ -14,8 +14,9 @@
 #define TRKTOOLS_IROTCREATOR_H
 
 #include "GaudiKernel/IAlgTool.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "TrkParameters/TrackParameters.h" // typedef
+
+class EventContext;
 
 namespace Trk {
   class PrepRawData;
