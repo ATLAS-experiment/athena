@@ -25,7 +25,6 @@
 #include "StoreGate/ThinningHandle.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include "AthenaKernel/RNGWrapper.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "CLHEP/Random/RandomEngine.h"
 #include "CLHEP/Random/RandFlat.h"
 

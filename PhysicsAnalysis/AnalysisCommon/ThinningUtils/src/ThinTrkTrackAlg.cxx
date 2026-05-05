@@ -10,7 +10,6 @@
 ///////////////////////////////////////////////////////////////////
 
 #include "ThinTrkTrackAlg.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "StoreGate/ThinningHandle.h"
 #include "TrkTrack/TrackCollection.h"
 #include "xAODEgamma/ElectronxAODHelpers.h"

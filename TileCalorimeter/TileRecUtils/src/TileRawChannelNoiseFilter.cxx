@@ -16,7 +16,6 @@
 #include "Identifier/Identifier.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/ReadCondHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 
 //========================================================

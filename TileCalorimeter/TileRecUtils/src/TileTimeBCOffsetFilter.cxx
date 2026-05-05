@@ -31,7 +31,6 @@
 // Atlas includes
 #include "AthenaKernel/errorcheck.h"
 #include "Identifier/HWIdentifier.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 
 //========================================================

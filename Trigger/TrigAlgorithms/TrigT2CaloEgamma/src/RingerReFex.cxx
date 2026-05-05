@@ -23,7 +23,6 @@
 #include "xAODTrigRinger/TrigRingerRingsContainer.h"
 #include "xAODTrigRinger/TrigRingerRingsAuxContainer.h"
 #include "TrigT2CaloCommon/IReAlgToolCalo.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "CaloDetDescr/CaloDetDescrElement.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 #include "AthenaMonitoringKernel/Monitored.h"
