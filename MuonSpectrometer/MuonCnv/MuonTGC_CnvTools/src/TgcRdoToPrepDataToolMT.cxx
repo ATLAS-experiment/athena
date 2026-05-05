@@ -10,7 +10,6 @@
 #include <cfloat>
 #include <memory>
 
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 #include "MuonDigitContainer/TgcDigit.h"
 #include "MuonReadoutGeometry/TgcReadoutElement.h"

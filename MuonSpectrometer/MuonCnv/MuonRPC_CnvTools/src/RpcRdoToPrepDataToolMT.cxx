@@ -4,7 +4,6 @@
 
 #include "RpcRdoToPrepDataToolMT.h"
 
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "MuonCnvToolInterfaces/IDC_Helper.h"
 #include "MuonPrepRawData/MuonPrepDataContainer.h"
 #include "MuonRPC_CnvTools/IRPC_RDO_Decoder.h"
