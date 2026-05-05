@@ -1,8 +1,8 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
-// $Id$
+
 /**
  * @file AthenaKernel/SlotSpecificObj.h
  * @author scott snyder <snyder@bnl.gov>
@@ -48,6 +48,8 @@ void setNSlotsHiveMgrName ATLAS_NOT_THREAD_SAFE (const std::string& s);
  * The usual pointer operators may be used to access the object, as well as @c get().
  * @c get() also takes an optional event context argument, to allow specifying
  * the slot explicitly, rather than looking it up in a thread-local global.
+ * The access to the object is range-checked and a std::out_of_range exception is
+ * thrown in case a non-existent slot is used.
  *
  * This class does not do anything itself to protect the contents
  * of the payload objects against simultaneous access from different threads.

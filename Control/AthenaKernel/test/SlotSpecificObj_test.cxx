@@ -1,8 +1,7 @@
 /*
- * Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 
-// $Id$
 /**
  * @file AthenaKernel/test/SlotSpecificObj_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -15,11 +14,12 @@
 #include "AthenaKernel/errorcheck.h"
 #include "CxxUtils/checker_macros.h"
 #include "TestTools/initGaudi.h"
+#include "TestTools/expect_exception.h"
 #include "GaudiKernel/Service.h"
 #include "GaudiKernel/IHiveWhiteBoard.h"
 #include <cassert>
 #include <iostream>
-
+#include <stdexcept>
 
 const size_t nslots = 4;
 
@@ -101,6 +101,14 @@ void test1()
     assert (p.x == (i+2)*30);
     ++i;
   }
+
+  // out of range
+  {
+    EventContext ctx (0, nslots);
+    EXPECT_EXCEPTION (std::out_of_range, o.get(ctx));
+    EXPECT_EXCEPTION (std::out_of_range, co.get(ctx));
+  }
+
 }
 
 

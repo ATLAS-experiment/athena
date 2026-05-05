@@ -1,16 +1,13 @@
 /*
- * Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
-// $Id$
+
 /**
  * @file AthenaKernel/SlotSpecificObj.icc
  * @author scott snyder <snyder@bnl.gov>
  * @date Jul, 2017
  * @brief Maintain a set of objects, one per slot.
  */
-
-
-#include <cassert>
 
 
 namespace SG {
@@ -49,9 +46,7 @@ template <class T>
 inline
 T* SlotSpecificObj<T>::get (const EventContext& ctx)
 {
-  size_t slot = ctx.slot();
-  assert (slot < m_slots.size());
-  return &m_slots[slot];
+  return &m_slots.at(ctx.slot());
 }
 
 
@@ -76,9 +71,7 @@ template <class T>
 inline
 const T* SlotSpecificObj<T>::get (const EventContext& ctx) const
 {
-  size_t slot = ctx.slot();
-  assert (slot < m_slots.size());
-  return &m_slots[slot];
+  return &m_slots.at(ctx.slot());
 }
 
 
