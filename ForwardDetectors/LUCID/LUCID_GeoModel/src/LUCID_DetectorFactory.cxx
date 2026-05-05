@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoModelInterfaces/StoredMaterialManager.h"
@@ -299,7 +299,9 @@ void LUCID_DetectorFactory::addPmtSupport(GeoFullPhysVol* parent) {
   double PmtSupportFrontPosition = (16962-13442);
 
   int nSections = 4;
- 
+  static const std::string aluminiumStr{"std::Aluminium"};
+  static const std::string pmtSupportStrStr{"PmtSupport"};
+  static const std::string lvPmtSupportStr{"lvPmtSupport"};
   for (int sec=0; sec<nSections; sec++) {
  
     GeoPcon* aShape = new GeoPcon(0.134 * M_PI +(sec-1)*(M_PI/2),0.232 * M_PI);
@@ -307,11 +309,11 @@ void LUCID_DetectorFactory::addPmtSupport(GeoFullPhysVol* parent) {
     aShape->addPlane(               0,   PmtSupportRadius,  PmtSupportRadius+PmtSupportThickness);
     aShape->addPlane(PmtSupportLength,   PmtSupportRadius,  PmtSupportRadius+PmtSupportThickness);
 
-    GeoLogVol*  logVol = new GeoLogVol("lvPmtSupport", aShape, m_materialManager->getMaterial("std::Aluminium"));
+    GeoLogVol*  logVol = new GeoLogVol(lvPmtSupportStr, aShape, m_materialManager->getMaterial(aluminiumStr));
     GeoPhysVol* phyVol = new GeoPhysVol(logVol);
 
     parent->add(new GeoTransform(GeoTrf::Translate3D(0, 0, PmtSupportFrontPosition)));
-    parent->add(new GeoNameTag("PmtSupport"));
+    parent->add(new GeoNameTag(pmtSupportStrStr));
     parent->add(phyVol);
   }
 }

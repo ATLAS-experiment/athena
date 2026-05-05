@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FPTracker/setupBeamline.h"
@@ -18,6 +18,7 @@
 #include <vector>
 #include <stdexcept>
 
+//coverity[UNNECESSARY_STRING_COPY]
 //coverity[root_function]
 int main(int argc, char** argv) {
 

@@ -93,7 +93,7 @@ private:
 public:
 
   ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr messageFunc_p, int nSample, float deltaTSample,
-                  size_t preSampleIdx, std::string fitFunction,
+                  size_t preSampleIdx, const std::string &fitFunction,
                   const ZDCModuleIntArray& peak2ndDerivMinSamples,
                   const ZDCModuleFloatArray& peak2ndDerivMinThresholdsHG,
                   const ZDCModuleFloatArray& peak2ndDerivMinThresholdsLG,

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <ZdcAnalysis/ZDCDataAnalyzer.h>
@@ -17,7 +17,7 @@ const ZDCJSONConfig::JSONParamList ZDCDataAnalyzer::JSONConfigParams = {
 };
 
 
-ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, int nSample, float deltaTSample, size_t preSampleIdx, std::string fitFunction,
+ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, int nSample, float deltaTSample, size_t preSampleIdx, const std::string & fitFunction,
                                  const ZDCModuleIntArray& peak2ndDerivMinSamples,
                                  const ZDCModuleFloatArray& peak2ndDerivMinThresholdsHG,
                                  const ZDCModuleFloatArray& peak2ndDerivMinThresholdsLG,
