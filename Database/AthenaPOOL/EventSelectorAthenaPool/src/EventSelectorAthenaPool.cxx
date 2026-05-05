@@ -41,17 +41,6 @@
 #include <vector>
 
 
-namespace {
-   /// Helper to suppress thread-checker warnings for single-threaded execution
-   StatusCode putEvent_ST(const IAthenaIPCTool& tool,
-                          long eventNumber, const void* source,
-                          size_t nbytes, unsigned int status) {
-      StatusCode sc ATLAS_THREAD_SAFE = tool.putEvent(eventNumber, source, nbytes, status);
-      return sc;
-   }
-}
-
-
 //________________________________________________________________________________
 EventSelectorAthenaPool::EventSelectorAthenaPool(const std::string& name, ISvcLocator* pSvcLocator) :
 	base_class(name, pSvcLocator)
@@ -127,13 +116,6 @@ StatusCode EventSelectorAthenaPool::initialize() {
       if( !skip_ranges_str.empty() )
          ATH_MSG_DEBUG("Events to skip: " << skip_ranges_str);
    }
-   // Get IncidentSvc
-   ATH_CHECK(m_incidentSvc.retrieve());
-   // Listen to the Event Processing incidents
-   if (m_eventStreamingTool.empty()) {
-      m_incidentSvc->addListener(this, IncidentType::BeginProcessing, 0);
-      m_incidentSvc->addListener(this, IncidentType::EndProcessing, 0);
-   }
 
    // Get AthenaPoolCnvSvc
    ATH_CHECK(m_athenaPoolCnvSvc.retrieve());
@@ -143,14 +125,6 @@ StatusCode EventSelectorAthenaPool::initialize() {
    }
    // Get HelperTools
    ATH_CHECK(m_helperTools.retrieve());
-   // Get SharedMemoryTool (if configured)
-   if (!m_eventStreamingTool.empty() && !m_eventStreamingTool.retrieve().isSuccess()) {
-      ATH_MSG_FATAL("Cannot get " << m_eventStreamingTool.typeAndName() << "");
-      return StatusCode::FAILURE;
-   } else if (m_makeStreamingToolClient.value() == -1) {
-      std::string dummyStr;
-      ATH_CHECK(m_eventStreamingTool->makeClient(m_makeStreamingToolClient.value(), dummyStr));
-   }
 
    // Ensure the xAODCnvSvc is listed in the EventPersistencySvc
    ServiceHandle<IProperty> epSvc("EventPersistencySvc", name());
@@ -194,7 +168,15 @@ StatusCode EventSelectorAthenaPool::initialize() {
    }
    // Jump to reinit() to execute common init/reinit actions
    m_guid = Guid::null();
-   return reinit();
+   if (!reinit().isSuccess()) {
+      return StatusCode::FAILURE;
+   }
+   // Get IncidentSvc
+   ATH_CHECK(m_incidentSvc.retrieve());
+   // Listen to the Event Processing incidents
+   m_incidentSvc->addListener(this, IncidentType::BeginProcessing, 0);
+   m_incidentSvc->addListener(this, IncidentType::EndProcessing, 0);
+   return StatusCode::SUCCESS;
 }
 //________________________________________________________________________________
 StatusCode EventSelectorAthenaPool::reinit() const {
@@ -213,10 +195,6 @@ StatusCode EventSelectorAthenaPool::reinit() const {
    m_inputCollectionsChanged = false;
    m_evtCount = 0;
    m_headerIterator = 0;
-   if (!m_eventStreamingTool.empty() && m_eventStreamingTool->isClient()) {
-      ATH_MSG_INFO("Done reinitialization for shared reader client");
-      return StatusCode::SUCCESS;
-   }
    bool retError = false;
    for (auto& tool : m_helperTools) {
       if (!tool->postInitialize().isSuccess()) {
@@ -313,9 +291,6 @@ StatusCode EventSelectorAthenaPool::start() {
    }
    m_inputCollectionsIterator = m_inputCollectionsProp.value().begin();
    m_curCollection = 0;
-   if (!m_eventStreamingTool.empty() && m_eventStreamingTool->isClient()) {
-      return StatusCode::SUCCESS;
-   }
    m_poolCollectionConverter = getCollectionCnv(true);
    if (!m_poolCollectionConverter) {
       ATH_MSG_INFO("No Events found in any Input Collections");
@@ -334,9 +309,6 @@ StatusCode EventSelectorAthenaPool::start() {
 }
 //________________________________________________________________________________
 StatusCode EventSelectorAthenaPool::stop() {
-   if (!m_eventStreamingTool.empty() && m_eventStreamingTool->isClient()) {
-      return StatusCode::SUCCESS;
-   }
    // Fire EndInputFile for any file still open (the event loop may end
    // before the file is fully read).
    m_inputFileGuard.reset();
@@ -350,14 +322,12 @@ StatusCode EventSelectorAthenaPool::stop() {
 
 //________________________________________________________________________________
 StatusCode EventSelectorAthenaPool::finalize() {
-   if (m_eventStreamingTool.empty() || !m_eventStreamingTool->isClient()) {
-      if (!m_counterTool.empty() && !m_counterTool->preFinalize().isSuccess()) {
-         ATH_MSG_WARNING("Failed to preFinalize() CounterTool");
-      }
-      for (auto& tool : m_helperTools) {
-         if (!tool->preFinalize().isSuccess()) {
-            ATH_MSG_WARNING("Failed to preFinalize() " << tool->name());
-         }
+   if (!m_counterTool.empty() && !m_counterTool->preFinalize().isSuccess()) {
+      ATH_MSG_WARNING("Failed to preFinalize() CounterTool");
+   }
+   for (auto& tool : m_helperTools) {
+      if (!tool->preFinalize().isSuccess()) {
+         ATH_MSG_WARNING("Failed to preFinalize() " << tool->name());
       }
    }
    delete m_endIter;   m_endIter   = nullptr;
@@ -377,55 +347,6 @@ StatusCode EventSelectorAthenaPool::createContext(IEvtSelector::Context*& ctxt) 
 //________________________________________________________________________________
 StatusCode EventSelectorAthenaPool::next(IEvtSelector::Context& ctxt) const {
    std::lock_guard<CallMutex> lockGuard(m_callLock);
-   if (!m_eventStreamingTool.empty() && m_eventStreamingTool->isClient()) {
-      if (m_makeStreamingToolClient.value() == -1) {
-         StatusCode sc = m_eventStreamingTool->lockEvent(m_evtCount);
-         while (sc.isRecoverable()) {
-            usleep(1000);
-            sc = m_eventStreamingTool->lockEvent(m_evtCount);
-         }
-      }
-      // Increase event count
-      ++m_evtCount;
-      void* tokenStr = nullptr;
-      unsigned int status = 0;
-      StatusCode sc = m_eventStreamingTool->getLockedEvent(&tokenStr, status);
-      if (sc.isRecoverable()) {
-         delete [] (char*)tokenStr; tokenStr = nullptr;
-         // Return end iterator
-         ctxt = *m_endIter;
-         // This is not a real failure but a Gaudi way of handling "end of job"
-         return StatusCode::FAILURE;
-      }
-      if (sc.isFailure()) {
-         ATH_MSG_FATAL("Cannot get NextEvent from AthenaSharedMemoryTool");
-         delete [] (char*)tokenStr; tokenStr = nullptr;
-         return StatusCode::FAILURE;
-      }
-      if (!eventStore()->clearStore().isSuccess()) {
-         ATH_MSG_WARNING("Cannot clear Store");
-      }
-      std::unique_ptr<AthenaAttributeList> athAttrList(new AthenaAttributeList());
-      athAttrList->extend("eventRef", "string");
-      (*athAttrList)["eventRef"].data<std::string>() = std::string((char*)tokenStr);
-      SG::WriteHandle<AthenaAttributeList> wh(m_attrListKey, eventStore()->name());
-      if (!wh.record(std::move(athAttrList)).isSuccess()) {
-         delete [] (char*)tokenStr; tokenStr = nullptr;
-         ATH_MSG_ERROR("Cannot record AttributeList to StoreGate " << StoreID::storeName(eventStore()->storeID()));
-         return StatusCode::FAILURE;
-      }
-      Token token;
-      token.fromString(std::string((char*)tokenStr));
-      delete [] (char*)tokenStr; tokenStr = nullptr;
-      Guid guid = token.dbID();
-      if (guid != m_guid && m_processMetadata.value()) {
-         InputFileIncidentGuard::transition(m_inputFileGuard, *m_incidentSvc, name(),
-                                          "FID:" + guid.toString(), guid.toString(),
-                                          /*endFileName=*/{});
-         m_guid = guid;
-      }
-      return StatusCode::SUCCESS;
-   }
    for (const auto& tool : m_helperTools) {
       if (!tool->preNext().isSuccess()) {
          ATH_MSG_WARNING("Failed to preNext() " << tool->name());
@@ -448,35 +369,10 @@ StatusCode EventSelectorAthenaPool::next(IEvtSelector::Context& ctxt) const {
       if( m_evtCount > m_skipEvents
           && (m_skipEventRanges.empty() || m_evtCount < m_skipEventRanges.front().first))
       {
-         if (!m_eventStreamingTool.empty() && m_eventStreamingTool->isServer()) {
-            IDataShare* ds = dynamic_cast<IDataShare*>(m_athenaPoolCnvSvc.get());
-            if (ds == nullptr) {
-               ATH_MSG_ERROR("Cannot cast AthenaPoolCnvSvc to DataShare");
+         if (!m_isSecondary.value()) {
+            if (!this->recordAttributeList().isSuccess()) {
+               ATH_MSG_ERROR("Failed to record AttributeList.");
                return StatusCode::FAILURE;
-            }
-            std::string token = m_headerIterator->eventRef().toString();
-            StatusCode sc;
-            while ( (sc = putEvent_ST(*m_eventStreamingTool,
-                                      m_evtCount - 1, token.c_str(),
-                                      token.length() + 1, 0)).isRecoverable() ) {
-               while (ds->readData().isSuccess()) {
-                  ATH_MSG_VERBOSE("Called last readData, while putting next event in next()");
-               }
-               // Nothing to do right now, trigger alternative (e.g. caching) here? Currently just fast loop.
-            }
-            if (!sc.isSuccess()) {
-               ATH_MSG_ERROR("Cannot put Event " << m_evtCount - 1 << " to AthenaSharedMemoryTool");
-               return StatusCode::FAILURE;
-            }
-         } else {
-            if (!m_isSecondary.value()) {
-               if (!eventStore()->clearStore().isSuccess()) {
-                  ATH_MSG_WARNING("Cannot clear Store");
-               }
-               if (!recordAttributeList().isSuccess()) {
-                  ATH_MSG_ERROR("Failed to record AttributeList.");
-                  return StatusCode::FAILURE;
-               }
             }
          }
          StatusCode status = StatusCode::SUCCESS;
@@ -802,131 +698,6 @@ int EventSelectorAthenaPool::findEvent(int evtNum) const {
    return(-1);
 }
 
-//________________________________________________________________________________
-StatusCode EventSelectorAthenaPool::makeServer(int num) {
-   IDataShare* ds = dynamic_cast<IDataShare*>(m_athenaPoolCnvSvc.get());
-   if (ds == nullptr) {
-      ATH_MSG_ERROR("Cannot cast AthenaPoolCnvSvc to DataShare");
-      return StatusCode::FAILURE;
-   }
-   if (num < 0) {
-      if (ds->makeServer(num - 1).isFailure()) {
-         ATH_MSG_ERROR("Failed to switch AthenaPoolCnvSvc to output DataStreaming server");
-      }
-      return StatusCode::SUCCESS;
-   }
-   if (ds->makeServer(num + 1).isFailure()) {
-      ATH_MSG_ERROR("Failed to switch AthenaPoolCnvSvc to input DataStreaming server");
-      return StatusCode::FAILURE;
-   }
-   if (m_eventStreamingTool.empty()) {
-      return StatusCode::SUCCESS;
-   }
-   m_processMetadata = false;
-   ATH_MSG_DEBUG("makeServer: " << m_eventStreamingTool << " = " << num);
-   return(m_eventStreamingTool->makeServer(1, ""));
-}
-
-//________________________________________________________________________________
-StatusCode EventSelectorAthenaPool::makeClient(int num) {
-   IDataShare* ds = dynamic_cast<IDataShare*>(m_athenaPoolCnvSvc.get());
-   if (ds == nullptr) {
-      ATH_MSG_ERROR("Cannot cast AthenaPoolCnvSvc to DataShare");
-      return StatusCode::FAILURE;
-   }
-   if (ds->makeClient(num + 1).isFailure()) {
-      ATH_MSG_ERROR("Failed to switch AthenaPoolCnvSvc to DataStreaming client");
-      return StatusCode::FAILURE;
-   }
-   if (m_eventStreamingTool.empty()) {
-      return StatusCode::SUCCESS;
-   }
-   ATH_MSG_DEBUG("makeClient: " << m_eventStreamingTool << " = " << num);
-   std::string dummyStr;
-   return(m_eventStreamingTool->makeClient(0, dummyStr));
-}
-
-//________________________________________________________________________________
-StatusCode EventSelectorAthenaPool::share(int evtnum) {
-   IDataShare* ds = dynamic_cast<IDataShare*>(m_athenaPoolCnvSvc.get());
-   if (ds == nullptr) {
-      ATH_MSG_ERROR("Cannot cast AthenaPoolCnvSvc to DataShare");
-      return StatusCode::FAILURE;
-   }
-   if (!m_eventStreamingTool.empty() && m_eventStreamingTool->isClient()) {
-      StatusCode sc = m_eventStreamingTool->lockEvent(evtnum);
-      while (sc.isRecoverable()) {
-         usleep(1000);
-         sc = m_eventStreamingTool->lockEvent(evtnum);
-      }
-// Send stop client and wait for restart
-      if (sc.isFailure()) {
-         if (ds->makeClient(0).isFailure()) {
-            return StatusCode::FAILURE;
-         }
-         sc = m_eventStreamingTool->lockEvent(evtnum);
-         while (sc.isRecoverable() || sc.isFailure()) {
-            usleep(1000);
-            sc = m_eventStreamingTool->lockEvent(evtnum);
-         }
-//FIXME
-         if (ds->makeClient(1).isFailure()) {
-            return StatusCode::FAILURE;
-         }
-      }
-      return(sc);
-   }
-   return StatusCode::FAILURE;
-}
-
-//________________________________________________________________________________
-StatusCode EventSelectorAthenaPool::readEvent(int maxevt) {
-   IDataShare* ds = dynamic_cast<IDataShare*>(m_athenaPoolCnvSvc.get());
-   if (ds == nullptr) {
-      ATH_MSG_ERROR("Cannot cast AthenaPoolCnvSvc to DataShare");
-      return StatusCode::FAILURE;
-   }
-   if (m_eventStreamingTool.empty()) {
-      ATH_MSG_ERROR("No AthenaSharedMemoryTool configured for readEvent()");
-      return StatusCode::FAILURE;
-   }
-   ATH_MSG_VERBOSE("Called read Event " << maxevt);
-   IEvtSelector::Context* ctxt = new EventContextAthenaPool(this);
-   for (int i = 0; i < maxevt || maxevt == -1; ++i) {
-      if (!next(*ctxt).isSuccess()) {
-         if (m_evtCount == -1) {
-            ATH_MSG_VERBOSE("Called read Event and read last event from input: " << i);
-            break;
-         }
-         ATH_MSG_ERROR("Cannot read Event " << m_evtCount - 1 << " into AthenaSharedMemoryTool");
-         delete ctxt; ctxt = nullptr;
-         return StatusCode::FAILURE;
-      } else {
-         ATH_MSG_VERBOSE("Called next, read Event " << m_evtCount - 1);
-      }
-   }
-   delete ctxt; ctxt = nullptr;
-   // End of file, wait for last event to be taken
-   StatusCode sc;
-   while ( (sc = putEvent_ST(*m_eventStreamingTool, 0, 0, 0, 0)).isRecoverable() ) {
-      while (ds->readData().isSuccess()) {
-         ATH_MSG_VERBOSE("Called last readData, while marking last event in readEvent()");
-      }
-      usleep(1000);
-   }
-   if (!sc.isSuccess()) {
-      ATH_MSG_ERROR("Cannot put last Event marker to AthenaSharedMemoryTool");
-      return StatusCode::FAILURE;
-   } else {
-      sc = ds->readData();
-      while (sc.isSuccess() || sc.isRecoverable()) {
-         sc = ds->readData();
-      }
-      ATH_MSG_DEBUG("Failed last readData -> Clients are stopped, after marking last event in readEvent()");
-   }
-   return StatusCode::SUCCESS;
-}
-
 //__________________________________________________________________________
 int EventSelectorAthenaPool::size(Context& /*ctxt*/) const {
    // Fetch sizes of all collections.
@@ -979,6 +750,9 @@ EventSelectorAthenaPool::getCollectionCnv(bool throwIncidents) const {
 }
 //__________________________________________________________________________
 StatusCode EventSelectorAthenaPool::recordAttributeList() const {
+   if (!eventStore()->clearStore().isSuccess()) {
+      ATH_MSG_WARNING("Cannot clear Store");
+   }
    // Get access to AttributeList
    ATH_MSG_DEBUG("Get AttributeList from the collection");
    // MN: accessing only attribute list, ignoring token list
@@ -1034,10 +808,6 @@ StatusCode EventSelectorAthenaPool::io_reinit() {
    if (!iomgr->io_hasitem(this)) {
       ATH_MSG_FATAL("IoComponentMgr does not know about myself !");
       return StatusCode::FAILURE;
-   }
-   if (!m_eventStreamingTool.empty() && m_eventStreamingTool->isClient()) {
-      m_guid = Guid::null();
-      return(this->reinit());
    }
    std::vector<std::string> inputCollections = m_inputCollectionsProp.value();
    std::set<std::size_t> updatedIndexes;
@@ -1131,7 +901,7 @@ void EventSelectorAthenaPool::handle(const Incident& inc)
 */
 bool EventSelectorAthenaPool::disconnectIfFinished( const SG::SourceID &fid ) const
 {
-   if( m_eventStreamingTool.empty() && m_activeEventsPerSource.find(fid) != m_activeEventsPerSource.end() 
+   if( m_activeEventsPerSource.find(fid) != m_activeEventsPerSource.end() 
            && m_activeEventsPerSource[fid] <= 0 && m_guid != fid ) {
       // Explicitly disconnect file corresponding to old FID to release memory.
       // EndInputFile is handled by the InputFileIncidentGuard.
