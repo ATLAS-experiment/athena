@@ -183,7 +183,7 @@ def ActsLargeRadiusStripSeedingToolCfg(flags,
     kwargs.setdefault("deltaZMax", 850. * ActsUnits.mm)
     kwargs.setdefault("cotThetaMax", 5.0)
     kwargs.setdefault("maxSeedsPerSpM", 1)
-    kwargs.setdefault("maxStripDeltaCotTheta", 0.5)
+    kwargs.setdefault("maxStripDeltaCotTheta", 0.3)
     kwargs.setdefault("absDeltaEtaWeightFactor", 10.)
     kwargs.setdefault("absDeltaEtaMinImpact", 2.)
     kwargs.setdefault("zBinEdges", [-3000., -2500, -1400., -910., -500., -250.,  250., 500., 910., 1400., 2500, 3000.])
