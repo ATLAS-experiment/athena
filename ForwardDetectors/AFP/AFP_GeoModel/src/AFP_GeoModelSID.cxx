@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AFP_GeoModelFactory.h"
@@ -41,6 +41,7 @@
 void AFP_GeoModelFactory::addSiDetector(GeoPhysVol* pPhysMotherVol, const char* pszStationName, HepGeom::Transform3D& TransInMotherVolume)
 {
 	std::string szLabel;
+	const std::string pszStationNameStr{pszStationName};
 	GeoLogVol* pLogElement=nullptr;
 	GeoFullPhysVol* pPhysElement;
 	eAFPStation eStation=m_pGeometry->parseStationName(pszStationName);
@@ -58,7 +59,7 @@ void AFP_GeoModelFactory::addSiDetector(GeoPhysVol* pPhysMotherVol, const char* 
 	GeoFullPhysVol* pPhysSIDVacuumSensor=new GeoFullPhysVol(pLogSIDVacuumSensor);
 	szLabel = std::format("{}_SIDVacuumSensor[{}]",pszStationName,nSpecVacSensorID);
 	pPhysMotherVol->add(new GeoNameTag(szLabel));
-	pPhysMotherVol->add(new GeoTransform(Amg::CLHEPTransformToEigen(m_pGeometry->getSIDTransform(ESTT_VACUUMSENSOR,pszStationName,nSpecVacSensorID))));
+	pPhysMotherVol->add(new GeoTransform(Amg::CLHEPTransformToEigen(m_pGeometry->getSIDTransform(ESTT_VACUUMSENSOR,pszStationNameStr,nSpecVacSensorID))));
 	pPhysMotherVol->add(pPhysSIDVacuumSensor);
     
     
@@ -70,7 +71,7 @@ void AFP_GeoModelFactory::addSiDetector(GeoPhysVol* pPhysMotherVol, const char* 
 		pPhysElement=new GeoFullPhysVol(pLogElement);
 		szLabel = std::format("{}_SIDPlate[{}]",pszStationName,i);
 		pPhysMotherVol->add(new GeoNameTag(szLabel));
-		pPhysMotherVol->add(new GeoTransform(Amg::CLHEPTransformToEigen(TransInMotherVolume*m_pGeometry->getSIDTransform(ESTT_PLATE,pszStationName,i))));
+		pPhysMotherVol->add(new GeoTransform(Amg::CLHEPTransformToEigen(TransInMotherVolume*m_pGeometry->getSIDTransform(ESTT_PLATE,pszStationNameStr,i))));
 		pPhysMotherVol->add(pPhysElement);
 
 		// create SID chip
@@ -80,7 +81,7 @@ void AFP_GeoModelFactory::addSiDetector(GeoPhysVol* pPhysMotherVol, const char* 
 		pPhysElement=new GeoFullPhysVol(pLogElement);
 		szLabel = std::format("{}_SIDChip[{}]",pszStationName,i);
 		pPhysMotherVol->add(new GeoNameTag(szLabel));
-		pPhysMotherVol->add(new GeoTransform(Amg::CLHEPTransformToEigen(TransInMotherVolume*m_pGeometry->getSIDTransform(ESTT_FEI4CHIP,pszStationName,i))));
+		pPhysMotherVol->add(new GeoTransform(Amg::CLHEPTransformToEigen(TransInMotherVolume*m_pGeometry->getSIDTransform(ESTT_FEI4CHIP,pszStationNameStr,i))));
 		pPhysMotherVol->add(pPhysElement);
 
 		// create SID sensor (pixel area)
@@ -89,7 +90,7 @@ void AFP_GeoModelFactory::addSiDetector(GeoPhysVol* pPhysMotherVol, const char* 
 		pPhysElement=new GeoFullPhysVol(pLogElement);
 		szLabel = std::format("{}_SIDSensor[{}]",pszStationName,i);
 		pPhysMotherVol->add(new GeoNameTag(szLabel));
-		pPhysMotherVol->add(new GeoTransform(Amg::CLHEPTransformToEigen(TransInMotherVolume*m_pGeometry->getSIDTransform(ESTT_SENSOR,pszStationName,i))));
+		pPhysMotherVol->add(new GeoTransform(Amg::CLHEPTransformToEigen(TransInMotherVolume*m_pGeometry->getSIDTransform(ESTT_SENSOR,pszStationNameStr,i))));
 		pPhysMotherVol->add(pPhysElement);
 		
 		if(m_CfgParams.sidcfg[eStation].bAddVacuumSensors)
@@ -101,7 +102,7 @@ void AFP_GeoModelFactory::addSiDetector(GeoPhysVol* pPhysMotherVol, const char* 
 
 			szLabel = std::format("{}_SIDVacuumSensor[{}]",pszStationName,i);
 			pPhysMotherVol->add(new GeoNameTag(szLabel));
-			pPhysMotherVol->add(new GeoTransform(Amg::CLHEPTransformToEigen(m_pGeometry->getSIDTransform(ESTT_VACUUMSENSOR,pszStationName,i))));
+			pPhysMotherVol->add(new GeoTransform(Amg::CLHEPTransformToEigen(m_pGeometry->getSIDTransform(ESTT_VACUUMSENSOR,pszStationNameStr,i))));
 			pPhysMotherVol->add(pPhysSIDVacuumSensor);
 		}
 	}

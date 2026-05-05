@@ -1,9 +1,10 @@
 /*
-	Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+	Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AFP_Calibration/AFP_NoisyPixelTool.h"
 #include <iostream>
+
 
 int AFP_NoisyPixelTool::Identify(std::shared_ptr<const TH2F> input, std::vector<TH2F>& output) const
 {
@@ -155,7 +156,8 @@ int AFP_NoisyPixelTool::Identify(std::shared_ptr<const TH2F> input, std::vector<
 }
 
 
-std::vector<std::pair<int,int>> AFP_NoisyPixelTool::getLegitPixels(std::shared_ptr<const TH2F> input, const int col_ID, const int row_ID, const std::string& method="8_PIX") const
+std::vector<std::pair<int,int>> 
+AFP_NoisyPixelTool::getLegitPixels(std::shared_ptr<const TH2F> input, const int col_ID, const int row_ID, std::string_view method) const
 {
 	// method="8_PIX" means to investigate all pixels around
 	
