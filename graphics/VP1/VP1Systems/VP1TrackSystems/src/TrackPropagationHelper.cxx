@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -14,6 +14,7 @@
   ////////////////////////////////////////////////////////////////
 
 #include "VP1TrackSystems/TrackPropagationHelper.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 #include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkTrack/Track.h"
 #include "TrkSurfaces/PlaneSurface.h"
