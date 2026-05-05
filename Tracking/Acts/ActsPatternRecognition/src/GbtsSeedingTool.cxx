@@ -117,7 +117,8 @@ namespace ActsTrk {
       const std::vector<xAOD::DetectorIDHashType>& elementlist = sp->elementIdList();
 
       const bool isPixel(elementlist.size() == 1);
-      if (isPixel == false) continue; // as currently strip hits are not used for seeding
+      // In LRT mode use strip spacepoints; in pixel mode use pixel spacepoints
+      if (isPixel == m_finderCfg.lrtMode) continue;
     
 	    const short layer = (isPixel ? m_pix_h2l : m_sct_h2l)->operator[](static_cast<int>(elementlist[0]));
 
@@ -145,7 +146,7 @@ namespace ActsTrk {
 
       newSp.extra(layerColumn) = layer;
 
-      if (m_finderCfg.useMl) {
+      if (m_finderCfg.useMl && isPixel) {
         assert(dynamic_cast<const xAOD::PixelCluster*>(sp->measurements().front())!=nullptr);
         const xAOD::PixelCluster* pCL = static_cast<const xAOD::PixelCluster*>(sp->measurements().front());
         newSp.extra(clusterWidthColumn) = pCL->widthInEta();
