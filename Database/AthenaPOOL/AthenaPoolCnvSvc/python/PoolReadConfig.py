@@ -8,10 +8,16 @@ import ROOT
 
 def EventSelectorAthenaPoolCfg(flags):
     result = ComponentAccumulator()
-    evSel = CompFactory.EventSelectorAthenaPool("EventSelector",
-                                                InputCollections=flags.Input.Files,
-                                                SkipEvents=flags.Exec.SkipEvents,
-                                                ConversionService="AthenaPoolSharedIOCnvSvc" if flags.MP.UseSharedReader or flags.MP.UseSharedWriter else "AthenaPoolCnvSvc")
+    if flags.MP.UseSharedReader:
+        evSel = CompFactory.EventSelectorAthenaPoolSharedIO("EventSelector",
+                                                            InputCollections=flags.Input.Files,
+                                                            SkipEvents=flags.Exec.SkipEvents,
+                                                            ConversionService="AthenaPoolSharedIOCnvSvc")
+    else:
+        evSel = CompFactory.EventSelectorAthenaPool("EventSelector",
+                                                    InputCollections=flags.Input.Files,
+                                                    SkipEvents=flags.Exec.SkipEvents,
+                                                    ConversionService="AthenaPoolSharedIOCnvSvc" if flags.MP.UseSharedWriter else "AthenaPoolCnvSvc")
     if flags.Input.OverrideRunNumber:
         if not flags.Input.RunAndLumiOverrideList:
             DataRunNumber = -1

@@ -118,7 +118,7 @@ def AthenaMPCfg(flags):
                 bscfg = ByteStreamReadCfg(flags)
                 result.merge(bscfg)
             else:
-                evSel = CompFactory.EventSelectorAthenaPool("EventSelector")
+                evSel = CompFactory.EventSelectorAthenaPoolSharedIO("EventSelector")
 
                 inputStreamingTool = AthenaSharedMemoryTool("InputStreamingTool",
                                                             SharedMemoryName=f"InputStream{unique_id}")

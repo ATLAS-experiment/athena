@@ -8,14 +8,7 @@ find_package( CORAL COMPONENTS CoralBase )
 find_package( Boost )
 
 # Component(s) in the package:
-atlas_add_component( EventSelectorAthenaPool
-                     src/AthenaPoolAddressProviderSvc.cxx
-                     src/CondProxyProvider.cxx
-                     src/DoubleEventSelectorAthenaPool.cxx
-                     src/EventSelectorAthenaPool.cxx
-                     src/PoolCollectionConverter.cxx
-                     src/registerKeys.cxx
-                     src/components/*.cxx
+atlas_add_component( EventSelectorAthenaPool src/*.cxx src/components/*.cxx
                      INCLUDE_DIRS ${CORAL_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
                      LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaBaseComps AthenaKernel AthenaPoolCnvSvcLib AthenaPoolUtilities CxxUtils GaudiKernel PersistentDataModel PoolSvcLib StoreGateLib
 		     PRIVATE_LINK_LIBRARIES CollectionSvc StorageSvc )
