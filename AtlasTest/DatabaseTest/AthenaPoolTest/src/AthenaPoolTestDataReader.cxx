@@ -3,14 +3,12 @@
 */
 
 /**
- * @file AthenaPoolTestAttrWriter.cxx
+ * @file AthenaPoolTestDataWriter.cxx
  *
  * @brief Test Algorithm for POOL I/O tests, reads AthenaPoolData
  * objects from the transient store
  *
  * @author RD Schaffer <R.D.Schaffer@cern.ch>
- *
- * $Id: AthenaPoolTestDataReader.cxx,v 1.25 2009-03-30 17:28:18 schaffer Exp $
  *
  */
 
