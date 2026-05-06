@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -360,7 +360,7 @@ InDet::TRT_SeededTrackFinder::execute(const EventContext& ctx) const{
                 ev_stat.m_counter[Stat_t::kNBckTrk]++; ev_stat.m_counter[Stat_t::Stat_t::kNBckTrkTrt]++;
                 // add it to output list
                 if (m_trackSummaryTool.isEnabled()) {
-                  m_trackSummaryTool->computeAndReplaceTrackSummary(*trtSeg,
+                  m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *trtSeg,
                                       false /* DO NOT suppress hole search*/);
                 }
                 outTracks->push_back(trtSeg);
@@ -371,7 +371,7 @@ InDet::TRT_SeededTrackFinder::execute(const EventContext& ctx) const{
               ev_stat.m_counter[Stat_t::kNBckTrk]++; ev_stat.m_counter[Stat_t::Stat_t::kNBckTrkSi]++;
               // add it to output list
               if (m_trackSummaryTool.isEnabled()) {
-                m_trackSummaryTool->computeAndReplaceTrackSummary(*globalTrackNew,
+                m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *globalTrackNew,
                                     false /* DO NOT suppress hole search*/);
               }
               outTracks->push_back(globalTrackNew);
