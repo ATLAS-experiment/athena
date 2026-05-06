@@ -35,7 +35,7 @@ public:
     bool passesPTCuts(const std::vector<Pythia8::Particle>&) const;
     bool passesEtaCuts(const std::vector<Pythia8::Particle>&) const;
     bool signalAccept(Pythia8::Event&, const std::vector<int>&, unsigned int) const;
-    bool userSelection(Pythia8::Event&, std::string, std::vector<double>);
+    bool userSelection(Pythia8::Event&, const std::string &, const std::vector<double>&);
     void printSignalSelections(const std::vector<int>&,const std::vector<double>&, const std::vector<double>&, unsigned int) const;
     
   static CLHEP::HepRandomEngine* p_rndmEngine;
