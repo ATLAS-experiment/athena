@@ -8,7 +8,9 @@ echo "Input Parameters"
 number_of_events=$1
 
 #Option for sim/digi/reco
-default_geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN4)")
+#default_geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN4)")
+# Preliminary update for testing in ART before launching production
+default_geometry="ATLAS-P2-RUN4-05-00-00"
 default_condition=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 
 run () {
