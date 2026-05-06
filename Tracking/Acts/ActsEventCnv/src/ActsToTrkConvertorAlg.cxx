@@ -128,7 +128,7 @@ namespace ActsTrk {
             if (flag.isHole())
             {
               const Acts::BoundTrackParameters actsParam = track.createParametersFromState(state);
-              parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsParam, tgContext);
+              parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(ctx, actsParam, tgContext);
 	      if(!m_boundaryCheckTool.empty()){
 		auto boundaryCheck = m_boundaryCheckTool->boundaryCheck(*parm);
 		// Check if this is a hole, a dead sensors or a state outside the sensor boundary
@@ -161,7 +161,7 @@ namespace ActsTrk {
             else if (flag.isOutlier())
             {
               const Acts::BoundTrackParameters actsParam = track.createParametersFromState(state);
-              parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsParam, tgContext);
+              parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(ctx, actsParam, tgContext);
               typePattern.set(Trk::TrackStateOnSurface::Outlier);
             }
             // The state is a measurement state, use smoothed parameters
@@ -171,7 +171,7 @@ namespace ActsTrk {
 
               // is it really necessary to keep our own copy of all the smoothed parameters?
               actsSmoothedParam.push_back(std::make_unique<const Acts::BoundTrackParameters>(Acts::BoundTrackParameters(actsParam)));
-              parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsParam, tgContext);
+              parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(ctx, actsParam, tgContext);
               typePattern.set(Trk::TrackStateOnSurface::Measurement);
             }
 
@@ -231,7 +231,7 @@ namespace ActsTrk {
                                                track.parameters(),
                                                track.covariance(),
                                                hypothesis);
-      std::unique_ptr<Trk::TrackParameters> per = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsPer, tgContext);
+      std::unique_ptr<Trk::TrackParameters> per = m_ATLASConverterTool->actsTrackParametersToTrkParameters(ctx, actsPer, tgContext);
       std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
       typePattern.set(Trk::TrackStateOnSurface::Perigee);
       auto perState = new Trk::TrackStateOnSurface(nullptr,

@@ -46,7 +46,7 @@ public:
   /// (Pixel and SCT)
   virtual 
   const Trk::Surface&
-  actsSurfaceToTrkSurface(const Acts::Surface &actsSurface) const override;
+  actsSurfaceToTrkSurface(const EventContext& ctx, const Acts::Surface &actsSurface) const override;
 
   /// Find the Acts surface corresponding to the ATLAS surface 
   /// Use a map associating ATLAS ID to Acts surfaces
@@ -80,7 +80,7 @@ public:
   /// Take care of unit conversion between the two.  
   virtual
   std::unique_ptr<Trk::TrackParameters>
-  actsTrackParametersToTrkParameters(const Acts::BoundTrackParameters &actsParameter, const Acts::GeometryContext& gctx) const override;
+  actsTrackParametersToTrkParameters(const EventContext& ctx, const Acts::BoundTrackParameters &actsParameter, const Acts::GeometryContext& gctx) const override;
 
   /** Convert TrackCollection to Acts track container. 
    * @param tc The track container to fill
