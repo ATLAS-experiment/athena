@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1197,7 +1197,7 @@ namespace MuonCombined {
             std::make_unique<Trk::Track>(info, std::move(trackStateOnSurfaces), (indetTrack.fitQuality())->uniqueClone());
 
         // create a track summary for this track
-        if (m_trackSummaryTool.isEnabled()) { m_trackSummaryTool->computeAndReplaceTrackSummary(*newtrack, false); }
+        if (m_trackSummaryTool.isEnabled()) { m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *newtrack, false); }
 
         return newtrack;
     }

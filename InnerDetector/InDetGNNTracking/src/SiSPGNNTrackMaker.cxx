@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <memory>
@@ -522,7 +522,7 @@ std::tuple<bool, int, std::unique_ptr<Trk::Track>> InDet::SiSPGNNTrackMaker::doF
 
     // if track fit succeeds, eta and pT within range, compute track summary. This is quite expensive.
     m_trackSummaryTool->computeAndReplaceTrackSummary(
-        *track, false /* DO NOT suppress hole search*/);
+        ctx, *track, false /* DO NOT suppress hole search*/);
     
     int passTrackCut = (m_doRecoTrackCuts) ? passEtaDepCuts(*track) : -1;
     

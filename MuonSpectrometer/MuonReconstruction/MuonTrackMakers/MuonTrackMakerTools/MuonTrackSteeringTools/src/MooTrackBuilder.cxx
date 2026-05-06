@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MooTrackBuilder.h"
@@ -102,7 +102,7 @@ namespace Muon {
                                                   << m_printer->print(finalTrack->measurementsOnTrack()->stdcont()));
 
         // generate a track summary for this track
-        if (m_trackSummaryTool.isEnabled()) { m_trackSummaryTool->computeAndReplaceTrackSummary(*finalTrack, false); }
+        if (m_trackSummaryTool.isEnabled()) { m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *finalTrack, false); }
 
         bool recalibrateMDTHits = m_recalibrateMDTHits;
         bool recreateCompetingROTs = true;

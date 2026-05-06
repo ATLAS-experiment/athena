@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //======================================================
@@ -399,7 +399,7 @@ StatusCode InDet::TRT_SegmentsToTrack::execute()
   final_outputTrackCollection->reserve(output_track_collection.size());
   if (m_trkSummaryTool.isEnabled()) {
      for (std::unique_ptr<Trk::Track> &track : output_track_collection) {
-        m_trkSummaryTool->computeAndReplaceTrackSummary(*track,prd_to_track_map.get());
+        m_trkSummaryTool->computeAndReplaceTrackSummary(ctx, *track,prd_to_track_map.get());
         final_outputTrackCollection->push_back(std::move(track));
      }
   }

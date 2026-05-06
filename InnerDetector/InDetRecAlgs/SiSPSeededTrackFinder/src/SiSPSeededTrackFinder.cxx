@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SiSPSeededTrackFinder/SiSPSeededTrackFinder.h"
@@ -232,7 +232,7 @@ StatusCode InDet::SiSPSeededTrackFinder::oldStrategy(const EventContext& ctx) co
   for (const std::pair<const double, Trk::Track*> & qualityAndTrack: qualitySortedTrackCandidates) {
     ++counter[kNTracks];
     if (m_trackSummaryTool.isEnabled()) {
-       m_trackSummaryTool->computeAndReplaceTrackSummary(*(qualityAndTrack.second),
+       m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *(qualityAndTrack.second),
                                                          false /* DO NOT suppress hole search*/);
     }
     outputTracks->push_back(qualityAndTrack.second);
@@ -344,7 +344,7 @@ StatusCode InDet::SiSPSeededTrackFinder::newStrategy(const EventContext& ctx) co
 
         /// For the first (highest quality) track from each seed, populate the vertex finding histograms
         if (firstTrack and not m_ITKGeometry) {
-          fillZHistogram(t, beamPosPerigee, numberHistogram, zWeightedHistogram, ptWeightedHistogram);
+          fillZHistogram(ctx, t, beamPosPerigee, numberHistogram, zWeightedHistogram, ptWeightedHistogram);
         }
         firstTrack = false;
       }  
@@ -412,7 +412,7 @@ StatusCode InDet::SiSPSeededTrackFinder::newStrategy(const EventContext& ctx) co
     if (m_trackSummaryTool.isEnabled()) {
       /// Note that for run-3 the tool here is configured to not perform a hole search,
       /// regardless of the 'false' argument below
-       m_trackSummaryTool->computeAndReplaceTrackSummary(*qualityAndTrack.second,
+       m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *qualityAndTrack.second,
                                                          false /* DO NOT suppress hole search*/);
        InDet::PatternHoleSearchOutcome theOutcome; 
        /// Check if we have a hole search result for this guy
@@ -532,7 +532,7 @@ StatusCode InDet::SiSPSeededTrackFinder::itkFastTrackingStrategy(const EventCont
     ++counter[kNTracks];
 
     if (m_trackSummaryTool.isEnabled()) {
-      m_trackSummaryTool->computeAndReplaceTrackSummary(*qualityAndTrack.second);
+      m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *qualityAndTrack.second);
       InDet::PatternHoleSearchOutcome theOutcome;
       /// Check if we have a hole search result for this guy
       if (m_writeHolesFromPattern && trackEventData.combinatorialData().findPatternHoleSearchOutcome(qualityAndTrack.second,theOutcome)){
@@ -681,7 +681,7 @@ StatusCode InDet::SiSPSeededTrackFinder::itkConvStrategy(const EventContext& ctx
     if (m_trackSummaryTool.isEnabled()) {
       /// Note that for run-3 the tool here is configured to not perform a hole search,
       /// regardless of the 'false' argument below
-      m_trackSummaryTool->computeAndReplaceTrackSummary(*qualityAndTrack.second,
+      m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *qualityAndTrack.second,
 							false /* DO NOT suppress hole search*/);
       InDet::PatternHoleSearchOutcome theOutcome;
       /// Check if we have a hole search result for this guy
@@ -985,7 +985,8 @@ void InDet::SiSPSeededTrackFinder::filterSharedTracksFast(std::multimap<double, 
 // Fill z coordinate histogram
 ///////////////////////////////////////////////////////////////////
 
-void InDet::SiSPSeededTrackFinder::fillZHistogram(const Trk::Track* Tr,
+void InDet::SiSPSeededTrackFinder::fillZHistogram(const EventContext& ctx,
+                                                  const Trk::Track* Tr,
                                                   const Trk::PerigeeSurface& beamPosPerigee,
                                                   std::vector<int>& numberHistogram,
                                                   std::vector<double>& zWeightedHistogram,
@@ -1010,7 +1011,7 @@ void InDet::SiSPSeededTrackFinder::fillZHistogram(const Trk::Track* Tr,
 	  
   double step;
   /// propagate from innermost hit to beam spot
-  if (not m_proptool->propagate(Gaudi::Hive::currentContext(),
+  if (not m_proptool->propagate(ctx,
                                 TP, beamPosPerigee, TP, Trk::anyDirection, m_fieldprop, step, Trk::pion)) return;
 	      
   const AmgVector(5)& parsAtBeamSpot = TP.parameters();
