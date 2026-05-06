@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "xAODTruthCnvAlg.h"
 
@@ -426,7 +426,8 @@ namespace xAODMaker {
         genEvt_valid_beam_particles=(beamParticles_vec.size()>1);
         if (genEvt_valid_beam_particles){beamParticles.first=beamParticles_vec[0]; beamParticles.second=beamParticles_vec[1]; }
         // We want to process particles in barcode order.
-        auto bcmapatt = genEvt->attribute<HepMC::GenEventBarcodes>("barcodes"); // FIXME barcode-based
+        static const std::string barcodeStr{"barcodes"};
+        auto bcmapatt = genEvt->attribute<HepMC::GenEventBarcodes>(barcodeStr); // FIXME barcode-based
         if (!bcmapatt) {
           ATH_MSG_ERROR("TruthParticleCnvTool.cxx: Event does not contain barcodes attribute");
           return StatusCode::FAILURE;
