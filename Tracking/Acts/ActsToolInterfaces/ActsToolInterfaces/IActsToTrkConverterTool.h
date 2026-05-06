@@ -49,8 +49,9 @@ class IActsToTrkConverterTool : virtual public IAlgTool {
    *         For the ID measurements a direct link is provided and for the muon measurements the look-up
    *         is performed via the associated Identifier and the detector manager. Exception is thrown
    *         if the mapping fails.
+   *  @param ctx: EventContext
    *  @param actsSurface: Refrence to the acts surface to translate */
-  virtual const Trk::Surface& actsSurfaceToTrkSurface(const Acts::Surface& actsSurface) const = 0;
+  virtual const Trk::Surface& actsSurfaceToTrkSurface(const EventContext& ctx, const Acts::Surface& actsSurface) const = 0;
   /** @brief Translate the parsed Trk surface into an Acts surface. The detector element identifier
    *         of the surface needs to be filled into the internal tool's look-up map. Otherwise an exception
    *         is thrown.
@@ -84,10 +85,12 @@ class IActsToTrkConverterTool : virtual public IAlgTool {
 
   /** @brief Translates the bounded Acts track parameters to Trk parameters. The bound parameter surface
    *         must be translatble by the tool
+   *  @param ctx: EventContext
    *  @param actsParameter: Refrence to the bounded parameters to translate
    *  @param gctx: Geometry context to align the associated surface in global space */
   virtual std::unique_ptr<Trk::TrackParameters> 
-    actsTrackParametersToTrkParameters(const Acts::BoundTrackParameters& actsParameter,
+    actsTrackParametersToTrkParameters(const EventContext& ctx,
+                                       const Acts::BoundTrackParameters& actsParameter,
                                        const Acts::GeometryContext& gctx) const = 0;
   /** @brief Convert the Acts fit result into a Trk::Track object, if the fit was successful. Otherwise,
    *         a nullptr is returned.

@@ -129,6 +129,7 @@ StatusCode ActsToTrkConverterTool::initialize() {
 }
 
 const Trk::Surface &ActsToTrkConverterTool::actsSurfaceToTrkSurface(
+    const EventContext& ctx,
     const Acts::Surface &actsSurface) const {
 
   const auto *detEleBase= dynamic_cast<const IDetectorElementBase*>(actsSurface.surfacePlacement());
@@ -155,7 +156,7 @@ const Trk::Surface &ActsToTrkConverterTool::actsSurfaceToTrkSurface(
       case sTgc:
       case Mm: {
         const MuonGM::MuonDetectorManager* detMgr{nullptr};
-        if (!SG::get(detMgr, m_muonMgrKey, Gaudi::Hive::currentContext()).isSuccess() || !detMgr) {
+        if (!SG::get(detMgr, m_muonMgrKey, ctx).isSuccess() || !detMgr) {
             THROW_EXCEPTION("Failed to retrieve the muon detector manager");
         }
         return detMgr->getReadoutElement(detEleBase->identify())->surface(detEleBase->identify());
@@ -297,6 +298,7 @@ ActsToTrkConverterTool::trkTrackParametersToActsParameters(const Trk::TrackParam
 
 std::unique_ptr<Trk::TrackParameters>
 ActsToTrkConverterTool::actsTrackParametersToTrkParameters(
+    const EventContext& ctx,
     const Acts::BoundTrackParameters &actsParameter,
     const Acts::GeometryContext &gctx) const {
 
@@ -317,7 +319,7 @@ ActsToTrkConverterTool::actsTrackParametersToTrkParameters(
   const Acts::Surface &actsSurface = actsParameter.referenceSurface();
   switch (actsSurface.type()) {
     case Acts::Surface::SurfaceType::Cone: {
-      const auto &coneSurface = static_cast<const Trk::ConeSurface&>(actsSurfaceToTrkSurface(actsSurface));
+      const auto &coneSurface = static_cast<const Trk::ConeSurface&>(actsSurfaceToTrkSurface(ctx, actsSurface));
       return std::make_unique<Trk::AtaCone>(
           actsParameter.get<Acts::eBoundLoc0>(),
           actsParameter.get<Acts::eBoundLoc1>(),
@@ -325,7 +327,7 @@ ActsToTrkConverterTool::actsTrackParametersToTrkParameters(
           actsParameter.get<Acts::eBoundTheta>(),
           actsParameter.get<Acts::eBoundQOverP>() * 1_MeV, coneSurface, cov);
     } case Acts::Surface::SurfaceType::Cylinder: {
-      const auto &cylSurface{static_cast<const Trk::CylinderSurface&>(actsSurfaceToTrkSurface(actsSurface))};
+      const auto &cylSurface{static_cast<const Trk::CylinderSurface&>(actsSurfaceToTrkSurface(ctx, actsSurface))};
       return std::make_unique<Trk::AtaCylinder>(
           actsParameter.get<Acts::eBoundLoc0>(),
           actsParameter.get<Acts::eBoundLoc1>(),
@@ -333,7 +335,7 @@ ActsToTrkConverterTool::actsTrackParametersToTrkParameters(
           actsParameter.get<Acts::eBoundTheta>(),
           actsParameter.get<Acts::eBoundQOverP>() * 1_MeV, cylSurface, cov);
     } case Acts::Surface::SurfaceType::Disc: {
-      const Trk::Surface& trkSurface{actsSurfaceToTrkSurface(actsSurface)};
+      const Trk::Surface& trkSurface{actsSurfaceToTrkSurface(ctx, actsSurface)};
       if (trkSurface.type() == Trk::SurfaceType::Disc) {
          const auto& discSurface{static_cast<const Trk::DiscSurface&>(trkSurface)};
          return std::make_unique<Trk::AtaDisc>(
@@ -394,7 +396,7 @@ ActsToTrkConverterTool::actsTrackParametersToTrkParameters(
           actsParameter.get<Acts::eBoundTheta>(),
           actsParameter.get<Acts::eBoundQOverP>() * 1_MeV, perSurface, cov);
     } case Acts::Surface::SurfaceType::Plane: {
-      auto &plaSurface{static_cast<const Trk::PlaneSurface&>(actsSurfaceToTrkSurface(actsSurface))};
+      auto &plaSurface{static_cast<const Trk::PlaneSurface&>(actsSurfaceToTrkSurface(ctx, actsSurface))};
       return std::make_unique<Trk::AtaPlane>(
           actsParameter.get<Acts::eBoundLoc0>(),
           actsParameter.get<Acts::eBoundLoc1>(),
@@ -402,7 +404,7 @@ ActsToTrkConverterTool::actsTrackParametersToTrkParameters(
           actsParameter.get<Acts::eBoundTheta>(),
           actsParameter.get<Acts::eBoundQOverP>() * 1_MeV, plaSurface, cov);
     } case Acts::Surface::SurfaceType::Straw: {
-      auto& lineSurface{static_cast<const Trk::StraightLineSurface&>(actsSurfaceToTrkSurface(actsSurface))};
+      auto& lineSurface{static_cast<const Trk::StraightLineSurface&>(actsSurfaceToTrkSurface(ctx, actsSurface))};
       return std::make_unique<Trk::AtaStraightLine>(
           actsParameter.get<Acts::eBoundLoc0>(),
           actsParameter.get<Acts::eBoundLoc1>(),
@@ -790,7 +792,7 @@ std::unique_ptr<Trk::Track> ActsToTrkConverterTool::convertFitResult(const Event
                                                      state.parameters(),
                                                      state.covariance(),
                                                      hypothesis);
-          measPars = actsTrackParametersToTrkParameters(actsParam, gctx);
+          measPars = actsTrackParametersToTrkParameters(ctx, actsParam, gctx);
           if (associatedDetEl->detectorType() == DetectorType::Pixel ||
               associatedDetEl->detectorType() == DetectorType::Sct) {
               ATH_MSG_VERBOSE("Check if this is a hole, a dead sensors or a state outside the sensor boundary");
@@ -845,7 +847,7 @@ std::unique_ptr<Trk::Track> ActsToTrkConverterTool::convertFitResult(const Event
                                               acts_track.parameters(), 
                                               acts_track.covariance(),
                                               acts_track.particleHypothesis());
-      std::unique_ptr<Trk::TrackParameters> per = actsTrackParametersToTrkParameters(actsPer, gctx);
+      std::unique_ptr<Trk::TrackParameters> per = actsTrackParametersToTrkParameters(ctx, actsPer, gctx);
       std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
       typePattern.set(Trk::TrackStateOnSurface::Perigee);
       auto perState = std::make_unique<Trk::TrackStateOnSurface>(nullptr, std::move(per), nullptr, typePattern);
