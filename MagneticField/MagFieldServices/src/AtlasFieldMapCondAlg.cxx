@@ -505,10 +505,10 @@ MagField::AtlasFieldMapCondAlg::checkCurrentFromConditions(
   if (!gotsol || !gottor) {
     if (!gotsol)
       ATH_MSG_ERROR("checkCurrentFromConditions: Missing solenoid current in "
-                    "DCS information");
+                    "DCS information; time: " << ctx.eventID().time_stamp());
     if (!gottor)
       ATH_MSG_ERROR("checkCurrentFromConditions: Missing toroid current in DCS "
-                    "information");
+                    "information; time: " << ctx.eventID().time_stamp());
     return StatusCode::FAILURE;
   }
 
