@@ -229,10 +229,16 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         ATH_MSG_DEBUG("Incoming Hits: " << FPGAHits->size());
         for (const FPGATrackSimHit* hit : *(FPGAHits.cptr())) {
             phits_all.emplace_back(hit, [](const FPGATrackSimHit*) {});
+
+            if(m_noHitFilter) {
+                phits_1st.push_back(std::shared_ptr<const FPGATrackSimHit>(hit, [](const FPGATrackSimHit*){}));
+                phits_2nd.push_back(std::shared_ptr<const FPGATrackSimHit>(hit, [](const FPGATrackSimHit*){}));
+                if(hit->isStrip()) phits_strips.push_back(hit);
+            }
         }
 
         // Use the slicing engine tool to do the stage-based separation. Does not use the pmap.
-        m_slicingEngineTool->sliceHits(phits_all, phits_1st, phits_2nd, phits_strips);
+        if(!m_noHitFilter) m_slicingEngineTool->sliceHits(phits_all, phits_1st, phits_2nd, phits_strips);
     }
 
     // record 1st stage hits in SG (VIEW_ELEMENTS - no copy, just store pointers)

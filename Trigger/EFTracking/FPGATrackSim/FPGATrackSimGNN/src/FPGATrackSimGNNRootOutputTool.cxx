@@ -14,6 +14,9 @@ StatusCode FPGATrackSimGNNRootOutputTool::initialize()
 {
   ATH_CHECK(m_tHistSvc.retrieve());
   ATH_CHECK(bookTree());
+  ATH_CHECK(m_layerNumberTool.retrieve());
+  m_pix_h2l = m_layerNumberTool->pixelLayers();
+  m_layerGeometry = m_layerNumberTool->layerGeometry();
   return StatusCode::SUCCESS;
 }
 
@@ -39,11 +42,14 @@ StatusCode FPGATrackSimGNNRootOutputTool::bookTree()
   m_hit_tree->Branch("hit_cluster_x",&m_hit_cluster_x);
   m_hit_tree->Branch("hit_cluster_y",&m_hit_cluster_y);
   m_hit_tree->Branch("hit_cluster_z",&m_hit_cluster_z);
+  m_hit_tree->Branch("hit_globalLayerID",&m_hit_globalLayerID);
 
   std::string GNNhittree_str = "FPGATrackSimGNNHit_reg" + m_region.value();
   m_GNNHit_tree = new TTree(GNNhittree_str.c_str(), GNNhittree_str.c_str());
   m_GNNHit_tree->Branch("hit_id",&m_GNNHit_id);
   m_GNNHit_tree->Branch("hit_module_id",&m_GNNHit_module_id);
+  m_GNNHit_tree->Branch("hit_uniqueID",&m_GNNHit_uniqueID);
+  m_GNNHit_tree->Branch("hit_eventIndex",&m_GNNHit_eventIndex);
   m_GNNHit_tree->Branch("hit_road_id",&m_GNNHit_road_id);
   m_GNNHit_tree->Branch("hit_x",&m_GNNHit_x);
   m_GNNHit_tree->Branch("hit_y",&m_GNNHit_y);
@@ -104,8 +110,10 @@ StatusCode FPGATrackSimGNNRootOutputTool::fillTree(const std::vector<std::shared
   // fill the FPGATrackSimHits
   int hit_count = 0;
   for (const auto& hit : hits) {
+    if (hit->isStrip()) continue;
+    
     m_hit_id.push_back(hit_count);
-    m_hit_module_id.push_back(hit->getIdentifier());
+    m_hit_module_id.push_back(hit->getIdentifierHash());
     m_hit_x.push_back(hit->getX());
     m_hit_y.push_back(hit->getY());
     m_hit_z.push_back(hit->getZ());
@@ -120,13 +128,20 @@ StatusCode FPGATrackSimGNNRootOutputTool::fillTree(const std::vector<std::shared
     m_hit_cluster_y.push_back(hit->getOriginalHit().getY());
     m_hit_cluster_z.push_back(hit->getOriginalHit().getZ());
     hit_count++;
+
+    short layer = m_pix_h2l->at(static_cast<int>(hit->getIdentifierHash()));
+    TrigInDetSiLayer layerGeometry = m_layerGeometry->at(layer);
+    int combinedId = layerGeometry.m_subdet;
+    m_hit_globalLayerID.push_back(combinedId);
   }
   m_hit_tree->Fill();
 
   // fill the FPGATrackSimGNNHits
   for (const auto& hit : gnn_hits) {
     m_GNNHit_id.push_back(hit->getHitID());
-    m_GNNHit_module_id.push_back(hit->getIdentifier());
+    m_GNNHit_module_id.push_back(hit->getIdentifierHash());
+    m_GNNHit_uniqueID.push_back(hit->getUniqueID());
+    m_GNNHit_eventIndex.push_back(hit->getEventIndex());
     m_GNNHit_road_id.push_back(hit->getRoadID());
     m_GNNHit_x.push_back(hit->getX());
     m_GNNHit_y.push_back(hit->getY());
@@ -215,8 +230,11 @@ void FPGATrackSimGNNRootOutputTool::resetVectors()
   m_hit_cluster_x.clear();
   m_hit_cluster_y.clear();
   m_hit_cluster_z.clear();
+  m_hit_globalLayerID.clear();
   m_GNNHit_id.clear();
   m_GNNHit_module_id.clear();
+  m_GNNHit_uniqueID.clear();
+  m_GNNHit_eventIndex.clear();
   m_GNNHit_road_id.clear();
   m_GNNHit_x.clear();
   m_GNNHit_y.clear();

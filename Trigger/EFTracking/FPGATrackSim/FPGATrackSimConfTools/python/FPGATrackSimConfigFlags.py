@@ -417,9 +417,11 @@ class graphTool(FlagEnum):
 
 class moduleMapType(FlagEnum):
     doublet = 'doublet'
+    triplet = 'triplet'
 
 class moduleMapFunc(FlagEnum):
     minmax = 'minmax'
+    meanrms = 'meanrms'
 
 class roadMakerTool(FlagEnum):
     ConnectedComponents = 'ConnectedComponents'
@@ -433,17 +435,21 @@ def createGNNFPGATrackSimConfigFlags():
     cf.addFlag("moduleMapType", moduleMapType.doublet, type=moduleMapType)
     cf.addFlag("moduleMapFunc", moduleMapFunc.minmax, type=moduleMapFunc)
     cf.addFlag("moduleMapTol",0.0000000001) # 1e-10
+    cf.addFlag("moduleMapRMSThresholdFactor",5.0)
     cf.addFlag("moduleMapPath",'')
     cf.addFlag("metricLearningR",0.1)
     cf.addFlag("metricLearningMaxN", 512)
     cf.addFlag("MLModelPath",'')
     cf.addFlag("GNNModelPath",'')
-    cf.addFlag("roadMakerTool", roadMakerTool.ConnectedComponents, type=roadMakerTool)
-    cf.addFlag("edgeScoreCut",0.8)
+    cf.addFlag("roadMakerTool", roadMakerTool.JunctionAwareCC, type=roadMakerTool)
+    cf.addFlag("edgeScoreCut",0.5)
     cf.addFlag("doGNNRootOutput",False)
     cf.addFlag("doGNNTracking",False)
     cf.addFlag("doGNNPixelSeeding",False)
     cf.addFlag("nInputsGNN",13)
+    cf.addFlag("doAllHits",False)
+    cf.addFlag("doPixelHits",True)
+    cf.addFlag("doStripHits",True)
     
     return cf
 

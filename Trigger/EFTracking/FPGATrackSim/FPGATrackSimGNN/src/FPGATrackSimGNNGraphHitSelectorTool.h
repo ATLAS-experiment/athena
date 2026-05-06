@@ -40,6 +40,12 @@ class FPGATrackSimGNNGraphHitSelectorTool : public AthAlgTool
 
         float getEta(const std::shared_ptr<const FPGATrackSimHit> & hit);
 
+        ///////////////////////////////////////////////////////////////////////
+        // Properties
+
+        Gaudi::Property<bool> m_doPixelHits { this, "doPixelHits", true, "Flag for selecting pixel hits" };
+        Gaudi::Property<bool> m_doStripHits { this, "doStripHits", true, "Flag for selecting strip hits" };
+
 };
 
 

@@ -23,10 +23,12 @@ StatusCode FPGATrackSimGNNGraphHitSelectorTool::selectHits(const std::vector<std
 
     for (unsigned long int i = 0; i < hits.size(); i++) {
         // For pixel, the hit = SP = cluster_1 = cluster_2
-        if(hits[i]->isPixel() && to_string(hits[i]->getHitType()) == "clustered") {
+        if(m_doPixelHits && hits[i]->isPixel() && to_string(hits[i]->getHitType()) == "clustered") {
             std::shared_ptr<FPGATrackSimGNNHit> graph_hit = std::make_shared<FPGATrackSimGNNHit>();
             graph_hit->setHitID(i);
-            graph_hit->setIdentifier(hits[i]->getIdentifier());
+            graph_hit->setIdentifierHash(hits[i]->getIdentifierHash());
+            graph_hit->setUniqueID(hits[i]->getUniqueID());
+            graph_hit->setEventIndex(hits[i]->getEventIndex());
             graph_hit->setX(hits[i]->getX());
             graph_hit->setY(hits[i]->getY());
             graph_hit->setZ(hits[i]->getZ());
@@ -49,12 +51,14 @@ StatusCode FPGATrackSimGNNGraphHitSelectorTool::selectHits(const std::vector<std
         }
         // For strip, two clusters -> one spacepoint -> duplicate SP record in the hit
         // This means we are ignoring single clusters in the strip that are labeled as hits (need to discuss if this is bad or not)
-        else if(i+1 < hits.size() && hits[i]->isStrip() && hits[i+1]->isStrip() && to_string(hits[i]->getHitType()) == "spacepoint" && to_string(hits[i+1]->getHitType()) == "spacepoint" && hits[i]->getX() == hits[i+1]->getX()) {
+        else if(m_doStripHits && i+1 < hits.size() && hits[i]->isStrip() && hits[i+1]->isStrip() && to_string(hits[i]->getHitType()) == "spacepoint" && to_string(hits[i+1]->getHitType()) == "spacepoint" && hits[i]->getX() == hits[i+1]->getX()) {
             std::shared_ptr<FPGATrackSimGNNHit> graph_hit = std::make_shared<FPGATrackSimGNNHit>();
             std::shared_ptr<const FPGATrackSimHit> cluster1_hit = std::make_shared<FPGATrackSimHit>(hits[i]->getOriginalHit());
             std::shared_ptr<const FPGATrackSimHit> cluster2_hit = std::make_shared<FPGATrackSimHit>(hits[i+1]->getOriginalHit());
             graph_hit->setHitID(i);
-            graph_hit->setIdentifier(hits[i]->getIdentifier());
+            graph_hit->setIdentifierHash(hits[i]->getIdentifierHash());
+            graph_hit->setUniqueID(hits[i]->getUniqueID());
+            graph_hit->setEventIndex(hits[i]->getEventIndex());
             graph_hit->setX(hits[i]->getX());
             graph_hit->setY(hits[i]->getY());
             graph_hit->setZ(hits[i]->getZ());

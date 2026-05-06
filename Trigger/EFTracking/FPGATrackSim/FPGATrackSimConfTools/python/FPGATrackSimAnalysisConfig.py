@@ -400,9 +400,12 @@ def FPGATrackSimRoadUnionToolGNNCfg(flags,name="FPGATrackSimRoadUnionToolGNN"):
     result = ComponentAccumulator()
     RF = CompFactory.FPGATrackSimRoadUnionTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
     RF.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
+    RF.noHitFilter = flags.Trigger.FPGATrackSim.GNN.doAllHits # Flag to turn on doing all hits for full-scan running of GNN pipeline
 
     patternRecoTool = CompFactory.FPGATrackSimGNNPatternRecoTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"FPGATrackSimGNNPatternRecoTool"))
-    patternRecoTool.GNNGraphHitSelector = CompFactory.FPGATrackSimGNNGraphHitSelectorTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"FPGATrackSimGNNGraphHitSelectorTool"))
+    patternRecoTool.GNNGraphHitSelector = result.popToolsAndMerge(FPGATrackSimGNNGraphHitSelectorToolCfg(flags))
+    
+    
     patternRecoTool.GNNGraphConstruction = result.popToolsAndMerge(FPGATrackSimGNNGraphConstructionToolCfg(flags))
     edgeResult, edgeClassifierTools = FPGATrackSimGNNEdgeClassifierToolCfg(flags)
     result.merge(edgeResult)
@@ -417,6 +420,18 @@ def FPGATrackSimRoadUnionToolGNNCfg(flags,name="FPGATrackSimRoadUnionToolGNN"):
 
     return result
 
+def FPGATrackSimGNNGraphHitSelectorToolCfg(flags,name="FPGATrackSimGNNGraphHitSelectorTool"):
+    result = ComponentAccumulator()
+
+    GNNGraphHitSelectorTool = CompFactory.FPGATrackSimGNNGraphHitSelectorTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"FPGATrackSimGNNGraphHitSelectorTool"))
+    GNNGraphHitSelectorTool.doPixelHits = flags.Trigger.FPGATrackSim.GNN.doPixelHits
+    GNNGraphHitSelectorTool.doStripHits = flags.Trigger.FPGATrackSim.GNN.doStripHits
+
+    result.setPrivateTools(GNNGraphHitSelectorTool)
+
+    return result
+
+
 def FPGATrackSimGNNGraphConstructionToolCfg(flags,name="FPGATrackSimGNNGraphConstructionTool"):
     result = ComponentAccumulator()
 
@@ -429,6 +444,7 @@ def FPGATrackSimGNNGraphConstructionToolCfg(flags,name="FPGATrackSimGNNGraphCons
     GNNGraphConstructionTool.moduleMapType=flags.Trigger.FPGATrackSim.GNN.moduleMapType.value
     GNNGraphConstructionTool.moduleMapFunc=flags.Trigger.FPGATrackSim.GNN.moduleMapFunc.value
     GNNGraphConstructionTool.moduleMapTol=flags.Trigger.FPGATrackSim.GNN.moduleMapTol
+    GNNGraphConstructionTool.moduleMapRMSThresholdFactor=flags.Trigger.FPGATrackSim.GNN.moduleMapRMSThresholdFactor
 
     # Metric Learning Configuration
     GNNGraphConstructionTool.metricLearningR=flags.Trigger.FPGATrackSim.GNN.metricLearningR
@@ -450,8 +466,16 @@ def FPGATrackSimGNNEdgeClassifierToolCfg(flags, name="FPGATrackSimGNNEdgeClassif
     from AthOnnxComps.OnnxRuntimeInferenceConfig import OnnxRuntimeInferenceToolCfg
     from AthOnnxComps.OnnxRuntimeFlags import OnnxRuntimeType
 
+    # For GNN models, we will have one model for each eta-slice, meant to be used for all 20 phi-slices
     region = int(flags.Trigger.FPGATrackSim.region)
-    model_path = f"{flags.Trigger.FPGATrackSim.GNN.GNNModelPath}_{region}.onnx"
+    phiBinBase = 2  # [2π/16, 3π/16]
+    etaBin = (region >> 6) & 0x1f # extract η bin and side from the real region number
+    #side   = (region >> 5) & 0x1
+    side = 1 # For now, only use the positive size models
+    minAbsEta = etaBin * 0.2 
+
+    base_region = FPGATrackSimDataPrepConfig.getRegionNumber(phiBinBase, minAbsEta, side, verbosePrint=False)
+    model_path = f"{flags.Trigger.FPGATrackSim.GNN.GNNModelPath}_{base_region}.onnx"
 
     GNNEdgeClassifierTool = CompFactory.FPGATrackSimGNNEdgeClassifierTool(
         FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags, name))
@@ -459,6 +483,7 @@ def FPGATrackSimGNNEdgeClassifierToolCfg(flags, name="FPGATrackSimGNNEdgeClassif
         OnnxRuntimeInferenceToolCfg(flags, model_path, OnnxRuntimeType.CPU, name=f"OnnxInferenceTool_{region}")
     )
     GNNEdgeClassifierTool.regionNum = region
+    GNNEdgeClassifierTool.doGNNPixelSeeding = flags.Trigger.FPGATrackSim.GNN.doGNNPixelSeeding # Use new models
 
     return result, [GNNEdgeClassifierTool]
 
@@ -483,6 +508,9 @@ def FPGATrackSimGNNRootOutputToolCfg(flags,name="FPGATrackSimGNNRootOutputTool")
 
     GNNRootOutputTool = CompFactory.FPGATrackSimGNNRootOutputTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
     GNNRootOutputTool.OutputRegion = str(flags.Trigger.FPGATrackSim.region)
+
+    from TrigFastTrackFinder.TrigFastTrackFinderConfig import ITkTrigL2LayerNumberToolCfg
+    GNNRootOutputTool.LayerNumberTool = result.getPrimaryAndMerge(ITkTrigL2LayerNumberToolCfg(flags))
 
     if(flags.Trigger.FPGATrackSim.GNN.doGNNRootOutput):
         result.addService(CompFactory.THistSvc(Output = ["TRIGFPGATrackSimGNNOUTPUT DATAFILE='GNNRootOutput.root', OPT='RECREATE'"]))
@@ -634,6 +662,7 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags,name="FPGATrackSimLogicalHit
     theFPGATrackSimLogicalHitsProcessAlg.DoNNTrack_1st = flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis
     theFPGATrackSimLogicalHitsProcessAlg.DoGNNTrack = flags.Trigger.FPGATrackSim.GNN.doGNNTracking
     theFPGATrackSimLogicalHitsProcessAlg.DoGNNPixelSeeding = flags.Trigger.FPGATrackSim.GNN.doGNNPixelSeeding
+    theFPGATrackSimLogicalHitsProcessAlg.noHitFilter = flags.Trigger.FPGATrackSim.GNN.doAllHits # Flag to turn on doing all hits for full-scan running of GNN pipeline
     theFPGATrackSimLogicalHitsProcessAlg.eventSelector = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionSvcCfg(flags))
     if flags.Trigger.FPGATrackSim.ActiveConfig.useVaryingChi2Cut and not flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis2nd:
         theFPGATrackSimLogicalHitsProcessAlg.TrackScoreCut = getChi2Cut(flags.Trigger.FPGATrackSim.region)
@@ -820,7 +849,6 @@ def FPGATrackSimF150FlagCfg(flags):
     flags.Trigger.FPGATrackSim.doMultiTruth=False
     
     flags.Trigger.FPGATrackSim.tracking = False
-    flags.Trigger.FPGATrackSim.Hough.genScan = True
     flags.Trigger.FPGATrackSim.convertSPs = False # in case we need the conversion to take place on hw we'll have to convert to SPs after the cluster-sorting (will probably need new algorithm)
     flags.Tracking.ITkActsValidateF150Pass.doActsSpacePoint = not flags.Trigger.FPGATrackSim.convertSPs
     flags.Trigger.FPGATrackSim.Hough.secondStage = False
