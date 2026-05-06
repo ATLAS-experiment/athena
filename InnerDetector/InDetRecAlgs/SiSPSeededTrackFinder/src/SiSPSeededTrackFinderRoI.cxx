@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SiSPSeededTrackFinder/SiSPSeededTrackFinderRoI.h"
@@ -284,7 +284,7 @@ StatusCode InDet::SiSPSeededTrackFinderRoI::execute(const EventContext& ctx) con
   for (const std::pair<const double, Trk::Track*> & qualityAndTrack: qualitySortedTrackCandidates) {
     ++counter[kNTracks];
     if (m_trackSummaryTool.isEnabled()) {
-       m_trackSummaryTool->computeAndReplaceTrackSummary(*(qualityAndTrack.second),
+       m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *(qualityAndTrack.second),
                                                          false /* DO NOT suppress hole search*/);
     }
     outputTracks->push_back(qualityAndTrack.second);

@@ -201,13 +201,15 @@ namespace InDet {
     /** fills three z0 histograms (non-weighted, weighted by z, and weighted by pt) 
     * with the track z at the beam line estimated using the innermost measurement. 
     * the first two parameters are input, the other three output. 
-    * @param [in] Tr Track candidate to fill 
+    * @param [in] ctx current EventContext
+    * @param [in] Tr Track candidate to fill
     * @param [in] beamlinePerigee Perigee surface corresponding to the beam spot 
     * @param [out] numberWeightedhistogram vector representing a histogram in z, counting the tracks per bin 
     * @param [out] zWeightedHistogram vector representing a histogram in z, counting the tracks per bin weighted by their z values 
     * @param [out] ptWeightedHistogram vector representing a histogram in z, counting the tracks per bin weighted by their pt values
     **/ 
-    void fillZHistogram(const Trk::Track* Tr,
+    void fillZHistogram(const EventContext& ctx,
+                        const Trk::Track* Tr,
                         const Trk::PerigeeSurface& beamlinePerigee,
                         std::vector<int>& numberWeightedhistogram,
                         std::vector<double>& zWeightedHistogram,
