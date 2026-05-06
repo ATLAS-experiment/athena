@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef L1TOPOBYTESTREAM_L1TOPOBYTESTREAMTOOL_H
@@ -18,6 +18,7 @@
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
 
 // Forward declaration(s):
+class EventContext;
 class L1TopoRDO;
 class L1TopoRDOCollection;
 
@@ -31,7 +32,6 @@ class L1TopoRDOCollection;
  *     @see L1TopoByteStreamCnv
  *
  *  @author Simon George
- *    @date $Date: 2014-11-12 00:00:00 $
  */
 class L1TopoByteStreamTool : public AthAlgTool {
  private:
@@ -55,7 +55,7 @@ class L1TopoByteStreamTool : public AthAlgTool {
   /// return list of L1Topo ROD source IDs to use, defaults to DAQ ROD IDs
   const std::vector<uint32_t>& sourceIDs();
   /// Convert ROBFragment to L1TopoRDO
-  StatusCode convert(const std::string& sgKey, L1TopoRDOCollection* result) const;
+  StatusCode convert(const EventContext& ctx, const std::string& sgKey, L1TopoRDOCollection* result) const;
   /// Convert ROBFragment to L1TopoRDO
   StatusCode convert(const ROBF* rob, L1TopoRDO*& result) const;
   /// convert L1TopoRDO to ByteStream
