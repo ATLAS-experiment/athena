@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeneratorFilters/xAODTauFilter.h"
 #include "AthenaKernel/RNGWrapper.h"
@@ -283,7 +283,8 @@ StatusCode xAODTauFilter::filterEvent() {
       }
 
 #ifdef HEPMC3
-      (*mec)[i]->add_attribute("filterWeight", std::make_shared<HepMC3::DoubleAttribute>(extra_weight));
+      static const std::string filterWeightStr{"filterWeight"};
+      (*mec)[i]->add_attribute(filterWeightStr, std::make_shared<HepMC3::DoubleAttribute>(extra_weight));
 #endif
 
     }
