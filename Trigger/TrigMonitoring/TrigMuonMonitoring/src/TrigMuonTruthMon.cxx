@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**    @Afile TrigMuonTruthMon.cxx
@@ -103,7 +103,7 @@ StatusCode TrigMuonTruthMon :: fillVariablesPerChain(const EventContext &ctx, co
     else{ // Find EFCB muons
       efmuon = m_matchTool->matchEFCB(truthMu, chain, passed_EF);  
     }
-    const xAOD::MuonRoI* l1muon = m_matchTool->matchL1(truthMu, chain, passed_L1);    // Find L1 muons
+    const xAOD::MuonRoI* l1muon = m_matchTool->matchL1(ctx, truthMu, chain, passed_L1);    // Find L1 muons
 
     if(efmuon && passed_EF){  // Fill matched muon histograms
       MatchedEFCBtruthPt = truthMu->pt()/1e3;
