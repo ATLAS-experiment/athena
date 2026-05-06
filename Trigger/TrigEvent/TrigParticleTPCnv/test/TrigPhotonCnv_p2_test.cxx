@@ -17,7 +17,6 @@
 #include "TestTools/leakcheck.h"
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include <cassert>
 #include <iostream>
 
@@ -73,7 +72,6 @@ void testit (const TrigPhoton& trans1)
 void test1 ATLAS_NOT_THREAD_SAFE ()
 {
   std::cout << "test1\n";
-  (void)Gaudi::Hive::currentContext();
   // Get proxy created outside of leak check.
   ElementLink< TrigEMClusterContainer > foo ("foo", 10);
   Athena_test::Leakcheck check;

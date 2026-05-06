@@ -17,7 +17,6 @@
 #include "SGTools/TestStore.h"
 #include "TestTools/leakcheck.h"
 #include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "CxxUtils/checker_macros.h"
 #include <cassert>
 #include <iostream>
@@ -62,7 +61,6 @@ void testit (const TrigDec::TrigDecision& trans1)
 void test1 ATLAS_NOT_THREAD_SAFE ()
 {
   std::cout << "test1\n";
-  (void)Gaudi::Hive::currentContext();
   // Get proxies created outside of leak check.
   DataLink<HLT::HLTResult> l2link ("l2result");
   DataLink<HLT::HLTResult> eflink ("efresult");

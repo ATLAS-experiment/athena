@@ -16,7 +16,6 @@
 #include "TestTools/leakcheck.h"
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include <cassert>
 #include <iostream>
 
@@ -74,7 +73,6 @@ void testit (const HLT::HLTResult& trans1)
 void test1 ATLAS_NOT_THREAD_SAFE ()
 {
   std::cout << "test1\n";
-  (void)Gaudi::Hive::currentContext();
   Athena_test::Leakcheck check;
 
   HLT::HLTResult trans1;
