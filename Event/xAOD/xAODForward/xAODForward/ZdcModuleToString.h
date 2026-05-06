@@ -5,8 +5,10 @@
 #ifndef ZDCMODULETOSTRING_H
 #define ZDCMODULETOSTRING_H
 
-#include "xAODForward/ZdcModule.h"
-#include "xAODForward/ZdcModuleContainer.h"
+#include "xAODForward/ZdcModule.h" //typedef
+#include "xAODForward/ZdcModuleContainer.h" //typedef
+#include <string>
+
 
 std::string ZdcModuleToString(const xAOD::ZdcModule& zm) ;
 std::string ZdcModuleToString(const xAOD::ZdcModuleContainer& zc) ;

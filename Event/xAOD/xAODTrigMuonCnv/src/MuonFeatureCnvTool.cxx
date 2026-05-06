@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id:$
@@ -140,12 +140,13 @@ StatusCode MuonFeatureCnvTool::convertMuonFeature( const MuonFeatureDetails* aod
     const std::vector<float>&    pad_hit_z        = aodMfd->pad_hit_z();
     const std::vector<float>&    pad_hit_r        = aodMfd->pad_hit_r();
     const std::vector<float>&    pad_hit_p        = aodMfd->pad_hit_p();
+    static const std::string emptyStr{};
     for (unsigned int i=0; i< pad_hit_onlineId.size(); i++) {
       if ( i >= pad_hit_code.size() || i >= pad_hit_x.size() || i >= pad_hit_y.size() || 
            i >= pad_hit_z.size() || i >= pad_hit_r.size() || i >= pad_hit_p.size() ) continue;
       xaod->setRpcHit( (uint32_t)pad_hit_onlineId[i], pad_hit_code[i],
                        pad_hit_x[i], pad_hit_y[i], pad_hit_z[i],
-                       0.,pad_hit_r[i], pad_hit_p[i],"");
+                       0.,pad_hit_r[i], pad_hit_p[i],emptyStr);
     }
 
 

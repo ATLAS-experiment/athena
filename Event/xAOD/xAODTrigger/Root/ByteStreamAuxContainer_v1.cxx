@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -13,6 +13,9 @@
 
 // Local include(s):
 #include "xAODTrigger/versions/ByteStreamAuxContainer_v1.h"
+namespace {
+  const std::string emptyStr{};
+}
 
 namespace xAOD {
 
@@ -437,7 +440,7 @@ namespace xAOD {
 #define ADD_IDS(VAR, TYP) \
       do { typedef std::map< std::string, std::vector< TYP > > CONT; \
           for (CONT::value_type& p : VAR)                                 \
-             m_auxids.insert (r.getAuxID< TYP > (p.first, "", SG::AuxVarFlags::SkipNameCheck)); } while(0)
+             m_auxids.insert (r.getAuxID< TYP > (p.first, emptyStr, SG::AuxVarFlags::SkipNameCheck)); } while(0)
       ADD_IDS(m_int, int);
       ADD_IDS(m_float, float);
       ADD_IDS(m_vecInt, std::vector<int>);

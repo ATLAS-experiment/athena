@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration */
+/* Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration */
 
 // Local include(s).
 #include "EventFormatStreamHelperTool.h"
@@ -121,9 +121,9 @@ StatusCode
           std::lock_guard< std::mutex > lock(m_efMutex);
           // If we already know about this object, then don't bother.
           if (event_format->exists(key)) continue;
-
+          static const std::string emptyStr{};
           // Add the info.
-          event_format->add(xAOD::EventFormatElement(key, typeName, "", hash));
+          event_format->add(xAOD::EventFormatElement(key, typeName, emptyStr, hash));
 
           // Tell the user what happened.
           ATH_MSG_VERBOSE("Adding info: key = \"" << key

@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODMISSINGET_VERSIONS_MISSINGET_V1_H
@@ -24,15 +24,14 @@ namespace xAOD
   class MissingET_v1 : public SG::AuxElement
   {
   public:
-
     /*! @name Constructors and destructor */
     /*!@{*/
     explicit MissingET_v1(bool createStore=false);  /*!< @brief Default constructor */
     MissingET_v1(const std::string& name,
 		 MissingETBase::Types::bitmask_t src=MissingETBase::Source::unknown()); /*!< @brief Constructor with identifiers */
-    MissingET_v1(const IParticle* particle, const std::string& name="MissingET",
+    MissingET_v1(const IParticle* particle, const std::string& name=s_defaultName,
 		 MissingETBase::Types::bitmask_t src=MissingETBase::Source::unknown()); /*!< @brief Constructor with particle */
-    MissingET_v1(float mpx,float mpy,float sumet,const std::string& name="MissingET",
+    MissingET_v1(float mpx,float mpy,float sumet,const std::string& name=s_defaultName,
 		 MissingETBase::Types::bitmask_t src=MissingETBase::Source::unknown()); /*!< @brief Constructor with initial kinematics */
     MissingET_v1(const MissingET_v1& met);                                              /*!< @brief Copy constructor */
     ~MissingET_v1();                                                                    /*!< @brief Implementation class destructor */
@@ -114,6 +113,7 @@ namespace xAOD
     /*!@}*/
 
   private:
+    inline static const std::string s_defaultName{"MissingET"};
     CxxUtils::CachedValue<std::size_t> m_nameHash; /*!< @brief Stores the hash for the current f_name string */
 
     static const SG::AuxElement::Accessor<float> m_acc_mpx;
