@@ -6,12 +6,8 @@
 #define TRKIEXTENDEDTRACKSUMMARYTOOL_H
 
 #include "ITrackSummaryTool.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 namespace Trk {
-
-static const InterfaceID
-  IID_IExtendedTrackSummaryTool("Trk::IExtendedTrackSummaryTool", 1, 0);
 
 /** @class IExtendedTrackSummaryTool
     @brief Interface for condensing Trk::Track properties and associated
@@ -22,7 +18,7 @@ static const InterfaceID
 class IExtendedTrackSummaryTool : virtual public ITrackSummaryTool
 {
 public:
-  static const InterfaceID& interfaceID();
+  DeclareInterfaceID(Trk::IExtendedTrackSummaryTool, 1, 0);
 
   using ITrackSummaryTool::summary;
   using ITrackSummaryTool::summaryNoHoleSearch;
@@ -44,19 +40,13 @@ public:
     Track& track,
     bool suppress_hole_search = false) const = 0;
 
-  void computeAndReplaceTrackSummary(Track& track,
-                                     bool suppress_hole_search = false) const;
-
-  /* Start from a copy of the existing input track summary if there,
+  /** Start from a copy of the existing input track summary if there,
    * otherwise start from a new one. Fill it and return it.
    * Does not modify the const track.
    */
   virtual std::unique_ptr<Trk::TrackSummary> summary(
     const EventContext& ctx,
     const Track& track) const = 0;
-
-  std::unique_ptr<Trk::TrackSummary> summary(
-    const Track& track) const;
 
   /** method which can be used to update the summary of a track.
    * If a summary is present is modified in place
@@ -66,10 +56,7 @@ public:
                                   Track& track,
                                   bool suppress_hole_search = false) const = 0;
 
-  void updateTrackSummary(Track& track,
-                          bool suppress_hole_search = false) const;
-
-  /* Start from a copy of the existing input track summary if there,
+  /** Start from a copy of the existing input track summary if there,
    * otherwise start from a new one. Fill it and return it.
    * but without doing the hole search.
    * Does not modify the const track.
@@ -78,11 +65,8 @@ public:
     const EventContext& ctx,
     const Track& track) const = 0;
 
-  std::unique_ptr<Trk::TrackSummary> summaryNoHoleSearch(
-    const Track& track) const;
-
   virtual void updateAdditionalInfo(Track& track) const = 0;
 };
 }
-#include "TrkToolInterfaces/IExtendedTrackSummaryTool.icc"
+
 #endif
