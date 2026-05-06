@@ -246,7 +246,7 @@ public:
      @param[in] caldata_above the caldata object from the sub-module above the one to be calibrated
      @return the root directory where the histgrams were written
   */
-  TDirectory* Calibrate ATLAS_NOT_THREAD_SAFE (TDirectory*, std::string, const std::string&, caldata*);
+  TDirectory* Calibrate ATLAS_NOT_THREAD_SAFE (TDirectory*, const std::string&, const std::string&, caldata*);
 
   /**
      Makes the R-t fit
