@@ -100,11 +100,11 @@ namespace xAODMaker {
     * @returns <code>StatusCode::SUCCESS</code> if all went fine,
     *          something else if not
     */
-   StatusCode EventInfoCnvTool::convert( const EventInfo* aod,
+   StatusCode EventInfoCnvTool::convert( [[maybe_unused]] const EventContext& ctx,
+                                         const EventInfo* aod,
                                          xAOD::EventInfo* xaod,
                                          bool pileUpInfo,
-                                         bool copyPileUpLinks,
-                                         [[maybe_unused]] const EventContext& ctx /*= Gaudi::Hive::currentContext()*/) const
+                                         bool copyPileUpLinks ) const
    {
 
       if( ! aod ) {
