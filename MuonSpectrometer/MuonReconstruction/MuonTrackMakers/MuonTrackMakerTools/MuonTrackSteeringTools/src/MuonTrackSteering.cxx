@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTrackSteering.h"
@@ -482,14 +482,14 @@ namespace Muon {
                                 << endmsg;
             }
 
-            if (!result.empty() && strategy.option(MuonTrackSteeringStrategy::DoAmbiSolving)) solveAmbiguities(result);
+            if (!result.empty() && strategy.option(MuonTrackSteeringStrategy::DoAmbiSolving)) solveAmbiguities(ctx, result);
 
             if (!result.empty())
                 resultAll.insert(resultAll.end(), std::make_move_iterator(result.begin()), std::make_move_iterator(result.end()));
 
         }  // Done with loop over strategies
 
-        if (!resultAll.empty()) { solveAmbiguities(resultAll); }
+        if (!resultAll.empty()) { solveAmbiguities(ctx, resultAll); }
 
         if (m_outputSingleStationTracks) {
             SegCol& emSegments = stationSegments[toInt(StIndex::EM)];
@@ -532,7 +532,7 @@ namespace Muon {
                 ATH_MSG_DEBUG("Final Output : " << m_candidateTool->print(resultAll) << endmsg);
         }
         std::unique_ptr<TrackCollection> finalTrack = nullptr;
-        if (!resultAll.empty()) { finalTrack = selectTracks(resultAll); }
+        if (!resultAll.empty()) { finalTrack = selectTracks(ctx, resultAll); }
 
         return finalTrack;
     }
@@ -643,7 +643,7 @@ namespace Muon {
     }
 
     //-----------------------------------------------------------------------------------------------------------
-    std::unique_ptr<TrackCollection> MuonTrackSteering::selectTracks(std::vector<std::unique_ptr<MuPatTrack> >& candidates, bool takeOwnership) const {
+    std::unique_ptr<TrackCollection> MuonTrackSteering::selectTracks(const EventContext& ctx, std::vector<std::unique_ptr<MuPatTrack> >& candidates, bool takeOwnership) const {
         std::unique_ptr<TrackCollection> result = takeOwnership ?std::make_unique<TrackCollection>() : std::make_unique<TrackCollection>(SG::VIEW_ELEMENTS);
         result->reserve(candidates.size());
         for (std::unique_ptr<MuPatTrack>& cit : candidates) {
@@ -657,7 +657,7 @@ namespace Muon {
             else
                 track = &thisTrack;
             // add track summary to this track
-            if (m_trackSummaryTool.isEnabled()) { m_trackSummaryTool->computeAndReplaceTrackSummary(*track, false); }
+            if (m_trackSummaryTool.isEnabled()) { m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *track, false); }
             result->push_back(track);
         }
         return result;
@@ -669,10 +669,11 @@ namespace Muon {
 
     //-----------------------------------------------------------------------------------------------------------
 
-    void MuonTrackSteering::solveAmbiguities(std::vector<std::unique_ptr<MuPatTrack> >& tracks,
+    void MuonTrackSteering::solveAmbiguities(const EventContext& ctx,
+                                             std::vector<std::unique_ptr<MuPatTrack> >& tracks,
                                              const MuonTrackSteeringStrategy* /*strat*/) const {
         // the resulting vector of tracks to be returned
-        std::unique_ptr<TrackCollection> trkColl(selectTracks(tracks, false));
+        std::unique_ptr<TrackCollection> trkColl(selectTracks(ctx, tracks, false));
         if (!trkColl || trkColl->empty()) { return; }
 
         std::unique_ptr<const TrackCollection> resolvedTracks(m_ambiTool->process(trkColl.get()));
