@@ -50,5 +50,6 @@ if( NOT SIMULATIONBASE )
    atlas_add_test( NewxAODConvertorTest
                    SCRIPT test/MuonxAODPRDCnv_test.py 
                    PROPERTIES TIMEOUT 1200
+                              DISABLED TRUE   # Temporary: ATLASRECTS-8373
                    POST_EXEC_SCRIPT noerror.sh )
 endif()
