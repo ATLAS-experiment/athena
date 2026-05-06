@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AmbiguityProcessorBase.h"
@@ -150,6 +150,7 @@ Track* AmbiguityProcessorBase::refitTrack(const Trk::Track* track,
 }
 //
 void AmbiguityProcessorBase::addTrack(
+    const EventContext& ctx,
     Trk::Track* in_track, const bool fitted, TrackScoreMap& trackScoreTrackMap,
     std::vector<std::unique_ptr<const Trk::Track> >& trackDustbin,
     Counter& stat, int parentTrackId) const {
@@ -161,7 +162,7 @@ void AmbiguityProcessorBase::addTrack(
   bool passBasicSelections = m_scoringTool->passBasicSelections(*atrack);
   if(passBasicSelections){
     if (m_trackSummaryTool.isEnabled()) {
-      m_trackSummaryTool->computeAndReplaceTrackSummary(*atrack,
+      m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *atrack,
 							suppressHoleSearch);
     }
     bool recheckBasicSel = false;
@@ -219,7 +220,7 @@ void AmbiguityProcessorBase::addTrack(
       passBasicSelections = m_scoringTool->passBasicSelections(*bremTrack);
       if(passBasicSelections){
         if (m_trackSummaryTool.isEnabled()) {
-          m_trackSummaryTool->computeAndReplaceTrackSummary(*bremTrack,
+          m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *bremTrack,
                                                             suppressHoleSearch);
         }
         bool recheckBasicSel = false;
