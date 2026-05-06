@@ -29,6 +29,16 @@ StatusCode HLTCaloGlobalCellMonitor::initialize() {
   if (!m_moniTool.empty()) {
      ATH_CHECK(m_moniTool.retrieve());
   }
+  for(size_t i=0;i<25; i++) {
+    std::string number("layer");
+    number+=std::to_string(i);
+    m_layerNames.push_back(number);
+  }
+  for(size_t i=0;i<2; i++) {
+    std::string number("layerIW");
+    number+=std::to_string(i+1);
+    m_layerNamesIW.push_back(number);
+  }
 
   return StatusCode::SUCCESS;
 }
@@ -42,6 +52,8 @@ StatusCode HLTCaloGlobalCellMonitor::execute(EventContext const& context) const 
   const CaloNoise* noiseCDO=*noiseHdl;
   SG::ReadCondHandle<LArOnOffIdMapping> onoff (m_onOffIdMappingKey, context);
 
+  const auto bcid = context.eventID().bunch_crossing_id();
+
   uint32_t n_febs = m_onlineId->febHashMax();
   std::map<HWIdentifier,uint32_t> cells_per_feb;
   for(uint32_t i=0;i<n_febs;i++){
@@ -49,10 +61,21 @@ StatusCode HLTCaloGlobalCellMonitor::execute(EventContext const& context) const 
          cells_per_feb[feb_id]=0;
   }
 
-  auto mon_inputSize = Monitored::Scalar("inputContSize", 0.);
-  auto mon_outputSize = Monitored::Scalar("outputContSize", 0.);
-  auto mon_larSize = Monitored::Scalar("larContSize", 0.);
-  auto mon_larAboveSigmaSize = Monitored::Scalar("larAboveSigmaContSize", 0.);
+  auto mon_bcid = Monitored::Scalar<int>("BCID",0);
+  auto mon_inputSize = Monitored::Scalar<int>("inputContSize", 0);
+  auto mon_outputSize = Monitored::Scalar<int>("outputContSize", 0);
+  auto mon_larSize = Monitored::Scalar<int>("larContSize", 0);
+  auto mon_larAboveSigmaSize = Monitored::Scalar<int>("larAboveSigmaContSize", 0);
+  
+  
+  std::vector<uint32_t> febID;
+  febID.reserve(2000);
+  std::vector<uint32_t> cellCount;
+  cellCount.reserve(2000);
+  std::vector<uint32_t> cellCountPerLayer[25];
+  for(size_t i=0;i<25;i++)cellCountPerLayer[i].reserve(200);
+  std::vector<uint32_t> cellCountPerLayerIW[2];
+  for(size_t i=0;i<2;i++)cellCountPerLayerIW[i].reserve(200);
   int larSize=0;
   int larAboveSizeSize=0;
   int outputSize=0;
@@ -75,12 +98,64 @@ StatusCode HLTCaloGlobalCellMonitor::execute(EventContext const& context) const 
        }
     } else outputSize++;
   }
+  for(uint32_t i=0;i<n_febs;i++){
+         HWIdentifier feb_id = m_onlineId->feb_Id(IdentifierHash(i));
+         febID.push_back( feb_id.get_identifier32().get_compact() );
+         HWIdentifier hw = m_onlineId->channel_Id(feb_id,0); // first channel layer
+	 Identifier id = (*onoff)->cnvToIdentifier(hw);
+         cellCount.push_back(cells_per_feb[feb_id]);
+         int calosample = m_caloCell_ID->calo_sample(id);
+         if (calosample < 5 ) {
+             cellCountPerLayer[calosample].push_back(cells_per_feb[feb_id]);
+         } else {
+           if ( !m_onlineId->isEMECIW(hw) ){
+             if ( calosample<25)
+                cellCountPerLayer[calosample].push_back(cells_per_feb[feb_id]);
+           }else{
+             if ( calosample<8)
+               cellCountPerLayerIW[calosample-6].push_back(cells_per_feb[feb_id]);
+	   }
+         }
+  }
 
+  mon_bcid = bcid;
   mon_inputSize = (*inputCellHandle).size();
   mon_outputSize = outputSize;
   mon_larSize = larSize;
   mon_larAboveSigmaSize = larAboveSizeSize;
-  auto monitorIt = Monitored::Group( m_moniTool, mon_inputSize, mon_outputSize, mon_larSize, mon_larAboveSigmaSize);
+  auto mon_febID = Monitored::Collection("FEBID",febID);
+  auto mon_cells = Monitored::Collection("CellsPerFEB",cellCount);
+  auto mon0 = Monitored::Collection(m_layerNames[0],cellCountPerLayer[0]);
+  auto mon1 = Monitored::Collection(m_layerNames[1],cellCountPerLayer[1]);
+  auto mon2 = Monitored::Collection(m_layerNames[2],cellCountPerLayer[2]);
+  auto mon3 = Monitored::Collection(m_layerNames[3],cellCountPerLayer[3]);
+  auto mon4 = Monitored::Collection(m_layerNames[4],cellCountPerLayer[4]);
+  auto mon5 = Monitored::Collection(m_layerNames[5],cellCountPerLayer[5]);
+  auto mon6 = Monitored::Collection(m_layerNames[6],cellCountPerLayer[6]);
+  auto mon7 = Monitored::Collection(m_layerNames[7],cellCountPerLayer[7]);
+  auto mon8 = Monitored::Collection(m_layerNamesIW[0],cellCountPerLayerIW[0]);
+  auto mon9 = Monitored::Collection(m_layerNamesIW[1],cellCountPerLayerIW[1]);
+  std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>> variables;
+  variables.reserve(50);
+  variables.push_back(std::ref(mon_bcid));
+  variables.push_back(std::ref(mon_inputSize));
+  variables.push_back(std::ref(mon_outputSize));
+  variables.push_back(std::ref(mon_larSize));
+  variables.push_back(std::ref(mon_larAboveSigmaSize) );
+  variables.push_back(std::ref(mon_cells) );
+  variables.push_back(std::ref(mon_febID) );
+  variables.push_back(std::ref(mon0));
+  variables.push_back(std::ref(mon1));
+  variables.push_back(std::ref(mon2));
+  variables.push_back(std::ref(mon3));
+  variables.push_back(std::ref(mon4));
+  variables.push_back(std::ref(mon5));
+  variables.push_back(std::ref(mon6));
+  variables.push_back(std::ref(mon7));
+  variables.push_back(std::ref(mon8));
+  variables.push_back(std::ref(mon9));
+  auto monitorIt = Monitored::Group( m_moniTool, variables);
+  variables.clear();
 
   return StatusCode::SUCCESS;
 }
