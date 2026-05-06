@@ -59,12 +59,14 @@ foreach( name
          InDetSimDataCollectionCnv_p4_test
          TRT_LoLumRawDataContainerCnv_p1_test
          TRT_LoLumRawDataContainerCnv_p2_test
-         TRT_LoLumRawDataContainerCnv_p3_test )
+         TRT_LoLumRawDataContainerCnv_p3_test
+         PhaseIIPixelRawDataContainerCnv_test
+         )
 
    atlas_add_test( ${name}
       SOURCES test/${name}.cxx
       LINK_LIBRARIES
-      AtlasHepMCLib IdDict IdDictParser InDetEventAthenaPool TruthUtils TestTools CxxUtils
+      AtlasHepMCLib IdDict IdDictParser InDetEventAthenaPool TruthUtils TestTools CxxUtils PersistentDataModel
       ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/share"
       POST_EXEC_SCRIPT nopost.sh )
    set_target_properties ( InDetEventAthenaPool_${name} PROPERTIES ENABLE_EXPORTS True )

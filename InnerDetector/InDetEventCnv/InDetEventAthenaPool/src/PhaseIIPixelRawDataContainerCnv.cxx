@@ -47,7 +47,7 @@ PixelRDO_Container_PERS* PhaseIIPixelRawDataContainerCnv::createPersistent(Phase
            persObj->m_rawdata.emplace_back();
            persObj->m_rawdata.back().m_rdoId = m_idHelper->pixel_id(wafer_id,
                                                                     rdo_proxy.coordinates()[0],
-                                                                    rdo_proxy.coordinates()[1]).get_identifier32().get_compact();
+                                                                    rdo_proxy.coordinates()[1]).get_compact();
            persObj->m_rawdata.back().m_word = rdo_proxy.dataWord();
         }
         assert( persObj->m_rawdata.size() == persObj->m_collections[ module_rdo_container_proxy.identifyHash() ].m_end);
