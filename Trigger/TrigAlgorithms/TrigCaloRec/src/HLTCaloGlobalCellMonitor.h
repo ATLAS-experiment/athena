@@ -10,6 +10,7 @@
 #include <StoreGate/ReadHandleKey.h>
 #include <StoreGate/WriteHandleKey.h>
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
+#include <string>
 
 class CaloCell_ID;
 class LArOnlineID; 
@@ -42,6 +43,8 @@ class HLTCaloGlobalCellMonitor : public AthReentrantAlgorithm {
     /** @brief Monitoring tool.
     *     */
     ToolHandle<GenericMonitoringTool> m_moniTool { this, "MonitoringTool", "", "Monitoring tool" };
+    std::vector<std::string> m_layerNames;
+    std::vector<std::string> m_layerNamesIW;
 
 };
 
