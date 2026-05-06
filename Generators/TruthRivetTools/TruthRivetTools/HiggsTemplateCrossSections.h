@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRUTHRIVETTOOLS_HIGGSTEMPLATECROSSSECTIONS_H
@@ -23,6 +23,9 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenRanges.h"
 #include "CxxUtils/checker_macros.h"
+#include <string>
+#include <string_view>
+
 
 namespace Rivet {
 
@@ -108,11 +111,15 @@ namespace Rivet {
     /// @brief Returns the classification object with the error code set.
     ///        Prints an warning message, and keeps track of number of errors
     HiggsClassification error(HiggsClassification &cat, HTXS::ErrorCode err,
-                              std::string msg="", int NmaxWarnings=20) const {
+                              std::string_view msg={}, int NmaxWarnings=20) const {
       // Set the error, and keep statistics
       cat.errorCode = err;
-      ++m_errorCount[err];
-
+      const auto errIndex = static_cast<std::size_t>(err);
+      if (errIndex < std::size(m_errorCount)) {
+        ++m_errorCount[errIndex];
+      } else {
+        MSG_WARNING("Invalid HTXS error code: " << errIndex);
+      }
       // Print warning message to the screen/log
       static std::atomic<int> Nwarnings = 0;
       if ( !msg.empty() && ++Nwarnings < NmaxWarnings )
