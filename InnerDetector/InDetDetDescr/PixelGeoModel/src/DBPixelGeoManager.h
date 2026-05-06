@@ -8,12 +8,15 @@
 #include "PixelGeometryManager.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "GeoModelKernel/GeoDefinitions.h"
+
+#include "RDBAccessSvc/IRDBAccessSvc.h"
+#include "CxxUtils/checker_macros.h"
+
 #include <string>
+#include <string_view>
 #include <map>
 #include <vector>
 #include <memory>
-#include "RDBAccessSvc/IRDBAccessSvc.h"
-#include "CxxUtils/checker_macros.h"
 
 class IRDBRecord;
 class IRDBAccessSvc;
@@ -327,7 +330,7 @@ class DBPixelGeoManager : public PixelGeometryManager {
   virtual int PixelECCarbonMaterialTypeNum(std::string) override;
 
   // Services
-  virtual std::string PixelServiceName(const std::string &, int) override;
+  virtual std::string PixelServiceName(std::string_view, int) override;
   virtual bool PixelServiceZsymm(const std::string &, int) override;
   virtual double PixelServiceRMin(const std::string &, int) override;
   virtual double PixelServiceRMax(const std::string &, int) override;
@@ -338,8 +341,8 @@ class DBPixelGeoManager : public PixelGeometryManager {
   virtual double PixelServicePhiLoc(const std::string &a, int _n) override;
   virtual double PixelServiceWidth(const std::string &a, int _n) override;
   virtual int PixelServiceRepeat(const std::string &a, int _n) override;
-  virtual std::string PixelServiceShape(const std::string &a, int _n) override;
-  virtual std::string PixelServiceMaterial(const std::string &, int) override;
+  virtual std::string PixelServiceShape(std::string_view a, int _n) override;
+  virtual std::string PixelServiceMaterial(std::string_view, int) override;
   virtual int PixelServiceLD(const std::string &, int) override;
   virtual int PixelServiceElements(const std::string &) override;
   virtual int PixelServiceFrameNum(const std::string &, int) override;
@@ -348,11 +351,11 @@ class DBPixelGeoManager : public PixelGeometryManager {
   virtual int PixelServiceShift(const std::string & type, int index) override;
 
 
-  virtual IRDBRecordset_ptr  getPixelServiceRecordset(const std::string & type) override;
-  std::string getPixelServiceRecordString(const std::string & name, const std::string & type, int index);
-  int getPixelServiceRecordInt(const std::string & name, const std::string & type, int index);
-  double getPixelServiceRecordDouble(const std::string & name, const std::string & type, int index);
-  bool getPixelServiceRecordTestField(const std::string & name, const std::string & type, int index);
+  virtual IRDBRecordset_ptr  getPixelServiceRecordset(std::string_view type) override;
+  std::string getPixelServiceRecordString(std::string_view name, std::string_view type, int index);
+  int getPixelServiceRecordInt(std::string_view name, std::string_view type, int index);
+  double getPixelServiceRecordDouble(std::string_view name, std::string_view type, int index);
+  bool getPixelServiceRecordTestField(std::string_view name, std::string_view type, int index);
 
   //  Pixel container
   virtual double PixelRMin() override;

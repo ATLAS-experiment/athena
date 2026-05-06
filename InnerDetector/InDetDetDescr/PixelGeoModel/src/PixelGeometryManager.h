@@ -5,15 +5,17 @@
 #ifndef PIXELGEOMODEL_PIXELGEOMETRYMANAGER_H
 #define PIXELGEOMODEL_PIXELGEOMETRYMANAGER_H
 
-#include <string>
-#include <iostream>
-#include <map>
-#include "GeoPrimitives/GeoPrimitives.h"
-#include "GeoModelKernel/GeoMaterial.h"
+
+//#include "GeoPrimitives/GeoPrimitives.h" //typedef for GeoTrf::Vector3D
+//#include "GeoModelKernel/GeoMaterial.h"
 #include "GeoModelKernel/GeoDefinitions.h"
 #include "PixelGeoModelAthenaComps.h"
-#include "RDBAccessSvc/IRDBAccessSvc.h"
+#include "RDBAccessSvc/IRDBAccessSvc.h" //typedef for IRDBRecordset_ptr
+//
+#include <string>
+#include <string_view>
 
+//
 class InDetMaterialManager;
 class PixelLegacyManager;
 class PixelID;
@@ -177,8 +179,8 @@ public:
   // Services
   // In principle there shouldn't be access to oracle db stuff in the interface,
   // but the tables are needed by GeoPixelServices.
-  virtual IRDBRecordset_ptr getPixelServiceRecordset(const std::string & type)=0;
-  virtual std::string PixelServiceName(const std::string &, int)=0;
+  virtual IRDBRecordset_ptr getPixelServiceRecordset(std::string_view type)=0;
+  virtual std::string PixelServiceName(std::string_view, int)=0;
   virtual bool PixelServiceZsymm(const std::string &, int)=0;
   virtual double PixelServiceRMin(const std::string &, int)=0;
   virtual double PixelServiceRMax(const std::string &, int)=0;
@@ -189,8 +191,8 @@ public:
   virtual double PixelServicePhiLoc(const std::string &a, int _n)=0;
   virtual double PixelServiceWidth(const std::string &a, int _n)=0;
   virtual int PixelServiceRepeat(const std::string &a, int _n)=0;
-  virtual std::string PixelServiceShape(const std::string &a, int _n)=0;
-  virtual std::string PixelServiceMaterial(const std::string &, int)=0;
+  virtual std::string PixelServiceShape(std::string_view a, int _n)=0;
+  virtual std::string PixelServiceMaterial(std::string_view, int)=0;
   virtual int PixelServiceLD(const std::string &, int)=0;
   virtual int PixelServiceElements(const std::string &)=0;
   virtual int PixelServiceFrameNum(const std::string &, int)=0;
@@ -636,7 +638,7 @@ public:
 private:
   
   // Access to athena components
-  PixelGeoModelAthenaComps * m_athenaComps;
+  PixelGeoModelAthenaComps * m_athenaComps{};
 
 
 };
