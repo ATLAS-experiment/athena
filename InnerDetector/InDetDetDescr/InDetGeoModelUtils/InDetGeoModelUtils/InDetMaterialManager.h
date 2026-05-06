@@ -217,7 +217,7 @@ private:
   typedef std::map<std::string, MaterialComponent > MaterialCompositionMap;
   MaterialCompositionMap m_matCompositionMap;
 
-  typedef std::map<std::string, double > ExtraScaleFactorMap;
+  typedef std::map<std::string, double, std::less<> > ExtraScaleFactorMap;
   ExtraScaleFactorMap m_scalingMap;
 
   // Has linear weight flag.
