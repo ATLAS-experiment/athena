@@ -823,8 +823,8 @@ def check_args(parser, args):
    if not args.jobOptions and not args.use_database:
       parser.error("No job options file specified")
 
-   if not args.file and not args.dump_config_exit:
-      parser.error("--file is required unless using --dump-config-exit")
+   if (not args.file and not args.dump_config_exit and args.efdf_interface_library == 'TrigDFEmulator'):
+      parser.error("--file is required unless using --dump-config-exit or online efdf-interface-library")
 
    if args.use_crest and not args.use_database:
       parser.error("--use-crest requires --use-database")
@@ -1105,6 +1105,10 @@ def main():
    # set ROOT to batch mode (ATR-21890)
    from PyUtils.Helpers import ROOTSetup
    ROOTSetup(batch=True)
+
+   # Enable ROOT thread safety
+   import ROOT
+   ROOT.ROOT.EnableThreadSafety()
 
    # set default OutputLevels and file inclusion
    import AthenaCommon.Logging
