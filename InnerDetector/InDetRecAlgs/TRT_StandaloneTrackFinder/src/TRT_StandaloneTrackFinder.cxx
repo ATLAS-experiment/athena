@@ -158,7 +158,7 @@ StatusCode InDet::TRT_StandaloneTrackFinder::execute(const EventContext& ctx) co
           continue;
         }
 	// add the track to list
-        m_segToTrackTool->addNewTrack(trtSeg,event_data);
+        m_segToTrackTool->addNewTrack(ctx,trtSeg,event_data);
       }
     }
   }
