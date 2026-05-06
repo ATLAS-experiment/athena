@@ -615,8 +615,6 @@ namespace MuonValR4 {
                                                                const int color,
                                                                const int lineStyle,
                                                                const View view) const {
-        using Parameters = MuonR4::SegmentFit::Parameters;
-        using ParamDefs = MuonR4::SpacePoint::SeedingAux::FitParIndex;
         auto makeLine = [](const double x1, const double y1, const double x2, const double y2, const int color, const int style){
             auto line = std::make_unique<TLine>(x1, y1, x2, y2);
             line->SetLineColor(color);
