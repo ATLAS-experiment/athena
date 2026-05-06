@@ -7,8 +7,6 @@ atlas_subdir( AthenaPoolTest )
 atlas_add_component( AthenaPoolTest
                      src/AthenaPoolTestDataReader.cxx
                      src/AthenaPoolTestDataWriter.cxx
-                     src/AthenaPoolTestAttrWriter.cxx
-                     src/AthenaPoolTestAttrReader.cxx
                      src/InDetRawDataFakeReader.cxx
                      src/InDetRawDataFakeWriter.cxx
                      src/LArCellContFakeWriter.cxx
@@ -20,7 +18,7 @@ atlas_add_component( AthenaPoolTest
                      src/FakeTrackBuilder.cxx
                      src/RDOReaderDoubleSelector.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AthenaPoolTestData CaloDetDescrLib CaloEvent CaloIdentifier AthenaBaseComps AthenaKernel StoreGateLib AthenaPoolUtilities CxxUtils GeoModelInterfaces GeoPrimitives Identifier GaudiKernel InDetIdentifier InDetReadoutGeometry InDetRawData InDetCompetingRIOsOnTrack InDetPrepRawData InDetRIO_OnTrack LArRecEvent TrkSurfaces TrkCompetingRIOsOnTrack TrkEventPrimitives TrkMaterialOnTrack TrkParameters TrkTrack TrkVertexOnTrack EventInfo EventInfoMgtLib xAODEventInfo )
+                     LINK_LIBRARIES AthenaPoolTestData CaloDetDescrLib CaloEvent CaloIdentifier AthenaBaseComps StoreGateLib CxxUtils GeoModelInterfaces GeoPrimitives Identifier GaudiKernel InDetIdentifier InDetReadoutGeometry InDetRawData InDetCompetingRIOsOnTrack InDetPrepRawData InDetRIO_OnTrack LArRecEvent TrkSurfaces TrkCompetingRIOsOnTrack TrkEventPrimitives TrkMaterialOnTrack TrkParameters TrkTrack TrkVertexOnTrack EventInfo EventInfoMgtLib xAODEventInfo )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
