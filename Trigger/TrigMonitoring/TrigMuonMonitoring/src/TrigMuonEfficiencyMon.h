@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGMUONMONITORING_TRIGMUONEFFICIENCYMON_H
@@ -24,11 +24,11 @@ class TrigMuonEfficiencyMon : public TrigMuonMonitorAlgorithm{
  protected:
   // virtual method
   virtual bool selectEvents() const override;
-  virtual StatusCode selectMuons(SG::ReadHandle<xAOD::MuonContainer> &muons, std::vector<const xAOD::Muon*> &probes) const override;
+  virtual StatusCode selectMuons(const EventContext& ctx, SG::ReadHandle<xAOD::MuonContainer> &muons, std::vector<const xAOD::Muon*> &probes) const override;
   virtual StatusCode fillVariablesPerOfflineMuonPerChain(const EventContext &ctx, const xAOD::Muon* mu, const std::string &chain) const override;
 
 
-  StatusCode selectMuonsTagAndProbe(SG::ReadHandle<xAOD::MuonContainer> &muons, std::vector<const xAOD::Muon*> &probes) const ;
+  StatusCode selectMuonsTagAndProbe(const EventContext& ctx, SG::ReadHandle<xAOD::MuonContainer> &muons, std::vector<const xAOD::Muon*> &probes) const ;
 
   // properties
   Gaudi::Property<std::string> m_eff_method {this, "Method", "", "Method to measure efficiency e.g. \"TTbarTagAndProbe\", \"ZTagAndProbe\", \"Bootstrap\""};

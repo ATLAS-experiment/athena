@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigMuonMonitorAlgorithm.h"
@@ -42,7 +42,7 @@ StatusCode TrigMuonMonitorAlgorithm :: fillHistograms(const EventContext& ctx) c
       return StatusCode::FAILURE;
     }
     std::vector<const xAOD::Muon*> probes;
-    ATH_CHECK(selectMuons(muons, probes));
+    ATH_CHECK(selectMuons(ctx, muons, probes));
 
     for(const xAOD::Muon* mu : probes){
       ATH_CHECK( fillVariablesPerOfflineMuon(ctx, mu) );
@@ -67,7 +67,7 @@ bool TrigMuonMonitorAlgorithm :: selectEvents() const {
 }
 
 
-StatusCode TrigMuonMonitorAlgorithm :: selectMuons(SG::ReadHandle<xAOD::MuonContainer> &muons, std::vector<const xAOD::Muon*> &probes) const {
+StatusCode TrigMuonMonitorAlgorithm :: selectMuons(const EventContext& /*ctx*/, SG::ReadHandle<xAOD::MuonContainer> &muons, std::vector<const xAOD::Muon*> &probes) const {
   for (const xAOD::Muon* mu : *muons) {
     if(mu->muonType()<=m_muontype && 
        (mu->author()==xAOD::Muon::Author::MuidCo || mu->author()==xAOD::Muon::Author::STACO) && 

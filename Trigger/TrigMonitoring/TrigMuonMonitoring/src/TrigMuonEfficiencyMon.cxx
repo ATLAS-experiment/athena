@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigMuonEfficiencyMon.h"
@@ -37,10 +37,10 @@ bool TrigMuonEfficiencyMon :: selectEvents() const {
 
 
 
-StatusCode TrigMuonEfficiencyMon :: selectMuons(SG::ReadHandle<xAOD::MuonContainer> &muons, std::vector<const xAOD::Muon*> &probes) const {
+StatusCode TrigMuonEfficiencyMon :: selectMuons(const EventContext& ctx, SG::ReadHandle<xAOD::MuonContainer> &muons, std::vector<const xAOD::Muon*> &probes) const {
 
   if(m_eff_method.value().find("TagAndProbe")!=std::string::npos){
-    return selectMuonsTagAndProbe(muons, probes);
+    return selectMuonsTagAndProbe(ctx, muons, probes);
   } else {
     for (const xAOD::Muon* mu : *muons) {
       if( mu->muonType()<=m_muontype && (mu->author()==xAOD::Muon::Author::MuidCo || mu->author()==xAOD::Muon::Author::STACO) && mu->quality()==xAOD::Muon::Quality::Medium ){
@@ -77,7 +77,7 @@ StatusCode TrigMuonEfficiencyMon :: fillVariablesPerOfflineMuonPerChain(const Ev
 
   if(m_doL1){
     bool activestate = false;
-    m_matchTool->matchL1(muEta, muPhi, 0.25, chain, activestate);
+    m_matchTool->matchL1(ctx, muEta, muPhi, 0.25, chain, activestate);
     L1pass = activestate;
   } else {
     L1pass = true;
@@ -87,7 +87,7 @@ StatusCode TrigMuonEfficiencyMon :: fillVariablesPerOfflineMuonPerChain(const Ev
   if(L1pass){
     if(m_doL2SA){
       bool activestate = false;
-      m_matchTool->matchL2SA(mu, chain, activestate);
+      m_matchTool->matchL2SA(ctx, mu, chain, activestate);
       L2SApass = activestate;
     } else {
       L2SApass = true;
@@ -177,7 +177,7 @@ StatusCode TrigMuonEfficiencyMon :: fillVariablesPerOfflineMuonPerChain(const Ev
 
 
 
-StatusCode TrigMuonEfficiencyMon :: selectMuonsTagAndProbe(SG::ReadHandle<xAOD::MuonContainer> &muons, std::vector<const xAOD::Muon*> &probes) const {
+StatusCode TrigMuonEfficiencyMon :: selectMuonsTagAndProbe(const EventContext& ctx, SG::ReadHandle<xAOD::MuonContainer> &muons, std::vector<const xAOD::Muon*> &probes) const {
 
   std::vector<float> vec_invmass;
   vec_invmass.clear();
@@ -207,9 +207,9 @@ StatusCode TrigMuonEfficiencyMon :: selectMuonsTagAndProbe(SG::ReadHandle<xAOD::
       bool bit_dR = lvmu1.DeltaR(lvmu2)>0.5;
       if(m_use_extrapolator){
 	const xAOD::TrackParticle *track1 = mu1->primaryTrackParticle();
-	const Trk::TrackParameters *extTrack1 = m_matchTool->extTrackToPivot(track1);
+	const Trk::TrackParameters *extTrack1 = m_matchTool->extTrackToPivot(ctx, track1);
 	const xAOD::TrackParticle *track2 = mu2->primaryTrackParticle();
-	const Trk::TrackParameters *extTrack2 = m_matchTool->extTrackToPivot(track2);
+	const Trk::TrackParameters *extTrack2 = m_matchTool->extTrackToPivot(ctx, track2);
 	if(extTrack1 && extTrack2){
 	  TLorentzVector lvext1 = lvmu1;
 	  TLorentzVector lvext2 = lvmu2;
