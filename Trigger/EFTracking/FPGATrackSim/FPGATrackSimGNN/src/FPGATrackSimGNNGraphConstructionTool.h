@@ -57,6 +57,7 @@ class FPGATrackSimGNNGraphConstructionTool : public AthAlgTool
         Gaudi::Property<std::string> m_moduleMapType { this, "moduleMapType", "", "Type for Module Map for graph construction" };
         Gaudi::Property<std::string> m_moduleMapFunc { this, "moduleMapFunc", "", "Function for Module Map for graph construction" };
         Gaudi::Property<float> m_moduleMapTol { this, "moduleMapTol", 0.0, "Tolerance value for Module Map cut calculations" };
+        Gaudi::Property<float> m_moduleMapRMSThresholdFactor { this, "moduleMapRMSThresholdFactor", 0.0, "RMS Threshold value for Module Map cut calculations" };
         Gaudi::Property<float> m_metricLearningR { this, "metricLearningR", 0.0, "Clustering radius for Metric Learning"};
         Gaudi::Property<int> m_metricLearningMaxN { this, "metricLearningMaxN", 1, "Max number of neighbours for Metric Learning"};
 
@@ -65,30 +66,81 @@ class FPGATrackSimGNNGraphConstructionTool : public AthAlgTool
 
         // Module Map Information
         std::string m_moduleMapPath;
-        std::vector<unsigned int> m_mid1{};
-        std::vector<unsigned int> m_mid2{};
-        std::vector<float> m_z0min_12{};
-        std::vector<float> m_dphimin_12{};
-        std::vector<float> m_phislopemin_12{};
-        std::vector<float> m_detamin_12{};
-        std::vector<float> m_z0max_12{};
-        std::vector<float> m_dphimax_12{};
-        std::vector<float> m_phislopemax_12{};
-        std::vector<float> m_detamax_12{};
+
+        struct ModuleMapConfig {
+            unsigned mid1 = 0;
+            unsigned mid2 = 0;
+            unsigned mid3 = 0;        // Only exists for triplet map
+            unsigned occurence = 0;   // Only exists for triplet map
+
+            struct FeatureCuts {
+                float min = 0.0f;
+                float max = 0.0f;
+                float sum = 0.0f;
+                float sumSq = 0.0f;
+                float mean = 0.0f;
+                float rms = 0.0f;
+            };
+
+            struct DoubletCuts {
+                FeatureCuts z0;
+                FeatureCuts dphi;
+                FeatureCuts deta;
+                FeatureCuts phiSlope;
+            };
+
+            struct TripletCuts {
+                FeatureCuts diff_dydx;
+                FeatureCuts diff_dzdr;
+            };
+
+            std::array<DoubletCuts, 2> doubletCuts = {};
+            TripletCuts tripletCuts = {};
+        };
+
+        struct TripletKey {
+            unsigned mid1;
+            unsigned mid2;
+            unsigned mid3;
+
+            bool operator==(const TripletKey& other) const {
+                return mid1 == other.mid1 && mid2 == other.mid2 && mid3 == other.mid3;
+            }
+        };
+
+        struct TripletKeyHash {
+            std::size_t operator()(const TripletKey& k) const {
+                return std::hash<unsigned>()(k.mid1) ^
+                    (std::hash<unsigned>()(k.mid2) << 1) ^
+                    (std::hash<unsigned>()(k.mid3) << 2);
+            }
+        };
+        
+        std::vector<ModuleMapConfig> m_cfgs;
+        std::unordered_map<TripletKey, const ModuleMapConfig*, TripletKeyHash> m_tripletMap;
 
         ///////////////////////////////////////////////////////////////////////
         // Helpers
 
         void loadDoubletModuleMap();
+        void loadTripletModuleMap();
         void doModuleMap(const std::vector<std::shared_ptr<FPGATrackSimGNNHit>> & hits,
                                std::vector<std::shared_ptr<FPGATrackSimGNNEdge>> & edges);
+        void getTripletEdges(const std::vector<std::shared_ptr<FPGATrackSimGNNHit>> & hits, 
+                               std::vector<std::shared_ptr<FPGATrackSimGNNEdge>> & edges);
         void getDoubletEdges(const std::vector<std::shared_ptr<FPGATrackSimGNNHit>> & hits,
-                             std::vector<std::shared_ptr<FPGATrackSimGNNEdge>> & edges);
-        void applyDoubletCuts(const std::shared_ptr<FPGATrackSimGNNHit> & hit1, const std::shared_ptr<FPGATrackSimGNNHit> & hit2,
-                              std::vector<std::shared_ptr<FPGATrackSimGNNEdge>> & edges,
-                              int hit1_index, int hit2_index, unsigned int modulemap_id);
-        bool doMask(float val, float min, float max);
-        bool doMinMaxMask(float val, float min, float max);
+                             std::vector<std::shared_ptr<FPGATrackSimGNNEdge>> & edges,
+                             int cutIndex);
+        bool applyDoubletCuts(const std::shared_ptr<FPGATrackSimGNNHit> & hit1, 
+                              const std::shared_ptr<FPGATrackSimGNNHit> & hit2, 
+                              const ModuleMapConfig::DoubletCuts& cuts);
+        bool applyTripletCuts(const std::shared_ptr<FPGATrackSimGNNHit> & hit1, 
+                              const std::shared_ptr<FPGATrackSimGNNHit> & hit2, 
+                              const std::shared_ptr<FPGATrackSimGNNHit> & hit3, 
+                              const ModuleMapConfig::TripletCuts& cuts);
+        bool doMask(float val, const ModuleMapConfig::FeatureCuts& cuts);
+        bool doMinMaxMask(float val, const ModuleMapConfig::FeatureCuts& cuts);
+        bool doMeanRMSMask(float val, const ModuleMapConfig::FeatureCuts& cuts);
         float featureSign(float feature);
         void doMetricLearning(const std::vector<std::shared_ptr<FPGATrackSimGNNHit>> & hits, std::vector<std::shared_ptr<FPGATrackSimGNNEdge>> & edges);
         std::vector<float> getNodeFeatures(const std::vector<std::shared_ptr<FPGATrackSimGNNHit>> & hits);

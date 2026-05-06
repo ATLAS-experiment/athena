@@ -46,6 +46,7 @@ class FPGATrackSimGNNEdgeClassifierTool : public AthAlgTool
 
         ToolHandle<AthOnnx::IOnnxRuntimeInferenceTool> m_GNNInferenceTool {this, "GNNInferenceTool", "AthOnnx::OnnxRuntimeInferenceTool"};
         Gaudi::Property<int> m_regionNum{this, "regionNum", -1, "Region number for this GNNEdgeClassifierTool"};
+        Gaudi::Property<bool> m_doGNNPixelSeeding { this, "doGNNPixelSeeding", false, "Flag to configure for GNN Pixel Seeding" };
 
         ///////////////////////////////////////////////////////////////////////
         // Helpers
@@ -62,6 +63,15 @@ class FPGATrackSimGNNEdgeClassifierTool : public AthAlgTool
         FloatArrayProperty m_gnnFeatureScalesVec{
             this, "GNNFeatureScales",
             {1000.0, 3.14159265359, 1000.0, 1.0, 1000.0, 3.14159265359, 1000.0, 1.0, 1000.0, 3.14159265359, 1000.0, 1.0},
+            "Feature scales for the GNN model"};
+
+        StringArrayProperty m_gnnFeatureNamesVec_pixelOnly{
+            this, "GNNFeatureNames",
+            {"r", "phi", "z", "eta"},
+            "Feature names for the GNN model"};
+        FloatArrayProperty m_gnnFeatureScalesVec_pixelOnly{
+            this, "GNNFeatureScales",
+            {1000.0, 3.14159265359, 1000.0, 1.0},
             "Feature scales for the GNN model"};
 };      
 
