@@ -121,6 +121,7 @@ StatusCode L1TopoByteStreamCnv::createObjConst(IOpaqueAddress* pAddr,
   // -------------------------------------------------------------------------
   ByteStreamAddress* pBS_Addr = dynamic_cast<ByteStreamAddress*>(pAddr);
   CHECK(pBS_Addr != nullptr);
+  const EventContext& ctx = pBS_Addr->getEventContext();
   // -------------------------------------------------------------------------
   //coverity[FORWARD_NULL:FALSE]
   const std::string nm = *(pBS_Addr->par());
@@ -130,7 +131,7 @@ StatusCode L1TopoByteStreamCnv::createObjConst(IOpaqueAddress* pAddr,
   // vector of pointers to L1TopoRDO and it owns the L1TopoRDOs from a memory
   // cleanup point of view
   L1TopoRDOCollection* result = new L1TopoRDOCollection();
-  StatusCode sc = m_tool->convert(nm, result);
+  StatusCode sc = m_tool->convert(ctx, nm, result);
   if (sc.isFailure()) {
     return sc;
   }

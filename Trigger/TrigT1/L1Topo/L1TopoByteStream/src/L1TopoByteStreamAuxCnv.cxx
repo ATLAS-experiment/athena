@@ -84,6 +84,7 @@ StatusCode L1TopoByteStreamAuxCnv::createObj(IOpaqueAddress* pAddr,
   // -------------------------------------------------------------------------
   //coverity[FORWARD_NULL:FALSE]
   const std::string nm = *(pBS_Addr->par());
+  const EventContext& ctx = pBS_Addr->getEventContext();
   ATH_MSG_DEBUG("Creating Objects " << nm);
 
   auto aux = new xAOD::L1TopoRawDataAuxContainer;
@@ -91,7 +92,7 @@ StatusCode L1TopoByteStreamAuxCnv::createObj(IOpaqueAddress* pAddr,
   topoContainer.setStore(aux);
   // -------------------------------------------------------------------------
   L1TopoRDOCollection topoRDOCollection;
-  StatusCode sc = m_readTool->convert(nm, &topoRDOCollection);
+  StatusCode sc = m_readTool->convert(ctx, nm, &topoRDOCollection);
   if (sc.isFailure()) {
     ATH_MSG_ERROR("Failed to create objects");
     delete aux;

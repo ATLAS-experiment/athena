@@ -172,13 +172,14 @@ StatusCode L1TopoByteStreamTool::convert(const L1TopoRDO* result,
   return StatusCode::SUCCESS;
 }
 
-StatusCode L1TopoByteStreamTool::convert(const std::string& sgKey,
+StatusCode L1TopoByteStreamTool::convert(const EventContext& ctx,
+                                         const std::string& sgKey,
                                          L1TopoRDOCollection* result) const {
   //
   // Get the ROB fragment:
   //
   IROBDataProviderSvc::VROBFRAG robFrags;
-  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), m_sourceIDs, robFrags);
+  m_robDataProvider->getROBData(ctx, m_sourceIDs, robFrags);
 
   if (robFrags.size() == 0) {
     ATH_MSG_WARNING("No ROB fragments found");
