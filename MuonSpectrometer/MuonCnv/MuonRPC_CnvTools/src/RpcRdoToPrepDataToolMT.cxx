@@ -11,7 +11,7 @@
 #include "MuonTrigCoinData/RpcCoinDataContainer.h"
 #include "TrkSurfaces/Surface.h"
 #include "MuonIdHelpers/IdentifierByDetElSorter.h"
-#include "GeoModelKernel/throwExcept.h"
+
 using namespace MuonGM;
 using namespace Trk;
 namespace Muon{

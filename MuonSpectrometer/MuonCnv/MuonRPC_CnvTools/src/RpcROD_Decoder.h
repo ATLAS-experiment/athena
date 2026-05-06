@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONBYTESTREAM_RPCROD_DECODER_H
@@ -55,7 +55,8 @@ namespace Muon {
         virtual StatusCode finalize() override;
 
         // implementation of the abstract interface
-        StatusCode fillCollections(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag, RpcPadContainer& rdoIdc,
+        StatusCode fillCollections(const EventContext& ctx,
+                                   const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag, RpcPadContainer& rdoIdc,
                                    const std::vector<IdentifierHash>& collections, RpcSectorLogicContainer*,
                                    const bool& decodeSL) const override;
 
@@ -66,18 +67,22 @@ namespace Muon {
     private:
         typedef OFFLINE_FRAGMENTS_NAMESPACE::PointerType BS;
 
-        StatusCode fillCollection_v240(BS data, const uint32_t data_size, RpcPad& v) const;
+        StatusCode fillCollection_v240(const EventContext& ctx, BS data, const uint32_t data_size, RpcPad& v) const;
 
-        StatusCode fillCollection_v300(BS data, const uint32_t data_size, RpcPad& v, const uint16_t& subDetector,
+        StatusCode fillCollection_v300(const EventContext& ctx,
+                                       BS data, const uint32_t data_size, RpcPad& v, const uint16_t& subDetector,
                                        RpcSectorLogicContainer*) const;
 
         // decoding of real data - 2010 & 2011 _v302
-        StatusCode fillCollection_v302new(BS data, const uint32_t data_size, RpcPad& v, const uint32_t& sourceId, RpcSectorLogicContainer*,
+        StatusCode fillCollection_v302new(const EventContext& ctx,
+                                          BS data, const uint32_t data_size, RpcPad& v, const uint32_t& sourceId, RpcSectorLogicContainer*,
                                           const bool&) const;
-        StatusCode fillCollection_v302(BS data, const uint32_t data_size, RpcPad& v, const uint32_t& sourceId,
+        StatusCode fillCollection_v302(const EventContext& ctx,
+                                       BS data, const uint32_t data_size, RpcPad& v, const uint32_t& sourceId,
                                        RpcSectorLogicContainer*) const;
         // decoding of real data - 2010 & 2011 _v302
-        StatusCode fillCollectionsFromRob_v302(BS data, const uint32_t data_size, std::map<Identifier, RpcPad*>& vmap,
+        StatusCode fillCollectionsFromRob_v302(const EventContext& ctx,
+                                               BS data, const uint32_t data_size, std::map<Identifier, RpcPad*>& vmap,
                                                const uint32_t& sourceId, RpcSectorLogicContainer*, const bool& decodeSL) const;
 
         // fragment each of the 32 bit words into 2 16 bit words!
@@ -303,7 +308,8 @@ namespace Muon {
         log << MSG::INFO << " ==================================================== " << endmsg;
     }
 
-    inline StatusCode RpcROD_Decoder::fillCollections(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag, RpcPadContainer& rdoIdc,
+    inline StatusCode RpcROD_Decoder::fillCollections(const EventContext& ctx,
+                                                      const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag, RpcPadContainer& rdoIdc,
                                                       const std::vector<IdentifierHash>& collections,
                                                       RpcSectorLogicContainer* RPC_SECTORLOGIC, const bool& decodeSL) const {
         try {
@@ -351,7 +357,7 @@ namespace Muon {
 
         StatusCode cnv_sc;
 
-        SG::ReadCondHandle<RpcCablingCondData> cablingCondData{m_rpcReadKey, Gaudi::Hive::currentContext()};
+        SG::ReadCondHandle<RpcCablingCondData> cablingCondData{m_rpcReadKey, ctx};
         const RpcCablingCondData* rpcCabling{*cablingCondData};
 
         // here optimize decoding of ROB fragment (for data only type==2)
@@ -386,7 +392,7 @@ namespace Muon {
             }
 
             // RpcPadCollections not decoded and in container are identified and passed explicitly to decoder
-            cnv_sc = fillCollectionsFromRob_v302(data, robFrag.rod_ndata(), mapOfCollections, rod_sourceId, RPC_SECTORLOGIC, decodeSL);
+            cnv_sc = fillCollectionsFromRob_v302(ctx, data, robFrag.rod_ndata(), mapOfCollections, rod_sourceId, RPC_SECTORLOGIC, decodeSL);
             if (cnv_sc != StatusCode::SUCCESS) {
                 if (cnv_sc == StatusCode::RECOVERABLE) {
                     ATH_MSG_DEBUG("Decoding errors found ");
@@ -435,10 +441,10 @@ namespace Muon {
 
                 // convert collection - note case3 will never be used due to statement above
                 switch (type) {
-                    case 0: cnv_sc = fillCollection_v240(data, robFrag.rod_ndata(), *coll); break;
-                    case 1: cnv_sc = fillCollection_v300(data, robFrag.rod_ndata(), *coll, subDetector, RPC_SECTORLOGIC); break;
-                    case 2: cnv_sc = fillCollection_v302(data, robFrag.rod_ndata(), *coll, sourceId, RPC_SECTORLOGIC); break;
-                    default: cnv_sc = fillCollection_v240(data, robFrag.rod_ndata(), *coll); break;
+                case 0: cnv_sc = fillCollection_v240(ctx, data, robFrag.rod_ndata(), *coll); break;
+                case 1: cnv_sc = fillCollection_v300(ctx, data, robFrag.rod_ndata(), *coll, subDetector, RPC_SECTORLOGIC); break;
+                case 2: cnv_sc = fillCollection_v302(ctx, data, robFrag.rod_ndata(), *coll, sourceId, RPC_SECTORLOGIC); break;
+                default: cnv_sc = fillCollection_v240(ctx, data, robFrag.rod_ndata(), *coll); break;
                 }
 
                 if (cnv_sc.isFailure()) { ATH_MSG_VERBOSE("Error into the RPC fillCollections decoding"); }
@@ -464,7 +470,7 @@ namespace Muon {
      New version for data format 3.1 (ATLAS cosmics - NEW RPC READOUT)
      */
 
-    inline StatusCode RpcROD_Decoder::fillCollection_v302(BS data, const uint32_t data_size, RpcPad& v, const uint32_t& sourceId,
+    inline StatusCode RpcROD_Decoder::fillCollection_v302(const EventContext& ctx, BS data, const uint32_t data_size, RpcPad& v, const uint32_t& sourceId,
                                                           RpcSectorLogicContainer* sectorLogicContainer) const {
         bool skipSectorLogicDecoding = (sectorLogicContainer == nullptr);
         if (skipSectorLogicDecoding) ATH_MSG_DEBUG("Skip SectorLogic decoding, so SLROC.decodeFragment is not being processed");
@@ -635,7 +641,7 @@ namespace Muon {
                 isSLFooter = false;
             }
 
-            SG::ReadCondHandle<RpcCablingCondData> cablingCondData{m_rpcReadKey, Gaudi::Hive::currentContext()};
+            SG::ReadCondHandle<RpcCablingCondData> cablingCondData{m_rpcReadKey, ctx};
             const RpcCablingCondData* rpcCabling{*cablingCondData};
 
             if (msgLvl(MSG::VERBOSE)) {
@@ -1011,7 +1017,7 @@ namespace Muon {
     /**   fill RpcPads from a block of integers
      New version for data format 3.0 (ATLAS cosmics)
      */
-    inline StatusCode RpcROD_Decoder::fillCollection_v300(BS data, const uint32_t data_size, RpcPad& v, const uint16_t& subDetector,
+    inline StatusCode RpcROD_Decoder::fillCollection_v300(const EventContext& ctx, BS data, const uint32_t data_size, RpcPad& v, const uint16_t& subDetector,
                                                           RpcSectorLogicContainer* sectorLogicContainer) const {
         bool skipSectorLogicDecoding = (sectorLogicContainer == nullptr);
         if (skipSectorLogicDecoding) ATH_MSG_DEBUG("Skip SectorLogic decoding, so SLROC.decodeFragment is not being processed");
@@ -1282,7 +1288,7 @@ namespace Muon {
                     msg(MSG::VERBOSE) << " Pad Identifier= " << PadID << " Status: " << status << endmsg;
 #endif
 
-                    SG::ReadCondHandle<RpcCablingCondData> cablingCondData{m_rpcReadKey, Gaudi::Hive::currentContext()};
+                    SG::ReadCondHandle<RpcCablingCondData> cablingCondData{m_rpcReadKey, ctx};
                     const RpcCablingCondData* rpcCabling{*cablingCondData};
 
                     // get the offline ID of the pad
@@ -1426,7 +1432,7 @@ namespace Muon {
     /**   fill RpcPads from a block of integers
      Decode collection for old data format 2.4.0
      */
-    inline StatusCode RpcROD_Decoder::fillCollection_v240(BS data, const uint32_t data_size, RpcPad& v) const {
+    inline StatusCode RpcROD_Decoder::fillCollection_v240(const EventContext& ctx, BS data, const uint32_t data_size, RpcPad& v) const {
         const int rodHeader = 8;
         const int rodFooter = 3;
         bool printMessage = true;  // to print only once per call
@@ -1514,7 +1520,7 @@ namespace Muon {
 
                 uint16_t status = 0;
 
-                SG::ReadCondHandle<RpcCablingCondData> cablingCondData{m_rpcReadKey, Gaudi::Hive::currentContext()};
+                SG::ReadCondHandle<RpcCablingCondData> cablingCondData{m_rpcReadKey, ctx};
                 const RpcCablingCondData* rpcCabling{*cablingCondData};
 
                 Identifier padOfflineId;

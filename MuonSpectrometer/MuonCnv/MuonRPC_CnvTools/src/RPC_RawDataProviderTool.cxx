@@ -45,13 +45,14 @@ StatusCode RPC_RawDataProviderTool::initialize() {
 
 StatusCode RPC_RawDataProviderTool::convertIntoContainers(
     const ROBFragmentList& vecRobs, const std::vector<IdentifierHash>& collections,
-    RpcPadContainer* pad, RpcSectorLogicContainer* logic, const bool& decodeSL) const {
+    RpcPadContainer* pad, RpcSectorLogicContainer* logic, const bool& decodeSL,
+    const EventContext& ctx) const {
     for (auto itFrag = vecRobs.begin(); itFrag != vecRobs.end(); itFrag++) {
         // convert only if data payload is delivered
         if ((**itFrag).rod_ndata() != 0) {
             std::vector<IdentifierHash> coll = to_be_converted(**itFrag, collections);
 
-            if (m_decoder->fillCollections(**itFrag, *pad, coll, logic, decodeSL).isFailure()) {
+            if (m_decoder->fillCollections(ctx, **itFrag, *pad, coll, logic, decodeSL).isFailure()) {
                 // store the error conditions into the StatusCode and continue
             }
         } else {
@@ -146,7 +147,7 @@ StatusCode RPC_RawDataProviderTool::convertIntoContainer(const ROBFragmentList& 
     }
 
     // pass the containers to the convertIntoContainers function
-    ATH_CHECK(convertIntoContainers(vecRobs, collections, pad, logic, true));
+    ATH_CHECK(convertIntoContainers(vecRobs, collections, pad, logic, true, ctx));
 
     return StatusCode::SUCCESS;
 }
