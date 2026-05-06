@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -33,15 +33,25 @@ namespace SCT_CalibAlgs {
 
 
 std::string
-formatPosition(const Identifier& waferId, const SCT_ID* helper, const std::string& delimiter, const bool includeSide) {
-   using std::string;
-   string result{std::to_string(helper->barrel_ec(waferId))+delimiter};
-   result += std::to_string(helper->layer_disk(waferId))+delimiter;
-   result += std::to_string(helper->phi_module(waferId))+delimiter;
-   result += std::to_string(helper->eta_module(waferId));
-   if (includeSide) result += (delimiter+std::to_string(helper->side(waferId)));
-   return result;
-}//function end
+formatPosition(const Identifier& waferId, const SCT_ID* helper,
+    std::string_view delimiter, const bool includeSide) {
+  std::string result{std::to_string(helper->barrel_ec(waferId))};
+  result.append(delimiter);
+  result += std::to_string(helper->layer_disk(waferId));
+  //
+  result.append(delimiter);
+  result += std::to_string(helper->phi_module(waferId));
+  //
+  result.append(delimiter);
+  result += std::to_string(helper->eta_module(waferId));
+  //
+  if (includeSide) {
+    result.append(delimiter);
+    result += std::to_string(helper->side(waferId));
+  }
+
+  return result;
+}
 
 std::string
 chipList2LinkList(const std::string& chipList) {

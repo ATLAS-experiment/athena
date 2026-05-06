@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -14,13 +14,14 @@
 
 #include <sstream>
 #include <string>
+#include <string_view>
 
 class Identifier;
 class SCT_ID;
 
 namespace SCT_CalibAlgs {
 
-std::string formatPosition(const Identifier& waferId, const SCT_ID* helper, const std::string& delimiter="_", const bool includeSide=true);
+std::string formatPosition(const Identifier& waferId, const SCT_ID* helper, std::string_view delimiter="_", const bool includeSide=true);
 std::string chipList2LinkList(const std::string& chipList);
 unsigned int bec2Index(const int bec);
 std::string normalizeList(std::string strList);
