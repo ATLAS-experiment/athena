@@ -9,6 +9,7 @@
 // EDM include(s):
 #include "xAODCore/tools/AuxPersVector.h"
 #include "AthContainers/AuxTypeRegistry.h"
+#include "AthContainers/AuxStoreInternal.h" // for getCopyIDs
 #include "AthContainers/exceptions.h"
 
 // Local include(s):
@@ -180,6 +181,11 @@ namespace xAOD {
       return ret;
    }
 
+
+   SG::auxid_set_t ByteStreamAuxContainer_v1::getCopyIDs (bool warnUnlocked) const
+   {
+     return SG::getCopyIDs (getAuxIDs(), getDecorIDs(), warnUnlocked, {});
+   }
 
    /// Test if a variable is a decoration.
    bool ByteStreamAuxContainer_v1::isDecoration (auxid_t auxid) const

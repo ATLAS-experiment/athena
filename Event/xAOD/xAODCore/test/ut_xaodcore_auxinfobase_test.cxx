@@ -131,10 +131,48 @@ void test_linked()
 }
 
 
+// Test getCopyIDs()
+void test_copyIDs()
+{
+  std::cout << "test_copyIDs\n";
+  AuxInfoTest s1;
+
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  SG::auxid_t i1 = r.getAuxID<int> ("i1");
+  SG::auxid_t i2 = r.getAuxID<int> ("i2");
+  SG::auxid_t i3 = r.getAuxID<int> ("i3");
+  SG::auxid_t m1 = r.findAuxID ("m1");
+  SG::auxid_t a1 = r.findAuxID ("a1");
+
+  (void)s1.getData(i1, 1, 1);
+  (void)s1.getData(i3, 1, 1);
+  s1.lock();
+  (void)s1.getDecoration(i2, 1, 1);
+
+  SG::auxid_set_t exp;
+  exp.set (i1);
+  exp.set (i3);
+  exp.set (m1);
+  exp.set (a1);
+
+  {
+    SG::auxid_set_t out = s1.getCopyIDs();
+    assert (out == exp);
+  }
+
+  {
+    std::cout << "Expect a warning here (except in standalone):\n";
+    SG::auxid_set_t out = s1.getCopyIDs (true);
+    assert (out == exp);
+  }
+}
+
+
 int main()
 {
   std::cout << "ut_xaodcore_auxinfobase_test\n";
   test1();
   test_linked();
+  test_copyIDs();
   return 0;
 }

@@ -235,6 +235,17 @@ public:
 
 
   /**
+   * @brief Return the set of variables to copy in a deep copy.
+   * @param warnUnlocked If true, we warn about variables skipped on account
+   *                     of being decorations.
+   *
+   * This is getAuxIDs()-getDecorIDs().
+   */
+  virtual SG::auxid_set_t
+  getCopyIDs (bool warnUnlocked = false) const override;
+
+
+  /**
    * @brief Test if a particular variable is tagged as a decoration.
    * @param auxid The identifier of the desired aux data item.
    */
@@ -461,6 +472,22 @@ private:
   typedef AthContainers_detail::lock_guard<mutex_t> guard_t;
   mutable mutex_t m_mutex;
 };
+
+
+/**
+ * @brief Compute the set of variables to copy in a deep copy.
+ * @param auxids Set of all variables.
+ * @param decors Set of decorations.
+ * @param warnUnlocked If true, we warn about variables skipped on account
+ *                     of being decorations.
+ * @param noWarn Names of variables for which we should not issue such warnings.
+ *
+ * Returns auxids -  decors.
+ */
+SG::auxid_set_t getCopyIDs (const SG::auxid_set_t& auxids,
+                            const SG::auxid_set_t& decors,
+                            bool warnUnlocked,
+                            std::span<const std::string> noWarn);
 
 
 } // namespace SG

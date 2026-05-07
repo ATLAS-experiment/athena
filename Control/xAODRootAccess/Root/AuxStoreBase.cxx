@@ -190,6 +190,12 @@ void* AuxStoreBase::getDecoration(SG::auxid_t auxid, std::size_t size,
   return result;
 }
 
+SG::auxid_set_t AuxStoreBase::getCopyIDs (bool warnUnlocked /*= false*/) const
+{
+  return SG::getCopyIDs (getAuxIDs(), getDecorIDs(), warnUnlocked, {});
+}
+
+
 bool AuxStoreBase::isDecoration(SG::auxid_t auxid) const {
   if (m_locked) {
     if (auxid < m_data.m_isDecoration.size() && m_data.m_isDecoration[auxid]) {

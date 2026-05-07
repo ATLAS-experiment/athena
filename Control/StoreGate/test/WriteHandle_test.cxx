@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/test/WriteHandle_test.cxx
@@ -45,6 +45,8 @@ public:
   virtual void* getDecoration (SG::auxid_t /*auxid*/, size_t /*size*/, size_t /*capacity*/) override { return 0; }
   virtual const SG::auxid_set_t& getAuxIDs() const override { std::abort(); }
   virtual const SG::auxid_set_t& getDecorIDs() const override { std::abort(); }
+  virtual SG::auxid_set_t
+  getCopyIDs (bool /*warnUnlocked*/) const override { std::abort(); }
   virtual bool isDecoration(SG::auxid_t /*auxid*/) const override { std::abort(); }
   virtual void lock() override { m_locked = true; }
   virtual bool clearDecorations() override { return false; }

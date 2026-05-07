@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/AuxStoreInternal_test.cxx
@@ -644,6 +644,67 @@ void test_linked2()
 }
 
 
+// test getCopyIDs()
+void test_copyIDs()
+{
+  std::cout << "test_copyIDs\n";
+
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  SG::auxid_t i1 = r.getAuxID<int> ("i1");
+  SG::auxid_t i2 = r.getAuxID<int> ("i2");
+  SG::auxid_t i3 = r.getAuxID<int> ("i3");
+
+  SG::auxid_set_t auxids;
+  auxids.set (i1);
+  auxids.set (i2);
+  auxids.set (i3);
+
+  SG::auxid_set_t decors;
+  decors.set (i2);
+
+  SG::auxid_set_t exp;
+  exp.set (i1);
+  exp.set (i3);
+
+  {
+    SG::auxid_set_t out = SG::getCopyIDs (auxids, decors, false, {});
+    assert (out == exp);
+  }
+
+  {
+    std::cout << "Expect a warning here (except in standalone):\n";
+    SG::auxid_set_t out = SG::getCopyIDs (auxids, decors, true, {});
+    assert (out == exp);
+  }
+
+  {
+    std::vector<std::string> ignore {"i2"};
+    SG::auxid_set_t out = SG::getCopyIDs (auxids, decors, true, ignore);
+    assert (out == exp);
+  }
+
+  SG::AuxStoreInternal  s;
+  (void)s.getData (i1, 1, 1);
+  (void)s.getData (i3, 1, 1);
+  s.lock();
+  (void)s.getDecoration (i2, 1, 1);
+
+  {
+    SG::auxid_set_t out = s.getCopyIDs();
+    assert (out == exp);
+  }
+
+  {
+    std::cout << "Expect a warning here (except in standalone):\n";
+    SG::auxid_set_t out = s.getCopyIDs (true);
+    assert (out == exp);
+  }
+}
+
+
+//********************************************************************
+
+
 class ThreadingTest
 {
 public:
@@ -753,6 +814,7 @@ int main()
   test5();
   test_linked();
   test_linked2();
+  test_copyIDs();
   test_threading();
   return 0;
 }

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthContainers )
@@ -21,7 +21,7 @@ atlas_add_library( AthContainers
    Root/*.cxx ${extra_sources}
    PUBLIC_HEADERS AthContainers
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${TBB_LIBRARIES}
+   LINK_LIBRARIES Boost::thread ${TBB_LIBRARIES}
                   AthContainersInterfaces AthLinks CxxUtils SGCoreLib ${extra_libs} )
 
 atlas_add_dictionary( AthContainersDict
@@ -65,10 +65,15 @@ function( _add_test name )
    atlas_add_test( ${name}
       SOURCES test/${name}.cxx
       INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-      LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AthLinks CxxUtils
+      LINK_LIBRARIES Boost::thread ${ROOT_LIBRARIES} AthLinks CxxUtils
       TestTools AthContainers ${extra_libs}
       ${extra_arg} )
 endfunction( _add_test )
+
+set( EXTRA_PATTERNS )
+if( XAOD_STANDALONE )
+   set( EXTRA_PATTERNS "|skipped unlocked decoration" )
+endif()
 
 # Test(s) in the package:
 _add_test( removeDuplicates_test LOG_IGNORE_PATTERN "0x[0-9a-f\]{4,}" )
@@ -82,13 +87,9 @@ _add_test( AuxTypeVector_test )
 _add_test( AuxTypeVectorFactory_test )
 _add_test( AuxTypeRegistry_test LOG_IGNORE_PATTERN "will use std::" )
 _add_test( AuxVectorBase_test LOG_IGNORE_PATTERN "will use std::" )
-_add_test( AuxStoreInternal_test )
 _add_test( AuxStoreStandalone_test LOG_IGNORE_PATTERN "will use std::" )
-if( XAOD_STANDALONE )
-  _add_test( AuxElement_test LOG_IGNORE_PATTERN "will use std::|skipped unlocked decoration" )
-else()
-  _add_test( AuxElement_test LOG_IGNORE_PATTERN "will use std::" )
-endif()
+_add_test( AuxElement_test LOG_IGNORE_PATTERN "will use std::${EXTRA_PATTERNS}" )
+_add_test( AuxStoreInternal_test LOG_IGNORE_PATTERN "will use std::${EXTRA_PATTERNS}" )
 _add_test( AuxElementComplete_test )
 _add_test( error_test LOG_IGNORE_PATTERN "will use std::" )
 _add_test( threading_test )

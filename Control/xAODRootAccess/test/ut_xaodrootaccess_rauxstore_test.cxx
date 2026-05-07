@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -22,6 +22,7 @@
 // System include(s):
 #include <filesystem>
 #include <memory>
+#include <iostream>
 
 /// Helper macro for evaluating logical tests
 #define SIMPLE_ASSERT(EXP)                                             \
@@ -270,6 +271,40 @@ StatusCode test_insertmove() {
   return StatusCode::SUCCESS;
 }
 
+
+StatusCode test_copyIDs()
+{
+  xAOD::RAuxStore s("fooAux:");
+
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  SG::auxid_t i1 = r.getAuxID<int> ("i1");
+  SG::auxid_t i2 = r.getAuxID<int> ("i2");
+  SG::auxid_t i3 = r.getAuxID<int> ("i3");
+
+  (void)s.getData(i1, 5, 5);
+  (void)s.getData(i3, 5, 5);
+  s.lock();
+  (void)s.getDecoration(i2, 5, 5);
+
+  SG::auxid_set_t exp;
+  exp.set (i1);
+  exp.set (i3);
+
+  {
+    SG::auxid_set_t out = s.getCopyIDs();
+    assert (out == exp);
+  }
+
+  {
+    std::cout << "Expect a warning here (except in standalone):\n";
+    SG::auxid_set_t out = s.getCopyIDs (true);
+    assert (out == exp);
+  }
+
+  return StatusCode::SUCCESS;
+}
+
+
 void createAndFillNtuple(const char* ntupleName, const char* fileName) {
   // Create an RNTuple model
   auto model = ROOT::RNTupleModel::Create();
@@ -460,6 +495,7 @@ int main() {
 
   SIMPLE_ASSERT(test_linked().isSuccess());
   SIMPLE_ASSERT(test_insertmove().isSuccess());
+  SIMPLE_ASSERT( test_copyIDs().isSuccess() );
 
   // Clean up.
   std::filesystem::remove(INPUT_FILE_NAME);
