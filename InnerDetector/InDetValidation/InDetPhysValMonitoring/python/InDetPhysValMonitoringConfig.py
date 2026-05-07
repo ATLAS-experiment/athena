@@ -146,6 +146,8 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
 
     # if we are running with the HGam hard scatter selection, we need to schedule the NN
     if hs_strategy == HardScatterStrategy.HYY:
+        from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowSvcCfg
+        acc.merge(CutFlowSvcCfg(flags))
         from DerivationFrameworkHiggs.HIGG1D1CustomVertexConfig import DiPhotonVertexCfg
         acc.merge(DiPhotonVertexCfg(flags))
 
