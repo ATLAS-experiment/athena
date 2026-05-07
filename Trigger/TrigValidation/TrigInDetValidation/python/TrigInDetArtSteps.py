@@ -172,21 +172,6 @@ class TrigInDetRecoData(ExecStep):
 
 
 ##################################################
-# Additional exec (athena) steps - extract Physics_Main when running on data
-##################################################
-
-class TrigBSExtr(ExecStep):
-    def __init__(self, name='TrigBSExtr'):
-        super(TrigBSExtr, self).__init__(name)
-        self.type = 'other'
-        self.executable = 'trigbs_extractStream.py'
-        self.input = ''
-        # the HLT step may produce several BS files, if we exceed the 2 GB file size limit
-        # process all BS files in trigbs_extractStream.py (by default, find_file only keeps the last one)
-        self.args = '-s Main ' + '`find . -name "*_HLTMPPy_output.*.data"`'
-
-
-##################################################
 # Additional exec (athena) steps - Tier0 Reco (BS->AOD)
 ##################################################
 
