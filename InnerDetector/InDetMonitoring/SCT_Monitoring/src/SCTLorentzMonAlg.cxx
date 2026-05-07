@@ -27,6 +27,19 @@ StatusCode SCTLorentzMonAlg::initialize() {
   ATH_CHECK(m_SCTDetEleCollKey.initialize());
   ATH_CHECK(m_assoTool.retrieve(DisableTool{!m_rejectSharedHits} ));
 
+  ATH_CHECK(m_holeSearchTool.retrieve());
+  ATH_MSG_INFO("Retrieved hole search tool " << m_holeSearchTool);
+
+  if ( m_beamSpotKey.initialize().isFailure() ) {
+    ATH_MSG_WARNING("Failed to retrieve beamspot service " << m_beamSpotKey << " - will use nominal beamspot at (0,0,0)");
+    m_hasBeamCondSvc = false;
+  } 
+  else {
+    m_hasBeamCondSvc = true;
+    ATH_MSG_DEBUG("Retrieved service " << m_beamSpotKey);
+  }
+
+
   return AthMonitorAlgorithm::initialize();
 }
 
@@ -76,23 +89,53 @@ StatusCode SCTLorentzMonAlg::fillHistograms(const EventContext& ctx) const {
      }
   }
 
+  float beamSpotX = 0.;
+  float beamSpotY = 0.;
+  float beamSpotZ = 0.;
+  float beamTiltX = 0.;
+  float beamTiltY = 0.;
+ 
+  if (m_hasBeamCondSvc) {
+    auto beamSpotHandle = SG::ReadCondHandle(m_beamSpotKey, ctx);
+    Amg::Vector3D bpos = beamSpotHandle->beamPos();
+    beamSpotX = bpos.x();
+    beamSpotY = bpos.y();
+    beamSpotZ = bpos.z();
+    beamTiltX = beamSpotHandle->beamTilt(0);
+    beamTiltY = beamSpotHandle->beamTilt(1);
+    ATH_MSG_DEBUG ("Beamspot: x0 = " << beamSpotX << ", y0 = " << beamSpotY << ", z0 = " << beamSpotZ << ", tiltX = " << beamTiltX << ", tiltY = " << beamTiltY);
+  }
+
   for (const Trk::Track* track: *tracks) {
     if (track==nullptr) {
       ATH_MSG_ERROR("no pointer to track!!!");
       continue;
     }
 
+    if (track->perigeeParameters() == nullptr) {
+      continue;
+    }
+    // Get a track with holes
+    std::unique_ptr<const Trk::Track> trackWithHoles(m_holeSearchTool->getTrackWithHoles(*track));
+
+    if (not trackWithHoles) {
+      ATH_MSG_WARNING("trackWithHoles pointer is invalid");
+      continue;
+    }
+
+    ATH_MSG_VERBOSE("Found " << trackWithHoles->trackStateOnSurfaces()->size() << " states on track");
+
     // Get pointer to track state on surfaces
-    const Trk::TrackStates* trackStates{track->trackStateOnSurfaces()};
+    const Trk::TrackStates* trackStates{trackWithHoles->trackStateOnSurfaces()};
     if (trackStates==nullptr) {
       ATH_MSG_WARNING("for current track, TrackStateOnSurfaces == Null, no data will be written for this track");
       continue;
     }
 
-    const Trk::TrackSummary* summary{track->trackSummary()};
+    const Trk::TrackSummary* summary{trackWithHoles->trackSummary()};
     std::unique_ptr<Trk::TrackSummary> mySummary;
     if (summary==nullptr) {
-      mySummary = m_trackSummaryTool->summary(ctx,*track);
+      mySummary = m_trackSummaryTool->summary(ctx, *trackWithHoles);
       summary = mySummary.get();
       if (summary==nullptr) {
         ATH_MSG_WARNING("Trk::TrackSummary is null and cannot be created by " << m_trackSummaryTool.name());
@@ -101,8 +144,12 @@ StatusCode SCTLorentzMonAlg::fillHistograms(const EventContext& ctx) const {
     }
 
     for (const Trk::TrackStateOnSurface* tsos: *trackStates) {
+      int nStrip = 0;
+      Identifier sct_id(0);
+
       if (tsos->type(Trk::TrackStateOnSurface::Measurement)) {
-        const InDet::SiClusterOnTrack* clus{dynamic_cast<const InDet::SiClusterOnTrack*>(tsos->measurementOnTrack())};
+	// This is hit.
+	const InDet::SiClusterOnTrack* clus{dynamic_cast<const InDet::SiClusterOnTrack*>(tsos->measurementOnTrack())};
         if (clus) { // Is it a SiCluster? If yes...
           // Reject shared hits if you want
           if (prd_to_track_map and prd_to_track_map->isShared(*(clus->prepRawData())) ) {
@@ -114,122 +161,146 @@ StatusCode SCTLorentzMonAlg::fillHistograms(const EventContext& ctx) const {
             continue; // Continue if dynamic_cast returns null
           }
           if (RawDataClus->detectorElement()->isSCT()) {
-            const Identifier sct_id{clus->identify()};
-            const int bec{m_pSCTHelper->barrel_ec(sct_id)};
-            const int layer{m_pSCTHelper->layer_disk(sct_id)};
-            const int side{m_pSCTHelper->side(sct_id)};
-            const int eta{m_pSCTHelper->eta_module(sct_id)};
-            const int phi{m_pSCTHelper->phi_module(sct_id)};
+	    sct_id = clus->identify();
+	    // find cluster size
+	    const std::vector<Identifier>& rdoList{RawDataClus->rdoList()};
+	    nStrip = static_cast<int>(rdoList.size());
+	  } else {
+	    continue;
+	  }
+	} else {
+	  // This is not an Si cluster.
+	  continue;
+	}
+      } else if (tsos->type(Trk::TrackStateOnSurface::Hole)) {
+	// This is a hole.
+	const Trk::MeasurementBase* mesb{tsos->measurementOnTrack()};
+	if (mesb and mesb->associatedSurface().associatedDetectorElement()) {
+	  sct_id = mesb->associatedSurface().associatedDetectorElement()->identify();
+	} else if (tsos->trackParameters()) {
+	  sct_id = tsos->trackParameters()->associatedSurface().associatedDetectorElementIdentifier();
+	} else {
+	  // sct_id wasn't correctly retrieved.
+	  continue;
+	}
+      } else {
+	continue;
+      }
 
-            // Check if the silicon surface is 100.
-            SiliconSurface surface{surface111};
-            for (unsigned int i{0}; i < layer100_n; i++) {
-              if ((layer100[i] == layer) and (eta100[i] == eta) and (phi100[i] == phi)) {
-                surface = surface100;
-                break;
-              }
-            }
-            // find cluster size
-            const std::vector<Identifier>& rdoList{RawDataClus->rdoList()};
-            int nStrip{static_cast<int>(rdoList.size())};
-            const Trk::TrackParameters* trkp{dynamic_cast<const Trk::TrackParameters*>(tsos->trackParameters())};
-            if (trkp==nullptr) {
-              ATH_MSG_WARNING(" Null pointer to MeasuredTrackParameters");
-              continue;
-            }
-            const Trk::Perigee* perigee{track->perigeeParameters()};
+      if (!m_pSCTHelper->is_sct(sct_id)) {
+	continue;
+      }
+      
+      const int bec{m_pSCTHelper->barrel_ec(sct_id)};
+      const int layer{m_pSCTHelper->layer_disk(sct_id)};
+      const int side{m_pSCTHelper->side(sct_id)};
+      const int eta{m_pSCTHelper->eta_module(sct_id)};
+      const int phi{m_pSCTHelper->phi_module(sct_id)};
 
-            if (perigee) {
-              // Get angle to wafer surface
-              float phiToWafer{90.f};
-              float thetaToWafer(90.f);
-              float sinAlpha{0.f}; // for barrel, which is the only thing considered here
-              float pTrack[3]; // 3 is for x, y, z.
-              pTrack[0] = trkp->momentum().x();
-              pTrack[1] = trkp->momentum().y();
-              pTrack[2] = trkp->momentum().z();
-	      float etaTrack = trkp->eta();
-              int iflag{findAnglesToWaferSurface(pTrack, sinAlpha, clus->identify(), elements, thetaToWafer, phiToWafer)};
-              if (iflag < 0) {
-                ATH_MSG_WARNING("Error in finding track angles to wafer surface");
-                continue; // Let's think about this (later)... continue, break or return?
-              }
+      // Check if the silicon surface is 100.
+      SiliconSurface surface{surface111};
+      for (unsigned int i{0}; i < layer100_n; i++) {
+	if ((layer100[i] == layer) and (eta100[i] == eta) and (phi100[i] == phi)) {
+	  surface = surface100;
+	  break;
+	}
+      }
 
-              bool passesCuts{true};
-	      // The cuts for the physics runs follow ATL-COM-INDET-2021-011.
-              if ((dataType() == AthMonitorAlgorithm::DataType_t::cosmics) and
-                  (trkp->momentum().perp() > 500.) and  // Pt > 500MeV
-                  (summary->get(Trk::numberOfSCTHits) > 6) // #SCTHits >6
-                  ) {
-                passesCuts = true;
-              } else if ((track->perigeeParameters()->parameters()[Trk::qOverP] < 0.) and // use negative track only
-                         (std::abs(perigee->parameters()[Trk::d0]) < 1.) and // d0 < 1mm
-                         (trkp->momentum().perp() > 500.) and  // Pt > 500MeV
-                         (summary->get(Trk::numberOfSCTHits) > 6)// and // #SCTHits >6
-                         ) {
-                passesCuts = true;
-              } else {
-                passesCuts = false;
-              }
+      const Trk::TrackParameters* trkp{dynamic_cast<const Trk::TrackParameters*>(tsos->trackParameters())};
+      if (trkp==nullptr) {
+	ATH_MSG_WARNING(" Null pointer to MeasuredTrackParameters");
+	continue;
+      }
 
-              if (passesCuts) {
-                // Fill profile
-                std::string xVar{"phiToWafer"};
-                std::string yVar{"nStrip"};
-                if(bec == 0){ // Barrel
-		  xVar += "_" + std::to_string(layer);
-		  yVar += "_" + std::to_string(layer);
-		  if(surface == surface100){
-                    xVar += "_100";
-                    yVar += "_100";
-		  }
-		  if(surface == surface111){
-                    xVar += "_111";
-                    yVar += "_111";
-		  }
-		} else { // Endcaps
-		  if (bec == -2) {
-		    xVar += "_ECC";
-		    yVar += "_ECC";
-		  } else {
-		    xVar += "_ECA";
-		    yVar += "_ECA";
-		  }
-		  xVar += std::to_string(layer);
-		  yVar += std::to_string(layer);
-		  if (eta == 0) {
-		    xVar += "_outer";
-		    yVar += "_outer";
-		  } else if (eta == 1) {
-		    xVar += "_middle";
-		    yVar += "_middle";
-		  } else {
-		    xVar += "_inner";
-		    yVar += "_inner";
-		  }
-		} // Common for barrel and endcaps
-		if(side == side0){
-		  xVar += "_0";
-		  yVar += "_0";
-		}
-		if(side == side1){
-		  xVar += "_1";
-		  yVar += "_1";
-		}
+      const Trk::Perigee* perigee{track->perigeeParameters()};
+      
+      if (perigee) {
+	// Get angle to wafer surface
+	float phiToWafer{90.f};
+	float thetaToWafer(90.f);
+	float sinAlpha{0.f}; // for barrel, which is the only thing considered here
+	float pTrack[3]; // 3 is for x, y, z.
+	pTrack[0] = trkp->momentum().x();
+	pTrack[1] = trkp->momentum().y();
+	pTrack[2] = trkp->momentum().z();
+	float etaTrack = trkp->eta();
 
-                auto phiToWaferAcc{Monitored::Scalar<float>(xVar, phiToWafer)};
-                auto nStripAcc{Monitored::Scalar<int>(yVar, nStrip)};
-		auto isCentralAcc{Monitored::Scalar<bool>("isCentral", (etaTrack < 0.5))};
-                fill("SCTLorentzMonitor", phiToWaferAcc, nStripAcc, isCentralAcc);
-              }// end if passesCuts
-            }// end if mtrkp
-          } // end if SCT..
-        } // end if (clus)
-      } // if (tsos->type(Trk::TrackStateOnSurface::Measurement)) {
+	int iflag{findAnglesToWaferSurface(pTrack, sinAlpha, sct_id, elements, thetaToWafer, phiToWafer)};
+	if (iflag < 0) {
+	  ATH_MSG_WARNING("Error in finding track angles to wafer surface");
+	  continue; // Let's think about this (later)... continue, break or return?
+	}
+
+        float beamX          = 0;
+        float beamY          = 0;
+        float d0bscorr       = -999;
+
+        // correct the track parameters for the beamspot position
+        beamX = beamSpotX + tan(beamTiltX) * (perigee->parameters()[Trk::z0]-beamSpotZ);
+        beamY = beamSpotY + tan(beamTiltY) * (perigee->parameters()[Trk::z0]-beamSpotZ);
+        d0bscorr = perigee->parameters()[Trk::d0] - ( -sin(perigee->parameters()[Trk::phi])*beamX + cos(perigee->parameters()[Trk::phi])*beamY );
+
+
+	// The cuts for the physics runs follow ATL-COM-INDET-2021-011.
+	if (trkp->momentum().perp() > 500. and
+	    summary->get(Trk::numberOfSCTHits) > 6 and
+            (dataType() == AthMonitorAlgorithm::DataType_t::cosmics or
+             (std::abs(d0bscorr) < 1. and trackWithHoles->perigeeParameters()->parameters()[Trk::qOverP] < 0.)
+            )
+	    ) {
+    // Fill profile
+	  std::string xVar{"phiToWafer"};
+	  std::string yVar{"nStrip"};
+	  if(bec == 0){ // Barrel
+	    xVar += "_" + std::to_string(layer);
+	    yVar += "_" + std::to_string(layer);
+	    if(surface == surface100){
+	      xVar += "_100";
+	      yVar += "_100";
+	    }
+	    if(surface == surface111){
+	      xVar += "_111";
+	      yVar += "_111";
+	    }
+	  } else { // Endcaps
+	    if (bec == -2) {
+	      xVar += "_ECC";
+	      yVar += "_ECC";
+	    } else {
+	      xVar += "_ECA";
+	      yVar += "_ECA";
+	    }
+	    xVar += std::to_string(layer);
+	    yVar += std::to_string(layer);
+	    if (eta == 0) {
+	      xVar += "_outer";
+	      yVar += "_outer";
+	    } else if (eta == 1) {
+	      xVar += "_middle";
+	      yVar += "_middle";
+	    } else {
+	      xVar += "_inner";
+	      yVar += "_inner";
+	    }
+	  } // Common for barrel and endcaps
+	  if(side == side0){
+	    xVar += "_0";
+	    yVar += "_0";
+	  }
+	  if(side == side1){
+	    xVar += "_1";
+	    yVar += "_1";
+	  }
+
+	  auto phiToWaferAcc{Monitored::Scalar<float>(xVar, phiToWafer)};
+	  auto nStripAcc{Monitored::Scalar<int>(yVar, nStrip)};
+	  auto isCentralAcc{Monitored::Scalar<bool>("isCentral", (std::abs(etaTrack) < 0.5))};
+	  fill("SCTLorentzMonitor", phiToWaferAcc, nStripAcc, isCentralAcc);
+	}// end if passesCuts
+      } // end if SCT..
     }// end of loop on TrackStatesonSurface (they can be SiClusters, TRTHits,..)
   } // end of loop on tracks
 
-    
   return StatusCode::SUCCESS;
 }
 
