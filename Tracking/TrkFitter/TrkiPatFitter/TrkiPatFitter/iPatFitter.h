@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKIPATFITTER_IPATFITTER_H
@@ -167,6 +167,7 @@ class iPatFitter : public AthAlgTool, virtual public ITrackFitter {
 
   // perform fit
   std::unique_ptr<Track> performFit(
+      const EventContext& ctx,
       FitState& fitState, const ParticleHypothesis particleHypothesis,
       const TrackInfo& trackInfo,
       const Trk::TrackStates* leadingTSOS,

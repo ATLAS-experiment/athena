@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -116,7 +116,8 @@ void InDet::TrackStatHelper::SetCuts(const struct cuts& ct)
 
 }
 
-void InDet::TrackStatHelper::addEvent(const TrackCollection              * recTracks, 
+void InDet::TrackStatHelper::addEvent(const EventContext& ctx,
+                      const TrackCollection              * recTracks,
 				      std::vector <const Trk::Track *>   & rec, 
 				      const std::vector <std::pair<HepMC::ConstGenParticlePtr,int> > & gen, 
 				      const TrackTruthCollection         * truthMap, 
@@ -227,7 +228,7 @@ void InDet::TrackStatHelper::addEvent(const TrackCollection              * recTr
     
     if (useTrackSummary) {
        if (!track->trackSummary()) {
-          cleanup = trkSummaryTool->summary(*track);
+          cleanup = trkSummaryTool->summary(ctx, *track);
           summary=cleanup.get();
        }
 
