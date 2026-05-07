@@ -111,6 +111,8 @@ if __name__ == "__main__":
 
     flags.Acts.TrackingGeometry.UseBlueprint = True
 
+    from AthenaConfiguration.Enums import ProductionStep
+    flags.Common.ProductionStep = ProductionStep.Simulation
 
     log.debug('Lock config flags now.')
     flags.lock()

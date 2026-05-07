@@ -27,13 +27,13 @@ atlas_add_test( MaterialStepWriter
                 SCRIPT RunGeantinoMaterialTrackProduction.py --maxEvents 1
                 PROPERTIES TIMEOUT 600
                 PRIVATE_WORKING_DIRECTORY
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( MaterialStepWriterToroid
                 SCRIPT testMaterialWriteToroid.sh
                 PROPERTIES TIMEOUT 600
                 PRIVATE_WORKING_DIRECTORY
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 
 
