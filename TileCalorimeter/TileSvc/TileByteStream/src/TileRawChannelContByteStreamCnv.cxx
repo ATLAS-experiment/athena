@@ -71,13 +71,10 @@ StatusCode TileRawChannelContByteStreamCnv::createObjConst(IOpaqueAddress* pAddr
 {
   ATH_MSG_DEBUG(" Executing createObj method ");
 
-  ByteStreamAddress *pRE_Addr;
-  pRE_Addr = dynamic_cast<ByteStreamAddress*>(pAddr); 
+  ByteStreamAddress* pRE_Addr{};
+  ATH_CHECK( (pRE_Addr = dynamic_cast<ByteStreamAddress*>(pAddr)) != nullptr );
 
-  if(!pRE_Addr) {
-    ATH_MSG_ERROR(" Can not cast to ByteStreamAddress ");
-    return StatusCode::FAILURE;    
-  }
+  const EventContext& ctx = pRE_Addr->getEventContext();
 
   const std::string containerName(*(pRE_Addr->par()));
   bool isTMDB(containerName == std::string("MuRcvRawChCnt"));
@@ -117,7 +114,7 @@ StatusCode TileRawChannelContByteStreamCnv::createObjConst(IOpaqueAddress* pAddr
     if (newrob != robid[0]) {
       robid[0] = newrob;
       robf.clear();
-      m_robSvc->getROBData(Gaudi::Hive::currentContext(), robid, robf);
+      m_robSvc->getROBData(ctx, robid, robf);
     }
     
     // unpack ROB data
