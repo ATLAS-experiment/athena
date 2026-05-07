@@ -72,10 +72,37 @@ void test1()
 }
 
 
+void test_copyIDs()
+{
+  std::cout << "test_copyIDs\n";
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  xAOD::EventAuxInfo eai;
+  eai.lock();
+  SG::auxid_t runid = r.findAuxID ("runNumber");
+  SG::auxid_t ewid = r.getAuxID<std::vector<float> > ("mcEventWeights");
+  SG::auxid_t fooid = r.getAuxID<int> ("foo");
+  
+  (void)eai.getDecoration (ewid, 1, 1);
+  (void)eai.getDecoration (fooid, 1, 1);
+  {
+    SG::auxid_set_t out = eai.getCopyIDs();
+    assert (!out.test(ewid)); 
+    assert (!out.test(fooid));
+    assert (out.test(runid));
+  }
+
+  {
+    std::cout << "Expect warning here (except in standalone):\n";
+    SG::auxid_set_t out = eai.getCopyIDs (true);
+  }
+}
+
+
 int main()
 {
   std::cout << "ut_xaodeventinfo_eventauxinfo_test\n";
   test1();
+  test_copyIDs();
   return 0;
 }
 

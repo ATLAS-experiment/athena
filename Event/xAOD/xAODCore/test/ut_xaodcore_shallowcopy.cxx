@@ -13,6 +13,7 @@
 #include "AthContainers/ConstAccessor.h"
 #include "AthContainers/Accessor.h"
 #include "AthContainers/Decorator.h"
+#include "AthContainers/CurrentContext.h"
 
 // System include(s).
 #include <iostream>
@@ -167,6 +168,48 @@ int testCopy(SG::AuxElement& copyObj, xAOD::ShallowAuxInfo& copyAux) {
   return 0;
 }
 
+
+void test_copyIDs()
+{
+  xAOD::AuxContainerBase origAux;
+  DataVector< SG::AuxElement > origVec;
+  origVec.setStore( &origAux );
+  origVec.push_back (std::make_unique<SG::AuxElement>());
+  SG::Accessor< int > IntVar( "IntVar" );
+  SG::Accessor< int > Int3Var( "Int3Var" );
+  IntVar(*origVec.back()) = 1;
+  Int3Var(*origVec.back()) = 3;
+  origVec.lock();
+
+  SG::Decorator< int > Int2Var( "Int2Var" );
+  Int2Var(*origVec.back()) = 2;
+
+  DataLink< SG::IConstAuxStore > link (&origAux, Gaudi::Hive::currentContext());
+
+  xAOD::ShallowAuxContainer copyAux;
+  copyAux.setParent( link );
+
+  SG::auxid_set_t exp;
+  exp.set (IntVar.auxid());
+  exp.set (Int3Var.auxid());
+
+  {
+    SG::auxid_set_t out = copyAux.getCopyIDs();
+    assert (out == exp);
+  }
+
+  SG::Decorator< int > Int4Var( "Int4Var" );
+  copyAux.lock();
+  copyAux.getDecoration (Int4Var.auxid(), 1, 1);
+  Int4Var(*origVec.back()) = 4;
+
+  {
+    SG::auxid_set_t out = copyAux.getCopyIDs();
+    assert (out == exp);
+  }
+}
+
+
 //coverity[UNCAUGHT_EXCEPT]
 int main() {
 
@@ -207,6 +250,8 @@ int main() {
      auto [copyVec2, copyAux2] = xAOD::shallowCopy(*copyVec);
      SIMPLE_ASSERT( copyAux2->getAuxIDs().size() == 5 );
    }
+
+   test_copyIDs();
 
    // Tell the user that everything went okay:
    std::cout << "All tests with xAOD::ShallowAuxContainer succeeded"

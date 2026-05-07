@@ -73,6 +73,9 @@ class AuxStoreBase : public SG::IAuxStore, public SG::IAuxStoreIO {
   virtual void* getDecoration(SG::auxid_t auxid, std::size_t size,
                               std::size_t capacity) override;
 
+  /// Get the set of variables that we should deep copy.
+  virtual SG::auxid_set_t getCopyIDs (bool warnUnlocked = false) const override;
+
   /// Test if a variable is a decoration.
   virtual bool isDecoration(SG::auxid_t auxid) const override;
 

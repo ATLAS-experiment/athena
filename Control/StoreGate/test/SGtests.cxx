@@ -135,6 +135,8 @@ public:
   virtual void shift (size_t /*pos*/, ptrdiff_t /*offs*/) override {}
   virtual bool insertMove (size_t, IAuxStore&, const SG::auxid_set_t&) override { std::abort(); }
   virtual void* getDecoration (auxid_t /*auxid*/, size_t /*size*/, size_t /*capacity*/) override { std::abort(); }
+  virtual SG::auxid_set_t
+  getCopyIDs (bool /*warnUnlocked*/) const override { std::abort(); }
   virtual bool isDecoration(SG::auxid_t /*auxid*/) const override { std::abort(); }
   virtual void lock() override { m_locked = true; }
   virtual bool clearDecorations() override { std::abort(); }

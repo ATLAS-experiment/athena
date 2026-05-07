@@ -237,6 +237,11 @@ namespace xAOD {
       return m_vecs[ auxid ];
    }
 
+   SG::auxid_set_t AuxInfoBase::getCopyIDs (bool warnUnlocked) const
+   {
+     return SG::getCopyIDs (getAuxIDs(), getDecorIDs(), warnUnlocked, {});
+   }
+
    bool AuxInfoBase::isDecoration (auxid_t auxid) const
    {
      guard_t guard( m_mutex );

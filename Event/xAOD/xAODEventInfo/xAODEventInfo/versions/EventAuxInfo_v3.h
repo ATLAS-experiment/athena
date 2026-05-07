@@ -46,6 +46,16 @@ namespace xAOD {
 
 
      /**
+      * @brief Return the set of variables to copy in a deep copy.
+      * @param warnUnlocked If true, we warn about variables skipped on account
+      *                     of being decorations.
+      *
+      * Special case to avoid warning about skipping mcEventWeights.
+      */
+     virtual SG::auxid_set_t getCopyIDs (bool warnUnlocked = false) const override;
+
+
+     /**
       * @brief Test if a particular variable is tagged as a decoration.
       * @param auxid The identifier of the desired aux data item.
       */

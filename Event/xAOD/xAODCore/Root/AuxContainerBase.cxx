@@ -290,6 +290,11 @@ namespace xAOD {
       return empty;
    }
 
+   SG::auxid_set_t AuxContainerBase::getCopyIDs (bool warnUnlocked) const
+   {
+     return SG::getCopyIDs (getAuxIDs(), getDecorIDs(), warnUnlocked, {});
+   }
+
    bool AuxContainerBase::isDecoration (auxid_t auxid) const
    {
      guard_t guard( m_mutex );

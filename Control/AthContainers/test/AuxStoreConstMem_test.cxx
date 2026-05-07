@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/AuxStoreConstMem_test.cxx
@@ -64,6 +64,8 @@ void test1()
   assert (!cm.clearDecorations());
   cm.lock();
   cm.lockDecoration(1);
+
+  assert (cm.getCopyIDs() == cm.getAuxIDs());
 }
 
 

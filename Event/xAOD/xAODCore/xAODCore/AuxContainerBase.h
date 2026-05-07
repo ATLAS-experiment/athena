@@ -107,6 +107,9 @@ namespace xAOD {
       /// Get the types(names) of decorations handled by this container
       virtual const auxid_set_t& getDecorIDs() const override;
 
+      /// Get the set of variables that we should deep copy.
+      virtual SG::auxid_set_t getCopyIDs (bool warnUnlocked = false) const override;
+
       /// Test if a variable is a decoration.
       virtual bool isDecoration (auxid_t auxid) const override;
 

@@ -4,6 +4,7 @@
 
 // Local include(s):
 #include "xAODEventInfo/versions/EventAuxInfo_v3.h"
+#include "AthContainers/AuxStoreInternal.h" // for SG::getAuxIDs
 
 namespace xAOD {
 
@@ -101,6 +102,21 @@ namespace xAOD {
      }
 
      return AuxInfoBase::getDecoration (auxid, size, capacity);
+   }
+
+
+   /**
+    * @brief Return the set of variables to copy in a deep copy.
+    * @param warnUnlocked If true, we warn about variables skipped on account
+    *                     of being decorations.
+    *
+    * Special case to avoid warning about skipping mcEventWeights.
+    */
+   SG::auxid_set_t
+   EventAuxInfo_v3::getCopyIDs (bool warnUnlocked) const
+   {
+     static const std::string ignored[1] = { "mcEventWeights" };
+     return SG::getCopyIDs (getAuxIDs(), getDecorIDs(), warnUnlocked, ignored);
    }
 
 

@@ -248,6 +248,17 @@ namespace xAOD {
       return m_decorids;
    }
 
+   SG::auxid_set_t ShallowAuxContainer::getCopyIDs (bool warnUnlocked) const
+   {
+     guard_t guard( m_mutex );
+     auxid_set_t ids;
+     if( m_parentLink.isValid() ) {
+       ids.insert (m_parentLink->getCopyIDs (warnUnlocked));
+     }
+     ids.insert (m_store->getCopyIDs (warnUnlocked));
+     return ids;
+   }
+
    bool ShallowAuxContainer::isDecoration (auxid_t auxid) const
    {
      guard_t guard( m_mutex );

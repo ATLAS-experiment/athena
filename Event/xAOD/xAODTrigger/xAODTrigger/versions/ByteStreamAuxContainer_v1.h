@@ -74,6 +74,9 @@ namespace xAOD {
       /// Get a pointer to a given array, as a decoration.
       virtual void* getDecoration (auxid_t auxid, size_t size, size_t capacity) override;
 
+      /// Get the set of variables that we should deep copy.
+      virtual SG::auxid_set_t getCopyIDs (bool warnUnlocked = false) const override;
+
       /// Test if a variable is a decoration.
       virtual bool isDecoration (auxid_t auxid) const override;
 
