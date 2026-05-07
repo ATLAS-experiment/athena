@@ -15,7 +15,6 @@
 #include "SGTools/TestStore.h"
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include <cassert>
 #include <iostream>
 
@@ -48,7 +47,6 @@ void compare (const TrackParticleAssocs& a1,
 void test1 ATLAS_NOT_THREAD_SAFE()
 {
   std::cout << "test1\n";
-  (void)Gaudi::Hive::currentContext();
 
   Rec::TrackParticleContainer* tpc = new Rec::TrackParticleContainer;
   for (int i=0; i < 10; i++)

@@ -14,7 +14,6 @@
 #include "CxxUtils/StrFormat.h"
 #include "CxxUtils/checker_macros.h"
 #include "TestTools/leakcheck.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include <cassert>
 #include <iostream>
 
@@ -76,7 +75,6 @@ std::unique_ptr<EventBookkeeper> make (int o)
 void test1 ATLAS_NOT_THREAD_SAFE ()
 {
   std::cout << "test1\n";
-  (void)Gaudi::Hive::currentContext();
   Athena_test::Leakcheck check;
 
   std::unique_ptr<EventBookkeeper> trans1 = make(1);

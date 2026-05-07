@@ -16,7 +16,6 @@
 #include "TestTools/FLOATassert.h"
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "CxxUtils/checker_macros.h"
 #include <cassert>
 #include <iostream>
@@ -113,7 +112,6 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
   {
     Analysis::Muon xx (MuonParameters::highPt);
   }
-  (void)Gaudi::Hive::currentContext();
   ElementLink<Rec::TrackParticleContainer> el1 ("cont1", 1);
   ElementLink<Rec::TrackParticleContainer> el2 ("cont2", 2);
   ElementLink<Rec::TrackParticleContainer> el3 ("cont3", 3);
