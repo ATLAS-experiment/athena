@@ -38,6 +38,9 @@ protected:
     // setable properties
     double      m_beamMomentum{0};
     double      m_targetMomentum{0};
+    
+    // seed from the command line
+    int  	m_argsRandomSeed{0};
 
     //Gen_tf run args.
     IntegerProperty m_dsid{this, "Dsid", 999999};
