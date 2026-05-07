@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTrackScoringTool.h"
@@ -61,7 +61,8 @@ namespace Muon {
             score = simpleScore(track, *summary);
         } else {
             // This is potentially slow, so might need revisiting.
-            std::unique_ptr<Trk::TrackSummary> tmpSummary = m_trkSummaryTool->summaryNoHoleSearch(track);
+            std::unique_ptr<Trk::TrackSummary> tmpSummary =
+              m_trkSummaryTool->summaryNoHoleSearch(Gaudi::Hive::currentContext(), track);
             score = simpleScore(track, *tmpSummary);
         }
         return score;
