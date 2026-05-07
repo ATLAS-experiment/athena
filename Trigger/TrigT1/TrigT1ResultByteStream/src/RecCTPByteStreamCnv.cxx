@@ -80,12 +80,10 @@ StatusCode RecCTPByteStreamCnv::createObj( IOpaqueAddress* pAddr, DataObject*& p
   MsgStream log( msgSvc(), "RecCTPByteStreamCnv" );
   log << MSG::DEBUG << "RecCTPByteStreamCnv::createObj() called" << endmsg;
 
-  ByteStreamAddress *pBS_Addr;
-  pBS_Addr = dynamic_cast< ByteStreamAddress* >( pAddr );
-  if( !pBS_Addr ) {
-    log << MSG::ERROR << " Can not cast to ByteStreamAddress " << endmsg ;
-    return StatusCode::FAILURE;
-  }
+  ByteStreamAddress* pBS_Addr{};
+  ATH_CHECK( (pBS_Addr = dynamic_cast<ByteStreamAddress*>(pAddr)) != nullptr );
+
+  const EventContext& ctx = pBS_Addr->getEventContext();
 
   log << MSG::DEBUG << " Creating Objects: " << *( pBS_Addr->par() ) << endmsg;
 
@@ -102,7 +100,7 @@ StatusCode RecCTPByteStreamCnv::createObj( IOpaqueAddress* pAddr, DataObject*& p
 
   // get ROB fragment
   IROBDataProviderSvc::VROBFRAG robFrags;
-  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags );
+  m_robDataProvider->getROBData(ctx, vID, robFrags );
 
   // size check
   if ( robFrags.size() != 1 ) {

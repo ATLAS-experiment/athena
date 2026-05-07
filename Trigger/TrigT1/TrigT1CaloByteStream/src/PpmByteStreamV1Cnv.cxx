@@ -80,13 +80,10 @@ StatusCode PpmByteStreamV1Cnv::initialize()
 StatusCode PpmByteStreamV1Cnv::createObjConst ( IOpaqueAddress* pAddr,
                                                 DataObject*& pObj ) const
 {
-  ByteStreamAddress *pBS_Addr;
-  pBS_Addr = dynamic_cast<ByteStreamAddress *>( pAddr );
-  if ( !pBS_Addr ) {
-    ATH_MSG_ERROR( " Can not cast to ByteStreamAddress " );
-    return StatusCode::FAILURE;
-  }
+  ByteStreamAddress* pBS_Addr{};
+  ATH_CHECK( (pBS_Addr = dynamic_cast<ByteStreamAddress*>(pAddr)) != nullptr );
 
+  const EventContext& ctx = pBS_Addr->getEventContext();
   const std::string nm = *( pBS_Addr->par() );
 
   ATH_MSG_DEBUG( " Creating Objects " << nm );
@@ -96,7 +93,7 @@ StatusCode PpmByteStreamV1Cnv::createObjConst ( IOpaqueAddress* pAddr,
 
   // get ROB fragments
   IROBDataProviderSvc::VROBFRAG robFrags;
-  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags );
+  m_robDataProvider->getROBData(ctx, vID, robFrags );
 
   // size check
   auto ttCollection = std::make_unique<DataVector<LVL1::TriggerTower> >(SG::VIEW_ELEMENTS);
