@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -21,7 +21,7 @@
 
 Trk::TruthTrackCreation::TruthTrackCreation(const std::string& name, ISvcLocator* pSvcLocator)
     :
-    AthAlgorithm(name,pSvcLocator),
+    AthReentrantAlgorithm(name,pSvcLocator),
     m_prdTruthTrajectoryBuilder("Trk::PRD_TruthTrajectoryBuilder/InDetPRD_TruthTrajectoryBuilder"),
     m_truthTrackBuilder("Trk::TruthTrackBuilder/InDetTruthTrackBuilder"),
     m_trackSummaryTool("")
@@ -89,7 +89,7 @@ StatusCode Trk::TruthTrackCreation::finalize()
 
 //================ Execution ====================================================
 
-StatusCode Trk::TruthTrackCreation::execute()
+StatusCode Trk::TruthTrackCreation::execute(const EventContext& ctx) const
 {
     std::unique_ptr<Trk::PRDtoTrackMap> prd_to_track_map(!m_assoTool.empty()
                                                          ? m_assoTool->createPRDtoTrackMap() 
@@ -97,21 +97,15 @@ StatusCode Trk::TruthTrackCreation::execute()
     // create the track collection
     std::unique_ptr<TrackCollection> outputTrackCollection = std::make_unique<TrackCollection>();
     std::unique_ptr<TrackCollection> skippedTrackCollection = std::make_unique<TrackCollection>();
-    SG::WriteHandle<TrackCollection> outputTrackCollectionHandle(m_outputTrackCollectionName);
-    SG::WriteHandle<TrackCollection> skippedTrackCollectionHandle(m_skippedTrackCollectionName);
+    SG::WriteHandle<TrackCollection> outputTrackCollectionHandle(m_outputTrackCollectionName, ctx);
+    SG::WriteHandle<TrackCollection> skippedTrackCollectionHandle(m_skippedTrackCollectionName, ctx);
  
     std::vector<std::unique_ptr<Trk::Track> > tmp_track_collection;
-
-    // set up the PRD trajectory builder
-    if ( m_prdTruthTrajectoryBuilder->refreshEvent().isFailure() ){
-        ATH_MSG_INFO("Could not refresh the PRD truth trajectory builder. No truth track creation.");
-        return StatusCode::SUCCESS;
-    }
 
     // ----------------------------------- main loop ------------------------------------------------------------------
     // get the PRD truth trajectories
     const std::map< HepMC::ConstGenParticlePtr, PRD_TruthTrajectory >& truthTraj =
-        m_prdTruthTrajectoryBuilder->truthTrajectories();
+        m_prdTruthTrajectoryBuilder->truthTrajectories(ctx);
     // some screen output
     ATH_MSG_VERBOSE("PRD_TruthTrajectoryBuilder delivered " << truthTraj.size() << " PRD truth trajectories, starting track creation.");
     // loop over truth trajectories and create track
@@ -142,17 +136,16 @@ StatusCode Trk::TruthTrackCreation::execute()
         // If configured : update the track summary
         if (m_trackSummaryTool.isEnabled()){
             ATH_MSG_VERBOSE("Updating the TrackSummary.");
-            m_trackSummaryTool->computeAndReplaceTrackSummary(*truthTrack,
+            m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *truthTrack,
                                                               false /* DO NOT suppress hole search*/);
 
         }
         // If configured : check with the TrackSelectors
         bool passed = m_trackSelectors.empty();
         if ( !m_trackSelectors.empty() ) {
-            ToolHandleArray<Trk::ITrackSelectorTool>::iterator tsIter  = m_trackSelectors.begin();
-            ToolHandleArray<Trk::ITrackSelectorTool>::iterator tsIterE = m_trackSelectors.end();
-            for ( ; ( tsIter != tsIterE && !passed ); ++tsIter){
-                passed = (*tsIter)->decision(*truthTrack);
+            for (const auto& ts : m_trackSelectors) {
+                passed = ts->decision(*truthTrack);
+                if (passed) break;
             }
         } 
         // now check the result
@@ -174,7 +167,7 @@ StatusCode Trk::TruthTrackCreation::execute()
         outputTrackCollection->reserve(tmp_track_collection.size());
         for (std::unique_ptr<Trk::Track> &track : tmp_track_collection) {
             ATH_MSG_VERBOSE("Updating the TrackSummary with shared hits.");
-            m_trackSummaryTool->computeAndReplaceTrackSummary(*track, false /* DO NOT suppress hole search*/);
+            m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *track, false /* DO NOT suppress hole search*/);
             outputTrackCollection->push_back(std::move(track));
         }
     }

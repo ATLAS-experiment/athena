@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -16,10 +16,7 @@
 #include "AtlasHepMC/GenParticle_fwd.h"
 
 namespace Trk {
- 
 
-  static const InterfaceID IID_IPRD_TruthTrajectoryBuilder("IPRD_TruthTrajectoryBuilder", 1, 0);
-   
   /**
    @class IPRD_TruthTrajectoryBuilder
 
@@ -30,19 +27,16 @@ namespace Trk {
      
   class IPRD_TruthTrajectoryBuilder : virtual public IAlgTool {
 
-     public:     
+     public:
+       /** Interface ID */
+       DeclareInterfaceID(IPRD_TruthTrajectoryBuilder, 1, 0);
+
        /** Virtual destructor */
        virtual ~IPRD_TruthTrajectoryBuilder(){}
 
-       /** AlgTool interface methods */
-       static const InterfaceID& interfaceID() { return IID_IPRD_TruthTrajectoryBuilder; }
-
-       /** return a vector of PrepRawData trajectories - uses internal cache**/
-       virtual std::map< HepMC::ConstGenParticlePtr, PRD_TruthTrajectory > truthTrajectories() const = 0;
+       /** return a vector of PrepRawData trajectories */
+       virtual std::map< HepMC::ConstGenParticlePtr, PRD_TruthTrajectory > truthTrajectories(const EventContext& ctx) const = 0;
        
-       /** Event refresh - can't be an IIncident, because it has to run after PRD creation and PRD truth creation */
-       virtual StatusCode refreshEvent() = 0;       
-
   };
 
 } // end of namespace
