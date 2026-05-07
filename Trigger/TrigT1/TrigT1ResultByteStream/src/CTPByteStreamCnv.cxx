@@ -91,12 +91,10 @@ StatusCode CTPByteStreamCnv::createObj( IOpaqueAddress* pAddr, DataObject*& pObj
   MsgStream log( msgSvc(), "CTPByteStreamCnv" );
   log << MSG::DEBUG << "createObj() called" << endmsg;
 
-  ByteStreamAddress *pBS_Addr;
-  pBS_Addr = dynamic_cast< ByteStreamAddress* >( pAddr );
-  if( ! pBS_Addr ) {
-    log << MSG::ERROR << "Can not cast input to ByteStreamAddress" << endmsg ;
-    return StatusCode::FAILURE;
-  }
+  ByteStreamAddress* pBS_Addr{};
+  ATH_CHECK( (pBS_Addr = dynamic_cast<ByteStreamAddress*>(pAddr)) != nullptr );
+
+  const EventContext& ctx = pBS_Addr->getEventContext();
 
   log << MSG::DEBUG << "Creating Objects: " << *( pBS_Addr->par() ) << endmsg;
 
@@ -115,7 +113,7 @@ StatusCode CTPByteStreamCnv::createObj( IOpaqueAddress* pAddr, DataObject*& pObj
   // Get the ROB fragment:
   //
   IROBDataProviderSvc::VROBFRAG robFrags;
-  m_robDataProvider->getROBData( Gaudi::Hive::currentContext(), vID, robFrags );
+  m_robDataProvider->getROBData( ctx, vID, robFrags );
 
   //
   // Size check:
