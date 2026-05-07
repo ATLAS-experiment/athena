@@ -62,7 +62,7 @@ namespace MuonValR4{
            /** @brief Time over threshold */
            VectorBranch<float>& m_toT{parent().newVector<float>(m_collName+"_timeOverThresh")};
 
-
+                
            /// Set of chambers to be dumped
            std::unordered_set<Identifier> m_filteredChamb{};
            /// Map of Identifiers to the position index inside the vector

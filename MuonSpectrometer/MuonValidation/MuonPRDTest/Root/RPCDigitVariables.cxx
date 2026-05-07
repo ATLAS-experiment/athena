@@ -46,6 +46,7 @@ namespace MuonPRDTest {
                 m_RPC_dig_time.push_back(digit->time());
                 m_RPC_tot.push_back(digit->ToT());
                 m_RPC_dig_id.push_back(Id);
+
                 ++n_digits;
             }
         }
