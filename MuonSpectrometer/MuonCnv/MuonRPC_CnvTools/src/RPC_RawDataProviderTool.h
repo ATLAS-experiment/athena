@@ -42,7 +42,8 @@ namespace Muon {
         // This function does all the actual work of decoding the data
         StatusCode convertIntoContainers(const ROBFragmentList& vecRobs,
                                          const std::vector<IdentifierHash>& collections, RpcPadContainer* pad,
-                                         RpcSectorLogicContainer* logic, const bool& decodeSL) const;
+                                         RpcSectorLogicContainer* logic, const bool& decodeSL,
+                                         const EventContext& ctx) const;
 
         std::vector<IdentifierHash> to_be_converted(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag,
                                                     const std::vector<IdentifierHash>& coll) const;
