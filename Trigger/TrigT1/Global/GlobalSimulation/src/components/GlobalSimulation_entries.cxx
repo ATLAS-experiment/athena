@@ -17,6 +17,7 @@
 #include "../FirstChain/GlobalCellTowerAlgTool.h"
 #include "../FirstChain/eFexCvtrAlgTool.h"
 #include "../FirstChain/eEmMultAlgTool.h"
+#include "../FirstChain/eEmEg1BDTMultAlgTool.h"
 
 #include "../FirstChain/eEmMultTestBench.h"
 #include "../FirstChain/eEmMultTestComparator.h"
@@ -41,6 +42,7 @@ DECLARE_COMPONENT(GlobalSim::GlobalCellTowerAlgTool)
 
 DECLARE_COMPONENT(GlobalSim::eFexCvtrAlgTool)
 DECLARE_COMPONENT(GlobalSim::eEmMultAlgTool)
+DECLARE_COMPONENT(GlobalSim::eEmEg1BDTMultAlgTool)
 
 DECLARE_COMPONENT(GlobalSim::eEmMultTestBench)
 DECLARE_COMPONENT(GlobalSim::eEmMultTestComparator)

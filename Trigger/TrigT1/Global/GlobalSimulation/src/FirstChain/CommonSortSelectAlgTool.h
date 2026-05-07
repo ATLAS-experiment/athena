@@ -118,9 +118,6 @@ namespace GlobalSim {
       "flag to enable debug dumps"
     };
 
-
-    void dump() const;
-
   };
 }
 #endif

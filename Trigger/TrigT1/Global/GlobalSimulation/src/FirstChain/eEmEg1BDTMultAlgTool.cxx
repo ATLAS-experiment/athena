@@ -2,15 +2,16 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "./eEmMultAlgTool.h"
+#include "./eEmEg1BDTMultAlgTool.h"
 #include "./CommonSelector.h"
 #include "./eEmSelector.h"
+#include "./eEmEg1BDTSelector.h"
 
 #include <fstream>
 
 namespace GlobalSim {
 
-  eEmMultAlgTool::eEmMultAlgTool(const std::string& type,
+  eEmEg1BDTMultAlgTool::eEmEg1BDTMultAlgTool(const std::string& type,
 				 const std::string& name,
 				 const IInterface* parent) :
     base_class(type, name, parent) {
@@ -18,9 +19,9 @@ namespace GlobalSim {
   
   
   // Initialize function running before first event
-  StatusCode eEmMultAlgTool::initialize() {
+  StatusCode eEmEg1BDTMultAlgTool::initialize() {
 
-    CHECK(m_eEmTOBContainerKey.initialize());
+    CHECK(m_eEmEg1BDTTOBContainerKey.initialize());
 
     if (m_n_multbits < 0) {
       ATH_MSG_ERROR("number of bits to write to TIP is negative");
@@ -44,19 +45,15 @@ namespace GlobalSim {
 						    );
 
     try {
-      m_e_selector = std::make_unique<eEmSelector>(std::stoul(m_rhad_str),
-						   m_rhad_op,
-						   std::stoul(m_reta_str),
-						   m_reta_op,
-						   std::stoul(m_wstot_str),
-						   m_wstot_op
-						   );
+      m_bdt_selector = std::make_unique<eEmEg1BDTSelector>(std::stoul(m_Eg1BDT_str),
+							   m_Eg1BDT_op
+							   );
     } catch (const std::exception& e) {
       
-      ATH_MSG_ERROR("Error initialising eEMSelector " << e.what());
+      ATH_MSG_ERROR("Error initialising eEmEg1BDTSelector " << e.what());
       return StatusCode::FAILURE;
     }
-      
+
       
 
     if (m_n_multbits == 0){
@@ -71,11 +68,11 @@ namespace GlobalSim {
   }
 
   
-  StatusCode eEmMultAlgTool::updateTIP(std::bitset<s_nbits_TIP>& word,
-				       const EventContext& ctx) const {
+  StatusCode eEmEg1BDTMultAlgTool::updateTIP(std::bitset<s_nbits_TIP>& word,
+					     const EventContext& ctx) const {
     auto tobs =
-      SG::ReadHandle<GlobalSim::IOBitwise::eEmTOBContainer>(m_eEmTOBContainerKey,
-							     ctx);
+      SG::ReadHandle<GlobalSim::IOBitwise::eEmEg1BDTTOBContainer>(m_eEmEg1BDTTOBContainerKey,
+								  ctx);
 
     CHECK(tobs.isValid());
 
@@ -83,8 +80,8 @@ namespace GlobalSim {
 
     ulong tob_count{0};
     std::vector<bool> tob_pass(tobs->size(), false);
-    for (uint tob_it = 0; const GlobalSim::IOBitwise::eEmTOB* t : *tobs){
-      if (m_c_selector->select(*t) and m_e_selector->select(*t)) {
+    for (int tob_it = 0; const GlobalSim::IOBitwise::eEmEg1BDTTOB* t : *tobs){
+      if (m_c_selector->select(*t) and m_bdt_selector->select(*t)) {
 	tob_pass[tob_it] = true;
 	if (++tob_count == m_maxtob){
 	  break;
@@ -92,8 +89,6 @@ namespace GlobalSim {
       }
       tob_it++;
     }
-
-    
 
     ATH_MSG_DEBUG("no of passing TOBS" << tob_count);
 
@@ -115,7 +110,7 @@ namespace GlobalSim {
       std::stringstream ss;
       ss << "\nRun " << ctx <<' ' << "TIP:\n" << word << '\n';
       std::size_t ind{0};
-      for (const GlobalSim::IOBitwise::eEmTOB* tob : *tobs) {
+      for (const GlobalSim::IOBitwise::eEmEg1BDTTOB* tob : *tobs) {
 	ss << tob->to_string()  << ' ' << std::boolalpha << " pass " << tob_pass[ind++] << '\n';
       }
       ss << "tob count " << tob_count << '\n';
@@ -129,12 +124,12 @@ namespace GlobalSim {
     return StatusCode::SUCCESS;
   }
 
-  std::string eEmMultAlgTool::toString() const {
+  std::string eEmEg1BDTMultAlgTool::toString() const {
     std::stringstream ss;
     ss <<name () << ": " <<m_menu_name << ' '
-       << "eEmMultAlgTool read, select, count and report number of related eEmTOBS\n"
+       << "eEmEg1BDTMultAlgTool read, select, count and report number of related eEmEg1BDTTOBS\n"
        << m_c_selector->to_string() << '\n'
-       << m_e_selector->to_string() << '\n'
+       << m_bdt_selector->to_string() << '\n'
        << m_TIP_position << ' ' << m_n_multbits;
 
     return ss.str();

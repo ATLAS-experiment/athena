@@ -2,35 +2,35 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef GLOBALSIM_EEMMULTALGTOOL_H
-#define GLOBALSIM_EEMMULTALGTOOL_H
+#ifndef GLOBALSIM_EEMEG1BDTMULTALGTOOL_H
+#define GLOBALSIM_EEMEG1BDTMULTALGTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
 
 #include "../GlobalSimComponents/ITIPwriterAlgTool.h"
-#include "../IO/eEmTOB.h"
+#include "../IO/eEmEg1BDTTOB.h"
 
 #include "ICommonSelector.h"
-#include "IeEmSelector.h"
+#include "IeEmEg1BDTSelector.h"
 
 #include <string>
 
 namespace GlobalSim {
 
   /**
-   * @brief AlgTool to count GlobalSim::IOBitwise::eEmTOB objects.
-   *
+   * @brief AlgTool to count GlobalSim::IOBitwise::eEmEg1BDTTOB objects.
+   * Cutting on the  eEmEg1BDT score
    */
 
 
-  class eEmMultAlgTool: public extends<AthAlgTool, ITIPwriterAlgTool> {
+  class eEmEg1BDTMultAlgTool: public extends<AthAlgTool, ITIPwriterAlgTool> {
 
   public:
-    eEmMultAlgTool(const std::string& type,
+    eEmEg1BDTMultAlgTool(const std::string& type,
 		   const std::string& name,
 		   const IInterface* parent);
 
-    virtual ~eEmMultAlgTool() override = default;
+    virtual ~eEmEg1BDTMultAlgTool() override = default;
 
     /** @brief Initialize function running before first event */
     virtual StatusCode initialize() override;
@@ -43,14 +43,14 @@ namespace GlobalSim {
   private:
   
     std::unique_ptr<ICommonSelector> m_c_selector{nullptr};
-    std::unique_ptr<IeEmSelector> m_e_selector{nullptr};
-  
-    SG::ReadHandleKey<IOBitwise::eEmTOBContainer>
-    m_eEmTOBContainerKey {
+    std::unique_ptr<IeEmEg1BDTSelector> m_bdt_selector{nullptr};
+
+    SG::ReadHandleKey<IOBitwise::eEmEg1BDTTOBContainer>
+    m_eEmEg1BDTTOBContainerKey {
       this,
-      "eEmTOBs",
-      "eEmTOBs",
-      "Key for GlobalSim eEmTOB container"};
+      "eEmEg1BDTTOBContainerKey",
+      "eEmEg1BDTTOBContainer",
+      "Key for GlobalSim eEmEg1BDTTOB container"};
     
     Gaudi::Property<std::string> m_et_low_str {
       this,
@@ -88,41 +88,18 @@ namespace GlobalSim {
       "inf",
       "phi high for window selector"};
 
-   Gaudi::Property<std::string> m_rhad_str {
-      this,
-      "rhad",
-      "0",
-      "rhad cut value"};
 
-   Gaudi::Property<std::string> m_rhad_op {
+   Gaudi::Property<std::string> m_Eg1BDT_str {
       this,
-      "rhad_op",
-      "unknown",
-      "rhad cut operator"};
-    
-   Gaudi::Property<std::string> m_reta_str {
-      this,
-      "reta",
+      "Eg1BDT",
       "0",
-      "reta cut value"};
+      "Eg1BDT lcut_value"};
 
-    Gaudi::Property<std::string> m_reta_op {
+    Gaudi::Property<std::string> m_Eg1BDT_op {
       this,
-      "reta_op",
+      "Eg1BDT_op",
       "unknown",
-      "reta cut operator"};
- 
-   Gaudi::Property<std::string> m_wstot_str {
-      this,
-      "wstot",
-      "0",
-      "wstot lcut_value"};
-
-    Gaudi::Property<std::string> m_wstot_op {
-      this,
-      "wstot_op",
-      "unknown",
-      "wstot cut_operator"};
+      "Eg1BDT cut_operator"};
     
     Gaudi::Property<int> m_TIP_position {
       this,
@@ -153,6 +130,7 @@ namespace GlobalSim {
 
 
     ulong m_maxtob{0};
+
   };
 }
 #endif
