@@ -25,6 +25,7 @@
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 from TrigValTools.TrigValSteering.Common import find_file
 from TrigAnalysisTest.TrigAnalysisSteps import add_analysis_steps
+from TrigP1Test.TrigP1TestSteps import filterBS
 from AthenaConfiguration.TestDefaults import defaultConditionsTags
 
 # Specify trigger menu once here:
@@ -43,12 +44,7 @@ hlt.flags = [f'Trigger.triggerMenuSetup="{triggermenu}"',
 hlt.args = '-o output'
 
 # Extract the physics_FTagPEBTLA stream out of the BS file with many streams
-filter_bs = ExecStep.ExecStep('FilterBS')
-filter_bs.type = 'other'
-filter_bs.executable = 'trigbs_extractStream.py'
-filter_bs.input = ''
-# cannot use 'find_file' as it only returns the last file matching the pattern
-filter_bs.args = '-s DarkJetPEBTLA ' + '`find . -name "*_HLTMPPy_output.*.data"`'
+filter_bs = filterBS('DarkJetPEBTLA')
 
 # Tier-0 reco step (BS->AOD)
 tlarecoPreExec = ';'.join([f"flags.Trigger.triggerMenuSetup=\'{triggermenu}\'",

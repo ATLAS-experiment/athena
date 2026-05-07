@@ -159,7 +159,7 @@ def filterBS(stream_name, extra_args = ''):
     filterStep.type = 'other'
     filterStep.executable = 'trigbs_extractStream.py'
     filterStep.input = ''
-    filterStep.args = f'{extra_args} -s {stream_name} ' + find_file('data*_SingleStream.daq.RAW.*_output.*.data')
+    filterStep.args = f'{extra_args} -s {stream_name} ' + find_file('data*_SingleStream.daq.RAW.*_output.*.data', max_files=None)
     return filterStep
 
 def decodeBS(stream_name, moduleID=0):
