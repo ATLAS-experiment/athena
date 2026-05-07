@@ -73,14 +73,12 @@ LArAccumulatedCalibDigitContByteStreamCnv::createObjConst(IOpaqueAddress* pAddr,
     ATH_MSG_ERROR( " ROBDataProviderSvc not loaded. Can't read ByteStream." );
     return StatusCode::FAILURE;
   }
-  ByteStreamAddress *pRE_Addr;
-  pRE_Addr = dynamic_cast<ByteStreamAddress*>(pAddr); //Cast from OpaqueAddress to ByteStreamAddress
-  if (!pRE_Addr) {
-    ATH_MSG_ERROR(  "dynamic_cast of OpaqueAdress to ByteStreamAddress failed!" );
-    return StatusCode::FAILURE;
-  }
 
-  const RawEvent* re = m_rdpSvc->getEvent(Gaudi::Hive::currentContext());
+  ByteStreamAddress* pRE_Addr{};
+  ATH_CHECK( (pRE_Addr = dynamic_cast<ByteStreamAddress*>(pAddr)) != nullptr );
+
+  const EventContext& ctx = pRE_Addr->getEventContext();
+  const RawEvent* re = m_rdpSvc->getEvent(ctx);
   if (!re) {
     ATH_MSG_ERROR(  "Could not get raw event from ByteStreamInputSvc" );
   }
