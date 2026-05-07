@@ -569,7 +569,7 @@ def HION12SmartCollections():
 
     return variables
 
-def HION12AllVarContent():
+def HION12AllVarContentRun2():
     variables  = []
     variables += ["AntiKt4EMPFlowJets"]                          # Include R = 0.4 anti-kt EM Particle Flow jets
     variables += ["AntiKt4EMTopoJets"]                           # Include R = 0.4 anti-kt EM topo-jets
@@ -597,6 +597,45 @@ def HION12AllVarContent():
     variables += ["HLT_xAOD__JetContainer_a10tclcwsubjesFS"]     # Include the HLT R = 1.0 LCW Topo trigger jets (2018 HI Run)
 
     return variables
+
+def HION12AllVarContentRun3():
+    variables  = []
+    variables += ["AntiKt4EMPFlowJets"]                          # Include R = 0.4 anti-kt EM Particle Flow jets
+    variables += ["AntiKt4LCTopoJets"]                           # Include R = 0.4 anti-kt local calibration topo-jets
+    variables += ["CaloCalTopoClusters"]                         # Include topocluster information
+    variables += ["PrimaryVertices"]                             # Include a list of all primary vertices
+    variables += ["NCB_MuonSegments"]                            # Include the non-collision background muons to handle punch-throughs.
+    variables += ["JetETMissChargedParticleFlowObjects"]         # Include the charged particle flow objects from the Jet/ET Miss group
+    variables += ["JetETMissNeutralParticleFlowObjects"]         # Include the neutral particle flow objects from the Jet/ET Miss group
+    variables += ["TauChargedParticleFlowObjects"]               # Include the charged particle flow objects used for Tau reconstruction
+    variables += ["TauNeutralParticleFlowObjects"]               # Include the neutral particle flow objects used for Tau reconstruction
+    variables += ["TauShotParticleFlowObjects"]                  # Include the["shot" particle flow objects used for Tau reconstruction
+    variables += ["Kt4EMPFlowEventShape"]                        # The event shape specifically for R=0.4 EM PFlow jets
+    variables += ["Kt4EMTopoOriginEventShape"]                   # The event shape specifically for R=0.4 EM Topo jets
+    variables += ["Kt4LCTopoOriginEventShape"]                   # The event shape specifically for R=0.4 LC Topo jets
+    variables += ["TopoClusterIsoCentralEventShape"]             # Part of the event shape for topo-jets
+    variables += ["TopoClusterIsoVeryForwardEventShape"]         # Part of the event shape for topo-jets
+    variables += ["TopoClusterIsoForwardEventShape"]             # Part of the event shape for topo-jets
+    variables += ["NeutralParticleFlowIsoCentralEventShape"]     # Part of the event shape for PFlow jets
+    variables += ["ParticleFlowIsoCentralEventShape"]            # Part of the event shape for PFlow jets
+    variables += ["NeutralParticleFlowIsoForwardEventShape"]     # Part of the event shape for PFlow jets
+    variables += ["ParticleFlowIsoForwardEventShape"]            # Part of the event shape for PFlow jets
+    variables += ["HLT_xAOD__JetContainer_a4tcemsubjesISFS"]     # Include the HLT R = 0.4 EM Topo trigger jets (2018 HI Run)
+    variables += ["HLT_xAOD__JetContainer_a4ionemsubjesISFS"]    # Include the HLT R = 0.4 heavy ion trigger jets (2015 HI Run)
+    variables += ["HLT_xAOD__JetContainer_a10tclcwsubjesFS"]     # Include the HLT R = 1.0 LCW Topo trigger jets (2018 HI Run)
+
+    return variables
+
+def HION12AllVarContent(project_tag):
+    switcher_HION12 = {
+        'data15_hi': HION12AllVarContentRun2(),
+        'data18_hi': HION12AllVarContentRun2(),
+        'data23_hi': HION12AllVarContentRun3(),
+        'data24_hi': HION12AllVarContentRun3(),
+        'data25_hi': HION12AllVarContentRun3(),
+        }
+
+    return  switcher_HION12.get(project_tag, "Invalid project tag")
 
 def HION12HIJetBranches():
     state_vars  = []
