@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigNavSlimmingMTAlg.h"
@@ -163,11 +163,32 @@ StatusCode TrigNavSlimmingMTAlg::execute(const EventContext& ctx) const {
   // We can optionally only keep data for a given set of chains. An empty set means to keep for all chains.
   DecisionIDContainer chainIDs = {};
   if (not m_chainsFilter.empty()) {
-    const Decision* applyPassingChainsFilter = nullptr;
-    if (not m_keepFailedBranches) { // In this case, we should further restrict the chainIDs to only chains which pass the event
-      applyPassingChainsFilter = terminusNode;
+    // Cache chain configuration from TDT once — the chain group resolution,
+    // trigger listing, and config lookups are static and need not be repeated per event.
+    std::call_once(m_chainIDsCacheFlag, [this]{
+      m_chainIDsCacheOK = cacheChainInfo().isSuccess();
+    });
+    if (!m_chainIDsCacheOK) {
+      ATH_MSG_ERROR("Failed to cache chain configuration from TrigDecisionTool");
+      return StatusCode::FAILURE;
     }
-    ATH_CHECK(fillChainIDs(chainIDs, applyPassingChainsFilter));
+
+    // Per-event: optionally filter cached chains to only those passing this event
+    DecisionIDContainer passingChains;
+    if (not m_keepFailedBranches) {
+      TrigCompositeUtils::decisionIDs(terminusNode, passingChains);
+    }
+
+    for (const auto& info : m_cachedChainInfo) {
+      if (!passingChains.empty() && !passingChains.contains(info.chainID)) {
+        continue; // Optional additional filter on passing chains in this specific event
+      }
+      chainIDs.insert(info.chainID);
+      for (const auto& legID : info.legIDs) {
+        chainIDs.insert(legID);
+      }
+    }
+
     ATH_MSG_DEBUG("Supplied " << m_chainsFilter.size() << " chain patterns. This converts to " << chainIDs.size() << " DecisionIDs to be preserved.");
     if (chainIDs.empty()) {
       // No chains are in the filter. We should reject everything. But an empty set is interpreted as keep-all. So we need to add a dummy entry.
@@ -324,12 +345,7 @@ std::vector<size_t> TrigNavSlimmingMTAlg::lookupHardCodedLegMultiplicities(const
   return std::vector<size_t>();
 }
 
-StatusCode TrigNavSlimmingMTAlg::fillChainIDs(DecisionIDContainer& chainIDs, const Decision* applyPassingChainsFilter) const {
-  DecisionIDContainer passingChains;
-  if (applyPassingChainsFilter) { // Expect either nullptr or a pointer to the terminus node here.
-    TrigCompositeUtils::decisionIDs(applyPassingChainsFilter, passingChains); // Extract all passing chains into the passingChains set 
-  }
-
+StatusCode TrigNavSlimmingMTAlg::cacheChainInfo() const {
   for (const std::string& filter : m_chainsFilter) {
     // We do this as filter->chains stage as filter could be a regexp matching a large number of chains
     const Trig::ChainGroup* cg = m_trigDec->getChainGroup(filter);
@@ -337,11 +353,8 @@ StatusCode TrigNavSlimmingMTAlg::fillChainIDs(DecisionIDContainer& chainIDs, con
     for (const std::string& chain : chains) {
       const TrigConf::HLTChain* hltChain = m_trigDec->ExperimentalAndExpertMethods().getChainConfigurationDetails(chain);
       const HLT::Identifier chainID( hltChain->chain_name() );
-      if (passingChains.size() && passingChains.count( chainID.numeric() ) == 0) { // Optional additional filter on passing chains in this specific event
-        ATH_MSG_VERBOSE("Skipping " << chain << " as it didn't pass this event");
-        continue;
-      }
-      chainIDs.insert( chainID.numeric() );
+      CachedChainInfo info;
+      info.chainID = chainID.numeric();
       std::vector<size_t> legMultiplicites = hltChain->leg_multiplicities();
       ATH_MSG_VERBOSE("Including " << chain << " and its " << legMultiplicites.size() << " legs in the trigger slimming output");
       if (legMultiplicites.size() == 0) {
@@ -356,13 +369,17 @@ StatusCode TrigNavSlimmingMTAlg::fillChainIDs(DecisionIDContainer& chainIDs, con
         // We don't care here exactly how many objects are required per leg, just that there are two-or-more legs
         for (size_t legNumeral = 0; legNumeral < legMultiplicites.size(); ++legNumeral) {
           const HLT::Identifier legID = TrigCompositeUtils::createLegName(chainID, legNumeral);
-          chainIDs.insert( legID.numeric() );
+          info.legIDs.push_back( legID.numeric() );
         }
       }
+      m_cachedChainInfo.push_back(std::move(info));
     }
   }
+  ATH_MSG_DEBUG("Cached " << m_cachedChainInfo.size() << " chain configurations for " << m_chainsFilter.size() << " chain patterns.");
   return StatusCode::SUCCESS;
 }
+
+
 
 StatusCode TrigNavSlimmingMTAlg::createPresaledGraphNode(Outputs& outputContainers,const TrigCompositeUtils::DecisionIDContainer& chainIDs) const {
   Decision* prescaledNode = newDecisionIn(outputContainers.nav->ptr(), TrigCompositeUtils::summaryPrescaledNodeName());
