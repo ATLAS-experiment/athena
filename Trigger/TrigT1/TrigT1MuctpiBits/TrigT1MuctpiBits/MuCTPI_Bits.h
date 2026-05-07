@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1MUCTPIBITS_MUCTPI_BITS_H
@@ -250,5 +250,42 @@ namespace LVL1::MuCTPIBits {
   static constexpr uint32_t RUN3_STATUS_WORD_MASK = 0xffff;
 
 } // namespace LVL1::MuCTPIBits
+
+namespace L0Muon::MuCTPIBits {
+  // Shifts and masks for RPC & TGC SL to MUCTPI data format for Run 4
+  static constexpr uint32_t RUN4_SL2MUCTPI_BOARD_ID_SHIFT = 20;
+  static constexpr uint32_t RUN4_SL2MUCTPI_BOARD_ID_MASK = 0x7F;
+  static constexpr uint32_t RUN4_SL2MUCTPI_FIBER_ID_SHIFT = 16;
+  static constexpr uint32_t RUN4_SL2MUCTPI_FIBER_ID_MASK = 0b1111;
+  static constexpr uint32_t RUN4_SL2MUCTPI_BCID_SHIFT = 0;
+  static constexpr uint32_t RUN4_SL2MUCTPI_BCID_MASK = 0xFFF;
+  static constexpr uint32_t RUN4_SL2MUCTPI_PT_VAL_SHIFT = 24;
+  static constexpr uint32_t RUN4_SL2MUCTPI_PT_VAL_MASK = 0xFF;
+  static constexpr uint32_t RUN4_SL2MUCTPI_CHARGE_SHIFT = 23;
+  static constexpr uint32_t RUN4_SL2MUCTPI_CHARGE_MASK = 0x1;
+  static constexpr uint32_t RUN4_SL2MUCTPI_PHI_SHIFT = 14;
+  static constexpr uint32_t RUN4_SL2MUCTPI_PHI_MASK = 0x1FF;
+  static constexpr uint32_t RUN4_SL2MUCTPI_ETA_SHIFT = 0;
+  static constexpr uint32_t RUN4_SL2MUCTPI_ETA_MASK = 0x3FFF;
+  static constexpr uint32_t RUN4_SL2MUCTPI_PTTHRESHOLD_SHIFT = 0;
+  static constexpr uint32_t RUN4_SL2MUCTPI_PTTHRESHOLD_MASK = 0xF;
+  static constexpr uint32_t RUN4_SL2MUCTPI_TCID_SHIFT = 4;
+  static constexpr uint32_t RUN4_SL2MUCTPI_TCID_MASK = 0x7;
+  static constexpr uint32_t RUN4_SL2MUCTPI_MDT_SHIFT = 7;
+  static constexpr uint32_t RUN4_SL2MUCTPI_MDT_MASK = 0x1;
+  static constexpr uint32_t RUN4_SL2MUCTPI_COINTYPE_SHIFT = 8;
+  static constexpr uint32_t RUN4_SL2MUCTPI_COINTYPE_MASK = 0x7;
+  static constexpr uint32_t RUN4_SL2MUCTPI_TC_SHIFT = 11;
+  static constexpr uint32_t RUN4_SL2MUCTPI_TC_MASK = 0x1;
+  static constexpr uint32_t RUN4_SL2MUCTPI_ET_SHIFT = 12;
+  static constexpr uint32_t RUN4_SL2MUCTPI_ET_MASK = 0x3;
+  static constexpr uint32_t RUN4_SL2MUCTPI_MDTFLAG_SHIFT = 14;
+  static constexpr uint32_t RUN4_SL2MUCTPI_MDTFLAG_MASK = 0xF;
+  static constexpr uint32_t RUN4_SL2MUCTPI_SEGNUM_SHIFT = 18;
+  static constexpr uint32_t RUN4_SL2MUCTPI_SEGNUM_MASK = 0x3;
+  static constexpr uint32_t RUN4_SL2MUCTPI_SEGQUAL_SHIFT = 20;
+  static constexpr uint32_t RUN4_SL2MUCTPI_SEGQUAL_MASK = 0x7;
+}
+
 
 #endif // TRIGT1MUCTPIBITS_MUCTPI_BITS_H
