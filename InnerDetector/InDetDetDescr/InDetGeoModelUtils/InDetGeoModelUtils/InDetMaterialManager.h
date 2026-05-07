@@ -11,6 +11,7 @@
 #include "GeoModelKernel/GeoMaterial.h"
 
 #include <string>
+#include <string_view>
 #include <map>
 
 class GeoElement;
@@ -56,7 +57,7 @@ public:
   bool hasMaterial(const std::string &materialName) const;
 
   /// Get material. First looks for locally defined material and if not found looks in GeoModel material manager.
-  const GeoMaterial* getMaterial(const std::string & materialName);
+  const GeoMaterial* getMaterial(std::string_view materialName);
 
   /// Get element from GeoModel material manager
   const GeoElement* getElement(const std::string & elementName);
@@ -68,9 +69,9 @@ public:
   /// the existing material. If it is consistent it returns the material.
   /// If it is different it creates a material with the string "Modified" added to the
   /// name.
-  const GeoMaterial* getMaterial(const std::string & origMaterialName, 
+  const GeoMaterial* getMaterial(std::string_view  origMaterialName, 
 				 double density, 
-				 const std::string & newName = "");
+				 std::string_view newName = {});
 
   // Creates a new material based on origMaterialName but with denisty scaled 
   // by scaleFactor. If no newName then will add the string containing the scale 
@@ -83,9 +84,9 @@ public:
 				       const std::string & newName = "");
 
   /// Create and get material with a density calculated to give weight in predefined weight table.
-  const GeoMaterial * getMaterialForVolume(const std::string & materialName, 
+  const GeoMaterial * getMaterialForVolume(std::string_view materialName, 
 					   double volume, 
-					   const std::string & newName = "");
+					   std::string_view newName = {});
 
   // Similar to getMaterialForVolume but if weight table uses linear weight, then determine weight 
   // using length. First looks in special table of material compositions which can specify several
@@ -178,14 +179,14 @@ private:
   
   
   StoredMaterialManager * retrieveManager(const StoreGateSvc* detStore);
-  const GeoMaterial* getAdditionalMaterial(const std::string & materialName) const; 
+  const GeoMaterial* getAdditionalMaterial(std::string_view materialName) const; 
   bool compareDensity(double d1, double d2) const;
 
   // Internal versions. The public versions allow materials to be have extra scaling.
-  const GeoMaterial* getMaterialInternal(const std::string & materialName);
-  const GeoMaterial* getMaterialInternal(const std::string & origMaterialName, 
+  const GeoMaterial* getMaterialInternal(std::string_view materialName);
+  const GeoMaterial* getMaterialInternal(std::string_view origMaterialName, 
 					 double density, 
-					 const std::string & newName = "");
+					 std::string_view newName = {});
   const GeoMaterial* getMaterialScaledInternal(const std::string & origMaterialName, 
 					       double scaleFactor, 
 					       const std::string & newName = "");
@@ -195,26 +196,26 @@ private:
 					  double density);
 
   // Methods to return material with extra scaling.
-  const GeoMaterial * extraScaledMaterial(const std::string & materialName, 
-					  const std::string & newName, 
+  const GeoMaterial * extraScaledMaterial(std::string_view materialName, 
+					  std::string_view newName, 
 					  const GeoMaterial * origMaterial);
 
-  const GeoMaterial * extraScaledMaterial(const std::string & materialName, 
+  const GeoMaterial * extraScaledMaterial(std::string_view materialName, 
 					  const GeoMaterial * origMaterial);
 
   void createMaterial(const MaterialDef & material);
-  double getExtraScaleFactor(const std::string & materialName);
+  double getExtraScaleFactor(std::string_view materialName);
 
   StoredMaterialManager *m_materialManager;
   std::string m_managerName;
 
-  using MaterialStore = std::map<std::string, GeoIntrusivePtr<const GeoMaterial>>;
+  using MaterialStore = std::map<std::string, GeoIntrusivePtr<const GeoMaterial>, std::less<>>;
   MaterialStore m_store;
 
-  typedef std::map<std::string, MaterialByWeight > MaterialWeightMap;
+  typedef std::map<std::string, MaterialByWeight, std::less<> > MaterialWeightMap;
   MaterialWeightMap m_weightMap;
 
-  typedef std::map<std::string, MaterialComponent > MaterialCompositionMap;
+  typedef std::map<std::string, MaterialComponent, std::less<> > MaterialCompositionMap;
   MaterialCompositionMap m_matCompositionMap;
 
   typedef std::map<std::string, double, std::less<> > ExtraScaleFactorMap;
