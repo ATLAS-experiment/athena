@@ -122,17 +122,14 @@ StatusCode EventInfoByteStreamAuxCnv::finalize()
 
 StatusCode EventInfoByteStreamAuxCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj) 
 {
-  ByteStreamAddress *pRE_Addr{nullptr};
-  pRE_Addr = dynamic_cast<ByteStreamAddress*>(pAddr);
-  if (!pRE_Addr) {
-    ATH_MSG_ERROR("Cannot cast to ByteStreamAddress ");
-    return StatusCode::FAILURE;
-  }
+  ByteStreamAddress* pRE_Addr{};
+  ATH_CHECK( (pRE_Addr = dynamic_cast<ByteStreamAddress*>(pAddr)) != nullptr );
 
+  const EventContext& ctx = pRE_Addr->getEventContext();
   ATH_MSG_DEBUG("Creating Objects");
 
   // get RawEvent
-  const RawEvent* re = m_robDataProvider->getEvent(Gaudi::Hive::currentContext());
+  const RawEvent* re = m_robDataProvider->getEvent(ctx);
   if (!re) {
     ATH_MSG_ERROR("Can not get RawEvent ");
     return StatusCode::FAILURE;
@@ -229,7 +226,7 @@ StatusCode EventInfoByteStreamAuxCnv::createObj(IOpaqueAddress* pAddr, DataObjec
     // Request the MC EventInfo ROB
     std::vector<uint32_t> mcRobIds = m_mcEventInfoTool->robIds();
     std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> mcRobFragments;
-    m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), mcRobIds, mcRobFragments, "EventInfoByteStreamAuxCnv");
+    m_robDataProvider->getROBData(ctx, mcRobIds, mcRobFragments, "EventInfoByteStreamAuxCnv");
 
     if (!mcRobFragments.empty()) {
       ATH_MSG_DEBUG("Found MC EventInfo ROB fragment, decoding...");
@@ -288,7 +285,7 @@ StatusCode EventInfoByteStreamAuxCnv::createObj(IOpaqueAddress* pAddr, DataObjec
   evtInfo.setStreamTags(streamTags);
 
   // record EventInfo
-  evtInfo.setEventFlags(xAOD::EventInfo::Core, m_robDataProvider->getEventStatus(Gaudi::Hive::currentContext()));
+  evtInfo.setEventFlags(xAOD::EventInfo::Core, m_robDataProvider->getEventStatus(ctx));
   pObj = SG::asStorable(pEvtInfoAux);
 
   ATH_MSG_DEBUG(" New xAOD::EventAuxInfo made, run/event= " << runNumber
