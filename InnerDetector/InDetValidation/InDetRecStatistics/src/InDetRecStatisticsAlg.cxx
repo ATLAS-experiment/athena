@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //  file:   InDetRecStatisticsAlg.cxx
@@ -347,7 +347,8 @@ StatusCode InDet::InDetRecStatisticsAlg::execute(const EventContext &ctx)  const
 		    << ", GenSignal.size()="          << GenSignal.size());
 
       ATH_MSG_DEBUG("Accumulating Statistics...");
-      (*statHelper)->addEvent    (RecCollection,
+      (*statHelper)->addEvent    (ctx,
+                  RecCollection,
 				  RecTracks,
 				  GenSignal,
 				  TruthMap,
