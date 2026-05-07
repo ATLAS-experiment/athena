@@ -6,9 +6,10 @@
 #define ACTSTOOLINTERFACES_ICELLCLUSTERINGTOOLBASE_H
 
 #include <GaudiKernel/IAlgTool.h>
-#include <InDetIdentifier/SCT_ID.h>
 #include <InDetReadoutGeometry/SiDetectorElement.h>
 #include <InDetReadoutGeometry/SiDetectorElementStatus.h>
+#include <cstdint>
+#include <concepts>
 #include <any>
 #include <vector>
 #include <utility>
