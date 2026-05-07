@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RDBMaterialManager.h"
@@ -198,7 +198,7 @@ StatusCode RDBMaterialManager::readMaterialsFromDB(ISvcLocator* pSvcLocator)
 // Destructor:
 RDBMaterialManager::~RDBMaterialManager() = default;
 
-GeoMaterial* RDBMaterialManager::searchMaterialMap(const std::string & name) const
+GeoMaterial* RDBMaterialManager::searchMaterialMap(std::string_view name) const
 {
   MaterialMapIterator m = m_materialMap.find(name);
 
@@ -247,7 +247,7 @@ GeoElement *RDBMaterialManager::searchElementVector(const unsigned int atomicNum
   return nullptr;
 }
 
-const GeoMaterial*  RDBMaterialManager::getMaterial(const std::string &name)
+const GeoMaterial*  RDBMaterialManager::getMaterial(std::string_view name)
 {
   [[maybe_unused]] static const bool specialMaterialsDone = [this]() {
     buildSpecialMaterials();
@@ -267,7 +267,7 @@ const GeoMaterial*  RDBMaterialManager::getMaterial(const std::string &name)
     return nullptr;
   }
 
-  const std::string detector = name.substr(0,pos);
+  const std::string detector{name.substr(0,pos)};
   auto it = m_detData.find(detector);
   if(it==m_detData.end()) {
     ATH_MSG_ERROR("Wrong detector name " << detector
@@ -447,6 +447,11 @@ std::ostream &  RDBMaterialManager::printAll(std::ostream & o) const
   	  	
   return o;
 }
+
+std::ostream &  
+RDBMaterialManager::printAll() const{
+  return printAll(std::cout);
+} 
 
 void RDBMaterialManager::buildSpecialMaterials()
 {

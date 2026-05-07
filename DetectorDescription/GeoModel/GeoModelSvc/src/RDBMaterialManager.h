@@ -19,6 +19,7 @@
 #include "AthenaBaseComps/AthMessaging.h"
 
 #include <string>
+#include <string_view>
 #include <vector>
 #include <iosfwd>
 
@@ -36,7 +37,7 @@ class RDBMaterialManager final : public StoredMaterialManager, public AthMessagi
   virtual ~RDBMaterialManager();
 
   // Query the material:
-  virtual const GeoMaterial *getMaterial(const std::string &name) override;
+  virtual const GeoMaterial *getMaterial(std::string_view name) override;
  
   // Query the elements:
   virtual const GeoElement *getElement(const std::string & name) override;
@@ -53,8 +54,9 @@ class RDBMaterialManager final : public StoredMaterialManager, public AthMessagi
   // Number of materials in the manager
   virtual size_t size() override;
 
-  virtual std::ostream & printAll(std::ostream & o=std::cout) const override;
-
+  virtual std::ostream & printAll(std::ostream & o) const override;
+  //default std::cout output
+  virtual std::ostream & printAll() const override;
  private:
 
   StatusCode readMaterialsFromDB(ISvcLocator* pSvcLocator);
@@ -63,7 +65,7 @@ class RDBMaterialManager final : public StoredMaterialManager, public AthMessagi
 
   GeoElement *searchElementVector (const std::string & name) const;
   GeoElement *searchElementVector (const unsigned int atomicNumber) const;
-  GeoMaterial *searchMaterialMap (const std::string & name) const;
+  GeoMaterial *searchMaterialMap (std::string_view name) const;
   
   IRDBRecordset_ptr m_elements;
 
