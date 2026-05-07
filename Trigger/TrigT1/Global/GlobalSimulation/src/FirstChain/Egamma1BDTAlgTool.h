@@ -68,6 +68,12 @@ namespace GlobalSim {
       "LArNeighborhoodTOBContainerReadKey",
       "stripNeighborhoodTOBContainer",
       "key to read inLArNeighborhoodTOBsReadKeys"};
+
+    SG::WriteHandleKey<eEmEg1BDTTOBContainer>
+    m_eEmEg1BDTTOBContainerKey {
+      this,
+      "eEmEg1BDTTOBContainerKey",
+      "eEmEg1BDTTOBContainer"};
     
     std::vector<double> combine_phi(const IOBitwise::eEmNbhoodTOB*) const;
 

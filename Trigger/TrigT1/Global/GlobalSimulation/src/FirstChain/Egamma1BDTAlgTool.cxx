@@ -23,9 +23,12 @@ namespace GlobalSim {
   }
   
   StatusCode Egamma1BDTAlgTool::initialize() {
-       
+
+    //Input keys
     CHECK(m_nbhdTOBContainerReadKey.initialize());
     CHECK(m_BDTScoreKey.initialize());
+    //Output keys
+    CHECK(m_eEmEg1BDTTOBContainerKey.initialize());
     
     return StatusCode::SUCCESS;
   }
@@ -45,6 +48,9 @@ namespace GlobalSim {
 
     SG::WriteHandle<std::vector<float> > h_BDTScore(m_BDTScoreKey, ctx);
     CHECK(h_BDTScore.record(std::make_unique<std::vector<float> >()));
+
+    //Setup a container of TOBs with associated GlobalLArCell windows
+    auto eEmEg1BDTTOBs = std::make_unique<IOBitwise::eEmEg1BDTTOBContainer>();
     
     for (const auto nbhdTOB : *in) {
       auto c_phi = combine_phi(nbhdTOB);
@@ -75,12 +81,19 @@ namespace GlobalSim {
       //Extract the bits (one by one) from the ap_fixed<10,5> object -> Bitset<10>
       std::bitset<eEmEg1BDTTOB::s_eGamma1BDT_width> result;
       for (int i=0;i<scores[0].length();i++){
-	result[i] = scores[0][0];
+	ATH_MSG_DEBUG("Result bit " << i << ": " << scores[0][i]);
+	result[i] = scores[0][i];
       }
 
       //Just output the float equivalent at the moment
       h_BDTScore->push_back(scores[0].to_float());
+      eEmEg1BDTTOBs->push_back(std::make_unique<IOBitwise::eEmEg1BDTTOB>(*nbhdTOB, result));
     }
+
+    //Setup the write out of the resultant TOBs
+    SG::WriteHandle<GlobalSim::IOBitwise::eEmEg1BDTTOBContainer> h_eEmEg1BDTTOBs(m_eEmEg1BDTTOBContainerKey, ctx);
+    CHECK(h_eEmEg1BDTTOBs.record(std::move(eEmEg1BDTTOBs)));
+
     return StatusCode::SUCCESS;
   }
 
