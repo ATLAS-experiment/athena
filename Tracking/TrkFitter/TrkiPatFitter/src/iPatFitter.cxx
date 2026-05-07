@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 /***************************************************************************
@@ -244,7 +244,7 @@ auto iPatFitter::fitWithState(const EventContext& ctx, const Track& track,
   TrackInfo trackInfo(TrackInfo::iPatTrackFitter, particleHypothesis);
   trackInfo.addPatternReco(track.info());
   std::unique_ptr<Trk::Track> fittedTrack{performFit(
-      *fitState, particleHypothesis, trackInfo, nullptr, nullptr, garbage)};
+      ctx, *fitState, particleHypothesis, trackInfo, nullptr, nullptr, garbage)};
 
   // validation
   for (int i = 0; i < m_forcedRefitsForValidation; ++i) {
@@ -336,7 +336,7 @@ std::unique_ptr<Track> iPatFitter::fit(
   // perform fit and return fitted track
   TrackInfo trackInfo(TrackInfo::iPatTrackFitter, particleHypothesis);
   trackInfo.addPatternReco(track.info());
-  return performFit(fitState, particleHypothesis, trackInfo,
+  return performFit(ctx, fitState, particleHypothesis, trackInfo,
                     track.trackStateOnSurfaces(), track.fitQuality(), garbage);
 }
 
@@ -375,7 +375,7 @@ std::unique_ptr<Trk::Track> iPatFitter::fit(
 
   // perform fit and return fitted track
   TrackInfo const trackInfo(TrackInfo::iPatTrackFitter, particleHypothesis);
-  return performFit(fitState, particleHypothesis, trackInfo, nullptr, nullptr,
+  return performFit(ctx, fitState, particleHypothesis, trackInfo, nullptr, nullptr,
                     garbage);
 }
 
@@ -481,7 +481,7 @@ std::unique_ptr<Track> iPatFitter::fit(
   trackInfo.addPatternReco(spectrometerTrack.info());
   if (m_fullCombinedFit) {
     std::unique_ptr<Trk::Track> fittedTrack = performFit(
-        fitState, particleHypothesis, trackInfo, nullptr, nullptr, garbage);
+        ctx, fitState, particleHypothesis, trackInfo, nullptr, nullptr, garbage);
 
     // validation
     for (int i = 0; i < m_forcedRefitsForValidation; ++i) {
@@ -501,7 +501,7 @@ std::unique_ptr<Track> iPatFitter::fit(
                                     new FitMeasurement(*indetPerigee));
   FitParameters const measuredParameters(*indetPerigee);
   std::unique_ptr<Trk::Track> fittedTrack = performFit(
-      fitState, particleHypothesis, trackInfo,
+      ctx, fitState, particleHypothesis, trackInfo,
       indetTrack.trackStateOnSurfaces(), indetTrack.fitQuality(), garbage);
 
   // validation
@@ -899,6 +899,7 @@ bool iPatFitter::addMeasurements(
 }
 
 std::unique_ptr<Trk::Track> iPatFitter::performFit(
+    const EventContext& ctx,
     FitState& fitState, const ParticleHypothesis particleHypothesis,
     const TrackInfo& trackInfo, const Trk::TrackStates* leadingTSOS,
     const FitQuality* perigeeQuality, Garbage_t& garbage) const {
@@ -1081,7 +1082,7 @@ std::unique_ptr<Trk::Track> iPatFitter::performFit(
 
   // generate a track summary for this candidate
   if ((m_trackSummaryTool.isEnabled()) && (fittedTrack != nullptr)) {
-    m_trackSummaryTool->computeAndReplaceTrackSummary(*fittedTrack, false);
+    m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *fittedTrack, false);
   }
 
   return fittedTrack;
@@ -1203,7 +1204,7 @@ void iPatFitter::refit(const EventContext& ctx, FitState& fitState,
   TrackInfo trackInfo(TrackInfo::iPatTrackFitter, particleHypothesis);
   trackInfo.addPatternReco(track.info());
   const std::unique_ptr<Trk::Track> fittedTrack{performFit(
-      fitState, particleHypothesis, trackInfo, nullptr, nullptr, garbage)};
+      ctx, fitState, particleHypothesis, trackInfo, nullptr, nullptr, garbage)};
 
   m_countGoodRefits += m_countGoodFits - countGoodFits;
   m_countGoodFits = countGoodFits;
