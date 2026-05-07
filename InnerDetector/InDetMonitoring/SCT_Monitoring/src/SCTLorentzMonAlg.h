@@ -12,7 +12,9 @@
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "BeamSpotConditionsData/BeamSpotData.h"
 #include "TrkTrack/TrackCollection.h"
+#include "TrkToolInterfaces/ITrackHoleSearchTool.h"
 #include "TrkToolInterfaces/ITrackSummaryTool.h"
 #include "TrkToolInterfaces/IPRDtoTrackMapTool.h"
 
@@ -30,10 +32,15 @@ class SCTLorentzMonAlg : public AthMonitorAlgorithm {
   enum SiliconSurface { surface100, surface111, nSurfaces };
   enum Sides { side0, side1, nSides };
 
+  bool m_hasBeamCondSvc = false;
+
   const SCT_ID* m_pSCTHelper{nullptr};
 
   ToolHandle<Trk::ITrackSummaryTool> m_trackSummaryTool{this, "TrackSummaryTool", "InDetTrackSummaryTool"};
   ToolHandle<Trk::IPRDtoTrackMapTool> m_assoTool{this, "AssociationTool", "InDet::InDetPRDtoTrackMapToolGangedPixels" };
+  ToolHandle<Trk::ITrackHoleSearchTool> m_holeSearchTool{this, "HoleSearch", "InDet::InDetTrackHoleSearchTool"};
+
+  SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey {this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
 
   /// Name of the Track collection to use
   SG::ReadHandleKey<TrackCollection> m_tracksName{this, "tracksName", "CombinedInDetTracks"};

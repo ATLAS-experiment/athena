@@ -1,19 +1,20 @@
 #!/bin/bash
 #
-# art-description: Reco_tf.py data24 RAWtoALL in MT mode and ComponentAccumulator
+# art-description: Reco_tf.py data26 RAWtoALL in MT mode and ComponentAccumulator
 # art-type: grid
 # art-include: main/Athena
 # art-include: 24.0/Athena
 # art-athena-mt: 8
 
-conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_DATA24)")
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_DATA26)")
 timeout 64800 Reco_tf.py \
-  --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data24/RAW/data24_13p6TeV.00484909.physics_Main.daq.RAW/1627events_data24_13p6TeV.00484909.physics_Main.daq.RAW._lb0098._SFO-16._0001.data \
+  --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data26_13p6TeV.00517465.express_express.merge.RAW._lb0821._SFO-ALL._0001.1 \
   --outputAODFile="myAOD.pool.root" \
   --outputHISTFile="myHIST.root" \
   --outputDAOD_IDTIDEFile="myDAOD_IDTIDE.pool.root" \
   --outputDAOD_L1CALO1File="myDAOD_L1CALO1.pool.root" \
   --outputDESDM_MCPFile="myDESDM_MCP.pool.root" \
+  --outputDESDM_EXOTHIPFile="myDESDM_EXOTHIP.pool.root" \
   --outputDRAW_EGZFile="myDRAW_EGZ.data" \
   --outputDRAW_TAULHFile="myDRAW_TAULH.data" \
   --outputDRAW_ZMUMUFile="myDRAW_ZMUMU.data" \
@@ -25,7 +26,7 @@ timeout 64800 Reco_tf.py \
   --maxEvents='-1'
 
 rc1=$?
-echo "art-result: ${rc1} Reco_tf_data24_mt_ca"
+echo "art-result: ${rc1} Reco_tf_data26_mt_ca"
 
 # Check for FPEs in the logiles
 test_trf_check_fpe.sh
@@ -33,7 +34,7 @@ fpeStat=$?
 
 echo "art-result: ${fpeStat} FPEs in logfiles"
 
-files=( myAOD.pool.root myHIST.root myDAOD_IDTIDE.pool.root myDAOD_L1CALO1.pool.root  myDESDM_MCP.pool.root myDRAW_EGZ.data myDRAW_TAULH.data myDRAW_ZMUMU.data )
+files=( myAOD.pool.root myHIST.root myDAOD_IDTIDE.pool.root myDAOD_L1CALO1.pool.root myDESDM_MCP.pool.root myDESDM_EXOTHIP.pool.root myDRAW_EGZ.data myDRAW_TAULH.data myDRAW_ZMUMU.data )
 for i in "${files[@]}"
 do
     if [ -f "$i" ]; then
