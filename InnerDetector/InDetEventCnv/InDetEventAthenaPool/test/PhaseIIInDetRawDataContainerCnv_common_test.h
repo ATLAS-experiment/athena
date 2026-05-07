@@ -86,10 +86,10 @@ public:
    virtual StatusCode initialize() override {
       return BASE::initialize();
    }
-   PERS* createPersistentWithKey(TRANS* obj, const std::string& key) {
+   virtual PERS* createPersistentWithKey(TRANS* obj, const std::string& key) override {
       return BASE::createPersistentWithKey(obj,key);
    }
-   TRANS* createTransient(const Token* token) {
+   virtual TRANS* createTransient(const Token* token) override {
       return BASE::createTransient(token);
    }
 
@@ -112,7 +112,6 @@ namespace {
          n_non_empty_b += (!module_proxy_b.empty());
       }
       // compare for modules with non-empty RDO list in a, the content of the RDOs
-      unsigned int n_comparison=0;
       for (PixelRawDataContainerProxy module_proxy_a : collection_proxy_a) {
          if (!module_proxy_a.empty()) {
             if (collection_proxy_b.empty()) return false;
@@ -131,7 +130,6 @@ namespace {
                    || hit_proxy_a.dataWord() != hit_proxy_b.dataWord()) {
                   return false;
                }
-               ++n_comparison;
                ++hit_i;
             }
             ++n_non_empty_a;
