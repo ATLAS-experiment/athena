@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // McEventCollectionCnv_p6.cxx
@@ -17,10 +17,13 @@
 // GeneratorObjectsTPCnv includes
 #include "GeneratorObjectsTPCnv/McEventCollectionCnv_p6.h"
 #include "HepMcDataPool.h"
+#include "HepMC3AccessStrings.h"
 #include "GenInterfaces/IHepMCWeightSvc.h"
 #include "McEventCollectionCnv_utils.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 #include "TruthUtils/MagicNumbers.h"
+
+using namespace GeneratorObjectsTPCnv;
 
 static const std::set<std::string> attributes_to_ignore {
       "barcodes","barcode",
@@ -100,24 +103,24 @@ void McEventCollectionCnv_p6::persToTrans( const McEventCollection_p6* persObj,
       genEvt        =  datapools.getGenEvent();
     }
 #ifdef HEPMC3
-    genEvt->add_attribute ("barcodes", std::make_shared<HepMC::GenEventBarcodes>());
+    genEvt->add_attribute (barcodesStr, std::make_shared<HepMC::GenEventBarcodes>());
     for (unsigned int i = 0; i < persEvt.m_e_attribute_id.size(); ++i) {
       if (attributes_to_ignore.count(persEvt.m_e_attribute_name[i])) continue;
       genEvt->add_attribute(persEvt.m_e_attribute_name[i], std::make_shared<HepMC3::StringAttribute>(persEvt.m_e_attribute_string[i]), persEvt.m_e_attribute_id[i]);
     }
     ///Note: the code above takes care about all the attributes: CS, HI, etc. ANd the code below is needed only for the compatibility
 
-    genEvt->add_attribute("signal_process_id", std::make_shared<HepMC3::IntAttribute>(persEvt.m_signalProcessId));
+    genEvt->add_attribute(signalProcessIdStr, std::make_shared<HepMC3::IntAttribute>(persEvt.m_signalProcessId));
     genEvt->set_event_number(persEvt.m_eventNbr);
-    genEvt->add_attribute("mpi", std::make_shared<HepMC3::IntAttribute>(persEvt.m_mpi));
-    genEvt->add_attribute("event_scale", std::make_shared<HepMC3::DoubleAttribute>(persEvt.m_eventScale));
-    genEvt->add_attribute("alphaQCD", std::make_shared<HepMC3::DoubleAttribute>(persEvt.m_alphaQCD));
-    genEvt->add_attribute("alphaQED", std::make_shared<HepMC3::DoubleAttribute>(persEvt.m_alphaQED));
-    genEvt->add_attribute("filterWeight", std::make_shared<HepMC3::DoubleAttribute>(persEvt.m_filterWeight));
-    genEvt->add_attribute("filterHT", std::make_shared<HepMC3::DoubleAttribute>(persEvt.m_filterHT));
-    genEvt->add_attribute("filterMET", std::make_shared<HepMC3::DoubleAttribute>(persEvt.m_filterMET));
+    genEvt->add_attribute(mpiStr, std::make_shared<HepMC3::IntAttribute>(persEvt.m_mpi));
+    genEvt->add_attribute(eventScaleStr, std::make_shared<HepMC3::DoubleAttribute>(persEvt.m_eventScale));
+    genEvt->add_attribute(alphaQcdStr, std::make_shared<HepMC3::DoubleAttribute>(persEvt.m_alphaQCD));
+    genEvt->add_attribute(alphaQedStr, std::make_shared<HepMC3::DoubleAttribute>(persEvt.m_alphaQED));
+    genEvt->add_attribute(filterWeightStr, std::make_shared<HepMC3::DoubleAttribute>(persEvt.m_filterWeight));
+    genEvt->add_attribute(filterHtStr, std::make_shared<HepMC3::DoubleAttribute>(persEvt.m_filterHT));
+    genEvt->add_attribute(filterMetStr, std::make_shared<HepMC3::DoubleAttribute>(persEvt.m_filterMET));
     genEvt->weights()= persEvt.m_weights;
-    genEvt->add_attribute("random_states", std::make_shared<HepMC3::VectorLongIntAttribute>(persEvt.m_randomStates));
+    genEvt->add_attribute(randomStatesStr, std::make_shared<HepMC3::VectorLongIntAttribute>(persEvt.m_randomStates));
 
     genEvt->set_units(static_cast<HepMC3::Units::MomentumUnit>(persEvt.m_momentumUnit),
                       static_cast<HepMC3::Units::LengthUnit>(persEvt.m_lengthUnit));
@@ -397,14 +400,14 @@ void McEventCollectionCnv_p6::transToPers( const McEventCollection* transObj,
         }
       }
 
-      auto A_mpi=genEvt->attribute<HepMC3::IntAttribute>("mpi");
-      auto A_signal_process_id=genEvt->attribute<HepMC3::IntAttribute>("signal_process_id");
-      auto A_event_scale=genEvt->attribute<HepMC3::DoubleAttribute>("event_scale");
-      auto A_alphaQCD=genEvt->attribute<HepMC3::DoubleAttribute>("alphaQCD");
-      auto A_alphaQED=genEvt->attribute<HepMC3::DoubleAttribute>("alphaQED");
-      auto A_filterWeight=genEvt->attribute<HepMC3::DoubleAttribute>("filterWeight");
-      auto A_filterHT=genEvt->attribute<HepMC3::DoubleAttribute>("filterHT");
-      auto A_filterMET=genEvt->attribute<HepMC3::DoubleAttribute>("filterMET");
+      auto A_mpi=genEvt->attribute<HepMC3::IntAttribute>(mpiStr);
+      auto A_signal_process_id=genEvt->attribute<HepMC3::IntAttribute>(signalProcessIdStr);
+      auto A_event_scale=genEvt->attribute<HepMC3::DoubleAttribute>(eventScaleStr);
+      auto A_alphaQCD=genEvt->attribute<HepMC3::DoubleAttribute>(alphaQcdStr);
+      auto A_alphaQED=genEvt->attribute<HepMC3::DoubleAttribute>(alphaQedStr);
+      auto A_filterWeight=genEvt->attribute<HepMC3::DoubleAttribute>(filterWeightStr);
+      auto A_filterHT=genEvt->attribute<HepMC3::DoubleAttribute>(filterHtStr);
+      auto A_filterMET=genEvt->attribute<HepMC3::DoubleAttribute>(filterMetStr);
       auto signal_process_vertex = HepMC::signal_process_vertex(genEvt);
 
       // If signal vertex not found on the vertices, look on the event (Sherpa)

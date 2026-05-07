@@ -18,12 +18,14 @@
 // GeneratorObjectsTPCnv includes
 #include "GeneratorObjectsTPCnv/McEventCollectionCnv_p4.h"
 #include "HepMcDataPool.h"
+#include "HepMC3AccessStrings.h"
 
 #include "GenInterfaces/IHepMCWeightSvc.h"
 
 #include "McEventCollectionCnv_utils.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 #include "TruthUtils/MagicNumbers.h"
+using namespace GeneratorObjectsTPCnv;
 
 ///////////////////////////////////////////////////////////////////
 // Constructors
@@ -101,14 +103,14 @@ void McEventCollectionCnv_p4::persToTrans( const McEventCollection_p4* persObj,
           genEvt        =  datapools.getGenEvent();
         }
 #ifdef HEPMC3
-      genEvt->add_attribute ("barcodes", std::make_shared<HepMC::GenEventBarcodes>());
-      genEvt->add_attribute("signal_process_id", std::make_shared<HepMC3::IntAttribute>(persEvt.m_signalProcessId));
+      genEvt->add_attribute (barcodesStr, std::make_shared<HepMC::GenEventBarcodes>());
+      genEvt->add_attribute(signalProcessIdStr, std::make_shared<HepMC3::IntAttribute>(persEvt.m_signalProcessId));
       genEvt->set_event_number(persEvt.m_eventNbr);
-      genEvt->add_attribute("event_scale", std::make_shared<HepMC3::DoubleAttribute>(persEvt.m_eventScale));
-      genEvt->add_attribute("alphaQCD", std::make_shared<HepMC3::DoubleAttribute>(persEvt.m_alphaQCD));
-      genEvt->add_attribute("alphaQED", std::make_shared<HepMC3::DoubleAttribute>(persEvt.m_alphaQED));
+      genEvt->add_attribute(eventScaleStr, std::make_shared<HepMC3::DoubleAttribute>(persEvt.m_eventScale));
+      genEvt->add_attribute(alphaQcdStr, std::make_shared<HepMC3::DoubleAttribute>(persEvt.m_alphaQCD));
+      genEvt->add_attribute(alphaQedStr, std::make_shared<HepMC3::DoubleAttribute>(persEvt.m_alphaQED));
       genEvt->weights() = persEvt.m_weights;
-      genEvt->add_attribute("random_states", std::make_shared<HepMC3::VectorLongIntAttribute>(persEvt.m_randomStates));
+      genEvt->add_attribute(randomStatesStr, std::make_shared<HepMC3::VectorLongIntAttribute>(persEvt.m_randomStates));
       //restore weight names from the dedicated svc (which was keeping them in metadata for efficiency)
       if(!genEvt->run_info()) genEvt->set_run_info(std::make_shared<HepMC3::GenRunInfo>());
       if(genEvt->run_info()) genEvt->run_info()->set_weight_names(m_hepMCWeightSvc->weightNameVec(ctx));
@@ -279,12 +281,12 @@ void McEventCollectionCnv_p4::transToPers( const McEventCollection* transObj,
           //m_hepMCWeightSvc->setWeightNames( names_to_name_index_map(names), ctx );
         }
       }
-      auto A_signal_process_id=genEvt->attribute<HepMC3::IntAttribute>("signal_process_id");
-      auto A_event_scale=genEvt->attribute<HepMC3::DoubleAttribute>("event_scale");
-      auto A_alphaQCD=genEvt->attribute<HepMC3::DoubleAttribute>("alphaQCD");
-      auto A_alphaQED=genEvt->attribute<HepMC3::DoubleAttribute>("alphaQED");
+      auto A_signal_process_id=genEvt->attribute<HepMC3::IntAttribute>(signalProcessIdStr);
+      auto A_event_scale=genEvt->attribute<HepMC3::DoubleAttribute>(eventScaleStr);
+      auto A_alphaQCD=genEvt->attribute<HepMC3::DoubleAttribute>(alphaQcdStr);
+      auto A_alphaQED=genEvt->attribute<HepMC3::DoubleAttribute>(alphaQedStr);
       auto signal_process_vertex = HepMC::signal_process_vertex(genEvt);
-      auto A_random_states=genEvt->attribute<HepMC3::VectorLongIntAttribute>("random_states");
+      auto A_random_states=genEvt->attribute<HepMC3::VectorLongIntAttribute>(randomStatesStr);
 
       persObj->m_genEvents.
       emplace_back( A_signal_process_id?(A_signal_process_id->value()):0,
