@@ -1,0 +1,146 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+#include <limits>
+#include "ActsGeometry/ActsDetectorElement.h"
+#include <PixelReadoutGeometry/PixelModuleDesign.h>
+#include "InDetReadoutGeometry/SiDetectorElement.h"
+#include "InDetMeasurementUtilities/Helpers.h"
+
+#include <stdexcept>
+
+namespace ActsTrk::detail {
+
+template <typename traj_t>
+const InDetDD::SiDetectorElement&
+PixelClusterCalibratorCommon<traj_t>::getDetectorElement(const Acts::Surface &surface) const
+{
+    const ActsDetectorElement* detElem = dynamic_cast<const ActsDetectorElement*>(surface.surfacePlacement());
+    const InDetDD::SiDetectorElement *
+       siDetElement = detElem ? dynamic_cast<const InDetDD::SiDetectorElement *>(detElem->upstreamDetectorElement())
+                              : nullptr;
+    if (!siDetElement) {
+        throw std::runtime_error("SiDetectorElement is NULL");
+    }
+    return *siDetElement;
+}
+
+template <typename traj_t>
+std::pair<float, float>
+PixelClusterCalibratorCommon<traj_t>::tanAnglesOfIncidence(const EventContext &ctx,
+                                                           const Acts::GeometryContext& gctx,
+                                                           const Acts::Surface &surface,
+                                                           const InDetDD::SiDetectorElement& element,
+                                                           const Acts::Vector3& direction) const
+{
+    // to ensure that referenceFrame can be called with dummy direction and position
+    assert(dynamic_cast<const Acts::PlaneSurface *>(&surface) != nullptr);
+    static const Acts::Vector3 dummy=Acts::Vector3::Zero();
+    Acts::Vector3 projection = surface.referenceFrame(gctx, dummy,dummy).transpose() * direction;
+#ifndef NDEBUG
+    float projPhi = direction.dot(element.phiAxis());
+    float projEta = direction.dot(element.etaAxis());
+    float projNorm = direction.dot(element.normal());
+    assert( std::abs(projection[0] - projPhi)   < std::abs(projPhi)  * std::numeric_limits<float>::epsilon() *2.);
+    assert( std::abs(projection[1] - projEta)   < std::abs(projEta)  * std::numeric_limits<float>::epsilon() *2.);
+    assert( std::abs(projection[2] - projNorm)  < std::abs(projNorm) * std::numeric_limits<float>::epsilon() *2.);
+#endif
+
+    double inv_proj_norm = 1./projection[2];
+    double tan_phi   = projection[0]*inv_proj_norm;
+    double tan_theta = projection[1]*inv_proj_norm;
+
+    // Subtract the Lorentz angle effect
+    double angleShift = m_baseOptions.m_lorentzAngleTool->getTanLorentzAngle(element.identifyHash(), ctx);
+    tan_phi -=  element.design().readoutSide() * angleShift;
+
+    return std::make_pair(static_cast<float>(tan_phi), static_cast<float>(tan_theta));
+}
+
+template <typename derived_t, typename traj_t>
+std::pair<typename PixelClusterCalibratorCommon<traj_t>::Pos,
+          typename PixelClusterCalibratorCommon<traj_t>::Cov>
+PixelClusterCalibratorBase<derived_t, traj_t>::calibrate(
+    const Acts::GeometryContext& gctx,
+    const Acts::CalibrationContext& cctx,
+    const xAOD::PixelCluster& cluster,
+    const typename PixelClusterCalibratorBase<derived_t, traj_t>::TrackStateProxy& state) const
+{
+    const EventContext& ctx = *cctx.get<const EventContext*>();
+    const InDetDD::SiDetectorElement &detElement = this->getDetectorElement(state.referenceSurface());
+    Acts::Vector3 direction = Acts::makeDirectionFromPhiTheta(state.parameters()[Acts::eBoundPhi],
+                                                              state.parameters()[Acts::eBoundTheta]);
+    return derived().calibrate(ctx, gctx, cctx, cluster, detElement, this->tanAnglesOfIncidence(ctx,
+                                                                                                gctx,
+                                                                                                state.referenceSurface(),
+                                                                                                detElement,
+                                                                                                direction));
+}
+
+template <typename derived_t, typename traj_t>
+std::pair<typename PixelClusterCalibratorCommon<traj_t>::Pos,
+          typename PixelClusterCalibratorCommon<traj_t>::Cov>
+PixelClusterCalibratorBase<derived_t, traj_t>::calibrate(const Acts::GeometryContext& gctx,
+                                                         const Acts::CalibrationContext& cctx,
+                                                         const Acts::Surface& surface,
+                                                         const xAOD::PixelCluster& cluster,
+                                                         const Acts::BoundTrackParameters& bound_parameters) const
+{
+    const EventContext& ctx = *cctx.get<const EventContext*>();
+    const InDetDD::SiDetectorElement &detElement = this->getDetectorElement(surface);
+    Acts::Vector3 direction = Acts::makeDirectionFromPhiTheta(bound_parameters.parameters()[Acts::eBoundPhi],
+                                                              bound_parameters.parameters()[Acts::eBoundTheta]);
+    return this->derived().calibrate(ctx, gctx, cctx, cluster, detElement, this->tanAnglesOfIncidence(ctx,
+                                                                                                      gctx,
+                                                                                                      surface,
+                                                                                                      detElement,
+                                                                                                      direction));
+}
+
+
+template <typename derived_t, typename traj_t>
+void
+PixelClusterCalibratorBase<derived_t, traj_t>
+  ::connectOnTrackCalibrator(PixelClusterCalibratorBase<derived_t, traj_t>::OnTrackCalibrator& calibrator) const
+{
+   using CalibFuncPtr_t =
+      std::pair<typename PixelClusterCalibratorCommon<traj_t>::Pos,
+                typename PixelClusterCalibratorCommon<traj_t>::Cov>
+      (PixelClusterCalibratorBase<derived_t, traj_t>:: *)(const Acts::GeometryContext&,
+                                                          const Acts::CalibrationContext&,
+                                                          const xAOD::PixelCluster&,
+                                                          const TrackStateProxy&) const;
+
+   calibrator. template connect<static_cast<CalibFuncPtr_t>(&PixelClusterCalibratorBase<derived_t, traj_t>::calibrate)>(this);
+}
+
+template <typename derived_t, typename traj_t>
+void
+PixelClusterCalibratorBase<derived_t,traj_t>
+ ::connectCalibrator(typename PixelClusterCalibratorBase<derived_t,traj_t>::Calibrator &calibrator) const {
+   using CalibFuncPtr_t =
+      std::pair<typename PixelClusterCalibratorCommon<traj_t>::Pos,
+                typename PixelClusterCalibratorCommon<traj_t>::Cov>
+      (PixelClusterCalibratorBase<derived_t, traj_t>:: *)(const Acts::GeometryContext&,
+                                                          const Acts::CalibrationContext&,
+                                                          const Acts::Surface&,
+                                                          const xAOD::PixelCluster&,
+                                                          const Acts::BoundTrackParameters&) const;
+
+   calibrator.template connect<static_cast<CalibFuncPtr_t>(&PixelClusterCalibratorBase<derived_t, traj_t>::calibrate)>(this);
+}
+
+template <typename traj_t>
+StatusCode PixelClusterCalibrationToolBase<traj_t>::initialize()
+{
+    ATH_CHECK(m_lorentzAngleTool.retrieve());
+    ATH_CHECK(AthAlgTool::detStore()->retrieve(m_pixelID, "PixelID"));
+
+    return StatusCode::SUCCESS;
+}
+
+template <typename traj_t>
+bool PixelClusterCalibrationToolBase<traj_t>::calibrateAfterMeasurementSelection() const
+{ return m_postCalibration.value(); }
+
+} // namespace ActsTrk
