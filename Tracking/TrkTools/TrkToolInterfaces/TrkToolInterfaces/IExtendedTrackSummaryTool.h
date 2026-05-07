@@ -22,7 +22,6 @@ public:
 
   using ITrackSummaryTool::summary;
   using ITrackSummaryTool::summaryNoHoleSearch;
-  using ITrackSummaryTool::updateAdditionalInfo;
   using ITrackSummaryTool::updateTrackSummary;
 
   /** Compute track summary and replace the summary in given track.
@@ -65,7 +64,6 @@ public:
     const EventContext& ctx,
     const Track& track) const = 0;
 
-  virtual void updateAdditionalInfo(Track& track) const = 0;
 };
 }
 

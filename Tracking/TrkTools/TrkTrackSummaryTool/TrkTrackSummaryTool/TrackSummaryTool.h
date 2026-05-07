@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKTRACKSUMMARYTOOL_H
@@ -109,11 +109,6 @@ public:
     const EventContext& ctx,
     Track& track,
     bool suppress_hole_search = false) const override final;
-
-  /** method to update additional information (PID, dEdX), this is
-   * optimised for track collection merging.
-   */
-  virtual void updateAdditionalInfo(Track& track) const override;
 
 private:
   /*
