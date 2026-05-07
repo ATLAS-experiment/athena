@@ -7,6 +7,7 @@
 
 // Services/helpers
 #include "LArIdentifier/LArOnlineID.h"
+#include "GaudiKernel/StatusCode.h"
 
 // Gaudi/Athena
 #include "GaudiKernel/Bootstrap.h"
@@ -34,8 +35,8 @@ StatusCode LArCondFlatBase::initializeBase() {
   SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
   ATH_CHECK_WITH_CONTEXT( detStore.isValid(), "LArCondFlatBase" );
   ATH_CHECK_WITH_CONTEXT( detStore->retrieve(m_onlineHelper,"LArOnlineID"), "LArCondFlatBase" );
-
-  m_isInitialized = true;
+  //belt-and-braces to ensure m_onlineHelper is valid
+  m_isInitialized = (m_onlineHelper!=nullptr);
   ATH_MSG_DEBUG( "end initializeBase ");
   return (StatusCode::SUCCESS);
 }
