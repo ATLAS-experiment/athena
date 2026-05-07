@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //======================================================================
@@ -270,13 +270,12 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
     array<std::unique_ptr<TH2D> , npsFEs> h2_ThrSig{};
 
     std::multimap<float, std::string, std::greater<float>> badThr_Order;
-
+    static const std::string knowModule{"LI_S06_C_M1_C1"};
     for (int sfe = 0; sfe < npsFEs; sfe++)
     {
         stringstream ss;
         ss << sfe;
 
-        string knowModule = "LI_S06_C_M1_C1";
         string idx = "I" + ss.str();
 
         pcdMap[knowModule][idx]["ThrNorm"] = -42.;
