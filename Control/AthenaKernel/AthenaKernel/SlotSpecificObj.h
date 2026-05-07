@@ -40,6 +40,12 @@ void setNSlotsHiveMgrName ATLAS_NOT_THREAD_SAFE (const std::string& s);
 
 
 /**
+ * @brief Support of the invalid @c EventContext in @c SlotSpecificObj.
+ */
+enum class InvalidSlot { Enabled, Disabled };
+
+
+/**
  * @brief Maintain a set of objects, one per slot.
  *
  * The payload @c T must be default-constructable.  One such instance of @c T
@@ -50,6 +56,11 @@ void setNSlotsHiveMgrName ATLAS_NOT_THREAD_SAFE (const std::string& s);
  * the slot explicitly, rather than looking it up in a thread-local global.
  * The access to the object is range-checked and a std::out_of_range exception is
  * thrown in case a non-existent slot is used.
+ *
+ * By default only objects for a valid @c EventContext can be stored/retrieved.
+ * To simplify use also outside of the event loop, the storage of an extra object
+ * for the invalid @c EventContext can be enabled by the @c InvalidSlot template
+ * parameter. When iterating over the objects, the extra object will be the last one.
  *
  * This class does not do anything itself to protect the contents
  * of the payload objects against simultaneous access from different threads.
@@ -66,8 +77,9 @@ void setNSlotsHiveMgrName ATLAS_NOT_THREAD_SAFE (const std::string& s);
  *     indexed by slot.  We thus don't need any locking.  The price of this
  *     is that we need to know the number of slots when we're constructed.
  *   - We allow requesting a given slot explicitly, via an @c EventContext argument.
+ *   - We optionally support an extra object for the invalid @c EventContext.
  */
-template <class T>
+template <class T, InvalidSlot = InvalidSlot::Disabled>
 class SlotSpecificObj
 {
 public:
@@ -83,7 +95,7 @@ public:
    * @brief Constructor, with number of slots specified explicitly.
    * @param nslots The number of event slots.
    */
-  SlotSpecificObj (size_t nslots);
+  explicit SlotSpecificObj (size_t nslots);
 
 
   /**

@@ -19,6 +19,7 @@
 #include "GaudiKernel/IHiveWhiteBoard.h"
 #include <cassert>
 #include <iostream>
+#include <iterator>
 #include <stdexcept>
 
 const size_t nslots = 4;
@@ -54,24 +55,28 @@ struct Payload
 };
 
 
+template <SG::InvalidSlot S>
 void test1()
 {
   std::cout << "test1\n";
-  SG::SlotSpecificObj<Payload> o;
-  const SG::SlotSpecificObj<Payload>& co = o;
+  SG::SlotSpecificObj<Payload, S> o;
+  const SG::SlotSpecificObj<Payload, S>& co = o;
 
-  for (size_t i = 0; i < nslots; i++) {
+  // One extra entry for testing the invalid slot
+  const size_t N = (S==SG::InvalidSlot::Disabled ? nslots : nslots +1);
+
+  for (size_t i = 0; i < N; i++) {
     EventContext ctx (0, i);
     o.get(ctx)->x = (i+1)*10;
   }
 
-  for (size_t i = 0; i < nslots; i++) {
+  for (size_t i = 0; i < N; i++) {
     EventContext ctx (0, i);
     assert (o.get(ctx)->x == (i+1)*10);
     assert (co.get(ctx)->x == (i+1)*10);
   }
 
-  for (size_t i = 0; i < nslots; i++) {
+  for (size_t i = 0; i < N; i++) {
     EventContext ctx (0, i);
     Gaudi::Hive::setCurrentContext (ctx);
     assert (o.get()->x == (i+1)*10);
@@ -84,10 +89,13 @@ void test1()
     o->x = (i+2)*20;
   }
 
-  for (size_t i = 0; i < nslots; i++) {
+  for (size_t i = 0; i < N; i++) {
     EventContext ctx (0, i);
     assert (o.get(ctx)->x == (i+2)*20);
   }
+
+  // Iterator
+  assert (std::distance(o.begin(), o.end()) == static_cast<int>(N));
 
   size_t i = 0;
   for (Payload& p : o) {
@@ -104,13 +112,22 @@ void test1()
 
   // out of range
   {
-    EventContext ctx (0, nslots);
+    EventContext ctx (0, nslots+10);
     EXPECT_EXCEPTION (std::out_of_range, o.get(ctx));
     EXPECT_EXCEPTION (std::out_of_range, co.get(ctx));
   }
 
+  // Invalid context
+  EventContext invalid_ctx;
+  if constexpr (S==SG::InvalidSlot::Disabled) {
+    EXPECT_EXCEPTION (std::out_of_range, o.get(invalid_ctx));
+    EXPECT_EXCEPTION (std::out_of_range, co.get(invalid_ctx));
+  }
+  else {
+    assert (o.get(invalid_ctx) == &*std::prev(o.end()));
+    assert (co.get(invalid_ctx) == &*std::prev(co.end()));
+  }
 }
-
 
 int main ATLAS_NOT_THREAD_SAFE ()
 {
@@ -123,6 +140,7 @@ int main ATLAS_NOT_THREAD_SAFE ()
   }  
   assert(svcloc);
 
-  test1();
+  test1<SG::InvalidSlot::Disabled>();
+  test1<SG::InvalidSlot::Enabled>();
   return 0;
 }
