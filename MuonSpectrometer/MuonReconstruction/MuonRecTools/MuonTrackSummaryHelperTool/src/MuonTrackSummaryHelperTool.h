@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTRACKSUMMARYHELPERTOOL_H
@@ -19,7 +19,7 @@
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 #include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkGeometry/TrackingGeometry.h"
-#include "TrkToolInterfaces/IExtendedTrackSummaryHelperTool.h"
+#include "TrkToolInterfaces/ITrackSummaryHelperTool.h"
 #include "TrkToolInterfaces/ITrackHoleSearchTool.h"
 #include "TrkTrackSummary/MuonTrackSummary.h"
 #include "TrkTrackSummary/TrackSummary.h"
@@ -36,7 +36,7 @@ namespace MuonGM {
 
 namespace Muon {
 
-    class MuonTrackSummaryHelperTool : public extends<AthAlgTool, Trk::IExtendedTrackSummaryHelperTool> {
+    class MuonTrackSummaryHelperTool : public extends<AthAlgTool, Trk::ITrackSummaryHelperTool> {
     public:
         MuonTrackSummaryHelperTool(const std::string&, const std::string&, const IInterface*);
 
@@ -44,18 +44,18 @@ namespace Muon {
 
         virtual StatusCode initialize() override;
 
-        using IExtendedTrackSummaryHelperTool::addDetailedTrackSummary;
-        using IExtendedTrackSummaryHelperTool::analyse;
-        virtual void analyse(const Trk::Track& trk, const Trk::RIO_OnTrack* rot, const Trk::TrackStateOnSurface* tsos,
+        virtual void analyse(const EventContext& ctx,
+                             const Trk::Track& trk, const Trk::RIO_OnTrack* rot, const Trk::TrackStateOnSurface* tsos,
                              std::vector<int>& information, std::bitset<Trk::numberOfDetectorTypes>& hitPattern) const override final;
 
-        virtual void analyse(const Trk::Track& trk, const Trk::CompetingRIOsOnTrack* crot, const Trk::TrackStateOnSurface* tsos,
+        virtual void analyse(const EventContext& ctx,
+                             const Trk::Track& trk, const Trk::CompetingRIOsOnTrack* crot, const Trk::TrackStateOnSurface* tsos,
                              std::vector<int>& information, std::bitset<Trk::numberOfDetectorTypes>& hitPattern) const override final;
 
         virtual void searchForHoles(const Trk::Track& track, std::vector<int>& information,
                                     Trk::ParticleHypothesis hyp) const override final;
 
-        virtual void addDetailedTrackSummary(const Trk::Track& track, Trk::TrackSummary& summary) const override final;
+        virtual void addDetailedTrackSummary(const EventContext& ctx, const Trk::Track& track, Trk::TrackSummary& summary) const override final;
 
     private:
         const MdtPrepDataCollection* findMdtPrdCollection(const Identifier& chId) const;

@@ -374,7 +374,7 @@ Trk::TrackSummaryTool::processMeasurement(
   }
   if (rot) {
     // have RIO_OnTrack
-    const Trk::IExtendedTrackSummaryHelperTool* tool = getTool(rot->identify());
+    const Trk::ITrackSummaryHelperTool* tool = getTool(rot->identify());
     if (tool == nullptr) {
       ATH_MSG_WARNING("Cannot find tool to match ROT. Skipping.");
     } else {
@@ -390,7 +390,7 @@ Trk::TrackSummaryTool::processMeasurement(
     if (compROT) {
       // if this works we have a CompetingRIOsOnTrack.
       rot = &compROT->rioOnTrack(0); // get 1st rot
-      const Trk::IExtendedTrackSummaryHelperTool* tool =
+      const Trk::ITrackSummaryHelperTool* tool =
         getTool(rot->identify()); // Use 'main' ROT to get detector type
       if (tool == nullptr) {
         ATH_MSG_WARNING("Cannot find tool to match cROT. Skipping.");
@@ -402,7 +402,7 @@ Trk::TrackSummaryTool::processMeasurement(
   }
 }
 
-const Trk::IExtendedTrackSummaryHelperTool*
+const Trk::ITrackSummaryHelperTool*
 Trk::TrackSummaryTool::getTool(const Identifier& id) const
 {
   if (m_detID->is_indet(id)) {

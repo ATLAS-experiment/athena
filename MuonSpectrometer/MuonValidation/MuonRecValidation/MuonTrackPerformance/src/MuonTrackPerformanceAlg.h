@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTRACKPERFORMANCEALG_H
@@ -192,8 +192,8 @@ public:
 private:
     void extractEtaPhiCounts(const std::set<Identifier>& ids, int& neta, int& nphi, int& netaCh, int& nphiCh) const;
 
-    bool handleTracks();
-    bool handleTrackTruth(const TrackCollection& trackCollection);
+    bool handleTracks(const EventContext& ctx);
+    bool handleTrackTruth(const EventContext& ctx, const TrackCollection& trackCollection);
 
     bool handleSegmentCombi(const Muon::MuonSegmentCombination& combi);
 
@@ -234,7 +234,7 @@ private:
     /** create track data object for truth track */
     TrackData* createTrackData(const Muon::IMuonTrackTruthTool::TruthTreeEntry& trackTruth) const;
 
-    void addTrackToTrackData(const Trk::Track& track, TrackData& trackData) const;
+    void addTrackToTrackData(const EventContext& ctx, const Trk::Track& track, TrackData& trackData) const;
 
     /** print TrackData to a string */
     std::string print(const TrackData& trackData) const;
