@@ -1,12 +1,13 @@
 include("EvgenProdTools/StdEvgenSetup.py")
 include("Epos4_i/configFile.py")
 
-theApp.EvtMax = 100
+theApp.EvtMax = 100 
 
 from Epos4_i.Epos4_iConf import Epos4
 Ep4 = Epos4()
 Ep4.BeamMomentum     = -runArgs.ecmEnergy/2.0 #For now, for symmetric collisions
 Ep4.TargetMomentum   = runArgs.ecmEnergy/2.0 #For now, for symmetric collisions
+Ep4.ArgsRandomSeed       = runArgs.randomSeed 
 
 energy                = float(runArgs.ecmEnergy) # center-of-mass energy
 number_of_events      = int(runArgs.maxEvents)   # number of events

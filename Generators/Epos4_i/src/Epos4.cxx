@@ -20,9 +20,8 @@
 #include "AtlasHepMC/SimpleVector.h"
 
 #include "HepMC3/GenEvent.h"
-#include "HepMC3/Writer.h"
 #include "HepMC3/Print.h"
-#include "HepMC3/GenEvent.h" 
+#include "HepMC3/Writer.h"
 
 #include <cstdlib> //for std::getenv
 #include <cstring> //for strlen, memcpy
@@ -113,6 +112,7 @@ Epos4::Epos4(const std::string &name, ISvcLocator *pSvcLocator)
   declareProperty("BeamMomentum", m_beamMomentum = -6500.0); // GeV
   declareProperty("TargetMomentum", m_targetMomentum = 6500.0);
   declareProperty("InputCard", m_inputcard = "foo.optns");
+  declareProperty("ArgsRandomSeed", m_argsRandomSeed = 0);
   m_events = 0; // current event number (counted by interface)
 }
 
@@ -169,15 +169,20 @@ std::string Epos4::create_file(const std::string &filein) {
                         : (ATH_MSG_WARNING(" CHK not set\n"), "");
   if (m_seeds.size() < 2)
     ATH_MSG_WARNING(" m_seeds should contain at least 2 elements\n");
-  std::string seedi = m_seeds.size() < 1
-                          ? "111111111"
-                          : std::to_string(m_seeds.at(
-                                0)); // Should be something like "222222222";
-                                     // //WARNING: SEEDS SHOUD EXIST HERE!
-  std::string seedj = m_seeds.size() < 2
+  std::string seedj;
+  if (m_argsRandomSeed != 0) {
+    seedj = std::to_string(m_argsRandomSeed);
+  } else if (!m_seeds.empty()) {
+    seedj = std::to_string(m_seeds.at(0));
+  } else {
+    seedj = "111111111";
+  };
+  std::string seedi = m_seeds.size() < 2
                           ? "222222222"
                           : std::to_string(m_seeds.at(
                                 1)); // Should be something like "111111111";
+                                     // for initialisation only
+
   std::string rootcproot = "nono";
   std::string system = "i";
   std::string ext1 = "-";
@@ -277,7 +282,7 @@ StatusCode Epos4::genInitialize() {
   m_events = 0;
 
   writer = std::make_shared<HepMC3::WriterEPOS>("foo");
-  const std::string & x = this->create_file(m_inputcard);
+  const std::string &x = this->create_file(m_inputcard);
   set_job_common(x.c_str());
   showMemoryAtStart();
   checkTime();
@@ -338,7 +343,7 @@ StatusCode Epos4::fillEvt(HepMC::GenEvent *evt) {
 
   e.set_units(HepMC3::Units::MEV, HepMC3::Units::MM);
   HepMC3::Print::content(e);
-  
+
   *evt = e;
   return StatusCode::SUCCESS;
 }
