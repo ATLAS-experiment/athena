@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -102,9 +102,6 @@ class MTCalibPebHypoOptions:
         self.PEBROBList = []
         self.PEBSubDetList = []
         self.CreateRandomData = {}
-        self.EnableL1CaloPhase1 = False  # Sets flags.Trigger.enableL1CaloPhase1
-        self.EnableL1MuonPhase1 = True  # Sets flags.Trigger.enableL1MuonPhase1
-        self.EnableL1CaloLegacy = True  # Sets flags.Trigger.enableL1CaloLegacy
 
 
 default_options = MTCalibPebHypoOptions()
@@ -119,9 +116,6 @@ def set_flags(flags, options=default_options):
     flags.Trigger.EDMVersion = 3
     flags.Trigger.Online.isPartition = True
     flags.Trigger.triggerMenuSetup = 'Dev_pp_run3_v1'
-    flags.Trigger.enableL1MuonPhase1 = options.EnableL1MuonPhase1
-    flags.Trigger.enableL1CaloPhase1 = options.EnableL1CaloPhase1
-    flags.Trigger.enableL1CaloLegacy = options.EnableL1CaloLegacy
     flags.Trigger.forceEnableAllChains = True
     flags.Trigger.ROBPrefetchingOptions = [] # workaround for ATR-26307
     # Disable signature-specific detector configuration parts
