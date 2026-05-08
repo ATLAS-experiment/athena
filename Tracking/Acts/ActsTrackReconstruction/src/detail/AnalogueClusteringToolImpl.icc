@@ -23,7 +23,6 @@ StatusCode AnalogueClusteringToolImpl<calib_data_t, traj_t>::initialize()
     ATH_CHECK(m_clusterErrorKey.initialize()); 
     ATH_MSG_DEBUG(AthAlgTool::name() << " successfully initialized");
     
-    ATH_MSG_DEBUG( m_thickness );
     ATH_MSG_DEBUG( this->calibrateAfterMeasurementSelection() );
     ATH_MSG_DEBUG( m_useWeightedPos );
     ATH_MSG_DEBUG( m_correctCovariance );
@@ -110,6 +109,37 @@ AnalogueClusteringToolImpl<calib_data_t, traj_t>::getErrorData(const EventContex
     return data;
 }
 
+namespace {
+   // negative limit of eta when computing eta as eta(T x) {return -log(tan(x*0.5)); } with x=M_PI-epsilon
+   // was eta<T>(static_cast<T>(M_PI)-std::numeric_limits<T>::epsilon());
+   // with T eta(T theta) { return static_cast<float>(-1*log(tan(theta*0.5))); }, and T=float
+   constexpr float etaMin() { return -16.3991603f; }
+   // positive limit of eta when computing eta as eta(T x) {return -log(tan(x*0.5)); } with x=0+epsilon
+   // was eta<T>(static_cast<T>(0)-std::numeric_limits<T>::epsilon()), with T=float
+   constexpr float etaMax() { return  16.6355323f; }
+
+   // compute eta from tan_theta
+   double computeEta(double tan_theta) {
+      // eta = - ln ( tan theta/2)
+      // tan theta /2 = tan theta / (1 + sec theta)
+      // 1+tan^2 theta = sec^2 theta
+      // sec theta = sqrt ( 1+ tan^2 theta)
+      double one_plus_sec_theta = 1.+std::copysign(std::sqrt ( 1. +  std::pow(tan_theta,2) ), tan_theta );
+
+      // reproduce roughly the original range;
+      // @TODO what would be the allowed range for getDelta ?
+      static constexpr double min_eta = etaMin();
+      static constexpr double max_eta = etaMax();
+
+      return std::max(min_eta,
+                      std::min( max_eta,
+                               (std::abs(one_plus_sec_theta)>tan_theta*std::numeric_limits<double>::epsilon()
+                                ? -std::log( tan_theta / ( one_plus_sec_theta ))
+                                :min_eta ) ));
+   }
+}
+
+
 template <typename calib_data_t, typename traj_t>
 std::pair<std::optional<float>, std::optional<float>>
 AnalogueClusteringCalibrator<calib_data_t, traj_t>::getCorrectedPosition(
@@ -117,9 +147,9 @@ AnalogueClusteringCalibrator<calib_data_t, traj_t>::getCorrectedPosition(
     const xAOD::PixelCluster& cluster,
     const error_data_t& errorData,
     const InDetDD::SiDetectorElement& element,
-    const std::pair<float, float>& angles) const
+    const std::pair<float, float>& tan_angles) const
 {
-    auto& [anglePhi, angleEta] = angles;
+    auto& [tan_anglePhi, tan_angleEta] = tan_angles; // Phi and Eta denote the direction of the axis
 
     std::optional<float> posX {std::nullopt};
     std::optional<float> posY {std::nullopt};
@@ -136,12 +166,13 @@ AnalogueClusteringCalibrator<calib_data_t, traj_t>::getCorrectedPosition(
         std::pair<float, float> centroid = getCentroid(ctx, cluster, element);
         IdentifierHash idHash = element.identifyHash();
 
+        double local_eta = computeEta(tan_angleEta);
         std::pair<double, double> delta =
           errorData.getDelta(idHash,
                              nrows,
-                             anglePhi,
+                             atan(tan_anglePhi),
                              ncols,
-                             angleEta);  // @TODO here angleEta should be local eta.
+                             local_eta); // @TODO why local eta and not the slope i.e. tan_angleEta ?
         
         if (nrows > 1)
           posX = centroid.first + delta.first * (omX - 0.5);
@@ -159,7 +190,7 @@ AnalogueClusteringCalibrator<calib_data_t, traj_t>::getCorrectedPosition(
   AnalogueClusteringCalibrator<calib_data_t, traj_t>::getCorrectedError(
     const typename AnalogueClusteringCalibrator<calib_data_t, traj_t>::error_data_t& errorData,
     [[maybe_unused]] const InDetDD::SiDetectorElement& element,
-    const std::pair<float, float>& angles,
+    const std::pair<float, float>& tan_angles,
     const xAOD::PixelCluster& cluster) const
   {
     std::optional<float> errX {std::nullopt};
@@ -172,21 +203,23 @@ AnalogueClusteringCalibrator<calib_data_t, traj_t>::getCorrectedPosition(
     int nrows = cluster.channelsInPhi();
     int ncols = cluster.channelsInEta();
 
-    auto& [anglePhi, angleEta] = angles;
+    auto& [tan_anglePhi, tan_angleEta] = tan_angles;
 
     if (m_options.m_errorStrategy == 0) {
     
       // Special case for very shallow tracks
       // Error estimated from geometrical projection of
       // the track path in silicon onto the module surface
-      if (std::abs(anglePhi) > 1) {
-        // @TODO should get thicknes from design instead: double thickness = element.design().thickness();
-        errX = m_options.m_thickness * Acts::UnitConstants::um * std::tan(std::abs(anglePhi)) / std::sqrt(12);
-        errY = m_options.m_thickness * Acts::UnitConstants::um * std::tan(std::abs(angleEta));
+      static constexpr float tan_1 = 1.55740772f; // std::tan(1.f);
+      if (std::abs(tan_anglePhi) > tan_1) {
+        static const double one_over_sqrt12 = 1./std::sqrt(12);
+        double thickness = element.design().thickness();
+        errX = thickness * std::abs(tan_anglePhi) * one_over_sqrt12;
+        errY = thickness * std::abs(tan_angleEta);
         if (cluster.widthInEta() > errY) {
-          errY = cluster.widthInEta() / std::sqrt(12);
+          errY = cluster.widthInEta()  * one_over_sqrt12;
         } else {
-          errY = *errY / std::sqrt(12);
+          errY = *errY * one_over_sqrt12;
         }
       } else if (nrows > 1 or ncols > 1) {
         IdentifierHash idHash = cluster.identifierHash();
@@ -209,41 +242,6 @@ AnalogueClusteringCalibrator<calib_data_t, traj_t>::getCorrectedPosition(
     return std::make_pair(errX, errY);
 }
 
-namespace {
-   // compute phi eta from tan_incident angles
-
-   template <typename T>
-   constexpr T eta(T theta) {
-      return static_cast<float>(-1*log(tan(theta*0.5)));
-   }
-
-   template <typename T>
-   std::pair<T,T> computeIncidentAngles(const std::pair<T,T> &tan_incident_angles) {
-    // @TODO angles should actually by angles not eta for the second angle
-      //     only getDelta needs for some reason local eta as argument.
-      //     for now try to reproduce original results
-
-      // eta = - ln ( tan theta/2)
-      // tan theta /2 = tan theta / (1 + sec theta)
-      // 1+tan^2 theta = sec^2 theta
-      // sec theta = sqrt ( 1+ tan^2 theta)
-      auto [tan_phi,tan_theta] = tan_incident_angles;
-      double one_plus_sec_theta = 1.+std::copysign(std::sqrt ( 1. +  std::pow(tan_theta,2) ), tan_theta );
-
-      auto angles = std::make_pair<T,T>(std::atan(tan_phi),
-                          (std::abs(one_plus_sec_theta)>tan_theta*std::numeric_limits<T>::epsilon()
-                           ? static_cast<T>(-std::log( tan_theta / ( one_plus_sec_theta )) )
-                           :-std::numeric_limits<T>::infinity() ) );
-
-      // reproduce roughly the original range;
-      static constexpr T min_eta = eta<T>(static_cast<T>(M_PI)-std::numeric_limits<T>::epsilon());
-      static constexpr T max_eta = eta<T>(static_cast<T>(0)+std::numeric_limits<T>::epsilon());
-      angles.second = std::max(std::min(angles.second, max_eta),min_eta);
-      return angles;
-   }
-}
-
-
 template <typename calib_data_t, typename traj_t>
 std::pair<typename AnalogueClusteringCalibrator<calib_data_t, traj_t>::BASE::Pos,
           typename AnalogueClusteringCalibrator<calib_data_t, traj_t>::BASE::Cov>
@@ -255,8 +253,6 @@ AnalogueClusteringCalibrator<calib_data_t, traj_t>::calibrate(
     const InDetDD::SiDetectorElement& detElement,
     const std::pair<float, float>& tan_incidence_angles) const
 {
-    // the analogue clustering needs phi and eta (@TODO why?)
-    std::pair<float, float> angles = computeIncidentAngles(tan_incidence_angles);
     typename BASE::Pos pos = cluster.template localPosition<2>();
     typename BASE::Cov cov = cluster.template localCovariance<2>();
 
@@ -267,13 +263,13 @@ AnalogueClusteringCalibrator<calib_data_t, traj_t>::calibrate(
       throw std::runtime_error("PixelClusterErrorData is NULL");
     }
 
-    auto [posX, posY] = getCorrectedPosition(ctx, cluster, *errorData, detElement, angles);
+    auto [posX, posY] = getCorrectedPosition(ctx, cluster, *errorData, detElement, tan_incidence_angles);
     if (posX.has_value())
       pos[Acts::eBoundLoc0] = *posX;
     if (posY.has_value())
       pos[Acts::eBoundLoc1] = *posY;
     
-    auto [errX, errY] = getCorrectedError(*errorData, detElement, angles, cluster);
+    auto [errX, errY] = getCorrectedError(*errorData, detElement, tan_incidence_angles, cluster);
     if (errX.has_value()) {
       double newErr = *errX;
       cov(0, 0) = std::max(newErr * newErr, cov(0, 0) * m_options.m_calibratedCovarianceLowerBound);

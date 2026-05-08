@@ -26,7 +26,6 @@ namespace ActsTrk::detail {
         using error_data_t = typename std::remove_pointer_t<decltype(std::declval<calib_data_t>().getClusterErrorData())>;
         const error_data_t *m_errorData;
         double m_calibratedCovarianceLowerBound;
-        int m_thickness;
         int m_errorStrategy;
         bool m_correctCovariance;
         bool m_useWeightedPos;
@@ -110,7 +109,6 @@ namespace ActsTrk::detail {
        AnalogueClusteringCalibratorOptions<calib_data_t> options{
           .m_errorData=getErrorData(ctx),
           .m_calibratedCovarianceLowerBound=m_calibratedCovarianceLowerBound,
-          .m_thickness=m_thickness,
           .m_errorStrategy=m_errorStrategy,
           .m_correctCovariance=m_correctCovariance,
           .m_useWeightedPos=m_useWeightedPos};
@@ -122,7 +120,6 @@ namespace ActsTrk::detail {
     };
 
     // in micrometers
-    Gaudi::Property<int> m_thickness {this, "PixelThickness", 250};
     Gaudi::Property<bool> m_correctCovariance{this, "PerformCovarianceCalibration", true};
     Gaudi::Property<double> m_calibratedCovarianceLowerBound {this, "CalibratedCovarianceLowerBound", 0.};
     Gaudi::Property<bool> m_useWeightedPos {this, "UseWeightedPosition", false}; // if pixel cluster use weighted local position
