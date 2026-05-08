@@ -35,12 +35,10 @@ def InDetAlignmentMonitoringRun3Config(flags, **kwargs):
         kwargsIDAlignMonGenericTracksAlg.update({'TrackName'  : trackCollectionName} )
         if ("NONE" not in trackCollectionName2): kwargsIDAlignMonGenericTracksAlg.update({'TrackName2' : trackCollectionName2})
             
-        from AthenaCommon.Constants import DEBUG
         from InDetAlignmentMonitoringRun3.IDAlignMonGenericTracksAlgCfg import IDAlignMonGenericTracksAlgCfg
         inDetAlignMonGenericTracksAlg = helper.addAlgorithm(CompFactory.IDAlignMonGenericTracksAlg, 'IDAlignMonGenericTracksAlg'+'_'+kwargsIDAlignMonGenericTracksAlg["TrackName"],
                                                             useExtendedPlots    = True,
-                                                            ApplyTrackSelection = False,
-                                                            OutputLevel         = DEBUG)
+                                                            ApplyTrackSelection = False)
         for k, v in kwargsIDAlignMonGenericTracksAlg.items():
             setattr(inDetAlignMonGenericTracksAlg, k, v)
 
@@ -57,8 +55,7 @@ def InDetAlignmentMonitoringRun3Config(flags, **kwargs):
         
         from InDetAlignmentMonitoringRun3.IDAlignMonResidualsAlgCfg import IDAlignMonResidualsAlgCfg
         inDetAlignMonResidualsAlg = helper.addAlgorithm(CompFactory.IDAlignMonResidualsAlg, 'IDAlignMonResidualsAlg'+'_'+kwargsIDAlignMonResidualsAlg["TrackName"],
-                                                        ApplyTrackSelection = False,
-                                                        OutputLevel         = DEBUG)
+                                                        ApplyTrackSelection = False)
         
         for k, v in kwargsIDAlignMonResidualsAlg.items():
             setattr(inDetAlignMonResidualsAlg, k, v)
