@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -215,7 +215,7 @@ namespace InDet
 
     bool doMassFit(xAOD::Vertex* vxCandidate, int pdgID) const;
 
-    xAOD::Vertex* massFit(int pdgID, const std::vector<const xAOD::TrackParticle*> &pairV0, const Amg::Vector3D &vertex) const;
+    std::unique_ptr<xAOD::Vertex> massFit(const EventContext& ctx, int pdgID, const std::vector<const xAOD::TrackParticle*> &pairV0, const Amg::Vector3D &vertex) const;
 
     const Trk::TrkV0VertexFitter* m_concreteVertexFitter = nullptr;
 
