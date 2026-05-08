@@ -240,24 +240,23 @@ namespace CP
                     }
                   } // Loop over allHLTJets
 		} // end Run 3 access
-
-		m_HLTPt_decor.set(*jet, bestHLT ? bestHLT->pt() : -99., sys);
-		m_HLTEta_decor.set(*jet, bestHLT ? bestHLT->eta() : -99., sys);
-		m_HLTPhi_decor.set(*jet, bestHLT ? bestHLT->phi() : -99., sys);
-		m_HLTDR_decor.set(*jet, minDRHLT, sys);
-
-		std::vector<int> hltThresh;
-		if(bestHLT) hltThresh = std::vector<int>(HLTThresholds.begin(), HLTThresholds.end());
-		m_HLTThreshold_decor.set(*jet, hltThresh, sys);
-
-		ANA_MSG_VERBOSE("Summary " << " Trigger: " << m_trigger << " bestHLT pT: "
-				<< (bestHLT ? bestHLT->pt() : -99.));
-	      } // end HLT matching
-
+	      }
 	      ileg++;
 	    }
 	  }
+
+	  m_HLTPt_decor.set(*jet, bestHLT ? bestHLT->pt() : -99., sys);
+	  m_HLTEta_decor.set(*jet, bestHLT ? bestHLT->eta() : -99., sys);
+	  m_HLTPhi_decor.set(*jet, bestHLT ? bestHLT->phi() : -99., sys);
+	  m_HLTDR_decor.set(*jet, minDRHLT, sys);
+
+	  std::vector<int> hltThresh;
+	  if(bestHLT) hltThresh = std::vector<int>(HLTThresholds.begin(), HLTThresholds.end());
+	  m_HLTThreshold_decor.set(*jet, hltThresh, sys);
 	  
+	  ANA_MSG_VERBOSE("Summary " << " Trigger: " << m_trigger << " bestHLT pT: "
+			  << (bestHLT ? bestHLT->pt() : -99.));
+
 	}
       }
     };
