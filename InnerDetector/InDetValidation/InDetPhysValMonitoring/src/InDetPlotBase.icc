@@ -3,9 +3,9 @@
 */
 
 template <class Htype> void InDetPlotBase::book (Htype* & pHisto, 
-                                const std::string& histoIdentifier, 
-                                const std::string & nameOverride, 
-                                const std::string& folder){
+                                std::string_view histoIdentifier, 
+                                std::string_view nameOverride, 
+                                std::string_view folder){
   const SingleHistogramDefinition hd = retrieveDefinition(histoIdentifier, folder, nameOverride);
   if (hd.empty()) {
     ATH_MSG_WARNING("Histogram definition is empty for identifier " << histoIdentifier);
