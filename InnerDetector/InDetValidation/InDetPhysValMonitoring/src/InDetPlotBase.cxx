@@ -148,7 +148,7 @@ InDetPlotBase::fillHisto(TEfficiency* eff2d, const float xvalue, const float yva
 
 /**/
 SingleHistogramDefinition
-InDetPlotBase::retrieveDefinition(const std::string& histoIdentifier, const std::string& folder, const std::string & nameOverride) {
+InDetPlotBase::retrieveDefinition(std::string_view histoIdentifier, std::string_view folder, std::string_view nameOverride) {
 
   ATH_CHECK( m_histoDefSvc.retrieve(), {} );
 
