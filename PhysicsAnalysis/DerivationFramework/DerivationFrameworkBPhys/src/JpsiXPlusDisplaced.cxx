@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
   Contact: Xin Chen <xin.chen@cern.ch>
 */
 #include "JpsiXPlusDisplaced.h"
@@ -646,7 +646,7 @@ namespace DerivationFramework {
 	  if(!trk_cut) continue;
 
 	  // track is used if std::abs(d0/sig_d0) > d0_cut for PV
-	  if(!d0Pass(TP,primaryVertex)) continue;
+	  if(!d0Pass(ctx,TP,primaryVertex)) continue;
 
 	  tracksDisplaced.push_back(TP);
 	}
@@ -702,7 +702,7 @@ namespace DerivationFramework {
     }
     else {
       // fit V0 vertices
-      fitV0Container(V0OutputContainer.ptr(), tracksDisplaced, trackCols);
+      fitV0Container(ctx, V0OutputContainer.ptr(), tracksDisplaced, trackCols);
 
       for(const xAOD::Vertex* vtx : *V0OutputContainer.cptr()) {
 	std::string type_V0Vtx;
@@ -1165,9 +1165,8 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  bool JpsiXPlusDisplaced::d0Pass(const xAOD::TrackParticle* track, const xAOD::Vertex* PV) const {
+  bool JpsiXPlusDisplaced::d0Pass(const EventContext& ctx, const xAOD::TrackParticle* track, const xAOD::Vertex* PV) const {
     bool pass = false;
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     std::unique_ptr<Trk::Perigee> per = m_trackToVertexTool->perigeeAtVertex(ctx, *track, PV->position());
     if(!per) return pass;
     double d0 = per->parameters()[Trk::d0];
@@ -2708,8 +2707,7 @@ namespace DerivationFramework {
     return result;
   }
 
-  void JpsiXPlusDisplaced::fitV0Container(xAOD::VertexContainer* V0ContainerNew, const std::vector<const xAOD::TrackParticle*>& selectedTracks, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
+  void JpsiXPlusDisplaced::fitV0Container(const EventContext& ctx, xAOD::VertexContainer* V0ContainerNew, const std::vector<const xAOD::TrackParticle*>& selectedTracks, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const {
 
     SG::AuxElement::Decorator<std::string> mDec_type("Type_V0Vtx");
     SG::AuxElement::Decorator<int>         mDec_gfit("gamma_fit");
@@ -2764,7 +2762,7 @@ namespace DerivationFramework {
 	    if(pass) {
 	      std::vector<const xAOD::TrackParticle*> tracksV0;
 	      tracksV0.push_back(TP1); tracksV0.push_back(TP2);
-	      std::unique_ptr<xAOD::Vertex> V0vtx = std::unique_ptr<xAOD::Vertex>( m_iV0Fitter->fit(tracksV0, startingPoint) );
+	      std::unique_ptr<xAOD::Vertex> V0vtx = m_iV0Fitter->fit(ctx, tracksV0, startingPoint);
 	      if(V0vtx && V0vtx->chiSquared()>=0) {
 		double chi2DOF = V0vtx->chiSquared()/V0vtx->numberDoF();
 		if(chi2DOF>m_chi2cut_V0) continue;
@@ -2784,7 +2782,7 @@ namespace DerivationFramework {
 
 		int gamma_fit = 0; int gamma_ndof = 0; double gamma_chisq = 999999.;
 		double gamma_prob = -1., gamma_mass = -1., gamma_massErr = -1.;
-		std::unique_ptr<xAOD::Vertex> gammaVtx = std::unique_ptr<xAOD::Vertex>( m_iGammaFitter->fit(tracksV0, m_V0Tools->vtx(V0vtx.get())) );
+		std::unique_ptr<xAOD::Vertex> gammaVtx = m_iGammaFitter->fit(ctx, tracksV0, m_V0Tools->vtx(V0vtx.get()));
 		if (gammaVtx) {
 		  gamma_fit     = 1;
 		  gamma_mass    = m_V0Tools->invariantMass(gammaVtx.get(),m_mass_e,m_mass_e);

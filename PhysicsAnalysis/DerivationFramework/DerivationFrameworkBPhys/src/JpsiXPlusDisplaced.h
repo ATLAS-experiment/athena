@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
   Contact: Xin Chen <xin.chen@cern.ch>
 */
 #ifndef JPSIXPLUSDISPLACED_H
@@ -216,14 +216,14 @@ namespace DerivationFramework {
     std::vector<double> m_massesV0_pip;
     std::vector<double> m_massesV0_pipi;
 
-    bool d0Pass(const xAOD::TrackParticle* track, const xAOD::Vertex* PV) const;
+    bool d0Pass(const EventContext& ctx, const xAOD::TrackParticle* track, const xAOD::Vertex* PV) const;
     XiCandidate getXiCandidate(const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticle* track3) const;
     std::unique_ptr<xAOD::Vertex> fitTracks(const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, const xAOD::TrackParticle* track3 = nullptr) const;
     MesonCandidate getDpmCandidate(const xAOD::Vertex* JXvtx, const xAOD::TrackParticle* extraTrk1, const xAOD::TrackParticle* extraTrk2, const xAOD::TrackParticle* extraTrk3) const;
     MesonCandidate getD0Candidate(const xAOD::Vertex* JXvtx, const xAOD::TrackParticle* extraTrk1, const xAOD::TrackParticle* extraTrk2) const;
     std::vector<std::pair<Trk::VxCascadeInfo*,Trk::VxCascadeInfo*> > fitMainVtx(const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols, const xAOD::VertexContainer* defaultPVContainer, const xAOD::VertexContainer* pvContainer) const;
     std::vector<std::pair<Trk::VxCascadeInfo*,Trk::VxCascadeInfo*> > fitMainVtx(const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const XiCandidate& disVtx, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols, const xAOD::VertexContainer* defaultPVContainer, const xAOD::VertexContainer* pvContainer) const;
-    void fitV0Container(xAOD::VertexContainer* V0ContainerNew, const std::vector<const xAOD::TrackParticle*>& selectedTracks, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const;
+    void fitV0Container(const EventContext& ctx, xAOD::VertexContainer* V0ContainerNew, const std::vector<const xAOD::TrackParticle*>& selectedTracks, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const;
     template<size_t NTracks> const xAOD::Vertex* FindVertex(const xAOD::VertexContainer* cont, const xAOD::Vertex* v) const;
   };
 }

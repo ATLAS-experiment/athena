@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ****************************************************************************
@@ -143,22 +143,22 @@ namespace DerivationFramework {
     ATH_MSG_DEBUG("Successful pairs.....");
     for (std::vector<Combination>::iterator pairItr = pairs.begin(); pairItr!=pairs.end(); ++pairItr) {
       std::vector<const xAOD::TrackParticle*> theTracks = (*pairItr).trackParticles("pair1");
-      xAOD::Vertex* pairVxCandidate = fit(theTracks,importedTrackCollection.get(),beamSpot); // This line actually does the fitting and object making
+      std::unique_ptr<xAOD::Vertex> pairVxCandidate = fit(ctx,theTracks,importedTrackCollection.get(),beamSpot); // This line actually does the fitting and object making
       if (pairVxCandidate) {
         // decorate the candidate with its codes
         indexDecorator(*pairVxCandidate) = (*pairItr).combinationIndices();
         chargeDecorator(*pairVxCandidate) = (*pairItr).combinationCharges();
         // decorate the candidate with refitted tracks and muons via the BPhysHelper
-        xAOD::BPhysHelper helper(pairVxCandidate);
+        xAOD::BPhysHelper helper(pairVxCandidate.get());
         helper.setRefTrks();
         std::vector<const xAOD::Muon*> theStoredMuons;
         theStoredMuons = (*pairItr).muons;
         helper.setMuons(theStoredMuons,importedMuonCollection.get());
-        // Retain the vertex
-        pairVxContainer->push_back(pairVxCandidate);
         ATH_MSG_DEBUG("..... indices: " << (*pairItr).combinationIndices() <<
                       " charges: " << (*pairItr).combinationCharges() <<
                       " chi2:    " << pairVxCandidate->chiSquared());
+        // Retain the vertex
+        pairVxContainer->push_back(std::move(pairVxCandidate));
       } else { // fit failed
         ATH_MSG_DEBUG("Fitter failed!");
       }
@@ -170,7 +170,7 @@ namespace DerivationFramework {
     for (std::vector<Combination>::iterator quadItr = quadruplets.begin(); quadItr!=quadruplets.end(); ++quadItr) {
       std::vector<const xAOD::TrackParticle*> theDCTracks; theDCTracks.clear();
       theDCTracks = (*quadItr).trackParticles("DC");
-      xAOD::Vertex* dcVxCandidate = fit(theDCTracks,importedTrackCollection.get(), beamSpot);
+      std::unique_ptr<xAOD::Vertex> dcVxCandidate = fit(ctx,theDCTracks,importedTrackCollection.get(), beamSpot);
       if (dcVxCandidate != 0) {
         // decorate the candidate with its codes
         indexDecorator(*dcVxCandidate) = (*quadItr).combinationIndices();
@@ -178,12 +178,12 @@ namespace DerivationFramework {
         // Decorate the DC candidate with the differences between its chi2 and the other
         double dcChi2 = dcVxCandidate->chiSquared();
         // decorate the candidate with refitted tracks and muons via the BPhysHelper
-        xAOD::BPhysHelper helper(dcVxCandidate);
+        xAOD::BPhysHelper helper(dcVxCandidate.get());
         helper.setRefTrks();
         const std::vector<const xAOD::Muon*> &theStoredMuons = (*quadItr).muons;
         helper.setMuons(theStoredMuons,importedMuonCollection.get());
         // Retain the vertex
-        quadVxContainer->push_back(dcVxCandidate);
+        quadVxContainer->push_back(std::move(dcVxCandidate));
         ATH_MSG_DEBUG("..... indices: " << (*quadItr).combinationIndices() <<
                       " charges: " << (*quadItr).combinationCharges() <<
                       " chi2(DC): " << dcChi2);
@@ -202,9 +202,10 @@ namespace DerivationFramework {
   // fit - does the fit
   // ---------------------------------------------------------------------------------
 
-  xAOD::Vertex* FourMuonTool::fit(const std::vector<const xAOD::TrackParticle*> &inputTracks,
-                                  const xAOD::TrackParticleContainer* importedTrackCollection,
-                                  const Amg::Vector3D &beamSpot) const {
+  std::unique_ptr<xAOD::Vertex> FourMuonTool::fit(const EventContext& ctx,
+                                                  const std::vector<const xAOD::TrackParticle*> &inputTracks,
+                                                  const xAOD::TrackParticleContainer* importedTrackCollection,
+                                                  const Amg::Vector3D &beamSpot) const {
 
     const Trk::TrkV0VertexFitter* concreteVertexFitter=0;
     if (m_useV0Fitter) {
@@ -216,14 +217,14 @@ namespace DerivationFramework {
       }
     }
 
-    xAOD::Vertex* myVxCandidate{};
+    std::unique_ptr<xAOD::Vertex> myVxCandidate;
     if (m_useV0Fitter) {
-      myVxCandidate = concreteVertexFitter->fit(inputTracks, beamSpot /*vertex startingPoint*/ );
+      myVxCandidate = std::unique_ptr<xAOD::Vertex>( concreteVertexFitter->fit(inputTracks, beamSpot /*vertex startingPoint*/) );
     } else {
-      myVxCandidate = m_iVertexFitter->fit(inputTracks, beamSpot /*vertex startingPoint*/ );
+      myVxCandidate = m_iVertexFitter->fit(ctx, inputTracks, beamSpot /*vertex startingPoint*/ );
     }
 
-    if(myVxCandidate) BPhysPVTools::PrepareVertexLinks(myVxCandidate, importedTrackCollection);
+    if(myVxCandidate) BPhysPVTools::PrepareVertexLinks(myVxCandidate.get(), importedTrackCollection);
 
     return myVxCandidate;
 
