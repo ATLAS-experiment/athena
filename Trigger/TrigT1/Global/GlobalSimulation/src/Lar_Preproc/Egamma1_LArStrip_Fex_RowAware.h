@@ -11,7 +11,7 @@
 */
 
 #include "ICaloCellsProducer.h"
-#include "eFexRoIAlgTool.h"
+#include "../FEX_Unpacker/eFexRoIAlgTool.h"
 #include "Egamma1_LArStrip_Fex.h"
 #include "CaloEvent/CaloCellContainer.h"
 #include "CaloConditions/CaloNoise.h"

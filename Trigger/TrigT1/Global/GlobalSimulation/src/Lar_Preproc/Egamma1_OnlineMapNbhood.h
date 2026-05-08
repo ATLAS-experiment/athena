@@ -12,7 +12,7 @@
   It is seeded from the GlobalLArCells.
 */
 
-#include "eFexRoIAlgTool.h"
+#include "../FEX_Unpacker/eFexRoIAlgTool.h"
 #include "GlobalLArCell.h"
 #include "GlobalLArCellContainer.h"
 
