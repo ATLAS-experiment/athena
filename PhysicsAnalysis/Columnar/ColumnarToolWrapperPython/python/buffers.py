@@ -153,7 +153,7 @@ def extract_buffers(events, classified):
 
         if not input_cols:
             # No inputs — synthesize an offset if outputs need it later
-            buffers[container_name] = np.array(
+            buffers[container_name] = np.ascontiguousarray(
                 [0, num_events], dtype=np.uint64
             )
             continue
@@ -179,7 +179,7 @@ def extract_buffers(events, classified):
                 # Use ak.to_numpy per field instead of walking raw_buffers:
                 # when events is masked/indexed, form.content(field) is an
                 # IndexedForm and the "-data" key doesn't exist in raw_buffers.
-                buffers[container_name] = np.array(
+                buffers[container_name] = np.ascontiguousarray(
                     [0, length], dtype=np.uint64
                 )
                 for col in cols:
@@ -190,20 +190,19 @@ def extract_buffers(events, classified):
                 offset_key = next(
                     key for key in raw_buffers if key.endswith("-offsets")
                 )
-                buffers[container_name] = np.asarray(
-                    raw_buffers[offset_key]
-                ).astype(np.uint64)
+                buffers[container_name] = np.ascontiguousarray(raw_buffers[offset_key]).astype(
+                    np.uint64
+                )
 
                 # Data buffers from the inner RecordForm
                 inner = form.content
                 for field in inner.fields:
-                    buffers[field] = np.asarray(
+                    buffers[field] = np.ascontiguousarray(
                         raw_buffers[f"{inner.content(field).form_key}-data"]
                     )
             else:
                 raise RuntimeError(
-                    f"Cannot handle form {type(form)} for "
-                    f"container {container_name}"
+                    f"Cannot handle form {type(form)} for container {container_name}"
                 )
 
     # TODO: nested vector offset extraction not yet implemented
