@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -348,7 +348,7 @@ namespace DerivationFramework {
         vtxTrkParticleIndex1 = trkIndex1;
         vtxTrkParticleIndex2 = trkIndex2;
 
-        std::unique_ptr<xAOD::Vertex> myVertex( m_VertexFitter->fit( trksToFit, startingPoint ) );
+        std::unique_ptr<xAOD::Vertex> myVertex( m_VertexFitter->fit( ctx, trksToFit, startingPoint ) );
 
         if(myVertex){
 
