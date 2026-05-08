@@ -116,7 +116,7 @@ bool ZmumuEvent::Reco (int theLumiBlock)
   // Clear out the previous events record.
   this->Clear();
 
-  // before getting into bsiness, check lumiblock is in requested range
+  // before getting into business, check lumiblock is in requested range
   if (m_maxGoodLumiBlock > m_minGoodLumiBlock) {
     // lumiblock range is requested
     if ( theLumiBlock < m_minGoodLumiBlock) return false;
