@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /*
    Tool to match a track to a Primary Vertex obtained with other leptons/tracks
@@ -53,10 +53,11 @@ TrkToLeptonPVTool::TrkToLeptonPVTool(const std::string& type,
    std::unique_ptr<xAOD::Vertex>  TrkToLeptonPVTool::matchTrkToPV( const xAOD::TrackParticle *trk, const xAOD::Vertex * PV,
                                                                          const xAOD::EventInfo * eventINFO) const
    {
+     const EventContext& ctx = Gaudi::Hive::currentContext();
      static const SG::ConstAccessor<float> vyAcc("vy");
      if(vyAcc.isAvailable(*trk)) {
        std::vector<const xAOD::TrackParticle *> tpv(1,trk);
-       return std::unique_ptr<xAOD::Vertex>(m_fitterSvc->fit(tpv,(*PV)));
+       return m_fitterSvc->fit(ctx,tpv,(*PV));
      }
 
      //---DAOD case     
@@ -69,14 +70,14 @@ TrkToLeptonPVTool::TrkToLeptonPVTool(const std::string& type,
      TPC.reserve( 1 );
      TPC.push_back(new (std::nothrow) xAOD::TrackParticle(*trk));
      if(!TPC[0])return {nullptr};
-     const EventContext& ctx = Gaudi::Hive::currentContext();
+
      const float mvx= (eventINFO) ? eventINFO->beamPosX() : 0.;
      const float mvy= (eventINFO) ? eventINFO->beamPosY() : 0.;
      static const SG::ConstAccessor<float> vzAcc("vz");
      const float mvz= (vzAcc.isAvailable(*trk)) ? trk->vz() : 0.;
      TPC[0]->setParametersOrigin( mvx, mvy, mvz);
      wrkTrkC[0]=TPC[0];
-     return std::unique_ptr<xAOD::Vertex>(m_fitterSvc->fit(ctx,wrkTrkC,(*PV)));
+     return m_fitterSvc->fit(ctx,wrkTrkC,(*PV));
 
    }
 
@@ -147,7 +148,7 @@ TrkToLeptonPVTool::TrkToLeptonPVTool(const std::string& type,
           BEAM.setX(BEAM.x()+beamtiltX*iniVertex->z());
           BEAM.setY(BEAM.y()+beamtiltY*iniVertex->z());
        }
-       return std::unique_ptr<xAOD::Vertex>(m_fitterSvc->fit(ctx,particles,BEAM));
+       return m_fitterSvc->fit(ctx,particles,BEAM);
      }
  
      //
@@ -178,7 +179,7 @@ TrkToLeptonPVTool::TrkToLeptonPVTool(const std::string& type,
         BEAM.setX(BEAM.x()+beamtiltX*iniVertex->z());
         BEAM.setY(BEAM.y()+beamtiltY*iniVertex->z());
      }
-     return std::unique_ptr<xAOD::Vertex>(m_fitterSvc->fit(ctx,wrkTrkC,BEAM));
+     return m_fitterSvc->fit(ctx,wrkTrkC,BEAM);
    } 
 
 
