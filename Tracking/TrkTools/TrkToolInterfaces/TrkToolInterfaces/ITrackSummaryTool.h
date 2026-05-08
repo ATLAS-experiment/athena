@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKITRACKSUMMARYTOOL_H
@@ -14,7 +14,6 @@ namespace Trk {
 class Track;
 class TrackSummary;
 
-static const InterfaceID IID_ITrackSummaryTool("Trk::ITrackSummaryTool", 1, 0);
 
 /** @class ITrackSummaryTool
     @brief Interface for condensing Trk::Track properties and associated
@@ -25,7 +24,7 @@ static const InterfaceID IID_ITrackSummaryTool("Trk::ITrackSummaryTool", 1, 0);
 class ITrackSummaryTool : virtual public IAlgTool
 {
 public:
-  static const InterfaceID& interfaceID();
+  DeclareInterfaceID(Trk::ITrackSummaryTool, 1, 0);
 
   /* Start from a copy of the existing input track summary if there,
    * otherwise start from a new one. Fill it and return it.
@@ -59,16 +58,7 @@ public:
   virtual void updateTrackSummary(const EventContext& ctx,
                                   Track& track) const = 0;
 
-  /** method to update additional information (PID,shared hits, dEdX), this is
-   * optimised for track collection merging. */
-  virtual void updateAdditionalInfo(Track& track) const = 0;
 };
-
-inline const InterfaceID&
-Trk::ITrackSummaryTool::interfaceID()
-{
-  return IID_ITrackSummaryTool;
-}
 
 }
 #endif
