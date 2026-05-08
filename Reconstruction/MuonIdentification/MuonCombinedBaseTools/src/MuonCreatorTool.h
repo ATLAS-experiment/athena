@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCOMBINEDBASETOOLS_MUONCREATORTOOL_H
@@ -108,7 +108,8 @@ namespace MuonCombined {
         /// function creates an element link to a track particle from the track and
         /// the TrackParticle collection. if a TrackCollection is also provided, the
         /// element link to the track will also be set takes ownership of the track
-        ElementLink<xAOD::TrackParticleContainer> createTrackParticleElementLink(const ElementLink<TrackCollection>& trackLink,
+        ElementLink<xAOD::TrackParticleContainer> createTrackParticleElementLink(const EventContext& ctx,
+                                                                                 const ElementLink<TrackCollection>& trackLink,
                                                                                  xAOD::TrackParticleContainer& trackParticleContainer,
                                                                                  TrackCollection* trackCollection = 0) const;
 
