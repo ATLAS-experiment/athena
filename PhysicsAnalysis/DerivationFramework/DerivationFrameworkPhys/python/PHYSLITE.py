@@ -209,9 +209,8 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.jetCollection', jetContainer)
     subConfig.setOptionValue ('.runFJvtSelection', False)
     subConfig.setOptionValue ('.runJvtSelection', False)
-    configSeq += subConfig
-    subConfig = factory.makeConfig ('Jets.Uncertainties')
-    subConfig.setOptionValue ('.containerName', 'AnalysisJets')
+    subConfig.setOptionValue ('.runUncertainties', False)
+    subConfig.setOptionValue ('.outputTruthLabelIDs', True)
     configSeq += subConfig
     subConfig = factory.makeConfig ('Thinning')
     subConfig.setOptionValue ('.containerName', 'AnalysisJets')
@@ -232,6 +231,8 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.maxRapidity', 0.)
     subConfig.setOptionValue ('.minMass', 0.)
     subConfig.setOptionValue ('.maxMass', 0.)
+    subConfig.setOptionValue ('.runUncertainties', False)
+    subConfig.setOptionValue ('.outputTruthLabelIDs', True)
     configSeq += subConfig
     subConfig = factory.makeConfig ('Thinning')
     subConfig.setOptionValue ('.containerName', 'AnalysisLargeRJets')

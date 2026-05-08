@@ -5,6 +5,7 @@
 #include <JetAnalysisAlgorithms/BJetCalibrationAlg.h>
 #include <JetAnalysisAlgorithms/JetFFSmearingAlg.h>
 #include <JetAnalysisAlgorithms/JetGhostMuonAssociationAlg.h>
+#include <JetAnalysisAlgorithms/JetPartonTruthLabelAlg.h>
 #include <JetAnalysisAlgorithms/JetGhostMergingAlg.h>
 #include <JetAnalysisAlgorithms/JetModifierAlg.h>
 #include <JetAnalysisAlgorithms/JetSelectionAlg.h>
@@ -26,6 +27,7 @@ DECLARE_COMPONENT (CP::JetCalibAlg)
 DECLARE_COMPONENT (CP::BJetCalibrationAlg)
 DECLARE_COMPONENT (CP::JetFFSmearingAlg)
 DECLARE_COMPONENT (CP::JetGhostMuonAssociationAlg)
+DECLARE_COMPONENT (CP::JetPartonTruthLabelAlg)
 DECLARE_COMPONENT (CP::JetGhostMergingAlg)
 DECLARE_COMPONENT (CP::JetModifierAlg)
 DECLARE_COMPONENT (CP::JetSelectionAlg)

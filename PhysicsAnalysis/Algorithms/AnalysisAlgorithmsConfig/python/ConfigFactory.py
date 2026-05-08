@@ -273,9 +273,6 @@ class ConfigFactory():
         self.addAlgConfigBlock(algName="FlavourTagging", alg=FTagConfig,
             defaults={'selectionName': ''},
             superBlocks="Jets")
-        from JetAnalysisAlgorithms.JetUncertaintiesConfig import JetUncertaintiesConfig
-        self.addAlgConfigBlock(algName="Uncertainties", alg=JetUncertaintiesConfig,
-            superBlocks="Jets")
         from FTagAnalysisAlgorithms.XbbAnalysisConfig import XbbConfig
         self.addAlgConfigBlock(algName="XbbTagging", alg=XbbConfig,
                                superBlocks="Jets")
