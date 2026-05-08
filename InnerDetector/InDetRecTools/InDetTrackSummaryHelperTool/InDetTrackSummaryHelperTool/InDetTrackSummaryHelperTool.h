@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETTRACKSUMMARYHELPERTOOL_H
 #define INDETTRACKSUMMARYHELPERTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "TrkToolInterfaces/IExtendedTrackSummaryHelperTool.h"
+#include "TrkToolInterfaces/ITrackSummaryHelperTool.h"
 
 #include "TRT_ConditionsServices/ITRT_StrawStatusSummaryTool.h"
 #include "TrkEventPrimitives/ParticleHypothesis.h"
@@ -37,7 +37,7 @@ class TrackStateOnSurface;
 namespace InDet {
 
 class InDetTrackSummaryHelperTool final
-  : public extends<AthAlgTool, Trk::IExtendedTrackSummaryHelperTool>
+  : public extends<AthAlgTool, Trk::ITrackSummaryHelperTool>
 {
 public:
   /** constructor */
@@ -58,8 +58,6 @@ public:
       Input quantities rot, tsos are used to increment the counts for hits and
      outliers in information and to set the proper bits in hitPattern.
   */
-  using IExtendedTrackSummaryHelperTool::addDetailedTrackSummary;
-  using IExtendedTrackSummaryHelperTool::analyse;
 
   virtual void analyse(
     const EventContext& ctx,

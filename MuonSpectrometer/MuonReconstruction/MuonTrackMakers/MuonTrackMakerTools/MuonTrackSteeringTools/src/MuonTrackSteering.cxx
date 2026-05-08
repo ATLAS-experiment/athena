@@ -649,7 +649,7 @@ namespace Muon {
         for (std::unique_ptr<MuPatTrack>& cit : candidates) {
             auto & thisTrack =  cit->track();
             // if track selector is configured, use it and remove bad tracks
-            if (!m_trackSelector.empty() && !m_trackSelector->decision(thisTrack)) continue;
+            if (!m_trackSelector.empty() && !m_trackSelector->decision(ctx, thisTrack)) continue;
 
             Trk::Track* track{nullptr};
             if (takeOwnership)

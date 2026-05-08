@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonHitSummaryTool.h"
@@ -29,8 +29,10 @@ namespace Muon {
         // check whether helper tool set
         if (m_summaryHelperTool.empty()) return;
 
+        const EventContext& ctx = Gaudi::Hive::currentContext();  // FIXME: should be passed as argument
+
         Trk::TrackSummary tmpSummary;
-        m_summaryHelperTool->addDetailedTrackSummary(track, tmpSummary);
+        m_summaryHelperTool->addDetailedTrackSummary(ctx, track, tmpSummary);
         if (!tmpSummary.muonTrackSummary()) {
             ATH_MSG_WARNING("Could not create MuonTrackSummary, please enable the creation in " << m_summaryHelperTool);
             return;

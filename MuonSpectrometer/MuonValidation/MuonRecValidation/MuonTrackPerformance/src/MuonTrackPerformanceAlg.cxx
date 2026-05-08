@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTrackPerformanceAlg.h"
@@ -111,13 +111,15 @@ StatusCode MuonTrackPerformanceAlg::initialize() {
 
 StatusCode MuonTrackPerformanceAlg::execute() {
 
-    SG::ReadHandle<xAOD::EventInfo> evInfo(m_eventInfoKey);
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+
+    SG::ReadHandle<xAOD::EventInfo> evInfo(m_eventInfoKey, ctx);
     if (!evInfo.isValid()) {
         ATH_MSG_WARNING("failed to retrieve EventInfo");
         return StatusCode::FAILURE;
     }
     m_eventInfo = evInfo.cptr();
-    handleTracks();
+    handleTracks(ctx);
 
     ++m_nevents;
 
@@ -152,10 +154,10 @@ bool MuonTrackPerformanceAlg::handleSegmentCombi(const Muon::MuonSegmentCombinat
     return true;
 }
 
-bool MuonTrackPerformanceAlg::handleTracks() {
+bool MuonTrackPerformanceAlg::handleTracks(const EventContext& ctx) {
     std::unique_ptr<TrackCollection> allTracks = std::make_unique<TrackCollection>();
     if (!m_trackKey.key().empty()) {  // MS tracks
-        SG::ReadHandle<TrackCollection> trackCol(m_trackKey);
+        SG::ReadHandle<TrackCollection> trackCol(m_trackKey, ctx);
         if (!trackCol.isValid()) {
             ATH_MSG_WARNING(" Could not find tracks at " << m_trackKey.key());
             return false;
@@ -164,11 +166,11 @@ bool MuonTrackPerformanceAlg::handleTracks() {
         ATH_MSG_DEBUG(" Retrieved " << trackCol->size() << " tracks from " << trackCol.key());
         m_ntracks += trackCol->size();
 
-        if (m_doTruth) { handleTrackTruth(*trackCol); }
+        if (m_doTruth) { handleTrackTruth(ctx, *trackCol); }
 
         if ((msgLvl(MSG::DEBUG) || m_doSummary >= 2) && !m_doTruth) { doSummary(*trackCol); }
     } else {
-        SG::ReadHandle<xAOD::MuonContainer> muons(m_muons);
+        SG::ReadHandle<xAOD::MuonContainer> muons(m_muons, ctx);
         if (!muons.isValid()) {
             ATH_MSG_WARNING("could not find muons");
             return false;
@@ -224,7 +226,7 @@ bool MuonTrackPerformanceAlg::handleTracks() {
         }
         ATH_MSG_DEBUG("got " << allTracks->size() << " tracks");
 
-        if (m_doTruth) { handleTrackTruth(*allTracks.get()); }
+        if (m_doTruth) { handleTrackTruth(ctx, *allTracks.get()); }
 
         if ((msgLvl(MSG::DEBUG) || m_doSummary >= 2) && !m_doTruth) { doSummary(*allTracks.get()); }
     }
@@ -249,16 +251,16 @@ bool MuonTrackPerformanceAlg::goodTruthTrack(const Muon::IMuonTrackTruthTool::Tr
     return (hits > 4);
 }
 
-bool MuonTrackPerformanceAlg::handleTrackTruth(const TrackCollection& trackCollection) {
+bool MuonTrackPerformanceAlg::handleTrackTruth(const EventContext& ctx, const TrackCollection& trackCollection) {
     bool didOutput = false;
 
     unsigned int ntruthTracks(0);
     unsigned int ntruthTracksSecondary(0);
 
-    SG::ReadHandle<TrackRecordCollection> truthTrackCol(m_trackRecord);
-    SG::ReadHandle<McEventCollection> mcEventCollection(m_mcEventColl);
+    SG::ReadHandle<TrackRecordCollection> truthTrackCol(m_trackRecord, ctx);
+    SG::ReadHandle<McEventCollection> mcEventCollection(m_mcEventColl, ctx);
     std::vector<const MuonSimDataCollection*> muonSimData;
-    for (SG::ReadHandle<MuonSimDataCollection>& simDataMap : m_muonSimData.makeHandles()) {
+    for (SG::ReadHandle<MuonSimDataCollection>& simDataMap : m_muonSimData.makeHandles(ctx)) {
         if (!simDataMap.isValid()) {
             ATH_MSG_WARNING(simDataMap.key() << " not valid");
             continue;
@@ -268,7 +270,7 @@ bool MuonTrackPerformanceAlg::handleTrackTruth(const TrackCollection& trackColle
     }
     const CscSimDataCollection* cscSimData = nullptr;
     if (m_idHelperSvc->hasCSC()) {
-        SG::ReadHandle<CscSimDataCollection> cscSimDataMap(m_cscSimData);
+        SG::ReadHandle<CscSimDataCollection> cscSimDataMap(m_cscSimData, ctx);
         if (!cscSimDataMap.isValid()) {
             ATH_MSG_WARNING(cscSimDataMap.key() << " not valid");
         } else {
@@ -378,7 +380,7 @@ bool MuonTrackPerformanceAlg::handleTrackTruth(const TrackCollection& trackColle
         // create track summary
         TrackData* trackData = evaluateTrackTruthOverlap(truthTrack);
         if (!trackData) continue;
-        addTrackToTrackData(*mit->second.first, *trackData);
+        addTrackToTrackData(ctx, *mit->second.first, *trackData);
         trackData->truthTrack = new TrackRecord(*mit->first);
         if (truthTrack.truthTrajectory) {
             trackData->truthTrajectory = new TruthTrajectory(*truthTrack.truthTrajectory);
@@ -535,7 +537,7 @@ bool MuonTrackPerformanceAlg::handleTrackTruth(const TrackCollection& trackColle
         summary.chambers = m_printer->printStations(**trit);
 
         TrackData* trackData = new TrackData();
-        addTrackToTrackData(**trit, *trackData);
+        addTrackToTrackData(ctx, **trit, *trackData);
         if (isHighPt) {
             eventData.fakeTracks.push_back(trackData);
             ++m_nfakeTracksHighPt;
@@ -1241,7 +1243,7 @@ std::string MuonTrackPerformanceAlg::print(const MuonTrackPerformanceAlg::TrackD
     return sout.str();
 }
 
-void MuonTrackPerformanceAlg::addTrackToTrackData(const Trk::Track& track, MuonTrackPerformanceAlg::TrackData& trackData) const {
+void MuonTrackPerformanceAlg::addTrackToTrackData(const EventContext& ctx, const Trk::Track& track, MuonTrackPerformanceAlg::TrackData& trackData) const {
     trackData.trackPars = track.perigeeParameters() ? new Trk::Perigee(*track.perigeeParameters()) : nullptr;
     trackData.chi2Ndof = 0.;
 
@@ -1250,7 +1252,7 @@ void MuonTrackPerformanceAlg::addTrackToTrackData(const Trk::Track& track, MuonT
 
     trackData.trackSummary = track.trackSummary() ? new Trk::TrackSummary(*track.trackSummary()) : nullptr;
     if (trackData.trackSummary && !trackData.trackSummary->muonTrackSummary()) {
-        m_summaryHelperTool->addDetailedTrackSummary(track, *trackData.trackSummary);
+        m_summaryHelperTool->addDetailedTrackSummary(ctx, track, *trackData.trackSummary);
     }
 }
 
