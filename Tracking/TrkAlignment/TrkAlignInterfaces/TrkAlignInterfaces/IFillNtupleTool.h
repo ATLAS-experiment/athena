@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKALIGNINTERFACES_IFILLNTUPLETOOL_IH
@@ -41,7 +41,7 @@ namespace Trk {
     virtual StatusCode finalize() = 0;
 
     /** dumps track information to ntuple */
-    virtual void dumpTrack(int itrk, const AlignTrack* alignTrack) = 0;
+    virtual void dumpTrack(const EventContext& ctx, int itrk, const AlignTrack* alignTrack) = 0;
     
     /** stores hitmap for writing to ntuple */
     virtual void storeHitmap() = 0;
