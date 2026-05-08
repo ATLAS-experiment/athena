@@ -128,6 +128,10 @@ public:
                                       ClusterProxy<T_CellContainer>,
                                       unsigned int >;
    using BASE::BASE;
+   unsigned int identifyHash() const {
+      assert( this->index() < this->container().m_moduleClusterRange.size());
+      return this->container().m_moduleClusterRange[this->index()].idHash;
+   }
 
    // index referring to the first cluster of a module
    static IndexWithBeginIndexCache beginIndex(const T_CellContainer *container, unsigned int module_index)
