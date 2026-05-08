@@ -23,12 +23,12 @@ namespace GlobalSim {
     
     if (m_enableDumps) {
       std::stringstream ss;
-      ss << "\nTOB creators\n";
+      ss << "\nTOB creators (" << m_algTools.size() << ")\n";
       for (const auto& tool : m_algTools) {
 	ss << tool->toString() << '\n';
 	ss << "=========\n";
       }
-      ss << "\nTIP writers\n";
+      ss << "\nTIP writers (" << m_TIPwriters.size() << ")\n";
       for (const auto& tool : m_TIPwriters) {
 	ss << tool->toString() << '\n';
 	ss << "=========\n";
@@ -47,6 +47,9 @@ namespace GlobalSim {
   StatusCode GlobalSimulationAlg::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("Executing ...");
 
+    if (m_enableDumps) {
+      ATH_MSG_INFO ("Dumping StoreGate\n" << evtStore()->dump());
+    }
 
     using TipWord = std::bitset<ITIPwriterAlgTool::s_nbits_TIP>;
 
