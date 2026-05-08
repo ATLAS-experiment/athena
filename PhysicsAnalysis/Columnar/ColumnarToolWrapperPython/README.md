@@ -586,11 +586,31 @@ These functions are useful for custom integrations or when building your own wra
 
 ## Nested Vectors
 
-Support for tools that read `std::vector<std::vector<T>>` columns (e.g. `VectorExampleTool` reading `NumTrkPt500`) is planned. The `ColumnInfo` metadata already exposes nested-vector offsets, but buffer extraction for these columns is not yet implemented in the high-level `Tool` API.
+Tools that read `std::vector<std::vector<T>>` columns (e.g. `VectorExampleTool` reading `NumTrkPt500`) are fully supported by the high-level `Tool` API. The wrapper auto-detects nested-vector inputs from `ColumnInfo` metadata and extracts the inner offsets and data buffers automatically.
 
-At the `PythonToolHandle` level, nested-vector columns can be set manually using the `.offset` / `.data` naming convention:
+Use `Tool.required_input_branch_names` to get the deduplicated list of uproot branch names to load. For nested-vector inputs the trailing `.data` suffix is stripped so the names match the actual ROOT branches:
+
+```python
+import uproot
+from ColumnarToolWrapperPython import Tool
+
+tool = Tool(
+    "columnar::VectorExampleTool/vecEx",
+    rename_containers={"Particles": "AnalysisJetsAuxDyn"},
+)
+
+with uproot.open("DAOD_PHYSLITE.root") as f:
+    events = f["CollectionTree"].arrays(tool.required_input_branch_names, entry_stop=10)
+
+result = tool(events)
+print(result["AnalysisJetsAuxDyn.selection"].to_list())
+```
+
+At the `PythonToolHandle` level, nested-vector columns can still be set manually using the `.offset` / `.data` naming convention:
 
 ```python
 handle["Met.name.offset"] = np.array([0, 9, 14], dtype=np.uint64)
 handle["Met.name.data"]   = np.array([ord(c) for c in "InvisibleFinal"], dtype=np.int8)
 ```
+
+**Note:** Nested-vector *outputs* (`std::vector<std::vector<T>>` written by the tool) are not yet supported by `Tool.__call__` — `allocate_outputs` raises `NotImplementedError` if it encounters one.

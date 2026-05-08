@@ -10,6 +10,7 @@ import awkward as ak
 import numpy as np
 
 from ColumnarToolWrapperPython.buffers import (
+    _branch_name_for_column,
     allocate_outputs,
     classify_columns,
     extract_buffers,
@@ -67,19 +68,43 @@ class Tool:
 
     @property
     def input_columns(self):
-        """Input (non-offset) ColumnInfo objects."""
+        """Input (non-offset) ColumnInfo objects, including nested-vector data columns."""
         cols = []
         for info in self._classified.values():
             cols.extend(info["inputs"])
+            for nested in info["nested_offsets"].values():
+                cols.extend(nested["inputs"])
         return cols
 
     @property
     def output_columns(self):
-        """Output ColumnInfo objects."""
+        """Output ColumnInfo objects, including nested-vector outputs (currently unsupported)."""
         cols = []
         for info in self._classified.values():
             cols.extend(info["outputs"])
+            for nested in info["nested_offsets"].values():
+                cols.extend(nested["outputs"])
         return cols
+
+    @property
+    def required_input_branch_names(self):
+        """Deduplicated uproot branch names needed to fill non-optional inputs.
+
+        For nested-vector inputs, the trailing ``.data`` suffix is stripped so
+        the returned name matches the actual ROOT branch (e.g.
+        ``"Particles.NumTrkPt500"`` instead of ``"Particles.NumTrkPt500.data"``).
+        Optional inputs are excluded.
+        """
+        seen = []
+        seen_set = set()
+        for col in self.input_columns:
+            if col.is_optional:
+                continue
+            branch = _branch_name_for_column(col.name)
+            if branch not in seen_set:
+                seen_set.add(branch)
+                seen.append(branch)
+        return seen
 
     @property
     def recommended_systematics(self):
@@ -136,16 +161,21 @@ class Tool:
                 # Container offset (always immutable)
                 self._handle[container_name] = np.asarray(buffer_dict[container_name])
 
-                # Nested-vector offsets (immutable)
-                for nested_name in info["nested_offsets"]:
-                    if nested_name in buffer_dict:
-                        self._handle[nested_name] = np.asarray(buffer_dict[nested_name])
+                # Nested-vector offsets and their data inputs/outputs
+                for nested_offset_name, nested in info["nested_offsets"].items():
+                    self._handle[nested_offset_name] = np.asarray(
+                        buffer_dict[nested_offset_name]
+                    )
+                    for col in nested["inputs"]:
+                        self._handle[col.name] = np.asarray(buffer_dict[col.name])
+                    for col in nested["outputs"]:
+                        self._handle.set_column_void(col.name, buffer_dict[col.name], False)
 
-                # Input data columns (immutable)
+                # Flat input data columns (immutable)
                 for col in info["inputs"]:
                     self._handle[col.name] = np.asarray(buffer_dict[col.name])
 
-                # Output data columns (mutable)
+                # Flat output data columns (mutable)
                 for col in info["outputs"]:
                     self._handle.set_column_void(col.name, buffer_dict[col.name], False)
 

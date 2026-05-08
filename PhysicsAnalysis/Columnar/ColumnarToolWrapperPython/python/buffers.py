@@ -14,6 +14,54 @@ import numpy as np
 from ColumnarToolWrapperPython.python_tool_handle import ColumnAccessMode
 
 
+def _inner_most_list_offset_array(array):
+    """Return the inner-most singly-jagged ListOffsetArray of ``array``.
+
+    For a ``var * var * T`` input (e.g. NumTrkPt500), returns a view whose
+    layout is a ``ListOffsetArray`` with ``NumpyArray`` content — i.e. the
+    per-particle list structure collapsed across the full event range.
+    Use ``result.layout.offsets.data`` for cumulative per-particle inner
+    offsets and ``result.layout.content.data`` for the flat numeric buffer.
+
+    Solution from Peter Fackeldey: traverse the layout with ``ak.transform``
+    and capture the deepest singly-jagged node.
+    """
+    layout = array.layout
+    layout_depth = layout.purelist_depth
+
+    is_branched, _ = layout.branch_depth
+    if is_branched:
+        raise ValueError(
+            f"{layout} has branching, cannot extract inner-most ListOffsetArray"
+        )
+
+    def _is_singly_jagged(lay):
+        return (
+            isinstance(lay, ak.contents.ListOffsetArray)
+            and isinstance(lay.content, ak.contents.NumpyArray)
+        )
+
+    found = None
+
+    def _capture(lay, depth, **_kwargs):
+        nonlocal found
+        if depth == (layout_depth - 1) and _is_singly_jagged(lay):
+            found = lay.materialize()
+
+    ak.transform(_capture, layout, return_value="none")
+
+    if found is None:
+        raise ValueError(
+            "Did not find a singly-jagged ListOffsetArray at the inner-most depth"
+        )
+    return ak.Array(found)
+
+
+def _branch_name_for_column(name):
+    """Strip the trailing ``.data`` suffix from a nested-vector column name."""
+    return name[:-5] if name.endswith(".data") else name
+
+
 def classify_columns(columns):
     """Group ColumnInfo objects by container and role.
 
@@ -50,24 +98,22 @@ def classify_columns(columns):
     # offsets. A container offset is one whose offset_name is either '' (root)
     # or points to another container offset. For MuonEffSF: EventInfo
     # (offset_name='') and Muons (offset_name='EventInfo') are both containers.
-    # A nested-vector offset would be something like
-    # "Muons.NumTrkPt500.offset" (offset_name='Muons'), which belongs under
-    # the "Muons" container entry.
-    #
-    # Detection: a nested-vector offset has offset_name pointing to a
-    # container offset AND its name is not a plain container name (contains '.').
+    # A nested-vector offset (e.g. "Particles.NumTrkPt500.offset") has a dotted
+    # name and its offset_name points to a container; it is stored under that
+    # container's "nested_offsets" as a dict with offset/inputs/outputs.
     container_offsets = {}
     nested_offsets_by_container = {}
 
     for name, col in offset_cols.items():
         parent = col.offset_name
         if parent == "" or parent in offset_cols:
-            # This could be a container or a nested-vector offset. Distinguish
-            # by checking whether the name contains a dot (nested) or not.
             if "." in name:
                 # Nested-vector offset — goes under its parent container
-                container = parent
-                nested_offsets_by_container.setdefault(container, {})[name] = col
+                nested_offsets_by_container.setdefault(parent, {})[name] = {
+                    "offset": col,
+                    "inputs": [],
+                    "outputs": [],
+                }
             else:
                 container_offsets[name] = col
         else:
@@ -85,16 +131,32 @@ def classify_columns(columns):
         for name, col in container_offsets.items()
     }
 
-    # Assign data columns to their container
+    # Reverse map: nested_offset_name -> parent container name, for routing
+    # data columns whose offset_name points to a nested offset.
+    nested_to_container = {
+        nested_name: container
+        for container, nested_map in nested_offsets_by_container.items()
+        for nested_name in nested_map
+    }
+
+    # Assign data columns to their container or nested-offset bucket
     for col in data_cols:
-        container = col.offset_name
-        if container not in classified:
+        target = col.offset_name
+        is_output = col.access_mode == ColumnAccessMode.output
+
+        if target in classified:
+            bucket = classified[target]
+        elif target in nested_to_container:
+            container = nested_to_container[target]
+            bucket = classified[container]["nested_offsets"][target]
+        else:
             # Shouldn't happen with well-formed tool output
             continue
-        if col.access_mode == ColumnAccessMode.output:
-            classified[container]["outputs"].append(col)
+
+        if is_output:
+            bucket["outputs"].append(col)
         else:
-            classified[container]["inputs"].append(col)
+            bucket["inputs"].append(col)
 
     return classified
 
@@ -149,18 +211,52 @@ def extract_buffers(events, classified):
     num_events = int(ak.num(events, axis=0))
 
     for container_name, info in classified.items():
-        input_cols = info["inputs"]
+        nested_offsets = info["nested_offsets"]
 
-        if not input_cols:
-            # No inputs — synthesize an offset if outputs need it later
-            buffers[container_name] = np.array(
-                [0, num_events], dtype=np.uint64
-            )
+        # Nested-vector inputs: extract inner offsets and data via the
+        # inner-most ListOffsetArray helper before processing flat inputs.
+        for nested_offset_name, nested in nested_offsets.items():
+            for col in nested["inputs"]:
+                base = _branch_name_for_column(col.name)
+                inner = _inner_most_list_offset_array(events[base])
+                raw_offsets = np.asarray(inner.layout.offsets.data)
+                start = int(raw_offsets[0])
+                end = int(raw_offsets[-1])
+                # ROOT baskets can provide a larger raw buffer than the
+                # offsets reference — normalize to [0, end-start] range.
+                buffers[nested_offset_name] = np.ascontiguousarray(
+                    raw_offsets - start, dtype=np.uint64
+                )
+                buffers[col.name] = np.ascontiguousarray(
+                    inner.layout.content.data[start:end]
+                )
+
+        flat_inputs = info["inputs"]
+
+        if not flat_inputs and not nested_offsets:
+            # No inputs at all — synthesize an offset so outputs can be sized
+            buffers[container_name] = np.array([0, num_events], dtype=np.uint64)
             continue
 
-        # Group input columns by their offset_name, then zip + to_buffers
+        if not flat_inputs:
+            # No flat inputs, but nested-vector inputs exist: derive the outer
+            # container offset from the first nested-vector field's outer layout.
+            any_nested_input = next(
+                (col for nested in nested_offsets.values() for col in nested["inputs"]),
+                None,
+            )
+            if any_nested_input is not None:
+                base = _branch_name_for_column(any_nested_input.name)
+                buffers[container_name] = np.ascontiguousarray(
+                    events[base].layout.offsets.data, dtype=np.uint64
+                )
+            else:
+                buffers[container_name] = np.array([0, num_events], dtype=np.uint64)
+            continue
+
+        # Group flat input columns by their offset_name, then zip + to_buffers
         # each group. This is the same pattern as the original example script.
-        sorted_cols = sorted(input_cols, key=lambda c: c.offset_name)
+        sorted_cols = sorted(flat_inputs, key=lambda c: c.offset_name)
 
         for offset_name, cols_iter in itertools.groupby(
             sorted_cols, key=lambda c: c.offset_name
@@ -206,8 +302,6 @@ def extract_buffers(events, classified):
                     f"container {container_name}"
                 )
 
-    # TODO: nested vector offset extraction not yet implemented
-
     return buffers
 
 
@@ -231,9 +325,19 @@ def allocate_outputs(classified, buffer_dict):
         Mapping of output column name -> zero-filled numpy array (same objects
         also inserted into ``buffer_dict``).
     """
+    nested_offset_names = {
+        nested_name
+        for info in classified.values()
+        for nested_name in info["nested_offsets"]
+    }
     output_buffers = {}
     for _container_name, info in classified.items():
         for col in info["outputs"]:
+            if col.offset_name in nested_offset_names:
+                raise NotImplementedError(
+                    f"Nested-vector output columns are not supported "
+                    f"(column '{col.name}' has nested offset '{col.offset_name}')"
+                )
             offset_data = buffer_dict.get(col.offset_name)
             if offset_data is None:
                 msg = (
