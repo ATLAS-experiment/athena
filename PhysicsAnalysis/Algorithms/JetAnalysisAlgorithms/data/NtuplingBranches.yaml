@@ -5,6 +5,8 @@ PreJetAnalysisConfig:
     description: jet $\eta$ (no systematics)
   - name: phi
     description: jet $\phi$ (no systematics)
+  - name: e
+    description: jet $E$ (*since AnalysisBase 25.2.13*)
   - name: HadronConeExclTruthLabelID
     description: truth labels used by the FTAG group (no systematics)
     toggled_by: outputTruthLabelIDs
@@ -38,8 +40,6 @@ JetUncertaintiesConfig:
   - name: Njet
     description: jet multiplicity for custom jet flavour composition uncertainties
     toggled_by: analysisJetSelection
-  - name: e
-    description: jet $E$ (*since AnalysisBase 25.2.13*)
 
 JetReclusteringBlock:
   - name: pt

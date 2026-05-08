@@ -90,7 +90,8 @@ Jets:
     jetCollection: AntiKt4EMPFlowJets
     runFJvtSelection: False
     runJvtSelection: False
-    Uncertainties: {}
+    runUncertainties: False
+    outputTruthLabelIDs: True
   - containerName: AnaLargeRJets
     jetCollection: AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets
     runGhostMuonAssociation: False
@@ -99,6 +100,8 @@ Jets:
     maxRapidity: 0.
     minMass: 0.
     maxMass: 0.
+    runUncertainties: False
+    outputTruthLabelIDs: True
 
 Thinning:
   - containerName: AnaMuons
