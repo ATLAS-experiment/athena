@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file TrkVertexFitters/src/AdaptiveVertexFitterTestAlg.cxx
@@ -435,18 +435,18 @@ StatusCode AdaptiveVertexFitterTestAlg::initialize()
 /**
  * @brief Standard Gaudi execute method.
  */
-StatusCode AdaptiveVertexFitterTestAlg::execute()
+StatusCode AdaptiveVertexFitterTestAlg::execute(const EventContext& ctx) const
 {
   ATH_MSG_VERBOSE ("execute");
 
-  ATH_CHECK( test1() );
-  ATH_CHECK( test2() );
-  ATH_CHECK( test3() );
+  ATH_CHECK( test1(ctx) );
+  ATH_CHECK( test2(ctx) );
+  ATH_CHECK( test3(ctx) );
   return StatusCode::SUCCESS;
 }
 
 // Neutral, no constraint.
-StatusCode AdaptiveVertexFitterTestAlg::test1()
+StatusCode AdaptiveVertexFitterTestAlg::test1(const EventContext& ctx) const
 {
   xAOD::Vertex exp_v0;
   exp_v0.makePrivateStore();
@@ -459,7 +459,7 @@ StatusCode AdaptiveVertexFitterTestAlg::test1()
   setFitQuality (exp_v0, 2, 0.000, 2);
 
   NeutralUVec_t neutrals = makeNeutrals1();
-  std::unique_ptr<xAOD::Vertex> v1 (m_fitter->fit (std::vector<const Trk::TrackParameters*>(),
+  std::unique_ptr<xAOD::Vertex> v1 (m_fitter->fit (ctx, std::vector<const Trk::TrackParameters*>(),
                                                    asVec (neutrals)));
   compareVertex (*v1, exp_v0);
 
@@ -467,7 +467,7 @@ StatusCode AdaptiveVertexFitterTestAlg::test1()
 }
 
 // Charged + Neutral + Vector3D constraint
-StatusCode AdaptiveVertexFitterTestAlg::test2()
+StatusCode AdaptiveVertexFitterTestAlg::test2(const EventContext& ctx) const
 {
   xAOD::Vertex exp_v0;
   exp_v0.makePrivateStore();
@@ -541,14 +541,16 @@ StatusCode AdaptiveVertexFitterTestAlg::test2()
 
   PerigeeUVec_t perigees = makePerigees1();
   NeutralUVec_t neutrals = makeNeutrals1();
-  std::unique_ptr<xAOD::Vertex> v1 (m_fitter->fit (asVec (perigees),
+  std::unique_ptr<xAOD::Vertex> v1 (m_fitter->fit (ctx,
+                                                   asVec (perigees),
                                                    asVec (neutrals),
                                                    pnt1));
   compareVertex (*v1, exp_v0);
 
   xAODTPUVec_t xtps = makexAODTP (makePerigees1());
   xAODNPUVec_t xaodnp = makexAODNP (makeNeutrals1());
-  std::unique_ptr<xAOD::Vertex> v2 (m_fitter->fit (asVec (xtps),
+  std::unique_ptr<xAOD::Vertex> v2 (m_fitter->fit (ctx,
+                                                   asVec (xtps),
                                                    asVec (xaodnp),
                                                    pnt1));
   clearInitialPerigees (exp_v0);
@@ -559,7 +561,7 @@ StatusCode AdaptiveVertexFitterTestAlg::test2()
 
 
 // Charged+Neutral + Vertex constraint
-StatusCode AdaptiveVertexFitterTestAlg::test3()
+StatusCode AdaptiveVertexFitterTestAlg::test3(const EventContext& ctx) const
 {
   xAOD::Vertex exp_v0;
   exp_v0.makePrivateStore();
@@ -622,14 +624,16 @@ StatusCode AdaptiveVertexFitterTestAlg::test3()
 
   PerigeeUVec_t perigees = makePerigees1();
   NeutralUVec_t neutrals = makeNeutrals1();
-  std::unique_ptr<xAOD::Vertex> v1 (m_fitter->fit (asVec (perigees),
+  std::unique_ptr<xAOD::Vertex> v1 (m_fitter->fit (ctx,
+                                                   asVec (perigees),
                                                    asVec (neutrals),
                                                    pnt2));
   compareVertex (*v1, exp_v0);
 
   xAODTPUVec_t xtps = makexAODTP (makePerigees1());
   xAODNPUVec_t xaodnp = makexAODNP (makeNeutrals1());
-  std::unique_ptr<xAOD::Vertex> v2 (m_fitter->fit (asVec (xtps),
+  std::unique_ptr<xAOD::Vertex> v2 (m_fitter->fit (ctx,
+                                                   asVec (xtps),
                                                    asVec (xaodnp),
                                                    pnt2));
   clearInitialPerigees (exp_v0);
