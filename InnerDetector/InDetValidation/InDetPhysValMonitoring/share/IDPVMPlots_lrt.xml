@@ -233,11 +233,6 @@
       <graph name="fakerate_vs_d0" plotopts="" type="TEfficiency"/>
       <graph name="fakerate_vs_z0" plotopts="" type="TEfficiency"/>
      </TDirectory>
-     <TDirectory name="Unlinked">
-      <TDirectory name="FakeRate">
-       <graph name="fakerate_vs_eta" plotopts="" type="TEfficiency"/>
-      </TDirectory>
-     </TDirectory>
      <TDirectory name="Efficiency">
       <graph name="efficiency_vs_eta" plotopts="" type="TEfficiency"/>
       <graph name="efficiency_vs_pt" plotopts="" type="TEfficiency"/>
@@ -462,11 +457,6 @@
        <graph name="fakerate_vs_phi" plotopts="" type="TEfficiency"/>
        <graph name="fakerate_vs_d0" plotopts="" type="TEfficiency"/>
        <graph name="fakerate_vs_z0" plotopts="" type="TEfficiency"/>
-      </TDirectory>
-      <TDirectory name="Unlinked">
-       <TDirectory name="FakeRate">
-        <graph name="fakerate_vs_eta" plotopts="" type="TEfficiency"/>
-       </TDirectory>
       </TDirectory>
       <TDirectory name="Efficiency">
        <graph name="efficiency_vs_eta" plotopts="" type="TEfficiency"/>

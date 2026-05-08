@@ -24,12 +24,10 @@
 // std includes
 #include <string>
 
-enum class FakeRateCategory { Linked, Unlinked, Total };
-
 ///class holding Pt plots for Inner Detector RTT Validation and implementing fill methods
 class InDetPerfPlot_FakeRate: public InDetPlotBase {
 public:
-  InDetPerfPlot_FakeRate(InDetPlotBase* pParent, const std::string& dirName, FakeRateCategory fakeRateCategory = FakeRateCategory::Linked);
+  InDetPerfPlot_FakeRate(InDetPlotBase* pParent, const std::string& dirName);
 
   void fill(const xAOD::TrackParticle& track, const bool isFake, float weight, float mu);
 private:
@@ -40,9 +38,6 @@ private:
   TEfficiency* m_fakerate_vs_d0;
   TEfficiency* m_fakerate_vs_z0;
   TEfficiency* m_fakerate_vs_mu;
-
-  // Tweak the y-axis label if not "Linked"
-  FakeRateCategory m_fakeRateCategory;
 
   // plot base has nop default implementation of this; we use it to book the histos
   void initializePlots();

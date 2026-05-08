@@ -197,9 +197,6 @@
         <graph name="fakerate_vs_offl_phi" type="TEfficiency" plotopts="" tests="KSnorm"/>
         <graph name="fakerate_vs_offl_d0" type="TEfficiency" plotopts="" tests="KSnorm"/>
         <graph name="fakerate_vs_offl_z0" type="TEfficiency" plotopts="" tests="KSnorm"/>
-        <TDirectory name="Unlinked">
-         <graph name="fakerate_vs_offl_eta" type="TEfficiency" plotopts="" tests="KSnorm"/>
-        </TDirectory>
        </TDirectory>
        <TDirectory name="Efficiencies">
         <graph name="eff_vs_truth_eta" type="TEfficiency" plotopts="" tests="KSnorm"/>

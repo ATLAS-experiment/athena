@@ -249,12 +249,6 @@
       <graph name="fakerate_vs_d0" plotopts="" tests="KS" type="TEfficiency"/>
       <graph name="fakerate_vs_z0" plotopts="" tests="KS" type="TEfficiency"/>
      </TDirectory>
-     <TDirectory name="Unlinked">
-      <TDirectory name="FakeRate">
-       <graph name="fakerate_vs_eta" plotopts="" tests="KS" type="TEfficiency"/>
-       <graph name="fakerate_vs_pt" plotopts="" tests="KS" type="TEfficiency"/>
-      </TDirectory>
-     </TDirectory>
      <TDirectory name="Efficiency">
       <graph name="efficiency_vs_eta" plotopts="" tests="KS" type="TEfficiency"/>
       <graph name="efficiency_vs_pt" plotopts="" tests="KS" type="TEfficiency"/>
@@ -524,12 +518,6 @@
 	 <graph name="fakerate_vs_phi" plotopts="" tests="KS" type="TEfficiency"/>
 	 <graph name="fakerate_vs_d0" plotopts="" tests="KS" type="TEfficiency"/>
 	 <graph name="fakerate_vs_z0" plotopts="" tests="KS" type="TEfficiency"/>
-       </TDirectory>
-       <TDirectory name="Unlinked">
-	 <TDirectory name="FakeRate">
-	   <graph name="fakerate_vs_eta" plotopts="" tests="KS" type="TEfficiency"/>
-	   <graph name="fakerate_vs_pt" plotopts="" tests="KS" type="TEfficiency"/>
-	 </TDirectory>
        </TDirectory>
        <TDirectory name="Efficiency">
 	 <graph name="efficiency_vs_eta" plotopts="" tests="KS" type="TEfficiency"/>
