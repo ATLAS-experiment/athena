@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: TrackParticleCnvAlg.cxx 298303 2013-12-05 08:41:30Z emoyse $
 
 // Gaudi/Athena include(s):
 #include "AthenaKernel/errorcheck.h"
@@ -191,10 +190,10 @@ TrackParticleCnvAlg::execute(const EventContext& ctx) const
         ATH_MSG_VERBOSE("Got ObservedTrackMap with key " << m_tracksMap.key()
                                                         << " found.");
       }
-      convert((*tracks), trackTruth, m_TrackCollectionCnvTool, wh_xaodout,
+      convert(ctx, (*tracks), trackTruth, m_TrackCollectionCnvTool, wh_xaodout,
               truthLinks, primaryVertex, tracksMap);
     } else {
-      convert((*tracks), trackTruth, m_TrackCollectionCnvTool, wh_xaodout,
+      convert(ctx, (*tracks), trackTruth, m_TrackCollectionCnvTool, wh_xaodout,
               truthLinks, primaryVertex);
     }
     // Monitor track parameters
@@ -207,7 +206,7 @@ TrackParticleCnvAlg::execute(const EventContext& ctx) const
     ATH_CHECK(wh_xaodTrackParticlesout.record(
       std::make_unique<xAOD::TrackParticleContainer>(),
       std::make_unique<xAOD::TrackParticleAuxContainer>()));
-    convert((*aod), aodTruth, m_RecTrackParticleContainerCnvTool,
+    convert(ctx, (*aod), aodTruth, m_RecTrackParticleContainerCnvTool,
             wh_xaodTrackParticlesout, truthLinks);
   }
 
@@ -263,6 +262,7 @@ private:
 template<typename CONT, typename TRUTHCONT, typename CONVTOOL>
 int
 TrackParticleCnvAlg::convert(
+  const EventContext& ctx,
   const CONT& container,
   const TRUTHCONT& truth,
   CONVTOOL& conv_tool,
@@ -278,14 +278,14 @@ TrackParticleCnvAlg::convert(
   ATH_MSG_DEBUG("calling the converting tool for " << xaod.name());
   // Augment track particles using track map if available
   if (obs_track_map){
-    if (conv_tool->convertAndAugment(&container, xaod.ptr(), obs_track_map, primaryVertex).isFailure()) {
+    if (conv_tool->convertAndAugment(ctx, &container, xaod.ptr(), obs_track_map, primaryVertex).isFailure()) {
       ATH_MSG_ERROR("Couldn't convert and augment aod to xaod ("
                     << xaod.name() << ") with the converting tool");
       return -1;
     }
   }
   else{
-    if (conv_tool->convert(&container, xaod.ptr(), primaryVertex).isFailure()) {
+    if (conv_tool->convert(ctx, &container, xaod.ptr(), primaryVertex).isFailure()) {
       ATH_MSG_ERROR("Couldn't convert aod to xaod ("
                     << xaod.name() << ") with the converting tool");
       return -1;
@@ -432,13 +432,14 @@ xAOD::TrackParticle*
 TrackParticleCnvAlg::createParticle(
   xAOD::TrackParticleContainer& xaod,
   const Rec::TrackParticleContainer& /**container*/,
-  const Rec::TrackParticle& tp)
+  const Rec::TrackParticle& tp,
+  const EventContext& ctx)
 {
   // create the xAOD::TrackParticle, the pointer is added to the container in
   // the function
-  xAOD::TrackParticle* xp = m_particleCreator->createParticle(tp, &xaod);
+  xAOD::TrackParticle* xp = m_particleCreator->createParticle(ctx, tp, &xaod);
   return xp;
-} // createParticleAndTruth
+}
 
 xAOD::TrackParticle*
 TrackParticleCnvAlg::createParticle(xAOD::TrackParticleContainer& xaod,
@@ -449,7 +450,7 @@ TrackParticleCnvAlg::createParticle(xAOD::TrackParticleContainer& xaod,
   // create the xAOD::TrackParticle, the pointer is added to the container in
   // the function
   ElementLink<TrackCollection> trackLink(&tp, container,ctx);
-  return m_particleCreator->createParticle(trackLink, &xaod);
+  return m_particleCreator->createParticle(ctx, trackLink, &xaod);
 }
 
 } // namespace xAODMaker

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGBSEXTRACTION_TRIGBSEXTRACTION_H
@@ -33,12 +33,14 @@ public:
 private:
   /**
    @brief method which does loop over objects
+   @param  ctx       EventContext
    @param  navTool   navigation tool
    @param  key       does the job for EF or L2
    @param  equalize  flattens the EDM if true
    @param  xAODCnv   do xAOD conversion of Run-1 EF containers
    */
-  StatusCode repackFeaturesToSG (HLT::Navigation& navTool,
+  StatusCode repackFeaturesToSG (const EventContext& ctx,
+                                 HLT::Navigation& navTool,
                                  const SG::ReadHandleKey<HLT::HLTResult>& key,
                                  SG::WriteHandleKey<HLT::HLTResult>& keyOut,
                                  bool equalize, bool xAODConv);

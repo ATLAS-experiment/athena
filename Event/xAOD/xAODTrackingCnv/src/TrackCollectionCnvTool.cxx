@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
@@ -33,7 +33,7 @@ namespace xAODMaker {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode TrackCollectionCnvTool::convert( const TrackCollection* aod,
+  StatusCode TrackCollectionCnvTool::convert( const EventContext& ctx, const TrackCollection* aod,
 					      xAOD::TrackParticleContainer* xaod, const xAOD::Vertex* vtx ) const {
     
     ATH_MSG_DEBUG( "Sizes of containers before conversion: aod, xaod: " << aod->size() << ", " << xaod->size() );
@@ -47,7 +47,7 @@ namespace xAODMaker {
         ATH_MSG_WARNING("Empty element in container!");
         continue;
       }
-      xAOD::TrackParticle* particle = createParticle(*xaod, *aod, **itr, vtx);
+      xAOD::TrackParticle* particle = createParticle(ctx, *xaod, *aod, **itr, vtx);
 
       if (!particle) {
         ATH_MSG_WARNING("Failed to create a TrackParticle");
@@ -60,7 +60,7 @@ namespace xAODMaker {
     return StatusCode::SUCCESS;    
   }
 
-  StatusCode TrackCollectionCnvTool::convertAndAugment( const TrackCollection* aod,
+  StatusCode TrackCollectionCnvTool::convertAndAugment( const EventContext& ctx, const TrackCollection* aod,
 					      xAOD::TrackParticleContainer* xaod, const ObservedTrackMap* trk_map, const xAOD::Vertex* vtx ) const {
         
     ATH_MSG_DEBUG( "convertAndAugment: Sizes of containers before conversion: aod, xaod: " << aod->size() << ", " << xaod->size() );
@@ -82,7 +82,7 @@ namespace xAODMaker {
         ATH_MSG_WARNING("convertAndAugment: Empty element in container!");
         continue;
       }
-      xAOD::TrackParticle* particle = createParticle(*xaod, *aod, **itr, vtx);
+      xAOD::TrackParticle* particle = createParticle(ctx, *xaod, *aod, **itr, vtx);
       if(!particle){
         ATH_MSG_WARNING("convertAndAugment: Failed to create a TrackParticle");
         ++itrMap;
@@ -148,13 +148,14 @@ namespace xAODMaker {
     return StatusCode::SUCCESS;    
   }
 
-  xAOD::TrackParticle* TrackCollectionCnvTool::createParticle(xAOD::TrackParticleContainer& xaod,
+  xAOD::TrackParticle* TrackCollectionCnvTool::createParticle(const EventContext& ctx,
+                                  xAOD::TrackParticleContainer& xaod,
 							      const TrackCollection& container,
 							      const Trk::Track& tp,
                     const xAOD::Vertex* vtx) const {
     // create the xAOD::TrackParticle, the pointer is added to the container in the function
     ElementLink<TrackCollection> trackLink( &tp, container );
-    return m_particleCreator->createParticle( trackLink, &xaod , vtx);
+    return m_particleCreator->createParticle(ctx, trackLink, &xaod , vtx);
     //no!    return m_particleCreator->createParticle( tp, &xaod );
   }
 

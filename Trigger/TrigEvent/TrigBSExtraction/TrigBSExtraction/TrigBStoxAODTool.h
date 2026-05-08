@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGBSEXTRACTION_TRIGBSTOXAODTOOL_H
@@ -66,7 +66,7 @@ public:
   TrigBStoxAODTool(const std::string& type, const std::string& name, const IInterface* parent);
   virtual ~TrigBStoxAODTool();   
   virtual StatusCode initialize();
-  StatusCode convert(HLT::Navigation* nav); 
+  StatusCode convert(const EventContext& ctx, HLT::Navigation* nav);
   StatusCode rewireNavigation(HLT::Navigation* nav);
   StatusCode setTrigPassBits(HLT::Navigation* nav);
 

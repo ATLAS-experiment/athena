@@ -1,10 +1,9 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id$
 #ifndef XAODTRACKINGCNV_ITRACKCOLLECTIONCNVTOOL_H
 #define XAODTRACKINGCNV_ITRACKCOLLECTIONCNVTOOL_H
 
@@ -25,28 +24,21 @@ namespace Trk {
 
 namespace xAODMaker {
 
-  /// The interface provided by ITrackCollectionCnvTool
-  static const InterfaceID
-  IID_ITrackCollectionCnvTool( "xAODMaker::ITrackCollectionCnvTool", 1, 0 );
-  
-
   class ITrackCollectionCnvTool : public virtual IAlgTool {
     
   public:
+    /// The interface provided by ITrackCollectionCnvTool
+    DeclareInterfaceID(ITrackCollectionCnvTool, 1, 0);
+
     /// Function that fills an existing xAOD::TrackParticleContainer
-    virtual StatusCode convert( const TrackCollection* aod,
+    virtual StatusCode convert( const EventContext& ctx, const TrackCollection* aod,
 				xAOD::TrackParticleContainer* xaod, const xAOD::Vertex* vtx = nullptr ) const = 0;
 
     /// Function that fills an existing xAOD::TrackParticleContainer and augments track particles
-    virtual StatusCode convertAndAugment( const TrackCollection* aod,
+    virtual StatusCode convertAndAugment( const EventContext& ctx, const TrackCollection* aod,
 				xAOD::TrackParticleContainer* xaod, const ObservedTrackMap* trk_map, const xAOD::Vertex* vtx = nullptr ) const = 0;
 
     virtual StatusCode setParticleCreatorTool(ToolHandle<Trk::ITrackParticleCreatorTool> *tool) = 0;
-    
-    /// Gaudi interface definition
-    static const InterfaceID& interfaceID() {
-      return IID_ITrackCollectionCnvTool;
-    }
 
   };//class definition
     
