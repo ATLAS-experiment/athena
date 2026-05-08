@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATRACKSIMGNNGRAPHCONSTRUCTIONTOOL_H
 #define FPGATRACKSIMGNNGRAPHCONSTRUCTIONTOOL_H
@@ -24,6 +24,12 @@
 #include "AthOnnxInterfaces/IOnnxRuntimeInferenceTool.h"
 #include "AthOnnxUtils/OnnxUtils.h"
 #include <onnxruntime_cxx_api.h>
+
+#include <vector>
+#include <string>
+#include <memory>
+#include <array>
+#include <unordered_map>
 
 class FPGATrackSimGNNGraphConstructionTool : public AthAlgTool
 {

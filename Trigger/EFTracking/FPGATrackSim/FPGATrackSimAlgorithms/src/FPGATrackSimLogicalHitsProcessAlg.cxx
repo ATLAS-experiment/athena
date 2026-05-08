@@ -227,12 +227,15 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         phits_1st.reserve(FPGAHits->size());
         phits_2nd.reserve(FPGAHits->size());
         ATH_MSG_DEBUG("Incoming Hits: " << FPGAHits->size());
+        auto noDelete = [](const FPGATrackSimHit*) {};
         for (const FPGATrackSimHit* hit : *(FPGAHits.cptr())) {
-            phits_all.emplace_back(hit, [](const FPGATrackSimHit*) {});
-
+            //vectors are non-owning due to no-op deleter. 
+            //should use some mechanism other than shared_ptr here (std::reference_wrapper? bare pointer?)
+            auto sharedHit = std::shared_ptr<const FPGATrackSimHit>{hit, noDelete};
+            phits_all.push_back(sharedHit);
             if(m_noHitFilter) {
-                phits_1st.push_back(std::shared_ptr<const FPGATrackSimHit>(hit, [](const FPGATrackSimHit*){}));
-                phits_2nd.push_back(std::shared_ptr<const FPGATrackSimHit>(hit, [](const FPGATrackSimHit*){}));
+                phits_1st.push_back(sharedHit);
+                phits_2nd.push_back(sharedHit);
                 if(hit->isStrip()) phits_strips.push_back(hit);
             }
         }
