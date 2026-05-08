@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 /**
  * @file EfieldInterpolator.h
@@ -18,6 +18,8 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include <vector>
+#include <string>
+#include <string_view>
 
 class TH1;
 class TH1D;
@@ -50,7 +52,7 @@ public:
   bool initializeFromFile(const std::string& finpath);
   bool initializeFromDirectory(const std::string& fpath);
   double estimateEfield(std::vector<double> vvol, const std::vector<double>& vflu, const std::vector<std::vector<double> >& vfluvvol,
-                        double aimFlu, double aimVol, const std::string& prepend = "", bool debug = false);
+                        double aimFlu, double aimVol, std::string_view prepend = "", bool debug = false);
   double estimateEfieldInvDistance(const std::vector<double> & vvol, const std::vector<double> & vflu,
                                    const std::vector<std::vector<double> > & vfluvvol, double aimFlu, double aimVol,
                                    double measure = 1.);
@@ -94,7 +96,7 @@ private:
   static double relativeDistance(double x1, double y1, double x2, double y2);
   double estimateEfieldLinear(double aimVoltage);
   void saveTGraph(std::vector<double> vvol, std::vector<double> vflu, std::vector<std::vector<double> > vfluvvol,
-                  double aimFlu, double aimVol, const std::string& prepend, bool skipNegative = true);
+                  double aimFlu, double aimVol, std::string_view prepend, bool skipNegative = true);
 };
 
 #endif //> !PIXELDIGITIZATION_EFIELDINTERPOLATOR_H

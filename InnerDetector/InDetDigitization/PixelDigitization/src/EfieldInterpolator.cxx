@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 // PixelDigitization includes
@@ -549,7 +549,7 @@ double EfieldInterpolator::estimateEfieldInvDistance(const std::vector<double> &
 // Interpolate using cubic splines
 // E efield values given as function of fluence and bias voltage (vvol, vflu)
 // interpolate to value for aimFluence and aimVoltage
-double EfieldInterpolator::estimateEfield(std::vector<double> vvol, const std::vector<double>& vflu, const std::vector<std::vector<double> >& vfluvvol, double aimFlu, double aimVol, const std::string& prepend, bool debug) {
+double EfieldInterpolator::estimateEfield(std::vector<double> vvol, const std::vector<double>& vflu, const std::vector<std::vector<double> >& vfluvvol, double aimFlu, double aimVol, std::string_view prepend, bool debug) {
   ATH_MSG_DEBUG("Estimating efield");
   std::vector<double> evol;          // e field values for fixed voltages inter- or extrapolated to fluence of interest
   std::vector<double> vvolWoEp;      // fixed voltages values for which no extrapolation is used to obatin E field in
@@ -585,8 +585,12 @@ double EfieldInterpolator::estimateEfield(std::vector<double> vvol, const std::v
     }
     if (debug) {
       TString aimFile = m_fInter;
-      aimFile.ReplaceAll(".root", "_debug.root");
-      aimFile.ReplaceAll(".root", prepend);
+      aimFile.ReplaceAll(".root", "_debug");
+      if (!prepend.empty()) {
+        aimFile += "_";
+        aimFile += TString{prepend};
+      }
+      aimFile += "_";
       aimFile += name;
       aimFile += ".root";
       tmpgr->SaveAs(aimFile);
@@ -619,7 +623,7 @@ double EfieldInterpolator::estimateEfield(std::vector<double> vvol, const std::v
   name += "-aimVol";
   name += TString::Format("%.0f", aimVol);
   double aimEf = -1;
-  TGraph* tmpgr = new TGraph(CastStdVec(vvol), CastStdVec(evol));
+  auto tmpgr = std::make_unique<TGraph>(CastStdVec(vvol), CastStdVec(evol));
   tmpgr->SetTitle(name.Data());
   if (isInterpolation(vvol, aimVol)) {
     name += "_ip";
@@ -633,18 +637,22 @@ double EfieldInterpolator::estimateEfield(std::vector<double> vvol, const std::v
   }
   if (debug) {
     TString aimFile = m_fInter;
-    aimFile.ReplaceAll(".root", "_debug.root");
-    aimFile.ReplaceAll(".root", prepend);
+    aimFile.ReplaceAll(".root", "_debug");
+    if (!prepend.empty()) {
+      aimFile += "_";
+      aimFile += TString{prepend};
+    }
+    aimFile += "_";
     aimFile += name;
     aimFile += ".root";
+  
     tmpgr->SaveAs(aimFile);
   }
-  delete tmpgr;
   return aimEf;
 }
 
 //Save all E field values as function of fluence and bias voltage for debugging
-void EfieldInterpolator::saveTGraph(std::vector<double> vvol, std::vector<double> vflu, std::vector<std::vector<double> > vfluvvol, double aimFlu, double aimVol, const std::string& prepend, bool skipNegative) {
+void EfieldInterpolator::saveTGraph(std::vector<double> vvol, std::vector<double> vflu, std::vector<std::vector<double> > vfluvvol, double aimFlu, double aimVol, std::string_view prepend, bool skipNegative) {
   TString name = "VoltageEfield";
 
   name += "-aimFlu";
@@ -669,8 +677,12 @@ void EfieldInterpolator::saveTGraph(std::vector<double> vvol, std::vector<double
     }
   }
   TString aimFile = m_fInter;
-  aimFile.ReplaceAll(".root", "_debugAvailableEfieldVals.root");
-  aimFile.ReplaceAll(".root", prepend);
+  aimFile.ReplaceAll(".root", "_debugAvailableEfieldVals");
+  if (!prepend.empty()) {
+    aimFile += "_";
+    aimFile += TString{prepend};
+  }
+  aimFile += "_";
   aimFile += name;
   aimFile += ".root";
   tmpgr->SaveAs(aimFile);
