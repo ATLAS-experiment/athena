@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // IInDetAlignTrackSelTool.h
@@ -26,7 +26,7 @@ class IInDetAlignTrackSelTool: virtual public IAlgTool {
  public:
   static const InterfaceID& interfaceID();
 
-  virtual int getStatus(const Trk::Track&) const = 0;
+  virtual int getStatus(const EventContext& ctx, const Trk::Track&) const = 0;
 };
 
 inline const InterfaceID& IInDetAlignTrackSelTool::interfaceID()
