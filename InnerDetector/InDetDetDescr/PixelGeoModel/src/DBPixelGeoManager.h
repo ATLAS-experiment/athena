@@ -784,7 +784,7 @@ class DBPixelGeoManager : public PixelGeometryManager {
   virtual const GeoTrf::Transform3D & partTransform(const std::string & partName) const override;
   virtual bool partPresent(const std::string & partName) const override;
   
-  virtual std::string getMaterialName(const std::string & volumeName, int layerdisk = 0, int typenum = 0) override;
+  virtual std::string getMaterialName(std::string_view volumeName, int layerdisk = 0, int typenum = 0) override;
 
   virtual double PixelDiskRMin() override;
   virtual int    PixelDiskNumSupports() override;
