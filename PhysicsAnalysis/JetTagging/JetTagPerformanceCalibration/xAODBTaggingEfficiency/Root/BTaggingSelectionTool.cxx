@@ -128,8 +128,8 @@ StatusCode BTaggingSelectionTool::initialize() {
      ATH_MSG_ERROR("Tagger fraction_c in Continuous2D WP not available");
      return StatusCode::FAILURE;
    }
-   //now the tau-fraction if the tagger is GN2*:
-   if ( m_taggerName == "GN2v01" ){
+   //now the tau-fraction if the tagger is GN2* or GN3*:
+   if ( m_taggerName.value().find("GN2") != std::string::npos || m_taggerName.value().find("GN3") != std::string::npos ){
      fraction_data_name = m_taggerName+"/"+m_jetAuthor+"/Continuous2D/fraction_tau";
      TString fraction_data_name_cTag = m_taggerName+"/"+m_jetAuthor+"/Continuous2D/fraction_tau_cTag";
      fraction_data = dynamic_cast<TVector*> (m_inf->Get(fraction_data_name));
@@ -157,6 +157,8 @@ StatusCode BTaggingSelectionTool::initialize() {
       // For GN2v01, we have different WPs than the default ones.
       if ( m_taggerName == "GN2v01" )
         m_wps_raw="FixedCutBEff_90,FixedCutBEff_85,FixedCutBEff_77,FixedCutBEff_70,FixedCutBEff_65";
+      else if (m_taggerName == "GN3EPCLV01" || m_taggerName == "GN3PflowMuonsV00")
+        m_wps_raw="FixedCutBEff_90,FixedCutBEff_85,FixedCutBEff_80,FixedCutBEff_75,FixedCutBEff_70";
       std::vector<std::string> workingpoints = split(m_wps_raw, ',');
       std::sort(workingpoints.begin(), workingpoints.end());
       std::reverse(workingpoints.begin(), workingpoints.end()); // put in descending order
@@ -234,7 +236,7 @@ StatusCode BTaggingSelectionTool::ExtractTaggerProperties(taggerproperties &tagg
 
   //retrieve the "fraction" used in the DL1 log likelihood from the CDI, if its not there, use the hard coded values
   // (backwards compatibility)
-  if( (m_taggerEnum == Tagger::DL1) || (m_taggerEnum == Tagger::GN1) || (m_taggerEnum == Tagger::GN2)){
+  if( (m_taggerEnum == Tagger::DL1) || (m_taggerEnum == Tagger::GN1) || (m_taggerEnum == Tagger::GN2) || (m_taggerEnum == Tagger::GN3EPCLV01) || (m_taggerEnum == Tagger::GN3PflowMuonsV00) ){
     
     double fraction_b = -1;
     const TString basePath = taggerName + "/" + m_jetAuthor + "/" + OP;
@@ -346,9 +348,9 @@ CorrectionCode BTaggingSelectionTool::getTaggerWeight( const xAOD::Jet& jet, dou
   tagger_pb = m_accessor_pb(*btagInfo);  
   tagger_pc = m_accessor_pc(*btagInfo);  
   tagger_pu = m_accessor_pu(*btagInfo);  
-  if(m_taggerName == "GN2v01")
+  if(m_taggerEnum == Tagger::GN2 || m_taggerEnum == Tagger::GN3EPCLV01 || m_taggerEnum == Tagger::GN3PflowMuonsV00){
       tagger_ptau = m_accessor_ptau(*btagInfo);  
-
+  }
 
    return getTaggerWeight(tagger_pb, tagger_pc, tagger_pu, tagweight, getCTagW, tagger_ptau);
 
@@ -383,7 +385,7 @@ CorrectionCode BTaggingSelectionTool::getTaggerWeight( double pb, double pc, dou
   }
 
   tagweight = -100.;
-  if( (m_taggerEnum == Tagger::DL1) || (m_taggerEnum == Tagger::GN1) || (m_taggerEnum == Tagger::GN2)){
+  if( (m_taggerEnum == Tagger::DL1) || (m_taggerEnum == Tagger::GN1) || (m_taggerEnum == Tagger::GN2) || (m_taggerEnum == Tagger::GN3EPCLV01) || (m_taggerEnum == Tagger::GN3PflowMuonsV00) ){
 
     bool valid_input = (!std::isnan(pu) && pb>=0 && pc>=0 && pu>=0 && ptau>=0);
 
@@ -562,9 +564,9 @@ asg::AcceptData BTaggingSelectionTool::accept(double pT, double eta, double tagg
 
 asg::AcceptData BTaggingSelectionTool::accept(double pT, double eta, double pb, double pc, double pu) const
 {
-  if (m_tagger.name == "GN2v01"){
+  if (m_tagger.name == "GN2v01" || m_tagger.name.find("GN3") != std::string::npos ){
     asg::AcceptData acceptData (&m_acceptinfo);
-    ATH_MSG_ERROR("For GN2v01 tagger, there is a new tau claass in the NN output. Please update the accept() to accept(double pT, double eta, double pb, double pc, double pu, double ptau)");
+    ATH_MSG_ERROR("For GN2v01 and GN3 taggers, there is a new tau class in the NN output. Please update the accept() to accept(double pT, double eta, double pb, double pc, double pu, double ptau)");
     return acceptData;
   } else {
     return accept(pT, eta, pb, pc, pu, 0.);

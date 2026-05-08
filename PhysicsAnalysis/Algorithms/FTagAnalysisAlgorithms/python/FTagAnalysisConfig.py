@@ -119,7 +119,7 @@ class FTagConfig (ConfigBlock):
 
         # Save the per-flavour probabilities or additional custom variables
         if self.saveScores == 'All' or self.saveCustomVariables:
-            variables = [f'{self.btagger}_{x}' for x in ['pb','pc','pu','ptau'] if x != 'ptau' or self.btagger == 'GN2v01']
+            variables = [f'{self.btagger}_{x}' for x in ['pb','pc','pu','ptau'] if x != 'ptau' or self.btagger == 'GN2v01' or self.btagger.startswith('GN3')]
             variables += self.saveCustomVariables
 
             if self.readFromBTaggingObject:
