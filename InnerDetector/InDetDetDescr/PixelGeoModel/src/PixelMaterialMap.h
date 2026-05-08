@@ -7,9 +7,11 @@
 
 // Class to interpret and query table PixelMaterialMap
 
+
+#include "RDBAccessSvc/IRDBAccessSvc.h"
+#include <string_view>
 #include <string>
 #include <map>
-#include "RDBAccessSvc/IRDBAccessSvc.h"
 
 class PixelMaterialMap
 {
@@ -17,16 +19,16 @@ class PixelMaterialMap
 public:
   PixelMaterialMap(const IRDBRecordset_ptr& mapTable);
 
-  void addMaterial(int layerdisk, int typenum, const std::string & volumeName, const std::string & materialName);
-  std::string getMaterial(int layerdisk, int typenum, const std::string & volumeName) const;
+  void addMaterial(int layerdisk, int typenum, std::string_view volumeName, std::string_view materialName);
+  std::string getMaterial(int layerdisk, int typenum, std::string_view volumeName) const;
 
 private:
   class Key 
   {
   public:
-    Key(int layerdisk_in, int typenum_in, const std::string & volumeName_in);
-    int layerdisk;
-    int typenum;
+    Key(int layerdisk_in, int typenum_in, std::string_view volumeName_in);
+    int layerdisk{};
+    int typenum{};
     std::string volumeName;
     bool operator<(const Key &rhs) const;
   };

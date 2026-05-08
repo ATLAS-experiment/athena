@@ -1111,7 +1111,7 @@ int DBPixelGeoManager::determineDbVersion() {
 
 
 
-std::string DBPixelGeoManager::getMaterialName(const std::string & volumeName, int layerdisk, int typenum) {
+std::string DBPixelGeoManager::getMaterialName(std::string_view volumeName, int layerdisk, int typenum) {
   return m_materialMap->getMaterial(layerdisk, typenum, volumeName);
 }
 

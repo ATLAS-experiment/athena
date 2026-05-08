@@ -6,8 +6,7 @@
 #define PIXELGEOMODEL_PIXELGEOMETRYMANAGER_H
 
 
-//#include "GeoPrimitives/GeoPrimitives.h" //typedef for GeoTrf::Vector3D
-//#include "GeoModelKernel/GeoMaterial.h"
+#include "GeoPrimitives/GeoPrimitives.h" //typedef for GeoTrf::Vector3D
 #include "GeoModelKernel/GeoDefinitions.h"
 #include "PixelGeoModelAthenaComps.h"
 #include "RDBAccessSvc/IRDBAccessSvc.h" //typedef for IRDBRecordset_ptr
@@ -606,7 +605,7 @@ public:
   virtual const GeoTrf::Transform3D & partTransform(const std::string & partName) const = 0; 
   virtual bool partPresent(const std::string & partName) const = 0;
  
-  virtual std::string getMaterialName(const std::string & volumeName, int layerdisk = 0, int typenum = 0) = 0;
+  virtual std::string getMaterialName(std::string_view volumeName, int layerdisk = 0, int typenum = 0) = 0;
 
   //Declaring the Message method for further use
   MsgStream& msg (MSG::Level lvl) const { return m_athenaComps->msg(lvl); }
