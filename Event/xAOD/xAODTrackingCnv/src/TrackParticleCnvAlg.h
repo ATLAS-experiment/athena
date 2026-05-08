@@ -1,10 +1,9 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: TrackParticleCnvAlg.h 297747 2013-10-28 15:14:24Z krasznaa $
 #ifndef XAODCREATORALGS_TRACKPARTICLECREATOR_H
 #define XAODCREATORALGS_TRACKPARTICLECREATOR_H
 
@@ -47,9 +46,6 @@ namespace xAODMaker {
    *
    * @author Edward Moyse <Edward.Moyse@cern.ch>
    * @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
-   *
-   * $Revision: 297747 $
-   * $Date: 2013-10-28 16:14:24 +0100 (Mon, 28 Oct 2013) $
    */
   class TrackParticleCnvAlg : public AthReentrantAlgorithm {
 
@@ -120,7 +116,8 @@ namespace xAODMaker {
     Gaudi::Property<bool> m_convertTracks{this, "ConvertTracks", false};
 
     template<typename CONT, typename TRUTHCONT, typename CONVTOOL>
-    int convert(const CONT&,
+    int convert(const EventContext& ctx,
+                const CONT&,
                 const TRUTHCONT&,
                 CONVTOOL& tool,
                 SG::WriteHandle<xAOD::TrackParticleContainer>&,
@@ -131,7 +128,9 @@ namespace xAODMaker {
     inline xAOD::TrackParticle* createParticle(
       xAOD::TrackParticleContainer& xaod,
       const Rec::TrackParticleContainer& container,
-      const Rec::TrackParticle& tp);
+      const Rec::TrackParticle& tp,
+      const EventContext& ctx);
+
     inline xAOD::TrackParticle* createParticle(
       xAOD::TrackParticleContainer& xaod,
       const TrackCollection& container,
