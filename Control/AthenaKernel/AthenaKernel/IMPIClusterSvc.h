@@ -5,6 +5,7 @@
 #define ATHENAKERNEL_IMPICLUSTERSVC_H
 
 #include <cstdint>
+#include <memory_resource>
 #include <string>
 
 #include "GaudiKernel/IInterface.h"
@@ -56,6 +57,9 @@ class IMPIClusterSvc : virtual public IInterface {
   virtual void log_completeEvent(int eventIdx, std::int64_t run_number,
                                  std::int64_t event_number,
                                  std::int64_t status) = 0;
+
+  /// Add a new type of destination memory
+  virtual unsigned int registerMemoryResource(std::pmr::memory_resource* res);
 };
 
 #endif  // ATHENAKERNEL_IMPICLUSTERSVC_H

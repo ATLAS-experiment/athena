@@ -6,6 +6,7 @@
 
 #include <array>
 #include <cstdint>
+#include <memory_resource>
 #include <optional>
 #include <variant>
 
@@ -54,12 +55,17 @@ struct ClusterMessage {
     void* ptr = nullptr;
     std::size_t len = 0;
     std::size_t align = 0;
+    unsigned int dest =
+        0;  // An ID that will communicate which device we're sending to.
+    // 0 will always mean CPU memory, but other numbers might depend on the
+    // destination rank
 
-    bool received = false;  // set if this DataDescr was received and therefore
-                            // owns its memory
     std::size_t evtNumber = 0;
     std::size_t fileNumber = 0;
 
+    std::pmr::memory_resource* allocating_memory_resource =
+        nullptr;  // If this was received, we need to keep track of the memory
+                  // resource used to allocate memory in order to free it
     template <typename T>
     DataDescr(const T* ptr, std::size_t count = 1)
         : ptr((void*)ptr), len(count * sizeof(T)), align(alignof(T)) {}
@@ -69,7 +75,9 @@ struct ClusterMessage {
     DataDescr(const DataDescr&) = delete;
     DataDescr& operator=(const DataDescr&) = delete;
 
-    DataDescr(const WireMsgBody& body);
+    DataDescr(const WireMsgBody& body,
+              std::pmr::memory_resource* allocating_memory_resource =
+                  std::pmr::get_default_resource());
 
     DataDescr& operator=(DataDescr&& rhs) noexcept;
 
@@ -93,7 +101,8 @@ struct ClusterMessage {
 
   ClusterMessage(ClusterMessageType mType, DataDescr&& payload);
 
-  ClusterMessage(const WireMsg&);
+  ClusterMessage(const WireMsg&,
+                 const std::vector<std::pmr::memory_resource*>&);
 
   [[nodiscard]] WireMsg wire_msg() const;
 };

@@ -188,7 +188,7 @@ void MPIClusterSvc::sendMessage(int destRank, ClusterMessage message,
 ClusterMessage MPIClusterSvc::waitReceiveMessage(ClusterComm communicator) {
   // Same offset as line 114
   constexpr int tag_offset = 16384;
-  constexpr std::uint64_t thirtytwo_ones = 0xFFFFFFFF;
+  constexpr std::uint64_t last32 = 0xFFFFFFFF;
 
   // Select correct communicator
   mpi3::communicator& comm =
@@ -206,29 +206,26 @@ ClusterMessage MPIClusterSvc::waitReceiveMessage(ClusterComm communicator) {
       ClusterMessage::WireMsgBody& bdy = *body;
       // Decode the body to figure out what to recieve
       std::size_t len = (std::uint64_t(bdy[2]) << 32) + std::uint64_t(bdy[3]);
-      std::size_t align = (std::uint64_t(bdy[4]) << 32) + std::uint64_t(bdy[5]);
-      std::size_t alloc_size = len;
-      if (!std::has_single_bit(align)) {
-        ATH_MSG_WARNING("Alignment {} is not a power of two!", align);
-        align = std::bit_ceil(align);
-      }
-      if (len % align != 0) {
-        ATH_MSG_WARNING("Length {} is not a multiple of alignment {}!",
-                        len, align);
-        // Convert to next multiple by adding align - 1, then zeroing out those
-        // final bits
-        alloc_size = (len + align - 1) & ~(align - 1);
-      }
+      std::size_t align = 1ULL << bdy[4];
+      unsigned int dest = std::uint32_t(bdy[5]);
 
-      char* ptr = static_cast<char*>(std::aligned_alloc(align, alloc_size));
+      if (dest >= m_destIDMemResMap.size()) {
+        ATH_MSG_ERROR(
+            "Received message for destination "
+            << dest
+            << " which is not valid for this rank. Assuming CPU memory.");
+        dest = 0;
+      }
+      char* ptr =
+          static_cast<char*>(m_destIDMemResMap[dest]->allocate(len, align));
       comm.receive_n(ptr, len, head[1], head[2] + tag_offset);
 
       // update the pointer in the WireMsgBody
       bdy[0] = int(std::uint64_t(ptr) >> 32);
-      bdy[1] = int(std::uint64_t(ptr) & thirtytwo_ones);
+      bdy[1] = int(std::uint64_t(ptr) & last32);
     }
   }
-  ClusterMessage message(msg);
+  ClusterMessage message(msg, m_destIDMemResMap);
   ATH_MSG_DEBUG("Rank {} received message from {}", rank(), message.source);
   return message;
 }
@@ -245,4 +242,9 @@ void MPIClusterSvc::log_completeEvent(int eventIdx, std::int64_t run_number,
                                       std::int64_t event_number,
                                       std::int64_t status) {
   m_mpiLog_completeEvent.run(eventIdx, run_number, event_number, status);
+}
+
+virtual unsigned int registerMemoryResource(std::pmr::memory_resource* res) {
+  m_destIDMemResMap.push_back(res);
+  return m_destIDMemResMap.size() - 1;
 }

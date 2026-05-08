@@ -3,50 +3,59 @@
 */
 #include "AthenaKernel/ClusterMessage.h"
 
+#include <bit>
 #include <cstdint>
 
 ClusterMessage::DataDescr::DataDescr(DataDescr&& rhs) noexcept
     : ptr(rhs.ptr),
       len(rhs.len),
       align(rhs.align),
-      received(rhs.received),
+      dest(rhs.dest),
       evtNumber(rhs.evtNumber),
-      fileNumber(rhs.fileNumber) {
+      fileNumber(rhs.fileNumber),
+      allocating_memory_resource(rhs.allocating_memory_resource) {
   rhs.ptr = nullptr;
   rhs.len = 0;
   rhs.align = 0;
-  rhs.received = false;
+  rhs.dest = 0;
+  rhs.allocating_memory_resource = nullptr;
 }
-ClusterMessage::DataDescr::DataDescr(const WireMsgBody& body)
+ClusterMessage::DataDescr::DataDescr(
+    const WireMsgBody& body,
+    std::pmr::memory_resource* allocating_memory_resource)
     : ptr(reinterpret_cast<void*>((std::uint64_t(body[0]) << 32) +
                                   std::uint64_t(body[1]))),
       len((std::uint64_t(body[2]) << 32) + std::uint64_t(body[3])),
-      align((std::uint64_t(body[4]) << 32) + std::uint64_t(body[5])),
-      received(true),
+      align(std::uint64_t(1ULL << body[4])),
+      dest(std::uint32_t(body[5])),
       evtNumber((std::uint64_t(body[6]) << 32) + std::uint64_t(body[7])),
-      fileNumber((std::uint64_t(body[8]) << 32) + std::uint64_t(body[9])) {}
+      fileNumber((std::uint64_t(body[8]) << 32) + std::uint64_t(body[9])),
+      allocating_memory_resource(allocating_memory_resource) {}
 
 ClusterMessage::DataDescr::~DataDescr() {
-  if (received) {
-    std::free(ptr);
+  if (allocating_memory_resource != nullptr) {
+    allocating_memory_resource->deallocate(ptr, len, align);
   }
 }
 
 ClusterMessage::DataDescr& ClusterMessage::DataDescr::operator=(
     DataDescr&& rhs) noexcept {
-  if (received) {
-    std::free(ptr);  // release the object memory before assigning a new one
+  if (allocating_memory_resource != nullptr) {
+    // release the object memory before assigning a new one
+    allocating_memory_resource->deallocate(ptr, len, align);
   }
   ptr = rhs.ptr;
   len = rhs.len;
   align = rhs.align;
-  received = rhs.received;
+  dest = rhs.dest;
   evtNumber = rhs.evtNumber;
   fileNumber = rhs.fileNumber;
+  allocating_memory_resource = rhs.allocating_memory_resource;
   rhs.ptr = nullptr;
   rhs.len = 0;
   rhs.align = 0;
-  rhs.received = false;
+  rhs.dest = 0;
+  rhs.allocating_memory_resource = nullptr;
   rhs.evtNumber = 0;
   rhs.fileNumber = 0;
   return *this;
@@ -96,14 +105,16 @@ ClusterMessage::ClusterMessage(ClusterMessageType mType) : messageType(mType) {
 
 ClusterMessage::ClusterMessage() = default;
 
-ClusterMessage::ClusterMessage(const ClusterMessage::WireMsg& wire_msg) {
+ClusterMessage::ClusterMessage(
+    const ClusterMessage::WireMsg& wire_msg,
+    const std::vector<std::pmr::memory_resource*>& memResMap) {
   const auto& [header, body] = wire_msg;
   messageType = static_cast<ClusterMessageType>(header[0]);
   source = header[1];
   if (body.has_value()) {
     const auto& body_2 = *body;
     if (messageType == ClusterMessageType::Data) {
-      payload = DataDescr(body_2);
+      payload = DataDescr(body_2, memResMap.at(body_2[5]));
     } else {
       WorkerStatus status{};
       status.status = StatusCode(body_2[0]);
@@ -137,8 +148,8 @@ ClusterMessage::WireMsg ClusterMessage::wire_msg() const {
     body[1] = std::uint32_t(std::uint64_t(payload_local.ptr) & lower32);
     body[2] = std::uint32_t(std::uint64_t(payload_local.len) >> 32);
     body[3] = std::uint32_t(std::uint64_t(payload_local.len) & lower32);
-    body[4] = std::uint32_t(std::uint64_t(payload_local.align) >> 32);
-    body[5] = std::uint32_t(std::uint64_t(payload_local.align) & lower32);
+    body[4] = std::uint32_t(std::bit_ceil(payload_local.align));
+    body[5] = std::uint32_t(payload_local.dest);
     body[6] = std::uint32_t(std::uint64_t(payload_local.evtNumber) >> 32);
     body[7] = std::uint32_t(std::uint64_t(payload_local.evtNumber) & lower32);
     body[8] = std::uint32_t(std::uint64_t(payload_local.fileNumber) >> 32);

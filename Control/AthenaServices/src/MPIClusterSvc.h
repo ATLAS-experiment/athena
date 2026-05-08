@@ -5,6 +5,7 @@
 #define ATHENASERVICES_MPICLUSTERSVC_H_
 
 #include <memory>
+#include <memory_resource>
 #include <string>
 
 #include "AthenaBaseComps/AthService.h"
@@ -74,6 +75,9 @@ class MPIClusterSvc
                                  std::int64_t event_number,
                                  std::int64_t status) override final;
 
+  /// Add a new type of destination
+  virtual unsigned int registerMemoryResource(std::pmr::memory_resource* res);
+
  private:
   std::unique_ptr<mpi3::environment> m_env;
   mpi3::communicator m_world;
@@ -90,6 +94,10 @@ class MPIClusterSvc
 
   // Hold current input filename hash for each slot
   std::int64_t m_lastInputFileHash{};
-  std::map<std::size_t, std::int64_t> m_inputFileSlotMap{};
+  std::map<std::size_t, std::int64_t> m_inputFileSlotMap;
+
+  // Hold a map of dest ID to memory resource
+  std::vector<std::pmr::memory_resource*> m_destIDMemResMap{
+      std::pmr::get_default_resource()};
 };
 #endif  // ATHENASERVICES_MPICLUSTERSVC_H_
