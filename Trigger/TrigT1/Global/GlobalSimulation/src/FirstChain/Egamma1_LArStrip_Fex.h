@@ -54,7 +54,7 @@ namespace GlobalSim {
     ToolHandle<eFexRoIAlgTool>
     m_roiAlgTool{this,
 		 "roiAlgTool",
-		 "EMBE1CellFromCaloCells",
+		 "eFexRoIAlgTool",
 		 "AlgTool to provide a vector<const xAOD::eFexEMRoI*>"};
 
     Gaudi::Property<bool> m_dump {

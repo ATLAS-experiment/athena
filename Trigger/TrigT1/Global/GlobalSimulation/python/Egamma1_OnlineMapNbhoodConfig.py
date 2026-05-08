@@ -20,6 +20,11 @@ def Egamma1_OnlineMapNbhoodCfg(
 
     alg = CompFactory.GlobalSim.Egamma1_OnlineMapNbhood(name,**kwargs)
 
+    
+    alg.roiAlgTool.etMin = 5000.
+    alg.roiAlgTool.etaMin = 0.0
+    alg.roiAlgTool.etaMax = 5.0
+
     cfg.addEventAlgo(alg)
 
     return cfg
