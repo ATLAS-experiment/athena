@@ -76,6 +76,7 @@ private:
   Gaudi::Property<double> m_clusterEtCut {this, "ClusterEtCut", 0.5 * Gaudi::Units::GeV, "Et threshould for pi0 candidate clusters"};
   Gaudi::Property<double> m_maxDeltaRNeutral {this, "MaxDeltaRNeutral", 0.2, "max DeltaR for pi0-tau association"};
   Gaudi::Property<double> m_maxDeltaRJetClust {this, "MaxDeltaRJetClust", 0.4, "max DeltaR for vertexed cluster-tau association"};
+  Gaudi::Property<double> m_recoFromAOD {this, "RecoFromAOD", false, "Flag if the reconstruction is happening at AOD-level"};
 
 };
 
