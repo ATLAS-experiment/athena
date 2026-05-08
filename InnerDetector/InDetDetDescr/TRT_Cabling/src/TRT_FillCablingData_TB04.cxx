@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -174,7 +174,7 @@ void TRT_FillCablingData_TB04::defineTables()
      ssFile << rod;
      std::string dataFile = "TRT_TB04_IdMapping_ROD" + ssFile.str() + ".dat";
 
-     std::string file = PathResolver::find_file (dataFile, "DATAPATH");
+     std::string file = PathResolverFindDataFile (dataFile);
 
      std::ifstream inputFile (file.c_str());
      if (!inputFile)
