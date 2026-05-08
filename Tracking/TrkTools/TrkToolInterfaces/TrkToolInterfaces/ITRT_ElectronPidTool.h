@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,15 +10,12 @@
 
 #include "GaudiKernel/IAlgTool.h"
 #include "GaudiKernel/EventContext.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 #include "TrkTrackSummary/TrackSummary.h"
 #include <vector>
 
 namespace Trk {
   class Track;
-
-  static const InterfaceID IID_ITRT_ElectronPidTool("Trk::ITRT_ElectronPidTool", 1, 0);
 
   /** @brief abstract interface for identification of electrons based on
       information from the inner detector track (mainly TRT)
@@ -32,7 +29,7 @@ namespace Trk {
 
   class ITRT_ElectronPidTool : virtual public IAlgTool {
   public:
-    static const InterfaceID& interfaceID( ) ;
+    DeclareInterfaceID(ITRT_ElectronPidTool, 1, 0);
 
    /** @brief particle identification function returning a vector of
        probabilities.
@@ -42,11 +39,6 @@ namespace Trk {
     virtual std::vector<float> electronProbability(
       const EventContext& ctx,
       const Trk::Track& track) const = 0;
-
-    std::vector<float> electronProbability(
-      const Trk::Track& track) const {
-      return  electronProbability(Gaudi::Hive::currentContext(),track);
-    }
 
 
     /** @brief return high threshold probability
@@ -67,32 +59,7 @@ namespace Trk {
                               float ZR,
                               float rTrkWire,
                               float Occupancy) const = 0;
-
-    double probHTRun2(float pTrk,
-                      Trk::ParticleHypothesis hypothesis,
-                      int TrtPart,
-                      int GasType,
-                      int StrawLayer,
-                      float ZR,
-                      float rTrkWire,
-                      float Occupancy) const
-    {
-      return probHTRun2(Gaudi::Hive::currentContext(),
-                        pTrk,
-                        hypothesis,
-                        TrtPart,
-                        GasType,
-                        StrawLayer,
-                        ZR,
-                        rTrkWire,
-                        Occupancy);
-    }
   };
-
-  inline const InterfaceID& Trk::ITRT_ElectronPidTool::interfaceID()
-    { 
-      return IID_ITRT_ElectronPidTool; 
-    }
 
 } // end of namespace
 
