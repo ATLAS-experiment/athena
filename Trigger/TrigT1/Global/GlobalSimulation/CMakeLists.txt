@@ -9,15 +9,17 @@ find_package( GTest )
 find_package( APTypes )
 
 atlas_add_component (GlobalSimulation
-   src/*.h src/*.cxx  
-   # src/GlobalAlgs/*.h src/GlobalAlgs/*.cxx FIXME
-   src/Utilities/*.cxx
+   src/Egamma1/*.h src/Egamma1/*.cxx
+   src/Egamma1BDT/*.h src/Egamma1BDT/*.cxx
+   src/Egamma1BDT/Egamma1BDT/*.h src/Egamma1BDT/Egamma1BDT/*.cpp
+   src/FEX_Unpacker/*.h src/FEX_Unpacker/*.cxx
    src/GlobalSimComponents/*.h src/GlobalSimComponents/*.cxx
-   src/FirstChain/BDT/*.h src/FirstChain/Egamma1BDT/*.cpp
-   src/FirstChain/*.h src/FirstChain/*.cxx 
+   src/Hypothesis/*.h src/Hypothesis/*.cxx
    src/IO/*.h src/IO/*.cxx
+   src/Lar_Preproc/*.h src/Lar_Preproc/*.cxx
+   src/PU1/*.h src/PU1/*.cxx
+   src/Utilities/*.h src/Utilities/*.cxx
    src/components/*.cxx
-   src/GlobalAlgs/PU1/Algorithms/*.h src/GlobalAlgs/PU1/Algorithms/*.cxx src/GlobalAlgs/PU1/PITT/*.h src/GlobalAlgs/PU1/PITT/*.cxx
    INCLUDE_DIRS ${APTYPES_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${APTYPES_LIBRARIES} ${ROOT_LIBRARIES} GaudiKernel
    CaloDetDescrLib
@@ -40,8 +42,8 @@ atlas_install_data( data/* share/*.xml )
 atlas_install_joboptions( share/plugin_*.py )
 
 atlas_add_test(testEgamma1BDT_tv
-               SOURCES src/FirstChain/Egamma1BDT/TestEgamma1/all_tests.cxx
-	       src/FirstChain/Egamma1BDT/*.cpp
+               SOURCES src/Egamma1BDT/Egamma1BDT/TestEgamma1/all_tests.cxx
+	       src/Egamma1BDT/Egamma1BDT/*.cpp
                INCLUDE_DIRS ${APTYPES_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                LINK_LIBRARIES ${APTYPES_LIBRARIES} ${GTEST_LIBRARIES} ${ROOT_LIBRARIES} CxxUtils
 	       		      PathResolver

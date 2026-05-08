@@ -5,7 +5,7 @@
 #include "./eEmEg1BDTSelector.h"
 #include "../IO/eEmEg1BDTTOB.h"
 
-#include "./Egamma1BDT/parameters.h"
+#include "../Egamma1BDT//Egamma1BDT/parameters.h"
 
 #include <sstream>
 

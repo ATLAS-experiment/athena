@@ -1,29 +1,29 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "../GlobalSimComponents/GlobalSimulationAlg.h"
 
-#include "../FirstChain/Egamma1_LArStrip_Fex.h"
-#include "../FirstChain/Egamma1_LArStrip_Fex_RowAware.h"
-#include "../FirstChain/Egamma1_OnlineMapNbhood.h"
-#include "../FirstChain/EMBE1CellsFromCaloCells.h"
-#include "../FirstChain/eFexRoIAlgTool.h"
-#include "../FirstChain/Egamma1BDTAlgTool.h"
-#include "../FirstChain/Egamma1eRatioAlgTool.h"
+#include "../Lar_Preproc/Egamma1_LArStrip_Fex.h"
+#include "../Lar_Preproc/Egamma1_LArStrip_Fex_RowAware.h"
+#include "../Lar_Preproc/Egamma1_OnlineMapNbhood.h"
+#include "../Lar_Preproc/EMBE1CellsFromCaloCells.h"
+#include "../FEX_Unpacker/eFexRoIAlgTool.h"
+#include "../Egamma1BDT/Egamma1BDTAlgTool.h"
+#include "../Egamma1/Egamma1eRatioAlgTool.h"
 
-#include "../FirstChain/LArCellPreparationAlg.h"
-#include "../FirstChain/LArCellMuxAlg.h"
-#include "../FirstChain/GlobalCellTowerAlgTool.h"
-#include "../FirstChain/eFexCvtrAlgTool.h"
-#include "../FirstChain/eEmMultAlgTool.h"
-#include "../FirstChain/eEmEg1BDTMultAlgTool.h"
+#include "../Lar_Preproc/LArCellPreparationAlg.h"
+#include "../Lar_Preproc/LArCellMuxAlg.h"
+#include "../Lar_Preproc/GlobalCellTowerAlgTool.h"
+#include "../FEX_Unpacker/eFexCvtrAlgTool.h"
+#include "../Hypothesis/eEmMultAlgTool.h"
+#include "../Hypothesis/eEmEg1BDTMultAlgTool.h"
 
-#include "../FirstChain/eEmMultTestBench.h"
-#include "../FirstChain/eEmMultTestComparator.h"
+#include "../Hypothesis/eEmMultTestBench.h"
+#include "../Hypothesis/eEmMultTestComparator.h"
 
-#include "../FirstChain/PU1SuppTestBench.h"
-#include "../FirstChain/PU1SuppAlgTool.h"
+#include "../PU1/PU1SuppTestBench.h"
+#include "../PU1/PU1SuppAlgTool.h"
 
 
 DECLARE_COMPONENT(GlobalSim::GlobalSimulationAlg)

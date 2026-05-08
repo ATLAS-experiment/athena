@@ -2,24 +2,21 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef GLOBALSIM_EGAMMA1BDTALGTOOL_H
-#define GLOBALSIM_EGAMMA1BDTALGTOOL_H
+#ifndef GLOBALSIM_EGAMMA1ERATIOALGTOOL_H
+#define GLOBALSIM_EGAMMA1ERATIOALGTOOL_H
 
 /**
- * AlgTool to read in LArStripNeighborhoods, and run the BDT Algorithm.
+ * AlgTool to read in LArStripNeighborhoods, and run the eRatio Algorithm.
  */
 
 #include "../GlobalSimComponents/IGlobalSimAlgTool.h"
 #include "../IO/LArStripNeighborhood.h"
 #include "../IO/eEmNbhoodTOB.h"
-#include "../IO/eEmEg1BDTTOB.h"
-
+#include "../IO/eEmEg1eRatioTOB.h"
 
 #include "ap_int.h"
 #include "ap_fixed.h"
-#include "Digitizer.h"
-
-#include "./Egamma1BDT/BDT.h"
+#include "../Utilities/Digitizer.h"
 
 #include "AthenaBaseComps/AthAlgTool.h"
 
@@ -27,18 +24,14 @@
 #include <vector>
 
 namespace GlobalSim {
- 
-  class Egamma1BDTAlgTool: public extends<AthAlgTool, IGlobalSimAlgTool> {
-
-    using eEmEg1BDTTOBContainer = GlobalSim::IOBitwise::eEmEg1BDTTOBContainer;
-    using eEmNbhoodTOBContainer =  GlobalSim::IOBitwise::eEmNbhoodTOBContainer;
- 
+  class Egamma1eRatioAlgTool: public extends<AthAlgTool, IGlobalSimAlgTool> {
+    
   public:
-    Egamma1BDTAlgTool(const std::string& type,
+    Egamma1eRatioAlgTool(const std::string& type,
 			    const std::string& name,
 			    const IInterface* parent);
     
-    virtual ~Egamma1BDTAlgTool() = default;
+    virtual ~Egamma1eRatioAlgTool() = default;
     
     StatusCode initialize() override;
 
@@ -48,43 +41,45 @@ namespace GlobalSim {
 
   private:
     
-
     Gaudi::Property<bool>
     m_enableDump{this,
 	     "enableDump",
 	     {false},
 	     "flag to enable dumps"};
-    
-    SG::WriteHandleKey<std::vector<float>>
-    m_BDTScoreKey {
-      this,
-      "BDTScoreKey",
-      "eGamma1BDT"};    
-        
-    // input to the  BDT Algorithm
-    SG::ReadHandleKey<eEmNbhoodTOBContainer>
+
+    // input to the  eRatio Algorithm
+    SG::ReadHandleKey<IOBitwise::eEmNbhoodTOBContainer>
     m_nbhdTOBContainerReadKey {
       this,
       "LArNeighborhoodTOBContainerReadKey",
       "stripNeighborhoodTOBContainer",
       "key to read inLArNeighborhoodTOBsReadKeys"};
-
-    SG::WriteHandleKey<eEmEg1BDTTOBContainer>
-    m_eEmEg1BDTTOBContainerKey {
+    
+    SG::WriteHandleKey<std::vector<float>>
+    m_eRatioKey {
       this,
-      "eEmEg1BDTTOBContainerKey",
-      "eEmEg1BDTTOBContainer"};
+      "eRatioKey",
+      "eRatio"};
+
+    SG::WriteHandleKey<std::vector<float>>
+    m_eRatioSimpleKey {
+      this,
+      "eRatioSimpleKey",
+      "eRatioSimple"};
     
     std::vector<double> combine_phi(const IOBitwise::eEmNbhoodTOB*) const;
-
+    ap_int<16> secondPeakSearch(const std::vector<ap_int<16>>& input, const ap_int<16> peak,
+				const int startCell, const int endCell,
+				const ap_int<16> noiseMargin) const;
+    
     // a neighborhood has 3 vectors of strip energies (phi_low, phi_center.
-    // phi_high). Provide the length thes vectors must have for the BDT to be
+    // phi_high). Provide the length thes vectors must have for the eRatio to be
     // evaluated
     static inline constexpr int s_required_phi_len = 17;
     
     // the three strip energy vectors are combined to form a single vector.
     // the length of this vector have the following length.
-    static inline constexpr int s_combination_len = 18;
+    static inline constexpr int s_combination_len = 51;
   };
 }
 #endif

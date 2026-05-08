@@ -11,7 +11,7 @@
 */
 
 #include "ICaloCellsProducer.h"
-#include "eFexRoIAlgTool.h"
+#include "../FEX_Unpacker/eFexRoIAlgTool.h"
 
 #include "../IO/LArStripNeighborhood.h"
 #include "../IO/eEmNbhoodTOB.h"
