@@ -39,6 +39,11 @@ class SuperChicConfig:
         self.ionbreakup = True
         self.fAA = '00'
         self.fracsigX = 1
+        if (Version(os.environ['SUPERCHICVER']) >= Version("5.7")):
+            self.veto = False
+            self.veto_ecent = 53.9655
+            self.veto_eden = 263.313
+            self.rshad = 0.4
         if (Version(os.environ['SUPERCHICVER']) >= Version("5.5.1")):
             self.wrho = False
             self.yrho = 2.5
@@ -158,6 +163,11 @@ class SuperChicConfig:
         conf+=fortBool(self.ionbreakup) + "                            ! [ionbreakup] \n"
         conf+=fortStr(self.fAA) + "                                    ! [fAA] \n"
         conf+=fortDouble(self.fracsigX) + "                            ! [fracsigX] : multiply sig_(gamA) by this factor (1d0 - default) \n"
+        if (Version(os.environ['SUPERCHICVER']) >= Version("5.7")):
+            conf+=fortBool(self.veto) + "                            ! [veto] : impose exclusivity veto in ion-ion case due to EMD \n"
+            conf+=fortDouble(self.veto_ecent) + "                    ! [veto_ecent] \n"
+            conf+=fortDouble(self.veto_eden) + "                     ! [veto_eden] \n"
+            conf+=fortDouble(self.rshad) + "                         ! [rshad] \n"
         if (Version(os.environ['SUPERCHICVER']) >= Version("5.5.1")):
             conf+=fortBool(self.wrho) + "                            ! [wrho] : generate concident rho production in AA collisions \n"
             conf+=fortDouble(self.yrho) + "                          ! [yrho] : maximum rho |y| \n"
