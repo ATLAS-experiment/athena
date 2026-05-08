@@ -164,7 +164,7 @@ void gFEXaltMetAlgo::metFPGA(const gTowersCentral &twrs, int & MET_x, int & MET_
           0, -6,-12,-17,-22,-26,-29,-30,
         -31,-30,-29,-26,-22,-17,-12, -6
     };
-    
+
     int rows = twrs.size();
     int cols = twrs[0].size();
     
@@ -172,16 +172,19 @@ void gFEXaltMetAlgo::metFPGA(const gTowersCentral &twrs, int & MET_x, int & MET_
         int etasum = 0;
         for (int jcolumn = 0; jcolumn < cols; jcolumn++) {
 	    int tower_et = twrs[irow][jcolumn] & ~3;  // Clear 2 LSBs
-            if (tower_et > m_etaThr[FPGA_NO][jcolumn]) {
+	    int scaled_thr = m_etaThr[FPGA_NO][jcolumn] * 4; // factor of 4 converts threshold from 800 MeV/count (fw) to 200 MeV/count (sim)
+            if (tower_et > scaled_thr) {
                 etasum += tower_et;
             }
         }
+
         MET_x += etasum * s_cosLUT[irow];
         MET_y += etasum * s_sinLUT[irow];
     }
-    
+
     MET_x >>= 5;
     MET_y >>= 5;
+
 }
 
 
@@ -262,7 +265,7 @@ int gFEXaltMetAlgo::sumEtFPGAnc(const gTowersCentral &twrs, const unsigned short
     const int cols = twrs[0].size();
     for( int irow = 0; irow < rows; irow++ ){
         for(int jcolumn = 0; jcolumn<cols; jcolumn++){
-            partial_sumEt += twrs[irow][jcolumn] > m_etaThr[FPGA_NO][jcolumn] ? twrs[irow][jcolumn] : 0;
+            partial_sumEt += twrs[irow][jcolumn] > m_etaThr[FPGA_NO][jcolumn] * 4 ? twrs[irow][jcolumn] : 0; // factor of 4 converts threshold from 800 MeV/count (fw) to 200 MeV/count (sim)
         }
     }
     return partial_sumEt;
