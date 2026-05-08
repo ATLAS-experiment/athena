@@ -73,16 +73,14 @@ StatusCode TileLaserObjByteStreamCnv::createObjConst(IOpaqueAddress* pAddr, Data
 {
   ATH_MSG_DEBUG( " Executing createObj method" );
 
-  ByteStreamAddress *pRE_Addr;
-  pRE_Addr = dynamic_cast<ByteStreamAddress*>(pAddr); 
-  if(!pRE_Addr) {
-    ATH_MSG_ERROR( " Can not cast to ByteStreamAddress " );
-    return StatusCode::FAILURE;    
-  }
+  ByteStreamAddress* pRE_Addr{};
+  ATH_CHECK( (pRE_Addr = dynamic_cast<ByteStreamAddress*>(pAddr)) != nullptr );
+
+  const EventContext& ctx = pRE_Addr->getEventContext();
 
   /*FIND ROB*/
   std::vector<const ROBDataProviderSvc::ROBF*> robf;
-  m_robSvc->getROBData(Gaudi::Hive::currentContext(), m_ROBID, robf);
+  m_robSvc->getROBData(ctx, m_ROBID, robf);
 
   // create TileLaserObject
   auto cont = std::make_unique<TileLaserObject>() ; 

@@ -119,14 +119,10 @@ StatusCode ZdcByteStreamCnv::initialize()
 StatusCode ZdcByteStreamCnv::createObjConst(IOpaqueAddress* pAddr, DataObject*& pObj) const
 {
 	/// Create the RDO from bytestream.
-	ByteStreamAddress *pBS_Addr;
-	pBS_Addr = dynamic_cast<ByteStreamAddress *> (pAddr);
-	if (!pBS_Addr)
-	{
-                ATH_MSG_ERROR( "ZDC: Can not cast to ByteStreamAddress " );
-		return StatusCode::FAILURE;
-	}
+	ByteStreamAddress* pBS_Addr{};
+	ATH_CHECK( (pBS_Addr = dynamic_cast<ByteStreamAddress*>(pAddr)) != nullptr );
 
+	const EventContext& ctx = pBS_Addr->getEventContext();
 	const std::string nm = *(pBS_Addr->par());
 
         ATH_MSG_DEBUG( "ZDC: Creating Objects " << nm );
@@ -137,7 +133,7 @@ StatusCode ZdcByteStreamCnv::createObjConst(IOpaqueAddress* pAddr, DataObject*& 
 
 	// get ROB fragments
 	IROBDataProviderSvc::VROBFRAG robFrags;
-	m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags);
+	m_robDataProvider->getROBData(ctx, vID, robFrags);
 
 	// size check
         ATH_MSG_DEBUG( "ZDC: Number of ROB fragments is " << robFrags.size() );
