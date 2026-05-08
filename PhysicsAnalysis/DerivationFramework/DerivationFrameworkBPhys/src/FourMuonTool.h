@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ****************************************************************************
@@ -140,7 +140,7 @@ namespace DerivationFramework {
     //Doing Calculation and inline functions
     StatusCode performSearch(xAOD::VertexContainer* pairVxContainer, xAOD::VertexContainer* quadVxContainer,
                              bool &acceptEvent, const EventContext& ctx) const;
-    xAOD::Vertex* fit(const std::vector<const xAOD::TrackParticle*>& ,const xAOD::TrackParticleContainer* importedTrackCollection, const Amg::Vector3D &beamSpot) const;
+    std::unique_ptr<xAOD::Vertex> fit(const EventContext& ctx, const std::vector<const xAOD::TrackParticle*>& ,const xAOD::TrackParticleContainer* importedTrackCollection, const Amg::Vector3D &beamSpot) const;
     static std::vector<std::vector<unsigned int> > getQuadIndices(unsigned int length);
     static std::vector<std::pair<unsigned int, unsigned int> > getPairIndices(unsigned int length);
     static std::vector<std::vector<unsigned int> > mFromN(unsigned int m, unsigned int n);

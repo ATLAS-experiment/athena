@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
   Contact: Xin Chen <xin.chen@cern.ch>
 */
 #include "JpsiXPlus2V0.h"
@@ -1154,7 +1154,7 @@ namespace DerivationFramework {
 	    if(pass) {
 	      std::vector<const xAOD::TrackParticle*> tracksV0;
 	      tracksV0.push_back(TP1); tracksV0.push_back(TP2);
-	      std::unique_ptr<xAOD::Vertex> V0vtx = std::unique_ptr<xAOD::Vertex>( m_iV0Fitter->fit(tracksV0, startingPoint) );
+	      std::unique_ptr<xAOD::Vertex> V0vtx = m_iV0Fitter->fit(ctx, tracksV0, startingPoint);
 	      if(V0vtx && V0vtx->chiSquared()>=0) {
 		double chi2DOF = V0vtx->chiSquared()/V0vtx->numberDoF();
 		if(chi2DOF>m_chi2cut_V0) continue;
@@ -1174,7 +1174,7 @@ namespace DerivationFramework {
 
 		int gamma_fit = 0; int gamma_ndof = 0; double gamma_chisq = 999999.;
 		double gamma_prob = -1., gamma_mass = -1., gamma_massErr = -1.;
-		std::unique_ptr<xAOD::Vertex> gammaVtx = std::unique_ptr<xAOD::Vertex>( m_iGammaFitter->fit(tracksV0, m_V0Tools->vtx(V0vtx.get())) );
+		std::unique_ptr<xAOD::Vertex> gammaVtx = m_iGammaFitter->fit(ctx, tracksV0, m_V0Tools->vtx(V0vtx.get()));
 		if (gammaVtx) {
 		  gamma_fit     = 1;
 		  gamma_mass    = m_V0Tools->invariantMass(gammaVtx.get(),m_mass_e,m_mass_e);
