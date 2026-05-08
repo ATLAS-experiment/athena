@@ -111,6 +111,8 @@ namespace ActsTrk {
     Gaudi::Property<std::vector<std::size_t>> m_absEtaMaxMeasurements{this, "absEtaMaxMeasurements", {}, "if specified for the given seed collection, applies absEtaMax cut in branch stopper once absEtaMaxMeasurements have been encountered"};
     Gaudi::Property<bool> m_doBranchStopper{this, "doBranchStopper", true, "use branch stopper"};
     Gaudi::Property<bool> m_doTwoWay{this, "doTwoWay", true, "run CKF twice, first with forward propagation with smoothing, then with backward propagation"};
+    Gaudi::Property<bool> m_inflateCovarianceTwoWay{this, "inflateCovarianceTwoWay", false, "inflate covariance matrix at the beginning of two-way track finding"};
+    Gaudi::Property<double> m_twoWayinflateCovarianceFactor{this, "twoWayinflateCovarianceFactor", 1.0, "factor to multiply the initial covariance matrix at the beginning of two-way track finding"};
     Gaudi::Property<double> m_branchStopperPtMinFactor{this, "branchStopperPtMinFactor", 1.0, "factor to multiply ptMin cut when used in the branch stopper"};
     Gaudi::Property<double> m_branchStopperAbsEtaMaxExtra{this, "branchStopperAbsEtaMaxExtra", 0.0, "increase absEtaMax cut when used in the branch stopper"};
     Gaudi::Property<double> m_branchStopperMeasCutReduce{this, "branchStopperMeasCutReduce", 2, "how much to reduce the minMeas requirement for the branch stopper"};

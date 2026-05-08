@@ -236,11 +236,11 @@ def createEFValidateF150TrackingPassFlags():
 def createACTSInnerDetectorTrackingPassFlags():
     # flags for ACTS based InnerDetector silicon tracking
     icf = createTrackingPassFlags()
+    setActsDefaultTunings(icf)
     icf.extension               = ""
     icf.Xi2max = 25.0
     icf.Xi2maxNoAdd = 25.0
     # ACTS components
-    icf.addFlag("isSecondaryPass", False)
     icf.addFlag("doActsCluster", True)
     icf.addFlag("doActsSpacePoint", True)
     icf.addFlag("doActsSeed", True)
