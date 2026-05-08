@@ -79,8 +79,7 @@ fi
 ## Copying json config in the output directory
 echo "Running IDTPM with the following json config:"
 ## change the name of the track collection to monitor and copy json config in work dir
-## FIXME - temporarily not producing teachnical efficiencies plots
-cat $IDTPMjsonConfig_absPath | sed "s|_TRKCOLLNAME_|${TrkCollName}|g" | grep -v "plotTechnicalEfficiencies" | tee ${cwd}/IDTPMconfig.json
+cat $IDTPMjsonConfig_absPath | sed "s|_TRKCOLLNAME_|${TrkCollName}|g" | tee ${cwd}/IDTPMconfig.json
 
 ## IDTPM step
 run "IDTPM" \

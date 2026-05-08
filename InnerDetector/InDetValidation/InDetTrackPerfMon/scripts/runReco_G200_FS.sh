@@ -72,9 +72,11 @@ fi
 
 echo "CUDACXX=$CUDACXX"
 echo "PANDA_RESOURCE=$PANDA_RESOURCE"
+echo "ALRB_CONT_PARENTHOSTNAME=$ALRB_CONT_PARENTHOSTNAME"
 if [ -n "$CUDACXX" ]; then
   "$CUDACXX" --version
 fi
+nvidia-smi -L
 
 cmake ../traccc-athena -DTRACCC_USE_SYSTEM_ACTS=ON
 rc=$?
@@ -108,13 +110,12 @@ sed -i -e 's/^pipeline.*$/pipeline = \"g200\"/g' ${PIPELINE_CONFIG_FILE}
 ## running reconstruction
 Reco_tf.py --CA \
     --maxEvents ${nEvents} \
+    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
     --postInclude 'EFTracking.TrackingAlgConfig.g2xxAlgCfg,ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
     --steering 'doRAWtoALL' \
     --inputRDOFile ${inputRDO} \
-    --outputAODFile ${outputAOD}
-    ## FIXME - temporarily not producing teachnical efficiencies plots
-    #--postInclude 'EFTracking.TrackingAlgConfig.TrackingAlgCfg,ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
-    #--preExec 'flags.Tracking.writeExtendedSi_PRDInfo=True' \
+    --outputAODFile ${outputAOD} \
+    --perfmon fullmonmt
 
 rc=$?
 echo "Reco_tf.py result: $rc"
