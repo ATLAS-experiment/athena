@@ -1,11 +1,13 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #include "FPGATrackSimGNNGraphConstructionTool.h"
 
 #include <TFile.h>
 #include <TTree.h>
 #include "FourMomUtils/P4Helpers.h"
-
+#include <cstdint>
+#include <algorithm>
+#include <map>
 ///////////////////////////////////////////////////////////////////////////////
 // AthAlgTool
 
@@ -338,7 +340,7 @@ void FPGATrackSimGNNGraphConstructionTool::loadTripletModuleMap()
         cfg.tripletCuts.diff_dydx.mean = diff_dydx_mean_value;
         cfg.tripletCuts.diff_dydx.rms = diff_dydx_rms_value;
 
-        m_cfgs.emplace_back(std::move(cfg));
+        m_cfgs.emplace_back(cfg);
         m_tripletMap.emplace(TripletKey{cfg.mid1, cfg.mid2, cfg.mid3}, &m_cfgs.back());
     }
 }
@@ -428,7 +430,7 @@ void FPGATrackSimGNNGraphConstructionTool::getDoubletEdges(const std::vector<std
     }
 
     for (const auto& cfg : m_cfgs) {
-        unsigned midA, midB;
+        unsigned midA{}, midB{};
         const ModuleMapConfig::DoubletCuts& cuts = cfg.doubletCuts[cutIndex];
         
         if (cutIndex == 0) {
