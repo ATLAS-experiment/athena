@@ -250,6 +250,27 @@ namespace ActsTrk {
       return {};
     }
 
+    // First, inflate the covariance matrix if configured
+    if (m_inflateCovarianceTwoWay) {
+      ATH_MSG_DEBUG("Inflating covariance matrix for second track finding with factor = " << m_twoWayinflateCovarianceFactor.value());
+      ATH_MSG_VERBOSE("Original parameters before inflation: \n" << secondInitialParameters);
+
+      auto inflatedCovariance = secondInitialParameters.covariance().value();
+      inflatedCovariance *= m_twoWayinflateCovarianceFactor;
+
+      const auto& origSurface = secondInitialParameters.referenceSurface();
+      auto surfacePtr = const_cast<Acts::Surface&>(origSurface).shared_from_this();
+
+      Acts::BoundTrackParameters newParams(
+          std::static_pointer_cast<const Acts::Surface>(surfacePtr),
+          secondInitialParameters.parameters(), 
+          std::make_optional(inflatedCovariance),
+          secondInitialParameters.particleHypothesis());
+      secondInitialParameters = std::move(newParams);
+      
+      ATH_MSG_VERBOSE("Inflated covariance matrix : \n" << secondInitialParameters.covariance().value());
+    }
+
     auto rootBranch = tracksContainerTemp.makeTrack();
     rootBranch.copyFromWithoutStates(trackProxy);  // #3534
 
