@@ -19,12 +19,32 @@
 #include <RDBAccessSvc/IRDBRecordset.h>
 #include <GeoModelRead/ReadGeoModel.h>
 #include <GeoModelKernel/GeoFullPhysVol.h>
+#include <optional>
 
 
 
 namespace
 {
-constexpr int SCT_HitIndex{1};
+    constexpr int SCT_HitIndex{1};
+    const std::string becStr{"barrel_endcap"};
+    const std::string layerStr{"layer_wheel"};
+    const std::string etaStr{"eta_module"};
+    const std::string phiStr{"phi_module"};
+    const std::string sideStr{"side"};
+    //
+    std::optional<InDetDD::SiDetectorDesign::Axis>
+    direction(std::string_view axisStr){
+      if (axisStr == "x") {
+        return InDetDD::SiDetectorDesign::xAxis;
+      }
+      if (axisStr == "y") {
+        return InDetDD::SiDetectorDesign::yAxis;
+      }
+      if (axisStr == "z") {
+        return InDetDD::SiDetectorDesign::zAxis;
+      }
+      return std::nullopt;
+    }
 }
 
 
@@ -50,14 +70,14 @@ int StripGmxInterface::sensorId(std::map<std::string, int> &index) const
   // Return the Simulation HitID (nothing to do with "ATLAS Identifiers" aka "Offline Identifiers"
 
   int hitIdOfWafer = SiHitIdHelper::GetHelper()->buildHitId(SCT_HitIndex,
-                                                            index["barrel_endcap"],
-                                                            index["layer_wheel"],
-                                                            index["eta_module"],
-                                                            index["phi_module"],
-                                                            index["side"]);
+                                                            index[becStr],
+                                                            index[layerStr],
+                                                            index[etaStr],
+                                                            index[phiStr],
+                                                            index[sideStr]);
 
-  ATH_MSG_DEBUG("Index list: " << index["barrel_endcap"] << " " << index["layer_wheel"] << " "
-                               << index["eta_module"] << " " << index["phi_module"] << " " << index["side"]);
+  ATH_MSG_DEBUG("Index list: " << index[becStr] << " " << index[layerStr] << " "
+                               << index[etaStr] << " " << index[phiStr] << " " << index[sideStr]);
   ATH_MSG_DEBUG("hitIdOfWafer = " << std::hex << hitIdOfWafer << std::dec);
   ATH_MSG_DEBUG(" bec = " << SiHitIdHelper::GetHelper()->getBarrelEndcap(hitIdOfWafer)
                 << " lay = " << SiHitIdHelper::GetHelper()->getLayerDisk(hitIdOfWafer)
@@ -74,9 +94,9 @@ int StripGmxInterface::splitSensorId(std::map<std::string, int> &index,
   //
   // Return the Simulation HitID (nothing to do with "ATLAS Identifiers" aka "Offline Identifiers"
 
-  if (extraIndex.first != "eta_module") {
-    ATH_MSG_FATAL("Base Identifier: " << index["barrel_endcap"] << " " << index["layer_wheel"] << " "
-                  << index["eta_module"] << " " << index["phi_module"] << " " << index["side"]);
+  if (extraIndex.first != etaStr) {
+    ATH_MSG_FATAL("Base Identifier: " << index[becStr] << " " << index[layerStr] << " "
+                  << index[etaStr] << " " << index[phiStr] << " " << index[sideStr]);
     ATH_MSG_FATAL("Attempting to split "<< extraIndex.second);
     ATH_MSG_FATAL("Only splitting of eta_module supported for ITk strips!!!");
     return -1;
@@ -87,14 +107,14 @@ int StripGmxInterface::splitSensorId(std::map<std::string, int> &index,
   updatedIndex[extraIndex.first] += extraIndex.second;
 
   int hitIdOfWafer = SiHitIdHelper::GetHelper()->buildHitId(SCT_HitIndex,
-                                                            index["barrel_endcap"],
-                                                            index["layer_wheel"],
-                                                            index["eta_module"] + extraIndex.second,
-                                                            index["phi_module"],
-                                                            index["side"]);
+                                                            index[becStr],
+                                                            index[layerStr],
+                                                            index[etaStr] + extraIndex.second,
+                                                            index[phiStr],
+                                                            index[sideStr]);
 
-  ATH_MSG_DEBUG("Index list: " << index["barrel_endcap"] << " " << index["layer_wheel"] << " "
-                << index["eta_module"] + extraIndex.second << " " << index["phi_module"] << " " << index["side"]);
+  ATH_MSG_DEBUG("Index list: " << index[becStr] << " " << index[layerStr] << " "
+                << index[etaStr] + extraIndex.second << " " << index[phiStr] << " " << index[sideStr]);
   ATH_MSG_DEBUG("hitIdOfWafer = " << std::hex << hitIdOfWafer << std::dec);
   ATH_MSG_DEBUG(" bec = " << SiHitIdHelper::GetHelper()->getBarrelEndcap(hitIdOfWafer)
                 << " lay = " << SiHitIdHelper::GetHelper()->getLayerDisk(hitIdOfWafer)
@@ -128,8 +148,7 @@ void StripGmxInterface::makeSiStripBox(const std::string &typeName,
   //
   // Get all parameters.
   //
-  SiDetectorDesign::Axis stripDirection;
-  SiDetectorDesign::Axis fieldDirection;
+  
   double thickness{0.320};
   int readoutSide{1};
   InDetDD::CarrierType carrier(InDetDD::electrons);
@@ -162,30 +181,21 @@ void StripGmxInterface::makeSiStripBox(const std::string &typeName,
 
   std::string fieldDirectionString;
   getParameter(typeName, parameters, "fieldDirection", fieldDirectionString);
-  if (fieldDirectionString == "x") {
-    fieldDirection = SiDetectorDesign::xAxis;
-  } else if (fieldDirectionString == "y") {
-    fieldDirection = SiDetectorDesign::yAxis;
-  } else if (fieldDirectionString == "z") {
-    fieldDirection = SiDetectorDesign::zAxis;
-  } else {
+  auto fieldDirectionOptional = direction(fieldDirectionString);
+  if (!fieldDirectionOptional){
     throw GaudiException("Parameter fieldDirection should be x, y, or z for " + typeName,
                          "StripGmxInterface::makeSiStripBox", StatusCode::FAILURE);
   }
 
   std::string stripDirectionString;
   getParameter(typeName, parameters, "stripDirection", stripDirectionString);
-  if (stripDirectionString == "x") {
-    stripDirection = SiDetectorDesign::xAxis;
-  } else if (stripDirectionString == "y") {
-    stripDirection = SiDetectorDesign::yAxis;
-  } else if (stripDirectionString == "z") {
-    stripDirection = SiDetectorDesign::zAxis;
-  } else {
+  auto stripDirectionOptional = direction(stripDirectionString);
+  if (!stripDirectionOptional){
     throw GaudiException("Parameter stripDirection should be x, y, or z for " + typeName,
                          "StripGmxInterface::makeSiStripBox", StatusCode::FAILURE);
   }
-
+  const auto stripDirection = *stripDirectionOptional;
+  const auto fieldDirection = *fieldDirectionOptional;
   getParameter(typeName, parameters, "thickness", thickness);
   getParameter(typeName, parameters, "nRows", nRows);
   getParameter(typeName, parameters, "nStrips", nStrips);
@@ -279,8 +289,7 @@ void StripGmxInterface::makeStereoAnnulus(const std::string &typeName,
   //  Get all parameters.
   //
   int readoutSide{1};
-  SiDetectorDesign::Axis fieldDirection;
-  SiDetectorDesign::Axis stripDirection;
+
   InDetDD::CarrierType carrier{InDetDD::electrons};
   double thickness{0.320};
   double stereoAngle{0.020};
@@ -316,30 +325,21 @@ void StripGmxInterface::makeStereoAnnulus(const std::string &typeName,
 
   std::string fieldDirectionString;
   getParameter(typeName, parameters, "fieldDirection", fieldDirectionString);
-  if (fieldDirectionString == "x") {
-    fieldDirection = SiDetectorDesign::xAxis;
-  } else if (fieldDirectionString == "y") {
-    fieldDirection = SiDetectorDesign::yAxis;
-  } else if (fieldDirectionString == "z") {
-    fieldDirection = SiDetectorDesign::zAxis;
-  } else {
+  auto fieldDirectionOptional = direction(fieldDirectionString);
+  if (!fieldDirectionOptional){
     throw GaudiException("Parameter fieldDirection should be x, y, or z for " + typeName,
                          "StripGmxInterface::makeStereoAnnulus", StatusCode::FAILURE);
   }
-
+  const auto fieldDirection = *fieldDirectionOptional;
+  //
   std::string stripDirectionString;
   getParameter(typeName, parameters, "stripDirection", stripDirectionString);
-  if (stripDirectionString == "x") {
-    stripDirection = SiDetectorDesign::xAxis;
-  } else if (stripDirectionString == "y") {
-    stripDirection = SiDetectorDesign::yAxis;
-  } else if (stripDirectionString == "z") {
-    stripDirection = SiDetectorDesign::zAxis;
-  } else {
+  auto stripDirectionOptional = direction(stripDirectionString);
+  if (!stripDirectionOptional){
     throw GaudiException("Parameter stripDirection should be x, y, or z for " + typeName,
                          "StripGmxInterface::makeStereoAnnulus", StatusCode::FAILURE);
   }
-
+  const auto stripDirection = *stripDirectionOptional;
   getParameter(typeName, parameters, "thickness", thickness);
   getParameter(typeName, parameters, "stereoAngle", stereoAngle);
   getParameter(typeName, parameters, "centreR", centreR);
@@ -491,11 +491,11 @@ void StripGmxInterface::addSplitSensor(const std::string& typeName,
     ATH_MSG_ERROR("Failed dynamic cast to SCT_ID in StripGmxInterface::addSplitSensor");
     return;
   }
-  Identifier id = sctIdHelper->wafer_id(updatedIndex["barrel_endcap"],
-                                        updatedIndex["layer_wheel"],
-                                        updatedIndex["phi_module"],
-                                        updatedIndex["eta_module"],
-                                        updatedIndex["side"]);
+  Identifier id = sctIdHelper->wafer_id(updatedIndex[becStr],
+                                        updatedIndex[layerStr],
+                                        updatedIndex[phiStr],
+                                        updatedIndex[etaStr],
+                                        updatedIndex[sideStr]);
   IdentifierHash hashId = sctIdHelper->wafer_hash(id);
   //
   // Now do our best to check if this is a valid id. If either the gmx file is wrong, or the xml file
@@ -517,8 +517,8 @@ void StripGmxInterface::addSplitSensor(const std::string& typeName,
   // Create the detector element and add to the DetectorManager
   //
   std::string splitTypeName = typeName + "_" + std::to_string(splitIndex);
-  if (updatedIndex["barrel_endcap"] == 0) { // only barrel-type have side dependence
-    splitTypeName += "_" + std::to_string(updatedIndex["side"]);
+  if (updatedIndex[becStr] == 0) { // only barrel-type have side dependence
+    splitTypeName += "_" + std::to_string(updatedIndex[sideStr]);
   }
 
   auto it = m_geometryMap.find(splitTypeName);
@@ -535,11 +535,11 @@ void StripGmxInterface::addSplitSensor(const std::string& typeName,
   //
   Wafer wafer((unsigned int) hashId);
   std::string errorMessage("");
-  if (!m_waferTree->add(updatedIndex["barrel_endcap"],
-                        updatedIndex["layer_wheel"],
-                        updatedIndex["eta_module"],
-                        updatedIndex["phi_module"],
-                        updatedIndex["side"],
+  if (!m_waferTree->add(updatedIndex[becStr],
+                        updatedIndex[layerStr],
+                        updatedIndex[etaStr],
+                        updatedIndex[phiStr],
+                        updatedIndex[sideStr],
                         wafer,
                         errorMessage)) {
     ATH_MSG_ERROR(errorMessage);
@@ -562,11 +562,11 @@ void StripGmxInterface::addSensor(const std::string& typeName,
     ATH_MSG_ERROR("StripGmxInterface::addSensor: ID helper pointer could not be cast to SCT_ID *");
     return;
   }
-  Identifier id = sctIdHelper->wafer_id(index["barrel_endcap"],
-                                        index["layer_wheel"],
-                                        index["phi_module"],
-                                        index["eta_module"],
-                                        index["side"]);
+  Identifier id = sctIdHelper->wafer_id(index[becStr],
+                                        index[layerStr],
+                                        index[phiStr],
+                                        index[etaStr],
+                                        index[sideStr]);
   IdentifierHash hashId = sctIdHelper->wafer_hash(id);
   //
   // Now do our best to check if this is a valid id. If either the gmx file is wrong, or the xml file
@@ -601,11 +601,11 @@ void StripGmxInterface::addSensor(const std::string& typeName,
   //
   Wafer wafer((unsigned int) hashId);
   std::string errorMessage("");
-  if (!m_waferTree->add(index["barrel_endcap"],
-                        index["layer_wheel"],
-                        index["eta_module"],
-                        index["phi_module"],
-                        index["side"],
+  if (!m_waferTree->add(index[becStr],
+                        index[layerStr],
+                        index[etaStr],
+                        index[phiStr],
+                        index[sideStr],
                         wafer,
                         errorMessage)) {
     ATH_MSG_ERROR(errorMessage);
@@ -632,28 +632,28 @@ void StripGmxInterface::addAlignable(int level,
   Identifier id;
   switch (level) {
     case 0:
-      id = sctIdHelper->wafer_id(index["barrel_endcap"],
-                                 index["layer_wheel"],
-                                 index["phi_module"],
-                                 index["eta_module"],
-                                 index["side"]);
+      id = sctIdHelper->wafer_id(index[becStr],
+                                 index[layerStr],
+                                 index[phiStr],
+                                 index[etaStr],
+                                 index[sideStr]);
       break;
     case 1:
-      id = sctIdHelper->wafer_id(index["barrel_endcap"],
-                                 index["layer_wheel"],
-                                 index["phi_module"],
-                                 index["eta_module"],
+      id = sctIdHelper->wafer_id(index[becStr],
+                                 index[layerStr],
+                                 index[phiStr],
+                                 index[etaStr],
                                  0);
       break;
     case 2:
-      id = sctIdHelper->wafer_id(index["barrel_endcap"],
-                                 index["layer_wheel"],
+      id = sctIdHelper->wafer_id(index[becStr],
+                                 index[layerStr],
                                  0,
                                  0,
                                  0);
       break;
     case 3:
-      id = sctIdHelper->wafer_id(index["barrel_endcap"],
+      id = sctIdHelper->wafer_id(index[becStr],
                                  0,
                                  0,
                                  0,
@@ -688,28 +688,28 @@ void StripGmxInterface::addSplitAlignable(int level,
   Identifier id;
   switch (level) {
     case 0:
-      id = sctIdHelper->wafer_id(updatedIndex["barrel_endcap"],
-                                 updatedIndex["layer_wheel"],
-                                 updatedIndex["phi_module"],
-                                 updatedIndex["eta_module"],
-                                 updatedIndex["side"]);
+      id = sctIdHelper->wafer_id(updatedIndex[becStr],
+                                 updatedIndex[layerStr],
+                                 updatedIndex[phiStr],
+                                 updatedIndex[etaStr],
+                                 updatedIndex[sideStr]);
       break;
     case 1:
-      id = sctIdHelper->wafer_id(updatedIndex["barrel_endcap"],
-                                 updatedIndex["layer_wheel"],
-                                 updatedIndex["phi_module"],
-                                 updatedIndex["eta_module"],
+      id = sctIdHelper->wafer_id(updatedIndex[becStr],
+                                 updatedIndex[layerStr],
+                                 updatedIndex[phiStr],
+                                 updatedIndex[etaStr],
                                  0);
       break;
     case 2:
-      id = sctIdHelper->wafer_id(updatedIndex["barrel_endcap"],
-                                 updatedIndex["layer_wheel"],
+      id = sctIdHelper->wafer_id(updatedIndex[becStr],
+                                 updatedIndex[layerStr],
                                  0,
                                  0,
                                  0);
       break;
     case 3:
-      id = sctIdHelper->wafer_id(updatedIndex["barrel_endcap"],
+      id = sctIdHelper->wafer_id(updatedIndex[becStr],
                                  0,
                                  0,
                                  0,
@@ -758,7 +758,7 @@ void StripGmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccess
 
     //Now, loop over the FullPhysVols and create the SiDetectorElements (including splitting where needed)
     //lots of string parsing...
-    const std::array<std::string,5> fields{"barrel_endcap","layer_wheel","phi_module","eta_module","side"}; 
+    const std::array<std::string,5> fields{becStr,layerStr,phiStr,etaStr,sideStr}; 
     //First, find which name the tables are in the file under (depends upon the plugin used to create the input file)
     //sort these in order of precedence - ITkPlugin, then ITkStripPlugin, then GeoModelXMLPlugin
     const std::array<std::string,3> publishers{"ITk","ITkStrip","GeoModelXML"};
@@ -800,7 +800,7 @@ void StripGmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccess
             std::string strNew = fullPhysVolInfoString.substr(splitPos+6,last-(splitPos+6));
             int splitLevel = std::stoi(strNew);
             for(int i=0;i<splitLevel;i++){
-              std::string field = "eta_module";//eventually specify in Xml the field to split in?
+              std::string field = etaStr;//eventually specify in Xml the field to split in?
               std::pair<std::string,int> extraIndex(field,i);
               addSplitSensor(typeName,index,extraIndex,0,fullPhysVolPointer,splitLevel);
             }
