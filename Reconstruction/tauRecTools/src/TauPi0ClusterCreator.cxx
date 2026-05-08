@@ -104,7 +104,11 @@ StatusCode TauPi0ClusterCreator::executePi0ClusterCreator(xAOD::TauJet& tau,
     const xAOD::CaloCluster& cluster = vertexedCluster.clust();
     const CaloClusterCellLink* cellLinks = cluster.getCellLinks();
     if (!cellLinks) {
-      ATH_MSG_WARNING("The cell links of the tau cluster is unavailable.");
+      if (!m_recoFromAOD)
+          ATH_MSG_WARNING("The cell links of the tau cluster is unavailable.");
+      else
+          ATH_MSG_DEBUG("The cell links of the tau cluster is unavailable due to reconstruction from AOD");
+
       continue;
     }
     CaloClusterCellLink::const_iterator cellLink = cellLinks->begin();
