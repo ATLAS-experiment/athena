@@ -134,7 +134,7 @@ TIDARoiDescriptor::TIDARoiDescriptor(unsigned int roiword, unsigned int l1id, in
 
 
 TIDARoiDescriptor::TIDARoiDescriptor(const TIDARoiDescriptor& a) : 
-  TObject(*this), 
+  TObject(a),
   m_params(a.m_params),
   m_fullscan(a.m_fullscan),
   m_l1Id(a.m_l1Id), m_roiId(a.m_roiId), m_roiWord(a.m_roiWord),  
