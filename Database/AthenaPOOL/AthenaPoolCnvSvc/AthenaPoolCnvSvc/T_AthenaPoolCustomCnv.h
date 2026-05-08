@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLCNVSVC_T_ATHENAPOOLCUSTOMCNV_H
@@ -10,10 +10,11 @@
  *  @author Marcin.Nowak@cern.ch
  **/
 
-#include "GaudiKernel/ThreadLocalContext.h"
-#include "GaudiKernel/EventContext.h"
+#include "AthenaKernel/SlotSpecificObj.h"
+
 #include "T_AthenaPoolCustCnv.h"
 
+#include <unordered_map>
 #include <vector>
 
 // class TopLevelTPCnvBase;
@@ -112,7 +113,8 @@ protected:
 
    /// Local cache for persistent objects created by this converter, grouped by processing slot
    /// These objects are deleted after a commit.
-   std::map<std::string, std::vector< std::unique_ptr<PERS> > > m_persObjLists;
+   using PersObjCache_t = std::unordered_map<std::string, std::vector<std::unique_ptr<PERS>>>;
+   SG::SlotSpecificObj<PersObjCache_t, SG::InvalidSlot::Enabled> m_persObjLists;
 
    /// protection mutex for m_persObjLists
    std::mutex  m_pListMutex;
