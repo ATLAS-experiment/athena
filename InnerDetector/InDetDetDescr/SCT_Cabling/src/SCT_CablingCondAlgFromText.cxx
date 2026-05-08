@@ -31,8 +31,11 @@
 #include <fstream>
 
 //Constants at file scope
-static const std::string atlasTableSignature{"Rod Fibre Bec LayerDisk Eta Phi Side RobId Sn"};
-static const int disabledFibre{255};
+namespace{
+  const std::string atlasTableSignature{"Rod Fibre Bec LayerDisk Eta Phi Side RobId Sn"};
+  const std::string endOfTableTableSignature{"</textList>"};
+  const int disabledFibre{255};
+}
 
 //utility functions in file scope
 namespace {
@@ -126,7 +129,7 @@ SCT_CablingCondAlgFromText::execute(const EventContext& ctx) const {
   do {
     std::getline(fromDataFile, inString);
     if (contains(inString, "- ")) continue;
-    endOfTable=contains(inString, "</textList>");
+    endOfTable=contains(inString, endOfTableTableSignature);
     std::istringstream dataLine(inString);
     if (not endOfTable) {
       int rod,link,barrelOrEndcap,layer,phi,eta,side,robidFromfile;
