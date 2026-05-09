@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
@@ -606,11 +606,10 @@ namespace ST {
     std::string m_commonPRWFileMC20a;
     std::string m_commonPRWFileMC20d;
     std::string m_commonPRWFileMC20e;
-    std::string m_commonPRWFileMC21a;
     std::string m_commonPRWFileMC23a;
-    std::string m_commonPRWFileMC23c;
     std::string m_commonPRWFileMC23d;
     std::string m_commonPRWFileMC23e;
+    std::string m_commonPRWFileMC23g;
 
     std::vector<std::string> m_prwConfFiles;
     std::vector<std::string> m_prwLcalcFiles;
@@ -619,6 +618,7 @@ namespace ST {
     std::string m_prwActualMu2022File;
     std::string m_prwActualMu2023File;
     std::string m_prwActualMu2024File;
+    std::string m_prwActualMu2025File;
 
     double m_prwDataSF;
     double m_prwDataSF_UP;

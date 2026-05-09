@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s):
@@ -160,11 +160,10 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_commonPRWFileMC20a(""),
     m_commonPRWFileMC20d(""),
     m_commonPRWFileMC20e(""),
-    m_commonPRWFileMC21a(""),
     m_commonPRWFileMC23a(""),
-    m_commonPRWFileMC23c(""),
     m_commonPRWFileMC23d(""),
     m_commonPRWFileMC23e(""),
+    m_commonPRWFileMC23g(""),
     m_prwDataSF(-99.),
     m_prwDataSF_UP(-99.),
     m_prwDataSF_DW(-99.),
@@ -645,6 +644,7 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   declareProperty( "PRWActualMu2022File",  m_prwActualMu2022File );
   declareProperty( "PRWActualMu2023File",  m_prwActualMu2023File );
   declareProperty( "PRWActualMu2024File",  m_prwActualMu2024File );
+  declareProperty( "PRWActualMu2025File",  m_prwActualMu2025File );
   declareProperty( "PRWDataScaleFactor",   m_prwDataSF);
   declareProperty( "PRWDataScaleFactorUP", m_prwDataSF_UP);
   declareProperty( "PRWDataScaleFactorDOWN", m_prwDataSF_DW);
@@ -653,11 +653,10 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   declareProperty( "PRWCommonFileMC20a", m_commonPRWFileMC20a);
   declareProperty( "PRWCommonFileMC20d", m_commonPRWFileMC20d);
   declareProperty( "PRWCommonFileMC20e", m_commonPRWFileMC20e);
-  declareProperty( "PRWCommonFileMC21a", m_commonPRWFileMC21a);
   declareProperty( "PRWCommonFileMC23a", m_commonPRWFileMC23a);
-  declareProperty( "PRWCommonFileMC23c", m_commonPRWFileMC23c);
   declareProperty( "PRWCommonFileMC23d", m_commonPRWFileMC23d);
   declareProperty( "PRWCommonFileMC23e", m_commonPRWFileMC23e);
+  declareProperty( "PRWCommonFileMC23g", m_commonPRWFileMC23g);
   //LargeR uncertainties config, as from https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/JetUncertainties2016PrerecLargeR#Understanding_which_configuratio
   declareProperty( "JetLargeRuncConfig",  m_fatJetUncConfig );
   declareProperty( "JetLargeRuncVars",  m_fatJetUncVars );
@@ -1026,9 +1025,9 @@ StatusCode SUSYObjDef_xAOD::autoconfigurePileupRWTool(const std::string& PRWfile
     const xAOD::FileMetaData* fmd = nullptr;
 
     // configure PRW rtag options from m_autoconfigPRWRtags string
-    // e.g. "mc20a:r13167_r14859,mc20d:r13144_r14860,mc20e:r13145_r14861,mc21a:r13752_r13829,mc23a:r14622_r14932_r15540,mc23c:r14799_r14908,mc23d:r15224_r15530,mc23e:r16083"
+    // e.g. "mc20a:r13167_r14859,mc20d:r13144_r14860,mc20e:r13145_r14861,mc23a:r14622_r14932_r15540,mc23d:r15224_r15530,mc23e:r16083,mc23g:r17610"
     std::map<std::string,std::vector<std::string>> PRWRtags = {};
-    std::string allcampaigns = "mc20a.mc20d.mc20e.mc21a.mc23a.mc23c.mc23d.mc23e";
+    std::string allcampaigns = "mc20a.mc20d.mc20e.mc23a.mc23d.mc23e.mc23g";
     bool standard_like = true;
     for ( const auto& campaign_rtags : split( m_autoconfigPRWRtags, "," ) ) {                                          // split string by ","
        std::string icampaign = campaign_rtags.substr(0, campaign_rtags.find(":"));                              // first field = campaign, split by ":"
@@ -1082,7 +1081,7 @@ StatusCode SUSYObjDef_xAOD::autoconfigurePileupRWTool(const std::string& PRWfile
       return StatusCode::FAILURE;
 #else
 
-      if ( m_mcCampaign == "mc20a" || m_mcCampaign == "mc20d" || m_mcCampaign == "mc20e" || m_mcCampaign == "mc21a" || m_mcCampaign == "mc23a" || m_mcCampaign == "mc23c" || m_mcCampaign == "mc23d" || m_mcCampaign == "mc23e") {
+      if ( m_mcCampaign == "mc20a" || m_mcCampaign == "mc20d" || m_mcCampaign == "mc20e" || m_mcCampaign == "mc23a" || m_mcCampaign == "mc23d" || m_mcCampaign == "mc23e" || m_mcCampaign == "mc23g") {
 	// First see if the user set the mcCampaign/run number by property (hopefully temporary workaround)
 	if ( m_mcChannel > 0) {
 	  ATH_MSG_WARNING( "autoconfigurePileupRWTool(): access to FileMetaData failed -> getting the mc channel number (DSID) and campaign from configuration." );
@@ -1121,11 +1120,10 @@ StatusCode SUSYObjDef_xAOD::autoconfigurePileupRWTool(const std::string& PRWfile
       if      (mcCampaignMD == "mc20a") {prwConfigFile = PathResolverFindCalibFile(m_commonPRWFileMC20a);}
       else if (mcCampaignMD == "mc20d") {prwConfigFile = PathResolverFindCalibFile(m_commonPRWFileMC20d);}
       else if (mcCampaignMD == "mc20e") {prwConfigFile = PathResolverFindCalibFile(m_commonPRWFileMC20e);}
-      else if (mcCampaignMD == "mc21a") {prwConfigFile = PathResolverFindCalibFile(m_commonPRWFileMC21a);}
       else if (mcCampaignMD == "mc23a") {prwConfigFile = PathResolverFindCalibFile(m_commonPRWFileMC23a);}
-      else if (mcCampaignMD == "mc23c") {prwConfigFile = PathResolverFindCalibFile(m_commonPRWFileMC23c);}
       else if (mcCampaignMD == "mc23d") {prwConfigFile = PathResolverFindCalibFile(m_commonPRWFileMC23d);}
       else if (mcCampaignMD == "mc23e") {prwConfigFile = PathResolverFindCalibFile(m_commonPRWFileMC23e);}
+      else if (mcCampaignMD == "mc23g") {prwConfigFile = PathResolverFindCalibFile(m_commonPRWFileMC23g);}
       else {
         ATH_MSG_ERROR( "autoconfigurePileupRWTool(): no common PRW file known for MC campaign: " << mcCampaignMD);
         return StatusCode::FAILURE;
@@ -1175,14 +1173,15 @@ StatusCode SUSYObjDef_xAOD::autoconfigurePileupRWTool(const std::string& PRWfile
         m_prwConfFiles.push_back( PathResolverFindCalibFile(m_prwActualMu2017File) );
       } else if (mcCampaignMD == "mc20e") {
         m_prwConfFiles.push_back( PathResolverFindCalibFile(m_prwActualMu2018File) );
-      } else if (mcCampaignMD == "mc21a" || mcCampaignMD == "mc23a") {
+      } else if (mcCampaignMD == "mc23a") {
         m_prwConfFiles.push_back( PathResolverFindCalibFile(m_prwActualMu2022File) );
-      } else if (mcCampaignMD == "mc23c" || mcCampaignMD == "mc23d") {
+      } else if (mcCampaignMD == "mc23d") {
         m_prwConfFiles.push_back( PathResolverFindCalibFile(m_prwActualMu2023File) );
       } else if (mcCampaignMD == "mc23e") {
         m_prwConfFiles.push_back( PathResolverFindCalibFile(m_prwActualMu2024File) );
+      } else if (mcCampaignMD == "mc23g") {
+	m_prwConfFiles.push_back( PathResolverFindCalibFile(m_prwActualMu2025File) );
       }
-
     }
     prwConfigFile = usePathResolver ? PathResolverFindCalibFile(prwConfigFile) : prwConfigFile;
 
@@ -1694,7 +1693,8 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_prwActualMu2018File, "PRW.ActualMu2018File", rEnv, "GoodRunsLists/data18_13TeV/20190318/physics_25ns_Triggerno17e33prim.actualMu.OflLumi-13TeV-010.root");
   configFromFile(m_prwActualMu2022File, "PRW.ActualMu2022File", rEnv, "GoodRunsLists/data22_13p6TeV/20250321/purw.actualMu.root");
   configFromFile(m_prwActualMu2023File, "PRW.ActualMu2023File", rEnv, "GoodRunsLists/data23_13p6TeV/20250321/purw.actualMu.root");
-  configFromFile(m_prwActualMu2024File, "PRW.ActualMu2024File", rEnv, "GoodRunsLists/data24_13p6TeV/20241118/purw.actualMu.root");
+  configFromFile(m_prwActualMu2024File, "PRW.ActualMu2024File", rEnv, "GoodRunsLists/data24_13p6TeV/20260127/purw.actualMu.root");
+  configFromFile(m_prwActualMu2025File, "PRW.ActualMu2025File", rEnv, "GoodRunsLists/data25_13p6TeV/20260129/purw.actualMu.root");
   configFromFile(m_prwDataSF, "PRW.DataSF", rEnv, 1./1.03); // default for mc16, see: https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/ExtendedPileupReweighting#Tool_Properties
   configFromFile(m_prwDataSF_UP, "PRW.DataSF_UP", rEnv, 1./0.99); // mc16 uncertainty? defaulting to the value in PRWtool
   configFromFile(m_prwDataSF_DW, "PRW.DataSF_DW", rEnv, 1./1.07); // mc16 uncertainty? defaulting to the value in PRWtool
@@ -1703,15 +1703,14 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_autoconfigPRWFile, "PRW.autoconfigPRWFile", rEnv, "None");
   configFromFile(m_autoconfigPRWCombinedmode, "PRW.autoconfigPRWCombinedmode", rEnv, false);
   configFromFile(m_autoconfigPRWRPVmode, "PRW.autoconfigPRWRPVmode", rEnv, false);
-  configFromFile(m_autoconfigPRWRtags, "PRW.autoconfigPRWRtags", rEnv, "mc20a:r13167_r14859,mc20d:r13144_r14860,mc20e:r13145_r14861,mc21a:r13752_r13829,mc23a:r14622_r14932_r15540,mc23c:r14799_r14908,mc23d:r15224_r15530,mc23e:r16083"); // Tag details here: https://twiki.cern.ch/twiki/bin/view/AtlasProtected/AtlasProductionGroup
+  configFromFile(m_autoconfigPRWRtags, "PRW.autoconfigPRWRtags", rEnv, "mc20a:r13167_r14859,mc20d:r13144_r14860,mc20e:r13145_r14861,mc23a:r14622_r14932_r15540,mc23d:r15224_r15530,mc23e:r16083,mc23g:r17610"); // Tag details here: https://twiki.cern.ch/twiki/bin/view/AtlasProtected/AtlasProductionGroup
   configFromFile(m_commonPRWFileMC20a, "PRW.commonPRWFileMC20a", rEnv, "PileupReweighting/mc20_common/mc20a.284500.physlite.prw.v1.root");
   configFromFile(m_commonPRWFileMC20d, "PRW.commonPRWFileMC20d", rEnv, "PileupReweighting/mc20_common/mc20d.300000.physlite.prw.v1.root");
   configFromFile(m_commonPRWFileMC20e, "PRW.commonPRWFileMC20e", rEnv, "PileupReweighting/mc20_common/mc20e.310000.physlite.prw.v1.root");
-  configFromFile(m_commonPRWFileMC21a, "PRW.commonPRWFileMC21a", rEnv, "PileupReweighting/mc21_common/mc21a.410000.physlite.prw.v1.root");
   configFromFile(m_commonPRWFileMC23a, "PRW.commonPRWFileMC23a", rEnv, "PileupReweighting/mc23_common/mc23a.410000.physlite.prw.v2.root");
-  configFromFile(m_commonPRWFileMC23c, "PRW.commonPRWFileMC23c", rEnv, "PileupReweighting/mc23_common/mc23c.450000.physlite.prw.v1.root");
   configFromFile(m_commonPRWFileMC23d, "PRW.commonPRWFileMC23d", rEnv, "PileupReweighting/mc23_common/mc23d.450000.physlite.prw.v1.root");
   configFromFile(m_commonPRWFileMC23e, "PRW.commonPRWFileMC23e", rEnv, "PileupReweighting/mc23_common/mc23e.470000.physlite.prw.v1.root");
+  configFromFile(m_commonPRWFileMC23g, "PRW.commonPRWFileMC23g", rEnv, "PileupReweighting/mc23_common/mc23g.495000.physlite.prw.v1.root");
   //
   configFromFile(m_strictConfigCheck, "StrictConfigCheck", rEnv, false);
 
@@ -3106,11 +3105,11 @@ StatusCode SUSYObjDef_xAOD::ApplyLRTUncertainty(){
   // Loop over tracks and call LRT uncertainty tool
   ATH_MSG_DEBUG ( "Applying LRT filter tool decorations for uncertainty");
   const xAOD::TrackParticleContainer inTracks = GetInDetLargeD0Tracks(ctx);
-  for(const auto trk: inTracks)  dec_lrtFilter(*trk) = m_LRTuncTool->accept(trk);
+  for(const auto* trk: inTracks)  dec_lrtFilter(*trk) = m_LRTuncTool->accept(trk);
 
   // Loop over GSF LRT tracks and call uncertainty tool
   const xAOD::TrackParticleContainer inGSFTracks = GetInDetLargeD0GSFTracks(ctx);
-  for(const auto trk: inGSFTracks) dec_lrtFilter(*trk) = m_LRTuncTool->accept(trk);
+  for(const auto* trk: inGSFTracks) dec_lrtFilter(*trk) = m_LRTuncTool->accept(trk);
 
   return StatusCode::SUCCESS;
 }
@@ -3126,7 +3125,9 @@ int SUSYObjDef_xAOD::treatAsYear(const int runNumber) const {
   else if (theRunNumber<400000) return 2018;
   else if (theRunNumber<445000) return 2022;
   else if (theRunNumber<465000) return 2023;
-  return 2024;
+  else if (theRunNumber<490000) return 2024;
+  else if (theRunNumber<510000) return 2025;
+  return 2026;
 }
 
 SUSYObjDef_xAOD::~SUSYObjDef_xAOD() {
