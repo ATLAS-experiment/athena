@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ISF_FastCaloSimServices )
@@ -38,5 +38,5 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_add_test( ISF_FastCaloSimServices_Config_test
                 SCRIPT test/FastCaloSimServicesTest.py -n 3
                 PRIVATE_WORKING_DIRECTORY
-                POST_EXEC_SCRIPT nopost.sh
+                POST_EXEC_SCRIPT noerror.sh
                 PROPERTIES TIMEOUT 4000)
