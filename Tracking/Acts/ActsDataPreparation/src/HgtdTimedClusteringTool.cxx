@@ -7,6 +7,7 @@
 #include "Acts/Clusterization/TimedClusterization.hpp"
 #include "AthContainers/JaggedVecUtils.h"
 #include "xAODCore/VariableStruct.h"
+#include "AthenaKernel/Units.h"
 
 namespace Hgtd {
   static inline int getCellRow(const Hgtd::UnpackedHgtdRDO& cell)
@@ -25,6 +26,13 @@ namespace Hgtd {
     cl.tots.push_back(cell.TOT);
     cl.times.push_back(cell.TOA);
   }
+}
+
+namespace {
+   static constexpr float acts_ns_over_athena_ns = Acts::UnitConstants::ns / Athena::Units::nanosecond;
+   float toActsTime(float athena_time) {
+      return athena_time * acts_ns_over_athena_ns;
+   }
 }
 
 
@@ -86,7 +94,7 @@ namespace ActsTrk {
       cells.emplace_back(-1,
 			 m_hgtd_id->phi_index(id),
 			 m_hgtd_id->eta_index(id),
-			 rdo->getTOA(),
+			 toActsTime(rdo->getTOA()),
 			 rdo->getTOT(),
 			 id);
   }
@@ -194,7 +202,7 @@ StatusCode HgtdTimedClusteringTool::clusterize(const EventContext& /*ctx*/,
     cells.emplace_back(-1,
       m_hgtd_id->phi_index(id),
       m_hgtd_id->eta_index(id),
-      time_of_flight,
+      toActsTime(time_of_flight),
       rdo->getToT(),
       id);
   }
