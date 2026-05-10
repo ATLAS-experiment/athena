@@ -7,6 +7,15 @@
 #include "details/HgtdCollectionAdapter.h"
 #include "details/HgtdAuxDataCache.h"
 
+#include "AthenaKernel/Units.h"
+
+namespace {
+   static constexpr float acts_ns_over_athena_ns = Acts::UnitConstants::ns / Athena::Units::nanosecond;
+   float toActsTime(float athena_time) {
+      return athena_time * acts_ns_over_athena_ns;
+   }
+}
+
 namespace ActsTrk {
   HgtdClusteringToolBase::HgtdClusteringToolBase(const std::string& type,
 						   const std::string& name,
@@ -156,7 +165,7 @@ namespace ActsTrk {
       ++n_rdos;
 
       pos_acc += si_pos;
-      float time_of_flight = rdoAdapter.calibratedTime(*rdo, cellProxy.coordinates()[2]);
+      float time_of_flight = toActsTime(rdoAdapter.calibratedTime(*rdo, cellProxy.coordinates()[2]));
       av_time_of_flight += time_of_flight;
     }
 
