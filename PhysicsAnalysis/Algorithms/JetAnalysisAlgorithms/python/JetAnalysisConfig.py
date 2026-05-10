@@ -980,13 +980,17 @@ class JvtWorkingPointSelectionConfig (ConfigBlock) :
         self.addOption ('jvtWP', '', type=str,
             noneAction='error',
             info="the NNJvt WP to use. Supported WPs: `FixedEffPt`.")
+        self.addOption ('useSuffix', True, type=bool,
+            info="whether the working point name is to be used as suffix ."
+            "Not to be disabled if multiple working points are scheduled.")
 
     def instanceName (self) :
         return self.containerName + '_' + self.selectionName
 
     def makeAlgs (self, config) :
 
-        decorationName = f"jvt_selection_{self.jvtWP},as_char"
+        suffix = f"_{self.jvtWP}" if self.useSuffix else ""
+        decorationName = f"jvt_selection{suffix},as_char"
         selectionName = self.selectionName
 
         alg = config.createAlgorithm('CP::AsgSelectionAlg', f'JvtSelectionAlg_{self.jvtWP}')
@@ -1019,6 +1023,9 @@ class JvtWorkingPointEfficiencyConfig (ConfigBlock) :
         self.addOption ('jvtWP', '', type=str,
             noneAction='error',
             info="the NNJvt WP to use. Supported WPs: `FixedEffPt`.")
+        self.addOption ('useSuffix', True, type=bool,
+            info="whether the working point name is to be used as suffix ."
+            "Not to be disabled if multiple working points are scheduled.")
         self.addOption ('noEffSF', False, type=bool,
             info="disables the calculation of efficiencies and scale factors. "
             "Only useful to test a new WP for which scale factors are not available.",
@@ -1031,7 +1038,8 @@ class JvtWorkingPointEfficiencyConfig (ConfigBlock) :
 
     def makeAlgs (self, config) :
 
-        decorationName = f"jvt_selection_{self.jvtWP},as_char"
+        suffix = f"_{self.jvtWP}" if self.useSuffix else ""
+        decorationName = f"jvt_selection{suffix},as_char"
 
         if not self.noEffSF and config.dataType() is not DataType.Data:
             alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', f'JvtEfficiencyAlg_{self.jvtWP}' )
@@ -1044,25 +1052,25 @@ class JvtWorkingPointEfficiencyConfig (ConfigBlock) :
             else:
                 alg.efficiencyTool.SFFile = "JetJvtEfficiency/May2024/NNJvtSFFile_Run3_EMPFlow.root"
             alg.selection = decorationName
-            alg.scaleFactorDecoration = f'jvt_effSF_{self.jvtWP}_%SYS%'
+            alg.scaleFactorDecoration = f'jvt_effSF{suffix}_%SYS%'
             alg.outOfValidity = 2
-            alg.outOfValidityDeco = f'no_jvt_{self.jvtWP}'
+            alg.outOfValidityDeco = f'no_jvt{suffix}'
             alg.skipBadEfficiency = False
             alg.jets = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
 
-            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, f'jvtEfficiency_{self.jvtWP}')
+            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, f'jvtEfficiency{suffix}')
 
             # Set up the per-event jet efficiency scale factor calculation algorithm
             if self.eventSF:
                 alg = config.createAlgorithm( 'CP::AsgEventScaleFactorAlg', f'JvtEventScaleFactorAlg_{self.jvtWP}' )
                 preselection = config.getFullSelection (self.containerName, '')
-                alg.preselection = preselection + f'&&no_jvt_{self.jvtWP}' if preselection else f'no_jvt_{self.jvtWP}'
-                alg.scaleFactorInputDecoration = f'jvt_effSF_{self.jvtWP}_%SYS%'
-                alg.scaleFactorOutputDecoration = f'jvt_effSF_{self.jvtWP}_%SYS%'
+                alg.preselection = preselection + f'&&no_jvt{suffix}' if preselection else f'no_jvt{suffix}'
+                alg.scaleFactorInputDecoration = f'jvt_effSF{suffix}_%SYS%'
+                alg.scaleFactorOutputDecoration = f'jvt_effSF{suffix}_%SYS%'
                 alg.particles = config.readName (self.containerName)
 
-                config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration, f'weight_jvt_effSF_{self.jvtWP}')
+                config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration, f'weight_jvt_effSF{suffix}')
 
 
 class FJvtWorkingPointSelectionConfig (ConfigBlock) :
@@ -1080,13 +1088,17 @@ class FJvtWorkingPointSelectionConfig (ConfigBlock) :
         self.addOption ('fjvtWP', '', type=str,
             noneAction='error',
             info="the fJvt WP to use. Supported WPs: `Loose`, `Tight`, `Tighter`.")
+        self.addOption ('useSuffix', True, type=bool,
+            info="whether the working point name is to be used as suffix ."
+            "Not to be disabled if multiple working points are scheduled.")
 
     def instanceName (self) :
         return self.containerName + '_' + self.selectionName
 
     def makeAlgs (self, config) :
 
-        decorationName = f"fjvt_selection_{self.fjvtWP},as_char"
+        suffix = f"_{self.fjvtWP}" if self.useSuffix else ""
+        decorationName = f"fjvt_selection{suffix},as_char"
         selectionName = self.selectionName
 
         alg = config.createAlgorithm('CP::AsgSelectionAlg', f'FJvtSelectionAlg_{self.fjvtWP}')
@@ -1118,6 +1130,9 @@ class FJvtWorkingPointEfficiencyConfig (ConfigBlock) :
         self.addOption ('fjvtWP', '', type=str,
             noneAction='error',
             info="the fJvt WP to use. Supported WPs: `Loose`, `Tight`, `Tighter`.")
+        self.addOption ('useSuffix', True, type=bool,
+            info="whether the working point name is to be used as suffix ."
+            "Not to be disabled if multiple working points are scheduled.")
         self.addOption ('noEffSF', False, type=bool,
             info="disables the calculation of efficiencies and scale factors. "
             "Only useful to test a new WP for which scale factors are not available.",
@@ -1130,6 +1145,9 @@ class FJvtWorkingPointEfficiencyConfig (ConfigBlock) :
 
     def makeAlgs (self, config) :
 
+        suffix = f"_{self.fjvtWP}" if self.useSuffix else ""
+        decorationName = f"fjvt_selection{suffix},as_char"
+
         if not self.noEffSF and config.dataType() is not DataType.Data:
             alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', f'FJvtEfficiencyAlg_{self.fjvtWP}' )
             config.addPrivateTool( 'efficiencyTool', 'CP::FJvtEfficiencyTool' )
@@ -1139,26 +1157,26 @@ class FJvtWorkingPointEfficiencyConfig (ConfigBlock) :
                 alg.efficiencyTool.SFFile = "JetJvtEfficiency/May2024/fJvtSFFile_Run2_EMPFlow.root"
             else:
                 alg.efficiencyTool.SFFile = "JetJvtEfficiency/May2024/fJvtSFFile_Run3_EMPFlow.root"
-            alg.selection = f'fjvt_selection_{self.fjvtWP},as_char'
-            alg.scaleFactorDecoration = f'fjvt_effSF_{self.fjvtWP}_%SYS%'
+            alg.selection = decorationName
+            alg.scaleFactorDecoration = f'fjvt_effSF{suffix}_%SYS%'
             alg.outOfValidity = 2
-            alg.outOfValidityDeco = f'no_fjvt_{self.fjvtWP}'
+            alg.outOfValidityDeco = f'no_fjvt{suffix}'
             alg.skipBadEfficiency = False
             alg.jets = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
 
-            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, f'fjvtEfficiency_{self.fjvtWP}')
+            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, f'fjvtEfficiency{suffix}')
 
             # Set up the per-event jet efficiency scale factor calculation algorithm
             if self.eventSF:
                 alg = config.createAlgorithm( 'CP::AsgEventScaleFactorAlg', f'ForwardJvtEventScaleFactorAlg_{self.fjvtWP}' )
                 preselection = config.getFullSelection (self.containerName, '')
-                alg.preselection = preselection + f'&&no_fjvt_{self.fjvtWP}' if preselection else f'no_fjvt_{self.fjvtWP}'
-                alg.scaleFactorInputDecoration = f'fjvt_effSF_{self.fjvtWP}_%SYS%'
-                alg.scaleFactorOutputDecoration = f'fjvt_effSF_{self.fjvtWP}_%SYS%'
+                alg.preselection = preselection + f'&&no_fjvt{suffix}' if preselection else f'no_fjvt{suffix}'
+                alg.scaleFactorInputDecoration = f'fjvt_effSF{suffix}_%SYS%'
+                alg.scaleFactorOutputDecoration = f'fjvt_effSF{suffix}_%SYS%'
                 alg.particles = config.readName (self.containerName)
 
-                config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration, f'weight_fjvt_effSF_{self.fjvtWP}')
+                config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration, f'weight_fjvt_effSF{suffix}')
 
 
 @groupBlocks
