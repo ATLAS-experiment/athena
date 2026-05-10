@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -36,6 +36,7 @@
 */
 
 /* Forward declarations */
+class EventContext;
 class VxSecVertexInfo;
 
 namespace Trk {
@@ -50,18 +51,14 @@ namespace xAOD {
 
 namespace InDet
 {
-static const InterfaceID IID_ISecVertexInJetFinder("ISecVertexInJetFinder", 1, 0);
 class ISecVertexInJetFinder : virtual public IAlgTool
   {
 public:
+    DeclareInterfaceID(ISecVertexInJetFinder, 1, 0);
     virtual ~ISecVertexInJetFinder() {};
-    static const InterfaceID& interfaceID()
-    {
-        return IID_ISecVertexInJetFinder;
-    };
-    
-   
-    virtual Trk::VxSecVertexInfo* findSecVertex(const xAOD::Vertex & primaryVertex,
+
+    virtual Trk::VxSecVertexInfo* findSecVertex(const EventContext& ctx,
+						      const xAOD::Vertex & primaryVertex,
 						      const TLorentzVector & jetMomentum,
 						      const std::vector<const xAOD::IParticle*> & inputTracks) const=0;
     

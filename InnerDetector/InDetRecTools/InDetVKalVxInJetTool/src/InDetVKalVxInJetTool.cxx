@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 // Author: Vadim Kostyukhin (vadim.kostyukhin@cern.ch)
 
@@ -300,7 +300,8 @@ InDetVKalVxInJetTool::InDetVKalVxInJetTool(const std::string& type,
 
 
 
-   Trk::VxSecVertexInfo* InDetVKalVxInJetTool::findSecVertex(const xAOD::Vertex & primVrt,
+   Trk::VxSecVertexInfo* InDetVKalVxInJetTool::findSecVertex(const EventContext& /*ctx*/,
+							           const xAOD::Vertex & primVrt,
 							           const TLorentzVector & jetDir,
 						 	           const std::vector<const xAOD::IParticle*> & IInpTrk)
     const  {
