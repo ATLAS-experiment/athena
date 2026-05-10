@@ -1,7 +1,7 @@
 // This is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PROMPT_VERTEXITERATIVEFITMERGINGTOOL_H
@@ -105,6 +105,7 @@ namespace Prompt
       we should avoid modifying the underlying objects in initVtxs.
     */
     virtual MergeResultNotOwner mergeInitVertices(
+      const EventContext& ctx,
       const FittingInput &input,
       const xAOD::TrackParticle *tracklep,
       std::vector<std::unique_ptr<xAOD::Vertex>> &initVtxs,
@@ -114,6 +115,7 @@ namespace Prompt
   private:
 
     bool mergeIteratively2TrackVtxs(
+      const EventContext& ctx,
       const FittingInput &input,
       std::vector<std::unique_ptr<xAOD::Vertex>> &initVtxs,
       MergeResultNotOwner &result,
@@ -126,6 +128,7 @@ namespace Prompt
       A new vertex is created and assigned to the newMergedVtx reference.
     */
     void getNewMergedVertex(
+      const EventContext& ctx,
       xAOD::Vertex* seedVtx,
       std::unique_ptr<xAOD::Vertex> &newMergedVtx,
       const FittingInput &input,
@@ -144,6 +147,7 @@ namespace Prompt
       bare pointer!
     */
     xAOD::Vertex* fitSeedVertexCluster(
+      const EventContext& ctx,
       const FittingInput &input,
       xAOD::Vertex* seedVtx,
       const VtxType vtxType,
@@ -155,6 +159,7 @@ namespace Prompt
       Used to prevent memory leaks within the recursion step 
     */
     xAOD::Vertex* fitSeedVertexCluster(
+      const EventContext& ctx,
       const FittingInput &input,
       std::unique_ptr<xAOD::Vertex> & seedVtx,
       const VtxType vtxType,
@@ -162,6 +167,7 @@ namespace Prompt
     );
 
     std::unique_ptr<xAOD::Vertex> fitSeedPlusOtherVertex(
+      const EventContext& ctx,
       const FittingInput &input,
       const xAOD::Vertex *seedVtx,
       const xAOD::Vertex *otherVtx,
@@ -195,6 +201,7 @@ namespace Prompt
       so that the caller will handle memory.
     */
     std::vector<std::unique_ptr<xAOD::Vertex>> fit2TrackVertexes(
+      const EventContext& ctx,
       const FittingInput &input,
       std::vector<const xAOD::TrackParticle *> &selectedTracks,
       const VtxType vtxType

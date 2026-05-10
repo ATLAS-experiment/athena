@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local
@@ -66,6 +66,7 @@ StatusCode Prompt::VertexIterativeFitMergingTool::initialize()
 }
 
 Prompt::MergeResultNotOwner Prompt::VertexIterativeFitMergingTool::mergeInitVertices(
+  const EventContext& ctx,
   const FittingInput &input,
   const xAOD::TrackParticle *tracklep,
   std::vector<std::unique_ptr<xAOD::Vertex>> &initVtxs,
@@ -122,7 +123,7 @@ Prompt::MergeResultNotOwner Prompt::VertexIterativeFitMergingTool::mergeInitVert
 
 
   MergeResultNotOwner resultExtra;
-  std::vector<std::unique_ptr<xAOD::Vertex>> twoTrackVtxInit = fit2TrackVertexes(input, tracksWithoutVertex, Prompt::kTwoTrackVtxWithoutLepton);
+  std::vector<std::unique_ptr<xAOD::Vertex>> twoTrackVtxInit = fit2TrackVertexes(ctx, input, tracksWithoutVertex, Prompt::kTwoTrackVtxWithoutLepton);
 
   ATH_MSG_DEBUG(
     name() << "::mergeInitVertices - will merge vertexes without lepton" << std::endl
@@ -135,7 +136,7 @@ Prompt::MergeResultNotOwner Prompt::VertexIterativeFitMergingTool::mergeInitVert
   //
   // Merge 2-track vertex without lepton only when there are two or more vertices
   //
-  mergeIteratively2TrackVtxs(input, twoTrackVtxInit, resultExtra, Prompt::kIterativeFitVtxWithoutLepton);
+  mergeIteratively2TrackVtxs(ctx, input, twoTrackVtxInit, resultExtra, Prompt::kIterativeFitVtxWithoutLepton);
 
   if(resultExtra.vtxsInitPassed.size() > 1) {
     //
@@ -166,7 +167,7 @@ Prompt::MergeResultNotOwner Prompt::VertexIterativeFitMergingTool::mergeInitVert
   //
   // Merge 2-track vertexes that contain lepton track
   //
-  mergeIteratively2TrackVtxs(input, vtxsInitPassed, result, Prompt::kIterativeFitVtx);
+  mergeIteratively2TrackVtxs(ctx, input, vtxsInitPassed, result, Prompt::kIterativeFitVtx);
 
   if(result.vtxsInitPassed.size() > 1) {
     //
@@ -225,6 +226,7 @@ Prompt::MergeResultNotOwner Prompt::VertexIterativeFitMergingTool::mergeInitVert
 }
 
 bool Prompt::VertexIterativeFitMergingTool::mergeIteratively2TrackVtxs(
+  const EventContext& ctx,
   const FittingInput &input,
   std::vector<std::unique_ptr<xAOD::Vertex>> &initVtxs,
   MergeResultNotOwner &result,
@@ -328,7 +330,7 @@ bool Prompt::VertexIterativeFitMergingTool::mergeIteratively2TrackVtxs(
     */
     std::unique_ptr<xAOD::Vertex> newMergedVtx = nullptr;
     getNewMergedVertex(
-      seedVtx, newMergedVtx, input, currVit, vtxs2Track, vtxType
+      ctx, seedVtx, newMergedVtx, input, currVit, vtxs2Track, vtxType
     );
 
     // Check to see if the new merged vertex is not a nullptr
@@ -384,6 +386,7 @@ bool Prompt::VertexIterativeFitMergingTool::mergeIteratively2TrackVtxs(
 }
 
 void Prompt::VertexIterativeFitMergingTool::getNewMergedVertex(
+  const EventContext& ctx,
   xAOD::Vertex* seedVtx,
   std::unique_ptr<xAOD::Vertex> &newMergedVtx,
   const FittingInput &input,
@@ -405,7 +408,7 @@ void Prompt::VertexIterativeFitMergingTool::getNewMergedVertex(
 
   // Call recursive function to fit seed+closest vertex pairs
   xAOD::Vertex* mergedVtx = fitSeedVertexCluster(
-    input, seedVtx, vtxType, others
+    ctx, input, seedVtx, vtxType, others
   );
 
   /*
@@ -426,6 +429,7 @@ void Prompt::VertexIterativeFitMergingTool::getNewMergedVertex(
 
 //=============================================================================
 xAOD::Vertex* Prompt::VertexIterativeFitMergingTool::fitSeedVertexCluster(
+  const EventContext& ctx,
   const FittingInput &input,
   xAOD::Vertex* seedVtx,
   const VtxType vtxType,
@@ -461,7 +465,7 @@ xAOD::Vertex* Prompt::VertexIterativeFitMergingTool::fitSeedVertexCluster(
     Found nearby vertex - fit merged vertex
   */
   std::unique_ptr<xAOD::Vertex> candVtx =fitSeedPlusOtherVertex(
-    input, seedVtx, currVtx, vtxType
+    ctx, input, seedVtx, currVtx, vtxType
   ); 
 
   if(!candVtx) {
@@ -472,7 +476,7 @@ xAOD::Vertex* Prompt::VertexIterativeFitMergingTool::fitSeedVertexCluster(
     ATH_MSG_DEBUG("fitSeedVertexCluster - NEW MERGED VERTEX FIT FAILED" << std::endl
           << "---------------------------------------------------------------------------");
 
-    return fitSeedVertexCluster(input, std::move(seedVtx), vtxType, others);
+    return fitSeedVertexCluster(ctx, input, std::move(seedVtx), vtxType, others);
   }
 
   const double probCand = getVertexFitProb(candVtx.get());
@@ -524,7 +528,7 @@ xAOD::Vertex* Prompt::VertexIterativeFitMergingTool::fitSeedVertexCluster(
     //
     // Continue with current seed vertex
     //
-    return fitSeedVertexCluster(input, seedVtx, vtxType, others);
+    return fitSeedVertexCluster(ctx, input, seedVtx, vtxType, others);
   }
 
   fillTH1(m_histNewVtxFitDistToSeedPass,       distToSeed);
@@ -541,13 +545,14 @@ xAOD::Vertex* Prompt::VertexIterativeFitMergingTool::fitSeedVertexCluster(
   ATH_MSG_DEBUG("fitSeedVertexCluster - PASS NEW MERGED VERTEX" << str.str());
 
 
-  return fitSeedVertexCluster(input, candVtx, vtxType, others);
+  return fitSeedVertexCluster(ctx, input, candVtx, vtxType, others);
 }
 
 // this signature is only called recursively, if a merged vertex candidate has been
 // found.  Ensures that we release the final merged candidate to hand it 
 // back to the original caller. 
 xAOD::Vertex* Prompt::VertexIterativeFitMergingTool::fitSeedVertexCluster(
+  const EventContext& ctx,
   const FittingInput &input,
       std::unique_ptr<xAOD::Vertex> & seedVtx,
   const VtxType vtxType,
@@ -556,7 +561,7 @@ xAOD::Vertex* Prompt::VertexIterativeFitMergingTool::fitSeedVertexCluster(
   // remember the seed vertex before the call 
   xAOD::Vertex* originalSeed = seedVtx.get(); 
   // call the original signature 
-  xAOD::Vertex* iterationResult = fitSeedVertexCluster(input,seedVtx.get(), vtxType,others); 
+  xAOD::Vertex* iterationResult = fitSeedVertexCluster(ctx, input,seedVtx.get(), vtxType,others);
   // if the iteration has finished (it is returning the seed), release the seed vertex. 
   // This will be re-captured by the top level caller after exiting the recursion stack.
   if (iterationResult == originalSeed) return seedVtx.release();
@@ -700,6 +705,7 @@ bool Prompt::VertexIterativeFitMergingTool::passVertexSelection(const xAOD::Vert
 
 //=============================================================================
 std::unique_ptr<xAOD::Vertex> Prompt::VertexIterativeFitMergingTool::fitSeedPlusOtherVertex(
+  const EventContext& ctx,
   const FittingInput &input,
   const xAOD::Vertex *seedVtx,
   const xAOD::Vertex *otherVtx,
@@ -758,7 +764,7 @@ std::unique_ptr<xAOD::Vertex> Prompt::VertexIterativeFitMergingTool::fitSeedPlus
   // Fit new vertex
   //
   std::unique_ptr<xAOD::Vertex> secVtx = m_vertexFitterTool->fitVertexWithSeed(
-    input, tracks, seedVtx->position(), vtxType
+    ctx, input, tracks, seedVtx->position(), vtxType
   );
 
   if(!secVtx) {
@@ -770,6 +776,7 @@ std::unique_ptr<xAOD::Vertex> Prompt::VertexIterativeFitMergingTool::fitSeedPlus
 }
 
 std::vector<std::unique_ptr<xAOD::Vertex>> Prompt::VertexIterativeFitMergingTool::fit2TrackVertexes(
+  const EventContext& ctx,
   const FittingInput &input,
   std::vector<const xAOD::TrackParticle *> &selectedTracks,
   const VtxType vtxType
@@ -810,7 +817,7 @@ std::vector<std::unique_ptr<xAOD::Vertex>> Prompt::VertexIterativeFitMergingTool
       // Fit new vertex
       //
       std::unique_ptr<xAOD::Vertex> vtx = m_vertexFitterTool->fitVertexWithPrimarySeed(
-        input, fit_tracks, vtxType
+        ctx, input, fit_tracks, vtxType
       );
 
       icount++;
