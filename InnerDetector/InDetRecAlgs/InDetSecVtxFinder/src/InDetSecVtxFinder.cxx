@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                          InDetSecVtxFinder.cxx  -  Description
@@ -160,7 +160,7 @@ namespace InDet
       //sort xAOD::Vertex container
 
       if( m_doVertexMerging && theXAODContainers.first->size() > 1) {
-        myVxContainers = m_VertexMergingTool->mergeVertexContainer( *theXAODContainers.first );
+        myVxContainers = m_VertexMergingTool->mergeVertexContainer( ctx, *theXAODContainers.first );
         delete theXAODContainers.first; //also cleans up the aux store
         delete theXAODContainers.second; 
         theXAODContainers = myVxContainers;

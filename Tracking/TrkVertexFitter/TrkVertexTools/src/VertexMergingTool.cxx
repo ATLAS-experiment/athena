@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkVertexTools/VertexMergingTool.h"
 #include "TrkVertexFitterInterfaces/IVertexWeightCalculator.h" 
 #include "VxVertex/VxTrackAtVertex.h"
+#include <memory>
 #include <vector> 
 
 namespace Trk{
@@ -39,7 +40,7 @@ namespace Trk{
    }///EndOfInitialize
 
 
-  std::pair<xAOD::VertexContainer*,xAOD::VertexAuxContainer*> VertexMergingTool::mergeVertexContainer(const xAOD::VertexContainer& MyVxCont) const
+  std::pair<xAOD::VertexContainer*,xAOD::VertexAuxContainer*> VertexMergingTool::mergeVertexContainer(const EventContext& ctx, const xAOD::VertexContainer& MyVxCont) const
   {
 
     ATH_MSG_DEBUG("Run vertex remerging");
@@ -47,7 +48,7 @@ namespace Trk{
     //if beamspot constraint was requested, get it now
     xAOD::Vertex theconstraint;
     if (m_useBeamConstraint) {
-      SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey };
+      SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx };
       if(not beamSpotHandle.isValid()) ATH_MSG_ERROR("Cannot Retrieve " << m_beamSpotKey.key() );
       theconstraint = xAOD::Vertex(); // Default constructor creates a private store
       theconstraint.setPosition( beamSpotHandle->beamVtx().position() );
@@ -67,10 +68,10 @@ namespace Trk{
     xAOD::VertexContainer::const_iterator endIter = MyVxCont.end();
     unsigned int Ni=0;
     for(xAOD::VertexContainer::const_iterator i = beginIter; i!=endIter; ++i) {
-      xAOD::Vertex * vx = new xAOD::Vertex( **i );
+      auto vx = std::make_unique<xAOD::Vertex>( **i );
 
       if( vx->vertexType() == xAOD::VxType::NoVtx ) { //dummy vertex -- just add a copy
-        NewContainer->push_back( vx );
+        NewContainer->push_back( std::move(vx) );
       } else if( !remerged[Ni] ) { //skip vertices already merged into another
 
         unsigned int Nj = Ni+1;
@@ -78,7 +79,7 @@ namespace Trk{
           const xAOD::Vertex * mergeCand = (*j);
           if( mergeCand->vertexType() != xAOD::VxType::NoVtx && !remerged[Nj] ) {
             //not dummy and not already merged into earlier vertex, so consider it as merging candidate
-            if( checkCompatibility( vx, mergeCand ) ) {
+            if( checkCompatibility( vx.get(), mergeCand ) ) {
 
               //get all the track particles to fit
               std::vector<const xAOD::TrackParticle*> combinedTracks;
@@ -90,13 +91,13 @@ namespace Trk{
               }
 
               //call the fitter -> using xAOD::TrackParticle it should set the track links for us
-              xAOD::Vertex * mergedVtx = nullptr;
+              std::unique_ptr<xAOD::Vertex> mergedVtx;
               if(m_useBeamConstraint) {
-                mergedVtx = m_iVertexFitter->fit( combinedTracks, theconstraint );
+                mergedVtx = m_iVertexFitter->fit( ctx, combinedTracks, theconstraint );
               } else { 
                 //no interface for no constraint and no starting point, so use starting point of original vertex
                 const Amg::Vector3D& start( vx->position() );
-                mergedVtx = m_iVertexFitter->fit( combinedTracks, start );
+                mergedVtx = m_iVertexFitter->fit( ctx, combinedTracks, start );
               }
 
               //CHECK MERGING IS GOOD? 
@@ -104,9 +105,8 @@ namespace Trk{
               ATH_MSG_DEBUG("Merge vertices " << Ni << " and " << Nj);
               remerged[Nj] = true;
               remerged[Ni] = true;
-              //delete copy of first vertex and then overwrite with merged vertex
-              delete vx;
-              vx = mergedVtx;
+              //overwrite with merged vertex
+              vx = std::move(mergedVtx);
             }            
           }
 
@@ -114,7 +114,7 @@ namespace Trk{
         } //loop over j
 
         //whether we merged or not, can add vx to the container
-        NewContainer->push_back( vx );
+        NewContainer->push_back( std::move(vx) );
 
       } //end if vtx[Ni] is not remerged
       Ni++;
