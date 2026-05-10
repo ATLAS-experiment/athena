@@ -81,7 +81,7 @@ private:
 
   BooleanProperty m_use_altiroc_rdo{this, "useALTIROC_RDO", false, "Use Altiroc RDO instead of standard"};
 
-  Gaudi::Property<double> m_timeTollerance {this, "TimeTollerance", 0.035 * Acts::UnitConstants::ns};
+  Gaudi::Property<double> m_timeTollerance {this, "TimeTollerance", 0.035 * Athena::Units::nanosecond};
   Gaudi::Property<bool> m_addCorners {this, "AddCorners", true};
 };
 
