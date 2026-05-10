@@ -7,7 +7,7 @@ makeTrains=True
 
 formatList = ["PHYSVAL","PHYS","PHYSLITE",
               "LLP1","LLJ1","HIGG1D1","HIGG1D2", "HIGG9D1"
-              "JETM1","JETM2","JETM3","JETM4","JETM5","JETM12",
+              "JETM1","JETM2","JETM3","JETM4","JETM5","JETM7","JETM12","JETM42",
               "IDTR2",
               "EGAM1","EGAM2","EGAM3","EGAM4","EGAM5","EGAM7","EGAM8","EGAM9","EGAM10",
               "FTAG1","FTAG1LITE","FTAG2","FTAG3","FTAG4","FTAG5","FTAGPU","FTAGXBB",
@@ -128,6 +128,23 @@ def generateTrains(formatList,label,inputFile,isMC,nEvents):
 
 if (makeDataDAODs or makeMCDAODs):
    for formatName in formatList:
+      # Special cases
+      if formatName == "JETM7":
+         # JETM7 requires per-vertex jet reconstruction, therefore running only over 100 events
+         if makeDataDAODs:
+            generateText(formatName,"data18",data18File,False,False,"100")
+            generateText(formatName,"data24",data24File,False,False,"100")
+         if makeMCDAODs:
+            generateText(formatName,"mc20",mc20File,False,True,"100")
+            generateText(formatName,"mc23",mc23File,False,True,"100")
+            generateText(formatName,"mc21_14TeV_",mc21_14TeV_File,False,True,"100")
+         continue
+      if formatName == "JETM42":
+         # JETM42 currently only used for upgrade studies
+         if makeMCDAODs:
+            generateText(formatName,"mc21_14TeV_",mc21_14TeV_File,False,True,"-1")
+         continue
+      # End special cases
       if makeDataDAODs: 
          generateText(formatName,"data18",data18File,False,False,"-1")
          generateText(formatName,"data22",data22File,False,False,"-1")
@@ -137,7 +154,8 @@ if (makeDataDAODs or makeMCDAODs):
          generateText(formatName,"mc20",mc20File,False,True,"-1")
          generateText(formatName,"mc23",mc23File,False,True,"-1")
          generateText(formatName,"mc21_14TeV_",mc21_14TeV_File,False,True,"-1")  
-      generateText("NCB1","data23cos",data23CosFile,False,False,"-1")
+   generateText("NCB1","data23cos",data23CosFile,False,False,"-1")
+
 if makeTruthDAODs:
    for formatName in truthFormatList:
       generateText(formatName,"mc23",truthFile,True,False,"1000")
