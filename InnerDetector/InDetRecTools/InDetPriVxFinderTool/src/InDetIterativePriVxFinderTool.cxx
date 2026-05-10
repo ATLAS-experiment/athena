@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 /***************************************************************************
@@ -414,25 +414,25 @@ InDetIterativePriVxFinderTool::findVertex(
     // to reassign vertices you look ino what is already in myVxCandidate
     // you do it only ONCE!
 
-    xAOD::Vertex* myxAODVertex = nullptr;
-    xAOD::Vertex* myxAODSplitVertex = nullptr;
+    std::unique_ptr<xAOD::Vertex> myxAODVertex;
+    std::unique_ptr<xAOD::Vertex> myxAODSplitVertex;
 
     if (m_useBeamConstraint && !perigeesToFit.empty()) {
-      myxAODVertex = m_iVertexFitter->fit(perigeesToFit, theconstraint);
+      myxAODVertex = m_iVertexFitter->fit(ctx, perigeesToFit, theconstraint);
     } else if (!m_useBeamConstraint && perigeesToFit.size() > 1) {
-      myxAODVertex = m_iVertexFitter->fit(perigeesToFit);
+      myxAODVertex = m_iVertexFitter->fit(ctx, perigeesToFit);
     }
     if (m_createSplitVertices && perigeesToFitSplitVertex.size() > 1) {
-      myxAODSplitVertex = m_iVertexFitter->fit(perigeesToFitSplitVertex);
+      myxAODSplitVertex = m_iVertexFitter->fit(ctx, perigeesToFitSplitVertex);
     }
 
     double ndf = 0.;
     int ntracks = 0;
-    countTracksAndNdf(myxAODVertex, ndf, ntracks);
+    countTracksAndNdf(myxAODVertex.get(), ndf, ntracks);
 
     double ndfSplitVertex = 0.;
     int ntracksSplitVertex = 0;
-    countTracksAndNdf(myxAODSplitVertex, ndfSplitVertex, ntracksSplitVertex);
+    countTracksAndNdf(myxAODSplitVertex.get(), ndfSplitVertex, ntracksSplitVertex);
 
     bool goodVertex = myxAODVertex != nullptr &&
                       ((!m_useBeamConstraint && ndf > 0 && ntracks >= 2) ||
@@ -548,18 +548,15 @@ InDetIterativePriVxFinderTool::findVertex(
         // check if you still have a good vertex
 
         if (numberOfAddedTracks > 0) {
-          delete myxAODVertex;
-          myxAODVertex = nullptr;
-
           if (m_useBeamConstraint && !perigeesToFit.empty()) {
-            myxAODVertex = m_iVertexFitter->fit(perigeesToFit, theconstraint);
+            myxAODVertex = m_iVertexFitter->fit(ctx, perigeesToFit, theconstraint);
           } else if (!m_useBeamConstraint && perigeesToFit.size() > 1) {
-            myxAODVertex = m_iVertexFitter->fit(perigeesToFit);
+            myxAODVertex = m_iVertexFitter->fit(ctx, perigeesToFit);
           }
 
           ndf = 0.;
           ntracks = 0;
-          countTracksAndNdf(myxAODVertex, ndf, ntracks);
+          countTracksAndNdf(myxAODVertex.get(), ndf, ntracks);
 
           goodVertex = myxAODVertex != nullptr &&
                        ((!m_useBeamConstraint && ndf > 0 && ntracks >= 2) ||
@@ -581,7 +578,7 @@ InDetIterativePriVxFinderTool::findVertex(
 
       // need to re-ask goodVertex since it can be changed in the mean time
       if (goodVertex) {
-        removeCompatibleTracks(myxAODVertex, perigeesToFit, seedTracks);
+        removeCompatibleTracks(myxAODVertex.get(), perigeesToFit, seedTracks);
       }
     } // end else case on if not good Vertex
 
@@ -599,31 +596,21 @@ InDetIterativePriVxFinderTool::findVertex(
         removeAllFrom(perigeesToFitSplitVertex, seedTracks);
       } else {
         removeCompatibleTracks(
-          myxAODSplitVertex, perigeesToFitSplitVertex, seedTracks);
+          myxAODSplitVertex.get(), perigeesToFitSplitVertex, seedTracks);
 
       } // end else if not good Vertex
     }   // end if create split vertices
 
     if (!m_createSplitVertices) {
       if (goodVertex) {
-        theVertexContainer->push_back(myxAODVertex);
-      } else {
-        if (myxAODVertex) {
-          delete myxAODVertex;
-          myxAODVertex = nullptr;
-        }
+        theVertexContainer->push_back(std::move(myxAODVertex));
       }
     } else {
       if (goodVertex) {
         // type does not seem to be set earlier
         myxAODVertex->setVertexType(xAOD::VxType::PriVtx);
-        theVertexContainer->push_back(myxAODVertex);
+        theVertexContainer->push_back(std::move(myxAODVertex));
       } else {
-        if (myxAODVertex) {
-          delete myxAODVertex;
-          myxAODVertex = nullptr;
-        }
-
         xAOD::Vertex* dummyxAODVertex = new xAOD::Vertex;
         theVertexContainer->push_back(
           dummyxAODVertex); // have to add vertex to container here first so it
@@ -638,13 +625,8 @@ InDetIterativePriVxFinderTool::findVertex(
       if (goodSplitVertex) {
         // type does not seem to be set earlier
         myxAODSplitVertex->setVertexType(xAOD::VxType::PriVtx);
-        theVertexContainer->push_back(myxAODSplitVertex);
+        theVertexContainer->push_back(std::move(myxAODSplitVertex));
       } else {
-        if (myxAODSplitVertex) {
-          delete myxAODSplitVertex;
-          myxAODSplitVertex = nullptr;
-        }
-
         xAOD::Vertex* dummyxAODVertex = new xAOD::Vertex;
         theVertexContainer->push_back(
           dummyxAODVertex); // have to add vertex to container here first so it
@@ -880,7 +862,7 @@ InDetIterativePriVxFinderTool::removeAllFrom(
 }
 
 void
-InDetIterativePriVxFinderTool::countTracksAndNdf(xAOD::Vertex* myxAODVertex,
+InDetIterativePriVxFinderTool::countTracksAndNdf(const xAOD::Vertex* myxAODVertex,
                                                  double& ndf,
                                                  int& ntracks)
 {
