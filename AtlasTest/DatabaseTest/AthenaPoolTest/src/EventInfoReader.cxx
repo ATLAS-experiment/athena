@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -16,7 +16,7 @@
 // Constructor with parameters:
 EventInfoReader::EventInfoReader(const std::string &name, 
 				 ISvcLocator *pSvcLocator) :
-    AthAlgorithm(name,pSvcLocator),
+    AthReentrantAlgorithm(name,pSvcLocator),
     m_geoModel("GeoModelSvc", name),
     m_tagInfoMgr("TagInfoMgr", name)
 {}
@@ -32,11 +32,11 @@ StatusCode EventInfoReader::initialize()
 }
 
 // Execute method:
-StatusCode EventInfoReader::execute() 
+StatusCode EventInfoReader::execute(const EventContext& ctx) const
 {
     ATH_MSG_DEBUG("EventInfoReader::execute()" );
 
-    SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey, getContext());
+    SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey, ctx);
     if(!eventInfo.isValid()) {
       ATH_MSG_ERROR("  Could not get event info");      
       return StatusCode::FAILURE;
