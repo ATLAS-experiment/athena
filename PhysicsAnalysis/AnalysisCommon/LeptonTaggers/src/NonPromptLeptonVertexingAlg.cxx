@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local
@@ -261,7 +261,7 @@ StatusCode Prompt::NonPromptLeptonVertexingAlg::execute()
     // Fit 2-track vertices
     //
     std::vector<std::unique_ptr<xAOD::Vertex>> twoTrkVertices = prepLepWithTwoTrkSVVec(
-      fittingInput, tracklep, ifitTracks
+      ctx, fittingInput, tracklep, ifitTracks
     );
 
     // We make a copy so we can store the list of original
@@ -276,7 +276,7 @@ StatusCode Prompt::NonPromptLeptonVertexingAlg::execute()
     ATH_MSG_DEBUG("Getting deep merged vertices");
     ATH_MSG_DEBUG("Starting with " << twoTrkVertices.size() << " 2-track vertices");
     Prompt::MergeResultNotOwner deep_merged_result = m_vertexMerger->mergeInitVertices(
-        fittingInput, tracklep, twoTrkVertices, ifitTracks);
+      ctx, fittingInput, tracklep, twoTrkVertices, ifitTracks);
 
     //
     // Save secondary vertices
@@ -440,6 +440,7 @@ std::vector<const xAOD::TrackParticle*> Prompt::NonPromptLeptonVertexingAlg::fin
 
 //=============================================================================
 std::vector<std::unique_ptr<xAOD::Vertex>> Prompt::NonPromptLeptonVertexingAlg::prepLepWithTwoTrkSVVec(
+  const EventContext& ctx,
   const FittingInput &input,
   const xAOD::TrackParticle* tracklep,
   const std::vector<const xAOD::TrackParticle*> &tracks
@@ -463,7 +464,7 @@ std::vector<std::unique_ptr<xAOD::Vertex>> Prompt::NonPromptLeptonVertexingAlg::
     tracksForFit.push_back(selectedtrack);
 
     std::unique_ptr<xAOD::Vertex> newSecondaryVertex = m_vertexFitterTool->fitVertexWithPrimarySeed(
-      input, tracksForFit, kTwoTrackVtx
+      ctx, input, tracksForFit, kTwoTrackVtx
     );
 
     if(!newSecondaryVertex) {

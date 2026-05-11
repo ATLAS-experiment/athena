@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LEPTONTAGGERS_VertexFittingTool_H
@@ -36,12 +36,14 @@ namespace Prompt {
         virtual StatusCode finalize() override;
 
         virtual std::unique_ptr<xAOD::Vertex> fitVertexWithPrimarySeed(
+            const EventContext& ctx,
             const FittingInput &input,
             const std::vector<const xAOD::TrackParticle* > &tracks,
             VtxType vtx
         ) override;
 
         virtual std::unique_ptr<xAOD::Vertex> fitVertexWithSeed(
+            const EventContext& ctx,
             const FittingInput &input,
             const std::vector<const xAOD::TrackParticle* > &tracks,
             const Amg::Vector3D& seed,
@@ -57,6 +59,7 @@ namespace Prompt {
         bool decorateNewSecondaryVertex(const FittingInput &input, xAOD::Vertex *secVtx);
 
         std::unique_ptr<xAOD::Vertex> getSecondaryVertexWithSeed(
+            const EventContext& ctx,
             const std::vector<const xAOD::TrackParticle*> &tracks,
             const xAOD::TrackParticleContainer *inDetTracks,
             const Amg::Vector3D& seed
