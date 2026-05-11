@@ -38,7 +38,7 @@ StatusCode GSCCalibStep::initialize() {
 
 StatusCode GSCCalibStep::calibrate(xAOD::JetContainer& jets) const {
 
-  ATH_MSG_DEBUG("calibrating jet collection.");
+  ATH_MSG_DEBUG("Calibrating jet collection with GSC.");
 
   // Retrieve the primary vertex location:
   int PVindex = 0;
@@ -165,14 +165,13 @@ StatusCode GSCCalibStep::calibrate(xAOD::JetContainer& jets) const {
 
     getGSCCorrection*=1./getChargedFractionResponse(*jet, jc, etabin);
     jet->setJetP4( startingP4*getGSCCorrection );
-    getGSCCorrection*=1./getTile0Response(*jet, jc, etabin); 
+    getGSCCorrection*=1./getTile0Response(*jet, jc, etabin);
     jet->setJetP4( startingP4*getGSCCorrection );
     getGSCCorrection*=1./getEM3Response(*jet, jc, etabin);
     jet->setJetP4( startingP4*getGSCCorrection );
     getGSCCorrection*=1./getNTrkResponse(*jet, jc, etabin);
     jet->setJetP4( startingP4*getGSCCorrection );
     getGSCCorrection*=1./getTrackWIDTHResponse(*jet, jc, etabin);
-
     if(m_applyPunchThrough && startingP4.Pt() >= m_punchThroughMinPt){
       jet->setJetP4( startingP4*getGSCCorrection );
       getGSCCorrection*=1./getPunchThroughResponse(*jet, jc, std::abs(detectorEta));

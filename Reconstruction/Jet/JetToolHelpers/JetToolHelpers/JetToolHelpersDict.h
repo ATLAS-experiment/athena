@@ -11,6 +11,7 @@
 
 #include "JetToolHelpers/HistoInput1D.h"
 #include "JetToolHelpers/HistoInput2D.h"
+#include "JetToolHelpers/HistoInput3D.h"
 #include "JetToolHelpers/VarTool.h"
 
 #endif
