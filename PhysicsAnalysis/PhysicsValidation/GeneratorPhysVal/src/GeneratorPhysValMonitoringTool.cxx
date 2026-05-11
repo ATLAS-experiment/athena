@@ -6,7 +6,6 @@
 #include <vector>
 #include "GaudiKernel/IToolSvc.h"
 #include "AthenaBaseComps/AthCheckMacros.h"
-#include "AthenaBaseComps/AthLegacySequence.h"
 #include "TString.h"
 #include <cmath>
 #include <limits>
