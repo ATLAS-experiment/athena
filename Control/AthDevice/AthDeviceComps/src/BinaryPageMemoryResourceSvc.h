@@ -16,7 +16,7 @@ namespace AthDevice {
 
 /// Service implementing "binary page" caching on top of another memory resource
 ///
-/// Note that the memory resource provided by this service **is** thread safe.
+/// Making use of @c vecmem::binary_page_memory_resource.
 ///
 class BinaryPageMemoryResourceSvc
     : public extends<AthService, IMemoryResourceSvc> {
@@ -25,7 +25,7 @@ class BinaryPageMemoryResourceSvc
   // Inherit the base class's constructor(s).
   using extends::extends;
 
-  /// @name Function(s) inherited from @c AthAlgTool
+  /// @name Function(s) inherited from @c AthService
   /// @{
 
   /// Initialize the tool
@@ -33,9 +33,10 @@ class BinaryPageMemoryResourceSvc
 
   /// @}
 
-  /// @name Function(s) inherited from @c IMemoryResourceTool
+  /// @name Function(s) inherited from @c IMemoryResourceSvc
   /// @{
 
+  /// Get the provided @c std::pmr::memory_resource object
   virtual std::pmr::memory_resource& mr() const override;
 
   /// @}
