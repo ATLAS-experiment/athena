@@ -909,6 +909,9 @@ def update_run_params(args, flags):
          dmask = hex(dmask)
       args.detector_mask = arg_detector_mask(dmask)
    
+   if args.dump_config_exit and not args.run_number:
+      args.run_number = 0
+
    # Apply defaults for magnet currents if not set (offline mode only)
    # In online mode, magnets must come from IS or command line (handled above)
    if getattr(args, 'solenoid_current', None) is None:
