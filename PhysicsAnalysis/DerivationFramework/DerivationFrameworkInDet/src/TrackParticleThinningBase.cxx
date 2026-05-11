@@ -70,7 +70,7 @@ StatusCode DerivationFramework::TrackParticleThinningBase::finalize()
   return StatusCode::SUCCESS;
 }
 
-std::vector<int> DerivationFramework::TrackParticleThinningBase::updateMask(const xAOD::TrackParticleContainer* trackParticles) const
+std::vector<int> DerivationFramework::TrackParticleThinningBase::updateMask(const EventContext& /*ctx*/, const xAOD::TrackParticleContainer* trackParticles) const
 {
   return std::vector<int>(trackParticles->size(), 0);
 }
@@ -93,7 +93,7 @@ StatusCode DerivationFramework::TrackParticleThinningBase::doThinning(const Even
   m_ntot += nTracks;
 
   // Execute the text parser and update the mask
-  std::vector<int> entries =  updateMask(importedTrackParticles.cptr());
+  std::vector<int> entries =  updateMask(ctx, importedTrackParticles.cptr());
   unsigned int nEntries = entries.size();
   // check the sizes are compatible
   if (nTracks != nEntries ) {
