@@ -10,7 +10,7 @@ JMSCalibStep::JMSCalibStep(const std::string& name)
 
 StatusCode JMSCalibStep::initialize() {
 
-  ATH_MSG_INFO("Initializing the JMS Calibration tool");
+  ATH_MSG_DEBUG("Initializing the JMS Calibration tool");
 
   ATH_MSG_DEBUG("Reading from " << m_jetInScale << " and writing to " << m_jetOutScale);
   

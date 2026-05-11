@@ -66,7 +66,7 @@ StatusCode Pileup1DResidualCalibStep::initialize() {
   CHECK_THEN_ERROR(m_doNJetOnly && m_doNPVOnly, 
 		   "It was requested to apply NJet-based and NPV calibrations.");
 
-  if(m_doJetArea) ATH_MSG_INFO("Jet area pile up correction will be applied.");
+  if(m_doJetArea) ATH_MSG_DEBUG("Jet area pile up correction will be applied.");
 
 
   CHECK_THEN_ERROR( (m_mu_ref==-99 && !m_doNPVOnly && !m_doNJetOnly),
@@ -106,6 +106,8 @@ StatusCode Pileup1DResidualCalibStep::initialize() {
 
 StatusCode Pileup1DResidualCalibStep::calibrate(xAOD::JetContainer& jetCont) const {
 
+  ATH_MSG_DEBUG("Calibrating jet collection with 1D pile-up correction");
+
   SG::ReadDecorHandle<xAOD::EventInfo,float> eventInfoDecor(m_muKey);
   CHECK_THEN_ERROR( ! eventInfoDecor.isPresent() , "EventInfo decoration not available! "<< m_muKey.key() );
   double mu = eventInfoDecor(0) ;
@@ -141,7 +143,6 @@ StatusCode Pileup1DResidualCalibStep::calibrate(xAOD::JetContainer& jetCont) con
  
   for( xAOD::Jet * jet : jetCont){
 
-    
     xAOD::JetFourMom_t jetStartP4 = startScaleMomAcc.getAttribute(*jet);
     
     const double E_det = jetStartP4.e();

@@ -232,6 +232,8 @@ def mc2mcStep(flags, **configDic):
                         showerModel = value+"-"+psType+"-"+hadType
                         break
 
+    jcslog.info(f'Using shower model {showerModel} for the MC-to-MC correction')
+
     # Get the settings for the histograms:
     baseHistoParams = configDic.pop('histoParams')
     baseHistoParams['inputFile'] = PathResolver.FindCalibFile(configDic.pop('CalibConstantFileName')+'_'+showerModel+'.root')
@@ -310,30 +312,30 @@ def calibConfigToToolList(flags, forceCalibSeq, calibSeq, **configDict):
 
         # Skip Insitu for MC
         if step=="Insitu" and flags.Input.isMC and not configDict.get("Insitu").get("CalibrateMC",False):
-            jcslog.info('Skipping Insitu for MC')
+            jcslog.debug('Skipping Insitu for MC')
             continue
 
         # Skip MC to MC calibration factors for data or Pythia8
         if step=="MC2MC":
             if not flags.Input.isMC:
-                jcslog.info('Skipping MC2MC calibration for data')
+                jcslog.debug('Skipping MC2MC calibration for data')
                 continue
 
             for key, value in flags.Input.GeneratorsInfo.items():
                 generator = key
                 break
             if 'Pythia' in generator:
-                jcslog.info('Skipping MC2MC calibration for Pythia8')
+                jcslog.debug('Skipping MC2MC calibration for Pythia8')
                 continue
 
         # Skip additional fast simulation calibration steps for data or full simulation
         if step=="AF3":
             if not flags.Input.isMC:
-                jcslog.info('Skipping additional FastSimulation calibration for data')
+                jcslog.debug('Skipping additional FastSimulation calibration for data')
                 continue
             # Check if full simulation
             if isFullSim:
-                jcslog.info('Skipping additional FastSimulation calibration for full sim')
+                jcslog.debug('Skipping additional FastSimulation calibration for full sim')
                 continue
 
         calibFunc = calibStepDic.get(step,None)
@@ -377,6 +379,8 @@ def calibConfigToToolList(flags, forceCalibSeq, calibSeq, **configDict):
     return ordered_tools
 
 def calibToolFromConfigFile(flags, configFile, name = "jetcalib", forceCalibSeq = False, calibSeq = ""):
+
+    jcslog.info(f'Configuring JetCalibTools with {configFile}')
 
     configDic = load_yaml_cfg(configFile)
 

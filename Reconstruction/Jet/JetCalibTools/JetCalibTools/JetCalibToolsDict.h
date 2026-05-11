@@ -22,7 +22,9 @@
 #include "JetCalibTools/EtaJESCalibStep.h"
 #include "JetCalibTools/SmearingCalibStep.h"
 #include "JetCalibTools/GSCCalibStep.h"
+#include "JetCalibTools/JMSCalibStep.h"
 #include "JetCalibTools/InSituCalibStep.h"
+#include "JetCalibTools/InSituJMSCalibStep.h"
 #include "JetCalibTools/Generic4VecCorrectionStep.h"
 
 #endif
