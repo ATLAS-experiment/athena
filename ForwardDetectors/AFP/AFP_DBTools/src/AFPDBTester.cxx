@@ -1,19 +1,8 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AFP_DBTools/AFPDBTester.h"
-
-AFPDBTester::AFPDBTester(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthAlgorithm(name, pSvcLocator), m_key("EMFracClassify")
-{
-  ATH_MSG_DEBUG("in the constructor of AFPDBTester");
-}
-
-AFPDBTester::~AFPDBTester()
-{
-  ATH_MSG_DEBUG("in the destructor of AFPDBTester");
-}
 
 StatusCode AFPDBTester::initialize()
 {
@@ -35,19 +24,11 @@ StatusCode AFPDBTester::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode AFPDBTester::finalize()
-{
-  ATH_MSG_DEBUG("in the finalize of AFPDBTester, bye bye");
-  return StatusCode::SUCCESS;
-}
 
-StatusCode AFPDBTester::execute()
+StatusCode AFPDBTester::execute(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
-  EventIDBase t( getContext().eventID() );
-
 // check if calo conditions can be loaded
-  ATH_MSG_INFO("execute: "<<getContext().eventID().event_number()<<" , before CaloLocalHadCoeff");
+  ATH_MSG_INFO("execute: "<<ctx.eventID().event_number()<<" , before CaloLocalHadCoeff");
   SG::ReadCondHandle<CaloLocalHadCoeff> rch(m_key, ctx);
   const CaloLocalHadCoeff* condObject = *rch;
   if(condObject==nullptr) {
@@ -56,7 +37,7 @@ StatusCode AFPDBTester::execute()
   }
 
 // check if beamspot conditions can be loaded
-  ATH_MSG_INFO("execute: "<<getContext().eventID().event_number()<<" , before beam pos");
+  ATH_MSG_INFO("execute: "<<ctx.eventID().event_number()<<" , before beam pos");
   SG::ReadCondHandle<AthenaAttributeList> readHandle{ m_readKey, ctx };  
   const AthenaAttributeList* raw { *readHandle };
   if ( raw == nullptr )
@@ -65,10 +46,10 @@ StatusCode AFPDBTester::execute()
     return StatusCode::FAILURE;
   }
   float beamposX { (*raw)["posX"].data<float>() };
-  ATH_MSG_INFO("execute: "<<getContext().eventID().event_number()<<" , beam pos X = "<<beamposX);
+  ATH_MSG_INFO("execute: "<<ctx.eventID().event_number()<<" , beam pos X = "<<beamposX);
 
 // load local AFP alignment and print out something
-  ATH_MSG_INFO("execute: "<<getContext().eventID().event_number()<<" , before loc shiftX");
+  ATH_MSG_INFO("execute: "<<ctx.eventID().event_number()<<" , before loc shiftX");
   SG::ReadCondHandle<CondAttrListCollection> ch_locshiftX( m_rch_locshiftX, ctx );
   const CondAttrListCollection* attrLocList { *ch_locshiftX };
   if ( attrLocList == nullptr )
@@ -98,7 +79,7 @@ StatusCode AFPDBTester::execute()
       int layerID=aligndata["layerID"];
       float shiftX=aligndata["shiftX"];
 
-      ATH_MSG_INFO("execute: run "<<getContext().eventID().run_number()<<", lb "<<getContext().eventID().lumi_block()<<", evnt "<<getContext().eventID().event_number()<<", channel "<<channel<<"/"<<nchannels<<", layerID "<<layerID<<", shiftX = "<<shiftX);
+      ATH_MSG_INFO("execute: run "<<ctx.eventID().run_number()<<", lb "<<ctx.eventID().lumi_block()<<", evnt "<<ctx.eventID().event_number()<<", channel "<<channel<<"/"<<nchannels<<", layerID "<<layerID<<", shiftX = "<<shiftX);
     }
 
     ++counter;
@@ -106,7 +87,7 @@ StatusCode AFPDBTester::execute()
 
 
 // load global AFP alignment and print out something else
-  ATH_MSG_INFO("test: "<<getContext().eventID().event_number()<<" , before glob shiftX");
+  ATH_MSG_INFO("test: "<<ctx.eventID().event_number()<<" , before glob shiftX");
   SG::ReadCondHandle<CondAttrListCollection> ch_globshiftX( m_rch_globshiftX, ctx );
   const CondAttrListCollection* attrGlobList { *ch_globshiftX };
   if ( attrGlobList == nullptr )
@@ -136,7 +117,7 @@ StatusCode AFPDBTester::execute()
       std::string alignType=aligndata["alignType"];
       float shiftX=aligndata["shiftX"];
 
-      ATH_MSG_INFO("execute: run "<<getContext().eventID().run_number()<<", lb "<<getContext().eventID().lumi_block()<<", evnt "<<getContext().eventID().event_number()<<", channel "<<channel<<"/"<<nchannels<<", alignType "<<alignType<<", shiftX = "<<shiftX);
+      ATH_MSG_INFO("execute: run "<<ctx.eventID().run_number()<<", lb "<<ctx.eventID().lumi_block()<<", evnt "<<ctx.eventID().event_number()<<", channel "<<channel<<"/"<<nchannels<<", alignType "<<alignType<<", shiftX = "<<shiftX);
     }
 
     ++counter;
@@ -144,7 +125,7 @@ StatusCode AFPDBTester::execute()
 
 
 // load local AFP ToF parameters and print out something
-  ATH_MSG_INFO("execute: "<<getContext().eventID().event_number()<<" , before loc tof");
+  ATH_MSG_INFO("execute: "<<ctx.eventID().event_number()<<" , before loc tof");
   SG::ReadCondHandle<CondAttrListCollection> ch_loctof( m_rch_loctof, ctx );
   const CondAttrListCollection* attrLocToFList { *ch_loctof };
   if ( attrLocToFList == nullptr )
@@ -174,14 +155,14 @@ StatusCode AFPDBTester::execute()
       int trainID=paramdata["trainID"];
       float barWeight=paramdata["barWeight"];
 
-      ATH_MSG_INFO("execute: run "<<getContext().eventID().run_number()<<", lb "<<getContext().eventID().lumi_block()<<", evnt "<<getContext().eventID().event_number()<<", channel "<<channel<<"/"<<nchannels<<", trainID "<<trainID<<", barWeight = "<<barWeight);
+      ATH_MSG_INFO("execute: run "<<ctx.eventID().run_number()<<", lb "<<ctx.eventID().lumi_block()<<", evnt "<<ctx.eventID().event_number()<<", channel "<<channel<<"/"<<nchannels<<", trainID "<<trainID<<", barWeight = "<<barWeight);
     }
 
     ++counter;
   }
 
 // load vertex AFP ToF parameters and print out something
-  ATH_MSG_INFO("execute: "<<getContext().eventID().event_number()<<" , before vtx tof");
+  ATH_MSG_INFO("execute: "<<ctx.eventID().event_number()<<" , before vtx tof");
   SG::ReadCondHandle<CondAttrListCollection> ch_vtxtof( m_rch_vtxtof, ctx );
   const CondAttrListCollection* attrVtxToFList { *ch_vtxtof };
   if ( attrVtxToFList == nullptr )
@@ -212,7 +193,7 @@ StatusCode AFPDBTester::execute()
       float timeGlobalOffset=paramdata["timeGlobalOffset"];
       std::vector<float> trainEdge=paramdata["trainEdge"];
 
-      ATH_MSG_INFO("execute: run "<<getContext().eventID().run_number()<<", lb "<<getContext().eventID().lumi_block()<<", evnt "<<getContext().eventID().event_number()<<", channel "<<channel<<"/"<<nchannels<<", stationID "<<stationID<<", timeGlobalOffset = "<<timeGlobalOffset<<", trainEdge = ("<<trainEdge.at(0)<<", "<<trainEdge.at(1)<<", ... "<<trainEdge.at(4)<<")");
+      ATH_MSG_INFO("execute: run "<<ctx.eventID().run_number()<<", lb "<<ctx.eventID().lumi_block()<<", evnt "<<ctx.eventID().event_number()<<", channel "<<channel<<"/"<<nchannels<<", stationID "<<stationID<<", timeGlobalOffset = "<<timeGlobalOffset<<", trainEdge = ("<<trainEdge.at(0)<<", "<<trainEdge.at(1)<<", ... "<<trainEdge.at(4)<<")");
     }
 
     ++counter;
