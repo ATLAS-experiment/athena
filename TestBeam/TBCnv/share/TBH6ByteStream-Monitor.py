@@ -30,7 +30,7 @@ ToolSvc.TBByteStreamCnvTool.OutputLevel = WARNING
 
 #--- Monitoring ---------------------------
 
-theApp.TopAlg += [ "TBAlgoSequencer/Seq1" ]
+theApp.TopAlg += [ "AthSequencer/Seq1" ]
 
 theApp.Dlls += [ "AthenaMonitoring"]
 
