@@ -9,6 +9,7 @@
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 #include <fmt/format.h>
+#include <fmt/ranges.h>
 
 namespace MuonML {
 
