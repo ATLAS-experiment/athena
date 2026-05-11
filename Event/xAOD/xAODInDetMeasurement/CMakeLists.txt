@@ -1,12 +1,13 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( xAODInDetMeasurement )
 
 # External dependencies:
-#find_package( xAODUtilities InDetEventTPCnv)
-find_package( xAODUtilities)
+find_package( xAODUtilities )
+find_package( benchmark )
 
+# Component(s) in the package.
 atlas_add_library( xAODInDetMeasurement
     xAODInDetMeasurement/*.h xAODInDetMeasurement/versions/*.h Root/*.cxx
     PUBLIC_HEADERS xAODInDetMeasurement
@@ -21,7 +22,6 @@ atlas_add_xaod_smart_pointer_dicts(
        "xAOD::StripClusterContainer_v1"
        "xAOD::SpacePointContainer_v1" )
 
-
 atlas_add_dictionary( xAODInDetMeasurementDict
     xAODInDetMeasurement/xAODInDetMeasurementDict.h
     ${_selectionFile}
@@ -29,21 +29,14 @@ atlas_add_dictionary( xAODInDetMeasurementDict
     EXTRA_FILES Root/dict/*.cxx )
 
 # Test(s) in the package.
-atlas_add_test( xAODInDetMeasurement_PixelCluster_test
-   SOURCES test/xAODInDetMeasurement_PixelCluster_test.cxx
-   LINK_LIBRARIES xAODInDetMeasurement )
+foreach( _testname PixelCluster HGTDCluster StripCluster SpacePoint )
+   atlas_add_test( xAODInDetMeasurement_${_testname}_test
+      SOURCES "test/xAODInDetMeasurement_${_testname}_test.cxx"
+      LINK_LIBRARIES xAODInDetMeasurement )
+endforeach()
 
-atlas_add_test( xAODInDetMeasurement_HGTDCluster_test
-   SOURCES test/xAODInDetMeasurement_HGTDCluster_test.cxx
-   LINK_LIBRARIES xAODInDetMeasurement )
-
-
-
-atlas_add_test( xAODInDetMeasurement_StripCluster_test
-   SOURCES test/xAODInDetMeasurement_StripCluster_test.cxx
-   LINK_LIBRARIES xAODInDetMeasurement )
-
-atlas_add_test( xAODInDetMeasurement_SpacePoint_test
-   SOURCES test/xAODInDetMeasurement_SpacePoint_test.cxx
-   LINK_LIBRARIES xAODInDetMeasurement )
-
+# Benchmark(s) in the package.
+atlas_add_executable( xAODInDetMeasurement_benchmarks
+    "test/PixelCluster_benchmark.cxx"
+    LINK_LIBRARIES AthAllocators xAODInDetMeasurement
+                   benchmark::benchmark benchmark::benchmark_main )
