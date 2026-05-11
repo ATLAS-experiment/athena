@@ -35,7 +35,7 @@ include( "TBRec/H6ScintRec_jobOptions.py" )
 
 
 #--- Monitoring ---------------------------
-theApp.TopAlg += [ "TBAlgoSequencer/Seq1" ]
+theApp.TopAlg += [ "AthSequencer/Seq1" ]
 theApp.Dlls += [ "GaudiAlg"]
 
 theApp.Dlls += [ "AthenaMonitoring"]

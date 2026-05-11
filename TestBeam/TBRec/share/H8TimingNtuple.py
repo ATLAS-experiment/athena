@@ -97,7 +97,7 @@ CBNT_Timing.IncludedSamplings += ["EMB2", "EMB1", "EMB0", "EMB3"]
 #theApp.Dlls += [ "TBMonitoring" ]
 
 # We put the Monitoring in a sequencer to skip calibration events
-#theApp.TopAlg += [ "TBAlgoSequencer/Seq" ]
+#theApp.TopAlg += [ "AthSequencer/Seq" ]
 #Seq = Algorithm( "Seq" )
 #Seq.OutputLevel=INFO
 #Seq.SubAlgorithms = ["TBEventStreamer/BeamStreamer",
