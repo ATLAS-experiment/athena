@@ -25,13 +25,10 @@ class HostMemoryResourceTool : public extends<AthAlgTool, IMemoryResourceTool> {
   /// @name Function(s) inherited from @c IMemoryResourceTool
   /// @{
 
+  /// Get the provided @c std::pmr::memory_resource object
   virtual std::pmr::memory_resource& mr() const override;
 
   /// @}
-
- private:
-  /// The memory resource that this tool uses
-  std::unique_ptr<std::pmr::memory_resource> m_mr;
 
 };  // class HostMemoryResourceTool
 

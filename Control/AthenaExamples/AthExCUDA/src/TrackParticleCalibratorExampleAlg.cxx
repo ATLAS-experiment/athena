@@ -29,6 +29,10 @@ StatusCode TrackParticleCalibratorExampleAlg::initialize() {
   ATH_CHECK(m_inputKey.initialize());
   ATH_CHECK(m_outputKey.initialize());
 
+  // Initialize the tools.
+  ATH_CHECK(m_hostMR.retrieve());
+  ATH_CHECK(m_deviceMR.retrieve());
+
   // Print some information about the configuration:
   ATH_MSG_INFO("Input container key: " << m_inputKey);
   ATH_MSG_INFO("Output container key: " << m_outputKey);
@@ -61,16 +65,13 @@ StatusCode TrackParticleCalibratorExampleAlg::execute(
     return StatusCode::SUCCESS;
   }
 
-  /// Memory resource for host allocations
-  vecmem::host_memory_resource hostMR;
-  /// Memory resource for device allocations
-  vecmem::cuda::device_memory_resource deviceMR;
   // The object managing CUDA memory copies.
   vecmem::cuda::copy copy;
 
   // Construct input buffer(s).
-  TrackParticleContainer::buffer inputHostBuffer(input->size(), hostMR);
-  TrackParticleContainer::buffer inputDeviceBuffer(input->size(), deviceMR);
+  TrackParticleContainer::buffer inputHostBuffer(input->size(), m_hostMR->mr());
+  TrackParticleContainer::buffer inputDeviceBuffer(input->size(),
+                                                   m_deviceMR->mr());
 
   // Copy the relevant data into the input buffer.
   static const SG::AuxElement::ConstAccessor<float> thetaAcc("theta");
@@ -87,8 +88,10 @@ StatusCode TrackParticleCalibratorExampleAlg::execute(
   copy(inputHostBuffer, inputDeviceBuffer)->wait();
 
   // Construct output buffer(s).
-  TrackParticleContainer::buffer outputDeviceBuffer(input->size(), deviceMR);
-  TrackParticleContainer::buffer outputHostBuffer(input->size(), hostMR);
+  TrackParticleContainer::buffer outputDeviceBuffer(input->size(),
+                                                    m_deviceMR->mr());
+  TrackParticleContainer::buffer outputHostBuffer(input->size(),
+                                                  m_hostMR->mr());
 
   // Run the kernel.
   ATH_CHECK(calibrateOnGPU(inputDeviceBuffer, outputDeviceBuffer));

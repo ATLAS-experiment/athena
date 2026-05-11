@@ -10,9 +10,12 @@
 
 // Framework include(s).
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "GaudiKernel/ServiceHandle.h"
+#include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
+
+// Device include(s).
+#include "AthDeviceInterfaces/IMemoryResourceTool.h"
 
 // xAOD include(s).
 #include "xAODTracking/TrackParticleContainer.h"
@@ -46,6 +49,9 @@ class TrackParticleCalibratorExampleAlg : public AthReentrantAlgorithm {
   /// @}
 
  private:
+  /// @name Algorithm properties
+  /// @{
+
   /// The input container
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_inputKey{
       this, "InputContainer", "InDetTrackParticles",
@@ -54,6 +60,15 @@ class TrackParticleCalibratorExampleAlg : public AthReentrantAlgorithm {
   SG::WriteHandleKey<xAOD::TrackParticleContainer> m_outputKey{
       this, "OutputContainer", "CalibratedInDetTrackParticles",
       "The output track particle container"};
+
+  /// Host memory resource tool to use
+  ToolHandle<AthDevice::IMemoryResourceTool> m_hostMR{
+      this, "HostMR", "", "The host memory resource tool to use"};
+  /// Device memory resource tool to use
+  ToolHandle<AthDevice::IMemoryResourceTool> m_deviceMR{
+      this, "DeviceMR", "", "The device memory resource tool to use"};
+
+  /// @}
 
 };  // class LinearTransformTaskExampleAlg
 

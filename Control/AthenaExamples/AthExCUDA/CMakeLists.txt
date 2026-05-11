@@ -18,7 +18,7 @@ atlas_add_component( AthExCUDA
    src/*.h src/*.cxx src/*.cu src/components/*.cxx
    DEFINITIONS EIGEN_NO_CUDA EIGEN_DONT_VECTORIZE
    LINK_LIBRARIES vecmem::core vecmem::cuda AthenaBaseComps GaudiKernel Gaudi::GaudiCUDALib
-   StoreGateLib xAODTracking AthCUDAInterfacesLib AthCUDAKernelLib )
+   StoreGateLib xAODTracking AthDeviceInterfacesLib AthCUDAInterfacesLib AthCUDAKernelLib )
 
 # Install extra files from the package.
 atlas_install_python_modules( python/*.py )
