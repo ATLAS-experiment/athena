@@ -1,4 +1,3 @@
-
 /*
    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
@@ -7,6 +6,7 @@
 
 #include <StoreGate/WriteHandle.h>
 #include <AthContainers/ConstDataVector.h>
+#include <xAODMuonViews/ContainerMerge.h>
 
 #include <ranges>
 
@@ -25,13 +25,7 @@ namespace MuonR4 {
         ATH_CHECK(SG::get(twinCircles, m_readKey2D, ctx));
 
         ConstDataVector<xAOD::MdtDriftCircleContainer> outContainer{SG::VIEW_ELEMENTS};
-        outContainer.reserve(driftCircles->size() + twinCircles->size());
-        std::merge(driftCircles->begin(), driftCircles->end(), twinCircles->begin(), twinCircles->end(),
-                   std::back_inserter(outContainer), 
-                    [](const xAOD::MdtDriftCircle*a, const xAOD::MdtDriftCircle* b){
-                        return a->identifierHash() < b->identifierHash(); 
-                    });
-
+        xAOD::mergeContainer(outContainer, *driftCircles, *twinCircles);
         SG::WriteHandle writeHandle{m_writeKey, ctx};
         ATH_CHECK(writeHandle.record(std::make_unique<xAOD::MdtDriftCircleContainer>(*outContainer.asDataVector())));
         return StatusCode::SUCCESS;

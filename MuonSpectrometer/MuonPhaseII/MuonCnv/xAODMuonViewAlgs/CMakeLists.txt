@@ -7,6 +7,6 @@ atlas_subdir( xAODMuonViewAlgs )
 atlas_add_component( xAODMuonViewAlgs
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES  AthenaBaseComps xAODMuonPrepData StoreGateLib GaudiKernel xAODMuon)
+                     LINK_LIBRARIES  AthenaBaseComps StoreGateLib GaudiKernel xAODMuonViews xAODMuon)
 
 atlas_install_python_modules( python/*.py)
