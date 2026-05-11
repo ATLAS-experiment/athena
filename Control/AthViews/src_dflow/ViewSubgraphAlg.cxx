@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ViewSubgraphAlg.h"
@@ -8,15 +8,6 @@
 #include "StoreGate/WriteHandle.h"
 
 namespace AthViews {
-
-ViewSubgraphAlg::ViewSubgraphAlg( const std::string& name, ISvcLocator* pSvcLocator ) :
-  AthAlgorithm( name, pSvcLocator )
-{
-}
-
-ViewSubgraphAlg::~ViewSubgraphAlg()
-{
-}
 
 StatusCode ViewSubgraphAlg::initialize()
 {
@@ -38,11 +29,9 @@ StatusCode ViewSubgraphAlg::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode ViewSubgraphAlg::execute()
+StatusCode ViewSubgraphAlg::execute(const EventContext& ctx) const
 {
   ATH_MSG_DEBUG ("Executing " << name() << "...");
-
-  const EventContext& ctx = getContext();
 
   //Start scheduler profiling
   auto profileCallback = [this, slot=ctx.slot()]( IScheduler::OccupancySnapshot snap ) -> void {

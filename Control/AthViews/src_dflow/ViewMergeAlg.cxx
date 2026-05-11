@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthExStoreGateExample includes
@@ -15,26 +15,6 @@
 
 namespace AthViews {
 
-/////////////////////////////////////////////////////////////////// 
-// Public methods: 
-/////////////////////////////////////////////////////////////////// 
-
-// Constructors
-////////////////
-ViewMergeAlg::ViewMergeAlg( const std::string& name, 
-                      ISvcLocator* pSvcLocator ) : 
-  ::AthAlgorithm( name, pSvcLocator ),
-  m_r_ints( "dflow_ints" )
-{
-}
-
-// Destructor
-///////////////
-ViewMergeAlg::~ViewMergeAlg()
-{}
-
-// Athena Algorithm's Hooks
-////////////////////////////
 StatusCode ViewMergeAlg::initialize()
 {
   ATH_MSG_INFO ("Initializing " << name() << "...");
@@ -53,11 +33,9 @@ StatusCode ViewMergeAlg::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode ViewMergeAlg::execute()
+StatusCode ViewMergeAlg::execute(const EventContext& ctx) const
 {  
   ATH_MSG_DEBUG ("Executing " << name() << "...");
-
-  const EventContext& ctx = getContext();
 
   //Merge results
   std::vector< int > outputVector;
