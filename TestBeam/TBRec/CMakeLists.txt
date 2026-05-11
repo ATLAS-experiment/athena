@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TBRec )
@@ -6,23 +6,22 @@ atlas_subdir( TBRec )
 # External dependencies:
 find_package( Boost )
 find_package( CLHEP )
-find_package( Eigen )
 find_package( ROOT COMPONENTS Cint Core Tree MathCore Hist RIO pthread )
 
 # Component(s) in the package:
 atlas_add_root_dictionary( TBRecLib
                            TBRecLibDictSource
                            ROOT_HEADERS TBRec/TBH6RunHeader.h TBRec/LinkDef.h
-                           EXTERNAL_PACKAGES  ROOT Boost CLHEP Eigen )
+                           EXTERNAL_PACKAGES  ROOT Boost CLHEP )
 
 atlas_add_library( TBRecLib
                    src/*.cxx
                    ${TBRecLibDictSource}
                    PUBLIC_HEADERS TBRec
-                   INCLUDE_DIRS CxxUtils ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS}
+                   INCLUDE_DIRS CxxUtils ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
                    DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} ${EIGEN_LIBRARIES} CaloEvent CaloGeoHelpers CaloIdentifier AthenaBaseComps AthenaKernel AthContainers GeoPrimitives Identifier xAODTracking GaudiKernel LArIdentifier LArRawEvent TBEvent TrkDetDescrUtils TrkParameters TrkTrack CaloUtilsLib StoreGateLib LArRawUtilsLib LArCablingLib CaloDetDescrLib TBCaloGeometryLib TBCondRunParLib
+                   LINK_LIBRARIES ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} CaloEvent CaloGeoHelpers CaloIdentifier AthenaBaseComps AthenaKernel AthContainers GeoPrimitives Identifier xAODTracking GaudiKernel LArIdentifier LArRawEvent TBEvent TrkDetDescrUtils TrkParameters TrkTrack CaloUtilsLib StoreGateLib LArRawUtilsLib LArCablingLib CaloDetDescrLib TBCaloGeometryLib TBCondRunParLib
                    PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} CaloDmDetDescr CaloSimEvent CondDBObjects xAODCaloEvent LArG4TBSimEvent Particle PathResolver TrkSurfaces TrkEventPrimitives TrkExInterfaces CaloTrackingGeometryLib TrackRecordLib CaloConditions )
 
 atlas_add_component( TBRec
