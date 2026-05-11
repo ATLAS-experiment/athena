@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -109,7 +109,7 @@ namespace Trk
   }
   
 
-  xAOD::Vertex*
+  std::unique_ptr<xAOD::Vertex>
   AdaptiveVertexFitter::_fit(
     const std::vector<const Trk::TrackParameters*>& perigeeList,
     const std::vector<const Trk::NeutralParameters*>& neutralPerigeeList,
@@ -253,7 +253,7 @@ namespace Trk
 
   }
 
-  xAOD::Vertex*
+  std::unique_ptr<xAOD::Vertex>
   AdaptiveVertexFitter::_fit(
     const std::vector<const Trk::Track*>& VectorTrk,
     const xAOD::Vertex& constraint,     // initialized to xAOD::Vertex()
@@ -272,7 +272,7 @@ namespace Trk
       perigeeList.push_back(iter->perigeeParameters());
     }
 
-    xAOD::Vertex * FittedVertex = _fit(perigeeList,constraint,startingPoint,IsConstraint,IsStartingPoint);
+    std::unique_ptr<xAOD::Vertex> FittedVertex = _fit(perigeeList,constraint,startingPoint,IsConstraint,IsStartingPoint);
 
     if (FittedVertex==nullptr) {
       return FittedVertex;
@@ -315,7 +315,7 @@ namespace Trk
     return FittedVertex;
   }
 
-  xAOD::Vertex*
+  std::unique_ptr<xAOD::Vertex>
   AdaptiveVertexFitter::dothefit(
     const xAOD::Vertex& ConstraintVertex,
     const Amg::Vector3D& SeedVertex,
@@ -330,7 +330,7 @@ namespace Trk
     int num_steps(0);
 
 
-    xAOD::Vertex* ActualVertex = new xAOD::Vertex();
+    auto ActualVertex = std::make_unique<xAOD::Vertex>();
     ActualVertex->makePrivateStore(); // xAOD::VertexContainer will take ownership of AuxStore when ActualVertex is added to it
     ActualVertex->setPosition( ConstraintVertex.position() );
     ActualVertex->setCovariancePosition( ConstraintVertex.covariancePosition() / m_AnnealingMaker->getWeight(astate, 1.) );
@@ -449,7 +449,7 @@ namespace Trk
               ActualSeedPosition=NewVertex;
               ATH_MSG_DEBUG("Linearized track to new seed Point " << NewVertex << ". " << *iter );
             }
-            ActualVertex=m_VertexUpdator->add(*ActualVertex,*iter);
+            m_VertexUpdator->add(*ActualVertex.get(),*iter);
           } else {
             if(msgLvl(MSG::VERBOSE))
             {
@@ -517,8 +517,9 @@ namespace Trk
     return ActualVertex;
   }
 
-  xAOD::Vertex*
+  std::unique_ptr<xAOD::Vertex>
   AdaptiveVertexFitter::fit(
+    const EventContext& /*ctx*/,
     const std::vector<const Trk::TrackParameters*>& perigeeList,
     const std::vector<const Trk::NeutralParameters*>& neutralPerigeeList,
     const Amg::Vector3D& startingPoint) const
@@ -527,8 +528,9 @@ namespace Trk
     return _fit(perigeeList,neutralPerigeeList,xAOD::Vertex(),startingPoint,false,true);
   }
 
-  xAOD::Vertex*
+  std::unique_ptr<xAOD::Vertex>
   AdaptiveVertexFitter::fit(
+    const EventContext& /*ctx*/,
     const std::vector<const Trk::TrackParameters*>& perigeeList,
     const std::vector<const Trk::NeutralParameters*>& neutralPerigeeList,
     const xAOD::Vertex& constraint) const
@@ -536,8 +538,9 @@ namespace Trk
     return _fit(perigeeList,neutralPerigeeList,constraint,Amg::Vector3D::Zero(),true);
   }
 
-  xAOD::Vertex*
+  std::unique_ptr<xAOD::Vertex>
   AdaptiveVertexFitter::fit(
+    const EventContext& /*ctx*/,
     const std::vector<const Trk::TrackParameters*>& perigeeList,
     const std::vector<const Trk::NeutralParameters*>& neutralPerigeeList,
     const xAOD::Vertex& constraint,
@@ -546,53 +549,63 @@ namespace Trk
     return _fit(perigeeList,neutralPerigeeList,constraint,startingPoint,true,true);
   }
 
-  xAOD::Vertex*
+  std::unique_ptr<xAOD::Vertex>
   AdaptiveVertexFitter::fit(
+    const EventContext& /*ctx*/,
     const std::vector<const Trk::TrackParameters*>& perigeeList,
     const std::vector<const Trk::NeutralParameters*>& neutralPerigeeList) const
   {
     return _fit(perigeeList,neutralPerigeeList,xAOD::Vertex(),Amg::Vector3D(),false,false);
   }
 
-  xAOD::Vertex*
+  std::unique_ptr<xAOD::Vertex>
   AdaptiveVertexFitter::fit(
+    const EventContext& ctx,
     const std::vector<const Trk::TrackParameters*>& perigeeList,
     const Amg::Vector3D& startingPoint) const
   {
     const std::vector<const Trk::NeutralParameters*> neutralPerigeeList;
-    return fit(perigeeList, neutralPerigeeList, startingPoint);
+    return fit(ctx, perigeeList, neutralPerigeeList, startingPoint);
   }
 
-  xAOD::Vertex*
+  std::unique_ptr<xAOD::Vertex>
   AdaptiveVertexFitter::fit(
+    const EventContext& ctx,
     const std::vector<const Trk::TrackParameters*>& perigeeList,
     const xAOD::Vertex& constraint) const
   {
     const std::vector<const Trk::NeutralParameters*> neutralPerigeeList;
-    return fit(perigeeList, neutralPerigeeList, constraint);
+    return fit(ctx, perigeeList, neutralPerigeeList, constraint);
   }
 
-  xAOD::Vertex*
+  std::unique_ptr<xAOD::Vertex>
   AdaptiveVertexFitter::fit(
+    const EventContext& ctx,
     const std::vector<const Trk::TrackParameters*>& perigeeList,
     const xAOD::Vertex& constraint,
     const Amg::Vector3D& startingPoint) const
   {
     const std::vector<const Trk::NeutralParameters*> neutralPerigeeList;
-    return fit(perigeeList, neutralPerigeeList, constraint, startingPoint);
+    return fit(ctx, perigeeList, neutralPerigeeList, constraint, startingPoint);
   }
 
-  xAOD::Vertex * AdaptiveVertexFitter::fit(const std::vector<const Trk::TrackParameters*> & perigeeList) const
+  std::unique_ptr<xAOD::Vertex>
+  AdaptiveVertexFitter::fit(
+    const EventContext& ctx,
+    const std::vector<const Trk::TrackParameters*> & perigeeList) const
   {
     const std::vector<const Trk::NeutralParameters*> neutralPerigeeList; 
-    return fit(perigeeList,neutralPerigeeList);
+    return fit(ctx,perigeeList,neutralPerigeeList);
   }
 
-  xAOD::Vertex * AdaptiveVertexFitter::_fit(const std::vector<const Trk::TrackParameters*> & perigeeList,
-		                            const xAOD::Vertex& constraint,
-					    const Amg::Vector3D & startingPoint,
-					    bool IsConstraint,
-					    bool IsStartingPoint) const {
+  std::unique_ptr<xAOD::Vertex>
+  AdaptiveVertexFitter::_fit(
+    const std::vector<const Trk::TrackParameters*> & perigeeList,
+    const xAOD::Vertex& constraint,
+    const Amg::Vector3D & startingPoint,
+    bool IsConstraint,
+    bool IsStartingPoint) const
+  {
     const std::vector<const Trk::NeutralParameters*> neutralPerigeeList;
     return _fit(perigeeList, neutralPerigeeList, constraint, startingPoint, IsConstraint, IsStartingPoint);
   }
@@ -600,8 +613,9 @@ namespace Trk
 //xAOD interfaced methods. Required to un-block the current situation 
 // with the xAOD tracking design.
 
-  xAOD::Vertex*
+  std::unique_ptr<xAOD::Vertex>
   AdaptiveVertexFitter::fit(
+    const EventContext& /*ctx*/,
     const std::vector<const xAOD::TrackParticle*>& vectorTrk,
     const std::vector<const xAOD::NeutralParticle*>& vectorNeut,
     const Amg::Vector3D& startingPoint) const
@@ -646,7 +660,8 @@ namespace Trk
                      // neutral parameters?
     }
 
-    xAOD::Vertex* fittedVertex = _fit(measuredPerigees,
+    std::unique_ptr<xAOD::Vertex> fittedVertex = _fit(
+                                      measuredPerigees,
                                       measuredNeutralPerigees,
                                       xAOD::Vertex(),
                                       startingPoint,
@@ -750,8 +765,9 @@ namespace Trk
    
  }//end of the xAOD starting point fit method
 
- xAOD::Vertex*
+ std::unique_ptr<xAOD::Vertex>
  AdaptiveVertexFitter::fit(
+   const EventContext& /*ctx*/,
    const std::vector<const xAOD::TrackParticle*>& vectorTrk,
    const std::vector<const xAOD::NeutralParticle*>& vectorNeut,
    const xAOD::Vertex& constraint) const
@@ -791,7 +807,7 @@ namespace Trk
    }
    
    
-   xAOD::Vertex* fittedVertex = _fit(measuredPerigees, measuredNeutralPerigees, constraint, Amg::Vector3D(),true);
+   std::unique_ptr<xAOD::Vertex> fittedVertex = _fit(measuredPerigees, measuredNeutralPerigees, constraint, Amg::Vector3D(),true);
 
 
    //assigning the input tracks to the fitted vertex through VxTrackAtVertices
