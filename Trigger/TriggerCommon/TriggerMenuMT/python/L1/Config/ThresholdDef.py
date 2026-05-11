@@ -284,7 +284,7 @@ class ThresholdDef:
             TEThreshold('gESPRESSO%i' % thrV, 'gTE').setTE(thrV)
         
         #gTE from BC+1 (for HI anti-shadowing in special 25ns runs)
-        for thrV in []: #note: do not populate with actual values until green lit by L1Topo FW experts!
+        for thrV in [280]:
             TEThreshold('gRISTRETTO%i' % thrV, 'gTE').setTE(thrV)
              
         # jXE
