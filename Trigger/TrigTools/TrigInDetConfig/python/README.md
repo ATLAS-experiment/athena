@@ -44,8 +44,10 @@ default settings. The set-up chain calling sequence is
 graph TD
   defaultTrigTrackingFlags-->defaultInDetTrigTrackingFlags;
   defaultTrigTrackingFlags-->defaultITkTrigTrackingFlags;
+  defaultTrigTrackingFlags-->defaultITkActsTrigTrackingFlags;
   defaultInDetTrigTrackingFlags-->electron;
   defaultITkTrigTrackingFlags-->electron;
+  defaultITkActsTrigTrackingFlags-->electron;
   electron-->derivedFromSignatureFlags;
 ```
 
@@ -53,8 +55,11 @@ Finally addGlobalFlags is used to add trigger flags common for all signature ins
 
 
 A flag can be modified at run time using
-```Trigger.InDetTracking.electron.pTmin=3.``` on the athena command line for
-example. Signature category flags have to be copied onto
+```Trigger.InDetTracking.electron.minPT=3.``` on the athena command line for
+example. The minPT flag is special as it is a single value for the ID detector but a list for pT thresholds in 3 eta regions like ```Trigger.InDetTracking.electron.minPT=[3.,1.5,1.5]```.
+The eta bins are configurable, common boundaries for ITk are [2, 2.6, 4] .
+
+The Signature category flags have to be copied onto
 ```Tracking.ActiveConfig``` by
 
 ```python
@@ -67,7 +72,7 @@ before the actual configuration of the tracking tools and algorithms is started 
 
 
 
-Last updated 2024/04/04 @jmasik
+Last updated 2026/05/09 @jmasik
 
 
 
