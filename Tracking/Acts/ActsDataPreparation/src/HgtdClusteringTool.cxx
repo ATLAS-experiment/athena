@@ -2,155 +2,66 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "src/HgtdClusteringTool.h"
+#include "HgtdClusteringTool.h"
 #include "HGTD_ReadoutGeometry/HGTD_ModuleDesign.h"
-#include "AthContainers/JaggedVecUtils.h"
-#include "xAODCore/VariableStruct.h"
+#include "details/HgtdCollectionAdapter.h"
 
 namespace ActsTrk {
 
-  HgtdClusteringTool::HgtdClusteringTool(const std::string& type,
-                                         const std::string& name,
-                                         const IInterface* parent)
-    : base_class(type, name, parent)
-  {}
-
-  StatusCode HgtdClusteringTool::initialize()
-  {
-    ATH_MSG_INFO("Initializing HgtdClusteringTool...");
-
-    ATH_CHECK(detStore()->retrieve(m_hgtd_det_mgr, "HGTD"));
-    ATH_CHECK(m_hgtd_tdc_calib_tool.retrieve(EnableTool{m_use_altiroc_rdo.value()}));
-
-    return StatusCode::SUCCESS;
-  }
-
-  struct HgtdAuxDataCache : xAOD::VariableStruct {
-      HgtdAuxDataCache(SG::AuxVectorData& cont, unsigned int n_cluster_rdos)
-         : xAOD::VariableStruct(cont)
-      {
-         if (n_cluster_rdos>0) {
-            auto *store = cont.getStore();
-            assert(store);
-            SG::setJaggedVectorData(cont,*store,xAOD::HGTDCluster::rdoListAcc(), n_cluster_rdos, rdoList, rdoListPayload);
-            SG::setJaggedVectorData(cont,*store,xAOD::HGTDCluster::totListAcc(), n_cluster_rdos, totList, totListPayload);
-         }
+   namespace {
+      template <std::integral T, std::integral T2>
+      T check_cast(T2 &&input) {
+         assert( input == static_cast<T>(input));
+         return static_cast<T>(input);
       }
-      SG::Accessor<SG::JaggedVecElt<Identifier::value_type> >::Elt_span     rdoList;
-      SG::Accessor<SG::JaggedVecElt<Identifier::value_type> >::Payload_span rdoListPayload;
-      SG::Accessor<SG::JaggedVecElt<int> >::Elt_span     totList;
-      SG::Accessor<SG::JaggedVecElt<int> >::Payload_span totListPayload;
-  };
-
-  std::any HgtdClusteringTool::createEventDataCache(xAOD::HGTDClusterContainer& cont, std::size_t nClusterRDOs) const {
-      return HgtdAuxDataCache(cont,nClusterRDOs);
-  }
-
-  StatusCode HgtdClusteringTool::clusterize(const EventContext&,
-                                            const RawDataCollection& RDOs,
-                                            std::vector<ClusterCollection>& collection) const
+   }
+   
+   StatusCode HgtdClusteringTool::clusterize(const EventContext& /*ctx*/,
+                                             const IHGTDClusteringTool::RawDataCollectionVariant& RDOs,
+                                             IHGTDClusteringTool::CellContainer &cellContainer) const
   {
-    ATH_MSG_DEBUG("Clustering hits...");
-    collection.emplace_back();
-    ClusterCollection &clusters=collection.back();
-    clusters.reserve(RDOs.size());
-    for	(std::size_t i(0), n(RDOs.size()); i < n; ++i) {
-      const auto* rdo = RDOs[i];
-      Identifier rdo_id = rdo->identify();
-      clusters.emplace_back();
-      clusters.back().ids.push_back(rdo_id.get_compact());
-      clusters.back().times.push_back(rdo->getTOA());
-      clusters.back().tots.push_back(rdo->getTOT());
+     auto [idHash,RDOs_is_empty] = std::visit([](const auto *RDOs) {
+        return std::make_pair(RDOs->identifierHash(),RDOs->empty());
+     }, RDOs);
+
+    IHGTDClusteringTool::CellContainer::ModuleRangeGuard rangeGuard(cellContainer.startNewModule(idHash));
+    if (!RDOs_is_empty) {
+    std::visit([this,&cellContainer](const auto *RDOs) {
+       Identifier waferId = RDOs->identify();
+       HgtdCollectionAdapter< std::remove_cvref_t<decltype(*RDOs)> > rdoAdapter(*m_hgtd_det_mgr,
+                                                                                *m_hgtd_tdc_calib_tool,
+                                                                                waferId);
+
+       unsigned int rdo_i=0;
+       --rdo_i; // to allow incrementing rdo_i at top of loop before any flow control
+       for (const auto* rdo : *RDOs) {
+          ++rdo_i;
+          assert(rdo);
+          Identifier rdo_id(rdo->identify());
+          uint8_t raw_time_of_flight = rdoAdapter.rawTime(*rdo);
+          assert ( raw_time_of_flight <= std::numeric_limits<std::int8_t>::max());
+          std::array<std::int8_t,3> coordinates{check_cast<std::int8_t>(m_hgtd_id->phi_index(rdo_id)),
+                                                check_cast<std::int8_t>(m_hgtd_id->eta_index(rdo_id)),
+                                                static_cast<std::int8_t>(raw_time_of_flight)};
+          cellContainer.emplace_back_cell(coordinates, rdo_i);
+       }
+    },RDOs);
+    std::span<IHGTDClusteringTool::CellContainer::Cell>
+       cellRange = rangeGuard.moduleCellSpan();
+    if (m_sortByLocalx) {
+       static constexpr unsigned int SORT_BY_LOCAL_X=0u;
+       std::sort(cellRange.begin(),cellRange.end(),[](IHGTDClusteringTool::CellContainer::Cell &a,
+                                                      IHGTDClusteringTool::CellContainer::Cell &b) {
+          return a.coordinates[SORT_BY_LOCAL_X] < b.coordinates[SORT_BY_LOCAL_X];
+       });
     }
-    return StatusCode::SUCCESS;
-  }
-
-  StatusCode HgtdClusteringTool::makeClusters(const EventContext& ctx,
-                                              const ClusterCollection& clusters,
-                                              xAOD::HGTDClusterContainer& container,
-                                              size_t& icluster,
-                                              std::any& cache) const
-  {
-    HgtdAuxDataCache* auxDataCache = std::any_cast<HgtdAuxDataCache> (&cache);
-    if (!auxDataCache) throw std::bad_any_cast();
-    assert( icluster+clusters.size() <= container.size() );
-    for (std::size_t i(0); i<clusters.size(); ++i) {
-      const HgtdClusteringTool::Cluster& cluster = clusters[i];
-      assert(icluster+i == container[icluster+i]->index());
-      ATH_CHECK(makeCluster(ctx, cluster, *container[icluster+i],auxDataCache));
+    // register each cell as a cluster
+    for (unsigned int cell_i=0; cell_i<cellRange.size(); ++cell_i) {
+       cellContainer.registerNewCluster(cell_i,cell_i+1);
     }
-
-    return StatusCode::SUCCESS;
-  }
-
-  StatusCode HgtdClusteringTool::makeCluster(const EventContext& /*ctx*/,
-                                             const typename HgtdClusteringTool::Cluster &cluster,
-                                             xAOD::HGTDCluster& xaodcluster,
-                                             HgtdAuxDataCache* auxDataCache) const
-  {
-    unsigned int icluster=xaodcluster.index();
-    unsigned int n_rdos = (icluster> 0 ?  auxDataCache->rdoList[icluster-1].end() : 0u);
-    assert(icluster==0 || n_rdos == auxDataCache->totList[icluster-1].end());
-    assert( n_rdos+cluster.ids.size() <= auxDataCache->rdoList.size() );
-    assert( cluster.tots.size() == cluster.ids.size());
-    assert( cluster.times.size() == cluster.ids.size());
-    assert( cluster.ids.size() == 1);
-    for (size_t rdo_i = 0; rdo_i < cluster.ids.size(); ++rdo_i) {
-      Identifier rdo_id( cluster.ids[rdo_i]);
-      // @TODO get detector element only once by caller aka. makeClusters
-      const InDetDD::HGTD_DetectorElement* element = m_hgtd_det_mgr->getDetectorElement(rdo_id);
-
-      InDetDD::SiCellId si_cell_id = element->cellIdFromIdentifier(rdo_id);
-
-      InDetDD::SiLocalPosition si_pos = element->design().localPositionOfCell(si_cell_id);
-
-
-      Eigen::Matrix<float, 3, 1> loc_pos(si_pos.xPhi(), si_pos.xEta(),cluster.times[rdo_i]);
-      Eigen::Matrix<float, 3, 3> cov_matrix= Eigen::Matrix<float, 3, 3>::Zero();
-
-      float xWidth = 1.3;
-      float yWidth = 1.3;
-      cov_matrix(0,0) = xWidth * xWidth / 12; // i.e. Cov XX
-      cov_matrix(1,1) = yWidth * yWidth / 12; // i.e. Cov YY
-      float time_of_arrival_err = 0.035;
-      cov_matrix(2,2) = time_of_arrival_err * time_of_arrival_err; // i.e. Cov TT
-
-      auxDataCache->rdoListPayload[n_rdos]=rdo_id.get_compact();
-      auxDataCache->totListPayload[n_rdos]=cluster.tots[rdo_i];
-      ++n_rdos;
-      // this will set the position and covariance to the last and only RDO
-      IdentifierHash id_hash = element->identifyHash();
-      xaodcluster.setMeasurement<3>(id_hash,loc_pos,cov_matrix);
+    
     }
-
-
-    // Fill
-    xaodcluster.setIdentifier(cluster.ids.front());
-    auxDataCache->rdoList[icluster] = n_rdos;
-    auxDataCache->totList[icluster] = n_rdos;
-
-    return StatusCode::SUCCESS;
-  }
-
-  StatusCode HgtdClusteringTool::clusterize(const EventContext&,
-                                            const HGTD_ALTIROC_RDO_Collection& RDOs,
-                                            std::vector<ClusterCollection>& collection) const
-  {
-    ATH_MSG_DEBUG("Clustering hits...");
-    collection.emplace_back();
-    ClusterCollection &clusters=collection.back();
-    clusters.reserve(RDOs.size());
-
-    for	(std::size_t i(0), n(RDOs.size()); i < n; ++i) {
-      const auto* rdo = RDOs[i];
-      Identifier rdo_id = rdo->identify();
-      clusters.emplace_back();
-      clusters.back().ids.push_back(rdo_id.get_compact());
-      const InDetDD::HGTD_DetectorElement* element = m_hgtd_det_mgr->getDetectorElement(rdo_id);
-      clusters.back().times.push_back(m_hgtd_tdc_calib_tool->TOA2Time(element, rdo->getToA()));
-      ATH_MSG_DEBUG("Recovered Time of Arrival: " << m_hgtd_tdc_calib_tool->TOA2Time(element, rdo->getToA()));
-      clusters.back().tots.push_back(rdo->getToT());
-    }
+    cellContainer.registerClustersForNewModule(rangeGuard.range());
     return StatusCode::SUCCESS;
   }
 

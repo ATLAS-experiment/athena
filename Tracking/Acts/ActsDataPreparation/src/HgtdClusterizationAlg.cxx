@@ -7,6 +7,7 @@
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "ActsInterop/TableUtils.h"
 #include "AthAllocators/DataPool.h"
+#include "details/CellContainer.h"
 
 namespace ActsTrk {
 
@@ -50,58 +51,67 @@ namespace ActsTrk {
     ATH_CHECK(clusterContainer.record(std::make_unique<xAOD::HGTDClusterContainer>(SG::VIEW_ELEMENTS, SG::ALWAYS_TRACK_INDICES),
 				      std::make_unique<xAOD::HGTDClusterAuxContainer>()));
 
-    unsigned int nRDOs=0;
-    unsigned int nClusters=0;
-    std::vector<IHGTDClusteringTool::ClusterCollection> clusterCollection;
-    if (m_use_altiroc_rdo){
-      SG::ReadHandle<HGTD_ALTIROC_RDO_Container> rdoContainer = SG::makeHandle(m_altiroc_rdo_rh_key, ctx);
-      if (!rdoContainer.isValid()) {
-          ATH_MSG_ERROR("Failed to retrieve HGTD ALTIROC RDO container");
-          return StatusCode::FAILURE;
-      }
 
-      clusterCollection.reserve(rdoContainer->size());
-      for (const auto rdoCollection : *rdoContainer) {
-          if (rdoCollection->empty()) {
-              continue;
+    auto getRDOContainer= [this, &ctx]() -> IHGTDClusteringTool::RDOContainerVariant {
+       if (m_use_altiroc_rdo){
+          SG::ReadHandle<HGTD_ALTIROC_RDO_Container> rdoContainer = SG::makeHandle(m_altiroc_rdo_rh_key, ctx);
+          if (!rdoContainer.isValid()) {
+             ATH_MSG_ERROR("Failed to retrieve HGTD ALTIROC RDO container" << m_altiroc_rdo_rh_key.key());
           }
-          nRDOs+=rdoCollection->size();
-          ATH_CHECK(m_clusteringTool->clusterize(ctx, *rdoCollection, clusterCollection));
-          nClusters += clusterCollection.back().size();
-      }
-
-    } else {
-      SG::ReadHandle<HGTD_RDO_Container> rdoContainer = SG::makeHandle(m_rdoContainerKey, ctx);
-      if (!rdoContainer.isValid()) {
-          ATH_MSG_ERROR("Failed to retrieve HGTD RDO container");
-          return StatusCode::FAILURE;
-      }
-        
-      clusterCollection.reserve(rdoContainer->size());
-      for (const auto rdoCollection : *rdoContainer) {
-          if (rdoCollection->empty()) {
-              continue;
+          return rdoContainer.cptr();
+       }
+       else {
+          SG::ReadHandle<HGTD_RDO_Container> rdoContainer = SG::makeHandle(m_rdoContainerKey, ctx);
+          if (!rdoContainer.isValid()) {
+             ATH_MSG_ERROR("Failed to retrieve HGTD RDO container " << m_rdoContainerKey.key());
           }
-          nRDOs+=rdoCollection->size();
-          ATH_CHECK(m_clusteringTool->clusterize(ctx, *rdoCollection, clusterCollection));
-          nClusters += clusterCollection.back().size();
-      }
+          return rdoContainer.cptr();
+       }
+    };
+    IHGTDClusteringTool::RDOContainerVariant rdoContainer = getRDOContainer();
+    if (!std::visit([](const auto *rdoContainer) -> bool { return rdoContainer != nullptr; }, rdoContainer)) {
+       return StatusCode::FAILURE;
     }
 
+    unsigned int n_modules=std::visit([](const auto *rdoContainer) { return rdoContainer->size();}, rdoContainer);
+
+    auto [n_cluster_total, n_rdos_total] = m_clusteringTool->countCells(rdoContainer,
+                                                                        std::vector<IdentifierHash>{}  /* all */ );
+    typename IHGTDClusteringTool::CellContainer cellContainer(n_modules, n_cluster_total, n_rdos_total);
+
+    
+    unsigned int nRDOs=0;
+    unsigned int nClusters=0;
+    ATH_CHECK( std::visit([this, &cellContainer, &ctx, &nRDOs, &nClusters](const auto *rdoContainer) {
+       for (const auto rdoCollection : *rdoContainer) {
+          if (rdoCollection->empty()) {
+             continue;
+          }
+          nRDOs+=rdoCollection->size();
+          ATH_CHECK(m_clusteringTool->clusterize(ctx, rdoCollection, cellContainer));
+          nClusters += cellContainer.m_moduleClusterRange.back().nClusters();
+       }
+       return StatusCode(StatusCode::SUCCESS);
+    }, rdoContainer));
+       
     DataPool<xAOD::HGTDCluster> pool (nClusters);
     clusterContainer->push_new(nClusters, [&pool]() {return pool.nextElementPtr();});
     std::any cache = m_clusteringTool->createEventDataCache(*clusterContainer,nRDOs);
 
     std::size_t icluster=0;
-    for (std::size_t icollection=0u; icollection<clusterCollection.size(); ++icollection) {
+    for (std::size_t icollection=0u; icollection<cellContainer.size(); ++icollection) {
        ATH_CHECK( m_clusteringTool->makeClusters(ctx,
-                                                 clusterCollection[icollection],
-                                                 *clusterContainer,
+                                                 rdoContainer,
+                                                 cellContainer,
+                                                 icollection,
                                                  icluster,
+                                                 *clusterContainer,
                                                  cache));
-       icluster += clusterCollection[icollection].size();
+       unsigned int n_new_clusters=cellContainer.moduleClusterRange(icollection).nClusters();
+       icluster += n_new_clusters;
     }
     assert( clusterContainer->size() == icluster);
+    assert( clusterContainer->size() == cellContainer.nClustersTotal());
     
     m_stat[kNRdo] += nRDOs;
     m_stat[kNClusters] += clusterContainer->size();
