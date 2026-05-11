@@ -1,7 +1,7 @@
 // dear emacs, this is -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ANALYSISTOOLS_AANTUPLESTREAM_H
@@ -10,7 +10,7 @@
 #include "GaudiKernel/IAddressCreator.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/IIoComponent.h"
-#include "AthenaBaseComps/AthLegacySequence.h"
+#include "AthenaBaseComps/AthAlgorithm.h"
 #include "CxxUtils/checker_macros.h"
 
 #include <map>
@@ -30,8 +30,7 @@ class TFile;
 class TTree;
 class TBranch;
 
-class ATLAS_NOT_THREAD_SAFE AANTupleStream : virtual public IIoComponent,
-                                             public AthLegacySequence
+class ATLAS_NOT_THREAD_SAFE AANTupleStream : public extends<AthAlgorithm, IIoComponent>
 {
 public:
     
@@ -42,13 +41,13 @@ public:
   virtual ~AANTupleStream();
 
   /// Initialize AANTupleStream
-  virtual StatusCode initialize();
+  virtual StatusCode initialize() override;
 
   /// Terminate AANTupleStream
-  virtual StatusCode finalize();
+  virtual StatusCode finalize() override;
 
   /// Working entry point
-  virtual StatusCode execute();
+  virtual StatusCode execute() override;
 
 private:
 
@@ -64,12 +63,6 @@ private:
 			   const std::string& match,
 			   std::string&       address_header,
 			   std::string&       address_data ) const;
-
-  /// initialize sub-algos
-  StatusCode initialize_subAlgos ();
-
-  /// execute sub-algos
-  StatusCode execute_subAlgos ();
 
   /// write schema of AttributeList
   void writeAttributeListSpecification();
@@ -140,9 +133,6 @@ private:
 
   /// THistSvc
   ServiceHandle<ITHistSvc> m_tHistSvc;
-
-  // Sub-algorithms  as given in jobOptions type/name
-  std::vector<std::string> m_membersNames;
 
   /// for string branches
   static const unsigned int s_maxLengthOfStrings = 5000;
