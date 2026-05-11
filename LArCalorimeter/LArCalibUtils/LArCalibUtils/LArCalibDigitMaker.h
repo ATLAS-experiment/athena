@@ -1,14 +1,13 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARCALIBDIGITMAKER
 #define LARCALIBDIGITMAKER
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "LArRawEvent/LArDigitContainer.h"
-#include "CaloIdentifier/LArEM_ID.h"
 #include "LArRecConditions/LArCalibLineMapping.h"
-#include <fstream>
+#include <vector>
+#include <string>
 
 class LArCalibDigitMaker : public AthAlgorithm
 {
@@ -30,12 +29,12 @@ class LArCalibDigitMaker : public AthAlgorithm
   std::vector<unsigned> m_vDelay;
   std::vector<int> m_nPatterns;
   std::vector<std::vector<double>> m_vBoardIDs;
-  unsigned m_nTrigger;
-  double m_delayScale;
-  bool m_dontRun;
-  bool m_isSC;
+  unsigned m_nTrigger{};
+  double m_delayScale{};
+  bool m_dontRun{};
+  bool m_isSC{};
   int m_eventNb = 0;
-  bool m_skipDuplicates;
+  bool m_skipDuplicates{};
   std::vector<HWIdentifier> m_pulsedChids;
 };
 

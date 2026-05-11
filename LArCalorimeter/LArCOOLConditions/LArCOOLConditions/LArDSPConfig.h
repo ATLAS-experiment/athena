@@ -61,9 +61,9 @@ protected:
   }
 
 protected:
-  const AthenaAttributeList* m_attrList;
-  const uint8_t* m_pBlob;
-  unsigned m_nFebs;
+  const AthenaAttributeList* m_attrList{};
+  const uint8_t* m_pBlob{};
+  unsigned m_nFebs{};
 		   
 };
 
@@ -86,7 +86,7 @@ public:
 
 private:
   std::unique_ptr<AthenaAttributeList> m_attrListNC;
-  uint8_t* m_pBlob_nc;
+  uint8_t* m_pBlob_nc{};
   //uint8_t m_nSamples;
 };
 

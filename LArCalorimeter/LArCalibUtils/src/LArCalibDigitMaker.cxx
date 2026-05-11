@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibUtils/LArCalibDigitMaker.h"
+#include "LArRawEvent/LArDigitContainer.h"
 
 #include "GaudiKernel/ToolHandle.h"
 
@@ -24,7 +25,6 @@ LArCalibDigitMaker::LArCalibDigitMaker(const std::string& name, ISvcLocator* pSv
   : AthAlgorithm(name, pSvcLocator),
     m_nTrigger(0)
 {
-  //declareProperty("DigitKey",m_key="");
  declareProperty("KeyList",m_keylist);
  declareProperty("DAC",m_vDAC);
  declareProperty("Delay",m_vDelay);
