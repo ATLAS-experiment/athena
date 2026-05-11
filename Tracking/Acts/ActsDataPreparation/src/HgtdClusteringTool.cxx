@@ -4,6 +4,7 @@
 
 #include "src/HgtdClusteringTool.h"
 #include "HGTD_ReadoutGeometry/HGTD_ModuleDesign.h"
+#include "CLHEP/Units/PhysicalConstants.h" //For speed of light
 
 namespace ActsTrk {
 
@@ -46,15 +47,17 @@ namespace ActsTrk {
 
       InDetDD::SiLocalPosition si_pos = element->design().localPositionOfCell(si_cell_id);
 
+      float toa_mm = rdo->getTOA()*CLHEP::c_light;
+      ATH_MSG_DEBUG("Recovered Time of Arrival: " << toa_mm);
 
-      Eigen::Matrix<float, 3, 1> loc_pos(si_pos.xPhi(), si_pos.xEta(),rdo->getTOA());
+      Eigen::Matrix<float, 3, 1> loc_pos(si_pos.xPhi(), si_pos.xEta(),toa_mm);
       Eigen::Matrix<float, 3, 3> cov_matrix= Eigen::Matrix<float, 3, 3>::Zero();
 
       float xWidth = 1.3;
       float yWidth = 1.3;
       cov_matrix(0,0) = xWidth * xWidth / 12; // i.e. Cov XX
       cov_matrix(1,1) = yWidth * yWidth / 12; // i.e. Cov YY
-      float time_of_arrival_err = 0.035;
+      float time_of_arrival_err = 0.035*CLHEP::c_light;
       cov_matrix(2,2) = time_of_arrival_err * time_of_arrival_err; // i.e. Cov TT
 
       std::vector<Identifier> rdo_list = {rdo_id};
@@ -97,16 +100,17 @@ namespace ActsTrk {
 
       InDetDD::SiLocalPosition si_pos = element->design().localPositionOfCell(si_cell_id);
 
-      Eigen::Matrix<float, 3, 1> loc_pos(si_pos.xPhi(), si_pos.xEta(), m_hgtd_tdc_calib_tool->TOA2Time(element, rdo->getToA()));
-      Eigen::Matrix<float, 3, 3> cov_matrix= Eigen::Matrix<float, 3, 3>::Zero();
+      float toa_mm = m_hgtd_tdc_calib_tool->TOA2Time(element, rdo->getToA())*CLHEP::c_light;
+      ATH_MSG_DEBUG("Recovered Time of Arrival: " << toa_mm);
 
-      ATH_MSG_DEBUG("Recovered Time of Arrival: " << m_hgtd_tdc_calib_tool->TOA2Time(element, rdo->getToA()));
+      Eigen::Matrix<float, 3, 1> loc_pos(si_pos.xPhi(), si_pos.xEta(), toa_mm);
+      Eigen::Matrix<float, 3, 3> cov_matrix= Eigen::Matrix<float, 3, 3>::Zero();
 
       float xWidth = 1.3;
       float yWidth = 1.3;
       cov_matrix(0,0) = xWidth * xWidth / 12; // i.e. Cov XX
       cov_matrix(1,1) = yWidth * yWidth / 12; // i.e. Cov YY
-      float time_of_arrival_err = 0.035;
+      float time_of_arrival_err = 0.035*CLHEP::c_light;
       cov_matrix(2,2) = time_of_arrival_err * time_of_arrival_err; // i.e. Cov TT
 
       std::vector<Identifier> rdo_list = {rdo_id};
