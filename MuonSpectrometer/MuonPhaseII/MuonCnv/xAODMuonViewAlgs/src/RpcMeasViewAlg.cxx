@@ -1,4 +1,3 @@
-
 /*
    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
@@ -8,6 +7,7 @@
 #include <StoreGate/ReadHandle.h>
 #include <StoreGate/WriteHandle.h>
 #include <AthContainers/ConstDataVector.h>
+#include <xAODMuonViews/ContainerMerge.h>
 
 namespace MuonR4{
     StatusCode RpcMeasViewAlg::initialize() {        
@@ -24,11 +24,7 @@ namespace MuonR4{
         ATH_CHECK(SG::get(bilStrips, m_readKeyBI, ctx));
 
         ConstDataVector<xAOD::RpcMeasurementContainer> outContainer{SG::VIEW_ELEMENTS};
-        std::merge(legacyStrips->begin(), legacyStrips->end(), bilStrips->begin(), bilStrips->end(),
-                   std::back_inserter(outContainer), 
-                    [](const xAOD::RpcMeasurement*a, const xAOD::RpcMeasurement* b){
-                        return a->identifierHash() < b->identifierHash(); 
-                    });
+        xAOD::mergeContainer(outContainer, *legacyStrips, *bilStrips);
         SG::WriteHandle writeHandle{m_writeKey, ctx};
         ATH_CHECK(writeHandle.record(std::make_unique<xAOD::RpcMeasurementContainer>(*outContainer.asDataVector())));
         return StatusCode::SUCCESS;
