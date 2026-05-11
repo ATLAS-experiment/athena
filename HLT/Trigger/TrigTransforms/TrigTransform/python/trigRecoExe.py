@@ -29,12 +29,22 @@ msg = logging.getLogger("PyJobTransforms." + __name__)
 # used to setup input files/arguments and change output filenames
 class trigRecoExecutor(athenaExecutor):
 
+    # Pattern for output files produces by athenaHLT/EF
+    expectedOutputFileName = '*SingleStream.daq.RAW._*.data'
+
     # preExecute is based on athenaExecutor but with key changes:
     # - removed athenaMP detection
     # - removed environment so does not require the noimf notcmalloc flags
-    # - added swap of argument name for runargs file so that athenaHLT reads it in
+    # - added swap of argument name for runargs file
     def preExecute(self, input = set(), output = set()):
         msg.debug('Preparing for execution of {0} with inputs {1} and outputs {2}'.format(self.name, input, output))
+
+        # setsid needed to fix process-group id of child processes to be the same as mother process (ATR-20513)
+        self._exe = 'setsid '
+        if self.conf.argdict['athenaEF'].value is True:
+            self._exe += 'athenaEF.py'
+        else:
+            self._exe += 'athenaHLT.py'
 
         # Check we actually have events to process!
         if (self._inputEventTest and 'skipEvents' in self.conf.argdict and
@@ -127,16 +137,16 @@ class trigRecoExecutor(athenaExecutor):
         # self._envUpdate.setStandardEnvironment(self.conf.argdict)
         self._prepAthenaCommandLine()
 
-        # to get athenaHLT to read in the relevant parts from the runargs file we have to translate them
-        if 'athenaHLT' in self._exe:
+        # translate relevant parts from the runargs file
+        if 'athenaHLT' in self._exe or 'athenaEF' in self._exe:
             self._cmd.remove('runargs.BSRDOtoRAW.py')
-            # get list of translated arguments to be used by athenaHLT
+            # get list of translated arguments
             optionList = getTranslated(self.conf.argdict, name=self._name, substep=self._substep, first=self.conf.firstExecutor, output = outputFiles)
             self._cmd.extend(optionList)
             # updates for CA
             if self._isCAEnabled():
                 msg.info("Running in CA mode")
-                # we don't use the runargs file with athenaHLT so add the JO and preExecs to the command line
+                # we don't use the runargs file so add the JO and preExecs to the command line
                 self._cmd.append(self._skeletonCA)
                 if 'preExec' in self.conf.argdict:
                     self._cmd.extend(self.conf.argdict['preExec'].returnMyValue(name=self._name, substep=self._substep, first=self.conf.firstExecutor))
@@ -174,14 +184,13 @@ class trigRecoExecutor(athenaExecutor):
         # The following is needed to avoid conflicts in finding BS files prduced by running the HLT step
         # and those already existing in the working directory
         if 'BS' in self.conf.dataDictionary or 'DRAW_TRIGCOST' in self.conf.dataDictionary or 'HIST_DEBUGSTREAMMON' in self.conf.dataDictionary:
-            expectedOutputFileName = '*_HLTMPPy_RAW.pool.root.*.data'
             # list of filenames of files matching expectedOutputFileName
-            matchedOutputFileNames = self._findOutputFiles(expectedOutputFileName)
+            matchedOutputFileNames = self._findOutputFiles(self.expectedOutputFileName)
             # check there are no file matches
             if len(matchedOutputFileNames) > 0:
-                msg.error(f'Directoy already contains files with expected output name format ({expectedOutputFileName}), please remove/rename these first: {matchedOutputFileNames}')
+                msg.error(f'Directoy already contains files with expected output name format ({self.expectedOutputFileName}), please remove/rename these first: {matchedOutputFileNames}')
                 raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_OUTPUT_FILE_ERROR'),
-                    f'Directory already contains files with expected output name format {expectedOutputFileName}, please remove/rename these first: {matchedOutputFileNames}')
+                    f'Directory already contains files with expected output name format {self.expectedOutputFileName}, please remove/rename these first: {matchedOutputFileNames}')
 
         # Sanity check:
         if OSSetupString is not None and asetupString is None:
@@ -200,7 +209,7 @@ class trigRecoExecutor(athenaExecutor):
 
     def _prepAthenaCommandLine(self):
 
-        # When running from the DB athenaHLT needs no skeleton file
+        # When running from the DB, no skeleton file is needed
         msg.info("Before build command line check if reading from DB")
 
         # Check if expecting to run from DB
@@ -291,7 +300,7 @@ class trigRecoExecutor(athenaExecutor):
         msg.info('Splitting stream %s from BS file', outputStreams)
         splitStreamFailure = 0
         try:
-            cmd = 'trigbs_extractStream.py -s ' + outputStreams + ' ' + allStreamsFileName
+            cmd = f'trigbs_extractStream.py -s {outputStreams} {allStreamsFileName}'
             msg.info('running command for splitting (in original asetup env): %s', cmd)
             splitStreamFailure = subprocess.call(cmd, shell=True)
             msg.debug('trigbs_extractStream.py splitting return code %s', splitStreamFailure)
@@ -302,7 +311,9 @@ class trigRecoExecutor(athenaExecutor):
             msg.warning('trigbs_extractStream.py returned error (%s) no split BS file created', splitStreamFailure)
             return 1
         else:
-            expectedStreamFileName = '*._HLTMPPy_RAW._*.data'
+            # If more than one stream selected, trigbs_extractStream produces an "accepted" stream file
+            streamName = outputStreams if len(streamsList)==1 else 'accepted'
+            expectedStreamFileName = f'*_{streamName}.*.RAW._*.data'
             # list of filenames of files matching expectedStreamFileName
             matchedOutputFileName = self._findOutputFiles(expectedStreamFileName)
             if(len(matchedOutputFileName)):
@@ -312,7 +323,7 @@ class trigRecoExecutor(athenaExecutor):
                 msg.error('trigbs_extractStream.py did not created expected file (%s)', expectedStreamFileName)
                 return 1
 
-    # rename a created file - used to overwrite filenames from athenaHLT into the requested argument name
+    # rename a created file to match the requested argument name
     def _renamefile(self, currentFileName, newFileName):
         msg.info('Renaming file from %s to %s', currentFileName, newFileName)
         try:
@@ -395,7 +406,7 @@ class trigRecoExecutor(athenaExecutor):
         # to save on panda it needs to be renamed via the outputHIST_HLTMONFile argument
         expectedFileName = 'expert-monitoring.root'
 
-        # first check athenaHLT step actually completed
+        # first check if trigger step actually completed
         if self._rc != 0:
             msg.info('HLT step failed (with status %s) so skip HIST_HLTMON filename check', self._rc)
         # next check argument is in dictionary as a requested output
@@ -438,16 +449,15 @@ class trigRecoExecutor(athenaExecutor):
         if self._rc != 0:
             msg.error('HLT step failed (with status %s) so skip BS filename check', self._rc)
         elif 'BS' in self.conf.dataDictionary or 'DRAW_TRIGCOST' in self.conf.dataDictionary or 'HIST_DEBUGSTREAMMON' in self.conf.dataDictionary:
-            expectedOutputFileName = '*_HLTMPPy_RAW.pool.root.*.data'
             # list of filenames of files matching expectedOutputFileName
-            matchedOutputFileNames = self._findOutputFiles(expectedOutputFileName)
+            matchedOutputFileNames = self._findOutputFiles(self.expectedOutputFileName)
 
 
             # check there are file matches and rename appropriately
             if len(matchedOutputFileNames) == 0:
-                msg.error('No BS files created with expected name: %s - please check for earlier failures', expectedOutputFileName)
+                msg.error('No BS files created with expected name: %s - please check for earlier failures', self.expectedOutputFileName)
                 raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_OUTPUT_FILE_ERROR'),
-                    f'No BS files created with expected name: {expectedOutputFileName} - please check for earlier failures')
+                    f'No BS files created with expected name: {self.expectedOutputFileName} - please check for earlier failures')
             else:
                 # if only one BS file was created
                 if len(matchedOutputFileNames) == 1:

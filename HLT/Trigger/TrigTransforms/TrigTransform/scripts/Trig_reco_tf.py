@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ## Trig_reco_tf.py
 ## - based on PyJobTransforms/Reco_tf.py
@@ -43,12 +43,9 @@ def getTransform():
     executorSet = set()
 
     # BSRDOtoRAW is the HLT step of the trigger transform
-    # runs primarily using athenaHLT
     # literalRunargs used for when running with athena
     executorSet.add(trigRecoExecutor(name = 'BSRDOtoRAW', skeletonFile = 'TriggerJobOpts/runHLT_standalone.py',
                                      skeletonCA = 'TriggerJobOpts.runHLT',
-                                     exe = 'setsid athenaHLT.py',
-                                     # setsid is needed to fix the process-group id of child processes to be the same as mother process; discussed in https://its.cern.ch/jira/browse/ATR-20513
                                      substep = 'b2r', tryDropAndReload = False,
                                      inData = ['BS_RDO', 'RDO'], outData = ['BS', 'DRAW_TRIGCOST', 'HIST_HLTMON', 'HIST_DEBUGSTREAMMON'],
                                      perfMonFile = 'ntuple_BSRDOtoRAW.pmon.gz',
@@ -114,7 +111,7 @@ def addTriggerArgs(parser):
     parser.defineArgGroup('Trigger', 'Specific options related to the trigger configuration used for reprocessing')
 
     # Arguments specific for trigger transform
-    # writeBS used in literal arguments when running HLT step in athena (not athenaHLT)
+    # writeBS used in literal arguments when running HLT step in athena (not athenaHLT/EF)
     parser.add_argument('--writeBS', type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=True),
                           help='Needed if running BSRDO to BS step in athena (default: True)', group='Trigger', default=trfArgClasses.argBool(True, runarg=True))
     # input BS file for the HLT step (name just to be unique identifier)
@@ -126,7 +123,7 @@ def addTriggerArgs(parser):
                         type=trfArgClasses.argFactory(trfArgClasses.argBSFile, io='output', runarg=True, type='bs'),
                         help='Output bytestream file', group='Trigger')
     # select output stream in  BS file
-    ## athenaHLT writes All streams into one file, but this can't be proceesed by standard reco if it contains events in only PEB streams
+    ## athenaHLT/EF writes All streams into one file, but this can't be proceesed by standard reco if it contains events in only PEB streams
     ## by defualt selects the Main stream, as likely the most needed option, but can ber reverted to All or any other stream chosen
     parser.add_argument('--streamSelection', nargs='+', type=trfArgClasses.argFactory(trfArgClasses.argList, runarg=True),
                         help='select output streams in produced BS file (default: \"Main\"). Specify \"All\" to disable splitting (standard reco will fail on any events with only PEB data)', group='Trigger', default=trfArgClasses.argList("Main", runarg=True))
@@ -139,12 +136,18 @@ def addTriggerArgs(parser):
                         type=trfArgClasses.argFactory(trfArgClasses.argSubstep, runarg=True, separator='='),
                         help='Trigger Configuration String. '
                         'N.B. This argument uses EQUALS (=) to separate the substep name from the value.', group='Trigger')
-    # precommand for athenaHLT aka -c
+    # precommand
     parser.add_argument('--precommand', nargs='+', type=trfArgClasses.argFactory(trfArgClasses.argList, runarg=True),
-                        help='precommand for athenaHLT aka -c', group='Trigger')
-    # postcommand for athenaHLT aka -C
+                        help='precommand for trigger step ("-c")', group='Trigger')
+    # postcommand
     parser.add_argument('--postcommand', nargs='+', type=trfArgClasses.argFactory(trfArgClasses.argList, runarg=True),
-                        help='postcommand for athenaHLT aka -C', group='Trigger')
+                        help='postcommand for trigger step ("-C")', group='Trigger')
+
+    # trigger executable
+    parser.add_argument('--athenaEF', type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=True),
+                        default=trfArgClasses.argBool(False),
+                        help='Use athenaEF instead of athenaHLT', group='Trigger')
+
     # For prodsys to make sure uses inputBS_RDOFile rather than inputBSFile when running the b2r step
     parser.add_argument('--prodSysBSRDO', type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=True),
                         help='For prodsys to make sure uses inputBS_RDOFile rather than inputBSFile when running the b2r step', group='Trigger')
@@ -186,9 +189,9 @@ def addTriggerDBArgs(parser):
     parser.defineArgGroup('TriggerDB', 'Specific options related to the trigger DB')
 
     parser.add_argument('--useDB', type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=True),
-                        help='read from DB for athenaHLT aka use-database', group='TriggerDB')
+                        help='read from DB', group='TriggerDB')
     parser.add_argument('--DBserver', type=trfArgClasses.argFactory(trfArgClasses.argString, runarg=True),
-                        help='DB name: aka athenaHLT db-server', group='TriggerDB')
+                        help='DB name', group='TriggerDB')
     parser.add_argument('--DBsmkey', type=trfArgClasses.argFactory(trfArgClasses.argString, runarg=True),
                         help='DB SMK', group='TriggerDB')
     parser.add_argument('--DBhltpskey', type=trfArgClasses.argFactory(trfArgClasses.argString, runarg=True),
