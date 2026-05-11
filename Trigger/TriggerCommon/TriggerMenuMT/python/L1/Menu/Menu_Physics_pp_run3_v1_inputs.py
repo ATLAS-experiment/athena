@@ -248,9 +248,11 @@ def defineInputsMenu():
             # cXE
             ('cXE100',1), ('cXE110',1),
             # gTE
-            ('gTE5',1), ('gTE10',1), ('gTE200',1), ('gTE280',1), 
+            ('gTE5',1), ('gTE10',1), ('gTE200',1),
             # gESPRESSO
             ('gESPRESSO280', 1),
+            # gRISTRETTO
+            ('gRISTRETTO280', 1), 
 
             # MHT
             ('gMHT500',1),
