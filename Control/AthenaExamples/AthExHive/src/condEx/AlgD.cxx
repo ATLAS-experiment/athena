@@ -1,16 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AlgD.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/ReadCondHandle.h"
-
-AlgD::AlgD( const std::string& name, 
-            ISvcLocator* pSvcLocator ) : 
-  ::AthAlgorithm( name, pSvcLocator )
-{
-}
 
 //---------------------------------------------------------------------------
 
@@ -30,10 +24,10 @@ StatusCode AlgD::initialize() {
 
 //---------------------------------------------------------------------------
 
-StatusCode AlgD::execute() {
+StatusCode AlgD::execute(const EventContext& ctx) const {
   ATH_MSG_DEBUG("execute " << name());
 
-  SG::ReadHandle<HiveDataObj> rh1(m_rdh1);
+  SG::ReadHandle<HiveDataObj> rh1(m_rdh1, ctx);
   if (!rh1.isValid()) {
     ATH_MSG_ERROR ("Could not retrieve HiveDataObj with key " << m_rdh1.key());
     return StatusCode::FAILURE;
@@ -41,11 +35,9 @@ StatusCode AlgD::execute() {
 
   ATH_MSG_INFO("  read: " << rh1.key() << " = " << rh1->val() );
 
-  SG::ReadCondHandle<CondDataObj> ch1( m_rch1 );
-  SG::ReadCondHandle<CondDataObj> ch2( m_rch2 );
+  SG::ReadCondHandle<CondDataObj> ch1(m_rch1, ctx);
+  SG::ReadCondHandle<CondDataObj> ch2(m_rch2, ctx);
 
-  EventIDBase t( getContext().eventID() );
-  
   const CondDataObj *cdo = *ch1;
   if (cdo != 0) {
     ATH_MSG_INFO("  CDO1: " << *cdo );
@@ -60,7 +52,7 @@ StatusCode AlgD::execute() {
     ATH_MSG_ERROR("  CDO2 ptr == zero");
   }
 
-  ATH_MSG_INFO("test: " << getContext().eventID().event_number() << " "
+  ATH_MSG_INFO("test: " << ctx.eventID().event_number() << " "
                << rh1->val() << " " << **ch1 << " " << **ch2);
   
   return StatusCode::SUCCESS;

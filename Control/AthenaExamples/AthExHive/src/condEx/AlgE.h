@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHEXHIVE_CONDEX_ALGE_H
 #define ATHEXHIVE_CONDEX_ALGE_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
@@ -14,17 +14,13 @@
 #include "AthExHive/CondDataObjY.h"
 #include "AthExHive/CondDataObjZ.h"
 
-class AlgE  :  public AthAlgorithm {
+class AlgE  :  public AthReentrantAlgorithm {
   
 public:
-    
-  AlgE (const std::string& name, ISvcLocator* pSvcLocator);
-  virtual ~AlgE() = default;
-  
-  virtual bool isClonable() const override { return true; }
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
   
 private:
   
