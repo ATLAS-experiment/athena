@@ -4,22 +4,15 @@
 atlas_subdir( CollectionSvc )
 
 # External dependencies:
-find_package( Boost )
 find_package( CORAL COMPONENTS CoralBase )
-find_package( XercesC )
 
 # Component(s) in the package:
 atlas_add_library( CollectionSvc
                    src/*.cpp
 		               PUBLIC_HEADERS CollectionSvc
-                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
-		               LINK_LIBRARIES ${Boost_LIBRARIES} ${CORAL_LIBRARIES} CxxUtils StorageSvc
+                   INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
+		               LINK_LIBRARIES ${CORAL_LIBRARIES} CxxUtils StorageSvc
                    PRIVATE_LINK_LIBRARIES CxxUtils PersistencySvc )
-
-atlas_add_component( CollectionSvcComponents
-    src/components/*.cpp
-    NO_PUBLIC_HEADERS
-    LINK_LIBRARIES CollectionSvc )
 
 atlas_add_dictionary( CollectionSvcDict
 		CollectionSvc/CollectionSvcDict.h
