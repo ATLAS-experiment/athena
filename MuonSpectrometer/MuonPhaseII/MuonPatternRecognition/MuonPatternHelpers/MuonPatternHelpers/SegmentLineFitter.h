@@ -32,7 +32,7 @@ namespace MuonR4::SegmentFit {
             /** @brief Abrivation of the fitted line parameters */
             using LinePar_t = Fitter_t::ParamVec_t; 
             /** @brief Abrivation of the space point type to use */
-            using Hit_t = std::unique_ptr<CalibratedSpacePoint>;
+            using Hit_t = Segment::MeasType;
             /** @brief Collection of space points */
             using HitVec_t = std::vector<Hit_t>;
             /** @brief Abrivation of the fit parameters  */

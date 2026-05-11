@@ -98,7 +98,7 @@ namespace MuonR4{
                                                        const double timeDelay) const {
         const ActsTrk::GeometryContext* gctx{nullptr};
         if (!SG::get(gctx, m_geoCtxKey, ctx).isSuccess()) {
-            return nullptr;
+            return CalibSpacePointPtr{};
         }
         const Amg::Vector3D& spPos{spacePoint->localPosition()};
         const Amg::Transform3D& locToGlob{spacePoint->msSector()->localToGlobalTransform(*gctx)};

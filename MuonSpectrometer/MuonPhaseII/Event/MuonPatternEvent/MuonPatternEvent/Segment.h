@@ -11,6 +11,8 @@
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 #include "MuonReadoutGeometryR4/SpectrometerSector.h"
 
+#include "Acts/Utilities/CloneablePtr.hpp"
+
 namespace MuonR4{
 
     /// @brief Placeholder for what will later be the muon segment EDM representation. 
@@ -19,7 +21,7 @@ namespace MuonR4{
     class Segment{
         public:
             /** @brief Calibrated space point type */
-            using MeasType = std::unique_ptr<CalibratedSpacePoint>;
+            using MeasType = Acts::CloneablePtr<CalibratedSpacePoint>;
             using MeasVec = std::vector<MeasType>;
             /** @brief Segment constructor
              *  @param globPos: Global position of the segment expressed at the associated chamber centre
