@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -129,6 +129,7 @@ namespace InDet
     // The VxJetCandidate, the TwoTrackVerticesInJet (V0s and neutrals), the selected tracks (primary and secondary)
     // So we need to do track selection, v0 finding, and then the fit with JetFitter.
 
+    const EventContext& ctx = Gaudi::Hive::currentContext();
 //
 //    // Initial track selection, track filter applied, separate primary and secondary tracks
     const Trk::SelectedTracksInJet* mySelectedTracksInJet = m_theTrackSelector->doTrackSelection( primaryVertex, jetMomentum, inputTracks );
@@ -138,7 +139,7 @@ namespace InDet
     std::vector< const Trk::ITrackLink* > secondaryTracks  = mySelectedTracksInJet->getSecondaryTrackLinks();
 
     // Two track vertex candidates
-    const Trk::TwoTrackVerticesInJet* twoTrackVertexCandidates = m_theTwoTrackVtxFinderTool->doVertexFinding( primaryVertex, jetMomentum, secondaryTracks );
+    const Trk::TwoTrackVerticesInJet* twoTrackVertexCandidates = m_theTwoTrackVtxFinderTool->doVertexFinding( ctx, primaryVertex, jetMomentum, secondaryTracks );
     const std::vector< const xAOD::Vertex* > vertexCandidates = twoTrackVertexCandidates->getTwoTrackVertice();
 
 //    // V0 finding AND further track selection, these could even be further separated
