@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // TileCellsMuonDecorator.cxx
@@ -161,7 +161,7 @@ namespace DerivationFramework {
         }
 
         if (addAdditionalGapCrackCells) {
-          std::vector<double> coordinates = m_trackInCalo->getXYZEtaPhiInCellSampling(mu_track, CaloCell_ID::TileGap3);
+          std::vector<double> coordinates = m_trackInCalo->getXYZEtaPhiInCellSampling(mu_track, CaloCell_ID::TileGap3, ctx);
           if (coordinates.size() == 5 ) {
             double eta = coordinates[3];
             double phi = coordinates[4];
@@ -179,11 +179,11 @@ namespace DerivationFramework {
 
         for (const CaloCell* cell : cells) {
 
-          std::vector<double> coordinates = m_trackInCalo->getXYZEtaPhiInCellSampling(mu_track, cell);
+          std::vector<double> coordinates = m_trackInCalo->getXYZEtaPhiInCellSampling(mu_track, cell, ctx);
 
           if (coordinates.size() == 5 ) {
 
-            float path_length = m_trackInCalo->getPathInsideCell(mu_track, cell);
+            float path_length = m_trackInCalo->getPathInsideCell(mu_track, cell, ctx);
             cells_mu_dx.push_back( path_length );
             cells_mu_dedx.push_back( (path_length > 0 ? (cell->energy() / path_length) : -1.0) );
 
