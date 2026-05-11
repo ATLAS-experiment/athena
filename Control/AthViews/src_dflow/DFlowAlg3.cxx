@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // DFlowAlg3.cxx 
@@ -21,41 +21,6 @@
 #include "AthenaKernel/ExtendedEventContext.h"
 
 namespace AthViews {
-
-/////////////////////////////////////////////////////////////////// 
-// Public methods: 
-/////////////////////////////////////////////////////////////////// 
-
-// Constructors
-////////////////
-DFlowAlg3::DFlowAlg3( const std::string& name, 
-			  ISvcLocator* pSvcLocator ) : 
-  ::AthAlgorithm( name, pSvcLocator ),
-  m_r_int( "dflow_int" ),
-  m_r_ints( "dflow_ints" ),
-  m_w_dflowDummy( "dflow_dummy" ),
-  m_testUpdate( "testUpdate" )
-{
-  //
-  // Property declaration
-  // 
-  //declareProperty( "Property", m_nProperty );
-
-
-  declareProperty( "RIntFlow", m_r_int, "Data flow of int (read)" );
-
-  declareProperty( "RIntsFlow", m_r_ints, "Data flow of integers (read)" );
-
-  declareProperty( "DFlowDummy", m_w_dflowDummy, "Dummy object to fix dependencies" );
-
-  declareProperty( "TestUpdate", m_testUpdate, "Test update handle" );
-
-}
-
-// Destructor
-///////////////
-DFlowAlg3::~DFlowAlg3()
-{}
 
 // Athena Algorithm's Hooks
 ////////////////////////////
@@ -79,11 +44,9 @@ StatusCode DFlowAlg3::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode DFlowAlg3::execute()
+StatusCode DFlowAlg3::execute(const EventContext& ctx) const
 {  
   ATH_MSG_DEBUG ("Executing " << name() << "...");
-
-  const EventContext& ctx = getContext();
 
   SG::ReadHandle< int > inputScalarHandle( m_r_int, ctx );
   ATH_MSG_INFO("================================");

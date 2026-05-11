@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // DFlowAlg1.h 
@@ -15,7 +15,7 @@
 #include <string>
 
 // FrameWork includes
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "AthExHive/HiveDataObj.h"
@@ -23,45 +23,20 @@
 namespace AthViews {
 
 class DFlowAlg1
-  : public ::AthAlgorithm
+  : public ::AthReentrantAlgorithm
 { 
-
-  /////////////////////////////////////////////////////////////////// 
-  // Public methods: 
-  /////////////////////////////////////////////////////////////////// 
- public: 
-
-  // Copy constructor: 
-
-  /// Constructor with parameters: 
-  DFlowAlg1( const std::string& name, ISvcLocator* pSvcLocator );
-
-  /// Destructor: 
-  virtual ~DFlowAlg1(); 
-
-  // Assignment operator: 
-  //DFlowAlg1 &operator=(const DFlowAlg1 &alg); 
+ public:
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
   // Athena algorithm's Hooks
-  virtual StatusCode  initialize();
-  virtual StatusCode  execute();
-  virtual StatusCode  finalize();
+  virtual StatusCode  initialize() override;
+  virtual StatusCode  execute(const EventContext& ctx) const override;
+  virtual StatusCode  finalize() override;
 
-  /////////////////////////////////////////////////////////////////// 
-  // Private data: 
-  /////////////////////////////////////////////////////////////////// 
- private: 
-
-  /// Default constructor: 
-  DFlowAlg1();
-
-  /// Containers
-  
-  // vars
-  SG::ReadHandleKey<int> m_r_int;
-  SG::WriteHandleKey<int> m_w_int;
-  SG::WriteHandleKey<HiveDataObj> m_testUpdate;
-
+ private:
+  SG::ReadHandleKey<int> m_r_int{this, "IntFlow", "view_start", "Data flow of int"};
+  SG::WriteHandleKey<int> m_w_int{this, "ViewStart", "dflow_int", "Seed data of view"};
+  SG::WriteHandleKey<HiveDataObj> m_testUpdate{this, "TestUpdate", "testUpdate", "Test update handle"};
 }; 
 
 } //> end namespace AthViews
