@@ -37,7 +37,7 @@ class QTest(WorkflowTest):
 
         self.command = \
             (f"ATHENA_CORE_NUMBER={threads} Reco_tf.py {threads_argument} --AMIConfig {ID}"
-             f" --imf False {extra_args}")
+             f" --imf True {extra_args}")
 
         self.output_checks = []
         # TODO: disable RDO comparison for now
@@ -249,14 +249,14 @@ class DerivationTest(WorkflowTest):
                 " --athenaMPMergeTargetSize 'DAOD_*:0'"
                 " --sharedWriter True"
                 " --outputDAODFile myOutput.pool.root"
-                f" --imf False {extra_args}")
+                f" --imf True {extra_args}")
         else:
             self.command = \
                 (f"ATHENA_CORE_NUMBER={threads} Derivation_tf.py"
                 f" --formats {' '.join(formats)}"
                 " --multithreaded"
                 " --outputDAODFile myOutput.pool.root"
-                f" --imf False {extra_args}")
+                f" --imf True {extra_args}")
 
         # skip performance checks for now
         self.skip_performance_checks = True
