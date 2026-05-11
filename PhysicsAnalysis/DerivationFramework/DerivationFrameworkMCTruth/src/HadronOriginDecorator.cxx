@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkMCTruth/HadronOriginDecorator.h"
@@ -23,7 +23,7 @@ namespace DerivationFramework {
       return StatusCode::FAILURE;
     }
 
-    std::map<const xAOD::TruthParticle*, DerivationFramework::HadronOriginClassifier::HF_id>  hadronMap=m_Tool->GetOriginMap();
+    std::map<const xAOD::TruthParticle*, DerivationFramework::HadronOriginClassifier::HF_id>  hadronMap=m_Tool->GetOriginMap(ctx);
     SG::WriteDecorHandle<xAOD::TruthParticleContainer, int> originDecorator(m_originDecoratorKey, ctx);
     for (auto* truthParticle : *truthParticles) {
       originDecorator(*truthParticle) = (hadronMap.find(truthParticle)!=hadronMap.end()) ? static_cast<int>(hadronMap[truthParticle]) : 6;

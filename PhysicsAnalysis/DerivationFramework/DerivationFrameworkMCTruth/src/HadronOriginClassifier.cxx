@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "DerivationFrameworkMCTruth/HadronOriginClassifier.h"
 #include "TruthUtils/HepMCHelpers.h"
@@ -357,14 +357,14 @@ namespace DerivationFramework{
   */
 
   // Define the function GetOriginMap that determines the origin of the hadrons.
-  std::map<const xAOD::TruthParticle*, DerivationFramework::HadronOriginClassifier::HF_id> HadronOriginClassifier::GetOriginMap() const {
+  std::map<const xAOD::TruthParticle*, DerivationFramework::HadronOriginClassifier::HF_id> HadronOriginClassifier::GetOriginMap(const EventContext& ctx) const {
     // Create a set of maps to store the information about the hadrons and the partons 
     std::map<const xAOD::TruthParticle*, int> mainHadronMap;                         // Map with main hadrons and their flavor.
     std::map<const xAOD::TruthParticle*, HF_id> partonsOrigin;                       // Map with partons and their category (from top, W, H, MPI, FSR, extra).
     std::map<const xAOD::TruthParticle*, const xAOD::TruthParticle*> hadronsPartons; // Map with hadrons and their matched parton.
     std::map<const xAOD::TruthParticle*, HF_id> hadronsOrigin;                       // Map with hadrons and their category (from top, W, H, MPI, FSR, extra)
     // Fill the maps mainHadronMap and partonsOrigin
-    buildPartonsHadronsMaps(mainHadronMap, partonsOrigin);
+    buildPartonsHadronsMaps(ctx, mainHadronMap, partonsOrigin);
     // Create two maps to know which partons and hadrons have already been matched.
     std::vector<const xAOD::TruthParticle*> matched_partons;
     std::vector<const xAOD::TruthParticle*> matched_hadrons;
@@ -425,9 +425,8 @@ namespace DerivationFramework{
   }
 
   // Define the function buildPartonsHadronsMaps that determines the flavour of the hadrons and the origin of the partons.
-  void HadronOriginClassifier::buildPartonsHadronsMaps(std::map<const xAOD::TruthParticle*,int>& mainHadronMap, std::map<const xAOD::TruthParticle*,HF_id>& partonsOrigin) const {
+  void HadronOriginClassifier::buildPartonsHadronsMaps(const EventContext& ctx, std::map<const xAOD::TruthParticle*,int>& mainHadronMap, std::map<const xAOD::TruthParticle*,HF_id>& partonsOrigin) const {
     // Extract the TruthParticles container.
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     SG::ReadHandle<xAOD::TruthEventContainer> xTruthEventContainer(m_mcName, ctx);
     if (!xTruthEventContainer.isValid()) {
       ATH_MSG_WARNING("Could not retrieve " <<m_mcName);
