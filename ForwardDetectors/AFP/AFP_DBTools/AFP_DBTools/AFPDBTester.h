@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef AFP_DBTOOLS_AFPDBTESTER_H
 #define AFP_DBTOOLS_AFPDBTESTER_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "AthenaKernel/CondCont.h"
@@ -22,14 +22,12 @@
  * @class AFPDBTester
  * @brief 
  **/
-class AFPDBTester : public AthAlgorithm {
+class AFPDBTester : public AthReentrantAlgorithm {
 public:
-  AFPDBTester(const std::string& name, ISvcLocator* pSvcLocator);
-  virtual ~AFPDBTester() override;
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
-  virtual StatusCode finalize() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
 
 private:
   SG::ReadCondHandleKey<CondAttrListCollection> m_rch_locshiftX {this, "locshiftXkey", "/FWD/Onl/AFP/Align/Local", "read cond handle local shiftXkey"};
@@ -37,7 +35,7 @@ private:
   SG::ReadCondHandleKey<CondAttrListCollection> m_rch_loctof {this, "locToFkey", "/FWD/Onl/AFP/ToFParameters/Local", "read cond handle local ToF"};
   SG::ReadCondHandleKey<CondAttrListCollection> m_rch_vtxtof {this, "vtxToFkey", "/FWD/Onl/AFP/ToFParameters/Vertex", "read cond handle vertex ToF"};
   SG::ReadCondHandleKey<AthenaAttributeList> m_readKey { this, "BeamSpotFolder", "/Indet/Beampos", "DB folder from which to read raw beam spot data" };
-  SG::ReadCondHandleKey<CaloLocalHadCoeff> m_key;
+  SG::ReadCondHandleKey<CaloLocalHadCoeff> m_key{"EMFracClassify"};
 
 };
 
