@@ -523,6 +523,8 @@ def defineMenu():
         'L1_AFP_OR_ZDC_XOR_VjTE200',
         'L1_AFP_OR_TRT_ZDC_XOR_VjTE200',
         'L1_AFP_OR_VjTE200',
+
+        'L1_RISTRETTO',
     ]
 
 
