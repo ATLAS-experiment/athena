@@ -5,7 +5,7 @@
        <field name="m_readoutEle" transient="true" />
        <field name="m_identifier" transient="true" />
    </class>
-   <class name="xAOD::MuonMeasurementContainer_v1",
+   <class name="xAOD::MuonMeasurementContainer_v1"
           id="E16D1889-95C6-4DB5-A98B-BDB8CF3A2B31" />
    <typedef name="xAOD::MuonMeasurement" />
    <typedef name="xAOD::MuonMeasurementContainer" />
