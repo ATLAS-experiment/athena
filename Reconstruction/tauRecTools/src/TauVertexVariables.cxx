@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
 
 #include "TauVertexVariables.h"
+#include "AsgTools/CurrentContext.h"
 
 //-----------------------------------------------------------------------------
 // Constructor
@@ -36,6 +37,7 @@ StatusCode TauVertexVariables::initialize() {
 // Execution
 //-----------------------------------------------------------------------------
 StatusCode TauVertexVariables::executeVertexVariables(xAOD::TauJet& pTau, xAOD::VertexContainer& pSecVtxContainer) const {
+  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   ElementLink<xAOD::VertexContainer> empty;
   pTau.setSecondaryVertexLink(empty);
@@ -72,19 +74,19 @@ StatusCode TauVertexVariables::executeVertexVariables(xAOD::TauJet& pTau, xAOD::
     return StatusCode::FAILURE;
   }
 
-  xAOD::Vertex* xAODvertex = nullptr;
+  std::unique_ptr<xAOD::Vertex> xAODvertex;
 
   if(!origTracks.empty()) {
     // get the starting point for the fit using Trk::Tracks
     const Amg::Vector3D& seedPoint = m_SeedFinder->findSeed(origTracks);
     // fitting the vertex
-    xAODvertex = m_fitTool->fit(xaodTracks, seedPoint);
+    xAODvertex = m_fitTool->fit(ctx, xaodTracks, seedPoint);
   }
   else if (!origTrackParameters.empty()) {
     // get the starting point for the fit using Trk::TrackParameters
     const Amg::Vector3D& seedPoint = m_SeedFinder->findSeed(origTrackParameters);
     // fitting the vertex
-    xAODvertex = m_fitTool->fit(xaodTracks, seedPoint);
+    xAODvertex = m_fitTool->fit(ctx, xaodTracks, seedPoint);
   }
 
   if (!xAODvertex) {
@@ -100,12 +102,9 @@ StatusCode TauVertexVariables::executeVertexVariables(xAOD::TauJet& pTau, xAOD::
   // Note, we only attach the 2nd vertex if at offline, otherwise, break the trigger persistency
   if (!inTrigger()) {
     ATH_MSG_VERBOSE("secondary vertex recorded! x="<<xAODvertex->position().x()<< ", y="<<xAODvertex->position().y()<<", perp="<<xAODvertex->position().perp());
-    pSecVtxContainer.push_back(xAODvertex);
     xAODvertex->setVertexType(xAOD::VxType::NotSpecified);
-    pTau.setSecondaryVertex(&pSecVtxContainer, xAODvertex);
-  }
-  else {
-    delete xAODvertex; // delete the vertex when in trigger mode, because we can not save it
+    pSecVtxContainer.push_back(std::move(xAODvertex));
+    pTau.setSecondaryVertex(&pSecVtxContainer, pSecVtxContainer.back());
   }
 
   return StatusCode::SUCCESS;
