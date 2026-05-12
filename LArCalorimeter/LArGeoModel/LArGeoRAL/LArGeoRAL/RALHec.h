@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -21,7 +21,7 @@ namespace LArGeo {
     RALHec();
     virtual ~RALHec();
 
-    virtual double GetValue(const std::string&, 
+    virtual double GetValue(std::string_view, 
                             const int i0 = INT_MIN,
                             const int i1 = INT_MIN,
                             const int i2 = INT_MIN,

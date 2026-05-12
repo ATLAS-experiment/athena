@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // RALEmec
@@ -99,7 +99,7 @@ LArGeo::RALEmec::~RALEmec()
 }
 
 
-double LArGeo::RALEmec::GetValue(const std::string& a_name,
+double LArGeo::RALEmec::GetValue(std::string_view a_name,
                                  const int a0,
                                  const int a1,
                                  const int /*a2*/,
@@ -182,7 +182,8 @@ double LArGeo::RALEmec::GetValue(const std::string& a_name,
 
   // We didn't find a match.
   MsgStream log(Athena::getMessageSvc(),"RALEmec");
-  std::string errMessage = "RALEmec::GetValue: could not find a match for the key '" + a_name;
+  std::string errMessage = "RALEmec::GetValue: could not find a match for the key '";
+  errMessage.append(a_name);
   log << MSG::FATAL << errMessage << endmsg;
   throw std::runtime_error(errMessage);
 

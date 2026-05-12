@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // RALHec
@@ -89,7 +89,7 @@ LArGeo::RALHec::~RALHec()
 }
 
 
-double LArGeo::RALHec::GetValue(const std::string& a_name,
+double LArGeo::RALHec::GetValue(std::string_view a_name,
                                 const int a0,
                                 const int /*a1*/,
                                 const int /*a2*/,
@@ -125,7 +125,8 @@ double LArGeo::RALHec::GetValue(const std::string& a_name,
   if ( a_name == "LArHECgapNumber"     ) return (*m_c->hecLongitudinalBlock)[a0]->getDouble("BLMOD");
 
   // We didn't find a match.  
-  std::string errMessage = "RALHec::GetValue: could not find a match for the key '" + a_name;
+  std::string errMessage = "RALHec::GetValue: could not find a match for the key '";
+  errMessage.append(a_name);
   std::cerr << errMessage << std::endl;
   throw std::runtime_error (errMessage.c_str());
 

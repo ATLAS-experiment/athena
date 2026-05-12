@@ -144,7 +144,7 @@ LArGeo::RALEmb::~RALEmb()
 }
 
 
-double LArGeo::RALEmb::GetValue(const std::string& a_name,
+double LArGeo::RALEmb::GetValue(std::string_view a_name,
                                 const int a0,
                                 const int /*a1*/,
                                 const int /*a2*/,
@@ -280,7 +280,8 @@ double LArGeo::RALEmb::GetValue(const std::string& a_name,
 
   // We didn't find a match.
   MsgStream log(Athena::getMessageSvc(),"RALEmb");
-  std::string errMessage = "RALEmb::GetValue: could not find a match for the key '" + a_name;
+  std::string errMessage = "RALEmb::GetValue: could not find a match for the key '";
+  errMessage.append(a_name);
   log << MSG::FATAL << errMessage << endmsg;
   throw std::runtime_error(errMessage);
 
