@@ -34,6 +34,11 @@ atlas_add_test( IDCValueTest SOURCES test/IDCValueTest.cxx
                 INCLUDE_DIRS src test EventContainers
                 LINK_LIBRARIES EventContainers
               )
+atlas_add_test( IDCMaskTest SOURCES test/maskTest.cxx
+                INCLUDE_DIRS src test EventContainers
+                LINK_LIBRARIES EventContainers
+                POST_EXEC_SCRIPT nopost.sh
+              )
 atlas_add_test( IDBenchTest SOURCES test/IDC_Benchmark.cxx
                 INCLUDE_DIRS src test EventContainers
                 LINK_LIBRARIES EventContainers
