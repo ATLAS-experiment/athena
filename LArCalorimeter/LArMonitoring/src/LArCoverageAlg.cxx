@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -19,17 +19,17 @@
 #include "Identifier/IdentifierHash.h"
 #include "LArElecCalib/LArProvenance.h"
 #include "CaloDetDescr/CaloDetDescrElement.h"
-
-
-
+#include "CaloIdentifier/CaloIdManager.h"
+#include "LArIdentifier/LArOnlineID.h"
+#include "Identifier/HWIdentifier.h"
 #include <sstream>
 #include <iomanip>
 #include <fstream>
-#include <string>
-#include <vector>
+
+
 #include <cstdlib>
 #include <functional>
-#include <map>
+
 #include <utility>
 
 
@@ -252,8 +252,8 @@ LArCoverageAlg::fillHistograms( const EventContext& ctx ) const
     if (m_LArOnlineIDHelper->isHECchannel(id)) phiChan = CaloPhiRange::fix(phiChan);
     
     /** Retrieve expected noise */
-    const auto idx = caloDetElement->getSubCalo();
-    if (idx == CaloCell_ID::NOT_VALID){
+    const auto idx = static_cast<unsigned>(caloDetElement->getSubCalo());
+    if (idx >= m_highestGain.size()){
       ATH_MSG_ERROR( "Invalid calo cell index" );
       continue;
     }

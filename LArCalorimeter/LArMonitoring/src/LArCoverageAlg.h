@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -15,25 +15,29 @@
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 
-
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "CaloIdentifier/CaloGain.h"
-#include "CaloIdentifier/CaloIdManager.h"
+
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloGeoHelpers/CaloPhiRange.h"
 
-#include "Identifier/HWIdentifier.h"
-#include "LArIdentifier/LArOnlineID.h"
 #include "LArRawEvent/LArRawChannelContainer.h"
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "LArRecConditions/LArBadChannelMask.h"
 #include "LArRecConditions/LArBadChannelCont.h"
 #include "CaloConditions/CaloNoise.h"
 
+#include <map>
+#include <vector>
+#include <string>
+#include <array>
 
 class LArEM_ID;
 class CaloDetDescrElement;
+class CaloIdManager;
+class HWIdentifier;
+class LArOnlineID;
 
 
 class LArCoverageAlg: public AthMonitorAlgorithm

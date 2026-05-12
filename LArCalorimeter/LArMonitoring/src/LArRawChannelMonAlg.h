@@ -1,14 +1,11 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARMONITORING_LARRAWCHANNELMONALG_H
 #define LARMONITORING_LARRAWCHANNELMONALG_H
 
-#include <array>
-#include <set>
-#include <string>
-#include <vector>
+
 
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
 #include "AthenaMonitoring/DQAtlasReadyFilterTool.h"
@@ -20,6 +17,12 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include "xAODEventInfo/EventInfo.h"
+
+#include <array>
+#include <set>
+#include <string>
+#include <vector>
+#include <cstdint>
 
 class LArOnlineID;
 class CaloNoise;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -25,7 +25,9 @@
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "GaudiKernel/ConcurrencyFlags.h"
 #include <cmath>
-
+#include <algorithm>
+#include <format>
+#include <type_traits>
 
 /*---------------------------------------------------------*/
 LArRODMonAlg::~LArRODMonAlg() {}
@@ -234,8 +236,13 @@ StatusCode LArRODMonAlg::fillHistograms(const EventContext& ctx) const {
     }
     //Check if this is a bad channel
     if (m_skipKnownProblematicChannels && m_bcMask.cellShouldBeMasked(bcCont,idDig)) continue;
-
+  
     const CaloGain::CaloGain gain = rcDigIt->gain();
+    if ((gain >= ERRCOUNTER::N) or (gain < 0)){
+      ATH_MSG_WARNING( std::format("gain {} is out of range for the ERRCOUNTER array size, {}",
+        static_cast<std::underlying_type_t<CaloGain::CaloGain>>(gain), ERRCOUNTER::N));
+      return StatusCode::FAILURE;
+    }
     //Check pedestal if needed
     if (m_skipNullPed) {
       const float ped = pedestals->pedestal(idDig,gain);
