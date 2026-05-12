@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1CALOBYTESTREAM_CPMROIBYTESTREAMV2TOOL_H
@@ -57,7 +57,8 @@ class CpmRoiByteStreamV2Tool : public AthAlgTool {
    virtual StatusCode initialize() override;
 
    /// Convert ROB fragments to CPM RoIs
-   StatusCode convert(const std::string& robFrags,
+   StatusCode convert(const EventContext& ctx,
+                      const std::string& robFrags,
                       DataVector<LVL1::CPMTobRoI>* roiCollection) const;
    StatusCode convert(const IROBDataProviderSvc::VROBFRAG& robFrags,
                       DataVector<LVL1::CPMTobRoI>* roiCollection) const;

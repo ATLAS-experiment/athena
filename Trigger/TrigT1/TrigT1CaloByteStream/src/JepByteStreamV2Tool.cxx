@@ -128,13 +128,14 @@ StatusCode JepByteStreamV2Tool::finalize()
 // Conversion bytestream to jet elements
 
 StatusCode JepByteStreamV2Tool::convert(
+    const EventContext& ctx,
     const std::string& sgKey,
     DataVector<LVL1::JetElement>* collection) const
 {
   const std::vector<uint32_t>& vID(sourceIDs());
   // // get ROB fragments
   IROBDataProviderSvc::VROBFRAG robFrags;
-  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags, "JepByteStreamV2Tool");
+  m_robDataProvider->getROBData(ctx, vID, robFrags, "JepByteStreamV2Tool");
   ATH_MSG_DEBUG("Number of ROB fragments:" << robFrags.size());
   return convert(sgKey, robFrags, collection);
 }
@@ -150,13 +151,14 @@ StatusCode JepByteStreamV2Tool::convert(
 
 // Conversion bytestream to energy sums
 StatusCode JepByteStreamV2Tool::convert(
+    const EventContext& ctx,
     const std::string& sgKey,
     DataVector<LVL1::JEMEtSums>* collection) const
 {
   const std::vector<uint32_t>& vID(sourceIDs());
   // // get ROB fragments
   IROBDataProviderSvc::VROBFRAG robFrags;
-  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags, "JepByteStreamV2Tool");
+  m_robDataProvider->getROBData(ctx, vID, robFrags, "JepByteStreamV2Tool");
   ATH_MSG_DEBUG("Number of ROB fragments:" << robFrags.size());
   return convert(sgKey, robFrags, collection);
 }
@@ -172,13 +174,14 @@ StatusCode JepByteStreamV2Tool::convert(
 
 // Conversion bytestream to CMX TOBs
 StatusCode JepByteStreamV2Tool::convert(
+    const EventContext& ctx,
     const std::string& sgKey,
     DataVector<LVL1::CMXJetTob>* collection) const
 {
   const std::vector<uint32_t>& vID(sourceIDs());
   // // get ROB fragments
   IROBDataProviderSvc::VROBFRAG robFrags;
-  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags, "JepByteStreamV2Tool");
+  m_robDataProvider->getROBData(ctx, vID, robFrags, "JepByteStreamV2Tool");
   ATH_MSG_DEBUG("Number of ROB fragments:" << robFrags.size());
   return convert(sgKey, robFrags, collection);
 }
@@ -194,13 +197,14 @@ StatusCode JepByteStreamV2Tool::convert(
 
 // Conversion bytestream to CMX hits
 StatusCode JepByteStreamV2Tool::convert(
+    const EventContext& ctx,
     const std::string& sgKey,
     DataVector<LVL1::CMXJetHits>* collection) const
 {
   const std::vector<uint32_t>& vID(sourceIDs());
   // // get ROB fragments
   IROBDataProviderSvc::VROBFRAG robFrags;
-  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags, "JepByteStreamV2Tool");
+  m_robDataProvider->getROBData(ctx, vID, robFrags, "JepByteStreamV2Tool");
   ATH_MSG_DEBUG("Number of ROB fragments:" << robFrags.size());
   return convert(sgKey, robFrags, collection);
 }
@@ -217,13 +221,14 @@ StatusCode JepByteStreamV2Tool::convert(
 // Conversion bytestream to CMX energy sums
 
 StatusCode JepByteStreamV2Tool::convert(
+    const EventContext& ctx,
     const std::string& sgKey,
     DataVector<LVL1::CMXEtSums>* collection) const
 {
   const std::vector<uint32_t>& vID(sourceIDs());
   // // get ROB fragments
   IROBDataProviderSvc::VROBFRAG robFrags;
-  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags, "JepByteStreamV2Tool");
+  m_robDataProvider->getROBData(ctx, vID, robFrags, "JepByteStreamV2Tool");
   ATH_MSG_DEBUG("Number of ROB fragments:" << robFrags.size());
   return convert(sgKey, robFrags, collection);
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ===========================================================================
@@ -131,12 +131,15 @@ StatusCode PpmByteStreamReadV1V2Tool::convert(
 
 
 StatusCode PpmByteStreamReadV1V2Tool::convert(
+    const EventContext& ctx,
     xAOD::TriggerTowerContainer* const ttCollection) const
 {
-  return convert(LVL1::TrigT1CaloDefs::xAODTriggerTowerLocation, ttCollection);
+  return convert(ctx, LVL1::TrigT1CaloDefs::xAODTriggerTowerLocation, ttCollection);
 }
 
-StatusCode PpmByteStreamReadV1V2Tool::convert(const std::string& sgKey,
+StatusCode PpmByteStreamReadV1V2Tool::convert(
+    const EventContext& ctx,
+    const std::string& sgKey,
     xAOD::TriggerTowerContainer* const ttCollection) const
 {
   State state;
@@ -144,7 +147,7 @@ StatusCode PpmByteStreamReadV1V2Tool::convert(const std::string& sgKey,
   const std::vector<uint32_t>& vID(ppmSourceIDs(state, sgKey));
   // // get ROB fragments
   IROBDataProviderSvc::VROBFRAG robFrags;
-  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags, "PpmByteStreamxAODReadTool");
+  m_robDataProvider->getROBData(ctx, vID, robFrags, "PpmByteStreamxAODReadTool");
   ATH_MSG_DEBUG("Number of ROB fragments:" << robFrags.size());
 
   CHECK(convert(state, robFrags));

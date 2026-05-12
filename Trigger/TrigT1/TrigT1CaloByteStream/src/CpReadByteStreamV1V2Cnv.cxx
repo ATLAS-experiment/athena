@@ -108,7 +108,7 @@ StatusCode CpReadByteStreamV1V2Cnv::createObjConst( IOpaqueAddress* pAddr,
   }
   // Post-LS1 data
   if (robFrags2.size() > 0) {
-    ATH_CHECK( m_tool2->convert(nm, robFrags2, towerCollection.get()) ); 
+    ATH_CHECK( m_tool2->convert(nm, robFrags2, towerCollection.get()) );
  }
 
   pObj = SG::asStorable(std::move(towerCollection));

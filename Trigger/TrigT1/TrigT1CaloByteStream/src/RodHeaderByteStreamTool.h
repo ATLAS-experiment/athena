@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1CALOBYTESTREAM_RODHEADERBYTESTREAMTOOL_H
@@ -54,7 +54,8 @@ class RodHeaderByteStreamTool : public AthAlgTool {
    virtual StatusCode finalize() override;
 
    /// Convert ROB fragments to RODHeaders
-   StatusCode convert(const std::string& name,
+   StatusCode convert(const EventContext& ctx,
+                      const std::string& name,
                       DataVector<LVL1::RODHeader>* rhCollection) const;
 
    StatusCode convert(const IROBDataProviderSvc::VROBFRAG& robFrags,

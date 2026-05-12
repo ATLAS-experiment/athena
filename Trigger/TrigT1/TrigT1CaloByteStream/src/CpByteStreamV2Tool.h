@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1CALOBYTESTREAM_CPBYTESTREAMV2TOOL_H
@@ -64,18 +64,22 @@ class CpByteStreamV2Tool : public AthAlgTool {
    virtual StatusCode initialize() override;
 
    /// Convert ROB fragments to CPM towers
-   StatusCode convert(const std::string& sgKey, DataVector<LVL1::CPMTower>* ttCollection) const;
+   StatusCode convert(const EventContext& ctx,
+                      const std::string& sgKey,
+                      DataVector<LVL1::CPMTower>* ttCollection) const;
    StatusCode convert(const std::string& sgKey,
                       const IROBDataProviderSvc::VROBFRAG& robFrags,
                       DataVector<LVL1::CPMTower>* ttCollection) const;
    /// Convert ROB fragments to CMX-CP TOBs
-   StatusCode convert(const std::string& sgKey,
+   StatusCode convert(const EventContext& ctx,
+                      const std::string& sgKey,
                       DataVector<LVL1::CMXCPTob>* tobCollection) const;
    StatusCode convert(const std::string& sgKey,
                       const IROBDataProviderSvc::VROBFRAG& robFrags,
                       DataVector<LVL1::CMXCPTob>* tobCollection) const;
    /// Convert ROB fragments to CMX-CP hits
-   StatusCode convert(const std::string& sgKey,
+   StatusCode convert(const EventContext& ctx,
+                      const std::string& sgKey,
                       DataVector<LVL1::CMXCPHits>* hitCollection) const;
    StatusCode convert(const std::string& sgKey,
                       const IROBDataProviderSvc::VROBFRAG& robFrags,

@@ -76,10 +76,11 @@ StatusCode RodHeaderByteStreamCnv::createObjConst( IOpaqueAddress* pAddr,
     return StatusCode::FAILURE;
   }
 
+  const EventContext& ctx = pBS_Addr->getEventContext();
   const std::string nm = *( pBS_Addr->par() );
   // size check
   auto rhCollection = std::make_unique<DataVector<LVL1::RODHeader> >();
-  ATH_CHECK( m_tool->convert(nm, rhCollection.get()) );
+  ATH_CHECK( m_tool->convert(ctx, nm, rhCollection.get()) );
 
   pObj = SG::asStorable(std::move(rhCollection));
 
