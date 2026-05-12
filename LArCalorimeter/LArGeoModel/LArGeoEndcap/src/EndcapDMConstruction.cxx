@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 // ***********************************************************************
 // Construction of passive materials around LAr EC cryostate.
@@ -90,7 +90,7 @@ void LArGeo::EndcapDMConstruction::create(GeoIntrusivePtr<GeoFullPhysVol> envelo
     const std::string& key = (*BarrelDMTubes)[i]->getString("TUBENAME");
     tubeMap[key] = i;
   }
-  std::map<std::string, unsigned int> ecCrateMap;
+  std::map<std::string, unsigned int, std::less<>> ecCrateMap;
   for(unsigned int i=0; i<LArEndcapCrate->size(); i++) {
     const std::string& key = (*LArEndcapCrate)[i]->getString("BOXNAME");
     ecCrateMap[key] = i;
