@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONMdtRdoToPrepDataToolMT_H
@@ -23,11 +23,7 @@
 #include "MuonPrepRawData/MuonPrepDataContainer.h"
 #include "MuonRDO/MdtCsmContainer.h"
 
-#include "xAODMuonPrepData/MdtDriftCircleContainer.h"
-#include "xAODMuonPrepData/MdtTwinDriftCircleContainer.h"
-
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
-#include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 
 class MdtDigit;
 
@@ -71,16 +67,10 @@ namespace Muon {
             StatusCode finalize(MsgStream& msg);
 
             Muon::MdtPrepDataContainer* legacyPrd{nullptr};
-            xAOD::MdtDriftCircleContainer* xAODPrd{nullptr};
-            xAOD::MdtTwinDriftCircleContainer* xAODTwinPrd{nullptr};
 
             const Muon::IMuonIdHelperSvc* m_idHelperSvc{nullptr};
             /// Detector manager from the conditions store
             const MuonGM::MuonDetectorManager* legacyDetMgr{nullptr};
-            /// Detector manger from R4
-            const MuonGMR4::MuonDetectorManager* r4DetMgr{nullptr};
-            /// Acts Geometry context
-            const ActsTrk::GeometryContext* gctx{nullptr};
             /// Pointer to the map having the mapping of twin tube pairs
             const TwinTubeMap* twinTubeMap{nullptr};
 
@@ -98,8 +88,7 @@ namespace Muon {
         
         /// Creates the PRD object
         std::unique_ptr<MdtPrepData> createPrepData(const MdtCalibInput& calibInput,
-                                                    const MdtCalibOutput& calibOutput,
-                                                    ConvCache& cache) const;
+                                                    const MdtCalibOutput& calibOutput) const;
         /// Creates the prep data container to be written
         ConvCache setupMdtPrepDataContainer(const EventContext& ctx) const;
         
@@ -116,14 +105,6 @@ namespace Muon {
 
         /// MDT calibration service
         ToolHandle<IMdtCalibrationTool> m_calibrationTool{this, "CalibrationTool", "MdtCalibrationTool"};
-
-        
-        Gaudi::Property<bool> m_useNewGeo{this, "UseR4DetMgr", false,
-                                         "Switch between the legacy and the new geometry"};
-
-        const MuonGMR4::MuonDetectorManager* m_detMgrR4{nullptr};
-        SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "Stored alignment"};
-
 
         /// MdtPrepRawData containers
         SG::WriteHandleKey<Muon::MdtPrepDataContainer> m_mdtPrepDataContainerKey{this, "OutputCollection", "MDT_DriftCircles"};
@@ -160,10 +141,6 @@ namespace Muon {
         /// This is the key for the cache for the MDT PRD containers, can be empty
         SG::UpdateHandleKey<MdtPrepDataCollection_Cache> m_prdContainerCacheKey{this, "MdtPrdContainerCacheKey", "",
                                                                                 "Optional external cache for the MDT PRD container"};
-
-        // xAOD PRDs
-        SG::WriteHandleKey<xAOD::MdtDriftCircleContainer> m_xAODKey{this, "xAODKey", "", "If empty, do not produce xAOD, otherwise this is the key of the output xAOD MDT PRD container"};
-        SG::WriteHandleKey<xAOD::MdtTwinDriftCircleContainer> m_xAODTwinKey{this, "xAODTwinKey", "", "If empty, do not produce xAOD, otherwise this is the key of the output xAOD MDT PRD container"};
 
     };
 }  // namespace Muon
