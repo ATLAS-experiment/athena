@@ -219,7 +219,7 @@ namespace DerivationFramework {
 
     std::unique_ptr<xAOD::Vertex> myVxCandidate;
     if (m_useV0Fitter) {
-      myVxCandidate = std::unique_ptr<xAOD::Vertex>( concreteVertexFitter->fit(inputTracks, beamSpot /*vertex startingPoint*/) );
+      myVxCandidate = concreteVertexFitter->fit(ctx, inputTracks, beamSpot /*vertex startingPoint*/ );
     } else {
       myVxCandidate = m_iVertexFitter->fit(ctx, inputTracks, beamSpot /*vertex startingPoint*/ );
     }

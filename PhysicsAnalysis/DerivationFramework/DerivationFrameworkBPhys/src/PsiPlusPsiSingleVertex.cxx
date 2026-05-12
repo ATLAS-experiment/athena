@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /////////////////////////////////////////////////////////////////
 // PsiPlusPsiSingleVertex.cxx, (c) ATLAS Detector software
@@ -426,7 +426,7 @@ namespace DerivationFramework {
       Amg::Vector3D startingPoint((psi1Vertex->x()+psi2Vertex->x())/2,(psi1Vertex->y()+psi2Vertex->y())/2,(psi1Vertex->z()+psi2Vertex->z())/2);
 
       // do the fit
-      std::unique_ptr<xAOD::Vertex> theResult( m_iVertexFitter->fit(inputTracks, startingPoint, *state) );
+      std::unique_ptr<xAOD::Vertex> theResult( m_iVertexFitter->fit(ctx, inputTracks, startingPoint, *state) );
 
       if(theResult != nullptr){
 	// Chi2/DOF cut
