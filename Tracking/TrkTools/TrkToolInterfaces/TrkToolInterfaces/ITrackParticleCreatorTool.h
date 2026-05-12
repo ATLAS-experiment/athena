@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -11,7 +11,6 @@
 #include "AthLinks/ElementLink.h"
 #include "GaudiKernel/EventContext.h"
 #include "GaudiKernel/IAlgTool.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "TrkParticleBase/TrackParticleBase.h" // to know TrackParticleOrigin enum
 #include "TrkTrack/TrackCollection.h"
 
@@ -54,14 +53,6 @@ public:
     const Rec::TrackParticle& trackParticle,
     xAOD::TrackParticleContainer* container = nullptr) const = 0;
 
-  xAOD::TrackParticle* createParticle(
-    const Rec::TrackParticle& trackParticle,
-    xAOD::TrackParticleContainer* container = nullptr) const
-  {
-    return createParticle(
-      Gaudi::Hive::currentContext(), trackParticle, container);
-  }
-
   /** Method to construct a TrackParticle from a passed Track.
       @param track element link to the track is not set, use the method with the
      element link if you want the link as well
@@ -78,19 +69,6 @@ public:
     const xAOD::Vertex* vxCandidate = nullptr,
     xAOD::ParticleHypothesis prtOrigin = xAOD::noHypothesis) const = 0;
 
-  xAOD::TrackParticle* createParticle(
-    const Trk::Track& track,
-    xAOD::TrackParticleContainer* container = nullptr,
-    const xAOD::Vertex* vxCandidate = nullptr,
-    xAOD::ParticleHypothesis prtOrigin = xAOD::noHypothesis) const
-  {
-    return createParticle(Gaudi::Hive::currentContext(),
-                          track,
-                          container,
-                          vxCandidate,
-                          prtOrigin);
-  }
-
   /** Method to construct a TrackParticle from a passed Track.
       @param track element link to a valid track (i.e. do not pass a zero!).
       @param TrackParticleContainer needed to have an AuxStore, if provided
@@ -105,19 +83,6 @@ public:
     const xAOD::Vertex* vxCandidate = nullptr,
     xAOD::ParticleHypothesis prtOrigin = xAOD::noHypothesis) const = 0;
 
-  xAOD::TrackParticle* createParticle(
-    const ElementLink<TrackCollection>& trackLink,
-    xAOD::TrackParticleContainer* container = nullptr,
-    const xAOD::Vertex* vxCandidate = nullptr,
-    xAOD::ParticleHypothesis prtOrigin = xAOD::noHypothesis) const
-  {
-    return createParticle(Gaudi::Hive::currentContext(),
-                          trackLink,
-                          container,
-                          vxCandidate,
-                          prtOrigin);
-  }
-
   /** create a xAOD::TrackParticle out of constituents (please don't use this
    * - it will eventually be removed) */
   virtual xAOD::TrackParticle* createParticle(
@@ -130,27 +95,6 @@ public:
     const std::vector<xAOD::ParameterPosition>& positions,
     xAOD::ParticleHypothesis prtOrigin = xAOD::noHypothesis,
     xAOD::TrackParticleContainer* container = nullptr) const = 0;
-
-  xAOD::TrackParticle* createParticle(
-    const Perigee* perigee,
-    const FitQuality* fq,
-    const TrackInfo* trackInfo,
-    const TrackSummary* summary,
-    const std::vector<const Trk::TrackParameters*>& parameters,
-    const std::vector<xAOD::ParameterPosition>& positions,
-    xAOD::ParticleHypothesis prtOrigin = xAOD::noHypothesis,
-    xAOD::TrackParticleContainer* container = nullptr) const
-  {
-    return createParticle(Gaudi::Hive::currentContext(),
-                          perigee,
-                          fq,
-                          trackInfo,
-                          summary,
-                          parameters,
-                          positions,
-                          prtOrigin,
-                          container);
-  }
 
   /** Convenience method to retrieve Beamspot Data object */
   virtual const InDet::BeamSpotData* CacheBeamSpotData(
