@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // TrkVKalVrtFitter.h
@@ -82,20 +82,24 @@ namespace Trk{
         // IVertexFitter interface
         //
 
-        virtual xAOD::Vertex* fit(
+        virtual std::unique_ptr<xAOD::Vertex> fit(
+          const EventContext& ctx,
           const std::vector<const TrackParameters*>& perigeeList,
           const Amg::Vector3D& startingPoint) const override final;
 
-        virtual xAOD::Vertex* fit(
+        virtual std::unique_ptr<xAOD::Vertex> fit(
+          const EventContext& ctx,
           const std::vector<const TrackParameters*>& perigeeList,
           const std::vector<const NeutralParameters*>& /*neutralPerigeeList*/,
           const Amg::Vector3D& startingPoint) const override final;
 
-        virtual xAOD::Vertex* fit(
+        virtual std::unique_ptr<xAOD::Vertex> fit(
+          const EventContext& ctx,
           const std::vector<const TrackParameters*>& perigeeList,
           const xAOD::Vertex& constraint) const override final;
 
-        virtual xAOD::Vertex* fit(
+        virtual std::unique_ptr<xAOD::Vertex> fit(
+          const EventContext& ctx,
           const std::vector<const TrackParameters*>& perigeeList,
           const std::vector<const NeutralParameters*>& /*neutralPerigeeList*/,
           const xAOD::Vertex& constraint) const override final;
@@ -105,35 +109,57 @@ namespace Trk{
           const std::vector<const xAOD::TrackParticle*>& vectorTrk,
           const Amg::Vector3D& startingPoint) const override final;
 
-        virtual xAOD::Vertex* fit(
+        virtual std::unique_ptr<xAOD::Vertex> fit(
+          const EventContext& ctx,
           const std::vector<const xAOD::TrackParticle*>& vectorTrk,
           const xAOD::Vertex& constraint) const override final;
 
-        virtual xAOD::Vertex* fit(
+        virtual std::unique_ptr<xAOD::Vertex> fit(
+          const EventContext& ctx,
           const std::vector<const xAOD::TrackParticle*>& vectorTrk,
           const std::vector<const xAOD::NeutralParticle*>& vectorNeu,
           const Amg::Vector3D& startingPoint) const override final;
 
-        virtual xAOD::Vertex* fit(
+        virtual std::unique_ptr<xAOD::Vertex> fit(
+          const EventContext& ctx,
           const std::vector<const xAOD::TrackParticle*>& vectorTrk,
           const std::vector<const xAOD::NeutralParticle*>& vectorNeu,
           const xAOD::Vertex& constraint) const override final;
 
-        virtual xAOD::Vertex* fit(
+        virtual std::unique_ptr<xAOD::Vertex> fit(
+          const EventContext& ctx,
           const std::vector<const TrackParameters*>&) const override final;
 
-        virtual xAOD::Vertex* fit(
+        virtual std::unique_ptr<xAOD::Vertex> fit(
+          const EventContext& ctx,
           const std::vector<const TrackParameters*>&,
           const std::vector<const Trk::NeutralParameters*>&) const override final;
 
 
         /*--------------  Additional  xAOD  interfaces -------------*/
-        xAOD::Vertex * fit(const std::vector<const xAOD::TrackParticle*>& vectorTrk,
+        std::unique_ptr<xAOD::Vertex> fit(const EventContext& ctx,
+                           const std::vector<const xAOD::TrackParticle*>& vectorTrk,
                            const Amg::Vector3D& constraint,
                            IVKalState& istate) const;
-        xAOD::Vertex * fit(const std::vector<const xAOD::TrackParticle*>& vectorTrk,
+        std::unique_ptr<xAOD::Vertex> fit(const EventContext& ctx,
+                           const std::vector<const xAOD::TrackParticle*>& vectorTrk,
                            const xAOD::Vertex& constraint,
                            IVKalState& istate) const;
+
+        /*--- temporary interfaces for IVertexFitter migration ---*/
+        xAOD::Vertex* fit(const std::vector<const xAOD::TrackParticle*>& vectorTrk,
+                           const Amg::Vector3D& constraint,
+                           IVKalState& istate) const {
+          return fit(Gaudi::Hive::currentContext(), vectorTrk, constraint, istate).release();
+        }
+
+        xAOD::Vertex* fit(const std::vector<const xAOD::TrackParticle*>& vectorTrk,
+                           const xAOD::Vertex& constraint,
+                           IVKalState& istate) const {
+          return fit(Gaudi::Hive::currentContext(), vectorTrk, constraint, istate).release();
+        }
+
+
 //
 //  Cascade fitter interface
 //
@@ -512,7 +538,7 @@ namespace Trk{
                            double[5],
                            double[15]) const;
 
-        xAOD::Vertex* makeXAODVertex(int,
+        std::unique_ptr<xAOD::Vertex> makeXAODVertex(int,
                                      const Amg::Vector3D&,
                                      const dvect&,
                                      const dvect&,
