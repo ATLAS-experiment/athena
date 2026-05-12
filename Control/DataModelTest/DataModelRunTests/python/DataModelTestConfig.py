@@ -78,6 +78,7 @@ def DataModelTestCfg (flags, testName,
     cfg.addService (CompFactory.ChronoStatSvc (ChronoPrintOutTable = False,
                                                PrintUserTime = False,
                                                StatPrintOutTable = False))
+    cfg.addService (CompFactory.DataModelCompatSvc (), create = True)
 
     if flags.Input.Files == ['_ATHENA_GENERIC_INPUTFILE_NAME_']:
         # No input file --- configure like an event generator,
