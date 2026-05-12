@@ -39,7 +39,6 @@ OnDemandMinbiasSvc::OnDemandMinbiasSvc(const std::string& name,
 OnDemandMinbiasSvc::~OnDemandMinbiasSvc() {}
 
 StatusCode OnDemandMinbiasSvc::initialize() {
-  m_stores.clear();
   ATH_CHECK(m_bkgEventSelector.retrieve());
   ATH_CHECK(m_activeStoreSvc.retrieve());
   ATH_CHECK(m_skipEventIdxSvc.retrieve());
@@ -87,21 +86,10 @@ StatusCode OnDemandMinbiasSvc::initialize() {
     m_proxyProviderSvc->addProvider(addRemapAP);
   }
 
-  const std::size_t n_concurrent =
-      Gaudi::Concurrency::ConcurrencyFlags::numConcurrentEvents();
-  m_idx_lists.clear();
-  m_idx_lists.resize(n_concurrent);
-
-  m_num_mb_by_bunch.clear();
-  m_num_mb_by_bunch.resize(n_concurrent);
-
-  m_stores.clear();
-  m_stores.resize(n_concurrent);
-
   const int n_stores = 50;  // Start with 50 stores per event
+  std::size_t i = 0;
   // setup n_concurrent vectors of n_stores StoreGates in m_stores
-  for (std::size_t i = 0; i < n_concurrent; ++i) {
-    auto& sgs = m_stores[i];
+  for (auto& sgs : m_stores) {
     sgs.reserve(n_stores);
     for (int j = 0; j < n_stores; ++j) {
       // creates / retrieves a different StoreGateSvc for each slot
@@ -111,6 +99,7 @@ StatusCode OnDemandMinbiasSvc::initialize() {
       sg->setStoreID(StoreID::PILEUP_STORE);
       sg->setProxyProviderSvc(m_proxyProviderSvc.get());
     }
+    ++i;
   }
 
   // setup spare store for event skipping
@@ -154,10 +143,8 @@ std::size_t OnDemandMinbiasSvc::calcMBRequired(std::int64_t hs_id,
   ATH_MSG_DEBUG("Run " << run << ", lumi " << lumi << ", event " << event
                        << "| hs_id " << hs_id);
   const int n_bunches = m_latestDeltaBC.value() - m_earliestDeltaBC.value() + 1;
-  // vector on stack for use if slot == s_NoSlot
-  std::vector<std::uint64_t> stack_num_mb_by_bunch{};
-  std::vector<std::uint64_t>& num_mb_by_bunch =
-      slot == s_NoSlot ? stack_num_mb_by_bunch : m_num_mb_by_bunch[slot];
+
+  std::vector<std::uint64_t>& num_mb_by_bunch = *m_num_mb_by_bunch.get(); // FIXME ctx
   num_mb_by_bunch.clear();
   num_mb_by_bunch.resize(n_bunches);
   FastReseededPRNG prng{m_seed.value(), hs_id};
@@ -199,7 +186,7 @@ std::size_t OnDemandMinbiasSvc::calcMBRequired(std::int64_t hs_id,
   }
   // Won't go past here if slot == s_NoSlot
 
-  std::vector<std::uint64_t>& index_array = m_idx_lists[slot];
+  std::vector<std::uint64_t>& index_array = *m_idx_lists.get();  // FIXME ctx
   index_array.clear();
   index_array.resize(num_mb);
   std::iota(index_array.begin(), index_array.end(), 0);
@@ -222,7 +209,7 @@ StatusCode OnDemandMinbiasSvc::beginHardScatter(const EventContext& ctx) {
   const std::size_t num_to_load =
       calcMBRequired(hs_id, slot, ctx.eventID().run_number(),
                      ctx.eventID().lumi_block(), ctx.eventID().event_number());
-  auto& stores = m_stores[slot];
+  auto& stores = *m_stores.get(ctx);
   // If we don't have enough stores, make more
   if (stores.size() < num_to_load) {
     ATH_MSG_INFO("Adding " << num_to_load - stores.size() << " stores");
@@ -295,9 +282,8 @@ StatusCode OnDemandMinbiasSvc::beginHardScatter(const EventContext& ctx) {
 
 StoreGateSvc* OnDemandMinbiasSvc::getMinbias(const EventContext& ctx,
                                              std::uint64_t mb_id) {
-  const std::size_t slot = ctx.slot();
-  const std::size_t index = m_idx_lists.at(slot).at(mb_id);
-  return m_stores.at(ctx.slot()).at(index).get();
+  const std::size_t index = m_idx_lists.get(ctx)->at(mb_id);
+  return m_stores.get(ctx)->at(index).get();
 }
 
 std::size_t OnDemandMinbiasSvc::getNumForBunch(const EventContext& ctx,
@@ -307,12 +293,12 @@ std::size_t OnDemandMinbiasSvc::getNumForBunch(const EventContext& ctx,
         "Tried to request bunch {} which is outside the range [{}, {}]", bunch,
         m_earliestDeltaBC.value(), m_latestDeltaBC.value()));
   }
-  return m_num_mb_by_bunch.at(ctx.slot()).at(bunch - m_earliestDeltaBC.value());
+  return m_num_mb_by_bunch.get(ctx)->at(bunch - m_earliestDeltaBC.value());
 }
 
 StatusCode OnDemandMinbiasSvc::endHardScatter(const EventContext& ctx) {
   // clear all stores
-  for (auto&& sg : m_stores[ctx.slot()]) {
+  for (SGHandle& sg : *m_stores.get(ctx)) {
     ATH_CHECK(sg->clearStore());
   }
   return StatusCode::SUCCESS;

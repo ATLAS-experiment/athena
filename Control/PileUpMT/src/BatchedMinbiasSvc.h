@@ -15,6 +15,7 @@
 #include <string>
 #include <vector>
 
+#include "AthenaKernel/SlotSpecificObj.h"
 #include "AthenaBaseComps/AthService.h"
 #include "Gaudi/Property.h"
 #include "GaudiKernel/IEvtSelector.h"
@@ -102,8 +103,8 @@ class BatchedMinbiasSvc : public extends<AthService, IMinbiasSvc> {
                          "StoreGate for discarding events"};
   IEvtSelector::Context* m_bkg_evt_sel_ctx;
 
-  std::vector<std::vector<std::uint64_t>> m_num_mb_by_bunch;
-  std::vector<std::vector<std::uint64_t>> m_idx_lists;
+  SG::SlotSpecificObj<std::vector<std::uint64_t>> m_num_mb_by_bunch;
+  SG::SlotSpecificObj<std::vector<std::uint64_t>> m_idx_lists;
   std::map<int, std::unique_ptr<SGHandleArray>> m_cache;
   std::map<int, std::mutex> m_cache_mtxs;  // protects m_cache entries
   // prevents attempting to read multiple batches at once

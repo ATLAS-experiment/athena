@@ -1,6 +1,6 @@
 /* -*- C++ -*- */
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PILEUPMT_ONDEMANDMINBIASSVC_H
@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "AthenaBaseComps/AthService.h"
+#include "AthenaKernel/SlotSpecificObj.h"
 #include "Gaudi/Property.h"
 #include "GaudiKernel/IEvtSelector.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -90,9 +91,10 @@ class OnDemandMinbiasSvc final : public extends<AthService, IMinbiasSvc> {
   IEvtSelector::Context* m_bkg_evt_sel_ctx;
   ServiceHandle<IProxyProviderSvc> m_proxyProviderSvc;
 
-  std::vector<std::vector<SGHandle>> m_stores;
-  std::vector<std::vector<std::uint64_t>> m_num_mb_by_bunch;
-  std::vector<std::vector<std::uint64_t>> m_idx_lists;
+  SG::SlotSpecificObj<std::vector<SGHandle>> m_stores;
+  SG::SlotSpecificObj<std::vector<std::uint64_t>> m_idx_lists;
+  SG::SlotSpecificObj<std::vector<std::uint64_t>, SG::InvalidSlot::Enabled> m_num_mb_by_bunch;
+
   // prevents attempting to read multiple batches at once
   std::mutex m_reading_batch_mtx;
   std::atomic_int64_t m_last_loaded_hs{-1};

@@ -45,13 +45,6 @@ StatusCode BatchedMinbiasSvc::initialize() {
   ATH_CHECK(m_skipEventIdxSvc.retrieve());
   ATH_CHECK(m_beamInt.retrieve());
   ATH_CHECK(m_beamLumi.retrieve());
-  std::size_t n_concurrent =
-      Gaudi::Concurrency::ConcurrencyFlags::numConcurrentEvents();
-  m_idx_lists.clear();
-  m_idx_lists.resize(n_concurrent);
-
-  m_num_mb_by_bunch.clear();
-  m_num_mb_by_bunch.resize(n_concurrent);
 
   m_cache.clear();
   m_empty_caches.clear();
@@ -194,7 +187,7 @@ StatusCode BatchedMinbiasSvc::initialize() {
 }
 
 std::size_t BatchedMinbiasSvc::calcMBRequired(std::int64_t hs_id,
-                                              std::size_t slot,
+                                              std::size_t /*slot*/,
                                               unsigned int run,
                                               unsigned int lumi,
                                               std::uint64_t event) {
@@ -220,7 +213,7 @@ std::size_t BatchedMinbiasSvc::calcMBRequired(std::int64_t hs_id,
     }
   }
 
-  std::vector<std::uint64_t>& num_mb_by_bunch = m_num_mb_by_bunch[slot];
+  std::vector<std::uint64_t>& num_mb_by_bunch = *m_num_mb_by_bunch.get();  // FIXME ctx
   num_mb_by_bunch.clear();
   num_mb_by_bunch.resize(n_bunches);
 
@@ -237,7 +230,7 @@ std::size_t BatchedMinbiasSvc::calcMBRequired(std::int64_t hs_id,
   }
 
   std::uint64_t num_mb = ranges::accumulate(num_mb_by_bunch, 0UL);
-  std::vector<std::uint64_t>& index_array = m_idx_lists[slot];
+  std::vector<std::uint64_t>& index_array = *m_idx_lists.get();  // FIXME ctx
   const std::uint64_t mbBatchSize = m_MBBatchSize.value();
   // Prevent running out of events
   if (num_mb > mbBatchSize) {
@@ -398,8 +391,7 @@ StatusCode BatchedMinbiasSvc::beginHardScatter(const EventContext& ctx) {
 StoreGateSvc* BatchedMinbiasSvc::getMinbias(const EventContext& ctx,
                                             std::uint64_t mb_id) {
   const std::int64_t hs_id = get_hs_id(ctx);
-  const std::size_t slot = ctx.slot();
-  const std::size_t index = m_idx_lists.at(slot).at(mb_id);
+  const std::size_t index = m_idx_lists.get(ctx)->at(mb_id);
   const int batch = event_to_batch(hs_id);
   return m_cache[batch]->at(index).get();
 }
@@ -411,7 +403,7 @@ std::size_t BatchedMinbiasSvc::getNumForBunch(const EventContext& ctx,
         "Tried to request bunch {} which is outside the range [{}, {}]", bunch,
         m_earliestDeltaBC.value(), m_latestDeltaBC.value()));
   }
-  return m_num_mb_by_bunch.at(ctx.slot()).at(bunch - m_earliestDeltaBC.value());
+  return m_num_mb_by_bunch.get(ctx)->at(bunch - m_earliestDeltaBC.value());
 }
 
 StatusCode BatchedMinbiasSvc::endHardScatter(const EventContext& ctx) {
