@@ -14,7 +14,9 @@
 #include "InDetCondTools/ISiLorentzAngleTool.h"
 #include "PixelConditionsData/PixelChargeCalibCondData.h"
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
-
+#include "details/CellContainer.h"
+#include "details/CellContainerProxy.h"
+#include "details/InPlaceClusterization.h"
 
 namespace ActsTrk {
 
@@ -24,50 +26,65 @@ public:
 			const std::string& name,
 			const IInterface* parent);
 
-    virtual StatusCode
-    clusterize(const EventContext& ctx,
-               const RawDataCollection& RDOs,
-               const InDet::SiDetectorElementStatus& pixelDetElStatus,
-               const InDetDD::SiDetectorElement& element,
-               Acts::Ccl::ClusteringData& data,
-               std::vector<ClusterCollection>& collection) const override;
-  
-    virtual std::any makeVars (SG::AuxVectorData& cont) const override;
-
-    virtual StatusCode
-    makeClusters(const EventContext& ctx,
-                 typename IPixelClusteringTool::ClusterCollection& clusters,
-                 const InDetDD::SiDetectorElement& element,
-                 size_t icluster,
-                 std::any& vars,
-		 typename ClusterContainer::iterator itrContainer) const override;
-  
     virtual StatusCode initialize() override;
+
+    virtual std::pair<unsigned int, unsigned int>
+    countCells(const RDOContainer& rdo_collection,
+               const std::vector<IdentifierHash> &listOfIds,
+               const InDetDD::SiDetectorElementCollection &detector_elements) const override;
+
+   virtual StatusCode
+   clusterize(const EventContext& ctx,
+              const RawDataCollection& RDOs,
+              const InDet::SiDetectorElementStatus& pixelDetElStatus,
+              const InDetDD::SiDetectorElement& element,
+              IPixelClusteringTool::CellContainer &cellContainer) const override;
+
+    virtual std::any createEventDataCache(xAOD::PixelClusterContainer& cont,
+                                          std::size_t nClusterRDOs) const override;
+
+   virtual StatusCode
+   makeClusters(const EventContext& ctx,
+                const RDOContainer &rdo_container,
+                const IPixelClusteringTool::CellContainer& cellContainer,
+                unsigned int module_i,
+                const InDetDD::SiDetectorElement& element,
+                unsigned int icluster,
+                xAOD::PixelClusterContainer& cont,
+                std::any& vars) const override;
   
 private:
-    // N.B. the cluster is added to the container
-    // and the tots and charges vectors will be moved to the xAOD object
-  
-  StatusCode makeCluster(PixelClusteringTool::Cluster &cluster,
-			 const InDetDD::SiDetectorElement* element,
-			 const InDetDD::PixelModuleDesign& design,
-			 const PixelChargeCalibCondData *calibData,
-			 const PixelChargeCalibCondData::CalibrationStrategy calibStrategy,
-			 double lorentz_shift,
-                         size_t icluster,
-                         xAOD::PixelCluster::ClusterVars& clusterVars) const;
+   // Template to count cells i.e. RDOs in the rdo_collection
+   // @tparam GANGED true if the pixel detector can contain ganged pixel otherwise false.
+   // @param rdo_collection the pixel RDO collection.
+   // @param listOfIds a list of id hashes to be considered or empty to consider all.
+   // @param detector_elements the list of all detector elements of the pixel detector.
+   // RDOs of ganged pixels will be counted as two.
+   template <bool GANGED>
+   std::pair<unsigned int, unsigned int>
+   countCellsImpl(const RDOContainer& rdo_collection,
+                  const std::vector<IdentifierHash> &listOfIds,
+                  const InDetDD::SiDetectorElementCollection &detector_elements) const;
 
-  typename IPixelClusteringTool::CellCollection
-  unpackRDOs(const RawDataCollection& RDOs,
-	     const InDet::SiDetectorElementStatus& stripDetElStatus,
-	     const InDetDD::SiDetectorElement& element) const;
+   using ClusterProxy = InPlaceClusterization::ClusterProxy<const IPixelClusteringTool::CellContainer>;
+   using Cell = IPixelClusteringTool::CellContainer::Cell;
 
-  static inline
-  std::optional<Identifier>
-  isGanged(const Identifier& rdoID,
-	   const InDetDD::SiDetectorElement& element);
+   std::span<IPixelClusteringTool::CellContainer::Cell>
+   unpackRDOs(const RawDataCollection& RDOs,
+              const InDet::SiDetectorElementStatus& pixelDetElStatus,
+              const InDetDD::SiDetectorElement& element,
+              IPixelClusteringTool::CellContainer &cellContainer) const;
 
-private:  
+   StatusCode makeCluster(size_t icluster,
+                          const PixelClusteringTool::ClusterProxy &cluster,
+                          const InDetDD::SiDetectorElement& element,
+                          const InDetDD::PixelModuleDesign& design,
+                          const InDetRawDataCollection<PixelRDORawData> &rdos,
+                          const PixelChargeCalibCondData *calibData,
+                          const PixelChargeCalibCondData::CalibrationStrategy calibStrategy,
+                          const double lorentz_shift,
+                          xAOD::PixelCluster::ClusterVars& clusterVars) const;
+
   ToolHandle< ISiLorentzAngleTool > m_pixelLorentzAngleTool {this, "PixelLorentzAngleTool", "", "Tool to retreive Lorentz angle of Pixel"};
   
   SG::ReadCondHandleKey<PixelChargeCalibCondData> m_chargeDataKey {this, "PixelChargeCalibCondData", "",

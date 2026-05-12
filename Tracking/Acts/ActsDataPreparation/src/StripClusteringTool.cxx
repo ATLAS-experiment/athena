@@ -1,16 +1,14 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
 #include "StripClusteringTool.h"
-
-
-#include <Acts/Clusterization/Clusterization.hpp>
 
 #include <InDetRawData/SCT3_RawData.h>
 #include <SCT_ReadoutGeometry/SCT_ModuleSideDesign.h>
 #include <SCT_ReadoutGeometry/StripStereoAnnulusDesign.h>
 #include <TrkSurfaces/Surface.h>
+#include "AthContainers/JaggedVecUtils.h"
+#include "xAODCore/VariableStruct.h"
 
 #include <algorithm>
 #include <cmath>
@@ -21,30 +19,6 @@ namespace ActsTrk {
 constexpr double ONE_TWELFTH = 1./12.;
 constexpr float oneStripSF = 1.1025;
 constexpr float twoStripSF = 0.0729; 
-  
-  // Required by ACTS clusterization
-static
-int getCellColumn(const StripClusteringTool::Cell& cell)
-{
-    return cell.index;
-}
-
-// Required by ACTS clusterization
-static inline void clusterReserve(StripClusteringTool::Cluster& cl,
-                                  std::size_t n)
-{
-  cl.ids.reserve(n);
-} 
-
-// Required by ACTS clusterization
-static
-void clusterAddCell(StripClusteringTool::Cluster& cl, const StripClusteringTool::Cell& cell)
-{
-    cl.ids.push_back(cell.id.get_compact());
-    if (cl.ids.size() < (sizeof(cl.hitsInThirdTimeBin) * 8)) {
-      cl.hitsInThirdTimeBin |= cell.timeBits.test(0) << cl.ids.size();
-    }
-}
 
 StripClusteringTool::StripClusteringTool(
     const std::string& type, const std::string& name, const IInterface* parent)
@@ -63,8 +37,6 @@ StatusCode StripClusteringTool::initialize()
     ATH_MSG_DEBUG(m_isITk);
     ATH_MSG_DEBUG(m_errorStrategy);
 
-
-    ATH_CHECK(m_conditionsTool.retrieve(DisableTool{!m_stripDetElStatus.empty()} ));
     ATH_CHECK(m_lorentzAngleTool.retrieve());
     ATH_CHECK(decodeTimeBins());    
 
@@ -74,6 +46,59 @@ StatusCode StripClusteringTool::initialize()
     ATH_CHECK( detStore()->retrieve(m_stripID, "SCT_ID") );
     
     return StatusCode::SUCCESS;
+}
+
+std::pair<unsigned int, unsigned int>
+StripClusteringTool::countCells(const RDOContainer& rdoContainer,
+                                const std::vector<IdentifierHash> &listOfIds,
+                                const InDetDD::SiDetectorElementCollection &detector_elements) const {
+   auto getNHits =[](const InDetRawDataCollection<SCT_RDORawData> &RDOs,
+                     [[maybe_unused]] const InDetDD::SiDetectorElementCollection &detector_elements )
+      -> unsigned int
+   {
+      unsigned int n_hits = 0u;
+      for (const SCT_RDORawData* rdo : RDOs) {
+        n_hits += rdo->getGroupSize();
+      }
+      return n_hits;
+   };
+   unsigned int n_hits=0;
+   if (listOfIds.empty()) {
+      for (const InDetRawDataCollection<SCT_RDORawData> *RDOs : rdoContainer) {
+         assert( RDOs);
+         n_hits += getNHits(*RDOs, detector_elements);
+      }
+   }
+   else {
+      for (const IdentifierHash& id : listOfIds) {
+         if (not id.is_valid()) continue;
+         const InDetRawDataCollection<SCT_RDORawData> *RDOs = rdoContainer.indexFindPtr(id);
+         if (RDOs) { // necessary ?
+            n_hits += getNHits(*RDOs, detector_elements);
+         }
+      }
+   }
+   return {n_hits,n_hits};
+}
+
+struct StripAuxDataCache : xAOD::VariableStruct {
+   StripAuxDataCache(SG::AuxVectorData& cont, unsigned int n_cluster_rdos)
+      : xAOD::VariableStruct(cont)
+   {
+      if (n_cluster_rdos>0) {
+         auto *store = cont.getStore();
+         assert(store);
+         SG::setJaggedVectorData(cont,*store,xAOD::StripCluster::rdoListAcc(), n_cluster_rdos, rdoList, rdoListPayload);
+      }
+   }
+   SG::Accessor<SG::JaggedVecElt<Identifier::value_type> >::Elt_span     rdoList;
+   SG::Accessor<SG::JaggedVecElt<Identifier::value_type> >::Payload_span rdoListPayload;
+};
+
+std::any StripClusteringTool::createEventDataCache(xAOD::StripClusterContainer& cont,
+                                                   std::size_t nClusterRDOs) const
+{
+   return std::any (StripAuxDataCache (cont, nClusterRDOs));
 }
 
 StatusCode StripClusteringTool::decodeTimeBins()
@@ -96,68 +121,64 @@ StatusCode StripClusteringTool::decodeTimeBins()
 }
 
 StatusCode
-StripClusteringTool::clusterize(const EventContext& ctx,
-				const RawDataCollection& RDOs,
-				const InDet::SiDetectorElementStatus& stripDetElStatus,
-				const InDetDD::SiDetectorElement& element,
-        Acts::Ccl::ClusteringData& data,
-				std::vector<typename IStripClusteringTool::ClusterCollection>& collection) const
+StripClusteringTool::clusterize([[maybe_unused]] const EventContext& ctx,
+                                const RawDataCollection& RDOs,
+                                const InDet::SiDetectorElementStatus& stripDetElStatus,
+                                const InDetDD::SiDetectorElement& element,
+                                IStripClusteringTool::CellContainer &cellContainer) const
 {
     IdentifierHash idHash = RDOs.identifyHash();
+    IStripClusteringTool::CellContainer::ModuleRangeGuard rangeGuard(cellContainer.startNewModule(idHash));
+
     // At least an empty cluster collection needs to be always added because the
     // assumption is that there is one element per element RawDataCollection.
-    collection.emplace_back();
     bool goodModule = true;
     if (m_checkBadModules.value()) {
       goodModule = stripDetElStatus.isGood(idHash);
     }
 
-    VALIDATE_STATUS_ARRAY(
-      m_checkBadModules.value() && !m_stripDetElStatus.empty(),
-      stripDetElStatus.isGood(idHash), m_conditionsTool->isGood(idHash));
-
-    if (!goodModule) {
-      ATH_MSG_DEBUG("Strip module failed status check");
-      return StatusCode::SUCCESS;
-    }
-    
     // If more than a certain number of RDOs set module to bad
     // in this case we skip clusterization
-    if (m_maxFiredStrips != 0u) {
+    if (!goodModule && m_maxFiredStrips != 0u) {
       unsigned int nFiredStrips = 0u;
       for (const SCT_RDORawData* rdo : RDOs) {
         nFiredStrips += rdo->getGroupSize();
       }
-      if (nFiredStrips > m_maxFiredStrips)
-	return StatusCode::SUCCESS;
-    }
-        
-    std::optional<std::pair<typename IStripClusteringTool::CellCollection,bool>> unpckd
-      = unpackRDOs(ctx, RDOs, stripDetElStatus, element);
-
-    if (not unpckd.has_value()) {
-	ATH_MSG_FATAL("Error encountered while unpacking strip RDOs!");
-	return StatusCode::FAILURE;
+      goodModule |= (nFiredStrips <m_maxFiredStrips);
     }
 
-    auto& [cells, badStripOnModule] = *unpckd;
-    // Bad strips on a module invalidates the hitsInThirdTimeBin word.
-    // Therefore set it to 0 if that's the case.
-    // We are currently not using this, but keeping it here should we need it in the future
+    if (goodModule) {
+       std::span<IStripClusteringTool::CellContainer::Cell>
+          cellRange = unpackRDOs(RDOs, stripDetElStatus, element, cellContainer);
 
-    Acts::Ccl::createClusters<CellCollection, typename IStripClusteringTool::ClusterCollection, 1>(data, cells, collection.back());
+       static constexpr unsigned int SORT_BY_LOCAL_X=0u;
+       namespace CL=Acts::InPlaceClusterization;
+       CL::clusterize<SORT_BY_LOCAL_X, std::uint16_t>(cellRange,
+                                                      CL::defaultConnectionHelper<CL::EConnectionType::CommonEdgeOrCorner>(cellRange));
 
+       // set the cell range per cluster
+       Acts::InPlaceClusterization::for_each_cluster(cellRange,
+                                                     [&cellContainer]([[maybe_unused]] std::span<IStripClusteringTool::CellContainer::Cell> &the_range,
+                                                                      unsigned int idx_begin, unsigned int idx_end) {
+          cellContainer.registerNewCluster(idx_begin,idx_end);
+       });
+    }
+    // must add a range for every call otherwise the cell container and
+    // the list of processed modules get out of sync.
+    cellContainer.registerClustersForNewModule(rangeGuard.range());
     return StatusCode::SUCCESS;
 }
 
   
 StatusCode
 StripClusteringTool::makeClusters(const EventContext& ctx,
-				  typename IStripClusteringTool::ClusterCollection& clusters,
-				  const InDetDD::SiDetectorElement& element,
-                                  size_t /*icluster*/,
-                                  std::any& /*vars*/,
-				  typename ClusterContainer::iterator itrContainer) const
+                                  [[maybe_unused]] const RDOContainer &rdoContainer,
+                                  const IStripClusteringTool::CellContainer& cellContainer,
+                                  unsigned int imodule,
+                                  const InDetDD::SiDetectorElement& element,
+                                  unsigned int icluster,
+                                  xAOD::StripClusterContainer& cont,
+                                  std::any& cache) const
 {
     const IdentifierHash idHash = element.identifyHash();
     double lorentzShift = m_lorentzAngleTool->getLorentzShift(idHash, ctx);
@@ -171,28 +192,27 @@ StripClusteringTool::makeClusters(const EventContext& ctx,
       : static_cast<const InDetDD::StripStereoAnnulusDesign&>(element.design()).phiPitchPhi();
     Eigen::Matrix<float,1,1> localCov(pitch * pitch * ONE_TWELFTH);
 
-    for (typename IStripClusteringTool::Cluster& cl : clusters) {
-      try {
-	xAOD::StripCluster *xaodCluster = *itrContainer;
-	ATH_CHECK(makeCluster(cl,
-			      lorentzShift,
-			      localCov,
-			      *m_stripID,
-			      element,
-			      design,
-			      *xaodCluster));
-	++itrContainer;
-      } catch (const std::exception& e) {
-	ATH_MSG_FATAL("Exception thrown while creating xAOD::StripCluster:"
-		      << e.what());
-	ATH_MSG_FATAL("Detector Element identifier: " << element.identify());
-	ATH_MSG_FATAL("Strip Identifiers in cluster:");
-	for (const auto& id : cl.ids)
-	  ATH_MSG_FATAL("  " << id);
-	return StatusCode::FAILURE;
-      }
-    }
+    StripAuxDataCache* auxDataCache = std::any_cast<StripAuxDataCache> (&cache);
+    if (!auxDataCache) throw std::bad_any_cast();
 
+    using CellContainerProxy = InPlaceClusterization::CellContainerProxy<const IStripClusteringTool::CellContainer>;
+    using ModuleProxy = InPlaceClusterization::ModuleProxy<const IStripClusteringTool::CellContainer>;
+    using ClusterProxy = InPlaceClusterization::ClusterProxy<const IStripClusteringTool::CellContainer>;
+    CellContainerProxy cellContainerProxy(&cellContainer);
+    ModuleProxy moduleProxy(cellContainerProxy[imodule]);
+
+    for (ClusterProxy clusterProxy: moduleProxy) {
+       assert( icluster< cont.size() && cont[icluster]);
+       xAOD::StripCluster &stripCluster= *cont[icluster];
+       ATH_CHECK(makeCluster(icluster++,
+                             stripCluster,
+                             clusterProxy,
+                             element,
+                             design,
+                             lorentzShift,
+                             localCov,
+                             *auxDataCache));
+    }
     return StatusCode::SUCCESS;
 }
 
@@ -200,28 +220,26 @@ static
 std::pair<
     Eigen::Matrix<float,1,1>,
     Eigen::Matrix<float,3,1>>
-computePosition(const StripClusteringTool::Cluster& cluster,
-		std::size_t size,
-		double lorentzShift,
-		const IStripClusteringTool::IDHelper& stripID,
+computePosition(const InPlaceClusterization::ClusterProxy<const IStripClusteringTool::CellContainer>& cluster,
 		const InDetDD::SiDetectorElement& element,
 		const InDetDD::SiDetectorDesign& design,
+		double lorentzShift,
 		bool isITk )
 {
 
-    Identifier ids_front(cluster.ids.front());
-    Identifier ids_back(cluster.ids.back());
-    InDetDD::SiCellId frontId = stripID.strip(ids_front);
+
+    InDetDD::SiCellId frontId = cluster.front().coordinates()[0];
     InDetDD::SiLocalPosition pos = design.localPositionOfCell(frontId);
-    if (size > 1) {
-      InDetDD::SiCellId backId = stripID.strip(ids_back);
-	InDetDD::SiLocalPosition backPos =
-	    design.localPositionOfCell(backId);
+    if (cluster.size()>1) {
+      InDetDD::SiCellId backId = cluster.back().coordinates()[0];
+      InDetDD::SiLocalPosition backPos =
+         design.localPositionOfCell(backId);
 	pos = 0.5 * (pos + backPos);
     }
 
     // update the xPhi position
     pos.xPhi( pos.xPhi() + lorentzShift );
+    // @TODO use local to global of Acts surface instead
     Eigen::Matrix<float,3,1> posG(element.surface().localToGlobal(pos).cast<float>());
     
     if ((not element.isBarrel()) and isITk) {
@@ -238,17 +256,13 @@ computePosition(const StripClusteringTool::Cluster& cluster,
 
 static
 InDetDD::SiLocalPosition
-computeCentrePosition(const StripClusteringTool::Cluster& cluster,
-                      std::size_t size,
-                      const IStripClusteringTool::IDHelper& stripID,
+computeCentrePosition(const InPlaceClusterization::ClusterProxy<const IStripClusteringTool::CellContainer>& cluster,
                       const InDetDD::SiDetectorDesign& design)
 {   // For Inner Detector SCT, compute the local position of the cluster center using the strip positions.
-    Identifier ids_front(cluster.ids.front());
-    Identifier ids_back(cluster.ids.back());
-    InDetDD::SiCellId frontId = stripID.strip(ids_front);
+    InDetDD::SiCellId frontId = cluster.front().coordinates()[0];
     InDetDD::SiLocalPosition pos = design.localPositionOfCell(frontId);
-    if (size > 1) {
-      InDetDD::SiCellId backId = stripID.strip(ids_back);
+    if (cluster.size() > 1) {
+      InDetDD::SiCellId backId = cluster.back().coordinates()[0];
       InDetDD::SiLocalPosition backPos = design.localPositionOfCell(backId);
       pos = 0.5 * (pos + backPos);
     }
@@ -256,13 +270,11 @@ computeCentrePosition(const StripClusteringTool::Cluster& cluster,
 }
 
 static
-float computeRotatedLocalCov(float localCov,
-                                                const InDetDD::SiDetectorElement& element,
-                                                const InDetDD::SiDetectorDesign& design,
-                                                const StripClusteringTool::Cluster& cluster,
-                                                std::size_t size,
-                                                const IStripClusteringTool::IDHelper& stripID,
-                                                float localPos)
+float computeRotatedLocalCov(const InPlaceClusterization::ClusterProxy<const IStripClusteringTool::CellContainer> &cluster,
+                             float localPos,
+                             float localCov, 
+                             const InDetDD::SiDetectorElement& element,
+                             const InDetDD::SiDetectorDesign& design)
 {   // For Inner Detector SCT, in the case of endcap modules, rotate the local covariance to account for the stereo angle.
     const bool rotate = (design.shape() == InDetDD::Trapezoid || design.shape() == InDetDD::Annulus);
     if (!rotate) {
@@ -274,7 +286,7 @@ float computeRotatedLocalCov(float localCov,
       return localCov;
     }
 
-    const InDetDD::SiLocalPosition centrePos = computeCentrePosition(cluster, size, stripID, design);
+    const InDetDD::SiLocalPosition centrePos = computeCentrePosition(cluster, design);
     const auto ends = sctDesign->endsOfStrip(centrePos);
     const double stripL = std::abs(ends.first.xEta() - ends.second.xEta());
     const double iphipitch = 1. / element.phiPitch();
@@ -294,21 +306,18 @@ float computeRotatedLocalCov(float localCov,
     return rotatedCov;
 }
 
-
-// N.B. the cluster is added to the container
 StatusCode
-StripClusteringTool::makeCluster(Cluster &cluster,
-				 double lorentzShift,
-				 Eigen::Matrix<float,1,1>& localCov,
-				 const StripID& stripID,
-				 const InDetDD::SiDetectorElement& element,
-				 const InDetDD::SiDetectorDesign& design,
-				 xAOD::StripCluster& cl) const
+StripClusteringTool::makeCluster(size_t icluster,
+                                 xAOD::StripCluster& cl,
+                                 const StripClusteringTool::ClusterProxy &clusterProxy,
+                                 const InDetDD::SiDetectorElement& element,
+                                 const InDetDD::SiDetectorDesign& design,
+                                 const double lorentzShift,
+                                 Eigen::Matrix<float,1,1>& localCov,
+                                 StripAuxDataCache &auxDataCache) const
 {
-    std::size_t size = cluster.ids.size();
-    
     auto [localPos, globalPos]
-      = computePosition(cluster, size, lorentzShift, stripID, element, design, m_isITk);
+      = computePosition(clusterProxy, element, design, lorentzShift, m_isITk);
 
     // For Strip Clusters the identifier is taken from the front rod list object
     // This is the same strategy used in Athena:
@@ -318,7 +327,7 @@ StripClusteringTool::makeCluster(Cluster &cluster,
 
     // If requiring broad errors, use the cluster size as error -
     // TODO use SiWidth to get the right cluster size as I'm assuming equal strip pitch
-    
+    std::size_t size = clusterProxy.size();
     if (m_errorStrategy == 1)   {// use width
       
       localCov *= size*size;
@@ -335,17 +344,27 @@ StripClusteringTool::makeCluster(Cluster &cluster,
     }
 
     if (not m_isITk) {
-      localCov(0,0) = computeRotatedLocalCov(localCov(0,0), element, design, cluster, size, stripID, localPos(0,0));
+      localCov(0,0) = computeRotatedLocalCov(clusterProxy, localPos(0,0), localCov(0,0), element, design);
     }
 
     cl.setMeasurement<1>(element.identifyHash(), localPos, localCov);
-    cl.setIdentifier( cluster.ids.front() );
+    Identifier frontRDOId = m_stripID->strip_id(element.identify(), clusterProxy.front().coordinates()[0]);
+    cl.setIdentifier( frontRDOId.get_compact() );
 
     // Do I really need the global position in fast tracking?
     cl.globalPosition() = globalPos;     
     
     cl.setChannelsInPhi(size);
-    cl.setRDOlist(std::move(cluster.ids));
+
+    unsigned int n_rdos = (icluster> 0 ?  auxDataCache.rdoList[icluster-1].end() : 0u);
+    Identifier waferId=element.identify();
+    using CellProxy = InPlaceClusterization::CellProxy<const StripClusteringTool::CellContainer>;
+    for (CellProxy cellProxy : clusterProxy) {
+       Identifier rdoId = m_stripID->strip_id(waferId, cellProxy.coordinates()[0]);
+       auxDataCache.rdoListPayload[n_rdos]=rdoId.get_compact();
+       ++n_rdos;
+    }
+    auxDataCache.rdoList[icluster] = n_rdos;
     
     return StatusCode::SUCCESS;
 }
@@ -362,46 +381,37 @@ bool StripClusteringTool::passTiming(const std::bitset<3>& timePattern) const {
 }
 
 
-bool StripClusteringTool::isBadStrip(const EventContext& ctx,
-				     const InDet::SiDetectorElementStatus *stripDetElStatus,
-				     const StripID& stripID,
+bool StripClusteringTool::isBadStrip(const InDet::SiDetectorElementStatus *stripDetElStatus,
 				     IdentifierHash waferHash,
-				     Identifier stripId) const
+				     std::int16_t strip)
 {
     if (stripDetElStatus) {
-        const int strip_i{stripID.strip(stripId)};
-	VALIDATE_STATUS_ARRAY(
-	    stripDetElStatus,
-	    stripDetElStatus->isCellGood(waferHash.value(), strip_i),
-	    m_conditionsTool->isGood(stripId, InDetConditions::SCT_STRIP));
-	return not stripDetElStatus->isCellGood(waferHash.value(), strip_i) ;
+	return not stripDetElStatus->isCellGood(waferHash.value(), strip) ;
     }
-    return not m_conditionsTool->isGood(stripId, InDetConditions::SCT_STRIP, ctx);
+    return false;
 }
 
 
-std::optional<std::pair<typename IStripClusteringTool::CellCollection, bool>>
-StripClusteringTool::unpackRDOs(const EventContext& ctx,
-				const RawDataCollection& RDOs,
+std::span<IStripClusteringTool::CellContainer::Cell>
+StripClusteringTool::unpackRDOs(const RawDataCollection& RDOs,
 				const InDet::SiDetectorElementStatus& stripDetElStatus,
-				const InDetDD::SiDetectorElement& element) const
+				const InDetDD::SiDetectorElement& element,
+                                IStripClusteringTool::CellContainer &cellContainer) const
 {
-     const InDetDD::SiDetectorDesign& design = element.design();
-  
-     CellCollection cells;
-     // reserve memory. number evaluated on ttbar pu200
-     cells.reserve(60);
-     bool badStripOnModule{false};
-     //Check type in debug build otherwise assume it is correct
-     assert(dynamic_cast<const InDetDD::SCT_ModuleSideDesign*>(&design)!=nullptr);
-     std::size_t ncells = static_cast<size_t>(static_cast<const InDetDD::SCT_ModuleSideDesign&>(design).cells());
-     
-     // Simple single-entry cache
-    Identifier::value_type waferId_compact_cache = 0;
-    IdentifierHash waferHash_cache(0);
-    bool cache_valid = false;
+    const InDetDD::SiDetectorDesign& design = element.design();
 
+    //Check type in debug build otherwise assume it is correct
+    assert(dynamic_cast<const InDetDD::SCT_ModuleSideDesign*>(&design)!=nullptr);
+    std::size_t ncells = static_cast<size_t>(static_cast<const InDetDD::SCT_ModuleSideDesign&>(design).cells());
+     
+    IStripClusteringTool::CellContainer::ModuleRangeGuard rangeGuard(cellContainer, RDOs.identifyHash() );
+    // Simple single-entry cache
+    IdentifierHash waferHash=RDOs.identifyHash();
+
+    unsigned int rdo_i=0;
+    --rdo_i; // to allow incrementing rdo_i at top of loop before any flow control
     for (const StripRDORawData * raw : RDOs) {
+        ++rdo_i;
 
     	//Check type in debug build otherwise assume it is correct
     	assert(static_cast<const SCT3_RawData*>(raw)!=nullptr);
@@ -415,39 +425,34 @@ StripClusteringTool::unpackRDOs(const EventContext& ctx,
 
 	Identifier firstStripId = raw->identify();
 	Identifier waferId = m_stripID->wafer_id(firstStripId);
-
-	Identifier::value_type waferId_compact = waferId.get_compact();
-
 	
-	// Check cache - will be invalid when switching wafer groups
-	if (!cache_valid || waferId_compact != waferId_compact_cache) {
-	  waferId_compact_cache = waferId_compact;
-	  waferHash_cache = m_stripID->wafer_hash(waferId);
-	  cache_valid = true;
-	}
-	
-	std::size_t iFirstStrip = static_cast<size_t>(m_stripID->strip(firstStripId));
+        assert( waferHash == m_stripID->wafer_hash(waferId) );
 
-	std::size_t iMaxStrip = std::min(
-	    iFirstStrip + raw->getGroupSize(),
-	    ncells
-	    );
+        std::int16_t iFirstStrip = static_cast<std::int16_t>(m_stripID->strip(firstStripId));
+        assert(m_stripID->strip(firstStripId)==iFirstStrip);
+
+        assert( ncells == static_cast<std::uint16_t>(ncells) );
+	std::int16_t iMaxStrip = std::min(
+            static_cast<std::int16_t>(iFirstStrip + raw->getGroupSize()),
+            static_cast<std::int16_t>(ncells));
 	
-	for (size_t i = iFirstStrip; i < iMaxStrip; i++) {
-	    Identifier stripIdent = m_stripID->strip_id(waferId, i);
-	    if (isBadStrip(ctx, &stripDetElStatus, *m_stripID, waferHash_cache, stripIdent)) {
+	for (std::int16_t strip_i = iFirstStrip; strip_i < iMaxStrip; strip_i++) {
+	    if (isBadStrip(&stripDetElStatus, waferHash, strip_i)) {
 		// Bad strip, throw it out to minimize useless work.
-		ATH_MSG_DEBUG("Bad strip encountered:" << stripIdent
-			      << ", wafer is: " << waferId);
-		badStripOnModule = true;
+               ATH_MSG_DEBUG("Bad strip encountered on module " << waferHash << " : "
+                              << m_stripID->strip_id(waferId, strip_i)
+			      << ", wafer is: " << waferId << " strip is "<< strip_i
+                              << " hash " << m_stripID->wafer_hash(waferId));
 	    } else {
 		// Good strip!
-		cells.emplace_back(i, stripIdent, std::move(timePattern));
+
+               std::array<std::int16_t,1> coordinates{strip_i};
+               cellContainer.emplace_back_cell(coordinates, rdo_i);
 	    }
 	}
     }
 
-    return std::make_pair(std::move(cells), badStripOnModule);
+    return rangeGuard.moduleCellSpan();
 }
 
 } // namespace ActsTrk
