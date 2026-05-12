@@ -381,7 +381,7 @@ StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer* v0Container,
 
             std::unique_ptr<xAOD::Vertex> myVxCandidate;
             if (m_useV0Fitter) {
-              myVxCandidate = std::unique_ptr<xAOD::Vertex>( m_concreteVertexFitter->fit(pairV0, startingPoint) );
+              myVxCandidate = m_concreteVertexFitter->fit(ctx, pairV0, startingPoint);
             } else {
               myVxCandidate = m_iVKVertexFitter->fit(ctx, pairV0, startingPoint);
             }
@@ -839,21 +839,21 @@ std::unique_ptr<xAOD::Vertex> InDetV0FinderTool::massFit(const EventContext& ctx
   }
   if (pdgID ==   310) {
     if (m_useV0Fitter) {
-      vxCandidate = std::unique_ptr<xAOD::Vertex>( m_concreteVertexFitter->fit(pairV0, masses, m_massK0S, nullptr, vertex) );
+      vxCandidate = m_concreteVertexFitter->fit(ctx, pairV0, masses, m_massK0S, nullptr, vertex);
     } else {
       vxCandidate = m_iKshortFitter->fit(ctx, pairV0, vertex);
     }
   }
   if (pdgID ==  3122) {
     if (m_useV0Fitter) {
-      vxCandidate = std::unique_ptr<xAOD::Vertex>( m_concreteVertexFitter->fit(pairV0, masses, m_massLambda, nullptr, vertex) );
+      vxCandidate = m_concreteVertexFitter->fit(ctx, pairV0, masses, m_massLambda, nullptr, vertex);
     } else {
       vxCandidate = m_iLambdaFitter->fit(ctx, pairV0, vertex);
     }
   }
   if (pdgID == -3122) {
     if (m_useV0Fitter) {
-      vxCandidate = std::unique_ptr<xAOD::Vertex>( m_concreteVertexFitter->fit(pairV0, masses, m_massLambda, nullptr, vertex) );
+      vxCandidate = m_concreteVertexFitter->fit(ctx, pairV0, masses, m_massLambda, nullptr, vertex);
     } else {
       vxCandidate = m_iLambdabarFitter->fit(ctx, pairV0, vertex);
     }
