@@ -38,7 +38,7 @@ def MeasToSimHitAssocAlgCfg(flags, name="MeasToSimHitConvAlg", **kwargs):
     result.addEventAlgo(the_alg, primary = True)    
     return result
 
-def TruthHitAssociationCfg(flags):
+def TruthHitAssociationCfg(flags, suffix = ""):
     result = ComponentAccumulator()
     if not flags.Input.isMC:
         return result
@@ -56,7 +56,7 @@ def TruthHitAssociationCfg(flags):
         else:
             simHits = "sTGC_SDO"
         result.merge(MeasToSimHitAssocAlgCfg(flags,
-                                             name=f"Muon{cont_name}ToSimHitAssoc",
+                                             name=f"Muon{cont_name}ToSimHitAssoc{suffix}",
                                              SimHits = simHits,
                                              Measurements=cont_name))
     return result
@@ -147,24 +147,49 @@ def TrackToTruthPartAssocCfg(flags, **kwargs):
     result.addEventAlgo(the_alg, primary = True)
     return result
 
+# Fragment for algs producing (and decorating) truth objects
+def MuonTruthObjCreatorsCfg(flags, useSDO=True):
+    result = ComponentAccumulator()
+    if not flags.Muon.setupTruthAlgorithms:
+        return result
+
+    from MuonConfig.MuonTruthAlgsConfig import TruthMuonMakerAlgCfg
+    result.merge(TruthMuonMakerAlgCfg(flags))
+    result.merge(SimHitToTruthPartAlgCfg(flags, useSDO = useSDO))
+    result.merge(TruthSegmentMakerCfg(flags, useSDO = useSDO))
+    result.merge(TruthSegmentToTruthPartAssocCfg(flags))
+    result.merge(TruthHitSummaryAlgCfg(flags))
+    return result
+
+# Fragment for algs associating reco objects to truth objects
+def MuonRecoTruthAssocCfg(flags, useSDO=True, suffix = ""):
+    result = ComponentAccumulator()
+    if not flags.Muon.setupTruthAlgorithms:
+        return result
+
+    if useSDO:
+        result.merge(TruthHitAssociationCfg(flags, suffix=suffix))
+
+    result.merge(RecoSegmentTruthAssocCfg(flags, name=f"MuonSegmentsFromR4TruthMatching{suffix}",
+                                                 SegmentKey="MuonSegmentsFromR4"))
+
+    from MuonObjectMarker.ObjectMarkerConfig import TruthMeasMarkerAlgCfg
+    result.merge(TruthMeasMarkerAlgCfg(flags, name = f"TruthMeasMarkerAlg{suffix}"))
+    return result
 
 @AccumulatorCache
 def MuonTruthAlgsCfg(flags, useSDO=True, recoAssoc = True):
     result = ComponentAccumulator()
     if not flags.Muon.setupTruthAlgorithms:
         return result
-    if useSDO and recoAssoc:
-        result.merge(TruthHitAssociationCfg(flags))
-   
-    from MuonConfig.MuonTruthAlgsConfig import TruthMuonMakerAlgCfg
-    result.merge(TruthMuonMakerAlgCfg(flags))
-    result.merge(SimHitToTruthPartAlgCfg(flags, useSDO = useSDO))
-    result.merge(TruthSegmentMakerCfg(flags, useSDO = useSDO))
-    result.merge(TruthHitSummaryAlgCfg(flags))
+    
+    result.merge(MuonTruthObjCreatorsCfg(flags, useSDO=useSDO))
 
+    if recoAssoc:
+        result.merge(MuonRecoTruthAssocCfg(flags, useSDO=useSDO))
+   
     # result.merge(MuonTruthHitCountsAlgCfg(flags))
     #### Disable for the moment because tracking geometry explodes for R4
     ### from MuonConfig.MuonTruthAlgsConfig import MuonTruthAddTrackRecordsAlgCfg
     ### result.merge(MuonTruthAddTrackRecordsAlgCfg(flags))
-    result.merge(TruthSegmentToTruthPartAssocCfg(flags))
     return result

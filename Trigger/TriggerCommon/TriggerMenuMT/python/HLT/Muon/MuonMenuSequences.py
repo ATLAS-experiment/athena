@@ -408,6 +408,22 @@ def muEFSAAlgSequenceCfg(flags, is_probe_leg=False, useBucketFilter=False, useNe
 
     #Clone and replace offline flags so we can set muon trigger specific values
     muonflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon')
+
+    truthAlgs = ComponentAccumulator()
+    if muonflags.Muon.setupTruthAlgorithms:
+        loadFromSG = [( 'xAOD::MuonSimHitContainer' , 'StoreGateSvc+MDT_SDO' ),
+                      ( 'xAOD::MuonSimHitContainer' , 'StoreGateSvc+MM_SDO' ),
+                      ( 'xAOD::MuonSimHitContainer' , 'StoreGateSvc+RPC_SDO' ),
+                      ( 'xAOD::MuonSimHitContainer' , 'StoreGateSvc+TGC_SDO' ),
+                      ( 'xAOD::MuonSimHitContainer' , 'StoreGateSvc+sTGC_SDO' )]
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        truthAlgs.merge(SGInputLoaderCfg(muonflags, loadFromSG))
+        
+        from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
+        truthAlgs.merge(GEN_AOD2xAODCfg(muonflags))
+        from MuonTruthAlgsR4.MuonTruthAlgsConfig import MuonTruthObjCreatorsCfg
+        truthAlgs.merge(MuonTruthObjCreatorsCfg(muonflags, useSDO=True))
+
     from .MuonRecoSequences import muEFSARecoSequenceCfg, muonDecodeCfg
     #Run decoding again since we are using updated RoIs
     recoMS.mergeReco(muonDecodeCfg(muonflags,RoIs=viewName+"RoIs"))
@@ -417,7 +433,7 @@ def muEFSAAlgSequenceCfg(flags, is_probe_leg=False, useBucketFilter=False, useNe
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Muon
     prefetch=ROBPrefetchingAlgCfg_Muon(flags, nameSuffix=viewName+'_probe' if is_probe_leg else viewName)
-    selAccMS.mergeReco(recoMS, robPrefetchCA=prefetch)
+    selAccMS.mergeReco(recoMS, robPrefetchCA=prefetch, upSequenceCA=truthAlgs)
 
     return (selAccMS, sequenceOut)
 
