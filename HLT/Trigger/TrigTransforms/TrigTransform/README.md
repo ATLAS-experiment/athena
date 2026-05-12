@@ -4,7 +4,7 @@
 ### Trig_reco_tf.py
 Based on Reco_tf.py this transform runs both rerunning the trigger and the reconstruction of this output.
 
-- Rerunning the trigger can be done using athenaHLT or athena, and can be configured to run from the trigger database.
+- Rerunning the trigger can be done using athenaHLT/EF or athena, and can be configured to run from the trigger database.
 - Outputs are renamed by the transform in cases where the argument name isn't handled directly
 - Reconstruction can be set to run in the same job or separately (at which point should be identical to running Reco_tf.py)
 
