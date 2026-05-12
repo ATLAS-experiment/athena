@@ -235,7 +235,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
             phits_all.push_back(sharedHit);
             if(m_noHitFilter) {
                 phits_1st.push_back(sharedHit);
-                phits_2nd.push_back(sharedHit);
+                phits_2nd.push_back(std::move(sharedHit));
                 if(hit->isStrip()) phits_strips.push_back(hit);
             }
         }

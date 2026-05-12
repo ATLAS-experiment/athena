@@ -774,6 +774,7 @@ void StripGmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccess
             }
     }
     if (mapFPV.empty()) ATH_MSG_ERROR("Could not find any FPV tables under the expected names: "<<publishers);
+    std::pair<std::string, int> extraIndex{etaStr, 0}; // eventually specify in XML the field to split in?
     for (const auto&[fullPhysVolInfoString, fullPhysVolPointer] : mapFPV){
         //find the name of the corresponding detector design type
         size_t startRG = fullPhysVolInfoString.find("RG_");
@@ -795,13 +796,13 @@ void StripGmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccess
         }
         //now check if we need to split
         size_t splitPos = fullPhysVolInfoString.find("split_");
+        
         if(splitPos!=std::string::npos){
             size_t last = fullPhysVolInfoString.find('_',splitPos+6);//"split_" is 6 characters
             std::string strNew = fullPhysVolInfoString.substr(splitPos+6,last-(splitPos+6));
             int splitLevel = std::stoi(strNew);
             for(int i=0;i<splitLevel;i++){
-              std::string field = etaStr;//eventually specify in Xml the field to split in?
-              std::pair<std::string,int> extraIndex(field,i);
+              extraIndex.second = i;
               addSplitSensor(typeName,index,extraIndex,0,fullPhysVolPointer,splitLevel);
             }
         }
