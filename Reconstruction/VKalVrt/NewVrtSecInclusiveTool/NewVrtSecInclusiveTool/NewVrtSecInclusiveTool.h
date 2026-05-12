@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -89,13 +89,14 @@ namespace Rec {
       virtual ~NewVrtSecInclusiveTool();
 
 
-      StatusCode initialize();
-      StatusCode finalize();
+      virtual StatusCode initialize() override;
+      virtual StatusCode finalize() override;
 
 
 
-      std::unique_ptr<Trk::VxSecVertexInfo> findAllVertices(const std::vector<const xAOD::TrackParticle*> & inputTracks,
-                                                                                     const xAOD::Vertex & primaryVertex) const final;
+      virtual std::unique_ptr<Trk::VxSecVertexInfo> findAllVertices(const EventContext& ctx,
+                                                            const std::vector<const xAOD::TrackParticle*> & inputTracks,
+                                                            const xAOD::Vertex & primaryVertex) const override final;
 //------------------------------------------------------------------------------------------------------------------
 // Private data and functions
 //
@@ -329,8 +330,9 @@ namespace Rec {
 //   Private technical functions
 //
 //
-      std::vector<xAOD::Vertex*> getVrtSecMulti(  workVectorArrxAOD * inpParticlesxAOD, const xAOD::Vertex  & primVrt,
-                                                  compatibilityGraph_t& compatibilityGraph ) const;
+      std::vector<xAOD::Vertex*> getVrtSecMulti( const EventContext& ctx,
+                                                 workVectorArrxAOD * inpParticlesxAOD, const xAOD::Vertex  & primVrt,
+                                                 compatibilityGraph_t& compatibilityGraph ) const;
 
 
       void printWrkSet(const std::vector<WrkVrt> * WrkSet, const std::string &name ) const;

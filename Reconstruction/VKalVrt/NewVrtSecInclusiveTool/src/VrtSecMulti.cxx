@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 ///
 ///    @author Vadim Kostyukhin <vadim.kostyukhin@cern.ch>
@@ -26,9 +26,10 @@
 namespace Rec{
 
 
-   std::vector<xAOD::Vertex*> NewVrtSecInclusiveTool::getVrtSecMulti(  workVectorArrxAOD * xAODwrk,
-                                                                       const xAOD::Vertex & primVrt,
-                                                                       compatibilityGraph_t& compatibilityGraph )
+   std::vector<xAOD::Vertex*> NewVrtSecInclusiveTool::getVrtSecMulti( const EventContext& ctx,
+                                                                      workVectorArrxAOD * xAODwrk,
+                                                                      const xAOD::Vertex & primVrt,
+                                                                      compatibilityGraph_t& compatibilityGraph )
    const
    {
 
@@ -474,11 +475,11 @@ namespace Rec{
              h.m_hb_r2d->Fill( curVrt.vertex.perp(), m_w_1);
           } 
 //--- Re-fit with full error matrix and xAOD::Vertex creation
-          xAOD::Vertex * tmpVertex=nullptr;
+          std::unique_ptr<xAOD::Vertex> tmpVertex;
           if(nth>1){                                    //-- Common case with full refit
-             tmpVertex=m_fitSvc->fit(xAODwrk->tmpListTracks,curVrt.vertex,*state);
+             tmpVertex=m_fitSvc->fit(ctx,xAODwrk->tmpListTracks,curVrt.vertex,*state);
           } else if(nth==1){                            //-- Special case for 1-track vertex
-             tmpVertex=new (std::nothrow) xAOD::Vertex();
+             tmpVertex=std::make_unique<xAOD::Vertex>();
              if(!tmpVertex)continue;
              tmpVertex->makePrivateStore();
              tmpVertex->setPosition(curVrt.vertex);
@@ -507,7 +508,8 @@ namespace Rec{
             nTrksDec(*tmpVertex) =curVrt.selTrk.size();
             vChrgTot(*tmpVertex) =curVrt.vertexCharge;
             tmpVertex->setVertexType(xAOD::VxType::SecVtx);
-            finalVertices.push_back(tmpVertex);
+            // Transferring ownership to caller (usually taken by VxSecVertexInfo)
+            finalVertices.push_back(tmpVertex.release());
             for (int ind=0; ind<nth; ind++) {
               m_chi2_toSV(*xAODwrk->listSelTracks[curVrt.selTrk[ind]]) = curVrt.chi2PerTrk[ind] > FLT_MAX ? FLT_MAX : curVrt.chi2PerTrk[ind];
             }
