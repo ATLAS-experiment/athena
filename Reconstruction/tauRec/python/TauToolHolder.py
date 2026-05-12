@@ -565,7 +565,7 @@ def Pi0ClusterCreatorCfg(flags):
     TauPi0ClusterCreator = CompFactory.getComp("TauPi0ClusterCreator")
     TauPi0ClusterCreator = TauPi0ClusterCreator(name = _name,
                                                 ExtraInputs = extraInputs,
-                                                RecoFromAOD = flags.Tau.ActiveConfig.inTauLRT)
+                                                RecoFromAOD = flags.Common.ProductionStep is ProductionStep.Derivation)
 
     result.setPrivateTools(TauPi0ClusterCreator)
     return result
