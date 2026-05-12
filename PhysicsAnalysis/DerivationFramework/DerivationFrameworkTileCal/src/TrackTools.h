@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -38,14 +38,15 @@ class TrackTools: public extends<AthAlgTool, ITrackTools> {
                                        const CaloCellContainer* input,
                                        ConstDataVector<CaloCellContainer>* output,
                                        double cone,
-                                       bool includelar) const override;
+                                       bool includelar,
+                                       const EventContext& ctx) const override;
 
-    std::vector< double > getXYZEtaPhiInCellSampling(const TRACK* track, const CaloCell *cell) const override;
-    std::vector< double > getXYZEtaPhiInCellSampling(const TRACK* track, CaloSampling::CaloSample sampling) const override;
-    std::unique_ptr<const Trk::TrackParameters> getTrackInCellSampling(const TRACK* track, CaloSampling::CaloSample sampling) const override;
-    std::vector< std::vector<double> > getXYZEtaPhiPerLayer(const TRACK* track) const override;
-    std::vector< std::vector<double> > getXYZEtaPhiPerSampling(const TRACK* track) const override;
-    double getPathInsideCell(const TRACK *track, const CaloCell *cell) const override;
+    std::vector< double > getXYZEtaPhiInCellSampling(const TRACK* track, const CaloCell *cell, const EventContext& ctx) const override;
+    std::vector< double > getXYZEtaPhiInCellSampling(const TRACK* track, CaloSampling::CaloSample sampling, const EventContext& ctx) const override;
+    std::unique_ptr<const Trk::TrackParameters> getTrackInCellSampling(const TRACK* track, CaloSampling::CaloSample sampling, const EventContext& ctx) const override;
+    std::vector< std::vector<double> > getXYZEtaPhiPerLayer(const TRACK* track, const EventContext& ctx) const override;
+    std::vector< std::vector<double> > getXYZEtaPhiPerSampling(const TRACK* track, const EventContext& ctx) const override;
+    double getPathInsideCell(const TRACK *track, const CaloCell *cell, const EventContext& ctx) const override;
     double getPath(const CaloCell* cell, const Trk::TrackParameters *entrance, const Trk::TrackParameters *exit) const override;
     int retrieveIndex(int sampling, float eta) const override;
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_IUNASSOCIATEDHITSGETTERTOOL_H
@@ -9,6 +9,7 @@
 
 #include "DerivationFrameworkInDet/MinBiasPRDAssociation.h"
 
+class EventContext;
 
 class IUnassociatedHitsGetterTool : virtual public IAlgTool
 {
@@ -25,7 +26,7 @@ class IUnassociatedHitsGetterTool : virtual public IAlgTool
    *
    * This is implemented in terms of @c getTypeinfo().
    */
-  virtual const MinBiasPRDAssociation* get (bool allowMissing = false) const = 0;
+  virtual const MinBiasPRDAssociation* get (const EventContext& ctx, bool allowMissing = false) const = 0;
 
   /**
    * @brief Type-safe wrapper for @c releaseObjectUntyped.

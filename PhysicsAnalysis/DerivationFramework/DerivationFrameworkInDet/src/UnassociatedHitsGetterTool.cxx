@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkInDet/UnassociatedHitsGetterTool.h"
@@ -44,8 +44,7 @@ StatusCode UnassociatedHitsGetterTool::initialize(){
   return StatusCode::SUCCESS;
 }
   
-const MinBiasPRDAssociation* UnassociatedHitsGetterTool::get (bool /*allowMissing*/) const {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
+  const MinBiasPRDAssociation* UnassociatedHitsGetterTool::get (const EventContext& ctx, bool /*allowMissing*/) const {
 
   // If we fail to find something we need in SG on the first call,
   // issue a warning and don't try again (this can happen if we're
