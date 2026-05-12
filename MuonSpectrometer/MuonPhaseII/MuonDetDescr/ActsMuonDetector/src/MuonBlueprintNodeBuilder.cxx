@@ -556,13 +556,13 @@ MuonBlueprintNodeBuilder::getPassiveMaterialSurfaces(
       case ChIdx::EMS :{
         side > 0 ? zShift = minZ - margin : zShift = maxZ + margin;
         trf = Amg::getTranslateZ3D(zShift);
-        auto surface = Acts::Surface::makeShared<Acts::DiscSurface>(trf, std::make_shared<Acts::RadialBounds>(0., rMax));
+        auto surface = Acts::Surface::makeShared<Acts::DiscSurface>(trf, std::make_shared<Acts::RadialBounds>(rMin, rMax));
         const auto [nBins1, nBins2] = getMaterialBins(testCh->chamberIndex());
         surface->assignSurfaceMaterial(preparePassiveMaterial(surface->bounds(), nBins1, nBins2));
         surfaces.push_back(surface);
         break;
         //large sectors (disc passive surface after NSW/EIL and after EML)
-      } case ChIdx::EIL :
+    } case ChIdx::EIL :
       case ChIdx::EML : {
         // HARDCODED!! (maybe think a better solution in the future) 
         // But for the EIL that we put after the EIS/EIL chambers we extend the radius of the disc surface 
@@ -573,7 +573,7 @@ MuonBlueprintNodeBuilder::getPassiveMaterialSurfaces(
         side > 0 ? zShift = maxZ + margin : zShift = minZ - margin;
         trf = Amg::getTranslateZ3D(zShift);
         auto surface = Acts::Surface::makeShared<Acts::DiscSurface>(trf, 
-                             std::make_shared<Acts::RadialBounds>(0., rMax));
+                             std::make_shared<Acts::RadialBounds>(rMin, rMax));
         const auto [nBins1, nBins2] = getMaterialBins(testCh->chamberIndex());
         surface->assignSurfaceMaterial(preparePassiveMaterial(surface->bounds(), nBins1, nBins2));
         surfaces.push_back(surface);
