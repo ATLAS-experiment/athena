@@ -84,10 +84,6 @@ def _configureReadAthenaPool():
         svcMgr += CfgMgr.AthenaPoolAddressProviderSvc ("AthenaPoolAddressProviderSvc")
     svcMgr.ProxyProviderSvc.ProviderNames += [ "AthenaPoolAddressProviderSvc" ]
 
-    # Set up DataVector/DataProxyStorage backwards compatibility.
-    #from DataModelAthenaPool import DataModelCompatSvc
-    svcMgr += CfgMgr.DataModelCompatSvc()
-
     # Always want AddressRemappingSvc, since that's responsible for suppressing
     # the read of objects that are produced by a WriteHandle.
     from SGComps.AddressRemappingSvc import getAddressRemappingSvc

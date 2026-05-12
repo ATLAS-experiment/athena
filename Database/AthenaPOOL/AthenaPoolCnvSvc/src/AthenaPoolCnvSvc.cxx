@@ -33,9 +33,6 @@
 //______________________________________________________________________________
 // Initialize the service.
 StatusCode AthenaPoolCnvSvc::initialize() {
-   // Initialize DataModelCompatSvc
-   ServiceHandle<IService> dmcsvc("DataModelCompatSvc", this->name());
-   ATH_CHECK(dmcsvc.retrieve());
    // Retrieve PoolSvc
    ATH_CHECK(m_poolSvc.retrieve());
    // Retrieve ClassIDSvc
