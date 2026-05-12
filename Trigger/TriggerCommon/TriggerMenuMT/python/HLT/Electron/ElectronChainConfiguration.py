@@ -5,7 +5,7 @@ logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 from ..Config.ChainConfigurationBase import ChainConfigurationBase
-from ..CommonSequences.CaloSequences import fastCaloSequenceGenCfg, fastCaloCalibSequenceGenCfg
+from ..CommonSequences.CaloSequences import fastCaloSequenceGenCfg
 from ..CommonSequences.CaloSequences_FWD import fastCalo_FWDSequenceGenCfg
 from ..Electron.FastElectronMenuSequences import fastElectronSequenceGenCfg, fastElectron_LRTSequenceGenCfg
 from ..Electron.FastTrackingMenuSequences import fastTrackingSequenceGenCfg, fastTracking_LRTSequenceGenCfg
@@ -88,10 +88,7 @@ class ElectronChainConfiguration(ChainConfigurationBase):
             if "etcut" in self.chainPart['addInfo']:
                 return stepNames
         else:
-            if 'calibringer' in self.chainPart['calibInfo']:
-                stepNames+=['getFastCaloCalib']
-            else:
-                stepNames += ['getFastCalo']
+            stepNames += ['getFastCalo']
 
         # Step2
         # Now lets do Fast Electron. Possible Flavours:
@@ -221,10 +218,6 @@ class ElectronChainConfiguration(ChainConfigurationBase):
     def getFastCalo(self, flags, is_probe_leg=False):
         stepName       = "FastCalo_electron"
         return self.getStep(flags, stepName,[fastCaloSequenceGenCfg], name='Electron', is_probe_leg=is_probe_leg)
-
-    def getFastCaloCalib(self, flags, is_probe_leg=False):
-        stepName       = "FastCalo_electronCalib"
-        return self.getStep(flags, stepName,[fastCaloCalibSequenceGenCfg], name='Electron', is_probe_leg=is_probe_leg)
 
     def getFastTracking(self, flags, is_probe_leg=False):
         stepName = "fast_tracking"
