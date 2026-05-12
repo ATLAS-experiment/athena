@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "METMakerAlg.h"
@@ -29,7 +29,7 @@ namespace met {
 
   METMakerAlg::METMakerAlg(const std::string& name,
 			   ISvcLocator* pSvcLocator )
-    : ::AthAlgorithm( name, pSvcLocator ),
+    : ::AthReentrantAlgorithm( name, pSvcLocator ),
     m_metKey(""),
     m_metmaker(this),  
     m_muonSelTool(this,""),
@@ -117,16 +117,16 @@ namespace met {
 
   //**********************************************************************
 
-  StatusCode METMakerAlg::execute() {
+  StatusCode METMakerAlg::execute(const EventContext& ctx) const {
     ATH_MSG_VERBOSE("Executing " << name() << "...");
 
     // Create a MissingETContainer with its aux store
-    auto ctx = getContext();
     auto metHandle= SG::makeHandle (m_metKey,ctx);
-    ATH_CHECK( metHandle.record (std::make_unique<xAOD::MissingETContainer>(),                      std::make_unique<xAOD::MissingETAuxContainer>()) );
+    ATH_CHECK( metHandle.record (std::make_unique<xAOD::MissingETContainer>(),
+                                 std::make_unique<xAOD::MissingETAuxContainer>()) );
     xAOD::MissingETContainer* newMet=metHandle.ptr();
 
-    SG::ReadHandle<xAOD::MissingETAssociationMap> metMap(m_metMapKey);
+    SG::ReadHandle<xAOD::MissingETAssociationMap> metMap(m_metMapKey, ctx);
     if (!metMap.isValid()) {
       ATH_MSG_WARNING("Unable to retrieve MissingETAssociationMap: " << m_metMapKey.key());
       return StatusCode::FAILURE;
@@ -136,7 +136,7 @@ namespace met {
     // Retrieve containers ***********************************************
 
     /// MET
-    SG::ReadHandle<xAOD::MissingETContainer> coreMet(m_CoreMetKey);
+    SG::ReadHandle<xAOD::MissingETContainer> coreMet(m_CoreMetKey, ctx);
     if (!coreMet.isValid()) {
       ATH_MSG_WARNING("Unable to retrieve MissingETContainer: " << m_CoreMetKey.key());
       return StatusCode::FAILURE;
@@ -144,35 +144,35 @@ namespace met {
 
 
     /// Jets
-    SG::ReadHandle<xAOD::JetContainer> Jets(m_JetContainerKey);
+    SG::ReadHandle<xAOD::JetContainer> Jets(m_JetContainerKey, ctx);
     if (!Jets.isValid()) {
       ATH_MSG_WARNING("Unable to retrieve JetContainer: " << Jets.key());
       return StatusCode::FAILURE;
     }
 
     /// Electrons
-    SG::ReadHandle<xAOD::ElectronContainer> Electrons(m_ElectronContainerKey);
+    SG::ReadHandle<xAOD::ElectronContainer> Electrons(m_ElectronContainerKey, ctx);
     if (!Electrons.isValid()) {
       ATH_MSG_WARNING("Unable to retrieve ElectronContainer: " << Electrons.key());
       return StatusCode::FAILURE;
     }
 
     /// Photons
-    SG::ReadHandle<xAOD::PhotonContainer> Gamma(m_PhotonContainerKey);
+    SG::ReadHandle<xAOD::PhotonContainer> Gamma(m_PhotonContainerKey, ctx);
     if (!Gamma.isValid()) {
       ATH_MSG_WARNING("Unable to retrieve GammaContainer: " << Gamma.key());
       return StatusCode::FAILURE;
     }
 
     /// Taus
-    SG::ReadHandle<xAOD::TauJetContainer> TauJets(m_TauJetContainerKey);
+    SG::ReadHandle<xAOD::TauJetContainer> TauJets(m_TauJetContainerKey, ctx);
     if (!TauJets.isValid()) {
       ATH_MSG_WARNING("Unable to retrieve TauJetContainer: " << TauJets.key());
       return StatusCode::FAILURE;
     }
 
     /// Muons
-    SG::ReadHandle<xAOD::MuonContainer> Muons(m_MuonContainerKey);
+    SG::ReadHandle<xAOD::MuonContainer> Muons(m_MuonContainerKey, ctx);
     if (!Muons.isValid()) {
       ATH_MSG_WARNING("Unable to retrieve MuonContainer: "  << Muons.key());
       return StatusCode::FAILURE;
@@ -277,28 +277,26 @@ namespace met {
 
   //**********************************************************************
 
-  bool METMakerAlg::accept(const xAOD::Muon* mu)
+  bool METMakerAlg::accept(const xAOD::Muon* mu) const
   {
     if( mu->pt()<2.5e3 || mu->pt()/cosh(mu->eta())<4e3 ) return false;
     return static_cast<bool>(m_muonSelTool->accept(*mu));
   }
 
-  bool METMakerAlg::accept(const xAOD::Electron* el)
+  bool METMakerAlg::accept(const xAOD::Electron* el) const
   {
     if( fabs(el->eta())>2.47 || el->pt()<10e3 ) return false;
     return static_cast<bool> (m_elecSelLHTool->accept(el));
   }
 
-  bool METMakerAlg::accept(const xAOD::Photon* ph)
+  bool METMakerAlg::accept(const xAOD::Photon* ph) const
   {
     if( !(ph->author()&20) || fabs(ph->eta())>2.47 || ph->pt()<10e3 ) return false;
     return static_cast<bool> (m_photonSelIsEMTool->accept(ph));
   }
 
-  bool METMakerAlg::accept(const xAOD::TauJet* tau)
+  bool METMakerAlg::accept(const xAOD::TauJet* tau) const
   { 
-  // std::cout<<"Just checking this works -> tau pt is "<<tau->pt()<<std::endl;
-
     return static_cast<bool>(m_tauSelTool->accept( *tau ));
   }
 
