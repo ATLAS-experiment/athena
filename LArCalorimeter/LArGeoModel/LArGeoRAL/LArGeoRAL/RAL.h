@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARGEORAL_RAL_H
@@ -20,7 +20,7 @@ namespace LArGeo {
     RAL() = default;
     virtual ~RAL() = default;
     
-    virtual double GetValue(const std::string&, 
+    virtual double GetValue(const std::string_view, 
                             const int i0 = INT_MIN,
                             const int i1 = INT_MIN,
                             const int i2 = INT_MIN,
