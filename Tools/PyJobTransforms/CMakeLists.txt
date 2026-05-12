@@ -24,7 +24,9 @@ function( _add_test test type timeout )
       SCRIPT test/test_${test}.${type}
       PROPERTIES WORKING_DIRECTORY ${_testdir}
       PROPERTIES TIMEOUT ${timeout}
-      POST_EXEC_SCRIPT nopost.sh )
+      # Expected errors
+      LOG_IGNORE_PATTERN "Output cannot be recognised|An ERROR message|A FATAL error message|will be suppressed|An error message number|Legacy configuration requested|Fatal error in athena logfile|message number 11|TileMon reported an ERROR"
+      POST_EXEC_SCRIPT noerror.sh )
 endfunction( _add_test )
 
 # Tests in the package:
