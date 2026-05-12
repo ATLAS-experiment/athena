@@ -127,26 +127,6 @@ namespace pool {
    }
 
 
-   void
-   ImplicitCollection::commit(bool)
-   {
-   }
-
-
-   void
-   ImplicitCollection::close()
-   {
-      // can't be closed
-   }
-
-
-   void
-   ImplicitCollection::open()
-   {
-      // hmm, no-op at the moment  //MN
-   }
-
-
    const CollectionDescription& ImplicitCollection::description() const
    {
       return m_description;
