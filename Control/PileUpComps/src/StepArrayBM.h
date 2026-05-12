@@ -1,7 +1,7 @@
 /*  -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PILEUPCOMPS_STEPARRAYBM
@@ -12,7 +12,6 @@
  * repeated for the entire beam xing range.
  * The Gaudi::Property<std::vector<float>> SignalPattern describes the positions at which signal events will be placed (and hence which xings are simulated)
  * This BeamIntensity service sequentially steps through the bunch crossings of the provided pattern
- * $Id: BkgStreamsStepCache.h,v 1.10 2008-08-28 01:11:06 calaf Exp $
  * @author Will Buttinger - ATLAS Collaboration
  */
 #include "GaudiKernel/ContextSpecificPtr.h"
@@ -47,7 +46,7 @@ public:
     return m_largestElementInPattern*m_intensityPattern[ index ];
   }
   virtual float largestElementInPattern() const override final { return m_largestElementInPattern; }
-  virtual void selectT0(unsigned int run, unsigned long long event) override final;
+  virtual void selectT0(const EventContext& ctx) override final;
   virtual unsigned int getCurrentT0BunchCrossing() const override final { return m_t0Offset; }
   virtual unsigned int getBeamPatternLength() const override final { return m_ipLength; }
   //@}

@@ -187,17 +187,16 @@ StatusCode BatchedMinbiasSvc::initialize() {
 }
 
 std::size_t BatchedMinbiasSvc::calcMBRequired(std::int64_t hs_id,
-                                              std::size_t /*slot*/,
-                                              unsigned int run,
-                                              unsigned int lumi,
-                                              std::uint64_t event) {
+                                              const EventContext& ctx) {
   const int n_bunches = m_latestDeltaBC.value() - m_earliestDeltaBC.value() + 1;
   FastReseededPRNG prng{m_seed.value(), hs_id};
 
   // First apply the beam luminosity SF
   bool sf_updated_throwaway;
   const float beam_lumi_sf =
-      m_useBeamLumi ? m_beamLumi->scaleFactor(run, lumi, sf_updated_throwaway)
+      m_useBeamLumi ? m_beamLumi->scaleFactor(ctx.eventID().run_number(),
+                                              ctx.eventID().lumi_block(),
+                                              sf_updated_throwaway)
                     : 1.f;
   std::vector<float> avg_num_mb_by_bunch(n_bunches,
                                          beam_lumi_sf * m_nPerBunch.value());
@@ -205,7 +204,7 @@ std::size_t BatchedMinbiasSvc::calcMBRequired(std::int64_t hs_id,
   if (m_useBeamInt) {
     // Supposed to be once per event, but ends up running once per minbias type
     // per event now
-    m_beamInt->selectT0(run, event);
+    m_beamInt->selectT0(ctx);
     for (int bunch = m_earliestDeltaBC.value();
          bunch <= m_latestDeltaBC.value(); ++bunch) {
       std::size_t idx = bunch - m_earliestDeltaBC.value();
@@ -213,7 +212,7 @@ std::size_t BatchedMinbiasSvc::calcMBRequired(std::int64_t hs_id,
     }
   }
 
-  std::vector<std::uint64_t>& num_mb_by_bunch = *m_num_mb_by_bunch.get();  // FIXME ctx
+  std::vector<std::uint64_t>& num_mb_by_bunch = *m_num_mb_by_bunch.get(ctx);
   num_mb_by_bunch.clear();
   num_mb_by_bunch.resize(n_bunches);
 
@@ -230,7 +229,7 @@ std::size_t BatchedMinbiasSvc::calcMBRequired(std::int64_t hs_id,
   }
 
   std::uint64_t num_mb = ranges::accumulate(num_mb_by_bunch, 0UL);
-  std::vector<std::uint64_t>& index_array = *m_idx_lists.get();  // FIXME ctx
+  std::vector<std::uint64_t>& index_array = *m_idx_lists.get(ctx);
   const std::uint64_t mbBatchSize = m_MBBatchSize.value();
   // Prevent running out of events
   if (num_mb > mbBatchSize) {
@@ -284,10 +283,8 @@ StatusCode BatchedMinbiasSvc::beginHardScatter(const EventContext& ctx) {
   std::chrono::steady_clock::time_point order_wait_start{};
   const std::int64_t hs_id = get_hs_id(ctx);
   const int batch = event_to_batch(hs_id);
-  calcMBRequired(hs_id, ctx.slot(),
-                 ctx.eventID().run_number(),  // don't need the total, only
-                 ctx.eventID().lumi_block(),  // need to populate the arrays
-                 ctx.eventID().event_number());
+  calcMBRequired(hs_id, ctx);  // don't need the total, only need to populate the arrays
+
   while (true) {
     if (m_cache.count(batch) != 0) {
       // batch already loaded

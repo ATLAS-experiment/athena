@@ -114,9 +114,7 @@ class BatchedMinbiasSvc : public extends<AthService, IMinbiasSvc> {
   std::vector<std::unique_ptr<std::atomic_int>> m_batch_use_count;
   std::atomic_int m_last_loaded_batch;
   int event_to_batch(std::int64_t hs_id);
-  std::size_t calcMBRequired(std::int64_t hs_id, std::size_t slot,
-                             unsigned int run, unsigned int lumi,
-                             std::uint64_t event);
+  std::size_t calcMBRequired(std::int64_t hs_id, const EventContext& ctx);
 };
 
 #endif  // PILEUPMT_BATCHEDMINBIASSVC_H

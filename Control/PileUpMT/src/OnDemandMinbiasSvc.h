@@ -102,9 +102,7 @@ class OnDemandMinbiasSvc final : public extends<AthService, IMinbiasSvc> {
   static constexpr std::size_t s_NoSlot =
       std::numeric_limits<std::size_t>::max();  // "slot" to pass when we don't
                                                 // have a slot
-  std::size_t calcMBRequired(std::int64_t hs_id, std::size_t slot,
-                             unsigned int run, unsigned int lumi,
-                             std::uint64_t event);
+  std::size_t calcMBRequired(std::int64_t hs_id, const EventContext& ctx);
 };
 
 #endif  // PILEUPMT_ONDEMANDMINBIASSVC_H

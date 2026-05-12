@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <algorithm> /*count_if,max_element*/
@@ -154,21 +154,17 @@ StatusCode ArrayBM::initialize()
   return StatusCode::SUCCESS;
 }
 
-void ArrayBM::selectT0(unsigned int run, unsigned long long event)
+void ArrayBM::selectT0(const EventContext& ctx)
 {
   if (m_seed == 0u) {
     // Use AthRNGSvc
-    const EventContext& ctx =
-        Gaudi::Hive::currentContext();  // not ideal, but seems the cleanest
-                                        // solution for now, as this call is
-                                        // once per event.
-    m_rngWrapper->setSeed("BEAMINT", ctx.slot(), event, run, ctx.evt());
+    m_rngWrapper->setSeed("BEAMINT", ctx);
     CLHEP::HepRandomEngine* rndmEngine = m_rngWrapper->getEngine(ctx);
     // m_biRandom->shoot() returns in range [0,1]
     m_t0Offset = static_cast<unsigned int>(
         floor((m_biRandom->shoot(rndmEngine) * m_ipLength) + 0.5));
   } else {
-    FastReseededPRNG prng{m_seed.value(), run, event};
+    FastReseededPRNG prng{m_seed.value(), ctx.eventID().run_number(), ctx.eventID().event_number()};
     m_t0Offset = (*m_t0Dist)(prng);
   }
   assert(m_intensityPattern[m_t0Offset % m_ipLength] > 0.0);  // just in case

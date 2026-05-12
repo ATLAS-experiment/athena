@@ -1,7 +1,7 @@
 /*  -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PILEUPCOMPS_ARRAYBM
@@ -11,7 +11,6 @@
  * The Gaudi::Property<std::vector<float>> describes the intensity pattern that is
  * repeated for the entire beam xing range.
  *
- * $Id: BkgStreamsCache.h,v 1.10 2008-08-28 01:11:06 calaf Exp $
  * @author Paolo Calafiura - ATLAS Collaboration
  */
 #include "GaudiKernel/ContextSpecificPtr.h"
@@ -46,7 +45,7 @@ public:
   //@{
   virtual float normFactor(int iXing) const override final;
   virtual float largestElementInPattern() const override final { return m_largestElementInPattern; }
-  virtual void selectT0(unsigned int run, unsigned long long event) override final;
+  virtual void selectT0(const EventContext& ctx) override final;
   virtual unsigned int getCurrentT0BunchCrossing() const override final { return m_t0Offset; }
   virtual unsigned int getBeamPatternLength() const override final { return m_ipLength; }
   //@}
