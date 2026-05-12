@@ -747,8 +747,8 @@ def getConfig_gTE():
 
 def getConfig_cXE():
     confObj = {
-        "jXeWeight": 0.55,
-        "gXeWeight": 0.45
+        "jXeWeight": 0.45,
+        "gXeWeight": 0.55
     }
     for param, value in confObj.items():
          # in L1Topo FW/ Sim weights become 10 bit unsigned values, 2 integer, 8 fractional bits
