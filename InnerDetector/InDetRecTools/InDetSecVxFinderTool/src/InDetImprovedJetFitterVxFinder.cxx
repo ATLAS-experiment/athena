@@ -120,7 +120,8 @@ namespace InDet
   }
   
 
-  Trk::VxSecVertexInfo* InDetImprovedJetFitterVxFinder::findSecVertex(const xAOD::Vertex & primaryVertex,
+  Trk::VxSecVertexInfo* InDetImprovedJetFitterVxFinder::findSecVertex(const EventContext& ctx,
+								      const xAOD::Vertex & primaryVertex,
 								      const TLorentzVector & jetMomentum,
 								      const std::vector<const xAOD::IParticle*> & inputTracks) const
   {
@@ -129,7 +130,6 @@ namespace InDet
     // The VxJetCandidate, the TwoTrackVerticesInJet (V0s and neutrals), the selected tracks (primary and secondary)
     // So we need to do track selection, v0 finding, and then the fit with JetFitter.
 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 //
 //    // Initial track selection, track filter applied, separate primary and secondary tracks
     const Trk::SelectedTracksInJet* mySelectedTracksInJet = m_theTrackSelector->doTrackSelection( primaryVertex, jetMomentum, inputTracks );
