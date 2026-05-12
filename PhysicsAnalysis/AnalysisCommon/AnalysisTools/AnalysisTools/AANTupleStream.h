@@ -84,7 +84,7 @@ private:
   /** @brief callback method to reinitialize the internal state of
    *         the component for I/O purposes (e.g. upon @c fork(2))
    */
-  StatusCode io_reinit ();
+  virtual StatusCode io_reinit () override;
 
   /// Persistency service
   ServiceHandle<IAddressCreator> m_persSvc;
