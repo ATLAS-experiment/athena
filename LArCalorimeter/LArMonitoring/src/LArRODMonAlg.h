@@ -59,7 +59,8 @@ private:
       clear();
     };
     void clear();
-    std::array<unsigned,3> errors_E,errors_T,errors_Q;
+    static constexpr int N = 3;
+    std::array<unsigned,N> errors_E{},errors_T{},errors_Q{};
   };
   
 
