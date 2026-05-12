@@ -119,21 +119,23 @@ namespace Trk
 	FullVertexFitter::~FullVertexFitter() = default;
 
 	/** Interface for ParametersBase with starting point */
-	xAOD::Vertex * FullVertexFitter::fit ( const std::vector<const Trk::TrackParameters*> & originalPerigees,
-	                                       const Amg::Vector3D& firstStartingPoint ) const
+	std::unique_ptr<xAOD::Vertex> FullVertexFitter::fit ( const EventContext& ctx,
+	                                                      const std::vector<const Trk::TrackParameters*> & originalPerigees,
+	                                                      const Amg::Vector3D& firstStartingPoint ) const
 	{
                 xAOD::Vertex constraint;
                 constraint.makePrivateStore();
                 constraint.setPosition( firstStartingPoint );
                 constraint.setCovariancePosition( AmgSymMatrix(3)(3,3) );
                 constraint.setFitQuality( 0.,0.);
-		return fit ( originalPerigees, constraint );
+               return fit ( ctx, originalPerigees, constraint );
 	}
 
 	/** Interface for ParametersBase with vertex constraint */
 	/** the position of the constraint is ALWAYS the starting point */
-	xAOD::Vertex * FullVertexFitter::fit ( const std::vector<const Trk::TrackParameters*> & originalPerigees,
-	                                       const xAOD::Vertex& firstStartingPoint ) const
+	std::unique_ptr<xAOD::Vertex> FullVertexFitter::fit ( const EventContext& /*ctx*/,
+	                                                      const std::vector<const Trk::TrackParameters*> & originalPerigees,
+	                                                      const xAOD::Vertex& firstStartingPoint ) const
 	{
 		if ( originalPerigees.empty() )
 		{
@@ -165,8 +167,8 @@ namespace Trk
 
 		std::vector<Amg::Vector3D> mom_at_Origin;
 
-		xAOD::Vertex * fittedVertex = new xAOD::Vertex;
-                fittedVertex->makePrivateStore(); // xAOD::VertexContainer will take ownership of AuxStore when ActualVertex is added to it
+		auto fittedVertex = std::make_unique<xAOD::Vertex>();
+		fittedVertex->makePrivateStore(); // xAOD::VertexContainer will take ownership of AuxStore when ActualVertex is added to it
 
 		std::vector<VxTrackAtVertex> tracksAtVertex;
 		std::vector<BilloirTrack> billoirTracks;
@@ -474,27 +476,27 @@ namespace Trk
 		return fittedVertex;
 	}
 
-	xAOD::Vertex * FullVertexFitter::fit ( const std::vector<const Trk::TrackParameters*>& perigeeList ) const
+	std::unique_ptr<xAOD::Vertex> FullVertexFitter::fit ( const EventContext& ctx, const std::vector<const Trk::TrackParameters*>& perigeeList ) const
 	{
                 Amg::Vector3D tmpVtx(0.,0.,0.);
-                return fit ( perigeeList, tmpVtx );
+                return fit ( ctx, perigeeList, tmpVtx );
 	}
 
 
  		//xAOD interfaced methods. Required to un-block the current situation  
  		// with the xAOD tracking design. 
- 		 xAOD::Vertex * FullVertexFitter::fit(const std::vector<const xAOD::TrackParticle*>& vectorTrk,const Amg::Vector3D& startingPoint)  const
+ 		 std::unique_ptr<xAOD::Vertex> FullVertexFitter::fit(const EventContext& ctx, const std::vector<const xAOD::TrackParticle*>& vectorTrk,const Amg::Vector3D& startingPoint)  const
  		 {
                   xAOD::Vertex constraint;
                   constraint.makePrivateStore();
                   constraint.setPosition( startingPoint );
                   constraint.setCovariancePosition( AmgSymMatrix(3)(3,3) );
                   constraint.setFitQuality( 0.,0.);
- 		  return fit(vectorTrk, constraint);                                
+                 return fit(ctx, vectorTrk, constraint);
  		 }//end of the xAOD starting point fit method 
  		 
  		     
- 		 xAOD::Vertex * FullVertexFitter::fit(const std::vector<const xAOD::TrackParticle*>& vectorTrk, const xAOD::Vertex& constraint) const
+ 		 std::unique_ptr<xAOD::Vertex> FullVertexFitter::fit(const EventContext& ctx, const std::vector<const xAOD::TrackParticle*>& vectorTrk, const xAOD::Vertex& constraint) const
  		 { 
  		   if(vectorTrk.empty()) 
  		   { 
@@ -514,7 +516,7 @@ namespace Trk
  		   } 
  		    
  		    
- 		   xAOD::Vertex* fittedVertex = fit( measuredPerigees, constraint ); 
+ 		   std::unique_ptr<xAOD::Vertex> fittedVertex = fit( ctx, measuredPerigees, constraint );
  		 
  		   //assigning the input tracks to the fitted vertex through VxTrackAtVertices
  		   { 
