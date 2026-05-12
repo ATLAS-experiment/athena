@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -13,22 +13,6 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 
 #include "xAODMeasurementBase/MeasurementDefs.h"
-
-
-template< typename T >
-std::ostream& operator<< ( std::ostream& out,
-                           const std::vector< T >& vec ) {
-
-   out << "[";
-   for( size_t i = 0; i < vec.size(); ++i ) {
-      out << vec[ i ];
-      if( i < vec.size() - 1 ) {
-         out << ", ";
-      }
-   }
-   out << "]";
-   return out;
-}
 
 /// Function fill one Strip cluster with information
 
@@ -59,6 +43,27 @@ void fill( xAOD::StripCluster& stripCluster) {
 
     stripCluster.setChannelsInPhi(3);
 
+}
+
+namespace {
+template <typename T>
+auto trans(T &&a) { return a; }
+
+template <>
+auto trans(const unsigned long long &a) { return Identifier(a); }
+
+template <typename T>
+std::ostream &operator<<(std::ostream &out, CxxUtils::range_with_conv<CxxUtils::span<T> > elements) {
+   out << "[";
+   for( size_t i = 0; i < elements.size(); ++i ) {
+      out << trans(elements[ i ]);
+      if( i < elements.size() - 1 ) {
+         out << ", ";
+      }
+   }
+   out << "]";
+   return out;
+}
 }
 
 void print ( const xAOD::StripCluster& stripCluster) {

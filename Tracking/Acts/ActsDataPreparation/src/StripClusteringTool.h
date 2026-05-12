@@ -21,7 +21,7 @@
 #include <xAODInDetMeasurement/StripClusterContainer.h>
 
 namespace ActsTrk {
-
+struct StripAuxDataCache;
 
 class StripClusteringTool : public extends<AthAlgTool, IStripClusteringTool> {
 public:
@@ -42,8 +42,8 @@ public:
          Acts::Ccl::ClusteringData& data,
 	       std::vector<typename IStripClusteringTool::ClusterCollection>& collection) const override;
 
-    virtual std::any makeVars (SG::AuxVectorData& /*cont*/) const override
-    { return std::any(); }
+    virtual std::any createEventDataCache(xAOD::StripClusterContainer& cont,
+                                          std::size_t nClusterRDOs) const override;
 
     virtual StatusCode
     makeClusters(const EventContext& ctx,
@@ -77,7 +77,8 @@ private:
 			   const StripID& stripID,
 			   const InDetDD::SiDetectorElement& element,
 			   const InDetDD::SiDetectorDesign& design,
-			   xAOD::StripCluster& container) const;
+			   xAOD::StripCluster& container,
+			   StripAuxDataCache& auxDataCache) const;
 
     StringProperty m_timeBinStr{this, "timeBins", ""};
 

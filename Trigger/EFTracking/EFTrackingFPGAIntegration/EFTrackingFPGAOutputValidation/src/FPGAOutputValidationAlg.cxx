@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "EFTrackingFPGAOutputValidation/FPGAOutputValidationAlg.h"
@@ -28,12 +28,14 @@ namespace {
   size_t compareClusters(const T* cluster1, const T* cluster2, size_t* nonCommonRdo1 = nullptr, size_t* nonCommonRdo2 = nullptr) {
     const auto& rdoList1 = cluster1->rdoList();
     const auto& rdoList2 = cluster2->rdoList();
-    std::unordered_set<Identifier> rdoSet1(rdoList1.begin(), rdoList1.end());
-    std::unordered_set<Identifier> rdoSet2(rdoList2.begin(), rdoList2.end());
+    std::unordered_set<Identifier::value_type> rdoSet1;
+    for (auto an_rdo : rdoList1) { rdoSet1.insert( Identifier(an_rdo).get_compact()); };
+    std::unordered_set<Identifier::value_type> rdoSet2;
+    for (auto an_rdo : rdoList2) { rdoSet2.insert( Identifier(an_rdo).get_compact()); };
 
     size_t nCommonRdo = 0;
     for (const auto& rdo : rdoList1) {
-      if (rdoSet2.count(rdo)) {
+      if (rdoSet2.count(Identifier(rdo).get_compact())) {
         ++nCommonRdo;
       }
     }
@@ -61,7 +63,7 @@ namespace {
 
     std::unordered_set<Identifier> rdoSet0{};
     for (const auto& rdo : cluster0->rdoList()) {
-      rdoSet0.insert(rdo);
+      rdoSet0.insert(Identifier(rdo));
     }
     const size_t rdoToMiss = (allowedMisses < rdoSet0.size()) ? allowedMisses : (rdoSet0.size()-1);
     if (matchByID) {
@@ -130,7 +132,7 @@ namespace {
       out += std::to_string(cluster->identifier()) + " x: " + std::to_string(cluster->globalPosition()[0]) +
              " y: " + std::to_string(cluster->globalPosition()[1]) + " z: " + std::to_string(cluster->globalPosition()[2]) + "\n";
       for (const auto& rdo : cluster->rdoList()) {
-        out += "\t" + std::to_string(rdo.get_compact()) + "\n";
+        out += "\t" + std::to_string(Identifier(rdo).get_compact()) + "\n";
       }
       out += "\n";
     }
@@ -209,7 +211,7 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
 
       if (matchedClusters.size() == 0) {
         std::vector<std::string> regions {"all"};
-        if(m_pixelid->barrel_ec(cluster0->rdoList()[0]) == 0) regions.push_back("barrel");
+        if(m_pixelid->barrel_ec(Identifier(cluster0->rdoList()[0])) == 0) regions.push_back("barrel");
         else regions.push_back("endcap");
         for (const auto& region : regions) {
           Monitored::Group(
@@ -230,7 +232,7 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
       const xAOD::PixelCluster *cluster1 = matchedClusters[0];
       
       std::vector<std::string> regions {"all"};
-      if(m_pixelid->barrel_ec(cluster0->rdoList()[0]) == 0) regions.push_back("barrel");
+      if(m_pixelid->barrel_ec(Identifier(cluster0->rdoList()[0])) == 0) regions.push_back("barrel");
       else regions.push_back("endcap");
 
       for(auto const& region: regions)
@@ -330,7 +332,7 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
 
       if (matchedClusters.size() == 0 && handle1->size() > 0) {
         std::vector<std::string> regions {"all"};
-        if(m_stripid->barrel_ec(cluster0->rdoList()[0]) == 0) regions.push_back("barrel");
+        if(m_stripid->barrel_ec(Identifier(cluster0->rdoList()[0])) == 0) regions.push_back("barrel");
         else regions.push_back("endcap");
         for (const auto& region : regions) {
           Monitored::Group(
@@ -351,7 +353,7 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
       const xAOD::StripCluster *cluster1 = matchedClusters[0];
 
       std::vector<std::string> regions {"all"};
-      if(m_stripid->barrel_ec(cluster0->rdoList()[0]) == 0) regions.push_back("barrel");
+      if(m_stripid->barrel_ec(Identifier(cluster0->rdoList()[0])) == 0) regions.push_back("barrel");
       else regions.push_back("endcap");
 
       for(auto const& region: regions)
@@ -404,7 +406,7 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
     for(auto cluster : *handle)
     {
       std::vector<std::string> regions {"all"};
-      if(m_pixelid->barrel_ec(cluster->rdoList()[0]) == 0) regions.push_back("barrel");
+      if(m_pixelid->barrel_ec(Identifier(cluster->rdoList()[0])) == 0) regions.push_back("barrel");
       else regions.push_back("endcap");
 
       for(auto const& region: regions)
@@ -435,7 +437,7 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
     for(auto cluster : *handle)
     {
       std::vector<std::string> regions {"all"};
-      if(m_stripid->barrel_ec(cluster->rdoList()[0]) == 0) regions.push_back("barrel");
+      if(m_stripid->barrel_ec(Identifier(cluster->rdoList()[0])) == 0) regions.push_back("barrel");
       else regions.push_back("endcap");
 
       for(auto const& region: regions)

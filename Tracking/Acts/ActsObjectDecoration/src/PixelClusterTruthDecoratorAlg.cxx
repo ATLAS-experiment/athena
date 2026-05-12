@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/PixelClusterTruthDecoratorAlg.h"
@@ -136,14 +136,16 @@ namespace ActsTrk {
       return StatusCode::FAILURE;
     }
 
-    const std::vector<Identifier> rdoList = cluster->rdoList();
+    SG::ConstAccessor<SG::JaggedVecElt<Identifier::value_type> >::element_type
+       rdoList = cluster->rdoList();
     std::vector< std::uint64_t > rdoIdentifierList;
     rdoIdentifierList.reserve(rdoList.size());
     int rowmin = std::numeric_limits<int>::max();
     int rowmax = std::numeric_limits<int>::min();
     int colmin = std::numeric_limits<int>::max();
     int colmax = std::numeric_limits<int>::min();
-    for( const Identifier& hitIdentifier : rdoList ){
+    for( const Identifier::value_type& hitIdentifierValue : rdoList ){
+      Identifier hitIdentifier(hitIdentifierValue);
       rdoIdentifierList.push_back( hitIdentifier.get_compact() );
       //May want to addinformation about the individual hits here
       int row = m_PixelHelper->phi_index(hitIdentifier);

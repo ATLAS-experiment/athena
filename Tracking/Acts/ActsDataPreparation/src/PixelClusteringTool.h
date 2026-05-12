@@ -32,7 +32,8 @@ public:
                Acts::Ccl::ClusteringData& data,
                std::vector<ClusterCollection>& collection) const override;
   
-    virtual std::any makeVars (SG::AuxVectorData& cont) const override;
+    virtual std::any createEventDataCache(xAOD::PixelClusterContainer& cont,
+                                          std::size_t nClusterRDOs) const override;
 
     virtual StatusCode
     makeClusters(const EventContext& ctx,

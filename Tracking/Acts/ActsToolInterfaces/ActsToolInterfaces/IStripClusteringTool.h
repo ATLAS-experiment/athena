@@ -43,7 +43,10 @@ public:
     std::vector<Identifier::value_type> ids;
     uint16_t hitsInThirdTimeBin{0};
   };  
-  using ClusterCollection = std::vector<Cluster>;
+  struct ClusterCollection : std::vector<Cluster> {
+     unsigned int nRDOs() const { return n_rdos; }
+     unsigned int n_rdos=0u;
+  };
   
   virtual StatusCode
   clusterize(const EventContext& ctx,
@@ -53,7 +56,8 @@ public:
        Acts::Ccl::ClusteringData& data,
 	     std::vector<ClusterCollection>& collection) const = 0;
   
-  virtual std::any makeVars (SG::AuxVectorData& cont) const = 0;
+  virtual std::any createEventDataCache(xAOD::StripClusterContainer& cont,
+                                        std::size_t nClusterRDOs) const = 0;
 
   virtual StatusCode
   makeClusters(const EventContext& ctx,
