@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FIXLARELECCALIB_H
@@ -17,6 +17,7 @@
 #include "LArRawConditions/LArRampMC.h" //typedef
 #include "LArRawConditions/LArAutoCorrMC.h" //typedef
 #include <string>
+#include <string_view>
 #include <utility> //std::pair
 #include <vector>
 
@@ -89,26 +90,20 @@ class FixLArElecCalib : public AthAlgorithm
   template <class T>
   StatusCode update_All ATLAS_NOT_THREAD_SAFE (const std::string& filename, const LArOnOffIdMapping *cabling, bool withGain, int nvar);
 
-  void print_object(const std::string& msg, const LArNoiseMC::LArCondObj& obj); 
+  void print_object(std::string_view msg, const LArNoiseMC::LArCondObj& obj); 
   void set_object(LArNoiseMC::LArCondObj& obj, const std::vector<float>& v ); 
 
-  void print_object(const std::string& msg, const LArAutoCorrMC::LArCondObj& obj); 
+  void print_object(std::string_view msg, const LArAutoCorrMC::LArCondObj& obj); 
   void set_object(LArAutoCorrMC::LArCondObj& obj, const std::vector<float>& v ); 
 
-  void print_object(const std::string& msg, const LArRampMC::LArCondObj& obj); 
+  void print_object(std::string_view, const LArRampMC::LArCondObj& obj); 
   void set_object(LArRampMC::LArCondObj& obj, const std::vector<float>& v ); 
 
-  //void print_object(const std::string& msg, const LAruA2MeVMC::LArCondObj& obj); 
-  //void set_object(LAruA2MeVMC::LArCondObj& obj, std::vector<float>& v ); 
-
-  void print_object(const std::string& msg, const LArShape32MC::LArCondObj& obj); 
+  void print_object(std::string_view msg, const LArShape32MC::LArCondObj& obj); 
   void set_object(LArShape32MC::LArCondObj& obj, const std::vector<float>& v ); 
 
-  void print_object(const std::string& msg, const LArSingleFloatP& obj); 
+  void print_object(std::string_view msg, const LArSingleFloatP& obj); 
   void set_object(LArSingleFloatP& obj, const std::vector<float>& v ); 
-
-  //  void print_object(const std::string& msg, const LArDAC2uAMC::LArCondObj& obj); 
-  //void set_object(LArDAC2uAMC::LArCondObj& obj, std::vector<float>& v ); 
 
   StatusCode addMphysOverMcal(const LArOnOffIdMapping *cabling) ; // add new one with default for FCAL
 
@@ -128,9 +123,6 @@ class FixLArElecCalib : public AthAlgorithm
   const LArHEC_SuperCell_ID* m_shec_idhelper;
   const LArOnline_SuperCellID* m_sonline_idhelper;
   const CaloCell_SuperCell_ID* m_scell_idhelper;
-
-
-
 
   typedef std::pair<HWIdentifier,std::vector<float> > ROW_t ;
   typedef std::vector<ROW_t> VROW_t;
