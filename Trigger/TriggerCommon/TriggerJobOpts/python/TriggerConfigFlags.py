@@ -33,7 +33,7 @@ def trigGeoTag(flags):
 def createTriggerFlags(doTriggerRecoFlags):
     flags = AthConfigFlags()
 
-    flags.addFlag('Trigger.doLVL1', lambda prevFlags: prevFlags.Input.isMC,
+    flags.addFlag('Trigger.doLVL1', lambda prevFlags: (prevFlags.Input.isMC and prevFlags.Trigger.doHLT),
                   help='enable L1 simulation')
 
     flags.addFlag('Trigger.doHLT', False,
@@ -174,19 +174,19 @@ def createTriggerFlags(doTriggerRecoFlags):
             elif "TrigNavigation" in collections:
                 _log.info("Determined EDMVersion to be 2, because TrigNavigation found in POOL file")
                 return 2
-            elif flags.Trigger.doHLT:
-                if flags.GeoModel.Run >= LHCPeriod.Run4:
-                    _log.info("Determined EDMVersion to be 4, because we're now running the trigger and GeoModel.Run >= 4")
-                    return 4
-                else:
-                    _log.info("Determined EDMVersion to be 3, because we're now running the trigger")
-                    return 3
             elif any("HLTNav_Summary" in s for s in collections):
                 if flags.GeoModel.Run >= LHCPeriod.Run4:
                     _log.info("Determined EDMVersion to be 4, because HLTNav_Summary.* found in POOL file and GeoModel.Run >= 4")
                     return 4
                 else:
                     _log.info("Determined EDMVersion to be 3, because HLTNav_Summary.* found in POOL file")
+                    return 3
+            elif flags.Trigger.doHLT or flags.Trigger.doLVL1:
+                if flags.GeoModel.Run >= LHCPeriod.Run4:
+                    _log.info("Determined EDMVersion to be 4, because we're now running the trigger and GeoModel.Run >= 4")
+                    return 4
+                else:
+                    _log.info("Determined EDMVersion to be 3, because we're now running the trigger")
                     return 3
             elif not flags.Input.Collections:
                 # Special case for empty input files (can happen in merge jobs on the grid)
