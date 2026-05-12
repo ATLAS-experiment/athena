@@ -80,11 +80,8 @@ run () {
 art.py download --user=artprod --dst=last_results "$ArtPackage" "$ArtJobName"
 run "dcube-latest" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-        -p -x ${X_FILE} \
-        # --plotopts=ratio \
+        -p -x dcube_last \
         -c ${DCUBE_CONFIG} \
-        # -M "${PREFIX}" \
-        # -R "${PREFIX}-previous" \
         -r ${R_FILE} \
-        # IDTPM.${PREFIX}.HIST.root
-fi
+        ${X_FILE}
+echo "art-result: $? plots"
