@@ -25,4 +25,4 @@ atlas_add_test( AtlasDetectorID_test
                 test/AtlasDetectorID_test.cxx
                 INCLUDE_DIRS ${Boost_INCLUDE_DIRS}  
                 LINK_LIBRARIES  AtlasDetDescr IdDictParser ${Boost_LIBRARIES} 
-                POST_EXEC_SCRIPT "nopost.sh" )
+                POST_EXEC_SCRIPT noerror.sh )
