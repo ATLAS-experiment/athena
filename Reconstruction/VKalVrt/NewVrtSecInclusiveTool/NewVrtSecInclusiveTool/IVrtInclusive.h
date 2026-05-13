@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //
 // IVrtInclusive.h - Description
@@ -31,17 +31,14 @@
 #include "xAODTracking/VertexContainer.h"
 #include "VxSecVertex/VxSecVertexInfo.h"
 
- 
+class EventContext;
+
 //------------------------------------------------------------------------
 namespace Rec {
 
-//------------------------------------------------------------------------
-  static const InterfaceID IID_IVrtInclusive("IVrtInclusive", 1, 0);
-
   class IVrtInclusive : virtual public IAlgTool {
     public:
-      static const InterfaceID& interfaceID() { return IID_IVrtInclusive;}
-//---------------------------------------------------------------------------
+      DeclareInterfaceID(IVrtInclusive, 1, 0);
 
   /** @class IVrtInclusive
 
@@ -52,8 +49,9 @@ namespace Rec {
     with default track quality cuts.
     
   */
-      virtual std::unique_ptr<Trk::VxSecVertexInfo> findAllVertices( const std::vector<const xAOD::TrackParticle*> & inputTracks,
-                                                     const xAOD::Vertex & PV) const =0;
+      virtual std::unique_ptr<Trk::VxSecVertexInfo> findAllVertices( const EventContext& ctx,
+                                                                     const std::vector<const xAOD::TrackParticle*> & inputTracks,
+                                                                     const xAOD::Vertex & PV) const = 0;
 
   };
 
