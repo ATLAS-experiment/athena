@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ASGTOOLS_ASGMETADATATOOL_H
@@ -8,7 +8,7 @@
 // Local include(s):
 #include "AsgTools/AsgTool.h"
 #ifdef XAOD_STANDALONE
-#   include "AsgTools/SgTEventMeta.h"
+#   include "AsgTools/SgEventMeta.h"
 #   include "xAODRootAccess/TVirtualIncidentListener.h"
 #else // XAOD_STANDALONE
 #   include "GaudiKernel/IIncidentListener.h"
@@ -37,7 +37,7 @@ namespace asg {
    /// The class provides StoreGate-like access to the input and output metadata
    /// store in a uniform way across Athena and ROOT. In Athena it just relies
    /// on the two StoreGateSvc instances taking care of this, and in ROOT it
-   /// uses a wrapper around xAOD::TEvent to achieve the same interface.
+   /// uses a wrapper around xAOD::Event to achieve the same interface.
    ///
    /// @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    ///
@@ -58,9 +58,9 @@ namespace asg {
 
 #ifdef XAOD_STANDALONE
       /// Type of the metadata store object in standalone mode
-      typedef SgTEventMeta  MetaStore_t;
+      typedef SgEventMeta  MetaStore_t;
       /// Type of the metadata store pointer in standalone mode
-      typedef SgTEventMeta* MetaStorePtr_t;
+      typedef SgEventMeta* MetaStorePtr_t;
 #else // XAOD_STANDALONE
       /// Type of the metadata store object in Athena
       typedef ServiceHandle< StoreGateSvc > MetaStore_t;
@@ -90,7 +90,7 @@ namespace asg {
       
       void setUseIncidents(const bool flag);
 
-      /// Function receiving incidents from IncidentSvc/TEvent
+      /// Function receiving incidents from IncidentSvc/Event
       virtual void handle( const Incident& inc );
 
       /// Function called when a new input file is opened

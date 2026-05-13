@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -132,7 +132,7 @@ namespace EL
 
 
 
-  asg::SgTEvent *AnaReentrantAlgorithm ::
+  asg::SgEvent *AnaReentrantAlgorithm ::
   evtStore () const
   {
     if (!m_evtStore)
@@ -143,7 +143,7 @@ namespace EL
 
 
   void AnaReentrantAlgorithm ::
-  setEvtStore (asg::SgTEvent *val_evtStore)
+  setEvtStore (asg::SgEvent *val_evtStore)
   {
     if (m_evtStore)
       throw std::logic_error ("set evtStore twice on algorithm " + name());

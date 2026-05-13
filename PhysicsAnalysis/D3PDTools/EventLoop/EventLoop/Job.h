@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EVENT_LOOP_JOB_HH
@@ -157,7 +157,7 @@ namespace EL
     /// effects: register this job to use XAODs
     /// guarantee: strong
     /// failures: out of memory II
-    /// failures: TEventSvc not available
+    /// failures: EventSvc not available
   public:
     void useXAOD ();
 
@@ -391,23 +391,6 @@ namespace EL
     /// \brief the option to select whether our input is xAODs
   public:
     static const std::string optXAODInput;
-
-    /// description: the option to select the access mode for xAODs.
-    ///   this can be "branch" for branch access, or "class" for
-    ///   access.  if this option isn't specified EventLoop will pick
-    ///   whatever is currently recommended.
-  public:
-    static const std::string optXaodAccessMode;
-    static const std::string optXaodAccessMode_branch;
-    static const std::string optXaodAccessMode_class;
-    static const std::string optXaodAccessMode_athena;
-
-  public:
-    /// Pattern for other MetaData tree name in input xAODs 
-    /// Can be useful for augmented file reading or excluding non real MetaData trees 
-    /// i.e. trees not containing a branch called EventFormat*
-    static const std::string optOtherMetaDataTreeNamePattern;
-
 
     /// \brief the option to turn on/off the xAOD summary reporting at
     /// the end of the job

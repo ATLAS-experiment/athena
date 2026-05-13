@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -77,8 +77,8 @@ using namespace EL;
       info->setEventNumber (firstEventNumber + iter);
       if (event.record (info.release(), "MyEventInfo").isFailure())
       {
-	std::cout << "failed to record EventInfo" << std::endl;
-	return ::StatusCode::FAILURE;
+        std::cout << "failed to record EventInfo" << std::endl;
+        return ::StatusCode::FAILURE;
       }
       if (event.record (aux.release(), "MyEventInfoAux.").isFailure())
       {
@@ -87,8 +87,8 @@ using namespace EL;
       }
       if (event.fill () < 0)
       {
-	std::cout << "failed to write to file" << std::endl;
-	return ::StatusCode::FAILURE;
+        std::cout << "failed to write to file" << std::endl;
+        return ::StatusCode::FAILURE;
       }
     }
   }

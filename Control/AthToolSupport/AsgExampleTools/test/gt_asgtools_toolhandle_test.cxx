@@ -1,4 +1,6 @@
-// $Id: gt_asgtools_toolhandle_test.cxx 743773 2016-04-28 21:21:41Z krumnack $
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
 
 // System include(s):
 #include <iostream>
@@ -8,6 +10,7 @@
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/AsgMetadataTool.h"
 #include "AsgTesting/UnitTest.h"
+#include <xAODRootAccess/TEvent.h>
 
 using namespace testing;
 

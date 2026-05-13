@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ASGTOOLS_ASGTOOL_H
@@ -17,7 +17,7 @@
 #ifdef XAOD_STANDALONE
 #   include "AsgMessaging/AsgMessaging.h"
 #   include "AsgTools/AsgComponent.h"
-#   include "AsgTools/SgTEvent.h"
+#   include "AsgTools/SgEvent.h"
    // Forward declaration(s):
 #else // XAOD_STANDALONE
 #   include "AthenaBaseComps/AthAlgTool.h"
@@ -59,7 +59,7 @@ namespace asg {
 #ifdef XAOD_STANDALONE
 
       /// Stand-alone, StoreGate-like accessor to the event store
-      SgTEvent* evtStore() const;
+      SgEvent* evtStore() const;
 
      // this is just so that my template functions can find this
      // method in the base class.
@@ -87,7 +87,7 @@ namespace asg {
 
       /// Get the name of an object that is / should be in the event store
       ///
-      /// This is a bit of a special one. @c StoreGateSvc and @c xAOD::TEvent
+      /// This is a bit of a special one. @c StoreGateSvc and @c xAOD::Event
       /// both provide ways for getting the @c std::string name for an object
       /// that is in the store, based on a bare pointer. But they provide
       /// different interfaces for doing so.
@@ -106,7 +106,7 @@ namespace asg {
 
       /// Get the (hashed) key of an object that is in the event store
       ///
-      /// This is a bit of a special one. @c StoreGateSvc and @c xAOD::TEvent
+      /// This is a bit of a special one. @c StoreGateSvc and @c xAOD::Event
       /// both provide ways for getting the @c SG::sgkey_t key for an object
       /// that is in the store, based on a bare pointer. But they provide
       /// different interfaces for doing so.
@@ -137,7 +137,7 @@ namespace asg {
 
    private:
 #ifdef XAOD_STANDALONE
-      mutable SgTEvent m_event; ///< Wrapper around TEvent/TStore
+      mutable SgEvent m_event; ///< Wrapper around Event/TStore
 #endif // XAOD_STANDALONE
 
    }; // class AsgTool

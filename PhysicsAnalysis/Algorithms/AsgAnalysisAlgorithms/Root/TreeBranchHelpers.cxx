@@ -84,7 +84,7 @@ namespace {
    /// @return A pointer to the container if successful, @c nullptr if not
    ///
    const SG::AuxVectorBase* getVector( const std::string& key,
-                                       asg::SgTEvent& evtStore,
+                                       asg::SgEvent& evtStore,
                                        bool allowMissing,
                                        const TClass*& cl,
                                        MsgStream& msg ) {
@@ -133,7 +133,7 @@ namespace {
    /// @return A pointer to the container if successful, @c nullptr if not
    ///
    const SG::AuxElement* getElement( const std::string& key,
-                                     asg::SgTEvent& evtStore,
+                                     asg::SgEvent& evtStore,
                                      bool allowMissing,
                                      MsgStream& msg ) {
       if( allowMissing &&

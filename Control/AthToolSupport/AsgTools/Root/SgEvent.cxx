@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
 #include <iostream>
 
 // Local include(s):
-#include "AsgTools/SgTEvent.h"
+#include "AsgTools/SgEvent.h"
 
 // RootCore include(s):
 #ifdef XAOD_STANDALONE
@@ -16,12 +16,12 @@
 
 namespace asg {
 
-   SgTEvent::SgTEvent( xAOD::TEvent* pevm, xAOD::TStore* ptds )
+   SgEvent::SgEvent( xAOD::Event* pevm, xAOD::TStore* ptds )
       : m_pevm( pevm ), m_ptds( ptds ) {
 
    }
 
-   xAOD::TEvent* SgTEvent::event() const {
+   xAOD::Event* SgEvent::event() const {
 
       if( ! m_pevm ) {
          initialize().ignore();
@@ -30,7 +30,7 @@ namespace asg {
       return m_pevm;
    }
 
-   xAOD::TStore* SgTEvent::tds() const {
+   xAOD::TStore* SgEvent::tds() const {
 
       // I'm checking the value of m_pevm on purpose. Since m_ptds may be
       // missing under normal circumstances as well.
@@ -41,7 +41,7 @@ namespace asg {
       return m_ptds;
    }
 
-   StatusCode SgTEvent::initialize() const {
+   StatusCode SgEvent::initialize() const {
 
       // Return right away if we already have a pointer to both stores:
       if( m_pevm && m_ptds ) {
@@ -53,16 +53,16 @@ namespace asg {
          // Check if there's an active event:
          xAOD::TVirtualEvent* event = xAOD::TActiveEvent::event();
          if( ! event ) {
-            std::cout << ERROR_SOURCE << "Couldn't find an active event in "
+            std::cout << ERROR_SRC << "Couldn't find an active event in "
                       << "the job" << std::endl;
             return StatusCode::FAILURE;
          }
 
-         // This should actually be a TEvent:
-         m_pevm = dynamic_cast< xAOD::TEvent* >( event );
+         // This should actually be a Event:
+         m_pevm = dynamic_cast< xAOD::Event* >( event );
          if( ! m_pevm ) {
-            std::cout << ERROR_SOURCE << "The active event is not of type "
-                      << "xAOD::TEvent?!?" << std::endl;
+            std::cout << ERROR_SRC << "The active event is not of type "
+                      << "xAOD::Event?!?" << std::endl;
             return StatusCode::FAILURE;
          }
       }
@@ -71,7 +71,7 @@ namespace asg {
       if( ! m_ptds ) {
          m_ptds = xAOD::TActiveStore::store();
          if( ! m_ptds ) {
-            std::cout << "asg::SgTEvent             WARNING "
+            std::cout << "asg::SgEvent              WARNING "
                       << "No xAOD::TStore object is available" << std::endl;
          }
       }

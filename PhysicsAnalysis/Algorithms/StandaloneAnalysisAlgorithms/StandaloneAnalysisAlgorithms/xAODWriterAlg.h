@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef STANDALONEANALYSISALGORITHMS_XAODWRITERALG_H
 #define STANDALONEANALYSISALGORITHMS_XAODWRITERALG_H
@@ -13,6 +13,7 @@
 // Core include(s):
 #include "AnaAlgorithm/AnaAlgorithm.h"
 #include "SystematicsHandles/SysListHandle.h"
+#include "xAODRootAccess/Event.h"
 #include "xAODRootAccess/TEvent.h"
 #include <AsgTools/PropertyWrapper.h>
 
@@ -75,7 +76,7 @@ namespace CP {
       }; // struct Item
 
       /// Object to write the output file with
-      xAOD::TEvent m_event;
+      std::unique_ptr<xAOD::TEvent> m_event;
 
       /// Internal flag
       bool m_itemListInitialized = false;

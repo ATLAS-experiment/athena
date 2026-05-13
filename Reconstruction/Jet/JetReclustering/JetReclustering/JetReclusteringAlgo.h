@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifdef ROOTCORE
@@ -9,7 +9,7 @@
 #include <EventLoop/Algorithm.h>
 
 #include <xAODRootAccess/Init.h>
-#include <xAODRootAccess/TEvent.h>
+#include <xAODRootAccess/Event.h>
 #include <xAODRootAccess/TStore.h>
 
 // reclustering
@@ -37,7 +37,7 @@ public:
 
 private:
   /* For counting and statistics */
-  xAOD::TEvent *m_event; //!
+  xAOD::Event  *m_event; //!
   xAOD::TStore *m_store; //!
 
   asg::AnaToolHandle<IJetExecuteTool> m_jetReclusteringTool; //!

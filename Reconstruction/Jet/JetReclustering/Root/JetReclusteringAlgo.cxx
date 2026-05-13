@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifdef ROOTCORE
@@ -59,7 +59,7 @@ EL::StatusCode JetReclusteringAlgo :: initialize ()
 
   if(!m_outputXAODName.empty()){
     TFile *file = wk()->getOutputFile(m_outputXAODName);
-    if(!m_event->writeTo(file).isSuccess()){
+    if(!m_event->writeTo(*file).isSuccess()){
       Error("initialize()", "Could not set up an output file to write xAODs to.");
       return EL::StatusCode::FAILURE;
     }
@@ -150,7 +150,7 @@ EL::StatusCode JetReclusteringAlgo :: postExecute () { return EL::StatusCode::SU
 EL::StatusCode JetReclusteringAlgo :: finalize () {
   if(!m_outputXAODName.empty()){
     TFile *file = wk()->getOutputFile(m_outputXAODName);
-    if(!m_event->finishWritingTo(file).isSuccess()){
+    if(!m_event->finishWritingTo(*file).isSuccess()){
       Error("finalize()", "Could not finish writing to file... oh bother");
       return EL::StatusCode::FAILURE;
     }

@@ -39,7 +39,7 @@ namespace CP {
    namespace RNtupleFieldHelpers {
 
 #ifdef XAOD_STANDALONE
-      using StoreType = asg::SgTEvent;
+      using StoreType = asg::SgEvent;
 #else
       using StoreType = StoreGateSvc;
 #endif 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -22,7 +22,7 @@ class TFile;
 
 namespace xAOD
 {
-  class TEvent;
+  class Event;
   class TStore;
 }
 
@@ -108,6 +108,10 @@ namespace EL
   public:
     virtual TFile *inputFile () const = 0;
 
+    /// \brief flag whether the most recently opened input file has events or not
+    /// \par Guarantee no-fail
+  public:
+    virtual bool hasInputEvents () const = 0;
 
     /// \brief the name of the file we are reading the current tree
     /// from, without the path component
@@ -128,10 +132,10 @@ namespace EL
     /// description: the xAOD event and store
     /// guarantee: strong
     /// failures: out of memory I
-    /// failures: TEventSvc not configured
+    /// failures: EventSvc not configured
     /// postcondition: result != 0
   public:
-    virtual xAOD::TEvent *xaodEvent () const = 0;
+    virtual xAOD::Event  *xaodEvent () const = 0;
     virtual xAOD::TStore *xaodStore () const = 0;
 
 

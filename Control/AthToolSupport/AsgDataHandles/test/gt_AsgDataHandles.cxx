@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -14,6 +14,7 @@
 #include <AsgTesting/UnitTest.h>
 #include <AsgTools/AsgTool.h>
 #include <AsgTools/CurrentContext.h>
+#include <xAODRootAccess/TEvent.h>
 #include <AsgDataHandles/ReadHandleKey.h>
 #include <AsgDataHandles/ReadHandle.h>
 #include <AsgDataHandles/WriteHandleKey.h>

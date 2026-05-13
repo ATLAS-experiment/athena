@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -14,7 +14,7 @@
 
 #include <AnaAlgorithm/AlgorithmWorkerData.h>
 #include <AnaAlgorithm/IAlgorithmWrapper.h>
-#include <AsgTools/SgTEvent.h>
+#include <AsgTools/SgEvent.h>
 #include <EventLoop/MessageCheck.h>
 #include <EventLoop/ModuleData.h>
 #include <EventLoop/Worker.h>
@@ -110,9 +110,8 @@ namespace EL
         return StatusCode::FAILURE;
       }
 
-      if (data.m_inputTree == nullptr ||
-          data.m_inputTree->GetEntries() == 0)
-        return StatusCode::SUCCESS;
+      // Check that there are events on input
+      if (!data.m_hasInputEvents) return StatusCode::SUCCESS;
 
       if (forAllAlgorithms (msg(), data, "changeInput", [&] (AlgorithmData& alg) {
             return alg->beginInputFile ();}).isFailure())

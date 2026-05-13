@@ -1,29 +1,29 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // xAOD include(s):
 #ifdef XAOD_STANDALONE
 #   include "xAODRootAccessInterfaces/TActiveEvent.h"
-#   include "xAODRootAccess/TEvent.h"
+#   include "xAODRootAccess/Event.h"
 #endif // XAOD_STANDALONE
 
 // Local include(s):
-#include "AsgTools/SgTEventMeta.h"
+#include "AsgTools/SgEventMeta.h"
 
 namespace asg {
 
-   SgTEventMeta::SgTEventMeta( StoreType type, xAOD::TEvent* event )
+   SgEventMeta::SgEventMeta( StoreType type, xAOD::Event* event )
       : m_type( type ) {
       m_event.store(event);
    }
 
-   SgTEventMeta::SgTEventMeta(SgTEventMeta&& other) noexcept
+   SgEventMeta::SgEventMeta(SgEventMeta&& other) noexcept
       : m_type(other.m_type) {
       m_event.store(other.m_event.load());
    }
 
-   SgTEventMeta& SgTEventMeta::operator=(SgTEventMeta&& other) noexcept {
+   SgEventMeta& SgEventMeta::operator=(SgEventMeta&& other) noexcept {
       if (this != &other) {
          m_type = other.m_type;
          m_event.store(other.m_event.load());
@@ -31,19 +31,19 @@ namespace asg {
       return *this;
    }
 
-   SgTEventMeta& SgTEventMeta::operator=(xAOD::TEvent* event) {
+   SgEventMeta& SgEventMeta::operator=(xAOD::Event* event) {
       m_event.store(event);
       return *this;
    }
 
    /// This function is used by the template functions to try to retrieve
-   /// a valid pointer to the active TEvent object, if one is not available
+   /// a valid pointer to the active Event object, if one is not available
    /// yet.
    ///
-   /// @returns <code>StatusCode::FAILURE</code> if TEvent can't be found,
+   /// @returns <code>StatusCode::FAILURE</code> if Event can't be found,
    ///          <code>StatusCode::SUCCESS</code> otherwise
    ///
-   StatusCode SgTEventMeta::initialize() const {
+   StatusCode SgEventMeta::initialize() const {
 
       // Return right away if we already have a non-null pointer:
       if (m_event && m_event.load()) {
@@ -53,16 +53,16 @@ namespace asg {
       // Check if there's an active event:
       xAOD::TVirtualEvent* event = xAOD::TActiveEvent::event();
       if( ! event ) {
-         std::cout << META_ERROR_SOURCE << "Couldn't find an active event in "
+         std::cout << META_ERROR_SRC << "Couldn't find an active event in "
                    << "the job" << std::endl;
          return StatusCode::FAILURE;
       }
 
-      // This should actually be a TEvent:
-      m_event.store(dynamic_cast< xAOD::TEvent* >( event ));
+      // This should actually be a Event:
+      m_event.store(dynamic_cast< xAOD::Event* >( event ));
       if( !m_event || !m_event.load() ) {
-         std::cout << META_ERROR_SOURCE << "The active event is not of type "
-                   << "xAOD::TEvent?!?" << std::endl;
+         std::cout << META_ERROR_SRC << "The active event is not of type "
+                   << "xAOD::Event?!?" << std::endl;
          return StatusCode::FAILURE;
       }
 
