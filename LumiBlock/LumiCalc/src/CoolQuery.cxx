@@ -1,9 +1,24 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <limits.h>
 #include "LumiCalc/CoolQuery.h"
+
+namespace{
+  const std::string chainNameStr{"ChainName"};
+  const std::string chainCounterStr{"ChainCounter"};
+  const std::string itemNameStr{"ItemName"};
+  const std::string prescaleStr{"Prescale"};
+  const std::string lvl1PrescaleStr{"Lvl1Prescale"};
+  const std::string lowerChainNameStr{"LowerChainName"};
+  const std::string validStr{"Valid"};
+  const std::string beforePrescaleStr{"BeforePrescale"};
+  const std::string afterPrescaleStr{"AfterPrescale"};
+  const std::string l1AcceptStr{"L1Accept"};
+  const std::string lbAvInstLumiStr{"LBAvInstLumi"};
+  const std::string lbAvEvtsPerBXStr{"LBAvEvtsPerBX"};
+}
 
 //===========================================================================
 CoolQuery::CoolQuery(const std::string& database, const std::string& triggerchain): 
@@ -28,14 +43,8 @@ CoolQuery::~CoolQuery() {
 
 //===========================================================================
 bool CoolQuery::openDbConn() {
-
   m_logger << Root::kINFO << "Trying to connect to database " << m_database << "..." << Root::GEndl;
-
-  //  CoraCoolDatabaseSvc& corasvc = CoraCoolDatabaseSvcFactory::databaseService();
-
   cool::IDatabaseSvc& databasesvc = cool::DatabaseSvcFactory::databaseService();
-  //std::cout << "Done the CoraCool initialisation" << std::endl;
-  //std::cout << "Opening CORAL database" << std::endl;
   try {
     m_repsort=new ReplicaSorter();
     coral::IConnectionServiceConfiguration& csconfig=m_coralsvc.configuration();
@@ -50,18 +59,7 @@ bool CoolQuery::openDbConn() {
     m_logger << Root::kERROR << "Problem opening CORAL database: " << e.what() << Root::GEndl;
     return false;
   }
-  //  std::cout << "Done the database opening" << std::endl;
-  
-  // list the COOL folders found in the database
-
-//    const std::vector<std::string>& folders=m_sourceDbPtr->listAllNodes();
-//    std::cout << "COOL database has " << folders.size() << " folders defined"
-//  	    << std::endl;
-//    for (std::vector<std::string>::const_iterator itr=folders.begin();
-//         itr!=folders.end();++itr) std::cout << *itr << std::endl;
-
   return false;
-
 }
 
 //===========================================================================
@@ -112,7 +110,7 @@ cool::Int32 CoolQuery::getL1PrescaleFromChannelId(const std::string& folder_name
   // Need to iterate once to get to first valid record, do it this way to avoid Coverity warning
   if (itr->goToNext()) {
     const cool::IRecord& payload=itr->currentRef().payload();    
-    return payload["Lvl1Prescale"].data<cool::Int32>();
+    return payload[lvl1PrescaleStr].data<cool::Int32>();
   }
 
   // Nonsense value
@@ -128,7 +126,7 @@ cool::Float CoolQuery::getHLTPrescaleFromChannelId(const std::string& folder_nam
   // Need to iterate once to get to first valid record, do it this way to avoid Coverity warning
   if (itr->goToNext()) {
     const cool::IRecord& payload=itr->currentRef().payload();    
-    return payload["Prescale"].data<cool::Float>();
+    return payload[prescaleStr].data<cool::Float>();
   }
 
   // Nonsense value
@@ -137,9 +135,6 @@ cool::Float CoolQuery::getHLTPrescaleFromChannelId(const std::string& folder_nam
 }
 
 cool::ChannelId CoolQuery::getL1ChannelId(const std::string& trigger, const std::string& folder_name){
-
-  //  m_logger << Root::kINFO << "Getting channel id for L1 trigger [" << trigger << "] from folder [" << folder_name << "]" << Root::GEndl;
-
   m_valid = false;
 
   if (trigger == "") return UINT_MAX;
@@ -150,31 +145,22 @@ cool::ChannelId CoolQuery::getL1ChannelId(const std::string& trigger, const std:
   while (obj_itr->goToNext()){
     const cool::IRecord& payload=obj_itr->currentRef().payload();
     // find the L1 trigger chain
-    if(payload["ItemName"].data<std::string>() == trigger){
+    if(payload[itemNameStr].data<std::string>() == trigger){
       m_valid = true;
-      //      cout << "Channel id: " << obj_itr->currentRef().channelId() << endl;
       return obj_itr->currentRef().channelId();
     }
   }
-
   if(!m_valid){
     m_logger << Root::kERROR << "Couldn't find L1 trigger [" << trigger << "] in folder [" << folder_name << "]" << Root::GEndl;
   }
-
-
   // Nonsense value
   return UINT_MAX;
 }
 
 //===========================================================================
 cool::ChannelId CoolQuery::getLumiChannelId(const std::string& lumimethod, const std::string& folder_name){
-
   m_valid = false;
-
   if (lumimethod == "") return UINT_MAX;
- 
-  // m_logger << Root::kINFO << "Getting channel id for Lumi method: " << lumimethod << " in folder " << folder_name << Root::GEndl;
-
   cool::IFolderPtr folder_ptr = m_sourceDbPtr->getFolder(folder_name);
   if(folder_ptr->existsChannel(lumimethod)){
     m_valid = true;
@@ -182,51 +168,40 @@ cool::ChannelId CoolQuery::getLumiChannelId(const std::string& lumimethod, const
   }else{
     m_logger << Root::kWARNING << "Couldn't find lumimethod: " << lumimethod << " in COOL database!" << Root::GEndl;
   }
-
   // Nonsense value
   return UINT_MAX;
 }
 
 //===========================================================================
 cool::ChannelId CoolQuery::getHLTChannelId(const std::string& trigger, const std::string& folder_name){
-
-  // m_logger << Root::kINFO << "Getting channel id for HLT trigger [" << trigger << "] from folder [" << folder_name << "]" << Root::GEndl;
-
   m_valid = false;
-
   if (trigger == "") return UINT_MAX;
-
   cool::IFolderPtr folder_ptr = m_sourceDbPtr->getFolder(folder_name);
   cool::IObjectIteratorPtr obj_itr=folder_ptr->browseObjects(m_VKstart,m_VKstart, cool::ChannelSelection::all());
   // loop through all triggers
   // loop through all triggers
   while (obj_itr->goToNext()){
     const cool::IRecord& payload=obj_itr->currentRef().payload();
-    if(payload["ChainName"].data<std::string>() == trigger){
+    if(payload[chainNameStr].data<std::string>() == trigger){
       m_valid = true;
-      // m_logger << Root::kINFO << "Found channel id: " << payload["ChainCounter"].data<cool::UInt32>() << Root::GEndl;
-      return payload["ChainCounter"].data<cool::UInt32>();
+      return payload[chainCounterStr].data<cool::UInt32>();
     }
   }
-  
   if(!m_valid){
     m_logger << Root::kERROR << "Couldn't find HLT trigger [" << trigger << "] in folder [" << folder_name << "]" << Root::GEndl;
   }
-
   // Nonsense value
   return UINT_MAX;
 }
 
 void
 CoolQuery::printL1Triggers(const std::string& folder_name) {
-
   m_logger << Root::kINFO << "Listing available triggers [triggername(prescale, chanid)]: " << Root::GEndl;
-
   cool::IFolderPtr folder_ptr = m_sourceDbPtr->getFolder(folder_name);
   cool::IObjectIteratorPtr obj_itr=folder_ptr->browseObjects(m_VKstart,m_VKstart, cool::ChannelSelection::all());
   while (obj_itr->goToNext()){
     const cool::IRecord& payload=obj_itr->currentRef().payload();
-    m_logger << Root::kINFO << payload["ItemName"].data<std::string>()  << "(" << this->getL1PrescaleFromChannelId("/TRIGGER/LVL1/Prescales",this->getL1ChannelId(payload["ItemName"].data<std::string>(), folder_name)) << ", " << obj_itr->currentRef().channelId() << "), ";
+    m_logger << Root::kINFO << payload[itemNameStr].data<std::string>()  << "(" << this->getL1PrescaleFromChannelId("/TRIGGER/LVL1/Prescales",this->getL1ChannelId(payload[itemNameStr].data<std::string>(), folder_name)) << ", " << obj_itr->currentRef().channelId() << "), ";
   }
   m_logger << Root::kINFO << Root::GEndl;
 }
@@ -240,45 +215,32 @@ CoolQuery::printHLTTriggers(const std::string& folder_name) {
   cool::IObjectIteratorPtr obj_itr2=folder_ptr->browseObjects(m_VKstart,m_VKstart, cool::ChannelSelection::all());
   while (obj_itr2->goToNext()){
     const cool::IRecord& payload2=obj_itr2->currentRef().payload();
-    //      m_logger << Root::kINFO << payload2["ChainName"].data<std::string>()  << ", ";
-    m_logger << Root::kINFO << payload2["ChainName"].data<std::string>()  << "(" << payload2["Prescale"].data<cool::Float>() << ", " << payload2["ChainCounter"].data<cool::UInt32>() << "), ";
+    m_logger << Root::kINFO << payload2[chainNameStr].data<std::string>()  << "(" << payload2[prescaleStr].data<cool::Float>() << ", " << payload2[chainCounterStr].data<cool::UInt32>() << "), ";
   }
   m_logger << Root::kINFO << Root::GEndl;
 }
 
 bool
 CoolQuery::channelIdValid() {
-  // m_logger << Root::kINFO << "channelIdValid = " << m_valid << Root::GEndl;
   return m_valid;
 }
 
 //===========================================================================
 std::string CoolQuery::getHLTLowerChainName(const std::string& trigger, const std::string& folder_name){
-
-  //  cout << "Getting lower chain name for trigger [" << trigger << "] from folder [" << folder_name << "] " << endl;
   bool found = false;
   cool::IFolderPtr folder_ptr = m_sourceDbPtr->getFolder(folder_name);
   cool::IObjectIteratorPtr obj_itr=folder_ptr->browseObjects(m_VKstart,m_VKstart, cool::ChannelSelection::all());
   // loop through all triggers
   while (obj_itr->goToNext()){
     const cool::IRecord& payload=obj_itr->currentRef().payload();
-    if(payload["ChainName"].data<std::string>() == trigger){
+    if(payload[chainNameStr].data<std::string>() == trigger){
       found = true;
-      return payload["LowerChainName"].data<std::string>();
+      return payload[lowerChainNameStr].data<std::string>();
 
     }
   }
-
   if (!found) {
     m_logger << Root::kERROR << "Couldn't find HLT trigger [" << trigger << "] in folder [" << folder_name << "]" << Root::GEndl;
-
-    //    m_logger << Root::kINFO << "List of triggers, hth: " << Root::GEndl;
-    //    cool::IObjectIteratorPtr obj_itr2=folder_ptr->browseObjects(m_VKstart,m_VKstart, cool::ChannelSelection::all());
-    //    while (obj_itr2->goToNext()){
-    //      const cool::IRecord& payload2=obj_itr2->currentRef().payload();
-    //      m_logger << Root::kINFO << payload2["ChainName"].data<std::string>()  << ", ";
-    //    }
-    //    m_logger << Root::kINFO << Root::GEndl;
   }
 
   return "";
@@ -293,7 +255,6 @@ CoolQuery::getLumiFolderData(const std::string& folder_name, const std::string& 
   LumiFolderData folderData;
 
   cool::IFolderPtr folder_ptr = m_sourceDbPtr->getFolder(folder_name);
-  //  m_logger << Root::kWARNING << "Getting from database " << m_database << " tag " << tag << Root::GEndl; 
   if (!folder_ptr->existsChannel(id)) {
     m_logger << Root::kWARNING << "Lumi channel id " << id << " does not exist in database " << folder_name << "!" << Root::GEndl;
     return mymap;
@@ -309,9 +270,9 @@ CoolQuery::getLumiFolderData(const std::string& folder_name, const std::string& 
 
   while (itr->goToNext()) {
     const cool::IRecord& payload=itr->currentRef().payload();
-    folderData.LBAvInstLumi = payload["LBAvInstLumi"].data<float>();
-    folderData.LBAvEvtsPerBX = payload["LBAvEvtsPerBX"].data<float>();
-    folderData.Valid = payload["Valid"].data<cool::UInt32>();
+    folderData.LBAvInstLumi = payload[lbAvInstLumiStr].data<float>();
+    folderData.LBAvEvtsPerBX = payload[lbAvEvtsPerBXStr].data<float>();
+    folderData.Valid = payload[validStr].data<cool::UInt32>();
     mymap.insert( std::pair<cool::ValidityKey, LumiFolderData>(itr->currentRef().since(), folderData));
   }
   
@@ -327,7 +288,6 @@ CoolQuery::getL1CountFolderData(const std::string& folder_name, const cool::Chan
   L1CountFolderData folderData;
 
   cool::IFolderPtr folder_ptr = m_sourceDbPtr->getFolder(folder_name);
-  //  m_logger << Root::kWARNING << "Getting from database " << m_database << " tag " << tag << Root::GEndl; 
   if (!folder_ptr->existsChannel(id)) {
     m_logger << Root::kWARNING << "Lumi channel id " << id << " does not exist in database " << folder_name << "!" << Root::GEndl;
     return mymap;
@@ -339,9 +299,9 @@ CoolQuery::getL1CountFolderData(const std::string& folder_name, const cool::Chan
 
   while (itr->goToNext()) {
     const cool::IRecord& payload=itr->currentRef().payload();
-    folderData.BeforePrescale = payload["BeforePrescale"].data<cool::UInt63>();
-    folderData.AfterPrescale = payload["AfterPrescale"].data<cool::UInt63>();
-    folderData.L1Accept = payload["L1Accept"].data<cool::UInt63>();
+    folderData.BeforePrescale = payload[beforePrescaleStr].data<cool::UInt63>();
+    folderData.AfterPrescale = payload[afterPrescaleStr].data<cool::UInt63>();
+    folderData.L1Accept = payload[l1AcceptStr].data<cool::UInt63>();
     mymap.insert( std::pair<cool::ValidityKey, L1CountFolderData>(itr->currentRef().since(), folderData));
   }
   
