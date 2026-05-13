@@ -1011,7 +1011,6 @@ class JvtWorkingPointEfficiencyConfig (ConfigBlock) :
     def __init__ (self) :
         super (JvtWorkingPointEfficiencyConfig, self).__init__ ()
         self.setBlockName('JvtWorkingPointEfficiencyConfig')
-        self.addDependency('OverlapRemoval', required=False)
         self.addDependency('EventSelection', required=False)
         self.addDependency('EventSelectionMerger', required=False)
         self.addOption ('containerName', '', type=str,
@@ -1030,8 +1029,6 @@ class JvtWorkingPointEfficiencyConfig (ConfigBlock) :
             info="disables the calculation of efficiencies and scale factors. "
             "Only useful to test a new WP for which scale factors are not available.",
             expertMode=True)
-        self.addOption ('eventSF', True, type=bool,
-            info="add calculation of event-level efficiency SF.")
 
     def instanceName (self) :
         return self.containerName + '_' + self.selectionName
@@ -1061,16 +1058,52 @@ class JvtWorkingPointEfficiencyConfig (ConfigBlock) :
 
             config.addOutputVar (self.containerName, alg.scaleFactorDecoration, f'jvtEfficiency{suffix}')
 
-            # Set up the per-event jet efficiency scale factor calculation algorithm
-            if self.eventSF:
-                alg = config.createAlgorithm( 'CP::AsgEventScaleFactorAlg', f'JvtEventScaleFactorAlg_{self.jvtWP}' )
-                preselection = config.getFullSelection (self.containerName, '')
-                alg.preselection = preselection + f'&&no_jvt{suffix}' if preselection else f'no_jvt{suffix}'
-                alg.scaleFactorInputDecoration = f'jvt_effSF{suffix}_%SYS%'
-                alg.scaleFactorOutputDecoration = f'jvt_effSF{suffix}_%SYS%'
-                alg.particles = config.readName (self.containerName)
 
-                config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration, f'weight_jvt_effSF{suffix}')
+class JvtWorkingPointEventEfficiencyConfig (ConfigBlock) :
+    """the ConfigBlock for the event Jvt working point efficiency"""
+
+    def __init__ (self) :
+        super (JvtWorkingPointEventEfficiencyConfig, self).__init__ ()
+        self.setBlockName('JvtWorkingPointEventEfficiencyConfig')
+        self.addDependency('JvtWorkingPointEfficiencyConfig', required=True)
+        self.addDependency('OverlapRemoval', required=False)
+        self.addDependency('EventSelection', required=False)
+        self.addDependency('EventSelectionMerger', required=False)
+        self.addOption ('containerName', '', type=str,
+            noneAction='error',
+            info="the name of the input container.")
+        self.addOption ('selectionName', '', type=str,
+            noneAction='error',
+            info="the name of the jet selection to define (e.g. `tight` or `loose`).")
+        self.addOption ('jvtWP', '', type=str,
+            noneAction='error',
+            info="the NNJvt WP to use. Supported WPs: `FixedEffPt`.")
+        self.addOption ('useSuffix', True, type=bool,
+            info="whether the working point name is to be used as suffix ."
+            "Not to be disabled if multiple working points are scheduled.")
+        self.addOption ('noEffSF', False, type=bool,
+            info="disables the calculation of efficiencies and scale factors. "
+            "Only useful to test a new WP for which scale factors are not available.",
+            expertMode=True)
+        self.addOption ('eventSF', True, type=bool,
+            info="add calculation of event-level efficiency SF.")
+
+    def instanceName (self) :
+        return self.containerName + '_' + self.selectionName
+
+    def makeAlgs (self, config) :
+
+        if (not self.noEffSF and self.eventSF and
+            config.dataType() is not DataType.Data):
+            suffix = f"_{self.jvtWP}" if self.useSuffix else ""
+            alg = config.createAlgorithm( 'CP::AsgEventScaleFactorAlg', f'JvtEventScaleFactorAlg_{self.jvtWP}' )
+            preselection = config.getFullSelection (self.containerName, '')
+            alg.preselection = preselection + f'&&no_jvt{suffix}' if preselection else f'no_jvt{suffix}'
+            alg.scaleFactorInputDecoration = f'jvt_effSF{suffix}_%SYS%'
+            alg.scaleFactorOutputDecoration = f'jvt_effSF{suffix}_%SYS%'
+            alg.particles = config.readName (self.containerName)
+
+            config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration, f'weight_jvt_effSF{suffix}')
 
 
 class FJvtWorkingPointSelectionConfig (ConfigBlock) :
@@ -1118,7 +1151,6 @@ class FJvtWorkingPointEfficiencyConfig (ConfigBlock) :
     def __init__ (self) :
         super (FJvtWorkingPointEfficiencyConfig, self).__init__ ()
         self.setBlockName('FJvtWorkingPointEfficiencyConfig')
-        self.addDependency('OverlapRemoval', required=False)
         self.addDependency('EventSelection', required=False)
         self.addDependency('EventSelectionMerger', required=False)
         self.addOption ('containerName', '', type=str,
@@ -1137,8 +1169,6 @@ class FJvtWorkingPointEfficiencyConfig (ConfigBlock) :
             info="disables the calculation of efficiencies and scale factors. "
             "Only useful to test a new WP for which scale factors are not available.",
             expertMode=True)
-        self.addOption ('eventSF', True, type=bool,
-            info="add calculation of event-level efficiency SF.")
 
     def instanceName (self) :
         return self.containerName + '_' + self.selectionName
@@ -1167,16 +1197,52 @@ class FJvtWorkingPointEfficiencyConfig (ConfigBlock) :
 
             config.addOutputVar (self.containerName, alg.scaleFactorDecoration, f'fjvtEfficiency{suffix}')
 
-            # Set up the per-event jet efficiency scale factor calculation algorithm
-            if self.eventSF:
-                alg = config.createAlgorithm( 'CP::AsgEventScaleFactorAlg', f'ForwardJvtEventScaleFactorAlg_{self.fjvtWP}' )
-                preselection = config.getFullSelection (self.containerName, '')
-                alg.preselection = preselection + f'&&no_fjvt{suffix}' if preselection else f'no_fjvt{suffix}'
-                alg.scaleFactorInputDecoration = f'fjvt_effSF{suffix}_%SYS%'
-                alg.scaleFactorOutputDecoration = f'fjvt_effSF{suffix}_%SYS%'
-                alg.particles = config.readName (self.containerName)
 
-                config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration, f'weight_fjvt_effSF{suffix}')
+class FJvtWorkingPointEventEfficiencyConfig (ConfigBlock) :
+    """the ConfigBlock for the event fJvt working point efficiency"""
+
+    def __init__ (self) :
+        super (FJvtWorkingPointEventEfficiencyConfig, self).__init__ ()
+        self.setBlockName('FJvtWorkingPointEventEfficiencyConfig')
+        self.addDependency('FJvtWorkingPointEfficiencyConfig', required=True)
+        self.addDependency('OverlapRemoval', required=False)
+        self.addDependency('EventSelection', required=False)
+        self.addDependency('EventSelectionMerger', required=False)
+        self.addOption ('containerName', '', type=str,
+            noneAction='error',
+            info="the name of the input container.")
+        self.addOption ('selectionName', '', type=str,
+            noneAction='error',
+            info="the name of the jet selection to define (e.g. `tight` or `loose`).")
+        self.addOption ('fjvtWP', '', type=str,
+            noneAction='error',
+            info="the fJvt WP to use. Supported WPs: `Loose`, `Tight`, `Tighter`.")
+        self.addOption ('useSuffix', True, type=bool,
+            info="whether the working point name is to be used as suffix ."
+            "Not to be disabled if multiple working points are scheduled.")
+        self.addOption ('noEffSF', False, type=bool,
+            info="disables the calculation of efficiencies and scale factors. "
+            "Only useful to test a new WP for which scale factors are not available.",
+            expertMode=True)
+        self.addOption ('eventSF', True, type=bool,
+            info="add calculation of event-level efficiency SF.")
+
+    def instanceName (self) :
+        return self.containerName + '_' + self.selectionName
+
+    def makeAlgs (self, config) :
+
+        if (not self.noEffSF and self.eventSF and
+            config.dataType() is not DataType.Data):
+            suffix = f"_{self.fjvtWP}" if self.useSuffix else ""
+            alg = config.createAlgorithm( 'CP::AsgEventScaleFactorAlg', f'ForwardJvtEventScaleFactorAlg_{self.fjvtWP}' )
+            preselection = config.getFullSelection (self.containerName, '')
+            alg.preselection = preselection + f'&&no_fjvt{suffix}' if preselection else f'no_fjvt{suffix}'
+            alg.scaleFactorInputDecoration = f'fjvt_effSF{suffix}_%SYS%'
+            alg.scaleFactorOutputDecoration = f'fjvt_effSF{suffix}_%SYS%'
+            alg.particles = config.readName (self.containerName)
+
+            config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration, f'weight_fjvt_effSF{suffix}')
 
 
 @groupBlocks
@@ -1190,8 +1256,10 @@ def Jets(seq):
 def JvtWorkingPoint(seq):
     seq.append(JvtWorkingPointSelectionConfig())
     seq.append(JvtWorkingPointEfficiencyConfig())
+    seq.append(JvtWorkingPointEventEfficiencyConfig())
 
 @groupBlocks
 def FJvtWorkingPoint(seq):
     seq.append(FJvtWorkingPointSelectionConfig())
     seq.append(FJvtWorkingPointEfficiencyConfig())
+    seq.append(FJvtWorkingPointEventEfficiencyConfig())
