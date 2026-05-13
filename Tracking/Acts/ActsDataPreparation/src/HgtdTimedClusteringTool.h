@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRK_DATAPREPARATION_HGTD_TIMEDCLUSTERING_TOOL_H
@@ -30,7 +30,7 @@ namespace Hgtd {
 }
 
 namespace ActsTrk {
-class HgtdAuxDataCache;
+struct HgtdAuxDataCache;
 
 class HgtdTimedClusteringTool :
     public extends<AthAlgTool, IHGTDClusteringTool> {
