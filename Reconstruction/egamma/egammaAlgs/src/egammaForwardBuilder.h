@@ -126,6 +126,14 @@ private:
     "Boolean to do pT calibration"
   };
 
+  Gaudi::Property<bool> m_fwdDNN {
+    this,
+    "dofwdDNN",
+    false,
+    "Boolean to do forward DNN identification"
+  };
+
+  
   /** @brief Input primary vertices for fwd energy calibration */
   SG::ReadHandleKey<xAOD::VertexContainer> m_pVtxKey{
     this,
@@ -253,7 +261,8 @@ protected:
     {},
     "The tool that we need to calibrate the pT of the FwdElectron object"
   };
-  
+
+
   Gaudi::Property<std::vector<std::string>> m_forwardElectronIsEMSelectorResultNames {
     this,
     "forwardelectronIsEMselectorResultNames",

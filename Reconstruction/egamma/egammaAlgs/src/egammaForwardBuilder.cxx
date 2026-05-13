@@ -68,19 +68,20 @@ StatusCode egammaForwardBuilder::initialize()
     
     return StatusCode::FAILURE;
   }
-  ATH_CHECK(m_forwardElectronNNSelectors.retrieve());
-  
-  if (
-      m_forwardElectronNNSelectors.size() !=
-      m_forwardElectronNNSelectorResultNames.size()
-      ) {
-    ATH_MSG_ERROR(
-		  "Number of selectors doesn't match number of given fwd-electron NN selector names"
-		  );
-      
-    return StatusCode::FAILURE;
-  }
+  if (m_fwdDNN) {
+    ATH_CHECK(m_forwardElectronNNSelectors.retrieve());
     
+    if (
+	m_forwardElectronNNSelectors.size() !=
+	m_forwardElectronNNSelectorResultNames.size()
+	) {
+      ATH_MSG_ERROR(
+		    "Number of selectors doesn't match number of given fwd-electron NN selector names"
+		    );
+      
+      return StatusCode::FAILURE;
+    }
+  }
 
   // Retrieve track match builder.
   ATH_CHECK(RetrieveEMTrackMatchBuilder());
@@ -298,25 +299,25 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
 
     
 
+    if (m_fwdDNN) {	
+      // Apply the Forward Electron selectors.
+      for (size_t i = 0; i < m_forwardElectronNNSelectors.size(); ++i) {
+	const auto selector = m_forwardElectronNNSelectors[i];
+	const auto name = m_forwardElectronNNSelectorResultNames[i];
 	
-    // Apply the Forward Electron selectors.
-    for (size_t i = 0; i < m_forwardElectronNNSelectors.size(); ++i) {
-      const auto selector = m_forwardElectronNNSelectors[i];
-      const auto name = m_forwardElectronNNSelectorResultNames[i];
-
-      
-      // Save the bool result.
-      const asg::AcceptData accept = selector->accept(ctx, el);
-      el->setPassSelection(static_cast<bool>(accept), "DNN"+name);
+	
+	// Save the bool result.
+	const asg::AcceptData accept = selector->accept(ctx, el);
+	el->setPassSelection(static_cast<bool>(accept), "DNN"+name);
+      }
+      std::string LikeliHoodName = "DNN_Score";
+      const auto selector = m_forwardElectronNNSelectors[0];
+      float val=selector->calculate(ctx,el);
+      el->setLikelihoodValue(val,LikeliHoodName);
     }
-    std::string LikeliHoodName = "DNN_Score";
-    const auto selector = m_forwardElectronNNSelectors[0];
-    float val=selector->calculate(ctx,el);
-    el->setLikelihoodValue(val,LikeliHoodName);
-
     
   }//end of loop over egammaRecs
-
+  
   CaloClusterStoreHelper::finalizeClusters(
     ctx,
     outClusterContainer,
