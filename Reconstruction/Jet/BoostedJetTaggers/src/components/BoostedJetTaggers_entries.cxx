@@ -27,3 +27,6 @@ DECLARE_COMPONENT(BJT::ScaleFactors)
 #include "src/BoostedJetTaggerAlg.h"
 DECLARE_COMPONENT(BJT::BoostedJetTaggerAlg)
 #endif
+
+#include "src/BoostedJetTaggerAlgAna.h"
+DECLARE_COMPONENT(BJT::BoostedJetTaggerAlgAna)

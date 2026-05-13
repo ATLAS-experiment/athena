@@ -965,16 +965,26 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             
 
         ### bjt
-        if self.runBoostedJetTagger :
-            alg = config.createAlgorithm( 'BJT::BoostedJetTaggerAlg', 'BoostedJetTaggerAlg' )
+        if self.runBoostedJetTagger:
+            alg = config.createAlgorithm( 'BJT::BoostedJetTaggerAlgAna', 'BoostedJetTaggerAlgAnaaaaa' )
             
             config.addPrivateTool( 'tagger', 'SmoothedWZTagger' )
 
-            alg.tagger.JetContainer = self.jetCollection
+            alg.tagger.ContainerName = self.jetCollection
             alg.tagger.CalibArea = 'Local'
             alg.tagger.IsMC = True
 
-            alg.jets = config.readName (self.containerName)
+            #from BoostedJetTaggers.BoostedJetTaggerConfig import BJTToolCfg
+            ConfigFile = '/eos/atlas/atlascerngroupdisk/perf-jets/LocalStorage/TAGGING/PreliminaryConfigs/WTagger/WTagger_AntiKt10UFOSoftDrop_ParT_FixSigEff50.dat'
+            #tool = BJTToolCfg(config.flags, 
+            #                  #ConfigFile=self.ConfigFile, 
+            #                  ConfigFile=ConfigFile, 
+            #                  ContainerName=self.containerName)
+            #alg.tagger = tool
+
+            alg.tagger.ConfigFile = ConfigFile
+
+            alg.jets = config.readName(self.containerName)
 
 
         config.addOutputVar (self.containerName, 'm', 'm')

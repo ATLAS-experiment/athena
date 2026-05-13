@@ -264,6 +264,12 @@ class ConfigFactory():
         from JetAnalysisAlgorithms.JetJvtAnalysisConfig import JetJvtAnalysisConfig
         self.addAlgConfigBlock(algName="JVT", alg=JetJvtAnalysisConfig,
             superBlocks="Jets")
+
+        ### bjt
+        from JetAnalysisAlgorithms.JetBJTAnalysisConfig import JetBJTAnalysisConfig
+        self.addAlgConfigBlock(algName="BJT", alg=JetBJTAnalysisConfig,
+            superBlocks="Jets")
+
         from JetAnalysisAlgorithms.BJetCalibAnalysisConfig import BJetCalibAnalysisConfig
         self.addAlgConfigBlock(algName="BJetCalib", alg=BJetCalibAnalysisConfig,
                                superBlocks="Jets")

@@ -1,0 +1,48 @@
+CommonServices: {}
+
+PileupReweighting: {}
+
+EventCleaning:
+  runEventCleaning: True
+
+Muons:
+  - containerName: AnaMuons
+    WorkingPoint:
+      - selectionName: medium
+        quality: Medium
+        isolation: Loose_VarRad
+
+Electrons:
+  - containerName: AnaElectrons
+    WorkingPoint:
+      - selectionName: loose
+        identificationWP: LooseBLayerLH
+        isolationWP: Tight_VarRad
+
+Jets:
+  - containerName: AnaJets
+    jetCollection: AntiKt4EMPFlowJets
+    JVT: {}
+
+MissingET:
+  - containerName: AnaMET
+    jets: AnaJets
+    electrons: AnaElectrons.loose
+    muons: AnaMuons.medium
+
+OverlapRemoval:
+  inputLabel: preselectOR
+  outputLabel: passesOR
+  jets: AnaJets.baselineJvt
+  electrons: AnaElectrons.loose
+  muons: AnaMuons.medium
+
+Output:
+  treeName: analysis
+  containers:
+    mu_: AnaMuons
+    el_: AnaElectrons
+    jet_: AnaJets
+    met_: AnaMET
+    "": EventInfo
+    
