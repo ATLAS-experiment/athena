@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -8,11 +8,12 @@
 #define LARCOOLCONDITIONS_LARDSPTHRESHOLDSFLAT_H
 
 #include "LArCOOLConditions/LArCondFlatBase.h"
-#include "Identifier/IdentifierHash.h"
-#include "LArIdentifier/LArOnlineID.h"
+#include "AthenaKernel/CLASS_DEF.h"
+#include "AthenaKernel/CondCont.h"
 
-
+class IdentifierHash;
 class AthenaAttributeList;
+class HWIdentifier;
 
 class LArDSPThresholdsFlat: public LArCondFlatBase {
   
@@ -21,9 +22,6 @@ private:
   
 public:
   LArDSPThresholdsFlat(const AthenaAttributeList* attrList);
-
-  //~LArDSPThresholdsFlat();
-
   bool good() const { return m_isInitialized && m_nChannels>0; }
 
   
@@ -38,21 +36,19 @@ public:
   float samplesThrByHash(const IdentifierHash& h) const;  
   float trigSumThrByHash(const IdentifierHash& h) const;  
 
-  //const std::string& name() { return m_setName;}
 
 private:
 
   void readBlob(const AthenaAttributeList* attr);
 
-  unsigned m_nChannels;
-  const float* m_ptQThr;
-  const float* m_psamplesThr;
-  const float* m_ptrigSumThr;
-  //std::string m_setName;
+  unsigned m_nChannels{};
+  const float* m_ptQThr{};
+  const float* m_psamplesThr{};
+  const float* m_ptrigSumThr{};
 
 };
 
 CLASS_DEF( LArDSPThresholdsFlat, 194681315 ,1  )
-#include "AthenaKernel/CondCont.h"
+
 CONDCONT_DEF( LArDSPThresholdsFlat, 148006985 );
 #endif 

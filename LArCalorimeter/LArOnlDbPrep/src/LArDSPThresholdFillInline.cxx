@@ -19,7 +19,6 @@
 #include "CoralBase/AttributeListSpecification.h"
 
 #include "LArCOOLConditions/LArDSPThresholdsFlat.h"
-//#include "CoolKernel/types.h"
 #include "CoolKernel/StorageType.h"
 
 LArDSPThresholdFillInline::LArDSPThresholdFillInline(const std::string& name, ISvcLocator* pSvcLocator) :
@@ -54,7 +53,6 @@ LArDSPThresholdFillInline::LArDSPThresholdFillInline(const std::string& name, IS
 
   declareProperty("Dump",m_dump=false);
   declareProperty("OutFile",m_outFileName="out.txt");
-  //declareProperty("InFile",m_inFileName="");
 }
 
 LArDSPThresholdFillInline::~LArDSPThresholdFillInline() {}
@@ -270,10 +268,12 @@ StatusCode LArDSPThresholdFillInline::stop() {
     const AthenaAttributeList* attr=0;
 
     ATH_CHECK( detStore()->retrieve(attr,m_key) );
-
+   
     LArDSPThresholdsFlat cont(attr);
-
-
+    if (!cont.good()){
+      ATH_MSG_ERROR("LArDSPThresholdsFlat did not initialise.");
+      return StatusCode::FAILURE;
+    }
     std::ofstream outfile;
     if (!m_outFileName.size()) {
       ATH_MSG_ERROR("No output file specified");
