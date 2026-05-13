@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Trigger includes
@@ -153,18 +153,19 @@ const RawEvent* TrigByteStreamInputSvc::nextEvent() {
   }
 
   // Monitor the input
-  auto numROBs = Monitored::Scalar<int>("L1Result_NumROBs",
-                                        cache->fullEventFragment->nchildren());
-  auto fragSize = Monitored::Scalar<float>("L1Result_FullEvFragSize",
+  auto numROBs = Monitored::Scalar<int>("Input_NumROBs", 0);
+  auto fragSize = Monitored::Scalar<float>("Input_FullEvFragSize",
                                            cache->fullEventFragment->fragment_size_word()*wordsToKiloBytes);
-  std::vector<eformat::read::ROBFragment> robVec;
-  cache->fullEventFragment->robs(robVec);
+
   std::vector<std::string> subdetNameVec;
-  for (const eformat::read::ROBFragment& rob : robVec) {
+  auto iter = cache->fullEventFragment->child_iter();
+  while (OFFLINE_FRAGMENTS_NAMESPACE::PointerType fp = iter.next()) {
+    ++numROBs;
+    OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment rob(fp);
     eformat::helper::SourceIdentifier sid(rob.rob_source_id());
     subdetNameVec.push_back(sid.human_detector());
   }
-  auto subdets = Monitored::Collection<std::vector<std::string>>("L1Result_SubDets", subdetNameVec);
+  auto subdets = Monitored::Collection<std::vector<std::string>>("Input_SubDets", subdetNameVec);
   auto mon = Monitored::Group(m_monTool, numROBs, fragSize, subdets, monLBN, monNoEvent);
 
   // Give the FullEventFragment pointer to ROBDataProviderSvc
