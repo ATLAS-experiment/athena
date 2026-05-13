@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/MsgStream.h"
@@ -43,8 +43,8 @@ StatusCode TrigT1CaloDataAccessV2::initialize()
 
 StatusCode TrigT1CaloDataAccessV2::loadTriggerTowers(xAOD::TriggerTowerContainer&  container)
 {
-  CHECK(m_tool->convert(&container));
-	return StatusCode::SUCCESS;
+  CHECK(m_tool->convert(Gaudi::Hive::currentContext(), &container));
+  return StatusCode::SUCCESS;
 }
 
 StatusCode TrigT1CaloDataAccessV2::PrintTriggerTowers()

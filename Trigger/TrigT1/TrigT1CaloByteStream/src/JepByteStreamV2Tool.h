@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1CALOBYTESTREAM_JEPBYTESTREAMV2TOOL_H
@@ -69,31 +69,36 @@ class JepByteStreamV2Tool : public AthAlgTool {
    virtual StatusCode finalize() override;
 
    /// Convert ROB fragments to jet elements
-   StatusCode convert(const std::string& name,
+   StatusCode convert(const EventContext& ctx,
+                      const std::string& name,
                       DataVector<LVL1::JetElement>* jeCollection) const;
    StatusCode convert(const std::string& sgKey,
                       const IROBDataProviderSvc::VROBFRAG& robFrags,
                       DataVector<LVL1::JetElement>* jeCollection) const;
    /// Convert ROB fragments to energy sums
-   StatusCode convert(const std::string& name,
+   StatusCode convert(const EventContext& ctx,
+                      const std::string& name,
                       DataVector<LVL1::JEMEtSums>* etCollection) const;
    StatusCode convert(const std::string& sgKey,
                       const IROBDataProviderSvc::VROBFRAG& robFrags,
                       DataVector<LVL1::JEMEtSums>* etCollection) const;
    /// Convert ROB fragments to CMX TOBs
-   StatusCode convert(const std::string& name,
+   StatusCode convert(const EventContext& ctx,
+                      const std::string& name,
                       DataVector<LVL1::CMXJetTob>* tobCollection) const;
    StatusCode convert(const std::string& sgKey,
                       const IROBDataProviderSvc::VROBFRAG& robFrags,
                       DataVector<LVL1::CMXJetTob>* tobCollection) const;
    /// Convert ROB fragments to CMX jet hits
-   StatusCode convert(const std::string& name,
+   StatusCode convert(const EventContext& ctx,
+                      const std::string& name,
                       DataVector<LVL1::CMXJetHits>* hitCollection) const;
    StatusCode convert(const std::string& sgKey,
                       const IROBDataProviderSvc::VROBFRAG& robFrags,
                       DataVector<LVL1::CMXJetHits>* hitCollection) const;
    /// Convert ROB fragments to CMX energy sums
-   StatusCode convert(const std::string& name,
+   StatusCode convert(const EventContext& ctx,
+                      const std::string& name,
                       DataVector<LVL1::CMXEtSums>* etCollection) const;
    StatusCode convert(const std::string& sgKey,
                       const IROBDataProviderSvc::VROBFRAG& robFrags,
