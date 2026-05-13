@@ -9,11 +9,19 @@ from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 
 KINEMATIC_VARS = ("pt", "eta", "phi", "m")
 INT_SUFFIXES = frozenset(("pdgId", "IsOnShell", "origin"))
+VECTOR_PREFIXES = ("MC_b_", "MC_bbar_", "MC_c_", "MC_cbar_")
+VECTOR_HISTORIES = frozenset(("Ttbarbbbar", "Ttbarccbar"))
 
+def _get_aux_type(branch: str, prefix: str) -> str:
+    # Handle specific cases where vectors are returned for each particle type
+    # In those cases, only external particles can be vectors, there is still
+    # a single particle allowed in named positions within decay chains
+    is_vector = prefix in VECTOR_HISTORIES and branch.startswith(VECTOR_PREFIXES) and "_from_" not in branch
 
-def _get_aux_type(branch: str) -> str:
-    return "int" if any(branch.endswith(s) for s in INT_SUFFIXES) else "float"
-
+    if is_vector:
+        return "vector_int" if any(branch.endswith(s) for s in INT_SUFFIXES) else "vector_float"
+    else:
+        return "int" if any(branch.endswith(s) for s in INT_SUFFIXES) else "float"
 
 def _make_particle_branches(
     prefix: str,
@@ -207,5 +215,5 @@ class PartonHistoryBlock(ConfigBlock):
                 f"{self.history}_{branch}",
                 f"{self.history}_{branch}",
                 noSys=True,
-                auxType=_get_aux_type(branch),
+                auxType=_get_aux_type(branch, self.history),
             )
