@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //Author: Lianyou Shan <lianyou.shan@cern.ch>
 
@@ -49,6 +49,7 @@ namespace Trk{
 
    std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*>
    SecVertexMergingTool::mergeVertexContainer(
+     const EventContext& ctx,
      const xAOD::VertexContainer& MyVxCont) const
 
    {
@@ -97,7 +98,7 @@ namespace Trk{
      unsigned int Ni = 0;
      for (xAOD::VertexContainer::const_iterator i = beginIter; i != endIter;
           ++i, Ni++) {
-       xAOD::Vertex* vx = new xAOD::Vertex(**i);
+       auto vx = std::make_unique<xAOD::Vertex>(**i);
 
        if (remerged[Ni])
          continue; // skip vertices already merged into another
@@ -133,7 +134,7 @@ namespace Trk{
 
            // not dummy and not already merged into earlier vertex, so consider
            // it as merging candidate
-           if (!checkCompatibility(vx, mergeCand))
+           if (!checkCompatibility(vx.get(), mergeCand))
              continue;
 
            ATH_MSG_DEBUG("To merge vertices " << Ni << " and " << Nj);
@@ -154,11 +155,10 @@ namespace Trk{
 
            // call the fitter -> using xAOD::TrackParticle it should set the
            // track links for us
-           xAOD::Vertex* mergedVtx = nullptr;
            // no interface for no constraint and no starting point, so use
            // starting point of original vertex
            Amg::Vector3D start(0.5 * (vx->position() + mergeCand->position()));
-           mergedVtx = m_iVertexFitter->fit(combinedTracks, start);
+           std::unique_ptr<xAOD::Vertex> mergedVtx = m_iVertexFitter->fit(ctx, combinedTracks, start);
 
            ATH_MSG_DEBUG("Merged vertices " << mergedVtx->nTrackParticles());
 
@@ -202,9 +202,8 @@ namespace Trk{
              ntrks = mAcc_numtav(*vx) + mAcc_numtav(*mergeCand);
            }
 
-           // delete copy of first vertex and then overwrite with merged vertex
-           delete vx;
-           vx = mergedVtx;
+           // overwrite with merged vertex
+           vx = std::move(mergedVtx);
 
            if (wght1 >= wght2)
              vx->setVertexType(typ1);
@@ -230,8 +229,8 @@ namespace Trk{
 
        // whether we merged or not, can add vx to the container
        if (vx != nullptr){
-	 ATH_MSG_DEBUG("Merged sumPt2 " << mAcc_sumPt2(*vx));
-         NewContainer->push_back(vx);
+         ATH_MSG_DEBUG("Merged sumPt2 " << mAcc_sumPt2(*vx));
+         NewContainer->push_back(std::move(vx));
        }
      }
 
