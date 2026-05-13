@@ -144,9 +144,9 @@ def addTriggerArgs(parser):
                         help='postcommand for trigger step ("-C")', group='Trigger')
 
     # trigger executable
-    parser.add_argument('--athenaEF', type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=True),
-                        default=trfArgClasses.argBool(False),
-                        help='Use athenaEF instead of athenaHLT', group='Trigger')
+    parser.add_argument('--trigExe', type=trfArgClasses.argFactory(trfArgClasses.argString, runarg=True),
+                        default=trfArgClasses.argString("athenaHLT.py"),
+                        help='Executable to run in the trigger step', group='Trigger')
 
     # For prodsys to make sure uses inputBS_RDOFile rather than inputBSFile when running the b2r step
     parser.add_argument('--prodSysBSRDO', type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=True),
