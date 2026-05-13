@@ -7,7 +7,7 @@
 #include "LArCafJobs/SimpleShape.h"
 #include "LArSamplesMon/MonitorBase.h"
 #include "LArSamplesMon/ScaledErrorData.h"
-#include "LArSamplesMon/History.h"
+
 #include "LArCafJobs/CellInfo.h"
 #include "LArSamplesMon/ShapeFitter.h"
 #include "LArCafJobs/EventData.h"
@@ -142,18 +142,8 @@ TString Data::str(LArFebErrorSummary::LArFebErrorType error)
 TString Data::problems(bool sayNone) const
 {
   if (isDisconnected()) return "DISCONNECTED";
-
-/*   
-  TString problems = "";
-  for (CaloBadChannel::CALOPROBLEM pb = CaloBadChannel::DEAD; pb < CaloBadChannel::NPB; pb = CaloBadChannel::CALOPROBLEM(pb + 1))
-    if (problem(pb)) {
-      if (problems != "") problems += " ";
-      problems += str(pb);
-    }
-*/  
-
-  TString problems = "";
-  if (problems =="" && sayNone) problems = "None";
+  TString problems{};
+  if (sayNone) problems = "None";
   return problems;
 }
 
@@ -495,12 +485,30 @@ double Data::residualError(short sample1, short sample2, bool scale) const
 }
 
 
-double Data::_x(const DataFuncArgs&)   const { return  m_history->cellInfo()->position().X(); }
-double Data::_y(const DataFuncArgs&)   const { return  m_history->cellInfo()->position().Y(); }
-double Data::_z(const DataFuncArgs&)   const { return  m_history->cellInfo()->position().Z(); }
-double Data::_rt(const DataFuncArgs&)  const { return  m_history->cellInfo()->rt(); }
-double Data::_eta(const DataFuncArgs&) const { return  m_history->cellInfo()->eta(); }
-double Data::_phi(const DataFuncArgs&) const { return  m_history->cellInfo()->phi(); }
+double Data::_x(const DataFuncArgs&)   const { 
+  if (auto ci = cellInfo(); !ci)[[unlikely]]  return 0.;
+  else return  ci->position().X(); 
+}
+double Data::_y(const DataFuncArgs&)   const {
+  if (auto ci = cellInfo(); !ci)[[unlikely]] return 0.;
+  else return  ci->position().Y(); 
+}
+double Data::_z(const DataFuncArgs&)   const {
+ if (auto ci = cellInfo(); !ci)[[unlikely]] return 0.;
+ else return  ci->position().Z(); 
+}
+double Data::_rt(const DataFuncArgs&)  const {
+ if (auto ci = cellInfo(); !ci)[[unlikely]] return 0.;
+ else return  ci->rt(); 
+}
+double Data::_eta(const DataFuncArgs&) const { 
+  if (auto ci = cellInfo(); !ci)[[unlikely]] return 0.;
+  else return  ci->eta(); 
+}
+double Data::_phi(const DataFuncArgs&) const {
+  if (auto ci = cellInfo(); !ci)[[unlikely]] return 0.; 
+  else return  ci->phi(); 
+}
 
 
 TString Data::gainStr(CaloGain::CaloGain gain) 
