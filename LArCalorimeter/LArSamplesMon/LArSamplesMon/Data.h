@@ -14,7 +14,7 @@
 #include "LArCafJobs/AbsShape.h"//inheritance
 #include "LArCafJobs/DataContainer.h" //method implemented
 #include "LArRawEvent/LArFebErrorSummary.h"//enum
-
+#include "LArSamplesMon/History.h"
 #include "TString.h" //set default value
 #include "TVectorD.h" //typedef
 
@@ -278,12 +278,12 @@ namespace LArSamples {
       static void setTimeShift(double shift = 0) { m_timeShift = shift; }
       
     private:
-     
+      inline const CellInfo* cellInfo() const {return m_history?m_history->cellInfo():nullptr;}
       //bool fit(const AbsShape& reference, double& k, double& deltaT, double& chi2) const;
       std::unique_ptr<const DataContainer> m_container;
       const EventData& m_eventData;
-      mutable const History* m_history;
-      mutable unsigned int m_index;
+      mutable const History* m_history{};
+      mutable unsigned int m_index{};
       inline static std::atomic<double> m_timeShift{0}; // specify a global time shift between first sample time and reported ofc time
  };
 }
