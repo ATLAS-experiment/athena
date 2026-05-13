@@ -34,6 +34,7 @@ def egammaForwardBuilderCfg(flags, name='egammaForwardElectron', **kwargs):
                 "TightForwardNNElectronSelector",
                 "Tight")
 
+            kwargs["dofwdDNN"] = True
             kwargs.setdefault("forwardelectronNNselectors",
                               [LooseFwdElectronSelector_NN.popPrivateTools(),
                                MediumFwdElectronSelector_NN.popPrivateTools(),
