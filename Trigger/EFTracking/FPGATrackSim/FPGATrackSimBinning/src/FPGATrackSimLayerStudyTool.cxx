@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimGenScanBinning.cxx
@@ -178,7 +178,7 @@ void FPGATrackSimLayerStudyTool::ClearTreeVectors()
   m_truth_tree_parset.clear();
 }
 
-void FPGATrackSimLayerStudyTool::fillBinLevelOutput ATLAS_NOT_THREAD_SAFE(const FPGATrackSimBinUtil::IdxSet &idx,
+void FPGATrackSimLayerStudyTool::fillBinLevelOutput(const FPGATrackSimBinUtil::IdxSet &idx,
                                   const FPGATrackSimBinnedHits::BinEntry &data)
 {
   setBinPlotsActive(idx);
@@ -240,7 +240,7 @@ void FPGATrackSimLayerStudyTool::fillBinLevelOutput ATLAS_NOT_THREAD_SAFE(const 
   }
 }
 
-void FPGATrackSimLayerStudyTool::fillBinningSummary ATLAS_NOT_THREAD_SAFE(
+void FPGATrackSimLayerStudyTool::fillBinningSummary(
     const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits)
 {
   m_inputHits->Fill(hits.size());
@@ -291,7 +291,7 @@ void FPGATrackSimLayerStudyTool::fillHitLevelInput(const FPGATrackSimHit *hit) {
 
 
 
-void FPGATrackSimLayerStudyTool::parseTruthInfo ATLAS_NOT_THREAD_SAFE(std::vector<FPGATrackSimTruthTrack> const & truthtracks) {
+void FPGATrackSimLayerStudyTool::parseTruthInfo(std::vector<FPGATrackSimTruthTrack> const & truthtracks) {
   ATH_MSG_DEBUG("In parseTruthInfo, truthtracks size = " << truthtracks.size());
   m_truthIsValid = false;
   m_bin_tree_event++;
