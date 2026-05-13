@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef COOLQUERY_H
@@ -318,7 +318,7 @@ class CoolQuery{
 
   // Retrieve prescale data into cached data object
   template <class T>
-    IOVData<T> getIOVData(const std::string& name, const std::string& folder_name, const cool::ChannelId& id, const std::string& tag="");
+    IOVData<T> getIOVData(const std::string& name, const std::string& folder_name, const cool::ChannelId& id, const std::string& tag={});
  
  private:
   std::string transConn(const std::string& inconn);
@@ -336,12 +336,6 @@ class CoolQuery{
   bool m_valid;
 };
 
-/* template <class T> */
-/* unordered_map<IOVRange, T> CoolQuery::getTrigObjMapFromFolderByNameIOV(const std::string& obj_name, const std::string& folder_name, const std::string& trigger){ */
-/*   unordered_map<IOVRange, T> test; */
-/*   return test; */
-
-/* } */
 
 
 
