@@ -40,11 +40,7 @@ class trigRecoExecutor(athenaExecutor):
         msg.debug('Preparing for execution of {0} with inputs {1} and outputs {2}'.format(self.name, input, output))
 
         # setsid needed to fix process-group id of child processes to be the same as mother process (ATR-20513)
-        self._exe = 'setsid '
-        if self.conf.argdict['athenaEF'].value is True:
-            self._exe += 'athenaEF.py'
-        else:
-            self._exe += 'athenaHLT.py'
+        self._exe = 'setsid ' + self.conf.argdict['trigExe'].value
 
         # Check we actually have events to process!
         if (self._inputEventTest and 'skipEvents' in self.conf.argdict and

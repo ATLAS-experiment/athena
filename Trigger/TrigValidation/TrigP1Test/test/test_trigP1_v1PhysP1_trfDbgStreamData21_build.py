@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # art-description: perform debug recovery from PU crash using PhysicsP1 menu
 # art-type: build
@@ -23,6 +23,7 @@ hlt.args += ' --streamSelection=Main,BphysDelayed,VBFDelayed'
 hlt.args += ' --prodSysBSRDO True'
 hlt.args += ' --outputBSFile=RAW.pool.root'
 hlt.args += ' --outputHIST_DEBUGSTREAMMONFile=HIST_DEBUGSTREAMMON.ntup.root' # Turn on debug recovery step
+hlt.args += ' --trigExe=athenaHLT.py'  # data21 requires athenaHLT.py
 hlt.input = 'data21_dbg_stream'
 
 
