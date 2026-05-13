@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -59,7 +59,7 @@ StatusCode TauTrackFinder::executeTrackFinder(xAOD::TauJet& pTau, xAOD::TauTrack
   //Retrieve standard track container
   const xAOD::TrackParticleContainer* trackParticleCont = nullptr; 
   
-  SG::ReadHandle<xAOD::TrackParticleContainer> trackPartInHandle( m_trackPartInputContainer );
+  SG::ReadHandle<xAOD::TrackParticleContainer> trackPartInHandle( m_trackPartInputContainer, ctx );
   if (!trackPartInHandle.isValid()) {
     ATH_MSG_ERROR ("Could not retrieve HiveDataObj with key " << trackPartInHandle.key());
     return StatusCode::FAILURE;
@@ -70,7 +70,7 @@ StatusCode TauTrackFinder::executeTrackFinder(xAOD::TauJet& pTau, xAOD::TauTrack
   const xAOD::TrackParticleContainer* largeD0TracksParticleCont = nullptr; 
   std::vector<const xAOD::TrackParticle*> vecTrksLargeD0;
   if (! m_largeD0TracksInputContainer.empty()) { 
-    SG::ReadHandle<xAOD::TrackParticleContainer> trackPartInHandle( m_largeD0TracksInputContainer );
+    SG::ReadHandle<xAOD::TrackParticleContainer> trackPartInHandle( m_largeD0TracksInputContainer, ctx );
     if (!trackPartInHandle.isValid()) {
       ATH_MSG_VERBOSE ("Could not retrieve HiveDataObj with key " << trackPartInHandle.key());
       ATH_MSG_VERBOSE ("LRT container " << trackPartInHandle.key()<<" is not being used for tau tracks");
@@ -86,7 +86,7 @@ StatusCode TauTrackFinder::executeTrackFinder(xAOD::TauJet& pTau, xAOD::TauTrack
   // retrieve the seed jet container when using ghost-matching
   const xAOD::JetContainer* jetContainer = nullptr; 
   if (! m_jetContainer.empty()) {
-    SG::ReadHandle<xAOD::JetContainer> jetContHandle( m_jetContainer );
+    SG::ReadHandle<xAOD::JetContainer> jetContHandle( m_jetContainer, ctx );
     if (!jetContHandle.isValid()) {
       ATH_MSG_ERROR ("Could not retrieve HiveDataObj with key " << jetContHandle.key());
       return StatusCode::FAILURE;
@@ -126,7 +126,7 @@ StatusCode TauTrackFinder::executeTrackFinder(xAOD::TauJet& pTau, xAOD::TauTrack
 
   // remove core and wide tracks outside a maximal delta z0 wrt lead core track                                                                                
   if (m_applyZ0cut) {
-    this->removeOffsideTracksWrtLeadTrk(tauTracks, wideTracks, otherTracks, pVertex, m_z0maxDelta);
+    this->removeOffsideTracksWrtLeadTrk(ctx, tauTracks, wideTracks, otherTracks, pVertex, m_z0maxDelta);
   }
 
   if(m_removeDuplicateCoreTracks){
@@ -278,7 +278,7 @@ StatusCode TauTrackFinder::executeTrackFinder(xAOD::TauJet& pTau, xAOD::TauTrack
   else if (inTrigger()) { // online: use vertex with x-y coordinates from the beamspot and the z from the leading track
     vxbkp.setX(0); vxbkp.setY(0); vxbkp.setZ(0);
 
-    SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey };
+    SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx };
     if(beamSpotHandle.isValid()) {
       vxbkp.setPosition(beamSpotHandle->beamPos());
       const auto& cov = beamSpotHandle->beamVtx().covariancePosition();
@@ -328,7 +328,7 @@ StatusCode TauTrackFinder::executeTrackFinder(xAOD::TauJet& pTau, xAOD::TauTrack
   // store information only in ExtraDetailsContainer
   if(!m_bypassExtrapolator)
     {
-      StatusCode sc = extrapolateToCaloSurface(pTau, tauTrackCon);
+      StatusCode sc = extrapolateToCaloSurface(ctx, pTau, tauTrackCon);
       if (sc.isFailure() && !sc.isRecoverable()) {
 	ATH_MSG_ERROR("couldn't extrapolate tracks to calo surface");
 	return StatusCode::FAILURE;
@@ -433,7 +433,8 @@ void TauTrackFinder::getTauTracksFromPV( const xAOD::TauJet& pTau,
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-StatusCode TauTrackFinder::extrapolateToCaloSurface(xAOD::TauJet& pTau,
+StatusCode TauTrackFinder::extrapolateToCaloSurface(const EventContext& ctx,
+                                                    xAOD::TauJet& pTau,
                                                     xAOD::TauTrackContainer& tauTrackCon) const
 {
   Trk::TrackParametersIdHelper parsIdHelper;
@@ -463,22 +464,20 @@ StatusCode TauTrackFinder::extrapolateToCaloSurface(xAOD::TauJet& pTau,
     if(!m_ParticleCacheKey.key().empty()){
       /*get the CaloExtension object*/
       ATH_MSG_VERBOSE("Using the CaloExtensionBuilder Cache");
-      SG::ReadHandle<CaloExtensionCollection>  particleCache {m_ParticleCacheKey};
+      SG::ReadHandle<CaloExtensionCollection>  particleCache {m_ParticleCacheKey, ctx};
       caloExtension = (*particleCache)[trackIndex];
       ATH_MSG_VERBOSE("Getting element " << trackIndex << " from the particleCache");
       if( not caloExtension ){
         ATH_MSG_VERBOSE("Cache does not contain a calo extension -> "
                         "Calculating with the a CaloExtensionTool");
-        uniqueExtension = m_caloExtensionTool->caloExtension(
-          Gaudi::Hive::currentContext(), *orgTrack);
+        uniqueExtension = m_caloExtensionTool->caloExtension(ctx, *orgTrack);
         caloExtension = uniqueExtension.get();
       }
     }
     else {
       /* If CaloExtensionBuilder is unavailable, use the calo extension tool */
       ATH_MSG_VERBOSE("Using the CaloExtensionTool");
-      uniqueExtension = m_caloExtensionTool->caloExtension(
-        Gaudi::Hive::currentContext(), *orgTrack);
+      uniqueExtension = m_caloExtensionTool->caloExtension(ctx, *orgTrack);
       caloExtension = uniqueExtension.get();
     }
 
@@ -550,7 +549,8 @@ StatusCode TauTrackFinder::extrapolateToCaloSurface(xAOD::TauJet& pTau,
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-void TauTrackFinder::removeOffsideTracksWrtLeadTrk(std::vector<const xAOD::TrackParticle*> &tauTracks,
+void TauTrackFinder::removeOffsideTracksWrtLeadTrk(const EventContext& ctx,
+						   std::vector<const xAOD::TrackParticle*> &tauTracks,
 						   std::vector<const xAOD::TrackParticle*> &wideTracks,
 						   std::vector<const xAOD::TrackParticle*> &otherTracks,
 						   const xAOD::Vertex* tauOrigin,
@@ -563,7 +563,7 @@ void TauTrackFinder::removeOffsideTracksWrtLeadTrk(std::vector<const xAOD::Track
 
   // get lead trk parameters
   const xAOD::TrackParticle *leadTrack = tauTracks.at(0);
-  float z0_leadTrk = getZ0(leadTrack, tauOrigin);
+  float z0_leadTrk = getZ0(ctx, leadTrack, tauOrigin);
 
   if (z0_leadTrk > MAX-1) return; // bad lead trk -> do nothing
 
@@ -574,7 +574,7 @@ void TauTrackFinder::removeOffsideTracksWrtLeadTrk(std::vector<const xAOD::Track
   // skip leading track, because it is the reference
   itr = tauTracks.begin()+1;
   while (itr!=tauTracks.end()) {
-    float z0 = getZ0(*itr, tauOrigin);
+    float z0 = getZ0(ctx, *itr, tauOrigin);
     float deltaZ0=z0 - z0_leadTrk;
     ATH_MSG_VERBOSE("core Trks: deltaZ0= " << deltaZ0);
 
@@ -588,7 +588,7 @@ void TauTrackFinder::removeOffsideTracksWrtLeadTrk(std::vector<const xAOD::Track
   // check wide tracks
   itr = wideTracks.begin();
   while (itr!=wideTracks.end()) {
-    float z0 = getZ0(*itr, tauOrigin);
+    float z0 = getZ0(ctx, *itr, tauOrigin);
     float deltaZ0=z0 - z0_leadTrk;
     ATH_MSG_VERBOSE("wide Trks: deltaZ0= " << deltaZ0);
 
@@ -608,15 +608,15 @@ void TauTrackFinder::removeOffsideTracksWrtLeadTrk(std::vector<const xAOD::Track
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-float TauTrackFinder::getZ0(const xAOD::TrackParticle* track, const xAOD::Vertex* vertex) const
+float TauTrackFinder::getZ0(const EventContext& ctx, const xAOD::TrackParticle* track, const xAOD::Vertex* vertex) const
 {
   float MAX=1e5;
 
   if (!track) return MAX;
 
   std::unique_ptr<Trk::Perigee> perigee;
-  if (vertex) perigee = m_trackToVertexTool->perigeeAtVertex(Gaudi::Hive::currentContext(), *track, vertex->position());
-  else        perigee = m_trackToVertexTool->perigeeAtVertex(Gaudi::Hive::currentContext(), *track); //will use beamspot or 0,0,0 instead
+  if (vertex) perigee = m_trackToVertexTool->perigeeAtVertex(ctx, *track, vertex->position());
+  else        perigee = m_trackToVertexTool->perigeeAtVertex(ctx, *track); //will use beamspot or 0,0,0 instead
 
   if (!perigee) {
     ATH_MSG_WARNING("Bad track; can't find perigee at vertex.");

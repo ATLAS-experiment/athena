@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -66,7 +66,8 @@ private:
     //-------------------------------------------------------------
     //! Extrapolate track eta and phi to the calorimeter middle surface
     //-------------------------------------------------------------
-    StatusCode extrapolateToCaloSurface(xAOD::TauJet& pTau,
+    StatusCode extrapolateToCaloSurface(const EventContext& ctx,
+                                        xAOD::TauJet& pTau,
                                         xAOD::TauTrackContainer& tauTrackCon) const;
 
     TauTrackType tauTrackType( const xAOD::TauJet& tauJet,
@@ -83,7 +84,8 @@ private:
 			     std::vector<const xAOD::TrackParticle*> &otherTracks) const;
 
     // new xAOD version
-    void removeOffsideTracksWrtLeadTrk(std::vector<const xAOD::TrackParticle*> &tauTracks,
+    void removeOffsideTracksWrtLeadTrk( const EventContext& ctx,
+				       std::vector<const xAOD::TrackParticle*> &tauTracks,
 				       std::vector<const xAOD::TrackParticle*> &wideTracks,
 				       std::vector<const xAOD::TrackParticle*> &otherTracks,
 				       const xAOD::Vertex* tauOrigin,
@@ -92,7 +94,7 @@ private:
     //-------------------------------------------------------------
     //! Some internally used functions
     //-------------------------------------------------------------
-    float getZ0(const xAOD::TrackParticle* track, const xAOD::Vertex* vertex) const;   //xAOD version
+    float getZ0(const EventContext& ctx, const xAOD::TrackParticle* track, const xAOD::Vertex* vertex) const;   //xAOD version
     bool  isLargeD0Track(const xAOD::TrackParticle* track) const;   
 
     //-------------------------------------------------------------
