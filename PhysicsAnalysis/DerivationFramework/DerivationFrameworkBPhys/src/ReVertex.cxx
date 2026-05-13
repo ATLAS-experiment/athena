@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 // ****************************************************************************
 // ----------------------------------------------------------------------------
@@ -159,15 +159,15 @@ StatusCode ReVertex::addBranches(const EventContext& ctx) const {
 
 	      // Daniel Scheirich: remove track too far from the Jpsi+2Tracks vertex (DeltaZ cut)
 	      if(m_trkDeltaZ>0 &&
-		 std::abs((tp)->z0() + (tp)->vz() - v->z()) > m_trkDeltaZ )
+	         std::abs((tp)->z0() + (tp)->vz() - v->z()) > m_trkDeltaZ )
 	       continue;
 	     
-	     fitAndStore(vtxContainer.ptr(),v,InVtxContainer.cptr(),fitpair,importedTrackCollection.cptr(),pvContainer.cptr());
+	     fitAndStore(ctx,vtxContainer.ptr(),v,InVtxContainer.cptr(),fitpair,importedTrackCollection.cptr(),pvContainer.cptr());
 	  }
        }
        else 
        {
-	  fitAndStore(vtxContainer.ptr(),v,InVtxContainer.cptr(),fitpair,importedTrackCollection.cptr(),pvContainer.cptr());
+	     fitAndStore(ctx,vtxContainer.ptr(),v,InVtxContainer.cptr(),fitpair,importedTrackCollection.cptr(),pvContainer.cptr());
        }
     }
 
@@ -219,14 +219,15 @@ StatusCode ReVertex::addBranches(const EventContext& ctx) const {
     return StatusCode::SUCCESS;
 }
 
-void ReVertex::fitAndStore(xAOD::VertexContainer* vtxContainer,
+void ReVertex::fitAndStore(const EventContext& ctx,
+				    xAOD::VertexContainer* vtxContainer,
 				    const xAOD::Vertex* v,
 				    const xAOD::VertexContainer    *InVtxContainer,
 				    const std::vector<const xAOD::TrackParticle*> &inputTracks,
 				    const xAOD::TrackParticleContainer* importedTrackCollection,
 				    const xAOD::VertexContainer* pvContainer) const
 {
-   std::unique_ptr<xAOD::Vertex> ptr(fit(inputTracks, importedTrackCollection, nullptr));
+   std::unique_ptr<xAOD::Vertex> ptr(fit(ctx, inputTracks, importedTrackCollection, nullptr));
    if(!ptr)return;
 
    double chi2DOF = ptr->chiSquared()/ptr->numberDoF();
@@ -249,7 +250,7 @@ void ReVertex::fitAndStore(xAOD::VertexContainer* vtxContainer,
       //
       Analysis::CleanUpVertex closestRefPV = Analysis::JpsiUpsilonCommon::ClosestRefPV(bHelper, pvContainer, &(*m_pvRefitter));
       if (!closestRefPV.get()) return;
-      std::unique_ptr<xAOD::Vertex> ptrPV(fit(inputTracks, importedTrackCollection, closestRefPV.get()));
+      std::unique_ptr<xAOD::Vertex> ptrPV(fit(ctx, inputTracks, importedTrackCollection, closestRefPV.get()));
       if(!ptrPV) return;
 
       double chi2DOFPV = ptrPV->chiSquared()/ptrPV->numberDoF();
@@ -279,7 +280,8 @@ void ReVertex::fitAndStore(xAOD::VertexContainer* vtxContainer,
     // fit - does the fit
     // ---------------------------------------------------------------------------------
     
-xAOD::Vertex* ReVertex::fit(const std::vector<const xAOD::TrackParticle*> &inputTracks,
+std::unique_ptr<xAOD::Vertex> ReVertex::fit(const EventContext& ctx,
+			    const std::vector<const xAOD::TrackParticle*> &inputTracks,
 			    const xAOD::TrackParticleContainer* importedTrackCollection,
 			    const xAOD::Vertex* pv) const
 {
@@ -310,10 +312,10 @@ xAOD::Vertex* ReVertex::fit(const std::vector<const xAOD::TrackParticle*> &input
    int errorcode = 0;
    Amg::Vector3D startingPoint = m_vertexEstimator->getCirclesIntersectionPoint(&aPerigee1,&aPerigee2,sflag,errorcode);
    if (errorcode != 0) {startingPoint(0) = 0.0; startingPoint(1) = 0.0; startingPoint(2) = 0.0;}
-   xAOD::Vertex* theResult = m_VKVFitter->fit(inputTracks, startingPoint, *state);
+   std::unique_ptr<xAOD::Vertex> theResult = m_VKVFitter->fit(ctx, inputTracks, startingPoint, *state);
 
    // Added by ASC
-   if(theResult != 0){
+   if(theResult){
       std::vector<ElementLink<DataVector<xAOD::TrackParticle> > > newLinkVector;
       for(unsigned int i=0; i< theResult->trackParticleLinks().size(); i++)
 	{

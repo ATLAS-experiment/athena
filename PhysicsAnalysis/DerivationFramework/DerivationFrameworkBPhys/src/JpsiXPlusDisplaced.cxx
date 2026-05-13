@@ -527,7 +527,7 @@ namespace DerivationFramework {
       // Iterate over displaced vertices
       if(m_disVDaug_num==2) {
 	for(auto&& V0Candidate : selectedV0Candidates) {
-	  std::vector<std::pair<Trk::VxCascadeInfo*, Trk::VxCascadeInfo*> > result = fitMainVtx(jxVtx, massesJX, V0Candidate.first, V0Candidate.second, trackContainer.cptr(), trackCols, defaultPVContainer.cptr(), pvContainer.cptr());
+	  std::vector<std::pair<Trk::VxCascadeInfo*, Trk::VxCascadeInfo*> > result = fitMainVtx(ctx, jxVtx, massesJX, V0Candidate.first, V0Candidate.second, trackContainer.cptr(), trackCols, defaultPVContainer.cptr(), pvContainer.cptr());
 	  for(auto cascade_info_pair : result) {
 	    if(cascade_info_pair.first) cascadeinfoContainer.push_back(cascade_info_pair);
 	  }
@@ -535,7 +535,7 @@ namespace DerivationFramework {
       } // m_disVDaug_num==2
       else if(m_disVDaug_num==3) {
 	for(auto&& disVtx : disVtxContainer) {
-	  std::vector<std::pair<Trk::VxCascadeInfo*, Trk::VxCascadeInfo*> > result = fitMainVtx(jxVtx, massesJX, disVtx, trackContainer.cptr(), trackCols, defaultPVContainer.cptr(), pvContainer.cptr());
+	  std::vector<std::pair<Trk::VxCascadeInfo*, Trk::VxCascadeInfo*> > result = fitMainVtx(ctx, jxVtx, massesJX, disVtx, trackContainer.cptr(), trackCols, defaultPVContainer.cptr(), pvContainer.cptr());
 	  for(auto cascade_info_pair : result) {
 	    if(cascade_info_pair.first) cascadeinfoContainer.push_back(cascade_info_pair);
 	  }
@@ -1225,7 +1225,7 @@ namespace DerivationFramework {
     return disVtx;
   }
 
-  std::unique_ptr<xAOD::Vertex> JpsiXPlusDisplaced::fitTracks(const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, const xAOD::TrackParticle* track3) const {
+  std::unique_ptr<xAOD::Vertex> JpsiXPlusDisplaced::fitTracks(const EventContext& ctx, const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, const xAOD::TrackParticle* track3) const {
     // Starting point
     const Trk::Perigee& aPerigee1 = track1->perigeeParameters();
     const Trk::Perigee& aPerigee2 = track2->perigeeParameters();
@@ -1235,16 +1235,14 @@ namespace DerivationFramework {
     std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
     // do the fit
     if(track3) {
-      std::unique_ptr<xAOD::Vertex> fittedVertex( m_iVertexFitter->fit(std::vector<const xAOD::TrackParticle*>{track1,track2,track3}, startingPoint, *state) );
-      return fittedVertex;
+      return m_iVertexFitter->fit(ctx, std::vector<const xAOD::TrackParticle*>{track1,track2,track3}, startingPoint, *state);
     }
     else {
-      std::unique_ptr<xAOD::Vertex> fittedVertex( m_iVertexFitter->fit(std::vector<const xAOD::TrackParticle*>{track1,track2}, startingPoint, *state) );
-      return fittedVertex;
+      return m_iVertexFitter->fit(ctx, std::vector<const xAOD::TrackParticle*>{track1,track2}, startingPoint, *state);
     }
   }
 
-  JpsiXPlusDisplaced::MesonCandidate JpsiXPlusDisplaced::getDpmCandidate(const xAOD::Vertex* JXvtx, const xAOD::TrackParticle* extraTrk1, const xAOD::TrackParticle* extraTrk2, const xAOD::TrackParticle* extraTrk3) const {
+  JpsiXPlusDisplaced::MesonCandidate JpsiXPlusDisplaced::getDpmCandidate(const EventContext& ctx, const xAOD::Vertex* JXvtx, const xAOD::TrackParticle* extraTrk1, const xAOD::TrackParticle* extraTrk2, const xAOD::TrackParticle* extraTrk3) const {
     MesonCandidate Dpm;
     // Check overlap
     std::vector<const xAOD::TrackParticle*> tracksJX;
@@ -1257,7 +1255,7 @@ namespace DerivationFramework {
     tmp3.SetPtEtaPhiM(extraTrk3->pt(),extraTrk3->eta(),extraTrk3->phi(),m_extraTrk3MassHypo);
     if((tmp1+tmp2+tmp3).M() < m_DpmMassLower || (tmp1+tmp2+tmp3).M() > m_DpmMassUpper) return Dpm;
 
-    std::unique_ptr<xAOD::Vertex> vtx = fitTracks(extraTrk1, extraTrk2, extraTrk3);
+    std::unique_ptr<xAOD::Vertex> vtx = fitTracks(ctx, extraTrk1, extraTrk2, extraTrk3);
     if(vtx) {
       double chi2NDF = vtx->chiSquared()/vtx->numberDoF();
       if(m_chi2cut_Dpm<=0.0 || chi2NDF < m_chi2cut_Dpm) {
@@ -1280,7 +1278,7 @@ namespace DerivationFramework {
     return Dpm;
   }
 
-  JpsiXPlusDisplaced::MesonCandidate JpsiXPlusDisplaced::getD0Candidate(const xAOD::Vertex* JXvtx, const xAOD::TrackParticle* extraTrk1, const xAOD::TrackParticle* extraTrk2) const {
+  JpsiXPlusDisplaced::MesonCandidate JpsiXPlusDisplaced::getD0Candidate(const EventContext& ctx, const xAOD::Vertex* JXvtx, const xAOD::TrackParticle* extraTrk1, const xAOD::TrackParticle* extraTrk2) const {
     MesonCandidate D0;
 
     TLorentzVector tmp1, tmp2;
@@ -1288,7 +1286,7 @@ namespace DerivationFramework {
     tmp2.SetPtEtaPhiM(extraTrk2->pt(),extraTrk2->eta(),extraTrk2->phi(),m_extraTrk2MassHypo);
     if((tmp1+tmp2).M() < m_D0MassLower || (tmp1+tmp2).M() > m_D0MassUpper) return D0;
 
-    std::unique_ptr<xAOD::Vertex> vtx = fitTracks(extraTrk1, extraTrk2);
+    std::unique_ptr<xAOD::Vertex> vtx = fitTracks(ctx, extraTrk1, extraTrk2);
     if(vtx) {
       double chi2NDF = vtx->chiSquared()/vtx->numberDoF();
       if(m_chi2cut_D0<=0.0 || chi2NDF < m_chi2cut_D0) {
@@ -1311,7 +1309,7 @@ namespace DerivationFramework {
     return D0;
   }
 
-  std::vector<std::pair<Trk::VxCascadeInfo*,Trk::VxCascadeInfo*> > JpsiXPlusDisplaced::fitMainVtx(const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols, const xAOD::VertexContainer* defaultPVContainer, const xAOD::VertexContainer* pvContainer) const {
+  std::vector<std::pair<Trk::VxCascadeInfo*,Trk::VxCascadeInfo*> > JpsiXPlusDisplaced::fitMainVtx(const EventContext& ctx, const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols, const xAOD::VertexContainer* defaultPVContainer, const xAOD::VertexContainer* pvContainer) const {
     std::vector<std::pair<Trk::VxCascadeInfo*,Trk::VxCascadeInfo*> > result;
 
     std::vector<const xAOD::TrackParticle*> tracksJX;
@@ -1725,7 +1723,7 @@ namespace DerivationFramework {
 	      if(m_massD0>0) main_mass += - (p4_ExtraTrk1+p4_ExtraTrk2).M() + m_massD0;
 	    }
 	    if(main_mass < m_MassLower || main_mass > m_MassUpper) continue;
-	    auto D0 = getD0Candidate(JXvtx,tp1,tp2);
+	    auto D0 = getD0Candidate(ctx,JXvtx,tp1,tp2);
 	    if(D0.extraTrack1) D0Candidates.push_back(D0);
 	  }
 	}
@@ -1887,7 +1885,7 @@ namespace DerivationFramework {
 		if(m_massDpm>0) main_mass += - (p4_ExtraTrk1+p4_ExtraTrk2+p4_ExtraTrk3).M() + m_massDpm;
 	      }
 	      if(main_mass < m_MassLower || main_mass > m_MassUpper) continue;
-	      auto Dpm = getDpmCandidate(JXvtx,tp1,tp2,tp3);
+	      auto Dpm = getDpmCandidate(ctx,JXvtx,tp1,tp2,tp3);
 	      if(Dpm.extraTrack1) DpmCandidates.push_back(Dpm);
 	    }
 	  }
@@ -1914,7 +1912,7 @@ namespace DerivationFramework {
 		if(m_massDpm>0) main_mass += - (p4_ExtraTrk1+p4_ExtraTrk2+p4_ExtraTrk3).M() + m_massDpm;
 	      }
 	      if(main_mass < m_MassLower || main_mass > m_MassUpper) continue;
-	      auto Dpm = getDpmCandidate(JXvtx,tp1,tp2,tp3);
+	      auto Dpm = getDpmCandidate(ctx,JXvtx,tp1,tp2,tp3);
 	      if(Dpm.extraTrack1) DpmCandidates.push_back(Dpm);
 	    }
 	  }
@@ -2297,7 +2295,7 @@ namespace DerivationFramework {
     return result;
   }
 
-  std::vector<std::pair<Trk::VxCascadeInfo*,Trk::VxCascadeInfo*> > JpsiXPlusDisplaced::fitMainVtx(const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const XiCandidate& disVtx, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols, const xAOD::VertexContainer* defaultPVContainer, const xAOD::VertexContainer* pvContainer) const {
+  std::vector<std::pair<Trk::VxCascadeInfo*,Trk::VxCascadeInfo*> > JpsiXPlusDisplaced::fitMainVtx(const EventContext& /*ctx*/, const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const XiCandidate& disVtx, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols, const xAOD::VertexContainer* defaultPVContainer, const xAOD::VertexContainer* pvContainer) const {
     std::vector<std::pair<Trk::VxCascadeInfo*,Trk::VxCascadeInfo*> > result;
 
     std::vector<const xAOD::TrackParticle*> tracksJX;

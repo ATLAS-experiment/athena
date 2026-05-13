@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 // ****************************************************************************
 // ----------------------------------------------------------------------------
@@ -48,13 +48,15 @@ public:
 
     virtual StatusCode addBranches(const EventContext& ctx) const override;
 
-   void fitAndStore(xAOD::VertexContainer* vtxContainer,
+    void fitAndStore(const EventContext& ctx,
+		    xAOD::VertexContainer* vtxContainer,
 		    const xAOD::Vertex* v,
 		    const xAOD::VertexContainer    *InVtxContainer,
 		    const std::vector<const xAOD::TrackParticle*> &inputTracks,
 		    const xAOD::TrackParticleContainer* importedTrackCollection,
 		    const xAOD::VertexContainer* pvContainer) const;
-   xAOD::Vertex* fit(const std::vector<const xAOD::TrackParticle*> &inputTracks,
+		    std::unique_ptr<xAOD::Vertex> fit(const EventContext& ctx,
+		     const std::vector<const xAOD::TrackParticle*> &inputTracks,
 		     const xAOD::TrackParticleContainer* importedTrackCollection,
 		     const xAOD::Vertex* pv) const;
 private:

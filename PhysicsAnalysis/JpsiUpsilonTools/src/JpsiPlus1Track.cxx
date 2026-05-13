@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ****************************************************************************
@@ -371,7 +371,7 @@ namespace Analysis {
 
 
                 //Managed pointer, "release" if you don't want it deleted. Automatically "deleted" otherwise
-                std::unique_ptr<xAOD::Vertex> bVertex( fit(tracks, importedTrackCollection, importedGSFTrackCollection));
+                std::unique_ptr<xAOD::Vertex> bVertex( fit(ctx, tracks, importedTrackCollection, importedGSFTrackCollection));
                 if (bVertex) {
 
                         // Chi2/DOF cut
@@ -426,7 +426,7 @@ namespace Analysis {
     // fit - does the fit
     // ---------------------------------------------------------------------------------
     
-    xAOD::Vertex* JpsiPlus1Track::fit(const std::vector<const xAOD::TrackParticle*> &inputTracks, const xAOD::TrackParticleContainer* importedTrackCollection, const xAOD::TrackParticleContainer* gsfCollection) const {
+    std::unique_ptr<xAOD::Vertex> JpsiPlus1Track::fit(const EventContext& ctx, const std::vector<const xAOD::TrackParticle*> &inputTracks, const xAOD::TrackParticleContainer* importedTrackCollection, const xAOD::TrackParticleContainer* gsfCollection) const {
         
         std::unique_ptr<Trk::IVKalState> state = m_VKVFitter->makeState();
         
@@ -449,10 +449,10 @@ namespace Analysis {
         if(sc.isFailure()){
             startingPoint = Amg::Vector3D(0,0,0);
         }
-        xAOD::Vertex* theResult = m_VKVFitter->fit(inputTracks, startingPoint, *state);
+        std::unique_ptr<xAOD::Vertex> theResult = m_VKVFitter->fit(ctx, inputTracks, startingPoint, *state);
 
         // Added by ASC
-        if(theResult != 0){
+        if(theResult){
            std::vector<ElementLink<DataVector<xAOD::TrackParticle> > > newLinkVector;
            for(unsigned int i=0; i< theResult->trackParticleLinks().size(); i++)
            {

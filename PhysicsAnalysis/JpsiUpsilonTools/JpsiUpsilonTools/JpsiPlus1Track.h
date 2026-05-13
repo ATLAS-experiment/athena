@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ****************************************************************************
@@ -50,7 +50,7 @@ namespace Analysis {
         //-------------------------------------------------------------------------------------
         //Doing Calculation and inline functions
         virtual StatusCode performSearch(const EventContext& ctx , xAOD::VertexContainer&) const override;
-        xAOD::Vertex* fit(const std::vector<const xAOD::TrackParticle*>&, const xAOD::TrackParticleContainer*, const xAOD::TrackParticleContainer*) const;
+        std::unique_ptr<xAOD::Vertex> fit(const EventContext& ctx, const std::vector<const xAOD::TrackParticle*>&, const xAOD::TrackParticleContainer*, const xAOD::TrackParticleContainer*) const;
         //-------------------------------------------------------------------------------------
         
     private:
