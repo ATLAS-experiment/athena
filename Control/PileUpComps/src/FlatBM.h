@@ -1,7 +1,7 @@
 /*  -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PILEUPCOMPS_FLATBM
@@ -9,7 +9,6 @@
 /** @file FlatBM.h
  * @brief dummy (flat beam) implementation of IBeamIntensity service
  *
- * $Id: BkgStreamsCache.h,v 1.10 2008-08-28 01:11:06 calaf Exp $
  * @author Paolo Calafiura - ATLAS Collaboration
  */
 #include "PileUpTools/IBeamIntensity.h"
@@ -26,7 +25,7 @@ public:
   //@{
   inline virtual float normFactor(int /*iXing*/) const override final { return 1.0; }
   inline virtual float largestElementInPattern() const override final { return 1.0; }
-  inline virtual void selectT0(unsigned int /*run*/, unsigned long long /*event*/) override {}
+  inline virtual void selectT0(const EventContext& /*ctx*/) override {}
   inline virtual unsigned int getCurrentT0BunchCrossing() const override final
   {
     //The first filled bunch crossing is always BCID 1

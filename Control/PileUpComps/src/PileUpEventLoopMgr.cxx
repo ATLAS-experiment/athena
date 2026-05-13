@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -349,7 +349,7 @@ StatusCode PileUpEventLoopMgr::nextEvent(int maxevt)
 
     //ask the BeamIntensitySvc to choose (and remember)
     //in which xing this event will be wrto the beam int distribution
-    m_beamInt->selectT0(ctx.eventID().run_number(), ctx.eventID().event_number());
+    m_beamInt->selectT0(ctx);
 
     // Use the position in the beam intensity array to set a BCID-like quantity
     pOverEvent->setBCID( m_beamInt->getCurrentT0BunchCrossing() );

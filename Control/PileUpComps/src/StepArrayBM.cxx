@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include<algorithm> /*count_if,max_element*/
@@ -111,7 +111,7 @@ StatusCode StepArrayBM::initialize()
   return StatusCode::SUCCESS;
 }
 
-void StepArrayBM::selectT0(unsigned int /*run*/, unsigned long long /*event*/)
+void StepArrayBM::selectT0(const EventContext& /*ctx*/)
 {
   //move to the next xing as dictated by the signalPattern, for each incremember, shift the t0Offset
   do {

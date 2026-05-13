@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // PileUpMT includes
@@ -239,7 +239,7 @@ StatusCode PileUpMTAlg::execute() {
                           std::make_unique<xAOD::EventInfoAuxContainer>()));
 
   // Get crossing number
-  m_beamInt->selectT0(evtID.run_number(), evtID.event_number());
+  m_beamInt->selectT0(ctx);
   overlaidEvt->setBCID(m_beamInt->getCurrentT0BunchCrossing());
 
   // Set simulation bit
