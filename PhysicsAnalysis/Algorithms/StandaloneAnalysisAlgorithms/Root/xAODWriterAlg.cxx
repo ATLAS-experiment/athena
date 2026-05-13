@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 
 // System include(s):
@@ -12,6 +12,8 @@
 // Core include(s):
 #include "AthContainers/normalizedTypeinfoName.h"
 #include "EventLoop/Worker.h"
+#include "xAODRootAccess/TEvent.h"
+
 
 // Local include(s):
 #include "StandaloneAnalysisAlgorithms/xAODWriterAlg.h"
@@ -36,7 +38,8 @@ namespace CP {
       }
 
       // Write to this output file.
-      ANA_CHECK( m_event.writeTo( ofile ) );
+      m_event = std::make_unique<xAOD::TEvent>();
+      ANA_CHECK( m_event->writeTo( ofile ) );
 
       // Reset the internal flag(s).
       m_itemListInitialized = false;
@@ -55,7 +58,11 @@ namespace CP {
       }
 
       // Write all objects to the output file.
-      xAOD::TEvent* event = evtStore()->event();
+      xAOD::TEvent* event = dynamic_cast<xAOD::TEvent*>(evtStore()->event());
+      if (event == nullptr) {
+         ATH_MSG_FATAL( "event pointer is not of TEvent type - writing is not yet implemented for RNTuple" );
+         return StatusCode::FAILURE;
+      }
       for( const Item& item : m_writtenItemList ) {
 
          // Get the object. See the description in @c xAOD::TEvent::retrieve
@@ -81,12 +88,12 @@ namespace CP {
          // Record it to the output for the current event.
          static constexpr bool OVERWRITE = false;
          static constexpr bool IS_OWNER = true;
-         ANA_CHECK( m_event.record( const_cast< void* >( obj ), item.typeName,
+         ANA_CHECK( m_event->record( const_cast< void* >( obj ), item.typeName,
                                     item.name, OVERWRITE, METADATA, IS_OWNER ) );
       }
 
       // Write the event.
-      if( m_event.fill() <= 0 ) {
+      if( m_event->fill() <= 0 ) {
          ATH_MSG_FATAL( "There was an error writing out the event" );
          return StatusCode::FAILURE;
       }
@@ -106,7 +113,7 @@ namespace CP {
       }
 
       // Finish writing to this output file.
-      ANA_CHECK( m_event.finishWritingTo( ofile ) );
+      ANA_CHECK( m_event->finishWritingTo( ofile ) );
 
       // Return gracefully.
       return StatusCode::SUCCESS;
@@ -144,7 +151,7 @@ namespace CP {
                ATH_MSG_DEBUG( "Calling setAuxItemList( \"" << key << "\""
                               << ", \"" << itemMatch[ 3 ]
                               << "\" )" );
-               m_event.setAuxItemList( key, itemMatch[ 3 ] );
+               m_event->setAuxItemList( key, itemMatch[ 3 ] );
             }
 
             // Construct an Item object.
@@ -166,7 +173,11 @@ namespace CP {
             // Check if the item is available.
             static const bool SILENT = true;
             static const bool METADATA = false;
-            xAOD::TEvent* event = evtStore()->event();
+            xAOD::TEvent* event = dynamic_cast<xAOD::TEvent*>(evtStore()->event());
+            if (event == nullptr) {
+               ATH_MSG_FATAL( "event pointer is not of TEvent type - writing is not yet implemented for RNTuple" );
+               return StatusCode::FAILURE;
+            }
             if( event->getOutputObject( item.name, *( item.type ), METADATA ) ||
                 event->getInputObject( item.name, *( item.type ), SILENT,
                                        METADATA ) ) {

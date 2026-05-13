@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigAnalysisTest_EVENTPTRDEF_H
@@ -10,12 +10,12 @@
  */
 
 namespace asg {
-   class SgTEvent;
+   class SgEvent;
 }
 class StoreGateSvc;
 
 #ifdef XAOD_STANDALONE
-    typedef asg::SgTEvent* EventPtr_t;
+    typedef asg::SgEvent* EventPtr_t;
 #elif !defined(XAOD_STANDALONE)
       typedef StoreGateSvc*  EventPtr_t;
 #else

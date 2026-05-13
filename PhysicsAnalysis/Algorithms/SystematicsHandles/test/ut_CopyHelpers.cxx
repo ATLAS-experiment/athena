@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -8,12 +8,13 @@
 #include <memory>
 
 // Infrastructure include(s):
-#include "xAODRootAccess/TEvent.h"
+#include "xAODRootAccess/Event.h"
 #include "xAODRootAccess/TStore.h"
 #include "xAODRootAccess/Init.h"
 #include "AsgMessaging/MsgStream.h"
 #include "AsgMessaging/MessageCheck.h"
-#include "AsgTools/SgTEvent.h"
+#include "AsgTools/SgEvent.h"
+#include <xAODRootAccess/TEvent.h>
 
 // EDM include(s):
 #include "xAODBase/IParticleHelpers.h"
@@ -40,7 +41,7 @@ int main() {
    // Create the transient store objects.
    xAOD::TEvent event;
    xAOD::TStore store;
-   asg::SgTEvent sgEvent( &event, &store );
+   asg::SgEvent sgEvent( &event, &store );
 
    // Create a message stream, to be used later on in the code.
    MsgStream msgStream( "ut_CopyHelpers" );

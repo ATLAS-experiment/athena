@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -14,7 +14,7 @@
 #include <AnaAlgorithm/AnaAlgorithmWrapper.h>
 #include <AnaAlgorithm/AnaReentrantAlgorithmWrapper.h>
 #include <AnaAlgorithm/PythonConfigBase.h>
-#include <AsgTools/SgTEventMeta.h>
+#include <AsgTools/SgEventMeta.h>
 #include <EventLoop/AsgServiceWrapper.h>
 #include <EventLoop/AsgToolWrapper.h>
 #include <EventLoop/ModuleData.h>
@@ -32,7 +32,7 @@ namespace EL
   WorkerConfig ::
   WorkerConfig (Detail::ModuleData *val_data) noexcept
     : m_data (val_data),
-      m_metaStore (asg::SgTEventMeta::InputStore, nullptr)
+      m_metaStore (asg::SgEventMeta::InputStore, nullptr)
   {}
 
 

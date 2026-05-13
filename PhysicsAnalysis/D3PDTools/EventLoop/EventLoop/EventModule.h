@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-/// @author Nils Krumnack
 
 
-#ifndef EVENT_LOOP_TEVENT_SVC_H
-#define EVENT_LOOP_TEVENT_SVC_H
+#ifndef EVENT_LOOP_EVENT_SVC_H
+#define EVENT_LOOP_EVENT_SVC_H
 
 #include <EventLoop/Global.h>
 
@@ -16,12 +15,12 @@
 
 namespace asg
 {
-  class SgTEvent;
+  class SgEvent;
 }
 
 namespace xAOD
 {
-  class TEvent;
+  class Event;
   class TStore;
 }
 
@@ -29,7 +28,7 @@ namespace EL
 {
   namespace Detail
   {
-    class TEventModule : public Module
+    class EventModule : public Module
     {
       //
       // public interface
@@ -39,12 +38,12 @@ namespace EL
 
       /// effects: standard constructor.
       /// guarantee: no-fail
-      TEventModule (const std::string& name);
+      EventModule (const std::string& name);
 
 
       /// effects: standard destructor.
       /// guarantee: no-fail
-      ~TEventModule ();
+      ~EventModule ();
 
 
 
@@ -54,13 +53,12 @@ namespace EL
 
     public:
 
-      virtual StatusCode onInitialize (ModuleData& data) override;
       virtual StatusCode postFinalize (ModuleData& data) override;
+      virtual StatusCode onFirstInputFile (ModuleData& data) override;
+      virtual StatusCode onNextInputFile (ModuleData& data) override;
       virtual StatusCode onNewInputFile (ModuleData& data) override;
       virtual StatusCode postCloseInputFile (ModuleData& data) override;
       virtual StatusCode onExecute (ModuleData& data) override;
-
-
 
       //
       // private interface
@@ -68,16 +66,13 @@ namespace EL
 
       /// description: the event structure used
     private:
-      std::unique_ptr<xAOD::TEvent> m_event; //!
-      std::unique_ptr<xAOD::TStore> m_store; //!
-      std::unique_ptr<asg::SgTEvent> m_evtStore; //!
+      std::unique_ptr<xAOD::Event>   m_event; //!
+      std::unique_ptr<xAOD::TStore>  m_store; //!
+      std::unique_ptr<asg::SgEvent>  m_evtStore; //!
 
       /// description: whether we collect D3PDPerfStats statistics
     private:
       Gaudi::Property<bool> m_useStats {this, "useStats", false}; //!
-
-      Gaudi::Property<std::string> m_modeStr {this, "accessMode", ""}; //!
-      Gaudi::Property<std::string> m_otherMetaDataTreeNamePattern {this, "otherMetaDataTreeNamePattern", ""}; //!
       Gaudi::Property<bool> m_summaryReport {this, "summaryReport", true}; //!
     };
   }

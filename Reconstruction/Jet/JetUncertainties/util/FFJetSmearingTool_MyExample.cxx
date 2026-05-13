@@ -19,6 +19,7 @@
 #include <memory>
 #include <AsgTools/ToolHandle.h>
 #include <AsgTools/AsgTool.h>
+#include "xAODRootAccess/Event.h"
 
 // xAOD EDM classes
 #include <xAODEventInfo/EventInfo.h>
@@ -160,10 +161,12 @@ int main(int argc, char* argv[]){
 
   std::unique_ptr< TFile > ifile( TFile::Open( sample.c_str(), "READ" ) );
 
-  // Create a TEvent object
-  xAOD::TEvent event(xAOD::TEvent::kClassAccess);
-
-  CHECK( event.readFrom( ifile.get() ) );
+  // Create a Event object
+  auto event = xAOD::Event::createAndReadFrom(*ifile);
+  if (!event) {
+    std::cout << "Failed to open file " << std::endl;
+    return 1;
+  }
 
   ////// Initialization of FFJetSmearingTool
 
@@ -280,8 +283,8 @@ int main(int argc, char* argv[]){
 
     ////// Loop over events
 
-    Long64_t nevents = event.getEntries();
-
+    Long64_t nevents = event->getEntries();
+    
     if (eventsMax < nevents){
       nevents = eventsMax;
     }
@@ -289,7 +292,7 @@ int main(int argc, char* argv[]){
     for (Long64_t ievent = 0;  ievent < nevents; ++ievent){
 
       // Load the event:
-      if ( event.getEntry( ievent ) < 0 ){
+      if ( event->getEntry( ievent ) < 0 ){
         std::cout << "Failed to load entry " << ievent << std::endl;
         return 1;
       }
@@ -302,13 +305,13 @@ int main(int argc, char* argv[]){
       // Print some event information for fun
       if (want_to_debug){
         const xAOD::EventInfo* ei = nullptr;
-        CHECK( event.retrieve(ei, "EventInfo") );
+        CHECK( event->retrieve(ei, "EventInfo") );
 
         std::cout << "===>>>  start processing event " << ei->eventNumber() << ", run " << ei->runNumber() << " - Events processed so far: " << ievent << std::endl;
 
         // Get the truth jets from the event
         const xAOD::JetContainer* jets_truth = nullptr;
-        CHECK( event.retrieve(jets_truth, truth_jetColl) );
+        CHECK( event->retrieve(jets_truth, truth_jetColl) );
         std::cout << "Number of truth jets: " << jets_truth->size() << std::endl;
 
         // Loop over the truth jets in the event
@@ -319,7 +322,7 @@ int main(int argc, char* argv[]){
 
         // Get the reco jets from the event
         const xAOD::JetContainer* jets_reco = nullptr;
-        CHECK( event.retrieve(jets_reco, reco_jetColl) );
+        CHECK( event->retrieve(jets_reco, reco_jetColl) ); 
         std::cout << "Number of reco jets: " << jets_reco->size() << std::endl;
 
         //Loop over the reco jets in the event
@@ -334,7 +337,7 @@ int main(int argc, char* argv[]){
 
       // Retrieve jet container
       const xAOD::JetContainer* jets = nullptr;
-      CHECK( event.retrieve( jets, reco_jetColl ) );
+      CHECK( event->retrieve( jets, reco_jetColl ) );
 
       // Shallow copy
       auto jets_shallowCopy = xAOD::shallowCopy( *jets );

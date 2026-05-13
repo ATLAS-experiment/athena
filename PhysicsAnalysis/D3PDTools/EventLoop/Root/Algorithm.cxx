@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //          
@@ -86,13 +86,13 @@ namespace EL
 
 
 
-  asg::SgTEvent *Algorithm ::
+  asg::SgEvent *Algorithm ::
   evtStore() const
   {
     RCU_CHANGE_INVARIANT (this);
     if (m_evtStorePtr)
       return m_evtStorePtr;
-    m_evtStore = asg::SgTEvent (wk()->xaodEvent(), wk()->xaodStore());
+    m_evtStore = asg::SgEvent (wk()->xaodEvent(), wk()->xaodStore());
     m_evtStorePtr = &m_evtStore;
     return m_evtStorePtr;
   }

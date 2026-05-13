@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -77,7 +77,7 @@ namespace asg {
 
 #ifdef XAOD_STANDALONE
 
-   SgTEvent* AsgTool::evtStore() const {
+   SgEvent* AsgTool::evtStore() const {
 
       return &m_event;
    }
@@ -106,7 +106,7 @@ namespace asg {
    const std::string& AsgTool::getName( const void* ptr ) const {
 
 #ifdef XAOD_STANDALONE
-      // In case we use @c xAOD::TEvent, we have a direct function call
+      // In case we use @c xAOD::Event, we have a direct function call
       // for this.
       return evtStore()->event()->getName( ptr );
 #else
@@ -119,7 +119,7 @@ namespace asg {
    SG::sgkey_t AsgTool::getKey( const void* ptr ) const {
 
 #ifdef XAOD_STANDALONE
-      // In case we use @c xAOD::TEvent, we have a direct function call
+      // In case we use @c xAOD::Event, we have a direct function call
       // for this.
       return evtStore()->event()->getKey( ptr );
 #else
