@@ -82,7 +82,7 @@ StatusCode SCT_ClusterAnalysis::execute() {
     m_sizeX->clear();
     m_sizeY->clear();
 
-    const EventContext& ctx = Algorithm::getContext();
+    const EventContext& ctx = getContext();
 
     SG::ReadHandle<InDet::SCT_ClusterContainer> stripContainer (m_inputKey, ctx);
     if( stripContainer.isValid() ) {
