@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSelectorTools/MuonSelectionTool.h"
@@ -53,11 +53,8 @@ namespace {
 
 namespace CP {
 
-    MuonSelectionTool::MuonSelectionTool(const std::string& tool_name) : asg::AsgTool(tool_name), m_acceptInfo("MuonSelection"){
-
-        if (!m_calculateTightNNScore) m_onnxTool.setTypeAndName("");
-
-    }
+    MuonSelectionTool::MuonSelectionTool(const std::string& tool_name): 
+        asg::AsgTool(tool_name){}
 
     MuonSelectionTool::~MuonSelectionTool() = default;
 
@@ -270,20 +267,13 @@ namespace CP {
             }
         }
         
-        ATH_MSG_INFO("TightNNScore calculation is " << (m_calculateTightNNScore ? "enabled." : "disabled."));
-
+        ATH_MSG_DEBUG("TightNNScore calculation is " << m_calculateTightNNScore);
         if (m_calculateTightNNScore) {
-            if (m_onnxTool.empty()) {
-                ATH_MSG_ERROR("Cannot calculate TightNNScore: ONNX tool not configured! "
-                            "Please set the ORTInferenceTool property to a valid AthOnnx::OnnxRuntimeInferenceTool instance.");
-                return StatusCode::FAILURE;
-            }
-
-            ATH_MSG_INFO("Retrieving ONNX tool: " << m_onnxTool.name());
             ATH_CHECK(m_onnxTool.retrieve());
-        } else ATH_MSG_INFO("ONNX tool not configured — skipping retrieval.");
-
-        ATH_MSG_INFO("Finished ONNX tool setup");
+        } else {
+            m_onnxTool.disable();
+        }
+        ATH_MSG_DEBUG("Finished ONNX tool setup");
         
         ATH_CHECK(m_eventInfo.initialize());
         // Return gracefully:

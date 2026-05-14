@@ -27,16 +27,13 @@ def MuonSelectionToolCfg(flags, name="MuonSelectionTool", **kwargs):
     kwargs.setdefault("IsRun3Geo", flags.GeoModel.Run >= LHCPeriod.Run3)
     kwargs.setdefault("DisablePtCuts", True)
     kwargs.setdefault("TurnOffMomCorr", True)
-    kwargs.setdefault("ORTInferenceTool", acc.popToolsAndMerge(
-        OnnxRuntimeInferenceToolCfg(flags, model_fname, execution_provider, name=name+"_ORTInferenceTool")
-    ))
+    kwargs.setdefault("ORTInferenceTool", 
+                      acc.popToolsAndMerge(OnnxRuntimeInferenceToolCfg(flags, model_fname, execution_provider, name=f"{name}_ORTInferenceTool")))
 
 
     # Now construct the tool with all kwargs set
     the_tool = CompFactory.CP.MuonSelectionTool(name, **kwargs)
     acc.setPrivateTools(the_tool)
-    acc.printConfig(withDetails=True)
-
     return acc
  
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONSELECTORTOOLS_MUONSELECTIONTOOL_H
@@ -180,7 +180,7 @@ namespace CP {
         bool passedBMVmimicCut(const xAOD::Muon&) const;
 
         /// Store selection information.
-        asg::AcceptInfo m_acceptInfo;
+        asg::AcceptInfo m_acceptInfo{"MuonSelection"};
 
         Gaudi::Property<double> m_maxEta{this, "MaxEta", 2.7, "Maximum eta range to select the muons"};
         Gaudi::Property<int>  m_quality{this, "MuQuality", 1,"Quality to select. Values correspond to 0=Tight, 1=Medium, 2=Loose, 3=VeryLoose (only for debug, not supported), 4=HighPt, 5=LowPtEfficiency"};
