@@ -4,7 +4,7 @@
 */
 
 #include "ElectronPhotonSelectorTools/ForwardElectronToolsTestAlg.h"
-#include "StoreGate/ReadHandle.h"
+#include "AsgDataHandles/ReadHandle.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODCaloEvent/CaloCluster.h"
 #include "CaloGeoHelpers/CaloSampling.h"
@@ -12,7 +12,7 @@
 
 ForwardElectronToolsTestAlg::ForwardElectronToolsTestAlg(
     const std::string& name, ISvcLocator* pSvcLocator)
-  : AthAlgorithm(name, pSvcLocator)
+  : AnaReentrantAlgorithm(name, pSvcLocator)
 {}
 
 StatusCode ForwardElectronToolsTestAlg::initialize()
@@ -35,10 +35,10 @@ static double deltaR(double eta1, double phi1, double eta2, double phi2) {
     return std::sqrt(deta*deta + dphi*dphi);
 }
 
-StatusCode ForwardElectronToolsTestAlg::execute()
+StatusCode ForwardElectronToolsTestAlg::execute(const EventContext& ctx) const
 {
     ++m_nEvents;
-    const EventContext& ctx = getContext();
+    //    const EventContext& ctx = getContext();
 
     SG::ReadHandle<xAOD::ElectronContainer> electrons(m_electronKey, ctx);
     if (!electrons.isValid()) return StatusCode::SUCCESS;
@@ -200,4 +200,4 @@ StatusCode ForwardElectronToolsTestAlg::finalize()
     return StatusCode::SUCCESS;
 }
 
-DECLARE_COMPONENT(ForwardElectronToolsTestAlg)
+//DECLARE_COMPONENT(ForwardElectronToolsTestAlg)
