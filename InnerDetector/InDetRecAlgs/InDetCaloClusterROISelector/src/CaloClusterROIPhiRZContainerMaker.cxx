@@ -3,21 +3,26 @@
  */
 
 #include "InDetCaloClusterROISelector/CaloClusterROIPhiRZContainerMaker.h"
+#include <GaudiKernel/StatusCode.h>
+#include "StoreGate/ReadHandle.h"
 #include "TrkCaloClusterROI/ROIPhiRZContainer.h"
 
 #include "xAODCaloEvent/CaloCluster.h"
+#include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODEgamma/EgammaxAODHelpers.h"
 
 #include "TrkEventPrimitives/LocalParameters.h"
 #include "TrkSurfaces/Surface.h"
 
-
+#include <limits>
+#include <numbers>
+#include <cmath>
 #include <stdexcept>
 #include <algorithm>
 #include <cstdint>
 
 namespace {
-  constexpr float PI_F = static_cast<float>(M_PI);
+  constexpr float PI_F = std::numbers::pi_v<float>;
 }
 
 namespace InDet {
@@ -66,7 +71,8 @@ StatusCode CaloClusterROIPhiRZContainerMaker::initialize()
     m_selectedClusters=0;
 
     ATH_CHECK(m_outputClusterContainerName.initialize());
-    ATH_CHECK(m_inputClusterContainerName.initialize(!m_inputClusterContainerName.key().empty()));
+    ATH_CHECK(m_inputClusterContainerNames.initialize(!m_inputClusterContainerNames.empty()));
+
     m_outputSorted.reserve( m_outputIndex.size() );
     m_outputUnsorted.reserve( m_outputIndex.size() );
     for (unsigned int output_i=0; output_i<m_outputIndex.size(); ++output_i) {
@@ -98,14 +104,19 @@ StatusCode CaloClusterROIPhiRZContainerMaker::finalize()
 // ======================================================================
 StatusCode CaloClusterROIPhiRZContainerMaker::execute(const EventContext& ctx) const
 {
-
-    if (m_inputClusterContainerName.key().empty()) {
-        return StatusCode::SUCCESS;
+    if (m_inputClusterContainerNames.empty()){
+      return StatusCode::SUCCESS;
     }
 
-    // retrieve cluster containers, return `failure' if not existing
-    SG::ReadHandle<xAOD::CaloClusterContainer> inputClusterContainer(m_inputClusterContainerName,ctx);
-    ATH_CHECK(inputClusterContainer.isValid());
+    std::vector< const xAOD::CaloClusterContainer *> inputClusterContainerArr;
+    inputClusterContainerArr.reserve(m_inputClusterContainerNames.size());
+    std::size_t total_cluster_size = 0;
+    for (const SG::ReadHandleKey<xAOD::CaloClusterContainer> &input_container_key : m_inputClusterContainerNames){
+      SG::ReadHandle<xAOD::CaloClusterContainer> input_container(input_container_key, ctx);
+      ATH_CHECK(input_container.isValid());
+      inputClusterContainerArr.push_back(input_container.cptr());
+      total_cluster_size += input_container->size();
+    }
 
     SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey,ctx};
     ATH_CHECK(caloMgrHandle.isValid());
@@ -118,25 +129,24 @@ StatusCode CaloClusterROIPhiRZContainerMaker::execute(const EventContext& ctx) c
     n_rois.resize(m_outputIndex.size(),0);
 
     std::vector<uint8_t >       max_output;// the outputs are ordered by the pt-cut, this is the index of the last output which passed the pt-cut per ROI
-    rois.reserve( inputClusterContainer->size());
-    max_output.resize(inputClusterContainer->size());
+    rois.reserve( total_cluster_size);
+    max_output.resize(total_cluster_size);
+    // Size of rois might be larger than total_cluster_size if a ROI close to +-pi gets duplicated...
+    //   so don't warn.  See ATLASRECTS-7160.
 
     // create ROIs.
     // first they are only stored in the temporary container
-    for(const xAOD::CaloCluster* cluster : *inputClusterContainer )
+    for (const xAOD::CaloClusterContainer *container : inputClusterContainerArr)
     {
-        all_clusters++;
-        if (m_egammaCaloClusterSelector->passSelection(cluster,*caloMgr))
-        {
+      for (const xAOD::CaloCluster* cluster : *container){
+         all_clusters++;
+         if (m_egammaCaloClusterSelector->passSelection(cluster,*caloMgr))
+         {
             selected_clusters++;
             addROI(*cluster, *caloMgr, rois, max_output, n_rois);
-        }
+         }
+      }
     }
-    // This may happen if a ROI close to +-pi gets duplicated...
-    //   so don't warn.  See ATLASRECTS-7160.
-    //if  (rois.size()  > inputClusterContainer->size() ) {
-    //   ATH_MSG_INFO( "Did not reserve enough storage for " << m_outputClusterContainerName[m_outputIndex[0]].key() );
-    //}
 
 
     // create ROI output container
