@@ -1,14 +1,15 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONCABLINGDATA_ROCCABLINGTRANSLATOR_H
 #define MUONCABLINGDATA_ROCCABLINGTRANSLATOR_H
 
+#include <CxxUtils/ArrayHelper.h>
 #include <array>
 #include <cstdint>
 #include <optional>
-#include <iostream>
-#include <CxxUtils/ArrayHelper.h>
+#include <iosfwd>
+
 
 /**  @brief 32 Rpc strips are connected to a flat-cable connector socket. The signal is transmitted via the
  * 
