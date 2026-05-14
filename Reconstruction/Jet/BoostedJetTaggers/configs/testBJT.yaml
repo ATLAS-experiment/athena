@@ -8,7 +8,7 @@ EventCleaning:
 Jets:
   - containerName: AnaLargeRJets
     jetCollection: AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets
-    runBoostedJetTagger: False
+    #runBoostedJetTagger: False
     BJT:
       - ConfigFile: /eos/atlas/atlascerngroupdisk/perf-jets/LocalStorage/TAGGING/PreliminaryConfigs/WTagger/WTagger_AntiKt10UFOSoftDrop_ParT_FixSigEff50.dat
       - CalibArea: Local

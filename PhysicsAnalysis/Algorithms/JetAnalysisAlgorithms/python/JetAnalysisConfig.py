@@ -691,8 +691,8 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             info="the maximum mass cut (in MeV) to apply to calibrated large-R jets.")
 
         ### bjt
-        self.addOption ('runBoostedJetTagger', False, type=bool,
-            info="whether to run the BJT.")
+        #self.addOption ('runBoostedJetTagger', False, type=bool,
+        #    info="whether to run the BJT.")
 
 
 
@@ -965,6 +965,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             
 
         ### bjt
+        """
         if self.runBoostedJetTagger:
             alg = config.createAlgorithm( 'BJT::BoostedJetTaggerAlgAna', 'BoostedJetTaggerAlgAnaaaaa' )
             
@@ -985,6 +986,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             alg.tagger.ConfigFile = ConfigFile
 
             alg.jets = config.readName(self.containerName)
+        """
 
 
         config.addOutputVar (self.containerName, 'm', 'm')
