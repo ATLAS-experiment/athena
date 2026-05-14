@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonCablingData/RpcFlatCableTranslator.h>
 #include <AthenaBaseComps/AthMessaging.h>
+#include <iostream>
 #include <format>
 
 
@@ -52,11 +53,14 @@ namespace Muon{
     }
     std::optional<uint8_t> RpcFlatCableTranslator::stripChannel(uint8_t tdcChannel, MsgStream& log) const {
         const uint8_t mapTdc = (tdcChannel - firstTdc);
-        if (mapTdc >= readStrips && log.level() <= MSG::WARNING) {
-            log<<MSG::WARNING<<"RpcFlatCableTranslator::"<<__func__<<"() - "<<__LINE__<<": The parsed tdc "
-               <<static_cast<unsigned>(tdcChannel)<<" is out of range"<<endmsg;
-            return std::nullopt;
+        if (mapTdc >= readStrips) {
+            if ( log.level() <= MSG::WARNING){
+              log<<MSG::WARNING<<"RpcFlatCableTranslator::"<<__func__<<"() - "<<__LINE__<<": The parsed tdc "
+                 <<static_cast<unsigned>(tdcChannel)<<" is out of range"<<endmsg;
+            }
+            return std::nullopt;//don't proceed out-of-bounds array access is possible
         } 
+        //mapTdc used as index into array here
         if (m_tdcToStrip[mapTdc] == notSet) {
             if (log.level() <= MSG::VERBOSE){
                 log<<MSG::VERBOSE<<"RpcFlatCableTranslator::"<<__func__<<"() - "<<__LINE__<<": The parsed tdc "
@@ -69,12 +73,17 @@ namespace Muon{
     bool RpcFlatCableTranslator::mapChannels(uint8_t strip, uint8_t tdc, MsgStream& log) {
         const uint8_t mapStrip = strip - firstStrip;
         const uint8_t mapTdc = tdc - firstTdc;
-        if (mapStrip >= readStrips || m_stripToTdc[mapStrip] != notSet){
+        if (mapStrip >= readStrips or mapTdc>=readStrips){
+            log<<MSG::ERROR<<"RpcFlatCableTranslator::"<<__func__<<"() - "<<__LINE__<<": The mapStrip "<<mapStrip
+               <<"or mapTdc "<<mapTdc<<" is out of range 0-31."<<endmsg;
+            return false;
+        }
+        if (m_stripToTdc[mapStrip] != notSet){
             log<<MSG::ERROR<<"RpcFlatCableTranslator::"<<__func__<<"() - "<<__LINE__<<": The strip "<<static_cast<unsigned>(strip)
                <<" is already mapped to "<<static_cast<unsigned>(m_stripToTdc[mapStrip] + firstTdc)<<std::endl<<(*this)<<endmsg;
             return false;
         }
-        if (mapTdc >= readStrips || m_tdcToStrip[mapTdc] != notSet){
+        if (m_tdcToStrip[mapTdc] != notSet){
             log<<MSG::ERROR<<"RpcFlatCableTranslator::"<<__func__<<"() - "<<__LINE__<<": The strip "<<static_cast<unsigned>(strip)
                <<" is already mapped to "<<static_cast<unsigned>(m_tdcToStrip[mapTdc] + firstStrip)<<std::endl<<(*this)<<endmsg;
             return false;
