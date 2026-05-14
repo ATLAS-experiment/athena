@@ -16,10 +16,10 @@ namespace  GlobalSim {
   class ICutter {
   public:
     virtual ~ICutter() = default;
-    virtual bool cut(const float&) const = 0;
+    virtual bool cut(const ulong&) const = 0;
     virtual std::string to_string() const = 0;
   };
-  std::unique_ptr<ICutter> make_cutter(const float& cut,
+  std::unique_ptr<ICutter> make_cutter(const ulong& cut,
 				       const std::string& op);
 }
 #endif

@@ -21,13 +21,8 @@ namespace GlobalSim {
 
   bool eEmEg1BDTSelector::select(const eEmEg1BDTTOB& tob) const {
 
-    score_t BDT_Result;
     std::bitset<eEmEg1BDTTOB::s_eGamma1BDT_width> bits = tob.eGamma1BDT_bits();
-    for (uint i=0;i<eEmEg1BDTTOB::s_eGamma1BDT_width;i++){
-	BDT_Result[i] = bits[i];
-      }
-
-    if(!m_Eg1BDT_cutter->cut(BDT_Result.to_float())) {return false;}
+    if(!m_Eg1BDT_cutter->cut(bits.to_ulong())) {return false;}
 
     return true;
   };

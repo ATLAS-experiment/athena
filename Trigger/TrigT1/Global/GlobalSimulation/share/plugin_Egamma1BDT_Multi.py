@@ -40,7 +40,8 @@ alg.globalsim_algs = [bdtTool]
 
 # add in the EgammaBDTMultiplicity Algorithm to be run
 tool =  CompFactory.GlobalSim.eEmEg1BDTMultAlgTool('eEmEg1BDTMultAlgTool')
-tool.Eg1BDT = '0'
+# 128 is 0 in the original BDT output.
+tool.Eg1BDT = '128'
 tool.Eg1BDT_op = '>='
 tool.enable_dump=True
 tool.OutputLevel = DEBUG

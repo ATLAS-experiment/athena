@@ -25,7 +25,7 @@ namespace GlobalSim {
     class eEmEg1BDTTOB : public eEmTOB {
     
     public:
-      static const std::size_t s_eGamma1BDT_width{10};
+      static const std::size_t s_eGamma1BDT_width{8};
 
       /**
        * @brief Constructor taking an eFexROITOB and eGamma1 BDT output bits to initialise bits..
