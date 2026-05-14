@@ -20,7 +20,8 @@
 
 #include "TrkEventPrimitives/LocalParameters.h"
 
-
+#include <cstdint>
+#include <vector>
 #include <atomic>
 
 namespace InDet {
@@ -65,10 +66,9 @@ class CaloClusterROIPhiRZContainerMaker : public AthReentrantAlgorithm
                 std::vector<uint_fast8_t> &max_output,
                 std::vector<unsigned int> &n_rois) const;
 
-   /** @brief Name of the cluster intput collection*/
-   SG::ReadHandleKey<xAOD::CaloClusterContainer>   m_inputClusterContainerName
-      {this, "InputClusterContainerName", "egammaTopoCluster", "Input cluster for egamma objects"};
-
+   /** @brief Names of the cluster intput collections*/   
+   SG::ReadHandleKeyArray<xAOD::CaloClusterContainer> m_inputClusterContainerNames {this, "InputClusterContainerNames", {}, "Input cluster container keys for egamma objects"};
+   
    /** @brief Name of the ROI output collection*/
    SG::WriteHandleKeyArray<ROIPhiRZContainer>  m_outputClusterContainerName
       {this, "OutputROIContainerName", {}, "Output collection of eta ordered ROIs"};
