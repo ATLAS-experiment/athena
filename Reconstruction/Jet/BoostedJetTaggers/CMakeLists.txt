@@ -49,7 +49,7 @@ atlas_add_library( BoostedJetTaggersLib
 if( XAOD_STANDALONE )
    atlas_add_component( BoostedJetTaggers
       src/components/*.cxx
-      src/*Ana.cxx # fix me
+      src/*.cxx # fix me
       LINK_LIBRARIES BoostedJetTaggersLib JetCalibToolsLib SystematicsHandlesLib)
 else()
    atlas_add_component( BoostedJetTaggers

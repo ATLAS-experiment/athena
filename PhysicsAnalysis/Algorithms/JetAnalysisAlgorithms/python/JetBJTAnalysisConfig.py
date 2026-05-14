@@ -42,7 +42,7 @@ class JetBJTAnalysisConfig (ConfigBlock) :
         if config.dataType() is DataType.Data: return
 
         # Set up the per-event jet efficiency scale factor calculation algorithm
-        alg = config.createAlgorithm( 'BJT::BoostedJetTaggerAlgAna', 'BoostedJetTaggerAlgAna' )
+        alg = config.createAlgorithm('BJT::BoostedJetTaggerAlg', 'BoostedJetTaggerAlg')
 
         # configure tool
         #ConfigFile = '/eos/atlas/atlascerngroupdisk/perf-jets/LocalStorage/TAGGING/PreliminaryConfigs/WTagger/WTagger_AntiKt10UFOSoftDrop_ParT_FixSigEff50.dat'

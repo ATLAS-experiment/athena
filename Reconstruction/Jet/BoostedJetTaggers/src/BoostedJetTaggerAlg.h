@@ -14,8 +14,8 @@
 #define BOOSTEDJETTAGGERS_BOOSTEDJETTAGGERALG_H
 
 
-#include <AthenaBaseComps/AthAlgorithm.h>
-#include <AthContainers/ConstDataVector.h>
+#include "AnaAlgorithm/AnaAlgorithm.h"
+//#include <AthContainers/ConstDataVector.h>
 #include <SystematicsHandles/SysListHandle.h>
 #include <SystematicsHandles/SysReadHandle.h>
 #include <xAODJet/JetContainer.h>
@@ -26,14 +26,17 @@
 namespace BJT{
 
     /// \brief An algorithm for counting containers
-    class BoostedJetTaggerAlg final : public AthAlgorithm {
+    class BoostedJetTaggerAlg final : public EL::AnaAlgorithm {
         /// \brief The standard constructor
         public: 
             BoostedJetTaggerAlg(const std::string &name, ISvcLocator *pSvcLocator);
 
             /// \brief Initialisation method, for setting up tools and other persistent
+
+            using EL::AnaAlgorithm::AnaAlgorithm;
+
             /// configs
-            virtual StatusCode initialize() override;
+            StatusCode initialize() override;
             /// \brief Execute method, for actions to be taken in the event loop
             virtual StatusCode execute(const EventContext& ctx) override;
             /// We use default finalize() -- this is for cleanup, and we don't do any

@@ -13,7 +13,7 @@ namespace BJT{
 
     BoostedJetTaggerAlg::BoostedJetTaggerAlg(const std::string &name,
                                                 ISvcLocator *pSvcLocator)
-      : AthAlgorithm(name, pSvcLocator){
+      : AnaAlgorithm(name, pSvcLocator){
 
     }
 
@@ -29,7 +29,7 @@ namespace BJT{
 
       // jet tagger tool
       ATH_CHECK(m_tagger.retrieve());
-      if(m_scalefactor)
+      if(!m_scalefactor.empty())
         ATH_CHECK(m_scalefactor.retrieve());
 
       return StatusCode::SUCCESS;
@@ -47,7 +47,7 @@ namespace BJT{
         ATH_CHECK(m_tagger -> decorate(*jets));
 
         // scale factors tool
-        if(m_scalefactor)
+        if(!m_scalefactor.empty())
           ATH_CHECK(m_scalefactor -> decorate(*jets));
 
       }
