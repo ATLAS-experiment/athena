@@ -1289,3 +1289,8 @@ def FJvtWorkingPoint(seq):
     seq.append(FJvtWorkingPointSelectionConfig())
     seq.append(FJvtWorkingPointEfficiencyConfig())
     seq.append(FJvtWorkingPointEventEfficiencyConfig())
+
+#@groupBlocks
+#def BoostedJetTagger(seq):
+#    from JetAnalysisAlgorithms.JetBJTAnalysisConfig import JetBJTAnalysisConfig
+#    seq.append(JetBJTAnalysisConfig())

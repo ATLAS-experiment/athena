@@ -270,6 +270,10 @@ class ConfigFactory():
         self.addAlgConfigBlock(algName="BJT", alg=JetBJTAnalysisConfig,
             superBlocks="Jets")
 
+        #from JetAnalysisAlgorithms.JetAnalysisConfig import BoostedJetTagger
+        #self.addAlgConfigBlock(algName="BJT", alg=BoostedJetTagger,
+        #    superBlocks="Jets")
+
         from JetAnalysisAlgorithms.BJetCalibAnalysisConfig import BJetCalibAnalysisConfig
         self.addAlgConfigBlock(algName="BJetCalib", alg=BJetCalibAnalysisConfig,
                                superBlocks="Jets")
