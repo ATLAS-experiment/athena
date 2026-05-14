@@ -15,7 +15,7 @@ atlas_add_library( ElectronPhotonSelectorToolsLib
   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
   INCLUDE_DIRS ${LWTNN_INCLUDE_DIRS}  ${EIGEN_INCLUDE_DIRS}
   LINK_LIBRARIES EgammaAnalysisInterfacesLib AsgTools xAODEgamma
-  xAODTracking xAODEventInfo MVAUtils
+  xAODTracking xAODEventInfo MVAUtils AthenaBaseComps
   xAODHIEvent PATCoreAcceptLib AsgDataHandlesLib
   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AsgMessagingLib FourMomUtils 
   xAODCaloEvent PathResolver EgammaAnalysisHelpersLib
