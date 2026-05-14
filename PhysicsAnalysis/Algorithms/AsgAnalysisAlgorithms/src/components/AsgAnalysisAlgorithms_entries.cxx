@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -34,6 +34,7 @@
 #include <AsgAnalysisAlgorithms/EventSelectionByObjectFlagAlg.h>
 #include <AsgAnalysisAlgorithms/EventStatusSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/FakeBkgCalculatorAlg.h>
+#include <AsgAnalysisAlgorithms/HSTPFilterAlg.h>
 #include <AsgAnalysisAlgorithms/IOStatsAlg.h>
 #include <AsgAnalysisAlgorithms/KinematicHistAlg.h>
 #include <AsgAnalysisAlgorithms/LeptonSFCalculatorAlg.h>
@@ -87,6 +88,7 @@ DECLARE_COMPONENT (CP::EventFlagSelectionAlg)
 DECLARE_COMPONENT (CP::EventSelectionByObjectFlagAlg)
 DECLARE_COMPONENT (CP::EventStatusSelectionAlg)
 DECLARE_COMPONENT (CP::FakeBkgCalculatorAlg)
+DECLARE_COMPONENT (CP::HSTPFilterAlg)
 DECLARE_COMPONENT (CP::IOStatsAlg)
 DECLARE_COMPONENT (CP::KinematicHistAlg)
 DECLARE_COMPONENT (CP::LeptonSFCalculatorAlg)

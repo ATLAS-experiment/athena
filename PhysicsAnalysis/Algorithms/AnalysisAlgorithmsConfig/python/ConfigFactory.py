@@ -248,6 +248,10 @@ class ConfigFactory():
         from TriggerAnalysisAlgorithms.TriggerAnalysisSFConfig import TriggerAnalysisSFBlock
         self.addAlgConfigBlock(algName="TriggerMatching", alg=TriggerAnalysisSFBlock)
 
+        # HSTP filter for dijet MC
+        from AsgAnalysisAlgorithms.HSTPFilterConfig import HSTPFilterBlock
+        self.addAlgConfigBlock(algName="HSTPFilter", alg=HSTPFilterBlock)
+
         # jets
         from JetAnalysisAlgorithms.JetAnalysisConfig import Jets
         self.addAlgConfigBlock(algName="Jets", alg=Jets)
