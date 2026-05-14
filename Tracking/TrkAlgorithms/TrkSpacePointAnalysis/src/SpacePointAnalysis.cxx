@@ -102,7 +102,7 @@ StatusCode SpacePointAnalysis::execute() {
     m_globalCovZX->clear();
     m_globalCovZY->clear();
 
-    const EventContext& ctx = Algorithm::getContext();
+    const EventContext& ctx = getContext();
 
     SG::ReadHandle<SpacePointContainer> spContainer (m_inputKey, ctx);
     if(spContainer.isValid()) {

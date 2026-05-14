@@ -80,7 +80,7 @@ StatusCode PixelClusterAnalysis::execute() {
     m_sizeX->clear();
     m_sizeY->clear();
 
-    const EventContext& ctx = Algorithm::getContext();
+    const EventContext& ctx = getContext();
 
     SG::ReadHandle<InDet::PixelClusterContainer> pixelContainer (m_inputKey, ctx);
     if(pixelContainer.isValid()) {
