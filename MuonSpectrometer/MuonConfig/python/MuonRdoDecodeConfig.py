@@ -303,6 +303,8 @@ def MdtRDODecodeCfg(flags, name="MuonMdtRdoToPrdConv", RDOContainer = None, **kw
         suffix = name[name.find("_") :] if name.find("_") != -1 else ""
         from xAODMuonViewAlgs.ViewAlgsConfig import MdtMeasViewAlgCfg
         acc.merge(MdtMeasViewAlgCfg(flags, name=f"MdtMeasViewAlg{suffix}"))
+        from xAODMuonTrkPrepDataCnv.MuonPrepDataCnvCfg import xMdtToPrepDataCnvAlgCfg
+        acc.merge(xMdtToPrepDataCnvAlgCfg(flags, name=f"xAODMdtToPrepDataCnvAlg{suffix}"))
     # else, use legacy
     else: 
         kwargs.setdefault("DecodingTool", CompFactory.Muon.MdtRdoToPrepDataToolMT(name="MdtPrepDataProviderTool", **tool_kwargs))

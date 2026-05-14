@@ -15,6 +15,11 @@ def xTgcToPrepDataCnvAlgCfg(flags,name = "xAODTgcToPrepDataCnvAlg", **kwargs):
     the_alg = CompFactory.MuonR4.xTgcMeasToTrkPrdCnvAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
+def xMdtToPrepDataCnvAlgCfg(flags,name = "xAODMdtToPrepDataCnvAlg", **kwargs):
+    result = ComponentAccumulator()
+    the_alg = CompFactory.MuonR4.xMdtMeasToTrkPrdCnvAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
 def MuonPrepDataToxAODCnvAlg(flags,name="MuonPrepDataToxAODCnvAlg", **kwargs):
     result = ComponentAccumulator()
     the_alg = CompFactory.Muon.PRDxAODConvertorAlg(name=name, **kwargs)
