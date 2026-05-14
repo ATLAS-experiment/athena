@@ -44,8 +44,7 @@ atlas_add_test( read_athena_statm_test
 
 atlas_add_test( PageAccessControl_test
    SOURCES test/PageAccessControl_test.cxx
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils
+   LINK_LIBRARIES CxxUtils
    LOG_IGNORE_PATTERN "for page .* 0x" )
 
 atlas_add_test( SEGVHandler_test
@@ -56,12 +55,12 @@ atlas_add_test( SEGVHandler_test
 atlas_add_test( procmaps_test
    SOURCES test/procmaps_test.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils )
+   LINK_LIBRARIES CxxUtils )
 
 atlas_add_test( copy_bounded_test
    SOURCES test/copy_bounded_test.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils )
+   LINK_LIBRARIES CxxUtils )
 
 atlas_add_test( BitPackerUnpacker_test
    SOURCES test/BitPackerUnpacker_test.cxx
@@ -94,7 +93,7 @@ endif()
 atlas_add_test( ConcurrentBitset_test
   SOURCES test/ConcurrentBitset_test.cxx
   INCLUDE_DIRS ${TBB_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CK_INCLUDE}
-  LINK_LIBRARIES CxxUtils TestTools ${TBB_LIBRARIES} ${Boost_LIBRARIES} ${CK_LIBRARIES} )
+  LINK_LIBRARIES CxxUtils TestTools ${TBB_LIBRARIES} Boost::timer ${CK_LIBRARIES} )
 if ( IS_DIRECTORY /usr/include/ck )
   target_compile_definitions(CxxUtils_ConcurrentBitset_test
     PRIVATE "-DHAVE_CK" )
@@ -103,7 +102,7 @@ endif()
 atlas_add_test( ConcurrentStrMap_test
   SOURCES test/ConcurrentStrMap_test.cxx
   INCLUDE_DIRS ${TBB_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CK_INCLUDE}
-  LINK_LIBRARIES CxxUtils TestTools ${TBB_LIBRARIES} ${Boost_LIBRARIES} ${CK_LIBRARIES} )
+  LINK_LIBRARIES CxxUtils TestTools ${TBB_LIBRARIES} Boost::timer ${CK_LIBRARIES} )
 if ( IS_DIRECTORY /usr/include/ck )
   target_compile_definitions(CxxUtils_ConcurrentStrMap_test
     PRIVATE "-DHAVE_CK" )
@@ -113,7 +112,7 @@ endif()
 atlas_add_test( ConcurrentMap_test
   SOURCES test/ConcurrentMap_test.cxx
   INCLUDE_DIRS ${TBB_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CK_INCLUDE}
-  LINK_LIBRARIES CxxUtils TestTools ${TBB_LIBRARIES} ${Boost_LIBRARIES} ${CK_LIBRARIES} )
+  LINK_LIBRARIES CxxUtils TestTools ${TBB_LIBRARIES} Boost::timer ${CK_LIBRARIES} )
 if ( IS_DIRECTORY /usr/include/ck )
   target_compile_definitions(CxxUtils_ConcurrentMap_test
     PRIVATE "-DHAVE_CK" )
@@ -123,7 +122,7 @@ endif()
 atlas_add_test( ConcurrentPtrSet_test
   SOURCES test/ConcurrentPtrSet_test.cxx
   INCLUDE_DIRS ${TBB_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CK_INCLUDE}
-  LINK_LIBRARIES CxxUtils TestTools ${TBB_LIBRARIES} ${Boost_LIBRARIES} ${CK_LIBRARIES} )
+  LINK_LIBRARIES CxxUtils TestTools ${TBB_LIBRARIES} Boost::timer ${CK_LIBRARIES} )
 if ( IS_DIRECTORY /usr/include/ck )
   target_compile_definitions(CxxUtils_ConcurrentPtrSet_test
     PRIVATE "-DHAVE_CK" )
@@ -143,7 +142,7 @@ atlas_add_test( stringUtilsTest
 
 atlas_add_test( CachedValueTiming_test
   SOURCES test/CachedValueTiming_test.cxx
-  LINK_LIBRARIES CxxUtils ${Boost_LIBRARIES}
+  LINK_LIBRARIES CxxUtils Boost::timer
   PROPERTIES TIMEOUT 300
   POST_EXEC_SCRIPT noerror.sh )
 
@@ -178,7 +177,7 @@ foreach( test sincos_test ArrayScanner_test Arrayrep_test
       RefCountedPtr_test throw_out_of_range_test iterator_range_test )
    atlas_add_test( ${test}
       SOURCES test/${test}.cxx
-      LINK_LIBRARIES CxxUtils TestTools ${Boost_LIBRARIES})
+      LINK_LIBRARIES CxxUtils TestTools Boost::timer Boost::unit_test_framework)
 endforeach()
 # Needed because this executable directly uses multiversioned functions.
 set_property( TARGET CxxUtils_crc64_test PROPERTY POSITION_INDEPENDENT_CODE ON )
