@@ -45,9 +45,9 @@ def GlobalSimulationAlgCfg(flags,
     
     fn = os.environ.get('GS_CFG_FILE', None)
     if fn is None:
-        AssertionError(
-            'Please set export environment variable GS_CFG_FILE with the '\
-            'name of a GloblSim config xml file')
+        logger.error('Please set export environment variable GS_CFG_FILE'\
+                     'with the name of a GloblSim config xml file')
+
 
     logger.info('GlobalSim local config, cfg file:' + fn)
 
@@ -66,9 +66,17 @@ def GlobalSimulationAlgCfg(flags,
         prop_names = []
         factory = getattr(CompFactory.GlobalSim, a_class)
         tool =  factory(a_name)
+
+        type_factories = {'int': int,
+                          'float': float,
+                          'str': str}
+        
         for prop in toolEl.iter('property'):
             name = prop.attrib['name']
             value = prop.attrib['value']
+            ptype = prop.attrib.get("type", None)
+            if ptype is not None:
+                value = type_factories[ptype](value)
             setattr(tool, name, value)
             prop_names.append(name)
 

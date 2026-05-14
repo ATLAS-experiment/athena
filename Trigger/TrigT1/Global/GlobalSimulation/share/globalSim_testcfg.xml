@@ -19,6 +19,8 @@
       <!-- wstot-->
       <property name="wstot" value="0"/>
       <property name="wstot_op" value="&lt;="/>
+      <property name="TIPposition" value="0" type="int"/>
+      <property name="TIPwidth" value="3" type="int"/>
       <child class="eFexCvtrAlgTool" name="eFexCvtrAlgTool"/>
     </AlgTool>
     <AlgTool class="eEmMultAlgTool" name="eEmMultAlgTool_1">
@@ -31,6 +33,8 @@
       <!-- wstot-->
       <property name="wstot" value="0"/>
       <property name="wstot_op" value="&lt;="/>
+      <property name="TIPposition" value="5" type="int" />
+      <property name="TIPwidth" value="3" type="int" />
       <child class="Egamma1BDTAlgTool" name="Egamma1BDTAlgTool"/>
     </AlgTool>
   </TIPWriters>
