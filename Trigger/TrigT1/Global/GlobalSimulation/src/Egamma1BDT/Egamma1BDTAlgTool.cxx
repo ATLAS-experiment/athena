@@ -15,7 +15,7 @@
 namespace GlobalSim {
 
   using eEmEg1BDTTOB = GlobalSim::IOBitwise::eEmEg1BDTTOB;
-
+  
   Egamma1BDTAlgTool::Egamma1BDTAlgTool(const std::string& type,
 				       const std::string& name,
 				       const IInterface* parent) :
@@ -58,7 +58,7 @@ namespace GlobalSim {
       auto input = digitizer::digitize10(c_phi);
 
       assert(input.size() == n_features);
-      ap_int<10>* c_input = &input[0];  // vector->array
+      ap_int<BDT_ouput_width>* c_input = &input[0];  // vector->array
 
       score_t scores[GlobalSim::BDT::fn_classes(n_classes)];
 
@@ -78,15 +78,39 @@ namespace GlobalSim {
 	ATH_MSG_DEBUG(ss.str());
       }
 
-      //Extract the bits (one by one) from the ap_fixed<10,5> object -> Bitset<10>
-      std::bitset<eEmEg1BDTTOB::s_eGamma1BDT_width> result;
+      //Extract the bits from the ap_fixed<10,5> object.
+      std::bitset<BDT_ouput_width> BDT_bits;
       for (int i=0;i<scores[0].length();i++){
-	ATH_MSG_DEBUG("Result bit " << i << ": " << scores[0][i]);
-	result[i] = scores[0][i];
+	BDT_bits[i] = scores[0][i];
+      }
+      ATH_MSG_DEBUG("BDT bits " << BDT_bits);
+ 
+      //Shift to an unsigned range, stored in a Bitset<8> as the hardware will.
+      std::bitset<eEmEg1BDTTOB::s_eGamma1BDT_width> result;
+      //First, interpret the ap_fixed<10,5> as an integer.
+      int BDT_int = bitSetToInt(BDT_bits);
+      ATH_MSG_DEBUG("BDT int " << BDT_int);
+      //We are going to restrict the range, but keep the resolution.
+      if(BDT_int >= 128) {
+	//So, cut off at 2^8/2-1 as the maximum possible value.
+	result = std::bitset<eEmEg1BDTTOB::s_eGamma1BDT_width>{0xFF};
+      } else if (BDT_int < -128) {
+	//So, cut off at and -2^8/2 as the minimum possible value.
+	result = std::bitset<eEmEg1BDTTOB::s_eGamma1BDT_width>{0x00};
+      } else {
+	//Then we take the remaining bits, flipping the maximum remaining bit.
+	//Due to the above logic, this is only 1 if -ive.
+	result[eEmEg1BDTTOB::s_eGamma1BDT_width-1] = ~BDT_bits[eEmEg1BDTTOB::s_eGamma1BDT_width-1];
+	for(uint i = 0; i <= eEmEg1BDTTOB::s_eGamma1BDT_width-2;i++){
+	  result[i] = BDT_bits[i];
+	}
       }
 
-      //Just output the float equivalent at the moment
-      h_BDTScore->push_back(scores[0].to_float());
+      ATH_MSG_DEBUG("Result bits " << result);
+      ATH_MSG_DEBUG("Result int " << result.to_ulong());
+      
+      //Outpout the ulong for debug, and store the result in the output TOB
+      h_BDTScore->push_back(result.to_ulong());
       eEmEg1BDTTOBs->push_back(std::make_unique<IOBitwise::eEmEg1BDTTOB>(*nbhdTOB, result));
     }
 
@@ -97,6 +121,11 @@ namespace GlobalSim {
     return StatusCode::SUCCESS;
   }
 
+  int Egamma1BDTAlgTool::bitSetToInt(std::bitset<BDT_ouput_width> bitSet) const {
+    if (!bitSet[BDT_ouput_width - 1]) return bitSet.to_ulong();
+    bitSet.flip();
+    return -(bitSet.to_ulong() + 1);
+  }
   
   std::vector<double>
   Egamma1BDTAlgTool::combine_phi(const IOBitwise::eEmNbhoodTOB* nbhdTOB) const  {

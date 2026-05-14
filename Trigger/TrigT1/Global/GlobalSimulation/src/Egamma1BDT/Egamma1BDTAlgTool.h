@@ -32,7 +32,7 @@ namespace GlobalSim {
 
     using eEmEg1BDTTOBContainer = GlobalSim::IOBitwise::eEmEg1BDTTOBContainer;
     using eEmNbhoodTOBContainer =  GlobalSim::IOBitwise::eEmNbhoodTOBContainer;
- 
+    
   public:
     Egamma1BDTAlgTool(const std::string& type,
 			    const std::string& name,
@@ -46,6 +46,8 @@ namespace GlobalSim {
     
     virtual std::string toString() const override;
 
+    static constexpr std::size_t BDT_ouput_width = 10;    
+    
   private:
     
 
@@ -75,6 +77,7 @@ namespace GlobalSim {
       "eEmEg1BDTTOBContainerKey",
       "eEmEg1BDTTOBContainer"};
     
+    int bitSetToInt(std::bitset<BDT_ouput_width> bitSet) const;
     std::vector<double> combine_phi(const IOBitwise::eEmNbhoodTOB*) const;
 
     // a neighborhood has 3 vectors of strip energies (phi_low, phi_center.

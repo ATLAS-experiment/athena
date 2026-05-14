@@ -9,8 +9,8 @@ namespace GlobalSim {
 
   class lt: public ICutter {
   public:
-    lt(const float& c): m_cut(c) {}
-    virtual bool cut(const float& v) const override {
+    lt(const ulong& c): m_cut(c) {}
+    virtual bool cut(const ulong& v) const override {
       return v < m_cut;  
     };
 
@@ -21,13 +21,13 @@ namespace GlobalSim {
     }
     
   private:
-    float m_cut;
+    ulong m_cut;
   };
 
   class leq: public ICutter {
   public:
-    leq(const float& c): m_cut(c) {}
-    virtual bool cut(const float& v) const override {
+    leq(const ulong& c): m_cut(c) {}
+    virtual bool cut(const ulong& v) const override {
       return v <= m_cut;  
     };
 
@@ -38,13 +38,13 @@ namespace GlobalSim {
     }
 
   private:
-    float m_cut;
+    ulong m_cut;
   };
 
   class gt: public ICutter {
   public:
-    gt(const float& c): m_cut(c) {}
-    virtual bool cut(const float& v) const override {
+    gt(const ulong& c): m_cut(c) {}
+    virtual bool cut(const ulong& v) const override {
       return v > m_cut;  
     };
     
@@ -55,14 +55,14 @@ namespace GlobalSim {
     }
 
   private:
-    float m_cut;
+    ulong m_cut;
   };
 
   
   class geq: public ICutter {
   public:
-    geq(const float& c): m_cut(c) {}
-    virtual bool cut(const float& v) const override {
+    geq(const ulong& c): m_cut(c) {}
+    virtual bool cut(const ulong& v) const override {
       return v >= m_cut;  
     };
 
@@ -73,10 +73,10 @@ namespace GlobalSim {
     }
 
   private:
-    float m_cut;
+    ulong m_cut;
   };
 
-  std::unique_ptr<ICutter> make_cutter(const float& cut,
+  std::unique_ptr<ICutter> make_cutter(const ulong& cut,
 				       const std::string& op) {
     
     auto cutter = std::unique_ptr<ICutter>(nullptr);
