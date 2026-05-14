@@ -15,12 +15,12 @@
 #ifndef  TRIGINDETEVENTTPCNV_TRIGTRTHITCOUNTSCOLLECTION_CNV_TLP1_H
 #define  TRIGINDETEVENTTPCNV_TRIGTRTHITCOUNTSCOLLECTION_CNV_TLP1_H
  
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 #include "TrigInDetEventTPCnv/TrigTrtHitCountsCollection_tlp1.h"
  
 #include "TrigInDetEventTPCnv/TrigTrtHitCountsCollectionCnv_p1.h"   
  
-class TrigTrtHitCountsCollectionCnv_tlp1 : public AthenaPoolTopLevelTPConverter< TrigTrtHitCountsCollectionCnv_p1, TrigTrtHitCountsCollection_tlp1 >
+class TrigTrtHitCountsCollectionCnv_tlp1 : public TopLevelTPConverter< TrigTrtHitCountsCollectionCnv_p1, TrigTrtHitCountsCollection_tlp1 >
 {
  
  public:

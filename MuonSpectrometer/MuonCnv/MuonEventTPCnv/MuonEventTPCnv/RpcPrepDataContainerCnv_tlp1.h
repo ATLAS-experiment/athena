@@ -6,7 +6,7 @@
 #define RPCPREPDATACONTAINERCNV_TLP1_H
 
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "RpcPrepDataContainer_tlp1.h"
 
@@ -19,7 +19,7 @@
 #include <iostream>
 
 class RpcPrepDataContainerCnv_tlp1
-   : public AthenaPoolTopLevelTPConverter<Muon::RpcPrepDataContainerCnv_p1, Muon::RpcPrepDataContainer_tlp1 >
+   : public TopLevelTPConverter<Muon::RpcPrepDataContainerCnv_p1, Muon::RpcPrepDataContainer_tlp1 >
 {
 public:
 

@@ -5,7 +5,7 @@
 #define JetElementCollectionCNV_TLP1_H
 
 // Gaudi/Athena include(s):
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigT1EventTPCnv/JetElementCollection_tlp1.h"
 #include "TrigT1EventTPCnv/JetElementCollectionCnv_p1.h"
@@ -20,7 +20,7 @@
  *          to do the T/P conversion before/after writing/reading the JetElement
  *          object.
  */
-class JetElementCollectionCnv_tlp1 : public AthenaPoolTopLevelTPConverter< JetElementCollectionCnv_p1, JetElementCollection_tlp1 > {
+class JetElementCollectionCnv_tlp1 : public TopLevelTPConverter< JetElementCollectionCnv_p1, JetElementCollection_tlp1 > {
 
 public:
   JetElementCollectionCnv_tlp1();

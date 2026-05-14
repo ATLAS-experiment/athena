@@ -43,7 +43,7 @@ class TrackParticleBaseCnv_p1:
         virtual void transToPers( const Trk :: TrackParticleBase    *transObj,
                                         Trk :: TrackParticleBase_p1 *persObj,
                                         MsgStream                        &log );
-        virtual void initPrivateConverters( AthenaPoolTopLevelTPCnvBase *topCnv ) {
+        virtual void initPrivateConverters( TopLevelTPCnvBase *topCnv ) {
            m_vecParametersBaseCnv.setTopConverter( topCnv, 0 );
         }
 

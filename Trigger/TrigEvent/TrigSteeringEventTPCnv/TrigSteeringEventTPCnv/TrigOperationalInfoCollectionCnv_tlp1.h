@@ -17,14 +17,14 @@
 #ifndef  TRIGSTEERINGEVENTTPCNV_TrigOperationalInfoCollection_CNV_TLP1_H
 #define  TRIGSTEERINGEVENTTPCNV_TrigOperationalInfoCollection_CNV_TLP1_H
  
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigSteeringEventTPCnv/TrigOperationalInfoCollection_tlp1.h"
  
 #include "TrigSteeringEventTPCnv/TrigOperationalInfoCollectionCnv_p1.h"   
 
  
-class TrigOperationalInfoCollectionCnv_tlp1 : public AthenaPoolTopLevelTPConverter< TrigOperationalInfoCollectionCnv_p1, TrigOperationalInfoCollection_tlp1 >
+class TrigOperationalInfoCollectionCnv_tlp1 : public TopLevelTPConverter< TrigOperationalInfoCollectionCnv_p1, TrigOperationalInfoCollection_tlp1 >
 {
  
  public:

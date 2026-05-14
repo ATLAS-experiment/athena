@@ -32,7 +32,7 @@ public:
 
     // Must initialize ID helpers
     virtual StatusCode initialize();
-    // virtual AthenaPoolTopLevelTPCnvBase*  getTopLevelTPCnv() { return &m_converter_tlp1; }
+    // virtual TopLevelTPCnvBase*  getTopLevelTPCnv() { return &m_converter_tlp1; }
         
 private:
     Muon::RpcCoinDataContainerCnv_p1    m_converter_p1; 

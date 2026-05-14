@@ -19,13 +19,13 @@
 #define TRIGPARTICLETPCNV_TRIGTAUCNV_TLP2_H
 
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigParticleTPCnv/TrigTau_tlp2.h"
 #include "TrigParticleTPCnv/TrigTauCnv_p2.h"
 #include "EventCommonTPCnv/P4PtEtaPhiMCnv_p1.h"
 
-class TrigTauCnv_tlp2 : public AthenaPoolTopLevelTPConverter<TrigTauCnv_p2, TrigTau_tlp2>
+class TrigTauCnv_tlp2 : public TopLevelTPConverter<TrigTauCnv_p2, TrigTau_tlp2>
 {
 
  public:

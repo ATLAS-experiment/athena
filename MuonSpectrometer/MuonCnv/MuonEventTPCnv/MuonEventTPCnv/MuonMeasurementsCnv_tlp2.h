@@ -4,7 +4,7 @@
 
 #ifndef MUONMEASUREMENTSCNV_TLP2_H
 #define MUONMEASUREMENTSCNV_TLP2_H
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelExtTPConverter.h"
+#include "TPTools/TopLevelTPCnvBaseP.h"
 #include "MuonMeasurements_tlp2.h"
 #include "MuonEventTPCnv/MuonRIO_OnTrack/CscClusterOnTrackCnv_p2.h"
 #include "MuonEventTPCnv/MuonRIO_OnTrack/RpcClusterOnTrackCnv_p3.h"
@@ -17,7 +17,7 @@
 #include "MuonEventTPCnv/MuonSegment/MuonSegmentQualityCnv_p1.h"
 
 class MuonMeasurementsCnv_tlp2
-   : public AthenaPoolTopLevelExtTPConverter< TPCnv::MuonMeasurements_tlp2 >
+   : public TopLevelTPCnvBaseP< TPCnv::MuonMeasurements_tlp2 >
 {
 public:
 

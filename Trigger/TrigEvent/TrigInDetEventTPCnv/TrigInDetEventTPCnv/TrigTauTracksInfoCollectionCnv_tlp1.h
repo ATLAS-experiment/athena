@@ -18,7 +18,7 @@
 #ifndef  TRIGINDETEVENTTPCNV_TRIGTAUTRACKSINFOCOLLECTION_CNV_TLP1_H
 #define  TRIGINDETEVENTTPCNV_TRIGTAUTRACKSINFOCOLLECTION_CNV_TLP1_H
  
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 #include "TrigInDetEventTPCnv/TrigTauTracksInfoCollection_tlp1.h"
  
 #include "TrigInDetEventTPCnv/TrigTauTracksInfoCollectionCnv_p1.h"   
@@ -26,7 +26,7 @@
 #include "EventCommonTPCnv/P4PtEtaPhiMCnv_p1.h"
 
  
-class TrigTauTracksInfoCollectionCnv_tlp1 : public AthenaPoolTopLevelTPConverter< TrigTauTracksInfoCollectionCnv_p1, TrigTauTracksInfoCollection_tlp1 >
+class TrigTauTracksInfoCollectionCnv_tlp1 : public TopLevelTPConverter< TrigTauTracksInfoCollectionCnv_p1, TrigTauTracksInfoCollection_tlp1 >
 {
  
  public:

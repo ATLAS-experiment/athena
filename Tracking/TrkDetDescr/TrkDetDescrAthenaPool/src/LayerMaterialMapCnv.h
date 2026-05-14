@@ -40,7 +40,7 @@ protected:
   virtual Trk::LayerMaterialMap* createTransientWithKey ( const Token* token,
                                                           const std::string& key) override;
 
-  virtual AthenaPoolTopLevelTPCnvBase* getTopLevelTPCnv() { return &m_TPConverter_tlp1; }
+  virtual TopLevelTPCnvBase* getTopLevelTPCnv() { return &m_TPConverter_tlp1; }
 
 private:
   IMessageSvc                     *m_msgSvc;

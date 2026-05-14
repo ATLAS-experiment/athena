@@ -34,7 +34,7 @@ protected:
   virtual StatusCode initialize();
 
 
-  virtual AthenaPoolTopLevelTPCnvBase*	getTopLevelTPCnv() { return &m_TPConverter2; }
+  virtual TopLevelTPCnvBase*	getTopLevelTPCnv() { return &m_TPConverter2; }
 
   virtual AthenaPoolCnvTPExtension*  clone() { return new InDetTrackCnv(0); }
 

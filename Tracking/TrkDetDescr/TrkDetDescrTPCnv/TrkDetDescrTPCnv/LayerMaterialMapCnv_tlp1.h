@@ -9,7 +9,7 @@
 #ifndef LAYERMATERIALMAP_CNV_TLP1_TRK_H
 #define LAYERMATERIALMAP_CNV_TLP1_TRK_H
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrkDetDescrTPCnv/LayerMaterialMap_tlp1.h"
 #include "TrkDetDescrTPCnv/TrkGeometry/LayerMaterialMapCnv_p1.h"
@@ -21,7 +21,7 @@
 #include "TrkDetDescrTPCnv/TrkGeometry/MaterialCnv_p1.h"
 #include "TrkDetDescrTPCnv/TrkGeometry/ElementTableCnv_p1.h"
 
-class LayerMaterialMapCnv_tlp1 : public AthenaPoolTopLevelTPConverter< LayerMaterialMapCnv_p1, Trk::LayerMaterialMap_tlp1 > {
+class LayerMaterialMapCnv_tlp1 : public TopLevelTPConverter< LayerMaterialMapCnv_p1, Trk::LayerMaterialMap_tlp1 > {
   
   public:
 

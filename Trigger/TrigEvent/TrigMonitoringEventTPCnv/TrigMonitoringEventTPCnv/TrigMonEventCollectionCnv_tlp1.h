@@ -5,13 +5,13 @@
 #ifndef TRIGMON_EVENT_COLLECTIONCNV_TLP1_H
 #define TRIGMON_EVENT_COLLECTIONCNV_TLP1_H
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 #include "TrigMonitoringEventTPCnv/TrigMonEventCollection_tlp1.h"
 #include "TrigMonitoringEventTPCnv/TrigMonEventCollectionCnv_p1.h"   
 
  
 class TrigMonEventCollectionCnv_tlp1 
-   : public AthenaPoolTopLevelTPConverter<TrigMonEventCollectionCnv_p1,
+   : public TopLevelTPConverter<TrigMonEventCollectionCnv_p1,
 					  TrigMonEventCollection_tlp1>
 { 
  public:

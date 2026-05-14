@@ -17,13 +17,13 @@
 #ifndef  TRIGMUONEVENTTPCNV_ISOMUONFEATURECONTAINER_CNV_TLP1_H
 #define  TRIGMUONEVENTTPCNV_ISOMUONFEATURECONTAINER_CNV_TLP1_H
  
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 #include "TrigMuonEventTPCnv/IsoMuonFeatureContainer_tlp1.h"
 #include "TrigMuonEventTPCnv/IsoMuonFeatureContainerCnv_p1.h"   
 #include "TrigMuonEventTPCnv/IsoMuonFeatureCnv_p1.h"   
 
  
-class IsoMuonFeatureContainerCnv_tlp1 : public AthenaPoolTopLevelTPConverter< IsoMuonFeatureContainerCnv_p1, IsoMuonFeatureContainer_tlp1 >
+class IsoMuonFeatureContainerCnv_tlp1 : public TopLevelTPConverter< IsoMuonFeatureContainerCnv_p1, IsoMuonFeatureContainer_tlp1 >
 {
  
  public:

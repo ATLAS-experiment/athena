@@ -10,14 +10,14 @@
   @author Jiri.Masik@cern.ch
  */
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 #include "TrackParticleTruthTPCnv/TrackParticleTruthCollectionContainer_tlp2.h"
 #include "TrackParticleTruthTPCnv/TrackParticleTruthCollectionContainerCnv_p2.h"
 #include "TrackParticleTruthTPCnv/TrackParticleTruthCollectionCnv_p2.h"
 
 ///Tau details container converter
 class TrackParticleTruthCollectionContainerCnv_tlp2:
-    public AthenaPoolTopLevelTPConverter<TrackParticleTruthCollectionContainerCnv_p2, 
+    public TopLevelTPConverter<TrackParticleTruthCollectionContainerCnv_p2, 
 					 TrackParticleTruthCollectionContainer_tlp2>
 {
 public:
@@ -32,7 +32,7 @@ protected:
 
 };
 
-// ??? Maybe this should be moved up to AthenaPoolTopLevelTPConverter...
+// ??? Maybe this should be moved up to TopLevelTPConverter...
 template <>
 class T_TPCnv<TrackParticleTruthCollectionContainer,
 	      TrackParticleTruthCollectionContainer_tlp2 >

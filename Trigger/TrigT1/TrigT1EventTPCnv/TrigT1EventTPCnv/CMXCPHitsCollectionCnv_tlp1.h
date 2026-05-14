@@ -5,7 +5,7 @@
 #define CMXCPHitsCollectionCNV_TLP1_H
 
 // Gaudi/Athena include(s):
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigT1EventTPCnv/CMXCPHitsCollection_tlp1.h"
 #include "TrigT1EventTPCnv/CMXCPHitsCollectionCnv_p1.h"
@@ -20,7 +20,7 @@
  *          to do the T/P conversion before/after writing/reading the CMXCPHits
  *          object.
  */
-class CMXCPHitsCollectionCnv_tlp1 : public AthenaPoolTopLevelTPConverter< CMXCPHitsCollectionCnv_p1, CMXCPHitsCollection_tlp1 > {
+class CMXCPHitsCollectionCnv_tlp1 : public TopLevelTPConverter< CMXCPHitsCollectionCnv_p1, CMXCPHitsCollection_tlp1 > {
 
 public:
   CMXCPHitsCollectionCnv_tlp1();

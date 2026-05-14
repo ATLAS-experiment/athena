@@ -43,7 +43,7 @@ class TrigVertexCnv_p1 : public T_AthenaPoolTPCnvBase<TrigVertex, TrigVertex_p1>
   virtual void persToTrans(const TrigVertex_p1* persObj, TrigVertex* transObj, MsgStream &log);
   virtual void transToPers(const TrigVertex* transObj, TrigVertex_p1* persObj, MsgStream &log);
   
-  virtual void initPrivateConverters( AthenaPoolTopLevelTPCnvBase *topCnv )
+  virtual void initPrivateConverters( TopLevelTPCnvBase *topCnv )
     {
       m_TrigInDetTrackVectorCnv.setTopConverter( topCnv, 0 );
     }

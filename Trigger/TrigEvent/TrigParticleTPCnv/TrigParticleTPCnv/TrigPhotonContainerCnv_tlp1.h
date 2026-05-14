@@ -18,7 +18,7 @@
 #ifndef  TRIGPARTICLETPCNV_TRIGPHOTONCONTAINER_CNV_TLP1_H
 #define  TRIGPARTICLETPCNV_TRIGPHOTONCONTAINER_CNV_TLP1_H
  
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigParticleTPCnv/TrigPhotonContainer_tlp1.h"
  
@@ -28,7 +28,7 @@
 #include "EventCommonTPCnv/P4PtEtaPhiMCnv_p1.h" 
 
  
-class TrigPhotonContainerCnv_tlp1 : public AthenaPoolTopLevelTPConverter< TrigPhotonContainerCnv_p1, TrigPhotonContainer_tlp1 >
+class TrigPhotonContainerCnv_tlp1 : public TopLevelTPConverter< TrigPhotonContainerCnv_p1, TrigPhotonContainer_tlp1 >
 {
  
  public:

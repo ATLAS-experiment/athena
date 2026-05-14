@@ -6,7 +6,7 @@
 #define TGCPREPDATACONTAINERCNV_TLP1_H
 
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TgcPrepDataContainer_tlp1.h"
 
@@ -19,7 +19,7 @@
 #include <iostream>
 
 class TgcPrepDataContainerCnv_tlp1
-   : public AthenaPoolTopLevelTPConverter<Muon::TgcPrepDataContainerCnv_p1, Muon::TgcPrepDataContainer_tlp1 >
+   : public TopLevelTPConverter<Muon::TgcPrepDataContainerCnv_p1, Muon::TgcPrepDataContainer_tlp1 >
 {
 public:
 

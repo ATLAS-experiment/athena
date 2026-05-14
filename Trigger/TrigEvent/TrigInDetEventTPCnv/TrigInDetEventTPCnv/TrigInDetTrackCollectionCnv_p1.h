@@ -38,7 +38,7 @@ class TrigInDetTrackCollectionCnv_p1
   virtual void persToTrans( const TrigInDetTrackCollection_p1*, TrigInDetTrackCollection*, MsgStream& );
   virtual void transToPers( const TrigInDetTrackCollection*, TrigInDetTrackCollection_p1*, MsgStream& );
   
-  virtual void initPrivateConverters( AthenaPoolTopLevelTPCnvBase *topCnv ) {
+  virtual void initPrivateConverters( TopLevelTPCnvBase *topCnv ) {
     m_trigInDetTrackVectorCnv.setTopConverter( topCnv, 0 );
   }
 

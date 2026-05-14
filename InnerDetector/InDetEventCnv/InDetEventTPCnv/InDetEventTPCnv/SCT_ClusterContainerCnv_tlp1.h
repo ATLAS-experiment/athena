@@ -6,7 +6,7 @@
 #define SCT_CLUSTERCONTAINERCNV_TLP1_H
 
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "SCT_ClusterContainer_tlp1.h"
 
@@ -22,7 +22,7 @@
 #include <iostream>
 
 class SCT_ClusterContainerCnv_tlp1
-   : public AthenaPoolTopLevelTPConverter<InDet::SCT_ClusterContainerCnv_p1, InDet::SCT_ClusterContainer_tlp1 >
+   : public TopLevelTPConverter<InDet::SCT_ClusterContainerCnv_p1, InDet::SCT_ClusterContainer_tlp1 >
 {
 public:
 

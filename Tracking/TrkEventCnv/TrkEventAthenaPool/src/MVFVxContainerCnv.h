@@ -48,7 +48,7 @@ protected:
 
   virtual MVFVxContainer      *createTransient(const Token* token) override;
 
-  virtual AthenaPoolTopLevelTPCnvBase*	getTopLevelTPCnv() override { return &m_TPConverter; }
+  virtual TopLevelTPCnvBase*	getTopLevelTPCnv() override { return &m_TPConverter; }
 
   virtual AthenaPoolCnvTPExtension*  clone() override { return new MVFVxContainerCnv(0); }
 

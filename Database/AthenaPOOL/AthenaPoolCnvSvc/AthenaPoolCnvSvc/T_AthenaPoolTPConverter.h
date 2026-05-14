@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLCNVSVC_T_ATHENAPOOLTPCONVERTER_H
 #define ATHENAPOOLCNVSVC_T_ATHENAPOOLTPCONVERTER_H 1
 
-// provide AthenaPoolTopLevelTPCnvBase definition to T/P converters
-#include "AthenaPoolTopLevelTPCnvBase.h"
+// provide TopLevelTPCnvBase definition to T/P converters
+#include "TPTools/TopLevelTPCnvBase.h"
 
 #include "TPTools/TPConverter.h"
 

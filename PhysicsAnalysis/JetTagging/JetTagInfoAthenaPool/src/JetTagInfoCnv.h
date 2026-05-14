@@ -32,7 +32,7 @@ public:
   JetTagInfoCnv (ISvcLocator *svcloc);
 protected:
   StatusCode initialize(void);
-  inline AthenaPoolTopLevelTPCnvBase *getTopLevelTPCnv(void)
+  inline TopLevelTPCnvBase *getTopLevelTPCnv(void)
     {
       return &m_TPConverter;
     }

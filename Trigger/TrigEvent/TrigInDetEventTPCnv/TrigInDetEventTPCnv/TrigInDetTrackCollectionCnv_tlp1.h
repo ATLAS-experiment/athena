@@ -18,7 +18,7 @@
 #ifndef TRIGINDETEVENTTPCNV_TRIGINDETTRACKCOLLECTIONCNV_TLP1_H
 #define TRIGINDETEVENTTPCNV_TRIGINDETTRACKCOLLECTIONCNV_TLP1_H
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigInDetTrackCollectionCnv_p1.h"
 #include "TrigInDetTrackCnv_p1.h"
@@ -28,7 +28,7 @@
 #include "TrigInDetTrackCollection_tlp1.h"
 
 
-class TrigInDetTrackCollectionCnv_tlp1 : public AthenaPoolTopLevelTPConverter<TrigInDetTrackCollectionCnv_p1, TrigInDetTrackCollection_tlp1>
+class TrigInDetTrackCollectionCnv_tlp1 : public TopLevelTPConverter<TrigInDetTrackCollectionCnv_p1, TrigInDetTrackCollection_tlp1>
 {
 
  public:

@@ -53,7 +53,7 @@ class JetCnv_p4 : public T_AthenaPoolTPCnvConstBase<Jet, Jet_p4>
 
   /// Init the converter so that it knows about its "parents" when it
   /// has to walk the lookup chain.
-  inline virtual void initPrivateConverters(AthenaPoolTopLevelTPCnvBase *topCnv)
+  inline virtual void initPrivateConverters(TopLevelTPCnvBase *topCnv)
     override
   {
     m_taginfoCnv.setTopConverter(topCnv, 0);

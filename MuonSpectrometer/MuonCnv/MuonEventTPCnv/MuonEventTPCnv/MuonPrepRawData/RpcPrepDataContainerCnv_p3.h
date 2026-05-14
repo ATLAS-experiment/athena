@@ -18,7 +18,7 @@ class RpcIdHelper;
 
 namespace Muon{
 /** Class to handle the conversion of the transient RpcPrepDataContainer into its persistent representation (defined in MuonPRD_Container_p3).
-This replaces RpcPrepDataContainerCnv_tlp1, which is a AthenaPoolTopLevelTPConverter, as I have now simplified/flattened the RpcPrepData.*/
+This replaces RpcPrepDataContainerCnv_tlp1, which is a TopLevelTPConverter, as I have now simplified/flattened the RpcPrepData.*/
 class RpcPrepDataContainerCnv_p3 : public T_AthenaPoolTPCnvBase<Muon::RpcPrepDataContainer, Muon::RpcPrepDataContainer_p3>
 {
 public:

@@ -6,7 +6,7 @@
 #define PIXELCLUSTERCONTAINERCNV_TLP1_H
 
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "PixelClusterContainer_tlp1.h"
 
@@ -22,7 +22,7 @@
 #include <iostream>
 
 class PixelClusterContainerCnv_tlp1
-   : public AthenaPoolTopLevelTPConverter<InDet::PixelClusterContainerCnv_p1, InDet::PixelClusterContainer_tlp1 >
+   : public TopLevelTPConverter<InDet::PixelClusterContainerCnv_p1, InDet::PixelClusterContainer_tlp1 >
 {
 public:
 

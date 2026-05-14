@@ -37,7 +37,7 @@ public:
     virtual Muon::CscPrepDataContainer*  createTransient(const Token* token);
 
     virtual StatusCode initialize();
-    virtual AthenaPoolTopLevelTPCnvBase*  getTopLevelTPCnv() { return &m_TPConverter; }
+    virtual TopLevelTPCnvBase*  getTopLevelTPCnv() { return &m_TPConverter; }
         
 private:
     Muon::CscPrepDataContainerCnv_p2    m_converter_p2;

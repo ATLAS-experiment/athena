@@ -18,7 +18,7 @@
 #ifndef  TRIGINDETEVENTTPCNV_TRIGSPACEPOINTCOUNTSCOLLECTION_CNV_TLP1_H
 #define  TRIGINDETEVENTTPCNV_TRIGSPACEPOINTCOUNTSCOLLECTION_CNV_TLP1_H
  
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 #include "TrigInDetEventTPCnv/TrigSpacePointCountsCollection_tlp1.h"
  
 #include "TrigInDetEventTPCnv/TrigSpacePointCountsCollectionCnv_p1.h"   
@@ -27,7 +27,7 @@
 #include "TrigInDetEventTPCnv/TrigSpacePointCountsCnv_p3.h"
 
  
-class TrigSpacePointCountsCollectionCnv_tlp1 : public AthenaPoolTopLevelTPConverter< TrigSpacePointCountsCollectionCnv_p1, TrigSpacePointCountsCollection_tlp1 >
+class TrigSpacePointCountsCollectionCnv_tlp1 : public TopLevelTPConverter< TrigSpacePointCountsCollectionCnv_p1, TrigSpacePointCountsCollection_tlp1 >
 {
  
  public:

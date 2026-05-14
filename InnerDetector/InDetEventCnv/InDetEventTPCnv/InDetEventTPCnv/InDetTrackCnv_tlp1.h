@@ -6,7 +6,7 @@
 #define INDET_TRACKCNV_TLP1_H
 
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelExtTPConverter.h"
+#include "TPTools/TopLevelTPCnvBaseP.h"
 
 #include "InDetTrack_tlp1.h"
 
@@ -27,7 +27,7 @@
 #include <iostream>
 
 class InDetTrackCnv_tlp1
-   : public AthenaPoolTopLevelExtTPConverter< InDet::Track_tlp1 >
+   : public TopLevelTPCnvBaseP< InDet::Track_tlp1 >
 {
 public:
 
