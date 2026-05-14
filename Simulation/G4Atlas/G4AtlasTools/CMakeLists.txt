@@ -9,7 +9,6 @@ atlas_subdir( G4AtlasTools )
 find_package( CLHEP )
 find_package( Geant4 )
 find_package( TBB )
-find_package( XercesC )
 
 # Possible extra dependencies:
 # Should only apply in case of Athena builds below (and not e.g in AthSimulation)
@@ -35,10 +34,10 @@ atlas_add_library( G4AtlasToolsLib
                    ${ALL_SRC_LIB_FILES}
                    OBJECT
                    PUBLIC_HEADERS G4AtlasTools
-                   INCLUDE_DIRS ${XERCESC_INCLUDE_DIRS} ${GEANT4_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS} ${extra_incl} 
+                   INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS} ${extra_incl} 
                    PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES ${XERCESC_LIBRARIES} ${GEANT4_LIBRARIES} ${TBB_LIBRARIES} AthenaBaseComps G4AtlasInterfaces HitManagement SubDetectorEnvelopesLib ${extra_lib}
+                   LINK_LIBRARIES ${GEANT4_LIBRARIES} ${TBB_LIBRARIES} AthenaBaseComps G4AtlasInterfaces HitManagement SubDetectorEnvelopesLib ${extra_lib}
                    PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} XMLCoreParser CxxUtils GaudiKernel )
 set_target_properties( G4AtlasToolsLib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
