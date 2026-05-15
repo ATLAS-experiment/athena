@@ -58,14 +58,14 @@ class TH2D;
 
     // Takes the truthtracks as input and parses it into a useful form for later use
     // (e.g. stores which bin the true track is in)
-    void parseTruthInfo ATLAS_NOT_THREAD_SAFE(std::vector<FPGATrackSimTruthTrack> const & truthtracks);
+    void parseTruthInfo(std::vector<FPGATrackSimTruthTrack> const & truthtracks);
     FPGATrackSimBinUtil::IdxSet& truthBin(unsigned stepnum) { return m_truthbin[stepnum]; }
     std::vector<FPGATrackSimBinUtil::IdxSet>& truthBin() { return m_truthbin; }
 
     // Fill methods
     void fillHitLevelInput(const FPGATrackSimHit* hit);
-    void fillBinLevelOutput ATLAS_NOT_THREAD_SAFE(const FPGATrackSimBinUtil::IdxSet &idx, const FPGATrackSimBinnedHits::BinEntry &data);
-    void fillBinningSummary ATLAS_NOT_THREAD_SAFE(const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits);
+    void fillBinLevelOutput(const FPGATrackSimBinUtil::IdxSet &idx, const FPGATrackSimBinnedHits::BinEntry &data);
+    void fillBinningSummary(const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits);
 
     // Error Checks
     void sliceCheck();
