@@ -380,8 +380,12 @@ def muEFSARecoSequenceCfg( flags, RoIs, name, useBucketFilter=False):
 
         # Schedule reco-to-truth object association
         if flags.Muon.setupTruthAlgorithms:
-            from MuonTruthAlgsR4.MuonTruthAlgsConfig import MuonRecoTruthAssocCfg
-            acc.merge(MuonRecoTruthAssocCfg(flags, useSDO=True, suffix=f'_{name}'))
+            from MuonObjectMarker.ObjectMarkerConfig import TruthMeasMarkerAlgCfg
+            acc.merge(TruthMeasMarkerAlgCfg(flags, name = f"TruthMeasMarkerAlg{name}"))
+            from MuonTruthAlgsR4.MuonTruthAlgsConfig import TruthHitAssociationCfg, RecoSegmentTruthAssocCfg
+            acc.merge(TruthHitAssociationCfg(flags, useSDO=True, suffix=f'_{name}'))
+            acc.merge(RecoSegmentTruthAssocCfg(flags, name=f"MuonSegmentsFromR4TruthMatching{name}",
+                                                      SegmentKey="MuonSegmentsFromR4"))
 
         # Schedule muon EF reco
         from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg
