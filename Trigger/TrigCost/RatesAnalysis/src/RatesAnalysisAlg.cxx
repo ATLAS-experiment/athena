@@ -386,6 +386,7 @@ StatusCode RatesAnalysisAlg::initialize() {
   }
 
   ATH_CHECK( m_enhancedBiasRatesTool.retrieve() ); 
+  ATH_CHECK( m_additionalWeights.retrieve() );
 
   ATH_CHECK( m_eventInfoKey.initialize());
   ATH_CHECK( m_truthHS_jets_RHKey.initialize( m_enhancedBiasRatesTool->isMC() && m_doMultiSliceDiJet));
@@ -674,14 +675,23 @@ StatusCode RatesAnalysisAlg::execute() {
     return StatusCode::SUCCESS;
   }
 
-  const double weightedEvents = (isMC ? eventInfo->mcEventWeight() : m_weightingValues.m_enhancedBiasWeight);
-  m_weightedEventCounter += weightedEvents;
+  // Apply any additional weights multiplicatively if required
+  if (!m_additionalWeights.empty()) {
+    for (const auto& addWeight : m_additionalWeights) {
+      double wt = 1.0;
+      ATH_CHECK(addWeight->getValue(wt));
+      ATH_MSG_DEBUG("Additional weight from [" << addWeight->name() << "], value = " << wt);
+      m_weightingValues.m_enhancedBiasWeight *= wt;
+    }
+  }
+
+  m_weightedEventCounter += m_weightingValues.m_enhancedBiasWeight;
 
   double ratesDenominator = 0.0;
   if (m_doMultiSliceDiJet) {
-    ratesDenominator = eventInfo->mcEventWeight(); // In multi-slice mode we only normalize to the weighted number of events
+    ratesDenominator = m_weightingValues.m_enhancedBiasWeight; // In multi-slice mode we only normalize to the weighted number of events
   } else {
-    ratesDenominator = m_weightingValues.m_eventLiveTime * (isMC ? eventInfo->mcEventWeight() : 1.0); // Otherwise, we need to keep track of elapsed walltime as well
+    ratesDenominator = m_weightingValues.m_eventLiveTime; // Otherwise, we need to keep track of elapsed walltime as well
   }
   m_ratesDenominator += ratesDenominator;
 
@@ -689,7 +699,7 @@ StatusCode RatesAnalysisAlg::execute() {
     m_bcidHist->Fill(eventInfo->bcid(), m_weightingValues.m_enhancedBiasWeight);
     m_scalingHist->Fill(0.5, ratesDenominator); // Walltime
     m_scalingHist->Fill(1.5, 1.); // Total events
-    m_scalingHist->Fill(2.5, weightedEvents ); // Total weighted events
+    m_scalingHist->Fill(2.5, m_weightingValues.m_enhancedBiasWeight ); // Total weighted events
   }
 
   // HSTP filter check

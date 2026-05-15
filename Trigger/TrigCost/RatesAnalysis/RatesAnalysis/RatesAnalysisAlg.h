@@ -17,6 +17,7 @@
 #include "RatesTrigger.h"
 #include "RatesScanTrigger.h"
 #include "RatesGroup.h"
+#include "IAdditionalWeight.h"
 
 #include "TTree.h"
 
@@ -271,6 +272,7 @@ class RatesAnalysisAlg: public ::AthAnalysisAlgorithm {
   ToolHandle<IEnhancedBiasWeighter> m_enhancedBiasRatesTool{this, "EnhancedBiasRatesTool", "EnhancedBiasWeighter/EnhancedBiasRatesTool"};
   ToolHandle<Trig::TrigDecisionTool> m_tdt{this, "TrigDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool"};
   ServiceHandle<TrigConf::ITrigConfigSvc> m_configSvc{this, "TrigConfigSvc", "TrigConf::xAODConfigSvc"};
+  ToolHandleArray<IAdditionalWeight> m_additionalWeights {this, "AdditionalWeights", {}, "Any additional reweightings to be applied directly on EB weight"};
 
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "EventInfo", "EventInfo", "EventInfo name"}; 
   SG::ReadHandleKey<xAOD::JetContainer> m_truthHS_jets_RHKey{this, "TruthHSJetsKey", "AntiKt4TruthJets", "Key for the hard scatter truth jet collection"};
