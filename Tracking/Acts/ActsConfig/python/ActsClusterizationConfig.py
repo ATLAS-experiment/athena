@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -100,7 +100,6 @@ def ActsStripClusteringToolCfg(flags,
         from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
         kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)))
 
-    kwargs.setdefault("conditionsTool",None)
     if "StripDetElStatus" not in kwargs :
         from SCT_ConditionsAlgorithms.ITkStripConditionsAlgorithmsConfig import  (
             ITkStripDetectorElementStatusAlgCfg)
