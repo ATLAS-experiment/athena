@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODEgamma/PhotonxAODHelpers.h"
@@ -17,7 +17,8 @@ namespace ZMassConstraint
         m_conWidth(2495.2),
         m_resolution(0.01),
         m_ignoreInputChecks(false),
-        m_parameters(3)
+        m_parameters(3),
+        m_nobj(0)
     {
         declareProperty( "Z_pdg_mass",                     m_conMass);
         declareProperty( "Z_pdg_width",                    m_conWidth);
