@@ -120,8 +120,9 @@ StatusCode CTPResultByteStreamTool::convertFromBS(const std::vector<const ROBF*>
       dataStatus.status_info = static_cast<uint32_t>(*status);
   }
 
-  uint32_t errStatus = dataStatus.status_word;  // error status
-  uint32_t statInfo = dataStatus.status_info;   // status info
+  uint32_t errStatus = dataStatus.status_word;   // error status
+  uint32_t statInfo = dataStatus.status_info;    // status info
+  uint32_t statPos = rob->rod_status_position(); // status info position
 
   //
   // Payload information
@@ -152,9 +153,18 @@ StatusCode CTPResultByteStreamTool::convertFromBS(const std::vector<const ROBF*>
   
   // Initialize the remaining words
   result->setHeader(headerMarker, formatVersion, sourceID, L1ID, runNum, bcid, trigType, evtType);  // Header words
-  result->setTrailer(ndata, errStatus, statInfo);                                                   // Trailer words
+  result->setTrailer(ndata, errStatus, statInfo, nstatus, statPos);                                 // Trailer words
   result->setL1AcceptBunchPosition(CTPfragment::lvl1AcceptBunch(rob));                              // L1A bunch position
   result->setTurnCounter(CTPfragment::turnCounter(rob));                                            // Turn counter
+
+  // Check status and print warning message if issue is seen
+  std::vector<std::string> ctpResultIssues = result->checkForIssues();
+  if (!ctpResultIssues.empty()) {
+    ATH_MSG_WARNING("Found " << ctpResultIssues.size() << " CTPResult issues");
+    for (const auto& issue : ctpResultIssues) {
+      ATH_MSG_WARNING(issue);
+    }
+  }
 
   // Record result
   ATH_MSG_DEBUG(CTPResultUtils::print(*result));
