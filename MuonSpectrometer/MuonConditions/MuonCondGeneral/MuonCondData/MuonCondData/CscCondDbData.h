@@ -1,13 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCONDDATA_CSCCONDDBDATA_H
 #define MUONCONDDATA_CSCCONDDBDATA_H
 
-//STL includes
-#include <string>
-#include <vector>
+
 
 //Athena includes
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
@@ -16,6 +14,10 @@
 #include "Identifier/IdContext.h"
 #include "Identifier/Identifier.h"
 #include "Identifier/IdentifierHash.h"
+//STL includes
+#include <string>
+#include <string_view>
+#include <vector>
 
 //forward declarations
 class CscIdHelper;
@@ -80,7 +82,7 @@ public:
 
     bool isGoodChannelHash(const IdentifierHash &) const;
 
-    StatusCode indexToStringId(const CscIdHelper*, const unsigned int &, const std::string &, std::string &) const;
+    StatusCode indexToStringId(const CscIdHelper*, const unsigned int &, std::string_view, std::string &) const;
     StatusCode layerHashToOnlineId(const unsigned int &, unsigned int &) const;
     StatusCode offlineElementToOnlineId(const CscIdHelper*, const Identifier &, unsigned int &) const;
     StatusCode offlineToOnlineId(const CscIdHelper*, const Identifier &, unsigned int &) const;

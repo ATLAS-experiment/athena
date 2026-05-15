@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCondData/CscCondDbData.h"
@@ -344,7 +344,7 @@ CscCondDbData::isGoodStation(const Identifier & Id) const{
 
 // indexToStringId
 StatusCode 
-CscCondDbData::indexToStringId(const CscIdHelper* idHelper, const unsigned int & index, const std::string & cat, std::string & idString) const {
+CscCondDbData::indexToStringId(const CscIdHelper* idHelper, const unsigned int & index, std::string_view cat, std::string & idString) const {
     // copy-paste from CscCoolStrSvc
 
     //There is no string id for the CSC category.
