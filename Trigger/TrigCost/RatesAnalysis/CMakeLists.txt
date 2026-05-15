@@ -9,7 +9,8 @@ find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
 # Package library:
 atlas_add_library( RatesAnalysisLib
                    src/Rates*.cxx
-		   src/L1Topo*cxx
+                   src/L1Topo*.cxx
+                   src/JZCombine*.cxx src/PileupProfileWeight.cxx
                    PUBLIC_HEADERS RatesAnalysis
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    LINK_LIBRARIES ${ROOT_LIBRARIES} GaudiKernel AthAnalysisBaseCompsLib AthenaBaseComps TrigDecisionToolLib EnhancedBiasWeighterLib
