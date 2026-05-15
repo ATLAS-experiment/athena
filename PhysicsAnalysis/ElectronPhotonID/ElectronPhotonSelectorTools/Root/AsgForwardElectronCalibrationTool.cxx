@@ -219,8 +219,17 @@ bool AsgForwardElectronCalibrationTool::getInputs(const xAOD::Electron* eg,
   inputs.push_back(static_cast<float>(track->phi()));
 
   // x5 = HGTD time
-  inputs.push_back(static_cast<float>(track->time()));
-
+   static const SG::AuxElement::Accessor<uint8_t> accValid("hasValidTime");
+   if (track && accValid.isAvailable(*track) && accValid(*track))
+     {
+       inputs.push_back(static_cast<float>(track->time()));
+     }
+   else
+     {
+       ATH_MSG_WARNING("No valid time for the track while doing track->time(): " );
+       inputs.push_back(-99);
+     }
+   
   // x6, x7 = ITk hit counts
   inputs.push_back(static_cast<float>(eg->trackParticleSummaryIntValue(xAOD::numberOfPixelHits)));
   inputs.push_back(static_cast<float>(eg->trackParticleSummaryIntValue(xAOD::numberOfSCTHits)));

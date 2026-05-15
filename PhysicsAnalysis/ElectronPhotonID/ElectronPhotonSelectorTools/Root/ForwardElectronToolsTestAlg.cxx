@@ -38,7 +38,6 @@ static double deltaR(double eta1, double phi1, double eta2, double phi2) {
 StatusCode ForwardElectronToolsTestAlg::execute(const EventContext& ctx) const
 {
     ++m_nEvents;
-    //    const EventContext& ctx = getContext();
 
     SG::ReadHandle<xAOD::ElectronContainer> electrons(m_electronKey, ctx);
     if (!electrons.isValid()) return StatusCode::SUCCESS;
@@ -46,19 +45,19 @@ StatusCode ForwardElectronToolsTestAlg::execute(const EventContext& ctx) const
     SG::ReadHandle<xAOD::TruthParticleContainer> truthParticles(m_truthKey, ctx);
 
     // Skip events with no forward electrons
-    int nFwd = 0;
+
+    std::vector<const xAOD::Electron*> fwd_electrons;
     for (const xAOD::Electron* el : *electrons) {
         const xAOD::CaloCluster* cl = el->caloCluster();
-        if (cl && std::abs(cl->eta()) > 2.5 && std::abs(cl->eta()) <= 4.0) ++nFwd;
+        if (cl && std::abs(cl->eta()) > 2.5 && std::abs(cl->eta()) <= 4.0)
+	  {
+	    fwd_electrons.push_back(el);
+	  }
     }
-    if (nFwd == 0) return StatusCode::SUCCESS;
+    if (fwd_electrons.size() == 0) return StatusCode::SUCCESS;
 
-    for (const xAOD::Electron* el : *electrons) {
+    for (const xAOD::Electron* el : fwd_electrons) {
         const xAOD::CaloCluster* cluster = el->caloCluster();
-        if (!cluster) continue;
-        const double absEta = std::abs(cluster->eta());
-        if (absEta <= 2.5 || absEta > 4.0) continue;
-
         const xAOD::TrackParticle* track = el->trackParticle();
         if (!track) continue;
 
@@ -150,39 +149,42 @@ StatusCode ForwardElectronToolsTestAlg::execute(const EventContext& ctx) const
         // =====================================================================
         // Print in parseable format
         // =====================================================================
-        ATH_MSG_INFO("FWDEL_START");
-        ATH_MSG_INFO("  raw_pT=" << calo_pt/1000.
-            << " calib_pT=" << calibPt/1000.
-            << " truth_pT=" << truthPt
-            << " score_cpp=" << score
-            << " L=" << isLoose << " M=" << isMedium << " T=" << isTight);
-        ATH_MSG_INFO("  calo_eta=" << calo_eta
-            << " calo_phi=" << calo_phi
-            << " track_eta=" << track_eta
-            << " track_phi=" << track_phi
-            << " time=" << hgtd_time
-            << " pixels=" << pixels
-            << " strips=" << strips);
-        ATH_MSG_INFO("  ENG_FRAC_MAX=" << ENG_FRAC_MAX
-            << " LONGITUDINAL=" << LONGITUDINAL
-            << " SECOND_LAMBDA=" << SECOND_LAMBDA
-            << " LATERAL=" << LATERAL
-            << " SECOND_R=" << SECOND_R
-            << " CENTER_LAMBDA=" << CENTER_LAMBDA
-            << " SECOND_ENG_DENS=" << SECOND_ENG_DENS);
-        ATH_MSG_INFO("  delta_eta2=" << delta_eta2
-            << " delta_phi2=" << delta_phi2
-            << " delta_phi_rescaled2=" << delta_phi_rescaled2
-            << " delta_phi_last=" << delta_phi_last);
-        ATH_MSG_INFO("  calo_frac_EM_1=" << frac_EM_1
-            << " calo_frac_EM_2=" << frac_EM_2
-            << " calo_frac_EM_3=" << frac_EM_3
-            << " calo_frac_HAD_0=" << frac_HAD_0
-            << " calo_frac_HAD_1=" << frac_HAD_1
+	if (msgLvl(MSG::DEBUG))
+	  {
+	    ATH_MSG_DEBUG("FWDEL_START");
+	    ATH_MSG_DEBUG("  raw_pT=" << calo_pt/1000.
+			 << " calib_pT=" << calibPt/1000.
+			 << " truth_pT=" << truthPt
+			 << " score_cpp=" << score
+			 << " L=" << isLoose << " M=" << isMedium << " T=" << isTight);
+	    ATH_MSG_DEBUG("  calo_eta=" << calo_eta
+			 << " calo_phi=" << calo_phi
+			 << " track_eta=" << track_eta
+			 << " track_phi=" << track_phi
+			 << " time=" << hgtd_time
+			 << " pixels=" << pixels
+			 << " strips=" << strips);
+	    ATH_MSG_DEBUG("  ENG_FRAC_MAX=" << ENG_FRAC_MAX
+			 << " LONGITUDINAL=" << LONGITUDINAL
+			 << " SECOND_LAMBDA=" << SECOND_LAMBDA
+			 << " LATERAL=" << LATERAL
+			 << " SECOND_R=" << SECOND_R
+			 << " CENTER_LAMBDA=" << CENTER_LAMBDA
+			 << " SECOND_ENG_DENS=" << SECOND_ENG_DENS);
+	    ATH_MSG_DEBUG("  delta_eta2=" << delta_eta2
+			 << " delta_phi2=" << delta_phi2
+			 << " delta_phi_rescaled2=" << delta_phi_rescaled2
+			 << " delta_phi_last=" << delta_phi_last);
+	    ATH_MSG_DEBUG("  calo_frac_EM_1=" << frac_EM_1
+			 << " calo_frac_EM_2=" << frac_EM_2
+			 << " calo_frac_EM_3=" << frac_EM_3
+			 << " calo_frac_HAD_0=" << frac_HAD_0
+			 << " calo_frac_HAD_1=" << frac_HAD_1
             << " calo_frac_HAD_2=" << frac_HAD_2
-            << " calo_frac_HAD_3=" << frac_HAD_3);
-        ATH_MSG_INFO("  calo_pt=" << calo_pt);
-        ATH_MSG_INFO("FWDEL_END");
+			 << " calo_frac_HAD_3=" << frac_HAD_3);
+	    ATH_MSG_DEBUG("  calo_pt=" << calo_pt);
+	    ATH_MSG_DEBUG("FWDEL_END");
+	  }
     }
     return StatusCode::SUCCESS;
 }
@@ -200,4 +202,3 @@ StatusCode ForwardElectronToolsTestAlg::finalize()
     return StatusCode::SUCCESS;
 }
 
-//DECLARE_COMPONENT(ForwardElectronToolsTestAlg)

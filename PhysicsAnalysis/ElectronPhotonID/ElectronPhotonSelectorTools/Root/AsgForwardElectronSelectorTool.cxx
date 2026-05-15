@@ -422,17 +422,8 @@ AsgForwardElectronSelectorTool::calculateWithCalibPt(const EventContext& /*ctx*/
     return false;
   }
 
-  // Step 1 - calibration of pT
+  // Step 1 - Usage of allready calibrated pT
   calibPt=eg->pt();
-  /*    calibPt = m_calibTool->calibrate(ctx, eg);
-      if (calibPt < 0.) return false;
-      
-      const int ptBin = getPtBin(calibPt);
-      if (ptBin < 0) {
-	ATH_MSG_WARNING("Calibrated pT=" << calibPt / 1000. << " GeV out of range.");
-	return false;
-      }
-      }*/
 
   // Step 2 - extract inputs with LR decorrelation
   std::vector<double> inputs;
@@ -521,7 +512,16 @@ bool AsgForwardElectronSelectorTool::getInputs(const xAOD::Electron* eg,
   inputs.push_back(static_cast<float>(track->phi()));
 
   // x5 = HGTD time
-  inputs.push_back(static_cast<float>(track->time()));
+  static const SG::AuxElement::Accessor<uint8_t> accValid("hasValidTime");
+  if (track && accValid.isAvailable(*track) && accValid(*track))
+    {
+      inputs.push_back(static_cast<float>(track->time()));
+    }
+  else
+    {
+      ATH_MSG_WARNING("No valid time for the track while doing track->time(): " );
+      inputs.push_back(-99);
+    }
 
   // x6, x7 = ITk hit counts
   inputs.push_back(static_cast<float>(eg->trackParticleSummaryIntValue(xAOD::numberOfPixelHits)));
