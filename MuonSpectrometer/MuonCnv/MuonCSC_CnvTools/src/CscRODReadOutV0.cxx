@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CscRODReadOutV0.h"
+#include <stdexcept>
 
 // constructor
 CscRODReadOutV0::CscRODReadOutV0() :
@@ -90,6 +91,9 @@ double CscRODReadOutV0::findCharge() {
           continue;
         }
         if (amp[i] > 0) n++;
+    }
+    if (n == 0)[[unlikely]]{
+      throw std::runtime_error("CscRODReadOutV0::findCharge: denominator 'n' is zero.");
     }
     adcCount = adcCount / n;
 
