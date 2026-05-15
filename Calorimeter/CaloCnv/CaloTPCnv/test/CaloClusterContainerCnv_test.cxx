@@ -30,7 +30,6 @@
 #include <cassert>
 
 
-#include "AthenaPoolCnvSvc/Compressor.h"
 #include "CaloClusterContainerCnvTest_p7.icc"
 #include "CaloClusterContainerCnvTest_p6.icc"
 

@@ -11,7 +11,7 @@
  *
  */
 
-#include "AthenaPoolCnvSvc/Compressor.h"
+#include "CxxUtils/Compressor.h"
 #include <bit>
 using namespace std;
 
@@ -108,33 +108,33 @@ void Compressor::expandToFloat(const std::vector<unsigned int> & vi, std::vector
         if (vi.empty())
           return;
 
-	std::vector<unsigned int>::const_iterator i=vi.begin();
-	
-	int format=(*i); ++i;
-	m_sign= 1 & format;
-//	if (m_sign) cout<<"Sign was neglected"<<endl;
-	format=format>>1;
-	m_bits= 63 & format; 
-//	cout<<"Uncompressing "<<m_bits<<" bits!"<<endl;
-	unsigned int vecs=(format>>6)&0xfffffff;
-//	cout<<"vec size: "<<vecs<<endl;
-	int bshift=32-m_bits;
-	
-	vf.reserve(vi.size()*m_bits/16+17); //this is roughly. can be made precisse. depends on sign stripping too.
-	
-	int L;
-	if (m_sign) L=m_bits-1; else L=m_bits;  
-	int CP=0; int FP=0; int REM=0;
-	unsigned int V=0xffffffff>>(32-L); unsigned int R=0;
-	unsigned int ui(*i);
+        std::vector<unsigned int>::const_iterator i=vi.begin();
 
-	
-	while (vecs){
-		FP = CP + L;	// Future point = Current point + lenght 
-		if (FP<=32){	// all of it is inside this integer 
-			R = ( ui >> (32-FP) ) & V;
-			R <<= bshift;
-			vf.push_back(std::bit_cast<float>(R)); 
+        int format=(*i); ++i;
+        m_sign= 1 & format;
+//      if (m_sign) cout<<"Sign was neglected"<<endl;
+        format=format>>1;
+        m_bits= 63 & format; 
+//      cout<<"Uncompressing "<<m_bits<<" bits!"<<endl;
+        unsigned int vecs=(format>>6)&0xfffffff;
+//      cout<<"vec size: "<<vecs<<endl;
+        int bshift=32-m_bits;
+
+        vf.reserve(vi.size()*m_bits/16+17); //this is roughly. can be made precisse. depends on sign stripping too.
+
+        int L;
+        if (m_sign) L=m_bits-1; else L=m_bits;  
+        int CP=0; int FP=0; int REM=0;
+        unsigned int V=0xffffffff>>(32-L); unsigned int R=0;
+        unsigned int ui(*i);
+
+
+        while (vecs){
+                FP = CP + L;    // Future point = Current point + lenght 
+                if (FP<=32){    // all of it is inside this integer 
+                        R = ( ui >> (32-FP) ) & V;
+                        R <<= bshift;
+                        vf.push_back(std::bit_cast<float>(R)); 
                         if (FP < 32)
                           CP=FP;
                         else {
@@ -142,19 +142,19 @@ void Compressor::expandToFloat(const std::vector<unsigned int> & vi, std::vector
                           ++i;
                           ui = (*i); // take next integer
                         }
-		}
-		else{			// part of the float is in the next integer
-			REM = FP - 32;	// Remainder = Future point - 32
-			R = ( ui & (0xffffffff >> CP) ) << REM; // find first part
-			++i;
-			ui = (*i); // take next integer
-			R |=  ui >> (32-REM) ;
-			R <<= bshift;
-			if (m_sign) R &= 0x7fffffff;
-			vf.push_back(std::bit_cast<float>(R));  
-			CP = REM;	// move Current point
-		}
-		--vecs;
-	}
-	return;
+                }
+                else{                   // part of the float is in the next integer
+                        REM = FP - 32;  // Remainder = Future point - 32
+                        R = ( ui & (0xffffffff >> CP) ) << REM; // find first part
+                        ++i;
+                        ui = (*i); // take next integer
+                        R |=  ui >> (32-REM) ;
+                        R <<= bshift;
+                        if (m_sign) R &= 0x7fffffff;
+                        vf.push_back(std::bit_cast<float>(R));  
+                        CP = REM;       // move Current point
+                }
+                --vecs;
+        }
+        return;
 }

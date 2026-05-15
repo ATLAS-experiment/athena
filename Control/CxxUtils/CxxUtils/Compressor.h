@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -12,8 +12,8 @@
  */
 
 
-#ifndef ATHENAPOOLCNVSVC_COMPRESSOR_H
-#define ATHENAPOOLCNVSVC_COMPRESSOR_H
+#ifndef CXXUTILS_COMPRESSOR_H
+#define CXXUTILS_COMPRESSOR_H
  
 // TO DO :
 // add double to int compressor
@@ -68,4 +68,4 @@ private:
 	bool m_bitStrip;
 };
 
-#endif // not ATHENAPOOLCNVSVC_COMPRESSOR_H
+#endif // not CXXUTILS_COMPRESSOR_H
