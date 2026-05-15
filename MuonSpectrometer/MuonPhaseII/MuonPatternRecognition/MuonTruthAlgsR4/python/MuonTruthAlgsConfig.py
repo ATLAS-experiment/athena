@@ -161,22 +161,6 @@ def MuonTruthObjCreatorsCfg(flags, useSDO=True):
     result.merge(TruthHitSummaryAlgCfg(flags))
     return result
 
-# Fragment for algs associating reco objects to truth objects
-def MuonRecoTruthAssocCfg(flags, useSDO=True, suffix = ""):
-    result = ComponentAccumulator()
-    if not flags.Muon.setupTruthAlgorithms:
-        return result
-
-    if useSDO:
-        result.merge(TruthHitAssociationCfg(flags, suffix=suffix))
-
-    result.merge(RecoSegmentTruthAssocCfg(flags, name=f"MuonSegmentsFromR4TruthMatching{suffix}",
-                                                 SegmentKey="MuonSegmentsFromR4"))
-
-    from MuonObjectMarker.ObjectMarkerConfig import TruthMeasMarkerAlgCfg
-    result.merge(TruthMeasMarkerAlgCfg(flags, name = f"TruthMeasMarkerAlg{suffix}"))
-    return result
-
 @AccumulatorCache
 def MuonTruthAlgsCfg(flags, useSDO=True, recoAssoc = True):
     result = ComponentAccumulator()
@@ -185,8 +169,8 @@ def MuonTruthAlgsCfg(flags, useSDO=True, recoAssoc = True):
     
     result.merge(MuonTruthObjCreatorsCfg(flags, useSDO=useSDO))
 
-    if recoAssoc:
-        result.merge(MuonRecoTruthAssocCfg(flags, useSDO=useSDO))
+    if useSDO and recoAssoc:
+        result.merge(TruthHitAssociationCfg(flags))
    
     # result.merge(MuonTruthHitCountsAlgCfg(flags))
     #### Disable for the moment because tracking geometry explodes for R4
