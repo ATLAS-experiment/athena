@@ -15,6 +15,7 @@ StatusCode
 TrigDec::TrigDecisionMakerValidator::initialize() {
   ATH_CHECK( m_tdt.retrieve() );
   ATH_CHECK( m_navigationReadHandleKey.initialize(m_doHLT && m_edmVersion >= 3) );
+  ATH_CHECK( m_CTPResultKeyIn.initialize( m_checkForValidCTPResult ) );
   return StatusCode::SUCCESS;
 }
 
@@ -35,7 +36,18 @@ StatusCode TrigDec::TrigDecisionMakerValidator::execute(const EventContext& cont
 
   ATH_MSG_DEBUG("Validator is checking this event.");
 
-  if (m_doL1) {
+  // Need to potentially skip the checks on L1 when using xAOD::CTPResult (see ATR-32736)
+  bool validL1Check = true;
+  if (m_checkForValidCTPResult) {
+    SG::ReadHandle<xAOD::CTPResult> ctpResult{m_CTPResultKeyIn, context};
+    ATH_CHECK(ctpResult.isValid());
+    if (!ctpResult->checkForIssues().empty()) { // If not empty then issues have are present for xAOD::CTPResult
+      ATH_MSG_WARNING("Issues seen with L1 information stored in xAOD::CTPResult, skipping L1 checks...");
+      validL1Check = false;
+    }
+  }
+
+  if (m_doL1 && validL1Check) {
 
     const Trig::ChainGroup* l1group = m_tdt->getChainGroup("L1_.*");
     const std::vector<std::string> items = l1group->getListOfTriggers();
