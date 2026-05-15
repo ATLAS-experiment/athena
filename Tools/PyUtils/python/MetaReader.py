@@ -727,8 +727,21 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                                         unique_amitags.add(
                                             "_".join({tag for tag in amitags.split("_") if tag})
                                         )
+                                    # Remove tags that are parents - are contained in other tags
+                                    # Such that ["s3681","s3681_d1485"] keeps only the latter
+                                    parent_tags = []
+                                    for atag in unique_amitags:
+                                        if any(atag+'_' in x for x in unique_amitags if x != atag):
+                                            parent_tags += [atag]
+                                    for atag in parent_tags:
+                                        # Do not remove the last tag!
+                                        if len(unique_amitags)>1:
+                                            msg.warn(f"Removing parent AMI tag {atag}")
+                                            unique_amitags.remove(atag)
                                     if len(unique_amitags) == 1:
                                         maybe_ok = True
+                                        # Make sure we keep the one we want to keep
+                                        value.insert(0,list(unique_amitags)[0])
                                 elif key == "beam_energy":
                                     # handle duplicates like: ['6500000', '6500000.0'] or [3, "3"]
                                     unique_energies = set()
