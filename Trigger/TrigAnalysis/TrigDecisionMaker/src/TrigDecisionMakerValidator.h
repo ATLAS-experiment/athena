@@ -9,6 +9,7 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "xAODTrigger/TrigCompositeContainer.h"
 #include "TrigDecisionTool/TrigDecisionTool.h"
+#include "xAODTrigger/CTPResult.h"
 
 namespace TrigDec {
 
@@ -41,6 +42,9 @@ namespace TrigDec {
 
     SG::ReadHandleKey<TrigCompositeUtils::DecisionContainer> m_navigationReadHandleKey{this, "NavigationKey", "For the Run 3 trigger, what is the primary navigation container?"};
 
+    // Need to potentially skip the checks on L1 when using xAOD::CTPResult (see ATR-32736)
+    Gaudi::Property<bool> m_checkForValidCTPResult{this, "checkForValidCTPResult", false, "Flag whether to check if the xAOD::CTPResult object used is valid"};
+    SG::ReadHandleKey<xAOD::CTPResult> m_CTPResultKeyIn{this, "CTPResult", "CTPResult", "Key to retrieve the L1 xAOD CTP result from SG" };
   };
 }
 
