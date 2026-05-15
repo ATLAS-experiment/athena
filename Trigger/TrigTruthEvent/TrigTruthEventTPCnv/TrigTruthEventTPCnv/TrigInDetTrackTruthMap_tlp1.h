@@ -17,7 +17,7 @@
 #ifndef TRIGTRUTHEVENTTPCNV_TRIGINDETTRACK_TRUTH_MAP_TLP1_H
 #define TRIGTRUTHEVENTTPCNV_TRIGINDETTRACK_TRUTH_MAP_TLP1_H
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigTruthEventTPCnv/TrigInDetTrackTruthMap_p1.h"
 #include "TrigTruthEventTPCnv/TrigInDetTrackTruth_p1.h"

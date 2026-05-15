@@ -6,7 +6,7 @@
 #define CSCSTRIPPREPDATACONTAINERCNV_TLP1_H
 
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "CscStripPrepDataContainer_tlp1.h"
 
@@ -19,7 +19,7 @@
 #include <iostream>
 
 class CscStripPrepDataContainerCnv_tlp1
-   : public AthenaPoolTopLevelTPConverter<Muon::CscStripPrepDataContainerCnv_p1, Muon::CscStripPrepDataContainer_tlp1 >
+   : public TopLevelTPConverter<Muon::CscStripPrepDataContainerCnv_p1, Muon::CscStripPrepDataContainer_tlp1 >
 {
 public:
 

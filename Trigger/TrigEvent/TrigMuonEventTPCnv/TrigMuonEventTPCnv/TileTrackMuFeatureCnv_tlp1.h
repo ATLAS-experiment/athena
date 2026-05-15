@@ -17,7 +17,7 @@
 #ifndef TRIGMUONEVENTTPCNV_TILETRACKMUFEATURECNV_TLP1_H
 #define TRIGMUONEVENTTPCNV_TILETRACKMUFEATURECNV_TLP1_H
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigMuonEventTPCnv/TileTrackMuFeature_tlp1.h"
 
@@ -26,7 +26,7 @@
 #include "TrigMuonEventTPCnv/TileMuFeatureCnv_p1.h"
 #include "TrigInDetEventTPCnv/TrigInDetTrackCnv_p1.h"
 
-class TileTrackMuFeatureCnv_tlp1 : public AthenaPoolTopLevelTPConverter<TileTrackMuFeatureCnv_p1, TileTrackMuFeature_tlp1>  {
+class TileTrackMuFeatureCnv_tlp1 : public TopLevelTPConverter<TileTrackMuFeatureCnv_p1, TileTrackMuFeature_tlp1>  {
 
  public:
   TileTrackMuFeatureCnv_tlp1();

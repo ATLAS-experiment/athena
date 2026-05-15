@@ -11,7 +11,7 @@
 // @brief  Top Level converter for persistent Track Collection
 //
 //-----------------------------------------------------------------------------
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrackCollection_tlp2.h"
 
@@ -54,7 +54,7 @@
 
 
 class TrackCollectionCnv_tlp2
- : public AthenaPoolTopLevelTPConverter< TrackCollectionCnv_p2, Trk::TrackCollection_tlp2 >
+ : public TopLevelTPConverter< TrackCollectionCnv_p2, Trk::TrackCollection_tlp2 >
 {
 public:
 

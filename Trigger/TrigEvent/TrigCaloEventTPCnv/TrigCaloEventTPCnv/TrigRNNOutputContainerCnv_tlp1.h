@@ -16,14 +16,14 @@
 #ifndef  TRIGEVENTTPCNV_TRIGRNNOUTPUTCONTAINER_CNV_TLP1_H
 #define  TRIGEVENTTPCNV_TRIGRNNOUTPUTCONTAINER_CNV_TLP1_H
  
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigCaloEventTPCnv/TrigRNNOutputContainer_tlp1.h"
 
 #include "TrigCaloEventTPCnv/TrigRNNOutputContainerCnv_p1.h"
 #include "TrigCaloEventTPCnv/TrigRNNOutputCnv_p1.h" 
  
-class TrigRNNOutputContainerCnv_tlp1 : public AthenaPoolTopLevelTPConverter<TrigRNNOutputContainerCnv_p1, TrigRNNOutputContainer_tlp1> {
+class TrigRNNOutputContainerCnv_tlp1 : public TopLevelTPConverter<TrigRNNOutputContainerCnv_p1, TrigRNNOutputContainer_tlp1> {
 
  public:
 

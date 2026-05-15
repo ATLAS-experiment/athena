@@ -16,7 +16,7 @@
 #include "JetTagInfoTPCnv/SVInfoPlusCnv_p1.h"
 
 /// Normal includes below.
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelExtTPConverter.h"
+#include "TPTools/TopLevelTPCnvBaseP.h"
 
 #include "JetTagInfoTPCnv/JetTagInfo_tlp3.h"
 
@@ -58,7 +58,7 @@ namespace Analysis {
 
   // Top level continer converter for teh JetTagInfo subclasses.
   class JetTagInfoCnv_tlp3
-    : public AthenaPoolTopLevelExtTPConverter<JetTagInfo_tlp3> {
+    : public TopLevelTPCnvBaseP<JetTagInfo_tlp3> {
 
     public:
 

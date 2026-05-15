@@ -35,7 +35,7 @@ public:
 
     // Must initialize ID helpers
     virtual StatusCode initialize();
-    virtual AthenaPoolTopLevelTPCnvBase*  getTopLevelTPCnv() { return &m_TPConverter; }
+    virtual TopLevelTPCnvBase*  getTopLevelTPCnv() { return &m_TPConverter; }
         
 private:
     StoreGateSvc*                   m_storeGate{};

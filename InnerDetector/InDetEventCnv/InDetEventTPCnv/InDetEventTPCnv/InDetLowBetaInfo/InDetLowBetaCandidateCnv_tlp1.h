@@ -5,13 +5,13 @@
 #ifndef InDetLowBetaCandidateCnv_TLP1_H
 #define InDetLowBetaCandidateCnv_TLP1_H
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "InDetLowBetaInfo/InDetLowBetaCandidate.h"
 #include "InDetEventTPCnv/InDetLowBetaInfo/InDetLowBetaCandidate_tlp1.h"
 #include "InDetEventTPCnv/InDetLowBetaInfo/InDetLowBetaCandidateCnv_p1.h"
 
-class InDetLowBetaCandidateCnv_tlp1 : public AthenaPoolTopLevelTPConverter<InDetLowBetaCandidateCnv_p1, InDetLowBetaCandidate_tlp1> {
+class InDetLowBetaCandidateCnv_tlp1 : public TopLevelTPConverter<InDetLowBetaCandidateCnv_p1, InDetLowBetaCandidate_tlp1> {
   
  public:
   InDetLowBetaCandidateCnv_tlp1();

@@ -28,7 +28,7 @@
 #include "TrigInDetEventTPCnv/TrigInDetTrackCnv_p1.h"
 #include "TrigInDetEventTPCnv/TrigInDetTrackFitParCnv_p1.h"
 
-class TrigInDetTrackTruthMapCnv_tlp1 : public AthenaPoolTopLevelTPConverter<TrigInDetTrackTruthMapCnv_p1, TrigInDetTrackTruthMap_tlp1>  {
+class TrigInDetTrackTruthMapCnv_tlp1 : public TopLevelTPConverter<TrigInDetTrackTruthMapCnv_p1, TrigInDetTrackTruthMap_tlp1>  {
 
  public:
   TrigInDetTrackTruthMapCnv_tlp1();

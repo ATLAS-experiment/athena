@@ -14,12 +14,12 @@
 #ifndef TRIGCALOEVENTTPCNV_TRIGTAUCLUSTERDETAILSCNV_TLP1_H
 #define TRIGCALOEVENTTPCNV_TRIGTAUCLUSTERDETAILSCNV_TLP1_H
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigCaloEventTPCnv/TrigTauClusterDetails_tlp1.h"
 #include "TrigCaloEventTPCnv/TrigTauClusterDetailsCnv_p1.h"
 
-class TrigTauClusterDetailsCnv_tlp1 : public AthenaPoolTopLevelTPConverter<TrigTauClusterDetailsCnv_p1, TrigTauClusterDetails_tlp1>
+class TrigTauClusterDetailsCnv_tlp1 : public TopLevelTPConverter<TrigTauClusterDetailsCnv_p1, TrigTauClusterDetails_tlp1>
 {
 
  public:

@@ -5,7 +5,7 @@
 #ifndef TRACKPARTICLECONTAINER_CNV_TLP2_REC_H
 #define TRACKPARTICLECONTAINER_CNV_TLP2_REC_H
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrackParticleContainer_tlp2.h"
 
@@ -91,7 +91,7 @@
 
 #include "TrackParticleTPCnv/DummyDetElementSurfaceCnv_p1.h"
 
-class TrackParticleContainerCnv_tlp2 : public AthenaPoolTopLevelTPConverter< TrackParticleContainerCnv_p2, Rec::TrackParticleContainer_tlp2 >
+class TrackParticleContainerCnv_tlp2 : public TopLevelTPConverter< TrackParticleContainerCnv_p2, Rec::TrackParticleContainer_tlp2 >
 {
 
 public:
@@ -167,7 +167,7 @@ template <>
 class T_TPCnv<Rec::TrackParticleContainer, Rec::TrackParticleContainer_tlp2 >
     : public TrackParticleContainerCnv_tlp2{
 public:
-  // ??? Maybe this should be moved up to AthenaPoolTopLevelTPConverter...
+  // ??? Maybe this should be moved up to TopLevelTPConverter...
     virtual void persToTrans (const Rec::TrackParticleContainer_tlp2* pers,
         Rec::TrackParticleContainer* trans,
         MsgStream& msg);

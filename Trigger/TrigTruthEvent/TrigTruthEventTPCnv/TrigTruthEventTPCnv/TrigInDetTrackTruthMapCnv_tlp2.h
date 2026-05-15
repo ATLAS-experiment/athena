@@ -25,7 +25,7 @@
 #include "GeneratorObjectsTPCnv/HepMcParticleLinkCnv_p1.h"
 
 
-class TrigInDetTrackTruthMapCnv_tlp2 : public AthenaPoolTopLevelTPConverter<TrigInDetTrackTruthMapCnv_p1, TrigInDetTrackTruthMap_tlp2>  {
+class TrigInDetTrackTruthMapCnv_tlp2 : public TopLevelTPConverter<TrigInDetTrackTruthMapCnv_p1, TrigInDetTrackTruthMap_tlp2>  {
 
  public:
   TrigInDetTrackTruthMapCnv_tlp2();

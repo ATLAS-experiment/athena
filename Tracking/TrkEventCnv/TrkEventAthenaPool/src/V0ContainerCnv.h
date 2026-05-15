@@ -51,7 +51,7 @@ protected:
   virtual V0Container_PERS *createPersistent( V0Container *transCont) override;
   virtual V0Container      *createTransient(const Token* token) override;
 
-  AthenaPoolTopLevelTPCnvBase*	getTopLevelTPCnv() { return &m_TPConverter; }
+  TopLevelTPCnvBase*	getTopLevelTPCnv() { return &m_TPConverter; }
 
  private:
   void    updateLog(); //!< This method modifies m_log to indicate the current key being converted

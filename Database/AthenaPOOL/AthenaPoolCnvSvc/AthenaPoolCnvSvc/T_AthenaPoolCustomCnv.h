@@ -19,7 +19,7 @@
 
 // class TopLevelTPCnvBase;
 // need the TopLevelTPCnvBase typedef still
-#include "AthenaPoolTopLevelTPCnvBase.h"
+#include "TPTools/TopLevelTPCnvBase.h"
 
 // forward declarations:
 template <class T, class P> class T_AthenaPoolExtendingCnv;

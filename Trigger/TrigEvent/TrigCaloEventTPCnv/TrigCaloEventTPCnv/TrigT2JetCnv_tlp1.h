@@ -18,14 +18,14 @@
 #ifndef  TRIGCALOEVENTTPCNV_TRIGT2JETCNV_TLP1_H
 #define  TRIGCALOEVENTTPCNV_TRIGT2JETCNV_TLP1_H
  
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigCaloEvent/TrigT2Jet.h"
 #include "TrigCaloEventTPCnv/TrigT2Jet_tlp1.h"
 #include "TrigCaloEventTPCnv/TrigT2JetCnv_p1.h"   
 
  
-class TrigT2JetCnv_tlp1 : public AthenaPoolTopLevelTPConverter< TrigT2JetCnv_p1, TrigT2Jet_tlp1 >
+class TrigT2JetCnv_tlp1 : public TopLevelTPConverter< TrigT2JetCnv_p1, TrigT2Jet_tlp1 >
 {
  
  public:

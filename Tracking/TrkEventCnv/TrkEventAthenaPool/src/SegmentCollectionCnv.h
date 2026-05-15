@@ -48,7 +48,7 @@ protected:
   virtual SegmentCollection_PERS *createPersistent( Trk::SegmentCollection *transCont) override;
   virtual Trk::SegmentCollection *createTransient(const Token* token) override;
 
-  virtual AthenaPoolTopLevelTPCnvBase* getTopLevelTPCnv() override { return &m_TPConverterForPER; }
+  virtual TopLevelTPCnvBase* getTopLevelTPCnv() override { return &m_TPConverterForPER; }
 
 private:
   void    initializeOldExtConverters();  //!< setup old extended converters when reading old data

@@ -15,13 +15,13 @@
 #ifndef  TRIGMUONEVENTTPCNV_TILETRACKMUFEATURECONTAINER_CNV_TLP1_H
 #define  TRIGMUONEVENTTPCNV_TILETRACKMUFEATURECONTAINER_CNV_TLP1_H
  
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 #include "TrigMuonEventTPCnv/TileTrackMuFeatureContainer_tlp1.h"
 #include "TrigMuonEventTPCnv/TileTrackMuFeatureContainerCnv_p1.h"   
 #include "TrigMuonEventTPCnv/TileTrackMuFeatureCnv_p1.h"   
 #include "TrigMuonEventTPCnv/TileTrackMuFeatureCnv_p2.h"
  
-class TileTrackMuFeatureContainerCnv_tlp1 : public AthenaPoolTopLevelTPConverter< TileTrackMuFeatureContainerCnv_p1, TileTrackMuFeatureContainer_tlp1 >
+class TileTrackMuFeatureContainerCnv_tlp1 : public TopLevelTPConverter< TileTrackMuFeatureContainerCnv_p1, TileTrackMuFeatureContainer_tlp1 >
 {
  
  public:

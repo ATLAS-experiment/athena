@@ -14,7 +14,7 @@
  * @author Mark Owen <markowen@cern.ch>
  */
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigMuonEventTPCnv/TrigMuonEFIsolationCnv_p1.h"
 #include "TrigMuonEvent/TrigMuonEFIsolationContainer.h"

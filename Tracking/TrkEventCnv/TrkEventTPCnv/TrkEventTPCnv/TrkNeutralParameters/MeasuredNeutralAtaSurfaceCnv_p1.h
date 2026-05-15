@@ -36,7 +36,7 @@ public:
   void persToTrans( const Trk::MeasuredAtaSurface_p1 *, ATA_SURFACE *, MsgStream & );
   void transToPers( const ATA_SURFACE *, Trk::MeasuredAtaSurface_p1 *, MsgStream & );
 
-  virtual void	initPrivateConverters( AthenaPoolTopLevelTPCnvBase *topCnv ) {
+  virtual void	initPrivateConverters( TopLevelTPCnvBase *topCnv ) {
      m_surfaceCnv.setTopConverter(topCnv, 0);
   }
   

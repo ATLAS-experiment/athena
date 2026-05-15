@@ -8,13 +8,13 @@
 #ifndef JETEVENTTPCNV_JETKEYDESCRIPTORCOLLECTIONCNV_TLP1
 #define JETEVENTTPCNV_JETKEYDESCRIPTORCOLLECTIONCNV_TLP1
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 #include "JetEventTPCnv/JetKeyDescriptorCollection_tlp1.h"
 
 #include "JetEventTPCnv/JetKeyDescriptorCnv_p1.h"
 #include "JetEventTPCnv/JetKeyDescriptorCollectionCnv_p1.h"
 
-class JetKeyDescriptorCollectionCnv_tlp1 : public AthenaPoolTopLevelTPConverter<JetKeyDescriptorCollectionCnv_p1, JetKeyDescriptorCollection_tlp1>
+class JetKeyDescriptorCollectionCnv_tlp1 : public TopLevelTPConverter<JetKeyDescriptorCollectionCnv_p1, JetKeyDescriptorCollection_tlp1>
 {
  public:
   JetKeyDescriptorCollectionCnv_tlp1 (void);

@@ -45,7 +45,7 @@ public:
   virtual void transToPers(const Analysis::TauPi0Candidate *transObj, TauPi0Candidate_p1 *persObj, MsgStream &log);
 
   /// make sure that the private converter is known
-  virtual void initPrivateConverters( AthenaPoolTopLevelTPCnvBase *topCnv )
+  virtual void initPrivateConverters( TopLevelTPCnvBase *topCnv )
   {
          m_vecTauPi0ClusterCnv.setTopConverter( topCnv, 0 );
   }

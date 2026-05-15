@@ -19,7 +19,7 @@
 #ifndef TAUEVENTTPCNV_TAUDETAILSCONTAINERCNV_TLP1_Ha
 #define TAUEVENTTPCNV_TAUDETAILSCONTAINERCNV_TLP1_Ha
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 #include "TauDetailsContainer_tlp1.h"
 #include "TauDetailsContainerCnv_p1.h"
 #include "tauEventTPCnv/TauCommonDetailsCnv_p1.h"
@@ -36,7 +36,7 @@
 
 ///Tau details container converter
 class TauDetailsContainerCnv_tlp1:
-    public AthenaPoolTopLevelTPConverter<
+    public TopLevelTPConverter<
     TauDetailsContainerCnv_p1, 
     TauDetailsContainer_tlp1>
 {

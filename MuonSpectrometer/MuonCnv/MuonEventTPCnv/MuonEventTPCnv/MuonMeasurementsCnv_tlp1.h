@@ -6,7 +6,7 @@
 #define MUONMEASUREMENTSCNV_TLP1_H
 
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelExtTPConverter.h"
+#include "TPTools/TopLevelTPCnvBaseP.h"
 
 #include "MuonMeasurements_tlp1.h"
 
@@ -24,7 +24,7 @@
 #include <iostream>
 
 class MuonMeasurementsCnv_tlp1
-   : public AthenaPoolTopLevelExtTPConverter< TPCnv::MuonMeasurements_tlp1 >
+   : public TopLevelTPCnvBaseP< TPCnv::MuonMeasurements_tlp1 >
 {
 public:
 

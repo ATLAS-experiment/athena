@@ -30,7 +30,7 @@ public:
     virtual void persToTrans( const Rec :: TrackParticle_p3 *persObj,  Rec :: TrackParticle    *transObj, MsgStream &log );
     virtual void transToPers( const Rec :: TrackParticle    *transObj, Rec :: TrackParticle_p3 *persObj,  MsgStream &log );
 
-    virtual void initPrivateConverters( AthenaPoolTopLevelTPCnvBase * /**topCnv*/ ) {
+    virtual void initPrivateConverters( TopLevelTPCnvBase * /**topCnv*/ ) {
       // Because we want to use a single convertor for all parameter types, we need to force the retrieval
       // of a convertor for TrackParameters. Can't just instantiate the right one (I think) because it needs
       // to be the exact convertor which belongs to the TL object, so that it has right place to store

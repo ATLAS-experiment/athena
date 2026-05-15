@@ -5,7 +5,7 @@
 #define CPMHitsCollectionCNV_TLP1_H
 
 // Gaudi/Athena include(s):
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigT1EventTPCnv/CPMHitsCollection_tlp1.h"
 #include "TrigT1EventTPCnv/CPMHitsCollectionCnv_p1.h"
@@ -20,7 +20,7 @@
  *          to do the T/P conversion before/after writing/reading the CPMHits
  *          object.
  */
-class CPMHitsCollectionCnv_tlp1 : public AthenaPoolTopLevelTPConverter< CPMHitsCollectionCnv_p1, CPMHitsCollection_tlp1 > {
+class CPMHitsCollectionCnv_tlp1 : public TopLevelTPConverter< CPMHitsCollectionCnv_p1, CPMHitsCollection_tlp1 > {
 
 public:
   CPMHitsCollectionCnv_tlp1();

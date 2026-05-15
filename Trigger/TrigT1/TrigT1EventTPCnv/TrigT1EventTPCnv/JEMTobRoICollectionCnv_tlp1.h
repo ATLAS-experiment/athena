@@ -5,7 +5,7 @@
 #define JEMTobRoICollectionCNV_TLP1_H
 
 // Gaudi/Athena include(s):
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigT1EventTPCnv/JEMTobRoICollection_tlp1.h"
 #include "TrigT1EventTPCnv/JEMTobRoICollectionCnv_p1.h"
@@ -20,7 +20,7 @@
  *          to do the T/P conversion before/after writing/reading the JEMTobRoI
  *          object.
  */
-class JEMTobRoICollectionCnv_tlp1 : public AthenaPoolTopLevelTPConverter< JEMTobRoICollectionCnv_p1, JEMTobRoICollection_tlp1 > {
+class JEMTobRoICollectionCnv_tlp1 : public TopLevelTPConverter< JEMTobRoICollectionCnv_p1, JEMTobRoICollection_tlp1 > {
 
 public:
   JEMTobRoICollectionCnv_tlp1();

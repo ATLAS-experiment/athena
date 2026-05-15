@@ -5,7 +5,7 @@
 #ifndef TRK_SEGMENTCOLLECTIONCNV_TLP2_H
 #define TRK_SEGMENTCOLLECTIONCNV_TLP2_H
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "SegmentCollection_tlp2.h"
 
@@ -37,7 +37,7 @@
 
 
 class SegmentCollectionCnv_tlp2
- : public AthenaPoolTopLevelTPConverter< SegmentCollectionCnv_p1, Trk::SegmentCollection_tlp2 >
+ : public TopLevelTPConverter< SegmentCollectionCnv_p1, Trk::SegmentCollection_tlp2 >
 {
 public:
 

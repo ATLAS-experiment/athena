@@ -31,7 +31,7 @@ protected:
   virtual EventBookkeeperCollection_PERS*  createPersistent (EventBookkeeperCollection* transCont);
   virtual EventBookkeeperCollection*     createTransient(const Token* token);
 
-  //  virtual AthenaPoolTopLevelTPCnvBase*  getTopLevelTPCnv() { return &m_TPConverter; }
+  //  virtual TopLevelTPCnvBase*  getTopLevelTPCnv() { return &m_TPConverter; }
 
  private:
   EventBookkeeperCollectionCnv_p1   m_TPConverterP1;

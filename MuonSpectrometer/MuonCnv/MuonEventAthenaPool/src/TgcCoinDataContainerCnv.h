@@ -40,7 +40,7 @@ public:
 
     // Must initialize ID helpers
     virtual StatusCode initialize();
-    virtual AthenaPoolTopLevelTPCnvBase*  getTopLevelTPCnv() { return &m_TPConverter_tlp3; }
+    virtual TopLevelTPCnvBase*  getTopLevelTPCnv() { return &m_TPConverter_tlp3; }
         
 private:
     // Not bothering with being able to read 'old' PRDs yet. Ed

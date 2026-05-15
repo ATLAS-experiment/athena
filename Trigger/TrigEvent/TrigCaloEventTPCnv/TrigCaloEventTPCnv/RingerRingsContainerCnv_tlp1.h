@@ -16,14 +16,14 @@
 #ifndef  TRIGCALOEVENTTPCNV_RINGERRINGSCONTAINER_CNV_TLP1_H
 #define  TRIGCALOEVENTTPCNV_RINGERRINGSCONTAINER_CNV_TLP1_H
  
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigCaloEventTPCnv/RingerRingsContainer_tlp1.h"
 
 #include "TrigCaloEventTPCnv/RingerRingsContainerCnv_p1.h"
 #include "TrigCaloEventTPCnv/RingerRingsCnv_p1.h" 
  
-class RingerRingsContainerCnv_tlp1 : public AthenaPoolTopLevelTPConverter<RingerRingsContainerCnv_p1, RingerRingsContainer_tlp1> {
+class RingerRingsContainerCnv_tlp1 : public TopLevelTPConverter<RingerRingsContainerCnv_p1, RingerRingsContainer_tlp1> {
 
  public:
 

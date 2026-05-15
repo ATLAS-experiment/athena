@@ -5,7 +5,7 @@
 #ifndef  V0CONTAINER_CNV_TLP2_TRK_H
 #define  V0CONTAINER_CNV_TLP2_TRK_H
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 #include "V0Container_tlp2.h"
 
 //-----------------------------------------
@@ -47,7 +47,7 @@
 //-----------------------------------------------------------------------------
 #include "TrkEventTPCnv/TrkTrack/TrackCnv_p12.h"
 
-class V0ContainerCnv_tlp2 : public AthenaPoolTopLevelTPConverter< V0ContainerCnv_p1, Trk::V0Container_tlp2 >
+class V0ContainerCnv_tlp2 : public TopLevelTPConverter< V0ContainerCnv_p1, Trk::V0Container_tlp2 >
 {
 
  public:

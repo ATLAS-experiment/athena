@@ -30,7 +30,7 @@ public:
     virtual void persToTrans( const Rec :: TrackParticle_p2 *persObj,  Rec :: TrackParticle    *transObj, MsgStream &log );
     virtual void transToPers( const Rec :: TrackParticle    *transObj, Rec :: TrackParticle_p2 *persObj,  MsgStream &log );
 
-    virtual void initPrivateConverters( AthenaPoolTopLevelTPCnvBase *topCnv ) {
+    virtual void initPrivateConverters( TopLevelTPCnvBase *topCnv ) {
         m_vecParametersBaseCnv.setTopConverter( topCnv, 0 );
     }
 

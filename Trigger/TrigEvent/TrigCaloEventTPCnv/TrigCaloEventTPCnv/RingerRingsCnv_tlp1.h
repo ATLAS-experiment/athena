@@ -17,12 +17,12 @@
 #ifndef TRIGCALOEVENTTPCNV_RINGERRINGSCNV_TLP1_H
 #define TRIGCALOEVENTTPCNV_RINGERRINGSCNV_TLP1_H
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigCaloEventTPCnv/RingerRings_tlp1.h"
 #include "TrigCaloEventTPCnv/RingerRingsCnv_p1.h"
 
-class RingerRingsCnv_tlp1 : public AthenaPoolTopLevelTPConverter<RingerRingsCnv_p1, RingerRings_tlp1> {
+class RingerRingsCnv_tlp1 : public TopLevelTPConverter<RingerRingsCnv_p1, RingerRings_tlp1> {
 
  public:
 

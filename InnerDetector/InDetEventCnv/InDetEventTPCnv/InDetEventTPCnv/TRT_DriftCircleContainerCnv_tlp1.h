@@ -6,7 +6,7 @@
 #define TRT_DRIFTCIRCLECONTAINERCNV_TLP1_H
 
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TRT_DriftCircleContainer_tlp1.h"
 
@@ -20,7 +20,7 @@
 #include <iostream>
 
 class TRT_DriftCircleContainerCnv_tlp1
-   : public AthenaPoolTopLevelTPConverter<InDet::TRT_DriftCircleContainerCnv_p1, InDet::TRT_DriftCircleContainer_tlp1 >
+   : public TopLevelTPConverter<InDet::TRT_DriftCircleContainerCnv_p1, InDet::TRT_DriftCircleContainer_tlp1 >
 {
 public:
 

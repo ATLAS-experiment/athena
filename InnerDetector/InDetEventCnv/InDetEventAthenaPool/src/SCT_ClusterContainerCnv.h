@@ -44,7 +44,7 @@ protected:
 
   // Must initialize ID helpers
   virtual StatusCode initialize() override;
-  virtual AthenaPoolTopLevelTPCnvBase*  getTopLevelTPCnv() { return &m_TPConverter; }
+  virtual TopLevelTPCnvBase*  getTopLevelTPCnv() { return &m_TPConverter; }
 };
 
 

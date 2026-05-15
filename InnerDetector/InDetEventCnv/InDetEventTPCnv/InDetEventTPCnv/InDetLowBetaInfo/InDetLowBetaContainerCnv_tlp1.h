@@ -5,14 +5,14 @@
 #ifndef  INDETLOWBETACONTAINER_CNV_TLP1_H
 #define  INDETLOWBETACONTAINER_CNV_TLP1_H
  
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "InDetEventTPCnv/InDetLowBetaInfo/InDetLowBetaContainer_tlp1.h"
 #include "InDetEventTPCnv/InDetLowBetaInfo/InDetLowBetaContainerCnv_p1.h"
 #include "InDetEventTPCnv/InDetLowBetaInfo/InDetLowBetaCandidateCnv_p1.h" 
  
 
-class InDetLowBetaContainerCnv_tlp1 : public AthenaPoolTopLevelTPConverter<InDetLowBetaContainerCnv_p1, InDetLowBetaContainer_tlp1> {
+class InDetLowBetaContainerCnv_tlp1 : public TopLevelTPConverter<InDetLowBetaContainerCnv_p1, InDetLowBetaContainer_tlp1> {
   
  public:
   
@@ -35,7 +35,7 @@ class T_TPCnv<InDet::InDetLowBetaContainer, InDetLowBetaContainer_tlp1>
 
  public:
 
-    // ??? Maybe this should be moved up to AthenaPoolTopLevelTPConverter...
+    // ??? Maybe this should be moved up to TopLevelTPConverter...
     virtual void persToTrans(const InDetLowBetaContainer_tlp1 *pers,
 			     InDet::InDetLowBetaContainer *trans,
 			     MsgStream& msg);

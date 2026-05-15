@@ -6,7 +6,7 @@
 #define MVFVXCONTAINER_CNV_TLP1_TRK_H
 
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "MVFVxContainer_tlp1.h"
 
@@ -17,7 +17,7 @@
 #include "TrkEventTPCnv/VxMultiVertex/MVFVxCandidateCnv_p1.h" 
 #include "TrkEventTPCnv/VxMultiVertex/MVFVxTrackAtVertexCnv_p1.h"
 
-class MVFVxContainerCnv_tlp1 : public AthenaPoolTopLevelTPConverter< MVFVxContainerCnv_p1, Trk::MVFVxContainer_tlp1 >
+class MVFVxContainerCnv_tlp1 : public TopLevelTPConverter< MVFVxContainerCnv_p1, Trk::MVFVxContainer_tlp1 >
 {
 
  public:
@@ -46,7 +46,7 @@ class T_TPCnv<MVFVxContainer, Trk::MVFVxContainer_tlp1 >
   : public MVFVxContainerCnv_tlp1
 {
 public:
-  // ??? Maybe this should be moved up to AthenaPoolTopLevelTPConverter...
+  // ??? Maybe this should be moved up to TopLevelTPConverter...
   virtual void persToTrans (const Trk::MVFVxContainer_tlp1* pers,
                             MVFVxContainer* trans,
                             MsgStream& msg);

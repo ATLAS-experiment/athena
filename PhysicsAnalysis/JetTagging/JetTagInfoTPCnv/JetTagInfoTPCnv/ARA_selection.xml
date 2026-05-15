@@ -35,7 +35,7 @@
     <field name="m_vertexCnv" transient="true"/>
     <field name="m_fitQualityCnv" transient="true"/>
   </class>
-  <class name="AthenaPoolTopLevelExtTPConverter<Analysis::JetTagInfo_tlp1>" />
+  <class name="TopLevelTPCnvBaseP<Analysis::JetTagInfo_tlp1>" />
 
   <class name="Analysis::JetTagInfoCnv_tlp2" >
     <field name="m_baseTagInfoCnv" transient="true"/>
@@ -74,7 +74,7 @@
     <field name="m_vertexCnv" transient="true"/>
     <field name="m_fitQualityCnv" transient="true"/>
   </class>
-  <class name="AthenaPoolTopLevelExtTPConverter<Analysis::JetTagInfo_tlp2>" />
+  <class name="TopLevelTPCnvBaseP<Analysis::JetTagInfo_tlp2>" />
 
 
   <class name="Analysis::JetTagInfoCnv_tlp3" >
@@ -115,7 +115,7 @@
     <field name="m_vertexCnv" transient="true"/>
     <field name="m_fitQualityCnv" transient="true"/>
   </class>
-  <class name="AthenaPoolTopLevelExtTPConverter<Analysis::JetTagInfo_tlp3>" />
+  <class name="TopLevelTPCnvBaseP<Analysis::JetTagInfo_tlp3>" />
 
 
 </lcgdict>

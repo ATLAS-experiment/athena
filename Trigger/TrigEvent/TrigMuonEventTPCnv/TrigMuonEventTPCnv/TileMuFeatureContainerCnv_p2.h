@@ -16,7 +16,7 @@
 #ifndef  TRIGMUONEVENTTPCNV_TILEMUFEATURECONTAINER_CNV_P2_H
 #define  TRIGMUONEVENTTPCNV_TILEMUFEATURECONTAINER_CNV_P2_H
  
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigMuonEvent/TileMuFeatureContainer.h"
 #include "TrigMuonEventTPCnv/TileMuFeatureContainer_p2.h"

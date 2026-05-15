@@ -93,7 +93,7 @@ protected:
   /** Return our top level converter. Used by other converters
       that want to extend this converter.
   */
-  inline AthenaPoolTopLevelTPCnvBase *getTopLevelTPCnv(void);
+  inline TopLevelTPCnvBase *getTopLevelTPCnv(void);
 
 private:
   /** The master translator.
@@ -119,7 +119,7 @@ private:
 /// Inline methods: 
 /////////////////////////////////////////////////////////////////// 
 
-AthenaPoolTopLevelTPCnvBase *JetCollectionCnv::getTopLevelTPCnv(void)
+TopLevelTPCnvBase *JetCollectionCnv::getTopLevelTPCnv(void)
 {
   return &m_TPConverter;
 }
