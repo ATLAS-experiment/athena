@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,7 +10,6 @@
 #define TRKVERTEXFITTERINTERFACE_IVERTEXFITTER_H
 
 #include "GaudiKernel/IAlgTool.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "TrkNeutralParameters/NeutralParameters.h"
 #include "TrkParameters/TrackParameters.h"
 #include <vector>
@@ -20,6 +19,8 @@
 #include "xAODTracking/NeutralParticle.h"
 #include "xAODTracking/TrackParticleFwd.h"
 #include "xAODTracking/Vertex.h"
+
+class EventContext;
 
 /**
  * @class Trk::IVertexFitter
@@ -61,15 +62,7 @@ public:
    */
   virtual ~IVertexFitter() = default;
 
-  /*
-   * First the context aware methods.
-   * If this set is not overloaded , it
-   * will call the methods without EventContext
-   */
 
-  //------ Event Context aware methods ---------
-
-  // 1
   /**
    * Interface for xAOD::TrackParticle with starting point
    * Event Context aware interface
@@ -77,13 +70,9 @@ public:
   virtual std::unique_ptr<xAOD::Vertex> fit(
     const EventContext& ctx,
     const std::vector<const xAOD::TrackParticle*>& vectorTrk,
-    const Amg::Vector3D& startingPoint) const
-  {
-    (void)(ctx);
-    return std::unique_ptr<xAOD::Vertex>(fit(vectorTrk, startingPoint));
-  }
+    const Amg::Vector3D& startingPoint) const = 0;
 
-  // 2
+
   /**
    *Interface for xAOD::TrackParticle and xAOD::NeutralParticle with starting
    *point. Event Context aware method
@@ -92,14 +81,9 @@ public:
     const EventContext& ctx,
     const std::vector<const xAOD::TrackParticle*>& vectorTrk,
     const std::vector<const xAOD::NeutralParticle*>& vectorNeu,
-    const Amg::Vector3D& startingPoint) const
-  {
-    (void)(ctx);
-    return std::unique_ptr<xAOD::Vertex>(
-      fit(vectorTrk, vectorNeu, startingPoint));
-  }
+    const Amg::Vector3D& startingPoint) const = 0;
 
-  // 3
+
   /**
    * Interface for xAOD::TrackParticle and xAOD::NeutralParticle with vertex
    * constraint the position of the constraint is ALWAYS the starting point
@@ -109,13 +93,9 @@ public:
     const EventContext& ctx,
     const std::vector<const xAOD::TrackParticle*>& vectorTrk,
     const std::vector<const xAOD::NeutralParticle*>& vectorNeu,
-    const xAOD::Vertex& constraint) const
-  {
-    (void)(ctx);
-    return std::unique_ptr<xAOD::Vertex>(fit(vectorTrk, vectorNeu, constraint));
-  }
+    const xAOD::Vertex& constraint) const = 0;
 
-  // 4
+
   /**
    * Interface for xAOD::TrackParticle with vertex constraint
    * the position of the constraint is ALWAYS the starting point
@@ -124,13 +104,9 @@ public:
   virtual std::unique_ptr<xAOD::Vertex> fit(
     const EventContext& ctx,
     const std::vector<const xAOD::TrackParticle*>& vectorTrk,
-    const xAOD::Vertex& constraint) const
-  {
-    (void)(ctx);
-    return std::unique_ptr<xAOD::Vertex>(fit(vectorTrk, constraint));
-  }
+    const xAOD::Vertex& constraint) const = 0;
 
-  // 5
+
   /**
    * Interface for TrackParameters and NeutralParameters with starting point
    * Event Context aware method
@@ -139,14 +115,9 @@ public:
     const EventContext& ctx,
     const std::vector<const Trk::TrackParameters*>& perigeeList,
     const std::vector<const Trk::NeutralParameters*>& neutralPerigeeList,
-    const Amg::Vector3D& startingPoint) const
-  {
-    (void)(ctx);
-    return std::unique_ptr<xAOD::Vertex>(
-      fit(perigeeList, neutralPerigeeList, startingPoint));
-  }
+    const Amg::Vector3D& startingPoint) const = 0;
 
-  // 6
+
   /**
    * Interface for TrackParameters with starting point
    * Event Context aware method
@@ -154,13 +125,9 @@ public:
   virtual std::unique_ptr<xAOD::Vertex> fit(
     const EventContext& ctx,
     const std::vector<const Trk::TrackParameters*>& perigeeList,
-    const Amg::Vector3D& startingPoint) const
-  {
-    (void)(ctx);
-    return std::unique_ptr<xAOD::Vertex>(fit(perigeeList, startingPoint));
-  }
+    const Amg::Vector3D& startingPoint) const = 0;
 
-  // 7
+
   /**
    * Interface for TrackParameters and NeutralParameters with vertex constraint
    * the position of the constraint is ALWAYS the starting point
@@ -170,13 +137,9 @@ public:
     const EventContext& ctx,
     const std::vector<const Trk::TrackParameters*>& perigeeList,
     const std::vector<const Trk::NeutralParameters*>& neutralPerigeeList,
-    const xAOD::Vertex& constraint) const
-  {
-    (void)(ctx);
-    return std::unique_ptr<xAOD::Vertex>(
-      fit(perigeeList, neutralPerigeeList, constraint));
-  }
-  // 8
+    const xAOD::Vertex& constraint) const = 0;
+
+
   /**
    * Interface for TrackParameters with vertex constraint
    * the position of the constraint is ALWAYS the starting point
@@ -185,13 +148,9 @@ public:
   virtual std::unique_ptr<xAOD::Vertex> fit(
     const EventContext& ctx,
     const std::vector<const Trk::TrackParameters*>& perigeeList,
-    const xAOD::Vertex& constraint) const
-  {
-    (void)(ctx);
-    return std::unique_ptr<xAOD::Vertex>(fit(perigeeList, constraint));
-  }
+    const xAOD::Vertex& constraint) const = 0;
 
-  // 9
+
   /**
    * Fit method using the VertexSeedFinder to estimate initial
    * position of the vertex and taking it as a first linearization point
@@ -200,13 +159,9 @@ public:
   virtual std::unique_ptr<xAOD::Vertex> fit(
     const EventContext& ctx,
     const std::vector<const Trk::TrackParameters*>& perigeeList,
-    const std::vector<const Trk::NeutralParameters*>& neutralPerigeeList) const
-  {
-    (void)(ctx);
-    return std::unique_ptr<xAOD::Vertex>(fit(perigeeList, neutralPerigeeList));
-  }
+    const std::vector<const Trk::NeutralParameters*>& neutralPerigeeList) const = 0;
 
-  // 10
+
   /**
    * Fit method using the VertexSeedFinder to estimate initial
    * position of the vertex and taking it as a first linearization point
@@ -214,150 +169,8 @@ public:
    */
   virtual std::unique_ptr<xAOD::Vertex> fit(
     const EventContext& ctx,
-    const std::vector<const Trk::TrackParameters*>& perigeeList) const
-  {
-    (void)(ctx);
-    return std::unique_ptr<xAOD::Vertex>(fit(perigeeList));
-  }
+    const std::vector<const Trk::TrackParameters*>& perigeeList) const = 0;
 
-  //------------ Event Context unaware methods ---------
-
-  // 1
-  /**
-   *Interface for xAOD::TrackParticle with starting point
-   */
-  virtual xAOD::Vertex* fit(
-    const std::vector<const xAOD::TrackParticle*>& vectorTrk,
-    const Amg::Vector3D& startingPoint) const
-  {
-    return fit(Gaudi::Hive::currentContext(), vectorTrk, startingPoint)
-      .release();
-  }
-
-  // 2
-  /**
-   *Interface for xAOD::TrackParticle and xAOD::NeutralParticle with starting
-   *point
-   */
-  virtual xAOD::Vertex* fit(
-    const std::vector<const xAOD::TrackParticle*>& vectorTrk,
-    const std::vector<const xAOD::NeutralParticle*>& vectorNeu,
-    const Amg::Vector3D& startingPoint) const
-  {
-    return fit(
-             Gaudi::Hive::currentContext(), vectorTrk, vectorNeu, startingPoint)
-      .release();
-  }
-
-  // 3
-  /**
-   * Interface for xAOD::TrackParticle and xAOD::NeutralParticle with vertex
-   * constraint the position of the constraint is ALWAYS the starting point
-   */
-  virtual xAOD::Vertex* fit(
-    const std::vector<const xAOD::TrackParticle*>& vectorTrk,
-    const std::vector<const xAOD::NeutralParticle*>& vectorNeu,
-    const xAOD::Vertex& constraint) const
-  {
-    return fit(Gaudi::Hive::currentContext(), vectorTrk, vectorNeu, constraint)
-      .release();
-  }
-
-  // 4
-  /**
-   * Interface for xAOD::TrackParticle with vertex constraint
-   * the position of the constraint is ALWAYS the starting point
-   */
-  virtual xAOD::Vertex* fit(
-    const std::vector<const xAOD::TrackParticle*>& vectorTrk,
-    const xAOD::Vertex& constraint) const
-  {
-    return fit(Gaudi::Hive::currentContext(), vectorTrk, constraint).release();
-  }
-
-  // 5
-  /**
-   * Interface for TrackParameters and NeutralParameters with starting point
-   */
-  virtual xAOD::Vertex* fit(
-    const std::vector<const Trk::TrackParameters*>& perigeeList,
-    const std::vector<const Trk::NeutralParameters*>& neutralPerigeeList,
-    const Amg::Vector3D& startingPoint) const
-  {
-    return fit(Gaudi::Hive::currentContext(),
-               perigeeList,
-               neutralPerigeeList,
-               startingPoint)
-      .release();
-  }
-
-  // 6
-  /**
-   * Interface for TrackParameters with starting point
-   */
-  virtual xAOD::Vertex* fit(
-    const std::vector<const Trk::TrackParameters*>& perigeeList,
-    const Amg::Vector3D& startingPoint) const
-  {
-    return fit(Gaudi::Hive::currentContext(), perigeeList, startingPoint)
-      .release();
-  }
-
-  // 7
-  /**
-   * Interface for TrackParameters and NeutralParameters with vertex constraint
-   * the position of the constraint is ALWAYS the starting point
-   */
-  virtual xAOD::Vertex* fit(
-    const std::vector<const Trk::TrackParameters*>& perigeeList,
-    const std::vector<const Trk::NeutralParameters*>& neutralPerigeeList,
-    const xAOD::Vertex& constraint) const
-  {
-    return fit(Gaudi::Hive::currentContext(),
-               perigeeList,
-               neutralPerigeeList,
-               constraint)
-      .release();
-  }
-
-  // 8
-  /**
-   * Interface for TrackParameters with vertex constraint
-   * the position of the constraint is ALWAYS the starting point
-   */
-  virtual xAOD::Vertex* fit(
-    const std::vector<const Trk::TrackParameters*>& perigeeList,
-    const xAOD::Vertex& constraint) const
-  {
-    return fit(Gaudi::Hive::currentContext(), perigeeList, constraint)
-      .release();
-  }
-
-  // 9
-  /**
-   * Fit method using the VertexSeedFinder to estimate initial
-   * position of the vertex and taking it as a first linearization point
-   * (in iterative fitters).
-   */
-  virtual xAOD::Vertex* fit(
-    const std::vector<const Trk::TrackParameters*>& perigeeList,
-    const std::vector<const Trk::NeutralParameters*>& neutralPerigeeList) const
-  {
-    return fit(Gaudi::Hive::currentContext(), perigeeList, neutralPerigeeList)
-      .release();
-  }
-
-  // 10
-  /**
-   * Fit method using the VertexSeedFinder to estimate initial
-   * position of the vertex and taking it as a first linearization point
-   * (in iterative fitters).
-   */
-  virtual xAOD::Vertex* fit(
-    const std::vector<const Trk::TrackParameters*>& perigeeList) const
-  {
-    return fit(Gaudi::Hive::currentContext(), perigeeList).release();
-  }
 };
 }
 #endif
