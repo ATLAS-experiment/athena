@@ -473,6 +473,53 @@ def HION4SkimmingTriggers2024():
 
     return triggers
 
+def HION4SkimmingTriggers2025():
+    '''primary and backup triggers for yy2ll and yy2yy processes'''
+    triggers  = []
+    triggers += ["HLT_mu3_hi_FgapAC5_L1MU3V_VjTE50"]
+    triggers += ["HLT_mu3_L1MU3V_VjTE50"]
+    triggers += ["HLT_mu4_hi_FgapAC5_L1MU3V_VjTE50"]
+    triggers += ["HLT_mu4_L1MU3V_VjTE50"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1VZDC_A_VZDC_C_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L11ZDC_A_1ZDC_C_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1ZDC_XOR_VjTE200"]
+    triggers += ["HLT_mb_sptrk_L1TRT_ZDC_XOR_VjTE200"]
+    triggers += ["HLT_mb_sptrk_L1ZDC_XOR_VjTE200"]
+    triggers += ["HLT_mb_sptrk_L11ZDC_A_1ZDC_C_VjTE200"]
+    triggers += ["HLT_mb_sptrk_L1ZDC_1XOR5_VjTE200"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L1eEM5_VjTE200"]
+    triggers += ["HLT_mb_sptrk_pt0p8_L1eEM2_TRT_VZDC_A_VZDC_C_VjTE200"]
+    triggers += ["HLT_mb_sptrk_pt0p8_L1eTAU2_TRT_VZDC_A_VZDC_C_VjTE200"]
+    triggers += ["HLT_mb_sptrk_hi_FgapAC5_L123INVM-27DPHI-2eTAU1_VjTE200"]
+    triggers += ["HLT_mb_sptrk_hi_FgapAC5_L1DPHI-2eTAU1_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_L1TRT_VZDC_A_VZDC_C_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_L1TRT_ZDC_OR_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt0p5_L1TRT_VZDC_A_VZDC_C_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt0p5_hi_FgapAC5_L1TRT_ZDC_OR_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt0p5_hi_FgapAC5_L1TRT_VZDC_A_VZDC_C_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1eEM2_TRT_VZDC_A_VZDC_C_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1eTAU2_TRT_VZDC_A_VZDC_C_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1CALMTEA_eEM2_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1DPHI-2eTAU1_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1CALMTEA_DPHI-2eTAU1_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1DPHI-2eEM1_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1CALMTEA_23INVM-27DPHI-2eTAU1_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1TRT_ZDC_OR_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1TRT_VZDC_A_VZDC_C_VjTE200"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_L1DPHI-2eTAU1_VjTE200"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_L1CALMTEA_DPHI-2eTAU1_VjTE200"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_L1DPHI-2eEM1_VjTE200"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_L1CALMTEA_23INVM-27DPHI-2eTAU1_VjTE200"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L1DPHI-2eEM1_VjTE200"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L1CALMTEA_eEM2_VjTE200"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L1CALMTEA_23INVM-27DPHI-2eTAU1_VjTE200_EMPTY"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L1CALMTEA_DPHI-2eTAU1_VjTE200_EMPTY"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L1DPHI-2eTAU1_VjTE200_EMPTY"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L1eEM2_VjTE200_EMPTY"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L1eEM5_VjTE200_EMPTY"]
+
+    return triggers
+
 def HION4SkimmingTriggersALL():
     triggers  = HION4SkimmingTriggers2015()
     triggers += HION4SkimmingTriggers2016()
@@ -480,6 +527,7 @@ def HION4SkimmingTriggersALL():
     triggers += HION4SkimmingTriggers2018Support()
     triggers += HION4SkimmingTriggers2023()
     triggers += HION4SkimmingTriggers2024()
+    triggers += HION4SkimmingTriggers2025()
 
     return triggers
 
