@@ -26,14 +26,24 @@ namespace CTPResultUtils {
     CTPdataformatVersion ctpDataFormat(ctpVersionNumber);
     ctpRes.setCtpVersionNumber(ctpVersionNumber);
 
-    // Number of bunches
+    // Check for the case we have an empty data vector and return early
     if (!data.size()) {
       ctpRes.setNumberOfBunches(0u);
-    } else {
-      uint32_t numberOfWords = static_cast<uint32_t>(data.size()) - ctpDataFormat.getNumberTimeWords() - nExtraWords;
-      ctpRes.setNumberOfBunches(numberOfWords / ctpDataFormat.getDAQwordsPerBunch());
+      ctpRes.setTimeSec(0u);
+      ctpRes.setTimeNanoSec(0u);
+      ctpRes.setTIPWords({});
+      ctpRes.setTBPWords({});
+      ctpRes.setTAPWords({});
+      ctpRes.setTAVWords({});
+      ctpRes.setAdditionalWords({});
+      return;
     }
 
+    // Set the number of bunches
+    uint32_t numberOfWords = static_cast<uint32_t>(data.size()) - ctpDataFormat.getNumberTimeWords() - nExtraWords;
+    ctpRes.setNumberOfBunches(numberOfWords / ctpDataFormat.getDAQwordsPerBunch());
+
+    // Set the timestamps
     ctpRes.setTimeSec(data[ctpDataFormat.getTimeSecondsPos()]);
     ctpRes.setTimeNanoSec(data[ctpDataFormat.getTimeNanosecondsPos()]);
 
@@ -101,6 +111,17 @@ namespace CTPResultUtils {
       s << "xAOD::CTPResult empty" << std::endl;
       s << "*END* xAOD::CTPResult" << std::endl;
       return s.str();
+    }
+
+    // Print whether the object has the expected format and has good status
+    std::vector<std::string> ctpResultIssues = ctpRes.checkForIssues();
+    if (ctpResultIssues.empty()) {
+      s << "xAOD::CTPResult status: Good! " << std::endl;
+    } else {
+      s << "xAOD::CTPResult status: Bad! " << std::endl;
+      for (const auto& issue : ctpResultIssues) {
+        s << "xAOD::CTPResult status: " << issue << std::endl;
+      }
     }
 
     s << "CTP version number: " <<  ctpRes.ctpVersionNumber() << std::endl;

@@ -732,9 +732,9 @@ def getConfig_gXE(do_HI_tob_thresholds):
         "XEJWOJ_c_A": 0,
         "XEJWOJ_c_B": 0,
         "XEJWOJ_c_C": 0,
-        "XENOISECUT_noiseCutThrA": 4,
-        "XENOISECUT_noiseCutThrB": 4,
-        "XENOISECUT_noiseCutThrC": 5,
+        "XENOISECUT_noiseCutThrA": 2,
+        "XENOISECUT_noiseCutThrB": 2,
+        "XENOISECUT_noiseCutThrC": 3,
         "resolutionMeV": 200
     }
     return confObj
@@ -747,8 +747,8 @@ def getConfig_gTE():
 
 def getConfig_cXE():
     confObj = {
-        "jXeWeight": 0.55,
-        "gXeWeight": 0.45
+        "jXeWeight": 0.45,
+        "gXeWeight": 0.55
     }
     for param, value in confObj.items():
          # in L1Topo FW/ Sim weights become 10 bit unsigned values, 2 integer, 8 fractional bits

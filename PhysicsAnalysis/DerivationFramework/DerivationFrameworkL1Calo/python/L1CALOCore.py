@@ -753,7 +753,9 @@ def addGfexTOBs(slimminghelper, allVariables, postFix = ""):
          "L1_gMHTComponentsJwoj"+postFix : "xAOD::gFexGlobalRoIContainer",
          "L1_gMHTComponentsJwoj"+postFix+"Aux" : "xAOD::gFexGlobalRoIAuxContainer",
          "L1_gMSTComponentsJwoj"+postFix : "xAOD::gFexGlobalRoIContainer",
-         "L1_gMSTComponentsJwoj"+postFix+"Aux" : "xAOD::gFexGlobalRoIAuxContainer"})
+         "L1_gMSTComponentsJwoj"+postFix+"Aux" : "xAOD::gFexGlobalRoIAuxContainer",
+         "L1_gMETComponentsNoiseCut"+postFix : "xAOD::gFexGlobalRoIContainer",
+         "L1_gMETComponentsNoiseCut"+postFix+"Aux" : "xAOD::gFexGlobalRoIAuxContainer"})
 
     allVariables += ["L1_gFexRhoRoI" + postFix,
                      "L1_gFexSRJetRoI" + postFix,
@@ -762,6 +764,7 @@ def addGfexTOBs(slimminghelper, allVariables, postFix = ""):
                      "L1_gMETComponentsJwoj" + postFix,
                      "L1_gMHTComponentsJwoj" + postFix,
                      "L1_gMSTComponentsJwoj" + postFix,
+                     "L1_gMETComponentsNoiseCut" + postFix,
                      "L1_gEspresso" + postFix,
                      "L1_gRistretto" + postFix,
                      "L1_gScalarEJwojOutOfTime" + postFix]
