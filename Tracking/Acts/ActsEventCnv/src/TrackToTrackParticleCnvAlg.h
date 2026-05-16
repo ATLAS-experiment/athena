@@ -27,15 +27,14 @@
 
 #include "ActsToolInterfaces/ITrackToTrackParticleCnvTool.h"
 
-namespace ActsTrk
-{
+namespace ActsTrk {
 
-  class TrackToTrackParticleCnvAlg : public AthReentrantAlgorithm
-  {
+  /** @brief Conversion algorithm to translate multiple transient Acts track containers
+   *         to an xAOD track particle container */
+  class TrackToTrackParticleCnvAlg : public AthReentrantAlgorithm {
 
   public:
-    TrackToTrackParticleCnvAlg(const std::string &name,
-                               ISvcLocator *pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext &ctx) const override;
@@ -52,13 +51,12 @@ namespace ActsTrk
     SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey
        {this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot or empty." };
 
-    SG::ReadHandleKey<xAOD::VertexContainer> m_vertexHandle
+    SG::ReadHandleKey<xAOD::VertexContainer> m_vertexKey
        {this, "VertexContainerKey", "", "Name of the Primary Vertex Container"};
-    SG::WriteHandleKey<xAOD::TrackParticleContainer> m_trackParticlesOutKey
-       {this, "TrackParticlesOutKey","", "Name of the produced track particle collection" };
+    SG::WriteHandleKey<xAOD::TrackParticleContainer> m_trackParticlesOutKey{this, "TrackParticlesOutKey",
+      "ChangeMe", "Name of the produced track particle collection" };
 
-    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_decorator_actsTracks
-      {this, "ActsTrackLink", "actsTrack"};
+    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_decorator_actsTracks{this, "ActsTrackLink", m_trackParticlesOutKey, "actsTrack"};
       Gaudi::Property<std::string> m_perigeeExpression{this, "PerigeeExpression", "DontRecalculate"};
 
     enum class expressionStrategy {DontRecalculate, BeamLine, Vertex};

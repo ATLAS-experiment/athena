@@ -30,18 +30,15 @@ namespace ActsTrk {
   class TrackToTrackParticleCnvTool : public extends<AthAlgTool, ITrackToTrackParticleCnvTool> {
 
   public:
-    TrackToTrackParticleCnvTool(const std::string& type,
-                                const std::string& name,
-                                const IInterface* parent);
+    using base_class::base_class;
 
     virtual StatusCode initialize() override;
 
-    virtual StatusCode convert(
-      xAOD::TrackParticle& trackParticle,
-      const EventContext& ctx,
-      const ActsTrk::TrackContainer::ConstTrackProxy& track,
-      const Acts::PerigeeSurface* perigeeSurface = nullptr,
-      const InDet::BeamSpotData* beamspotData = nullptr) const override;
+    virtual StatusCode convert(xAOD::TrackParticle& trackParticle,
+                               const EventContext& ctx,
+                               const ActsTrk::TrackContainer::ConstTrackProxy& track,
+                               const Acts::Surface& perigeeSurface,
+                               const InDet::BeamSpotData* beamspotData = nullptr) const override;
 
   private:
     using Stepper = Acts::EigenStepper<>;
@@ -50,9 +47,7 @@ namespace ActsTrk {
 
     Acts::BoundTrackParameters parametersAtPerigee(const EventContext& ctx,
                                                    const ActsTrk::TrackContainer::ConstTrackProxy& track,
-                                                   const Acts::PerigeeSurface& perigee_surface) const;
-
-    static xAOD::ParticleHypothesis convertParticleHypothesis(Acts::PdgParticle abs_pdg_id);
+                                                   const Acts::Surface& perigee_surface) const;
 
     ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool
        {this, "ExtrapolationTool", ""};

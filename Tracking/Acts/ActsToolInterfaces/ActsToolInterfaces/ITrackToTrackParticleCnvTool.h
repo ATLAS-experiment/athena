@@ -30,16 +30,14 @@ namespace ActsTrk {
      *  @param trackParticle the output TrackParticle to populate (must already be registered in a container)
      *  @param ctx the current Athena EventContext
      *  @param track the track proxy to convert
-     *  @param perigeeSurface if non-null, extrapolate defining parameters to this surface;
-     *         if null, use the track's reference surface as-is (DontRecalculate mode)
+     *  @param perigeeSurface Extrapolate defining parameters to this surface
      *  @param beamspotData if non-null, decorate beam tilt information on the particle
      */
-    virtual StatusCode convert(
-      xAOD::TrackParticle& trackParticle,
-      const EventContext& ctx,
-      const ActsTrk::TrackContainer::ConstTrackProxy& track,
-      const Acts::PerigeeSurface* perigeeSurface = nullptr,
-      const InDet::BeamSpotData* beamspotData = nullptr) const = 0;
+    virtual StatusCode convert(xAOD::TrackParticle& trackParticle,
+                               const EventContext& ctx,
+                               const ActsTrk::TrackContainer::ConstTrackProxy& track,
+                               const Acts::Surface& perigeeSurface,
+                               const InDet::BeamSpotData* beamspotData = nullptr) const = 0;
   };
 
 }

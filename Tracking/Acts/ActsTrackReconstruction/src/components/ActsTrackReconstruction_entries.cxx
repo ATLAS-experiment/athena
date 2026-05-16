@@ -1,18 +1,16 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/TrackFindingAlg.h"
 #include "src/AmbiguityResolutionAlg.h"
 #include "src/ScoreBasedAmbiguityResolutionAlg.h"
 #include "src/ReFitterAlg.h"
-#include "src/TrackToTrackParticleCnvAlg.h"
 #include "src/ProtoTrackCreationAndFitAlg.h"
 #include "src/TrackExtensionAlg.h"
 #include "src/ProtoTrackReportingAlg.h"
 #include "src/HGTDTrackExtensionAlg.h"
 #include "src/HGTDTruthTrackDecorationAlg.h"
-#include "src/ActsToXAODTrackConverterAlg.h"
 
 // Tools
 #include "src/TrackToTrackParticleCnvTool.h"
@@ -34,10 +32,9 @@ DECLARE_COMPONENT( ActsTrk::ScoreBasedAmbiguityResolutionAlg )
 DECLARE_COMPONENT( ActsTrk::ProtoTrackCreationAndFitAlg )
 DECLARE_COMPONENT( ActsTrk::TrackExtensionAlg )
 DECLARE_COMPONENT( ActsTrk::ProtoTrackReportingAlg )
-DECLARE_COMPONENT( ActsTrk::TrackToTrackParticleCnvAlg )
 DECLARE_COMPONENT( ActsTrk::HGTDTrackExtensionAlg)
 DECLARE_COMPONENT( ActsTrk::HGTDTruthTrackDecorationAlg )
-DECLARE_COMPONENT( ActsTrk::ActsToXAODTrackConverterAlg )
+
 
 // Tools
 DECLARE_COMPONENT( ActsTrk::TrackToTrackParticleCnvTool )
