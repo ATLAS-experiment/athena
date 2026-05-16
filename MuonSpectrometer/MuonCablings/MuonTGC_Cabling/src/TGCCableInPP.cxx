@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCCableInPP.h"
@@ -62,14 +62,14 @@ std::unique_ptr<TGCChannelId> TGCCableInPP::getChannelIn(
     TGCId::ModuleType moduleType = ppout.getModuleType();
 
     int ndatabaseP = 1;
-    TGCDatabase* databaseP[2];
-    databaseP[0] = m_database[ppout.getRegionType()][moduleType].get();
+    TGCDatabase* databaseP[2]{};
+    databaseP[0] = m_database[ppout.getRegionIndex()][ppout.getModuleIndex()].get();
     // EI/FI
     //  wire(TGCId::WI) and strip(TGCId::SI) of a chamber
     //  use the same SLB chip
     //  The SLB chip is treated as TGCId::WI in TGCCableSLBToSSW.cxx
     if (moduleType == TGCId::WI) {
-        databaseP[1] = m_database[ppout.getRegionType()][TGCId::SI].get();
+        databaseP[1] = m_database[ppout.getRegionIndex()][TGCId::SI].get();
         ndatabaseP = 2;
     }
 
@@ -133,7 +133,7 @@ std::unique_ptr<TGCChannelId> TGCCableInPP::getChannelOut(
     const int ppinId = ppin.getId();
 
     TGCDatabase* databaseP =
-        m_database[ppin.getRegionType()][ppin.getModuleType()].get();
+        m_database[ppin.getRegionIndex()][ppin.getModuleIndex()].get();
 
     const int MaxEntry = databaseP->getMaxEntry();
     for (int i = 0; i < MaxEntry; i++) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCCablePPToSLB.h"
@@ -199,7 +199,7 @@ TGCModuleMap TGCCablePPToSLB::getModuleIn(const TGCModuleId& slb) const {
     const int slbId = slb.getId();
 
     TGCDatabase* databaseP =
-        m_database[slb.getRegionType()][slb.getModuleType()].get();
+        m_database[slb.getRegionIndex()][slb.getModuleIndex()].get();
     TGCModuleMap mapId{};
     const int MaxEntry = databaseP->getMaxEntry();
     for (int i = 0; i < MaxEntry; i++) {
@@ -234,7 +234,7 @@ TGCModuleMap TGCCablePPToSLB::getModuleOut(const TGCModuleId& pp) const {
     const int ppId = pp.getId();
 
     TGCDatabase* databaseP =
-        m_database[pp.getRegionType()][pp.getModuleType()].get();
+        m_database[pp.getRegionIndex()][pp.getModuleIndex()].get();
     TGCModuleMap mapId{};
     const int MaxEntry = databaseP->getMaxEntry();
     for (int i = 0; i < MaxEntry; i++) {
