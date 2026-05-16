@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RPC_CondCabling/SectorLogicSetup.h"
@@ -844,4 +844,4 @@ HalfType SectorLogicSetup::side() const {
     return NoHalf;
 }
 
-void SectorLogicSetup::SetPtoTrigRoads(const std::map<std::string, std::string>* RPC_trigroads) { m_trigroads = RPC_trigroads; }
+void SectorLogicSetup::SetPtoTrigRoads(const TrigRoadsMap * RPC_trigroads) { m_trigroads = RPC_trigroads; }
