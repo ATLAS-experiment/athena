@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/MsgStream.h"
@@ -13,6 +13,7 @@
 #include <stdexcept>
 
 using namespace RPC_CondCabling;
+using TrigRoadsMap = RPC_CondCabling::SectorLogicSetup::TrigRoadsMap;
 
 const EvenPhiCMA::WORlink& EvenPhiCMA::pivot_WORs() const { return m_pivot_WORs; }
 const EvenPhiCMA::WORlink& EvenPhiCMA::lowPt_WORs() const { return m_lowPt_WORs; }
@@ -612,7 +613,7 @@ bool EvenPhiCMA::setup(SectorLogicSetup& setup, MsgStream& log) {
     for (int i = 0; i < 200; ++i) name[i] = '\0';
 
     // LB retrieve pointer to the map of the trigger roads
-    const std::map<std::string, std::string>* p_trigroads = setup.GetPtoTrigRoads();
+    const TrigRoadsMap * p_trigroads = setup.GetPtoTrigRoads();
 
     // Read trigger configurations from files
     if (p_trigroads == nullptr) {
@@ -647,7 +648,7 @@ bool EvenPhiCMA::setup(SectorLogicSetup& setup, MsgStream& log) {
                 namestr << s_tag << "_" << t_tag << "_pl" << c_tag << ".txt" << std::ends;
                 namestr.str().copy(name, namestr.str().length(), 0);
                 name[namestr.str().length()] = 0;
-                std::map<std::string, std::string>::const_iterator itc;
+                TrigRoadsMap::const_iterator itc;
                 itc = p_trigroads->find(name);
                 if (itc != p_trigroads->end()) {
                     if (log.level() <= MSG::VERBOSE) {
@@ -746,7 +747,7 @@ bool EvenPhiCMA::setup(SectorLogicSetup& setup, MsgStream& log) {
                 namestr << s_tag << "_" << t_tag << "_ph" << c_tag << ".txt" << std::ends;
                 namestr.str().copy(name, namestr.str().length(), 0);
                 name[namestr.str().length()] = 0;
-                std::map<std::string, std::string>::const_iterator itc;
+                TrigRoadsMap::const_iterator itc;
                 itc = p_trigroads->find(name);
                 if (itc != p_trigroads->end()) {
                     if (log.level() <= MSG::VERBOSE) {

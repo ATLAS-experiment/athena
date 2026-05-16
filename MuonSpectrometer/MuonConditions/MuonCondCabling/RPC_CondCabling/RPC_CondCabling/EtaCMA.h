@@ -1,15 +1,16 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ETACMA_H
 #define ETACMA_H
 
-#include <algorithm>
-#include <map>
+
 
 #include "RPC_CondCabling/CMAparameters.h"
 #include "RPC_CondCabling/RPCchamber.h"
+
+#include <map>
 
 class MsgStream;
 
@@ -19,7 +20,7 @@ namespace RPC_CondCabling {
 
     class EtaCMA : public CMAparameters {
     private:
-        typedef std::map<int, RPCchamber*, std::less<int> > RPClink;
+        typedef std::map<int, RPCchamber*> RPClink;
 
         RPClink m_pivot_RPCs;
         RPClink m_lowPt_RPCs;

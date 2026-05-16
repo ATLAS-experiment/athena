@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef MUONCONDALG_RPCCABLINGCONDALG_H
@@ -28,7 +28,7 @@ public:
 
 private:
     typedef std::array<int, 64> sectorMap_t;
-    typedef std::map<int, RPC_CondCabling::SectorLogicSetup*, std::less<int>> SLmap_t;
+    typedef std::map<int, RPC_CondCabling::SectorLogicSetup*> SLmap_t;
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 

@@ -1,19 +1,25 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+
+#include "RPC_CondCabling/EtaCMA.h"
+
+#include "RPC_CondCabling/CMAprogram.h"
+#include "RPC_CondCabling/SectorLogicSetup.h"
 
 #include "GaudiKernel/MsgStream.h"
 #include "AthenaKernel/errorcheck.h"
 
-#include "RPC_CondCabling/EtaCMA.h"
-#include "RPC_CondCabling/CMAprogram.h"
-#include "RPC_CondCabling/SectorLogicSetup.h"
-
-#include <cstdio>
-#include <cstdlib>
+#include <cstdio> //for sprintf
+#include <cstdlib> //for abs
 #include <fstream>
+#include <sstream>
+#include <string>
+#include <memory>
+#include <algorithm>
 
 using namespace RPC_CondCabling;
+using TrigRoadsMap = RPC_CondCabling::SectorLogicSetup::TrigRoadsMap;
 
 EtaCMA::EtaCMA(const CMAparameters::parseParams& parse)
   : CMAparameters(parse)
@@ -294,7 +300,7 @@ bool EtaCMA::setup(SectorLogicSetup& setup, MsgStream& log) {
     char name[200];
 
     // LB retrieve pointer to the map of the trigger roads
-    const std::map<std::string, std::string>* p_trigroads = setup.GetPtoTrigRoads();
+    const SectorLogicSetup::TrigRoadsMap * p_trigroads = setup.GetPtoTrigRoads();
 
     // Read trigger configurations from files
 
@@ -324,7 +330,7 @@ bool EtaCMA::setup(SectorLogicSetup& setup, MsgStream& log) {
             namestr << s_tag << "_" << t_tag << "_pl" << c_tag << ".txt" << std::ends;
             namestr.str().copy(name, namestr.str().length(), 0);
             name[namestr.str().length()] = 0;
-            std::map<std::string, std::string>::const_iterator itc;
+            TrigRoadsMap::const_iterator itc;
             itc = p_trigroads->find(name);
             if (itc != p_trigroads->end()) {
                 CMAprogLow_COOL.str(itc->second.c_str());
@@ -415,7 +421,7 @@ bool EtaCMA::setup(SectorLogicSetup& setup, MsgStream& log) {
             namestr << s_tag << "_" << t_tag << "_ph" << c_tag << ".txt" << std::ends;
             namestr.str().copy(name, namestr.str().length(), 0);
             name[namestr.str().length()] = 0;
-            std::map<std::string, std::string>::const_iterator itc;
+            TrigRoadsMap::const_iterator itc;
             itc = p_trigroads->find(name);
             if (itc != p_trigroads->end()) {
                 if (log.level() <= MSG::VERBOSE) {
