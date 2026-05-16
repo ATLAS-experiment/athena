@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -89,21 +89,21 @@ public:
   /** @brief constructor for TileCell when we don't care about
       PMT energies separetely (e.g. cells from Atlfast)
       only cell energy,time,quality here, no channel quality */
-  TileCell(const CaloDetDescrElement* const & caloDDE,
+  TileCell(const CaloDetDescrElement* caloDDE,
            float energy, float time=0.0,
 	   uint16_t quality = 0, uint16_t provenance = 0,
            CaloGain::CaloGain gain=CaloGain::INVALIDGAIN);
 
   /** @brief constructor which also works for cells without CaloDDE, e.g. MBTS
       (passing null CaloDDE pointer and valid cell identifier for them) */
-  TileCell(const CaloDetDescrElement* const & caloDDE,
+  TileCell(const CaloDetDescrElement* caloDDE,
            const Identifier & cell_ID,
            float energy, float time=0.0,
 	   uint16_t quality = 0, uint16_t provenance = 0,
            CaloGain::CaloGain gain=CaloGain::INVALIDGAIN);
 
   /** @brief constructor using full info from both channels separately */
-  TileCell(const CaloDetDescrElement* const & caloDDE,
+  TileCell(const CaloDetDescrElement* caloDDE,
            float ene1, float ene2,
            float time1, float time2,
            int qual1, int qual2,
@@ -111,7 +111,7 @@ public:
            int gain1, int gain2);
 
   /** @brief constructor used in clone() method - just copy everything */
-  TileCell(const CaloDetDescrElement* const & caloDDE,
+  TileCell(const CaloDetDescrElement* caloDDE,
            const Identifier & cell_ID,
            float energy, float time,
            uint16_t quality, uint16_t provenance,

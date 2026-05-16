@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -44,7 +44,7 @@ TileCell::TileCell( )
 {
 }
 
-TileCell::TileCell(const CaloDetDescrElement* const & caloDDE,
+TileCell::TileCell(const CaloDetDescrElement* caloDDE,
                    float energy, float time, uint16_t quality,
                    uint16_t provenance, CaloGain::CaloGain gain)
   : CaloCell(caloDDE,energy,time,quality,provenance,gain)
@@ -53,7 +53,7 @@ TileCell::TileCell(const CaloDetDescrElement* const & caloDDE,
 {
 }
 
-TileCell::TileCell(const CaloDetDescrElement* const & caloDDE,
+TileCell::TileCell(const CaloDetDescrElement* caloDDE,
                    const Identifier & cell_ID,
                    float energy, float time, uint16_t quality,
                    uint16_t provenance, CaloGain::CaloGain gain)
@@ -63,7 +63,7 @@ TileCell::TileCell(const CaloDetDescrElement* const & caloDDE,
 {
 }
 
-TileCell::TileCell(const CaloDetDescrElement* const & caloDDE,
+TileCell::TileCell(const CaloDetDescrElement* caloDDE,
                    float ene1, float ene2, float time1, float time2,
                    int qual1, int qual2, int qbit1, int qbit2,
                    int gain1, int gain2)
@@ -88,7 +88,7 @@ TileCell::TileCell(const TileCell *cell)
 {
 }
 
-TileCell::TileCell(const CaloDetDescrElement* const & caloDDE,
+TileCell::TileCell(const CaloDetDescrElement* caloDDE,
                    const Identifier & cell_ID,
                    float energy, float time, uint16_t quality,
                    uint16_t provenance, CaloGain::CaloGain gain,
