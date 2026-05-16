@@ -133,7 +133,7 @@ void TGCCableASDToPP::updateDatabase(const std::string& diffFile) {
 std::vector<std::vector<int>> TGCCableASDToPP::getUpdateInfo(
     const int side, const int sector, const std::vector<std::string>& diffFile,
 
-    const std::string& blockname) {
+    std::string_view blockname) {
     // clear info
     std::vector<std::vector<int>> info{};
 
@@ -386,7 +386,7 @@ std::unique_ptr<TGCChannelId> TGCCableASDToPP::getChannelOut(
 
 void TGCCableASDToPP::updateIndividualDatabase(
     const int side, const int sector, const std::vector<std::string>& diffFile,
-    const std::string& blockname,
+    std::string_view blockname,
     std::shared_ptr<TGCDatabaseASDToPP>& database) {
     if (!database) {
         return;

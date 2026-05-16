@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCCableHPBToSL.h"
@@ -7,6 +7,7 @@
 #include "MuonTGC_Cabling/TGCDatabasePPToSL.h"
 #include "MuonTGC_Cabling/TGCModuleHPB.h"
 #include "MuonTGC_Cabling/TGCModuleSL.h"
+#include <stdexcept>
 
 namespace MuonTGC_Cabling {
 
@@ -39,8 +40,8 @@ TGCModuleMap TGCCableHPBToSL::getModuleIn(const TGCModuleId& sl) const {
         return TGCModuleMap{};
     }
 
-    TGCDatabase* wireP = m_database[sl.getRegionType()][TGCId::Wire].get();
-    TGCDatabase* stripP = m_database[sl.getRegionType()][TGCId::Strip].get();
+    TGCDatabase* wireP = m_database[sl.getRegionIndex()][TGCId::Wire].get();
+    TGCDatabase* stripP = m_database[sl.getRegionIndex()][TGCId::Strip].get();
 
     TGCModuleMap mapId{};
     const int wireMaxEntry = wireP->getMaxEntry();
@@ -72,9 +73,12 @@ TGCModuleMap TGCCableHPBToSL::getModuleOut(const TGCModuleId& hpb) const {
     }
 
     const int hpbId = hpb.getId();
-
+    auto signal = hpb.getSignalType();
+    if (signal == TGCId::NoSignalType)[[unlikely]]{
+      throw std::out_of_range("TGCCableHPBToSL::getModuleOut: signalType is undefined.");
+    }
     TGCDatabase* databaseP =
-        m_database[hpb.getRegionType()][hpb.getSignalType()].get();
+        m_database[hpb.getRegionIndex()][signal].get();
 
     TGCModuleMap mapId{};
     const int MaxEntry = databaseP->getMaxEntry();
