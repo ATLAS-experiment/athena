@@ -17,11 +17,13 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "GaudiKernel/PhysicalConstants.h"
 
+#include "ActsEvent/ParticleHypothesisEncoding.h"
 #include "src/detail/CurvilinearCovarianceHelper.h"
 #include "src/detail/HitSummaryDataUtils.h"
 #include "src/detail/ExpectedHitUtils.h"
 
 #include <Acts/Definitions/TrackParametrization.hpp>
+#include <Acts/Utilities/Helpers.hpp>
 #include <tuple>
 
 namespace {
@@ -67,43 +69,18 @@ namespace {
       track_particle.setSummaryValue(tmp, summary_type);
    }
 
-   std::array<unsigned short, ActsTrk::detail::to_underlying(xAOD::UncalibMeasType::nTypes)> makeMeasurementToSummaryTypeMap() {
-      std::array<unsigned short, ActsTrk::detail::to_underlying(xAOD::UncalibMeasType::nTypes)> ret;
+   std::array<unsigned short, Acts::toUnderlying(xAOD::UncalibMeasType::nTypes)> makeMeasurementToSummaryTypeMap() {
+      std::array<unsigned short, Acts::toUnderlying(xAOD::UncalibMeasType::nTypes)> ret;
       for (unsigned short& elm : ret) {
          elm = xAOD::numberOfTrackSummaryTypes;
       }
-      ret.at(ActsTrk::detail::to_underlying(xAOD::UncalibMeasType::PixelClusterType)) = xAOD::numberOfPixelHits;
-      ret.at(ActsTrk::detail::to_underlying(xAOD::UncalibMeasType::StripClusterType)) = xAOD::numberOfSCTHits;
+      ret.at(Acts::toUnderlying(xAOD::UncalibMeasType::PixelClusterType)) = xAOD::numberOfPixelHits;
+      ret.at(Acts::toUnderlying(xAOD::UncalibMeasType::StripClusterType)) = xAOD::numberOfSCTHits;
       return ret;
    }
 }
 
 namespace ActsTrk {
-
-   xAOD::ParticleHypothesis ActsTrk::TrackToTrackParticleCnvTool::convertParticleHypothesis(Acts::PdgParticle abs_pdg_id) {
-     static const std::array map {
-       std::pair{Acts::eElectron, xAOD::electron},
-       std::pair{Acts::eMuon,     xAOD::muon},
-       std::pair{Acts::ePionPlus, xAOD::pion},
-       std::pair{Acts::eProton,   xAOD::proton},
-       std::pair{Acts::ePionZero, xAOD::pi0},
-       std::pair{Acts::eNeutron,  xAOD::neutron},
-       std::pair{Acts::eGamma,    xAOD::photon},
-     };
-     auto iter = std::find_if(
-       map.begin(), map.end(),
-       [abs_pdg_id](const auto& elm) {
-         return abs_pdg_id == elm.first;
-       });
-     return (iter != map.end() ? iter->second : xAOD::noHypothesis);
-   }
-
-   TrackToTrackParticleCnvTool::TrackToTrackParticleCnvTool(const std::string& type,
-                                                            const std::string& name,
-                                                            const IInterface* parent)
-      : base_class(type, name, parent)
-   {
-   }
 
    StatusCode TrackToTrackParticleCnvTool::initialize()
    {
@@ -145,31 +122,26 @@ namespace ActsTrk {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode TrackToTrackParticleCnvTool::convert(
-      xAOD::TrackParticle& track_particle,
-      const EventContext& ctx,
-      const ActsTrk::TrackContainer::ConstTrackProxy& track,
-      const Acts::PerigeeSurface* perigeeSurface,
-      const InDet::BeamSpotData* beamspot_data) const
-   {
+   StatusCode TrackToTrackParticleCnvTool::convert(xAOD::TrackParticle& track_particle,
+                                                   const EventContext& ctx,
+                                                   const ActsTrk::TrackContainer::ConstTrackProxy& track,
+                                                   const Acts::Surface& perigeeSurface,
+                                                   const InDet::BeamSpotData* beamspot_data) const {
       using namespace Acts::UnitLiterals;
 
-      SG::ReadCondHandle<AtlasFieldCacheCondObj> fieldHandle = SG::makeHandle(m_fieldCacheCondObjInputKey, ctx);
-      ATH_CHECK(fieldHandle.isValid());
-      const AtlasFieldCacheCondObj* field_cond_data = fieldHandle.cptr();
+      const AtlasFieldCacheCondObj* field_cond_data{nullptr};
+      ATH_CHECK(SG::get(field_cond_data, m_fieldCacheCondObjInputKey, ctx));
       MagField::AtlasFieldCache fieldCache;
       field_cond_data->getInitializedCache(fieldCache);
 
-      const GeometryContext& gctx = m_trackingGeometryTool->getNominalGeometryContext();
+      const GeometryContext& gctx = m_trackingGeometryTool->getGeometryContext(ctx);
 
-      std::array<const InDetDD::SiDetectorElementCollection*, ActsTrk::detail::to_underlying(xAOD::UncalibMeasType::nTypes)> siDetEleColl{};
+      std::array<const InDetDD::SiDetectorElementCollection*, Acts::toUnderlying(xAOD::UncalibMeasType::nTypes)> siDetEleColl{};
       for (unsigned int idx = 0; idx < m_siDetEleCollToMeasurementType.size(); ++idx) {
-         SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> detHandle = SG::makeHandle(m_siDetEleCollKey[idx], ctx);
-         ATH_CHECK(detHandle.isValid());
-         siDetEleColl[m_siDetEleCollToMeasurementType[idx]] = detHandle.cptr();
+         ATH_CHECK(SG::get(siDetEleColl[m_siDetEleCollToMeasurementType[idx]], m_siDetEleCollKey[idx], ctx));
       }
 
-      static const std::array<unsigned short, ActsTrk::detail::to_underlying(xAOD::UncalibMeasType::nTypes)>
+      static const std::array<unsigned short, Acts::toUnderlying(xAOD::UncalibMeasType::nTypes)>
          measurementToSummaryType ATLAS_THREAD_SAFE (makeMeasurementToSummaryTypeMap());
 
       // re-used temporaries
@@ -182,10 +154,10 @@ namespace ActsTrk {
 
       // convert defining parameters
       Acts::BoundTrackParameters perigeeParam = [&] {
-         if (perigeeSurface == nullptr) {
+         if (&perigeeSurface == &track.referenceSurface()) {
             return track.createParametersAtReference();
          } else {
-            return parametersAtPerigee(ctx, track, *perigeeSurface);
+            return parametersAtPerigee(ctx, track, perigeeSurface);
          }
       }();
 
@@ -213,11 +185,11 @@ namespace ActsTrk {
       track_particle.setTrackFitter(static_cast<xAOD::TrackFitter>(m_trackFitter.value()));
 
       const Acts::ParticleHypothesis& hypothesis = track.particleHypothesis();
-      track_particle.setParticleHypothesis(convertParticleHypothesis(hypothesis.absolutePdg()));
+      track_particle.setParticleHypothesis(ParticleHypothesis::convert(hypothesis));
       constexpr float inv_1_MeV = 1 / 1_MeV;
 
-      std::array<std::array<uint8_t, ActsTrk::detail::to_underlying(ActsTrk::detail::HitCategory::N)>,
-                 ActsTrk::detail::to_underlying(xAOD::UncalibMeasType::nTypes)> specialHitCounts{};
+      std::array<std::array<uint8_t, Acts::toUnderlying(ActsTrk::detail::HitCategory::N)>,
+                 Acts::toUnderlying(xAOD::UncalibMeasType::nTypes)> specialHitCounts{};
 
       ActsTrk::detail::SumOfValues chi2_stat;
       gatherTrackSummaryData(track,
@@ -282,7 +254,7 @@ namespace ActsTrk {
                       hitInfo.contributingOutlierHits(ActsTrk::detail::HitSummaryData::pixelTotal),
                       xAOD::numberOfPixelOutliers);
       setSummaryValue(track_particle,
-                      specialHitCounts[ActsTrk::detail::to_underlying(xAOD::UncalibMeasType::PixelClusterType)][ActsTrk::detail::HitCategory::Hole],
+                      specialHitCounts[Acts::toUnderlying(xAOD::UncalibMeasType::PixelClusterType)][ActsTrk::detail::HitCategory::Hole],
                       xAOD::numberOfPixelHoles);
       setSummaryValue(track_particle,
                       hitInfo.sum<ActsTrk::detail::HitSummaryData::SharedHit>(ActsTrk::detail::HitSummaryData::pixelEndcap, 0),
@@ -347,7 +319,7 @@ namespace ActsTrk {
                       hitInfo.contributingSharedHits(ActsTrk::detail::HitSummaryData::stripTotal),
                       xAOD::numberOfSCTSharedHits);
       setSummaryValue(track_particle,
-                      specialHitCounts[ActsTrk::detail::to_underlying(xAOD::UncalibMeasType::StripClusterType)][ActsTrk::detail::HitCategory::Hole],
+                      specialHitCounts[Acts::toUnderlying(xAOD::UncalibMeasType::StripClusterType)][ActsTrk::detail::HitCategory::Hole],
                       xAOD::numberOfSCTHoles);
 
       double biased_chi2_variance = chi2_stat.biasedVariance();
@@ -441,11 +413,9 @@ namespace ActsTrk {
       return StatusCode::SUCCESS;
    }
 
-   Acts::BoundTrackParameters TrackToTrackParticleCnvTool::parametersAtPerigee(
-      const EventContext& ctx,
-      const ActsTrk::TrackContainer::ConstTrackProxy& track,
-      const Acts::PerigeeSurface& perigee_surface) const
-   {
+   Acts::BoundTrackParameters TrackToTrackParticleCnvTool::parametersAtPerigee(const EventContext& ctx,
+                                                                               const ActsTrk::TrackContainer::ConstTrackProxy& track,
+                                                                               const Acts::Surface& perigee_surface) const {
       const Acts::BoundTrackParameters trackParam = track.createParametersAtReference();
 
       Acts::Result<Acts::BoundTrackParameters>
