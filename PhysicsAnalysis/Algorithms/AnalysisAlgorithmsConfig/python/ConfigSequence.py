@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AnaAlgorithm.Logging import logging
 logCPAlgCfgSeq = logging.getLogger('CPAlgCfgSeq')
@@ -238,7 +238,8 @@ class ConfigSequence:
                 if name != 'groupName':
                     options[name] = defaultVal
                 logCPAlgCfgSeq.debug(f"    {name}: {defaultVal}")
-        return algOptions
+        # refresh and return options
+        return self.getOptions()
 
 
     def groupBlocks(self, groupName=''):

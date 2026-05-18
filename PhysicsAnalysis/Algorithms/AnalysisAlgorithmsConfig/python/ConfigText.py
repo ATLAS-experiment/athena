@@ -293,20 +293,16 @@ class TextConfig(ConfigFactory):
                 configSeq += seq
 
             # propagate special extra options to subalgs
-            if extraOptions is None:
+            extraOptionsForAlg = extraOptions.copy() if extraOptions is not None else None
+            if extraOptionsForAlg is None:
                 extraOptionsList = ["skipOnData", "skipOnMC", "onlyForDSIDs"]
                 for i in algOpts:
                     if i['name'] in extraOptionsList and i['defaultValue'] != i['value']:
-                        if extraOptions is None:
-                            extraOptions = {}
-                        extraOptions[i['name']] = i['value']
-                    # TODO: figure out why onlyForDSIDs is not properly updated in algOpts
-                    if i['name'] == "onlyForDSIDs" and options.get("onlyForDSIDs", None):
-                        if extraOptions is None:
-                            extraOptions = {}
-                        extraOptions[i['name']] = options["onlyForDSIDs"]
+                        if extraOptionsForAlg is None:
+                            extraOptionsForAlg = {}
+                        extraOptionsForAlg[i['name']] = i['value']
             else:
-                algOpts = seq.setOptions(extraOptions.copy())
+                algOpts = seq.setOptions(extraOptionsForAlg.copy())
 
             # check to see if there are unused parameters
             algOpts = [i['name'] for i in algOpts]
@@ -326,7 +322,7 @@ class TextConfig(ConfigFactory):
             for alg in self._order.get(block.algName, []):
                 if alg in options:
                     subAlg = block.subAlgs[alg]
-                    self._configureAlg(subAlg, options[alg], configSeq, containerName, extraOptions)
+                    self._configureAlg(subAlg, options[alg], configSeq, containerName, extraOptionsForAlg)
         return configSeq
 
 
