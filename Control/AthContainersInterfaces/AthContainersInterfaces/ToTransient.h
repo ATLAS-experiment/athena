@@ -39,7 +39,7 @@ template <class T>
 class ToTransient
 {
 public:
-  /// This definition flags taht we can skip actually calling @c toTransient
+  /// This definition flags that we can skip actually calling @c toTransient
   /// for this type.  It should be aliased to @c int.
   using noToTransient = int;
 

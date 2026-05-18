@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/AuxVectorData_test.cxx
@@ -390,6 +390,7 @@ public:
   virtual void reserve (size_t) override { std::abort(); }
   virtual void shift (size_t, ptrdiff_t) override { std::abort(); }
   virtual bool insertMove (size_t, IAuxStore&, const SG::auxid_set_t&) override { std::abort(); }
+  virtual void toTransient (const EventContext&) override { std::abort(); }
 
   virtual bool setOption (SG::auxid_t auxid, const SG::AuxDataOption&  option) override
   {

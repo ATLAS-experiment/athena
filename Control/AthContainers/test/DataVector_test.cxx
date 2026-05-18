@@ -773,6 +773,7 @@ public:
   virtual void reserve (size_t) override { }
   virtual void shift (size_t, ptrdiff_t) override { }
   virtual bool insertMove (size_t, IAuxStore&, const SG::auxid_set_t&) override { return false; }
+  virtual void toTransient (const EventContext&) override { std::abort(); }
 
   SG::auxid_set_t m_auxids;
 };

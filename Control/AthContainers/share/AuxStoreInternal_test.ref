@@ -12,4 +12,5 @@ getCopyAuxIDs      WARNING AthContainers/Root/AuxStoreInternal.cxx:895: skipped 
 Expect a warning here (except in standalone):
 Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
 getCopyAuxIDs      WARNING AthContainers/Root/AuxStoreInternal.cxx:895: skipped unlocked decoration during copy i2 (15)
+test_totransient
 test_threading

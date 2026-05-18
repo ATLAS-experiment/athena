@@ -14,7 +14,10 @@
 #include "AsgMessaging/MessageCheck.h"
 #include "AthContainers/AuxStoreInternal.h"
 #include "AthContainers/AuxTypeRegistry.h"
+#include "AthContainers/CurrentContext.h"
 #include "AthContainers/exceptions.h"
+
+#include "CxxUtils/checker_macros.h"
 
 // ROOT include(s):
 #include <TFile.h>
@@ -41,6 +44,25 @@ static const char* const INPUT_FILE_NAME = "InputNtuple.root";
 static const char* const INPUT_NTUPLE_NAME = "InputNtuple";
 static const char* const OUTPUT_FILE_NAME = "OutputNtuple.root";
 static const char* const OUTPUT_NTUPLE_NAME = "OutputNtuple";
+
+
+class TTest
+{
+public:
+  const EventContext* m_ctx = nullptr;
+};
+namespace SG {
+template <> class ATLAS_CHECK_THREAD_SAFETY ToTransient<std::vector<TTest> > {
+public:
+  static void toTransient (std::vector<TTest>& v, const EventContext& ctx)
+  {
+    for (TTest& e : v) {
+      e.m_ctx = &ctx;
+    }
+  }
+};
+}
+
 
 StatusCode test_linked() {
 
@@ -326,6 +348,31 @@ void createAndFillNtuple(const char* ntupleName, const char* fileName) {
   ntuple->Fill();
 }
 
+
+StatusCode test_toTransient()
+{
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  SG::auxid_t auxid1 = r.getAuxID<int> ("itest1");
+  SG::auxid_t auxid2 = r.getAuxID<TTest> ("ttest1");
+
+  xAOD::RAuxStore s( "fooAux." );
+
+  int* vp1 = reinterpret_cast<int*> (s.getData (auxid1, 3, 3));
+  TTest* vp2 = reinterpret_cast<TTest*> (s.getData (auxid2, 3, 3));
+
+  assert (vp1[0] == 0);
+  assert (vp2[0].m_ctx == nullptr);
+
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  s.toTransient (ctx);
+  assert (vp1[0] == 0);
+  assert (vp2[0].m_ctx == &ctx);
+  assert (vp2[2].m_ctx == &ctx);
+
+  return StatusCode::SUCCESS;
+}
+
+
 int main() {
 
   ANA_CHECK_SET_TYPE(int);
@@ -495,7 +542,8 @@ int main() {
 
   SIMPLE_ASSERT(test_linked().isSuccess());
   SIMPLE_ASSERT(test_insertmove().isSuccess());
-  SIMPLE_ASSERT( test_copyIDs().isSuccess() );
+  SIMPLE_ASSERT(test_copyIDs().isSuccess());
+  SIMPLE_ASSERT(test_toTransient().isSuccess());
 
   // Clean up.
   std::filesystem::remove(INPUT_FILE_NAME);

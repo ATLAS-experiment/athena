@@ -14,6 +14,7 @@
 // EDM include(s):
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthContainers/exceptions.h"
+#include "AthContainers/CurrentContext.h"
 
 #include "AsgMessaging/MessageCheck.h"
 
@@ -21,6 +22,8 @@
 #include "xAODRootAccess/Init.h"
 #include "xAODRootAccess/TAuxStore.h"
 #include "xAODRootAccess/tools/ReturnCheck.h"
+
+#include "CxxUtils/checker_macros.h"
 
 /// Helper macro for evaluating logical tests
 #define SIMPLE_ASSERT( EXP )                                            \
@@ -36,6 +39,24 @@
 
 // The name of the application:
 const char* APP_NAME = "ut_xaodrootaccess_tauxstore_test";
+
+
+class TTest
+{
+public:
+  const EventContext* m_ctx = nullptr;
+};
+namespace SG {
+template <> class ATLAS_CHECK_THREAD_SAFETY ToTransient<std::vector<TTest> > {
+public:
+  static void toTransient (std::vector<TTest>& v, const EventContext& ctx)
+  {
+    for (TTest& e : v) {
+      e.m_ctx = &ctx;
+    }
+  }
+};
+}
 
 
 StatusCode test_linked()
@@ -152,6 +173,32 @@ StatusCode test_copyIDs()
     SG::auxid_set_t out = s.getCopyIDs (true);
     assert (out == exp);
   }
+
+  return StatusCode::SUCCESS;
+}
+
+
+StatusCode test_toTransient()
+{
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  SG::auxid_t auxid1 = r.getAuxID<int> ("itest1");
+  SG::auxid_t auxid2 = r.getAuxID<TTest> ("ttest1");
+
+  TTree tree ("t", "t");
+  xAOD::TAuxStore s( "fooAux." );
+  RETURN_CHECK( APP_NAME, s.readFrom (tree) );
+
+  int* vp1 = reinterpret_cast<int*> (s.getData (auxid1, 3, 3));
+  TTest* vp2 = reinterpret_cast<TTest*> (s.getData (auxid2, 3, 3));
+
+  assert (vp1[0] == 0);
+  assert (vp2[0].m_ctx == nullptr);
+
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  s.toTransient (ctx);
+  assert (vp1[0] == 0);
+  assert (vp2[0].m_ctx == &ctx);
+  assert (vp2[2].m_ctx == &ctx);
 
   return StatusCode::SUCCESS;
 }
@@ -304,6 +351,7 @@ int main() {
 
    SIMPLE_ASSERT( test_linked().isSuccess() );
    SIMPLE_ASSERT( test_copyIDs().isSuccess() );
+   SIMPLE_ASSERT( test_toTransient().isSuccess() );
 
    return 0;
 }

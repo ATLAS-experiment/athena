@@ -141,6 +141,9 @@ public:
    /// Prepare the object to be written out
    bool toPersistent();
 
+   /// Dummy toTransient method.
+   bool toTransient( const EventContext& ) { return false; }
+
 private:
    /// Reset the object's internal cache
    virtual bool toTransient();

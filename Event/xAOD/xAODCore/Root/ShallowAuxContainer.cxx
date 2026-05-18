@@ -515,6 +515,12 @@ namespace xAOD {
                                 "container" );
    }
 
+   void ShallowAuxContainer::toTransient( const EventContext& ctx ) {
+     m_parentLink.toTransient( ctx );
+     m_store->toTransient( ctx );
+   }
+
+
    //
    /////////////////////////////////////////////////////////////////////////////
 

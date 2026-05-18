@@ -18,6 +18,31 @@
 #include <sstream>
 #include <cassert>
 
+#ifndef XAOD_STANDALONE
+#include "GaudiKernel/EventContext.h"
+#endif
+
+
+#ifndef XAOD_STANDALONE
+// Test toTransient.
+class TTest
+{
+public:
+  size_t m_evtnum = 0;
+};
+namespace SG {
+template <> class ToTransient<std::vector<TTest> > {
+public:
+  static void toTransient (std::vector<TTest>& v, const EventContext& ctx)
+  {
+    for (TTest& e : v) {
+      e.m_evtnum = ctx.evt();
+    }
+  }
+};
+}
+#endif
+
 
 class AuxInfoTest
   : public xAOD::AuxInfoBase
@@ -168,11 +193,37 @@ void test_copyIDs()
 }
 
 
+// Test toTransient.
+void test_toTransient()
+{
+  std::cout << "test_toTransient\n";
+
+#ifndef XAOD_STANDALONE
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  SG::auxid_t ityp1 = r.getAuxID<int> ("i1");
+  SG::auxid_t ttyp1 = r.getAuxID<TTest> ("tt1");
+
+  AuxInfoTest s1;
+  int* i1    = reinterpret_cast<int*> (s1.getData(ityp1, 1, 1));
+  TTest* tt1 = reinterpret_cast<TTest*> (s1.getData(ttyp1, 1, 1));
+
+  assert (i1[0] == 0);
+  assert (tt1[0].m_evtnum == 0);
+
+  EventContext ctx (123);
+  s1.toTransient (ctx);
+  assert (i1[0] == 0);
+  assert (tt1[0].m_evtnum == 123);
+#endif
+}
+
+
 int main()
 {
   std::cout << "ut_xaodcore_auxinfobase_test\n";
   test1();
   test_linked();
   test_copyIDs();
+  test_toTransient();
   return 0;
 }

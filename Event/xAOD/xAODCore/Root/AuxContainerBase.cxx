@@ -434,6 +434,24 @@ namespace xAOD {
    }
 
 
+   void AuxContainerBase::toTransient (const EventContext& ctx)
+   {
+      // Guard against multi-threaded execution:
+      guard_t guard (m_mutex);
+
+      for (SG::IAuxTypeVector* v : m_vecs) {
+         if(v) {
+           v->toTransient( ctx );
+         }
+      }
+
+      // Do the operation on the dynamic variables:
+      if( m_store ) {
+        m_store->toTransient( ctx );
+      }
+   }
+
+
    size_t AuxContainerBase::size() const {
 
       // Guard against multi-threaded execution:

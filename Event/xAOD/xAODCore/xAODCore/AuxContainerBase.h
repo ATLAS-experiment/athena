@@ -160,6 +160,10 @@ namespace xAOD {
       /// @brief Return interface for a linked variable.
       virtual SG::IAuxTypeVector* linkedVector (SG::auxid_t auxid) override;
 
+      /// Perform processing on aux variable objects just after reading
+      /// to make them usable as transient objects.
+      virtual void toTransient (const EventContext& ctx) override;
+
       /// @}
 
       /// @name Functions implementing the SG::IAuxStoreIO interface

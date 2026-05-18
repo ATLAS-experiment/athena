@@ -1,12 +1,14 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: IAuxStoreHolder.h 570883 2013-11-16 18:47:55Z krasznaa $
 #ifndef ATHCONTAINERSINTERFACES_IAUXSTOREHOLDER_H
 #define ATHCONTAINERSINTERFACES_IAUXSTOREHOLDER_H
+
+class EventContext;
 
 namespace SG {
 
@@ -73,6 +75,23 @@ namespace SG {
       /// @see AuxStoreType
       ///
       virtual AuxStoreType getStoreType() const = 0;
+
+
+     /**
+      * @brief Perform post-read processing on this store.
+      * @param ctx The current event context.
+      *
+      * Some object types require some processing after being read before
+      * they are usable.  This can be indicated by specializing SG::ToTransient
+      * for the vector type containing the variable.  This method will call
+      * such a ToTransient method for all contained variables for which this
+      * is required.
+      *
+      * This is also declared in IAuxStore.  We declare it here as well
+      * to prevent the need for from cross-hierarchy dynamic casting.
+      */
+      virtual void toTransient (const EventContext& ctx) = 0;
+
 
    }; // class IAuxStoreHolder
 
