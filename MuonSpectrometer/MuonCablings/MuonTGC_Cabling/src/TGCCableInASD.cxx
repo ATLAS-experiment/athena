@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCCableInASD.h"
@@ -60,7 +60,7 @@ std::unique_ptr<TGCChannelId> TGCCableInASD::getChannelIn(
     }
 
     TGCDatabase* databaseP =
-        m_database[asdout.getRegionIndex()][asdout.getModuleIndex()].get();
+        m_database[asdout.getRegionType()][asdout.getModuleType()].get();
 
     // sector ASDIn [1..48, 1..24], ASDOut [0..47, 0..23]
     int sector;
@@ -129,7 +129,7 @@ std::unique_ptr<TGCChannelId> TGCCableInASD::getChannelOut(
     const int asdinChannel = asdin.getChannel();
 
     TGCDatabase* databaseP =
-        m_database[asdin.getRegionIndex()][asdin.getModuleIndex()].get();
+        m_database[asdin.getRegionType()][asdin.getModuleType()].get();
 
     if (!databaseP) {
         return nullptr;

@@ -5,12 +5,10 @@
 #ifndef MUONTGC_CABLING_TGCCHANNELID_H
 #define MUONTGC_CABLING_TGCCHANNELID_H
 
-
+#include <memory>
 
 #include "MuonTGC_Cabling/TGCId.h"
 #include "MuonTGC_Cabling/TGCModuleId.h"
-#include <memory>
-#include <cstddef>//std::size_t
 
 namespace MuonTGC_Cabling {
 
@@ -54,8 +52,6 @@ class TGCChannelId : public TGCId {
     virtual void setChannel(int channel);
 
     bool isBackward() const;
-    
-    
 
    protected:
     ChannelIdType m_channelType{ChannelIdType::NoChannelIdType};
