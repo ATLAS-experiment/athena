@@ -4,10 +4,10 @@ usage () {
     [ $# -gt 1 ] && echo $2
     echo "
     Command line script to run track reconstruction
-    for the G-200 pipeline only as offline-like algorithms (Full-Scan)
+    for the G-130 pipeline only as offline-like algorithms (Full-Scan)
 
     Usage:
-    runReco_G200_FS.sh -i <your_input_RDO_file> -o <your_output_AOD_file_name>
+    runReco_G130_FS.sh -i <your_input_RDO_file> -o <your_output_AOD_file_name>
 
     Options:
     -i  |  --inputRDO       STRING      full path to input RDO file (mandatory)
@@ -51,7 +51,7 @@ if [ -z $inputRDO ]; then usage ; fi
 if [ -z $outputAOD ]; then usage ; fi
 
 if [ ! -f $inputRDO ]; then
-    echo "runReco_G200_FS.sh result: 1 ${inputRDO} not found"
+    echo "runReco_G130_FS.sh result: 1 ${inputRDO} not found"
     exit 1
 fi
 
@@ -61,11 +61,13 @@ source "$(dirname "$0")/setup_G200_ART.sh"
 run Reco_tf.py --CA \
     --maxEvents ${nEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
-    --postInclude 'EFTracking.TrackingAlgConfig.g2xxAlgCfg,ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
+    --postInclude 'EFTracking.TrackingAlgConfig.g1xxAlgCfg,ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
     --preExec 'from EFTracking.GpuEFTrackingConfigFlags import createGpuEFTrackingConfigFlags; \
                flags.addFlagsCategory("Trigger.EFTracking.GPU", createGpuEFTrackingConfigFlags, prefix=True); \
                flags.Trigger.EFTracking.GPU.inputDirectory="'"$PWD"'/ITk_data/"; \
-               flags.Trigger.EFTracking.GPU.pipeline="g200";' \
+               flags.Trigger.EFTracking.GPU.pipeline="g130"; \
+               from ActsConfig.ActsConfigFlags import SeedingStrategy; \
+               flags.Acts.SeedingStrategy=SeedingStrategy.GbtsFtf;' \
     --steering 'doRAWtoALL' \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD} \
