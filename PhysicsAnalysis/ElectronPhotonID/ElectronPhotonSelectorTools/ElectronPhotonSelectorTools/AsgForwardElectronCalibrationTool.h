@@ -24,6 +24,7 @@
 */
 
 
+#include "AsgTools/PropertyWrapper.h"
 #include "AsgTools/AsgTool.h"
 #include "xAODEgamma/ElectronFwd.h"
 
