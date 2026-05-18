@@ -1,0 +1,38 @@
+#!/bin/sh
+
+# art-include: main/Athena
+# art-description: DAOD building PHYSLITE mc23g
+# art-type: grid
+# art-memory: 4096
+# art-input: user.martindl.mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8514_s4618_r17610
+# art-input-nfiles: 1 
+# art-output: *.pool.root
+# art-output: checkFile*.txt
+# art-output: checkxAOD*.txt
+# art-output: checkIndexRefs*.txt
+
+set -e
+
+if [[ -z ${ArtInFile} ]]; then
+    ArtInFile="root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/data-art/large-input/CampaignInputs/mc23/AOD/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8514_s4618_r17610/AOD.50092877._002250.pool.root.1"
+fi
+
+Derivation_tf.py \
+--inputAODFile ${ArtInFile} \
+--outputDAODFile art.pool.root \
+--formats PHYSLITE \
+--maxEvents 1000 \
+
+echo "art-result: $? reco"
+
+checkFile.py DAOD_PHYSLITE.art.pool.root > checkFile_PHYSLITE.txt
+
+echo "art-result: $?  checkfile"
+
+checkxAOD.py DAOD_PHYSLITE.art.pool.root > checkxAOD_PHYSLITE.txt
+
+echo "art-result: $?  checkxAOD"
+
+checkIndexRefs.py DAOD_PHYSLITE.art.pool.root > checkIndexRefs_PHYSLITE.txt 2>&1
+
+echo "art-result: $?  checkIndexRefs"
