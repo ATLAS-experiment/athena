@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RecoToTruthAssociationAlg.h"
@@ -18,7 +18,6 @@
 using namespace xAOD::P4Helpers;
 namespace {
     constexpr unsigned int dummy_unsigned = 999;
-    constexpr int com_bit = (1<<xAOD::Muon::Author::Commissioning);
     void increment_unsigned(unsigned& val) {
         if (val == dummy_unsigned)
             val = 1;
@@ -183,12 +182,6 @@ StatusCode RecoToTruthAssociationAlg::execute(const EventContext& ctx) const {
                         // Check first if the exiting muon has a better author
                         if (MuonCombined::authorRank(decor_muon->author()) <  MuonCombined::authorRank(muon->author())){
                             ATH_MSG_DEBUG("Author of the decorated muon is better than the one of the new candidate");
-                            continue;
-                        }
-                        /// May be both muons are reconstructed by the same author but one is commissioning
-                        const int com_score = (muon->allAuthors() & com_bit) - (decor_muon->allAuthors() &com_bit);
-                        if (com_score > 0){
-                            ATH_MSG_DEBUG("Found two muons reconstructed by an equivalent author. But this one is from the commissioning chain");
                             continue;
                         }
                         /// The last judge is a simple dR cut but this will hopefully never trigger
