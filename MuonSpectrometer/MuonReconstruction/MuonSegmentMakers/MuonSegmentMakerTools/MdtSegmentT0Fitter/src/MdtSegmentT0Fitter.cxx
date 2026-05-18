@@ -457,7 +457,7 @@ namespace TrkDriftCircleMath {
 
     ATH_MSG_DEBUG("positive radii ML1 " <<  nml1p << " ML2 " <<  nml2p << " negative radii ML1 " << nml1n << " ML " << nml2n << " used hits " << used << " t0 Error " << t0Error);
 
-    constexpr std::array<Double_t,3> step{0.01 , 0.01 , 0.1 };
+    constexpr std::array<Double_t,3> step{0.01 , 0.01 , 2.0 };
     // starting point
     std::array<Double_t,3> variable{theta,d,0};
     // if t0Seed value from outside use this
