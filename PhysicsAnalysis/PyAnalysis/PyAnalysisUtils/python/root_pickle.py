@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #
 # File: root_pickle.py
@@ -79,7 +79,11 @@ def _getdir():
         if hasattr (d, 'load'):
             # Handle case of CurrentDirectory() returning an atomic.
             d = d.load()
-    return ROOT.gDirectory
+    d = ROOT.gDirectory
+    if hasattr (d, '_resolve'):
+        # Handle case of CurrentDirectory() returning TDirectoryPythonAdapter.
+        d = d._resolve()
+    return d
 
 
 def _setdir (d):
