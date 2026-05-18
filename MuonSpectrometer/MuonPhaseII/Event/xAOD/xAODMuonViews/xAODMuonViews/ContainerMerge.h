@@ -86,7 +86,13 @@ namespace xAOD{
         typename ConstDataVector<outT>::iterator outItr = outContainer.begin();
         for (; begin != end; ++begin){
             /// assume that the container is sorted under the identifier sorter
-            assert(begin + 1 == end || sorter(*begin, *(begin + 1)));
+            assert ((*begin) != nullptr);
+#ifndef NDEBUG
+            if (typename DataVector<inT>::const_iterator next = (begin +1); next != end) {
+                assert ((*next) != nullptr);
+                assert ((*begin)->identifierHash() <= (*next)->identifierHash());
+            }
+#endif
             outItr = std::find_if(outItr, outContainer.end(),
                                 [&](const outT::base_value_type* obj){
                                     return !sorter(obj, *begin);
