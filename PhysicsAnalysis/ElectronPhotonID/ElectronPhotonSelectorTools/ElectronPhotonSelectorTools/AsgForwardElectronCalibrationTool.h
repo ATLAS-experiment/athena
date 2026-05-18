@@ -89,12 +89,14 @@ private:
   /** Undo MinMax pT scaling used during training */
   double unscalePt(double x) const;
 
+
+
   /** pT scaling range used [MeV] */
-  double m_pTMin{10000.};
-  double m_pTMax{255000.};
+  Gaudi::Property<double> m_pTMin {this,"pTMin", 10000, "Lower bound of pT Min scaling [MeV]"};
+  Gaudi::Property<double> m_pTMax {this,"pTMax", 255000, "Lower bound of pT Max scaling [MeV]"};
 
   /** One lwtnn JSON file / DNN  per eta bin */
-  std::vector<std::string> m_modelFiles;
+  Gaudi::Property<std::vector<std::string>> m_modelFiles {this,"ModelFiles",{"","",""} , "lwtnn JSON files, one per eta bin (in eta order)"};
   std::vector<std::unique_ptr<lwt::LightweightGraph>> m_graphs;
 
   /** Input variable names */

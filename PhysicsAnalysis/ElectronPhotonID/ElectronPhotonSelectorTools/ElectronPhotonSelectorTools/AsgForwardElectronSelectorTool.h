@@ -161,15 +161,11 @@ public:
                             double& score,
                             double& calibPt) const;
 
-  /** One lwtnn JSON file / DNN  per eta bin */
-  std::vector<std::string> m_modelFiles;
   std::vector<std::unique_ptr<lwt::LightweightGraph>> m_graphs;
 
   /** Input variable names */
   std::vector<std::string> m_variables;
 
-  /** Working point: Loose = 90% | Medium = 80% | Tight = 70% */
-  std::string m_workingPoint;
 
   /** Handle to the calibration tool */
   ToolHandle<AsgForwardElectronCalibrationTool> m_calibTool{
@@ -182,6 +178,10 @@ public:
         2 = Tight */
   int m_wpIndex{-1};
 
+  /** One lwtnn JSON file / DNN  per eta bin */
+  Gaudi::Property<std::vector<std::string>> m_modelFiles {this,"ModelFiles",{"","",""} ,"lwtnn JSON files, one per eta bin (in eta order)"};                                         /** Working point: Loose = 90% | Medium = 80% | Tight = 70% */
+  Gaudi::Property<std::string> m_workingPoint {this,"WorkingPoint","Loose","Working Point: Loose(90%), Medium (80%), or Tight (70%)"};
+  
   /** AcceptInfo: defines the cut structure */
   asg::AcceptInfo m_acceptInfo;
 
