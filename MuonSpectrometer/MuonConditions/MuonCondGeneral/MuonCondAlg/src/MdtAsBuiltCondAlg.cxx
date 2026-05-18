@@ -10,6 +10,8 @@
 #include <PathResolver/PathResolver.h>
 #include <CxxUtils/StringUtils.h>
 #include "GeoModelKernel/throwExcept.h"
+#include <format>
+#include <string_view>
 
 namespace Muon{
 StatusCode MdtAsBuiltCondAlg::initialize(){
@@ -96,17 +98,18 @@ StatusCode MdtAsBuiltCondAlg::parseDataFromJSON(const nlohmann::json& lines,
         using tubeSide_t = MdtAsBuiltPar::tubeSide_t;
         for (const multilayer_t ml : {multilayer_t::ML1, multilayer_t::ML2}){
             for (const tubeSide_t side : {tubeSide_t::POS, tubeSide_t::NEG}){
-                std::stringstream prefix{};
-                prefix<<"Ml"<<(static_cast<unsigned>(ml) + 1);
-                prefix<<(side  == tubeSide_t::POS? "Pos" : "Neg")<<"TubeSide";
-                auto getValue = [&prefix,&line, this](const std::string& val) -> float{
-                    const std::string itrName = prefix.str()+val;
-                    if (line.find(itrName) == line.end()) {
-                        ATH_MSG_ERROR("JSON does not contain "<<itrName);
-                        THROW_EXCEPTION("Bad JSON key");
-                    }
-                    return line[prefix.str()+val];
-                };                
+                const std::string prefix = std::format("Ml{}{}TubeSide",
+                                       static_cast<unsigned>(ml) + 1,
+                                       side == tubeSide_t::POS ? "Pos" : "Neg");
+                auto getValue = [&prefix, &line, this](std::string_view val) -> float {
+                  std::string itrName{prefix};
+                  itrName.append(val);
+                  if (line.find(itrName) == line.end()) {
+                    ATH_MSG_ERROR("JSON does not contain " << itrName);
+                    THROW_EXCEPTION("Bad JSON key");
+                  }
+                  return line[itrName];
+                };               
                 xPar.setAlignmentParameters(ml, side, getValue("y0"), getValue("z0"),
                                             getValue("alpha"), getValue("ypitch"),
                                             getValue("zpitch"),getValue("stagg"));
@@ -185,11 +188,12 @@ StatusCode MdtAsBuiltCondAlg::setFromAscii(const std::string& asciiData,
     } 
     for (const multilayer_t ml : {multilayer_t::ML1, multilayer_t::ML2}){
         for (const tubeSide_t side : {tubeSide_t::POS, tubeSide_t::NEG}){
-            std::stringstream prefix{};
-            prefix<<"Ml"<<(static_cast<unsigned>(ml) + 1);
-            prefix<<(side  == tubeSide_t::POS? "Pos" : "Neg")<<"TubeSide";
-            auto dumpValue  = [&prefix, &newChannel](const std::string& field, const float val) {
-                newChannel[prefix.str()+field] = val;
+            const std::string prefix = std::format("Ml{}{}TubeSide",
+              static_cast<unsigned>(ml) + 1, side == tubeSide_t::POS ? "Pos" : "Neg");
+            auto dumpValue  = [&prefix, &newChannel](std::string_view field, const float val) {
+                std::string key{prefix};
+                key.append(field);
+                newChannel[key] = val;
             } ;
             
             float y0{0.f}, z0{0.f}, alpha{0.f}, ypitch{0.f}, zpitch{0.f};
