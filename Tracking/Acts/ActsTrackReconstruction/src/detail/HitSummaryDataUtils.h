@@ -18,20 +18,11 @@
 #include <type_traits>
 
 namespace ActsTrk::detail {
-   /** @brief Helper to convert class enum into an integer.
-    */
-   template <typename T_EnumClass >
-   constexpr typename std::underlying_type<T_EnumClass>::type to_underlying(T_EnumClass an_enum) {
-      return static_cast<typename std::underlying_type<T_EnumClass>::type>(an_enum);
-   }
- 
-   namespace HitCategory {
-      enum ESpecialHitCategories {
+   enum class HitCategory: std::uint8_t {      
          DeadSensor,
          Hole,
          N
-      };
-   }
+   };
  
    /** @brief Helper class to gather hit summary information for e.g. tracks.
     */
@@ -288,14 +279,14 @@ namespace ActsTrk::detail {
     */
    void gatherTrackSummaryData(const typename ActsTrk::TrackContainer::ConstTrackProxy &track,
                                const std::array<const InDetDD::SiDetectorElementCollection *,
-                                                to_underlying(xAOD::UncalibMeasType::nTypes)> &siDetEleColl,
-                               const std::array<unsigned short,to_underlying(xAOD::UncalibMeasType::nTypes)>
+                                                Acts::toUnderlying(xAOD::UncalibMeasType::nTypes)> &siDetEleColl,
+                               const std::array<unsigned short,Acts::toUnderlying(xAOD::UncalibMeasType::nTypes)>
                                         &measurement_to_summary_type,
                                SumOfValues &chi2_stat_out,
                                HitSummaryData &hit_info_out,
                                std::vector<ActsTrk::TrackStateBackend::ConstTrackStateProxy::IndexType > &param_state_idx_out,
-                               std::array<std::array<uint8_t,to_underlying(HitCategory::N)>,
-                                          to_underlying(xAOD::UncalibMeasType::nTypes)> &special_hit_counts_out);
+                               std::array<std::array<uint8_t,Acts::toUnderlying(HitCategory::N)>,
+                                          Acts::toUnderlying(xAOD::UncalibMeasType::nTypes)> &special_hit_counts_out);
  
 }
 #endif
