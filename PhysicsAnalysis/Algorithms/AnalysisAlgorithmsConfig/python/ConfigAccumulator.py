@@ -310,6 +310,7 @@ class ConfigAccumulator :
         self._currentAlg = None
         self._selectionNameExpr = re.compile ('[A-Za-z_][A-Za-z_0-9]+')
         self.setSourceName ('EventInfo', 'EventInfo')
+        self.setContainerMeta ('EventInfo', "nonContainer", True)
         self._eventcutflow = {}
         self.CA = None
 
@@ -663,6 +664,10 @@ class ConfigAccumulator :
         self._pass = 1
         self._currentAlg = None
         self._outputContainers = {}
+
+        # the above wiped out the meta-information, so we need to
+        # re-register the non-container status of EventInfo
+        self.setContainerMeta ('EventInfo', 'nonContainer', True)
 
 
     def getPreselection (self, containerName, selectionName, *, asList = False) :

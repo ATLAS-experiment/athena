@@ -43,7 +43,7 @@ class OutputAnalysisConfig (ConfigBlock):
         self.addOption ('containersOnlyForDSIDs', {}, type=dict,
             info="specify which DSIDs are allowed to produce a given container. "
             "This works like `onlyForDSIDs`: pass a list of DSIDs or regexps.")
-        self.addOption ('nonContainers', ['EventInfo'], type=list,
+        self.addOption ('nonContainers', [], type=list,
             info="a list of container names that are not actual containers but should be treated as non-containers.")
         self.addOption ('treeName', 'analysis', type=str,
             info="name of the output TTree to save.")
@@ -179,6 +179,11 @@ class OutputAnalysisConfig (ConfigBlock):
                             self.containers.pop (container)
                     # clear the dictionary to avoid warnings during the second pass
                     self.containersOnlyForDSIDs.clear()
+
+            for prefix, container in self.containers.items():
+                origName = config.getOutputContainerOrigin(container)
+                if config.getContainerMeta(origName, "nonContainer", False):
+                    self.nonContainers.append(origName)
 
             # at this point we are OK
             self.validated = True
