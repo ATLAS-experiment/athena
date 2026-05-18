@@ -7,7 +7,6 @@
 
 #include <array>
 #include <string>
-#include <string_view>
 #include <vector>
 
 #include "MuonTGC_Cabling/TGCCable.h"
@@ -36,14 +35,14 @@ class TGCCableASDToPP : public TGCCable {
 
     std::vector<std::vector<int> > getUpdateInfo(
         const int side, const int sector,
-        const std::vector<std::string>& diffFile, std::string_view blockname);
+        const std::vector<std::string>& diffFile, const std::string& blockname);
 
     TGCDatabaseASDToPP* getDatabase(const int side, const int region,
                                     const int sector, const int module) const;
 
     void updateIndividualDatabase(
         const int side, const int sector,
-        const std::vector<std::string>& diffFile, std::string_view blockname,
+        const std::vector<std::string>& diffFile, const std::string& blockname,
         std::shared_ptr<TGCDatabaseASDToPP>& database);
 
    private:

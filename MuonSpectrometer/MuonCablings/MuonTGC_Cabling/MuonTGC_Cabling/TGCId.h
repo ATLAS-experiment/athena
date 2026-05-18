@@ -5,9 +5,6 @@
 #ifndef MUONTGC_CABLING_TGCID_H
 #define MUONTGC_CABLING_TGCID_H
 
-#include <stdexcept>
-#include <cstddef> //size_t
-
 namespace MuonTGC_Cabling {
 
 class TGCId {
@@ -75,14 +72,6 @@ class TGCId {
     SignalType getSignalType() const;
     MultipletType getMultipletType() const;
     RegionType getRegionType() const;
-    
-    ///Return the region in a form which can be used as an index into an array;
-    ///throws std::out_of_range if the RegionType is "NoRegionType" (i.e. negative index)
-    std::size_t getRegionIndex() const;
-    
-    ///Return the module type in a form which can be used as an index into an array;
-    ///throws std::out_of_range if the ModuleType is "NoModuleType" (i.e. negative index)
-    std::size_t getModuleIndex() const;
 
     int getSectorInReadout() const;
 
@@ -161,24 +150,6 @@ inline TGCId::MultipletType TGCId::getMultipletType() const {
 inline TGCId::RegionType TGCId::getRegionType() const {
     return m_region;
 }
-
-inline std::size_t 
- TGCId::getRegionIndex() const{
-   const auto regionType = getRegionType();
-   if (regionType == NoRegionType)[[unlikely]]{
-     throw std::out_of_range("TGCChannelId::getRegionIndex: region type is 'NoRegionType'.");
-   } 
-   return static_cast<std::size_t>(regionType);
- }
-    
-inline std::size_t 
- TGCId::getModuleIndex() const{
-   const auto moduleType = getModuleType();
-   if (moduleType == NoModuleType)[[unlikely]]{
-     throw std::out_of_range("TGCChannelId::getModuleIndex: module type is 'NoModuleType'.");
-   } 
-   return static_cast<std::size_t>(moduleType);
- }
 
 inline int TGCId::getOctant() const {
     return m_octant;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCCableSLBToHPB.h"
@@ -9,8 +9,6 @@
 #include "MuonTGC_Cabling/TGCDatabasePPToSL.h"
 #include "MuonTGC_Cabling/TGCModuleHPB.h"
 #include "MuonTGC_Cabling/TGCModuleSLB.h"
-
-#include <utility>//std::in_range
 
 namespace MuonTGC_Cabling {
 
@@ -321,12 +319,10 @@ TGCModuleMap TGCCableSLBToHPB::getModuleInforHPB(
     }
 
     const int hpbId = hpbin.getId();
-    if (moduleType == TGCId::NoModuleType)[[unlikely]]{
-      throw std::out_of_range("TGCCableSLBToHPB::getModuleInforHPB: moduleType is out of range");
-    }
+
     TGCDatabase* databaseP =
-        m_database[hpbin.getRegionIndex()][moduleType].get();
-    
+        m_database[hpbin.getRegionType()][moduleType].get();
+
     TGCModuleMap mapId{};
     const int MaxEntry = databaseP->getMaxEntry();
     for (int i = 0; i < MaxEntry; i++) {
@@ -366,7 +362,7 @@ TGCModuleMap TGCCableSLBToHPB::getModuleOut(const TGCModuleId& slb) const {
     const int slbId = slb.getId();
 
     TGCDatabase* databaseP =
-        m_database[slb.getRegionIndex()][slb.getModuleIndex()].get();
+        m_database[slb.getRegionType()][slb.getModuleType()].get();
 
     TGCModuleMap mapId{};
     const int MaxEntry = databaseP->getMaxEntry();
