@@ -200,7 +200,7 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
   // Perform the fit
   auto result = fit(trackSourceLinks, initialParamsWithHypothesis, gx2fOptions, tracks);
 
-  return m_ATLASConverterTool->convertFitResult(ctx, tracks, result,
+  return m_ATLASConverterTool->convertFitResult(ctx, result,
                                                 Trk::TrackInfo::TrackFitter::GlobalChi2Fitter,
                                                 detail::SourceLinkType::TrkMeasurement);
 }
@@ -250,7 +250,7 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
                                                 pSurface.get(), detail::SourceLinkType::TrkMeasurement);
   // Perform the fit
   auto result = fit(trackSourceLinks, initialParams, gx2fOptions, tracks);
-  return m_ATLASConverterTool->convertFitResult(ctx, tracks, result,
+  return m_ATLASConverterTool->convertFitResult(ctx, result,
                                                 Trk::TrackInfo::TrackFitter::GlobalChi2Fitter,
                                                 detail::SourceLinkType::TrkMeasurement);
 }
@@ -297,7 +297,7 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(const EventContext& c
   // Perform the fit
   auto result = fit(trackSourceLinks, initialParams, gx2fOptions, tracks);
 
-  return m_ATLASConverterTool->convertFitResult(ctx, tracks, result,
+  return m_ATLASConverterTool->convertFitResult(ctx, result,
                                   Trk::TrackInfo::TrackFitter::GlobalChi2Fitter,
                                   detail::SourceLinkType::TrkPrepRawData);
 }
@@ -405,7 +405,7 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
                                                 pSurface.get(), detail::SourceLinkType::TrkMeasurement);
   // Perform the fit
   auto result = fit(trackSourceLinks, initialParams, gx2fOptions, tracks);
-  return m_ATLASConverterTool->convertFitResult(ctx, tracks, result,
+  return m_ATLASConverterTool->convertFitResult(ctx, result,
                                 Trk::TrackInfo::TrackFitter::GlobalChi2Fitter,
                                 detail::SourceLinkType::TrkMeasurement);
 }
@@ -488,7 +488,7 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
   // Perform the fit
   auto result = fit(trackSourceLinks, initialParamsWithHypothesis, gx2fOptions, tracks);
       
-  return m_ATLASConverterTool->convertFitResult(ctx, tracks, result,
+  return m_ATLASConverterTool->convertFitResult(ctx, result,
                                 Trk::TrackInfo::TrackFitter::GlobalChi2Fitter,
                                 detail::SourceLinkType::TrkMeasurement);
 }
