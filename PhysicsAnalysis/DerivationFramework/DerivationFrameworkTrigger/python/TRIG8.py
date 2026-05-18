@@ -230,6 +230,18 @@ def TRIG8Cfg(flags):
                                             "TauJets"
                                             ]
     if flags.Tracking.doLargeD0:
+        # dictionary update required for RAW->DAOD
+        TRIG8SlimmingHelper.AppendToDictionary.update({"LRTElectrons":"xAOD::ElectronContainer",
+                                                       "LRTElectronsAux":"xAOD::ElectronAuxContainer",
+                                                       "MuonsLRT": "xAOD::MuonContainer",
+                                                       "MuonsLRTAux": "xAOD::MuonAuxContainer",
+                                                       "InDetLargeD0TrackParticles": "xAOD::TrackParticleContainer",
+                                                       "InDetLargeD0TrackParticlesAux": "xAOD::TrackParticleAuxContainer",
+                                                       "LRTGSFTrackParticles": "xAOD::TrackParticleContainer",
+                                                       "LRTGSFTrackParticlesAux": "xAOD::TrackParticleAuxContainer",
+                                                       "LRTegammaClusters":"xAOD::CaloClusterContainer",
+                                                       "LRTegammaClustersAux":"xAOD::CaloClusterAuxContainer"})
+
         TRIG8SlimmingHelper.SmartCollections += ["LRTElectrons", "MuonsLRT",
                                                  "InDetLargeD0TrackParticles"]
 
@@ -271,6 +283,9 @@ def TRIG8Cfg(flags):
                                         "HLT_MET_tcpufit",
                                         "HLT_DisTrkBDTSel" ]
     if flags.Tracking.doTrackSegmentsDisappearing:
+        # dictionary update required for RAW->DAOD
+        TRIG8SlimmingHelper.AppendToDictionary.update({"InDetDisappearingTrackParticles": "xAOD::TrackParticleContainer",
+                                                       "InDetDisappearingTrackParticlesAux": "xAOD::TrackParticleAuxContainer"})
         TRIG8SlimmingHelper.AllVariables += ["InDetDisappearingTrackParticles"]
 
     TRIG8SlimmingHelper.StaticContent = [ 
