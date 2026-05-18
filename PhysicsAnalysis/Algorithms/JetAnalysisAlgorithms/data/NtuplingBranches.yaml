@@ -36,11 +36,6 @@ JetJvtAnalysisConfig:
   - name: weight_fjvt_effSF
     description: the event-level forward JVT efficiency SF
 
-JetUncertaintiesConfig:
-  - name: Njet
-    description: jet multiplicity for custom jet flavour composition uncertainties
-    toggled_by: analysisJetSelection
-
 JetReclusteringBlock:
   - name: pt
     description: reclustered jet $p_\mathrm{T}$
