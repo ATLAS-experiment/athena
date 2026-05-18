@@ -254,7 +254,7 @@ namespace ActsTrk {
                       hitInfo.contributingOutlierHits(ActsTrk::detail::HitSummaryData::pixelTotal),
                       xAOD::numberOfPixelOutliers);
       setSummaryValue(track_particle,
-                      specialHitCounts[Acts::toUnderlying(xAOD::UncalibMeasType::PixelClusterType)][ActsTrk::detail::HitCategory::Hole],
+                      specialHitCounts[Acts::toUnderlying(xAOD::UncalibMeasType::PixelClusterType)][Acts::toUnderlying(ActsTrk::detail::HitCategory::Hole)],
                       xAOD::numberOfPixelHoles);
       setSummaryValue(track_particle,
                       hitInfo.sum<ActsTrk::detail::HitSummaryData::SharedHit>(ActsTrk::detail::HitSummaryData::pixelEndcap, 0),
@@ -319,7 +319,7 @@ namespace ActsTrk {
                       hitInfo.contributingSharedHits(ActsTrk::detail::HitSummaryData::stripTotal),
                       xAOD::numberOfSCTSharedHits);
       setSummaryValue(track_particle,
-                      specialHitCounts[Acts::toUnderlying(xAOD::UncalibMeasType::StripClusterType)][ActsTrk::detail::HitCategory::Hole],
+                      specialHitCounts[Acts::toUnderlying(xAOD::UncalibMeasType::StripClusterType)][Acts::toUnderlying(ActsTrk::detail::HitCategory::Hole)],
                       xAOD::numberOfSCTHoles);
 
       double biased_chi2_variance = chi2_stat.biasedVariance();

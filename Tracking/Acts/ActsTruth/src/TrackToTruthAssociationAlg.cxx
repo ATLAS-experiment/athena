@@ -13,12 +13,7 @@
 #include <typeinfo>
 #include <numeric>
 
-namespace {
-   template <typename T_EnumClass >
-   constexpr typename std::underlying_type<T_EnumClass>::type to_underlying(T_EnumClass an_enum) {
-      return static_cast<typename std::underlying_type<T_EnumClass>::type>(an_enum);
-   }
-}
+
 namespace ActsTrk
 {
   // to dump
@@ -137,19 +132,19 @@ namespace ActsTrk
                static_cast< std::underlying_type<xAOD::UncalibMeasType>::type >(xAOD::UncalibMeasType::nTypes)>
        measurement_to_truth_association_maps{};
    
-    measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::PixelClusterType)]=pixelClustersToTruthAssociation.cptr();
-    measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::StripClusterType)]=stripClustersToTruthAssociation.cptr();
+    measurement_to_truth_association_maps[Acts::toUnderlying(xAOD::UncalibMeasType::PixelClusterType)]=pixelClustersToTruthAssociation.cptr();
+    measurement_to_truth_association_maps[Acts::toUnderlying(xAOD::UncalibMeasType::StripClusterType)]=stripClustersToTruthAssociation.cptr();
 
     if (!m_hgtdClustersToTruth.key().empty()) {
        SG::ReadHandle<ActsTrk::MeasurementToTruthParticleAssociation> hgtdClustersToTruthAssociation = SG::makeHandle(m_hgtdClustersToTruth, ctx);
          if (!hgtdClustersToTruthAssociation.isValid()) {
             ATH_MSG_DEBUG("No HGTD clusterss for key " << m_hgtdClustersToTruth.key() );
          }
-        measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::HGTDClusterType)]=hgtdClustersToTruthAssociation.cptr();
+        measurement_to_truth_association_maps[Acts::toUnderlying(xAOD::UncalibMeasType::HGTDClusterType)]=hgtdClustersToTruthAssociation.cptr();
     }
 
     auto assocSize = [&measurement_to_truth_association_maps](xAOD::UncalibMeasType type) {
-      const ActsTrk::MeasurementToTruthParticleAssociation *assoc = measurement_to_truth_association_maps[to_underlying(type)];
+      const ActsTrk::MeasurementToTruthParticleAssociation *assoc = measurement_to_truth_association_maps[Acts::toUnderlying(type)];
       return assoc ? assoc->size() : 0ul;
     };
 
@@ -194,11 +189,11 @@ namespace ActsTrk
               assert( sl != nullptr );
               const xAOD::UncalibratedMeasurement &uncalibMeas = getUncalibratedMeasurement(sl);
 
-              const ActsTrk::MeasurementToTruthParticleAssociation *association_map = measurement_to_truth_association_maps.at(to_underlying(uncalibMeas.type()));
+              const ActsTrk::MeasurementToTruthParticleAssociation *association_map = measurement_to_truth_association_maps.at(Acts::toUnderlying(uncalibMeas.type()));
               if (association_map) {
                  if (!association_map->isCompatibleWith(dynamic_cast< const xAOD::UncalibratedMeasurementContainer *>(uncalibMeas.container()))) {
                     if (compatible_assoc_container_counts.second==0) {
-                       ATH_MSG_ERROR("MeasurementToTruthParticleAssociation for measurement type " << to_underlying(uncalibMeas.type())
+                       ATH_MSG_ERROR("MeasurementToTruthParticleAssociation for measurement type " << Acts::toUnderlying(uncalibMeas.type())
                                      << " is not compatible with the measurement on track.");
                     }
                     ++compatible_assoc_container_counts.second;
@@ -227,14 +222,14 @@ namespace ActsTrk
                           truth_particle_counts.push_back( std::make_pair(mother_particle, HitCounterArray{}));
                           hit_count_iter = truth_particle_counts.end()-1;
                        }
-                       ++(hit_count_iter->second.at( to_underlying(uncalibMeas.type())));
+                       ++(hit_count_iter->second.at( Acts::toUnderlying(uncalibMeas.type())));
                     }
                  }
                  if (association_map->at(uncalibMeas.index()).empty()) {
-                    ++noise_hits.at( to_underlying(uncalibMeas.type()));
+                    ++noise_hits.at( Acts::toUnderlying(uncalibMeas.type()));
                  }
               }
-              ++reco_hits.at( to_underlying(uncalibMeas.type()));
+              ++reco_hits.at( Acts::toUnderlying(uncalibMeas.type()));
             }
 
           });

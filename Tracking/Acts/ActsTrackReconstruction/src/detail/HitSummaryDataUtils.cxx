@@ -14,14 +14,14 @@ namespace ActsTrk::detail {
 
   void gatherTrackSummaryData(const typename ActsTrk::TrackContainer::ConstTrackProxy &track,
                               const std::array<const InDetDD::SiDetectorElementCollection *,
-			      to_underlying(xAOD::UncalibMeasType::nTypes)> &siDetEleColl,
-                              const std::array<unsigned short, to_underlying(xAOD::UncalibMeasType::nTypes)>
+			      Acts::toUnderlying(xAOD::UncalibMeasType::nTypes)> &siDetEleColl,
+                              const std::array<unsigned short, Acts::toUnderlying(xAOD::UncalibMeasType::nTypes)>
                                        &measurement_to_summary_type,
                               SumOfValues &chi2_stat_out,
                               HitSummaryData &hit_info_out,
                               std::vector<ActsTrk::TrackStateBackend::ConstTrackStateProxy::IndexType > &param_state_idx_out,
-                              std::array<std::array<uint8_t, to_underlying(HitCategory::N)>,
-			      to_underlying(xAOD::UncalibMeasType::nTypes)> &special_hit_counts_out)
+                              std::array<std::array<uint8_t, Acts::toUnderlying(HitCategory::N)>,
+			      Acts::toUnderlying(xAOD::UncalibMeasType::nTypes)> &special_hit_counts_out)
   {
      chi2_stat_out.reset();
 
@@ -66,9 +66,9 @@ namespace ActsTrk::detail {
                 if (state.referenceSurface().insideBounds(localPos)) {
                    // @TODO check whether detector element is dead..
                    // if (dead) {
-                   // ++specialHitCounts.at(to_underlying(det_type)).at(HitCategory::DeadSensor);
+                   // ++specialHitCounts.at(Acts::toUnderlying(det_type)).at(HitCategory::DeadSensor);
                    // } else {
-                   ++special_hit_counts_out.at(to_underlying(det_type)).at(HitCategory::Hole);
+                   ++special_hit_counts_out.at(Acts::toUnderlying(det_type)).at(Acts::toUnderlying(HitCategory::Hole));
                 }
 
              }
@@ -82,15 +82,15 @@ namespace ActsTrk::detail {
                 auto sl = state.getUncalibratedSourceLink().template get<ActsTrk::ATLASUncalibSourceLink>();
                 assert( sl != nullptr );
                 const xAOD::UncalibratedMeasurement &uncalibMeas = getUncalibratedMeasurement(sl);
-                if (measurement_to_summary_type.at(to_underlying(uncalibMeas.type())) <  xAOD::numberOfTrackSummaryTypes ) {
-                   if (static_cast<unsigned int>(to_underlying(uncalibMeas.type())) < siDetEleColl.size()) {
+                if (measurement_to_summary_type.at(Acts::toUnderlying(uncalibMeas.type())) <  xAOD::numberOfTrackSummaryTypes ) {
+                   if (static_cast<unsigned int>(Acts::toUnderlying(uncalibMeas.type())) < siDetEleColl.size()) {
                      HitSummaryData::EHitSelection hit_selection = (flag.isOutlier()
                                                                         ? HitSummaryData::Outlier
                                                                         : HitSummaryData::Hit);
                      if (flag.isSharedHit()) {
                         hit_selection = HitSummaryData::EHitSelection(hit_selection | HitSummaryData::SharedHit);
                      }
-                     hit_info_out.addHit(siDetEleColl[to_underlying(uncalibMeas.type())],
+                     hit_info_out.addHit(siDetEleColl[Acts::toUnderlying(uncalibMeas.type())],
                                          uncalibMeas.identifierHash(),
                                          hit_selection);
                    }

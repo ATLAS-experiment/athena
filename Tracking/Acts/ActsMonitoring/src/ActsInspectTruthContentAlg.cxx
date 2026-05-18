@@ -10,11 +10,6 @@
 
 namespace ActsTrk {
 
-  template <typename T>
-  std::underlying_type_t<T> to_underlying(T val)
-  { return static_cast< std::underlying_type_t<T> >(val); }
-
-  
   ActsInspectTruthContentAlg::ActsInspectTruthContentAlg(const std::string& name,
 							 ISvcLocator* pSvcLocator)
     : AthReentrantAlgorithm(name, pSvcLocator)
@@ -151,12 +146,12 @@ namespace ActsTrk {
     ATH_MSG_DEBUG( "Checking truth for clusters ..." );
     for (const xAOD::UncalibratedMeasurement* meas : container) {
       std::size_t clusterTypeIndex = static_cast<std::size_t>(meas->type());
-      ++stat[to_underlying(EStatClusters::kNTotal)][clusterTypeIndex];
+      ++stat[Acts::toUnderlying(EStatClusters::kNTotal)][clusterTypeIndex];
       const auto& tps = truth.at(meas->index());
 
       // get number of (valid) contributions
       if (tps.empty()) {
-        ++stat[to_underlying(EStatClusters::kNClustersWithNoBarcode)][clusterTypeIndex];
+        ++stat[Acts::toUnderlying(EStatClusters::kNClustersWithNoBarcode)][clusterTypeIndex];
         continue;
       }
       
@@ -169,16 +164,16 @@ namespace ActsTrk {
       }
       
       if (tps.size() == 1) {
-	++stat[to_underlying(EStatClusters::kNClustersWith1Contribution)][clusterTypeIndex];
-	if (allValidParticles) ++stat[to_underlying(EStatClusters::kNClustersWith1ValidContribution)][clusterTypeIndex];
+	++stat[Acts::toUnderlying(EStatClusters::kNClustersWith1Contribution)][clusterTypeIndex];
+	if (allValidParticles) ++stat[Acts::toUnderlying(EStatClusters::kNClustersWith1ValidContribution)][clusterTypeIndex];
       }
       else if (tps.size() == 2) {
-	++stat[to_underlying(EStatClusters::kNClustersWith2Contribution)][clusterTypeIndex];
-	if (allValidParticles) ++stat[to_underlying(EStatClusters::kNClustersWith2ValidContribution)][clusterTypeIndex];
+	++stat[Acts::toUnderlying(EStatClusters::kNClustersWith2Contribution)][clusterTypeIndex];
+	if (allValidParticles) ++stat[Acts::toUnderlying(EStatClusters::kNClustersWith2ValidContribution)][clusterTypeIndex];
       }
       else {
-	++stat[to_underlying(EStatClusters::kNClustersWith3Contribution)][clusterTypeIndex];
-	if (allValidParticles) ++stat[to_underlying(EStatClusters::kNClustersWith3ValidContribution)][clusterTypeIndex];
+	++stat[Acts::toUnderlying(EStatClusters::kNClustersWith3Contribution)][clusterTypeIndex];
+	if (allValidParticles) ++stat[Acts::toUnderlying(EStatClusters::kNClustersWith3ValidContribution)][clusterTypeIndex];
       }
       
       // get main contribution
@@ -189,8 +184,8 @@ namespace ActsTrk {
 	break;
       }
 
-      if (not hasContributionFromPrimaryParticle) ++stat[to_underlying(EStatClusters::kNClustersWith200kBarcode)][clusterTypeIndex];
-      else ++stat[to_underlying(EStatClusters::kNClustersFromPrimaries)][clusterTypeIndex];
+      if (not hasContributionFromPrimaryParticle) ++stat[Acts::toUnderlying(EStatClusters::kNClustersWith200kBarcode)][clusterTypeIndex];
+      else ++stat[Acts::toUnderlying(EStatClusters::kNClustersFromPrimaries)][clusterTypeIndex];
     }
     
     return StatusCode::SUCCESS;
@@ -209,8 +204,8 @@ namespace ActsTrk {
       int nMeasurements = 0;
       std::unordered_map<std::size_t, int> particleIds {};
 
-      std::size_t seedType = to_underlying(deduceSeedType(seed));
-      ++stat[to_underlying(EStatSeeds::kNTotal)][seedType];
+      std::size_t seedType = Acts::toUnderlying(deduceSeedType(seed));
+      ++stat[Acts::toUnderlying(EStatSeeds::kNTotal)][seedType];
 
       const auto& sps = seed.sp();
       for ( const xAOD::SpacePoint* sp : sps ) {
@@ -218,7 +213,7 @@ namespace ActsTrk {
 	for (const xAOD::UncalibratedMeasurement* meas : measurements ) {
 	  ++nMeasurements;
 	  
-	  std::size_t clusterTypeIndex = to_underlying(meas->type());
+	  std::size_t clusterTypeIndex = Acts::toUnderlying(meas->type());
 	  const ActsTrk::MeasurementToTruthParticleAssociation* truth = truths.at(clusterTypeIndex);
 	  auto tps = truth->at(meas->index());
 
@@ -251,24 +246,24 @@ namespace ActsTrk {
 
       
       if (nMatches == 0) {
-	++stat[to_underlying(EStatSeeds::nKSeedsWith0Matches)][seedType];
+	++stat[Acts::toUnderlying(EStatSeeds::nKSeedsWith0Matches)][seedType];
       } else if (nMatches == 1) {
-	++stat[to_underlying(EStatSeeds::nKSeedsWith1Matches)][seedType];
+	++stat[Acts::toUnderlying(EStatSeeds::nKSeedsWith1Matches)][seedType];
       } else if	(nMatches == 2) {
-	++stat[to_underlying(EStatSeeds::nKSeedsWith2Matches)][seedType];
-	if (isFromSameParticle) ++stat[to_underlying(EStatSeeds::nKSeedsSame2Matches)][seedType];
+	++stat[Acts::toUnderlying(EStatSeeds::nKSeedsWith2Matches)][seedType];
+	if (isFromSameParticle) ++stat[Acts::toUnderlying(EStatSeeds::nKSeedsSame2Matches)][seedType];
       } else if (nMatches == 3) {
-        ++stat[to_underlying(EStatSeeds::nKSeedsWith3Matches)][seedType];
-	if (isFromSameParticle) ++stat[to_underlying(EStatSeeds::nKSeedsSame3Matches)][seedType];
+        ++stat[Acts::toUnderlying(EStatSeeds::nKSeedsWith3Matches)][seedType];
+	if (isFromSameParticle) ++stat[Acts::toUnderlying(EStatSeeds::nKSeedsSame3Matches)][seedType];
       } else if (nMatches == 4) {
-        ++stat[to_underlying(EStatSeeds::nKSeedsWith4Matches)][seedType];
-	if (isFromSameParticle) ++stat[to_underlying(EStatSeeds::nKSeedsSame4Matches)][seedType];
+        ++stat[Acts::toUnderlying(EStatSeeds::nKSeedsWith4Matches)][seedType];
+	if (isFromSameParticle) ++stat[Acts::toUnderlying(EStatSeeds::nKSeedsSame4Matches)][seedType];
       } else if (nMatches == 5) {
-        ++stat[to_underlying(EStatSeeds::nKSeedsWith5Matches)][seedType];
-	if (isFromSameParticle) ++stat[to_underlying(EStatSeeds::nKSeedsSame5Matches)][seedType];
+        ++stat[Acts::toUnderlying(EStatSeeds::nKSeedsWith5Matches)][seedType];
+	if (isFromSameParticle) ++stat[Acts::toUnderlying(EStatSeeds::nKSeedsSame5Matches)][seedType];
       } else if (nMatches == 6) {
-        ++stat[to_underlying(EStatSeeds::nKSeedsWith6Matches)][seedType];
-	if (isFromSameParticle) ++stat[to_underlying(EStatSeeds::nKSeedsSame6Matches)][seedType];
+        ++stat[Acts::toUnderlying(EStatSeeds::nKSeedsWith6Matches)][seedType];
+	if (isFromSameParticle) ++stat[Acts::toUnderlying(EStatSeeds::nKSeedsSame6Matches)][seedType];
       }                  
     } // loop on seed
     
@@ -312,18 +307,18 @@ namespace ActsTrk {
 							cluster_stat_t& onTrackStat) const {
     ATH_MSG_DEBUG( "Checking truth for tracks ..." );
     for (const auto track : tracks) {
-      ++trackStat[to_underlying(EStatTracks::kNTotal)][0];
+      ++trackStat[Acts::toUnderlying(EStatTracks::kNTotal)][0];
       std::size_t nHoles = track.nHoles();
-      if (nHoles == 0) ++trackStat[to_underlying(EStatTracks::kNTracks0Holes)][0];
-      else if (nHoles == 1) ++trackStat[to_underlying(EStatTracks::kNTracks1Holes)][0];
-      else if (nHoles == 2) ++trackStat[to_underlying(EStatTracks::kNTracks2Holes)][0];
-      else ++trackStat[to_underlying(EStatTracks::kNTracks3Holes)][0];
+      if (nHoles == 0) ++trackStat[Acts::toUnderlying(EStatTracks::kNTracks0Holes)][0];
+      else if (nHoles == 1) ++trackStat[Acts::toUnderlying(EStatTracks::kNTracks1Holes)][0];
+      else if (nHoles == 2) ++trackStat[Acts::toUnderlying(EStatTracks::kNTracks2Holes)][0];
+      else ++trackStat[Acts::toUnderlying(EStatTracks::kNTracks3Holes)][0];
 
       std::size_t nOutliers = track.nOutliers();
-      if (nOutliers == 0) ++trackStat[to_underlying(EStatTracks::kNTracks0Outliers)][0];
-      else if (nOutliers == 1) ++trackStat[to_underlying(EStatTracks::kNTracks1Outliers)][0];
-      else if (nOutliers == 2) ++trackStat[to_underlying(EStatTracks::kNTracks2Outliers)][0];
-      else ++trackStat[to_underlying(EStatTracks::kNTracks3Outliers)][0];
+      if (nOutliers == 0) ++trackStat[Acts::toUnderlying(EStatTracks::kNTracks0Outliers)][0];
+      else if (nOutliers == 1) ++trackStat[Acts::toUnderlying(EStatTracks::kNTracks1Outliers)][0];
+      else if (nOutliers == 2) ++trackStat[Acts::toUnderlying(EStatTracks::kNTracks2Outliers)][0];
+      else ++trackStat[Acts::toUnderlying(EStatTracks::kNTracks3Outliers)][0];
 
 
       bool AllValids = true;
@@ -346,14 +341,14 @@ namespace ActsTrk {
 						assert( sl != nullptr);
 						const xAOD::UncalibratedMeasurement &meas = getUncalibratedMeasurement(sl);
 						
-						std::size_t clusterTypeIndex = to_underlying(meas.type());
-						++onTrackStat[to_underlying(EStatClusters::kNTotal)][clusterTypeIndex];
+						std::size_t clusterTypeIndex = Acts::toUnderlying(meas.type());
+						++onTrackStat[Acts::toUnderlying(EStatClusters::kNTotal)][clusterTypeIndex];
 						
 						const ActsTrk::MeasurementToTruthParticleAssociation* truth = truths[clusterTypeIndex];
 						const auto& tps = truth->at(meas.index());
 
 						if (tps.empty()) {
-						  ++onTrackStat[to_underlying(EStatClusters::kNClustersWithNoBarcode)][clusterTypeIndex];
+						  ++onTrackStat[Acts::toUnderlying(EStatClusters::kNClustersWithNoBarcode)][clusterTypeIndex];
 						  AllValids = false;
 						  return;
 						}
@@ -371,16 +366,16 @@ namespace ActsTrk {
 						if (not hasContributionFromPrimaryParticle) AllValids = false;
 						
 						if (tps.size() == 1) {
-						  ++onTrackStat[to_underlying(EStatClusters::kNClustersWith1Contribution)][clusterTypeIndex];
-						  if (allBarcodesValid) ++onTrackStat[to_underlying(EStatClusters::kNClustersWith1ValidContribution)][clusterTypeIndex];
+						  ++onTrackStat[Acts::toUnderlying(EStatClusters::kNClustersWith1Contribution)][clusterTypeIndex];
+						  if (allBarcodesValid) ++onTrackStat[Acts::toUnderlying(EStatClusters::kNClustersWith1ValidContribution)][clusterTypeIndex];
 						}
 						else if (tps.size() == 2) {
-						  ++onTrackStat[to_underlying(EStatClusters::kNClustersWith2Contribution)][clusterTypeIndex];
-						  if (allBarcodesValid) ++onTrackStat[to_underlying(EStatClusters::kNClustersWith2ValidContribution)][clusterTypeIndex];
+						  ++onTrackStat[Acts::toUnderlying(EStatClusters::kNClustersWith2Contribution)][clusterTypeIndex];
+						  if (allBarcodesValid) ++onTrackStat[Acts::toUnderlying(EStatClusters::kNClustersWith2ValidContribution)][clusterTypeIndex];
 						}
 						else {
-						  ++onTrackStat[to_underlying(EStatClusters::kNClustersWith3Contribution)][clusterTypeIndex];
-						  if (allBarcodesValid) ++onTrackStat[to_underlying(EStatClusters::kNClustersWith3ValidContribution)][clusterTypeIndex];
+						  ++onTrackStat[Acts::toUnderlying(EStatClusters::kNClustersWith3Contribution)][clusterTypeIndex];
+						  if (allBarcodesValid) ++onTrackStat[Acts::toUnderlying(EStatClusters::kNClustersWith3ValidContribution)][clusterTypeIndex];
 						}
 
 						bool contributionOnlyFromSimulationParticles = true;
@@ -394,8 +389,8 @@ namespace ActsTrk {
 						}
 						
 						// get main contribution
-						if (contributionOnlyFromSimulationParticles) ++onTrackStat[to_underlying(EStatClusters::kNClustersWith200kBarcode)][clusterTypeIndex];
-						else ++onTrackStat[to_underlying(EStatClusters::kNClustersFromPrimaries)][clusterTypeIndex];
+						if (contributionOnlyFromSimulationParticles) ++onTrackStat[Acts::toUnderlying(EStatClusters::kNClustersWith200kBarcode)][clusterTypeIndex];
+						else ++onTrackStat[Acts::toUnderlying(EStatClusters::kNClustersFromPrimaries)][clusterTypeIndex];
 					      }); // llop on states
 
       bool AllSameBarcode = false;
@@ -405,8 +400,8 @@ namespace ActsTrk {
 	break;
       }
       
-      if (AllValids) ++trackStat[to_underlying(EStatTracks::kNFullMatch)][0];
-      if (AllSameBarcode) ++trackStat[to_underlying(EStatTracks::kNPerfectMatch)][0];
+      if (AllValids) ++trackStat[Acts::toUnderlying(EStatTracks::kNFullMatch)][0];
+      if (AllSameBarcode) ++trackStat[Acts::toUnderlying(EStatTracks::kNPerfectMatch)][0];
     } // loop on tracks    
 
     return StatusCode::SUCCESS;

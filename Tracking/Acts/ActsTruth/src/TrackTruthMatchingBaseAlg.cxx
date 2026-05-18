@@ -17,11 +17,6 @@
 #include <numeric>
 
 namespace {
-   template <typename T_EnumClass >
-   constexpr typename std::underlying_type<T_EnumClass>::type to_underlying(T_EnumClass an_enum) {
-      return static_cast<typename std::underlying_type<T_EnumClass>::type>(an_enum);
-   }
-
    template <typename T, std::size_t N>
    void accumulateTo(typename std::vector<std::array<T,N> >::const_iterator src_begin,
                      typename std::vector<std::array<T,N> >::const_iterator src_end,
