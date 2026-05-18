@@ -1,16 +1,18 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RPCCALIBDBENTRY_H
 #define RPCCALIBDBENTRY_H
 
-#include <string>
-#include <iostream>
-#include <memory>
+
 #include "MuonCondData/RpcCalibData.h"
 #include "Identifier/Identifier.h"
-//#include <sstream>
+#include <vector>
+#include <string>
+#include <memory>
+
+class Identifier;
 
 namespace MuonCalib{
 
@@ -51,7 +53,9 @@ namespace MuonCalib{
 	          int getNPhiStrips() const {return m_nRecPhi1;}
 
         private:
-	        void  initData(std::string etaRec, std::string etaDet, std::string phiRec1, std::string phiRec2, std::string phiDet1, std::string phiDet2);
+	        void  initData(std::string_view etaRec, std::string_view etaDet,
+            std::string_view phiRec1, std::string_view phiRec2, std::string_view phiDet1,
+            std::string_view phiDet2);
 	        int m_nRecEta{-9999}; 
           int m_nDetEta{-9999};
           int m_nRecPhi1{-9999};
