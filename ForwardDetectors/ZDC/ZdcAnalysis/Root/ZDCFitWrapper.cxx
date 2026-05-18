@@ -216,6 +216,90 @@ void ZDCFitExpFermiVariableTausLHCf::UnconstrainFit()
   theTF1->SetParameter(6, 0.1);
 }
 
+ZDCFitExpFermiVariableTausInduct::ZDCFitExpFermiVariableTausInduct(const std::string& tag, float tmin, float tmax, bool fixTau1, bool fixTau2, float tau1, float tau2) :
+  ZDCFitWrapper(std::make_shared<TF1>(("ExpFermiVariableTausInduct" + tag).c_str(), ZDCFermiExpFitInduct, tmin, tmax, 9)),
+  m_fixTau1(fixTau1), m_fixTau2(fixTau2), m_tau1(tau1), m_tau2(tau2)
+{
+  std::shared_ptr<TF1> theTF1 = ZDCFitWrapper::GetWrapperTF1();
+
+  theTF1->SetParName(0, "Amp");
+  theTF1->SetParName(1, "T0");
+  theTF1->SetParName(2, "#tau_{1}");
+  theTF1->SetParName(3, "#tau_{2}");
+  theTF1->SetParName(4, "C");
+  theTF1->SetParName(5, "period");
+  theTF1->SetParName(6, "Acos");
+  theTF1->SetParName(7, "Bsin");
+  theTF1->SetParName(8, "delta");
+
+  theTF1->SetParLimits(1, tmin, tmax);
+  theTF1->SetParLimits(4, -50, 50);
+  theTF1->SetParLimits(5, 10, 50);
+  theTF1->SetParLimits(6, 0, 1);
+  theTF1->SetParLimits(7, -1, 1);
+
+  if (m_fixTau1) theTF1->FixParameter(2, m_tau1);
+  else theTF1->SetParLimits(2, 0.5, 3);
+    
+  if (m_fixTau2) theTF1->FixParameter(3, m_tau2);
+  else theTF1->SetParLimits(3, 3.5, 8);
+}
+
+void ZDCFitExpFermiVariableTausInduct::DoInitialize(float initialAmp, float initialT0, float ampMin, float ampMax)
+{
+  std::shared_ptr<TF1> theTF1 = ZDCFitWrapper::GetWrapperTF1();
+
+  theTF1->SetParameter(0, initialAmp);
+  theTF1->SetParLimits(0, ampMin, ampMax);
+
+  float t0 = initialT0;
+  if (t0 < GetT0Min()) t0 = GetT0Min()*1.1;
+  if (t0 > GetT0Max()) t0 = GetT0Max()/1.1;
+  theTF1->SetParameter(1, t0);
+
+  theTF1->SetParameter(1, initialT0);
+  //theTF1->FixParameter(4, 0);
+  theTF1->FixParameter(5, 13.5);
+  theTF1->SetParameter(6, 0.5);
+  theTF1->SetParameter(7, 0.5);
+  theTF1->FixParameter(8, 0);
+
+  //  theTF1->SetParLimits(0, ampMin, ampMax);
+
+  if (!m_fixTau1) theTF1->SetParameter(2, m_tau1);
+  if (!m_fixTau2) theTF1->SetParameter(3, m_tau2);
+
+  // Set the parameter errors which ROOT now uses <<<to set the initial step sizes>>>
+  //
+  double ampStep = std::min(0.05*initialAmp, std::abs(ampMax - initialAmp)/2.);
+  
+  theTF1->SetParError(0, ampStep);
+  theTF1->SetParError(1, 1.0);
+
+  if (!m_fixTau1) theTF1->SetParError(2, 0.05);
+  if (!m_fixTau2) theTF1->SetParError(3, 0.25);
+
+  theTF1->SetParError(4, 1);
+  theTF1->SetParError(5, 5);
+  theTF1->SetParError(6, 0.1);
+  theTF1->SetParError(7, 0.1);
+}
+
+void ZDCFitExpFermiVariableTausInduct::SetT0FitLimits(float t0Min, float t0Max)
+{
+  // Set the parameter limits accordingly on the TF1
+  //
+  std::shared_ptr<TF1> theTF1 = ZDCFitWrapper::GetWrapperTF1();
+  theTF1->SetParLimits(1, t0Min, t0Max);
+}
+
+void ZDCFitExpFermiVariableTausInduct::ConstrainFit()
+{
+}
+void ZDCFitExpFermiVariableTausInduct::UnconstrainFit()
+{
+}
+
 ZDCFitExpFermiFixedTaus::ZDCFitExpFermiFixedTaus(const std::string& tag, float tmin, float tmax, float tau1, float tau2) :
   ZDCFitWrapper(std::make_shared<TF1>(("ExpFermiFixedTaus" + tag).c_str(), this, tmin, tmax, 3)),
   m_tau1(tau1), m_tau2(tau2)

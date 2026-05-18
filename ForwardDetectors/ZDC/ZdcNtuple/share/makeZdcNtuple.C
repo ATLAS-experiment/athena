@@ -118,6 +118,7 @@ int makeZdcNtuple(std::string submitDir = "submitDir", std::string readDir = "fi
   if (enableStr.find("mboverlay2016"   ) != std::string::npos) { zdcAna.setProperty("mboverlay2016"      , true);}
   if (enableStr.find("upc2018"         ) != std::string::npos) { zdcAna.setProperty("upc2018"            , true);}
   if (enableStr.find("mb2018"          ) != std::string::npos) { zdcAna.setProperty("mb2018"             , true);}
+  if (enableStr.find("oo2025"          ) != std::string::npos) { zdcAna.setProperty("oo2025"             , true);}
 
   if (enableStr.find("zdc2015") != std::string::npos) { zdcAna.setProperty("zdcConfig", "PbPb2015"); zdcAna.setProperty("doZdcCalib", true); }
   if (enableStr.find("zdc2016") != std::string::npos) { zdcAna.setProperty("zdcConfig", "pPb2016"); zdcAna.setProperty("doZdcCalib", false); }
