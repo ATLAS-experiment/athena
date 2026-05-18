@@ -12,6 +12,8 @@
 
 #include "GlobalEventInfo.h"
 
+class EventContext;
+
 /**
  * @class IForwardElectronCalib
  * @brief A tool used to Compute the pT Calibration.
