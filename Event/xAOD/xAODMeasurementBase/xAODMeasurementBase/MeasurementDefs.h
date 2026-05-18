@@ -1,6 +1,5 @@
-
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMEASUREMENTBASE_MEASUREMENTDEFS_H
 #define XAODMEASUREMENTBASE_MEASUREMENTDEFS_H
@@ -39,6 +38,12 @@ enum class UncalibMeasType {
     nTypes
 };
 
+/**@brief Convert the measurement enum to a string */
+std::string toString(const UncalibMeasType type);
+
+inline std::ostream& operator<<(std::ostream&ostr, const UncalibMeasType type) {
+        return (ostr<<toString(type));
+}
 /// @ detector ID element hash
 using DetectorIDHashType = unsigned int;
 using DetectorIdentType = long unsigned int;
@@ -71,9 +76,9 @@ template <int N> MeasVector<N> toStorage(const AmgVector(N)& amgVec){
         for (int i =0 ; i < N ; ++i) vec[i] = amgVec[i];
         return vec;
 }
-
-///@brief Converts the double precision of the AmgSymMatrix 
-///       into the floating point storage precision of the MeasMatrix
+/** @brief Type conversion of a symmetric double matrix to 
+ *         a float matrix
+ *  @param amgMat: Reference to the matrix to convert */
 template <int N> MeasMatrix<N> toStorage(const AmgSymMatrix(N)& amgMat)
     requires (N > 1) {
      MeasMatrix<N> mat{MeasMatrix<N>::Zero()};
@@ -84,7 +89,9 @@ template <int N> MeasMatrix<N> toStorage(const AmgSymMatrix(N)& amgMat)
      }
      return mat;
 }
-
+/** @brief Type conversion of a symmetrix float matrix to a matrix with
+ *         double precision
+ *  @param xAODmat: Reference to the matrix to convert */
 template <int N> AmgSymMatrix(N) toEigen(const ConstMatrixMap<N>& xAODmat)
     requires (N > 1) {
     AmgSymMatrix(N) mat{AmgSymMatrix(N)::Zero()};
@@ -95,7 +102,9 @@ template <int N> AmgSymMatrix(N) toEigen(const ConstMatrixMap<N>& xAODmat)
     }
     return mat;
 }
-
+/** @brief Type conversion of a symmetrix float vector to a vector with
+ *         double precision
+ *  @param xAODvec: Reference to the vector to convert */
 template <int N> AmgVector(N) toEigen(const ConstVectorMap<N>& xAODvec) {
     AmgVector(N) v{AmgVector(N)::Zero()};
     for (int i = 0 ; i < N; ++i) {

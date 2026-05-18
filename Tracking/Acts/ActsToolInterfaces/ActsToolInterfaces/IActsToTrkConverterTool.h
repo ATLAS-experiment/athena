@@ -21,10 +21,11 @@
 #include "Acts/EventData/BoundTrackParameters.hpp"
 #include "Acts/EventData/VectorTrackContainer.hpp"
 #include "ActsEvent/TrackContainer.h"
-
+#include "TrkEventPrimitives/SurfaceUniquePtrT.h"
+#include "TrkSurfaces/Surface.h"
 namespace Trk {
-  class Surface;
   class Track;
+  class Surface;
   class MeasurementBase;
   class PrepRawData;
 }  // namespace Trk
@@ -45,18 +46,22 @@ namespace ActsTrk {
 class IActsToTrkConverterTool : virtual public IAlgTool {
  public:
   DeclareInterfaceID(IActsToTrkConverterTool, 1, 0);
+  /** @brief Abrivation of the surface pointer with memory management for 
+   *         free surfaces not associated with a Trk::DetElementBase */
+  using SurfacePtr_t = Trk::SurfaceUniquePtrT<const Trk::Surface>;
   /** @brief Translates the parsed Acts surface into a Trk::Surface via associated detector element.
    *         For the ID measurements a direct link is provided and for the muon measurements the look-up
-   *         is performed via the associated Identifier and the detector manager. Exception is thrown
-   *         if the mapping fails.
-   *  @param ctx: EventContext
+   *         is performed via the associated Identifier and the detector manager.
+   *         Other surfaces trigger the creation of new free Trk surfaces
+   *  @param ctx: The current event context 
    *  @param actsSurface: Refrence to the acts surface to translate */
-  virtual const Trk::Surface& actsSurfaceToTrkSurface(const EventContext& ctx, const Acts::Surface& actsSurface) const = 0;
+  virtual SurfacePtr_t actsSurfaceToTrkSurface(const EventContext& ctx,
+                                               const Acts::Surface& actsSurface) const = 0;
   /** @brief Translate the parsed Trk surface into an Acts surface. The detector element identifier
    *         of the surface needs to be filled into the internal tool's look-up map. Otherwise an exception
    *         is thrown.
    * @param atlasSurface: Refrence to the Trk surface to translate */
-  virtual const Acts::Surface& trkSurfaceToActsSurface(const Trk::Surface& atlasSurface) const = 0;
+  virtual std::shared_ptr<const Acts::Surface> trkSurfaceToActsSurface(const Trk::Surface& atlasSurface) const = 0;
 
   /** @brief Converts the Trk measurement track states into a vector of Acts::Source links. The 
    *         source links don't take ownership over the measurement states.
@@ -95,14 +100,12 @@ class IActsToTrkConverterTool : virtual public IAlgTool {
   /** @brief Convert the Acts fit result into a Trk::Track object, if the fit was successful. Otherwise,
    *         a nullptr is returned.
    * @param ctx: EventContext to construct the Geometry & calibration context inside
-   * @param tracks: Reference to the Multi trajectory cotnainer
    * @param fitResult: Outcome from the Acts fitter
    * @param fitAuthor: Author flag to be put into the Trk::Track meta data
    * @param slType: Source link type steering how the uncalibrated Acts::SourceLinks are 
    *                turned into Trk::MeasurementBase objects */
   using TrackFitResult_t = Acts::Result<ActsTrk::MutableTrackContainer::TrackProxy, std::error_code>;
   virtual std::unique_ptr<Trk::Track> convertFitResult(const EventContext& ctx,
-                                                       ActsTrk::MutableTrackContainer& tracks,
                                                        TrackFitResult_t& fitResult,
                                                        const Trk::TrackInfo::TrackFitter fitAuthor,
                                                        const detail::SourceLinkType slType) const = 0;
@@ -111,6 +114,13 @@ class IActsToTrkConverterTool : virtual public IAlgTool {
       ActsTrk::MutableTrackContainer &tc,
       const TrackCollection& trackColl,
       const Acts::GeometryContext& gctx) const = 0;
+
+  /** @brief Converts the Acts track container to a Trk::Track collection
+   *  @param ctx: EventContext to access the current conditions (alignment, calibration, etc.)
+   *  @param trackCont: Reference to the track container for legacy converstion */
+  virtual std::unique_ptr<TrackCollection> 
+      convertActsToTrkContainer(const EventContext& ctx,
+                                const ActsTrk::TrackContainer& trackCont) const = 0;
 
 };
 }  // namespace ActsTrk

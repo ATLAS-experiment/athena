@@ -204,6 +204,8 @@ if __name__ == "__main__":
     flags.Trigger.FPGATrackSim.ExtensionNNVolonnxFile = ""
     flags.Trigger.FPGATrackSim.ExtensionNNHitonnxFile = ""
 
+    flags.Detector.GeometryMuon = False
+
     flags.lock()
     flags.dump()
     flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.MainPass")

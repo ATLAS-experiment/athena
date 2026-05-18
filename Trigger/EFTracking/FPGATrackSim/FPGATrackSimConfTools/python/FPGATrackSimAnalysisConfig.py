@@ -1030,6 +1030,8 @@ if __name__ == "__main__":
         if flags.Trigger.FPGATrackSim.Hough.useVaryingChi2Cut and flags.Trigger.FPGATrackSim.Hough.trackNNAnalysis:
             flags.Trigger.FPGATrackSim.Hough.chi2cut = getChi2CutNN(flags.Trigger.FPGATrackSim.region)
 
+        flags.Detector.GeometryMuon = False
+
         flags.lock()
         flags.dump()
         flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.ITkActsPass",keepOriginal=True)

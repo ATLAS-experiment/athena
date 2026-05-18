@@ -62,22 +62,8 @@ def MuonActsToTrkConvCfg(flags, name="MuonActsToTrkConverterAlg", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault('ACTSTracksLocation', "MsTracks")
     kwargs.setdefault('TracksLocation', 'MsTracksConv')
-    
-    from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
-    kwargs.setdefault("ATLASConverterTool", result.popToolsAndMerge(ActsToTrkConverterToolCfg(flags, ConvertMuonTracks=True)))
     from TrkConfig.TrkTrackSummaryToolConfig import MuonTrackSummaryToolCfg
     kwargs.setdefault("SummaryTool", result.popToolsAndMerge(MuonTrackSummaryToolCfg(flags)))
-    kwargs.setdefault("BoundaryCheckTool", "")
-    from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MdtDriftCircleOnTrackCreatorCfg, MuonClusterOnTrackCreatorCfg
-    kwargs.setdefault('RotCreatorTool', result.popToolsAndMerge(MdtDriftCircleOnTrackCreatorCfg(flags)))
-    kwargs.setdefault("MuonClusterCreator", result.popToolsAndMerge(MuonClusterOnTrackCreatorCfg(flags, RestrictWarnings=True)))
-    kwargs.setdefault("MdtKey", "MDT_DriftCircles" if flags.Detector.EnableMDT else "")
-    kwargs.setdefault("RpcKey", "RPC_Measurements" if flags.Detector.EnableRPC else "")
-    kwargs.setdefault("TgcKey", "TGC_MeasurementsAllBCs" if flags.Detector.EnableTGC else "")
-    kwargs.setdefault("MmKey", "MM_Measurements" if flags.Detector.EnableMM else "")
-    kwargs.setdefault("sTgcKey", "STGC_Measurements" if flags.Detector.EnablesTGC else "")
-    from MuonConfig.MuonGeometryConfig import MuonIdHelperSvcCfg
-    kwargs.setdefault("MuonIdHelperSvc",result.getPrimaryAndMerge(MuonIdHelperSvcCfg(flags)))
-    
-    result.addEventAlgo(CompFactory.ActsTrk.ActsToTrkConvertorAlg(name, **kwargs))
-    return result
+    from ActsConfig.ActsEventCnvConfig import ActsToTrkConvertorAlgCfg
+    result.merge(ActsToTrkConvertorAlgCfg(flags, name=name, **kwargs))
+    return result 

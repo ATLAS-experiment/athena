@@ -9,6 +9,6 @@ namespace ActsTrk::detail{
     const Acts::Surface* TrkPrepRawDataSurfaceAcc::operator()(const Acts::SourceLink& sourceLink) const {
         const auto* meas = TrkPrepRawDataCalibrator::unpack(sourceLink);
         assert(m_trkConvTool != nullptr);
-        return &(m_trkConvTool->trkSurfaceToActsSurface(meas->detectorElement()->surface(meas->identify())));
+        return m_trkConvTool->trkSurfaceToActsSurface(meas->detectorElement()->surface(meas->identify())).get();
     }
 }

@@ -212,7 +212,7 @@ KalmanFitterTool::fit(const EventContext& ctx,
   // Perform the fit
   auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
                               scaledInitialParams, kfOptions, tracks);
-  return m_ATLASConverterTool->convertFitResult(ctx, tracks, result,
+  return m_ATLASConverterTool->convertFitResult(ctx, result,
                                       Trk::TrackInfo::TrackFitter::KalmanFitter,
                                       detail::SourceLinkType::TrkMeasurement);
 }
@@ -260,7 +260,7 @@ KalmanFitterTool::fit(const EventContext& ctx,
   // Perform the fit
   auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
                               initialParams, kfOptions, tracks);
-  return m_ATLASConverterTool->convertFitResult(ctx, tracks, result,
+  return m_ATLASConverterTool->convertFitResult(ctx, result,
                                                 Trk::TrackInfo::TrackFitter::KalmanFitter,
                                                 detail::SourceLinkType::TrkMeasurement);
 }
@@ -304,7 +304,7 @@ KalmanFitterTool::fit(const EventContext& ctx,
     // Perform the fit
     auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
                                 initialParams, kfOptions, tracks);
-    return m_ATLASConverterTool->convertFitResult(ctx, tracks, result,
+    return m_ATLASConverterTool->convertFitResult(ctx, result,
                                                   Trk::TrackInfo::TrackFitter::KalmanFitter,
                                                   detail::SourceLinkType::TrkPrepRawData);
 }
@@ -426,7 +426,7 @@ KalmanFitterTool::fit(const EventContext& ctx,
   // Perform the fit
   auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
                               initialParams, kfOptions, tracks);
-  return m_ATLASConverterTool->convertFitResult(ctx, tracks, result,
+  return m_ATLASConverterTool->convertFitResult(ctx, result,
                                                 Trk::TrackInfo::TrackFitter::KalmanFitter,
                                                 detail::SourceLinkType::TrkMeasurement);
 }
@@ -519,7 +519,7 @@ KalmanFitterTool::fit(const EventContext& ctx,
   // Perform the fit
   auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
                               scaledInitialParams, kfOptions, tracks);
-  return m_ATLASConverterTool->convertFitResult(ctx, tracks, result,
+  return m_ATLASConverterTool->convertFitResult(ctx, result,
                                                 Trk::TrackInfo::TrackFitter::KalmanFitter,
                                                 detail::SourceLinkType::TrkMeasurement);
 }
