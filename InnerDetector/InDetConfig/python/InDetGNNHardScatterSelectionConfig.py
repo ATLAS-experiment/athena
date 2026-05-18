@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # A GNN based algorithm for selecting the Hard Scatter vertex (truth primary vertex 
 # that is simulated for the hard process, i.e. the PV in the TruthEvent) 
  
@@ -164,22 +164,9 @@ def GNNHSVertexDecoratorAlgCfg(flags, name="GNNHS_VertexDecoratorAlg", **kwargs)
                        nnFile="InDetGNNHardScatterSelection/v1.2/HSGNN_baseline_v1.2.onnx")))
 
     if "TrackVertexAssociationTool" not in kwargs:
-        from TrackVertexAssociationTool.TrackVertexAssociationToolConfig import TTVAToolCfg
-        kwargs.setdefault(
-            "TrackVertexAssociationTool",
-            cfg.popToolsAndMerge(
-                TTVAToolCfg(
-                    flags,
-                    "TrackVertexAssociationTool_GNNHS",
-                    VertexContName=(
-                        "PrimaryVertices_initial" 
-                        if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.GNNSorting 
-                        else "PrimaryVertices"
-                    ),
-                )
-            ),
-        )
-
+        from TrackVertexAssociationTool.TrackVertexAssociationToolConfig import GNNHS_TTVAToolCfg
+        kwargs.setdefault("TrackVertexAssociationTool", cfg.popToolsAndMerge(
+            GNNHS_TTVAToolCfg(flags)))
 
     vertex_extra_inputs = set(kwargs.get("ExtraInputs", set()))
     for cont in ["electronsIn", "muonsIn", "photonsIn", "jetsIn"]:
