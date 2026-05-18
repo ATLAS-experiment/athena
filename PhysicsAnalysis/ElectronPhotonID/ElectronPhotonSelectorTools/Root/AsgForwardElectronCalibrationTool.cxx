@@ -46,13 +46,6 @@ AsgForwardElectronCalibrationTool::AsgForwardElectronCalibrationTool(
   const std::string& myname)
   : AsgTool(myname)
 {
-  // Declare the needed properties
-  declareProperty("ModelFiles", m_modelFiles,
-                  "lwtnn JSON files, one per eta bin (in eta order)");
-  declareProperty("pTMin", m_pTMin,
-                  "Lower bound of pT MinMax scaling [MeV]");
-  declareProperty("pTMax", m_pTMax,
-                  "Upper bound of pT MinMax scaling [MeV]");
 }
 
 //=============================================================================
@@ -226,7 +219,7 @@ bool AsgForwardElectronCalibrationTool::getInputs(const xAOD::Electron* eg,
      }
    else
      {
-       ATH_MSG_WARNING("No valid time for the track while doing track->time(): " );
+       ATH_MSG_DEBUG("No valid time for the track while doing track->time(): " );
        inputs.push_back(-99);
      }
    

@@ -145,10 +145,6 @@ AsgForwardElectronSelectorTool::AsgForwardElectronSelectorTool(
     const std::string& myname)
   : AsgTool(myname)
 {
-  declareProperty("ModelFiles", m_modelFiles,
-                  "lwtnn JSON files, one per eta bin (in eta order)");
-  declareProperty("WorkingPoint", m_workingPoint,
-                  "Working point: Loose (90%), Medium (80%), or Tight (70%)");
 }
 
 //=============================================================================
