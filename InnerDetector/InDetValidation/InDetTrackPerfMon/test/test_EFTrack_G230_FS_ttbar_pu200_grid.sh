@@ -1,7 +1,8 @@
 #!/bin/bash
-# art-description: Nightly test to compare G-200 vs C-000 (Full-scan) for EFTrack studies using ttbar pu200 noFPT sample
+# art-description: Nightly test to compare G-230 vs C-000 (Full-scan) for EFTrack studies using ttbar pu200 sample
 # art-type: grid
 # art-include: main/Athena/x86_64-el9-gcc14-opt
+# art-pathena-flags-add: --site=UKI-LT2-QMUL_GPU,UKI-SOUTHGRID-RALPP_GPU
 # art-architecture: '#&nvidia'
 # art-memory: 4095
 # art-output: IDTPM.*.root
@@ -14,15 +15,15 @@
 
 
 ## Input parameters
-pipelineName='G200'
-SampleName='ttbar_pu200_noFPT'  # as defined in samplesDict of InDetTrackPerfMon/scripts/getEFTrackSample.py
+pipelineName='G230'
+SampleName='ttbar_pu200'  # as defined in samplesDict of InDetTrackPerfMon/scripts/getEFTrackSample.py
 OutSampleName="${pipelineName}_FS.${SampleName}"
 TrkCollName='TracccTrackParticles'
 referencePath='/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetTrackPerfMon/EFTrackRefereceHistograms/'
 referenceName="C000_FS.${SampleName}"
 referenceName_absPath="${referencePath}/IDTPM.${referenceName}.HIST.root"
 refLabel="C-000"
-testLabel="G-200"
+testLabel="G-230"
 
 ## search in $DATAPATH for matching files
 IDTPMjsonConfig='EFTrack_base_FS_noDoubleRatio_IDTPMconfig.json'
@@ -64,7 +65,7 @@ fi
 
 ## Track reconstruction step
 run "${pipelineName}" \
-  runReco_G200_FS.sh \
+  runReco_G230_FS.sh \
     -i ${InputRDOfiles} \
     -o "${OutSampleName}.AOD.pool.root"
     #-n 10
