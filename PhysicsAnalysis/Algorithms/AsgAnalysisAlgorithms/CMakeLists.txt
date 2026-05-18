@@ -97,6 +97,16 @@ if (NOT COLUMNAR_ANALYSIS)
    atlas_add_test( TestFullTermsOutput
       SCRIPT CPRun.py --input-list $ASG_TEST_FILE_RUN3_MC --text-config AsgAnalysisAlgorithms/test_full_terms_output.yaml -e 150
       POST_EXEC_SCRIPT nopost.sh
+      PRIVATE_WORKING_DIRECTORY
+      PROPERTIES TIMEOUT 400
+      )
+
+   # a test job that writes out an n-tuple with event shape variables
+   # in the output file
+   atlas_add_test( TestEventShapeOutput
+      SCRIPT CPRun.py --input-list $ASG_TEST_FILE_RUN3_MC --text-config AsgAnalysisAlgorithms/test_event_shape_output.yaml -e 150
+      POST_EXEC_SCRIPT nopost.sh
+      PRIVATE_WORKING_DIRECTORY
       PROPERTIES TIMEOUT 400
       )
 
