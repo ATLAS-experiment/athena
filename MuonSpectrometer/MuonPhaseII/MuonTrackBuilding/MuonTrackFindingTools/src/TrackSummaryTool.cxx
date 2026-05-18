@@ -216,17 +216,17 @@ namespace MuonR4 {
             acc(extendedLargeHoles) = summary.value(Cat_t::Precision, Stat_t::Hole, LayerIndex::Extended, false);
         }
         if (m_fillOutliers) {
-            acc(innerOutBoundsPrecisionHits) = summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Inner, false)
-                                             + summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Inner, true);
+            acc(innerClosePrecisionHits) = summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Inner, false)
+                                         + summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Inner, true);
 
-            acc(middleOutBoundsPrecisionHits) = summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Middle, false)
-                                              + summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Middle, true);
+            acc(middleClosePrecisionHits) = summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Middle, false)
+                                          + summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Middle, true);
 
-            acc(outerOutBoundsPrecisionHits) = summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Outer, false)
-                                             + summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Outer, true);
+            acc(outerClosePrecisionHits) = summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Outer, false)
+                                         + summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Outer, true);
 
-            acc(extendedOutBoundsPrecisionHits) = summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Extended, false)
-                                                + summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Extended, true);
+            acc(extendedClosePrecisionHits) = summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Extended, false)
+                                            + summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Extended, true);
         }
 
         /// Trigger hits

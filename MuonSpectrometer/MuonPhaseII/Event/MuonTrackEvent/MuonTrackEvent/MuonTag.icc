@@ -1,0 +1,28 @@
+/*
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+#ifndef MUONTRACKEVENT_MUONTAG_ICC
+#define MUONTRACKEVENT_MUONTAG_ICC
+
+#include "MuonTrackEvent/MuonTag.h"
+
+namespace MuonR4 {
+    template <typename T>
+        std::optional<T> MuonTag::parameter(const ParamDef par) const {
+
+        const ParamMap_t::const_iterator itr = m_params.find(par); 
+        if (itr == m_params.end()) {
+            return std::nullopt;
+        }
+        if constexpr(std::is_same_v<T, ParamData_t>) {
+            return itr->second;
+        } else {
+            if (!std::holds_alternative<T>(itr->second)){
+                return std::nullopt;
+            }
+            return std::get<T>(itr->second);
+        }
+    }
+}
+
+#endif

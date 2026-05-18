@@ -5,6 +5,8 @@
 #include "MuonPatternEvent/MuonPatternContainer.h"
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 
+
+#include "FourMomUtils/xAODP4Helpers.h"
 namespace{
   using PrdLink_t = ElementLink<xAOD::UncalibratedMeasurementContainer>;
   using PrdLinkVec_t = std::vector<PrdLink_t>;
@@ -66,7 +68,23 @@ namespace MuonR4{
         }
         return out;
     }
-     Acts::GeometryIdentifier volumeId(const Acts::Surface& surface) {
-        return surface.geometryId().withSensitive(0).withBoundary(0);
-     }
+    Acts::GeometryIdentifier volumeId(const Acts::Surface& surface) {
+       return surface.geometryId().withSensitive(0).withBoundary(0);
+    }
+
+
+    bool ParticleSorter::operator()(const xAOD::IParticle* a,
+                                    const xAOD::IParticle* b) const {
+
+        if (const float dPt = a->pt() - b->pt(); 
+            std::abs(dPt) > std::numeric_limits<float>::epsilon()) {
+            return dPt < 0.;
+        }
+        if (const float dEta = a->eta() - b->eta();
+            std::abs(dEta) > std::numeric_limits<float>::epsilon()) {
+            return dEta < 0.;
+        }
+        const float dPhi = xAOD::P4Helpers::deltaPhi(a, b);
+        return dPhi < 0.;
+    }
 }
