@@ -59,7 +59,8 @@ class IMPIClusterSvc : virtual public IInterface {
                                  std::int64_t status) = 0;
 
   /// Add a new type of destination memory
-  virtual unsigned int registerMemoryResource(std::pmr::memory_resource* res);
+  virtual unsigned int registerMemoryResource(
+      std::pmr::memory_resource* res) = 0;
 };
 
 #endif  // ATHENAKERNEL_IMPICLUSTERSVC_H

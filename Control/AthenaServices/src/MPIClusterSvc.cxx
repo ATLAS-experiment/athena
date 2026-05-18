@@ -244,7 +244,8 @@ void MPIClusterSvc::log_completeEvent(int eventIdx, std::int64_t run_number,
   m_mpiLog_completeEvent.run(eventIdx, run_number, event_number, status);
 }
 
-virtual unsigned int registerMemoryResource(std::pmr::memory_resource* res) {
+unsigned int MPIClusterSvc::registerMemoryResource(
+    std::pmr::memory_resource* res) {
   m_destIDMemResMap.push_back(res);
   return m_destIDMemResMap.size() - 1;
 }
