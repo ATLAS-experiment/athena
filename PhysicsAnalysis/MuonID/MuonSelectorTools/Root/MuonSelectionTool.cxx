@@ -469,11 +469,6 @@ namespace CP {
 
     xAOD::Muon::Quality MuonSelectionTool::getQuality(const xAOD::Muon& mu) const {
         ATH_MSG_VERBOSE("Evaluating muon quality...");
-        if (isRun3() && mu.isAuthor(xAOD::Muon::Author::Commissioning) && !m_allowComm) {
-            ATH_MSG_VERBOSE("Reject authors from the commissioning chain");
-            return xAOD::Muon::VeryLoose;
-        }
-
         // SegmentTagged muons
         if (mu.muonType() == xAOD::Muon::SegmentTagged) {
             ATH_MSG_VERBOSE("Muon is segment-tagged");
