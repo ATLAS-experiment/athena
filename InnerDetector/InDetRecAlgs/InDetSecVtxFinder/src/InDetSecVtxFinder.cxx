@@ -22,6 +22,8 @@
 // normal includes
 #include "TrkParticleBase/TrackParticleBaseCollection.h"
 #include "AthContainers/ConstAccessor.h"
+#include "GaudiKernel/EventContext.h"
+
 
 namespace InDet
 {

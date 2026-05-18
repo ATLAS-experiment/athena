@@ -18,7 +18,6 @@
 #define INDETSECVXFINDER_INDETSECVXFINDER_H
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "GaudiKernel/EventContext.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/VertexContainer.h"
 
