@@ -86,11 +86,7 @@ namespace InDetGNNHardScatterSelection
 
     // Tools
     ATH_CHECK(m_gnnTool.retrieve());
-    ATH_CHECK(m_trkVtxAssociationTool->setProperty("WorkingPoint","Prompt_MaxWeight"));
-    ATH_CHECK(m_trkVtxAssociationTool->setProperty("AMVFVerticesDeco","TTVA_AMVFVertices_forReco"));
-    ATH_CHECK(m_trkVtxAssociationTool->setProperty("AMVFWeightsDeco","TTVA_AMVFWeights_forReco"));
     ATH_CHECK(m_trkVtxAssociationTool.retrieve());
-    ATH_CHECK(m_trkVtxAssociationTool->initialize());
 
     return StatusCode::SUCCESS;
   }
