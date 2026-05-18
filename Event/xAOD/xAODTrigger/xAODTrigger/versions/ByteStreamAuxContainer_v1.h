@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODTRIGGER_VERSIONS_BYTESTREAMAUXCONTAINER_V1_H
 #define XAODTRIGGER_VERSIONS_BYTESTREAMAUXCONTAINER_V1_H
@@ -144,6 +144,13 @@ namespace xAOD {
       template< typename T >
       void regAuxVar( auxid_t auxid, const std::string& name,
                       std::vector< T >& vec );
+
+     /**
+      * @brief Perform post-read processing on this store.
+      * @param ctx The current event context.
+      */
+      virtual void toTransient (const EventContext& ctx) override;
+
 
    private:
       /// Internal method: return size without taking out the lock.

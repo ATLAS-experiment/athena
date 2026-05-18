@@ -580,4 +580,20 @@ namespace xAOD {
       return nullptr;
    }
 
+   void ByteStreamAuxContainer_v1::toTransient( const EventContext& ctx)
+   {
+      guard_t guard (m_mutex);
+      for (SG::IAuxTypeVector* v : m_staticVecs) {
+         if(v) {
+           v->toTransient( ctx );
+         }
+      }
+      for (SG::IAuxTypeVector* v : m_dynamicVecs) {
+         if(v) {
+           v->toTransient( ctx );
+         }
+      }
+   }
+
+
 } // namespace xAOD

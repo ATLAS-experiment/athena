@@ -145,6 +145,11 @@ namespace xAOD {
                                IAuxStore& other,
                                const SG::auxid_set_t& ignore) override;
 
+      /// Perform processing on aux variable objects just after reading
+      /// to make them usable as transient objects.
+      virtual void toTransient (const EventContext& ctx) override;
+
+
       /// @}
 
       /// @name Functions implementing the SG::IAuxStoreIO interface

@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: ShallowAuxInfo.h 671678 2015-06-02 12:28:46Z krasznaa $
@@ -10,6 +10,10 @@
 
 // Local include(s):
 #include "xAODCore/ShallowAuxContainer.h"
+#include "AthContainersInterfaces/ToTransient.h"
+#ifndef XAOD_STANDALONE
+#include "GaudiKernel/ThreadLocalContext.h"
+#endif
 
 namespace xAOD {
 
@@ -45,6 +49,35 @@ namespace xAOD {
    }; // class ShallowAuxInfo
 
 } // namespace xAOD
+
+
+
+// This class declares supportsThinning=false, meaning that it will be
+// handled by the generic POOL converter rather than the one specialized
+// for xAOD auxiliary stores.  Hence, we need to specialize ToTransient
+// in order to get toTransient called for this type.
+namespace SG {
+
+
+template<>
+class ToTransient<xAOD::ShallowAuxInfo>
+{
+public:
+  static bool toTransient (xAOD::ShallowAuxInfo& s, const EventContext& ctx)
+  {
+    s.toTransient( ctx );
+    return true;
+  }
+#ifndef XAOD_STANDALONE
+  static bool toTransient (xAOD::ShallowAuxInfo& s)
+  {
+    return toTransient( s, Gaudi::Hive::currentContext() );
+  }
+#endif
+};
+
+
+}
 
 // Declare a class ID for the class:
 #include "xAODCore/CLASS_DEF.h"

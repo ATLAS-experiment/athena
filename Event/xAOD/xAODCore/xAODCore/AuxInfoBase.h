@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODCORE_AUXINFOBASE_H
 #define XAODCORE_AUXINFOBASE_H
@@ -115,6 +115,11 @@ namespace xAOD {
 
       /// @brief Return interface for a linked variable.
       virtual const SG::IAuxTypeVector* linkedVector (SG::auxid_t auxid) const override;
+
+      /// Perform processing on aux variable objects just after reading
+      /// to make them usable as transient objects.
+      virtual void toTransient (const EventContext& ctx) override;
+
 
       /// @}
 

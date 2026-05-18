@@ -396,6 +396,24 @@ namespace xAOD {
    }
 
 
+   void AuxInfoBase::toTransient (const EventContext& ctx)
+   {
+      // Guard against multi-threaded execution:
+      guard_t guard (m_mutex);
+
+      for (SG::IAuxTypeVector* v : m_vecs) {
+         if(v) {
+           v->toTransient( ctx );
+         }
+      }
+
+      // Do the operation on the dynamic variables:
+      if( m_store ) {
+        m_store->toTransient( ctx );
+      }
+   }
+
+
    size_t AuxInfoBase::size() const {
 
       // Should really always be 1, but do the general thing anyway...
