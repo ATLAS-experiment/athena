@@ -248,7 +248,7 @@ class TriggerAnalysisSFBlock(ConfigBlock):
         for trig in list(alg.trigSingleMatchingList) + list(alg.trigSingleMatchingListDummy):
             trig = trig.replace(".", "p").replace("-", "_").replace(" ", "")
             if trig_string in trig:
-                config.addOutputVar(particles.split(".")[0], f"trigMatched_{self.postfix}{trig}", f"trigMatched_{self.postfix}{trig}", noSys=True)
+                config.addOutputVar(particles.split(".")[0], f"trigMatched_{self.postfix}{trig}", f"trigMatched_{self.postfix}{trig}", noSys=True, auxType='char')
 
     def makeTrigMatchingAlg(
         self,
