@@ -15,10 +15,17 @@ from egammaTools.egammaOQFlagsBuilderConfig import egammaOQFlagsBuilderCfg
 def egammaForwardBuilderCfg(flags, name='egammaForwardElectron', **kwargs):
 
     acc = ComponentAccumulator()
-
+    extraInputs = []
+    
     if flags.Detector.GeometryITk:
         kwargs["doTrackMatching"] = True
         kwargs["doCookieCutting"] = True
+        if flags.Reco.EnableHGTDExtension:
+            extraInputs += [
+                ("xAOD::TrackParticleContainer",
+                 "StoreGateSvc+" + kwargs["TrackParticleContainerName"] + ".time")
+            ]
+        kwargs.setdefault("ExtraInputs", extraInputs)
         kwargs.setdefault("TrackMatchBuilderTool", acc.popToolsAndMerge(EMTrackMatchBuilderCfg(flags)))
         if "forwardelectronNNselectors" not in kwargs:
             LooseFwdElectronSelector_NN = AsgForwardElectronSelectorToolCfg(
