@@ -15,7 +15,7 @@
 
 #include "../GlobalSimComponents/IGlobalSimAlgTool.h"
 #include "../IO/CommonTOBContainer.h"
-#include "GlobalLArCellContainer.h"
+#include "../IO/GlobalLArCellContainer.h"
 
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"

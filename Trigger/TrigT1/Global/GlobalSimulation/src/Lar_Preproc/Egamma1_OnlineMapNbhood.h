@@ -13,9 +13,9 @@
 */
 
 #include "../FEX_Unpacker/eFexRoIAlgTool.h"
-#include "GlobalLArCell.h"
-#include "GlobalLArCellContainer.h"
 
+#include "../IO/GlobalLArCell.h"
+#include "../IO/GlobalLArCellContainer.h"
 #include "../IO/LArStripNeighborhood.h"
 #include "../IO/eEmNbhoodTOB.h"
 
