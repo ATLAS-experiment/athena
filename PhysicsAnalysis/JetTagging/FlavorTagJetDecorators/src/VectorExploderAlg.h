@@ -24,7 +24,7 @@ namespace FlavorTagJetDecorators {
   /// Ported from TDD's VectorExploderAlg (FTagDumper/src/VectorExploderAlg.{h,cxx}).
   /// Primary use-case: split EnergyPerSampling / EnergyPerSamplingCaloBased
   /// (each vector<float> of length 28) into 28 individual float decorations
-  /// per jet, which can then be cast to bf16 via JetScalarCastAlg.
+  /// per jet, persisted directly as float32 jet decorations.
   ///
   /// Differences from TDD version:
   ///   - Namespace FlavorTagJetDecorators:: (TDD uses global namespace).
