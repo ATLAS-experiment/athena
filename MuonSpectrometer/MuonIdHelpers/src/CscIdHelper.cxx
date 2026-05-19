@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonIdHelpers/CscIdHelper.h"
@@ -662,6 +662,9 @@ bool CscIdHelper::validChannel(const Identifier& id, int stationName, int statio
 // calculate the hash offset
 int CscIdHelper::strip_hash_offsets() {
     m_hashOffset[0][0] = 0;
+    if (! m_dict){
+      return 1;
+    }
     std::string version = m_dict->version();
 
     if (version == "H8 2004") {
