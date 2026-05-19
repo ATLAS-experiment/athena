@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -210,11 +210,12 @@ namespace CP
         systematics.emplace_back(CP::SystematicSet({variation}));
       }
     }
-
+    static const std::string idSignature{"%DSID%"};
+    static const std::string runSignature{"%RUN%"};
     for (const CP::SystematicSet &sys : systematics)
     {
-      std::string name = RCU::substitute(m_histPattern, "%DSID%", std::to_string(m_mcChannelNumber));
-      name = RCU::substitute(name, "%RUN%", std::to_string(m_runNumber));
+      std::string name = RCU::substitute(m_histPattern, idSignature, std::to_string(m_mcChannelNumber));
+      name = RCU::substitute(name, runSignature, std::to_string(m_runNumber));
       ANA_CHECK (m_systematics->makeSystematicsName (name, name, sys));
 
       ANA_CHECK (book(TH1F(name.c_str(), "CutBookkeeper Information", 3, 0.5, 3.5)));
