@@ -18,7 +18,6 @@ namespace Trk{
   void TrkVKalVrtFitter::VKalVrtConfigureFitterCore(int NTRK, State& state) const
   {
     state.m_FitStatus = 0;     // Drop all previous fit results
-    state.m_globalFirstHit = nullptr;
     state.m_vkalFitControl.vk_forcft = ForCFT();
   
     //Set input particle masses
