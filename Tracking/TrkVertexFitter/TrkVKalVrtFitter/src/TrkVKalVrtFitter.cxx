@@ -155,12 +155,6 @@ StatusCode TrkVKalVrtFitter::initialize()
 }
 
 
-void TrkVKalVrtFitter::initState (State& state) const
-{
-    initState(Gaudi::Hive::currentContext(), state);
-}
-
-
 void TrkVKalVrtFitter::initState (const EventContext& ctx, State& state) const
 
 {
@@ -200,12 +194,12 @@ void TrkVKalVrtFitter::initState (const EventContext& ctx, State& state) const
 }
 
 /** Interface for MeasuredPerigee with starting point */
-std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& /*ctx*/,
+std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& ctx,
                                      const std::vector<const TrackParameters*> & perigeeListC,
                                      const Amg::Vector3D & startingPoint) const
 {
     State state;
-    initState (state);
+    initState (ctx, state);
     setApproximateVertex(startingPoint.x(),
                          startingPoint.y(),
                          startingPoint.z(),
@@ -228,13 +222,13 @@ std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& /*ctx*/,
 }
 
 
-std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& /*ctx*/,
+std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& ctx,
                                      const std::vector<const TrackParameters*>   & perigeeListC,
                                      const std::vector<const NeutralParameters*> & perigeeListN,
                                      const Amg::Vector3D & startingPoint) const
 {
     State state;
-    initState (state);
+    initState (ctx, state);
     setApproximateVertex(startingPoint.x(),
                          startingPoint.y(),
                          startingPoint.z(),
@@ -262,12 +256,12 @@ std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& /*ctx*/,
 
      /** Interface for MeasuredPerigee with vertex constraint */
      /** the position of the constraint is ALWAYS the starting point */
-std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& /*ctx*/,
+std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& ctx,
                                      const std::vector<const TrackParameters*> & perigeeListC,
                                      const xAOD::Vertex & constraint) const
 {
     State state;
-    initState (state);
+    initState (ctx, state);
     if(msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)<< "A priori vertex constraint is activated in VKalVrt fitter!" << endmsg;
     Amg::Vector3D VertexIni(0.,0.,0.);
     StatusCode sc=VKalVrtFitFast(perigeeListC, VertexIni, state);
@@ -310,13 +304,13 @@ std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& /*ctx*/,
 }
 
 
-std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& /*ctx*/,
+std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& ctx,
                                      const std::vector<const TrackParameters*>   & perigeeListC,
                                      const std::vector<const NeutralParameters*> & perigeeListN,
                                      const xAOD::Vertex & constraint) const
 {
     State state;
-    initState (state);
+    initState (ctx, state);
 
     if(msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)<< "A priori vertex constraint is activated in VKalVrt fitter!" << endmsg;
     Amg::Vector3D VertexIni(0.,0.,0.);
@@ -408,13 +402,13 @@ std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& /*ctx*/,
     return tmpVertex;
 }
 
-std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& /*ctx*/,
+std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& ctx,
                                      const std::vector<const xAOD::TrackParticle*>   & xtpListC,
                                      const std::vector<const xAOD::NeutralParticle*> & xtpListN,
                                      const Amg::Vector3D & startingPoint) const
 {
     State state;
-    initState (state);
+    initState (ctx, state);
     std::unique_ptr<xAOD::Vertex> tmpVertex;
     setApproximateVertex(startingPoint.x(),
                          startingPoint.y(),
@@ -456,7 +450,7 @@ std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& ctx,
                                      const xAOD::Vertex & constraint) const
 {
     State state;
-    initState (state);
+    initState (ctx, state);
     return fit (ctx, xtpListC, constraint, state);
 }
 std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& /*ctx*/,
@@ -506,13 +500,13 @@ std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& /*ctx*/,
     return tmpVertex;
 }
 
-std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& /*ctx*/,
+std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& ctx,
                                      const std::vector<const xAOD::TrackParticle*>   & xtpListC,
                                      const std::vector<const xAOD::NeutralParticle*> & xtpListN,
                                      const xAOD::Vertex & constraint) const
 {
     State state;
-    initState (state);
+    initState (ctx, state);
 
     if(msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)<< "A priori vertex constraint is activated in VKalVrt fitter!" << endmsg;
     std::unique_ptr<xAOD::Vertex> tmpVertex;
@@ -559,11 +553,11 @@ std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& /*ctx*/,
 }
 
 
-std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& /*ctx*/,
+std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& ctx,
                                      const std::vector<const  TrackParameters*> & perigeeListC) const
 {
     State state;
-    initState (state);
+    initState (ctx, state);
     Amg::Vector3D VertexIni(0.,0.,0.);
     StatusCode sc=VKalVrtFitFast(perigeeListC, VertexIni, state);
     if( sc.isSuccess()) setApproximateVertex(VertexIni.x(),VertexIni.y(),VertexIni.z(),state);
@@ -584,12 +578,12 @@ std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& /*ctx*/,
     return {};
 }
 
-std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& /*ctx*/,
+std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& ctx,
                                      const std::vector<const  TrackParameters*>   & perigeeListC,
                                      const std::vector<const  NeutralParameters*> & perigeeListN) const
 {
     State state;
-    initState (state);
+    initState (ctx, state);
     Amg::Vector3D VertexIni(0.,0.,0.);
     StatusCode sc=VKalVrtFitFast(perigeeListC, VertexIni, state);
     if( sc.isSuccess()) setApproximateVertex(VertexIni.x(),VertexIni.y(),VertexIni.z(),state);

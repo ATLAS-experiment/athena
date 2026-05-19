@@ -8,7 +8,7 @@
 #define TRKVKALVRTFITTER_IVERTEXCASCADEFITTER_H
 
 // Gaudi includes
-#include "AthenaBaseComps/AthAlgTool.h"
+#include "GaudiKernel/IAlgTool.h"
 //
 #include  "xAODTracking/TrackParticleFwd.h"
 #include  "TrkVKalVrtFitter/IVKalState.h"
@@ -23,31 +23,18 @@ namespace Trk{
   class IVKalState;
   class VxCascadeInfo;
 
- typedef int VertexID;
-
-//------------------------------------------------------------------------
-  static const InterfaceID IID_IVertexCascadeFitter("IVertexCascadeFitter", 1, 0);
+  typedef int VertexID;
 
   class IVertexCascadeFitter : virtual public IAlgTool {
     public:
-      static const InterfaceID& interfaceID() { return IID_IVertexCascadeFitter;}
-//---------------------------------------------------------------------------
-//Interface itself
+      DeclareInterfaceID(IVertexCascadeFitter, 1, 0);
 
      /*
       * Context aware method
       */
       virtual std::unique_ptr<IVKalState> makeState(const EventContext& ctx) const = 0;
       
-     /*
-      * For non-migrated clients whcih should always use the context aware method
-      */
-      virtual std::unique_ptr<IVKalState> makeState() const 
-          {
-              return makeState(Gaudi::Hive::currentContext());
-          }
-      
-    virtual VertexID startVertex(const  std::vector<const xAOD::TrackParticle*> & list,
+      virtual VertexID startVertex(const  std::vector<const xAOD::TrackParticle*> & list,
                                    std::span<const double> particleMass,
                                    IVKalState& istate,
 				   double massConstraint = 0.) const = 0;
