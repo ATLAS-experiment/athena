@@ -219,8 +219,7 @@ bool AsgForwardElectronCalibrationTool::getInputs(const xAOD::Electron* eg,
      }
    else
      {
-       ATH_MSG_DEBUG("No valid time for the track while doing track->time(): " );
-       inputs.push_back(-99);
+       ATH_MSG_ERROR("No valid time for the track while doing track->time(): " );
      }
    
   // x6, x7 = ITk hit counts
