@@ -18,8 +18,8 @@
 #include "CaloEvent/CaloCellContainer.h"
 #include "CaloConditions/CaloNoise.h"
 
-#include "GlobalLArCell.h"
-#include "GlobalLArCellContainer.h"
+#include "../IO/GlobalLArCell.h"
+#include "../IO/GlobalLArCellContainer.h"
 
 #include <vector>
 #include <boost/dynamic_bitset.hpp>
