@@ -25,7 +25,6 @@ genseeds = {
     'Photospp'          : ["PHOTOSPP OFFSET {rnd} 20450275 {rnd}", "PHOTOSPP_INIT 930021 3447532"],
     'EvtGen'            : ["EVTGEN OFFSET {rnd} 30450275 {rnd}"],
     'Hijing'            : ["HIJING OFFSET {rnd} 327213897 {rnd}", "HIJING_INIT 31452781 78713307"],
-    'Hydjet'            : ["HYDJET OFFSET {rnd} 252413389 {rnd}", "HYDJET_INIT 52413389 24133894"],
     'Pyquen'            : ["PYTHIA OFFSET {rnd} 47898993 {rnd}", "PYTHIA_INIT 820021 2347532"],
     'Isajet'            : ["ISAJET OFFSET {rnd} 1857585203 {rnd}", "ISAJET_INIT 820021 2347532"],
     'Phojet'            : ["PHOJET OFFSET {rnd} 174947321 {rnd}", "PHOJET_INIT 820021 2347532"],
