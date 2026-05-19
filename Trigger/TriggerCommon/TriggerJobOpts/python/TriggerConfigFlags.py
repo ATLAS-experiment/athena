@@ -445,7 +445,6 @@ def createTriggerRecoFlags():
         muonflags.Muon.useTGCPriorNextBC=True
         muonflags.Muon.MuonTrigger=True
         muonflags.Muon.SAMuonTrigger=True
-        muonflags.Muon.runCommissioningChain=False
         muonflags.Muon.enableErrorTuning=False
         return muonflags
     flags.addFlagsCategory('Trigger.Offline.SA', __muonSA, prefix=True)
