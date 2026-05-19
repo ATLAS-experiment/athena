@@ -248,6 +248,16 @@ bool ZDCDataAnalyzer::disableModule(size_t side, size_t module)
   }
 }
 
+void ZDCDataAnalyzer::saveFitFunc(bool save)
+{
+  for (size_t side : {0, 1}) {
+    for (size_t module : {0, 1, 2, 3}) {
+      m_moduleAnalyzers[side][module]->saveFitFunc(save);
+    }
+  }
+}
+
+
 void ZDCDataAnalyzer::enableDelayed(float deltaT, const ZDCModuleFloatArray& undelayedDelayedPedestalDiff)
 {
   int delayedOrder = deltaT < 0 ? -1 : 1;
@@ -397,6 +407,16 @@ void ZDCDataAnalyzer::SetNoiseSigmas(const ZDCModuleFloatArray& noiseSigmasHG, c
   }
 }
 
+void ZDCDataAnalyzer::setPerSampleNoiseSigmas(const std::array<std::array<std::vector<float>,4>,2>& sampleNoiseVecsHG,
+					      const std::array<std::array<std::vector<float>,4>,2>& sampleNoiseVecsLG)
+{
+  for (size_t side : {0, 1}) {
+    for (size_t module : {0, 1, 2, 3}) {
+      m_moduleAnalyzers[side][module]->setPerSampleNoiseSigmas(sampleNoiseVecsHG[side][module], sampleNoiseVecsLG[side][module]);
+    }
+  }
+}
+
 void ZDCDataAnalyzer::SetModuleAmpFractionLG(const ZDCDataAnalyzer::ZDCModuleFloatArray& moduleAmpFractionLG) {
   for (size_t side : {0, 1}) {
     for (size_t module : {0, 1, 2, 3}) {
@@ -449,6 +469,42 @@ void ZDCDataAnalyzer::SetCutValues(const ZDCModuleFloatArray& chisqDivAmpCutHG, 
   }
 }
 
+void ZDCDataAnalyzer::SetTimeCuts(const ZDCModuleFloatArray& deltaT0MinHG, const ZDCModuleFloatArray& deltaT0MaxHG,
+				  const ZDCModuleFloatArray& deltaT0MinLG, const ZDCModuleFloatArray& deltaT0MaxLG)
+{
+  for (size_t side : {0, 1}) {
+    for (size_t module : {0, 1, 2, 3}) {
+      m_moduleAnalyzers[side][module]->SetTimeCuts(deltaT0MinHG[side][module], deltaT0MaxHG[side][module],
+						   deltaT0MinLG[side][module], deltaT0MaxLG[side][module]);
+    }
+  }
+}
+
+void ZDCDataAnalyzer::SetChisqCuts(const ZDCModuleFloatArray& chisqDivAmpCutHG, const ZDCModuleFloatArray& chisqDivAmpScaleHG,
+				   const ZDCModuleFloatArray& chisqDivAmpOffsetHG, const ZDCModuleFloatArray& chisqDivAmpPowerHG,
+				   const ZDCModuleFloatArray& chisqDivAmpCutLG, const ZDCModuleFloatArray& chisqDivAmpScaleLG,
+				   const ZDCModuleFloatArray& chisqDivAmpOffsetLG, const ZDCModuleFloatArray& chisqDivAmpPowerLG)
+{
+  for (size_t side : {0, 1}) {
+    for (size_t module : {0, 1, 2, 3}) {
+      m_moduleAnalyzers[side][module]->SetChisqCuts(chisqDivAmpCutHG[side][module], chisqDivAmpScaleHG[side][module],
+						    chisqDivAmpOffsetHG[side][module], chisqDivAmpPowerHG[side][module],
+						    chisqDivAmpCutLG[side][module], chisqDivAmpScaleLG[side][module],
+						    chisqDivAmpOffsetLG[side][module], chisqDivAmpPowerLG[side][module]);
+    }
+  }
+}
+
+void ZDCDataAnalyzer::enablePostPulseCheck(unsigned int postPulseSampleDelta, float postPulseDerivMinSig,
+					       float postPulseAbsDer2ndMinSig, float minMainDer2ndRatio)
+{
+  for (size_t side : {0, 1}) {
+    for (size_t module : {0, 1, 2, 3}) {
+      m_moduleAnalyzers[side][module]->enablePostPulseCheck(postPulseSampleDelta, postPulseDerivMinSig, postPulseAbsDer2ndMinSig, minMainDer2ndRatio);
+    }
+  }
+}
+
 void ZDCDataAnalyzer::SetTimingCorrParams(ZDCPulseAnalyzer::TimingCorrMode mode, float refADC, float refScale,
 					  const std::array<std::array<std::vector<float>, 4>, 2>& HGParamArr,
 					  const std::array<std::array<std::vector<float>, 4>, 2>& LGParamArr)
@@ -475,16 +531,13 @@ void ZDCDataAnalyzer::SetNonlinCorrParams(float refADC, float refScale,
   }
 }
 
-void ZDCDataAnalyzer::SetNLcalibParams(std::array< std::array< std::array<float,6>, 3>, 2>& nlcalibParams)
+void ZDCDataAnalyzer::SetNLcalibParams(std::array< std::array< std::vector<float>, 3>, 2>& nlcalibParams)
 {
   for (size_t side: {0,1})
     {
       for (size_t module: {0,1,2})
 	{
-	  for (size_t val: {0,1,2,3,4,5})
-	    {
-	      m_NLcalibFactors[side][module][val] = nlcalibParams[side][module][val];
-	    }
+	  m_NLcalibFactors[side][module] = nlcalibParams[side][module];
 	}
     }
   m_haveNLcalib = true;
@@ -529,17 +582,6 @@ void ZDCDataAnalyzer::enableTimeSigCut(bool AND, float sigCut, const std::string
 void ZDCDataAnalyzer::StartEvent(int lumiBlock)
 {
   (*m_msgFunc_p)(ZDCMsg::Verbose, ("Starting new event, event index = " + std::to_string(m_eventCount)));
-
-  // By default we perform quiet pulse fits
-  //
-  /*
-  if ((*m_msgFunc_p)(ZDCMsg::Verbose, "")) {
-    invokeAll([](ZDCPulseAnalyzer* pa){pa->setQuietFits();});
-  }
-  else {
-    invokeAll([](ZDCPulseAnalyzer* pa){pa->setQuietFits();});
-  }
-  */
   
   //  See if we have to load up new calibrations
   //
@@ -798,6 +840,10 @@ void ZDCDataAnalyzer::DoNLcalibModuleSum()
   
   for (int iside:{0,1})
     {
+      // If the module mask is empty for this side, there's nothing to do
+      //
+      if ((m_moduleMask>>(4*iside)&0xf) == 0) continue;
+      
       if (m_calibModuleSum[iside]>0.)
 	{
 	  float fEM = m_calibAmplitude[iside][0] / m_calibModuleSum[iside];
