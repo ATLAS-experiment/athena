@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
- Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 #ifndef ATHLINKS_ELEMENTLINK_ICC
 #define ATHLINKS_ELEMENTLINK_ICC
@@ -136,6 +136,42 @@ ElementLink< STORABLE >::ElementLink( const ElementLink& parent )
      m_elementCached( parent.m_elementCached ), m_event( parent.m_event ) {
 
 }
+
+template< typename STORABLE >
+inline
+ElementLink< STORABLE >::ElementLink( const ID_type& key, index_type index,
+                                      const EventContext& )
+  : ElementLink( key, index ) {}
+
+template< typename STORABLE >
+inline
+ElementLink< STORABLE >::ElementLink( sgkey_t id, index_type index,
+                                      const EventContext& )
+  : ElementLink( id, index ) {}
+
+template< typename STORABLE >
+inline
+ElementLink< STORABLE >::ElementLink( const ID_type& key, index_type index, ElementType element,
+                                      const EventContext& )
+  : ElementLink( key, index, element ) {}
+
+template< typename STORABLE >
+inline
+ElementLink< STORABLE >::ElementLink( sgkey_t id, index_type index, ElementType element,
+                                      const EventContext& )
+  : ElementLink( id, index, element ) {}
+
+template< typename STORABLE >
+inline
+ElementLink< STORABLE >::ElementLink( BaseConstReference container, index_type index,
+                                      const EventContext& )
+  : ElementLink( container, index ) {}
+
+template< typename STORABLE >
+inline
+ElementLink< STORABLE >::ElementLink( ElementType element, BaseConstReference container,
+                                      const EventContext& )
+  : ElementLink( element, container ) {}
 
 //
 ////////////////////////////////////////////////////////////////////////////////
