@@ -15,29 +15,29 @@ namespace MuonTGC_Cabling {
 // Constructor & Destructor
 TGCCablePPToSLB::TGCCablePPToSLB(const std::string& filename)
     : TGCCable(TGCCable::PPToSLB), m_database{{{nullptr}}} {
-    m_database[TGCId::Endcap][TGCId::WT] =
+    m_database.at(TGCId::Endcap).at(TGCId::WT) =
         std::make_unique<TGCDatabasePPToSL>(filename, "PP EWT");
-    m_database[TGCId::Endcap][TGCId::WD] =
+    m_database.at(TGCId::Endcap).at(TGCId::WD) =
         std::make_unique<TGCDatabasePPToSL>(filename, "PP EWD");
-    m_database[TGCId::Endcap][TGCId::ST] =
+    m_database.at(TGCId::Endcap).at(TGCId::ST) =
         std::make_unique<TGCDatabasePPToSL>(filename, "PP EST");
-    m_database[TGCId::Endcap][TGCId::SD] =
+    m_database.at(TGCId::Endcap).at(TGCId::SD) =
         std::make_unique<TGCDatabasePPToSL>(filename, "PP ESD");
-    m_database[TGCId::Endcap][TGCId::WI] =
+    m_database.at(TGCId::Endcap).at(TGCId::WI) =
         std::make_unique<TGCDatabasePPToSL>(filename, "PP EWI");
-    m_database[TGCId::Endcap][TGCId::SI] =
+    m_database.at(TGCId::Endcap).at(TGCId::SI) =
         std::make_unique<TGCDatabasePPToSL>(filename, "PP ESI");
-    m_database[TGCId::Forward][TGCId::WT] =
+    m_database.at(TGCId::Forward).at(TGCId::WT) =
         std::make_unique<TGCDatabasePPToSL>(filename, "PP FWT");
-    m_database[TGCId::Forward][TGCId::WD] =
+    m_database.at(TGCId::Forward).at(TGCId::WD) =
         std::make_unique<TGCDatabasePPToSL>(filename, "PP FWD");
-    m_database[TGCId::Forward][TGCId::ST] =
+    m_database.at(TGCId::Forward).at(TGCId::ST) =
         std::make_unique<TGCDatabasePPToSL>(filename, "PP FST");
-    m_database[TGCId::Forward][TGCId::SD] =
+    m_database.at(TGCId::Forward).at(TGCId::SD) =
         std::make_unique<TGCDatabasePPToSL>(filename, "PP FSD");
-    m_database[TGCId::Forward][TGCId::WI] =
+    m_database.at(TGCId::Forward).at(TGCId::WI) =
         std::make_unique<TGCDatabasePPToSL>(filename, "PP FWI");
-    m_database[TGCId::Forward][TGCId::SI] =
+    m_database.at(TGCId::Forward).at(TGCId::SI) =
         std::make_unique<TGCDatabasePPToSL>(filename, "PP FSI");
 }
 
@@ -199,7 +199,7 @@ TGCModuleMap TGCCablePPToSLB::getModuleIn(const TGCModuleId& slb) const {
     const int slbId = slb.getId();
 
     TGCDatabase* databaseP =
-        m_database[slb.getRegionType()][slb.getModuleType()].get();
+        m_database.at(slb.getRegionType()).at(slb.getModuleType()).get();
     TGCModuleMap mapId{};
     const int MaxEntry = databaseP->getMaxEntry();
     for (int i = 0; i < MaxEntry; i++) {
@@ -234,7 +234,7 @@ TGCModuleMap TGCCablePPToSLB::getModuleOut(const TGCModuleId& pp) const {
     const int ppId = pp.getId();
 
     TGCDatabase* databaseP =
-        m_database[pp.getRegionType()][pp.getModuleType()].get();
+        m_database.at(pp.getRegionType()).at(pp.getModuleType()).get();
     TGCModuleMap mapId{};
     const int MaxEntry = databaseP->getMaxEntry();
     for (int i = 0; i < MaxEntry; i++) {

@@ -14,21 +14,21 @@ namespace MuonTGC_Cabling {
 
 TGCCableSLBToHPB::TGCCableSLBToHPB(const std::string& filename)
     : TGCCable(TGCCable::SLBToHPB), m_database{{{nullptr}}} {
-    m_database[TGCId::Endcap][TGCId::WT] =
+    m_database.at(TGCId::Endcap).at(TGCId::WT) =
         std::make_unique<TGCDatabasePPToSL>(filename, "SB EWT");
-    m_database[TGCId::Endcap][TGCId::WD] =
+    m_database.at(TGCId::Endcap).at(TGCId::WD) =
         std::make_unique<TGCDatabasePPToSL>(filename, "SB EWD");
-    m_database[TGCId::Endcap][TGCId::ST] =
+    m_database.at(TGCId::Endcap).at(TGCId::ST) =
         std::make_unique<TGCDatabasePPToSL>(filename, "SB EST");
-    m_database[TGCId::Endcap][TGCId::SD] =
+    m_database.at(TGCId::Endcap).at(TGCId::SD) =
         std::make_unique<TGCDatabasePPToSL>(filename, "SB ESD");
-    m_database[TGCId::Forward][TGCId::WT] =
+    m_database.at(TGCId::Forward).at(TGCId::WT) =
         std::make_unique<TGCDatabasePPToSL>(filename, "SB FWT");
-    m_database[TGCId::Forward][TGCId::WD] =
+    m_database.at(TGCId::Forward).at(TGCId::WD) =
         std::make_unique<TGCDatabasePPToSL>(filename, "SB FWD");
-    m_database[TGCId::Forward][TGCId::ST] =
+    m_database.at(TGCId::Forward).at(TGCId::ST) =
         std::make_unique<TGCDatabasePPToSL>(filename, "SB FST");
-    m_database[TGCId::Forward][TGCId::SD] =
+    m_database.at(TGCId::Forward).at(TGCId::SD) =
         std::make_unique<TGCDatabasePPToSL>(filename, "SB FSD");
 }
 
@@ -280,8 +280,8 @@ TGCModuleMap TGCCableSLBToHPB::getModuleIn(const TGCModuleId& hpbin) const {
         return TGCModuleMap{};
     }
 
-    TGCDatabase* doubletP = m_database[hpbin.getRegionType()][doublet].get();
-    TGCDatabase* tripletP = m_database[hpbin.getRegionType()][triplet].get();
+    TGCDatabase* doubletP = m_database.at(hpbin.getRegionType()).at(doublet).get();
+    TGCDatabase* tripletP = m_database.at(hpbin.getRegionType()).at(triplet).get();
 
     TGCModuleMap mapId{};
     const int doubletMaxEntry = doubletP->getMaxEntry();
@@ -321,7 +321,7 @@ TGCModuleMap TGCCableSLBToHPB::getModuleInforHPB(
     const int hpbId = hpbin.getId();
 
     TGCDatabase* databaseP =
-        m_database[hpbin.getRegionType()][moduleType].get();
+        m_database.at(hpbin.getRegionType()).at(moduleType).get();
 
     TGCModuleMap mapId{};
     const int MaxEntry = databaseP->getMaxEntry();
@@ -362,7 +362,7 @@ TGCModuleMap TGCCableSLBToHPB::getModuleOut(const TGCModuleId& slb) const {
     const int slbId = slb.getId();
 
     TGCDatabase* databaseP =
-        m_database[slb.getRegionType()][slb.getModuleType()].get();
+        m_database.at(slb.getRegionType()).at(slb.getModuleType()).get();
 
     TGCModuleMap mapId{};
     const int MaxEntry = databaseP->getMaxEntry();
