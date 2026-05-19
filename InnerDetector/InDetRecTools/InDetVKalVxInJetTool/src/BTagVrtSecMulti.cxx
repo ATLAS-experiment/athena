@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
@@ -107,7 +107,8 @@ InDetVKalVxInJetTool::getVrtSecMulti(workVectorArrxAOD* xAODwrk,
   double vrt2TrackNumber = 0;
 
   if (xAODwrk) {
-    select2TrVrt(xAODwrk->listJetTracks,
+    select2TrVrt(ctx,
+                 xAODwrk->listJetTracks,
                  xAODwrk->TracksForFit,
                  primVrt,
                  jetDir,
@@ -141,7 +142,7 @@ InDetVKalVxInJetTool::getVrtSecMulti(workVectorArrxAOD* xAODwrk,
   std::unique_ptr<std::vector<WrkVrt>> wrkVrtSet = std::make_unique<std::vector<WrkVrt>>();
   WrkVrt newvrt;
   newvrt.Good = true;
-  std::unique_ptr<Trk::IVKalState> state = m_fitSvc->makeState();
+  std::unique_ptr<Trk::IVKalState> state = m_fitSvc->makeState(ctx);
   StatusCode sc;
 
   //================================================== Boost version (don't
@@ -361,7 +362,7 @@ InDetVKalVxInJetTool::getVrtSecMulti(workVectorArrxAOD* xAODwrk,
   long int selectedTrack, selectedVertex;
   int foundV1, foundV2;
 
-  state = m_fitSvc->makeState();
+  state = m_fitSvc->makeState(ctx);
   while( ( foundMaxT = MaxOfShared(wrkVrtSet.get(), trkInVrt.get(), selectedTrack, selectedVertex) ) > 0) {
 
     double foundMinVrtDst = 1000000.;
@@ -468,7 +469,7 @@ InDetVKalVxInJetTool::getVrtSecMulti(workVectorArrxAOD* xAODwrk,
   }
 
   // Final vertex selection/cleaning
-  state = m_fitSvc->makeState();
+  state = m_fitSvc->makeState(ctx);
 
   //--------- Start with 1-track vertices
   //=First check if the track was detached from a multitrack vertex. If so - reattach.
