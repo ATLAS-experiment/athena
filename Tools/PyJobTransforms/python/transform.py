@@ -460,6 +460,8 @@ class transform(object):
                 try:
                     executor.execute()
                     executor.postExecute()
+                except Exception as e:
+                    msg.error('Exception encountered during execution of {0}:{1}'.format(executor.name,e))
                 finally:
                     executor.validate()
              
