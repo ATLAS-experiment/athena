@@ -75,13 +75,16 @@ def ActsTrackingGeometrySvcCfg(flags,
       subDetectors += ["Calo"]
       blueprintTools += [acc.popToolsAndMerge(caloBlueprintNodeBuilderCfg(flags))]
     # Muon system is currently disabled for simulation. Enabling it for non-simulation use cases. 
-    if flags.Detector.GeometryMuon and 'ACTS' not in flags.Sim.ISF.Simulator.value:
+    if flags.Muon.usePhaseIIGeoSetup and 'ACTS' not in flags.Sim.ISF.Simulator.value:
       subDetectors += ["Muon"]
       from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
       acc.merge(MuonGeoModelCfg(flags))
       from ActsMuonDetector.ActsMuonDetectorCfg import MuonBlueprintNodeBuilderCfg, MuonMaterialDecoratorToolCfg
       blueprintTools += [acc.popToolsAndMerge(MuonBlueprintNodeBuilderCfg(flags))]
-      if False and flags.Muon.trackGeometryPassiveMaterial:
+      ### Only load the material decorator if the material map is also defined
+      ### Otherwise it would break with the Material generation script
+      if flags.Muon.trackGeometryPassiveMaterial and \
+         len(flags.Muon.trackGeometryMaterialMap) > 0:
          refineTools+= [acc.popToolsAndMerge(MuonMaterialDecoratorToolCfg(flags))]
         
 
