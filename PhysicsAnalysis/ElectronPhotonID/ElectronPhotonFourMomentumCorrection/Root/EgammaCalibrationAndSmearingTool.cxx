@@ -1262,7 +1262,8 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
 
 void EgammaCalibrationAndSmearingTool::setPt(columnar::MutableEgammaId input, double energy) const {
   const double new_energy2 = energy * energy;
-  const double m = m_accessors->momAcc.m (input);
+  const auto ptype = xAOD2ptype(input);
+  const double m = ptype == PATCore::ParticleType::Electron ? ParticleConstants::electronMassInMeV : ParticleConstants::photonMassInMeV;
   const double m2 = m * m;
   const double p2 = new_energy2 > m2 ? new_energy2 - m2 : 0.;
   m_accessors->ptOutDec (input) = sqrt(p2) / cosh(m_accessors->etaAcc (input));
