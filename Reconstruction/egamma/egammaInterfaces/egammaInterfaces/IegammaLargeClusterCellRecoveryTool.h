@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef EGAMMAINTERFACES_IEGAMMALARGECLUSTERCELLRECOVERYTOOL_H
@@ -13,7 +13,10 @@
 #include <GaudiKernel/IInterface.h>
 
 // xAOD includes
-#include "xAODCaloEvent/CaloClusterFwd.h"
+#include "xAODCaloEvent/CaloCluster.h"
+
+#include <memory>
+#include <vector>
 
 class CaloCell;
 class CaloCellContainer;
@@ -32,6 +35,7 @@ class IegammaLargeClusterCellRecoveryTool : virtual public IAlgTool {
     class Info {
         public:
             std::vector<const CaloCell*> cells711;
+            std::unique_ptr<xAOD::CaloCluster> cluster;
     };
 
     /** @brief Method to recover large clusters */
