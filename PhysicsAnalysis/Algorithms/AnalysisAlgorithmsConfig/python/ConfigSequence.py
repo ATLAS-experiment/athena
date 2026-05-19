@@ -1,5 +1,6 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
+from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnaAlgorithm.Logging import logging
 logCPAlgCfgSeq = logging.getLogger('CPAlgCfgSeq')
 
@@ -61,6 +62,7 @@ class ConfigSequence:
             block.checkExpertSettings (config)
             block.makeAlgs (config)
         config.setAlgPostfix('')  # reset algPostfix after all blocks are configured
+        ConfigBlock.instance_counts.clear()  # reset for a possible next config run
 
 
     def applyConfigOverrides(self, config):
