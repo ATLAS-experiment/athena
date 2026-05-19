@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigBphysMonitorAlgorithm.h"
@@ -517,7 +517,7 @@ StatusCode TrigBphysMonitorAlgorithm::buildDimuons(const EventContext& ctx, std:
       if( !(dimu_momentum_prefit > m_dimuMassLower_prefit && dimu_momentum_prefit < m_dimuMassUpper_prefit) ) 
         continue;
       // Fit
-      std::unique_ptr<xAOD::Vertex> dimuon = dimuonFit(trackParticle1, trackParticle2);
+      std::unique_ptr<xAOD::Vertex> dimuon = dimuonFit(ctx, trackParticle1, trackParticle2);
       if(!dimuon) continue;
       if(dimuon->chiSquared() > m_dimuChi2Cut) continue;
       vxContainer.push_back(std::move(dimuon));
@@ -548,7 +548,7 @@ StatusCode TrigBphysMonitorAlgorithm::buildDimuons(const EventContext& ctx, std:
   return StatusCode::SUCCESS;
 }
 
-std::unique_ptr<xAOD::Vertex> TrigBphysMonitorAlgorithm::dimuonFit(const xAOD::TrackParticle* mu1, const xAOD::TrackParticle* mu2) const {
+std::unique_ptr<xAOD::Vertex> TrigBphysMonitorAlgorithm::dimuonFit(const EventContext& ctx, const xAOD::TrackParticle* mu1, const xAOD::TrackParticle* mu2) const {
   
   const Trk::Perigee& mu1Perigee = mu1->perigeeParameters();
   const Trk::Perigee& mu2Perigee = mu2->perigeeParameters();
@@ -556,9 +556,8 @@ std::unique_ptr<xAOD::Vertex> TrigBphysMonitorAlgorithm::dimuonFit(const xAOD::T
   Amg::Vector3D startingPoint = m_vertexPointEstimator->getCirclesIntersectionPoint(&mu1Perigee,&mu2Perigee,sflag,errorcode);
   if (errorcode != 0) {startingPoint(0) = 0.0; startingPoint(1) = 0.0; startingPoint(2) = 0.0;}
   const std::vector<const xAOD::TrackParticle*> trackPair = {mu1, mu2};
-  std::unique_ptr<xAOD::Vertex> myVxCandidate(m_vertexFitter->fit(trackPair, startingPoint)); 
 
-  return myVxCandidate;
+  return m_vertexFitter->fit(ctx, trackPair, startingPoint);
 }
 
 bool TrigBphysMonitorAlgorithm::matchDimuon(const xAOD::Vertex* dimuonVertex, const std::string& chainName) const {
