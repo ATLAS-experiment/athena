@@ -431,13 +431,6 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg.jets = config.readName (self.containerName)
             alg.jetsOut = config.copyName (self.containerName)
 
-
-        if (config.dataType() is not DataType.Data):
-            alg = config.createAlgorithm( 'CP::JetPartonTruthLabelAlg',
-                                          'JetPartonTruthLabelAlg' )
-            config.addPrivateTool( 'LabelTool', 'Analysis::JetPartonTruthLabel' )
-            alg.jets = config.readName (self.containerName)
-
         # Jet uncertainties
         if self.runUncertainties:
             alg = config.createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg' )
@@ -886,12 +879,6 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             alg.calibrationTool = f'{calibTool.getType()}/{calibTool.getName()}'
             alg.jets = config.readName(self.containerName)
             alg.jetsOut = config.copyName(self.containerName)
-
-        if (config.dataType() is not DataType.Data):
-            alg = config.createAlgorithm( 'CP::JetPartonTruthLabelAlg',
-                                          'JetPartonTruthLabelAlg' )
-            config.addPrivateTool( 'LabelTool', 'Analysis::JetPartonTruthLabel' )
-            alg.jets = config.readName (self.containerName)
 
         # Jet uncertainties
         if jetInput == "UFO" and config.dataType() in [DataType.FullSim, DataType.FastSim] and self.runUncertainties:
