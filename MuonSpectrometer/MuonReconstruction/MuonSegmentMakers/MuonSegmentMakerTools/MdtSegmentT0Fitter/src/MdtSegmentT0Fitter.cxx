@@ -482,7 +482,12 @@ namespace TrkDriftCircleMath {
     minimum.SetFunction(minFunct);
 
     // do the minimization
-    minimum.Minimize();
+    const bool minuit_succedded = minimum.Minimize();
+    const int minuitStatus = minimum.Status();
+    if (!minuit_succedded || minuitStatus != 0) {
+      ATH_MSG_DEBUG("Minuit fit failed with status " << minuitStatus);
+      return false;
+    }
 
     const double *results = minimum.X();
     const double *errors = minimum.Errors();
