@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGBPHYSMONITORING_TRIGBPHYSMONITORALGORITHM_H
@@ -80,7 +80,7 @@ private:
   bool isChainPassed(const std::string& chain) const;
   
   StatusCode buildDimuons(const EventContext& ctx, std::vector<std::unique_ptr<xAOD::Vertex>>& vxContainer) const;
-  std::unique_ptr<xAOD::Vertex> dimuonFit(const xAOD::TrackParticle* mu1, const xAOD::TrackParticle* mu2) const;
+  std::unique_ptr<xAOD::Vertex> dimuonFit(const EventContext& ctx, const xAOD::TrackParticle* mu1, const xAOD::TrackParticle* mu2) const;
   double dimuonMass(const xAOD::TrackParticle* mu1, const xAOD::TrackParticle* mu2) const;
   std::vector<const xAOD::Vertex*> GetGoodPVs(const xAOD::VertexContainer* pvContainer) const;
   const xAOD::Vertex* getPvForDimuon_lowestA0(const xAOD::Vertex* vtx, const std::vector<const xAOD::Vertex*>& PVs) const;
