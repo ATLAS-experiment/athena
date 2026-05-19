@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "egammaLargeClusterCellRecoveryTool.h"
@@ -129,11 +129,11 @@ StatusCode egammaLargeClusterCellRecoveryTool::execute(const xAOD::CaloCluster* 
         return StatusCode::SUCCESS;
     }
     
-    /// FIXME: this tool should probably return the cluster object
     // Iterate through cells and store in info
     for (const CaloCell* cell : *largeCluster) {
         info.cells711.push_back(cell);
     }
+    info.cluster = std::move(largeCluster);
 
     return StatusCode::SUCCESS;
 }
