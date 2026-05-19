@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCCableInPP.h"
@@ -14,29 +14,29 @@ namespace MuonTGC_Cabling {
 // Constructor & Destructor
 TGCCableInPP::TGCCableInPP(const std::string& filename)
     : TGCCable(TGCCable::InPP), m_database{{{nullptr}}} {
-    m_database[TGCId::Endcap][TGCId::WD] =
+    m_database.at(TGCId::Endcap).at(TGCId::WD) =
         std::make_unique<TGCDatabaseInPP>(filename, "EWD");
-    m_database[TGCId::Endcap][TGCId::WT] =
+    m_database.at(TGCId::Endcap).at(TGCId::WT) =
         std::make_unique<TGCDatabaseInPP>(filename, "EWT");
-    m_database[TGCId::Endcap][TGCId::SD] =
+    m_database.at(TGCId::Endcap).at(TGCId::SD) =
         std::make_unique<TGCDatabaseInPP>(filename, "ESD");
-    m_database[TGCId::Endcap][TGCId::ST] =
+    m_database.at(TGCId::Endcap).at(TGCId::ST) =
         std::make_unique<TGCDatabaseInPP>(filename, "EST");
-    m_database[TGCId::Endcap][TGCId::WI] =
+    m_database.at(TGCId::Endcap).at(TGCId::WI) =
         std::make_unique<TGCDatabaseInPP>(filename, "EWI");
-    m_database[TGCId::Endcap][TGCId::SI] =
+    m_database.at(TGCId::Endcap).at(TGCId::SI) =
         std::make_unique<TGCDatabaseInPP>(filename, "ESI");
-    m_database[TGCId::Forward][TGCId::WD] =
+    m_database.at(TGCId::Forward).at(TGCId::WD) =
         std::make_unique<TGCDatabaseInPP>(filename, "FWD");
-    m_database[TGCId::Forward][TGCId::WT] =
+    m_database.at(TGCId::Forward).at(TGCId::WT) =
         std::make_unique<TGCDatabaseInPP>(filename, "FWT");
-    m_database[TGCId::Forward][TGCId::SD] =
+    m_database.at(TGCId::Forward).at(TGCId::SD) =
         std::make_unique<TGCDatabaseInPP>(filename, "FSD");
-    m_database[TGCId::Forward][TGCId::ST] =
+    m_database.at(TGCId::Forward).at(TGCId::ST) =
         std::make_unique<TGCDatabaseInPP>(filename, "FST");
-    m_database[TGCId::Forward][TGCId::WI] =
+    m_database.at(TGCId::Forward).at(TGCId::WI) =
         std::make_unique<TGCDatabaseInPP>(filename, "FWI");
-    m_database[TGCId::Forward][TGCId::SI] =
+    m_database.at(TGCId::Forward).at(TGCId::SI) =
         std::make_unique<TGCDatabaseInPP>(filename, "FSI");
 }
 
@@ -63,13 +63,13 @@ std::unique_ptr<TGCChannelId> TGCCableInPP::getChannelIn(
 
     int ndatabaseP = 1;
     TGCDatabase* databaseP[2];
-    databaseP[0] = m_database[ppout.getRegionType()][moduleType].get();
+    databaseP[0] = m_database.at(ppout.getRegionType()).at(moduleType).get();
     // EI/FI
     //  wire(TGCId::WI) and strip(TGCId::SI) of a chamber
     //  use the same SLB chip
     //  The SLB chip is treated as TGCId::WI in TGCCableSLBToSSW.cxx
     if (moduleType == TGCId::WI) {
-        databaseP[1] = m_database[ppout.getRegionType()][TGCId::SI].get();
+        databaseP[1] = m_database.at(ppout.getRegionType()).at(TGCId::SI).get();
         ndatabaseP = 2;
     }
 
@@ -133,7 +133,7 @@ std::unique_ptr<TGCChannelId> TGCCableInPP::getChannelOut(
     const int ppinId = ppin.getId();
 
     TGCDatabase* databaseP =
-        m_database[ppin.getRegionType()][ppin.getModuleType()].get();
+        m_database.at(ppin.getRegionType()).at(ppin.getModuleType()).get();
 
     const int MaxEntry = databaseP->getMaxEntry();
     for (int i = 0; i < MaxEntry; i++) {

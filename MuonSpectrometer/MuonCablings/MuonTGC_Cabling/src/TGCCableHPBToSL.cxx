@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCCableHPBToSL.h"
@@ -12,13 +12,13 @@ namespace MuonTGC_Cabling {
 
 TGCCableHPBToSL::TGCCableHPBToSL(const std::string& filename)
     : TGCCable(TGCCable::HPBToSL), m_database{{{nullptr}}} {
-    m_database[TGCId::Endcap][TGCId::Wire] =
+    m_database.at(TGCId::Endcap).at(TGCId::Wire) =
         std::make_unique<TGCDatabasePPToSL>(filename, "HPB EW");
-    m_database[TGCId::Endcap][TGCId::Strip] =
+    m_database.at(TGCId::Endcap).at(TGCId::Strip) =
         std::make_unique<TGCDatabasePPToSL>(filename, "HPB ES");
-    m_database[TGCId::Forward][TGCId::Wire] =
+    m_database.at(TGCId::Forward).at(TGCId::Wire) =
         std::make_unique<TGCDatabasePPToSL>(filename, "HPB FW");
-    m_database[TGCId::Forward][TGCId::Strip] =
+    m_database.at(TGCId::Forward).at(TGCId::Strip) =
         std::make_unique<TGCDatabasePPToSL>(filename, "HPB FS");
 }
 
@@ -39,8 +39,8 @@ TGCModuleMap TGCCableHPBToSL::getModuleIn(const TGCModuleId& sl) const {
         return TGCModuleMap{};
     }
 
-    TGCDatabase* wireP = m_database[sl.getRegionType()][TGCId::Wire].get();
-    TGCDatabase* stripP = m_database[sl.getRegionType()][TGCId::Strip].get();
+    TGCDatabase* wireP = m_database.at(sl.getRegionType()).at(TGCId::Wire).get();
+    TGCDatabase* stripP = m_database.at(sl.getRegionType()).at(TGCId::Strip).get();
 
     TGCModuleMap mapId{};
     const int wireMaxEntry = wireP->getMaxEntry();
@@ -74,7 +74,7 @@ TGCModuleMap TGCCableHPBToSL::getModuleOut(const TGCModuleId& hpb) const {
     const int hpbId = hpb.getId();
 
     TGCDatabase* databaseP =
-        m_database[hpb.getRegionType()][hpb.getSignalType()].get();
+        m_database.at(hpb.getRegionType()).at(hpb.getSignalType()).get();
 
     TGCModuleMap mapId{};
     const int MaxEntry = databaseP->getMaxEntry();
