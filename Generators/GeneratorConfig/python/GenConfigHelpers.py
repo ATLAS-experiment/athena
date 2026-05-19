@@ -11,7 +11,7 @@ LHEFGenerators = ["Lhef", # generic name: prefer to use the names below
                   "MCFM", "JHU", "MEtop", "BCVEGPY", "Dire4Pythia8", 
                   "BlackMax", "QBH", "gg2ww", "gg2zz", "gg2vv", "HvyN", 
                   "VBFNLO", "FPMC", "ProtosLHEF",
-                  "BCVEGPY", "STRINGS", "Phantom"]
+                  "BCVEGPY", "STRINGS", "Phantom", "Pepper"]
 
 # "Main" generators which typically model QCD showers, hadronisation, decays, etc.
 # Herwig family
@@ -27,7 +27,7 @@ MainGenerators += ["Epos4"]
 MainGenerators += ["ParticleGun"]
 MainGenerators += ["CosmicGenerator", "BeamHaloGenerator"]
 # Heavy ion generators - as a special group to avoid problems in sorting
-HIMainGenerators = ["AMPT","SuperChic","Starlight", "Hijing", "Hydjet"]
+HIMainGenerators = ["AMPT","SuperChic","Starlight", "Hijing"]
 # Reading in fully-formed events
 
 MainGenerators += ["HepMCAscii"]
@@ -42,7 +42,7 @@ KnownGenerators = LHEFGenerators + HIMainGenerators +MainGenerators + Afterburne
 
 # Note which generators should NOT be sanity tested by the TestHepMC alg
 NoTestHepMCGenerators = ["Superchic","ParticleDecayer", "ParticleGun", "CosmicGenerator", 
-                         "BeamHaloGenerator", "FPMC", "Hijing", "Hydjet", "Starlight"]
+                         "BeamHaloGenerator", "FPMC", "Hijing", "Starlight"]
 
 # Generators with no flexibility/concept of a tune or PDF choice
 NoTuneGenerators = ["ParticleGun", "CosmicGenerator", "BeamHaloGenerator", "HepMCAscii"]

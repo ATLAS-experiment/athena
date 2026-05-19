@@ -217,7 +217,7 @@ if joparts[0].startswith("mc"): #and all(c in string.digits for c in joparts[0][
         evgenLog.error(jofile + " has too few physicsShort fields separated by '_': should contain <generators>(_<tune+PDF_if_available>)_<process>. Please rename.")
         sys.exit(1)
     ## NOTE: a further check on physicsShort consistency is done below, after fragment loading
-    check_jofiles="/cvmfs/atlas.cern.ch/repo/sw/Generators/MC16JobOptions/scripts/check_jo_consistency.py"
+    check_jofiles="/cvmfs/atlas.cern.ch/repo/sw/Generators/MCJobOptions/scripts/check_jo_consistency.py"
     if os.path.exists(check_jofiles):
         include(check_jofiles)
         check_naming(os.path.basename(jofile))
