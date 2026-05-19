@@ -154,7 +154,7 @@ CP::CorrectionCode CommonEfficiencyTool::getEfficiencyScaleFactor(columnar::TauJ
 
   // check which true state is requested
   // need columnar migration
-  if (!m_bSkipTruthMatchCheck and getTruthParticleType(tau.getXAODObject()) != m_eCheckTruth)
+  if (!m_bSkipTruthMatchCheck and acc.m_truthParticleType(tau) != m_eCheckTruth)
   {
     dEfficiencyScaleFactor = 1.;
     return CP::CorrectionCode::Ok;
