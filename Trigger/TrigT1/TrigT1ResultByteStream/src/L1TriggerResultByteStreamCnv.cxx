@@ -62,6 +62,10 @@ StatusCode L1TriggerResultByteStreamCnv::initialize() {
   ATH_MSG_DEBUG("eFex BS encoding is " << (doEfex ? "enabled" : "disabled"));
   ATH_CHECK(m_efexEncoderTool.retrieve(EnableTool(doEfex)));
 
+  const bool doJfex = not serviceLocator()->getOptsSvc().get("ToolSvc.jFexBSEncoderTool.ROBIDs").empty();
+  ATH_MSG_DEBUG("jFex BS encoding is " << (doJfex ? "enabled" : "disabled"));
+  ATH_CHECK(m_jfexEncoderTool.retrieve(EnableTool(doJfex)));
+
   ATH_MSG_VERBOSE("end of " << __FUNCTION__);
   return StatusCode::SUCCESS;
 }
@@ -81,6 +85,8 @@ StatusCode L1TriggerResultByteStreamCnv::finalize() {
     ATH_MSG_WARNING("Failed to release tool " << m_ctpResultEncoderTool.typeAndName());
   if (m_efexEncoderTool.isEnabled() && m_efexEncoderTool.release().isFailure())
     ATH_MSG_WARNING("Failed to release tool " << m_efexEncoderTool.typeAndName());
+  if (m_jfexEncoderTool.isEnabled() && m_jfexEncoderTool.release().isFailure())
+    ATH_MSG_WARNING("Failed to release tool " << m_jfexEncoderTool.typeAndName());
   ATH_MSG_VERBOSE("end of " << __FUNCTION__);
   return StatusCode::SUCCESS;
 }
@@ -190,7 +196,7 @@ StatusCode L1TriggerResultByteStreamCnv::createRep(DataObject* pObj, IOpaqueAddr
 
   //  ===== MuonRoI + eFex encoding =================
 
-  for (ToolHandle<IL1TriggerByteStreamTool>& tool : {std::reference_wrapper(m_muonEncoderTool), std::reference_wrapper(m_muonEncoderToolDaq), std::reference_wrapper(m_efexEncoderTool)}) {
+  for (ToolHandle<IL1TriggerByteStreamTool>& tool : {std::reference_wrapper(m_muonEncoderTool), std::reference_wrapper(m_muonEncoderToolDaq), std::reference_wrapper(m_efexEncoderTool), std::reference_wrapper(m_jfexEncoderTool)}) {
     if (not tool.isEnabled()) {continue;}
     std::vector<WROBF*> muon_robs;
     ATH_CHECK(tool->convertToBS(muon_robs, l1TriggerResult, ctx)); // TODO: find a way to avoid ThreadLocalContext
@@ -207,7 +213,7 @@ StatusCode L1TriggerResultByteStreamCnv::createRep(DataObject* pObj, IOpaqueAddr
     }
   }
 
-  // Placeholder for other systems: L1Topo, L1Calo
+  // Placeholder for other systems: L1Topo, gFEX
 
   // Create a ByteStreamAddress for L1TriggerResult
   ByteStreamAddress* bsAddr = new ByteStreamAddress(classID(), pObj->registry()->name(), "");
