@@ -37,11 +37,11 @@ pool::MicroSessionManager::~MicroSessionManager()
 
 
 bool
-pool::MicroSessionManager::connect( ITransaction::Type transType )
+pool::MicroSessionManager::connect( ITransaction::Type transType, int ageLimit )
 {
   if( !m_inSession ) {
     long mode = (transType == ITransaction::UPDATE) ? pool::UPDATE : pool::READ;
-    m_inSession = m_storageSvc->startSession(mode, m_technology).isSuccess();
+    m_inSession = m_storageSvc->startSession(mode, m_technology, ageLimit).isSuccess();
   }
   return m_inSession;
 }

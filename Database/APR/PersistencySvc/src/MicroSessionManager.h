@@ -36,7 +36,7 @@ namespace pool {
     virtual ~MicroSessionManager();
 
     /// Connects to the storage service
-    bool connect( ITransaction::Type transType );
+    bool connect( ITransaction::Type transType, int ageLimit );
 
     /// Connects to a database.
     DatabaseHandler* connect( ITransaction::Type transType,

@@ -66,7 +66,7 @@ namespace pool  {
       * @return                 std::string container name.
       */
     virtual std::string getContName(FileDescriptor& refDB,
-                                    Token&          pToken) = 0;
+                                    Token&          pToken) const = 0;
 
     /// Register object for write
     /**
@@ -139,10 +139,11 @@ namespace pool  {
       *                         READ, NEW/CREATE/WRITE, UPDATE, RECREATE
       * @param    tech     [IN] Flag indicating the technology type of the
       *                         Database  the user  wants to connect to.
+      * @param    ageLimit [IN] Overwriting default age limit of the session.
       *
       * @return                 StatusCode code indicating success or failure.
       */
-      virtual StatusCode startSession(int mode, int tech) = 0;
+      virtual StatusCode startSession(int mode, int tech, int ageLimit = -1) = 0;
 
     /// End the Database session.
     /** The  request to end a Database session requires, that all pending 

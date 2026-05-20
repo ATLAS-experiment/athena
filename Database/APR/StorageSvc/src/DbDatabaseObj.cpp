@@ -106,10 +106,7 @@ DbDatabaseObj::~DbDatabaseObj()  {
 }
 
 /// Access the size of the database: May be undefined for some technologies
-long long int DbDatabaseObj::size() {
-  if ( 0 == m_info )    {  // Re-open the database if it was retired
-     open().ignore();
-  }
+long long int DbDatabaseObj::size() const {
   return 0==m_info ? -1 : m_info->size();
 }
 
@@ -173,7 +170,7 @@ StatusCode DbDatabaseObj::makeLink(Token* pTok, Token::OID_t& refLnk) {
         // Update the transient list of links
         Guid tmp_key;
         makeKey(link.get(), tmp_key);
-    m_linkMap.insert( LinkMap::value_type(tmp_key, link.get()));
+        m_linkMap.insert( LinkMap::value_type(tmp_key, link.get()));
         m_indexMap.insert( IndexMap::value_type(link->oid().first, m_linkVec.size()));
         m_linkVec.push_back( link.release() );
         return StatusCode::SUCCESS;
@@ -184,8 +181,7 @@ StatusCode DbDatabaseObj::makeLink(Token* pTok, Token::OID_t& refLnk) {
 }
 
 // Retrieve shape information for a specified object by shape ID
-const DbTypeInfo* DbDatabaseObj::objectShape(const Guid& id)  {
-  if ( 0 == m_info ) open().ignore();
+const DbTypeInfo* DbDatabaseObj::objectShape(const Guid& id) const {
   ShapeMap::const_iterator i = m_shapeMap.find(id);
   if( i != m_shapeMap.end() ) return (*i).second;
   if( id == m_string_t->shapeID() ) return m_string_t;
@@ -193,8 +189,7 @@ const DbTypeInfo* DbDatabaseObj::objectShape(const Guid& id)  {
 }
 
 // Retrieve shape information for a specified object by reflection handle
-const DbTypeInfo* DbDatabaseObj::objectShape(const TypeH& id)  {
-  if ( 0 == m_info ) open().ignore();
+const DbTypeInfo* DbDatabaseObj::objectShape(const TypeH& id) const {
   std::map<TypeH, const DbTypeInfo*>::const_iterator i = m_classMap.find(id);
   if( i != m_classMap.end() ) return i->second;
   if( id == m_string_t->clazz() or id.Name() == "string" ) {
@@ -205,10 +200,7 @@ const DbTypeInfo* DbDatabaseObj::objectShape(const TypeH& id)  {
 }
 
 // Retrieve shape information for a specified object by container name
-const DbTypeInfo* DbDatabaseObj::contShape(const std::string& nam) {
-  if ( 0 == m_info )    {
-    open().ignore();
-  }
+const DbTypeInfo* DbDatabaseObj::contShape(const std::string& nam) const {
   LinkVector::const_iterator j=m_linkVec.begin();
   for(; j != m_linkVec.end(); ++j ) {
     Token* t = (*j);
@@ -220,7 +212,7 @@ const DbTypeInfo* DbDatabaseObj::contShape(const std::string& nam) {
 }
 
 // Add persistent shape to the Database
-StatusCode DbDatabaseObj::addShape (const DbTypeInfo* pShape) {
+StatusCode DbDatabaseObj::addShape(const DbTypeInfo* pShape) {
   if ( pShape )    {
     const Guid& id = pShape->shapeID();
     ShapeMap::iterator i = m_shapeMap.find(id);
@@ -537,18 +529,9 @@ StatusCode DbDatabaseObj::retire()  {
   return ret;
 }
 
-/// Retrieve the number of user parameters
-int DbDatabaseObj::nParam() {
-  if ( 0 == m_info )    {  // Re-open the database if it was retired
-    open().ignore();
-  }
-  return 0 == m_info ? -1 : int(m_paramMap.size());
-}
-
 /// Add a persistent parameter to the file
 StatusCode DbDatabaseObj::addParam(const std::string& nam, const std::string& val) {
   if ( !nam.empty() && !val.empty() ) {
-    if ( 0 == m_info ) open().ignore();
     if ( m_info )  {
       ParamMap::const_iterator i = m_paramMap.find(nam);
       if ( i == m_paramMap.end() )  {
@@ -566,8 +549,7 @@ StatusCode DbDatabaseObj::addParam(const std::string& nam, const std::string& va
 }
 
 /// Retrieve existing parameter by name
-StatusCode DbDatabaseObj::param(const std::string& nam, std::string& val)  {
-  if ( 0 == m_info ) open().ignore();
+StatusCode DbDatabaseObj::param(const std::string& nam, std::string& val) const {
   if ( m_info ) {
     ParamMap::const_iterator i = m_paramMap.find(nam);
     if ( i == m_paramMap.end() )  {
@@ -579,40 +561,12 @@ StatusCode DbDatabaseObj::param(const std::string& nam, std::string& val)  {
   return StatusCode::FAILURE;
 }
 
-/// Retrieve all parameters
-StatusCode DbDatabaseObj::params(Parameters& vals)   {
-  vals.clear();
-  if ( 0 == m_info ) open().ignore();
-  if ( m_info ) {
-    ParamMap::const_iterator i = m_paramMap.begin();
-    for ( ; i != m_paramMap.end(); ++i )  {
-      vals.push_back(*i);
-    }
-    return StatusCode::SUCCESS;
-  }
-  return StatusCode::FAILURE;
-}
-
-/// Expand OID into a full Token, based on the Links table.
-StatusCode DbDatabaseObj::getLink(const Token::OID_t& oid, Token* pTok)
-{
-   if ( 0 == m_info ) open().ignore();
-   if ( 0 != m_info && 0 != pTok && oid.first >= 0 ) {
-      pTok->oid() = oid;
-      m_linkVec[ oid.first ]->set(pTok);
-      return StatusCode::SUCCESS;
-   }
-   return StatusCode::FAILURE;
-}
-
-
-std::string DbDatabaseObj::cntName(Token& token) {
-  if ( 0 == m_info ) open().ignore();
+std::string DbDatabaseObj::cntName(Token& token) const {
   if ( 0 != m_info )    {
-    int lnk = m_indexMap[token.oid().first]; // Map link to index
+    int lnk = m_indexMap.at(token.oid().first); // Map link to index
     if ( lnk >= 0 )  {
       if ( lnk < int(m_linkVec.size()) )   {
-        Token* link = m_linkVec[lnk];
+        Token* link = m_linkVec.at(lnk);
         if ( link != 0 ) {
           if ( token.contID().empty() ) {
             token.setCont(link->contID());
@@ -669,7 +623,7 @@ StatusCode DbDatabaseObj::read(const Token& token, ShapeH shape, void** object)
 
 
 /// Allow access to all known containers
-StatusCode DbDatabaseObj::containers(std::vector<const Token*>& conts,bool with_internals)  {
+StatusCode DbDatabaseObj::containers(std::vector<const Token*>& conts, bool with_internals)  {
   conts.clear();
   if ( 0 == m_info ) open().ignore();
   if ( 0 != m_info )    {
@@ -687,7 +641,7 @@ StatusCode DbDatabaseObj::containers(std::vector<const Token*>& conts,bool with_
 }
 
 /// Allow access to all known containers
-StatusCode DbDatabaseObj::containers(std::vector<IDbContainer*>& conts,bool with_internals)  {
+StatusCode DbDatabaseObj::containers(std::vector<IDbContainer*>& conts, bool with_internals)  {
   conts.clear();
   if ( 0 == m_info ) open().ignore();
   if ( 0 != m_info )    {
@@ -714,19 +668,6 @@ const Token* DbDatabaseObj::cntToken(const std::string& cntName)  {
     }
   }
   return 0;
-}
-
-/// Allow access to all known shapes used by the database
-StatusCode DbDatabaseObj::shapes(std::vector<const DbTypeInfo*>& shaps)  {
-  if ( 0 == m_info ) open().ignore();
-  if ( 0 != m_info )    {
-    shaps.clear();
-    for(ShapeMap::iterator j=m_shapeMap.begin(); j != m_shapeMap.end(); ++j) {
-      shaps.push_back((*j).second);
-    }
-    return StatusCode::SUCCESS;
-  }
-  return StatusCode::FAILURE;
 }
 
 /// Execute Database Transaction action

@@ -26,7 +26,7 @@ namespace pool {
 
   /// Factory method to create a session object
   class ISession;
-  std::unique_ptr<ISession> createSession( IFileCatalog& catalog );
+  std::unique_ptr<ISession> createSession( IFileCatalog& catalog, int ageLimit = -1 );
 
   /** @class ISession ISession.h PersistencySvc/ISession.h
   *

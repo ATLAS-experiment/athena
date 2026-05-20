@@ -14,16 +14,17 @@
 
 
 std::unique_ptr< pool::ISession >
-pool::createSession( IFileCatalog& catalog )
+pool::createSession( IFileCatalog& catalog , int ageLimit )
 {
-   return std::unique_ptr<ISession>(  new pool::UserSession(catalog) );
+   return std::unique_ptr<ISession>(  new pool::UserSession(catalog, ageLimit) );
 }
 
 
-pool::UserSession::UserSession( pool::IFileCatalog& fileCatalog ):
+pool::UserSession::UserSession( pool::IFileCatalog& fileCatalog, int ageLimit ):
   APRMessaging( "APR Session" ),
   m_policy( 0 ),
   m_catalog( &fileCatalog ),
+  m_ageLimit( ageLimit ),
   m_registry( 0 ),
   m_transactionType( pool::ITransaction::INACTIVE )
 {
@@ -188,6 +189,7 @@ pool::UserSession::microSessionManager( long technology )
   // Technology does not exist. Create the new session.
   auto mgr = new pool::MicroSessionManager( *m_registry, majorType );
   m_technologies.insert( std::make_pair( majorType, mgr ) );
+  mgr->connect( m_transactionType, m_ageLimit );
   return *mgr;
 }
 
@@ -206,6 +208,6 @@ pool::ITechnologySpecificAttributes&
 pool::UserSession::technologySpecificAttributes( long technology )
 {
   pool::MicroSessionManager& mgr = microSessionManager( technology );
-  mgr.connect( m_transactionType );
+  mgr.connect( m_transactionType, m_ageLimit );
   return mgr;
 }

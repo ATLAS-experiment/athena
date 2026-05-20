@@ -109,7 +109,7 @@ StatusCode DbStorageSvc::finalize()   {
   return rc;
 }
 
-std::string DbStorageSvc::getContName(FileDescriptor& refDB, Token& persToken)  {
+std::string DbStorageSvc::getContName(FileDescriptor& refDB, Token& persToken) const {
   if ( m_domH.isValid() )   {
     DbDatabase dbH(DbDatabaseHNC(refDB.dbc()->handle()));
     if ( dbH.isValid() )  {
@@ -135,6 +135,13 @@ StatusCode DbStorageSvc::getShape( FileDescriptor&       fDesc,
       }
     }
     if ( dbH.isValid() )  {
+      if ( !dbH.info() ) { // ageing may close DbDatabaseObj w/o invalidating DbDatabase
+        StatusCode sc = dbH.open(m_domH, fDesc.PFN(), fDesc.FID(), pool::READ);
+        if ( !sc.isSuccess() )    {
+          ATH_MSG_ERROR( "Failed to re-open the Database!" );
+          return sc;
+        }
+      }
       shape = dbH.objectShape(objType);
       if ( shape )  {
         return StatusCode::SUCCESS;
@@ -235,10 +242,10 @@ StatusCode DbStorageSvc::read( const FileDescriptor& fDesc,
 }
 
 /// Start a new Database Session.
-StatusCode DbStorageSvc::startSession(int accessmode, int technology) {
+StatusCode DbStorageSvc::startSession(int accessmode, int technology, int ageLimit) {
   m_type   = DbType(technology).majorType();
   if( m_domH.open(db(), m_type, accessmode).isSuccess() )  {
-      m_domH.setAgeLimit(m_ageLimit);
+      m_domH.setAgeLimit(ageLimit==-1 ? m_ageLimit : ageLimit);
       return StatusCode::SUCCESS;
   }
   ATH_MSG_ERROR( "Cannot connect to the domain: " << DbType(technology).storageName() );
