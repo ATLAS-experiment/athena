@@ -1235,10 +1235,10 @@ namespace DerivationFramework {
     std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState(ctx);
     // do the fit
     if(track3) {
-      return m_iVertexFitter->fit(ctx, std::vector<const xAOD::TrackParticle*>{track1,track2,track3}, startingPoint, *state);
+      return m_iVertexFitter->fit(std::vector<const xAOD::TrackParticle*>{track1,track2,track3}, startingPoint, *state);
     }
     else {
-      return m_iVertexFitter->fit(ctx, std::vector<const xAOD::TrackParticle*>{track1,track2}, startingPoint, *state);
+      return m_iVertexFitter->fit(std::vector<const xAOD::TrackParticle*>{track1,track2}, startingPoint, *state);
     }
   }
 

@@ -362,11 +362,10 @@ TrkVKalVrtFitter::fit(const EventContext& ctx,
 {
   State state;
   initState(ctx, state);
-  return std::unique_ptr<xAOD::Vertex>(fit(ctx, xtpListC, startingPoint, state));
+  return std::unique_ptr<xAOD::Vertex>(fit(xtpListC, startingPoint, state));
 }
 
-std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& /*ctx*/,
-                                     const std::vector<const xAOD::TrackParticle*> & xtpListC,
+std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const std::vector<const xAOD::TrackParticle*> & xtpListC,
                                      const Amg::Vector3D & startingPoint,
                                      IVKalState& istate) const
 {
@@ -451,10 +450,9 @@ std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& ctx,
 {
     State state;
     initState (ctx, state);
-    return fit (ctx, xtpListC, constraint, state);
+    return fit (xtpListC, constraint, state);
 }
-std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const EventContext& /*ctx*/,
-                                     const std::vector<const xAOD::TrackParticle*> & xtpListC,
+std::unique_ptr<xAOD::Vertex> TrkVKalVrtFitter::fit(const std::vector<const xAOD::TrackParticle*> & xtpListC,
                                      const xAOD::Vertex & constraint,
                                      IVKalState& istate) const
 {

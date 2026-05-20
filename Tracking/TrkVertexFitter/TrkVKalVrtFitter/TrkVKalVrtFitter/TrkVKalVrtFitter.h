@@ -133,12 +133,10 @@ namespace Trk{
 
 
         /*--------------  Additional  xAOD  interfaces -------------*/
-        std::unique_ptr<xAOD::Vertex> fit(const EventContext& ctx,
-                           const std::vector<const xAOD::TrackParticle*>& vectorTrk,
+        std::unique_ptr<xAOD::Vertex> fit(const std::vector<const xAOD::TrackParticle*>& vectorTrk,
                            const Amg::Vector3D& constraint,
                            IVKalState& istate) const;
-        std::unique_ptr<xAOD::Vertex> fit(const EventContext& ctx,
-                           const std::vector<const xAOD::TrackParticle*>& vectorTrk,
+        std::unique_ptr<xAOD::Vertex> fit(const std::vector<const xAOD::TrackParticle*>& vectorTrk,
                            const xAOD::Vertex& constraint,
                            IVKalState& istate) const;
 

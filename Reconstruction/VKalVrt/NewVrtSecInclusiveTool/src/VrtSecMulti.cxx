@@ -477,7 +477,7 @@ namespace Rec{
 //--- Re-fit with full error matrix and xAOD::Vertex creation
           std::unique_ptr<xAOD::Vertex> tmpVertex;
           if(nth>1){                                    //-- Common case with full refit
-             tmpVertex=m_fitSvc->fit(ctx,xAODwrk->tmpListTracks,curVrt.vertex,*state);
+             tmpVertex=m_fitSvc->fit(xAODwrk->tmpListTracks,curVrt.vertex,*state);
           } else if(nth==1){                            //-- Special case for 1-track vertex
              tmpVertex=std::make_unique<xAOD::Vertex>();
              if(!tmpVertex)continue;

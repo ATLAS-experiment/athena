@@ -449,7 +449,7 @@ namespace Analysis {
         if(sc.isFailure()){
             startingPoint = Amg::Vector3D(0,0,0);
         }
-        std::unique_ptr<xAOD::Vertex> theResult = m_VKVFitter->fit(ctx, inputTracks, startingPoint, *state);
+        std::unique_ptr<xAOD::Vertex> theResult = m_VKVFitter->fit(inputTracks, startingPoint, *state);
 
         // Added by ASC
         if(theResult){

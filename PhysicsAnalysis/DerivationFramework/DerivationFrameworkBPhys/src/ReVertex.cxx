@@ -312,7 +312,7 @@ std::unique_ptr<xAOD::Vertex> ReVertex::fit(const EventContext& ctx,
    int errorcode = 0;
    Amg::Vector3D startingPoint = m_vertexEstimator->getCirclesIntersectionPoint(&aPerigee1,&aPerigee2,sflag,errorcode);
    if (errorcode != 0) {startingPoint(0) = 0.0; startingPoint(1) = 0.0; startingPoint(2) = 0.0;}
-   std::unique_ptr<xAOD::Vertex> theResult = m_VKVFitter->fit(ctx, inputTracks, startingPoint, *state);
+   std::unique_ptr<xAOD::Vertex> theResult = m_VKVFitter->fit(inputTracks, startingPoint, *state);
 
    // Added by ASC
    if(theResult){
