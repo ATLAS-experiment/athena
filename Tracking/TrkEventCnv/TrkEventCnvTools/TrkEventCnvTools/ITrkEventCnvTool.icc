@@ -63,13 +63,19 @@ void Trk::ITrkEventCnvTool::prepareRIO_OnTrackElementLink(const ROT* rot,
       index = prd->getHashAndIndex().hashAndIndex();
       return; //exit loop and function. We're done.
     }
+    if (coll != nullptr) {
+      MsgStream log(m_msgSvc.get(), name());
+      for (const auto* prd : *coll) {
+        log<<MSG::ERROR<<"Available prd in collection: "<<(*prd)<<endmsg;
+      }
+    }
   }
   // so, we obviously didn't have the correct container (or something else went wrong)
   MsgStream log(&(*m_msgSvc), name());
   log << MSG::ERROR<<"Could not find matching PRD container for this ROT. ROT will be written out in incomplete state. "
       << "Dumping ROT: "<<*rot<<endmsg;
+  throw std::runtime_error("Failed to persitify");
 
-  return;
 }
 
 template <class CONT, class ROT>
