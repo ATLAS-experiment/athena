@@ -30,7 +30,7 @@ StatusCode NRPC_RawDataProviderTool::convertIntoContainer(
     for (const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment* frag : vecRobs) {
         // convert only if data payload is delivered
         if (frag->rod_ndata() != 0) {
-            ATH_CHECK(fillCollections(*frag, *rdoContainer).ignore() );
+            ATH_CHECK(fillCollections(*frag, *rdoContainer));
         } else {
             ATH_MSG_DEBUG(" ROB " << MSG::hex << frag->source_id() << " is delivered with an empty payload" );
         }
