@@ -193,7 +193,7 @@ bool HI::HIEventSelectionToolRun3::noPUZDCvsFCal(
 
 int HI::HIEventSelectionToolRun3::nTrk(
     HI::IonDataType, const xAOD::TrackParticleContainer* tracks,
-    const xAOD::VertexContainer* vertices) const {
+    const xAOD::VertexContainer* vertices, const double min_pt_cut) const {
   const xAOD::Vertex* pv = 0;
   for (const xAOD::Vertex* vx : *vertices) {
     if (vx->vertexType() == xAOD::VxType::PriVtx) {
@@ -205,6 +205,7 @@ int HI::HIEventSelectionToolRun3::nTrk(
   int count = 0;
   for (const xAOD::TrackParticle* trk : *tracks) {
     if (m_trackSelectionTool->accept(*trk, pv)) {
+      if(trk->pt()<min_pt_cut) continue;
       count++;
     }
   }
@@ -215,8 +216,14 @@ bool HI::HIEventSelectionToolRun3::noPUFCalVsNtracks(
     HI::IonDataType period, const xAOD::HIEventShapeContainer* es,
     const xAOD::TrackParticleContainer* tracks,
     const xAOD::VertexContainer* vertices, PileupVariation variation) const {
+
+  double min_pt_cut=-1;
+  if (period == HI::IonDataType::OO2025 || period == HI::IonDataType::NeNe2025) {
+     min_pt_cut=500;//https://atlas-heavy-ions.docs.cern.ch/analyzes/2025/#fcal-sumet-ntrk-correlation-cut
+  }
+  
   return noPUFCalVsNtracks(period, fcalEt(period, es),
-                           nTrk(period, tracks, vertices), variation);
+                           nTrk(period, tracks, vertices,min_pt_cut), variation);
 }
 
 bool HI::HIEventSelectionToolRun3::noPUFCalVsNtracks(
@@ -311,27 +318,24 @@ bool HI::HIEventSelectionToolRun3::noPUOOVertexCuts(
   }
 
   unsigned int nPrimary = 0;
-  unsigned int nSplit = 0;
-  unsigned int nOther = 0;
+  unsigned int nSplit   = 0;
   // count primary vertices with sigma_z^2 < threshold
   // documentation: https://atlas-heavy-ions.docs.cern.ch/analyzes/2025/
+  int num_vtx_tot=vertices->size()-1;//exclude dummy vertex
+  int vtx_counter=0;
   for (const xAOD::Vertex* vx : *vertices) {
-    if (vx->vertexType() == xAOD::VxType::PriVtx) {
-      // check Primary vertices to see if there are some of good quality
-      AmgSymMatrix(3) vtx_err = vx->covariancePosition();
-      const double sigmaZSq = vtx_err(2, 2);
-      if (sigmaZSq >= 0.02)  // cut in mm^2
-        ++nSplit;
-      else
-        ++nPrimary;
-    }
-    // vertices that are not PV, note that dummy vertex probably will get
-    // assigned here
+     vtx_counter++;
+     if(vtx_counter>num_vtx_tot) break;
+
+    // check Primary vertices to see if there are some of good quality
+    AmgSymMatrix(3) vtx_err = vx->covariancePosition();
+    const double sigmaZSq = vtx_err(2, 2);
+    if (sigmaZSq >= 0.02)  // cut in mm^2
+      ++nSplit;
     else
-      ++nOther;
+      ++nPrimary;
   }
-  ATH_MSG_DEBUG("n primary " << nPrimary << ",   nSplit " << nSplit
-                             << ",  nOther " << nOther);
+  ATH_MSG_DEBUG("nPrimary " << nPrimary << ",   nSplit " << nSplit);
 
   // If all vertices were classified as split, then we consider one of them to
   // be a real vertex
