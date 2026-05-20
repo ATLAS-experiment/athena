@@ -428,7 +428,7 @@ namespace Analysis {
     
     std::unique_ptr<xAOD::Vertex> JpsiPlus1Track::fit(const EventContext& ctx, const std::vector<const xAOD::TrackParticle*> &inputTracks, const xAOD::TrackParticleContainer* importedTrackCollection, const xAOD::TrackParticleContainer* gsfCollection) const {
         
-        std::unique_ptr<Trk::IVKalState> state = m_VKVFitter->makeState();
+        std::unique_ptr<Trk::IVKalState> state = m_VKVFitter->makeState(ctx);
         
         // Set the mass constraint if requested by user (default=true)
         // Can be set by user (m_altMassConstraint) - default is -1.0.

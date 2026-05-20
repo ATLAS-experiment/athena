@@ -436,7 +436,7 @@ namespace Analysis {
                                       const xAOD::TrackParticleContainer* importedTrackCollection,
                                       const xAOD::TrackParticleContainer* gsfCollection) const {
 
-        std::unique_ptr<Trk::IVKalState> state = m_VKVFitter->makeState();
+        std::unique_ptr<Trk::IVKalState> state = m_VKVFitter->makeState(ctx);
         
 
 
