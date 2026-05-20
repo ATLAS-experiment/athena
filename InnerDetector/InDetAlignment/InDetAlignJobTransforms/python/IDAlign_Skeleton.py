@@ -194,14 +194,7 @@ def configureFlags(runArgs):
 
     # To respect --athenaopts
     flags.fillFromArgs()
-
-    print("Input files:", flags.Input.Files)
-    print("Format:", flags.Input.Format)
-    print("isMC:", flags.Input.isMC)
-    print("GlobalTag:", flags.IOVDb.GlobalTag)
-    print("DBInstance:", flags.IOVDb.DatabaseInstance)
-    print("flags.InDet.Align: ", flags.InDet.Align)
-
+    
     # Lock flags
     flags.lock()
 
