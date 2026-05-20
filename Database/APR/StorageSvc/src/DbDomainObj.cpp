@@ -100,7 +100,7 @@ StatusCode DbDomainObj::closeAgedDbs()  {
   vector<DbDatabaseObj*> aged_dbs;
   for (const_iterator i = begin(); i != end(); ++i ) {
     DbDatabaseObj* pDB = (*i).second;
-    if ( pDB->age() > m_maxAge )   {
+    if ( pDB->age() > m_maxAge && m_maxAge > 0 )   {
       DbAccessMode m  = pDB->mode();
       if( 0 == (m&pool::CREATE) && 0 == (m&pool::UPDATE) )  {
         aged_dbs.push_back(pDB);
@@ -108,8 +108,7 @@ StatusCode DbDomainObj::closeAgedDbs()  {
     }
   }
   vector<DbDatabaseObj*>::const_iterator j;
-  for (j=aged_dbs.begin(); j != aged_dbs.end(); ++j)
-  CHECK( (*j)->retire() );
+  for (j=aged_dbs.begin(); j != aged_dbs.end(); ++j) CHECK( (*j)->retire() );
   return StatusCode::SUCCESS;
 }
 

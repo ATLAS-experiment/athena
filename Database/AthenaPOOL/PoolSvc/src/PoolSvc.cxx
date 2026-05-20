@@ -367,7 +367,7 @@ unsigned int PoolSvc::getInputContext(const std::string& label, unsigned int max
       }
    }
    const unsigned int id = m_dbSessionVec.size();
-   m_dbSessionVec.push_back( pool::createSession(*m_catalog).release() );
+   m_dbSessionVec.push_back( pool::createSession(*m_catalog, maxFile).release() );
    m_pers_mut.push_back(new CallMutex);
    if (!connect(pool::ITransaction::READ, id).isSuccess()) {
       ATH_MSG_WARNING("Failed to connect Input PersistencySvc: " << id);
@@ -954,7 +954,7 @@ std::unique_ptr<pool::IDatabase> PoolSvc::getDbHandle(unsigned int contextId, co
       return sesH->databaseHandle(dbName.substr(4), pool::DatabaseSpecification::LFN);
    } else if (dbName.compare(0, 4,"FID:") == 0) {
       return sesH->databaseHandle(dbName.substr(4), pool::DatabaseSpecification::FID);
-   } 
+   }
    return sesH->databaseHandle(dbName, pool::DatabaseSpecification::PFN);
 }
 //__________________________________________________________________________
@@ -963,9 +963,6 @@ std::unique_ptr<pool::IContainer> PoolSvc::getContainerHandle(pool::IDatabase* d
    if (dbH == nullptr) {
       ATH_MSG_DEBUG("No DatabaseHandle to get Container.");
       return(nullptr);
-   }
-   if (dbH->openMode() == pool::IDatabase::CLOSED) {
-      dbH->connectForRead();
    }
    if (contName.find("DataHeader") != std::string::npos) {
       contH = dbH->containerHandle(contName.substr(0, contName.find("_p")));

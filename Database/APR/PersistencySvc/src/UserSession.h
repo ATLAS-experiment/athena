@@ -29,7 +29,7 @@ namespace pool {
   {
   public:
     /// Constructor
-    explicit UserSession( IFileCatalog& fileCatalog );
+    explicit UserSession( IFileCatalog& fileCatalog, int ageLimit );
 
     /// Destructor
     virtual ~UserSession();
@@ -124,6 +124,7 @@ namespace pool {
   private:
     DatabaseConnectionPolicy*      m_policy;
     IFileCatalog*                  m_catalog;
+    int                            m_ageLimit;
     DatabaseRegistry*              m_registry;
     ITransaction::Type             m_transactionType;
     std::map< long, std::unique_ptr<MicroSessionManager> >    m_technologies;
