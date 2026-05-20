@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaCommon.Logging import logging
@@ -367,8 +367,8 @@ def EFMuSADataPrepViewDataVerifierCfg(flags, RoIs, roiName):
 def muEFSARecoSequenceCfg( flags, RoIs, name, useBucketFilter=False):
 
     from MuonCombinedAlgs.MuonCombinedAlgsMonitoring import MuonCreatorAlgMonitoring
-    from MuonConfig.MuonSegmentFindingConfig import MuonSegmentFinderAlgCfg, MuonLayerHoughAlgCfg, MuonSegmentFilterAlgCfg
-    from MuonConfig.MuonTrackBuildingConfig import MuPatTrackBuilderCfg, EMEO_MuPatTrackBuilderCfg
+    from MuonConfig.MuonSegmentFindingConfig import MuonSegmentFinderAlgCfg, MuonLayerHoughAlgCfg
+    from MuonConfig.MuonTrackBuildingConfig import MuPatTrackBuilderCfg
     from xAODTrackingCnv.xAODTrackingCnvConfig import MuonStandaloneTrackParticleCnvAlgCfg
     from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCombinedMuonCandidateAlgCfg, MuonCreatorAlgCfg
 
@@ -401,7 +401,7 @@ def muEFSARecoSequenceCfg( flags, RoIs, name, useBucketFilter=False):
         # Pattern recognition & segment fitting
         from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonEtaHoughTransformAlgCfg, MuonNSWSegmentFinderAlgCfg, MuonPhiHoughTransformAlgCfg, MuonSegmentFittingAlgCfg
         segmentContainers = []
-        if (flags.Detector.GeometrysTGC or flags.Detector.GeometryMM) and not flags.Muon.runCommissioningChain:
+        if flags.Detector.GeometrysTGC or flags.Detector.GeometryMM:
             segmentContainers+=["MuonNswSegments"]
             acc.merge(MuonEtaHoughTransformAlgCfg(flags, name=f"MuonNswEtaHoughTransformAlg_{name}", 
                                                          EtaHoughMaxContainer = "MuonHoughNswMaxima", 
@@ -433,20 +433,10 @@ def muEFSARecoSequenceCfg( flags, RoIs, name, useBucketFilter=False):
                                                 WriteKey="TrackMuonSegments"))
     else: 
         acc.merge(MuonLayerHoughAlgCfg(flags, "TrigMuonLayerHoughAlg"))
-
-        # if NSW is excluded from reconstruction (during commissioning)
-        if flags.Muon.runCommissioningChain:
-            acc.merge(MuonSegmentFinderAlgCfg(flags, name="TrigMuonSegmentMaker_"+name,SegmentCollectionName="TrackMuonSegments_withNSW"))
-            acc.merge(MuonSegmentFilterAlgCfg(flags, name="TrigMuonSegmentFilter_"+name,SegmentCollectionName="TrackMuonSegments_withNSW",
-                                                        FilteredCollectionName="TrackMuonSegments", TrashUnFiltered=False, ThinStations=()))
-        else:
-            acc.merge(MuonSegmentFinderAlgCfg(flags, "TrigMuonSegmentMaker_"+name))
+        acc.merge(MuonSegmentFinderAlgCfg(flags, "TrigMuonSegmentMaker_"+name))
 
     from MuonSegmentTrackMaker.MuonTrackMakerAlgsMonitoring import MuPatTrackBuilderMonitoring
-    if flags.Muon.runCommissioningChain:
-        acc.merge(EMEO_MuPatTrackBuilderCfg(flags, name="TrigMuPatTrackBuilder_"+name ,MuonSegmentCollection = "TrackMuonSegments", MonTool = MuPatTrackBuilderMonitoring(flags, "MuPatTrackBuilderMonitoringSA_"+name), SpectrometerTrackOutputLocation="MuonSpectrometerTracks"))
-    else:
-        acc.merge(MuPatTrackBuilderCfg(flags, name="TrigMuPatTrackBuilder_"+name ,MuonSegmentCollection = "TrackMuonSegments", MonTool = MuPatTrackBuilderMonitoring(flags, "MuPatTrackBuilderMonitoringSA_"+name)))
+    acc.merge(MuPatTrackBuilderCfg(flags, name="TrigMuPatTrackBuilder_"+name ,MuonSegmentCollection = "TrackMuonSegments", MonTool = MuPatTrackBuilderMonitoring(flags, "MuPatTrackBuilderMonitoringSA_"+name)))
 
     acc.merge(MuonStandaloneTrackParticleCnvAlgCfg(flags, name = "TrigMuonStandaloneTrackParticleCnvAlg_"+name))
     acc.merge(MuonCombinedMuonCandidateAlgCfg(flags, name="TrigMuonCandidateAlg_"+name))
@@ -637,7 +627,7 @@ def VDVMuInsideOutCfg(flags, name, candidatesName, suffix):
 
 def muEFInsideOutRecoSequenceCfg(flags, RoIs, name, suffix ):
 
-  from MuonConfig.MuonSegmentFindingConfig import MuonSegmentFinderAlgCfg, MuonLayerHoughAlgCfg, MuonSegmentFilterAlgCfg
+  from MuonConfig.MuonSegmentFindingConfig import MuonSegmentFinderAlgCfg, MuonLayerHoughAlgCfg
   from MuonCombinedAlgs.MuonCombinedAlgsMonitoring import MuonCreatorAlgMonitoring
   from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCreatorAlgCfg, MuGirlStauAlgCfg, StauCreatorAlgCfg, MuonInDetToMuonSystemExtensionAlgCfg, MuonInsideOutRecoAlgCfg, MuonCombinedInDetCandidateAlgCfg
   from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonInsideOutRecoToolCfg
@@ -653,15 +643,8 @@ def muEFInsideOutRecoSequenceCfg(flags, RoIs, name, suffix ):
     #Need to run hough transform at start of late muon chain   
     acc.merge(MuonLayerHoughAlgCfg(flags, "TrigMuonLayerHoughAlg_"+name,MuonPatternCombinationCollection="MuonLayerHoughCombis_"+name,
                                    Key_MuonLayerHoughToolHoughDataPerSectorVec="HoughDataPerSectorVec_"+name))
-    
 
-    # if NSW is excluded from reconstruction (during commissioning)
-    if flags.Muon.runCommissioningChain:
-      acc.merge(MuonSegmentFinderAlgCfg(flags, name="TrigMuonSegmentMaker_"+name,SegmentCollectionName="TrackMuonSegments_withNSW",MuonLayerHoughCombisKey="MuonLayerHoughCombis_"+name))
-      acc.merge(MuonSegmentFilterAlgCfg(flags, name="TrigMuonSegmentFilter_"+name,SegmentCollectionName="TrackMuonSegments_withNSW",
-                                                  FilteredCollectionName="TrackMuonSegments", TrashUnFiltered=False, ThinStations=())) 
-    else:
-      acc.merge(MuonSegmentFinderAlgCfg(flags, "TrigMuonSegmentMaker_"+name,MuonLayerHoughCombisKey="MuonLayerHoughCombis_"+name))
+    acc.merge(MuonSegmentFinderAlgCfg(flags, "TrigMuonSegmentMaker_"+name,MuonLayerHoughCombisKey="MuonLayerHoughCombis_"+name))
 
 
     # need to run precisions tracking for late muons, since we don't run it anywhere else

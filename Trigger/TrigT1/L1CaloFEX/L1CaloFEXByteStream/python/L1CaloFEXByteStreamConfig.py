@@ -92,13 +92,8 @@ def jFexRoiByteStreamToolCfg(flags, name, *, writeBS=False, xTOBs=False):
   tool.ROBIDs = [int(SourceIdentifier(SubDetector.TDAQ_CALO_FEAT_EXTRACT_ROI, moduleid)) for moduleid in jfex_roi_moduleids]
   if writeBS:
     # write BS == read xAOD
-    tool.jJRoIContainerReadKey   = "L1_jFexSRJetxRoI" if xTOBs else "L1_jFexSRJetRoI"
-    tool.jLJRoIContainerReadKey  = "L1_jFexLRJetxRoI" if xTOBs else "L1_jFexLRJetRoI"
-    tool.jTauRoIContainerReadKey = "L1_jFexTauxRoI"   if xTOBs else "L1_jFexTauRoI"
-    tool.jEMRoIContainerReadKey  = "L1_jFexFwdElxRoI" if xTOBs else "L1_jFexFwdElRoI"
-    tool.jTERoIContainerReadKey  = "L1_jFexSumETxRoI" if xTOBs else "L1_jFexSumETRoI"
-    tool.jXERoIContainerReadKey  = "L1_jFexMETxRoI"   if xTOBs else "L1_jFexMETRoI"
-
+    # Input RoI containers come from the TrigCompositeContainer passed by the
+    # Cnv at runtime, so no read-handle properties are needed here.
     tool.jJRoIContainerWriteKey  =""
     tool.jLJRoIContainerWriteKey =""
     tool.jTauRoIContainerWriteKey=""
@@ -107,13 +102,6 @@ def jFexRoiByteStreamToolCfg(flags, name, *, writeBS=False, xTOBs=False):
     tool.jXERoIContainerWriteKey =""
   else:
     # read BS == write xAOD
-    tool.jJRoIContainerReadKey   =""
-    tool.jLJRoIContainerReadKey  =""
-    tool.jTauRoIContainerReadKey =""
-    tool.jEMRoIContainerReadKey  =""
-    tool.jTERoIContainerReadKey  =""
-    tool.jXERoIContainerReadKey  =""
-
     tool.jJRoIContainerWriteKey  = "L1_jFexSRJetxRoI" if xTOBs else "L1_jFexSRJetRoI"
     tool.jLJRoIContainerWriteKey = "L1_jFexLRJetxRoI" if xTOBs else "L1_jFexLRJetRoI"
     tool.jTauRoIContainerWriteKey= "L1_jFexTauxRoI"   if xTOBs else "L1_jFexTauRoI"

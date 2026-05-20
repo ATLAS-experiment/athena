@@ -11,7 +11,7 @@ def LArDigitRetrieverCfg(flags, **kwargs):
                 name="LArDigitRetriever",
                 DoLArDigit=False,
                 DoHECDigit=False,
-                DoFCalDigit=False,
+                DoFCalDigit=False, **kwargs
             )
     result.addPublicTool(the_tool, primary=True)
     return result
@@ -22,7 +22,7 @@ def CaloFCalRetrieverCfg(flags, **kwargs):
     the_tool = CompFactory.JiveXML.CaloFCalRetriever(
                 name="CaloFCalRetriever",
                 DoFCalCellDetails=False,
-                DoBadFCal=False,
+                DoBadFCal=False, **kwargs
             )
     result.addPublicTool(the_tool, primary=True)
     return result
@@ -34,7 +34,7 @@ def CaloLArRetrieverCfg(flags, **kwargs):
                 name="CaloLArRetriever",
                 DoLArCellDetails=False,
                 DoBadLAr=False,
-                LArlCellThreshold = 500 if flags.OnlineEventDisplays.BeamSplashMode else 50,
+                LArlCellThreshold = 500 if flags.OnlineEventDisplays.BeamSplashMode else 50, **kwargs
             )
     result.addPublicTool(the_tool, primary=True)
     return result
@@ -46,7 +46,7 @@ def CaloHECRetrieverCfg(flags, **kwargs):
                 name="CaloHECRetriever",
                 DoHECCellDetails=False,
                 DoBadHEC=False,
-                HEClCellThreshold = 500 if flags.OnlineEventDisplays.BeamSplashMode else 50,
+                HEClCellThreshold = 500 if flags.OnlineEventDisplays.BeamSplashMode else 50, **kwargs
             )
     result.addPublicTool(the_tool, primary=True)
     return result
@@ -97,7 +97,7 @@ def CaloTileRetrieverCfg(flags, **kwargs):
             TileRawChannelContainer = tileRawChannelContainer,
             DoTileCellDetails = False,
             DoTileDigit = False,
-            DoBadTile = False,
+            DoBadTile = False, **kwargs
         )
     result.addPublicTool(the_tool, primary=True)
     return result
@@ -139,7 +139,7 @@ def CaloMBTSRetrieverCfg(flags, **kwargs):
             name = "CaloMBTSRetriever",
             TileDigitsContainer= tileDigitsContainer,
             TileRawChannelContainer = tileRawChannelContainer,
-            DoMBTSDigits = False,
+            DoMBTSDigits = False,  **kwargs
         )
     result.addPublicTool(the_tool, primary=True)
     return result
