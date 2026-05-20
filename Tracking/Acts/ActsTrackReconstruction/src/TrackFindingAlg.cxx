@@ -418,15 +418,15 @@ namespace ActsTrk
   }
 
   bool TrackFindingAlg::shouldReverseSearch(const ActsTrk::Seed& seed) const {
-    const xAOD::SpacePoint* bottom_sp = seed.sp().front();
-
-    const double r = bottom_sp->radius();
-    const double z = std::abs(bottom_sp->z());
+    ActsTrk::SpacePointProxy bottom_sp = seed.sp().front();
+    xAOD::ConstVectorMap<3> globalPosition(bottom_sp.globalPosition() );
+    
+    const double z = std::abs(globalPosition[2]);
 
     const double rBoundary = m_useTopSpRZboundary.value()[0];
     const double zBoundary = m_useTopSpRZboundary.value()[1];
 
-    return r > rBoundary || z > zBoundary;
+    return z > zBoundary || (globalPosition[0]*globalPosition[0]+globalPosition[1]*globalPosition[1]) > rBoundary*rBoundary ;
   }
 
   // === findTracks ==========================================================
@@ -487,9 +487,10 @@ namespace ActsTrk
     // Function for Estimate Track Parameters
     auto retrieveSurfaceFunction =
       [this, &detElements] (const ActsTrk::Seed& seed, bool useTopSp) -> const Acts::Surface& {
-        const xAOD::SpacePoint* sp = useTopSp ? seed.sp().back() : seed.sp().front();
-        const InDetDD::SiDetectorElement* element = detElements.getDetectorElement(useTopSp ? sp->elementIdList().back()
-                                                                                   : sp->elementIdList().front());
+         ActsTrk::SpacePointProxy sp = useTopSp ? seed.sp().back() : seed.sp().front();
+         std::span<const xAOD::UncalibratedMeasurement * const> measurements = sp.measurements();
+         const InDetDD::SiDetectorElement* element = detElements.getDetectorElement(useTopSp ? measurements.back()->identifierHash()
+                                                                                    : measurements.front()->identifierHash());
         const Trk::Surface& atlas_surface = element->surface();
         return m_ATLASConverterTool->trkSurfaceToActsSurface(atlas_surface);
       };
@@ -822,8 +823,8 @@ namespace ActsTrk
                                                const ActsTrk::Seed& seed,
                                                bool useTopSp) const
   {
-    const xAOD::SpacePoint* sp = useTopSp ? seed.sp().back() : seed.sp().front();
-    const xAOD::SpacePoint::ConstVectorMap pos = sp->globalPosition();
+    ActsTrk::SpacePointProxy sp = useTopSp ? seed.sp().back() : seed.sp().front();
+    const xAOD::ConstVectorMap<3> pos = sp.globalPosition();
     double etaSeed = std::atanh(pos[2] / pos.norm());
     return getStatCategory(typeIndex, etaSeed);
   }

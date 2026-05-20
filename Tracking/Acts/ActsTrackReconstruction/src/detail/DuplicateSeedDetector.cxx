@@ -48,8 +48,8 @@ namespace ActsTrk::detail {
       bool useTopSp = useTopSpFun(seed);
       const auto& sps = seed.sp();
       for (std::size_t isp : spacePointIndicesFun(sps.size())) {
-        const xAOD::SpacePoint *sp = sps.at(useTopSp ? sps.size() - isp - 1 : isp);
-        const std::vector<const xAOD::UncalibratedMeasurement *> &els = sp->measurements();
+        ActsTrk::SpacePointProxy sp = sps.at(useTopSp ? sps.size() - isp - 1 : isp);
+        std::span<const xAOD::UncalibratedMeasurement * const> els = sp.measurements();
         for (const xAOD::UncalibratedMeasurement *meas : els) {
           std::size_t hitIndex = measurementIndex.index(*meas);
           if (!(hitIndex < m_seedIndex.size())) {

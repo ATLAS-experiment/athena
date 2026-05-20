@@ -57,7 +57,9 @@ class GenericSeedingAlg : public AthReentrantAlgorithm {
       "Name of the Magnetic Field conditions object key"};
 
   SG::ReadHandleKeyArray<xAOD::SpacePointContainer> m_spacePointKey{
-      this, "InputSpacePoints", {}, "Input Space Points"};
+      this, "InputSpacePoints", {}, "Empty or input Space Points"};
+  SG::ReadHandleKeyArray<xAOD::PixelClusterContainer> m_pixelContainerKey{
+      this, "InputPixelCluster", {}, "Empty or input pxiel cluster"};
   SG::WriteHandleKey<ActsTrk::SeedContainer> m_seedKey{this, "OutputSeeds", "",
                                                        "Output Seeds"};
 

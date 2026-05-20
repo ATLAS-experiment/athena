@@ -8,6 +8,7 @@
 #endif
 
 #include "src/GbtsSeedingTool.h"
+#include "SpacePointAdapter.h"
 
 #include "CxxUtils/inline_hints.h"
 
@@ -72,7 +73,7 @@ namespace ActsTrk {
   ATH_FLATTEN
   StatusCode GbtsSeedingTool::createSeeds(
     const EventContext& ctx,
-    const std::vector<const xAOD::SpacePointContainer*>& spacePointCollections,
+    const std::vector<ISeedingTool::SourceContainerVariant>& spacePointCollections,
     const Eigen::Vector3f& beamSpotPos, float bFieldInZ,
     ActsTrk::SeedContainer& seedContainer) const
   {
@@ -97,63 +98,66 @@ namespace ActsTrk {
     auto clusterWidthColumn = coreSpacePoints.createColumn<float>("clusterWidth");
     auto localPositionColumn = coreSpacePoints.createColumn<float>("localPositionY");
 
-    std::vector<const xAOD::SpacePoint*> tmpSpacePoints;
-    std::size_t totalSpacePoints = 0;
 
     // add spacepoint pointers to singel container, this makes indexing them easier 
-    for (const xAOD::SpacePointContainer* spacePoints : spacePointCollections) {
-      for (const xAOD::SpacePoint* sp : *spacePoints) {
-        tmpSpacePoints.emplace_back(sp);
-      }
-      totalSpacePoints += spacePoints->size();
+    std::size_t totalSpacePoints = 0;
+    for (const ISeedingTool::SourceContainerVariant &container_variant : spacePointCollections) {
+       std::visit([&totalSpacePoints](const auto *container) {
+          totalSpacePoints += container->size();
+       },container_variant);
     }
 
     coreSpacePoints.reserve(totalSpacePoints);
 
     // add spacepoints to new container
-    for(std::size_t idx = 0; idx < tmpSpacePoints.size(); ++idx){
-      // obtain module hash for spacepoint
-      const xAOD::SpacePoint* sp = tmpSpacePoints[idx];
-      const std::vector<xAOD::DetectorIDHashType>& elementlist = sp->elementIdList();
+    for (const ISeedingTool::SourceContainerVariant &container_variant : spacePointCollections) {
+     std::visit([&](const auto *container) {
+     std::size_t container_offset = seedContainer.addSourceContainer(ctx,*container);        
+     for (auto [space_point,idx] : Acts::zip(*container,std::ranges::iota_view(container_offset, container_offset + container->size()) )) {
+      SpacePointAdapter sp(space_point);
+      std::span<const xAOD::UncalibratedMeasurement * const> measurements = sp.measurements();
+      xAOD::ConstVectorMap<3> globalPosition(sp.globalPosition() );
+             
 
-      const bool isPixel(elementlist.size() == 1);
+      const bool isPixel(measurements.size() == 1);
       // In LRT mode use strip spacepoints; in pixel mode use pixel spacepoints
       if (isPixel == m_finderCfg.lrtMode) continue;
     
-	    const short layer = (isPixel ? m_pix_h2l : m_sct_h2l)->operator[](static_cast<int>(elementlist[0]));
+      const short layer = (isPixel ? m_pix_h2l : m_sct_h2l)->operator[](static_cast<int>(measurements.front()->identifierHash()));
 
       auto newSp = coreSpacePoints.createSpacePoint();
       newSp.copyFromIndex() = idx;
 
       // apply beamspot corrections if needed
       if (m_finderCfg.beamSpotCorrection) {
-        const float new_x = static_cast<float>(sp->x() - beamSpotPos[0]);
-        const float new_y = static_cast<float>(sp->y() - beamSpotPos[1]);
+        const float new_x = static_cast<float>(globalPosition[0] - beamSpotPos[0]);
+        const float new_y = static_cast<float>(globalPosition[1] - beamSpotPos[1]);
         newSp.x() = new_x;
         newSp.y() = new_y;
-        newSp.z() = static_cast<float>(sp->z());
+        newSp.z() = static_cast<float>(globalPosition[2]);
         newSp.r() = std::hypot(new_x, new_y);
         newSp.phi() = std::atan2(new_y, new_x);
       } else {
-        const float new_x = static_cast<float>(sp->x());
-        const float new_y = static_cast<float>(sp->y());
-        newSp.x() = static_cast<float>(sp->x());
-        newSp.y() = static_cast<float>(sp->y());
-        newSp.z() = static_cast<float>(sp->z());
+        const float new_x = static_cast<float>(globalPosition[0]);
+        const float new_y = static_cast<float>(globalPosition[1]);
+        newSp.x() = static_cast<float>(globalPosition[0]);
+        newSp.y() = static_cast<float>(globalPosition[1]);
+        newSp.z() = static_cast<float>(globalPosition[2]);
         newSp.r() = std::hypot(new_x, new_y);
-        newSp.phi() = std::atan2(sp->y(), sp->x());
+        newSp.phi() = std::atan2(globalPosition[1], globalPosition[0]);
       }
 
       newSp.extra(layerColumn) = layer;
 
       if (m_finderCfg.useMl && isPixel) {
-        assert(dynamic_cast<const xAOD::PixelCluster*>(sp->measurements().front())!=nullptr);
-        const xAOD::PixelCluster* pCL = static_cast<const xAOD::PixelCluster*>(sp->measurements().front());
+        assert(dynamic_cast<const xAOD::PixelCluster*>(measurements.front())!=nullptr);
+        const xAOD::PixelCluster* pCL = static_cast<const xAOD::PixelCluster*>(measurements.front());
         newSp.extra(clusterWidthColumn) = pCL->widthInEta();
         newSp.extra(localPositionColumn) = pCL->localPosition<2>().y();
       }
     }
-
+     },container_variant);
+    }
     ATH_MSG_VERBOSE("Spacepoints successfully added to new container");
 
     const int max_layers = m_are_pixels.size();
@@ -168,7 +172,7 @@ namespace ActsTrk {
       seedContainer.push_back(
         seed.asConst(),
         [&](const Acts::SpacePointIndex2 spIndex) {
-          return tmpSpacePoints[spIndex];
+          return spIndex;
         });
     }
 

@@ -55,7 +55,7 @@ namespace ActsTrk {
     // Interface
     StatusCode createSeeds(
       const EventContext& ctx,
-      const std::vector<const xAOD::SpacePointContainer*>& spacePointCollections,
+      const std::vector<SourceContainerVariant>& spacePointCollections,
       const Eigen::Vector3f& beamSpotPos, float bFieldInZ,
       ActsTrk::SeedContainer& seedContainer) const override;
 

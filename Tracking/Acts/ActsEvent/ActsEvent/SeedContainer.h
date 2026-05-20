@@ -8,9 +8,15 @@
 #include <algorithm>
 #include <utility>
 #include <vector>
+#include <variant>
+#include <cassert>
 
 #include "Acts/EventData/SeedContainer2.hpp"
+#include "xAODInDetMeasurement/SpacePointContainer.h"
+#include "xAODInDetMeasurement/PixelClusterContainer.h"
+#include "xAODInDetMeasurement/PixelCluster.h"
 #include "xAODInDetMeasurement/SpacePoint.h"
+#include "AthLinks/DataLink.h"
 
 namespace ActsTrk {
 
@@ -25,21 +31,84 @@ namespace ActsTrk {
 
 // hack extension of std::span with necessary at() method for seed parameter
 // estimation
-struct SpacePointRange final : public std::span<const xAOD::SpacePoint* const> {
-  using Base = std::span<const xAOD::SpacePoint* const>;
-
-  using Base::Base;
-
-  const xAOD::SpacePoint* at(std::size_t index) const {
-    if (index >= size()) {
-      throw std::out_of_range("SpacePointRange index out of range");
-    }
-    return Base::operator[](index);
-  }
-};
 
 struct SeedContainer;
 
+struct SpacePointProxy {
+   const SeedContainer *container;
+   const unsigned int index;
+   using ConstVoidPtr=const void *;
+
+   mutable ConstVoidPtr elementPtrCache ATLAS_THREAD_SAFE = nullptr;
+   std::span<const xAOD::UncalibratedMeasurement * const> measurements() const;
+   xAOD::ConstVectorMap<3> globalPosition() const;
+   unsigned int spacePointIndex() const { return index; }
+   float x() const;
+   float y() const;
+   float z() const;
+   std::optional<float> t() const;
+   const SpacePointProxy *operator->() const { return this; }
+
+};
+// to support Acts::estimateTrackParamsFromSeed
+inline bool operator==(const SpacePointProxy &a, const void *b) {
+   return b!=nullptr || a.index == std::numeric_limits<unsigned int>::max();
+}
+
+struct SpacePointRange {
+   //protected:
+  friend class SeedContainer;
+  using const_value_type = SpacePointProxy;
+   
+  const SeedContainer *m_container;
+  std::span<const unsigned int> m_indices;
+   //public:
+  std::size_t size() const { return m_indices.size(); }
+  struct const_iterator {
+     const_iterator &operator++() {
+        ++indexIter;
+        return *this;
+     }
+     SpacePointProxy operator*() {
+        assert( container );
+        return SpacePointProxy{container,*indexIter};
+     }
+     const SeedContainer *container;
+     std::span<const unsigned int>::iterator indexIter;
+  };
+  const_iterator begin() const {
+     return const_iterator{m_container, m_indices.begin()};
+  }
+  const_iterator end() const {
+     return const_iterator{m_container, m_indices.end()};
+  }
+  SpacePointProxy front() const {
+     assert( m_container );
+     assert(!m_indices.empty());
+     return *begin();
+  }
+  SpacePointProxy back() const {
+     assert(!m_indices.empty());
+     assert( m_container );
+     return SpacePointProxy{m_container,m_indices.back()};
+  }
+  SpacePointProxy operator[](std::size_t index) const {
+     assert( index < m_indices.size() );
+     assert( m_container );
+     return SpacePointProxy{m_container,m_indices[index]};
+  }
+  SpacePointProxy at(std::size_t index) const {
+    if (index >= size()) {
+      throw std::out_of_range("SpacePointRange index out of range");
+    }
+    return operator[](index);
+  }
+};
+inline bool operator!=(const SpacePointRange::const_iterator &a, const SpacePointRange::const_iterator &b) {
+   assert(a.container==b.container);
+   return a.indexIter != b.indexIter;
+}
+   
 struct Seed final {
   using Index = Acts::SeedIndex2;
 
@@ -64,8 +133,11 @@ struct Seed final {
 };
 
 struct SeedContainer final {
+  friend struct SpacePointProxy;
   using Index = Acts::SeedIndex2;
   using value_type = Seed;
+  using SpacePointVariant = std::variant<const xAOD::SpacePoint * const,
+                                         const xAOD::PixelCluster * const>;
 
   std::size_t size() const noexcept { return m_size; }
   bool empty() const noexcept { return size() == 0; }
@@ -74,7 +146,7 @@ struct SeedContainer final {
     m_spacePointCounts.reserve(size);
     m_qualities.reserve(size);
     m_vertexZs.reserve(size);
-    m_spacePoints.reserve(static_cast<std::size_t>(size * averageSpacePoints));
+    m_constituentIndex.reserve(static_cast<std::size_t>(size * averageSpacePoints));
   }
   void clear() noexcept {
     m_size = 0;
@@ -82,7 +154,9 @@ struct SeedContainer final {
     m_spacePointCounts.clear();
     m_qualities.clear();
     m_vertexZs.clear();
-    m_spacePoints.clear();
+    m_constituentIndex.clear();
+    m_srcContainer.clear();
+    m_srcContainerIndexOffset.clear();
   }
 
   Seed operator[](Index index) const noexcept { return Seed(*this, index); }
@@ -96,7 +170,7 @@ struct SeedContainer final {
   SpacePointRange spacePoints(Index index) const noexcept {
     const std::uint32_t offset = m_spacePointOffsets[index];
     const std::uint8_t count = m_spacePointCounts[index];
-    return SpacePointRange(m_spacePoints.data() + offset, count);
+    return SpacePointRange{ this, std::span<const unsigned int>(m_constituentIndex.data()+offset, static_cast<std::size_t>(count)) };
   }
   float quality(Index index) const noexcept { return m_qualities[index]; }
   float vertexZ(Index index) const noexcept { return m_vertexZs[index]; }
@@ -111,8 +185,9 @@ struct SeedContainer final {
 
   Seed push_back(SpacePointRange spacePoints, float quality, float vertexZ) {
     push_back_(spacePoints.size(), quality, vertexZ);
-    m_spacePoints.insert(m_spacePoints.end(), spacePoints.begin(),
-                         spacePoints.end());
+    for (SpacePointProxy proxy : spacePoints) {
+       m_constituentIndex.push_back(proxy.spacePointIndex());
+    }
     return at(m_size++);
   }
 
@@ -123,7 +198,7 @@ struct SeedContainer final {
     push_back_(arbitrarySpacePoints.size(), quality, vertexZ);
     std::ranges::copy(
         std::views::transform(arbitrarySpacePoints, xAODspProjector),
-        std::back_inserter(m_spacePoints));
+        std::back_inserter(m_constituentIndex));
     return at(m_size++);
   }
 
@@ -146,6 +221,32 @@ struct SeedContainer final {
                      seed.vertexZ());
   }
 
+  // @return intex offset for the elements of this container
+  template <typename T_Container>
+  unsigned int addSourceContainer(const EventContext &ctx, const T_Container &src_container) {
+     m_srcContainer.emplace_back(DataLink<T_Container>(&src_container, ctx));
+     if (m_srcContainerIndexOffset.empty()) {
+        m_srcContainerIndexOffset.push_back(0u);
+     }
+     unsigned int element_offset_for_container = m_srcContainerIndexOffset.back();
+     m_srcContainerIndexOffset.push_back(element_offset_for_container + src_container.size());
+     return element_offset_for_container;
+  }
+
+  /// @param index a valid index
+  /// @return a variant containint the space point associated to the given index
+  /// @note the result is undefined if the index is outside the allowed range.
+  SpacePointVariant getSpacePointVariant(unsigned int index) const;
+ protected:
+  using SrcContainerVariant = std::variant<DataLink<xAOD::SpacePointContainer>,
+                                           DataLink<xAOD::PixelClusterContainer> >;
+  std::pair<const SrcContainerVariant *,unsigned int> getSrcContainer(unsigned int index) const;
+  std::span<const xAOD::UncalibratedMeasurement * const> measurementsOfSpacePoint(unsigned int index, SpacePointProxy::ConstVoidPtr &element_ptr_cache) const;
+  xAOD::ConstVectorMap<3> spacePointGlobalPosition(unsigned int index) const;
+  inline std::optional<float> spacePointTime(unsigned int index) const;
+
+   
+   
  private:
   std::uint32_t m_size{0};
   std::vector<std::uint32_t> m_spacePointOffsets;
@@ -153,11 +254,13 @@ struct SeedContainer final {
   std::vector<float> m_qualities;
   std::vector<float> m_vertexZs;
 
-  std::vector<const xAOD::SpacePoint*> m_spacePoints;
+  std::vector<unsigned int> m_constituentIndex;
+  std::vector<SrcContainerVariant> m_srcContainer;
+  std::vector<unsigned int> m_srcContainerIndexOffset;
 
   void push_back_(std::size_t nSpacePoints, float quality, float vertexZ) {
     const std::uint32_t offset =
-        static_cast<std::uint32_t>(m_spacePoints.size());
+        static_cast<std::uint32_t>(m_constituentIndex.size());
     const std::uint8_t count = static_cast<std::uint8_t>(nSpacePoints);
 
     m_spacePointOffsets.push_back(offset);
@@ -179,6 +282,7 @@ inline float Seed::vertexZ() const noexcept {
 
 }  // namespace ActsTrk
 
+#include "SeedContainer.icc"
 // Set up a CLID for the type:
 #include "AthenaKernel/CLASS_DEF.h"
 CLASS_DEF(ActsTrk::SeedContainer, 1261318102, 2)

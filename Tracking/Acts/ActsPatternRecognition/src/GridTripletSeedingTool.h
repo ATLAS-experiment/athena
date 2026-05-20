@@ -11,6 +11,8 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "InDetIdentifier/PixelID.h"
 
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+
 // ACTS CORE
 #include "Acts/EventData/SeedContainer2.hpp"
 #include "Acts/EventData/SpacePointContainer2.hpp"
@@ -33,12 +35,12 @@ class GridTripletSeedingTool
   virtual StatusCode initialize() override;
 
   StatusCode createSeeds(const EventContext& ctx,
-                          const std::vector<const xAOD::SpacePointContainer*>&
-                              spacePointCollections,
+                         const std::vector<ISeedingTool::SourceContainerVariant>& spacePointCollections,
                           const Eigen::Vector3f& beamSpotPos, float bFieldInZ,
                           ActsTrk::SeedContainer& seedContainer) const override;
 
  protected:
+  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
   Gaudi::Property<bool> m_seedQualitySelection{
       this, "doSeedQualitySelection", true,
       "Select seed according to quality criteria"};
@@ -346,6 +348,17 @@ class GridTripletSeedingTool
   Gaudi::Property<float> m_expCutrMin{this, "SpSelectionExpCutrMin",
                                       45. * Acts::UnitConstants::mm};
 
+  /// Whether to use maximum variance for space point covariance
+  /// If true, the covariance terms will be capped at the values specified by MaxVarianceZ and MaxVarianceR.
+  /// If false, the covariance terms will be calculated based on the cluster width and the rotation of the detector element.
+  Gaudi::Property<bool> m_useMaxVariance{this, "UseMaxVariance", false};
+  /// Maximum variance for the z component of the space point covariance.
+  /// Default value was around the minimum observed value in the pixel barrel.
+  Gaudi::Property<float> m_maxVarianceZ{this, "MaxVarianceZ", 0.0014f};
+  /// Maximum variance for the r component of the space point covariance.
+  /// Default value was around the minimum observed value in the pixel barrel.
+  Gaudi::Property<float> m_maxVarianceR{this, "MaxVarianceR", 0.015f};
+
  private:
   Acts::CylindricalSpacePointGrid2::Config m_gridCfg;
   Acts::DoubletSeedFinder::Config m_bottomDoubletFinderCfg;
@@ -364,7 +377,7 @@ class GridTripletSeedingTool
   /// Private access to the logger
   const Acts::Logger& logger() const { return *m_logger; }
 
-  bool spacePointSelectionFunction(const xAOD::SpacePoint* sp, float r) const;
+   bool spacePointSelectionFunction(float z, float r, bool isPixelBarrel) const;
 
   bool doubletSelectionFunction(const Acts::ConstSpacePointProxy2& middle,
                                 const Acts::ConstSpacePointProxy2& other,

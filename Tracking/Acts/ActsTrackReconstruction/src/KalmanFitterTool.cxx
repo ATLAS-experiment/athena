@@ -536,8 +536,8 @@ KalmanFitterTool::fit(const Seed &seed,
   sourceLinks.reserve(6);
 
   const auto& sps = seed.sp();
-  for (const xAOD::SpacePoint* sp : sps) {
-    const auto& measurements = sp->measurements();
+  for (SpacePointProxy sp : sps) {
+    std::span<const xAOD::UncalibratedMeasurement * const> measurements = sp.measurements();
     for (const xAOD::UncalibratedMeasurement *umeas : measurements) {     
       sourceLinks.emplace_back(umeas);
     }

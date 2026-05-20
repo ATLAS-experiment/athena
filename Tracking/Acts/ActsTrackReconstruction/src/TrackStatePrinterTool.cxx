@@ -447,10 +447,10 @@ namespace ActsTrk
 
     std::ostringstream os;
     size_t nos = 0;
-    for (const auto *sp : seed.sp())
+    for (ActsTrk::SpacePointProxy sp : seed.sp())
     {
       size_t nom = 0;
-      for (const auto *el : sp->measurements())
+      for (const auto *el : sp.measurements())
       {
         if (nom > 0)
           os << '+';
