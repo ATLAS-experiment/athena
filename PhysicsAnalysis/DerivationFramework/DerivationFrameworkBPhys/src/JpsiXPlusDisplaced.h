@@ -217,7 +217,7 @@ namespace DerivationFramework {
     std::vector<double> m_massesV0_pipi;
 
     bool d0Pass(const EventContext& ctx, const xAOD::TrackParticle* track, const xAOD::Vertex* PV) const;
-    XiCandidate getXiCandidate(const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticle* track3) const;
+    XiCandidate getXiCandidate(const EventContext& ctx, const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticle* track3) const;
     std::unique_ptr<xAOD::Vertex> fitTracks(const EventContext& ctx, const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, const xAOD::TrackParticle* track3 = nullptr) const;
     MesonCandidate getDpmCandidate(const EventContext& ctx, const xAOD::Vertex* JXvtx, const xAOD::TrackParticle* extraTrk1, const xAOD::TrackParticle* extraTrk2, const xAOD::TrackParticle* extraTrk3) const;
     MesonCandidate getD0Candidate(const EventContext& ctx, const xAOD::Vertex* JXvtx, const xAOD::TrackParticle* extraTrk1, const xAOD::TrackParticle* extraTrk2) const;

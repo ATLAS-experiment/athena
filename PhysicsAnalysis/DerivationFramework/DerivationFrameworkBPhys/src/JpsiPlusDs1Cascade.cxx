@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /////////////////////////////////////////////////////////////////
 // JpsiPlusDs1Cascade.cxx, (c) ATLAS Detector software
@@ -588,7 +588,7 @@ namespace DerivationFramework {
 
     JpsiPlusDs1Cascade::~JpsiPlusDs1Cascade(){ }
 
-    StatusCode JpsiPlusDs1Cascade::performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer, const EventContext&) const
+    StatusCode JpsiPlusDs1Cascade::performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer, const EventContext& ctx) const
     {
         ATH_MSG_DEBUG( "JpsiPlusDs1Cascade::performSearch" );
         assert(cascadeinfoContainer!=nullptr);
@@ -827,7 +827,7 @@ namespace DerivationFramework {
              
                  // Apply the user's settings to the fitter
                  // Reset
-                 std::unique_ptr<Trk::IVKalState> state (m_iVertexFitter->makeState());
+                 std::unique_ptr<Trk::IVKalState> state (m_iVertexFitter->makeState(ctx));
                  // Robustness
                  int robustness = 0;
                  m_iVertexFitter->setRobustness(robustness, *state);
