@@ -37,6 +37,11 @@ void sTgcRdoToPrepDataToolMT::DataCache::translateAndSort(sTgcPrepDataCollection
     std::sort(coll.begin(), coll.end(),[](const sTgcPrepData*a, const sTgcPrepData* b){
         return a->identify() < b->identify();
     });
+    /// update the index otherwise the persitification is not happy...
+    std::size_t idx{0};
+    for (sTgcPrepData* prd : coll) {
+        prd->setHashAndIndex(coll.identifyHash(), idx++);
+    }
     const IMuonIdHelperSvc* idHelperSvc = detMgr->idHelperSvc();
     
     const sTgcIdHelper& id_helper = idHelperSvc->stgcIdHelper();

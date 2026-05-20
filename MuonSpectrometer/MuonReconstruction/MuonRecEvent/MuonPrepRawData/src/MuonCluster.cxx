@@ -1,18 +1,9 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// MuonCluster.cxx
-//   Implementation file for class MuonCluster
-///////////////////////////////////////////////////////////////////
-// (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
-// Version 1.0 03/07/2007 Niels van Eldik
-///////////////////////////////////////////////////////////////////
-
-#include <new>
 #include "MuonPrepRawData/MuonCluster.h"
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
+#include "MuonReadoutGeometry/MuonReadoutElement.h"
 #include "GaudiKernel/MsgStream.h"
 
 namespace Muon
@@ -80,9 +71,10 @@ MuonCluster::MuonCluster( const Identifier& RDOId,
     stream << MSG::INFO<<"MuonCluster {"<<std::endl;
     Trk::PrepRawData::dump(stream);
     stream << "Global Coordinates (x,y,z) = (";
-    stream<<this->globalPosition().x()<<", "
-          <<this->globalPosition().y()<<", "
-          <<this->globalPosition().z()<<")"<<std::endl;
+    stream<< Amg::toString(globalPosition())<<std::endl;
+    if (const auto* re = dynamic_cast<const MuonGM::MuonReadoutElement*>(detectorElement())) {
+      stream<<"Id - "<<re->idHelperSvc()->toString(identify())<<std::endl;
+    } 
     stream<<"} End MuonCluster"<<endmsg;
     return stream;
   }
@@ -90,7 +82,12 @@ MuonCluster::MuonCluster( const Identifier& RDOId,
   std::ostream& MuonCluster::dump( std::ostream&    stream) const
   {
     stream << "MuonCluster {"<<std::endl;
-    Trk::PrepRawData::dump(stream);   
+    Trk::PrepRawData::dump(stream); 
+    stream << "Global Coordinates (x,y,z) = (";
+    stream<< Amg::toString(globalPosition())<<std::endl;
+    if (const auto* re = dynamic_cast<const MuonGM::MuonReadoutElement*>(detectorElement())) {
+      stream<<"Id - "<<re->idHelperSvc()->toString(identify())<<std::endl;
+    }  
     stream<<"} End MuonCluster"<<std::endl;
     return stream;
   }
