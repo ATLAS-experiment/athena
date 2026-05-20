@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /////////////////////////////////////////////////////////////////
 // MuPlusDsCascade.cxx, (c) ATLAS Detector software
@@ -579,7 +579,7 @@ namespace DerivationFramework {
 
     MuPlusDsCascade::~MuPlusDsCascade(){ }
 
-    StatusCode MuPlusDsCascade::performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer, const EventContext&) const
+    StatusCode MuPlusDsCascade::performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer, const EventContext& ctx) const
     {
         ATH_MSG_DEBUG( "MuPlusDsCascade::performSearch" );
         assert(cascadeinfoContainer!=nullptr);
@@ -784,7 +784,7 @@ namespace DerivationFramework {
               ATH_MSG_DEBUG("Using tracks" << tracksMu[0] << ", " << tracksDx[0] << ", " << tracksDx[1] << ", " << tracksDx[2]);
                // Apply the user's settings to the fitter
               // Reset
-              std::unique_ptr<Trk::IVKalState> state (m_iVertexFitter->makeState());
+              std::unique_ptr<Trk::IVKalState> state (m_iVertexFitter->makeState(ctx));
               // Robustness
               int robustness = 0;
               m_iVertexFitter->setRobustness(robustness, *state);

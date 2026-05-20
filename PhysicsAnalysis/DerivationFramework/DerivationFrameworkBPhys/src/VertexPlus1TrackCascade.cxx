@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -105,18 +105,18 @@ namespace DerivationFramework {
         return isContained;
     }
 
-    StatusCode VertexPlus1TrackCascade::performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer) const
+    StatusCode VertexPlus1TrackCascade::performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer, const EventContext& ctx) const
     {
         ATH_MSG_DEBUG( "VertexPlus1TrackCascade::performSearch" );
         assert(cascadeinfoContainer!=nullptr);
-        SG::ReadHandle<xAOD::VertexContainer>  vertexContainer(m_vertexContainerKey);
+        SG::ReadHandle<xAOD::VertexContainer>  vertexContainer(m_vertexContainerKey, ctx);
         if(!vertexContainer.isValid()){
             ATH_MSG_ERROR("No VertexContainer with key " << m_vertexContainerKey.key() << " found in StoreGate. BCandidates will be EMPTY!");
             return StatusCode::FAILURE;
         }
 
         // Get tracks
-        SG::ReadHandle<xAOD::TrackParticleContainer> TrackPContainer(m_TrackPContainerKey);
+        SG::ReadHandle<xAOD::TrackParticleContainer> TrackPContainer(m_TrackPContainerKey, ctx);
         if(!TrackPContainer.isValid()){
             ATH_MSG_ERROR("No track particle collection with name " << m_TrackPContainerKey.key() << " found in StoreGate!");
             return StatusCode::FAILURE;
@@ -126,7 +126,7 @@ namespace DerivationFramework {
         // Get the muon collection used to build the J/psis
         const xAOD::MuonContainer*  importedMuonCollection = nullptr;
         if (!m_MuonsUsedInJpsiKey.key().empty()) {
-            SG::ReadHandle<xAOD::MuonContainer>  handle(m_MuonsUsedInJpsiKey);
+            SG::ReadHandle<xAOD::MuonContainer>  handle(m_MuonsUsedInJpsiKey, ctx);
             if(handle.isValid()) importedMuonCollection = handle.cptr();
             else {
               ATH_MSG_FATAL("problem retrieving MuonContainer " << m_MuonsUsedInJpsiKey.key());
@@ -178,7 +178,7 @@ namespace DerivationFramework {
 
               if(m_roughMassUpper > 0.0 && (roughmass < m_roughMassLower || roughmass > m_roughMassUpper)) continue;
 
-              std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
+              std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState(ctx);
               m_iVertexFitter->setRobustness( 0, *state );
 
               auto vID1 = m_iVertexFitter->startVertex( originalVertexTracks, initialVertexMassHypo, *state );

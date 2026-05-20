@@ -285,7 +285,7 @@ std::unique_ptr<xAOD::Vertex> ReVertex::fit(const EventContext& ctx,
 			    const xAOD::TrackParticleContainer* importedTrackCollection,
 			    const xAOD::Vertex* pv) const
 {
-   std::unique_ptr<Trk::IVKalState> state = m_VKVFitter->makeState();
+   std::unique_ptr<Trk::IVKalState> state = m_VKVFitter->makeState(ctx);
    if (m_doMassConst && (m_trkMasses.size()==inputTracks.size())) {
       m_VKVFitter->setMassInputParticles(m_trkMasses, *state);
       if (m_totalMassConst) m_VKVFitter->setMassForConstraint(m_totalMassConst, *state);

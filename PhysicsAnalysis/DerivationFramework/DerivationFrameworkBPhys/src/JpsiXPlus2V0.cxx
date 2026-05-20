@@ -417,17 +417,17 @@ namespace DerivationFramework {
 	  }
 
 	  if(numberOfVertices==2) {
-	    Trk::VxCascadeInfo* result1 = fitMainVtx(*jxItr, massesJX, V0Itr1->first, V0Itr1->second, V0Itr2->first, V0Itr2->second, trackCols, defaultPVContainer.cptr(), pvContainer.cptr());
+	    Trk::VxCascadeInfo* result1 = fitMainVtx(ctx, *jxItr, massesJX, V0Itr1->first, V0Itr1->second, V0Itr2->first, V0Itr2->second, trackCols, defaultPVContainer.cptr(), pvContainer.cptr());
 	    if(result1) cascadeinfoContainer.push_back(result1);
-	    Trk::VxCascadeInfo* result2 = fitMainVtx(*jxItr, massesJX, V0Itr2->first, V0Itr2->second, V0Itr1->first, V0Itr1->second, trackCols, defaultPVContainer.cptr(), pvContainer.cptr());
+	    Trk::VxCascadeInfo* result2 = fitMainVtx(ctx, *jxItr, massesJX, V0Itr2->first, V0Itr2->second, V0Itr1->first, V0Itr1->second, trackCols, defaultPVContainer.cptr(), pvContainer.cptr());
 	    if(result2) cascadeinfoContainer.push_back(result2);
 	  }
 	  else if(numberOfVertices==1) {
-	    Trk::VxCascadeInfo* result = fitMainVtx(*jxItr, massesJX, V0Itr1->first, V0Itr1->second, V0Itr2->first, V0Itr2->second, trackCols, defaultPVContainer.cptr(), pvContainer.cptr());
+	    Trk::VxCascadeInfo* result = fitMainVtx(ctx, *jxItr, massesJX, V0Itr1->first, V0Itr1->second, V0Itr2->first, V0Itr2->second, trackCols, defaultPVContainer.cptr(), pvContainer.cptr());
 	    if(result) cascadeinfoContainer.push_back(result);
 	  }
 	  else if(numberOfVertices==-1) {
-	    Trk::VxCascadeInfo* result = fitMainVtx(*jxItr, massesJX, V0Itr2->first, V0Itr2->second, V0Itr1->first, V0Itr1->second, trackCols, defaultPVContainer.cptr(), pvContainer.cptr());
+	    Trk::VxCascadeInfo* result = fitMainVtx(ctx, *jxItr, massesJX, V0Itr2->first, V0Itr2->second, V0Itr1->first, V0Itr1->second, trackCols, defaultPVContainer.cptr(), pvContainer.cptr());
 	    if(result) cascadeinfoContainer.push_back(result);
 	  }
 	}
@@ -793,7 +793,7 @@ namespace DerivationFramework {
     return pass;
   }
 
-  Trk::VxCascadeInfo* JpsiXPlus2V0::fitMainVtx(const xAOD::Vertex* JXvtx, std::vector<double>& massesJX, const xAOD::Vertex* V01vtx, const V0Enum V01, const xAOD::Vertex* V02vtx, const V0Enum V02, const std::vector<const xAOD::TrackParticleContainer*>& trackCols, const xAOD::VertexContainer* defaultPVContainer, const xAOD::VertexContainer* pvContainer) const {
+  Trk::VxCascadeInfo* JpsiXPlus2V0::fitMainVtx(const EventContext& ctx, const xAOD::Vertex* JXvtx, std::vector<double>& massesJX, const xAOD::Vertex* V01vtx, const V0Enum V01, const xAOD::Vertex* V02vtx, const V0Enum V02, const std::vector<const xAOD::TrackParticleContainer*>& trackCols, const xAOD::VertexContainer* defaultPVContainer, const xAOD::VertexContainer* pvContainer) const {
     Trk::VxCascadeInfo* result(nullptr);
 
     std::vector<const xAOD::TrackParticle*> tracksJX;
@@ -898,7 +898,7 @@ namespace DerivationFramework {
     std::vector<float> trk_pz;
 
     // Apply the user's settings to the fitter
-    std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
+    std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState(ctx);
     // Robustness: http://cdsweb.cern.ch/record/685551
     int robustness = 0;
     m_iVertexFitter->setRobustness(robustness, *state);
