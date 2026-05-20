@@ -12,6 +12,8 @@ from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, pr
 from AthenaCommon.Logging import logging
 msg = logging.getLogger('IDAlign')
 
+from AthenaConfiguration.Enums import Format
+
 # force no legacy job properties
 from AthenaCommon import JobProperties
 import AthenaCommon.Constants
@@ -143,6 +145,19 @@ def configureFlags(runArgs):
     flags.Exec.OutputLevel = getattr(AthenaCommon.Constants, runArgs.logLevel)
     flags.Exec.FPE = -2
     flags.IOVDb.GlobalTag = runArgs.globalTag
+
+    if flags.Input.Format is Format.BS:
+        # RAW bytestream data
+        flags.Input.isMC = False
+        flags.IOVDb.DatabaseInstance = "CONDBR2"
+
+    elif flags.Input.Format is Format.POOL:
+        if flags.Input.isMC:
+            # MC RDO
+            flags.IOVDb.DatabaseInstance = "OFLP200"
+        else:
+            # data POOL (ESD/AOD/RDO from data)
+            flags.IOVDb.DatabaseInstance = "CONDBR2"
         
     flags.GeoModel.Align.Dynamic = True
     flags.GeoModel.AtlasVersion = runArgs.atlasVersion
@@ -180,6 +195,13 @@ def configureFlags(runArgs):
     # To respect --athenaopts
     flags.fillFromArgs()
 
+    print("Input files:", flags.Input.Files)
+    print("Format:", flags.Input.Format)
+    print("isMC:", flags.Input.isMC)
+    print("GlobalTag:", flags.IOVDb.GlobalTag)
+    print("DBInstance:", flags.IOVDb.DatabaseInstance)
+    print("flags.InDet.Align: ", flags.InDet.Align)
+
     # Lock flags
     flags.lock()
 
@@ -192,8 +214,13 @@ def fromRunArgs(runArgs):
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     cfg = MainServicesCfg(flags)
 
-    from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-    cfg.merge(ByteStreamReadCfg(flags))
+    if flags.Input.Format is Format.BS:
+        from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
+        cfg.merge(ByteStreamReadCfg(flags))
+
+    elif flags.Input.Format is Format.POOL:
+        from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+        cfg.merge(PoolReadCfg(flags))
 
     ## Reconstruction related cfg
     with open(os.devnull, 'w') as f, contextlib.redirect_stdout(f):
