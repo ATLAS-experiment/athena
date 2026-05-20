@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthHistogramming.h
@@ -11,9 +11,7 @@
 #ifndef ATHENABASECOMPS_ATHHISTOGRAMMING_H
 #define ATHENABASECOMPS_ATHHISTOGRAMMING_H 1
 
-// STL includes
-#include <string>
-#include <map>
+
 
 // Framework includes
 #include "GaudiKernel/ServiceHandle.h"
@@ -29,6 +27,10 @@
 #include "TEfficiency.h"
 #include "TTree.h"
 #include "TGraph.h"
+
+// STL includes
+#include <string>
+#include <map>
 
 
 
