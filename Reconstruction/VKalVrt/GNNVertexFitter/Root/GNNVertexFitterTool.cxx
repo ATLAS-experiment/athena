@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GNNVertexFitter/GNNVertexFitterTool.h"
@@ -227,7 +227,7 @@ StatusCode GNNVertexFitterTool::fitAllVertices(const xAOD::JetContainer *inJetCo
     std::unique_ptr<std::vector<WrkVrt>> wrkVrtSet = std::make_unique<std::vector<WrkVrt>>();
     WrkVrt newvrt;
     newvrt.Good = true;
-    std::unique_ptr<Trk::IVKalState> state = m_vertexFitterTool->makeState();
+    std::unique_ptr<Trk::IVKalState> state = m_vertexFitterTool->makeState(ctx);
     std::vector<const xAOD::NeutralParticle *> neutralPartDummy(0);
     Amg::Vector3D IniVrt(0., 0., 0.);
 
