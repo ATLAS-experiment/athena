@@ -8,6 +8,11 @@ ActsStripClusterizationAlg                                        INFO Clusteriz
 | RDOs     |    4642935 |
 | Clusters |    1116636 |
 |----------|------------|
+ActsPLRClusterizationAlg                                          INFO Clusterization statistics
+|----------|------------|
+| RDOs     |      43518 |
+| Clusters |       4739 |
+|----------|------------|
 ActsPixelSpacePointFormationAlg                                   INFO Space Point Formation statistics
 |--------------|------------|
 | Clusters     |    1164869 |
