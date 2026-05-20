@@ -11,21 +11,21 @@ atlas_install_scripts( test/*.sh )
 
 atlas_add_test( egammaConfigFlagsTest
 		SCRIPT python -m egammaConfig.egammaConfigFlags
-		POST_EXEC_SCRIPT nopost.sh )
+		POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( egammaReconstructionConfigTest
 		SCRIPT python -m egammaConfig.egammaReconstructionConfig
-		POST_EXEC_SCRIPT nopost.sh )
+		POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( egammaxAODThinningConfigTest
 		SCRIPT python -m egammaConfig.egammaxAODThinningConfig
-		POST_EXEC_SCRIPT nopost.sh )
+		POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( egammaSteeringConfigTest
 		SCRIPT python -m egammaConfig.egammaSteeringConfig egamma.configOnly=True
-		POST_EXEC_SCRIPT nopost.sh )
+		POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( egammaLRTReconstructionConfigTest
 		SCRIPT python -m egammaConfig.egammaLRTReconstructionConfig
-		POST_EXEC_SCRIPT nopost.sh )
+		POST_EXEC_SCRIPT noerror.sh )
 
