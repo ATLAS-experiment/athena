@@ -65,7 +65,7 @@ namespace Rec{
 //
 
       std::map<long int,std::vector<double>> foundVrt2t;
-      select2TrVrt(xAODwrk->listSelTracks, primVrt, foundVrt2t, compatibilityGraph);
+      select2TrVrt(ctx, xAODwrk->listSelTracks, primVrt, foundVrt2t, compatibilityGraph);
 
 //---
       ATH_MSG_DEBUG(" Defined edges in the graph="<< num_edges(compatibilityGraph));
@@ -81,7 +81,7 @@ namespace Rec{
 
       std::unique_ptr<std::vector<WrkVrt>> wrkVrtSet = std::make_unique<std::vector<WrkVrt>>();
       WrkVrt newvrt; newvrt.Good=true;
-      std::unique_ptr<Trk::IVKalState> state = m_fitSvc->makeState();
+      std::unique_ptr<Trk::IVKalState> state = m_fitSvc->makeState(ctx);
       StatusCode sc;
       long int NPTR=0, nth=2; // VK nth=2 to speed up PGRAPH when it's used
 
@@ -135,7 +135,7 @@ namespace Rec{
 //
 //- Resolve all overlapped vertices
 //
-    state = m_fitSvc->makeState();
+    state = m_fitSvc->makeState(ctx);
     std::multimap<double,std::pair<int,int>> vrtWithCommonTrk;
     while(true){
       int nSoluI=(*wrkVrtSet).size();
