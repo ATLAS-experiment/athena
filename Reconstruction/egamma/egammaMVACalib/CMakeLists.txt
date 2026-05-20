@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( egammaMVACalib )
@@ -33,7 +33,7 @@ atlas_add_component( egammaMVACalib
 if( NOT XAOD_ANALYSIS)
 atlas_add_test(egammaMVASvcConfigTest
    SCRIPT python -m egammaMVACalib.egammaMVACalibConfig
-   POST_EXEC_SCRIPT nopost.sh)
+   POST_EXEC_SCRIPT noerror.sh)
 endif()
 
 # Install files from the package:

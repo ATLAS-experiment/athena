@@ -89,7 +89,7 @@ if( XAOD_ANALYSIS )
           INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS}
           LINK_LIBRARIES ${ROOT_LIBRARIES} ${GTEST_LIBRARIES} ${readLib}
                 AsgTools xAODBase xAODMissingET METUtilitiesLib
-          POST_EXEC_SCRIPT nopost.sh )
+          POST_EXEC_SCRIPT noerror.sh )
   endforeach()
 endif()
 
@@ -97,7 +97,7 @@ atlas_add_test( gt_ColumnarToolTests
    SOURCES test/gt_ColumnarToolTests.cxx
    INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
    LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarTestFixturesLib METUtilitiesLib
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py )
