@@ -74,6 +74,7 @@ def GNNHSOverlapRemovalToolCfg(flags, name="GNNHS_OverlapRemovalToolCfg", **kwar
                 if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.GNNSorting 
                 else "PrimaryVertices"
             ),
+            AllowNoPV=True,
             **subtool_kwargs
         )
     )
