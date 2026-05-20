@@ -141,9 +141,10 @@ StatusCode TauTrackFinder::executeTrackFinder(xAOD::TauJet& pTau, xAOD::TauTrack
 	  if( (*track_it) == tau_trk->track()) alreadyUsed = true;
 	}
 	//if this track has already been used by another tau, don't associate it to this new one                                                               
-	if(alreadyUsed) ATH_MSG_INFO( "Found Already Used track new, now removing: " << *track_it );
-	if (alreadyUsed) track_it = tauTracks.erase(track_it);
-	else ++track_it;
+	if(alreadyUsed) {
+          ATH_MSG_INFO( "Found Already Used track new, now removing: " << *track_it );
+	  track_it = tauTracks.erase(track_it);
+        } else ++track_it;
       }
   }
 
