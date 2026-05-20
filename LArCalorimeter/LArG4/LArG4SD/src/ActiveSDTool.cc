@@ -4,9 +4,6 @@
 
 #include "ActiveSDTool.h"
 
-#include "LArG4Code/SDWrapper.h"
-
-
 namespace LArG4
 {
 
@@ -42,31 +39,42 @@ namespace LArG4
     return StatusCode::SUCCESS;
   }
 
+  std::string ActiveSDTool::hitCollectionName() const
+  {
+    return m_hitCollName;
+  }
+
+  std::string ActiveSDTool::deadHitCollectionName() const
+  {
+    return m_hitCollName.value() + "_DEAD";
+  }
+
+  std::string ActiveSDTool::srHitCollectionName() const
+  {
+    return m_outputCollectionNames.size() > 1
+      ? m_outputCollectionNames[1]
+      : "SR_" + hitCollectionName();
+  }
+
   //---------------------------------------------------------------------------
-  // Create SD wrapper for current thread
+  // Create SDs for current thread
   //---------------------------------------------------------------------------
   G4VSensitiveDetector* ActiveSDTool::makeSD() const
   {
-    const std::string deadHitCollName=m_hitCollName+"_DEAD";
-    // Create the wrapper
-    auto *sdWrapper = new CalibSDWrapper("LArActiveSDWrapper", m_hitCollName, deadHitCollName);
-
-    // Create the SDs.
-    sdWrapper->addSD( makeOneSD( "Barrel::Presampler::Module::Calibration", &*m_bpsmodcalc, m_presBarVolumes ) );
-    sdWrapper->addSD( makeOneSD( "EMB::STAC::Calibration", &*m_embcalc, m_stacVolumes ) );
-    sdWrapper->addSD( makeOneSD( "EMEC::Pos::InnerWheel::Calibration", &*m_emepiwcalc, m_posIWVolumes ) );
-    sdWrapper->addSD( makeOneSD( "EMEC::Neg::InnerWheel::Calibration", &*m_emeniwcalc, m_negIWVolumes ) );
-    sdWrapper->addSD( makeOneSD( "EMEC::Pos::OuterWheel::Calibration", &*m_emepowcalc, m_posOWVolumes ) );
-    sdWrapper->addSD( makeOneSD( "EMEC::Neg::OuterWheel::Calibration", &*m_emenowcalc, m_negOWVolumes ) );
-    sdWrapper->addSD( makeOneSD( "Endcap::Presampler::LiquidArgon::Calibration", &*m_emepscalc, m_presECVolumes ) );
-    sdWrapper->addSD( makeOneSD( "EMEC::Pos::BackOuterBarrette::Calibration", &*m_emepobarcalc, m_pBOBVolumes ) );
-    sdWrapper->addSD( makeOneSD( "EMEC::Neg::BackOuterBarrette::Calibration", &*m_emenobarcalc, m_nBOBVolumes ) );
-    sdWrapper->addSD( makeOneSD( "FCAL::Module1::Gap::Calibration", &*m_fcal1calc, m_fcal1Volumes ) );
-    sdWrapper->addSD( makeOneSD( "FCAL::Module2::Gap::Calibration", &*m_fcal2calc, m_fcal2Volumes ) );
-    sdWrapper->addSD( makeOneSD( "FCAL::Module3::Gap::Calibration", &*m_fcal3calc, m_fcal3Volumes ) );
-    sdWrapper->addSD( makeOneSD( "HEC::Module::Depth::Slice::Wheel::Calibration", &*m_heccalc, m_sliceVolumes ) );
-
-    return sdWrapper;
+    makeOneSD( "Barrel::Presampler::Module::Calibration", &*m_bpsmodcalc, m_presBarVolumes );
+    makeOneSD( "EMB::STAC::Calibration", &*m_embcalc, m_stacVolumes );
+    makeOneSD( "EMEC::Pos::InnerWheel::Calibration", &*m_emepiwcalc, m_posIWVolumes );
+    makeOneSD( "EMEC::Neg::InnerWheel::Calibration", &*m_emeniwcalc, m_negIWVolumes );
+    makeOneSD( "EMEC::Pos::OuterWheel::Calibration", &*m_emepowcalc, m_posOWVolumes );
+    makeOneSD( "EMEC::Neg::OuterWheel::Calibration", &*m_emenowcalc, m_negOWVolumes );
+    makeOneSD( "Endcap::Presampler::LiquidArgon::Calibration", &*m_emepscalc, m_presECVolumes );
+    makeOneSD( "EMEC::Pos::BackOuterBarrette::Calibration", &*m_emepobarcalc, m_pBOBVolumes );
+    makeOneSD( "EMEC::Neg::BackOuterBarrette::Calibration", &*m_emenobarcalc, m_nBOBVolumes );
+    makeOneSD( "FCAL::Module1::Gap::Calibration", &*m_fcal1calc, m_fcal1Volumes );
+    makeOneSD( "FCAL::Module2::Gap::Calibration", &*m_fcal2calc, m_fcal2Volumes );
+    makeOneSD( "FCAL::Module3::Gap::Calibration", &*m_fcal3calc, m_fcal3Volumes );
+    makeOneSD( "HEC::Module::Depth::Slice::Wheel::Calibration", &*m_heccalc, m_sliceVolumes );
+    return nullptr;
   }
 
 } // namespace LArG4

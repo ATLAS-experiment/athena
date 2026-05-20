@@ -36,6 +36,8 @@ protected:
 private:
   Gaudi::Property<std::string> m_fastSimDedicatedSD{this, "SensitiveDetector", ""
       , "Fast sim dedicated SD for this setup"}; //!< Shower library sensitive detector for this shower
+  Gaudi::Property<std::string> m_outputCollectionName{this, "OutputCollectionName", ""
+      , "Output hit collection receiving fast-shower hits"};
   ServiceHandle<ILArG4ShowerLibSvc> m_showerLibSvc{this, "ShowerLibSvc", "LArG4ShowerLibSvc"
     , "Handle on the shower library service"};       //!< Pointer to the shower library service
 

@@ -2,20 +2,22 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <memory>
 #include <utility>
 
 #include "LArG4Code/LArG4SimpleSD.h"
 
 #include "LArG4Code/ILArCalculatorSvc.h"
+#include "LArG4Code/LArHitContainerBuilder.h"
 #include "CaloIdentifier/CaloIdManager.h"
 #include "CaloIdentifier/LArID_Exception.h"
 #include "CaloIdentifier/LArEM_ID.h"
 #include "CaloIdentifier/LArFCAL_ID.h"
 #include "CaloIdentifier/LArHEC_ID.h"
 #include "StoreGate/StoreGateSvc.h"
-#include "LArSimEvent/LArHitContainer.h"
 
-#include "G4RunManager.hh"
+#include "G4EventManager.hh"
+#include "HitManagement/HitCollectionMap.h"
 #include "MCTruth/AtlasG4EventUserInfo.h"
 
 #include "G4Step.hh"
@@ -23,7 +25,9 @@
 #include "G4ThreeVector.hh"
 #endif
 
-LArG4SimpleSD::LArG4SimpleSD(G4String a_name, ILArCalculatorSvc* calc, const std::string& type, const float width)
+LArG4SimpleSD::LArG4SimpleSD(G4String a_name, ILArCalculatorSvc* calc,
+                             std::string hitCollectionName,
+                             const std::string& type, const float width)
   : G4VSensitiveDetector(std::move(a_name))
   , m_calculator(calc)
   , m_numberInvalidHits(0)
@@ -32,13 +36,16 @@ LArG4SimpleSD::LArG4SimpleSD(G4String a_name, ILArCalculatorSvc* calc, const std
   , m_larEmID(nullptr)
   , m_larFcalID(nullptr)
   , m_larHecID(nullptr)
+  , m_hitCollectionName(std::move(hitCollectionName))
+  , m_hitSourceName(SensitiveDetectorName)
 {
   // Only one string causes a change in action
   if(type == "Uniform")
     m_timeBinType = LArG4SimpleSD::HitTimeBinUniform;
 }
 
-LArG4SimpleSD::LArG4SimpleSD(G4String a_name, StoreGateSvc* detStore)
+LArG4SimpleSD::LArG4SimpleSD(G4String a_name, StoreGateSvc* detStore,
+                             std::string hitCollectionName)
   : G4VSensitiveDetector(std::move(a_name))
   , m_calculator(nullptr)
   , m_numberInvalidHits(0)
@@ -47,6 +54,7 @@ LArG4SimpleSD::LArG4SimpleSD(G4String a_name, StoreGateSvc* detStore)
   , m_larEmID (nullptr)
   , m_larFcalID (nullptr)
   , m_larHecID (nullptr)
+  , m_hitCollectionName(std::move(hitCollectionName))
 {
   // This should only be used when it's safe to do this retrieval
   const CaloIdManager* caloIdManager=nullptr;
@@ -74,6 +82,14 @@ LArG4SimpleSD::~LArG4SimpleSD()
   if(verboseLevel>5 && m_numberInvalidHits>0) {
     G4cout << "Destructor: Sensitive Detector <" << SensitiveDetectorName << "> had " << m_numberInvalidHits
            << " G4Step energy deposits outside the region determined by its Calculator." << G4endl;
+  }
+}
+
+void LArG4SimpleSD::Initialize(G4HCofThisEvent*)
+{
+  if (auto* hitContainer = getHitContainer()) {
+    // Register before any hits arrive so finalization follows SD setup order.
+    hitContainer->RegisterSource(m_hitSourceName);
   }
 }
 
@@ -136,75 +152,14 @@ G4bool LArG4SimpleSD::SimpleHit( const LArG4Identifier& lar_id , G4double time ,
   if (!id.is_valid()) return false;
 
   G4int timeBin = getTimeBin( time );
-    
-  // Find the set of hits for this time bin.  If this is the
-  // first hit in this bin, create a new set.
-    
-  hits_t* hitCollection = nullptr;
-  auto setForThisBin = m_timeBins.find( timeBin );
-    
-  if (setForThisBin == m_timeBins.end()) {
-    // New time bin
-    hitCollection = new hits_t;
-    m_timeBins[ timeBin ] = hitCollection;
-  } else {
-    // Get the existing set of hits for this time bin.
-    // Reminders:
-    // setForThisBin = iterator (pointer) into the m_timeBins map
-    // (*setForThisBin) = pair< G4int, m_hits_t* >
-    // (*setForThisBin).second = m_hits_t*, the pointer to the set of hits
-        
-    hitCollection = (*setForThisBin).second;
-  }
-    
-  LArHit* hit = new LArHit(id,energy,time);
 
-  // If we haven't had a hit in this cell before, create one and add
-  // it to the hit collection.
-    
-  // If we've had a hit in this cell before, then add the energy to
-  // the existing hit.
-    
-  // Look for the key in the hitCollection (this is a binary search).
-  auto bookmark = hitCollection->lower_bound(hit);
-    
-  // The lower_bound method of a map finds the first element
-  // whose key is not less than the identifier.  If this element
-  // == our hit, we've found a match.
-    
-  // Reminders:
-  // bookmark = iterator (pointer) into the hitCollection set.
-  // (*bookmark) = a member of the set, which is a LArG4Hit*.
-    
-  // Equals() is a function defined in LArG4Hit.h; it has the value of
-  // "true" when a LArG4Hit* points to the same identifier.
-    
-  if (bookmark == hitCollection->end() ||
-      !(*bookmark)->Equals(hit)) {
-    // We haven't had a hit in this readout cell before.  Add it
-    // to our set.
-    if (hitCollection->empty() ||
-        bookmark == hitCollection->begin()) {
-      // Insert the hit before the first entry in the map.
-      hitCollection->insert(hit);
-    } else {
-      // We'just done a binary search of hitCollection, so we should use
-      // the results of that search to speed up the insertion of a new
-      // hit into the map.  The "insert" method is faster if the new
-      // entry is right _after_ the bookmark.  If we left bookmark
-      // unchanged, the new entry would go right _before_ the
-      // bookmark.  We therefore want to decrement the bookmark from
-      // the lower_bound search.
-            
-      hitCollection->insert(--bookmark, hit);
-    }
-  } else {
-    // Update the existing hit.
-    (*bookmark)->Add(hit);
-        
-    // We don't need our previously-created hit anymore.
-    delete hit;
+  auto* hitContainer = getHitContainer();
+  if (!hitContainer) {
+    return false;
   }
+  hitContainer->AddHit(m_hitSourceName,
+                       std::make_unique<LArHit>(id,energy,time),
+                       timeBin);
   
   return true;
 }
@@ -240,26 +195,22 @@ G4int LArG4SimpleSD::getTimeBin(G4double time) const
 } 
 
 
-void LArG4SimpleSD::EndOfAthenaEvent( LArHitContainer * hitContainer )
+LArHitContainerBuilder* LArG4SimpleSD::getHitContainer() const
 {
-  // For each time bin...
-  for(const auto& i : m_timeBins) {
-    if (verboseLevel>5)
-      G4cout << "EndOfEvent: time bin " << i.first << " - #hits = " << i.second->size() << G4endl;
-      
-    const hits_t* hitSet = i.second;
-      
-    // For each hit in the set...
-    for(auto *hit : *hitSet){
-      // Because of the design, we are sure this is going into the right hit container
-      hit->finalize();
-      hitContainer->push_back(hit);
-    } // End of loop over hits in the set
+  auto* eventManager = G4EventManager::GetEventManager();
+  if (!eventManager) {
+    return nullptr;
+  }
 
-  } // End of loop over time bins
-    
-  for(auto i : m_timeBins) delete i.second;
-  m_timeBins.clear();
+  auto* eventInfo =
+    dynamic_cast<AtlasG4EventUserInfo*>(eventManager->GetUserInformation());
+  if (!eventInfo) {
+    return nullptr;
+  }
+
+  std::shared_ptr<HitCollectionMap> hitCollections = eventInfo->GetHitCollectionMap();
+  return hitCollections ? hitCollections->Find<LArHitContainerBuilder>(m_hitCollectionName)
+                        : nullptr;
 }
 
 Identifier LArG4SimpleSD::ConvertID(const LArG4Identifier& a_ident) const

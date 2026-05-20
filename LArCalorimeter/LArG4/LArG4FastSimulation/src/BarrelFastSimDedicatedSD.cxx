@@ -15,13 +15,18 @@
 #include "CLHEP/Geometry/Transform3D.h"
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
 
+#include <utility>
+
 using HepGeom::Point3D;
 using HepGeom::Transform3D;
 using CLHEP::Hep3Vector;
 
 // Constructor:
-BarrelFastSimDedicatedSD::BarrelFastSimDedicatedSD(StoreGateSvc* detStore, bool verbose)
-  : IFastSimDedicatedSD("BarrelFastSimDedicatedSD", detStore)
+BarrelFastSimDedicatedSD::BarrelFastSimDedicatedSD(StoreGateSvc* detStore,
+                                                   std::string hitCollectionName,
+                                                   bool verbose)
+  : IFastSimDedicatedSD("BarrelFastSimDedicatedSD", detStore,
+                        std::move(hitCollectionName))
   , m_embManager(nullptr)
   , m_accordionDetails(nullptr)
   , m_absorberSections(nullptr)

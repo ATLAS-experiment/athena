@@ -3,7 +3,6 @@
 */
 
 #include "EMBSDTool.h"
-#include "LArG4Code/SDWrapper.h"
 
 namespace LArG4
 {
@@ -29,28 +28,15 @@ namespace LArG4
   }
 
   //---------------------------------------------------------------------------
-  // Create the SD wrapper for current worker thread
+  // Create the SDs for current worker thread
   //---------------------------------------------------------------------------
   G4VSensitiveDetector* EMBSDTool::makeSD() const
   {
     m_pscalc->initializeForSDCreation();
     m_embcalc->initializeForSDCreation();
-
-    // Create the wrapper
-    auto *sdWrapper = new SimpleSDWrapper("LArEMBSDWrapper", m_outputCollectionNames[0]);
-
-    // Add the SDs
-    sdWrapper->addSD( makeOneSD("LAr::Barrel::Presampler::Module", &*m_pscalc, m_presVolumes) );
-    sdWrapper->addSD( makeOneSD("LAr::EMB::STAC", &*m_embcalc, m_stacVolumes) );
-
-    // Setup frozen shower SD
-    if(useFrozenShowers())
-      {
-        sdWrapper->addFastSimSD("BarrelFastSimDedicatedSD");
-      }
-
-    // Return the wrapper as my SD
-    return sdWrapper;
+    makeOneSD("LAr::Barrel::Presampler::Module", &*m_pscalc, m_presVolumes);
+    makeOneSD("LAr::EMB::STAC", &*m_embcalc, m_stacVolumes);
+    return nullptr;
   }
 
 } // namespace LArG4
