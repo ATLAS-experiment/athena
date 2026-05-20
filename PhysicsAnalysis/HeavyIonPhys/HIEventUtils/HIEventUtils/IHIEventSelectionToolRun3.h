@@ -103,7 +103,8 @@ class IHIEventSelectionToolRun3 : public virtual asg::IAsgTool {
 
   virtual int nTrk(IonDataType dataType,
                    const xAOD::TrackParticleContainer* tracks,
-                   const xAOD::VertexContainer* vertices) const = 0;
+                   const xAOD::VertexContainer* vertices,
+                   const double min_pt_cut=-1) const = 0;
 
   virtual bool noPUFCalVsNtracks(
       IonDataType dataType, float fcalEt, int ntrk,

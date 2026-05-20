@@ -47,7 +47,9 @@ class HIEventSelectionToolRun3 : public virtual HI::IHIEventSelectionToolRun3,
 
   virtual int nTrk(HI::IonDataType dataType,
                    const xAOD::TrackParticleContainer* tracks,
-                   const xAOD::VertexContainer* vertices) const override;
+                   const xAOD::VertexContainer* vertices,
+                   const double min_pt_cut=-1
+                  ) const override;
 
   virtual bool noPUFCalVsNtracks(
       IonDataType dataType, float fcalEt, int ntrk,
