@@ -20,4 +20,4 @@ atlas_add_test( MdtCalibrationTest
                 SCRIPT python -m MuonCalibrationTest.MuonCalibrationTesterConfig --nEvents 2
                 PROPERTIES TIMEOUT 600
                 PRIVATE_WORKING_DIRECTORY
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
