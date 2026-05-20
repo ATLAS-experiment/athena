@@ -49,7 +49,7 @@ atlas_add_test( SimpleViews
 
 atlas_add_test( ViewScheduling
                 SCRIPT test/ViewScheduling.py --threads=1
-                LOG_SELECT_PATTERN "INFO condTestAlg running with store view_0|INFO 109" )
+                LOG_SELECT_PATTERN "^condTestAlg|INFO 109" )
 
 atlas_add_test( ViewInheritance
                 SCRIPT test/ViewInheritance.py --threads=1

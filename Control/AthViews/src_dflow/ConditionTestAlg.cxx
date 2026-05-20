@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ConditionTestAlg.cxx 
@@ -58,10 +58,17 @@ StatusCode ConditionTestAlg::finalize()
 }
 
 StatusCode ConditionTestAlg::execute(const EventContext& ctx) const
-{  
-  ATH_MSG_DEBUG ("Executing " << name() << "...");
+{
+  SG::WriteCondHandle< CondDataObj > condHandleTest( m_condKeyTest, ctx );
 
-  ATH_MSG_INFO( name() << " running with store " << Atlas::getExtendedEventContext(ctx).proxy()->name() );
+  if ( condHandleTest.isValid() ) {
+    ATH_MSG_DEBUG("CondHandle " << condHandleTest.fullKey() << " is already valid.");
+    return StatusCode::SUCCESS;
+  }
+
+  ATH_MSG_INFO ("Creating " << m_condKeyTest);
+
+  ATH_MSG_DEBUG( name() << " running with store " << Atlas::getExtendedEventContext(ctx).proxy()->name() );
 
   // Make a (large) validity range
   EventIDBase begin (0,
@@ -77,7 +84,6 @@ StatusCode ConditionTestAlg::execute(const EventContext& ctx) const
   EventIDRange range( begin, end );
 
   // Write a dummy object with this validity range
-  SG::WriteCondHandle< CondDataObj > condHandleTest( m_condKeyTest, ctx );
   ATH_CHECK( condHandleTest.record( range, std::make_unique< CondDataObj >( 987 ) ) );
 
   return StatusCode::SUCCESS;
