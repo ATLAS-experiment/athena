@@ -1,26 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetVKalVxInJetTool/TCTDecorCheckInTool.h"
-#include "PathResolver/PathResolver.h"
-#include "TLorentzVector.h"
 
 #include <cassert>
 #include "TestTools/FLOATassert.h"
-//
-//-------------------------------------------------
-//
-//Constructor-------------------------------------------------------------- 
-TCTDecorCheckInTool::TCTDecorCheckInTool( const std::string& name,
-                            ISvcLocator* pSvcLocator):
-  AthAlgorithm( name, pSvcLocator )
-  { }
-
-//Destructor---------------------------------------------------------------
-  TCTDecorCheckInTool::~TCTDecorCheckInTool(){
-    ATH_MSG_DEBUG("TCTDecorCheckInTool destructor called");
-  }
 
 //Initialize---------------------------------------------------------------
    StatusCode TCTDecorCheckInTool::initialize(){
@@ -55,30 +40,24 @@ TCTDecorCheckInTool::TCTDecorCheckInTool( const std::string& name,
      return StatusCode::SUCCESS;
    }
 
-   StatusCode TCTDecorCheckInTool::finalize()
-   {
-    ATH_MSG_DEBUG("TCTDecorCheck finalize()");
-    return StatusCode::SUCCESS; 
-   }
-
-   StatusCode TCTDecorCheckInTool::execute() 
+   StatusCode TCTDecorCheckInTool::execute(const EventContext& ctx) const
    {  
       ATH_MSG_DEBUG( "Executing..." );
-      SG::ReadDecorHandle< xAOD::TrackParticleContainer, std::vector<float> > trackReadDecorHandleTCTScore (m_trackReadDecorKeyTCTScore);
-      SG::ReadDecorHandle< xAOD::TrackParticleContainer, ElementLink<xAOD::JetContainer> > trackReadDecorHandleJetLink (m_trackReadDecorKeyJetLink);
+      SG::ReadDecorHandle< xAOD::TrackParticleContainer, std::vector<float> > trackReadDecorHandleTCTScore (m_trackReadDecorKeyTCTScore, ctx);
+      SG::ReadDecorHandle< xAOD::TrackParticleContainer, ElementLink<xAOD::JetContainer> > trackReadDecorHandleJetLink (m_trackReadDecorKeyJetLink, ctx);
 
       //JetRead handles
-      SG::ReadDecorHandle< xAOD::JetContainer, std::vector<std::vector<float>> > jetReadDecorHandleTCTScore (m_jetReadDecorKeyTCTScore);
-      SG::ReadDecorHandle< xAOD::JetContainer, std::vector<ElementLink<xAOD::TrackParticleContainer>> > jetReadDecorHandleTrackLink (m_jetReadDecorKeyTrackLink);
+      SG::ReadDecorHandle< xAOD::JetContainer, std::vector<std::vector<float>> > jetReadDecorHandleTCTScore (m_jetReadDecorKeyTCTScore, ctx);
+      SG::ReadDecorHandle< xAOD::JetContainer, std::vector<ElementLink<xAOD::TrackParticleContainer>> > jetReadDecorHandleTrackLink (m_jetReadDecorKeyTrackLink, ctx);
 
       // Retrieve the track particles:
-      SG::ReadHandle<xAOD::TrackParticleContainer> trackTES(m_particlesKey);
+      SG::ReadHandle<xAOD::TrackParticleContainer> trackTES(m_particlesKey, ctx);
       if ( !trackTES.isValid() ) {
       ATH_MSG_WARNING( "No TrackParticle container found in TDS" );
       return StatusCode::SUCCESS; }
       ATH_MSG_DEBUG( "TrackParticleContainer successfully retrieved" );
 
-      SG::ReadHandle<xAOD::VertexContainer> pvTES(m_verticesKey);
+      SG::ReadHandle<xAOD::VertexContainer> pvTES(m_verticesKey, ctx);
       if ( !pvTES.isValid() ) {
       ATH_MSG_WARNING( "No Primary Vertices container found in TDS" );
       return StatusCode::SUCCESS; }
@@ -88,7 +67,7 @@ TCTDecorCheckInTool::TCTDecorCheckInTool( const std::string& name,
 
 
     //==========================================================================
-    SG::ReadHandle<xAOD::JetContainer> jetTES(m_jetsKey);
+      SG::ReadHandle<xAOD::JetContainer> jetTES(m_jetsKey, ctx);
     if ( !jetTES.isValid() ) {
       ATH_MSG_WARNING( "No AntiKt4EMPflow jet container found in TDS" );
       return StatusCode::SUCCESS;  }
