@@ -40,9 +40,9 @@ namespace BJT{
 
         /// input parameters
         //Gaudi::Property<std::string> m_decorationName{this, "decorationName", "", "decoration name"};
-        Gaudi::Property<float> m_jetPtMin{this, "jetPtMin", 200., "minimum jet pT cut"};
-        Gaudi::Property<float> m_jetPtMax{this, "jetPtMax", 2500., "maximum jet pT cut"};
-        Gaudi::Property<float> m_jetEtaMax{this, "jetEtaMax", 2., "maximum jet eta cut"};
+        Gaudi::Property<float> m_jetPtMin{this, "jetPtMin", 20., "minimum jet pT cut"};
+        Gaudi::Property<float> m_jetPtMax{this, "jetPtMax", 2000., "maximum jet pT cut"};
+        Gaudi::Property<float> m_jetEtaMax{this, "jetEtaMax", 4.5, "maximum jet eta cut"};
 
         /// helper histogram tool
         ToolHandle<JetHelper::IVarTool> m_histTool2D {
