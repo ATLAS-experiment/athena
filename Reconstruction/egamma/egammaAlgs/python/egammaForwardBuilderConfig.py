@@ -17,15 +17,13 @@ def egammaForwardBuilderCfg(flags, name='egammaForwardElectron', **kwargs):
     acc = ComponentAccumulator()
     extraInputs = []
 
-    kwargs.setdefault("TrackParticleContainerName", "InDetTrackParticles")
-    
     if flags.Detector.GeometryITk:
         kwargs["doTrackMatching"] = True
         kwargs["doCookieCutting"] = True
         if flags.Reco.EnableHGTDExtension:
             extraInputs += [
                 ("xAOD::TrackParticleContainer",
-                 "StoreGateSvc+" + kwargs["TrackParticleContainerName"] + ".time")
+                 "StoreGateSvc+InDetTrackParticles.time")
             ]
         kwargs.setdefault("ExtraInputs", extraInputs)
         kwargs.setdefault("TrackMatchBuilderTool", acc.popToolsAndMerge(EMTrackMatchBuilderCfg(flags)))
