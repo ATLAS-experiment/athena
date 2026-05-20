@@ -31,7 +31,7 @@ IDTIDE_AOD_EXCLUDED_AUXDATA = [
     'IDTIDE_unbiased_z0SigmaSinTheta', 'IDTIDE_unbiased_z0SinTheta'
     ]
 IDTIDE_AOD_EXCLUDED_AUXDATA_TRUTH = [
-    'd0', 'z0', 'phi', 'theta', 'z0st', 'qOverP', 'prodR', 'prodZ', 'nSilHits'
+    'd0', 'z0', 'phi', 'theta', 'z0st', 'qOverP', 'prodR', 'prodZ', 'nSilHits', 'time'
     ]
 
 def IDTIDEKernelCommonCfg(flags, name='IDTIDEKernel'):
