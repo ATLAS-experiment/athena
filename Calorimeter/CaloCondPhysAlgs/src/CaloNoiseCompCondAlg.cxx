@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloNoiseCompCondAlg.h"
@@ -1108,7 +1108,7 @@ CaloNoiseCompCondAlg::elecNoiseRMS(const CaloDetDescrElement* caloDDE,
       //:::::::::::::::::
       gain_shifted=gain_wanted-shift_gain;
       //:::::::::::::::::
-      sigma = (*sigmaVector)[gain_shifted];
+      sigma = sigmaVector->at(gain_shifted);
       //:::::::::::::::::
       sigma = this->calculateElecNoiseForLAR(idCaloHash) [gain_shifted];
       //:::::::::::::::::
@@ -1264,12 +1264,12 @@ CaloNoiseCompCondAlg::adc2mev(const CaloDetDescrElement* caloDDE,
   if(iCalo==CaloCell_ID::LAREM || iCalo==CaloCell_ID::LARHEC)
   {      
     int index=this->index(idCaloHash);
-    factor=(m_adc2mevContainer[index])[gain];
+    factor=(m_adc2mevContainer[index]).at(gain);
   }
   else if(iCalo==CaloCell_ID::LARFCAL)
   {
     int index=this->index(idCaloHash);
-    factor=(m_adc2mevContainer[index])[gain];
+    factor=(m_adc2mevContainer[index]).at(gain);
   }  
   else if(iCalo==CaloCell_ID::TILE)
   {
