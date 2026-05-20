@@ -703,10 +703,6 @@ def TrigMuonEFMSonlyHypoToolFromDict( flags, chainDict ) :
             kwargs.setdefault("MonTool", monTool)
     if '3layersEC' in chainDict['chainParts'][0]['addInfo']:
         kwargs.setdefault("RequireThreeStations", True)
-        muonflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon')
-        if muonflags.Muon.runCommissioningChain:
-            kwargs.setdefault("RunCommissioningChain",True)
-            
 
     if 'nscan10' in chainDict['chainParts'][0]['addInfo']:
        conesize = 0.1

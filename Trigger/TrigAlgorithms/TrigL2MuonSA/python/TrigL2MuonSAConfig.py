@@ -208,7 +208,7 @@ def muFastSteeringCfg( flags, roisKey="", setup="", **kwargs ):
         MuFastStationFitter.NswStationFitter=""
 
     # Set Reco alg of muFast step
-    useNSW = (( not flags.Muon.runCommissioningChain ) and ( not flags.Muon.disableNSWForL2SA ))
+    useNSW =  not flags.Muon.disableNSWForL2SA
     from TrigL2MuonSA.TrigL2MuonSAMonitoring import TrigL2MuonSAMonitoring
     from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
     muFastAlg = CompFactory.MuFastSteering(

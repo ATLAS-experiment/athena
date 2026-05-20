@@ -18,7 +18,7 @@ testFile = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data24_
 #testFile = "/eos/atlas/atlascerngroupdisk/det-l1calo/OfflineSoftware/TestFiles/data24_13p6TeV/data24_13p6TeV.00477048.physics_Main.daq.RAW._lb0821._SFO-20._0001.data"
 
 def runMonCmd(inputFile,outputBSFile=None,outputMonFile=None):
-    cmdString = f"l1calo-ath-mon --evtMax 10 --filesInput {inputFile} -- Trigger.CTP.UseEDMxAOD=False Trigger.L1.doeFex=True"
+    cmdString = f"l1calo-ath-mon --evtMax 150 --filesInput {inputFile} -- Trigger.CTP.UseEDMxAOD=False Trigger.L1.doeFex=True Trigger.L1.dojFex=True"
     if outputMonFile: cmdString += f" Output.HISTFileName={outputMonFile}"
     if outputBSFile: 
        if os.path.exists(outputBSFile): os.remove(outputBSFile)
@@ -29,10 +29,14 @@ def runMonCmd(inputFile,outputBSFile=None,outputMonFile=None):
 
 def histosEqual(h1, h2, tolerance=1e-3):
    for bin in range(h1.GetNcells()):
-      if( abs(h1.GetBinContent(bin)-h2.GetBinContent(bin))>tolerance ): 
+      if( abs(h1.GetBinContent(bin)-h2.GetBinContent(bin))>tolerance ):
          print(f"Bin {bin} difference: {h1.GetBinContent(bin)} vs {h2.GetBinContent(bin)}")
          return False
    return True
+
+
+def histoEmpty(h):
+   return h.GetEntries() == 0
 
 
 with tempfile.TemporaryDirectory() as tmp:
@@ -46,7 +50,15 @@ with tempfile.TemporaryDirectory() as tmp:
 # now c.f. the relevant histograms from the two monitoring files
 f1 = ROOT.TFile("monitoring.orig.root")
 f2 = ROOT.TFile("monitoring.root")
-hists = ["h_L1_eEMRoI_LowPtCut_EtaPhiMap","h_L1_eTauRoI_LowPtCut_EtaPhiMap","h_L1_eEMxRoI_LowPtCut_EtaPhiMap","h_L1_eTauxRoI_LowPtCut_EtaPhiMap"]
+hists = [
+   "h_L1_eEMRoI_LowPtCut_EtaPhiMap",
+   "h_L1_eTauRoI_LowPtCut_EtaPhiMap",
+   "h_L1_eEMxRoI_LowPtCut_EtaPhiMap",
+   "h_L1_eTauxRoI_LowPtCut_EtaPhiMap",
+   "h_jJ_EtaPhiMap",
+   "h_jTAU_EtaPhiMap",
+   "h_jEM_EtaPhiMap",
+]
 for h in hists:
    h1 = f1.FindObjectAny(h)
    if not h1:
@@ -55,6 +67,12 @@ for h in hists:
    h2 = f2.FindObjectAny(h)
    if not h2:
       print(f"Missing {h} from {f2.GetName()}")
+      exit(1)
+   if histoEmpty(h1):
+      print(f"{h} is empty in {f1.GetName()} - test needs more events to populate")
+      exit(1)
+   if histoEmpty(h2):
+      print(f"{h} is empty in {f2.GetName()} - test needs more events to populate")
       exit(1)
    if not histosEqual(h1,h2):
       print(f"{h} histograms differ")

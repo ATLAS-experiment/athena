@@ -631,6 +631,12 @@ if flags.Output.BSFileName != "":
     algo.eFexEMRoIKeys = ["L1_eEMRoI","L1_eEMxRoI"]  # will write these containers
     algo.eFexTauRoIKeys = ["L1_eTauRoI","L1_eTauxRoI"]
 
+  if flags.Trigger.L1.dojFex:
+    algo.jFexSRJetRoIKeys = ["L1_jFexSRJetRoI"]
+    algo.jFexLRJetRoIKeys = ["L1_jFexLRJetRoI"]
+    algo.jFexTauRoIKeys   = ["L1_jFexTauRoI"]
+    algo.jFexFwdElRoIKeys = ["L1_jFexFwdElRoI"]
+
   cfg.addEventAlgo(algo)
   from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamWriteCfg
   write = ByteStreamWriteCfg(flags, ["xAOD::TrigCompositeContainer#OutputBSTCC"])
