@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Framework include(s):
@@ -37,28 +37,24 @@ namespace CP
 
         // Set the options
         if (m_calibMode == MuonCalibTool::correctData_CB) {
-            ATH_MSG_INFO("Data will be corrected for sagitta bias with CB calibration");
-            m_doDirectCBCalib = true;
-            m_applyCorrectionOnData = true;
-
+            ATH_MSG_INFO("Data will be corrected for sagitta bias and Montecarlo will be corrected using CB calibration");
+	    m_applyCorrectionOnData = true;
         } else if (m_calibMode == MuonCalibTool::correctData_IDMS) {
-            ATH_MSG_INFO("Data will be corrected for sagitta bias with ID+MS calibration");
-	    if (m_isRun3.value()) ATH_MSG_WARNING("You are using the ID+MS calibration which is currenlty not recommended from the MCP group in Run3. Please refer to the MCP documentation page");
-            m_doDirectCBCalib = false;
-            m_applyCorrectionOnData = true;
-	    
-        } else if (m_calibMode == MuonCalibTool::notCorrectData_IDMS) {
-	    ATH_MSG_INFO("Data will be untouched. Instead an additional systematic will be added with ID+MS calibration");
-	    if (m_isRun3.value()) ATH_MSG_WARNING("You are using the ID+MS calibration which is currenlty not recommended from the MCP group in Run3. Please refer to the MCP documentation page");
-	    m_doDirectCBCalib = false;
+            ATH_MSG_INFO("Data will be corrected for sagitta bias and Montecarlo will be corrected using ID+MS calibration");
 	    m_applyCorrectionOnData = false;
-        } 
-	else if (m_calibMode == MuonCalibTool::notCorrectData_CB) {
-            ATH_MSG_INFO("Data will be untouched. Instead an additional systematic will be added with CB calibration");
-            m_doDirectCBCalib = true;
-            m_applyCorrectionOnData = false;
-	}
-        else if (m_calibMode == MuonCalibTool::userDefined) {
+        } else if (m_calibMode == MuonCalibTool::notCorrectData_IDMS) {
+   	    ATH_MSG_INFO("Data will be untouched (no sagitta bias corrections) and Montecarlo will be corrected using ID+MS calibration");
+	    m_applyCorrectionOnData = false;
+        } else if (m_calibMode == MuonCalibTool::notCorrectData_CB) {
+            ATH_MSG_INFO("Data will be untouched (no sagitta bias corrections) and Montecarlo will be corrected using CB calibration");
+	    m_applyCorrectionOnData = true;
+	} else if (m_calibMode == MuonCalibTool::correctData_IDonly) {
+	    ATH_MSG_INFO("Data will be corrected for sagitta bias and Montecarlo will be corrected using ID calibration only");
+	    m_applyCorrectionOnData = true;
+	} else if (m_calibMode == MuonCalibTool::correctData_MSonly) {
+	    ATH_MSG_INFO("Data will be corrected for sagitta bias and Montecarlo will be corrected using MS calibration only");
+	    m_applyCorrectionOnData = true;
+	} else if (m_calibMode == MuonCalibTool::userDefined) {
             ATH_MSG_INFO("Using options as provided by the user");
         } 
         else {
@@ -66,7 +62,9 @@ namespace CP
                                                         << MuonCalibTool::correctData_CB << ") correctData_IDMS ("
                                                         << MuonCalibTool::correctData_IDMS << ") or notCorrectData_IDMS ("
                                                         << MuonCalibTool::notCorrectData_IDMS << ") or notCorrectData_CB ("
-                                                        << MuonCalibTool::notCorrectData_CB << ")");
+                                                        << MuonCalibTool::notCorrectData_CB << ") or correctData_IDonly ("
+ 			                                << MuonCalibTool::correctData_IDonly << ") or correctData_MSonly ("
+			                                << MuonCalibTool::correctData_MSonly << ")");
             return StatusCode::FAILURE;
         }
 
@@ -80,7 +78,7 @@ namespace CP
                 ATH_CHECK(m_MuonSelectionTool.setProperty("TurnOffMomCorr", true));
                 ATH_CHECK(m_MuonSelectionTool.setProperty("IsRun3Geo", m_isRun3.value()));
                 ATH_CHECK(m_MuonSelectionTool.setProperty("OutputLevel", msg().level()));
-            ATH_CHECK(m_MuonSelectionTool.setProperty("ExcludeNSWFromPrecisionLayers", m_excludeNSWFromPrecisionLayers.value()));
+		ATH_CHECK(m_MuonSelectionTool.setProperty("ExcludeNSWFromPrecisionLayers", m_excludeNSWFromPrecisionLayers.value()));
             }
             ATH_CHECK(m_MuonSelectionTool.retrieve());
             if (auto *selectionTool = dynamic_cast<columnar::ColumnarTool<>*>(m_MuonSelectionTool.get()))
@@ -92,8 +90,7 @@ namespace CP
             m_MuonIntSagittaTool.setTypeAndName("CP::MuonCalibIntSagittaTool/MCaST_Sagitta");
             ATH_CHECK(m_MuonIntSagittaTool.setProperty("release", m_release.value()));
             ATH_CHECK(m_MuonIntSagittaTool.setProperty("systematicScheme", m_sysScheme.value()));
-            ATH_CHECK(m_MuonIntSagittaTool.setProperty("applyCorrectionOnData", m_applyCorrectionOnData.value()));
-	    ATH_CHECK(m_MuonIntSagittaTool.setProperty("doDirectCBCalib", m_doDirectCBCalib.value()));
+	    ATH_CHECK(m_MuonIntSagittaTool.setProperty("calibMode", m_calibMode));
             ATH_CHECK(m_MuonIntSagittaTool.setProperty("doEtaSagittaSys", m_doEtaSagittaSys.value()));
             ATH_CHECK(m_MuonIntSagittaTool.setProperty("OutputLevel", msg().level()));
         }       
@@ -104,7 +101,7 @@ namespace CP
             m_MuonIntScaleSmearTool.setTypeAndName("CP::MuonCalibIntScaleSmearTool/MCaST_ScaleSmear");
             ATH_CHECK(m_MuonIntScaleSmearTool.setProperty("release", m_release.value()));
             ATH_CHECK(m_MuonIntScaleSmearTool.setProperty("systematicScheme", m_sysScheme.value()));
-            ATH_CHECK(m_MuonIntScaleSmearTool.setProperty("doDirectCBCalib", m_doDirectCBCalib.value()));
+            ATH_CHECK(m_MuonIntScaleSmearTool.setProperty("calibMode", m_calibMode));
             ATH_CHECK(m_MuonIntScaleSmearTool.setProperty("OutputLevel", msg().level()));
             ATH_CHECK(m_MuonIntScaleSmearTool.retrieve());
         }

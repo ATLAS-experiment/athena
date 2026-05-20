@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MCAST_MUONCALIBINTSCALESMEARTOOL_H
@@ -66,9 +66,9 @@ namespace CP {
         // Systematics scheme 
         Gaudi::Property<std::string> m_sysScheme{this, "systematicScheme", "Corr_Scale", "Systematic scheme to be configured"};
 
-        // Do direct CB calibration 
-        Gaudi::Property<bool> m_doDirectCBCalib{this, "doDirectCBCalib", true, "Do direct calibration of CB tracks, otherwise, do ID+MS"};
-
+        // See MuonCalibTool
+        Gaudi::Property<int> m_calibMode{this, "calibMode", -1, "Calib mode"};
+            
         typedef std::map<MCP::ScaleResCorrection, std::shared_ptr<MCP::CalibContainer>>  ScaleSmearCorrConstMap;
 
         // For systematics
@@ -89,7 +89,6 @@ namespace CP {
         std::map<MCP::DataYear, std::map<MCP::ScaleSmearParam, ScaleSmearCorrConstMap>> m_IDparams;
         std::map<MCP::DataYear, std::map<MCP::ScaleSmearParam, ScaleSmearCorrConstMap>> m_MEparams;
         std::map<MCP::DataYear, std::map<MCP::ScaleSmearParam, ScaleSmearCorrConstMap>> m_CBparams;
-
 
         // For expected resu
         std::map<MCP::DataYear, std::map<MCP::ExpectedResParam, std::shared_ptr<MCP::CalibContainer>>> m_IDExpectedResparams;

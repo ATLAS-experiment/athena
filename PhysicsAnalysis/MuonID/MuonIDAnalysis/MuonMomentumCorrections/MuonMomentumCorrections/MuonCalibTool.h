@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MCAST_MUONCALIBTOOL_H
@@ -47,6 +47,8 @@ namespace CP {
             correctData_IDMS = 1,
             notCorrectData_IDMS = 2,
             notCorrectData_CB = 3,
+            correctData_IDonly = 4,
+            correctData_MSonly = 5,
             userDefined = 99,
         };
 
@@ -105,16 +107,10 @@ namespace CP {
 	//more infos here https://atlas-mcp.docs.cern.ch/guidelines/muonselectiontool/index.html
 	Gaudi::Property<bool> m_excludeNSWFromPrecisionLayers{this, "ExcludeNSWFromPrecisionLayers", false, "Cut on the number of precision layers ignores the NSW"};
 
-        // Scale and Smear options
-        // Do direct CB calibration 
-        Gaudi::Property<bool> m_doDirectCBCalib{this, "doDirectCBCalib", true,     "Do direct calibration of CB tracks, otherwise, do ID+MS"};
-
-
         // SagittaBias properties
         Gaudi::Property<bool> m_doEtaSagittaSys{this, "doEtaSagittaSys",   false, "Do Eta dependant systematic system"};
         Gaudi::Property<bool> m_applyCorrectionOnData{this, "applyCorrectionOnData",   true, "If to apply sagitta corrections on data, or take the full effect as systematic"};
-
-
+      
         // High pT correction options
         // For more info: https://twiki.cern.ch/twiki/bin/view/Atlas/MuonSelectionToolR21#Usage_of_the_HighPt_selection
         Gaudi::Property<bool>  m_2stations_highpt_smearing{this, "do2StationsHighPt", false, "Extra smearing to be applied if high pT WP is used"};
