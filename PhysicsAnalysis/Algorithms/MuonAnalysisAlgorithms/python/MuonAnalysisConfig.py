@@ -68,8 +68,12 @@ class MuonMomentumCalibrationConfig (ConfigBlock):
             calibMode = 2
         elif self.calibMode == 'notCorrectData_CB':
             calibMode = 3
+        elif self.calibMode == 'correctData_IDonly':
+            calibMode = 4
+        elif self.calibMode == 'correctData_MSonly':
+            calibMode = 5
         else :
-            raise ValueError ("invalid calibMode: \"" + self.calibMode + "\". Allowed values are correctData_CB, correctData_IDMS, notCorrectData_IDMS, notCorrectData_CB")
+            raise ValueError ("invalid calibMode: \"" + self.calibMode + "\". Allowed values are correctData_CB, correctData_IDMS, notCorrectData_IDMS, notCorrectData_CB, correctData_IDonly, correctData_MSonly")
 
         inputContainer = "AnalysisMuons" if config.isPhyslite() else "Muons"
         if self.inputContainer:

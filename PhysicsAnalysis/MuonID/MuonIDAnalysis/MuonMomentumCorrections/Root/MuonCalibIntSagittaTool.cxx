@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Framework include(s):
@@ -10,6 +10,7 @@
 #include <cmath>
 #include "TRandom3.h"
 
+#include "MuonMomentumCorrections/MuonCalibTool.h"
 #include "MuonMomentumCorrections/MuonCalibIntSagittaTool.h"
 #include "MuonMomentumCorrections/EnumDef.h"
 #include <MuonMomentumCorrections/CalibInitializer.h>
@@ -77,7 +78,6 @@ namespace CP
         double corrDirectCBpT = mu.CB.calib_pt;
         applySagittaCorrection(corrDirectCBpT, CBCorrections, mu.CB.calib_charge, mu.CB.isData);
 
-
         // Perform the statistical combination of ID + ME, before and after correction. Apply that ratio as a correction to create the weighted rho
         double corrStatCombCBpT = statCombCorrection(mu, corrIDpT, corrMEpT, mu.CB.calib_pt);
 
@@ -123,8 +123,11 @@ namespace CP
         // Write the pT into the object
         mu.ID.calib_pt = corrIDpT;
         mu.ME.calib_pt = corrMEpT;
-	if(m_doDirectCBCalib) mu.CB.calib_pt = corrCBpT;
-	else mu.CB.calib_pt = corrStatCombCBpT;
+	
+	if(m_calibMode == MuonCalibTool::correctData_CB) mu.CB.calib_pt = corrCBpT;
+	else if(m_calibMode == MuonCalibTool::correctData_IDMS) mu.CB.calib_pt = corrStatCombCBpT;
+	else if(m_calibMode == MuonCalibTool::correctData_IDonly) mu.CB.calib_pt = corrIDpT;
+	else if(m_calibMode == MuonCalibTool::correctData_MSonly) mu.CB.calib_pt = corrMEpT;
 
         // Return gracefully:
         return CorrectionCode::Ok;
