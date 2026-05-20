@@ -627,7 +627,7 @@ def VDVMuInsideOutCfg(flags, name, candidatesName, suffix):
 
 def muEFInsideOutRecoSequenceCfg(flags, RoIs, name, suffix ):
 
-  from MuonConfig.MuonSegmentFindingConfig import MuonSegmentFinderAlgCfg, MuonLayerHoughAlgCfg, MuonSegmentFilterAlgCfg
+  from MuonConfig.MuonSegmentFindingConfig import MuonSegmentFinderAlgCfg, MuonLayerHoughAlgCfg
   from MuonCombinedAlgs.MuonCombinedAlgsMonitoring import MuonCreatorAlgMonitoring
   from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCreatorAlgCfg, MuGirlStauAlgCfg, StauCreatorAlgCfg, MuonInDetToMuonSystemExtensionAlgCfg, MuonInsideOutRecoAlgCfg, MuonCombinedInDetCandidateAlgCfg
   from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonInsideOutRecoToolCfg
