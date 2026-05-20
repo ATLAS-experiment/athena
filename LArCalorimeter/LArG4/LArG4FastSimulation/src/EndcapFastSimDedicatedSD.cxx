@@ -29,12 +29,17 @@
 #include "CLHEP/Geometry/Transform3D.h"
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
 
+#include <utility>
+
 using HepGeom::Point3D;
 using HepGeom::Transform3D;
 
 // Constructor:
-EndcapFastSimDedicatedSD::EndcapFastSimDedicatedSD(StoreGateSvc* detStore, bool verbose)
-  : IFastSimDedicatedSD("EndcapFastSimDedicatedSD", detStore)
+EndcapFastSimDedicatedSD::EndcapFastSimDedicatedSD(StoreGateSvc* detStore,
+                                                   std::string hitCollectionName,
+                                                   bool verbose)
+  : IFastSimDedicatedSD("EndcapFastSimDedicatedSD", detStore,
+                        std::move(hitCollectionName))
   , m_emecManager(nullptr)
   , m_innerWheelCalculatorPos(nullptr)
   , m_innerWheelCalculatorNeg(nullptr)

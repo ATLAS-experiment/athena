@@ -12,9 +12,11 @@
 #include "CaloIdentifier/CaloDM_ID.h"
 
 // Local includes
-#include "LArG4Code/SDWrapper.h"
+#include "LArG4Code/LArCalibrationHitContainerBuilder.h"
 #include "LArG4Code/ILArCalibCalculatorSvc.h"
 #include "LArG4Code/VolumeUtils.h"
+
+#include <memory>
 
 namespace LArG4
 {
@@ -63,16 +65,59 @@ namespace LArG4
   }
 
   //---------------------------------------------------------------------------
-  // Collect hits for this event
+  // Create all SDs for this worker thread
   //---------------------------------------------------------------------------
-  StatusCode CalibSDTool::Gather()
+  StatusCode CalibSDTool::initializeSD()
   {
-    auto *sdWrapper = dynamic_cast<CalibSDWrapper*>( getSD() );
-    if(!sdWrapper) {
-      ATH_MSG_ERROR("Failed to cast SD to CalibSDWrapper");
-      return StatusCode::FAILURE;
+    ATH_MSG_VERBOSE( name() << "::initializeSD()" );
+    makeSD();
+    return StatusCode::SUCCESS;
+  }
+
+  //---------------------------------------------------------------------------
+  // Create event-owned hit collections
+  //---------------------------------------------------------------------------
+  StatusCode CalibSDTool::SetupEvent(HitCollectionMap& hitCollections)
+  {
+    hitCollections.Emplace<LArCalibrationHitContainerBuilder>(hitCollectionName(),
+                                                              hitCollectionName());
+    if (!deadHitCollectionName().empty()) {
+      hitCollections.Emplace<LArCalibrationHitContainerBuilder>(deadHitCollectionName(),
+                                                                deadHitCollectionName());
     }
-    sdWrapper->EndOfAthenaEvent();
+    if (!srHitCollectionName().empty()) {
+      hitCollections.Emplace<LArSrCalibrationHitContainerBuilder>(srHitCollectionName(),
+                                                                  srHitCollectionName());
+    }
+    return StatusCode::SUCCESS;
+  }
+
+  //---------------------------------------------------------------------------
+  // Finalize and record hits for this event
+  //---------------------------------------------------------------------------
+  StatusCode CalibSDTool::Gather(HitCollectionMap& hitCollections)
+  {
+    hitCollections.TransformAndRecord<CaloCalibrationHitContainer>(hitCollectionName(),
+      [](CaloCalibrationHitContainer& hits)
+      {
+        static_cast<LArCalibrationHitContainerBuilder&>(hits).Finalize();
+      });
+
+    if (!deadHitCollectionName().empty()) {
+      hitCollections.TransformAndRecord<CaloCalibrationHitContainer>(deadHitCollectionName(),
+        [](CaloCalibrationHitContainer& hits)
+        {
+          static_cast<LArCalibrationHitContainerBuilder&>(hits).Finalize();
+        });
+    }
+
+    if (!srHitCollectionName().empty()) {
+      hitCollections.TransformAndRecord<SrCaloCalibrationHitContainer>(srHitCollectionName(),
+        [](SrCaloCalibrationHitContainer& hits)
+        {
+          static_cast<LArSrCalibrationHitContainerBuilder&>(hits).Finalize();
+        });
+    }
     return StatusCode::SUCCESS;
   }
 
@@ -89,7 +134,11 @@ namespace LArG4
     auto parsedVolumes = findLogicalVolumes(volumes, msg());
 
     // Create the calib SD
-    auto sd = std::make_unique<LArG4CalibSD>(sdName, calc, m_doPID);
+    auto sd = std::make_unique<LArG4CalibSD>(sdName, calc,
+                                             hitCollectionName(),
+                                             deadHitCollectionName(),
+                                             srHitCollectionName(),
+                                             m_doPID);
     auto* sdPtr = sd.get();
     sd->setupHelpers(m_larEmID, m_larFcalID, m_larHecID, m_caloDmID);
 
@@ -105,6 +154,23 @@ namespace LArG4
                            name(), StatusCode::FAILURE);
     }
     return sdPtr;
+  }
+
+  std::string CalibSDTool::hitCollectionName() const
+  {
+    return m_outputCollectionNames.empty() ? std::string{} : m_outputCollectionNames[0];
+  }
+
+  std::string CalibSDTool::deadHitCollectionName() const
+  {
+    return {};
+  }
+
+  std::string CalibSDTool::srHitCollectionName() const
+  {
+    return m_outputCollectionNames.size() > 1
+      ? m_outputCollectionNames[1]
+      : (hitCollectionName().empty() ? std::string{} : "SR_" + hitCollectionName());
   }
 
 } // namespace LArG4

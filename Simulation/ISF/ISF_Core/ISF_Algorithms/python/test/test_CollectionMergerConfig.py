@@ -67,6 +67,44 @@ class Test_generate_mergeable_collection_name(unittest.TestCase):
         self.assertEqual(expected_collection_merger_input,
                          actual_collection_merger_input)
 
+    def test_isISFRunAndHITSMergingRequiredWithDuplicateCollection_expectCollectionAddedOnceToCollectionMergerAlgorithm(self):
+        flags = initConfigFlags()
+        flags.Sim.ISFRun = True
+        flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+        mergeDict = {'ID':True, 'CALO':True, 'MUON':True}
+        flags.Sim.ISF.HITSMergingRequired = mergeDict
+        flags.Detector.EnableBCM = False
+        flags.lock()
+
+        bare_collection_name = 'aTestCollection'
+        mergeable_collection_suffix = '_TESTSUFFIX'
+        merger_input_property = 'PixelHits'
+        region = 'ID'
+        result, actual_collection_name = CollectionMergerCfg(flags,
+                                                             bare_collection_name,
+                                                             mergeable_collection_suffix,
+                                                             merger_input_property,
+                                                             region)
+        duplicate_result, duplicate_collection_name = CollectionMergerCfg(flags,
+                                                                          bare_collection_name,
+                                                                          mergeable_collection_suffix,
+                                                                          merger_input_property,
+                                                                          region)
+        result.merge(duplicate_result)
+        print('***************** TEST 2b ***********************')
+        result.printConfig(withDetails=True, summariseProps=True, prefix='CATest')
+        actual_collection_merger_input = None
+        try:
+            actual_collection_merger_input = list(result.getEventAlgo("ISF_CollectionMerger").InputPixelHits)
+        except ConfigurationError:
+            pass
+        expected_collection_name = 'aTestCollection_TESTSUFFIX'
+        expected_collection_merger_input = [expected_collection_name]
+        self.assertEqual(expected_collection_name, actual_collection_name)
+        self.assertEqual(expected_collection_name, duplicate_collection_name)
+        self.assertEqual(expected_collection_merger_input,
+                         actual_collection_merger_input)
+
     def test_isISFRunAndNoHITSMergingRequired_expectBareCollectionNameReturned(self):
         flags = initConfigFlags()
         flags.Sim.ISFRun = True

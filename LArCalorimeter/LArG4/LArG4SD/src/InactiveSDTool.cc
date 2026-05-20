@@ -3,7 +3,6 @@
 */
 
 #include "InactiveSDTool.h"
-#include "LArG4Code/SDWrapper.h"
 
 namespace LArG4
 {
@@ -35,33 +34,27 @@ namespace LArG4
     return StatusCode::SUCCESS;
   }
 
+  std::string InactiveSDTool::hitCollectionName() const
+  {
+    return m_hitCollName;
+  }
+
+  std::string InactiveSDTool::deadHitCollectionName() const
+  {
+    return m_hitCollName.value() + "_DEAD";
+  }
+
   //---------------------------------------------------------------------------
-  // Create SD wrapper for current thread
+  // Create SDs for current thread
   //---------------------------------------------------------------------------
   G4VSensitiveDetector* InactiveSDTool::makeSD() const
   {
-    const std::string deadHitCollName=m_hitCollName+"_DEAD";
-    // Create the wrapper
-    auto *sdWrapper = new CalibSDWrapper("LArInactiveSDWrapper", m_hitCollName, deadHitCollName);
-
-    sdWrapper->addSD(
-      makeOneSD("LAr::Barrel::Presampler::Inactive", &*m_embpscalc, m_barPreVolumes)
-    );
-    sdWrapper->addSD(
-      makeOneSD("LAr::Barrel::Inactive", &*m_embcalc, m_barVolumes)
-    );
-    sdWrapper->addSD(
-      makeOneSD("LAr::EMEC::Pos::InnerWheel::Inactive", &*m_emepiwcalc, m_ECPosInVolumes)
-    );
-    sdWrapper->addSD(
-      makeOneSD("LAr::EMEC::Pos::OuterWheel::Inactive", &*m_emepowcalc, m_ECPosOutVolumes)
-    );
-    sdWrapper->addSD(
-      makeOneSD("LAr::EMEC::Neg::InnerWheel::Inactive", &*m_emeniwcalc, m_ECNegInVolumes)
-    );
-    sdWrapper->addSD(
-      makeOneSD("LAr::EMEC::Neg::OuterWheel::Inactive", &*m_emenowcalc, m_ECNegOutVolumes)
-    );
+    makeOneSD("LAr::Barrel::Presampler::Inactive", &*m_embpscalc, m_barPreVolumes);
+    makeOneSD("LAr::Barrel::Inactive", &*m_embcalc, m_barVolumes);
+    makeOneSD("LAr::EMEC::Pos::InnerWheel::Inactive", &*m_emepiwcalc, m_ECPosInVolumes);
+    makeOneSD("LAr::EMEC::Pos::OuterWheel::Inactive", &*m_emepowcalc, m_ECPosOutVolumes);
+    makeOneSD("LAr::EMEC::Neg::InnerWheel::Inactive", &*m_emeniwcalc, m_ECNegInVolumes);
+    makeOneSD("LAr::EMEC::Neg::OuterWheel::Inactive", &*m_emenowcalc, m_ECNegOutVolumes);
 
     //sdWrapper->addSD(
     //  makeOneSD("LAr::HEC::Inactive",
@@ -75,21 +68,11 @@ namespace LArG4
     //            m_HECLocVolumes)
     //);
 
-    sdWrapper->addSD(
-      makeOneSD("LAr::HEC::Wheel::Inactive", &*m_heccalc, m_HECWheelVolumes)
-    );
-    sdWrapper->addSD(
-      makeOneSD("LAr::FCAL::Inactive1", &*m_fcal1calc, m_fcal1Volumes)
-    );
-    sdWrapper->addSD(
-      makeOneSD("LAr::FCAL::Inactive2", &*m_fcal2calc, m_fcal2Volumes)
-    );
-    sdWrapper->addSD(
-      makeOneSD("LAr::FCAL::Inactive3", &*m_fcal3calc, m_fcal3Volumes)
-    );
-
-    // Return the wrapper as my SD
-    return sdWrapper;
+    makeOneSD("LAr::HEC::Wheel::Inactive", &*m_heccalc, m_HECWheelVolumes);
+    makeOneSD("LAr::FCAL::Inactive1", &*m_fcal1calc, m_fcal1Volumes);
+    makeOneSD("LAr::FCAL::Inactive2", &*m_fcal2calc, m_fcal2Volumes);
+    makeOneSD("LAr::FCAL::Inactive3", &*m_fcal3calc, m_fcal3Volumes);
+    return nullptr;
   }
 
 } // namespace LArG4

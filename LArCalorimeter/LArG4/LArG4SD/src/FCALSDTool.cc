@@ -3,7 +3,6 @@
 */
 
 #include "FCALSDTool.h"
-#include "LArG4Code/SDWrapper.h"
 
 namespace LArG4
 {
@@ -30,26 +29,14 @@ namespace LArG4
   }
 
   //---------------------------------------------------------------------------
-  // Create the SD wrapper for current worker thread
+  // Create the SDs for current worker thread
   //---------------------------------------------------------------------------
   G4VSensitiveDetector* FCALSDTool::makeSD() const
   {
-    // Create the wrapper
-    auto *sdWrapper = new SimpleSDWrapper("LArFCALSDWrapper", m_outputCollectionNames[0]);
-
-    // Add the SDs
-    sdWrapper->addSD( makeOneSD("LAr::FCAL::Module1::Gap", &*m_fcal1calc, m_fcal1Volumes) );
-    sdWrapper->addSD( makeOneSD("LAr::FCAL::Module2::Gap", &*m_fcal2calc, m_fcal2Volumes) );
-    sdWrapper->addSD( makeOneSD("LAr::FCAL::Module3::Gap", &*m_fcal3calc, m_fcal3Volumes) );
-
-    // Setup frozen shower SD
-    if(useFrozenShowers())
-      {
-        sdWrapper->addFastSimSD("FCALFastSimDedicatedSD");
-      }
-
-    // Return the wrapper as my SD
-    return sdWrapper;
+    makeOneSD("LAr::FCAL::Module1::Gap", &*m_fcal1calc, m_fcal1Volumes);
+    makeOneSD("LAr::FCAL::Module2::Gap", &*m_fcal2calc, m_fcal2Volumes);
+    makeOneSD("LAr::FCAL::Module3::Gap", &*m_fcal3calc, m_fcal3Volumes);
+    return nullptr;
   }
 
 } // namespace LArG4

@@ -28,7 +28,8 @@ class BarrelFastSimDedicatedSD : public IFastSimDedicatedSD
 public:
 
   // Constructor:
-  BarrelFastSimDedicatedSD(StoreGateSvc*, bool verbose);
+  BarrelFastSimDedicatedSD(StoreGateSvc*, std::string hitCollectionName,
+                           bool verbose);
 
   // Destructor:
   ~BarrelFastSimDedicatedSD() {}
@@ -47,5 +48,4 @@ private:
 };
 
 #endif //LARG4FASTSIMULATION_BARRELFASTSIMDEDICATEDSD_H
-
 
