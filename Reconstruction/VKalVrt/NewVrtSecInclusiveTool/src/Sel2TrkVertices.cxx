@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 ///
 ///     @author  Vadim Kostyukhin <vadim.kostyukhin@cern.ch>
@@ -28,7 +28,8 @@ namespace Rec{
 //   Template routine for 2track secondary vertices selection
 //
 
-    void NewVrtSecInclusiveTool::select2TrVrt(std::vector<const xAOD::TrackParticle*>  & selectedTracks,
+    void NewVrtSecInclusiveTool::select2TrVrt(const EventContext& ctx,
+                                  std::vector<const xAOD::TrackParticle*>  & selectedTracks,
                                   const xAOD::Vertex                 & primVrt,
                                   std::map<long int,std::vector<double>> & goodVrt,
                                   compatibilityGraph_t& compatibilityGraph )
@@ -92,7 +93,7 @@ namespace Rec{
       }
    
       std::vector<std::vector<std::tuple<int,float>>> trkCount(NTracks);
-      std::unique_ptr<Trk::IVKalState> state = m_fitSvc->makeState();
+      std::unique_ptr<Trk::IVKalState> state = m_fitSvc->makeState(ctx);
       m_fitSvc->setMassInputParticles( inpMass, *state );     // Use pion masses for fit
       for (i=0; i<NTracks-1; i++) {
          if(trackSignif[i]<m_trkSigCut || dRdZratio[i]<m_dRdZRatioCut )continue;

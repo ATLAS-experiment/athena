@@ -385,7 +385,8 @@ namespace Rec {
 
 
 
-      void select2TrVrt(std::vector<const xAOD::TrackParticle*> & SelectedTracks, const xAOD::Vertex  & primVrt,
+      void select2TrVrt(const EventContext& ctx,
+                        std::vector<const xAOD::TrackParticle*> & SelectedTracks, const xAOD::Vertex  & primVrt,
                         std::map<long int,std::vector<double>> & vrt,
                         compatibilityGraph_t& compatibilityGraph) const;
 
