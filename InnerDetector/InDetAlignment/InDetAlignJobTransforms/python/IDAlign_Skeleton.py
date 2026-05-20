@@ -145,19 +145,6 @@ def configureFlags(runArgs):
     flags.Exec.OutputLevel = getattr(AthenaCommon.Constants, runArgs.logLevel)
     flags.Exec.FPE = -2
     flags.IOVDb.GlobalTag = runArgs.globalTag
-
-    if flags.Input.Format is Format.BS:
-        # RAW bytestream data
-        flags.Input.isMC = False
-        flags.IOVDb.DatabaseInstance = "CONDBR2"
-
-    elif flags.Input.Format is Format.POOL:
-        if flags.Input.isMC:
-            # MC RDO
-            flags.IOVDb.DatabaseInstance = "OFLP200"
-        else:
-            # data POOL (ESD/AOD/RDO from data)
-            flags.IOVDb.DatabaseInstance = "CONDBR2"
         
     flags.GeoModel.Align.Dynamic = True
     flags.GeoModel.AtlasVersion = runArgs.atlasVersion
@@ -194,7 +181,7 @@ def configureFlags(runArgs):
 
     # To respect --athenaopts
     flags.fillFromArgs()
-    
+
     # Lock flags
     flags.lock()
 
