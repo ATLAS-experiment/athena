@@ -45,6 +45,9 @@ void RNTupleWriterHelper::makeNewEntry() {
     }
   }
   m_entry = m_ntupleWriter->GetModel().CreateBareEntry();
+  if (!m_entry)[[unlikely]]{
+     throw std::runtime_error("RNTupleWriterHelper::makeNewEntry failed to create valid entry.");
+  }
 }
 
 void RNTupleWriterHelper::addAttribute(const attrDataTuple& in) {
