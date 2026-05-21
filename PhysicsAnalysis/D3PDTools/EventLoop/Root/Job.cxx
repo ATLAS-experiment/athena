@@ -333,6 +333,15 @@ namespace EL
 
 
 
+  void Job ::
+  startNewAlgSequence ()
+  {
+    RCU_CHANGE_INVARIANT (this);
+    m_jobConfig.startNewAlgSequence ();
+  }
+
+
+
   Job::outputMIter Job ::
   outputBegin ()
   {

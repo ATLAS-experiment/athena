@@ -20,6 +20,12 @@ class StatusCode;
 
 namespace EL
 {
+  namespace Detail
+  {
+    struct AlgorithmData;
+  }
+
+
   /// \brief the job configuration that is independent of driver and
   /// dataset
   ///
@@ -132,7 +138,7 @@ namespace EL
     /// \par Failures
     ///   streaming errors
   public:
-    std::vector<std::unique_ptr<EL::IAlgorithmWrapper> > extractAlgorithms ();
+    std::vector<Detail::AlgorithmData> extractAlgorithms ();
 
 
     /// \brief get the number of algorithms configured
@@ -140,6 +146,11 @@ namespace EL
     ///   no-fail
   public:
     std::size_t numberOfAlgorithms () const noexcept;
+
+
+    /// @brief start a new sub-sequence of algorithms
+  public:
+    void startNewAlgSequence ();
 
 
 
@@ -161,6 +172,12 @@ namespace EL
     /// member need to check it regularly.
   private:
     std::vector<std::unique_ptr<EL::IAlgorithmWrapper> > m_algorithms;
+
+
+    /// \brief the list of indices at which new algorithm sequences start
+  private:
+    std::vector<std::size_t> m_algSequenceStartIndices;
+
 
     ClassDef (JobConfig, 1);
   };
