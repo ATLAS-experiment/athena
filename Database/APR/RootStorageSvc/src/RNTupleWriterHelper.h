@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RNTUPLEWRITERHELPER_H
@@ -14,6 +14,13 @@
 #include "ROOT/RNTupleWriter.hxx"
 
 #include <tuple>
+#include <map>
+#include <set>
+#include <string>
+#include <string_view>
+#include <memory>
+
+class TFile;
 
 namespace RootStorageSvc {
 
@@ -69,7 +76,7 @@ class RNTupleWriterHelper : public pool::APRMessaging {
   std::map<std::string, void*> m_attrDataMap;
 
   /// Set of field names that should be unsplit
-  std::set<std::string> m_unsplitFields;
+  std::set<std::string, std::less<>> m_unsplitFields;
 
   /// Internal cache for the RNTuple model
   /// Before first commit the fields are added to the model
