@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GLOBALCHI2FITTER_H
@@ -330,6 +330,7 @@ namespace Trk {
     ) const override final;
 
     virtual Track* alignmentFit(
+      const EventContext& ctx,
       AlignmentCache&,
       const Track&,
       const RunOutlierRemoval  runOutlier=false,

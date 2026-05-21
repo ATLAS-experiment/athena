@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -23,13 +23,12 @@ namespace Trk {
 
 /**  GlobalTrackFitter tool providing methods used during alignment */
 
-class iPatGlobalFitter : public iPatFitter, virtual public IGlobalTrackFitter {
+class iPatGlobalFitter : public extends<iPatFitter, IGlobalTrackFitter> {
  public:
-  iPatGlobalFitter(const std::string& type, const std::string& name,
-                   const IInterface* parent);
-  ~iPatGlobalFitter(void);  // destructor
+  using base_class::base_class;
 
   Track* alignmentFit(
+      const EventContext& ctx,
       AlignmentCache&, const Track&, const RunOutlierRemoval runOutlier = false,
       const ParticleHypothesis matEffects = Trk::nonInteracting) const;
 
@@ -49,7 +48,8 @@ class iPatGlobalFitter : public iPatFitter, virtual public IGlobalTrackFitter {
   void setMinIterations(int minIterations);
 
   // configurables (tools and options)
-  bool m_allParameters;  // all or 5 parameters for above matrix methods
+  Gaudi::Property<bool> m_allParameters{
+    this, "AllParameters", false, "all or 5 parameters for matrix methods"};
 };
 
 }  // namespace Trk
