@@ -225,6 +225,7 @@ inline std::vector<WTAJet> WTAConeParallelHelper::GetAllJets()
     {
         all_jets.insert(all_jets.end(), m_OutputJetsPerBlock.at(i).begin(), m_OutputJetsPerBlock.at(i).end());
     }
+    if(all_jets.size() == 0)return all_jets; // If there's no jet, return empty std::vector
     SortByPt(all_jets); // Maximum 40 jets here
     if(m_StoreAmbiguousJets){
         std::vector<pt_t> duplicated_pt_list;
