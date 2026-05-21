@@ -151,7 +151,9 @@ def PFOClusterMLCorrectionAlgorithmBuilder(inputFlags,spec):
     correctionTool_cfg = getNeutralPFOClusterMLCorrectionToolCfg(
         inputFlags,
         toolName = "NeutralPFOClusterMLCorrectionTool",
-        clusterMLCorrectedEnergyDecorationKey = "clusterE_ML"
+        ClusterMLCorrectedEnergyDecorationKey = "clusterE_ML",
+        MaxAllowedChargedCorrectionFraction = 0.001,
+        MinAllowedEMEnergyMeV = 300
     )
     alg.PFOContainerCorrectionTool = result.popToolsAndMerge(correctionTool_cfg)
 
