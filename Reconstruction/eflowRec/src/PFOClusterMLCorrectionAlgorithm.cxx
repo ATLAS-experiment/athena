@@ -22,38 +22,22 @@ StatusCode PFOClusterMLCorrectionAlgorithm::execute(const EventContext &ctx) con
 
   ATH_MSG_DEBUG("Executing");
 
-  ATH_CHECK(shallowCopyChargedFEContainer(ctx));
-  ATH_CHECK(shallowCopyAndModifyNeutralFEContainer(ctx));
-
-  return StatusCode::SUCCESS;
-}
-
-StatusCode PFOClusterMLCorrectionAlgorithm::shallowCopyChargedFEContainer(const EventContext &ctx) const {
-  // Just a shallow copy, no modifications
+  // Read charged container
   SG::ReadHandle<xAOD::FlowElementContainer> chargedFEContainerReadHandle(m_chargedFEContainerReadHandleKey, ctx);
-
-  xAOD::ShallowCopyResult_t<xAOD::FlowElementContainer> shallowCopyPair =
-    xAOD::shallowCopy(*chargedFEContainerReadHandle, ctx);
-
-  SG::WriteHandle<xAOD::FlowElementContainer> chargedFEMLContainerWriteHandle(m_chargedFEMLContainerWriteHandleKey, ctx);
-  ATH_CHECK(chargedFEMLContainerWriteHandle.record(std::move(shallowCopyPair.first), std::move(shallowCopyPair.second)));
-
-  return StatusCode::SUCCESS;
-}
-
-StatusCode PFOClusterMLCorrectionAlgorithm::shallowCopyAndModifyNeutralFEContainer(const EventContext &ctx) const {
-
-  // Shallow copy step
+  auto [chargedFEMLContainer, chargedFEMLContainerAux] = xAOD::shallowCopy(*chargedFEContainerReadHandle);
+  
+  // Read neutral container
   SG::ReadHandle<xAOD::FlowElementContainer> neutralFEContainerReadHandle(m_neutralFEContainerReadHandleKey, ctx);
-  xAOD::ShallowCopyResult_t<xAOD::FlowElementContainer> shallowCopyPair =
-    xAOD::shallowCopy(*neutralFEContainerReadHandle, ctx);
-
+  auto [neutralFEMLContainer, neutralFEMLContainerAux] = xAOD::shallowCopy(*neutralFEContainerReadHandle);
+  
   // Modification step
-  m_correctionTool->correctContainer(*shallowCopyPair.first);
+  m_correctionTool->correctContainer(*neutralFEMLContainer, *chargedFEMLContainer);
 
-  // Registration of results step
+  // Writing containers
+  SG::WriteHandle<xAOD::FlowElementContainer> chargedFEMLContainerWriteHandle(m_chargedFEMLContainerWriteHandleKey, ctx);
+  ATH_CHECK(chargedFEMLContainerWriteHandle.record(std::move(chargedFEMLContainer), std::move(chargedFEMLContainerAux)));
   SG::WriteHandle<xAOD::FlowElementContainer> neutralFEMLContainerWriteHandle(m_neutralFEMLContainerWriteHandleKey, ctx);
-  ATH_CHECK(neutralFEMLContainerWriteHandle.record(std::move(shallowCopyPair.first), std::move(shallowCopyPair.second)));
+  ATH_CHECK(neutralFEMLContainerWriteHandle.record(std::move(neutralFEMLContainer), std::move(neutralFEMLContainerAux)));
 
   return StatusCode::SUCCESS;
 }

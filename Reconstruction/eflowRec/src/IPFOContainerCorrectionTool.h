@@ -19,6 +19,6 @@ public:
     virtual ~IPFOContainerCorrectionTool() = default;
     DeclareInterfaceID(IPFOContainerCorrectionTool, 1, 0);
 
-    virtual void correctContainer(xAOD::FlowElementContainer& pfos) const = 0;
+    virtual void correctContainer(xAOD::FlowElementContainer& neutral_pfos, xAOD::FlowElementContainer& charged_pfos) const = 0;
 };
 #endif // EFLOWREC_IPFOCONTAINERCORRECTIONTOOL_H
