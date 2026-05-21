@@ -80,7 +80,45 @@ def setL16AlignmentFlags(flags):
 
 ## TODO Fill L2 and L3 from current T0 setup
 def setL2AlignmentFlags(flags):
-    pass  
+    flags.InDet.Align.pixelAlignmentLevel = 2
+    flags.InDet.Align.pixelAlignmentLevelBarrel = 2
+    flags.InDet.Align.pixelAlignmentLevelEndcaps = 2
+    
+    flags.InDet.Align.SCTAlignmentLevel = 2
+    flags.InDet.Align.SCTAlignmentLevelBarrel = 2
+    flags.InDet.Align.SCTAlignmentLevelEndcaps = 2
+    
+    flags.InDet.Align.TRTAlignmentLevel = 2
+    flags.InDet.Align.TRTAlignmentLevelBarrel = 2
+    flags.InDet.Align.TRTAlignmentLevelEndcaps = 2
+
+    if flags.InDet.Align.localDataBase:
+        msg = logging.getLogger('setL2AlignmentFlags')
+        msg.info(f"Change IBLDist tag from '{flags.InDet.Align.IBLDistTag}' to 'InDetAlignIBLDIST-T0-Alignment'")
+        msg.info(f"Change L1IDTag tag from '{flags.InDet.Align.L1IDTag}' to 'InDetAlignL1-T0-Alignment'")
+            
+        flags.InDet.Align.IBLDistTag = "InDetAlignIBLDIST-T0-Alignment"
+        flags.InDet.Align.L1IDTag = "InDetAlignL1-T0-Alignment" 
     
 def setL3AlignmentFlags(flags):
-    pass  
+
+    print("pass set L3")
+    flags.InDet.Align.pixelAlignmentLevel = 3
+    flags.InDet.Align.pixelAlignmentLevelBarrel = 3
+    flags.InDet.Align.pixelAlignmentLevelEndcaps = 3
+    
+    flags.InDet.Align.SCTAlignmentLevel = 3
+    flags.InDet.Align.SCTAlignmentLevelBarrel = 3
+    flags.InDet.Align.SCTAlignmentLevelEndcaps = 3
+    
+    flags.InDet.Align.TRTAlignmentLevel = 3
+    flags.InDet.Align.TRTAlignmentLevelBarrel = 3
+    flags.InDet.Align.TRTAlignmentLevelEndcaps = 3
+
+    if flags.InDet.Align.localDataBase:
+        msg = logging.getLogger('setL3AlignmentFlags')
+        msg.info(f"Change IBLDist tag from '{flags.InDet.Align.IBLDistTag}' to 'InDetAlignIBLDIST-T0-Alignment'")
+        msg.info(f"Change L1IDTag tag from '{flags.InDet.Align.L1IDTag}' to 'InDetAlignL1-T0-Alignment'")
+            
+        flags.InDet.Align.IBLDistTag = "InDetAlignIBLDIST-T0-Alignment"
+        flags.InDet.Align.L1IDTag = "InDetAlignL1-T0-Alignment" 
