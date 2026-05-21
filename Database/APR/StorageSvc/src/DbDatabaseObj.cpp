@@ -28,6 +28,8 @@
 
 #include <memory>
 #include <cstdio>
+#include <string_view>
+#include <cstdint>
 
 using namespace pool;
 
@@ -107,7 +109,7 @@ DbDatabaseObj::~DbDatabaseObj()  {
 
 /// Access the size of the database: May be undefined for some technologies
 long long int DbDatabaseObj::size() const {
-  return 0==m_info ? -1 : m_info->size();
+  return (m_info) ? m_info->size() : -1 ;
 }
 
 // Perform cleanup of internal structures.
@@ -408,15 +410,15 @@ StatusCode DbDatabaseObj::open()   {
           while (static_cast<uint64_t>(oid.second) <= m_params.size()) {
             auto result = m_params.ptr()->load(&ptr, m_string_t, oid, oid, true);
             if (!result.isSuccess() || !ptr) break;
-            std::string dsc = param_str;
+            std::string_view dsc{param_str};
             size_t id1 = dsc.find("[NAME=");
             size_t id2 = dsc.find("[VALUE=");
             if ( id1 != std::string::npos && id2 != std::string::npos )  {
               size_t id11 = dsc.find(']', id1+6);
               size_t id22 = dsc.find(']', id2+7);
               if ( id11 != std::string::npos && id22 != std::string::npos )  {
-                std::string n = dsc.substr(id1+6, id11-id1-6);
-                std::string v = dsc.substr(id2+7, id22-id2-7);
+                std::string n{dsc.substr(id1+6, id11-id1-6)};
+                std::string v{dsc.substr(id2+7, id22-id2-7)};
                 // ParamMap::value_type val(n, v);
                 ATH_MSG_DEBUG("--->Reading Param:" << n << "=[" << v << ']');
                 m_paramMap[n] = v;
