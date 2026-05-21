@@ -12,13 +12,24 @@
 #ifndef METUTILITIES_MET_METHELPERS_H
 #define METUTILITIES_MET_METHELPERS_H 1
 
+#include <vector>
+#include <utility>
+
 // Framework includes
 #include "AsgMessaging/MessageCheck.h"
 #include "AsgMessaging/StatusCode.h"
 
+#include "xAODBase/IParticle.h"
+#include "xAODEgamma/Electron.h"
+#include "xAODEgamma/Photon.h"
+#include "xAODTau/TauJet.h"
+
 #include "xAODMuon/MuonContainer.h"
 #include "xAODJet/JetContainer.h"
+
 #include "xAODMissingET/MissingETContainer.h"
+
+
 
 namespace met {
 
@@ -40,6 +51,16 @@ namespace met {
                      const std::string& metKey,
                      const MissingETBase::Types::bitmask_t metSource);
 
+  // Helpers for retrieving contributing objects from MET terms
+
+  template <class T = xAOD::IParticle>
+  std::vector<const T*> getMETElements(const xAOD::MissingET& met);
+
+  template <class T = xAOD::IParticle>
+  std::vector<std::pair<const T*,float> > getMETElementsWeights(const xAOD::MissingET& met);
+
 }
+
+#include "METUtilities/METHelpers.icc"
 
 #endif
