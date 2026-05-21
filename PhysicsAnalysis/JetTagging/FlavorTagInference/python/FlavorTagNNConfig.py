@@ -365,6 +365,8 @@ def getDependencySet(tagger_name: str, override: set[str] | None = None) -> set[
     - ``L`` : Track-Lepton decoration (generic lepton-related information).
     - ``E`` : Electron inputs associated to the jet.
     - ``M`` : Muon inputs associated to the jet.
+    - ``MC``: Muon inputs associated to the jet based on cone-matching
+    - ``R`` : Jet-calibration decorators for regression inputs
 
     Parameters
     ----------
@@ -406,6 +408,9 @@ def getDependencySet(tagger_name: str, override: set[str] | None = None) -> set[
         "GN3V01": {"L", "E"},
         "GN3EPCLV01": {"E", "L"},
         "GN3V02": {"E", "M"},
+
+        # Small-R jet regression
+        "bJR4v01": {"E", "MC", "R"},
 
         # Run 4 small-R jet taggers
         "GN2HL": {},

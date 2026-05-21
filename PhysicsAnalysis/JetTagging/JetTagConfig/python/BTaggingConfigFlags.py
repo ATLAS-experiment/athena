@@ -104,6 +104,10 @@ def getNNs(flags):
     # Combine the paths for GN3v00 and GN3v01 models
     gn3_paths = gn3v00_paths + gn3v01_paths
 
+    bjr4_paths = [
+        "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bJES_calibFactors_R22_MC20MC23_AntiKt4EMPflow_bJR4v01_20260319.onnx" # bJR4v01
+    ] if isRun3Derivation(flags) else []
+    
     lrj_paths = [
              "BTagging/20230705/gn2xv01/antikt10ufo/network.onnx",
              "BTagging/20240925/GN2Xv02/antikt10ufo/network.onnx",
@@ -122,7 +126,7 @@ def getNNs(flags):
                 'hash': 'jetFoldHash',
                 'cone_association': True,
             },
-            *[{'folds' : [nn_path]} for nn_path in gn3_paths]
+            *[{'folds' : [nn_path]} for nn_path in gn3_paths+bjr4_paths]
         ],
         'AntiKt4EMTopoJets': [
             {
@@ -137,7 +141,7 @@ def getNNs(flags):
                 'hash': 'jetFoldHash',
                 'cone_association': True
             },
-            *[{'folds' : [nn_path]} for nn_path in gn3_paths]
+            *[{'folds' : [nn_path]} for nn_path in gn3_paths+bjr4_paths]
         ],
         'AntiKt4EMPFlowByVertexJets': [
             {
