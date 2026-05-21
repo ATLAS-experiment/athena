@@ -101,9 +101,12 @@ namespace pool {
           type[1] = it->second;
         }
         std::string leaflist = name + type;
-        m_tree->Branch( name.c_str(), 0, leaflist.c_str() );
-
-        ATH_MSG_DEBUG( "Created Branch " <<  name << ", Type=" <<  type_name );
+        if (m_tree)[[likely]]{ 
+          m_tree->Branch( name.c_str(), 0, leaflist.c_str() );
+          ATH_MSG_DEBUG( "Created Branch " <<  name << ", Type=" <<  type_name );
+        } else {
+          ATH_MSG_ERROR( "m_tree is nullptr");
+        }
      }
 
      void RootCollection::addField(ROOT::RNTupleModel* model, const std::string& field_name, const std::string& field_type)
