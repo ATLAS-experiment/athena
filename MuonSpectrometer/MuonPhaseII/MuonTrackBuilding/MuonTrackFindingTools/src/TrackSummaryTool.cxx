@@ -230,54 +230,44 @@ namespace MuonR4 {
         }
 
         /// Trigger hits
-        acc(etaLayer1Hits) = summary.value(Cat_t::TriggerEta, Stat_t::OnTrack, LayerIndex::Inner, true)
-                           + summary.value(Cat_t::TriggerEta, Stat_t::OnTrack, LayerIndex::Inner, false);
+        acc(innerTriggerEtaHits) = summary.value(Cat_t::TriggerEta, Stat_t::OnTrack, LayerIndex::Inner, true)
+                                 + summary.value(Cat_t::TriggerEta, Stat_t::OnTrack, LayerIndex::Inner, false);
 
-        acc(etaLayer2Hits) = summary.value(Cat_t::TriggerEta, Stat_t::OnTrack, LayerIndex::Middle, true)
-                           + summary.value(Cat_t::TriggerEta, Stat_t::OnTrack, LayerIndex::Middle, false);
+        acc(middleTriggerEtaHits) = summary.value(Cat_t::TriggerEta, Stat_t::OnTrack, LayerIndex::Middle, true)
+                                  + summary.value(Cat_t::TriggerEta, Stat_t::OnTrack, LayerIndex::Middle, false);
 
-        acc(etaLayer3Hits) = summary.value(Cat_t::TriggerEta, Stat_t::OnTrack, LayerIndex::Outer, true)
-                          + summary.value(Cat_t::TriggerEta, Stat_t::OnTrack, LayerIndex::Outer, false);
+        acc(outerTriggerEtaHits) = summary.value(Cat_t::TriggerEta, Stat_t::OnTrack, LayerIndex::Outer, true)
+                                 + summary.value(Cat_t::TriggerEta, Stat_t::OnTrack, LayerIndex::Outer, false);
 
-        acc(etaLayer4Hits) = summary.value(Cat_t::TriggerEta, Stat_t::OnTrack, LayerIndex::Extended, true)
-                           + summary.value(Cat_t::TriggerEta, Stat_t::OnTrack, LayerIndex::Extended, false);
 
          if (m_fillHoles) {
-            acc(etaLayer1Holes) = summary.value(Cat_t::TriggerEta, Stat_t::Hole, LayerIndex::Inner, true)
-                                + summary.value(Cat_t::TriggerEta, Stat_t::Hole, LayerIndex::Inner, false);
+            acc(innerTriggerEtaHoles) = summary.value(Cat_t::TriggerEta, Stat_t::Hole, LayerIndex::Inner, true)
+                                      + summary.value(Cat_t::TriggerEta, Stat_t::Hole, LayerIndex::Inner, false);
 
-            acc(etaLayer2Holes) = summary.value(Cat_t::TriggerEta, Stat_t::Hole, LayerIndex::Middle, true)
-                                + summary.value(Cat_t::TriggerEta, Stat_t::Hole, LayerIndex::Middle, false);
+            acc(middleTriggerEtaHoles) = summary.value(Cat_t::TriggerEta, Stat_t::Hole, LayerIndex::Middle, true)
+                                       + summary.value(Cat_t::TriggerEta, Stat_t::Hole, LayerIndex::Middle, false);
 
-            acc(etaLayer3Holes) = summary.value(Cat_t::TriggerEta, Stat_t::Hole, LayerIndex::Outer, true)
-                                + summary.value(Cat_t::TriggerEta, Stat_t::Hole, LayerIndex::Outer, false);
-
-            acc(etaLayer4Holes) = summary.value(Cat_t::TriggerEta, Stat_t::Hole, LayerIndex::Extended, true)
-                                + summary.value(Cat_t::TriggerEta, Stat_t::Hole, LayerIndex::Extended, false);
+            acc(outerTriggerEtaHoles) = summary.value(Cat_t::TriggerEta, Stat_t::Hole, LayerIndex::Outer, true)
+                                      + summary.value(Cat_t::TriggerEta, Stat_t::Hole, LayerIndex::Outer, false);
         }
-        acc(phiLayer1Hits) = summary.value(Cat_t::TriggerPhi, Stat_t::OnTrack, LayerIndex::Inner, true)
-                           + summary.value(Cat_t::TriggerPhi, Stat_t::OnTrack, LayerIndex::Inner, false);
+        acc(innerTriggerPhiHits) = summary.value(Cat_t::TriggerPhi, Stat_t::OnTrack, LayerIndex::Inner, true)
+                                 + summary.value(Cat_t::TriggerPhi, Stat_t::OnTrack, LayerIndex::Inner, false);
 
-        acc(phiLayer2Hits) = summary.value(Cat_t::TriggerPhi, Stat_t::OnTrack, LayerIndex::Middle, true)
-                           + summary.value(Cat_t::TriggerPhi, Stat_t::OnTrack, LayerIndex::Middle, false);
+        acc(middleTriggerPhiHits) = summary.value(Cat_t::TriggerPhi, Stat_t::OnTrack, LayerIndex::Middle, true)
+                                  + summary.value(Cat_t::TriggerPhi, Stat_t::OnTrack, LayerIndex::Middle, false);
 
-        acc(phiLayer3Hits) = summary.value(Cat_t::TriggerPhi, Stat_t::OnTrack, LayerIndex::Outer, true)
-                           + summary.value(Cat_t::TriggerPhi, Stat_t::OnTrack, LayerIndex::Outer, false);
+        acc(outerTriggerPhiHits) = summary.value(Cat_t::TriggerPhi, Stat_t::OnTrack, LayerIndex::Outer, true)
+                                 + summary.value(Cat_t::TriggerPhi, Stat_t::OnTrack, LayerIndex::Outer, false);
 
-        acc(phiLayer4Hits) = summary.value(Cat_t::TriggerPhi, Stat_t::OnTrack, LayerIndex::Extended, true)
-                           + summary.value(Cat_t::TriggerPhi, Stat_t::OnTrack, LayerIndex::Extended, false);
         if (m_fillHoles) {
-            acc(phiLayer1Holes) = summary.value(Cat_t::TriggerPhi, Stat_t::Hole, LayerIndex::Inner, true)
-                                + summary.value(Cat_t::TriggerPhi, Stat_t::Hole, LayerIndex::Inner, false);
+            acc(innerTriggerPhiHoles) = summary.value(Cat_t::TriggerPhi, Stat_t::Hole, LayerIndex::Inner, true)
+                                      + summary.value(Cat_t::TriggerPhi, Stat_t::Hole, LayerIndex::Inner, false);
 
-            acc(phiLayer2Holes) = summary.value(Cat_t::TriggerPhi, Stat_t::Hole, LayerIndex::Middle, true)
-                                + summary.value(Cat_t::TriggerPhi, Stat_t::Hole, LayerIndex::Middle, false);
+            acc(middleTriggerPhiHoles) = summary.value(Cat_t::TriggerPhi, Stat_t::Hole, LayerIndex::Middle, true)
+                                       + summary.value(Cat_t::TriggerPhi, Stat_t::Hole, LayerIndex::Middle, false);
 
-            acc(phiLayer3Holes) = summary.value(Cat_t::TriggerPhi, Stat_t::Hole, LayerIndex::Outer, true)
-                                + summary.value(Cat_t::TriggerPhi, Stat_t::Hole, LayerIndex::Outer, false);
-
-            acc(phiLayer4Holes) = summary.value(Cat_t::TriggerPhi, Stat_t::Hole, LayerIndex::Extended, true)
-                                + summary.value(Cat_t::TriggerPhi, Stat_t::Hole, LayerIndex::Extended, false);
+            acc(outerTriggerPhiHoles) = summary.value(Cat_t::TriggerPhi, Stat_t::Hole, LayerIndex::Outer, true)
+                                      + summary.value(Cat_t::TriggerPhi, Stat_t::Hole, LayerIndex::Outer, false);
         }
     }     
 }

@@ -1,6 +1,5 @@
-// Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMUON_XAODMUONDICT_H
 #define XAODMUON_XAODMUONDICT_H
@@ -9,6 +8,7 @@
 #include "xAODMuon/Muon.h"
 #include "xAODMuon/MuonContainer.h"
 #include "xAODMuon/MuonAuxContainer.h"
+#include "xAODMuon/MuonAuxContainerR4.h"
 #include "xAODMuon/versions/Muon_v1.h"
 #include "xAODMuon/versions/MuonContainer_v1.h"
 #include "xAODMuon/versions/MuonAuxContainer_v1.h"
@@ -16,6 +16,7 @@
 #include "xAODMuon/versions/MuonAuxContainer_v3.h"
 #include "xAODMuon/versions/MuonAuxContainer_v4.h"
 #include "xAODMuon/versions/MuonAuxContainer_v5.h"
+#include "xAODMuon/versions/MuonAuxContainer_v6.h"
 
 #include "xAODMuon/MuonSegment.h"
 #include "xAODMuon/MuonSegmentContainer.h"
