@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -55,7 +55,7 @@ namespace pool    {
     /// Collection of retired database containers
     typedef std::vector< DbContainerObj >            Containers;
     /// Parameter map definition
-    typedef std::map<std::string, std::string>       ParamMap;
+    typedef std::map<std::string, std::string, std::less<>>       ParamMap;
     /// Definition of map with link elements
     typedef std::map< Guid , Token* >                LinkMap;
     /// Definition of array with link elements
