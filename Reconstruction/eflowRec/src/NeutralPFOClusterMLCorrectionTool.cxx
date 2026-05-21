@@ -134,7 +134,8 @@ double NeutralPFOClusterMLCorrectionTool::getChargedCorrectionsToClusterFromSing
 
   for (size_t i = 0; i < cl_links.size(); ++i) {
     const xAOD::CaloCluster* linked_cluster = getClusterFromLink(i);
-    if (!linked_cluster) continue;
+    if (!linked_cluster)
+      continue;
 
     if (cl_weights[i] <= 0.)
       std::cout << "NeutralPFOClusterMLCorrectionTool: charged FE index " << charged_fe.index() << ", energy " << charged_fe.e() << ", linked cluster index " << linked_cluster->index() << ", linked cluster EM energy " << linked_cluster->rawE() << ", weight " << cl_weights[i] << std::endl;
