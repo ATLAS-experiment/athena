@@ -70,8 +70,6 @@ testBookTH1(TestHistogramming& hist){
   assert(booked != nullptr);
 
   TH1* retrieved = hist.hist("h1");
-  std::cout << "retrieved name: " << retrieved->GetName() << '\n';
-  std::cout << "retrieved title: " << retrieved->GetTitle() << std::endl;
   assert(retrieved != nullptr);
   assert(retrieved == booked);
   assert(std::string{retrieved->GetName()} == "h1");
