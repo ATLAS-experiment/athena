@@ -17,6 +17,9 @@ struct PFData
     std::vector<eflowRecTrack *> tracks;
     std::vector<eflowRecCluster *> clusters;
     eflowRec::EtaPhiLUT clusterLUT;
+
+    unsigned int nMatches = 0;
+    unsigned int nOrigCaloObj = 0;
   };
 
 #endif
