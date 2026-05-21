@@ -443,10 +443,10 @@ _stdSeqList = [
     JetInputConstitSeq("EMPFlow", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'JetETMissParticleFlowObjects', 'CHSParticleFlowObjects'),
 
     # EM-scale particle flow objects with correction to ML cluster scale, with charged hadron subtraction
-    JetInputConstitSeq("GPFlowML", xAODType.FlowElement,["CHS"] , 'GlobalClusterMLCorrectedParticleFlowObjects', 'CHSGlobalClusterMLCorrectedParticleFlowObjects', label = 'EMPFlow',),
+    JetInputConstitSeq("GPFlowML", xAODType.FlowElement,["CorrectPFO_only_double_counting", "CHS"] , 'GlobalClusterMLCorrectedParticleFlowObjects', 'CHSGlobalClusterMLCorrectedParticleFlowObjects', label = 'EMPFlow',),
 
     # GPFlow are the same than EMPFlow except they have pflow linked to elec or muons filtered out.
-    JetInputConstitSeq("GPFlow", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalParticleFlowObjects', 'CHSGParticleFlowObjects',
+    JetInputConstitSeq("GPFlow", xAODType.FlowElement,["CorrectPFO_only_double_counting", "CHS"] , 'GlobalParticleFlowObjects', 'CHSGParticleFlowObjects',
                        label='EMPFlow'),
     
     JetInputConstitSeq("GPFlow_noElectrons", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalParticleFlowObjects_noElectrons', 'CHSGParticleFlowObjects_noElectrons',
@@ -554,14 +554,23 @@ for jc in _stdSeqList:
 ########################################################################
 ## List of standard constituent modifiers 
 
-def _getPFOTool(*l):
+def _getWeightPFOToolDefault(*l):
     """One Property of the CorrectPFO constit modifier is a tool. 
-    we use this function as a placeholder, allowing to delay the intantiation of this property tool
+    we use this function as a placeholder, allowing to delay the instantiation of this property tool
     to the time the modifier itself is instantiated.
     """
     from AthenaConfiguration.ComponentFactory import CompFactory
     return CompFactory.getComp("CP::WeightPFOTool")("weightPFO")
     
+def _getWeightPFOToolOnlyDoubleCountingCorrection(*l):
+    """One Property of the CorrectPFO constit modifier is a tool. 
+    we use this function as a placeholder, allowing to delay the instantiation of this property tool
+    to the time the modifier itself is instantiated. This version defines the tool with DoEoverPWeight = False.
+    """
+    from AthenaConfiguration.ComponentFactory import CompFactory
+    comp = CompFactory.getComp("CP::WeightPFOTool")("weightPFOOnlyDoubleCounting")
+    comp.DoEoverPWeight = False
+    return comp
 
 
 vtxKey = "PrimaryVertices"
@@ -581,8 +590,15 @@ _stdModList = [
                        # See StandardJetContext.py for the default values.
                        prereqs=[inputsFromContext("Vertices")],
                        properties=dict(VertexContainerKey=propFromContext("Vertices"),
-                                       WeightPFOTool= _getPFOTool,
-                                       DoByVertex = lambda jdef, _: jdef.byVertex) ), 
+                                       WeightPFOTool= _getWeightPFOToolDefault,
+                                       DoByVertex = lambda jdef, _: jdef.byVertex) ),
+    JetConstitModifier("CorrectPFO_only_double_counting", "CorrectPFOTool",
+                       # get the track properties from the context with wich jet will be configured with propFromContext
+                       # See StandardJetContext.py for the default values.
+                       prereqs=[inputsFromContext("Vertices")],
+                       properties=dict(VertexContainerKey=propFromContext("Vertices"),
+                                       WeightPFOTool= _getWeightPFOToolOnlyDoubleCountingCorrection,
+                                       DoByVertex = lambda jdef, _: jdef.byVertex)),
           
     JetConstitModifier("CHS",    "ChargedHadronSubtractionTool",
                        # get the track properties from the context with wich jet will be configured with propFromContext

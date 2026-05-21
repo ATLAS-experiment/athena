@@ -22,38 +22,26 @@ StatusCode PFOClusterMLCorrectionAlgorithm::execute(const EventContext &ctx) con
 
   ATH_MSG_DEBUG("Executing");
 
-  ATH_CHECK(shallowCopyChargedFEContainer(ctx));
-  ATH_CHECK(shallowCopyAndModifyNeutralFEContainer(ctx));
-
-  return StatusCode::SUCCESS;
-}
-
-StatusCode PFOClusterMLCorrectionAlgorithm::shallowCopyChargedFEContainer(const EventContext &ctx) const {
-  // Just a shallow copy, no modifications
+  // Read charged container
   SG::ReadHandle<xAOD::FlowElementContainer> chargedFEContainerReadHandle(m_chargedFEContainerReadHandleKey, ctx);
+  std::pair<xAOD::FlowElementContainer *, xAOD::ShallowAuxContainer *> shallowCopyPairCharged = xAOD::shallowCopyContainer(*chargedFEContainerReadHandle);
+  std::unique_ptr<xAOD::FlowElementContainer> chargedFEMLContainer{shallowCopyPairCharged.first};
+  std::unique_ptr<xAOD::ShallowAuxContainer> chargedFEMLContainerAux{shallowCopyPairCharged.second};
 
-  xAOD::ShallowCopyResult_t<xAOD::FlowElementContainer> shallowCopyPair =
-    xAOD::shallowCopy(*chargedFEContainerReadHandle, ctx);
-
-  SG::WriteHandle<xAOD::FlowElementContainer> chargedFEMLContainerWriteHandle(m_chargedFEMLContainerWriteHandleKey, ctx);
-  ATH_CHECK(chargedFEMLContainerWriteHandle.record(std::move(shallowCopyPair.first), std::move(shallowCopyPair.second)));
-
-  return StatusCode::SUCCESS;
-}
-
-StatusCode PFOClusterMLCorrectionAlgorithm::shallowCopyAndModifyNeutralFEContainer(const EventContext &ctx) const {
-
-  // Shallow copy step
+  // Read neutral container
   SG::ReadHandle<xAOD::FlowElementContainer> neutralFEContainerReadHandle(m_neutralFEContainerReadHandleKey, ctx);
-  xAOD::ShallowCopyResult_t<xAOD::FlowElementContainer> shallowCopyPair =
-    xAOD::shallowCopy(*neutralFEContainerReadHandle, ctx);
+  std::pair<xAOD::FlowElementContainer *, xAOD::ShallowAuxContainer *> shallowCopyPairNeutral = xAOD::shallowCopyContainer(*neutralFEContainerReadHandle);
+  std::unique_ptr<xAOD::FlowElementContainer> neutralFEMLContainer{shallowCopyPairNeutral.first};
+  std::unique_ptr<xAOD::ShallowAuxContainer> neutralFEMLContainerAux{shallowCopyPairNeutral.second};
 
-  // Modification step
-  m_correctionTool->correctContainer(*shallowCopyPair.first);
+  // neutralFEMLContainer is modified, chargedFEMLContainer is kept constant
+  m_correctionTool->correctContainer(*neutralFEMLContainer, *chargedFEMLContainer);
 
-  // Registration of results step
+  // Writing containers
+  SG::WriteHandle<xAOD::FlowElementContainer> chargedFEMLContainerWriteHandle(m_chargedFEMLContainerWriteHandleKey, ctx);
+  ATH_CHECK(chargedFEMLContainerWriteHandle.record(std::move(chargedFEMLContainer), std::move(chargedFEMLContainerAux)));
   SG::WriteHandle<xAOD::FlowElementContainer> neutralFEMLContainerWriteHandle(m_neutralFEMLContainerWriteHandleKey, ctx);
-  ATH_CHECK(neutralFEMLContainerWriteHandle.record(std::move(shallowCopyPair.first), std::move(shallowCopyPair.second)));
+  ATH_CHECK(neutralFEMLContainerWriteHandle.record(std::move(neutralFEMLContainer), std::move(neutralFEMLContainerAux)));
 
   return StatusCode::SUCCESS;
 }

@@ -30,14 +30,18 @@ public:
   virtual ~NeutralPFOClusterMLCorrectionTool() = default;
 
   virtual StatusCode initialize() override;
-  virtual void correctContainer(xAOD::FlowElementContainer& pfos) const override;
+  virtual void correctContainer(xAOD::FlowElementContainer& neutral_pfos, xAOD::FlowElementContainer& charged_pfos) const override;
 
 private:
   // Property to configure the ML energy decoration key
   Gaudi::Property<std::string> m_clusterMLCorrectedEnergyKey{this, "ClusterMLCorrectedEnergyDecorationKey", "clusterE_ML", 
     "Name of the decoration storing the ML-corrected cluster energy"};
 
-  void scaleEnergyToAlternativeSignalState(xAOD::FlowElement &pfo, const xAOD::CaloCluster &cls) const;
+  void correctNeutralFlowElement(xAOD::FlowElement &pfo, const xAOD::FlowElementContainer &charged_pfos) const;
+  void correctNeutralFlowElement(xAOD::FlowElement &pfo) const;
+  double getChargedCorrectionsToClusterFromSingleChargedFe(const xAOD::CaloCluster* cls_ptr, const xAOD::FlowElement& charged_fe) const;
+  double getChargedCorrectionToCluster(const xAOD::CaloCluster* cls_ptr, const xAOD::FlowElementContainer& charged_pfos) const;
+  double getClusterMLCorrectedEnergy(const xAOD::CaloCluster &cls) const;
   const xAOD::CaloCluster* getLinkedCluster(const xAOD::FlowElement &pfo) const;
 };
 #endif
