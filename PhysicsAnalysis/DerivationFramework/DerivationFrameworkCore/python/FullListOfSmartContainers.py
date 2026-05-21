@@ -74,4 +74,9 @@ def FullListOfSmartContainers(flags=None):
          "InDetSiSPSeededTracksParticles"
       ]
 
+   if flags is not None and flags.Tracking.doLowPtRoI:
+      containers += ["InDetLowPtRoITrackParticles",
+                     "RoIVerticesLowPtRoI"
+                     ]
+
    return containers
