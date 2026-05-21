@@ -583,11 +583,11 @@ class MGControl:
                     modify_param_card(process_dir=self.process_dir, params={'MASS': {'5': '0.000000e+00'}})
 
         # Check scale consistency
-        if '91.188' not in self.runCardDict['scale'] and self.runCardDict['fixed_ren_scale'].lower() in ['f','false']:
+        if '91.188' not in self.runCardDict.get('scale','91.188') and self.runCardDict.get('fixed_ren_scale','f').lower() in ['f','false']:
             mglog.error('Seems you set "scale" in the run card without setting "fixed_ren_scale" to True. Not sure what to do here, throwing an error.')
             raise ValueError("Renormalization scale setting incorrect")
-        if ('91.188' not in self.runCardDict['dsqrt_q2fact1'] or '91.188' not in self.runCardDict['dsqrt_q2fact2']) \
-           and self.runCardDict['fixed_fac_scale'].lower() in ['f','false']:
+        if ('91.188' not in self.runCardDict.get('dsqrt_q2fact1','91.188') or '91.188' not in self.runCardDict.get('dsqrt_q2fact2','91.188')) \
+           and self.runCardDict.get('fixed_fac_scale','f').lower() in ['f','false']:
             mglog.error('Seems you set "dsqrt_q2fact1" or "dsqrt_q2fact2" in the run card without setting "fixed_fac_scale" to True. Not sure what to do here, throwing an error.')
             raise ValueError("Factorization scale setting incorrect")
 
