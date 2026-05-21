@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <ZdcAnalysis/ZDCDataAnalyzer.h>
@@ -7,6 +7,7 @@
 
 #include <sstream>
 #include <utility>
+#include <format>
 
 const ZDCJSONConfig::JSONParamList ZDCDataAnalyzer::JSONConfigParams = {
   {"moduleEnabled", {JSON::value_t::array, 4, true, false}},
@@ -66,7 +67,7 @@ ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, int nSamp
       std::ostringstream moduleTag;
       moduleTag << "_s" << side << "_m" << module;
 
-      m_moduleAnalyzers[side][module] = make_unique<ZDCPulseAnalyzer>(m_msgFunc_p, moduleTag.str().c_str(), nSample, deltaTSample, preSampleIdx,
+      m_moduleAnalyzers[side][module] = make_unique<ZDCPulseAnalyzer>(m_msgFunc_p, moduleTag.str(), nSample, deltaTSample, preSampleIdx,
 								      m_pedestals[side][module], m_HGGains[side][module], fitFunction,
 								      peak2ndDerivMinSamples[side][module],
 								      peak2ndDerivMinThresholdsHG[side][module],
@@ -186,7 +187,7 @@ ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, const JSO
       std::ostringstream ostr;
       ostr << "JSON configuration for ZDC pulse analyyzer for side " << std::to_string(side)
 	   << ", module " <<  std::to_string(module) << "\n" <<  moduleConfig.dump(2);
-      (*m_msgFunc_p)(ZDCMsg::Verbose, ostr.str().c_str());
+      (*m_msgFunc_p)(ZDCMsg::Verbose, ostr.str());
 
       // Construct the ZDCPulseAnalyzer object
       //
@@ -878,9 +879,12 @@ void ZDCDataAnalyzer::DoNLcalibModuleSum()
 	      Had2CorrFact += std::pow(fHad2 - m_NLcalibFactors[iside][2][0],i)*m_NLcalibFactors[iside][2][i+1];
 	    }
 
-	  std::ostringstream ostr;
-	  ostr << "ZDCDataAnalyzer: " << m_calibModuleSum[iside] << " " << EMCorrFact << " " << Had1CorrFact << " " << Had2CorrFact << std::endl;
-	  (*m_msgFunc_p)(ZDCMsg::Debug,ostr.str().c_str());
+	  const std::string &dbgmsg = std::format("ZDCDataAnalyzer: {} {} {} {}\n",m_calibModuleSum[iside], EMCorrFact, Had1CorrFact, Had2CorrFact);
+	  (*m_msgFunc_p)(ZDCMsg::Debug, dbgmsg);
+	  if ((EMCorrFact == 0.) or (Had1CorrFact == 0.) or (Had2CorrFact == 0.))[[unlikely]]{
+	    (*m_msgFunc_p)(ZDCMsg::Error,"ZDCDataAnalyzer::DoNLcalibModuleSum:  Denominator is zero");
+	    return;
+	  }
 	  
 	  float ECorrEM = m_calibModuleSum[iside]/EMCorrFact;
 	  float ECorrEMHad1 = ECorrEM/Had1CorrFact;
