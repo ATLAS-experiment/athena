@@ -296,7 +296,8 @@ StatusCode RNTupleContainer::writeObject( ActionList::value_type& action )
       m_ntupleWriter->addFieldValue( dsc.fieldname, ptr );
       // fill the index field
       m_index = action.link.second;
-      m_ntupleWriter->addFieldValue( "index_ref", &m_index );
+      const static std::string idxRefStr{"index_ref"};
+      m_ntupleWriter->addFieldValue( idxRefStr, &m_index );
       ATH_MSG_VERBOSE("Setting index for " << dsc.fieldname << " to " << std::hex << m_index << std::dec);
       m_indexSize++;
    }
