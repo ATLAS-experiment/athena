@@ -84,13 +84,13 @@ def setL2AlignmentFlags(flags):
     flags.InDet.Align.pixelAlignmentLevelBarrel = 2
     flags.InDet.Align.pixelAlignmentLevelEndcaps = 2
     
-    flags.InDet.Align.SCTAlignmentLevel = 2
-    flags.InDet.Align.SCTAlignmentLevelBarrel = 2
-    flags.InDet.Align.SCTAlignmentLevelEndcaps = 2
+    flags.InDet.Align.SCTAlignmentLevel = 1
+    flags.InDet.Align.SCTAlignmentLevelBarrel = -1
+    flags.InDet.Align.SCTAlignmentLevelEndcaps = -1
     
-    flags.InDet.Align.TRTAlignmentLevel = 2
-    flags.InDet.Align.TRTAlignmentLevelBarrel = 2
-    flags.InDet.Align.TRTAlignmentLevelEndcaps = 2
+    flags.InDet.Align.TRTAlignmentLevel = 1
+    flags.InDet.Align.TRTAlignmentLevelBarrel = -1
+    flags.InDet.Align.TRTAlignmentLevelEndcaps = -1
 
     if flags.InDet.Align.localDataBase:
         msg = logging.getLogger('setL2AlignmentFlags')
@@ -101,19 +101,17 @@ def setL2AlignmentFlags(flags):
         flags.InDet.Align.L1IDTag = "InDetAlignL1-T0-Alignment" 
     
 def setL3AlignmentFlags(flags):
-
-    print("pass set L3")
     flags.InDet.Align.pixelAlignmentLevel = 3
-    flags.InDet.Align.pixelAlignmentLevelBarrel = 3
-    flags.InDet.Align.pixelAlignmentLevelEndcaps = 3
+    flags.InDet.Align.pixelAlignmentLevelBarrel = -1
+    flags.InDet.Align.pixelAlignmentLevelEndcaps = -1
     
-    flags.InDet.Align.SCTAlignmentLevel = 3
-    flags.InDet.Align.SCTAlignmentLevelBarrel = 3
-    flags.InDet.Align.SCTAlignmentLevelEndcaps = 3
+    flags.InDet.Align.SCTAlignmentLevel = 1
+    flags.InDet.Align.SCTAlignmentLevelBarrel = -1
+    flags.InDet.Align.SCTAlignmentLevelEndcaps = -1
     
-    flags.InDet.Align.TRTAlignmentLevel = 3
-    flags.InDet.Align.TRTAlignmentLevelBarrel = 3
-    flags.InDet.Align.TRTAlignmentLevelEndcaps = 3
+    flags.InDet.Align.TRTAlignmentLevel = 1
+    flags.InDet.Align.TRTAlignmentLevelBarrel = -1
+    flags.InDet.Align.TRTAlignmentLevelEndcaps = -1
 
     if flags.InDet.Align.localDataBase:
         msg = logging.getLogger('setL3AlignmentFlags')

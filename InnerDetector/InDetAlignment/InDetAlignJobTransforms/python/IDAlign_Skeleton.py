@@ -67,6 +67,8 @@ def getT0SolveDB(runArgs):
 
 
 def configureInDetFlags(runArgs, flags):
+
+    print("configure the InDet")
     
     ## Turn off ID parts if wished (may cause conflicts with level setting)
     for IDpart in runArgs.excludeIDPart:
@@ -188,6 +190,52 @@ def configureInDetFlags(runArgs, flags):
     return flags
 
 def configureITkFlags(runArgs, flags):
+
+    ## Set Tags
+    for tag in [tag for tag in dir(runArgs) if "Tag" in tag and tag != "globalTag"]:
+        setattr(flags.InDet.Align, tag, getattr(runArgs, tag))
+
+    ## Set configuration for chosen alignment level
+    from InDetAlignConfig.IDAlignFlags import setL3AlignmentFlags
+        
+    if runArgs.alignLevel == 3:
+        setL3AlignmentFlags(flags)
+
+    else:
+        raise Exception(f"No valid alignment level has been selected: '{runArgs.alignLevel}'")
+
+
+    ## Disable all non-track related flag parameter
+    from InDetConfig.ConfigurationHelpers import OnlyTrackingPreInclude
+    OnlyTrackingPreInclude(flags)
+
+
+    flags.ITk.Align.alignITk = runArgs.alignITk
+    flags.ITk.Align.alignITkPixel = runArgs.alignITkPixel
+    flags.ITk.Align.alignITkStrip = runArgs.alignITkStrip
+
+    flags.ITk.Align.writeSilicon = False
+
+    flags.ITk.Align.inputTFiles = runArgs.inputTFiles
+
+    if runArgs.localgeo:
+        flags.ITk.Geometry.AllLocal = True
+
+    if runArgs.localDB:
+        flags.ITk.Align.useLocalDatabase = True
+
+        flags.IOVDb.DBConnection = (
+            f"sqlite://;schema={runArgs.localDB};dbname=OFLCOND"
+        )
+
+        flags.ITk.Geometry.alignmentFolder = "/Indet/AlignITk"
+
+    if flags.ITk.Align.alignITkPixel:
+        flags.ITk.Geometry.pixelAlignable = True
+
+    if flags.ITk.Align.alignITkStrip:
+        flags.ITk.Geometry.stripAlignable = True
+
     # Lock flags
     flags.lock()
     return flags
