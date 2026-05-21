@@ -91,7 +91,8 @@ namespace AllowedVariables
 AsgElectronSelectorTool::AsgElectronSelectorTool( const std::string& myname ) :
   AsgTool(myname),
   m_configFile{""},
-  m_mvaTool(nullptr)
+  m_mvaTool_binary(nullptr),
+  m_mvaTool_multi(nullptr)
 {
 
   // Declare the needed properties
@@ -102,7 +103,8 @@ AsgElectronSelectorTool::AsgElectronSelectorTool( const std::string& myname ) :
   declareProperty("inputModelFileName", m_modelFileName="", "The input file name that holds the model" );
   // QuantileTransformer file name ( required for preprocessing ). Managed in the ElectronDNNCalculator.
   declareProperty("quantileFileName", m_quantileFileName="", "The input file name that holds the QuantileTransformer");
-  // especially for  trigger electron
+ 
+ // especially for  trigger electron
   declareProperty("skipDeltaPoverP",m_skipDeltaPoverP = false,"If true, it will skip the check of deltaPoverP");
 
   declareProperty("skipAmbiguityCut",m_skipAmbiguityCut = false,"If true, it will skip the ambiguity cut");
@@ -121,18 +123,30 @@ AsgElectronSelectorTool::~AsgElectronSelectorTool()
 //=============================================================================
 StatusCode AsgElectronSelectorTool::initialize()
 {
+//  if (!m_workingPoint.empty()){
+//    m_configFile = AsgConfigHelper::findConfigFile(m_workingPoint, EgammaSelectors::ElectronDNNPointToConfFile);
+//    ATH_MSG_INFO("operating point : " << this->getOperatingPointName());
+//  }
+  
+if (m_configFile.empty()) {
   if (!m_workingPoint.empty()){
     m_configFile = AsgConfigHelper::findConfigFile(m_workingPoint, EgammaSelectors::ElectronDNNPointToConfFile);
     ATH_MSG_INFO("operating point : " << this->getOperatingPointName());
   }
-
+}
+else {
+  ATH_MSG_INFO("Using USER provided config file: " << m_configFile);
+}
   if (m_configFile.empty()){
     ATH_MSG_ERROR("Could not find configuration file " << m_configFile);
     return StatusCode::FAILURE;
   }
 
   std::string configFile = PathResolverFindCalibFile(m_configFile);
-  if (configFile.empty()){
+ ATH_MSG_INFO("CONFIG FILE (logical): " << m_configFile);
+ ATH_MSG_INFO("CONFIG FILE (resolved full path): " << configFile);
+
+ if (configFile.empty()){
     ATH_MSG_ERROR("Could not locate " << m_configFile);
     return StatusCode::FAILURE;
   }
@@ -141,6 +155,8 @@ StatusCode AsgElectronSelectorTool::initialize()
   ATH_MSG_DEBUG("Configfile to use: " << m_configFile);
   TEnv env;
   env.ReadFile(configFile.c_str(), kEnvLocal);
+  {
+    ATH_MSG_INFO("Initializing BINARY DNN");
 
   std::string modelFilename("");
   std::string quantileFilename("");
@@ -153,8 +169,9 @@ StatusCode AsgElectronSelectorTool::initialize()
     modelFilename = m_modelFileName;
   }
   else {
-    modelFilename = env.GetValue("inputModelFileName", "ElectronPhotonSelectorTools/offline/mc16_20210204/ElectronDNNNetwork.json");
-    ATH_MSG_DEBUG("Getting the input Model from: " << modelFilename );
+  //  modelFilename = env.GetValue("inputModelFileName", "ElectronPhotonSelectorTools/offline/mc16_20210204/ElectronDNNNetwork.json");
+   modelFilename = env.GetValue( "inputModelFileName", ""); 
+   ATH_MSG_DEBUG("Getting the input Binary Model from: " << modelFilename );
   }
   std::string filename = PathResolverFindCalibFile(modelFilename);
   if (filename.empty()){
@@ -170,7 +187,8 @@ StatusCode AsgElectronSelectorTool::initialize()
     quantileFilename = m_quantileFileName;
   }
   else {
-    quantileFilename = env.GetValue("inputQuantileFileName", "ElectronPhotonSelectorTools/offline/mc16_20210204/ElectronDNNQuantileTransformer.root");
+  //  quantileFilename = env.GetValue("inputQuantileFileName", "ElectronPhotonSelectorTools/offline/mc16_20210204/ElectronDNNQuantileTransformer.root");
+    quantileFilename = env.GetValue("inputQuantileFileName", "");
     ATH_MSG_DEBUG("Getting the input QuantileTransformer from: " << quantileFilename);
   }
   std::string qfilename = PathResolverFindCalibFile(quantileFilename);
@@ -185,25 +203,93 @@ StatusCode AsgElectronSelectorTool::initialize()
   while(vars.good()){
     std::string substr;
     std::getline(vars, substr, ',');
-    m_variables.push_back( substr );
+    m_variables_binary.push_back( substr );
     if(!AllowedVariables::variableMap.contains(substr)){
       ATH_MSG_ERROR("Unsupported variable " << substr << " found in the config.");
       return StatusCode::FAILURE;
     }
-    m_enum_variables.push_back(AllowedVariables::variableMap.at(substr));
+    m_enum_variables_binary.push_back(AllowedVariables::variableMap.at(substr));
+  }
+   ATH_MSG_INFO("Initializing 2-class DNN");
+   m_mvaTool_binary = std::make_unique<ElectronDNNCalculator>(
+    this,
+    filename.c_str(),
+    qfilename.c_str(),
+    m_variables_binary,
+    false   // binary
+   );
+}
+
+ {
+    ATH_MSG_INFO("Initializing MULTI-CLASS DNN");
+
+    std::string modelFile =
+      env.GetValue("SecondSelection.inputModelFileName", "");
+
+    std::string quantileFile =
+      env.GetValue("SecondSelection.inputQuantileFileName", "");
+
+    std::string modelPath = PathResolverFindCalibFile(modelFile);
+    std::string quantilePath = PathResolverFindCalibFile(quantileFile);
+
+    if (modelPath.empty()){
+      ATH_MSG_ERROR("Multi model not found: " << modelFile);
+      return StatusCode::FAILURE;
+    }
+
+    if (quantilePath.empty()){
+      ATH_MSG_ERROR("Multi quantile not found: " << quantileFile);
+      return StatusCode::FAILURE;
+    }
+
+    // ---- variables ----
+    m_variables_multi.clear();
+    m_enum_variables_multi.clear();
+
+    std::stringstream vars(env.GetValue("SecondSelection.Variables", ""));
+
+    while(vars.good()){
+      std::string v;
+      std::getline(vars, v, ',');
+
+      if(v.empty()) continue;
+
+      if(!AllowedVariables::variableMap.contains(v)){
+        ATH_MSG_ERROR("Unsupported variable in Second Selection: " << v);
+        return StatusCode::FAILURE;
+      }
+
+      m_variables_multi.push_back(v);
+      m_enum_variables_multi.push_back(AllowedVariables::variableMap.at(v));
+    }
+
+    if (m_variables_multi.empty()){
+      ATH_MSG_ERROR("No variables defined for Second Selection Multiclass network");
+      return StatusCode::FAILURE;
+    }
+
+    // ---- tool ----
+    m_mvaTool_multi = std::make_unique<ElectronDNNCalculator>(
+        this,
+        modelPath.c_str(),
+        quantilePath.c_str(),
+        m_variables_multi,
+        true   // multiclass
+    );
   }
 
   // Model is multiclass or not, default is binary model
   m_multiClass = env.GetValue("multiClass", false);
+  m_useMultiStepDNN = env.GetValue("useMultiStepDNN", false);
   // Include cf node in numerator or denominator when combining different outputs
-  m_cfSignal = env.GetValue("cfSignal", true);
+  m_cfSignal = env.GetValue("cfSignal", false);
   // Fractions to multiply different outputs with before combining
   m_fractions = AsgConfigHelper::HelperDouble("Fractions", env);
 
   // cut on MVA discriminant
-  m_cutSelector = AsgConfigHelper::HelperDouble("CutSelector", env);
+  m_cutSelector = AsgConfigHelper::HelperDouble("CutSelector",env);
   m_cutSelectorCF = AsgConfigHelper::HelperDouble("CutSelectorCF", env);
-
+  // First Selection
   // cut on ambiguity bit
   m_cutAmbiguity = AsgConfigHelper::HelperInt("CutAmbiguity", env);
   // cut on b-layer
@@ -215,7 +301,13 @@ StatusCode AsgElectronSelectorTool::initialize()
   // do smooth interpolation between bins
   m_doSmoothBinInterpolation = env.GetValue("doSmoothBinInterpolation", false);
 
-
+  // Second Selection 
+  if (m_useMultiStepDNN) {
+      m_cutSCT2 = AsgConfigHelper::HelperInt("SecondSelection.CutSCT", env);
+      m_cutPi2  = AsgConfigHelper::HelperInt("SecondSelection.CutPi", env);
+      m_cutAmbiguity2 = AsgConfigHelper::HelperInt("SecondSelection.CutAmbiguity", env);
+      m_cutSelector2 = AsgConfigHelper::HelperDouble("SecondSelection.CutSelector", env);
+  }
 
   unsigned int numberOfExpectedBinCombinedMVA ;
   numberOfExpectedBinCombinedMVA = s_fnDiscEtBins * s_fnDiscEtaBins;
@@ -243,50 +335,15 @@ StatusCode AsgElectronSelectorTool::initialize()
   else {
     m_CFReject = false;
   }
-  // Create an instance of the class calculating the DNN score
-  m_mvaTool = std::make_unique<ElectronDNNCalculator>(this, filename.c_str(), qfilename.c_str(), m_variables, m_multiClass);
 
   if (m_multiClass){
     // Fractions are only needed if multiclass model is used
-    // There are five fractions for the combination, the signal fraction is either one (cfSignal == false) or 1 - cf fraction (cfSignal == true)
-    if (m_fractions.size() != numberOfExpectedEtaBins * 5){
+    // There are three fractions for the combination, the signal fraction is either one (cfSignal == false) or 1 - cf fraction (cfSignal == true)
+    if (m_fractions.size() != numberOfExpectedEtaBins * 3){
       ATH_MSG_ERROR("Configuration issue : multiclass but not the right amount of fractions." << m_fractions.size());
       return StatusCode::FAILURE;
     }
   }
-
-  if (!m_cutSCT.empty()){
-    if (m_cutSCT.size() != numberOfExpectedEtaBins){
-      ATH_MSG_ERROR("Configuration issue :  cutSCT expected size " << numberOfExpectedEtaBins <<
-                    " input size " << m_cutSCT.size());
-      return StatusCode::FAILURE;
-    }
-  }
-
-  if (!m_cutPi.empty()){
-    if (m_cutPi.size() != numberOfExpectedEtaBins){
-      ATH_MSG_ERROR("Configuration issue :  cutPi expected size " << numberOfExpectedEtaBins <<
-                    " input size " << m_cutPi.size());
-      return StatusCode::FAILURE;
-    }
-  }
-
-  if (!m_cutBL.empty()){
-    if (m_cutBL.size() != numberOfExpectedEtaBins){
-      ATH_MSG_ERROR("Configuration issue :  cutBL expected size " << numberOfExpectedEtaBins <<
-                    " input size " << m_cutBL.size());
-      return StatusCode::FAILURE;
-    }
-  }
-
-  if (!m_cutAmbiguity.empty()){
-    if (m_cutAmbiguity.size() != numberOfExpectedEtaBins){
-      ATH_MSG_ERROR("Configuration issue :  cutAmbiguity expected size " << numberOfExpectedEtaBins <<
-                    " input size " << m_cutAmbiguity.size());
-      return StatusCode::FAILURE;
-    }
-  }
-
   // --------------------------------------------------------------------------
   // Register the cuts and check that the registration worked:
   // NOTE: THE ORDER IS IMPORTANT!!! Cut0 corresponds to bit 0, Cut1 to bit 1,...
@@ -328,13 +385,27 @@ StatusCode AsgElectronSelectorTool::initialize()
 
   // define a default vector to return in the calculateMultipleOutputs methods
   // depending on the number of expected outputs
-  if (m_multiClass){
-    m_defaultVector = {-999., -999., -999., -999., -999., -999.};
+  if (!m_multiClass && !m_useMultiStepDNN) {
+    m_defaultOutputs.binary = {-999.};
   }
-  else{
-    m_defaultVector = {-999.};
+  else if (m_multiClass && !m_useMultiStepDNN) {  
+    m_defaultOutputs.multi = {-999., -999., -999., -999.};
   }
-
+  else if (m_multiClass && m_useMultiStepDNN) {
+    m_defaultOutputs.binary = {-999.};
+    m_defaultOutputs.multi  = {-999., -999., -999., -999.};
+  }
+  else {
+    ATH_MSG_ERROR("Invalid DNN configuration");
+    return StatusCode::FAILURE;
+ }
+ // if (m_multiClass){
+ //   m_defaultVector = {-999., -999., -999., -999.};
+ // }
+//  else{
+ //   m_defaultVector = {-999.};
+ // }
+  ATH_MSG_INFO("Initialization SUCCESS with Binary + Multi DNN");
   return StatusCode::SUCCESS;
 }
 
@@ -416,17 +487,18 @@ asg::AcceptData AsgElectronSelectorTool::accept( const EventContext& ctx, const 
   passBLayerRequirement = ElectronSelectorHelpers::passBLayerRequirement(*track);
 
   // calculate the output of the selector tool
+  DNNOutputs mvaOutputs = runDNNs(ctx, eg, mu);
 
-  std::vector<float> mvaOutputs = calculateMultipleOutputs(ctx, eg, mu);
-  double mvaScore = getDiscriminant(mvaOutputs, eg);
-  ATH_MSG_VERBOSE(Form("PassVars: MVA=%8.5f, eta=%8.5f, et=%8.5f, nSiHitsPlusDeadSensors=%i, nHitsPlusPixDeadSensors=%i, passBLayerRequirement=%i, ambiguityBit=%i, mu=%8.5f",
-                       mvaScore, eta, et,
+  auto [disc_binary, disc_multi] = getDiscriminant(mvaOutputs, eg);
+
+  ATH_MSG_VERBOSE(Form("PassVars: MVA_Bin=%8.5f, MVA_Multi=%8.5f, eta=%8.5f, et=%8.5f, nSiHitsPlusDeadSensors=%i, nHitsPlusPixDeadSensors=%i, passBLayerRequirement=%i, ambiguityBit=%i, mu=%8.5f",
+                       disc_binary,disc_multi, eta, et,
                        nSiHitsPlusDeadSensors, nPixHitsPlusDeadSensors,
                        passBLayerRequirement,
                        ambiguityBit, mu));
   double mvaScoreCF = 0;
   if (m_CFReject){
-    mvaScoreCF = combineOutputsCF(mvaOutputs);
+    mvaScoreCF = combineOutputsCF(mvaOutputs.multi);
     ATH_MSG_VERBOSE(Form("PassVars: MVA=%8.5f, eta=%8.5f, et=%8.5f, nSiHitsPlusDeadSensors=%i, nHitsPlusPixDeadSensors=%i, passBLayerRequirement=%i, ambiguityBit=%i, mu=%8.5f",
                         mvaScoreCF, eta, et,
                         nSiHitsPlusDeadSensors, nPixHitsPlusDeadSensors,
@@ -434,9 +506,9 @@ asg::AcceptData AsgElectronSelectorTool::accept( const EventContext& ctx, const 
                         ambiguityBit, mu));
   }
 
-  if (!allFound){
-    throw std::runtime_error("AsgElectronSelectorTool: Not all variables needed for the decision are found. The following variables are missing: " + notFoundList );
-  }
+//  if (!allFound){
+//    throw std::runtime_error("AsgElectronSelectorTool: Not all variables needed for the decision are found. The following variables are missing: " + notFoundList );
+//  }
 
   // Set up the individual cuts
   bool passKine(true);
@@ -467,7 +539,7 @@ asg::AcceptData AsgElectronSelectorTool::accept( const EventContext& ctx, const 
   // ambiguity bit
   if (!m_cutAmbiguity.empty()){
     if (!ElectronSelectorHelpers::passAmbiguity((xAOD::AmbiguityTool::AmbiguityType)ambiguityBit, m_cutAmbiguity[etaBin])){
-      ATH_MSG_DEBUG("MVA macro: ambiguity Bit Failed.");
+      ATH_MSG_DEBUG("MVA macro: ambiguity Bit Failed in First Selection.");
       passAmbiguity = false;
     }
   }
@@ -493,9 +565,8 @@ asg::AcceptData AsgElectronSelectorTool::accept( const EventContext& ctx, const 
       passNSilicon = false;
     }
   }
-
   unsigned int ibin_combinedMVA = etBin*s_fnDiscEtaBins+etaBin; // Must change if number of eta bins changes!.
-
+  
   // First cut on the CF discriminant
   // If empty, continue only with prompt ID
   if (!m_cutSelectorCF.empty()){
@@ -517,9 +588,11 @@ asg::AcceptData AsgElectronSelectorTool::accept( const EventContext& ctx, const 
       passMVA = false;
     }
   }
+  // (Second) cut on prompt discriminant
+  // Cut on Score MVA First Selection
+  double mvaScore = (m_useMultiStepDNN || !m_multiClass) ? disc_binary : disc_multi;
 
-// (Second) cut on prompt discriminant
-  if (!m_cutSelector.empty()){
+  if (!m_cutSelector.empty()) {
     double cutDiscriminant;
     // To protect against a binning mismatch, which should never happen
     if (ibin_combinedMVA >= m_cutSelector.size()){
@@ -538,6 +611,25 @@ asg::AcceptData AsgElectronSelectorTool::accept( const EventContext& ctx, const 
       passMVA = false;
     }
   }
+  
+  // ===========================================================================
+  // Phase 2: SecondSelection 
+  // ===========================================================================
+  if (m_useMultiStepDNN) {
+      
+      // A) Cuts Hits Phase 2
+      if (!m_cutAmbiguity2.empty() && !ElectronSelectorHelpers::passAmbiguity((xAOD::AmbiguityTool::AmbiguityType)ambiguityBit, m_cutAmbiguity2[etaBin])) passAmbiguity = false;
+      if (!m_cutBL2.empty() && m_cutBL2[etaBin] == 1 && !passBLayerRequirement) passNBlayer = false;
+      if (!m_cutPi2.empty() && nPixHitsPlusDeadSensors < m_cutPi2[etaBin]) passNPixel = false;
+      if (!m_cutSCT2.empty() && nSiHitsPlusDeadSensors < m_cutSCT2[etaBin]) passNSilicon = false;
+
+      // B) Cuts on  MVA Score Second Selection
+      if (!m_cutSelector2.empty()) {
+          double cutdiscriminant2 = m_doSmoothBinInterpolation ? interpolateCuts(m_cutSelector2, et, eta) : m_cutSelector2.at(ibin_combinedMVA);
+          if (disc_multi < cutdiscriminant2) passMVA = false;
+      }
+  }
+
 
   // Set the individual cut bits in the return object
   acceptData.setCutResult(m_cutPosition_NSilicon, passNSilicon);
@@ -556,31 +648,106 @@ asg::AcceptData AsgElectronSelectorTool::accept( const EventContext& ctx, const 
 double AsgElectronSelectorTool::calculate( const EventContext& ctx, const xAOD::Electron* eg, double mu ) const
 {
   // Get all outputs of the mva tool
-  std::vector<float> mvaOutputs = calculateMultipleOutputs(ctx, eg, mu);
+  DNNOutputs mvaOutputs = runDNNs(ctx, eg, mu);
+  auto [disc_binary, disc_multi] = getDiscriminant(mvaOutputs, eg);
 
-  return getDiscriminant(mvaOutputs, eg);
+  // Binary DNN only 
+  if (!m_multiClass && !m_useMultiStepDNN) {
+    return disc_binary;
+  }
+  // Multiclass DNN only
+  if (m_multiClass && !m_useMultiStepDNN) {
+    return disc_multi;
+  }
+  // Multi-step DNNs
+  if (m_multiClass && m_useMultiStepDNN) {
+    return disc_multi;
+  }
+  return -999.;
 }
 
-double AsgElectronSelectorTool::getDiscriminant(std::vector<float>& mvaOutputs, const xAOD::Electron* eg ) const
+std::pair<double, double> AsgElectronSelectorTool::getDiscriminant(const DNNOutputs& mvaOutputs, const xAOD::Electron* eg ) const
 {
-  double discriminant = 0;
+  double discriminant_binary = 0;
+  double discriminant_multi = 0;
   // If a binary model is used, vector will have one entry, if multiclass is used vector will have six entries
-  if (!m_multiClass){
-    discriminant = transformMLOutput(mvaOutputs.at(0));
+  if (!mvaOutputs.binary.empty()){
+    discriminant_binary = transformMLOutput(mvaOutputs.binary.at(0));
+  //  std::cout << "Discriminant = " << discriminant << std::endl;
   }
-  else{
+  if (!mvaOutputs.multi.empty()) {
     const xAOD::CaloCluster* cluster = eg->caloCluster();
     const float eta = cluster->etaBE(2);
     // combine the six output nodes into one discriminant to cut on, any necessary transformation is applied within combineOutputs()
-    discriminant = combineOutputs(mvaOutputs, eta);
+    discriminant_multi  = combineOutputs(mvaOutputs.multi, eta);
   }
 
-  return discriminant;
+  return {discriminant_binary, discriminant_multi};
 }
 
+std::vector<double> AsgElectronSelectorTool::buildInputVector(
+    const std::vector<int>& varIDs,
+    double eta, double et,
+    float f3, float Rhad, float Rhad1, float Reta, float w2, float f1, float Eratio,
+    float deltaEta1, float d0, float qd0, float d0significance,
+    float Rphi, double dPOverP, float deltaPhiRescaled2,
+    double trans_TRTPID, float wtots1, float EoverP,
+    uint8_t nPixHitsPlusDeadSensors,
+    uint8_t nSCTHitsPlusDeadSensors,
+    double SCTWeightedCharge
+) const
+{
+  std::vector<double> values;
+  values.reserve(varIDs.size());
+
+  for(const auto varID : varIDs)
+  {
+    switch(varID)
+    {
+      case AllowedVariables::eta: values.push_back(std::abs(eta)); break;
+      case AllowedVariables::et: values.push_back(et); break;
+      case AllowedVariables::f3: values.push_back(f3); break;
+      case AllowedVariables::Rhad: values.push_back(Rhad); break;
+      case AllowedVariables::Rhad1: values.push_back(Rhad1); break;
+      case AllowedVariables::Reta: values.push_back(Reta); break;
+      case AllowedVariables::weta2: values.push_back(w2); break;
+      case AllowedVariables::f1: values.push_back(f1); break;
+      case AllowedVariables::Eratio: values.push_back(Eratio); break;
+      case AllowedVariables::deltaEta1: values.push_back(deltaEta1); break;
+      case AllowedVariables::d0: values.push_back(d0); break;
+      case AllowedVariables::qd0: values.push_back(qd0); break;
+      case AllowedVariables::d0significance: values.push_back(d0significance); break;
+      case AllowedVariables::Rphi: values.push_back(Rphi); break;
+      case AllowedVariables::dPOverP: values.push_back(dPOverP); break;
+      case AllowedVariables::deltaPhiRescaled2: values.push_back(deltaPhiRescaled2); break;
+      case AllowedVariables::trans_TRTPID: values.push_back(trans_TRTPID); break;
+      case AllowedVariables::wtots1: values.push_back(wtots1); break;
+      case AllowedVariables::EoverP: values.push_back(EoverP); break;
+      case AllowedVariables::nPixHitsPlusDeadSensors: values.push_back(nPixHitsPlusDeadSensors); break;
+      case AllowedVariables::nSCTHitsPlusDeadSensors: values.push_back(nSCTHitsPlusDeadSensors); break;
+      case AllowedVariables::SCTWeightedCharge: values.push_back(SCTWeightedCharge); break;
+      default:
+        throw std::runtime_error("Unknown variable in buildInputVector");
+    }
+  }
+
+  return values;
+}
 
 std::vector<float> AsgElectronSelectorTool::calculateMultipleOutputs(const EventContext &ctx, const xAOD::Electron *eg, double mu) const
 {
+  // Llamamos a la función "trabajadora"
+  DNNOutputs mvaOutputs = runDNNs(ctx, eg, mu);
+
+  if (!mvaOutputs.multi.empty()) {
+    return mvaOutputs.multi;
+  }
+  return mvaOutputs.binary;
+}
+AsgElectronSelectorTool::DNNOutputs AsgElectronSelectorTool::runDNNs(const EventContext &ctx, const xAOD::Electron *eg, double mu) const
+{
+  
+  DNNOutputs mvaOutputs;
   ATH_MSG_VERBOSE("\t AsgElectronSelectorTool::calculateMultipleOutputs( &ctx, *eg, mu= "<<(&ctx)<<", "<<eg<<", "<<mu<<" )");
   if (!eg){
     throw std::runtime_error("AsgElectronSelectorTool: Failed, no electron object was passed" );
@@ -590,13 +757,13 @@ std::vector<float> AsgElectronSelectorTool::calculateMultipleOutputs(const Event
   if (!cluster){
     ATH_MSG_DEBUG("Failed, no cluster.");
     // Return a default value
-    return m_defaultVector;
+    return m_defaultOutputs;
   }
 
   if (!cluster->hasSampling(CaloSampling::CaloSample::EMB2) && !cluster->hasSampling(CaloSampling::CaloSample::EME2)){
     ATH_MSG_DEBUG("Failed, cluster is missing samplings EMB2 and EME2.");
     // Return a default value
-    return m_defaultVector;
+    return m_defaultOutputs;
   }
 
   const double energy = cluster->e();
@@ -605,14 +772,14 @@ std::vector<float> AsgElectronSelectorTool::calculateMultipleOutputs(const Event
   if (isForwardElectron(eg, eta)){
     ATH_MSG_DEBUG("Failed, this is a forward electron! The AsgElectronSelectorTool is only suitable for central electrons!");
     // Return a default value
-    return m_defaultVector;
+    return m_defaultOutputs;
   }
 
   const xAOD::TrackParticle* track = eg->trackParticle();
   if (!track){
     ATH_MSG_DEBUG("Failed, no track.");
     // Return a default value
-    return m_defaultVector;
+    return m_defaultOutputs;
   }
 
   // transverse energy of the electron (using the track eta)
@@ -790,77 +957,75 @@ std::vector<float> AsgElectronSelectorTool::calculateMultipleOutputs(const Event
                        mu,
                        wtots1, EoverP, int(nPixHitsPlusDeadSensors), int(nSCTHitsPlusDeadSensors), SCTWeightedCharge));
 
-  if (!allFound){
-    throw std::runtime_error("AsgElectronSelectorTool: Not all variables needed for MVA calculation are found. The following variables are missing: " + notFoundList );
+//  if (!allFound){
+//    throw std::runtime_error("AsgElectronSelectorTool: Not all variables needed for MVA calculation are found. The following variables are missing: " + notFoundList );
+//  }
+
+  auto vars_binary = buildInputVector(
+      m_enum_variables_binary,
+      eta, et, f3, Rhad, Rhad1, Reta, w2, f1, Eratio,
+      deltaEta1, d0, qd0, d0significance,
+      Rphi, dPOverP, deltaPhiRescaled2,
+      trans_TRTPID, wtots1, EoverP,
+      nPixHitsPlusDeadSensors,
+      nSCTHitsPlusDeadSensors,
+      SCTWeightedCharge
+  );
+
+  auto vars_multi = buildInputVector(
+      m_enum_variables_multi,
+      eta, et, f3, Rhad, Rhad1, Reta, w2, f1, Eratio,
+      deltaEta1, d0, qd0, d0significance,
+      Rphi, dPOverP, deltaPhiRescaled2,
+      trans_TRTPID, wtots1, EoverP,
+      nPixHitsPlusDeadSensors,
+      nSCTHitsPlusDeadSensors,
+      SCTWeightedCharge
+  );
+
+  if (!m_multiClass && !m_useMultiStepDNN) {
+    
+     auto mvaScores_binary = m_mvaTool_binary->calculate(vars_binary);
+     mvaOutputs.binary.resize(mvaScores_binary.rows());
+    
+     for (int i = 0; i < mvaScores_binary.rows(); i++) { 
+         mvaOutputs.binary[i]=(mvaScores_binary(i, 0));
+      }
+  } 
+  else if (m_multiClass && !m_useMultiStepDNN) {
+
+     auto mvaScores_multi  = m_mvaTool_multi->calculate(vars_multi);
+     mvaOutputs.multi.resize(mvaScores_multi.rows());
+
+     for (int i = 0; i < mvaScores_multi.rows(); i++) {
+         mvaOutputs.multi[i] = (mvaScores_multi(i, 0));
+     }
   }
 
-  std::vector<double> variableValues;
-  for(const auto varID : m_enum_variables)
-  {
-    switch(varID)
-    {
-      case AllowedVariables::eta:
-        variableValues.push_back(std::abs(eta));  break; // TODO - rename to abseta?
-      case AllowedVariables::et:
-        variableValues.push_back(et); break;
-      case AllowedVariables::f3:
-        variableValues.push_back(f3); break;
-      case AllowedVariables::Rhad:
-        variableValues.push_back(Rhad); break;
-      case AllowedVariables::Rhad1:
-        variableValues.push_back(Rhad1); break;
-      case AllowedVariables::Reta:
-        variableValues.push_back(Reta); break;
-      case AllowedVariables::weta2:
-        variableValues.push_back(w2); break;
-      case AllowedVariables::f1:
-        variableValues.push_back(f1); break;
-      case AllowedVariables::Eratio:
-        variableValues.push_back(Eratio); break;
-      case AllowedVariables::deltaEta1:
-        variableValues.push_back(deltaEta1); break;
-      case AllowedVariables::d0:
-        variableValues.push_back(d0); break;
-      case AllowedVariables::qd0:
-        variableValues.push_back(qd0); break;
-      case AllowedVariables::d0significance:
-        variableValues.push_back(d0significance); break;
-      case AllowedVariables::Rphi:
-        variableValues.push_back(Rphi); break;
-      case AllowedVariables::dPOverP:
-        variableValues.push_back(dPOverP); break;
-      case AllowedVariables::deltaPhiRescaled2:
-        variableValues.push_back(deltaPhiRescaled2); break;
-      case AllowedVariables::trans_TRTPID:
-        variableValues.push_back(trans_TRTPID); break;
-      case AllowedVariables::wtots1:
-        variableValues.push_back(wtots1); break;
-      case AllowedVariables::EoverP:
-        variableValues.push_back(EoverP); break;
-      case AllowedVariables::nPixHitsPlusDeadSensors:
-        variableValues.push_back(nPixHitsPlusDeadSensors); break;
-      case AllowedVariables::nSCTHitsPlusDeadSensors:
-        variableValues.push_back(nSCTHitsPlusDeadSensors); break;
-      case AllowedVariables::SCTWeightedCharge:
-        variableValues.push_back(SCTWeightedCharge); break;
-      default:
-        // Handle unknown varID or error case
-        throw std::runtime_error("AsgElectronSelectorTool: unknown variable "
-          "index, something went wrong in initialization!" );
-        break;
+  else if (m_multiClass && m_useMultiStepDNN) {
+
+    auto mvaScores_binary = m_mvaTool_binary->calculate(vars_binary);
+    mvaOutputs.binary.resize(mvaScores_binary.rows());
+
+    for (int i = 0; i < mvaScores_binary.rows(); i++) {
+      mvaOutputs.binary[i] = (mvaScores_binary(i,0));
+    }
+
+    auto mvaScores_multi = m_mvaTool_multi->calculate(vars_multi);
+
+    mvaOutputs.multi.resize(mvaScores_multi.rows());
+
+    for (int i = 0; i < mvaScores_multi.rows(); i++) {
+      mvaOutputs.multi[i] = (mvaScores_multi(i,0));
     }
   }
 
-  Eigen::Matrix<float, -1, 1> mvaScores = m_mvaTool->calculate(variableValues);
+  else {
 
-  // Return a vector of all outputs of the MVA
-  std::vector<float> mvaOutputs;
-  mvaOutputs.reserve(mvaScores.rows());
-  for (int i = 0; i < mvaScores.rows(); i++) {
-    mvaOutputs.push_back(mvaScores(i, 0));
+    ATH_MSG_ERROR("Invalid DNN configuration");
   }
 
-  return mvaOutputs;
+return mvaOutputs;
 }
 
 //=============================================================================
@@ -890,12 +1055,12 @@ asg::AcceptData AsgElectronSelectorTool::accept( const EventContext& ctx, const 
     return acceptData;
   }
 }
-
-double AsgElectronSelectorTool::calculate( const xAOD::IParticle* part ) const
+/*
+std::vector<float> AsgElectronSelectorTool::calculateMultipleOutputs( const xAOD::IParticle* part ) const
 {
   return calculate(Gaudi::Hive::currentContext(), part);
 }
-
+*/
 double AsgElectronSelectorTool::calculate( const EventContext& ctx, const xAOD::IParticle* part ) const
 {
   ATH_MSG_VERBOSE("\t AsgElectronSelectorTool::calculate( &ctx, *part"<<(&ctx)<<", "<<part<<" )");
@@ -965,18 +1130,19 @@ bool AsgElectronSelectorTool::isForwardElectron( const xAOD::Egamma* eg, const f
 double AsgElectronSelectorTool::transformMLOutput( float score ) const
 {
   // returns transformed or non-transformed output
-  constexpr double oneOverTau = 1. / 10;
+  //constexpr double oneOverTau = 1. / 10;
   constexpr double fEpsilon = 1.0e-30; // to avoid zero division
   if (score >= 1.0) score = 1.0 - 1.0e-15; // this number comes from TMVA
   else if (score <= fEpsilon) score = fEpsilon;
   //cppcheck-suppress invalidFunctionArg
-  score = -std::log(1.0 / score - 1.0) * oneOverTau;
+  //score = -std::log(1.0 / score - 1.0) * oneOverTau;
+  score = -std::log(1.0 / score - 1.0);
   ATH_MSG_DEBUG("score is " << score);
   return score;
 }
 
 
-double AsgElectronSelectorTool::combineOutputs( const std::vector<float>& mvaScores, double eta ) const
+double AsgElectronSelectorTool::combineOutputs( const std::vector<float>& mvaScores_multi, double eta ) const
 {
   unsigned int etaBin = getDiscEtaBin(eta);
   double disc = 0;
@@ -984,31 +1150,27 @@ double AsgElectronSelectorTool::combineOutputs( const std::vector<float>& mvaSco
   if (m_cfSignal){
     // Put cf node into numerator
 
-    disc = (mvaScores.at(0) * (1 - m_fractions.at(5 * etaBin + 0)) +
-            (mvaScores.at(1) * m_fractions.at(5 * etaBin + 0))) /
-           ((mvaScores.at(2) * m_fractions.at(5 * etaBin + 1)) +
-            (mvaScores.at(3) * m_fractions.at(5 * etaBin + 2)) +
-            (mvaScores.at(4) * m_fractions.at(5 * etaBin + 3)) +
-            (mvaScores.at(5) * m_fractions.at(5 * etaBin + 4)));
+    disc = (mvaScores_multi.at(0) * (1 - m_fractions.at(3 * etaBin + 0)) +
+            (mvaScores_multi.at(1) * m_fractions.at(3 * etaBin + 0))) /
+           ((mvaScores_multi.at(2) * m_fractions.at(3 * etaBin + 1)) +
+            (mvaScores_multi.at(3) * m_fractions.at(3 * etaBin + 2)));
   }
   else{
     // Put cf node in denominator
-    disc = mvaScores.at(0) /
-           ((mvaScores.at(1) * m_fractions.at(5 * etaBin + 0)) +
-            (mvaScores.at(2) * m_fractions.at(5 * etaBin + 1)) +
-            (mvaScores.at(3) * m_fractions.at(5 * etaBin + 2)) +
-            (mvaScores.at(4) * m_fractions.at(5 * etaBin + 3)) +
-            (mvaScores.at(5) * m_fractions.at(5 * etaBin + 4)));
+    disc = mvaScores_multi.at(0) /
+           ((mvaScores_multi.at(1) * m_fractions.at(3 * etaBin + 0)) +
+            (mvaScores_multi.at(2) * m_fractions.at(3 * etaBin + 1)) +
+            (mvaScores_multi.at(3) * m_fractions.at(3 * etaBin + 2)));
   }
 
   // Log transform to have values in reasonable range
   return std::log(disc);
 }
 
-double AsgElectronSelectorTool::combineOutputsCF( const std::vector<float>& mvaScores )
+double AsgElectronSelectorTool::combineOutputsCF( const std::vector<float>& mvaScores_multi )
 {
   double disc = 0;
-  disc = mvaScores.at(0) / mvaScores.at(1);
+  disc = mvaScores_multi.at(0) / mvaScores_multi.at(1);
 
   return std::log(disc);
 }

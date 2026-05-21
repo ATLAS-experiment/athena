@@ -35,6 +35,11 @@ public:
   /** Standard destructor */
   virtual ~AsgElectronSelectorTool();
 public:
+
+   struct DNNOutputs {
+    std::vector<float> binary;
+    std::vector<float> multi;
+  };
   /** Gaudi Service Interface method implementations */
   virtual StatusCode initialize() override;
 
@@ -86,13 +91,29 @@ public:
 
   /** The main result method: the actual mva score is calculated here */
   double calculate( const EventContext &ctx, const xAOD::Egamma* eg, double mu ) const override;
-
-  /** Computes discrimiant value from mva output based on whether multiclass is true or false */
-  double getDiscriminant(std::vector<float>& mvaOutputs, const xAOD::Electron* egu ) const;
-
+  
+  std::vector<double> buildInputVector(
+    const std::vector<int>& varIDs,
+    double eta, double et,
+    float f3, float Rhad, float Rhad1, float Reta, float w2, float f1, float Eratio,
+    float deltaEta1, float d0, float qd0, float d0significance,
+    float Rphi, double dPOverP, float deltaPhiRescaled2,
+    double trans_TRTPID, float wtots1, float EoverP,
+    uint8_t nPixHitsPlusDeadSensors,
+    uint8_t nSCTHitsPlusDeadSensors,
+    double SCTWeightedCharge
+  ) const;
+  
   /** The result method for multiple outputs: can return multiple outputs of the MVA */
-  std::vector<float> calculateMultipleOutputs( const EventContext &ctx, const xAOD::Electron *eg, double mu = -99) const override;
+  DNNOutputs runDNNs(const EventContext &ctx,const xAOD::Electron *eg, double mu) const;
 
+  virtual std::vector<float> calculateMultipleOutputs( const EventContext &ctx, const xAOD::Electron *eg, double mu = -99) const override;
+  
+  /** Computes discrimiant value from mva output based on whether multiclass is true or false */
+  std::pair<double,double> getDiscriminant(const DNNOutputs&, const xAOD::Electron* egu ) const;
+  
+ // std::vector<float> calculateMultipleOutputs( const EventContext &ctx, const xAOD::Electron *eg, double mu = -99) const override;
+  
   virtual std::string getOperatingPointName() const override;
 
   // Private methods
@@ -107,8 +128,8 @@ private:
   double transformMLOutput( float score ) const;
 
   /** Combines the six output nodes of a multiclass model into one discriminant. */
-  double combineOutputs(const std::vector<float>& mvaScores, double eta) const;
-  static double combineOutputsCF(const std::vector<float>& mvaScores) ;
+  double combineOutputs(const std::vector<float>& mvaScores_multi, double eta) const;
+  static double combineOutputsCF(const std::vector<float>& mvaScores_multi) ;
 
   /** Gets the Discriminant Eta bin [0,s_fnDiscEtaBins-1] given the eta*/
   static unsigned int getDiscEtaBin( double eta ) ;
@@ -133,7 +154,8 @@ private:
   std::string m_configFile;
 
   /** Pointer to the class that calculates the MVA score. const for thread safety */
-  std::unique_ptr<const ElectronDNNCalculator> m_mvaTool;
+  std::unique_ptr<const ElectronDNNCalculator> m_mvaTool_binary;
+  std::unique_ptr<const ElectronDNNCalculator> m_mvaTool_multi;
 
   /// The input file name that holds the model
   std::string m_modelFileName;
@@ -142,16 +164,18 @@ private:
   std::string m_quantileFileName;
 
   /// Variables used in the MVA Tool
-  std::vector<std::string> m_variables;
+  std::vector<std::string> m_variables_binary;
+  std::vector<std::string> m_variables_multi;
 
   /// Enum version of used variables
-  std::vector<int> m_enum_variables;
+  std::vector<int> m_enum_variables_binary;
+  std::vector<int> m_enum_variables_multi;
 
   /// Flag for skip the use of deltaPoverP in dnn calculation (like at HLT)
   bool m_skipDeltaPoverP;
 
   bool m_skipAmbiguityCut;
-
+  bool m_useMultiStepDNN;
   /// Multiclass model or not
   bool m_multiClass{};
   /// Run CF rejection or not
@@ -163,16 +187,21 @@ private:
 
   /// do cut on ambiguity bit
   std::vector<int> m_cutAmbiguity;
+  std::vector<int> m_cutAmbiguity2;
   /// cut min on b-layer hits
   std::vector<int> m_cutBL;
+  std::vector<int> m_cutBL2;
   /// cut min on pixel hits
   std::vector<int> m_cutPi;
+  std::vector<int> m_cutPi2;
   /// cut min on precision hits
   std::vector<int> m_cutSCT;
+  std::vector<int> m_cutSCT2;
   /// do smooth interpolation between bins
   bool m_doSmoothBinInterpolation{};
   /// cut on mva output
   std::vector<double> m_cutSelector;
+  std::vector<double> m_cutSelector2;
   std::vector<double> m_cutSelectorCF;
 
 
@@ -190,8 +219,8 @@ private:
   int m_cutPosition_MVA{};
 
   /// Default vector to return if calculation fails
-  std::vector<float> m_defaultVector;
-
+  DNNOutputs m_defaultOutputs;
+  
   /// number of discrimintants vs Et
   static const unsigned int s_fnDiscEtBins = 10;
   /// number of discriminants vs |eta|
