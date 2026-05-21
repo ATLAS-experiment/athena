@@ -12,7 +12,7 @@ from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, pr
 from AthenaCommon.Logging import logging
 msg = logging.getLogger('IDAlign')
 
-from AthenaConfiguration.Enums import Format
+from AthenaConfiguration.Enums import Format, LHCPeriod
 
 # force no legacy job properties
 from AthenaCommon import JobProperties
@@ -64,10 +64,10 @@ def getT0SolveDB(runArgs):
     
     return latestLocalDataBase
 
-def configureFlags(runArgs):
-    from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    flags = initConfigFlags()
 
+
+def configureInDetFlags(runArgs, flags):
+    
     ## Turn off ID parts if wished (may cause conflicts with level setting)
     for IDpart in runArgs.excludeIDPart:
         setattr(flags.InDet.Align, f"align{IDpart}", False)
@@ -146,8 +146,8 @@ def configureFlags(runArgs):
     flags.Exec.FPE = -2
     flags.IOVDb.GlobalTag = runArgs.globalTag
         
-    flags.GeoModel.Align.Dynamic = True
-    flags.GeoModel.AtlasVersion = runArgs.atlasVersion
+    # flags.GeoModel.Align.Dynamic = True
+    # flags.GeoModel.AtlasVersion = runArgs.atlasVersion
 
     if not flags.Input.isMC and runArgs.isCosmics:
         from AthenaConfiguration.Enums import BeamType
@@ -186,6 +186,27 @@ def configureFlags(runArgs):
     flags.lock()
 
     return flags
+
+def configureITkFlags(runArgs, flags):
+    # Lock flags
+    flags.lock()
+    return flags
+    
+
+def configureFlags(runArgs):
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+
+    flags.GeoModel.Align.Dynamic = True
+    flags.GeoModel.AtlasVersion = runArgs.atlasVersion
+    
+    if flags.GeoModel.Run > LHCPeriod.Run3:
+        # needs to be adapted
+        return configureInDetFlags(runArgs, flags)
+    else: 
+        # return configureITkFlags(runArgs, flags)
+        return configureInDetFlags(runArgs, flags)
+
     
 
 def fromRunArgs(runArgs):
@@ -223,10 +244,16 @@ def fromRunArgs(runArgs):
                
     else:
         raise Exception("You can run either the acculumation step or the solve step, but not both or neither at the same time!")
-            
+
     ## Update condition database (Needs to be done last)
-    from InDetAlignConfig.IDAlignConditionConfig import UpdateTagsCfg
-    cfg.merge(UpdateTagsCfg(flags))
+    if flags.GeoModel.Run > LHCPeriod.Run3:
+        # This is what needs to be corrected
+        from InDetAlignConfig.IDAlignConditionConfig import UpdateTagsCfg
+        cfg.merge(UpdateTagsCfg(flags))
+        # flags.ITk.Align.alignITkPixel = kwargs
+    else:
+        from InDetAlignConfig.IDAlignConditionConfig import UpdateTagsCfg
+        cfg.merge(UpdateTagsCfg(flags))
 
     ## Post-include
     processPostInclude(runArgs, flags, cfg)
