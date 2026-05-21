@@ -13,6 +13,11 @@ ActsLegacyHgtdClusterizationAlg                                   INFO Clusteriz
 | RDOs     |     327475 |
 | Clusters |     327475 |
 |----------|------------|
+ActsLegacyPLRClusterizationAlg                                    INFO Clusterization statistics
+|----------|------------|
+| RDOs     |      43518 |
+| Clusters |       4739 |
+|----------|------------|
 ActsLegacyPixelSpacePointFormationAlg                             INFO Space Point Formation statistics
 |--------------|------------|
 | Clusters     |    1164869 |

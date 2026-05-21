@@ -73,6 +73,8 @@ def createITkConfigFlags():
                   prevFlags.Detector.EnableITkPixel)
     itkcf.addFlag("ITk.DAODStoreStrip", lambda prevFlags:
                   prevFlags.Detector.EnableITkStrip)
+    itkcf.addFlag("ITk.DAODStorePLR", lambda prevFlags:
+                  prevFlags.Detector.EnablePLR)
     itkcf.addFlag("ITk.DAODStoreExtra", True)
 
     # Save SiHitCollections to RDO

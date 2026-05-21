@@ -326,6 +326,11 @@ def IDTRKVALIDCfg(flags):
                 "ITkStripMSOSs": "xAOD::TrackStateValidationContainer",
                 "ITkStripMSOSsAux": "xAOD::TrackStateValidationAuxContainer"
             })
+        if flags.ITk.DAODStorePLR:
+            IDTRKVALIDSlimmingHelper.AppendToDictionary.update({
+                "PLRMeasurements": "xAOD::TrackMeasurementValidationContainer",
+                "PLRMeasurementsAux": "xAOD::TrackMeasurementValidationAuxContainer"
+            })
 
     SmartCollections += ["Muons", "Electrons", "Photons"]
 
@@ -351,6 +356,8 @@ def IDTRKVALIDCfg(flags):
             AllVariables += ["ITkPixelMeasurements","ITkPixelMSOSs"]
         if flags.ITk.DAODStoreStrip:
             AllVariables += ["ITkStripMeasurements","ITkStripMSOSs"]
+        if flags.ITk.DAODStorePLR:
+            AllVariables += ["PLRMeasurements"]
 
     IDTRKVALIDSlimmingHelper.AppendToDictionary.update({
         "TauJets": "xAOD::TauJetContainer",

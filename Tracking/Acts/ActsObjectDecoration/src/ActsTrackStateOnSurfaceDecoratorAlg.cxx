@@ -105,8 +105,11 @@ namespace ActsTrk {
 	  stripMsos->back()->setDetType( Trk::TrackState::SCT );
 	}
 	else {
-	  ATH_MSG_ERROR("Not recognized detector type");
-	  return StatusCode::FAILURE;
+	  ATH_MSG_DEBUG("Skipping unsupported Acts volume id "
+			<< surface.geometryId().volume()
+			<< " in " << name()
+			<< "; state is not written to the standard Pixel/Strip MSOS containers");
+	  continue;
 	}
 	
       } // loop on states
@@ -182,7 +185,7 @@ namespace ActsTrk {
       case 20:
         return xAOD::UncalibMeasType::PixelClusterType;
       default:
-        throw std::runtime_error("Cannot recognize volume id");
+        return xAOD::UncalibMeasType::Other;
       }
     } else {
       switch (volumeId) {
@@ -195,9 +198,8 @@ namespace ActsTrk {
       case 7:
         return xAOD::UncalibMeasType::PixelClusterType;
       default:
-        throw std::runtime_error("Cannot recognize Inner Detetor volume id");
+        return xAOD::UncalibMeasType::Other;
       }
     }
   }
 }
-

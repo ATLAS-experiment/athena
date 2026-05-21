@@ -402,6 +402,11 @@ def IDTIDECfg(flags):
             "ITkStripMeasurements": "xAOD::TrackMeasurementValidationContainer",
             "ITkStripMeasurementsAux": "xAOD::TrackMeasurementValidationAuxContainer"
         })
+        if flags.ITk.DAODStorePLR:
+            IDTIDESlimmingHelper.AppendToDictionary.update({
+                "PLRMeasurements": "xAOD::TrackMeasurementValidationContainer",
+                "PLRMeasurementsAux": "xAOD::TrackMeasurementValidationAuxContainer"
+            })
 
     SmartCollections += ["Muons", "Electrons", "Photons"]
 
@@ -423,6 +428,8 @@ def IDTIDECfg(flags):
         AllVariables += ["PixelClusters", "SCT_Clusters"]
     if flags.Detector.GeometryITk:
         AllVariables += ["ITkPixelMeasurements", "ITkStripMeasurements"]
+        if flags.ITk.DAODStorePLR:
+            AllVariables += ["PLRMeasurements"]
 
     IDTIDESlimmingHelper.AppendToDictionary.update({
         "Kt4EMPFlowEventShape": "xAOD::EventShape",

@@ -91,6 +91,32 @@ def ActsPixelClusteringToolCfg(flags,
     return acc
 
 
+def ActsPLRClusteringToolCfg(flags,
+                             name: str = "ActsPLRClusteringTool",
+                             **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    if flags.Acts.Clusters.RetrieveChargeInformation:
+        from PixelConditionsAlgorithms.PLR_ConditionsConfig import PLR_ChargeCalibCondAlgCfg
+        acc.merge(PLR_ChargeCalibCondAlgCfg(flags))
+        kwargs.setdefault("PixelChargeCalibCondData", "PLR_ChargeCalibCondData")
+
+    if "PixelLorentzAngleTool" not in kwargs:
+        from SiLorentzAngleTool.PLR_LorentzAngleConfig import PLR_LorentzAngleToolCfg
+        kwargs.setdefault("PixelLorentzAngleTool",
+                          acc.popToolsAndMerge(PLR_LorentzAngleToolCfg(flags)))
+
+    kwargs.setdefault("IDHelperName", "PLR_ID")
+    kwargs.setdefault("UseWeightedPosition", flags.Acts.Clusters.UseWeightedPosition)
+
+    # Always use broad errors if cosmics
+    kwargs.setdefault("UseBroadErrors",
+                      flags.Acts.Clusters.UsePixelBroadErrors or flags.Beam.Type is BeamType.Cosmics)
+
+    acc.setPrivateTools(CompFactory.ActsTrk.PixelClusteringTool(name, **kwargs))
+    return acc
+
+
 def ActsStripClusteringToolCfg(flags,
                                name: str = "ActsStripClusteringTool",
                                **kwargs) -> ComponentAccumulator:
@@ -152,6 +178,48 @@ def ActsPixelClusterizationAlgCfg(flags,
     if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
         from ActsConfig.ActsMonitoringConfig import ActsITkPixelClusterizationMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsITkPixelClusterizationMonitoringToolCfg(flags)))
+
+    if not useCache:
+        acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterizationAlg(name, **kwargs))
+    else:
+        acc.addEventAlgo(CompFactory.ActsTrk.PixelCacheClusterizationAlg(name, **kwargs))
+    return acc
+
+
+def ActsPLRClusterizationAlgCfg(flags,
+                                name: str = "ActsPLRClusterizationAlg",
+                                *,
+                                useCache: bool = False,
+                                **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault("IDHelper", "PLR_ID")
+    kwargs.setdefault("RDOContainerKey", "PLR_RDOs")
+    kwargs.setdefault("ClustersKey", "PLR_Clusters")
+    kwargs.setdefault("DetEleCollKey", "PLR_DetectorElementCollection")
+    kwargs.setdefault("RoIs", "ActsRegionOfInterest")
+
+    kwargs.setdefault("ClusterCacheBackend", "ActsPLRClusterCache_Back")
+    kwargs.setdefault("ClusterCache", "ActsPLRClustersCache")
+
+    if "RegSelTool" not in kwargs:
+        from RegionSelector.RegSelToolConfig import regSelTool_PLR_Cfg
+        kwargs.setdefault("RegSelTool", acc.popToolsAndMerge(regSelTool_PLR_Cfg(flags)))
+
+    if "ClusteringTool" not in kwargs:
+        kwargs.setdefault("ClusteringTool", acc.popToolsAndMerge(ActsPLRClusteringToolCfg(flags)))
+
+    if "DetElStatus" not in kwargs:
+        from PixelConditionsAlgorithms.PLR_ConditionsConfig import PLR_DetectorElementStatusAlgCfg
+        acc.merge(PLR_DetectorElementStatusAlgCfg(flags))
+        kwargs.setdefault("DetElStatus", "PLR_DetectorElementStatus")
+
+    if flags.Acts.doMonitoring and "MonTool" not in kwargs:
+        from ActsConfig.ActsMonitoringConfig import ActsITkPixelClusterizationMonitoringToolCfg
+        kwargs.setdefault("MonTool", acc.popToolsAndMerge(
+            ActsITkPixelClusterizationMonitoringToolCfg(
+                flags,
+                name="ActsPLRClusterizationMonitoringTool")))
 
     if not useCache:
         acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterizationAlg(name, **kwargs))
@@ -533,4 +601,3 @@ def ActsClusterizationCfg(flags,
         acc.merge(addToAOD(flags, toAOD))
         
     return acc
-
