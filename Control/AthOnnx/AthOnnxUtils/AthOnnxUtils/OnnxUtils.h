@@ -1,13 +1,17 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #ifndef Onnx_UTILS_H
 #define Onnx_UTILS_H
 
+#include <cassert>
 #include <memory>
+#include <string>
 #include <vector>
 
 // Onnx Runtime include(s).
 #include <onnxruntime_cxx_api.h>
+
+class AthAsynchronousAlgorithm;
 
 namespace AthOnnxUtils {
 
@@ -72,6 +76,16 @@ void inferenceWithIOBinding(Ort::Session& session,
     const std::vector<std::string>& outputNames,
     const std::vector<Ort::Value>& outputData
 );
+
+#ifndef XAOD_STANDALONE
+// Asynchronous inference
+std::string asyncInference(Ort::Session& session,
+                           const std::vector<std::string>& inputNames,
+                           const std::vector<Ort::Value>& inputData,
+                           const std::vector<std::string>& outputNames,
+                           std::vector<Ort::Value>& outputData,
+                           const AthAsynchronousAlgorithm* parentAlg);
+#endif
 
 // @brief Create a tensor from a vector of data and its shape.
 template<typename T>

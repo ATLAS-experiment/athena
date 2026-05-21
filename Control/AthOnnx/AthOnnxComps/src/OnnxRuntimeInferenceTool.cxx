@@ -1,9 +1,17 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthOnnxComps/OnnxRuntimeInferenceTool.h"
 #include "AthOnnxUtils/OnnxUtils.h"
+
+#ifndef XAOD_STANDALONE
+// AthAsynchronousAlgorithm for pointer
+#include "AthenaBaseComps/AthAsynchronousAlgorithm.h"
+
+// Gaudi include to figure out if something is an algorithm, a service, or a tool
+#include "GaudiKernel/IAlgTool.h"
+#endif // !XAOD_STANDALONE
 
 AthOnnx::OnnxRuntimeInferenceTool::OnnxRuntimeInferenceTool( const std::string& name)
   : asg::AsgTool ( name )
@@ -19,6 +27,32 @@ StatusCode AthOnnx::OnnxRuntimeInferenceTool::initialize()
     ATH_CHECK(m_onnxSessionTool.retrieve());
 
     ATH_CHECK(getNodeInfo());
+
+    #ifndef XAOD_STANDALONE
+    // If session doesn't support asynchronous inference we don't need to find our parent
+    if (!m_onnxSessionTool->supportsAsync())
+    {
+        ATH_MSG_INFO("Session does not support asynchronous inference");
+        m_parentAsyncAlg = nullptr;
+        return StatusCode::SUCCESS;
+    }
+    // Figure out if parent is an AthAsynchronousAlgorithm, and set pointer if it is
+    const IAlgTool* p = dynamic_cast<const IAlgTool*>(this);
+    // Follow chain of parents up until we hit one that can't be converted to an IAlgTool
+    const IInterface* myParent = nullptr;
+    while (p != nullptr) {
+        myParent = p->parent();
+        p = dynamic_cast<const IAlgTool*>(myParent);
+    }
+    // If this ultimate ancestor can be converted to an AthAsynchronousAlgorithm, set the member variable
+    m_parentAsyncAlg = dynamic_cast<const AthAsynchronousAlgorithm*>(myParent);
+    if (m_parentAsyncAlg != nullptr) {
+        ATH_MSG_INFO("Owned by an AthAsynchronousAlgorithm, using asynchronous inference");
+    }
+    else {
+        ATH_MSG_INFO("Not owned by an AthAsynchronousAlgorithm, not using asynchronous inference");
+    }
+    #endif // !XAOD_STANDALONE
 
     return StatusCode::SUCCESS;
 }
@@ -73,10 +107,29 @@ StatusCode AthOnnx::OnnxRuntimeInferenceTool::inference(std::vector<Ort::Value>&
     assert (outputTensors.size() == m_numOutputs);
 
     // Run the model.
+    // If we're in Athena and the parent is an asynchronous algorithm we do the inference asynchronously
+    #ifndef XAOD_STANDALONE
+    if (m_parentAsyncAlg == nullptr) {
+    #endif // !XAOD_STANDALONE
+
     AthOnnxUtils::inferenceWithIOBinding(
             m_onnxSessionTool->session(), 
             m_inputNodeNames, inputTensors, 
             m_outputNodeNames, outputTensors);
+
+    #ifndef XAOD_STANDALONE
+    }
+    else {
+        // Asynchronous version
+        std::string errorMsg = AthOnnxUtils::asyncInference(
+            m_onnxSessionTool->session(), m_inputNodeNames, inputTensors,
+            m_outputNodeNames, outputTensors, m_parentAsyncAlg);
+        if (!errorMsg.empty()) {
+            ATH_MSG_ERROR("ONNX Runtime Error: " << errorMsg);
+            return StatusCode::FAILURE;
+        }
+    }
+    #endif // !XAOD_STANDALONE
 
     return StatusCode::SUCCESS;
 }
