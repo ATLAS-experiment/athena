@@ -672,7 +672,8 @@ StatusCode
 RootTreeContainer::addBranch(const DbColumn* col,BranchDesc& dsc,std::string_view desc) {
   dsc.column = col;
   const char* nam  = (m_branchName.empty() ? col->name().c_str() : m_branchName.c_str());
-  std::string  coldesc = col->name().append(desc);
+  std::string  coldesc{col->name()};
+  coldesc.append(desc);
   char buff[32];
   dsc.branch = m_tree->Branch(nam, buff, coldesc.c_str(), 4096);
   if( dsc.branch )  {
