@@ -167,7 +167,6 @@ namespace MuonCombined {
                 // in this case the extrapolation failed
                 muon_candidate = std::make_unique<MuonCandidate>(MS_TrkLink);
             }
-            muon_candidate->setCommissioning(m_commissioning);
             /// Last but not least set the segments
             if (segments) {
                 std::vector<const Muon::MuonSegment*> assoc_segs;

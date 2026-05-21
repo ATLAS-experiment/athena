@@ -22,7 +22,6 @@ namespace MuonCombined {
         sout << name() << " TrackScore " << trackScore() << " matchChi2 " << matchChi2();
         return sout.str();
     }
-    bool CombinedFitTag::isCommissioning() const { return muonCandidate().isCommissioning(); }
     const Trk::Track* CombinedFitTag::combinedTrack() const { return m_combLink.isValid() ? *m_combLink : nullptr; }
     const MuonCandidate& CombinedFitTag::muonCandidate() const { return *m_muonCandidate; }
     const Trk::Track* CombinedFitTag::updatedExtrapolatedTrack() const { return m_MELink.isValid() ? *m_MELink : nullptr; }

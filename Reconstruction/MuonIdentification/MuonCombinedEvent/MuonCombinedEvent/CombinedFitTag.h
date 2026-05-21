@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCOMBINEDEVENT_COMBINEDFITTAG_H
@@ -91,9 +91,6 @@ namespace MuonCombined {
 
         /** access to associated segments, empty vector if non available */
         std::vector<const Muon::MuonSegment*> associatedSegments() const override;
-
-        /** Returns whether the muon belongs to the commissioning chain **/
-        bool isCommissioning() const override;
 
     private:
         /** block copy and assignment */
