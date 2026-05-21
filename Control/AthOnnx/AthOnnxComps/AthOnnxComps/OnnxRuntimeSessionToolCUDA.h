@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #ifndef OnnxRuntimeSessionToolCUDA_H
 #define OnnxRuntimeSessionToolCUDA_H
@@ -30,6 +30,9 @@ namespace AthOnnx {
 
         /// Create Onnx Runtime session
         virtual Ort::Session& session() const override final;
+
+        /// Check if asynchronous inference is supported (yes, it is)
+        virtual bool supportsAsync() const override final;
 
         protected:
         OnnxRuntimeSessionToolCUDA() = delete;

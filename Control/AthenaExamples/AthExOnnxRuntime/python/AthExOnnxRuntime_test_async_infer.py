@@ -20,7 +20,7 @@ def AthExOnnxRuntimeExampleCfg(flags, name="AthOnnxExample", **kwargs):
     kwargs.setdefault("BatchSize", 3)
     kwargs.setdefault("InputDataPixel", input_data)
     kwargs.setdefault("OutputLevel", Constants.DEBUG)
-    acc.addEventAlgo(CompFactory.AthOnnx.EvaluateModelWithAthInfer(name, **kwargs))
+    acc.addEventAlgo(CompFactory.AthOnnx.EvaluateModelWithAsyncInfer(name, **kwargs))
 
     return acc
 
@@ -34,13 +34,15 @@ if __name__ == "__main__":
     flags = initConfigFlags()
     flags.AthOnnx.ExecutionProvider = OnnxRuntimeType.CPU
     flags.Concurrency.NumThreads = 4
+    flags.Concurrency.NumOffloadThreads = 4
+    flags.Exec.FPE = -1
     flags.lock()
 
     acc = MainServicesCfg(flags)
     acc.merge(AthExOnnxRuntimeExampleCfg(flags))
     acc.printConfig(withDetails=True, summariseProps=True)
 
-    acc.store(open('test_AthInferORTExampleCfg.pkl','wb'))
+    acc.store(open('test_AsyncInferORTExampleCfg.pkl','wb'))
 
     import sys
     sys.exit(acc.run(2).isFailure())

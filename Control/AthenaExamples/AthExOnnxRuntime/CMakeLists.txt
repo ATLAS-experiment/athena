@@ -39,3 +39,14 @@ atlas_add_test( AthInferORTTest_pkl
    LOG_IGNORE_PATTERN "ERROR Locating dev file"
    DEPENDS AthInferORTTest
    POST_EXEC_SCRIPT noerror.sh )
+
+atlas_add_test( AthAsyncInferORTTest
+   SCRIPT python -m AthExOnnxRuntime.AthExOnnxRuntime_test_async_infer
+   LOG_IGNORE_PATTERN "ERROR Locating dev file"  # OK for this example unit test
+   POST_EXEC_SCRIPT noerror.sh )
+
+atlas_add_test( AthAsyncInferORTTest_pkl
+   SCRIPT athena --evtMax 200 --threads=4 --CA test_AsyncInferORTExampleCfg.pkl
+   LOG_IGNORE_PATTERN "ERROR Locating dev file"  # OK for this example unit test
+   DEPENDS AthAsyncInferORTTest
+   POST_EXEC_SCRIPT noerror.sh )

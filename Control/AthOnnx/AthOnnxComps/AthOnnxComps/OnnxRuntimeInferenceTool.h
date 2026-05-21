@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #ifndef OnnxRuntimeInferenceTool_H
 #define OnnxRuntimeInferenceTool_H
@@ -11,6 +11,9 @@
 #include "AthOnnxInterfaces/IOnnxRuntimeSessionTool.h"
 #include "AsgServices/ServiceHandle.h"
 #include "AsgTools/ToolHandle.h"
+
+// Forward declaration
+class AthAsynchronousAlgorithm;
 
 namespace AthOnnx {
     // @class OnnxRuntimeInferenceTool
@@ -55,6 +58,9 @@ namespace AthOnnx {
         };        
         std::vector<std::string> m_inputNodeNames;
         std::vector<std::string> m_outputNodeNames;
+
+        // pointer to parent AthAsynchronousAlgorithm if one exists
+        const AthAsynchronousAlgorithm* m_parentAsyncAlg = nullptr;
     };
 } // namespace AthOnnx
 
