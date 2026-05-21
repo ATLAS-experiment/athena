@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCOMBINEDEVENT_TAGBASE_H
@@ -26,10 +26,8 @@ namespace MuonCombined {
         if (a == xAOD::Muon::MuTagIMO) return 2;
         if (a == xAOD::Muon::MuTag) return 3;
         if (a == xAOD::Muon::CaloTag) return 4;
-        if (a == xAOD::Muon::CaloLikelihood) return 5;
-        //if (a == xAOD::Muon::CaloLikelihood) return 6;  //duplicate
-        if (a == xAOD::Muon::MuidSA) return 7;
-        if (a == xAOD::Muon::STACO) return 8;
+        if (a == xAOD::Muon::MuidSA) return 5;
+        if (a == xAOD::Muon::STACO) return 6;
         return xAOD::Muon::NumberOfMuonAuthors;
     }
 
@@ -72,9 +70,6 @@ namespace MuonCombined {
         /** access to associated segments, empty vector if non available */
         virtual std::vector<const Muon::MuonSegment*> associatedSegments() const;
 
-        /** Returns whether the muon belongs to the commissioning chain **/
-        virtual bool isCommissioning() const;
-
     protected:
         /** protected base class to be called by concrete implementations */
         TagBase(Author author, Type type) : m_author(author), m_type(type) {}
@@ -85,7 +80,6 @@ namespace MuonCombined {
         Type m_type;      /// type
     };
 
-    inline bool TagBase::isCommissioning() const { return false; }
     inline const Trk::Track* TagBase::primaryTrack() const { return nullptr; }
 
     inline std::vector<const Muon::MuonSegment*> TagBase::associatedSegments() const { return {}; }

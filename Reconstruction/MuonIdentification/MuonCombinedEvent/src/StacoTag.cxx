@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCombinedEvent/StacoTag.h"
@@ -17,7 +17,6 @@ namespace MuonCombined {
     StacoTag::~StacoTag() = default;
 
     std::string StacoTag::name() const { return "StacoTag"; }
-    bool StacoTag::isCommissioning() const { return muonCandidate().isCommissioning(); }
     std::string StacoTag::toString() const {
         std::ostringstream sout;
         sout << name() << " match chi2 " << matchChi2();

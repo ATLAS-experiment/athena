@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSegContainerMergerAlg.h"
@@ -16,9 +16,6 @@ namespace{
     }
 
 }
-
-MuonSegContainerMergerAlg::MuonSegContainerMergerAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator) {}
 
 StatusCode MuonSegContainerMergerAlg::initialize() {
     /// Initialize the data dependencies
@@ -40,7 +37,7 @@ StatusCode MuonSegContainerMergerAlg::initialize() {
     ATH_CHECK(m_assocMapKey.initialize());
     ATH_CHECK(m_inputSegContainerName.initialize(m_saveUnassocSegs));
     ATH_CHECK(m_unassocTrkContainerName.initialize(m_saveUnassocSegs));
-    if (m_solveAmbi) ATH_CHECK(m_ambiguityProcessor.retrieve());
+    ATH_CHECK(m_ambiguityProcessor.retrieve(EnableTool{m_solveAmbi}));
 
     return StatusCode::SUCCESS;
 }
@@ -78,7 +75,6 @@ StatusCode MuonSegContainerMergerAlg::execute(const EventContext& ctx) const {
         }
     }
     std::stable_sort(good_tags.begin(),good_tags.end(),[](const MuonCombined::TagBase* a, const MuonCombined::TagBase* b){
-        if (a->isCommissioning() != b->isCommissioning()) return b->isCommissioning();
         /// Sort according to the author
         const int auth_a = MuonCombined::authorRank(a->author());
         const int auth_b = MuonCombined::authorRank(b->author());

@@ -53,11 +53,6 @@ namespace {
 }  // namespace
 namespace MuonCombined {
 
-    MuonCreatorTool::MuonCreatorTool(const std::string& type, const std::string& name, const IInterface* parent) :
-        AthAlgTool(type, name, parent) {
-        declareInterface<IMuonCreatorTool>(this);
-    }
-
     StatusCode MuonCreatorTool::initialize() {
         if (m_buildStauContainer) ATH_MSG_DEBUG(" building Stau container ");
 
@@ -115,12 +110,6 @@ namespace MuonCombined {
     }
     void MuonCreatorTool::create(const EventContext& ctx, const MuonCandidateCollection* muonCandidates,
                                  const std::vector<const InDetCandidateToTagMap*>& tagMaps, OutputData& outputData) const {
-        create(ctx, muonCandidates, tagMaps, outputData, false);
-        create(ctx, muonCandidates, tagMaps, outputData, true);
-    }
-    void MuonCreatorTool::create(const EventContext& ctx, const MuonCandidateCollection* muonCandidates,
-                                 const std::vector<const InDetCandidateToTagMap*>& tagMaps, OutputData& outputData,
-                                 bool select_commissioning) const {
         // Create containers for resolved candidates (always of type VIEW_ELEMENTS)
         InDetCandidateTagsMap resolvedInDetCandidates;
         // std::vector<const MuonCombined::InDetCandidate*> resolvedInDetCandidates;
@@ -128,9 +117,10 @@ namespace MuonCombined {
 
         // Resolve Overlap
         if (!m_buildStauContainer)
-            resolveOverlaps(ctx, muonCandidates, tagMaps, resolvedInDetCandidates, resolvedMuonCandidates, select_commissioning);
-        else if (!select_commissioning)
+            resolveOverlaps(ctx, muonCandidates, tagMaps, resolvedInDetCandidates, resolvedMuonCandidates);
+        else{
             selectStaus(resolvedInDetCandidates, tagMaps);
+        }
 
         unsigned int numIdCan = resolvedInDetCandidates.size();
         unsigned int numMuCan = muonCandidates ? muonCandidates->size() : 0;
@@ -148,8 +138,6 @@ namespace MuonCombined {
                 ATH_MSG_DEBUG("no muon found");
             } else {
                 ATH_MSG_DEBUG("muon found");
-                if (select_commissioning) { muon->addAllAuthor(xAOD::Muon::Author::Commissioning); }
-                
                 if (!muon->primaryTrackParticleLink().isValid()) {
                     ATH_MSG_ERROR("This muon has no valid primaryTrackParticleLink! Author=" << muon->author());
                 }
@@ -159,8 +147,7 @@ namespace MuonCombined {
         if (!m_requireIDTracks) {  // only build SA muons if ID tracks are not required
             for (const MuonCombined::MuonCandidate* can : resolvedMuonCandidates) {
                 ATH_MSG_DEBUG("New MuonCandidate");
-                xAOD::Muon* muon = create(ctx, *can, outputData);
-                if (muon && select_commissioning) { muon->addAllAuthor(xAOD::Muon::Author::Commissioning); }
+                create(ctx, *can, outputData);
                 ATH_MSG_DEBUG("Creation of Muon from MuonCandidates done");
             }
         }
@@ -974,8 +961,7 @@ namespace MuonCombined {
     void MuonCreatorTool::resolveOverlaps(const EventContext& ctx, const MuonCandidateCollection* muonCandidates,
                                           const std::vector<const InDetCandidateToTagMap*>& tagMaps,
                                           InDetCandidateTagsMap& resolvedInDetCandidates,
-                                          std::vector<const MuonCombined::MuonCandidate*>& resolvedMuonCandidates,
-                                          bool select_commissioning) const {
+                                          std::vector<const MuonCombined::MuonCandidate*>& resolvedMuonCandidates) const {
         resolvedMuonCandidates.clear();
         resolvedInDetCandidates.clear();
 
@@ -993,7 +979,6 @@ namespace MuonCombined {
                 /// Check whether the author arises from the comissioning chain
                 /// The maps are filled in dedicated algorithim. So all tags will
                 /// fail / satisfy this condition
-                if (tag->isCommissioning() != select_commissioning) break;
                 InDetCandidateTagsMap::iterator itr =
                     std::find_if(inDetCandidateMap.begin(), inDetCandidateMap.end(),
                                  [&comb_tag](const InDetCandidateTags& to_test) { return (*to_test.first) == (*comb_tag.first); });
@@ -1138,7 +1123,6 @@ namespace MuonCombined {
         // and muon candidates
         std::map<const Trk::Track*, const MuonCandidate*> trackMuonCandLinks;
         for (const MuonCandidate* candidate : *muonCandidates) {
-            if (candidate->isCommissioning() != select_commissioning) continue;
             const Trk::Track* track = candidate->primaryTrack();
             if (used_candidates.count(candidate)) {
                 ATH_MSG_DEBUG("Duplicate MS track " << m_printer->print(*track));
