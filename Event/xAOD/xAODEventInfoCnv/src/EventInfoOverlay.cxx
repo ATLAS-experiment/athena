@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak <tadej@cern.ch>
@@ -8,6 +8,8 @@
 
 #include <xAODEventInfo/EventAuxInfo.h>
 
+// For treatment of decorations that should be passed along
+#include "AthContainers/AuxTypeRegistry.h"
 
 namespace xAODMaker
 {
@@ -42,6 +44,24 @@ StatusCode EventInfoOverlay::initialize()
 }
 
 
+#if !defined(XAOD_ANALYSIS)
+  StatusCode EventInfoOverlay::decorationsToKeep(const xAOD::EventInfo* signalEvent, std::vector<std::string>& keep_ids) const
+  {
+    // Get the aux type registry in order to decode aux IDs
+    SG::AuxTypeRegistry& registry = SG::AuxTypeRegistry::instance();
+
+    // Get the aux IDs from the signal event info; we need some of them
+    auto signalAIDs = signalEvent->getAuxIDs();
+    for (const auto id : signalAIDs) {
+      if (registry.getName(id).find("mcFilter") != std::string::npos) { // TODO This could be made configurable in future.
+        keep_ids.push_back(registry.getName(id));
+      }
+    }
+    return StatusCode::SUCCESS;
+  }
+#endif
+
+
 StatusCode EventInfoOverlay::execute(const EventContext& ctx) const
 {
   ATH_MSG_DEBUG("execute() begin");
@@ -59,6 +79,11 @@ StatusCode EventInfoOverlay::execute(const EventContext& ctx) const
     return StatusCode::FAILURE;
   }
   ATH_MSG_DEBUG("Found signal xAOD::EventInfo " << signalEvent.name() << " in store " << signalEvent.store());
+
+  std::vector<std::string> keep_ids;
+#if !defined(XAOD_ANALYSIS)
+  ATH_CHECK(decorationsToKeep(signalEvent.cptr(), keep_ids));
+#endif
 
   auto outputEvent = std::make_unique<xAOD::EventInfo>();
   auto outputEventAux = std::make_unique<xAOD::EventAuxInfo>();
@@ -157,6 +182,13 @@ StatusCode EventInfoOverlay::execute(const EventContext& ctx) const
     outputEvent->setBeamStatus( beamSpotHandle->beamStatus() );
   }
 #endif
+
+  // Add decorations that are required
+  for (const std::string& id : keep_ids){
+    SG::ConstAccessor<float> origDecor(id);
+    SG::Accessor<float> filtDecor(id);
+    filtDecor(*outputEvent) = origDecor(*signalEvent);
+  }
 
   // Creating output timings container
   SG::WriteHandle<xAOD::EventInfo> outputEventH(m_outputKey, ctx);
