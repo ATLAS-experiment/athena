@@ -2,8 +2,8 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef XAODMUON_MUONAUXCONTAINER$R4_H
-#define XAODMUON_MUONAUXCONTAINER$R4_H
+#ifndef XAODMUON_MUONAUXCONTAINERR4_H
+#define XAODMUON_MUONAUXCONTAINERR4_H
  
 // Local include(s):
 #include "xAODMuon/versions/MuonAuxContainer_v6.h"
@@ -19,4 +19,4 @@ namespace xAOD {
 CLASS_DEF( xAOD::MuonAuxContainerR4, 1217898686, 1 )
 
 
-#endif // XAODMUON_MUONAUXCONTAINER_H
+#endif // XAODMUON_MUONAUXCONTAINERR4_H
