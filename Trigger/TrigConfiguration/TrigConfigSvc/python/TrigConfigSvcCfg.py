@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from typing import Any, cast
 from AthenaCommon.Logging import logging
@@ -419,7 +419,7 @@ if __name__ == "__main__":
             from AthenaConfiguration.TestDefaults import defaultTestFiles
             flags.Input.Files = defaultTestFiles.RAW_RUN2
             flags.lock()
-            TrigConfigSvcCfg( flags )
+            TrigConfigSvcCfg( flags ).wasMerged()
 
         def test_legacyMenu(self):
             from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -427,7 +427,7 @@ if __name__ == "__main__":
             from AthenaConfiguration.TestDefaults import defaultTestFiles
             flags.Input.Files = defaultTestFiles.RAW_RUN2
             flags.lock()
-            TrigConfigSvcCfg( flags )
+            TrigConfigSvcCfg( flags ).wasMerged()
 
         def test_jsonConverter(self):
             keys = _createJsonMenuFiles(run=360026, lb=151, crestServer=None)

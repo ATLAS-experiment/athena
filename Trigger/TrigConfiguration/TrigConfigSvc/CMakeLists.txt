@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigConfigSvc )
@@ -32,13 +32,13 @@ atlas_add_test( TrigConfSvcHelper_test
    SOURCES test/TrigConfSvcHelper_test.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
    LINK_LIBRARIES TrigConfigSvcLib Boost::unit_test_framework
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( AccumulatorTest
    SCRIPT python -m TrigConfigSvc.TrigConfigSvcCfg
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( FrontierTest
    SCRIPT python -m TrigConfigSvc.TrigConfFrontier
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
   
