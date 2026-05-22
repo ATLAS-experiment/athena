@@ -390,6 +390,10 @@ StatusCode JetTruthLabelingTool::decorate(const xAOD::JetContainer& jets) const 
     return labelTruthJets(dh, jets, ctx);
   }
 
+  else if (!m_isTruthJetCol && m_truthLabelConfig == TruthLabelConfiguration::R4TruthLabel) {
+      return labelRecoJets(dh, jets, ctx);
+  }
+
   /// Copy label to matched reco jets
   else {
     ATH_CHECK( labelTruthJets(dh, ctx) );
@@ -487,25 +491,29 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
     if ( matchTruthJet ) {
         // Can't use the WriteDecorHandle to read --- the decoration may have
         // been added and locked by a previous algorithm.
-        SG::ConstAccessor<int> labelAcc (dh.labelHandle->auxid());
-        label = labelAcc(*matchTruthJet);
-        if ( m_useDRMatch ) {
-          if(dh.dRWHandle->isAvailable()) dR_truthJet_W = (*dh.dRWHandle)(*matchTruthJet);
-          if(dh.dRZHandle->isAvailable()) dR_truthJet_Z = (*dh.dRZHandle)(*matchTruthJet);
-          if(dh.dRHHandle->isAvailable()) dR_truthJet_H = (*dh.dRHHandle)(*matchTruthJet);
-          if(dh.dRTopHandle->isAvailable()) dR_truthJet_Top = (*dh.dRTopHandle)(*matchTruthJet);
+        // Not saving Truth jet decorations for small R
+        if (!(m_truthLabelConfig == TruthLabelConfiguration::R4TruthLabel)) {
+            SG::ConstAccessor<int> labelAcc(dh.labelHandle->auxid());
+            label = labelAcc(*matchTruthJet);
+            if (m_useDRMatch) {
+                if (dh.dRWHandle->isAvailable()) dR_truthJet_W = (*dh.dRWHandle)(*matchTruthJet);
+                if (dh.dRZHandle->isAvailable()) dR_truthJet_Z = (*dh.dRZHandle)(*matchTruthJet);
+                if (dh.dRHHandle->isAvailable()) dR_truthJet_H = (*dh.dRHHandle)(*matchTruthJet);
+                if (dh.dRTopHandle->isAvailable()) dR_truthJet_Top = (*dh.dRTopHandle)(*matchTruthJet);
+            }
+            if (m_truthLabelConfig == TruthLabelConfiguration::R21Precision) {
+                SG::ReadDecorHandle<xAOD::JetContainer, float> split23Handle(m_split23_truthKey, ctx);
+                if (split23Handle.isAvailable()) truthJetSplit23 = split23Handle(*matchTruthJet);
+            }
+            if (m_truthLabelConfig == TruthLabelConfiguration::R21Precision_2022v1 || m_truthLabelConfig == TruthLabelConfiguration::R10TruthLabel_R22v1 || m_truthLabelConfig == TruthLabelConfiguration::R10WZTruthLabel_R22v1) {
+                SG::ReadDecorHandle<xAOD::JetContainer, float> split23Handle(m_split23_truthKey, ctx);
+                if (split23Handle.isAvailable()) truthJetSplit23 = split23Handle(*matchTruthJet);
+                SG::ReadDecorHandle<xAOD::JetContainer, float> split12Handle(m_split12_truthKey, ctx);
+                if (split12Handle.isAvailable()) truthJetSplit12 = split12Handle(*matchTruthJet);
+            }
+            if (nbAcc.isAvailable(*matchTruthJet)) truthJetNB = nbAcc(*matchTruthJet);
         }
-        if ( m_truthLabelConfig == TruthLabelConfiguration::R21Precision) {
-          SG::ReadDecorHandle<xAOD::JetContainer, float> split23Handle(m_split23_truthKey, ctx);
-          if(split23Handle.isAvailable()) truthJetSplit23 = split23Handle(*matchTruthJet);
-        }
-        if ( m_truthLabelConfig == TruthLabelConfiguration::R21Precision_2022v1 || m_truthLabelConfig == TruthLabelConfiguration::R10TruthLabel_R22v1 || m_truthLabelConfig == TruthLabelConfiguration::R10WZTruthLabel_R22v1) {
-          SG::ReadDecorHandle<xAOD::JetContainer, float> split23Handle(m_split23_truthKey, ctx);
-          if(split23Handle.isAvailable()) truthJetSplit23 = split23Handle(*matchTruthJet);
-          SG::ReadDecorHandle<xAOD::JetContainer, float> split12Handle(m_split12_truthKey, ctx);
-          if(split12Handle.isAvailable()) truthJetSplit12 = split12Handle(*matchTruthJet);
-        }
-        if(nbAcc.isAvailable(*matchTruthJet)) truthJetNB = nbAcc (*matchTruthJet);
+        // Reco jet decorations, saved for small and large R
         truthJetMass = matchTruthJet->m();
         truthJetPt = matchTruthJet->pt();
         truthJetEta = matchTruthJet->eta();
@@ -548,26 +556,27 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
     }
 
     /// Decorate truth label
-    (*dh.labelRecoHandle)(*jet) = label;
+    if (!(m_truthLabelConfig == TruthLabelConfiguration::R4TruthLabel)) {
+        (*dh.labelRecoHandle)(*jet) = label;
+        /// Decorate additional information used for truth labeling
+        if (m_useDRMatch) {
+            (*dh.dRWRecoHandle)(*jet) = dR_truthJet_W;
+            (*dh.dRZRecoHandle)(*jet) = dR_truthJet_Z;
+            (*dh.dRHRecoHandle)(*jet) = dR_truthJet_H;
+            (*dh.dRTopRecoHandle)(*jet) = dR_truthJet_Top;
+        }
+        if (m_truthLabelConfig == TruthLabelConfiguration::R21Precision) {
+            (*dh.split23Handle)(*jet) = truthJetSplit23;
+        }
 
-    /// Decorate additional information used for truth labeling
-    if ( m_useDRMatch ) {
-      (*dh.dRWRecoHandle)(*jet) = dR_truthJet_W;
-      (*dh.dRZRecoHandle)(*jet) = dR_truthJet_Z;
-      (*dh.dRHRecoHandle)(*jet) = dR_truthJet_H;
-      (*dh.dRTopRecoHandle)(*jet) = dR_truthJet_Top;
+        if (m_truthLabelConfig == TruthLabelConfiguration::R21Precision_2022v1 || m_truthLabelConfig == TruthLabelConfiguration::R10TruthLabel_R22v1 || m_truthLabelConfig == TruthLabelConfiguration::R10WZTruthLabel_R22v1) {
+            (*dh.split23Handle)(*jet) = truthJetSplit23;
+            (*dh.split12Handle)(*jet) = truthJetSplit12;
+        }
+
+        (*dh.nbRecoHandle)(*jet) = truthJetNB;
     }
-    if ( m_truthLabelConfig == TruthLabelConfiguration::R21Precision) {
-      (*dh.split23Handle)(*jet) = truthJetSplit23;
-    }
-
-    if ( m_truthLabelConfig == TruthLabelConfiguration::R21Precision_2022v1 || m_truthLabelConfig == TruthLabelConfiguration::R10TruthLabel_R22v1 || m_truthLabelConfig == TruthLabelConfiguration::R10WZTruthLabel_R22v1) {
-      (*dh.split23Handle)(*jet) = truthJetSplit23;
-      (*dh.split12Handle)(*jet) = truthJetSplit12;
-    }
-
-    (*dh.nbRecoHandle)(*jet) = truthJetNB;
-
+    
     (*dh.matchedTruthJetMassHandle)(*jet) = truthJetMass;
     (*dh.matchedTruthJetPtHandle)(*jet) = truthJetPt;
     (*dh.matchedTruthJetEtaHandle)(*jet) = truthJetEta;
