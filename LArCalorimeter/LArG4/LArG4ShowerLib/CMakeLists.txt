@@ -9,16 +9,15 @@ atlas_subdir( LArG4ShowerLib )
 find_package( CLHEP )
 find_package( Geant4 )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
-find_package( XercesC )
 
 # Component(s) in the package:
 atlas_add_library( LArG4ShowerLib
                    src/*.cxx
                    OBJECT
                    PUBLIC_HEADERS LArG4ShowerLib
-                   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS} ${GEANT4_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} 
+                   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${GEANT4_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} 
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
                    LINK_LIBRARIES AthContainers LArG4Code AtlasHepMCLib
-                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${XERCESC_LIBRARIES} ${GEANT4_LIBRARIES} ${CLHEP_LIBRARIES} )
+                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${GEANT4_LIBRARIES} ${CLHEP_LIBRARIES} )
 set_target_properties( LArG4ShowerLib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
