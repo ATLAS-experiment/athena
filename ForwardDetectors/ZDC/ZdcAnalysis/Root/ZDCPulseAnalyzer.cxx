@@ -10,6 +10,7 @@
 #include "TList.h"
 #include "TMinuit.h"
 #include "ZdcAnalysis/ZDCMsg.h"
+#include "CxxUtils/trapping_fp.h"
 
 #include <algorithm>
 #include <sstream>
@@ -1176,6 +1177,8 @@ bool ZDCPulseAnalyzer::DoAnalysis(bool repass)
 			   power = m_chisqDivAmpPowerLG]
       (float chisq, float amp, unsigned int fitNDoF, float& ratio)->bool
     {
+      // Avoid a spurious FPE from clang.
+      CXXUTILS_TRAPPING_FP;
       if (amp < 1e-6) return true;
       ratio = chisq /(scale* (std::pow(amp/1000 + offset, power)));
       if (chisq/fitNDoF > 2 && ratio > cut) return false;
@@ -1223,6 +1226,8 @@ bool ZDCPulseAnalyzer::DoAnalysis(bool repass)
 			   power = m_chisqDivAmpPowerHG, tag = m_tag]
       (float chisq, float amp, unsigned int fitNDoF, float& ratio)->bool
     {
+      // Avoid a spurious FPE from clang.
+      CXXUTILS_TRAPPING_FP;
       if (amp < 1e-6) return true;
       ratio = chisq /(scale*(std::pow(amp/1000 + offset, power)));
       if (chisq/float(fitNDoF) > 2 && ratio > cut) return false;
