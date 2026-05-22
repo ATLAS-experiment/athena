@@ -31,6 +31,7 @@ partition = ispy.IPCPartition(os.getenv("TDAQ_PARTITION","ATLAS"))
 flags = initConfigFlags()
 # remove unused flag categories. Note Calo and Tile are only needed if running on CaloCells
 neededCats = ["GeoModel","DQ","Trigger","PerfMon","Detector","Muon","Overlay","LAr","Reco","Calo","Tile"]
+if partition.isValid(): neededCats += ["BField"] # online auto flag config also wants to set BField flags
 for cat in list(flags._dynaflags.keys()):
   if cat not in neededCats: del flags._dynaflags[cat]
 flags.Input.Files = [] # so that when no files given we can detect that
