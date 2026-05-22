@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EvtRangeScatterer.h"
@@ -255,7 +255,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> EvtRangeScatterer::exec_func(
     if(eventRange.starts_with( "[{")) eventRange=eventRange.substr(2);
     if(eventRange.ends_with("}]")) eventRange.resize(eventRange.size()-2);
 
-    std::map<std::string,std::string> eventRangeMap;
+    std::map<std::string,std::string, std::less<>> eventRangeMap;
     size_t startpos(0);
     size_t endpos = eventRange.find(',');
     while(endpos!=std::string::npos) {
