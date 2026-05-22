@@ -154,7 +154,7 @@ namespace MuonR4{
         const Amg::Vector2D projPos{pos.perp(), pos.z()};
         const Amg::Vector2D projDir{dir.perp(), dir.z()};
 
-        ATH_MSG_VERBOSE( "segment position:" << segment.position() << ", direction: " << segment.direction() );
+        ATH_MSG_VERBOSE( "segment position:" << Amg::toString(segment.position())<< ", direction: " << Amg::toString(segment.direction()) );
         ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Express segment in @"<<Amg::toString(pos)
                         <<", direction: "<<Amg::toString(dir)<< " sector projector: " << Acts::toUnderlying(proj) << " location: " << Acts::toUnderlying(loc));
         ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Projected position onto sector: "<<Amg::toString(projPos)

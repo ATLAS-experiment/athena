@@ -44,6 +44,11 @@ namespace MuonR4{
         ATH_CHECK(m_calibTool.retrieve());
         ATH_CHECK(m_writeKey.initialize());
 
+        if (m_trackingGeometryTool->trackingGeometry()->geometryVersion() !=
+            Acts::TrackingGeometry::GeometryVersion::Gen3){
+            ATH_MSG_ERROR("The MS track fit requires the Gen 3 geometry format");
+            return StatusCode::FAILURE;
+        }
 
         MsTrackSeeder::Config seederCfg{};
         seederCfg.seedHalfLength = m_seedHalfLength;
@@ -146,15 +151,13 @@ std::pair<MsTrackFindingAlg::OptBoundPars_t,
             }
         }
         if (!refSeg || measurements.empty()) {
-            ATH_MSG_WARNING("No reference segment passing seeding quality was found");
+            ATH_MSG_WARNING(__func__<<"() "<<__LINE__
+                            <<" - No reference segment passing seeding quality "<<
+                            (refSeg != nullptr)<<" was found. #"<<measurements.size()<<" measurements. ");
             return std::make_pair(Acts::Result<Acts::BoundTrackParameters>::failure(std::make_error_code(std::errc::invalid_argument)),
                                   std::vector<const xAOD::UncalibratedMeasurement_v1*>{});
         }
-        if (measurements.empty()) {
-            ATH_MSG_WARNING("No measurements collected for seed");
-            return std::make_pair(Acts::Result<Acts::BoundTrackParameters>::failure(std::make_error_code(std::errc::invalid_argument)),
-                                  std::vector<const xAOD::UncalibratedMeasurement_v1*>{});
-        }
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - "<<measurements.size()<<" measurements");
         Amg::Vector3D seedPos{refSeg->position()};
         Amg::Vector3D seedDir{refSeg->direction()};
         /// The middle or outer segment provide the phi information. Not so easy becasue we want to
@@ -183,7 +186,6 @@ std::pair<MsTrackFindingAlg::OptBoundPars_t,
                                                                              innerPars[Acts::toUnderlying(y0)], 0};
             seedDir = surf.localToGlobalTransform(tgContext).linear() * combSegDir;
         }
-        
         /// Create a surface shortly before the first measurement that belongs to a valid volume.
         /// Trigger and phi layer hits may have surface geometry IDs that don't map to a named
         /// tracking volume (e.g., they belong to a gap region), even though the measurements
@@ -194,6 +196,8 @@ std::pair<MsTrackFindingAlg::OptBoundPars_t,
         const Acts::TrackingVolume* volume{nullptr};
         for (const xAOD::UncalibratedMeasurement* meas : measurements) {
             const Acts::GeometryIdentifier volId = volumeId(xAOD::muonSurface(meas));
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Check measurement "
+                <<m_idHelperSvc->toString(xAOD::identify(meas))<<", "<<xAOD::muonSurface(meas).geometryId());
             volume = m_trackingGeometryTool->trackingGeometry()->findVolume(volId);
             if (volume) {
                 firstVolumeMeas = meas;
@@ -202,16 +206,18 @@ std::pair<MsTrackFindingAlg::OptBoundPars_t,
         }
 
         if (!volume) {
-            ATH_MSG_WARNING("Failed to find tracking volume for any seed measurement");
+            ATH_MSG_WARNING(__func__<<"() "<<__LINE__
+                            <<" - Failed to find tracking volume for any seed measurement");
             return std::make_pair(Acts::Result<Acts::BoundTrackParameters>::failure(std::make_error_code(std::errc::invalid_argument)),
                                   std::vector<const xAOD::UncalibratedMeasurement_v1*>{});
         }
-        ATH_MSG_VERBOSE("Using seed measurement " << m_idHelperSvc->toString(xAOD::identify(firstVolumeMeas))
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Using seed measurement " 
+                        << m_idHelperSvc->toString(xAOD::identify(firstVolumeMeas))
                         << " with volume id " << volumeId(xAOD::muonSurface(firstVolumeMeas)));
 
         auto boundSurf = MuonGMR4::bottomBoundary(*volume);
         if (!boundSurf) {
-            ATH_MSG_WARNING("Failed to find boundary surface for tracking volume");
+            ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - Failed to find boundary surface for tracking volume");
             return std::make_pair(Acts::Result<Acts::BoundTrackParameters>::failure(std::make_error_code(std::errc::invalid_argument)),
                                   std::vector<const xAOD::UncalibratedMeasurement_v1*>{});
         }
