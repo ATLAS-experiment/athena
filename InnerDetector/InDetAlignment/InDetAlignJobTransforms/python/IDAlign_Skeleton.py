@@ -223,28 +223,9 @@ def configureITkFlags(runArgs, flags):
 
     flags.addFlag("ConstrainedTrackProvider.InputTracksCollection", runArgs.inputTracksCollection)
     flags.Input.Files = [os.path.abspath(inputFile) for inputFile in runArgs.inputRAWFile]
-    flags.Input.Files = runArgs.input
+    #flags.Input.Files = runArgs.input
 
     flags.ITk.Align.writeSilicon = False
-    
-    ## Accumulate step
-    if kwargs["accumulate"] and not kwargs["solve"]:
-        os.makedirs(f"{flags.ITk.Align.baseDir}/Accumulate", exist_ok = True)
-        os.chdir("Accumulate")
-        from InDetAlignConfig.AccumulateITkConfig import ITkAccumulateCfg
-        cfg.merge(ITkAccumulateCfg(flags))
-
-    ## Solve step
-    elif kwargs["solve"] and not kwargs["accumulate"]:
-        os.makedirs(f"{flags.ITk.Align.baseDir}/Solve", exist_ok = True)
-        os.chdir("Solve")
-        from InDetAlignConfig.SolveITkConfig import ITkSolveCfg
-        cfg.merge(ITkSolveCfg(flags))
-        
-    else:
-        raise Exception("You can run either the acculumation step or the solve step, but not both or neither at the same time!")
-
-
 
     flags.Exec.MaxEvents = runArgs.maxEvents if not runArgs.solve else 1
 
@@ -257,7 +238,6 @@ def configureITkFlags(runArgs, flags):
 
     if runArgs.localgeo:
         flags.ITk.Geometry.AllLocal = True
-
 
     if not flags.Input.isMC and runArgs.isCosmics:
         from AthenaConfiguration.Enums import BeamType
@@ -301,6 +281,11 @@ def configureITkFlags(runArgs, flags):
     if flags.ITk.Align.alignITkStrip:
         flags.ITk.Geometry.stripAlignable = True
 
+    
+    if runArgs.threads > 0:
+        flags.Concurrency.NumThreads = runArgs.threads
+
+
     # Lock flags
     flags.lock()
     return flags
@@ -320,9 +305,53 @@ def configureFlags(runArgs):
         # return configureITkFlags(runArgs, flags)
         return configureInDetFlags(runArgs, flags)
 
-    
+def fromRunArgsITk(runArgs):
 
-def fromRunArgs(runArgs):
+    DBFile = ""
+    DBName="OFLCOND"
+    tag="InDetSi_MisalignmentMode_random misalignment"
+
+    flags = configureFlags(runArgs)
+
+    from RecJobTransforms.RecoSteering import RecoSteering
+    cfg = RecoSteering(flags)
+
+    if flags.ITk.Align.useLocalDatabase:
+        from IOVDbSvc.IOVDbSvcConfig import addFolders, getSqliteContent
+        print("Adding Align Folder "+flags.ITk.Geometry.alignmentFolder+" from local "+DBName+" Database in file "+DBFile)
+        cfg.merge(addFolders(flags,flags.ITk.Geometry.alignmentFolder,db=DBName,detDb=DBFile,tag=tag, className="AlignableTransformContainer"))     
+
+    from MuonConfig.MuonGeometryConfig import MuonIdHelperSvcCfg
+    cfg.getPrimaryAndMerge(MuonIdHelperSvcCfg(flags))
+
+
+    ## Accumulate step
+    if runArgs.accumulate and not runArgs.solve:
+        os.makedirs(f"{flags.ITk.Align.baseDir}/Accumulate", exist_ok = True)
+        os.chdir("Accumulate")
+        from InDetAlignConfig.AccumulateITkConfig import ITkAccumulateCfg
+        cfg.merge(ITkAccumulateCfg(flags))
+
+    ## Solve step
+    elif runArgs.solve and not runArgs.accumulate:
+        os.makedirs(f"{flags.ITk.Align.baseDir}/Solve", exist_ok = True)
+        os.chdir("Solve")
+        from InDetAlignConfig.SolveITkConfig import ITkSolveCfg
+        cfg.merge(ITkSolveCfg(flags))
+        
+    else:
+        raise Exception("You can run either the acculumation step or the solve step, but not both or neither at the same time!")
+
+    ##----- Run the setup -----##
+                
+    if runArgs.dryRun:
+        cfg.printConfig()
+    
+    else:
+        cfg.run()
+
+
+def fromRunArgsInDet(runArgs):
     flags = configureFlags(runArgs)
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -401,3 +430,18 @@ def fromRunArgs(runArgs):
         
     import sys
     sys.exit(sc.isFailure())
+    
+
+def fromRunArgs(runArgs):
+
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+
+    flags.GeoModel.Align.Dynamic = True
+    flags.GeoModel.AtlasVersion = runArgs.atlasVersion
+
+    if flags.GeoModel.Run > LHCPeriod.Run3:
+        pass
+    else:
+        return fromRunArgsInDet(runArgs)
+    
