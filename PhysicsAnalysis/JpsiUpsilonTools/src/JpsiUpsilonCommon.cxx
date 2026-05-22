@@ -67,13 +67,9 @@ namespace Analysis {
     }
     
     bool JpsiUpsilonCommon::isContainedIn(const xAOD::TrackParticle* theTrack, const xAOD::MuonContainer* theColl) {
-        bool isContained(false);
-        xAOD::MuonContainer::const_iterator muItr;
-        for (muItr=theColl->begin(); muItr!=theColl->end(); ++muItr) {
-            auto& link = ( *muItr )->inDetTrackParticleLink();
-            if ( link.isValid() && ( *link == theTrack ) ) {isContained=true; break;}
-        }
-        return isContained;
+        return std::find_if(theColl->begin(), theColl->end(), [theTrack](const xAOD::Muon* muon){
+            return muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle) == theTrack;
+        }) != theColl->end();
     }
 
     bool JpsiUpsilonCommon::cutRange(double value, double min, double max) noexcept {
