@@ -61,7 +61,7 @@ int main() {
                      result( SG::VIEW_ELEMENTS );
                   for( const xAOD::Muon* mu : muons ) {
                      if( ( mu->pt() > 10000.0 ) &&
-                         ( mu->muonType() == xAOD::Muon::Combined ) ) {
+                         ( mu->muonType() == xAOD::Muon::MuonType::Combined ) ) {
                         result.push_back( mu );
                      }
                   }
@@ -73,7 +73,7 @@ int main() {
                   result.reserve( muons.size() );
                   for( const xAOD::Muon* mu : muons ) {
                      result.push_back( mu->pt() -
-                                       mu->trackParticle( xAOD::Muon::InnerDetectorTrackParticle )->pt() );
+                                       mu->trackParticle( xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle )->pt() );
                   }
                   return result;
                }, { "HighPtMuons" } );
