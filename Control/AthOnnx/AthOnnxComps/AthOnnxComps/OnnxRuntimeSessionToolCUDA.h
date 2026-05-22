@@ -34,6 +34,9 @@ namespace AthOnnx {
         /// Check if asynchronous inference is supported (yes, it is)
         virtual bool supportsAsync() const override final;
 
+        /// Device ID passed to the CUDA provider (needed to build Ort::MemoryInfo for IoBinding).
+        int deviceId() const { return m_deviceId; }
+
         protected:
         OnnxRuntimeSessionToolCUDA() = delete;
         OnnxRuntimeSessionToolCUDA(const OnnxRuntimeSessionToolCUDA&) = delete;

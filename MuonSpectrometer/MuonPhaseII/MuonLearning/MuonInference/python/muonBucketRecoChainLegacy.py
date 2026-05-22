@@ -6,8 +6,8 @@ if __name__=="__main__":
     from MuonConfig.MuonConfigUtils import executeTest,setupHistSvcCfg
     parser = SetupArgParser()
     parser.set_defaults(nEvents = -1)
-    parser.set_defaults(noMM=True)
-    parser.set_defaults(noSTGC=True)
+    parser.set_defaults(noMM=False)
+    parser.set_defaults(noSTGC=False)
     parser.set_defaults(outRootFile="RecoChainTester.root")
     parser.set_defaults(inputFile=MuonPhaseIITestDefaults.HITS_PG_R3)
     
@@ -17,40 +17,38 @@ if __name__=="__main__":
                         help="runs VTune profiler service for the muon hough alg", action='store_true', default = False)
     parser.add_argument("--noPerfMon", help="If set to true, full perfmonMT is enabled",
                         default=False, action='store_true')
-    parser.add_argument("--use-cpu", action="store_true", default=False,
+    parser.add_argument("--houghR4", help="Schedules the R4 pattern -> legacy segment -> legacy track chain",
+                        action="store_true", default = False)
+    parser.add_argument("--use-gpu", action="store_true", dest="use_gpu", default=True,
+                       help="Use GPU for ONNX inference (default: True)")
+    parser.add_argument("--use-cpu", dest="use_gpu", action="store_false",
                        help="Use CPU for ONNX inference")
-    parser.add_argument("--skip_bucket_filter", action="store_true", default=False,
-                       help="Skip the bucket filter inference step (default: False)")
-
+    parser.add_argument("--skip-onnx", action="store_true", default=False,
+                       help="Skip ONNX inference step")
+    parser.add_argument("--bucket-model-path",
+                        default="/eos/project-f/fcc-ml/ddicroce/ATLAS_MuonSpectrometer/KubeFlow/Inference_EdgeClassifier/athena/MuonSpectrometer/MuonPhaseII/MuonLearning/MuonInference/models/edgecnn_bucket_sparse_best.onnx",
+                        dest="bucket_model_path")
+    parser.add_argument("--score-threshold", type=float, default=0.0, dest="score_threshold")
+    parser.add_argument("--output-name", default="logits", dest="output_name")
+  
     args = parser.parse_args()
     
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.PerfMon.doFullMonMT = not args.noPerfMon
     flags.PerfMon.OutputJSON="perfmonmt_MuonR4Reco.json"
-    
+
     from AthOnnxComps.OnnxRuntimeFlags import OnnxRuntimeType
-    use_gpu_requested = not args.use_cpu
-    # Runtime check for GPU availability. Prefer ONNXRuntime provider list,
-    # fall back to PyTorch if ONNX runtime isn't available.
-    gpu_available = False
-    try:
-        import onnxruntime as ort
-        gpu_available = "CUDAExecutionProvider" in ort.get_available_providers()
-    except Exception:
-        try:
-            import torch
-            gpu_available = torch.cuda.is_available()
-        except Exception:
-            gpu_available = False
-    if use_gpu_requested and gpu_available:
+    # Honor the explicit CLI choice for Athena ONNX provider.
+    # Python package provider discovery can differ from Athena's C++ runtime.
+    use_gpu_requested = args.use_gpu if args.use_gpu is not None else True
+    if use_gpu_requested:
         flags.AthOnnx.ExecutionProvider = OnnxRuntimeType.CUDA
     else:
         flags.AthOnnx.ExecutionProvider = OnnxRuntimeType.CPU
 
     flags, cfg = setupGeoR4TestCfg(args,flags)
     
-
     cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
                                     outStream="MuonEtaHoughTransformTest"))
 
@@ -59,80 +57,51 @@ if __name__=="__main__":
 
     from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg 
     cfg.merge(MuonSpacePointFormationCfg(flags))
+    
+    ### Build segments from the leagcy chain
+    from MuonPatternRecognitionTest.PatternTestConfig import LegacyMuonRecoChainCfg
+    cfg.merge(LegacyMuonRecoChainCfg(flags))
 
-    ###### ML Inference
-
-    ### SP Filter (alone)
-    #from MuonInference.InferenceConfig import GraphSPFilterToolCfg, GraphInferenceAlgCfg
-    #cfg.merge(GraphInferenceAlgCfg(flags,InferenceTools = [cfg.popToolsAndMerge(GraphSPFilterToolCfg(flags))]))
-
-    ### Bucket + SP Filter
-    from MuonInference.InferenceConfig import (
-        GraphBucketFilterToolCfg,
-        GraphSPFilterToolCfg,
-        GraphInferenceAlgCfg,
-    )
-    # 1) Bucket filter: read raw SPs, write filtered buckets (optional)
-    if not args.skip_bucket_filter:
+    if not args.skip_onnx:
+        ### Setup the ONNX inference step
+        from MuonInference.InferenceConfig import GraphBucketFilterToolCfg, GraphInferenceAlgCfg
         bucketTool = cfg.popToolsAndMerge(
             GraphBucketFilterToolCfg(
                 flags,
-                ReadSpacePoints="MuonSpacePoints",
-                WriteSpacePointKey="FilteredMlBuckets",
+                ModelPath=args.bucket_model_path,
+                ScoreThreshold=args.score_threshold,
+                OutputName=args.output_name,
             )
         )
         cfg.merge(
             GraphInferenceAlgCfg(
                 flags,
-                name="GraphInferenceAlgBuckets",
                 InferenceTools=[bucketTool],
             )
         )
-        # SP filter reads from bucket filter output
-        sp_input_container = "FilteredMlBuckets"
-    else:
-        # Skip bucket filter, SP filter reads directly from raw space points
-        sp_input_container = "MuonSpacePoints"
-    
-    # 2) SP filter: read filtered buckets (or raw SPs), write filtered SPs
-    spTool = cfg.popToolsAndMerge(
-        GraphSPFilterToolCfg(
-            flags,
-            ReadSpacePoints=sp_input_container,         # chain from previous stage or raw SPs
-            WriteSpacePointKey="FilteredMlSpacePoints",  # final SPs for Hough
-            # MLFilterCut=-3.6,
-        )
-    )
-    cfg.merge(
-        GraphInferenceAlgCfg(
-            flags,
-            name="GraphInferenceAlgSP",    # unique name
-            InferenceTools=[spTool],
-        )
-    )
-
-    ### Build segments from the legacy chain
-    from MuonPatternRecognitionTest.PatternTestConfig import LegacyMuonRecoChainCfg
-    cfg.merge(LegacyMuonRecoChainCfg(flags))
 
     ### Setup the new chain
-    from MuonConfig.ReconstructionConfigR4 import MuonReconstructionConfig
-    cfg.merge(MuonReconstructionConfig(flags)) 
+    from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
+    cfg.merge(MuonPatternRecognitionCfg(flags))    
     
-    cfg.getEventAlgo("MuonEtaHoughTransformAlg").SpacePointContainer = "FilteredMlSpacePoints"
-
+    if not args.skip_onnx:
+        cfg.getEventAlgo("MuonEtaHoughTransformAlg").SpacePointContainer = "FilteredMlBuckets"
 
     from MuonPatternRecognitionTest.PatternTestConfig import MuonR4PatternRecoChainCfg, MuonR4SegmentRecoChainCfg
-    cfg.merge(MuonR4PatternRecoChainCfg(flags))
+    if args.houghR4:
+        cfg.merge(MuonR4PatternRecoChainCfg(flags))
 
     ### What happens if you parse the R4 patterns to the legacy chain?
     cfg.merge(MuonR4SegmentRecoChainCfg(flags))
 
     from MuonPatternRecognitionTest.PatternTestConfig import TrackTruthMatchCfg
-    cfg.merge(TrackTruthMatchCfg(flags))
+    cfg.merge(TrackTruthMatchCfg(flags, setupHoughR4 = args.houghR4))
+
 
     from MuonPatternRecognitionTest.PatternTestConfig import MuonRecoChainTesterCfg
-    cfg.merge(MuonRecoChainTesterCfg(flags))
+    cfg.merge(MuonRecoChainTesterCfg(flags,
+                                    SegmentFromR4HoughKey = "MuonSegmentsFromHoughR4" if args.houghR4 else "" ))
+
     if args.runVtune: 
         from PerfMonVTune.PerfMonVTuneConfig import VTuneProfilerServiceCfg
         cfg.merge(VTuneProfilerServiceCfg(flags, ProfiledAlgs=["MuonHoughTransformAlg"]))
@@ -152,5 +121,3 @@ if __name__=="__main__":
                                                                                                 AllCanvasName="AllSegmentFitPlots", doPhiBucketViews = False,
                                                                                                 displayTruthOnly = True, saveSinglePDFs = True, saveSummaryPDF= False))
     executeTest(cfg)
-
-
