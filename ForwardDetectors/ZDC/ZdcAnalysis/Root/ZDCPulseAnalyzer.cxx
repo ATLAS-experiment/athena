@@ -68,6 +68,8 @@ const ZDCJSONConfig::JSONParamList ZDCPulseAnalyzer::JSONConfigParams = {
     {"gainFactorLG", {JSON::value_t::number_float, 1, true, true}},
     {"noiseSigmaHG", {JSON::value_t::number_float, 1, true, true}},
     {"noiseSigmaLG", {JSON::value_t::number_float, 1, true, true}},
+    {"perSampleNoiseSigmaHG", {JSON::value_t::array, -1, true, true}},
+    {"perSampleNoiseSigmaLG", {JSON::value_t::array, -1, true, true}},
     {"enableRepass", {JSON::value_t::boolean, 1, false, false}},
     {"Repass2ndDerivThreshHG", {JSON::value_t::number_integer, 1, true, true}},
     {"Repass2ndDerivThreshLG", {JSON::value_t::number_integer, 1, true, true}},
@@ -395,12 +397,17 @@ void ZDCPulseAnalyzer::reset(bool repass)
     m_useSampleHG.assign(m_NSamplesAna, true);
     m_useSampleLG.assign(m_NSamplesAna, true);
 
-    if (m_havePerSampleNoise) {
+    if (m_havePerSampleNoiseHG) {
       m_sampleNoiseHG = m_setPerSampleNoiseHG;
-      m_sampleNoiseLG = m_setPerSampleNoiseLG;
     }
     else {
       m_sampleNoiseHG.assign(m_NSamplesAna, m_noiseSigHG);
+    }
+    
+    if (m_havePerSampleNoiseLG) {
+      m_sampleNoiseLG = m_setPerSampleNoiseLG;
+    }
+    else {
       m_sampleNoiseLG.assign(m_NSamplesAna, m_noiseSigLG);
     }
 
@@ -468,7 +475,8 @@ void ZDCPulseAnalyzer::reset(bool repass)
   m_prePulseSig = -10;
 
   m_fitChisq = 0;
-
+  m_chisqRatio = 0;
+ 
   m_amplitude       = 0;
   m_ampError        = 0;
   m_preSampleAmp    = 0;
@@ -786,9 +794,10 @@ void ZDCPulseAnalyzer::SetupFitFunctions()
     //
     m_defaultFitWrapper = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiVariableTausInduct(m_tag, m_tmin, m_tmax, m_fixTau1, m_fixTau2,
 											      m_nominalTau1, m_nominalTau2));
+    m_preExpFitWrapper = std::unique_ptr<ZDCFitExpFermiInductPreExp>(new ZDCFitExpFermiInductPreExp(m_tag, m_tmin, m_tmax, m_nominalTau1, m_nominalTau2, 6, false));
 
-    m_preExpFitWrapper = std::unique_ptr<ZDCFitExpFermiLHCfPreExp>(new ZDCFitExpFermiLHCfPreExp(m_tag, m_tmin, m_tmax, m_nominalTau1, m_nominalTau2, 6, false));
-    
+    // We still have to implement the pre-pulse version of the new induct function For now, using old ("LHCf") version
+    //
     m_prePulseFitWrapper = std::unique_ptr<ZDCPrePulseFitWrapper>(new ZDCFitExpFermiLHCfPrePulse(m_tag, m_tmin, m_tmax, m_nominalTau1, m_nominalTau2));
   }
   else if (m_fitFunction == "FermiExpLinear") {
@@ -2270,7 +2279,7 @@ void ZDCPulseAnalyzer::dumpTF1(const TF1* func) const
 void ZDCPulseAnalyzer::dumpConfiguration() const    // setting
 {
   std::ostringstream ostrStream;
-  
+  (*m_msgFunc_p)(ZDCMsg::Info, ("\n ZDCPulserAnalyzer:: ======================================================================="));
   (*m_msgFunc_p)(ZDCMsg::Info, ("ZDCPulserAnalyzer:: settings for instance: " + m_tag));
 
   ostrStream << "Nsample = " << m_Nsample << " at frequency " << m_freqMHz << " MHz, preSample index = "
@@ -2280,7 +2289,21 @@ void ZDCPulseAnalyzer::dumpConfiguration() const    // setting
 
   ostrStream << "LG mode = " << m_LGMode << ", gainFactor HG = " << m_gainFactorHG << ", gainFactor LG = " << m_gainFactorLG << ", noise sigma HG = " <<  m_noiseSigHG << ", noiseSigLG = " << m_noiseSigLG;
   (*m_msgFunc_p)(ZDCMsg::Info, ostrStream.str()); ostrStream.str(""); ostrStream.clear();
-  
+
+  if (m_havePerSampleNoiseHG) {
+    ostrStream << "Using per-sample noise sigmas for high gain, values = ";
+    for (auto sig : m_setPerSampleNoiseHG) {ostrStream << sig << ", ";}
+    ostrStream << "end";
+    (*m_msgFunc_p)(ZDCMsg::Info, ostrStream.str()); ostrStream.str(""); ostrStream.clear();
+  }
+
+  if (m_havePerSampleNoiseLG) {
+    ostrStream << "Using per-sample noise sigmas for low gain, values = ";
+    for (auto sig : m_setPerSampleNoiseLG) {ostrStream << sig << ", ";}
+    ostrStream << "end";
+    (*m_msgFunc_p)(ZDCMsg::Info, ostrStream.str()); ostrStream.str(""); ostrStream.clear();
+  }
+
   ostrStream << "peak sample = " << m_peak2ndDerivMinSample <<  ", tolerance = " << m_peak2ndDerivMinTolerance
 	     << ", 2ndDerivThresh HG, LG = " << m_peak2ndDerivMinThreshHG <<  ", " << m_peak2ndDerivMinThreshLG
 	     << ", 2nd deriv step = " << m_2ndDerivStep;
@@ -2684,6 +2707,19 @@ std::pair<bool, std::string> ZDCPulseAnalyzer::ConfigFromJSON(const JSON& config
     else if (key == "gainFactorLG") m_gainFactorLG = value;
     else if (key == "noiseSigmaHG") m_noiseSigHG = value;
     else if (key == "noiseSigmaLG") m_noiseSigLG = value;
+    else if (key == "perSampleNoiseSigmaHG") {
+      m_havePerSampleNoiseHG = true;
+      value.get_to(m_setPerSampleNoiseHG);
+    }
+    else if (key == "perSampleNoiseSigmaLG") {
+      m_havePerSampleNoiseLG = true;
+      value.get_to(m_setPerSampleNoiseLG);
+      // m_setPerSampleNoiseLG.clear();
+      
+      // for (auto elem : value) {
+      // 	m_setPerSampleNoiseLG.push_back(elem);
+      // }
+    }
     else if (key == "fitTimeMax") {
       SetFitTimeMax(static_cast<float>(value));
     }

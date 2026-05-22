@@ -124,7 +124,8 @@ private:
   float m_noiseSigHG{};
   float m_noiseSigLG{};
 
-  bool m_havePerSampleNoise{false};
+  bool m_havePerSampleNoiseHG{false};
+  bool m_havePerSampleNoiseLG{false};
   std::vector<float> m_setPerSampleNoiseHG;
   std::vector<float> m_setPerSampleNoiseLG;
   
@@ -558,7 +559,8 @@ public:
   {
     m_setPerSampleNoiseHG =  sigmaHG;
     m_setPerSampleNoiseLG =  sigmaLG;
-    m_havePerSampleNoise = true;
+    m_havePerSampleNoiseHG = true;
+    m_havePerSampleNoiseLG = true;
   }
   
   void setLGMode(unsigned int mode) {m_LGMode = mode;}
