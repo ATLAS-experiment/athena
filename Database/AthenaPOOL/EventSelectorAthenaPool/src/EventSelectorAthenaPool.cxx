@@ -633,7 +633,7 @@ StatusCode EventSelectorAthenaPool::seek(Context& /*ctxt*/, int evtNum) const {
 	         m_inputCollectionsProp.value()[m_curCollection],
 	         IPoolSvc::kInputStream,
 	         m_athenaPoolCnvSvc->getPoolSvc());
-         if (!m_poolCollectionConverter->initialize().isSuccess()) {
+         if (!m_poolCollectionConverter || !m_poolCollectionConverter->initialize().isSuccess()) {
             m_headerIterator = nullptr;
             ATH_MSG_ERROR("seek: Unable to initialize PoolCollectionConverter.");
             return StatusCode::FAILURE;
