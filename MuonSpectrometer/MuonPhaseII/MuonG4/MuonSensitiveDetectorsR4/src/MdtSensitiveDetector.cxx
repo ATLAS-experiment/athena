@@ -1,20 +1,19 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSensitiveDetectorsR4/Utils.h"
 
 #include "MdtSensitiveDetector.h"
 
-
 #include <MCTruth/TrackHelper.h>
+#include <MCTruth/AtlasG4EventUserInfo.h>
 
 #include <limits>
 #include <iostream>
 #include <GeoPrimitives/CLHEPtoEigenConverter.h>
 #include <GeoModelKernel/throwExcept.h>
 #include <GaudiKernel/SystemOfUnits.h>
-#include <StoreGate/ReadHandle.h>
 
 using namespace MuonGMR4;
 using namespace CxxUtils;
@@ -58,9 +57,12 @@ G4bool MdtSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROH
     const G4TouchableHistory* touchHist = static_cast<const G4TouchableHistory*>(preStep->GetTouchable());
     const MdtReadoutElement* reEle{getReadoutElement(touchHist)};
 
-    const ActsTrk::GeometryContext gctx{getGeoContext()};
+    auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo();
+    if (!eventInfo) {
+        THROW_EXCEPTION("No AtlasG4EventUserInfo available");
+    }
+    const ActsTrk::GeometryContext gctx{getGeoContext(eventInfo->GetEventContext())};
 
-  
     const Identifier HitID = getIdentifier(gctx, reEle, touchHist);
     if (!HitID.is_valid()) {
         ATH_MSG_VERBOSE("No valid hit found");
