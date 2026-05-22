@@ -25,7 +25,7 @@ namespace ZMassConstraint
         declareProperty( "hasWidth",                       m_conHasWidth);
         declareProperty( "ignoreInputChecks",              m_ignoreInputChecks);
         declareProperty( "EgammaCalibAndSmearingTool",     m_energyRescaler = ToolHandle<CP::IEgammaCalibrationAndSmearingTool>("CP::EgammaCalibrationAndSmearingTool"));
-        declareProperty( "MuonCalibrationAndSmearingTool", m_mu_resolSFTool = ToolHandle<CP::IMuonCalibrationAndSmearingTool>("CP::MuonCalibrationAndSmearingTool"));
+        // declareProperty( "MuonCalibrationAndSmearingTool", m_mu_resolSFTool = ToolHandle<CP::IMuonCalibrationAndSmearingTool>("CP::MuonCalibrationAndSmearingTool"));
     }
 
     ConstraintFit::~ConstraintFit(void)
@@ -34,18 +34,18 @@ namespace ZMassConstraint
 
     StatusCode ConstraintFit::initialize()
     {
-        ATH_MSG_INFO ("initialize: retrieve tools" << m_energyRescaler.name() << " and "
-                       << m_mu_resolSFTool.name());
+        ATH_MSG_INFO ("initialize: retrieve tools" << m_energyRescaler.name());
+    //   << " and " << m_mu_resolSFTool.name());
 
         if (!m_energyRescaler.retrieve().isSuccess()) {
             ATH_MSG_ERROR ("initialize: unable to retrieve EgammaCalibrationAndSmearingTool");
             return StatusCode::FAILURE;
         }
 
-        if (!m_mu_resolSFTool.retrieve().isSuccess()) {
-            ATH_MSG_ERROR ("initialize: unable to retrieve MuonCalibrationAndSmearingTool");
-            return StatusCode::FAILURE;
-        }
+        // if (!m_mu_resolSFTool.retrieve().isSuccess()) {
+        //     ATH_MSG_ERROR ("initialize: unable to retrieve MuonCalibrationAndSmearingTool");
+        //     return StatusCode::FAILURE;
+        // }
         
         // Return gracefully:
         return StatusCode::SUCCESS;
