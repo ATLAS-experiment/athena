@@ -276,8 +276,7 @@ namespace Analysis {
         TrackBag muonTracks;
         if (importedMuonCollection && m_excludeJpsiMuonsOnly) {
           for(auto muon : *importedMuonCollection){
-            if(!muon->inDetTrackParticleLink().isValid()) continue;
-            auto track = muon->trackParticle( xAOD::Muon::InnerDetectorTrackParticle );
+            auto track = muon->trackParticle( xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
             if(track==nullptr) continue;
             if(!JpsiUpsilonCommon::isContainedIn(track, theIDTracksAfterSelection)) continue;
             muonTracks.push_back(track);
