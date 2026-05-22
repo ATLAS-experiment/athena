@@ -45,102 +45,102 @@ ActsLegacyTrackFindingAlg                                         INFO statistic
 |-----------------------------------|------------|------------|------------|
 | Input seeds                       |     116751 |      24676 |     141427 |
 | No track parameters               |          0 |          0 |          0 |
-| Used   seeds                      |      65652 |      12451 |      78103 |
-| Cannot find track                 |      53285 |       9598 |      62883 |
-| Duplicate seeds                   |      51099 |      10064 |      61163 |
-| Initial param estimation failed   |          0 |       2161 |       2161 |
-| CKF tracks                        |      12367 |       2853 |      15220 |
+| Used   seeds                      |      65646 |      12525 |      78171 |
+| Cannot find track                 |      53282 |      10087 |      63369 |
+| Duplicate seeds                   |      51105 |       9982 |      61087 |
+| Initial param estimation failed   |          0 |       2169 |       2169 |
+| CKF tracks                        |      12364 |       2438 |      14802 |
 | Rejected refined parameters       |          0 |          0 |          0 |
-| selected tracks                   |       9785 |        546 |      10331 |
-| Stopped tracks reaching max holes |      51530 |       9102 |      60632 |
+| selected tracks                   |       9790 |        443 |      10233 |
+| Stopped tracks reaching max holes |      51534 |       9601 |      61135 |
 | Seeds with more than one branch   |          0 |          0 |          0 |
-| Tracks failing second CKF         |          4 |         47 |         51 |
-| Stopped tracks below pT cut       |       1755 |        496 |       2251 |
+| Tracks failing second CKF         |          4 |         67 |         71 |
+| Stopped tracks below pT cut       |       1748 |        486 |       2234 |
 | Stopped tracks above max eta      |          0 |          0 |          0 |
-| Total shared hits                 |       9920 |      12450 |      22370 |
-| Total forced measurements         |     196956 |      74706 |     271662 |
+| Total shared hits                 |      10011 |      10411 |      20422 |
+| Total forced measurements         |     196938 |      75150 |     272088 |
 | resolved tracks                   |          0 |          0 |          0 |
 |-----------------------------------|------------|------------|------------|
 ActsLegacyTrackFindingAlg                                         INFO Ratios
 |-------------------------------------------|------------|------------|------------|
 |                                           | PPP        | SSS        | ALL        |
 |-------------------------------------------|------------|------------|------------|
-| failed / seeds                            |   0.456399 |   0.476536 |   0.459912 |
-| duplication / seeds                       |   0.437675 |   0.407846 |    0.43247 |
+| failed / seeds                            |   0.456373 |   0.496677 |   0.463405 |
+| duplication / seeds                       |   0.437726 |   0.404523 |   0.431933 |
 | Rejected refined params / seeds           |          0 |          0 |          0 |
-| selected / CKF tracks                     |   0.791219 |   0.191377 |   0.678778 |
-| selected tracks / used seeds              |   0.149043 |  0.0438519 |   0.132274 |
+| selected / CKF tracks                     |   0.791815 |   0.181706 |   0.691325 |
+| selected tracks / used seeds              |   0.149133 |  0.0353693 |   0.130905 |
 | resolved / selected tracks                |          0 |          0 |          0 |
 | resolved tracks / used seeds              |          0 |          0 |          0 |
 | branched tracks / used seeds              |          0 |          0 |          0 |
-| no 2nd CKF / CKF tracks                   | 0.000323441 |  0.0164739 | 0.00335085 |
-| shared hits / CKF tracks                  |   0.802135 |    4.36383 |    1.46978 |
-| forced measurements / used seeds          |          3 |          6 |    3.47825 |
+| no 2nd CKF / CKF tracks                   | 0.00032352 |  0.0274815 | 0.00479665 |
+| shared hits / CKF tracks                  |   0.809689 |     4.2703 |    1.37968 |
+| forced measurements / used seeds          |          3 |          6 |    3.48068 |
 |-------------------------------------------|------------|------------|------------|
-| selected tracks / used seeds     0.0- 0.5 |   0.214517 |  0.0325203 |   0.186223 |
-|                                  0.5- 1.0 |   0.152823 |  0.0542373 |   0.139893 |
-|                                  1.0- 1.5 |  0.0682173 |  0.0897332 |  0.0701118 |
-|                                  1.5- 2.0 |  0.0571843 |  0.0322129 |  0.0496559 |
-|                                  2.0- 2.5 |   0.140515 |  0.0543079 |   0.121717 |
-|                                  2.5- 3.0 |   0.172612 |          0 |   0.172573 |
-|                                  3.0- 3.5 |   0.266301 |          0 |   0.266301 |
-|                                  3.5-+inf |   0.620282 |          0 |   0.620282 |
+| selected tracks / used seeds     0.0- 0.5 |   0.215358 |  0.0163265 |    0.18445 |
+|                                  0.5- 1.0 |   0.152785 |  0.0299335 |   0.136424 |
+|                                  1.0- 1.5 |  0.0684247 |  0.0699845 |   0.068567 |
+|                                  1.5- 2.0 |  0.0573865 |  0.0278785 |  0.0484585 |
+|                                  2.0- 2.5 |   0.140709 |  0.0469522 |   0.120393 |
+|                                  2.5- 3.0 |   0.172145 |          0 |   0.172145 |
+|                                  3.0- 3.5 |   0.265432 |          0 |   0.265432 |
+|                                  3.5-+inf |   0.621838 |          0 |   0.621838 |
 |-------------------------------------------|------------|------------|------------|
 ActsLegacyAmbiguityResolutionAlg                                  INFO Ambiguity Resolution statistics
 |-------------------|------------|
-| Input tracks      |      10331 |
-| Resolved tracks   |       9411 |
-| Total shared hits |        266 |
+| Input tracks      |      10233 |
+| Resolved tracks   |       9399 |
+| Total shared hits |        272 |
 |-------------------|------------|
 ActsLegacyPrdAssociationAlg                                       INFO Prd Map statistics
 |-----------------------|------------|
-| N. Tracks             |       9411 |
-| N. Pixel Measurements |     101623 |
-| N. Strip Measurements |      36165 |
-| N. Hgtd Measurements  |         18 |
+| N. Tracks             |       9399 |
+| N. Pixel Measurements |     101533 |
+| N. Strip Measurements |      35995 |
+| N. Hgtd Measurements  |         17 |
 |-----------------------|------------|
 ActsConversionPixelClusterPreparationAlg                          INFO Data Prep statistics
 |---------|------------|
 | Inputs  |    1164869 |
-| Outputs |      27876 |
+| Outputs |      27873 |
 |---------|------------|
 ActsConversionStripClusterPreparationAlg                          INFO Data Prep statistics
 |---------|------------|
 | Inputs  |    1116636 |
-| Outputs |      17352 |
+| Outputs |      17356 |
 |---------|------------|
 ActsConversionHgtdClusterPreparationAlg                           INFO Data Prep statistics
 |---------|------------|
 | Inputs  |     327475 |
-| Outputs |     327457 |
+| Outputs |     327458 |
 |---------|------------|
 ActsConversionStripSpacePointPreparationAlg                       INFO Data Prep statistics
 |---------|------------|
 | Inputs  |     327706 |
-| Outputs |       4745 |
+| Outputs |       4746 |
 |---------|------------|
 ActsConversionStripSeedingAlg                                     INFO Seed statistics
 |-------------|------------|
-| Spacepoints |       4745 |
-| Seeds       |         64 |
+| Spacepoints |       4746 |
+| Seeds       |         61 |
 |-------------|------------|
 ActsConversionTrackFindingAlg                                     INFO statistics
 |-----------------------------------|------------|------------|
 |                           All eta | SSS        | ALL        |
 |-----------------------------------|------------|------------|
-| Input seeds                       |         64 |         64 |
+| Input seeds                       |         61 |         61 |
 | No track parameters               |          0 |          0 |
-| Used   seeds                      |         55 |         55 |
-| Cannot find track                 |         43 |         43 |
+| Used   seeds                      |         52 |         52 |
+| Cannot find track                 |         40 |         40 |
 | Duplicate seeds                   |          0 |          0 |
 | Initial param estimation failed   |          9 |          9 |
 | CKF tracks                        |         12 |         12 |
 | Rejected refined parameters       |          0 |          0 |
 | selected tracks                   |          0 |          0 |
-| Stopped tracks reaching max holes |         41 |         41 |
+| Stopped tracks reaching max holes |         37 |         37 |
 | Seeds with more than one branch   |          0 |          0 |
 | Tracks failing second CKF         |          0 |          0 |
-| Stopped tracks below pT cut       |          2 |          2 |
+| Stopped tracks below pT cut       |          3 |          3 |
 | Stopped tracks above max eta      |          0 |          0 |
 | Total shared hits                 |          0 |          0 |
 | Total forced measurements         |          0 |          0 |
@@ -150,7 +150,7 @@ ActsConversionTrackFindingAlg                                     INFO Ratios
 |-------------------------------------------|------------|------------|
 |                                           | SSS        | ALL        |
 |-------------------------------------------|------------|------------|
-| failed / seeds                            |     0.8125 |     0.8125 |
+| failed / seeds                            |   0.803279 |   0.803279 |
 | duplication / seeds                       |          0 |          0 |
 | Rejected refined params / seeds           |          0 |          0 |
 | selected / CKF tracks                     |          0 |          0 |
@@ -187,52 +187,52 @@ ActsConversionPrdAssociationAlg                                   INFO Prd Map s
 ActsLargeRadiusPixelClusterPreparationAlg                         INFO Data Prep statistics
 |---------|------------|
 | Inputs  |    1164869 |
-| Outputs |    1063343 |
+| Outputs |    1063436 |
 |---------|------------|
 ActsLargeRadiusStripClusterPreparationAlg                         INFO Data Prep statistics
 |---------|------------|
 | Inputs  |    1116636 |
-| Outputs |    1080507 |
+| Outputs |    1080677 |
 |---------|------------|
 ActsLargeRadiusHgtdClusterPreparationAlg                          INFO Data Prep statistics
 |---------|------------|
 | Inputs  |     327475 |
-| Outputs |     327457 |
+| Outputs |     327458 |
 |---------|------------|
 ActsLargeRadiusStripSpacePointPreparationAlg                      INFO Data Prep statistics
 |---------|------------|
 | Inputs  |     327706 |
-| Outputs |     307698 |
+| Outputs |     307789 |
 |---------|------------|
 ActsLargeRadiusStripOv...pSpacePointPreparationAlg                INFO Data Prep statistics
 |---------|------------|
 | Inputs  |     106134 |
-| Outputs |     100726 |
+| Outputs |     100777 |
 |---------|------------|
 ActsLargeRadiusStripSeedingAlg                                    INFO Seed statistics
 |-------------|------------|
-| Spacepoints |     408424 |
-| Seeds       |      25192 |
+| Spacepoints |     408566 |
+| Seeds       |      25248 |
 |-------------|------------|
 ActsLargeRadiusTrackFindingAlg                                    INFO statistics
 |-----------------------------------|------------|------------|
 |                           All eta | SSS        | ALL        |
 |-----------------------------------|------------|------------|
-| Input seeds                       |      25192 |      25192 |
+| Input seeds                       |      25248 |      25248 |
 | No track parameters               |          0 |          0 |
-| Used   seeds                      |      24757 |      24757 |
-| Cannot find track                 |      12906 |      12906 |
-| Duplicate seeds                   |        435 |        435 |
+| Used   seeds                      |      24845 |      24845 |
+| Cannot find track                 |      13125 |      13125 |
+| Duplicate seeds                   |        403 |        403 |
 | Initial param estimation failed   |          0 |          0 |
-| CKF tracks                        |       2244 |       2244 |
-| Rejected refined parameters       |       9607 |       9607 |
-| selected tracks                   |        943 |        943 |
-| Stopped tracks reaching max holes |      12534 |      12534 |
+| CKF tracks                        |       2175 |       2175 |
+| Rejected refined parameters       |       9545 |       9545 |
+| selected tracks                   |        890 |        890 |
+| Stopped tracks reaching max holes |      12770 |      12770 |
 | Seeds with more than one branch   |          0 |          0 |
-| Tracks failing second CKF         |         29 |         29 |
-| Stopped tracks below pT cut       |        360 |        360 |
+| Tracks failing second CKF         |         37 |         37 |
+| Stopped tracks below pT cut       |        344 |        344 |
 | Stopped tracks above max eta      |          0 |          0 |
-| Total shared hits                 |       1802 |       1802 |
+| Total shared hits                 |       1540 |       1540 |
 | Total forced measurements         |          0 |          0 |
 | resolved tracks                   |          0 |          0 |
 |-----------------------------------|------------|------------|
@@ -240,99 +240,99 @@ ActsLargeRadiusTrackFindingAlg                                    INFO Ratios
 |-------------------------------------------|------------|------------|
 |                                           | SSS        | ALL        |
 |-------------------------------------------|------------|------------|
-| failed / seeds                            |   0.512305 |   0.512305 |
-| duplication / seeds                       |  0.0172674 |  0.0172674 |
-| Rejected refined params / seeds           |   0.381351 |   0.381351 |
-| selected / CKF tracks                     |   0.420232 |   0.420232 |
-| selected tracks / used seeds              |  0.0380902 |  0.0380902 |
+| failed / seeds                            |   0.519843 |   0.519843 |
+| duplication / seeds                       |  0.0159617 |  0.0159617 |
+| Rejected refined params / seeds           |    0.37805 |    0.37805 |
+| selected / CKF tracks                     |   0.409195 |   0.409195 |
+| selected tracks / used seeds              |  0.0358221 |  0.0358221 |
 | resolved / selected tracks                |          0 |          0 |
 | resolved tracks / used seeds              |          0 |          0 |
 | branched tracks / used seeds              |          0 |          0 |
-| no 2nd CKF / CKF tracks                   |  0.0129234 |  0.0129234 |
-| shared hits / CKF tracks                  |    0.80303 |    0.80303 |
+| no 2nd CKF / CKF tracks                   |  0.0170115 |  0.0170115 |
+| shared hits / CKF tracks                  |   0.708046 |   0.708046 |
 | forced measurements / used seeds          |          0 |          0 |
 |-------------------------------------------|------------|------------|
-| selected tracks / used seeds     0.0- 0.5 |  0.0709759 |  0.0709759 |
-|                                  0.5- 1.0 |  0.0797182 |  0.0797182 |
-|                                  1.0- 1.5 |  0.0652963 |  0.0652963 |
-|                                  1.5- 2.0 |   0.021169 |   0.021169 |
-|                                  2.0- 2.5 |   0.020362 |   0.020362 |
+| selected tracks / used seeds     0.0- 0.5 |  0.0574423 |  0.0574423 |
+|                                  0.5- 1.0 |   0.067617 |   0.067617 |
+|                                  1.0- 1.5 |  0.0639324 |  0.0639324 |
+|                                  1.5- 2.0 |  0.0220474 |  0.0220474 |
+|                                  2.0- 2.5 |  0.0204367 |  0.0204367 |
 |                                  2.5- 3.0 |          0 |          0 |
 |                                  3.0- 3.5 |          0 |          0 |
 |                                  3.5-+inf |          0 |          0 |
 |-------------------------------------------|------------|------------|
 ActsLargeRadiusAmbiguityResolutionAlg                             INFO Ambiguity Resolution statistics
 |-------------------|------------|
-| Input tracks      |        943 |
-| Resolved tracks   |        850 |
-| Total shared hits |         38 |
+| Input tracks      |        890 |
+| Resolved tracks   |        805 |
+| Total shared hits |         32 |
 |-------------------|------------|
 ActsLargeRadiusPrdAssociationAlg                                  INFO Prd Map statistics
 |-----------------------|------------|
-| N. Tracks             |        850 |
-| N. Pixel Measurements |       2488 |
-| N. Strip Measurements |       6999 |
+| N. Tracks             |        805 |
+| N. Pixel Measurements |       2409 |
+| N. Strip Measurements |       6690 |
 | N. Hgtd Measurements  |          0 |
 |-----------------------|------------|
 ActsLowPtPixelClusterPreparationAlg                               INFO Data Prep statistics
 |---------|------------|
 | Inputs  |    1164869 |
-| Outputs |    1060860 |
+| Outputs |    1061032 |
 |---------|------------|
 ActsLowPtStripClusterPreparationAlg                               INFO Data Prep statistics
 |---------|------------|
 | Inputs  |    1116636 |
-| Outputs |    1073521 |
+| Outputs |    1073997 |
 |---------|------------|
 ActsLowPtHgtdClusterPreparationAlg                                INFO Data Prep statistics
 |---------|------------|
 | Inputs  |     327475 |
-| Outputs |     327457 |
+| Outputs |     327458 |
 |---------|------------|
 ActsLowPtPixelSpacePointPreparationAlg                            INFO Data Prep statistics
 |---------|------------|
 | Inputs  |    1164869 |
-| Outputs |    1060860 |
+| Outputs |    1061032 |
 |---------|------------|
 ActsLowPtStripSpacePointPreparationAlg                            INFO Data Prep statistics
 |---------|------------|
 | Inputs  |     327706 |
-| Outputs |     303548 |
+| Outputs |     303832 |
 |---------|------------|
 ActsLowPtStripOverlapSpacePointPreparationAlg                     INFO Data Prep statistics
 |---------|------------|
 | Inputs  |     106134 |
-| Outputs |      99655 |
+| Outputs |      99772 |
 |---------|------------|
 ActsLowPtPixelSeedingAlg                                          INFO Seed statistics
 |-------------|------------|
-| Spacepoints |    1060860 |
-| Seeds       |     235640 |
+| Spacepoints |    1061032 |
+| Seeds       |     235740 |
 |-------------|------------|
 ActsLowPtStripSeedingAlg                                          INFO Seed statistics
 |-------------|------------|
-| Spacepoints |     403203 |
-| Seeds       |      26526 |
+| Spacepoints |     403604 |
+| Seeds       |      26505 |
 |-------------|------------|
 ActsLowPtTrackFindingAlg                                          INFO statistics
 |-----------------------------------|------------|------------|------------|
 |                           All eta | PPP        | SSS        | ALL        |
 |-----------------------------------|------------|------------|------------|
-| Input seeds                       |     235640 |      26526 |     262166 |
+| Input seeds                       |     235740 |      26505 |     262245 |
 | No track parameters               |          0 |          0 |          0 |
-| Used   seeds                      |     185026 |      15598 |     200624 |
-| Cannot find track                 |     166341 |      13213 |     179554 |
-| Duplicate seeds                   |      50614 |       6680 |      57294 |
-| Initial param estimation failed   |          0 |       4248 |       4248 |
-| CKF tracks                        |      18685 |       2385 |      21070 |
+| Used   seeds                      |     185343 |      15576 |     200919 |
+| Cannot find track                 |     166701 |      13482 |     180183 |
+| Duplicate seeds                   |      50397 |       6673 |      57070 |
+| Initial param estimation failed   |          0 |       4256 |       4256 |
+| CKF tracks                        |      18642 |       2094 |      20736 |
 | Rejected refined parameters       |          0 |          0 |          0 |
-| selected tracks                   |      12077 |        393 |      12470 |
-| Stopped tracks reaching max holes |     150250 |      13029 |     163279 |
+| selected tracks                   |      12031 |        303 |      12334 |
+| Stopped tracks reaching max holes |     150531 |      13313 |     163844 |
 | Seeds with more than one branch   |          0 |          0 |          0 |
-| Tracks failing second CKF         |          7 |        118 |        125 |
-| Stopped tracks below pT cut       |      16091 |        184 |      16275 |
+| Tracks failing second CKF         |          7 |        130 |        137 |
+| Stopped tracks below pT cut       |      16170 |        169 |      16339 |
 | Stopped tracks above max eta      |          0 |          0 |          0 |
-| Total shared hits                 |      25032 |       7630 |      32662 |
+| Total shared hits                 |      24785 |       5842 |      30627 |
 | Total forced measurements         |          0 |          0 |          0 |
 | resolved tracks                   |          0 |          0 |          0 |
 |-----------------------------------|------------|------------|------------|
@@ -340,37 +340,37 @@ ActsLowPtTrackFindingAlg                                          INFO Ratios
 |-------------------------------------------|------------|------------|------------|
 |                                           | PPP        | SSS        | ALL        |
 |-------------------------------------------|------------|------------|------------|
-| failed / seeds                            |   0.705912 |    0.65826 |    0.70109 |
-| duplication / seeds                       |   0.214794 |   0.251828 |   0.218541 |
+| failed / seeds                            |   0.707139 |   0.669232 |   0.703308 |
+| duplication / seeds                       |   0.213782 |   0.251764 |   0.217621 |
 | Rejected refined params / seeds           |          0 |          0 |          0 |
-| selected / CKF tracks                     |   0.646347 |    0.16478 |   0.591837 |
-| selected tracks / used seeds              |  0.0652719 |  0.0251955 |  0.0621561 |
+| selected / CKF tracks                     |   0.645371 |   0.144699 |   0.594811 |
+| selected tracks / used seeds              |  0.0649121 |   0.019453 |  0.0613879 |
 | resolved / selected tracks                |          0 |          0 |          0 |
 | resolved tracks / used seeds              |          0 |          0 |          0 |
 | branched tracks / used seeds              |          0 |          0 |          0 |
-| no 2nd CKF / CKF tracks                   | 0.000374632 |  0.0494759 | 0.00593261 |
-| shared hits / CKF tracks                  |    1.33968 |    3.19916 |    1.55017 |
+| no 2nd CKF / CKF tracks                   | 0.000375496 |  0.0620821 | 0.00660687 |
+| shared hits / CKF tracks                  |    1.32952 |    2.78988 |      1.477 |
 | forced measurements / used seeds          |          0 |          0 |          0 |
 |-------------------------------------------|------------|------------|------------|
-| selected tracks / used seeds     0.0- 0.5 |   0.172808 |  0.0238596 |   0.153425 |
-|                                  0.5- 1.0 |    0.11216 |  0.0624227 |   0.107235 |
-|                                  1.0- 1.5 |  0.0511718 |  0.0760264 |  0.0525919 |
-|                                  1.5- 2.0 |  0.0430455 |  0.0112764 |  0.0379171 |
-|                                  2.0- 2.5 |  0.0577722 | 0.00623886 |  0.0540287 |
-|                                  2.5- 3.0 |  0.0500467 |          0 |  0.0500434 |
-|                                  3.0- 3.5 |  0.0715871 |          0 |  0.0715871 |
-|                                  3.5-+inf |   0.100353 |          0 |   0.100353 |
+| selected tracks / used seeds     0.0- 0.5 |   0.169852 |  0.0218618 |   0.150851 |
+|                                  0.5- 1.0 |   0.111081 |  0.0403082 |   0.103867 |
+|                                  1.0- 1.5 |  0.0508013 |  0.0553086 |  0.0510642 |
+|                                  1.5- 2.0 |  0.0428166 | 0.00976374 |  0.0375022 |
+|                                  2.0- 2.5 |  0.0576244 | 0.00511628 |   0.053953 |
+|                                  2.5- 3.0 |   0.049975 |          0 |   0.049975 |
+|                                  3.0- 3.5 |  0.0713453 |          0 |  0.0713453 |
+|                                  3.5-+inf |  0.0997696 |          0 |  0.0997696 |
 |-------------------------------------------|------------|------------|------------|
 ActsLowPtAmbiguityResolutionAlg                                   INFO Ambiguity Resolution statistics
 |-------------------|------------|
-| Input tracks      |      12470 |
-| Resolved tracks   |      10986 |
-| Total shared hits |       1005 |
+| Input tracks      |      12334 |
+| Resolved tracks   |      10959 |
+| Total shared hits |       1006 |
 |-------------------|------------|
 ActsLowPtPrdAssociationAlg                                        INFO Prd Map statistics
 |-----------------------|------------|
-| N. Tracks             |      10986 |
-| N. Pixel Measurements |     100147 |
-| N. Strip Measurements |      52479 |
+| N. Tracks             |      10959 |
+| N. Pixel Measurements |      99786 |
+| N. Strip Measurements |      52277 |
 | N. Hgtd Measurements  |          0 |
 |-----------------------|------------|

@@ -33,7 +33,6 @@ StatusCode InDet::ActsGnnModuleMapFinderTool::initialize() {
   gcCfg.zScale = kScaleZ;
   gcCfg.phiScale = kScalePhi;
   gcCfg.moduleMapPath = m_moduleMapPath.value();
-  gcCfg.moreParallel = true;
   gcCfg.gpuBlocks = 512;
   auto gc = std::make_shared<ActsPlugins::ModuleMapCuda>(
       gcCfg, m_logger->cloneWithSuffix("ModuleMap"));
