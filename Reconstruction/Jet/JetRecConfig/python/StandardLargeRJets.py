@@ -139,6 +139,11 @@ AntiKt10UFOCSSKSoftDrop = JetSoftDrop(AntiKt10UFOCSSK,
                                       Beta = 1., ZCut= 0.1,
                                       )
 
+# The following jet collection will be scheduled in derivation production (lighter versions with _trigger used at Tier-0)
+AntiKt10UFOCSSKSoftDrop_deriv = AntiKt10UFOCSSKSoftDrop.clone(
+    modifiers = AntiKt10UFOCSSKSoftDrop.modifiers+("toptransformer","wtransformer","wtransformer_massdec")
+)
+
 AntiKt10UFOCSSKSoftDrop_noElectrons = JetSoftDrop(AntiKt10UFOCSSK_noElectrons,
                                                   #A filter of 1 GeV is applied before the calibration to remove jets with zero constituents after the soft drop alg is applied
                                                   modifiers = ("Filter:1000","Calib:SoftDrop:mc","Filter:100000","Sort","JetGhostLabel")+standardrecomods+substrmods+ufo_softdrop_mods+truthlabels_SD+ufo_dnn_moments,
