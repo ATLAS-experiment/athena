@@ -43,6 +43,9 @@ namespace MuonML{
             /** @brief List of features to be used for the inference */
             NodeFeatureList m_graphFeatures{};
             ToolHandle<AthOnnx::IOnnxRuntimeSessionTool> m_onnxSessionTool{this, "ModelSession", "" };
+            // Cached at initialize: true when the session runs on CUDA.
+            bool m_isCuda{false};
+            int  m_cudaDeviceId{0};
 
     }; 
 

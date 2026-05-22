@@ -24,6 +24,8 @@
 #include "TruthUtils/HepMCHelpers.h"
 #include "MuonVisualizationHelpersR4/ObjVisualizationHelpers.h"
 
+#include <system_error>
+
 using namespace Acts::UnitLiterals;
 using namespace Acts::PlanarHelper;
 
@@ -143,6 +145,16 @@ std::pair<MsTrackFindingAlg::OptBoundPars_t,
                 refSeg = segment;
             }
         }
+        if (!refSeg || measurements.empty()) {
+            ATH_MSG_WARNING("No reference segment passing seeding quality was found");
+            return std::make_pair(Acts::Result<Acts::BoundTrackParameters>::failure(std::make_error_code(std::errc::invalid_argument)),
+                                  std::vector<const xAOD::UncalibratedMeasurement_v1*>{});
+        }
+        if (measurements.empty()) {
+            ATH_MSG_WARNING("No measurements collected for seed");
+            return std::make_pair(Acts::Result<Acts::BoundTrackParameters>::failure(std::make_error_code(std::errc::invalid_argument)),
+                                  std::vector<const xAOD::UncalibratedMeasurement_v1*>{});
+        }
         Amg::Vector3D seedPos{refSeg->position()};
         Amg::Vector3D seedDir{refSeg->direction()};
         /// The middle or outer segment provide the phi information. Not so easy becasue we want to
@@ -172,14 +184,38 @@ std::pair<MsTrackFindingAlg::OptBoundPars_t,
             seedDir = surf.localToGlobalTransform(tgContext).linear() * combSegDir;
         }
         
-        /// Create a surface which is shortly before the first measurement
-        const Acts::GeometryIdentifier volId = volumeId(xAOD::muonSurface(measurements[0]));
-        /// Fetch the embedding volume
-        const Acts::TrackingVolume* volume = m_trackingGeometryTool->trackingGeometry()->findVolume(volId);
+        /// Create a surface shortly before the first measurement that belongs to a valid volume.
+        /// Trigger and phi layer hits may have surface geometry IDs that don't map to a named
+        /// tracking volume (e.g., they belong to a gap region), even though the measurements
+        /// are valid and used in the fit. We search for the first precision measurement whose
+        /// geometry ID successfully resolves to a named Acts::TrackingVolume so we can extract
+        /// a boundary surface to seed the track parameters.
+        const xAOD::UncalibratedMeasurement* firstVolumeMeas{nullptr};
+        const Acts::TrackingVolume* volume{nullptr};
+        for (const xAOD::UncalibratedMeasurement* meas : measurements) {
+            const Acts::GeometryIdentifier volId = volumeId(xAOD::muonSurface(meas));
+            volume = m_trackingGeometryTool->trackingGeometry()->findVolume(volId);
+            if (volume) {
+                firstVolumeMeas = meas;
+                break;
+            }
+        }
 
-        assert(volume != nullptr);
+        if (!volume) {
+            ATH_MSG_WARNING("Failed to find tracking volume for any seed measurement");
+            return std::make_pair(Acts::Result<Acts::BoundTrackParameters>::failure(std::make_error_code(std::errc::invalid_argument)),
+                                  std::vector<const xAOD::UncalibratedMeasurement_v1*>{});
+        }
+        ATH_MSG_VERBOSE("Using seed measurement " << m_idHelperSvc->toString(xAOD::identify(firstVolumeMeas))
+                        << " with volume id " << volumeId(xAOD::muonSurface(firstVolumeMeas)));
 
-        auto targetSurf = MuonGMR4::bottomBoundary(*volume)->getSharedPtr();
+        auto boundSurf = MuonGMR4::bottomBoundary(*volume);
+        if (!boundSurf) {
+            ATH_MSG_WARNING("Failed to find boundary surface for tracking volume");
+            return std::make_pair(Acts::Result<Acts::BoundTrackParameters>::failure(std::make_error_code(std::errc::invalid_argument)),
+                                  std::vector<const xAOD::UncalibratedMeasurement_v1*>{});
+        }
+        auto targetSurf = boundSurf->getSharedPtr();
         using namespace Acts::PlanarHelper;
 
         auto pIsect = intersectPlane(seedPos, seedDir, 

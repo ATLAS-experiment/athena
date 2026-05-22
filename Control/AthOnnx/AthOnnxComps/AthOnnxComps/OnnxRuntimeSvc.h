@@ -8,6 +8,7 @@
 
 // Framework include(s).
 #include <AsgServices/AsgService.h>
+#include "AsgTools/PropertyWrapper.h"
 
 // ONNX include(s).
 #include <onnxruntime_cxx_api.h>
@@ -48,6 +49,9 @@ namespace AthOnnx {
       /// @}
 
    private:
+      /// ONNX Runtime logging level (0=VERBOSE, 1=INFO, 2=WARNING, 3=ERROR, 4=FATAL)
+      Gaudi::Property<int> m_logLevel{this, "LogLevel", 2, "ONNX Runtime logging level (0=VERBOSE, 1=INFO, 2=WARNING, 3=ERROR, 4=FATAL)"};
+      
       /// Global runtime environment for Onnx Runtime
       std::unique_ptr< Ort::Env > m_env;
 

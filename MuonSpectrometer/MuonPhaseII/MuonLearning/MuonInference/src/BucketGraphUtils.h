@@ -34,6 +34,13 @@ inline double bucket_size_mm(const MuonR4::SpacePointBucket& b) {
 }
 
 /**
+ * bucket_size == 0, where bucket_size is bucket_max - bucket_min.
+ */
+inline bool keepBucketAsTrainingNode(const MuonR4::SpacePointBucket& b) {
+  return bucket_size_mm(b) != 0.0;
+}
+
+/**
  * Build nodes + flat features (N,6) and number of SPs per kept bucket.
  * - Features: [x, y, z, layers, nSp, bucketSize]
  */
@@ -55,9 +62,11 @@ inline void buildNodesAndFeatures(const MuonR4::SpacePointContainer& buckets,
 
   for (const MuonR4::SpacePointBucket* bucket : buckets) {
     const double bsize = bucket_size_mm(*bucket);
-    // Don't skip buckets with 0 size - this was causing 0 nodes with new gctx implementation
-    // The new gctx may result in buckets with exactly 0.0 size that should still be processed
     
+    if (!keepBucketAsTrainingNode(*bucket)) {
+      continue;
+    }
+  
     NodeAux n;
 
     const double midY = 0.5 * (bucket->coveredMin() + bucket->coveredMax());
