@@ -108,10 +108,10 @@ StatusCode TrigMuonEFInfoCnvTestAlg::execute() {
  * from the MS.
  */ 
 StatusCode TrigMuonEFInfoCnvTestAlg::compareExtrapolatedTracks(const TrigMuonEFInfoTrack* infotrk, const xAOD::Muon* muon) {
-
+  using enum xAOD::Muon::TrackParticleType;
   if( !infotrk->hasExtrapolatedTrack() ) {
     ATH_MSG_DEBUG("TrigMuonEFInfo track has no extrapolated track");
-    if(muon->muonSpectrometerTrackParticleLink().isValid() ) {
+    if(muon->trackParticle(MuonSpectrometerTrackParticle) ) {
       ATH_MSG_ERROR("Mismatch: TrigMuonEFInfoTrack has no ME track, xAOD::Muon does");
       return StatusCode::RECOVERABLE;
     }
@@ -121,28 +121,26 @@ StatusCode TrigMuonEFInfoCnvTestAlg::compareExtrapolatedTracks(const TrigMuonEFI
 
   if( infotrk->hasExtrapolatedTrack() ) {
     ATH_MSG_DEBUG("TrigMuonEFInfo track has extrapolated track");
-    if( !(muon->muonSpectrometerTrackParticleLink().isValid()) ) {
+    if( !(muon->trackParticle(MuonSpectrometerTrackParticle)) ) {
       ATH_MSG_ERROR("Mismatch: TrigMuonEFInfoTrack has ME track, xAOD::Muon does not");
       return StatusCode::RECOVERABLE;
     }
   }
 
   // now compare the actual tracks
-  StatusCode sc = compareTracks( infotrk->ExtrapolatedTrack(), *(muon->muonSpectrometerTrackParticleLink()) );
-  if(sc.isFailure()) return sc;
-  else ATH_MSG_DEBUG("Passed check on extrapolated track");
-
-  return StatusCode::SUCCESS;
+  ATH_CHECK(compareTracks( infotrk->ExtrapolatedTrack(), muon->trackParticle(MuonSpectrometerTrackParticle)));
+   return StatusCode::SUCCESS;
 }
 
 /**
  * Compare the contents of the old TrigMuonEFInfoTrack and the xAOD::Muon for the combined track
  */ 
 StatusCode TrigMuonEFInfoCnvTestAlg::compareCombinedTracks(const TrigMuonEFInfoTrack* infotrk, const xAOD::Muon* muon) {
-
+  using enum xAOD::Muon::TrackParticleType;
   if( !infotrk->hasCombinedTrack() ) {
     ATH_MSG_DEBUG("TrigMuonEFInfo track has no combined track");
-    if(muon->combinedTrackParticleLink().isValid() ) {
+
+    if(muon->trackParticle(CombinedTrackParticle)) {
       ATH_MSG_ERROR("Mismatch: TrigMuonEFInfoTrack has no combined track, xAOD::Muon does");
       return StatusCode::RECOVERABLE;
     }
@@ -152,17 +150,15 @@ StatusCode TrigMuonEFInfoCnvTestAlg::compareCombinedTracks(const TrigMuonEFInfoT
 
   if( infotrk->hasCombinedTrack() ) {
     ATH_MSG_DEBUG("TrigMuonEFInfo track has combined track");
-    if( !(muon->combinedTrackParticleLink().isValid()) ) {
+    if( !muon->trackParticle(CombinedTrackParticle) ) {
       ATH_MSG_ERROR("Mismatch: TrigMuonEFInfoTrack has combined track, xAOD::Muon does not");
       return StatusCode::RECOVERABLE;
     }
   }
 
   // now compare the actual tracks
-  StatusCode sc = compareTracks( infotrk->CombinedTrack(), *(muon->combinedTrackParticleLink()) );
-  if(sc.isFailure()) return sc;
-  else ATH_MSG_DEBUG("Passed check on combined track");
-
+  ATH_CHECK(compareTracks( infotrk->CombinedTrack(), muon->trackParticle(CombinedTrackParticle)));
+ 
   return StatusCode::SUCCESS;
 }
 
@@ -178,15 +174,7 @@ StatusCode TrigMuonEFInfoCnvTestAlg::comparePrimaryTracks(const TrigMuonEFInfoTr
   if( infotrk->hasCombinedTrack() ) {
     primtrk = infotrk->CombinedTrack();
   }
-  if(primtrk!=nullptr && muon->primaryTrackParticleLink().isValid()) {
-    StatusCode sc = compareTracks(primtrk, *(muon->primaryTrackParticleLink()));
-    if(sc.isFailure()) return sc;
-  } else {
-    if(primtrk!=nullptr || muon->primaryTrackParticleLink().isValid()) {
-      ATH_MSG_ERROR("One of the primary tracks is not good, old = " << (primtrk!=nullptr) << ", new = " << muon->primaryTrackParticleLink().isValid() );
-      return StatusCode::RECOVERABLE;
-    } else return StatusCode::SUCCESS; // this means both are 0, which is ok
-  }
+  ATH_CHECK(compareTracks(primtrk, muon->primaryTrackParticle()));
 
   ATH_MSG_DEBUG("Passed check on primary track");
 

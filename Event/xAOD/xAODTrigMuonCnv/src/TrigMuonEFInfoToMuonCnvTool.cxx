@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -73,21 +73,21 @@ StatusCode TrigMuonEFInfoToMuonCnvTool::convertTrigMuonEFInfo(const TrigMuonEFIn
             StatusCode sc = convertTrigMuonEFTrack( *extraptrk, *extrapTrackPart );
             if(sc.isFailure()) return sc;
             
-	    // create and set element link to the xAOD::TrackParticle
-	    if(extrapParticleContainer) {
-	      ElementLink<xAOD::TrackParticleContainer> link( *extrapParticleContainer, extrapParticleContainer->size() - 1 );
-	      muon->setTrackParticleLink( xAOD::Muon::MuonSpectrometerTrackParticle, link );
-	    }
+        // create and set element link to the xAOD::TrackParticle
+        if(extrapParticleContainer) {
+          ElementLink<xAOD::TrackParticleContainer> link( *extrapParticleContainer, extrapParticleContainer->size() - 1 );
+          muon->setTrackParticleLink( xAOD::Muon::TrackParticleType::MuonSpectrometerTrackParticle, link );
+        }
 
             // set main muon 4-vector to the extrapolated track
             muon->setP4(extraptrk->pt(),extraptrk->eta(),extraptrk->phi());
             // set some author flags - note this relies on the 'knowledge' that we only ran muid at EF before 2015
-            muon->addAllAuthor(xAOD::Muon::MuidSA);
-            muon->setAuthor(xAOD::Muon::MuidSA);
-            muon->setMuonType(xAOD::Muon::MuonStandAlone);
-	    
-	    // clean up the track particle in case we did not put it in a container
-	    if(!extrapParticleContainer) delete extraptrk;
+            muon->addAllAuthor(xAOD::Muon::Author::MuidSA);
+            muon->setAuthor(xAOD::Muon::Author::MuidSA);
+            muon->setMuonType(xAOD::Muon::MuonType::MuonStandAlone);
+        
+        // clean up the track particle in case we did not put it in a container
+        if(!extrapParticleContainer) delete extraptrk;
         }
         
         // make combined TrackParticle object and fill it
@@ -100,26 +100,24 @@ StatusCode TrigMuonEFInfoToMuonCnvTool::convertTrigMuonEFInfo(const TrigMuonEFIn
             StatusCode sc = convertTrigMuonEFTrack( *combtrk, *combinedTrackPart );
             if(sc.isFailure()) return sc;
             
-	    // create and set element link to the xAOD::TrackParticle
-	    if(combParticleContainer) {
-	      ElementLink<xAOD::TrackParticleContainer> link( *combParticleContainer, combParticleContainer->size() - 1 );
-	      muon->setTrackParticleLink( xAOD::Muon::CombinedTrackParticle, link );
-	    }
+            // create and set element link to the xAOD::TrackParticle
+            if(combParticleContainer) {
+              ElementLink<xAOD::TrackParticleContainer> link( *combParticleContainer, combParticleContainer->size() - 1 );
+              muon->setTrackParticleLink( xAOD::Muon::TrackParticleType::CombinedTrackParticle, link );
+            }
 
             // set main muon 4-vector to the combined track
             muon->setP4(combtrk->pt(),combtrk->eta(),combtrk->phi());
             // set some author flags - note this relies on the 'knowledge' that we ran muid and mugirl at EF before 2015
             if( infotrk->MuonType() == TrigMuonEFInfoTrack::MuonTypeEFMuon ) {
-                muon->addAllAuthor(xAOD::Muon::MuidCo);
-                muon->setAuthor(xAOD::Muon::MuidCo);
-                muon->setMuonType(xAOD::Muon::Combined);
+                muon->addAllAuthor(xAOD::Muon::Author::MuidCo);
+                muon->setAuthor(xAOD::Muon::Author::MuidCo);
+                muon->setMuonType(xAOD::Muon::MuonType::Combined);
             } else {
-                muon->addAllAuthor(xAOD::Muon::MuGirl);
-                muon->setAuthor(xAOD::Muon::MuGirl);
-		// we set all MuGirl to be combined because we set the combined track, could change this once ID track link works
-		muon->setMuonType(xAOD::Muon::Combined);
-                //if( infotrk->MuonType() == TrigMuonEFInfoTrack::MuGirlMuonTag) muon->setMuonType(xAOD::Muon::SegmentTagged);
-                //else muon->setMuonType(xAOD::Muon::Combined);
+                muon->addAllAuthor(xAOD::Muon::Author::MuGirl);
+                muon->setAuthor(xAOD::Muon::Author::MuGirl);
+                // we set all MuGirl to be combined because we set the combined track, could change this once ID track link works
+                muon->setMuonType(xAOD::Muon::MuonType::Combined);
             }
             
             if(m_makeIDTrackLink) {
@@ -139,8 +137,8 @@ StatusCode TrigMuonEFInfoToMuonCnvTool::convertTrigMuonEFInfo(const TrigMuonEFIn
                 } else ATH_MSG_WARNING("TrigMuonEFCbTrack with invalid element link to ID track - cannot create link for xAOD muon");
             }//create element link to ID track
             
-	    // clean up the track particle in case we did not put it in a container
-	    if(!combParticleContainer) delete combinedTrackPart;
+        // clean up the track particle in case we did not put it in a container
+        if(!combParticleContainer) delete combinedTrackPart;
 
         } // valid combinedTrack
         
@@ -186,11 +184,11 @@ StatusCode TrigMuonEFInfoToMuonCnvTool::convertTrigMuonEFTrack(const TrigMuonEFT
 
     /*if(abs(eftrack.pt() - trackpart.pt())> 10.0) {
       if(eftrack.pt() < 1000000.0) {
-	ATH_MSG_ERROR("pT mismatch, parameters are:");
-	ATH_MSG_ERROR("input d0, z0, phi, theta, qoverp = " << eftrack.d0() << ", " << eftrack.z0() << ", " << eftrack.phi() << ", " << theta << ", " << qoverp);
-	ATH_MSG_ERROR("old e, pt, eta, phi, m = " << std::fixed << std::setprecision(8) << eftrack.e() << ", " << eftrack.pt() << ", " << eftrack.eta() << ", " << eftrack.phi() << ", " << eftrack.m());
-	ATH_MSG_ERROR("new e, pt, eta, phi, m = " << std::fixed << std::setprecision(8) << trackpart.e() << ", " << trackpart.pt() << ", " << trackpart.eta() << ", " << trackpart.phi() << ", " << trackpart.m());
-	return StatusCode::FAILURE;
+    ATH_MSG_ERROR("pT mismatch, parameters are:");
+    ATH_MSG_ERROR("input d0, z0, phi, theta, qoverp = " << eftrack.d0() << ", " << eftrack.z0() << ", " << eftrack.phi() << ", " << theta << ", " << qoverp);
+    ATH_MSG_ERROR("old e, pt, eta, phi, m = " << std::fixed << std::setprecision(8) << eftrack.e() << ", " << eftrack.pt() << ", " << eftrack.eta() << ", " << eftrack.phi() << ", " << eftrack.m());
+    ATH_MSG_ERROR("new e, pt, eta, phi, m = " << std::fixed << std::setprecision(8) << trackpart.e() << ", " << trackpart.pt() << ", " << trackpart.eta() << ", " << trackpart.phi() << ", " << trackpart.m());
+    return StatusCode::FAILURE;
       }
       }*/
 
