@@ -133,8 +133,9 @@ bool ZmumuEvent::Reco (int theLumiBlock)
     for( auto muon :  *pxMuonContainer ){
       const xAOD::TrackParticle* idtrk(nullptr);
       const xAOD::TrackParticle* metrk(nullptr);
-      idtrk = muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
-      metrk = muon->trackParticle(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle);
+      using enum xAOD::Muon::TrackParticleType;
+      idtrk = muon->trackParticle(InnerDetectorTrackParticle);
+      metrk = muon->trackParticle(ExtrapolatedMuonSpectrometerTrackParticle);
       if (idtrk && metrk) {
 	static const SG::Decorator<float> InnerDetectorPtAcc("InnerDetectorPt");
 	static const SG::Decorator<float> MuonSpectrometerPtAcc("MuonSpectrometerPt");
@@ -397,7 +398,7 @@ bool ZmumuEvent::RecordMuon( const xAOD::Muon* pxMuon )
       // The main Muon
       m_pxRecMuon[m_numberOfFullPassMuons] = pxMuon;
       // Tracking Muon Spectrometer ( raw )
-      const xAOD::TrackParticle* pxMSTrack   = pxMuon->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);
+      const xAOD::TrackParticle* pxMSTrack   = pxMuon->trackParticle(xAOD::Muon::TrackParticleType::MuonSpectrometerTrackParticle);
       if (!pxMSTrack) {
 	if(m_doDebug){  std::cout <<" * ZmumuEvent * RecordMuon * bad pxMSmuon --> EXIT "<< std::endl;}
 	return false;
@@ -405,7 +406,7 @@ bool ZmumuEvent::RecordMuon( const xAOD::Muon* pxMuon )
       m_pxMSTrack[m_numberOfFullPassMuons] = pxMSTrack;
 
       // Tracking ID ( fix later to include loose match track conditions )
-      const xAOD::TrackParticle*  pxIDTrack  = pxMuon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+      const xAOD::TrackParticle*  pxIDTrack  = pxMuon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
       if (!pxIDTrack) {
 	return false;
       }      
