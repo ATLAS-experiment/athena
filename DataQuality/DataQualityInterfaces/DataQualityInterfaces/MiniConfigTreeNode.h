@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef dqiMiniConfigTreeNode_h
@@ -8,6 +8,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <string_view>
 
 #include <TObject.h>
 
@@ -72,7 +73,7 @@ public:
 
   virtual void                   SetAttribute( const std::string & attName, const std::string & attValue, bool isAttribKeyword = false );
 
-  virtual std::string            GetAttribute( const std::string & attName, bool calledFromDaughter = false ) const;
+  virtual std::string            GetAttribute( std::string_view attName, bool calledFromDaughter = false ) const;
 
   virtual std::string            GetAttributeLocal( const std::string & attName ) const;
 
@@ -94,7 +95,7 @@ protected:
   typedef std::map<std::string,MiniConfigTreeNode*>  NodeMap_t;
   typedef NodeMap_t::const_iterator              NodeIter_t;
 
-  typedef std::map<std::string,std::pair<std::string,bool> >      AttMap_t;
+  typedef std::map<std::string,std::pair<std::string,bool>, std::less<> >      AttMap_t;
   typedef AttMap_t::const_iterator               AttIter_t;
 
   const std::string  m_name;
