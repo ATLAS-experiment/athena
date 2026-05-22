@@ -16,7 +16,7 @@ class ZDCJSONConfig
 {
 public:
   using JSON = nlohmann::json; 
-  using JSONParamDescr = std::tuple<JSON::value_t, unsigned int, bool, bool>;
+  using JSONParamDescr = std::tuple<JSON::value_t, int, bool, bool>;
   using JSONParamList = std::map<std::string, JSONParamDescr>;
 
 private:
@@ -92,7 +92,7 @@ private:
   }
 
   template<typename T> std::pair<bool, std::string>
-  ParsePerChannelParams(const std::string& paramKey, const T& paramValue, JSON::value_t paramType, size_t paramSize);
+  ParsePerChannelParams(const std::string& paramKey, const T& paramValue, JSON::value_t paramType, int paramSize);
 
   
 public:

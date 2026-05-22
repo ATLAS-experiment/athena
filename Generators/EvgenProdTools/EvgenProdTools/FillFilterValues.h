@@ -32,6 +32,10 @@ public:
 
 private:
 
+  // Note that these names should begin with "mcFilter" in order
+  // to ensure that they are passed along during digitization in
+  // xAODEventInfoCnv/EventInfoOverlay
+
 SG::WriteDecorHandleKey<xAOD::EventInfo> m_mcFilterHTKey {this
       , "mcFilterHTKey"
       , "TMPEvtInfo.mcFilterHT"

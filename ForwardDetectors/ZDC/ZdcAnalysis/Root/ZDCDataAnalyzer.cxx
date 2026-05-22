@@ -6,6 +6,7 @@
 #include <ZdcAnalysis/ZDCPulseAnalyzer.h>
 
 #include <utility>
+#include <format>
 
 #include "CxxUtils/trapping_fp.h"
 
@@ -55,6 +56,7 @@ ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, int nSamp
   for (size_t side : {0, 1}) {
     for (size_t module : {0, 1, 2, 3}) {
       std::string moduleTag= "_s" + std::to_string(side) + "_m" +std::to_string(module);
+
       m_moduleAnalyzers[side][module] = make_unique<ZDCPulseAnalyzer>(m_msgFunc_p, std::move(moduleTag), nSample, deltaTSample, preSampleIdx,
 								      m_pedestals[side][module], fitFunction,
 								      peak2ndDerivMinSamples[side][module],
@@ -175,7 +177,7 @@ ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, const JSO
       std::ostringstream ostr;
       ostr << "JSON configuration for ZDC pulse analyyzer for side " << std::to_string(side)
 	   << ", module " <<  std::to_string(module) << "\n" <<  moduleConfig.dump(2);
-      (*m_msgFunc_p)(ZDCMsg::Verbose, ostr.str().c_str());
+      (*m_msgFunc_p)(ZDCMsg::Verbose, ostr.str());
 
       // Construct the ZDCPulseAnalyzer object
       //
@@ -869,9 +871,12 @@ void ZDCDataAnalyzer::DoNLcalibModuleSum()
 	      Had2CorrFact += std::pow(fHad2 - m_NLcalibFactors[iside][2][0],i)*m_NLcalibFactors[iside][2][i+1];
 	    }
 
-	  std::ostringstream ostr;
-	  ostr << "ZDCDataAnalyzer: " << m_calibModuleSum[iside] << " " << EMCorrFact << " " << Had1CorrFact << " " << Had2CorrFact << std::endl;
-	  (*m_msgFunc_p)(ZDCMsg::Debug,ostr.str().c_str());
+	  const std::string &dbgmsg = std::format("ZDCDataAnalyzer: {} {} {} {}\n",m_calibModuleSum[iside], EMCorrFact, Had1CorrFact, Had2CorrFact);
+	  (*m_msgFunc_p)(ZDCMsg::Debug, dbgmsg);
+	  if ((EMCorrFact == 0.) or (Had1CorrFact == 0.) or (Had2CorrFact == 0.))[[unlikely]]{
+	    (*m_msgFunc_p)(ZDCMsg::Error,"ZDCDataAnalyzer::DoNLcalibModuleSum:  Denominator is zero");
+	    return;
+	  }
 	  
 	  float ECorrEM = m_calibModuleSum[iside]/EMCorrFact;
 	  float ECorrEMHad1 = ECorrEM/Had1CorrFact;
