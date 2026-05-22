@@ -574,8 +574,11 @@ namespace xAOD {
       // The object can't handle this variable type...
       std::cerr << "ERROR xAOD::ByteStreamAuxContainer_v1::getData "
                 << "Unknown variable type ("
-                << SG::AuxTypeRegistry::instance().getType( auxid )->name()
-                << ") requested" << std::endl;
+                << SG::AuxTypeRegistry::instance().getTypeName( auxid )
+                << ") requested for variable "
+                << SG::AuxTypeRegistry::instance().getName( auxid )
+                << " (" << auxid << ")"
+                << std::endl;
 
       return nullptr;
    }
