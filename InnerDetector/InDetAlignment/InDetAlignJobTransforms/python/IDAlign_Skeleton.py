@@ -210,16 +210,81 @@ def configureITkFlags(runArgs, flags):
     OnlyTrackingPreInclude(flags)
 
 
+    flags.ITk.Align.inputTFiles = runArgs.inputTFiles
+
+
+    ## Update flags based on parser line args
+    flags.ITk.Align.accumulate = runArgs.accumulate
+    flags.ITk.Align.baseDir = os.path.abspath(runArgs.baseDir)
+
     flags.ITk.Align.alignITk = runArgs.alignITk
     flags.ITk.Align.alignITkPixel = runArgs.alignITkPixel
     flags.ITk.Align.alignITkStrip = runArgs.alignITkStrip
 
-    flags.ITk.Align.writeSilicon = False
+    flags.addFlag("ConstrainedTrackProvider.InputTracksCollection", runArgs.inputTracksCollection)
+    flags.Input.Files = [os.path.abspath(inputFile) for inputFile in runArgs.inputRAWFile]
+    flags.Input.Files = runArgs.input
 
-    flags.ITk.Align.inputTFiles = runArgs.inputTFiles
+    flags.ITk.Align.writeSilicon = False
+    
+    ## Accumulate step
+    if kwargs["accumulate"] and not kwargs["solve"]:
+        os.makedirs(f"{flags.ITk.Align.baseDir}/Accumulate", exist_ok = True)
+        os.chdir("Accumulate")
+        from InDetAlignConfig.AccumulateITkConfig import ITkAccumulateCfg
+        cfg.merge(ITkAccumulateCfg(flags))
+
+    ## Solve step
+    elif kwargs["solve"] and not kwargs["accumulate"]:
+        os.makedirs(f"{flags.ITk.Align.baseDir}/Solve", exist_ok = True)
+        os.chdir("Solve")
+        from InDetAlignConfig.SolveITkConfig import ITkSolveCfg
+        cfg.merge(ITkSolveCfg(flags))
+        
+    else:
+        raise Exception("You can run either the acculumation step or the solve step, but not both or neither at the same time!")
+
+
+
+    flags.Exec.MaxEvents = runArgs.maxEvents if not runArgs.solve else 1
+
+    flags.IOVDb.GlobalTag = runArgs.globalTag
+
+    # These are not present in runITkAlign.py
+    flags.Exec.SkipEvents = runArgs.skipEvents if hasattr(runArgs, "skipEvents") else 0
+    flags.Exec.OutputLevel = getattr(AthenaCommon.Constants, runArgs.logLevel)
+    flags.Exec.FPE = -2
 
     if runArgs.localgeo:
         flags.ITk.Geometry.AllLocal = True
+
+
+    if not flags.Input.isMC and runArgs.isCosmics:
+        from AthenaConfiguration.Enums import BeamType
+        
+        flags.Beam.NumberOfCollisions = 0
+        flags.Beam.Type = BeamType.Cosmics
+        flags.Beam.Energy = 0.
+        flags.Beam.BunchSpacing = 50
+
+    if runArgs.isHeavyIon:
+        flags.Beam.BunchSpacing = 50
+        flags.Reco.EnableHI = True
+        flags.HeavyIon.doGlobal = True
+        
+    else:
+        flags.Beam.BunchSpacing = 25
+                
+    if not runArgs.isBFieldOff:
+        flags.BField.solenoidOn = True
+        flags.BField.barrelToroidOn = True
+        flags.BField.endcapToroidOn = True
+            
+    else:
+        flags.BField.solenoidOn = False
+        flags.BField.barrelToroidOn = False
+        flags.BField.endcapToroidOn = False
+
 
     if runArgs.localDB:
         flags.ITk.Align.useLocalDatabase = True
