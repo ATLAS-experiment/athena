@@ -1031,11 +1031,11 @@ StatusCode IDPerfMonZmumu::execute()
 
   if (muon_pos && muon_neg) { // if both combined muons exist and were sucessfully retrieved        
     ATH_MSG_DEBUG("** IDPerfMonZmumu::execute ** combined muons exist ** retrieving their m_trackparticleName: " << m_trackParticleName.c_str());
-    
+    using enum xAOD::Muon::TrackParticleType;
     if (m_trackParticleName.find("InnerDetectorTrackParticles") != std::string::npos) {
       ATH_MSG_INFO("** IDPerfMonZmumu::execute ** Retrieving InnerDetectorTrackParticles of the accepted muons");
-      ppos_comb = muon_pos->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
-      pneg_comb = muon_neg->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+      ppos_comb = muon_pos->trackParticle(InnerDetectorTrackParticle);
+      pneg_comb = muon_neg->trackParticle(InnerDetectorTrackParticle);
       
       if (!ppos_comb || !pneg_comb) {
 	ATH_MSG_WARNING("** IDPerfMonZmumu::execute ** InnerDetectorTrackParticles are requested but they are not present. Exiting event.");
@@ -1045,8 +1045,8 @@ StatusCode IDPerfMonZmumu::execute()
     if (m_trackParticleName.find("CombinedTrackParticle") != std::string::npos) {
       // 
       ATH_MSG_DEBUG("** IDPerfMonZmumu::execute ** Retrieving CombinedTrackParticles of the accepted muons");
-      ppos_comb = muon_pos->trackParticle(xAOD::Muon::CombinedTrackParticle);
-      pneg_comb = muon_neg->trackParticle(xAOD::Muon::CombinedTrackParticle);
+      ppos_comb = muon_pos->trackParticle(CombinedTrackParticle);
+      pneg_comb = muon_neg->trackParticle(CombinedTrackParticle);
       
       if (!ppos_comb || !pneg_comb){
 	ATH_MSG_WARNING( "** IDPerfMonZmumu::execute ** CombinedTrackParticles are requested but they are not present. Exiting event.");
@@ -1102,15 +1102,15 @@ StatusCode IDPerfMonZmumu::execute()
 
     if (m_useTrackSelectionTool) {
       // The track selection is applied to the InnerDetectorTrackParticle of the muons
-      if ( !m_selTool->accept(muon_pos->trackParticle(xAOD::Muon::InnerDetectorTrackParticle)) ) {
+      if ( !m_selTool->accept(muon_pos->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle)) ) {
 	ATH_MSG_DEBUG("Exiting because the ID segment of muon_pos do not pass the TrackSelection");
 	return StatusCode::SUCCESS;
       }	
-      if ( !m_selTool->accept(muon_neg->trackParticle(xAOD::Muon::InnerDetectorTrackParticle)) ) {
+      if ( !m_selTool->accept(muon_neg->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle)) ) {
 	ATH_MSG_DEBUG("Exiting because the ID segment of muon_neg do not pass the TrackSelection");
 	return StatusCode::SUCCESS;
       }
-      ATH_MSG_DEBUG("** IDPerfMonZmumu::execute ** Good news ** pos and neg muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle) pass the trackSelection :)");
+      ATH_MSG_DEBUG("** IDPerfMonZmumu::execute ** Good news ** pos and neg muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle) pass the trackSelection :)");
     } 
     else {
       ATH_MSG_DEBUG("** IDPerfMonZmumu::execute ** Track selection is not in use ");
@@ -1124,13 +1124,13 @@ StatusCode IDPerfMonZmumu::execute()
       
       // Fill Inner Detector Tree 
       ATH_MSG_DEBUG("-- >> going to fill ID muons params << --");
-      success_pos = FillRecParametersTP (muon_pos->trackParticle(xAOD::Muon::InnerDetectorTrackParticle), 
-					 muon_pos->trackParticle(xAOD::Muon::InnerDetectorTrackParticle), 
-					 muon_pos->trackParticle(xAOD::Muon::InnerDetectorTrackParticle)->charge(),
+      success_pos = FillRecParametersTP (muon_pos->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle), 
+					 muon_pos->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle), 
+					 muon_pos->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle)->charge(),
 					 ppos_comb_v);
-      success_neg = FillRecParametersTP (muon_neg->trackParticle(xAOD::Muon::InnerDetectorTrackParticle), 
-					 muon_neg->trackParticle(xAOD::Muon::InnerDetectorTrackParticle), 
-					 muon_neg->trackParticle(xAOD::Muon::InnerDetectorTrackParticle)->charge(),
+      success_neg = FillRecParametersTP (muon_neg->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle), 
+					 muon_neg->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle), 
+					 muon_neg->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle)->charge(),
 					 pneg_comb_v);
       
       if (success_pos && success_neg) {
@@ -1148,7 +1148,7 @@ StatusCode IDPerfMonZmumu::execute()
 	ATH_MSG_DEBUG("mu+  --> pxyz " << m_positive_px 
 		      << ", " << m_positive_py
 		      << ", " << m_positive_pz
-		      << "  pt: " << muon_pos->trackParticle(xAOD::Muon::InnerDetectorTrackParticle)->pt()
+		      << "  pt: " << muon_pos->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle)->pt()
 		      << "  d0: " << m_positive_d0 
 		      << "  z0: " << m_positive_z0
 		      << "  d0unc: " << m_positive_d0_err
@@ -1156,7 +1156,7 @@ StatusCode IDPerfMonZmumu::execute()
 	ATH_MSG_DEBUG("mu-  --> pxyz: " << m_negative_px
 		      << ", " << m_negative_py
 		      << ", " << m_negative_pz
-		      << "  pt: " << muon_neg->trackParticle(xAOD::Muon::InnerDetectorTrackParticle)->pt()
+		      << "  pt: " << muon_neg->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle)->pt()
 		      << "  d0: " << m_negative_d0
 		      << "  z0: " << m_negative_z0
 		      << "  d0unc: " << m_negative_d0_err
@@ -1188,20 +1188,20 @@ StatusCode IDPerfMonZmumu::execute()
 	m_IDTrack_sigma_qoverp.push_back(m_negative_sigma_qoverp);
       }
       else {
-	ATH_MSG_DEBUG("** IDPerfMonZmumu::execute ** not filling IDTracks in combTree due to problems with muon_xxx->trackParticle(xAOD::Muon::InnerDetectorTrackParticle)");
+	ATH_MSG_DEBUG("** IDPerfMonZmumu::execute ** not filling IDTracks in combTree due to problems with muon_xxx->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle)");
       }
       // End of fill ID Tree 
       
       //
       // combined muons ntuple
       if ((!m_skipMS && m_combTree) || m_commonTree ) { // if skipMS -> no combined muons
-	success_pos = FillRecParametersTP(muon_pos->trackParticle(xAOD::Muon::CombinedTrackParticle), 
-					  muon_pos->trackParticle(xAOD::Muon::InnerDetectorTrackParticle), 
+	success_pos = FillRecParametersTP(muon_pos->trackParticle(xAOD::Muon::TrackParticleType::CombinedTrackParticle), 
+					  muon_pos->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle), 
 					  ppos_comb->charge(), 
 					  ppos_comb_v);
 	ATH_MSG_DEBUG("** IDPerfMonZmumu::execute ** success_pos TP pt: " << m_positive_pt << " GeV");
-	success_neg = FillRecParametersTP(muon_neg->trackParticle(xAOD::Muon::CombinedTrackParticle), 
-					  muon_neg->trackParticle(xAOD::Muon::InnerDetectorTrackParticle), 
+	success_neg = FillRecParametersTP(muon_neg->trackParticle(xAOD::Muon::TrackParticleType::CombinedTrackParticle), 
+					  muon_neg->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle), 
 					  pneg_comb->charge(), 
 					  pneg_comb_v);    
 	ATH_MSG_DEBUG("** IDPerfMonZmumu::excute ** success_neg TP pt: " << m_negative_pt << " GeV");
@@ -1261,12 +1261,12 @@ StatusCode IDPerfMonZmumu::execute()
       if (!m_skipMS && m_MSTree) { // if skipMS -> no MS tracks
 	ATH_MSG_DEBUG("-- >> going to fill MS muons params << --");
 	success_pos = FillRecParametersTP(m_xZmm.getMSTrack(m_xZmm.getPosMuon(ZmumuEvent::CB)),
-					  muon_pos->trackParticle(xAOD::Muon::InnerDetectorTrackParticle),
+					  muon_pos->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle),
 					  ppos_comb->charge(), 
 					  ppos_comb_v);
 
 	success_neg = FillRecParametersTP(m_xZmm.getMSTrack(m_xZmm.getNegMuon(ZmumuEvent::CB)),
-					  muon_neg->trackParticle(xAOD::Muon::InnerDetectorTrackParticle),
+					  muon_neg->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle),
 					  pneg_comb->charge(),
 					  pneg_comb_v);
 	if (success_pos && success_neg) { 
@@ -1630,7 +1630,7 @@ StatusCode IDPerfMonZmumu::execute()
   const xAOD::MuonContainer* muons = PerfMonServices::getContainer<xAOD::MuonContainer>( PerfMonServices::MUON_COLLECTION );
   if(muons){   
     for (auto muon : *muons) {
-      const xAOD::TrackParticle* tp = muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);   
+      const xAOD::TrackParticle* tp = muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);   
       if(!tp) {
 	ATH_MSG_DEBUG(" - tpb = "<< tp << " -> is null? " << (!tp));
 	continue;
@@ -2773,8 +2773,8 @@ void IDPerfMonZmumu::ExtractIDHitsInformation(const xAOD::Muon* muon_pos, const 
 {
   // hits info
   // positive Muon
-  const xAOD::TrackParticle* IDTrkMuPos = muon_pos->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
-  const xAOD::TrackParticle* IDTrkMuNeg = muon_neg->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+  const xAOD::TrackParticle* IDTrkMuPos = muon_pos->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
+  const xAOD::TrackParticle* IDTrkMuNeg = muon_neg->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
 
   int nBLhits, nhitsPIX, nhitsSCT, nhitsTRT, nContribPixLayers;
   int nPIXholes, nSCTholes;

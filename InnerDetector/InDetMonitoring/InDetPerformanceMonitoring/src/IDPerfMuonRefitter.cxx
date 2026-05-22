@@ -85,7 +85,7 @@ StatusCode IDPerfMuonRefitter::execute()
       continue;
     }
 	  ++m_N_Muons;
-    const xAOD::TrackParticle* idTP =   muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+    const xAOD::TrackParticle* idTP =   muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
     if (!idTP) {
        ATH_MSG_DEBUG("ID TrackParticles missing!  Skipping Muon");
        continue;

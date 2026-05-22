@@ -75,10 +75,10 @@ class MuonSelector : public EventAnalysis
   MsgStream * m_msgStream;
 
   // Class variables
-  const xAOD::Muon*   m_pxMuon;
+  const xAOD::Muon*   m_pxMuon{nullptr};
 
   // requested muon tag (tight, medium, loose..)
-  int m_requestedMuonQuality{};
+  xAOD::Muon::Quality m_requestedMuonQuality{xAOD::Muon::Quality::VeryLoose};
 
   //  TrackIsolationTool* m_isolationTool;
   double m_coneSize{};

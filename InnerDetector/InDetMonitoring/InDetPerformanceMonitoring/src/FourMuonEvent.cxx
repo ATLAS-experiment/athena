@@ -939,7 +939,7 @@ void FourMuonEvent::RecordMuon( const xAOD::Muon* pxMuon )
 	std::cout <<"                                                       sigma_d0 "<< m_pxRecMuon[m_numberOfFullPassMuons]->primaryTrackParticle()->definingParametersCovMatrixVec()[0] << std::endl;
       }
 
-      const xAOD::TrackParticle* pxMSTrack   = pxMuon->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);
+      const xAOD::TrackParticle* pxMSTrack   = pxMuon->trackParticle(xAOD::Muon::TrackParticleType::MuonSpectrometerTrackParticle);
       if (!pxMSTrack) {
 	if (m_doDebug){  std::cout <<" * FourMuonEvent * RecordMuon * bad pxMSmuon --> EXIT "<< std::endl;}
 	return;
@@ -952,7 +952,7 @@ void FourMuonEvent::RecordMuon( const xAOD::Muon* pxMuon )
       }
 
       // ID muon 
-      const xAOD::TrackParticle*  pxIDTrack  = pxMuon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+      const xAOD::TrackParticle*  pxIDTrack  = pxMuon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
       if (!pxIDTrack) {
 	if (m_doDebug){  std::cout <<" * FourMuonEvent * RecordMuon * bad pxIDTrack for this muon--> EXIT "<< std::endl;}
 	return;
