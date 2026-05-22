@@ -91,18 +91,28 @@ namespace ActsTrk {
     if (nSp < 3) return std::nullopt;
 
     // Function to extract the values from sp_collection
-    auto sp_collection_extract = std::views::transform([&sp_collection, useTopSp](std::size_t i) {
+    const auto sp_collection_extract = std::views::transform([&sp_collection, useTopSp](std::size_t i) {
       return sp_collection.at(useTopSp ? sp_collection.size() - i - 1 : i);
     });
+    const auto collect_sp_positions = [&](auto sp_range) -> std::array<Acts::Vector3, 3> {
+      std::array<Acts::Vector3, 3> sps;
+      std::size_t idx = 0;
+      for (const auto& sp : sp_range) {
+        sps[idx++] = Acts::Vector3(sp->x(), sp->y(), sp->z());
+      }
+      return sps;
+    };
 
     // Compute free parameters
-    Acts::FreeVector freeParams = Acts::estimateTrackParamsFromSeed(m_spacePointIndicesFun(nSp) | sp_collection_extract, bField);
+    const std::array<Acts::Vector3, 3> sp_positions = collect_sp_positions(m_spacePointIndicesFun(nSp) | sp_collection_extract);
+    Acts::FreeVector freeParams = Acts::estimateTrackParamsFromSeed(sp_positions[0], 0, sp_positions[1], sp_positions[2], bField);
 
     if (m_useLongSeeds == 1 && nSp > 3ul) {
-      auto spacePointIndicesFun2 = [](std::size_t nSp) -> std::array<std::size_t, 3> {
+      const auto spacePointIndicesFun2 = [](std::size_t nSp) -> std::array<std::size_t, 3> {
         return {0, nSp / 2ul, nSp - 1};
       };
-      Acts::FreeVector freeParams2 = Acts::estimateTrackParamsFromSeed(spacePointIndicesFun2(nSp) | sp_collection_extract, bField);
+      const std::array<Acts::Vector3, 3> sp_positions2 = collect_sp_positions(spacePointIndicesFun2(nSp) | sp_collection_extract);
+      const Acts::FreeVector freeParams2 = Acts::estimateTrackParamsFromSeed(sp_positions2[0], 0, sp_positions2[1], sp_positions2[2], bField);
       ATH_MSG_DEBUG("update seed p = " << 1.0 / freeParams[Acts::eFreeQOverP] << " to " << 1.0 / freeParams2[Acts::eFreeQOverP]);
       freeParams[Acts::eFreeQOverP] = freeParams2[Acts::eFreeQOverP];
     }
