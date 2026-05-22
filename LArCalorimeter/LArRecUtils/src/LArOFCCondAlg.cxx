@@ -51,6 +51,7 @@ LArOFCCondAlg::LArOFCCondAlg(const std::string &name,
                 "First sample to use for in-time event on the full pulse shape");
         declareProperty("useHighestGainAutoCorr",m_useHighestGainAutoCorr);
         declareProperty("DumpOFCCondAlg",m_Dump);
+	declareProperty("NGains",m_nGains);
     }
 
 LArOFCCondAlg::~LArOFCCondAlg() {}
@@ -70,12 +71,9 @@ StatusCode LArOFCCondAlg::initialize() {
     ATH_CHECK(m_LArNoiseObjKey.initialize(m_isMC));
     ATH_CHECK(m_LArPedestalObjKey.initialize(!m_isMC));
 
-    // Number of gains (does this have to be in initialize now b/c of AthenaMT?)
-    // Copied from LArADC2MeVCondAlg.cxx
-    if (m_isSuperCell) {
-        m_nGains = 1;
-    } else {
-        m_nGains = 3;
+    if (m_isSuperCell && m_nGains!=1) {
+      ATH_MSG_ERROR("Inconsistent configuration: m_isSuperCell set but nGains != 1");
+      return StatusCode::FAILURE;
     }
 
     return StatusCode::SUCCESS;
