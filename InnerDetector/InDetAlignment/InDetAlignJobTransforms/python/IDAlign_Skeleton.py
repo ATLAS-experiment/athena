@@ -300,18 +300,16 @@ def configureFlags(runArgs):
     
     if flags.GeoModel.Run > LHCPeriod.Run3:
         # needs to be adapted
-        return configureInDetFlags(runArgs, flags)
+        return configureITkFlags(runArgs, flags)
     else: 
         # return configureITkFlags(runArgs, flags)
         return configureInDetFlags(runArgs, flags)
 
-def fromRunArgsITk(runArgs):
+def fromRunArgsITk(runArgs, flags):
 
     DBFile = ""
     DBName="OFLCOND"
     tag="InDetSi_MisalignmentMode_random misalignment"
-
-    flags = configureFlags(runArgs)
 
     from RecJobTransforms.RecoSteering import RecoSteering
     cfg = RecoSteering(flags)
@@ -351,8 +349,7 @@ def fromRunArgsITk(runArgs):
         cfg.run()
 
 
-def fromRunArgsInDet(runArgs):
-    flags = configureFlags(runArgs)
+def fromRunArgsInDet(runArgs, flags):
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     cfg = MainServicesCfg(flags)
@@ -441,7 +438,9 @@ def fromRunArgs(runArgs):
     flags.GeoModel.AtlasVersion = runArgs.atlasVersion
 
     if flags.GeoModel.Run > LHCPeriod.Run3:
-        pass
+        flags = configureITkFlags(runArgs, flags)
+        return fromRunArgsITk(runArgs)
     else:
-        return fromRunArgsInDet(runArgs)
+        flags = configureInDetFlags(runArgs, flags)
+        return fromRunArgsInDet(runArgs, flags)
     
