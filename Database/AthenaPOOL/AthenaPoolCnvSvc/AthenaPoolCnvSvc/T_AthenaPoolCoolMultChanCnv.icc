@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file T_AthenaPoolCoolMultChanCnv.icc
@@ -26,7 +26,6 @@
 #include "CxxUtils/checker_macros.h"
 
 #include <exception>
-#include <string>
 #include <format>
 
 //__________________________________________________________________________
@@ -146,31 +145,32 @@ T_AthenaPoolCoolMultChanCnv<COLL_T, ELEM_T, ELEM_P>::objectToAttrListColl ATLAS_
     typename COLL_T::chan_const_iterator itChan = obj->chan_begin();
     typename COLL_T::iov_const_iterator  itIOV  = obj->iov_begin();
     std::string token_str;
+    static const std::string  poolRefStr{"PoolRef"};
+    static const std::string  dataTypeStr{"string"};
     for (unsigned int chan = 0; chan < obj->size(); ++chan, ++itChan) {
-	ELEM_T* elem = (*obj)[chan];
-        // Allow for T/P separation, convert to persistent object
-        ELEM_P* elem_p = this->createPersistent(elem);
-        std::unique_ptr<Token> token;
-	StatusCode sc = this->objectToPool(elem_p, token, "", *pAddr->par());
-	if (sc != StatusCode::SUCCESS || !token) {
-	    ATH_MSG_ERROR("Unable to write out object");
-	    return(StatusCode::FAILURE);
-	}
-        token_str = token->toString();
-
-	// Create a new AthenaAttributeList
-	AthenaAttributeList attrList;
-        attrList.extend("PoolRef","string");
-	attrList["PoolRef"].setValue( token_str );
-	attrListColl->add((*itChan), attrList);
-	if (hasIOVs) {
-	    attrListColl->add((*itChan), (*itIOV));
-	    ++itIOV;
-	}
-	ATH_MSG_DEBUG("Adding new attrList for token: " << token_str);
-
-	// Save as well in implementation
-	impl->add(token_str);
+      ELEM_T* elem = (*obj)[chan];
+      // Allow for T/P separation, convert to persistent object
+      ELEM_P* elem_p = this->createPersistent(elem);
+      std::unique_ptr<Token> token;
+      StatusCode sc = this->objectToPool(elem_p, token, "", *pAddr->par());
+      if (sc != StatusCode::SUCCESS || !token) {
+        ATH_MSG_ERROR("Unable to write out object");
+        return(StatusCode::FAILURE);
+      }
+      token_str = token->toString();
+      
+      // Create a new AthenaAttributeList
+      AthenaAttributeList attrList;
+      attrList.extend(poolRefStr,dataTypeStr);
+      attrList[poolRefStr].setValue( token_str );
+      attrListColl->add((*itChan), attrList);
+      if (hasIOVs) {
+        attrListColl->add((*itChan), (*itIOV));
+        ++itIOV;
+      }
+	    ATH_MSG_DEBUG("Adding new attrList for token: " << token_str);
+	    // Save as well in implementation
+	    impl->add(token_str);
     }
 
     // Print out tokens

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLCNVSVC_T_ATHENAPOOLCOOLMULTCHANCNV_H
@@ -17,6 +17,7 @@
 #include "AthenaPoolCnvSvc/T_AthenaPoolCustCnv.h"
 #include "PersistentDataModel/Token.h"
 
+#include <memory>
 #include <string>
 
 class DataObject;
