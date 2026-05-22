@@ -13,15 +13,20 @@
 #include <xAODMuonSimHit/MuonSimHitContainer.h>
 
 namespace MuonG4R4 {
-
+   /** @brief Sensitive detector implementation to record G4 hits in the
+     *        Tgc detectors. The ProcessHits hook is called by Geant4
+     *        if the track enters a sensible Rpc gas gap volume. The TouchableHistory is 
+     *        used to deduce the associated readout element and then to identify
+     *        the actual gas gap. The hit is then passed to the `MuonSensitiveDetector` 
+     *        class for event record */
   class TgcSensitiveDetector : public MuonSensitiveDetector {
     public:
-      using MuonSensitiveDetector::MuonSensitiveDetector;
-      ~TgcSensitiveDetector()=default;
-    
-      virtual G4bool ProcessHits(G4Step* aStep, G4TouchableHistory* ROhist) override final;
-
-    
+        /** @brief Recycle the constructor from the MuonSensitiveDetector */
+        using MuonSensitiveDetector::MuonSensitiveDetector;
+        /** @brief Default destructor */  
+        ~TgcSensitiveDetector()=default;
+        /** @copydoc MuonSensitiveDetector::ProcessHits */
+        virtual G4bool ProcessHits(G4Step* aStep, G4TouchableHistory* ROhist) override final;
     private:
       /** @brief Retrieves the readout element that's associates with the TouchableHistory. 
        *         The readout element is decoded from the volume name in the history.

@@ -1,12 +1,14 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "TgcSensitiveDetector.h"
 #include "MuonSensitiveDetectorsR4/Utils.h"
 
 #include "G4ThreeVector.hh"
 
-#include "MCTruth/TrackHelper.h"
+#include <MCTruth/TrackHelper.h>
+#include <MCTruth/AtlasG4EventUserInfo.h>
+
 #include <sstream>
 
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
@@ -30,7 +32,12 @@ G4bool TgcSensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*) {
     if (!readOutEle) {
        return false;
     }
-    const ActsTrk::GeometryContext gctx{getGeoContext()};
+    auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo();
+    if (!eventInfo) {
+        THROW_EXCEPTION("No AtlasG4EventUserInfo available");
+    }
+
+    const ActsTrk::GeometryContext gctx{getGeoContext(eventInfo->GetEventContext())};
     
     const Amg::Transform3D localToGlobal = getTransform(touchHist, 0);
     ATH_MSG_VERBOSE(" Track is inside volume "

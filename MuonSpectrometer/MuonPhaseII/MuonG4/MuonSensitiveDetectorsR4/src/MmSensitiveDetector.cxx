@@ -1,19 +1,17 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MmSensitiveDetector.h"
 #include "MuonSensitiveDetectorsR4/Utils.h"
 #include "G4ThreeVector.hh"
-#include "G4Trd.hh"
-#include "G4Geantino.hh"
-#include "G4ChargedGeantino.hh"
 
-#include "MCTruth/TrackHelper.h"
+#include <MCTruth/TrackHelper.h>
+#include <MCTruth/AtlasG4EventUserInfo.h>
+
 #include <sstream>
 
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
-#include "xAODMuonSimHit/MuonSimHitAuxContainer.h"
 #include "GeoModelKernel/throwExcept.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
@@ -34,7 +32,12 @@ G4bool MmSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
   if (!processStep(aStep)) {
     return true;
   }
-  const ActsTrk::GeometryContext gctx{getGeoContext()};
+  
+  auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo();
+  if (!eventInfo) {
+    THROW_EXCEPTION("No AtlasG4EventUserInfo available");
+  }
+  const ActsTrk::GeometryContext gctx{getGeoContext(eventInfo->GetEventContext())};
 
   const G4TouchableHistory* touchHist = static_cast<const G4TouchableHistory*>(aStep->GetPreStepPoint()->GetTouchable());
   const MuonGMR4::MmReadoutElement* readOutEle = getReadoutElement(gctx, touchHist);

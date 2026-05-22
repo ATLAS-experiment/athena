@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -14,6 +14,7 @@
 //
 // vector class
 #include <vector>
+#include <concepts>
 
 #include "AthContainers/tools/DVLInfo.h"
 #include "boost/iterator/transform_iterator.hpp"
@@ -27,14 +28,6 @@
 #include "GaudiKernel/MsgStream.h"
 #endif
 
-namespace AthHitVec{
-  enum OwnershipPolicy {
-    OWN_ELEMENTS = 0,  ///< this data object owns its elements
-    VIEW_ELEMENTS = 1  ///< this data object is a view, does not own its elmts
-  };
-}
-
-
 struct HitsVectorBase {
   // This base class is used to store AthenaHitsVector
   // and AtlasHitsVector in the same container, avoiding std::any RTTI.
@@ -42,6 +35,19 @@ struct HitsVectorBase {
   // when converting a std::unique_ptr<Derived> to std::unique_ptr<Base>.
   virtual ~HitsVectorBase() = default;
 };
+
+
+namespace AthHitVec{
+  enum OwnershipPolicy {
+    OWN_ELEMENTS = 0,  ///< this data object owns its elements
+    VIEW_ELEMENTS = 1  ///< this data object is a view, does not own its elmts
+  };
+  /// Define the concept that the struct needs to inherit from the 
+  /// HitsVectorBase
+  template <typename Cont_t> concept isHitVectorBase = std::is_base_of_v<HitsVectorBase, Cont_t>;
+}
+
+
 
 //
 template <typename T>
