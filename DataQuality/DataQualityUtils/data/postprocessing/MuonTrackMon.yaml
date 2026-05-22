@@ -1,5 +1,5 @@
 #
-#   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # Separate blocks with ---
 ---
@@ -106,3 +106,12 @@ Input : ['MuonPhysics/Muons/CBMuons/Muons_CBMuons_eta_phi_tight', 'MuonPhysics/M
 Output : ['MuonPhysics/Muons/CBMuons/Muons_CBMuons_Tight_eff']
 Function : MuonTrackMonitoring.MuonTrackMonitorPostProcessing.efficiencies_2d
 Description: EtaPhiTightEfficiency
+#
+#
+# Normalize LumiBlockplot
+#
+---
+Input : ['MuonPhysics/Overview/General/Overview_LB_nMuonTrack']
+Output : ['MuonPhysics/Overview/General/Overview_LB_nMuonTrack_row_normalized']
+Function : MuonTrackMonitoring.MuonTrackMonitorPostProcessing.normalize_rows_ROOT
+Description : NormalizedLumiBlockTrackCategory
