@@ -35,6 +35,18 @@ from  GlobalSimulation.graphAlgs import Topological
 import xml.etree.ElementTree as ET
 import os
 
+# The following DataHandle look up tables will be removed in future developments
+read_handles = {
+    'eFexCvtrAlgTool': ('eFexEMRoIKey',),
+    'Egamma1BDTAlgTool': ('LArNeighborhoodTOBContainerReadKey',),
+    'eEmMultAlgTool': ('eEmTOBs',),
+    }
+
+write_handles = {
+    'eFexCvtrAlgTool': 'eEmTOBs',
+    'Egamma1BDTAlgTool': 'eEmEg1BDTTOBContainerKey',
+}
+
 def GlobalSimulationAlgCfg(flags,
                            dump,
                            algName = 'GlobalSimTestAlg',
@@ -58,6 +70,9 @@ def GlobalSimulationAlgCfg(flags,
         a_class = toolEl.attrib['class']
         a_name = toolEl.attrib['name']
         return  '/'.join((a_class, a_name))
+
+    def classname_from_fullname(fullname):
+        return fullname.split('/')[0]
 
 
     def configure_algtool(toolEl):
@@ -102,7 +117,7 @@ def GlobalSimulationAlgCfg(flags,
                 for toolEl in writerEl.iter('AlgTool'):
                     f_name = str_id(toolEl)                    
                     if f_name in alg_ids:
-                        AssertionError('Algorithm duplicated in ' + fn)
+                        raise AssertionError('Algorithm duplicated in ' + fn)
                     alg_ids[f_name] = alg_ind
                     alg_tools[alg_ind] = (configure_algtool(toolEl), toolType)
                     alg_ind += 1
@@ -123,7 +138,7 @@ def GlobalSimulationAlgCfg(flags,
         """
 
         
-        logger.debug('make_digraph: ', alg_ids)
+        logger.debug('make_digraph alg_ids: ', alg_ids)
         logger.debug('make_digraph:  V ' + str(V))
 
         # Create an empty DAG
@@ -144,8 +159,8 @@ def GlobalSimulationAlgCfg(flags,
                     for childEl in toolEl.iter('child'):
                         f_c_name = str_id(childEl)
                         if f_c_name not in alg_ids:
-                            AssertionError('child ' + f_c_name +
-                                           ' not in ' + fn)
+                            raise AssertionError('child ' + f_c_name +
+                                                 ' not in ' + fn)
 
                         G.addEdge(par_id, alg_ids[f_c_name])
 
@@ -153,9 +168,67 @@ def GlobalSimulationAlgCfg(flags,
         roots = [n for n in range(R.V) if not R.adj(n) and n != 0]
         return G, roots
 
+    def set_SGout_locations(tools):
+        """
+        Set the StoreGate locations to be written to. As the
+        same Algorithm may have > 1 instance, ensure that the
+        write locations differ.
+       """
+        # set the Storegate location each tool writes to.
+        
+        out_index = 0
+        for indx, (tool, tooltype)  in tools.items():
+            class_name = tool.__class__.__name__
+            handle = write_handles.get(class_name, None)
 
+            if handle is not None:
+                setattr(tool, handle, 'GlobalSim_'+str(out_index))
+                out_index += 1
+ 
 
+    def set_SGin_locations(tools, alg_ids, G):
+        """"
 
+        Set locations read from by each Algorithm according to the
+        call graph G.
+        
+        NOTE: currently we assume a tool has one output location
+        and one input location, which allows only "narrow chains".
+        This will be extended to allow multiple children in the near future.
+        
+        alg_ids is a str:int map
+        tools is a int : (tool, toolType) map
+        """
+
+        #check alg_ids is a str:int map. Invert it if it is a bijection.
+        if len(set(alg_ids.values())) != len(alg_ids.values()):
+               logger.error('alg_ids is not a 1-1 mapping')
+               raise AssertionError ('alg_ids dictionary  is not a 1-1 mapping')
+        
+        alg_ids_rev = {v: k for k, v in alg_ids.items()}
+
+        # Temporary single child assumption
+        for nid in range(1, G.V):
+            parent = tools[nid][0]
+            child_ids =  G.adj(nid)
+            if len(child_ids) == 0:
+                continue
+            if  len(child_ids) > 1:
+                raise NotImplementedError(alg_ids_rev[nid] +
+                                          ': a GS AlgTool can have a single'\
+                                          'input for now')
+
+            # children[0] is the first (and currently only) child id
+            # in G.
+            # tools[children[0]] is tool information for the (only) child
+            # tools[children[0]] [0] is the tool itself.
+            child_tool =  tools[child_ids[0]][0]
+            w_handle_name = write_handles[child_tool.__class__.__name__]
+            read_handle = read_handles[parent.__class__.__name__][0]
+            read_from = getattr(child_tool, w_handle_name)
+            setattr(parent, read_handle, read_from)
+
+               
     # parse the config XML file
     
     tree = ET.parse(fn)
@@ -168,9 +241,15 @@ def GlobalSimulationAlgCfg(flags,
     alg_ids,  alg_tools, V= fill_alg_ids(root)
 
     G, roots = make_digraph(alg_ids, V)
+    logger.debug('call graph ' + str(G))
+
     topological = Topological(G, roots=roots)
-    assert topological.isDAG()
+    if not topological.isDAG(): raise AssertionError(
+            'Call graph is not a DAG')
+    
     index_order = topological.order()
+    set_SGout_locations(tools=alg_tools)
+    set_SGin_locations(tools=alg_tools, alg_ids = alg_ids, G=G)
 
     logger.debug('DAG: ' + str(G))
     logger.debug('order: ' + str(index_order))
@@ -182,14 +261,39 @@ def GlobalSimulationAlgCfg(flags,
 
     msg = [str(tool) for tool in orderedTOBWriters]
     logger.debug(toolType + ': ' + '\n'.join(msg))
+
     
     toolType = 'TIPWriters'
     orderedTIPWriters = [alg_tools[i][0] for i in index_order
                          if alg_tools[i][1] == toolType]
 
-    msg = [str(tool) for tool in orderedTIPWriters]
-    logger.debug(toolType + ': ' + '\n'.join(msg))
-  
+    tools = [alg_tools[i][0] for i in index_order]
+    msg = ['GlobalSim tool IO dump:']
+    for tool in tools:
+        
+        tname =  tool.__class__.__name__ + '/' + tool.name
+
+        logger.debug('GS tool name ' + tname)
+        logger.debug('GS r_handle str(tool)' , str(tool))
+
+        handle_name = read_handles.get(tool.__class__.__name__, None)
+        if handle_name is None:
+            logger.debug('GS r_handle not in table')
+        else:
+                  
+            logger.debug('GS r_handle from table: ', handle_name)
+            logger.debug('GS r_handle loc from tool: ' + tname + ' ' +
+                         str(getattr(tool, handle_name[0])))
+        
+        handle_name = write_handles.get(tool.__class__.__name__, None)
+        if handle_name is None:
+            logger.debug('GS w_handle not in table')
+        else:
+            logger.debug('GS w_handle from table: ' + handle_name)
+            logger.debug('GS w_handle loc from tool: ' + tname + ' ' +
+                         str(getattr(tool, handle_name)))
+
+
     alg = CompFactory.GlobalSim.GlobalSimulationAlg(algName)
     alg.globalsim_algs = orderedTOBWriters
     alg.TIPwriters = orderedTIPWriters
