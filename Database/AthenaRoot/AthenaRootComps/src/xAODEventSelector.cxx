@@ -39,6 +39,7 @@
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/CLIDRegistry.h"
 #include "CxxUtils/checker_macros.h"
+#include "StorageSvc/DbType.h"
 
 // StoreGate includes
 
@@ -823,7 +824,7 @@ xAODEventSelector::createRootBranchAddresses(StoreID::type storeID,
       const std::string br_name = itr->second.branchName();
 
       Athena::xAODBranchAddress* addr = new Athena::xAODBranchAddress
-        (POOL_ROOTTREE_StorageType, id,
+        (pool::ROOT_StorageType.type(), id,
          m_tupleName.value(),
          br_name,
          (unsigned long)(value_ptr),
@@ -954,7 +955,7 @@ xAODEventSelector::createMetaDataRootBranchAddresses() const
 	ATH_MSG_DEBUG("id = " << id << ", m_metadataName.value() = " << m_metadataName.value() << ", br_name = " << br_name << ", value_ptr = " << value_ptr);
         CxxUtils::RefCountedPtr<Athena::xAODBranchAddress> addr
           (new Athena::xAODBranchAddress
-           (POOL_ROOTTREE_StorageType, id,
+           (pool::ROOT_StorageType.type(), id,
             m_metadataName.value(),
             br_name,
             (unsigned long)(value_ptr),

@@ -20,6 +20,7 @@
 #include "GaudiKernel/GenericAddress.h"
 #include "GaudiKernel/IRegistry.h"
 #include "Gaudi/Property.h"
+#include "StorageSvc/DbType.h"
 
 // ROOT includes
 #include "TFile.h"
@@ -34,7 +35,7 @@ namespace Athena {
 ////////////////
 xAODCnvSvc::xAODCnvSvc( const std::string& name, 
                             ISvcLocator* pSvcLocator ) : 
-  base_class( name, pSvcLocator, POOL_ROOTTREE_StorageType )
+  base_class( name, pSvcLocator, pool::ROOT_StorageType.type() )
 {
 }
 
@@ -233,13 +234,13 @@ xAODCnvSvc::createAddress(long svcType,
   ATH_MSG_VERBOSE("::createAddress(" << svcType << ", " << clid 
                << ", " << refAddress << ", " << refpAddress
                << ")...");
-  if (svcType != POOL_ROOTTREE_StorageType) {
+  if (svcType != pool::ROOT_StorageType.type()) {
     ATH_MSG_ERROR("::createAddress: svcType != root-type");
     ATH_MSG_ERROR("    svcType   = [" << svcType << "]");
-    ATH_MSG_ERROR("    root-type = [" << POOL_ROOTTREE_StorageType << "]");
+    ATH_MSG_ERROR("    root-type = [" << pool::ROOT_StorageType.type() << "]");
     return StatusCode::FAILURE;
   }
-  refpAddress = new GenericAddress(POOL_ROOTTREE_StorageType, clid, refAddress);
+  refpAddress = new GenericAddress(pool::ROOT_StorageType.type(), clid, refAddress);
   return StatusCode::SUCCESS;
 }
 //@}
