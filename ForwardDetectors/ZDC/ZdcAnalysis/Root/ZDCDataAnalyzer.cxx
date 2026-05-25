@@ -56,7 +56,6 @@ ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, int nSamp
   for (size_t side : {0, 1}) {
     for (size_t module : {0, 1, 2, 3}) {
       std::string moduleTag= "_s" + std::to_string(side) + "_m" +std::to_string(module);
-
       m_moduleAnalyzers[side][module] = make_unique<ZDCPulseAnalyzer>(m_msgFunc_p, std::move(moduleTag), nSample, deltaTSample, preSampleIdx,
 								      m_pedestals[side][module], fitFunction,
 								      peak2ndDerivMinSamples[side][module],

@@ -27,7 +27,7 @@ if( NOT XAOD_STANDALONE )
 
    atlas_add_test( test_Run2Run3Conversion
                    SCRIPT TrigConfReadWrite -i TRIGGERDB 2218,4229,2967,1373 -o r3json
-                   POST_EXEC_SCRIPT nopost.sh
+                   POST_EXEC_SCRIPT noerror.sh
                    PROPERTIES TIMEOUT 300 )
 endif()
 
