@@ -18,7 +18,6 @@ namespace MuonG4R4{
         return StatusCode::SUCCESS;
     }
     StatusCode MuonSensitiveDetectorTool::Gather(HitCollectionMap& hitCollections) {
-        hitCollections.Record<MuonSimHitsVec>(m_outputCollectionNames[0]);
-        return StatusCode::SUCCESS;
+        return hitCollections.Record<MuonSimHitsVec>(m_outputCollectionNames[0]);
     }
 }

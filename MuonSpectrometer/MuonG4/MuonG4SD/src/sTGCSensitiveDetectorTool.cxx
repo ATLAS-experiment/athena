@@ -27,6 +27,5 @@ StatusCode sTGCSensitiveDetectorTool::SetupEvent(HitCollectionMap& hitCollection
 
 StatusCode sTGCSensitiveDetectorTool::Gather(HitCollectionMap& hitCollections)
 {
-  hitCollections.Record<sTGCSimHitCollection>(m_outputCollectionNames[0]);
-  return StatusCode::SUCCESS;
+  return hitCollections.Record<sTGCSimHitCollection>(m_outputCollectionNames[0]);
 }

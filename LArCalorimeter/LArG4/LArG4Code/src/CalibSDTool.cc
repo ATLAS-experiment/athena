@@ -5,6 +5,7 @@
 #include "LArG4Code/CalibSDTool.h"
 
 // ID helper includes
+#include "AthenaKernel/errorcheck.h"
 #include "CaloIdentifier/CaloIdManager.h"
 #include "CaloIdentifier/LArEM_ID.h"
 #include "CaloIdentifier/LArFCAL_ID.h"
@@ -95,31 +96,27 @@ namespace LArG4
   //---------------------------------------------------------------------------
   // Finalize and record hits for this event
   //---------------------------------------------------------------------------
-  StatusCode CalibSDTool::Gather(HitCollectionMap& hitCollections)
-  {
-    hitCollections.TransformAndRecord<CaloCalibrationHitContainer>(hitCollectionName(),
-      [](CaloCalibrationHitContainer& hits)
-      {
+StatusCode CalibSDTool::Gather(HitCollectionMap& hitCollections) {
+  CHECK(hitCollections.TransformAndRecord<CaloCalibrationHitContainer>(
+      hitCollectionName(), [](CaloCalibrationHitContainer& hits) {
         static_cast<LArCalibrationHitContainerBuilder&>(hits).Finalize();
-      });
+      }));
 
-    if (!deadHitCollectionName().empty()) {
-      hitCollections.TransformAndRecord<CaloCalibrationHitContainer>(deadHitCollectionName(),
-        [](CaloCalibrationHitContainer& hits)
-        {
+  if (!deadHitCollectionName().empty()) {
+    CHECK(hitCollections.TransformAndRecord<CaloCalibrationHitContainer>(
+        deadHitCollectionName(), [](CaloCalibrationHitContainer& hits) {
           static_cast<LArCalibrationHitContainerBuilder&>(hits).Finalize();
-        });
-    }
-
-    if (!srHitCollectionName().empty()) {
-      hitCollections.TransformAndRecord<SrCaloCalibrationHitContainer>(srHitCollectionName(),
-        [](SrCaloCalibrationHitContainer& hits)
-        {
-          static_cast<LArSrCalibrationHitContainerBuilder&>(hits).Finalize();
-        });
-    }
-    return StatusCode::SUCCESS;
+        }));
   }
+
+  if (!srHitCollectionName().empty()) {
+    CHECK(hitCollections.TransformAndRecord<SrCaloCalibrationHitContainer>(
+        srHitCollectionName(), [](SrCaloCalibrationHitContainer& hits) {
+          static_cast<LArSrCalibrationHitContainerBuilder&>(hits).Finalize();
+        }));
+  }
+  return StatusCode::SUCCESS;
+}
 
   //---------------------------------------------------------------------------
   // Create one calib SD

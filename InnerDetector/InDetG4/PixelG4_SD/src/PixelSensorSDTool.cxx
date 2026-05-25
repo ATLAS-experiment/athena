@@ -35,8 +35,7 @@ StatusCode PixelSensorSDTool::SetupEvent(HitCollectionMap& hitCollections)
 
 StatusCode PixelSensorSDTool::Gather(HitCollectionMap& hitCollections)
 {
-  hitCollections.Record<SiHitCollection>(m_outputCollectionNames[0]);
-  return StatusCode::SUCCESS;
+  return hitCollections.Record<SiHitCollection>(m_outputCollectionNames[0]);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

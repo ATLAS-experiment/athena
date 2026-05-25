@@ -39,12 +39,11 @@ StatusCode TileGeoG4SDTool::SetupEvent(HitCollectionMap& hitCollections)
 
 StatusCode TileGeoG4SDTool::Gather(HitCollectionMap& hitCollections)
 {
-  hitCollections.TransformAndRecord<TileHitVector>(m_outputCollectionNames[0], [](TileHitVector& hits){
+  return hitCollections.TransformAndRecord<TileHitVector>(m_outputCollectionNames[0], [](TileHitVector& hits){
     // Because ISF transports multiple G4Event per Athena event, ResetCells must be called here.
     // Once we have a one-to-one G4Event to Athena event mapping, this should be moved to G4VSensitiveDetector::EndOfEvent
     static_cast<TileHitVectorBuilder&>(hits).ResetCells();
   });
-  return StatusCode::SUCCESS;
 }
 
 

@@ -22,8 +22,7 @@ StatusCode MDTSensitiveDetectorCosmicsTool::SetupEvent(HitCollectionMap& hitColl
 
 StatusCode MDTSensitiveDetectorCosmicsTool::Gather(HitCollectionMap& hitCollections)
 {
-  hitCollections.Record<MDTSimHitCollection>(m_outputCollectionNames[0]);
-  return StatusCode::SUCCESS;
+  return hitCollections.Record<MDTSimHitCollection>(m_outputCollectionNames[0]);
 }
 
 G4VSensitiveDetector* MDTSensitiveDetectorCosmicsTool::makeSD() const
