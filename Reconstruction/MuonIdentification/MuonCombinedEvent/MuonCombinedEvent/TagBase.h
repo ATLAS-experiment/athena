@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "xAODMuon/Muon.h"
+#include "MuonStationIndex/MuonStationIndex.h"
 
 namespace Muon {
     class MuonSegment;
@@ -20,23 +21,25 @@ namespace Trk {
 
 namespace MuonCombined {
 
-    inline int authorRank(const xAOD::Muon::Author& a) {
-        if (a == xAOD::Muon::MuidCo) return 0;
-        if (a == xAOD::Muon::MuGirl) return 1;
-        if (a == xAOD::Muon::MuTagIMO) return 2;
-        if (a == xAOD::Muon::MuTag) return 3;
-        if (a == xAOD::Muon::CaloTag) return 4;
-        if (a == xAOD::Muon::MuidSA) return 5;
-        if (a == xAOD::Muon::STACO) return 6;
-        return xAOD::Muon::NumberOfMuonAuthors;
+    inline int authorRank(const xAOD::Muon::Author a) {
+        using enum xAOD::Muon::Author;
+        if (a == MuidCo) return 0;
+        if (a == MuGirl) return 1;
+        if (a == MuTagIMO) return 2;
+        if (a == MuTag) return 3;
+        if (a == CaloTag) return 4;
+        if (a == MuidSA) return 5;
+        if (a == STACO) return 6;
+        return Muon::MuonStationIndex::toInt(NumberOfMuonAuthors);
     }
 
-    inline int typeRank(const xAOD::Muon::MuonType& a) {
-        if (a == xAOD::Muon::Combined) return 0;
-        if (a == xAOD::Muon::SiliconAssociatedForwardMuon) return 1;
-        if (a == xAOD::Muon::SegmentTagged) return 2;
-        if (a == xAOD::Muon::MuonStandAlone) return 3;
-        if (a == xAOD::Muon::CaloTagged) return 4;
+    inline int typeRank(const xAOD::Muon::MuonType a) {
+        using enum xAOD::Muon::MuonType;
+        if (a == Combined) return 0;
+        if (a == SiliconAssociatedForwardMuon) return 1;
+        if (a == SegmentTagged) return 2;
+        if (a == MuonStandAlone) return 3;
+        if (a == CaloTagged) return 4;
         return 5;
     }
 
@@ -87,7 +90,8 @@ namespace MuonCombined {
     inline bool operator<(const TagBase& t1, const TagBase& t2) {
         int r1 = typeRank(t1.type());
         int r2 = typeRank(t2.type());
-        if (r1 != r2 && t1.author() != xAOD::Muon::STACO && t2.author() != xAOD::Muon::STACO) return r1 < r2;
+        if (r1 != r2 && t1.author() != xAOD::Muon::Author::STACO && 
+                        t2.author() != xAOD::Muon::Author::STACO) return r1 < r2;
         return authorRank(t1.author()) < authorRank(t2.author());
     }
 

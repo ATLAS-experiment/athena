@@ -119,15 +119,15 @@ namespace MuonCombined {
 
         /** data content */
 
-        EnergyLossType m_energyLossType;
-        float m_caloLRLikelihood;
-        float m_caloMuonScore;
-        unsigned short m_caloMuonIdTag;
-        float m_fsrCandidateEnergy;
-        std::vector<DepositInCalo> m_deposits;
-        float m_etCore;    // summed cell ET in core DeltaR
-        Author m_author2;  // in case of tag by more than one algorithm
-        Author m_author3;  // in case of tag by all three algorithms
+        EnergyLossType m_energyLossType{static_cast<CaloTag::EnergyLossType>(0)};
+        float m_caloLRLikelihood{0.f};
+        float m_caloMuonScore{0.f};
+        unsigned short m_caloMuonIdTag{0};
+        float m_fsrCandidateEnergy{0.f};
+        std::vector<DepositInCalo> m_deposits{};
+        float m_etCore{};    // summed cell ET in core DeltaR
+        Author m_author2{Author::unknown};  // in case of tag by more than one algorithm
+        Author m_author3{Author::unknown};  // in case of tag by all three algorithms
     };
     inline CaloTag::EnergyLossType CaloTag::energyLossType(void) const { return m_energyLossType; }
 

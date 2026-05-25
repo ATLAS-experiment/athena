@@ -1,7 +1,5 @@
-///////////////////////// -*- C++ -*- /////////////////////////////
-
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // MuonMeanMDTdADCFillerTool.cxx, Implementation file for class MuonMeanMDTdADCFillerTool
@@ -23,11 +21,6 @@ using CLHEP::GeV;
 
 namespace Rec {
 
-    MuonMeanMDTdADCFillerTool::MuonMeanMDTdADCFillerTool(const std::string& type, const std::string& name, const IInterface* parent) :
-        AthAlgTool(type, name, parent) {
-        declareInterface<IMuonMeanMDTdADCFiller>(this);
-    }
-
     // Athena Algorithm's Hooks
     ////////////////////////////
     StatusCode MuonMeanMDTdADCFillerTool::initialize() {
@@ -42,28 +35,30 @@ namespace Rec {
 
     double MuonMeanMDTdADCFillerTool::meanMDTdADCFiller(const xAOD::Muon& muon) const {
         // exclude statistical combination
-        if (muon.author() == xAOD::Muon::STACO) return -9999.;
-
+        if (muon.author() == xAOD::Muon::Author::STACO) {
+            return -9999.;
+        }
         // Trk::Track* for trackParticle
-        const Trk::Track* theTrack = muon.trackParticle(xAOD::Muon::CombinedTrackParticle)
-                                         ? muon.trackParticle(xAOD::Muon::CombinedTrackParticle)->track()
+        using enum xAOD::Muon::TrackParticleType;
+        const Trk::Track* theTrack = muon.trackParticle(CombinedTrackParticle)
+                                         ? muon.trackParticle(CombinedTrackParticle)->track()
                                          : nullptr;
 
         if (theTrack) { return meanMDTdADCFiller(*theTrack); }
 
-        const Trk::Track* theTrack1 = muon.trackParticle(xAOD::Muon::InnerDetectorTrackParticle)
-                                          ? muon.trackParticle(xAOD::Muon::InnerDetectorTrackParticle)->track()
+        const Trk::Track* theTrack1 = muon.trackParticle(InnerDetectorTrackParticle)
+                                          ? muon.trackParticle(InnerDetectorTrackParticle)->track()
                                           : nullptr;
 
         if (theTrack1) { return meanMDTdADCFiller(*theTrack1); }
 
-        const Trk::Track* theTrack2 = muon.trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle)
-                                          ? muon.trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle)->track()
+        const Trk::Track* theTrack2 = muon.trackParticle(MuonSpectrometerTrackParticle)
+                                          ? muon.trackParticle(MuonSpectrometerTrackParticle)->track()
                                           : nullptr;
 
         if (theTrack2) { return meanMDTdADCFiller(*theTrack2); }
 
-        const Trk::Track* theTrack3 = muon.trackParticle(xAOD::Muon::Primary) ? muon.trackParticle(xAOD::Muon::Primary)->track() : nullptr;
+        const Trk::Track* theTrack3 = muon.trackParticle(Primary)->track();
 
         if (theTrack3) { return meanMDTdADCFiller(*theTrack3); }
 

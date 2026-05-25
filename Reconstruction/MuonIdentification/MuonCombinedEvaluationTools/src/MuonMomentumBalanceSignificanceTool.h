@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONMOMENTUMBALANCESIGNIFICANCETOOL_H
@@ -17,9 +17,9 @@ namespace Rec {
                information (parameters, scattering angles) of a track fit.
       */
 
-    class MuonMomentumBalanceSignificanceTool : public AthAlgTool, virtual public IMuonMomentumBalanceSignificance {
+    class MuonMomentumBalanceSignificanceTool : public extends<AthAlgTool, IMuonMomentumBalanceSignificance> {
     public:
-        MuonMomentumBalanceSignificanceTool(const std::string& type, const std::string& name, const IInterface* parent);
+        using base_class::base_class;
         ~MuonMomentumBalanceSignificanceTool() = default;
 
         /** Calculate momentum (im)balance significance of a muon (method will simply step down to the relevant track */

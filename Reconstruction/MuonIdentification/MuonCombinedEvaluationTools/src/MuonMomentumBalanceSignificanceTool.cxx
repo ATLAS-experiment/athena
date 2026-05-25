@@ -16,19 +16,14 @@ using Gaudi::Units::GeV;
 
 namespace Rec {
 
-    MuonMomentumBalanceSignificanceTool::MuonMomentumBalanceSignificanceTool(const std::string& type, const std::string& name,
-                                                                             const IInterface* parent) :
-        AthAlgTool(type, name, parent) {
-        declareInterface<IMuonMomentumBalanceSignificance>(this);
-    }
-
+   
     double MuonMomentumBalanceSignificanceTool::momentumBalanceSignificance(const xAOD::Muon& muon) const {
         // exclude statistical combination
-        if (muon.author() == xAOD::Muon::STACO) return 0.;
-
+        if (muon.author() == xAOD::Muon::Author::STACO) return 0.;
+        using enum xAOD::Muon::TrackParticleType;
         // get combined track
         const Trk::Track* theTrack =
-            muon.trackParticle(xAOD::Muon::CombinedTrackParticle) ? muon.trackParticle(xAOD::Muon::CombinedTrackParticle)->track() : nullptr;
+            muon.trackParticle(CombinedTrackParticle) ? muon.trackParticle(CombinedTrackParticle)->track() : nullptr;
 
         if (theTrack == nullptr) {
             ATH_MSG_DEBUG("No primary author original track for refitted muon, stop calculation...");
