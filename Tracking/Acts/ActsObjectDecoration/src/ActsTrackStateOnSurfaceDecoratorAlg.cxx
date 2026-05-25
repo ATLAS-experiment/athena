@@ -7,6 +7,7 @@
 #include "StoreGate/ReadDecorHandle.h"
 #include "TrkEventPrimitives/TrackStateDefs.h"
 #include "ActsGeometry/ATLASSourceLink.h"
+#include "ActsEvent/Decoration.h"
 
 namespace ActsTrk {
 
@@ -47,10 +48,6 @@ namespace ActsTrk {
 				      std::make_unique<xAOD::TrackStateValidationAuxContainer>()) );
     xAOD::TrackStateValidationContainer* stripMsos = stripMsosHandle.ptr();
 
-    // Decorators
-    SG::ReadDecorHandle<xAOD::TrackParticleContainer, ElementLink<ActsTrk::TrackContainer>> decorator_trackLink(m_decorator_actsTracks, ctx);
-    ATH_CHECK(decorator_trackLink.isValid());
-
     SG::WriteDecorHandle<xAOD::TrackParticleContainer,
 			 std::vector< ElementLink< xAOD::TrackStateValidationContainer > > > decorator_msos_link( m_trackMsosLink, ctx );
     ATH_CHECK(decorator_msos_link.isValid());
@@ -58,10 +55,8 @@ namespace ActsTrk {
 
     
     for (const xAOD::TrackParticle* trackParticle : *trackParticles) {
-      ElementLink<ActsTrk::TrackContainer> trackLink = decorator_trackLink(*trackParticle);
-      ATH_CHECK(trackLink.isValid());
-
-      std::optional<ActsTrk::TrackContainer::ConstTrackProxy> optional_track = *trackLink;
+     
+      std::optional<ActsTrk::TrackContainer::ConstTrackProxy> optional_track = getActsTrack(*trackParticle);
       if ( not optional_track.has_value() ) {
 	ATH_MSG_ERROR("Invalid track link for particle  " << trackParticle->index());
 	return StatusCode::FAILURE;

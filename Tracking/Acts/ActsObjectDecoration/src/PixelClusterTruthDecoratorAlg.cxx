@@ -10,6 +10,8 @@
 #include "StoreGate/ReadDecorHandle.h"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometry/ATLASSourceLink.h"
+#include "ActsEvent/Decoration.h"
+
 
 namespace ActsTrk {
   
@@ -262,7 +264,6 @@ StatusCode PixelClusterTruthDecoratorAlg::labelMeasurementToKeep(const EventCont
   }
   labels.resize(clusters.size(), false);
 
-  static const SG::ConstAccessor< ElementLink<ActsTrk::TrackContainer> > decorator_trackLink("actsTrack");
   
   // get the tracks
   for (const SG::ReadHandleKey<xAOD::TrackParticleContainer>& trackParticleKey : m_trackParticlesKey) {
@@ -271,12 +272,8 @@ StatusCode PixelClusterTruthDecoratorAlg::labelMeasurementToKeep(const EventCont
     const xAOD::TrackParticleContainer* trackParticles = trackParticleHandle.cptr();
     
     for (const xAOD::TrackParticle* trackParticle : *trackParticles) {
-      // Get the ACTS track object
-      ATH_CHECK( decorator_trackLink.isAvailable(*trackParticle) );
-      ElementLink<ActsTrk::TrackContainer> trackLink = decorator_trackLink(*trackParticle);
-      ATH_CHECK(trackLink.isValid());
       
-      std::optional<ActsTrk::TrackContainer::ConstTrackProxy> optional_track = *trackLink;
+      std::optional<ActsTrk::TrackContainer::ConstTrackProxy> optional_track = getActsTrack(*trackParticle);
       if ( not optional_track.has_value() ) {
 	ATH_MSG_ERROR("Invalid track link for particle  " << trackParticle->index());
 	return StatusCode::FAILURE;

@@ -34,6 +34,7 @@
 #include "StoreGate/ReadDecorHandle.h"
 #include "GaudiKernel/PhysicalConstants.h"  // for Gaudi::Units::c_light
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
+#include "ActsEvent/Decoration.h"
 
 
 namespace ActsTrk{
@@ -143,8 +144,6 @@ StatusCode HGTDTrackExtensionAlg::execute(const EventContext& ctx) const
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> extrapYHandle(m_extrapYKey, ctx);
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, int> numHGTDHitsHandle(m_numHGTDHitsKey, ctx);
 
-  SG::ReadDecorHandle<xAOD::TrackParticleContainer, ElementLink<ActsTrk::TrackContainer>> actsTrackLink( m_actsTrackLinkKey, ctx );
-  ATH_CHECK( actsTrackLink.isValid() );
   // ================================================== //
   // ============ RETRIEVE MEASUREMENTS =============== //
   // ================================================== //
@@ -251,14 +250,8 @@ StatusCode HGTDTrackExtensionAlg::execute(const EventContext& ctx) const
   for (const xAOD::TrackParticle* trackParticle : *trackParticles) {
     // Default to empty track data
     TrackExtensionData trackData;
-    // Check if the TrackParticle has a link to an ACTS track
-    ElementLink<ActsTrk::TrackContainer> link_to_track = actsTrackLink(*trackParticle);
-    if (!link_to_track.isValid()) {
-      ATH_MSG_ERROR("Invalid ACTS track link for TrackParticle " << trackParticle->index());
-      return StatusCode::FAILURE;
-    }
 
-    std::optional<ActsTrk::TrackContainer::ConstTrackProxy> optional_track = *link_to_track;
+    std::optional<ActsTrk::TrackContainer::ConstTrackProxy> optional_track = getActsTrack(*trackParticle);
     if (!optional_track.has_value()) {
       ATH_MSG_ERROR("No valid ACTS track associated with TrackParticle " << trackParticle->index());
       return StatusCode::FAILURE;

@@ -8,6 +8,8 @@
 #include "xAODTruth/TruthParticleContainer.h"
 #include <unordered_map>
 #include "decoratorUtils.h"
+#include "ActsEvent/Decoration.h"
+
 
 
 namespace ActsTrk
@@ -67,19 +69,14 @@ namespace ActsTrk
                          perPdgIdSize(),
                          track_particle_handle->size());
 
-    static const SG::AuxElement::ConstAccessor<ElementLink<ActsTrk::TrackContainer> > actsTrackLink("actsTrack");
-
     std::pair<const ActsTrk::TrackContainerBase *, const ActsTrk::TrackToTruthParticleAssociation *>
        the_track_truth_association{ nullptr, nullptr};
     ElementLink<xAOD::TruthParticleContainer> ref_truth_link;
     for(const xAOD::TrackParticle *track_particle : *track_particle_handle) {
-       ElementLink<ActsTrk::TrackContainer> link_to_track = actsTrackLink(*track_particle);
-       static_assert( std::is_same<ElementLink<ActsTrk::TrackContainer>::ElementConstReference,
-                      std::optional<ActsTrk::TrackContainer::ConstTrackProxy> >::value);
        TruthMatchResult truth_match{} ;
 
        {
-          std::optional<ActsTrk::TrackContainer::ConstTrackProxy> optional_track = *link_to_track;
+          std::optional<ActsTrk::TrackContainer::ConstTrackProxy> optional_track = getActsTrack(*track_particle);
           if (optional_track.has_value()) {
              const ActsTrk::TrackContainerBase *track_container = &(optional_track.value().container());
              if (track_container != the_track_truth_association.first && track_container ) {

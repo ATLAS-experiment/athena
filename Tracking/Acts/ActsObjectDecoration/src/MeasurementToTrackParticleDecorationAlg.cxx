@@ -15,6 +15,8 @@
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "Acts/Surfaces/AnnulusBounds.hpp"
 #include "Acts/Utilities/TrackHelpers.hpp"
+#include "ActsEvent/Decoration.h"
+
 
 using namespace Acts::UnitLiterals;
 
@@ -93,17 +95,10 @@ namespace ActsTrk {
         ATH_CHECK(trackParticlesHandle.isValid());
         const xAOD::TrackParticleContainer *track_particles = trackParticlesHandle.cptr();
 
-        static const SG::AuxElement::ConstAccessor<ElementLink<ActsTrk::TrackContainer> > actsTrackLink("actsTrack");
-
         for (const xAOD::TrackParticle *track_particle : *track_particles) {
-            ElementLink<ActsTrk::TrackContainer> link_to_track = actsTrackLink(*track_particle);
-            ATH_CHECK(link_to_track.isValid());
-
-            // to ensure that the code does not suggest something stupid (i.e. creating an unnecessary copy)
-            static_assert( std::is_same<ElementLink<ActsTrk::TrackContainer>::ElementConstReference,
-                           std::optional<ActsTrk::TrackContainer::ConstTrackProxy> >::value);
-            std::optional<ActsTrk::TrackContainer::ConstTrackProxy> optional_track = *link_to_track;
-
+        
+		std::optional<ActsTrk::TrackContainer::ConstTrackProxy> optional_track = getActsTrack(*track_particle);
+		
             if ( not optional_track.has_value() ) {
 	      ATH_MSG_WARNING("Invalid track link for particle  " << track_particle->index() << ". Skipping track..");
 	      continue;  
