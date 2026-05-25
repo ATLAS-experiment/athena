@@ -85,7 +85,7 @@ StatusCode TrigMuonEFHypoAlg::execute( const EventContext& context ) const
 
       const xAOD::Muon* muon = *muonEL;
       //skip SA muons if we are looking only for combined muons
-      if(muon->author()==5 && !m_inclSAmuons) continue; 
+      if(muon->author()== xAOD::Muon::Author::MuidSA && !m_inclSAmuons) continue; 
 
       //Map muons to the correct decisions from previous step
       bool matchedToDec = false;
@@ -93,7 +93,7 @@ StatusCode TrigMuonEFHypoAlg::execute( const EventContext& context ) const
 	//Check if the combined muon has an extrapolated track particle
 	//and if so whether it matches the SA track from the previous decision's muon
 	//This won't work for inside-out muons
-	if(muon->author()!=6){
+	if(muon->author()!=xAOD::Muon::Author::MuGirl){
 	  auto trk1 = muon->trackParticle(xAOD::Muon::TrackParticleType::MuonSpectrometerTrackParticle);
 	  auto trk2 = muonPrev->trackParticle(xAOD::Muon::TrackParticleType::MuonSpectrometerTrackParticle);
 	  if(trk1 && trk2){

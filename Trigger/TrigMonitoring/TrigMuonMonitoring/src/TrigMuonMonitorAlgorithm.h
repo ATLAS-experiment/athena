@@ -137,7 +137,9 @@ class TrigMuonMonitorAlgorithm : public AthMonitorAlgorithm {
   /// List of trigger chains that are monitored in @c fillVariablesPerChain and @c fillVariablesPerOfflineMuonPerChain
   Gaudi::Property<std::vector<std::string> > m_monitored_chains {this, "MonitoredChains", {}, "Trigger chains that are monitored"};
   /// Requirement for the offline muon type considered in analyses
-  Gaudi::Property<int> m_muontype {this, "MuonType", xAOD::Muon::MuonType::Combined, "MuonType used for monitoring"};
+  Gaudi::Property<int> m_muontype {this, "MuonType", 
+                                   static_cast<int>(xAOD::Muon::MuonType::Combined), 
+                                   "MuonType used for monitoring"};
   /// Name of monitored group
   Gaudi::Property<std::string> m_group {this, "Group", "", "Histogram group"};
 

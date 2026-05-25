@@ -132,13 +132,13 @@ bool TrigMuonEFIdtpHypoTool::passedQualityCuts(const xAOD::Muon* muon) const
 {
    bool passCut = false;
 
-   const xAOD::TrackParticle* metrack = muon->trackParticle( xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle );
+   const xAOD::TrackParticle* metrack = muon->trackParticle( xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle );
    float reducedChi2 = -10;
    
    if( metrack ) {
       reducedChi2 = muon->primaryTrackParticle()->chiSquared()/muon->primaryTrackParticle()->numberDoF(); 
       // Selection criteria based on the requirements that are part of the muon quality working points (offline)
-      if(std::abs(reducedChi2) < 8.0 && !m_muonSelTool->isBadMuon(*muon) && muon->author()==xAOD::Muon::MuidSA) passCut = true;
+      if(std::abs(reducedChi2) < 8.0 && !m_muonSelTool->isBadMuon(*muon) && muon->author()==xAOD::Muon::Author::MuidSA) passCut = true;
    }
    
    return passCut;

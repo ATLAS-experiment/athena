@@ -420,10 +420,9 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
                             muonPhi = muon->phi();
                             ATH_MSG_DEBUG("        muonPhi : " << muonPhi);
                             // muonZ
-                            auto link = muon->combinedTrackParticleLink();    // TM and DG 18/06/22
-                            if (link.isValid()) {
+                            auto track = muon->trackParticle(xAOD::Muon::TrackParticleType::CombinedTrackParticle);    // TM and DG 18/06/22
+                            if (track) {
                                 plotDeltaZ = true;
-                                const xAOD::TrackParticle* track = *link;
                                 muonZ = track->z0() + track->vz();
                             } else {
                                 plotDeltaZ = false;

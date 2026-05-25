@@ -69,9 +69,8 @@ bool TrigMuonMonitorAlgorithm :: selectEvents() const {
 
 StatusCode TrigMuonMonitorAlgorithm :: selectMuons(const EventContext& /*ctx*/, SG::ReadHandle<xAOD::MuonContainer> &muons, std::vector<const xAOD::Muon*> &probes) const {
   for (const xAOD::Muon* mu : *muons) {
-    if(mu->muonType()<=m_muontype && 
-       (mu->author()==xAOD::Muon::Author::MuidCo || mu->author()==xAOD::Muon::Author::STACO) && 
-       m_muonSelectionTool->getQuality(*mu)<=xAOD::Muon::Medium ){
+    if(mu->author()==xAOD::Muon::Author::MuidCo && 
+       m_muonSelectionTool->getQuality(*mu)<=xAOD::Muon::Quality::Medium ){
       probes.push_back(mu);
     }
   }

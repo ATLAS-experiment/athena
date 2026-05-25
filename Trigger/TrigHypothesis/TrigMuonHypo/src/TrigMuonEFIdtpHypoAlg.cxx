@@ -84,7 +84,7 @@ StatusCode TrigMuonEFIdtpHypoAlg::execute( const EventContext& context ) const
 	 ATH_MSG_VERBOSE("previous decision muon is not SA, skipping this decision");
 	 continue;
       }
-      const xAOD::TrackParticle* metrack = muonSA->trackParticle( xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle );
+      const xAOD::TrackParticle* metrack = muonSA->trackParticle( xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle );
       ATH_MSG_VERBOSE("muonSA: muonType="<<muonSA->muonType()<<", pT="<<muonSA->pt()/1000.0<<", eta="<<muonSA->eta()<<", phi="<<muonSA->phi()<<", author="<<muonSA->author());
 
       // select PT track

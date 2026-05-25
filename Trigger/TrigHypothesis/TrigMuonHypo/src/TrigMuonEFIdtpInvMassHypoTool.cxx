@@ -290,8 +290,8 @@ bool TrigMuonEFIdtpInvMassHypoTool::passedCBQualityCuts(const xAOD::Muon* muon) 
 {
    bool passCut = false;
 
-   const xAOD::TrackParticle* idtrack = muon->trackParticle( xAOD::Muon::InnerDetectorTrackParticle );
-   const xAOD::TrackParticle* metrack = muon->trackParticle( xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle );
+   const xAOD::TrackParticle* idtrack = muon->trackParticle( xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle );
+   const xAOD::TrackParticle* metrack = muon->trackParticle( xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle );
 
    const float CHI2_CUT = 8.0;
    const float QOVP_CUT = 7.0;
@@ -300,7 +300,7 @@ bool TrigMuonEFIdtpInvMassHypoTool::passedCBQualityCuts(const xAOD::Muon* muon) 
       float qOverPsignif = TrigMuonEFIdtpCommon::qOverPMatching(metrack,idtrack);
       float reducedChi2  = muon->primaryTrackParticle()->chiSquared()/muon->primaryTrackParticle()->numberDoF(); 
       // Selection criteria based on the requirements that are part of the muon quality working points (offline)
-      if(std::abs(reducedChi2) < CHI2_CUT && !m_muonSelTool->isBadMuon(*muon) && qOverPsignif<QOVP_CUT && muon->author()==xAOD::Muon::MuidCo) passCut = true;
+      if(std::abs(reducedChi2) < CHI2_CUT && !m_muonSelTool->isBadMuon(*muon) && qOverPsignif<QOVP_CUT && muon->author()==xAOD::Muon::Author::MuidCo) passCut = true;
    }
    
    return passCut;
@@ -311,7 +311,7 @@ bool TrigMuonEFIdtpInvMassHypoTool::passedSAQualityCuts(const xAOD::Muon* muon) 
 {
    bool passCut = false;
 
-   const xAOD::TrackParticle* metrack = muon->trackParticle( xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle );
+   const xAOD::TrackParticle* metrack = muon->trackParticle( xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle );
 
    const float CHI2_CUT = 8.0;
 
