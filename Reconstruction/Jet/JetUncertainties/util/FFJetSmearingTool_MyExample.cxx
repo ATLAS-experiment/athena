@@ -191,16 +191,6 @@ int main(int argc, char* argv[]){
 
   std::vector<CP::SystematicSet> sysList;
 
-  ////// Initialize the tool to set the truth tagging
-  // Note: in principle not needed for most of the derivation formats, as we save this information in DAODs
-  /*
-    JetTruthLabelingTool m_JetTruthLabelingTool("JetTruthLabelingTool");
-    CHECK(m_JetTruthLabelingTool.setProperty("TruthLabelName", "R10TruthLabel_R22v1"));
-    CHECK(m_JetTruthLabelingTool.setProperty("UseTRUTH3",  false)); // Set this to false only if you have the FULL !TruthParticles container in your input file
-    CHECK(m_JetTruthLabelingTool.setProperty("TruthParticleContainerName", "TruthParticles")); // Set this if you have the FULL !TruthParticles container but have named it something else
-    CHECK(m_JetTruthLabelingTool.initialize());
-  */
-
   ////// Calibrate jets
 
   const std::string name_JetCalibTools = "JetCalibrationTool";

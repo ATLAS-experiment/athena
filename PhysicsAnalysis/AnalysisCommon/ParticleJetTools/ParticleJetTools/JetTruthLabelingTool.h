@@ -46,22 +46,15 @@ public:
 protected:
   
   Gaudi::Property<std::string> m_jetContainerName{this, "RecoJetContainer", "", "Input reco jet container name"};
-  Gaudi::Property<std::string> m_truthLabelName{this, "TruthLabelName", "R10TruthLabel_R21Consolidated", "Truth label name"};
+  Gaudi::Property<std::string> m_truthLabelName{this, "TruthLabelName", "R10TruthLabel_R22v1", "Truth label name"};
 
   Gaudi::Property<bool> m_isTruthJetCol{this, "IsTruthJetCollection", false, "Flag indicating whether input collection is a truth jet container"};
 
   SG::ReadHandleKey<xAOD::EventInfo> m_evtInfoKey{this, "EventInfoKey", "EventInfo", "Name of EventInfo object"};
 
-  /// TRUTH1 or TRUTH3
-  Gaudi::Property<bool> m_useTRUTH3{this, "UseTRUTH3", false, "True for TRUTH3 format, false for TRUTH1"};
-  SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthParticleContainerName{this, "TruthParticleContainerName", "TruthParticles", "Truth particle container name"};
-  SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthBosonContainerName{this, "TruthBosonContainerName", "TruthBosonsWithDecayParticles", "Truth boson container name"};
-  SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthTopQuarkContainerName{this, "TruthTopQuarkContainerName", "TruthTopQuarkWithDecayParticles", "Truth top container name"};
-
   /// parameters for truth labeling
   SG::ReadHandleKey<xAOD::JetContainer> m_truthJetCollectionName{this, "TruthJetContainer", "", "Do not configure manually!"};
   SG::ReadHandleKey<xAOD::JetContainer> m_truthGroomedJetCollectionName{this, "TruthGroomedJetContainer", "", "Do not configure manually!"};
-  bool m_useDRMatch{}; /// Use dR to match partons to truth jet
   bool m_useWZMassHigh{}; /// Use upper mass cut for W/Z labels
   bool m_useGhostJetMatch{}; /// Use ghost association to match reco to truth jets, dR otherwise
   bool m_matchUngroomedParent{}; /// Use the ungroomed reco jet parent to match to truth jet
@@ -86,14 +79,6 @@ protected:
     IntHandleOp_t nbRecoHandle;
     using FloatHandle_t = SG::WriteDecorHandle<xAOD::JetContainer, float>;
     using FloatHandleOp_t = std::optional<FloatHandle_t>;
-    FloatHandleOp_t dRWHandle;
-    FloatHandleOp_t dRZHandle;
-    FloatHandleOp_t dRHHandle;
-    FloatHandleOp_t dRTopHandle;
-    FloatHandleOp_t dRWRecoHandle;
-    FloatHandleOp_t dRZRecoHandle;
-    FloatHandleOp_t dRHRecoHandle;
-    FloatHandleOp_t dRTopRecoHandle;
     FloatHandleOp_t split23Handle;
     FloatHandleOp_t split12Handle;
     FloatHandleOp_t matchedTruthJetMassHandle;
@@ -119,12 +104,6 @@ protected:
                            const xAOD::JetContainer &jets,
                            const EventContext& ctx) const;
 
-  /// Get truth label using dR-matched particles
-  int getTruthJetLabelDR( DecorHandles& dh,
-                          const xAOD::Jet &jet,
-                          const std::vector<std::pair<TLorentzVector,int> >& tlv_truthParts,
-                          const EventContext& ctx ) const;
-  
   /// Get truth label using ghost-associated particles
   int getTruthJetLabelGA( DecorHandles& dh,
                           const xAOD::Jet &jet,
@@ -144,26 +123,7 @@ protected:
   /// Get number of ghost associated particles
   int getNGhostParticles( const xAOD::Jet &jet, std::string collection ) const;
 
-  /// Check for Sherpa DSIDs
-  bool getIsSherpa( const int DSID ) const {
-    if(
-        (304307 <= DSID && DSID <= 304309) || // Sherpa 2.2.1 W+jets
-        (304707 <= DSID && DSID <= 304709) // Sherpa 2.2.1 Z+jets
-	) { 
-      return true;
-    }
-    return false;
-  };
-
-  /// Extract heavy particle 4-vectors from truth record
-  void getTLVs( std::vector< std::pair<TLorentzVector,int> > &tlvs, const xAOD::TruthParticleContainer *truthBosons, const xAOD::TruthParticleContainer *truthTop, bool isSherpa = false ) const;
-
-  /// Check if truth particle has correct DSID and isn't self decay
-  bool selectTruthParticle( const xAOD::TruthParticle *tp, int pdgId ) const;
-
   enum class TruthLabelConfiguration {
-      R21Consolidated,
-      R21Precision,
       R21Precision_2022v1,
       R10TruthLabel_R22v1,
       R10WZTruthLabel_R22v1,
@@ -175,19 +135,11 @@ protected:
   TruthLabelConfiguration m_truthLabelConfig = TruthLabelConfiguration::Unknown;
 
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_label_truthKey{this, "label_TruthKey", "", "Do not configure manually!"};
-  SG::WriteDecorHandleKey<xAOD::JetContainer> m_dR_W_truthKey{this, "dR_W_TruthKey", "", "Do not configure manually!"};
-  SG::WriteDecorHandleKey<xAOD::JetContainer> m_dR_Z_truthKey{this, "dR_Z_TruthKey", "", "Do not configure manually!"};
-  SG::WriteDecorHandleKey<xAOD::JetContainer> m_dR_H_truthKey{this, "dR_H_TruthKey", "", "Do not configure manually!"};
-  SG::WriteDecorHandleKey<xAOD::JetContainer> m_dR_Top_truthKey{this, "dR_Top_TruthKey", "", "Do not configure manually!"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_NB_truthKey{this, "NB_TruthKey", "", "Do not configure manually!"};
   SG::ReadDecorHandleKey<xAOD::JetContainer> m_split12_truthKey{this, "Split12_TruthKey", "", "Do not configure manually!"};
   SG::ReadDecorHandleKey<xAOD::JetContainer> m_split23_truthKey{this, "Split23_TruthKey", "", "Do not configure manually!"};
 
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_label_recoKey{this, "label_RecoKey", "", "Do not configure manually!"};
-  SG::WriteDecorHandleKey<xAOD::JetContainer> m_dR_W_recoKey{this, "dR_W_RecoKey", "", "Do not configure manually!"};
-  SG::WriteDecorHandleKey<xAOD::JetContainer> m_dR_Z_recoKey{this, "dR_Z_RecoKey", "", "Do not configure manually!"};
-  SG::WriteDecorHandleKey<xAOD::JetContainer> m_dR_H_recoKey{this, "dR_H_RecoKey", "", "Do not configure manually!"};
-  SG::WriteDecorHandleKey<xAOD::JetContainer> m_dR_Top_recoKey{this, "dR_Top_RecoKey", "", "Do not configure manually!"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_NB_recoKey{this, "NB_RecoKey", "", "Do not configure manually!"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_truthSplit12_recoKey{this, "TruthSplit12_RecoKey", "", "Do not configure manually!"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_truthSplit23_recoKey{this, "TruthSplit23_RecoKey", "", "Do not configure manually!"};

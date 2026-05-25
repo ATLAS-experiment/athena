@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BoostedJetTaggers/JSSTaggerBase.h"
@@ -28,16 +28,6 @@ JSSTaggerBase::JSSTaggerBase(const std::string &name) :
 
   /// Jet kinematics properties
   declareProperty( "JetEtaMax", m_jetEtaMax = 2.0, "Eta cut to define fiducial phase space for the tagger");
-
-  /// Truth labeling properties
-  declareProperty( "UseTRUTH3",                     m_truthLabelUseTRUTH3 = true,
-		   "Flag to use TRUTH3 containers. If false, TRUTH1 format is used." );
-  declareProperty( "TruthParticleContainerName",    m_truthParticleContainerName = "TruthParticles",
-		   "Name of truth-particle container (with UseTRUTH3=false). TruthParticles by default" );
-  declareProperty( "TruthBosonContainerName",       m_truthBosonContainerName = "TruthBosonsWithDecayParticles",
-		   "Name of truth-boson container (with UseTRUTH3=true). TruthBosonWithDecayParticles by default" );
-  declareProperty( "TruthTopQuarkContainerName",    m_truthTopQuarkContainerName = "TruthTopQuarkWithDecayParticles",
-		   "Name of truth-top container (with UseTRUTH3=true). TruthTopQuarkWithDecayParticles by default" );
 
   /// Keras properties
   declareProperty( "CalibAreaKeras",  m_kerasCalibArea = "BoostedJetTaggers/TopoclusterTopTagger/Boost2017/",
