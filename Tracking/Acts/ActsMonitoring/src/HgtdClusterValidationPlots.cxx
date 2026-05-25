@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/HgtdClusterValidationPlots.h"
@@ -105,11 +105,11 @@ namespace ActsTrk {
 
       m_local_x_left->Fill(local_position(0, 0), beamSpotWeight);
       m_local_y_left->Fill(local_position(1, 0), beamSpotWeight);
-      m_local_t_left->Fill(local_position(2, 0), beamSpotWeight);
+      m_local_t_left->Fill(xAOD::HGTDCluster::time(local_position), beamSpotWeight);
 
       m_localCovXX_left->Fill(local_covariance(0, 0), beamSpotWeight);
       m_localCovYY_left->Fill(local_covariance(1, 1), beamSpotWeight);
-      m_localCovTT_left->Fill(local_covariance(2, 2), beamSpotWeight);
+      m_localCovTT_left->Fill(xAOD::HGTDCluster::timeCovariance(local_covariance), beamSpotWeight);
 
       m_global_x_left->Fill(globalPos.x(), beamSpotWeight);
       m_global_y_left->Fill(globalPos.y(), beamSpotWeight);
@@ -128,11 +128,11 @@ namespace ActsTrk {
 
       m_local_x_right->Fill(local_position(0, 0), beamSpotWeight);
       m_local_y_right->Fill(local_position(1, 0), beamSpotWeight);
-      m_local_t_right->Fill(local_position(2, 0), beamSpotWeight);
+      m_local_t_right->Fill(xAOD::HGTDCluster::time(local_position), beamSpotWeight);
 
       m_localCovXX_right->Fill(local_covariance(0, 0), beamSpotWeight);
       m_localCovYY_right->Fill(local_covariance(1, 1), beamSpotWeight);
-      m_localCovTT_right->Fill(local_covariance(2, 2), beamSpotWeight);
+      m_localCovTT_right->Fill(xAOD::HGTDCluster::timeCovariance(local_covariance), beamSpotWeight);
 
       m_global_x_right->Fill(globalPos.x(), beamSpotWeight);
       m_global_y_right->Fill(globalPos.y(), beamSpotWeight);
