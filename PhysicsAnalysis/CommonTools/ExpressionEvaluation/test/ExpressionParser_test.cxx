@@ -116,13 +116,13 @@ void fill( xAOD::Muon& muon ) {
    double phi=std::rand()/(RAND_MAX/(2.*M_PI)); //phi
    double eta=std::rand()/(RAND_MAX/(2.7+2.7))-2.7; //eta
    muon.setP4( pt,eta,phi );
-   muon.setAuthor(xAOD::Muon::MuidCo);
+   muon.setAuthor(xAOD::Muon::Author::MuidCo);
    muon.setAllAuthors(0x10);
-   muon.setMuonType(xAOD::Muon::Combined);
+   muon.setMuonType(xAOD::Muon::MuonType::Combined);
    float value=1.0;
-   muon.setParameter(value, xAOD::Muon::spectrometerFieldIntegral);
-   muon.setParameter(value, xAOD::Muon::momentumBalanceSignificance);
-   muon.setQuality(xAOD::Muon::Medium);
+   muon.setParameter(value, xAOD::Muon::ParamDef::spectrometerFieldIntegral);
+   muon.setParameter(value, xAOD::Muon::ParamDef::momentumBalanceSignificance);
+   muon.setQuality(xAOD::Muon::Quality::Medium);
 }
 
 void createMuons(EventContext &ctx, const SG::WriteHandleKey<xAOD::MuonContainer> &key) {

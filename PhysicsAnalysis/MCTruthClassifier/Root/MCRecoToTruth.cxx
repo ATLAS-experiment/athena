@@ -95,12 +95,8 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::Muon* mu, MCTruthPartClas
   ATH_MSG_DEBUG("Executing muon  Classifier");
   ParticleType parttype = Unknown;
   ParticleOrigin partorig = NonDefined;
-  const xAOD::TrackParticle* trkPtr = nullptr;
-  if (mu->primaryTrackParticleLink().isValid()) trkPtr = *mu->primaryTrackParticleLink();
-  else if (mu->combinedTrackParticleLink().isValid()) trkPtr = *mu->combinedTrackParticleLink();
-  else if (mu->inDetTrackParticleLink().isValid()) trkPtr = *mu->combinedTrackParticleLink();
-  else if (mu->muonSpectrometerTrackParticleLink().isValid()) trkPtr = *mu->muonSpectrometerTrackParticleLink();
-
+  const xAOD::TrackParticle* trkPtr = mu->primaryTrackParticle();
+  
   if (!trkPtr) return std::make_pair(parttype, partorig);
 
   const xAOD::TruthParticle* genPart = getGenPart(trkPtr);
