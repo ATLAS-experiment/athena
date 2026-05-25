@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ActsEvent_Decoration_h
 #define ActsEvent_Decoration_h
@@ -7,7 +7,9 @@
 #include "AthContainersInterfaces/AuxTypes.h"
 #include "AthContainersInterfaces/IAuxStore.h"
 #include "AthContainersInterfaces/IConstAuxStore.h"
+#include "ActsEvent/TrackContainer.h"
 #include "xAODCore/AuxContainerBase.h"
+#include "xAODTracking/TrackParticleFwd.h"
 #include <any>
 
 namespace ActsTrk {
@@ -105,6 +107,12 @@ std::vector<Decoration> restoreDecorations(
     const std::set<std::string>& staticVariables);
 
 }  // namespace detail
+
+/** @brief Return the proxy to the Acts track from which the track particle
+ *         was made frome
+ * @param trkPart: The track particle containing a link to the Acts::Track */
+std::optional<ActsTrk::TrackContainer::ConstTrackProxy> getActsTrack(const xAOD::TrackParticle& trkPart);
+
 }  // namespace ActsTrk
 
 #endif
