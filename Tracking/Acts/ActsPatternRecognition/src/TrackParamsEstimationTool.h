@@ -75,6 +75,8 @@ namespace ActsTrk {
         "Index of first SP to use"};
     Gaudi::Property<bool> m_allowPropagatorFailure{this, "allowPropagatorFailure", false,
         "Use curvilinear parameters when propagation fails instead of returning null"};
+    Gaudi::Property<std::size_t> m_stripCalibrationIterations{this, "stripCalibrationIterations", 1ul,
+        "Number of strip calibration iterations"};
 
     using Stepper = Acts::SympyStepper;
     using Navigator = Acts::VoidNavigator;
