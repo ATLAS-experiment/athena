@@ -30,7 +30,7 @@ namespace MuonCombined {
 
             // if we get here we have the same author and type
             // this is not too elegant, maybe rethink implementation
-            if (t1.type() == xAOD::Muon::Combined) {
+            if (t1.type() == xAOD::Muon::MuonType::Combined) {
                 // work out type of tag
                 const CombinedFitTag* cbFitTag1 = dynamic_cast<const CombinedFitTag*>(&t1);
                 if (cbFitTag1) {
@@ -51,7 +51,7 @@ namespace MuonCombined {
                     return *muGirlTag1 < *muGirlTag2;
                 }
                 return false;
-            } else if (t1.type() == xAOD::Muon::SegmentTagged) {
+            } else if (t1.type() == xAOD::Muon::MuonType::SegmentTagged) {
                 const SegmentTag* segmentTag1 = dynamic_cast<const SegmentTag*>(&t1);
                 if (segmentTag1) {
                     const SegmentTag* segmentTag2 = dynamic_cast<const SegmentTag*>(&t2);
@@ -65,7 +65,7 @@ namespace MuonCombined {
                     return *muGirlTag1 < *muGirlTag2;
                 }
                 return false;
-            } else if (t1.type() == xAOD::Muon::CaloTagged) {
+            } else if (t1.type() == xAOD::Muon::MuonType::CaloTagged) {
                 const CaloTag* caloTag1 = dynamic_cast<const CaloTag*>(&t1);
                 if (caloTag1) {
                     const CaloTag* caloTag2 = dynamic_cast<const CaloTag*>(&t2);

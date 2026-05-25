@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonScatteringAngleSignificanceTool.h"
 
-#include "TrkGeometry/TrackingVolume.h"
 #include "TrkMaterialOnTrack/MaterialEffectsOnTrack.h"
 #include "TrkMaterialOnTrack/ScatteringAngles.h"
 #include "TrkMeasurementBase/MeasurementBase.h"
@@ -13,51 +12,36 @@
 
 namespace Rec {
 
-    MuonScatteringAngleSignificanceTool::MuonScatteringAngleSignificanceTool(const std::string& type, const std::string& name,
-                                                                             const IInterface* parent) :
-        AthAlgTool(type, name, parent), m_calorimeterVolume(nullptr), m_indetVolume(nullptr), m_inDetOnly(true), m_refitInDetOnly(true) {
-        declareInterface<IMuonScatteringAngleSignificance>(this);
-        declareProperty("InDetOnly", m_inDetOnly);
-        declareProperty("RefitInDetOnly", m_refitInDetOnly);
-    }
-
-    //<<<<<< PUBLIC MEMBER FUNCTION DEFINITIONS                             >>>>>>
+     //<<<<<< PUBLIC MEMBER FUNCTION DEFINITIONS                             >>>>>>
     StatusCode MuonScatteringAngleSignificanceTool::initialize() {
         ATH_MSG_INFO("Initializing MuonScatAngleSignificanceTool");
 
         // tool needed to refit slimmed tracks
-        if (!m_fitter.empty()) {
-            if (m_fitter.retrieve().isFailure()) {
-                ATH_MSG_FATAL("Failed to retrieve tool " << m_fitter);
-                m_fitter.setTypeAndName("");  // Bang!
-            } else {
-                ATH_MSG_DEBUG("Retrieved tool " << m_fitter);
-            }
-        }
-
+        ATH_CHECK(m_fitter.retrieve(EnableTool{!m_fitter.empty()}));
         // need to know which TrackingVolume we are in: indet/calo/spectrometer
-        if (m_trackingVolumesSvc.retrieve().isFailure()) {
-            ATH_MSG_FATAL("Failed to retrieve Svc " << m_trackingVolumesSvc);
-            return StatusCode::FAILURE;
-        } else {
-            ATH_MSG_DEBUG("Retrieved Svc " << m_trackingVolumesSvc);
-            m_calorimeterVolume = new Trk::Volume(m_trackingVolumesSvc->volume(Trk::ITrackingVolumesSvc::MuonSpectrometerEntryLayer));
-            m_indetVolume = new Trk::Volume(m_trackingVolumesSvc->volume(Trk::ITrackingVolumesSvc::CalorimeterEntryLayer));
-        }
+        ATH_CHECK(m_trackingVolumesSvc.retrieve());
+        
+        ATH_MSG_DEBUG("Retrieved Svc " << m_trackingVolumesSvc);
+        m_calorimeterVolume = std::make_unique<Trk::Volume>(m_trackingVolumesSvc->volume(Trk::ITrackingVolumesSvc::MuonSpectrometerEntryLayer));
+        m_indetVolume = std::make_unique<Trk::Volume>(m_trackingVolumesSvc->volume(Trk::ITrackingVolumesSvc::CalorimeterEntryLayer));
+        
 
         return StatusCode::SUCCESS;
     }
 
     ScatteringAngleSignificance MuonScatteringAngleSignificanceTool::scatteringAngleSignificance(const xAOD::Muon& muon) const {
-        if (muon.muonType() == xAOD::Muon::MuonStandAlone) return ScatteringAngleSignificance(0);
+        if (muon.muonType() == xAOD::Muon::MuonType::MuonStandAlone) {
+            return ScatteringAngleSignificance(0);
+        }
 
         const Trk::Track* theTrack =
-            muon.trackParticle(xAOD::Muon::CombinedTrackParticle) ? muon.trackParticle(xAOD::Muon::CombinedTrackParticle)->track() : nullptr;
+            muon.trackParticle(xAOD::Muon::TrackParticleType::CombinedTrackParticle) ? 
+            muon.trackParticle(xAOD::Muon::TrackParticleType::CombinedTrackParticle)->track() : nullptr;
 
         if (theTrack == nullptr) {
-            theTrack = muon.trackParticle(xAOD::Muon::InnerDetectorTrackParticle)
-                           ? muon.trackParticle(xAOD::Muon::InnerDetectorTrackParticle)->track()
-                           : nullptr;
+            theTrack = muon.trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle)
+                     ? muon.trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle)->track()
+                     : nullptr;
         }
 
         if (theTrack == nullptr) {

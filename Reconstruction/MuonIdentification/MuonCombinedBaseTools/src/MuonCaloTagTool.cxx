@@ -308,13 +308,13 @@ namespace MuonCombined {
         for (; deposit != depositE; ++deposit) eLoss += deposit->energyDeposited();
 
         if (tag > 0) {
-            caloTag = std::make_unique<CaloTag>(xAOD::Muon::CaloTag, eLoss, 0);  // set eLoss, sigmaEloss is set to 0.
+            caloTag = std::make_unique<CaloTag>(xAOD::Muon::Author::CaloTag, eLoss, 0);  // set eLoss, sigmaEloss is set to 0.
 
             if (muonScore > m_CaloMuonScoreCut) {
-                caloTag->set_author2(xAOD::Muon::CaloScore);
+                caloTag->set_author2(xAOD::Muon::Author::CaloScore);
             }
         } else if (muonScore > m_CaloMuonScoreCut) {
-            caloTag = std::make_unique<CaloTag>(xAOD::Muon::CaloScore, eLoss, 0);
+            caloTag = std::make_unique<CaloTag>(xAOD::Muon::Author::CaloScore, eLoss, 0);
         }
 
         if (caloTag) {

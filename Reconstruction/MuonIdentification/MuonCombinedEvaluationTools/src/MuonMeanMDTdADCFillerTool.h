@@ -1,7 +1,5 @@
-///////////////////////// -*- C++ -*- /////////////////////////////
-
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // MuonMeanMDTdADCFillerTool.h,  Header file for class MuonMeanMDTdADCFillerTool
@@ -24,7 +22,7 @@ namespace Rec {
        @brief return mean Number of ADC counts for MDT tubes on the track
      */
 
-    class MuonMeanMDTdADCFillerTool : public AthAlgTool, virtual public IMuonMeanMDTdADCFiller {
+    class MuonMeanMDTdADCFillerTool : public extends<AthAlgTool, IMuonMeanMDTdADCFiller> {
         ///////////////////////////////////////////////////////////////////
         // Public methods:
         ///////////////////////////////////////////////////////////////////
@@ -32,7 +30,7 @@ namespace Rec {
         // Copy constructor:
 
         /// Constructor with parameters:
-        MuonMeanMDTdADCFillerTool(const std::string& type, const std::string& name, const IInterface* parent);
+        using base_class::base_class;
         virtual ~MuonMeanMDTdADCFillerTool() = default;
 
         StatusCode initialize() override;

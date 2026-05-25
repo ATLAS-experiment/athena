@@ -100,7 +100,7 @@ StatusCode MuonSegContainerMergerAlg::execute(const EventContext& ctx) const {
     
     for (const MuonCombined::TagBase* cmb_tag : good_tags) {
         std::vector<const Muon::MuonSegment*> assoc_segs = cmb_tag->associatedSegments();
-        if (assoc_segs.empty() && cmb_tag->type() != xAOD::Muon::CaloTagged) {
+        if (assoc_segs.empty() && cmb_tag->type() != xAOD::Muon::MuonType::CaloTagged) {
             ATH_MSG_WARNING("Combined candidate " << cmb_tag->toString() << " does not have associated segments");
         }
         for (const Muon::MuonSegment* seg : assoc_segs) { 
