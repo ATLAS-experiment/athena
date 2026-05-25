@@ -116,8 +116,9 @@ namespace CP {
                                              const xAOD::Muon* lrtMuon) const{
 
     // we compare based on MS track information to detect re-use of the same track  
-    const xAOD::TrackParticle* lrtMsTrack = lrtMuon->trackParticle( xAOD::Muon::MuonSpectrometerTrackParticle );
-    const xAOD::TrackParticle* promptMsTrack = promptMuon->trackParticle( xAOD::Muon::MuonSpectrometerTrackParticle );
+    using enum xAOD::Muon::TrackParticleType;
+    const xAOD::TrackParticle* lrtMsTrack = lrtMuon->trackParticle( MuonSpectrometerTrackParticle );
+    const xAOD::TrackParticle* promptMsTrack = promptMuon->trackParticle( MuonSpectrometerTrackParticle );
 
     // baseline case: if no two MS tracks or two different MS tracks, no overlap possible 
     if ( (!promptMsTrack && !lrtMsTrack) || (promptMsTrack != lrtMsTrack)){
@@ -136,8 +137,8 @@ namespace CP {
                                                                   const xAOD::Muon* lrtMuon) const{
 
     // apply the loosest available ID to resolve most overlaps using existing MCP recommendations
-    bool promptPassQuality = (m_muonSelectionTool->getQuality(*promptMuon) < xAOD::Muon::VeryLoose);
-    bool lrtPassQuality = (m_muonSelectionTool->getQuality(*lrtMuon) < xAOD::Muon::VeryLoose);
+    bool promptPassQuality = (m_muonSelectionTool->getQuality(*promptMuon) < xAOD::Muon::Quality::VeryLoose);
+    bool lrtPassQuality = (m_muonSelectionTool->getQuality(*lrtMuon) < xAOD::Muon::Quality::VeryLoose);
 
     if (promptPassQuality && !lrtPassQuality) { 
       return {true,false}; 
@@ -147,8 +148,8 @@ namespace CP {
     }
 
     // still here? Next prefer combined muons over others 
-    bool promptIsCombined = promptMuon->muonType() == xAOD::Muon::Combined;
-    bool lrtIsCombined = lrtMuon->muonType() == xAOD::Muon::Combined;
+    bool promptIsCombined = promptMuon->muonType() == xAOD::Muon::MuonType::Combined;
+    bool lrtIsCombined = lrtMuon->muonType() == xAOD::Muon::MuonType::Combined;
 
     if (promptIsCombined && !lrtIsCombined) {
       return {true,false};
@@ -192,8 +193,8 @@ namespace CP {
   }
 
   float MuonLRTOverlapRemovalTool::getIDMEdEta(const xAOD::Muon* muon) const{
-    const xAOD::TrackParticle* ID_track = muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
-    const xAOD::TrackParticle* ME_track = muon->trackParticle(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle);
+    const xAOD::TrackParticle* ID_track = muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
+    const xAOD::TrackParticle* ME_track = muon->trackParticle(xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle);
     if (!ID_track || !ME_track) return FLT_MAX;
     return ( std::abs( ID_track->eta() - ME_track->eta() ) );
   }

@@ -169,7 +169,7 @@ namespace CP
             if (std::abs(muonObj.ID.calib_pt) == 0) muonObj.CB.calib_pt = muonObj.ME.calib_pt;
 
             // Only for combined set it
-            if (mu(acc.muonTypeAcc) == xAOD::Muon::Combined) 
+            if (mu(acc.muonTypeAcc) == xAOD::Muon::MuonType::Combined) 
             {
                 acc.ptOutDec (mu) = muonObj.CB.calib_pt * GeVtoMeV;
             }
@@ -192,7 +192,7 @@ namespace CP
         if (sgCode != CorrectionCode::Ok) return sgCode;
 
         // Systematics for sagitta correction
-        if ((mu(acc.muonTypeAcc) != xAOD::Muon::SiliconAssociatedForwardMuon)) 
+        if ((mu(acc.muonTypeAcc) != xAOD::Muon::MuonType::SiliconAssociatedForwardMuon)) 
         {
             ATH_MSG_VERBOSE("Systematic uncertainties for sagitta bias ");
             // TODO:: something specific for calo tags
@@ -469,7 +469,7 @@ namespace CP
             auto ME_track = mu(acc.extrapolatedMuonSpectrometerTrackParticleLinkAcc);
 
             // For SI muons, overwrite the charge from the CB track
-            if (mu(acc.muonTypeAcc) == xAOD::Muon::SiliconAssociatedForwardMuon)
+            if (mu(acc.muonTypeAcc) == xAOD::Muon::MuonType::SiliconAssociatedForwardMuon)
             {
                 if (CB_track) charge = CB_track.value()(acc.trkChargeAcc);
             }
