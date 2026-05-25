@@ -69,7 +69,7 @@ std::unique_ptr<InputVariable> InputVariable::createVariable(const std::string& 
 	if (name == "LOGmOe")
 	    return std::make_unique<InputVariable>(name,
                 [](const xAOD::Jet& jet, const JetContext&) {
-		  if(jet.m() / jet.e() < 0){
+		  if(jet.m() / jet.e() <= 0){
 		    return -1.e-6;
 		  }
 		  else{
