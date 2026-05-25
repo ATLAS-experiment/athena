@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #undef NDEBUG
 #include "TrackParticleTruthDecorationAlg.h"
@@ -26,10 +26,17 @@ namespace ActsTrk
      float_decor_names[kHitEfficiency]="truthHitEfficiency";
      createDecoratorKeys(*this,m_trkParticleName,"" /*prefix ? */, float_decor_names,m_floatDecor);
      assert( m_floatDecor.size() == kNFloatDecorators);
-     std::vector<std::string> link_decor_names;
-     link_decor_names.push_back("truthParticleLink");
-     createDecoratorKeys(*this,m_trkParticleName,"" /*prefix ? */, link_decor_names,m_linkDecor);
-     assert( m_linkDecor.size() == 1);
+
+     std::vector<std::string> int_decor_names(kNIntDecorators);
+     int_decor_names[kTruthType]="truthType";
+     int_decor_names[kTruthOrigin]="truthOrigin";
+     createDecoratorKeys(*this,m_trkParticleName,"" /*prefix ? */, int_decor_names,m_intDecor);
+     assert( m_intDecor.size() == kNIntDecorators);
+
+     ATH_CHECK(m_truthClassDecor.initialize());
+     ATH_CHECK(m_linkDecor.initialize());
+
+     ATH_CHECK(m_truthClassifier.retrieve());
      return sc;
   }
 
@@ -61,8 +68,10 @@ namespace ActsTrk
     }
     std::vector< SG::WriteDecorHandle<xAOD::TrackParticleContainer,float > >
        float_decor( createDecorators<xAOD::TrackParticleContainer, float >(m_floatDecor, ctx) );
-    SG::WriteDecorHandle<xAOD::TrackParticleContainer, ElementLink<xAOD::TruthParticleContainer> >
-       link_decor(m_linkDecor.at(0), ctx);
+    std::vector< SG::WriteDecorHandle<xAOD::TrackParticleContainer,int > >
+       int_decor( createDecorators<xAOD::TrackParticleContainer, int >(m_intDecor, ctx) );
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, unsigned int> truthClass_decor(m_truthClassDecor, ctx);
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, ElementLink<xAOD::TruthParticleContainer> > link_decor(m_linkDecor, ctx);
 
     EventStat event_stat(truthSelectionTool(),
                          perEtaSize(),
@@ -74,6 +83,9 @@ namespace ActsTrk
     ElementLink<xAOD::TruthParticleContainer> ref_truth_link;
     for(const xAOD::TrackParticle *track_particle : *track_particle_handle) {
        TruthMatchResult truth_match{} ;
+       MCTruthPartClassifier::ParticleType type = MCTruthPartClassifier::Unknown;
+       MCTruthPartClassifier::ParticleOrigin origin = MCTruthPartClassifier::NonDefined;
+       unsigned int classification = 0;
 
        {
           std::optional<ActsTrk::TrackContainer::ConstTrackProxy> optional_track = getActsTrack(*track_particle);
@@ -107,6 +119,11 @@ namespace ActsTrk
                    }
                    assert( truth_particle->container() == ref_truth_link.getStorableObjectPointer() );
                    link_decor(*track_particle) = ElementLink<xAOD::TruthParticleContainer>(ref_truth_link, truth_particle->index());
+
+		   auto truthClass = m_truthClassifier->particleTruthClassifier(truth_particle);
+		   type = truthClass.first;
+		   origin = truthClass.second;
+		   classification = std::get<0>(MCTruthPartClassifier::defOrigOfParticle(truth_particle));
                 }
                 else {
                    link_decor(*track_particle) = ElementLink<xAOD::TruthParticleContainer>();
@@ -117,6 +134,9 @@ namespace ActsTrk
        float_decor[kMatchingProbability](*track_particle) = truth_match.m_matchProbability;
        float_decor[kHitPurity](*track_particle) = truth_match.m_hitPurity;
        float_decor[kHitEfficiency](*track_particle) = truth_match.m_hitEfficiency;
+       int_decor[kTruthType](*track_particle) = type;
+       int_decor[kTruthOrigin](*track_particle) = origin;
+       truthClass_decor(*track_particle) = classification;
     }
     postProcessEventStat(truth_particle_hit_counts,
                          track_particle_handle->size(),

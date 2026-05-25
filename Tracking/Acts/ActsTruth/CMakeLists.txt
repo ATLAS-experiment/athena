@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ActsTruth )
@@ -32,6 +32,7 @@ atlas_add_component( ActsTruth
 		       GeneratorObjects
 		       Identifier
 		       InDetSimData
+		       MCTruthClassifierLib
 		       StoreGateLib
 		       TrkTruthTrackInterfaces
 		       xAODInDetMeasurement

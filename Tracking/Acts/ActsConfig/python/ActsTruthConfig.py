@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -232,6 +232,11 @@ def ActsTrackParticleTruthDecorationAlgCfg(flags,
                                           minPt=500.,
                                           maxEta=4.5
                                           )))
+
+    if 'MCTruthClassifier' not in kwargs:
+        from MCTruthClassifier.MCTruthClassifierConfig import MCTruthClassifierCfg
+        kwargs.setdefault("MCTruthClassifier", acc.popToolsAndMerge(
+            MCTruthClassifierCfg(flags)))
 
     acc.addEventAlgo( CompFactory.ActsTrk.TrackParticleTruthDecorationAlg(name=name, **kwargs) )
     return acc
