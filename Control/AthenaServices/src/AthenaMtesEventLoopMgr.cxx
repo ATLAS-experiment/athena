@@ -1427,7 +1427,7 @@ std::unique_ptr<AthenaMtesEventLoopMgr::RangeStruct> AthenaMtesEventLoopMgr::get
     leftString(range, truncate);
   }
 
-  std::map<std::string,std::string> eventRangeMap;
+  std::map<std::string,std::string, std::less<>> eventRangeMap;
   size_t startpos(0);
   size_t endpos = range.find(',');
   while(endpos!=std::string::npos) {
