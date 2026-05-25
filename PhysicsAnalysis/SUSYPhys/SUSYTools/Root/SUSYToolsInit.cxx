@@ -271,8 +271,6 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_WTaggerTool.setProperty("ConfigFile", m_WtagConfig) );
       ATH_CHECK( m_WTaggerTool.setProperty("CalibArea", m_WZTaggerCalibArea) );
       ATH_CHECK( m_WTaggerTool.setProperty("IsMC",!isData()));
-      ATH_CHECK( m_WTaggerTool.setProperty("TruthBosonContainerName", "TruthBoson") );  // Set this if you are using a TRUTH3 style truth boson container;
-      ATH_CHECK( m_WTaggerTool.setProperty("TruthTopQuarkContainerName", "TruthTop") );  // Set this if you are using a TRUTH3 style truth boson container;
 #ifndef XAOD_STANDALONE
       ATH_CHECK( m_WTaggerTool.setProperty("SuppressOutputDependence", true) );
 #endif
@@ -298,8 +296,6 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_ZTaggerTool.setProperty("ConfigFile", m_ZtagConfig) );
       ATH_CHECK( m_ZTaggerTool.setProperty("CalibArea", m_WZTaggerCalibArea) );
       ATH_CHECK( m_ZTaggerTool.setProperty("IsMC",!isData()));
-      ATH_CHECK( m_ZTaggerTool.setProperty("TruthBosonContainerName", "TruthBoson") );  // Set this if you are using a TRUTH3 style truth boson container;
-      ATH_CHECK( m_ZTaggerTool.setProperty("TruthTopQuarkContainerName", "TruthTop") );  // Set this if you are using a TRUTH3 style truth boson container;
 #ifndef XAOD_STANDALONE
       ATH_CHECK( m_ZTaggerTool.setProperty("SuppressOutputDependence", true) );
 #endif
@@ -325,8 +321,6 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_TopTaggerTool.setProperty("ConfigFile", m_ToptagConfig) );
       ATH_CHECK( m_TopTaggerTool.setProperty("CalibArea", m_TopTaggerCalibArea) );
       ATH_CHECK( m_TopTaggerTool.setProperty("IsMC",!isData()));
-      ATH_CHECK( m_TopTaggerTool.setProperty("TruthBosonContainerName", "TruthBoson") );  // Set this if you are using a TRUTH3 style truth boson container;
-      ATH_CHECK( m_TopTaggerTool.setProperty("TruthTopQuarkContainerName", "TruthTop") );  // Set this if you are using a TRUTH3 style truth boson container;
 #ifndef XAOD_STANDALONE
       ATH_CHECK( m_TopTaggerTool.setProperty("SuppressOutputDependence", true) );
 #endif
@@ -356,10 +350,6 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 	m_jetTruthLabelingTool.setTypeAndName("JetTruthLabelingTool/ST_JetTruthLabelingTool");
 	ATH_CHECK( m_jetTruthLabelingTool.setProperty("RecoJetContainer", m_fatJets) );
 	ATH_CHECK( m_jetTruthLabelingTool.setProperty("TruthLabelName", m_JetTruthLabelName) );
-	ATH_CHECK( m_jetTruthLabelingTool.setProperty("UseTRUTH3", m_useTRUTH3) );                 // Set this to false only if you have the FULL !TruthParticles container in your input file
-	ATH_CHECK( m_jetTruthLabelingTool.setProperty("TruthParticleContainerName", "TruthParticles") );
-	ATH_CHECK( m_jetTruthLabelingTool.setProperty("TruthBosonContainerName", "TruthBoson") );  // Set this if you are using a TRUTH3 style truth boson container
-	ATH_CHECK( m_jetTruthLabelingTool.setProperty("TruthTopQuarkContainerName", "TruthTop") ); // Set this if you are using a TRUTH3 style truth top quark container
 	ATH_CHECK( m_jetTruthLabelingTool.setProperty("OutputLevel", this->msg().level()) );
 	ATH_CHECK( m_jetTruthLabelingTool.retrieve() );
       } else if (m_jetTruthLabelingTool.isUserConfigured()) ATH_CHECK(m_jetTruthLabelingTool.retrieve());

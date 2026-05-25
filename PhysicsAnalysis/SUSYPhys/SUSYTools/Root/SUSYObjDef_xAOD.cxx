@@ -312,8 +312,6 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_useSigLepForIsoCloseByOR(false),
     m_IsoCloseByORpassLabel(""),
 
-    m_useTRUTH3(true),
-
     m_slices(std::map<std::string,bool>()),
     m_isRun3(false),
     m_isPHYSLITE(false),
@@ -623,9 +621,6 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   //Isolation correction for leptons and photons
   declareProperty( "UseSigLepForIsoCloseByOR", m_useSigLepForIsoCloseByOR );
   declareProperty( "IsoCloseByORpassLabel", m_IsoCloseByORpassLabel );
-
-  //Truth
-  declareProperty( "UseTRUTH3", m_useTRUTH3 ); // true if using TRUTH3 type containers
 
   //--- Tools configuration
   //PRW
@@ -1652,8 +1647,6 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_EleFatJetDR, "OR.EleFatJetDR", rEnv, -999.);
   configFromFile(m_JetFatJetDR, "OR.JetFatJetDR", rEnv, -999.);
   //
-  configFromFile(m_useTRUTH3, "Truth.UseTRUTH3", rEnv, true);
-  ///
   configFromFile(m_upstreamTriggerMatching, "Trigger.UpstreamMatching", rEnv, false);
   configFromFile(m_trigMatchingPrefix, "Trigger.MatchingPrefix", rEnv, "", true);
   //

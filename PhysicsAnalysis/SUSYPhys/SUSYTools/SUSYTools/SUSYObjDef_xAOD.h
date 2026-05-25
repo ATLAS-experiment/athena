@@ -800,8 +800,6 @@ namespace ST {
     bool m_useSigLepForIsoCloseByOR;
     std::string m_IsoCloseByORpassLabel;
 
-    bool m_useTRUTH3;
-
     std::map<std::string,bool> m_slices;
     bool m_isRun3;
     bool m_isPHYSLITE;
