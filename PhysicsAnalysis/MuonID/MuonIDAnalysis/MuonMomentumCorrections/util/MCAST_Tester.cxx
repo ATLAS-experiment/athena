@@ -194,7 +194,7 @@ int main(int argc, char* argv[]) {
     //::: set the properties
     selTool.setProperty("IsRun3Geo", isRun3Geo).ignore();
     selTool.setProperty("MaxEta", 2.5).ignore();
-    selTool.setProperty("MuQuality", (int)xAOD::Muon::Loose).ignore();  // corresponds to 0=Tight, 1=Medium, 2=Loose, 3=VeryLoose, 4=HighPt, 5=LowPtEfficiency
+    selTool.setProperty("MuQuality", (int)xAOD::Muon::Quality::Loose).ignore();  // corresponds to 0=Tight, 1=Medium, 2=Loose, 3=VeryLoose, 4=HighPt, 5=LowPtEfficiency
 
     //::: retrieve the tool
     if (selTool.retrieve().isFailure() || sc.isFailure()) {
@@ -305,14 +305,12 @@ int main(int argc, char* argv[]) {
                 //::: Should be using correctedCopy here, testing behaviour of applyCorrection though
                 InitPtCB = muon->pt();
                 InitPtID = -999;
-                if (muon->inDetTrackParticleLink().isValid()) {
-                    const ElementLink<xAOD::TrackParticleContainer>& id_track = muon->inDetTrackParticleLink();
-                    InitPtID = (!id_track) ? 0 : (*id_track)->pt();
+                if (const auto* id_track = muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle); id_track != nullptr) {
+                    InitPtID = id_track->pt();
                 }
                 InitPtMS = -999;
-                if (muon->extrapolatedMuonSpectrometerTrackParticleLink().isValid()) {
-                    const ElementLink<xAOD::TrackParticleContainer>& ms_track = muon->extrapolatedMuonSpectrometerTrackParticleLink();
-                    InitPtMS = (!ms_track) ? 0 : (*ms_track)->pt();
+                if (const auto* ms_track = muon->trackParticle(xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle); ms_track != nullptr) {
+                    InitPtMS = ms_track->pt();
                 }
 
                 Eta = muon->eta();
@@ -323,29 +321,31 @@ int main(int argc, char* argv[]) {
                 if (isDebug) Info(APP_NAME, "Selected muon: eta = %g, phi = %g, pt = %g", muon->eta(), muon->phi(), muon->pt() / 1e3);
 
                 float ptCB = 0;
-                if (muon->primaryTrackParticleLink().isValid()) {
-                    const ElementLink<xAOD::TrackParticleContainer>& cb_track = muon->primaryTrackParticleLink();
-                    ptCB = (!cb_track) ? 0 : (*cb_track)->pt();
+                if (const auto* cb_track = muon->trackParticle(xAOD::Muon::TrackParticleType::CombinedTrackParticle); cb_track != nullptr) {
+                    ptCB = cb_track->pt();
                 } else {
-                    if (isDebug)
-                        Info(APP_NAME, "Missing primary track particle link for --> CB %g, author: %d, type: %d", ptCB, muon->author(),
-                             muon->muonType());
+                    if (isDebug){
+                        std::stringstream sstr{};
+                        sstr<<"Missing primary track particle link for --> CB "<<ptCB<<", author: "<<muon->author()
+                            <<"type: "<<muon->muonType();
+                        Info(APP_NAME,sstr.str().c_str());    
+                    }
                 }
                 float ptID = 0;
-                if (muon->inDetTrackParticleLink().isValid()) {
-                    const ElementLink<xAOD::TrackParticleContainer>& id_track = muon->inDetTrackParticleLink();
-                    ptID = (!id_track) ? 0 : (*id_track)->pt();
+                if (const auto* id_track = muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle); id_track != nullptr) {
+                    ptID = id_track->pt();
                 }
                 float ptME = 0;
-                if (muon->extrapolatedMuonSpectrometerTrackParticleLink().isValid()) {
-                    const ElementLink<xAOD::TrackParticleContainer>& ms_track = muon->extrapolatedMuonSpectrometerTrackParticleLink();
-                    ptME = (!ms_track) ? 0 : (*ms_track)->pt();
+                if (const auto* ms_track = muon->trackParticle(xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle); ms_track != nullptr) {
+                    ptME = ms_track->pt();
                 }
 
-                if (isDebug)
-                    Info(APP_NAME, "--> CB %g, ID %g, ME %g, author: %d, type: %d", ptCB / 1e3, ptID / 1e3, ptME / 1e3, muon->author(),
-                         muon->muonType());
-
+                if (isDebug){
+                    std::stringstream sstr{};
+                    sstr<<"--> CB "<<(ptCB / 1e3)<<", ID "<<(ptID / 1e3)
+                         <<", ME "<<(ptME / 1e3)<<", author: "<<muon->author()<<", type:"<<muon->muonType();
+                    Info(APP_NAME, sstr.str().c_str());
+                }
                 // either use the correctedCopy call or correct the muon object itself
                 static const SG::ConstAccessor<float> InnerDetectorPtAcc ("InnerDetectorPt");
                 static const SG::ConstAccessor<float> MuonSpectrometerPtAcc ("MuonSpectrometerPt");
