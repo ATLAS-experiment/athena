@@ -76,8 +76,7 @@ namespace DerivationFramework {
     }
 
     const xAOD::TrackParticle* GetMuonTrack(const xAOD::Muon* mu) const{
-      auto& link = mu->inDetTrackParticleLink();
-      return link.isValid() ? *link : nullptr;
+      return mu->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
     }
 
     std::vector<const xAOD::TrackParticle*> trackParticles(const std::string& specify) {

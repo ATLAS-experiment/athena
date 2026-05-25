@@ -112,7 +112,7 @@ StatusCode DerivationFramework::TagAndProbeTrackParticleThinning::doThinning(con
 
     // probe track keeping
     for (const auto muon : *muons) {
-      const auto* muon_trk = muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+      const auto* muon_trk = muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
 
       if( muon_trk ) {
 	if( muon_trk == trk) continue;

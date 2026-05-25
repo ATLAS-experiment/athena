@@ -98,16 +98,16 @@ StatusCode DerivationFramework::MuonTrackParticleThinning::doThinning(const Even
     DerivationFramework::TracksInCone tInC;    
     if (m_selectionString=="") { // check all muons as user didn't provide a selection string
 	    for (const auto *muIt : *importedMuons) {
-	      if (muIt->inDetTrackParticleLink().isValid()) {
+	      if (muIt->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle) != nullptr) {
 		//This line prevents SiliconAssociatedForwardMuon from being used unless we're skimming InDetForwardTrackParticles
 		//since their track links point to this container while all others point to InDetTrackParticles
-		if (muIt->muonType()==xAOD::Muon::SiliconAssociatedForwardMuon &&  m_inDetSGKey.key() != "InDetForwardTrackParticles")
+		if (muIt->muonType()==xAOD::Muon::MuonType::SiliconAssociatedForwardMuon &&  m_inDetSGKey.key() != "InDetForwardTrackParticles")
 		  {
 		    ATH_MSG_DEBUG("Skipping Forward Muon since we are not skimming InDetForwardParticles");
 		  }
 		else{
 		  ATH_MSG_DEBUG("Simming Muon tracks in " << m_inDetSGKey << " "<< muIt->muonType());
-		  int index = muIt->inDetTrackParticleLink().index();
+		  int index = muIt->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle)->index();
 		  mask[index] = true;
 		}
 	      }
@@ -115,15 +115,15 @@ StatusCode DerivationFramework::MuonTrackParticleThinning::doThinning(const Even
 	      }
     } else { // check only muons passing user selection string
         for (auto & muIt : muToCheck) {
-	    if (muIt->inDetTrackParticleLink().isValid()) {
+	    if (muIt->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle) != nullptr) {
 	      
-	      if (muIt->muonType()==xAOD::Muon::SiliconAssociatedForwardMuon &&  m_inDetSGKey.key() != "InDetForwardTrackParticles")
+	      if (muIt->muonType()==xAOD::Muon::MuonType::SiliconAssociatedForwardMuon &&  m_inDetSGKey.key() != "InDetForwardTrackParticles")
 		{
 		  ATH_MSG_DEBUG("Skipping Forward Muon since we are not skimming InDetForwardParticles");
 		}
 	      else{
 		ATH_MSG_DEBUG("Simming Muon tracks in " << m_inDetSGKey << " "<< muIt->muonType());
-		int index = muIt->inDetTrackParticleLink().index();
+		int index = muIt->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle)->index();
 		mask[index] = true;
 	      }
 	    } 	

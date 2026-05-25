@@ -306,15 +306,15 @@ bool DerivationFramework::SkimmingToolHIGG2::checkMuonQuality(const xAOD::Muon *
   if(muonQual=="any") {
     // do nothing
   } else if(muonQual=="combined") {
-    if(mu->muonType()!=xAOD::Muon::Combined) return false;
+    if(mu->muonType()!=xAOD::Muon::MuonType::Combined) return false;
   } else if(muonQual=="standalone") {
-    if(mu->muonType()!=xAOD::Muon::MuonStandAlone) return false;
+    if(mu->muonType()!=xAOD::Muon::MuonType::MuonStandAlone) return false;
   } else if(muonQual=="lowpt") {
-    if(mu->muonType()!=xAOD::Muon::SegmentTagged) return false;
+    if(mu->muonType()!=xAOD::Muon::MuonType::SegmentTagged) return false;
   } else if(muonQual=="combined+lowpt") {
-    if(mu->muonType()!=xAOD::Muon::Combined and mu->muonType()!=xAOD::Muon::SegmentTagged) return false;
+    if(mu->muonType()!=xAOD::Muon::MuonType::Combined and mu->muonType()!=xAOD::Muon::MuonType::SegmentTagged) return false;
   } else if(muonQual=="inMS") {
-    if(mu->muonType()==xAOD::Muon::MuonStandAlone and fabs(fabs(mu->eta())-2.6)>0.12) return false;
+    if(mu->muonType()==xAOD::Muon::MuonType::MuonStandAlone and fabs(fabs(mu->eta())-2.6)>0.12) return false;
   } else if(muonQual=="DFCommonGoodMuon") { // Derivation Framework variable
     static const SG::ConstAccessor<char> DFCommonGoodMuonAcc("DFCommonGoodMuon");
     if(!DFCommonGoodMuonAcc.withDefault(*mu, false)) return false;
@@ -335,7 +335,7 @@ bool DerivationFramework::SkimmingToolHIGG2::checkMuonQuality(const xAOD::Muon *
   if(mu->pt()<muonPtCut) return false;
   if(fabs(mu->eta())>m_muonEtaCut) return false;
   if(muonQual!="DFCommonGoodMuon" and
-     (mu->muonType()==xAOD::Muon::CaloTagged and fabs(mu->eta())>m_caloMuonEtaCut)) return false;
+     (mu->muonType()==xAOD::Muon::MuonType::CaloTagged and fabs(mu->eta())>m_caloMuonEtaCut)) return false;
 
   return true;
 }
