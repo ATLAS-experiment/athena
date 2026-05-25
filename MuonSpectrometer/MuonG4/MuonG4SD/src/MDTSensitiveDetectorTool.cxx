@@ -22,8 +22,7 @@ StatusCode MDTSensitiveDetectorTool::SetupEvent(HitCollectionMap& hitCollections
 
 StatusCode MDTSensitiveDetectorTool::Gather(HitCollectionMap& hitCollections)
 {
-  hitCollections.Record<MDTSimHitCollection>(m_outputCollectionNames[0]);
-  return StatusCode::SUCCESS;
+  return hitCollections.Record<MDTSimHitCollection>(m_outputCollectionNames[0]);
 }
 
 G4VSensitiveDetector* MDTSensitiveDetectorTool::makeSD() const

@@ -112,15 +112,15 @@ namespace MuonG4R4 {
 /** @brief Explicitly specify the template to record the MuonSimHits as the defined MuonSimHitsVector is 
  *         an auxiliary container carrier. We need to extract both containers from this struct and 
  *         pass it to the write handle */
-template<> inline void HitCollectionMap::Record<MuonG4R4::MuonSimHitsVec>(std::string const& sgKey, std::string const& hitCollectionName, EventContext const& ctx) {
+template<> inline StatusCode HitCollectionMap::Record<MuonG4R4::MuonSimHitsVec>(std::string const& sgKey, std::string const& hitCollectionName, EventContext const& ctx) {
     SG::WriteHandle<xAOD::MuonSimHitContainer> writeHandle{sgKey, ctx};
     auto simHitVec = Extract<MuonG4R4::MuonSimHitsVec>(hitCollectionName);
     if (!simHitVec) {
         THROW_EXCEPTION("The Muon sim hit collection "<<hitCollectionName<<" does not exist");
     }
     /// Record should return a StatusCode type
-    writeHandle.record(std::move(simHitVec->container), 
-                       std::move(simHitVec->auxContainer)).isSuccess();
+    return writeHandle.record(std::move(simHitVec->container), 
+                       std::move(simHitVec->auxContainer));
 
 }
 

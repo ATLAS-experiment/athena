@@ -10,9 +10,9 @@
 #include <type_traits>
 #include <unordered_map>
 #include <utility>
-#include <format>
 
 #include <GaudiKernel/EventContext.h>
+#include <GaudiKernel/StatusCode.h>
 #include <GaudiKernel/ThreadLocalContext.h>
 #include "HitManagement/AthenaHitsVector.h"
 #include "StoreGate/WriteHandle.h"
@@ -61,32 +61,36 @@ class HitCollectionMap
   template <AthHitVec::isHitVectorBase T>
   std::unique_ptr<T> Extract(std::string const& hitCollectionName) {
     auto it = m_outputCollections.find(hitCollectionName);
-    if (it != m_outputCollections.end()) {
-      auto castPtr = dynamic_cast<T*>(it->second.get());
-      std::unique_ptr<T> retPtr{castPtr}; 
-      assert(castPtr != nullptr);
-      it->second.release();
-      m_outputCollections.erase(it);
-      return retPtr;
+    if (it == m_outputCollections.end()) {
+      return nullptr;
     }
-    return nullptr;
+
+    auto* baseCollection = it->second.release();
+    auto* collection = dynamic_cast<T*>(baseCollection);
+    if (!collection) {
+      it->second.reset(baseCollection);
+      return nullptr;
+    }
+
+    m_outputCollections.erase(it);
+    return std::unique_ptr<T>{collection};
   }
 
   /**
    * @brief Record the hit collection hitCollectionName to the StoreGate sgKey
    */
   template <AthHitVec::isHitVectorBase T>
-  void Record(std::string const& sgKey, std::string const& hitCollectionName, EventContext const& ctx) {
+  StatusCode Record(std::string const& sgKey, std::string const& hitCollectionName, EventContext const& ctx) {
     SG::WriteHandle<T> handle{sgKey, ctx};
-    handle = Extract<T>(hitCollectionName);
+    return handle.record(Extract<T>(hitCollectionName));
   }
 
   /**
    * @brief Overload for Record with the same name for the SG key and hit collection name.
    */
   template <AthHitVec::isHitVectorBase T>
-  void Record(std::string const& hitCollectionName) {
-    Record<T>(hitCollectionName, hitCollectionName, Gaudi::Hive::currentContext());
+  StatusCode Record(std::string const& hitCollectionName) {
+    return Record<T>(hitCollectionName, hitCollectionName, Gaudi::Hive::currentContext());
   }
 
   /**
@@ -94,7 +98,7 @@ class HitCollectionMap
    * function to the hit collection before recording it.
    */
   template <class T>
-  void TransformAndRecord(
+  StatusCode TransformAndRecord(
       std::string const& sgKey,
       std::string const& hitCollectionName,
       EventContext const& ctx,
@@ -102,15 +106,15 @@ class HitCollectionMap
     auto hitColl = Extract<T>(hitCollectionName);
     transform(*hitColl);
     SG::WriteHandle<T> handle(sgKey, ctx);
-    handle = std::move(hitColl);
+    return handle.record(std::move(hitColl));
   }
 
   /**
    * @brief Overload for TransformAndRecord with the same name for the SG key and hit collection name.
    */
   template <class T>
-  void TransformAndRecord(std::string const& hitCollectionName, std::function<void(T&)> transform) {
-    TransformAndRecord(hitCollectionName, hitCollectionName, Gaudi::Hive::currentContext(), std::move(transform));
+  StatusCode TransformAndRecord(std::string const& hitCollectionName, std::function<void(T&)> transform) {
+    return TransformAndRecord(hitCollectionName, hitCollectionName, Gaudi::Hive::currentContext(), std::move(transform));
   }
 
  private:

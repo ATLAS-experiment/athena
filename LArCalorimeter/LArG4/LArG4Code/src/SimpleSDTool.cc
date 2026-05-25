@@ -84,12 +84,11 @@ namespace LArG4
   StatusCode SimpleSDTool::Gather(HitCollectionMap& hitCollections)
   {
     ATH_MSG_DEBUG("Gathering hits to write out in " << name());
-    hitCollections.TransformAndRecord<LArHitContainer>(hitCollectionName(),
+    return hitCollections.TransformAndRecord<LArHitContainer>(hitCollectionName(),
       [](LArHitContainer& hits)
       {
         static_cast<LArHitContainerBuilder&>(hits).Finalize();
       });
-    return StatusCode::SUCCESS;
   }
 
   //---------------------------------------------------------------------------
