@@ -7,6 +7,7 @@
 
 #include "AthContainers/DataVector.h"
 #include "AthenaKernel/CLASS_DEF.h"
+#include "CaloEvent/CaloCell.h"
 #include "GlobalLArCell.h"
 
 #include "Identifier/IdentifierHash.h"
@@ -36,6 +37,18 @@ namespace GlobalSim {
         bool error{false};
     };
 
+    /** @brief Helper struct to hold cell's eta/phi location and size */
+    struct LocSize {
+        double eta{0.0};
+        double phi{0.0};
+        float deta{0.0};
+        float dphi{0.0};
+
+        bool operator<(const LocSize& ls) const {
+	    return (eta < ls.eta || (eta==ls.eta && phi < ls.phi));
+        } 
+    };
+
     /** @brief Main constructor setting up FEB2 LUTs */
     GlobalLArCellContainer(const std::map<std::string, Feb2MuxInfo>& febMap);
 
@@ -54,9 +67,12 @@ namespace GlobalSim {
     /** @brief Function to get all GlobalLArCells for a given FEB2 name */
     const std::vector<std::shared_ptr<GlobalLArCell>>& getCellsForFeb2(const std::string& feb2) const;
 
-    /** @brief Function to get all GlobalLArCells for a given hash identifier */
+    /** @brief Function to get the GlobalLArCell for a given hash identifier */
     const std::shared_ptr<GlobalLArCell> getCellFromHash(IdentifierHash hashId) const;
 
+    /** @brief Get the HashID from an input cell position*/
+    Identifier getIDFromLoc(float eta, float phi) const;
+    
     /** @brief Function to get ordered list of FEB2s for a given MUX name */
     const std::vector<std::string>& getOrderedFeb2sForMux(const std::string& mux) const;
 
@@ -66,6 +82,9 @@ namespace GlobalSim {
     /** @brief Set overflow and error flag for a FEB2 */
     void setFeb2Flags(const std::string& feb2Key, bool overflow, bool error);
 
+    /** @brief Fill the location to HashId map */
+    void fillLocToIDMap(Identifier ID, const CaloCell*& cell);
+    
     /** @brief Function to get maximum number of cells per FEB2 */
     std::size_t getMaxCellsPerFeb2() const { return m_maxCellsPerFeb2; }
 
@@ -104,7 +123,8 @@ namespace GlobalSim {
     std::size_t m_maxCellsPerFeb2 = 0;
     /** @brief map for fast look up of cells */
     std::map<IdentifierHash, std::shared_ptr<GlobalLArCell>> m_hashToCells;
-
+    /** @brief map for cell HashID lookup from position */
+    std::map<LocSize,Identifier> m_cellLocationToID;
   };
 
 } //namespace GlobalSim

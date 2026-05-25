@@ -272,13 +272,17 @@ namespace GlobalSim {
             
       //Need the hash for the neighbours
       IdentifierHash hashId=m_calocell_id->calo_cell_hash(CellID);
+      IdentifierHash hashIdMax=hashId;
       //Find the initial 17x3 eta/phi window
       ATH_CHECK(findWindow(hashId, cells, window));
       //Find the maxima in the window (only once!)
-      ATH_CHECK(findMaxima(hashId, window));
-      //Find the new 17x3 eta/phi window around this maxima
-      ATH_CHECK(findWindow(hashId, cells, window));
-
+      ATH_CHECK(findMaxima(hashIdMax, window));
+      /*Find the new 17x3 eta/phi window around this maxima
+        Don't need to if the max is the seed already */
+      if(hashIdMax != hashId){
+	ATH_CHECK(findWindow(hashIdMax, cells, window));
+      }
+      
       //Rediscover the maximum energy cell
       auto it = std::ranges::max_element(std::begin(window[1]),
 				 std::end(window[1]),
@@ -383,27 +387,14 @@ namespace GlobalSim {
 					     const GlobalSim::GlobalLArCellContainer& cells,
 					     Identifier& CellID) const {
 
-    // Loop over the cells
-    for(const GlobalSim::GlobalLArCell* cell :cells){
-      // Find the layer one cells
-      if(cell->getSampling() == 1 || cell->getSampling() == 5) {
-	// Draw the boxes for each cell
-	float etamin = cell->eta() - (0.5*cell->deta());
-	float etamax = cell->eta() + (0.5*cell->deta());
-	
-	float phimin = cell->phi() - (0.5*cell->dphi());
-	float phimax = cell->phi() + (0.5*cell->dphi());
 
-	// Ask if the input lies within a box.
-	if(etamin < eta && eta < etamax && phimin < phi && phi < phimax){
-	  // Return the cellID if we find a match
-	  CellID = cell->getID();
-	  ATH_MSG_DEBUG("Found the seed " << CellID << " eta "<< cell->eta() << " phi " << cell->phi() << " sampling " << m_larem_id->sampling(CellID));
-	  return true;
-	}
-      }
+    CellID = cells.getIDFromLoc(eta, phi);
+    //Failing to find a match will return a default CellID
+    if((CellID.get_identifier32()).get_compact() != 0xffffffff){
+      ATH_MSG_DEBUG("Found the seed from MAP: " << CellID << " eta "<< eta << " phi " << phi);
+      return true;
     }
-    // Otherwise report that we failed to find a match.
+    ATH_MSG_DEBUG("Didn't find the seed from MAP: eta "<< eta << " phi " << phi);
     return false;
   }
 
@@ -443,7 +434,12 @@ namespace GlobalSim {
 	  ATH_MSG_DEBUG("Found the middle cell " << cell->getID() << " at eta " << cell->eta() << " phi " << cell->phi());
 	  //Start defining where we are in eta.
 	  etaMax = cell->eta();
-	}	
+	} else {
+	  //We didn't find the cell in the hash map. Put a dummy in the window.
+	  ATH_MSG_DEBUG("Putting in a dummy middle cell with hashId " << hashId);
+	  window[1][8] = std::make_shared<GlobalLArCell>(hashId,"",0);
+	  //Potential issue if you cannot find the cell... but this cell would be the last in eta?
+	}
       } else {
 	//If we are not at the edge, and were not previously at the edge. Then...
 	if(std::abs(etaMax) < 2.475 && hashIdNext != hashIdDummy){

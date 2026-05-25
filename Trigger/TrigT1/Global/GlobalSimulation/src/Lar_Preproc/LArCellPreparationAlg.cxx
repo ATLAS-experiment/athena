@@ -151,6 +151,10 @@ namespace GlobalSim {
 
     std::map<std::string,std::vector<GlobalSim::GlobalLArCell>> gblLArCellsPerFEB2;
 
+    // Set up a GlobalLArCellContainer from template
+    const GlobalSim::GlobalLArCellContainer& templateRef = *m_gblLArCellContainerTemplate;
+    auto gblLArCellContainer = std::make_unique<GlobalSim::GlobalLArCellContainer>(templateRef);
+    
     for(const auto *cell: cells){
 
         int cell_id = (cell->ID().get_identifier32()).get_compact();
@@ -158,6 +162,10 @@ namespace GlobalSim {
         auto gblLArCell_itr = m_gblLArCellMap.find(cell_id);
         if (gblLArCell_itr == m_gblLArCellMap.end()) continue;
 
+	//Fill a map with the cell location -> Cell ID
+	if(cell->caloDDE()->getSampling() == 1 || cell->caloDDE()->getSampling() == 5){
+	     gblLArCellContainer->fillLocToIDMap(cell->ID(), cell);
+	}
         GlobalSim::GlobalLArCell gblLArCell = gblLArCell_itr->second;
 
         float totalNoise = totalNoiseCDO->getNoise(cell->ID(), cell->gain());
@@ -185,10 +193,6 @@ namespace GlobalSim {
             gblLArCellsPerFEB2.insert(std::pair<std::string,std::vector<GlobalSim::GlobalLArCell>>(gblLArCell.getFEB2(),cellsThisFEB));
         }
     }
-
-    // Set up a GlobalLArCellContainer from template
-    const GlobalSim::GlobalLArCellContainer& templateRef = *m_gblLArCellContainerTemplate;
-    auto gblLArCellContainer = std::make_unique<GlobalSim::GlobalLArCellContainer>(templateRef);
 
     // do truncation
     for (auto& [feb2Name, cells] : gblLArCellsPerFEB2) {
