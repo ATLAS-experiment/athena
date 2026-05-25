@@ -21,7 +21,11 @@ class WZj_MiNNLO(PowhegRES):
         @param base_directory: path to PowhegBox code.
         @param kwargs          dictionary of arguments from Generate_tf.
         """
-        super(WZj_MiNNLO, self).__init__(base_directory, "WZJ", **kwargs)
+        errors = super(WZj_MiNNLO, self).openloops_error()
+        warnings = super(WZj_MiNNLO, self).hoppet_warning()
+        infos = super(WZj_MiNNLO, self).hoppet_info()
+        infos.append("qqvvamp: increasing precision to")
+        super(WZj_MiNNLO, self).__init__(base_directory, "WZJ", warning_output=warnings, info_output=infos, error_output=errors, **kwargs)
 
         # Add parameter validation functions
         self.validation_functions.append("validate_decays")
@@ -60,6 +64,7 @@ class WZj_MiNNLO(PowhegRES):
         self.add_keyword("rwl_file")
         self.add_keyword("rwl_add")
         self.add_keyword("rwl_format_rwgt")
+        self.add_keyword("clobberlhe")
         self.add_keyword("idvecbosW")
         self.add_keyword("Wdecaymode", 1, name="decay_mode", hidden=False)
         self.add_keyword("Zdecaymode")
