@@ -35,7 +35,7 @@ bool TIDA::isGoodOffline(const xAOD::Electron& elec, const unsigned int selectio
 bool TIDA::isGoodOffline(const xAOD::Muon& muon, const unsigned int selection, double ) { 
 
   /// should allow this to be set also
-  if ( muon.muonType() != xAOD::Muon::Combined ) return false;
+  if ( muon.muonType() != xAOD::Muon::MuonType::Combined ) return false;
  
   bool good_muon = false;
 
@@ -43,10 +43,10 @@ bool TIDA::isGoodOffline(const xAOD::Muon& muon, const unsigned int selection, d
   /// selection, then it *does not* pass medium selection, as the goups are *exclusive*
   /// this is completely nonsensical !
 
-  if      ( selection == 1 ) good_muon = (muon.quality()<=xAOD::Muon::Tight);
-  else if ( selection == 2 ) good_muon = (muon.quality()<=xAOD::Muon::Medium);
-  else if ( selection == 3 ) good_muon = (muon.quality()<=xAOD::Muon::Loose);
-  else if ( selection == 4 ) good_muon = (muon.quality()<=xAOD::Muon::VeryLoose);
+  if      ( selection == 1 ) good_muon = (muon.quality()<=xAOD::Muon::Quality::Tight);
+  else if ( selection == 2 ) good_muon = (muon.quality()<=xAOD::Muon::Quality::Medium);
+  else if ( selection == 3 ) good_muon = (muon.quality()<=xAOD::Muon::Quality::Loose);
+  else if ( selection == 4 ) good_muon = (muon.quality()<=xAOD::Muon::Quality::VeryLoose);
   else                       good_muon = true;
 
   return good_muon; 

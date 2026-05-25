@@ -453,7 +453,7 @@ StatusCode TrigMultiTrkComboHypo::mergeTracksFromDecisions(TrigMultiTrkStateBase
     if constexpr(std::is_same<CONTAINER, xAOD::MuonContainer>::value) {
       if (!lepton->trackParticle(xAOD::Muon::TrackParticleType::CombinedTrackParticle)) continue;
       if (!lepton->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle)) continue;
-      trackEL = lepton->inDetTrackParticleLink();
+       trackEL = linkTrack(lepton->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle));
     }
     else if constexpr(std::is_same<CONTAINER, xAOD::L2CombinedMuonContainer>::value) {
       if (!lepton->idTrack()) continue;
@@ -642,7 +642,7 @@ StatusCode TrigMultiTrkComboHypo::findMultiLeptonCandidates(TrigMultiTrkState<T>
         charge += static_cast<int>(lround(leg->charge()));
         ElementLink<xAOD::TrackParticleContainer> trackEL;
         if constexpr(std::is_same<T, xAOD::MuonContainer>::value) {
-          trackEL = leg->inDetTrackParticleLink();
+          trackEL = linkTrack(leg->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle));
         }
         else {
           trackEL = leg->trackParticleLink();
@@ -802,7 +802,10 @@ StatusCode TrigMultiTrkComboHypo::findMuTrkCandidates(TrigMultiTrkState<xAOD::Mu
 
     // try to fit muon and track into common vertex: first track is always muon, second tracks comes from the same SG::View
     std::vector<ElementLink<xAOD::TrackParticleContainer>> tracklist(2);
-    tracklist[0] = muon->inDetTrackParticleLink();
+    if (const auto* idTrk = muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle); idTrk != nullptr){
+    tracklist[0] = ElementLink<xAOD::TrackParticleContainer>{*static_cast<const xAOD::TrackParticleContainer*>(idTrk->container()),
+                                                             idTrk->index()};
+    }
     for (size_t idx = 0; idx < tracksHandle->size(); ++idx) {
       const xAOD::TrackParticle* track = tracksHandle->at(idx);
 
@@ -1021,7 +1024,8 @@ bool TrigMultiTrkComboHypo::isIdenticalTracks(const xAOD::TrackParticle* lhs, co
 
 bool TrigMultiTrkComboHypo::isIdenticalTracks(const xAOD::Muon* lhs, const xAOD::Muon* rhs) const {
 
-  return isIdenticalTracks(*lhs->inDetTrackParticleLink(), *rhs->inDetTrackParticleLink());
+  return isIdenticalTracks(lhs->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle), 
+                           rhs->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle));
 }
 
 bool TrigMultiTrkComboHypo::isIdenticalTracks(const xAOD::Electron* lhs, const xAOD::Electron* rhs) const {

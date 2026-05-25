@@ -47,6 +47,8 @@ class ITrigBphysState {
   Amg::Vector3D beamSpotPosition() const { return (m_beamSpotData ? m_beamSpotData->beamPos() : Amg::Vector3D::Zero(3)); }
   const xAOD::Vertex& beamSpot() const { return m_beamSpotVertex; }
 
+ 
+
  private:
   const EventContext* m_context;
   const TrigCompositeUtils::DecisionContainer* m_previousDecisions;
@@ -55,5 +57,12 @@ class ITrigBphysState {
   const InDet::BeamSpotData* m_beamSpotData;
   xAOD::Vertex m_beamSpotVertex;
 };
+
+
+inline ElementLink<xAOD::TrackParticleContainer> linkTrack(const xAOD::TrackParticle* trk){
+    if (!trk) { return {};}
+    return ElementLink<xAOD::TrackParticleContainer>{*static_cast<const xAOD::TrackParticleContainer*>(trk->container()),
+                                                      trk->index()};
+}
 
 #endif  // TRIG_ITrigBphysState_H

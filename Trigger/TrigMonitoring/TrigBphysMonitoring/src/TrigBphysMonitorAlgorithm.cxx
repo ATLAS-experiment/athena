@@ -491,9 +491,8 @@ StatusCode TrigBphysMonitorAlgorithm::buildDimuons(const EventContext& ctx, std:
   std::vector<const xAOD::Muon*> selectedMuons;
   for (const auto mu : *muonContainer) {
     if ( mu == nullptr ) continue;
-    if ( mu->muonType() != xAOD::Muon::Combined ) continue; // require combined muons
-    if (!mu->inDetTrackParticleLink()) continue; // No muons without ID tracks
-    if (!mu->inDetTrackParticleLink().isValid()) continue; // No muons without ID tracks
+    if ( mu->muonType() != xAOD::Muon::MuonType::Combined ) continue; // require combined muons
+    if (!mu->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle)) continue; // No muons without ID tracks
     selectedMuons.push_back(mu);
   }
   if(selectedMuons.size() < 2) {
@@ -507,8 +506,8 @@ StatusCode TrigBphysMonitorAlgorithm::buildDimuons(const EventContext& ctx, std:
     for(auto innerItr=(outerItr+1); innerItr!=selectedMuons.end(); ++innerItr){
       const auto muon1 = *outerItr;
       const auto muon2 = *innerItr;
-      const auto trackParticle1 = muon1->trackParticle( xAOD::Muon::InnerDetectorTrackParticle );
-      const auto trackParticle2 = muon2->trackParticle( xAOD::Muon::InnerDetectorTrackParticle );
+      const auto trackParticle1 = muon1->trackParticle( xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle );
+      const auto trackParticle2 = muon2->trackParticle( xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle );
       // Charge selection
       if(trackParticle1->qOverP() * trackParticle2->qOverP() > 0.) 
         continue;

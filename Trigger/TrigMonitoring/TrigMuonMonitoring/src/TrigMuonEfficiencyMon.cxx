@@ -43,7 +43,9 @@ StatusCode TrigMuonEfficiencyMon :: selectMuons(const EventContext& ctx, SG::Rea
     return selectMuonsTagAndProbe(ctx, muons, probes);
   } else {
     for (const xAOD::Muon* mu : *muons) {
-      if( mu->muonType()<=m_muontype && (mu->author()==xAOD::Muon::Author::MuidCo || mu->author()==xAOD::Muon::Author::STACO) && mu->quality()==xAOD::Muon::Quality::Medium ){
+      if( static_cast<int>(mu->muonType())<=m_muontype && 
+          mu->author()==xAOD::Muon::Author::MuidCo && 
+          mu->quality()==xAOD::Muon::Quality::Medium ){
 	probes.push_back(mu);
       }
     }
@@ -187,16 +189,12 @@ StatusCode TrigMuonEfficiencyMon :: selectMuonsTagAndProbe(const EventContext& c
   xAOD::MuonContainer::const_iterator mu1_end = muons->end();
   for(; mu1_it!=mu1_end; ++mu1_it){
     const xAOD::Muon *mu1 = *mu1_it;
-    if( mu1->muonType()>m_muontype ) continue;
-    if( mu1->author()==xAOD::Muon::Author::unknown || mu1->author()>xAOD::Muon::Author::STACO ) continue;
-    if( m_muonSelectionTool->getQuality(*mu1)>xAOD::Muon::Medium ) continue;
+    if( m_muonSelectionTool->getQuality(*mu1)>xAOD::Muon::Quality::Medium ) continue;
     xAOD::MuonContainer::const_iterator mu2_it = mu1_it;
     xAOD::MuonContainer::const_iterator mu2_end = mu1_end;
     for(++mu2_it; mu2_it!=mu2_end; ++mu2_it){
       const xAOD::Muon *mu2 = *mu2_it;
-      if( mu2->muonType()>m_muontype ) continue;
-      if( mu2->author()==xAOD::Muon::Author::unknown || mu2->author()>xAOD::Muon::Author::STACO ) continue;
-      if( m_muonSelectionTool->getQuality(*mu2)>xAOD::Muon::Medium ) continue;
+      if( m_muonSelectionTool->getQuality(*mu2)>xAOD::Muon::Quality::Medium ) continue;
       if( mu1->charge()*mu2->charge()>0 ) continue;
 
       TLorentzVector lvmu1 = mu1->p4();

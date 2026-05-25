@@ -67,13 +67,12 @@ StatusCode TrigMuonEFTrackIsolationTool::calcTrackIsolation(const xAOD::Muon* ef
   //for combined muons use the associated ID track for the self removal
   const xAOD::TrackParticle* muon_idtrk = 0;
   const Trk::Perigee* muidtrk_perigee = 0;
-  if( efmuon->combinedTrackParticleLink().isValid()  ) {
+  if( (muon =efmuon->trackParticle(xAOD::Muon::TrackParticleType::CombinedTrackParticle)) != nullptr ) {
     if(m_debug) {
       msg() << MSG::DEBUG << "EF muon has combined muon" << endmsg;
     }
-    muon = *(efmuon->combinedTrackParticleLink());
-    if( efmuon->inDetTrackParticleLink().isValid() ) {
-      muon_idtrk = *(efmuon->inDetTrackParticleLink());
+    if( efmuon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle) ) {
+      muon_idtrk = efmuon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
       muidtrk_perigee = &(muon_idtrk->perigeeParameters());
       selfpt = muon_idtrk->pt();
       if(m_debug) {
@@ -87,7 +86,7 @@ StatusCode TrigMuonEFTrackIsolationTool::calcTrackIsolation(const xAOD::Muon* ef
   }//combinedmuon
   else {
     // for extrapolated muons use the extrapolated muon for self removal
-    if( !efmuon->muonSpectrometerTrackParticleLink().isValid() ) {
+    if( !efmuon->trackParticle(xAOD::Muon::TrackParticleType::MuonSpectrometerTrackParticle) ) {
       if(m_removeSelf) {
 	msg() << MSG::WARNING << "This EF muon has neither a combined or extrapolated muon and removeSelf is requested, do not process further" << endmsg;
 	return StatusCode::FAILURE;
@@ -96,7 +95,7 @@ StatusCode TrigMuonEFTrackIsolationTool::calcTrackIsolation(const xAOD::Muon* ef
       return StatusCode::FAILURE; 
     }
     else {
-      muon = *(efmuon->muonSpectrometerTrackParticleLink());
+      muon = efmuon->trackParticle(xAOD::Muon::TrackParticleType::MuonSpectrometerTrackParticle);
       selfpt = muon->pt();
     }//extrapmuon
   }//not combined
