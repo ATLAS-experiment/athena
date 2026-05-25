@@ -1243,6 +1243,8 @@ def _extract_fields_esi(value):
     for clid, sgkey in value.m_itemList:
         if isinstance(sgkey, bytes):
             sgkey = sgkey.decode()
+        else:
+            sgkey = str(sgkey)
         result['itemList'].append((cgen.getNameFromClid(clid), sgkey))
 
     return result
@@ -1346,7 +1348,7 @@ def _extract_fields_tmd(interface=None, aux=None):
         result['mcChannelNumber'] = tmd.mcChannelNumber()
 
         try:
-            result['weightNames'] = list(tmd.weightNames())
+            result['weightNames'] = [str(v) for v in tmd.weightNames()]
         except BadAuxVarException:
             result['weightNames'] = []
 
