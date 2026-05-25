@@ -98,6 +98,26 @@ namespace GlobalSim {
       return emptyCell;
   }
 
+  // Function to get all GlobalLArCells for a given IdentifierHash
+  Identifier GlobalLArCellContainer::getIDFromLoc(float eta, float phi) const {
+
+    Identifier emptyID;
+      for (auto& [location, ID] : m_cellLocationToID) {
+	float etamin = location.eta - (0.5*location.deta);
+	float etamax = location.eta + (0.5*location.deta);
+	
+	float phimin = location.phi - (0.5*location.dphi);
+	float phimax = location.phi + (0.5*location.dphi);
+
+	if(etamin < eta && eta < etamax && phimin < phi && phi < phimax){
+	  // Return the cellID if we find a match
+	  return ID;
+	}
+
+      }
+      return emptyID;
+  }
+  
   // Function to get ordered list of FEB2s for a given MUX name
   const std::vector<std::string>& GlobalLArCellContainer::getOrderedFeb2sForMux(const std::string& mux) const {
 
@@ -138,6 +158,11 @@ namespace GlobalSim {
       }
   }
 
+  // Function to fill a map with the location and size of incoming cells
+  void GlobalLArCellContainer::fillLocToIDMap(Identifier ID, const CaloCell*& cell) {
+      LocSize cell_LocSize = {cell->eta(), cell->phi(),cell->caloDDE()->deta(),cell->caloDDE()->dphi()};
+      m_cellLocationToID.insert({cell_LocSize, ID});
+  }  
  
   // Function to check whether a given FEB2 is in overflow 
   bool GlobalLArCellContainer::feb2InOverflow(const std::string& feb2Key) const {
