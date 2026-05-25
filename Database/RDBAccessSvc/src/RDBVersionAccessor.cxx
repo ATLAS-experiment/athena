@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -180,17 +180,18 @@ void RDBVersionAccessor::getChildTagData()
 
     coral::AttributeList bindsNode ATLAS_THREAD_SAFE;
     bindsNode.extend<std::string>("nodeId");
-
+    const std::string parentIdStr{"PARENT_ID"};
+    const std::string conditionStr{"NODE_ID=:nodeId"};
     while(currentParrent != parentNodeId) {
       //
       // Query: "SELECT PARENT_ID FROM HVS_NODE WHERE NODE_ID='currentChild'"
       //
       coral::IQuery* queryNode(tableNode.newQuery());
 
-      queryNode->addToOutputList("PARENT_ID");
+      queryNode->addToOutputList(parentIdStr);
       queryNode->setMemoryCacheSize(1);
 
-      queryNode->setCondition("NODE_ID=:nodeId", bindsNode);
+      queryNode->setCondition(conditionStr, bindsNode);
       bindsNode[0].data<std::string>()=currentChild;
 
       coral::ICursor& cursorNode = queryNode->execute();
@@ -211,7 +212,7 @@ void RDBVersionAccessor::getChildTagData()
 	  throw std::runtime_error("The requested child and parent nodes are not on the same branch!");
 	}	
 
-	currentParrent = attribute2String(row,"PARENT_ID");
+	currentParrent = attribute2String(row,parentIdStr);
 	currentChild = currentParrent;
 	path.push_back(currentParrent);
       }
@@ -232,19 +233,19 @@ void RDBVersionAccessor::getChildTagData()
     bindsLtag2Ltag.extend<std::string>("parentT");
     bindsLtag2Ltag.extend<std::string>("parentN");
 
-
+    const std::string childTagString{"CHILD_TAG"};
+    const std::string childConditionStr = "CHILD_NODE =:childN AND PARENT_TAG =:parentT AND PARENT_NODE =:parentN";
     for(unsigned int ind=1; ind<path.size(); ind++) {
       // Query: "SELECT CHILD_TAG FROM HVS_LTAG2LTAG WHERE
       //         CHILD_NODE  = 'path[path.size()-ind-1]' AND
       //         PARENT_TAG  = 'parentTagId' AND
       //         PARENT_NODE = 'path[path.size()-ind]'
       coral::IQuery* queryLtag2Ltag(tableLtag2Ltag.newQuery());
-
-      queryLtag2Ltag->addToOutputList("CHILD_TAG");
+      
+      queryLtag2Ltag->addToOutputList(childTagString);
       queryLtag2Ltag->setMemoryCacheSize(1);
 
-      std::string conditionString = "CHILD_NODE =:childN AND PARENT_TAG =:parentT AND PARENT_NODE =:parentN";
-      queryLtag2Ltag->setCondition(conditionString, bindsLtag2Ltag);
+      queryLtag2Ltag->setCondition(childConditionStr, bindsLtag2Ltag);
 
       bindsLtag2Ltag[0].data<std::string>() = path[path.size()-ind-1];
       bindsLtag2Ltag[1].data<std::string>() = parentTagId;
@@ -262,7 +263,7 @@ void RDBVersionAccessor::getChildTagData()
 	}
 
 	const coral::AttributeList& row = cursorLtag2Ltag.currentRow();
-	parentTagId = attribute2String(row,"CHILD_TAG");
+	parentTagId = attribute2String(row,childTagString);
       }
       if(nRows==0) {
 	delete queryLtag2Ltag;
@@ -282,8 +283,8 @@ void RDBVersionAccessor::getChildTagData()
     // Query: "SELECT TAG_NAME from HVS_TAG2NODE WHERE TAG_ID='parentTagId'"
     //
     coral::IQuery* queryTagName(tableTag2Node.newQuery());
-
-    queryTagName->addToOutputList("TAG_NAME");
+    const std::string tagNameStr{"TAG_NAME"};
+    queryTagName->addToOutputList(tagNameStr);
     queryTagName->setMemoryCacheSize(1);
 
     coral::AttributeList bindsTagName ATLAS_THREAD_SAFE;
@@ -302,8 +303,8 @@ void RDBVersionAccessor::getChildTagData()
       }  
 
       const coral::AttributeList& row = cursorTagName.currentRow();
-
-      m_tagName =attribute2String(row,"TAG_NAME"); 
+      
+      m_tagName =attribute2String(row,tagNameStr); 
       m_tagID = parentTagId;
 
       if(m_msgStream.level()==MSG::VERBOSE) {
