@@ -55,9 +55,12 @@
 #include "Acts/EventData/TransformationHelpers.hpp"
 #include "Acts/Geometry/TrackingGeometry.hpp"
 #include "Acts/Propagator/detail/JacobianEngine.hpp"
+#include "Acts/Surfaces/detail/PlanarHelper.hpp"
+
 #include "ActsEvent/MultiTrajectory.h"
 #include "Acts/EventData/TrackStatePropMask.hpp"
 #include "Acts/EventData/SourceLink.hpp"
+
 
 
 
@@ -97,6 +100,24 @@ static void ActsTrackParameterCheck(
     const Acts::BoundVector &targetPars, const Acts::BoundMatrix &targetCov,
     const Trk::PlaneSurface *planeSurface);
 
+
+std::unique_ptr<Trk::TrackParameters> rotateParams(const Trk::TrackParameters& inPars,
+                                                   const Trk::Surface&  target) {
+    const Amg::Vector3D& pos = inPars.position();
+    const Amg::Vector3D& mom = inPars.momentum();
+    using namespace Acts::PlanarHelper;
+    
+    const auto isect = intersectPlane(pos, mom.normalized(), target.normal(), target.center());
+    std::optional<AmgSymMatrix(5)> cov{};
+    if (inPars.covariance()) {
+        AmgSymMatrix(5) rot {AmgSymMatrix(5)::Identity()};
+        rot.block<2,2>(0,0) = AmgSymMatrix(2){Eigen::Rotation2D{90._degree}};
+        cov = rot.transpose() * (*inPars.covariance()) * rot;
+    }
+    return target.createUniqueTrackParameters(isect.position(), mom,
+                                              std::copysign(1., inPars.parameters()[Trk::qOverP]),
+                                              std::move(cov));                     
+}
 
 
 StatusCode ActsToTrkConverterTool::initialize() {
@@ -141,7 +162,6 @@ StatusCode ActsToTrkConverterTool::initialize() {
   ATH_CHECK(m_keyMm.initialize(SG::AllowEmpty));
   ATH_CHECK(m_keyStgc.initialize(SG::AllowEmpty));
   ATH_CHECK(m_compRotCreator.retrieve(EnableTool{!m_keyRpc.empty() || !m_keyTgc.empty()}));
-  ATH_CHECK(m_extrapolator.retrieve(EnableTool{m_compRotCreator.isEnabled() || !m_keyStgc.empty()}));
   if (m_extractMuonSurfaces){
     ATH_CHECK(m_idHelperSvc.retrieve());
     const MuonGMR4::MuonDetectorManager* muonMgr{nullptr};    
@@ -974,44 +994,52 @@ template <typename Proxy_t>
             const Identifier& id = static_cast<const xAOD::MuonMeasurement*>(meas)->identify();
             const IdentifierHash modHash = m_idHelperSvc->moduleHash(id);
             /// Dimension 0 measurements are combined measurements!
+            const Trk::PrepRawData* prd{nullptr}, *prd1{nullptr};
+
             if (meas->numDimensions() == 0) {
-                const Trk::PrepRawData* prd{nullptr}, *prd1{nullptr};
-                const auto* muonMeas = static_cast<const xAOD::CombinedMuonStrip*>(meas);
-                if (meas->type() == RpcStripType) {
-                  prd  = fetchPrd(ctx, m_keyRpc, id, modHash);
-                  prd1 = fetchPrd(ctx, m_keyRpc, muonMeas->secondaryStrip()->identify(), modHash);
-                } else if (meas->type() == TgcStripType) {
-                  prd = fetchPrd(ctx, m_keyTgc, id, modHash);
-                  prd1 = fetchPrd(ctx, m_keyTgc, muonMeas->secondaryStrip()->identify(), modHash);
-                } else {
-                  prd  = fetchPrd(ctx, m_keyStgc, id, modHash);
-                  prd1 = fetchPrd(ctx, m_keyStgc, muonMeas->secondaryStrip()->identify(), modHash);
-                }
-                assert(prd != nullptr);
-                assert(prd1 != nullptr);
-                if (meas->type() != sTgcStripType) {
-                  rot = m_compRotCreator->createBroadCluster(std::list{prd,prd1}, 1.);
-                } else {
-                  /// @todo Check whether the phi surface is in front of the eta surface
-                  const Trk::Surface& phiSurface = prd1->detectorElement()->surface(prd1->identify());
-                  auto phiPars = m_extrapolator->extrapolateDirectly(ctx, *trkPars, phiSurface);
-                  assert(phiPars != nullptr);
-                  std::unique_ptr<Trk::RIO_OnTrack> phiRot{m_ROTcreator->correct(*prd1, *phiPars, ctx)};
-                  assert(phiRot != nullptr);
-                  states.insert(states.begin(),
-                                std::make_unique<Trk::TrackStateOnSurface>(quality,  std::move(phiRot), 
-                                                                           std::move(phiPars), nullptr, typePattern));
-                  rot.reset(m_ROTcreator->correct(*prd, *trkPars, ctx));
-                }
+              const auto* muonMeas = static_cast<const xAOD::CombinedMuonStrip*>(meas);
+              if (meas->type() == RpcStripType) {
+                prd  = fetchPrd(ctx, m_keyRpc, id, modHash);
+                prd1 = fetchPrd(ctx, m_keyRpc, muonMeas->secondaryStrip()->identify(), modHash);
+              } else if (meas->type() == TgcStripType) {
+                prd = fetchPrd(ctx, m_keyTgc, id, modHash);
+                prd1 = fetchPrd(ctx, m_keyTgc, muonMeas->secondaryStrip()->identify(), modHash);
+              } else {
+                prd  = fetchPrd(ctx, m_keyStgc, id, modHash);
+                prd1 = fetchPrd(ctx, m_keyStgc, muonMeas->secondaryStrip()->identify(), modHash);
+              }
+              assert(prd != nullptr);
+              assert(prd1 != nullptr);
+
+              /// @todo Check whether the phi surface is in front of the eta surface
+              const Trk::Surface& phiSurface = prd1->detectorElement()->surface(prd1->identify());
+              auto phiPars = rotateParams(*trkPars, phiSurface);
+              assert(phiPars != nullptr);
+              std::unique_ptr<Trk::MeasurementBase> phiRot{};
+              if (meas->type() != sTgcStripType) {
+                phiRot = m_compRotCreator->createBroadCluster(std::list{prd1}, 1.);
+                rot = m_compRotCreator->createBroadCluster(std::list{prd}, 1.);
+              } else {
+                phiRot.reset(m_ROTcreator->correct(*prd1, *phiPars, ctx));
+                rot.reset(m_ROTcreator->correct(*prd, *trkPars, ctx));
+              }
+              assert(phiRot != nullptr);
+              states.insert(states.begin(),
+                            std::make_unique<Trk::TrackStateOnSurface>(quality, 
+                                                                       std::move(phiRot), 
+                                                                       std::move(phiPars), nullptr, typePattern));
             } else {
               const auto* prd  = meas->type() == RpcStripType ? fetchPrd(ctx, m_keyRpc, id, modHash)
-                                                              : fetchPrd(ctx, m_keyTgc, id, modHash);
+                                                              :
+                                meas->type() == TgcStripType ? fetchPrd(ctx, m_keyTgc, id, modHash)
+                                                             : fetchPrd(ctx, m_keyStgc, id, modHash);
               assert(prd != nullptr);
               // Track parameter representation needs to change towards a phi surface
               if (m_idHelperSvc->measuresPhi(id)) {
+                  ATH_MSG_VERBOSE("Convert the track parameters "<<m_idHelperSvc->toString(id)
+                                <<", "<<m_idHelperSvc->toStringDetEl(prd->detectorElement()->identify()));
                   const Trk::Surface& target = prd->detectorElement()->surface(id);
-                  trkPars = m_extrapolator->extrapolateDirectly(ctx,*trkPars, target);
-                  assert(trkPars != nullptr);
+                  trkPars = rotateParams(*trkPars, target);
               }
               /// Correct the ROT according to the surface
               rot.reset(m_ROTcreator->correct(*prd, *trkPars, ctx));

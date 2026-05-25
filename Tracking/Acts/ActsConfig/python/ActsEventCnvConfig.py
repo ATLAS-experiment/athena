@@ -9,7 +9,9 @@ def ActsToTrkConverterToolCfg(flags,
     acc = ComponentAccumulator()
 
     # Currently this does not work if we are in a muon-only mode
-    if (flags.Detector.GeometryITk or flags.Detector.GeometryID) and 'TrackingGeometryTool' not in kwargs:
+    if (flags.Detector.GeometryITk or \
+        flags.Detector.GeometryID or \
+        flags.Acts.TrackingGeometry.UseBlueprint) and 'TrackingGeometryTool' not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
         kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
     else:
@@ -34,9 +36,6 @@ def ActsToTrkConverterToolCfg(flags,
 
     from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
     kwargs.setdefault('SummaryTool', acc.getPrimaryAndMerge(InDetTrackSummaryToolCfg(flags)))
-
-    from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-    kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
 
     if flags.Muon.usePhaseIIGeoSetup and (flags.Detector.GeometryRPC or flags.Detector.GeometryTGC):
         from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import TriggerChamberClusterOnTrackCreatorCfg
