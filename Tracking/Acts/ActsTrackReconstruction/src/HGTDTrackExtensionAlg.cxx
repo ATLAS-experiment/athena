@@ -361,9 +361,7 @@ HGTDTrackExtensionAlg::collectMeasurements(const EventContext& context,
       
       Acts::Vector3 globalPos = surface->center(m_trackingGeometryTool->getGeometryContext(context).context());
       
-      // Get the time from local position (3rd coordinate)
-      auto localPosition = cluster->localPosition<3>();  // Get 3D local position
-      double clusterTime = localPosition[2];  // Time is in the third coordinate
+      double clusterTime = cluster->time();
       
       ATH_MSG_DEBUG("HGTD Cluster: "<< Amg::toString(globalPos) );
 
@@ -498,9 +496,8 @@ HGTDTrackExtensionAlg::TrackExtensionData HGTDTrackExtensionAlg::processTrackExt
                 const xAOD::HGTDCluster* cluster = getHGTDClusterFromState(ctx, state);
 
                 if (cluster) {
-                  auto localPos = cluster->localPosition<3>();
-                  rawTime = static_cast<float>(localPos[2]);
-                  ATH_MSG_DEBUG("Got raw time from cluster local position: " << rawTime);
+                  rawTime = cluster->time();
+                  ATH_MSG_DEBUG("Got raw time from cluster: " << rawTime);
                 } else {
                   ATH_MSG_WARNING("Could not get cluster from state");
                 }

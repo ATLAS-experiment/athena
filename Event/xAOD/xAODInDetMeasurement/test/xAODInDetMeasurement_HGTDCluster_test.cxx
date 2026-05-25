@@ -1,9 +1,10 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
+#undef NDEBUG
 // System include(s):
 #include <iostream>
+#include <cassert>
 
 // Local include(s):
 #include "xAODInDetMeasurement/HGTDClusterContainer.h"
@@ -45,6 +46,8 @@ void fill( xAOD::HGTDCluster& HGTDCluster) {
     std::vector < int > tots = {1, 2, 3, 4, 5, 6};
 
     HGTDCluster.setToTlist(tots);
+    assert( HGTDCluster.time() == xAOD::HGTDCluster::time( HGTDCluster.localPosition<3>()));
+    assert( HGTDCluster.timeCovariance() == xAOD::HGTDCluster::timeCovariance( HGTDCluster.localCovariance<3>()));
     return;
 }
 
