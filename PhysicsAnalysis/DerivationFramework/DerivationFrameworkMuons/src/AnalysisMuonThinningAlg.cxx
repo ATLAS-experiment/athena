@@ -126,12 +126,14 @@ namespace DerivationFramework {
             ATH_MSG_DEBUG("Muon will be dumped");
 
             /// Ensure that all associated track particles are written to the output file
+            using enum xAOD::Muon::TrackParticleType;
             for (auto tp :
-                 {xAOD::Muon::InnerDetectorTrackParticle, xAOD::Muon::MuonSpectrometerTrackParticle, xAOD::Muon::CombinedTrackParticle,
-                  xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle, xAOD::Muon::MSOnlyExtrapolatedMuonSpectrometerTrackParticle}) {
+                 {InnerDetectorTrackParticle, 
+                  MuonSpectrometerTrackParticle,  CombinedTrackParticle,
+                  ExtrapolatedMuonSpectrometerTrackParticle, MSOnlyExtrapolatedMuonSpectrometerTrackParticle}) {
                 const xAOD::TrackParticle* track = muon->trackParticle(tp);
                 if (!track) {
-                    ATH_MSG_DEBUG("No track particle given");
+                    ATH_MSG_DEBUG("No "<<tp<<" track particle given");
                     continue;
                 }
                 KeepMap::iterator itr = std::find_if(thin_decisions.begin(), thin_decisions.end(),

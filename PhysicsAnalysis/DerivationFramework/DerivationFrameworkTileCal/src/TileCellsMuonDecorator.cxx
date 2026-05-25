@@ -119,7 +119,7 @@ namespace DerivationFramework {
       std::vector< float > lar_energy_in_cones;
 
       if (m_selectMuons &&
-          (mu->muonType() != xAOD::Muon::Combined
+          (mu->muonType() != xAOD::Muon::MuonType::Combined
            || mu->pt() < m_minPt
            || std::abs(mu->eta()) > m_maxAbsEta)) {
 
@@ -127,7 +127,7 @@ namespace DerivationFramework {
         continue;
       }
 
-      const xAOD::TrackParticle* mu_track = mu->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+      const xAOD::TrackParticle* mu_track = mu->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
       const xAOD::CaloCluster* mu_cluster = mu->cluster();
       if (mu_track && mu_cluster && mu_cluster->getCellLinks()) {
 

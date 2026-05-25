@@ -97,12 +97,10 @@ namespace DerivationFramework {
     }
 
     bool VertexPlus1TrackCascade::isContainedIn(const xAOD::TrackParticle* theTrack, const xAOD::MuonContainer* theColl) {
-        bool isContained(false);
-        for (auto muItr=theColl->cbegin(); muItr!=theColl->cend(); ++muItr) {
-            auto& link = ( *muItr )->inDetTrackParticleLink();
-            if ( link.isValid() && ( *link == theTrack ) ) {isContained=true; break;}
-        }
-        return isContained;
+        return std::find_if(theColl->begin(), theColl->end(), 
+                            [theTrack](const xAOD::Muon* muon){
+                                return muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle) == theTrack;
+                            }) != theColl->end();
     }
 
     StatusCode VertexPlus1TrackCascade::performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer, const EventContext& ctx) const
