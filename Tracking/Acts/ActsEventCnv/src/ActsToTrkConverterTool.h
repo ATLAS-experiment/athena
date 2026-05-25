@@ -13,7 +13,6 @@
 
 #include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
-#include "TrkExInterfaces/IExtrapolator.h"
 
 #include "TrkParameters/TrackParameters.h" //typedef, cannot fwd declare
 #include "xAODTracking/TrackJacobianContainer.h"
@@ -192,11 +191,6 @@ private:
 
 
   ToolHandle<Muon::IMuonCompetingClustersOnTrackCreator> m_compRotCreator{this, "CompetingRotCreator", ""};  //<! competing clusters rio ontrack creator
-
-  ToolHandle <Trk::IExtrapolator> m_extrapolator {this,"Extrapolator","",""};    //!< track extrapolator
-
-
-
 
   /** @brief Detector manager to fetch the legacy Trk surfaces */
   SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_muonMgrKey{this, "MuonManagerKey", "MuonDetectorManager"};
