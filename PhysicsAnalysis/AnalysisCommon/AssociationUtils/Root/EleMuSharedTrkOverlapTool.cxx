@@ -97,7 +97,7 @@ namespace ORUtils
         // Loop over input calo muons
         for(const auto muon : muons) {
           if(!isSurvivingObject(muon)) continue;
-          if(muon(acc.m_muonTypeAcc) != xAOD::Muon::CaloTagged) continue;
+          if(muon(acc.m_muonTypeAcc) != xAOD::Muon::MuonType::CaloTagged) continue;
 
           // Get the muon ID track
           auto muTrk = muon(acc.m_muonTrkAcc);
