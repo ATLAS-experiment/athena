@@ -63,7 +63,7 @@ ZdcNtuple :: ZdcNtuple (const std::string& name, ISvcLocator *pSvcLocator)
   declareProperty("lhcf2022", lhcf2022 = false,"LHCf2022 general config");
   declareProperty("lhcf2022afp", lhcf2022afp = false,"LHCf2022 AFP-specific config");
   declareProperty("lhcf2022zdc", lhcf2022zdc = false,"LHCf2022 ZDC-specific config");
-  declareProperty("pbpb2023", pbpb2023 = true, "PbPb2023 config");
+  declareProperty("pbpb2023", pbpb2023 = false, "PbPb2023 config");
   declareProperty("oo2025", oo2025 = false, "OO and NeNe 2025 config");
   declareProperty("zdcConfig", zdcConfig = "PbPb2018", "argument to configure ZdcAnalysisTool");
   declareProperty("doZdcCalib", doZdcCalib = false, "perform ZDC energy calibration");
@@ -2051,24 +2051,24 @@ void ZdcNtuple::setupTriggerHistos()
       {
 	if (lhcf2022)
 	  {
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1LHCF");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR");
+	    triggers.push_back("L1_LHCF");
+	    triggers.push_back("L1_ZDC_OR");
 	  }
 
 	if (pbpb2023)
 	  {
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR_EMPTY");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR_UNPAIRED_NONISO");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_C");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_C_EMPTY");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_C_UNPAIRED_NONISO");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_EMPTY");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_UNPAIRED_NONISO");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_C");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_C_EMPTY");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_C_UNPAIRED_NONISO");
+ 	    triggers.push_back("L1_ZDC_OR");
+	    triggers.push_back("L1_ZDC_A");
+	    triggers.push_back("L1_ZDC_C");
+	    triggers.push_back("L1_ZDC_A_C");
+	    triggers.push_back("L1_ZDC_OR_EMPTY");
+	    triggers.push_back("L1_ZDC_A_EMPTY");
+	    triggers.push_back("L1_ZDC_C_EMPTY");
+	    triggers.push_back("L1_ZDC_A_C_EMPTY");
+	    triggers.push_back("L1_ZDC_OR_UNPAIRED_NONISO");
+	    triggers.push_back("L1_ZDC_A_UNPAIRED_NONISO");
+	    triggers.push_back("L1_ZDC_C_UNPAIRED_NONISO");
+	    triggers.push_back("L1_ZDC_A_C_UNPAIRED_NONISO");
 	  }
       }
     else // lists for physics data

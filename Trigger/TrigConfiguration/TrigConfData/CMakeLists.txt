@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigConfData )
@@ -35,16 +35,16 @@ endif()
 # Tests in the package:
 atlas_add_test( ConstIter SOURCES test/itertest.cxx
                 LINK_LIBRARIES TrigConfData
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( TestLogicParser SOURCES test/testLogicParser.cxx
                 LINK_LIBRARIES TrigConfData
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( TestFileRW SOURCES test/testfilerw.cxx
                 LINK_LIBRARIES TrigConfData
                 ENVIRONMENT "TESTFILEPATH=${CMAKE_CURRENT_SOURCE_DIR}/test/"
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 if( NOT XAOD_ANALYSIS )
 # test excluded from AnalysisBase and AthAnalysis where TrigConfIO is absent
