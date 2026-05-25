@@ -36,14 +36,15 @@ namespace MuonG4R4 {
         m_trfCacheKey.initialize().ignore();
     }
     void MuonSensitiveDetector::Initialize(G4HCofThisEvent*) {
-        if (auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()) {
+        if (auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo(); eventInfo != nullptr) {
             auto* hitVec = eventInfo->GetHitCollectionMap()->Find<MuonSimHitsVec>(m_writeKey);
             if (!hitVec) {
-                THROW_EXCEPTION("The event does not contain a MuonSimHit container called "<<m_writeKey);
+                THROW_EXCEPTION("The event does not contain a MuonSimHit container called '"<<m_writeKey<<"'");
             }
             m_outContainer = hitVec->container.get();
+            ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Retrieved '"<<m_writeKey<<"'.");
         } else {
-           THROW_EXCEPTION("There is no ATLAS event info");
+            m_outContainer = nullptr;
         }
     }
     ActsTrk::GeometryContext MuonSensitiveDetector::getGeoContext(const EventContext& ctx) const {
@@ -119,6 +120,9 @@ namespace MuonG4R4 {
         xAOD::MuonSimHit* hit = lastSnapShot(hitId, aStep);
         bool newHit{false};
         if (!hit) {
+            if (!m_outContainer) {
+                THROW_EXCEPTION("Cannot find container '"<<m_writeKey<<"'.");
+            }
             hit = m_outContainer->push_back(std::make_unique<xAOD::MuonSimHit>());
             newHit = true;
         }
