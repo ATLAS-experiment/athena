@@ -340,14 +340,18 @@ def add_common_augmentation(
         return
 
     acc.merge(trackTruthDecorator(flags))
-    acc.merge(
-        ParentDecoratorCfg(
-            flags,
-            targetContainer=target,
-            prefix="PFlow",
-            matchDeltaR=0.3,
+ 
+    # PFlow-based parent decorators are incompatible with heavy-ion reconstruction;
+    # skip for all HION derivations (same guard as FtagLargeRJetTruthLabelCfg below).
+    if not flags.HeavyIon.isDerivation:
+        acc.merge(
+            ParentDecoratorCfg(
+                flags,
+                targetContainer=target,
+                prefix="PFlow",
+                matchDeltaR=0.3,
+            )
         )
-    )
 
     # FTAG simplified large-R jet truth labelling (see https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/AnalysisCommon/ParticleJetTools/ParticleJetTools/FtagLargeRJetLabelEnum.h?ref_type=heads)
     # Skipped for heavy-ion derivations which do not build this jet collection

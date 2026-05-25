@@ -385,7 +385,6 @@ def HION5SmartCollections():
     variables += ["Muons"]
     variables += ["Photons"]
     #variables += ["MET_Reference_AntiKt4EMTopo",]
-    variables += ["AntiKt4EMTopoJets"]
     
     return variables
 
