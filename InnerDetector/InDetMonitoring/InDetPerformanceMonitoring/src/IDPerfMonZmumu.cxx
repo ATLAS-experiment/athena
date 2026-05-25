@@ -313,6 +313,8 @@ StatusCode IDPerfMonZmumu::bookTrees()
     m_commonTree->Branch("runNumber"           , &m_runNumber,  "runNumber/I");
     m_commonTree->Branch("eventNumber"         , &m_evtNumber,  "eventNumber/I");
     m_commonTree->Branch("lumi_block"          , &m_lumi_block, "lumi_block/I");
+    m_commonTree->Branch("beamposX"            , &m_beamposX,   "beamposX/F");
+    m_commonTree->Branch("beamposY"            , &m_beamposY,   "beamposY/F");
     m_commonTree->Branch("mu"                  , &m_event_mu,   "mu/I");
     m_commonTree->Branch("preScale"            , &m_triggerPrescale, "preScale/I");
     m_commonTree->Branch("mcEventWeight"       , &m_event_weight, "mcEventWeight/F");
@@ -942,11 +944,14 @@ StatusCode IDPerfMonZmumu::execute()
   ATH_MSG_DEBUG("** IDPerfMonZmumu::execute ** START **");
   
   SG::ReadHandle<xAOD::EventInfo> eventInfo (m_EventInfoKey, getContext());
+
   if(eventInfo.isValid()) {
     m_runNumber = eventInfo->runNumber();
     m_evtNumber = eventInfo->eventNumber();
     m_lumi_block = eventInfo->lumiBlock();
     m_event_mu = eventInfo->actualInteractionsPerCrossing();
+    m_beamposX = eventInfo->beamPosX();
+    m_beamposY = eventInfo->beamPosY();
     if (eventInfo->mcEventWeights().size()>0) { 
       m_event_weight = eventInfo->mcEventWeights()[0];
     }
@@ -2040,6 +2045,15 @@ StatusCode IDPerfMonZmumu::FillRecParametersSimple (const Trk::Track* track, flo
   float d0bscorr = trkd0 - beamD0;
   float z0bscorr = trkz0 - bsZ - vertex->z();
 
+  ATH_MSG_DEBUG("* FillRecParametersSimple *" 
+		<< " charge " << charge
+		<< " eventInfo->beamPos: " 
+		<< "( " << bsX
+		<< ", " << bsY
+		<< ", " << bsZ
+		<< ") --> trkd0: " << trkd0
+		<< " beamD0: " << d0bscorr );
+    
   if (charge == 1) {
     m_positive_px = px;
     m_positive_py = py;
@@ -2069,7 +2083,7 @@ StatusCode IDPerfMonZmumu::FillRecParametersSimple (const Trk::Track* track, flo
     m_negative_z0_err = z0_err;
   }
 
-  ATH_MSG_DEBUG("-- FillRecParametersSimple -- charge " << charge << "  pt: " << pt << "  d0: " << d0 << "  z0: " << z0);
+  ATH_MSG_DEBUG("* FillRecParametersSimple * completed * charge " << charge << "  pt: " << pt << "  d0: " << d0 << "  z0: " << z0);
 
   return StatusCode::SUCCESS;
 }

@@ -230,6 +230,8 @@ class IDPerfMonZmumu : public AthAlgorithm
   int           m_triggerPrescale{};
   std::string m_triggerName;
   unsigned int  m_nVertex{};
+  float         m_beamposX{};
+  float         m_beamposY{};
 
   double m_positive_px{};
   double m_positive_py{};
