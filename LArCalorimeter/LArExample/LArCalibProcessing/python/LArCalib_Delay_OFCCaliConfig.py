@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory 
@@ -20,18 +21,21 @@ def LArDelay_OFCCaliCfg(flags):
 
     from LArCalibProcessing.utils import FolderTagResolver
     FolderTagResolver._globalTag=flags.IOVDb.GlobalTag
-    tagResolver=FolderTagResolver()
-    pedestalTag=tagResolver.getFolderTag(flags.LArCalib.Pedestal.Folder)
+    tagResolver=FolderTagResolver(dbname=flags.LArCalib.Input.CoolOflP1Replica)
     caliWaveTag=tagResolver.getFolderTag(flags.LArCalib.CaliWave.Folder)
     caliOFCTag=tagResolver.getFolderTag(flags.LArCalib.OFCCali.Folder)
-    acTag=tagResolver.getFolderTag(flags.LArCalib.AutoCorr.Folder)
+    if (flags.LArCalib.Input.Database == "LAR_OFL" and flags.LArCalib.Input.Database2 == "LAR_OFL"):
+        pedestalTag=tagResolver.getFolderTag(flags.LArCalib.Pedestal.Folder)
+        acTag=tagResolver.getFolderTag(flags.LArCalib.AutoCorr.Folder)
+    else:
+        pedestalTag=None
+        acTag=None
+
     del tagResolver
-    
     from IOVDbSvc.IOVDbSvcConfig import addFolders
     result.merge(addFolders(flags,flags.LArCalib.Pedestal.Folder,detDb=flags.LArCalib.Input.Database, tag=pedestalTag, modifiers=chanSelStr(flags),
                             className="LArPedestalComplete"))
     result.merge(addFolders(flags,flags.LArCalib.AutoCorr.Folder,detDb=flags.LArCalib.Input.Database, tag=acTag,modifiers=chanSelStr(flags)))
-    
 
     if not flags.LArCalib.isSC:
        if flags.LArCalib.Input.isRawData:
@@ -229,15 +233,6 @@ def LArDelay_OFCCaliCfg(flags):
            result.getService("NTupleSvc").Output += [ "FILE2 DATAFILE='"+rootfile2+"' OPT='NEW'" ]
         result.setAppProperty("HistogramPersistency","ROOT")
         pass # end if ROOT ntuple writing
-
-
-    #Get the current folder tag by interrogating the database:
-    from LArCalibProcessing.utils import FolderTagResolver
-    tagResolver=FolderTagResolver()
-    caliWaveTag=tagResolver.getFolderTag(flags.LArCalib.CaliWave.Folder)
-    caliOFCTag=tagResolver.getFolderTag(flags.LArCalib.OFCCali.Folder)
-    del tagResolver
-
 
     #Output (POOL + sqlite) file writing:
     from RegistrationServices.OutputConditionsAlgConfig import OutputConditionsAlgCfg
@@ -450,9 +445,9 @@ if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
     from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
+    import sys
     ConfigFlags=initConfigFlags()
     addLArCalibFlags(ConfigFlags)
-
     ConfigFlags.LArCalib.Input.Dir = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/LArCalibProcessing"
     ConfigFlags.LArCalib.Input.Type="calibration_LArElec-Delay"
     ConfigFlags.LArCalib.Input.RunNumbers=[441251,]
@@ -478,5 +473,5 @@ if __name__ == "__main__":
     cfg.merge(LArDelay_OFCCaliCfg(ConfigFlags))
     cfg.getService("IOVDbSvc").DBInstance=""
     print("Start running...")
-    cfg.run()
+    sys.exit(cfg.run().isFailure())
 

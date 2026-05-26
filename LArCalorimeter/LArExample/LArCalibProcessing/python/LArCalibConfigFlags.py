@@ -1,12 +1,11 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
-
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+import os
 def addLArCalibFlags(flags, isSC=False):
-    
     flags.Input.isMC=False
     flags.addFlag("LArCalib.isSC",isSC)
     flags.addFlag("LArCalib.BadChannelDB","LAR_OFL")
-    flags.addFlag("LArCalib.BadChannelTag","-RUN2-UPD3-00")
-    flags.addFlag("LArCalib.BadChannelTagSC","-RUN3-UPD3-00")
+    flags.addFlag("LArCalib.BadChannelTag","-RUN2-UPD3-00" if  _useFrontier() else "")
+    flags.addFlag("LArCalib.BadChannelTagSC","-RUN3-UPD3-00" if _useFrontier() else "")
 
     #Folders:
     def _prefix(prevFlags):
@@ -40,7 +39,7 @@ def addLArCalibFlags(flags, isSC=False):
 
     flags.addFlag("LArCalib.Gain",0)
 
-    flags.addFlag("LArCalib.doValidation",True)
+    flags.addFlag("LArCalib.doValidation", _useFrontier())  # = disabled when running at P1
 
     flags.addFlag("LArCalib.CorrectBadChannels",True)
 
@@ -55,7 +54,7 @@ def addLArCalibFlags(flags, isSC=False):
     
     flags.addFlag("LArCalib.Input.Database","LAR_OFL") #In practice, a sqlite file
     flags.addFlag("LArCalib.Input.Database2","LAR_OFL") #In practice, a sqlite file, sometimes we need 2 of them
-
+    flags.addFlag("LArCalib.Input.CoolOflP1Replica", "LAR_OFL" if _useFrontier() else "/det/lar/project/databases/jobsDatabase/database.db")
     flags.addFlag("LArCalib.Input.ChannelSelection","") #Read only a subset of COOL channels. Format like '3,4,5:10' 
 
     flags.addFlag("LArCalib.IOVStart", lambda pF: min(pF.LArCalib.Input.RunNumbers) if len(pF.LArCalib.Input.RunNumbers)>0 else 0) #Output IOV start (runnumber)
@@ -100,3 +99,9 @@ def _getInputFiles(prevFlags):
 
 def LArCalibFolderTag(folder,tag):
     return ''.join(folder.split('/')) + tag    
+
+def _useFrontier():
+    return (
+        "FRONTIER_SERVER" in os.environ and
+        os.environ["FRONTIER_SERVER"] != ""
+    )
