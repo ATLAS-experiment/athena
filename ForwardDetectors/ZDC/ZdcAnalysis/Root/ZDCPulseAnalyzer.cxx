@@ -476,7 +476,7 @@ void ZDCPulseAnalyzer::reset(bool repass)
 
   m_fitChisq = 0;
   m_chisqRatio = 0;
- 
+  
   m_amplitude       = 0;
   m_ampError        = 0;
   m_preSampleAmp    = 0;
@@ -1399,6 +1399,8 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
   m_minDeriv2ndIndex = std::distance(m_samplesDeriv2nd.cbegin(), minDeriv2ndIter);
   m_minDeriv2ndSig = -m_minDeriv2nd/m_samplesDeriv2ndErr[m_minDeriv2ndIndex];
 
+  m_havePulse = false;
+
   // If the second derivative is greater than the threshold, we may have a pulse
   //
   if (std::abs(m_minDeriv2nd) >= peak2ndDerivMinThresh) {
@@ -1406,22 +1408,37 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
     // Check that we have found a real maximum
     //
     auto deltaLeft = m_samplesSub[m_minDeriv2ndIndex] - m_samplesSub[m_minDeriv2ndIndex - 1];
-    auto deltaLeft2 = m_samplesSub[m_minDeriv2ndIndex] - m_samplesSub[m_minDeriv2ndIndex - 2];
+    auto deltaLeft2 = m_samplesSub[m_minDeriv2ndIndex-1] - m_samplesSub[m_minDeriv2ndIndex - 2];
     auto deltaRight = m_samplesSub[m_minDeriv2ndIndex] - m_samplesSub[m_minDeriv2ndIndex + 1];
-    auto deltaRight2 = m_samplesSub[m_minDeriv2ndIndex] - m_samplesSub[m_minDeriv2ndIndex + 2];
+    auto deltaRight2 = m_samplesSub[m_minDeriv2ndIndex+1] - m_samplesSub[m_minDeriv2ndIndex + 2];
     
     if ((deltaLeft2 > 0 || deltaLeft > 0) && (deltaRight2 > 0 || deltaRight > 0)) {
       m_havePulse = true;
     }
     else {
-      (*m_msgFunc_p)(ZDCMsg::Info, ("ZDCPulseAnalyzer for " + m_tag + " found a fake maximum at sample " + std::to_string(m_minDeriv2ndIndex) ));
-      m_havePulse = false;
+      // In the case that a fluctuation made the most negative 2nd derivative not at the real peak
+      //  check the 2nd derivative at the nominal peak position.
+      //
+      if (std::abs(m_samplesDeriv2nd[m_peak2ndDerivMinSample]) > peak2ndDerivMinThresh) {
+	m_minDeriv2ndIndex = m_peak2ndDerivMinSample;
+
+	// Now we re-do the check
+	//
+	deltaLeft = m_samplesSub[m_minDeriv2ndIndex] - m_samplesSub[m_minDeriv2ndIndex - 1];
+	deltaLeft2 = m_samplesSub[m_minDeriv2ndIndex-1] - m_samplesSub[m_minDeriv2ndIndex - 2];
+	deltaRight = m_samplesSub[m_minDeriv2ndIndex] - m_samplesSub[m_minDeriv2ndIndex + 1];
+	deltaRight2 = m_samplesSub[m_minDeriv2ndIndex+1] - m_samplesSub[m_minDeriv2ndIndex + 2];
+
+	if ((deltaLeft2 > 0 || deltaLeft > 0) && (deltaRight2 > 0 || deltaRight > 0)) {
+	  m_havePulse = true;
+	}
+      }
+      else {
+	(*m_msgFunc_p)(ZDCMsg::Info, ("ZDCPulseAnalyzer for " + m_tag + " found a fake maximum at sample " + std::to_string(m_minDeriv2ndIndex) ));
+      }
     }
   }
-  else {
-    m_havePulse = false;
-  }
-
+  
   // save the low and high gain ADC values at the peak -- if we have a pulse, at m_minDeriv2ndIndex
   //   otherwise at m_peak2ndDerivMinSample
   //
@@ -2700,6 +2717,8 @@ std::pair<bool, std::string> ZDCPulseAnalyzer::ConfigFromJSON(const JSON& config
     else if (key == "chisqDivAmpCutHG") m_chisqDivAmpCutHG = value;
     else if (key == "chisqDivAmpCutLG") m_chisqDivAmpCutLG = value;
     else if (key == "chisqDivAmpOffsetHG") m_chisqDivAmpOffsetHG = value;
+    else if (key == "chisqDivAmpScaleLG") m_chisqDivAmpScaleLG = value;
+    else if (key == "chisqDivAmpScaleHG") m_chisqDivAmpScaleHG = value;
     else if (key == "chisqDivAmpOffsetLG") m_chisqDivAmpOffsetLG = value;
     else if (key == "chisqDivAmpPowerHG") m_chisqDivAmpPowerHG = value;
     else if (key == "chisqDivAmpPowerLG") m_chisqDivAmpPowerLG = value;
