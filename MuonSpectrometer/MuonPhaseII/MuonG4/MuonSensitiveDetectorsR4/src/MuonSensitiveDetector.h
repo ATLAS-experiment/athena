@@ -7,7 +7,8 @@
 #include <GeoPrimitives/GeoPrimitives.h>
 ///
 
-#include <StoreGate/WriteHandle.h>
+#include <GaudiKernel/EventContext.h>
+#include <StoreGate/ReadHandleKey.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <xAODMuonSimHit/MuonSimHitContainer.h>
 #include <xAODMuonSimHit/MuonSimHitAuxContainer.h>
@@ -22,19 +23,10 @@
  *         a Step shall be processed or not. Finally, it keeps track whether a particle from a G4 step has already been recorded
  *         and updates then the last hit accordingly */
 namespace MuonG4R4 {
-    /** @brief Introduce a helper struct which can be filled into the HitCollectionMap
-     *         storing the event content in the evet */
-    struct MuonSimHitsVec : public  HitsVectorBase {
-        /** @brief Default constructor to connect the xAOD container
-         *         with the Aux store class */
-        MuonSimHitsVec() {
-            container->setStore(auxContainer.get());
-        }
-        /** @brief Container to which the new sim hits will be appended */
-        std::unique_ptr<xAOD::MuonSimHitContainer> container{std::make_unique<xAOD::MuonSimHitContainer>()};
-        /** @brief Auxiliary container actully holding the sim hit variables  */
-        std::unique_ptr<xAOD::MuonSimHitAuxContainer> auxContainer{std::make_unique<xAOD::MuonSimHitAuxContainer>()};
-    };
+    /** @brief Helper type which can be filled into the HitCollectionMap
+     *         storing the event content in the event */
+    using MuonSimHitsVec = AthHitVec::AuxStoreHitCollection<xAOD::MuonSimHitContainer,
+                                                            xAOD::MuonSimHitAuxContainer>;
 
     class MuonSensitiveDetector : public G4VSensitiveDetector, public AthMessaging {
         public:
@@ -108,20 +100,6 @@ namespace MuonG4R4 {
 
             
     };
-}
-/** @brief Explicitly specify the template to record the MuonSimHits as the defined MuonSimHitsVector is 
- *         an auxiliary container carrier. We need to extract both containers from this struct and 
- *         pass it to the write handle */
-template<> inline StatusCode HitCollectionMap::Record<MuonG4R4::MuonSimHitsVec>(std::string const& sgKey, std::string const& hitCollectionName, EventContext const& ctx) {
-    SG::WriteHandle<xAOD::MuonSimHitContainer> writeHandle{sgKey, ctx};
-    auto simHitVec = Extract<MuonG4R4::MuonSimHitsVec>(hitCollectionName);
-    if (!simHitVec) {
-        THROW_EXCEPTION("The Muon sim hit collection "<<hitCollectionName<<" does not exist");
-    }
-    /// Record should return a StatusCode type
-    return writeHandle.record(std::move(simHitVec->container), 
-                       std::move(simHitVec->auxContainer));
-
 }
 
 #endif

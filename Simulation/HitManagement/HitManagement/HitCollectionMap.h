@@ -81,8 +81,8 @@ class HitCollectionMap
    */
   template <AthHitVec::isHitVectorBase T>
   StatusCode Record(std::string const& sgKey, std::string const& hitCollectionName, EventContext const& ctx) {
-    SG::WriteHandle<T> handle{sgKey, ctx};
-    return handle.record(Extract<T>(hitCollectionName));
+    auto hitColl = Extract<T>(hitCollectionName);
+    return recordExtracted<T>(sgKey, ctx, std::move(hitColl));
   }
 
   /**
@@ -90,34 +90,52 @@ class HitCollectionMap
    */
   template <AthHitVec::isHitVectorBase T>
   StatusCode Record(std::string const& hitCollectionName) {
-    return Record<T>(hitCollectionName, hitCollectionName, Gaudi::Hive::currentContext());
+    auto hitColl = Extract<T>(hitCollectionName);
+    return recordExtracted<T>(hitCollectionName, Gaudi::Hive::currentContext(), std::move(hitColl));
   }
 
   /**
    * @brief Record the hit collection hitCollectionName to the StoreGate sgKey, applying a transformation
    * function to the hit collection before recording it.
    */
-  template <class T>
+  template <AthHitVec::isHitVectorBase T>
   StatusCode TransformAndRecord(
       std::string const& sgKey,
       std::string const& hitCollectionName,
       EventContext const& ctx,
       std::function<void(T&)> transform) {
     auto hitColl = Extract<T>(hitCollectionName);
+    if (!hitColl) {
+      return StatusCode::FAILURE;
+    }
     transform(*hitColl);
-    SG::WriteHandle<T> handle(sgKey, ctx);
-    return handle.record(std::move(hitColl));
+    return recordExtracted<T>(sgKey, ctx, std::move(hitColl));
   }
 
   /**
    * @brief Overload for TransformAndRecord with the same name for the SG key and hit collection name.
    */
-  template <class T>
+  template <AthHitVec::isHitVectorBase T>
   StatusCode TransformAndRecord(std::string const& hitCollectionName, std::function<void(T&)> transform) {
     return TransformAndRecord(hitCollectionName, hitCollectionName, Gaudi::Hive::currentContext(), std::move(transform));
   }
 
  private:
+  template <AthHitVec::isHitVectorBase T>
+  StatusCode recordExtracted(std::string const& sgKey, EventContext const& ctx, std::unique_ptr<T> hitColl) {
+    if (!hitColl) {
+      return StatusCode::FAILURE;
+    }
+
+    if constexpr (AthHitVec::isAuxStoreHitCollection<T>) {
+      SG::WriteHandle<typename T::container_type> handle{sgKey, ctx};
+      return handle.record(std::move(hitColl->container), std::move(hitColl->auxContainer));
+    } else {
+      SG::WriteHandle<T> handle{sgKey, ctx};
+      return handle.record(std::move(hitColl));
+    }
+  }
+
    // Holds the hits container for this event.
    Storage m_outputCollections;
 };
