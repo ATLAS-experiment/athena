@@ -38,7 +38,6 @@ def main(args):
     cfg.merge(MuonSpacePointFormationCfg(flags))
 
     from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
-    cfg.merge(MuonPatternRecognitionCfg(flags))
 
     do_ml_bucket_filter = bool(getattr(args, "doMLBucketFilter", False) or
                                getattr(args, "bucketModel", None) is not None or
@@ -62,6 +61,12 @@ def main(args):
                 InferenceTools=[bucket_tool],
             )
         )
+        # Re-run pattern recognition on filtered buckets so dumped segments
+        # correspond to the same filtered container.
+        cfg.merge(MuonPatternRecognitionCfg(flags))
+        cfg.getEventAlgo("MuonEtaHoughTransformAlg").SpacePointContainer = "FilteredMlBuckets"
+    else:
+        cfg.merge(MuonPatternRecognitionCfg(flags))
 
     # Truth information if MC
     if flags.Input.isMC:
@@ -85,12 +90,10 @@ if __name__=="__main__":
     parser.set_defaults(inputFile=MuonPhaseIITestDefaults.HITS_PG_R3)
     parser.add_argument("--doMLBucketFilter", action="store_true", default=False,
                         help="Run ML bucket filtering and dump segments from filtered buckets.")
-    parser.add_argument("--bucketModel", type=str,
-                        default=None,
+    parser.add_argument("--bucketModel", type=str, default=None,
                         help="Path to ONNX model used by the ML bucket filter.")
     parser.add_argument("--bucketThreshold", type=float, default=None,
                         help="Score threshold for single-output bucket filtering.")
-
     parser.add_argument("--use-gpu", action="store_true", default=True,
                         help="Use GPU for ONNX inference when available (default: True)")
     parser.add_argument("--use-cpu", dest="use_gpu", action="store_false",
