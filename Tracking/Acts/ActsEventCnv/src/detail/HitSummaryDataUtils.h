@@ -107,11 +107,11 @@ namespace ActsTrk::detail {
        * @param returns false in case the hit was not considered.
        * The hit is not considered if the given id_hash is not valid for the given detector element collectio.
        */
-      bool addHit(const InDetDD::SiDetectorElementCollection *detector_elements, unsigned int id_hash, EHitSelection hit_selection) {
-         if (!detector_elements ||  id_hash>=detector_elements->size() || !(*detector_elements)[id_hash]) {
+      bool addHit(const InDetDD::SiDetectorElement *detEl, 
+                  EHitSelection hit_selection) {
+         if (!detEl) {
             return false;
          }
-         const InDetDD::SiDetectorElement *detEl=(*detector_elements)[id_hash];
          DetectorRegion region = unknown;
          uint8_t layer  = 255;
          int eta_module = 0;
@@ -270,7 +270,6 @@ namespace ActsTrk::detail {
  
    /** Helper to gather track summary information from the track states of the specified track
     * @param track a track of the given acts track container for which the summary information is to be gathered
-    * @param siDetEleColl array of SiDetectorElement collections per measurement type.
     * @param measurement_to_summary_type a LUT to map measurement types to the corresponding summary type for the measurement counts
     * @param chi2_stat_out output of the per track state chi-squared sums and squared sums to compute the per state chi2 variance.
     * @param hit_info_out output of the gathered measurement statistics per detector region, layer, ... .
@@ -278,8 +277,6 @@ namespace ActsTrk::detail {
     * @param special_hit_counts_out arrays to count holes (and @TODO dead sensors) per measurement type.
     */
    void gatherTrackSummaryData(const typename ActsTrk::TrackContainer::ConstTrackProxy &track,
-                               const std::array<const InDetDD::SiDetectorElementCollection *,
-                                                Acts::toUnderlying(xAOD::UncalibMeasType::nTypes)> &siDetEleColl,
                                const std::array<unsigned short,Acts::toUnderlying(xAOD::UncalibMeasType::nTypes)>
                                         &measurement_to_summary_type,
                                SumOfValues &chi2_stat_out,

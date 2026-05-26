@@ -9,7 +9,8 @@ find_package(Acts COMPONENTS Core)
 
 atlas_add_component(ActsEventCnv
     src/*.h src/*.cxx
-    src/components/*.cxx
+    src/components/*.cxx 
+    src/detail/*.cxx
     LINK_LIBRARIES
     Acts::Core
     ActsEventLib
@@ -25,9 +26,11 @@ atlas_add_component(ActsEventCnv
     InDetRIO_OnTrack
     MuonReadoutGeometry
     MuonReadoutGeometryR4
+    MuonRecToolInterfacesR4
     MuonRecToolInterfaces
     MuonRIO_OnTrack
     MuonCompetingRIOsOnTrack
+    MuonTrackEvent
     StoreGateLib
     TrkEventPrimitives
     TrkExUtils
