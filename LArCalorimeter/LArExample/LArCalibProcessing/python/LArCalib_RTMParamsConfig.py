@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory 
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -10,12 +9,17 @@ def LArRTMParamsCfg(flags):
     from LArCalibProcessing.LArCalibBaseConfig import LArCalibBaseCfg,chanSelStr
     result=LArCalibBaseCfg(flags)
 
+
+    #Get basic services and cond-algos
     from LArCalibProcessing.utils import FolderTagResolver
     FolderTagResolver._globalTag=flags.IOVDb.GlobalTag
-    rs=FolderTagResolver()
+    rs=FolderTagResolver(flags.LArCalib.Input.CoolOflP1Replica)
     DetCellParamsTag=rs.getFolderTag(flags.LArCalib.DetCellParams.Folder)
     CaliPulseParamsTag=rs.getFolderTag(flags.LArCalib.CaliPulseParams.Folder)
-    CaliWaveTag=rs.getFolderTag(flags.LArCalib.CaliWave.Folder)
+    if (flags.LArCalib.Input.Database == "LAR_OFL" and flags.LArCalib.Input.Database2 == "LAR_OFL"):
+        CaliWaveTag=rs.getFolderTag(flags.LArCalib.CaliWave.Folder)
+    else:
+        CaliWaveTag=None
     del rs #Close database
 
     #Retrieve CaliWave: 
