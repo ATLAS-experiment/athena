@@ -258,6 +258,7 @@ def initConfigFlags():
     # output
     acf.addFlag('Output.BSFileName', '', help='BS output file name')
     acf.addFlag('Output.EVNTFileName', '', help='EVNT output file name')
+    acf.addFlag('Output.TXTFileName', '', help='LHE output file name')
     acf.addFlag('Output.EVNT_TRFileName', '', help='EVNT_TR output file name')
     acf.addFlag('Output.HITSFileName', '', help='HITS output file name')
     acf.addFlag('Output.RDOFileName',  '', help='RDO output file name')
@@ -267,6 +268,7 @@ def initConfigFlags():
     acf.addFlag('Output.HISTFileName', '', help='HIST output file name')
     
     acf.addFlag('Output.doWriteEVNT', lambda prevFlags: bool(prevFlags.Output.EVNTFileName), help='write EVNT file')
+    acf.addFlag('Output.doWriteTXT', lambda prevFlags: bool(prevFlags.Output.TXTFileName), help='write LHE file')
     acf.addFlag('Output.doWriteEVNT_TR', lambda prevFlags: bool(prevFlags.Output.EVNT_TRFileName), help='write EVNT_TR file')
     acf.addFlag('Output.doWriteHITS', lambda prevFlags: bool(prevFlags.Output.HITSFileName), help='write HITS file')
     acf.addFlag('Output.doWriteRDO', lambda prevFlags: bool(prevFlags.Output.RDOFileName), help='write RDO file')
