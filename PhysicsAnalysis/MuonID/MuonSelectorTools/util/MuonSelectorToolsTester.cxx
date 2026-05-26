@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// a simple testing macro for the MuonSelectorTools_xAOD package
@@ -326,16 +326,16 @@ int main(int argc, char* argv[]) {
             {
                 std::stringstream sstr{};
                 sstr<<"Muon muonType:        "<<(*mu_itr)->muonType();
-                Info(APP_NAME, sstr.str().c_str());
+                Info(APP_NAME, "%s", sstr.str().c_str());
             }
             {
                 std::stringstream sstr{};
                 sstr<<"Muon primary author:  "<<(*mu_itr)->author();
-                Info(APP_NAME, sstr.str().c_str());
+                Info(APP_NAME, "%s", sstr.str().c_str());
             }{
                 std::stringstream sstr{};
                 sstr<<"Muon quality (from tool, from xAOD):      "<<my_quality<<", "<<(*mu_itr)->quality();
-                Info(APP_NAME, sstr.str().c_str());
+                Info(APP_NAME, "%s", sstr.str().c_str());
             }
             Info(APP_NAME, "Muon passes cuts (ID hits, preselection): %d, %d", passesIDRequirements, passesPreselectionCuts);
 
