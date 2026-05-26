@@ -78,6 +78,9 @@ def createMuonConfigFlags():
     mcf.addFlag("Muon.setupTruthAlgorithms", lambda prevFlags: prevFlags.Muon.usePhaseIIGeoSetup and \
                                                                prevFlags.Input.isMC and \
                                                                not prevFlags.Trigger.doHLT)
+
+    mcf.addFlag("Muon.doFastRPCDigitization",True) ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
+    
     # 2. Reco MuonRecFlags 
 
     #### If this flag is enabled, the phase II MS track 
