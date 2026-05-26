@@ -91,26 +91,26 @@ class ITkStripRawDataProvider : public AthReentrantAlgorithm
   /** Write handle for SCT RDO container. */
   SG::WriteHandleKey<SCT_RDO_Container> m_rdoContainerKey{this,
                                                           "RDOKey",
-                                                          "SCT_RDOs",
-                                                          "SCT RDO key"};
+                                                          "ITkStripRDOs",
+                                                          "ITk RDO key"};
 
   /** Write handle for LVL 1 Inner Detector time collection. */
   SG::WriteHandleKey<InDetTimeCollection> m_lvl1CollectionKey{this,
                                                               "LVL1IDKey",
-                                                              "SCT_LVL1ID",
-                                                              "SCT LVL1ID key"};
+                                                              "ITkStrip_LVL1ID",
+                                                              "ITkStrip LVL1ID key"};
 
   /** Write handle for BC ID Inner Detector time collection. */
   SG::WriteHandleKey<InDetTimeCollection> m_bcIDCollectionKey{this,
                                                               "BCIDKey",
-                                                              "SCT_BCID",
-                                                              "SCT BCID key"};
+                                                              "ITkStrip_BCID",
+                                                              "ITkStrip BCID key"};
 
   /** Write handle for Inner Detector ByteStream error container. */  
   SG::WriteHandleKey<IDCInDetBSErrContainer> m_bsIDCErrContainerKey{this,
                                                                     "IDCByteStreamErrContainer",
-                                                                    "SCT_ByteStreamErrs",
-                                                                    "SCT BS error key for IDC variant"};
+                                                                    "ITkStrip_ByteStreamErrs",
+                                                                    "ITkStrip BS error key for IDC variant"};
 
 
   /** Update handle for SCT RDO and Erorrs Cache. */
