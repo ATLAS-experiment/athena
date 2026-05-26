@@ -13,8 +13,10 @@
 //
 //
 // vector class
-#include <vector>
 #include <concepts>
+#include <memory>
+#include <type_traits>
+#include <vector>
 
 #include "AthContainers/tools/DVLInfo.h"
 #include "boost/iterator/transform_iterator.hpp"
@@ -45,6 +47,37 @@ namespace AthHitVec{
   /// Define the concept that the struct needs to inherit from the 
   /// HitsVectorBase
   template <typename Cont_t> concept isHitVectorBase = std::is_base_of_v<HitsVectorBase, Cont_t>;
+
+  /**
+   * @brief Helper for event-local xAOD hit collections with a separate
+   * auxiliary store.
+   */
+  template <class ContainerT, class AuxContainerT>
+  struct AuxStoreHitCollection : public HitsVectorBase {
+    using container_type = ContainerT;
+    using aux_container_type = AuxContainerT;
+
+    AuxStoreHitCollection() {
+      container->setStore(auxContainer.get());
+    }
+
+    std::unique_ptr<ContainerT> container{std::make_unique<ContainerT>()};
+    std::unique_ptr<AuxContainerT> auxContainer{std::make_unique<AuxContainerT>()};
+  };
+
+  /// Define the concept for hit-collection carriers owning an xAOD container
+  /// and its auxiliary store.
+  template <typename Cont_t>
+  concept isAuxStoreHitCollection =
+    isHitVectorBase<Cont_t> &&
+    requires(Cont_t& collection) {
+      typename Cont_t::container_type;
+      typename Cont_t::aux_container_type;
+      { collection.container } ->
+        std::same_as<std::unique_ptr<typename Cont_t::container_type>&>;
+      { collection.auxContainer } ->
+        std::same_as<std::unique_ptr<typename Cont_t::aux_container_type>&>;
+    };
 }
 
 
