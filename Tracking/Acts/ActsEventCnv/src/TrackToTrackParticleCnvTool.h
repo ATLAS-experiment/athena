@@ -22,6 +22,7 @@
 #include "Acts/Propagator/Navigator.hpp"
 #include "Acts/Definitions/PdgParticle.hpp"
 #include "xAODTracking/TrackingPrimitives.h"
+#include "MuonRecToolInterfacesR4/ITrackSummaryTool.h"
 
 #include "Gaudi/Property.h"
 
@@ -53,21 +54,14 @@ namespace ActsTrk {
        {this, "ExtrapolationTool", ""};
 
     PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool
-       {this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+       {this, "TrackingGeometryTool", ""};
 
-    SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheCondObjInputKey
+   PublicToolHandle<MuonR4::ITrackSummaryTool> m_muonSummaryTool{this, "MuonSummaryTool", ""}; 
+   SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheCondObjInputKey
        {this, "AtlasFieldCacheCondObj", "fieldCondObj",
         "Name of the Magnetic Field conditions object key"};
 
-    SG::ReadCondHandleKeyArray<InDetDD::SiDetectorElementCollection> m_siDetEleCollKey
-       {this, "SiDetectorElementCollections", {},
-        "Pixel and strip element collections to get geometry information about measurements."};
-
-    Gaudi::Property<std::vector<unsigned int>> m_siDetEleCollToMeasurementType
-       {this, "SiDetEleCollToMeasurementType", {},
-        "One value per si detector collection: Pixel = 1, Strip = 2"};
-
-    Gaudi::Property<double> m_paramExtrapolationParLimit
+   Gaudi::Property<double> m_paramExtrapolationParLimit
        {this, "ExtrapolationPathLimit", std::numeric_limits<double>::max(),
         "PathLimit for extrapolating track parameters."};
 

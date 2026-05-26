@@ -23,7 +23,7 @@
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
-#include "src/detail/ExpectedHitUtils.h"
+#include "ActsEvent/ExpectedHitUtils.h"
 #include "src/detail/TrackFindingMeasurements.h"
 #include "src/detail/SharedHitCounter.h"
 

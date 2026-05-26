@@ -20,7 +20,8 @@
 #include "ActsEvent/ParticleHypothesisEncoding.h"
 #include "src/detail/CurvilinearCovarianceHelper.h"
 #include "src/detail/HitSummaryDataUtils.h"
-#include "src/detail/ExpectedHitUtils.h"
+#include "ActsEvent/ExpectedHitUtils.h"
+#include "MuonTrackEvent/HitSummary.h"
 
 #include <Acts/Definitions/TrackParametrization.hpp>
 #include <Acts/Utilities/Helpers.hpp>
@@ -87,24 +88,7 @@ namespace ActsTrk {
       ATH_CHECK( m_trackingGeometryTool.retrieve() );
       ATH_CHECK( m_extrapolationTool.retrieve() );
       ATH_CHECK( m_fieldCacheCondObjInputKey.initialize() );
-      ATH_CHECK( m_siDetEleCollKey.initialize() );
-
-      if (m_siDetEleCollToMeasurementType.size() == m_siDetEleCollKey.size()) {
-         unsigned int collection_idx = 0;
-         for (int type : m_siDetEleCollToMeasurementType) {
-            if (type < 1 || type > 2) {
-               ATH_MSG_ERROR("Invalid measurement type (" << type << ") given for collection " << collection_idx << " : "
-                             << m_siDetEleCollKey[collection_idx].key()
-                             << ". Expected 1 for pixel, 2 for strips.");
-               return StatusCode::FAILURE;
-            }
-            ++collection_idx;
-         }
-      } else {
-         ATH_MSG_ERROR("Expected exactly one value in SiDetEleCollToMeasurementType per SiDetectorElementCollection. But got "
-                       << m_siDetEleCollToMeasurementType.size() << " instead of " << m_siDetEleCollKey.size() << ".");
-         return StatusCode::FAILURE;
-      }
+      ATH_CHECK( m_muonSummaryTool.retrieve(EnableTool{!m_muonSummaryTool.empty()}));
 
       // propagator for conversion to curvilinear parameters
       {
@@ -134,12 +118,11 @@ namespace ActsTrk {
       MagField::AtlasFieldCache fieldCache;
       field_cond_data->getInitializedCache(fieldCache);
 
-      const GeometryContext& gctx = m_trackingGeometryTool->getGeometryContext(ctx);
-
-      std::array<const InDetDD::SiDetectorElementCollection*, Acts::toUnderlying(xAOD::UncalibMeasType::nTypes)> siDetEleColl{};
-      for (unsigned int idx = 0; idx < m_siDetEleCollToMeasurementType.size(); ++idx) {
-         ATH_CHECK(SG::get(siDetEleColl[m_siDetEleCollToMeasurementType[idx]], m_siDetEleCollKey[idx], ctx));
+      if (m_muonSummaryTool.isEnabled()) {
+         m_muonSummaryTool->copySummary(m_muonSummaryTool->makeSummary(ctx, track),
+                                        track_particle);
       }
+      const GeometryContext& gctx = m_trackingGeometryTool->getGeometryContext(ctx);
 
       static const std::array<unsigned short, Acts::toUnderlying(xAOD::UncalibMeasType::nTypes)>
          measurementToSummaryType ATLAS_THREAD_SAFE (makeMeasurementToSummaryTypeMap());
@@ -193,7 +176,6 @@ namespace ActsTrk {
 
       ActsTrk::detail::SumOfValues chi2_stat;
       gatherTrackSummaryData(track,
-                             siDetEleColl,
                              measurementToSummaryType,
                              chi2_stat,
                              hitInfo,
