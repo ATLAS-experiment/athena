@@ -250,6 +250,8 @@ StatusCode TruthParentDecoratorAlg::initialize() {
   m_match_pdgid_key = pfx + "MatchingParticlePdgId";
   m_match_children_key = pfx + "MatchingParticleNChildren";
   m_match_link_key = pfx + "MatchingParticleLink";
+  m_target_mass_key = pfx + "Mass";
+  m_target_pt_key = pfx + "PT";
   ATH_CHECK(m_target_pdgid_key.initialize());
   ATH_CHECK(m_target_dr_truth_key.initialize());
   ATH_CHECK(m_target_link_key.initialize());
@@ -259,6 +261,8 @@ StatusCode TruthParentDecoratorAlg::initialize() {
   ATH_CHECK(m_match_pdgid_key.initialize());
   ATH_CHECK(m_match_children_key.initialize());
   ATH_CHECK(m_match_link_key.initialize());
+  ATH_CHECK(m_target_mass_key.initialize());
+  ATH_CHECK(m_target_pt_key.initialize());
 
   for (auto& [key, pids]: m_counts_matching_cascade) {
     m_cascade_count_writer_keys.emplace_back(jc + "." + key);
@@ -292,6 +296,8 @@ StatusCode TruthParentDecoratorAlg::execute(const EventContext& cxt) const
   SG::WriteDecorHandle<JC,int> matchPdgId(m_match_pdgid_key, cxt);
   SG::WriteDecorHandle<JC,int> matchChildCount(m_match_children_key, cxt);
   SG::WriteDecorHandle<JC,JL> matchLink(m_match_link_key, cxt);
+  SG::WriteDecorHandle<JC,float> dec_mass(m_target_mass_key, cxt);
+  SG::WriteDecorHandle<JC,float> dec_pt(m_target_pt_key, cxt);
 
   if (targets->empty()) return StatusCode::SUCCESS;
 
@@ -399,6 +405,8 @@ StatusCode TruthParentDecoratorAlg::execute(const EventContext& cxt) const
       matchChildCount(*j) = child->nChildren();
       auto* matchedContainer = dynamic_cast<const TPC*>(child->container());
       matchLink(*j) = JL(*matchedContainer, child->index());
+      dec_mass(*j) = p->m();
+      dec_pt(*j) = p->pt();
       for (const auto& cascadeCount: m_cascade_count_decorators) {
         cascadeCount.decorate(*j, matches);
       }
@@ -412,6 +420,8 @@ StatusCode TruthParentDecoratorAlg::execute(const EventContext& cxt) const
       matchPdgId(*j) = 0;
       matchChildCount(*j) = 0;
       matchLink(*j) = JL();
+      dec_mass(*j) = NAN;
+      dec_pt(*j) = NAN;
       for (const auto& cascadeCount: m_cascade_count_decorators) {
         cascadeCount.decorateDefault(*j);
       }
