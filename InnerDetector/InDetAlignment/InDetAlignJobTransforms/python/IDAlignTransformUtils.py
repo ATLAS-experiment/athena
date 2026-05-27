@@ -34,10 +34,13 @@ def addIDAlignArguments(parser):
     parser.add_argument("--outputConditionFile", type = trfArgClasses.argFactory(trfArgClasses.argPOOLFile, io = "output"), group = "ID alignment", help = "Output POOL file with constants created in solve step")
     parser.add_argument("--outputDBFile", type = trfArgClasses.argFactory(trfArgClasses.argFile, io = "output", type = "db"), group = "ID alignment", help = "Output database file with constants created in solve step")
     parser.add_argument("--outputTaredLogFile", type = trfArgClasses.argFactory(trfArgClasses.argFile, io = "output", type = "misc"), group = "ID alignment", help = "Tar zip log files if wished")
-    
+
     ## Local database file to use after initial iteration
     parser.add_argument("--localDatabase", type = trfArgClasses.argFactory(trfArgClasses.argFile, io = "input", type = "db"), group = "ID alignment", help='Local database to use')
     
+    ## Local DB File (ITk ??)
+    parser.add_argument("--localDB", default = "", help='Use local DB file rather than from conditions tag')
+
     ## Tier0 specific tags
     parser.add_argument("--eosT0Dir", default = trfArgClasses.argString(""), type = trfArgClasses.argFactory(trfArgClasses.argString), group = "ID alignment", help='Tier0 eos output dir, used to determine solve output while running the CL on Tier0')
     
@@ -49,6 +52,9 @@ def addIDAlignArguments(parser):
     parser.add_argument("--alignITk", default = trfArgClasses.argBool(False), action="store_true", help='Align whole ITk')
     parser.add_argument("--alignITkPixel", default = trfArgClasses.argBool(False), action="store_true", help='Align ITkPixel')
     parser.add_argument("--alignITkStrip", default = trfArgClasses.argBool(False), action="store_true", help='Align ITkStrip')
+
+    ## Local Geometry
+    parser.add_argument("--localgeo", default = trfArgClasses.argBool(False), action="store_true", help='Use local geometry XML files')
 
     ## Number of threads
     parser.add_argument("--threads", default = 1, type = int, help='Number of threads')

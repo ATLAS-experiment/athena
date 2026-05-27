@@ -191,6 +191,14 @@ def configureInDetFlags(runArgs, flags):
 
 def configureITkFlags(runArgs, flags):
 
+    ## Create flags and set alignment specific parameter
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+
+    ## Disable all non-track related flag parameter
+    from InDetConfig.ConfigurationHelpers import OnlyTrackingPreInclude
+    OnlyTrackingPreInclude(flags)
+
     ## Set Tags
     for tag in [tag for tag in dir(runArgs) if "Tag" in tag and tag != "globalTag"]:
         setattr(flags.InDet.Align, tag, getattr(runArgs, tag))
@@ -209,11 +217,8 @@ def configureITkFlags(runArgs, flags):
     from InDetConfig.ConfigurationHelpers import OnlyTrackingPreInclude
     OnlyTrackingPreInclude(flags)
 
-
-    flags.ITk.Align.inputTFiles = runArgs.inputTFiles
-
-
     ## Update flags based on parser line args
+
     flags.ITk.Align.accumulate = runArgs.accumulate
     flags.ITk.Align.baseDir = os.path.abspath(runArgs.baseDir)
 
@@ -226,6 +231,11 @@ def configureITkFlags(runArgs, flags):
     #flags.Input.Files = runArgs.input
 
     flags.ITk.Align.writeSilicon = False
+
+    if runArgs.solve:
+        flags.ITk.Align.inputTFiles = [os.path.abspath(f) for f in runArgs.inputTFile]
+    else:
+        flags.ITk.Align.inputTFiles = []
 
     flags.Exec.MaxEvents = runArgs.maxEvents if not runArgs.solve else 1
 
@@ -266,7 +276,7 @@ def configureITkFlags(runArgs, flags):
         flags.BField.endcapToroidOn = False
 
 
-    if runArgs.localDB:
+    if hasattr(runArgs, "localDB") and runArgs.localDB:
         flags.ITk.Align.useLocalDatabase = True
 
         flags.IOVDb.DBConnection = (
@@ -385,14 +395,8 @@ def fromRunArgsInDet(runArgs, flags):
         raise Exception("You can run either the acculumation step or the solve step, but not both or neither at the same time!")
 
     ## Update condition database (Needs to be done last)
-    if flags.GeoModel.Run > LHCPeriod.Run3:
-        # This is what needs to be corrected
-        from InDetAlignConfig.IDAlignConditionConfig import UpdateTagsCfg
-        cfg.merge(UpdateTagsCfg(flags))
-        # flags.ITk.Align.alignITkPixel = kwargs
-    else:
-        from InDetAlignConfig.IDAlignConditionConfig import UpdateTagsCfg
-        cfg.merge(UpdateTagsCfg(flags))
+    from InDetAlignConfig.IDAlignConditionConfig import UpdateTagsCfg
+    cfg.merge(UpdateTagsCfg(flags))
 
     ## Post-include
     processPostInclude(runArgs, flags, cfg)
@@ -438,9 +442,11 @@ def fromRunArgs(runArgs):
     flags.GeoModel.AtlasVersion = runArgs.atlasVersion
 
     if flags.GeoModel.Run > LHCPeriod.Run3:
+        print("perdiod > 3")
         flags = configureITkFlags(runArgs, flags)
-        return fromRunArgsITk(runArgs)
+        return fromRunArgsITk(runArgs, flags)
     else:
+        print("perdiod < 3")
         flags = configureInDetFlags(runArgs, flags)
         return fromRunArgsInDet(runArgs, flags)
     
