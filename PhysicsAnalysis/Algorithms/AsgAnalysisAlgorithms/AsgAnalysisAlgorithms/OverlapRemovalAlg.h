@@ -18,7 +18,6 @@
 #include <xAODEgamma/ElectronContainer.h>
 #include <xAODEgamma/PhotonContainer.h>
 #include <xAODJet/JetContainer.h>
-#include <xAODMissingET/MissingETContainer.h>
 #include <xAODMuon/MuonContainer.h>
 #include <xAODTau/TauJetContainer.h>
 

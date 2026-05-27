@@ -10,7 +10,6 @@
 //
 
 #include <JetAnalysisAlgorithms/ReclusteredJetCalibrationAlg.h>
-#include <AthContainers/ConstDataVector.h>
 #include <vector>
 #include <string>
 //

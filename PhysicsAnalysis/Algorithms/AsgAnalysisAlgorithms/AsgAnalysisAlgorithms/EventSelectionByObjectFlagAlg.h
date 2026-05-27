@@ -13,7 +13,6 @@
 #include <SystematicsHandles/SysListHandle.h>
 #include <SystematicsHandles/SysReadHandle.h>
 #include <xAODBase/IParticleContainer.h>
-#include <xAODEventInfo/EventInfo.h>
 
 namespace CP {
 /// \brief an algorithm for selecting events based on object flags

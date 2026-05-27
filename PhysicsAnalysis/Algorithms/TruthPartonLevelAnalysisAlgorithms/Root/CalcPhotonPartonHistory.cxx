@@ -6,7 +6,6 @@
 /// @author Steffen Korn <steffen.korn@cern.ch>
 
 #include "PartonHistory/CalcPartonHistory.h"
-#include "PartonHistory/PartonHistoryUtils.h"
 #include "VectorHelpers/DecoratorHelpers.h"
 
 namespace CP {
