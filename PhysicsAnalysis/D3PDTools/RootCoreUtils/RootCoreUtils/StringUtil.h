@@ -29,8 +29,8 @@ namespace RCU
   /// returns: the substituted string
   /// guarantee: out of memory II
   /// requires: !pattern.empty()
-  std::string substitute (const std::string& str, const std::string& pattern,
-			  const std::string& with);
+  std::string substitute (const std::string & str, std::string_view pattern,
+			  std::string_view with);
 
 
   /// returns: whether we can match the entire string with the regular

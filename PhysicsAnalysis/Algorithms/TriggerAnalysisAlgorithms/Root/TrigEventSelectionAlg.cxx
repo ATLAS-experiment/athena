@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -27,8 +27,9 @@ StatusCode CP::TrigEventSelectionAlg::initialize()
   ANA_CHECK(m_trigDecisionTool.retrieve());
 
   if (!m_selectionDecoration.empty()) {
+    const std::string prefix{m_selectionDecoration.value() + "_"};
     for (const std::string &chain : m_trigList) {
-      m_selectionAccessors.emplace_back(m_selectionDecoration + "_" + RCU::substitute(RCU::substitute(chain, ".", "p"), "-", "_"));
+      m_selectionAccessors.emplace_back( prefix + RCU::substitute(RCU::substitute(chain, ".", "p"), "-", "_"));
     }
   }
 

@@ -21,16 +21,16 @@
 
 namespace RCU
 {
-  std::string substitute (const std::string& str, const std::string& pattern,
-			  const std::string& with)
+  std::string substitute (const std::string & str, std::string_view pattern,
+			  std::string_view with)
   {
     RCU_REQUIRE (!pattern.empty());
 
-    std::string result = str;
+    std::string result{str};
     std::string::size_type pos;
     while ((pos = result.find (pattern)) != std::string::npos) {
       // cppcheck-suppress uselessCallsSubstr
-      result = result.substr (0, pos) + with + result.substr (pos + pattern.size());
+      result = result.substr (0, pos).append(with) + result.substr (pos + pattern.size());
     }
     return result;
   }
