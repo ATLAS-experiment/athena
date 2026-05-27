@@ -55,10 +55,11 @@ namespace CP
     TH1 *histogram = hist (m_histogramName);
 
     int i = 1;
+    const std::string sysSignatureStr{"%SYS%"};
     for (const SystematicSet& sys : systematics)
     {
       std::string name;
-      ANA_CHECK (m_systematicsService->makeSystematicsName (name, "%SYS%", sys));
+      ANA_CHECK (m_systematicsService->makeSystematicsName (name, sysSignatureStr, sys));
 
       histogram->GetXaxis()->SetBinLabel(i, name.c_str());
       i++;
