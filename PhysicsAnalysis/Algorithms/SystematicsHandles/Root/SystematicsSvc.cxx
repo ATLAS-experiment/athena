@@ -13,7 +13,6 @@
 
 #include <AsgMessaging/MessageCheck.h>
 #include <PATInterfaces/MakeSystematicsVector.h>
-#include <RootCoreUtils/StringUtil.h>
 #include <algorithm>
 #include <cassert>
 #include <cmath>
