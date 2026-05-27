@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsGeometry/ActsDetectorElement.h"
@@ -68,7 +68,7 @@ namespace ActsTrk::detail {
             // @TODO dead elements
             auto uncalibMeas = detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());
             assert( uncalibMeas != nullptr );
-            assert( det_type == toMeasType(uncalibMeas->type()));
+            assert( det_type == uncalibMeas->type());
 
             if (measurement_to_summary_type.at(Acts::toUnderlying(uncalibMeas->type())) <  
                 xAOD::numberOfTrackSummaryTypes ) {
