@@ -288,9 +288,15 @@ def ActsStripGbtsSeedingToolCfg(flags,
     kwargs.setdefault("useML", False)
     kwargs.setdefault("connectorInputFile", find_datafile("binTables_ITK_RUN4_LRT.txt"))
     kwargs.setdefault("minPt", flags.Tracking.ActiveConfig.minPTSeed / GaudiUnits.GeV * ActsUnits.GeV)
-    kwargs.setdefault("d0_max", 300. * ActsUnits.mm)
-    kwargs.setdefault("max_z0", 500. * ActsUnits.mm)
-
+    kwargs.setdefault("d0Max", 300. * ActsUnits.mm)
+    kwargs.setdefault("filterMaxZ0", 500. * ActsUnits.mm)
+    kwargs.setdefault("cutDPhiMax", 0.07)
+    kwargs.setdefault("cutDCurvMax", 0.015)
+    kwargs.setdefault("tauRatioCut", 0.015)
+    kwargs.setdefault("minZ0", -600.0)
+    kwargs.setdefault("maxZ0", 600.0)
+    kwargs.setdefault("minDeltaPhi", 0.01)
+    kwargs.setdefault("maxOuterRadius", 1050.0)
     acc.setPrivateTools(CompFactory.ActsTrk.GbtsSeedingTool(name=name, **kwargs))
     return acc
 

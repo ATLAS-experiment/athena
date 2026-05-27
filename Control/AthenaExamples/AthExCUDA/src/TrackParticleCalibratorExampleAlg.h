@@ -5,9 +5,6 @@
 #ifndef ATHEXCUDA_TRACKPARTICLECALIBRATOREXAMPLEALG_H
 #define ATHEXCUDA_TRACKPARTICLECALIBRATOREXAMPLEALG_H
 
-// Local include(s).
-#include "TrackParticleContainer.h"
-
 // Framework include(s).
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -19,6 +16,9 @@
 
 // xAOD include(s).
 #include "xAODTracking/TrackParticleContainer.h"
+
+// Traccc include(s).
+#include <traccc/edm/track_collection.hpp>
 
 namespace AthCUDAExamples {
 
@@ -73,8 +73,10 @@ class TrackParticleCalibratorExampleAlg : public AthReentrantAlgorithm {
 };  // class LinearTransformTaskExampleAlg
 
 /// Perform the transformation on an NVIDIA GPU
-StatusCode calibrateOnGPU(const TrackParticleContainer::const_view& input,
-                          TrackParticleContainer::view& output);
+StatusCode calibrateOnGPU(
+    const traccc::edm::track_collection<traccc::default_algebra>::const_view&
+        input,
+    traccc::edm::track_collection<traccc::default_algebra>::view& output);
 
 }  // namespace AthCUDAExamples
 
