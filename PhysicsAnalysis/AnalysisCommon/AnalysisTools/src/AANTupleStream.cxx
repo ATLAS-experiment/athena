@@ -100,12 +100,13 @@ StatusCode AANTupleStream::initialize()
   m_attribSpec = new coral::AttributeListSpecification;
   m_attribSpec->extend( name_RunNumber,   "unsigned int" );
   m_attribSpec->extend( name_EventNumber, "unsigned int" );
-
+  const std::string refStr{"_ref"};
+  const std::string stringTypeStr{"string"};
   // Add on specification for extra refs
   for (const std::string& ref : m_extraRefNames.value())
     {
       // Append _ref to name of attribute
-      m_attribSpec->extend(ref + "_ref", "string");
+      m_attribSpec->extend(ref + refStr, stringTypeStr);
     }
 
   if (!m_lateSchema) {
