@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: EnergySum_ROI.h,v 1.5 2008-05-08 15:00:11 krasznaa Exp $
@@ -80,7 +80,7 @@ public:
    const thresholds_type& getThresholds() const { return m_thresholds; }
 
    /// Add the name of a threshold that this RoI passed
-   void addThreshold( thresholds_type::value_type thr ) { m_thresholds.push_back( thr ); }
+   void addThreshold( const thresholds_type::value_type & thr ) { m_thresholds.push_back( thr ); }
 
 private:
    uint32_t m_roiWord0; //!< First 32bit encoded ROI word
