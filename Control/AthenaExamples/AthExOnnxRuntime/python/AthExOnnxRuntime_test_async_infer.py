@@ -1,9 +1,10 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon import Constants
 from AthOnnxComps.OnnxRuntimeFlags import OnnxRuntimeType
+from AthOnnxComps.OnnxRuntimeInferenceConfig import OnnxRuntimeInferenceToolCfg
 
 
 def AthExOnnxRuntimeExampleCfg(flags, name="AthOnnxExample", **kwargs):
@@ -11,18 +12,19 @@ def AthExOnnxRuntimeExampleCfg(flags, name="AthOnnxExample", **kwargs):
 
     model_fname = "dev/MLTest/2020-03-02/MNIST_testModel.onnx"
     execution_provider = OnnxRuntimeType.CPU
-    from AthOnnxComps.OnnxRuntimeInferenceConfig import OnnxRuntimeInferenceToolCfg
     kwargs.setdefault("ORTInferenceTool", acc.popToolsAndMerge(
         OnnxRuntimeInferenceToolCfg(flags, model_fname, execution_provider)
     ))
 
     input_data = "dev/MLTest/2020-03-31/t10k-images-idx3-ubyte"
-    kwargs.setdefault("BatchSize", 3)
+    kwargs.setdefault("BatchSize", 100)
     kwargs.setdefault("InputDataPixel", input_data)
     kwargs.setdefault("OutputLevel", Constants.DEBUG)
-    acc.addEventAlgo(CompFactory.AthOnnx.EvaluateModelWithAsyncInfer(name, **kwargs))
+    acc.addEventAlgo(
+        CompFactory.AthOnnx.EvaluateModelWithAsyncInfer(name, **kwargs))
 
     return acc
+
 
 if __name__ == "__main__":
     from AthenaCommon.Logging import log as msg
@@ -33,8 +35,8 @@ if __name__ == "__main__":
 
     flags = initConfigFlags()
     flags.AthOnnx.ExecutionProvider = OnnxRuntimeType.CPU
-    flags.Concurrency.NumThreads = 4
-    flags.Concurrency.NumOffloadThreads = 4
+    flags.Concurrency.NumThreads = 3
+    flags.Concurrency.NumOffloadThreads = 1
     flags.Exec.FPE = -1
     flags.lock()
 
@@ -42,7 +44,7 @@ if __name__ == "__main__":
     acc.merge(AthExOnnxRuntimeExampleCfg(flags))
     acc.printConfig(withDetails=True, summariseProps=True)
 
-    acc.store(open('test_AsyncInferORTExampleCfg.pkl','wb'))
+    acc.store(open('test_AsyncInferORTExampleCfg.pkl', 'wb'))
 
     import sys
     sys.exit(acc.run(2).isFailure())
