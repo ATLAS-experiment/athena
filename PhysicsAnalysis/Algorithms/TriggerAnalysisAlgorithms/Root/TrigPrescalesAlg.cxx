@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -70,10 +70,10 @@ namespace CP
     {
       m_trigListAll = m_trigList;
     }
-
+    const std::string prefix = m_prescaleDecoration + "_";
     for (const std::string &chain : m_trigListAll)
     {
-      m_prescaleAccessors.emplace_back(m_prescaleDecoration + "_" + RCU::substitute(RCU::substitute(chain, ".", "p"), "-", "_"));
+      m_prescaleAccessors.emplace_back(prefix + RCU::substitute(RCU::substitute(chain, ".", "p"), "-", "_"));
 
       // Generate helper functions
       if (std::find(m_trigList.begin(), m_trigList.end(), chain) != m_trigList.end())

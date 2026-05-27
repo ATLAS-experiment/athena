@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Marco Rimoldi
@@ -35,14 +35,14 @@ namespace CP
 
     // retrieve the trigger matching tool
     ANA_CHECK(m_trigMatchingTool.retrieve());
-
+    const std::string prefix = m_matchingDecoration + "_";
     for (const std::string &chain : m_trigSingleMatchingList)
     {
-      m_matchingDecorators.emplace(chain, m_matchingDecoration + "_" + RCU::substitute (chain, "-", "_"));
+      m_matchingDecorators.emplace(chain, prefix + RCU::substitute (chain, "-", "_"));
     }
     for (const std::string &chain : m_trigSingleMatchingListDummy)
     {
-      m_matchingDecorators.emplace(chain, m_matchingDecoration + "_" + RCU::substitute (chain, "-", "_"));
+      m_matchingDecorators.emplace(chain, prefix + RCU::substitute (chain, "-", "_"));
     }
 
     if (m_particlesHandle)
