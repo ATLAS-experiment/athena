@@ -4,9 +4,11 @@
 
 #include <arpa/inet.h>
 
+#include <algorithm>
 #include <cstdint>
 #include <format>
 #include <fstream>
+#include <numeric>
 
 namespace EvaluateUtils {
 //*******************************************************************
@@ -70,5 +72,20 @@ std::vector<std::vector<std::vector<float>>> read_mnist_pixel_notFlat(
     }
   }
   return input_tensor_values;
+}
+
+std::vector<float> flattenNestedVectors(
+    const std::vector<std::vector<float>>& nestedVector) {
+  const std::size_t total_size = std::transform_reduce(
+      nestedVector.cbegin(), nestedVector.cend(), 0, std::plus<>{},
+      [](const std::vector<float>& c) { return c.size(); });
+
+  std::vector<float> result{};
+  result.reserve(total_size);
+
+  for (const auto& v : nestedVector) {
+    std::ranges::copy(v, std::back_inserter(result));
+  }
+  return result;
 }
 }  // namespace EvaluateUtils
