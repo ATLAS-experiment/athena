@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -158,11 +157,10 @@ def LArPedestalAutoCorrCfg(flags):
     #Get the current folder tag by interrogating the database:
     from LArCalibProcessing.utils import FolderTagResolver
     FolderTagResolver._globalTag=flags.IOVDb.GlobalTag
-    tagResolver=FolderTagResolver()
+    tagResolver=FolderTagResolver(dbname=flags.LArCalib.Input.CoolOflP1Replica)
     pedestalTag=tagResolver.getFolderTag(flags.LArCalib.Pedestal.Folder)
     autocorrTag=tagResolver.getFolderTag(flags.LArCalib.AutoCorr.Folder)
     del tagResolver
-
 
     #Output (POOL + sqlite) file writing:
     from RegistrationServices.OutputConditionsAlgConfig import OutputConditionsAlgCfg
@@ -182,7 +180,6 @@ def LArPedestalAutoCorrCfg(flags):
     if flags.LArCalib.doValidation:
         from IOVDbSvc.IOVDbSvcConfig import addFolders 
 
-        #result.merge(addFolders(flags,"/LAR/ElecCalibOnl/Pedestal<key>PedestalRef</key>","LAR_ONL"))
         result.merge(addFolders(flags,"/LAR/ElecCalibFlat/Pedestal<key>PedestalRefIn</key>","LAR_ONL","CondAttrListCollection"))
         LArPedestalCondAlg = CompFactory.getComp("LArFlatConditionsAlg<LArPedestalFlat>")
         result.addCondAlgo(LArPedestalCondAlg("LArFlatPedCondAlg",ReadKey="PedestalRefIn", WriteKey="PedestalRef"))
@@ -310,7 +307,6 @@ if __name__ == "__main__":
 
     cfg=MainServicesCfg(ConfigFlags)
     cfg.merge(LArPedestalAutoCorrCfg(ConfigFlags))
-
     log.info("Start running...")
     sys.exit(cfg.run().isFailure())
 

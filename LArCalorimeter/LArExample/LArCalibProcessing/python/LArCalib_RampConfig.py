@@ -20,14 +20,11 @@ def LArRampCfg(flags):
 
     from LArCalibProcessing.utils import FolderTagResolver
     FolderTagResolver._globalTag=flags.IOVDb.GlobalTag
-    tagResolver=FolderTagResolver()
+    tagResolver=FolderTagResolver(flags.LArCalib.Input.CoolOflP1Replica)
     pedestalTag=tagResolver.getFolderTag(flags.LArCalib.Pedestal.Folder)
     caliOFCTag=tagResolver.getFolderTag(flags.LArCalib.OFCCali.Folder)
-
     rampTag=tagResolver.getFolderTag(flags.LArCalib.Ramp.Folder)
     del tagResolver
-    
-    print("pedestalTag",pedestalTag)
     print("rampTag",rampTag)
 
 
@@ -108,7 +105,7 @@ def LArRampCfg(flags):
     if "HEC" in flags.LArCalib.Input.SubDet:
         theLArRampBuilder.isHEC = True
         theLArRampBuilder.HECKey = "LArHEC_PAmap"
-        result.merge(addFolders(flags,'/LAR/ElecCalibOfl/HecPAMap','LAR_OFL'))
+        result.merge(addFolders(flags,'/LAR/ElecCalibOfl/HecPAMap',flags.LArCalib.Input.CoolOflP1Replica))
     
     result.addEventAlgo(theLArRampBuilder)
 
