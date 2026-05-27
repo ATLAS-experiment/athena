@@ -194,7 +194,7 @@ namespace AnalysisUtils {
     
     if (setNewIndex (iElement-1))
       {
-	m_index[iElement] = m_index[iElement-1]+1;
+	m_index[iElement] = m_index.at(iElement-1)+1;
 	return true;
       }
     
