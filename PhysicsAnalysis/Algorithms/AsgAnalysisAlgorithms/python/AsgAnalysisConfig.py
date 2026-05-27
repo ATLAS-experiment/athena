@@ -147,7 +147,7 @@ class CommonServicesConfig (ConfigBlock) :
                 etag = str(amiTags.split("_")[0])
             metadataHistAlg.etag = etag
 
-        if self.enableExpertMode and config._pass == 0:
+        if self.enableExpertMode:
             # set any expert-mode errors to be ignored instead
             warnings.simplefilter('ignore', ExpertModeWarning)
             # just warning users they might be doing something dangerous

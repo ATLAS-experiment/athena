@@ -136,8 +136,6 @@ class ConfigSequence:
 
         self.reorderAlgs()
         self.makeAlgs (config)
-        config.nextPass ()
-        self.makeAlgs (config)
         self.applyConfigOverrides(config)
 
 
