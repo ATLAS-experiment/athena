@@ -45,7 +45,8 @@ namespace EL
   JobConfig ::
   JobConfig (const JobConfig& that)
     : TObject (that),
-      m_algorithmCount (that.m_algorithmCount)
+      m_algorithmCount (that.m_algorithmCount),
+      m_algSequenceStartIndices (that.m_algSequenceStartIndices)
   {
     RCU_READ_INVARIANT (&that);
 
@@ -114,6 +115,7 @@ namespace EL
     RCU_CHANGE_INVARIANT (&that);
     std::swap (m_algorithmCount, that.m_algorithmCount);
     m_algorithms.swap (that.m_algorithms);
+    m_algSequenceStartIndices.swap (that.m_algSequenceStartIndices);
   }
 
 
