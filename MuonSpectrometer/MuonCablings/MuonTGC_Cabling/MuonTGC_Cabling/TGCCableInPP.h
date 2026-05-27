@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCCABLEINPP_HH
@@ -31,8 +31,8 @@ class TGCCableInPP : public TGCCable {
     std::unique_ptr<TGCChannelId> getChannelOut(
         const TGCChannelId& ppin, const bool orChannel = false) const;
 
-    std::array<std::array<std::unique_ptr<TGCDatabase>, TGCId::MaxModuleType>,
-               TGCId::MaxRegionType>
+    std::array<std::array<std::unique_ptr<TGCDatabase>, +TGCId::ModuleType::MaxModuleType>,
+               +TGCId::RegionType::MaxRegionType>
         m_database;
 };
 

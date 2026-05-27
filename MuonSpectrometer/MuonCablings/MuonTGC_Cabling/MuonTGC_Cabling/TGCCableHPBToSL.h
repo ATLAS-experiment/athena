@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCCABLEHPBTOSL_HH
@@ -26,8 +26,8 @@ class TGCCableHPBToSL : public TGCCable {
    private:
     TGCModuleMap getModuleIn(const TGCModuleId& sl) const;
     TGCModuleMap getModuleOut(const TGCModuleId& hpt) const;
-    std::array<std::array<std::unique_ptr<TGCDatabase>, TGCId::MaxSignalType>,
-               TGCId::MaxRegionType>
+    std::array<std::array<std::unique_ptr<TGCDatabase>, +TGCId::SignalType::MaxSignalType>,
+               +TGCId::RegionType::MaxRegionType>
         m_database;
 };
 

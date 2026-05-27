@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCChannelASDIn.h"
@@ -12,10 +12,9 @@ TGCChannelASDIn::TGCChannelASDIn(TGCId::SideType vside,
                                  TGCId::RegionType vregion, int vsector,
                                  int vlayer, int vchamber, int vchannel)
     : TGCChannelId(TGCChannelId::ChannelIdType::ASDIn) {
-    setSideType(vside);
-    setSignalType(vsignal);
-    setRegionType(vregion);
-    setLayer(vlayer);
+    setSideType(vside);         // SideType
+    setRegionType(vregion);     // RegionType
+    setSignalAndLayer(vsignal, vlayer);  // SignalType as well as Layer (to define station,Module)
     TGCChannelASDIn::setSector(vsector);
     setChamber(vchamber);
     setChannel(vchannel);
@@ -47,13 +46,11 @@ int TGCChannelASDIn::getSector() const {
 }
 
 bool TGCChannelASDIn::isValid() const {
-    if ((getSideType() > TGCId::NoSideType) &&
-        (getSideType() < TGCId::MaxSideType) &&
-        (getSignalType() > TGCId::NoSignalType) &&
-        (getSignalType() < TGCId::MaxSignalType) &&
-        (getRegionType() > TGCId::NoRegionType) &&
-        (getRegionType() < TGCId::MaxRegionType) && (getOctant() >= 0) &&
-        (getOctant() < 8) && (getLayer() >= 0) && (getChamber() >= 0) &&
+    if ((getSideType() < TGCId::SideType::MaxSideType) &&
+        (getSignalType() < TGCId::SignalType::MaxSignalType) &&
+        (getRegionType() < TGCId::RegionType::MaxRegionType) &&
+        (getOctant() >= 0) && (getOctant() < 8) &&
+        (getLayer() >= 0) && (getChamber() >= 0) &&
         (getChannel() >= 0)) {
         return true;
     }

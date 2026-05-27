@@ -38,101 +38,56 @@ int TGCId::getSectorInReadout() const {
 
 void TGCId::setModuleType(ModuleType v_module) {
     m_module = v_module;
-    if (m_module == WI) {
-        setSignalType(Wire);
-        setMultipletType(Inner);
+    if (m_module == ModuleType::WI) {
+        setSignalType(SignalType::Wire);
     }
-    if (m_module == SI) {
-        setSignalType(Strip);
-        setMultipletType(Inner);
+    if (m_module == ModuleType::SI) {
+        setSignalType(SignalType::Strip);
     }
-    if (m_module == WD) {
-        setSignalType(Wire);
-        setMultipletType(Doublet);
+    if (m_module == ModuleType::WD) {
+        setSignalType(SignalType::Wire);
     }
-    if (m_module == SD) {
-        setSignalType(Strip);
-        setMultipletType(Doublet);
+    if (m_module == ModuleType::SD) {
+        setSignalType(SignalType::Strip);
     }
-    if (m_module == WT) {
-        setSignalType(Wire);
-        setMultipletType(Triplet);
+    if (m_module == ModuleType::WT) {
+        setSignalType(SignalType::Wire);
     }
-    if (m_module == ST) {
-        setSignalType(Strip);
-        setMultipletType(Triplet);
+    if (m_module == ModuleType::ST) {
+        setSignalType(SignalType::Strip);
     }
 }
 
 void TGCId::setSignalType(SignalType v_signal) {
     m_signal = v_signal;
-    if (m_multiplet == Inner && m_signal == Wire) {
-        m_module = WI;
-    }
-    if (m_multiplet == Inner && m_signal == Strip) {
-        m_module = SI;
-    }
-    if (m_multiplet == Doublet && m_signal == Wire) {
-        m_module = WD;
-    }
-    if (m_multiplet == Doublet && m_signal == Strip) {
-        m_module = SD;
-    }
-    if (m_multiplet == Triplet && m_signal == Wire) {
-        m_module = WT;
-    }
-    if (m_multiplet == Triplet && m_signal == Strip) {
-        m_module = ST;
-    }
-}
-
-void TGCId::setMultipletType(MultipletType v_multiplet) {
-    this->m_multiplet = v_multiplet;
-    if (m_multiplet == Inner && m_signal == Wire) {
-        m_module = WI;
-    }
-    if (m_multiplet == Inner && m_signal == Strip) {
-        m_module = SI;
-    }
-    if (m_multiplet == Doublet && m_signal == Wire) {
-        m_module = WD;
-    }
-    if (m_multiplet == Doublet && m_signal == Strip) {
-        m_module = SD;
-    }
-    if (m_multiplet == Triplet && m_signal == Wire) {
-        m_module = WT;
-    }
-    if (m_multiplet == Triplet && m_signal == Strip) {
-        m_module = ST;
+    if (isInner() && m_signal == SignalType::Wire) {
+        m_module = ModuleType::WI;
+    } else if (isInner() && m_signal == SignalType::Strip) {
+        m_module = ModuleType::SI;
+    } else if (isDoublet() && m_signal == SignalType::Wire) {
+        m_module = ModuleType::WD;
+    } else if (isDoublet() && m_signal == SignalType::Strip) {
+        m_module = ModuleType::SD;
+    } else if (isTriplet() && m_signal == SignalType::Wire) {
+        m_module = ModuleType::WT;
+    } else if (isTriplet() && m_signal == SignalType::Strip) {
+        m_module = ModuleType::ST;
     }
 }
 
 void TGCId::setStation(StationType v_station) {
     m_station = v_station;
-    if (m_station == StationType::M1) {
-        setMultipletType(Triplet);
-    }
-    if (m_station == StationType::M2) {
-        setMultipletType(Doublet);
-    }
-    if (m_station == StationType::M3) {
-        setMultipletType(Doublet);
-    }
-    if (m_station == StationType::M4) {
-        setMultipletType(Inner);
-    }
 }
 
 void TGCId::setSector(int v_sector) {
     m_sector = v_sector;
-    if (m_region == Endcap) {
-        if (m_multiplet == Inner) {
+    if (m_region == RegionType::Endcap) {
+        if (isInner()) {
             m_octant = m_sector / (NUM_INNER_SECTOR / NUM_OCTANT);
         } else {
             m_octant = m_sector / (NUM_ENDCAP_SECTOR / NUM_OCTANT);
         }
-    } else if (m_region == Forward) {
+    } else if (m_region == RegionType::Forward) {
         m_octant = m_sector / (NUM_FORWARD_SECTOR / NUM_OCTANT);
     }
 }
@@ -183,21 +138,21 @@ void TGCId::setSectorModule(int sectorModule) {
     }
 
     if (regionId[sectorModule] == 0) {
-        setRegionType(Endcap);
+        setRegionType(RegionType::Endcap);
         setSector(sectorId[sectorModule] +
                   m_octant * (NUM_ENDCAP_SECTOR / NUM_OCTANT));
 
     } else if (regionId[sectorModule] == 1) {
-        setRegionType(Forward);
+        setRegionType(RegionType::Forward);
         setSector(sectorId[sectorModule] +
                   m_octant * (NUM_FORWARD_SECTOR / NUM_OCTANT));
     } else {
-        setMultipletType(Inner);
+        setStation(StationType::M4);
         if (regionId[sectorModule] == 2) {
-            setRegionType(Endcap);
+            setRegionType(RegionType::Endcap);
         }
         if (regionId[sectorModule] == 3) {
-            setRegionType(Forward);
+            setRegionType(RegionType::Forward);
         }
         setSector(sectorId[sectorModule] +
                   m_octant * (NUM_INNER_SECTOR / NUM_OCTANT));

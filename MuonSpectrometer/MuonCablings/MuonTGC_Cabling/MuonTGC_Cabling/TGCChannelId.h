@@ -51,6 +51,8 @@ class TGCChannelId : public TGCId {
     virtual void setBlock(int block);
     virtual void setChannel(int channel);
 
+    void setSignalAndLayer(TGCId::SignalType signal, int layer);
+
     bool isBackward() const;
 
    protected:

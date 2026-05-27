@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCChannelSLBIn.h"
@@ -23,14 +23,28 @@ void checkCellType(MuonTGC_Cabling::TGCChannelSLBIn::CellType cellType,
 
 namespace MuonTGC_Cabling {
 
-// Constructor
 TGCChannelSLBIn::TGCChannelSLBIn(TGCId::SideType vside,
                                  TGCId::ModuleType vmodule,
-                                 TGCId::RegionType vregion, int vsector,
-                                 int vid, int vchannel)
-    : TGCChannelId(TGCChannelId::ChannelIdType::SLBIn) {
+                                 TGCId::RegionType vregion,
+                                 int vsector, int vid, int vchannel)
+  : TGCChannelId(TGCChannelId::ChannelIdType::SLBIn) {
     setSideType(vside);
     setModuleType(vmodule);
+    setRegionType(vregion);
+    setSector(vsector);
+    setId(vid);
+    TGCChannelSLBIn::setChannel(vchannel);
+}
+
+TGCChannelSLBIn::TGCChannelSLBIn(TGCId::SideType vside,
+                                 TGCId::StationType vstation,
+                                 TGCId::ModuleType vmodule,
+                                 TGCId::RegionType vregion,
+                                 int vsector, int vid, int vchannel)
+  : TGCChannelId(TGCChannelId::ChannelIdType::SLBIn) {
+    setSideType(vside);
+    setModuleType(vmodule);
+    setStation(vstation);
     setRegionType(vregion);
     setSector(vsector);
     setId(vid);
@@ -43,13 +57,11 @@ std::unique_ptr<TGCModuleId> TGCChannelSLBIn::getModule() const {
 }
 
 bool TGCChannelSLBIn::isValid() const {
-    if ((getSideType() > TGCId::NoSideType) &&
-        (getSideType() < TGCId::MaxSideType) &&
-        (getModuleType() > TGCId::NoModuleType) &&
-        (getModuleType() < TGCId::MaxModuleType) &&
-        (getRegionType() > TGCId::NoRegionType) &&
-        (getRegionType() < TGCId::MaxRegionType) && (getOctant() >= 0) &&
-        (getOctant() < 8) && (getId() >= 0) && (getChannel() >= 0) &&
+    if ((getSideType() < TGCId::SideType::MaxSideType) &&
+        (getModuleType() < TGCId::ModuleType::MaxModuleType) &&
+        (getRegionType() < TGCId::RegionType::MaxRegionType) &&
+        (getOctant() >= 0) && (getOctant() < 8) &&
+        (getId() >= 0) && (getChannel() >= 0) &&
         (m_channelInSLB < getLengthOfSLB(getModuleType(), getCellType())) &&
         (m_channelInSLB >= 0)) {
         return true;
@@ -84,17 +96,17 @@ int TGCChannelSLBIn::getLengthOfSLB(TGCId::ModuleType moduleType,
                                     CellType cellType) {
     checkCellType(cellType, __func__);
     switch (moduleType) {
-        case TGCId::WD:
+        case TGCId::ModuleType::WD:
             return s_lengthWD[cellType];
-        case TGCId::SD:
+        case TGCId::ModuleType::SD:
             return s_lengthSD[cellType];
-        case TGCId::WT:
+        case TGCId::ModuleType::WT:
             return s_lengthWT[cellType];
-        case TGCId::ST:
+        case TGCId::ModuleType::ST:
             return s_lengthST[cellType];
-        case TGCId::WI:
+        case TGCId::ModuleType::WI:
             return s_lengthST[cellType];
-        case TGCId::SI:
+        case TGCId::ModuleType::SI:
             return s_lengthST[cellType];
         default:
             break;
@@ -111,17 +123,17 @@ int TGCChannelSLBIn::getAdjacentOfSLB(TGCId::ModuleType moduleType,
                                       CellType cellType) {
     checkCellType(cellType, __func__);
     switch (moduleType) {
-        case TGCId::WD:
+        case TGCId::ModuleType::WD:
             return s_adjacentWD[cellType];
-        case TGCId::SD:
+        case TGCId::ModuleType::SD:
             return s_adjacentSD[cellType];
-        case TGCId::WT:
+        case TGCId::ModuleType::WT:
             return s_adjacentWT[cellType];
-        case TGCId::ST:
+        case TGCId::ModuleType::ST:
             return s_adjacentST[cellType];
-        case TGCId::WI:
+        case TGCId::ModuleType::WI:
             return s_adjacentST[cellType];
-        case TGCId::SI:
+        case TGCId::ModuleType::SI:
             return s_adjacentST[cellType];
         default:
             break;

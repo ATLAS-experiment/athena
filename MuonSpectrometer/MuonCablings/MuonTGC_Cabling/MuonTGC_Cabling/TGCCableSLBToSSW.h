@@ -18,8 +18,8 @@ class TGCDatabase;
 class TGCCableSLBToSSW : public TGCCable {
    public:
     enum {
-        SL = TGCId::MaxModuleType,
-        MaxModuleType = TGCId::MaxModuleType + 1
+        SL = +TGCId::ModuleType::MaxModuleType,
+        MaxModuleType = +TGCId::ModuleType::MaxModuleType + 1
     };
 
     TGCCableSLBToSSW(const std::string& filename);
@@ -32,7 +32,7 @@ class TGCCableSLBToSSW : public TGCCable {
     TGCModuleMap getModuleIn(const TGCModuleId& ssw) const;
     TGCModuleMap getModuleOut(const TGCModuleId& slb) const;
     std::array<std::array<std::unique_ptr<TGCDatabase>, MaxModuleType>,
-               TGCId::MaxRegionType>
+               +TGCId::RegionType::MaxRegionType>
         m_database;
 };
 
