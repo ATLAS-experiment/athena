@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCMODULESLB_HH
@@ -19,6 +19,8 @@ class TGCModuleSLB : public TGCModuleId {
     virtual ~TGCModuleSLB() = default;
 
     virtual bool isValid() const;
+
+    void identifyStationType(TGCId::ModuleType module);
 
     // special method for SLB
     int getSBLoc() const { return m_sbLoc; }

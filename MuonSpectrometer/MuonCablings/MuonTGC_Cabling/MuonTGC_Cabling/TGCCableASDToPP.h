@@ -37,8 +37,8 @@ class TGCCableASDToPP : public TGCCable {
         const int side, const int sector,
         const std::vector<std::string>& diffFile, const std::string& blockname);
 
-    TGCDatabaseASDToPP* getDatabase(const int side, const int region,
-                                    const int sector, const int module) const;
+    TGCDatabaseASDToPP* getDatabase(const TGCId::SideType side, const TGCId::RegionType region,
+                                    const int sector, const TGCId::ModuleType module) const;
 
     void updateIndividualDatabase(
         const int side, const int sector,
@@ -55,15 +55,15 @@ class TGCCableASDToPP : public TGCCable {
     using ForwardSectorDB =
         std::array<std::array<std::shared_ptr<TGCDatabaseASDToPP>,
                               TGCId::NUM_FORWARD_SECTOR>,
-                   TGCId::MaxSideType>;
+                   +TGCId::SideType::MaxSideType>;
     using InnerSectorDB =
         std::array<std::array<std::shared_ptr<TGCDatabaseASDToPP>,
                               TGCId::NUM_INNER_SECTOR>,
-                   TGCId::MaxSideType>;
+                   +TGCId::SideType::MaxSideType>;
     using EndcapSectorDB =
         std::array<std::array<std::shared_ptr<TGCDatabaseASDToPP>,
                               TGCId::NUM_ENDCAP_SECTOR>,
-                   TGCId::MaxSideType>;
+                   +TGCId::SideType::MaxSideType>;
 
     ForwardSectorDB m_FWDdb{};
     ForwardSectorDB m_FSDdb{};
@@ -81,8 +81,8 @@ class TGCCableASDToPP : public TGCCable {
 
     /** Pointers of common databases are recorded in this array */
     using CommonDB = std::array<
-        std::array<std::shared_ptr<TGCDatabaseASDToPP>, TGCId::MaxModuleType>,
-        TGCId::MaxRegionType>;
+        std::array<std::shared_ptr<TGCDatabaseASDToPP>, +TGCId::ModuleType::MaxModuleType>,
+        +TGCId::RegionType::MaxRegionType>;
     CommonDB m_commonDb{{{nullptr}}};
 };
 

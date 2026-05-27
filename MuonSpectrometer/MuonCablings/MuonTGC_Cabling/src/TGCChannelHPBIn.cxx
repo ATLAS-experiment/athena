@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCChannelHPBIn.h"
@@ -29,13 +29,11 @@ std::unique_ptr<TGCModuleId> TGCChannelHPBIn::getModule() const {
 }
 
 bool TGCChannelHPBIn::isValid() const {
-    if ((getSideType() > TGCId::NoSideType) &&
-        (getSideType() < TGCId::MaxSideType) &&
-        (getSignalType() > TGCId::NoSignalType) &&
-        (getSignalType() < TGCId::MaxSignalType) &&
-        (getRegionType() > TGCId::NoRegionType) &&
-        (getRegionType() < TGCId::MaxRegionType) && (getOctant() >= 0) &&
-        (getOctant() < 8) && (getId() >= 0) && (getBlock() >= 0) &&
+    if ((getSideType() < TGCId::SideType::MaxSideType) &&
+        (getSignalType() < TGCId::SignalType::MaxSignalType) &&
+        (getRegionType() < TGCId::RegionType::MaxRegionType) &&
+        (getOctant() >= 0) && (getOctant() < 8) &&
+        (getId() >= 0) && (getBlock() >= 0) &&
         (getChannel() >= 0)) {
         return true;
     }
