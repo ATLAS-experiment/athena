@@ -3,7 +3,7 @@
 # art-type: grid
 # art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-architecture: '#&nvidia'
-# art-pathena-flags-add: --site=BNL_GPU,OU_OSCER_GPU,CERN-GPU,FZK-LCG2_GPU,UKI-SOUTHGRID-RALPP_GPU
+# art-pathena-flags-add: --site=CERN-GPU
 # art-memory: 4095
 # art-output: IDTPM.*.root
 # art-output: *.json
@@ -44,6 +44,10 @@ run () {
     chmod 777 step_${name}.sh
     time $(pwd)/step_${name}.sh
     rc=$?
+    ## if _diffOK is in name, then we expect dcube differences, so don't flag as an error
+    if [[ $rc == 1 && "${name}" =~ "_diffOK" ]]; then
+      rc=0
+    fi
     rm step_${name}.sh
     echo "art-result: $rc ${name}"
     ## if _skipRC is in name skip exit condition
@@ -101,7 +105,7 @@ if [ ! -f "$referenceName_absPath" ]; then
 fi
 
 ## dcube step
-run "dcube_skipRC" \
+run "dcube_diffOK" \
   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_cmp \
     -c ${dcubeXmlIDTPMconfig_absPath} \

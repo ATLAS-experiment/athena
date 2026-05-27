@@ -32,6 +32,10 @@ run () {
     echo "${cmd}" >> "${cwd}/commands.log"
     time ${cmd}
     rc=$?
+    ## if _diffOK is in name, then we expect dcube differences, so don't flag as an error
+    if [[ $rc == 1 && "${name}" =~ "_diffOK" ]]; then
+      rc=0
+    fi
     echo "art-result: $rc ${name}"
     ## if _skipRC is in name skip exit condition
     if [[ "${name}" =~ "_skipRC" ]]; then

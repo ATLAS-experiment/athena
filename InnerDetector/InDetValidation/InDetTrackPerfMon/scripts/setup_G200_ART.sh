@@ -23,13 +23,12 @@ cd G-200
 mkdir build
 cd build
 
-if [ -z "$CUDACXX" ] && type -t nvcc >/dev/null; then
-  export CUDACXX=$(type -p nvcc)
-fi
-
 if [ -n "$CUDACXX" ]; then
   "$CUDACXX" --version
+  # hack for when we have a local CUDA installation
   export CMAKE_PREFIX_PATH="$(dirname "$(dirname "$CUDACXX")")/targets/x86_64-linux:${CMAKE_PREFIX_PATH}"
+  # hack to work on CERN-GPU Grid jobs
+  unset CUDAToolkit_ROOT
 fi
 nvidia-smi -L
 env > envlog.log
