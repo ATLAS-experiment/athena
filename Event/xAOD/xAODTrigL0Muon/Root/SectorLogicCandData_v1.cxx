@@ -57,7 +57,7 @@ namespace xAOD {
       s << "   pT threshold:                      " << ptThresh() << std::endl;
       s << "   Charge:                            " << (charge() ? "Positive" : "Negative") << std::endl;
       s << "   MDT processing flag [0:15]:        " << mdtFlag() << std::endl;
-      s << "   Processed by MDT or RPC/TGC:       " << (isMDT() ? "RPC/TGC" : "MDT") << std::endl;
+      s << "   Processed by MDT or RPC/TGC:       " << (isMDT() ? "MDT" : "RPC/TGC") << std::endl;
       s << "   MDT segment quality:               " << mdtSegQual() << std::endl;
       s << "   Number of associated MDT segments: " << numMDTSeg() << std::endl;
       s << "   Exotic trigger:                    " << exotTrig() << std::endl;
@@ -97,7 +97,7 @@ namespace xAOD {
 
    // Get bits for phi position from word
    uint32_t SectorLogicCandData_v1::rawPhi() const {
-      return (candExtraWord() >> L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_PHI_SHIFT) & L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_PHI_MASK;
+      return (candWord() >> L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_PHI_SHIFT) & L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_PHI_MASK;
    }
 
    // Get float phi value from phi bits
@@ -107,7 +107,7 @@ namespace xAOD {
 
    // Get bits for eta position from word
    uint32_t SectorLogicCandData_v1::rawEta() const {
-      return (candExtraWord() >> L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_ETA_SHIFT) & L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_ETA_MASK;
+      return (candWord() >> L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_ETA_SHIFT) & L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_ETA_MASK;
    }
 
    // Get float eta value from eta bits
