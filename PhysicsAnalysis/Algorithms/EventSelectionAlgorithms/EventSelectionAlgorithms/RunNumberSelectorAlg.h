@@ -15,7 +15,6 @@
  #include <SelectionHelpers/SysWriteSelectionHandle.h>
  
  // Framework includes
- #include <xAODBase/IParticleContainer.h>
  #include <xAODEventInfo/EventInfo.h>
  
  #include <EventSelectionAlgorithms/SignEnums.h>
