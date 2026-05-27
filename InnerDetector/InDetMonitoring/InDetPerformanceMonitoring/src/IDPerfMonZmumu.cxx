@@ -313,6 +313,8 @@ StatusCode IDPerfMonZmumu::bookTrees()
     m_commonTree->Branch("runNumber"           , &m_runNumber,  "runNumber/I");
     m_commonTree->Branch("eventNumber"         , &m_evtNumber,  "eventNumber/I");
     m_commonTree->Branch("lumi_block"          , &m_lumi_block, "lumi_block/I");
+    m_commonTree->Branch("beamposX"            , &m_beamposX,   "beamposX/F");
+    m_commonTree->Branch("beamposY"            , &m_beamposY,   "beamposY/F");
     m_commonTree->Branch("mu"                  , &m_event_mu,   "mu/I");
     m_commonTree->Branch("preScale"            , &m_triggerPrescale, "preScale/I");
     m_commonTree->Branch("mcEventWeight"       , &m_event_weight, "mcEventWeight/F");
@@ -942,11 +944,16 @@ StatusCode IDPerfMonZmumu::execute()
   ATH_MSG_DEBUG("** IDPerfMonZmumu::execute ** START **");
   
   SG::ReadHandle<xAOD::EventInfo> eventInfo (m_EventInfoKey, getContext());
+  SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandleRec { m_beamSpotKey, getContext() };
+
   if(eventInfo.isValid()) {
-    m_runNumber = eventInfo->runNumber();
-    m_evtNumber = eventInfo->eventNumber();
+    m_runNumber  = eventInfo->runNumber();
+    m_evtNumber  = eventInfo->eventNumber();
     m_lumi_block = eventInfo->lumiBlock();
-    m_event_mu = eventInfo->actualInteractionsPerCrossing();
+    m_event_mu   = eventInfo->actualInteractionsPerCrossing();
+    m_beamposX   = beamSpotHandleRec->beamPos().x();
+    m_beamposY   = beamSpotHandleRec->beamPos().y();
+
     if (eventInfo->mcEventWeights().size()>0) { 
       m_event_weight = eventInfo->mcEventWeights()[0];
     }
@@ -2019,20 +2026,25 @@ StatusCode IDPerfMonZmumu::FillRecParametersSimple (const Trk::Track* track, flo
     d0_err = Amg::error(*trkPerigee->covariance(),Trk::d0);
     z0_err = Amg::error(*trkPerigee->covariance(),Trk::z0);
   }
-
+  
+  
   SG::ReadHandle<xAOD::EventInfo> eventInfo (m_EventInfoKey, getContext());
   Amg::Vector3D position (eventInfo->beamPosX(), eventInfo->beamPosY(), eventInfo->beamPosZ());
   TLorentzVector vtrack = TLorentzVector (trkPerigee->momentum().x(),
 					  trkPerigee->momentum().y(),
 					  trkPerigee->momentum().z(),
 					  trkPerigee->momentum().mag());
-  float trkd0 = trkPerigee->parameters()[Trk::d0];
-  float trkz0 = trkPerigee->parameters()[Trk::z0];
-  float bsX = position.x();
-  float bsY = position.y();
-  float bsZ = position.z();
-  float btiltX = eventInfo->beamTiltXZ();
-  float btiltY = eventInfo->beamTiltYZ();
+
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandleRec { m_beamSpotKey, ctx }; // This method loads the proper beam spot conditions
+
+  float trkd0 =  trkPerigee->parameters()[Trk::d0];
+  float trkz0 =  trkPerigee->parameters()[Trk::z0];
+  float bsX =    beamSpotHandleRec->beamPos().x();
+  float bsY =    beamSpotHandleRec->beamPos().y();
+  float bsZ =    beamSpotHandleRec->beamPos().z();
+  float btiltX = beamSpotHandleRec->beamTilt(0);
+  float btiltY = beamSpotHandleRec->beamTilt(1);
   // correct the track parameters for the beamspot position
   float beamX = bsX + std::tan(btiltX) * (trkz0-bsZ);
   float beamY = bsY + std::tan(btiltY) * (trkz0-bsZ);
@@ -2040,6 +2052,16 @@ StatusCode IDPerfMonZmumu::FillRecParametersSimple (const Trk::Track* track, flo
   float d0bscorr = trkd0 - beamD0;
   float z0bscorr = trkz0 - bsZ - vertex->z();
 
+  ATH_MSG_DEBUG("* FillRecParametersSimple *" 
+		<< " charge " << charge
+		<< " ** beamSpotHandleRec " << m_beamSpotKey 
+		<< "( " << beamSpotHandleRec->beamPos().x()
+		<< ", " << beamSpotHandleRec->beamPos().y()
+		<< ", " << beamSpotHandleRec->beamPos().z()
+		<< ")  tkd0: " << trkd0
+		<< "  d0bscorr: " << d0bscorr);
+
+  // store the values 
   if (charge == 1) {
     m_positive_px = px;
     m_positive_py = py;
@@ -2069,7 +2091,7 @@ StatusCode IDPerfMonZmumu::FillRecParametersSimple (const Trk::Track* track, flo
     m_negative_z0_err = z0_err;
   }
 
-  ATH_MSG_DEBUG("-- FillRecParametersSimple -- charge " << charge << "  pt: " << pt << "  d0: " << d0 << "  z0: " << z0);
+  ATH_MSG_DEBUG("* FillRecParametersSimple * completed * charge " << charge << "  pt: " << pt << "  d0: " << d0 << "  z0: " << z0);
 
   return StatusCode::SUCCESS;
 }
