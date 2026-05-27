@@ -16,7 +16,6 @@
 #include <xAODCutFlow/CutBookkeeper.h>
 #include <xAODCutFlow/CutBookkeeperContainer.h>
 #include <xAODMetaData/FileMetaData.h>
-#include <xAODTruth/TruthMetaData.h>
 #include <xAODTruth/TruthMetaDataContainer.h>
 
 #include <regex>

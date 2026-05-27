@@ -13,7 +13,6 @@
 #include <SelectionHelpers/SysWriteSelectionHandle.h>
 #include <SystematicsHandles/SysCopyHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
-#include <SystematicsHandles/SysWriteDecorHandle.h>
 #include <AsgTools/PropertyWrapper.h>
 
 #include <xAODEgamma/ElectronContainer.h>

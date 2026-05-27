@@ -12,7 +12,6 @@
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <SystematicsHandles/SysCopyHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
-#include <METInterface/IMETMaker.h>
 #include <xAODMissingET/MissingETContainer.h>
 #include <AsgTools/PropertyWrapper.h>
 

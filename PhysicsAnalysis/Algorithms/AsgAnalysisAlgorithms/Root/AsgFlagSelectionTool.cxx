@@ -12,8 +12,6 @@
 
 #include <AsgAnalysisAlgorithms/AsgFlagSelectionTool.h>
 
-#include <cmath>
-
 //
 // method implementations
 //

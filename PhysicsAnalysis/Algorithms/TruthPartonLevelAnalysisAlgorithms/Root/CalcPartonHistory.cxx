@@ -14,7 +14,6 @@
 #include "PartonHistory/PartonSchemeConfig.h"
 #include "VectorHelpers/LorentzHelper.h"
 #include "xAODTruth/TruthParticleContainer.h"
-#include "xAODTruth/TruthVertex.h"
 
 #ifdef XAOD_STANDALONE
 #define TDS() evtStore()->tds()

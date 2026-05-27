@@ -11,11 +11,7 @@
 // Include necessary header files
 #include "Math/Vector4D.h"
 #include "Math/VectorUtil.h"
-#include "xAODEgamma/ElectronContainer.h"
-#include "xAODJet/JetContainer.h"
-#include "xAODMuon/MuonContainer.h"
 #include "xAODTruth/TruthParticle.h"
-#include "xAODTruth/xAODTruthHelpers.h"
 
 // Using directives for convenience with ROOT::Math vector types
 using ROOT::Math::PtEtaPhiEVector;

@@ -6,7 +6,6 @@
 
 #include <TrigCompositeUtils/ChainNameParser.h>
 #include <TriggerAnalysisAlgorithms/TrigMatchingAlg.h>
-#include <xAODEventInfo/EventInfo.h>
 #include <RootCoreUtils/StringUtil.h>
 
 
