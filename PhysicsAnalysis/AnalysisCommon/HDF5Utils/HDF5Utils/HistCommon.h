@@ -11,19 +11,21 @@
 
 #include <cstdint>
 #include <string>
+#include <string_view>
 #include <vector>
+#include <utility> //std::pair
 
 namespace H5Utils::hist::detail {
 
   // Error check helper
-  void chkerr(herr_t code, const std::string& error);
+  void chkerr(herr_t code, std::string_view error);
 
   // Attribute write helpers
   void write_str_attr(H5::H5Object& obj,
                       const std::string& key,
                       const std::string& val);
   void write_bool_attr(H5::H5Object& obj,
-                       const std::string& key,
+                       const char * key,
                        bool val);
   void write_int_attr(H5::H5Object& obj,
                       const std::string& key,
