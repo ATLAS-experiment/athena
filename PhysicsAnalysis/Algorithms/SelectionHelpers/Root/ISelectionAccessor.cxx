@@ -22,7 +22,6 @@
 #include <SelectionHelpers/SelectionReadAccessorInvert.h>
 #include <SelectionHelpers/SelectionWriteAccessorInvert.h>
 #include <exception>
-#include <unordered_map>
 
 //
 // method implementations

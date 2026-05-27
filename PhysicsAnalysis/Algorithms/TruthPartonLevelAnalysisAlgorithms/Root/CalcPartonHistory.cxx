@@ -10,10 +10,7 @@
 #include <xAODEventInfo/EventInfo.h>
 
 #include "AthContainers/ConstDataVector.h"
-#include "PartonHistory/PartonHistoryUtils.h"
-#include "PartonHistory/PartonSchemeConfig.h"
 #include "VectorHelpers/LorentzHelper.h"
-#include "xAODTruth/TruthParticleContainer.h"
 
 #ifdef XAOD_STANDALONE
 #define TDS() evtStore()->tds()
