@@ -1,0 +1,107 @@
+namespace ActsTrk {
+   namespace {
+      template <typename T_SpacePoint>
+      std::span<const xAOD::UncalibratedMeasurement * const> makeMeasurementSpan(const T_SpacePoint &container,
+                                                                                 unsigned int index,
+                                                                                 SpacePointProxy::ConstVoidPtr &element_ptr_cache);
+
+      template <>
+      std::span<const xAOD::UncalibratedMeasurement * const> makeMeasurementSpan(const xAOD::SpacePointContainer &container,
+                                                                                 unsigned int index,
+                                                                                 [[maybe_unused]] SpacePointProxy::ConstVoidPtr &element_ptr_cache) {
+         assert( index < container.size());
+         assert( container[index] != nullptr );
+         const std::vector< const xAOD::UncalibratedMeasurement* >& measurements=container[index]->measurements();
+         return std::span<const xAOD::UncalibratedMeasurement * const>(measurements.begin(),measurements.end());
+      }
+      template <>
+      std::span<const xAOD::UncalibratedMeasurement * const> makeMeasurementSpan(const xAOD::PixelClusterContainer &container,
+                                                                                 unsigned int index,
+                                                                                 SpacePointProxy::ConstVoidPtr &element_ptr_cache) {
+         assert( index < container.size());
+         assert( container[index] != nullptr );
+         element_ptr_cache=container[index];
+         using Ptr_t=const xAOD::UncalibratedMeasurement *;
+         return std::span<const xAOD::UncalibratedMeasurement * const>(reinterpret_cast<const Ptr_t *>(&element_ptr_cache),1ul);
+      }
+
+      template <typename T_SpacePoint>
+      std::optional<float> getSpacePointTime(const T_SpacePoint *);
+
+      template <>
+      std::optional<float> getSpacePointTime(const xAOD::SpacePoint *space_point) {
+         assert( space_point != nullptr);
+         return space_point->t();
+      }
+      template <>
+      std::optional<float> getSpacePointTime([[maybe_unused]] const xAOD::PixelCluster *pixel_cluster) {
+         return 0.f;
+      }
+   }
+   
+   inline std::pair<const SeedContainer::SrcContainerVariant *,unsigned int> SeedContainer::getSrcContainer(unsigned int index) const {
+      assert( !m_srcContainerIndexOffset.empty());
+      assert( m_srcContainerIndexOffset.size() == m_srcContainer.size()+1);
+      unsigned int container_index=m_srcContainer.size(); // i.e. m_srcContainerIndexOffset.size()-1;
+      for (; container_index-->0;) {
+         if (index>=m_srcContainerIndexOffset[container_index]) break;
+      }
+      unsigned int container_element_index_offset = m_srcContainerIndexOffset[container_index];
+      assert( container_element_index_offset <=index );
+      return std::make_pair(&(m_srcContainer[container_index]), index - container_element_index_offset );
+   }
+
+  inline SeedContainer::SpacePointVariant SeedContainer::getSpacePointVariant(unsigned int index) const {
+     auto [containerVariantPtr,inContainerIndex] = getSrcContainer(index);
+     assert( containerVariantPtr);
+     return std::visit([inContainerIndex](const auto &container_dl) -> SpacePointVariant {
+        const auto *container = container_dl.cptr();
+        assert(container);
+        assert( inContainerIndex <container->size());
+        return (*container)[inContainerIndex];
+     },(*containerVariantPtr));
+  }
+   
+   inline std::span<const xAOD::UncalibratedMeasurement * const>
+   SeedContainer::measurementsOfSpacePoint(unsigned int index,
+                                           SpacePointProxy::ConstVoidPtr &element_ptr_cache) const {
+      auto [containerVariantPtr,inContainerIndex] = getSrcContainer(index);
+      return std::visit([&element_ptr_cache, inContainerIndex](const auto &container_dl) {
+         assert( container_dl.cptr());
+         assert( inContainerIndex < container_dl->size());
+         return makeMeasurementSpan( *(container_dl.cptr()), inContainerIndex, element_ptr_cache);
+      },*containerVariantPtr);
+   }
+   inline xAOD::ConstVectorMap<3> SeedContainer::spacePointGlobalPosition(unsigned int index) const {
+      return std::visit([](const auto *space_point) {
+         assert( space_point != nullptr);
+         return space_point->globalPosition();
+      },getSpacePointVariant(index));
+   }
+   inline std::optional<float> SeedContainer::spacePointTime(unsigned int index) const {
+      return std::visit([](const auto *space_point) {
+         assert( space_point != nullptr);
+         return getSpacePointTime(space_point);
+      },getSpacePointVariant(index));
+   }
+
+   inline std::span<const xAOD::UncalibratedMeasurement * const> SpacePointProxy::measurements() const
+   { return container->measurementsOfSpacePoint(index, elementPtrCache); }
+
+   inline xAOD::ConstVectorMap<3> SpacePointProxy::globalPosition() const
+   { return container->spacePointGlobalPosition(index); }
+
+   inline float SpacePointProxy::x() const
+   { return container->spacePointGlobalPosition(index)[0]; }
+
+   inline float SpacePointProxy::y() const
+   { return container->spacePointGlobalPosition(index)[1]; }
+
+   inline float SpacePointProxy::z() const
+   { return container->spacePointGlobalPosition(index)[2]; }
+
+   inline std::optional<float> SpacePointProxy::t() const
+   { return container->spacePointTime(index); }
+
+}
+

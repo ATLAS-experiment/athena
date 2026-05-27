@@ -11,6 +11,7 @@
 #include "xAODInDetMeasurement/SpacePointContainer.h"
 #include "xAODInDetMeasurement/SpacePointAuxContainer.h"
 #include "ActsEvent/SeedContainer.h"
+#include "AthenaKernel/ExtendedEventContext.h"
 #include "src/detail/MeasurementIndex.h"
 #include "src/detail/DuplicateSeedDetector.h"
 #include <vector>
@@ -23,10 +24,11 @@ namespace ActsTrk::detail {
   // DuplicateSeedDetectorTest is a friend of DuplicateSeedDetector, so has access to its internals.
   struct DuplicateSeedDetectorTest {
 
-    static ActsTrk::SeedContainer createSeeds(const xAOD::SpacePointContainer& spacePoints) {
+    static ActsTrk::SeedContainer createSeeds(const EventContext &ctx, const xAOD::SpacePointContainer& spacePoints) {
       ActsTrk::SeedContainer seedContainer;
+      unsigned int offset = seedContainer.addSourceContainer(ctx, spacePoints);
       for (unsigned int i(0u); i+2u<spacePoints.size(); i+=3u) {
-        seedContainer.push_back(std::array{spacePoints.at(i), spacePoints.at(i+1), spacePoints.at(i+2)}, 0.f, 0.f);
+         seedContainer.push_back(SpacePointRange{&seedContainer, std::array{i+offset, offset+i+1u, offset+i+2u}}, 0.f, 0.f);
       }
       return seedContainer;
     }
@@ -45,6 +47,10 @@ namespace ActsTrk::detail {
     }
 
     static void test() {
+      EventIDBase now(0, EventIDBase::UNDEFEVT, EventIDBase::UNDEFNUM, 0, 1);
+      EventContext ctx(1);
+      ctx.setEventID( now );
+
       std::cout << "----------------------------------------------" << std::endl;
       std::cout << "Creating cluster containers ..." << std::endl;
       std::size_t nPixelClusters = 900;
@@ -101,9 +107,9 @@ namespace ActsTrk::detail {
 
       std::cout << "----------------------------------------------" << std::endl;
       std::cout << "Creating seed containers ..." << std::endl;
-      ActsTrk::SeedContainer pixelSeeds = createSeeds( pixelSpacePoints );
+      ActsTrk::SeedContainer pixelSeeds = createSeeds( ctx, pixelSpacePoints );
       std::cout << "- Created " << pixelSeeds.size() << " pixel seeds" << std::endl;
-      ActsTrk::SeedContainer stripSeeds = createSeeds( stripSpacePoints );
+      ActsTrk::SeedContainer stripSeeds = createSeeds( ctx, stripSpacePoints );
       std::cout << "- Created " << stripSeeds.size() << " strip seeds" << std::endl;
 
       assert( pixelSeeds.size() == nPixelSpacePoints/3ul );

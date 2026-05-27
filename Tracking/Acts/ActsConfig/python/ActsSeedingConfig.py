@@ -60,6 +60,14 @@ def ActsPixelSeedingToolCfg(flags,
         [40, 260],
         [140, 260],
         [0, 0]])
+    if 'TrackingGeometryTool' not in kwargs and not flags.Acts.SpacePoints.createPixelSpacePoints :
+      from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+      kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+
+    from InDetConfig.ITkActsHelpers import isFastPrimaryPass
+    if isFastPrimaryPass(flags):
+      kwargs.setdefault('UseMaxVariance', True)
+
     acc.setPrivateTools(CompFactory.ActsTrk.GridTripletSeedingTool(name, **kwargs))
     return acc
 
@@ -324,8 +332,14 @@ def ActsPixelSeedingAlgCfg(flags,
             else:
                 kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsPixelSeedingToolCfg(flags)))
 
+
     kwargs.setdefault("useFastTracking", useFastTracking)
-    kwargs.setdefault('InputSpacePoints', ['ITkPixelSpacePoints_Cached'] if flags.Acts.useCache else ['ITkPixelSpacePoints'])
+    if flags.Acts.SpacePoints.createPixelSpacePoints :
+      kwargs.setdefault('InputSpacePoints', ['ITkPixelSpacePoints_Cached'] if flags.Acts.useCache else ['ITkPixelSpacePoints'])
+    else :
+      kwargs.setdefault('InputSpacePoints', [])
+      kwargs.setdefault('InputPixelCluster', ['ITkPixelClusters'])
+
     kwargs.setdefault('OutputSeeds', 'ActsPixelSeeds')
     kwargs.setdefault('UsePixel', True)
 
@@ -450,10 +464,17 @@ def ActsSeedingCfg(flags,**kwargs) -> ComponentAccumulator:
         kwargs.setdefault('PixelSeedingAlg.useFastTracking', isFastPrimaryPass(flags))
         kwargs.setdefault('PixelSeedingAlg.OutputSeeds', f'{flags.Tracking.ActiveConfig.extension}PixelSeeds')
 
-        pixelSpacePoints = ['ITkPixelSpacePoints_Cached'] if flags.Acts.useCache else ['ITkPixelSpacePoints']        
-        if flags.Tracking.ActiveConfig.isSecondaryPass:
+        if flags.Acts.SpacePoints.createPixelSpacePoints:
+          pixelSpacePoints = ['ITkPixelSpacePoints_Cached'] if flags.Acts.useCache else ['ITkPixelSpacePoints']        
+          if flags.Tracking.ActiveConfig.isSecondaryPass:
             pixelSpacePoints = [f'ITk{flags.Tracking.ActiveConfig.extension.replace("Acts", "")}PixelSpacePoints_Cached'] if flags.Acts.useCache else [f'ITk{flags.Tracking.ActiveConfig.extension.replace("Acts", "")}PixelSpacePoints']
-        kwargs.setdefault('PixelSeedingAlg.InputSpacePoints', pixelSpacePoints)
+          kwargs.setdefault('PixelSeedingAlg.InputSpacePoints', pixelSpacePoints)
+        else :
+          pixelClusters = ['ITkPixelClusters_Cached'] if flags.Acts.useCache else ['ITkPixelClusters']        
+          if flags.Tracking.ActiveConfig.isSecondaryPass:
+            pixelClusters = [f'ITk{flags.Tracking.ActiveConfig.extension.replace("Acts", "")}PixelClusters_Cached'] if flags.Acts.useCache else [f'ITk{flags.Tracking.ActiveConfig.extension.replace("Acts", "")}PixelClusters']
+          
+          kwargs.setdefault('PixelSeedingAlg.InputPixelCluster', pixelClusters)
 
         # Setup the seed to track parameters algorithms either if we persistify them or we want to run the ActsMonitoring
         if flags.Tracking.ActiveConfig.storeTrackSeeds or flags.Acts.Seeds.doAnalysis:

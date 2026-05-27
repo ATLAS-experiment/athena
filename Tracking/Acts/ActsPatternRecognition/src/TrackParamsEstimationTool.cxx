@@ -124,12 +124,12 @@ Acts::FreeVector estimateTrackParamsFromSeed(
   {
     const auto& sp_collection = seed.sp();
     if ( sp_collection.size() < 3 ) return std::nullopt;
-    const xAOD::SpacePoint* bottom_sp = (useTopSp && m_bFieldMode != 2) ? sp_collection.back() : sp_collection.front();
+    ActsTrk::SpacePointProxy  bottom_sp = (useTopSp && m_bFieldMode != 2) ? sp_collection.back() : sp_collection.front();
 
     // Magnetic Field
     ATLASMagneticFieldWrapper magneticField;
     Acts::MagneticFieldProvider::Cache magFieldCache = magneticField.makeCache( magFieldContext );
-    Acts::Vector3 bField = *magneticField.getField( Acts::Vector3(bottom_sp->x(), bottom_sp->y(), bottom_sp->z()),
+    Acts::Vector3 bField = *magneticField.getField( Acts::Vector3(bottom_sp.globalPosition().cast<double>()),
                                                     magFieldCache );
     if (m_bFieldMode == 1) {
         bField[0] = 0.0;

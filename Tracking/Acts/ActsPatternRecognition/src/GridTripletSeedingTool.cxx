@@ -1,8 +1,17 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
 #include "src/GridTripletSeedingTool.h"
+#include "Acts/Utilities/Zip.hpp" // @TODO change to std::views::zip (C++23)
+#include "SpacePointAdapter.h"
+
+namespace {
+   bool isPixelBarrel(Identifier id, const PixelID &pixelId) {
+      Identifier wafer_id = pixelId.wafer_id(id);
+      assert( pixelId.is_barrel(id) == pixelId.is_barrel(wafer_id));
+      return pixelId.is_barrel(wafer_id);
+  }
+}
 
 namespace ActsTrk {
 
@@ -13,7 +22,7 @@ GridTripletSeedingTool::GridTripletSeedingTool(const std::string& type,
 
 StatusCode GridTripletSeedingTool::initialize() {
   ATH_MSG_DEBUG("Initializing " << name() << "...");
-
+  ATH_CHECK(m_trackingGeometryTool.retrieve(DisableTool{m_trackingGeometryTool.empty()}));
   ATH_MSG_DEBUG("Properties Summary:");
   ATH_MSG_DEBUG("   " << m_zBinNeighborsTop);
   ATH_MSG_DEBUG("   " << m_zBinNeighborsBottom);
@@ -287,13 +296,12 @@ StatusCode GridTripletSeedingTool::initialize() {
 }
 
 bool GridTripletSeedingTool::spacePointSelectionFunction(
-    const xAOD::SpacePoint* sp, float r) const {
-  float zabs = std::abs(sp->z());
+    float z, float r, bool isPixelBarrel) const {
+  float zabs = std::abs(z);
   float absCotTheta = zabs / r;
 
   // checking configuration to remove pixel space points
-  Identifier identifier = m_pixelId->wafer_id(sp->elementIdList().at(0));
-  if (m_pixelId->is_barrel(identifier)) {
+  if (isPixelBarrel) {
     if (zabs > 200 && r < 40)
       return false;
 
@@ -388,7 +396,7 @@ std::pair<float, float> GridTripletSeedingTool::retrieveRadiusRangeForMiddle(
 
 StatusCode GridTripletSeedingTool::createSeeds(
     const EventContext& ctx,
-    const std::vector<const xAOD::SpacePointContainer*>& spacePointCollections,
+    const std::vector<ISeedingTool::SourceContainerVariant>& spacePointCollections,
     const Eigen::Vector3f& beamSpotPos, float bFieldInZ,
     ActsTrk::SeedContainer& seedContainer) const {
   (void)ctx;
@@ -400,33 +408,51 @@ StatusCode GridTripletSeedingTool::createSeeds(
                                         logger().cloneWithSuffix("Grid"));
 
   std::size_t totalSpacePoints = 0;
-  for (const xAOD::SpacePointContainer* spacePoints : spacePointCollections) {
-    totalSpacePoints += spacePoints->size();
+  for (const ISeedingTool::SourceContainerVariant &container_variant : spacePointCollections) {
+     std::visit([&totalSpacePoints](const auto *container) {
+        totalSpacePoints += container->size();
+     },container_variant);
   }
 
-  std::vector<const xAOD::SpacePoint*> selectedXAODSpacePoints;
+  std::vector<unsigned int> selectedSpacePointsIndex;
   std::vector<float> selectedSpacePointsR;
-  selectedXAODSpacePoints.reserve(totalSpacePoints);
+  std::vector<std::array<float,2> > selectedSpacePointsVarianceZR;
+  selectedSpacePointsIndex.reserve(totalSpacePoints);
   selectedSpacePointsR.reserve(totalSpacePoints);
+  selectedSpacePointsVarianceZR.reserve(totalSpacePoints);
+  {
+  GeoCache geo_cache = GeoCache::make(ctx, m_trackingGeometryTool.get());
 
-  for (const xAOD::SpacePointContainer* spacePoints : spacePointCollections) {
-    for (const xAOD::SpacePoint* sp : *spacePoints) {
-      float x = static_cast<float>(sp->x() - beamSpotPos[0]);
-      float y = static_cast<float>(sp->y() - beamSpotPos[1]);
-      float z = static_cast<float>(sp->z());
-      float r = std::hypot(x, y);
-      float phi = std::atan2(y, x);
-
-      if (m_useExperimentCuts && !spacePointSelectionFunction(sp, r)) {
-        continue;
-      }
-
-      grid.insert(selectedXAODSpacePoints.size(), phi, z, r);
-      selectedXAODSpacePoints.push_back(sp);
-      selectedSpacePointsR.push_back(r);
-    }
+  for (const ISeedingTool::SourceContainerVariant &container_variant : spacePointCollections) {
+     std::visit([&](const auto *container) {
+        std::size_t container_offset = seedContainer.addSourceContainer(ctx,*container);        
+        for (auto [sp,index] : Acts::zip(*container,std::ranges::iota_view(container_offset, container_offset + container->size()) )) {
+           SpacePointAdapter space_point(sp);
+           xAOD::ConstVectorMap<3> globalPosition(space_point.globalPosition() );
+           Eigen::Vector3f correctedPos = globalPosition - beamSpotPos;
+           float r = std::hypot(correctedPos[0], correctedPos[1]);
+           float phi = std::atan2(correctedPos[1], correctedPos[0]);
+           
+           if (m_useExperimentCuts && !spacePointSelectionFunction(globalPosition[2], r, isPixelBarrel(space_point.identifier(*m_pixelId),*m_pixelId) )) {
+              continue;
+           }
+           assert(selectedSpacePointsIndex.size() == selectedSpacePointsR.size() ) ;
+           assert(selectedSpacePointsR.size() == selectedSpacePointsVarianceZR.size());
+           grid.insert(selectedSpacePointsIndex.size(), phi, globalPosition[2], r);
+           auto cap=[&](std::array<float,2> variance_zr) {
+              if (m_useMaxVariance) {
+                 variance_zr[0] = std::min(variance_zr[0], m_maxVarianceZ.value());
+                 variance_zr[1] = std::min(variance_zr[1], m_maxVarianceR.value());
+              }
+              return variance_zr;
+           };
+           selectedSpacePointsIndex.push_back(index);
+           selectedSpacePointsVarianceZR.push_back(cap(space_point.varianceZR(geo_cache)));
+           selectedSpacePointsR.push_back(r);
+        }
+     },container_variant);
   }
-
+  }
   for (std::size_t i = 0; i < grid.numberOfBins(); ++i) {
     std::ranges::sort(
         grid.at(i), [&](Acts::SpacePointIndex2 a, Acts::SpacePointIndex2 b) {
@@ -448,24 +474,33 @@ StatusCode GridTripletSeedingTool::createSeeds(
   for (std::size_t i = 0; i < grid.numberOfBins(); ++i) {
     std::uint32_t begin = selectedSpacePoints.size();
     for (const Acts::SpacePointIndex2 spIndex : grid.at(i)) {
-      const xAOD::SpacePoint* sp = selectedXAODSpacePoints[spIndex];
-
       auto newSp = selectedSpacePoints.createSpacePoint();
+      assert(spIndex < selectedSpacePointsIndex.size());
       newSp.copyFromIndex() = spIndex;
+      std::visit([this,ctx,&newSp,
+                  &beamSpotPos,
+                  &selectedSpacePointsR,
+                  &selectedSpacePointsVarianceZR,
+                  spIndex,
+                  useDetailedDoubleMeasurementInfo=m_useDetailedDoubleMeasurementInfo
+                  ](const auto *space_point) {
+         xAOD::ConstVectorMap<3> globalPosition(ActsTrk::makeSpacePointAdapter(space_point).globalPosition() );
+         Eigen::Vector3f correctedPos = globalPosition - beamSpotPos;
       newSp.xy() =
-          std::array<float, 2>{static_cast<float>(sp->x() - beamSpotPos[0]),
-                               static_cast<float>(sp->y() - beamSpotPos[1])};
-      newSp.zr() = std::array<float, 2>{static_cast<float>(sp->z()),
+          std::array<float, 2>{correctedPos[0],
+                               correctedPos[1]};
+      newSp.zr() = std::array<float, 2>{globalPosition[2],
                                         selectedSpacePointsR[spIndex]};
-      newSp.varianceZ() = static_cast<float>(sp->varianceZ());
-      newSp.varianceR() = static_cast<float>(sp->varianceR());
-      if (m_useDetailedDoubleMeasurementInfo) {
+      newSp.varianceZ() = selectedSpacePointsVarianceZR[spIndex][0];
+      newSp.varianceR() = selectedSpacePointsVarianceZR[spIndex][1];
+      if (useDetailedDoubleMeasurementInfo) {
+      if constexpr(std::is_same_v<std::remove_cvref_t<decltype(*space_point)>,xAOD::SpacePoint>) {
         Eigen::Vector3f topStripVector =
-            sp->topHalfStripLength() * sp->topStripDirection();
+            space_point->topHalfStripLength() * space_point->topStripDirection();
         Eigen::Vector3f bottomStripVector =
-            sp->bottomHalfStripLength() * sp->bottomStripDirection();
-        Eigen::Vector3f stripCenterDistance = sp->stripCenterDistance();
-        Eigen::Vector3f topStripCenter = sp->topStripCenter();
+            space_point->bottomHalfStripLength() * space_point->bottomStripDirection();
+        Eigen::Vector3f stripCenterDistance = space_point->stripCenterDistance();
+        Eigen::Vector3f topStripCenter = space_point->topStripCenter();
 
         newSp.topStripVector() = std::array<float, 3>{
             topStripVector.x(), topStripVector.y(), topStripVector.z()};
@@ -478,6 +513,8 @@ StatusCode GridTripletSeedingTool::createSeeds(
         newSp.topStripCenter() = std::array<float, 3>{
             topStripCenter.x(), topStripCenter.y(), topStripCenter.z()};
       }
+      }
+      },seedContainer.getSpacePointVariant(selectedSpacePointsIndex[spIndex]));
     }
     std::uint32_t end = selectedSpacePoints.size();
     gridSpacePointRanges.emplace_back(begin, end);
@@ -600,7 +637,8 @@ StatusCode GridTripletSeedingTool::createSeeds(
         Acts::ConstSeedProxy2(seed), [&](const Acts::SpacePointIndex2 spIndex) {
           const Acts::SpacePointIndex2 originalIndex =
               selectedSpacePoints.at(spIndex).copyFromIndex();
-          return selectedXAODSpacePoints[originalIndex];
+          assert( originalIndex < selectedSpacePointsIndex.size());
+          return selectedSpacePointsIndex[originalIndex];
         });
   }
 

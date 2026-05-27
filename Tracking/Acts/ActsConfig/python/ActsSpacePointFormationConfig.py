@@ -34,7 +34,8 @@ def ActsSpacePointCacheCreatorAlgCfg(flags,
                                      name: str = "ActsSpacePointCacheCreatorAlg",
                                      **kwargs: dict) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    kwargs.setdefault("PixelSpacePointCacheKey", "ActsPixelSpacePointCache_Back")
+    if flags.Acts.SpacePoints.createPixelSpacePoints:
+        kwargs.setdefault("PixelSpacePointCacheKey", "ActsPixelSpacePointCache_Back")
     kwargs.setdefault("StripSpacePointCacheKey", "ActsStripSpacePointCache_Back")
     kwargs.setdefault("StripOverlapSpacePointCacheKey", "ActsStripOverlapSpacePointCache_Back")
     acc.addEventAlgo(CompFactory.ActsTrk.Cache.CreatorAlg(name, **kwargs))
@@ -220,14 +221,14 @@ def ActsMainSpacePointFormationCfg(flags,
         acc.merge(ActsSpacePointCacheCreatorAlgCfg(flags, **extractChildKwargs(prefix='SpacePointCacheCreatorAlg.', **kwargs)))
 
     if kwargs['runReconstruction']:
-        if kwargs['processPixels']:
+        if kwargs['processPixels'] and flags.Acts.SpacePoints.createPixelSpacePoints:
             acc.merge(ActsPixelSpacePointFormationAlgCfg(flags,**extractChildKwargs(prefix='PixelSpacePointFormationAlg.', **kwargs)))
             
         if kwargs['processStrips']:
             acc.merge(ActsStripSpacePointFormationAlgCfg(flags, **extractChildKwargs(prefix='StripSpacePointFormationAlg.', **kwargs)))
 
     if kwargs['runPreparation']:
-        if kwargs['processPixels']:
+        if kwargs['processPixels'] and flags.Acts.SpacePoints.createPixelSpacePoints:
             acc.merge(ActsPixelSpacePointPreparationAlgCfg(flags,
                                                            RoIs=RoIs,
                                                            **extractChildKwargs(prefix='PixelSpacePointPreparationAlg.', **kwargs)))
@@ -242,7 +243,7 @@ def ActsMainSpacePointFormationCfg(flags,
             
     # Analysis extensions
     if flags.Acts.SpacePoints.doAnalysis:
-        if kwargs['processPixels']:
+        if kwargs['processPixels'] and flags.Acts.SpacePoints.createPixelSpacePoints:
             from ActsConfig.ActsAnalysisConfig import ActsPixelSpacePointAnalysisAlgCfg
             acc.merge(ActsPixelSpacePointAnalysisAlgCfg(flags, **extractChildKwargs(prefix='PixelSpacePointAnalysisAlg.', **kwargs)))
         if kwargs['processStrips']:

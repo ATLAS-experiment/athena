@@ -41,6 +41,7 @@ StatusCode GenericSeedingAlg::initialize() {
 
   // Read and Write handles
   ATH_CHECK(m_spacePointKey.initialize());
+  ATH_CHECK(m_pixelContainerKey.initialize());
   ATH_CHECK(m_seedKey.initialize());
 
   ATH_CHECK(m_monTool.retrieve(EnableTool{not m_monTool.empty()}));
@@ -91,7 +92,7 @@ StatusCode GenericSeedingAlg::execute(const EventContext& ctx) const {
 
   ATH_MSG_DEBUG("Retrieving elements from " << m_spacePointKey.size()
                                             << " input collections...");
-  std::vector<const xAOD::SpacePointContainer*> allInputCollections;
+  std::vector<ISeedingTool::SourceContainerVariant> allInputCollections;
   allInputCollections.reserve(m_spacePointKey.size());
 
   for (const auto& spacePointKey : m_spacePointKey) {
@@ -99,13 +100,23 @@ StatusCode GenericSeedingAlg::execute(const EventContext& ctx) const {
                                                        << "' ...");
     const xAOD::SpacePointContainer* spCont{nullptr};
     ATH_CHECK(SG::get(spCont, spacePointKey, ctx));
-    allInputCollections.push_back(spCont);
+    allInputCollections.emplace_back(spCont);
     ATH_MSG_DEBUG("    \\__ " << spCont->size() << " elements!");
+  }
+  for (const auto& pixelContainerKey : m_pixelContainerKey) {
+    ATH_MSG_DEBUG("Retrieving from Input Collection '" << pixelContainerKey.key()
+                                                       << "' ...");
+    const xAOD::PixelClusterContainer* clusterContainer{nullptr};
+    ATH_CHECK(SG::get(clusterContainer, pixelContainerKey, ctx));
+    allInputCollections.emplace_back(clusterContainer);
+    ATH_MSG_DEBUG("    \\__ " << clusterContainer->size() << " elements!");
   }
 
   std::size_t totalSpacePoints = 0;
-  for (const xAOD::SpacePointContainer* collection : allInputCollections) {
-    totalSpacePoints += collection->size();
+  for (const auto &abstract_collection : allInputCollections) {
+     std::visit([&totalSpacePoints](const auto &container_dl) {
+        totalSpacePoints += container_dl->size();
+     }, abstract_collection);
   }
 
   ATH_MSG_DEBUG("    \\__ Total input space points: " << totalSpacePoints);

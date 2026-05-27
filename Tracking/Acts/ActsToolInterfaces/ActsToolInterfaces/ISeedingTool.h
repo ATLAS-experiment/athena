@@ -13,11 +13,9 @@
 
 // ACTS EDM
 #include "Acts/Definitions/Algebra.hpp"
-#include "Acts/EventData/SpacePointContainer.hpp"
-#include "Acts/EventData/SpacePointContainer2.hpp"
 #include "ActsEvent/SeedContainer.h"
-#include "xAODInDetMeasurement/SpacePointAuxContainer.h"
 #include "xAODInDetMeasurement/SpacePointContainer.h"
+#include "xAODInDetMeasurement/PixelClusterContainer.h"
 
 namespace ActsTrk {
 
@@ -25,10 +23,12 @@ class ISeedingTool : virtual public IAlgTool {
  public:
   DeclareInterfaceID(ISeedingTool, 1, 0);
 
+  using SourceContainerVariant = std::variant< const xAOD::SpacePointContainer*,
+                                               const xAOD::PixelClusterContainer*>;
+
   virtual StatusCode createSeeds(
       const EventContext& ctx,
-      const std::vector<const xAOD::SpacePointContainer*>&
-          spacePointCollections,
+      const std::vector<SourceContainerVariant>& spacePointCollections,
       const Eigen::Vector3f& beamSpotPos, float bFieldInZ,
       ActsTrk::SeedContainer& seedContainer) const = 0;
 };

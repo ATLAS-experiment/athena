@@ -504,8 +504,9 @@ std::unique_ptr<MutableTrackContainer> GlobalChiSquareFitterTool::fit(
   std::vector<ATLASUncalibSourceLink> sourceLinks;
   sourceLinks.reserve(6);
   
-  for (const xAOD::SpacePoint* sp : seed.sp()) {
-    sourceLinks.insert(sourceLinks.end(), sp->measurements().begin(), sp->measurements().end());
+  for (const ActsTrk::SpacePointProxy sp : seed.sp()) {
+    std::span<const xAOD::UncalibratedMeasurement * const> measurements = sp.measurements();
+    sourceLinks.insert(sourceLinks.end(), measurements.begin(), measurements.end());
   }
   return fit(sourceLinks, initialParams, tgContext, mfContext, calContext, &targetSurface);
 }

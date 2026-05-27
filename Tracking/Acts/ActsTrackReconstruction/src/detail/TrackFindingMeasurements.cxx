@@ -120,8 +120,8 @@ namespace ActsTrk::detail {
                                                           const MeasurementIndex &measurementIndex) const {
     std::unique_ptr<MeasurementRangeListFlat> measurementRangesForced=std::make_unique<ActsTrk::detail::MeasurementRangeListFlat>();
     measurementRangesForced->reserve(seed.sp().size());  // wrong for strip seeds, but just means an extra allocation in this rare case
-    for (const xAOD::SpacePoint *sp : seed.sp()) {
-      for (const xAOD::UncalibratedMeasurement *measurement : sp->measurements()) {
+    for (const ActsTrk::SpacePointProxy sp : seed.sp()) {
+      for (const xAOD::UncalibratedMeasurement *measurement : sp.measurements()) {
         std::size_t idx = measurementIndex.index(*measurement);
         if (!(idx < m_surfaceIndices.size())) {
           // The measurement was not found in the measurementIndex.
