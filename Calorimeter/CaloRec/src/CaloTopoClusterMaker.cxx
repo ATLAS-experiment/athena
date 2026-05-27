@@ -656,7 +656,6 @@ CaloTopoClusterMaker::execute(const EventContext& ctx,
     }
     if ( addCluster) {
       std::unique_ptr<CaloProtoCluster> myCluster = std::make_unique<CaloProtoCluster>(cellCollLink);
-      //CaloProtoCluster* myCluster = new CaloProtoCluster(cellCollLink);
       myCluster->getCellLinks()->reserve(tmpCluster->size());
 
       for (CaloTopoTmpClusterCell* cell : *tmpCluster) {
@@ -685,8 +684,8 @@ CaloTopoClusterMaker::execute(const EventContext& ctx,
   clusColl->reserve(sortClusters.size());
 
   for (const auto& protoCluster: sortClusters) {
-    xAOD::CaloCluster* xAODCluster=new xAOD::CaloCluster();
-    clusColl->push_back(xAODCluster);
+    auto xAODClusterUP = std::make_unique<xAOD::CaloCluster>();
+    xAOD::CaloCluster* xAODCluster=clusColl->push_back(std::move(xAODClusterUP));
     xAODCluster->addCellLink(protoCluster->releaseCellLinks());//Hand over ownership to xAOD::CaloCluster
     xAODCluster->setClusterSize(m_clusterSize);
     CaloClusterKineHelper::calculateKine(xAODCluster,false,true, m_useGPUCriteria); //No weight at this point! 
