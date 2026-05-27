@@ -5,7 +5,7 @@
 /// @author Tadej Novak
 
 #include <EventBookkeeperTools/FilterReporter.h>
-#include <RootCoreUtils/StringUtil.h>
+#include <algorithm>
 #include <TriggerAnalysisAlgorithms/TrigEventSelectionAlg.h>
 #include <xAODEventInfo/EventInfo.h>
 
@@ -29,7 +29,10 @@ StatusCode CP::TrigEventSelectionAlg::initialize()
   if (!m_selectionDecoration.empty()) {
     const std::string prefix{m_selectionDecoration.value() + "_"};
     for (const std::string &chain : m_trigList) {
-      m_selectionAccessors.emplace_back( prefix + RCU::substitute(RCU::substitute(chain, ".", "p"), "-", "_"));
+      std::string chainfix = chain;
+      std::replace(chainfix.begin(), chainfix.end(), '.', 'p');
+      std::replace(chainfix.begin(), chainfix.end(), '-', '_');
+      m_selectionAccessors.emplace_back( prefix + chainfix);
     }
   }
 
