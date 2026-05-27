@@ -725,7 +725,7 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                                     unique_amitags = set()
                                     for amitags in unique_values:
                                         unique_amitags.add(
-                                            "_".join({tag for tag in amitags.split("_") if tag})
+                                            "_".join([tag for tag in amitags.split("_") if tag])
                                         )
                                     # Remove tags that are parents - are contained in other tags
                                     # Such that ["s3681","s3681_d1485"] keeps only the latter
