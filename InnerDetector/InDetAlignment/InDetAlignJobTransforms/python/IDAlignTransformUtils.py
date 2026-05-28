@@ -22,8 +22,10 @@ def addIDAlignArguments(parser):
     
     ## Input file/track setup for accumulate file
     parser.add_argument("--inputRAWFile", nargs = "+", default = trfArgClasses.argBSFile(defaultTestFiles.RAW_RUN3_DATA24, io = "input", type = "RAW"), type = trfArgClasses.argFactory(trfArgClasses.argBSFile, io = "input", type = "RAW"), group = "ID alignment", help='Input RAW file(s)')
-    parser.add_argument("--inputTracksCollection", default = trfArgClasses.argString("CombinedInDetTracks"), type = trfArgClasses.argFactory(trfArgClasses.argString), group = "ID alignment", help='Name of the track collection to use')
-    
+    parser.add_argument("--inputRDOFile", nargs = "+", default = trfArgClasses.argBSFile(defaultTestFiles.RDO_RUN4, io = "input", type = "RDO"), type = trfArgClasses.argFactory(trfArgClasses.argBSFile, io = "input", type = "RDO"), group = "ID alignment", help='Input RDO file(s)')
+    # parser.add_argument("--inputTracksCollection", default = trfArgClasses.argString("CombinedInDetTracks"), type = trfArgClasses.argFactory(trfArgClasses.argString), group = "ID alignment", help='Name of the track collection to use')
+    parser.add_argument("--inputTracksCollection", default = None, type = trfArgClasses.argFactory(trfArgClasses.argString), group = "ID alignment", help='Name of the track collection to use')
+
     ## IO for ITk
     # parser.add_argument("-i", "--input", default = defaultTestFiles.RDO_RUN4, nargs = "+", help='Input file(s)')
 
@@ -79,7 +81,7 @@ def addIDAlignArguments(parser):
     parser.add_argument("--pixelDistortionTag", default = trfArgClasses.argString(""), type = trfArgClasses.argFactory(trfArgClasses.argString), group = "ID alignment", help='Tag to update')
     parser.add_argument("--TRTCalibT0TagCos", default = trfArgClasses.argString(""), type = trfArgClasses.argFactory(trfArgClasses.argString), group = "ID alignment", help='Tag to update')
     parser.add_argument("--TRTCalibRtTagCos", default = trfArgClasses.argString(""), type = trfArgClasses.argFactory(trfArgClasses.argString), group = "ID alignment", help='Tag to update')
-    parser.add_argument("--atlasVersion", default = trfArgClasses.argString(defaultGeometryTags.RUN3), type = trfArgClasses.argFactory(trfArgClasses.argString), group = "ID alignment", help='Global tag')
+    parser.add_argument("--atlasVersion", default = None, type = trfArgClasses.argFactory(trfArgClasses.argString), group = "ID alignment", help='Global tag')
     
     parser.add_argument("--isBFieldOff", const = trfArgClasses.argBool(True), default = trfArgClasses.argBool(False), nargs='?', type = trfArgClasses.argFactory(trfArgClasses.argBool), group = "ID alignment", help='Check if Bfield is off')
     parser.add_argument("--isCosmics", const = trfArgClasses.argBool(True), default = trfArgClasses.argBool(False), nargs='?', type = trfArgClasses.argFactory(trfArgClasses.argBool), group = "ID alignment", help='Check if cosmics run')

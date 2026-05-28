@@ -8,6 +8,8 @@ import re
 import os
 
 from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
+import PyJobTransforms.trfArgClasses as trfArgClasses
+from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags, defaultTestFiles
 
 from AthenaCommon.Logging import logging
 msg = logging.getLogger('IDAlign')
@@ -435,17 +437,39 @@ def fromRunArgsInDet(runArgs, flags):
         
     import sys
     sys.exit(sc.isFailure())
+
+def isITkGeometry(flags):
+    return flags.GeoModel.Run > LHCPeriod.Run3
+
+def isITkFromDef(runArgs):
+    return (("RUN4" in str(runArgs.inputRAWFile)) or getattr(runArgs, "alignITk", True) or getattr(runArgs, "alignITkPixel", True)) or (getattr(runArgs, "alignITk", True))
     
+def applyDetectorDefaults(runArgs, flags):
+
+    isITk = isITkFromDef(runArgs)
+
+    if getattr(runArgs, "atlasVersion", None) is None:
+        runArgs.atlasVersion = (defaultGeometryTags.RUN4 if isITk else defaultGeometryTags.RUN3)
+
+    if getattr(runArgs, "inputTracksCollection", None) is None:
+        runArgs.inputTracksCollection = ("CombinedITkTracks" if isITk else "CombinedInDetTracks")
+
+    if getattr(runArgs, "globalTag", None) is None:
+        runArgs.atlasVersion = (defaultConditionsTags.RUN4_DATA if isITk else defaultConditionsTags.RUN3_DATA)
+
+
 
 def fromRunArgs(runArgs):
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
 
+    applyDetectorDefaults(runArgs, flags)
+
     flags.GeoModel.Align.Dynamic = True
     flags.GeoModel.AtlasVersion = runArgs.atlasVersion
 
-    if flags.GeoModel.Run > LHCPeriod.Run3:
+    if isITkGeometry(flags):
         print("perdiod > 3")
         flags = configureITkFlags(runArgs, flags)
         return fromRunArgsITk(runArgs, flags)
