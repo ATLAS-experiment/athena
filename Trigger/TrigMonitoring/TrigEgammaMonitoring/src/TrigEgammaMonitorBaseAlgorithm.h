@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigEgammaMonitorBaseAlgorithm_h 
@@ -129,9 +129,9 @@ class TrigEgammaMonitorBaseAlgorithm : public AthMonitorAlgorithm {
     /*! Get the trig info map */
     const std::map<std::string,TrigInfo>& getTrigInfoMap() { return m_trigInfo; } 
     /*! Get offline electron decision */
-    bool ApplyElectronPid(const xAOD::Electron *eg,const std::string&) const;
+    bool ApplyElectronPid(const EventContext& ctx, const xAOD::Electron *eg,const std::string&) const;
     /*! Get offline electron decision */
-    bool ApplyPhotonPid(const xAOD::Photon *eg,const std::string&) const;
+    bool ApplyPhotonPid(const EventContext& ctx, const xAOD::Photon *eg,const std::string&) const;
     /*! Get the TDT  */
     const ToolHandle<Trig::TrigDecisionTool>& tdt() const {return m_trigdec;};
     /*! Get the e/g match tool */

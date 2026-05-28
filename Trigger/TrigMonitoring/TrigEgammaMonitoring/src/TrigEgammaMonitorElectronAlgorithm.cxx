@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigEgammaMonitorElectronAlgorithm.h"
@@ -83,9 +83,9 @@ StatusCode TrigEgammaMonitorElectronAlgorithm::fillHistograms( const EventContex
         }
 
 
-        fillDistributions( pairObjsRaw, info );
-        fillEfficiencies( pairObjsRaw, info, false);
-        fillResolutions( pairObjsRaw, info );
+        fillDistributions( ctx, pairObjsRaw, info );
+        fillEfficiencies( ctx, pairObjsRaw, info, false );
+        fillResolutions( ctx, pairObjsRaw, info );
 
         ATH_MSG_DEBUG("End Chain Analysis ============================= " << trigger);
     } // End loop over trigger list
@@ -141,7 +141,7 @@ StatusCode TrigEgammaMonitorElectronAlgorithm::executeNavigation( const EventCon
       }
 
       if(m_forcePidSelection){///default is true
-        if(!ApplyElectronPid(eg,pidName)){
+        if(!ApplyElectronPid(ctx,eg,pidName)){
 	        ATH_MSG_DEBUG("Fails ElectronID "<< pidName);
 	        continue;
 	      }
@@ -153,7 +153,7 @@ StatusCode TrigEgammaMonitorElectronAlgorithm::executeNavigation( const EventCon
       }
 
       if(m_forceVetoVeryLoose){///default is false
-        bool veto = ApplyElectronPid(eg,"lhvloose"); 
+        bool veto = ApplyElectronPid(ctx,eg,"lhvloose");
         if(veto)  continue;
       }
 

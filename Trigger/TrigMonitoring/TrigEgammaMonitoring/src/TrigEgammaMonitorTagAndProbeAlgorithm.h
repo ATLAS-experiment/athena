@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TrigEgammaMonitorTagAndProbeAlgorithm_H
 #define TrigEgammaMonitorTagAndProbeAlgorithm_H
@@ -45,7 +45,7 @@ class TrigEgammaMonitorTagAndProbeAlgorithm: public TrigEgammaMonitorAnalysisAlg
     /*! at least one chain should pass. e28_tight_iloose? */
     bool minimalTriggerRequirement () const;
     /*! Tag Electron selection */
-    bool isTagElectron( const ToolHandle<GenericMonitoringTool>& monGroup, const xAOD::Electron *el) const;
+    bool isTagElectron(const EventContext& ctx, const ToolHandle<GenericMonitoringTool>& monGroup, const xAOD::Electron *el) const;
     /*! Probe selection */
     bool isGoodProbeElectron( const ToolHandle<GenericMonitoringTool>& monGroup, const xAOD::Electron *el, const xAOD::JetContainer *) const;
     /*! Return pseudo-lifetime of Jpsi */
@@ -53,7 +53,7 @@ class TrigEgammaMonitorTagAndProbeAlgorithm: public TrigEgammaMonitorAnalysisAlg
     /*! Calculate the displacement of the Jpsi vertex w.r.t. the primary vertex in the transverse plane */
     double simple_lxy(int ,double, double, double , double , double , double , double, double ) const;
     /*! Rerun offline selection */
-    void dressPid(const xAOD::Electron *eg) const;
+    void dressPid(const EventContext& ctx, const xAOD::Electron *eg) const;
     
 
     /** Properties **/
