@@ -138,11 +138,19 @@ def JETM42CoreCfg(flags, name, StreamName, TriggerListsHelper):
     from DerivationFrameworkJetEtMiss.JetCommonConfig import addJetsToSlimmingTool
     addJetsToSlimmingTool(JETM42SlimmingHelper, jetOutputList, JETM42SlimmingHelper.SmartCollections)
 
+    JETM42SlimmingHelper.SmartCollections += [
+        'AntiKt4TruthJets',
+    ]
+
     JETM42SlimmingHelper.ExtraVariables += [
         'PrimaryVertices.trackWeights',
-        'HLT_ftfChargedParticleFlowObjectsAuxDyn.charge.chargedObjectLinks.chargedObjectWeights.eta.m.otherObjectLinks.otherObjectWeights.phi.pt.signalType.vertexType',
-        'HLT_ftfNeutralParticleFlowObjectsAuxDyn.charge.chargedObjectLinks.chargedObjectWeights.eta.m.otherObjectLinks.otherObjectWeights.phi.pt.signalType.vertexType',
+        'HLT_ftfChargedParticleFlowObjects.charge.chargedObjectLinks.chargedObjectWeights.eta.m.otherObjectLinks.otherObjectWeights.phi.pt.signalType.vertexType',
+        'HLT_ftfNeutralParticleFlowObjects.charge.chargedObjectLinks.chargedObjectWeights.eta.m.otherObjectLinks.otherObjectWeights.phi.pt.signalType.vertexType',
+        'AntiKt4TruthDressedWZJets.IsoFixedCone5Pt',
+        'AntiKt4TruthJets.IsoFixedCone5Pt',
+        'AntiKt4EMPFlowJets.IsoFixedCone5PtPUsub',
     ]
+
 
     # Pass through all trigger content
     JETM42SlimmingHelper.IncludeFullTriggerEDMLevel = "ESD"
