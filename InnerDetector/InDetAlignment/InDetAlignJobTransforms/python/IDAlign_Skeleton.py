@@ -129,8 +129,12 @@ def configureInDetFlags(runArgs, flags):
     flags.InDet.Align.accumulate = runArgs.accumulate
     flags.InDet.Align.baseDir = os.path.abspath(runArgs.baseDir)
     flags.InDet.Align.inputTracksCollection = runArgs.inputTracksCollection
-    flags.Input.Files = [os.path.abspath(inputFile) for inputFile in runArgs.inputRAWFile]
     
+    if hasattr(runArgs, "inputRDOFile"):
+        flags.Input.Files = [os.path.abspath(inputFile) for inputFile in runArgs.inputRDOFile]
+    else:
+        flags.Input.Files = [os.path.abspath(inputFile) for inputFile in runArgs.inputRAWFile]
+
     if runArgs.accumulate:
         if hasattr(runArgs, "outputTFile"):
             flags.InDet.Align.outputTFile = runArgs.outputTFile
@@ -233,8 +237,7 @@ def configureITkFlags(runArgs, flags):
         flags.ITk.Align.alignITkStrip = runArgs.alignITkStrip
 
     flags.addFlag("ConstrainedTrackProvider.InputTracksCollection", runArgs.inputTracksCollection)
-    flags.Input.Files = [os.path.abspath(inputFile) for inputFile in runArgs.inputRAWFile]
-    #flags.Input.Files = runArgs.input
+    flags.Input.Files = [os.path.abspath(inputFile) for inputFile in runArgs.inputRDOFile]
 
     flags.ITk.Align.writeSilicon = False
 
@@ -441,12 +444,12 @@ def fromRunArgsInDet(runArgs, flags):
 def isITkGeometry(flags):
     return flags.GeoModel.Run > LHCPeriod.Run3
 
-def isITkFromDef(runArgs):
-    return (("RUN4" in str(runArgs.inputRAWFile)) or getattr(runArgs, "alignITk", True) or getattr(runArgs, "alignITkPixel", True)) or (getattr(runArgs, "alignITk", True))
+def isITkFromDef(runArgs, flags):
+    return ((flags.Input.Format == Format.POOL) or ("RUN4" in str(runArgs.inputRAWFile)) or getattr(runArgs, "alignITk", True) or getattr(runArgs, "alignITkPixel", True)) or (getattr(runArgs, "alignITk", True))
     
 def applyDetectorDefaults(runArgs, flags):
 
-    isITk = isITkFromDef(runArgs)
+    isITk = isITkFromDef(runArgs, flags)
 
     if getattr(runArgs, "atlasVersion", None) is None:
         runArgs.atlasVersion = (defaultGeometryTags.RUN4 if isITk else defaultGeometryTags.RUN3)
@@ -455,7 +458,7 @@ def applyDetectorDefaults(runArgs, flags):
         runArgs.inputTracksCollection = ("CombinedITkTracks" if isITk else "CombinedInDetTracks")
 
     if getattr(runArgs, "globalTag", None) is None:
-        runArgs.atlasVersion = (defaultConditionsTags.RUN4_DATA if isITk else defaultConditionsTags.RUN3_DATA)
+        runArgs.globalTag = (defaultConditionsTags.RUN4_MC if isITk else defaultConditionsTags.RUN3_DATA)
 
 
 

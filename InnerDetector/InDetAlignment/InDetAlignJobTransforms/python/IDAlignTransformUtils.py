@@ -22,7 +22,7 @@ def addIDAlignArguments(parser):
     
     ## Input file/track setup for accumulate file
     parser.add_argument("--inputRAWFile", nargs = "+", default = trfArgClasses.argBSFile(defaultTestFiles.RAW_RUN3_DATA24, io = "input", type = "RAW"), type = trfArgClasses.argFactory(trfArgClasses.argBSFile, io = "input", type = "RAW"), group = "ID alignment", help='Input RAW file(s)')
-    parser.add_argument("--inputRDOFile", nargs = "+", default = trfArgClasses.argBSFile(defaultTestFiles.RDO_RUN4, io = "input", type = "RDO"), type = trfArgClasses.argFactory(trfArgClasses.argBSFile, io = "input", type = "RDO"), group = "ID alignment", help='Input RDO file(s)')
+    parser.add_argument("--inputRDOFile", nargs = "+", default = None, type = trfArgClasses.argFactory(trfArgClasses.argBSFile, io = "input", type = "RDO"), group = "ID alignment", help='Input RDO file(s)')
     # parser.add_argument("--inputTracksCollection", default = trfArgClasses.argString("CombinedInDetTracks"), type = trfArgClasses.argFactory(trfArgClasses.argString), group = "ID alignment", help='Name of the track collection to use')
     parser.add_argument("--inputTracksCollection", default = None, type = trfArgClasses.argFactory(trfArgClasses.argString), group = "ID alignment", help='Name of the track collection to use')
 
@@ -65,7 +65,7 @@ def addIDAlignArguments(parser):
     parser.add_argument("--threads", default = 1, type = int, help='Number of threads')
 
     ## Tags
-    parser.add_argument("--globalTag", default = trfArgClasses.argString(defaultConditionsTags.RUN3_DATA), type = trfArgClasses.argFactory(trfArgClasses.argString), group = "ID alignment", help='Global tag')
+    parser.add_argument("--globalTag", default = None, type = trfArgClasses.argFactory(trfArgClasses.argString), group = "ID alignment", help='Global tag')
     parser.add_argument("--beamSpotTag", default = trfArgClasses.argString(""), type = trfArgClasses.argFactory(trfArgClasses.argString), group = "ID alignment", help='Tag to update')
     parser.add_argument("--L1IDTag", default = trfArgClasses.argString(""), type = trfArgClasses.argFactory(trfArgClasses.argString), group = "ID alignment", help='Tag to update')
     parser.add_argument("--L2PIXTag", default = trfArgClasses.argString(""), type = trfArgClasses.argFactory(trfArgClasses.argString), group = "ID alignment", help='Tag to update')
