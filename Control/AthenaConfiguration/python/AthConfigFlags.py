@@ -801,7 +801,7 @@ class AthConfigFlags(object):
                 continue
             try:
                 self.fillFromString(arg)
-            except KeyError as e:
+            except (KeyError,ValueError) as e:
                 if return_unknown:
                     unknown_args += [arg]
                 else:
