@@ -84,6 +84,7 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
   const float cut_zMinU = min_z0 + maxOuterRadius*roi.dzdrMinus();
   const float cut_zMaxU = max_z0 + maxOuterRadius*roi.dzdrPlus();
 
+
   const float ptCoeff = 0.29997*1.9972/2.0;// ~0.3*B/2 - assuming nominal field of 2*T
 
   float tripletPtMin = 0.8*m_minPt;//correction due to limited pT resolution
@@ -121,14 +122,14 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
       float rb2 = B2.getMaxBinRadius();
     
       if(m_useEtaBinning) {
-	deltaPhi = min_deltaPhi + dphi_coeff*std::fabs(rb2-rb1);	
+	      deltaPhi = min_deltaPhi + dphi_coeff*std::fabs(rb2-rb1);	
       }
 
       unsigned int first_it = 0;
 
       for(unsigned int n1Idx = 0;n1Idx<B1.m_vn.size();n1Idx++) {//loop over nodes in Layer 1
 
-	std::vector<unsigned int>& v1In = B1.m_in[n1Idx];   
+	std::vector<unsigned int>& v1In = B1.m_in[n1Idx];
 
 	if(v1In.size() >= MAX_SEG_PER_NODE) continue;
       
@@ -151,6 +152,7 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 	    first_it = n2PhiIdx;
 	    continue;
 	  }
+  
 	  if(phi2 > maxPhi) break;
 	
 	  unsigned int n2Idx = B2.m_vPhiNodes[n2PhiIdx].second;
@@ -178,21 +180,25 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 	    continue;
 	  }
 	
-	  if(ftau < n1pars[0]) continue;
-	  if(ftau > n1pars[1]) continue;
+	  //if(ftau < n1pars[0]) continue;
+	  //if(ftau > n1pars[1]) continue;
 
-	  if(ftau < n2pars[0]) continue;
-	  if(ftau > n2pars[1]) continue;
+	  //if(ftau < n2pars[0]) continue;
+	  //if(ftau > n2pars[1]) continue;
 		
 	  if (m_doubletFilterRZ) {
 		  
 	    float z0 = z1 - r1*tau;
-	  
-	    if(z0 < min_z0 || z0 > max_z0) continue;
-	  
+
+	    if(z0 < min_z0 || z0 > max_z0) {
+        continue;
+      }
+
 	    float zouter = z0 + maxOuterRadius*tau;
 	  
-	    if(zouter < cut_zMinU || zouter > cut_zMaxU) continue;                
+	    if(zouter < cut_zMinU || zouter > cut_zMaxU){
+        continue;  
+      }              
 	  }
 		
 	  float curv = (phi2-phi1)/dr;
@@ -239,7 +245,7 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 	  
 	  float dPhi2 = curv*r2;
 	  float dPhi1 = curv*r1;
-	
+
 	  if(nEdges < m_nMaxEdges) {
 	  
 	    edgeStorage.emplace_back(B1.m_vn[n1Idx], B2.m_vn[n2Idx], exp_eta, curv, phi1 + dPhi1);
@@ -259,24 +265,24 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 	      if(pS->m_nNei >= N_SEG_CONNS) continue;
 	    
 	      float tau_ratio = pS->m_p[0]*uat_2 - 1.0f;
-	      
-	      if(std::abs(tau_ratio) > cut_tau_ratio_max){//bad match
-		continue;
+
+	      if(std::fabs(tau_ratio) > cut_tau_ratio_max){//bad match
+		      continue;
 	      }
 	      
 	      float dPhi =  Phi2 - pS->m_p[2];
 	      
 	      if(dPhi<-M_PI) dPhi += M_2PI;
 	      else if(dPhi>M_PI) dPhi -= M_2PI;
-	      
+
 	      if(dPhi < -cut_dphi_max || dPhi > cut_dphi_max) {
-		continue;
+		      continue;
 	      }
             
 	      float dcurv = curv2 - pS->m_p[1];
             
 	      if(dcurv < -cut_dcurv_max || dcurv > cut_dcurv_max) {
-		continue;
+		      continue;
 	      }
             
 	      pS->m_vNei[pS->m_nNei++] = outEdgeIdx;
@@ -291,7 +297,9 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
     } //loop over bins in Layer 2
   } //loop over bin groups
 
+
   return std::make_pair(nEdges, nConnections);
+
 }
 
 int SeedingToolBase::runCCA(int nEdges, std::vector<TrigFTF_GNNR3_Edge>& edgeStorage) const {

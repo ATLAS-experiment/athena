@@ -640,10 +640,6 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
     } else {
 
       if (m_useGBTSeedingTool) {
-        
-        //useTracklets = true; // needed for future development
-
-        ATH_MSG_WARNING("This code is under development, not be used for any real physics");
 
         TrigInDetTrackSeedingResult seed_result = m_seedingTool->findSeeds(roi, new_tracklets, ctx);
       
@@ -655,7 +651,6 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
           ATH_MSG_DEBUG("REGTEST / Found " << mnt_roi_nSPs << " space points.");
           ATH_MSG_DEBUG("REGTEST / Found " << mnt_roi_nSPsPIX << " Pixel space points.");
           ATH_MSG_DEBUG("REGTEST / Found " << mnt_roi_nSPsSCT << " SCT space points.");
-          m_countRoIwithEnoughHits++;
         }
         else {
           ATH_MSG_DEBUG("No tracks found - too few hits in ROI to run " << mnt_roi_nSPs);
@@ -691,9 +686,10 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
     //GPU offloading ends ...
   }
 
-  //unsigned int nTrackSeeds = useTracklets ? new_tracklets.size() : triplets.size();
+  unsigned int nTrackSeeds = m_useGBTSeedingTool ? new_tracklets.size() : triplets.size();
 
   ATH_MSG_DEBUG("number of triplets: " << triplets.size());
+
   mnt_timer_TripletMaking.stop();
   mnt_roi_lastStageExecuted = 4;
 
@@ -724,26 +720,35 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
   int disTrk_n_disFailTrks=0;
   int disTrk_n_disFailTrks_cleaning=0;
 
-  for(unsigned int tripletIdx=0;tripletIdx!=triplets.size();tripletIdx++) {
+  for(unsigned int seedIdx=0;seedIdx!=nTrackSeeds;seedIdx++) {
 
-    const TrigInDetTriplet &seed = triplets[tripletIdx];
+    std::vector<const Trk::SpacePoint*> spVec;
+  
+    if( m_useGBTSeedingTool && (!new_tracklets.empty())) { //create an n-SP seed 
+      spVec = new_tracklets[seedIdx].seed();
+    }
+    else {
+    
+      const TrigInDetTriplet &seed = triplets[seedIdx];
+      const Trk::SpacePoint* osp1 = seed.s1().offlineSpacePoint();
+      const Trk::SpacePoint* osp2 = seed.s2().offlineSpacePoint();
+      const Trk::SpacePoint* osp3 = seed.s3().offlineSpacePoint();
 
-    const Trk::SpacePoint* osp1 = seed.s1().offlineSpacePoint();
-    const Trk::SpacePoint* osp2 = seed.s2().offlineSpacePoint();
-    const Trk::SpacePoint* osp3 = seed.s3().offlineSpacePoint();
+      spVec = {osp1, osp2, osp3};//create a 3-SP seed
+    }
 
+    //vec_seedSize.push_back(spVec.size());//monitoring seed length for GBTS seeding
+ 
     if(m_checkSeedRedundancy) {
       //check if clusters do not belong to any track
       std::vector<Identifier> clusterIds;
-      extractClusterIds(osp1, clusterIds);
-      extractClusterIds(osp2, clusterIds);
-      extractClusterIds(osp3, clusterIds);
+      extractClusterIds(spVec.at(0), clusterIds);
+      extractClusterIds(spVec.at(1), clusterIds);
+      extractClusterIds(spVec.at(2), clusterIds);
       if(usedByAnyTrack(clusterIds, siClusterMap)) {
-        continue;
+	    continue;
       }
     }
-
-    std::vector<const Trk::SpacePoint*> spVec = {osp1, osp2, osp3};
 
     ++mnt_roi_nSeeds;
 
@@ -757,8 +762,9 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
     else {
        tracksFail = tracksAll;
     }
-    if( m_doDisappearingTrk ) {
+    if( m_doDisappearingTrk) {
        ATH_MSG_VERBOSE("size of tracks=" << tracks.size() << ", tracksFail=" << tracksFail.size() << ": resultCode=" << resultCode);
+       const TrigInDetTriplet &seed = triplets[seedIdx];
        for(std::list<Trk::Track*>::const_iterator t=tracks.begin(); t!=tracks.end(); ++t) {
 	  if( ! (*t) ) continue;
 	  m_trackSummaryTool->updateTrack(ctx, **t);
