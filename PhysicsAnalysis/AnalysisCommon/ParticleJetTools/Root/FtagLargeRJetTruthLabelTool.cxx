@@ -39,15 +39,24 @@ StatusCode FtagLargeRJetTruthLabelTool::decorate(const xAOD::JetContainer& jets)
   auto ptComp = [](const xAOD::TruthParticle* a, const xAOD::TruthParticle* b) {
     return a->pt() < b->pt();
   };
-
+  //construct 'Ghost' strings before loop
+  const std::string gHBosons{"GhostHBosons"};
+  const std::string gTQuarks{"GhostTQuarksFinal"};
+  const std::string gZBosons{"GhostZBosons"};
+  const std::string gWBosons{"GhostWBosons"};
+  const std::string gBHadrons{"GhostBHadronsFinal"};
+  const std::string gCHadrons{"GhostCHadronsFinal"};
+  const std::string gTaus{"GhostTausFinal"};
+  const std::string gExtendedTruthLabel{"HadronGhostExtendedTruthLabelID"};
+  //
   for (const xAOD::Jet* jet : jets) {
-    std::vector<const xAOD::TruthParticle*> ghostH   = jet->getAssociatedObjects<xAOD::TruthParticle>("GhostHBosons");
-    std::vector<const xAOD::TruthParticle*> ghostTop = jet->getAssociatedObjects<xAOD::TruthParticle>("GhostTQuarksFinal");
-    std::vector<const xAOD::TruthParticle*> ghostZ   = jet->getAssociatedObjects<xAOD::TruthParticle>("GhostZBosons");
-    std::vector<const xAOD::TruthParticle*> ghostW   = jet->getAssociatedObjects<xAOD::TruthParticle>("GhostWBosons");
-    std::vector<const xAOD::TruthParticle*> ghostB   = jet->getAssociatedObjects<xAOD::TruthParticle>("GhostBHadronsFinal");
-    std::vector<const xAOD::TruthParticle*> ghostC   = jet->getAssociatedObjects<xAOD::TruthParticle>("GhostCHadronsFinal");
-    std::vector<const xAOD::TruthParticle*> ghostTau = jet->getAssociatedObjects<xAOD::TruthParticle>("GhostTausFinal");
+    std::vector<const xAOD::TruthParticle*> ghostH   = jet->getAssociatedObjects<xAOD::TruthParticle>(gHBosons);
+    std::vector<const xAOD::TruthParticle*> ghostTop = jet->getAssociatedObjects<xAOD::TruthParticle>(gTQuarks);
+    std::vector<const xAOD::TruthParticle*> ghostZ   = jet->getAssociatedObjects<xAOD::TruthParticle>(gZBosons);
+    std::vector<const xAOD::TruthParticle*> ghostW   = jet->getAssociatedObjects<xAOD::TruthParticle>(gWBosons);
+    std::vector<const xAOD::TruthParticle*> ghostB   = jet->getAssociatedObjects<xAOD::TruthParticle>(gBHadrons);
+    std::vector<const xAOD::TruthParticle*> ghostC   = jet->getAssociatedObjects<xAOD::TruthParticle>(gCHadrons);
+    std::vector<const xAOD::TruthParticle*> ghostTau = jet->getAssociatedObjects<xAOD::TruthParticle>(gTaus);
 
     // Origin priority: H > top > Z > W > QCD
     int originPdgId = 0;
@@ -66,7 +75,7 @@ StatusCode FtagLargeRJetTruthLabelTool::decorate(const xAOD::JetContainer& jets)
 
     // Extended truth label encodes tau-pair decay mode:
     // 1515 = had-had, 151511 = had + tau->e, 151513 = had + tau->mu
-    static const SG::AuxElement::ConstAccessor<int> accExtLabel("HadronGhostExtendedTruthLabelID");
+    static const SG::AuxElement::ConstAccessor<int> accExtLabel(gExtendedTruthLabel);
     int extLabel = accExtLabel.isAvailable(*jet) ? accExtLabel(*jet) : 0;
 
     FtagLargeRLabel::TypeEnum label = FtagLargeRLabel::UNKNOWN;

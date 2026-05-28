@@ -45,14 +45,23 @@ namespace {
   }
 
   // debugging functions
-  std::string join(const std::vector<std::string>& v, const std::string& sep = ", ") {
+  std::string
+  join(const std::vector<std::string>& v, std::string_view sep = ", "){
     std::string out;
-    for (unsigned int pos = 0; pos < v.size(); pos++) {
-      out.append(v.at(pos));
-      if (pos + 1 < v.size()) out.append(sep);
+    if (v.empty()) return out;
+    auto totalSize = (v.size() - 1) * sep.size();
+    for (const auto& s: v) {
+      totalSize += s.size();
+    }
+    out.reserve(totalSize);
+    out.append(v.front());
+    for (std::size_t pos = 1; pos < v.size(); ++pos) {
+      out.append(sep);
+      out.append(v[pos]);
     }
     return out;
   }
+  //
   template <typename T>
   std::vector<std::string> stringify(const T& container) {
     std::vector<std::string> out;

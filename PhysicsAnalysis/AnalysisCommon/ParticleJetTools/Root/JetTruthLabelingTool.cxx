@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ParticleJetTools/JetTruthLabelingTool.h"
@@ -289,7 +289,6 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
         return StatusCode::FAILURE;
       }
     }
-
     /// Find matched truth jet
     float dRmin = 9999;
     float ghostFracNominal = 9999;
@@ -300,6 +299,9 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
     // Ensure that the reco jet has at least one constituent
     // (and thus a well-defined four-vector)
     if(jet->numConstituents() > 0){
+      //accessor used in loop
+      const SG::ConstAccessor<float> accGhostTruthPt("GhostTruthPt");
+      //
       for ( const xAOD::Jet* truthJet : *truthJets ) {
           // Calculate DR and GF values. Both are used regardless of the matching option.
           // DR
@@ -307,7 +309,6 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
           /// If parent jet has been retrieved, calculate dR w.r.t. it instead
           if (parent) dR = parent->p4().DeltaR(truthJet->p4());
           // GF
-          static const SG::ConstAccessor<float> accGhostTruthPt("GhostTruthPt");
           float ghostTruthPt = accGhostTruthPt(*jet);
           float ghostPtFraction = (ghostTruthPt / (truthJet->pt()));
           if (m_useGhostJetMatch) {
@@ -384,7 +385,7 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
         }
       }
       // If no matched jet found or matched jet has no corresponding groomed jet, use dR matching
-      if ( !matchTruthGroomedJet ) {
+      if ( !matchTruthGroomedJet && parent != nullptr) {
         for ( const xAOD::Jet* truthGroomedJet : *truthGroomedJets ) {
 	        float dR = parent->p4().DeltaR(truthGroomedJet->p4());
 	        /// If m_dRTruthJet < 0, the closest truth jet is used as matched jet. Otherwise, only match if dR < m_dRTruthJet
@@ -517,7 +518,7 @@ float JetTruthLabelingTool::getTopSplit23Cut( float pt ) const {
   return split23;
 }
 
-int JetTruthLabelingTool::getNGhostParticles( const xAOD::Jet &jet, std::string collection ) const {
+int JetTruthLabelingTool::getNGhostParticles( const xAOD::Jet &jet, const std::string & collection ) const {
 
   int nMatchPart = 0;
 
