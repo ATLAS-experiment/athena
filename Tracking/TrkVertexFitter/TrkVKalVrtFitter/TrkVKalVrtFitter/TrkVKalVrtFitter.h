@@ -307,13 +307,15 @@ namespace Trk{
                                      dvect& ImpactError,
                                      IVKalState& istate) const override final;
 
-        virtual double VKalGetImpact(const xAOD::TrackParticle*,
+        virtual double VKalGetImpact(const EventContext& ctx,
+                                     const xAOD::TrackParticle*,
                                      const Amg::Vector3D& Vertex,
                                      const long int Charge,
                                      dvect& Impact,
                                      dvect& ImpactError) const override final;
 
-        virtual double VKalGetImpact(const Trk::Perigee*,
+        virtual double VKalGetImpact(const EventContext& ctx,
+                                     const Trk::Perigee*,
                                      const Amg::Vector3D& Vertex,
                                      const long int Charge,
                                      dvect& Impact,

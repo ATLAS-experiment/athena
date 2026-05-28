@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file JetTagTools/test/ClassifiedTrackTaggerTool_test.cxx
@@ -97,7 +97,7 @@ xAOD::TrackParticle makeTP(int i)
 }
 
 
-void testDefaultTCT (Analysis::IClassifiedTrackTaggerTool& cttTool)
+void testDefaultTCT (const EventContext& ctx, Analysis::IClassifiedTrackTaggerTool& cttTool)
 {
   std::cout << "test CTT with default TCT training\n";
   xAOD::TrackParticle TP1 = makeTP(1);  
@@ -121,7 +121,7 @@ void testDefaultTCT (Analysis::IClassifiedTrackTaggerTool& cttTool)
   //float predCTTScore = -0.22773;
   float predCTTScore = -0.335793;
   std::cout << "[INFO]: Retrieving CTT score "<< std::endl;
-  float cttScore = cttTool.bJetWgts(v_tp, pv, jet);
+  float cttScore = cttTool.bJetWgts(ctx, v_tp, pv, jet);
   assert(Athena_test::isEqual(cttScore,predCTTScore));
 
   std::cout << "testDefaultTCT is OK" << std::endl;
@@ -186,7 +186,7 @@ int main()
   std::cout << "JetTagTools/ClassifiedTrackTaggerTool_test retrieve tool \n";
 
 
-  testDefaultTCT (*cttTool);
+  testDefaultTCT (ctx, *cttTool);
 
   return 0;
 }

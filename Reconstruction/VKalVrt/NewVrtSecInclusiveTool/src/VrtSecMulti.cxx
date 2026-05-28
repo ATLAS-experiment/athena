@@ -330,7 +330,7 @@ namespace Rec{
           for(i=0;i<nth;i++) {
              j=curVrt.selTrk[i];                           //Track number
              minPtT=std::min( minPtT, xAODwrk->listSelTracks[j]->pt());
-             m_fitSvc->VKalGetImpact(xAODwrk->listSelTracks[j], primVrt.position(), 1, impact, impactError);
+             m_fitSvc->VKalGetImpact(xAODwrk->listSelTracks[j], primVrt.position(), 1, impact, impactError, *state);
              double SigR2 = impact[0]*impact[0]/impactError[0];
              double SigZ2 = impact[1]*impact[1]/impactError[2];
              minSig3DT=std::min( minSig3DT, sqrt( SigR2 + SigZ2) );
@@ -384,7 +384,8 @@ namespace Rec{
              std::vector<float> testVcov(curVrt.vertexCov.begin(),curVrt.vertexCov.end());
              testV.setCovariance(testVcov);
              testV.setFitQuality(curVrt.chi2,1.);
-             bool acceptV=m_fin_v2trselector->isgood(std::make_pair(xAODwrk->listSelTracks[curVrt.selTrk[0]],
+             bool acceptV=m_fin_v2trselector->isgood(ctx,
+                                                     std::make_pair(xAODwrk->listSelTracks[curVrt.selTrk[0]],
                                                                     xAODwrk->listSelTracks[curVrt.selTrk[1]]),
                                                                     testV, 
                       std::make_pair(momAtVrt(curVrt.trkAtVrt[0]),momAtVrt(curVrt.trkAtVrt[1])), primVrt, wgtSelect);
@@ -413,7 +414,7 @@ namespace Rec{
       for(auto & vrt : (*wrkVrtSet)) {
         if( !vrt.Good || vrt.selTrk.size() != 1 ) continue;  // Good 1track vertices
         const auto *xaodtp=xAODwrk->listSelTracks[vrt.selTrk[0]];
-        m_fitSvc->VKalGetImpact(xaodtp, primVrt.position(), 1, impact, impactError);
+        m_fitSvc->VKalGetImpact(ctx, xaodtp, primVrt.position(), 1, impact, impactError);
         double SigR2 = std::abs(impact[0]*impact[0]/impactError[0]);
         double SigZ2 = std::abs(impact[1]*impact[1]/impactError[2]);
         float dist2D=vrtVrtDist2D(primVrt,vrt.vertex, vrt.vertexCov, signif2D); 

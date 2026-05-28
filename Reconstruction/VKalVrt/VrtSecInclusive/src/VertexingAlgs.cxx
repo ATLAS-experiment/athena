@@ -147,14 +147,14 @@ namespace VKalVrtAthena {
         std::vector<double> impactParameters;
         std::vector<double> impactParErrors;
 
-        if( !getSVImpactParameters( *itrk, initVertex, impactParameters, impactParErrors) ) continue;
+        if( !getSVImpactParameters( ctx, *itrk, initVertex, impactParameters, impactParErrors) ) continue;
         const auto roughD0_itrk = impactParameters.at(TrkParameter::k_d0);
         const auto roughZ0_itrk = impactParameters.at(TrkParameter::k_z0);
         if( fabs( impactParameters.at(0)) > roughD0Cut || fabs( impactParameters.at(1) ) > roughZ0Cut ) {
           continue;
         }
 
-        if( !getSVImpactParameters( *jtrk, initVertex, impactParameters, impactParErrors) ) continue;
+        if( !getSVImpactParameters( ctx, *jtrk, initVertex, impactParameters, impactParErrors) ) continue;
         const auto roughD0_jtrk = impactParameters.at(TrkParameter::k_d0);
         const auto roughZ0_jtrk = impactParameters.at(TrkParameter::k_z0);
         if( fabs( impactParameters.at(0) ) > roughD0Cut || fabs( impactParameters.at(1) ) > roughZ0Cut ) {
@@ -1035,7 +1035,7 @@ namespace VKalVrtAthena {
           std::vector<double> impactParameters;
           std::vector<double> impactParErrors;
 
-          if( !getSVImpactParameters(trk,targetVertex.vertex,impactParameters,impactParErrors) ) continue;
+          if( !getSVImpactParameters(ctx,trk,targetVertex.vertex,impactParameters,impactParErrors) ) continue;
 
           const auto& distance = hypot( impactParameters.at(0), impactParameters.at(1) );
           distances.emplace_back( distance );
@@ -1198,7 +1198,7 @@ namespace VKalVrtAthena {
         std::vector<double> impactParameters;
         std::vector<double> impactParErrors;
 
-        if( !getSVImpactParameters( trk, vertexPos, impactParameters, impactParErrors) ) continue;
+        if( !getSVImpactParameters( ctx, trk, vertexPos, impactParameters, impactParErrors) ) continue;
 
         if( std::abs( impactParameters.at(0) ) / sqrt( impactParErrors.at(0) ) > m_associateMaxD0Signif ) continue;
         if( std::abs( impactParameters.at(1) ) / sqrt( impactParErrors.at(1) ) > m_associateMaxZ0Signif ) continue;
@@ -2193,8 +2193,8 @@ namespace VKalVrtAthena {
 
 
       // Post process -- Additional augmentations
-      if( m_doAugmentDVimpactParametersToMuons     ) { ATH_CHECK( augmentDVimpactParametersToLeptons<xAOD::Muon>    ( "Muons"     ) ); }
-      if( m_doAugmentDVimpactParametersToElectrons ) { ATH_CHECK( augmentDVimpactParametersToLeptons<xAOD::Electron>( "Electrons" ) ); }
+      if( m_doAugmentDVimpactParametersToMuons     ) { ATH_CHECK( augmentDVimpactParametersToLeptons<xAOD::Muon>    ( ctx, "Muons"     ) ); }
+      if( m_doAugmentDVimpactParametersToElectrons ) { ATH_CHECK( augmentDVimpactParametersToLeptons<xAOD::Electron>( ctx, "Electrons" ) ); }
 
     } catch (const std::out_of_range& e) {
 
@@ -2321,7 +2321,8 @@ namespace VKalVrtAthena {
   }
 
   //____________________________________________________________________________________________________
-  bool VrtSecInclusive::getSVImpactParameters(const xAOD::TrackParticle* trk, const Amg::Vector3D& vertex,
+  bool VrtSecInclusive::getSVImpactParameters(const EventContext& ctx,
+                                              const xAOD::TrackParticle* trk, const Amg::Vector3D& vertex,
                                               std::vector<double>& impactParameters,
                                               std::vector<double>& impactParErrors){
 
@@ -2329,10 +2330,10 @@ namespace VKalVrtAthena {
     impactParErrors.clear();
 
     if( m_trkExtrapolator==1 ){
-      m_fitSvc->VKalGetImpact(trk, vertex, static_cast<int>( trk->charge() ), impactParameters, impactParErrors);
+      m_fitSvc->VKalGetImpact(ctx, trk, vertex, static_cast<int>( trk->charge() ), impactParameters, impactParErrors);
     }
     else if( m_trkExtrapolator==2 ){
-      auto sv_perigee = m_trackToVertexTool->perigeeAtVertex(Gaudi::Hive::currentContext(), *trk, vertex );
+      auto sv_perigee = m_trackToVertexTool->perigeeAtVertex(ctx, *trk, vertex );
       if( !sv_perigee ) return false;
       impactParameters.push_back(sv_perigee->parameters() [Trk::d0]);
       impactParameters.push_back(sv_perigee->parameters() [Trk::z0]);
