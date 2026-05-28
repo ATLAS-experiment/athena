@@ -171,6 +171,7 @@ namespace MuonR4{
             truthLinkDecor(*segment) = TruthPartLink_t{truthParticles, truthPart->index()};
         
         }
+        matchPileupSegments(ctx, bkgMuons, bkgSegments, truthLinkDecor, segLinkDecor);
         /// Finally sort the segments along the trajectory
         for (const xAOD::TruthParticle* truthMuon : *truthParticles){
             const Amg::Vector3D dir = Amg::Vector3D{truthMuon->px(), truthMuon->py(), truthMuon->pz()}.normalized();
