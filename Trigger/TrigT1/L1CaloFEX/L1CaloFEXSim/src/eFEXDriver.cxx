@@ -50,7 +50,7 @@ StatusCode eFEXDriver::finalize()
   my_eFEXOutputCollection->setdooutput(true);
 
   // STEP 3 - Run THE eFEXSysSim
-  ATH_CHECK(m_eFEXSysSimTool->execute(my_eFEXOutputCollection));
+  ATH_CHECK(m_eFEXSysSimTool->execute(my_eFEXOutputCollection, Gaudi::Hive::currentContext()));
 
   // STEP 5 - Write the completed eFEXOutputCollection into StoreGate (move the local copy in memory)
   std::unique_ptr<eFEXOutputCollection> local_eFEXOutputCollection = std::unique_ptr<eFEXOutputCollection>(my_eFEXOutputCollection);

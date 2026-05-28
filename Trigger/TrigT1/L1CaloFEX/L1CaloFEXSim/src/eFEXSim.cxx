@@ -63,12 +63,9 @@ namespace LVL1 {
   eFEXSim::~eFEXSim()
   {
   }
-  
- void eFEXSim::execute(){
 
- }
 
-StatusCode eFEXSim::NewExecute(int tmp_eTowersIDs_subset[10][18], eFEXOutputCollection* inputOutputCollection){
+StatusCode eFEXSim::NewExecute(int tmp_eTowersIDs_subset[10][18], eFEXOutputCollection* inputOutputCollection, const EventContext& ctx){
   m_emTobObjects.clear();
   m_tauHeuristicTobObjects.clear();
   m_tauBDTTobObjects.clear();
@@ -87,7 +84,7 @@ StatusCode eFEXSim::NewExecute(int tmp_eTowersIDs_subset[10][18], eFEXOutputColl
   }
   ATH_CHECK(m_eFEXFPGATool->init(0, m_id));
   m_eFEXFPGATool->SetTowersAndCells_SG(tmp_eTowersIDs_subset_FPGA);
-  ATH_CHECK(m_eFEXFPGATool->execute(inputOutputCollection));
+  ATH_CHECK(m_eFEXFPGATool->execute(inputOutputCollection,ctx));
   m_emTobObjects.push_back(m_eFEXFPGATool->getEmTOBs());
   m_tauHeuristicTobObjects.push_back(m_eFEXFPGATool->getTauHeuristicTOBs());
   m_tauBDTTobObjects.push_back(m_eFEXFPGATool->getTauBDTTOBs());
@@ -103,7 +100,7 @@ StatusCode eFEXSim::NewExecute(int tmp_eTowersIDs_subset[10][18], eFEXOutputColl
   }
   ATH_CHECK(m_eFEXFPGATool->init(1, m_id));
   m_eFEXFPGATool->SetTowersAndCells_SG(tmp_eTowersIDs_subset_FPGA);
-  ATH_CHECK(m_eFEXFPGATool->execute(inputOutputCollection));
+  ATH_CHECK(m_eFEXFPGATool->execute(inputOutputCollection,ctx));
   m_emTobObjects.push_back(m_eFEXFPGATool->getEmTOBs());
   m_tauHeuristicTobObjects.push_back(m_eFEXFPGATool->getTauHeuristicTOBs());
   m_tauBDTTobObjects.push_back(m_eFEXFPGATool->getTauBDTTOBs());
@@ -120,7 +117,7 @@ StatusCode eFEXSim::NewExecute(int tmp_eTowersIDs_subset[10][18], eFEXOutputColl
   }
   ATH_CHECK(m_eFEXFPGATool->init(2, m_id));
   m_eFEXFPGATool->SetTowersAndCells_SG(tmp_eTowersIDs_subset_FPGA);
-  ATH_CHECK(m_eFEXFPGATool->execute(inputOutputCollection));
+  ATH_CHECK(m_eFEXFPGATool->execute(inputOutputCollection,ctx));
   m_emTobObjects.push_back(m_eFEXFPGATool->getEmTOBs());
   m_tauHeuristicTobObjects.push_back(m_eFEXFPGATool->getTauHeuristicTOBs());
   m_tauBDTTobObjects.push_back(m_eFEXFPGATool->getTauBDTTOBs());
@@ -136,7 +133,7 @@ StatusCode eFEXSim::NewExecute(int tmp_eTowersIDs_subset[10][18], eFEXOutputColl
   }
   ATH_CHECK(m_eFEXFPGATool->init(3, m_id));
   m_eFEXFPGATool->SetTowersAndCells_SG(tmp_eTowersIDs_subset_FPGA);
-  ATH_CHECK(m_eFEXFPGATool->execute(inputOutputCollection));
+  ATH_CHECK(m_eFEXFPGATool->execute(inputOutputCollection,ctx));
   m_emTobObjects.push_back(m_eFEXFPGATool->getEmTOBs());
   m_tauHeuristicTobObjects.push_back(m_eFEXFPGATool->getTauHeuristicTOBs());
   m_tauBDTTobObjects.push_back(m_eFEXFPGATool->getTauBDTTOBs());

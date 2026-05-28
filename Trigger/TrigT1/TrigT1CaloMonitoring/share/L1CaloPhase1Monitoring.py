@@ -379,6 +379,11 @@ if flags.Trigger.enableL1CaloPhase1:
   if flags.Trigger.L1.doTopo:
     from L1TopoSimulation.L1TopoSimulationConfig import L1TopoSimulationCfg
     cfg.merge(L1TopoSimulationCfg(flags,readMuCTPI=True,doMonitoring=False),sequenceName="L1Sim") # monitoring scheduled separately below
+  # check there aren't any duplicates in L1sim that are already in the main sequence
+  for alg in cfg.getSequence("L1Sim").Members:
+    if alg.name in [a.name for a in cfg.getSequence("AthAlgSeq").Members]:
+      cfg.getSequence("L1Sim").Members.remove(alg)
+
 
   # Phase II Global simulation...
   if "doGlobal" in flags.Trigger.L1 and flags.Trigger.L1.doGlobal:
