@@ -46,9 +46,7 @@ def SiSPSeededTrackFinderCfg(flags, name="InDetSiSpTrackFinder", **kwargs):
         kwargs.setdefault("useZBoundFinding",
                           flags.Tracking.ActiveConfig.doZBoundary)
 
-    #
-    # --- Z-coordinates primary vertices finder (only for collisions)
-    #
+    # Z-coordinates primary vertices finder (only for collisions)
     if kwargs["useZvertexTool"] and "ZvertexTool" not in kwargs:
         from InDetConfig.SiZvertexToolConfig import SiZvertexMaker_xkCfg
         kwargs.setdefault("ZvertexTool", acc.popToolsAndMerge(
@@ -147,4 +145,62 @@ def ITkSiSPSeededTrackFinderROIConvCfg(
                       "ITkCaloClusterROIPhiRZ15GeVUnordered")
 
     acc.merge(ITkSiSPSeededTrackFinderCfg(flags, name, **kwargs))
+    return acc
+
+
+def SiSPSeededTrackFinderRoICfg(flags, name="InDetSiSpTrackFinderRoI", **kwargs):
+    acc = ComponentAccumulator()
+
+    if "TrackTool" not in kwargs:
+        from InDetConfig.SiTrackMakerConfig import SiTrackMaker_xkCfg
+        kwargs.setdefault("TrackTool", acc.popToolsAndMerge(
+            SiTrackMaker_xkCfg(flags)))
+
+    if "TrackSummaryTool" not in kwargs:
+        from TrkConfig.TrkTrackSummaryToolConfig import (
+            InDetTrackSummaryToolNoHoleSearchCfg)
+        kwargs.setdefault("TrackSummaryTool", acc.popToolsAndMerge(
+            InDetTrackSummaryToolNoHoleSearchCfg(flags)))
+
+    if "SeedsTool" not in kwargs:
+        from InDetConfig.SiSpacePointsSeedToolConfig import (
+            SiSpacePointsSeedMakerCfg)
+        kwargs.setdefault("SeedsTool", acc.popToolsAndMerge(
+            SiSpacePointsSeedMakerCfg(flags)))
+
+    if flags.Tracking.ActiveConfig.usePrdAssociationTool:
+        kwargs.setdefault("PRDtoTrackMap", (
+            'InDetPRDtoTrackMap' + flags.Tracking.ActiveConfig.extension))
+        
+    if (flags.Tracking.ActiveConfig.RoIStrategy == "LeadTracksRoISeedTool") and ("ZWindowRoISeedTool" not in kwargs):
+        from InDetConfig.ZWindowRoISeedToolConfig import LeadTracksRoISeedToolCfg
+        kwargs.setdefault("ZWindowRoISeedTool", acc.popToolsAndMerge(
+            LeadTracksRoISeedToolCfg(flags)))
+    elif (flags.Tracking.ActiveConfig.RoIStrategy == "RandomRoISeedTool") and ("ZWindowRoISeedTool" not in kwargs):
+        from InDetConfig.ZWindowRoISeedToolConfig import RandomRoISeedToolCfg
+        kwargs.setdefault("ZWindowRoISeedTool", acc.popToolsAndMerge(
+            RandomRoISeedToolCfg(flags)))
+    elif (flags.Tracking.ActiveConfig.RoIStrategy == "FileRoISeedTool") and ("ZWindowRoISeedTool" not in kwargs):
+        from InDetConfig.ZWindowRoISeedToolConfig import FileRoISeedToolCfg
+        kwargs.setdefault("ZWindowRoISeedTool", acc.popToolsAndMerge(
+            FileRoISeedToolCfg(flags)))
+    elif (flags.Tracking.ActiveConfig.RoIStrategy == "TruthHSRoISeedTool") and ("ZWindowRoISeedTool" not in kwargs):
+        from InDetConfig.ZWindowRoISeedToolConfig import TruthHSRoISeedToolCfg
+        kwargs.setdefault("ZWindowRoISeedTool", acc.popToolsAndMerge(
+            TruthHSRoISeedToolCfg(flags)))
+    else:
+        print(f"ERROR. Invalid flags.Tracking.ActiveConfig.RoIStrategy value ({flags.Tracking.ActiveConfig.RoIStrategy}). Expected a valid RoI Seed Tool name. Please check.")
+
+    kwargs.setdefault("doRandomSpot", flags.Tracking.ActiveConfig.doRandomSpot)
+    if flags.Tracking.ActiveConfig.doRandomSpot and ("RandomRoISeedTool" not in kwargs):
+        from InDetConfig.ZWindowRoISeedToolConfig import RandomRoISeedToolCfg
+        kwargs.setdefault("RandomRoISeedTool", acc.popToolsAndMerge(
+            RandomRoISeedToolCfg(flags)))
+
+    kwargs.setdefault("RoIWidth",flags.Tracking.ActiveConfig.z0WindowRoI)
+    kwargs.setdefault("VxOutputName", "RoIVertices"+flags.Tracking.ActiveConfig.extension)
+
+    acc.addEventAlgo(CompFactory.InDet.SiSPSeededTrackFinderRoI(
+        name+flags.Tracking.ActiveConfig.extension, **kwargs))
+
     return acc

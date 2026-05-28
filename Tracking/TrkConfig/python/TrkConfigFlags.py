@@ -235,6 +235,8 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.doVeryLowPt", False)
     # Turn running of doLargeD0 second pass down to 100 MeV on and off
     icf.addFlag("Tracking.doLowPtLargeD0", False)
+    # Switch for running LowPtRoI settings
+    icf.addFlag("Tracking.doLowPtRoI", False)
     # Turn running of high pile-up reconstruction on and off
     icf.addFlag("Tracking.doHighPileup", False)
     # Special reconstruction for vertex lumi measurement
@@ -283,7 +285,7 @@ def createTrackingConfigFlags():
         createTrackingPassFlags, createHighPileupTrackingPassFlags,
         createMinBiasTrackingPassFlags, createLargeD0TrackingPassFlags,
         createR3LargeD0TrackingPassFlags, createLowPtLargeD0TrackingPassFlags,
-        createLowPtTrackingPassFlags, createVeryLowPtTrackingPassFlags,
+        createLowPtTrackingPassFlags, createVeryLowPtTrackingPassFlags, createLowPtRoITrackingPassFlags,
         createForwardTracksTrackingPassFlags, createBeamGasTrackingPassFlags,
         createVtxLumiTrackingPassFlags, createVtxBeamSpotTrackingPassFlags, createCosmicsTrackingPassFlags,
         createHeavyIonTrackingPassFlags, createPixelTrackingPassFlags, createDisappearingTrackingPassFlags,
@@ -307,6 +309,8 @@ def createTrackingConfigFlags():
                          createLowPtTrackingPassFlags, prefix=True)
     icf.addFlagsCategory("Tracking.VeryLowPtPass",
                          createVeryLowPtTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory("Tracking.LowPtRoIPass",
+                         createLowPtRoITrackingPassFlags, prefix=True)
     icf.addFlagsCategory("Tracking.ForwardPass",
                          createForwardTracksTrackingPassFlags, prefix=True)
     icf.addFlagsCategory("Tracking.BeamGasPass",

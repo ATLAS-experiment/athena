@@ -239,11 +239,25 @@ if InDetFlags.loadFitter():
 
     from AthenaCommon import CfgGetter
     InDetTrackFitter    = CfgGetter.getPublicTool('InDetTrackFitter')
+    from RecExConfig.RecFlags import rec
+    if not rec.doMuon():
+        #Switch-off muon-related components
+        InDetTrackFitter.ResidualPullCalculatorTool.ResidualPullCalculatorForRPC=""
+        InDetTrackFitter.ResidualPullCalculatorTool.ResidualPullCalculatorForTGC=""
 
     if InDetFlags.doLowPt() or InDetFlags.doVeryLowPt() or (InDetFlags.doTrackSegmentsPixel() and InDetFlags.doMinBias()):
         InDetTrackFitterLowPt = CfgGetter.getPublicTool('InDetTrackFitterLowPt')
+        if not rec.doMuon():
+            #Switch-off muon-related components
+            InDetTrackFitterLowPt.ResidualPullCalculatorTool.ResidualPullCalculatorForRPC=""
+            InDetTrackFitterLowPt.ResidualPullCalculatorTool.ResidualPullCalculatorForTGC=""
+
     if DetFlags.TRT_on():
         InDetTrackFitterTRT =   CfgGetter.getPublicTool('InDetTrackFitterTRT')
+        if not rec.doMuon():
+            #Switch-off muon-related components
+            InDetTrackFitterTRT.ResidualPullCalculatorTool.ResidualPullCalculatorForRPC=""
+            InDetTrackFitterTRT.ResidualPullCalculatorTool.ResidualPullCalculatorForTGC=""
 
 #
 # ----------- load association tool from Inner Detector to handle pixel ganged ambiguities

@@ -31,10 +31,16 @@ def TrackingSiPatternCfg(flags,
     # ------------------------------------------------------------
 
     from InDetConfig.SiSPSeededTrackFinderConfig import (
-        SiSPSeededTrackFinderCfg)
-    acc.merge(SiSPSeededTrackFinderCfg(
-        flags,
-        TracksLocation = SiSPSeededTrackCollectionKey))
+        SiSPSeededTrackFinderCfg, SiSPSeededTrackFinderRoICfg)
+    if flags.Tracking.ActiveConfig.extension == "LowPtRoI":
+        # Dedicated track finding algorithm supporting z-window RoI
+        acc.merge(SiSPSeededTrackFinderRoICfg(
+            flags,
+            TracksLocation = SiSPSeededTrackCollectionKey))        
+    else:
+        acc.merge(SiSPSeededTrackFinderCfg(
+            flags,
+            TracksLocation = SiSPSeededTrackCollectionKey))
 
     from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
     if flags.Tracking.doTruth:
