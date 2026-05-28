@@ -18,6 +18,10 @@
 
 #include <G4VSensitiveDetector.hh>
 
+class AtlasG4EventUserInfo;
+class G4Track;
+class HepMcParticleLink;
+
 /** @brief Basic MuonSensitiveDetector class from which all the other sensitive detectors inherit. The base implementation 
  *         provides the output container to store gate, creates the GeometryContext of interest and unifies the criteria whether
  *         a Step shall be processed or not. Finally, it keeps track whether a particle from a G4 step has already been recorded
@@ -50,9 +54,23 @@ namespace MuonG4R4 {
             std::string m_writeKey{};
             /** @brief Pointer to the MuonSimHit output container */
             xAOD::MuonSimHitContainer* m_outContainer{};
+            /** @brief G4 event user information holding the current event store/context */
+            AtlasG4EventUserInfo* m_g4UserEventInfo{};
             /**  ReadHandleKey to the DetectorAlignmentStore caching
               *  the relevant transformations needed in this event */
             SG::ReadHandleKey<ActsTrk::DetectorAlignStore> m_trfCacheKey;
+
+            /** @brief Returns the event user info for the current G4 event, if available */
+            AtlasG4EventUserInfo* eventInfo() const;
+
+            /** @brief Returns the last snap shot matching an already generated HepMcParticleLink 
+             *  @param gasGapId: Identifier of the gasGap to consider
+             *  @param hitStep: Pointer to the current step
+             *. @param particleLink the existing particle link for the G4Track */
+            xAOD::MuonSimHit* lastSnapShot(const Identifier& gasGapId,
+                                           const G4Step* hitStep,
+                                           const HepMcParticleLink& particleLink);
+
         protected:
             /** @brief Checks whether the current step shall be processed at all. 
              *         I.e. the particle needs to be charged, there's a minimum velocity needed
@@ -60,9 +78,15 @@ namespace MuonG4R4 {
              *  @param step: G4 step to consider */
             bool processStep(const G4Step* step) const;
 
-            /** @brief Returns the current geometry context in the event
-             *  @param ctx: Event context to access the store gate service */
-            ActsTrk::GeometryContext getGeoContext(const EventContext& ctx) const;
+            /** @brief Returns the current event context recorded in the G4 event info */
+            const EventContext& eventContext() const;
+
+            /** @brief Returns the current geometry context in the event */
+            ActsTrk::GeometryContext getGeoContext() const;
+
+            /** @brief Generates a HepMcParticleLink for the Geant4 track using the current event store
+                @param track: the track for which particle link should be created */
+            HepMcParticleLink genParticleLink(const G4Track* track) const;
 
             /** @brief Returns the last snap shot of the traversing particle. The G4 track
              *         must have stepped through the same volume. Otherwise, a nullptr is returned

@@ -36,8 +36,9 @@ namespace MuonG4R4 {
         m_trfCacheKey.initialize().ignore();
     }
     void MuonSensitiveDetector::Initialize(G4HCofThisEvent*) {
-        if (auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo(); eventInfo != nullptr) {
-            auto* hitVec = eventInfo->GetHitCollectionMap()->Find<MuonSimHitsVec>(m_writeKey);
+        m_g4UserEventInfo = AtlasG4EventUserInfo::GetEventUserInfo();
+        if (m_g4UserEventInfo) {
+            auto* hitVec = m_g4UserEventInfo->GetHitCollectionMap()->Find<MuonSimHitsVec>(m_writeKey);
             if (!hitVec) {
                 THROW_EXCEPTION("The event does not contain a MuonSimHit container called '"<<m_writeKey<<"'");
             }
@@ -47,10 +48,20 @@ namespace MuonG4R4 {
             m_outContainer = nullptr;
         }
     }
-    ActsTrk::GeometryContext MuonSensitiveDetector::getGeoContext(const EventContext& ctx) const {
+    AtlasG4EventUserInfo* MuonSensitiveDetector::eventInfo() const {
+        return m_g4UserEventInfo ? m_g4UserEventInfo : AtlasG4EventUserInfo::GetEventUserInfo();
+    }
+    const EventContext& MuonSensitiveDetector::eventContext() const {
+        AtlasG4EventUserInfo* g4EventInfo = eventInfo();
+        if (!g4EventInfo) {
+            THROW_EXCEPTION("No AtlasG4EventUserInfo available");
+        }
+        return g4EventInfo->GetEventContext();
+    }
+    ActsTrk::GeometryContext MuonSensitiveDetector::getGeoContext() const {
         ActsTrk::GeometryContext gctx{};
         const ActsTrk::DetectorAlignStore* alignment{nullptr};
-        if (!SG::get(alignment, m_trfCacheKey, ctx).isSuccess()) {
+        if (!SG::get(alignment, m_trfCacheKey, eventContext()).isSuccess()) {
             THROW_EXCEPTION("Failed to retrieve "<<m_trfCacheKey.fullKey()<<".");
         }
         gctx.setStore(std::make_unique<DetectorAlignStore>(*alignment));
@@ -72,6 +83,11 @@ namespace MuonG4R4 {
                    currentTrack->GetDefinition() == G4ChargedGeantino::ChargedGeantinoDefinition();
         }
         return true;
+    }
+    HepMcParticleLink MuonSensitiveDetector::genParticleLink(const G4Track* track) const {
+        TrackHelper trHelper{track};
+        AtlasG4EventUserInfo* g4EventInfo = eventInfo();
+        return trHelper.GenerateParticleLink(g4EventInfo ? g4EventInfo->GetEventStore() : nullptr);
     }
     xAOD::MuonSimHit* MuonSensitiveDetector::propagateAndSaveStrip(const Identifier& hitID,
                                                                    const Amg::Transform3D& toGasGap,
@@ -115,9 +131,9 @@ namespace MuonG4R4 {
                                                      const double globTime,
                                                      const G4Step* aStep) {
         const G4Track* currentTrack = aStep->GetTrack();
-        TrackHelper trHelper{currentTrack};
+        const HepMcParticleLink particleLink{genParticleLink(currentTrack)};
         // If Geant4 propagates the same track through the same volume just update the last hit and don't write a new one
-        xAOD::MuonSimHit* hit = lastSnapShot(hitId, aStep);
+        xAOD::MuonSimHit* hit = lastSnapShot(hitId, aStep, particleLink);
         bool newHit{false};
         if (!hit) {
             if (!m_outContainer) {
@@ -135,14 +151,14 @@ namespace MuonG4R4 {
         hit->setPdgId(currentTrack->GetDefinition()->GetPDGEncoding());
         hit->setEnergyDeposit(aStep->GetTotalEnergyDeposit() + (newHit ? 0. : hit->energyDeposit()));
         hit->setKineticEnergy(currentTrack->GetKineticEnergy());
-        hit->setGenParticleLink(trHelper.GenerateParticleLink());
+        hit->setGenParticleLink(particleLink);
         hit->setStepLength(aStep->GetStepLength());
         
         ATH_MSG_VERBOSE("Save new hit "<<m_detMgr->idHelperSvc()->toString(hitId)
                         <<", pdgId: "<<hit->pdgId()
-                        <<", "<<hit->genParticleLink()
+                        <<", "<<particleLink
                         <<", trackId: "<<currentTrack->GetTrackID()<<", "
-                        <<", "<<hit->genParticleLink().cptr()<<std::endl
+                        <<", "<<particleLink.cptr()<<std::endl
                         <<"pos: "<<Amg::toString(hitPos)<<", dir: "<<Amg::toString(hitDir)<<", time: "<<globTime
                         <<", energy: "<<hit->kineticEnergy()<<", stepLength: "<<hit->stepLength()<<", "
                         <<", deposit energy: "<<hit->energyDeposit());
@@ -150,12 +166,17 @@ namespace MuonG4R4 {
     }
     xAOD::MuonSimHit* MuonSensitiveDetector::lastSnapShot(const Identifier& hitId,
                                                           const G4Step* hitStep) {
-        TrackHelper trkHelper{hitStep->GetTrack()};
+        const HepMcParticleLink particleLink{genParticleLink(hitStep->GetTrack())};
+        return lastSnapShot(hitId, hitStep, particleLink);
+    }
+    xAOD::MuonSimHit* MuonSensitiveDetector::lastSnapShot(const Identifier& hitId,
+                                                          const G4Step* hitStep,
+                                                          const HepMcParticleLink& particleLink) {
         /// There's only a snapshot if the last saved hit has the same Identifier & the same
         /// particle Link + G4Track Id
         if (m_outContainer->empty() || 
             m_outContainer->back()->identify() != hitId ||
-            trkHelper.GenerateParticleLink() != m_outContainer->back()->genParticleLink() ||
+            particleLink != m_outContainer->back()->genParticleLink() ||
             dec_G4TrkId(*m_outContainer->back()) != hitStep->GetTrack()->GetTrackID()) {
             return nullptr;
         }

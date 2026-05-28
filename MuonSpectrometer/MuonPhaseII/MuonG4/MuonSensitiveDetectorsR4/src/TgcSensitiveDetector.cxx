@@ -6,9 +6,6 @@
 
 #include "G4ThreeVector.hh"
 
-#include <MCTruth/TrackHelper.h>
-#include <MCTruth/AtlasG4EventUserInfo.h>
-
 #include <sstream>
 
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
@@ -32,12 +29,8 @@ G4bool TgcSensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*) {
     if (!readOutEle) {
        return false;
     }
-    auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo();
-    if (!eventInfo) {
-        THROW_EXCEPTION("No AtlasG4EventUserInfo available");
-    }
 
-    const ActsTrk::GeometryContext gctx{getGeoContext(eventInfo->GetEventContext())};
+    const ActsTrk::GeometryContext gctx{getGeoContext()};
     
     const Amg::Transform3D localToGlobal = getTransform(touchHist, 0);
     ATH_MSG_VERBOSE(" Track is inside volume "
