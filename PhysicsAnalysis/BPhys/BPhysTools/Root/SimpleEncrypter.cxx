@@ -2,19 +2,25 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
+
+// Local include(s):
+#include "BPhysTools/SimpleEncrypter.h"
+// ROOT includes
+#include <TString.h>
+
 // system include:
-#include <climits>
 #include <vector>
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
 #include <cmath>
+#include <bit>
+#include <cstdint>
+#include <limits>
 
-// ROOT includes
-#include <TString.h>
 
-// Local include(s):
-#include "BPhysTools/SimpleEncrypter.h"
+
+
 
 namespace xAOD {
 
@@ -336,83 +342,26 @@ namespace xAOD {
   //--------------------------------------------------------------------------
   // Interpret bits of positive floating point number as integer
   //--------------------------------------------------------------------------
-  SimpleEncrypter::ULLI_t SimpleEncrypter::floatBitsToInt(float val) const {
-
-    ULLI_t res(0);
-
-    if ( val < 0. ) {
+  SimpleEncrypter::ULLI_t
+  SimpleEncrypter::floatBitsToInt(float val) const {
+    static_assert(sizeof(float) == sizeof(std::uint32_t),"This code assumes a 32-bit float");
+    if (val < 0.0F) {
       ATH_MSG_ERROR("Float value needs to be positive!");
-    } else {
-      // convert floating point number to ULLI_t if size fits
-      if ( sizeof(float) <= sizeof(ULLI_t) ) {
-        // check whether a quick conversion is possible
-        if ( sizeof(float) == sizeof(int) ) {
-          union {
-            float f;
-            int i;
-          } fint;
-          fint.f = val;
-          res = fint.i;
-        } else {
-        // do a slow conversion
-          char* pval = reinterpret_cast<char*>(&val);
-          // loop over bytes
-          for (unsigned int i=0; i<sizeof(float); ++i) {
-            // loop over bits
-            for (unsigned int j=0; j<CHAR_BIT; ++j) {
-              unsigned int n = i*CHAR_BIT + j;
-              unsigned int bit = (*(pval+i) >> j) & 1;
-              if ( bit > 0 ) res |= 1 << n;
-            } // for bits
-          } // for bytes
-        } // if sizeof
-      } else {
-        ATH_MSG_ERROR("sizeof(float) > sizeof(ULLI_t): "
-                      << sizeof(float) << " > " << sizeof(LLI_t));
-      } // if sizeof
-    } // if val < 0.
-
-    return res;
+      return 0;
+    }
+    return std::bit_cast<std::uint32_t>(val);
   }
   //--------------------------------------------------------------------------
   // Interpret bits of positive integer as floating point number
   //--------------------------------------------------------------------------
-  float SimpleEncrypter::intBitsToFloat(ULLI_t val) const {
-
-    float res(0.);
-
-    // number of bits needed
-    unsigned int r = (int)(std::log2(val))+1;
-    
-    // convert ULLI_t to floating point number if size fits
-    if ( sizeof(float)*CHAR_BIT >= r ) {
-      // check whether a quick conversion is possible
-      if ( sizeof(float) == sizeof(int) ) {
-        union {
-          float f;
-          ULLI_t i;
-        } ficnv;
-        ficnv.i = val;
-        res = ficnv.f;
-      } else {
-        // do a slow conversion
-        char* pres = reinterpret_cast<char*>(&res);
-        // loop over bytes
-        for (unsigned int i=0; i<sizeof(float); ++i) {
-          // loop over bits
-          for (unsigned int j=0; j<CHAR_BIT; ++j) {
-            unsigned int n = i*CHAR_BIT + j;
-            unsigned int bit = (val >> n) & 1;
-            if ( bit > 0 ) *(pres+i) |= 1 << j;
-          } // for bits
-        } // for bytes
-      } // if sizeof
-    } else {
-      ATH_MSG_WARNING("sizeof(float)*CHAR_BIT < r: "
-                      << sizeof(float)*CHAR_BIT << " < " << r);
-    } // if sizeof
-    
-    return res;
+  float
+  SimpleEncrypter::intBitsToFloat(ULLI_t val) const {
+    static_assert(sizeof(float) == sizeof(std::uint32_t),"This code assumes a 32-bit float");
+    if (val > std::numeric_limits<std::uint32_t>::max()) {
+      ATH_MSG_WARNING("Value does not fit in float bit representation: "<< val);
+      return 0.0F;
+    }
+    return std::bit_cast<float>(static_cast<std::uint32_t>(val));
   }
   //--------------------------------------------------------------------------
   // Encrypt using format preserving encryption w.r.t. RSA modulus
