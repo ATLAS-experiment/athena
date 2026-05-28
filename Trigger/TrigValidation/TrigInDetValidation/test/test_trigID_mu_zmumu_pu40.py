@@ -36,6 +36,7 @@ Threads = 8
 Slots   = 8
 Input   = 'Zmumu'    # defined in TrigValTools/share/TrigValInputs.json
 
+
 Jobs = [ ( "Truth",       " TIDAdata-run3.dat                    -o data-hists.root -p 13" ),
          ( "Offline",     " TIDAdata-run3-offline.dat -r Offline -o data-hists-offline.root" ) ]
 
@@ -51,6 +52,3 @@ Comp = [ ( "L2muon",              "L2muonTnP",      "data-hists.root",         "
 
 from AthenaCommon.Include import include 
 include("TrigInDetValidation/TrigInDetValidation_Base.py")
-
-
- 
