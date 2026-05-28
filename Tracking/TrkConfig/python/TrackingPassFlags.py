@@ -344,6 +344,13 @@ def createTrackingPassFlags():
     # --- Pixel and TRT particle ID during particle creation
     icf.addFlag("RunPixelPID", True)
     icf.addFlag("RunTRTPID", True)
+
+    # --- Flags for detailed information. 
+    #     Ignored for Primary Pass (always active); 
+    #     Enable for other passes with dedicated output container, if desired.
+    icf.addFlag("storeTrackSeeds", False)
+    icf.addFlag("storeSiSPSeededTracks", False)
+
     return icf
 
 ### RobustReco mode ####################
@@ -568,6 +575,37 @@ def createMinBiasTrackingPassFlags():
     icf.maxSecondaryImpact        = 100.0 * Units.mm # low lumi
 
     return icf
+
+
+## LowPtRoI mode ########################
+def createLowPtRoITrackingPassFlags():
+    icf = createTrackingPassFlags()
+    icf.extension          = "LowPtRoI"
+    icf.usePrdAssociationTool = True
+    icf.storeSeparateContainer = True
+    icf.maxPT              = 0.850 * Units.GeV
+    icf.minPT              = 0.050 * Units.GeV
+    icf.minClusters        = 5
+    icf.minSiNotShared     = 4
+    icf.maxShared          = 1   # cut is now on number of shared modules
+    icf.minPixel           = 2
+    icf.maxHoles           = 2
+    icf.maxPixelHoles      = 1
+    icf.maxSctHoles        = 2
+    icf.maxDoubleHoles     = 1
+    icf.radMax             = 600. * Units.mm
+    icf.nHolesMax          = icf.maxHoles
+    icf.nHolesGapMax       = icf.maxHoles # not as tight as 2*maxDoubleHoles
+    #icf.seedFilterLevel    = 1
+    #icf.maxTracksPerSharedPRD = 2
+    # Add custom flags valid for this pass only
+    icf.addFlag("z0WindowRoI", 30.0) # mm
+    icf.addFlag("doRandomSpot", False)
+    icf.addFlag("RoIStrategy", "LeadTracksRoISeedTool")
+    icf.addFlag("inputLowPtRoIfile","")
+
+    return icf
+
 
 ## LargeD0 mode ########################
 def createLargeD0TrackingPassFlags():

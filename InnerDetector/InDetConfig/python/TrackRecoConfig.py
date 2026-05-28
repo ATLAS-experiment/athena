@@ -5,7 +5,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType, Format
 
 _flags_set = []  # For caching
-
+_extensions_list = [] # For caching
 
 def CombinedTrackingPassFlagSets(flags):
 
@@ -54,6 +54,12 @@ def CombinedTrackingPassFlagSets(flags):
                                              "Tracking.R3LargeD0Pass")
 
         flags_set += [flagsLRT]
+
+    # LowPtRoI pass (low-pt tracks in high pile-up enviroment)
+    if flags.Tracking.doLowPtRoI:
+        flagsLowPtRoI = flags.cloneAndReplace("Tracking.ActiveConfig",
+                                              "Tracking.LowPtRoIPass")
+        flags_set += [flagsLowPtRoI]
 
     # LowPt pass
     if flags.Tracking.doLowPt:
@@ -315,6 +321,7 @@ def InDetTrackRecoCfg(flags):
         extension = (
             "" if isPrimaryPass else
             current_flags.Tracking.ActiveConfig.extension)
+        _extensions_list.append(extension)
 
         # ---------------------------------------
         # ----   TRTStandalone pass
@@ -612,33 +619,41 @@ def InDetTrackRecoCfg(flags):
     if flags.Tracking.doStoreTrackSeeds:
         from xAODTrackingCnv.xAODTrackingCnvConfig import (
             TrackParticleCnvAlgNoPIDCfg)
-        TrackContainer = "SiSPSeedSegments"
+        # get list of extensions requesting track seeds. Add always the Primary Pass.
+        listOfExtensionsRequesting = [ e for e in _extensions_list if (e == '') or (flags.Tracking.__getattr__(e+'Pass').storeTrackSeeds and flags.Tracking.__getattr__(e+'Pass').storeSeparateContainer) ]
+        for extension in listOfExtensionsRequesting:
+            TrackContainer = "SiSPSeedSegments"+extension
 
-        if flags.Tracking.doTruth:
-            result.merge(InDetTrackTruthCfg(
+            if flags.Tracking.doTruth:
+                result.merge(InDetTrackTruthCfg(
+                    flags,
+                    Tracks=TrackContainer,
+                    DetailedTruth=f"{TrackContainer}DetailedTruth",
+                    TracksTruth=f"{TrackContainer}TruthCollection"))
+
+            result.merge(TrackParticleCnvAlgNoPIDCfg(
                 flags,
-                Tracks=TrackContainer,
-                DetailedTruth=f"{TrackContainer}DetailedTruth",
-                TracksTruth=f"{TrackContainer}TruthCollection"))
-
-        result.merge(TrackParticleCnvAlgNoPIDCfg(
-            flags,
-            name="SiSPSeedSegmentsCnvAlg",
-            TrackContainerName=TrackContainer,
-            xAODTrackParticlesFromTracksContainerName=(
-                "SiSPSeedSegmentsTrackParticles")))
+                name=f"SiSPSeedSegments{extension}CnvAlg",
+                TrackContainerName=TrackContainer,
+                xAODTrackParticlesFromTracksContainerName=(
+                    f"{TrackContainer}TrackParticles")))
 
     if flags.Tracking.doStoreSiSPSeededTracks:
         from xAODTrackingCnv.xAODTrackingCnvConfig import (
             TrackParticleCnvAlgNoPIDCfg)
-        result.merge(TrackParticleCnvAlgNoPIDCfg(
-            flags,
-            name = "SiSPSeededTracksCnvAlg",
-            TrackContainerName = "SiSPSeededTracks",
-            xAODTrackParticlesFromTracksContainerName=(
-                "SiSPSeededTracksTrackParticles"),
-            AssociationMapName=(
-                "PRDtoTrackMapCombinedInDetTracks")))
+        # get list of extensions requesting track candidates. Add always the Primary Pass.
+        listOfExtensionsRequesting = [ e for e in _extensions_list if (e == '') or (flags.Tracking.__getattr__(e+'Pass').storeSiSPSeededTracks and flags.Tracking.__getattr__(e+'Pass').storeSeparateContainer) ]
+        for extension in listOfExtensionsRequesting:
+            AssociationMapNameKey="PRDtoTrackMapCombinedInDetTracks"
+            if extension=='Disappearing': AssociationMapNameKey = "PRDtoTrackMapDisappearingTracks"
+            elif not (extension == ''): AssociationMapNameKey = f"InDetPRDtoTrackMap{extension}"
+            result.merge(TrackParticleCnvAlgNoPIDCfg(
+                flags,
+                name = f"SiSPSeededTracks{extension}CnvAlg",
+                TrackContainerName = f"SiSPSeeded{extension}Tracks",
+                xAODTrackParticlesFromTracksContainerName=(
+                    f"SiSPSeededTracks{extension}TrackParticles"),
+                AssociationMapName=AssociationMapNameKey))
 
     # ---------------------------------------
     # --- Primary vertexing
@@ -832,7 +847,9 @@ def InDetTrackRecoOutputCfg(flags):
 
     # add tracks
     if flags.Tracking.doStoreTrackSeeds:
-        toESD += ["TrackCollection#SiSPSeedSegments"]
+        listOfExtensionsRequesting = [ e for e in _extensions_list if (e == '') or (flags.Tracking.__getattr__(e+'Pass').storeTrackSeeds and flags.Tracking.__getattr__(e+'Pass').storeSeparateContainer) ]
+        for extension in listOfExtensionsRequesting:
+            toESD += ["TrackCollection#SiSPSeedSegments"+extension]
 
     if flags.Tracking.doTrackSegmentsPixel:
         toESD += ["TrackCollection#ResolvedPixelTracks"]
@@ -873,6 +890,14 @@ def InDetTrackRecoOutputCfg(flags):
         if flags.Tracking.doTruth:
             toESD += ["TrackTruthCollection#DisappearingTracksTruthCollection"]
             toESD += ["DetailedTrackTruthCollection#DisappearingTracksDetailedTruth"]
+
+    if flags.Tracking.doLowPtRoI:
+        toESD += ["xAOD::VertexContainer#RoIVerticesLowPtRoI", "xAOD::VertexAuxContainer#RoIVerticesLowPtRoIAux."]
+        if flags.Tracking.LowPtRoIPass.storeSeparateContainer:
+            toESD += ["TrackCollection#ExtendedLowPtRoITracks"]
+            if flags.Tracking.doTruth:
+                toESD += ["TrackTruthCollection#ExtendedLowPtRoITracksTruthCollection"]
+                toESD += ["DetailedTrackTruthCollection#ExtendedLowPtRoITracksDetailedTruth"] 
 
     # Add TRT Segments (only if standalone is off).
     # TODO: no TP converter?
@@ -919,6 +944,12 @@ def InDetTrackRecoOutputCfg(flags):
         toAOD += ["xAOD::TrackParticleContainer#InDetDisappearingTrackParticles"]
         toAOD += [
             f"xAOD::TrackParticleAuxContainer#InDetDisappearingTrackParticlesAux.{excludedAuxData}"]
+    if flags.Tracking.doLowPtRoI:
+        toAOD += ["xAOD::VertexContainer#RoIVerticesLowPtRoI", "xAOD::VertexAuxContainer#RoIVerticesLowPtRoIAux."]
+        if flags.Tracking.LowPtRoIPass.storeSeparateContainer:
+            toAOD += ["xAOD::TrackParticleContainer#InDetLowPtRoITrackParticles"]
+            toAOD += [
+                f"xAOD::TrackParticleAuxContainer#InDetLowPtRoITrackParticlesAux.{excludedAuxData}"]    
     if flags.Tracking.doTrackSegmentsSCT:
         toAOD += ["xAOD::TrackParticleContainer#InDetSCTTrackParticles"]
         toAOD += [
@@ -942,15 +973,21 @@ def InDetTrackRecoOutputCfg(flags):
             toAOD += ["TrackTruthCollection#InDetObservedTrackTruthCollection"]
             toAOD += ["DetailedTrackTruthCollection#ObservedDetailedTracksTruth"]
     if flags.Tracking.doStoreSiSPSeededTracks:
-        toAOD += ["xAOD::TrackParticleContainer#SiSPSeededTracksTrackParticles"]
-        toAOD += [
-            f"xAOD::TrackParticleAuxContainer#SiSPSeededTracksTrackParticlesAux.{excludedAuxData}"]
+        # get list of extensions requesting track candidates. Add always the Primary Pass.
+        listOfExtensionsRequesting = [ e for e in _extensions_list if (e == '') or (flags.Tracking.__getattr__(e+'Pass').storeSiSPSeededTracks and flags.Tracking.__getattr__(e+'Pass').storeSeparateContainer) ]
+        for extension in listOfExtensionsRequesting:
+            toAOD += [f"xAOD::TrackParticleContainer#SiSPSeededTracks{extension}TrackParticles"]
+            toAOD += [
+                f"xAOD::TrackParticleAuxContainer#SiSPSeededTracks{extension}TrackParticlesAux.{excludedAuxData}"]
 
     if flags.Tracking.doStoreTrackSeeds:
-        toAOD += [
-            "xAOD::TrackParticleContainer#SiSPSeedSegmentsTrackParticles",
-            "xAOD::TrackParticleAuxContainer#SiSPSeedSegmentsTrackParticlesAux."
-        ]
+        # get list of extensions requesting track seeds. Add always the Primary Pass.
+        listOfExtensionsRequesting = [ e for e in _extensions_list if (e == '') or (flags.Tracking.__getattr__(e+'Pass').storeTrackSeeds and flags.Tracking.__getattr__(e+'Pass').storeSeparateContainer) ]
+        for extension in listOfExtensionsRequesting:
+            toAOD += [
+                f"xAOD::TrackParticleContainer#SiSPSeedSegments{extension}TrackParticles",
+                f"xAOD::TrackParticleAuxContainer#SiSPSeedSegments{extension}TrackParticlesAux."
+            ]
     if flags.Tracking.writeExtendedPRDInfo:
         toAOD += [
             "xAOD::TrackMeasurementValidationContainer#PixelClusters",
