@@ -265,6 +265,14 @@ std::pair<MsTrackFindingAlg::OptBoundPars_t,
             }
             return false;
         }
+        /** Add the links to the segments making up this track as an extra
+         *  column. Use the indices of the segment objects which can later
+         *  be transformed into a full ElementLink as there is only one
+         *  SegmentContainer from which the seeds are built */
+        {
+            fitTraject->addColumn<std::vector<const xAOD::MuonSegment*>>("muonSegLinks");
+            fitTraject->getTrack(0).component<std::vector<const xAOD::MuonSegment*>>("muonSegLinks") = seed.segments();
+        }
         outContainer.ensureDynamicColumns(*fitTraject);
         auto destProxy = outContainer.getTrack(outContainer.addTrack());
         destProxy.copyFrom(fitTraject->getTrack(0));
@@ -272,14 +280,6 @@ std::pair<MsTrackFindingAlg::OptBoundPars_t,
         if (m_visualizationTool.isEnabled()) {
             m_visualizationTool->displayTrackSeedObj(ctx, seed, 
                 destProxy.createParametersAtReference(), "GoodFit");
-        }
-        for (const auto state : destProxy.trackStates()) {
-            if (!state.hasUncalibratedSourceLink()){
-                continue;
-            }
-            auto meas = ActsTrk::detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());
-            ATH_MSG_DEBUG("Accepted measurement "<<m_idHelperSvc->toString(xAOD::identify(meas))
-                              <<", "<<xAOD::muonSurface(meas).geometryId()); 
         }
         return true;
     }
