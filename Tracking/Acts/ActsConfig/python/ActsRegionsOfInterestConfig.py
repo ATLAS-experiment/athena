@@ -36,7 +36,7 @@ def ActsRegionsOfInterestCreatorAlgCfg(flags,
     acc = ComponentAccumulator()
 
     # Large Radius tracking pass will use the full-scan roi made from primary pass
-    if flags.Tracking.ActiveConfig.extension == 'ActsLargeRadius':
+    if flags.Tracking.ActiveConfig.isLargeD0 and flags.Tracking.ActiveConfig.isSecondaryPass:
         return acc
     
     # Conversion tracking pass requirements

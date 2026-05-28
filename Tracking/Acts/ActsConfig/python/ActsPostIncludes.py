@@ -54,7 +54,7 @@ def PersistifyActsEDMCfg(flags) -> ComponentAccumulator:
 
     if flags.Acts.EDM.PersistifyTracks:
         trackPrefixes = ['Acts', 'ActsResolved',
-                         'ActsLargeRadius', 'ActsLargeRadiusResolved',
+                         'LargeD0', 'LargeD0Resolved',
                          'ActsConversion', 'ActsConversionResolved',
                          'ActsHeavyIon', 'ActsHeavyIonResolved']
         for prefix in trackPrefixes:

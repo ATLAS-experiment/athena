@@ -19,7 +19,7 @@ def ActsGbtsFtfSeedingTrigToolCfg(flags,name: str = "GbtsFtfActsSeedingTool", **
   kwargs.setdefault("DoPhiFiltering", False) #no phi-filtering for full-scan tracking
   kwargs.setdefault("UseBeamTilt", False)
 
-  isLargeD0 = flags.Tracking.ActiveConfig.extension in ["LargeD0", "ActsLargeRadius"]
+  isLargeD0 = flags.Tracking.ActiveConfig.isLargeD0
   
   kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minPTSeed)
   kwargs.setdefault("MaxGraphEdges", 3000000)
@@ -424,7 +424,7 @@ def ActsSeedingCfg(flags,**kwargs) -> ComponentAccumulator:
 
     # For conversion pass we do not process pixels
     from InDetConfig.ITkActsHelpers import isFastPrimaryPass
-    if flags.Tracking.ActiveConfig.extension in ["ActsConversion", "ActsLargeRadius", "ActsValidateLargeRadiusStandalone"]:
+    if flags.Tracking.ActiveConfig.extension == "ActsConversion" or flags.Tracking.ActiveConfig.isLargeD0:
         processPixels = False
     # For main pass disable strips if fast tracking configuration
     elif isFastPrimaryPass(flags):
@@ -486,10 +486,11 @@ def ActsSeedingCfg(flags,**kwargs) -> ComponentAccumulator:
         # Space Point naming is not yet fully connected to tracking passes - this will change
         if flags.Tracking.ActiveConfig.extension == 'ActsConversion':
             kwargs.setdefault('StripSeedingAlg.InputSpacePoints', ['ITkConversionStripSpacePoints_Cached'] if flags.Acts.useCache else ['ITkConversionStripSpacePoints'])
-        elif flags.Tracking.ActiveConfig.extension == 'ActsLargeRadius':
-            kwargs.setdefault('StripSeedingAlg.InputSpacePoints', ['ITkLargeRadiusStripSpacePoints_Cached',
-                                                                   'ITkLargeRadiusStripOverlapSpacePoints_Cached'] if flags.Acts.useCache else ['ITkLargeRadiusStripSpacePoints',
-                                                                                                                                                'ITkLargeRadiusStripOverlapSpacePoints'])
+        elif flags.Tracking.ActiveConfig.isLargeD0 and flags.Tracking.ActiveConfig.isSecondaryPass:
+            ext_suffix = flags.Tracking.ActiveConfig.extension.replace("Acts", "")
+            kwargs.setdefault('StripSeedingAlg.InputSpacePoints', [f'ITk{ext_suffix}StripSpacePoints_Cached',
+                                                                   f'ITk{ext_suffix}StripOverlapSpacePoints_Cached'] if flags.Acts.useCache else [f'ITk{ext_suffix}StripSpacePoints',
+                                                                                                                                                   f'ITk{ext_suffix}StripOverlapSpacePoints'])
         elif flags.Tracking.ActiveConfig.extension == 'ActsLowPt':
             kwargs.setdefault('StripSeedingAlg.InputSpacePoints', ['ITkLowPtStripSpacePoints_Cached',
                                                                    'ITkLowPtStripOverlapSpacePoints_Cached'] if flags.Acts.useCache else ['ITkLowPtStripSpacePoints',

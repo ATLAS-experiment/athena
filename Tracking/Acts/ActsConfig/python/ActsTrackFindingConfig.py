@@ -174,7 +174,7 @@ def ActsMainTrackFindingAlgCfg(flags,
         from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
 
         tpe_tool_kwargs = {}
-        if flags.Tracking.ActiveConfig.extension in ['ActsLargeRadius', 'ActsValidateLargeRadiusStandalone']:
+        if flags.Tracking.ActiveConfig.isLargeD0:
             tpe_tool_kwargs["allowPropagatorFailure"] = True
 
         kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags, **tpe_tool_kwargs)))
@@ -265,7 +265,7 @@ def ActsTrackFindingCfg(flags,
     stripSeedLabels = ['SSS']
     # Conversion and LRT do not process pixel seeds
     from InDetConfig.ITkActsHelpers import isFastPrimaryPass
-    if flags.Tracking.ActiveConfig.extension in ['ActsConversion', 'ActsLargeRadius', 'ActsValidateLargeRadiusStandalone']:
+    if flags.Tracking.ActiveConfig.extension == 'ActsConversion' or flags.Tracking.ActiveConfig.isLargeD0:
         pixelSeedLabels = None
     # Main pass does not process strip seeds in the fast tracking configuration
     elif isFastPrimaryPass(flags):
@@ -279,7 +279,7 @@ def ActsTrackFindingCfg(flags,
 
     pixelRefit = [False]
     stripRefit = [False]
-    if flags.Tracking.ActiveConfig.extension in ['ActsLargeRadius', 'ActsValidateLargeRadiusStandalone']:
+    if flags.Tracking.ActiveConfig.isLargeD0:
         stripRefit = [True]
 
     if pixelSeedLabels is None:
