@@ -91,9 +91,9 @@ std::vector<const xAOD::TauJet*> TrigTauMonitorBaseAlgorithm::getOnlineTausAll(c
 }
 
 
-std::tuple<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> TrigTauMonitorBaseAlgorithm::getOnlineTaus(const std::string& trigger) const
+std::tuple<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> TrigTauMonitorBaseAlgorithm::getOnlineTaus(const EventContext& ctx, const std::string& trigger) const
 {
-    return classifyOnlineTaus(getOnlineTausAll(trigger, true), 0.0);
+    return classifyOnlineTaus(ctx, getOnlineTausAll(trigger, true), 0.0);
 }
 
 
@@ -135,7 +135,7 @@ std::vector<const xAOD::TauJet*> TrigTauMonitorBaseAlgorithm::getOfflineTausAll(
 
 std::pair<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> TrigTauMonitorBaseAlgorithm::getOfflineTaus(const EventContext& ctx, const float threshold, const TauID tau_id) const
 {
-    return classifyOfflineTaus(getOfflineTausAll(ctx, threshold), threshold, tau_id);
+  return classifyOfflineTaus(ctx, getOfflineTausAll(ctx, threshold), threshold, tau_id);
 }
 
 
@@ -289,11 +289,11 @@ StatusCode TrigTauMonitorBaseAlgorithm::fillHistograms(const EventContext& ctx) 
 }
 
 
-std::vector<const xAOD::TauJet*> TrigTauMonitorBaseAlgorithm::classifyTausAll(const std::vector<const xAOD::TauJet*>& taus, const float threshold, const TauID tau_id) const
+std::vector<const xAOD::TauJet*> TrigTauMonitorBaseAlgorithm::classifyTausAll(const EventContext& ctx, const std::vector<const xAOD::TauJet*>& taus, const float threshold, const TauID tau_id) const
 {
     std::vector<const xAOD::TauJet*> tau_vec;
 
-    SG::ReadDecorHandle<xAOD::TauJetContainer, char> tauid_medium{m_offlineGNTauDecorKey, Gaudi::Hive::currentContext()};
+    SG::ReadDecorHandle<xAOD::TauJetContainer, char> tauid_medium{m_offlineGNTauDecorKey, ctx};
     if(!tauid_medium.isValid()) {
       ATH_MSG_WARNING("Cannot retrieve " << tauid_medium.key());
       return tau_vec;
@@ -317,11 +317,11 @@ std::vector<const xAOD::TauJet*> TrigTauMonitorBaseAlgorithm::classifyTausAll(co
 }
 
 
-std::tuple<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> TrigTauMonitorBaseAlgorithm::classifyOnlineTaus(const std::vector<const xAOD::TauJet*>& taus, const float threshold) const
+std::tuple<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> TrigTauMonitorBaseAlgorithm::classifyOnlineTaus(const EventContext& ctx, const std::vector<const xAOD::TauJet*>& taus, const float threshold) const
 {
     std::vector<const xAOD::TauJet*> tau_vec_0p, tau_vec_1p, tau_vec_mp;
 
-    for(const xAOD::TauJet* tau : classifyTausAll(taus, threshold, TauID::None)) {
+    for(const xAOD::TauJet* tau : classifyTausAll(ctx, taus, threshold, TauID::None)) {
         int nTracks = -1;
         tau->detail(xAOD::TauJetParameters::nChargedTracks, nTracks);
 
@@ -334,11 +334,11 @@ std::tuple<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>, s
 }
 
 
-std::pair<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> TrigTauMonitorBaseAlgorithm::classifyOfflineTaus(const std::vector<const xAOD::TauJet*>& taus, const float threshold, const TauID tau_id) const
+std::pair<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> TrigTauMonitorBaseAlgorithm::classifyOfflineTaus(const EventContext& ctx, const std::vector<const xAOD::TauJet*>& taus, const float threshold, const TauID tau_id) const
 {
     std::vector<const xAOD::TauJet*> tau_vec_1p, tau_vec_3p;
 
-    for(const xAOD::TauJet* const tau : classifyTausAll(taus, threshold, tau_id)) {
+    for(const xAOD::TauJet* const tau : classifyTausAll(ctx, taus, threshold, tau_id)) {
         int nTracks = -1;
         tau->detail(xAOD::TauJetParameters::nChargedTracks, nTracks);
 
