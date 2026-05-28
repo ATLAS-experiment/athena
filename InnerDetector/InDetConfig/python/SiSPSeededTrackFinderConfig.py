@@ -39,10 +39,8 @@ def SiSPSeededTrackFinderCfg(flags, name="InDetSiSpTrackFinder", **kwargs) :
     else:
         kwargs.setdefault("useZvertexTool", flags.Reco.EnableHI) # For heavy-ion
         kwargs.setdefault("useZBoundFinding", flags.InDet.Tracking.ActiveConfig.doZBoundary)
-    
-    #
-    # --- Z-coordinates primary vertices finder (only for collisions)
-    #
+
+    # Z-coordinates primary vertices finder (only for collisions)
     if kwargs["useZvertexTool"] and "ZvertexTool" not in kwargs:
         from InDetConfig.SiZvertexToolConfig import SiZvertexMaker_xkCfg
         kwargs.setdefault("ZvertexTool", acc.popToolsAndMerge(
@@ -122,4 +120,62 @@ def ITkSiSPSeededTrackFinderROIConvCfg(flags, name="ITkSiSpTrackFinderROIConv", 
     kwargs.setdefault("EMROIPhiRZContainer", "ITkCaloClusterROIPhiRZ15GeVUnordered")
 
     acc.merge(ITkSiSPSeededTrackFinderCfg(flags, name, **kwargs))
+    return acc
+
+
+def SiSPSeededTrackFinderRoICfg(flags, name="InDetSiSpTrackFinderRoI", **kwargs):
+    acc = ComponentAccumulator()
+
+    if "TrackTool" not in kwargs:
+        from InDetConfig.SiTrackMakerConfig import SiTrackMaker_xkCfg
+        kwargs.setdefault("TrackTool", acc.popToolsAndMerge(
+            SiTrackMaker_xkCfg(flags)))
+
+    if "TrackSummaryTool" not in kwargs:
+        from TrkConfig.TrkTrackSummaryToolConfig import (
+            InDetTrackSummaryToolNoHoleSearchCfg)
+        kwargs.setdefault("TrackSummaryTool", acc.popToolsAndMerge(
+            InDetTrackSummaryToolNoHoleSearchCfg(flags)))
+
+    if "SeedsTool" not in kwargs:
+        from InDetConfig.SiSpacePointsSeedToolConfig import (
+            SiSpacePointsSeedMakerCfg)
+        kwargs.setdefault("SeedsTool", acc.popToolsAndMerge(
+            SiSpacePointsSeedMakerCfg(flags)))
+
+    if flags.InDet.Tracking.ActiveConfig.usePrdAssociationTool:
+        kwargs.setdefault("PRDtoTrackMap", (
+            'InDetPRDtoTrackMap' + flags.InDet.Tracking.ActiveConfig.extension))
+        
+    if (flags.InDet.Tracking.ActiveConfig.RoIStrategy == "LeadTracksRoISeedTool") and ("ZWindowRoISeedTool" not in kwargs):
+        from InDetConfig.ZWindowRoISeedToolConfig import LeadTracksRoISeedToolCfg
+        kwargs.setdefault("ZWindowRoISeedTool", acc.popToolsAndMerge(
+            LeadTracksRoISeedToolCfg(flags)))
+    elif (flags.InDet.Tracking.ActiveConfig.RoIStrategy == "RandomRoISeedTool") and ("ZWindowRoISeedTool" not in kwargs):
+        from InDetConfig.ZWindowRoISeedToolConfig import RandomRoISeedToolCfg
+        kwargs.setdefault("ZWindowRoISeedTool", acc.popToolsAndMerge(
+            RandomRoISeedToolCfg(flags)))
+    elif (flags.InDet.Tracking.ActiveConfig.RoIStrategy == "FileRoISeedTool") and ("ZWindowRoISeedTool" not in kwargs):
+        from InDetConfig.ZWindowRoISeedToolConfig import FileRoISeedToolCfg
+        kwargs.setdefault("ZWindowRoISeedTool", acc.popToolsAndMerge(
+            FileRoISeedToolCfg(flags)))
+    elif (flags.InDet.Tracking.ActiveConfig.RoIStrategy == "TruthHSRoISeedTool") and ("ZWindowRoISeedTool" not in kwargs):
+        from InDetConfig.ZWindowRoISeedToolConfig import TruthHSRoISeedToolCfg
+        kwargs.setdefault("ZWindowRoISeedTool", acc.popToolsAndMerge(
+            TruthHSRoISeedToolCfg(flags)))
+    else:
+        print(f"ERROR. Invalid flags.InDet.Tracking.ActiveConfig.RoIStrategy value ({flags.InDet.Tracking.ActiveConfig.RoIStrategy}). Expected a valid RoI Seed Tool name. Please check.")
+
+    kwargs.setdefault("doRandomSpot", flags.InDet.Tracking.ActiveConfig.doRandomSpot)
+    if flags.InDet.Tracking.ActiveConfig.doRandomSpot and ("RandomRoISeedTool" not in kwargs):
+        from InDetConfig.ZWindowRoISeedToolConfig import RandomRoISeedToolCfg
+        kwargs.setdefault("RandomRoISeedTool", acc.popToolsAndMerge(
+            RandomRoISeedToolCfg(flags)))
+
+    kwargs.setdefault("RoIWidth",flags.InDet.Tracking.ActiveConfig.z0WindowRoI)
+    kwargs.setdefault("VxOutputName", "RoIVertices"+flags.InDet.Tracking.ActiveConfig.extension)
+
+    acc.addEventAlgo(CompFactory.InDet.SiSPSeededTrackFinderRoI(
+        name+flags.InDet.Tracking.ActiveConfig.extension, **kwargs))
+
     return acc
