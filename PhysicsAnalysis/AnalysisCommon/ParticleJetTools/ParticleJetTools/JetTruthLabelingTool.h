@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PARTICLEJETTOOLS_JETTRUTHLABELINGTOOL_H
@@ -121,7 +121,7 @@ protected:
   float getTopSplit23Cut( float pt ) const;
 
   /// Get number of ghost associated particles
-  int getNGhostParticles( const xAOD::Jet &jet, std::string collection ) const;
+  int getNGhostParticles( const xAOD::Jet &jet, const std::string & collection ) const;
 
   enum class TruthLabelConfiguration {
       R21Precision_2022v1,
