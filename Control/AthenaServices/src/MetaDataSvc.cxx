@@ -551,7 +551,8 @@ StatusCode MetaDataSvc::initInputMetaDataStore(const std::string& fileName) {
 
 const std::string MetaDataSvc::currentRangeID() const
 {
-   return m_outSeqSvc.isValid()? m_outSeqSvc->currentRangeID() : "";
+   const EventContext& ctx = Gaudi::Hive::currentContext();
+   return m_outSeqSvc.isValid()? m_outSeqSvc->currentRangeID(ctx) : "";
 }
 
 
