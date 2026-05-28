@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -147,9 +147,9 @@ def SetConfigTag(flags):
                 if (aa_type == 82):
                     config = "configZDC_PbPb2025.v1.json"
             elif flags.Input.ProjectName in ["data26_comm", "data26_cos", "data26_900GeV", "data26_13p6TeV"]:
-                config = "configZDC_PbPb2025.v2.json" # assume same config for 2026 pp as for PbPb for 2025 run
+                config = "configZDC_PbPb2025.v2.1.json" # assume same config for 2026 pp as for PbPb for 2025 run
             elif flags.Input.ProjectName in ["data26_hi","data26_hicomm"]:
-                config = "configZDC_PbPb2025.v2.json" #until we can install a 2026v1
+                config = "configZDC_PbPb2026.v2.json"
 
         elif run == LHCPeriod.Run2:
             if flags.Input.ProjectName == "data15_hi":
