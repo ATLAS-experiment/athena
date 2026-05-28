@@ -70,7 +70,7 @@ namespace asg {
 
 
     /** Get the bit position of a cut */
-    inline unsigned int getCutPosition( const std::string& cutName ) const 
+    inline unsigned int getCutPosition( std::string_view cutName ) const 
     {
       auto it = m_cutMap.find(cutName);
       return (it != m_cutMap.end()) ? (it->second).second : 999999;
@@ -106,7 +106,7 @@ namespace asg {
     std::string m_name;
 
     /** The map for mapping cut names to their description and position */
-    std::map< std::string, std::pair< std::string, unsigned int > > m_cutMap;
+    std::map< std::string, std::pair< std::string, unsigned int > , std::less<>> m_cutMap;
 
     /** A bitmap that provides a mask that only leaves defined cuts */
     std::bitset<NBITS> m_cutMask;
