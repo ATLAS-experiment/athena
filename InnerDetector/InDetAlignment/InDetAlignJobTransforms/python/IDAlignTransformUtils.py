@@ -49,9 +49,12 @@ def addIDAlignArguments(parser):
     parser.add_argument("--excludeIDPart", default = trfArgClasses.argList([]), nargs = "+", choices = ["Pixel", "SCT", "TRT"], type = trfArgClasses.argFactory(trfArgClasses.argList), group = "ID alignment", help = "By default all ID is aligned, exclude some if wished (which may conflict with the set alignment level)")
     
     ## ITk Things to align
-    parser.add_argument("--alignITk", default = trfArgClasses.argBool(False), action="store_true", help='Align whole ITk')
-    parser.add_argument("--alignITkPixel", default = trfArgClasses.argBool(False), action="store_true", help='Align ITkPixel')
-    parser.add_argument("--alignITkStrip", default = trfArgClasses.argBool(False), action="store_true", help='Align ITkStrip')
+    parser.add_argument("--alignITk", const = trfArgClasses.argBool(True), default = trfArgClasses.argBool(False), nargs='?', type = trfArgClasses.argFactory(trfArgClasses.argBool), group = "ID alignment", help='Align ITk')
+    parser.add_argument("--alignITkPixel", const = trfArgClasses.argBool(True), default = trfArgClasses.argBool(False), nargs='?', type = trfArgClasses.argFactory(trfArgClasses.argBool), group = "ID alignment", help='Align ITkPixel')
+    parser.add_argument("--alignITkStrip", const = trfArgClasses.argBool(True), default = trfArgClasses.argBool(False), nargs='?', type = trfArgClasses.argFactory(trfArgClasses.argBool), group = "ID alignment", help='Align ITkStrip')
+    # parser.add_argument("--alignITk", default = trfArgClasses.argBool(True), action="store_true", help='Align whole ITk')
+    # parser.add_argument("--alignITkPixel", default = trfArgClasses.argBool(True), action="store_true", help='Align ITkPixel')
+    # parser.add_argument("--alignITkStrip", default = trfArgClasses.argBool(False), action="store_true", help='Align ITkStrip')
 
     ## Local Geometry
     parser.add_argument("--localgeo", default = trfArgClasses.argBool(False), action="store_true", help='Use local geometry XML files')

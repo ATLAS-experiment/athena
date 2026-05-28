@@ -222,9 +222,13 @@ def configureITkFlags(runArgs, flags):
     flags.ITk.Align.accumulate = runArgs.accumulate
     flags.ITk.Align.baseDir = os.path.abspath(runArgs.baseDir)
 
-    flags.ITk.Align.alignITk = runArgs.alignITk
-    flags.ITk.Align.alignITkPixel = runArgs.alignITkPixel
-    flags.ITk.Align.alignITkStrip = runArgs.alignITkStrip
+    if hasattr(runArgs, "alignITk"):
+        flags.ITk.Align.alignITk = runArgs.alignITk
+    if hasattr(runArgs, "alignITkPixel"):
+        print("PixelStatus: ", runArgs.alignITkPixel)
+        flags.ITk.Align.alignITkPixel = runArgs.alignITkPixel
+    if hasattr(runArgs, "alignITkStrip"):
+        flags.ITk.Align.alignITkStrip = runArgs.alignITkStrip
 
     flags.addFlag("ConstrainedTrackProvider.InputTracksCollection", runArgs.inputTracksCollection)
     flags.Input.Files = [os.path.abspath(inputFile) for inputFile in runArgs.inputRAWFile]
