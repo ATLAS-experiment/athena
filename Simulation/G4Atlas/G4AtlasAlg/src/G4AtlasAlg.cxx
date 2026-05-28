@@ -342,7 +342,7 @@ StatusCode G4AtlasAlg::execute()
   // because of the mismatch between Gaudi slot-local and G4 thread-local RNG.
   ATHRNG::RNGWrapper* rngWrapper = m_rndmGenSvc->getEngine(this, m_randomStreamName);
   rngWrapper->setSeed( m_randomStreamName,  ctx);
-  G4Random::setTheEngine(*rngWrapper);
+  G4Random::setTheEngine(rngWrapper->getEngine(ctx));
 
   ATH_MSG_DEBUG("Calling SimulateG4Event");
 

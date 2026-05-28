@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************************
@@ -353,7 +353,8 @@ StatusCode TilePulseForTileMuonReceiver::execute() {
   // Prepare RNG service
   //
   ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, m_randomStreamName);
-  rngWrapper->setSeed( m_randomStreamName, Gaudi::Hive::currentContext() );
+  rngWrapper->setSeed( m_randomStreamName, ctx );
+  CLHEP::HepRandomEngine* rndmEngine = rngWrapper->getEngine(ctx);
 
   /////////////////////////////////////////////////////////////////////////////////
   // (a.0) iterate over collections in the HIT container: access 'ros' and 'drawer'
@@ -716,8 +717,8 @@ StatusCode TilePulseForTileMuonReceiver::execute() {
         if (m_tileNoise) {
           // Generate an array to randomize the noise for each digit
           //
-          RandGaussQ::shootArray(*rngWrapper, m_nSamples, Rndm, 0.0, 1.0);
-          RandFlat::shootArray(*rngWrapper, 1, Rndm_dG, 0.0, 1.0);
+          RandGaussQ::shootArray(rndmEngine, m_nSamples, Rndm, 0.0, 1.0);
+          RandFlat::shootArray(rndmEngine, 1, Rndm_dG, 0.0, 1.0);
           sigma_Hfn1 = sampleNoise->getHfn1(idhash, TMDBchan, TileID::LOWGAIN);
           sigma_Hfn2 = sampleNoise->getHfn2(idhash, TMDBchan, TileID::LOWGAIN);
           if (sigma_Hfn1 > 0 || sigma_Hfn2) {
