@@ -157,32 +157,32 @@ ActsConversionPrdAssociationAlg                                   INFO Prd Map s
 | N. Strip Measurements |         15 |
 | N. Hgtd Measurements  |          0 |
 |-----------------------|------------|
-ActsLargeRadiusPixelClusterPreparationAlg                         INFO Data Prep statistics
+LargeD0PixelClusterPreparationAlg                                 INFO Data Prep statistics
 |---------|------------|
 | Inputs  |    1164869 |
 | Outputs |    1075338 |
 |---------|------------|
-ActsLargeRadiusStripClusterPreparationAlg                         INFO Data Prep statistics
+LargeD0StripClusterPreparationAlg                                 INFO Data Prep statistics
 |---------|------------|
 | Inputs  |    1116636 |
 | Outputs |    1082913 |
 |---------|------------|
-ActsLargeRadiusStripSpacePointPreparationAlg                      INFO Data Prep statistics
+LargeD0StripSpacePointPreparationAlg                              INFO Data Prep statistics
 |---------|------------|
 | Inputs  |     327706 |
 | Outputs |     309002 |
 |---------|------------|
-ActsLargeRadiusStripOv...pSpacePointPreparationAlg                INFO Data Prep statistics
+LargeD0StripOverlapSpacePointPreparationAlg                       INFO Data Prep statistics
 |---------|------------|
 | Inputs  |     106134 |
 | Outputs |     101032 |
 |---------|------------|
-ActsLargeRadiusStripSeedingAlg                                    INFO Seed statistics
+LargeD0StripSeedingAlg                                            INFO Seed statistics
 |-------------|------------|
 | Spacepoints |     410034 |
 | Seeds       |      25685 |
 |-------------|------------|
-ActsLargeRadiusTrackFindingAlg                                    INFO statistics
+LargeD0TrackFindingAlg                                            INFO statistics
 |-----------------------------------|------------|------------|
 |                           All eta | SSS        | ALL        |
 |-----------------------------------|------------|------------|
@@ -204,7 +204,7 @@ ActsLargeRadiusTrackFindingAlg                                    INFO statistic
 | Total forced measurements         |          0 |          0 |
 | resolved tracks                   |        905 |        905 |
 |-----------------------------------|------------|------------|
-ActsLargeRadiusTrackFindingAlg                                    INFO Ratios
+LargeD0TrackFindingAlg                                            INFO Ratios
 |-------------------------------------------|------------|------------|
 |                                           | SSS        | ALL        |
 |-------------------------------------------|------------|------------|
@@ -229,7 +229,7 @@ ActsLargeRadiusTrackFindingAlg                                    INFO Ratios
 |                                  3.0- 3.5 |          0 |          0 |
 |                                  3.5-+inf |          0 |          0 |
 |-------------------------------------------|------------|------------|
-ActsLargeRadiusPrdAssociationAlg                                  INFO Prd Map statistics
+LargeD0PrdAssociationAlg                                          INFO Prd Map statistics
 |-----------------------|------------|
 | N. Tracks             |        905 |
 | N. Pixel Measurements |       2586 |

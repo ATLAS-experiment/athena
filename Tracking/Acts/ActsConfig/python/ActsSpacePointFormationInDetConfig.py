@@ -232,7 +232,7 @@ def ActsIDSpacePointFormationCfg(flags,
     # Name of the RoI to be used
     roisName = f'{flags.Tracking.ActiveConfig.extension}RegionOfInterest'
     # Large Radius pass uses the same roi as the primary pass (FS roi)
-    if flags.Tracking.ActiveConfig.extension == 'ActsLargeRadius':
+    if flags.Tracking.ActiveConfig.isLargeD0 and flags.Tracking.ActiveConfig.isSecondaryPass:
         roisName = 'ActsRegionOfInterest'
       
     # Cluster Collection name(s) and Space Point Collection name(s)

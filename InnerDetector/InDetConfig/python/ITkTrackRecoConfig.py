@@ -7,7 +7,7 @@ from AthenaCommon.Constants import WARNING, INFO
 
 _flags_set = []  # For caching
 _extensions_list = [] # For caching, possible legacy / validate Passes/Configurations
-_actsExtensions  = ['Acts', 'ActsLegacy', 'ActsConversion', 'ActsLargeRadius', 'ActsLowPt', 'ActsValidateF100', 'ActsValidateF150', 'ActsValidateLargeRadiusStandalone'] # Possible Acts Alone Passes/Configurations
+_actsExtensions  = ['Acts', 'ActsLegacy', 'ActsConversion', 'LargeD0', 'ActsLowPt', 'ActsValidateF100', 'ActsValidateF150', 'ActsValidateLargeRadiusStandalone'] # Possible Acts Alone Passes/Configurations
 _outputExtensions  = [] # Passes/Configurations to be passed to the output job option
 
 def CombinedTrackingPassFlagSets(flags):
@@ -65,7 +65,7 @@ def CombinedTrackingPassFlagSets(flags):
             "Tracking.ITkActsConversionPass")]
 
     # Acts Large Radius Pass
-    if flags.Acts.doLargeRadius:
+    if TrackingComponent.ActsChain in flags.Tracking.recoChain and flags.Acts.doLargeRadius:
         flags_set += [flags.cloneAndReplace(
             "Tracking.ActiveConfig",
             "Tracking.ITkActsLargeRadiusPass")]
@@ -382,7 +382,7 @@ def ITkTrackFinalCfg(flags,
             'ActsValidateAmbiguityResolution' in splitProbName or \
             'ActsValidateScoreBasedAmbiguityResolution' in splitProbName or \
             'ActsConversion' in splitProbName or \
-            'ActsLargeRadius' in splitProbName or \
+            'LargeD0' in splitProbName or \
             'ActsValidateLargeRadiusStandalone' in splitProbName or \
             'ActsLowPt' in splitProbName or \
             ('Acts' in  splitProbName and 'Validate' not in splitProbName) ))
