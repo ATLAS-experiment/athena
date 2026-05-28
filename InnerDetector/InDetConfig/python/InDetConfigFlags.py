@@ -151,7 +151,7 @@ def createInDetConfigFlags():
         createTrackingPassFlags, createHighPileupTrackingPassFlags,
         createMinBiasTrackingPassFlags, createLargeD0TrackingPassFlags,
         createR3LargeD0TrackingPassFlags, createLowPtLargeD0TrackingPassFlags,
-        createLowPtTrackingPassFlags, createVeryLowPtTrackingPassFlags,
+        createLowPtTrackingPassFlags, createVeryLowPtTrackingPassFlags, createLowPtRoITrackingPassFlags,
         createForwardTracksTrackingPassFlags, createBeamGasTrackingPassFlags,
         createVtxLumiTrackingPassFlags, createVtxBeamSpotTrackingPassFlags, createCosmicsTrackingPassFlags,
         createHeavyIonTrackingPassFlags, createPixelTrackingPassFlags, createDisappearingTrackingPassFlags,
@@ -175,6 +175,8 @@ def createInDetConfigFlags():
                          createLowPtTrackingPassFlags, prefix=True)
     icf.addFlagsCategory("InDet.Tracking.VeryLowPtPass",
                          createVeryLowPtTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory("InDet.Tracking.LowPtRoIPass",
+                         createLowPtRoITrackingPassFlags, prefix=True)
     icf.addFlagsCategory("InDet.Tracking.ForwardPass",
                          createForwardTracksTrackingPassFlags, prefix=True)
     icf.addFlagsCategory("InDet.Tracking.BeamGasPass",

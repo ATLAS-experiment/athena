@@ -95,6 +95,8 @@ def createTrackingConfigFlags():
 
     # Turn running of doLargeD0 second pass down to 100 MeV on and off
     icf.addFlag("Tracking.doLowPtLargeD0", False)
+    # Switch for running LowPtRoI settings
+    icf.addFlag("Tracking.doLowPtRoI", False)
     # Turn running of high pile-up reconstruction on and off
     icf.addFlag("Tracking.doHighPileup", False)
     # Special reconstruction for vertex lumi measurement
