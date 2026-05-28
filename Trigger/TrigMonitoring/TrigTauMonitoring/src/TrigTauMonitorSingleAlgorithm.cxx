@@ -100,17 +100,17 @@ StatusCode TrigTauMonitorSingleAlgorithm::processEvent(const EventContext& ctx) 
         const bool hlt_not_prescaled_flag = (passBits & TrigDefs::EF_prescaled) == 0;
 
         // Offline tau requirement check
-        const std::vector<const xAOD::TauJet*> offline_taus_with_id = classifyTausAll(offline_taus_all, 0, static_cast<TauID>(m_offline_tau_id.value()));
+        const std::vector<const xAOD::TauJet*> offline_taus_with_id = classifyTausAll(ctx, offline_taus_all, 0, static_cast<TauID>(m_offline_tau_id.value()));
         if(m_requireOfflineTaus && offline_taus_with_id.empty()) continue;
 
         // Filter offline taus
-        auto offline_taus = classifyOfflineTaus(offline_taus_with_id, info.getHLTTauThreshold() - threshold_offset);
+        auto offline_taus = classifyOfflineTaus(ctx, offline_taus_with_id, info.getHLTTauThreshold() - threshold_offset);
         std::vector<const xAOD::TauJet*> offline_taus_1p = offline_taus.first;
         std::vector<const xAOD::TauJet*> offline_taus_3p = offline_taus.second;
 
         // Online taus
         std::vector<const xAOD::TauJet*> hlt_taus_all = getOnlineTausAll(trigger, true, info.isBootstrappedTauTrigger());
-        auto hlt_taus = classifyOnlineTaus(hlt_taus_all);
+        auto hlt_taus = classifyOnlineTaus(ctx, hlt_taus_all);
         std::vector<const xAOD::TauJet*> hlt_taus_0p = std::get<0>(hlt_taus);
         std::vector<const xAOD::TauJet*> hlt_taus_1p = std::get<1>(hlt_taus);
         std::vector<const xAOD::TauJet*> hlt_taus_mp = std::get<2>(hlt_taus);
