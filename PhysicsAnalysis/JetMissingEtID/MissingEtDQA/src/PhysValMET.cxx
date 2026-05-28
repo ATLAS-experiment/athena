@@ -68,6 +68,7 @@ namespace MissingEtDQA
     declareProperty( "InputMuons",     m_muonColl  = "Muons"             );
     declareProperty( "DoTruth", m_doTruth = false );
     declareProperty( "InputIsDAOD",    m_inputIsDAOD = false              );
+    declareProperty( "DoMETRefPlots",  m_doMETRefPlots = false           );
     declareProperty( "METMapName",     m_mapname   = "METAssoc"          );
     declareProperty( "METCoreName",    m_corename  = "MET_Core"          );
   }
@@ -608,7 +609,7 @@ namespace MissingEtDQA
       sum_photon += (*pho_itr)->pt();
     }
 
-    //JVT
+    //JVT and OR on jets
     for (const auto& jet_type : m_types)
     {
       ToolHandle<IJetUpdateJvt>* jvtTool(nullptr);
@@ -1186,7 +1187,40 @@ namespace MissingEtDQA
     m_MET_Calo_y->Sumw2();
     m_MET_Calo_phi->Sumw2();
     m_MET_Calo_sum->Sumw2();
-  
+ 
+
+    //Testing Particles
+    //doing METMaker particles
+
+    // This will be the output MET.
+    auto met_MetMaker = std::make_unique<xAOD::MissingETContainer>();
+    auto aux = std::make_unique<xAOD::MissingETAuxContainer>();
+    met_MetMaker->setStore(aux.get());
+
+    // Build the hard terms. The string argument is arbitrary, it's the name you're giving to the term for later lookup.
+    ATH_CHECK((*m_metmaker)->rebuildMET("RefEle", xAOD::Type::Electron, met_MetMaker.get(), metElectrons.asDataVector(), metHelper));
+    ATH_CHECK((*m_metmaker)->rebuildMET("RefGamma", xAOD::Type::Photon, met_MetMaker.get(), metPhotons.asDataVector(), metHelper));
+    ATH_CHECK((*m_metmaker)->rebuildMET("RefTau", xAOD::Type::Tau, met_MetMaker.get(), metTaus.asDataVector(),metHelper));
+    ATH_CHECK((*m_metmaker)->rebuildMET("Muons", xAOD::Type::Muon, met_MetMaker.get(), metMuons.asDataVector(), metHelper));
+
+    ATH_CHECK((*m_metmaker)->rebuildJetMET("RefJet", "SoftClus", "PVSoftTrk", met_MetMaker, jets, coreMet, metHelper, true));
+
+    // If the specific object interfaces are needed
+    std::vector<const xAOD::Electron*> el_elems = met::getMETElements<xAOD::Electron>(met_MetMaker["RefEle"]);
+    std::vector<const xAOD::Photon*> ph_elems = met::getMETElements<xAOD::Photon>(met_MetMaker["RefGamma"]);
+    std::vector<const xAOD::Tau*> ta_elems = met::getMETElements<xAOD::Tau>(met_MetMaker["RefTau"]);
+    std::vector<const xAOD::Muon*> mu_elems = met::getMETElements<xAOD::Muon>(met_MetMaker["Muons"]);
+    std::vector<const xAOD::JetContainer*> jet_elems = met::getMETElements<xAOD::JetContainer>(met_MetMaker["RefJet"]);
+
+    std::cout << "Comparing particle numbers" << std::endl;
+    std::cout << "Electrons - METMaker: " << el_elems.size() << " Current: " << metElectrons.size() << std::endl;
+    std::cout << "Gamma - METMaker: " << ph_elems.size() << " Current: " << metPhotonsOR.size() << std::endl;
+    std::cout << "Tau - METMaker: " << ta_elems.size() << " Current: " << metTausOR.size() << std::endl;
+    std::cout << "Muon - METMaker: " << mu_elems.size() << " Current: " << metMuons.size() << std::endl;
+    std::cout << "Jet - METMaker: " << jet_elems.size() << " Current: " << metJetsOR.size() << std::endl;
+
+    //
+ 
     return StatusCode::SUCCESS;
   }
   

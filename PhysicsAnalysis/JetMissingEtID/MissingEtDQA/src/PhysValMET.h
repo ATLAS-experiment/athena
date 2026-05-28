@@ -81,6 +81,7 @@ class PhysValMET
  private:
   bool m_doTruth;
   bool m_inputIsDAOD;
+  bool m_doMETRefPlots;
 
   /// Default constructor: 
   PhysValMET();
