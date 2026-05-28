@@ -142,7 +142,7 @@ namespace InDet{
     std::vector<float> trkRank(0);
     for(const auto *tk : listSecondTracks){
       float rank = m_useTrackClassificator ?
-	m_trackClassificator->trkTypeWgts(tk, primVrt, jetDir)[0] :
+	m_trackClassificator->trkTypeWgts(ctx, tk, primVrt, jetDir)[0] :
 	std::count(saveSecondTracks.begin(), saveSecondTracks.end(), tk); // Number of 2tr vertices where each track is used
       trkRank.push_back(rank);
     }
@@ -198,17 +198,17 @@ namespace InDet{
 	if( find( listSecondTracks.begin(), listSecondTracks.end(), i_ntrk) != listSecondTracks.end() ) continue; // Track is used already
 
 	if(m_useTrackClassificator){
-	  std::vector<float> trkScore=m_trackClassificator->trkTypeWgts(i_ntrk, primVrt, jetDir);
+	  std::vector<float> trkScore=m_trackClassificator->trkTypeWgts(ctx, i_ntrk, primVrt, jetDir);
 	  if(trkScore[0] < 0.1) continue; //Remove very low track HF score
 	}
 
-	double Signif3DS = m_fitSvc->VKalGetImpact(i_ntrk, fitVertex         , 1, Impact, ImpactError);
+	double Signif3DS = m_fitSvc->VKalGetImpact(ctx, i_ntrk, fitVertex         , 1, Impact, ImpactError);
 	if(Signif3DS > 10.) continue;
 
 	getPixelLayers(i_ntrk , hitIBL , hitBL, hitL1, nLays);
 	if( hitIBL<=0 && hitBL<=0 ) continue;                  // No IBL and BL pixel hits => non-precise track
 
-	double Signif3DP = m_fitSvc->VKalGetImpact(i_ntrk, primVrt.position(), 1, Impact, ImpactError);
+	double Signif3DP = m_fitSvc->VKalGetImpact(ctx, i_ntrk, primVrt.position(), 1, Impact, ImpactError);
 	if(Signif3DP<1.)continue;
 
 	if(m_fillHist){
@@ -228,8 +228,8 @@ namespace InDet{
       for (auto atrk : AdditionalTracks) listSecondTracks.push_back(atrk.second);        //3tracks with max DIFF are selected
       trkRank.clear();
       for(const auto *tk : listSecondTracks){
-	float rank = m_useTrackClassificator ? m_trackClassificator->trkTypeWgts(tk, primVrt, jetDir)[0] : 1;
-	trkRank.push_back( rank );
+        float rank = m_useTrackClassificator ? m_trackClassificator->trkTypeWgts(ctx, tk, primVrt, jetDir)[0] : 1;
+        trkRank.push_back( rank );
       }
       Chi2 = fitCommonVrt(ctx, listSecondTracks, trkRank, primVrt, jetDir, inpMass, fitVertex, errorMatrix, Momentum, TrkAtVrt);
       ATH_MSG_DEBUG("Added track fitCommonVrt output="<< Chi2);
@@ -582,7 +582,7 @@ namespace InDet{
     //
     for (int i=0; i<NTracks; i++) {
       std::vector<double> Impact, ImpactError;
-      double TrkSig3D = m_fitSvc->VKalGetImpact(selectedTracks[i], primVrt.position(), 1, Impact, ImpactError);
+      double TrkSig3D = m_fitSvc->VKalGetImpact(ctx, selectedTracks[i], primVrt.position(), 1, Impact, ImpactError);
 
       AmgVector(5) tmpPerigee = getPerigee(selectedTracks[i])->parameters();
       if( sin(tmpPerigee[2]-jetDir.Phi())*Impact[0] < 0 ) Impact[0] = -std::abs(Impact[0]);
@@ -595,7 +595,7 @@ namespace InDet{
       int hitIBL=0, hitBL=0, hL1=0, nLays=0;
       getPixelLayers(selectedTracks[i] , hitIBL, hitBL, hL1, nLays );
 
-      if(m_useTrackClassificator) trkScore[i] = m_trackClassificator->trkTypeWgts(selectedTracks[i], primVrt, jetDir);
+      if(m_useTrackClassificator) trkScore[i] = m_trackClassificator->trkTypeWgts(ctx, selectedTracks[i], primVrt, jetDir);
 
       if(m_fillHist){
 	Hists& h = getHists();

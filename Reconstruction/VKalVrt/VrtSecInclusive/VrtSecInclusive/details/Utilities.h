@@ -105,7 +105,7 @@ namespace VKalVrtAthena {
 
   //____________________________________________________________________________________________________
   template<class LeptonFlavor>
-  StatusCode VrtSecInclusive::augmentDVimpactParametersToLeptons( const std::string& containerName )
+  StatusCode VrtSecInclusive::augmentDVimpactParametersToLeptons( const EventContext& ctx, const std::string& containerName )
   {
 
     const xAOD::VertexContainer *secondaryVertexContainer{};
@@ -162,7 +162,7 @@ namespace VKalVrtAthena {
           std::vector<double> impactParameters;
           std::vector<double> impactParErrors;
 
-          m_fitSvc->VKalGetImpact( trk, vtx->position(), static_cast<int>( lepton->charge() ), impactParameters, impactParErrors );
+          m_fitSvc->VKalGetImpact( ctx, trk, vtx->position(), static_cast<int>( lepton->charge() ), impactParameters, impactParErrors );
 
           enum { k_d0, k_z0, k_theta, k_phi, k_qOverP }; // for the impact parameter
           enum { k_d0d0, k_d0z0, k_z0z0 };               // for the par errors

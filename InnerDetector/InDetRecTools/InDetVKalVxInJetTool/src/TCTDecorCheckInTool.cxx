@@ -67,7 +67,7 @@
 
 
     //==========================================================================
-      SG::ReadHandle<xAOD::JetContainer> jetTES(m_jetsKey, ctx);
+    SG::ReadHandle<xAOD::JetContainer> jetTES(m_jetsKey, ctx);
     if ( !jetTES.isValid() ) {
       ATH_MSG_WARNING( "No AntiKt4EMPflow jet container found in TDS" );
       return StatusCode::SUCCESS;  }
@@ -94,7 +94,7 @@
           float curDeltaR = (itrk)->p4().DeltaR(curJet->p4());
           if(curDeltaR < minDeltaR) {minDeltaR = curDeltaR; closestJet = curJet;}
         }
-        m_trackClassificationTool->decorateTrack(itrk,*primVertex, *jetTES, closestJet);
+        m_trackClassificationTool->decorateTrack(ctx, itrk, *primVertex, *jetTES, closestJet);
         }
       
        //loop over tracks and check if decoration was correctly added (using either decorateTrack)
@@ -104,7 +104,7 @@
         const ElementLink<xAOD::JetContainer>& v_jetLinks = trackReadDecorHandleJetLink(*itrk);
 
           ATH_MSG_DEBUG("TCT score from decoration: " << v_tctScoresDeco.at(0) << ", " << v_tctScoresDeco.at(1) << ", "<< v_tctScoresDeco.at(2));
-          std::vector<float> v_tctScore = m_trackClassificationTool->trkTypeWgts(itrk,*primVertex,(*v_jetLinks)->p4());
+          std::vector<float> v_tctScore = m_trackClassificationTool->trkTypeWgts(ctx,itrk,*primVertex,(*v_jetLinks)->p4());
           ATH_MSG_DEBUG("Calculated TCT score: " << v_tctScore.at(0) << ", " << v_tctScore.at(1) << ", " << v_tctScore.at(2));
 
           for(int j=0; j<=2 ; j++) {assert(Athena_test::isEqual(v_tctScore.at(j),v_tctScoresDeco.at(j)));}
@@ -121,7 +121,7 @@
           const xAOD::TrackParticle* itrk = (*trackItr);
           if((itrk)->p4().DeltaR(ijet->p4()) < 0.4) {trkparticles.push_back(itrk); }
         }
-        m_trackClassificationTool->decorateJet(trkparticles,*trackTES,*primVertex, ijet);
+        m_trackClassificationTool->decorateJet(ctx,trkparticles,*trackTES,*primVertex, ijet);
       }
       
       //loop over jets and check if decoration was correctly added 
@@ -133,7 +133,7 @@
         for(unsigned int i=0; i<v_tctScoresDeco.size(); i++)
         {
           ATH_MSG_DEBUG("TCT score from decoration: " << v_tctScoresDeco.at(i).at(0) << ", " << v_tctScoresDeco.at(i).at(1) << ", "<< v_tctScoresDeco.at(i).at(2));
-          std::vector<float> v_tctScore = m_trackClassificationTool->trkTypeWgts(*v_trackLinks.at(i),*primVertex,ijet->p4());
+          std::vector<float> v_tctScore = m_trackClassificationTool->trkTypeWgts(ctx,*v_trackLinks.at(i),*primVertex,ijet->p4());
           ATH_MSG_DEBUG("Calculated TCT score: " << v_tctScore.at(0) << ", " << v_tctScore.at(1) << ", " << v_tctScore.at(2));
 
           for(int j=0; j<=2 ; j++) {assert(Athena_test::isEqual(v_tctScore.at(j),v_tctScoresDeco.at(i).at(j)));}
