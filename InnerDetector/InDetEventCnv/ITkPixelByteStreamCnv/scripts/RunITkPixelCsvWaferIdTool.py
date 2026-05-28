@@ -1,0 +1,66 @@
+#!/usr/bin/env python3
+
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+
+"""Configure and initialize ITkPixelCsvWaferIdTool.
+
+This script is a lightweight AthenaConfiguration entry point for the CSV-based
+wafer identifier tool. It currently validates that the tool can be configured
+and initialized, and prints the lookup request that would be passed to the
+underlying waferId() implementation.
+"""
+
+from argparse import ArgumentParser
+
+from AthenaCommon.Constants import INFO
+from AthenaCommon.Logging import log
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
+from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
+
+from ITkPixelByteStreamCnv.ITkPixelByteStreamCnvConfig import ITkPixelCsvWaferIdToolCfg
+
+parser = ArgumentParser("RunITkPixelCsvWaferIdTool.py")
+parser.add_argument(
+    "--csv-file",
+    default="AT2-IP-ES-0016_v1.41_INCOMPLETE-ModuleA.csv",
+    help="CSV file to load. The default is resolved through DATAPATH.",
+)
+#parser.add_argument("--sp-chain", required=True, help="SP chain identifier from the CSV.")
+#parser.add_argument("--module", type=int, required=True, help="Module number from the CSV.")
+#parser.add_argument("--fe", type=int, required=True, help="Front-end number from the CSV.")
+parser.add_argument(
+    "--verbose",
+    action="store_true",
+    help="Print the full Athena configuration and properties.",
+)
+args = parser.parse_args()
+
+log.setLevel(INFO)
+
+flags = initConfigFlags()
+flags.Input.isMC = True
+flags.Input.Files = []  # No input files needed for this test
+
+from AthenaConfiguration.TestDefaults import defaultGeometryTags
+flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
+flags.GeoModel.Align.Dynamic = False
+
+from AthenaConfiguration.TestDefaults import defaultConditionsTags
+flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
+
+flags.lock()
+
+cfg = MainServicesCfg(flags)
+cfg.merge(ITkPixelReadoutGeometryCfg(flags))
+cfg.merge(ITkPixelCsvWaferIdToolCfg(flags, CsvFile=args.csv_file))
+
+if args.verbose:
+    cfg.printConfig(withDetails=True, summariseProps=True, printDefaults=True)
+
+cfg.run(0)
+
+print("Configured ITkPixelCsvWaferIdTool")
+print(f"  CSV file: {args.csv_file}")
+#print(f"  Lookup request: spChain={args.sp_chain}, module={args.module}, fe={args.fe}")
+print("  Note: waferId() is still a placeholder and returns an invalid Identifier.")
