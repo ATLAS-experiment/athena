@@ -48,7 +48,7 @@ namespace LVL1 {
     virtual ~eFEXFPGA();
 
     virtual StatusCode init(int id, int efexid);
-    virtual StatusCode execute(eFEXOutputCollection* inputOutputCollection);
+    virtual StatusCode execute(eFEXOutputCollection* inputOutputCollection, const EventContext& ctx);
     virtual void reset();
     virtual int getID() const {return m_id;}
 

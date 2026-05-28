@@ -21,15 +21,15 @@ LVL1::eFEXtauAlgoBase::eFEXtauAlgoBase(const std::string &type,
 
 LVL1::eFEXtauAlgoBase::~eFEXtauAlgoBase() {}
 
-StatusCode LVL1::eFEXtauAlgoBase::safetyTest() {
+StatusCode LVL1::eFEXtauAlgoBase::safetyTest(const EventContext& ctx) {
 
-  SG::ReadHandle<eTowerContainer> eTowerContainer(
-      m_eTowerContainerKey /*,ctx*/);
+  SG::ReadHandle<eTowerContainer> eTowerContainer(m_eTowerContainerKey, ctx);
   if (!eTowerContainer.isValid()) {
     ATH_MSG_FATAL("Could not retrieve eTowerContainer "
                   << m_eTowerContainerKey.key());
     return StatusCode::FAILURE;
   }
+  m_eTowers = eTowerContainer.cptr();
   return StatusCode::SUCCESS;
 }
 
@@ -37,8 +37,6 @@ StatusCode LVL1::eFEXtauAlgoBase::safetyTest() {
 void LVL1::eFEXtauAlgoBase::buildLayers(int efex_id, int fpga_id,
                                         int central_eta) {
 
-  SG::ReadHandle<eTowerContainer> eTowerContainer(
-      m_eTowerContainerKey /*,ctx*/);
 
   for (unsigned int ieta = 0; ieta < 3; ieta++) {
     for (unsigned int iphi = 0; iphi < 3; iphi++) {
@@ -56,7 +54,7 @@ void LVL1::eFEXtauAlgoBase::buildLayers(int efex_id, int fpga_id,
         }
       } else {
         const LVL1::eTower *tmpTower =
-            eTowerContainer->findTower(m_eFexalgoTowerID[iphi][ieta]);
+            m_eTowers->findTower(m_eFexalgoTowerID[iphi][ieta]);
         m_twrcells[ieta][iphi] = tmpTower->getTotalET();
         m_em0cells[ieta][iphi] = tmpTower->getLayerTotalET(0);
         m_em3cells[ieta][iphi] = tmpTower->getLayerTotalET(3);

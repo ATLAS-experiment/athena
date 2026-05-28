@@ -52,7 +52,7 @@ namespace LVL1 {
     /** standard Athena-Algorithm method */
     virtual StatusCode initialize();
 
-    virtual StatusCode execute(eFEXOutputCollection* inputOutputCollection);
+    virtual StatusCode execute(eFEXOutputCollection* inputOutputCollection, const EventContext& ctx);
 
     virtual int calcTowerID(int eta, int phi, int mod) const;
 
@@ -88,7 +88,7 @@ namespace LVL1 {
     // Auxiliary for storing EDMs of both tau algos
     StatusCode StoreTauTOBs(std::map<int, std::vector<std::unique_ptr<eFEXtauTOB>> >& allTauTobObjects,
 		 SG::WriteHandleKey< xAOD::eFexTauRoIContainer >& eFexTauxTOBOutKey,
-		 SG::WriteHandleKey< xAOD::eFexTauRoIContainer >& eFexTauOutKey);
+		 SG::WriteHandleKey< xAOD::eFexTauRoIContainer >& eFexTauOutKey, const EventContext& ctx) const;
 
     // EM TOBs and xTOBS
     ToolHandle<eFEXSim> m_eFEXSimTool {this, "eFEXSimTool",    "LVL1::eFEXSim",    "Tool that creates the eFEX Simulation"};
