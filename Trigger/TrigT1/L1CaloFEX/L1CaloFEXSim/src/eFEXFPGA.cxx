@@ -70,19 +70,19 @@ void eFEXFPGA::reset(){
   m_efexid = -1;
 }
 
-StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
+StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection, const EventContext& ctx){
   m_emTobObjects.clear();
   m_tauHeuristicTobObjects.clear();
   m_tauBDTTobObjects.clear();
 
-  SG::ReadHandle<eTowerContainer> eTowerContainer(m_eTowerContainerKey/*,ctx*/);
+  SG::ReadHandle<eTowerContainer> eTowerContainer(m_eTowerContainerKey,ctx);
   if(!eTowerContainer.isValid()){
     ATH_MSG_FATAL("Could not retrieve container " << m_eTowerContainerKey.key() );
     return StatusCode::FAILURE;
   }
 
   // Retrieve the L1 menu configuration
-  SG::ReadHandle<TrigConf::L1Menu> l1Menu (m_l1MenuKey/*, ctx*/);
+  SG::ReadHandle<TrigConf::L1Menu> l1Menu (m_l1MenuKey, ctx);
   ATH_CHECK(l1Menu.isValid());
 
   auto & thr_eEM = l1Menu->thrExtraInfo().eEM();
@@ -105,7 +105,8 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
   } else {
     overflow_eta = 5;
   }
-  
+
+  ATH_CHECK( m_eFEXegAlgoTool->safetyTest(ctx) );
   for(int ieta = min_eta; ieta < overflow_eta; ieta++) {
     for(int iphi = 1; iphi < 9; iphi++) {
 
@@ -124,7 +125,6 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       };
 
 
-      ATH_CHECK( m_eFEXegAlgoTool->safetyTest() );
       m_eFEXegAlgoTool->setup(tobtable, m_efexid, m_id, ieta);
 
       // ignore any tobs without a seed, move on to the next window
@@ -244,6 +244,8 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
   }
 
   // --------------- TAU -------------
+  ATH_CHECK( m_eFEXtauAlgoTool->safetyTest(ctx) );
+  ATH_CHECK( m_eFEXtauBDTAlgoTool->safetyTest(ctx) );
   for(int ieta = min_eta; ieta < overflow_eta; ieta++)
   {
     for(int iphi = 1; iphi < 9; iphi++)
@@ -262,8 +264,7 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
          ieta < 5 ? m_eTowersIDs[iphi+1][ieta+1] : 0},
       };
       
-      ATH_CHECK( m_eFEXtauAlgoTool->safetyTest() );
-      ATH_CHECK( m_eFEXtauBDTAlgoTool->safetyTest() );
+
       m_eFEXtauAlgoTool->setup(tobtable, m_efexid, m_id, ieta);
       m_eFEXtauAlgoTool->setAlgoVersion(tauAlgoVersion);
       m_eFEXtauBDTAlgoTool->setup(tobtable, m_efexid, m_id, ieta);

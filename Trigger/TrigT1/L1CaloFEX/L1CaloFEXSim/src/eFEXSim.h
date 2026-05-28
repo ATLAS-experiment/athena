@@ -49,13 +49,11 @@ namespace LVL1 {
 
     virtual void reset ();
 
-    virtual void execute();
-
     virtual int ID() const {return m_id;}
     
     virtual void SetTowersAndCells_SG(int tmp[10][18]);
 
-    virtual StatusCode NewExecute(int tmp[10][18], eFEXOutputCollection* inputOutputCollection);
+    virtual StatusCode NewExecute(int tmp[10][18], eFEXOutputCollection* inputOutputCollection, const EventContext& ctx);
 
     virtual std::vector<std::unique_ptr<eFEXegTOB>> getEmTOBs();
     virtual std::vector<std::unique_ptr<eFEXtauTOB>> getTauHeuristicTOBs();
