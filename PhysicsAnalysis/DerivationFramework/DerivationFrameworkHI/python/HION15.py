@@ -59,7 +59,7 @@ def HION15Cfg(flags):
         extra_AppendToDictionary = {}
         FtagBaseContent.update_append_to_dictionary_in_slimming_helper(flags, HION15SlimmingHelper, extra_AppendToDictionary)
         # Add ExtraVariables
-        ExtraVars += ListSlimming.HION15ExtraVarForBtag(JetColl)
+        ExtraVars += ListSlimming.HION15ExtraVarForBtag(JetColl+"AntiKt4HIJets")
         FtagBaseContent.add_extra_variables_to_slimming_helper(flags, HION15SlimmingHelper)
 
     HION15SlimmingHelper.ExtraVariables = ExtraVars

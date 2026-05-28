@@ -453,7 +453,7 @@ def HION7AllVarFromFTAG1():
 
 def HION7ExtraVarForBtag(JetColl):
 
-    variables  = [JetColl+"AntiKt4HIJets.HadronConeExclTruthLabelID.HadronGhostTruthLabelID.GhostBHadronsFinal.GhostCHadronsFinal.GhostTausFinal.ConeExclBHadronsFinal.ConeExclCHadronsFinal.ConeExclTausFinal"]
+    variables  = [JetColl+".HadronConeExclTruthLabelID.HadronGhostTruthLabelID.GhostBHadronsFinal.GhostCHadronsFinal.GhostTausFinal.ConeExclBHadronsFinal.ConeExclCHadronsFinal.ConeExclTausFinal"]
     FTAG_AUXDATA = [
     'VxTrackAtVertex',
     'btagIp_d0Uncertainty',
@@ -599,6 +599,9 @@ def HION12AllVarContentRun2():
 
 def HION12AllVarContentRun3():
     variables  = []
+    variables += ["EventInfo"]
+    variables += ["CaloSums"]
+    variables += ["Kt4EMPFlowNeutEventShape"]
     variables += ["AntiKt4EMPFlowJets"]                          # Include R = 0.4 anti-kt EM Particle Flow jets
     variables += ["AntiKt4LCTopoJets"]                           # Include R = 0.4 anti-kt local calibration topo-jets
     variables += ["CaloCalTopoClusters"]                         # Include topocluster information
@@ -622,10 +625,23 @@ def HION12AllVarContentRun3():
     variables += ["HLT_xAOD__JetContainer_a4tcemsubjesISFS"]     # Include the HLT R = 0.4 EM Topo trigger jets (2018 HI Run)
     variables += ["HLT_xAOD__JetContainer_a4ionemsubjesISFS"]    # Include the HLT R = 0.4 heavy ion trigger jets (2015 HI Run)
     variables += ["HLT_xAOD__JetContainer_a10tclcwsubjesFS"]     # Include the HLT R = 1.0 LCW Topo trigger jets (2018 HI Run)
+    variables += ["HLT_MuonsCB_RoI", "HLT_MuonsCB_RoIAux."]
 
     return variables
 
-def HION12AllVarContent(project_tag):
+def HION12AllVarMCContent():
+    variables  = HION12AllVarContentRun3()
+    variables += ["AntiKt4TruthJets"]
+    variables += ["TruthEvents"]
+    variables += ["TruthParticles"]
+    variables += ["TruthVertices"]
+    variables += ["TruthElectrons"]
+    variables += ["TruthMuons"]
+    variables += ["TruthPrimaryVertices"]
+
+    return variables
+
+def HION12AllVarContent(project_tag,isMC):
     switcher_HION12 = {
         'data15_hi': HION12AllVarContentRun2(),
         'data18_hi': HION12AllVarContentRun2(),
@@ -634,6 +650,8 @@ def HION12AllVarContent(project_tag):
         'data25_hi': HION12AllVarContentRun3(),
         }
 
+    if isMC:
+        return HION12AllVarMCContent()
     return  switcher_HION12.get(project_tag, "Invalid project tag")
 
 def HION12HIJetBranches():
