@@ -1,20 +1,10 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+
+
 #ifndef ROOT_CORE_UTILS__STRING_UTIL_H
 #define ROOT_CORE_UTILS__STRING_UTIL_H
-
-//          
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
-// Please feel free to contact me (krumnack@iastate.edu) for bug
-// reports, feature suggestions, praise and complaints.
-
-
-// This module still needs to be documented.  The interface provided
-// in this module is intended for experts only.  The module is
-// considered to be in the pre-alpha stage.
-
-
 
 #include <RootCoreUtils/Global.h>
 #include <regex>
@@ -29,15 +19,14 @@ namespace RCU
   /// returns: the substituted string
   /// guarantee: out of memory II
   /// requires: !pattern.empty()
-  std::string substitute (const std::string & str, std::string_view pattern,
-			  std::string_view with);
-
+  std::string substitute(std::string_view str, std::string_view pattern,
+                         std::string_view with);
 
   /// returns: whether we can match the entire string with the regular
   ///   expression
   /// guarantee: strong
   /// failures: out of memory II
-  bool match_expr (const std::regex& expr, const std::string& str);
+  bool match_expr(const std::regex& expr, std::string_view str);
 
 
   /// returns: a string that is the regular expression equivalent of
@@ -46,7 +35,7 @@ namespace RCU
   /// failures: out of memory II
   /// rationale: I am returning a TString instead of an std::string,
   ///   so that this can be passed directly into regexp
-  std::string glob_to_regexp (const std::string& glob);
+  std::string glob_to_regexp(std::string_view glob);
 }
 
 #endif
