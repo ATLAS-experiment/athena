@@ -13,7 +13,7 @@ find_package( XercesC )
 # Possible extra dependencies:
 set( extra_lib )
 if( NOT SIMULATIONBASE )
-   set( extra_lib ISF_FastCaloSimInterfaces ISF_FastCaloSimParametrizationLib TruthUtils )
+   set( extra_lib ISF_FastCaloSimInterfaces ISF_FastCaloSimParametrizationLib MCTruth TruthUtils )
 endif()
 # FastCaloSim G4VFastSimulationModel should only be used in Athena builds
 set ( extra_src )
@@ -33,4 +33,3 @@ atlas_add_library( G4FastSimulation
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-
