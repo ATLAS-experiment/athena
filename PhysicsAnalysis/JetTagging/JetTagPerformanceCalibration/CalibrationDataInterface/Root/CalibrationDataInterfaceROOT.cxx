@@ -1886,6 +1886,7 @@ Analysis::CalibrationDataInterfaceROOT::checkWeightScaleFactors(unsigned int ind
     }
     CalibrationDataVariables x;
     std::vector<double>& vPt = mergedBoundaries[CalibrationDataContainer::kPt], vEta = mergedBoundaries[CalibrationDataContainer::kEta], vTagWeight = mergedBoundaries[CalibrationDataContainer::kTagWeight];
+    const std::string mcRefStr{"MCreference"};
     for (unsigned int ipt = 0; ipt < vPt.size()-1; ++ipt) {
       x.jetPt = (vPt[ipt] + vPt[ipt+1]) * 500.; // account for MeV -> GeV conversion
       for (unsigned int ieta = 0; ieta < vEta.size()-1; ++ieta) {
@@ -1896,7 +1897,7 @@ Analysis::CalibrationDataInterfaceROOT::checkWeightScaleFactors(unsigned int ind
           double value;
           container->getResult(x, value);
           Analysis::UncertaintyResult uncertaintyResult(0,0);
-          container->getUncertainty("MCreference", x, uncertaintyResult);
+          container->getUncertainty(mcRefStr, x, uncertaintyResult);
           double fracMCref = uncertaintyResult.first;
           double fracMCnew;
           effContainer->getResult(x, fracMCnew);
