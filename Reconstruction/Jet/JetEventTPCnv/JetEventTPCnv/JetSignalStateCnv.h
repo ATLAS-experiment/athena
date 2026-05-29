@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETEVENTTPCNV_SIGNALSTATESTORE_H 
@@ -46,6 +46,26 @@
 #include "JetEventTPCnv/JetConverterBase.h"
 
 #include <cmath>
+
+namespace{
+  static_assert(sizeof(float) == 2 * sizeof(std::uint16_t));
+  float
+  floatFromShorts(std::uint16_t lo, std::uint16_t hi){
+    const std::uint32_t bits =
+      static_cast<std::uint32_t>(lo) |
+      (static_cast<std::uint32_t>(hi) << 16);
+  
+    return std::bit_cast<float>(bits);
+  }
+  auto
+  shortsFromFloat(float value){
+    const auto bits = std::bit_cast<std::uint32_t>(value);
+    return std::array<std::uint16_t, 2>{
+      static_cast<std::uint16_t>(bits & 0xFFFFu),
+      static_cast<std::uint16_t>((bits >> 16) & 0xFFFFu)
+    };
+  }
+}
 
 class SignalStateCnv {
  public:
@@ -341,15 +361,21 @@ class SignalStateCnv {
   	  break;
 	case NO_COMPRESSION:
 	default:
-	  union {
-	    unsigned short s[2];
-	    float f;
-	  } m;
-	  
-	  m.f = momRaw.m_px;  ps.push_back(m.s[0]);  ps.push_back(m.s[1]);
-	  m.f = momRaw.m_py;  ps.push_back(m.s[0]);  ps.push_back(m.s[1]);
-	  m.f = momRaw.m_pz;  ps.push_back(m.s[0]);  ps.push_back(m.s[1]);
-	  m.f = momRaw.m_m;   ps.push_back(m.s[0]);  ps.push_back(m.s[1]);
+	  const auto px = shortsFromFloat(momRaw.m_px);
+    ps.push_back(px[0]);
+    ps.push_back(px[1]);
+    
+    const auto py = shortsFromFloat(momRaw.m_py);
+    ps.push_back(py[0]);
+    ps.push_back(py[1]);
+    
+    const auto pz = shortsFromFloat(momRaw.m_pz);
+    ps.push_back(pz[0]);
+    ps.push_back(pz[1]);
+    
+    const auto m = shortsFromFloat(momRaw.m_m);
+    ps.push_back(m[0]);
+    ps.push_back(m[1]);
 	  msg << MSG::VERBOSE << " compress x : " << m.f << " = " << m.s[0] << " = " << m.s[1] << endmsg;
 	  msg << MSG::VERBOSE << " compress y : " << m.f << " = " << m.s[0] << " = " << m.s[1] << endmsg;
 	  msg << MSG::VERBOSE << " compress z : " << m.f << " = " << m.s[0] << " = " << m.s[1] << endmsg;
@@ -451,21 +477,29 @@ class SignalStateCnv {
 	  break;
 	  
 	case 8:
-	default:
-	  union {
-	    unsigned short s[2];
-	    float f;
-	  } m;
-	  
-	  m.s[0] = ps[0]; m.s[1] = ps[1]; momRaw.m_px = m.f;
-	  m.s[0] = ps[2]; m.s[1] = ps[3]; momRaw.m_py = m.f;
-	  m.s[0] = ps[4]; m.s[1] = ps[5]; momRaw.m_pz = m.f;
-	  m.s[0] = ps[6]; m.s[1] = ps[7]; momRaw.m_m = m.f;
-	  msg << MSG::VERBOSE << " RS x : " << m.f << " = " << m.s[0] << " = " << m.s[1] << endmsg;
-	  msg << MSG::VERBOSE << " RS y : " << m.f << " = " << m.s[0] << " = " << m.s[1] << endmsg;
-	  msg << MSG::VERBOSE << " RS z : " << m.f << " = " << m.s[0] << " = " << m.s[1] << endmsg;
-	  msg << MSG::VERBOSE << " RS m : " << m.f << " = " << m.s[0] << " = " << m.s[1] << endmsg;
-	  break;
+  default:
+  if (ps.size() < 8) {
+    msg << MSG::WARNING
+        << "Bad signal state size " << ps.size()
+        << " in SignalStateCnv::decompress; returning default momentum."
+        << endmsg;
+    return momRaw;
+  }
+
+  momRaw.m_px = floatFromShorts(ps[0], ps[1]);
+  momRaw.m_py = floatFromShorts(ps[2], ps[3]);
+  momRaw.m_pz = floatFromShorts(ps[4], ps[5]);
+  momRaw.m_m  = floatFromShorts(ps[6], ps[7]);
+
+  msg << MSG::VERBOSE << " RS x : " << momRaw.m_px
+      << " = " << ps[0] << " = " << ps[1] << endmsg;
+  msg << MSG::VERBOSE << " RS y : " << momRaw.m_py
+      << " = " << ps[2] << " = " << ps[3] << endmsg;
+  msg << MSG::VERBOSE << " RS z : " << momRaw.m_pz
+      << " = " << ps[4] << " = " << ps[5] << endmsg;
+  msg << MSG::VERBOSE << " RS m : " << momRaw.m_m
+      << " = " << ps[6] << " = " << ps[7] << endmsg;
+  break;
 	};
       
       if ( ps.size() < 8 )
