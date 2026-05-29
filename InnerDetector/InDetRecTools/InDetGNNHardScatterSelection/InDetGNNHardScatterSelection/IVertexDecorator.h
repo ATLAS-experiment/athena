@@ -19,7 +19,7 @@ public:
   virtual ~IVertexDecorator() { };
 
   /// Method to decorate a vertex.
-  virtual void decorate(const xAOD::Vertex& vertex) const = 0;
+  virtual float decorate(const xAOD::Vertex& vertex) const = 0;
 };
 
 

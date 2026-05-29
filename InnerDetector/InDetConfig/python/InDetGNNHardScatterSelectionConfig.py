@@ -30,7 +30,12 @@ def GNNHSSelectionAlgCfg(flags, input, minPt):
     cfg = ComponentAccumulator()
 
     selectionTool = None
-    if input in ["Electrons", "Photons", "AntiKt4EMTopoJets"]:
+    jetContainer =  (
+        "AntiKt4EMTopoCustomVtxGNNJets" 
+        if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.GNNSorting 
+        else "AntiKt4EMTopoJets"
+    )
+    if input in ["Electrons", "Photons", jetContainer]:
         selectionTool = cfg.popToolsAndMerge(
             AsgPtEtaSelectionToolGapCfg(flags, minPt = minPt))
     elif input in ["Muons"]:
