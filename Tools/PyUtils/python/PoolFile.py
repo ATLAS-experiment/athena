@@ -382,45 +382,6 @@ def file_name(fname):
 
     return (protocol, fname)
 
-def _setup_ssl(root):
-    x509_proxy = os.environ.get('X509_USER_PROXY', '')
-    if x509_proxy:
-        # setup proper credentials
-        root.TSSLSocket.SetUpSSL(
-            x509_proxy,
-            "/etc/grid-security/certificates",
-            x509_proxy,
-            x509_proxy)
-    else:
-        print("## warning: protocol https is requested but no X509_USER_PROXY was found! (opening the file might fail.)")
-        pass
-    return
-
-def _root_open(fname):
-    import PyUtils.RootUtils as ru
-    root = ru.import_root()
-    import re
-
-    with ShutUp(filters=[
-        re.compile('TClass::TClass:0: RuntimeWarning: no dictionary for class.*') ]):
-        root.gSystem.Load('libRootCollection')
-        root_open = root.TFile.Open
-
-        # we need to get back the protocol b/c of the special
-        # case of secure-http which needs to open TFiles as TWebFiles...
-        protocol, _ = file_name(fname)
-        if protocol == 'https':
-            _setup_ssl(root)
-            root_open = root.TWebFile.Open
-
-        f = root_open(fname, 'READ')
-        if f is None or not f:
-            import errno
-            raise IOError(errno.ENOENT,
-                          'No such file or directory',fname)
-        return f
-    return
-
 def retrieveBranchInfos( branch, poolRecord, ident = "" ):
     fmt = "%s %3i %8.3f %8.3f %8.3f %s"
     if 0:
