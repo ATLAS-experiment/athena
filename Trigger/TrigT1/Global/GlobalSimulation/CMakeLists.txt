@@ -16,6 +16,7 @@ atlas_add_component (GlobalSimulation
    src/GlobalSimComponents/*.h src/GlobalSimComponents/*.cxx
    src/Hypothesis/*.h src/Hypothesis/*.cxx
    src/IO/*.h src/IO/*.cxx
+   src/Jet1/*.h src/Jet1/*.cxx
    src/Lar_Preproc/*.h src/Lar_Preproc/*.cxx
    src/PU1/*.h src/PU1/*.cxx
    src/Utilities/*.h src/Utilities/*.cxx
@@ -26,6 +27,7 @@ atlas_add_component (GlobalSimulation
    CaloIdentifier
    L1TopoSimulationLib
    TrigConfData
+   TrigGepPerfLib # For JET1(WTAConeJet), use TGP headers
    L1TopoEvent
    L1TopoInterfaces
    AthenaBaseComps
@@ -34,6 +36,9 @@ atlas_add_component (GlobalSimulation
    xAODEventInfo
    CaloEvent
    PathResolver)
+
+remove_definitions(-DFLOATING_POINT_SIMULATION)
+add_definitions(-DBITWISE_SIMULATION) # For JET1(WTAConeJet), need extra definition
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

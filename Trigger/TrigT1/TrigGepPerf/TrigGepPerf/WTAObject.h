@@ -10,7 +10,7 @@
 #include <cassert>
 #include <cmath>
 
-#include "./WTASimTypes.h" // Use the WTASimTypes
+#include "WTASimTypes.h" // Use the WTASimTypes
 
 template <typename T>
         static void SortByPt(std::vector<T>& list) // Simple List sorting

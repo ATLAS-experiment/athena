@@ -9,8 +9,9 @@
 #include "Jet.h"
 #include "Cluster.h"
 
-#include "WTAConeMaker.h" // WTAConeMaker is the core header
-#include "WTACone2PassMaker.h" // WTACone2PassMaker is the 2-Pass header
+#include "TrigGepPerf/WTAConeMaker.h" // WTAConeMaker is the core header
+#include "TrigGepPerf/WTACone2PassMaker.h" // WTACone2PassMaker is the 2-Pass header
+#include "TrigGepPerf/WTAConeParallelHelper.h"
 
 #include <string>
 #include <vector>
