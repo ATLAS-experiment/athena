@@ -120,7 +120,7 @@ StatusCode egammaTransformerCalibTool::setupTransformerModel(const std::string& 
   // return StatusCode::SUCCESS;
 
   // set up decorators using a dummy query of the onnx model
-  std::map<std::string, FlavorTagInference::Inputs> gnn_input;
+  FlavorTagInference::InputMap gnn_input;
 
   ATH_MSG_DEBUG("initialize() initialize cluster-level features...");
   std::vector<float> cluster_feat(m_num_cluster_features, 0.);
@@ -407,7 +407,7 @@ float egammaTransformerCalibTool::getEnergy(const xAOD::CaloCluster& clus,
     double ratio_L0_total = (main_layers_sum != 0) ? (sum_cell_E_L0 / main_layers_sum) : 0.0;
     double ratio_Tile_total = (main_layers_sum != 0) ? (sum_cell_E_Gap / main_layers_sum) : 0.0;
 
-    std::map<std::string, FlavorTagInference::Inputs> gnn_input;
+    FlavorTagInference::InputMap gnn_input;
 
     // Cluster Features
     std::vector<float> cluster_feats = {

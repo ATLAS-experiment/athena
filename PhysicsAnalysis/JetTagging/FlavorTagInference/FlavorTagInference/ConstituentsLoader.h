@@ -6,14 +6,13 @@
   and extracting their features for the NN evaluation.
 */
 
-#ifndef CONTITUENTS_LOADER_H
-#define CONTITUENTS_LOADER_H
+#ifndef CONSTITUENTS_LOADER_H
+#define CONSTITUENTS_LOADER_H
 
 // local includes
 #include "FlavorTagInference/FlipTagEnums.h"
 #include "FlavorTagInference/SaltModel.h"
 #include "FlavorTagInference/FTagDataDependencyNames.h"
-#include "FlavorTagInference/StringUtils.h"
 
 // EDM includes
 #include "xAODJet/Jet.h"
@@ -22,7 +21,7 @@
 #include <string>
 #include <vector>
 #include <set>
-#include <tuple>
+#include <limits>
 
 namespace FlavorTagInference {
 

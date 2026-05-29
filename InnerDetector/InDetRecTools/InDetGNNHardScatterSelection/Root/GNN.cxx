@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetGNNHardScatterSelection/GNN.h"
@@ -108,7 +108,7 @@ namespace InDetGNNHardScatterSelection {
 
     // prepare input
     // -------------
-    std::map<std::string, FlavorTagInference::Inputs> gnn_input;
+    FlavorTagInference::InputMap gnn_input;
 
     std::vector<float> vertex_feat;
     vertex_feat.reserve(m_varsFromVertex.size());

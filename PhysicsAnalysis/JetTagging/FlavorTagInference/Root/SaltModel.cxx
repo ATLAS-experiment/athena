@@ -131,8 +131,7 @@ namespace FlavorTagInference {
   }
 
 
-  InferenceOutput SaltModel::runInference(
-    std::map<std::string, Inputs>& gnn_inputs) const {
+  InferenceOutput SaltModel::runInference(InputMap & gnn_inputs) const {
 
     std::vector<float> input_tensor_values;
 
