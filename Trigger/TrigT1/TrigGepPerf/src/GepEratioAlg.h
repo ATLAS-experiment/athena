@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef TRIGGEPPERF_GEPERATIOALG_H
@@ -11,6 +11,7 @@
 #include "xAODTrigger/eFexEMRoIContainer.h"
 #include "xAODTrigger/eFexTauRoIContainer.h"
 #include "TrigGepPerf/GepCellMap.h"
+#include "Gaudi/Property.h"
 
 namespace Gep {
 
@@ -28,6 +29,13 @@ private:
 
     SG::WriteDecorHandleKey<DataVector<T>> m_eratioKey{
         this, "OutputEratioDecorKey", "Eratio", "Output variable decorated with Eratio result"};
+
+    Gaudi::Property<unsigned int> m_etaWindowHalfSize{
+        this, "EtaWindowHalfSize", 8, "Half-size of window in eta (total size = 2*HalfSize + 1)"};
+
+    Gaudi::Property<unsigned int> m_phiWindowHalfSize{
+    this, "PhiWindowHalfSize", 1, "Half-size of window in phi (total size = 2*HalfSize + 1)"};
+
 };
 
 }

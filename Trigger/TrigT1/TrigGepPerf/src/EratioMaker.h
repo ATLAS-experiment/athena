@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2025 CERN
+ *   Copyright (C) 2002-2026 CERN
  *   for the benefit of the ATLAS collaboration
  */
 
@@ -28,7 +28,9 @@ class EratioMaker {
 public:
 
     // Constructor
-    EratioMaker(const GepCellMap& caloCellsMap);
+    EratioMaker(const GepCellMap& caloCellsMap,
+                unsigned int etaWindowHalfSize = 8,    // leads to 17 cells in eta
+                unsigned int phiWindowHalfSize = 1);   // leads to 3 cells in phi
 
     // Main method to get Eratio for each seed
     const EratioObj makeEratio(const ROOT::Math::PtEtaPhiEVector obj) const;
@@ -40,7 +42,9 @@ private:
     double computeEratio(double E1, double E2) const;
 
     // Attributes
-    const GepCellMap& m_caloCellsMap;    
+    const GepCellMap& m_caloCellsMap;
+    const unsigned int m_etaWindowHalfSize;
+    const unsigned int m_phiWindowHalfSize;    
 };
 
 } // namespace Gep
