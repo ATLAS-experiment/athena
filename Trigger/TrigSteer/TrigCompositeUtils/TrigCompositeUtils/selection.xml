@@ -1,0 +1,5 @@
+<lcgdict>
+   <class name="ChainNameParser::LegInfoIterator" />
+   <class name="ChainNameParser::HLTChainInfo" />
+   <struct name="ChainNameParser::LegInfo" />
+</lcgdict>
