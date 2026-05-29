@@ -18,13 +18,12 @@
 // Base class
 #include "G4VSensitiveDetector.hh"
 
-// For the hits
-#include "TileSimEvent/TileHitVector.h"
-#include "StoreGate/WriteHandle.h"
-
+#include "Identifier/Identifier.h"
 #include "MinBiasScintSDOptions.h"
+#include "TileSimEvent/TileHitVectorCellBuilder.h"
 
 // STL headers
+#include <string>
 #include <vector>
 
 // G4 needed classes
@@ -39,26 +38,28 @@ class MinBiasScintillatorSD: public G4VSensitiveDetector {
         const MinBiasScintSDOptions& opts);
     ~MinBiasScintillatorSD() = default;
 
+    static constexpr int NCells = 32;
+    using HitVectorBuilder = TileHitVectorCellBuilder<NCells>;
+
     virtual void Initialize(G4HCofThisEvent*) override final;
 
     virtual G4bool ProcessHits(G4Step*, G4TouchableHistory*) override final;
 
-    void EndOfAthenaEvent();
-
   private:
     // Options for the SD configuration
     const MinBiasScintSDOptions m_options;
-
-    // The hits collection
-    SG::WriteHandle<TileHitVector> m_HitColl;
 
     const TileTBID* m_tileTBID;
 
     static const int N_SIDE = 2;
     static const int N_PHI = 8;
     static const int N_ETA = 2;
-    static const int N_CELLS = N_SIDE * N_PHI * N_ETA;
     static const int N_DIST = N_SIDE * N_ETA;
+
+    HitVectorBuilder* GetHitCollection();
+
+    const std::string m_hitCollectionName;
+    HitVectorBuilder* m_hitCollection{};
 
     inline int cell_index(int side, int phi, int eta) const {
       return (side * N_PHI + phi) * N_ETA + eta;
@@ -67,19 +68,10 @@ class MinBiasScintillatorSD: public G4VSensitiveDetector {
       return side * N_ETA + eta;
     }
 
-    /** @brief number of contributions to the energy in each cell
-     (size=nCell).
-     */
-    std::vector<int> m_numberOfHitsInCell;
-
-    /** @brief local temporary TileSimHit for each cell (size=nCell).
-     */
-    std::vector<TileSimHit*> m_tempSimHit;
-
     /** @brief array to cache look-ups of Identifiers for each cell
      (size=nCell).
      */
-    Identifier m_channelID[N_CELLS];
+    Identifier m_channelID[NCells];
 
     /** @brief granularity in time for hits
      */

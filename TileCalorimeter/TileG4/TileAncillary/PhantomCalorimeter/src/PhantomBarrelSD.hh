@@ -15,9 +15,8 @@
 // Base class
 #include "G4VSensitiveDetector.hh"
 
-// use of the hits
-#include "TileSimEvent/TileHitVector.h"
-#include "StoreGate/WriteHandle.h"
+#include "Identifier/Identifier.h"
+#include "TileSimEvent/TileHitVectorCellBuilder.h"
 
 // STL header
 #include <string>
@@ -28,30 +27,26 @@ class G4TouchableHistory;
 class G4Step;
 class G4HCofThisEvent;
 class TileTBID;
-class TileSimHit;
-class Identifier;
 
 class PhantomBarrelSD: public G4VSensitiveDetector {
   public:
     PhantomBarrelSD(const std::string& name, const std::string& hitCollectionName);
     ~PhantomBarrelSD() = default;
 
-    // Called from PhantomBarrelSDTool::SetupEvent
-    void StartOfAthenaEvent();
+    static constexpr int NCells = 8;
+    using HitVectorBuilder = TileHitVectorCellBuilder<NCells>;
+
     void Initialize(G4HCofThisEvent*) override final;
     G4bool ProcessHits(G4Step*, G4TouchableHistory*) override final;
-    void EndOfAthenaEvent();
 
   private:
     const TileTBID* m_tileTBID = nullptr;
 
-    static const int N_CELLS = 8;
+    HitVectorBuilder* GetHitCollection();
 
-    int m_nhits[N_CELLS]={};
-    TileSimHit* m_hit[N_CELLS]={};
-    Identifier m_id[N_CELLS]={};
-    // The hits collections
-    SG::WriteHandle<TileHitVector> m_HitColl;
+    Identifier m_id[NCells]={};
+    const std::string m_hitCollectionName;
+    HitVectorBuilder* m_hitCollection{};
 };
 
 #endif  // PHANTOMCALORIMETER_PHANTOMBARRELSD_H

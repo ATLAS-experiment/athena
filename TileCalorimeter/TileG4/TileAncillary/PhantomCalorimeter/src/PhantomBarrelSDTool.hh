@@ -27,9 +27,9 @@ class PhantomBarrelSDTool: public SensitiveDetectorBase {
 
     ~PhantomBarrelSDTool();
 
-    virtual StatusCode SetupEvent() override final;
+    virtual StatusCode SetupEvent(HitCollectionMap&) override final;
 
-    virtual StatusCode Gather() override final;
+    virtual StatusCode Gather(HitCollectionMap&) override final;
 
   protected:
     // Make me an SD!

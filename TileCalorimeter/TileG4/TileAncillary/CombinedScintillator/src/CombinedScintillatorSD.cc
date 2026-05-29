@@ -12,12 +12,14 @@
 #include "CombinedScintillatorSD.hh"
 
 #include "CaloIdentifier/TileTBID.h"
+#include "HitManagement/HitCollectionMap.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "StoreGate/StoreGateSvc.h"
-#include "TileSimEvent/TileHitVector.h"
 
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/Bootstrap.h"
 
+#include "G4EventManager.hh"
 #include "G4HCofThisEvent.hh"
 #include "G4VPhysicalVolume.hh"
 #include "G4Step.hh"
@@ -26,8 +28,7 @@
 
 CombinedScintillatorSD::CombinedScintillatorSD(const std::string& name, const std::string& hitCollectionName)
     : G4VSensitiveDetector(name),
-    m_hit(),
-    m_HitColl(hitCollectionName)
+    m_hitCollectionName(hitCollectionName)
 {
   SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
   if ( !detStore ) {
@@ -48,17 +49,25 @@ CombinedScintillatorSD::CombinedScintillatorSD(const std::string& name, const st
     G4cout << "TileTBID helper retrieved" << G4endl;
   }
   int type = TileTBID::ADC_TYPE, module = TileTBID::CRACK_WALL;
-  for (int channel = 0; channel < N_CELLS; ++channel) {
+  for (int channel = 0; channel < NCells; ++channel) {
     m_id[channel] = m_tileTBID->channel_id(type, module, channel);
   }
 }
 
-void CombinedScintillatorSD::StartOfAthenaEvent() {
-  if (verboseLevel > 5) {
-    G4cout << "Initializing SD" << G4endl;
+CombinedScintillatorSD::HitVectorBuilder* CombinedScintillatorSD::GetHitCollection()
+{
+  auto* eventManager = G4EventManager::GetEventManager();
+  if (!eventManager) {
+    return nullptr;
   }
 
-  memset(m_nhits, 0, sizeof(m_nhits));
+  auto* eventInfo = dynamic_cast<AtlasG4EventUserInfo*>(eventManager->GetUserInformation());
+  if (!eventInfo) {
+    return nullptr;
+  }
+
+  auto hitCollections = eventInfo->GetHitCollectionMap();
+  return hitCollections ? hitCollections->Find<HitVectorBuilder>(m_hitCollectionName) : nullptr;
 }
 
 void CombinedScintillatorSD::Initialize(G4HCofThisEvent* /* HCE */) {
@@ -66,9 +75,7 @@ void CombinedScintillatorSD::Initialize(G4HCofThisEvent* /* HCE */) {
     G4cout << "CombinedScintillatorSD::Initialize()" << G4endl;
   }
 
-  if (!m_HitColl.isValid()) {
-    m_HitColl = std::make_unique<TileHitVector>(m_HitColl.name());
-  }
+  m_hitCollection = GetHitCollection();
 }
 
 G4bool CombinedScintillatorSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /* ROhist */) {
@@ -84,7 +91,6 @@ G4bool CombinedScintillatorSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*
 
   const G4double edep = aStep->GetTotalEnergyDeposit() * aStep->GetTrack()->GetWeight();
   G4double stepl = 0.;
-  G4ThreeVector pStep = aStep->GetDeltaPosition();
 
   if (aStep->GetTrack()->GetDefinition()->GetPDGCharge() != 0.) {// FIXME not-equal check on double
 
@@ -100,43 +106,28 @@ G4bool CombinedScintillatorSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*
     int ind = nScinti; // Only one scintillator at the test beam
     // No copy nScinti == 0 !!
 
-    if ( m_nhits[ind] > 0 ) {
+    HitVectorBuilder* hitCollection = m_hitCollection ? m_hitCollection : GetHitCollection();
+    if (!hitCollection) {
+      if (verboseLevel > 5) {
+        G4cout << "CombinedScintillatorSD::ProcessHits WARNING hit collection is not available" << G4endl;
+      }
+      return false;
+    }
+    m_hitCollection = hitCollection;
+
+    if (hitCollection->HasHit(ind)) {
       if (verboseLevel > 10) {
         G4cout << "Additional hit in CombinedScintillator " << nScinti
                << " ene=" << edep << G4endl;
       }
-      m_hit[ind]->add(edep, 0.0, 0.0);
     } else {
       // First hit in a cell
       if (verboseLevel > 10) {
         G4cout << "First hit in CombinedScintillator " << nScinti
                << " ene=" << edep << G4endl;
       }
-      m_hit[ind] = new TileSimHit(m_id[ind], edep, 0.0, 0.0);
     }
-    ++m_nhits[ind];
+    hitCollection->AddHit(ind, m_id[ind], edep);
   }
   return true;
-}
-
-void CombinedScintillatorSD::EndOfAthenaEvent() {
-  for (int ind = 0; ind < N_CELLS; ++ind) {
-    int nhit = m_nhits[ind];
-    if (nhit > 0) {
-      if (verboseLevel > 5) {
-        G4cout << "Cell id=" << m_tileTBID->to_string(m_id[ind])
-               << " nhit=" << nhit
-               << " ene=" << m_hit[ind]->energy() << G4endl;
-      }
-      m_HitColl->Insert(TileHit(m_hit[ind]));
-      delete m_hit[ind];
-    } else if (verboseLevel > 10) {
-      G4cout << "Cell id=" << m_tileTBID->to_string(m_id[ind]) << " nhit=0" << G4endl;
-    }
-  }
-
-  if (verboseLevel > 5) {
-    G4cout << "Total number of hits is " << m_HitColl->size() << G4endl;
-  }
-  return ;
 }
