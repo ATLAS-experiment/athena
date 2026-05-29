@@ -17,22 +17,16 @@ atlas_add_library( IPPerformanceLib
                    PUBLIC_HEADERS IPPerformance
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    LINK_LIBRARIES ${ROOT_LIBRARIES} xAODBase xAODRootAccess
-                   xAODEventInfo GoodRunsListsLib PileupReweightingLib PATInterfaces PATCoreLib
-                   PathResolver xAODTau xAODJet xAODMuon xAODEgamma
-                   xAODTracking xAODTruth MuonMomentumCorrectionsLib
-                   MuonEfficiencyCorrectionsLib MuonSelectorToolsLib JetCalibToolsLib
+                   xAODEventInfo PileupReweightingLib PATInterfaces PATCoreLib
+                   xAODJet
+                   xAODTracking xAODTruth
+                   JetCalibToolsLib
                    JetSelectorToolsLib AthContainers
-                   ElectronPhotonFourMomentumCorrectionLib
-                   ElectronEfficiencyCorrectionLib ElectronPhotonSelectorToolsLib
-                   IsolationSelectionLib IsolationCorrectionsLib
-                   FTagAnalysisInterfacesLib MuonAnalysisInterfacesLib
-                   PhotonEfficiencyCorrectionLib METUtilitiesLib METInterface
-                   TauAnalysisToolsLib AsgTools xAODMissingET
-                   AssociationUtilsLib JetEDM JetUncertaintiesLib
-                   JetCPInterfaces xAODBTaggingEfficiencyLib TrigConfxAODLib
+                   AsgTools
+                   JetUncertaintiesLib
+                   TrigConfxAODLib
                    TrigDecisionToolLib xAODCutFlow JetMomentToolsLib
-                   TriggerMatchingToolLib xAODMetaData
-                   JetJvtEfficiencyLib AnaAlgorithmLib PMGToolsLib JetSubStructureUtils JetSubStructureMomentToolsLib
+                   AnaAlgorithmLib EventBookkeeperToolsLib
 		   TrackVertexAssociationToolLib InDetTrackSystematicsToolsLib 
                    ${release_libs}
                    PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${extra_private_libs} AsgMessagingLib

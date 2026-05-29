@@ -13,6 +13,15 @@ def EventSelectorAlgCfg(flags, name="EventSelectorAlg", **kwargs):
     return acc
 
 
+def EventStatusSelection_And_VertexSelectionCfg(flags):
+
+    acc = ComponentAccumulator()
+    if not flags.Input.isMC:
+        acc.addEventAlgo(CompFactory.CP.EventStatusSelectionAlg("EventStatusSelectionAlg"))
+
+    acc.addEventAlgo(CompFactory.CP.VertexSelectionAlg("VertexSelectionAlg",VertexContainer="PrimaryVertices",MinTracks=3))
+    return acc
+
 def JetCalibratorCfg(flags, name="JetCalibrator", **kwargs):
     acc = ComponentAccumulator()
     from JetCalibTools.JetCalibToolsConfig import defineJetCalibTool
@@ -26,28 +35,8 @@ def JetCalibratorCfg(flags, name="JetCalibrator", **kwargs):
         CalibSequence = "JetArea_Residual_EtaJES_GSC_Insitu"
     jct = defineJetCalibTool(jetcollection="AntiKt4EMTopo",context="AnalysisLatest",configfile=config,calibarea="00-04-82",calibseq=CalibSequence,data_type = "mc" if flags.Input.isMC else "data",rhoname="auto", pvname="PrimaryVertices", gscdepth="auto")
 
-    #jct = CompFactory.JetCalibrationTool()
-    #jct.JetCollection = "AntiKt4EMTopo"
-    #config = "JES_MC16Recommendation_Consolidated_EMTopo_Apr2019_Rel21.config"
-    #if flags.Input.isMC:
-     #   if not flags.Sim.ISF.Simulator.isFullSim():
-      #      config = "JES_MC16Recommendation_AFII_EMTopo_Apr2019_Rel21.config"
-    #jct.ConfigFile = config
-
-    #jct.CalibArea = "00-04-82"
-    #if flags.Input.isMC:
-     #   jct.CalibSequence = "JetArea_Residual_EtaJES_GSC_Smear"
-    #else:
-     #   jct.CalibSequence = "JetArea_Residual_EtaJES_GSC_Insitu"
-        
-    #jct.IsData = not flags.Input.isMC
-    #jct.OutputLevel = logging.INFO
-
     from JetSelectorTools.JetSelectorToolsConfig import JetCleaningToolCfg
     jetCleaningTool = acc.popToolsAndMerge(JetCleaningToolCfg(flags,name="JetCleaningTool",jetdef="AntiKt4EMTopoJets",cleaningLevel="LooseBad",useDecorations=True))
-
-    #jetCleaningTool = CompFactory.JetCleaningTool()
-    #jetCleaningTool.CutLevel = "LooseBad"
 
     jetUncertaintiesTool = CompFactory.JetUncertaintiesTool()
     #the following parameters have to be configured here 
@@ -72,9 +61,6 @@ def JetCalibratorCfg(flags, name="JetCalibrator", **kwargs):
 def JetSelectorCfg(flags,name="JetSelector", **kwargs):
     acc = ComponentAccumulator()
 
-    #jetCleaningTool = CompFactory.JetCleaningTool()
-    #jetCleaningTool.CutLevel = "LooseBad"
-    #jetCleaningTool.DoUgly = False
     from JetSelectorTools.JetSelectorToolsConfig import JetCleaningToolCfg
     jetCleaningTool = acc.popToolsAndMerge(JetCleaningToolCfg(flags,name="JetCleaningTool",jetdef="AntiKt4EMTopoJets",cleaningLevel="LooseBad",useDecorations=True))
 
@@ -108,7 +94,10 @@ def IPNtupleDumperCfg(flags,name="IPNtupleDumper", **kwargs):
         kwargs.setdefault("trackSelectionTools", [
             acc.popToolsAndMerge(InDetTrackSelectionTool_LoosePrimary_Cfg(flags)),
             acc.popToolsAndMerge(InDetTrackSelectionTool_TightPrimary_Cfg(flags)) ])
-
+    
+    #from AthenaConfiguration.ComponentFactory import CompFactory
+    #nnjvt_tool = CompFactory.CP.NNJvtSelectionTool("NNJvtTool",JetContainer="AntiKt4EMTopoJets_Selected",WorkingPoint="FixedEffPt",MaxPtForJvt=60e3,MaxEtaForJvt=2.4)
+    #kwargs.setdefault("NNJvtTool", nnjvt_tool) 
     acc.addEventAlgo(CompFactory.IPNtupleDumper(name, **kwargs))
     return acc
 
@@ -118,18 +107,15 @@ def IPPerformanceCfg(flags,name="IPPerformance", **kwargs):
 
     from AthenaConfiguration.ComponentFactory import CompFactory
     histSvc = CompFactory.THistSvc()
-    #histSvc.Output += ["MYSTREAM DATAFILE='" + args.outputFile + "' OPT='RECREATE'"]
-    #histSvc.Output += ["MYSTREAM DATAFILE='{flags.Output.HISTFileName}' TYPE='ROOT' OPT='RECREATE'"]
     histSvc.Output += ["MYSTREAM DATAFILE='IPPerformance.root' OPT='RECREATE'"]
-    #histSvc.Output += ["MYSTREAM DATAFILE='DAOD_IDTIDE.pool.root' OPT='UPDATE'"]
     acc.addService(histSvc)
     
     from IPPerformance.IPPerformanceConfig import EventSelectorAlgCfg
     acc.merge(EventSelectorAlgCfg(flags))
+    #from IPPerformance.IPPerformanceConfig import EventStatusSelection_And_VertexSelectionCfg
+    #acc.merge(EventStatusSelection_And_VertexSelectionCfg(flags))
 
     from IPPerformance.IPPerformanceConfig import JetCalibratorCfg
-    #@TODO: Use other ways to determine the type of the sample
-    #acc.merge(JetCalibratorCfg(flags, filesInput="CI_samples"))
     acc.merge(JetCalibratorCfg(flags))
 
     from IPPerformance.IPPerformanceConfig import JetSelectorCfg

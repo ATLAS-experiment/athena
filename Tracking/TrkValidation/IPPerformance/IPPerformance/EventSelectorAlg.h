@@ -6,7 +6,6 @@
 
 // Core include(s):
 #include <AnaAlgorithm/AnaAlgorithm.h>
-#include "GoodRunsLists/GoodRunsListSelectionTool.h"
 #include "TrigDecisionTool/TrigDecisionTool.h"
 #include "PileupReweighting/PileupReweightingTool.h"
 #include "xAODTracking/VertexContainer.h"

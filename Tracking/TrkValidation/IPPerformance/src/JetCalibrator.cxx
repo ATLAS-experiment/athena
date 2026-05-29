@@ -22,7 +22,6 @@
 
 // package include(s):
 #include "IPPerformance/JetCalibrator.h"
-#include "IPPerformance/ReturnCheck.h"
 #include "StoreGate/StoreGateSvc.h"
 // ROOT include(s):
 #include "TEnv.h"
@@ -68,12 +67,9 @@ StatusCode JetCalibrator :: initialize ()
   ATH_MSG_INFO("initialize(): Initializing JetCalibrator Interface... ");
   m_runSysts = false; //Ensure this starts false
 
-  if( m_isMC ) ATH_MSG_INFO("initialize(): Running on MC sample.");
+  if( m_isMC ) 
+    ATH_MSG_INFO("initialize(): Running on MC sample.");
   else ATH_MSG_INFO("initialize(): Running on data sample.");
-
-  if(!m_isMC){
-    ATH_MSG_INFO("Running on data");
-  }
 
   // If there is no InputContainer we must stop
   if ( m_inContainKey.empty()) {
@@ -91,7 +87,6 @@ StatusCode JetCalibrator :: initialize ()
 
   // initialize and configure the jet cleaning tool
   //------------------------------------------------
-  std::string jc_tool_name = std::string("JetCleaning_") + std::string(name());
   ANA_CHECK(m_jetCleaning.retrieve());
 
   // initialize and configure the jet uncertainity tool
@@ -156,7 +151,7 @@ StatusCode JetCalibrator :: initialize ()
   for ( const auto& syst_it : m_systList ){
     ATH_MSG_INFO("initialize():  Running with systematic : " << syst_it.name());
   }
-  RETURN_CHECK("JetCalibrator::initialize()", service("StoreGateSvc", m_storeGate), "Failed to retrieve StoreGateSvc.");
+  ATH_CHECK(service("StoreGateSvc", m_storeGate));
   return StatusCode::SUCCESS;
 }
 
@@ -259,13 +254,13 @@ StatusCode JetCalibrator ::execute ()
     }
 
     // add shallow copy to StoreGate
-    RETURN_CHECK( "JetCalibrator::execute()", m_storeGate->record( calibJetsSC.first, outSCContainerName), "Failed to record shallow copy container.");
-    RETURN_CHECK( "JetCalibrator::execute()", m_storeGate->record( calibJetsSC.second, outSCAuxContainerName), "Failed to record shallow copy aux container.");
+    ATH_CHECK( m_storeGate->record( calibJetsSC.first, outSCContainerName));
+    ATH_CHECK( m_storeGate->record( calibJetsSC.second, outSCAuxContainerName));
     // add ConstDataVector to StoreGate
-    RETURN_CHECK( "JetCalibrator::execute()", m_storeGate->record( calibJetsCDV, outContainerName), "Failed to record const data container.");
+    ATH_CHECK( m_storeGate->record( calibJetsCDV, outContainerName));
   }
   // add vector of systematic names to StoreGate
-  RETURN_CHECK( "JetCalibrator::execute()", m_storeGate->record( vecOutContainerNames, m_outputAlgo), "Failed to record vector of output container names.");
+  ATH_CHECK( m_storeGate->record( vecOutContainerNames, m_outputAlgo));
 
   // look what do we have in TStore
   return StatusCode::SUCCESS;

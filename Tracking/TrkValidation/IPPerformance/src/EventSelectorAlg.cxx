@@ -14,7 +14,6 @@
 
 // local include(s):
 #include "IPPerformance/EventSelectorAlg.h"
-#include "IPPerformance/ReturnCheck.h"
 
 // ROOT include(s):
 #include "TEnv.h"
@@ -90,18 +89,6 @@ StatusCode EventSelectorAlg::execute() {
     ATH_MSG_ERROR ("Failed to retrieve Input Vertex container from event. Exiting: " << m_inVertexKey.key() );
     return StatusCode::FAILURE;
   }
-
-  float mcEvtWeight(1.0);
-  if (m_isMC) {
-    const std::vector<float> weights = eventInfo->mcEventWeights();  // The weights of all the MC events used in the simulation
-    if (weights.size() > 0)
-      mcEvtWeight = weights[0];
-  }
-
-  // decorate with mc event weight
-  // TODO: Use WriteDecorHandle for this
-  static SG::AuxElement::Decorator<float> mcEvtWeightDecor("mcEventWeight");
-  mcEvtWeightDecor(*eventInfo) = mcEvtWeight;
 
   m_cutflowHist->Fill(m_cutflow_all, 1);
 

@@ -20,9 +20,9 @@
 #include "InDetTrackSystematicsTools/InDetTrackTruthOriginTool.h"
 #include "InDetTrackSystematicsTools/JetTrackFilterTool.h"
 #include "InDetTrackSystematicsTools/InDetTrackBiasingTool.h"
+//#include "JetJvtEfficiency/NNJvtSelectionTool.h"
 
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "IPPerformance/ReturnCheck.h"
 #include "GaudiKernel/ToolHandle.h"
 #ifndef __MAKECINT__
 #include "xAODTruth/TruthParticle.h"
@@ -67,7 +67,8 @@ private:
   // put your configuration variables here as public variables.
   // that way they can be set directly from CINT and python.
 public:
-  // float cutValue;
+ 
+  //ToolHandle<CP::NNJvtSelectionTool> m_nnjvtTool{this, "NNJvtTool", "CP::NNJvtSelectionTool/NNJvt", "NNJvt tool"};
 
   //Config variables
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackKey{this, "TrackParticlesKey", "InDetTrackParticles"};
@@ -157,7 +158,6 @@ public:
 
   // Functions used when filling histograms for IP studies
   StatusCode FillIPHistograms();
-  std::vector<int> Classify(unsigned int i);
   
   //Get the truth link of a track
   //This should go in a helper

@@ -28,7 +28,6 @@
 // package include(s):
 #include "xAODEventInfo/EventInfo.h"
 #include "IPPerformance/JetSelector.h"
-#include "IPPerformance/ReturnCheck.h"
 
 // ROOT include(s):
 #include "TEnv.h"
@@ -98,7 +97,7 @@ StatusCode JetSelector :: initialize ()
 
   ATH_MSG_INFO("initialize(): JetSelector Interface succesfully initialized!" );
 
-  RETURN_CHECK("JetSelector::initialize()", service("StoreGateSvc", m_storeGate), "Failed to retrieve StoreGateSvc.");
+  ATH_CHECK(service("StoreGateSvc", m_storeGate));
 
   return StatusCode::SUCCESS;
 }
@@ -175,7 +174,7 @@ StatusCode JetSelector :: execute ()
 
   // add ConstDataVector to TStore
   if ( m_createSelectedContainer ) {
-    RETURN_CHECK("JetSelector::execute()",  m_storeGate->record( selectedJets, m_outContainerName ), "Failed to store const data container.");
+    ATH_CHECK(m_storeGate->record( selectedJets, m_outContainerName ));
   }
   return StatusCode::SUCCESS;
 }

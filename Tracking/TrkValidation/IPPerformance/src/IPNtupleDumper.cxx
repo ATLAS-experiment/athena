@@ -1,6 +1,4 @@
 #include "IPPerformance/EventSelectorAlg.h"
-
-#include "IPPerformance/ReturnCheck.h"
 #include "IPPerformance/IPNtupleDumper.h"
 #include "AthContainers/ConstDataVector.h"
 
@@ -71,7 +69,8 @@ StatusCode IPNtupleDumper :: initialize ()
     return StatusCode::FAILURE;
   }
   ATH_MSG_INFO("IPNtupleDumper::configure(): InputVertexContainer: "<< m_vtxContainer);
-
+  
+//  ATH_CHECK( m_nnjvtTool.retrieve() );
   //Track to vertex tool
   ANA_CHECK(m_trktovxtool.retrieve());
 
@@ -99,7 +98,7 @@ StatusCode IPNtupleDumper :: initialize ()
     ATH_MSG_INFO("histInitialize(): Initializing IPhistos class");
     m_IPhistos = std::make_unique<IPhistos>("default_");
     ATH_MSG_INFO("histInitialize(): Saving additonal IP histograms? "<<m_ipSaveAdditionalHistos);
-    m_IPhistos->SaveAdditionalHistos(m_ipSaveAdditionalHistos);
+    if(m_ipSaveAdditionalHistos) m_IPhistos->SaveAdditionalHistos();
     ATH_MSG_INFO("histInitialize(): Defining 3D histograms");
     m_IPhistos->define3DHistos();
     for (const auto& histEntry : m_IPhistos->get3DHistos()) {
@@ -117,11 +116,9 @@ StatusCode IPNtupleDumper :: initialize ()
 
     ATH_MSG_INFO("histInitialize(): Booking histograms");
     m_IPhistos->BookHistograms();
-    for(const auto& histvector : m_IPhistos->get1Dvector()) {
-      for(const auto& hist: histvector) {
+    for(TH1D* hist : m_IPhistos->get1Dvector()) {
         const std::string& histName = hist->GetName();
         ANA_CHECK( histSvc->regHist("/MYSTREAM/"+histName,hist));
-      }
     }
     ATH_MSG_INFO("histInitialize(): Histograms booked successfully!");
 
@@ -1021,7 +1018,12 @@ bool IPNtupleDumper::PassJVTCut(const xAOD::Jet* jet)
   return -1;
 
 }
- 
+/*bool IPNtupleDumper::PassNNJVTCut(const xAOD::Jet* jet) const
+{
+   const asg::AcceptData result = m_nnjvtTool->accept(jet);
+   return result.getCutResult(0);
+}
+ */
 // Original truth-truth matching, based only on element link
 // No selection on truth particle of truth matching probability
 const xAOD::TruthParticle* IPNtupleDumper::getTrackTruthLink(const xAOD::TrackParticle* track) const 
@@ -1048,31 +1050,16 @@ StatusCode IPNtupleDumper::FillIPHistograms()
 
   if(trk_pt.size() == 0) return StatusCode::SUCCESS;
 
-  // Checking which classes do this track (with index i) lie in
-  std::vector<std::vector<int>> class_satisfied; 
-  for (unsigned int i = 0; i < trk_pt.size(); ++i)
-    class_satisfied.push_back(Classify(i));
-      
   for (unsigned int i = 0; i < trk_pt.size(); ++i) {
-    std::vector<float> weights(15, 1); // for same track in different classes
+    float weight = evtW;
     
     // Selection on jetPt
     if (jetPt.at(i) > 300 && selectionBits.at(i) > 1) { // Tight selection
-
-      for (int class_index = 0; class_index < int(class_satisfied.at(i).size()); class_index++) {
-        if (!m_isMC)
-          weights.at(class_index) = 1;
-        else if (class_satisfied.at(i)[class_index]) {
-          float net_weight = evtW; //mc_weight * evtW * mc_reweight;
-          weights.at(class_index) = net_weight;
-        }
-      }
 
       // To find out deltaR to the nearest track
       double deltaR_trk12 = 9999;
       for (unsigned int i2 = 0; i2 < trk_pt.size(); ++i2) {
         if (jetPt.at(i) == jetPt.at(i2)) { 
-          // Both tracks in same jet (To find: closest track in same jet)
           double deltaR = TMath::Sqrt(TMath::Power((trk_eta.at(i) - trk_eta.at(i2)), 2) + TMath::Power((trk_phi.at(i) - trk_phi.at(i2)), 2));
           if (deltaR < deltaR_trk12 && deltaR != 0)
             deltaR_trk12 = deltaR;
@@ -1081,7 +1068,7 @@ StatusCode IPNtupleDumper::FillIPHistograms()
 
       double bsWidth = (bsSigmax + bsSigmay) / 2.;
       m_IPhistos->FillHistograms(trk_d0.at(i) * 1000., (trk_z0.at(i) - pvz + bsz) * 1000, trk_pt.at(i) * 0.001, trk_eta.at(i), trk_phi.at(i),
-				                           runN, mu, jetPt.at(i), weights, bsWidth, deltaR_trk12, class_satisfied.at(i));
+                                                            mu, jetPt.at(i), weight, bsWidth, deltaR_trk12);
       
     } // jetpT selection
   
@@ -1091,43 +1078,4 @@ StatusCode IPNtupleDumper::FillIPHistograms()
 
 }
 
-std::vector<int> IPNtupleDumper::Classify(unsigned int i)
-{
-
-  // init vector of 0 (false)
-  std::vector<int> output(15, 0);
-
-  if (trk_nInnermostPixelLayerHits.at(i) == 0 && trk_nNextToInnermostPixelLayerHits.at(i) == 0 && trk_expectInnermostPixelLayerHit.at(i) >= 1 && trk_expectNextToInnermostPixelLayerHit.at(i) >= 1)
-    output.at(0) = 1; //!
-  if (trk_nInnermostPixelLayerHits.at(i) == 0 && trk_nNextToInnermostPixelLayerHits.at(i) == 0 && trk_expectInnermostPixelLayerHit.at(i) >= 1 && trk_expectNextToInnermostPixelLayerHit.at(i) == 0)
-    output.at(1) = 1;
-  if (trk_nInnermostPixelLayerHits.at(i) == 0 && trk_nNextToInnermostPixelLayerHits.at(i) == 0 && trk_expectInnermostPixelLayerHit.at(i) == 0 && trk_expectNextToInnermostPixelLayerHit.at(i) >= 1)
-    output.at(2) = 1;
-  if (trk_nInnermostPixelLayerHits.at(i) == 0 && trk_nNextToInnermostPixelLayerHits.at(i) == 0 && trk_expectInnermostPixelLayerHit.at(i) == 0 && trk_expectNextToInnermostPixelLayerHit.at(i) == 0)
-    output.at(3) = 1;
-  if (trk_nInnermostPixelLayerHits.at(i) == 0 && trk_expectInnermostPixelLayerHit.at(i) >= 1)
-    output.at(4) = 1;
-  if (trk_nInnermostPixelLayerHits.at(i) == 0 && trk_expectInnermostPixelLayerHit.at(i) == 0)
-    output.at(5) = 1;
-  if (trk_nNextToInnermostPixelLayerHits.at(i) == 0 && trk_expectNextToInnermostPixelLayerHit.at(i) >= 1)
-    output.at(6) = 1;
-  if (trk_nNextToInnermostPixelLayerHits.at(i) == 0 && trk_expectNextToInnermostPixelLayerHit.at(i) == 0)
-    output.at(7) = 1;
-  if (trk_nInnermostPixelLayerSharedHits.at(i) >= 1 && trk_nNextToInnermostPixelLayerSharedHits.at(i) >= 1)
-    output.at(8) = 1; //TMP not using now;
-  if (trk_nPixelSharedHits.at(i) >= 1)
-    output.at(9) = 1;
-  if (trk_nSCTSharedHits.at(i) >= 2)
-    output.at(10) = 1;
-  if (trk_nInnermostPixelLayerSplitHits.at(i) >= 1 && trk_nNextToInnermostPixelLayerSplitHits.at(i) >= 1)
-    output.at(11) = 1;
-  if (trk_nPixelSplitHits.at(i) >= 1)
-    output.at(12) = 1;
-  if (!(trk_nInnermostPixelLayerHits.at(i) == 0 && trk_nNextToInnermostPixelLayerHits.at(i) == 0) && !(trk_nInnermostPixelLayerHits.at(i) == 0) && !(trk_nNextToInnermostPixelLayerHits.at(i) == 0) && !(trk_nInnermostPixelLayerSharedHits.at(i) >= 1 && trk_nNextToInnermostPixelLayerSharedHits.at(i) >= 1) && !(trk_nPixelSharedHits.at(i) >= 1) && !(trk_nSCTSharedHits.at(i) >= 2) && !(trk_nInnermostPixelLayerSplitHits.at(i) >= 1 && trk_nNextToInnermostPixelLayerSplitHits.at(i) >= 1) && !(trk_nPixelSplitHits.at(i) >= 1))
-    output.at(13) = 1;
-  output.at(14) = 1;
-
-  return output;
-
-}
 
