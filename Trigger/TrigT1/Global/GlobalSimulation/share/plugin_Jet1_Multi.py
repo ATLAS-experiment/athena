@@ -1,8 +1,7 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaCommon.Constants import DEBUG
 
-# Add algorithms to run tower building from GlobalLArCells
-
+# Add algorithm to prepare LAr cells for Global
 from  GlobalSimulation.LArCellPreparationAlgConfig import LArCellPreparationAlgCfg
 gblLArCellContainerKey = "GlobalLArCells"
 cfg.merge(LArCellPreparationAlgCfg(flags,
@@ -20,16 +19,30 @@ cfg.merge(LArCellMuxAlgCfg(flags,
                            WriteMuxOutputBitstreamToFile = True,
                            OutputLevel=DEBUG))
 
-# Algorithm to build cell towers                                                                                                                                                             
-from  GlobalSimulation.GlobalCellTowerAlgToolConfig import GlobalCellTowerAlgToolCfg
-cfg.merge(GlobalCellTowerAlgToolCfg(flags,
-                                    GlobalLArCellsKey = gblLArCellContainerKey,
-                                    GlobalCellTowersKey = "GlobalCellTowers",
-                                    OutputLevel=DEBUG))
+# Add the GlobalSim Algorithm
+alg = CompFactory.GlobalSim.GlobalSimulationAlg('GlobalSimulationAlg')
 
-# Algorithm to build Jet1 jets
-from  GlobalSimulation.GlobalJet1AlgToolConfig import GlobalJet1AlgToolCfg
-acc.merge(GlobalJet1AlgToolCfg(flags,
-                               gblCellTowersKey = "GlobalCellTowers",
-                               gblSRJetsKey = "GlobalJet1Jets",
-                               OutputLevel=DEBUG))
+# Attach the CellTower AlgTool
+cellTowerTool =  CompFactory.GlobalSim.GlobalCellTowerAlgTool('GlobalCellTowerAlgTool')
+cellTowerTool.GlobalCellTowersKey = "GlobalCellTowers"
+cellTowerTool.OutputLevel = DEBUG
+
+alg.globalsim_algs += [cellTowerTool]
+
+# Attach the WTAConeJet AlgTool
+jet1Tool =  CompFactory.GlobalSim.GlobalJet1AlgTool('GlobalJet1AlgTool')
+jet1Tool.GlobalCellTowersKey = "GlobalCellTowers"
+jet1Tool.OutputLevel = DEBUG
+
+alg.globalsim_algs += [jet1Tool]
+
+# add in the JetMultiplicity AlgTool
+tool =  CompFactory.GlobalSim.JetMultAlgTool('JetMultAlgTool')
+
+tool.et_low = '2500'
+tool.enable_dump=True
+tool.OutputLevel = DEBUG
+
+alg.TIPwriters = [tool]
+
+cfg.addEventAlgo(alg)

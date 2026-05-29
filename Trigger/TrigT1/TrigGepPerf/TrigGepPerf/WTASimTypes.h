@@ -5,6 +5,8 @@
 #ifndef WTASimTypes_h
 #define WTASimTypes_h
 
+#include "WTAFixedInt.hpp"
+
 const float fl_ETA_MAX = 5.0;
 const float fl_PHI_MAX = 3.14159265;
 #ifdef BITWISE_SIMULATION
