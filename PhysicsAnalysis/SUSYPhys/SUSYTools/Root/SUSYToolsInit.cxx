@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SUSYTools/SUSYObjDef_xAOD.h"
@@ -943,6 +943,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_muonTriggerSFTool.setProperty("OutputLevel", this->msg().level()) );
       if(!m_muTriggerSFCalibRelease.empty() ) ATH_CHECK(  m_muonTriggerSFTool.setProperty("CalibrationRelease",m_muTriggerSFCalibRelease) );
       if(!m_muTriggerSFCalibFilename.empty()) ATH_CHECK(  m_muonTriggerSFTool.setProperty("filename",          m_muTriggerSFCalibFilename) );
+      if(!m_mcCampaign.empty()) ATH_CHECK( m_muonTriggerSFTool.setProperty("Campaign", m_mcCampaign) ); // if not set, loads all !86245
       ATH_CHECK( m_muonTriggerSFTool.retrieve() );
       m_muonTrigSFTools.push_back(m_muonTriggerSFTool.getHandle());
     } else if (m_muonTriggerSFTool.isUserConfigured()) {
@@ -1598,24 +1599,12 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Initialise path to tau config file and config reader
 
-    std::string inputfile = "";
-    if (!m_tauConfigPath.empty() && (m_tauConfigPath!="default")) inputfile = m_tauConfigPath;
-    else if (m_tauId == "rnn001") inputfile = "SUSYTools/tau_selection_rnn001.conf";
-    else if (m_tauId == "VeryLoose") inputfile = "SUSYTools/tau_selection_veryloose.conf";
-    else if (m_tauId == "Loose") inputfile = "SUSYTools/tau_selection_loose.conf";
-    else if (m_tauId == "Medium") inputfile = "SUSYTools/tau_selection_medium.conf";
-    else if (m_tauId == "Tight") inputfile = "SUSYTools/tau_selection_tight.conf";
-    else {
-      ATH_MSG_ERROR("Invalid tau ID selected: " << m_tauId);
-      return StatusCode::FAILURE;
-    }
-
     // Read in the config file so we can retrieve the fields later when configuring the efficiency tools
-    if ( m_tauConfigReader.ReadFile( PathResolverFindCalibFile(inputfile).c_str(), EEnvLevel(0) ) ) {
-      ATH_MSG_ERROR( "Error while reading tau config file : " << inputfile );
+    if ( m_tauConfigReader.ReadFile( PathResolverFindCalibFile(m_tauInputFile).c_str(), EEnvLevel(0) ) ) {
+      ATH_MSG_ERROR( "Error while reading tau config file : " << m_tauInputFile );
       return StatusCode::FAILURE;
     }
-    else ATH_MSG_DEBUG( "Successfully read tau config file : " << inputfile );
+    else ATH_MSG_DEBUG( "Successfully read tau config file : " << m_tauInputFile );
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -1624,74 +1613,80 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     if (!m_tauSelTool.isUserConfigured()) {
       toolName = "TauSelectionTool_" + m_tauId;
       m_tauSelTool.setTypeAndName("TauAnalysisTools::TauSelectionTool/"+toolName);
-      ATH_CHECK( m_tauSelTool.setProperty("ConfigPath", inputfile) );
+      ATH_CHECK( m_tauSelTool.setProperty("ConfigPath", m_tauInputFile) );
       ATH_CHECK( m_tauSelTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_tauSelTool.retrieve() );
     } else  ATH_CHECK( m_tauSelTool.retrieve() );
 
 
     if (!m_tauSelToolBaseline.isUserConfigured()) {
-      std::string inputfile = "";
-      if (!m_tauConfigPathBaseline.empty() && (m_tauConfigPathBaseline!="default")) inputfile = m_tauConfigPathBaseline;
-      else if (m_tauIdBaseline == "rnn001") inputfile = "SUSYTools/tau_selection_rnn001.conf";
-      else if (m_tauIdBaseline == "VeryLoose") inputfile = "SUSYTools/tau_selection_veryloose.conf";
-      else if (m_tauIdBaseline == "Loose") inputfile = "SUSYTools/tau_selection_loose.conf";
-      else if (m_tauIdBaseline == "Medium") inputfile = "SUSYTools/tau_selection_medium.conf";
-      else if (m_tauIdBaseline == "Tight") inputfile = "SUSYTools/tau_selection_tight.conf";
-      else {
-        ATH_MSG_ERROR("Invalid baseline tau ID selected: " << m_tauIdBaseline);
-        return StatusCode::FAILURE;
-      }
       toolName = "TauSelectionToolBaseline_" + m_tauIdBaseline;
       m_tauSelToolBaseline.setTypeAndName("TauAnalysisTools::TauSelectionTool/"+toolName);
-      ATH_CHECK( m_tauSelToolBaseline.setProperty("ConfigPath", inputfile) );
-
+      ATH_CHECK( m_tauSelToolBaseline.setProperty("ConfigPath", m_tauInputFileBaseline) );
       ATH_CHECK( m_tauSelToolBaseline.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_tauSelToolBaseline.retrieve() );
     } else  ATH_CHECK( m_tauSelToolBaseline.retrieve() );
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////
+    // jetIDWP/elIDWP for efficiency tool + trigger tool
+    std::string jetIDWP = m_tauConfigReader.GetValue("JetIDWP" ,"");
+    ANA_MSG_DEBUG( "Found JetIDWP in tau config file : " << jetIDWP );
+    int jet_id_lvl;
+    // Read out the tau ID from the config file and map into the enum from tau CP
+    if (jetIDWP == "JETIDNONE") jet_id_lvl = (int)TauAnalysisTools::JetID::JETIDNONE;
+    else if (jetIDWP == "JETIDRNNVERYLOOSE") jet_id_lvl = (int)TauAnalysisTools::JetID::JETIDRNNVERYLOOSE;
+    else if (jetIDWP == "JETIDRNNLOOSE") jet_id_lvl = (int)TauAnalysisTools::JetID::JETIDRNNLOOSE;
+    else if (jetIDWP == "JETIDRNNMEDIUM") jet_id_lvl = (int)TauAnalysisTools::JetID::JETIDRNNMEDIUM;
+    else if (jetIDWP == "JETIDRNNTIGHT") jet_id_lvl = (int)TauAnalysisTools::JetID::JETIDRNNTIGHT;
+    else if (jetIDWP == "JETIDGNTAUVERYLOOSE") jet_id_lvl = (int)TauAnalysisTools::JetID::JETIDGNTAUVERYLOOSE;
+    else if (jetIDWP == "JETIDGNTAULOOSE") jet_id_lvl = (int)TauAnalysisTools::JetID::JETIDGNTAULOOSE;
+    else if (jetIDWP == "JETIDGNTAUMEDIUM") jet_id_lvl = (int)TauAnalysisTools::JetID::JETIDGNTAUMEDIUM;
+    else if (jetIDWP == "JETIDGNTAUTIGHT") jet_id_lvl = (int)TauAnalysisTools::JetID::JETIDGNTAUTIGHT;
+    else {
+      ATH_MSG_ERROR("Invalid Tau ID in tau config file " << jetIDWP);
+      return StatusCode::FAILURE;
+    }
+    // Read out the (optional) Ele OR from the config file and map into the enum from tau CP
+    std::string eleIDWP = m_tauConfigReader.GetValue("EleIDWP" ,"");
+    ANA_MSG_DEBUG( "Found EleIDWP in tau config file : " << eleIDWP );
+    int ele_id_lvl = -1;
+    if (eleIDWP == "ELEIDRNNLOOSE") ele_id_lvl = (int)TauAnalysisTools::EleID::ELEIDRNNLOOSE;
+    else if (eleIDWP == "ELEIDRNNMEDIUM") ele_id_lvl = (int)TauAnalysisTools::EleID::ELEIDRNNMEDIUM;
+    else if (eleIDWP == "ELEIDRNNTIGHT") ele_id_lvl = (int)TauAnalysisTools::EleID::ELEIDRNNTIGHT;
+    else {
+      ATH_MSG_INFO("No or invalid Ele OR in tau config file " << eleIDWP << " will not apply SFs for electro veto" );
+    }
+    if (jet_id_lvl == (int)TauAnalysisTools::JetID::JETIDRNNTIGHT || jet_id_lvl == (int)TauAnalysisTools::JetID::JETIDGNTAUTIGHT) {
+      ATH_MSG_WARNING("EleOR with Tight TauID is currently not supported, please discuss with TauCP!");
+    }
+
+    int jet_id_lvl_fb = jet_id_lvl;
+    if (m_tau_id_fallback.count(jet_id_lvl) > 0) {
+       jet_id_lvl_fb = m_tau_id_fallback[jet_id_lvl];
+       ATH_MSG_WARNING("Configuring fallback RNN ID SF for GNTau config, do not use in production!");
+    }
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
     // Initialise tau efficiency tool
 
-    if (!m_tauEffTool.isUserConfigured() && !isData()) {
+    // TEMPORARY: no recommendations yet for 2024+
+    if (!m_tauEffTool.isUserConfigured() && !isData() && !(m_mcCampaign=="mc23e" || m_mcCampaign=="mc23g")) {
       toolName = "TauEffTool_" + m_tauId;
       m_tauEffTool.setTypeAndName("TauAnalysisTools::TauEfficiencyCorrectionsTool/"+toolName);
 
       std::vector<int> correction_types;
-      // Read out the tau ID from the config file and map into the enum from tau CP
-      std::string jetIDWP = m_tauConfigReader.GetValue("JetIDWP" ,"");
-      ANA_MSG_DEBUG( "Found JetIDWP in tau config file : " << jetIDWP );
-      int jet_id_lvl;
-      if (jetIDWP == "JETIDNONE") jet_id_lvl = (int)TauAnalysisTools::JetID::JETIDNONE;
-      else if (jetIDWP == "JETIDRNNVERYLOOSE") jet_id_lvl = (int)TauAnalysisTools::JetID::JETIDRNNVERYLOOSE;
-      else if (jetIDWP == "JETIDRNNLOOSE") jet_id_lvl = (int)TauAnalysisTools::JetID::JETIDRNNLOOSE;
-      else if (jetIDWP == "JETIDRNNMEDIUM") jet_id_lvl = (int)TauAnalysisTools::JetID::JETIDRNNMEDIUM;
-      else if (jetIDWP == "JETIDRNNTIGHT") jet_id_lvl = (int)TauAnalysisTools::JetID::JETIDRNNTIGHT;
-      else {
-        ATH_MSG_ERROR("Invalid Tau ID in tau config file " << jetIDWP);
-        return StatusCode::FAILURE; 
-      }
       // Add retrieval of reco and ID SFs
       correction_types.insert(correction_types.end(), {TauAnalysisTools::EfficiencyCorrectionType::SFRecoHadTau,
                                                        TauAnalysisTools::EfficiencyCorrectionType::SFJetIDHadTau});
 
-      // Read out the (optional) Ele OR from the config file and map into the enum from tau CP
-      std::string eleIDWP = m_tauConfigReader.GetValue("EleIDWP" ,"");
-      ANA_MSG_DEBUG( "Found EleIDWP in tau config file : " << eleIDWP );
-      int ele_id_lvl = -1;
-      if (eleIDWP == "ELEIDRNNLOOSE") ele_id_lvl = (int)TauAnalysisTools::EleID::ELEIDRNNLOOSE;
-      else if (eleIDWP == "ELEIDRNNMEDIUM") ele_id_lvl = (int)TauAnalysisTools::EleID::ELEIDRNNMEDIUM;
-      else if (eleIDWP == "ELEIDRNNTIGHT") ele_id_lvl = (int)TauAnalysisTools::EleID::ELEIDRNNTIGHT;
-      else {
-        ATH_MSG_INFO("No or invalid Ele OR in tau config file " << eleIDWP << " will not apply SFs for electro veto" );
-      }
       // Add retrieval of electron veto SFs if its applied
       if (ele_id_lvl != -1 )
         correction_types.insert(correction_types.end(), {TauAnalysisTools::EfficiencyCorrectionType::SFEleIDHadTau,
                                                          TauAnalysisTools::EfficiencyCorrectionType::SFEleIDElectron});
 
-      ATH_CHECK( m_tauEffTool.setProperty("JetIDLevel", jet_id_lvl) );
+      ATH_CHECK( m_tauEffTool.setProperty("JetIDLevel", jet_id_lvl_fb) );
       ATH_CHECK( m_tauEffTool.setProperty("EleIDLevel", ele_id_lvl) );
       ATH_CHECK( m_tauEffTool.setProperty("EfficiencyCorrectionTypes", correction_types) );
       ATH_CHECK( m_tauEffTool.setProperty("OutputLevel", this->msg().level()) );
@@ -1706,18 +1701,8 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Initialise tau trigger efficiency tool(s)
 
-    if (!isData()) {
-      int iTauID = (int) TauAnalysisTools::JETIDNONE;
-      if (m_tauId == "rnn001")   iTauID = (int) TauAnalysisTools::JETIDNONE;
-      else if (m_tauId == "VeryLoose")   iTauID = (int) TauAnalysisTools::JETIDRNNVERYLOOSE;
-      else if (m_tauId == "Loose")  iTauID = (int) TauAnalysisTools::JETIDRNNLOOSE;
-      else if (m_tauId == "Medium") iTauID = (int) TauAnalysisTools::JETIDRNNMEDIUM;
-      else if (m_tauId == "Tight")  iTauID = (int) TauAnalysisTools::JETIDRNNTIGHT;
-      else {
-        ATH_MSG_ERROR("Invalid tau ID selected: " << m_tauId);
-        return StatusCode::FAILURE;
-      }
-
+    // TEMPORARY: no recommendations yet for 2024+
+    if (!isData() && !(m_mcCampaign=="mc23e" || m_mcCampaign=="mc23g")) {
       // map format: SF file name, corresponding single-tau leg (comma-separated in case of OR)
       m_tau_trig_support = {
         {"HLT_tau25_medium1_tracktwo", "HLT_tau25_medium1_tracktwo"},
@@ -1738,6 +1723,8 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
       if (m_isRun3){
           m_tau_trig_support = {
+            // 2024,2025,2026
+            // TBA
             // 2022, 2023
             {"HLT_tau25_mediumRNN_tracktwoMVA", "HLT_tau25_mediumRNN_tracktwoMVA"},
             {"HLT_tau35_mediumRNN_tracktwoMVA", "HLT_tau35_mediumRNN_tracktwoMVA"},
@@ -1753,7 +1740,8 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         auto tau_trigSF = m_tauTrigEffTool.emplace(m_tauTrigEffTool.end(), "TauAnalysisTools::TauEfficiencyCorrectionsTool/"+toolName);
         ATH_CHECK( tau_trigSF->setProperty("EfficiencyCorrectionTypes", std::vector<int>({TauAnalysisTools::SFTriggerHadTau})) );
         ATH_CHECK( tau_trigSF->setProperty("TriggerName", trigger.first) );
-        ATH_CHECK( tau_trigSF->setProperty("JetIDLevel", iTauID) );
+        ATH_CHECK( tau_trigSF->setProperty("JetIDLevel", jet_id_lvl_fb) );
+        ATH_CHECK( tau_trigSF->setProperty("EleIDLevel", ele_id_lvl) );
         ATH_CHECK( tau_trigSF->setProperty("OutputLevel", this->msg().level()) );
         ATH_CHECK( tau_trigSF->setProperty("useFastSim", isAtlfast()) );
         ATH_CHECK( tau_trigSF->setProperty("RecommendationTag", m_tauEffToolRecommendationTag) );
@@ -1826,7 +1814,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_btagSelTool.setProperty("FlvTagCutDefinitionsFileName",  m_bTaggingCalibrationFilePath) );
       // Read from BTagging object. This will be needed until the input file is produced from
       // a derivation release that includes !80336.
-      ATH_CHECK( m_btagSelTool.setProperty("readFromBTaggingObject", true ) );  
+      ATH_CHECK( m_btagSelTool.setProperty("readFromBTaggingObject", m_BtagReadFromObject ) );
       ATH_CHECK( m_btagSelTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_btagSelTool.retrieve() );
     } else if (m_btagSelTool.isUserConfigured()) ATH_CHECK( m_btagSelTool.retrieve() );
@@ -1847,7 +1835,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_btagSelTool_OR.setProperty("FlvTagCutDefinitionsFileName",  m_bTaggingCalibrationFilePath) );
       // Read from BTagging object. This will be needed until the input file is produced from
       // a derivation release that includes !80336.
-      ATH_CHECK( m_btagSelTool_OR.setProperty("readFromBTaggingObject", true ) );  
+      ATH_CHECK( m_btagSelTool_OR.setProperty("readFromBTaggingObject", m_BtagReadFromObject ) );
       ATH_CHECK( m_btagSelTool_OR.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_btagSelTool_OR.retrieve() );
     } else if (m_btagSelTool_OR.isUserConfigured()) ATH_CHECK( m_btagSelTool_OR.retrieve() );
@@ -1878,7 +1866,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         ATH_CHECK( m_btagSelTool_trkJet.setProperty("FlvTagCutDefinitionsFileName",  m_bTaggingCalibrationFilePath) );
         // Read from BTagging object. This will be needed until the input file is produced from
         // a derivation release that includes !80336.
-        ATH_CHECK( m_btagSelTool_trkJet.setProperty("readFromBTaggingObject", true ) );  
+        ATH_CHECK( m_btagSelTool_trkJet.setProperty("readFromBTaggingObject", m_BtagReadFromObject ) );
         ATH_CHECK( m_btagSelTool_trkJet.setProperty("OutputLevel", this->msg().level()) );
         ATH_CHECK( m_btagSelTool_trkJet.retrieve() );
       } else if (m_btagSelTool_trkJet.isUserConfigured()) ATH_CHECK( m_btagSelTool_trkJet.retrieve() );
@@ -1965,7 +1953,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_btagEffTool.setProperty("JetAuthor",      jetcollBTag ) );
       // Read from BTagging object. This will be needed until the input file is produced from
       // a derivation release that includes !80336.
-      ATH_CHECK( m_btagEffTool.setProperty("readFromBTaggingObject", true) );
+      ATH_CHECK( m_btagEffTool.setProperty("readFromBTaggingObject", m_BtagReadFromObject ) );
       ATH_CHECK( m_btagEffTool.setProperty("MinPt",          m_BtagMinPt ) );
       ATH_CHECK( m_btagEffTool.setProperty("SystematicsStrategy", m_BtagSystStrategy ) );
       ATH_CHECK( m_btagEffTool.setProperty("EfficiencyBCalibrations",     MCshowerID   ));
