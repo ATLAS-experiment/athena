@@ -98,6 +98,13 @@ def _addDepsByTagger(flags, tagger_name: str, jetCollection: str) -> ComponentAc
             else 'JetArea_Residual_EtaJES_GSC'
         )
         config_file = 'PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config'
+        calib_kwargs = {}
+        # Assume CustomVtx jets only used in Hgamma context
+        if 'EMPFlowCustomVtx' in jetCollection:
+            calib_kwargs['calibJetCollection'] = 'AntiKt4EMPFlow'
+            calib_kwargs['rhoKey'] = 'Kt4EMPFlowCustomVtxEventShape'
+            calib_kwargs['originScale'] = 'Hgg_JetOriginConstitScaleMomentum'
+            calib_sequence = calib_sequence.replace('Residual', 'Residual_Origin')
         acc.merge(JetCalibrationDecoratorCfg(
             flags,
             jetCollection=jetCollection,
@@ -106,6 +113,7 @@ def _addDepsByTagger(flags, tagger_name: str, jetCollection: str) -> ComponentAc
             calibArea='00-04-83',
             calibrationScale='EtaJES_GSC', # For labeling the decorator
             isData=is_data,
+            **calib_kwargs,
         ))
     if "X" in modset:
         acc.merge(
