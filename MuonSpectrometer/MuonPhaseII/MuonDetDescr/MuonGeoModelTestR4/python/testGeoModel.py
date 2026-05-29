@@ -71,6 +71,7 @@ def SetupArgParser():
     parser.add_argument("--eventPrintoutLevel", type=int, help="Interval of event heartbeat printouts from the loop manager", default = 1)
     parser.add_argument("--localMdtMezzJSON", default="", help="")
     parser.add_argument("--localMdtCablingJSON", default="", help="")
+    parser.add_argument("--passiveMaterialMaps", default = "", help="Root file with the material maps on the surfaces")
     return parser
 
 def setupServicesCfg(flags):
@@ -206,7 +207,10 @@ def setupGeoR4TestCfg(args,  flags = None):
 
     flags.GeoModel.SQLiteDB = True
     configureDefaultTagsCfg(flags)
-    
+
+    if args.passiveMaterialMaps:        
+        flags.Muon.trackGeometryMaterialMap = args.passiveMaterialMaps
+  
     flags.Detector.GeometryBpipe = False
     ### Inner detector
     flags.Detector.GeometryBCM = False
