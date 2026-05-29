@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file OutputStreamSequencerSvc.cxx
@@ -59,9 +59,6 @@ StatusCode OutputStreamSequencerSvc::initialize() {
       ATH_MSG_VERBOSE("Sequential events mode");
    }
 
-   // Gaudi::Concurrency::ConcurrencyFlags::numConcurrentEvents() not set yet
-   // m_rangeIDinSlot.resize( );
-   std::lock_guard lockg( m_mutex );
    m_finishedRange = m_fnToRangeId.end();
 
    return(StatusCode::SUCCESS);
@@ -89,13 +86,9 @@ bool    OutputStreamSequencerSvc::inUse() const {
 //__________________________________________________________________________
 void OutputStreamSequencerSvc::handle(const Incident& inc)
 {
-   auto slot = Gaudi::Hive::currentContext().slot();
-   bool has_context = ( slot != EventContext::INVALID_CONTEXT_ID );
-   // in AthenaSP there is no context so go with the first slot
-   if( !has_context )  slot = 0;
+   const EventContext& ctx = inc.context();
    m_lastIncident = inc.type();
-   ATH_MSG_INFO("Handling incident of type " << m_lastIncident << " for slot=" << slot
-                << (!has_context? " NO event context":"") );
+   ATH_MSG_INFO("Handling incident of type " << m_lastIncident << " for " << ctx);
 
    if( inc.type() == incidentName() ) {  // NextEventRange
       std::string rangeID;
@@ -139,15 +132,11 @@ void OutputStreamSequencerSvc::handle(const Incident& inc)
          else if (rangeID == "INFILE") {
              rangeID = std::to_string(m_fileSequenceNumber);
          }
-         if( slot >= m_rangeIDinSlot.size() ) {
-            // MN - late resize, is there a better place for it?
-            m_rangeIDinSlot.resize( std::max(slot+1, Gaudi::Concurrency::ConcurrencyFlags::numConcurrentEvents()) );
-         }
          // from now on new events will use the new rangeID
          m_currentRangeID = rangeID;
          // for ESMT these incidents are asynchronous, so wait for BeginProcessing to update the range map
-         if( not inConcurrentEventsMode() or has_context ) {
-            m_rangeIDinSlot[ slot ] = std::move(rangeID);
+         if( not inConcurrentEventsMode() or ctx.valid() ) {
+           *m_rangeIDinSlot.get(ctx) = std::move(rangeID);
          }
       }
       if( not inConcurrentEventsMode() and not fileInc ) {
@@ -163,12 +152,8 @@ void OutputStreamSequencerSvc::handle(const Incident& inc)
    else if( inc.type() == IncidentType::BeginProcessing ) {
       // new event start - assing current rangeId to its slot
       std::lock_guard lockg( m_mutex );
-      ATH_MSG_DEBUG("Assigning rangeID = " << m_currentRangeID << " to slot " << slot);
-      // If this service is enabled but not getting NextRange incidents, need to resize here
-      if( slot >= m_rangeIDinSlot.size() ) {
-         m_rangeIDinSlot.resize( std::max(slot+1, Gaudi::Concurrency::ConcurrencyFlags::numConcurrentEvents()) );
-      }
-      m_rangeIDinSlot[ slot ] = m_currentRangeID;
+      ATH_MSG_DEBUG("Assigning rangeID = " << m_currentRangeID << " to slot " << ctx.slot());
+      *m_rangeIDinSlot.get(ctx) = m_currentRangeID;
    }
 }
 
@@ -254,24 +239,17 @@ std::string OutputStreamSequencerSvc::buildSequenceFileName(const std::string& o
 std::string OutputStreamSequencerSvc::currentRangeID() const
 {
    if( !inUse() )  return "";
-   auto slot = Gaudi::Hive::currentContext().slot();
-   if( slot == EventContext::INVALID_CONTEXT_ID )  slot = 0;
-   std::lock_guard lockg( m_mutex );
-   if( slot >= m_rangeIDinSlot.size() ) return "";
-   return m_rangeIDinSlot[ slot ];
+   const EventContext& ctx = Gaudi::Hive::currentContext();
+   return *m_rangeIDinSlot.get(ctx);
 }
 
 
 std::string OutputStreamSequencerSvc::setRangeID(const std::string & rangeID)
 {
-   auto slot = Gaudi::Hive::currentContext().slot();
-   if( slot == EventContext::INVALID_CONTEXT_ID )  slot = 0;
-   std::lock_guard lockg( m_mutex );
-   if( slot >= m_rangeIDinSlot.size() ) {
-      throw std::runtime_error("OutputStreamSequencer::setRangeID(): slot out of range");
-   }
-   std::string oldrange =  m_rangeIDinSlot[ slot ];
-   m_rangeIDinSlot[ slot ] = rangeID;
+   const EventContext& ctx = Gaudi::Hive::currentContext();
+   std::string* rangeid = m_rangeIDinSlot.get(ctx);
+   const std::string oldrange = *rangeid;
+   *rangeid = rangeID;
    return oldrange;
 }
 
