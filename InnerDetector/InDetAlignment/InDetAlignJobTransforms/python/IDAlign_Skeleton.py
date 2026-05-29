@@ -298,21 +298,6 @@ def configureITkFlags(runArgs, flags):
     # Lock flags
     flags.lock()
     return flags
-    
-
-def configureFlags(runArgs):
-    from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    flags = initConfigFlags()
-
-    flags.GeoModel.Align.Dynamic = True
-    flags.GeoModel.AtlasVersion = runArgs.atlasVersion
-    
-    if flags.GeoModel.Run > LHCPeriod.Run3:
-        # needs to be adapted
-        return configureITkFlags(runArgs, flags)
-    else: 
-        # return configureITkFlags(runArgs, flags)
-        return configureInDetFlags(runArgs, flags)
 
 def fromRunArgsITk(runArgs, flags):
 
@@ -431,50 +416,6 @@ def fromRunArgsInDet(runArgs, flags):
     import sys
     sys.exit(sc.isFailure())
 
-
-
-def isITkInfer(runArgs, flags):
-    if getattr(runArgs, "alignITk", False):
-        return True
-
-    if getattr(runArgs, "alignITkPixel", False):
-        return True
-
-    if getattr(runArgs, "alignITkStrip", False):
-        return True
-
-    if getattr(runArgs, "inputRDOFile", None):
-        files = runArgs.inputRDOFile
-        if any("RUN4" in str(f) for f in files):
-            return True
-    
-    return False
-
-
-
-def applyDetectorDefaults(runArgs, flags):
-
-    isITk = isITkInfer(runArgs, flags)
-
-    if getattr(runArgs, "atlasVersion", None) is None:
-        runArgs.atlasVersion = (defaultGeometryTags.RUN4 if isITk else defaultGeometryTags.RUN3)
-
-    if getattr(runArgs, "inputTracksCollection", None) is None:
-        runArgs.inputTracksCollection = ("CombinedITkTracks" if isITk else "CombinedInDetTracks")
-
-    if getattr(runArgs, "globalTag", None) is None:
-        if isITk:
-            runArgs.globalTag = defaultConditionsTags.RUN4_MC
-        elif flags.Input.isMC:
-            runArgs.globalTag = defaultConditionsTags.RUN3_MC
-        else:
-            runArgs.globalTag = defaultConditionsTags.RUN3_DATA
-
-
-
-
-
-
 def isITkGeometryFromInput(runArgs):
     if (getattr(runArgs, "inputRDOFile", None) is None):
         return False
@@ -485,7 +426,7 @@ def isITkGeometryFromInput(runArgs):
 def isITkGeometry(flags):
     return flags.GeoModel.Run > LHCPeriod.Run3
 
-def applyDetectorDefaultsNew(runArgs, flags):
+def applyDetectorDefaults(runArgs, flags):
 
     isITk = False
 
@@ -497,11 +438,8 @@ def applyDetectorDefaultsNew(runArgs, flags):
             runArgs.atlasVersion = defaultGeometryTags.RUN3
     else:
         isITk = isITkGeometry(flags)
-
-    print("isITk: ", isITk)
     
     flags.GeoModel.AtlasVersion = runArgs.atlasVersion
-    print("flags.GeoModel.AtlasVersion: ", flags.GeoModel.AtlasVersion)
 
     if getattr(runArgs, "inputTracksCollection", None) is None:
         runArgs.inputTracksCollection = (
@@ -512,10 +450,7 @@ def applyDetectorDefaultsNew(runArgs, flags):
 
     if getattr(runArgs, "globalTag", None) is None:
 
-        isMC = getattr(flags.Input, "isMC", None)
-        print("flags.Input.Files: ", flags.Input.Files)
-        print("isMC: ", isMC)
-        
+        isMC = getattr(flags.Input, "isMC", None) 
 
         if isITk:
             runArgs.globalTag = defaultConditionsTags.RUN4_MC
@@ -525,7 +460,6 @@ def applyDetectorDefaultsNew(runArgs, flags):
                 if isMC
                 else defaultConditionsTags.RUN3_DATA
             )
-        print("defaultConditionsTags: ", runArgs.globalTag)
 
     flags.GeoModel.AtlasVersion = runArgs.atlasVersion
 
@@ -540,16 +474,13 @@ def fromRunArgs(runArgs):
     else:
         flags.Input.Files = [os.path.abspath(inputFile) for inputFile in runArgs.inputRAWFile]
 
-    applyDetectorDefaultsNew(runArgs, flags)
+    applyDetectorDefaults(runArgs, flags)
 
     if isITkGeometry(flags):
-        print("perdiod > 3")
         flags.GeoModel.Align.Dynamic = False
         flags = configureITkFlags(runArgs, flags)
-        print("geoModel in run: ", flags.GeoModel.AtlasVersion)
         return fromRunArgsITk(runArgs, flags)
     else:
-        print("perdiod < 3")
         flags.GeoModel.Align.Dynamic = True
         flags = configureInDetFlags(runArgs, flags)
         return fromRunArgsInDet(runArgs, flags)
