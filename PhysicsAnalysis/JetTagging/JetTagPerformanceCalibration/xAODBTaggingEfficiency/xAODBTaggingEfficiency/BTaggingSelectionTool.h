@@ -84,7 +84,6 @@ private:
   Gaudi::Property<std::string> m_OP {this, "OperatingPoint", "", "operating point"};
   Gaudi::Property<std::string> m_jetAuthor {this, "JetAuthor", ftag::defaults::jet_collection, "jet collection"};
   Gaudi::Property<std::string> m_ContinuousBenchmarks {this, "CutBenchmarksContinuousWP", "", "comma separated list of tag bins that will be accepted as tagged: 1,2,3 etc.. "};
-  Gaudi::Property<std::string> m_wps_raw {this, "WorkingPointDefinitions", "FixedCutBEff_85,FixedCutBEff_77,FixedCutBEff_70,FixedCutBEff_60", "Comma-separated list of tagger working points (in decreasing order of efficiency!) - required for 1D tagging purposes"};
   
   Gaudi::Property<bool> m_ErrorOnTagWeightFailure{this, "ErrorOnTagWeightFailure", true, "optionally ignore cases where the tagweight cannot be retrieved. default behaviour is to give an error, switching to false will turn it into a warning"};
   //use c-tagging or b-tagging in 1D
