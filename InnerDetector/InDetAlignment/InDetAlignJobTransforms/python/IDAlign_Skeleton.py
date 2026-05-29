@@ -129,11 +129,6 @@ def configureInDetFlags(runArgs, flags):
     flags.InDet.Align.accumulate = runArgs.accumulate
     flags.InDet.Align.baseDir = os.path.abspath(runArgs.baseDir)
     flags.InDet.Align.inputTracksCollection = runArgs.inputTracksCollection
-    
-    if hasattr(runArgs, "inputRDOFile"):
-        flags.Input.Files = [os.path.abspath(inputFile) for inputFile in runArgs.inputRDOFile]
-    else:
-        flags.Input.Files = [os.path.abspath(inputFile) for inputFile in runArgs.inputRAWFile]
 
     if runArgs.accumulate:
         if hasattr(runArgs, "outputTFile"):
@@ -197,10 +192,6 @@ def configureInDetFlags(runArgs, flags):
 
 def configureITkFlags(runArgs, flags):
 
-    ## Create flags and set alignment specific parameter
-    from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    flags = initConfigFlags()
-
     ## Disable all non-track related flag parameter
     from InDetConfig.ConfigurationHelpers import OnlyTrackingPreInclude
     OnlyTrackingPreInclude(flags)
@@ -237,7 +228,6 @@ def configureITkFlags(runArgs, flags):
         flags.ITk.Align.alignITkStrip = runArgs.alignITkStrip
 
     flags.addFlag("ConstrainedTrackProvider.InputTracksCollection", runArgs.inputTracksCollection)
-    flags.Input.Files = [os.path.abspath(inputFile) for inputFile in runArgs.inputRDOFile]
 
     flags.ITk.Align.writeSilicon = False
 
@@ -441,15 +431,30 @@ def fromRunArgsInDet(runArgs, flags):
     import sys
     sys.exit(sc.isFailure())
 
-def isITkGeometry(flags):
-    return flags.GeoModel.Run > LHCPeriod.Run3
 
-def isITkFromDef(runArgs, flags):
-    return ((flags.Input.Format == Format.POOL) or ("RUN4" in str(runArgs.inputRAWFile)) or getattr(runArgs, "alignITk", True) or getattr(runArgs, "alignITkPixel", True)) or (getattr(runArgs, "alignITk", True))
+
+def isITkInfer(runArgs, flags):
+    if getattr(runArgs, "alignITk", False):
+        return True
+
+    if getattr(runArgs, "alignITkPixel", False):
+        return True
+
+    if getattr(runArgs, "alignITkStrip", False):
+        return True
+
+    if getattr(runArgs, "inputRDOFile", None):
+        files = runArgs.inputRDOFile
+        if any("RUN4" in str(f) for f in files):
+            return True
     
+    return False
+
+
+
 def applyDetectorDefaults(runArgs, flags):
 
-    isITk = isITkFromDef(runArgs, flags)
+    isITk = isITkInfer(runArgs, flags)
 
     if getattr(runArgs, "atlasVersion", None) is None:
         runArgs.atlasVersion = (defaultGeometryTags.RUN4 if isITk else defaultGeometryTags.RUN3)
@@ -458,8 +463,71 @@ def applyDetectorDefaults(runArgs, flags):
         runArgs.inputTracksCollection = ("CombinedITkTracks" if isITk else "CombinedInDetTracks")
 
     if getattr(runArgs, "globalTag", None) is None:
-        runArgs.globalTag = (defaultConditionsTags.RUN4_MC if isITk else defaultConditionsTags.RUN3_DATA)
+        if isITk:
+            runArgs.globalTag = defaultConditionsTags.RUN4_MC
+        elif flags.Input.isMC:
+            runArgs.globalTag = defaultConditionsTags.RUN3_MC
+        else:
+            runArgs.globalTag = defaultConditionsTags.RUN3_DATA
 
+
+
+
+
+
+def isITkGeometryFromInput(runArgs):
+    if (getattr(runArgs, "inputRDOFile", None) is None):
+        return False
+    else:
+        return "RUN4" in str(runArgs.inputRDOFile)
+
+
+def isITkGeometry(flags):
+    return flags.GeoModel.Run > LHCPeriod.Run3
+
+def applyDetectorDefaultsNew(runArgs, flags):
+
+    isITk = False
+
+    if getattr(runArgs, "atlasVersion", None) is None:
+        if isITkGeometryFromInput(runArgs):
+            runArgs.atlasVersion = defaultGeometryTags.RUN4
+            isITk = True
+        else:
+            runArgs.atlasVersion = defaultGeometryTags.RUN3
+    else:
+        isITk = isITkGeometry(flags)
+
+    print("isITk: ", isITk)
+    
+    flags.GeoModel.AtlasVersion = runArgs.atlasVersion
+    print("flags.GeoModel.AtlasVersion: ", flags.GeoModel.AtlasVersion)
+
+    if getattr(runArgs, "inputTracksCollection", None) is None:
+        runArgs.inputTracksCollection = (
+            "CombinedITkTracks"
+            if isITk
+            else "CombinedInDetTracks"
+        )
+
+    if getattr(runArgs, "globalTag", None) is None:
+
+        isMC = getattr(flags.Input, "isMC", None)
+        print("flags.Input.Files: ", flags.Input.Files)
+        print("isMC: ", isMC)
+        
+
+        if isITk:
+            runArgs.globalTag = defaultConditionsTags.RUN4_MC
+        else:
+            runArgs.globalTag = (
+                defaultConditionsTags.RUN3_MC
+                if isMC
+                else defaultConditionsTags.RUN3_DATA
+            )
+        print("defaultConditionsTags: ", runArgs.globalTag)
+
+    flags.GeoModel.AtlasVersion = runArgs.atlasVersion
 
 
 def fromRunArgs(runArgs):
@@ -467,17 +535,22 @@ def fromRunArgs(runArgs):
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
 
-    applyDetectorDefaults(runArgs, flags)
+    if hasattr(runArgs, "inputRDOFile"):
+        flags.Input.Files = [os.path.abspath(inputFile) for inputFile in runArgs.inputRDOFile]
+    else:
+        flags.Input.Files = [os.path.abspath(inputFile) for inputFile in runArgs.inputRAWFile]
 
-    flags.GeoModel.Align.Dynamic = True
-    flags.GeoModel.AtlasVersion = runArgs.atlasVersion
+    applyDetectorDefaultsNew(runArgs, flags)
 
     if isITkGeometry(flags):
         print("perdiod > 3")
+        flags.GeoModel.Align.Dynamic = False
         flags = configureITkFlags(runArgs, flags)
+        print("geoModel in run: ", flags.GeoModel.AtlasVersion)
         return fromRunArgsITk(runArgs, flags)
     else:
         print("perdiod < 3")
+        flags.GeoModel.Align.Dynamic = True
         flags = configureInDetFlags(runArgs, flags)
         return fromRunArgsInDet(runArgs, flags)
     
