@@ -151,7 +151,7 @@ def PFOClusterMLCorrectionAlgorithmBuilder(inputFlags,spec):
     correctionTool_cfg = getNeutralPFOClusterMLCorrectionToolCfg(
         inputFlags,
         toolName = "NeutralPFOClusterMLCorrectionTool",
-        ClusterMLCorrectedEnergyDecorationKey = "clusterE_ML",
+        ClusterMLCorrectedEnergyDecorationKey = "CaloCalTopoClusters.clusterE_ML",
         MaxAllowedChargedCorrectionFraction = 0.001,
         MinAllowedEMEnergyMeV = 300
     )
