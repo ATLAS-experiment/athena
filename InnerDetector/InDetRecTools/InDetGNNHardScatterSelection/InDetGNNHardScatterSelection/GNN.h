@@ -48,7 +48,7 @@ namespace InDetGNNHardScatterSelection {
     GNN(const GNN&) = delete;
     virtual ~GNN();
 
-    virtual void decorate(const xAOD::Vertex& verrtex) const;
+    virtual float decorate(const xAOD::Vertex& verrtex) const;
 
   private:
     // type definitions for ONNX output decorators

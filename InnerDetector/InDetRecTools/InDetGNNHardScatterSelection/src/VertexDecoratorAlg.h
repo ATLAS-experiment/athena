@@ -89,6 +89,9 @@ private:
     SG::WriteDecorHandleKey<xAOD::VertexContainer> m_muonLinksKey{
       this, "muonLinks", "", "" };
     
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_mDecor_gnnScore{
+      this, "GNNScoreKey", "HSGN2_phsvertex", "Score from HSGNN"};
+      
     SG::WriteHandleKey<xAOD::CompositeParticleContainer> m_multiPhotonsOutKey{
       this, "multiPhotonsOut", "MultiPhotons", "Output container for multi-photon node"};
     SG::WriteDecorHandleKey<xAOD::VertexContainer> m_multiPhotonLinksKey{
