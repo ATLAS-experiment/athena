@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef OUTPUTSTREAMSEQUENCERSVC_H
@@ -14,6 +14,7 @@
 #include "Gaudi/Property.h"  // no forward decl: typedef
 #include "GaudiKernel/IIncidentListener.h"
 #include "AthenaBaseComps/AthService.h"
+#include "AthenaKernel/SlotSpecificObj.h"
 
 #include <memory>
 #include <map>
@@ -89,7 +90,7 @@ private: // data
    std::string  m_lastIncident;
 
    /// EventRange ID for all slots
-   std::vector<std::string>   m_rangeIDinSlot;
+   SG::SlotSpecificObj<std::string, SG::InvalidSlot::Enabled> m_rangeIDinSlot;
 
 private: // properties
    /// SequenceIncidentName, incident name for triggering file sequencing.
