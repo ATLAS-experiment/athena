@@ -278,7 +278,7 @@ bool TGCCabling::getReadoutFromHighPtID(
     // SLB Module -> readout ID
     TGCId::SideType sideType;
     int rodid;  // dummy
-    bool status = getReadoutFromSLB(*dynamic_cast<TGCModuleSLB*>(slb.get()),
+    bool status = getReadoutFromSLB(*static_cast<TGCModuleSLB*>(slb.get()),
                                     sideType, rodid, sswId, sbLoc);
 
     return status;

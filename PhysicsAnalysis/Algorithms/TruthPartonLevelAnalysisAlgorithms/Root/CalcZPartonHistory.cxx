@@ -34,19 +34,19 @@ bool CalcPartonHistory::getZ(const std::string& str_lep1,
   if (has_candidates) {
     const xAOD::TruthParticle* bp1 = nullptr;
     const xAOD::TruthParticle* bp2 = nullptr;
-    for (const auto* p1 : Z_offshell_decay1_candidates) {
-      for (const auto* p2 : Z_offshell_decay2_candidates) {
-        unsigned int o1 = acc_classifierParticleOrigin(*p1);
-        unsigned int o2 = acc_classifierParticleOrigin(*p2);
-        unsigned int t1 = acc_classifierParticleType(*p1);
-        unsigned int t2 = acc_classifierParticleType(*p2);
+    for (const auto* pDecay1 : Z_offshell_decay1_candidates) {
+      for (const auto* pDecay2 : Z_offshell_decay2_candidates) {
+        unsigned int o1 = acc_classifierParticleOrigin(*pDecay1);
+        unsigned int o2 = acc_classifierParticleOrigin(*pDecay2);
+        unsigned int t1 = acc_classifierParticleType(*pDecay1);
+        unsigned int t2 = acc_classifierParticleType(*pDecay2);
         // Condition 1: Opposite charge — pdgId product must be negative
         // (e.g. e-=11, e+=−11 → product −121 < 0).
-        if ((p1->pdgId() * p2->pdgId()) > 0)
+        if ((pDecay1->pdgId() * pDecay2->pdgId()) > 0)
           continue;
         // Condition 2: Same flavour — both leptons must have the same |pdgId|
         // (e.g. both electrons or both muons).
-        if (p1->absPdgId() != p2->absPdgId())
+        if (pDecay1->absPdgId() != pDecay2->absPdgId())
           continue;
         // Condition 3: Origin == 13 (ZBoson) from MCTruthClassifier
         // (see TruthUtils/TruthClasses.h). Ensures both leptons are
@@ -59,8 +59,8 @@ bool CalcPartonHistory::getZ(const std::string& str_lep1,
         // non-isolated or non-prompt contributions.
         if (!((t1 == 2 && t2 == 2) || (t1 == 4 && t2 == 4)))
           continue;
-        bp1 = p1;
-        bp2 = p2;
+        bp1 = pDecay1;
+        bp2 = pDecay2;
       }
     }
     if (bp1 && bp2) {
