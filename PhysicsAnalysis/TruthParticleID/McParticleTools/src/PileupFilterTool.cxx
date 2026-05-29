@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////// 
@@ -238,11 +238,12 @@ StatusCode PileupFilterTool::selectSpclMcBarcodes()
 StatusCode PileupFilterTool::shapeGenEvent( McEventCollection* genAod )
 {
   //now remove all the particles except those whose barcodes are marked
+  const std::string barcodeStr{"barcodes"};
   for ( McEventCollection::iterator evt = genAod->begin(); evt != genAod->end();++evt) {
     std::vector<HepMC::GenParticlePtr> going_out;
     std::list<int> evtBarcodes;
 #ifdef HEPMC3
-    const auto &barcodes = (*evt)->attribute<HepMC::GenEventBarcodes> ("barcodes");
+    const auto &barcodes = (*evt)->attribute<HepMC::GenEventBarcodes> (barcodeStr);
     std::map<int,int> id_to_barcode_map;
     if (barcodes) id_to_barcode_map = barcodes->id_to_barcode_map();
     for (const auto& keyval: id_to_barcode_map) evtBarcodes.push_back(keyval.second);
