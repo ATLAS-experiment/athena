@@ -13,16 +13,15 @@
 #include <stdexcept>
 #include <ranges>
 
-static std::string 
-show_vector (const ExpandedIdentifier::element_vector& v, const std::string & sep="/"){
-  if (v.empty()) return {};
-  std::string result = std::to_string(v.front());
-  for (auto value : v | std::views::drop(1)){
-      result+= sep + std::to_string(value);
-  }
-  return result;
+template <typename Stream, typename CHAR>
+static void stream_vector(Stream& out, const ExpandedIdentifier::element_vector& v, CHAR sep) {
+    if (v.empty()) return;
+    
+    out << v.front();
+    for (auto value : v | std::views::drop(1)) {
+        out << sep << value;
+    }
 }
-
 
 ExpandedIdentifier::ExpandedIdentifier (const std::string& text){
   set (text);
@@ -53,23 +52,28 @@ ExpandedIdentifier::set (const std::string& text){
 
 
 
-ExpandedIdentifier::operator std::string () const{
-  return show_vector(m_fields);
+ExpandedIdentifier::operator std::string () const {
+  // If a string is explicitly requested, we use stringstream to generate it
+  std::ostringstream oss;
+  stream_vector(oss, m_fields, '/');
+  return oss.str();
 }
 
 void 
-ExpandedIdentifier::show (std::ostream & out) const{
-  out<<  "["<< show_vector (m_fields,".") <<"]";
+ExpandedIdentifier::show (std::ostream & out) const {
+  out << '[';
+  stream_vector(out, m_fields, '.');
+  out << ']';
 }
 
 void 
-ExpandedIdentifier::show (MsgStream & out) const{
-  out<<  "["<< show_vector (m_fields,".") <<"]";
+ExpandedIdentifier::show (MsgStream & out) const {
+  out << '[';
+  stream_vector(out, m_fields, '.');
+  out << ']';
 }
 
-std::ostream & operator << (std::ostream &out, const ExpandedIdentifier & x){
-  out<<std::string(x);
+std::ostream & operator << (std::ostream &out, const ExpandedIdentifier& id) {
+  stream_vector(out, id.m_fields, '/');
   return out;
 }
-
-

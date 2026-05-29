@@ -17,7 +17,6 @@
 #include "IdDict/IdDictMgr.h"
 #include "IdDict/IdDictRange.h"
 #include "IdDict/IdDictRegion.h"
-#include <format>
 
 namespace{
   
@@ -339,16 +338,16 @@ AtlasDetectorID::show_to_string(const Identifier id, const IdContext *context, c
     bool first = true;
     result = "";
     if ('.' == sep)
-        result = "[";
+        result = '[';
     for (unsigned int i = 0; i < expId.fields(); ++i) {
         if (first)
             first = false;
         else
             result += sep;
-        result += std::format("{}", expId[i]);
+        result += std::to_string(expId[i]);
     }
     if ('.' == sep)
-        result += "]";
+        result += ']';
     return result;
 }
 
@@ -418,7 +417,7 @@ std::string AtlasDetectorID::to_range(const ExpandedIdentifier &id) const {
         if (i > 0) {
             result += '/'; // add '/' only if NOT first one
         }
-        result += std::format("{}", id[i]);
+        result += std::to_string(id[i]);
     }
     return result;
 }
