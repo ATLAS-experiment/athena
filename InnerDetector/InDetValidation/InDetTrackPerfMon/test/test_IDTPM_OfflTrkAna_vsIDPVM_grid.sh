@@ -93,7 +93,7 @@ if [ -z "$dcubeXml_IDTPMcmp_absPath" ]; then
     exit 1
 fi
 
-run "dcube-IDTPMvsIDPVM_skipRC" \
+run "dcube-IDTPMvsIDPVM_diffOK" \
   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_cmp \
     --plotopts=ratio \
