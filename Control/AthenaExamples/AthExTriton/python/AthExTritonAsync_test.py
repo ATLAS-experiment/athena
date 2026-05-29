@@ -17,7 +17,7 @@ def AthExTritonCfg(flags, name="AthExTritonExample", **kwargs):
     except RuntimeError as e:
         import sys
         from AthenaCommon.Logging import log as msg
-        msg.error(e)
+        msg.warning(e)
         sys.exit(2)  # indicate test is skipped, not failed
 
     input_data = "dev/MLTest/2020-03-31/t10k-images-idx3-ubyte"
