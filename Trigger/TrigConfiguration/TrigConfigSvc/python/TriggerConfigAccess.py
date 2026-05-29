@@ -272,7 +272,7 @@ def getHLTMonitoringAccess( flags = None, filterOnActiveChains = False ) -> HLTM
         else:
             keysFromInfileMD = getDBKeysFromMetadata(flags)
             smkey = keysFromInfileMD['SMK'] if keysFromInfileMD is not None else 0
-            if smkey < 3000 and not flags.Input.isMC:
+            if flags.Trigger.EDMVersion < 3 and not flags.Input.isMC:
                 # Run 1/2 data or keys missing in metadata 
                 log.info("Trigger metadata with key 'TriggerMenuJson_HLTMonitoring' is not available for Run 2 data. Returning empty dummy.")
                 jsonHLTMon = '{"filetype": "hltmonitoringsummary","name": "EmptyDefault", "signatures": {}}'
@@ -280,8 +280,12 @@ def getHLTMonitoringAccess( flags = None, filterOnActiveChains = False ) -> HLTM
             else:
                 # Run 3 data or MC
                 try:
-                    log.info("Falling back on reading the HLTMonitoring from the TRIGGERDB_RUN3 for SMK %i.", smkey)
-                    cfg = HLTMonitoringAccess( dbalias = "TRIGGERDB_RUN3", smkey = smkey )
+                    if smkey < 3000:
+                        log.info("Falling back on reading the HLTMonitoring from the TRIGGERDBREPR_RUN3 for SMK %i.", smkey)
+                        cfg = HLTMonitoringAccess( dbalias = "TRIGGERDBREPR_RUN3", smkey = smkey )
+                    else:
+                        log.info("Falling back on reading the HLTMonitoring from the TRIGGERDB_RUN3 for SMK %i.", smkey)
+                        cfg = HLTMonitoringAccess( dbalias = "TRIGGERDB_RUN3", smkey = smkey )
                 except KeyError:
                     # SMK for this run has no HLT monitoring (earlier 2022 data) => providing dummy configuration
                     log.info("Trigger HLTMonitoring is not available for SMK %i. Returning empty dummy.", smkey)
