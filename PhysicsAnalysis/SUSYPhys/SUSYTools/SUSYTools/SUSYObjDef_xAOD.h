@@ -493,7 +493,7 @@ namespace ST {
 
     std::string getDefaultJetUncConfig();
 
-    void getTauConfig(const std::string& tauConfigPath, std::vector<float>& pT_window, std::vector<float>& eta_window, bool &eleOLR, bool &muVeto, bool &muOLR) const;
+    StatusCode getTauConfig(const std::string& tauConfigPath, std::vector<float>& pT_window, std::vector<float>& eta_window, bool &eleOLR, bool &muVeto, bool &muOLR) const;
 
     void configFromFile(bool& property, const std::string& propname, TEnv& rEnv,
                         bool defaultValue);
@@ -633,9 +633,10 @@ namespace ST {
     std::vector<std::string> m_el_iso_support;
     std::vector<std::string> m_mu_iso_support;
 
-    // Iso SF mapping file (temporary while not all SFs are available)
+    // ID/Iso SF mapping file (temporary while not all SFs are available)
     std::map<std::string, std::string> m_el_iso_fallback;
     std::map<std::string, std::string> m_mu_iso_fallback;
+    std::map<int, int> m_tau_id_fallback;
 
     // strings needed for dealing with 2015+2016 electron trigger SFs
     std::string m_electronTriggerSFStringSingle;
@@ -652,8 +653,13 @@ namespace ST {
     int         m_muIdBaseline;
     std::string m_photonId;
     std::string m_photonIdBaseline;
+    std::string m_tauTagger;
     std::string m_tauId;
     std::string m_tauIdBaseline;
+    bool m_tauEleId;
+    bool m_tauEleIdBaseline;
+    bool m_tauMuOLR;
+    bool m_tauMuOLRBaseline;
     std::string m_eleIso_WP;
     std::string m_eleIsoHighPt_WP;
     double      m_eleIsoHighPtThresh;
@@ -682,9 +688,11 @@ namespace ST {
     std::string m_EigenvectorReductionB;
     std::string m_EigenvectorReductionC;
     std::string m_EigenvectorReductionLight;
+    bool        m_BtagReadFromObject;
     std::string m_BtagWP_trkJet;
     std::string m_BtagTagger_trkJet;
     double m_BtagMinPt_trkJet;
+    bool        m_BtagReadFromObject_trkJet;
 
     //configurable cuts here
     double m_eleBaselinePt;
@@ -731,6 +739,8 @@ namespace ST {
     double m_tauEta;
     std::string m_tauConfigPath;
     std::string m_tauConfigPathBaseline;
+    std::string m_tauInputFile;
+    std::string m_tauInputFileBaseline;
     bool   m_tauDoTTM;
     std::string m_tauSmearingToolRecommendationTag;
     std::string m_tauEffToolRecommendationTag;
@@ -1023,6 +1033,10 @@ namespace ST {
   const static SG::ConstAccessor<char> acc_signal_less_JVT("signal_less_JVT"); //!< Accessor for signal jets without a JVT requirement
   const static SG::ConstAccessor<char> acc_bjet("bjet");
   const static SG::ConstAccessor<double> acc_btag_weight("btag_weight");
+  const static SG::ConstAccessor<float> acc_btag_pb("btag_pb");
+  const static SG::ConstAccessor<float> acc_btag_pc("btag_pc");
+  const static SG::ConstAccessor<float> acc_btag_pu("btag_pu");
+  const static SG::ConstAccessor<float> acc_btag_ptau("btag_ptau");
   const static SG::ConstAccessor<float> acc_btag_dl1pb("btag_dl1pb");
   const static SG::ConstAccessor<float> acc_btag_dl1pc("btag_dl1pc");
   const static SG::ConstAccessor<float> acc_btag_dl1pu("btag_dl1pu");
