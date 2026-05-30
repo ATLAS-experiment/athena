@@ -33,7 +33,7 @@ EratioMaker::makeWindow(const ROOT::Math::PtEtaPhiEVector &seed) const
 
     // Window dimensions set based on configured half sizes
     unsigned int etaWindowSize = 2 * m_etaWindowHalfSize + 1;
-    unsigned int phiWindowSize = 2 * m_etaWindowHalfSize + 1;  
+    unsigned int phiWindowSize = 2 * m_phiWindowHalfSize + 1;  
 
     std::vector<std::vector<GepCaloCell>> window(etaWindowSize, std::vector<GepCaloCell>(phiWindowSize));
 
