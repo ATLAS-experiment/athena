@@ -26,8 +26,8 @@ def MuonTrackingGeometryTestCfg(flags, name = "ActsMuonTrackingGeometryTest", **
 
 if __name__ == "__main__":
 
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest, MuonPhaseIITestDefaults
-    from MuonConfig.MuonConfigUtils import setupHistSvcCfg
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, MuonPhaseIITestDefaults
+    from MuonConfig.MuonConfigUtils import executeTest, setupHistSvcCfg
     parser = SetupArgParser()
     parser.set_defaults(outRootFile="MuonNavigationTestR4_Gen3Geometry.root")
     parser.set_defaults(inputFile=MuonPhaseIITestDefaults.HITS_PG_R4)  

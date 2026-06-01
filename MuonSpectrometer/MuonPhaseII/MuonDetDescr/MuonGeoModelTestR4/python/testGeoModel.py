@@ -25,7 +25,8 @@ class MuonPhaseIITestDefaults:
         "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-16._0001.data",
         "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-17._0001.data",
         "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-18._0001.data",
-        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-19._0001.data"]
+        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-19._0001.data",
+        "root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/data-art/large-input/MuonRecRTT/data26_13p6TeV.00519268.physics_Main.daq.RAW._lb0178._SFO-11._0001.data"]
     ###
     RDO_R3 = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/myRDO.R3.pool.root"]
     ###
@@ -270,9 +271,6 @@ def setupGeoR4TestCfg(args,  flags = None):
 
     return flags, cfg
 
-def executeTest(cfg):
-    cfg.printConfig(withDetails=True, summariseProps=True)
-    if not cfg.run().isSuccess(): exit(1)
 
 if __name__=="__main__":
     args = SetupArgParser().parse_args()
@@ -354,5 +352,5 @@ if __name__=="__main__":
                                           TestStations = [ch for ch in chambToTest if ch[0] == "S"],
                                           ExcludeStations = [ch for ch in chambToExclude if ch[0] == "S"],
                                           ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' )]))
-    
+    from MuonConfig.MuonConfigUtils import executeTest
     executeTest(cfg)
