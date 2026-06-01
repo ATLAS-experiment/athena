@@ -11,6 +11,8 @@
 #include "JetCalibTools/InSituJMSCalibStep.h"
 #include "JetCalibTools/MuonInJetCorrectionTool.h"
 #include "JetCalibTools/BJetCorrectionTool.h"
+#include "JetCalibTools/JetResponseTool.h"
+
 
 // Project include(s).
 #include "AsgTools/AsgComponentFactories.h"
@@ -28,3 +30,4 @@ DECLARE_COMPONENT( InSituJMSCalibStep )
 DECLARE_COMPONENT( MuonInJetCorrectionTool )
 DECLARE_COMPONENT( BJetCorrectionTool )
 DECLARE_COMPONENT( Pileup1DResidualCalibStep )
+DECLARE_COMPONENT( JetResponseTool )
