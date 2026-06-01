@@ -6,11 +6,13 @@
 //  Created by Joerg Stelzer on 11/18/12.
 
 #include "L1TopoInterfaces/Parameter.h"
+#include <iostream>
+
 
 using namespace std;
 using namespace TCS;
 
-Parameter::Parameter( const string & name,
+Parameter::Parameter( string_view name,
                       TCS::parType_t value) :
    m_name(name),
    m_value(value),
@@ -19,7 +21,7 @@ Parameter::Parameter( const string & name,
 {}
 
 
-Parameter::Parameter( const string & name,
+Parameter::Parameter( string_view name,
                       TCS::parType_t value,
                       TCS::parType_t selection) :
    m_name(name),
