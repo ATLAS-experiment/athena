@@ -18,7 +18,7 @@ testFile = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data24_
 #testFile = "/eos/atlas/atlascerngroupdisk/det-l1calo/OfflineSoftware/TestFiles/data24_13p6TeV/data24_13p6TeV.00477048.physics_Main.daq.RAW._lb0821._SFO-20._0001.data"
 
 def runMonCmd(inputFile,outputBSFile=None,outputMonFile=None):
-    cmdString = f"l1calo-ath-mon --evtMax 150 --filesInput {inputFile} -- Trigger.CTP.UseEDMxAOD=False Trigger.L1.doeFex=True Trigger.L1.dojFex=True"
+    cmdString = f"l1calo-ath-mon --evtMax 150 --filesInput {inputFile} -- Trigger.CTP.UseEDMxAOD=False Trigger.L1.doeFex=True Trigger.L1.dojFex=True Trigger.L1.dogFex=True"
     if outputMonFile: cmdString += f" Output.HISTFileName={outputMonFile}"
     if outputBSFile: 
        if os.path.exists(outputBSFile): os.remove(outputBSFile)
@@ -58,6 +58,10 @@ hists = [
    "h_jJ_EtaPhiMap",
    "h_jTAU_EtaPhiMap",
    "h_jEM_EtaPhiMap",
+   "h_etaphiMapL1_gFexSRJetRoI_CutPt0",
+   "h_etaphiMapL1_gFexLRJetRoI_CutPt0",
+   "h_gFexMet",
+   "h_gFexSumEt",
 ]
 for h in hists:
    h1 = f1.FindObjectAny(h)

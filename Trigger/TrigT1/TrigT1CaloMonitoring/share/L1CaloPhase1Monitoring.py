@@ -643,6 +643,12 @@ if flags.Output.BSFileName != "":
     algo.jFexTauRoIKeys   = ["L1_jFexTauRoI"]
     algo.jFexFwdElRoIKeys = ["L1_jFexFwdElRoI"]
 
+  if flags.Trigger.L1.dogFex:
+    algo.gFexSRJetRoIKeys = ["L1_gFexSRJetRoI"]
+    algo.gFexLRJetRoIKeys = ["L1_gFexLRJetRoI"]
+    algo.gScalarEJwojKeys = ["L1_gScalarEJwoj"]
+    algo.gMETComponentsJwojKeys = ["L1_gMETComponentsJwoj"]
+
   cfg.addEventAlgo(algo)
   from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamWriteCfg
   write = ByteStreamWriteCfg(flags, ["xAOD::TrigCompositeContainer#OutputBSTCC"])
