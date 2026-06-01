@@ -155,7 +155,7 @@ std::pair<MCTruthPartClassifier::ParticleType,
 D3PDMCTruthClassifier::particleTruthClassifier (const xAOD::Muon* mu)
 {
   // Avoid using forward muons that have a tracklet associated to them:
-  if( mu->muonType() == xAOD::Muon::SiliconAssociatedForwardMuon ) {
+  if( mu->muonType() == xAOD::Muon::MuonType::SiliconAssociatedForwardMuon ) {
     return std::make_pair( MCTruthPartClassifier::Unknown, MCTruthPartClassifier::NonDefined );
   }
 

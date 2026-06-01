@@ -171,10 +171,9 @@ ThinTRTStandaloneTrackAlg::execute(const EventContext& ctx) const
       return StatusCode::FAILURE;
     }
     for (const xAOD::Muon* muon : *muons) {
-      const xAOD::TrackParticle* trk =
-        muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+      const xAOD::TrackParticle* trk = muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
       /// SaF muons have the ID link to the InDetForwardTrackParticles
-      if (muon->muonType() != xAOD::Muon::SiliconAssociatedForwardMuon && trk)
+      if (muon->muonType() != xAOD::Muon::MuonType::SiliconAssociatedForwardMuon && trk)
         keptInDetTrackParticles[trk->index()] = true;
     }
   }
