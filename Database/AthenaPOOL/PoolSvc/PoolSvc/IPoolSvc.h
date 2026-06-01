@@ -115,7 +115,7 @@ public: // Non-static members
 	   const unsigned long ientry) const = 0;
 
    /// Connect to a logical database unit; PersistencySvc is chosen according to transaction type (accessmode).
-   virtual StatusCode connect(pool::ITransaction::Type type,
+   virtual StatusCode connect(Io::IoFlag type,
 	   unsigned int contextId = IPoolSvc::kInputStream) = 0;
 
    /// Commit data for a given stream and flush buffer.

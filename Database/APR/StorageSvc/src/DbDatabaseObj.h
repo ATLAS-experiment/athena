@@ -109,7 +109,7 @@ namespace pool    {
     DbDatabaseObj( DbDomain&          dom,
                    const std::string& pfn,
                    const std::string& fid,
-                   DbAccessMode mode = pool::READ);
+                   Io::IoFlag mode = Io::READ);
     /// Standard Destructor
     virtual ~DbDatabaseObj();
     /// Access to the logon string

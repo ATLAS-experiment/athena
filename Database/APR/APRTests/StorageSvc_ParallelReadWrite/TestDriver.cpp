@@ -52,12 +52,12 @@ TestDriver::testWriting()
     throw std::runtime_error( "Could not create a StorageSvc object" );
   }
   storSvc->addRef();
-  if( !storSvc->startSession( pool::RECREATE, pool::ROOT_StorageType.type() ).isSuccess() ) {
+  if( !storSvc->startSession( Io::WRITE, pool::ROOT_StorageType.type() ).isSuccess() ) {
     throw std::runtime_error( "Could not start a session." );
   }
 
   pool::FileDescriptor fd( file1, file1 );
-  if( !storSvc->connect( pool::RECREATE, fd ).isSuccess() ) {
+  if( !storSvc->connect( Io::WRITE, fd ).isSuccess() ) {
     throw std::runtime_error( "Could not start a connection." );
   }
   // Retrieve the dictionary
@@ -118,20 +118,20 @@ TestDriver::testParallelReadWrite()
     throw std::runtime_error( "Could not create a StorageSvc object" );
   }
   storSvc->addRef();
-  if( !storSvc->startSession( pool::UPDATE, pool::ROOT_StorageType.type() ).isSuccess() ) {
+  if( !storSvc->startSession( Io::WRITE, pool::ROOT_StorageType.type() ).isSuccess() ) {
     throw std::runtime_error( "Could not start a session." );
   }
 
 
   // Open the file to read
   pool::FileDescriptor fd1( file1, file1 );
-  if( !storSvc->connect( pool::READ, fd1 ).isSuccess() ) {
+  if( !storSvc->connect( Io::READ, fd1 ).isSuccess() ) {
     throw std::runtime_error( "Could not start a connection." );
   }
 
   // Open the file to write
   pool::FileDescriptor fd2( file2, file2 );
-  if ( ! ( storSvc->connect( pool::RECREATE, fd2 ).isSuccess() ) ) {
+  if ( ! ( storSvc->connect( Io::WRITE, fd2 ).isSuccess() ) ) {
     throw std::runtime_error( "Could not start a connection." );
   }
 
@@ -161,7 +161,7 @@ TestDriver::testParallelReadWrite()
   // Fetch the objects in the container.
   DbContainer cntH(containerToken->technology());
   Token::OID_t linkH(containerToken->oid());
-  StatusCode sc = cntH.open(dbH, containerToken->contID(), 0, containerToken->technology(), pool::READ);
+  StatusCode sc = cntH.open(dbH, containerToken->contID(), 0, containerToken->technology(), Io::READ);
   int iObject = 0;
   if ( sc.isSuccess() && cntH.isValid() ) {
     Token* objectToken = new Token(cntH.token());
@@ -262,12 +262,12 @@ TestDriver::testReading()
     throw std::runtime_error( "Could not create a StorageSvc object" );
   }
 
-  if( !storSvc->startSession( pool::READ, pool::ROOT_StorageType.type() ).isSuccess() ) {
+  if( !storSvc->startSession( Io::READ, pool::ROOT_StorageType.type() ).isSuccess() ) {
     throw std::runtime_error( "Could not start a session." );
   }
 
   pool::FileDescriptor fd( file2, file2 );
-  if( !storSvc->connect( pool::READ, fd ).isSuccess() ) {
+  if( !storSvc->connect( Io::READ, fd ).isSuccess() ) {
     throw std::runtime_error( "Could not start a connection." );
   }
 
@@ -289,7 +289,7 @@ TestDriver::testReading()
   // Fetch the objects in the container.
   DbContainer cntH(containerToken->technology());
   Token::OID_t linkH(containerToken->oid());
-  StatusCode sc = cntH.open(dbH, containerToken->contID(), 0, containerToken->technology(), pool::READ);
+  StatusCode sc = cntH.open(dbH, containerToken->contID(), 0, containerToken->technology(), Io::READ);
   int iObject = 0;
   if ( sc.isSuccess() && cntH.isValid() ) {
     Token* objectToken = new Token(cntH.token());

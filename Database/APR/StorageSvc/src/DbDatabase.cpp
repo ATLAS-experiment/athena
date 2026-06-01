@@ -63,7 +63,7 @@ bool DbDatabase::exist(DbDomain& dH, const string& n) const
 StatusCode DbDatabase::open(DbDomain&       domH,
                             const string&   pfn, 
                             const string&   fid, 
-                            DbAccessMode    mode)
+                            Io::IoFlag    mode)
 {
   if ( domH.isValid() )   {
     DbDatabaseObj* db = domH.find(fid);
@@ -114,8 +114,8 @@ StatusCode DbDatabase::remove(const DbContainerObj* cnt)
 {  return (isValid() && cnt) ? ptr()->remove(cnt) : StatusCode::FAILURE;              }
 
 /// Access to access mode member
-DbAccessMode DbDatabase::openMode() const 
-{  return isValid() ? ptr()->mode() : DbAccessMode(pool::NOT_OPEN);     }
+Io::IoFlag DbDatabase::openMode() const 
+{  return isValid() ? ptr()->mode() : Io::IoFlag(Io::INVALID);     }
 
 /// Access to db name (FID)
 const string& DbDatabase::name() const 

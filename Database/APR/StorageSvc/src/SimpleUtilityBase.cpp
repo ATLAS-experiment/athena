@@ -68,7 +68,7 @@ void SimpleUtilityBase::startSession ATLAS_NOT_THREAD_SAFE ()
       throw std::runtime_error( "Could not create a StorageSvc object" );
    }
    long technologyId = pool::DbType::getType( technologyName ).majorType();
-   if( ! storageSvc->startSession( pool::READ, technologyId).isSuccess() ) {
+   if( ! storageSvc->startSession( Io::READ, technologyId).isSuccess() ) {
       throw std::runtime_error( "Could not start a new session" );
    }
    if( technologyId == pool::ROOT_StorageType.majorType() ) {
@@ -82,7 +82,7 @@ std::string SimpleUtilityBase::readFileGUID( const std::string& pfn )
 {
    std::string fid;
    pool::FileDescriptor fd( fid, pfn );
-   if( ! storageSvc->connect(pool::READ, fd).isSuccess() ) {
+   if( ! storageSvc->connect(Io::READ, fd).isSuccess() ) {
       throw std::runtime_error( "Could not open file \"" + pfn + "\"" );
    }
    DbDatabase dbH( fd.dbc()->handle() );

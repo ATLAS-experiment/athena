@@ -70,7 +70,7 @@ namespace pool  {
     virtual StatusCode open(DbDatabase& dbH,
                             const std::string& nam, 
                             const DbTypeInfo* info,
-                            DbAccessMode mod) override;
+                            Io::IoFlag mod) override;
     /// Check if we can access the container for reading with the given type
     virtual StatusCode checkAccess(DbDatabase& dbH,
                                  const std::string& nam) const override final;

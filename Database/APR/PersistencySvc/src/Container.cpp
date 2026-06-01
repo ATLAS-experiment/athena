@@ -37,7 +37,7 @@ pool::Container::attributeOfType( const std::string& attributeName,
   
   DbDatabase  dbH( m_fileDescriptor.dbc()->handle() );
   DbContainer cntH( dbH.find(name()) );
-  if( !cntH.isValid() and !cntH.open(dbH, name(), 0, dbH.type(), pool::READ).isSuccess() ) {
+  if( !cntH.isValid() and !cntH.open(dbH, name(), 0, dbH.type(), Io::READ).isSuccess() ) {
     return false;
   }
   if( !cntH.getOption(containerOption).isSuccess() ) return false;
@@ -58,7 +58,7 @@ pool::Container::setAttributeOfType( const std::string& attributeName,
   
   DbDatabase  dbH( m_fileDescriptor.dbc()->handle() );
   DbContainer cntH( dbH.find(name()) );
-  if( !cntH.isValid() and !cntH.open(dbH, name(), 0, dbH.type(), pool::READ).isSuccess() ) {
+  if( !cntH.isValid() and !cntH.open(dbH, name(), 0, dbH.type(), Io::READ).isSuccess() ) {
     return false;
   }
   return cntH.setOption(containerOption).isSuccess();

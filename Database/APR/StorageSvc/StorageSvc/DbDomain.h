@@ -87,11 +87,11 @@ namespace pool    {
       *
       * @return StatusCode code indicating success or failure.
       */
-    StatusCode open(IOODatabase* imp, const DbType& technology, DbAccessMode mod = pool::READ);
+    StatusCode open(IOODatabase* imp, const DbType& technology, Io::IoFlag mod = Io::READ);
     /// Close domain
     StatusCode close();
     /// Access to access mode
-    DbAccessMode openMode() const;
+    Io::IoFlag openMode() const;
     /// Check if Database exists within the domain
     bool existsDbase(const std::string& db_name);
     /// Find Database in domain

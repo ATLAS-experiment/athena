@@ -28,7 +28,7 @@ RootTreeIndexContainer::RootTreeIndexContainer(const std::string& name) :
 StatusCode RootTreeIndexContainer::open( DbDatabase& dbH, 
                                        const std::string& nam,
                                        const DbTypeInfo* info,
-                                       DbAccessMode mod)
+                                       Io::IoFlag mod)
 {
    auto db = static_cast<const RootDatabase*>( dbH.info() );
    m_indexBump = db? db->currentIndexMasterID() : 0;
