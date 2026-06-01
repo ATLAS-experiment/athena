@@ -69,8 +69,8 @@ private:
    // * this map is used by the lwtnn graph // can I use this to make the Input Data Map for ONYX?
    // */
    
-  virtual StatusCode getInputs(const xAOD::TauJet &xTau,
-                               std::map<std::string, std::map<std::string, std::vector<double>>> &inputSeqMap) const;
+  virtual StatusCode getInputs(const xAOD::TauJet &xTau, std::vector<float> &inputDataVector_chargedPFOs, std::vector<float> &inputDataVector_neutralPFOs, std::vector<float> &inputDataVector_conversionTracks, std::vector<float> &inputDataVector_photonShots) const;
+                               //std::map<std::string, std::map<std::string, std::vector<double>>> &inputSeqMap) const;
 
   SG::ReadDecorHandleKey<xAOD::TauJetContainer> m_decayModeName {this,
       "decayModeNameKey", 
