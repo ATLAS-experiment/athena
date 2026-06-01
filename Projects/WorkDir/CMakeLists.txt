@@ -76,7 +76,7 @@ if( CMAKE_HIP_COMPILER )
 endif()
 
 # Potentially override the Acts package to use a local checkout.
-include(${CMAKE_CURRENT_SOURCE_DIR}/ActsOverride.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/ActsOverride.cmake)
 
 # Find the project that we depend on:
 find_package( ${ATLAS_PROJECT} REQUIRED )

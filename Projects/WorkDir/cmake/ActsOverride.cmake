@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
-# Project file for building a selected set of packages against an
+# Project file for building a custom version of Acts against an
 # installed ATLAS release/nightly.
 
 set(ATLAS_ACTS_SOURCE_DIR "" CACHE PATH "Optional local Acts source directory")
@@ -23,16 +23,27 @@ if(IS_DIRECTORY ${ATLAS_ACTS_SOURCE_DIR})
   set(ACTS_BUILD_PLUGIN_ROOT ON CACHE BOOL "Build root plugin")
   set(ACTS_BUILD_FATRAS ON CACHE BOOL "Build ACTS FATRAS")
   if(CMAKE_CUDA_COMPILER)
+    # Overall options.
+    set(ACTS_ENABLE_CUDA ON CACHE BOOL "Enable CUDA support in Acts in general")
     # Make Acts's Findonnxruntime.cmake visible to the Acts build.
     list(PREPEND CMAKE_MODULE_PATH "${ATLAS_ACTS_SOURCE_DIR}/cmake")
     find_package(onnxruntime)
     # Turn on the build of the GNN plugin.
     set(ACTS_BUILD_PLUGIN_GNN ON CACHE BOOL "Build GNN plugin")
-    set(ACTS_GNN_ENABLE_CUDA ON CACHE BOOL "Enable CUDA support in the GNN plugin")
     set(ACTS_GNN_ENABLE_ONNX ON CACHE BOOL "Enable ONNX support in the GNN plugin")
     set(ACTS_GNN_ENABLE_TORCH OFF CACHE BOOL "Disable Torch support in the GNN plugin")
     set(ACTS_GNN_ENABLE_TENSORRT OFF CACHE BOOL "Disable TensorRT support in the GNN plugin")
     set(ACTS_GNN_ENABLE_MODULEMAP ON CACHE BOOL "Enable module map usage in the GNN plugin")
+    # Turn on the build of the traccc plugin(s).
+    set(ACTS_BUILD_PLUGIN_TRACCC ON CACHE BOOL "Build TRACCC plugin")
+    set(ACTS_USE_SYSTEM_VECMEM ON CACHE BOOL "Use system vecmem")
+    set(DETRAY_BUILD_CUDA ON CACHE BOOL "Turn on CUDA support in Detray") # Workaround for EFTRACK-1010
+    set(TRACCC_SUPPORTED_DETECTORS "default_detector;itk_detector" CACHE STRING "Supported detectors for TRACCC")
+    # Make sure that find_package(traccc) calls would not actually look for
+    # traccc. Since in this setup that will be provided by this Acts build.
+    file(COPY "${CMAKE_CURRENT_LIST_DIR}/traccc-config.cmake"
+              "${CMAKE_CURRENT_LIST_DIR}/traccc-config-version.cmake"
+         DESTINATION "${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}" )
   endif()
 
   # We need to set the library output directories to match the
