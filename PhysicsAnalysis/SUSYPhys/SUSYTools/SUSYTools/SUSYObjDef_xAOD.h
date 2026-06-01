@@ -683,7 +683,6 @@ namespace ST {
     std::string m_BtagWP;
     std::string m_BtagTagger;
     double m_BtagMinPt;
-    std::string m_BtagKeyOverride;
     std::string m_BtagSystStrategy;
     std::string m_EigenvectorReductionB;
     std::string m_EigenvectorReductionC;
@@ -1037,9 +1036,6 @@ namespace ST {
   const static SG::ConstAccessor<float> acc_btag_pc("btag_pc");
   const static SG::ConstAccessor<float> acc_btag_pu("btag_pu");
   const static SG::ConstAccessor<float> acc_btag_ptau("btag_ptau");
-  const static SG::ConstAccessor<float> acc_btag_dl1pb("btag_dl1pb");
-  const static SG::ConstAccessor<float> acc_btag_dl1pc("btag_dl1pc");
-  const static SG::ConstAccessor<float> acc_btag_dl1pu("btag_dl1pu");
   const static SG::ConstAccessor<int> acc_wtagged("wtagged");
   const static SG::ConstAccessor<int> acc_ztagged("ztagged");
   const static SG::ConstAccessor<int> acc_toptagged("toptagged");
