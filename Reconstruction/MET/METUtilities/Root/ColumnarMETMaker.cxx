@@ -405,7 +405,8 @@ namespace met {
       }
 
       //Do special overlap removal for calo tagged muons
-      if(m_orCaloTaggedMuon && !removeOverlap && m_inputObjTypeAcc(orig)==xAOD::Type::Muon && m_inputMuonTypeAcc.getOptional(orig)==xAOD::Muon::CaloTagged) {
+      if(m_orCaloTaggedMuon && !removeOverlap && m_inputObjTypeAcc(orig)==xAOD::Type::Muon && 
+         m_inputMuonTypeAcc.getOptional(orig)==xAOD::Muon::MuonType::CaloTagged) {
         for (decltype(auto) assoc : assocs) {
           auto ind = m_assocAcc.overlapIndices(assoc,orig);
           auto allObjects = m_assocAcc.objects(assoc);
@@ -918,11 +919,12 @@ namespace met {
         } // end muon-jet overlap-removal
 
         switch(mu_in_jet.getXAODObject().energyLossType()) {
-          case xAOD::Muon::Parametrized:
-          case xAOD::Muon::MOP:
-          case xAOD::Muon::Tail:
-          case xAOD::Muon::FSRcandidate:
-          case xAOD::Muon::NotIsolated:
+          using enum xAOD::Muon::EnergyLossType;
+          case Parametrized:
+          case MOP:
+          case Tail:
+          case FSRcandidate:
+          case NotIsolated:
             // For now don't differentiate the behaviour
             // Remove the Eloss assuming the parameterised value
             // The correction is limited to the selected clusters
@@ -1117,11 +1119,12 @@ namespace met {
         if(helper.objSelected(mu_test)) { //
           float mu_Eloss = acc_Eloss(*mu_test);
           switch(mu_test->energyLossType()) {
-          case xAOD::Muon::Parametrized:
-          case xAOD::Muon::MOP:
-          case xAOD::Muon::Tail:
-          case xAOD::Muon::FSRcandidate:
-          case xAOD::Muon::NotIsolated:
+          using enum xAOD::Muon::EnergyLossType;
+          case Parametrized:
+          case MOP:
+          case Tail:
+          case FSRcandidate:
+          case NotIsolated:
             // For now don't differentiate the behaviour
             // Remove the Eloss assuming the parameterised value
             // The correction is limited to the selected clusters

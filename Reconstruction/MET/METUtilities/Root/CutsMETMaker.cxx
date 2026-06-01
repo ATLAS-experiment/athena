@@ -19,20 +19,18 @@ StatusCode CutsMETMaker::accept(const xAOD::Muon* mu)
 {
 
   if(mu->pt()<2.5e3 || mu->pt()/cosh(mu->eta())<4e3) return StatusCode::FAILURE;
-  if(mu->muonType()==xAOD::Muon::MuonStandAlone) {
+  if(mu->muonType()==xAOD::Muon::MuonType::MuonStandAlone) {
     // only take forward SA -- need a max eta cut?
     if(fabs(mu->eta())<2.5) return StatusCode::FAILURE;
     uint8_t nPrecision=0;
-    if(!mu->primaryTrackParticleLink().isValid()) return StatusCode::FAILURE;
     mu->primaryTrackParticle()->summaryValue(nPrecision,xAOD::numberOfPrecisionLayers);
     if(nPrecision<3) return StatusCode::FAILURE;
   } // selection for StandAlone muons
-  else if(mu->muonType()==xAOD::Muon::Combined || mu->muonType()==xAOD::Muon::SegmentTagged) {
+  else if(mu->muonType()==xAOD::Muon::MuonType::Combined || mu->muonType()==xAOD::Muon::MuonType::SegmentTagged) {
     if(fabs(mu->eta())>2.5) return StatusCode::FAILURE;
 
     // could add some error checking to make sure we successfully read the details
-    uint8_t nPixHits(0), nSctHits(0);
-    if(!mu->primaryTrackParticleLink().isValid()) return StatusCode::FAILURE;
+    uint8_t nPixHits{0}, nSctHits{0};    
     mu->primaryTrackParticle()->summaryValue(nPixHits,xAOD::numberOfPixelHits);
     mu->primaryTrackParticle()->summaryValue(nSctHits,xAOD::numberOfSCTHits);
 

@@ -123,10 +123,8 @@ PFLeptonSelector::selectMuons(SG::WriteHandle<ConstDataVector<xAOD::MuonContaine
     // We only care about muons with ID tracks. Of the muon types which could be medium, only Combined have ID tracks
     // (for looser selections other muon types could have ID tracks)
 
-    xAOD::Muon::Quality muonQuality = theMuon->quality();
-    if (muonQuality <= xAOD::Muon::Medium) {
-      xAOD::Muon::MuonType muonType = theMuon->muonType();
-      if (xAOD::Muon::Combined == muonType) {
+    if (theMuon->quality() <= xAOD::Muon::Quality::Medium) {
+      if (xAOD::Muon::MuonType::Combined == theMuon->muonType()) {
         if (selectedMuonsWriteHandle.isValid())
           selectedMuonsWriteHandle->push_back(theMuon);
         else
