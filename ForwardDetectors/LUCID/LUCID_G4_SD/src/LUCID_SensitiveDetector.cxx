@@ -10,7 +10,9 @@
 #include "LUCID_HitHelper.h"
 
 // Athena headers
+#include "HitManagement/HitCollectionMap.h"
 #include "LUCID_GeoModel/LUCID_Constants.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackHelper.h"
 
 
@@ -27,21 +29,27 @@
 
 LUCID_SensitiveDetector::LUCID_SensitiveDetector(const std::string& name, const std::string& hitCollectionName)
   : G4VSensitiveDetector( name )
-  , m_HitColl( hitCollectionName )
+  , m_hitCollectionName( hitCollectionName )
 {
   m_hit = new LUCID_HitHelper();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-// Initialize from G4 - necessary to new the write handle for now
+// Initialize from G4.
 void LUCID_SensitiveDetector::Initialize(G4HCofThisEvent *)
 {
-  if (!m_HitColl.isValid()) m_HitColl = std::make_unique<LUCID_SimHitCollection>(m_HitColl.name());
+  m_HitColl = getHitCollection();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 bool LUCID_SensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*) {
+  if (!m_HitColl) {
+    m_HitColl = getHitCollection();
+    if (!m_HitColl) {
+      return false;
+    }
+  }
 
   if (verboseLevel>5)
     {
@@ -84,4 +92,14 @@ bool LUCID_SensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*) {
                      lambda,
                      energy);
   return true;
+}
+
+LUCID_SimHitCollection* LUCID_SensitiveDetector::getHitCollection() const
+{
+  auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo();
+  if (!eventInfo) {
+    return nullptr;
+  }
+  auto hitCollections = eventInfo->GetHitCollectionMap();
+  return hitCollections ? hitCollections->Find<LUCID_SimHitCollection>(m_hitCollectionName) : nullptr;
 }

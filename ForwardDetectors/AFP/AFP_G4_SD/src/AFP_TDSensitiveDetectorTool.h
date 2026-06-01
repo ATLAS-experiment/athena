@@ -22,9 +22,9 @@ public:
   // Destructor
   ~AFP_TDSensitiveDetectorTool() {}
   /** Beginning of an athena event.  This is where collection initialization should happen.*/
-  StatusCode SetupEvent() override final; //FIXME would be good to be able to avoid this.
+  StatusCode SetupEvent(HitCollectionMap&) override final;
   /** End of an athena event */
-  StatusCode Gather() override final; //FIXME would be good to be able to avoid this.
+  StatusCode Gather(HitCollectionMap&) override final;
 
 protected:
   // Make me an SD!

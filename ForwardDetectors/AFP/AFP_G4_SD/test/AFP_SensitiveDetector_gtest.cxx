@@ -10,7 +10,6 @@
 
 #include "TestTools/initGaudi.h"
 
-#include "G4HCofThisEvent.hh"
 #include "G4Step.hh"
 #include "G4TouchableHistory.hh"
 
@@ -46,20 +45,12 @@ class AFP_SensitiveDetectortest : public ::testing::Test {
 };
 //end of environment setting
 
-TEST_F( AFP_SensitiveDetectortest, Initialize )
-{
-  G4HCofThisEvent hce;
-  AFP_SensitiveDetector sd1("name1", "name1", "name1");
-  sd1.Initialize(&hce);
-  ASSERT_TRUE(sd1.m_pTDSimHitCollection.isValid());
-  ASSERT_TRUE(sd1.m_pSIDSimHitCollection.isValid());
-}
-
 /*TEST_F( AFP_SensitiveDetectortest, ProcessHits1 )//this test fixture aims to test the specific block of ProcessHits(i.e.,if ( (bRes=VolumeName.contains("TDQuarticBar[")) ) )
 {
-  G4HCofThisEvent hce;
   G4Step sp;
   G4TouchableHistory th;
+  auto hitCollections = makeHitCollectionMap();
+  emplaceAFPCollections(*hitCollections, "name21_TD", "name21_SiD");
 
   G4double totalenergydeposit = 0.8;
   std::vector<G4String> physicalname = {"physicsTDQuarticBar[9]"};
@@ -86,11 +77,12 @@ TEST_F( AFP_SensitiveDetectortest, Initialize )
   G4String nop3 = "photon";
   DerivedG4SensitiveDetectorTestSetting(sp, totalenergydeposit, physicalname, logicalname, copynos, preStepPos, postStepPos, globaltime0, kineticenergy0, velocity0, globaltime, kineticenergy, globaltime1, kineticenergy1, velocity1, steplength, charge, encoding, antiencoding, astring, atype, nop1, nop2, nop3);
 
-  AFP_SensitiveDetector sd21("name21", "name21", "name21");
-  sd21.Initialize(&hce);
+  AFP_SensitiveDetector sd21("name21", "name21_TD", "name21_SiD");
+  sd21.m_pTDSimHitCollection = hitCollections->Find<AFP_TDSimHitCollectionBuilder>("name21_TD");
+  sd21.m_pSIDSimHitCollection = hitCollections->Find<AFP_SIDSimHitCollectionBuilder>("name21_SiD");
   sd21.ProcessHits(&sp, &th);
 
-  AFP_TDSimHitCollection* a = sd21.m_pTDSimHitCollection.ptr();
+  AFP_TDSimHitCollection* a = sd21.m_pTDSimHitCollection;
   ASSERT_TRUE(a->begin()->m_nHitID==0); //test the HitID value of the 1st Hit, the same below
   ASSERT_TRUE((a->end()-1)->m_nHitID==0); // test the HitID value of the last Hit, the same below
   ASSERT_TRUE(a->begin()->m_nTrackID==3);
@@ -127,9 +119,10 @@ TEST_F( AFP_SensitiveDetectortest, Initialize )
 
 TEST_F( AFP_SensitiveDetectortest, ProcessHits2 )//this test aims to test the specific block of ProcessHits(i.e.,else if (VolumeName.contains("SIDSensor") || (bIsSIDAuxVSID=VolumeName.contains("SIDVacuumSensor"))))
 {
-  G4HCofThisEvent hce;
   G4Step sp;
   G4TouchableHistory th;
+  AFP_TDSimHitCollectionBuilder tdHitCollection("name22_TD");
+  AFP_SIDSimHitCollectionBuilder sidHitCollection("name22_SiD");
 
   G4double totalenergydeposit = 8;
   std::vector<G4String> physicalname = {"phy01lSIDSensor[9]"};
@@ -156,11 +149,12 @@ TEST_F( AFP_SensitiveDetectortest, ProcessHits2 )//this test aims to test the sp
   G4String nop3 = "photon";
   DerivedG4SensitiveDetectorTestSetting(sp, totalenergydeposit, physicalname, logicalname, copynos, preStepPos, postStepPos, globaltime0, kineticenergy0, velocity0, globaltime, kineticenergy, globaltime1, kineticenergy1, velocity1, steplength, charge, encoding, antiencoding, astring, atype, nop1, nop2, nop3);
 
-  AFP_SensitiveDetector sd22("name22", "name22", "name22");
-  sd22.Initialize(&hce);
+  AFP_SensitiveDetector sd22("name22", "name22_TD", "name22_SiD");
+  sd22.m_pTDSimHitCollection = &tdHitCollection;
+  sd22.m_pSIDSimHitCollection = &sidHitCollection;
   sd22.ProcessHits(&sp, &th);
 
-  AFP_SIDSimHitCollection* a = sd22.m_pSIDSimHitCollection.ptr();
+  AFP_SIDSimHitCollection* a = sd22.m_pSIDSimHitCollection;
   ASSERT_TRUE(a->begin()->m_nHitID==0); //test the HitID value of the 1st Hit, the same below
   ASSERT_TRUE((a->end()-1)->m_nHitID==0); //test the HitID value of the last Hit, the same below
   ASSERT_TRUE(a->begin()->m_nTrackID==3);
@@ -195,50 +189,7 @@ TEST_F( AFP_SensitiveDetectortest, ProcessHits2 )//this test aims to test the sp
   ASSERT_EQ((a->end()-1)->m_nPixelRow,7);
   ASSERT_EQ(a->begin()->m_nPixelCol,0);
   ASSERT_EQ((a->end()-1)->m_nPixelCol,20);
-  ASSERT_EQ(sd22.m_nNumberOfSIDSimHits,21);
-  ASSERT_EQ(sd22.m_nNOfSIDSimHits[1],21);
-}
-
-TEST_F( AFP_SensitiveDetectortest, StartOfAthenaEvent)
-{
-  G4HCofThisEvent hce;
-  AFP_SensitiveDetector sd3("name3", "name3", "name3");
-  sd3.Initialize(&hce);
-  sd3.StartOfAthenaEvent();
-
-//the following lines aim to test the values of the arrays(m_nNOfSIDSimHits and m_nNOfTDSimHits) initialized by the member function StartOfAthenaEvent()
-  for (int i=0;i<4;i++)
-  {
-    ASSERT_TRUE(sd3.m_nNOfSIDSimHits[i]==0);
-  }
-  for( int i=0; i < 4; i++)
-  {
-    for( int j=0; j < 32; j++)
-    {
-      ASSERT_TRUE(sd3.m_nNOfTDSimHits[i][j]==0);
-    }
-  }
-}
-
-TEST_F( AFP_SensitiveDetectortest, EndOfAthenaEvent)
-{
-  G4HCofThisEvent hce;
-  AFP_SensitiveDetector sd4("name4", "name4", "name4");
-  sd4.Initialize(&hce);
-  sd4.EndOfAthenaEvent();
-
-//the following line saim to test the values of the arrays(m_nNOfSIDSimHits and m_nNOfTDSimHits) assigned by the member function EndOfAthenaEvent()
-  for (int i=0;i<4;i++)
-  {
-    ASSERT_TRUE(sd4.m_nNOfSIDSimHits[i]==0);
-  }
-  for( int i=0; i < 4; i++)
-  {
-    for( int j=0; j < 32; j++)
-    {
-      ASSERT_TRUE(sd4.m_nNOfTDSimHits[i][j]==0);
-    }
-  }
+  ASSERT_EQ(sd22.m_pSIDSimHitCollection->NumberOfHits(), 21);
 }
 
 int main( int argc, char** argv ) {

@@ -9,6 +9,10 @@
 // Package includes
 #include "ALFA_SensitiveDetector.h"
 
+#include "ALFA_SimEv/ALFA_HitCollection.h"
+#include "ALFA_SimEv/ALFA_ODHitCollection.h"
+#include "HitManagement/HitCollectionMap.h"
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 ALFA_SensitiveDetectorTool::ALFA_SensitiveDetectorTool(const std::string& type, const std::string& name, const IInterface* parent)
@@ -19,47 +23,23 @@ ALFA_SensitiveDetectorTool::ALFA_SensitiveDetectorTool(const std::string& type, 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-StatusCode ALFA_SensitiveDetectorTool::SetupEvent()
+StatusCode ALFA_SensitiveDetectorTool::SetupEvent(HitCollectionMap& hitCollections)
 {
   ATH_MSG_VERBOSE( "ALFA_SensitiveDetectorTool::SetupEvent()" );
-  if(!getSD())
-    {
-      ATH_MSG_ERROR ("SetupEvent: ALFA_SensitiveDetector never created!");
-      return StatusCode::FAILURE;
-    }
-  else
-    {
-      ALFA_SensitiveDetector *localSD = dynamic_cast<ALFA_SensitiveDetector*>(getSD());
-      if(!localSD)
-        {
-          ATH_MSG_ERROR ("SetupEvent: Failed to cast m_SD into ALFA_SensitiveDetector.");
-          return StatusCode::FAILURE;
-        }
-      localSD->StartOfAthenaEvent();
-    }
+  hitCollections.Emplace<ALFA_HitCollection>(m_outputCollectionNames[0],
+                                             m_outputCollectionNames[0]);
+  hitCollections.Emplace<ALFA_ODHitCollection>(m_outputCollectionNames[1],
+                                               m_outputCollectionNames[1]);
   return StatusCode::SUCCESS;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-StatusCode ALFA_SensitiveDetectorTool::Gather()
+StatusCode ALFA_SensitiveDetectorTool::Gather(HitCollectionMap& hitCollections)
 {
   ATH_MSG_VERBOSE( "ALFA_SensitiveDetectorTool::Gather()" );
-  if(!getSD())
-    {
-      ATH_MSG_ERROR ("Gather: ALFA_SensitiveDetector never created!");
-      return StatusCode::FAILURE;
-    }
-  else
-    {
-      ALFA_SensitiveDetector *localSD = dynamic_cast<ALFA_SensitiveDetector*>(getSD());
-      if(!localSD)
-        {
-          ATH_MSG_ERROR ("Gather: Failed to cast m_SD into ALFA_SensitiveDetector.");
-          return StatusCode::FAILURE;
-        }
-      localSD->EndOfAthenaEvent();
-    }
+  CHECK(hitCollections.Record<ALFA_HitCollection>(m_outputCollectionNames[0]));
+  CHECK(hitCollections.Record<ALFA_ODHitCollection>(m_outputCollectionNames[1]));
   return StatusCode::SUCCESS;
 }
 

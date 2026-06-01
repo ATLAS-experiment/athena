@@ -20,8 +20,10 @@ class ZDC_FiberSDTool : public SensitiveDetectorBase
   ZDC_FiberSDTool(const std::string& type, const std::string& name, const IInterface* parent);
   // Destructor
   ~ZDC_FiberSDTool() {};
+  /** Beginning of an athena event */
+  StatusCode SetupEvent(HitCollectionMap&) override final;
   /** End of an athena event */
-  StatusCode Gather() override final; //FIXME would be good to be able to avoid this.
+  StatusCode Gather(HitCollectionMap&) override final;
 
 protected:
   // Make me an SD!
