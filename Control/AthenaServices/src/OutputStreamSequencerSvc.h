@@ -52,7 +52,7 @@ public: // Non-static members
    virtual void handle(const Incident& /*inc*/) override final;
 
    /// Returns sequenced file name for output stream
-   std::string buildSequenceFileName(const std::string&);
+   std::string buildSequenceFileName(const EventContext& ctx, const std::string&);
    void publishRangeReport(const std::string& outputFile);
    RangeReport_ptr getRangeReport();
 
@@ -60,10 +60,10 @@ public: // Non-static members
    std::string  incidentName() const            { return m_incidentName.value(); }
 
    /// The current Event Range ID (only one range is returned)
-   std::string  currentRangeID() const;
+   std::string  currentRangeID(const EventContext& ctx) const;
 
    /// set the RangeID (possibly temporarily) so the right Range Filename may be generated
-   std::string  setRangeID(const std::string & rangeID);
+   std::string  setRangeID(const EventContext& ctx, const std::string & rangeID);
 
    /// Is the service in active use? (true after the first range incident is handled)
    bool         inUse() const;

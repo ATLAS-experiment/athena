@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AthenaOutputStream_test.cxx
@@ -24,6 +24,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "AthenaKernel/errorcheck.h"
+#include "AthenaKernel/ExtendedEventContext.h"
 #include "CxxUtils/ubsan_suppress.h"
 
 #include "../src/AthenaOutputStream.h"
@@ -62,6 +63,10 @@ int main() {
   assert( algMan.isValid() );
   IAlgorithm* pAlg(nullptr);
   assert( (algMan->createAlgorithm( "AthenaOutputStream", "AthenaOutputStream", pAlg)).isSuccess() );
+
+  EventContext ctx;
+  Atlas::ExtendedEventContext ectx;
+  Atlas::setExtendedEventContext (ctx, std::move (ectx));
 
   assert( (pAlg->sysInitialize()).isSuccess() );
 
@@ -104,7 +109,7 @@ int main() {
   assert( pStream );
 
   //fill the vector of selected objects
-  assert( pStream->collectAllObjects().isSuccess() );
+  assert( pStream->collectAllObjects(ctx).isSuccess() );
 
   //  cout << pStream->selectedObjects()->end() - 
   //    pStream->selectedObjects()->begin() <<endl;

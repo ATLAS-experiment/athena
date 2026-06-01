@@ -158,13 +158,13 @@ void OutputStreamSequencerSvc::handle(const Incident& inc)
 }
 
 //__________________________________________________________________________
-std::string OutputStreamSequencerSvc::buildSequenceFileName(const std::string& orgFileName)
+std::string OutputStreamSequencerSvc::buildSequenceFileName(const EventContext& ctx, const std::string& orgFileName)
 {
    if( !inUse() ) {
       // Event sequences not in use, just return the original filename
       return orgFileName;
    }
-   std::string rangeID = currentRangeID();
+   std::string rangeID = currentRangeID(ctx);
    std::lock_guard lockg( m_mutex );
    if (!m_replaceRangeMode) {
      // build the full output file name for this event range
@@ -236,17 +236,15 @@ std::string OutputStreamSequencerSvc::buildSequenceFileName(const std::string& o
 }
 
 
-std::string OutputStreamSequencerSvc::currentRangeID() const
+std::string OutputStreamSequencerSvc::currentRangeID(const EventContext& ctx) const
 {
    if( !inUse() )  return "";
-   const EventContext& ctx = Gaudi::Hive::currentContext();
    return *m_rangeIDinSlot.get(ctx);
 }
 
 
-std::string OutputStreamSequencerSvc::setRangeID(const std::string & rangeID)
+std::string OutputStreamSequencerSvc::setRangeID(const EventContext& ctx, const std::string & rangeID)
 {
-   const EventContext& ctx = Gaudi::Hive::currentContext();
    std::string* rangeid = m_rangeIDinSlot.get(ctx);
    const std::string oldrange = *rangeid;
    *rangeid = rangeID;
