@@ -1,6 +1,6 @@
 // -*- c++ -*-
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ATHENAKERNEL_RNGWRAPPER_H
 #define ATHENAKERNEL_RNGWRAPPER_H
@@ -103,16 +103,10 @@ namespace ATHRNG{
     static constexpr std::initializer_list<SeedingOptionType> all_SeedingOptions = {MC20Seeding, MC16Seeding, MC21Seeding};
     
     /// Set the random seed using a string (e.g. algorithm name) and
-    /// the current slot, event, and run numbers and an optional offset. - Version allowing to switch
-    /// the seeding options
-    void setSeedLegacy(const std::string& algName, size_t slot, uint64_t ev, uint64_t run, uint64_t offset, SeedingOptionType seeding,
-                 EventContext::ContextEvt_t evt = EventContext::INVALID_CONTEXT_EVT);
-
-    /// Set the random seed using a string (e.g. algorithm name) and
     /// the current EventContext and an optional offset. Does nothing
     /// if the context is invalid. - Version allowing to switch
     /// the seeding options
-    inline void setSeedLegacy(const std::string& algName, const EventContext& ctx, uint32_t offset, SeedingOptionType seeding,
+    void setSeedLegacy(const std::string& algName, const EventContext& ctx, uint32_t offset, SeedingOptionType seeding,
                         EventContext::ContextEvt_t evt = EventContext::INVALID_CONTEXT_EVT);
 
     /// Set the seed value directly for a specified slot
@@ -173,16 +167,6 @@ inline void ATHRNG::RNGWrapper::setSeed(const std::string& algName, const EventC
            ctx.eventID().run_number(),
            ctx.evt() );
 }
-
-inline void ATHRNG::RNGWrapper::setSeedLegacy(const std::string& algName, const EventContext& ctx, uint32_t offset, SeedingOptionType seeding,
-                                              EventContext::ContextEvt_t evt /*= EventContext::INVALID_CONTEXT_EVT*/)
-{
-  setSeedLegacy( algName, ctx.slot(),
-                 ctx.eventID().event_number(),
-                 ctx.eventID().run_number(),
-                 offset, seeding, evt);
-}
-
 
 
 #endif
