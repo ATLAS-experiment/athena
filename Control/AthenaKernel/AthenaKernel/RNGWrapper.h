@@ -129,12 +129,6 @@ namespace ATHRNG{
       return m_engines[ctx.slot()];
     }
 
-    /// Return the event count at which the current slot was last seeded.
-    EventContext::ContextEvt_t evtSeeded() const
-    {
-      return m_evtSeeded[Gaudi::Hive::currentContext().slot()];
-    }
-
     /// Return the event count at which the current slot of CTX was last seeded.
     EventContext::ContextEvt_t evtSeeded(const EventContext &ctx) const
     {
