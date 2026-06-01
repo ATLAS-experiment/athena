@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_RecAlgs/TrackTimeDefAndQualityAlg.h
  * @author Valentina Raskina <valentina.raskina@cern.ch>
@@ -139,12 +139,12 @@ private:
 
   CleaningResult
   runTimeConsistencyCuts(const std::vector<float>& times,
-			 const std::vector<bool>& has_clusters,
+			 const std::vector<char>& has_clusters,
 			 const std::vector<int>& hit_classification) const;
 
   std::array<Hit, s_hgtd_layers>
   getValidHits(const std::vector<float>& times,
-	       const std::vector<bool>& has_clusters,
+	       const std::vector<char>& has_clusters,
 	       const std::vector<int>& hit_classification) const;
 
   /**
