@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //  BaseTOBoAlg.h
 //  TopoCore
@@ -19,6 +19,7 @@
 
 #include <vector>
 #include <string>
+#include <string_view>
 #include <memory>
 
 class TH1;
@@ -106,9 +107,9 @@ namespace TCS {
    protected:
 
       // define parameters by developer
-      void defineParameter(const std::string & name, TCS::parType_t value);
+      void defineParameter(std::string_view name, TCS::parType_t value);
 
-      void defineParameter(const std::string & name, TCS::parType_t value, unsigned int selection);
+      void defineParameter(std::string_view name, TCS::parType_t value, unsigned int selection);
       
       virtual StatusCode doReset() = 0;
       
