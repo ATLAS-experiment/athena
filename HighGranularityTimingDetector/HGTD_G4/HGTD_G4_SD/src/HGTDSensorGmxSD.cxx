@@ -10,6 +10,8 @@
 #include "HGTDSensorGmxSD.h"
 
 // Athena headers
+#include "HitManagement/HitCollectionMap.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackHelper.h"
 
 // Geant4 headers
@@ -33,8 +35,8 @@
 #include <string.h>
 
 HGTDSensorGmxSD::HGTDSensorGmxSD(const std::string& name, const std::string& hitCollectionName, GeoModelIO::ReadGeoModel * sqlreader)
-    : G4VSensitiveDetector( name ), 
-      m_HitColl( hitCollectionName ),
+    : G4VSensitiveDetector( name ),
+      m_hitCollectionName( hitCollectionName ),
       m_sqlreader( sqlreader )
 {
 
@@ -43,11 +45,18 @@ HGTDSensorGmxSD::HGTDSensorGmxSD(const std::string& name, const std::string& hit
 // Initialize from G4
 void HGTDSensorGmxSD::Initialize(G4HCofThisEvent *)
 {
-    if (!m_HitColl.isValid()) m_HitColl = std::make_unique<SiHitCollection>();
+    m_hitColl = getHitCollection();
 }
 
 G4bool HGTDSensorGmxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist*/)
 {
+    if (!m_hitColl) {
+        m_hitColl = getHitCollection();
+        if (!m_hitColl) {
+            return false;
+        }
+    }
+
     if (verboseLevel>5) G4cout << "Process Hit" << G4endl;
 
     G4double edep = aStep->GetTotalEnergyDeposit();
@@ -107,24 +116,24 @@ G4bool HGTDSensorGmxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist*
 
         int hitIdOfWafer = SiHitIdHelper::GetHelper()->buildHitIdFromStringHGTD(2,physVolName);
 
-        m_HitColl->Emplace(lP1,
+        m_hitColl->Emplace(lP1,
                            lP2,
                            edep,
                            aStep->GetPreStepPoint()->GetGlobalTime(),
                            trHelp.GenerateParticleLink(),
                            hitIdOfWafer);
-        
+
         return true;
     }
-  
-    // if not from SQLite, we assume that the Identifier has already been written in as the copy number 
+
+    // if not from SQLite, we assume that the Identifier has already been written in as the copy number
     // (it should hsave done if GeoModel building ran within Athena)
     //
     //    Get the indexes of which detector the hit is in
     //
     const int id = myTouch->GetVolume()->GetCopyNo();
 
-    m_HitColl->Emplace(lP1,
+    m_hitColl->Emplace(lP1,
                        lP2,
                        edep,
                        aStep->GetPreStepPoint()->GetGlobalTime(),
@@ -132,4 +141,15 @@ G4bool HGTDSensorGmxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist*
                        id);
 
     return true;
+}
+
+SiHitCollection* HGTDSensorGmxSD::getHitCollection() const
+{
+    auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo();
+    if (!eventInfo) {
+        return nullptr;
+    }
+
+    auto hitCollections = eventInfo->GetHitCollectionMap();
+    return hitCollections ? hitCollections->Find<SiHitCollection>(m_hitCollectionName) : nullptr;
 }
