@@ -238,6 +238,11 @@ TruthParentDecoratorAlg::TruthParentDecoratorAlg(const std::string& name, ISvcLo
   declare(m_match_pdgid_key);
   declare(m_match_children_key);
   declare(m_match_link_key);
+  declare(m_target_mass_key);
+  declare(m_target_pt_key);
+  declare(m_target_energy_key);
+  declare(m_target_eta_key);
+  declare(m_target_phi_key);
 }
 
 StatusCode TruthParentDecoratorAlg::initialize() {
@@ -261,6 +266,9 @@ StatusCode TruthParentDecoratorAlg::initialize() {
   m_match_link_key = pfx + "MatchingParticleLink";
   m_target_mass_key = pfx + "Mass";
   m_target_pt_key = pfx + "PT";
+  m_target_energy_key = pfx + "Energy";
+  m_target_eta_key = pfx + "Eta";
+  m_target_phi_key = pfx + "Phi";
   ATH_CHECK(m_target_pdgid_key.initialize());
   ATH_CHECK(m_target_dr_truth_key.initialize());
   ATH_CHECK(m_target_link_key.initialize());
@@ -272,6 +280,9 @@ StatusCode TruthParentDecoratorAlg::initialize() {
   ATH_CHECK(m_match_link_key.initialize());
   ATH_CHECK(m_target_mass_key.initialize());
   ATH_CHECK(m_target_pt_key.initialize());
+  ATH_CHECK(m_target_energy_key.initialize());
+  ATH_CHECK(m_target_eta_key.initialize());
+  ATH_CHECK(m_target_phi_key.initialize());
 
   for (auto& [key, pids]: m_counts_matching_cascade) {
     m_cascade_count_writer_keys.emplace_back(jc + "." + key);
@@ -307,6 +318,9 @@ StatusCode TruthParentDecoratorAlg::execute(const EventContext& cxt) const
   SG::WriteDecorHandle<JC,JL> matchLink(m_match_link_key, cxt);
   SG::WriteDecorHandle<JC,float> dec_mass(m_target_mass_key, cxt);
   SG::WriteDecorHandle<JC,float> dec_pt(m_target_pt_key, cxt);
+  SG::WriteDecorHandle<JC,float> dec_energy(m_target_energy_key, cxt);
+  SG::WriteDecorHandle<JC,float> dec_eta(m_target_eta_key, cxt);
+  SG::WriteDecorHandle<JC,float> dec_phi(m_target_phi_key, cxt);
 
   if (targets->empty()) return StatusCode::SUCCESS;
 
@@ -416,6 +430,9 @@ StatusCode TruthParentDecoratorAlg::execute(const EventContext& cxt) const
       matchLink(*j) = JL(*matchedContainer, child->index());
       dec_mass(*j) = p->m();
       dec_pt(*j) = p->pt();
+      dec_energy(*j) = p->e();
+      dec_eta(*j) = p->eta();
+      dec_phi(*j) = p->phi();
       for (const auto& cascadeCount: m_cascade_count_decorators) {
         cascadeCount.decorate(*j, matches);
       }
@@ -431,6 +448,9 @@ StatusCode TruthParentDecoratorAlg::execute(const EventContext& cxt) const
       matchLink(*j) = JL();
       dec_mass(*j) = NAN;
       dec_pt(*j) = NAN;
+      dec_energy(*j) = NAN;
+      dec_eta(*j) = NAN;
+      dec_phi(*j) = NAN;
       for (const auto& cascadeCount: m_cascade_count_decorators) {
         cascadeCount.decorateDefault(*j);
       }
