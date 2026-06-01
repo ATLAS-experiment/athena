@@ -73,27 +73,7 @@ namespace ATHRNG{
     inline void setSeed(const std::string& algName, size_t slot, uint64_t ev, uint64_t run,
                         EventContext::ContextEvt_t evt = EventContext::INVALID_CONTEXT_EVT);
 
-    /// Set the random seed using a string (e.g. algorithm name) and
-    /// the current slot, event, and run numbers and an optional
-    /// offset. - MC16 Legacy Version attempting to reproduce seeds from
-    /// thread-unsafe random number services
-    void setSeedMC16(const std::string& algName, size_t slot, uint64_t ev, uint64_t run, uint32_t offset=0,
-                     EventContext::ContextEvt_t evt = EventContext::INVALID_CONTEXT_EVT);
-                       
-    /// Set the random seed using a string (e.g. algorithm name) and the
-    /// current slot, event, and run numbers. MC20 seeding algorithm
-    void setSeedMC20(const std::string& algName, size_t slot, uint64_t ev, uint64_t run,
-                     EventContext::ContextEvt_t evt = EventContext::INVALID_CONTEXT_EVT);
-
-    /// Set the random seed using a string (e.g. algorithm name) and the
-    /// current slot, event, and run numbers. MC21 seeding algorithm
-    void setSeedMC21(const std::string& algName, size_t slot, uint64_t ev, uint64_t run, uint64_t offset=0,
-                     EventContext::ContextEvt_t evt = EventContext::INVALID_CONTEXT_EVT);
-
-    ///Options for seeding
-    /// option=0 is setSeed as in MC20
-    /// option=1 is setSeedLegacy as in MC16
-    /// option=2 is setSeedImproved
+    /// Options for seeding
     enum SeedingOptionType {
       MC20Seeding=0,
       MC16Seeding=1,
@@ -136,6 +116,23 @@ namespace ATHRNG{
     }
 
   private:
+
+    /// Set the random seed using a string (e.g. algorithm name) and
+    /// the current slot, event, and run numbers and an optional
+    /// offset. - MC16 Legacy Version attempting to reproduce seeds from
+    /// thread-unsafe random number services
+    void setSeedMC16(const std::string& algName, size_t slot, uint64_t ev, uint64_t run, uint32_t offset=0,
+                     EventContext::ContextEvt_t evt = EventContext::INVALID_CONTEXT_EVT);
+
+    /// Set the random seed using a string (e.g. algorithm name) and the
+    /// current slot, event, and run numbers. MC20 seeding algorithm
+    void setSeedMC20(const std::string& algName, size_t slot, uint64_t ev, uint64_t run,
+                     EventContext::ContextEvt_t evt = EventContext::INVALID_CONTEXT_EVT);
+
+    /// Set the random seed using a string (e.g. algorithm name) and the
+    /// current slot, event, and run numbers. MC21 seeding algorithm
+    void setSeedMC21(const std::string& algName, size_t slot, uint64_t ev, uint64_t run, uint64_t offset=0,
+                     EventContext::ContextEvt_t evt = EventContext::INVALID_CONTEXT_EVT);
 
     /// Vector of random engines, ordered by slot number.
     std::vector<CLHEP::HepRandomEngine*> m_engines;
