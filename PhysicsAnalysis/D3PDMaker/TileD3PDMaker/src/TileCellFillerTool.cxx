@@ -265,7 +265,7 @@ StatusCode TileCellFillerTool::fill (const CaloCell& p){
           // MUON COUNTER AND TYPES
           *m_muN = *m_muN + 1;
           m_mutype->push_back(m_trackType); // NO MUON
-          m_muonAuthor->push_back( muon->author() );
+          m_muonAuthor->push_back( static_cast<int>(muon->author()) );
      
           /// primaryTrackParticle() Returns a pointer (which should not usually be NULL, but might be if the muon has been stripped of information) to the
           /// primary TrackParticle corresponding to the MuonType of this muon.
