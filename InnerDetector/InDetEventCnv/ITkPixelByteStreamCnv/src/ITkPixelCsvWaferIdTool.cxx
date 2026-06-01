@@ -58,7 +58,7 @@ StatusCode ITkPixelCsvWaferIdTool::loadCsv() {
 
         CsvRow row;
         row.spChain = trim(fields[0]);
-        row.module = std::stoi(trim(fields[3]));
+        row.md = trim(fields[3]);
         row.fe = std::stoi(trim(fields[4]));
 
         m_rows.push_back(row);
@@ -70,7 +70,7 @@ StatusCode ITkPixelCsvWaferIdTool::loadCsv() {
 
 Identifier ITkPixelCsvWaferIdTool::waferId(const CsvRow& row) const {
     ATH_MSG_WARNING("waferId lookup for SP chain " << row.spChain
-                    << ", module " << row.module << ", FE " << row.fe
+                    << ", module " << row.md << ", FE " << row.fe
                     << " is not implemented yet.");
 
     // Placeholder: the concrete mapping from SP chain/module/FE to a PixelID
@@ -142,13 +142,13 @@ int ITkPixelCsvWaferIdTool::layer_disk(std::vector<std::string> spchain){
         return spchain.at(2)[1];
     }
     else{ // endcap and barrel rings - all considered as disks
-        if(spchain[2] == "L01"){ // barrel rings, first layer (disk 0)
+        if(spchain[2] == "L01"){ // barrel rings, first layer (disk 0) - TODO some are disk 1 in fact, need to split the cases
             return 0;
         }
         else if(spchain[1] == "OB" && (spchain[2] == "L2" || //OB inclined rings, disks 3, 5, 7
             spchain[2] == "L3" ||
             spchain[2] == "L4") ){
-            return (2* (int)(spchain.at(2)[1]) - 1);
+            return (2* std::stoi(spchain.at(2)[1]) - 1);
         }
         else if(spchain[1] == "IS" && spchain[2] == "L05"){
             return 1; // end-cap rings, inner system, layer 1
@@ -157,14 +157,38 @@ int ITkPixelCsvWaferIdTool::layer_disk(std::vector<std::string> spchain){
             return 2; // end-cap rings, inner system, layer 2
         }
         else if(spchain[1] == "EC"){ //outer end-cap
-            return (2* (int)(spchain.at(2)[1])); // disks 4, 6, 8
+            return (2* std::stoi(spchain.at(2)[1])); // disks 4, 6, 8
         }
 
 
     }
 }
 
-int ITkPixelCsvWaferIdTool::eta_module(std::vector<std::string> spchain){
-    
+int ITkPixelCsvWaferIdTool::phi_module(std::vector<std::string> spchain, std::string mod ){
+    int b_ec = barrel_ec(spchain);
+    int ld = layer_disk(spchain);
+    if( fabs(b_ec) == 1 ){ // flat barrel
+        std::string phi_str = (spchain.at(3)).substr(1,2);
+        return std::stoi(phi_str);
+    }
+    //barrel rings and end caps
+    else if(ld == 3 || ld == 5 || ld ==7){ //OB inclined rings, disks 3, 5, 7
+
+    }
+}
+
+
+int ITkPixelCsvWaferIdTool::eta_module(std::vector<std::string> spchain, std::string mod){
+    int b_ec = barrel_ec(spchain);
+    int ld = layer_disk(spchain);
+    if( fabs(b_ec) == 1 ){ // flat barrel
+        if()
+        return mod;
+    }
+    //barrel rings and end caps
+    else if(ld == 3 || ld == 5 || ld ==7){ //OB inclined rings, disks 3, 5, 7
+        
+    }
+
 
 }

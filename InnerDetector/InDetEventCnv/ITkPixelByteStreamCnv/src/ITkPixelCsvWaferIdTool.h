@@ -19,7 +19,7 @@ class ITkPixelCsvWaferIdTool : public AthAlgTool {
 public:
     struct CsvRow {
         std::string spChain;
-        int module = -1;
+        std::string md;
         int fe = -1;
     };
 
@@ -41,7 +41,8 @@ private:
     // Helper functions implemented in the .cxx file
     int barrel_ec(std::vector<std::string> spchain);
     int layer_disk(std::vector<std::string> spchain);
-    int eta_module(std::vector<std::string> spchain);
+    int phi_module(std::vector<std::string> spchain, int mod);
+    int eta_module(std::vector<std::string> spchain, int mod);
     Gaudi::Property<std::string> m_csvFile{this,
                                            "CsvFile",
                                            "AT2-IP-ES-0016_v1.41_INCOMPLETE-ModuleA.csv",
