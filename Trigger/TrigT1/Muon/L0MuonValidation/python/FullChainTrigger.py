@@ -1,14 +1,14 @@
 #Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
-from AthenaConfiguration.ComponentFactory import CompFactory
 
 from AthenaCommon.Logging import logging
 _log = logging.getLogger(__name__)
 
 
 if __name__ == "__main__":
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, MuonPhaseIITestDefaults
+    from MuonConfig.MuonConfigUtils import executeTest, setupHistSvcCfg
     parser = SetupArgParser()
-    parser.set_defaults(inputFile= ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/myRDO.R3.pool.root"])
+    parser.set_defaults(inputFile= MuonPhaseIITestDefaults.RDO_R3)
     parser.set_defaults(nEvents = 20)
     args = parser.parse_args()
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -17,17 +17,13 @@ if __name__ == "__main__":
     flags.Detector.GeometryTGC = False
     flags.Detector.GeometryMM = False
     flags.Detector.GeometrysTGC = False
-    flags.Detector.EnableMM = False
-    flags.Detector.EnablesTGC = False
-    flags.Detector.EnableTGC = False
+    
     flags.Common.MsgSuppression = False
     flags, acc = setupGeoR4TestCfg(args, flags)
     from AthenaCommon.Constants import DEBUG
 
-    histSvc = CompFactory.THistSvc(Output=[
-        "EXPERT DATAFILE='L0MuonFullChain.root' OPT='RECREATE'"
-    ])
-    acc.addService(histSvc)
+    acc.merge(setupHistSvcCfg(flags,outFile = "L0MuonFullChain.root", 
+                                    outStream = "EXPERT"))
 
     from DerivationFrameworkMCTruth.MCTruthCommonConfig import HepMCtoXAODTruthCfg
     acc.merge(HepMCtoXAODTruthCfg(flags))
@@ -53,19 +49,8 @@ if __name__ == "__main__":
                              RegSel_MDT = acc.popToolsAndMerge(regSelTool_MDT_Cfg(flags))
                             ))
 
-    from AthenaConfiguration.ComponentFactory import CompFactory
 
-    try:
-        th = acc.getService("THistSvc")
-    except KeyError:
-        th = CompFactory.THistSvc("THistSvc")
-        acc.addService(th)
-    
-    th.Output = ["EXPERT DATAFILE='L0MuonFullChain.root' OPT='RECREATE'"]
-    
-    print("THistSvc.Output =", th.Output)
-
-
+   
     print("=== Registered services ===")
     for svc in acc.getServices():
         print(svc.name)

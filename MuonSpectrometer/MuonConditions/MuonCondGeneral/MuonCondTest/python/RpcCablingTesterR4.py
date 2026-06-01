@@ -2,7 +2,8 @@
 
 if __name__ == "__main__":
     from MuonCondTest.RpcCablingTester import RpcCablingTestAlgCfg
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser
+    from MuonConfig.MuonConfigUtils import executeTest
     parser = SetupArgParser()
     parser.add_argument("--JSONFile", help="External cabling JSON file", default="")
     parser.set_defaults(nEvents = 1)
