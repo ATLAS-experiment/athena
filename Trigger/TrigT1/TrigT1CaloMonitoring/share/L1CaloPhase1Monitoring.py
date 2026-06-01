@@ -96,7 +96,11 @@ Note: If you do not specify any flags, then all the flags that are marked with a
 
 E.g. to run just the jFex monitoring, without offline simulation, you can do:
 
-athena TrigT1CaloMonitoring/L1CalPhase1Monitoring.py .... -- Trigger.enableL1CaloPhase1=False Trigger.L1.doCaloInputs=False Trigger.L1.doeFex=False Trigger.L1.dogFex=False
+l1calo-ath-mon .... -- Trigger.enableL1CaloPhase1=False Trigger.L1.doCaloInputs=False Trigger.L1.doeFex=False Trigger.L1.dogFex=False
+
+To run with a plugin you can do e.g:
+
+l1calo-ath-mon PluginPackage/plugin.py --evtMax 10 ...
 
 Further notes: Run with "--evtMax 0" to print flags and ca config, and generate a hanConfig file.
                Run with "--evtMax 1" to dump StoreGate contents after the first event
@@ -115,6 +119,24 @@ parser.add_argument('--postConfig',default=[],nargs="+",type=str,help="specify c
 parser.add_argument('--postInclude',default=[],nargs="+",type=str,help="specify python files to call before configuration completes")
 parser.add_argument('--postHelp',default=None,nargs="*",help="Displays configurables and their properties")
 args,unknown_args = flags.fillFromArgs(parser=parser,return_unknown=True)
+# check for files in unknown_args list ... will assume are plugins
+# this is copied from Include.py ... seems if I try import it, I get CA behaviour blockage
+try:
+  optionsPathEnv = os.environ[ 'JOBOPTSEARCHPATH' ]
+except Exception:
+  optionsPathEnv = os.curdir
+optionsPath = re.split( ',|' + os.pathsep, optionsPathEnv )
+if '' in optionsPath:
+  optionsPath[ optionsPath.index( '' ) ] = str(os.curdir)
+for fn in unknown_args:
+  from AthenaCommon.Utils.unixtools import FindFile
+  name = FindFile( os.path.expanduser( os.path.expandvars( fn ) ), optionsPath, os.R_OK )
+  if not name: name = FindFile( os.path.basename( fn ), optionsPath, os.R_OK )
+  if name:
+    args.postInclude += [fn]
+    unknown_args.remove(fn)
+
+
 args.postConfig += [x[4:] for x in unknown_args if x.startswith("cfg.")]
 if any([not x.startswith("cfg.") for x in unknown_args]):
   raise KeyError("Unknown flags: " + " ".join([x for x in unknown_args if not x.startswith("cfg.")]))
@@ -249,6 +271,37 @@ from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 cfg = MainServicesCfg(flags)
 
 log.setLevel(logging.INFO)
+
+if len(args.postInclude):
+  # call setup methods if any exist in the postIncludes
+  from AthenaCommon.Configurable import ConfigurableCABehavior
+  with ConfigurableCABehavior():
+    from AthenaCommon.Utils.unixtools import FindFile
+    import ast
+
+    def load_function(file_path, function_name):
+      with open(file_path, "r", encoding="utf-8") as f:
+        source = f.read()
+      tree = ast.parse(source, filename=file_path)
+      for node in tree.body:
+        if isinstance(node, ast.FunctionDef) and node.name == function_name:
+          # Create a module containing only this function
+          mod = ast.Module(body=[node], type_ignores=[])
+          # Compile it
+          code = compile(mod, filename=file_path, mode="exec")
+          namespace = {}
+          # Execute only the function definition
+          exec(code, namespace)
+          return namespace[function_name]
+    for fn in args.postInclude:
+      name = FindFile( os.path.expanduser( os.path.expandvars( fn ) ), optionsPath, os.R_OK )
+      if not name:
+        name = FindFile( os.path.basename( fn ), optionsPath, os.R_OK )
+        if not name: raise RuntimeError( 'plugin file %s can not be found' % fn )
+      func = load_function(name,"setup")
+      if func:
+        func(flags)
+
 
 flags.lock()
 if flags.Exec.MaxEvents == 0: flags.dump(evaluate=True)

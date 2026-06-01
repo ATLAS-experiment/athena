@@ -69,19 +69,21 @@ StatusCode AFPSiLayerAlgorithm::fillHistograms( const EventContext& ctx ) const 
 
 	// BCX handler
 	const unsigned int bcid = eventInfo->bcid();
+	const unsigned int run_number = eventInfo->runNumber();
 	SG::ReadCondHandle<BunchCrossingCondData> bcidHdl(m_bunchCrossingKey,ctx);
 	if (!bcidHdl.isValid()) {
 		ATH_MSG_ERROR( "Unable to retrieve BunchCrossing conditions object (SiT)" );
 	}
 	const BunchCrossingCondData* bcData{*bcidHdl};
 
+	int bx_diff = int(run_number) >= 521800 ? 2 : 1;
 	// Classifying bunches by position in train (Front, Middle, End)
 	enum { FRONT, MIDDLE, END, NPOS } position = NPOS;
 	if(bcData->isFilled(bcid))
 	{
 		bcidAll = bcid;
 		fill("AFPSiLayerTool", bcidAll);
-		if(!bcData->isFilled(bcid-1))
+		if(!bcData->isFilled(bcid-bx_diff))
 		{
 			position = FRONT;
 			bcidFront = bcid;
@@ -90,7 +92,7 @@ StatusCode AFPSiLayerAlgorithm::fillHistograms( const EventContext& ctx ) const 
 		}
 		else
 		{
-			if(bcData->isFilled(bcid+1))
+			if(bcData->isFilled(bcid+bx_diff))
 			{
 				position = MIDDLE;
 				bcidMiddle = bcid;
