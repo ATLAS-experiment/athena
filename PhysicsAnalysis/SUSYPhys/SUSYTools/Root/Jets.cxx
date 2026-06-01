@@ -1205,17 +1205,7 @@ namespace ST {
     ATH_MSG_DEBUG( btagSelTool->name() << " b-tag " << btagTagger << "-type pc:   " << btag_pc );
     ATH_MSG_DEBUG( btagSelTool->name() << " b-tag " << btagTagger << "-type pu:   " << btag_pu );
     ATH_MSG_DEBUG( btagSelTool->name() << " b-tag " << btagTagger << "-type ptau: " << btag_ptau );
-    // backwards compatibility
-    if ( btagSelTool->name().find("DL1")!=std::string::npos ) {
-       dec_btag_dl1pb(input) = btag_pb;
-       dec_btag_dl1pc(input) = btag_pc;
-       dec_btag_dl1pu(input) = btag_pu;
-    }
-    else {
-       dec_btag_dl1pb(input) = -10;
-       dec_btag_dl1pc(input) = -10;
-       dec_btag_dl1pu(input) = -10;
-    }
+
     return StatusCode::SUCCESS;
   }
 }

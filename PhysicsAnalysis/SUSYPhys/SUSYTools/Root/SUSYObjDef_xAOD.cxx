@@ -207,7 +207,6 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_BtagWP(""),
     m_BtagTagger(""),
     m_BtagMinPt(-99.),
-    m_BtagKeyOverride(""),
     m_BtagSystStrategy(""),
     m_EigenvectorReductionB(""),
     m_EigenvectorReductionC(""),
@@ -545,7 +544,6 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   declareProperty( "BtagWPOR", m_orBtagWP); //the one used in the Overlap Removal
   declareProperty( "BtagWP", m_BtagWP);     //the one used in FillJet() afterwards
   declareProperty( "BtagMinPt", m_BtagMinPt);    // minimum jetPt cut (MR31061) >=20 GeV EM jets & >=10 GeV TrackJets (not calibrated below)
-  declareProperty( "BtagKeyOverride", m_BtagKeyOverride); /// Override for the b-tagging jet collection
   declareProperty( "BtagCalibPath", m_bTaggingCalibrationFilePath);
   declareProperty( "BtagReadFromObject", m_BtagReadFromObject);
   declareProperty( "BtagTaggerTrkJet", m_BtagTagger_trkJet);
@@ -1632,7 +1630,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_BtagWP, "Btag.WP", rEnv, "Continuous");
   configFromFile(m_BtagMinPt, "Btag.MinPt", rEnv, -1.); // Not calibrated below 20
 
-  configFromFile(m_bTaggingCalibrationFilePath, "Btag.CalibPath", rEnv, m_isRun3 ? "xAODBTaggingEfficiency/13p6TeV/MC23_2025-06-17_GN2v01_v4.root": "xAODBTaggingEfficiency/13TeV/MC20_2025-06-17_GN2v01_v4.root");
+  configFromFile(m_bTaggingCalibrationFilePath, "Btag.CalibPath", rEnv, m_isRun3 ? "xAODBTaggingEfficiency/13p6TeV/MC23_2026_05_13_GN2v01_v0.root": "xAODBTaggingEfficiency/13TeV/MC20_2025-06-17_GN2v01_v4.root");
   configFromFile(m_BtagSystStrategy, "Btag.SystStrategy", rEnv, "SFEigen");
   configFromFile(m_EigenvectorReductionB, "Btag.EigenvectorReductionB", rEnv, "Loose");
   configFromFile(m_EigenvectorReductionC, "Btag.EigenvectorReductionC", rEnv, "Loose");
@@ -1644,7 +1642,6 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_BtagWP_trkJet, "BtagTrkJet.WP", rEnv, "FixedCutBEff_77");
   configFromFile(m_BtagMinPt_trkJet, "BtagTrkJet.MinPt", rEnv, -1.); // Not calibrated below 10
   configFromFile(m_BtagReadFromObject_trkJet, "BtagTrkJet.ReadFromObject", rEnv, false);
-  configFromFile(m_BtagKeyOverride, "Btag.KeyOverride", rEnv, "", true);
   //
   configFromFile(m_orDoBoostedElectron, "OR.DoBoostedElectron", rEnv, true);
   configFromFile(m_orBoostedElectronC1, "OR.BoostedElectronC1", rEnv, -999.); // set to positive number to override default
