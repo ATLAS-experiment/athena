@@ -30,6 +30,12 @@ JetTruthLabelingTool::parseLabel(const std::string& name) {
     if (name == "R4TruthLabel")
         return TruthLabelConfiguration::R4TruthLabel;
 
+    if (name == "R4TruthDressedWZLabel")
+        return TruthLabelConfiguration::R4TruthDressedWZLabel;
+
+    if (name == "R4InTimeTruthLabel")
+        return TruthLabelConfiguration::R4InTimeTruthLabel;
+
     return TruthLabelConfiguration::Unknown;
 }
 
@@ -40,70 +46,80 @@ StatusCode JetTruthLabelingTool::initialize(){
 
   m_truthLabelConfig = parseLabel(m_truthLabelName);
 
-  /// Ghost Association values
-  m_useGhostJetMatch = false;
-  m_recoGhostFrac = 0.75;
-
-  /// Hard-code some values for R10TruthLabel_R21Precision_2022v1 and R10TruthLabel_R22v1                                                                                                     
-  if(m_truthLabelConfig == TruthLabelConfiguration::R21Precision_2022v1 or m_truthLabelConfig == TruthLabelConfiguration::R10TruthLabel_R22v1) {
-    m_truthJetCollectionName="AntiKt10TruthJets";
-    m_matchUngroomedParent = true;
-    m_dRTruthJet = 0.75;
-    m_useWZMassHigh = false;
-    m_mLowTop = 140.0;
-    m_mLowW = 50.0;
-    m_mLowZ = 50.0;
-    if ( m_truthLabelConfig == TruthLabelConfiguration::R10TruthLabel_R22v1) {
-      m_getTruthGroomedJetValues = true;
-      m_truthGroomedJetCollectionName = "AntiKt10TruthSoftDropBeta100Zcut10Jets";
-    } else {
-      m_getTruthGroomedJetValues = false;
-    }
-  }
-  /// Hard-code some values for R10WZTruthLabel_R22v1
-  else if( m_truthLabelConfig == TruthLabelConfiguration::R10WZTruthLabel_R22v1 ) {
-    m_truthJetCollectionName="AntiKt10TruthDressedWZJets";
-    m_matchUngroomedParent = true;
-    m_dRTruthJet = 0.75;
-    m_useWZMassHigh = false;
-    m_mLowTop = 140.0;
-    m_mLowW = 50.0;
-    m_mLowZ = 50.0;
-    m_getTruthGroomedJetValues = true;
-    m_truthGroomedJetCollectionName = "AntiKt10TruthDressedWZSoftDropBeta100Zcut10Jets";
-  } 
-
-  /// Hard code for small-R jets
-  else if (m_truthLabelConfig == TruthLabelConfiguration::R4TruthLabel ) {
-      m_truthJetCollectionName = "AntiKt4TruthJets";
-      // m_truthJetCollectionName = "AntiKt4TruthDressedWZJets";
-      // Dressed option not working as of 2026-04-17, using regular.
-      m_matchUngroomedParent = false;
-      m_dRTruthJet = 0.3;
-      m_useWZMassHigh = true;
-      m_getTruthGroomedJetValues = false;
-      m_useGhostJetMatch = true;
-  }
-
-  print();
-
   /// Check if TruthLabelName is supported. If not, give an error and return FAILURE
-  
-  bool isSupportedLabel = false;
-  isSupportedLabel = isSupportedLabel || (m_truthLabelConfig == TruthLabelConfiguration::R21Precision_2022v1);
-  isSupportedLabel = isSupportedLabel || (m_truthLabelConfig == TruthLabelConfiguration::R10TruthLabel_R22v1);
-  isSupportedLabel = isSupportedLabel || (m_truthLabelConfig == TruthLabelConfiguration::R10WZTruthLabel_R22v1);
-  isSupportedLabel = isSupportedLabel || (m_truthLabelConfig == TruthLabelConfiguration::R4TruthLabel);
-
-  if(!isSupportedLabel) {
+  if(m_truthLabelConfig == TruthLabelConfiguration::Unknown) {
     ATH_MSG_ERROR("TruthLabelName " << m_truthLabelName << " is not supported. Exiting...");
     return StatusCode::FAILURE;
   }
 
-  m_label_truthKey   = m_truthJetCollectionName.key() + "." + m_truthLabelName;
-  m_NB_truthKey      = m_truthJetCollectionName.key() + "." + m_truthLabelName + "_NB";
-  m_split12_truthKey = m_truthJetCollectionName.key() + ".Split12";
-  m_split23_truthKey = m_truthJetCollectionName.key() + ".Split23";
+  /// Ghost Association values
+  m_useGhostJetMatch = false;
+  m_recoGhostFrac = 0.75;
+
+  switch(m_truthLabelConfig) {
+  /// Hard-code some values for R10TruthLabel_R21Precision_2022v1 and R10TruthLabel_R22v1                                                                                                     
+  case TruthLabelConfiguration::R21Precision_2022v1:
+  case TruthLabelConfiguration::R10TruthLabel_R22v1:
+    m_truthJetCollectionKey="AntiKt10TruthJets";
+    m_matchUngroomedParent = true;
+    m_dRTruthJet = 0.75;
+    if ( m_truthLabelConfig == TruthLabelConfiguration::R10TruthLabel_R22v1) {
+      m_getTruthGroomedJetValues = true;
+      m_truthGroomedJetCollectionKey="AntiKt10TruthSoftDropBeta100Zcut10Jets";
+    } else {
+      m_getTruthGroomedJetValues = false;
+    }
+    break;
+  /// Hard-code some values for R10WZTruthLabel_R22v1
+  case TruthLabelConfiguration::R10WZTruthLabel_R22v1:
+    m_truthJetCollectionKey="AntiKt10TruthDressedWZJets";
+    m_matchUngroomedParent = true;
+    m_dRTruthJet = 0.75;
+    m_mLowTop = 140.0;
+    m_mLowW = 50.0;
+    m_mLowZ = 50.0;
+    m_getTruthGroomedJetValues = true;
+    m_truthGroomedJetCollectionKey="AntiKt10TruthDressedWZSoftDropBeta100Zcut10Jets";
+    break;
+
+  /// Hard code for small-R jets
+  case TruthLabelConfiguration::R4TruthLabel:
+  case TruthLabelConfiguration::R4TruthDressedWZLabel:
+  case TruthLabelConfiguration::R4InTimeTruthLabel:
+    switch (m_truthLabelConfig) {
+    case TruthLabelConfiguration::R4TruthLabel:
+      m_truthJetCollectionKey = "AntiKt4TruthJets";
+      break;
+    case TruthLabelConfiguration::R4TruthDressedWZLabel:
+      m_truthJetCollectionKey = "AntiKt4TruthDressedWZJets";
+      break;
+    case TruthLabelConfiguration::R4InTimeTruthLabel:
+      m_truthJetCollectionKey = "InTimeAntiKt4TruthJets";
+      break;
+    default: // Cannot hit anything else
+      break;
+    }
+    m_matchUngroomedParent = false;
+    m_dRTruthJet = 0.3;
+    m_getTruthGroomedJetValues = false;
+    m_useGhostJetMatch = true;
+    m_doLargeRLabels = false;
+    break;
+  default:
+    ATH_MSG_ERROR(" Unhandled TruthLabelName " << m_truthLabelName << "! Exiting...");
+    return StatusCode::FAILURE;
+  }
+
+  if(m_forceDeltaRMatch) {
+    m_useGhostJetMatch = false;
+  }
+
+  print();
+
+  m_label_truthKey   = m_truthJetCollectionKey.key() + "." + m_truthLabelName;
+  m_NB_truthKey      = m_truthJetCollectionKey.key() + "." + m_truthLabelName + "_NB";
+  m_split12_truthKey = m_truthJetCollectionKey.key() + ".Split12";
+  m_split23_truthKey = m_truthJetCollectionKey.key() + ".Split23";
 
   if(!m_isTruthJetCol){
     m_label_recoKey  = m_jetContainerName + "." + m_truthLabelName;
@@ -111,6 +127,7 @@ StatusCode JetTruthLabelingTool::initialize(){
     m_truthSplit12_recoKey = m_jetContainerName + "." + m_truthLabelName + "_TruthJetSplit12";
     m_truthSplit23_recoKey = m_jetContainerName + "." + m_truthLabelName + "_TruthJetSplit23";
 
+    m_matchedTruthJet_recoKey = m_jetContainerName + "." + m_truthLabelName + "_MatchedTruthJet";
     m_matchedTruthJetMass_recoKey = m_jetContainerName + "." + m_truthLabelName + "_MatchedTruthJetMass";
     m_matchedTruthJetPt_recoKey = m_jetContainerName + "." + m_truthLabelName + "_MatchedTruthJetPt";
     m_matchedTruthJetEta_recoKey = m_jetContainerName + "." + m_truthLabelName + "_MatchedTruthJetEta";
@@ -123,8 +140,8 @@ StatusCode JetTruthLabelingTool::initialize(){
   }
 
   ATH_CHECK(m_evtInfoKey.initialize());
-  ATH_CHECK(m_truthJetCollectionName.initialize());
-  ATH_CHECK(m_truthGroomedJetCollectionName.initialize(m_getTruthGroomedJetValues));
+  ATH_CHECK(m_truthJetCollectionKey.initialize());
+  ATH_CHECK(m_truthGroomedJetCollectionKey.initialize(m_getTruthGroomedJetValues));
 
   ATH_CHECK(m_label_truthKey.initialize());
   ATH_CHECK(m_NB_truthKey.initialize());
@@ -137,6 +154,7 @@ StatusCode JetTruthLabelingTool::initialize(){
   ATH_CHECK(m_truthSplit12_recoKey.initialize(!m_isTruthJetCol && (m_truthLabelConfig == TruthLabelConfiguration::R21Precision_2022v1 || m_truthLabelConfig == TruthLabelConfiguration::R10TruthLabel_R22v1 || m_truthLabelConfig == TruthLabelConfiguration::R10WZTruthLabel_R22v1) ));
   ATH_CHECK(m_truthSplit23_recoKey.initialize(!m_isTruthJetCol && (m_truthLabelConfig == TruthLabelConfiguration::R21Precision_2022v1 || m_truthLabelConfig == TruthLabelConfiguration::R10TruthLabel_R22v1 || m_truthLabelConfig == TruthLabelConfiguration::R10WZTruthLabel_R22v1)));
   
+  ATH_CHECK(m_matchedTruthJet_recoKey.initialize(!m_isTruthJetCol));
   ATH_CHECK(m_matchedTruthJetMass_recoKey.initialize(!m_isTruthJetCol));
   ATH_CHECK(m_matchedTruthJetPt_recoKey.initialize(!m_isTruthJetCol));
   ATH_CHECK(m_matchedTruthJetEta_recoKey.initialize(!m_isTruthJetCol));
@@ -155,21 +173,11 @@ void JetTruthLabelingTool::print() const {
 
   ATH_MSG_INFO("xAOD information:");
   ATH_MSG_INFO("TruthLabelName:               " << m_truthLabelName);
-  ATH_MSG_INFO("TruthJetCollectionName:         " << m_truthJetCollectionName.key());
+  ATH_MSG_INFO("TruthJetCollectionName:         " << m_truthJetCollectionKey.key());
   ATH_MSG_INFO("dRTruthJet:    " << std::to_string(m_dRTruthJet));
 
-  if(m_truthLabelName != "R4TruthLabel"){
-    ATH_MSG_INFO("mLowTop:       " << std::to_string(m_mLowTop));
-    ATH_MSG_INFO("mLowW:         " << std::to_string(m_mLowW));
-    if(m_useWZMassHigh)
-      ATH_MSG_INFO("mHighW:        " << std::to_string(m_mHighW));
-    ATH_MSG_INFO("mLowZ:         " << std::to_string(m_mLowZ));
-    if(m_useWZMassHigh)
-      ATH_MSG_INFO("mHighZ:        " << std::to_string(m_mHighZ));
-  }
-
   if(m_getTruthGroomedJetValues) {
-    ATH_MSG_INFO("truthGroomedJetCollectionName: " << m_truthGroomedJetCollectionName.key());
+    ATH_MSG_INFO("truthGroomedJetCollectionName: " << m_truthGroomedJetCollectionKey.key());
   }
 }
 
@@ -189,6 +197,7 @@ JetTruthLabelingTool::DecorHandles::DecorHandles
   maybeInit (split23Handle,   tool.m_truthSplit23_recoKey);
   maybeInit (split12Handle,   tool.m_truthSplit12_recoKey);
 
+  maybeInit (matchedTruthJetHandle, tool.m_matchedTruthJet_recoKey);
   maybeInit (matchedTruthJetMassHandle, tool.m_matchedTruthJetMass_recoKey);
   maybeInit (matchedTruthJetPtHandle,   tool.m_matchedTruthJetPt_recoKey);
   maybeInit (matchedTruthJetEtaHandle, tool.m_matchedTruthJetEta_recoKey);
@@ -237,7 +246,7 @@ int JetTruthLabelingTool::getTruthJetLabelGA( DecorHandles& dh,
   if ( nMatchTop ) {
     matchTop = true;
   }
-
+ 
   return getLabel( dh, jet, matchH, matchW, matchZ, matchTop, ctx );
 
 }
@@ -251,7 +260,7 @@ StatusCode JetTruthLabelingTool::decorate(const xAOD::JetContainer& jets) const 
     return labelTruthJets(dh, jets, ctx);
   }
 
-  else if (!m_isTruthJetCol && m_truthLabelConfig == TruthLabelConfiguration::R4TruthLabel) {
+  else if (!m_isTruthJetCol && !m_doLargeRLabels) {
       return labelRecoJets(dh, jets, ctx);
   }
 
@@ -268,10 +277,10 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
                                                const xAOD::JetContainer& jets,
                                                const EventContext& ctx) const {
     
-  SG::ReadHandle<xAOD::JetContainer> truthJets(m_truthJetCollectionName, ctx);
+  SG::ReadHandle<xAOD::JetContainer> truthJets(m_truthJetCollectionKey, ctx);
   SG::ReadHandle<xAOD::JetContainer> truthGroomedJets;
   if ( m_getTruthGroomedJetValues ) {
-    truthGroomedJets = SG::makeHandle(m_truthGroomedJetCollectionName, ctx);
+    truthGroomedJets = SG::makeHandle(m_truthGroomedJetCollectionKey, ctx);
   }
   const SG::AuxElement::Accessor<int> nbAcc (m_truthLabelName + "_NB");
   static const SG::ConstAccessor< ElementLink< xAOD::JetContainer > > ParentAcc ("Parent");
@@ -299,19 +308,17 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
     // Ensure that the reco jet has at least one constituent
     // (and thus a well-defined four-vector)
     if(jet->numConstituents() > 0){
-      //accessor used in loop
-      const SG::ConstAccessor<float> accGhostTruthPt("GhostTruthPt");
-      //
       for ( const xAOD::Jet* truthJet : *truthJets ) {
           // Calculate DR and GF values. Both are used regardless of the matching option.
           // DR
           float dR = jet->p4().DeltaR(truthJet->p4());
           /// If parent jet has been retrieved, calculate dR w.r.t. it instead
           if (parent) dR = parent->p4().DeltaR(truthJet->p4());
-          // GF
-          float ghostTruthPt = accGhostTruthPt(*jet);
-          float ghostPtFraction = (ghostTruthPt / (truthJet->pt()));
           if (m_useGhostJetMatch) {
+              // GF
+              static const SG::ConstAccessor<float> accGhostTruthPt("GhostTruthPt");
+              float ghostTruthPt = accGhostTruthPt(*jet);
+              float ghostPtFraction = (ghostTruthPt / (truthJet->pt()));
               // GA matching. Upper bound applied for completeness, but realistically not needed.
               if ((ghostPtFraction >= m_recoGhostFrac) && (ghostPtFraction <= (2 - m_recoGhostFrac))) {
                   if (std::abs(1 - ghostPtFraction) < std::abs(1 - ghostFracNominal)) {
@@ -339,6 +346,8 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
     float truthJetSplit12 = -9999;
     float truthJetSplit23 = -9999;
 
+    // Defaults to null EL
+    ElementLink<xAOD::JetContainer> truthJetEL{};
     float truthJetMass = -9999;
     float truthJetPt = -9999;
     float truthJetEta = -9999;
@@ -350,7 +359,7 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
         // Can't use the WriteDecorHandle to read --- the decoration may have
         // been added and locked by a previous algorithm.
         // Not saving Truth jet decorations for small R
-        if (!(m_truthLabelConfig == TruthLabelConfiguration::R4TruthLabel)) {
+        if (m_doLargeRLabels) {
             SG::ConstAccessor<int> labelAcc(dh.labelHandle->auxid());
             label = labelAcc(*matchTruthJet);
             if (m_truthLabelConfig == TruthLabelConfiguration::R21Precision_2022v1 || m_truthLabelConfig == TruthLabelConfiguration::R10TruthLabel_R22v1 || m_truthLabelConfig == TruthLabelConfiguration::R10WZTruthLabel_R22v1) {
@@ -361,7 +370,7 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
             }
             if (nbAcc.isAvailable(*matchTruthJet)) truthJetNB = nbAcc(*matchTruthJet);
         }
-        // Reco jet decorations, saved for small and large R
+        truthJetEL = ElementLink<xAOD::JetContainer>(*truthJets,matchTruthJet->index(),ctx);
         truthJetMass = matchTruthJet->m();
         truthJetPt = matchTruthJet->pt();
         truthJetEta = matchTruthJet->eta();
@@ -404,7 +413,7 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
     }
 
     /// Decorate truth label
-    if (!(m_truthLabelConfig == TruthLabelConfiguration::R4TruthLabel)) {
+    if (m_doLargeRLabels) {
         (*dh.labelRecoHandle)(*jet) = label;
         /// Decorate additional information used for truth labeling
         if (m_truthLabelConfig == TruthLabelConfiguration::R21Precision_2022v1 || m_truthLabelConfig == TruthLabelConfiguration::R10TruthLabel_R22v1 || m_truthLabelConfig == TruthLabelConfiguration::R10WZTruthLabel_R22v1) {
@@ -415,6 +424,7 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
         (*dh.nbRecoHandle)(*jet) = truthJetNB;
     }
     
+    (*dh.matchedTruthJetHandle)(*jet) = truthJetEL;
     (*dh.matchedTruthJetMassHandle)(*jet) = truthJetMass;
     (*dh.matchedTruthJetPtHandle)(*jet) = truthJetPt;
     (*dh.matchedTruthJetEtaHandle)(*jet) = truthJetEta;
@@ -435,7 +445,7 @@ StatusCode JetTruthLabelingTool::labelTruthJets(DecorHandles& dh,
                                                 const EventContext& ctx) const {
 
   /// Retrieve appropriate truth jet container
-  SG::ReadHandle<xAOD::JetContainer> truthJets(m_truthJetCollectionName, ctx);
+  SG::ReadHandle<xAOD::JetContainer> truthJets(m_truthJetCollectionKey, ctx);
 
   /// Make sure the truth jet collection has been retrieved
   if ( !truthJets.isValid() ) {
@@ -468,12 +478,14 @@ StatusCode JetTruthLabelingTool::labelTruthJets( DecorHandles& dh,
     return StatusCode::FAILURE;
   }
 
-  int label = LargeRJetTruthLabel::enumToInt(LargeRJetTruthLabel::notruth);
-  /// Apply label to truth jet
-  for ( const xAOD::Jet *jet : truthJets ) {
-    ATH_MSG_DEBUG("Getting truth label using ghost-association");
-    label = getTruthJetLabelGA(dh, *jet, ctx);
-    (*dh.labelHandle)(*jet) = label;
+  if(m_doLargeRLabels) {
+    int label = LargeRJetTruthLabel::enumToInt(LargeRJetTruthLabel::notruth);
+    /// Apply label to truth jet
+    for ( const xAOD::Jet *jet : truthJets ) {
+      ATH_MSG_DEBUG("Getting truth label using ghost-association");
+      label = getTruthJetLabelGA(dh, *jet, ctx);
+      (*dh.labelHandle)(*jet) = label;
+    }
   }
 
   return StatusCode::SUCCESS;
@@ -571,7 +583,7 @@ int JetTruthLabelingTool::getLabel( DecorHandles& dh,
     // get extended ghost associated truth label
     int extended_GA_label = -1;
     if (not jet.getAttribute("HadronGhostExtendedTruthLabelID", extended_GA_label)) {
-      ATH_MSG_ERROR( "HadronGhostExtendedTruthLabelID not available for " + m_truthJetCollectionName.key() );
+      ATH_MSG_ERROR( "HadronGhostExtendedTruthLabelID not available for " + m_truthJetCollectionKey.key() );
     }
 
     SG::ReadDecorHandle<xAOD::JetContainer, float> split23Handle(m_split23_truthKey, ctx);

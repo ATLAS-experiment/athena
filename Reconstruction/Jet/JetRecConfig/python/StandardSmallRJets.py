@@ -297,6 +297,16 @@ AntiKt6TruthGEN   = AntiKt4TruthGEN.clone(radius=0.6)
 AntiKt6TruthGENWZ = AntiKt4TruthGENWZ.clone(radius=0.6)
 
 
+# *********************************************************
+# Support for merged HS/PU jet definitions from simulation
+# *********************************************************
+
+InTimeAntiKt4Truth = AntiKt4Truth.clone(prefix="InTime")
+
+# These jets may be used as input for the JetTruthLabelling, so they also need to be defined as constituents:
+registerAsInputConstit(InTimeAntiKt4Truth)
+
+
 def StandardSmallRJetCfg(flags):
     """Top-level function to schedule the smallR jets in standard reconstruction """
     from JetRecConfig.JetRecConfig import JetRecCfg
