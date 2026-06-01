@@ -5,6 +5,10 @@
 // Class header
 #include "ZDC_FiberSD.h"
 
+// Athena headers
+#include "HitManagement/HitCollectionMap.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
+
 // CLHEP headers
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "CLHEP/Units/PhysicalConstants.h"
@@ -17,18 +21,14 @@
 #include "G4OpProcessSubType.hh"
 
 ZDC_FiberSD::ZDC_FiberSD(const G4String &name, const G4String &hitCollectionName, const float &readoutPos)
-    : G4VSensitiveDetector(name), m_HitColl(hitCollectionName), m_readoutPos(readoutPos)
+    : G4VSensitiveDetector(name), m_hitCollectionName(hitCollectionName), m_readoutPos(readoutPos)
 {
-    
-}
-
-
-ZDC_FiberSD::~ZDC_FiberSD(){
     
 }
 
 void ZDC_FiberSD::Initialize(G4HCofThisEvent *)
 {
+    m_HitColl = getHitCollection();
 }
 
 /*
@@ -40,6 +40,13 @@ void ZDC_FiberSD::Initialize(G4HCofThisEvent *)
 */
 G4bool ZDC_FiberSD::ProcessHits(G4Step *aStep, G4TouchableHistory *)
 {
+    if (!m_HitColl) {
+        m_HitColl = getHitCollection();
+        if (!m_HitColl) {
+            return false;
+        }
+    }
+
     G4ThreeVector pos = aStep->GetTrack()->GetPosition();
     G4ThreeVector momentum = aStep->GetPreStepPoint()->GetMomentum();
 
@@ -139,20 +146,9 @@ G4bool ZDC_FiberSD::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     * Record the survivors
     **************************************************/
 
-    //Get the hash for this volume to keep track of hits
     Identifier id;
     id = aStep->GetPreStepPoint()->GetPhysicalVolume()->GetCopyNo();
-    uint32_t hash = id.get_identifier32().get_compact();
-
-    std::map<uint32_t,ZDC_SimFiberHit*>::iterator it = m_hitMap.find(hash);
-
-    if(it == m_hitMap.end()){
-        //This is a new hit
-        ZDC_SimFiberHit *hit = new ZDC_SimFiberHit(id, 1, photonEnergy);
-        m_hitMap.insert(std::pair<uint32_t,ZDC_SimFiberHit*>(hash,hit));
-    }else{
-        it->second->Add(1, photonEnergy);
-    }
+    m_HitColl->AddHit(id, photonEnergy);
 
     /*************************************************
     * Put the survivors out of their misery
@@ -161,35 +157,12 @@ G4bool ZDC_FiberSD::ProcessHits(G4Step *aStep, G4TouchableHistory *)
     return true;
 }
 
-void ZDC_FiberSD::EndOfAthenaEvent()
+ZDC_SimFiberHitCollectionBuilder* ZDC_FiberSD::getHitCollection() const
 {
-    
-    //Move the hits from the hit set to the hit container
-    if (!m_HitColl.isValid())
-        m_HitColl = std::make_unique<ZDC_SimFiberHit_Collection>(m_HitColl.name());
-
-    for(auto hit : m_hitMap){
-        m_HitColl->Emplace(*(hit.second));
+    auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo();
+    if (!eventInfo) {
+        return nullptr;
     }
-
-
-    if (verboseLevel > 5){
-        G4cout << "ZDC_FiberSD::EndOfAthenaEvent(): Printing Final Energy(eV) deposited in Fibers " << G4endl;
-        
-        int photonCount = 0;
-        float energyTotal = 0;
-        for(auto hit : m_hitMap){
-            photonCount += hit.second->getNPhotons();
-            energyTotal += hit.second->getEdep();
-        }
-
-        G4cout << "ZDC_FiberSD::EndOfAthenaEvent(): Final Energy(eV) deposited in Fiber "
-            << energyTotal << " ev and Number of Photons deposited = " << photonCount 
-            << " across " << m_hitMap.size() << " volumes" << G4endl;
-
-    }
-    //Reset hit container
-    m_hitMap.clear();
-
-    return;
+    auto hitCollections = eventInfo->GetHitCollectionMap();
+    return hitCollections ? hitCollections->Find<ZDC_SimFiberHitCollectionBuilder>(m_hitCollectionName) : nullptr;
 }

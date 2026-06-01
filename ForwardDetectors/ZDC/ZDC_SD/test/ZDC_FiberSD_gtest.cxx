@@ -12,7 +12,6 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 #include "TestTools/initGaudi.h"
 
-#include "G4HCofThisEvent.hh"
 #include "G4Step.hh"
 #include "G4TouchableHistory.hh"
 
@@ -29,6 +28,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 #include "G4AtlasTools/DerivedG4PhysicalVolume.h"
 #include "G4AtlasTools/DerivedG4SensitiveDetectorTestSetting.h"
+#include "src/ZDC_HitCollectionBuilders.h"
 
 //set environment
 class GaudiEnvironment : public ::testing::Environment {
@@ -41,7 +41,6 @@ class GaudiEnvironment : public ::testing::Environment {
 class ZDC_FiberSDtest : public ::testing::Test {	
   protected:
     virtual void SetUp() override {
-      ServiceHandle<StoreGateSvc> detStore("StoreGateSvc/DetectorStore", "ZDC_FiberSDtest");
     }
 
     virtual void TearDown() override {
@@ -49,18 +48,11 @@ class ZDC_FiberSDtest : public ::testing::Test {
 };
 //end of environment setting
 
-TEST_F( ZDC_FiberSDtest, Initialize )
-{
-  G4HCofThisEvent hce;
-  ZDC_FiberSD sd1("name1", "name1", 511.8);
-  sd1.Initialize(&hce);
-}
-
 TEST_F( ZDC_FiberSDtest, ProcessHits )
 {
-  G4HCofThisEvent hce;
   G4Step sp;
   G4TouchableHistory th;
+  ZDC_SimFiberHitCollectionBuilder hitCollection("name2");
 
   G4double totalenergydeposit = 0.8;
   std::vector<G4String> physicalname = {"physicsTDQuarticBar[9]"};
@@ -88,21 +80,10 @@ TEST_F( ZDC_FiberSDtest, ProcessHits )
   DerivedG4SensitiveDetectorTestSetting(sp, totalenergydeposit, physicalname, logicalname, copynos, preStepPos, postStepPos, globaltime0, kineticenergy0, velocity0, globaltime, kineticenergy, globaltime1, kineticenergy1, velocity1, steplength, charge, encoding, antiencoding, astring, atype, nop1, nop2, nop3);
 
   ZDC_FiberSD sd2("name2", "name2", 511.8);
-  sd2.Initialize(&hce);
+  sd2.m_HitColl = &hitCollection;
   sd2.ProcessHits(&sp, &th);
-  sd2.EndOfAthenaEvent();
 
-  ASSERT_TRUE(sd2.m_HitColl.isValid());
-}
-
-TEST_F( ZDC_FiberSDtest, EndOfAthenaEvent )
-{
-  G4HCofThisEvent hce;
-  ZDC_FiberSD sd4("name4", "name4", 511.8);
-  sd4.Initialize(&hce);
-  sd4.EndOfAthenaEvent();
-  
-  ASSERT_TRUE(sd4.m_HitColl.isValid());
+  ASSERT_NE(sd2.m_HitColl, nullptr);
 }
 
 int main( int argc, char** argv ) {
@@ -113,4 +94,3 @@ int main( int argc, char** argv ) {
   return RUN_ALL_TESTS();
 
 }
-

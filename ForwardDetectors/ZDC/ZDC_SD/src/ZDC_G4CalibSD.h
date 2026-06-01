@@ -7,10 +7,10 @@
 
 #include "G4VSensitiveDetector.hh"
 #include "ZDC_EscapedEnergyProcessing.h"
+#include "ZDC_HitCollectionBuilders.h"
 
 #include "CaloSimEvent/CaloCalibrationHit.h"
 #include "CaloG4Sim/SimulationEnergies.h"
-#include "StoreGate/WriteHandle.h"
 #include "Identifier/Identifier.h"
 #include "ZdcIdentifier/ZdcID.h"
 
@@ -22,7 +22,6 @@ class CaloCalibrationHitContainer;
 class ZDC_G4CalibSD : public G4VSensitiveDetector
 {
   FRIEND_TEST( ZDC_G4CalibSDtest, ProcessHits );
-  FRIEND_TEST( ZDC_G4CalibSDtest, EndOfAthenaEvent );
   FRIEND_TEST( ZDC_G4CalibSDtest, SpecialHit );
   FRIEND_TEST( ZDC_G4CalibSDtest, SimpleHit );
 public:
@@ -40,17 +39,16 @@ public:
   G4bool ProcessHits(G4Step* a_step,G4TouchableHistory*) override;
   // For other classes that need to call into us...
   G4bool SpecialHit(G4Step* a_step, const std::vector<G4double>& a_energies);
-  // End of athena event processing
-  void EndOfAthenaEvent();
-
-
 protected:
   //Add hit either from ProcessHits or SpecialHit to the collection
   G4bool SimpleHit( const Identifier& id, const std::vector<double>& energies );
   
  private:
-  SG::WriteHandle<CaloCalibrationHitContainer> m_HitColl;
-  std::map< uint32_t, CaloCalibrationHit* > m_hitMap;
+  ZDC_CalibrationHitContainerBuilder* getHitCollection() const;
+
+  std::string m_hitCollectionName;
+  // Non-owning cache; HitCollectionMap owns the collection.
+  ZDC_CalibrationHitContainerBuilder* m_HitColl{};
   std::vector<G4double> m_energies;
 
   // Count the number of invalid hits.

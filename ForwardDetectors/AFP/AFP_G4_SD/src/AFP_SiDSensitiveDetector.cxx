@@ -7,6 +7,8 @@
 
 // Athena headers
 #include "AFP_Geometry/AFP_constants.h"
+#include "HitManagement/HitCollectionMap.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
 
 // Geant4 headers
 #include "G4Version.hh"
@@ -31,14 +33,11 @@
 AFP_SiDSensitiveDetector::AFP_SiDSensitiveDetector(const std::string& name, const std::string& hitCollectionName)
   : G4VSensitiveDetector( name )
   , m_nHitID(-1)
-  , m_nEventNumber(0)
-  , m_nNumberOfSIDSimHits(0)
   , m_delta_pixel_x(0.050)
   , m_delta_pixel_y(0.250)
-  , m_HitColl(hitCollectionName)
+  , m_hitCollectionName(hitCollectionName)
 {
   for( int i=0; i < 4; i++){
-    m_nNOfSIDSimHits[i] = 0;
     for( int j=0; j < 10; j++){
       m_death_edge[i][j] = AFP_CONSTANTS::SiT_DeathEdge; //in mm, it is left edge as the movement is horizontal
       m_lower_edge[i][j] = AFP_CONSTANTS::SiT_LowerEdge; //in mm,
@@ -47,27 +46,23 @@ AFP_SiDSensitiveDetector::AFP_SiDSensitiveDetector(const std::string& name, cons
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void AFP_SiDSensitiveDetector::StartOfAthenaEvent()
-{
-  m_nNumberOfSIDSimHits=0;
-  for( int i=0; i < 4; i++)
-    {
-      m_nNOfSIDSimHits[i] = 0;
-    }
-}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-// Initialize from G4 - necessary to new the write handle for now
+// Initialize from G4.
 void AFP_SiDSensitiveDetector::Initialize(G4HCofThisEvent *)
 {
-  if (!m_HitColl.isValid())m_HitColl = std::make_unique<AFP_SIDSimHitCollection>();
+  m_HitColl = getHitCollection();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 bool AFP_SiDSensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
 {
+  if (!m_HitColl) {
+    m_HitColl = getHitCollection();
+    if (!m_HitColl) {
+      return false;
+    }
+  }
+
   if(verboseLevel>5)
     {
       G4cout << "AFP_SiDSensitiveDetector::ProcessHits" << G4endl;
@@ -165,15 +160,11 @@ bool AFP_SiDSensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
             m_HitColl->Emplace(m_nHitID,nTrackID,nParticleEncoding,fKineticEnergy,fEnergyDeposit,
                                fPreStepX,fPreStepY,fPreStepZ,fPostStepX,fPostStepY,fPostStepZ,
                                fGlobalTime,nStationID,nDetectorID,bIsSIDAuxVSID,-1,-1);
-            // G4cout << "pixel["<< act_pixel_x - n_death_pixels <<"]["<< act_pixel_y - n_lower_pixels
-            //        << "] will be stored, with energy "<< fEnergyDeposit*(pixel_track_length_XY/track_length_XY)
-            //        << G4endl;
-            // m_nNumberOfSIDSimHits++;
           }
         else
           {
             // Cut on maximum number of SID hits/station
-            if(m_nNOfSIDSimHits[nStationID] >= SiDMaxCnt) return 1;
+            if(m_HitColl->HasReachedLimit(nStationID)) return 1;
 
             // Get the Touchable History:
             const G4TouchableHistory* myTouch = static_cast<const G4TouchableHistory*>(pPreStepPoint->GetTouchable());
@@ -306,9 +297,7 @@ bool AFP_SiDSensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
                                        fGlobalTime,nStationID,nDetectorID,bIsSIDAuxVSID,
                                        (pre_pixel_y - n_lower_pixels - 1),
                                        (pre_pixel_x - n_death_pixels - 1));
-                    m_nNumberOfSIDSimHits++;
-
-                    m_nNOfSIDSimHits[nStationID]++;
+                    m_HitColl->CountHit(nStationID);
                   }
                 else if(verboseLevel>5)
                   {
@@ -455,9 +444,7 @@ bool AFP_SiDSensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
                             if(verboseLevel>5) { G4cout << "AFP_SiDSensitiveDetector::ProcessHits:pixel["<< act_pixel_x - n_death_pixels <<"]["<< act_pixel_y - n_lower_pixels <<"] will be stored, with energy "
                                                         << fEnergyDeposit*(pixel_track_length_XY/track_length_XY) << G4endl; }
 
-                            m_nNumberOfSIDSimHits++;
-
-                            m_nNOfSIDSimHits[nStationID]++;
+                            m_HitColl->CountHit(nStationID);
                           }
 
                         x_det = x_border;
@@ -505,9 +492,7 @@ bool AFP_SiDSensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
                             if(verboseLevel>5) { G4cout << "AFP_SiDSensitiveDetector::ProcessHits:pixel["<< act_pixel_x - n_death_pixels <<"]["<< act_pixel_y - n_lower_pixels <<"] will be stored, with energy "
                                                         << fEnergyDeposit*(pixel_track_length_XY/track_length_XY) << G4endl; }
 
-                            m_nNumberOfSIDSimHits++;
-
-                            m_nNOfSIDSimHits[nStationID]++;
+                            m_HitColl->CountHit(nStationID);
                           }
 
                         y_det = y_border;
@@ -530,19 +515,12 @@ bool AFP_SiDSensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
   return true;
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void AFP_SiDSensitiveDetector::EndOfAthenaEvent()
+AFP_SIDSimHitCollectionBuilder* AFP_SiDSensitiveDetector::getHitCollection() const
 {
-  if(verboseLevel>5)
-    {
-      G4cout << "AFP_SiDSensitiveDetector::EndOfAthenaEvent: Total number of hits in SiD: " << m_nNumberOfSIDSimHits << G4endl;
-      G4cout << "AFP_SiDSensitiveDetector::EndOfAthenaEvent: *************************************************************" << G4endl;
-    }
-  m_nEventNumber++;
-  m_nNumberOfSIDSimHits=0;
-
-  for( int i=0; i < 4; i++){
-    m_nNOfSIDSimHits[i] = 0;
+  auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo();
+  if (!eventInfo) {
+    return nullptr;
   }
+  auto hitCollections = eventInfo->GetHitCollectionMap();
+  return hitCollections ? hitCollections->Find<AFP_SIDSimHitCollectionBuilder>(m_hitCollectionName) : nullptr;
 }
