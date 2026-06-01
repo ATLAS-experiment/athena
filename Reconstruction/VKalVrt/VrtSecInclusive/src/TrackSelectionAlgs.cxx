@@ -263,7 +263,7 @@ namespace VKalVrtAthena {
       if( !trk ) continue;
       // remove calo-tagged muons when selecting muons
       if (m_doRemoveCaloTaggedMuons) {
-        if (muon->muonType() == xAOD::Muon::CaloTagged) continue;
+        if (muon->muonType() == xAOD::Muon::MuonType::CaloTagged) continue;
       }
       selectTrack( trk );
 
@@ -340,8 +340,8 @@ namespace VKalVrtAthena {
 
     // Loop over muons to book-keep all ID tracks matched to muons
     for (const auto *muon : *muons) {
-      if (m_doRemoveCaloTaggedMuons && muon->muonType() == xAOD::Muon::CaloTagged) { continue; }
-      const auto* mu_trk = muon->trackParticle( xAOD::Muon::InnerDetectorTrackParticle );
+      if (m_doRemoveCaloTaggedMuons && muon->muonType() == xAOD::Muon::MuonType::CaloTagged) { continue; }
+      const auto* mu_trk = muon->trackParticle( xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle );
       if(!mu_trk) { continue; }
       m_leptonicTracks.emplace_back(mu_trk);
     }
