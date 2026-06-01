@@ -64,20 +64,49 @@ void PixelClusterOnTrackCnv_p2::transToPers( const InDet::PixelClusterOnTrack *t
   persObj->m_hasClusterAmbiguity = transObj->hasClusterAmbiguity();
   persObj->m_isFake              = transObj->isFake();
   persObj->m_energyLoss          = transObj->energyLoss();
+ 
+  using PixelContainer = InDet::PixelClusterContainer;
 
-  static const SG::InitializedReadHandleKey<InDet::PixelClusterContainer> pixelClusContName("PixelClusters");
-  ElementLink<InDet::PixelClusterContainer>::index_type hashAndIndex{0};
-  bool isFound{m_eventCnvTool->getHashAndIndex<InDet::PixelClusterContainer, InDet::PixelClusterOnTrack>(transObj, pixelClusContName, hashAndIndex)};
-  //in the case of track overlay, the final output container has a different name which we use instead
-  if(m_eventCnvTool->doTrackOverlay()){
-    persObj->m_prdLink.m_contName = (isFound ? "Bkg_PixelClusters" : "");
-    if(!isFound){ //in this case the input collection is called Bkg_PixelClusters as well
-      static const SG::InitializedReadHandleKey<InDet::PixelClusterContainer> pixelClusContName("Bkg_PixelClusters");
-      isFound=m_eventCnvTool->getHashAndIndex<InDet::PixelClusterContainer, InDet::PixelClusterOnTrack>(transObj, pixelClusContName, hashAndIndex);
-      persObj->m_prdLink.m_contName = (isFound ? "Bkg_PixelClusters" : "");
-    }
+  static const SG::InitializedReadHandleKey<PixelContainer> pixelClusters{
+      "PixelClusters"};
+  static const SG::InitializedReadHandleKey<PixelContainer> bkgPixelClusters{
+      "Bkg_PixelClusters"};
+  static const SG::InitializedReadHandleKey<PixelContainer> itkPixelClusters{
+      "ITkPixelClusters"};
+  static const SG::InitializedReadHandleKey<PixelContainer> bkgItkPixelClusters{
+      "Bkg_ITkPixelClusters"};
+
+  struct ContainerCandidate {
+    const SG::ReadHandleKey<PixelContainer>& key;
+    const char* overlayOutputName;
+  };
+  static const ContainerCandidate candidates[] = {
+      {pixelClusters, "Bkg_PixelClusters"},
+      {itkPixelClusters, "Bkg_ITkPixelClusters"},
+      {bkgPixelClusters, "Bkg_PixelClusters"},
+      {bkgItkPixelClusters, "Bkg_ITkPixelClusters"},
+  };
+
+  ElementLink<PixelContainer>::index_type hashAndIndex{0};
+
+  persObj->m_prdLink.m_contName.clear();
+
+  const bool doOverlay = m_eventCnvTool->doTrackOverlay();
+
+  for (const ContainerCandidate& candidate : candidates) {
+    const bool found =
+        m_eventCnvTool
+            ->getHashAndIndex<PixelContainer, InDet::PixelClusterOnTrack>(
+                transObj, candidate.key, hashAndIndex);
+
+    if (!found) continue;
+
+    persObj->m_prdLink.m_contName =
+        doOverlay ? candidate.overlayOutputName : candidate.key.key();
+
+    break;
   }
-  else persObj->m_prdLink.m_contName = (isFound ? pixelClusContName.key() : "");
+
   persObj->m_prdLink.m_elementIndex = hashAndIndex;
 }
 

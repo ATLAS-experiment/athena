@@ -10,9 +10,9 @@ _extensions_list = [] # For caching, possible legacy / validate Passes/Configura
 _actsExtensions  = ['Acts', 'ActsLegacy', 'ActsConversion', 'LargeD0', 'ActsLowPt', 'ActsValidateF100', 'ActsValidateF150', 'ActsValidateLargeRadiusStandalone'] # Possible Acts Alone Passes/Configurations
 _outputExtensions  = [] # Passes/Configurations to be passed to the output job option
 
-def CombinedTrackingPassFlagSets(flags):
+def CombinedTrackingPassFlagSets(flags, resetCache=False):
     global _flags_set
-    if _flags_set:
+    if _flags_set and not resetCache:
         return _flags_set
 
     flags_set = []
@@ -132,20 +132,23 @@ def ITkStoreTrackSeparateContainerCfg(flags,
     extension = flags.Tracking.ActiveConfig.extension
     doTrackOverlay = flags.TrackOverlay.isTrackOverlaySeq
     if doTrackOverlay:
-        # schedule merger to combine signal and background tracks
-        InputTracks = [flags.Overlay.SigPrefix+TrackContainer,
-                       flags.Overlay.BkgPrefix+TrackContainer]
         AssociationMapName = ("PRDtoTrackMapMerge_Resolved" +
                               extension + "Tracks")
-        MergerOutputTracks = TrackContainer
-
-        from TrkConfig.TrkTrackCollectionMergerConfig import TrackCollectionMergerAlgCfg
-        result.merge(TrackCollectionMergerAlgCfg(
-            flags,
-            name="TrackCollectionMergerAlgCfg"+extension,
-            InputCombinedTracks=InputTracks,
-            OutputCombinedTracks=MergerOutputTracks,
-            AssociationMapName=AssociationMapName))
+        if extension != "Conversion":
+            # schedule merger to combine signal and background tracks.
+            # For the Conversion extension this merger is created in ITkTrackRecoPassCfg
+            # before this function is called, so we skip it here to avoid duplication.
+            InputTracks = [flags.Overlay.SigPrefix+TrackContainer,
+                           flags.Overlay.BkgPrefix+TrackContainer]
+            MergerOutputTracks = TrackContainer
+    
+            from TrkConfig.TrkTrackCollectionMergerConfig import ITkTrackCollectionMergerAlgCfg
+            result.merge(ITkTrackCollectionMergerAlgCfg(
+                flags,
+                name="ITkTrackCollectionMergerAlgCfg"+extension,
+                InputCombinedTracks=InputTracks,
+                OutputCombinedTracks=MergerOutputTracks,
+                AssociationMapName=AssociationMapName))
 
     # Run truth, but only do this for non ACTS workflows
     if flags.Tracking.doTruth and extension not in _actsExtensions:
@@ -241,11 +244,20 @@ def ITkTrackRecoPassCfg(flags,
                                   TrackContainer+"TruthCollection"]
     
     if doTrackOverlay and extension == "Conversion":
+        # Reset TrackContainer from the Sig-prefixed name back to the bare name.
         TrackContainer = "Resolved" + extension + "Tracks"
-        result.merge(ITkStoreTrackSeparateContainerCfg(
+        # Merge Sig_ResolvedConversionTracks + Bkg_ResolvedConversionTracks -> ResolvedConversionTracks.
+        # This must happen regardless of storeSeparateContainer, because the merged container is
+        # consumed either by the final ITkTrackCollectionMerger (storeSeparateContainer=False)
+        # or by ITkStoreTrackSeparateContainerCfg truth/cnv steps (storeSeparateContainer=True).
+        from TrkConfig.TrkTrackCollectionMergerConfig import ITkTrackCollectionMergerAlgCfg
+        result.merge(ITkTrackCollectionMergerAlgCfg(
             flags,
-            TrackContainer=TrackContainer,
-            ClusterSplitProbContainer=ClusterSplitProbContainer))
+            name="ITkTrackCollectionMergerAlgCfgConversion",
+            InputCombinedTracks=[flags.Overlay.SigPrefix + TrackContainer,
+                                 flags.Overlay.BkgPrefix + TrackContainer],
+            OutputCombinedTracks=TrackContainer,
+            AssociationMapName="PRDtoTrackMapMerge_" + TrackContainer))
 
     if flags.Tracking.ActiveConfig.storeSeparateContainer:
         # If we do not want the track collection to be merged with another collection
@@ -516,7 +528,7 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
 
 
     # Get all the requested tracking passes
-    flags_set = CombinedTrackingPassFlagSets(flags)
+    flags_set = CombinedTrackingPassFlagSets(flags, resetCache=True)
 
     # Store the names of several collections from all the different passes
     # These collections will then be used for different purposes
