@@ -137,6 +137,7 @@ class ConfigSequence:
         self.reorderAlgs()
         self.makeAlgs (config)
         self.applyConfigOverrides(config)
+        config.renameFinalContainers()
 
 
     def setOptionValue (self, name, value, **kwargs) :

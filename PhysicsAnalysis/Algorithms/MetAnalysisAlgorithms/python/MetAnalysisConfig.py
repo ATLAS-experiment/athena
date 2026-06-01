@@ -81,8 +81,6 @@ class MetAnalysisConfig (ConfigBlock):
         self.addOption ('switchTauMuOrder', False, type=bool,
             info="whether to switch order of taus and muons",
             expertMode=True)
-        self.addOption ('noStepSuffix', True, type=bool,
-            info="whether to omit the step suffix for the MET container name. This is needed if the MET container name is hard-coded somewhere downstream. however, it should be set to `False` if you need to make any copies downstream")
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -148,7 +146,7 @@ class MetAnalysisConfig (ConfigBlock):
             invisibleContainers, invisibleSelections = zip(*[config.readNameAndSelection (container, excludeFrom={'or'}) for container in self.invisible])
             alg.invisible = list(invisibleContainers)
             alg.invisibleSelection = list(invisibleSelections)
-        alg.met = config.writeName (self.containerName, isMet = True, noStepSuffix = self.noStepSuffix)
+        alg.met = config.writeName (self.containerName, isMet = True)
 
 
         # Set up the met builder algorithm:

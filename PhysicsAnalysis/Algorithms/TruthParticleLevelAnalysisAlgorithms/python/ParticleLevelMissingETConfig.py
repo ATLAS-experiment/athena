@@ -12,8 +12,6 @@ class ParticleLevelMissingETBlock(ConfigBlock):
                        info='the name of the input truth MET container.')
         self.addOption('outputContainerName', 'TruthMET', type=str,
                        info='the name of the output MET container.')
-        self.addOption ('noStepSuffix', True, type=bool,
-            info="whether to omit the step suffix for the MET container name. This is needed if the MET container name is hard-coded somewhere downstream. however, it should be set to `False` if you need to make any copies downstream")
         # Always skip on data
         self.setOptionValue('skipOnData', True)
 
@@ -32,7 +30,7 @@ class ParticleLevelMissingETBlock(ConfigBlock):
         if config.wantCopy (self.outputContainerName):
             alg = config.createAlgorithm( 'CP::AsgShallowCopyAlg', 'TruthMissingETShallowCopyAlg' )
             alg.input = config.readName (self.outputContainerName)
-            alg.output = config.copyName (self.outputContainerName, noStepSuffix = self.noStepSuffix)
+            alg.output = config.copyName (self.outputContainerName)
 
         config.addOutputVar (self.outputContainerName, 'met', 'met', noSys=True, auxType='float')
         config.addOutputVar (self.outputContainerName, 'phi', 'phi', noSys=True, auxType='float')

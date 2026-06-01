@@ -1,6 +1,10 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import AnaAlgorithm.DualUseConfig as DualUseConfig
+from AnalysisAlgorithmsConfig.ConfigPropertySubstitution import (
+    substituteComponentProperties,
+    substituteValue,
+)
 from AthenaConfiguration.Enums import LHCPeriod, FlagEnum
 import re
 
@@ -144,23 +148,14 @@ class ContainerConfig :
         self.selections = []
         self.outputs = {}
         self.meta = {}
-        self.finalImplicitCopy = False
         # The chain of container names this container has occupied in the
         # event store, in order. The latest name is the current name.
         self.names = [sourceName] if sourceName is not None else []
 
-    def appendStep (self, *, noStepSuffix=False) :
-        """Compute and append the next step name; return it.
-
-        If noStepSuffix is True the bare container name is used (no
-        `_STEP{n}` suffix); the systematics suffix is still applied."""
-        if self.finalImplicitCopy :
-            raise Exception ("trying to write container after we made a copy with no step suffix" + self.name)
-        if noStepSuffix :
-            newName = ContainerConfig.systematicsName(self.name, noSysSuffix=self.noSysSuffix)
-        else :
-            step = len(self.names)
-            newName = ContainerConfig.systematicsName(f"{self.name}_STEP{step}", noSysSuffix=self.noSysSuffix)
+    def appendStep (self) :
+        """Add a new step/copy, return the new name of the container"""
+        step = len(self.names)
+        newName = ContainerConfig.systematicsName(f"{self.name}_STEP{step}", noSysSuffix=self.noSysSuffix)
         self.names.append(newName)
         return newName
 
@@ -545,15 +540,9 @@ class ConfigAccumulator :
             self._containerConfig[containerName] = ContainerConfig (containerName, sourceName, noSysSuffix = self._noSysSuffix, originalName = originalName, isMet = isMet)
 
 
-    def writeName (self, containerName, *, isMet=None, noStepSuffix=False) :
+    def writeName (self, containerName, *, isMet=None) :
         """register that the given container will be made and return
-        its name
-
-        If noStepSuffix is True the returned name is the bare container name
-        (no `_STEP{n}` suffix).  This is intended for single-shot containers
-        with no copy chain (e.g. MET); calling writeName/copyName again on
-        such a container would collide on the bare name.
-        """
+        its name"""
         if containerName not in self._containerConfig :
             self._containerConfig[containerName] = ContainerConfig (containerName, sourceName = None, noSysSuffix = self._noSysSuffix)
         config = self._containerConfig[containerName]
@@ -563,7 +552,7 @@ class ConfigAccumulator :
             raise Exception ("trying to write container twice: " + containerName)
         if isMet is not None :
             config.isMet = isMet
-        return config.appendStep(noStepSuffix=noStepSuffix)
+        return config.appendStep()
 
 
     def readName (self, containerName, *, nominal=False) :
@@ -578,18 +567,12 @@ class ConfigAccumulator :
         return self._containerConfig[containerName].currentName(nominal=nominal)
 
 
-    def copyName (self, containerName, *, noStepSuffix=False) :
+    def copyName (self, containerName) :
         """register that a copy of the container will be made and return
-        its name
-
-        If noStepSuffix is True the returned name is the bare container name
-        (no `_STEP{n}` suffix).  This is intended for single-shot containers
-        with no further copy chain; calling copyName again on such a
-        container would collide on the bare name.
-        """
+        its name"""
         if containerName not in self._containerConfig :
             raise Exception ("unknown container: " + containerName)
-        return self._containerConfig[containerName].appendStep(noStepSuffix=noStepSuffix)
+        return self._containerConfig[containerName].appendStep()
 
 
     def wantCopy (self, containerName) :
@@ -604,6 +587,35 @@ class ConfigAccumulator :
         if len (config.names) == 0 :
             raise Exception ("checking wantCopy on container with no name in event store: " + containerName)
         return config.names[-1] == config.sourceName
+
+
+    def renameFinalContainers (self) :
+        """post-process the configured algorithms, tools and services to
+        strip the auto-generated `_STEP<n>` suffix from each container's
+        *final* name in every property value.
+
+        This is mostly needed in case the user has further downstream
+        algorithms that rely on the exact name of containers in the
+        event store. For anything configured through the
+        `ConfigAccumulator` this doesn't matter, as the names are
+        configured consistently."""
+
+        substitutions = []
+        for containerConfig in self._containerConfig.values() :
+            if not containerConfig.names :
+                continue
+            base = containerConfig.name
+            lastName = containerConfig.names[-1]
+            match = re.match (re.escape (base) + r'_STEP\d+', lastName)
+            if match :
+                substitutions.append ((match.group(0), base))
+                # keep ContainerConfig in sync, in case anything reads
+                # currentName() after this pass
+                containerConfig.names[-1] = substituteValue (lastName, [(match.group(0), base)])
+        if not substitutions :
+            return
+        for component in self._algorithms.values() :
+            substituteComponentProperties (component, substitutions)
 
 
     def originalName (self, containerName) :
