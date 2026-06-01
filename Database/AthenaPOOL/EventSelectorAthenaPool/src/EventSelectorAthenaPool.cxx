@@ -162,7 +162,7 @@ StatusCode EventSelectorAthenaPool::initialize() {
    }
 
    // Connect to PersistencySvc
-   if (!m_athenaPoolCnvSvc->getPoolSvc()->connect(pool::ITransaction::READ, IPoolSvc::kInputStream).isSuccess()) {
+   if (!m_athenaPoolCnvSvc->getPoolSvc()->connect(Io::READ, IPoolSvc::kInputStream).isSuccess()) {
       ATH_MSG_FATAL("Cannot connect to POOL PersistencySvc.");
       return StatusCode::FAILURE;
    }

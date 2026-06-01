@@ -5,6 +5,8 @@
 #ifndef INCLUDE_PERSISTENCYSVC_ITRANSACTION_H
 #define INCLUDE_PERSISTENCYSVC_ITRANSACTION_H
 
+#include "StorageSvc/pool.h"
+
 /*
  *   POOL namespace declaration
  */
@@ -18,11 +20,8 @@ namespace pool {
 
   class ITransaction {
   public:
-    /// Transaction type enumeration
-    enum Type { INACTIVE, READ, UPDATE };
-
     /// Starts a new transaction. Returns the success of the operation
-    virtual bool start( Type type = READ ) = 0;
+    virtual bool start( Io::IoFlag type = Io::READ ) = 0;
 
     /// Commits the transaction.
     virtual bool commit() = 0;
@@ -34,7 +33,7 @@ namespace pool {
     virtual bool isActive() const = 0;
 
     /// Returns the transaction type
-    virtual Type type() const = 0;
+    virtual Io::IoFlag type() const = 0;
 
   protected:
     /// Default destructor

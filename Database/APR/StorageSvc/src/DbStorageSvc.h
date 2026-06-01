@@ -165,7 +165,7 @@ namespace pool  {
       *
       * @return                 StatusCode code indicating success or failure.
       */
-    virtual StatusCode startSession(int mode, int tech, int ageLimit = -1) override final;
+    virtual StatusCode startSession(Io::IoFlag mode, int tech, int ageLimit = -1) override final;
 
     /// End the Database session.
     /** The  request to end a Database session requires, that all pending 
@@ -203,7 +203,7 @@ namespace pool  {
       *
       * @return                 StatusCode code indicating success or failure.
       */
-    virtual StatusCode connect(int mode, FileDescriptor& refDB) override final;
+    virtual StatusCode connect(Io::IoFlag mode, FileDescriptor& refDB) override final;
 
     /// Disconnect from a logical Database unit.
     /** The  request for disconnect requires, that all pending Transactions
@@ -229,7 +229,7 @@ namespace pool  {
       * @return                 StatusCode code indicating success or failure.
       */
     virtual StatusCode openMode( FileDescriptor&     refDB,
-                                 int&                mode ) override final;
+                                 Io::IoFlag&         mode ) override final;
 
 
     /// End/Finish an existing Transaction sequence.

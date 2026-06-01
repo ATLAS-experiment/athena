@@ -24,6 +24,7 @@
 #include <memory>
 #include <stdexcept>
 #include <atomic>
+
 using namespace std;
 using namespace pool;
 
@@ -42,7 +43,7 @@ void retireDatabase(DbContainerObj* c)  {
 DbContainerObj::DbContainerObj( DbDatabase&       dbH,
                                 const string&     nam, 
                                 const DbType&     dbtyp,
-                                DbAccessMode      mod)   
+                                Io::IoFlag      mod)   
 : Base(nam, mod, dbtyp, dbH.db()),
   APRMessaging( dbH.logon() ),
   m_info(0), m_tokH(0)
@@ -54,9 +55,6 @@ DbContainerObj::DbContainerObj( DbDatabase&       dbH,
       if ( dbH.add( name(), this).isSuccess() )    {
         m_dbH  = dbH;
         setMode(mod);
-        if ( mod & pool::UPDATE ) {
-          setMode(mod |= pool::CREATE);
-        }
         ATH_MSG_DEBUG("--> Access   DbContainer  " 
             << accessMode(mode())
             << " [" << type().storageName() << "] " 
@@ -121,7 +119,7 @@ StatusCode DbContainerObj::open(const DbTypeInfo* typ)   {
     if ( 0 != m_info && 0 != typ && database().isValid() )  {
       StatusCode sc = info()->open(database(), name(), typ, mode());
       if ( sc.isSuccess())  {
-        if ( mode() != pool::READ )  {
+        if ( mode() != Io::READ )  {
           Token tok;
           tok.setDb(database().name());
           tok.setCont(name());

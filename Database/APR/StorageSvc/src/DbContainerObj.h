@@ -71,7 +71,7 @@ namespace pool  {
     DbContainerObj( DbDatabase&        dbH,
                     const std::string& nam,
                     const DbType&      dbtyp,
-                    DbAccessMode       mod);
+                    Io::IoFlag       mod);
     /// Standard destructor
     virtual ~DbContainerObj();
     /// Access to internals
@@ -87,7 +87,7 @@ namespace pool  {
     bool isOpen() const                     {  return m_isOpen;       }
     /// Check if database is in read-only mode
     bool isReadOnly() const      
-    { return !(mode()&pool::UPDATE) && !(mode()&pool::CREATE);    }
+    { return !(mode() == Io::WRITE || mode() == Io::APPEND);    }
     /// Cancel transaction flag
     void cancelTransaction()                { }
     /// Size of the Database container (=# of objects)

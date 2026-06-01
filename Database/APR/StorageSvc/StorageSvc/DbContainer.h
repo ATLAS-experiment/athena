@@ -77,7 +77,7 @@ namespace pool  {
     /// Name of the container the handle is supposed to point to
     const std::string& name() const;
     /// Mode of the handle (READ,WRITE,...)
-    DbAccessMode openMode() const;
+    Io::IoFlag openMode() const;
     /// Access to the size of the container
     uint64_t size();
     /// Access to the Database the container resides in
@@ -106,7 +106,7 @@ namespace pool  {
                     const std::string&  nam,
                     const DbTypeInfo*   typ,
                     const DbType&       dbtyp,
-                    DbAccessMode        mod);
+                    Io::IoFlag        mod);
 
     /// Check if we can access the residing in \<file\> container for reading with the given type
     /** @param   dbH     [IN]    Valid handle to database object

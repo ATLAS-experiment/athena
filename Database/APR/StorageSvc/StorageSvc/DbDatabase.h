@@ -106,7 +106,7 @@ namespace pool  {
     /// Access reference counter
     int refCount()  const;
     /// Access to access mode member
-    DbAccessMode openMode() const;
+    Io::IoFlag openMode() const;
     /// Access to db name (FID)
     const std::string& name() const;
     /// Set db name (FID) after opening in case opening happened by PFN
@@ -143,7 +143,7 @@ namespace pool  {
     StatusCode open(DbDomain&          domH,
                   const std::string& pfn,
                   const std::string& fid,
-                  DbAccessMode mode = pool::READ);
+                  Io::IoFlag mode = Io::READ);
     /// Close Database
     StatusCode close();
     /// End database access, but still leave database accessible

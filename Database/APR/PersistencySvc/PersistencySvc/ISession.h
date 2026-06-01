@@ -19,10 +19,8 @@ class Token;
 namespace pool {
 
   // forward declarations
-  class DatabaseConnectionPolicy;
   class ITechnologySpecificAttributes;
   class IFileCatalog;
-  
 
   /// Factory method to create a session object
   class ISession;
@@ -38,12 +36,6 @@ namespace pool {
 
   class ISession : public ITransaction {
   public:
-    /// Sets the default policy when databases are opened/connected
-    virtual void setDefaultConnectionPolicy( const DatabaseConnectionPolicy& policy ) = 0;
-
-    /// Retrieves the default connection policy
-    virtual const DatabaseConnectionPolicy& defaultConnectionPolicy() const = 0;
-
     /// Explicitly disconnects all the databases.
     /// If a transaction is active, then all the changes since the last commit are aborted.
     virtual bool disconnectAll() = 0;

@@ -34,7 +34,7 @@ namespace pool {
                      long technology,
                      const std::string& fid,
                      const std::string& pfn,
-                     long accessmode );
+                     Io::IoFlag accessmode );
 
     /// Destructor. Disconnects from the database
     ~DatabaseHandler();
@@ -64,7 +64,7 @@ namespace pool {
     long technology() const;
 
     /// Returns the access mode
-    long accessMode() const;
+    Io::IoFlag accessMode() const;
 
     /// Writes an object and returns a token
     Token* writeObject( const std::string& containerName,
@@ -95,7 +95,7 @@ namespace pool {
     /// Technology identifier
     long              m_technology;
     /// Current access mode
-    long              m_accessMode;
+    Io::IoFlag        m_accessMode;
   };
 }
 

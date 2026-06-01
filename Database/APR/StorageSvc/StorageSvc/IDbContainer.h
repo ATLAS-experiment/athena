@@ -78,7 +78,7 @@ namespace pool    {
     virtual StatusCode open( DbDatabase&        dbH, 
                              const std::string& nam, 
                              const DbTypeInfo* info, 
-                             DbAccessMode mode) = 0;
+                             Io::IoFlag mode) = 0;
     /// Check if we can access the container for reading with the given type
     virtual StatusCode checkAccess(DbDatabase&        dbH,
                                  const std::string& nam) const = 0;

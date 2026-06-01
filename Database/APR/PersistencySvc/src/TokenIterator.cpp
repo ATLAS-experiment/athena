@@ -21,7 +21,7 @@ pool::TokenIterator::TokenIterator( FileDescriptor& fileDescriptor,
       m_refToken = new Token(dbH.cntToken(containerName));
       m_container = new DbContainer(m_refToken->technology());
    }
-   if( !dbH.isValid() || !m_container->open(dbH, m_refToken->contID(), 0, m_refToken->technology(), pool::READ).isSuccess() ) {
+   if( !dbH.isValid() || !m_container->open(dbH, m_refToken->contID(), 0, m_refToken->technology(), Io::READ).isSuccess() ) {
       throw std::runtime_error( "Selection from " + fileDescriptor.PFN() + "(" + containerName + ") failed (APR: \" TokenIterator::TokenIterator() \" from \" PersistencySvc \")" );
    }
 }

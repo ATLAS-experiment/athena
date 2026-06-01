@@ -3,7 +3,6 @@
 */
 
 #include "UserSession.h"
-#include "PersistencySvc/DatabaseConnectionPolicy.h"
 #include "DatabaseRegistry.h"
 #include "UserDatabase.h"
 #include "DatabaseHandler.h"
@@ -22,13 +21,11 @@ pool::createSession( IFileCatalog& catalog , int ageLimit )
 
 pool::UserSession::UserSession( pool::IFileCatalog& fileCatalog, int ageLimit ):
   APRMessaging( "APR Session" ),
-  m_policy( 0 ),
   m_catalog( &fileCatalog ),
   m_ageLimit( ageLimit ),
   m_registry( 0 ),
-  m_transactionType( pool::ITransaction::INACTIVE )
+  m_transactionType( Io::INVALID )
 {
-  m_policy = new pool::DatabaseConnectionPolicy;
   m_registry = new pool::DatabaseRegistry();
 }
 
@@ -37,7 +34,6 @@ pool::UserSession::~UserSession()
   // order is important
   m_technologies.clear();
   delete m_registry;
-  delete m_policy;
 }
 
 
@@ -47,7 +43,7 @@ pool::UserSession::readObject( const Token& token, void* object )
   void* result {};
   if( isActive() ) {
     UserDatabase db( *this, token.dbID().toString(), pool::DatabaseSpecification::FID );
-    if ( db.openMode() == pool::IDatabase::CLOSED ) {
+    if ( db.openMode() == Io::INVALID ) {
       db.setTechnology( token.technology() );
       db.connectForRead();
     }
@@ -61,11 +57,11 @@ pool::UserSession::registerForWrite( const Placement& place,
                                                      const void* object,
                                                      const RootType& type )
 {
-  if( m_transactionType != pool::ITransaction::UPDATE ) {
+  if( m_transactionType != Io::WRITE && m_transactionType != Io::APPEND ) {
     return 0;
   }
   UserDatabase db( *this, place.fileName(), pool::DatabaseSpecification::PFN );
-  if ( db.openMode() == pool::IDatabase::CLOSED ) {
+  if ( db.openMode() == Io::INVALID ) {
     db.setTechnology( place.technology() );
     db.connectForWrite();
   }
@@ -82,17 +78,6 @@ pool::UserSession::registry()
   return *m_registry;
 }
 
-void
-pool::UserSession::setDefaultConnectionPolicy( const pool::DatabaseConnectionPolicy& policy )
-{
-  *m_policy = policy;
-}
-
-const pool::DatabaseConnectionPolicy&
-pool::UserSession::defaultConnectionPolicy() const
-{
-  return *m_policy;
-}
 
 bool
 pool::UserSession::disconnectAll()
@@ -106,9 +91,9 @@ pool::UserSession::disconnectAll()
       
 
 bool
-pool::UserSession::start( pool::ITransaction::Type type )
+pool::UserSession::start( Io::IoFlag type )
 {
-  if( isActive() || type == pool::ITransaction::INACTIVE ) return false;
+  if( isActive() ) return false;
   m_transactionType = type;
   return true;
 }
@@ -127,7 +112,7 @@ pool::UserSession::commit()
       }
       OK = OK && bCommit;
     }
-    m_transactionType = INACTIVE;
+    m_transactionType = Io::INVALID;
     return OK;
   }
   return false;

@@ -91,11 +91,11 @@ long long int RootDatabase::size()  const   {
 }
 
 /// Callback after successful open of a database object
-StatusCode RootDatabase::onOpen(DbDatabase& dbH, DbAccessMode mode)  {
+StatusCode RootDatabase::onOpen(DbDatabase& dbH, Io::IoFlag mode)  {
   m_dbH = dbH;
   std::string par_val;
   if ( !dbH.param("FORMAT_VSN", par_val).isSuccess() )  {
-    if ( mode&pool::CREATE || mode&pool::UPDATE ) {
+    if ( mode == Io::WRITE || mode == Io::APPEND ) {
       return dbH.addParam("FORMAT_VSN", m_version);
     }
     ATH_MSG_WARNING("No ROOT data format parameter present and file not opened for update.");
@@ -113,10 +113,10 @@ StatusCode RootDatabase::onOpen(DbDatabase& dbH, DbAccessMode mode)  {
 }
 
 // Open a new root Database: Access the TFile
-StatusCode RootDatabase::open(const DbDomain& domH,const std::string& nam,DbAccessMode mode)
+StatusCode RootDatabase::open(const DbDomain& domH,const std::string& nam,Io::IoFlag mode)
 {
   const char* fname = nam.c_str();
-  Bool_t result = ( mode == pool::READ ) ? kFALSE : gSystem->AccessPathName(fname, kFileExists);
+  Bool_t result = ( mode == Io::READ ) ? kFALSE : gSystem->AccessPathName(fname, kFileExists);
   DbOption opt1("DEFAULT_COMPRESSION","");
   DbOption opt2("DEFAULT_COMPRESSIONALG","");
   DbOption opt3("DEFAULT_SPLITLEVEL","");
@@ -155,7 +155,7 @@ StatusCode RootDatabase::open(const DbDomain& domH,const std::string& nam,DbAcce
   // see: https://its.cern.ch/jira/browse/ATR-20263
   ROOT::TReadLockGuard lock (ROOT::gCoreMutex);
 
-  if ( mode == pool::READ )   {
+  if ( mode == Io::READ )   {
     if (!m_fileMgr) {
       m_file = TFile::Open(fname);
     } else {
@@ -168,56 +168,31 @@ StatusCode RootDatabase::open(const DbDomain& domH,const std::string& nam,DbAcce
       }
     }
   }
-  else if ( mode&pool::UPDATE && result == kFALSE )    {
+  else if ( mode == Io::WRITE || ( mode == Io::APPEND && result == kTRUE ) )    {
+    if (m_fileMgr == nullptr) {
+      m_file = TFile::Open(fname, "RECREATE", fname);
+    } else {
+      void *vf(nullptr);
+      int r =  m_fileMgr->open(Io::ROOT,"RootDatabase",fname,Io::WRITE|Io::CREATE,vf,"POOL",true);
+      if (r < 0) {
+        ATH_MSG_ERROR("unable to open \"" << fname << "\" for WRITE");
+      } else {      
+        m_file = (TFile*)vf;
+      }
+    }
+  }
+  else if ( mode == Io::APPEND && result == kFALSE )    {
     if (m_fileMgr == nullptr) {
       m_file = TFile::Open(fname, "UPDATE", fname);
     } else {
       void *vf(nullptr);
       int r =  m_fileMgr->open(Io::ROOT,"RootDatabase",fname,Io::APPEND,vf,"POOL",true);
       if (r < 0) {
-        ATH_MSG_ERROR("unable to open \"" << fname << "\" for UPDATE");
-      } else {      
+        ATH_MSG_ERROR("unable to open \"" << fname << "\" for APPEND");
+      } else {
         m_file = (TFile*)vf;
       }
     }
-  }
-  else if ( pool::RECREATE == (mode&pool::RECREATE) )   {
-    if (!m_fileMgr) {
-      m_file = TFile::Open(fname, "RECREATE", fname);
-    } else {
-      void *vf(nullptr);
-      int r =  m_fileMgr->open(Io::ROOT,"RootDatabase",fname,Io::WRITE|Io::CREATE,vf,"POOL",true);
-      if (r < 0) {
-        ATH_MSG_ERROR("unable to open \"" << fname << "\" for RECREATE");
-      } else {      
-        m_file = (TFile*)vf;
-      }
-    }
-  }
-  else if ( mode&pool::CREATE && result == kTRUE )   {
-    if (!m_fileMgr) {
-      m_file = TFile::Open(fname, "RECREATE", fname);
-    } else {
-      void *vf(nullptr);
-      int r =  m_fileMgr->open(Io::ROOT,"RootDatabase",fname,Io::WRITE|Io::CREATE,vf,"POOL",true);
-      if (r < 0) {
-        ATH_MSG_ERROR("unable to open \"" << fname << "\" for RECREATE");
-      } else {      
-        m_file = (TFile*)vf;
-      }
-    }
-  }
-  else if ( mode&pool::CREATE && result == kFALSE )   {
-    ATH_MSG_ERROR("You cannot open a ROOT file in mode CREATE"
-                  << " if it already exists. "
-                  << "[" << nam << "]" << endmsg
-                  << "Use the RECREATE flag if you wish to overwrite.");
-  }
-  else if ( mode&pool::UPDATE && result == kTRUE )   {
-    ATH_MSG_ERROR("You cannot open a ROOT file in mode UPDATE"
-                  << " if it does not exists. " << endmsg
-                  << "[" << nam << "]" << endmsg
-                  << "Use the CREATE or RECREATE flag.");
   }
   if ( m_file )   {
     ATH_MSG_INFO(fname << " File version:" << m_file->GetVersion());
@@ -226,14 +201,14 @@ StatusCode RootDatabase::open(const DbDomain& domH,const std::string& nam,DbAcce
       deletePtr(m_file);
     }
   }
-  else if ( mode == pool::READ )   {
+  else if ( mode == Io::READ )   {
     ATH_MSG_ERROR("You cannot open the ROOT file [" << nam << "] in mode READ"
                   << " if it does not exists. ");
   }
 
   if( !m_file ) return FAILURE;
 
-  if( mode != pool::READ ) {
+  if( mode != Io::READ ) {
      m_file->SetCompressionLevel(m_defCompression);
      m_file->SetCompressionAlgorithm(m_defCompressionAlg);
   }
@@ -260,7 +235,7 @@ void RootDatabase::printErrno(const char* nam, int err) {
 }
 
 /// Close the root Database: in CREATE/Update mode write the file header...
-StatusCode RootDatabase::close(DbAccessMode /* mode */ )  {
+StatusCode RootDatabase::close(Io::IoFlag /* mode */ )  {
    int err(0);
    int fclose_rc = 0;
    if( m_file ) {
