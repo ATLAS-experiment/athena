@@ -28,8 +28,6 @@ protected:
 
 private:
   using EdgeSide = MuonGMR4::RpcReadoutElement::EdgeSide;
-  int m_stIdxBIL{-1}; // Station name index of the BIL stations
-  int m_stIdxBIS{-1}; // Station name index of the BIS stations
 
   /**  @brief Digitize the sim hit as Rpc strip 1D hit.
    *   @param simHit: Reference to the sim hit to digitize
@@ -112,26 +110,12 @@ private:
 
   /** @brief Returns Time Over Threshold (ns) for a signal on a strip
    *  @param aCharge: electric charge deposited on the strip (fC) */
-  double getTOT(const double aCharge) const {
-    // This is a parameterization of BIRPC TOT (ns) values corresponding to
-    // a charge (fC), it was obtained from a detailed model for
-    // RPC signal emulation.
-    return -0.00017 * aCharge * aCharge + 0.10081 * aCharge + 19.9587;
-  }
+  double getTOT(const double aCharge) const; 
 
   /** @brief Returns Time Of Arrival (ns) for a signal on a strip
    *  @param aCharge: electric charge deposited on the strip (fC)
    *  @param aDistance: distance from hit to strip edge (m) */
-  double getTOA(const double aCharge, const double aDistance) const {
-    // This is a parameterization of BIRPC TOA (ns) values corresponding to
-    // a charge (fC) and a distance (m), it was obtained from a
-    // detailed model for RPC signal emulation.
-    constexpr std::array<double, 3> distCoeffs{0., 5.00311, 0.00006};
-    constexpr std::array<double, 3> chargeCoeffs{2.02843, -0.00641, 0.00001};
-    using namespace Acts::detail;
-    return polynomialSum(aDistance, distCoeffs) +
-           polynomialSum(aCharge, chargeCoeffs);
-  }
+  double getTOA(const double aCharge, const double aDistance) const;
 };
 
 } // namespace MuonR4

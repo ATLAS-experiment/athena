@@ -10,9 +10,14 @@
 #include "xAODMuonViews/ChamberViewer.h"
 
 namespace {
-constexpr double percentage(unsigned int numerator, unsigned int denom) {
-  return 100. * numerator / std::max(denom, 1u);
-}
+  constexpr double percentage(unsigned int numerator, unsigned int denom) {
+    return 100. * numerator / std::max(denom, 1u);
+  }
+    using ChVec_t = std::vector<std::uint16_t>;
+    /// @brief Declare the secondary phi and eta channels matched to the SDO
+    static const SG::Decorator<ChVec_t> dec_phiChannel{"SDO_phiChannels"};
+    static const SG::Decorator<ChVec_t> dec_etaChannel{"SDO_etaChannels"};
+
 } // namespace
 namespace MuonR4 {
 
@@ -20,8 +25,6 @@ StatusCode RpcDigiTool::initialize() {
   ATH_CHECK(MuonDigitizationTool::initialize());
   ATH_CHECK(m_writeKey.initialize());
   ATH_CHECK(m_effiDataKey.initialize(!m_effiDataKey.empty()));
-  m_stIdxBIL = m_idHelperSvc->rpcIdHelper().stationNameIndex("BIL");
-  m_stIdxBIS = m_idHelperSvc->rpcIdHelper().stationNameIndex("BIS");
   return StatusCode::SUCCESS;
 }
 
@@ -33,6 +36,26 @@ StatusCode RpcDigiTool::finalize() {
                << "% of the cases, the conversion was successful");
   return StatusCode::SUCCESS;
 }
+
+
+ double RpcDigiTool::getTOT(const double aCharge) const {
+    // This is a parameterization of BIRPC TOT (ns) values corresponding to
+    // a charge (fC), it was obtained from a detailed model for
+    // RPC signal emulation.
+    constexpr std::array<double, 3> coeffs{19.9587, 0.10081, -0.00017};
+    using namespace Acts::detail;
+    return polynomialSum(aCharge, coeffs); 
+  }
+  double RpcDigiTool::getTOA(const double aCharge, const double aDistance) const {
+    // This is a parameterization of BIRPC TOA (ns) values corresponding to
+    // a charge (fC) and a distance (m), it was obtained from a
+    // detailed model for RPC signal emulation.
+    constexpr std::array<double, 3> distCoeffs{0., 5.00311, 0.00006};
+    constexpr std::array<double, 3> chargeCoeffs{2.02843, -0.00641, 0.00001};
+    using namespace Acts::detail;
+    return polynomialSum(aDistance, distCoeffs) +
+           polynomialSum(aCharge, chargeCoeffs);
+  }
 
 StatusCode
 RpcDigiTool::digitize(const EventContext &ctx, const TimedHits &hitsToDigit,
@@ -53,27 +76,32 @@ RpcDigiTool::digitize(const EventContext &ctx, const TimedHits &hitsToDigit,
         continue;
       }
       const Identifier hitId{simHit->identify()};
-      const int stName = m_idHelperSvc->stationName(hitId);
       RpcDigitCollection *digiColl = fetchCollection(hitId, digitCache);
-      bool run4_BI = (stName == m_stIdxBIS &&
-                      std::abs(m_idHelperSvc->stationEta(hitId)) < 7) ||
-                     stName == m_stIdxBIL;
-      if (!run4_BI) {
+      const std::size_t beforeDigiSize = digiColl->size();
+      xAOD::MuonSimHit* sdo{nullptr};
+      if (m_detMgr->getRpcReadoutElement(hitId)->nPhiStrips() > 0) {
         /// Standard digitization path
-        const bool digitizedEta = digitizeHit(simHit, false, efficiencyMap,
-                                              *digiColl, rndEngine, deadTimes);
 
         const bool digitizedPhi = digitizeHit(simHit, true, efficiencyMap,
                                               *digiColl, rndEngine, deadTimes);
-
+        const bool digitizedEta = digitizeHit(simHit, false, efficiencyMap,
+                                              *digiColl, rndEngine, deadTimes);
         if (digitizedEta || digitizedPhi) {
-          xAOD::MuonSimHit *sdo = addSDO(simHit, sdoContainer);
-          sdo->setIdentifier(digiColl->at(digiColl->size() - 1)->identify());
+            sdo = addSDO(simHit, sdoContainer);
         }
       } else if (digitizeHitBI(simHit, efficiencyMap, *digiColl, rndEngine,
                                deadTimes)) {
-        xAOD::MuonSimHit *sdo = addSDO(simHit, sdoContainer);
-        sdo->setIdentifier(digiColl->at(digiColl->size() - 1)->identify());
+       sdo = addSDO(simHit, sdoContainer);
+      }
+      if (sdo) {
+        sdo->setIdentifier(digiColl->back()->identify());
+        dec_etaChannel(*sdo).clear();
+        dec_phiChannel(*sdo).clear();
+        for (std::size_t newDigit = beforeDigiSize; newDigit< digiColl->size(); ++newDigit) {
+            const Identifier id = digiColl->at(newDigit)->identify();
+            ChVec_t& ch{idHelper.measuresPhi(id)? dec_phiChannel(*sdo) : dec_etaChannel(*sdo)};
+            ch.push_back(idHelper.channel(id));      
+        }
       }
     }
   } while (viewer.next());
@@ -180,21 +208,12 @@ bool RpcDigiTool::digitizeHitBI(const TimedHit &simHit,
   const MuonGMR4::StripDesign &design{*reEle->getParameters().etaDesign};
   const RpcIdHelper &idHelper{m_idHelperSvc->rpcIdHelper()};
 
-  ATH_MSG_DEBUG("----------------->RPCDigiTool");
   /* with RpcReadoutElement reEle you can access infor about the readout like */
-  ATH_MSG_DEBUG("RpcDigiTool::digitizeHitBI reEle->nGasGaps "
-                << reEle->nGasGaps());
+  ATH_MSG_VERBOSE("RpcDigiTool::digitizeHitBI reEle->nGasGaps "<< reEle->nGasGaps());
   /* with StripDesign you can access the strip information of the readout
    * element for instance: */
-  ATH_MSG_DEBUG("RpcDigiTool::digitizeHitBI design.stripPitch() "
-                << design.stripPitch());
-  ATH_MSG_DEBUG("RpcDigiTool::digitizeHitBI design.stripWidth() "
-                << design.stripWidth());
-  ATH_MSG_DEBUG("RpcDigiTool::digitizeHitBI design.numStrips() "
-                << design.numStrips());
-  ATH_MSG_DEBUG("RpcDigiTool::digitizeHitBI design.halfWidth() "
-                << design.halfWidth());
-
+  ATH_MSG_VERBOSE("RpcDigiTool::digitizeHitBI design: "<< design);
+ 
   // Check the correctness of the local hit position
   const Amg::Vector2D locHitPosition{locPos.x(), locPos.y()};
   if (!design.insideTrapezoid(locHitPosition)) {
@@ -222,7 +241,6 @@ bool RpcDigiTool::digitizeHitBI(const TimedHit &simHit,
 
   // Get corresponding strip number and apply checks
   const int strip = design.stripNumber(locHitPosition);
-  // std::cout << " strip number: " << strip;
   if (strip < 0) {
     ATH_MSG_VERBOSE("Hit " << Amg::toString(locHitPosition)
                            << " cannot trigger any signal in a strip for "
@@ -239,31 +257,22 @@ bool RpcDigiTool::digitizeHitBI(const TimedHit &simHit,
     minStrip = strip - halfCluster;    // min strip number
     if (clusterSize % 2 == 0) { // if clusterSize is even, we have to randomly
                                 // assign one strip on left or right side
-      int side = (int)(CLHEP::RandFlat::shoot(rndEngine, 0., 1.) + 0.5);
+      int side = Acts::copySign(1,CLHEP::RandFlat::shoot(rndEngine, 0., 1.) + 0.5);
       minStrip += side; // if side==1 move the min strip to right
     }
     maxStrip = minStrip + clusterSize - 1;
     // Check design strip boundaries
-    if (minStrip < design.firstStripNumber())
-      minStrip = design.firstStripNumber();
-    if (maxStrip > design.firstStripNumber() + design.numStrips() - 1)
-      maxStrip = design.firstStripNumber() + design.numStrips() - 1;
+    minStrip = std::max(minStrip, design.firstStripNumber());
+    maxStrip = std::min(design.firstStripNumber() + design.numStrips() - 1, maxStrip);
   }
-  // std::cout << " min and max strip number: " << minStrip << " " << maxStrip;
-
+ 
   // Recalculate cluster size with minStrip and maxStrip
-  if (minStrip == maxStrip)
-    clusterSize = 1;
-  else
-    clusterSize = (maxStrip - minStrip) + 1;
-  // std::cout << " new cluster size: " << clusterSize;
-
+  clusterSize = (maxStrip - minStrip) + 1;
+ 
   // Divide charge on N strips
   const std::vector<double> StripCharges =
       divideChargeOnStrips(TotalChargeOnStrip, clusterSize, rndEngine);
-  // for (auto &s : StripCharges)
-  //   std::cout << " fractions: " << s;
-
+ 
   // Digitize each strip
   for (int aStrip = minStrip; aStrip <= maxStrip; aStrip++) {
     bool isValid{false};
@@ -401,16 +410,14 @@ double RpcDigiTool::calculateChargeOnStrip(const TimedHit &simHit,
   constexpr double W_VALUE_EV = 30.0; // Unit: [eV/pair]
 
   // RPC BI gas gap thickness
-  const double GAP_THICKNESS_M =
-      gasGapSize; // Unit: [m] (2 mm for Phase-II BI RPCs))
+  const double GAP_THICKNESS_M = gasGapSize; // Unit: [m] (2 mm for Phase-II BI RPCs))
 
   // Townsend coefficient for gas mixture and operational voltage
-  constexpr double ALPHA_PER_M = 5500.0; // Unit: [1/m]
+  constexpr double ALPHA_PER_M = 5500.0 / Gaudi::Units::m; // Unit: [1/m]
 
   // Energy deposited by Geant4
-  const double energy_deposit_ev =
-      simHit->energyDeposit() * 1.0e6; // [MeV] -> [eV]
-
+  const double energy_deposit_ev = simHit->energyDeposit() / Gaudi::Units::eV;
+ 
   // Number of electron-ion pairs created
   const double N0 = energy_deposit_ev / W_VALUE_EV;
 
@@ -427,7 +434,9 @@ double RpcDigiTool::calculateChargeOnStrip(const TimedHit &simHit,
   // Total charge
   const double total_charge_c = N0 * gas_gain * Gaudi::Units::e_SI; // Unit: [C]
 
-  ATH_MSG_DEBUG("Charge on strip (fC): " << total_charge_c * 1e15);
+  ATH_MSG_DEBUG(__func__<<"() - "<<__LINE__<<" GAP_THICKNESS_M: "<<GAP_THICKNESS_M<<
+      ", "<<energy_deposit_ev<<", z_hit_m: "<<z_hit_m<<", N0: "<<N0<<", z_drift_m: "<<z_drift_m
+    <<", gas_gain: "<<gas_gain<< "---> Charge on strip (fC): " << total_charge_c * 1e15);
 
   return total_charge_c * 1e15; // charge in fC
 }

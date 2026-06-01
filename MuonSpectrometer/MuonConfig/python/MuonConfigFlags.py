@@ -79,7 +79,7 @@ def createMuonConfigFlags():
                                                                prevFlags.Input.isMC and \
                                                                not prevFlags.Trigger.doHLT)
 
-    mcf.addFlag("Muon.doFastRPCDigitization",True) ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
+    mcf.addFlag("Muon.doFastRPCDigitization",False) ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
     
     # 2. Reco MuonRecFlags 
 
