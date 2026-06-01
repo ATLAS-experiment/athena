@@ -3,7 +3,7 @@
 # art-type: grid
 # art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-architecture: '#&nvidia'
-# art-pathena-flags-add: --site=CERN-GPU
+# art-pathena-flags-add: --site=UKI-LT2-QMUL_GPU,UKI-NORTHGRID-MAN-HEP_GPU,CERN-GPU
 # art-memory: 4095
 # art-output: IDTPM.*.root
 # art-output: *.json
