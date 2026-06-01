@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_RecAlgs/src/TrackTimeDefAndQualityAlg.cxx
  * @author Valentina Raskina <valentina.raskina@cern.ch>
@@ -71,7 +71,7 @@ StatusCode TrackTimeDefAndQualityAlg::execute(const EventContext& ctx) const {
     layerClusterTimeHandle(m_layerClusterTimeKey, ctx);
   ATH_CHECK(layerClusterTimeHandle.isValid());
 
-  SG::ReadDecorHandle<xAOD::TrackParticleContainer, std::vector<bool>>
+  SG::ReadDecorHandle<xAOD::TrackParticleContainer, std::vector<char>>
       layerHasExtensionHandle(m_layerHasExtensionKey, ctx);
   ATH_CHECK(layerHasExtensionHandle.isValid());
 
@@ -84,7 +84,7 @@ StatusCode TrackTimeDefAndQualityAlg::execute(const EventContext& ctx) const {
     // runs the time consistency checks
     // if no hits are found in HGTD, returns a default time
     const std::vector<float>& times = layerClusterTimeHandle(*track_ptkl);
-    const std::vector<bool>& has_clusters = layerHasExtensionHandle(*track_ptkl);
+    const std::vector<char>& has_clusters = layerHasExtensionHandle(*track_ptkl);
     const std::vector<int>& hit_classification = layerClusterTruthClassHandle(*track_ptkl);
 
     CleaningResult res = runTimeConsistencyCuts(times,
@@ -121,7 +121,7 @@ StatusCode TrackTimeDefAndQualityAlg::execute(const EventContext& ctx) const {
 
 TrackTimeDefAndQualityAlg::CleaningResult
 TrackTimeDefAndQualityAlg::runTimeConsistencyCuts(const std::vector<float>& times,
-						  const std::vector<bool>& has_clusters,
+						  const std::vector<char>& has_clusters,
 						  const std::vector<int>& hit_classification) const {
   // get all available hits (see the struct Hit) in a first step
   std::array<Hit, s_hgtd_layers> valid_hits = getValidHits(times,
@@ -209,7 +209,7 @@ TrackTimeDefAndQualityAlg::runTimeConsistencyCuts(const std::vector<float>& time
 
 std::array<TrackTimeDefAndQualityAlg::Hit, s_hgtd_layers>
 TrackTimeDefAndQualityAlg::getValidHits(const std::vector<float>& times,
-					const std::vector<bool>& has_clusters,
+					const std::vector<char>& has_clusters,
 					const std::vector<int>& hit_classification) const {
   std::array<Hit, s_hgtd_layers> valid_hits {};
 
