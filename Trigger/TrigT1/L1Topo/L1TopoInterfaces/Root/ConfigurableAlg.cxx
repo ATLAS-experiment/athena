@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //  BaseTOBoAlg.cpp
 //  TopoCore
@@ -200,13 +200,13 @@ ConfigurableAlg::calcDeltaR2(const TCS::GenericTOB* tob1, const TCS::GenericTOB*
 
 // define parameters to be called by developer
 void
-ConfigurableAlg::defineParameter(const std::string & name, TCS::parType_t value) {
+ConfigurableAlg::defineParameter(std::string_view name, TCS::parType_t value) {
    defineParameter( Parameter(name, value) );
 }
 
 
 void
-ConfigurableAlg::defineParameter(const std::string & name, TCS::parType_t value, unsigned int selection) {
+ConfigurableAlg::defineParameter(std::string_view name, TCS::parType_t value, unsigned int selection) {
    defineParameter( Parameter(name, value, selection) );
 }
 
