@@ -63,7 +63,7 @@ std::vector<const xAOD::Muon*> TrigTauMonitorTandPAlgorithm::getOfflineMuons(con
         if(mu->p4().Pt()/Gaudi::Units::GeV < threshold) continue; 
 
         // Select offline muons passing good quality cuts (quality >= Medium, but the Enum indexes are reversed...)
-        if(!(mu->quality() <= xAOD::Muon::Medium && mu->passesIDCuts())) continue;
+        if(!(mu->quality() <= xAOD::Muon::Quality::Medium && mu->passesIDCuts())) continue;
 
         mu_vec.push_back(mu);
     }

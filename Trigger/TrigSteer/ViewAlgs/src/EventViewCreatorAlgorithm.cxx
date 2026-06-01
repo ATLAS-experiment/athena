@@ -12,6 +12,14 @@
 
 #include <sstream>
 
+ElementLink<xAOD::TrackParticleContainer> makeLink(const xAOD::TrackParticle* track) {
+    if (!track) {
+        return ElementLink<xAOD::TrackParticleContainer>{};
+    }
+    return ElementLink<xAOD::TrackParticleContainer>{static_cast<const xAOD::TrackParticleContainer&>(*track->container()),
+                                                      track->index()};
+}
+
 using namespace TrigCompositeUtils;
 
 EventViewCreatorAlgorithm::EventViewCreatorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
@@ -313,15 +321,19 @@ StatusCode EventViewCreatorAlgorithm::placeMuonInView( const xAOD::Muon* theObje
   auto oneObjectAuxCollection = std::make_unique< xAOD::MuonAuxContainer >();
   oneObjectCollection->setStore( oneObjectAuxCollection.get() );
 
-  xAOD::Muon* copiedMuon = new xAOD::Muon();
-  oneObjectCollection->push_back( copiedMuon );
+  xAOD::Muon* copiedMuon =  oneObjectCollection->push_back( std::make_unique<xAOD::Muon>());  
+  
   *copiedMuon = *theObject;
 
   auto muonCandidate = std::make_unique< ConstDataVector< MuonCandidateCollection > >();
-  auto msLink = theObject->muonSpectrometerTrackParticleLink();
-  auto extTrackLink = theObject->extrapolatedMuonSpectrometerTrackParticleLink();
-  if(msLink.isValid() && extTrackLink.isValid()) muonCandidate->push_back( new MuonCombined::MuonCandidate(msLink, (*extTrackLink)->trackLink(), (*extTrackLink)->index()) );
+  auto* msLink       = theObject->trackParticle(xAOD::Muon::TrackParticleType::MuonSpectrometerTrackParticle);
+  auto* extTrackLink = theObject->trackParticle(xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle);
+  if(msLink && extTrackLink) {
 
+    muonCandidate->push_back( std::make_unique<MuonCombined::MuonCandidate>(makeLink(msLink), 
+                                                                            extTrackLink->trackLink(), 
+                                                                            extTrackLink->index()) );
+  }
   //store both in the view
   auto handleMuon = ViewHelper::makeHandle( view, m_inViewMuons, context );
   ATH_CHECK( handleMuon.record( std::move( oneObjectCollection ), std::move( oneObjectAuxCollection )) );
