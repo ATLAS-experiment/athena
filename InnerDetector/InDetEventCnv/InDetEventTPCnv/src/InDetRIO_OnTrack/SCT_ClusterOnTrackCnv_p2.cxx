@@ -64,18 +64,48 @@ void SCT_ClusterOnTrackCnv_p2::transToPers(const InDet::SCT_ClusterOnTrack* tran
   persObj->m_idDE = transObj->idDE();
   persObj->m_isbroad = transObj->isBroadCluster();
   persObj->m_positionAlongStrip = static_cast<float>(transObj->positionAlongStrip());
+  
+  using SCTContainer = InDet::SCT_ClusterContainer;
 
-  static const SG::InitializedReadHandleKey<InDet::SCT_ClusterContainer> sctClusContName ("SCT_Clusters");
-  ElementLink<InDet::SCT_ClusterContainer>::index_type hashAndIndex{0};
-  bool isFound{m_eventCnvTool->getHashAndIndex<InDet::SCT_ClusterContainer, InDet::SCT_ClusterOnTrack>(transObj, sctClusContName, hashAndIndex)};
-  if(m_eventCnvTool->doTrackOverlay()){
-    persObj->m_prdLink.m_contName = (isFound ? "Bkg_SCT_Clusters" : "");
-    if(!isFound){ //in this case the input collection is called Bkg_SCT_Clusters as well
-      static const SG::InitializedReadHandleKey<InDet::SCT_ClusterContainer> sctClusContName("Bkg_SCT_Clusters");
-      isFound=m_eventCnvTool->getHashAndIndex<InDet::SCT_ClusterContainer, InDet::SCT_ClusterOnTrack>(transObj, sctClusContName, hashAndIndex);
-      persObj->m_prdLink.m_contName = (isFound ? "Bkg_SCT_Clusters" : "");
-    }
+  static const SG::InitializedReadHandleKey<SCTContainer> sctClusters{
+      "SCT_Clusters"};
+  static const SG::InitializedReadHandleKey<SCTContainer> bkgSctClusters{
+      "Bkg_SCT_Clusters"};
+  static const SG::InitializedReadHandleKey<SCTContainer> itkStripClusters{
+      "ITkStripClusters"};
+  static const SG::InitializedReadHandleKey<SCTContainer> bkgItkStripClusters{
+      "Bkg_ITkStripClusters"};
+
+  struct ContainerCandidate {
+    const SG::ReadHandleKey<SCTContainer>& key;
+    const char* overlayOutputName;
+  };
+  static const ContainerCandidate candidates[] = {
+      {sctClusters, "Bkg_SCT_Clusters"},
+      {itkStripClusters, "Bkg_ITkStripClusters"},
+      {bkgSctClusters, "Bkg_SCT_Clusters"},
+      {bkgItkStripClusters, "Bkg_ITkStripClusters"},
+  };
+
+  ElementLink<SCTContainer>::index_type hashAndIndex{0};
+
+  persObj->m_prdLink.m_contName.clear();
+
+  const bool doOverlay = m_eventCnvTool->doTrackOverlay();
+
+  for (const ContainerCandidate& candidate : candidates) {
+    const bool found =
+        m_eventCnvTool
+            ->getHashAndIndex<SCTContainer, InDet::SCT_ClusterOnTrack>(
+                transObj, candidate.key, hashAndIndex);
+
+    if (!found) continue;
+
+    persObj->m_prdLink.m_contName =
+        doOverlay ? candidate.overlayOutputName : candidate.key.key();
+
+    break;
   }
-  else persObj->m_prdLink.m_contName = (isFound ? sctClusContName.key() : "");
+
   persObj->m_prdLink.m_elementIndex = hashAndIndex;
 }

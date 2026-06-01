@@ -29,9 +29,9 @@ Trk::TrackCollectionMerger::initialize()
 
   ATH_MSG_DEBUG("Initializing TrackCollectionMerger");
   ATH_CHECK(m_tracklocation.initialize());
-  ATH_CHECK(m_pileupTRT.initialize(m_doTrackOverlay));
-  ATH_CHECK(m_pileupPixel.initialize(m_doTrackOverlay));
-  ATH_CHECK(m_pileupSCT.initialize(m_doTrackOverlay));
+  ATH_CHECK(m_pileupTRT.initialize(m_doTrackOverlay && !m_pileupTRT.key().empty()));
+  ATH_CHECK(m_pileupPixel.initialize(m_doTrackOverlay && !m_pileupPixel.key().empty()));
+  ATH_CHECK(m_pileupSCT.initialize(m_doTrackOverlay && !m_pileupSCT.key().empty()));
   ATH_CHECK(m_outtracklocation.initialize());
   ATH_CHECK(m_assoTool.retrieve(DisableTool{m_assoTool.name().empty()}));
   ATH_CHECK(m_assoMapName.initialize(!m_assoMapName.key().empty()));
