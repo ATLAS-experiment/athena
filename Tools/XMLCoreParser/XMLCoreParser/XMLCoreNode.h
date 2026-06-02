@@ -15,6 +15,7 @@
 
 
 #include <string>
+#include <string_view>
 #include <map>
 #include <vector>
 #include <memory>
@@ -146,7 +147,7 @@ public:
    * Returns an invalid optional if the attribute does not exist or cannot
    * be converted to an integer.
    */
-  std::optional<int> try_int_attrib (const std::string& name) const;
+  std::optional<int> try_int_attrib (std::string_view name) const;
 
 
   /**
@@ -156,7 +157,7 @@ public:
    * Returns an invalid optional if the attribute does not exist or cannot
    * be converted to a double.
    */
-  std::optional<double> try_double_attrib (const std::string& name) const;
+  std::optional<double> try_double_attrib (std::string_view name) const;
 
 
   /**
@@ -165,7 +166,7 @@ public:
    *
    * Throws an exception if the attribute does not exist.
    */
-  const std::string& get_attrib (const std::string& name) const;
+  const std::string& get_attrib (std::string_view name) const;
 
 
   /**
@@ -175,7 +176,7 @@ public:
    * Throws an exception if the attribute does not exist or cannot
    * be converted to an int.
    */
-  int get_int_attrib (const std::string& name) const;
+  int get_int_attrib (std::string_view name) const;
 
 
   /**
@@ -185,7 +186,7 @@ public:
    * Throws an exception if the attribute does not exist or cannot
    * be converted to a double.
    */
-  double get_double_attrib (const std::string& name) const;
+  double get_double_attrib (std::string_view name) const;
 
 
   /**
@@ -245,7 +246,7 @@ private:
    * or cannot be converted to @c T.
    */
   template <class T>
-  std::optional<T> try_attrib (const std::string& name) const;
+  std::optional<T> try_attrib (std::string_view name) const;
 
 
   /**
@@ -274,7 +275,7 @@ private:
   std::string m_value;
 
   /// Attributes of this node.
-  std::map<std::string, std::string> m_attribs;
+  std::map<std::string, std::string, std::less<>> m_attribs;
 
   /// Children of this node.
   std::vector<std::unique_ptr<XMLCoreNode> > m_children;
