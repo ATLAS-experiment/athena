@@ -40,16 +40,16 @@ namespace FlavorTagInference {
                   if (std::abs(mu->eta()) > 2.5) return false;
                   if (mu->pt() <= 2000) return false;
                   if (mu->pt() >= 3000000) return false;
-                  if (mu->muonType() != xAOD::Muon::Combined) return false;
+                  if (mu->muonType() != xAOD::Muon::MuonType::Combined) return false;
 
                   // Check that ID and MS tracks are good
-                  auto InnerDetectorTrack = mu->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
-                  auto MuonSpectrometerTrack = mu->trackParticle(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle);
+                  auto InnerDetectorTrack = mu->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
+                  auto MuonSpectrometerTrack = mu->trackParticle(xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle);
                   if (!InnerDetectorTrack || !MuonSpectrometerTrack) return false;
                   if (MuonSpectrometerTrack->qOverP() == 0) return false;
 
                   float momBalSignif = 0;
-                  mu->parameter(momBalSignif, xAOD::Muon::momentumBalanceSignificance);
+                  mu->parameter(momBalSignif, xAOD::Muon::ParamDef::momentumBalanceSignificance);
                   if (momBalSignif == 0) return false;
 
                   return true;
@@ -58,7 +58,7 @@ namespace FlavorTagInference {
         case ConstituentsSelection::R22_BJR:
             return {
                 [](const xAOD::IParticle& jet, const xAOD::Muon* mu) {
-                  if (mu->quality() > 2)
+                  if (mu->quality() > xAOD::Muon::Quality::Loose)
                     return false;
                   // Check minimum muon pT
                   if (mu->pt() < 1000 || mu->pt() > 500000) // 1 < pT < 500 GeV
@@ -75,7 +75,7 @@ namespace FlavorTagInference {
                   if (mu->p4().Vect().Perp(jet.p4().Vect()) > 5000) // pTrel < 5 GeV
                     return false;
 
-                  const auto* track = mu->primaryTrackParticle();
+                  const auto* track = mu->trackParticle(xAOD::Muon::TrackParticleType::Primary);
                   if (!track)
                     return false;
                   if (std::abs(track->d0()) >= 1)
