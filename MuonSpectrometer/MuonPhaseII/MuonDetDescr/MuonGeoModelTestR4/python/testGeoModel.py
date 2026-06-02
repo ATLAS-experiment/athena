@@ -73,6 +73,7 @@ def SetupArgParser():
     parser.add_argument("--localMdtMezzJSON", default="", help="")
     parser.add_argument("--localMdtCablingJSON", default="", help="")
     parser.add_argument("--passiveMaterialMaps", default = "", help="Root file with the material maps on the surfaces")
+    parser.add_argument("--noPlots", help="Disable the pdf dumps of the geo tester", action='store_true', default = False)
     return parser
 
 def setupServicesCfg(flags):
@@ -93,16 +94,21 @@ def setupServicesCfg(flags):
     result.merge(MuonIdHelperSvcCfg(flags))
     return result
 
-def GeoModelMdtTestCfg(flags, name = "GeoModelMdtTest", localMezzanineJSON="", localCablingJSON="",**kwargs):
+def GeoModelMdtTestCfg(flags, name = "GeoModelMdtTest", localMezzanineJSON="", localCablingJSON="", doPlots=True,**kwargs):
     result = ComponentAccumulator()
     from MuonConfig.MuonCablingConfig import MDTCablingConfigCfg
     result.merge(MDTCablingConfigCfg(flags,MezzanineJSON=localMezzanineJSON, CablingJSON=localCablingJSON))
+    if not doPlots:
+        kwargs["visualizeTubes"] = False
+        kwargs["visualizeStaggering"] = False
     the_alg = CompFactory.MuonGMR4.GeoModelMdtTest(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
 
-def GeoModelRpcTestCfg(flags, name = "GeoModelRpcTest", **kwargs):
+def GeoModelRpcTestCfg(flags, name = "GeoModelRpcTest", doPlots=True,**kwargs):
     result = ComponentAccumulator()
+    if not doPlots:
+        kwargs["visualizePlanes"] = False
     the_alg = CompFactory.MuonGMR4.GeoModelRpcTest(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
@@ -303,6 +309,7 @@ if __name__=="__main__":
                                          localMezzanineJSON=args.localMdtMezzJSON,
                                          localCablingJSON=args.localMdtCablingJSON,
                                          ReadoutSideXML="ReadoutSides.xml",
+                                         doPlots=not args.noPlots,
                                          ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' )]))
 
     if flags.Detector.GeometryRPC: 
@@ -315,6 +322,7 @@ if __name__=="__main__":
             cfg.merge(GeoModelRpcTestCfg(flags, 
                                          TestStations = [ch for ch in chambToTest if ch[0] == "B"],
                                          ExcludeStations = [ch for ch in chambToExclude if ch[0] == "B"],
+                                         doPlots=not args.noPlots,
                                          ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' )]))
 
     if flags.Detector.GeometryTGC:
