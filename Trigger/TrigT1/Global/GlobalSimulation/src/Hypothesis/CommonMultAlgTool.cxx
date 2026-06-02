@@ -2,14 +2,14 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "./JetMultAlgTool.h"
+#include "./CommonMultAlgTool.h"
 #include "./CommonSelector.h"
 
 #include <fstream>
 
 namespace GlobalSim {
 
-  JetMultAlgTool::JetMultAlgTool(const std::string& type,
+  CommonMultAlgTool::CommonMultAlgTool(const std::string& type,
 				 const std::string& name,
 				 const IInterface* parent) :
     base_class(type, name, parent) {
@@ -17,9 +17,9 @@ namespace GlobalSim {
   
   
   // Initialize function running before first event
-  StatusCode JetMultAlgTool::initialize() {
+  StatusCode CommonMultAlgTool::initialize() {
 
-    CHECK(m_JetTOBContainerKey.initialize());
+    CHECK(m_CommonTOBContainerKey.initialize());
 
     if (m_n_multbits < 0) {
       ATH_MSG_ERROR("number of bits to write to TIP is negative");
@@ -54,10 +54,10 @@ namespace GlobalSim {
   }
 
   
-  StatusCode JetMultAlgTool::updateTIP(std::bitset<s_nbits_TIP>& word,
+  StatusCode CommonMultAlgTool::updateTIP(std::bitset<s_nbits_TIP>& word,
 					     const EventContext& ctx) const {
     auto tobs =
-      SG::ReadHandle<GlobalSim::IOBitwise::CommonTOBContainer>(m_JetTOBContainerKey,
+      SG::ReadHandle<GlobalSim::IOBitwise::CommonTOBContainer>(m_CommonTOBContainerKey,
 								  ctx);
 
     CHECK(tobs.isValid());
@@ -111,10 +111,10 @@ namespace GlobalSim {
     return StatusCode::SUCCESS;
   }
 
-  std::string JetMultAlgTool::toString() const {
+  std::string CommonMultAlgTool::toString() const {
     std::stringstream ss;
     ss <<name () << ": " <<m_menu_name << ' '
-       << "JetMultAlgTool read, select, count and report number of related Jet CommonTOBS\n"
+       << "CommonMultAlgTool read, select, count and report number of related CommonTOBS\n"
        << m_c_selector->to_string() << '\n'
        << m_TIP_position << ' ' << m_n_multbits;
 

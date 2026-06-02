@@ -2,8 +2,8 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef GLOBALSIM_JETMULTALGTOOL_H
-#define GLOBALSIM_JETMULTALGTOOL_H
+#ifndef GLOBALSIM_COMMONMULTALGTOOL_H
+#define GLOBALSIM_COMMONMULTALGTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
 
@@ -17,19 +17,19 @@
 namespace GlobalSim {
 
   /**
-   * @brief AlgTool to count GlobalSim::IOBitwise::CommonTOB Jet objects.
-   * Cutting on the  Jet score
+   * @brief AlgTool to count GlobalSim::IOBitwise::CommonTOB objects.
+   * Cutting on the et/eta/phi values
    */
 
 
-  class JetMultAlgTool: public extends<AthAlgTool, ITIPwriterAlgTool> {
+  class CommonMultAlgTool: public extends<AthAlgTool, ITIPwriterAlgTool> {
 
   public:
-    JetMultAlgTool(const std::string& type,
+    CommonMultAlgTool(const std::string& type,
 		   const std::string& name,
 		   const IInterface* parent);
 
-    virtual ~JetMultAlgTool() override = default;
+    virtual ~CommonMultAlgTool() override = default;
 
     /** @brief Initialize function running before first event */
     virtual StatusCode initialize() override;
@@ -43,11 +43,11 @@ namespace GlobalSim {
   
     std::unique_ptr<ICommonSelector> m_c_selector{nullptr};
 
-    SG::ReadHandleKey<IOBitwise::CommonTOBContainer> m_JetTOBContainerKey {
+    SG::ReadHandleKey<IOBitwise::CommonTOBContainer> m_CommonTOBContainerKey {
       this,
-      "GlobalJet1JetsKey",
-      "GlobalJet1Jets",
-      "Key for GlobalSim Jet CommonTOB container"};
+      "CommonTOBsKey",
+      "CommonTOBs",
+      "Key for GlobalSim CommonTOB container"};
     
     Gaudi::Property<std::string> m_et_low_str {
       this,
