@@ -1,5 +1,5 @@
 /*
-        Copyright (C) 2019-2023 CERN for the benefit of the ATLAS collaboration
+        Copyright (C) 2019-2026 CERN for the benefit of the ATLAS collaboration
 */
 // Author: Neza Ribaric <neza.ribaric@cern.ch>
 
@@ -129,6 +129,8 @@ namespace InDet {
         static const xAOD::Vertex::Decorator<bool> isInitialized("isInitialized");
         static const xAOD::Vertex::Decorator<std::vector<Trk::VxTrackAtVertex*>> VTAV("VTAV");
 
+        const EventContext& ctx = Gaudi::Hive::currentContext();
+
         std::vector<xAODVertex_pair> myxAODVertices;
 
         std::vector<Trk::TrackToVtxLink*> myTrackToVtxLinks;
@@ -210,7 +212,7 @@ for (const Trk::ITrackLink* seedtrkAtVtxIter : seedTracks) { perigeeList.push_ba
 
             for (Trk::ITrackLink* trkIter : origTracks) {
                 // now fill perigeesToFit list of track parameters from origTracks
-                float doe = findCompatibleTracks(seedVertex, trkIter);
+                float doe = findCompatibleTracks(ctx, seedVertex, trkIter);
                 if (doe < m_significanceCutSeeding) {
                     Trk::TrackToVtxLink* actualLink = TrackLinkOf[trkIter];
                     std::vector<xAOD::Vertex*>* actualvtxlink = actualLink->vertices();
@@ -247,7 +249,7 @@ for (const Trk::ITrackLink* seedtrkAtVtxIter : seedTracks) { perigeeList.push_ba
             
             ATH_MSG_DEBUG("Going to fitter.");
 
-            m_VertexFitter->addVtxTofit(actualCandidate);
+            m_VertexFitter->addVtxTofit(ctx, actualCandidate);
 
             ATH_MSG_DEBUG("Deleting tracks with really good fit to vertex from seeding tracks.");
             int nFound = removeTracksFromSeeds(actualCandidate, seedTracks);
@@ -258,7 +260,7 @@ for (const Trk::ITrackLink* seedtrkAtVtxIter : seedTracks) { perigeeList.push_ba
                 // all the tracks used for the fit came from fitting track list
                 //-> so remove the closest track to seed from seeding, otherwise you'll keep finding the same seed position
 
-                removeClosestTrack(seedVertex, seedTracks, nFound);
+                removeClosestTrack(ctx, seedVertex, seedTracks, nFound);
             }
 
             if (nFound == 0) {
@@ -535,12 +537,12 @@ for (const Trk::ITrackLink* seedtrkAtVtxIter : seedTracks) { perigeeList.push_ba
         return nFound;
     }
 
-    float InDetAdaptiveMultiSecVtxFinderTool::findCompatibleTracks(Amg::Vector3D& seedVertex, Trk::ITrackLink* trkIter) const {
+    float InDetAdaptiveMultiSecVtxFinderTool::findCompatibleTracks(const EventContext& ctx, Amg::Vector3D& seedVertex, Trk::ITrackLink* trkIter) const {
         double distance = 0.;
 
         try {
             std::unique_ptr<Trk::PlaneSurface> mySurface =
-                m_ImpactPoint3dEstimator->Estimate3dIP((trkIter)->parameters(), &seedVertex, distance);
+                m_ImpactPoint3dEstimator->Estimate3dIP(ctx, (trkIter)->parameters(), &seedVertex, distance);
             ATH_MSG_VERBOSE(" ImpactPoint3dEstimator done ");
         } catch (error::ImpactPoint3dEstimatorProblem err) {
             ATH_MSG_DEBUG(" ImpactPoint3dEstimator failed to find minimum distance between track and vertex seed: " << err.p);
@@ -568,7 +570,8 @@ for (const Trk::ITrackLink* seedtrkAtVtxIter : seedTracks) { perigeeList.push_ba
         return doe;
     }
 
-    void InDetAdaptiveMultiSecVtxFinderTool::removeClosestTrack(Amg::Vector3D& seedVertex, std::vector<Trk::ITrackLink*>& seedTracks,
+    void InDetAdaptiveMultiSecVtxFinderTool::removeClosestTrack(const EventContext& ctx,
+                                                                Amg::Vector3D& seedVertex, std::vector<Trk::ITrackLink*>& seedTracks,
                                                                 int& nFound) const {
         const Trk::ITrackLink* nearestTrack = nullptr;
         double dist = 1e8;
@@ -577,7 +580,7 @@ for (const Trk::ITrackLink* seedtrkAtVtxIter : seedTracks) { perigeeList.push_ba
             double distance = 0.;
             try {
                 std::unique_ptr<Trk::PlaneSurface> mySurface =
-                    m_ImpactPoint3dEstimator->Estimate3dIP((trkIter)->parameters(), &seedVertex, distance);
+                    m_ImpactPoint3dEstimator->Estimate3dIP(ctx, (trkIter)->parameters(), &seedVertex, distance);
             } catch (error::ImpactPoint3dEstimatorProblem err) {
                 ATH_MSG_DEBUG(" ImpactPoint3dEstimator failed to find minimum distance between this track and vertex seed: " << err.p);
             }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file TrkVertexFitterUtils/test/ImpactPoint3dEstimator_test.cxx
@@ -94,19 +94,25 @@ void test1 (Trk::IImpactPoint3dEstimator& tool)
 {
   std::cout << "test1\n";
 
+  EventIDBase now(0, EventIDBase::UNDEFEVT, 1);
+  EventContext ctx(1, 1);
+  ctx.setEventID( now );
+  ctx.setExtension( Atlas::ExtendedEventContext() );
+  Gaudi::Hive::setCurrentContext(ctx);
+
   Amg::Vector3D pos1 { 2*mm, 1*mm, -10*mm };
   Amg::Vector3D mom1 { 400*MeV, 600*MeV, 200*MeV };
   Amg::Vector3D vert { 1.2*mm, 0.8*mm, -7*mm };
 
   double distance = 0;
   Trk::Perigee p1 (pos1, mom1, 1, pos1, cov5());
-  std::unique_ptr<Trk::PlaneSurface> s1 (tool.Estimate3dIP (&p1, &vert, distance));
+  std::unique_ptr<Trk::PlaneSurface> s1 (tool.Estimate3dIP (ctx, &p1, &vert, distance));
   checkPlaneSurface (*s1, vert, {0.53466, 0.801692, 0.267261});
   assert( Athena_test::isEqual (distance, 3.10391, 1e-5) );
 
   distance = 0;
   Trk::NeutralPerigee p2 (pos1, mom1, 1, pos1, cov5());
-  std::unique_ptr<Trk::PlaneSurface> s2 (tool.Estimate3dIP (&p2, &vert, distance));
+  std::unique_ptr<Trk::PlaneSurface> s2 (tool.Estimate3dIP (ctx, &p2, &vert, distance));
   checkPlaneSurface (*s2, vert, {0.534522, 0.801784, 0.267261});
   assert( Athena_test::isEqual (distance, 3.10391, 1e-5) );
 

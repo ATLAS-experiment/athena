@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -140,7 +140,7 @@ namespace Trk
      */
 
     void 
-    fit(std::vector<xAOD::Vertex*> & allVertices) const;
+    fit(const EventContext& ctx, std::vector<xAOD::Vertex*> & allVertices) const;
 
     /**
      * Adds a new MVFVxCandidate to a previous multi-vertex fit and fits everything together.
@@ -168,10 +168,10 @@ namespace Trk
      */
 
     void 
-    addVtxToFit(xAOD::Vertex* pVtx) const; 
+    addVtxToFit(const EventContext& ctx, xAOD::Vertex* pVtx) const;
     //
     void 
-    addVtxTofit(xAOD::Vertex* pVtx)  const { return addVtxToFit(pVtx);}
+    addVtxTofit(const EventContext& ctx, xAOD::Vertex* pVtx)  const { return addVtxToFit(ctx, pVtx);}
     
     static const InterfaceID& 
     interfaceID() {
@@ -207,7 +207,7 @@ namespace Trk
      */
 
     void 
-    prepareCompatibility(xAOD::Vertex* newvertex) const;
+    prepareCompatibility(const EventContext& ctx, xAOD::Vertex* newvertex) const;
 
     /**
      * Max number of iterations.

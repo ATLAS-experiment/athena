@@ -204,6 +204,7 @@ private:
    * NeutralParameters, with or without constraint and starting point
    */
   std::unique_ptr<xAOD::Vertex> _fit(
+                     const EventContext& ctx,
                      const std::vector<const Trk::TrackParameters*>& perigeeList,
                      const std::vector<const Trk::NeutralParameters*>& neutralPerigeeList =
                        std::vector<const Trk::NeutralParameters*>(),
@@ -212,6 +213,7 @@ private:
                      bool IsConstraint = false,
                      bool IsStartingPoint = false) const;
   std::unique_ptr<xAOD::Vertex> _fit(
+                     const EventContext& ctx,
                      const std::vector<const Trk::TrackParameters*>& perigeeList,
                      const xAOD::Vertex& constraint = xAOD::Vertex(),
                      const Amg::Vector3D& startingPoint = Amg::Vector3D(),
@@ -224,6 +226,7 @@ private:
    */
 
   std::unique_ptr<xAOD::Vertex> _fit(
+                     const EventContext& ctx,
                      const std::vector<const Trk::Track*>& VectorTrk,
                      const xAOD::Vertex& constraint = xAOD::Vertex(),
                      const Amg::Vector3D& startingPoint = Amg::Vector3D(),
@@ -236,7 +239,8 @@ private:
    * The real fit happens here.
    */
 
-  std::unique_ptr<xAOD::Vertex> dothefit(const xAOD::Vertex& ConstraintVertex,
+  std::unique_ptr<xAOD::Vertex> dothefit(const EventContext& ctx,
+                         const xAOD::Vertex& ConstraintVertex,
                          const Amg::Vector3D& SeedVertex,
                          std::vector<VxTrackAtVertex>& myLinTracks) const;
 

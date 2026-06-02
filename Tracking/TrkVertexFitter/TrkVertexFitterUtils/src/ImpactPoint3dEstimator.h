@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKVERTEXFITTERUTILS_IMPACTPOINT3DESTIMATOR_H
@@ -50,19 +50,21 @@ namespace Trk
     virtual ~ImpactPoint3dEstimator();
     
     virtual std::unique_ptr<PlaneSurface>
-    Estimate3dIP(const Trk::TrackParameters* trackPerigee,
+    Estimate3dIP(const EventContext& ctx,
+                 const Trk::TrackParameters* trackPerigee,
                  const Amg::Vector3D* theVertex,
                  double& distance) const override;
 
     virtual std::unique_ptr<PlaneSurface>
-    Estimate3dIP(const Trk::NeutralParameters* neutralPerigee,
+    Estimate3dIP(const EventContext& ctx,
+                 const Trk::NeutralParameters* neutralPerigee,
                  const Amg::Vector3D* theVertex,
                  double& distance) const override;
    
     /**
       * Actual estimate method, changing the state of Trk::VxTrackAtVertex
       */
-    virtual bool addIP3dAtaPlane(VxTrackAtVertex &,const Amg::Vector3D & vertex) const override;
+    virtual bool addIP3dAtaPlane(const EventContext& ctx, VxTrackAtVertex &,const Amg::Vector3D & vertex) const override;
 
     /**
       *
@@ -71,10 +73,10 @@ namespace Trk
       * intersecting the track at point of closest approach, with track ortogonal to the plane and center 
       * of the plane defined as the given vertex.
       */
-    virtual const Trk::AtaPlane * IP3dAtaPlane(VxTrackAtVertex & vtxTrack,const Amg::Vector3D & vertex) const override;
+    virtual const Trk::AtaPlane * IP3dAtaPlane(const EventContext& ctx,VxTrackAtVertex & vtxTrack,const Amg::Vector3D & vertex) const override;
 
     //Same for neutrals
-    virtual const Trk::NeutralAtaPlane * IP3dNeutralAtaPlane(const NeutralParameters * initNeutPerigee,const Amg::Vector3D & vertex) const override;
+    virtual const Trk::NeutralAtaPlane * IP3dNeutralAtaPlane(const EventContext& ctx,const NeutralParameters * initNeutPerigee,const Amg::Vector3D & vertex) const override;
 
   private:
     template<typename T>
