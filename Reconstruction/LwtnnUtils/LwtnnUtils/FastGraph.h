@@ -41,7 +41,7 @@ namespace lwt::atlas {
     // define a "default" output, so that calling "compute" with no
     // output specified doesn't lead to ambiguity.
     FastGraph(const GraphConfig& config, const InputOrder& order,
-              std::string default_output = "");
+              const std::string & default_output = "");
 
     ~FastGraph();
     FastGraph(FastGraph&) = delete;
