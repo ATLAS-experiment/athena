@@ -1009,6 +1009,30 @@ def createHeavyIonTrackingPassFlags():
 
     return icf
 
+def createHeavyIonLowPtTrackingPassFlags():
+    icf = createHeavyIonTrackingPassFlags()
+    icf.extension        = "LowPt"
+    icf.maxPT            = lambda pcf: 0.6 * Units.GeV * pcf.BField.configuredSolenoidFieldScale
+    icf.minPT            = lambda pcf: 0.2 * Units.GeV * pcf.BField.configuredSolenoidFieldScale
+
+    icf.usePrdAssociationTool = True
+    icf.isLowPt          = True
+    icf.minClusters      = 5
+    icf.minSiNotShared   = 4
+    icf.maxShared        = 1   # cut is now on number of shared modules
+    icf.minPixel         = 2   # At least one pixel hit for low-pt (assoc. seeded on pixels!)
+    icf.maxHoles         = 2
+    icf.maxPixelHoles    = 1
+    icf.maxSctHoles      = 2
+    icf.maxDoubleHoles   = 1
+    icf.radMax           = 600. * Units.mm
+    icf.nHolesMax        = icf.maxHoles
+    icf.nHolesGapMax     = icf.maxHoles # not as tight as 2*maxDoubleHoles
+    icf.maxPrimaryImpact = lambda pcf: (
+        100. * Units.mm if pcf.Tracking.doMinBias else 10. * Units.mm)
+    icf.doBremRecoverySi = False
+    return icf
+
 ### Pixel mode ###############################################
 def createPixelTrackingPassFlags():
     icf = createTrackingPassFlags()

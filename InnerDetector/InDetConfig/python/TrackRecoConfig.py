@@ -44,8 +44,14 @@ def CombinedTrackingPassFlagSets(flags, resetCache=False):
 
     # LowPt pass
     if flags.Tracking.doLowPt:
-        flagsLowPt = flags.cloneAndReplace("Tracking.ActiveConfig",
-                                           "Tracking.LowPtPass")
+        from TrkConfig.TrkConfigFlags import PrimaryPassConfig
+        flagsLowPt = None
+        if flags.Tracking.PrimaryPassConfig is PrimaryPassConfig.HeavyIon:
+            flagsLowPt = flags.cloneAndReplace("Tracking.ActiveConfig",
+                                               "Tracking.HeavyIonLowPtPass")
+        else:
+            flagsLowPt = flags.cloneAndReplace("Tracking.ActiveConfig",
+                                               "Tracking.LowPtPass")
         flags_set += [flagsLowPt]
 
     # VeryLowPt pass
