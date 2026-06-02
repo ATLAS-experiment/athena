@@ -8,6 +8,7 @@
 #include "TProfile.h"
 #include "TProfile2D.h"
 #include "TTree.h"
+#include "TString.h"
 
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/Bootstrap.h"
@@ -111,13 +112,13 @@ namespace G4UA
     if(m_doHistos){
       // Register the RZ profiles. The other profiles need to wait until the end
       // of the events as they are created only if used.
-      const char* radName = "/lengths/radLen/RZRadLen";
+      const std::string radName = "/lengths/radLen/RZRadLen";
       if(!getHist(m_hSvc, radName, m_rzProfRL)) {
 	m_rzProfRL = new TProfile2D("RZRadLen","RZRadLen",1000,-25000.,25000.,2000,0.,15000.);
 	regHist(m_hSvc, radName, m_rzProfRL);
       }
       
-      const char* intName = "/lengths/intLen/RZIntLen";
+      const std::string intName = "/lengths/intLen/RZIntLen";
       if(!getHist(m_hSvc, intName, m_rzProfIL)) {
 	m_rzProfIL = new TProfile2D("RZIntLen","RZIntLen",1000,-25000.,25000.,2000,0.,15000.);
 	regHist(m_hSvc, intName, m_rzProfIL);
