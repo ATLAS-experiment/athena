@@ -19,6 +19,18 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "AthOnnxInterfaces/IAthInferenceTool.h"
 #include "MVAUtils/BDT.h"
+#include <ColumnarCore/ColumnAccessor.h>
+#include <ColumnarCore/ColumnarTool.h>
+#include <ColumnarCore/LinkColumn.h>
+#include <ColumnarCore/ObjectColumn.h>
+#include <ColumnarMuon/MuonDef.h>
+#include <ColumnarMuon/MuonTrackHelpers.h>
+#include <ColumnarTracking/TrackDef.h>
+#include <ColumnarTracking/TrackHelpers.h>
+#include <ColumnarVariant/VariantAccessor.h>
+#include <ColumnarVariant/VariantDef.h>
+#include <ColumnarVariant/VariantLinkColumn.h>
+#include <ColumnarEventInfo/EventInfoDef.h>
 #include <string>
 #include <vector>
 #include <memory>
@@ -38,7 +50,7 @@ namespace CP {
     /// $Revision: 299883 $
     /// $Date: 2014-03-28 18:34:16 +0100 (Fri, 28 Mar 2014) $
     ///
-    class MuonSelectionTool : public virtual IAsgSelectionTool, public virtual IMuonSelectionTool, public asg::AsgTool {
+    class MuonSelectionTool : public virtual IAsgSelectionTool, public virtual IMuonSelectionTool, public asg::AsgTool, public columnar::ColumnarTool<> {
         /// Create a proper constructor for Athena
         ASG_TOOL_CLASS2(MuonSelectionTool, IAsgSelectionTool, CP::IMuonSelectionTool)
 

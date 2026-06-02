@@ -276,6 +276,8 @@ namespace CP {
         ATH_MSG_DEBUG("Finished ONNX tool setup");
         
         ATH_CHECK(m_eventInfo.initialize());
+        // Initialize columnar accessor infrastructure (must be last in initialize)
+        ATH_CHECK(initializeColumns());
         // Return gracefully:
         return StatusCode::SUCCESS;
     }
