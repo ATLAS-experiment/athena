@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -7,14 +7,11 @@
 #include "TBXMLEventWriterTool.h"
 #include "TBXMLWriter.h"
 
-#include <string>
-
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <sstream> 
 
-//#include <map>
 #include <vector>
 
 TBXMLEventWriterTool::TBXMLEventWriterTool(const std::string& type, 
@@ -28,8 +25,7 @@ TBXMLEventWriterTool::~TBXMLEventWriterTool()
 { }
 
 StatusCode
-TBXMLEventWriterTool::writeEvent(std::ostream& outStream,
-				 const std::string&  entryTag)
+TBXMLEventWriterTool::writeEvent(std::ostream& outStream, std::string_view  entryTag)
 {
 
   MsgStream log(msgSvc(),name());

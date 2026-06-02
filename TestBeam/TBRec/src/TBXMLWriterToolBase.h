@@ -44,7 +44,7 @@ class TBXMLWriterToolBase : public AthAlgTool
 
   //  template<typename DATA>
   virtual StatusCode writeOut( std::ostream& outStream, 
-			       const std::string& entryTag = " " )
+			       std::string_view entryTag = " " )
     {
       return this->writeEvent(outStream,entryTag);
     }
@@ -69,7 +69,7 @@ class TBXMLWriterToolBase : public AthAlgTool
   virtual StatusCode writeRunFiles(const std::string& fileDir,
 				   unsigned int runNumber) = 0;
   virtual StatusCode writeEvent(std::ostream& theFile,
-				const std::string& entryTag) = 0;
+				std::string_view entryTag) = 0;
 
   /////////////
   // Helpers //

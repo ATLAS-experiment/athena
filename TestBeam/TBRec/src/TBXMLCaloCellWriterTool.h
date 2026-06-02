@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_TBXMLCALOCELLWRITERTOOL_H
@@ -19,6 +19,7 @@
 #include <iosfwd>
 #include <vector>
 #include <string>
+#include <string_view>
 #include <unordered_set>
 
 class TBXMLWriter;
@@ -50,7 +51,7 @@ class TBXMLCaloCellWriterTool : public TBXMLWriterToolBase
   virtual StatusCode writeRunFiles(const std::string& fileDir,
 				   unsigned int runNumber) override;
   virtual StatusCode writeEvent(std::ostream& outFile, 
-				const std::string& /* entryTag */ ) override;
+				std::string_view /* entryTag */ ) override;
 
   virtual StatusCode convertProperties();
 
