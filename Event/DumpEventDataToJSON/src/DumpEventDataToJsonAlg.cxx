@@ -425,9 +425,22 @@ nlohmann::json DumpEventDataToJsonAlg::getData(const xAOD::Muon &muon) {
   data["Type"] = type[static_cast<unsigned int>(muon.muonType())];
 
   addLink(muon.clusterLink(), data["LinkedClusters"]);
-  addLink(muon.inDetTrackParticleLink(), data["LinkedTracks"]);
-  addLink(muon.muonSpectrometerTrackParticleLink(), data["LinkedTracks"]);
-  addLink(muon.extrapolatedMuonSpectrometerTrackParticleLink(),
+  
+  using Track_t = xAOD::Muon::TrackParticleType;
+  using Link_t = ElementLink<xAOD::TrackParticleContainer>;
+  auto makeMuonLink = [&muon](const Track_t tType) -> Link_t {
+    const xAOD::TrackParticle* trk = muon.trackParticle(tType);
+    if (!trk) {
+      return Link_t{};
+    }
+    return Link_t{static_cast<const xAOD::TrackParticleContainer&>(*trk->container()),
+                  trk->index()};
+  };
+
+
+  addLink(makeMuonLink(Track_t::InnerDetectorTrackParticle), data["LinkedTracks"]);
+  addLink(makeMuonLink(Track_t::MuonSpectrometerTrackParticle), data["LinkedTracks"]);
+  addLink(makeMuonLink(Track_t::ExtrapolatedMuonSpectrometerTrackParticle),
           data["LinkedTracks"]);
 
   return data;
