@@ -211,6 +211,12 @@ namespace CP {
         /// Columnar version of IdMsPt
         void IdMsPt(columnar::MuonId mu, float& idPt, float& mePt) const;
 
+        /// Loop over all muons in one event and fill output columns
+        void callSingleEvent(columnar::MuonRange muons, columnar::EventInfoId event) const;
+
+        /// Required columnar entry point: loops over events and calls callSingleEvent
+        virtual void callEvents(columnar::EventContextRange events) const override;
+
         /// Columnar version of rhoPrime
         float rhoPrime(columnar::MuonId mu) const;
 

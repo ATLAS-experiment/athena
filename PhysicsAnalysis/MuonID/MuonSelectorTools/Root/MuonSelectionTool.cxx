@@ -2091,4 +2091,16 @@ namespace CP {
         return score;
     }
 
+    void MuonSelectionTool::callSingleEvent(columnar::MuonRange muons, columnar::EventInfoId event) const {
+        for (columnar::MuonId mu : muons) {
+            m_passSelectionDec(mu) = static_cast<char>(static_cast<bool>(accept(mu, event)));
+        }
+    }
+
+    void MuonSelectionTool::callEvents(columnar::EventContextRange events) const {
+        for (columnar::EventContextId event : events) {
+            callSingleEvent(m_muonsHandle(event), m_eventInfoHandle(event));
+        }
+    }
+
 }  // namespace CP
