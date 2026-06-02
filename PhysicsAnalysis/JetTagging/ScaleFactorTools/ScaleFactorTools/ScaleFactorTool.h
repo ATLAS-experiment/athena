@@ -9,6 +9,7 @@
 #include <AsgTools/PropertyWrapper.h>
 #include <nlohmann/json.hpp>
 #include "ScaleFactorTools/ToolUtils.h"
+#include "xAODBase/IParticle.h"
 using json = nlohmann::json;
 
 class ScaleFactorTool: public asg::AsgTool,
@@ -16,8 +17,10 @@ class ScaleFactorTool: public asg::AsgTool,
   ASG_TOOL_CLASS( ScaleFactorTool, IScaleFactorTool)
 
   public:
-  ScaleFactorTool(const json& cfg);
-  float getSF(const SG::AuxElement& el) const;
+  ScaleFactorTool(const std::string& name);
+  StatusCode initialize() override;
+
+  float getSF(const xAOD::IParticle* p) const override;
 
   private:
   bool m_initialised = false;
@@ -35,3 +38,4 @@ class ScaleFactorTool: public asg::AsgTool,
 
   std::vector<float> m_sf_values;
 };
+#endif // CP_SCALEFACTORTOOL_H

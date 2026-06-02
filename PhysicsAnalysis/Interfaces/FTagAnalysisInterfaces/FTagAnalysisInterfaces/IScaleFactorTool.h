@@ -13,13 +13,12 @@
 #define CPISCALEFACTORTOOL_H
 
 #include "AsgTools/IAsgTool.h"
-
-using xAOD::IParticle;
+#include "xAODBase/IParticle.h"
 
 class IScaleFactorTool : virtual public asg::IAsgTool {
   ASG_TOOL_INTERFACE ( IScaleFactorTool )
 
   public:
-  virtual float getSF( const xAOD::IParticle* p) const = 0;
+  virtual float getSF( const xAOD::IParticle* p ) const = 0;
 };
 #endif // CPISCALEFACTORTOOL_H

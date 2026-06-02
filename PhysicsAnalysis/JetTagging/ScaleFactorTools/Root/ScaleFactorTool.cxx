@@ -1,11 +1,9 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
 #include "ScaleFactorTools/ScaleFactorTool.h"
 #include "PathResolver/PathResolver.h"
 #include <fstream>
-
 
 ScaleFactorTool::ScaleFactorTool(const std::string& name)
   : asg::AsgTool(name)
@@ -50,8 +48,9 @@ StatusCode ScaleFactorTool::initialize(){
   return StatusCode::SUCCESS;
 }
 
-float ScaleFactorTool::getSF(const SG::AuxElement& el) const
+float ScaleFactorTool::getSF(const xAOD::IParticle* p) const
 {
+  const SG::AuxElement& el = *p;
   int sf_bin = m_sf_func(el);
   int pcbt_bin = m_pcbt_func(el);
   int global = sf_bin * m_n_pcbt_bins + pcbt_bin;
