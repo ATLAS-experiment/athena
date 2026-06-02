@@ -34,29 +34,39 @@ atlas_add_dictionary( MuonSelectorToolsDict
 
 
 # Executable(s) in the package:
-if( XAOD_STANDALONE )
-   atlas_add_executable( MuonSelectorToolsTester
-      util/MuonSelectorToolsTester.cxx
-      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-      LINK_LIBRARIES ${ROOT_LIBRARIES} xAODRootAccess xAODEventInfo xAODMuon MCTruthClassifierLib
-      xAODTracking xAODCore MuonSelectorToolsLib PATCoreLib )
-else()
-   atlas_add_executable( MuonSelectorToolsTester
-      util/MuonSelectorToolsTester.cxx
-      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-      LINK_LIBRARIES ${ROOT_LIBRARIES} POOLRootAccessLib xAODRootAccess xAODEventInfo xAODMuon MCTruthClassifierLib
-      xAODTracking xAODCore MuonSelectorToolsLib PATCoreLib )
+if( NOT COLUMNAR_ANALYSIS )
+   if( XAOD_STANDALONE )
+      atlas_add_executable( MuonSelectorToolsTester
+         util/MuonSelectorToolsTester.cxx
+         INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+         LINK_LIBRARIES ${ROOT_LIBRARIES} xAODRootAccess xAODEventInfo xAODMuon MCTruthClassifierLib
+         xAODTracking xAODCore MuonSelectorToolsLib PATCoreLib )
+   else()
+      atlas_add_executable( MuonSelectorToolsTester
+         util/MuonSelectorToolsTester.cxx
+         INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+         LINK_LIBRARIES ${ROOT_LIBRARIES} POOLRootAccessLib xAODRootAccess xAODEventInfo xAODMuon MCTruthClassifierLib
+         xAODTracking xAODCore MuonSelectorToolsLib PATCoreLib )
+   endif()
 endif()
 
 
 # Test(s) in the package:
-atlas_add_test( ut_MuonSelectorToolsTester_data
-   SCRIPT test/ut_MuonSelectorToolsTester_data.sh
-   PROPERTIES TIMEOUT 450
-   POST_EXEC_SCRIPT nopost.sh )
-atlas_add_test( ut_MuonSelectorToolsTester_MC
-   SCRIPT test/ut_MuonSelectorToolsTester_MC.sh
-   PROPERTIES TIMEOUT 450
+if( NOT COLUMNAR_ANALYSIS )
+   atlas_add_test( ut_MuonSelectorToolsTester_data
+      SCRIPT test/ut_MuonSelectorToolsTester_data.sh
+      PROPERTIES TIMEOUT 450
+      POST_EXEC_SCRIPT nopost.sh )
+   atlas_add_test( ut_MuonSelectorToolsTester_MC
+      SCRIPT test/ut_MuonSelectorToolsTester_MC.sh
+      PROPERTIES TIMEOUT 450
+      POST_EXEC_SCRIPT nopost.sh )
+endif()
+
+atlas_add_test( gt_MuonSelectorToolsColumnarTest
+   SOURCES test/gt_MuonSelectorToolsColumnarTest.cxx
+   LINK_LIBRARIES ColumnarTestFixturesLib MuonSelectorToolsLib xAODMuon
+   PRIVATE_WORKING_DIRECTORY
    POST_EXEC_SCRIPT nopost.sh )
 
 # Install files from the package:
