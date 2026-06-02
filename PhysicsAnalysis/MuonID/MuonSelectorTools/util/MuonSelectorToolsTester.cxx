@@ -346,11 +346,12 @@ int main(int argc, char* argv[]) {
             std::string badMuonResults = "Bad muon flag:              ";
 
             for (int wp = 0; wp < Nwp; wp++) {
+                using namespace Muon::MuonStationIndex;
                 if (selectorTools[wp]->accept(*mu_itr)) {
                     selectedMuons[wp]++;
                     selectedMuonsEvent[wp]++;
-                    selectedMuonsType[(*mu_itr)->muonType()][wp]++;
-                    selectedMuonsAuthor[(*mu_itr)->author()][wp]++;
+                    selectedMuonsType[toInt((*mu_itr)->muonType())][wp]++;
+                    selectedMuonsAuthor[toInt((*mu_itr)->author())][wp]++;
                     selectedMuonsTruthType[truthType][wp]++;
                     selectedMuonsEta[etaIndex][wp]++;
                     selectionResults += "pass     ";
@@ -358,8 +359,8 @@ int main(int argc, char* argv[]) {
                     if (!selectorTools[wp]->isBadMuon(**mu_itr)) {
                         selectedMuonsNotBad[wp]++;
                         selectedMuonsEventNotBad[wp]++;
-                        selectedMuonsTypeNotBad[(*mu_itr)->muonType()][wp]++;
-                        selectedMuonsAuthorNotBad[(*mu_itr)->author()][wp]++;
+                        selectedMuonsTypeNotBad[toInt((*mu_itr)->muonType())][wp]++;
+                        selectedMuonsAuthorNotBad[toInt((*mu_itr)->author())][wp]++;
                         selectedMuonsTruthTypeNotBad[truthType][wp]++;
                         selectedMuonsEtaNotBad[etaIndex][wp]++;
                     }
