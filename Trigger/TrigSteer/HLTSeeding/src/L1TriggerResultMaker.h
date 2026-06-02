@@ -93,12 +93,12 @@ private:
   // m_gMETComponentsJwojKeys, so both keys must be linked together for the
   // h_gFexMet round-trip histogram to reproduce.
   SG::ReadHandleKeyArray<xAOD::gFexGlobalRoIContainer> m_gScalarEJwojKeys {
-    this, "gScalarEJwojKeys", {"L1_gScalarEJwoj"},
+    this, "gScalarEJwojKeys", {},
     "Keys of the gFex Scalar E (JwoJ) RoI container to be linked to L1 Trigger Result"};
 
   // gFex MET Components (JwoJ) RoIs -- carries METx / METy partials
   SG::ReadHandleKeyArray<xAOD::gFexGlobalRoIContainer> m_gMETComponentsJwojKeys {
-    this, "gMETComponentsJwojKeys", {"L1_gMETComponentsJwoj"},
+    this, "gMETComponentsJwojKeys", {},
     "Keys of the gFex MET Components (JwoJ) RoI container to be linked to L1 Trigger Result"};
 
   // Key of the cTau container to create (if empty, cTau creation is disabled)
