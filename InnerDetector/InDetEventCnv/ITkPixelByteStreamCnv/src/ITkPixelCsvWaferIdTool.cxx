@@ -142,7 +142,7 @@ int ITkPixelCsvWaferIdTool::layer_disk(std::vector<std::string> spchain){
         return spchain.at(2)[1];
     }
     else{ // endcap and barrel rings - all considered as disks
-        if(spchain[2] == "L01"){ // barrel rings, first layer (disk 0) - TODO some are disk 1 in fact, need to split the cases
+        if(spchain[2] == "L01" && spchain.at(5)){ // barrel rings, first layer (disk 0) - TODO some are disk 1 in fact, need to split the cases
             return 0;
         }
         else if(spchain[1] == "OB" && (spchain[2] == "L2" || //OB inclined rings, disks 3, 5, 7
