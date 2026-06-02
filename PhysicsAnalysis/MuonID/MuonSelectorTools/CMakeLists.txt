@@ -6,13 +6,14 @@ atlas_subdir( MuonSelectorTools )
 # External dependencies:
 find_package( ROOT COMPONENTS Core Hist RIO TMVA )
 find_package( onnxruntime )
+find_package( GSL COMPONENTS CBLAS )
 
 # Libraries in the package:
 atlas_add_library( MuonSelectorToolsLib
    MuonSelectorTools/*.h Root/*.cxx
    PUBLIC_HEADERS MuonSelectorTools
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} AsgTools AsgServicesLib xAODEventInfo PATCoreLib MuonAnalysisInterfacesLib AsgDataHandlesLib AthOnnxInterfaces AthOnnxUtilsLib MVAUtils ColumnarCoreLib ColumnarMuonLib
+   LINK_LIBRARIES ${ROOT_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} $<TARGET_NAME_IF_EXISTS:GSL::gslcblas> AsgTools AsgServicesLib xAODEventInfo PATCoreLib MuonAnalysisInterfacesLib AsgDataHandlesLib AthOnnxInterfaces AthOnnxUtilsLib MVAUtils ColumnarCoreLib ColumnarMuonLib ColumnarEventInfoLib
    PRIVATE_LINK_LIBRARIES xAODTracking PathResolver )
 
 if( NOT XAOD_STANDALONE )

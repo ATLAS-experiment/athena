@@ -165,7 +165,7 @@ namespace CP {
         /// @{
 
         /// Columnar version of accept
-        asg::AcceptData accept(columnar::MuonId mu, unsigned long long eventNumber) const;
+        asg::AcceptData accept(columnar::MuonId mu, columnar::EventInfoId event) const;
 
         /// Columnar version of passedMuonCuts
         bool passedMuonCuts(columnar::MuonId mu) const;
