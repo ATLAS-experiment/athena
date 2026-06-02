@@ -197,6 +197,8 @@ namespace MuonR4{
                 using EdgeSide = MuonGMR4::RpcReadoutElement::EdgeSide;
                 calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos));
 
+                // @TODO the constants could be converted to what is needed here (units, inverse) at initialization/construction time
+                //       in particular 1/m_rpcSignalVelocity
                 cov[Acts::toUnderlying(AxisDefs::timeCov)] = Acts::square(ActsTrk::timeToActs(m_rpcTimeResolution.value()));
 
                 const double time1 = strip->time() 
