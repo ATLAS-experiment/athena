@@ -25,6 +25,7 @@ def TruthSegmentMakerCfg(flags, name = "MuonTruthSegmentMaker", useSDO = True, *
     if flags.Detector.EnableMM or flags.Detector.EnablesTGC:
         result.merge(NswErrorCalibDbAlgCfg(flags))
     kwargs.setdefault("SimHitKeys", containerNames)
+    kwargs.setdefault("includePileUpHits", flags.Muon.includePileUpTruth)
 
     the_alg = CompFactory.MuonR4.TruthSegmentMaker(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
@@ -129,7 +130,7 @@ def TruthSegmentToTruthPartAssocCfg(flags, name="MuonTruthSegmentToTruthAssocAlg
     kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=100000)))
     from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
     kwargs.setdefault("TrackingGeometryTool", result.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
-
+    kwargs.setdefault("includePileUpObjs", flags.Muon.includePileUpTruth)
     the_alg = CompFactory.MuonR4.TruthSegToTruthPartAssocAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result

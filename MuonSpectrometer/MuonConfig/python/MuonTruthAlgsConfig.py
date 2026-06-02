@@ -26,13 +26,15 @@ def MuonDetailedTrackTruthMakerCfg(flags, name="MuonDetailedTrackTruthMaker", **
     result.addEventAlgo(CompFactory.MuonDetailedTrackTruthMaker(name, **kwargs))
     return result
 
-# The following 4 configuration fragments replace the ld MuonTruthDecorationAlg config
 def TruthMuonMakerAlgCfg(flags, name="TruthMuonMakerAlg", **kwargs):
     result = ComponentAccumulator()
 
     from MCTruthClassifier.MCTruthClassifierConfig import MCTruthClassifierCfg
     kwargs.setdefault("MCTruthClassifier", result.popToolsAndMerge(MCTruthClassifierCfg(flags)))
-        
+    inCollections = ["TruthParticles"]
+    if flags.Muon.includePileUpTruth and ("TruthPileupParticles" in flags.Input.Collections):
+        inCollections+=["TruthPileupParticles"]
+    kwargs.setdefault("InContainers", inCollections)
     result.addEventAlgo(CompFactory.Muon.TruthMuonMakerAlg(name, **kwargs))
     return result
 
