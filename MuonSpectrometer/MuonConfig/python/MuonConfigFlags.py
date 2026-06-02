@@ -86,13 +86,15 @@ def createMuonConfigFlags():
     #### If this flag is enabled, the phase II MS track 
     #### reconstruction algorithms are scheduled   
     try:
-        #### Use 
         from TrkConfig.TrkConfigFlags import TrackingComponent
         mcf.addFlag("Muon.scheduleActsReco", lambda prevFlags: prevFlags.Muon.usePhaseIIGeoSetup and \
                             prevFlags.Tracking.recoChain[0] in [TrackingComponent.ActsChain , TrackingComponent.ActsLegacyChain ]) 
     except ImportError:
         mcf.addFlag("Muon.scheduleActsReco", False)
-        
+
+    #### Include pile-up muons from the background as truth muons and 
+    #### try to match the segments to them
+    mcf.addFlag("Muon.includePileUpTruth", False)
     #### Enable ML bucket filter inference for muon reconstruction
     mcf.addFlag("Muon.enableMLBucketFilter", False)
 
