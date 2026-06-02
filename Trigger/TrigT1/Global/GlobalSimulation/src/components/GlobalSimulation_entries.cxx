@@ -20,7 +20,7 @@
 #include "../FEX_Unpacker/eFexCvtrAlgTool.h"
 #include "../Hypothesis/eEmMultAlgTool.h"
 #include "../Hypothesis/eEmEg1BDTMultAlgTool.h"
-#include "../Hypothesis/JetMultAlgTool.h"
+#include "../Hypothesis/CommonMultAlgTool.h"
 
 #include "../Hypothesis/eEmMultTestBench.h"
 #include "../Hypothesis/eEmMultTestComparator.h"
@@ -48,7 +48,7 @@ DECLARE_COMPONENT(GlobalSim::eFexCvtrAlgTool)
 
 DECLARE_COMPONENT(GlobalSim::eEmMultAlgTool)
 DECLARE_COMPONENT(GlobalSim::eEmEg1BDTMultAlgTool)
-DECLARE_COMPONENT(GlobalSim::JetMultAlgTool)
+DECLARE_COMPONENT(GlobalSim::CommonMultAlgTool)
 
 DECLARE_COMPONENT(GlobalSim::eEmMultTestBench)
 DECLARE_COMPONENT(GlobalSim::eEmMultTestComparator)

@@ -36,10 +36,11 @@ jet1Tool.OutputLevel = DEBUG
 
 alg.globalsim_algs += [jet1Tool]
 
-# add in the JetMultiplicity AlgTool
-tool =  CompFactory.GlobalSim.JetMultAlgTool('JetMultAlgTool')
+# add in the CommonMultiplicity AlgTool To count Jets
+tool =  CompFactory.GlobalSim.CommonMultAlgTool('CommonMultAlgTool')
 
 tool.et_low = '2500'
+tool.CommonTOBsKey = "GlobalJet1Jets"
 tool.enable_dump=True
 tool.OutputLevel = DEBUG
 
