@@ -428,18 +428,17 @@ def isITkGeometry(flags):
 
 def applyDetectorDefaults(runArgs, flags):
 
-    isITk = False
-
     if getattr(runArgs, "atlasVersion", None) is None:
         if isITkGeometryFromInput(runArgs):
             runArgs.atlasVersion = defaultGeometryTags.RUN4
-            isITk = True
+            # isITk = True
         else:
             runArgs.atlasVersion = defaultGeometryTags.RUN3
-    else:
-        isITk = isITkGeometry(flags)
     
     flags.GeoModel.AtlasVersion = runArgs.atlasVersion
+    
+    isITk = isITkGeometry(flags)
+    print("evaluate itk: ", isITk)        
 
     if getattr(runArgs, "inputTracksCollection", None) is None:
         runArgs.inputTracksCollection = (
@@ -461,19 +460,20 @@ def applyDetectorDefaults(runArgs, flags):
                 else defaultConditionsTags.RUN3_DATA
             )
 
-    flags.GeoModel.AtlasVersion = runArgs.atlasVersion
-
 
 def fromRunArgs(runArgs):
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
 
+    # Check if the input file is specified as RDO (parser argument)
+    # If not, it is assumed to be the RAW file as default
     if hasattr(runArgs, "inputRDOFile"):
         flags.Input.Files = [os.path.abspath(inputFile) for inputFile in runArgs.inputRDOFile]
     else:
         flags.Input.Files = [os.path.abspath(inputFile) for inputFile in runArgs.inputRAWFile]
 
+    # Some default tags are set (flags.GeoModel.AtlasVersion, runArgs.globalTag)
     applyDetectorDefaults(runArgs, flags)
 
     if isITkGeometry(flags):
