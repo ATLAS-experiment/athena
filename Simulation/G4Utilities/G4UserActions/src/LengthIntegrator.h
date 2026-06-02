@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4UserActions_LengthIntegrator_H
@@ -8,18 +8,16 @@
 #include "GaudiKernel/ITHistSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
 
-#include "G4Pow.hh"
-#include "TString.h"
-
 #include "G4UserEventAction.hh"
 #include "G4UserSteppingAction.hh"
-//#include "AthenaBaseComps/AthMessaging.h"
 #include <string>
 #include <map>
 
 // Forward declarations
 class TProfile;
 class TProfile2D;
+class TString;
+class G4Pow;
 
 
 namespace G4UA
