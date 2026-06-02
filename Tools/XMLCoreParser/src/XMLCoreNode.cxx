@@ -12,6 +12,7 @@
 #include "XMLCoreParser/XMLCoreNode.h"
 #include <charconv>
 #include <iostream>
+#include <format>
 
 
 static const char* const SPACE = " \t\r\n";
@@ -159,7 +160,7 @@ bool XMLCoreNode::has_attrib (const std::string& name) const
  * or cannot be converted to @c T.
  */
 template <class T>
-std::optional<T> XMLCoreNode::try_attrib (const std::string& name) const
+std::optional<T> XMLCoreNode::try_attrib (std::string_view name) const
 {
   std::optional<T> ret;
   auto it = m_attribs.find (name);
@@ -185,7 +186,7 @@ std::optional<T> XMLCoreNode::try_attrib (const std::string& name) const
  * Returns an invalid optional if the attribute does not exist or cannot
  * be converted to an integer.
  */
-std::optional<int> XMLCoreNode::try_int_attrib (const std::string& name) const
+std::optional<int> XMLCoreNode::try_int_attrib (std::string_view name) const
 {
   return try_attrib<int> (name);
 }
@@ -198,7 +199,7 @@ std::optional<int> XMLCoreNode::try_int_attrib (const std::string& name) const
  * Returns an invalid optional if the attribute does not exist or cannot
  * be converted to a double.
  */
-std::optional<double> XMLCoreNode::try_double_attrib (const std::string& name) const
+std::optional<double> XMLCoreNode::try_double_attrib (std::string_view name) const
 {
   return try_attrib<double> (name);
 }
@@ -210,11 +211,11 @@ std::optional<double> XMLCoreNode::try_double_attrib (const std::string& name) c
  *
  * Throws an exception if the attribute does not exist.
  */
-const std::string& XMLCoreNode::get_attrib (const std::string& name) const
+const std::string& XMLCoreNode::get_attrib (std::string_view name) const
 {
   auto it = m_attribs.find (name);
   if (it == m_attribs.end()) {
-    throw ExcXMLCore ("Cannot find attribute " + name + " in " + m_name);
+    throw ExcXMLCore (std::format("Cannot find attribute {} in {}", name, m_name));
   }
   return it->second;
 }
@@ -227,11 +228,11 @@ const std::string& XMLCoreNode::get_attrib (const std::string& name) const
  * Throws an exception if the attribute does not exist or cannot
  * be converted to an int.
  */
-int XMLCoreNode::get_int_attrib (const std::string& name) const
+int XMLCoreNode::get_int_attrib (std::string_view name) const
 {
   std::optional<int> val = try_int_attrib (name);
   if (!val) {
-    throw ExcXMLCore ("Bad integer attribute " + name + " in " + m_name);
+    throw ExcXMLCore (std::format("Bad integer attribute {} in {}", name, m_name));
   }
   return val.value();
 }
@@ -244,11 +245,11 @@ int XMLCoreNode::get_int_attrib (const std::string& name) const
  * Throws an exception if the attribute does not exist or cannot
  * be converted to a double.
  */
-double XMLCoreNode::get_double_attrib (const std::string& name) const
+double XMLCoreNode::get_double_attrib (std::string_view name) const
 {
   std::optional<double> val = try_double_attrib (name);
   if (!val) {
-    throw ExcXMLCore ("Bad double attribute " + name + " in " + m_name);
+    throw ExcXMLCore (std::format("Bad double attribute {} in {}", name, m_name));
   }
   return val.value();
 }
