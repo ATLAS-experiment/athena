@@ -11,6 +11,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <string>
+#include <string_view>
 
 class TBBeamDetector 
 {
@@ -25,12 +26,12 @@ class TBBeamDetector
     , m_overflow(false)
     { };
 
-    TBBeamDetector(const std::string& tbBeamDetectorName)
+    TBBeamDetector(std::string_view tbBeamDetectorName)
     : m_tbDetectorName(tbBeamDetectorName)
     , m_overflow(false)
       { };
 
-    TBBeamDetector(const std::string& tbBeamDetectorName, bool overflow)
+    TBBeamDetector(std::string_view tbBeamDetectorName, bool overflow)
     : m_tbDetectorName(tbBeamDetectorName)
     , m_overflow(overflow)
       { };
@@ -45,8 +46,8 @@ class TBBeamDetector
   /////////////
   // Setters //
   ////////////
-  virtual void setDetectorName(const std::string& tbBeamDetectorName) 
-    { m_tbDetectorName = tbBeamDetectorName; }
+  virtual void setDetectorName(std::string_view tbBeamDetectorName) 
+    { m_tbDetectorName.assign(tbBeamDetectorName); }
 
   virtual void setOverflow() 
     { m_overflow = true; }

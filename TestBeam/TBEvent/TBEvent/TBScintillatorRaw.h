@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBEVENT_TBSCINTILLATORRaw_H
@@ -20,7 +20,7 @@
 #include "TBEvent/TBADCRawCont.h"
 #include "AthLinks/ElementLink.h"
 #include "AthenaKernel/CLASS_DEF.h"
-
+#include <string_view>
 
 class TBScintillatorRaw : public TBBeamDetector
 { 
@@ -35,10 +35,10 @@ class TBScintillatorRaw : public TBBeamDetector
   TBScintillatorRaw() : TBBeamDetector()
   { }
 
-  TBScintillatorRaw(const std::string& scintallatorName) : TBBeamDetector(scintallatorName)
+  TBScintillatorRaw(std::string_view scintillatorName) : TBBeamDetector(scintillatorName)
   { }
 
-  TBScintillatorRaw(const std::string& scintallatorName,
+  TBScintillatorRaw(std::string_view scintillatorName,
 		 const TBTDCRawCont* tdcCont,TBTDCRaw* tbtdc,
 		 const TBADCRawCont* adcCont,TBADCRaw* tbadc);
 
