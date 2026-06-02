@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -251,7 +251,11 @@ StatusCode TBEMECXTalkToyModel::processOnCellIterators(const CaloCellContainer::
 	  myId = m_calo_id->cell_id(mySubDet,nId);
 	  cellIt = cellMap.find(myId);
 	  if (cellIt!=cellMap.end()) {
-            theCellN4 = (*cellIt).second;
+      theCellN4 = (*cellIt).second;
+      if (!theCellN4){
+        ATH_MSG_ERROR ( "theCellN4 is a nulllptr" );
+        return StatusCode::FAILURE;
+      }
 	    cellItEng = energyMap.find(theCellN4->ID());
 	    if (cellItEng==energyMap.end()) {
 	      ATH_MSG_ERROR ( "Identifier not found in energyMap" );
