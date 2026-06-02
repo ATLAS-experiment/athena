@@ -113,7 +113,15 @@ private:
 
   double m_version{-1.};
 
-  StringArrayProperty m_commands{this, "Commands", {} };
+  // Custom property to hold Pythia8 commands as a list of strings,
+  // with associated metadata for parsing and merging.
+  // The merging is handled by CA.merge() according to the rules in
+  // GeneratorSettingsSemantics.
+  StringArrayProperty m_commands{this,
+                                 "Commands",
+                                 {},
+                                 "List of Pythia8 commands",
+                                 "GeneratorSettings<std::string>"};
   std::vector<std::string> m_userParams;
   std::vector<std::string> m_userModes;
 

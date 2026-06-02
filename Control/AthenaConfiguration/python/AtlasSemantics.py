@@ -81,7 +81,9 @@ class VarHandleArraySematics(GaudiConfig2.semantics.SequenceSemantics):
 
 
 from AthenaServices.ItemListSemantics import OutputStreamItemListSemantics
+from GeneratorConfig.GeneratorSettingsSemantics import GeneratorSettingsSemantics
 
 GaudiConfig2.semantics.SEMANTICS.append(VarHandleKeySemantics)
 GaudiConfig2.semantics.SEMANTICS.append(VarHandleArraySematics)
 GaudiConfig2.semantics.SEMANTICS.append(OutputStreamItemListSemantics)
+GaudiConfig2.semantics.SEMANTICS.append(GeneratorSettingsSemantics)
