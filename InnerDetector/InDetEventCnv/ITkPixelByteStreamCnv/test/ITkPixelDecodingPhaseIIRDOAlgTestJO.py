@@ -23,7 +23,7 @@ if __name__=="__main__":
    print(f'ITkPixelDecodingPhaseIIRDOAlgTestJO.py ----------   Running over input file {inputRAW}')
 
    flags.Input.Files = [inputRAW]
-   flags.Output.RDOFileName = "RDO.pool.root"
+   flags.Output.RDOFileName = "RDO_phaseII.pool.root"
 
    from AthenaConfiguration.TestDefaults import defaultGeometryTags
    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
@@ -35,6 +35,9 @@ if __name__=="__main__":
    # Set the necessary flags
    flags.PerfMon.doFullMonMT = True
    flags.PerfMon.OutputJSON = 'perfmonmt_test.json'
+   # We want to keep the commented code for debugging
+   # from AthenaCommon.Constants import DEBUG
+   # flags.Exec.OutputLevel=DEBUG
 
    flags.lock()
 

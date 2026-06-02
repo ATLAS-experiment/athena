@@ -33,6 +33,7 @@ StatusCode ITkPixelDecodingPhaseIIRDOAlg::initialize()
     ATH_CHECK(m_pixelRDOKey.initialize());
 
     //this should go into the cabling likely...
+
     for (size_t hash = 0; hash < m_idHelper->wafer_hash_max(); hash++){
         m_sourceIDs.push_back(m_idHelper->wafer_id(hash).get_identifier32().get_compact() | 0b00 );
         m_sourceIDs.push_back(m_idHelper->wafer_id(hash).get_identifier32().get_compact() | 0b10 );
@@ -62,9 +63,10 @@ StatusCode ITkPixelDecodingPhaseIIRDOAlg::execute(const EventContext& ctx) const
     fmt.options.en_chip_id = true;
     fmt.options.en_eos = true;
     int container_list_size = 2;
+
     auto cont_coll = std::make_unique< PhaseIIPixelRawDataContainerMT>(m_idHelper->wafer_hash_max(), container_list_size);
     PhaseIIPixelRawDataContainerMT::ContainerPtr rdoCont = cont_coll->getNewContainerPtr();
-    PixelCallbacksPhaseIIRDO::PhaseIIRDOCallback cb(cont_coll.get(), rdoCont, m_idHelper);
+    PixelCallbacksPhaseIIRDO::PhaseIIRDOCallback cb(cont_coll.get(), rdoCont, m_idHelper, msg());
 
     // Instantiate the output (PhaseII).
     rdoCont->reserve(m_n_rdos_est);
@@ -109,8 +111,7 @@ StatusCode ITkPixelDecodingPhaseIIRDOAlg::execute(const EventContext& ctx) const
 
     for (const auto& ROB : ROBs_sorted){
         const uint32_t* payload = ROB->rod_data();
-        uint32_t length = ROB->rod_ndata();
-        
+        uint32_t length = ROB->rod_ndata();        
 
         //Translate the data into 64 bits. We know the length, so we can reserve
         //the space to avoid reallocation. Since the frames are always 64 bits split
@@ -148,8 +149,8 @@ StatusCode ITkPixelDecodingPhaseIIRDOAlg::execute(const EventContext& ctx) const
                 }
             }
         }
-        cb.registerLastModule();
     }
+    cb.registerLastModule();
 
 
     //The container is filled by now. We can write it to SG
