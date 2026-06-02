@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///@file Tau1P3PDetails.h DEPRECATED DO NOT USE 
@@ -29,6 +29,7 @@
 #include "CaloEvent/CaloClusterContainer.h"
 
 #include <vector>
+#include <memory>
 
 namespace Analysis
 {
@@ -47,21 +48,17 @@ namespace Analysis
         // Constructor and destructor
         //-----------------------------------------------------------------
 
-        //! Default Constructor
         Tau1P3PDetails();
-        //! Destructor
-        virtual ~Tau1P3PDetails();
-        //! Constructor
-        Tau1P3PDetails( const Tau1P3PDetails &rhs );
-        //! Assignment Operator
-        Tau1P3PDetails &operator = ( const Tau1P3PDetails &rhs );
-        virtual const std::string& className() const;
+        ~Tau1P3PDetails() override;
+        Tau1P3PDetails(const Tau1P3PDetails& rhs);
+        Tau1P3PDetails& operator=(const Tau1P3PDetails& rhs);
+        virtual const std::string& className() const override;
 
         //-----------------------------------------------------------------
         //! Generic parameter accessors - for old AOD compatibility
         //-----------------------------------------------------------------
-        virtual double parameter( TauJetParameters :: Detail detail ) const;
-        virtual bool hasParameter( TauJetParameters :: Detail detail ) const;
+        virtual double parameter( TauJetParameters :: Detail detail ) const override;
+        virtual bool hasParameter( TauJetParameters :: Detail detail ) const override;
 
         //-----------------------------------------------------------------
         //! cells used for candidate building, only EM calorimeter, without 3rd sampling
@@ -341,7 +338,7 @@ namespace Analysis
         //-----------------------------------------------------------------
         // Secondary Vertex
         //-----------------------------------------------------------------
-        Trk :: RecVertex *m_secVertex;
+        std::unique_ptr<Trk::RecVertex> m_secVertex;
 
         //-----------------------------------------------------------------
         // Pi0
@@ -641,13 +638,12 @@ namespace Analysis
 
     inline const Trk :: RecVertex *Tau1P3PDetails :: secVertex() const
     {
-        return m_secVertex;
+        return m_secVertex.get();
     }
 
     inline void Tau1P3PDetails :: setSecVertex( const Trk :: RecVertex *secVertex )
     {
-        delete m_secVertex;
-        m_secVertex = new Trk :: RecVertex( *secVertex );
+        m_secVertex = secVertex ? std::make_unique<Trk::RecVertex>(*secVertex) : nullptr;
     }
 
     //-------------------------------------------------------------------------

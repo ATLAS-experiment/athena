@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///@file Tau1P3PDetails.cxx DEPRECATED DO NOT USE
@@ -45,7 +45,7 @@ namespace Analysis
         m_etNeuEM( TauDetails::DEFAULT ),
         m_etResNeuEM( TauDetails::DEFAULT ),
         m_trFlightPathSig(TauDetails::DEFAULT),
-        m_secVertex( 0 ),
+        m_secVertex(nullptr),
         m_etEflow(TauDetails::DEFAULT),
         m_sumEtCellsLArOverLeadTrackPt(TauDetails::DEFAULT),
         m_hadronicLeak(TauDetails::DEFAULT),
@@ -53,88 +53,51 @@ namespace Analysis
     {
     }
 
-    Tau1P3PDetails :: ~Tau1P3PDetails()
-    {
-        delete m_secVertex;
+    Tau1P3PDetails::~Tau1P3PDetails() = default;
+
+    Tau1P3PDetails::Tau1P3PDetails(const Tau1P3PDetails& rhs):
+      TauDetails(),
+      m_numStripCells(rhs.m_numStripCells),
+      m_stripWidth2(rhs.m_stripWidth2),
+      m_emRadius(rhs.m_emRadius),
+      m_ET12Frac(rhs.m_ET12Frac),
+      m_etIsolHAD(rhs.m_etIsolHAD),
+      m_etIsolEM(rhs.m_etIsolEM),
+      m_etChrgHAD(rhs.m_etChrgHAD),
+      m_nAssocTracksCore(rhs.m_nAssocTracksCore),
+      m_nAssocTracksIsol(rhs.m_nAssocTracksIsol),
+      m_signD0Trk3P(rhs.m_signD0Trk3P),
+      m_massTrk3P(rhs.m_massTrk3P),
+      m_rWidth2Trk3P(rhs.m_rWidth2Trk3P),
+      m_z0SinThetaSig(rhs.m_z0SinThetaSig),
+      m_etChrgHADoverPttot(rhs.m_etChrgHADoverPttot),
+      m_etIsolFrac(rhs.m_etIsolFrac),
+      m_cellEM012Cluster(rhs.m_cellEM012Cluster),
+      m_etHadAtEMScale(rhs.m_etHadAtEMScale),
+      m_etEMAtEMScale(rhs.m_etEMAtEMScale),
+      m_etEMCL(rhs.m_etEMCL),
+      m_etChrgEM(rhs.m_etChrgEM),
+      m_etNeuEM(rhs.m_etNeuEM),
+      m_etResNeuEM(rhs.m_etResNeuEM),
+      m_trFlightPathSig(rhs.m_trFlightPathSig),
+      m_etChrgEM01Trk(rhs.m_etChrgEM01Trk),
+      m_etResChrgEMTrk(rhs.m_etResChrgEMTrk),
+      m_sumEM(rhs.m_sumEM),
+      m_secVertex(rhs.m_secVertex ? std::make_unique<Trk::RecVertex>(*rhs.m_secVertex) : nullptr),
+      m_pi0(rhs.m_pi0),
+      m_etEflow(rhs.m_etEflow),
+      m_sumEtCellsLArOverLeadTrackPt(rhs.m_sumEtCellsLArOverLeadTrackPt),
+      m_hadronicLeak(rhs.m_hadronicLeak),
+      m_secondaryMax(rhs.m_secondaryMax){
     }
 
-    Tau1P3PDetails :: Tau1P3PDetails( const Tau1P3PDetails &rhs ):
-        TauDetails(),
-        m_numStripCells(rhs.m_numStripCells),
-        m_stripWidth2(rhs.m_stripWidth2),
-        m_emRadius(rhs.m_emRadius),
-        m_ET12Frac(rhs.m_ET12Frac),
-        m_etIsolHAD(rhs.m_etIsolHAD),
-        m_etIsolEM(rhs.m_etIsolEM),
-        m_etChrgHAD(rhs.m_etChrgHAD),
-        m_nAssocTracksCore(rhs.m_nAssocTracksCore),
-        m_nAssocTracksIsol(rhs.m_nAssocTracksIsol),
-        m_signD0Trk3P(rhs.m_signD0Trk3P),
-        m_massTrk3P(rhs.m_massTrk3P),
-        m_rWidth2Trk3P(rhs.m_rWidth2Trk3P),
-        m_z0SinThetaSig(rhs.m_z0SinThetaSig),
-        m_etChrgHADoverPttot(rhs.m_etChrgHADoverPttot),
-        m_etIsolFrac(rhs.m_etIsolFrac),
-        m_cellEM012Cluster(rhs.m_cellEM012Cluster),
-        m_etHadAtEMScale(rhs.m_etHadAtEMScale),
-        m_etEMAtEMScale(rhs.m_etEMAtEMScale),
-        m_etEMCL(rhs.m_etEMCL),
-        m_etChrgEM(rhs.m_etChrgEM),
-        m_etNeuEM(rhs.m_etNeuEM),
-        m_etResNeuEM(rhs.m_etResNeuEM),
-        m_trFlightPathSig(rhs.m_trFlightPathSig),	
-        m_etChrgEM01Trk(rhs.m_etChrgEM01Trk),
-        m_etResChrgEMTrk(rhs.m_etResChrgEMTrk),
-        m_sumEM(rhs.m_sumEM),
-        m_secVertex(new Trk::RecVertex(*rhs.m_secVertex)),
-        m_pi0 (rhs.m_pi0),
-        m_etEflow(rhs.m_etEflow),
-        m_sumEtCellsLArOverLeadTrackPt(rhs.m_sumEtCellsLArOverLeadTrackPt),
-        m_hadronicLeak(rhs.m_hadronicLeak),
-        m_secondaryMax(rhs.m_secondaryMax)
-    {
-    }
-
-    Tau1P3PDetails &Tau1P3PDetails :: operator = ( const Tau1P3PDetails &rhs )
-    {
-        if( this != &rhs )
-        {
-            delete m_secVertex;
-            m_numStripCells= rhs.m_numStripCells;
-            m_stripWidth2= rhs.m_stripWidth2;
-            m_emRadius= rhs.m_emRadius;
-            m_ET12Frac= rhs.m_ET12Frac;
-            m_etIsolHAD = rhs.m_etIsolHAD;
-            m_etIsolEM= rhs.m_etIsolEM;
-            m_etChrgHAD = rhs.m_etChrgHAD;
-            m_nAssocTracksCore = rhs.m_nAssocTracksCore;
-            m_nAssocTracksIsol = rhs.m_nAssocTracksIsol;
-            m_signD0Trk3P= rhs.m_signD0Trk3P;
-            m_massTrk3P = rhs.m_massTrk3P;
-            m_rWidth2Trk3P = rhs.m_rWidth2Trk3P;
-            m_z0SinThetaSig= rhs.m_z0SinThetaSig;
-            m_etChrgHADoverPttot = rhs.m_etChrgHADoverPttot;
-            m_etIsolFrac= rhs.m_etIsolFrac;
-            m_etHadAtEMScale = rhs.m_etHadAtEMScale;
-            m_etEMAtEMScale= rhs.m_etEMAtEMScale;
-            m_etEMCL = rhs.m_etEMCL;
-            m_etChrgEM= rhs.m_etChrgEM;
-            m_etNeuEM= rhs.m_etNeuEM;
-            m_etResNeuEM= rhs.m_etResNeuEM;
-            m_etChrgEM01Trk= rhs.m_etChrgEM01Trk;
-            m_etResChrgEMTrk = rhs.m_etResChrgEMTrk;
-            m_sumEM= rhs.m_sumEM;
-            if (rhs.m_secVertex)
-                m_secVertex = new Trk :: RecVertex( *rhs.m_secVertex );
-            m_etEflow= rhs.m_etEflow;
-            m_pi0  = rhs.m_pi0;
-            m_cellEM012Cluster = rhs.m_cellEM012Cluster;
-            m_trFlightPathSig= rhs.m_trFlightPathSig;
-            m_sumEtCellsLArOverLeadTrackPt = rhs.m_sumEtCellsLArOverLeadTrackPt;
-            m_hadronicLeak = rhs.m_hadronicLeak;
-            m_secondaryMax = rhs.m_secondaryMax;
-        }
-        return *this;
+    Tau1P3PDetails&
+    Tau1P3PDetails::operator=(const Tau1P3PDetails& rhs){
+      if (this != &rhs) {
+        Tau1P3PDetails tmp(rhs);
+        std::swap(*this, tmp);
+      }
+      return *this;
     }
 
     double Tau1P3PDetails :: parameter( TauJetParameters :: Detail detail ) const
@@ -172,7 +135,6 @@ namespace Analysis
             default:
                 return TauDetails::DEFAULT;
         }
-        return TauDetails::DEFAULT;
     }
 
     bool Tau1P3PDetails :: hasParameter( TauJetParameters :: Detail detail ) const
@@ -196,7 +158,6 @@ namespace Analysis
             default:
                 return false;
         }
-        return false;
     }
 
     const std::string Tau1P3PDetails::s_className =
