@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -10,6 +10,7 @@ def JetMatchingCfg(flags, target, source=None,
                    sources=[],
                    source_name=None,
                    floats_to_copy=[], ints_to_copy=[],
+                   no_copy_suffix=False,
                    source_minimum_pt=0,
                    pt_priority_with_delta_r=-1,
                    particle_link_name=None,
@@ -41,7 +42,7 @@ def JetMatchingCfg(flags, target, source=None,
     match_str = f'matchedTo{source_name}'
     n_match_str = f'numberOfMatchesTo{source_name}'
     def to(f):
-        return f + to_suffix
+        return f if no_copy_suffix else f + to_suffix
 
     ca = ComponentAccumulator()
     ca.addEventAlgo(
