@@ -128,23 +128,16 @@ namespace CP {
 
         /// Returns an integer corresponding to categorization of muons with different resolutions
         virtual int getResolutionCategory(const xAOD::Muon&) const override;
-        /// @}
-        
-        /// Returns a vector of the muon's segments, sorted according to chamber index
-        std::vector<const xAOD::MuonSegment*> getSegmentsSorted(const xAOD::Muon& mu) const;
-        
-        /// Check if muon eta/phi falls in BIS7/8 chambers
-        bool isBIS78(const float eta, const float phi) const;
-        /// Check if muon eta/phi falls in BEE chambers
-        bool isBEE(const float eta, const float phi) const;
-        /// Check if muon eta/phi falls in BMG chambers
-        bool isBMG(const float eta, const float phi) const;
-        
+
+        /// Returns the TightNNscore of the muon, an experimental ML-based score for the identification of muons from HF hadron decays
+        virtual float getTightNNScore(const xAOD::Muon& muon) const override;
+
         /// Returns q/p significance of the muon (see definition in https://cds.cern.ch/record/2665711 )
         float qOverPsignificance(const xAOD::Muon& muon) const;
         /// Returns rhoPrime of the muon (see definition in https://cds.cern.ch/record/2665711 )
         float rhoPrime(const xAOD::Muon& muon) const;
-        
+        /// @}
+
         /// struct to handle easily number of hits in different parts of the MS
         struct hitSummary {
             uint8_t nprecisionLayers{0};
@@ -165,7 +158,71 @@ namespace CP {
             uint8_t etaLayer2STGCHits{0};
             uint8_t MMHits{0};
         };
-        
+
+        /// @name Columnar versions of the key selection functions
+        /// These take columnar::MuonId instead of xAOD::Muon. The xAOD versions
+        /// above are thin wrappers that forward to these implementations.
+        /// @{
+
+        /// Columnar version of accept
+        asg::AcceptData accept(columnar::MuonId mu, unsigned long long eventNumber) const;
+
+        /// Columnar version of passedMuonCuts
+        bool passedMuonCuts(columnar::MuonId mu) const;
+
+        /// Columnar version of passedIDCuts for a muon
+        bool passedIDCuts(columnar::MuonId mu) const;
+
+        /// Columnar version of passedCaloTagQuality
+        bool passedCaloTagQuality(columnar::MuonId mu) const;
+
+        /// Columnar version of passedCaloScore
+        bool passedCaloScore(columnar::MuonId mu) const;
+
+        /// Columnar version of getQuality
+        xAOD::Muon::Quality getQuality(columnar::MuonId mu) const;
+
+        /// Columnar version of fillSummary — fully converted, no getXAODObject() calls
+        void fillSummary(columnar::MuonId muon, hitSummary& summary) const;
+
+        /// Columnar version of passedHighPtCuts — fully migrated
+        bool passedHighPtCuts(columnar::MuonId mu) const;
+
+        /// Columnar version of passedErrorCutCB.
+        /// Note: the IS_SIMULATION check for the BMV mimic path uses an xAOD bridge in
+        /// xAOD mode; in columnar mode that path is skipped (m_doBadMuonVetoMimic is
+        /// off by default and IS_SIMULATION requires an EventInfoId not yet threaded here).
+        bool passedErrorCutCB(columnar::MuonId mu) const;
+
+        /// Columnar version of isBadMuon
+        bool isBadMuon(columnar::MuonId mu) const;
+
+        /// Columnar version of passedLowPtEfficiencyCuts.
+        bool passedLowPtEfficiencyCuts(columnar::MuonId mu,
+                                       xAOD::Muon::Quality thisMu_quality,
+                                       unsigned long long eventNumber) const;
+
+        /// Columnar version of qOverPsignificance
+        float qOverPsignificance(columnar::MuonId mu) const;
+
+        /// Columnar version of IdMsPt
+        void IdMsPt(columnar::MuonId mu, float& idPt, float& mePt) const;
+
+        /// Columnar version of rhoPrime
+        float rhoPrime(columnar::MuonId mu) const;
+
+        /// @}
+
+        /// Returns a vector of the muon's segments, sorted according to chamber index
+        std::vector<const xAOD::MuonSegment*> getSegmentsSorted(const xAOD::Muon& mu) const;
+
+        /// Check if muon eta/phi falls in BIS7/8 chambers
+        bool isBIS78(const float eta, const float phi) const;
+        /// Check if muon eta/phi falls in BEE chambers
+        bool isBEE(const float eta, const float phi) const;
+        /// Check if muon eta/phi falls in BMG chambers
+        bool isBMG(const float eta, const float phi) const;
+
         /// helper function to retrieve a hitSummary value
         template <class P, class T, class S> inline void retrieveSummaryValue(const P& muon, T& value, const S type, bool ignoreMissing = false) const {
             if (!muon.summaryValue(value, type) && !ignoreMissing) {
@@ -173,23 +230,24 @@ namespace CP {
                 throw std::runtime_error("MuonSelectorTool summary retrieval failed");
             }
         }
-        
+
         /// functions that fills a hitSummary for a muon
         void fillSummary(const xAOD::Muon& muon, hitSummary& summary) const;
-
-        /// Returns the TightNNscore of the muon, an experimental ML-based score for the identification of muons from HF hadron decays
-        virtual float getTightNNScore(const xAOD::Muon& muon) const override;
 
     private:
         bool passedLowPtEfficiencyMVACut(const xAOD::Muon&) const;
         bool passedLowPtEfficiencyMVACutRun3(const xAOD::Muon&) const;
+        bool passedLowPtEfficiencyMVACut(columnar::MuonId mu, unsigned long long eventNumber) const;
+        bool passedLowPtEfficiencyMVACutRun3(columnar::MuonId mu) const;
 
         /// Returns true if the muon passed the tight working point cuts
         bool passTight(const xAOD::Muon& mu, float rho, float oneOverPSig) const;
+        bool passTight(columnar::MuonId mu, float rho, float oneOverPSig) const;
 
         /// Returns true if the muon passes a cut which mimics the effect of the combined error cut
         /// This is necessary only when the resolution is very optimistic in the MC such that a large smearing is applied
         bool passedBMVmimicCut(const xAOD::Muon&) const;
+        bool passedBMVmimicCut(columnar::MuonId mu) const;
 
         /// Store selection information.
         asg::AcceptInfo m_acceptInfo{"MuonSelection"};
@@ -197,7 +255,7 @@ namespace CP {
         Gaudi::Property<double> m_maxEta{this, "MaxEta", 2.7, "Maximum eta range to select the muons"};
         Gaudi::Property<int>  m_quality{this, "MuQuality", 1,"Quality to select. Values correspond to 0=Tight, 1=Medium, 2=Loose, 3=VeryLoose (only for debug, not supported), 4=HighPt, 5=LowPtEfficiency"};
         Gaudi::Property<bool> m_toroidOff{this, "ToroidOff", false, "Run the tool in Toroid off setup"};
-        Gaudi::Property<bool> m_isRun3{this, "IsRun3Geo", false, "Switch to toggle the run 2 & run 3 geometry cuts. The tool will throw an exception if the run number does not match the expectations later"}; 
+        Gaudi::Property<bool> m_isRun3{this, "IsRun3Geo", false, "Switch to toggle the run 2 & run 3 geometry cuts. The tool will throw an exception if the run number does not match the expectations later"};
         Gaudi::Property<bool> m_excludeNSWFromPrecisionLayers{this, "ExcludeNSWFromPrecisionLayers", false, "Cut on the nprecisionlayers ignoring the NSW"};
         Gaudi::Property<bool> m_recalcPrecisionLayerswNSW{this, "RecalcPrecisionLayerswNSW", true, "Recalculate nprecisionlayers with internal criteria for NSW"};
         Gaudi::Property<bool> m_useCaloScore{this, "UseCaloScore", true, "Use CaloScore for calo-tags in the Loose working point. False will revert back to CaloMuonIDTag (not recommended in Rel.22)"};
@@ -218,11 +276,11 @@ namespace CP {
         Gaudi::Property<bool> m_useSegmentTaggedLowPt{this, "UseSegmentTaggedLowPt", false, "Use MVA low-pt WP. In development phase"};
         Gaudi::Property<bool> m_geoOnTheFly{this, "AllowSettingGeometryOnTheFly", false,"avoids crash if run2/run3 geo is wrongly set"};
         Gaudi::Property<bool> m_doBadMuonVetoMimic{this, "DoBadMuonVetoMimic", false}; // switch to cut away the tail of very large smearing in MC to mimic the effect of the bad muon veto for 2-station muons in the high-pT selection
-        Gaudi::Property<bool> m_useBEEBISInHighPtRun3{this, "UseBEEBISInHighPtRun3", true, "Include BEE and BIS7/8 in high-pT WP in Run3"};        
+        Gaudi::Property<bool> m_useBEEBISInHighPtRun3{this, "UseBEEBISInHighPtRun3", true, "Include BEE and BIS7/8 in high-pT WP in Run3"};
 
         Gaudi::Property<int> m_expertMode_RunNumber{this, "expertMode_RunNumber", 0, "Expert only option. Overwrites RunNumber"};
         Gaudi::Property<unsigned long long> m_expertMode_EvtNumber{this, "expertMode_EvtNumber", 0, "Expert only option. Overwrites EventNumber"};
-	
+
         SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo{this, "EventInfoContName", "EventInfo", "event info key"};
 
         // MVA configs for low-pT working point. Expert use only!
@@ -296,7 +354,7 @@ namespace CP {
         mutable std::mutex m_low_pt_mva_mutex;
 
         void IdMsPt(const xAOD::Muon& muon, float& idPt, float& msPt) const;
-        
+
         void checkSanity() const;
 
         bool isRun3(bool forceOnTheFly = false) const {
@@ -304,7 +362,7 @@ namespace CP {
           int rn = getRunNumber(true);
           return rn>=399999;
         }
-        
+
         void retrieveParam(const xAOD::Muon& muon, float& value, const xAOD::Muon::ParamDef param) const;
 
         //ONNX
