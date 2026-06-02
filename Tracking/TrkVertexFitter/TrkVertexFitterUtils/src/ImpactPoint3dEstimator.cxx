@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*********************************************************************
@@ -103,7 +103,8 @@ namespace Trk
   }
 
   std::unique_ptr<PlaneSurface>
-  ImpactPoint3dEstimator::Estimate3dIP(const NeutralParameters* neutralPerigee,
+  ImpactPoint3dEstimator::Estimate3dIP(const EventContext& /*ctx*/,
+                                       const NeutralParameters* neutralPerigee,
                                        const Amg::Vector3D* theVertex,
                                        double& distance) const
   {
@@ -112,11 +113,12 @@ namespace Trk
   }
 
   std::unique_ptr<PlaneSurface>
-  ImpactPoint3dEstimator::Estimate3dIP(const TrackParameters* trackPerigee,
+  ImpactPoint3dEstimator::Estimate3dIP(const EventContext& ctx,
+                                       const TrackParameters* trackPerigee,
                                        const Amg::Vector3D* theVertex,
                                        double& distance) const
   {
-    SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCacheCondObjInputKey, Gaudi::Hive::currentContext()};
+    SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCacheCondObjInputKey, ctx};
     const AtlasFieldCacheCondObj* fieldCondObj{*readHandle};
 
     MagField::AtlasFieldCache fieldCache;
@@ -138,7 +140,7 @@ namespace Trk
       Trk::PerigeeSurface perigeeSurface(*theVertex);
       std::unique_ptr<const Trk::TrackParameters> tmp =
         m_extrapolator->extrapolateDirectly(
-          Gaudi::Hive::currentContext(), *trackPerigee, perigeeSurface);
+          ctx, *trackPerigee, perigeeSurface);
       if (tmp && tmp->associatedSurface().type() == Trk::SurfaceType::Perigee) {
         thePerigee = static_cast<const Trk::Perigee*>(tmp.release());
       }
@@ -282,17 +284,17 @@ namespace Trk
   }//end of estimate 3dIP method
 
   bool
-  ImpactPoint3dEstimator::addIP3dAtaPlane(VxTrackAtVertex & vtxTrack,const Amg::Vector3D & vertex) const
+  ImpactPoint3dEstimator::addIP3dAtaPlane(const EventContext& ctx, VxTrackAtVertex & vtxTrack,const Amg::Vector3D & vertex) const
   {
     if (vtxTrack.initialPerigee()) {
-      const AtaPlane* myPlane=IP3dAtaPlane(vtxTrack,vertex);
+      const AtaPlane* myPlane=IP3dAtaPlane(ctx,vtxTrack,vertex);
       if (myPlane)
         {
           vtxTrack.setImpactPoint3dAtaPlane(myPlane);
           return true;
         }
     } else { //for neutrals
-      const NeutralAtaPlane* myPlane=IP3dNeutralAtaPlane(vtxTrack.initialNeutralPerigee(),vertex);
+      const NeutralAtaPlane* myPlane=IP3dNeutralAtaPlane(ctx,vtxTrack.initialNeutralPerigee(),vertex);
       if (myPlane)      {
         ATH_MSG_VERBOSE ("Adding plane: " << myPlane->associatedSurface() );
         vtxTrack.setImpactPoint3dNeutralAtaPlane(myPlane);
@@ -304,7 +306,7 @@ namespace Trk
 
 
   const Trk::AtaPlane *
-  ImpactPoint3dEstimator::IP3dAtaPlane(VxTrackAtVertex & vtxTrack,const Amg::Vector3D & vertex) const
+  ImpactPoint3dEstimator::IP3dAtaPlane(const EventContext& ctx,VxTrackAtVertex & vtxTrack,const Amg::Vector3D & vertex) const
   {
     if (!vtxTrack.initialPerigee() && vtxTrack.initialNeutralPerigee())
       ATH_MSG_WARNING( "Calling ImpactPoint3dEstimator::IP3dAtaPlane cannot return NeutralAtaPlane"  );
@@ -312,7 +314,7 @@ namespace Trk
     try
     {
       double distance = 0;
-      theSurfaceAtIP = Estimate3dIP(vtxTrack.initialPerigee(),&vertex,distance);
+      theSurfaceAtIP = Estimate3dIP(ctx,vtxTrack.initialPerigee(),&vertex,distance);
     }
     catch (error::ImpactPoint3dEstimatorProblem err)
     {
@@ -328,7 +330,7 @@ namespace Trk
     ATH_MSG_VERBOSE( "The resulting surface is: " << *theSurfaceAtIP  );
 #endif
    const auto* pTrackPar = m_extrapolator->extrapolate(
-     Gaudi::Hive::currentContext(),
+     ctx,
      *(vtxTrack.initialPerigee()),
      *theSurfaceAtIP).release();
    if (const Trk::AtaPlane* res = dynamic_cast<const Trk::AtaPlane *>(pTrackPar); res){
@@ -340,14 +342,14 @@ namespace Trk
 
 
   const Trk::NeutralAtaPlane *
-  ImpactPoint3dEstimator::IP3dNeutralAtaPlane(const NeutralParameters * initNeutPerigee,const Amg::Vector3D & vertex) const
+  ImpactPoint3dEstimator::IP3dNeutralAtaPlane(const EventContext& ctx,const NeutralParameters * initNeutPerigee,const Amg::Vector3D & vertex) const
   {
     std::unique_ptr<PlaneSurface> theSurfaceAtIP;
 
     try
     {
         double distance = 0;
-        theSurfaceAtIP = Estimate3dIP(initNeutPerigee,&vertex,distance);
+        theSurfaceAtIP = Estimate3dIP(ctx,initNeutPerigee,&vertex,distance);
     }
     catch (error::ImpactPoint3dEstimatorProblem err)
     {

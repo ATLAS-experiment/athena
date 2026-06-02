@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file TrkVertexFitters/AdaptiveMultiVertexFitterTestAlg.h
@@ -38,7 +38,7 @@ public:
 
 
 private:
-  StatusCode test1();
+  StatusCode test1(const EventContext& ctx);
 
 
   ToolHandle<Trk::AdaptiveMultiVertexFitter> m_fitter

@@ -111,6 +111,7 @@ namespace Trk
 
   std::unique_ptr<xAOD::Vertex>
   AdaptiveVertexFitter::_fit(
+    const EventContext& ctx,
     const std::vector<const Trk::TrackParameters*>& perigeeList,
     const std::vector<const Trk::NeutralParameters*>& neutralPerigeeList,
     const xAOD::Vertex& constraint,     // initialized to xAOD::Vertex()
@@ -181,7 +182,7 @@ namespace Trk
       VxTrackAtVertex* LinTrackToAdd = new VxTrackAtVertex(0., nullptr, nullptr, (*perigeesIter), nullptr); //TODO: Must think now about when to delete this memory! -David S.
       
       //m_LinearizedTrackFactory->linearize(*LinTrackToAdd,SeedPoint); why linearize it? maybe you don't need it at all!!!!! <19-05-2006>
-      bool success=m_ImpactPoint3dEstimator->addIP3dAtaPlane(*LinTrackToAdd,SeedPoint);
+      bool success=m_ImpactPoint3dEstimator->addIP3dAtaPlane(ctx,*LinTrackToAdd,SeedPoint);
       if (!success)
       {
 	msg(MSG::DEBUG) << "Adding compatibility to vertex information failed. Newton distance finder didn't converge..." << endmsg;
@@ -207,7 +208,7 @@ namespace Trk
 
       VxTrackAtVertex* LinTrackToAdd = new VxTrackAtVertex(0., nullptr, nullptr, nullptr, (*neutralPerigeesIter) ); //TODO: Must think now about when to delete this memory! -David S.
      
-      bool success = m_ImpactPoint3dEstimator->addIP3dAtaPlane(*LinTrackToAdd,SeedPoint);
+      bool success = m_ImpactPoint3dEstimator->addIP3dAtaPlane(ctx,*LinTrackToAdd,SeedPoint);
       if (!success)
       {
 	msg(MSG::DEBUG) << "Adding compatibility to vertex information failed. Newton distance finder didn't converge..." << endmsg;
@@ -248,13 +249,14 @@ namespace Trk
     }
 
     //now put the linearizedtracks into VxTrackAtVertex
-    return dothefit(ConstraintVertex,SeedPoint,theLinTracks);
+    return dothefit(ctx,ConstraintVertex,SeedPoint,theLinTracks);
 
 
   }
 
   std::unique_ptr<xAOD::Vertex>
   AdaptiveVertexFitter::_fit(
+    const EventContext& ctx,
     const std::vector<const Trk::Track*>& VectorTrk,
     const xAOD::Vertex& constraint,     // initialized to xAOD::Vertex()
     const Amg::Vector3D& startingPoint, // initialized to Amg::Vector3D()
@@ -272,7 +274,7 @@ namespace Trk
       perigeeList.push_back(iter->perigeeParameters());
     }
 
-    std::unique_ptr<xAOD::Vertex> FittedVertex = _fit(perigeeList,constraint,startingPoint,IsConstraint,IsStartingPoint);
+    std::unique_ptr<xAOD::Vertex> FittedVertex = _fit(ctx,perigeeList,constraint,startingPoint,IsConstraint,IsStartingPoint);
 
     if (FittedVertex==nullptr) {
       return FittedVertex;
@@ -317,6 +319,7 @@ namespace Trk
 
   std::unique_ptr<xAOD::Vertex>
   AdaptiveVertexFitter::dothefit(
+    const EventContext& ctx,
     const xAOD::Vertex& ConstraintVertex,
     const Amg::Vector3D& SeedVertex,
     std::vector<Trk::VxTrackAtVertex>& myLinTracks) const
@@ -387,7 +390,7 @@ namespace Trk
         
         for (iter=lintracksBegin;iter!=lintracksEnd;++iter) {
           //m_LinearizedTrackFactory->linearize(*iter,ActualPosition);
-          bool success=m_ImpactPoint3dEstimator->addIP3dAtaPlane(*iter,NewVertex);
+          bool success=m_ImpactPoint3dEstimator->addIP3dAtaPlane(ctx,*iter,NewVertex);
           if (!success)
           {
             msg(MSG::DEBUG) << "Adding compatibility to vertex information failed. Newton distance finder didn't converge..." << endmsg;
@@ -519,43 +522,43 @@ namespace Trk
 
   std::unique_ptr<xAOD::Vertex>
   AdaptiveVertexFitter::fit(
-    const EventContext& /*ctx*/,
+    const EventContext& ctx,
     const std::vector<const Trk::TrackParameters*>& perigeeList,
     const std::vector<const Trk::NeutralParameters*>& neutralPerigeeList,
     const Amg::Vector3D& startingPoint) const
   {
 
-    return _fit(perigeeList,neutralPerigeeList,xAOD::Vertex(),startingPoint,false,true);
+    return _fit(ctx,perigeeList,neutralPerigeeList,xAOD::Vertex(),startingPoint,false,true);
   }
 
   std::unique_ptr<xAOD::Vertex>
   AdaptiveVertexFitter::fit(
-    const EventContext& /*ctx*/,
+    const EventContext& ctx,
     const std::vector<const Trk::TrackParameters*>& perigeeList,
     const std::vector<const Trk::NeutralParameters*>& neutralPerigeeList,
     const xAOD::Vertex& constraint) const
   {
-    return _fit(perigeeList,neutralPerigeeList,constraint,Amg::Vector3D::Zero(),true);
+    return _fit(ctx,perigeeList,neutralPerigeeList,constraint,Amg::Vector3D::Zero(),true);
   }
 
   std::unique_ptr<xAOD::Vertex>
   AdaptiveVertexFitter::fit(
-    const EventContext& /*ctx*/,
+    const EventContext& ctx,
     const std::vector<const Trk::TrackParameters*>& perigeeList,
     const std::vector<const Trk::NeutralParameters*>& neutralPerigeeList,
     const xAOD::Vertex& constraint,
     const Amg::Vector3D& startingPoint) const
   {
-    return _fit(perigeeList,neutralPerigeeList,constraint,startingPoint,true,true);
+    return _fit(ctx,perigeeList,neutralPerigeeList,constraint,startingPoint,true,true);
   }
 
   std::unique_ptr<xAOD::Vertex>
   AdaptiveVertexFitter::fit(
-    const EventContext& /*ctx*/,
+    const EventContext& ctx,
     const std::vector<const Trk::TrackParameters*>& perigeeList,
     const std::vector<const Trk::NeutralParameters*>& neutralPerigeeList) const
   {
-    return _fit(perigeeList,neutralPerigeeList,xAOD::Vertex(),Amg::Vector3D(),false,false);
+    return _fit(ctx,perigeeList,neutralPerigeeList,xAOD::Vertex(),Amg::Vector3D(),false,false);
   }
 
   std::unique_ptr<xAOD::Vertex>
@@ -600,6 +603,7 @@ namespace Trk
 
   std::unique_ptr<xAOD::Vertex>
   AdaptiveVertexFitter::_fit(
+    const EventContext& ctx,
     const std::vector<const Trk::TrackParameters*> & perigeeList,
     const xAOD::Vertex& constraint,
     const Amg::Vector3D & startingPoint,
@@ -607,7 +611,7 @@ namespace Trk
     bool IsStartingPoint) const
   {
     const std::vector<const Trk::NeutralParameters*> neutralPerigeeList;
-    return _fit(perigeeList, neutralPerigeeList, constraint, startingPoint, IsConstraint, IsStartingPoint);
+    return _fit(ctx, perigeeList, neutralPerigeeList, constraint, startingPoint, IsConstraint, IsStartingPoint);
   }
 
 //xAOD interfaced methods. Required to un-block the current situation 
@@ -615,7 +619,7 @@ namespace Trk
 
   std::unique_ptr<xAOD::Vertex>
   AdaptiveVertexFitter::fit(
-    const EventContext& /*ctx*/,
+    const EventContext& ctx,
     const std::vector<const xAOD::TrackParticle*>& vectorTrk,
     const std::vector<const xAOD::NeutralParticle*>& vectorNeut,
     const Amg::Vector3D& startingPoint) const
@@ -661,6 +665,7 @@ namespace Trk
     }
 
     std::unique_ptr<xAOD::Vertex> fittedVertex = _fit(
+                                      ctx,
                                       measuredPerigees,
                                       measuredNeutralPerigees,
                                       xAOD::Vertex(),
@@ -767,7 +772,7 @@ namespace Trk
 
  std::unique_ptr<xAOD::Vertex>
  AdaptiveVertexFitter::fit(
-   const EventContext& /*ctx*/,
+   const EventContext& ctx,
    const std::vector<const xAOD::TrackParticle*>& vectorTrk,
    const std::vector<const xAOD::NeutralParticle*>& vectorNeut,
    const xAOD::Vertex& constraint) const
@@ -807,7 +812,7 @@ namespace Trk
    }
    
    
-   std::unique_ptr<xAOD::Vertex> fittedVertex = _fit(measuredPerigees, measuredNeutralPerigees, constraint, Amg::Vector3D(),true);
+   std::unique_ptr<xAOD::Vertex> fittedVertex = _fit(ctx, measuredPerigees, measuredNeutralPerigees, constraint, Amg::Vector3D(),true);
 
 
    //assigning the input tracks to the fitted vertex through VxTrackAtVertices
