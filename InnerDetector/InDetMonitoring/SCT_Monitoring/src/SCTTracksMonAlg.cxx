@@ -89,11 +89,11 @@ ATH_MSG_DEBUG("SCTTracksMonAlg::fillHistograms()");
   for (const Trk::Track* track: *tracks) {
     if (track==nullptr) {
       ATH_MSG_ERROR("No pointer to track");
-      break;
+      continue;
     }
 
     int local_scthits{0};
-    int scthits_on_trk{0}; // Breaks out of loop if track has less than 3 sct hits
+    int scthits_on_trk{0}; // skip this track if it has less than 3 sct hits
     std::unique_ptr<const Trk::TrackSummary> trkSum = m_trackSummaryTool->summary (ctx, *track);
     if (trkSum==nullptr) {
       ATH_MSG_WARNING("Trk::TrackSummary is null and cannot be created by " << m_trackSummaryTool.name());
@@ -106,7 +106,7 @@ ATH_MSG_DEBUG("SCTTracksMonAlg::fillHistograms()");
     }
     if (scthits_on_trk < m_trackHitCut) {
       ATH_MSG_DEBUG("track fails minimum SCT hit requirement");
-      break;
+      continue;
     }
     goodTrks_N++;
     if (track->fitQuality()->numberDoF() > 0.) { // Fill Track Chi2/ndf histogram
@@ -151,7 +151,7 @@ ATH_MSG_DEBUG("SCTTracksMonAlg::fillHistograms()");
     const Trk::TrackStates* trackStates{track->trackStateOnSurfaces()};
     if (not trackStates) {
       ATH_MSG_ERROR("for current track, TrackStateOnSurfaces == Null, no data will be written for this track");
-      break;
+      continue;
     }
     for (const Trk::TrackStateOnSurface* tsos: *trackStates) {
       if (tsos->type(Trk::TrackStateOnSurface::Measurement)) {
@@ -203,7 +203,7 @@ ATH_MSG_DEBUG("SCTTracksMonAlg::fillHistograms()");
                                          : Trk::ResidualPull::Biased)};
                 if (not residualPull) {
                   ATH_MSG_WARNING("Residual Pull Calculator did not succeed!");
-                  return StatusCode::SUCCESS;
+                  continue;
                 } else {
                   double local_residual{residualPull->residual()[Trk::locX]};
                   double local_pull{residualPull->pull()[Trk::locX]};
