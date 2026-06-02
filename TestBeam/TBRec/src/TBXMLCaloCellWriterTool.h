@@ -16,7 +16,7 @@
 
 #include "TBXMLWriterToolBase.h"
 
-#include <iostream>
+#include <iosfwd>
 #include <vector>
 #include <string>
 #include <unordered_set>
