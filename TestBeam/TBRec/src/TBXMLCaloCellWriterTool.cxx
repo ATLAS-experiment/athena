@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
-#include "TBXMLWriterToolBase.h"
 #include "TBXMLCaloCellWriterTool.h"
 #include "TBXMLWriter.h"
 
@@ -30,7 +29,6 @@
 #include <iomanip>
 
 #include <vector>
-#include <string>
 #include <sstream>
 #include <map>
 
@@ -80,7 +78,7 @@ StatusCode TBXMLCaloCellWriterTool::initialize()
 
 StatusCode
 TBXMLCaloCellWriterTool::writeEvent(std::ostream& outStream,
-				    const std::string& /* entryTag */)
+				    std::string_view /* entryTag */)
 {
   // messaging
   MsgStream log(msgSvc(),name());

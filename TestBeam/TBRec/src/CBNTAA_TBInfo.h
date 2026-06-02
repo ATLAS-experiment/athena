@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_CBNTAA_TBINFO_H
@@ -35,54 +35,54 @@ private:
 
     ToolHandle<ICaloCoordinateTool> m_coord{this, "CaloCoordinateTool", "TBCaloCoordinate"};
     ToolHandle<TBCondRunParTool> m_runpar{this, "CondRunParTool", "TBCondRunParTool"};
-	bool m_DBRead;
-	int m_beamener;
-	int m_beamtype;
-	bool m_computeBeamEnergy;
-	bool m_dumpBeamLine;
+	bool m_DBRead{};
+	int m_beamener{};
+	int m_beamtype{};
+	bool m_computeBeamEnergy{};
+	bool m_dumpBeamLine{};
 
 	//for VLE setup...
-	float  m_B8_Bdl; //B8dl of VLE setup B8 magnet
-	bool   m_is_VLE; //a flag showing whether the run is a VLE run or HLE run
+	float  m_B8_Bdl{}; //B8dl of VLE setup B8 magnet
+	bool   m_is_VLE{}; //a flag showing whether the run is a VLE run or HLE run
 
 	//previous values of calculated variables used for caching pruposes...
-	int m_prevrunNum;
-	float m_prevEnergy;
-	float m_preverrAbsEnergy;
-	float m_preverrCollimators;
-	float m_preverrCurrents;
-	float m_prevsycLoss;
-	float m_preverrSycLoss;
-	float m_prevB3;
-	float m_prevB4;
-	float m_prevB8;
+	int m_prevrunNum{};
+	float m_prevEnergy{};
+	float m_preverrAbsEnergy{};
+	float m_preverrCollimators{};
+	float m_preverrCurrents{};
+	float m_prevsycLoss{};
+	float m_preverrSycLoss{};
+	float m_prevB3{};
+	float m_prevB4{};
+	float m_prevB8{};
 	//new method added by H.Hakobyan to deal with energy calculation out of execute()..
 	void calculateAll(int runNumber,int eventNumber);
 
     // ntuple variables
     // for test beam
-	double    m_runEta_nt;
-	long      m_runParticleType_nt;
-	long      m_runEnergy_nt;
+	double    m_runEta_nt{};
+	long      m_runParticleType_nt{};
+	long      m_runEnergy_nt{};
 
-	std::vector<float>    *m_quad_file;
-	std::vector<float>    *m_quad_equip;
+	std::vector<float>    *m_quad_file{};
+	std::vector<float>    *m_quad_equip{};
 	
-	std::vector<float>    *m_bend_file;
-	std::vector<float>    *m_bend_equip;
+	std::vector<float>    *m_bend_file{};
+	std::vector<float>    *m_bend_equip{};
 	
-	std::vector<float>    *m_trim_file;
-	std::vector<float>    *m_trim_equip;
+	std::vector<float>    *m_trim_file{};
+	std::vector<float>    *m_trim_equip{};
 
-	std::vector<float>    *m_coll_file;
-	std::vector<float>    *m_coll_equip;
+	std::vector<float>    *m_coll_file{};
+	std::vector<float>    *m_coll_equip{};
 
-	float      m_energy;
-	float      m_errAbsEnergy;
-	float      m_errCollimators;
-	float      m_errCurrents;
-	float      m_sycLoss;
-	float      m_errSycLoss;
+	float      m_energy{};
+	float      m_errAbsEnergy{};
+	float      m_errCollimators{};
+	float      m_errCurrents{};
+	float      m_sycLoss{};
+	float      m_errSycLoss{};
 
         virtual StatusCode CBNT_clear() override;
 };
