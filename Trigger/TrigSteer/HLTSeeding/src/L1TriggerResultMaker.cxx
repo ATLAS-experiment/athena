@@ -54,6 +54,8 @@ StatusCode L1TriggerResultMaker::initialize() {
   ATH_CHECK(m_jFexLRJetRoIKeys.initialize(SG::AllowEmpty));
   ATH_CHECK(m_gFexSRJetRoIKeys.initialize(SG::AllowEmpty));
   ATH_CHECK(m_gFexLRJetRoIKeys.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_gScalarEJwojKeys.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_gMETComponentsJwojKeys.initialize(SG::AllowEmpty));
   ATH_CHECK(m_thresholdPatternTools.retrieve());
   return StatusCode::SUCCESS;
 }
@@ -101,6 +103,8 @@ StatusCode L1TriggerResultMaker::execute(const EventContext& eventContext) const
   ATH_CHECK(retrieveAndLink(m_jFexLRJetRoIKeys));
   ATH_CHECK(retrieveAndLink(m_gFexSRJetRoIKeys));
   ATH_CHECK(retrieveAndLink(m_gFexLRJetRoIKeys));
+  ATH_CHECK(retrieveAndLink(m_gScalarEJwojKeys));
+  ATH_CHECK(retrieveAndLink(m_gMETComponentsJwojKeys));
 
   // Create combined Taus and link them to the L1TR
   ATH_CHECK(createCombinedTauRoIs(*(l1trHandle->back()), eventContext));

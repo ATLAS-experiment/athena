@@ -23,7 +23,7 @@ def SPCountHypoToolGen(flags, chainDict):
         hypo.sctSP = 3
     if "mb_excl" in chainDict["chainName"]:
         hypo.pixCLMax = 150 # TODO revisit tightening those
-        hypo.sctSPMax = 150 # as above
+        hypo.sctSPMax = 150 + 350 # as above, +350 to compensate for noisy SCT modules during 2026 HI run
     if "sp_pix" in chainDict["chainName"]:
         hypo.pixCL = int(chainDict["chainParts"][0]["hypoSPInfo"].removeprefix("pix"))
     if "sp_vpix" in chainDict["chainName"]:
