@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //==================================================================================
@@ -496,8 +496,6 @@ StatusCode IDPerfMonZmumu::bookTrees()
     m_refit1Tree->Branch("Negative_Eta", &m_negative_eta, "Negative_Eta/D");
     m_refit1Tree->Branch("Negative_z0",  &m_negative_z0,  "Negative_z0/D");
     m_refit1Tree->Branch("Negative_d0",  &m_negative_d0,  "Negative_d0/D");
-    m_refit1Tree->Branch("Negative_z0_manualBS",  &m_positive_z0_manualBS,  "Negative_z0_manualBS/D");
-    m_refit1Tree->Branch("Negative_d0_manualBS",  &m_positive_d0_manualBS,  "Negative_d0_manualBS/D");
     m_refit1Tree->Branch("Negative_z0_err",  &m_negative_z0_err,  "Negative_z0_err/D");
     m_refit1Tree->Branch("Negative_d0_err",  &m_negative_d0_err,  "Negative_d0_err/D");
     m_refit1Tree->Branch("Negative_sigma_pt",  &m_negative_sigma_pt,  "Negative_sigma_pt/D");
@@ -510,8 +508,6 @@ StatusCode IDPerfMonZmumu::bookTrees()
     m_refit1Tree->Branch("Positive_eta", &m_positive_eta, "Positive_Eta/D");
     m_refit1Tree->Branch("Positive_z0",  &m_positive_z0,  "Positive_z0/D");
     m_refit1Tree->Branch("Positive_d0",  &m_positive_d0,  "Positive_d0/D");
-    m_refit1Tree->Branch("Positive_z0_manualBS",  &m_positive_z0_manualBS,  "Positive_z0_manualBS/D");
-    m_refit1Tree->Branch("Positive_d0_manualBS",  &m_positive_d0_manualBS,  "Positive_d0_manualBS/D");
     m_refit1Tree->Branch("Positive_z0_err",  &m_positive_z0_err,  "Positive_z0_err/D");
     m_refit1Tree->Branch("Positive_d0_err",  &m_positive_d0_err,  "Positive_d0_err/D");
     m_refit1Tree->Branch("Positive_sigma_pt",  &m_positive_sigma_pt,  "Positive_sigma_pt/D");
@@ -555,8 +551,6 @@ StatusCode IDPerfMonZmumu::bookTrees()
     m_refit2Tree->Branch("Negative_Eta", &m_negative_eta, "Negative_Eta/D");
     m_refit2Tree->Branch("Negative_z0",  &m_negative_z0,  "Negative_z0/D");
     m_refit2Tree->Branch("Negative_d0",  &m_negative_d0,  "Negative_d0/D");
-    m_refit2Tree->Branch("Negative_z0_manualBS",  &m_positive_z0_manualBS,  "Negative_z0_manualBS/D");
-    m_refit2Tree->Branch("Negative_d0_manualBS",  &m_positive_d0_manualBS,  "Negative_d0_manualBS/D");
     m_refit2Tree->Branch("Negative_z0_err",  &m_negative_z0_err,  "Negative_z0_err/D");
     m_refit2Tree->Branch("Negative_d0_err",  &m_negative_d0_err,  "Negative_d0_err/D");
     m_refit2Tree->Branch("Negative_sigma_pt",  &m_negative_sigma_pt,  "Negative_sigma_pt/D");
@@ -569,8 +563,6 @@ StatusCode IDPerfMonZmumu::bookTrees()
     m_refit2Tree->Branch("Positive_Eta", &m_positive_eta, "Positive_Eta/D");
     m_refit2Tree->Branch("Positive_z0",  &m_positive_z0,  "Positive_z0/D");
     m_refit2Tree->Branch("Positive_d0",  &m_positive_d0,  "Positive_d0/D");
-    m_refit2Tree->Branch("Positive_z0_manualBS",  &m_positive_z0_manualBS,  "Positive_z0_manualBS/D");
-    m_refit2Tree->Branch("Positive_d0_manualBS",  &m_positive_d0_manualBS,  "Positive_d0_manualBS/D");
     m_refit2Tree->Branch("Positive_z0_err",  &m_positive_z0_err,  "Positive_z0_err/D");
     m_refit2Tree->Branch("Positive_d0_err",  &m_positive_d0_err,  "Positive_d0_err/D");
     m_refit2Tree->Branch("Positive_sigma_pt",  &m_positive_sigma_pt,  "Positive_sigma_pt/D");
@@ -1886,8 +1878,6 @@ StatusCode IDPerfMonZmumu::FillRecParameters (const Trk::Track* track, const xAO
       phi= trkPerigee->parameters()[Trk::phi];
       d0 = atBL->parameters()[Trk::d0];
       z0 = atBL->parameters()[Trk::z0];
-      //      z0_err = Amg::error(*trkPerigee->covariance(),Trk::z0);  //->Why not?
-      //      d0_err = Amg::error(*trkPerigee->covariance(),Trk::d0);  //->Why not?
     } 
     delete atBL;
   }
@@ -1895,25 +1885,13 @@ StatusCode IDPerfMonZmumu::FillRecParameters (const Trk::Track* track, const xAO
     ATH_MSG_WARNING("FillRecParameters::Failed extrapolation to the BeamLine");
   }
 
-  Amg::Vector3D position = beamSpotHandleRec->beamPos();
+  
+  // Amg::Vector3D position = beamSpotHandleRec->beamPos();
   TLorentzVector vtrack = TLorentzVector (trkPerigee->momentum().x(),
 					  trkPerigee->momentum().y(),
 					  trkPerigee->momentum().z(),
 					  trkPerigee->momentum().mag());
-  float trkd0 = trkPerigee->parameters()[Trk::d0];
-  float trkz0 = trkPerigee->parameters()[Trk::z0];
-  float bsX = position.x();
-  float bsY = position.y();
-  float bsZ = position.z();
-  float btiltX = beamSpotHandleRec->beamTilt(0);
-  float btiltY = beamSpotHandleRec->beamTilt(1);
-  // correct the track parameters for the beamspot position
-  float beamX = bsX + std::tan(btiltX) * (trkz0-bsZ);
-  float beamY = bsY + std::tan(btiltY) * (trkz0-bsZ);
-  float beamD0 = ( -std::sin(vtrack.Phi())*beamX + std::cos(vtrack.Phi())*beamY );
-  float d0bscorr = trkd0 - beamD0;
-  float z0bscorr = trkz0 - bsZ;
-
+  
   if(m_doIP && vertex){ //I assume that the vertex is the same of the original track
     std::unique_ptr<Trk::ImpactParametersAndSigma> iPandSigma(nullptr);
     if (!m_skipMS) iPandSigma = m_trackToVertexIPEstimator->estimate(ctx, trk_for_unbiasPerigee,trkPerigee,vertex,m_doRemoval);
@@ -1951,8 +1929,6 @@ StatusCode IDPerfMonZmumu::FillRecParameters (const Trk::Track* track, const xAO
     m_positive_eta= eta;
     m_positive_z0 = z0;
     m_positive_d0 = d0;
-    m_positive_z0_manualBS = z0bscorr;
-    m_positive_d0_manualBS = d0bscorr;
     m_positive_d0_err = d0_err;
     m_positive_z0_err = z0_err;
     if(m_doIP){
@@ -1972,8 +1948,6 @@ StatusCode IDPerfMonZmumu::FillRecParameters (const Trk::Track* track, const xAO
     m_negative_eta= eta;
     m_negative_z0 = z0;
     m_negative_d0 = d0;
-    m_negative_z0_manualBS = z0bscorr;
-    m_negative_d0_manualBS = d0bscorr;
     m_negative_d0_err = d0_err;
     m_negative_z0_err = z0_err;
     if(m_doIP){
@@ -2038,61 +2012,91 @@ StatusCode IDPerfMonZmumu::FillRecParametersSimple (const Trk::Track* track, flo
   const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandleRec { m_beamSpotKey, ctx }; // This method loads the proper beam spot conditions
 
-  float trkd0 =  trkPerigee->parameters()[Trk::d0];
-  float trkz0 =  trkPerigee->parameters()[Trk::z0];
-  float bsX =    beamSpotHandleRec->beamPos().x();
-  float bsY =    beamSpotHandleRec->beamPos().y();
-  float bsZ =    beamSpotHandleRec->beamPos().z();
-  float btiltX = beamSpotHandleRec->beamTilt(0);
-  float btiltY = beamSpotHandleRec->beamTilt(1);
-  // correct the track parameters for the beamspot position
-  float beamX = bsX + std::tan(btiltX) * (trkz0-bsZ);
-  float beamY = bsY + std::tan(btiltY) * (trkz0-bsZ);
-  float beamD0 = ( -std::sin(vtrack.Phi())*beamX + std::cos(vtrack.Phi())*beamY );
-  float d0bscorr = trkd0 - beamD0;
-  float z0bscorr = trkz0 - bsZ - vertex->z();
 
-  ATH_MSG_DEBUG("* FillRecParametersSimple *" 
-		<< " charge " << charge
-		<< " ** beamSpotHandleRec " << m_beamSpotKey 
-		<< "( " << beamSpotHandleRec->beamPos().x()
-		<< ", " << beamSpotHandleRec->beamPos().y()
-		<< ", " << beamSpotHandleRec->beamPos().z()
-		<< ")  tkd0: " << trkd0
-		<< "  d0bscorr: " << d0bscorr);
+  // access beam spot and extrapolate track till there
+  auto beamline = m_trackToVertexTool->GetBeamLine(beamSpotHandleRec.cptr());
 
+  auto trackBLtemp = m_trackToVertexTool->trackAtBeamline(ctx, *track , beamline.get() );
+  const Trk::AtaStraightLine*  atBL = dynamic_cast<const Trk::AtaStraightLine*>(trackBLtemp.get());
+
+  if (atBL){
+    double qOverP   = atBL->parameters()[Trk::qOverP];
+    if(qOverP){
+      px = atBL->momentum().x();
+      py = atBL->momentum().y();
+      pt = std::abs(atBL->pT());
+      pz = atBL->momentum().z();
+      eta= trkPerigee->eta();
+      phi= trkPerigee->parameters()[Trk::phi];
+      d0 = atBL->parameters()[Trk::d0];
+      z0 = atBL->parameters()[Trk::z0] - vertex->z(); // correct also for the vertex position along the beam line
+    } 
+    ATH_MSG_DEBUG("* FillRecParametersSimple *" 
+		  << " charge " << charge
+		  << " ** trackToVertexTool->trackAtBeamline ** " 
+		  << "( " << beamSpotHandleRec->beamPos().x()
+		  << ", " << beamSpotHandleRec->beamPos().y()
+		  << ", " << beamSpotHandleRec->beamPos().z()
+		  << ")  pt: " << pt
+		  << "  d0: " << d0
+		  << "  z0: " << z0);
+  }
+  else {
+    ATH_MSG_WARNING("FillRecParametersSimple::Failed extrapolation to the BeamLine --> extrapolate using line approximation");
+    float trkd0 =  trkPerigee->parameters()[Trk::d0];
+    float trkz0 =  trkPerigee->parameters()[Trk::z0];
+    float bsX =    beamSpotHandleRec->beamPos().x();
+    float bsY =    beamSpotHandleRec->beamPos().y();
+    float bsZ =    beamSpotHandleRec->beamPos().z();
+    float btiltX = beamSpotHandleRec->beamTilt(0);
+    float btiltY = beamSpotHandleRec->beamTilt(1);
+    // compute the corrections for the track parameters considering the beamspot position
+    float beamX = bsX + std::tan(btiltX) * (trkz0-bsZ);
+    float beamY = bsY + std::tan(btiltY) * (trkz0-bsZ);
+    float beamD0 = ( -std::sin(vtrack.Phi())*beamX + std::cos(vtrack.Phi())*beamY );
+
+    // correct d0 and z0
+    d0 = trkd0 - beamD0;
+    z0 = trkz0 - bsZ - vertex->z(); // correct also for the vertex position along the beam line  
+
+    ATH_MSG_DEBUG("* FillRecParametersSimple *" 
+		  << " charge " << charge
+		  << " ** beamSpotHandleRec " << m_beamSpotKey 
+		  << "( " << beamSpotHandleRec->beamPos().x()
+		  << ", " << beamSpotHandleRec->beamPos().y()
+		  << ", " << beamSpotHandleRec->beamPos().z()
+		  << ")  pt: " << pt
+		  << "  d0: " << d0 
+		  << "  z0: " << z0);
+  }
+  
   // store the values 
-  if (charge == 1) {
+  if (charge == 1) { // positive particle
     m_positive_px = px;
     m_positive_py = py;
     m_positive_pt = pt;
     m_positive_pz = pz;
     m_positive_phi= phi;
     m_positive_eta= eta;
-    m_positive_z0 = z0bscorr;
-    m_positive_d0 = d0bscorr;
-    m_positive_z0_manualBS = z0bscorr;
-    m_positive_d0_manualBS = d0bscorr;
+    m_positive_z0 = z0;
+    m_positive_d0 = d0;
     m_positive_d0_err = d0_err;
     m_positive_z0_err = z0_err;
   }
-  if (charge == -1) {
+  if (charge == -1) { // negative particle
     m_negative_px = px;
     m_negative_py = py;
     m_negative_pt = pt;
     m_negative_pz = pz;
     m_negative_phi= phi;
     m_negative_eta= eta;
-    m_negative_z0 = z0bscorr;
-    m_negative_d0 = d0bscorr;
-    m_negative_z0_manualBS = z0bscorr;
-    m_negative_d0_manualBS = d0bscorr;
+    m_negative_z0 = z0;
+    m_negative_d0 = d0;
     m_negative_d0_err = d0_err;
     m_negative_z0_err = z0_err;
   }
 
   ATH_MSG_DEBUG("* FillRecParametersSimple * completed * charge " << charge << "  pt: " << pt << "  d0: " << d0 << "  z0: " << z0);
-
   return StatusCode::SUCCESS;
 }
 
@@ -2466,8 +2470,6 @@ void IDPerfMonZmumu::Clear4MuNtupleVariables()
   m_positive_pz = 0.;
   m_positive_d0 = 0.;
   m_positive_z0 = 0.;
-  m_positive_d0_manualBS = 0.;
-  m_positive_z0_manualBS = 0.;
   m_positive_d0_err = 0.;
   m_positive_z0_err = 0.;
   m_positive_sigma_pt = 0.;
@@ -2479,8 +2481,6 @@ void IDPerfMonZmumu::Clear4MuNtupleVariables()
   m_negative_pz = 0.;
   m_negative_d0 = 0.;
   m_negative_z0 = 0.;
-  m_negative_d0_manualBS = 0.;
-  m_negative_z0_manualBS = 0.;
   m_negative_d0_err = 0.;
   m_negative_z0_err = 0.;
   m_negative_sigma_pt = 0.;
