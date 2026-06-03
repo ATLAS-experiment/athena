@@ -7,6 +7,11 @@ import contextlib
 import re
 import os
 
+from AthenaCommon.Logging import logging
+
+msg = logging.getLogger('MetaReader')
+
+
 from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
 import PyJobTransforms.trfArgClasses as trfArgClasses
 from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags, defaultTestFiles
@@ -431,7 +436,6 @@ def applyDetectorDefaults(runArgs, flags):
     if getattr(runArgs, "atlasVersion", None) is None:
         if isITkGeometryFromInput(runArgs):
             runArgs.atlasVersion = defaultGeometryTags.RUN4
-            # isITk = True
         else:
             runArgs.atlasVersion = defaultGeometryTags.RUN3
     
@@ -454,6 +458,8 @@ def applyDetectorDefaults(runArgs, flags):
         if isITk:
             runArgs.globalTag = defaultConditionsTags.RUN4_MC
         else:
+            if isMC:
+                msg.warn("Running Align_tf on Run2/3 RDOs is not yet supported. Please use RAW input files for pre-HL-LHC geometries.")
             runArgs.globalTag = (
                 defaultConditionsTags.RUN3_MC
                 if isMC
@@ -473,9 +479,11 @@ def fromRunArgs(runArgs):
     else:
         flags.Input.Files = [os.path.abspath(inputFile) for inputFile in runArgs.inputRAWFile]
 
-    # Some default tags are set (flags.GeoModel.AtlasVersion, runArgs.globalTag)
+    # Handling of default values for specific tags (flags.GeoModel.AtlasVersion, runArgs.inputTracksCollection, runArgs.globalTag, )
+    # N.B.: The function could be reorganised, putting the ITk/InDet parts in the respective configureITk/InDetFlags() functions
     applyDetectorDefaults(runArgs, flags)
 
+    # Configure flags based on the detector geometry
     if isITkGeometry(flags):
         flags.GeoModel.Align.Dynamic = False
         flags = configureITkFlags(runArgs, flags)
