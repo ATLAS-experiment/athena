@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Gaudi includes
@@ -15,6 +15,7 @@
 
 // Tile includes
 #include "TileRecUtils/TileCellMaskingTool.h"
+#include "Identifier/HWIdentifier.h"
 #include "TileIdentifier/TileHWID.h"
 #include "TileEvent/TileCell.h"
 
@@ -104,7 +105,7 @@ StatusCode TileCellMaskingTool::fillIncludedCellsMap() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void TileCellMaskingTool::killer(const std::string& component, int ros, int drw, int index) {
+void TileCellMaskingTool::killer(std::string_view component, int ros, int drw, int index) {
 
   int begin = 0, end = 0;
 

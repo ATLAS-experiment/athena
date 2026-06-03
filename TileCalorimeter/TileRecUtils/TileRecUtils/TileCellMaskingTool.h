@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECELLMASKINGTOOL_H
@@ -13,7 +13,7 @@
 
 // Calo includes
 #include "CaloInterface/ICaloCellMakerTool.h"
-#include "Identifier/HWIdentifier.h"
+
 
 #include <string>
 #include <vector>
@@ -21,6 +21,7 @@
 
 class TileID;
 class TileHWID;
+class HWIdentifier;
 
 class TileCellMaskingTool: public AthAlgTool, virtual public ICaloCellMakerTool {
   public:
@@ -38,7 +39,7 @@ class TileCellMaskingTool: public AthAlgTool, virtual public ICaloCellMakerTool 
   private:
 
     StatusCode fillIncludedCellsMap();
-    void killer(const std::string& component, int ros, int drw, int index);
+    void killer(std::string_view component, int ros, int drw, int index);
 
     std::vector<std::string> m_rejectedTileDrawer;
     std::vector<std::string> m_rejectedTileMB;

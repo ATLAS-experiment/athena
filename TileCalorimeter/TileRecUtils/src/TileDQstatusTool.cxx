@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -24,6 +24,7 @@
 #include <CLHEP/Random/RandFlat.h>
 #include "GaudiKernel/EventContext.h"
 #include "StoreGate/ReadCondHandle.h"
+#include <bit>
 
 /**
  * @brief Standard Gaudi tool constructor.
@@ -301,13 +302,8 @@ TileDQstatusTool::doBeamElem (const TileBeamElemContainer* tileBeamElemContainer
             }
 
             if (cispar[16] != cispar[17]) {
-              // Warning: nonportable.
-              union {
-                unsigned int i;
-                float f;
-              } chargeCnv;
-              chargeCnv.i = cispar[17];
-              cispar[17] = chargeCnv.f;
+              const float charge = std::bit_cast<float>(cispar[17]);
+              cispar[17] = static_cast<uint32_t>(charge);
             }
           }
           break;
