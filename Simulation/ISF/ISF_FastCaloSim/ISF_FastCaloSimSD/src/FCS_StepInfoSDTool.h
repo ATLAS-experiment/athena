@@ -13,6 +13,9 @@
 // System includes
 #include <string>
 #include <vector>
+#include <thread>
+
+#include "tbb/concurrent_unordered_map.h"
 
 // G4Atlas includes
 #include "G4AtlasTools/SensitiveDetectorBase.h"
@@ -48,7 +51,7 @@ class FCS_StepInfoSDTool : public SensitiveDetectorBase {
   StatusCode initialize() override final;
 
   /// Calls down to all the SDs to pack their hits into one collection
-  StatusCode Gather() override final;
+  StatusCode Gather(HitCollectionMap&) override final;
 
  private:
   /// Create the SD wrapper for current worker thread
@@ -69,6 +72,9 @@ class FCS_StepInfoSDTool : public SensitiveDetectorBase {
 
   /// Hit collection name
   std::string m_hitCollName;
+
+  //SD thread map
+  mutable tbb::concurrent_unordered_map<std::thread::id, G4VSensitiveDetector*, std::hash<std::thread::id>> m_sdThreadMap ATLAS_THREAD_SAFE;
 
   /// @name SD volumes
   /// @{
