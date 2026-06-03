@@ -102,10 +102,10 @@ def stringGetResult(file, rootFolder):
 
 def hancool(runNumber=3070,
             filePath="/afs/cern.ch/user/a/atlasdqm/dqmdisk/han_results/tier0/FDR2/NoStream/",
-            dbConnection="sqlite://;schema=MyCOOL.db;dbname=CONDBR2", isESn=True):
+            dbConnection="sqlite://;schema=MyCOOL.db;dbname=CONDBR2", isESn=True, stream='', amitag=None):
 
     logger.info('====> Running hancool_defects')
-    hancool_defects(runNumber, filePath, dbConnection, isESn)
+    hancool_defects(runNumber, filePath, dbConnection, isESn, stream, amitag)
     logger.info('<==== Done with hancool_defects')
 
 
@@ -214,7 +214,9 @@ def sct_conf_defects(d, i, runNumber):
 
 def sct_perlb_defects(d, i, runNumber):
     pairs = [('InnerDetector/SCT/Summary/SCT_LinksWithLinkLevelErrorsVsLbs',
-              'SCT_PERIOD_ERR_GT40', lambda _: _ > 80)]
+              'SCT_PERIOD_ERR_GT40', lambda _: _ > 80),
+             ('InnerDetector/SCT/Summary/SCT_LinksWithRODLevelErrorsVsLbs',
+              'SCT_ROD_OUT', lambda _: _ >= 1)]
 
     rv = []
     bad_lbs = {}
@@ -246,6 +248,56 @@ def sct_perlb_defects(d, i, runNumber):
         return rv
     else:
         return None
+
+
+def sct_rod_retraction(d, runNumber, ddb):
+    from DQDefects import DEFECT_IOV
+    from DQUtils.sugar import RunLumi
+
+    histogram = d.Get('InnerDetector/SCT/Summary/SCT_LinksWithRODLevelErrorsVsLbs')
+    if not histogram:
+        logger.warning('sct_rod_retraction: histogram not found in physics_Main, skipping')
+        return []
+
+    existing = ddb.retrieve(RunLumi(runNumber, 0), RunLumi(runNumber, 0xFFFFFFFF),
+                            channels=['SCT_ROD_OUT'], primary_only=True)
+    auto_set = [iov for iov in existing if iov.user == 'sys:hancool' and iov.present]
+
+    if not auto_set:
+        logger.info('sct_rod_retraction: no auto-set SCT_ROD_OUT found for run %d', runNumber)
+        return []
+
+    logger.info('sct_rod_retraction: found %d auto-set SCT_ROD_OUT IOV(s) for run %d',
+                len(auto_set), runNumber)
+
+    # Retract LBs where physics_Main does not satisfy the original assignment policy (>= 1)
+    rod_out_policy = lambda _: _ >= 1
+    clean_lbs = []
+    for iov in auto_set:
+        for lb in range(iov.since.lumi, iov.until.lumi):
+            if lb > histogram.GetNbinsX():
+                logger.warning('sct_rod_retraction: LB %d beyond histogram range, skipping', lb)
+                continue
+            if not rod_out_policy(histogram.GetBinContent(lb)):
+                clean_lbs.append(defect_iov('SCT_ROD_OUT',
+                                            'Retracted: no ROD errors in physics_Main',
+                                            False, lb, lb + 1))
+
+    if not clean_lbs:
+        logger.info('sct_rod_retraction: no LBs to retract for run %d', runNumber)
+        return []
+
+    merged = iovs_merge(clean_lbs)
+    logger.info('sct_rod_retraction: retracting %d IOV(s) for run %d', len(merged), runNumber)
+
+    return [DEFECT_IOV(RunLumi(runNumber, r.since),
+                       RunLumi(runNumber, r.until),
+                       channel=r.defect,
+                       comment=r.comment,
+                       present=False,
+                       recoverable=False,
+                       user='sys:hancool')
+            for r in merged]
 
 
 def iovs_merge(l):
@@ -310,13 +362,21 @@ def dqmf_node_defect(node, defect, badstatuses=['Red']):
     return dqmf_node_defect_core
 
 
-def hancool_defects(runNumber, filePath="./", dbConnection="", isESn=True):
+def hancool_defects(runNumber, filePath="./", dbConnection="", isESn=True, stream='', amitag=None):
     from . import pix_defect
+    isUPCESn = (amitag is not None and 'x' in amitag and stream == 'UPC')
     analyzers = []
     if isESn:
         # CTP
         analyzers += [ctp_defects]
         # SCT
+        analyzers += [sct_eff_defect,
+                      sct_lowstat_defect,
+                      sct_conf_defects,
+                      sct_perlb_defects,
+                      ]
+    elif isUPCESn:
+        # Heavy-ion UPC express: SCT defects only, no CTP or pixel
         analyzers += [sct_eff_defect,
                       sct_lowstat_defect,
                       sct_conf_defects,
@@ -372,6 +432,13 @@ def hancool_defects(runNumber, filePath="./", dbConnection="", isESn=True):
     from DQUtils.sugar import RunLumi
     import json
     ddb = DefectsDB(dbConnection, read_only=False)
+    use_flask = 'sqlite' not in dbConnection
+    if use_flask:
+        secret_path = os.environ.get('COOLFLASK_SECRET', '/afs/cern.ch/user/a/atlasdqm/private/coolflask_secret/coolflask_secret.json')
+        auth = json.loads(open(secret_path).read())
+    else:
+        auth = {}
+
     if isESn:
         logging.info('Running detmask_defects')
         dm_defects = detmask_defects(runNumber)
@@ -386,8 +453,36 @@ def hancool_defects(runNumber, filePath="./", dbConnection="", isESn=True):
                                          present=True,
                                          recoverable=defect.recoverable,
                                          user='sys:hancool'))
-        secret_path=os.environ.get('COOLFLASK_SECRET', '/afs/cern.ch/user/a/atlasdqm/private/coolflask_secret/coolflask_secret.json')
-        auth = json.loads(open(secret_path).read())
         logger.debug('Flask upload')
-        ddb.insert_multiple(defectlist, use_flask=('sqlite' not in dbConnection),
-                            flask_auth=auth)
+        ddb.insert_multiple(defectlist, use_flask=use_flask, flask_auth=auth)
+
+    elif isUPCESn and defects:
+        # Heavy-ion UPC express pass: insert SCT defects collected from analyzers above
+        defectlist = [DEFECT_IOV(RunLumi(runNumber, d.since),
+                                 RunLumi(runNumber, d.until),
+                                 channel=d.defect,
+                                 comment=d.comment,
+                                 present=True,
+                                 recoverable=d.recoverable,
+                                 user='sys:hancool')
+                      for d in iovs_merge(defects)]
+        logger.debug('Flask upload (UPC express SCT defects)')
+        ddb.insert_multiple(defectlist, use_flask=use_flask, flask_auth=auth)
+
+    elif stream == 'Main' and fnames[0]:
+        # physics_Main pass: cross-check previously auto-set SCT_ROD_OUT against
+        # physics_Main histogram and retract any LBs that no longer meet the threshold
+        fpath = fnames[0][0]
+        if not os.path.exists(fpath):
+            logger.warning('sct_rod_retraction: file not found: %s', fpath)
+        else:
+            fobj = ROOT.TFile.Open(fpath)
+            try:
+                retract_list = sct_rod_retraction(fobj, runNumber, ddb)
+                if retract_list:
+                    logger.debug('Flask upload (retraction)')
+                    ddb.insert_multiple(retract_list, use_flask=use_flask, flask_auth=auth)
+            except Exception:
+                logger.exception('sct_rod_retraction failed for run %d', runNumber)
+            finally:
+                fobj.Close()

@@ -29,11 +29,6 @@ import re
 partition = ispy.IPCPartition(os.getenv("TDAQ_PARTITION","ATLAS"))
 
 flags = initConfigFlags()
-# remove unused flag categories. Note Calo and Tile are only needed if running on CaloCells
-neededCats = ["GeoModel","DQ","Trigger","PerfMon","Detector","Muon","Overlay","LAr","Reco","Calo","Tile"]
-if partition.isValid(): neededCats += ["BField"] # online auto flag config also wants to set BField flags
-for cat in list(flags._dynaflags.keys()):
-  if cat not in neededCats: del flags._dynaflags[cat]
 flags.Input.Files = [] # so that when no files given we can detect that
 
 # Note: The order in which all these flag defaults get set is very fragile
@@ -73,6 +68,13 @@ if partition.isValid():
 else:
   flags.Trigger.doLVL1 = True # set this just so that IOBDb.GlobalTag is autoconfigured based on release setup if running on RAW (autoconfig will take it from POOL file if running on that)
 #flags.IOVDb.GlobalTag = lambda s: "OFLCOND-MC23-SDR-RUN3-02" if s.Input.isMC else "CONDBR2-ES1PA-2022-07" #"CONDBR2-HLTP-2022-02"
+
+import sys
+if "--help" in sys.argv:
+  # remove unused flag categories to clean up help printout.
+  neededCats = ["DQ","Trigger","PerfMon"]
+  for cat in list(flags._dynaflags.keys()):
+    if cat not in neededCats: del flags._dynaflags[cat]
 
 # now parse
 
@@ -695,6 +697,12 @@ if flags.Output.BSFileName != "":
     algo.jFexLRJetRoIKeys = ["L1_jFexLRJetRoI"]
     algo.jFexTauRoIKeys   = ["L1_jFexTauRoI"]
     algo.jFexFwdElRoIKeys = ["L1_jFexFwdElRoI"]
+
+  if flags.Trigger.L1.dogFex:
+    algo.gFexSRJetRoIKeys = ["L1_gFexSRJetRoI"]
+    algo.gFexLRJetRoIKeys = ["L1_gFexLRJetRoI"]
+    algo.gScalarEJwojKeys = ["L1_gScalarEJwoj"]
+    algo.gMETComponentsJwojKeys = ["L1_gMETComponentsJwoj"]
 
   cfg.addEventAlgo(algo)
   from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamWriteCfg
