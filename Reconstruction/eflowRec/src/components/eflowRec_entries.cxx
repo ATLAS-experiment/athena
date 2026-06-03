@@ -31,6 +31,9 @@
 #include "../PFSimulateTruthShowerTool.h"
 #include "../PFRadialEnergyCalculatorTool.h"
 
+#include "../PFUnifiedMatchingTool.h"
+#include "../PFUnifiedSubtractionOnlyTool.h"
+
 DECLARE_COMPONENT( PFLeptonSelector )
 DECLARE_COMPONENT( PFClusterSelectorTool )
 DECLARE_COMPONENT( PFTrackSelector )
@@ -59,3 +62,6 @@ DECLARE_COMPONENT( PFEnergyPredictorTool )
 DECLARE_COMPONENT( PFSimulateTruthShowerTool)
 DECLARE_COMPONENT( PFClusterWidthDecorator )
 DECLARE_COMPONENT( PFRadialEnergyCalculatorTool )
+
+DECLARE_COMPONENT( PFUnifiedMatchingTool )
+DECLARE_COMPONENT( PFUnifiedSubtractionOnlyTool )

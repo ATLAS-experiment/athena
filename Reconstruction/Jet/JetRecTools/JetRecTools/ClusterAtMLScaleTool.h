@@ -20,6 +20,8 @@
 #include "xAODCaloEvent/CaloCluster.h"
 #include "AsgTools/AsgTool.h" 
 #include <string>
+#include "StoreGate/ReadDecorHandleKey.h"
+
 
 class ClusterAtMLScaleTool : public JetConstituentModifierBase{
   ASG_TOOL_CLASS(ClusterAtMLScaleTool, IJetConstituentModifier)
@@ -34,8 +36,14 @@ class ClusterAtMLScaleTool : public JetConstituentModifierBase{
   
   private:
   // Property to configure the ML energy decoration key
-  Gaudi::Property<std::string> m_clusterMLCorrectedEnergyKey{this, "ClusterMLCorrectedEnergyDecorationKey", "clusterE_ML", 
-    "Name of the decoration storing the ML-corrected cluster energy"};
+  
+  SG::ReadDecorHandleKey<xAOD::CaloClusterContainer> m_clusterMLCorrectedEnergyKey{
+    this,
+    "ClusterMLCorrectedEnergyDecorationKey",
+    "CaloCalTopoClusters.clusterE_ML",
+    "Decoration storing ML-corrected cluster energy"
+  };
+
   // Implement the correction
   virtual StatusCode process_impl(xAOD::IParticleContainer* cont) const override; 
   StatusCode setClustersToMLScale(xAOD::CaloClusterContainer& cont) const;

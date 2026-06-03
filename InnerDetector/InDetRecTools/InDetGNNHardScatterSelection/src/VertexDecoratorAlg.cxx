@@ -50,6 +50,7 @@ namespace InDetGNNHardScatterSelection
     m_mDecor_photon_deltaPhi = baseName + "." + m_mDecor_photon_deltaPhi.key();
     m_mDecor_actualInterPerXing = baseName + "." + m_mDecor_actualInterPerXing.key();
     m_multiPhotonLinksKey = baseName + ".multiPhotonLinks";
+    m_mDecor_gnnScore = baseName + "." + m_mDecor_gnnScore.key();
 
     ATH_CHECK(m_multiPhotonLinksKey.initialize());
     ATH_CHECK(m_photonLinksKey.initialize());
@@ -66,6 +67,7 @@ namespace InDetGNNHardScatterSelection
     ATH_CHECK(m_mDecor_photon_deltaz.initialize());
     ATH_CHECK(m_mDecor_photon_deltaPhi.initialize());
     ATH_CHECK(m_mDecor_actualInterPerXing.initialize());
+    ATH_CHECK(m_mDecor_gnnScore.initialize());
 
     // ReadHandleKeys
     m_deltaZKey = baseName + ".deltaZ";
@@ -86,11 +88,7 @@ namespace InDetGNNHardScatterSelection
 
     // Tools
     ATH_CHECK(m_gnnTool.retrieve());
-    ATH_CHECK(m_trkVtxAssociationTool->setProperty("WorkingPoint","Prompt_MaxWeight"));
-    ATH_CHECK(m_trkVtxAssociationTool->setProperty("AMVFVerticesDeco","TTVA_AMVFVertices_forReco"));
-    ATH_CHECK(m_trkVtxAssociationTool->setProperty("AMVFWeightsDeco","TTVA_AMVFWeights_forReco"));
     ATH_CHECK(m_trkVtxAssociationTool.retrieve());
-    ATH_CHECK(m_trkVtxAssociationTool->initialize());
 
     return StatusCode::SUCCESS;
   }
@@ -125,6 +123,8 @@ namespace InDetGNNHardScatterSelection
     SG::ReadDecorHandle<xAOD::PhotonContainer, float> acc_zCommon(m_zCommonKey, ctx);
     SG::ReadDecorHandle<xAOD::PhotonContainer, float> acc_zCommonError(m_zCommonErrorKey, ctx);
 
+    SG::WriteDecorHandle<xAOD::VertexContainer, float> dec_gnnScore(m_mDecor_gnnScore,ctx);
+    
     // Decorations needed by the GNNTool
     SG::WriteDecorHandle<xAOD::VertexContainer, int> dec_ntrk(m_mDecor_ntrk, ctx);
     SG::WriteDecorHandle<xAOD::VertexContainer, float> dec_sumPt(m_mDecor_sumPt,ctx);
@@ -472,7 +472,9 @@ namespace InDetGNNHardScatterSelection
       dec_muonLinks(*vertex) = muonLinks;
 
       // Finally, decorate the vertices with the GNN score
-      m_gnnTool->decorate(*vertex);
+      float score_phsvertex = m_gnnTool->decorate(*vertex);
+
+      dec_gnnScore(*vertex) = score_phsvertex;
     }
 
     return StatusCode::SUCCESS;

@@ -12,12 +12,14 @@
 #include "MuonWallSD.h"
 
 #include "CaloIdentifier/TileTBID.h"
+#include "HitManagement/HitCollectionMap.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "StoreGate/StoreGateSvc.h"
-#include "TileSimEvent/TileHitVector.h"
 
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/Bootstrap.h"
 
+#include "G4EventManager.hh"
 #include "G4HCofThisEvent.hh"
 #include "G4VPhysicalVolume.hh"
 #include "G4Step.hh"
@@ -26,9 +28,7 @@
 
 MuonWallSD::MuonWallSD(const std::string& name, const std::string& hitCollectionName, int verbose)
     : G4VSensitiveDetector(name),
-    m_nhits(),
-    m_hit(),
-    m_HitColl(hitCollectionName)
+    m_hitCollectionName(hitCollectionName)
 {
   verboseLevel = std::max(verboseLevel, verbose);
 
@@ -62,12 +62,20 @@ MuonWallSD::MuonWallSD(const std::string& name, const std::string& hitCollection
   }
 }
 
-void MuonWallSD::StartOfAthenaEvent() {
-  if (verboseLevel >= 5) {
-    G4cout << "Initializing SD" << G4endl;
+MuonWallSD::HitVectorBuilder* MuonWallSD::GetHitCollection()
+{
+  auto* eventManager = G4EventManager::GetEventManager();
+  if (!eventManager) {
+    return nullptr;
   }
 
-  memset(m_nhits, 0, sizeof(m_nhits));
+  auto* eventInfo = dynamic_cast<AtlasG4EventUserInfo*>(eventManager->GetUserInformation());
+  if (!eventInfo) {
+    return nullptr;
+  }
+
+  auto hitCollections = eventInfo->GetHitCollectionMap();
+  return hitCollections ? hitCollections->Find<HitVectorBuilder>(m_hitCollectionName) : nullptr;
 }
 
 void MuonWallSD::Initialize(G4HCofThisEvent* /* HCE */) {
@@ -75,9 +83,7 @@ void MuonWallSD::Initialize(G4HCofThisEvent* /* HCE */) {
     G4cout << "MuonWallSD::Initialize()" << G4endl;
   }
 
-  if (!m_HitColl.isValid()) {
-    m_HitColl = std::make_unique<TileHitVector>(m_HitColl.name());
-  }
+  m_hitCollection = GetHitCollection();
 }
 
 G4bool MuonWallSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /* ROhist */) {
@@ -120,44 +126,23 @@ G4bool MuonWallSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /* ROhist */) 
   }
 
   if (verboseLevel >= 10) {
-    G4cout << ((m_nhits[ind] > 0)?"Additional hit in ":"First hit in ")
+    HitVectorBuilder* hitCollection = m_hitCollection ? m_hitCollection : GetHitCollection();
+    G4cout << ((hitCollection && hitCollection->HasHit(ind))?"Additional hit in ":"First hit in ")
            << ((ind<s_nCellMu)?"MuonWall ":"beam counter S")
            << ((ind<s_nCellMu)?nScinti:(ind-s_nCellMu+1))
            << " time=" << aStep->GetPostStepPoint()->GetGlobalTime()
            << " ene=" << edep << G4endl;
   }
 
-  if ( m_nhits[ind] > 0 ) {
-    m_hit[ind]->add(edep,0.0,0.0);
-  } else {
-    // First hit in a cell
-    m_hit[ind] = new TileSimHit(m_id[ind],edep,0.0,0.0);
+  HitVectorBuilder* hitCollection = m_hitCollection ? m_hitCollection : GetHitCollection();
+  if (!hitCollection) {
+    if (verboseLevel >= 5) {
+      G4cout << "MuonWallSD::ProcessHits WARNING hit collection is not available" << G4endl;
+    }
+    return false;
   }
-
-  ++m_nhits[ind];
+  m_hitCollection = hitCollection;
+  hitCollection->AddHit(ind, m_id[ind], edep);
 
   return true;
-}
-
-void MuonWallSD::EndOfAthenaEvent() {
-  for (int ind = 0; ind < s_nCell; ++ind) {
-    int nhit = m_nhits[ind];
-    if (nhit > 0) {
-      if (verboseLevel >= 5) {
-        G4cout << "Cell id=" << m_tileTBID->to_string(m_id[ind])
-               << " nhit=" << nhit
-               << " ene=" << m_hit[ind]->energy() << G4endl;
-      }
-      m_HitColl->Insert(TileHit(m_hit[ind]));
-      delete m_hit[ind];
-    } else if (verboseLevel >= 10) {
-      G4cout << "Cell id=" << m_tileTBID->to_string(m_id[ind])
-             << " nhit=0" << G4endl;
-    }
-  }
-
-  if (verboseLevel >= 5) {
-    G4cout << "Total number of hits is " << m_HitColl->size() << G4endl;
-  }
-  return ;
 }

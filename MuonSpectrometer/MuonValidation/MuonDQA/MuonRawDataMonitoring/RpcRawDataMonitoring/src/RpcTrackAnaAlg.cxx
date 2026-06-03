@@ -386,7 +386,7 @@ StatusCode RpcTrackAnaAlg::fillMuonExtrapolateEff(
             triggerMatching(muon, m_trigTagDefs) == StatusCode::SUCCESS;
 
         // muon quality
-        if (muon->quality() > xAOD::Muon::Medium)
+        if (muon->quality() > xAOD::Muon::Quality::Medium)
             continue;
 
         //

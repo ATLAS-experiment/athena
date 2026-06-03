@@ -65,7 +65,7 @@ StatusCode ITkPixelDecodingAlg::execute(const EventContext& ctx) const
     DataFormat fmt;
     fmt.options.en_chip_id = true;
     fmt.options.en_eos = true;
-    PixelCallbacks::RDOCallback cb(rdoCont.get(), m_idHelper);
+    PixelCallbacks::RDOCallback cb(rdoCont.get(), m_idHelper, msg());
     DecCore<PixelCallbacks::RDOCallback> core(fmt, cb);
     core.initialize();
     
@@ -80,9 +80,13 @@ StatusCode ITkPixelDecodingAlg::execute(const EventContext& ctx) const
     //Nevertheless, we need to rearrange them.
     std::vector<uint64_t> payload64;
     std::array<std::vector<uint64_t>, 4> split_streams;
+
+    ATH_MSG_DEBUG("***** ITkPixelDecodingRDOAlg::execute ---------  ROBs size" << ROBs.size());
     for (const auto& ROB : ROBs){
         const uint32_t* payload = ROB->rod_data();
         uint32_t length = ROB->rod_ndata();
+
+        ATH_MSG_DEBUG("***** ITkPixelDecodingRDOAlg::execute ---------  ROD # data" << length);
 
         //Translate the data into 64 bits. We know the length, so we can reserve
         //the space to avoid reallocation. Since the frames are always 64 bits split

@@ -56,7 +56,7 @@ const std::string RNTupleContainer::FieldDesc::typeName() {
 /// Standard constructor
 RNTupleContainer::RNTupleContainer(const std::string& name) :
    DbContainerImp(name),
-   m_dbH(POOL_StorageType), m_rootDb(nullptr),
+   m_dbH(pool::POOL_StorageType), m_rootDb(nullptr),
    m_ioBytes(0), m_isDirty(false),
    m_index(0), m_indexSize(0), m_indexBump(0), m_indexMulti( getpid() )
 { }
@@ -74,7 +74,7 @@ uint64_t RNTupleContainer::size() {
 
 /// Open the container for object access
 StatusCode RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
-                                   const DbTypeInfo* info, DbAccessMode mode)
+                                   const DbTypeInfo* info, Io::IoFlag mode)
 {
    m_name = nam;
    m_fieldDescs.clear();
@@ -125,7 +125,7 @@ StatusCode RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
       }
    }
 
-   if( mode & pool::CREATE ) {
+   if( mode == Io::WRITE || mode == Io::APPEND ) {
       m_ntupleWriter = m_rootDb->getNTupleWriter(ntupleName, true);
       if( m_ntupleWriter ) {
          ATH_MSG_DEBUG("Created container " << m_name
@@ -142,7 +142,7 @@ StatusCode RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
          m_ntupleWriter->addField( dsc.fieldname, dsc.typeName() );
       }
    }
-   else if( mode & (pool::READ | pool::UPDATE) ) {
+   else if( mode == Io::READ ) {
       // create (and keep in the description object) the rntuple field for reading
       m_ntupleReader = m_rootDb->getNTupleReader(ntupleName);
       if( m_ntupleReader ) {
@@ -296,7 +296,8 @@ StatusCode RNTupleContainer::writeObject( ActionList::value_type& action )
       m_ntupleWriter->addFieldValue( dsc.fieldname, ptr );
       // fill the index field
       m_index = action.link.second;
-      m_ntupleWriter->addFieldValue( "index_ref", &m_index );
+      const static std::string idxRefStr{"index_ref"};
+      m_ntupleWriter->addFieldValue( idxRefStr, &m_index );
       ATH_MSG_VERBOSE("Setting index for " << dsc.fieldname << " to " << std::hex << m_index << std::dec);
       m_indexSize++;
    }
@@ -436,7 +437,7 @@ StatusCode RNTupleContainer::store(const void* object, DbContainer& cntH, ShapeH
 
 /// Close the container and deallocate resources
 StatusCode RNTupleContainer::close() {
-  m_dbH = DbDatabase(POOL_StorageType);
+  m_dbH = DbDatabase(pool::POOL_StorageType);
   m_fieldDescs.clear();
   m_rootDb = nullptr;
   return DbContainerImp::close();

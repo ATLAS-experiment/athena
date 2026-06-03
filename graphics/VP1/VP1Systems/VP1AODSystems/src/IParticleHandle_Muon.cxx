@@ -320,46 +320,13 @@ void IParticleHandle_Muon::fillLineFromSplineFit(const std::vector<Amg::Vector3D
 //____________________________________________________________________
 QStringList IParticleHandle_Muon::clicked() const
 {
+  std::stringstream sstr{};
   QStringList l;
   l << "Muon:";
-  l << IParticleHandleBase::baseInfo();
-  switch (m_d->muon->muonType()){
-    case  xAOD::Muon::Combined: 
-      l << "Type = Combined";
-      break;
-    case  xAOD::Muon::MuonStandAlone: 
-      l << "Type = MuonStandAlone";
-      break;
-    case  xAOD::Muon::SegmentTagged: 
-      l << "Type = SegmentTagged";
-      break;
-    case  xAOD::Muon::CaloTagged: 
-      l << "Type = CaloTagged";
-      break;
-    case  xAOD::Muon::SiliconAssociatedForwardMuon: 
-      l << "Type = SiliconAssociatedForwardMuon";
-      break;
-    default:
-       l << "Type = Unknown";
-  }
-  
-  switch (m_d->muon->quality()){
-    case xAOD::Muon::Tight: 
-      l << "Quality = Tight";
-      break;
-    case  xAOD::Muon::Medium: 
-      l << "Quality = Medium";
-      break;
-    case  xAOD::Muon::Loose: 
-      l << "Quality = Loose";
-      break;
-    case  xAOD::Muon::VeryLoose: 
-      l << "Quality = VeryLoose";
-      break;
-    default:
-       l << "Quality = Unknown";
-  }
-  
+  l << IParticleHandleBase::baseInfo();  
+  sstr << "Type = "<<m_d->muon->muonType()<<", ";
+  sstr << "Quality = "<<m_d->muon->quality();
+  l<<sstr.str().c_str();
   return l;
 }
 
@@ -424,9 +391,6 @@ QStringList IParticleHandle_Muon::clicked() const
     double z0 = m_d->muon->primaryTrackParticle()->z0();
     double phi = m_d->muon->primaryTrackParticle()->phi0();
 
-    // glopos[Amg::x] = - locpos[Trk::d0]*sin(phi);
-    // glopos[Amg::y] =   locpos[Trk::d0]*cos(phi);
-    // glopos[Amg::z] =   locpos[Trk::z0];
 
 
     const Amg::Vector3D pos = Amg::Vector3D(- d0*sin(phi), d0*cos(phi), z0);
@@ -479,50 +443,6 @@ const xAOD::Muon& IParticleHandle_Muon::muon() const
   return *(m_d->muon);
 }
 
-QString IParticleHandle_Muon::muonTypeString() const {
-  switch (m_d->muon->muonType()) {
-    case xAOD::Muon::Combined:
-    return QString("Combined");
-    case xAOD::Muon::MuonStandAlone:
-    return QString("MuonStandAlone");
-    case xAOD::Muon::SegmentTagged:
-    return QString("SegmentTagged");
-    case xAOD::Muon::CaloTagged:
-    return QString("CaloTagged");
-    case xAOD::Muon::SiliconAssociatedForwardMuon:
-    return QString("SiliconAssociatedForwardMuon");
-    default:
-    return QString("Unknown Muon type");
-  }
-}
-
-QString IParticleHandle_Muon::qualityString() const{
-  switch (m_d->muon->quality()) {
-    case xAOD::Muon::Tight:
-    return QString("Tight");
-    case xAOD::Muon::Medium:
-    return QString("Medium");
-    case xAOD::Muon::Loose:
-    return QString("Loose");
-    case xAOD::Muon::VeryLoose:
-    return QString("VeryLoose");
-    default:
-    return QString("Unknown Muon quality");
-  }
-}
-
-// //____________________________________________________________________
-// unsigned IParticleHandle_Muon::summaryValue(xAOD::SummaryType type) const
-// { 
-//   uint8_t num = 0;
-//   if (m_d->muon->summaryValue(num,type)){
-//     return num;
-//   }
-//   // else...
-//   VP1Msg::message("IParticleHandle_Muon::getSummaryValue - unable to retrieve the requested enum: "+VP1Msg::str(type));
-//   return 999999;
-// }
-
 
 QString IParticleHandle_Muon::shortInfo() const
 {
@@ -530,8 +450,6 @@ QString IParticleHandle_Muon::shortInfo() const
   QString l("");
   l+= "|P|=";
   l+= VP1Msg::str(momentum().mag()/SYSTEM_OF_UNITS::GeV)+" [GeV], ";
-  l+= muonTypeString() + ", ";
-  l+= qualityString();
   return l;
 }
 

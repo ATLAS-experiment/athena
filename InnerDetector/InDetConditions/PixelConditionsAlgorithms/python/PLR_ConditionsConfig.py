@@ -88,6 +88,23 @@ def PLR_DetectorElementCondAlgCfg(flags, name="PLR_DetectorElementCondAlg", **kw
     return acc
 
 
+def PLR_DetectorElementStatusAlgCfg(flags, name="PLR_DetectorElementStatusAlg", **kwargs):
+    """Return a ComponentAccumulator with configured SiDetectorElementStatusAlg for PLR"""
+    acc = ComponentAccumulator()
+
+    from PLRGeoModelXml.PLR_GeoModelConfig import PLR_ReadoutGeometryCfg
+    acc.merge(PLR_ReadoutGeometryCfg(flags))
+
+    if "ConditionsSummaryTool" not in kwargs:
+        from PixelConditionsTools.PLR_ConditionsSummaryConfig import PLR_ConditionsSummaryCfg
+        kwargs.setdefault("ConditionsSummaryTool",
+                          acc.popToolsAndMerge(PLR_ConditionsSummaryCfg(flags)))
+
+    kwargs.setdefault("WriteKey", "PLR_DetectorElementStatus")
+    acc.addEventAlgo(CompFactory.InDet.SiDetectorElementStatusAlg(name, **kwargs))
+    return acc
+
+
 def PLR_DistortionAlgCfg(flags, name="PLR_DistortionAlg", **kwargs):
     """Return a ComponentAccumulator with configured PixelDistortionAlg for PLR"""
     acc = ComponentAccumulator()

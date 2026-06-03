@@ -36,6 +36,21 @@ namespace EL
       /// this event
       uint64_t m_skipCount {0};
 
+      /// \brief whether this algorithm starts a new logical sequence
+      ///
+      /// This allows grouping algorithms into sub-sequences within the
+      /// overall sequence. This allows filter algorithms to skip the
+      /// rest of the current sub-sequence, instead of all algorithms. 
+      bool m_sequenceStart {false};
+
+      /// \brief whether this algorithm was skipped during the execute
+      /// pass
+      ///
+      /// The AlgorithmStateModule sets this flag when an algorithm is
+      /// skipped, to indicate that `postExecute` should not be run for
+      /// this algorithm.
+      bool m_wasSkipped {false};
+
 
       AlgorithmData () = default;
 

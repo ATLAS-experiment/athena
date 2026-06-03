@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -277,6 +277,7 @@ StatusCode TileDigitsFromPulse::execute() {
 	// Prepare RNG service
 	ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, m_randomStreamName);
 	rngWrapper->setSeed( m_randomStreamName, ctx );
+	CLHEP::HepRandomEngine* rndmEngine = rngWrapper->getEngine(ctx);
 
 	// Create new container for digits
 	auto digitsContainer = std::make_unique<TileMutableDigitsContainer>(true,
@@ -402,8 +403,8 @@ StatusCode TileDigitsFromPulse::execute() {
 							double Hfn1 = m_tileToolNoiseSample->getHfn1(drawerIdx, channel, gain, ctx);
 							double Hfn2 = m_tileToolNoiseSample->getHfn2(drawerIdx, channel, gain, ctx);
 							double Norm = m_tileToolNoiseSample->getHfnNorm(drawerIdx, channel, gain, ctx);
-							RandGaussQ::shootArray(*rngWrapper, samples.size(), Rndm, 0.0, 1.0);
-							RandFlat::shootArray(*rngWrapper, 1, Rndm_dG, 0.0, 1.0);
+							RandGaussQ::shootArray(rndmEngine, samples.size(), Rndm, 0.0, 1.0);
+							RandFlat::shootArray(rndmEngine, 1, Rndm_dG, 0.0, 1.0);
 							for (unsigned int js = 0; js < samples.size(); ++js) {
 								//using the same gaussian(sigma) for all samples in one channel in one event
 								if (Rndm_dG[0] < Norm)

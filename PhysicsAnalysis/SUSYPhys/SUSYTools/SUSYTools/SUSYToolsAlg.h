@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // SUSYToolsAlg.h
@@ -46,6 +46,7 @@ namespace STAlg {
   const static SG::ConstAccessor<char> acc_IsTruthMatched("IsTruthMatched");
   const static SG::ConstAccessor<ElementLink<xAOD::TruthParticleContainer>> acc_truthParticleLink("truthParticleLink");
   const static SG::ConstAccessor<float> acc_RNNJetScoreSigTrans("RNNJetScoreSigTrans");
+  const static SG::ConstAccessor<float> acc_GNTauScoreSigTrans("GNTauScoreSigTrans_v0prune");
 }
 
 class SUSYToolsAlg : public EL::AnaAlgorithm {

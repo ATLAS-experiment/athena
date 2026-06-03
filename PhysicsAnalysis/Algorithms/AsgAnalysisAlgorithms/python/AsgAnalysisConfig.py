@@ -675,18 +675,23 @@ class EventCutFlowBlock (ConfigBlock):
             "If provided, takes precedence over selectionName.")
         self.addOption('cutFlowHistograms', True, type=bool,
             info="whether to generate cutflow histograms for the selection cuts.")
+        self.addOption ('streamName', None, type=str,
+            info="name of the output stream to save the cut bookkeeper in.")
 
     def instanceName(self):
         return 'EventInfo_' + self.selectionName
 
     def makeAlgs(self, config):
-
         if not self.cutFlowHistograms:
             return
+
+        # Setup stream name
+        streamName = self.streamName or config.defaultHistogramStream()
 
         postfix = ('_' + self.selectionName) if self.selectionName else ''
 
         alg = config.createAlgorithm('CP::EventCutFlowHistAlg', 'CutFlowDumperAlg')
+        alg.RootStreamName = streamName
         alg.histPattern = 'cflow_EventInfo' + postfix + '_%SYS%'
         alg.eventInfo = config.readName('EventInfo')
         alg.histTitle = 'Event Cutflow: EventInfo.' + self.selectionName

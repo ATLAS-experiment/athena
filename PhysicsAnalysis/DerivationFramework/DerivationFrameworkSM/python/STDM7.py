@@ -206,9 +206,13 @@ def STDM7CoreCfg(flags, name_tag='STDM7', StreamName='StreamDAOD_STDM7', Trigger
                                             "AntiKt4EMPFlowJets",
                                             "MET_Baseline_AntiKt4EMTopo",
                                             "MET_Baseline_AntiKt4EMPFlow",
-                                            "TauJets",
+                                            "TauJets"
                                             ]
-    
+
+    if flags.Tracking.doLowPtRoI:
+        STDM7SlimmingHelper.SmartCollections += ["InDetLowPtRoITrackParticles",
+                                                 "RoIVerticesLowPtRoI"]
+
     excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
     StaticContent = []
     StaticContent += ["xAOD::VertexContainer#SoftBVrtClusterTool_Tight_Vertices"]
@@ -229,7 +233,9 @@ def STDM7CoreCfg(flags, name_tag='STDM7', StreamName='StreamDAOD_STDM7', Trigger
 
     # Tracks extra content
     STDM7SlimmingHelper.ExtraVariables += ["InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers"]
-
+    if flags.Tracking.doLowPtRoI:
+        STDM7SlimmingHelper.ExtraVariables += ["InDetLowPtRoITrackParticles.numberOfTRTHits.numberOfTRTOutliers"]
+        
     # Truth extra content
     if flags.Input.isMC:
 
@@ -243,6 +249,8 @@ def STDM7CoreCfg(flags, name_tag='STDM7', StreamName='StreamDAOD_STDM7', Trigger
                                                "TruthPrimaryVertices.t.x.y.z",
                                                "InDetTrackParticles.truthParticleLink.truthMatchProbability"
                                                ]
+        if flags.Tracking.doLowPtRoI:
+            STDM7SlimmingHelper.ExtraVariables += ["InDetLowPtRoITrackParticles.truthParticleLink.truthMatchProbability.truthType.truthOrigin"]
  
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTauAndDownstreamParticlesCfg
         acc.merge(AddTauAndDownstreamParticlesCfg(flags))

@@ -401,7 +401,7 @@ namespace DerivationFramework {
       if(m_vtx2Daug_num==4) inputTracks.push_back(psi2Vertex->trackParticle(3));
 
       // start the fit
-      std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
+      std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState(ctx);
       m_iVertexFitter->setMassInputParticles(massesInputTracks, *state);
       if (m_constrJpsi1) {
 	m_iVertexFitter->setMassForConstraint(m_mass_jpsi1, std::array<int,2>{1,2}, *state);
@@ -426,7 +426,7 @@ namespace DerivationFramework {
       Amg::Vector3D startingPoint((psi1Vertex->x()+psi2Vertex->x())/2,(psi1Vertex->y()+psi2Vertex->y())/2,(psi1Vertex->z()+psi2Vertex->z())/2);
 
       // do the fit
-      std::unique_ptr<xAOD::Vertex> theResult( m_iVertexFitter->fit(ctx, inputTracks, startingPoint, *state) );
+      std::unique_ptr<xAOD::Vertex> theResult( m_iVertexFitter->fit(inputTracks, startingPoint, *state) );
 
       if(theResult != nullptr){
 	// Chi2/DOF cut

@@ -298,13 +298,14 @@ unsigned int MuonCollectionSettingsButton::minimumQuality() const
     m_d->initEditWindow();
   
   QString text = m_d->editwindow_ui.comboBox_minimumQuality->currentText();
-  if (text=="Very Loose") return static_cast<unsigned int>(xAOD::Muon::VeryLoose);
-  if (text=="Loose")  return static_cast<unsigned int>(xAOD::Muon::Loose);
-  if (text=="Medium") return static_cast<unsigned int>(xAOD::Muon::Medium);
-  if (text=="Tight")  return static_cast<unsigned int>(xAOD::Muon::Tight);
+  using Quality=xAOD::Muon::Quality;
+  if (text=="Very Loose") return static_cast<unsigned int>(Quality::VeryLoose);
+  if (text=="Loose")  return static_cast<unsigned int>(Quality::Loose);
+  if (text=="Medium") return static_cast<unsigned int>(Quality::Medium);
+  if (text=="Tight")  return static_cast<unsigned int>(Quality::Tight);
 
   message("ERROR! MuonCollectionSettingsButton::minimumQuality - unknown value! Returning 'Very Loose'.");
-  return static_cast<unsigned int>(xAOD::Muon::VeryLoose);
+  return static_cast<unsigned int>(Quality::VeryLoose);
 }
 
 MuonCollectionSettingsButton::ShownAssociatedObjects MuonCollectionSettingsButton::shownAssociatedObjects() const 

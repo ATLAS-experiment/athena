@@ -61,31 +61,6 @@ int SharedWriterTool::makePool(int /*maxevt*/, int nprocs, const std::string& to
   m_nprocs = (nprocs==-1?sysconf(_SC_NPROCESSORS_ONLN):nprocs) + 1;
   m_subprocTopDir = topdir;
 
-  SmartIF<IProperty> propertyServer(m_cnvSvc);
-  if(!propertyServer) {
-    ATH_MSG_ERROR("Unable to cast conversion service to IProperty");
-    return -1;
-  }
-  else {
-    std::string propertyName = "ParallelCompression";
-    bool parallelCompression(false);
-    BooleanProperty parallelCompressionProp(std::move(propertyName),parallelCompression);
-    if(propertyServer->getProperty(&parallelCompressionProp).isFailure()) {
-      ATH_MSG_INFO("Conversion service does not have ParallelCompression property");
-    }
-    else {
-      SmartIF<IProperty> poolSvc(serviceLocator()->service("PoolSvc"));
-      if(!poolSvc) {
-        ATH_MSG_ERROR("Error retrieving PoolSvc");
-      }
-      else if(parallelCompressionProp.value()) {
-        if (poolSvc->setProperty("FileOpen", "update").isFailure()) {
-          ATH_MSG_ERROR("Could not change PoolSvc FileOpen Property");
-        }
-      }
-    }
-  }
-
   // Create rank queue and fill it
   m_sharedRankQueue = new AthenaInterprocess::SharedQueue("SharedWriterTool_RankQueue_"+m_randStr,1,sizeof(int));
   if(!m_sharedRankQueue->send_basic<int>(0)) {

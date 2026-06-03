@@ -139,6 +139,25 @@ namespace xAOD {
         DEFINE_ACCESSOR( uint8_t, cscEtaHits );
         DEFINE_ACCESSOR( uint8_t, cscUnspoiledEtaHits );
 
+        DEFINE_ACCESSOR( uint8_t, innerTriggerEtaHits);
+        DEFINE_ACCESSOR( uint8_t, innerTriggerPhiHits);
+
+        DEFINE_ACCESSOR( uint8_t, middleTriggerEtaHits);
+        DEFINE_ACCESSOR( uint8_t, middleTriggerPhiHits);
+  
+        DEFINE_ACCESSOR( uint8_t, outerTriggerEtaHits);
+        DEFINE_ACCESSOR( uint8_t, outerTriggerPhiHits);
+  
+        DEFINE_ACCESSOR( uint8_t, innerTriggerEtaHoles);
+        DEFINE_ACCESSOR( uint8_t, innerTriggerPhiHoles);
+
+        DEFINE_ACCESSOR( uint8_t, middleTriggerEtaHoles);
+        DEFINE_ACCESSOR( uint8_t, middleTriggerPhiHoles);
+  
+        DEFINE_ACCESSOR( uint8_t, outerTriggerEtaHoles);
+        DEFINE_ACCESSOR( uint8_t, outerTriggerPhiHoles);
+
+        DEFINE_ACCESSOR( uint8_t, sTgcPadHits);
       default:
          throw std::runtime_error("xAOD::MuonTrackParticle_v1 ERROR Unknown MuonSummaryType "
                               +std::to_string(type)+" requested");

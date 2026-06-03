@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ################################################################################
 # Package: ActsMuonDetectorTest
@@ -17,7 +17,7 @@ atlas_add_test( testMuonTrackingGeometry
                 SCRIPT python -m ActsMuonDetectorTest.testMuonTrackingGeometry --gen3
                 PROPERTIES TIMEOUT 1000
                 PRIVATE_WORKING_DIRECTORY
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
 
 
 # Install files from the package:

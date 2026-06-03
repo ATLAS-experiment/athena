@@ -11,6 +11,7 @@
 #include "xAODInDetMeasurement/PixelCluster.h"
 #include "xAODInDetMeasurement/StripCluster.h"
 #include "xAODInDetMeasurement/HGTDCluster.h"
+#include "AthenaKernel/Units.h"
 
 #include "Acts/EventData/MultiTrajectory.hpp"
 #include "Acts/EventData/BoundTrackParameters.hpp"
@@ -25,6 +26,7 @@
 #include "ActsToolInterfaces/IPixelOnBoundStateCalibratorTool.h"
 #include "ActsToolInterfaces/IStripOnBoundStateCalibratorTool.h"
 #include "ActsToolInterfaces/IHGTDOnBoundStateCalibratorTool.h"
+#include "ActsInterop/UnitConverters.h"
 
 #include "boost/container/static_vector.hpp"
 
@@ -185,8 +187,14 @@ namespace ActsTrk {
                   const Cluster &cluster,
                   const Acts::BoundTrackParameters &) const
       {
-         return std::make_pair(cluster.template localPosition<Dim>(),
-                               cluster.template localCovariance<Dim>());
+         auto ret = std::make_pair<xAOD::MeasVector<Dim>, xAOD::MeasMatrix<Dim>>(cluster.template localPosition<Dim>(),
+                                                                                 cluster.template localCovariance<Dim>());
+         if constexpr(std::is_same_v<xAOD::HGTDCluster, std::remove_cvref_t<Cluster> >) {
+            ret.first(2,0)  = ActsTrk::timeToActs(ret.first(2,0));
+            assert(ret.second(2,1)==0. && ret.second(2,0)==0.);
+            ret.second(2,2) = ActsTrk::timeCovToActs(ret.second(2,2));
+         }
+         return ret;
       }
    };
 

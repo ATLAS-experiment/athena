@@ -1,7 +1,8 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 if __name__=="__main__":
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest, MuonPhaseIITestDefaults
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, MuonPhaseIITestDefaults
+    from MuonConfig.MuonConfigUtils import executeTest
     parser = SetupArgParser()
     parser.set_defaults(nEvents = -1)
     parser.set_defaults(inputFile=MuonPhaseIITestDefaults.HITS_PG_R3)

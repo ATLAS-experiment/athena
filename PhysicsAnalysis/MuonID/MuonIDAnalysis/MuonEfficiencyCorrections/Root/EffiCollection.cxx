@@ -211,7 +211,7 @@ namespace CP {
             }
             else { /// If the isLRT decor is not available, try to see if patternRecoInfo is available for the corresponding ID track.
                 static const SG::AuxElement::Accessor<uint64_t> patternAcc("patternRecoInfo");
-                const xAOD::TrackParticle* idtrack = mu.getXAODObject().trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+                const xAOD::TrackParticle* idtrack = mu.getXAODObject().trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
                 if(idtrack) { /// All LRT muons should have ID tracks. The muons without ID tracks have to come from the standard muon container.
                     if(!patternAcc.isAvailable(*idtrack)) {
                         Error("CollectionContainer", "No information available to tell if the muon is LRT or standard. Either run MuonLRTMergingAlg to decorate with `isLRT` flag, or supply the patternRecoInfo for the original ID track.");
@@ -225,12 +225,12 @@ namespace CP {
             if (std::abs(etaAcc(mu)) >= 2.5) {
                 return m_forward_eff.get();
             }
-            if (muonTypeAcc(mu) == xAOD::Muon::CaloTagged) {
+            if (muonTypeAcc(mu) == xAOD::Muon::MuonType::CaloTagged) {
                 return m_lowpt_calo_eff.get();
             }
             return m_lowpt_central_eff.get();
         }
-        if (muonTypeAcc(mu) == xAOD::Muon::CaloTagged) {
+        if (muonTypeAcc(mu) == xAOD::Muon::MuonType::CaloTagged) {
             return m_calo_eff.get();
         } else if (std::abs(etaAcc(mu)) < 2.5) {
             return m_central_eff.get();

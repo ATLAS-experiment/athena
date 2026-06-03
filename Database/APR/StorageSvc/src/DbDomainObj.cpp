@@ -32,7 +32,7 @@ using namespace std;
 using namespace pool;
 
 /// Constructor
-DbDomainObj::DbDomainObj(IOODatabase* imp, const DbType& typ, DbAccessMode mode)
+DbDomainObj::DbDomainObj(IOODatabase* imp, const DbType& typ, Io::IoFlag mode)
 : Base("Domain["+typ.storageName()+"]", mode, typ, imp),
   APRMessaging(name()),
   m_maxAge(2),
@@ -61,7 +61,7 @@ DbDomainObj::~DbDomainObj()  {
 bool DbDomainObj::existsDbase( const string& name)
 {  return (m_info) ? m_info->existsDbase( name ) : false;               }
 
-StatusCode DbDomainObj::open(DbAccessMode mod) {
+StatusCode DbDomainObj::open(Io::IoFlag mod) {
   setMode(mod);
   //  return m_info ? m_info->open(session(),name(),mode()) : FAILURE;
   return m_info ? StatusCode::SUCCESS : StatusCode::FAILURE;
@@ -87,8 +87,8 @@ StatusCode DbDomainObj::close()
 StatusCode DbDomainObj::ageOpenDbs() {
   for (iterator i = begin(); i != end(); ++i ) {
     DbDatabaseObj* pDB = (*i).second;
-    DbAccessMode m  = pDB->mode();
-    if( 0==(m&pool::CREATE) && 0==(m&pool::UPDATE) )  {
+    Io::IoFlag m  = pDB->mode();
+    if( m == Io::READ )  {
       pDB->setAge(1);
     }
   }
@@ -100,16 +100,15 @@ StatusCode DbDomainObj::closeAgedDbs()  {
   vector<DbDatabaseObj*> aged_dbs;
   for (const_iterator i = begin(); i != end(); ++i ) {
     DbDatabaseObj* pDB = (*i).second;
-    if ( pDB->age() > m_maxAge )   {
-      DbAccessMode m  = pDB->mode();
-      if( 0 == (m&pool::CREATE) && 0 == (m&pool::UPDATE) )  {
+    if ( pDB->age() > m_maxAge && m_maxAge > 0 )   {
+      Io::IoFlag m  = pDB->mode();
+      if( m == Io::READ )  {
         aged_dbs.push_back(pDB);
       }
     }
   }
   vector<DbDatabaseObj*>::const_iterator j;
-  for (j=aged_dbs.begin(); j != aged_dbs.end(); ++j)
-  CHECK( (*j)->retire() );
+  for (j=aged_dbs.begin(); j != aged_dbs.end(); ++j) CHECK( (*j)->retire() );
   return StatusCode::SUCCESS;
 }
 

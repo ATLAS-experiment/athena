@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ANALYSISTRIGGEREVENT_EMTAU_ROI_H
@@ -73,7 +73,7 @@ public:
    const thr_value_type&  getThresholdValues() const { return m_thresholdValues; }
 
    /// Add the name of a threshold that this RoI passed
-   void addThresholdName( thresholds_type::value_type thr ) { m_thresholdNames.push_back( thr ); }
+   void addThresholdName( const thresholds_type::value_type &thr ) { m_thresholdNames.push_back( thr ); }
    /// Add the value of a threshold that this RoI passed
    void addThresholdValue( thr_value_type::value_type thr ) { m_thresholdValues.push_back( thr ); }
 

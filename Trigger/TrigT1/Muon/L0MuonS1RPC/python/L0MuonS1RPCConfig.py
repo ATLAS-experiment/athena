@@ -39,10 +39,10 @@ def L0MuonRPCSimCfg(flags, name = "L0MuonRPCSim", **kwargs):
   
 
 if __name__ == "__main__":
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, MuonPhaseIITestDefaults
     from MuonConfig.MuonConfigUtils import executeTest
     parser = SetupArgParser()
-    parser.set_defaults(inputFile= ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/myRDO.R3.pool.root"])
+    parser.set_defaults(inputFile= MuonPhaseIITestDefaults.RDO_R3)
     parser.set_defaults(nEvents = 20)
 
     args = parser.parse_args()

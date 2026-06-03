@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODMUON_MUONAUXCONTAINER_H
@@ -16,7 +16,7 @@ namespace xAOD {
    /// the container type as we get new I/O technologies for these
    /// objects.
    ///
-   typedef MuonAuxContainer_v5 MuonAuxContainer;
+   using MuonAuxContainer = MuonAuxContainer_v5;
 }
 
 // Set up a CLID and StoreGate inheritance for the class:

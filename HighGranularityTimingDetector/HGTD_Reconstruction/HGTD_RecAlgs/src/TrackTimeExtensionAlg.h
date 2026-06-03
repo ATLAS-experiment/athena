@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_RecAlgs/TrackTimeExtensionAlg.h
  * @author Alexander Leopold <alexander.leopold@cern.ch>
@@ -50,14 +50,14 @@ private:
   struct DecorHandles
   {
     DecorHandles (const TrackTimeExtensionAlg& tool, const EventContext& ctx);
-    SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<bool>> layerHasExtensionHandle;
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<char>> layerHasExtensionHandle;
     SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> layerExtensionChi2Handle;
     SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> layerClusterRawTimeHandle;
     SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> layerClusterTimeHandle;
     SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<int>> layerClusterTruthClassHandle;
-    SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<bool>> layerClusterShadowedHandle;
-    SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<bool>> layerClusterMergedHandle;
-    SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<bool>> layerPrimaryExpectedHandle;
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<char>> layerClusterShadowedHandle;
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<char>> layerClusterMergedHandle;
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<char>> layerPrimaryExpectedHandle;
     SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> extrapXHandle;
     SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> extrapYHandle;
   };

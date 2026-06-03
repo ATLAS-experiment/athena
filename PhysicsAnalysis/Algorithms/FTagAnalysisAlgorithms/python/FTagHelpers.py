@@ -6,10 +6,10 @@ def getRecommendedBTagCalib_Run2():
     return "xAODBTaggingEfficiency/13TeV/MC20_2025-06-17_GN2v01_v4.root"
 
 def getRecommendedBTagCalib_PCFT_Run3():
-    return "xAODBTaggingEfficiency/13p6TeV/MC23_2025-06-17_GN2v01_v4.root"
+    return getRecommendedBTagCalib_Run3()
 
 def getRecommendedBTagCalib_Run3():
-    return "xAODBTaggingEfficiency/13p6TeV/MC23_2026-03-24_GN2v01_v6.root"
+    return "xAODBTaggingEfficiency/13p6TeV/MC23_2026_05_13_GN2v01_v0.root"
 
 def getRecommendedBTagCalib(geometry, wp):
     """return the recommended FTag calibration files

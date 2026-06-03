@@ -85,7 +85,7 @@ ZDCJSONConfig::ParseConfig(const JSON& config, const JSONParamList& configParamL
 }
 
 template<typename T> std::pair<bool, std::string> 
-ZDCJSONConfig::ParsePerChannelParams(const std::string& paramKey, const T& paramValue, JSON::value_t paramType, size_t paramSize)
+ZDCJSONConfig::ParsePerChannelParams(const std::string& paramKey, const T& paramValue, JSON::value_t paramType, int paramSize)
 {
   bool result = true;
   std::string resultString = "success";
@@ -95,19 +95,17 @@ ZDCJSONConfig::ParsePerChannelParams(const std::string& paramKey, const T& param
       //
       // Compare the key against the side labels
       //
-      //bool validKey = false;
       for (unsigned int side = 0; side < m_nSides; side++) {
 	size_t srchIdx = key.find(m_sideLabels[side]);
 	if (srchIdx == 0) {
-	  //validKey = true;
-
 	  // Check to see whether the key length matches the
 	  //   side label length -- if it does, then we either
 	  //   have an array specifying the values for all channels
 	  //   or we have a single value that applies to all channels
 	  //
 	  if (key.size() == m_sideLabels[side].size()) {
-	    if (value.size() == 1) {
+	    int vsize = value.size();
+	    if (vsize == 1 || vsize == paramSize) {
 	      //
 	      // We have per-side value that we set for all channels on that side,
 	      //  unless it already has had a specific value provided (handled by SetSideParameter)
@@ -122,16 +120,24 @@ ZDCJSONConfig::ParsePerChannelParams(const std::string& paramKey, const T& param
 	      break;
 	    }
 	    else if (paramType == JSON::value_t::array) {
-
-	      size_t elementSize = value[0].size();
+	      int elementSize = value[0].size();
+	      JSON::value_t elementType = value[0].type();
 	      size_t arrayLength = value.size();
-	      
-	      if (arrayLength == m_numChannelsPerSide && elementSize == paramSize) {
+
+	      // If the array length is the same as the # channels and the
+	      //  type of each (tested with the first) element is the
+	      //  same as paramType, then we have a set of per-channel "values"
+	      //  the value could be an array or object
+	      //
+	      if (arrayLength == m_numChannelsPerSide && elementType == paramType && int(elementSize) == paramSize) {
+		//
+		// set the channel values
+		//
 		for (unsigned int chan = 0; chan < m_numChannelsPerSide; chan++) {
 		  setChannelParameter(side, chan, paramKey, value[chan]);
 		}
 	      }
-	      else if (arrayLength == paramSize) {
+	      else if (int(arrayLength) == paramSize || paramSize == -1) {
 		//
 		// We have a single array that is set for all channels
 		//

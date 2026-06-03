@@ -209,7 +209,7 @@ def getTransform():
        exeSet.add(EvgenExecutor(name="generate", skeleton="EvgenJobTransforms/skel.GENtoEVGEN.py", skeletonCA="EvgenJobTransforms.GENtoEVGEN_Skeleton", inData=["inNULL"], outData=["YODA", "TXT"]))
        msg.info("Output EVNT file")
     elif "--outputTXTFile" in str(sys.argv[1:]):
-       exeSet.add(EvgenExecutor(name="generate", skeleton="EvgenJobTransforms/skel.GENtoTXT.py", inData=["inNULL"], outData=["TXT"]))
+       exeSet.add(EvgenExecutor(name="generate", skeleton="EvgenJobTransforms/skel.GENtoTXT.py", skeletonCA="EvgenJobTransforms.GENtoEVGEN_Skeleton", inData=["inNULL"], outData=["TXT"]))
        msg.info("Output TXT file")
     elif "--outputHEPMCFile" not in str(sys.argv[1:]):
        msg.error("Output cannot be recognised")

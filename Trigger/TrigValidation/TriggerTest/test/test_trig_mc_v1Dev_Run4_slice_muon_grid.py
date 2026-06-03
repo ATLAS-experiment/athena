@@ -47,6 +47,8 @@ ex.flags+=[ 'GeoModel.SQLiteDB=True',
             'ITk.doTruth=False',
             'Tracking.doTruth=False',
             'Trigger.enableL1CaloPhase1=True',
+            'Acts.TrackingGeometry.UseBlueprint=True',
+            'Common.MsgSuppression=False',
             'Trigger.enableL1CaloLegacy=False']
 ex.imf = False
 

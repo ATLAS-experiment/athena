@@ -15,6 +15,7 @@
 #include "Acts/Utilities/MathHelpers.hpp"
 
 #include <utility>
+#include <concepts>
 
 namespace ActsTrk{
     /// @brief Converts an energy scalar from Athena to Acts units 
@@ -47,17 +48,37 @@ namespace ActsTrk{
     }
     /// @brief Converts a time unit from Athena to Acts units
     /// @param athenaT: Time interval to convert
-    inline constexpr double timeToActs(const double athenaT) {
+    template <std::floating_point T>
+    inline constexpr auto timeToActs(T athenaT) {
         using namespace Acts::UnitLiterals;
-        constexpr double timeCnv = 1_ns / Gaudi::Units::ns;
+        constexpr auto timeCnv = static_cast<T>(1_ns / Gaudi::Units::ns);
         return timeCnv * athenaT;
     }
     /// @brief Converts a time unit from Acts to Athena units
     /// @param actsT: Time interval to convert
-    inline constexpr double timeToAthena(const double actsT) {
+    template <std::floating_point T>
+    inline constexpr double timeToAthena(T actsT) {
         using namespace Acts::UnitLiterals;
-        constexpr double timeCnv = Gaudi::Units::ns/ 1_ns;
+        constexpr auto timeCnv = static_cast<T>(Gaudi::Units::ns/ 1_ns);
         return timeCnv * actsT;
+    }
+    /// @brief Converts a time covariance element from Athena to Acts units
+    /// @param athenaT: Time interval to convert
+    template <std::floating_point T>
+    inline constexpr auto timeCovToActs(T athenaTCov) {
+        using namespace Acts::UnitLiterals;
+        constexpr auto sqr=[](double a) { return a*a;};
+        constexpr auto timeCnv = static_cast<T>(sqr(1_ns / Gaudi::Units::ns));
+        return timeCnv * athenaTCov;
+    }
+    /// @brief Converts a time covariance element from Acts to Athena units
+    /// @param actsT: Time interval to convert
+    template <std::floating_point T>
+    inline constexpr double timeCovToAthena(T actsTCov) {
+        using namespace Acts::UnitLiterals;
+        constexpr auto sqr=[](double a) { return a*a;};
+        constexpr auto timeCnv = static_cast<T>(sqr(Gaudi::Units::ns/ 1_ns));
+        return timeCnv * actsTCov;
     }
     /// @brief Converts a velocity from Athena to Acts units
     /// @param athenaV: Velocity to convert

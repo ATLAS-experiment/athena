@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // METHelpers.cxx
@@ -9,6 +9,8 @@
 // Author: T.J.Khoo<khoo@cern.ch>
 // Author: Bill Balunas <bill.balunas@cern.ch>
 ///////////////////////////////////////////////////////////////////
+
+#include <iostream>
 
 // METUtilities includes
 #include "METUtilities/METHelpers.h"
@@ -25,10 +27,7 @@
 
 #include "FourMomUtils/xAODP4Helpers.h"
 
-#include <iostream>
-
 namespace met {
-
   ANA_MSG_SOURCE (msgMET, "METUtilities")
 
   void addGhostMuonsToJets(const xAOD::MuonContainer& muons, xAOD::JetContainer& jets)
@@ -142,5 +141,65 @@ namespace met {
 
     return StatusCode::SUCCESS;
   }
-    
+ 
+  
+  // Explicit template instantiation for all the relevant classes
+  extern template std::vector<const xAOD::Electron*> getMETElements<xAOD::Electron>(const xAOD::MissingET& met);
+  extern template std::vector<const xAOD::Photon*> getMETElements<xAOD::Photon>(const xAOD::MissingET& met);
+  extern template std::vector<const xAOD::Muon*> getMETElements<xAOD::Muon>(const xAOD::MissingET& met);
+  extern template std::vector<const xAOD::TauJet*> getMETElements<xAOD::TauJet>(const xAOD::MissingET& met);
+  extern template std::vector<const xAOD::Jet*> getMETElements<xAOD::Jet>(const xAOD::MissingET& met);
+
+  extern template std::vector<std::pair<const xAOD::Electron*,float> > getMETElementsWeights<xAOD::Electron>(const xAOD::MissingET& met);
+  extern template std::vector<std::pair<const xAOD::Photon*,float> > getMETElementsWeights<xAOD::Photon>(const xAOD::MissingET& met);
+  extern template std::vector<std::pair<const xAOD::Muon*,float> > getMETElementsWeights<xAOD::Muon>(const xAOD::MissingET& met);
+  extern template std::vector<std::pair<const xAOD::TauJet*,float> > getMETElementsWeights<xAOD::TauJet>(const xAOD::MissingET& met);
+  extern template std::vector<std::pair<const xAOD::Jet*,float> > getMETElementsWeights<xAOD::Jet>(const xAOD::MissingET& met);
+
+
+  // Specialisation, no need for cast
+  template <>
+  std::vector<const xAOD::IParticle*> getMETElements(const xAOD::MissingET& met) {
+    using namespace msgMET;
+
+    const auto& uniqueLinks = accessors::constitObjLinks(met);
+    std::vector<const xAOD::IParticle*> objs_out{};
+    objs_out.reserve(uniqueLinks.size());
+    // Loop through links
+    for (const auto& link: uniqueLinks){
+      if (link.isValid()) {
+        objs_out.push_back(*link);
+      } else {
+        ANA_MSG_WARNING("Invalid ElementLink from MET term " << met.name());
+        objs_out.push_back(nullptr);        
+      }
+    }
+
+    return objs_out;
+  }
+
+
+  template <>
+  std::vector<std::pair<const xAOD::IParticle*,float> > getMETElementsWeights(const xAOD::MissingET& met) {
+    using namespace msgMET;
+
+    const auto& uniqueLinks = accessors::constitObjLinks(met);
+    const auto& uniqueWeights = accessors::constitObjWeights(met);
+    std::vector<std::pair<const xAOD::IParticle*,float> > objs_weights_out{};
+    objs_weights_out.reserve(uniqueLinks.size());
+    // Loop through links
+    for (size_t i=0; i<uniqueLinks.size(); ++i) {
+      auto& link = uniqueLinks[i];
+      float weight = uniqueWeights[i];
+      if (link.isValid()) {
+        objs_weights_out.push_back(std::make_pair(*link,weight));
+      } else {
+        ANA_MSG_WARNING("Invalid ElementLink from MET term " << met.name());
+        objs_weights_out.push_back(std::make_pair(nullptr,0));        
+      }
+    }
+
+    return objs_weights_out;
+  }
+
 }

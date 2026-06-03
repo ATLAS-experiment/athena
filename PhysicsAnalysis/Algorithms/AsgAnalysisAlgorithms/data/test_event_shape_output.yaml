@@ -1,0 +1,12 @@
+CommonServices:
+    runSystematics: False
+
+EventShape:
+  - eventShape: Kt4EMPFlowNeutEventShape
+
+# After configuring each container, many variables will be saved automatically.
+Output:
+    treeName: 'analysis'
+    containers:
+        evt_shape_: 'Kt4EMPFlowNeutEventShape'
+        "": 'EventInfo'

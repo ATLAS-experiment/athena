@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigEgammaMonitorBaseAlgorithm.h"
@@ -46,9 +46,8 @@ StatusCode TrigEgammaMonitorBaseAlgorithm::initialize()
 
 
 
-bool TrigEgammaMonitorBaseAlgorithm::ApplyElectronPid( const xAOD::Electron *eg, const std::string& pidname) const
+bool TrigEgammaMonitorBaseAlgorithm::ApplyElectronPid(const EventContext& ctx, const xAOD::Electron *eg, const std::string& pidname) const
 {
-    const auto& ctx = Gaudi::Hive::currentContext() ;
     if (pidname == "tight"){
         return (bool) this->m_electronIsEMTool[0]->accept(ctx,eg);
     }
@@ -94,9 +93,8 @@ bool TrigEgammaMonitorBaseAlgorithm::ApplyElectronPid( const xAOD::Electron *eg,
 // ************************************************************************************************
 
 
-bool TrigEgammaMonitorBaseAlgorithm::ApplyPhotonPid( const xAOD::Photon *eg, const std::string& pidname) const
+bool TrigEgammaMonitorBaseAlgorithm::ApplyPhotonPid(const EventContext& ctx, const xAOD::Photon *eg, const std::string& pidname) const
 {
-    const auto& ctx = Gaudi::Hive::currentContext() ;
     if (pidname == "tight"){
         return (bool) this->m_photonIsEMTool[0]->accept(ctx,eg);
     }

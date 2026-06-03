@@ -12,34 +12,34 @@ namespace MuonTGC_Cabling {
 
 TGCCableSLBToSSW::TGCCableSLBToSSW(const std::string& filename)
     : TGCCable(TGCCable::SLBToSSW), m_database{{{nullptr}}} {
-    m_database[TGCId::Endcap][TGCId::WT] =
+    m_database.at(+TGCId::RegionType::Endcap).at(+TGCId::ModuleType::WT) =
         std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB EWT");
-    m_database[TGCId::Endcap][TGCId::WD] =
+    m_database.at(+TGCId::RegionType::Endcap).at(+TGCId::ModuleType::WD) =
         std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB EWD");
-    m_database[TGCId::Endcap][TGCId::ST] =
+    m_database.at(+TGCId::RegionType::Endcap).at(+TGCId::ModuleType::ST) =
         std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB EST");
-    m_database[TGCId::Endcap][TGCId::SD] =
+    m_database.at(+TGCId::RegionType::Endcap).at(+TGCId::ModuleType::SD) =
         std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB ESD");
-    m_database[TGCId::Endcap][TGCId::WI] =
+    m_database.at(+TGCId::RegionType::Endcap).at(+TGCId::ModuleType::WI) =
         std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB EWI");
-    m_database[TGCId::Endcap][TGCId::SI] =
+    m_database.at(+TGCId::RegionType::Endcap).at(+TGCId::ModuleType::SI) =
         std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB ESI");
-    m_database[TGCId::Endcap][SL] =
+    m_database.at(+TGCId::RegionType::Endcap).at(SL) =
         std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB ESL");
 
-    m_database[TGCId::Forward][TGCId::WT] =
+    m_database.at(+TGCId::RegionType::Forward).at(+TGCId::ModuleType::WT) =
         std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB FWT");
-    m_database[TGCId::Forward][TGCId::WD] =
+    m_database.at(+TGCId::RegionType::Forward).at(+TGCId::ModuleType::WD) =
         std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB FWD");
-    m_database[TGCId::Forward][TGCId::ST] =
+    m_database.at(+TGCId::RegionType::Forward).at(+TGCId::ModuleType::ST) =
         std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB FST");
-    m_database[TGCId::Forward][TGCId::SD] =
+    m_database.at(+TGCId::RegionType::Forward).at(+TGCId::ModuleType::SD) =
         std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB FSD");
-    m_database[TGCId::Forward][TGCId::WI] =
+    m_database.at(+TGCId::RegionType::Forward).at(+TGCId::ModuleType::WI) =
         std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB FWI");
-    m_database[TGCId::Forward][TGCId::SI] =
+    m_database.at(+TGCId::RegionType::Forward).at(+TGCId::ModuleType::SI) =
         std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB FSI");
-    m_database[TGCId::Forward][SL] =
+    m_database.at(+TGCId::RegionType::Forward).at(SL) =
         std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB FSL");
 }
 
@@ -64,19 +64,19 @@ TGCModuleMap TGCCableSLBToSSW::getModuleIn(const TGCModuleId& ssw) const {
 
     const int sswId = ssw.getId();
 
-    TGCDatabase* databaseP[TGCId::MaxRegionType * MaxModuleType];
-    TGCId::ModuleType module[TGCId::MaxRegionType * MaxModuleType];
-    TGCId::RegionType region[TGCId::MaxRegionType * MaxModuleType];
-    for (int i = 0; i < TGCId::MaxRegionType; i++) {
+    TGCDatabase* databaseP[+TGCId::RegionType::MaxRegionType * MaxModuleType];
+    TGCId::ModuleType module[+TGCId::RegionType::MaxRegionType * MaxModuleType];
+    TGCId::RegionType region[+TGCId::RegionType::MaxRegionType * MaxModuleType];
+    for (int i = 0; i < +TGCId::RegionType::MaxRegionType; i++) {
         for (int j = 0; j < MaxModuleType; j++) {
-            databaseP[i * MaxModuleType + j] = m_database[i][j].get();
+            databaseP[i * MaxModuleType + j] = m_database.at(i).at(j).get();
             region[i * MaxModuleType + j] = static_cast<TGCId::RegionType>(i);
             module[i * MaxModuleType + j] = static_cast<TGCId::ModuleType>(j);
         }
     }
 
     TGCModuleMap mapId{};
-    for (int type = 0; type < TGCId::MaxRegionType * MaxModuleType; type++) {
+    for (int type = 0; type < +TGCId::RegionType::MaxRegionType * MaxModuleType; type++) {
         const int MaxEntry = databaseP[type]->getMaxEntry();
         for (int i = 0; i < MaxEntry; i++) {
 
@@ -84,7 +84,7 @@ TGCModuleMap TGCCableSLBToSSW::getModuleIn(const TGCModuleId& ssw) const {
                 int sector = databaseP[type]->getEntry(i, 0);
 
                 // Inner
-                if (module[type] == TGCId::WI) {
+                if (module[type] == TGCId::ModuleType::WI) {
                     // EI/FI
                     //  wire(TGCId::WI) and strip(TGCId::SI) of a chamber
                     //  use the same SLB chip
@@ -113,7 +113,7 @@ TGCModuleMap TGCCableSLBToSSW::getModuleIn(const TGCModuleId& ssw) const {
                         mapId.insert(pblock, std::move(slb));
                     }
 
-                } else if (module[type] == TGCId::SI) {
+                } else if (module[type] == TGCId::ModuleType::SI) {
                     // EI/FI
                     //  wire(TGCId::WI) and strip(TGCId::SI) of a chamber
                     //  use the same SLB chip
@@ -121,7 +121,7 @@ TGCModuleMap TGCCableSLBToSSW::getModuleIn(const TGCModuleId& ssw) const {
                     // do nothing
 
                 } else {
-                    if (region[type] == TGCId::Endcap) {
+                    if (region[type] == TGCId::RegionType::Endcap) {
                         sector += ssw.getReadoutSector() *
                                   (TGCId::NUM_ENDCAP_SECTOR / TGCId::N_RODS);
                     } else {
@@ -157,9 +157,9 @@ TGCModuleMap TGCCableSLBToSSW::getModuleOut(const TGCModuleId& slb) const {
     TGCModuleMap mapId{};
 
     TGCDatabase* databaseP =
-        m_database[slb.getRegionType()][slb.getModuleType()].get();
+        m_database.at(+slb.getRegionType()).at(+slb.getModuleType()).get();
     const int MaxEntry = databaseP->getMaxEntry();
-    if (slb.getModuleType() == TGCId::WI || slb.getModuleType() == TGCId::SI) {
+    if (slb.getModuleType() == TGCId::ModuleType::WI || slb.getModuleType() == TGCId::ModuleType::SI) {
         // inner
         for (int i = 0; i < MaxEntry; i++) {
             if (databaseP->getEntry(i, 0) == sector &&

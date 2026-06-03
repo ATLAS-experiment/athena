@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigEgammaMonitorPhotonAlgorithm.h"
@@ -103,9 +103,9 @@ StatusCode TrigEgammaMonitorPhotonAlgorithm::fillHistograms( const EventContext&
           pairObjsRaw.emplace_back(itr.first.get(), itr.second);
         }
         
-        fillDistributions( pairObjsRaw, info );
-        fillEfficiencies( pairObjsRaw, info, m_onlyHLT );
-        fillResolutions( pairObjsRaw, info );
+        fillDistributions( ctx, pairObjsRaw, info );
+        fillEfficiencies( ctx, pairObjsRaw, info, m_onlyHLT );
+        fillResolutions( ctx, pairObjsRaw, info );
 
 
         ATH_MSG_DEBUG("End Chain Analysis ============================= " << trigger);
@@ -151,7 +151,7 @@ StatusCode TrigEgammaMonitorPhotonAlgorithm::executeNavigation( const EventConte
         }
       }
       if(m_forcePidSelection){///default is true
-        if(!ApplyPhotonPid(eg,pidName)){
+        if(!ApplyPhotonPid(ctx,eg,pidName)){
 	        ATH_MSG_DEBUG("Fails PhotonID: "<< pidName << " Trigger: " << trigItem);
 	        continue;
 	      }

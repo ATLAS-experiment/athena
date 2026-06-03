@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: TrackParticleAuxContainer_v4.h $
@@ -43,6 +43,7 @@ namespace xAOD {
       void dump() const;
       /// Function implementing soft schema evolution for the class
       void toTransient();
+      using AuxContainerBase::toTransient;
 
    private:
 

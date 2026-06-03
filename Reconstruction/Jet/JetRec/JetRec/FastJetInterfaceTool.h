@@ -45,7 +45,7 @@ namespace FastJetInterface
   typedef std::map<std::string,int> splitMergeScaleMap_t;
 #endif
   /*! @brief Mapping keyword on @c fastjet area type tag */ 
-  typedef std::map<std::string,fastjet::AreaType>              areamap_t;
+  typedef std::map<std::string,fastjet::AreaType, std::less<>>              areamap_t;
 
   /*! @brief @c fastjet data model for jet */ 
   typedef fastjet::PseudoJet   fjet_t;

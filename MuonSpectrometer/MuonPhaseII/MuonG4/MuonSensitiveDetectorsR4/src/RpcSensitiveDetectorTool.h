@@ -1,33 +1,23 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONG4R4_RpcSENSITIVEDETECTORTOOL_H
 #define MUONG4R4_RpcSENSITIVEDETECTORTOOL_H
 
-#include <GeoPrimitives/GeoPrimitives.h>
-
-#include <G4AtlasTools/SensitiveDetectorBase.h>
-#include <MuonReadoutGeometryR4/MuonDetectorManager.h>
-#include <xAODMuonSimHit/MuonSimHitContainer.h>
+#include "MuonSensitiveDetectorTool.h"
 
 namespace MuonG4R4 {
-
-class RpcSensitiveDetectorTool : public SensitiveDetectorBase {
-
-public:
-    RpcSensitiveDetectorTool(const std::string& type, const std::string& name, const IInterface *parent);
-    ~RpcSensitiveDetectorTool()=default;
-
-    StatusCode initialize() override final;
-protected:
-    G4VSensitiveDetector* makeSD() const override final;
-private:
-    const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
-    /** @brief: Key to the alignment / transform store per event. */
-    Gaudi::Property<std::string> m_alignStoreKey{this, "AlignStoreKey", ""};
-
-   
-};
+    /**  @brief Tool implementation that creates the Rpc sensitive detector. */
+    class RpcSensitiveDetectorTool : public MuonSensitiveDetectorTool {
+        public:
+            /** @brief Use the standard Athena tool constructor */
+            using MuonSensitiveDetectorTool::MuonSensitiveDetectorTool;
+            /** @brief Default the destructor */
+            ~RpcSensitiveDetectorTool() = default;
+        protected:
+            /** @brief Override the hook creating the sensitive detector 
+             *         to return a new RpcSensitiveDetector instance */
+            G4VSensitiveDetector* makeSD() const override final;
+    };
 }
-
 #endif

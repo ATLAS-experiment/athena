@@ -88,6 +88,8 @@ namespace Trk {
     if (!tracks || tracks->empty())
       return nullptr;
 
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+
     // the output collection of AlignTracks
     // we define it as collection of Tracks but fill AlignTracks inside
     DataVector<Track> * newTracks = new DataVector<Track>;
@@ -137,7 +139,7 @@ namespace Trk {
         // refit track
         if (m_refitTracks &!m_selectHits) {
 
-          newTrack=fitter->alignmentFit(alignCache,*origTrack,m_runOutlierRemoval,
+          newTrack=fitter->alignmentFit(ctx,alignCache,*origTrack,m_runOutlierRemoval,
 					static_cast<ParticleHypothesis>(m_particleHypothesis.value()));
           if (!newTrack) {
             ATH_MSG_DEBUG("Track refit yielded no track. Skipping the track.");
@@ -197,9 +199,10 @@ namespace Trk {
   {
     /** select silicon hits by quality. keep all the rest **/
     ATH_MSG_DEBUG(" -- performSiliconHitSelection -- before removing bad Silicon hits, this track has "<< inputTrack->trackStateOnSurfaces()->size()<< " tsos");
-    Track * newTrack;
 
+    Track * newTrack;
     std::vector<const Trk::MeasurementBase*> selectedMeasurementSet;
+    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // loop on track hits
     int nhits = 0;
@@ -215,7 +218,7 @@ namespace Trk {
     }
     ATH_MSG_DEBUG(" -- performSiliconHitSelection -- after removing bad Silicon hits, the selected measurement collection has "<< selectedMeasurementSet.size()<< " elements");
 
-    newTrack = (fitter->fit(Gaudi::Hive::currentContext(),
+    newTrack = (fitter->fit(ctx,
                             selectedMeasurementSet,
                             *inputTrack->perigeeParameters(),
                             m_runOutlierRemoval,

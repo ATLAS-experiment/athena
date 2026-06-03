@@ -14,12 +14,17 @@
 #include "CLHEP/Geometry/Point3D.h"
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
 
+#include <utility>
+
 using HepGeom::Transform3D;
 using HepGeom::Point3D;
 
 // Constructor:
-FCALFastSimDedicatedSD::FCALFastSimDedicatedSD(StoreGateSvc* detStore, bool verbose)
-  : IFastSimDedicatedSD("FCALFastSimDedicatedSD", detStore)
+FCALFastSimDedicatedSD::FCALFastSimDedicatedSD(StoreGateSvc* detStore,
+                                               std::string hitCollectionName,
+                                               bool verbose)
+  : IFastSimDedicatedSD("FCALFastSimDedicatedSD", detStore,
+                        std::move(hitCollectionName))
   , m_fcalManager(nullptr)
 {
   if (verbose) { G4cout << GetName() << "::initialize()" << G4endl; }

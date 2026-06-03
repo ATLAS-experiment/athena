@@ -9,8 +9,10 @@
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODJet/JetContainer.h"
-#include "TLorentzVector.h"
 
+#include <vector>
+
+class TLorentzVector;
 
 
 namespace DerivationFramework {

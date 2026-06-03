@@ -5,7 +5,7 @@
 #pragma once
 #include "xAODBase/IParticle.h"
 #include "FlavorTagInference/SaltModelGraphConfig.h"
-#include "FlavorTagInference/ISaltModel.h"
+#include "FlavorTagInference/ISaltModel.h" //Inputs, InputMap typedef
 
 #include "FlavorTagInference/TracksLoader.h"
 #include "FlavorTagInference/FlowElementsLoader.h"
@@ -19,11 +19,11 @@
 #include <vector>
 #include <utility>
 #include <functional>
+#include <iostream>
 
 namespace FlavorTagInference {
 
-    using Inputs = std::pair<std::vector<float>, std::vector<int64_t>>;
-    using SaltModelInputs = std::map<std::string, Inputs>;
+    using SaltModelInputs = InputMap; //FlavorTagInference::InputMap defined in ISaltModel.h
 
     struct SaltModelData {
         SaltModelInputs gnn_inputs;

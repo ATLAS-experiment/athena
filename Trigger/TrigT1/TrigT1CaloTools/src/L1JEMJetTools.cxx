@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 ///////////////////////////////////////////////////////////////////
 // L1JEMJetTools.cxx,  
@@ -27,7 +27,7 @@ L1JEMJetTools::L1JEMJetTools(const std::string& t, const std::string& n, const I
 
 StatusCode L1JEMJetTools::initialize()
 {
-  ATH_CHECK(detStore()->retrieve(m_l1menu).ignore());
+  ATH_CHECK(detStore()->retrieve(m_l1menu));
   return StatusCode::SUCCESS;
 }
 

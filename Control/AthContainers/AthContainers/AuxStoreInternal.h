@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/AuxStoreInternal.h
@@ -369,6 +369,32 @@ public:
    * support linked variables.
    */
   virtual const IAuxTypeVector* linkedVector (SG::auxid_t auxid) const override;
+
+
+  /**
+   * @brief Perform post-read processing for a single variable.
+   * @param ctx The current event context.
+   * @param auxid The ID of the variable to process.
+   *
+   * Some object types require some processing after being read before
+   * they are usable.  This can be indicated by specializing SG::ToTransient
+   * for the vector type containing the variable.  This method will call
+   * such a ToTransient method for the single variable identified by AUXID.
+   */
+  void toTransient (const EventContext& ctx, SG::auxid_t auxid);
+
+
+  /**
+   * @brief Perform post-read processing on this store.
+   * @param ctx The current event context.
+   *
+   * Some object types require some processing after being read before
+   * they are usable.  This can be indicated by specializing SG::ToTransient
+   * for the vector type containing the variable.  This method will call
+   * such a ToTransient method for all contained variables for which this
+   * is required.
+   */
+  virtual void toTransient (const EventContext& ctx) override;
 
 
 protected:

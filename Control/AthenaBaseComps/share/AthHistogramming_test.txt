@@ -1,0 +1,3 @@
+
+ApplicationMgr.CreateSvc += { "THistSvc" };
+THistSvc.Output = { "AANT DATAFILE='AthHistogramming_test.root' OPT='RECREATE'" };

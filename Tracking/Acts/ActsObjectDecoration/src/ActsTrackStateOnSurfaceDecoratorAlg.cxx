@@ -7,6 +7,7 @@
 #include "StoreGate/ReadDecorHandle.h"
 #include "TrkEventPrimitives/TrackStateDefs.h"
 #include "ActsGeometry/ATLASSourceLink.h"
+#include "ActsEvent/Decoration.h"
 
 namespace ActsTrk {
 
@@ -47,10 +48,6 @@ namespace ActsTrk {
 				      std::make_unique<xAOD::TrackStateValidationAuxContainer>()) );
     xAOD::TrackStateValidationContainer* stripMsos = stripMsosHandle.ptr();
 
-    // Decorators
-    SG::ReadDecorHandle<xAOD::TrackParticleContainer, ElementLink<ActsTrk::TrackContainer>> decorator_trackLink(m_decorator_actsTracks, ctx);
-    ATH_CHECK(decorator_trackLink.isValid());
-
     SG::WriteDecorHandle<xAOD::TrackParticleContainer,
 			 std::vector< ElementLink< xAOD::TrackStateValidationContainer > > > decorator_msos_link( m_trackMsosLink, ctx );
     ATH_CHECK(decorator_msos_link.isValid());
@@ -58,10 +55,8 @@ namespace ActsTrk {
 
     
     for (const xAOD::TrackParticle* trackParticle : *trackParticles) {
-      ElementLink<ActsTrk::TrackContainer> trackLink = decorator_trackLink(*trackParticle);
-      ATH_CHECK(trackLink.isValid());
-
-      std::optional<ActsTrk::TrackContainer::ConstTrackProxy> optional_track = *trackLink;
+     
+      std::optional<ActsTrk::TrackContainer::ConstTrackProxy> optional_track = getActsTrack(*trackParticle);
       if ( not optional_track.has_value() ) {
 	ATH_MSG_ERROR("Invalid track link for particle  " << trackParticle->index());
 	return StatusCode::FAILURE;
@@ -105,8 +100,11 @@ namespace ActsTrk {
 	  stripMsos->back()->setDetType( Trk::TrackState::SCT );
 	}
 	else {
-	  ATH_MSG_ERROR("Not recognized detector type");
-	  return StatusCode::FAILURE;
+	  ATH_MSG_DEBUG("Skipping unsupported Acts volume id "
+			<< surface.geometryId().volume()
+			<< " in " << name()
+			<< "; state is not written to the standard Pixel/Strip MSOS containers");
+	  continue;
 	}
 	
       } // loop on states
@@ -182,7 +180,7 @@ namespace ActsTrk {
       case 20:
         return xAOD::UncalibMeasType::PixelClusterType;
       default:
-        throw std::runtime_error("Cannot recognize volume id");
+        return xAOD::UncalibMeasType::Other;
       }
     } else {
       switch (volumeId) {
@@ -195,9 +193,8 @@ namespace ActsTrk {
       case 7:
         return xAOD::UncalibMeasType::PixelClusterType;
       default:
-        throw std::runtime_error("Cannot recognize Inner Detetor volume id");
+        return xAOD::UncalibMeasType::Other;
       }
     }
   }
 }
-

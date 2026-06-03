@@ -129,6 +129,11 @@ namespace EL
     bool algsHas (const std::string& name) const;
 
 
+    /// @brief start a new sub-sequence of algorithms
+  public:
+    void startNewAlgSequence ();
+
+
     /// description: the list of output datasets used
     /// guarantee: no-fail / strong
     /// failures(3): out of memory II

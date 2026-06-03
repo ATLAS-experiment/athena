@@ -68,7 +68,7 @@ StatusCode RecoverZeroPixelHitMuons::execute(const EventContext& context) const
 
     for (muItr = inputMuons->begin(); muItr != inputMuons->end(); ++muItr){
       const xAOD::Muon &m = *(*muItr);
-      if (m.muonType() != xAOD::Muon::MuonStandAlone) continue;
+      if (m.muonType() != xAOD::Muon::MuonType::MuonStandAlone) continue;
       if (std::find(matchedMuons.begin(), matchedMuons.end(), *muItr) != matchedMuons.end()) continue;
 
       // Define SA muon vector
@@ -94,7 +94,7 @@ StatusCode RecoverZeroPixelHitMuons::execute(const EventContext& context) const
       // Set to not assigned Muon Type to distinguish from other muons, will need to properly define in MuonType enum later
       zeroPixelHitMuon->setMuonType((xAOD::Muon::MuonType)10);
       ElementLink<xAOD::TrackParticleContainer> link( *inputTracks, n_tracks-1 );
-      zeroPixelHitMuon->setTrackParticleLink(xAOD::Muon::InnerDetectorTrackParticle, link);
+      zeroPixelHitMuon->setTrackParticleLink(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle, link);
     }
     
   }

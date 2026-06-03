@@ -11,7 +11,6 @@
 
 #include <AsgAnalysisAlgorithms/EventCutFlowHistAlg.h>
 
-#include <RootCoreUtils/StringUtil.h>
 #include <TH1.h>
 
 //

@@ -825,7 +825,7 @@ protected:
 
     for( ; muon!=muon_end ; ++muon ){
 #     ifdef XAODTRACKING_TRACKPARTICLE_H
-      if ( TIDA::isGoodOffline(*(*muon), selection, ETOffline ) ) selectorRef.selectTrack(*((*muon)->inDetTrackParticleLink()));
+      if ( TIDA::isGoodOffline(*(*muon), selection, ETOffline ) ) selectorRef.selectTrack((*muon)->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle));
 #     else
       if ( TIDA::isGoodOffline(*(*muon)) ) selectorRef.selectTrack((*muon)->inDetTrackParticle());
 #     endif

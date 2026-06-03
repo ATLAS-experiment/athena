@@ -124,13 +124,11 @@ StatusCode L2MuonSAIOMon :: fillVariablesPerOfflineMuonPerChain(const EventConte
     auto passL2InsideOut = Monitored::Scalar<bool>(chain+"_passL2InsideOut",false);
     auto passL2SA = Monitored::Scalar<bool>(chain+"_passL2SA",false);
     auto offdR = Monitored::Scalar<float>(chain+"_offdR",1000.);
-    const ElementLink<xAOD::TrackParticleContainer> &tag_ms_track = tag->muonSpectrometerTrackParticleLink();
-    if( !tag_ms_track.isValid() ) return StatusCode::SUCCESS; // tag muon dosen't have ms track
-    const ElementLink<xAOD::TrackParticleContainer> &probe_ms_track = mu->muonSpectrometerTrackParticleLink();
-    if( !probe_ms_track.isValid() ) return StatusCode::SUCCESS; // probe muon dosen't have ms track
-    float tpext_deta = (*tag_ms_track)->eta() - (*probe_ms_track)->eta();
-    float tpext_dphi = xAOD::P4Helpers::deltaPhi((*tag_ms_track)->phi(), (*probe_ms_track)->phi());
-    offdR = std::sqrt(tpext_deta*tpext_deta + tpext_dphi*tpext_dphi);
+    const auto* tag_ms_track = tag->trackParticle(xAOD::Muon::TrackParticleType::MuonSpectrometerTrackParticle);
+    if( !tag_ms_track) return StatusCode::SUCCESS; // tag muon dosen't have ms track
+    const auto* probe_ms_track = mu->trackParticle(xAOD::Muon::TrackParticleType::MuonSpectrometerTrackParticle);
+    if( !probe_ms_track ) return StatusCode::SUCCESS; // probe muon dosen't have ms track
+    offdR = xAOD::P4Helpers::deltaR(tag_ms_track, probe_ms_track);
 
     passL2InsideOut = false;
     passL2SA = false;
@@ -1104,11 +1102,11 @@ const xAOD::Muon* L2MuonSAIOMon :: searchTagOfflineMuon( const EventContext& ctx
   double tpdR_min = 999.;
   bool tpfromZ = false;
   for( const xAOD::Muon* mu : *muons ){
-    if( mu->muonType()>m_muontype ) continue;
-    if( mu->quality() != xAOD::Muon::Medium && mu->quality() != xAOD::Muon::Tight ) continue;
+    if( mu->quality() != xAOD::Muon::Quality::Medium && 
+        mu->quality() != xAOD::Muon::Quality::Tight ) continue;
     if( mu->charge()*probe->charge() > 0 ) continue;
-    const ElementLink<xAOD::TrackParticleContainer> &tag_ms_track = mu->muonSpectrometerTrackParticleLink();
-    if( !tag_ms_track.isValid() ) continue; // tag muon dosen't have ms track 
+    const auto* tag_ms_track = mu->trackParticle(xAOD::Muon::TrackParticleType::MuonSpectrometerTrackParticle);
+    if( !tag_ms_track) continue; // tag muon dosen't have ms track 
     TLorentzVector lvmu = mu->p4();
     TLorentzVector lvprobe = probe->p4();
     double dimu_mass = (lvmu+lvprobe).M()/1.e3;

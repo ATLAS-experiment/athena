@@ -16,6 +16,9 @@
 #include "AthContainers/tools/AuxTypeVector.h"
 #include "AthContainers/tools/threading.h"
 #include "TestTools/expect_exception.h"
+#ifndef XAOD_STANDALONE
+#include "GaudiKernel/EventContext.h"
+#endif
 #ifndef ATHCONTAINERS_NO_THREADS
 #include <shared_mutex>
 #endif
@@ -705,6 +708,62 @@ void test_copyIDs()
 //********************************************************************
 
 
+#ifndef XAOD_STANDALONE
+class TTest
+{
+public:
+  size_t m_evtnum = 0;
+};
+namespace SG {
+template <> class ToTransient<std::vector<TTest> > {
+public:
+  static void toTransient (std::vector<TTest>& v, const EventContext& ctx)
+  {
+    for (TTest& e : v) {
+      e.m_evtnum = ctx.evt();
+    }
+  }
+};
+}
+#endif
+void test_totransient()
+{
+  std::cout << "test_totransient\n";
+
+#ifndef XAOD_STANDALONE
+  SG::AuxStoreInternal s;
+
+  SG::auxid_t ttyp1 = SG::AuxTypeRegistry::instance().getAuxID<TTest> ("tt1");
+  SG::auxid_t ttyp2 = SG::AuxTypeRegistry::instance().getAuxID<TTest> ("tt2");
+
+  TTest* tt1 = reinterpret_cast<TTest*> (s.getData(ttyp1, 3, 3));
+  TTest* tt2 = reinterpret_cast<TTest*> (s.getData(ttyp2, 3, 3));
+
+  assert (tt1[0].m_evtnum == 0);
+  assert (tt1[2].m_evtnum == 0);
+  assert (tt2[0].m_evtnum == 0);
+  assert (tt2[2].m_evtnum == 0);
+
+  EventContext ctx (321);
+
+  s.toTransient (ctx, ttyp1);
+  assert (tt1[0].m_evtnum == 321);
+  assert (tt1[2].m_evtnum == 321);
+  assert (tt2[0].m_evtnum == 0);
+  assert (tt2[2].m_evtnum == 0);
+
+  s.toTransient (ctx);
+  assert (tt1[0].m_evtnum == 321);
+  assert (tt1[2].m_evtnum == 321);
+  assert (tt2[0].m_evtnum == 321);
+  assert (tt2[2].m_evtnum == 321);
+#endif
+}
+
+
+//********************************************************************
+
+
 class ThreadingTest
 {
 public:
@@ -815,6 +874,7 @@ int main()
   test_linked();
   test_linked2();
   test_copyIDs();
+  test_totransient();
   test_threading();
   return 0;
 }

@@ -26,8 +26,7 @@ StatusCode TRTSensitiveDetectorTool::SetupEvent(HitCollectionMap& hitCollections
 
 StatusCode TRTSensitiveDetectorTool::Gather(HitCollectionMap& hitCollections)
 {
-  hitCollections.Record<TRTUncompressedHitCollection>(m_outputCollectionNames[0]);
-  return StatusCode::SUCCESS;
+  return hitCollections.Record<TRTUncompressedHitCollection>(m_outputCollectionNames[0]);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

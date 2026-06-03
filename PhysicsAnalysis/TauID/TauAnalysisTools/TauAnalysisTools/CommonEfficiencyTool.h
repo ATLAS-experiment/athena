@@ -34,6 +34,7 @@
 #include <ColumnarCore/ObjectColumn.h>
 #include <ColumnarCore/VectorColumn.h>
 #include <ColumnarTau/TauJetDef.h>
+#include "TauAnalysisTools/ColumnarTauAccessors.h"
 
 namespace TauAnalysisTools
 {
@@ -169,11 +170,17 @@ public:
     columnar::EventInfoAccessor<columnar::ObjectColumn> m_eventInfo {*this, "EventInfo", {.addMTDependency=true}};
     columnar::EventInfoAccessor<uint32_t> randomrunnumber;
 
+    // Associated truth particles and jets. These are picked up by truth
+    // links on the tau itself.
+    columnar::TruthParticleAccessor<columnar::ObjectColumn> m_truthParticles {*this, "TruthTaus"};
+    columnar::JetAccessor<columnar::ObjectColumn> m_jets {*this, "AntiKt4TruthDressedWZJets"};
+
     columnar::TauJetAccessor<columnar::ObjectColumn> m_taus {*this, "TauJets"};
     //columnar::TauJetAccessor<int> m_nTracks{*this, "nChargedTracks", {.isOptional=true}}; to be used when 'nChargedTracks' will be in physlite
     //columnar::TauJetAccessor<float> m_eta{*this,"eta"};
     //columnar::TauJetAccessor<float> m_pt{*this,"pt"};
     columnar::TauJetAccessor<int> m_decayMode{*this,"PanTau_DecayMode"};
+    TruthParticleTypeAccessor<> m_truthParticleType{*this};
     columnar::TauJetDecorator<float> m_sfDec{*this,"sfOut"};
     columnar::TauJetDecorator<char> m_validDec{*this,"validOut"};
   };

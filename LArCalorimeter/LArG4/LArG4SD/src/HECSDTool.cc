@@ -3,7 +3,6 @@
 */
 
 #include "HECSDTool.h"
-#include "LArG4Code/SDWrapper.h"
 
 namespace LArG4
 {
@@ -28,19 +27,13 @@ namespace LArG4
   }
 
   //---------------------------------------------------------------------------
-  // Create the SD wrapper for current worker thread
+  // Create the SDs for current worker thread
   //---------------------------------------------------------------------------
   G4VSensitiveDetector* HECSDTool::makeSD() const
   {
     m_heccalc->initializeForSDCreation();
-
-    // Create the wrapper
-    auto *sdWrapper = new SimpleSDWrapper("LArHECSDWrapper", m_outputCollectionNames[0]);
-
-    // Add the SDs
-    sdWrapper->addSD( makeOneSD("LAr::HEC::Module::Depth::Slice::Wheel", &*m_heccalc, m_wheelVolumes) );
-
-    return sdWrapper;
+    makeOneSD("LAr::HEC::Module::Depth::Slice::Wheel", &*m_heccalc, m_wheelVolumes);
+    return nullptr;
   }
 
 } // namespace LArG4

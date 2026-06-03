@@ -428,7 +428,7 @@ def summarise_failing_tests(check_for_duplicates = True):
                     if input("%s (y/N) " % msg).lower() != 'y':
                         sys.exit(1)
 
-                if (test.existing_ref not in reference_folders):
+                if (not test.shared_ref and test.existing_ref not in reference_folders):
                     reference_folders.append(test.existing_ref)
                 elif check_for_duplicates and not test.shared_ref:
                     print('FATAL: Found two tests which both change the same reference file: {}, which is not supported.'.format(test.existing_ref))

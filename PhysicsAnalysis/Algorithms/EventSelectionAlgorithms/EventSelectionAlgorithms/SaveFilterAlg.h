@@ -12,7 +12,6 @@
 #include <AsgTools/PropertyWrapper.h>
 #include <SystematicsHandles/SysFilterReporterParams.h>
 #include <SystematicsHandles/SysReadHandle.h>
-#include <SystematicsHandles/SysReadDecorHandle.h>
 #include <SystematicsHandles/SysWriteDecorHandle.h>
 #include <SelectionHelpers/SysReadSelectionHandle.h>
 #include <SelectionHelpers/SysWriteSelectionHandle.h>

@@ -13,7 +13,6 @@
 #include "AsgDataHandles/WriteDecorHandle.h"
 #include "AsgDataHandles/WriteDecorHandleKey.h"
 #include "AthContainers/AuxVectorData.h"
-#include "CxxUtils/checker_macros.h"
 
 //
 // method implementations

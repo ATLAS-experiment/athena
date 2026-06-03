@@ -22,9 +22,6 @@ using namespace xAOD;
 
 namespace met {
 
-  using iplink_t = ElementLink<xAOD::IParticleContainer>;
-  static const SG::AuxElement::ConstAccessor< std::vector<iplink_t > > acc_constitObjLinks("ConstitObjectLinks");
-
   //**********************************************************************
 
   METMakerAlg::METMakerAlg(const std::string& name,
@@ -197,7 +194,7 @@ namespace met {
     	ATH_MSG_WARNING("Failed to build electron term.");
       }
       ATH_MSG_DEBUG("Selected " << metElectrons.size() << " MET electrons. "
-    		    << acc_constitObjLinks(*(*newMet)["RefEle"]).size() << " are non-overlapping.");
+    		    << getMETElements(*(*newMet)["RefEle"]).size() << " are non-overlapping.");
     }
 
     // Photons
@@ -214,7 +211,7 @@ namespace met {
     	ATH_MSG_WARNING("Failed to build photon term.");
       }
       ATH_MSG_DEBUG("Selected " << metPhotons.size() << " MET photons. "
-    		    << acc_constitObjLinks(*(*newMet)["RefGamma"]).size() << " are non-overlapping.");
+    		    << getMETElements(*(*newMet)["RefGamma"]).size() << " are non-overlapping.");
     }
 
     // Taus
@@ -231,7 +228,7 @@ namespace met {
     	ATH_MSG_WARNING("Failed to build tau term.");
       }
       ATH_MSG_DEBUG("Selected " << metTaus.size() << " MET taus. "
-    		    << acc_constitObjLinks(*(*newMet)["RefTau"]).size() << " are non-overlapping.");
+    		    << getMETElements(*(*newMet)["RefTau"]).size() << " are non-overlapping.");
     }
 
     // Muons
@@ -250,7 +247,7 @@ namespace met {
     	ATH_MSG_WARNING("Failed to build muon term.");
       }
       ATH_MSG_DEBUG("Selected " << metMuons.size() << " MET muons. "
-    		    << acc_constitObjLinks(*(*newMet)["Muons"]).size() << " are non-overlapping.");
+    		    << getMETElements(*(*newMet)["Muons"]).size() << " are non-overlapping.");
     }
 
     if( m_metmaker->rebuildJetMET("RefJet", m_softclname, m_softtrkname, newMet,
@@ -258,8 +255,16 @@ namespace met {
       ATH_MSG_WARNING("Failed to build jet and soft terms.");
     }
     ATH_MSG_DEBUG("Of " << Jets.cptr()->size()  << " jets, "
-		  << acc_constitObjLinks(*(*newMet)["RefJet"]).size() << " are non-overlapping, "
-		  << acc_constitObjLinks(*(*newMet)[m_softtrkname]).size() << " are soft");
+		  << getMETElements(*(*newMet)["RefJet"]).size() << " are non-overlapping, "
+		  << getMETElements(*(*newMet)[m_softtrkname]).size() << " are soft");
+
+    auto jets_and_weights = getMETElementsWeights<xAOD::Jet>(*(*newMet)["RefJet"]);
+    for (const auto& [jet, weight] : jets_and_weights) {
+      ATH_MSG_VERBOSE("  Jet " << jet->index() << " with pt " << jet->pt()
+        << " contributes with weight " <<weight
+      );
+    }
+
 
     MissingETBase::Types::bitmask_t trksource = static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::Track);
     if((*newMet)[m_softtrkname]) trksource = (*newMet)[m_softtrkname]->source();

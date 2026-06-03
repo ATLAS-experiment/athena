@@ -18,7 +18,7 @@ namespace AthOnnx {
       tp_options.SetGlobalInterOpNumThreads(1);
 
       m_env = std::make_unique< Ort::Env >(
-            tp_options, ORT_LOGGING_LEVEL_WARNING, name().c_str());
+            tp_options, static_cast<OrtLoggingLevel>(m_logLevel.value()), name().c_str());
       ATH_MSG_DEBUG( "Ort::Env object created" );
 
       // Return gracefully.
@@ -27,7 +27,7 @@ namespace AthOnnx {
 
    StatusCode OnnxRuntimeSvc::finalize() {
 
-      // Dekete the environment object.
+      // Delete the environment object.
       m_env.reset();
       ATH_MSG_DEBUG( "Ort::Env object deleted" );
 

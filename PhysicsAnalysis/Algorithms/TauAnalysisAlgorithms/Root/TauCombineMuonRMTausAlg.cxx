@@ -62,12 +62,6 @@ namespace CP
             ANA_CHECK (evtStore()->record (outputTauCont,    m_outputTauHandle.getName (sys)));
             ANA_CHECK (evtStore()->record (outputTauContAux, m_outputTauHandle.getName (sys) + "Aux."));
 
-            // auto viewCopy = std::make_unique<ConstDataVector<xAOD::TauJetContainer>> (SG::VIEW_ELEMENTS);
-            // for (const xAOD::TauJet* tau : combined_taus_vec){
-            //     decSelection(*tau) = true;
-            //     viewCopy->push_back (tau);
-            // }
-            // ANA_CHECK (evtStore()->record (viewCopy.release(), m_outputTauHandle.getName (sys)));
         }
         return StatusCode::SUCCESS;
     }

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ################################################################################
 # Package: LArG4GenShowerLib
@@ -11,24 +11,23 @@ atlas_subdir( LArG4GenShowerLib )
 find_package( CLHEP )
 find_package( Geant4 )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
-find_package( XercesC )
 
 # Component(s) in the package:
 atlas_add_library( LArG4GenShowerLibLib
                    src/*.cxx
                    OBJECT
                    PUBLIC_HEADERS LArG4GenShowerLib
-                   PRIVATE_INCLUDE_DIRS ${XERCESC_INCLUDE_DIRS} ${GEANT4_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
+                   PRIVATE_INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
                    LINK_LIBRARIES AthenaBaseComps AthContainers AtlasHepMCLib GaudiKernel G4AtlasToolsLib LArG4Code
-                   PRIVATE_LINK_LIBRARIES ${XERCESC_LIBRARIES} ${GEANT4_LIBRARIES} ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} GeneratorObjects GeoModelInterfaces LArG4ShowerLib )
+                   PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} GeneratorObjects GeoModelInterfaces LArG4ShowerLib )
 set_target_properties( LArG4GenShowerLibLib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 atlas_add_library( LArG4GenShowerLib
                    src/components/*.cxx
                    OBJECT
                    NO_PUBLIC_HEADERS
-                   PRIVATE_INCLUDE_DIRS ${XERCESC_INCLUDE_DIRS} ${GEANT4_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
+                   PRIVATE_INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_LINK_LIBRARIES LArG4GenShowerLibLib )
 set_target_properties( LArG4GenShowerLib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 

@@ -368,16 +368,17 @@ namespace TrackingUtilities {
 
     const auto& locPos = xaodCluster.localPosition<3>(); 
     Amg::Vector2D localPosition(locPos(0,0), locPos(1,0));
-    float time = locPos(2,0);
+    float time = xAOD::HGTDCluster::time(locPos);
 
     InDetDD::SiLocalPosition centroid(localPosition);
     const Identifier id = element.identifierOfPosition(centroid);
 
+    xAOD::ConstMatrixMap<3> local_covariance(xaodCluster.localCovariance<3>());
     auto errorMatrix = Amg::MatrixX(2,2);
     errorMatrix.setIdentity();
-    errorMatrix.fillSymmetric(0, 0, xaodCluster.localCovariance<3>()(0, 0));
-    errorMatrix.fillSymmetric(1, 1, xaodCluster.localCovariance<3>()(1, 1));    
-    float time_resolution = std::sqrt(xaodCluster.localCovariance<3>()(2, 2));
+    errorMatrix.fillSymmetric(0, 0, local_covariance(0, 0));
+    errorMatrix.fillSymmetric(1, 1, local_covariance(1, 1));
+    float time_resolution = std::sqrt(xAOD::HGTDCluster::timeCovariance(local_covariance));
 
     double etaWidth = 1.3;
     double phiWidth = 1.3;

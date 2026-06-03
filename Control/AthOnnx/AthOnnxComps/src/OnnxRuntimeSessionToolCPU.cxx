@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthOnnxComps/OnnxRuntimeSessionToolCPU.h"
@@ -31,4 +31,9 @@ StatusCode AthOnnx::OnnxRuntimeSessionToolCPU::initialize()
 Ort::Session& AthOnnx::OnnxRuntimeSessionToolCPU::session() const
 {
   return *m_session;
+}
+
+bool AthOnnx::OnnxRuntimeSessionToolCPU::supportsAsync() const
+{
+  return false;
 }

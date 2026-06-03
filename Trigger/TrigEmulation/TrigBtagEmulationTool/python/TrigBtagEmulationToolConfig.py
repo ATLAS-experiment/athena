@@ -1,7 +1,8 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod
+from Campaigns.Utils import Campaign, getMCCampaign
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
 
@@ -11,7 +12,6 @@ def jetManagerToolCfg(flags,
                       **kwargs) -> ComponentAccumulator:
     assert isinstance(name, str), "JetManagerTool name must be a string"
     acc = ComponentAccumulator()
-    kwargs.setdefault('BTaggingLink', 'btaggingLink')
     kwargs.setdefault('LHCPeriod', 3 if flags.GeoModel.Run is LHCPeriod.Run3 else 2)
     acc.setPrivateTools(CompFactory.Trig.JetManagerTool(name, **kwargs))
     return acc
@@ -34,8 +34,13 @@ def jetEMTopoPRESELManagerToolCfg(flags,
 
 # Run2 HLT jet collection
 def jetHLTCNTManagerToolCfg(flags,
-                              **kwargs) -> ComponentAccumulator:
-    kwargs.setdefault('JetContainerName', 'HLT_xAOD__JetContainer_a4tcemsubjesJet')
+                            **kwargs) -> ComponentAccumulator:
+    campaign = getMCCampaign(flags.Input.Files)
+    a4tcemsubjesJet = ('HLT_xAOD__JetContainer_a4tcemsubjesFS'
+                       if campaign is Campaign.MC20a or flags.Input.DataYear == 2016
+                       else 'HLT_xAOD__JetContainer_a4tcemsubjesISFS')
+    kwargs.setdefault('JetContainerName', a4tcemsubjesJet)
+
     return jetManagerToolCfg(flags,
                              name = "JM_a4tcemsubjes_CNT",
                              **kwargs)
@@ -55,71 +60,12 @@ def jetGSCManagerToolCfg(flags,
                              name = "JM_GSC_CNT",
                              **kwargs)
 
-# Emulation Tool                            
-def TrigBtagEmulationToolCfg(flags, 
-                             toBeEmulatedTriggers: list, 
-                             InputChain_EMTopo: str = '',
-                             InputJetContainer_EMTopo: str = '',
-                             InputJetContainer_EMTopoPresel: str = '',
-                             InputJetContainer_PFlow: str = '',
-                             InputJetContainer_PFlowPresel: str = '',
-                             InputJetContainer_a4tcemsubjesJet: str = '',
-                             InputJetContainer_SplitJet: str = '',
-                             InputJetContainer_GSCJet: str = '',
-                             **kwargs) -> ComponentAccumulator:
-    assert isinstance(toBeEmulatedTriggers, list)
-    assert isinstance(InputChain_EMTopo, str)
-    assert isinstance(InputJetContainer_EMTopo, str)
-    assert isinstance(InputJetContainer_EMTopoPresel, str)
-    assert isinstance(InputJetContainer_PFlow, str)
-    assert isinstance(InputJetContainer_PFlowPresel, str)
-    assert isinstance(InputJetContainer_a4tcemsubjesJet, str)
-    assert isinstance(InputJetContainer_SplitJet, str)
-    assert isinstance(InputJetContainer_GSCJet, str)
-
-    from AthenaCommon.Logging import logging
-    log = logging.getLogger('TrigBtagEmulationToolCfg')
-
-    period = -1
-    if flags.GeoModel.Run is LHCPeriod.Run2:
-        period = 2
-        from Campaigns.Utils import Campaign, getMCCampaign
-        campaign = getMCCampaign(flags.Input.Files)
-        if len(InputJetContainer_a4tcemsubjesJet) == 0:
-            InputJetContainer_a4tcemsubjesJet = 'HLT_xAOD__JetContainer_a4tcemsubjesFS' if campaign == Campaign.MC20a or flags.Input.DataYear == 2016 else 'HLT_xAOD__JetContainer_a4tcemsubjesISFS'
-        if len(InputJetContainer_SplitJet) == 0:
-            InputJetContainer_SplitJet = 'HLT_xAOD__JetContainer_SplitJet'
-        if len(InputJetContainer_GSCJet) == 0:
-            if campaign != Campaign.MC20a and flags.Input.DataYear != 2016:
-                InputJetContainer_GSCJet = 'HLT_xAOD__JetContainer_GSCJet'
-        # check if btagging link exists for DAOD input
-        if "StreamAOD" not in flags.Input.ProcessingTags:
-            import PyUtils.PoolFile as PF
-            PF.PoolOpts.FAST_MODE = True
-            for fname in flags.Input.Files:
-                pool_file = PF.PoolFile(fname, verbose=False)
-                btag_link_exists = any("BTagBtagToJetAssociator" in d.name for d in pool_file.data)
-                if not btag_link_exists:
-                    log.error(f"BTagBtagToJetAssociator not found in input file {fname}. Emulation of b-jet chains will be incorrect.")
-    elif flags.GeoModel.Run is LHCPeriod.Run3:
-        period = 3
-        if len(InputChain_EMTopo) == 0:
-            InputChain_EMTopo = 'HLT_j45_subjesgsc_ftf_L1J15'
-        if len(InputJetContainer_EMTopo) == 0:
-            InputJetContainer_EMTopo = 'HLT_AntiKt4EMTopoJets_subjesIS'
-        if len(InputJetContainer_EMTopoPresel) == 0:
-            InputJetContainer_EMTopoPresel = 'HLT_AntiKt4EMTopoJets_subjesIS'
-        if len(InputJetContainer_PFlow) == 0:
-            InputJetContainer_PFlow = 'HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf'
-        if len(InputJetContainer_PFlowPresel) == 0:
-            InputJetContainer_PFlowPresel = 'HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf'
-    else:
-        raise ValueError(f"Unsupported LHC Period {flags.GeoModel.Run}.")
-
+def chainDefinitions_TrigBtagEmulation(flags,
+                                       toBeEmulatedTriggers: list) -> list:
     ### determine trigger thresholds from to be emulated chain names
     chainDefinitions = {}
     for chain in toBeEmulatedTriggers:
-        if period == 3:
+        if flags.GeoModel.Run is LHCPeriod.Run3:
             from TriggerMenuMT.HLT.Config.Utility.DictFromChainName import dictFromChainName
             from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
             chainDict = dictFromChainName(flags, chain)
@@ -143,7 +89,7 @@ def TrigBtagEmulationToolCfg(flags,
                 chainParts.append(partDefinition)
             chainName = chain.name if isinstance(chain, ChainProp) else chain
             chainDefinitions[chainName] = chainParts
-        elif period == 2:
+        elif flags.GeoModel.Run is LHCPeriod.Run2:
             from ROOT.ChainNameParser import HLTChainInfo
             chainInfo = HLTChainInfo(chain)
             chainParts = ['L1item:' + chainInfo.l1Item()]
@@ -174,45 +120,27 @@ def TrigBtagEmulationToolCfg(flags,
                 chainParts.append(partDefinition)
             chainDefinitions[chain] = chainParts
 
-    ### all trigger thresholds parsed
+    return chainDefinitions
 
-    # Component Accumulator
-    acc = ComponentAccumulator()
-
-    ### add TriggerDecisionTool
-    tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
-
-    ### set tool options
+def TrigBtagEmulation_kwargs(flags, toBeEmulatedTriggers: list, **kwargs):
+    ### determine trigger thresholds from to be emulated chain names
+    chainDefinitions = chainDefinitions_TrigBtagEmulation(flags, toBeEmulatedTriggers)
     kwargs.setdefault('EmulatedChainDefinitions', chainDefinitions)
-    kwargs.setdefault('TrigDecisionTool', tdt)
-    kwargs.setdefault('LHCPeriod', period)
 
-    if period == 3:
-        kwargs.setdefault('JM_PFlow_CNT' , acc.popToolsAndMerge(jetPFlowCNTManagerToolCfg(flags,
-                                                                                          JetContainerName=InputJetContainer_PFlow)))
+    kwargs.setdefault('LHCPeriod', 3 if flags.GeoModel.Run is LHCPeriod.Run3 else 2)
 
-        kwargs.setdefault('JM_EMTopo_PRESEL', acc.popToolsAndMerge(jetEMTopoPRESELManagerToolCfg(flags,
-                                                                                                 JetContainerName=InputJetContainer_EMTopoPresel)))
+    if flags.GeoModel.Run is LHCPeriod.Run3:
         from TrigBjetHypo.TrigBjetBtagHypoTool import bTaggingWP
         from TrigBjetHypo.TrigBjetBtagHypoTool import bbTaggingWP
-
         working_points = { "newTagger" : 1.234 }
         working_points.update(bTaggingWP)
         working_points.update(bbTaggingWP)
+
         kwargs.setdefault('FTD_Remapping', 
                           {"DL1d20210519r22_pu" : "DL1dEMUL_pu",
                            "DL1d20210519r22_pc" : "DL1dEMUL_pc",
                            "DL1d20210519r22_pb" : "DL1dEMUL_pb"})
-
-    elif period == 2:
-        kwargs.setdefault('JM_a4tcemsubjes_CNT' , acc.popToolsAndMerge(jetHLTCNTManagerToolCfg(flags,
-                                                                                          JetContainerName=InputJetContainer_a4tcemsubjesJet)))
-
-        kwargs.setdefault('JM_Split_CNT' , acc.popToolsAndMerge(jetSplitManagerToolCfg(flags,
-                                                                                          JetContainerName=InputJetContainer_SplitJet)))
-
-        kwargs.setdefault('JM_GSC_CNT' , acc.popToolsAndMerge(jetGSCManagerToolCfg(flags,
-                                                                                          JetContainerName=InputJetContainer_GSCJet)))
+    elif flags.GeoModel.Run is LHCPeriod.Run2:
         # Run2 taggers from https://twiki.cern.ch/twiki/bin/view/Atlas/OnlineBTaggingBenchmarks
         working_points = { 
             "mv2c2040": 0.75,
@@ -232,6 +160,51 @@ def TrigBtagEmulationToolCfg(flags,
         })
 
     kwargs.setdefault('WorkingPoints', working_points)
+
+    return kwargs
+
+# Emulation Tool
+def TrigBtagEmulationToolCfg(flags, toBeEmulatedTriggers: list,
+                             **kwargs) -> ComponentAccumulator:
+    assert isinstance(toBeEmulatedTriggers, list)
+
+    from AthenaCommon.Logging import logging
+    log = logging.getLogger('TrigBtagEmulationToolCfg')
+
+    if flags.GeoModel.Run is LHCPeriod.Run2:
+        # check if btagging link exists for DAOD input
+        if "StreamAOD" not in flags.Input.ProcessingTags:
+            import PyUtils.PoolFile as PF
+            PF.PoolOpts.FAST_MODE = True
+            for fname in flags.Input.Files:
+                pool_file = PF.PoolFile(fname, verbose=False)
+                btag_link_exists = any("BTagBtagToJetAssociator" in d.name for d in pool_file.data)
+                if not btag_link_exists:
+                    log.error(f"BTagBtagToJetAssociator not found in input file {fname}. Emulation of b-jet chains will be incorrect.")
+
+    if not(flags.GeoModel.Run in [LHCPeriod.Run2, LHCPeriod.Run3]):
+        raise ValueError(f"Unsupported LHC Period {flags.GeoModel.Run}.")
+
+    kwargs = TrigBtagEmulation_kwargs(flags, toBeEmulatedTriggers, **kwargs)
+
+    # Component Accumulator
+    acc = ComponentAccumulator()
+
+    ### add TriggerDecisionTool
+    tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
+    kwargs.setdefault('TrigDecisionTool', tdt)
+
+    if flags.GeoModel.Run is LHCPeriod.Run3:
+        kwargs.setdefault('JM_PFlow_CNT' , acc.popToolsAndMerge(jetPFlowCNTManagerToolCfg(flags)))
+        kwargs.setdefault('JM_EMTopo_PRESEL', acc.popToolsAndMerge(jetEMTopoPRESELManagerToolCfg(flags)))
+
+    elif flags.GeoModel.Run is LHCPeriod.Run2:
+        kwargs.setdefault('JM_a4tcemsubjes_CNT' , acc.popToolsAndMerge(jetHLTCNTManagerToolCfg(flags)))
+        kwargs.setdefault('JM_Split_CNT' , acc.popToolsAndMerge(jetSplitManagerToolCfg(flags)))
+        campaign = getMCCampaign(flags.Input.Files)
+        if not(campaign is Campaign.MC20a or flags.Input.DataYear == 2016):
+            kwargs.setdefault('JM_GSC_CNT' , acc.popToolsAndMerge(jetGSCManagerToolCfg(flags)))
+
     acc.setPrivateTools(CompFactory.Trig.TrigBtagEmulationTool('TrigBtagEmulationTool', **kwargs))
     return acc
 

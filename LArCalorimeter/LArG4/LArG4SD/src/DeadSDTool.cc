@@ -4,8 +4,6 @@
 
 #include "DeadSDTool.h"
 
-#include "LArG4Code/SDWrapper.h"
-
 #include "CalibrationDefaultCalculator.h"
 
 // For escaped energy
@@ -51,26 +49,27 @@ namespace LArG4
     return StatusCode::SUCCESS;
   }
 
+  std::string DeadSDTool::hitCollectionName() const
+  {
+    return m_hitCollName;
+  }
+
   //---------------------------------------------------------------------------
   // Create SDs for the current thread
   //---------------------------------------------------------------------------
   G4VSensitiveDetector* DeadSDTool::makeSD() const
   {
-    // Create the wrapper
-    auto *sdWrapper = new CalibSDWrapper("LArDeadSDWrapper", m_hitCollName);
-
-    // Create the SDs.
-    sdWrapper->addSD( makeOneSD("LArDead::BarrelCryostat::Dead", &*m_embccalc, m_barCryVolumes ) );
-    sdWrapper->addSD( makeOneSD("LArDead::BarrelCryostat::LAr::Dead", &*m_embclarcalc, m_barCryLArVolumes ) );
-    sdWrapper->addSD( makeOneSD("LArDead::BarrelCryostat::Mixed::Dead", &*m_mixcalc, m_barCryMixVolumes ) );
-    sdWrapper->addSD( makeOneSD("LArDead::DM::Dead", &*m_dmcalc, m_DMVolumes ) );
-    sdWrapper->addSD( makeOneSD("LArDead::Barrel::Presampler::Dead", &*m_embpscalc, m_barPresVolumes ) );
-    sdWrapper->addSD( makeOneSD("LArDead::Barrel::Dead", &*m_embcalc, m_barVolumes ) );
-    sdWrapper->addSD( makeOneSD("LArDead::EndcapCryostat::Dead", &*m_emeccalc, m_ECCryVolumes ) );
-    sdWrapper->addSD( makeOneSD("LArDead::EndcapCryostat::LAr::Dead", &*m_emecclarcalc, m_ECCryLArVolumes ) );
-    sdWrapper->addSD( makeOneSD("LArDead::EndcapCryostat::Mixed::Dead", &*m_ememixcalc, m_ECCryMixVolumes ) );
-    sdWrapper->addSD( makeOneSD("LArDead::EMECSupport::Dead", &*m_emesupcalc, m_ECSupportVolumes ) );
-    sdWrapper->addSD( makeOneSD("LArDead::HEC::Wheel::Inactive", &*m_heccalc, m_HECWheelVolumes ) );
+    makeOneSD("LArDead::BarrelCryostat::Dead", &*m_embccalc, m_barCryVolumes );
+    makeOneSD("LArDead::BarrelCryostat::LAr::Dead", &*m_embclarcalc, m_barCryLArVolumes );
+    makeOneSD("LArDead::BarrelCryostat::Mixed::Dead", &*m_mixcalc, m_barCryMixVolumes );
+    makeOneSD("LArDead::DM::Dead", &*m_dmcalc, m_DMVolumes );
+    makeOneSD("LArDead::Barrel::Presampler::Dead", &*m_embpscalc, m_barPresVolumes );
+    makeOneSD("LArDead::Barrel::Dead", &*m_embcalc, m_barVolumes );
+    makeOneSD("LArDead::EndcapCryostat::Dead", &*m_emeccalc, m_ECCryVolumes );
+    makeOneSD("LArDead::EndcapCryostat::LAr::Dead", &*m_emecclarcalc, m_ECCryLArVolumes );
+    makeOneSD("LArDead::EndcapCryostat::Mixed::Dead", &*m_ememixcalc, m_ECCryMixVolumes );
+    makeOneSD("LArDead::EMECSupport::Dead", &*m_emesupcalc, m_ECSupportVolumes );
+    makeOneSD("LArDead::HEC::Wheel::Inactive", &*m_heccalc, m_HECWheelVolumes );
 
     // Take care of the default material
     if (m_do_eep)
@@ -86,11 +85,9 @@ namespace LArG4
 	      std::unique_ptr<CaloG4::VEscapedEnergyProcessing> eep(new EscapedEnergyProcessing(uninstSD));
         CaloG4::EscapedEnergyRegistry* registry = CaloG4::EscapedEnergyRegistry::GetInstance();
         registry->AddAndAdoptProcessing( "LAr::", std::move(eep) );
-
-        sdWrapper->addSD( std::move(uninstSD) );
       }
 
-    return sdWrapper;
+    return nullptr;
   }
 
 } // namespace LArG4

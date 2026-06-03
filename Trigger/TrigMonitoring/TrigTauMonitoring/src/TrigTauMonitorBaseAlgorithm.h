@@ -52,7 +52,7 @@ protected:
 
     // Get online 0P, 1P and MP TauJets
     std::vector<const xAOD::TauJet*> getOnlineTausAll(const std::string& trigger, bool include_0P=true, bool filter_legs=false) const;
-    std::tuple<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> getOnlineTaus(const std::string& trigger) const;
+    std::tuple<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> getOnlineTaus(const EventContext& ctx, const std::string& trigger) const;
 
     // Get offline 1P and 3P TauJet objects that pass the quality selection cuts
     std::vector<const xAOD::TauJet*> getOfflineTausAll(const EventContext& ctx, const float threshold = 20.0) const;
@@ -113,9 +113,9 @@ protected:
       return false;
     }
 
-    std::vector<const xAOD::TauJet*> classifyTausAll(const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0, const TauID tau_id = TauID::None) const;
-    std::pair<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> classifyOfflineTaus(const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0, const TauID tau_id = TauID::None) const;
-    std::tuple<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> classifyOnlineTaus(const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0) const;
+    std::vector<const xAOD::TauJet*> classifyTausAll(const EventContext& ctx, const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0, const TauID tau_id = TauID::None) const;
+    std::pair<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> classifyOfflineTaus(const EventContext& ctx, const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0, const TauID tau_id = TauID::None) const;
+    std::tuple<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> classifyOnlineTaus(const EventContext& ctx, const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0) const;
 
     // StorageGate keys, accessible by subclasses
     SG::ReadHandleKey<xAOD::TauJetContainer> m_offlineTauJetKey{this, "OfflineTauJetKey", "TauJets", "Offline taujet container key"};

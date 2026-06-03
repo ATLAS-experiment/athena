@@ -46,8 +46,6 @@ public:
   virtual QString type() const { return QString("Muon"); } //!< return very short word with type (maybe link with collection type?)
   unsigned int quality() const;
   const xAOD::Muon& muon() const;
-  QString muonTypeString() const;
-  QString qualityString() const;
   
   
   /// This returns the information shown about the object in the object browser

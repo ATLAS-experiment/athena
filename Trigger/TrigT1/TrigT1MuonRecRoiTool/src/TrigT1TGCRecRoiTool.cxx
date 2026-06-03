@@ -42,7 +42,7 @@ StatusCode TrigT1TGCRecRoiTool::roiData(const unsigned int & roiWord, TrigT1Muon
                      << " roi word = " << std::hex << roiWord  );
       return StatusCode::FAILURE;
     }
-    if (tgcId.getSideType() == MuonTGC_Cabling::TGCId::NoSideType) {
+    if (tgcId.getSideType() == MuonTGC_Cabling::TGCId::SideType::Undefined) {
       ATH_MSG_ERROR( "TGCRecRoiSvc::reconstruct  : "
                      << "This roiWord is not of TGC" );
       return StatusCode::FAILURE;
@@ -102,8 +102,8 @@ bool TrigT1TGCRecRoiTool::getSLBparameters(const unsigned int & roiWord,
 					   int & wireSLBId, 
 					   int & block) const {
     // init
-    tgcId.setSideType( MuonTGC_Cabling::TGCId::NoSideType );
-    tgcId.setRegionType( MuonTGC_Cabling::TGCId::NoRegionType );
+    tgcId.setSideType( MuonTGC_Cabling::TGCId::SideType::Undefined );
+    tgcId.setRegionType( MuonTGC_Cabling::TGCId::RegionType::Undefined );
     sectorID = roiNumber = r = phi = 9999;
     wireSLBId = block = 0;
     
@@ -118,7 +118,7 @@ bool TrigT1TGCRecRoiTool::getSLBparameters(const unsigned int & roiWord,
     bool isOK = true;
     
     if (sysID==1) { // Forward
-      tgcId.setRegionType( MuonTGC_Cabling::TGCId::Forward );
+      tgcId.setRegionType( MuonTGC_Cabling::TGCId::RegionType::Forward );
       // trigger sector ID
       t_sectorID  = getBitMaskValue(&roiWord,ForwardSectorIDMask());
       // roi number
@@ -131,7 +131,7 @@ bool TrigT1TGCRecRoiTool::getSLBparameters(const unsigned int & roiWord,
 	isOK = (t_sectorID<24) && (roiNumber<64); 
       } 
       
-      tgcId.setSideType( (subSysID==1) ? MuonTGC_Cabling::TGCId::Aside : MuonTGC_Cabling::TGCId::Cside );
+      tgcId.setSideType( (subSysID==1) ? MuonTGC_Cabling::TGCId::SideType::Aside : MuonTGC_Cabling::TGCId::SideType::Cside );
       r         = getBitMaskValue(&roiWord,ForwardRMask());
       phi       = getBitMaskValue(&roiWord,ForwardPhiMask());
       wireSLBId = r/4;
@@ -147,7 +147,7 @@ bool TrigT1TGCRecRoiTool::getSLBparameters(const unsigned int & roiWord,
       
     } else if (sysID>1) {
       // Endcap
-      tgcId.setRegionType( MuonTGC_Cabling::TGCId::Endcap );
+      tgcId.setRegionType( MuonTGC_Cabling::TGCId::RegionType::Endcap );
       // trigger sector ID
       t_sectorID  = getBitMaskValue(&roiWord,EndcapSectorIDMask());
       // roi number
@@ -155,7 +155,7 @@ bool TrigT1TGCRecRoiTool::getSLBparameters(const unsigned int & roiWord,
       
       isOK = (t_sectorID<48) && (roiNumber<148); 
       
-      tgcId.setSideType( (subSysID==1) ? MuonTGC_Cabling::TGCId::Aside : MuonTGC_Cabling::TGCId::Cside );
+      tgcId.setSideType( (subSysID==1) ? MuonTGC_Cabling::TGCId::SideType::Aside : MuonTGC_Cabling::TGCId::SideType::Cside );
       r         = getBitMaskValue(&roiWord,EndcapRMask());
       phi       = getBitMaskValue(&roiWord,EndcapPhiMask());
       wireSLBId = (r+3)/4;
@@ -207,7 +207,7 @@ std::unique_ptr<MuonTGC_Cabling::TGCChannelId>
     // wire
     MuonTGC_Cabling::TGCChannelId w_slbin(MuonTGC_Cabling::TGCChannelId::ChannelIdType::SLBIn);
     w_slbin.setSideType(tgcId.getSideType());
-    w_slbin.setModuleType(MuonTGC_Cabling::TGCId::WD);
+    w_slbin.setModuleType(MuonTGC_Cabling::TGCId::ModuleType::WD);
     w_slbin.setRegionType(tgcId.getRegionType());
     w_slbin.setSector(sectorID);
     w_slbin.setId(wireSLBId);
@@ -231,7 +231,7 @@ std::unique_ptr<MuonTGC_Cabling::TGCChannelId>
     // wire
     MuonTGC_Cabling::TGCChannelId w_slbin(MuonTGC_Cabling::TGCChannelId::ChannelIdType::SLBIn);
     w_slbin.setSideType(tgcId.getSideType());
-    w_slbin.setModuleType(MuonTGC_Cabling::TGCId::WD);
+    w_slbin.setModuleType(MuonTGC_Cabling::TGCId::ModuleType::WD);
     w_slbin.setRegionType(tgcId.getRegionType());
     w_slbin.setSector(sectorID);
     w_slbin.setId(wireSLBId);
@@ -245,7 +245,7 @@ std::unique_ptr<MuonTGC_Cabling::TGCChannelId>
     
     MuonTGC_Cabling::TGCChannelId s_slbin(MuonTGC_Cabling::TGCChannelId::ChannelIdType::SLBIn);
     s_slbin.setSideType(tgcId.getSideType());
-    s_slbin.setModuleType(MuonTGC_Cabling::TGCId::SD);
+    s_slbin.setModuleType(MuonTGC_Cabling::TGCId::ModuleType::SD);
     s_slbin.setRegionType(tgcId.getRegionType());
     s_slbin.setSector(sectorID);
     s_slbin.setId(stripSLBId);
@@ -377,20 +377,20 @@ StatusCode TrigT1TGCRecRoiTool::RoIsize(const unsigned int & roiWord,
 	return StatusCode::FAILURE;
       }
       
-      if (tgcId.getSideType() == MuonTGC_Cabling::TGCId::NoSideType) {
+      if (tgcId.getSideType() == MuonTGC_Cabling::TGCId::SideType::Undefined) {
 	ATH_MSG_ERROR( "TGCRecRoiSvc::RoIsize  : "
 		       << "This roiWord is not of TGC" );
 	return StatusCode::FAILURE;
       }
       
       int wireOffset = offset;
-      if(tgcId.getRegionType()==MuonTGC_Cabling::TGCId::Endcap) {
+      if(tgcId.getRegionType()==MuonTGC_Cabling::TGCId::RegionType::Endcap) {
 	if(roiNumber<4) { // Outermost ROI (|eta|~1.04)
 	  if(wireOffset==1) wireOffset = 3; // The largest R channel
 	} else if(roiNumber>=144) { // Innermost ROI (|eta|~1.91)
 	  if(wireOffset==8) wireOffset = 4; // The smallest R channel
 	}
-      } else if(tgcId.getRegionType()==MuonTGC_Cabling::TGCId::Forward) {
+      } else if(tgcId.getRegionType()==MuonTGC_Cabling::TGCId::RegionType::Forward) {
 	if(roiNumber<4) { // Outermost ROI (|eta|~1.93)
 	  if(wireOffset==1) wireOffset = 4; // The largest R channel
 	} else if(roiNumber>=60) { // Innermost ROI (|eta|~2.40)

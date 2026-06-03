@@ -13,13 +13,11 @@
 #include <SelectionHelpers/SysWriteSelectionHandle.h>
 #include <SystematicsHandles/SysCopyHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
-#include <SystematicsHandles/SysWriteDecorHandle.h>
 #include <AsgTools/PropertyWrapper.h>
 
 #include <xAODEgamma/ElectronContainer.h>
 #include <xAODEgamma/PhotonContainer.h>
 #include <xAODJet/JetContainer.h>
-#include <xAODMissingET/MissingETContainer.h>
 #include <xAODMuon/MuonContainer.h>
 #include <xAODTau/TauJetContainer.h>
 

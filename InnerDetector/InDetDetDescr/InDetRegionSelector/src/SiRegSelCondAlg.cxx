@@ -115,8 +115,12 @@ StatusCode SiRegSelCondAlg::execute(const EventContext& ctx)  const
 
   std::unique_ptr<RegSelSiLUT> rd;
 
-  if   ( m_managerName=="Pixel" ) rd = std::make_unique<RegSelSiLUT>(RegSelSiLUT::PIXEL);
-  else                            rd = std::make_unique<RegSelSiLUT>(RegSelSiLUT::SCT);
+  const bool isPixelLikeManager = (m_managerName == "Pixel" || m_managerName == "PLR");
+  if (isPixelLikeManager) {
+    rd = std::make_unique<RegSelSiLUT>(RegSelSiLUT::PIXEL);
+  } else {
+    rd = std::make_unique<RegSelSiLUT>(RegSelSiLUT::SCT);
+  }
 
   // Get detector elements (=alignment) in condition store
   const InDetDD::SiDetectorElementCollection* elements = nullptr;
@@ -164,12 +168,16 @@ StatusCode SiRegSelCondAlg::execute(const EventContext& ctx)  const
       int      layerDisk = 0;
       uint32_t     robId = 0;
 
-      if (element->isPixel()) {
+      // PLR uses its own detector type flag, but its offline helper inherits
+      // from PixelID and should follow the pixel-like RegionSelector path.
+      if (element->isPixel() || element->isPLR() || m_managerName == "PLR") {
 
 	const PixelID* pixelId = dynamic_cast<const PixelID*>(element->getIdHelper());
 	if ( pixelId!=nullptr ) { 
 	  barrelEC  = pixelId->barrel_ec(element->identify());
-	  if ( std::fabs(barrelEC)>3 ) continue; // skip DBM modules
+	  // DBM is pixel-only. PLR is pixel-like for RegionSelector purposes,
+	  // but it must not be filtered out by the DBM-specific barrel_ec cut.
+	  if ( m_managerName != "PLR" && std::fabs(barrelEC)>3 ) continue;
 	  layerDisk = pixelId->layer_disk(element->identify());
 	  if(m_useCabling) robId=(*pixCabling)->find_entry_offrob(element->identify());
 	  else robId = 0;
@@ -242,7 +250,6 @@ StatusCode SiRegSelCondAlg::execute(const EventContext& ctx)  const
 
   return StatusCode::SUCCESS;
 }
-
 
 
 

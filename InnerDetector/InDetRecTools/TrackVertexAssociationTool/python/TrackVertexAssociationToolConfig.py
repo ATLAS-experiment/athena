@@ -54,3 +54,8 @@ def CVF_TTVAToolCfg(flags, name="CVF_TTVATool", **kwargs):
     kwargs.setdefault("dzSinTheta_cut", 2.0)
     return TTVAToolCfg(flags, name, **kwargs)
  
+
+def GNNHS_TTVAToolCfg(flags, name="TrackVertexAssociationTool_GNNHS", **kwargs):
+    kwargs.setdefault("WorkingPoint", "Prompt_MaxWeight")
+    kwargs.setdefault("VertexContName", "PrimaryVertices_initial")
+    return TTVAToolCfg(flags, name, **kwargs)

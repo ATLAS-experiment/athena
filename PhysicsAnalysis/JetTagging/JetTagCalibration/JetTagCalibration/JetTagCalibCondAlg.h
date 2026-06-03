@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGCALIBRATION_JETTAGCALIBCONDALG_H
@@ -15,6 +15,7 @@
 #include "TFile.h"
 #include <map>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <set>
 
@@ -58,8 +59,8 @@ class JetTagCalibCondAlg : public AthCondAlgorithm {
   virtual StatusCode finalize() override;
 
  private:
-  void registerHistogram(const std::string& tagger, const std::string& histoname);
-  void registerHistogram(const std::string& tagger, const std::string& directory, const std::string& histoname);
+  void registerHistogram(const std::string & tagger, const std::string& histoname);
+  void registerHistogram(const std::string & tagger, const std::string& directory, const std::string& histoname);
   std::vector<std::string> createHistoMap(TFile* file, JetTagCalibCondData * histos) const;
   StatusCode objectTDirExists(const std::string& histname, TFile* file) const;
   std::vector<std::string> tokenize(const std::string& str, const std::string& delim);
@@ -82,8 +83,7 @@ class JetTagCalibCondAlg : public AthCondAlgorithm {
   SG::WriteCondHandleKey<JetTagCalibCondData> m_writeKey{this, "HistosKey", "JetTagCalibHistosKey", "Key of output (derived) JetTag calibration data"};
 
   ServiceHandle<IPoolSvc> m_poolsvc;
-
-
+  
   std::vector< std::string > m_taggers;
   std::unordered_map<std::string,std::string> m_directoryMap;
   std::vector<std::vector<std::string> > m_taggersHists;

@@ -1,14 +1,11 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "sTgcSensitiveDetector.h"
 
 #include "MuonSensitiveDetectorsR4/Utils.h"
 #include "G4ThreeVector.hh"
-
-#include "MCTruth/TrackHelper.h"
-#include <sstream>
 
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
 #include "GaudiKernel/SystemOfUnits.h"
@@ -42,8 +39,7 @@ G4bool sTgcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
                  <<touchHist->GetHistory()->GetTopVolume()->GetName()
                  <<" transformation: "<<Amg::toString(localToGlobal));
 
-  const Identifier etaHitID = getIdentifier(gctx, readOutEle, localToGlobal.translation(), 
-                                            sTgcIdHelper::sTgcChannelTypes::Strip);
+  const Identifier etaHitID = getIdentifier(gctx, readOutEle, localToGlobal.translation());
   if (!etaHitID.is_valid()) {
       ATH_MSG_VERBOSE("No valid hit found");
       return true;
@@ -56,10 +52,10 @@ G4bool sTgcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
 
 Identifier sTgcSensitiveDetector::getIdentifier(const ActsTrk::GeometryContext& gctx,
                                                 const MuonGMR4::sTgcReadoutElement* readOutEle, 
-                                                const Amg::Vector3D& hitAtGapPlane, 
-                                                sTgcIdHelper::sTgcChannelTypes chType) const {
+                                                const Amg::Vector3D& hitAtGapPlane) const {
 
   const sTgcIdHelper& idHelper{m_detMgr->idHelperSvc()->stgcIdHelper()};
+  constexpr auto chType = sTgcIdHelper::sTgcChannelTypes::Strip;
   const Identifier firstChan = idHelper.channelID(readOutEle->identify(),
                                                   readOutEle->multilayer(), 1, chType, 1);
   

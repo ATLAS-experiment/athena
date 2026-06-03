@@ -23,7 +23,8 @@ class FCALFastSimDedicatedSD : public IFastSimDedicatedSD
 public:
 
   // Constructor:
-  FCALFastSimDedicatedSD(StoreGateSvc*, bool verbose);
+  FCALFastSimDedicatedSD(StoreGateSvc*, std::string hitCollectionName,
+                         bool verbose);
 
   // Destructor:
   ~FCALFastSimDedicatedSD() {}

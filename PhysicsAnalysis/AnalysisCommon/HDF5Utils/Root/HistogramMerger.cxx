@@ -38,21 +38,21 @@ std::string read_str_attr(const H5::H5Object& obj,
   return val;
 }
 
-bool read_bool_attr(const H5::H5Object& obj, const std::string& key) {
+bool read_bool_attr(const H5::H5Object& obj, const char * key) {
   H5::Attribute attr = obj.openAttribute(key);
   uint8_t val = 0;
   attr.read(H5::PredType::NATIVE_UINT8, &val);
   return val != 0;
 }
 
-double read_double_attr(const H5::H5Object& obj, const std::string& key) {
+double read_double_attr(const H5::H5Object& obj, const char * key) {
   H5::Attribute attr = obj.openAttribute(key);
   double val = 0.0;
   attr.read(H5::PredType::NATIVE_DOUBLE, &val);
   return val;
 }
 
-int64_t read_int_attr(const H5::H5Object& obj, const std::string& key) {
+int64_t read_int_attr(const H5::H5Object& obj, const char * key) {
   H5::Attribute attr = obj.openAttribute(key);
   int64_t val = 0;
   attr.read(H5::PredType::NATIVE_INT64, &val);

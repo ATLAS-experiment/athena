@@ -5,8 +5,6 @@
 // Local include(s).
 #include "TrackParticleCalibratorExampleAlg.h"
 
-#include "TrackParticleContainer.h"
-
 // Framework include(s).
 #include "AthContainers/tools/copyAuxStoreThinned.h"
 #include "StoreGate/ReadHandle.h"
@@ -65,54 +63,62 @@ StatusCode TrackParticleCalibratorExampleAlg::execute(
     return StatusCode::SUCCESS;
   }
 
-  // The object managing CUDA memory copies.
-  vecmem::cuda::copy copy;
+  // The object managing host memory copies.
+  vecmem::copy hostCopy;
+  // The object managing device memory copies.
+  vecmem::cuda::copy deviceCopy;
 
   // Construct input buffer(s).
-  TrackParticleContainer::buffer inputHostBuffer(input->size(), m_hostMR->mr());
-  TrackParticleContainer::buffer inputDeviceBuffer(input->size(),
-                                                   m_deviceMR->mr());
+  traccc::edm::track_collection<traccc::default_algebra>::buffer
+      inputHostBuffer(std::vector<unsigned int>(input->size(), 0u),
+                      m_hostMR->mr());
+  traccc::edm::track_collection<traccc::default_algebra>::buffer
+      inputDeviceBuffer(std::vector<unsigned int>(input->size(), 0u),
+                        m_deviceMR->mr(), &(m_hostMR->mr()));
+  hostCopy.setup(inputHostBuffer)->wait();
+  deviceCopy.setup(inputDeviceBuffer)->wait();
 
   // Copy the relevant data into the input buffer.
-  static const SG::AuxElement::ConstAccessor<float> thetaAcc("theta");
-  static const SG::AuxElement::ConstAccessor<float> phiAcc("phi");
-  static const SG::AuxElement::ConstAccessor<float> qOverPAcc("qOverP");
-  std::memcpy(inputHostBuffer.get<0>().ptr(), thetaAcc.getDataArray(*input),
-              nTracks * sizeof(float));
-  std::memcpy(inputHostBuffer.get<1>().ptr(), phiAcc.getDataArray(*input),
-              nTracks * sizeof(float));
-  std::memcpy(inputHostBuffer.get<2>().ptr(), qOverPAcc.getDataArray(*input),
-              nTracks * sizeof(float));
+  traccc::edm::track_collection<traccc::default_algebra>::device inputHost{
+      inputHostBuffer};
+  for (unsigned int i = 0; i < input->size(); ++i) {
+    inputHost[i].params().set_theta(input->at(i)->theta());
+    inputHost[i].params().set_phi(input->at(i)->phi());
+    inputHost[i].params().set_qop(input->at(i)->qOverP());
+  }
 
   // Copy the input buffer to the device.
-  copy(inputHostBuffer, inputDeviceBuffer)->wait();
+  deviceCopy(inputHostBuffer, inputDeviceBuffer)->wait();
 
   // Construct output buffer(s).
-  TrackParticleContainer::buffer outputDeviceBuffer(input->size(),
-                                                    m_deviceMR->mr());
-  TrackParticleContainer::buffer outputHostBuffer(input->size(),
-                                                  m_hostMR->mr());
+  traccc::edm::track_collection<traccc::default_algebra>::buffer
+      outputDeviceBuffer(std::vector<unsigned int>(input->size(), 0u),
+                         m_deviceMR->mr(), &(m_hostMR->mr()));
+  deviceCopy.setup(outputDeviceBuffer)->wait();
+  traccc::edm::track_collection<traccc::default_algebra>::host
+      outputHostCollection(m_hostMR->mr());
 
   // Run the kernel.
   ATH_CHECK(calibrateOnGPU(inputDeviceBuffer, outputDeviceBuffer));
 
   // Get the output back to the host.
-  copy(outputDeviceBuffer, outputHostBuffer)->wait();
+  deviceCopy(outputDeviceBuffer, outputHostCollection)->wait();
 
   // Construct the output container.
   auto outputAux = std::make_unique<xAOD::AuxContainerBase>();
   SG::copyAuxStoreThinned(*(input->getConstStore()), *outputAux, nullptr);
-  std::memcpy(outputAux->getData(thetaAcc.auxid(), nTracks, nTracks),
-              outputHostBuffer.get<0>().ptr(), nTracks * sizeof(float));
-  std::memcpy(outputAux->getData(phiAcc.auxid(), nTracks, nTracks),
-              outputHostBuffer.get<1>().ptr(), nTracks * sizeof(float));
-  std::memcpy(outputAux->getData(qOverPAcc.auxid(), nTracks, nTracks),
-              outputHostBuffer.get<2>().ptr(), nTracks * sizeof(float));
   auto output = std::make_unique<xAOD::TrackParticleContainer>();
   for (std::size_t i = 0; i < nTracks; ++i) {
-    output->push_back(new xAOD::TrackParticle());
+    output->push_back(std::make_unique<xAOD::TrackParticle>());
   }
   output->setStore(outputAux.get());
+  for (std::size_t i = 0; i < nTracks; ++i) {
+    xAOD::TrackParticle* track = output->at(i);
+    track->setDefiningParameters(input->at(i)->d0(), input->at(i)->z0(),
+                                 outputHostCollection[i].params().phi(),
+                                 outputHostCollection[i].params().theta(),
+                                 outputHostCollection[i].params().qop());
+  }
 
   // Record the output container.
   auto outputHandle = SG::makeHandle(m_outputKey, ctx);

@@ -3,8 +3,8 @@
 */
 
 #include "GlobalCellTowerAlgTool.h"
-#include "GlobalLArCell.h"
 
+#include "../IO/GlobalLArCell.h"
 #include "../IO/CommonTOB.h"
 
 #include <bitset>

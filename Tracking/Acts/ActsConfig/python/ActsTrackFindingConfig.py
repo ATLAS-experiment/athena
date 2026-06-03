@@ -174,7 +174,7 @@ def ActsMainTrackFindingAlgCfg(flags,
         from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
 
         tpe_tool_kwargs = {}
-        if flags.Tracking.ActiveConfig.extension in ['ActsLargeRadius', 'ActsValidateLargeRadiusStandalone']:
+        if flags.Tracking.ActiveConfig.isLargeD0:
             tpe_tool_kwargs["allowPropagatorFailure"] = True
 
         kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags, **tpe_tool_kwargs)))
@@ -265,7 +265,7 @@ def ActsTrackFindingCfg(flags,
     stripSeedLabels = ['SSS']
     # Conversion and LRT do not process pixel seeds
     from InDetConfig.ITkActsHelpers import isFastPrimaryPass
-    if flags.Tracking.ActiveConfig.extension in ['ActsConversion', 'ActsLargeRadius', 'ActsValidateLargeRadiusStandalone']:
+    if flags.Tracking.ActiveConfig.extension == 'ActsConversion' or flags.Tracking.ActiveConfig.isLargeD0:
         pixelSeedLabels = None
     # Main pass does not process strip seeds in the fast tracking configuration
     elif isFastPrimaryPass(flags):
@@ -279,7 +279,7 @@ def ActsTrackFindingCfg(flags,
 
     pixelRefit = [False]
     stripRefit = [False]
-    if flags.Tracking.ActiveConfig.extension in ['ActsLargeRadius', 'ActsValidateLargeRadiusStandalone']:
+    if flags.Tracking.ActiveConfig.isLargeD0:
         stripRefit = [True]
 
     if pixelSeedLabels is None:
@@ -471,38 +471,13 @@ def ActsTrackToTrackParticleCnvToolCfg(flags,
         AtlasFieldCacheCondAlgCfg)
     acc.merge(AtlasFieldCacheCondAlgCfg(flags))
 
-    if 'ExtrapolationTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-        kwargs.setdefault('ExtrapolationTool', acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags)) )
-
+    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+    kwargs.setdefault('ExtrapolationTool', acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags)) )
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
     kwargs.setdefault('FirstAndLastParameterOnly',True)
     kwargs.setdefault('ComputeExpectedLayerPattern',True)
 
-    det_elements=[]
-    element_types=[]
-    if flags.Detector.EnableITkPixel:
-        from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
-        acc.merge(ITkPixelReadoutGeometryCfg(flags))
-        det_elements += ['ITkPixelDetectorElementCollection']
-        element_types += [1]
-    if flags.Detector.EnableITkStrip:
-        from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
-        acc.merge(ITkStripReadoutGeometryCfg(flags))
-        det_elements += ['ITkStripDetectorElementCollection']
-        element_types += [2]
-    if flags.Detector.EnablePixel:
-        from PixelGeoModel.PixelGeoModelConfig import PixelReadoutGeometryCfg
-        acc.merge(PixelReadoutGeometryCfg(flags))
-        det_elements += ['PixelDetectorElementCollection']
-        element_types += [1]
-    if flags.Detector.EnableSCT:
-        from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
-        acc.merge(SCT_ReadoutGeometryCfg(flags))
-        det_elements += ['SCT_DetectorElementCollection']
-        element_types += [2]
-
-    kwargs.setdefault('SiDetectorElementCollections',det_elements)
-    kwargs.setdefault('SiDetEleCollToMeasurementType',element_types)
 
     acc.setPrivateTools(CompFactory.ActsTrk.TrackToTrackParticleCnvTool(name, **kwargs))
     return acc
@@ -525,11 +500,8 @@ def ActsTrackToTrackParticleCnvAlgCfg(flags,
         tool_kwargs["FirstAndLastParameterOnly"] = kwargs.pop("FirstAndLastParameterOnly")
     if "ComputeExpectedLayerPattern" in kwargs:
         tool_kwargs["ComputeExpectedLayerPattern"] = kwargs.pop("ComputeExpectedLayerPattern")
-    if "SiDetectorElementCollections" in kwargs:
-        tool_kwargs["SiDetectorElementCollections"] = kwargs.pop("SiDetectorElementCollections")
-    if "SiDetEleCollToMeasurementType" in kwargs:
-        tool_kwargs["SiDetEleCollToMeasurementType"] = kwargs.pop("SiDetEleCollToMeasurementType")
-
+    if "MuonSummaryTool" in kwargs:
+        tool_kwargs["MuonSummaryTool"] = kwargs.pop("MuonSummaryTool")
     if 'TrackToTrackParticleCnvTool' not in kwargs:
         kwargs['TrackToTrackParticleCnvTool'] = acc.popToolsAndMerge(
             ActsTrackToTrackParticleCnvToolCfg(flags, **tool_kwargs))

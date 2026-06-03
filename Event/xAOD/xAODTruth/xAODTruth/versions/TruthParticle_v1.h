@@ -104,6 +104,11 @@ namespace xAOD {
 
       /// Retrieve the i-th mother (TruthParticle) of this TruthParticle
       const TruthParticle_v1* parent( size_t i) const;
+      
+      [[deprecated("Please select a specific parent index in your code!")]]
+      const TruthParticle_v1* parent() const {
+         return parent(0);
+      }
 
       /// Number of children of this particle
       size_t nChildren() const;

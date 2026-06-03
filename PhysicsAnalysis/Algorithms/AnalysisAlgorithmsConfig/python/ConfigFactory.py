@@ -464,6 +464,10 @@ class ConfigFactory():
         from AsgAnalysisAlgorithms.VGammaORConfig import VGammaORBlock
         self.addAlgConfigBlock(algName='VGammaOR', alg=VGammaORBlock)
 
+        # Event shape density
+        from AsgAnalysisAlgorithms.EventShapeDensityDumperConfig import EventShapeDensityDumperBlock
+        self.addAlgConfigBlock(algName='EventShape', alg=EventShapeDensityDumperBlock)
+
         # output
         from AsgAnalysisAlgorithms.OutputAnalysisConfig import OutputAnalysisConfig
         self.addAlgConfigBlock(algName="Output", alg=OutputAnalysisConfig,

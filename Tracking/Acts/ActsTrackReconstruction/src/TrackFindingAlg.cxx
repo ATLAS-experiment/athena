@@ -23,7 +23,7 @@
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
-#include "src/detail/ExpectedHitUtils.h"
+#include "ActsEvent/ExpectedHitUtils.h"
 #include "src/detail/TrackFindingMeasurements.h"
 #include "src/detail/SharedHitCounter.h"
 
@@ -491,7 +491,7 @@ namespace ActsTrk
         const InDetDD::SiDetectorElement* element = detElements.getDetectorElement(useTopSp ? sp->elementIdList().back()
                                                                                    : sp->elementIdList().front());
         const Trk::Surface& atlas_surface = element->surface();
-        return m_ATLASConverterTool->trkSurfaceToActsSurface(atlas_surface);
+        return *m_ATLASConverterTool->trkSurfaceToActsSurface(atlas_surface);
       };
 
 

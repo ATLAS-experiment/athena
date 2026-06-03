@@ -21,8 +21,7 @@ StatusCode TGCSensitiveDetectorTool::SetupEvent(HitCollectionMap& hitCollections
 
 StatusCode TGCSensitiveDetectorTool::Gather(HitCollectionMap& hitCollections)
 {
-  hitCollections.Record<TGCSimHitCollection>(m_outputCollectionNames[0]);
-  return StatusCode::SUCCESS;
+  return hitCollections.Record<TGCSimHitCollection>(m_outputCollectionNames[0]);
 }
 
 G4VSensitiveDetector* TGCSensitiveDetectorTool::makeSD() const

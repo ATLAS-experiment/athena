@@ -48,13 +48,13 @@ TestDriver::testWriting()
    }
    storSvc->addRef();
    cout << "startSession" << endl;
-   if( !storSvc->startSession(pool::RECREATE, m_storageType.type()).isSuccess() ) {
+   if( !storSvc->startSession(Io::WRITE, m_storageType.type()).isSuccess() ) {
       throw std::runtime_error( "Could not start a session." );
    }
 
    cout << "Session connect" << endl;
    pool::FileDescriptor fd( m_filename, m_filename );
-   if ( ! ( storSvc->connect( pool::RECREATE, fd ).isSuccess() ) ) {
+   if ( ! ( storSvc->connect( Io::WRITE, fd ).isSuccess() ) ) {
       throw std::runtime_error( "Could not start a connection." );
    }
   // Retrieve the dictionary
@@ -146,12 +146,12 @@ TestDriver::testReading()
   }
   storSvc->addRef();
 
-  if( !storSvc->startSession(pool::READ, m_storageType.type()).isSuccess() ) {
+  if( !storSvc->startSession(Io::READ, m_storageType.type()).isSuccess() ) {
     throw std::runtime_error( "Could not start a session." );
   }
 
   pool::FileDescriptor* fd = new pool::FileDescriptor( m_filename, m_filename );
-  if( !storSvc->connect(pool::READ, *fd).isSuccess() ) {
+  if( !storSvc->connect(Io::READ, *fd).isSuccess() ) {
     throw std::runtime_error( "Could not start a connection." );
   }
 
@@ -186,7 +186,7 @@ TestDriver::testReading()
   // Fetch the objects in the container.
   DbContainer objCntH(objContToken->technology());
   Token::OID_t objLinkH(objContToken->oid());
-  StatusCode sc = objCntH.open(dbH, m_objContainerName, 0, objContToken->technology(), pool::READ);
+  StatusCode sc = objCntH.open(dbH, m_objContainerName, 0, objContToken->technology(), Io::READ);
   int iObject = 0;
   if ( sc.isSuccess() && objCntH.isValid() ) {
     Token* objectToken = new Token(objCntH.token());
@@ -226,7 +226,7 @@ TestDriver::testReading()
   // Read the Strings
   DbContainer strCntH(strContToken->technology());
   Token::OID_t strLinkH(strContToken->oid());
-  sc = strCntH.open(dbH, m_strContainerName, 0, strContToken->technology(), pool::READ);
+  sc = strCntH.open(dbH, m_strContainerName, 0, strContToken->technology(), Io::READ);
   if ( sc.isSuccess() && strCntH.isValid() ) {
      Token* stringToken = new Token(strCntH.token());
      const Guid& guid = stringToken->classID();

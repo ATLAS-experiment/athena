@@ -38,10 +38,6 @@ InDetPhysValTruthDecoratorAlg::initialize() {
   ATH_CHECK(m_beamSpotDecoKey.initialize());
   ATH_CHECK( m_truthPixelClusterName.initialize() );
   ATH_CHECK( m_truthSCTClusterName.initialize() );
-  ATH_CHECK( m_truthSelectionTool.retrieve( EnableTool { not m_truthSelectionTool.name().empty() } ) );
-  if (not m_truthSelectionTool.name().empty() ) {
-    m_cutFlow = CutFlow(m_truthSelectionTool->nCuts() );
-  }
 
   ATH_CHECK( m_truthParticleName.initialize());
   ATH_CHECK( m_truthParticleIndexDecor.initialize( !m_truthParticleIndexDecor.key().empty()));
@@ -68,10 +64,6 @@ InDetPhysValTruthDecoratorAlg::initialize() {
 
 StatusCode
 InDetPhysValTruthDecoratorAlg::finalize() {
-  if (not m_truthSelectionTool.name().empty()) {
-    std::lock_guard<std::mutex> lock(m_mutex);
-    ATH_MSG_DEBUG( "Truth selection cut flow : " << m_cutFlow.report(m_truthSelectionTool->names()) );
-  }
   if (m_nMissingTruthParticles>0) {
     ATH_MSG_INFO( "Clusters which reference missing / thinned truth particles : " << m_nMissingTruthParticles );
   }
@@ -169,27 +161,12 @@ InDetPhysValTruthDecoratorAlg::execute(const EventContext &ctx) const {
      SG::ReadDecorHandle<xAOD::EventInfo, float> beamPosY(m_beamSpotDecoKey[1], ctx);
      SG::ReadDecorHandle<xAOD::EventInfo, float> beamPosZ(m_beamSpotDecoKey[2], ctx);
      Amg::Vector3D beamPos = Amg::Vector3D(beamPosX(0), beamPosY(0), beamPosZ(0));
-
-     if ( m_truthSelectionTool.get() ) {
-        CutFlow tmp_cut_flow(m_truthSelectionTool->nCuts());
-        for (const xAOD::TruthParticle *truth_particle : *ptruth) {
-           auto passed = m_truthSelectionTool->accept(truth_particle);
-           tmp_cut_flow.update( passed.missingCuts() );
-           if (not passed) continue;
-           decorateTruth(*truth_particle, float_decor, beamPos, tp_clustercount);
-        }
-        std::lock_guard<std::mutex> lock(m_mutex);
-        m_cutFlow.merge(std::move(tmp_cut_flow));
+     for (const xAOD::TruthParticle *truth_particle : *ptruth) {
+        decorateTruth(*truth_particle, float_decor, beamPos, tp_clustercount);
      }
-     else {
-        for (const xAOD::TruthParticle *truth_particle : *ptruth) {
-           decorateTruth(*truth_particle, float_decor, beamPos, tp_clustercount);
-        }
+     if (!decorateTruthTime(float_decor)) {
+        return StatusCode::FAILURE;
      }
-  }
-
-  if (!decorateTruthTime(float_decor)) {
-   return StatusCode::FAILURE;
   }
 
   return StatusCode::SUCCESS;

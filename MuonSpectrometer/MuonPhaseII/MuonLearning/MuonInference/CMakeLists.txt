@@ -14,9 +14,9 @@ atlas_add_component(    MuonInference
                                         AthenaBaseComps GeoPrimitives MuonIdHelpersLib
                                         MuonSimEvent xAODMuonSimHit  MdtCalibInterfacesLib
                                         xAODMuonPrepData MuonSpacePoint xAODMuon MuonTesterTreeLib
-                                        MuonPatternEvent MuonPatternHelpers MuonPatternHelpers
-                                        MuonInferenceInterfaces
-                                        AthOnnxInterfaces  ${ONNXRUNTIME_LIBRARIES} ${FMT_LIBRARIES}
+                                        MuonPatternEvent MuonTrackEvent MuonPatternHelpers MuonPatternHelpers
+                                        MuonInferenceInterfaces 
+                                        AthOnnxInterfaces AthOnnxCompsLib  ${ONNXRUNTIME_LIBRARIES} ${FMT_LIBRARIES}
                     )
 
 atlas_install_python_modules( python/*.py)

@@ -471,8 +471,7 @@ std::vector<int> InDetSecVtxTruthMatchTool::checkParticle(const xAOD::TruthParti
           }
 
           float spectrometerFieldIntegral = 0.0f;
-          bool hasSpectrometerField = saMuon->parameter(spectrometerFieldIntegral, xAOD::Muon::spectrometerFieldIntegral);
-          if (!hasSpectrometerField) {
+          if (!saMuon->parameter(spectrometerFieldIntegral, xAOD::Muon::ParamDef::spectrometerFieldIntegral)) {
             ATH_MSG_DEBUG("Standalone muon missing spectrometer field integral parameter; proceeding without field cut.");
           } else if (spectrometerFieldIntegral < 0.1f) {
             ATH_MSG_DEBUG("Skipping SA muon with spectrometerFieldIntegral " << spectrometerFieldIntegral << " T*m!");
@@ -542,8 +541,8 @@ const xAOD::Muon* InDetSecVtxTruthMatchTool::findStandAloneMuon(const xAOD::Trac
     if (!muon) {
       continue;
     }
-    const xAOD::TrackParticle* msTrack = muon->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);
-    if (msTrack == &mstp && muon->muonType() == xAOD::Muon::MuonStandAlone) {
+    const xAOD::TrackParticle* msTrack = muon->trackParticle(xAOD::Muon::TrackParticleType::MuonSpectrometerTrackParticle);
+    if (msTrack == &mstp && muon->muonType() == xAOD::Muon::MuonType::MuonStandAlone) {
       return muon;
     }
   }

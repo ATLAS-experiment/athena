@@ -472,7 +472,8 @@ namespace InDet {
 
 
       template <class Trk>
-      double fitCommonVrt(std::vector<const Trk*>& listSecondTracks,
+      double fitCommonVrt(const EventContext& ctx,
+                          std::vector<const Trk*>& listSecondTracks,
                           std::vector<float>   & trkRank,
                           const xAOD::Vertex   & primVrt,
                           const TLorentzVector & jetDir,
@@ -520,7 +521,8 @@ namespace InDet {
 
 
       template <class Trk>
-      int select2TrVrt(std::vector<const Trk*>  & SelectedTracks,
+      int select2TrVrt(const EventContext& ctx,
+                        std::vector<const Trk*>  & SelectedTracks,
                         std::vector<const Trk*>  & TracksForFit,
                         const xAOD::Vertex       & primVrt,
                         const TLorentzVector     & JetDir,

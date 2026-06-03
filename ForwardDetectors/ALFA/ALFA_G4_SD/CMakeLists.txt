@@ -13,7 +13,7 @@ atlas_add_library( ALFA_G4_SDLib
                    OBJECT
                    NO_PUBLIC_HEADERS
                    INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${GEANT4_LIBRARIES} ${GTEST_LIBRARIES} ALFA_SimEv G4AtlasToolsLib StoreGateLib )
+                   LINK_LIBRARIES ${GEANT4_LIBRARIES} ${GTEST_LIBRARIES} ALFA_SimEv G4AtlasToolsLib HitManagement MCTruth StoreGateLib )
 
 atlas_add_library( ALFA_G4_SD
                    src/components/*.cxx

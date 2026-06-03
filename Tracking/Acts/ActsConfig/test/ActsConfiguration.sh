@@ -72,18 +72,18 @@ activate_all_flags="flags.Acts.doLargeRadius=True; \
 activate_all_collections="\"InDet\" \
         \"InDetActsLegacy\" \
         \"InDetActsConversion\" \
-        \"InDetActsLargeRadius\" \
+        \"InDetLargeD0\" \
         \"InDetActsLowPt\" \
 	\"SiSPSeedSegmentsActsLegacy\" \
         \"SiSPSeedSegmentsActsLegacyPixel\" \
         \"SiSPSeedSegmentsActsLegacyStrip\" \
         \"SiSPSeedSegmentsActsConversionStrip\" \
-        \"SiSPSeedSegmentsActsLargeRadiusStrip\" \
+        \"SiSPSeedSegmentsLargeD0Strip\" \
 	\"SiSPSeedSegmentsActsLowPt\" \
         \"SiSPSeedSegmentsActsLowPtPixel\" \
         \"SiSPSeedSegmentsActsLowPtStrip\" \
         \"SiSPSeededTracksActsLegacy\" \
-        \"SiSPSeededTracksActsLargeRadius\" \
+        \"SiSPSeededTracksLargeD0\" \
         \"SiSPSeededTracksActsConversion\" \
         \"SiSPSeededTracksActsLowPt\" \
 	"

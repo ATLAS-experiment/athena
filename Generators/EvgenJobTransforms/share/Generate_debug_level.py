@@ -22,8 +22,6 @@ elif 'ParticleDecayer' in evgenConfig.generators:
     genSeq.ParticleDecayer.OutputLevel = DEBUG
 elif 'Starlight' in evgenConfig.generators:                            
     genSeq.Starlight.OutputLevel = DEBUG 
-elif 'Hydjet' in evgenConfig.generators:
-    genSeq.Hydjet.OutputLevel = DEBUG
 elif 'Hijing' in evgenConfig.generators:
     genSeq.Hijing.OutputLevel = DEBUG
 

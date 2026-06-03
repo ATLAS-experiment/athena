@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
   Contact: Xin Chen <xin.chen@cern.ch>
 */
 #ifndef JPSIXPLUS2V0_H
@@ -150,7 +150,7 @@ namespace DerivationFramework {
     std::vector<double> m_massesV0_pipi;
 
     bool d0Pass(const xAOD::TrackParticle* track, const xAOD::Vertex* PV) const;
-    Trk::VxCascadeInfo* fitMainVtx(const xAOD::Vertex* JXvtx, std::vector<double>& massesJX, const xAOD::Vertex* V01vtx, const V0Enum V01, const xAOD::Vertex* V02vtx, const V0Enum V02, const std::vector<const xAOD::TrackParticleContainer*>& trackCols, const xAOD::VertexContainer* defaultPVContainer, const xAOD::VertexContainer* pvContainer) const;
+    Trk::VxCascadeInfo* fitMainVtx(const EventContext& ctx, const xAOD::Vertex* JXvtx, std::vector<double>& massesJX, const xAOD::Vertex* V01vtx, const V0Enum V01, const xAOD::Vertex* V02vtx, const V0Enum V02, const std::vector<const xAOD::TrackParticleContainer*>& trackCols, const xAOD::VertexContainer* defaultPVContainer, const xAOD::VertexContainer* pvContainer) const;
     void fitV0Container(xAOD::VertexContainer* V0ContainerNew, const std::vector<const xAOD::TrackParticle*>& selectedTracks, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const;
     template<size_t NTracks> const xAOD::Vertex* FindVertex(const xAOD::VertexContainer* cont, const xAOD::Vertex* v) const;
   };

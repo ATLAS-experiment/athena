@@ -31,8 +31,6 @@ public:
   StatusCode execute(const EventContext &ctx) const;
 
 protected:
-  StatusCode shallowCopyChargedFEContainer(const EventContext &ctx) const;
-  StatusCode shallowCopyAndModifyNeutralFEContainer(const EventContext &ctx) const;
     
   ToolHandle<IPFOContainerCorrectionTool> m_correctionTool{this, "PFOContainerCorrectionTool", "NeutralPFOClusterMLCorrectionTool"};
     

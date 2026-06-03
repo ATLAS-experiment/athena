@@ -37,25 +37,22 @@ pool::MicroSessionManager::~MicroSessionManager()
 
 
 bool
-pool::MicroSessionManager::connect( ITransaction::Type transType )
+pool::MicroSessionManager::connect( Io::IoFlag mode, int ageLimit )
 {
   if( !m_inSession ) {
-    long mode = (transType == ITransaction::UPDATE) ? pool::UPDATE : pool::READ;
-    m_inSession = m_storageSvc->startSession(mode, m_technology).isSuccess();
+    m_inSession = m_storageSvc->startSession(mode, m_technology, ageLimit).isSuccess();
   }
   return m_inSession;
 }
 
 
 pool::DatabaseHandler*
-pool::MicroSessionManager::connect( ITransaction::Type transType,
-                                                    const std::string& fid,
-                                                    const std::string& pfn,
-                                                    long accessMode )
+pool::MicroSessionManager::connect( Io::IoFlag mode,
+                                                     const std::string& fid,
+                                                     const std::string& pfn )
 {
-  if( transType == ITransaction::INACTIVE ) return 0;
+  if( mode == Io::INVALID ) return 0;
   if( m_databaseHandlers.empty() ) {
-    long mode = (transType == ITransaction::UPDATE) ? pool::UPDATE : pool::READ;
     if( !m_inSession ) {
       if( !m_storageSvc->startSession(mode, m_technology).isSuccess() ) {
         return nullptr;
@@ -67,14 +64,16 @@ pool::MicroSessionManager::connect( ITransaction::Type transType,
   pool::DatabaseHandler* db = 0;
   try {
     db = new pool::DatabaseHandler( *m_storageSvc,
-                                                    m_technology,
-                                                    fid,
-                                                    pfn,
-                                                    accessMode );
+                                    m_technology,
+                                    fid,
+                                    pfn,
+                                    mode );
     m_registry.registerDatabaseHandler( db );
     m_databaseHandlers.insert( db );
-  }
-  catch( std::runtime_error& /* error */) { // FIXME, this looks dangerous
+  } catch( std::runtime_error& /* error */) {
+    m_storageSvc->endSession().ignore();
+    m_inSession = false;
+    return 0;
   }
 
   if( m_databaseHandlers.empty() && m_inSession ) {
@@ -132,7 +131,7 @@ std::string
 pool::MicroSessionManager::fidForPfn( const std::string& pfn )
 {
   if ( m_databaseHandlers.empty() ) {
-    long mode = pool::READ;
+    Io::IoFlag mode = Io::READ;
     if( !m_storageSvc->startSession(mode, m_technology).isSuccess() ) {
       return "";
     }
@@ -143,7 +142,7 @@ pool::MicroSessionManager::fidForPfn( const std::string& pfn )
   // this is only a temporary FID so use a special pattern to make that clear
   fd.setFID( fd.FID().substr(0,24) + "0FF0FF0FF0FF" );
   if( m_storageSvc->existsConnection(fd).isSuccess() ) {
-    if ( m_storageSvc->connect(pool::READ, fd).isSuccess() ) {
+    if ( m_storageSvc->connect(Io::READ, fd).isSuccess() ) {
       DbDatabase dbH( fd.dbc()->handle() );
       if ( ! dbH.param( "FID", fid ).isSuccess() ) fid = "";
       m_storageSvc->disconnect( fd ).ignore();

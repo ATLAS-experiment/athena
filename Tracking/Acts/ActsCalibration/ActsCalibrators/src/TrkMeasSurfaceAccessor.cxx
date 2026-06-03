@@ -9,6 +9,6 @@ namespace ActsTrk::detail {
     const Acts::Surface* TrkMeasSurfaceAccessor::operator()(const Acts::SourceLink& sourceLink) const {
         const auto* meas = TrkMeasurementCalibrator::unpack(sourceLink);
         assert(m_trkConvTool != nullptr);
-        return &(m_trkConvTool->trkSurfaceToActsSurface(meas->associatedSurface()));
+        return m_trkConvTool->trkSurfaceToActsSurface(meas->associatedSurface()).get();
     }
 }

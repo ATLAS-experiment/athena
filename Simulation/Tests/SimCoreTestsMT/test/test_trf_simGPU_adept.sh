@@ -4,7 +4,7 @@
 # art-type: grid
 # art-include: main--simGPU/AthSimulation
 # art-athena-mt: 8
-# art-architecture: '#&nvidia'
+# art-architecture: {"gpu_spec": {"vendor": "nvidia", "model": {"pattern": ".*(P100|V100).*", "excl": true}}}
 # art-output: dcube*
 # art-html: dcube_simGPU
 
@@ -85,4 +85,3 @@ echo "============ dcube"
 $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py -p --jobId simGPUTest -c ${dcubeXML} -r ${dcubeRef} -x dcube_simGPU $OUTPUT.HIST.root
 rc5=$?
 echo "art-result: ${rc5} dcube_simGPU" 
-

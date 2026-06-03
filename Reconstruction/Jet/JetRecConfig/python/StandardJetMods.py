@@ -29,6 +29,21 @@ from JetRecConfig.JetRecCommon import isMC
 
 stdJetModifiers = ldict()
 
+
+# Many JetMoment tools need to know the name of the container they operate on.
+# We set the function below as the 'JetContainer' property so the config system
+# can assign the right name to the c++ tool.
+def _jetname(jetdef,modspec):
+    return jetdef.fullname()
+
+
+def _constitContainername(jetdef,modspec):
+    """Returns the exact constituent container name used to build jetdef"""
+    constitdef = jetdef.inputdef
+    containername = constitdef.containername(jetdef).split(':')[-1] if callable(constitdef.containername) else constitdef.containername
+    return containername
+
+
 ########################################################################
 # Define the simple modifier setups here -- those defined in JetRec.
 stdJetModifiers.update( 
@@ -61,6 +76,18 @@ try:
                             createfn=JetCalibToolsConfig.getJetCalibToolFromString,
                             prereqs=lambda mod,jetdef : JetCalibToolsConfig.getJetCalibToolPrereqs(mod,jetdef)+[inputsFromContext("Vertices")])
     )
+
+    from JetCalibTools import JetResponseToolConfig
+    stdJetModifiers.update(
+        # *******************
+        # Response variables
+        Response = JetModifier("JetResponseTool","response",
+                             JetContainer=_jetname,
+                             prereqs= ["input:EventDensity"],
+                             createfn=JetResponseToolConfig.getJetResponseTool,
+                             ),
+    )
+
 except ModuleNotFoundError:
     from AthenaCommon import Logging
     jetlog = Logging.logging.getLogger('JetStandardMods')
@@ -91,13 +118,6 @@ except ModuleNotFoundError:
 # can assign the right name to the c++ tool.
 def _jetname(jetdef,modspec):
     return jetdef.fullname()
-
-
-def _constitContainername(jetdef,modspec):
-    """Returns the exact constituent container name used to build jetdef"""
-    constitdef = jetdef.inputdef
-    containername = constitdef.containername(jetdef).split(':')[-1] if callable(constitdef.containername) else constitdef.containername
-    return containername
 
 
 # Standard jet moments
@@ -222,14 +242,14 @@ try:
                                    IsolationCalculations = ["IsoFixedCone:5:Pt", ],
                                    RhoKey = "",
                                    ),
-        
-        
     )
+
 except ModuleNotFoundError:
     from AthenaCommon import Logging
     jetlog = Logging.logging.getLogger('JetStandardMods')
     jetlog.info("No JetMomentTools pakage found (expected in AthGeneration or analysis releases). Some jet calculations will be disabled.")
     pass
+
 
 # Truth labelling moments
 from ParticleJetTools import ParticleJetToolsConfig
@@ -288,7 +308,7 @@ stdJetModifiers.update(
                                  createfn=ParticleJetToolsConfig.getJetPileupLabelTool,
                                  prereqs=["input:AntiKt4TruthDressedWZJets"]
                                  )
-)
+    )
 
 
 

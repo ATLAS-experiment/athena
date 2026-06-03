@@ -87,6 +87,7 @@
 // system includes
 #include <fstream>
 #include <regex>
+#include <string>
 
 namespace ST {
 
@@ -179,8 +180,13 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_muIdBaseline(static_cast<int>(xAOD::Muon::Quality(xAOD::Muon::VeryLoose))),
     m_photonId(""),
     m_photonIdBaseline(""),
+    m_tauTagger(""),
     m_tauId(""),
     m_tauIdBaseline(""),
+    m_tauEleId(true),
+    m_tauEleIdBaseline(true),
+    m_tauMuOLR(false),
+    m_tauMuOLRBaseline(false),
     m_eleIso_WP(""),
     m_eleIsoHighPt_WP(""),
     m_eleIsoHighPtThresh(-99.),
@@ -201,14 +207,15 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_BtagWP(""),
     m_BtagTagger(""),
     m_BtagMinPt(-99.),
-    m_BtagKeyOverride(""),
     m_BtagSystStrategy(""),
     m_EigenvectorReductionB(""),
     m_EigenvectorReductionC(""),
     m_EigenvectorReductionLight(""),
+    m_BtagReadFromObject(false),
     m_BtagWP_trkJet(""),
     m_BtagTagger_trkJet(""),
     m_BtagMinPt_trkJet(-99.),
+    m_BtagReadFromObject_trkJet(false),
     //configurable cuts here
     m_eleBaselinePt(-99.),
     m_eleBaselineEta(-99.),
@@ -250,6 +257,8 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_tauEta(-99.),
     m_tauConfigPath(""),
     m_tauConfigPathBaseline(""),
+    m_tauInputFile(""),
+    m_tauInputFileBaseline(""),
     m_tauDoTTM(false),
     m_tauSmearingToolRecommendationTag(""),
     m_tauEffToolRecommendationTag(""),
@@ -311,8 +320,6 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
 
     m_useSigLepForIsoCloseByOR(false),
     m_IsoCloseByORpassLabel(""),
-
-    m_useTRUTH3(true),
 
     m_slices(std::map<std::string,bool>()),
     m_isRun3(false),
@@ -537,11 +544,12 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   declareProperty( "BtagWPOR", m_orBtagWP); //the one used in the Overlap Removal
   declareProperty( "BtagWP", m_BtagWP);     //the one used in FillJet() afterwards
   declareProperty( "BtagMinPt", m_BtagMinPt);    // minimum jetPt cut (MR31061) >=20 GeV EM jets & >=10 GeV TrackJets (not calibrated below)
-  declareProperty( "BtagKeyOverride", m_BtagKeyOverride); /// Override for the b-tagging jet collection
   declareProperty( "BtagCalibPath", m_bTaggingCalibrationFilePath);
+  declareProperty( "BtagReadFromObject", m_BtagReadFromObject);
   declareProperty( "BtagTaggerTrkJet", m_BtagTagger_trkJet);
   declareProperty( "BtagMinPtTrkJet", m_BtagMinPt_trkJet);    // minimum jetPt cut (MR31061) >=20 GeV EM jets & >=10 GeV TrackJets (not calibrated below)
   declareProperty( "BtagWPTrkJet", m_BtagWP_trkJet);  //the one used in FillTrackJet() afterwards
+  declareProperty( "BtagReadFromObjectTrkJet", m_BtagReadFromObject_trkJet);
   //ELECTRONS
   declareProperty( "EleBaselinePt", m_eleBaselinePt);
   declareProperty( "ElePt", m_elePt);
@@ -605,10 +613,17 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   declareProperty( "PhotonAllowLate", m_photonAllowLate);
 
   //TAUS
+  declareProperty( "TauTagger", m_tauTagger);
   declareProperty( "TauBaselineId", m_tauIdBaseline);
   declareProperty( "TauId", m_tauId);
+  declareProperty( "TauBaselineEleId", m_tauEleIdBaseline);
+  declareProperty( "TauEleId", m_tauEleId);
+  declareProperty( "TauBaselineMuOLR", m_tauMuOLRBaseline);
+  declareProperty( "TauMuOLR", m_tauMuOLR);
   declareProperty( "TauIdConfigPathBaseline", m_tauConfigPathBaseline);
   declareProperty( "TauIdConfigPath", m_tauConfigPath);
+  declareProperty( "TauIdInputFileBaseline", m_tauInputFileBaseline);
+  declareProperty( "TauIdInputFile", m_tauInputFile);
   declareProperty( "TauDoTruthMatching", m_tauDoTTM);
   declareProperty( "TauSmearingToolRecommendationTag", m_tauSmearingToolRecommendationTag);
   declareProperty( "TauEffToolRecommendationTag", m_tauEffToolRecommendationTag);
@@ -623,9 +638,6 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   //Isolation correction for leptons and photons
   declareProperty( "UseSigLepForIsoCloseByOR", m_useSigLepForIsoCloseByOR );
   declareProperty( "IsoCloseByORpassLabel", m_IsoCloseByORpassLabel );
-
-  //Truth
-  declareProperty( "UseTRUTH3", m_useTRUTH3 ); // true if using TRUTH3 type containers
 
   //--- Tools configuration
   //PRW
@@ -805,7 +817,7 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   m_mu_id_support = 4; //maximum value supported
 
   // Tau ID WPs
-  m_tau_id_support.push_back("rnn001");
+  m_tau_id_support.push_back("001");
   m_tau_id_support.push_back("VeryLoose");
   m_tau_id_support.push_back("Loose");
   m_tau_id_support.push_back("Medium");
@@ -850,6 +862,13 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   m_mu_iso_fallback = {};
   m_mu_iso_fallback["PLImprovedTight"] = "PLVTight";
   m_mu_iso_fallback["PLImprovedVeryTight"] = "PLVTight";
+
+  // Construct tau fallback WPs for GNTau --> RNN ID SFs
+  m_tau_id_fallback = {};
+  m_tau_id_fallback[10] = 6; // VeryLoose
+  m_tau_id_fallback[11] = 7; // Loose
+  m_tau_id_fallback[12] = 8; // Medium
+  m_tau_id_fallback[13] = 9; // Tight
 }
 
 #define CHECK_TOOL_RETRIEVE( TOOLHANDLE )         \
@@ -1545,9 +1564,14 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_tauPrePtCut, "Tau.PrePtCut", rEnv, 0.);
   configFromFile(m_tauPt, "Tau.Pt", rEnv, 20000.);
   configFromFile(m_tauEta, "Tau.Eta", rEnv, 2.5);
+  configFromFile(m_tauTagger, "Tau.Tagger", rEnv, "RNN");
   configFromFile(m_tauId, "Tau.Id", rEnv, "Medium");
+  configFromFile(m_tauEleId, "Tau.EleId", rEnv, true);
+  configFromFile(m_tauMuOLR, "Tau.MuOLR", rEnv, false);
   configFromFile(m_tauConfigPath, "Tau.ConfigPath", rEnv, "default");
   configFromFile(m_tauIdBaseline, "TauBaseline.Id", rEnv, "Medium");
+  configFromFile(m_tauEleIdBaseline, "TauBaseline.EleId", rEnv, true);
+  configFromFile(m_tauMuOLRBaseline, "TauBaseline.MuOLR", rEnv, false);
   configFromFile(m_tauConfigPathBaseline, "TauBaseline.ConfigPath", rEnv, "default");
   configFromFile(m_tauDoTTM, "Tau.DoTruthMatching", rEnv, false);
   //
@@ -1606,17 +1630,18 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_BtagWP, "Btag.WP", rEnv, "Continuous");
   configFromFile(m_BtagMinPt, "Btag.MinPt", rEnv, -1.); // Not calibrated below 20
 
-  configFromFile(m_bTaggingCalibrationFilePath, "Btag.CalibPath", rEnv, m_isRun3 ? "xAODBTaggingEfficiency/13p6TeV/MC23_2025-06-17_GN2v01_v4.root": "xAODBTaggingEfficiency/13TeV/MC20_2025-06-17_GN2v01_v4.root");
+  configFromFile(m_bTaggingCalibrationFilePath, "Btag.CalibPath", rEnv, m_isRun3 ? "xAODBTaggingEfficiency/13p6TeV/MC23_2026_05_13_GN2v01_v0.root": "xAODBTaggingEfficiency/13TeV/MC20_2025-06-17_GN2v01_v4.root");
   configFromFile(m_BtagSystStrategy, "Btag.SystStrategy", rEnv, "SFEigen");
   configFromFile(m_EigenvectorReductionB, "Btag.EigenvectorReductionB", rEnv, "Loose");
   configFromFile(m_EigenvectorReductionC, "Btag.EigenvectorReductionC", rEnv, "Loose");
   configFromFile(m_EigenvectorReductionLight, "Btag.EigenvectorReductionLight", rEnv, "Loose");
+  configFromFile(m_BtagReadFromObject, "Btag.ReadFromObject", rEnv, false);
 
   configFromFile(m_useBtagging_trkJet, "BtagTrkJet.enable", rEnv, true);
   configFromFile(m_BtagTagger_trkJet, "BtagTrkJet.Tagger", rEnv, "DL1r");
   configFromFile(m_BtagWP_trkJet, "BtagTrkJet.WP", rEnv, "FixedCutBEff_77");
   configFromFile(m_BtagMinPt_trkJet, "BtagTrkJet.MinPt", rEnv, -1.); // Not calibrated below 10
-  configFromFile(m_BtagKeyOverride, "Btag.KeyOverride", rEnv, "", true);
+  configFromFile(m_BtagReadFromObject_trkJet, "BtagTrkJet.ReadFromObject", rEnv, false);
   //
   configFromFile(m_orDoBoostedElectron, "OR.DoBoostedElectron", rEnv, true);
   configFromFile(m_orBoostedElectronC1, "OR.BoostedElectronC1", rEnv, -999.); // set to positive number to override default
@@ -1652,8 +1677,6 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_EleFatJetDR, "OR.EleFatJetDR", rEnv, -999.);
   configFromFile(m_JetFatJetDR, "OR.JetFatJetDR", rEnv, -999.);
   //
-  configFromFile(m_useTRUTH3, "Truth.UseTRUTH3", rEnv, true);
-  ///
   configFromFile(m_upstreamTriggerMatching, "Trigger.UpstreamMatching", rEnv, false);
   configFromFile(m_trigMatchingPrefix, "Trigger.MatchingPrefix", rEnv, "", true);
   //
@@ -1713,6 +1736,50 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_commonPRWFileMC23g, "PRW.commonPRWFileMC23g", rEnv, "PileupReweighting/mc23_common/mc23g.495000.physlite.prw.v1.root");
   //
   configFromFile(m_strictConfigCheck, "StrictConfigCheck", rEnv, false);
+
+  // Translate tau config names
+  if(!m_tauConfigPathBaseline.empty()) { //baseline taus
+    m_tauInputFileBaseline = m_tauConfigPathBaseline;
+    if( m_tauConfigPathBaseline=="default" ) {
+      if (m_tauTagger == "RNN") m_tauInputFileBaseline = "SUSYTools/tau_selection";
+      else if (m_tauTagger == "GNTau") m_tauInputFileBaseline = "SUSYTools/tau_selection_gntau";
+      else if (m_tauTagger == "LowPt") m_tauInputFileBaseline = "SUSYTools/tau_selection_lowpt";
+      else {
+         ATH_MSG_ERROR("Invalid tau ID selected: " << m_tauTagger << " - " << m_tauIdBaseline);
+         return StatusCode::FAILURE;
+      }
+      std::string tauWPLC = m_tauIdBaseline;
+      std::transform(tauWPLC.begin(), tauWPLC.end(), tauWPLC.begin(), [](unsigned char c) { return std::tolower(c); });
+      // wp
+      m_tauInputFileBaseline += "_"+tauWPLC;
+      // eleid & muOLR
+      m_tauInputFileBaseline += (m_tauEleIdBaseline ? "_eleid" : "_noeleid");
+      m_tauInputFileBaseline += (m_tauMuOLRBaseline ? "_muonolr" : "");
+      m_tauInputFileBaseline += ".conf";
+    }
+    ANA_MSG_INFO("configFromFile(): Parsed Tau Baseline Config input: " << m_tauInputFileBaseline);
+  }
+  if(!m_tauConfigPathBaseline.empty()) { //signal taus
+    m_tauInputFile = m_tauConfigPath;
+    if( m_tauConfigPath=="default" ) {
+      if (m_tauTagger == "RNN") m_tauInputFile = "SUSYTools/tau_selection";
+      else if (m_tauTagger == "GNTau") m_tauInputFile = "SUSYTools/tau_selection_gntau";
+      else if (m_tauTagger == "LowPt") m_tauInputFile = "SUSYTools/tau_selection_lowpt";
+      else {
+         ATH_MSG_ERROR("Invalid tau ID selected: " << m_tauTagger << " - " << m_tauId);
+         return StatusCode::FAILURE;
+      }
+      std::string tauWPLC = m_tauId;
+      std::transform(tauWPLC.begin(), tauWPLC.end(), tauWPLC.begin(), [](unsigned char c) { return std::tolower(c); });
+      // wp
+      m_tauInputFile += "_"+tauWPLC;
+      // eleid & muOLR
+      m_tauInputFile += (m_tauEleId ? "_eleid" : "_noeleid");
+      m_tauInputFile += (m_tauMuOLR ? "_muonolr" : "");
+      m_tauInputFile += ".conf";
+    }
+    ANA_MSG_INFO("configFromFile(): Parsed Tau Signal Config input: " << m_tauInputFile);
+  }
 
   // By now rEnv should be empty!
   if (rEnv.GetTable() && rEnv.GetTable()->GetSize()>0){
@@ -1834,13 +1901,19 @@ std::string SUSYObjDef_xAOD::getDefaultJetUncConfig() {
     return isAtlfast() ? "rel22/Spring2025_PreRec/R4_CategoryReduction_FullJER_MC20_MC21.config" : "rel22/Spring2025_PreRec/R4_CategoryReduction_FullJER_MC20_MC21.config";  
 }
 
-void SUSYObjDef_xAOD::getTauConfig(const std::string& tauConfigPath, std::vector<float>& pT_window, std::vector<float>& eta_window, bool &eleOLR, bool &muVeto, bool &muOLR) const {
+StatusCode SUSYObjDef_xAOD::getTauConfig(const std::string& tauConfigPath, std::vector<float>& pT_window, std::vector<float>& eta_window, bool &eleOLR, bool &muVeto, bool &muOLR) const {
 
-  if(tauConfigPath.empty()) return;
+  if(tauConfigPath.empty()) return StatusCode::FAILURE;
 
   TEnv rEnv;
   auto filename = PathResolverFindCalibFile(tauConfigPath);
-  rEnv.ReadFile(filename.c_str(), kEnvAll);
+  if ( rEnv.ReadFile(filename.c_str(), kEnvAll) ) {
+    ATH_MSG_ERROR( "Error while reading tau config file : " << filename );
+    ATH_MSG_ERROR( "Find examples at: https://gitlab.cern.ch/atlas/athena/-/tree/main/PhysicsAnalysis/Algorithms/TauAnalysisAlgorithms/data");
+    return StatusCode::FAILURE;
+  } else {
+    ATH_MSG_DEBUG( "Successfully read tau config file : " << filename );
+  }
 
   std::vector<std::string> cuts;
   if (rEnv.Defined("SelectionCuts")) {
@@ -1936,6 +2009,8 @@ void SUSYObjDef_xAOD::getTauConfig(const std::string& tauConfigPath, std::vector
       eta_window.push_back(std::numeric_limits<float>::infinity());
     }
   }
+
+  return StatusCode::SUCCESS;
 }
 
 StatusCode SUSYObjDef_xAOD::validConfig(bool strict) const {
@@ -2029,17 +2104,8 @@ StatusCode SUSYObjDef_xAOD::validConfig(bool strict) const {
 
   if(!m_tauConfigPathBaseline.empty()) { //baseline taus
 
-    std::string theConfig = m_tauConfigPathBaseline;
-    if( m_tauConfigPathBaseline=="default" ){
-      if (m_tauId == "rnn001")   theConfig = "SUSYTools/tau_selection_rnn001.conf";
-      else if (m_tauId == "VeryLoose")   theConfig = "SUSYTools/tau_selection_veryloose.conf";
-      else if (m_tauId == "Loose")  theConfig = "SUSYTools/tau_selection_loose.conf";
-      else if (m_tauId == "Medium") theConfig = "SUSYTools/tau_selection_medium.conf";
-      else if (m_tauId == "Tight")  theConfig = "SUSYTools/tau_selection_tight.conf";
-    }
-
     //read config
-    getTauConfig(theConfig, pT_window, eta_window, elOLR, muVeto, muOLR);
+    ANA_CHECK(getTauConfig(m_tauInputFileBaseline, pT_window, eta_window, elOLR, muVeto, muOLR));
 
     //pt-eta checks
     if( m_tauPrePtCut > 0 and (m_tauPrePtCut != 1000*pT_window[0] or (pT_window[1] > 0 and m_tauPrePtCut > 1000*pT_window[1]))) {
@@ -2060,16 +2126,7 @@ StatusCode SUSYObjDef_xAOD::validConfig(bool strict) const {
 
   if(!m_tauConfigPath.empty()) { //signal taus
 
-    std::string theConfig = m_tauConfigPath;
-    if( m_tauConfigPath=="default" ){
-      if (m_tauId == "rnn001")   theConfig = "SUSYTools/tau_selection_rnn001.conf";
-      else if (m_tauId == "VeryLoose")   theConfig = "SUSYTools/tau_selection_veryloose.conf";
-      else if (m_tauId == "Loose")  theConfig = "SUSYTools/tau_selection_loose.conf";
-      else if (m_tauId == "Medium") theConfig = "SUSYTools/tau_selection_medium.conf";
-      else if (m_tauId == "Tight")  theConfig = "SUSYTools/tau_selection_tight.conf";
-    }
-
-    getTauConfig(theConfig, pT_window, eta_window, elOLR, muVeto, muOLR);
+    ANA_CHECK(getTauConfig(m_tauInputFile, pT_window, eta_window, elOLR, muVeto, muOLR));
 
     if( m_tauPrePtCut > 0 and (m_tauPrePtCut != 1000*pT_window[0] or (pT_window[1] > 0 and m_tauPrePtCut > 1000*pT_window[1]))) {
       ATH_MSG_WARNING("Your tau pt configuration is inconsistent! pre pT cut : " << m_tauPrePtCut << " / TauSelectionTool window (in MeV) : [" << 1000*pT_window[0] << ", " << 1000*pT_window[1] << "]");

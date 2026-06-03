@@ -276,8 +276,7 @@ namespace Analysis {
         TrackBag muonTracks;
         if (importedMuonCollection && m_excludeJpsiMuonsOnly) {
           for(auto muon : *importedMuonCollection){
-            if(!muon->inDetTrackParticleLink().isValid()) continue;
-            auto track = muon->trackParticle( xAOD::Muon::InnerDetectorTrackParticle );
+            auto track = muon->trackParticle( xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
             if(track==nullptr) continue;
             if(!JpsiUpsilonCommon::isContainedIn(track, theIDTracksAfterSelection)) continue;
             muonTracks.push_back(track);
@@ -428,7 +427,7 @@ namespace Analysis {
     
     std::unique_ptr<xAOD::Vertex> JpsiPlus1Track::fit(const EventContext& ctx, const std::vector<const xAOD::TrackParticle*> &inputTracks, const xAOD::TrackParticleContainer* importedTrackCollection, const xAOD::TrackParticleContainer* gsfCollection) const {
         
-        std::unique_ptr<Trk::IVKalState> state = m_VKVFitter->makeState();
+        std::unique_ptr<Trk::IVKalState> state = m_VKVFitter->makeState(ctx);
         
         // Set the mass constraint if requested by user (default=true)
         // Can be set by user (m_altMassConstraint) - default is -1.0.
@@ -449,7 +448,7 @@ namespace Analysis {
         if(sc.isFailure()){
             startingPoint = Amg::Vector3D(0,0,0);
         }
-        std::unique_ptr<xAOD::Vertex> theResult = m_VKVFitter->fit(ctx, inputTracks, startingPoint, *state);
+        std::unique_ptr<xAOD::Vertex> theResult = m_VKVFitter->fit(inputTracks, startingPoint, *state);
 
         // Added by ASC
         if(theResult){

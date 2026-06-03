@@ -86,17 +86,15 @@ namespace DerivationFramework {
     for (const auto * muon : *importedMuonCollection) {
       if ( !muon ) continue;
       muonDecorator(*muon) = -1; // all muons must be decorated
-      if (  (muon->muonType() != xAOD::Muon::Combined ) && (muon->muonType() != xAOD::Muon::SegmentTagged ) ) continue;
-      if (!muon->inDetTrackParticleLink().isValid()) continue; // No muons without ID tracks
-      auto& link = muon->inDetTrackParticleLink();
-      const xAOD::TrackParticle* muonTrk = *link;
+      if (  (muon->muonType() != xAOD::Muon::MuonType::Combined ) && (muon->muonType() != xAOD::Muon::MuonType::SegmentTagged ) ) continue;
+      const xAOD::TrackParticle* muonTrk = muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
       if ( !muonTrk ) continue;
       const xAOD::Vertex* vx{};
       if ( !m_trkSelector->decision(*muonTrk, vx) ) continue; // all ID tracks must pass basic tracking cuts
       if ( fabs(muonTrk->pt())<m_ptCut ) continue; //  pt cut
       if ( fabs(muonTrk->eta())>m_etaCut ) continue; //  eta cut
-      if ( muon->muonType() == xAOD::Muon::Combined ) ++nCombMuons;
-      if ( muon->muonType() == xAOD::Muon::SegmentTagged ) ++nSegmentTaggedMuons;
+      if ( muon->muonType() == xAOD::Muon::MuonType::Combined ) ++nCombMuons;
+      if ( muon->muonType() == xAOD::Muon::MuonType::SegmentTagged ) ++nSegmentTaggedMuons;
       theMuonsAfterSelection.push_back(muon);
     }
     unsigned int nSelectedMuons = theMuonsAfterSelection.size();
@@ -347,10 +345,10 @@ namespace DerivationFramework {
     bool accept(false);
     bool charges(true);
     bool quality(false);
-    if ((  muons.at(0)->muonType() == xAOD::Muon::Combined ) ||
-        (  muons.at(1)->muonType() == xAOD::Muon::Combined ) ||
-        (  muons.at(2)->muonType() == xAOD::Muon::Combined ) ||
-        (  muons.at(3)->muonType() == xAOD::Muon::Combined )
+    if ((  muons.at(0)->muonType() == xAOD::Muon::MuonType::Combined ) ||
+        (  muons.at(1)->muonType() == xAOD::Muon::MuonType::Combined ) ||
+        (  muons.at(2)->muonType() == xAOD::Muon::MuonType::Combined ) ||
+        (  muons.at(3)->muonType() == xAOD::Muon::MuonType::Combined )
         ) quality = true;
     if (charges && quality) accept = true;
     return accept;

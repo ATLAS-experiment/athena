@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCModuleSL.h"
@@ -16,11 +16,9 @@ TGCModuleSL::TGCModuleSL(TGCId::SideType vside, TGCId::RegionType vregion,
 }
 
 bool TGCModuleSL::isValid() const {
-    if ((getSideType() > TGCId::NoSideType) &&
-        (getSideType() < TGCId::MaxSideType) &&
-        (getRegionType() > TGCId::NoRegionType) &&
-        (getRegionType() < TGCId::MaxRegionType) && (getOctant() >= 0) &&
-        (getOctant() < 8)) {
+    if ((getSideType() < TGCId::SideType::MaxSideType) &&
+        (getRegionType() < TGCId::RegionType::MaxRegionType) &&
+        (getOctant() >= 0) && (getOctant() < 8)) {
         return true;
     }
     return false;

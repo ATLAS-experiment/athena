@@ -23,13 +23,9 @@ if __name__=='__main__':
     cfg = MainServicesCfg(flags)
     cfg.merge(PoolReadCfg(flags))
 
-    # config files
-    config_file = "/eos/atlas/atlascerngroupdisk/perf-jets/LocalStorage/TAGGING/PreliminaryConfigs/qgTagger/QGTagger_AntiKt04PFlow_Transformer.dat"
-    calib_path = '/eos/atlas/atlascerngroupdisk/perf-jets/LocalStorage/TAGGING/PreliminaryConfigs/qgTagger/'
 
-    testacc = qgTagAlgCfg(flags, tagger='qg', generation='ParT', WP='50',
-                          cfg_file=config_file, 
-                          calib_path=calib_path,
+    testacc = qgTagAlgCfg(flags,
+                          WP='50',
                           addSFs=True,
                           run='run2')
 

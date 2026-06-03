@@ -1,7 +1,12 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from ISF_Algorithms.CollectionMergerConfig import CollectionMergerCfg
 
+
+# Frozen-shower tools write into the same event-owned collections as the regular
+# LAr SD tools.  CollectionMergerCfg resolves the correct bare-vs-mergeable
+# collection name for the current job and deduplicates shared merger inputs.
 
 def LArG4ShowerLibSvcCfg(flags, **kwargs):
     result = ComponentAccumulator()
@@ -23,6 +28,9 @@ def LArG4ShowerLibSvcCfg(flags, **kwargs):
 def EMBFastShowerCfg(flags, **kwargs):
     result = ComponentAccumulator()
     result.merge(LArG4ShowerLibSvcCfg(flags))
+    acc, hits_collection_name = CollectionMergerCfg(flags, "LArHitEMB", "_G4",
+                                                    "LArEMBHits", "CALO")
+    result.merge(acc)
     kwargs.setdefault("RegionName",        "EMB")
     kwargs.setdefault("EFlagToShowerLib",   False)
     kwargs.setdefault("GFlagToShowerLib",   False)
@@ -37,6 +45,7 @@ def EMBFastShowerCfg(flags, **kwargs):
     kwargs.setdefault("AbsCrackEta2",       1.1)
     kwargs.setdefault("DetectorTag",        100000)
     kwargs.setdefault("SensitiveDetector",  "BarrelFastSimDedicatedSD")
+    kwargs.setdefault("OutputCollectionName", hits_collection_name)
     kwargs.setdefault("EMinEneShowerLib",   0.51)
     result.setPrivateTools(CompFactory.LArFastShowerTool(name="EMBFastShower", **kwargs))
     return result
@@ -45,6 +54,9 @@ def EMBFastShowerCfg(flags, **kwargs):
 def EMECFastShowerCfg(flags, **kwargs):
     result = ComponentAccumulator()
     result.merge(LArG4ShowerLibSvcCfg(flags))
+    acc, hits_collection_name = CollectionMergerCfg(flags, "LArHitEMEC", "_G4",
+                                                    "LArEMECHits", "CALO")
+    result.merge(acc)
     kwargs.setdefault("RegionName",        "EMECPara")
     kwargs.setdefault("EFlagToShowerLib",   False)
     kwargs.setdefault("GFlagToShowerLib",   False)
@@ -59,6 +71,7 @@ def EMECFastShowerCfg(flags, **kwargs):
     kwargs.setdefault("AbsCrackEta2",       2.8)
     kwargs.setdefault("DetectorTag",        200000)
     kwargs.setdefault("SensitiveDetector", "EndcapFastSimDedicatedSD")
+    kwargs.setdefault("OutputCollectionName", hits_collection_name)
     kwargs.setdefault("EMinEneShowerLib",   0.51)
     result.setPrivateTools(CompFactory.LArFastShowerTool(name="EMECFastShower", **kwargs))
     return result
@@ -67,6 +80,9 @@ def EMECFastShowerCfg(flags, **kwargs):
 def FCALFastShowerCfg(flags, **kwargs):
     result = ComponentAccumulator()
     result.merge(LArG4ShowerLibSvcCfg(flags))
+    acc, hits_collection_name = CollectionMergerCfg(flags, "LArHitFCAL", "_G4",
+                                                    "LArFCALHits", "CALO")
+    result.merge(acc)
     kwargs.setdefault("RegionName",        "FCALPara")
     kwargs.setdefault("EFlagToShowerLib",   True)
     kwargs.setdefault("GFlagToShowerLib",   True)
@@ -78,6 +94,7 @@ def FCALFastShowerCfg(flags, **kwargs):
     kwargs.setdefault("AbsHighEta",         4.6)
     kwargs.setdefault("DetectorTag",        300000)
     kwargs.setdefault("SensitiveDetector", "FCALFastSimDedicatedSD")
+    kwargs.setdefault("OutputCollectionName", hits_collection_name)
     kwargs.setdefault("EMinEneShowerLib",   3.0)
     result.setPrivateTools(CompFactory.LArFastShowerTool(name="FCALFastShower", **kwargs))
     return result
@@ -86,6 +103,9 @@ def FCALFastShowerCfg(flags, **kwargs):
 def FCAL2FastShowerCfg(flags, **kwargs):
     result = ComponentAccumulator()
     result.merge(LArG4ShowerLibSvcCfg(flags))
+    acc, hits_collection_name = CollectionMergerCfg(flags, "LArHitFCAL", "_G4",
+                                                    "LArFCALHits", "CALO")
+    result.merge(acc)
     kwargs.setdefault("RegionName",        "FCAL2Para")
     kwargs.setdefault("EFlagToShowerLib",   True)
     kwargs.setdefault("GFlagToShowerLib",   True)
@@ -97,6 +117,7 @@ def FCAL2FastShowerCfg(flags, **kwargs):
     kwargs.setdefault("AbsHighEta",         4.4)
     kwargs.setdefault("DetectorTag",        400000)
     kwargs.setdefault("SensitiveDetector", "FCALFastSimDedicatedSD")
+    kwargs.setdefault("OutputCollectionName", hits_collection_name)
     kwargs.setdefault("EMinEneShowerLib",   1.0)
     result.setPrivateTools(CompFactory.LArFastShowerTool(name="FCAL2FastShower", **kwargs))
     return result

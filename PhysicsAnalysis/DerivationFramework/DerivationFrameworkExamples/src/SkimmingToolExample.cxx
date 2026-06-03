@@ -38,7 +38,7 @@ bool DerivationFramework::SkimmingToolExample::eventPassesFilter(const EventCont
   // Loop over muons, count up and set decision
   unsigned int nGoodMu{0};
   for (const xAOD::Muon* muon : *muons) {
-    if ( muon->muonType() == xAOD::Muon::Combined && muon->pt() > m_muonPtCut ) ++nGoodMu;
+    if ( muon->muonType() == xAOD::Muon::MuonType::Combined && muon->pt() > m_muonPtCut ) ++nGoodMu;
   }
   bool acceptEvent{false};
   if (nGoodMu >= m_nMuons) {

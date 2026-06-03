@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Jackson Burzynski
@@ -10,8 +10,8 @@
 //
 
 #include <JetAnalysisAlgorithms/ReclusteredJetCalibrationAlg.h>
-#include <AthContainers/ConstDataVector.h>
-
+#include <vector>
+#include <string>
 //
 // method implementations
 //
@@ -43,8 +43,10 @@ namespace CP
 
       const xAOD::JetContainer *smallRJets = nullptr;
       ATH_CHECK(m_smallRJetHandle.retrieve(smallRJets, sys));
-
+     
       // loop over jets
+      // construct constant string before loops
+      const std::string manualCalibScaleStr{"JetManualCalibScaleMomentum"};
       for (xAOD::Jet *jet : *reclusteredJets)
       {  
         const std::vector< ElementLink< xAOD::IParticleContainer > >& element_links = jet->constituentLinks();
@@ -62,7 +64,7 @@ namespace CP
           calibP4 += subjetCal->jetP4();
         }
         // Set calibrated P4
-        jet->setAttribute<xAOD::JetFourMom_t>("JetManualCalibScaleMomentum",calibP4);
+        jet->setAttribute<xAOD::JetFourMom_t>(manualCalibScaleStr,calibP4);
         jet->setJetP4( calibP4 );
       }
     }

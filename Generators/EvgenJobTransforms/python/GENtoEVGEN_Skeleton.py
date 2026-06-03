@@ -1,5 +1,5 @@
-#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
-#
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+
 """Functionality core of the Gen_tf transform"""
 
 # force no legacy job properties
@@ -11,187 +11,35 @@ from AthenaCommon.Logging import logging
 evgenLog = logging.getLogger("Gen_tf")
 
 # Common
-from AthenaCommon.SystemOfUnits import GeV
 from GeneratorConfig.Sequences import EvgenSequence
 from PyUtils.Helpers import release_metadata
 
 # Functions for pre/post-include/exec
-from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
+from PyJobTransforms.TransformUtils import (
+    processPreExec, 
+    processPreInclude, 
+    processPostExec, 
+    processPostInclude
+)
+
+# Helper functions
+from EvgenJobTransforms.EvgenHelpers import (
+    _count_lhe_events,
+    _validate_sample_properties,
+    _handle_input_files,
+    _is_txt_only_run
+)
 
 # Other imports that are needed
 import sys, os, re
 
-# Helper function to make symlinks
-def _mk_symlink(srcfile, dstfile):
-    if dstfile:
-        if os.path.exists(dstfile) and not os.path.samefile(dstfile, srcfile):
-            os.remove(dstfile)
-        if not os.path.exists(dstfile):
-            evgenLog.info(f"Symlinking {srcfile} to {dstfile}")
-            print (f"Symlinking {srcfile} to {dstfile}")
-            os.symlink(srcfile, dstfile)
-        else:
-            evgenLog.debug(f"Symlinking: {dstfile} is already the same as {srcfile}")
-
-
-# Helper functions for finding input file
-def _find_unique_file(pattern):
-    import glob
-    files = glob.glob(pattern)
-    # Check that there is exactly 1 match
-    if not files:
-        raise RuntimeError(f"No {pattern} file found")
-    elif len(files) > 1:
-        raise RuntimeError(f"More than one {pattern} file found")
-    return files[0]
-
-
-# This function merges a list of input LHE files into one output file.
-# The header is taken from the first file, but the number of events is
-# updated to equal the total number of events in all input files.
-def _merge_lhe_files(listOfFiles, outputFile):
-    if os.path.exists(outputFile):
-        print("outputFile", outputFile, "already exists. Will rename to", outputFile + ".OLD")
-        os.rename(outputFile, outputFile + ".OLD")
-
-    total_events = 0
-    for file in listOfFiles:
-        with open(file, "r") as f:
-            total_events += sum(1 for line in f if "</event>" in line)
-
-    wrote_header = False
-    with open(outputFile, "w") as output:
-        for file in listOfFiles:
-            inHeader = True
-            header = ""
-            print("*** Starting file", file)
-            with open(file, "r") as infile:
-                for line in infile:
-                    # Reading first event signals that we are done with all header information.
-                    if "<event" in line and inHeader:
-                        inHeader = False
-                        if not wrote_header:
-                            wrote_header = True
-                            output.write(header)
-                        output.write(line)
-                    # Each input file ends with "</LesHouchesEvents>". We only write it once at the end.
-                    elif not inHeader and "</LesHouchesEvents>" not in line:
-                        output.write(line)
-
-                    if inHeader:
-                        # Format for storing number of events differs in MG and Powheg.
-                        if "nevents" in line:
-                            # MG5 format is "n = nevents".
-                            parts = line.split("=")
-                            if parts:
-                                line = line.replace(parts[0], str(total_events), 1)
-                        elif "numevts" in line:
-                            # Powheg format is "numevts n".
-                            parts = line.split()
-                            if len(parts) > 1:
-                                line = line.replace(parts[1], str(total_events), 1)
-                        header += line
-
-        output.write("</LesHouchesEvents>\n")
-
-
-# Helper for handling input files
-def _handle_input_files(generators, flags):
-    from GeneratorConfig.GenConfigHelpers import gens_lhef
-
-    # Name of event files produced by various generators.
-    events_file_map = {
-        "Alpgen": "alpgen.unw_events",
-        "Protos": "protos.events",
-        "ProtosLHEF": "protoslhef.events",
-        "BeamHaloGenerator": "beamhalogen.events",
-        "HepMCAscii": "events.hepmc",
-        "ReadMcAscii": "events.hepmc",
-    }
-    eventsFile = None
-    for gen_name, out_file in events_file_map.items():
-        if gen_name in generators:
-            eventsFile = out_file
-            break
-    if eventsFile is None:
-        if gens_lhef(generators):
-            eventsFile = "events.lhe"
-        else:
-            raise RuntimeError(f"Unknown type of ME generator: {generators}")
-
-    genInputFiles = [f.strip() for f in flags.Generator.inputGeneratorFile.split(",") if f.strip()]
-    if not genInputFiles:
-        raise RuntimeError("Generator.inputGeneratorFile is empty while input handling is requested")
-
-    def _input_root(path, keep_suffix_after_underscore=False):
-        fname = os.path.basename(path)
-        if any(ext in fname for ext in (".tar.", ".tgz", ".gz")):
-            return re.split(r"\.tar\.|\.tgz|\.gz", fname, maxsplit=1)[0]
-        parts = fname.split("._", 1)
-        if keep_suffix_after_underscore and len(parts) > 1:
-            return parts[0] + "._" + parts[1].split(".", 1)[0]
-        return parts[0]
-
-    # If there is a single file, make a symlink. If multiple files, merge them into one output eventsFile.
-    if len(genInputFiles) == 1:
-        inputroot = _input_root(genInputFiles[0], keep_suffix_after_underscore=False)
-        if inputroot.endswith(".events"):
-            inputroot = inputroot[:-7]
-        realEventsFile = _find_unique_file(f"*{inputroot}.*ev*ts")
-        _mk_symlink(realEventsFile, eventsFile)
-        return
-
-    allFiles = []
-    for file in genInputFiles:
-        # Since we can have multiple files from the same task, include more of the filename
-        # to make the lookup unique in the plain-file case.
-        inputroot = _input_root(file, keep_suffix_after_underscore=True)
-        evgenLog.info("inputroot = %s", inputroot)
-        realEventsFile = _find_unique_file(f"*{inputroot}.*ev*ts")
-        # The only input format where merging is permitted is LHE.
-        with open(realEventsFile, "r") as f:
-            first_line = f.readline()
-            if "LesHouche" not in first_line:
-                raise RuntimeError(f"{realEventsFile} is NOT a LesHouche file")
-        allFiles.append(realEventsFile)
-    _merge_lhe_files(allFiles, eventsFile)
-
-    # counting the number of events in LHE input
-    eventsInLHE = 0
-    with open(eventsFile) as f:
-        for line in f:
-           eventsInLHE += line.count('/event')
-    return eventsInLHE
-
-
-# Helper function to validate and set sample properties
-def _validate_sample_properties(sample):
-    # Required fields with lightweight, explicit validators.
-    required_rules = {
-        "keywords": lambda v: isinstance(v, list) and len(v) > 0,
-        "contact": lambda v: isinstance(v, list) and len(v) > 0,
-        "nEventsPerJob": lambda v: v is not None,
-    }
-    for field, validator in required_rules.items():
-        value = getattr(sample, field, None)
-        if not validator(value):
-            raise RuntimeError(f"self.{field} should be set in Sample(EvgenConfig)")
-
-    input_files_per_job = getattr(sample, "inputFilesPerJob", 0)
-    me_generator = getattr(sample, "MEgenerator", None)
-
-    if input_files_per_job < 0:
-        raise RuntimeError("self.inputFilesPerJob should be >= 0 in Sample(EvgenConfig)")
-    if input_files_per_job > 0 and not me_generator:
-        raise RuntimeError("self.MEgenerator should be set when self.inputFilesPerJob > 0 in Sample(EvgenConfig)")
-    if input_files_per_job == 0 and me_generator:
-        raise RuntimeError("self.MEgenerator should be empty when self.inputFilesPerJob == 0 in Sample(EvgenConfig)")
-
-
 # Function that reads the jO and returns an instance of Sample(EvgenCAConfig)
-def setupSample(runArgs, flags):
+def setupSample(flags):
     # Only permit one jobConfig argument for evgen
-    if len(runArgs.jobConfig) != 1:
+    job_config = flags.Generator.jobConfig
+    if isinstance(job_config, str):
+        job_config = [job_config]
+    if len(job_config) != 1:
         raise RuntimeError("You must supply one and only one jobConfig file argument")
 
     evgenLog.info("Using JOBOPTSEARCHPATH (as seen in skeleton) = {}".format(os.environ["JOBOPTSEARCHPATH"]))
@@ -205,7 +53,12 @@ def setupSample(runArgs, flags):
     jofile = jofiles[0]
 
     # Perform consistency checks on the jO
-    from GeneratorConfig.GenConfigHelpers import checkNaming, checkNEventsPerJob, checkKeywords, checkCategories
+    from GeneratorConfig.GenConfigHelpers import (
+        checkNaming, 
+        checkNEventsPerJob, 
+        checkKeywords, 
+        checkCategories
+    )
     checkNaming(jofile)
 
     # Import the jO as a module
@@ -218,8 +71,9 @@ def setupSample(runArgs, flags):
         location=os.path.join(FIRST_DIR,jofile),
     )
     jo = importlib.util.module_from_spec(spec)
+    
     spec.loader.exec_module(jo)
-    evgenLog.info("including file %s", jofile)
+    evgenLog.info(f"including file {jofile}")
 
     # Create instance of Sample(EvgenCAConfig)
     sample = jo.Sample(flags)
@@ -231,7 +85,7 @@ def setupSample(runArgs, flags):
     # Need to use logic in EvgenJobTransforms.Generate_dsid_ranseed
 
     # Get DSID
-    dsid = os.path.basename(runArgs.jobConfig[0])
+    dsid = os.path.basename(job_config[0])
     if dsid.startswith("Test"):
         dsid = dsid.split("Test")[-1]
 
@@ -325,25 +179,45 @@ def fromRunArgs(runArgs):
     # convert arguments to flags
     flags.fillFromArgs()
 
+    # Determine maximum number of events to generate
+    requested_max_events = flags.Exec.MaxEvents
+
     # Create an instance of the Sample(EvgenCAConfig) and update global flags accordingly
-    sample = setupSample(runArgs, flags)
+    sample = setupSample(flags)
+
+    # Determine output file name and type.
+    output_pool_file = (
+        flags.Output.EVNTFileName
+        or getattr(runArgs, "outputEVNTFile", None)
+        or getattr(runArgs, "outputEVNT_PreFile", None)
+    )
+    flags.Output.EVNTFileName = output_pool_file or ""
+    output_txt_file = (
+        flags.Output.TXTFileName
+        or getattr(runArgs, "outputTXTFile", None)
+    )
+    flags.Output.TXTFileName = output_txt_file or ""
+
+    # If no EVNT output is specified, we check if it's a TXT-only run (i.e. standalone LHE output production). 
+    # In that case, we don't require an EVNT output file.
+    txt_only_mode = _is_txt_only_run(flags)
+    if not output_pool_file and not (flags.Generator.outputYODAFile or txt_only_mode):
+        raise RuntimeError("No output evgen EVNT or EVNT_Pre file provided.")
 
     # Setup the main flags
-    flags.Exec.FirstEvent = runArgs.firstEvent
-    # Max events should be not set, job stopping is handled by CountHepMC
-    # using the RequestedOutput property
-    flags.Exec.MaxEvents = -1
+    flags.Exec.FirstEvent = flags.Generator.firstEvent
 
-    if hasattr(runArgs, "inputEVNT_PreFile"):
+    # If no inputEVNT_PreFile was provided clear transform placeholder input files 
+    # and set RunNumber/TimeStamp based on DSID. 
+    if hasattr(runArgs, "inputEVNT_PreFile") and runArgs.inputEVNT_PreFile:
         flags.Input.Files = runArgs.inputEVNT_PreFile
     else:
         flags.Input.Files = []
+
+    if not flags.Input.Files:
+        flags.Input.Files = []
         flags.Input.RunNumbers = [flags.Generator.DSID]
         flags.Input.TimeStamps = [0]
-
-    flags.Output.EVNTFileName = runArgs.outputEVNTFile
-
-    flags.Beam.Energy = runArgs.ecmEnergy / 2 * GeV
 
     flags.PerfMon.doFastMonMT = True
     flags.PerfMon.doFullMonMT = True
@@ -364,7 +238,7 @@ def fromRunArgs(runArgs):
         flags.dump("Generator.*")
 
     # Print various stuff
-    evgenLog.info(".transform =                  Gen_tf")
+    evgenLog.info(".transform = Gen_tf")
     evgenLog.info(".platform = " + str(os.environ["BINARY_TAG"]))
 
     # Announce start of job configuration
@@ -375,7 +249,7 @@ def fromRunArgs(runArgs):
     cfg = MainEvgenServicesCfg(flags, withSequences=True)
 
     # Input file handling (if needed)
-    if flags.Input.Files:
+    if flags.Input.Files and not txt_only_mode:
         from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
         cfg.merge(PoolReadCfg(flags))
 
@@ -401,6 +275,7 @@ def fromRunArgs(runArgs):
             raise RuntimeError("'EvtGen' found in job options name, please set '--steering=afterburn'")
 
     # LHE input handling
+    nEventsLHE = None
     if flags.Generator.inputFilesPerJob > 0:
         if not flags.Generator.inputGeneratorFile:
             raise RuntimeError(f"Sample sets inputFilesPerJob = {flags.Generator.inputFilesPerJob} but Gen_tf run without inputGeneratorFile")
@@ -418,7 +293,7 @@ def fromRunArgs(runArgs):
         evgenLog.warning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
     # Fix non-standard event features
-    if not flags.Input.Files:
+    if not txt_only_mode and not flags.Input.Files:
         from EvgenProdTools.EvgenProdToolsConfig import FixHepMCCfg
         from GeneratorConfig.GenConfigHelpers import gens_purgenoendvtx
         generatorsList = generators.copy()
@@ -432,37 +307,53 @@ def fromRunArgs(runArgs):
 
     # Sanity check the event record (not appropriate for all generators)
     from GeneratorConfig.GenConfigHelpers import gens_testhepmc
-    if gens_testhepmc(generators):
+    if not txt_only_mode and gens_testhepmc(generators):
         from EvgenProdTools.EvgenProdToolsConfig import TestHepMCCfg
         cfg.merge(TestHepMCCfg(flags))
 
-    # Copy the event weight from HepMC to the Athena EventInfo class
-    from EvgenProdTools.EvgenProdToolsConfig import CopyEventWeightCfg
-    cfg.merge(CopyEventWeightCfg(flags))
+    # Copying event-level HepMC decorations is EVNT-oriented and not needed for
+    # standalone LHE output production.
+    if not txt_only_mode:
+        from EvgenProdTools.EvgenProdToolsConfig import CopyEventWeightCfg
+        cfg.merge(CopyEventWeightCfg(flags))
 
-    from EvgenProdTools.EvgenProdToolsConfig import FillFilterValuesCfg
-    cfg.merge(FillFilterValuesCfg(flags))
+        from EvgenProdTools.EvgenProdToolsConfig import FillFilterValuesCfg
+        cfg.merge(FillFilterValuesCfg(flags))
 
     # Configure the event counting (AFTER all filters)
     from EvgenProdTools.EvgenProdToolsConfig import CountHepMCCfg
-    cfg.merge(CountHepMCCfg(flags,
-                            RequestedOutput=sample.nEventsPerJob if runArgs.maxEvents == -1
-                                            else runArgs.maxEvents))
-    evgenLog.info("Requested output events = %d", cfg.getEventAlgo("CountHepMC").RequestedOutput)
+    requested_output = (
+        1 if txt_only_mode else
+        (sample.nEventsPerJob if requested_max_events == -1 else requested_max_events)
+    )
+    count_kwargs = {"RequestedOutput": requested_output}
+    if txt_only_mode:
+        # In TXT-only mode there is no GEN_EVENT in StoreGate. Disabling
+        # HepMC/EventInfo corrections avoids dereferencing missing event data.
+        count_kwargs["CorrectHepMC"] = False
+        count_kwargs["CorrectEventID"] = False
+        count_kwargs["CorrectRunNumber"] = False
+        count_kwargs["CopyRunNumber"] = False
+        count_kwargs["InputEventInfo"] = ""
+        count_kwargs["OutputEventInfo"] = ""
+        count_kwargs["mcEventWeightsKey"] = ""
+    cfg.merge(CountHepMCCfg(flags, **count_kwargs))
+    evgenLog.info(f"Requested output events = {cfg.getEventAlgo('CountHepMC').RequestedOutput}")
 
     # Print out the contents of the first 5 events (after filtering)
-    if hasattr(runArgs, "printEvts") and runArgs.printEvts > 0:
+    if not txt_only_mode and flags.Generator.printEvts > 0:
         from TruthIO.TruthIOConfig import PrintMCCfg
         cfg.merge(PrintMCCfg(flags,
-                             LastEvent=runArgs.printEvts))
+                             LastEvent=flags.Generator.printEvts))
 
     # PerfMon
     from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
     cfg.merge(PerfMonMTSvcCfg(flags), sequenceName=EvgenSequence.Post.value)
 
     # Estimate time needed for Simulation
-    from EvgenProdTools.EvgenProdToolsConfig import SimTimeEstimateCfg
-    cfg.merge(SimTimeEstimateCfg(flags))
+    if not txt_only_mode:
+        from EvgenProdTools.EvgenProdToolsConfig import SimTimeEstimateCfg
+        cfg.merge(SimTimeEstimateCfg(flags))
 
     # TODO: Rivet
 
@@ -485,23 +376,33 @@ def fromRunArgs(runArgs):
     if hasattr(sample, "specialConfig"): metadata.update({"specialConfiguration": sample.specialConfig})
     if hasattr(sample, "hardPDF"): metadata.update({"hardPDF": sample.hardPDF})
     if hasattr(sample, "softPDF"): metadata.update({"softPDF": sample.softPDF})
-    if hasattr(sample, "randomSeed"): metadata.update({"randomSeed": str(runArgs.randomSeed)})
+    if hasattr(sample, "randomSeed"): metadata.update({"randomSeed": str(flags.Random.SeedOffset)})
     cfg.merge(TagInfoMgrCfg(flags, tagValuePairs=metadata))
 
     # Print metadata in the log
     evgenLog.info(f"HepMC version {os.environ['HEPMCVER']}")
     evgenLog.info(f"MetaData: generatorTune = {cfg.getService('GeneratorInfoSvc').Tune}")
     evgenLog.info("MetaData: generatorName = {}".format(generatorsWithVersion))
-    if flags.Generator.inputGeneratorFile:
+    if nEventsLHE is not None:
         print(f"MetaData: Number of input LHE events = {nEventsLHE}")
+    elif txt_only_mode:
+        produced_lhe = None
+        for candidate in (flags.Output.TXTFileName, "events.lhe"):
+            if candidate and os.path.exists(candidate):
+                produced_lhe = candidate
+                break
+        if produced_lhe:
+            nEventsTXT = _count_lhe_events(produced_lhe)
+            print(f"MetaData: Number of produced LHE events = {nEventsTXT}")
 
-    # Configure output stream
-    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    cfg.merge(OutputStreamCfg(flags, "EVNT", ["McEventCollection#*"]))
+    if output_pool_file:
+        # Configure output stream
+        from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+        cfg.merge(OutputStreamCfg(flags, "EVNT", ["McEventCollection#*"]))
 
-    # Add in-file MetaData
-    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-    cfg.merge(SetupMetaDataForStreamCfg(flags, "EVNT"))
+        # Add in-file MetaData
+        from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+        cfg.merge(SetupMetaDataForStreamCfg(flags, "EVNT"))
 
     # Post-include
     processPostInclude(runArgs, flags, cfg)

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCCABLESLBTOHPB_HH
@@ -38,8 +38,8 @@ class TGCCableSLBToHPB : public TGCCable {
     TGCModuleMap getModuleInforHPB(const TGCModuleId& hpb,
                                    TGCId::ModuleType moduleType) const;
     TGCModuleMap getModuleOut(const TGCModuleId& slb) const;
-    std::array<std::array<std::unique_ptr<TGCDatabase>, TGCId::MaxModuleType>,
-               TGCId::MaxRegionType>
+    std::array<std::array<std::unique_ptr<TGCDatabase>, +TGCId::ModuleType::MaxModuleType>,
+               +TGCId::RegionType::MaxRegionType>
         m_database;
 };
 

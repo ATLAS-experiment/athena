@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCondData/RpcCalibData.h"
@@ -11,6 +11,47 @@
 #include <sstream>
 #include <algorithm>
 #include <stdexcept>
+#include <charconv>
+
+namespace {
+
+class NumberParser{
+public:
+  explicit NumberParser(std::string_view text)
+    : m_text{text}
+  {}
+
+  template <class T>
+  T next(){
+    skipSpaces();
+
+    T value{};
+    const char* first = m_text.data();
+    const char* last = m_text.data() + m_text.size();
+
+    const auto [ptr, ec] = std::from_chars(first, last, value);
+    if (ec != std::errc{} || ptr == first) {
+      throw std::runtime_error("RpcCalibDBEntry: failed to parse numeric payload");
+    }
+
+    m_text.remove_prefix(static_cast<std::size_t>(ptr - first));
+    return value;
+  }
+
+private:
+  void skipSpaces(){
+    const auto pos = m_text.find_first_not_of(" \t\n\r");
+    if (pos == std::string_view::npos) {
+      m_text = {};
+    } else {
+      m_text.remove_prefix(pos);
+    }
+  }
+
+  std::string_view m_text;
+};
+
+}
 
 namespace MuonCalib{
 
@@ -41,61 +82,45 @@ namespace MuonCalib{
            std::string(phiDet1), std::string(phiDet2));
 }
 
-  void  RpcCalibDBEntry::initData(std::string etaRec, std::string etaDet, std::string phiRec1, std::string phiRec2, std::string phiDet1, std::string phiDet2){
-
-
-    unsigned long int pos = 0;
-    std::string::size_type start = etaRec.find_first_not_of(' ',pos);
-    if(start == std::string::npos) {
-      std::cout << "RpcCalibDBEntry::initData -- problems extracting m_nRecEta -- crashing." << std::endl;
-      std::abort();
-    }
-    std::string::size_type stop = etaRec.find_first_of(' ',start+1);
-    if (stop == std::string::npos) stop = etaRec.size();
-    m_nRecEta = std::stoi(etaRec.substr(start,stop-start),nullptr);
-    etaRec.erase(pos,stop-pos);
-
-    pos = 0;
-    start = phiRec1.find_first_not_of(' ',pos);
-    if(start == std::string::npos) {
-      std::cout << "RpcCalibDBEntry::initData -- problems extracting m_nRecPhi1 -- crashing." << std::endl;
-      std::abort();      
-    }
-    stop = phiRec1.find_first_of(' ',start+1);
-    if (stop == std::string::npos) stop = phiRec1.size();
-    m_nRecPhi1 = std::stoi(phiRec1.substr(start,stop-start),nullptr);
-    phiRec1.erase(pos,stop-pos);
-
-    std::istringstream etaRec_str; 
-    std::istringstream etaDet_str; 
-    std::istringstream phiRec1_str;
-    std::istringstream phiRec2_str;
-    std::istringstream phiDet1_str;
-    std::istringstream phiDet2_str;
-    
-    etaRec_str.str(etaRec);     
-    etaDet_str.str(etaDet); 
-    phiRec1_str.str(phiRec1);
-    phiRec2_str.str(phiRec2);
-    phiDet1_str.str(phiDet1);
-    phiDet2_str.str(phiDet2);
-    
-    etaDet_str>>m_nDetEta;
-    phiRec2_str>>m_nRecPhi2;
-    phiDet1_str>>m_nDetPhi1;
-    phiDet2_str>>m_nDetPhi2;
-
-    float eff, errEff, res1, res2, resX, errRes1, errRes2, errResX, time, errTime, noise, errNoise, noiseC, errNoiseC, cs, errCs;
-    
-    // start with eta processing, 41 strips
-    
-    for(int k=0;k<m_nRecEta;k++){
-      
-      etaRec_str>>eff>>errEff>>res1>>errRes1>>res2>>errRes2>>resX>>errResX>>time>>errTime;
-      etaDet_str>>noise>>errNoise>>noiseC>>errNoiseC>>cs>>errCs;
-      
-      auto etaData= std::make_unique<RpcCalibData>();
-      
+  void
+  RpcCalibDBEntry::initData(std::string_view etaRec, std::string_view etaDet,
+    std::string_view phiRec1, std::string_view phiRec2, std::string_view phiDet1,
+    std::string_view phiDet2){
+    NumberParser etaRecParser{etaRec};
+    NumberParser etaDetParser{etaDet};
+    NumberParser phiRec1Parser{phiRec1};
+    NumberParser phiRec2Parser{phiRec2};
+    NumberParser phiDet1Parser{phiDet1};
+    NumberParser phiDet2Parser{phiDet2};
+  
+    m_nRecEta = etaRecParser.next<int>();
+    m_nDetEta = etaDetParser.next<int>();
+    m_nRecPhi1 = phiRec1Parser.next<int>();
+    m_nRecPhi2 = phiRec2Parser.next<int>();
+    m_nDetPhi1 = phiDet1Parser.next<int>();
+    m_nDetPhi2 = phiDet2Parser.next<int>();
+  
+    for (int k = 0; k < m_nRecEta; ++k) {
+      const float eff = etaRecParser.next<float>();
+      const float errEff = etaRecParser.next<float>();
+      const float res1 = etaRecParser.next<float>();
+      const float errRes1 = etaRecParser.next<float>();
+      const float res2 = etaRecParser.next<float>();
+      const float errRes2 = etaRecParser.next<float>();
+      const float resX = etaRecParser.next<float>();
+      const float errResX = etaRecParser.next<float>();
+      const float time = etaRecParser.next<float>();
+      const float errTime = etaRecParser.next<float>();
+  
+      const float noise = etaDetParser.next<float>();
+      const float errNoise = etaDetParser.next<float>();
+      const float noiseC = etaDetParser.next<float>();
+      const float errNoiseC = etaDetParser.next<float>();
+      const float cs = etaDetParser.next<float>();
+      const float errCs = etaDetParser.next<float>();
+  
+      auto etaData = std::make_unique<RpcCalibData>();
+  
       etaData->setId(k);
       etaData->setEff(eff);
       etaData->setErrEff(errEff);
@@ -113,21 +138,32 @@ namespace MuonCalib{
       etaData->setErrNoiseC(errNoiseC);
       etaData->setCs(cs);
       etaData->setErrCs(errCs);
-      
+  
       m_theEtaData.push_back(std::move(etaData));
-      
     }
-    
-    // now phi
-    
-    for(int k=0;k<m_nRecPhi1;k++){
-      
-      phiRec1_str>>eff>>res1>>res2>>resX>>time;
-      phiRec2_str>>errEff>>errRes1>>errRes2>>errResX>>errTime;
-      phiDet1_str>>noise>>errNoise>>noiseC>>errNoiseC>>cs>>errCs;
-
-      auto phiData= std::make_unique<RpcCalibData>();
-
+  
+    for (int k = 0; k < m_nRecPhi1; ++k) {
+      const float eff = phiRec1Parser.next<float>();
+      const float res1 = phiRec1Parser.next<float>();
+      const float res2 = phiRec1Parser.next<float>();
+      const float resX = phiRec1Parser.next<float>();
+      const float time = phiRec1Parser.next<float>();
+  
+      const float errEff = phiRec2Parser.next<float>();
+      const float errRes1 = phiRec2Parser.next<float>();
+      const float errRes2 = phiRec2Parser.next<float>();
+      const float errResX = phiRec2Parser.next<float>();
+      const float errTime = phiRec2Parser.next<float>();
+  
+      const float noise = phiDet1Parser.next<float>();
+      const float errNoise = phiDet1Parser.next<float>();
+      const float noiseC = phiDet1Parser.next<float>();
+      const float errNoiseC = phiDet1Parser.next<float>();
+      const float cs = phiDet1Parser.next<float>();
+      const float errCs = phiDet1Parser.next<float>();
+  
+      auto phiData = std::make_unique<RpcCalibData>();
+  
       phiData->setId(k);
       phiData->setEff(eff);
       phiData->setErrEff(errEff);
@@ -145,14 +181,10 @@ namespace MuonCalib{
       phiData->setErrNoiseC(errNoiseC);
       phiData->setCs(cs);
       phiData->setErrCs(errCs);
-
+  
       m_thePhiData.push_back(std::move(phiData));
-
     }
-
-
   }
-
   // initialize from db columns
   
   RpcCalibDBEntry::RpcCalibDBEntry(Identifier gapID, const std::string& etaRec, const std::string& etaDet, const std::string& phiRec1, const std::string& phiRec2, const std::string& phiDet1, const std::string& phiDet2 ):m_nRecEta(0),m_nDetEta(0), m_nRecPhi1(0),m_nRecPhi2(0),m_nDetPhi1(0),m_nDetPhi2(0),m_theGap(gapID)

@@ -19,17 +19,9 @@
 #include "TrkiPatFitterUtils/FitProcedure.h"
 
 namespace Trk {
-iPatGlobalFitter::iPatGlobalFitter(const std::string& type,
-                                   const std::string& name,
-                                   const IInterface* parent)
-    : iPatFitter(type, name, parent, true), m_allParameters(false) {
-  declareInterface<IGlobalTrackFitter>(this);
-  declareProperty("AllParameters", m_allParameters);
-}
-
-iPatGlobalFitter::~iPatGlobalFitter(void) = default;
 
 Track* iPatGlobalFitter::alignmentFit(
+    const EventContext& ctx,
     AlignmentCache& alignCache, const Track& trk,
     const RunOutlierRemoval runOutlier,
     const ParticleHypothesis matEffects) const {
@@ -40,7 +32,7 @@ Track* iPatGlobalFitter::alignmentFit(
   alignCache.m_iterationsOfLastFit = 0;
 
   auto [refittedTrack, fitState] =
-      fitWithState(Gaudi::Hive::currentContext(), trk, runOutlier, matEffects);
+      fitWithState(ctx, trk, runOutlier, matEffects);
 
   if (refittedTrack) {
     alignCache.m_derivMatrix = derivMatrix(*fitState);

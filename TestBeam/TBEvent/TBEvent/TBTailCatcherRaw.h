@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBEVENT_TBTAILCATCHERRAW_H
@@ -32,7 +32,7 @@ class TBTailCatcherRaw : public TBBeamDetector,
   /////////////////////////////////
 
   TBTailCatcherRaw();
-  TBTailCatcherRaw(const std::string& thisTailCatcherName,
+  TBTailCatcherRaw(std::string_view thisTailCatcherName,
 		bool overflow,
 		const std::vector< TBScintillatorRaw* >& theScints);
  

@@ -1,9 +1,10 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 // Local include(s).
 #include "AthTritonComps/TritonTool.h"
 
 // Project include(s).
+#include "AthenaBaseComps/AthAsynchronousAlgorithm.h"
 #include "AthenaBaseComps/AthMessaging.h"
 
 // External include(s).
@@ -114,6 +115,7 @@ struct TritonTool::Impl : public AthMessaging {
     return StatusCode::SUCCESS;
   }
 
+  const AthAsynchronousAlgorithm* m_parentAsyncAlg = nullptr;
   std::unique_ptr<tc::InferOptions> m_options;
 
 };  // struct TritonTool::Impl
@@ -131,6 +133,29 @@ StatusCode TritonTool::initialize() {
   m_impl->m_options = std::make_unique<tc::InferOptions>(m_modelName.value());
   m_impl->m_options->model_version_ = m_modelVersion;
   m_impl->m_options->client_timeout_ = m_clientTimeout;
+
+  // Figure out if parent is an AthAsynchronousAlgorithm, and set pointer if it
+  // is
+  const IAlgTool* p = dynamic_cast<const IAlgTool*>(this);
+  // Follow chain of parents up until we hit one that can't be converted to an
+  // IAlgTool
+  const IInterface* myParent = nullptr;
+  while (p != nullptr) {
+    myParent = p->parent();
+    p = dynamic_cast<const IAlgTool*>(myParent);
+  }
+  // If this ultimate ancestor can be converted to an AthAsynchronousAlgorithm,
+  // set the member variable
+  m_impl->m_parentAsyncAlg =
+      dynamic_cast<const AthAsynchronousAlgorithm*>(myParent);
+  if (m_impl->m_parentAsyncAlg != nullptr) {
+    ATH_MSG_INFO(
+        "Owned by an AthAsynchronousAlgorithm, using asynchronous inference");
+  } else {
+    ATH_MSG_INFO(
+        "Not owned by an AthAsynchronousAlgorithm, not using asynchronous "
+        "inference");
+  }
 
   // Make sure already during initialization that a client can be created.
   tc::InferenceServerGrpcClient* dummyClient = nullptr;
@@ -176,16 +201,32 @@ StatusCode AthInfer::TritonTool::inference(InputDataMap& inputData,
   assert(client != nullptr);
 
   // perform the inference.
-  tc::InferResult* rawResultPtr = nullptr;
+  std::shared_ptr<tc::InferResult> results;
   tc::Headers http_headers;
   grpc_compression_algorithm compression_algorithm =
       grpc_compression_algorithm::GRPC_COMPRESS_NONE;
 
-  TRITON_CHECK(client->Infer(&rawResultPtr, *(m_impl->m_options), rawInputs, {},
-                             http_headers, compression_algorithm));
-  assert(rawResultPtr != nullptr);
-
-  std::unique_ptr<tc::InferResult> results(rawResultPtr);
+  if (m_impl->m_parentAsyncAlg == nullptr) {
+    tc::InferResult* rawResultPtr = nullptr;
+    TRITON_CHECK(client->Infer(&rawResultPtr, *(m_impl->m_options), rawInputs,
+                               {}, http_headers, compression_algorithm));
+    assert(rawResultPtr != nullptr);
+    results.reset(rawResultPtr);
+  } else {
+    // If m_impl->m_parentAsyncAlg is set, use asynchronous inference
+    using Promise_t = boost::fibers::promise<tc::InferResult*>;
+    using Future_t = boost::fibers::future<tc::InferResult*>;
+    Promise_t promise{};
+    Future_t future = promise.get_future();
+    auto callback = [&promise](tc::InferResult* resultPtr) {
+      assert(resultPtr != nullptr);
+      promise.set_value(resultPtr);
+    };
+    TRITON_CHECK(client->AsyncInfer(callback, *(m_impl->m_options), rawInputs,
+                                    {}, http_headers, compression_algorithm));
+    results.reset(future.get());
+    ATH_CHECK(m_impl->m_parentAsyncAlg->restoreAfterSuspend());
+  }
 
   // Get the result of the inference.
   for (auto& [outputName, outputInfo] : outputData) {

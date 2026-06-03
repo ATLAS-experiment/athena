@@ -228,17 +228,13 @@ StatusCode AthenaPoolCnvSvc::fillRepRefs(IOpaqueAddress* pAddress, DataObject* p
 }
 //______________________________________________________________________________
 StatusCode AthenaPoolCnvSvc::connectOutput(const std::string& outputConnectionSpec,
-		const std::string& /*openMode*/) {
-   return(connectOutput(outputConnectionSpec));
-}
-//______________________________________________________________________________
-StatusCode AthenaPoolCnvSvc::connectOutput(const std::string& outputConnectionSpec) {
-// This is called before DataObjects are being converted.
+		const std::string& openMode) {
    std::string outputConnection = outputConnectionSpec.substr(0, outputConnectionSpec.find('['));
    unsigned int contextId = outputContextId(outputConnection);
+   Io::IoFlag mode = openMode == "APPEND" ? Io::APPEND : Io::WRITE;
    try {
-      if (!m_poolSvc->connect(pool::ITransaction::UPDATE, contextId).isSuccess()) {
-         ATH_MSG_ERROR("connectOutput FAILED to open an UPDATE transaction.");
+      if (!m_poolSvc->connect(mode, contextId).isSuccess()) {
+         ATH_MSG_ERROR("connectOutput FAILED to open an " << openMode << " transaction.");
          return(StatusCode::FAILURE);
       }
    } catch (std::exception& e) {
@@ -257,6 +253,11 @@ StatusCode AthenaPoolCnvSvc::connectOutput(const std::string& outputConnectionSp
       ATH_MSG_DEBUG("connectOutput failed process POOL database attributes.");
    }
    return(StatusCode::SUCCESS);
+}
+//______________________________________________________________________________
+StatusCode AthenaPoolCnvSvc::connectOutput(const std::string& outputConnectionSpec) {
+// This is called before DataObjects are being converted.
+   return(connectOutput(outputConnectionSpec, "UPDATE"));
 }
 
 //______________________________________________________________________________

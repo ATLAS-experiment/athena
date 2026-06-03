@@ -34,6 +34,7 @@
 #include "StoreGate/ReadDecorHandle.h"
 #include "GaudiKernel/PhysicalConstants.h"  // for Gaudi::Units::c_light
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
+#include "ActsEvent/Decoration.h"
 
 
 namespace ActsTrk{
@@ -135,7 +136,7 @@ StatusCode HGTDTrackExtensionAlg::execute(const EventContext& ctx) const
   ATH_MSG_DEBUG("Size of trackParticles collection " << trackParticles->size());
   
   // Create WriteDecorHandles for all decorations
-  SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<bool>> layerHasExtensionHandle(m_layerHasExtensionKey, ctx);
+  SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<char>> layerHasExtensionHandle(m_layerHasExtensionKey, ctx);
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> layerExtensionChi2Handle(m_layerExtensionChi2Key, ctx);
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> layerClusterRawTimeHandle(m_layerClusterRawTimeKey, ctx);
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> layerClusterTimeHandle(m_layerClusterTimeKey, ctx);
@@ -143,8 +144,6 @@ StatusCode HGTDTrackExtensionAlg::execute(const EventContext& ctx) const
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> extrapYHandle(m_extrapYKey, ctx);
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, int> numHGTDHitsHandle(m_numHGTDHitsKey, ctx);
 
-  SG::ReadDecorHandle<xAOD::TrackParticleContainer, ElementLink<ActsTrk::TrackContainer>> actsTrackLink( m_actsTrackLinkKey, ctx );
-  ATH_CHECK( actsTrackLink.isValid() );
   // ================================================== //
   // ============ RETRIEVE MEASUREMENTS =============== //
   // ================================================== //
@@ -251,14 +250,8 @@ StatusCode HGTDTrackExtensionAlg::execute(const EventContext& ctx) const
   for (const xAOD::TrackParticle* trackParticle : *trackParticles) {
     // Default to empty track data
     TrackExtensionData trackData;
-    // Check if the TrackParticle has a link to an ACTS track
-    ElementLink<ActsTrk::TrackContainer> link_to_track = actsTrackLink(*trackParticle);
-    if (!link_to_track.isValid()) {
-      ATH_MSG_ERROR("Invalid ACTS track link for TrackParticle " << trackParticle->index());
-      return StatusCode::FAILURE;
-    }
 
-    std::optional<ActsTrk::TrackContainer::ConstTrackProxy> optional_track = *link_to_track;
+    std::optional<ActsTrk::TrackContainer::ConstTrackProxy> optional_track = getActsTrack(*trackParticle);
     if (!optional_track.has_value()) {
       ATH_MSG_ERROR("No valid ACTS track associated with TrackParticle " << trackParticle->index());
       return StatusCode::FAILURE;
@@ -368,9 +361,7 @@ HGTDTrackExtensionAlg::collectMeasurements(const EventContext& context,
       
       Acts::Vector3 globalPos = surface->center(m_trackingGeometryTool->getGeometryContext(context).context());
       
-      // Get the time from local position (3rd coordinate)
-      auto localPosition = cluster->localPosition<3>();  // Get 3D local position
-      double clusterTime = localPosition[2];  // Time is in the third coordinate
+      double clusterTime = cluster->time();
       
       ATH_MSG_DEBUG("HGTD Cluster: "<< Amg::toString(globalPos) );
 
@@ -411,15 +402,10 @@ HGTDTrackExtensionAlg::TrackExtensionData HGTDTrackExtensionAlg::processTrackExt
     std::size_t nOutliers = 0;
     std::size_t nHGTDHits = 0;
     
-    std::vector<bool> hasHitInLayer = {false, false, false, false};
+    std::vector<char> hasHitInLayer = {false, false, false, false};
     std::vector<float> chi2PerLayer = {0.0, 0.0, 0.0, 0.0};
     std::vector<float> timePerLayer = {0.0, 0.0, 0.0, 0.0};
     std::vector<float> rawTimePerLayer = {0.0, 0.0, 0.0, 0.0};
-
-    std::vector<int> truthClassPerLayer = {-1, -1, -1, -1};
-    std::vector<bool> isShadowedPerLayer = {false, false, false, false};
-    std::vector<bool> isMergedPerLayer = {false, false, false, false};
-    std::vector<bool> primaryExpectedPerLayer = {false, false, false, false};
     
     // Extrapolated position - get the position at the first HGTD surface encountered
     float extrapX = 0.0;
@@ -505,9 +491,8 @@ HGTDTrackExtensionAlg::TrackExtensionData HGTDTrackExtensionAlg::processTrackExt
                 const xAOD::HGTDCluster* cluster = getHGTDClusterFromState(ctx, state);
 
                 if (cluster) {
-                  auto localPos = cluster->localPosition<3>();
-                  rawTime = static_cast<float>(localPos[2]);
-                  ATH_MSG_DEBUG("Got raw time from cluster local position: " << rawTime);
+                  rawTime = cluster->time();
+                  ATH_MSG_DEBUG("Got raw time from cluster: " << rawTime);
                 } else {
                   ATH_MSG_WARNING("Could not get cluster from state");
                 }

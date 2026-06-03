@@ -128,6 +128,7 @@ public:
   /// Append a value into a new field.
   void add (element_type value);
   ExpandedIdentifier& operator << (element_type value);
+  friend std::ostream & operator << (std::ostream &out, const ExpandedIdentifier& id);
   element_type& operator [] (size_type index);
 
   /// build from a textual description
@@ -166,8 +167,6 @@ private:
 
   element_vector m_fields;
 };
-
-std::ostream & operator << (std::ostream &out, const ExpandedIdentifier & x);
 
 
 

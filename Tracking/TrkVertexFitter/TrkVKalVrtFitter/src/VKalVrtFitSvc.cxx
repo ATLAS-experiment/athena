@@ -40,6 +40,7 @@
 //
 
     int ntrk=0;
+    state.m_globalFirstHit = nullptr;
     StatusCode sc = CvtPerigee(InpPerigee, ntrk, state);
     if(sc.isFailure())return StatusCode::FAILURE;
 
@@ -70,6 +71,7 @@ StatusCode TrkVKalVrtFitter::VKalVrtFit(const std::vector<const xAOD::TrackParti
 //------  extract information about selected tracks
 //
     int ntrk=0;
+    state.m_globalFirstHit = nullptr;
 
     // The tmpInputC will be not owning just holding plain ptr
     // the ownership is handled via the TParamOwner
@@ -208,6 +210,7 @@ StatusCode TrkVKalVrtFitter::VKalVrtFit(const std::vector<const TrackParameters*
 //------  extract information about selected tracks
 //
     int ntrk=0;
+    state.m_globalFirstHit = nullptr;
     StatusCode sc;
     if(!InpTrkC.empty()){
       sc=CvtTrackParameters(InpTrkC,ntrk,state);

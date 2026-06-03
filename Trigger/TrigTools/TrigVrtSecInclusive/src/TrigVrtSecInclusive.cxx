@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
   * Trigger specific modification of VSI, that is aimed at reconstructing displaced vertex
   * author Kunihiro Nagano <kunihiro.nagano@cern.ch> - KEK
@@ -525,7 +525,7 @@ StatusCode TrigVrtSecInclusive::findDiTrackVertex
          // impact parameter on initial fast fitting
          std::vector<double> impactParameters;
          std::vector<double> impactParErrors;
-         if( ! m_fitSvc->VKalGetImpact(itrk, initVertex, static_cast<int>( itrk->charge() ), impactParameters, impactParErrors) ) continue;
+         if( ! m_fitSvc->VKalGetImpact(itrk, initVertex, static_cast<int>( itrk->charge() ), impactParameters, impactParErrors, *fitterState) ) continue;
          const auto roughD0_itrk = impactParameters.at(TrkParameter::k_d0);
          const auto roughZ0_itrk = impactParameters.at(TrkParameter::k_z0);
          mnt_init_trkd0.push_back(std::abs(roughD0_itrk));
@@ -533,7 +533,7 @@ StatusCode TrigVrtSecInclusive::findDiTrackVertex
          wrkprm.vrtFast_trkd0.push_back(std::abs(roughD0_itrk));
          wrkprm.vrtFast_trkz0.push_back(std::abs(roughZ0_itrk));
 
-         if( ! m_fitSvc->VKalGetImpact(jtrk, initVertex, static_cast<int>( jtrk->charge() ), impactParameters, impactParErrors) ) continue;
+         if( ! m_fitSvc->VKalGetImpact(jtrk, initVertex, static_cast<int>( jtrk->charge() ), impactParameters, impactParErrors, *fitterState) ) continue;
          const auto roughD0_jtrk = impactParameters.at(TrkParameter::k_d0);
          const auto roughZ0_jtrk = impactParameters.at(TrkParameter::k_z0);
          mnt_init_trkd0.push_back(std::abs(roughD0_jtrk));
@@ -803,7 +803,7 @@ StatusCode TrigVrtSecInclusive::findDiTrackVertexVSI
          // impact parameter on initial fast fitting
          std::vector<double> impactParameters;
          std::vector<double> impactParErrors;
-         if( ! m_fitSvc->VKalGetImpact(itrk, initVertex, static_cast<int>( itrk->charge() ), impactParameters, impactParErrors) ) continue;
+         if( ! m_fitSvc->VKalGetImpact(itrk, initVertex, static_cast<int>( itrk->charge() ), impactParameters, impactParErrors, *fitterState) ) continue;
          const auto roughD0_itrk = impactParameters.at(TrkParameter::k_d0);
          const auto roughZ0_itrk = impactParameters.at(TrkParameter::k_z0);
          mnt_init_trkd0.push_back(std::abs(roughD0_itrk));
@@ -812,7 +812,7 @@ StatusCode TrigVrtSecInclusive::findDiTrackVertexVSI
          wrkprm.vrtFast_trkz0.push_back(std::abs(roughZ0_itrk));
          if( std::abs(roughD0_itrk) > roughD0Cut || std::abs(roughZ0_itrk) > roughZ0Cut ) continue;
 
-         if( ! m_fitSvc->VKalGetImpact(jtrk, initVertex, static_cast<int>( jtrk->charge() ), impactParameters, impactParErrors) ) continue;
+         if( ! m_fitSvc->VKalGetImpact(jtrk, initVertex, static_cast<int>( jtrk->charge() ), impactParameters, impactParErrors, *fitterState) ) continue;
          const auto roughD0_jtrk = impactParameters.at(TrkParameter::k_d0);
          const auto roughZ0_jtrk = impactParameters.at(TrkParameter::k_z0);
          mnt_init_trkd0.push_back(std::abs(roughD0_jtrk));

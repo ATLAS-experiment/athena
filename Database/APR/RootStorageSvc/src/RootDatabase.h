@@ -212,7 +212,7 @@ namespace pool  {
       */
     virtual StatusCode   open(const DbDomain&     domH,
                               const std::string&  nam,
-                              DbAccessMode        mode);
+                              Io::IoFlag        mode);
 
     /// Callback after successful open of a database object
     /** @param dbH      [IN]  Handle to valid database object
@@ -220,14 +220,14 @@ namespace pool  {
       *
       * @return StatusCode code indicating success or failure.  
       */
-    virtual StatusCode   onOpen(DbDatabase& dbH, DbAccessMode      mode);
+    virtual StatusCode   onOpen(DbDatabase& dbH, Io::IoFlag      mode);
 
     /// Close database access
     /** @param mode     [IN]  Desired session access mode.
       *
       * @return StatusCode code indicating success or failure.  
       */
-    virtual StatusCode   close(DbAccessMode mode);
+    virtual StatusCode   close(Io::IoFlag mode);
 
     /// Execute Database Transaction action
     virtual StatusCode   transAct(Transaction::Action action);

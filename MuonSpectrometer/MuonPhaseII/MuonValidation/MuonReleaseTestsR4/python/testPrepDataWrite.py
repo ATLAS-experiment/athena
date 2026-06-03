@@ -33,7 +33,7 @@ def setupTestOutputCfg(flags,**kwargs):
     return result
 
 if __name__=="__main__":
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest, MuonPhaseIITestDefaults
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, MuonPhaseIITestDefaults
     parser = SetupArgParser()
     parser.add_argument("--saveTestNtuple", help="Schedule the SimHits tester n-tuple", action='store_true',
                          default=False)
@@ -58,5 +58,6 @@ if __name__=="__main__":
  
     cfg.merge(setupTestOutputCfg(flags, streamName=streamName))  
  
+    from MuonConfig.MuonConfigUtils import executeTest
     executeTest(cfg)
   

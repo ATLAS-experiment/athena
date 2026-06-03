@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file TrkVertexFitters/src/AdaptiveMultiVertexFitterTestAlg.cxx
@@ -323,15 +323,16 @@ StatusCode AdaptiveMultiVertexFitterTestAlg::initialize()
  */
 StatusCode AdaptiveMultiVertexFitterTestAlg::execute()
 {
+  const EventContext& ctx = Gaudi::Hive::currentContext();
   ATH_MSG_VERBOSE ("execute");
 
-  ATH_CHECK( test1() );
+  ATH_CHECK( test1(ctx) );
 
   return StatusCode::SUCCESS;
 }
 
 
-StatusCode AdaptiveMultiVertexFitterTestAlg::test1()
+StatusCode AdaptiveMultiVertexFitterTestAlg::test1(const EventContext& ctx)
 {
   VertexInfo v1;
   initVertex (v1, {1.5*mm, 1.7*mm, -6*mm}, makePerigees1());
@@ -341,7 +342,7 @@ StatusCode AdaptiveMultiVertexFitterTestAlg::test1()
   initVertex (v2, {9.8*mm, 0.2*mm, -4.8*mm}, makePerigees2());
 
   std::vector<xAOD::Vertex*> verts {&v1.v, &v2.v};
-  m_fitter->fit (verts);
+  m_fitter->fit (ctx, verts);
 
   xAOD::Vertex exp_v1;
   exp_v1.makePrivateStore();

@@ -107,7 +107,7 @@ class RNTupleContainer : public pool::DbContainerImp
   /// Open the container for object access
   virtual StatusCode open(pool::DbDatabase& dbH, const std::string& nam,
                           const pool::DbTypeInfo* info,
-                          pool::DbAccessMode mod) override final;
+                          Io::IoFlag mod) override final;
 
   /// Check if we can access the container for reading with the given type
   virtual StatusCode checkAccess(pool::DbDatabase& dbH,

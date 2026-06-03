@@ -35,13 +35,6 @@ StatusCode SensitiveDetectorBase::initializeSD()
     return StatusCode::FAILURE;
   }
 
-  // Make sure SD isn't already registered
-  if(getSD())
-    {
-      ATH_MSG_ERROR("Trying to create a SD which already exists!");
-      return StatusCode::FAILURE;
-    }
-
   // Make the SD stored by this tool
   auto sd = std::unique_ptr<G4VSensitiveDetector>(makeSD());
   if(!sd)
@@ -49,8 +42,6 @@ StatusCode SensitiveDetectorBase::initializeSD()
       ATH_MSG_ERROR("Failed to create SD!");
       return StatusCode::FAILURE;
     }
-  setSD(sd.get());
-
   // Assign the SD to our list of volumes
   ATH_CHECK( assignSD( std::move(sd), m_volumeNames.value() ) );
 
@@ -117,31 +108,6 @@ assignSD(std::unique_ptr<G4VSensitiveDetector> sd, const std::vector<std::string
   }
 
   return StatusCode::SUCCESS;
-}
-
-G4VSensitiveDetector* SensitiveDetectorBase::getSD()
-{
-#ifdef G4MULTITHREADED
-  // Get current thread-ID
-  const auto tid = std::this_thread::get_id();
-  // Retrieve it from the SD map
-  auto sdPair = m_sdThreadMap.find(tid);
-  if(sdPair == m_sdThreadMap.end()) return nullptr;
-  return sdPair->second;
-#else
-  return m_SD;
-#endif
-}
-
-void SensitiveDetectorBase::setSD(G4VSensitiveDetector* sd)
-{
-#ifdef G4MULTITHREADED
-  const auto tid = std::this_thread::get_id();
-  ATH_MSG_DEBUG("Creating and registering SD " << sd << " in thread " << tid);
-  m_sdThreadMap.insert( std::make_pair(tid, sd) );
-#else
-  m_SD = sd;
-#endif
 }
 
 //This function was adapted from the example found at

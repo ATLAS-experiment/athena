@@ -49,7 +49,7 @@ class XbbConfig (ConfigBlock):
             config.addPrivateTool('efficiencyTool', 'BTaggingEfficiencyJsonTool' )
             alg.efficiencyTool.MaxEta = 4.5
             alg.efficiencyTool.MinPt = 0.
-            alg.efficiencyTool.TaggerName = self.Xbbtagger
+            alg.efficiencyTool.OutputName = self.Xbbtagger
             alg.efficiencyTool.JetAuthor = jetContainer
             alg.efficiencyTool.OperatingPoint = self.XbbWP
             alg.efficiencyTool.JsonConfigFile = self.calibFile

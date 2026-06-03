@@ -130,7 +130,7 @@ private:
   /// @brief Data structure to hold HGTD track extension results
   /// Contains information about hits, timing, and extrapolation for each HGTD layer
   struct TrackExtensionData {
-    std::vector<bool> hasClusterVec = {false, false, false, false};  ///< Whether track has cluster in each HGTD layer
+    std::vector<char> hasClusterVec = {false, false, false, false};  ///< Whether track has cluster in each HGTD layer
     std::vector<float> chi2Vec = {0.0, 0.0, 0.0, 0.0};             ///< Chi2 contribution per HGTD layer
     std::vector<float> rawTimeVec = {0.0, 0.0, 0.0, 0.0};          ///< Raw measured time per HGTD layer
     std::vector<float> timeVec = {0.0, 0.0, 0.0, 0.0};             ///< TOF-corrected time per HGTD layer

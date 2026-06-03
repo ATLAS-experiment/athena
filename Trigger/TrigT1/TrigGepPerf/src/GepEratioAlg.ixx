@@ -50,8 +50,8 @@ StatusCode GepEratioAlg<T>::execute(const EventContext& ctx) const {
         return StatusCode::FAILURE;
     }
 
-    // Build classs instance 
-    EratioMaker eratioProcessor(*caloCellsHandle);
+    // Build classs instance with configurable window size 
+    EratioMaker eratioProcessor(*caloCellsHandle, m_etaWindowHalfSize, m_phiWindowHalfSize);
 
     // Clone seeds from original container and decorate with Eratio result
     SG::WriteDecorHandle<DataVector<T>, float> decorEratio(m_eratioKey, ctx);

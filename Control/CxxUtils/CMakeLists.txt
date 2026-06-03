@@ -155,6 +155,12 @@ atlas_add_test( close_to_zero_test
   LINK_LIBRARIES CxxUtils
   PROPERTIES TIMEOUT 300
   POST_EXEC_SCRIPT noerror.sh )
+  
+atlas_add_test( transparent_string_hash_test
+  SOURCES test/transparent_string_hash_test.cxx
+  LINK_LIBRARIES CxxUtils Boost::unit_test_framework
+  POST_EXEC_SCRIPT noerror.sh
+)
 
 
 # Set up the "simple" tests:

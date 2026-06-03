@@ -14,8 +14,8 @@ if __name__ == "__main__":
     flags.ITk.Geometry.AllLocal = False
 
     # We want to keet the commented code for debugging
-    #from AthenaCommon.Constants import DEBUG
-    #flags.Exec.OutputLevel=DEBUG
+    # from AthenaCommon.Constants import DEBUG
+    # flags.Exec.OutputLevel=DEBUG
 
     #flags.Output.RDOFileName = "RDO.pool.root"    
 

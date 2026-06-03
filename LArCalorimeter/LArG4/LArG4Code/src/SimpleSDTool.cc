@@ -5,6 +5,7 @@
 #include "LArG4Code/SimpleSDTool.h"
 
 // ID helper includes
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "CaloIdentifier/CaloIdManager.h"
 #include "CaloIdentifier/LArEM_ID.h"
 #include "CaloIdentifier/LArFCAL_ID.h"
@@ -12,7 +13,7 @@
 
 // Local includes
 #include "LArG4Code/LArG4SimpleSD.h"
-#include "LArG4Code/SDWrapper.h"
+#include "LArG4Code/LArHitContainerBuilder.h"
 #include "LArG4Code/VolumeUtils.h"
 
 namespace LArG4
@@ -58,18 +59,36 @@ namespace LArG4
   }
 
   //---------------------------------------------------------------------------
-  // Collect hits for this event
+  // Create all SDs for this worker thread
   //---------------------------------------------------------------------------
-  StatusCode SimpleSDTool::Gather()
+  StatusCode SimpleSDTool::initializeSD()
+  {
+    ATH_MSG_VERBOSE( name() << "::initializeSD()" );
+    makeSD();
+    return StatusCode::SUCCESS;
+  }
+
+  //---------------------------------------------------------------------------
+  // Create event-owned hit collections
+  //---------------------------------------------------------------------------
+  StatusCode SimpleSDTool::SetupEvent(HitCollectionMap& hitCollections)
+  {
+    hitCollections.Emplace<LArHitContainerBuilder>(hitCollectionName(),
+                                                   hitCollectionName());
+    return StatusCode::SUCCESS;
+  }
+
+  //---------------------------------------------------------------------------
+  // Finalize and record hits for this event
+  //---------------------------------------------------------------------------
+  StatusCode SimpleSDTool::Gather(HitCollectionMap& hitCollections)
   {
     ATH_MSG_DEBUG("Gathering hits to write out in " << name());
-    auto *sdWrapper = dynamic_cast<SimpleSDWrapper*>( getSD() );
-    if(!sdWrapper) {
-      ATH_MSG_ERROR("Failed to cast SD to SimpleSDWrapper");
-      return StatusCode::FAILURE;
-    }
-    sdWrapper->EndOfAthenaEvent();
-    return StatusCode::SUCCESS;
+    return hitCollections.TransformAndRecord<LArHitContainer>(hitCollectionName(),
+      [](LArHitContainer& hits)
+      {
+        static_cast<LArHitContainerBuilder&>(hits).Finalize();
+      });
   }
 
   //---------------------------------------------------------------------------
@@ -86,7 +105,7 @@ namespace LArG4
 
     // Create the simple SD
     auto sd = std::make_unique<LArG4SimpleSD>
-      (sdName, calc, m_timeBinType, m_timeBinWidth);
+      (sdName, calc, hitCollectionName(), m_timeBinType, m_timeBinWidth);
     auto* sdPtr = sd.get();
     sd->setupHelpers(m_larEmID, m_larFcalID, m_larHecID);
 
@@ -97,6 +116,11 @@ namespace LArG4
                            name(), StatusCode::FAILURE);
     }
     return sdPtr;
+  }
+
+  std::string SimpleSDTool::hitCollectionName() const
+  {
+    return m_outputCollectionNames.empty() ? std::string{} : m_outputCollectionNames[0];
   }
 
 } // namespace LArG4

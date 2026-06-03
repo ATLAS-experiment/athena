@@ -3,7 +3,7 @@
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AthenaConfiguration.Enums import LHCPeriod
-
+from Campaigns.Utils import Campaign
 from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import TriggerAnalysisBlock
 from TriggerAnalysisAlgorithms.TriggerAnalysisSFConfig import trigger_set
 
@@ -63,11 +63,37 @@ class JetTriggerMatchingBlock (ConfigBlock):
             alg.jets = config.readName (self.containerName)
         
             if config.geometry() is LHCPeriod.Run2 and self.runHLTMatching:
+                # Configuration adapted from
+                # https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigEmulation/TrigBtagEmulationTool/python/TrigBtagEmulationToolConfig.py
+
                 alg.useEmulationTool = True
                 config.addPrivateTool( 'trigEmulationTool',
                                        'Trig::TrigBtagEmulationTool' )
-                # Configuration to adapt from
-                # https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigEmulation/TrigBtagEmulationTool/python/TrigBtagEmulationToolConfig.py#L59
+
+                from TrigBtagEmulationTool.TrigBtagEmulationToolConfig import (
+                    TrigBtagEmulation_kwargs)
+                tool_kwargs = TrigBtagEmulation_kwargs(config.flags, [chain])
+                for prop, value in tool_kwargs.items():
+                    setattr(alg.trigEmulationTool, prop, value)
+
+                alg.trigEmulationTool.TrigDecisionTool = (
+                    f"{decisionTool.getType()}/{decisionTool.getName()}")
+
+                config.addPrivateTool( 'trigEmulationTool.JM_a4tcemsubjes_CNT',
+                                       'Trig::JetManagerTool' )
+                a4tcemsubjesJet = ('HLT_xAOD__JetContainer_a4tcemsubjesFS'
+                                   if config.campaign() is Campaign.MC20a or config.dataYear()==2016
+                                   else 'HLT_xAOD__JetContainer_a4tcemsubjesISFS')
+                alg.trigEmulationTool.JM_a4tcemsubjes_CNT.JetContainerName = a4tcemsubjesJet
+
+                config.addPrivateTool( 'trigEmulationTool.JM_Split_CNT',
+                                       'Trig::JetManagerTool' )
+                alg.trigEmulationTool.JM_Split_CNT.JetContainerName = 'HLT_xAOD__JetContainer_SplitJet'
+
+                if not(config.campaign() is Campaign.MC20a or config.dataYear()==2016):
+                    config.addPrivateTool( 'trigEmulationTool.JM_GSC_CNT',
+                                           'Trig::JetManagerTool' )
+                    alg.trigEmulationTool.JM_GSC_CNT.JetContainerName = 'HLT_xAOD__JetContainer_GSCJet'
 
             if self.runL1Matching:
                 alg.L1Et = "match_" + chain_out + "_L1et_%SYS%"

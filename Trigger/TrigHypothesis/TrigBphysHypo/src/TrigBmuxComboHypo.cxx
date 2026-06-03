@@ -221,13 +221,14 @@ StatusCode TrigBmuxComboHypo::findBmuxCandidates(TrigBmuxState& state) const {
             (p_trk1 + p_trk2).Pt() > m_BToD0_minD0Pt &&
             isInMassRange((p_trk1.SetM(PDG::mKaon) + p_trk2.SetM(PDG::mPion)).M(), m_BToD0_D0MassRange) &&
             isInMassRange((p_mu + p_trk1.SetM(PDG::mKaon) + p_trk2.SetM(PDG::mPion)).M(), m_BToD0_massRange)) {
-          vtx_D0 = fit(state.context(), {muon->inDetTrackParticleLink(), tracks[itrk1], tracks[itrk2]}, kD0);
+          vtx_D0 = fit(state.context(), {linkTrack(muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle)), tracks[itrk1], tracks[itrk2]}, kD0);
           ++iterations;
 
           if (vtx_D0 && vtx_D0->chiSquared() < m_BToD0_chi2) {
             ATH_MSG_DEBUG( "Partially reconstructed B+ -> mu+ nu_mu anti-D0(-> K+ pi-) candidate has been created from { " << itrk1 << ", " << itrk2 << " }" );
             if (m_makeCascadeFit) {
-              auto result = fitCascade(state.context(), {muon->inDetTrackParticleLink(), tracks[itrk1], tracks[itrk2]}, kD0);
+              auto result = fitCascade(state.context(), {linkTrack(muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle)), 
+                                                         tracks[itrk1], tracks[itrk2]}, kD0);
               // all fitted (muon + D0) candidates should be taken into account to avoid bias in (muon + D*-) sample
               if (result &&
                   result->fitChi2() < m_cascadeChi2 && result->nDoF() == 2) {
@@ -262,7 +263,8 @@ StatusCode TrigBmuxComboHypo::findBmuxCandidates(TrigBmuxState& state) const {
           auto p_trk3 = trk3->genvecP4();
           auto charge3 = trk3->charge();
 
-          std::vector<ElementLink<xAOD::TrackParticleContainer>> trackParticleLinks = {muon->inDetTrackParticleLink(), tracks[itrk1], tracks[itrk2], tracks[itrk3]};
+          std::vector<ElementLink<xAOD::TrackParticleContainer>> trackParticleLinks = {linkTrack(muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle)), 
+                                                                                       tracks[itrk1], tracks[itrk2], tracks[itrk3]};
 
           // D*-(-> anti-D0(-> K+ pi-) pi-)
           if (m_BToD0_makeDstar && D0.isValid() &&

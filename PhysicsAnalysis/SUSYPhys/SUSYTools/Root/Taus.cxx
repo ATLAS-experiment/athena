@@ -138,7 +138,8 @@ double SUSYObjDef_xAOD::GetSignalTauSF(const xAOD::TauJet& tau,
 {
   double sf(1.);
 
-  if (acc_signal(tau)) {
+  // TEMPORARY: no recommendations yet for 2024+
+  if (acc_signal(tau) && this->treatAsYear()<2024) {
     if (idSF) {
       if (m_tauEffTool->getEfficiencyScaleFactor(tau, sf) != CP::CorrectionCode::Ok) {
         ATH_MSG_WARNING("Failed to retrieve tau efficiency scale factor.");
@@ -150,8 +151,8 @@ double SUSYObjDef_xAOD::GetSignalTauSF(const xAOD::TauJet& tau,
       double trig_sf = GetTauTriggerEfficiencySF(tau, trigExpr);
 
       if (trig_sf > -90) {
-	sf *= trig_sf;
-	ATH_MSG_VERBOSE(" Retrieved tau trig SF  " << trig_sf);
+        sf *= trig_sf;
+        ATH_MSG_VERBOSE(" Retrieved tau trig SF  " << trig_sf);
       }
     }
   }
@@ -169,24 +170,27 @@ double SUSYObjDef_xAOD::GetSignalTauSFsys(const xAOD::TauJet& tau,
 {
   double sf(1.);
 
-  //Set the new systematic variation
-  StatusCode ret = m_tauEffTool->applySystematicVariation(systConfig);
-  if (ret != StatusCode::SUCCESS) { ATH_MSG_ERROR("Cannot configure TauEfficiencyCorrectionsTool for systematic var. " << systConfig.name() ); }
+  // TEMPORARY: no recommendations yet for 2024+
+  if (this->treatAsYear()<2024) {
+    //Set the new systematic variation
+    StatusCode ret = m_tauEffTool->applySystematicVariation(systConfig);
+    if (ret != StatusCode::SUCCESS) { ATH_MSG_ERROR("Cannot configure TauEfficiencyCorrectionsTool for systematic var. " << systConfig.name() ); }
 
-  for (auto& tool : m_tauTrigEffTool) {
-    ret = tool->applySystematicVariation(systConfig);
-    if (ret != StatusCode::SUCCESS) { ATH_MSG_ERROR("Cannot configure " << tool->name() << " for systematic var. " << systConfig.name()); }
-  }
+    for (auto& tool : m_tauTrigEffTool) {
+      ret = tool->applySystematicVariation(systConfig);
+      if (ret != StatusCode::SUCCESS) { ATH_MSG_ERROR("Cannot configure " << tool->name() << " for systematic var. " << systConfig.name()); }
+    }
 
-  sf *= GetSignalTauSF(tau, idSF, triggerSF, trigExpr);
+    sf *= GetSignalTauSF(tau, idSF, triggerSF, trigExpr);
 
-  //Roll back to default
-  ret = m_tauEffTool->applySystematicVariation(m_currentSyst);
-  if (ret != StatusCode::SUCCESS) { ATH_MSG_ERROR("Cannot configure TauEfficiencyCorrectionsTool back to default"); }
+    //Roll back to default
+    ret = m_tauEffTool->applySystematicVariation(m_currentSyst);
+    if (ret != StatusCode::SUCCESS) { ATH_MSG_ERROR("Cannot configure TauEfficiencyCorrectionsTool back to default"); }
 
-  for (auto& tool : m_tauTrigEffTool) {
-    ret = tool->applySystematicVariation(m_currentSyst);
-    if (ret != StatusCode::SUCCESS) { ATH_MSG_ERROR("Cannot configure " << tool->name() << " back to default"); }
+    for (auto& tool : m_tauTrigEffTool) {
+      ret = tool->applySystematicVariation(m_currentSyst);
+      if (ret != StatusCode::SUCCESS) { ATH_MSG_ERROR("Cannot configure " << tool->name() << " back to default"); }
+    }
   }
 
   dec_effscalefact(tau) = sf;

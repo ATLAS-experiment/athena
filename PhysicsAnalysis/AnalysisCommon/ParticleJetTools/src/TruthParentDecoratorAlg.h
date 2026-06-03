@@ -93,6 +93,11 @@ private:
   SG::WriteDecorHandleKey<JC> m_match_pdgid_key;
   SG::WriteDecorHandleKey<JC> m_match_children_key;
   SG::WriteDecorHandleKey<JC> m_match_link_key;
+  SG::WriteDecorHandleKey<JC> m_target_mass_key;
+  SG::WriteDecorHandleKey<JC> m_target_pt_key;
+  SG::WriteDecorHandleKey<JC> m_target_energy_key;
+  SG::WriteDecorHandleKey<JC> m_target_eta_key;
+  SG::WriteDecorHandleKey<JC> m_target_phi_key;
 
   Gaudi::Property<cascade_counter_property_t> m_counts_matching_cascade {
     this, "countChildrenInCascadeWithPdgIds", {},

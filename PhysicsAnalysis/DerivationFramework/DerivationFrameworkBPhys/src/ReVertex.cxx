@@ -285,7 +285,7 @@ std::unique_ptr<xAOD::Vertex> ReVertex::fit(const EventContext& ctx,
 			    const xAOD::TrackParticleContainer* importedTrackCollection,
 			    const xAOD::Vertex* pv) const
 {
-   std::unique_ptr<Trk::IVKalState> state = m_VKVFitter->makeState();
+   std::unique_ptr<Trk::IVKalState> state = m_VKVFitter->makeState(ctx);
    if (m_doMassConst && (m_trkMasses.size()==inputTracks.size())) {
       m_VKVFitter->setMassInputParticles(m_trkMasses, *state);
       if (m_totalMassConst) m_VKVFitter->setMassForConstraint(m_totalMassConst, *state);
@@ -312,7 +312,7 @@ std::unique_ptr<xAOD::Vertex> ReVertex::fit(const EventContext& ctx,
    int errorcode = 0;
    Amg::Vector3D startingPoint = m_vertexEstimator->getCirclesIntersectionPoint(&aPerigee1,&aPerigee2,sflag,errorcode);
    if (errorcode != 0) {startingPoint(0) = 0.0; startingPoint(1) = 0.0; startingPoint(2) = 0.0;}
-   std::unique_ptr<xAOD::Vertex> theResult = m_VKVFitter->fit(ctx, inputTracks, startingPoint, *state);
+   std::unique_ptr<xAOD::Vertex> theResult = m_VKVFitter->fit(inputTracks, startingPoint, *state);
 
    // Added by ASC
    if(theResult){

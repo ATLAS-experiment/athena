@@ -122,6 +122,11 @@ private:
   float m_noiseSigHG{};
   float m_noiseSigLG{};
 
+  bool m_havePerSampleNoiseHG{false};
+  bool m_havePerSampleNoiseLG{false};
+  std::vector<float> m_setPerSampleNoiseHG;
+  std::vector<float> m_setPerSampleNoiseLG;
+  
   // Default fit values and cuts that can be set via modifier methods
   //
   std::string m_fitOptions{};
@@ -143,6 +148,8 @@ private:
 
   float m_chisqDivAmpCutLG{}; // maximum good LG chisq / amplitude
   float m_chisqDivAmpCutHG{}; // maximum good HG chisq / amplitude
+  float m_chisqDivAmpScaleLG{}; // maximum good LG chisq / amplitude
+  float m_chisqDivAmpScaleHG{}; // maximum good HG chisq / amplitude
   float m_chisqDivAmpOffsetLG{}; // maximum good LG chisq / amplitude
   float m_chisqDivAmpOffsetHG{}; // maximum good HG chisq / amplitude
   float m_chisqDivAmpPowerLG{}; // maximum good LG chisq / amplitude
@@ -171,6 +178,16 @@ private:
   bool m_haveSignifCuts{false};
   float m_sigMinHG{};           // Minimum amplitude significance to be considered valid pulse
   float m_sigMinLG{};           // Minimum amplitude significance to be considered valid pulse
+
+  // Enable or not post-pulse detection and associated parameters
+  //
+  bool m_doPostPulseCheck{false};
+  unsigned int m_postPulseDelta{0};
+  float m_postPulseDerivMinSig{};
+  float m_postPulseAbsDer2ndMinSig{};
+  float m_postPulseMainMinDer2ndRatio{};
+
+  unsigned int m_prePulseDelta{0};
   
   // Enabling (or not) of exclusion of early or late samples from OOT pileup
   //
@@ -215,6 +232,7 @@ private:
   std::unique_ptr<TH1> m_fitHist{};
   std::unique_ptr<TH1> m_fitHistLGRefit{};
 
+  bool m_initialized{false};
   bool m_initializedFits{false};
   std::unique_ptr<ZDCFitWrapper> m_defaultFitWrapper{};
   std::unique_ptr<ZDCPrePulseFitWrapper> m_prePulseFitWrapper{};
@@ -326,6 +344,7 @@ private:
   float m_fitTau1{};
   float m_fitTau2{};
   float m_fitChisq{};
+  float m_chisqRatio{};
   float m_fitNDoF{};
   float m_fitPreT0{};
   float m_fitPreAmp{};
@@ -342,12 +361,15 @@ private:
   float m_bkgdMaxFraction{};
   float m_delayedBaselineShift{};
 
+  std::vector<float> m_shapeParameters;
+  
   bool m_evtLGRefit{false};
   float m_refitLGAmpl{0};
   float m_refitLGFitAmpl{0};
   float m_refitLGAmplCorr{0};
   float m_refitLGAmpError{0};
   float m_refitLGChisq{0};
+  float m_refitLGChisqRatio{0};
   float m_refitLGTime{0};
   float m_refitLGTimeSub{0};
   
@@ -359,20 +381,23 @@ private:
   std::vector<float> m_ADCSamplesLG;
   std::vector<float> m_ADCSamplesHGSub;
   std::vector<float> m_ADCSamplesLGSub;
+  std::vector<float> m_sampleNoiseHG;
+  std::vector<float> m_sampleNoiseLG;
 
   std::vector<bool> m_useSampleLG;
   std::vector<bool> m_useSampleHG;
 
-  std::vector<float> m_ADCSSampSigHG;
-  std::vector<float> m_ADCSSampSigLG;
+  std::vector<float> m_ADCSSampNoiseHG;
+  std::vector<float> m_ADCSSampNoiseLG;
 
   std::vector<float> m_samplesSub;
-  std::vector<float> m_samplesSig;
+  std::vector<float> m_samplesNoise;
 
   std::vector<float> m_samplesLGRefit;
-  std::vector<float> m_samplesSigLGRefit;
+  std::vector<float> m_samplesNoiseLGRefit;
   
   std::vector<float> m_samplesDeriv2nd;
+  std::vector<float> m_samplesDeriv2ndErr;
 
   // When using combined delayed + undelayed pulses we calculate the chisquare ourselves
   //   so fill this vector as part of that calculation. For the cases where we do not use
@@ -383,8 +408,9 @@ private:
 
   // Private methods
   //
-  void Reset(bool reanalyze = false);
-  void SetDefaults();
+  void initialize();
+  void reset(bool reanalyze = false);
+  void setDefaults();
   
   std::pair<bool, std::string> ValidateJSONConfig(const JSON& config);
   std::pair<bool, std::string> ConfigFromJSON(const JSON& config);
@@ -395,12 +421,13 @@ private:
 
   bool ScanAndSubtractSamples();
 
-  using ChisqCutLambdatype = std::function<bool(float,float,float)>;
+  using ChisqCutLambdatype = std::function<bool(float,float,float, float&)>;
+  
   bool AnalyzeData(size_t nSamples, size_t preSample,
                    const std::vector<float>& samples,        // The samples used for this event
-		   const std::vector<bool>& useSamples,        // The samples used for this event
+		   const std::vector<float>& samplesNoise,   // The per-sample noise used for this event
+		   const std::vector<bool>& useSamples,      // The samples used for this event
                    float peak2ndDerivMinThresh,
-                   float noiseSig,                           // The "resolution" on the ADC value
                    const std::vector<float>& toCorrParams,   // The parameters used to correct the t0
                    ChisqCutLambdatype chisqCutLambda, // Lambda to apply chisq cut
                    float minT0Corr, float maxT0Corr          // The minimum and maximum corrected T0 values
@@ -409,11 +436,15 @@ private:
 
   double getAmplitudeCorrection(bool highGain);
     
-  static std::vector<float> Calculate2ndDerivative(const std::vector <float>& inputData, unsigned int step);
-  static std::vector<float> CalculateDerivative(const std::vector <float>& inputData, unsigned int step);
+  static std::vector<float> calculate2ndDerivative(const std::vector <float>& inputData, unsigned int step);
+
+  static std::pair<std::vector<float>, std::vector<float>>
+  calculate2ndDerivative(const std::vector<float>& inputData, const std::vector<float>& inputNoise, unsigned int step);
+
+  static std::vector<float> calculateDerivative(const std::vector <float>& inputData, unsigned int step);
   static float obtainDelayedBaselineCorr(const std::vector<float>& samples);
 
-  void prepareLGRefit(const std::vector<float>& samplesLG, const std::vector<float>& samplesSig,
+  void prepareLGRefit(const std::vector<float>& samplesLG, const std::vector<float>& samplesNoise,
 		      const std::vector<bool>& useSamples);
   
   void FillHistogram(bool refitLG)
@@ -424,13 +455,13 @@ private:
 	//
 	for (size_t isample = 0; isample < m_NSamplesAna; isample++) {
 	  m_fitHist->SetBinContent(isample + 1, m_samplesSub[isample]);
-	  m_fitHist->SetBinError(isample + 1, m_samplesSig[isample]);
+	  m_fitHist->SetBinError(isample + 1, m_samplesNoise[isample]);
 	}
       }
       else {
 	for (size_t isample = 0; isample < m_NSamplesAna; isample++) {
 	  m_fitHistLGRefit->SetBinContent(isample + 1, m_samplesLGRefit[isample]);
-	  m_fitHistLGRefit->SetBinError(isample + 1, m_samplesSigLGRefit[isample]);
+	  m_fitHistLGRefit->SetBinError(isample + 1, m_samplesNoiseLGRefit[isample]);
 	}
       }
     }
@@ -442,8 +473,8 @@ private:
 	  m_fitHist->SetBinContent(isample + 1, m_samplesSub[isample * 2]);
 	  m_delayedHist->SetBinContent(isample + 1, m_samplesSub[isample * 2 + 1]);
 	  
-	  m_fitHist->SetBinError(isample + 1, m_samplesSig[isample]); 
-	  m_delayedHist->SetBinError(isample + 1, m_samplesSig[isample]);
+	  m_fitHist->SetBinError(isample + 1, m_samplesNoise[isample]); 
+	  m_delayedHist->SetBinError(isample + 1, m_samplesNoise[isample]);
 	}
       }
       else {
@@ -453,8 +484,8 @@ private:
 	  m_fitHistLGRefit->SetBinContent(isample + 1, m_samplesLGRefit[isample * 2]);
 	  m_delayedHistLGRefit->SetBinContent(isample + 1, m_samplesLGRefit[isample * 2 + 1]);
 	  
-	  m_fitHistLGRefit->SetBinError(isample + 1, m_samplesSigLGRefit[isample]); 
-	  m_delayedHistLGRefit->SetBinError(isample + 1, m_samplesSigLGRefit[isample]);
+	  m_fitHistLGRefit->SetBinError(isample + 1, m_samplesNoiseLGRefit[isample]); 
+	  m_delayedHistLGRefit->SetBinError(isample + 1, m_samplesNoiseLGRefit[isample]);
 	}
       }
     }
@@ -484,7 +515,7 @@ public:
   ~ZDCPulseAnalyzer(){}
 
   void setFitOPtions(const std::string& fitOptions) { m_fitOptions = fitOptions;}
-  void saveFitFunc() {m_saveFitFunc = true;}
+  void saveFitFunc(bool save) {m_saveFitFunc = save;}
 
   bool quietFits() const {return m_quietFits;}
   void setQuietFits() {m_quietFits = true;}
@@ -519,6 +550,14 @@ public:
     m_initializedFits = false;
   }
 
+  void setPerSampleNoiseSigmas(const std::vector<float>& sigmaHG, const std::vector<float>& sigmaLG)
+  {
+    m_setPerSampleNoiseHG =  sigmaHG;
+    m_setPerSampleNoiseLG =  sigmaLG;
+    m_havePerSampleNoiseHG = true;
+    m_havePerSampleNoiseLG = true;
+  }
+  
   void setLGMode(unsigned int mode) {m_LGMode = mode;}
   unsigned int getLGMode() const {return m_LGMode;}
 
@@ -526,8 +565,14 @@ public:
 
   void SetCutValues(float chisqDivAmpCutHG, float chisqDivAmpCutLG,
                     float deltaT0MinHG, float deltaT0MaxHG,
-                    float deltaT0MinLG, float deltaT0MaxLG) ;
+                    float deltaT0MinLG, float deltaT0MaxLG);
 
+  void SetTimeCuts(float deltaT0MinHG, float deltaT0MaxHG,
+                   float deltaT0MinLG, float deltaT0MaxLG);
+
+  void SetChisqCuts(float chisqDivAmpCutHG, float chisqDivAmpScaleHG, float chisqDivAmpOffsetHG, float chisqDivAmpPowerHG,
+		    float chisqDivAmpCutLG, float chisqDivAmpScaleLG, float chisqDivAmpOffsetLG, float chisqDivAmpPowerLG);
+  
   void SetNoiseSigmas(float noiseSigHG, float noiseSigLG) 
   {
     m_noiseSigHG = noiseSigHG;
@@ -542,6 +587,9 @@ public:
   
   void SetTauT0Values(bool fixTau1, bool fixTau2, float tau1, float tau2, float t0HG, float t0LG);
 
+  void enablePostPulseCheck(unsigned int postPulseSampleDelta, float postPulseDerivMinSig, float postPulseAbsDer2ndMinSig, float minMainDer2ndRatio);
+  void disablePostPulseCheck() {m_doPostPulseCheck = false;}
+			     
   void SetADCOverUnderflowValues(int HGOverflowADC, int HGUnderflowADC, int LGOverflowADC);
 
   void SetTimingCorrParams(TimingCorrMode mode, float refADC, float refScale,
@@ -634,6 +682,7 @@ public:
   float GetT0Corr()       const {return m_fitTimeCorr;}
   float getTimeSig()      const {return m_timeSig;}
   float GetChisq()        const {return m_fitChisq;}
+  float GetChisqRatio()   const {return m_chisqRatio;}
   float GetFitTau1()      const {return m_fitTau1;}
   float GetFitTau2()      const {return m_fitTau2;}
   float GetFitPreT0()     const {return m_fitPreT0;}
@@ -648,6 +697,8 @@ public:
   float GetAmpError() const {return m_ampError;}
   float GetPreExpAmp() const {return m_expAmplitude;}
 
+  const std::vector<float>& GetShapeParameters() const {return m_shapeParameters;}
+  
   float getRefitLGAmp() const
   {
     if (m_evtLGRefit) return m_refitLGAmpl;
@@ -669,6 +720,12 @@ public:
   float getRefitLGChisq() const
   {
     if (m_evtLGRefit) return m_refitLGChisq;
+    else return 0;
+  }
+
+  float getRefitLGChisqRatio() const
+  {
+    if (m_evtLGRefit) return m_refitLGChisqRatio;
     else return 0;
   }
 

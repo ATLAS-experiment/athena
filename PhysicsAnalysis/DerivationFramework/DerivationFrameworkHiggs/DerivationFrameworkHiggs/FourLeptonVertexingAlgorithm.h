@@ -63,7 +63,7 @@ namespace DerivationFramework {
         Gaudi::Property<float> m_minElecPt{this, "MinElecPt", 4.5 * Gaudi::Units::GeV, " Minimum pt cut applied on the electron"};
 
         using MuonTrk = xAOD::Muon::TrackParticleType;
-        Gaudi::Property<int> m_muonTrkProp{this, "PickMuonTrk", MuonTrk::InnerDetectorTrackParticle,
+        Gaudi::Property<int> m_muonTrkProp{this, "PickMuonTrk", static_cast<int>(MuonTrk::InnerDetectorTrackParticle),
                                            "Pick the proper track particle from the muon"};
         MuonTrk m_muonTrk{MuonTrk::Primary};
 

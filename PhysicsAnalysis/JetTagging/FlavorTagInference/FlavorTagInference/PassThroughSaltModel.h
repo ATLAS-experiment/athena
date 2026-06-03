@@ -7,11 +7,11 @@
 
 #include "FlavorTagInference/ISaltModel.h"
 #include "FlavorTagInference/SaltModelGraphConfig.h"
-#include "FlavorTagInference/SaltModelOutput.h"
 #include "nlohmann/json.hpp"
 
 #include <string>
 #include <vector>
+#include <map>
 
 namespace FlavorTagInference {
 
@@ -47,8 +47,7 @@ namespace FlavorTagInference {
     PassThroughSaltModel(const nlohmann::json& config);
     virtual ~PassThroughSaltModel() = default;
 
-    InferenceOutput runInference(
-      std::map<std::string, Inputs>& gnn_inputs) const override;
+    InferenceOutput runInference(InputMap& gnn_inputs) const override;
 
     const SaltModelGraphConfig::GraphConfig getGraphConfig() const override;
     const OutputConfig& getOutputConfig() const override;

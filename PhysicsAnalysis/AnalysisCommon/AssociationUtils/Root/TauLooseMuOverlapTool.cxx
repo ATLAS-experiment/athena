@@ -87,7 +87,7 @@ namespace ORUtils
       // flagged as overlap. Perhaps this deserves more thought/study.
       if(isRejectedObject(muon)) continue;
       if(muon(acc.m_muPtAcc) < m_minMuPt) continue;
-      bool isCombined = (muon(acc.m_muonTypeAcc) == xAOD::Muon::Combined);
+      bool isCombined = (muon(acc.m_muonTypeAcc) == xAOD::Muon::MuonType::Combined);
 
       // Loop over surviving taus
       for(auto tau : taus){

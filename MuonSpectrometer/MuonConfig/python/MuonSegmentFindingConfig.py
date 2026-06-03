@@ -535,15 +535,6 @@ def MuonSegmentFinderAlgCfg(flags, name="MuonSegmentMaker", **kwargs):
     result.addEventAlgo(the_alg)
     return result    
 
-def MuonSegmentFilterAlgCfg(flags, name="MuonSegmentFilterAlg", **kwargs):
-    result = ComponentAccumulator()
-    kwargs.setdefault("SegmentCollectionName", "TrackMuonSegments")
-    ## The output key of this alg is per default FilteredMuonSegments
-    kwargs.setdefault("FilteredCollectionName", "TrackMuonSegmentsEMEO")
-    the_alg =  CompFactory.MuonSegmentFilterAlg(name, **kwargs)
-    result.addEventAlgo(the_alg)
-    return result
-
 def MuonSegmentCnvAlgCfg(flags, name="MuonSegmentCnvAlg", **kwargs):
     result = ComponentAccumulator()
     from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonSegmentConverterToolCfg
@@ -592,11 +583,7 @@ def MuonSegmentFindingCfg(flags, setup_bytestream = True):
     # We need to add two algorithms - one for normal collisions, one for NCB
     result.merge(MuonLayerHoughAlgCfg(flags))
     result.merge(MuonSegmentFinderAlgCfg(flags, name="MuonSegmentMaker"))
-  
-    
-    if flags.Muon.runCommissioningChain:
-        result.merge(MuonSegmentFilterAlgCfg(flags))
-
+ 
     if flags.Beam.Type is BeamType.Collisions:
         result.merge(MuonSegmentFinderNCBAlgCfg(flags))
         result.merge(MuonSegmentCnvAlgCfg(flags, "MuonSegmentCnvAlg_NCB",

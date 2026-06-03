@@ -13,7 +13,6 @@
 #include <xAODTau/TauJetContainer.h>
 #include <xAODTau/TauJetAuxContainer.h>
 #include <TauAnalysisTools/HelperFunctions.h>
-#include <AthContainers/ConstDataVector.h>
 
 namespace CP
 {

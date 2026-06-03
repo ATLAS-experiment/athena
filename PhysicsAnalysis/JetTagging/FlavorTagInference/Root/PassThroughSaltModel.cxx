@@ -126,8 +126,7 @@ namespace FlavorTagInference {
     }
   }
 
-  InferenceOutput PassThroughSaltModel::runInference(
-    std::map<std::string, Inputs>& gnn_inputs) const
+  InferenceOutput PassThroughSaltModel::runInference(InputMap& gnn_inputs) const
   {
     InferenceOutput output;
 

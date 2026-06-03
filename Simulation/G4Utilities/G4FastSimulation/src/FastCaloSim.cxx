@@ -9,6 +9,7 @@
 #include "ISF_FastCaloSimEvent/TFCSSimulationState.h"
 #include "ISF_FastCaloSimEvent/TFCSTruthState.h"
 #include "ISF_FastCaloSimEvent/TFCSExtrapolationState.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
 
 // Geant4 particle includes
 #include "G4Gamma.hh"
@@ -23,6 +24,8 @@
 
 // HepMCHelpers include
 #include "TruthUtils/HepMCHelpers.h"
+
+#include "GaudiKernel/ThreadLocalContext.h"
 
 // G4 sensitive detector includes
 #include "G4SDManager.hh"
@@ -161,6 +164,9 @@ G4bool FastCaloSim::ModelTrigger(const G4FastTrack& fastTrack)
 
 void FastCaloSim::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep)
 {
+  if (auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()) {
+    Gaudi::Hive::setCurrentContext(eventInfo->GetEventContext());
+  }
 
   TFCSSimulationState simState(G4Random::getTheEngine());
   TFCSTruthState truthState;
@@ -346,4 +352,3 @@ G4bool FastCaloSim::passedIDCaloBoundary(const G4FastTrack& fastTrack){
   return false;
 
 }
-

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SourceCompAlg.h"
@@ -171,11 +171,12 @@ StatusCode SourceCompAlg::compareGlobalTags(const std::vector<std::string>& glob
       if(rdbAccessConc) {
 	std::vector<std::string> leafNodes;
 	rdbAccessConc->getAllLeafNodes(leafNodes,m_connNames[connInd]);
+	const std::string atlasStr{"ATLAS"};
 	for(size_t ii=0; ii<leafNodes.size(); ++ii) {
 	  std::string nodeName = leafNodes[ii];
 	  int perc = ii*100/leafNodes.size();
 	  ATH_MSG_DEBUG("\t ** Node: " << nodeName << "\t" << perc << "%");
-	  std::string childTag = rdbAccessSvc->getChildTag(nodeName,tag,"ATLAS",m_connNames[connInd],true);
+	  std::string childTag = rdbAccessSvc->getChildTag(nodeName,tag,atlasStr,m_connNames[connInd],true);
 	  if(!childTag.empty()) {
 	    IRDBRecordset_ptr recPtr = rdbAccessSvc->getRecordsetPtr(nodeName,childTag,"",m_connNames[connInd]);
 	    if(recPtr->size()) {

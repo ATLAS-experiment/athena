@@ -16,8 +16,8 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "GaudiKernel/ToolHandle.h"
 
-#include "GlobalLArCell.h"
-#include "GlobalLArCellContainer.h"
+#include "../IO/GlobalLArCell.h"
+#include "../IO/GlobalLArCellContainer.h"
 
 #include <vector>
 #include <bitset>

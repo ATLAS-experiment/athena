@@ -13,7 +13,6 @@ namespace AthDevice {
 
 std::pmr::memory_resource& HostMemoryResourceTool::mr() const {
 
-  assert(std::pmr::new_delete_resource() != nullptr);
   return *(std::pmr::new_delete_resource());
 }
 

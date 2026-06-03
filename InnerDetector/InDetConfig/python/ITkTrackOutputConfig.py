@@ -87,6 +87,12 @@ def ITkTrackRecoOutputCfg(flags, extensions_list=None):
             "xAOD::TrackStateValidationAuxContainer#ITkStripMSOSsAux."
         ]
 
+        if flags.Detector.EnablePLR:
+            toAOD += [
+                "xAOD::TrackMeasurementValidationContainer#PLRMeasurements",
+                "xAOD::TrackMeasurementValidationAuxContainer#PLRMeasurementsAux."
+            ]
+
         if flags.Tracking.doStoreSiSPSeededTracks:
             toAOD += [
                 "xAOD::TrackStateValidationContainer#SiSP_ITkPixel_MSOSs",

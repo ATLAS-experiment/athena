@@ -131,7 +131,7 @@ StatusCode CorrectPFOTool::correctPFO(xAOD::PFOContainer& cont) const {
 }
 
 StatusCode CorrectPFOTool::correctPFO(xAOD::FlowElementContainer& cont) const { 
-
+  ATH_MSG_DEBUG("Using correctPFO");
   const xAOD::Vertex* vtx = nullptr;
   if(m_correctneutral) {
     vtx = getPrimaryVertex();
@@ -218,6 +218,7 @@ StatusCode CorrectPFOTool::correctPFOByVertex(xAOD::PFOContainer& cont) const {
 }
 
 StatusCode CorrectPFOTool::correctPFOByVertex(xAOD::FlowElementContainer& cont) const {
+  ATH_MSG_DEBUG("Using correctPFOByVertex");
   static const SG::AuxElement::Accessor<unsigned> copyIndex("ConstituentCopyIndex");
 
   // Retrieve Primary Vertices

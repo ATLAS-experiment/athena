@@ -26,7 +26,8 @@ class EndcapFastSimDedicatedSD : public IFastSimDedicatedSD
 public:
 
   // Constructor:
-  EndcapFastSimDedicatedSD(StoreGateSvc*, bool verbose);
+  EndcapFastSimDedicatedSD(StoreGateSvc*, std::string hitCollectionName,
+                           bool verbose);
 
   // Destructor:
   ~EndcapFastSimDedicatedSD() {}
@@ -50,5 +51,4 @@ private:
 };
 
 #endif //LARG4FASTSIMULATION_ENDCAPFASTSIMDEDICATEDSD_H
-
 

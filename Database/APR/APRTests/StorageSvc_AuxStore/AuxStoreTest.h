@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -39,7 +39,8 @@ namespace APRTest
      virtual size_t size() const override
      { return m_extra_store ? m_extra_store->size() : SG::AuxStoreInternal::size(); }
 
-     
+     virtual void toTransient (const EventContext& ) override { }
+
    };
    
    inline

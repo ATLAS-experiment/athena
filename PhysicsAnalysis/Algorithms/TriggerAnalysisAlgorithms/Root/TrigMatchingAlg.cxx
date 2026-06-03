@@ -1,13 +1,12 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Marco Rimoldi
 
 #include <TrigCompositeUtils/ChainNameParser.h>
 #include <TriggerAnalysisAlgorithms/TrigMatchingAlg.h>
-#include <xAODEventInfo/EventInfo.h>
-#include <RootCoreUtils/StringUtil.h>
+#include <algorithm>
 
 
 namespace CP
@@ -36,14 +35,18 @@ namespace CP
 
     // retrieve the trigger matching tool
     ANA_CHECK(m_trigMatchingTool.retrieve());
-
+    const std::string prefix = m_matchingDecoration + "_";
     for (const std::string &chain : m_trigSingleMatchingList)
     {
-      m_matchingDecorators.emplace(chain, m_matchingDecoration + "_" + RCU::substitute (chain, "-", "_"));
+      std::string chainfix = chain;
+      std::replace(chainfix.begin(), chainfix.end(), '-', '_');
+      m_matchingDecorators.emplace(chain, prefix + chainfix);
     }
     for (const std::string &chain : m_trigSingleMatchingListDummy)
     {
-      m_matchingDecorators.emplace(chain, m_matchingDecoration + "_" + RCU::substitute (chain, "-", "_"));
+      std::string chainfix = chain;
+      std::replace(chainfix.begin(), chainfix.end(), '-', '_');
+      m_matchingDecorators.emplace(chain, prefix + chainfix);
     }
 
     if (m_particlesHandle)

@@ -168,28 +168,33 @@ AthMonitorAlgorithm::DataType_t AthMonitorAlgorithm::dataTypeStringToEnum( const
 const ToolHandle<GenericMonitoringTool>& AthMonitorAlgorithm::getGroup( const std::string& name ) const {
     // get the pointer to the tool, and check that it exists
     auto idx = m_toolLookupMap.find(name);
+    //Check if the tool exists in the map
     if (ATH_LIKELY(idx != m_toolLookupMap.end())) {
         return m_tools[idx->second];
     }
     else {
-      // treat empty tool handle case as in Monitored::Group
-      if (m_toolLookupMap.empty()) {
-	return m_dummy;
-      }
-
-      if (!isInitialized()) {
-        ATH_MSG_FATAL(
-            "It seems that the AthMonitorAlgorithm::initialize was not called "
-            "in derived class initialize method");
-      } else {
-        std::string available = std::accumulate(
+      //Check if the map is empty
+     if (m_toolLookupMap.empty()) {
+            ATH_MSG_FATAL("The m_toolLookupMap is empty. The tool " << name << " cannot be found in an empty map.");
+            return m_dummy;
+      } 
+      //If the map is not empty and the tool was not found, print a fatal error
+      if (!m_toolLookupMap.empty()) {
+            std::string available = std::accumulate(
             m_toolLookupMap.begin(), m_toolLookupMap.end(), std::string(""),
             [](const std::string& s, auto h) { return s + "," + h.first; });
-        ATH_MSG_FATAL("The tool " << name << " could not be found in the tool array of the "
+            ATH_MSG_FATAL("The tool " << name << " could not be found in the tool array of the "
                       << "monitoring algorithm " << m_name << ". This probably reflects a discrepancy between "
                       << "your python configuration and c++ filling code. Note: your available groups are {"
                       << available << "}.");
-        }
+
+            return m_dummy;
+      } 
+      if (!isInitialized()) {
+            ATH_MSG_FATAL(
+            "It seems that the AthMonitorAlgorithm::initialize was not called "
+            "in derived class initialize method, group name: " << name);
+      } 
     }
     return m_dummy;
 }

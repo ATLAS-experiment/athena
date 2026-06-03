@@ -26,7 +26,10 @@ namespace ActsTrk {
     // Make the logger And Propagate to ACTS routines
     m_logger = makeActsAthenaLogger(this, "Acts");
 
-    ATH_CHECK( prepareConfiguration() );
+    // eta,etaMinus,etaPlus,phi,phiMinus,Phiplus,z,zMinus,zPlus
+    m_internalRoi.emplace(0, -4.5, 4.5, 0, -std::numbers::pi, std::numbers::pi, 0, -150.0,150.0);
+
+    ATH_CHECK( prepareConfiguration());
     printGbtsConfig();
 
     // layer geometry creation 
@@ -81,86 +84,68 @@ namespace ActsTrk {
 
     const Acts::Experimental::GraphBasedTrackSeeder::Options options(bFieldInZ);
 
-    // define new custom spacepoint container
-    Acts::SpacePointContainer2 coreSpacePoints(
-      Acts::SpacePointColumns::CopyFromIndex |
-      Acts::SpacePointColumns::SourceLinks |
-      Acts::SpacePointColumns::X |
-      Acts::SpacePointColumns::Y |
-      Acts::SpacePointColumns::Z |
-      Acts::SpacePointColumns::R |
-      Acts::SpacePointColumns::Phi
-    );
-
-    // add new column for layer ID and clusterwidth
-    auto layerColumn = coreSpacePoints.createColumn<std::uint32_t>("layerId");
-    auto clusterWidthColumn = coreSpacePoints.createColumn<float>("clusterWidth");
-    auto localPositionColumn = coreSpacePoints.createColumn<float>("localPositionY");
 
     std::vector<const xAOD::SpacePoint*> tmpSpacePoints;
-    std::size_t totalSpacePoints = 0;
 
     // add spacepoint pointers to singel container, this makes indexing them easier 
     for (const xAOD::SpacePointContainer* spacePoints : spacePointCollections) {
       for (const xAOD::SpacePoint* sp : *spacePoints) {
         tmpSpacePoints.emplace_back(sp);
       }
-      totalSpacePoints += spacePoints->size();
     }
 
-    coreSpacePoints.reserve(totalSpacePoints);
 
-    // add spacepoints to new container
+    // create node storage manually
+    std::vector<std::vector<Acts::Experimental::GbtsNode>> nodeStorage{};
+    nodeStorage.resize(m_are_pixels.size());
+    //reasonable size for reservation
+    for (auto& v : nodeStorage) {
+      v.reserve(10000); 
+    }
+
+    // add spacepoints to node storage
     for(std::size_t idx = 0; idx < tmpSpacePoints.size(); ++idx){
       // obtain module hash for spacepoint
       const xAOD::SpacePoint* sp = tmpSpacePoints[idx];
       const std::vector<xAOD::DetectorIDHashType>& elementlist = sp->elementIdList();
 
       const bool isPixel(elementlist.size() == 1);
-      // In LRT mode use strip spacepoints; in pixel mode use pixel spacepoints
-      if (isPixel == m_finderCfg.lrtMode) continue;
-    
+      
 	    const short layer = (isPixel ? m_pix_h2l : m_sct_h2l)->operator[](static_cast<int>(elementlist[0]));
 
-      auto newSp = coreSpacePoints.createSpacePoint();
-      newSp.copyFromIndex() = idx;
-
-      // apply beamspot corrections if needed
+      Acts::Experimental::GbtsNode& node = nodeStorage[layer].emplace_back(layer);
       if (m_finderCfg.beamSpotCorrection) {
         const float new_x = static_cast<float>(sp->x() - beamSpotPos[0]);
         const float new_y = static_cast<float>(sp->y() - beamSpotPos[1]);
-        newSp.x() = new_x;
-        newSp.y() = new_y;
-        newSp.z() = static_cast<float>(sp->z());
-        newSp.r() = std::hypot(new_x, new_y);
-        newSp.phi() = std::atan2(new_y, new_x);
+        node.x = new_x;
+        node.y = new_y;
+        node.z = static_cast<float>(sp->z());
+        node.r = std::hypot(new_x, new_y);
+        node.phi = std::atan2(new_y, new_x);
+        node.idx = idx;
       } else {
         const float new_x = static_cast<float>(sp->x());
         const float new_y = static_cast<float>(sp->y());
-        newSp.x() = static_cast<float>(sp->x());
-        newSp.y() = static_cast<float>(sp->y());
-        newSp.z() = static_cast<float>(sp->z());
-        newSp.r() = std::hypot(new_x, new_y);
-        newSp.phi() = std::atan2(sp->y(), sp->x());
+        node.x = static_cast<float>(sp->x());
+        node.y = static_cast<float>(sp->y());
+        node.z = static_cast<float>(sp->z());
+        node.r = std::hypot(new_x, new_y);
+        node.phi = std::atan2(sp->y(), sp->x());
+        node.idx = idx;
       }
-
-      newSp.extra(layerColumn) = layer;
 
       if (m_finderCfg.useMl && isPixel) {
         assert(dynamic_cast<const xAOD::PixelCluster*>(sp->measurements().front())!=nullptr);
         const xAOD::PixelCluster* pCL = static_cast<const xAOD::PixelCluster*>(sp->measurements().front());
-        newSp.extra(clusterWidthColumn) = pCL->widthInEta();
-        newSp.extra(localPositionColumn) = pCL->localPosition<2>().y();
+        node.pcw = pCL->widthInEta();
+        node.locPosY = pCL->localPosition<2>().y();
       }
     }
 
-    ATH_MSG_VERBOSE("Spacepoints successfully added to new container");
+    ATH_MSG_VERBOSE("Spacepoints successfully added to node storage");
 
-    const int max_layers = m_are_pixels.size();
-    // eta,etaMinus,etaPlus,phi,phiMinus,Phiplus,z,zMinus,zPlus
-    const Acts::Experimental::GbtsRoiDescriptor internalRoi(0, -4.5, 4.5, 0, -std::numbers::pi, std::numbers::pi, 0, -150.0,150.0);
     Acts::SeedContainer2 seeds;
-    m_finder->createSeeds(coreSpacePoints, internalRoi, max_layers, *m_filter, options, seeds);
+    m_finder->createSeeds(nodeStorage, m_are_pixels, m_internalRoi.value(), *m_filter, options, seeds);
 
     // add seeds to the output container
     seedContainer.reserve(seedContainer.size() + seeds.size(), 7.0f);
@@ -178,7 +163,7 @@ namespace ActsTrk {
 
   // this is called in initialise
   // adds all veriables that may have been changed in the gaudi properties defined in headerfile 
-  // TODO: ADD NEW VERIABLES, DELETE OLD ONES AND CHANGE CURRENT ONES TO NEW VALUES 
+  
   StatusCode GbtsSeedingTool::prepareConfiguration() {
     m_finderCfg.lrtMode = m_LRTmode;
     m_finderCfg.useMl = m_useML;
@@ -194,69 +179,89 @@ namespace ActsTrk {
     m_finderCfg.doubletFilterRZ = m_doubletFilterRZ;
     m_finderCfg.minDeltaRadius = m_minDeltaRadius;
     m_finderCfg.nMaxEdges = m_nMaxEdges;
-    m_finderCfg.tauRatioCut = m_tau_ratio_cut; 
-    m_finderCfg.tauRatioPrecut = m_tau_ratio_precut;
-    m_finderCfg.edgeMaskMinEta = m_edge_mask_min_eta;
-    m_finderCfg.hitShareThreshold = m_hit_share_threshold;
-    m_finderCfg.maxEndcapClusterWidth = m_max_endcap_clusterwidth;
-    m_finderCfg.d0Max = m_d0_max;
+    m_finderCfg.tauRatioCut = m_tauRatioCut; 
+    m_finderCfg.tauRatioPrecut = m_tauRatioPrecut;
+    m_finderCfg.edgeMaskMinEta = m_edgeMaskMinEta;
+    m_finderCfg.hitShareThreshold = m_hitShareThreshold;
+    m_finderCfg.maxEndcapClusterWidth = m_maxEndcapClusterwidth;
+    m_finderCfg.d0Max = m_d0Max;
+
+    //use roi for pixel and given value for strip
+    m_finderCfg.maxZ0 = m_LRTmode ? m_maxZ0.value() : m_internalRoi->zMax();
+    m_finderCfg.minZ0 = m_LRTmode ? m_minZ0.value() : m_internalRoi->zMin();
+
     m_finderCfg.validateTriplets = m_validateTriplets;
     m_finderCfg.useAdaptiveCuts = m_useAdaptiveCuts;
-    m_finderCfg.tauRatioCorr = m_tau_ratio_corr;
+    m_finderCfg.tauRatioCorr = m_tauRatioCorr;
     m_finderCfg.addTriplets = m_addTriplets;
     m_finderCfg.maxAbsEtaAddTripelts = m_maxEtaAddTriplets;
+    m_finderCfg.cutDPhiMax = m_cutDPhiMax;
+    m_finderCfg.cutDCurvMax = m_cutDCurvMax;
+    m_finderCfg.minDeltaPhi = m_minDeltaPhi;
+    m_finderCfg.maxOuterRadius = m_maxOuterRadius;
+
     m_filterCfg.sigmaMS = m_sigmaMS;
     m_filterCfg.radLen = m_radLen;
-    m_filterCfg.sigmaX = m_sigma_x;
-    m_filterCfg.sigmaY = m_sigma_y;
-    m_filterCfg.weightX = m_weight_x;
-    m_filterCfg.weightY = m_weight_y;
-    m_filterCfg.maxDChi2X = m_maxDChi2_x;
-    m_filterCfg.maxDChi2Y = m_maxDChi2_y;
-    m_filterCfg.addHit = m_add_hit;
-    m_filterCfg.maxCurvature = m_max_curvature;
-    m_filterCfg.maxZ0 = m_max_z0;
+    m_filterCfg.sigmaX = m_sigmaX;
+    m_filterCfg.sigmaY = m_sigmaY;
+    m_filterCfg.weightX = m_weightX;
+    m_filterCfg.weightY = m_weightY;
+    m_filterCfg.maxDChi2X = m_maxDChi2X;
+    m_filterCfg.maxDChi2Y = m_maxDChi2Y;
+    m_filterCfg.addHit = m_addHit;
+    m_filterCfg.maxCurvature = m_maxCurvature;
+    m_filterCfg.maxZ0 = m_filterMaxZ0;
 
     return StatusCode::SUCCESS;
   }
 
   // called in initialise, used to make sure all config settings look sensible
-  void GbtsSeedingTool::printGbtsConfig() const {
-    ATH_MSG_DEBUG("===== GBTS finder config =====");
-    ATH_MSG_DEBUG( "beamSpotCorrection: " << m_finderCfg.beamSpotCorrection);
-    ATH_MSG_DEBUG( "connectorInputFile: " << m_finderCfg.connectorInputFile);
-    ATH_MSG_DEBUG( "lutInputFile: " << m_finderCfg.lutInputFile);
-    ATH_MSG_DEBUG( "lrtMode: " << m_finderCfg.lrtMode);
-    ATH_MSG_DEBUG( "useMl: " << m_finderCfg.useMl);
-    ATH_MSG_DEBUG( "matchBeforeCreate: " << m_finderCfg.matchBeforeCreate);
-    ATH_MSG_DEBUG( "useOldTunings: " << m_finderCfg.useOldTunings);
-    ATH_MSG_DEBUG( "tauRatioPrecut: " << m_finderCfg.tauRatioPrecut);
-    ATH_MSG_DEBUG( "tauRatioCut: " << m_finderCfg.tauRatioCut);
-    ATH_MSG_DEBUG( "etaBinWidthOverride: " << m_finderCfg.etaBinWidthOverride);
-    ATH_MSG_DEBUG( "nMaxPhiSlice: " << m_finderCfg.nMaxPhiSlice);
-    ATH_MSG_DEBUG( "minPt: " << m_finderCfg.minPt);
-    ATH_MSG_DEBUG( "useEtaBinning: " << m_finderCfg.useEtaBinning);
-    ATH_MSG_DEBUG( "doubletFilterRZ: " << m_finderCfg.doubletFilterRZ);
-    ATH_MSG_DEBUG( "nMaxEdges: " << m_finderCfg.nMaxEdges);
-    ATH_MSG_DEBUG( "minDeltaRadius: " << m_finderCfg.minDeltaRadius);
-    ATH_MSG_DEBUG( "edgeMaskMinEta: " << m_finderCfg.edgeMaskMinEta);
-    ATH_MSG_DEBUG( "hitShareThreshold: " << m_finderCfg.hitShareThreshold);
-    ATH_MSG_DEBUG( "maxEndcapClusterWidth: " << m_finderCfg.maxEndcapClusterWidth);
-    ATH_MSG_DEBUG( "addTriplets: " << m_finderCfg.addTriplets);
-    ATH_MSG_DEBUG( "maxEtaAddTriplets " << m_finderCfg.maxAbsEtaAddTripelts);
-    
-    ATH_MSG_DEBUG("===== GBTS filter config =====");
-    ATH_MSG_DEBUG( "sigmaMS: " << m_filterCfg.sigmaMS);
-    ATH_MSG_DEBUG( "radLen: " << m_filterCfg.radLen);
-    ATH_MSG_DEBUG( "sigmaX: " << m_filterCfg.sigmaX);
-    ATH_MSG_DEBUG( "sigmaY: " << m_filterCfg.sigmaY);
-    ATH_MSG_DEBUG( "weightX: " << m_filterCfg.weightX);
-    ATH_MSG_DEBUG( "weightY: " << m_filterCfg.weightY);
-    ATH_MSG_DEBUG( "maxDChi2X: " << m_filterCfg.maxDChi2X);
-    ATH_MSG_DEBUG( "maxDChi2Y: " << m_filterCfg.maxDChi2Y);
-    ATH_MSG_DEBUG( "addHit: " << m_filterCfg.addHit);
-    ATH_MSG_DEBUG( "maxCurvature: " << m_filterCfg.maxCurvature);
-    ATH_MSG_DEBUG( "maxZ0: " << m_filterCfg.maxZ0);
-  }
+void GbtsSeedingTool::printGbtsConfig() const {
+  ATH_MSG_DEBUG("===== GBTS finder config =====");
+  ATH_MSG_DEBUG( "beamSpotCorrection: " << m_finderCfg.beamSpotCorrection);
+  ATH_MSG_DEBUG( "connectorInputFile: " << m_finderCfg.connectorInputFile);
+  ATH_MSG_DEBUG( "lutInputFile: " << m_finderCfg.lutInputFile);
+  ATH_MSG_DEBUG( "lrtMode: " << m_finderCfg.lrtMode);
+  ATH_MSG_DEBUG( "useMl: " << m_finderCfg.useMl);
+  ATH_MSG_DEBUG( "matchBeforeCreate: " << m_finderCfg.matchBeforeCreate);
+  ATH_MSG_DEBUG( "useOldTunings: " << m_finderCfg.useOldTunings);
+  ATH_MSG_DEBUG( "tauRatioPrecut: " << m_finderCfg.tauRatioPrecut);
+  ATH_MSG_DEBUG( "tauRatioCut: " << m_finderCfg.tauRatioCut);
+  ATH_MSG_DEBUG( "tauRatioCorr: " << m_finderCfg.tauRatioCorr);
+  ATH_MSG_DEBUG( "etaBinWidthOverride: " << m_finderCfg.etaBinWidthOverride);
+  ATH_MSG_DEBUG( "nMaxPhiSlice: " << m_finderCfg.nMaxPhiSlice);
+  ATH_MSG_DEBUG( "minPt: " << m_finderCfg.minPt);
+  ATH_MSG_DEBUG( "useEtaBinning: " << m_finderCfg.useEtaBinning);
+  ATH_MSG_DEBUG( "doubletFilterRZ: " << m_finderCfg.doubletFilterRZ);
+  ATH_MSG_DEBUG( "nMaxEdges: " << m_finderCfg.nMaxEdges);
+  ATH_MSG_DEBUG( "minDeltaRadius: " << m_finderCfg.minDeltaRadius);
+  ATH_MSG_DEBUG( "edgeMaskMinEta: " << m_finderCfg.edgeMaskMinEta);
+  ATH_MSG_DEBUG( "hitShareThreshold: " << m_finderCfg.hitShareThreshold);
+  ATH_MSG_DEBUG( "maxEndcapClusterWidth: " << m_finderCfg.maxEndcapClusterWidth);
+  ATH_MSG_DEBUG( "d0Max: " << m_finderCfg.d0Max);
+  ATH_MSG_DEBUG("maxZ0: " << m_finderCfg.maxZ0);
+  ATH_MSG_DEBUG("minZ0: " << m_finderCfg.minZ0);
+  ATH_MSG_DEBUG( "validateTriplets: " << m_finderCfg.validateTriplets);
+  ATH_MSG_DEBUG( "useAdaptiveCuts: " << m_finderCfg.useAdaptiveCuts);
+  ATH_MSG_DEBUG( "addTriplets: " << m_finderCfg.addTriplets);
+  ATH_MSG_DEBUG( "maxEtaAddTriplets: " << m_finderCfg.maxAbsEtaAddTripelts);
+  ATH_MSG_DEBUG("cutDphiMax: " << m_finderCfg.cutDPhiMax);
+  ATH_MSG_DEBUG("cutDCurvMax: " << m_finderCfg.cutDCurvMax);
+  ATH_MSG_DEBUG("minDeltaPhi: " << m_finderCfg.minDeltaPhi);
+  ATH_MSG_DEBUG("maxOuterRadius: " << m_finderCfg.maxOuterRadius);
+
+  ATH_MSG_DEBUG("===== GBTS filter config =====");
+  ATH_MSG_DEBUG( "sigmaMS: " << m_filterCfg.sigmaMS);
+  ATH_MSG_DEBUG( "radLen: " << m_filterCfg.radLen);
+  ATH_MSG_DEBUG( "sigmaX: " << m_filterCfg.sigmaX);
+  ATH_MSG_DEBUG( "sigmaY: " << m_filterCfg.sigmaY);
+  ATH_MSG_DEBUG( "weightX: " << m_filterCfg.weightX);
+  ATH_MSG_DEBUG( "weightY: " << m_filterCfg.weightY);
+  ATH_MSG_DEBUG( "maxDChi2X: " << m_filterCfg.maxDChi2X);
+  ATH_MSG_DEBUG( "maxDChi2Y: " << m_filterCfg.maxDChi2Y);
+  ATH_MSG_DEBUG( "addHit: " << m_filterCfg.addHit);
+  ATH_MSG_DEBUG( "maxCurvature: " << m_filterCfg.maxCurvature);
+  ATH_MSG_DEBUG( "filterMaxZ0: " << m_filterCfg.maxZ0);
+}
 
 } // namespace ActsTrk

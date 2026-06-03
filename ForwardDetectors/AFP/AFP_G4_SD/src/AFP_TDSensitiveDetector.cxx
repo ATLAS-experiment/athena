@@ -5,6 +5,10 @@
 // Class header
 #include "AFP_TDSensitiveDetector.h"
 
+// Athena headers
+#include "HitManagement/HitCollectionMap.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
+
 // Geant4 headers
 #include "G4Version.hh"
 #include "G4TouchableHistory.hh"
@@ -28,42 +32,28 @@
 AFP_TDSensitiveDetector::AFP_TDSensitiveDetector(const std::string& name, const std::string& hitCollectionName)
   : G4VSensitiveDetector( name )
   , m_nHitID(-1)
-  , m_nEventNumber(0)
-  , m_nNumberOfTDSimHits(0)
-  , m_HitColl(hitCollectionName)
+  , m_hitCollectionName(hitCollectionName)
 {
-  for( int i=0; i < 4; i++){
-    for( int j=0; j < 32; j++){
-      m_nNOfTDSimHits[i][j] = 0;
-    }
-  }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void AFP_TDSensitiveDetector::StartOfAthenaEvent()
-{
-  m_nNumberOfTDSimHits=0;
-  for( int i=0; i < 4; i++)
-    {
-      for( int j=0; j < 32; j++)
-        {
-          m_nNOfTDSimHits[i][j] = 0;
-        }
-    }
-}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-// Initialize from G4 - necessary to new the write handle for now
+// Initialize from G4.
 void AFP_TDSensitiveDetector::Initialize(G4HCofThisEvent *)
 {
-  if (!m_HitColl.isValid()) m_HitColl = std::make_unique<AFP_TDSimHitCollection>();
+  m_HitColl = getHitCollection();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 bool AFP_TDSensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
 {
+  if (!m_HitColl) {
+    m_HitColl = getHitCollection();
+    if (!m_HitColl) {
+      return false;
+    }
+  }
+
   if(verboseLevel>5)
     {
       G4cout << "AFP_TDSensitiveDetector::ProcessHits" << G4endl;
@@ -176,9 +166,7 @@ bool AFP_TDSensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
     pHit->m_nStationID=nStationID;
     pHit->m_nDetectorID=nDetectorID;
     pHit->m_nSensitiveElementID=(bRes? 2:1)+2*nQuarticID;//Q1: 1-2, Q2: 3-4
-
     m_HitColl->Insert(*pHit);
-    m_nNumberOfTDSimHits++;
     }
     }
   */
@@ -197,7 +185,6 @@ bool AFP_TDSensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
         // m_HitColl->Emplace(m_nHitID,nTrackID,nParticleEncoding,fKineticEnergy,fEnergyDeposit,
         //                                fWaveLength,fPreStepX,fPreStepY,fPreStepZ,fPostStepX,fPostStepY,
         //                                fPostStepZ,fGlobalTime,nStationID,nDetectorID,((bRes? 2:1)+2*nQuarticID));//Q1: 1-2, Q2: 3-4
-        m_nNumberOfTDSimHits++;
       */
     }
 
@@ -211,10 +198,7 @@ bool AFP_TDSensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
       nQuarticID=szbuff[7]-0x30;
 
       // Cut on maximum number of generated photons/bar
-      if     (nStationID==0 && nQuarticID==0){ if (m_nNOfTDSimHits[0][nDetectorID] >= TDMaxCnt) return 1;}
-      else if(nStationID==0 && nQuarticID==1){ if (m_nNOfTDSimHits[1][nDetectorID] >= TDMaxCnt) return 1;}
-      else if(nStationID==3 && nQuarticID==0){ if (m_nNOfTDSimHits[2][nDetectorID] >= TDMaxCnt) return 1;}
-      else if(nStationID==3 && nQuarticID==1){ if (m_nNOfTDSimHits[3][nDetectorID] >= TDMaxCnt) return 1;}
+      if (m_HitColl->HasReachedLimit(nStationID, nQuarticID, nDetectorID)) return 1;
 
       // Get the Touchable History:
       const G4TouchableHistory* myTouch = static_cast<const G4TouchableHistory*>(pPreStepPoint->GetTouchable());
@@ -406,10 +390,7 @@ bool AFP_TDSensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
         fWaveLength = 2.*M_PI*CLHEP::hbarc/sampledEnergy/(CLHEP::MeV*CLHEP::nm);
 
         // Cut on maximum number of generated photons/bar
-        if     (nStationID==0 && nQuarticID==0){ if (m_nNOfTDSimHits[0][nDetectorID] >= TDMaxCnt) return 1;}
-        else if(nStationID==0 && nQuarticID==1){ if (m_nNOfTDSimHits[1][nDetectorID] >= TDMaxCnt) return 1;}
-        else if(nStationID==3 && nQuarticID==0){ if (m_nNOfTDSimHits[2][nDetectorID] >= TDMaxCnt) return 1;}
-        else if(nStationID==3 && nQuarticID==1){ if (m_nNOfTDSimHits[3][nDetectorID] >= TDMaxCnt) return 1;}
+        if (m_HitColl->HasReachedLimit(nStationID, nQuarticID, nDetectorID)) return 1;
 
         int nSensitiveElementID=-1;
         if(nQuarticID==0) { nSensitiveElementID=1; }
@@ -418,12 +399,7 @@ bool AFP_TDSensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
         m_HitColl->Emplace(m_nHitID,nTrackID,nParticleEncoding,fKineticEnergy,fEnergyDeposit,
                            fWaveLength,PhotonX,PhotonY,PhotonZ,(PhotonX+PX),(PhotonY+PY),(PhotonZ+PZ),
                            fGlobalTime2,nStationID,nDetectorID,nSensitiveElementID);
-        m_nNumberOfTDSimHits++;
-
-        if     (nStationID==0 && nQuarticID==0) m_nNOfTDSimHits[0][nDetectorID]++;
-        else if(nStationID==0 && nQuarticID==1) m_nNOfTDSimHits[1][nDetectorID]++;
-        else if(nStationID==3 && nQuarticID==0) m_nNOfTDSimHits[2][nDetectorID]++;
-        else if(nStationID==3 && nQuarticID==1) m_nNOfTDSimHits[3][nDetectorID]++;
+        m_HitColl->CountHit(nStationID, nQuarticID, nDetectorID);
       }
       if(verboseLevel>5)
         {
@@ -434,21 +410,12 @@ bool AFP_TDSensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
   return true;
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void AFP_TDSensitiveDetector::EndOfAthenaEvent()
+AFP_TDSimHitCollectionBuilder* AFP_TDSensitiveDetector::getHitCollection() const
 {
-  if(verboseLevel>5)
-    {
-      G4cout << "AFP_TDSensitiveDetector::EndOfAthenaEvent: Total number of hits in TD:  " << m_nNumberOfTDSimHits  << G4endl;
-      G4cout << "AFP_TDSensitiveDetector::EndOfAthenaEvent: *************************************************************" << G4endl;
-    }
-  m_nEventNumber++;
-  m_nNumberOfTDSimHits=0;
-
-  for( int i=0; i < 4; i++){
-    for( int j=0; j < 32; j++){
-      m_nNOfTDSimHits[i][j] = 0;
-    }
+  auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo();
+  if (!eventInfo) {
+    return nullptr;
   }
+  auto hitCollections = eventInfo->GetHitCollectionMap();
+  return hitCollections ? hitCollections->Find<AFP_TDSimHitCollectionBuilder>(m_hitCollectionName) : nullptr;
 }

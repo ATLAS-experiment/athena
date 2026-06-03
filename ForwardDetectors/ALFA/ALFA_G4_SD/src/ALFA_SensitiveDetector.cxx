@@ -5,6 +5,10 @@
 // Class header
 #include "ALFA_SensitiveDetector.h"
 
+// Athena headers
+#include "HitManagement/HitCollectionMap.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
+
 // Geant4 headers
 #include "G4ParticleDefinition.hh"
 #include "G4Step.hh"
@@ -22,15 +26,11 @@
 
 ALFA_SensitiveDetector::ALFA_SensitiveDetector(const std::string& name, const std::string& hitCollectionName, const std::string& ODhitCollectionName)
   : G4VSensitiveDetector( name ),
-    m_HitCollection(hitCollectionName),
-    m_ODHitCollection(ODhitCollectionName)
+    m_hitCollectionName(hitCollectionName),
+    m_ODHitCollectionName(ODhitCollectionName)
 {
 
   m_hitID = -1;
-
-  m_eventNumber = 0;
-  m_numberOfHits = 0;
-  m_numberOfODHits = 0;
 
   m_pos1 = 0;
   m_pos2 = 0;
@@ -41,21 +41,21 @@ ALFA_SensitiveDetector::ALFA_SensitiveDetector(const std::string& name, const st
 
 }
 
-void ALFA_SensitiveDetector::StartOfAthenaEvent()
-{
-  m_numberOfHits = 0;
-  m_numberOfODHits = 0;
-}
-
-// Initialize from G4 - necessary to new the write handle for now
+// Initialize from G4.
 void ALFA_SensitiveDetector::Initialize(G4HCofThisEvent *)
 {
-  if (!m_HitCollection.isValid()) m_HitCollection = std::make_unique<ALFA_HitCollection>(m_HitCollection.name());
-  if (!m_ODHitCollection.isValid()) m_ODHitCollection = std::make_unique<ALFA_ODHitCollection>(m_ODHitCollection.name());
+  m_HitCollection = getHitCollection();
+  m_ODHitCollection = getODHitCollection();
 }
 
 bool ALFA_SensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
 {
+  if (!m_HitCollection) {
+    m_HitCollection = getHitCollection();
+  }
+  if (!m_ODHitCollection) {
+    m_ODHitCollection = getODHitCollection();
+  }
 
   const double energyDeposit(pStep->GetTotalEnergyDeposit());
 
@@ -104,18 +104,17 @@ bool ALFA_SensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
       else if(vol_name.find("A7R1") != std::string::npos) n_station=2;
       else if(vol_name.find("B7R1") != std::string::npos) n_station=3;
       else n_station=-1;
-      if(m_HitCollection.isValid())
+      if(m_HitCollection)
         {
           m_HitCollection->Emplace(m_hitID, trackID, particleEncoding, (float) kineticEnergy,
                                    (float) energyDeposit,(float) preStepX, (float) preStepY, (float) preStepZ,
                                    (float) postStepX, (float) postStepY, (float) postStepZ,(float) globalTime,
                                    -1, 100, -1, (int) n_station);
-          m_numberOfHits++;
         }
       else
         {
           G4ExceptionDescription description;
-          description << "ProcessHits: Can't access HitCollection with key " << m_HitCollection.key() << " from store " << m_HitCollection.store();
+          description << "ProcessHits: Can't access HitCollection with key " << m_hitCollectionName;
           G4Exception("ALFA_SensitiveDetector", "InvalidHitColl1", FatalException, description);
           return false; //The G4Exception call above should abort the job, but Coverity does not seem to pick this up.
         }
@@ -158,7 +157,7 @@ bool ALFA_SensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
       n_fiber   = m_num[2];
 
 
-      if(m_HitCollection.isValid())
+      if(m_HitCollection)
         {
           m_HitCollection->Emplace(m_hitID,
                                    trackID,
@@ -170,12 +169,11 @@ bool ALFA_SensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
                                    (float) globalTime,
                                    (int) sign_fiber, (int) n_plate, (int) n_fiber, (int) n_station
                                    );
-          ++m_numberOfHits;
         }
       else
         {
           G4ExceptionDescription description;
-          description << "ProcessHits: Can't access HitCollection with key " << m_HitCollection.key() << " from store " << m_HitCollection.store();
+          description << "ProcessHits: Can't access HitCollection with key " << m_hitCollectionName;
           G4Exception("ALFA_SensitiveDetector", "InvalidHitColl2", FatalException, description);
           return false; //The G4Exception call above should abort the job, but Coverity does not seem to pick this up.
         }
@@ -228,7 +226,7 @@ bool ALFA_SensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
       n_plate   = m_num[1];
       n_fiber   = m_num[2];
 
-      if(m_ODHitCollection.isValid())
+      if(m_ODHitCollection)
         {
           m_ODHitCollection->Emplace(m_hitID,
                                      trackID,
@@ -240,12 +238,11 @@ bool ALFA_SensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
                                      (float) globalTime,
                                      (int) sign_fiber, (int) OD_side, (int) n_plate, (int) n_fiber, (int) n_station
                                      );
-          ++m_numberOfODHits;
         }
       else
         {
           G4ExceptionDescription description;
-          description << "ProcessHits: Can't access HitCollection with key " << m_ODHitCollection.key() << " from store " << m_ODHitCollection.store();
+          description << "ProcessHits: Can't access HitCollection with key " << m_ODHitCollectionName;
           G4Exception("ALFA_SensitiveDetector", "InvalidHitColl3", FatalException, description);
           return false; //The G4Exception call above should abort the job, but Coverity does not seem to pick this up.
         }
@@ -256,14 +253,22 @@ bool ALFA_SensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
   return true;
 }
 
-void ALFA_SensitiveDetector::EndOfAthenaEvent()
+ALFA_HitCollection* ALFA_SensitiveDetector::getHitCollection() const
 {
-  G4cout << " Total number of hits in MD: " << m_numberOfHits << G4endl;
-  G4cout << " Total number of hits in OD: " << m_numberOfODHits << G4endl;
-  G4cout << "*************************************************************" << G4endl;
+  auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo();
+  if (!eventInfo) {
+    return nullptr;
+  }
+  auto hitCollections = eventInfo->GetHitCollectionMap();
+  return hitCollections ? hitCollections->Find<ALFA_HitCollection>(m_hitCollectionName) : nullptr;
+}
 
-  ++m_eventNumber;
-
-  m_numberOfHits = 0;
-  m_numberOfODHits = 0;
+ALFA_ODHitCollection* ALFA_SensitiveDetector::getODHitCollection() const
+{
+  auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo();
+  if (!eventInfo) {
+    return nullptr;
+  }
+  auto hitCollections = eventInfo->GetHitCollectionMap();
+  return hitCollections ? hitCollections->Find<ALFA_ODHitCollection>(m_ODHitCollectionName) : nullptr;
 }

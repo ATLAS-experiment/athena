@@ -215,17 +215,17 @@ CollectionTree(xAOD::EventInfo_v1/EventInfo)        DEBUG Branch container 'xAOD
 CollectionTree(xAOD::EventInfo_v1/EventInfo)        DEBUG Opened container CollectionTree(xAOD::EventInfo_v1/EventInfo) of type ROOT_Tree
 StreamCopy                                          DEBUG  Added object 45903698,"EventInfo"
 StreamCopy.StreamCopyTool                           DEBUG In connectOutput SimplePoolReplica1.root
-SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  CREATE    [ROOT_All] ##Shapes
+SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  WRITE     [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
 ##Shapes                                            DEBUG    attributes# = 1
 ##Shapes                                            DEBUG Opened container ##Shapes of type ROOT_Tree
 ##Shapes                                            DEBUG No objects passing selection criteria... Container has 0 Entries in total.
-SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  CREATE    [ROOT_All] ##Links
+SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  WRITE     [ROOT_All] ##Links
 ##Links                                             DEBUG Opening
 ##Links                                             DEBUG    attributes# = 1
 ##Links                                             DEBUG Opened container ##Links of type ROOT_Tree
 ##Links                                             DEBUG No objects passing selection criteria... Container has 0 Entries in total.
-SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  CREATE    [ROOT_All] ##Params
+SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  WRITE     [ROOT_All] ##Params
 ##Params                                            DEBUG Opening
 ##Params                                            DEBUG    attributes# = 1
 ##Params                                            DEBUG Opened container ##Params of type ROOT_Tree
@@ -236,14 +236,14 @@ RootDatabase                                        DEBUG File name SimplePoolRe
 StreamCopy.StreamCopyTool                           DEBUG Connected to SimplePoolReplica1.root
 StreamCopy.StreamCopyTool                           DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamCopy'
 StreamCopy                                          DEBUG connectOutput done for SimplePoolReplica1.root
-SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] CollectionTree(EventInfo_p4/McEventInfo)
+SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  WRITE     [ROOT_TreeIndex] CollectionTree(EventInfo_p4/McEventInfo)
 CollectionTree(EventInfo_p4/McEventInfo)            DEBUG Opening
 CollectionTree(EventInfo_p4/McEventInfo)            DEBUG    attributes# = 1
 CollectionTree(EventInfo_p4/McEventInfo)            DEBUG Branch container 'EventInfo_p4_McEventInfo'
 CollectionTree(EventInfo_p4/McEventInfo)            DEBUG Opened container CollectionTree(EventInfo_p4/McEventInfo) of type ROOT_Tree
 SimplePoolReplica1.root                             DEBUG ---->Class:EventInfo_p4
 SimplePoolReplica1.root                             DEBUG ---->[0]:EventInfo_p4 Typ:EventInfo_p4 [21] Size:0 Offset:0 #Elements:1
-SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] CollectionTree(ExampleHitContainer_p1/MyHits)
+SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  WRITE     [ROOT_TreeIndex] CollectionTree(ExampleHitContainer_p1/MyHits)
 CollectionTree(ExampleHitContainer_p1/MyHits)       DEBUG Opening
 CollectionTree(ExampleHitContainer_p1/MyHits)       DEBUG    attributes# = 1
 CollectionTree(ExampleHitContainer_p1/MyHits)       DEBUG Branch container 'ExampleHitContainer_p1_MyHits'
@@ -251,28 +251,28 @@ CollectionTree(ExampleHitContainer_p1/MyHits)       DEBUG Opened container Colle
 SimplePoolReplica1.root                             DEBUG ---->Class:ExampleHitContainer_p1
 SimplePoolReplica1.root                             DEBUG ---->[0]:ExampleHitContainer_p1 Typ:ExampleHitContainer_p1 [21] Size:0 Offset:0 #Elements:1
 TBranchAuxDynReader                                  INFO ../TBranchAuxDynReader.cxx (FUNC): attribute 'mcEventNumber' (id=1 typename=unsigned long) has different type than the branch: ULong64_t  Marking for schema evolution.
-SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)
+SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  WRITE     [ROOT_TreeIndex] CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)
 CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Opening
 CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG    attributes# = 1
 CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Branch container 'xAOD::EventAuxInfo_v3_EventInfoAux.'
 CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Opened container CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.) of type ROOT_Tree
 SimplePoolReplica1.root                             DEBUG ---->Class:xAOD::EventAuxInfo_v3
 SimplePoolReplica1.root                             DEBUG ---->[0]:xAOD::EventAuxInfo_v3 Typ:xAOD::EventAuxInfo_v3 [21] Size:0 Offset:0 #Elements:1
-SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] CollectionTree(xAOD::EventInfo_v1/EventInfo)
+SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  WRITE     [ROOT_TreeIndex] CollectionTree(xAOD::EventInfo_v1/EventInfo)
 CollectionTree(xAOD::EventInfo_v1/EventInfo)        DEBUG Opening
 CollectionTree(xAOD::EventInfo_v1/EventInfo)        DEBUG    attributes# = 1
 CollectionTree(xAOD::EventInfo_v1/EventInfo)        DEBUG Branch container 'xAOD::EventInfo_v1_EventInfo'
 CollectionTree(xAOD::EventInfo_v1/EventInfo)        DEBUG Opened container CollectionTree(xAOD::EventInfo_v1/EventInfo) of type ROOT_Tree
 SimplePoolReplica1.root                             DEBUG ---->Class:xAOD::EventInfo_v1
 SimplePoolReplica1.root                             DEBUG ---->[0]:xAOD::EventInfo_v1 Typ:xAOD::EventInfo_v1 [21] Size:0 Offset:0 #Elements:1
-SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] POOLContainer(DataHeader)
+SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  WRITE     [ROOT_TreeIndex] POOLContainer(DataHeader)
 POOLContainer(DataHeader)                           DEBUG Opening
 POOLContainer(DataHeader)                           DEBUG    attributes# = 1
 POOLContainer(DataHeader)                           DEBUG Branch container 'DataHeader'
 POOLContainer(DataHeader)                           DEBUG Opened container POOLContainer(DataHeader) of type ROOT_Tree
 SimplePoolReplica1.root                             DEBUG ---->Class:DataHeader_p6
 SimplePoolReplica1.root                             DEBUG ---->[0]:DataHeader_p6 Typ:DataHeader_p6 [21] Size:0 Offset:0 #Elements:1
-SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] POOLContainerForm(DataHeaderForm)
+SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  WRITE     [ROOT_TreeIndex] POOLContainerForm(DataHeaderForm)
 POOLContainerForm(DataHeaderForm)                   DEBUG Opening
 POOLContainerForm(DataHeaderForm)                   DEBUG    attributes# = 1
 POOLContainerForm(DataHeaderForm)                   DEBUG Branch container 'DataHeaderForm'
@@ -1131,40 +1131,40 @@ StreamCopy.StreamCopyTool                           DEBUG In connectOutput Simpl
 StreamCopy.StreamCopyTool                           DEBUG Connected to SimplePoolReplica1.root[OutputCollection=MetaDataHdr][PoolContainerPrefix=MetaData][AttributeListKey=]
 StreamCopy.StreamCopyTool                           DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamCopy'
 StreamCopy                                          DEBUG connectOutput done for SimplePoolReplica1.root
-SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.)
+SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  WRITE     [ROOT_TreeIndex] MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.)
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Opening
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG    attributes# = 1
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Branch container 'xAOD::FileMetaDataAuxInfo_v1_FileMetaDataAux.'
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Opened container MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) of type ROOT_Tree
 SimplePoolReplica1.root                             DEBUG ---->Class:xAOD::FileMetaDataAuxInfo_v1
 SimplePoolReplica1.root                             DEBUG ---->[0]:xAOD::FileMetaDataAuxInfo_v1 Typ:xAOD::FileMetaDataAuxInfo_v1 [21] Size:0 Offset:0 #Elements:1
-SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] MetaData(EventStreamInfo_p3/StreamCopy)
+SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  WRITE     [ROOT_TreeIndex] MetaData(EventStreamInfo_p3/StreamCopy)
 MetaData(EventStreamInfo_p3/StreamCopy)             DEBUG Opening
 MetaData(EventStreamInfo_p3/StreamCopy)             DEBUG    attributes# = 1
 MetaData(EventStreamInfo_p3/StreamCopy)             DEBUG Branch container 'EventStreamInfo_p3_StreamCopy'
 MetaData(EventStreamInfo_p3/StreamCopy)             DEBUG Opened container MetaData(EventStreamInfo_p3/StreamCopy) of type ROOT_Tree
 SimplePoolReplica1.root                             DEBUG ---->Class:EventStreamInfo_p3
 SimplePoolReplica1.root                             DEBUG ---->[0]:EventStreamInfo_p3 Typ:EventStreamInfo_p3 [21] Size:0 Offset:0 #Elements:1
-SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] MetaData(xAOD::FileMetaData_v1/FileMetaData)
+SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  WRITE     [ROOT_TreeIndex] MetaData(xAOD::FileMetaData_v1/FileMetaData)
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Opening
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG    attributes# = 1
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Branch container 'xAOD::FileMetaData_v1_FileMetaData'
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Opened container MetaData(xAOD::FileMetaData_v1/FileMetaData) of type ROOT_Tree
 SimplePoolReplica1.root                             DEBUG ---->Class:xAOD::FileMetaData_v1
 SimplePoolReplica1.root                             DEBUG ---->[0]:xAOD::FileMetaData_v1 Typ:xAOD::FileMetaData_v1 [21] Size:0 Offset:0 #Elements:1
-SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] MetaData(IOVMetaDataContainer_p1//TagInfo)
+SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  WRITE     [ROOT_TreeIndex] MetaData(IOVMetaDataContainer_p1//TagInfo)
 MetaData(IOVMetaDataContainer_p1//TagInfo)          DEBUG Opening
 MetaData(IOVMetaDataContainer_p1//TagInfo)          DEBUG    attributes# = 1
 MetaData(IOVMetaDataContainer_p1//TagInfo)          DEBUG Branch container 'IOVMetaDataContainer_p1__TagInfo'
 MetaData(IOVMetaDataContainer_p1//TagInfo)          DEBUG Opened container MetaData(IOVMetaDataContainer_p1//TagInfo) of type ROOT_Tree
 SimplePoolReplica1.root                             DEBUG ---->Class:IOVMetaDataContainer_p1
 SimplePoolReplica1.root                             DEBUG ---->[0]:IOVMetaDataContainer_p1 Typ:IOVMetaDataContainer_p1 [21] Size:0 Offset:0 #Elements:1
-SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] MetaDataHdr(DataHeader)
+SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  WRITE     [ROOT_TreeIndex] MetaDataHdr(DataHeader)
 MetaDataHdr(DataHeader)                             DEBUG Opening
 MetaDataHdr(DataHeader)                             DEBUG    attributes# = 1
 MetaDataHdr(DataHeader)                             DEBUG Branch container 'DataHeader'
 MetaDataHdr(DataHeader)                             DEBUG Opened container MetaDataHdr(DataHeader) of type ROOT_Tree
-SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] MetaDataHdrForm(DataHeaderForm)
+SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  WRITE     [ROOT_TreeIndex] MetaDataHdrForm(DataHeaderForm)
 MetaDataHdrForm(DataHeaderForm)                     DEBUG Opening
 MetaDataHdrForm(DataHeaderForm)                     DEBUG    attributes# = 1
 MetaDataHdrForm(DataHeaderForm)                     DEBUG Branch container 'DataHeaderForm'

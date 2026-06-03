@@ -48,6 +48,11 @@ class HGTDCluster_v1 : public UncalibratedMeasurement_v1 {
     SG::ConstAccessor<SG::JaggedVecElt<int> >::element_type
     totList() const;
 
+    /// Return the measured time in ns.
+    float time() const;
+
+    /// Return the covariance of the measured time in ns squared.
+    float timeCovariance() const;
 
     /// @name Functions to set HGTD cluster properties
     /// @{
@@ -64,7 +69,15 @@ class HGTDCluster_v1 : public UncalibratedMeasurement_v1 {
 
     static const SG::AuxElement::Accessor<SG::JaggedVecElt<Identifier::value_type> > rdoListAcc() { return s_rdoListAcc; }
     static const SG::AuxElement::Accessor<SG::JaggedVecElt<int> > totListAcc() { return s_totListAcc; }
+
     /// @}
+
+    /// Convenience methods to extract the time from the local position in ns.
+    static float time(ConstVectorMap<3> local_position);
+    static float time(VectorMap<3> local_position);
+    /// Convenience methods to extract the time covariance from the local covariance in ns squared.
+    static float timeCovariance(ConstMatrixMap<3> local_covariance);
+    static float timeCovariance(MatrixMap<3> local_covariance);
 protected:
     static const SG::AuxElement::Accessor<SG::JaggedVecElt<Identifier::value_type> > s_rdoListAcc;
     static const SG::AuxElement::Accessor<SG::JaggedVecElt<int> > s_totListAcc;
@@ -82,6 +95,25 @@ inline
 SG::ConstAccessor<SG::JaggedVecElt<int> >::element_type
 HGTDCluster_v1::totList() const {
    return s_totListAcc(*this);
+}
+
+inline float HGTDCluster_v1::time(VectorMap<3> local_position) {
+   return local_position[2];
+}
+inline float HGTDCluster_v1::timeCovariance(MatrixMap<3> local_covariance) {
+   return local_covariance(2,2);
+}
+inline float HGTDCluster_v1::time(ConstVectorMap<3> local_position) {
+   return local_position[2];
+}
+inline float HGTDCluster_v1::timeCovariance(ConstMatrixMap<3> local_covariance) {
+   return local_covariance(2,2);
+}
+inline float HGTDCluster_v1::time() const {
+   return HGTDCluster_v1::time(this->localPosition<3>());
+}
+inline float HGTDCluster_v1::timeCovariance() const {
+   return HGTDCluster_v1::timeCovariance(this->localCovariance<3>());
 }
 
 } // namespace xAOD

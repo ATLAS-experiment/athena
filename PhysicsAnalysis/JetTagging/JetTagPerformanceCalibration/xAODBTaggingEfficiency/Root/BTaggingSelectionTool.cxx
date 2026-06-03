@@ -13,12 +13,14 @@
 #include "PathResolver/PathResolver.h"
 
 #include "TFile.h"
+#include "TKey.h"
 #include "TObjArray.h"
 #include "TObjString.h"
 #include "TMatrixD.h"
 
 #include <algorithm>
 #include <string>
+#include <boost/algorithm/string.hpp>
 
 using std::string;
 
@@ -154,16 +156,46 @@ StatusCode BTaggingSelectionTool::initialize() {
       if(m_useCTag)
       ATH_MSG_WARNING( "Running in Continuous WP and using 1D c-tagging");
       m_continuous   = true;
-      // For GN2v01, we have different WPs than the default ones.
-      if ( m_taggerName == "GN2v01" )
-        m_wps_raw="FixedCutBEff_90,FixedCutBEff_85,FixedCutBEff_77,FixedCutBEff_70,FixedCutBEff_65";
-      else if (m_taggerName == "GN3EPCLV01" || m_taggerName == "GN3PflowMuonsV00")
-        m_wps_raw="FixedCutBEff_90,FixedCutBEff_85,FixedCutBEff_80,FixedCutBEff_75,FixedCutBEff_70";
-      std::vector<std::string> workingpoints = split(m_wps_raw, ',');
+
+      std::string subDirName = m_taggerName + "/" + m_jetAuthor;
+      // Get directory containing the cuts information 
+      TDirectoryFile *tmpDir = dynamic_cast<TDirectoryFile*>( m_inf->Get(subDirName.c_str()) );
+      if (!tmpDir){
+        // Raise error if could not retrieve subdirectory 
+        ATH_MSG_ERROR( "CDI file does not contain sub-directory: " << subDirName );
+        return StatusCode::FAILURE;
+      }
+      
+      // Now retrieve the name of the b-tagging fixed cut efficiency working points 
+      static const std::string fixedBCutPrefix = "FixedCutBEff_";
+      std::vector<std::string> workingpoints;
+      
+      // Loop over keys in the sub directory and select the ones corresponding to fixed cuts 
+      TIter next(tmpDir->GetListOfKeys());
+      TKey *key;
+      while ((key = (TKey*)next())) {
+        std::string keyName = key->GetName();
+        // Check if key begins with prefix in that case it's one of the working point
+        // Also make sure the key is not already in the vector as 
+        // the list of keys from GetListOfKeys() can contain several times the same name
+        // because there can be several cycle number per objects
+        // since here we check the entry is not already in the vector it's fine 
+        // See
+        // https://root-forum.cern.ch/t/tkey-tobject-and-getlistofkeys-for-only-newest-ttrees/25928/3
+        // https://root-forum.cern.ch/t/tkey-tobject-and-getlistofkeys-for-only-newest-ttrees/25928/7
+        if (boost::starts_with(keyName, fixedBCutPrefix) && 
+            std::find(workingpoints.begin(), workingpoints.end(), keyName) == workingpoints.end()){
+            // Add efficiency working point to the vector 
+            workingpoints.push_back( keyName );
+        }
+      }
+      
+      // After having retrieved all b-tagging working points 
+      // Sort vector then set descending order i.e. loosest working point first 
       std::sort(workingpoints.begin(), workingpoints.end());
       std::reverse(workingpoints.begin(), workingpoints.end()); // put in descending order
       for(const std::string& wp : workingpoints){
-        cutname = m_taggerName + "/" + m_jetAuthor + "/" + wp + "/cutvalue";
+        cutname = subDirName + "/" + wp + "/cutvalue";
         m_tagger.constcut = dynamic_cast<TVector*> (m_inf->Get(cutname));
         if (m_tagger.constcut != nullptr) {
           m_continuouscuts.push_back(m_tagger.constcut[0](0));

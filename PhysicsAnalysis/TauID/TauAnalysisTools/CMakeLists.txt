@@ -10,30 +10,17 @@ find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 find_package( onnxruntime )
 
 # Libraries in the package:
-if( XAOD_STANDALONE )
-   atlas_add_library( TauAnalysisToolsLib
-      TauAnalysisTools/*.h Root/*.cxx
-      PUBLIC_HEADERS TauAnalysisTools
-      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
-      LINK_LIBRARIES ${ROOT_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} 
-                     AsgTools xAODEgamma xAODMuon xAODJet xAODTau xAODTracking 
-                     xAODTruth TruthUtils PATCoreLib PATInterfaces tauRecToolsLib 
-                     MCTruthClassifierLib TruthUtils AsgAnalysisInterfaces
-                     xAODCore xAODBTagging AthOnnxInterfaces AthOnnxUtilsLib ColumnarCoreLib ColumnarTauLib ColumnarEventInfoLib
-      PRIVATE_LINK_LIBRARIES AthLinks xAODEventInfo xAODMetaData PathResolver )
-else()
-   atlas_add_library( TauAnalysisToolsLib
-      TauAnalysisTools/*.h Root/*.cxx
-      PUBLIC_HEADERS TauAnalysisTools
-      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
-      LINK_LIBRARIES ${ROOT_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} 
-                     AsgTools xAODEgamma xAODMuon xAODJet xAODTau xAODTracking 
-                     xAODTruth TruthUtils PATCoreLib PATInterfaces 
-                     ElectronPhotonSelectorToolsLib tauRecToolsLib 
-                     MCTruthClassifierLib TruthUtils AsgAnalysisInterfaces GaudiKernel
-                     xAODCore xAODBTagging AthOnnxInterfaces AthOnnxUtilsLib ColumnarCoreLib ColumnarTauLib ColumnarEventInfoLib
-      PRIVATE_LINK_LIBRARIES AthLinks xAODEventInfo xAODMetaData PathResolver )
-endif()
+atlas_add_library( TauAnalysisToolsLib
+   TauAnalysisTools/*.h Root/*.cxx
+   PUBLIC_HEADERS TauAnalysisTools
+   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
+   LINK_LIBRARIES ${ROOT_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} 
+                  AsgTools xAODEgamma xAODMuon xAODJet xAODTau xAODTracking 
+                  xAODTruth TruthUtils PATCoreLib PATInterfaces tauRecToolsLib 
+                  MCTruthClassifierLib TruthUtils AsgAnalysisInterfaces
+                  xAODCore xAODBTagging AthOnnxInterfaces AthOnnxUtilsLib ColumnarCoreLib ColumnarTauLib ColumnarEventInfoLib
+                  ColumnarTruthLib ColumnarJetLib TruthUtils
+   PRIVATE_LINK_LIBRARIES AthLinks xAODEventInfo xAODMetaData PathResolver )
 
 if( NOT XAOD_STANDALONE )
    atlas_add_component( TauAnalysisTools

@@ -18,6 +18,7 @@
 #include "xAODInDetMeasurement/StripCluster.h"
 #include "xAODInDetMeasurement/HGTDCluster.h"
 #include "boost/container/static_vector.hpp"
+#include "ActsInterop/UnitConverters.h"
 
 namespace ActsTrk::detail {
 
@@ -119,6 +120,7 @@ private:
     void connect(const EventContext &ctx,
                  const T_CalibratorToolHandle &calibrator_tool,
                  T_Delegate &delegate);
+
 };
 
 } // namespace ActsTrk

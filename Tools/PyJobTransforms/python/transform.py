@@ -481,6 +481,8 @@ class transform(object):
                 try:
                     executor.execute()
                     executor.postExecute()
+                except Exception as e:
+                    msg.error('Exception encountered during execution of {0}:{1}'.format(executor.name,e))
                 finally:
                     # Swap out the output files for the version with [] lists expanded
                     if 'mpi' in self._argdict:

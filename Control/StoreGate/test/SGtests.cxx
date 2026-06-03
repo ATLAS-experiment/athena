@@ -142,6 +142,7 @@ public:
   virtual bool clearDecorations() override { std::abort(); }
   virtual size_t size() const override { std::abort(); }
   virtual void lockDecoration (SG::auxid_t) override { std::abort(); }
+  virtual void toTransient (const EventContext&) override { std::abort(); }
 
   bool m_locked;
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaOutputStream.h"
@@ -231,7 +231,7 @@ void AthenaOutputStream::handle(const Incident& inc)
          if( m_outSeqSvc->inConcurrentEventsMode() ) {
             // EventService MT - write metadata and close all remaining substreams
             while( m_streamerMap.size() > 0 ) {
-               finalizeRange( m_streamerMap.begin()->first );
+               finalizeRange( inc.context(), m_streamerMap.begin()->first );
             }
             return;
          }
@@ -243,7 +243,7 @@ void AthenaOutputStream::handle(const Incident& inc)
          }
       }
       // not in Event Service
-      writeMetaData();
+      writeMetaData(inc.context());
    }
    else if( m_outSeqSvc->inUse() ) {
       // Handle Event Ranges for Event Service
@@ -259,7 +259,7 @@ void AthenaOutputStream::handle(const Incident& inc)
          // get the current/old range filename for this slot
          const std::string rangeFN = m_slotRangeMap[ slot ];
          // build the new range filename for this slot
-         const std::string newRangeFN = m_outSeqSvc->buildSequenceFileName( m_outputName );
+         const std::string newRangeFN = m_outSeqSvc->buildSequenceFileName(inc.context(), m_outputName );
          if( !rangeFN.empty() and rangeFN != newRangeFN ) {
             ATH_MSG_INFO(std::format("Slot range change: '{}' -> '{}'", rangeFN, newRangeFN));
             ATH_MSG_DEBUG(std::format("There are {} slots in use",m_slotRangeMap.size()));
@@ -267,13 +267,13 @@ void AthenaOutputStream::handle(const Incident& inc)
                ATH_MSG_DEBUG(std::format("Slot: {}  FN={}", range.first, range.second));
             }
             if( count_events_in_range(rangeFN) == 1 ) {
-               finalizeRange( rangeFN );
+               finalizeRange( inc.context(), rangeFN );
             }
          }
          ATH_MSG_INFO(std::format("slot {} processing event in range: {}", slot, newRangeFN));
          m_slotRangeMap[ slot ] = newRangeFN;
          // remember the RangeID for this slot so we can write metadata *after* a range change
-         m_rangeIDforRangeFN[ newRangeFN ] = m_outSeqSvc->currentRangeID();
+         m_rangeIDforRangeFN[ newRangeFN ] = m_outSeqSvc->currentRangeID(inc.context());
       }
       else if( inc.type() == IncidentType::EndProcessing ) {
          ATH_MSG_DEBUG(std::format("There are {} slots in use", m_slotRangeMap.size()));
@@ -285,7 +285,7 @@ void AthenaOutputStream::handle(const Incident& inc)
             // - except the last range, because there is no next range to clear the slot map
             const std::string rangeFN = m_slotRangeMap[ slot ];
             if( count_events_in_range(rangeFN) == 1 ) {
-               finalizeRange( rangeFN );
+               finalizeRange( inc.context(), rangeFN );
                m_slotRangeMap[ slot ].clear();
             }
          }
@@ -295,14 +295,14 @@ void AthenaOutputStream::handle(const Incident& inc)
 }
 
 // Note - this method works in any slot - MetaCont uses the filenames to find objects
-void AthenaOutputStream::finalizeRange( const std::string & rangeFN )
+void AthenaOutputStream::finalizeRange( const EventContext& ctx, const std::string & rangeFN )
 {
    ATH_MSG_DEBUG(std::format("Writing MetaData to {}", rangeFN));
    // MN: not calling StopMetaData Incident here but directly writeMetaData() - OK for Sim, check others
    // metadata tools like CutFlowSvc are not able to handle this yet
-   const std::string rememberID = m_outSeqSvc->setRangeID( m_rangeIDforRangeFN[ rangeFN ] );
-   writeMetaData( rangeFN );
-   m_outSeqSvc->setRangeID( rememberID );
+   const std::string rememberID = m_outSeqSvc->setRangeID( ctx, m_rangeIDforRangeFN[ rangeFN ] );
+   writeMetaData( ctx, rangeFN );
+   m_outSeqSvc->setRangeID( ctx, rememberID );
 
    ATH_MSG_INFO(std::format("Finished writing Event Sequence to {}", rangeFN));
    auto strm_iter = m_streamerMap.find( rangeFN );
@@ -315,7 +315,7 @@ void AthenaOutputStream::finalizeRange( const std::string & rangeFN )
 // Method to write MetaData for this stream
 // in ES mode the range substream is determined by the current Event slot
 // called from the incident handler - returns void and throws GaudiExceptions on errors
-void AthenaOutputStream::writeMetaData(const std::string& outputFN)
+void AthenaOutputStream::writeMetaData(const EventContext& ctx, const std::string& outputFN)
 {
    // use main stream tool by default, or per outputFile in ES mode
    IAthenaOutputStreamTool* streamer = outputFN.empty()? &*m_streamer : m_streamerMap[outputFN].get();
@@ -332,7 +332,7 @@ void AthenaOutputStream::writeMetaData(const std::string& outputFN)
    MetaDataSvc::ToolLockGuard   tool_guard( *m_metaDataSvc );
 
    // Prepare the WriteDataHeaderForms incident
-   std::string DHFWriteIncidentfileName = m_outSeqSvc->buildSequenceFileName(m_outputName);
+   std::string DHFWriteIncidentfileName = m_outSeqSvc->buildSequenceFileName(ctx, m_outputName);
    // remove technology from the name
    size_t pos = DHFWriteIncidentfileName.find(':');
    if( pos != std::string::npos ) DHFWriteIncidentfileName = DHFWriteIncidentfileName.substr(pos+1);
@@ -354,7 +354,7 @@ void AthenaOutputStream::writeMetaData(const std::string& outputFN)
           (pAsIProp->setProperty("ItemList", m_metadataItemList.toString())).isFailure()) {
          throw GaudiException("Folder property [metadataItemList] not found", name(), StatusCode::FAILURE);
       }
-      if (write().isFailure()) {
+      if (write(ctx).isFailure()) {
          throw GaudiException("Cannot write metadata", name(), StatusCode::FAILURE);
       }
       FileIncident incident(name(), "WriteDataHeaderForms", DHFWriteIncidentfileName + m_outputAttributes);
@@ -404,6 +404,7 @@ StatusCode AthenaOutputStream::finalize()
 
 // Execute data writer
 StatusCode AthenaOutputStream::execute() {
+   const EventContext& ctx = Gaudi::Hive::currentContext();
    bool failed = false;
    // Call tool preExecute prior to writing
    for (auto& tool : m_helperTools) {
@@ -413,7 +414,7 @@ StatusCode AthenaOutputStream::execute() {
    }
    // Write the event if the event is accepted
    if (isEventAccepted()) {
-      if (write().isFailure()) {
+      if (write(ctx).isFailure()) {
          failed = true;
       }
    }
@@ -425,7 +426,7 @@ StatusCode AthenaOutputStream::execute() {
    }
    // See if we should write metadata and do if so
    if( m_writeMetadataAndDisconnect ) {
-      writeMetaData();
+      writeMetaData(ctx);
       m_writeMetadataAndDisconnect = false;
       // finalize will disconnect output
       if( !finalize().isSuccess() ) {
@@ -439,13 +440,13 @@ StatusCode AthenaOutputStream::execute() {
 }
 
 // The main method that performs the writing
-StatusCode AthenaOutputStream::write() {
+StatusCode AthenaOutputStream::write(const EventContext& ctx) {
    bool failed = false;
    IAthenaOutputStreamTool* streamer = &*m_streamer;
    std::string outputFN;
 
    std::unique_lock<mutex_t>  lock(m_mutex);
-   outputFN = m_outSeqSvc->buildSequenceFileName( m_outputName );
+   outputFN = m_outSeqSvc->buildSequenceFileName( ctx, m_outputName );
 
    // Handle Event Ranges
    if( m_outSeqSvc->inUse() and m_outSeqSvc->inConcurrentEventsMode() ) {
@@ -477,7 +478,7 @@ StatusCode AthenaOutputStream::write() {
    // Clear any previously existing item list
    // and collect all objects that are asked to be written out
    clearSelection();
-   ATH_CHECK( collectAllObjects() );
+   ATH_CHECK( collectAllObjects(ctx) );
 
    // keep a local copy of the object lists so they are not overwritten when we release the lock
    IDataSelector objects = std::move( m_objects );
@@ -530,7 +531,7 @@ void AthenaOutputStream::clearSelection()     {
 }
 
 // Collect objects
-StatusCode AthenaOutputStream::collectAllObjects() {
+StatusCode AthenaOutputStream::collectAllObjects(const EventContext& ctx) {
    if (m_itemListFromTool) {
       if (!m_streamer->getInputItemList(&*m_p2BWritten).isSuccess()) {
          ATH_MSG_WARNING("collectAllObjects() could not get ItemList from Tool.");
@@ -545,17 +546,17 @@ StatusCode AthenaOutputStream::collectAllObjects() {
    m_p2BWritten->updateItemList(true);
    // Collect all objects that need to be persistified:
    for (const auto& i : *m_p2BWritten) {
-      ATH_CHECK( addItemObjects(i, *vetoes, *compInfo) );
+      ATH_CHECK( addItemObjects(ctx, i, *vetoes, *compInfo) );
    }
 
    // If there were any variable selections, record the information in SG.
    if (!vetoes->empty()) {
-     ATH_CHECK( SG::makeHandle (m_selVetoesKey).record (std::move (vetoes)) );
+      ATH_CHECK( SG::makeHandle (m_selVetoesKey, ctx).record (std::move (vetoes)) );
    }
 
    // Store the lossy float compression information in the SG.
    if (!compInfo->empty()) {
-     ATH_CHECK( SG::makeHandle (m_compInfoKey).record (std::move (compInfo)) );
+      ATH_CHECK( SG::makeHandle (m_compInfoKey, ctx).record (std::move (compInfo)) );
    }
 
    return StatusCode::SUCCESS;
@@ -564,7 +565,8 @@ StatusCode AthenaOutputStream::collectAllObjects() {
 // Build a list of objects we're going to write out
 // This function also builds the list of vetoed AuxIDs
 // and the lossy float compression lists.
-StatusCode AthenaOutputStream::addItemObjects(const SG::FolderItem& item,
+StatusCode AthenaOutputStream::addItemObjects(const EventContext& ctx,
+                                              const SG::FolderItem& item,
                                               SG::SelectionVetoes& vetoes,
                                               SG::CompressionInfo& compInfo)
 {
@@ -667,7 +669,7 @@ StatusCode AthenaOutputStream::addItemObjects(const SG::FolderItem& item,
                      // create a temporary DataObject for an entry in the  container to pass to CnvSvc
                      DataBucketBase* dbb = static_cast<DataBucketBase*>( itemProxy->object() );
                      const MetaContBase* metaCont = static_cast<MetaContBase*>( dbb->cast( ClassID_traits<MetaContBase>::ID() ) );
-                     void* obj = metaCont? metaCont->getAsVoid( m_outSeqSvc->currentRangeID() ) : nullptr;
+                     void* obj = metaCont? metaCont->getAsVoid( m_outSeqSvc->currentRangeID(ctx) ) : nullptr;
                      if( obj ) {
                         auto altbucket = std::make_unique<AltDataBucket>(
                            obj, item_id, *CLIDRegistry::CLIDToTypeinfo(item_id), proxyName );
@@ -676,7 +678,7 @@ StatusCode AthenaOutputStream::addItemObjects(const SG::FolderItem& item,
                         m_altObjects.push_back( itemProxy->object() ); // only for duplicate prevention
                      } else {
                         ATH_MSG_ERROR(std::format("Failed to retrieve object from MetaCont with key={}, for EventRangeID={}",
-                                      item_key, m_outSeqSvc->currentRangeID()));
+                                      item_key, m_outSeqSvc->currentRangeID(ctx)));
                         return StatusCode::FAILURE;
                      }
                   } else if (item.exact()) {

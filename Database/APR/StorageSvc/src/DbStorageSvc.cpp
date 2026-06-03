@@ -109,7 +109,7 @@ StatusCode DbStorageSvc::finalize()   {
   return rc;
 }
 
-std::string DbStorageSvc::getContName(FileDescriptor& refDB, Token& persToken)  {
+std::string DbStorageSvc::getContName(FileDescriptor& refDB, Token& persToken) const {
   if ( m_domH.isValid() )   {
     DbDatabase dbH(DbDatabaseHNC(refDB.dbc()->handle()));
     if ( dbH.isValid() )  {
@@ -128,13 +128,20 @@ StatusCode DbStorageSvc::getShape( FileDescriptor&       fDesc,
   if ( /*0 != &fDesc &&*/ m_domH.isValid() )   {
     DbDatabase dbH(DbDatabaseHNC(fDesc.dbc()->handle()));
     if ( !dbH.isValid() )  {
-      StatusCode sc = dbH.open(m_domH, fDesc.PFN(), fDesc.FID(), pool::READ);
+      StatusCode sc = dbH.open(m_domH, fDesc.PFN(), fDesc.FID(), Io::READ);
       if ( !sc.isSuccess() )    {
         ATH_MSG_ERROR( "Failed to open the Database!" );
         return sc;
       }
     }
     if ( dbH.isValid() )  {
+      if ( !dbH.info() ) { // ageing may close DbDatabaseObj w/o invalidating DbDatabase
+        StatusCode sc = dbH.open(m_domH, fDesc.PFN(), fDesc.FID(), Io::READ);
+        if ( !sc.isSuccess() )    {
+          ATH_MSG_ERROR( "Failed to re-open the Database!" );
+          return sc;
+        }
+      }
       shape = dbH.objectShape(objType);
       if ( shape )  {
         return StatusCode::SUCCESS;
@@ -182,7 +189,7 @@ StatusCode DbStorageSvc::allocate( FileDescriptor&       fDesc,
                       refCont,
                       DbTypeInfoH(shape),
                       DbType(technology),
-                      pool::CREATE|pool::UPDATE);
+                      Io::WRITE);
       if ( sc.isSuccess() ) {
          Token* t = new Token(cntH.token());
          t->setClassID(shape->shapeID());
@@ -211,7 +218,7 @@ StatusCode DbStorageSvc::read( const FileDescriptor& fDesc,
                                void**                object)
 {
 
-  pool::AccessMode mode = pool::READ;
+  Io::IoFlag mode = Io::READ;
   if ( m_domH.isValid() ) {
     DbType typ(token.technology());
     if ( m_domH.type() == typ ) {
@@ -235,10 +242,10 @@ StatusCode DbStorageSvc::read( const FileDescriptor& fDesc,
 }
 
 /// Start a new Database Session.
-StatusCode DbStorageSvc::startSession(int accessmode, int technology) {
+StatusCode DbStorageSvc::startSession(Io::IoFlag accessmode, int technology, int ageLimit) {
   m_type   = DbType(technology).majorType();
   if( m_domH.open(db(), m_type, accessmode).isSuccess() )  {
-      m_domH.setAgeLimit(m_ageLimit);
+      m_domH.setAgeLimit(ageLimit==-1 ? m_ageLimit : ageLimit);
       return StatusCode::SUCCESS;
   }
   ATH_MSG_ERROR( "Cannot connect to the domain: " << DbType(technology).storageName() );
@@ -258,24 +265,10 @@ StatusCode DbStorageSvc::existsConnection(const FileDescriptor& fDesc) {
 }
 
 /// Connect to a logical Database unit.
-StatusCode DbStorageSvc::connect(int mod, FileDescriptor& fDesc) {
+StatusCode DbStorageSvc::connect(Io::IoFlag mod, FileDescriptor& fDesc) {
   StatusCode sc = StatusCode::FAILURE;
   fDesc.setDbc(0);
   DbDatabase dbH = m_domH.find(fDesc.FID());
-  if( dbH.isValid() ) {
-    int all = pool::READ + pool::CREATE + pool::UPDATE;
-    int wr  = pool::CREATE + pool::UPDATE;
-    int m   = dbH.openMode();
-    if ( (m&all) && mod == pool::READ )
-    ;
-    else if ( m&wr && mod&pool::CREATE )
-    ;
-    else if ( m&wr && mod&pool::UPDATE )
-    ;
-    else
-      dbH.close().ignore();
-  }
-  // No Else!
   if ( !dbH.isValid() )  {
     sc = dbH.open(m_domH, fDesc.PFN(), fDesc.FID(), mod);
     if ( !sc.isSuccess() )    {
@@ -306,7 +299,7 @@ StatusCode DbStorageSvc::disconnect(FileDescriptor& fDesc) {
 }
 
 /// Query the access mode of a Database unit.
-StatusCode DbStorageSvc::openMode(FileDescriptor& refDB, int& mode) {
+StatusCode DbStorageSvc::openMode(FileDescriptor& refDB, Io::IoFlag& mode) {
   DbConnection* dbc = dynamic_cast<DbConnection*>(refDB.dbc());
   if ( dbc )   {
     DbDatabase  dbH(DbDatabaseHNC(dbc->handle()));
@@ -315,7 +308,7 @@ StatusCode DbStorageSvc::openMode(FileDescriptor& refDB, int& mode) {
       return StatusCode::SUCCESS;
     }
   }
-  mode = pool::NOT_OPEN;
+  mode = Io::INVALID;
   return StatusCode::FAILURE;
 }
 

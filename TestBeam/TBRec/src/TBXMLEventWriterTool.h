@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_TBXMLEVENTWRITERTOOL_H
@@ -10,9 +10,9 @@
 
 #include "TBXMLWriterToolBase.h"
 
-#include <iostream>
+#include <iosfwd>
 #include <string>
-#include <map>
+#include <string_view>
 
 class TBXMLWriter;
 
@@ -40,9 +40,9 @@ class TBXMLEventWriterTool : public TBXMLWriterToolBase
  protected:
 
   virtual StatusCode writeRunFiles(const std::string& /* fileDir */,
-				   unsigned int /*runNumber*/ );
+				   unsigned int /*runNumber*/ ) override;
 
   virtual StatusCode writeEvent( std::ostream& outFile,
-				 const std::string& entryTag);
+				 std::string_view entryTag) override;
 };
 #endif

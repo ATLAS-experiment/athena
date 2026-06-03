@@ -7,6 +7,7 @@ atlas_subdir( InDetGNNTracking )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
 find_package( HepPDT )
 find_package(Boost REQUIRED COMPONENTS graph)
+find_package( Acts COMPONENTS Core PluginGnn )
 
 # Component(s) in the package:
 atlas_add_component( InDetGNNTracking
@@ -20,6 +21,7 @@ atlas_add_component( InDetGNNTracking
     InDetPrepRawData TrkTrack TrkRIO_OnTrack InDetSimEvent
     AtlasHepMCLib InDetRIO_OnTrack InDetRawData TrkTruthData
     SiSPSeededTrackFinderData Boost::graph CxxUtils
+    Acts::Core Acts::PluginGnn ActsInteropLib InDetIdentifier
 )
 
 atlas_install_python_modules( python/*.py )

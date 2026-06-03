@@ -29,7 +29,7 @@ class SensitiveDetectorMasterTool : public extends<AthAlgTool, ISensitiveDetecto
   SensitiveDetectorMasterTool(const std::string& type, const std::string& name,
                               const IInterface* parent);
   /// Empty virtual destructor
-  virtual ~SensitiveDetectorMasterTool() {}
+  virtual ~SensitiveDetectorMasterTool() = default;
 
   /// Retrieve the SD tools. SD creation is deferred until initializeSDs.
   StatusCode initialize() override final;

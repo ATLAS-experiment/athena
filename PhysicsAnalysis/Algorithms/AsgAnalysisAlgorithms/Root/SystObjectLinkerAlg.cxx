@@ -9,7 +9,6 @@
 
 #include "AsgAnalysisAlgorithms/SystObjectLinkerAlg.h"
 #include "PATInterfaces/SystematicSet.h"
-#include "AthContainers/ConstDataVector.h"
 
 typedef ElementLink<xAOD::IParticleContainer> iplink_t;
 static const SG::Decorator< iplink_t  > dec_nominalObject("nominalObjectLink");

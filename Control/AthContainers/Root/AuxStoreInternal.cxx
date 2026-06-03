@@ -826,6 +826,47 @@ const IAuxTypeVector* AuxStoreInternal::linkedVector (SG::auxid_t auxid) const
 
 
 /**
+ * @brief Perform post-read processing for a single variable.
+ * @param ctx The current event context.
+ * @param auxid The ID of the variable to process.
+ *
+ * Some object types require some processing after being read before
+ * they are usable.  This can be indicated by specializing SG::ToTransient
+ * for the vector type containing the variable.  This method will call
+ * such a ToTransient method for the single variable identified by AUXID.
+ */
+void AuxStoreInternal::toTransient (const EventContext& ctx, SG::auxid_t auxid)
+{
+  guard_t guard (m_mutex);
+  if (auxid < m_vecs.size() && m_vecs[auxid]) {
+    m_vecs[auxid]->toTransient (ctx);
+  }
+}
+
+
+/**
+ * @brief Perform post-read processing on this store.
+ * @param ctx The current event context.
+ *
+ * Some object types require some processing after being read before
+ * they are usable.  This can be indicated by specializing SG::ToTransient
+ * for the vector type containing the variable.  This method will call
+ * such a ToTransient method for all contained variables for which this
+ * is required.
+ */
+void AuxStoreInternal::toTransient (const EventContext& ctx)
+{
+  guard_t guard (m_mutex);
+  size_t sz = m_vecs.size();
+  for (SG::auxid_t id : m_auxids) {
+    if (id < sz && m_vecs[id]) {
+      m_vecs[id]->toTransient (ctx);
+    }
+  }
+}
+
+
+/**
  * @brief Compute the set of variables to copy in a deep copy.
  * @param auxids Set of all variables.
  * @param decors Set of decorations.

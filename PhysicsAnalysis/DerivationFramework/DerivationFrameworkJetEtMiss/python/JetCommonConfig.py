@@ -26,24 +26,11 @@ def JetCommonCfg(ConfigFlags):
 def StandardJetsInDerivCfg(ConfigFlags):
     """Jet reconstruction needed for PHYS/PHYSLITE"""
 
-    from JetRecConfig.StandardSmallRJets import AntiKt4EMTopo,AntiKt4EMPFlow,AntiKtVR30Rmax4Rmin02PV0Track
-    from JetRecConfig.StandardLargeRJets import AntiKt10UFOCSSKSoftDrop
+    from JetRecConfig.StandardSmallRJets import AntiKt4EMTopo_deriv,AntiKt4EMPFlow_deriv,AntiKtVR30Rmax4Rmin02PV0Track
+    from JetRecConfig.StandardLargeRJets import AntiKt10UFOCSSKSoftDrop_deriv
     from JetRecConfig.JetRecConfig import JetRecCfg
 
     acc = ComponentAccumulator()
-
-    AntiKt4EMTopo_deriv = AntiKt4EMTopo.clone(
-        modifiers = AntiKt4EMTopo.modifiers+("JetPtAssociation",)
-    )
-
-    AntiKt4EMPFlow_deriv = AntiKt4EMPFlow.clone(
-        ghostdefs = AntiKt4EMPFlow.ghostdefs+["UnAssocMuonSegment"],
-        modifiers = AntiKt4EMPFlow.modifiers+("JetPtAssociation","fJVT","NNJVT","CaloEnergiesClus","JetPileupLabel","qgtransformer")
-    )
-
-    AntiKt10UFOCSSKSoftDrop_deriv = AntiKt10UFOCSSKSoftDrop.clone(
-        modifiers = AntiKt10UFOCSSKSoftDrop.modifiers+("toptransformer","wtransformer","wtransformer_massdec")
-    )
 
     jetList = [AntiKt4EMTopo_deriv, AntiKt4EMPFlow_deriv,
                AntiKtVR30Rmax4Rmin02PV0Track,

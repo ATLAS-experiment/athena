@@ -61,7 +61,7 @@ MuonSelector::MuonSelector():
 
   
   // requested muon tag (tight, medium, loose..)
-  m_requestedMuonQuality = xAOD::Muon::Medium; 
+  m_requestedMuonQuality = xAOD::Muon::Quality::Medium; 
 
 
   m_coneSize        = 0.4;
@@ -179,12 +179,7 @@ bool MuonSelector::passSelection( const xAOD::Muon* pxMuon)
       xAOD::Muon::Quality my_quality=m_muonSelectionTool->getQuality(*pxMuon);
       if (m_doDebug) std::cout << "  * MuonSelector::passSelection * muon quality from muonsSelectionTool: " << my_quality << std::endl;
 
-      pass = true; 
-      if (m_requestedMuonQuality == xAOD::Muon::Tight     && my_quality > xAOD::Muon::Tight)     pass = false;
-      if (m_requestedMuonQuality == xAOD::Muon::Medium    && my_quality > xAOD::Muon::Medium)    pass = false;
-      if (m_requestedMuonQuality == xAOD::Muon::Loose     && my_quality > xAOD::Muon::Loose)     pass = false;
-      if (m_requestedMuonQuality == xAOD::Muon::VeryLoose && my_quality > xAOD::Muon::VeryLoose) pass = false;
-
+      pass = (my_quality <= m_requestedMuonQuality); 
       passes.push_back(pass);
       if (m_doDebug &&  pass) std::cout<<"  * MuonSelector::passSelection * Muon Passes official m_muonSelectionTool (medium) Selection :)" << std::endl;
       if (m_doDebug && !pass) std::cout<<"  * MuonSelector::passSelection * Muon Fails official m_muonSelectionTool (medium) Selection" << std::endl;
@@ -222,7 +217,7 @@ bool MuonSelector::passQualCuts()
   bool goodTrack = false;
 
   // First get the muon track, then the summary  
-  const xAOD::TrackParticle* IDTrk = m_pxMuon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle); // use the Inner Detector segment
+  const xAOD::TrackParticle* IDTrk = m_pxMuon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle); // use the Inner Detector segment
   
   if (IDTrk) {
     uint8_t dummy(-1);
@@ -276,10 +271,10 @@ bool MuonSelector::passPtCuts()
 {
 
   if(m_doDebug) std::cout << "    * MuonSelector::passPtCuts * START *" << std::endl; 
-
-  const xAOD::TrackParticle* pxMuonID = m_pxMuon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
-  const xAOD::TrackParticle* pxMuonMS = m_pxMuon->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);
-  const xAOD::TrackParticle* pxMuonCB = m_pxMuon->trackParticle(xAOD::Muon::CombinedTrackParticle);
+  using enum xAOD::Muon::TrackParticleType;
+  const xAOD::TrackParticle* pxMuonID = m_pxMuon->trackParticle(InnerDetectorTrackParticle);
+  const xAOD::TrackParticle* pxMuonMS = m_pxMuon->trackParticle(MuonSpectrometerTrackParticle);
+  const xAOD::TrackParticle* pxMuonCB = m_pxMuon->trackParticle(CombinedTrackParticle);
 
   double pt = 0, ptID, ptMS,ptCB;
 
@@ -351,14 +346,9 @@ bool MuonSelector::passIPCuts()
 {
   float extd0 = 0.0 ;
   float extz0 = 0.0 ;  
-
+  using enum xAOD::Muon::TrackParticleType;
   //I'm not really sure of this logic. 
-  if (m_pxMuon->inDetTrackParticleLink().isValid()) {
-    const xAOD::TrackParticle* IDTrk = m_pxMuon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);  
-    if (!IDTrk) {
-      if (m_doDebug) std::cout << "    * MuonSelector::passIPCuts * no IDTrk --> IP failure" << std::endl;
-	return false;
-    }
+  if (const xAOD::TrackParticle* IDTrk = m_pxMuon->trackParticle(InnerDetectorTrackParticle); IDTrk != nullptr) {
     extd0 = IDTrk->d0();
     extz0 = IDTrk->z0()+IDTrk->vz();
     if(m_doDebug){
@@ -366,11 +356,10 @@ bool MuonSelector::passIPCuts()
 		<< " the IDTrack muon d0:  " << extd0
 		<< " the IDTrack muon z0:  " << extz0 << " = " << IDTrk->z0() << " + " << IDTrk->vz() << std::endl;
     }
-  }
-  else {
+  } else {
     if(m_doDebug) std::cout << "   * MuonSelector * passIPCuts() * no valid inDetTrackParticleLink(). Will use the combined muon IPs" << std::endl;
     
-    const xAOD::TrackParticle* CBTrk = m_pxMuon->trackParticle(xAOD::Muon::CombinedTrackParticle);
+    const xAOD::TrackParticle* CBTrk = m_pxMuon->trackParticle(CombinedTrackParticle);
     if (!CBTrk) {
       if(m_doDebug) std::cout << "   * MuonSelector * passIPCuts() * no valid CombinedTrackParticle. Giving up." << std::endl;
       return false;
@@ -468,16 +457,13 @@ void MuonSelector::finalize()
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void MuonSelector::SetMuonQualityRequirement (std::string newname)
 {
-  int qualityvalue = xAOD::Muon::Tight;
-
-  for_each (newname.begin(), newname.end(), [](char & c) {c = std::toupper(c);} );
+  using enum xAOD::Muon::Quality;
+  std::for_each (newname.begin(), newname.end(), [](char & c) {c = std::toupper(c);} );
   
-  if (newname.find("TIGHT")    != std::string::npos) qualityvalue = xAOD::Muon::Tight;
-  if (newname.find("MEDIUM")   != std::string::npos) qualityvalue = xAOD::Muon::Medium;
-  if (newname.find("LOOSE")    != std::string::npos) qualityvalue = xAOD::Muon::Loose;
-  if (newname.find("VERYLOOSE")!= std::string::npos) qualityvalue = xAOD::Muon::VeryLoose;
-
-  m_requestedMuonQuality = qualityvalue;
+  if (newname.find("TIGHT")    != std::string::npos) m_requestedMuonQuality = Tight;
+  if (newname.find("MEDIUM")   != std::string::npos) m_requestedMuonQuality = Medium;
+  if (newname.find("LOOSE")    != std::string::npos) m_requestedMuonQuality = Loose;
+  if (newname.find("VERYLOOSE")!= std::string::npos) m_requestedMuonQuality = VeryLoose;
 
   std::cout << " ** MuonSelector::SetMuonQualityRequirement(" << newname <<") = " << m_requestedMuonQuality << std::endl;
 

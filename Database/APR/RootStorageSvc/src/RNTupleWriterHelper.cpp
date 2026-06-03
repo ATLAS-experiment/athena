@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RNTupleWriterHelper.h"
@@ -45,6 +45,9 @@ void RNTupleWriterHelper::makeNewEntry() {
     }
   }
   m_entry = m_ntupleWriter->GetModel().CreateBareEntry();
+  if (!m_entry)[[unlikely]]{
+     throw std::runtime_error("RNTupleWriterHelper::makeNewEntry failed to create valid entry.");
+  }
 }
 
 void RNTupleWriterHelper::addAttribute(const attrDataTuple& in) {

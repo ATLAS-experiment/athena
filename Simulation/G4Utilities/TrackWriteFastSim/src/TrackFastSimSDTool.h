@@ -21,6 +21,9 @@ public:
   // Destructor
   ~TrackFastSimSDTool() {}
 protected:
+  StatusCode SetupEvent(HitCollectionMap&) override final;
+  StatusCode Gather(HitCollectionMap&) override final;
+
   // Make me an SD!
   G4VSensitiveDetector* makeSD() const override final;
 };

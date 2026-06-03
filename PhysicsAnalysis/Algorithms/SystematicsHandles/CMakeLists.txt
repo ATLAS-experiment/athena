@@ -10,8 +10,7 @@ atlas_add_library( SystematicsHandlesLib
    PUBLIC_HEADERS SystematicsHandles
    LINK_LIBRARIES AsgTools PATInterfaces AnaAlgorithmLib xAODBase xAODCore AthContainers xAODEventInfo xAODMissingET
    AsgServicesLib AsgDataHandlesLib CxxUtils
-   PRIVATE_LINK_LIBRARIES RootCoreUtils
-   xAODJet xAODMuon xAODEgamma xAODTau )
+   PRIVATE_LINK_LIBRARIES xAODJet xAODMuon xAODEgamma xAODTau )
 
 atlas_add_dictionary( SystematicsHandlesDict
    SystematicsHandles/SystematicsHandlesDict.h

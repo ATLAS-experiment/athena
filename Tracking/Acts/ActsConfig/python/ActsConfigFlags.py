@@ -87,7 +87,7 @@ def createActsConfigFlags():
     from InDetConfig.ITkActsHelpers import primaryPassUsesActs
     actscf.addFlag('Acts.doITkConversion', lambda pcf: (
         pcf.Detector.EnableCalo and primaryPassUsesActs(pcf)))
-    actscf.addFlag('Acts.doLargeRadius', False)
+    actscf.addFlag('Acts.doLargeRadius', True)
     actscf.addFlag('Acts.doLowPt', False)
     
     # Geometry Flags
@@ -113,8 +113,6 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.TrackingGeometry.PassiveITkStripBarrelLayerRadii', [480., 665., 880.])
     actscf.addFlag('Acts.TrackingGeometry.PassiveITkStripBarrelLayerHalflengthZ', [1370., 1370., 1370.])
     actscf.addFlag('Acts.TrackingGeometry.PassiveITkStripBarrelLayerThickness', [1., 1., 1.])
-    actscf.addFlag('Acts.TrackingGeometry.MuonMaterialMapFile', '')
-
     # Monitoring
     actscf.addFlag('Acts.doMonitoring', False)
     actscf.addFlag('Acts.doAnalysis', False)

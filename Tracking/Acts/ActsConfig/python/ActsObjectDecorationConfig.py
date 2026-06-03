@@ -97,6 +97,36 @@ def ActsPixelClusterTruthDecoratorAlgCfg(flags,
     return acc
 
 
+def ActsPLRClusterMeasurementDecoratorAlgCfg(flags,
+                                             name: str = "ActsPLRClusterMeasurementDecoratorAlg",
+                                             **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    kwargs.setdefault("ClusterContainer", "PLR_Clusters")
+    kwargs.setdefault("MeasurementContainer", "PLRMeasurements")
+    kwargs.setdefault("PixelDetEleCollKey", "PLR_DetectorElementCollection")
+    kwargs.setdefault("IDHelperName", "PLR_ID")
+    kwargs.setdefault("MeasurementSizeZ", "sizeR")
+    kwargs.setdefault("UseTruthInfo", False)
+    kwargs.setdefault("KeepOnlyOnTrackMeasurements", False)
+
+    if "LorentzAngleTool" not in kwargs:
+        from SiLorentzAngleTool.PLR_LorentzAngleConfig import PLR_LorentzAngleToolCfg
+        kwargs.setdefault("LorentzAngleTool",
+                          acc.popToolsAndMerge(PLR_LorentzAngleToolCfg(flags)))
+
+    acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterTruthDecoratorAlg(name, **kwargs))
+
+    if flags.Tracking.writeExtendedSi_PRDInfo:
+        toAOD = [
+            f'xAOD::TrackMeasurementValidationContainer#{kwargs["MeasurementContainer"]}',
+            f'xAOD::TrackMeasurementValidationAuxContainer#{kwargs["MeasurementContainer"]}Aux.'
+        ]
+        from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
+        acc.merge(addToAOD(flags, toAOD))
+
+    return acc
+
+
 def ActsStripClusterTruthDecoratorAlgCfg(flags,
                                          name: str = "ActsStripClusterTruthDecoratorAlg",
                                          *,

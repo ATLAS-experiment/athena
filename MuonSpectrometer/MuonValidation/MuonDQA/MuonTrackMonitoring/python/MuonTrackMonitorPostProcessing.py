@@ -52,3 +52,49 @@ def efficiencies_2d(inputs):
     efficiency.GetXaxis().SetTitle("eta")
     efficiency.GetYaxis().SetTitle("phi")
     return [efficiency]
+
+
+def normalize_rows_ROOT(inputs):
+    """
+    Normalize each row (Y-bin) of a TH2F to a maximum of 1.
+    Rows with zero entries are skipped.
+    """
+    hist2d = inputs[0][1][0]
+    name = hist2d.GetName()
+
+    print("normalize rows for this hist:", hist2d)
+
+    # Clone histogram for output
+    norm_hist = hist2d.Clone(name + "_row_normalized")
+    norm_hist.Reset()
+
+    n_bins_x = hist2d.GetNbinsX()
+    n_bins_y = hist2d.GetNbinsY()
+
+    for iy in range(1, n_bins_y + 1):
+        # Project this row (fixed Y-bin) onto X
+        proj = hist2d.ProjectionX(f"{name}_proj_{iy}", iy, iy)
+
+        if proj.GetEntries() == 0:
+            print(f"Row {iy}: zero entries, skipping")
+            continue
+
+        max_val = proj.GetMaximum()
+
+        if max_val == 0:
+            print(f"Row {iy}: max is zero, skipping")
+            continue
+
+        # Normalize this row
+        for ix in range(1, n_bins_x + 1):
+            val = hist2d.GetBinContent(ix, iy)
+            err = hist2d.GetBinError(ix, iy)
+
+            norm_hist.SetBinContent(ix, iy, val / max_val)
+            norm_hist.SetBinError(ix, iy, err / max_val)
+
+    norm_hist.SetTitle(hist2d.GetTitle() + " (row-normalized)")
+    norm_hist.GetXaxis().SetTitle(hist2d.GetXaxis().GetTitle())
+    norm_hist.GetYaxis().SetTitle(hist2d.GetYaxis().GetTitle())
+
+    return [norm_hist]

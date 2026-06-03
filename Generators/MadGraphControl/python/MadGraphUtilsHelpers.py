@@ -72,6 +72,14 @@ def isNLO_from_run_card(run_card):
 def error_check(errors_a, return_code):
     if not MADGRAPH_CATCH_ERRORS:
         return
+    if errors_a is None:
+        # stderr is not always captured (e.g. catch_errors=False).
+        # Still fail on non-zero return code.
+        if return_code != 0:
+            mglog.error(f'Detected a bad return code: {return_code}')
+            write_test_script()
+            raise RuntimeError('Error detected in MadGraphControl process')
+        return
     unmasked_error = False
     my_debug_file = None
     bad_variables = []

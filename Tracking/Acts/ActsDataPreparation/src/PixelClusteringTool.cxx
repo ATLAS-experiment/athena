@@ -70,8 +70,9 @@ StatusCode PixelClusteringTool::initialize()
   ATH_CHECK(m_chargeDataKey.initialize(not m_chargeDataKey.empty()));
 
   ATH_MSG_INFO("   Charge Data Key:" << m_chargeDataKey);
+  ATH_MSG_INFO("   ID Helper Name:" << m_idHelperName);
 
-  ATH_CHECK( detStore()->retrieve(m_pixelID, "PixelID") );
+  ATH_CHECK( detStore()->retrieve(m_pixelID, m_idHelperName) );
   
   ATH_MSG_DEBUG(name() << " successfully initialized");
   return StatusCode::SUCCESS;

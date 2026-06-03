@@ -58,7 +58,7 @@ Tracking.ITkActsPass           points to                        nothing
 
 ************************************************************************
 ******************** Tracking reconstruction Config ********************
-                     Active Config is ActsLargeRadius
+                     Active Config is LargeD0
 Tracking.ActiveConfig.doAthenaAmbiguityResolution : False
 Tracking.ActiveConfig.doAthenaCluster    : False
 Tracking.ActiveConfig.doAthenaSeed       : False

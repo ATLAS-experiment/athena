@@ -6,6 +6,7 @@
 
 #include "MuonPatternEvent/Segment.h"
 #include "xAODMuon/MuonSegment.h"
+#include "xAODTracking/TrackParticle.h"
 
 namespace MuonR4{
     /** @brief Helper function to navigate from the xAOD::MuonSegment to the MuonR4::Segment.
@@ -39,6 +40,12 @@ namespace MuonR4{
     /** @brief Returns the identifier of the volume in which the surface is embedded
      *  @param surface: Reference to the surface of interest */
     Acts::GeometryIdentifier volumeId(const Acts::Surface& surface);
+    /** @brief Auxiliary class to sort the particles by momentum
+     *         First sorting is by pt, then eta and finally by phi */
+    struct ParticleSorter{
+        bool operator()(const xAOD::IParticle* a,
+                        const xAOD::IParticle* b) const;
+    }; 
 
 }
 

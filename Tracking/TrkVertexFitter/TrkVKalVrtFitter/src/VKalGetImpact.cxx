@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
@@ -18,14 +18,15 @@
 
 namespace Trk{
 
-  double TrkVKalVrtFitter::VKalGetImpact(const Trk::Perigee* InpPerigee,
+  double TrkVKalVrtFitter::VKalGetImpact(const EventContext& ctx,
+                                         const Trk::Perigee* InpPerigee,
                                          const Amg::Vector3D& Vertex,
                                          const long int Charge,
                                          std::vector<double>& Impact,
                                          std::vector<double>& ImpactError) const
   {
     State state;
-    initState (state);
+    initState (ctx, state);
     return VKalGetImpact (InpPerigee, Vertex, Charge, Impact, ImpactError, state);
   }
 
@@ -79,11 +80,12 @@ namespace Trk{
   }
 
 
-  double TrkVKalVrtFitter::VKalGetImpact(const xAOD::TrackParticle* InpTrk,const Amg::Vector3D& Vertex,const long int Charge,
+  double TrkVKalVrtFitter::VKalGetImpact(const EventContext& ctx,
+                                         const xAOD::TrackParticle* InpTrk,const Amg::Vector3D& Vertex,const long int Charge,
                                          std::vector<double>& Impact, std::vector<double>& ImpactError) const
   {
     State state;
-    initState (state);
+    initState (ctx, state);
     return VKalGetImpact (InpTrk, Vertex, Charge, Impact, ImpactError, state);
   }
 

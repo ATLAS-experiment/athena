@@ -212,6 +212,7 @@ private:
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleStatus{this, "ZdcModuleStatus", "", "ZDC module fit status"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleTime{this, "ZdcModuleTime", "", "ZDC module time"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleChisq{this, "ZdcModuleChisq", "", "ZDC module fit chisq"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleChisqRatio{this, "ZdcModuleChisqRatio", "", "ZDC module chisq ratio"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleAmpNoNonLin{this, "ZdcModuleAmpNoNonLin", "", "ZDC module amplitude with gain factor applied but no nonlinear correction"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleFitAmp{this, "ZdcModuleFitAmp", "", "ZDC module fit amp"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleFitAmpError{this, "ZdcModuleFitAmpError", "", "ZDC module fit amp error"};  

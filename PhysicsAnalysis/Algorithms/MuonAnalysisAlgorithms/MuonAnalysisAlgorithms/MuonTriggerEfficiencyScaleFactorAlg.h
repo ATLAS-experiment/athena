@@ -15,7 +15,6 @@
 #include <SystematicsHandles/SysReadHandle.h>
 #include <SystematicsHandles/SysWriteDecorHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
-#include <SystematicsHandles/SysReadHandle.h>
 #include <xAODEventInfo/EventInfo.h>
 #include <xAODMuon/MuonContainer.h>
 #include <AsgTools/PropertyWrapper.h>

@@ -8,7 +8,8 @@ def MdtCalibTestAlgCfg(flags, name="MdtCalibDbTestAlg", **kwargs):
     return result
 
 if __name__ == "__main__":
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser
+    from MuonConfig.MuonConfigUtils import executeTest
     parser = SetupArgParser()
     parser.add_argument("--rtJSON", help="Location of the RT json file", default="")
     parser.add_argument("--t0JSON", help="Location of the T0 json file", default="")

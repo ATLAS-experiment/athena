@@ -7,7 +7,6 @@
 #ifndef PARTONS_PARTONSCHEMECONFIG_H
 #define PARTONS_PARTONSCHEMECONFIG_H
 
-#include <stdexcept>
 #include <string>
 #include <vector>
 

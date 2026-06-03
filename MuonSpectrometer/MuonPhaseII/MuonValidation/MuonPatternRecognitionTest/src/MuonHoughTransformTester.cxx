@@ -329,6 +329,21 @@ namespace MuonValR4 {
         m_out_bucketEnd = bucket.coveredMax();
         m_out_bucketStart = bucket.coveredMin();
         m_out_nSpacePoints = bucket.size();
+        double maxHitGap{-1.f};
+        for (auto itr = bucket.begin(); itr != bucket.end(); ++itr){
+            if (!(*itr)->measuresEta()) {
+                continue;
+            }
+            auto itr1 = std::find_if(itr+1, bucket.end(),[](const SpacePointBucket::value_type& sp){
+                return sp->measuresEta();
+            });
+            if (itr1 == bucket.end()){
+                break;
+            }
+            maxHitGap = std::max(maxHitGap, std::abs( (*itr)->localPosition().y() - 
+                                                      (*itr1)->localPosition().y()));
+        }
+        m_out_bucketHitGap = maxHitGap;
         m_out_nPrecSpacePoints = std::ranges::count_if(bucket, [](const SpacePointBucket::value_type& sp){
             return isPrecisionHit(*sp);
         });

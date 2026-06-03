@@ -374,7 +374,7 @@ namespace EL
   setJobConfig (JobConfig&& jobConfig)
   {
     RCU_CHANGE_INVARIANT (this);
-    for (std::unique_ptr<IAlgorithmWrapper>& alg : jobConfig.extractAlgorithms())
+    for (auto& alg : jobConfig.extractAlgorithms())
     {
       m_algs.push_back (std::move (alg));
     }

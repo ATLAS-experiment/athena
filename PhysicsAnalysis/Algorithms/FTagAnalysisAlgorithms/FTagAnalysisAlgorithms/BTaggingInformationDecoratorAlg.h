@@ -15,7 +15,6 @@
 #include <SelectionHelpers/SysReadSelectionHandle.h>
 #include <SystematicsHandles/SysReadHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
-#include <SystematicsHandles/SysWriteDecorHandle.h>
 #include <xAODJet/JetContainer.h>
 #include <AsgTools/PropertyWrapper.h>
 

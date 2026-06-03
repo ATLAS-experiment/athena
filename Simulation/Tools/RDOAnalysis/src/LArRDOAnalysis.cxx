@@ -151,7 +151,7 @@ StatusCode LArRDOAnalysis::execute() {
           const uint16_t rawProv(lar_itr->provenance());
           CaloGain::CaloGain larGain(lar_itr->gain());
 
-          const unsigned long long larID_int = larID.get_compact();
+          const unsigned long long larID_int = larID.get_identifier32().get_compact();
           const int larGain_int = (int)larGain;
           if(m_tree){
             m_larID->push_back(larID_int);

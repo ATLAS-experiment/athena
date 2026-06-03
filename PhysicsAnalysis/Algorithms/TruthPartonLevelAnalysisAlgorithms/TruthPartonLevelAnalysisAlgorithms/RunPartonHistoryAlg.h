@@ -9,14 +9,6 @@
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
 
-// EDM include(s):
-#include <vector>
-
-#include "AthContainers/DataVector.h"
-#include "xAODCore/AuxContainerBase.h"
-#include "xAODCore/CLASS_DEF.h"
-
-// Top parton histories
 #include "PartonHistory/CalcPartonHistory.h"
 
 namespace CP {

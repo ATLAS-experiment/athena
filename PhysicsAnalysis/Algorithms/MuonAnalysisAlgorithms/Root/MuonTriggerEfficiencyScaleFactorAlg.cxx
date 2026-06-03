@@ -13,7 +13,6 @@
 #include <MuonAnalysisAlgorithms/MuonTriggerEfficiencyScaleFactorAlg.h>
 
 #include <AthContainers/ConstDataVector.h>
-#include <RootCoreUtils/Assert.h>
 
 //
 // method implementations

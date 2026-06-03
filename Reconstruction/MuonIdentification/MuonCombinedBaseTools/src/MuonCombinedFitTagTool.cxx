@@ -119,7 +119,7 @@ namespace MuonCombined {
             Trk::TrackScore score = m_trackScoringTool->score(*combinedTrack);
 
             // add fit info into tag object
-            currentTag = std::make_unique<CombinedFitTag>(xAOD::Muon::MuidCo, muonCandidate, score);
+            currentTag = std::make_unique<CombinedFitTag>(xAOD::Muon::Author::MuidCo, muonCandidate, score);
 
             // re-fit standalone track (if needed) and store output into tag object
             METrack = evaluateMatchProperties(ctx, combinedTrack.get(), *currentTag, cand_prob.second->indetTrackParticle());
@@ -147,7 +147,7 @@ namespace MuonCombined {
                     Trk::TrackScore score = m_trackScoringTool->score(*combinedTrack);
 
                     // add fit info into tag object
-                    currentTag = std::make_unique<CombinedFitTag>(xAOD::Muon::MuidCo, muonCandidate, score);
+                    currentTag = std::make_unique<CombinedFitTag>(xAOD::Muon::Author::MuidCo, muonCandidate, score);
 
                     if (msgLevel() >= MSG::DEBUG) {
                         dumpCaloEloss(ctx, combinedTrack.get(), "Recovery Combined Track ");

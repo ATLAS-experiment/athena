@@ -172,19 +172,11 @@ PFTrackSelector::isMuon(const xAOD::TrackParticle* track, const xAOD::MuonContai
     if (theMuon) {
       ATH_MSG_DEBUG("Considering muon in isMuon with e,pt, eta and phi of "
 		    << theMuon->e() << ", " << theMuon->pt() << ", " << theMuon->eta() << " and " << theMuon->phi());
-      const ElementLink<xAOD::TrackParticleContainer>& theLink = theMuon->inDetTrackParticleLink();
-      if (theLink.isValid()) {
-	const xAOD::TrackParticle* ID_track = *theLink;
-	if (ID_track) {
-	  if (track == ID_track){
-	    return true;
-	  }
-	} else
-	  ATH_MSG_WARNING("This muon has a NULL pointer to the track");
-      } else
-	ATH_MSG_WARNING("This muon has an invalid link to the track");
-    } // if muon pointer is valid
-    else
+        const xAOD::TrackParticle* ID_track = theMuon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
+	      if (track == ID_track){
+	          return true;
+	      }
+    }else
       ATH_MSG_WARNING("This muon is a NULL pointer");
   } // muon loop
 

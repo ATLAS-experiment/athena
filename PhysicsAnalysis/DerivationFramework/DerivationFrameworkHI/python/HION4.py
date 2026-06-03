@@ -46,10 +46,11 @@ def HION4SkimmingToolCfg(flags):
 
     tightTrackRequirements = '(InDetTrackParticles.pt >= 1*GeV) && (abs(InDetTrackParticles.eta) < 2.5)'
     tightTrackOnlySelection = '( count('+tightTrackRequirements+') == 2 )'
-    HION4OTightTrackSkimmingTool = acc.addPublicTool(acc.getPrimaryAndMerge(
-        xAODStringSkimmingToolCfg(flags, name = "HION4OTightTrackSkimmingTool",
+
+    HION4TightTrackSkimmingTool = acc.addPublicTool(acc.getPrimaryAndMerge(
+        xAODStringSkimmingToolCfg(flags, name = "HION4TightTrackSkimmingTool",
                                   expression = tightTrackOnlySelection)))
-    filterList = [HION4ObjSkimmingTool, HION4OTightTrackSkimmingTool]
+    filterList = [HION4ObjSkimmingTool, HION4TightTrackSkimmingTool]
 
     if flags.Trigger.EDMVersion != -1: # Only for files with trigger payload
         from DerivationFrameworkHI import ListTriggers
@@ -67,13 +68,13 @@ def HION4SkimmingToolCfg(flags):
         HION4VMTriggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(
             name = "HION4VMTriggerSkimmingTool", TriggerListOR = VMtrigger)
         acc.addPublicTool(HION4VMTriggerSkimmingTool)
-        HION4OTightTrackTriggerSkimmingTool = (
+        HION4TightTrackTriggerSkimmingTool = (
             CompFactory.DerivationFramework.FilterCombinationAND(
-                name="HION4OTightTrackTriggerSkimmingTool",
-                FilterList=[HION4VMTriggerSkimmingTool, HION4OTightTrackSkimmingTool]))
-        acc.addPublicTool(HION4ObjTriggerSkimmingTool)
+                name="HION4TightTrackTriggerSkimmingTool",
+                FilterList=[HION4VMTriggerSkimmingTool, HION4TightTrackSkimmingTool]))
+        acc.addPublicTool(HION4TightTrackTriggerSkimmingTool)
 
-        filterList = [HION4ObjTriggerSkimmingTool, HION4OTightTrackTriggerSkimmingTool]
+        filterList = [HION4ObjTriggerSkimmingTool, HION4TightTrackTriggerSkimmingTool]
 
     HION4SkimmingTool  = CompFactory.DerivationFramework.FilterCombinationOR(
         name="HION4SkimmingTool",  FilterList=filterList)

@@ -202,6 +202,16 @@ class ConfigAccumulator :
     If not explicitly set the decision to run systematics or not
     will be taken depending on the CommonServicesConfig setup.
     """
+    # class-level counter
+    _instance_counter = 0
+    # tracks singleton names already added to any algSeq
+    _singleton_registry = {}
+
+    @classmethod
+    def beginJob(cls):
+        """Helper class method to fully reset the counters, call once before building a new job sequence."""
+        cls._instance_counter = 0
+        cls._singleton_registry.clear()
 
     def __init__ (self, *, flags=None, algSeq=None, noSysSuffix=False, noSystematics=None, dataType=None, isPhyslite=None, geometry=None, dsid=0, campaign=None, runNumber=None, autoconfigFromFlags=None, dataYear=0):
 
@@ -310,6 +320,7 @@ class ConfigAccumulator :
         self._currentAlg = None
         self._selectionNameExpr = re.compile ('[A-Za-z_][A-Za-z_0-9]+')
         self.setSourceName ('EventInfo', 'EventInfo')
+        self.setContainerMeta ('EventInfo', "nonContainer", True)
         self._eventcutflow = {}
         self.CA = None
 
@@ -321,6 +332,9 @@ class ConfigAccumulator :
         else:
             if algSeq is None :
                 raise ValueError ("need to pass algSeq if not using ComponentAccumulator")
+
+        ConfigAccumulator._instance_counter += 1
+        self._algPrefix = f'seq{self._instance_counter}_'
 
     def noSystematics (self) :
         """noSystematics flag used by CommonServices block"""
@@ -416,14 +430,14 @@ class ConfigAccumulator :
         Despite the name this will also return services and tools. It is
         mostly meant for internal use, particularly for the property
         overrides."""
-        name = name + self._algPostfix
+        name = self._algPrefix + name + self._algPostfix
         if name not in self._algorithms:
             return None
         return self._algorithms[name]
 
     def createAlgorithm (self, type, name, reentrant=False) :
         """create a new algorithm and register it as the current algorithm"""
-        name = name + self._algPostfix
+        name = self._algPrefix + name + self._algPostfix
         if self._pass == 0 :
             if name in self._algorithms :
                 raise Exception ('duplicate algorithms: ' + name + ' with algPostfix=' + self._algPostfix)
@@ -452,9 +466,16 @@ class ConfigAccumulator :
             return self._algorithms[name]
 
 
-    def createService (self, type, name) :
+    def createService (self, type, name, isSingleton=True) :
         '''create a new service and register it as the "current algorithm"'''
+        if not isSingleton:
+            name = self._algPrefix + name + self._algPostfix
         if self._pass == 0 :
+            if isSingleton and name in ConfigAccumulator._singleton_registry:
+                service = ConfigAccumulator._singleton_registry[name]
+                self._algorithms[name] = service
+                self._currentAlg = service
+                return service
             if name in self._algorithms :
                 raise Exception ('duplicate service: ' + name)
             service = DualUseConfig.createService (type, name)
@@ -467,6 +488,8 @@ class ConfigAccumulator :
                 self._algSeq += service
             self._algorithms[name] = service
             self._currentAlg = service
+            if isSingleton:
+                ConfigAccumulator._singleton_registry[name] = service
             return service
         else :
             if name not in self._algorithms :
@@ -475,9 +498,16 @@ class ConfigAccumulator :
             return self._algorithms[name]
 
 
-    def createPublicTool (self, type, name) :
+    def createPublicTool (self, type, name, isSingleton=True) :
         '''create a new public tool and register it as the "current algorithm"'''
+        if not isSingleton:
+            name = self._algPrefix + name + self._algPostfix
         if self._pass == 0 :
+            if isSingleton and name in ConfigAccumulator._singleton_registry:
+                tool = ConfigAccumulator._singleton_registry[name]
+                self._algorithms[name] = tool
+                self._currentAlg = tool
+                return tool
             if name in self._algorithms :
                 raise Exception ('duplicate public tool: ' + name)
             tool = DualUseConfig.createPublicTool (type, name)
@@ -490,6 +520,8 @@ class ConfigAccumulator :
                 self._algSeq += tool
             self._algorithms[name] = tool
             self._currentAlg = tool
+            if isSingleton:
+                ConfigAccumulator._singleton_registry[name] = tool
             return tool
         else :
             if name not in self._algorithms :
@@ -663,6 +695,10 @@ class ConfigAccumulator :
         self._pass = 1
         self._currentAlg = None
         self._outputContainers = {}
+
+        # the above wiped out the meta-information, so we need to
+        # re-register the non-container status of EventInfo
+        self.setContainerMeta ('EventInfo', 'nonContainer', True)
 
 
     def getPreselection (self, containerName, selectionName, *, asList = False) :

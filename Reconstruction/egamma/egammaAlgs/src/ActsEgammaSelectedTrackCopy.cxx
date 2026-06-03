@@ -69,7 +69,7 @@ ActsEgammaSelectedTrackCopy::initialize()
   });
 
   // Check that all geoIds were found
-  for(const auto &[geoId, layerInfo] : Acts::zip(m_barrelCaloGeoIds, volIndex)) {
+  for(const auto [geoId, layerInfo] : Acts::zip(m_barrelCaloGeoIds, volIndex)) {
     if( geoId == Acts::GeometryIdentifier{} ) {
       ATH_MSG_ERROR("Could not find geometry ID for barrel calo layer '" << layerInfo.first << "'");
 

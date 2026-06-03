@@ -582,14 +582,14 @@ namespace Trk {
 
 
 // Simple cascade fitter test.
-StatusCode TrkVKalVrtFitterTestAlg::test4() const
+StatusCode TrkVKalVrtFitterTestAlg::test4(const EventContext& ctx) const
 {
   const Trk::IVertexCascadeFitter* fitter =
     dynamic_cast<const Trk::IVertexCascadeFitter*> (m_fitter.get());
 
   xAODTPUVec_t tracks1 = makexAODTP (makePerigees2());
 
-  std::unique_ptr<IVKalState> state (fitter->makeState());
+  std::unique_ptr<IVKalState> state (fitter->makeState(ctx));
   Trk::VertexID v1 = fitter->startVertex (asVec (tracks1),
                                           std::vector<double> {100*MeV, 150*MeV, 200*MeV},
                                           *state,

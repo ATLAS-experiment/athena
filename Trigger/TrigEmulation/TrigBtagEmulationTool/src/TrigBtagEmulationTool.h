@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration 
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigBtagEmulationTool_H
@@ -104,7 +104,7 @@ private:
   Gaudi::Property< std::map<std::string, std::string> > m_remapping {this, "FTD_Remapping", {}};
 
   // LHC period Run2 or Run3
-  Gaudi::Property<int> m_LHCPeriod {this, "LHCPeriod", 3, "LHC Period Run2 or Run3"};
+  Gaudi::Property<int> m_LHCPeriod {this, "LHCPeriod", 2, "LHC Period Run2 or Run3"};
 
   // EMULATED CHAINS
   Gaudi::Property< std::map< std::string, std::vector< std::string >>> m_emulatedChainDefinitions {this, "EmulatedChainDefinitions", {}, ""};

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -14,8 +14,8 @@ def MuonBlueprintNodeBuilderCfg(flags, name = "MuonBlueprintNodeBuilder", **kwar
     return result
 
 def MuonMaterialDecoratorToolCfg(flags, name = "MuonMaterialDecoratorTool", **kwargs):    
-    kwargs.setdefault('MuonMaterialDbFile', flags.Acts.TrackingGeometry.MuonMaterialMapFile)
     result = ComponentAccumulator()
+    kwargs.setdefault('MuonMaterialDbFile', flags.Muon.trackGeometryMaterialMap)
     the_tool = CompFactory.MuonGMR4.MuonMaterialDecoratorTool(name, **kwargs)
     result.setPrivateTools(the_tool)
     return result

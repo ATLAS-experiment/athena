@@ -2,7 +2,15 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from GeneratorConfig.GeneratorSettingsSemantics import (
+    GeneratorSettingsLayer,
+    GeneratorSettingsPrecedence,
+)
 from GeneratorConfig.Sequences import EvgenSequence, EvgenSequenceFactory
+from Pythia8_i.Pythia8Tunes import (
+    a14_nnpdf23lo_tune_cmds,
+    a2_mstw2008lo_tune_cmds,
+)
 from AthenaCommon.SystemOfUnits import GeV
 
 # Get logger
@@ -10,21 +18,33 @@ from AthenaCommon.Logging import logging
 log = logging.getLogger("Pythia8Config")
 
 
+def Pythia8CommandsCfg(flags, source, commands, precedence, name="Pythia8_i"):
+    """
+    Return a CA fragment that adds one command layer to Pythia8_i.
+    """
+    ca = ComponentAccumulator(EvgenSequenceFactory(EvgenSequence.Generator))
+    ca.addEventAlgo(
+        CompFactory.Pythia8_i(name, Commands=GeneratorSettingsLayer(
+            source=source,
+            values=tuple(commands or ()),
+            precedence=precedence,
+            report_context="Pythia8Cfg.Commands",
+        ))
+    )
+    return ca
+
+
 def Pythia8BaseCfg(flags, name="Pythia8_i", **kwargs):
     """
     The main Pythia8 configuration fragment that sets up the Pythia8_i algorithm
     and returns a CA instance
     """
-    # Default commands
-    commands = kwargs.get("Commands", [])
-    
     # Baseline P8 settings
     base_cmds = [
         "Main:timesAllowErrors = 500",
         "ParticleDecays:limitTau0 = on",
         "ParticleDecays:tau0Max = 10.0"
     ]
-    commands.extend(base_cmds)
 
     # Collision energy
     if "CollisionEnergy" not in kwargs:
@@ -42,8 +62,8 @@ def Pythia8BaseCfg(flags, name="Pythia8_i", **kwargs):
                 ## Only the top quark, the leptons and the bosons are applied
                 pdg = int(pdg_str)
                 if 6 <= pdg < 26:
-                    commands.append(f"{pdg}:m0 = {vals['mass']}")
-                    commands.append(f"{pdg}:mWidth = {vals['width']}")
+                    base_cmds.append(f"{pdg}:m0 = {vals['mass']}")
+                    base_cmds.append(f"{pdg}:mWidth = {vals['width']}")
         else:
             log.warning("Could not retrieve standard ATLAS particle parameters")
 
@@ -53,12 +73,12 @@ def Pythia8BaseCfg(flags, name="Pythia8_i", **kwargs):
             ## Only the parameters sin2thetaW and sin2thetaWbar are applied
             for key, val in ew_params.items():
                 if key[1] in ('sin2thetaW', 'sin2thetaWbar'):
-                    commands.append(f"StandardModel:{key[1]} = {val}")
+                    base_cmds.append(f"StandardModel:{key[1]} = {val}")
         else:
             log.warning("Could not retrieve standard ATLAS EW parameters")
     else:
         ## Load basic parameters
-        commands.extend([
+        base_cmds.extend([
             "6:m0 = 172.5",
             "23:m0 = 91.1876",
             "23:mWidth = 2.4952",
@@ -68,15 +88,29 @@ def Pythia8BaseCfg(flags, name="Pythia8_i", **kwargs):
             "StandardModel:sin2thetaWbar = 0.23146",
         ])
 
-    # Remove duplicate commands and update kwargs
-    commands = list(dict.fromkeys(commands))
-    kwargs["Commands"] = commands
+    user_cmds = kwargs.pop("Commands", None)
+    kwargs["Commands"] = GeneratorSettingsLayer(
+        source="base_fragment_commands",
+        values=tuple(base_cmds),
+        precedence=GeneratorSettingsPrecedence.BASE,
+        report_context="Pythia8Cfg.Commands",
+    )
 
     # Create CA object
     ca = ComponentAccumulator(EvgenSequenceFactory(EvgenSequence.Generator)) 
     ca.addEventAlgo(
-        CompFactory.Pythia8_i("Pythia8_i", **kwargs)
+        CompFactory.Pythia8_i(name, **kwargs)
     )
+
+    # Add the user commands
+    if user_cmds:
+        ca.merge(Pythia8CommandsCfg(
+            flags,
+            source="user_commands",
+            commands=user_cmds,
+            precedence=GeneratorSettingsPrecedence.USER,
+            name=name,
+        ))
 
     # Announce generator to service
     from GeneratorConfig.GeneratorInfoSvcConfig import GeneratorInfoSvcCfg
@@ -109,29 +143,33 @@ def Pythia8_A2_MSTW2008LO_Common_Cfg(flags, **kwargs):
     """
     Fragment for setting up A2 MSTW2008LO tune
     """
-    # Defaults
-    cmds = kwargs.get("Commands", [])
-    
-    # Tune parameters
-    cmds.extend([
-        "Tune:pp = 5",
-        "MultipartonInteractions:bProfile = 4",
-        "MultipartonInteractions:a1 = 0.03",
-        "MultipartonInteractions:pT0Ref = 1.90",
-        "MultipartonInteractions:ecmPow = 0.30",
-        "SpaceShower:rapidityOrder = 0",
-        "PDF:pSet = LHAPDF6:MSTW2008lo68cl",
-        "ColourReconnection:range = 2.28"
-    ])
 
-    # Now call rapidity ordering
-    cmds = ensureRapidityOrderMPI(cmds)
+    # Remove any user command before calling base config
+    user_cmds = list(kwargs.pop("Commands", []))
 
-    # Update kwargs
-    kwargs["Commands"] = list(dict.fromkeys(cmds))
-
-    # Now get the base config
+    # Get the base config
     ca = Pythia8BaseCfg(flags, **kwargs)
+    
+    # Get the tune commands and apply rapidity ordering
+    tune_cmds = a2_mstw2008lo_tune_cmds()
+    tune_cmds = ensureRapidityOrderMPI(tune_cmds)
+
+    # Add the tune commands
+    ca.merge(Pythia8CommandsCfg(
+        flags,
+        source="pythia_tune_A2_MSTW2008LO",
+        commands=tune_cmds,
+        precedence=GeneratorSettingsPrecedence.TUNE,
+    ))
+
+    # Now apply the user commands
+    if user_cmds:
+        ca.merge(Pythia8CommandsCfg(
+            flags,
+            source="job_options",
+            commands=user_cmds,
+            precedence=GeneratorSettingsPrecedence.USER,
+        ))
 
     # Broadcast tune to service
     from GeneratorConfig.GeneratorInfoSvcConfig import GeneratorInfoSvcCfg
@@ -145,35 +183,33 @@ def Pythia8_A14_NNPDF23LO_Common_Cfg(flags, **kwargs):
     """
     Fragment for setting up A14 tune with NNPDF23LO PDF
     """
-    # Defaults
-    cmds = kwargs.get("Commands", [])
-    
-    # Tune parameters
-    cmds.extend([
-        "Tune:ee = 7", 
-        "Tune:pp = 14",
-        "SpaceShower:rapidityOrder = on",
-        "SigmaProcess:alphaSvalue = 0.140",
-        "SpaceShower:pT0Ref = 1.56",
-        "SpaceShower:pTmaxFudge = 0.91",
-        "SpaceShower:pTdampFudge = 1.05",
-        "SpaceShower:alphaSvalue = 0.127",
-        "TimeShower:alphaSvalue = 0.127",
-        "BeamRemnants:primordialKThard = 1.88",
-        "MultipartonInteractions:pT0Ref = 2.09",
-        "MultipartonInteractions:alphaSvalue = 0.126",
-        "PDF:pSet=LHAPDF6:NNPDF23_lo_as_0130_qed",
-        "ColourReconnection:range = 1.71"
-    ])
 
-    # Now call rapidity ordering
-    cmds = ensureRapidityOrderMPI(cmds)
+    # Remove any user command before calling base config
+    user_cmds = list(kwargs.pop("Commands", []))
 
-    # Update kwargs
-    kwargs["Commands"] = list(dict.fromkeys(cmds))
-
-    # Now get the base config
+    # Get the base config
     ca = Pythia8BaseCfg(flags, **kwargs)
+
+    # Get the tune commands and apply rapidity ordering
+    tune_cmds = a14_nnpdf23lo_tune_cmds()
+    tune_cmds = ensureRapidityOrderMPI(tune_cmds)
+
+    # Add the tune commands
+    ca.merge(Pythia8CommandsCfg(
+        flags,
+        source="pythia_tune_A14_NNPDF23LO",
+        commands=tune_cmds,
+        precedence=GeneratorSettingsPrecedence.TUNE,
+    ))
+
+    # Now apply the user commands
+    if user_cmds:
+        ca.merge(Pythia8CommandsCfg(
+            flags,
+            source="job_options",
+            commands=user_cmds,
+            precedence=GeneratorSettingsPrecedence.USER,
+        ))
 
     # Broadcast tune to service
     from GeneratorConfig.GeneratorInfoSvcConfig import GeneratorInfoSvcCfg

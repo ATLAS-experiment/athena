@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigInDetValidation )
@@ -18,4 +18,4 @@ atlas_install_scripts( scripts/TIDA*.py test/test*.py bin/*.py POST_BUILD_CMD ${
 atlas_add_test( TrigValSteeringUT
                 SCRIPT trigvalsteering-unit-tester.py ${CMAKE_CURRENT_SOURCE_DIR}/test
                 PROPERTIES TIMEOUT 600
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )

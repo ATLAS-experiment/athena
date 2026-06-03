@@ -60,10 +60,10 @@ StatusCode IDTrackCaloDepositsDecoratorAlg::execute(const EventContext& ctx) con
             track_part = static_cast<const xAOD::TrackParticle*>(particle);
         } else if (particle->type() == xAOD::Type::ObjectType::Muon) {
             const xAOD::Muon* muon = static_cast<const xAOD::Muon*>(particle);
-            track_part = muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+            track_part = muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
             if (!track_part) {
                 ATH_MSG_VERBOSE("The muon does not have an associated ID track");
-                track_part = muon->trackParticle(xAOD::Muon::Primary);
+                track_part = muon->trackParticle(xAOD::Muon::TrackParticleType::Primary);
             }
         }
         if (!track_part) {

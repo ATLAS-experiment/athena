@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 if __name__=='__main__':
@@ -266,13 +266,16 @@ if __name__=='__main__':
    cfg.run() 
 
    #build tag hierarchy in output sqlite file
+   script = "/afs/cern.ch/user/l/larcalib/LArDBTools/python/BuildTagHierarchy.py"
+   if not os.path.isfile(script): script = "/det/lar/project/athena/BuildTagHierarchy.py"
    import subprocess
-   cmdline = (['/afs/cern.ch/user/l/larcalib/LArDBTools/python/BuildTagHierarchy.py',args.outpdir + "/" + args.outsql , flags.IOVDb.GlobalTag])
+   cmdline = [script,
+              f"{args.outpdir}/{args.outsql}" if args.outsql[0]!="/" else args.outsql,
+              flags.IOVDb.GlobalTag]
    print(cmdline)
    try:
       subprocess.run(cmdline, check=True)
    except Exception as e:
       print('Could not create tag hierarchy in output sqlite file !!!!')
       sys.exit(-1)
-
 

@@ -12,12 +12,15 @@
 #include "../Egamma1BDT/Egamma1BDTAlgTool.h"
 #include "../Egamma1/Egamma1eRatioAlgTool.h"
 
+
 #include "../Lar_Preproc/LArCellPreparationAlg.h"
 #include "../Lar_Preproc/LArCellMuxAlg.h"
 #include "../Lar_Preproc/GlobalCellTowerAlgTool.h"
+#include "../Jet1/GlobalJet1AlgTool.h"
 #include "../FEX_Unpacker/eFexCvtrAlgTool.h"
 #include "../Hypothesis/eEmMultAlgTool.h"
 #include "../Hypothesis/eEmEg1BDTMultAlgTool.h"
+#include "../Hypothesis/CommonMultAlgTool.h"
 
 #include "../Hypothesis/eEmMultTestBench.h"
 #include "../Hypothesis/eEmMultTestComparator.h"
@@ -39,10 +42,13 @@ DECLARE_COMPONENT(GlobalSim::Egamma1eRatioAlgTool)
 DECLARE_COMPONENT(GlobalSim::LArCellPreparationAlg)
 DECLARE_COMPONENT(GlobalSim::LArCellMuxAlg)
 DECLARE_COMPONENT(GlobalSim::GlobalCellTowerAlgTool)
+DECLARE_COMPONENT(GlobalSim::GlobalJet1AlgTool)
 
 DECLARE_COMPONENT(GlobalSim::eFexCvtrAlgTool)
+
 DECLARE_COMPONENT(GlobalSim::eEmMultAlgTool)
 DECLARE_COMPONENT(GlobalSim::eEmEg1BDTMultAlgTool)
+DECLARE_COMPONENT(GlobalSim::CommonMultAlgTool)
 
 DECLARE_COMPONENT(GlobalSim::eEmMultTestBench)
 DECLARE_COMPONENT(GlobalSim::eEmMultTestComparator)

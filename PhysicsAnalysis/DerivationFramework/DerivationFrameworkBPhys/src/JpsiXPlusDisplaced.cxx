@@ -440,7 +440,7 @@ namespace DerivationFramework {
 	  }
 	  // A rough mass window cut, as V0 and track3 are not from a common vertex
 	  if(disV_mass > m_DisplacedMassLower-500. && disV_mass < m_DisplacedMassUpper+500.) {
-	    auto disVtx = getXiCandidate(elem.first,elem.second,TP);
+	    auto disVtx = getXiCandidate(ctx,elem.first,elem.second,TP);
 	    if(disVtx.V0vtx && disVtx.track) disVtxContainer.push_back(disVtx);
 	  }
 	}
@@ -1175,7 +1175,7 @@ namespace DerivationFramework {
     return pass;
   }
 
-  JpsiXPlusDisplaced::XiCandidate JpsiXPlusDisplaced::getXiCandidate(const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticle* track3) const {
+  JpsiXPlusDisplaced::XiCandidate JpsiXPlusDisplaced::getXiCandidate(const EventContext& ctx, const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticle* track3) const {
     XiCandidate disVtx;
 
     std::vector<const xAOD::TrackParticle*> tracksV0;
@@ -1186,7 +1186,7 @@ namespace DerivationFramework {
     else if(V0==LAMBDABAR) massesV0 = m_massesV0_pip;
     else if(V0==KS)        massesV0 = m_massesV0_pipi;
 
-    std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
+    std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState(ctx);
     int robustness = 0;
     m_iVertexFitter->setRobustness(robustness, *state);
     std::vector<Trk::VertexID> vrtList;
@@ -1232,13 +1232,13 @@ namespace DerivationFramework {
     int sflag(0), errorcode(0);
     Amg::Vector3D startingPoint = m_vertexEstimator->getCirclesIntersectionPoint(&aPerigee1,&aPerigee2,sflag,errorcode);
     if(errorcode) startingPoint(0) = startingPoint(1) = startingPoint(2) = 0.0;
-    std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
+    std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState(ctx);
     // do the fit
     if(track3) {
-      return m_iVertexFitter->fit(ctx, std::vector<const xAOD::TrackParticle*>{track1,track2,track3}, startingPoint, *state);
+      return m_iVertexFitter->fit(std::vector<const xAOD::TrackParticle*>{track1,track2,track3}, startingPoint, *state);
     }
     else {
-      return m_iVertexFitter->fit(ctx, std::vector<const xAOD::TrackParticle*>{track1,track2}, startingPoint, *state);
+      return m_iVertexFitter->fit(std::vector<const xAOD::TrackParticle*>{track1,track2}, startingPoint, *state);
     }
   }
 
@@ -1400,7 +1400,7 @@ namespace DerivationFramework {
       if (main_mass < m_MassLower || main_mass > m_MassUpper) return result;
 
       // Apply the user's settings to the fitter
-      std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
+      std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState(ctx);
       // Robustness: http://cdsweb.cern.ch/record/685551
       int robustness = 0;
       m_iVertexFitter->setRobustness(robustness, *state);
@@ -1545,7 +1545,7 @@ namespace DerivationFramework {
 	std::vector<const xAOD::TrackParticle*> tracksJXExtra = tracksJX; tracksJXExtra.push_back(tpExtra);
 
 	// Apply the user's settings to the fitter
-	std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
+	std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState(ctx);
 	// Robustness: http://cdsweb.cern.ch/record/685551
 	int robustness = 0;
 	m_iVertexFitter->setRobustness(robustness, *state);
@@ -1735,7 +1735,7 @@ namespace DerivationFramework {
 	std::vector<const xAOD::TrackParticle*> tracksExtra{D0.extraTrack1,D0.extraTrack2};
 
 	// Apply the user's settings to the fitter
-	std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
+	std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState(ctx);
 	// Robustness: http://cdsweb.cern.ch/record/685551
 	int robustness = 0;
 	m_iVertexFitter->setRobustness(robustness, *state);
@@ -1925,7 +1925,7 @@ namespace DerivationFramework {
 	std::vector<const xAOD::TrackParticle*> tracksExtra{Dpm.extraTrack1,Dpm.extraTrack2,Dpm.extraTrack3};
 
 	// Apply the user's settings to the fitter
-	std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
+	std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState(ctx);
 	// Robustness: http://cdsweb.cern.ch/record/685551
 	int robustness = 0;
 	m_iVertexFitter->setRobustness(robustness, *state);
@@ -2096,7 +2096,7 @@ namespace DerivationFramework {
 	      for(size_t it=0; it<moms[iMoth].size(); it++) totalMom += moms[iMoth][it];
 	      double mainV_mass = totalMom.M();
 	      if(mainV_mass>m_PostMassLower && mainV_mass<m_PostMassUpper) {
-		std::unique_ptr<Trk::IVKalState> state_mvc = m_iVertexFitter->makeState();
+		std::unique_ptr<Trk::IVKalState> state_mvc = m_iVertexFitter->makeState(ctx);
 		int robustness_mvc = 0;
 		m_iVertexFitter->setRobustness(robustness_mvc, *state_mvc);
 		std::vector<Trk::VertexID> vrtList_mvc;
@@ -2295,7 +2295,7 @@ namespace DerivationFramework {
     return result;
   }
 
-  std::vector<std::pair<Trk::VxCascadeInfo*,Trk::VxCascadeInfo*> > JpsiXPlusDisplaced::fitMainVtx(const EventContext& /*ctx*/, const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const XiCandidate& disVtx, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols, const xAOD::VertexContainer* defaultPVContainer, const xAOD::VertexContainer* pvContainer) const {
+  std::vector<std::pair<Trk::VxCascadeInfo*,Trk::VxCascadeInfo*> > JpsiXPlusDisplaced::fitMainVtx(const EventContext& ctx, const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const XiCandidate& disVtx, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols, const xAOD::VertexContainer* defaultPVContainer, const xAOD::VertexContainer* pvContainer) const {
     std::vector<std::pair<Trk::VxCascadeInfo*,Trk::VxCascadeInfo*> > result;
 
     std::vector<const xAOD::TrackParticle*> tracksJX;
@@ -2391,7 +2391,7 @@ namespace DerivationFramework {
       if (main_mass < m_MassLower || main_mass > m_MassUpper) return result;
 
       // Apply the user's settings to the fitter
-      std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
+      std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState(ctx);
       // Robustness: http://cdsweb.cern.ch/record/685551
       int robustness = 0;
       m_iVertexFitter->setRobustness(robustness, *state);
@@ -2545,7 +2545,7 @@ namespace DerivationFramework {
 	std::vector<const xAOD::TrackParticle*> tracksJXExtra = tracksJX; tracksJXExtra.push_back(tpExtra);
 
 	// Apply the user's settings to the fitter
-	std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
+	std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState(ctx);
 	// Robustness: http://cdsweb.cern.ch/record/685551
 	int robustness = 0;
 	m_iVertexFitter->setRobustness(robustness, *state);

@@ -342,7 +342,7 @@ StatusCode G4AtlasAlg::execute()
   // because of the mismatch between Gaudi slot-local and G4 thread-local RNG.
   ATHRNG::RNGWrapper* rngWrapper = m_rndmGenSvc->getEngine(this, m_randomStreamName);
   rngWrapper->setSeed( m_randomStreamName,  ctx);
-  G4Random::setTheEngine(*rngWrapper);
+  G4Random::setTheEngine(rngWrapper->getEngine(ctx));
 
   ATH_MSG_DEBUG("Calling SimulateG4Event");
 
@@ -352,7 +352,7 @@ StatusCode G4AtlasAlg::execute()
 
   ATH_CHECK(m_senDetTool->BeginOfAthenaEvent(*hitCollections));
   ATH_CHECK(m_userActionSvc->BeginOfAthenaEvent(*hitCollections));
-  ATH_CHECK(m_fastSimTool->BeginOfAthenaEvent());
+  ATH_CHECK(m_fastSimTool->BeginOfAthenaEvent(*hitCollections));
 
   SG::ReadHandle<McEventCollection> inputTruthCollection(m_inputTruthCollectionKey);
   if (!inputTruthCollection.isValid()) {
@@ -450,7 +450,7 @@ StatusCode G4AtlasAlg::execute()
 
     ATH_CHECK(m_senDetTool->EndOfAthenaEvent(*hitCollections));
     ATH_CHECK(m_userActionSvc->EndOfAthenaEvent(*hitCollections));
-    ATH_CHECK(m_fastSimTool->EndOfAthenaEvent());
+    ATH_CHECK(m_fastSimTool->EndOfAthenaEvent(*hitCollections));
 
     ATH_CHECK(m_truthRecordSvc->releaseEvent());
   }

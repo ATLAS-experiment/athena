@@ -13,8 +13,6 @@
 
 namespace pool {
 
-  class DatabaseConnectionPolicy;
-
   // forward declarations
   class DatabaseRegistry;
   class MicroSessionManager;
@@ -29,7 +27,7 @@ namespace pool {
   {
   public:
     /// Constructor
-    explicit UserSession( IFileCatalog& fileCatalog );
+    explicit UserSession( IFileCatalog& fileCatalog, int ageLimit );
 
     /// Destructor
     virtual ~UserSession();
@@ -68,12 +66,6 @@ namespace pool {
     DatabaseRegistry& registry();
     //TechnologyDispatcher& technologyDispatcher();
 
-    /// Sets the default policy when databases are opened/connected
-    virtual void setDefaultConnectionPolicy( const DatabaseConnectionPolicy& policy ) override final;
-
-    /// Retrieves the default connection policy
-    virtual const DatabaseConnectionPolicy& defaultConnectionPolicy() const override final;
-
     /** Explicitly disconnects all the databases.
      *  If a transaction is active, then all the changes since the last commit are aborted.
      */
@@ -84,7 +76,7 @@ namespace pool {
     virtual const ITransaction& transaction() const override final { return *this; }
 
     /// Starts a new transaction. Returns the success of the operation
-    virtual bool start( ITransaction::Type type = READ ) override final;
+    virtual bool start( Io::IoFlag type = Io::READ ) override final;
 
     /// Commits the transaction.
     virtual bool commit() override final;
@@ -93,13 +85,13 @@ namespace pool {
     virtual bool commitAndHold() override final;
 
     /// Checks if the transaction is active
-    virtual bool isActive() const override final { return m_transactionType != ITransaction::INACTIVE; }
+    virtual bool isActive() const override final { return m_transactionType != Io::INVALID; }
 
     /// Returns the transaction type
-    virtual ITransaction::Type type() const override final { return m_transactionType; }
+    virtual Io::IoFlag type() const override final { return m_transactionType; }
 
     /// Returns the transaction type
-    ITransaction::Type transactionType() const { return transaction().type(); }
+    Io::IoFlag transactionType() const { return transaction().type(); }
 
     /// Creates and returns a new database handle object
     virtual std::unique_ptr<IDatabase>
@@ -122,10 +114,10 @@ namespace pool {
     MicroSessionManager& microSessionManager( long technology );
 
   private:
-    DatabaseConnectionPolicy*      m_policy;
     IFileCatalog*                  m_catalog;
+    int                            m_ageLimit;
     DatabaseRegistry*              m_registry;
-    ITransaction::Type             m_transactionType;
+    Io::IoFlag               m_transactionType;
     std::map< long, std::unique_ptr<MicroSessionManager> >    m_technologies;
 
   };

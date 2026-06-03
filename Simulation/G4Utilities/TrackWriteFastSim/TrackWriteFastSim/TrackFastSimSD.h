@@ -10,10 +10,10 @@
 
 // Athena headers
 #include "TrackRecord/TrackRecordCollection.h"
-#include "StoreGate/WriteHandle.h"
 
 // STL headers
 #include <string>
+#include <utility>
 
 // G4 needed classes
 class G4Step;
@@ -35,12 +35,21 @@ public:
   /** Templated method to stuff a single hit into the sensitive detector class.  This
    could get rather tricky, but the idea is to allow fast simulations to use the very
    same SD classes as the standard simulation. */
-  template <class... Args> void AddHit(Args&&... args){ m_trackRecordCollection->Emplace( args... ); }
+  template <class... Args> bool AddHit(Args&&... args)
+  {
+    if (m_trackRecordCollection) {
+      m_trackRecordCollection->Emplace(std::forward<Args>(args)...);
+      return true;
+    }
+    return false;
+  }
 
 private:
-  // The hits collection
-  SG::WriteHandle<TrackRecordCollection> m_trackRecordCollection;
+  TrackRecordCollection* getTrackRecordCollection() const;
 
+  std::string m_outputCollectionName;
+  // Non-owning cache set by Initialize; HitCollectionMap owns the collection.
+  TrackRecordCollection* m_trackRecordCollection{};
   int m_SD_type; //TrackRecorderSD=1, CosmicTRSD=2
 };
 

@@ -40,7 +40,7 @@ private:
   StatusCode test1(const EventContext& ctx) const;
   StatusCode test2(const EventContext& ctx) const;
   StatusCode test3(const EventContext& ctx) const;
-  StatusCode test4() const;
+  StatusCode test4(const EventContext& ctx) const;
 
   ToolHandle<Trk::IVertexFitter> m_fitter
   { this, "Tool", "Trk::TrkVKalVertexFitter", "Tool to test." };

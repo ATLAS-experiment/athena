@@ -1,0 +1,4 @@
+<!-- Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration -->
+<lcgdict>
+  <enum name="ActsTrk::detail::SourceLinkType" />
+</lcgdict>

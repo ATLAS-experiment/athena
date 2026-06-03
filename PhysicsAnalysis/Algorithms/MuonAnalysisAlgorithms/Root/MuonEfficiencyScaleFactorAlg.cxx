@@ -12,8 +12,6 @@
 
 #include <MuonAnalysisAlgorithms/MuonEfficiencyScaleFactorAlg.h>
 
-#include <RootCoreUtils/Assert.h>
-
 //
 // method implementations
 //

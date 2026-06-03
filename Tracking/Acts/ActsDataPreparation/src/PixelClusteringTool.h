@@ -17,6 +17,8 @@
 #include "details/CellContainer.h"
 #include "details/CellContainerProxy.h"
 #include "details/InPlaceClusterization.h"
+#include <string>
+
 
 namespace ActsTrk {
 
@@ -89,6 +91,8 @@ private:
   
   SG::ReadCondHandleKey<PixelChargeCalibCondData> m_chargeDataKey {this, "PixelChargeCalibCondData", "",
     "Pixel charge calibration data"};
+  Gaudi::Property<std::string> m_idHelperName {this, "IDHelperName", "PixelID",
+    "Pixel-like ID helper name to retrieve from DetectorStore"};
   
   Gaudi::Property<bool> m_addCorners {this, "AddCorners", true};
   Gaudi::Property<bool> m_useWeightedPos {this, "UseWeightedPosition", false};

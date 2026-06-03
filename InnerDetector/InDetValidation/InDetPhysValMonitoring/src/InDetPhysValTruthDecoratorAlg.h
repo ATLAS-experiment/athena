@@ -59,12 +59,6 @@ private:
         {"EventInfo.beamPosX", "EventInfo.beamPosY", "EventInfo.beamPosZ"},
 	"Beamspot position decoration keys"};
 
-  PublicToolHandle<IAthSelectionTool>         m_truthSelectionTool
-     {this,"TruthSelectionTool","",""};
-
-  mutable std::mutex m_mutex;
-  mutable CutFlow m_cutFlow ATLAS_THREAD_SAFE; // Guarded by m_mutex
-
   mutable std::atomic<std::size_t> m_nMissingTruthParticles = 0u;
   mutable std::atomic<bool> m_errorEmitted{false};
 

@@ -1,6 +1,6 @@
 """
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-2020 Matthias Schott - Uni Mainz
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+2026 Peter Kraemer -- Uni Bonn
 """
 
 from AthenaConfiguration.Enums import BeamType
@@ -787,7 +787,7 @@ def MuonTrackConfig(flags, **kwargs):
             title='Overview_LB_nMuonTrack;LumiBlock;LumiBlockTrackCategory',
             type='TH2F', path='Overview/General',
             xbins=2500, xmin=0, xmax=2500,
-            ybins=27, ymin=-1, ymax=26, ylabels=["", "", "NoTrigNonCB", "NoTrigCB", "NonCB", "CB", "AllNonCB", "AllCB", "", "Z", "Jpsi", "", "ME_EC", "ME_BC", "ME_BA", "ME_EA", "", "MS_EC", "MS_BC", "MS_BA", "MS_EA", "", "ID_EC", "ID_BC", "ID_BA", "ID_EA", ""],
+            ybins=32, ymin=-1, ymax=31, ylabels=["", "", "AllMuons", "Loose", "Medium", "Tight", "", "NoTrigNonCB", "NoTrigCB", "NonCB", "CB", "AllNonCB", "AllCB", "", "Z", "Jpsi", "", "ME_EC", "ME_BC", "ME_BA", "ME_EA", "", "MS_EC", "MS_BC", "MS_BA", "MS_EA", "", "ID_EC", "ID_BC", "ID_BA", "ID_EA", ""],
             opt='kAlwaysCreate')
 
     # Overview/Jpsi
@@ -1383,7 +1383,8 @@ def MuonTrackConfig(flags, **kwargs):
     myGroup.defineHistogram('JpsiEta2D;m_Jpsi_2occupancy', 
             title='m_Jpsi_2occupancy;#etaRegionPermutations[+#mu,-#mu];N_{#mu}', 
             type='TH1F', path='MuonTrkPhys/Jpsi', 
-            xbins=16, xmin=-0.5, xmax=15.5, opt='kAlwaysCreate')
+            xbins=20, xmin=0, xmax=20,
+            xlabels=["EA_EA", "EA_BA", "EA_BC", "EA_EC", "BA_EA", "BA_BA", "BA_BC", "BA_EC", "BC_EA", "BC_BA", "BC_BC", "BC_EC", "EC_EA", "EC_BA", "EC_BC", "EC_EA", "", "", "out", ""], opt='kAlwaysCreate')
     myGroup.defineHistogram('JpsiEta2;m_Jpsi_occy', 
             title='m_Jpsi_occy;#etaRegionPermutations[+#mu,-#mu];N_{#mu}', 
             type='TH1F', path='MuonTrkPhys/Jpsi', 
@@ -1479,7 +1480,8 @@ def MuonTrackConfig(flags, **kwargs):
     myGroup.defineHistogram('ZEta2D;m_Z_2occupancy', 
             title='m_Z_2occupancy;#etaRegionPermutations[+#mu,-#mu];N_{#mu}', 
             type='TH1F', path='MuonTrkPhys/Z', 
-            xbins=16, xmin=-0.5, xmax=15.5, opt='kAlwaysCreate', merge="merge")
+            xbins=20, xmin=0, xmax=20,
+            xlabels=["EA_EA", "EA_BA", "EA_BC", "EA_EC", "BA_EA", "BA_BA", "BA_BC", "BA_EC", "BC_EA", "BC_BA", "BC_BC", "BC_EC", "EC_EA", "EC_BA", "EC_BC", "EC_EA", "", "", "out", ""], opt='kAlwaysCreate')
     myGroup.defineHistogram('ZMass_BA_BA;m_Z_M_BA_BA', 
             title='m_Z_M_BA_BA;M_{#mu#mu};Entries', 
             type='TH1F', path='MuonTrkPhys/Z', 

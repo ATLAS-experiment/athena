@@ -145,7 +145,7 @@ SetAttribute( const std::string & attName, const std::string & attValue, bool is
 
 std::string
 MiniConfigTreeNode::
-GetAttribute( const std::string & attName, bool calledFromDaughter ) const
+GetAttribute( std::string_view attName, bool calledFromDaughter ) const
 {
   AttIter_t i = m_attributes.find( attName );
   if( i == m_attributes.end() ) {

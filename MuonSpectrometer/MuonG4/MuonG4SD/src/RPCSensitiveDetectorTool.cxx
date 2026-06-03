@@ -22,8 +22,7 @@ StatusCode RPCSensitiveDetectorTool::SetupEvent(HitCollectionMap& hitCollections
 
 StatusCode RPCSensitiveDetectorTool::Gather(HitCollectionMap& hitCollections)
 {
-  hitCollections.Record<RPCSimHitCollection>(m_outputCollectionNames[0]);
-  return StatusCode::SUCCESS;
+  return hitCollections.Record<RPCSimHitCollection>(m_outputCollectionNames[0]);
 }
 
 G4VSensitiveDetector* RPCSensitiveDetectorTool::makeSD() const

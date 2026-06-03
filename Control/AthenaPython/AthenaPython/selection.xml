@@ -27,6 +27,10 @@
   -->
   <class name="AthenaInternal::ROOT6_AthenaPython_WorkAround_Dummy" />
   <function name="AthenaInternal::getClid" />
+  <function name="AthenaInternal::getHist" />
+  <function name="AthenaInternal::getGraph" />
+  <function name="AthenaInternal::getEfficiency" />
+  <function name="AthenaInternal::getTree" />
 
 </lcgdict>
 

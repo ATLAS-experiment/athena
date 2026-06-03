@@ -1,8 +1,10 @@
 #!/bin/bash
-# art-description: Test running pipeliene
+# art-description: Test running pipeline
 # art-type: grid
 # art-include: main/Athena
 # art-memory: 8192
+# art-cores: 8
+# art-runtime: 86400
 # art-output: *.txt
 # art-output: *.root
 # art-output: *.xml
@@ -14,10 +16,7 @@ set -e
 echo "$ArtInFile"
 fileList="${ArtInFile// /,}"
 echo $fileList
-# PREFIX="F610"
-lastref_dir=last_results
 
-ATHENA_SOURCE="${ATLAS_RELEASE_BASE}/Athena/${Athena_VERSION}/InstallArea/${Athena_PLATFORM}/src/"
 DCUBE_CONFIG="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/dcube_config_G4Validation.xml"
 INPUT_EVNT_FILE="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1"
 
@@ -63,6 +62,7 @@ if [ -z "$DCUBE_CONFIG" ]; then
     exit 1
 fi
 
+# Define a function to run a command and check its return code
 run () {
     name="${1}"
     cmd="${@:2}"
@@ -76,7 +76,6 @@ run () {
     return $rc
 }
 
-
 art.py download --user=artprod --dst=last_results "$ArtPackage" "$ArtJobName"
 run "dcube-latest" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
@@ -84,4 +83,6 @@ run "dcube-latest" \
         -c ${DCUBE_CONFIG} \
         -r ${R_FILE} \
         ${X_FILE}
+status=$rc
 echo "art-result: $? plots"
+exit $status

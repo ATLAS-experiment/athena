@@ -16,13 +16,6 @@
 // for erase_if detection i.e. >=c++20
 #include <version>
 
-namespace {
-   template <typename T_EnumClass >
-   constexpr typename std::underlying_type<T_EnumClass>::type to_underlying(T_EnumClass an_enum) {
-      return static_cast<typename std::underlying_type<T_EnumClass>::type>(an_enum);
-   }
-}
-
 #ifndef  __cpp_lib_erase_if
 namespace std {
    template <class T_container, class T_Func>
@@ -122,11 +115,11 @@ namespace ActsTrk
                static_cast< std::underlying_type<xAOD::UncalibMeasType>::type >(xAOD::UncalibMeasType::nTypes)>
        measurement_to_truth_association_maps{};
     
-    measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::PixelClusterType)]=pixelClustersToTruthAssociation;
-    measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::StripClusterType)]=stripClustersToTruthAssociation;
-    measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::HGTDClusterType)]=hgtdClustersToTruthAssociation;
+    measurement_to_truth_association_maps[Acts::toUnderlying(xAOD::UncalibMeasType::PixelClusterType)]=pixelClustersToTruthAssociation;
+    measurement_to_truth_association_maps[Acts::toUnderlying(xAOD::UncalibMeasType::StripClusterType)]=stripClustersToTruthAssociation;
+    measurement_to_truth_association_maps[Acts::toUnderlying(xAOD::UncalibMeasType::HGTDClusterType)]=hgtdClustersToTruthAssociation;
     auto assocSize = [&measurement_to_truth_association_maps](xAOD::UncalibMeasType type) {
-      const ActsTrk::MeasurementToTruthParticleAssociation *assoc = measurement_to_truth_association_maps[to_underlying(type)];
+      const ActsTrk::MeasurementToTruthParticleAssociation *assoc = measurement_to_truth_association_maps[Acts::toUnderlying(type)];
       return assoc ? assoc->size() : 0ul;
     };
 

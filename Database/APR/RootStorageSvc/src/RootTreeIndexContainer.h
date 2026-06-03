@@ -40,7 +40,7 @@ namespace pool {
       virtual ~RootTreeIndexContainer() override {}
 
       /// Open the container
-      virtual StatusCode open(DbDatabase&, const std::string&, const DbTypeInfo*, DbAccessMode) override final;
+      virtual StatusCode open(DbDatabase&, const std::string&, const DbTypeInfo*, Io::IoFlag) override final;
 
       /// Number of entries within the container
       virtual uint64_t nextRecordId() override final;

@@ -86,24 +86,24 @@ namespace CP {
 
         for (; mu_itr != mu_end; ++mu_itr) {
             //---\\---// Simple preselection
-            if ((*mu_itr)->muonType() != xAOD::Muon::Combined) continue;
+            if ((*mu_itr)->muonType() != xAOD::Muon::MuonType::Combined) continue;
 
-            const xAOD::TrackParticle* cbTrack = (*mu_itr)->trackParticle(xAOD::Muon::CombinedTrackParticle);
+            const xAOD::TrackParticle* cbTrack = (*mu_itr)->trackParticle(xAOD::Muon::TrackParticleType::CombinedTrackParticle);
             if (cbTrack) m_Combined->Fill(cbTrack);
 
-            const xAOD::TrackParticle* idTrack = (*mu_itr)->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+            const xAOD::TrackParticle* idTrack = (*mu_itr)->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
             if (idTrack) m_InnerDet->Fill(idTrack);
 
             const xAOD::TrackParticle* meTrack = nullptr;
             try {
-                meTrack = (*mu_itr)->trackParticle(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle);
-            } catch (SG::ExcBadAuxVar& b) { meTrack = (*mu_itr)->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle); }
+                meTrack = (*mu_itr)->trackParticle(xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle);
+            } catch (SG::ExcBadAuxVar& b) { meTrack = (*mu_itr)->trackParticle(xAOD::Muon::TrackParticleType::MuonSpectrometerTrackParticle); }
             if (meTrack) m_MSExtr->Fill(meTrack);
 
             const xAOD::TrackParticle* msoeTrack = nullptr;
             try {
-                msoeTrack = (*mu_itr)->trackParticle(xAOD::Muon::MSOnlyExtrapolatedMuonSpectrometerTrackParticle);
-            } catch (SG::ExcBadAuxVar& b) { msoeTrack = (*mu_itr)->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle); }
+                msoeTrack = (*mu_itr)->trackParticle(xAOD::Muon::TrackParticleType::MSOnlyExtrapolatedMuonSpectrometerTrackParticle);
+            } catch (SG::ExcBadAuxVar& b) { msoeTrack = (*mu_itr)->trackParticle(xAOD::Muon::TrackParticleType::MuonSpectrometerTrackParticle); }
             if (msoeTrack) m_MSOnlyExtr->Fill(msoeTrack);
 
             //---\\---// Calibrating muon

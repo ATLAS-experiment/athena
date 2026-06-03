@@ -50,7 +50,7 @@ StatusCode CondProxyProvider::initialize() {
    // Get PoolSvc and connect as "Conditions"
    IPoolSvc *poolSvc = m_athenaPoolCnvSvc->getPoolSvc();
    m_contextId = poolSvc->getInputContext("Conditions");
-   ATH_CHECK( poolSvc->connect(pool::ITransaction::READ, m_contextId) );
+   ATH_CHECK( poolSvc->connect(Io::READ, m_contextId) );
 
    for( const auto &inp : m_inputCollectionsProp.value() ) {
       ATH_MSG_INFO("Inputs: " << inp);

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -52,6 +52,10 @@ def zdcGeometry(flags):
         case "data25_hipcomm":
             return defaultGeometryTags.RUN3_ZDC24
         case "data25_hicomm":
+            return defaultGeometryTags.RUN3_ZDC24
+        case "data26_hi":
+            return defaultGeometryTags.RUN3_ZDC24
+        case "data26_hicomm":
             return defaultGeometryTags.RUN3_ZDC24
         case _:
             run = flags.GeoModel.Run
@@ -110,7 +114,7 @@ def SetConfigTag(flags):
             config = "Injectorpp2024"
         if flags.Input.ProjectName in ["data24_hi","data24_hicomm"]:
             config = "InjectorPbPb2024"
-        if flags.Input.ProjectName in ["data25_hi","data25_hicomm","data25_hip"] :
+        if flags.Input.ProjectName in ["data25_hi","data25_hicomm","data25_hip","data26_hicomm","data26_hi"] :
             if (aa_type == 8 or aa_type == 10):
                 config = "InjectorpOOONeNe2025"
             if (aa_type == 82):
@@ -143,8 +147,10 @@ def SetConfigTag(flags):
                 if (aa_type == 82):
                     config = "configZDC_PbPb2025.v1.json"
             elif flags.Input.ProjectName in ["data26_comm", "data26_cos", "data26_900GeV", "data26_13p6TeV"]:
-                config = "configZDC_PbPb2025.v1.json" # assume same config for 2026 pp as for PbPb for 2025 run
-            
+                config = "configZDC_PbPb2025.v2.1.json" # assume same config for 2026 pp as for PbPb for 2025 run
+            elif flags.Input.ProjectName in ["data26_hi","data26_hicomm"]:
+                config = "configZDC_PbPb2026.v2.json"
+
         elif run == LHCPeriod.Run2:
             if flags.Input.ProjectName == "data15_hi":
                 config = "PbPb2015"
@@ -501,6 +507,16 @@ def ZdcRecRun3Cfg(flags):
             doTimeCalib = True
             doFADCCorr = True
             doNonLinCorr = False
+        elif flags.Input.ProjectName in ["data26_hicomm"]:
+            doCalib = True
+            doTimeCalib = False
+            doFADCCorr = False
+            doNonLinCorr = False            
+        elif flags.Input.ProjectName in ["data26_hi"]: 
+            doCalib = True
+            doTimeCalib = True
+            doFADCCorr = True
+            doNonLinCorr = False
 
     # No calibration required (or exists) for MC
     if flags.Input.isMC:
@@ -597,10 +613,12 @@ def ZdcNtupleRun3Cfg(flags,**kwargs):
     acc = ComponentAccumulator()
     acc.merge(ZdcNtupleCfg(flags,
                            useGRL = False,
-                           zdcOnly = True,
+                           zdcOnly = False,
+                           zdcCalib = True,
                            lhcf2022 = False,
                            lhcf2022zdc = False,
                            lhcf2022afp = False,
+                           pbpb2023 = True,
                            isMC = flags.Input.isMC,
                            enableTrigger = not flags.Input.isMC,
                            enableOutputSamples = True,
@@ -622,6 +640,7 @@ def ZdcInjNtupleCfg(flags,**kwargs):
                            useGRL = False,
                            zdcOnly = True,
                            zdcInj = True,
+                           pbpb2023 = False,
                            lhcf2022 = False,
                            lhcf2022zdc = False,
                            lhcf2022afp = False,
@@ -660,7 +679,7 @@ def ZdcLEDRecCfg(flags):
         #config = 'ppALFA2023'
         doFADCCorr = False
 
-        if flags.Input.ProjectName in ["data24_hi","data25_hip","data25_hi"]:
+        if flags.Input.ProjectName in ["data24_hi","data25_hip","data25_hi","data26_hicomm","data26_hi"]:
             doFADCCorr = True
     
         acc.addEventAlgo(CompFactory.ZdcByteStreamLucrodData())

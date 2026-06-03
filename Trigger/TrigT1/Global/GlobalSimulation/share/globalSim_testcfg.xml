@@ -21,7 +21,7 @@
       <property name="wstot_op" value="&lt;="/>
       <property name="TIPposition" value="0" type="int"/>
       <property name="TIPwidth" value="3" type="int"/>
-      <child class="eFexCvtrAlgTool" name="eFexCvtrAlgTool"/>
+      <child class="eFexCvtrAlgTool" name="eFexCvtrAlgTool" slot="in0"/>
     </AlgTool>
     <AlgTool class="eEmMultAlgTool" name="eEmMultAlgTool_1">
       <!-- rhad-->
@@ -35,7 +35,7 @@
       <property name="wstot_op" value="&lt;="/>
       <property name="TIPposition" value="5" type="int" />
       <property name="TIPwidth" value="3" type="int" />
-      <child class="Egamma1BDTAlgTool" name="Egamma1BDTAlgTool"/>
+      <child class="Egamma1BDTAlgTool" name="Egamma1BDTAlgTool" slot="in0"/>
     </AlgTool>
   </TIPWriters>
 </GlobalSimAlgConfig>

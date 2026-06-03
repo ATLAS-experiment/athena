@@ -31,8 +31,7 @@ StatusCode SctSensor_CTBTool::SetupEvent(HitCollectionMap& hitCollections)
 
 StatusCode SctSensor_CTBTool::Gather(HitCollectionMap& hitCollections)
 {
-  hitCollections.Record<SiHitCollection>(m_outputCollectionNames[0]);
-  return StatusCode::SUCCESS;
+  return hitCollections.Record<SiHitCollection>(m_outputCollectionNames[0]);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
