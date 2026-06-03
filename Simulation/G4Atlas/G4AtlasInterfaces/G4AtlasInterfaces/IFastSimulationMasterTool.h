@@ -7,6 +7,9 @@
 
 #include "GaudiKernel/IAlgTool.h"
 
+// Forward declaration
+class HitCollectionMap;
+
 /** @class IFastSimulationMasterTool IFastSimulationMasterTool.h "G4AtlasInterfaces/IFastSimulationMasterTool.h"
  *
  *  Abstract interface to service for Geant4 fast simulation classes
@@ -27,13 +30,13 @@ class IFastSimulationMasterTool : virtual public IAlgTool {
   virtual StatusCode initializeFastSims() = 0;
 
   /** Begin of athena event method. Gets called once at the beginning of every Athena event */
-  virtual StatusCode BeginOfAthenaEvent() = 0;
+  virtual StatusCode BeginOfAthenaEvent(HitCollectionMap&) = 0;
 
   /** End of athena event method.  This should get called once per athena event by the
    framework, somewhere.  Eventually it may be done via a Gaudi function.  This ensures
    a simple call when we have multiple G4 events per athena event.  The function calls
    the Gather() method for all the SD handles that it owns. */
-  virtual StatusCode EndOfAthenaEvent() = 0;
+  virtual StatusCode EndOfAthenaEvent(HitCollectionMap&) = 0;
 };
 
 #endif

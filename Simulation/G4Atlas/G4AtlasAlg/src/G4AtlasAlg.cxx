@@ -352,7 +352,7 @@ StatusCode G4AtlasAlg::execute()
 
   ATH_CHECK(m_senDetTool->BeginOfAthenaEvent(*hitCollections));
   ATH_CHECK(m_userActionSvc->BeginOfAthenaEvent(*hitCollections));
-  ATH_CHECK(m_fastSimTool->BeginOfAthenaEvent());
+  ATH_CHECK(m_fastSimTool->BeginOfAthenaEvent(*hitCollections));
 
   SG::ReadHandle<McEventCollection> inputTruthCollection(m_inputTruthCollectionKey);
   if (!inputTruthCollection.isValid()) {
@@ -450,7 +450,7 @@ StatusCode G4AtlasAlg::execute()
 
     ATH_CHECK(m_senDetTool->EndOfAthenaEvent(*hitCollections));
     ATH_CHECK(m_userActionSvc->EndOfAthenaEvent(*hitCollections));
-    ATH_CHECK(m_fastSimTool->EndOfAthenaEvent());
+    ATH_CHECK(m_fastSimTool->EndOfAthenaEvent(*hitCollections));
 
     ATH_CHECK(m_truthRecordSvc->releaseEvent());
   }

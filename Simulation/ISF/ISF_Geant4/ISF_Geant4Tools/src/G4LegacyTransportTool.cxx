@@ -380,7 +380,7 @@ StatusCode iGeant4::G4LegacyTransportTool::releaseEvent(
 
   ATH_CHECK(m_senDetTool->EndOfAthenaEvent(hitCollections));
   ATH_CHECK(m_userActionSvc->EndOfAthenaEvent(hitCollections));
-  ATH_CHECK(m_fastSimTool->EndOfAthenaEvent());
+  ATH_CHECK(m_fastSimTool->EndOfAthenaEvent(hitCollections));
 
   return StatusCode::SUCCESS;
 }

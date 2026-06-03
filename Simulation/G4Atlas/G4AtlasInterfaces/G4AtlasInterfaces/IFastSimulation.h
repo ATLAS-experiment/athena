@@ -14,6 +14,7 @@
  *  @author Zach Marshall
  *  @date   2014-12-20
  */
+class HitCollectionMap;
 class G4VFastSimulationModel;
 
 class IFastSimulation : virtual public IAlgTool {
@@ -29,13 +30,13 @@ class IFastSimulation : virtual public IAlgTool {
 
   /** Method to be called at the beginning of the *athena* event.  This is where the
   hit collections should be set up, if need be. */
-  virtual StatusCode BeginOfAthenaEvent() = 0;
+  virtual StatusCode BeginOfAthenaEvent(HitCollectionMap&) = 0;
 
   /** Method to be called at the end of the *athena* event.  This
    ensures a simple call when we have multiple G4 events per athena
    event.  This is where any tidying that may need to be done at the
    end of the *athena* event rather that the G4 event can be done. */
-  virtual StatusCode EndOfAthenaEvent() = 0;
+  virtual StatusCode EndOfAthenaEvent(HitCollectionMap&) = 0;
 
  protected:
   /** Method to make the actual fast simulation model itself, which
