@@ -9,6 +9,7 @@
 #include "G4ParticleTable.hh"
 #include "G4FastSimulationManagerProcess.hh"
 #include "G4ProcessManager.hh"
+#include "HitManagement/HitCollectionMap.h"
 
 FastSimulationMasterTool::FastSimulationMasterTool(const std::string& type, const std::string& name, const IInterface* parent)
   : base_class(type,name,parent)
@@ -31,18 +32,18 @@ StatusCode FastSimulationMasterTool::initializeFastSims(){
   return StatusCode::SUCCESS;
 }
 
-StatusCode FastSimulationMasterTool::BeginOfAthenaEvent(){
+StatusCode FastSimulationMasterTool::BeginOfAthenaEvent(HitCollectionMap& hcm){
   // Method that gets called at the beginning of every *athena* event
   for (auto& ifs : m_FastSimList){
-    CHECK(ifs->BeginOfAthenaEvent());
+    CHECK(ifs->BeginOfAthenaEvent(hcm));
   }
   return StatusCode::SUCCESS;
 }
 
-StatusCode FastSimulationMasterTool::EndOfAthenaEvent(){
+StatusCode FastSimulationMasterTool::EndOfAthenaEvent(HitCollectionMap& hcm){
   // Method that gets called at the end of every *athena* event
   for (auto& ifs : m_FastSimList){
-    CHECK(ifs->EndOfAthenaEvent());
+    CHECK(ifs->EndOfAthenaEvent(hcm));
   }
   return StatusCode::SUCCESS;
 }
