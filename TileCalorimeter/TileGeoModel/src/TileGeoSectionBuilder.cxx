@@ -2415,7 +2415,7 @@ void TileGeoSectionBuilder::fillPeriod(PVLink &              mother,
 
 // Checking geometry dimensions for all directions
 
-void TileGeoSectionBuilder::checking(const std::string& Name, bool print, int level,
+void TileGeoSectionBuilder::checking(std::string_view Name, bool print, int level,
                                      double X1, double X2, double Y1, double Y2, double Z)
 {
   double rless = .005; //5 [mkm]
