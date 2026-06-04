@@ -50,10 +50,9 @@ TrkToLeptonPVTool::TrkToLeptonPVTool(const std::string& type,
    }
 
 
-   std::unique_ptr<xAOD::Vertex>  TrkToLeptonPVTool::matchTrkToPV( const xAOD::TrackParticle *trk, const xAOD::Vertex * PV,
-                                                                         const xAOD::EventInfo * eventINFO) const
+   std::unique_ptr<xAOD::Vertex>  TrkToLeptonPVTool::matchTrkToPV( const EventContext& ctx, const xAOD::TrackParticle *trk, const xAOD::Vertex * PV,
+                                                                   const xAOD::EventInfo * eventINFO) const
    {
-     const EventContext& ctx = Gaudi::Hive::currentContext();
      static const SG::ConstAccessor<float> vyAcc("vy");
      if(vyAcc.isAvailable(*trk)) {
        std::vector<const xAOD::TrackParticle *> tpv(1,trk);
@@ -82,8 +81,9 @@ TrkToLeptonPVTool::TrkToLeptonPVTool(const std::string& type,
    }
 
 
-   std::unique_ptr<xAOD::Vertex>TrkToLeptonPVTool::npartVertex( const std::vector<const xAOD::TrackParticle*> & particles,
-                                                                      const xAOD::EventInfo * eventINFO) const
+   std::unique_ptr<xAOD::Vertex>TrkToLeptonPVTool::npartVertex( const EventContext& ctx,
+                                                                const std::vector<const xAOD::TrackParticle*> & particles,
+                                                                const xAOD::EventInfo * eventINFO) const
    {
      if(particles.empty()) return {nullptr};
 
@@ -120,7 +120,7 @@ TrkToLeptonPVTool::TrkToLeptonPVTool(const std::string& type,
           beamtiltX= eventINFO->beamTiltXZ();
           beamtiltY= eventINFO->beamTiltYZ();
      }
-     SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey };
+     SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx };
      
      if(beamSpotHandle.isValid() && fullxAOD ){
           ATH_MSG_DEBUG("Beam service is present");
@@ -137,8 +137,6 @@ TrkToLeptonPVTool::TrkToLeptonPVTool(const std::string& type,
      ATH_MSG_DEBUG("BEAM covariance="<<BEAM.covariance()[0]<<","<<BEAM.covariance()[1]<<","<<BEAM.covariance()[2]
                                 <<","<<BEAM.covariance()[3]<<","<<BEAM.covariance()[4]<<","<<BEAM.covariance()[5]);
      ATH_MSG_DEBUG("BEAM  tiltX,Y="<<beamtiltX<<","<<beamtiltY);
-
-     const EventContext& ctx = Gaudi::Hive::currentContext();
 
      if(fullxAOD){
        //---If beam is tilted -> make pre-fit and translate beam constraint to pre-fitted position

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //
 // ITrkToLeptonPV.h - Description
@@ -15,9 +15,9 @@
 #include "xAODTracking/VertexContainer.h"
 #include "xAODEventInfo/EventInfo.h"
 
+class EventContext;
+
 //------------------------------------------------------------------------
-  /** Interface for PV creation based on identified tracks */
-  static const InterfaceID IID_TrkToLeptonPV("ITrkToLeptonPV", 1, 0);
 
   /**  @class ITrkToLeptonPV
   
@@ -33,19 +33,18 @@
 
   class ITrkToLeptonPV : virtual public IAlgTool {
     public:
-      static const InterfaceID& interfaceID() { return IID_TrkToLeptonPV;}
-//---------------------------------------------------------------------------
+      DeclareInterfaceID(ITrkToLeptonPV, 1, 0);
 
       /** Method to match any tracks to a known Primary Vertex.
           A combined PV+track vertex is returned. Track compatibility to PV can be estimated with Chi2 of the PV+track vertex (NDF=2) 
       */
-      virtual std::unique_ptr<xAOD::Vertex> matchTrkToPV( const xAOD::TrackParticle*, const xAOD::Vertex*, const xAOD::EventInfo* =0) const =0;
+      virtual std::unique_ptr<xAOD::Vertex> matchTrkToPV(const EventContext& ctx, const xAOD::TrackParticle*, const xAOD::Vertex*, const xAOD::EventInfo* =0) const =0;
  
       /** Method to create a Primary Vertex using N(>=2) identified tracks (e.g. leptons) and beam constraint,
           The obtained N-track PV can be used as input for matchTrkToPV() to check another track.
 	  However, better way to check another track compatibility  is to call again  npartVertex() with N+1 tracks and check the obtained Chi2 (NDF=2*N_trk-1)  
       */
-      virtual std::unique_ptr<xAOD::Vertex> npartVertex(const std::vector<const xAOD::TrackParticle*>&, const xAOD::EventInfo * =0) const =0;
+    virtual std::unique_ptr<xAOD::Vertex> npartVertex(const EventContext& ctx, const std::vector<const xAOD::TrackParticle*>&, const xAOD::EventInfo * =0) const =0;
   };
 
 
