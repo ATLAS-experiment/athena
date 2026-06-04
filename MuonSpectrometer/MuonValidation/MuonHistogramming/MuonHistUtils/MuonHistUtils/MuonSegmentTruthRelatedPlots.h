@@ -5,38 +5,39 @@
 #ifndef MUONHISTUTILS_MUONSEGMENTTRUTHRELATEDPLOTS_H
 #define MUONHISTUTILS_MUONSEGMENTTRUTHRELATEDPLOTS_H
 
-#include "TrkValHistUtils/PlotBase.h"
-#include "TrkValHistUtils/HitTypePlots.h"
-#include "xAODMuon/MuonSegment.h"
-#include <vector>
 #include <string>
+#include <vector>
 
-namespace Muon{
+#include "TrkValHistUtils/HitTypePlots.h"
+#include "TrkValHistUtils/PlotBase.h"
+#include "xAODMuon/MuonSegment.h"
 
-class MuonSegmentTruthRelatedPlots:public PlotBase {
-    public:
-      MuonSegmentTruthRelatedPlots(PlotBase* pParent, const std::string& sDir);
-      ~MuonSegmentTruthRelatedPlots();
+namespace Muon {
 
-      void fill(const xAOD::MuonSegment& muonSeg,const xAOD::MuonSegment& truthMuonSeg,float weight=1.0);
+class MuonSegmentTruthRelatedPlots : public PlotBase {
+   public:
+    MuonSegmentTruthRelatedPlots(PlotBase* pParent, const std::string& sDir);
+    ~MuonSegmentTruthRelatedPlots();
 
-      //hit difference plots
-      Trk::HitTypePlots nPrecisionHits;
-      Trk::HitTypePlots nPhiLayers;
-      Trk::HitTypePlots nTrigEtaLayers;
+    void fill(const xAOD::MuonSegment& muonSeg,
+              const xAOD::MuonSegment& truthMuonSeg, float weight = 1.0);
 
-      //resolution plots     
-      TH1* dxpos{nullptr};
-      TH1* dypos{nullptr};
-      TH1* dzpos{nullptr};
+    // hit difference plots
+    Trk::HitTypePlots nPrecisionHits;
+    Trk::HitTypePlots nPhiLayers;
+    Trk::HitTypePlots nTrigEtaLayers;
 
-      TH1* detapos{nullptr};
-      TH1* dphipos{nullptr};
+    // resolution plots
+    TH1* dxpos{nullptr};
+    TH1* dypos{nullptr};
+    TH1* dzpos{nullptr};
 
-      TH1* detadir{nullptr};
-      TH1* dphidir{nullptr};
+    TH1* detapos{nullptr};
+    TH1* dphipos{nullptr};
 
+    TH1* detadir{nullptr};
+    TH1* dphidir{nullptr};
 };
-}
+}  // namespace Muon
 
 #endif
