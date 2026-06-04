@@ -55,16 +55,20 @@ void MuonReadoutElement::releaseUnAlignedTrfs() const {
     m_centralTrfCache->releaseNominalCache();
 }
 
-unsigned MuonReadoutElement::storeAlignedTransforms(const DetectorAlignStore& store) const {
-    if (store.detType != detectorType()) return 0;
-    unsigned int aligned{1};
-    m_centralTrfCache->getTransform(&store);
-    for (const auto& cache : m_localToGlobalCaches) {
-        if (cache) {
-            cache->getTransform(&store);
-        }
-        ++aligned;
+unsigned MuonReadoutElement::storeAlignedTransforms(DetectorAlignStore& store) const {
+    if (store.detType != detectorType()) {
+        return 0;
     }
+    ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Start "<<idHelperSvc()->toStringDetEl(identify())<<".");
+    unsigned int aligned{0};
+    aligned+=m_centralTrfCache->storeTransform(store);
+    for (const auto& cache : m_localToGlobalCaches) {
+        if (!cache) {
+            continue;
+        }
+        aligned+=cache->storeTransform(store);
+    }
+    ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Internal caching done.");
     return aligned;
 }
 

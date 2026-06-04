@@ -113,7 +113,7 @@ StatusCode ReadoutGeomCnvAlg::execute(const EventContext& ctx) const {
             continue;
         }
         ATH_MSG_WARNING("No external detector alignment has been defined for technology "<<ActsTrk::to_string(detType));
-        geoContext.setStore(std::make_unique<ActsTrk::DetectorAlignStore>(detType));
+        geoContext.setStore(std::make_unique<ActsTrk::DetectorAlignStore>(detType, ActsTrk::DetectorAlignStore::Mode::LazyFill));
     }
     /// Create the cache and populate it with the geoWolds
     ConstructionCache cacheObj;

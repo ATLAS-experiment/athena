@@ -40,7 +40,11 @@ namespace ActsTrk {
             *        transformation cache is invoked. 
             * @param store: Pointer to the detector aligment store */
           const Amg::Transform3D& getTransform(const DetectorAlignStore* store) const;
-
+          /** @brief Store the final transform in the mutable alignment store. 
+           *         Returns true whether a new transform was stored
+           *  @param store: The reference to the store where the cache
+           *                 stores its transform*/
+          bool storeTransform(DetectorAlignStore& store) const;
 #ifndef SIMULATIONBASE
           /** @brief returns the cached transform from the Acts Geometry context */
           const Amg::Transform3D& getTransform(const Acts::GeometryContext& gctx) const;
@@ -54,9 +58,8 @@ namespace ActsTrk {
       private:
           const IdentifierHash m_hash{0};
           const DetectorType m_type{DetectorType::UnDefined};
-          using TicketCounter = DetectorAlignStore::TrackingAlignStore;
+          using TicketCounter = detail::TrfStoreTicketCounter;
           const unsigned int m_clientNo{TicketCounter::drawTicket(m_type)};
-          mutable std::shared_mutex m_mutex ATLAS_THREAD_SAFE{};
           mutable CxxUtils::CachedUniquePtrT<Amg::Transform3D> m_nomCache ATLAS_THREAD_SAFE{};
   };
 

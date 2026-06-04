@@ -256,10 +256,8 @@ const Acts::Transform3 &ActsDetectorElement::localToGlobalTransform(const ActsTr
     return m_trfCache.getTransform(store);
 }
 
-unsigned int ActsDetectorElement::storeAlignedTransforms(const ActsTrk::DetectorAlignStore& store) const {
-    if (store.detType != detectorType()) return 0;
-    m_trfCache.getTransform(&store);
-    return 1;
+unsigned int ActsDetectorElement::storeAlignedTransforms(ActsTrk::DetectorAlignStore& store) const {
+    return m_trfCache.storeTransform(store);
 }
 
 const Acts::Transform3 & ActsDetectorElement::getDefaultTransform() const {

@@ -25,7 +25,8 @@ namespace MuonGMR4 {
             if (!inStore.geoModelAlignment->posCacheLocked()) {
                 newStore->geoModelAlignment->clearPosCache();
             }
-            newStore->trackingAlignment = std::make_unique<ActsTrk::DetectorAlignStore::TrackingAlignStore>(inStore.detType);
+            newStore->trackingAlignment = std::make_unique<ActsTrk::detail::TransformStore>(inStore.detType,
+                                                                                            ActsTrk::detail::TransformStore::Mode::LazyFill);
         }
         return newStore;
     }

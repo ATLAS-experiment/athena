@@ -29,7 +29,7 @@ namespace ActsTrk{
              *   --> A detector element base following the alignment
              *   --> Another alignable volume element */
             using Parent_t = std::variant<AlignableNode_t, 
-                                          const IDetectorElementBase*,
+                                          const IDetectorElement*,
                                           const VolumePlacement*>;
             /** @brief Constructor taking an Alignable transform from the geometry tree
              *  @param detType: Detectortype of the alignment store into which the transforms are written
@@ -42,7 +42,7 @@ namespace ActsTrk{
              *         detector element must be ensured to exceed the Placement's lifetime
              *  @param parentElement: The detector element which alignment the volume is following
              *  @param addShift: Additional optional shift to be applied on top of the alignable reference */
-            explicit VolumePlacement(const IDetectorElementBase& parentElement,
+            explicit VolumePlacement(const IDetectorElement& parentElement,
                                      std::optional<Amg::Transform3D> addShift = std::nullopt);
             /** @brief Constructor taking the reference to another placement The life time of the 
              *       object must be ensured to exceed the Placement's lifetime
@@ -60,7 +60,7 @@ namespace ActsTrk{
             /** @copydoc ActTrk::IVolumePlacement::detectorType */
             DetectorType detectorType() const override final;
             /** @copydoc ActTrk::IVolumePlacement::storeAlignedTransforms */
-            unsigned storeAlignedTransforms(const DetectorAlignStore& store) const override final;
+            unsigned storeAlignedTransforms(DetectorAlignStore& store) const override final;
             /** @copydoc Acts::VolumePlacmentBase::makePortalsAlignable */
             void makePortalsAlignable(const Acts::GeometryContext& gctx,
                                       const std::vector<std::shared_ptr<Acts::RegularSurface>>& portalsToAlign) override final;
@@ -73,9 +73,8 @@ namespace ActsTrk{
             /** @copydoc Acts::VolumePlacmentBase::globalToLocalTransform */
             const Amg::Transform3D& globalToLocalTransform(const GeometryContext& gctx) const;
             /** @copydoc Acts::VolumePlacmentBase::portalLocalToGlobal */
-             const Acts::Transform3& portalLocalToGlobal(const Acts::GeometryContext& gctx, 
+            const Acts::Transform3& portalLocalToGlobal(const Acts::GeometryContext& gctx, 
                                                         const std::size_t portalIdx) const override final;
-
         private:
             /** @brief Constructs the local -> global transform of the volume. The request
              *         is forwarded to the parent and an optional shift is applied on top
