@@ -16,6 +16,7 @@
 #include <AsgMessaging/MessageCheck.h>
 #include "TruthUtils/MagicNumbers.h"
 #include "PathResolver/PathResolver.h"
+#include <cmath>
 
 using namespace asg::msgUserCode;
 
@@ -25,8 +26,8 @@ FPGATrackSimEventSelectionSvc::FPGATrackSimEventSelectionSvc(const std::string& 
 
 StatusCode FPGATrackSimEventSelectionSvc::initialize()
 {
-  if (!m_regions) createRegions();
-
+  createRegions(); //does nothing is m_regions is already valid
+  
   m_min = m_regions->getMin(m_regionID);
   m_max = m_regions->getMax(m_regionID);
 
@@ -279,7 +280,7 @@ bool FPGATrackSimEventSelectionSvc::selectEvent(FPGATrackSimLogicalEventInputHea
 
 const FPGATrackSimRegionSlices* FPGATrackSimEventSelectionSvc::getRegions()
 {
-  if (!m_regions) createRegions();
+  createRegions();
   return m_regions;
 }
 
@@ -303,21 +304,25 @@ bool FPGATrackSimEventSelectionSvc::checkTruthTracks(const std::vector<FPGATrack
 {  
 // find at least one track in the region
   bool good=false;
+  if (!m_regions){
+    ATH_MSG_WARNING("checkTruthTracks(): m_regions is nullptr");
+    return false;
+  }
   for (const FPGATrackSimTruthTrack& track : truthTracks){
     if(m_regions->inRegion(m_regionID, track) || m_skipRegionCheck){      
       good=true;
       if (std::abs(track.getPDGCode()) != static_cast<int>(m_st)) {
-	      ATH_MSG_WARNING("selectEvent(): TruthTrack PDGCode != sampleType");
+	      ATH_MSG_WARNING("checkTruthTracks(): TruthTrack PDGCode != sampleType");
 	      good=false;
       } 
       else {    
-	      ATH_MSG_DEBUG("selectEvent(): found one truth track, in region "
+	      ATH_MSG_DEBUG("checkTruthTracks(): found one truth track, in region "
 		      <<getRegionID() <<"; track pars: "<< track.getPars());
 	      break;
       }
     }
     else {
-      ATH_MSG_DEBUG("selectEvent(): found one truth track over "<<truthTracks.size()<<", out of region "
+      ATH_MSG_DEBUG("checkTruthTracks(): found one truth track over "<<truthTracks.size()<<", out of region "
 		    <<getRegionID() <<"; track pars: "<< track.getPars());
     }
   }
