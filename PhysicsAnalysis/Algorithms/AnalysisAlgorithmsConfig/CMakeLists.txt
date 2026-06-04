@@ -23,6 +23,11 @@ if (NOT COLUMNAR_ANALYSIS)
       POST_EXEC_SCRIPT nopost.sh
       PROPERTIES TIMEOUT 30 )
 
+   atlas_add_test( ConfigPropertySubstitution
+      SCRIPT python/ConfigPropertySubstitution_unitTest.py
+      POST_EXEC_SCRIPT nopost.sh
+      PROPERTIES TIMEOUT 30 )
+
    atlas_add_test( ConfigTextCompareBuilder
       SCRIPT python/ConfigText_unitTest.py --text-config AnalysisAlgorithmsConfig/test_configuration_Run2.yaml --compare-builder --check-order
       POST_EXEC_SCRIPT nopost.sh
