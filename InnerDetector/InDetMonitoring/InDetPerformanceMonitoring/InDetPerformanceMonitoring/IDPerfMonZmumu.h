@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDPERFMON_ZMUMU_H
@@ -241,8 +241,6 @@ class IDPerfMonZmumu : public AthAlgorithm
   double m_positive_eta{};
   double m_positive_z0{};
   double m_positive_d0{};
-  double m_positive_z0_manualBS{};
-  double m_positive_d0_manualBS{};
   double m_positive_z0_err{};
   double m_positive_d0_err{};
   double m_positive_sigma_pt{};
@@ -276,8 +274,6 @@ class IDPerfMonZmumu : public AthAlgorithm
   double m_negative_eta{};
   double m_negative_z0{};
   double m_negative_d0{};  
-  double m_negative_z0_manualBS{};
-  double m_negative_d0_manualBS{};
   double m_negative_z0_err{};
   double m_negative_d0_err{};
   double m_negative_sigma_pt{};
