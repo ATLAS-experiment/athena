@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -455,11 +455,11 @@ StatusCode TileTBStat::execute() {
   default: ind = 4; break;
   }
   ++(m_nEvt[ind]);
-
+  //After this assignment, bits 8-31 of lvl1_trigger_type are known to be unset. 
   unsigned int lvl1_trigger_type = event->lvl1_trigger_type();
-  if (lvl1_trigger_type < 256U) ++m_nEventsPerTrigger[lvl1_trigger_type];
-  else ++m_nEventsPerTrigger[256];
-
+  //...so lvl1_trigger_type must be less than 256
+  ++m_nEventsPerTrigger[lvl1_trigger_type];
+  
   m_spillPattern <<= 4;
   m_spillPattern |= (m_trigType & 0xF);
 
