@@ -299,16 +299,15 @@ PoolFilePeeker::PoolFilePeeker(const char* filename, const bool vbs) {
   TTree* params=(TTree*)tf->Get("##Params");
   const unsigned nParamsEntries=params->GetEntries();
 
-  char dbStr[1024];
+  char dbStr[1024]{};
   params->SetBranchAddress("db_string",&dbStr);
-
-  const std::string starter("[NAME=FID][VALUE=");
+  std::string_view starter("[NAME=FID][VALUE=");
+  
   for (unsigned i=0;i<nParamsEntries;++i) {
     params->GetEntry(i);
     //Model: [NAME=FID][VALUE=41DB894B-C39C-BF47-81E9-C52658B117BF]
-    const std::string field(dbStr);
-
-    if (field.compare(starter)) {
+    std::string_view field(dbStr);
+    if (field.starts_with(starter)) {
       m_fmd.m_guid=field.substr(starter.size(),field.size()-starter.size()-1);
       break;
     }
