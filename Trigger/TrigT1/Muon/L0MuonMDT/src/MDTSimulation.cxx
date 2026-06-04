@@ -28,8 +28,9 @@ namespace L0Muon {
 
   StatusCode MDTSimulation::execute(const EventContext& ctx) const {
 
-    const RPCCandDataContainer* barrelCandidates{nullptr};
+    const xAOD::RPCCandDataContainer* barrelCandidates{};
     ATH_CHECK(SG::get(barrelCandidates, m_barrelCandidateKey, ctx));
+
   
     const ActsTrk::GeometryContext* geoCtx{nullptr};
     ATH_CHECK(SG::get(geoCtx, m_geoCtxKey, ctx));
@@ -39,7 +40,7 @@ namespace L0Muon {
 
 
   
-    for(const L0Muon::RPCCandData* cand : *barrelCandidates) {
+    for(const auto& cand : *barrelCandidates) {
 
       float m=0, b=0;
 
@@ -49,7 +50,9 @@ namespace L0Muon {
       }
 
       std::vector<const xAOD::MdtDriftCircle*> mdtHits;
-      ATH_CHECK(collectMDTHits(ctx, gctx, cand->eta(), cand->phi(), mdtHits, m, b));
+      float eta = (static_cast<float>(cand->eta()) / static_cast<float>(xAOD::ICandData_v1::etaBitRange())) * (2.0f * xAOD::ICandData_v1::etaRange()) - xAOD::ICandData_v1::etaRange();
+      float phi = (static_cast<float>(cand->phi()) / static_cast<float>(xAOD::ICandData_v1::phiBitRange())) * xAOD::ICandData_v1::phiRange() - M_PI;
+      ATH_CHECK(collectMDTHits(ctx, gctx, eta, phi, mdtHits, m, b));
  
       // Split hits by station
       std::vector<const xAOD::MdtDriftCircle*> biHits;
@@ -145,16 +148,17 @@ namespace L0Muon {
   }
 
 
-  bool MDTSimulation::fitRPC(const L0Muon::RPCCandData& cand,float& m, float& b, std::vector<float>& z_positions, std::vector<float>& r_positions) const {
+  bool MDTSimulation::fitRPC(const xAOD::RPCCandData& cand,float& m, float& b, std::vector<float>& z_positions, std::vector<float>& r_positions) const {
 
-    float theta = 2.f * std::atan(std::exp(-cand.eta()));
+    float eta = (static_cast<float>(cand.eta()) / static_cast<float>(xAOD::ICandData_v1::etaBitRange())) * (2.0f * xAOD::ICandData_v1::etaRange()) - xAOD::ICandData_v1::etaRange();
+    float theta = 2.f * std::atan(std::exp(-eta));
     float tanTheta = std::tan(theta);
 
     z_positions.clear();
     r_positions.clear();
 
     for (int i = 0; i < 4; ++i) {
-        const float z_pos = cand.zPos(i);
+        const float z_pos = static_cast<float>(cand.zPos().at(i)) / static_cast<float>(xAOD::RPCCandData_v1::zPosBitRange()) * (2.0f * xAOD::RPCCandData_v1::zPosRange()) - xAOD::RPCCandData_v1::zPosRange();
         z_positions.push_back(z_pos);
         r_positions.push_back(z_pos * tanTheta);
       }
