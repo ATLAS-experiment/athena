@@ -19,6 +19,7 @@ if __name__ == "__main__":
     flags.Detector.GeometrysTGC = False
     
     flags.Common.MsgSuppression = False
+    flags.Output.RDOFileName = "test.RDO.pool.root"
     flags, acc = setupGeoR4TestCfg(args, flags)
     from AthenaCommon.Constants import DEBUG
 
@@ -49,11 +50,21 @@ if __name__ == "__main__":
                              RegSel_MDT = acc.popToolsAndMerge(regSelTool_MDT_Cfg(flags))
                             ))
 
-
-   
     print("=== Registered services ===")
     for svc in acc.getServices():
         print(svc.name)
+
+    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    itemList = [
+        "xAOD::RPCCandDataContainer#RPCCandData",
+        "xAOD::RPCCandDataAuxContainer#RPCCandDataAux."
+    ]
+
+    acc.merge(OutputStreamCfg(flags,
+                              "RDO",
+                              ItemList=itemList,
+                              takeItemsFromInput=False))
+
 
 
     executeTest(acc)

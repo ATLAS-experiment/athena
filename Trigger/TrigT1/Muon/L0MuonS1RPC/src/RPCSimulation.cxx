@@ -45,8 +45,9 @@ namespace L0Muon
     ATH_MSG_DEBUG("Executing " << name() << "...");
 
     // output candidates container
-    SG::WriteHandle outputCands(m_outputCandKey, ctx);
-    ATH_CHECK(outputCands.record(std::make_unique<L0Muon::RPCCandDataContainer>()));
+    SG::WriteHandle<xAOD::RPCCandDataContainer> outputCands_handle(m_outputCandKey, ctx);
+    ATH_CHECK(outputCands_handle.record(std::make_unique<xAOD::RPCCandDataContainer>(), std::make_unique<xAOD::RPCCandDataAuxContainer>()));
+    auto outputCands = outputCands_handle.ptr();
 
     if (m_useTruth)
     {
@@ -101,7 +102,7 @@ namespace L0Muon
       return rpcHits;
   }
 
-  StatusCode RPCSimulation::buildFromTruth(L0Muon::RPCCandDataContainer& outputCands,
+  StatusCode RPCSimulation::buildFromTruth(xAOD::RPCCandDataContainer& outputCands,
                                            const EventContext &ctx) const
   {
     const ActsTrk::GeometryContext* geoContextHandle{nullptr};
@@ -133,16 +134,14 @@ namespace L0Muon
       /// create the candidate
       /// do not set the sectorId and bcTag for the moment
       uint16_t subdetectorId = eta > 0 ? 0x65 : 0x66;
-      auto cand = std::make_unique<L0Muon::RPCCandData>(subdetectorId, 0, 0);
-
-      std::cout << "eta before setEta = " << eta << std::endl;
+      auto* cand = outputCands.push_back(std::make_unique<xAOD::RPCCandData>()); 
+      
+      cand->initialize(subdetectorId, 0, 0);
       cand->setEta(eta);
-      std::cout << "eta after setEta  = " << cand->eta() << std::endl;
-      //cand->setEta(eta);
       cand->setPhi(phi);
       cand->setPt(pt);
       cand->setThreshold(0);
-      cand->setCharge(charge);
+      cand->setCandCharge(charge);
       cand->setMdtFlag(0);
 
       std::array<float, 4> zPos{};
@@ -191,11 +190,11 @@ namespace L0Muon
             //  L0Muon::RPCCandData::s_zPosRange*L0Muon::RPCCandData::s_zPosBitRange), i);
             //std::cout << "z after setZpos = " <<cand->zPos(i)<< std::endl;
 
-            cand->setZPos(zPos[i], i);
           }
       }
-      cand->setQuality(L0Muon::RPCCandData::Quality::Q_BEST);
-      outputCands.push_back(std::move(cand));        
+      
+      cand->setZPos(zPos);
+      cand->setCandQuality(xAOD::ICandData_v1::Quality::Q_BEST); // Set to BEST for truth
     }
     // Implementation of building candidates from truth
     return StatusCode::SUCCESS;
