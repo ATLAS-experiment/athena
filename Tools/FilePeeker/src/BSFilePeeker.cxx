@@ -1,10 +1,11 @@
 //Dear emacs, this is -*-c++-*- 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
 #include <string>
+#include <string_view>
 #include <unistd.h>
 #include "EventStorage/pickDataReader.h"
 #include "FileMetaData.h"
@@ -19,21 +20,21 @@ public:
 
 private:
 
-  bool extractValue(const std::string& source, const std::string& key, std::string& value);
+  bool extractValue(std::string_view source, std::string_view key, std::string& value);
   
   FileMetaData m_fmd;
   
 };
 
 
-bool BSFilePeeker::extractValue(const std::string& source, const std::string& key, std::string& value) {
+bool BSFilePeeker::extractValue(std::string_view source, std::string_view key, std::string& value) {
 
   const size_t sep=source.find(':');
-  if (sep==std::string::npos || source.compare(0,sep,key)!=0) {
+  if (sep==std::string_view::npos || source.substr(0,sep) != key) {
     return false;
   }
   else {
-    value=source.substr(sep+1);
+    value.assign(source.substr(sep+1));
     return true;
   }
 }
