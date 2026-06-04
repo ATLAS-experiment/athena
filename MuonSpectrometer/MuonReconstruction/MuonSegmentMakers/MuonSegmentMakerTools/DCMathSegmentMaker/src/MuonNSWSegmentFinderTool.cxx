@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonNSWSegmentFinderTool.h"
@@ -554,7 +554,7 @@ namespace Muon {
         }
 
         MuonSegmentVec segments{};
-        std::unique_ptr<const TrackCollection> resolvedTracks(m_ambiTool->process(&segTrkColl));
+        std::unique_ptr<const TrackCollection> resolvedTracks(m_ambiTool->process(ctx, &segTrkColl));
         ATH_MSG_DEBUG("Resolved track candidates: old size " << segTrkColl.size() << " new size " << resolvedTracks->size());
 
         // store the resolved segments

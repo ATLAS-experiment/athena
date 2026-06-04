@@ -148,7 +148,7 @@ StatusCode MuonSegContainerMergerAlg::execute(const EventContext& ctx) const {
             track_seg_map[trk.get()] = seg;
             ambi_tracks.push_back(std::move(trk));
         }
-        std::unique_ptr<const TrackCollection> resolved_trks{m_ambiguityProcessor->process(&ambi_tracks)};
+        std::unique_ptr<const TrackCollection> resolved_trks{m_ambiguityProcessor->process(ctx, &ambi_tracks)};
         std::vector<const Trk::Segment*> resolved_copies{};
         for (const Trk::Track* res : *resolved_trks) {
             const Trk::Segment* seg = track_seg_map[res];

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ITRKAMBIGUITYSCOREPROCESSORTOOL_H
@@ -9,8 +9,6 @@
 #include "TrkTrack/TrackCollection.h" // typedef
 #include "TrkToolInterfaces/ITrackAmbiguityProcessorTool.h"
 
-
-static const InterfaceID IID_ITrackAmbiguityScoreProcessorTool("Trk::ITrackAmbiguityScoreProcessorTool", 1, 0);
 
 namespace Trk {
 
@@ -23,21 +21,16 @@ class ITrackAmbiguityScoreProcessorTool : virtual public IAlgTool
 {
 	public:
 
-	static const InterfaceID& interfaceID( ) ;
+	DeclareInterfaceID(ITrackAmbiguityScoreProcessorTool, 1, 0);
 	/** (in concrete object) Returns a processed TrackCollection from the passed 'tracks'
 	@param tracks collection of tracks which will have ambiguities resolved. Will not be modified.
 	@return  map of score and track. Ownership is passed on 
 	(i.e. client handles deletion)*/
-  virtual void process(const TrackCollection & tracks , TracksScores* scoredTracks) const = 0;
+  virtual void process(const EventContext& ctx, const TrackCollection & tracks, TracksScores* scoredTracks) const = 0;
   //Print statistics at the end of the processing.
   virtual void statistics() = 0;
 
 };
-
-inline const InterfaceID& Trk::ITrackAmbiguityScoreProcessorTool::interfaceID()
-{
-	return IID_ITrackAmbiguityScoreProcessorTool;
-}
 
 } //end ns
 
