@@ -68,10 +68,12 @@ namespace Trk {
  (for internal use only, or exported to storegate).
     */
     virtual const TrackCollection *process(
+        const EventContext& ctx,
         const TrackCollection *tracksCol,
         Trk::PRDtoTrackMap *prdToTrackMap) const override;
 
     virtual const TrackCollection *process(
+        const EventContext& /*ctx*/,
         const TracksScores * /*trackScoreTrackMap*/) const override {
       return nullptr;
     }

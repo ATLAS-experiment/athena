@@ -125,9 +125,8 @@ Trk::DenseEnvironmentsAmbiguityProcessorTool::statistics(){
     and then returns the tracks which have been selected*/
 
 const TrackCollection*
-Trk::DenseEnvironmentsAmbiguityProcessorTool::process(const TracksScores *trackScoreTrackMap) const{
+Trk::DenseEnvironmentsAmbiguityProcessorTool::process(const EventContext& ctx, const TracksScores *trackScoreTrackMap) const{
   if (!trackScoreTrackMap) return nullptr;
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   // clear prdAssociationTool via selection tool
   // @TODO remove :
   std::unique_ptr<Trk::PRDtoTrackMap> prdToTrackMap( m_assoTool->createPRDtoTrackMap() );

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkAmbiguitySolver/TrkAmbiguityScore.h"
@@ -38,7 +38,7 @@ Trk::TrkAmbiguityScore::execute(const EventContext& ctx) const{
   const auto & theTrackCollection = *theTrackCollectionHandle;
   std::unique_ptr<TracksScores> scoredTracks(new TracksScores);
   if (m_scoreTool.isEnabled()){
-    m_scoreTool->process(theTrackCollection, scoredTracks.get());
+    m_scoreTool->process(ctx, theTrackCollection, scoredTracks.get());
   } else {
     scoredTracks->reserve(theTrackCollection.size());
     for(const Track* trk: theTrackCollection ){

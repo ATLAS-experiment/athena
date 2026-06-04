@@ -59,8 +59,8 @@ namespace Trk {
 
       If no prd-to-track map is given the processor will create
       one internally (exported to storegate).*/
-      virtual const TrackCollection*  process(const TrackCollection*, Trk::PRDtoTrackMap *prdToTrackMap) const override;
-      virtual const TrackCollection*  process(const TracksScores* scoredTracks) const override;
+      virtual const TrackCollection*  process(const EventContext& ctx, const TrackCollection*, Trk::PRDtoTrackMap *prdToTrackMap) const override;
+      virtual const TrackCollection*  process(const EventContext& ctx, const TracksScores* scoredTracks) const override;
 
       /** statistics output to be called by algorithm during finalize. */
       virtual void statistics() override;

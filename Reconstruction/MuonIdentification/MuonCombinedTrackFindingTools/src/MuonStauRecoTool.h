@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONSTAURECOTOOL_H
@@ -190,7 +190,7 @@ namespace MuonCombined {
         bool combineCandidates(const EventContext& ctx, const xAOD::TrackParticle& indetTrackParticle, CandidateVec& candidates) const;
 
         /** resolve ambiguities between the candidates */
-        bool resolveAmbiguities(CandidateVec& candidates) const;
+        bool resolveAmbiguities(const EventContext& ctx, CandidateVec& candidates) const;
 
         /** create final tag object and add it to the inDetCandidate */
         void addTag(const InDetCandidate& inDetCandidate, Candidate& candidate, InDetCandidateToTagMap* tagMap, TrackCollection* combTracks,

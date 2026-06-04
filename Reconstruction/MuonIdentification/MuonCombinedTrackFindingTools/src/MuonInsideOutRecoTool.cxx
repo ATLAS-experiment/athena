@@ -178,7 +178,7 @@ namespace MuonCombined {
             selectedTrack = tracks.front();
         } else {
             // more than 1 track call ambiguity solver and select first track
-            std::unique_ptr<const TrackCollection> resolvedTracks(m_trackAmbiguityResolver->process(&tracks));
+            std::unique_ptr<const TrackCollection> resolvedTracks(m_trackAmbiguityResolver->process(ctx, &tracks));
             if (!resolvedTracks || resolvedTracks->empty()) {
                 ATH_MSG_WARNING("Ambiguity resolver returned no tracks. Arbitrarily using the first track of initial collection.");
                 selectedTrack = tracks.front();

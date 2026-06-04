@@ -104,19 +104,19 @@ void Trk::SimpleAmbiguityProcessorTool::statistics(){
     and then returns the tracks which have been selected*/
 
 const TrackCollection*  
-Trk::SimpleAmbiguityProcessorTool::process(const TrackCollection* trackCol, Trk::PRDtoTrackMap *prdToTrackMap) const {
-  return processVector(Gaudi::Hive::currentContext(), *trackCol, prdToTrackMap);
+Trk::SimpleAmbiguityProcessorTool::process(const EventContext& ctx, const TrackCollection* trackCol, Trk::PRDtoTrackMap *prdToTrackMap) const {
+  return processVector(ctx, *trackCol, prdToTrackMap);
 }
 
 
 const TrackCollection*  
-Trk::SimpleAmbiguityProcessorTool::process(const TracksScores* tracksScores) const {
+Trk::SimpleAmbiguityProcessorTool::process(const EventContext& ctx, const TracksScores* tracksScores) const {
   ConstDataVector<TrackCollection> tracks(SG::VIEW_ELEMENTS);
   tracks.reserve(tracksScores->size());
   for(const std::pair<const Trk::Track *, float>& e: *tracksScores){
     tracks.push_back(e.first);
   }
-  const TrackCollection* re_tracks = processVector(Gaudi::Hive::currentContext(),*tracks.asDataVector(),nullptr /* no external PRD-to-track map*/);
+  const TrackCollection* re_tracks = processVector(ctx,*tracks.asDataVector(),nullptr /* no external PRD-to-track map*/);
   return re_tracks;
 }
 

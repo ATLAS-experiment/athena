@@ -58,7 +58,8 @@ Trk::TrackSelectionProcessorTool::finalize(){
     and then returns the tracks which have been selected*/
 
 const TrackCollection*  
-Trk::TrackSelectionProcessorTool::process(const TrackCollection* tracksCol,
+Trk::TrackSelectionProcessorTool::process(const EventContext& ctx,
+                                          const TrackCollection* tracksCol,
                                           Trk::PRDtoTrackMap *pPrdToTrackMap) const{
   //TODO: make sure the ownership; delete origin tracks from map?
   std::vector<const Track*> tracks;
@@ -71,7 +72,7 @@ Trk::TrackSelectionProcessorTool::process(const TrackCollection* tracksCol,
   if (!pPrdToTrackMap) {
      tmpPrdToTrackMap = m_assoTool->createPRDtoTrackMap();
      if (!m_assoMapName.key().empty()) {
-        SG::ReadHandle<Trk::PRDtoTrackMap> inputPrdMap(m_assoMapName);
+        SG::ReadHandle<Trk::PRDtoTrackMap> inputPrdMap(m_assoMapName, ctx);
         if (!inputPrdMap.isValid()) {
            ATH_MSG_ERROR("Failed to retrieve prd to track map " << m_assoMapName.key() );
         } else {
@@ -88,7 +89,7 @@ Trk::TrackSelectionProcessorTool::process(const TrackCollection* tracksCol,
   // - remove shared hits from all other tracks
   // - take next highest scoring tracks, and repeat 
   std::unique_ptr<ConstDataVector<TrackCollection> > result(std::make_unique<ConstDataVector<TrackCollection> >(SG::VIEW_ELEMENTS)); //TODO, old or new
-  solveTracks(Gaudi::Hive::currentContext(), trackScoreTrackMap, *pPrdToTrackMap, *result);
+  solveTracks(ctx, trackScoreTrackMap, *pPrdToTrackMap, *result);
   if (msgLvl(MSG::DEBUG)) dumpTracks(*result->asDataVector());
   return result.release()->asDataVector();
 }
