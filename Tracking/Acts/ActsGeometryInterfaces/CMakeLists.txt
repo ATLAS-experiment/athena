@@ -12,7 +12,7 @@ endif()
 
 # Component(s) in the package:
 atlas_add_library( ActsGeometryInterfacesLib
-                   src/DetectorAlignStore.cxx
+                   src/TransformStore.cxx
                    ActsGeometryInterfaces/*.h
                    PUBLIC_HEADERS ActsGeometryInterfaces
                    LINK_LIBRARIES ${extra_libs} AthenaBaseComps AthenaKernel GaudiKernel GeoModelUtilities GeoPrimitives 

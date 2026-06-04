@@ -36,11 +36,8 @@ StatusCode GeometryContextAlg::execute(const EventContext& ctx) const {
     auto gctx = std::make_unique<GeometryContext>();
 
     for (const SG::ReadHandleKey<DetectorAlignStore>& key : m_alignStoreKeys) {
-        SG::ReadHandle<DetectorAlignStore> alignStore{key, ctx};
-        if (!alignStore.isValid()) {
-            ATH_MSG_FATAL("Failed to retrieve alignment from " << key.fullKey());
-            return StatusCode::FAILURE;
-        }
+        const DetectorAlignStore* alignStore{nullptr};
+        ATH_CHECK(SG::get(alignStore,key, ctx));
         gctx->setStore(std::make_unique<DetectorAlignStore>(*alignStore));
     }
 

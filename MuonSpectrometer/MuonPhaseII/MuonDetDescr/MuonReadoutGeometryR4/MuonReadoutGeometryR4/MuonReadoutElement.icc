@@ -61,12 +61,13 @@ inline const Amg::Transform3D& MuonReadoutElement::localToGlobalTransform(const 
     if (cache) {
         return cache->getTransform(ctx.getStore(detectorType()).get());
     }
-    ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" "<<__func__<<"() -- "
+    ATH_MSG_FATAL(__func__<<"() "<<__LINE__<<" - "
                 <<idHelperSvc()->toStringDetEl(identify())<<" hash: "<<hash<<" is unknown.");
     static const Amg::Transform3D dummyTrf{Amg::Transform3D::Identity()};
     return dummyTrf;
 }
 inline const Amg::Transform3D& MuonReadoutElement::localToGlobalTransform(const ActsTrk::DetectorAlignStore* store) const {
+    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Return central transform for "<<idHelperSvc()->toStringDetEl(identify()));
     return m_centralTrfCache->getTransform(store);
 }
 inline const ActsTrk::TransformCache* MuonReadoutElement::transformCache(const IdentifierHash& measHash) const {
@@ -79,14 +80,14 @@ inline const ActsTrk::TransformCache* MuonReadoutElement::transformCache(const I
 template<class MuonImpl>
 StatusCode MuonReadoutElement::insertTransform(const IdentifierHash& hash) {
     const unsigned idx = static_cast<unsigned>(hash);
-    ATH_MSG_VERBOSE(__FILE__<<":"<<__LINE__<<" - "<<idHelperSvc()->toStringDetEl(identify())
+    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - "<<idHelperSvc()->toStringDetEl(identify())
                  <<" Insert new transform cache: "<<idx);
 
     if (m_localToGlobalCaches.size() <= idx) {
         m_localToGlobalCaches.resize(idx+1);
     }
     if (m_localToGlobalCaches[idx]) {
-        ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" - "<<idHelperSvc()->toStringDetEl(identify())
+        ATH_MSG_FATAL(__func__<<"() "<<__LINE__<<" - "<<idHelperSvc()->toStringDetEl(identify())
                    <<" has already a transformation cached for hash "<<hash);
         return StatusCode::FAILURE;
     }

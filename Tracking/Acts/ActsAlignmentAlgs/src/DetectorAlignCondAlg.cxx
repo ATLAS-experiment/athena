@@ -46,8 +46,11 @@ StatusCode DetectorAlignCondAlg::execute(const EventContext& ctx) const {
         return StatusCode::FAILURE;
     }
     writeHandle.addDependency(readHandle);
+
+    DetectorAlignStore::Mode mode{m_fillAlignStoreCache ? DetectorAlignStore::Mode::Block
+                                                        : DetectorAlignStore::Mode::LazyFill};
     /// Create the new alignment
-    auto newAlignment = std::make_unique<DetectorAlignStore>(m_Type);
+    auto newAlignment = std::make_unique<DetectorAlignStore>(m_Type, mode);
     newAlignment->geoModelAlignment = std::make_unique<GeoAlignmentStore>(**readHandle);
     newAlignment->geoModelAlignment->clearPosCache();
     /// Process using the tracking geometry

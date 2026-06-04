@@ -52,7 +52,7 @@ namespace ActsTrk {
         /** @brief Default destructor */
         virtual ~IDetectorElement() = default;
         /** @brief Caches the aligned transformation in the provided store. Returns the number of cached elements*/
-        virtual unsigned storeAlignedTransforms(const DetectorAlignStore& store) const = 0;
+        virtual unsigned storeAlignedTransforms(DetectorAlignStore& store) const = 0;
     };
 }  // namespace ActsTrk
 

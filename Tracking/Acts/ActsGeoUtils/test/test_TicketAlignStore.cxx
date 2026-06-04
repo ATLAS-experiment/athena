@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "ActsGeometryInterfaces/DetectorAlignStore.h"
 
 #include <stdlib.h>
 
 int main() {
-    using TicketCounter = ActsTrk::DetectorAlignStore::TrackingAlignStore;
+    using TicketCounter = ActsTrk::detail::TrfStoreTicketCounter;
     
     const ActsTrk::DetectorType refType = ActsTrk::DetectorType::Csc;
     constexpr unsigned int nTicketsToTest = 1000;

@@ -31,14 +31,14 @@ namespace MuonG4{
         }
         writeHandle.addDependency(EventIDRange(IOVInfiniteRange::infiniteTime()));
 
-        auto trfCache = std::make_unique<ActsTrk::DetectorAlignStore>(m_type);
-        std::ranges::for_each(m_detMgr->getAllReadoutElements(),
-                              [&](const MuonGMR4::MuonReadoutElement* re){
-                                if (re->detectorType() == m_type){
-                                    re->getMaterialGeom()->getAbsoluteTransform(trfCache->geoModelAlignment.get());
-                                    re->getMaterialGeom()->clearPositionInfo();
-                                }
-                              });
+        auto trfCache = std::make_unique<ActsTrk::DetectorAlignStore>(m_type,
+                                        ActsTrk::DetectorAlignStore::Mode::Block);
+        std::ranges::for_each(m_detMgr->getAllReadoutElements(m_type),
+                            [&](const MuonGMR4::MuonReadoutElement* re){
+                                re->storeAlignedTransforms(*trfCache);
+                                re->getMaterialGeom()->getAbsoluteTransform(trfCache->geoModelAlignment.get());
+                                re->getMaterialGeom()->clearPositionInfo();
+                            });
         ATH_CHECK(writeHandle.record(std::move(trfCache)));
         return StatusCode::SUCCESS;
     }

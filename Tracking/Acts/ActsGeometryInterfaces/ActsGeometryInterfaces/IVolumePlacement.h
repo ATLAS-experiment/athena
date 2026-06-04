@@ -22,7 +22,7 @@ namespace ActsTrk{
             /** @brief Fill the alignment store wwith the transforms from the element & Return
              *         the number of cached transforms
              *  @param store: Reference to the store which will be populated. */
-            virtual unsigned storeAlignedTransforms(const DetectorAlignStore& store) const = 0;
+            virtual unsigned storeAlignedTransforms(DetectorAlignStore& store) const = 0;
     };
 }
 #endif

@@ -52,7 +52,7 @@ namespace ActsTrk{
         assert(child != nullptr);
         m_children.push_back(std::move(child));
     }
-    VolumePlacement::VolumePlacement(const IDetectorElementBase& parentElement,
+    VolumePlacement::VolumePlacement(const IDetectorElement& parentElement,
                                      std::optional<Amg::Transform3D> addShift):
         m_parent{&parentElement},
         m_globToLocCache{std::make_unique<AlignedCache>(AlignedCache::CacheFlags::volumeGlobToLoc, 
@@ -90,8 +90,8 @@ namespace ActsTrk{
 
     const Acts::Transform3& VolumePlacement::localToGlobalTransform(const Acts::GeometryContext& gctx) const {
         if (!m_locToGlobCache) {
-            if (std::holds_alternative<const IDetectorElementBase*>(m_parent)){
-                return std::get<const IDetectorElementBase*>(m_parent)->localToGlobalTransform(gctx);
+            if (std::holds_alternative<const IDetectorElement*>(m_parent)){
+                return std::get<const IDetectorElement*>(m_parent)->localToGlobalTransform(gctx);
             } else if (std::holds_alternative<const VolumePlacement*>(m_parent)) {
                 return std::get<const VolumePlacement*>(m_parent)->localToGlobalTransform(gctx);
             } else {
@@ -153,24 +153,18 @@ namespace ActsTrk{
                                    : Amg::Transform3D::Identity());
     }
   
-    unsigned VolumePlacement::storeAlignedTransforms(const DetectorAlignStore& store) const {
+    unsigned VolumePlacement::storeAlignedTransforms(DetectorAlignStore& store) const {
         unsigned n{0};
-        for (const std::unique_ptr<VolumePlacement>& child : m_children) {
-            n+=child->storeAlignedTransforms(store);
-        }
-        if (store.detType != detectorType()) {
-            return n;
-        }
         for (const AlignedCache* volCache : {m_locToGlobCache.get(), m_globToLocCache.get()}) {
-            if (!volCache) {
-                continue;
+            if (volCache) {
+                n+=volCache->storeTransform(store);
             }
-            volCache->getTransform(&store);
-            ++n;
         }
         for (const std::unique_ptr<AlignedCache>& cache: m_portalCaches) {
-            cache->getTransform(&store);
-            ++n;
+            n+=cache->storeTransform(store);
+        }
+        for (const std::unique_ptr<VolumePlacement>& child : m_children) {
+            n+=child->storeAlignedTransforms(store);
         }
         return n;
     }
