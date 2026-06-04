@@ -42,24 +42,18 @@ if __name__=="__main__":
     from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, MuonPhaseIITestDefaults
     from MuonConfig.MuonConfigUtils import executeTest, setupHistSvcCfg
     parser = SetupArgParser()
-    parser.add_argument("--noMonitorPlots", default = False, action='store_true',
-                        help="If set to true, there're no monitoring plots")
-    parser.add_argument("--writeSpacePoints", default=False, action='store_true',
-                        help="If set to true, the spacepoints in the bucket are saved to disk")
-    parser.add_argument("--noPerfMon", default=False, action='store_true',
-                        help="If set to true, disable performance monitoring")
-    parser.add_argument("--noLegacyChain", default = False, action = 'store_true',
-                        help="If set to true, the legacy chain is not scheduled",)
-    parser.add_argument("--use-gpu", action="store_true", dest="use_gpu", default=True,
-                        help="Use GPU for ONNX inference (default: True)")
-    parser.add_argument("--use-cpu", dest="use_gpu", action="store_false",
-                        help="Use CPU for ONNX inference")
-    parser.add_argument("--skip-onnx", action="store_true", default=False,
-                        help="Skip ONNX inference step")
+    parser.add_argument("--noMonitorPlots", default = False, action='store_true', help="If set to true, there're no monitoring plots")
+    parser.add_argument("--writeSpacePoints", default=False, action='store_true', help="If set to true, the spacepoints in the bucket are saved to disk")
+    parser.add_argument("--noPerfMon", default=False, action='store_true', help="If set to true, disable performance monitoring")
+    parser.add_argument("--LegacyChain", default = False, action = 'store_true', help="If set to true, the legacy chain is not scheduled",)
+    parser.add_argument("--use-cpu", default = False, action = 'store_true', help="Use CPU for ONNX inference")
+    parser.add_argument("--skip-onnx", action="store_true", default=False, help="Skip ONNX inference step")
     parser.add_argument("--bucket-model-path", dest="bucket_model_path",
                         default="/eos/project-i01/f/fcc-ml/ddicroce/ATLAS_MuonSpectrometer/KubeFlow/Inference_EdgeClassifier/athena/MuonSpectrometer/MuonPhaseII/MuonLearning/MuonInference/models/edgecnn_bucket_sparse_best.onnx")
     parser.add_argument("--score-threshold", type=float, default=0.0, dest="score_threshold")
     parser.add_argument("--output-name", default="logits", dest="output_name")
+    parser.add_argument("--graph-bucket-output-level", type=int, default=3, dest="graph_bucket_output_level", help="OutputLevel for GraphBucketFilterTool")
+    parser.add_argument("--is-logit", dest="is_logit", default=False, action="store_true", help="Interpret the single output directly and do not apply sigmoid")
     parser.set_defaults(nEvents = -1)
 
     parser.set_defaults(outRootFile="MsTrkTester.root")
@@ -73,11 +67,10 @@ if __name__=="__main__":
     flags.Trigger.Muon.useNewRegionSelector = False
     
     from AthOnnxComps.OnnxRuntimeFlags import OnnxRuntimeType
-    use_gpu_requested = args.use_gpu if args.use_gpu is not None else True
-    if use_gpu_requested:
-        flags.AthOnnx.ExecutionProvider = OnnxRuntimeType.CUDA
-    else:
+    if args.use_cpu:
         flags.AthOnnx.ExecutionProvider = OnnxRuntimeType.CPU
+    else:
+        flags.AthOnnx.ExecutionProvider = OnnxRuntimeType.CUDA
 
     flags, cfg = setupGeoR4TestCfg(args,flags)
 
@@ -95,6 +88,8 @@ if __name__=="__main__":
                 ModelPath=args.bucket_model_path,
                 ScoreThreshold=args.score_threshold,
                 OutputName=args.output_name,
+                OutputLevel=args.graph_bucket_output_level,
+                SingleOutputIsLogit=args.is_logit if hasattr(args, "is_logit") else False,
             )
         )
         cfg.merge(
@@ -108,10 +103,10 @@ if __name__=="__main__":
     #### Schedule the legacy MS track building to compare the two reconstruction chains
     from MuonPatternRecognitionTest.PatternTestConfig import LegacyMuonRecoChainCfg
 
-    if not args.noLegacyChain:
+    if args.LegacyChain:
         cfg.merge(LegacyMuonRecoChainCfg(flags))
 
-    cfg.merge(MsTrackTesterCfg(flags, scheduleLegacy = not args.noLegacyChain))
+    cfg.merge(MsTrackTesterCfg(flags, scheduleLegacy = args.LegacyChain))
 
     cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
                                     outStream="MuonEtaHoughTransformTest"))
