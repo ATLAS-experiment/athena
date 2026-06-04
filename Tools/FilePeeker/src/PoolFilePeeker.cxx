@@ -35,7 +35,7 @@ public:
 
 private:
   template<typename T>
-  bool findBranch(TBranch* br, const std::string& nametag, const std::string& type,
+  bool findBranch(TBranch* br, std::string_view nametag, std::string_view type,
                   std::pair<bool,T*>& destination) const;
 
   FileMetaData m_fmd;
@@ -45,11 +45,11 @@ private:
 
 
 template<typename T>
-bool PoolFilePeeker::findBranch(TBranch* br, const std::string& nametag, const std::string& type,
+bool PoolFilePeeker::findBranch(TBranch* br, std::string_view nametag, std::string_view type,
                                 std::pair<bool,T*>& destination) const {
-  const std::string brName(br->GetName());
-  const std::string brType(br->GetClassName());
-  if (brName.find(nametag)!=std::string::npos && brType==type) {
+  std::string_view brName(br->GetName());
+  std::string_view brType(br->GetClassName());
+  if (brName.find(nametag)!=std::string_view::npos && brType==type) {
     if (destination.first) {
       std::cerr << "WARNING: Found more than one " << type << " labelled '" << nametag << "'. Ignoring " << brName << std::endl;
     }
@@ -121,8 +121,8 @@ PoolFilePeeker::PoolFilePeeker(const char* filename, const bool vbs) {
       const unsigned short nameIdx=idx.nameIndex();
       if (idx.typeIndex()==IOVPayloadContainer_p1::ATTR_STRING) {
         const unsigned short iObj=idx.objIndex();
-        const std::string objKey=genparam.second->m_payload.m_attrName[nameIdx];
-        const std::string objValue=genparam.second->m_payload.m_string[iObj];
+        const std::string &objKey=genparam.second->m_payload.m_attrName[nameIdx];
+        const std::string &objValue=genparam.second->m_payload.m_string[iObj];
         if (vbs) std::cout << "Genparam: " << objKey << " : " <<  objValue << std::endl;
 
       }
@@ -137,15 +137,15 @@ PoolFilePeeker::PoolFilePeeker(const char* filename, const bool vbs) {
       const unsigned short nameIdx=idx.nameIndex();
       if (idx.typeIndex()==IOVPayloadContainer_p1::ATTR_STRING) {
         const unsigned short iObj=idx.objIndex();
-        const std::string objKey=simparam.second->m_payload.m_attrName[nameIdx];
-        const std::string objValue=simparam.second->m_payload.m_string[iObj];
+        const std::string &objKey=simparam.second->m_payload.m_attrName[nameIdx];
+        const std::string &objValue=simparam.second->m_payload.m_string[iObj];
         if (vbs) std::cout << "Simparam: " << objKey << " : " <<  objValue << std::endl;
         if (objKey=="TRTRangeCut") {
           std::string::size_type sz;     // alias of size_t
           m_fmd.m_trtRangeCut=std::stod(objValue,&sz);
         }
         if (objKey=="beamType") {
-          m_fmd.m_beamType=std::move(objValue);
+          m_fmd.m_beamType=objValue;
         }
 
       }
@@ -160,8 +160,8 @@ PoolFilePeeker::PoolFilePeeker(const char* filename, const bool vbs) {
       const unsigned short nameIdx=idx.nameIndex();
       if (idx.typeIndex()==IOVPayloadContainer_p1::ATTR_STRING) {
         const unsigned short iObj=idx.objIndex();
-        const std::string objKey=digiparam.second->m_payload.m_attrName[nameIdx];
-        const std::string objValue=digiparam.second->m_payload.m_string[iObj];
+        const std::string &objKey=digiparam.second->m_payload.m_attrName[nameIdx];
+        const std::string &objValue=digiparam.second->m_payload.m_string[iObj];
         if (vbs) std::cout << "Digiparam: " << objKey << " : " <<  objValue << std::endl;
         if (objKey=="IOVDbGlobalTag") {
           m_fmd.m_condTag=objValue;
@@ -170,7 +170,7 @@ PoolFilePeeker::PoolFilePeeker(const char* filename, const bool vbs) {
           m_fmd.m_geoTag=objValue;
         }
         if (objKey=="beamType") {
-          m_fmd.m_beamType=std::move(objValue);
+          m_fmd.m_beamType=objValue;
         }
 
       }
@@ -186,8 +186,8 @@ PoolFilePeeker::PoolFilePeeker(const char* filename, const bool vbs) {
       const unsigned short nameIdx=idx.nameIndex();
       if (idx.typeIndex()==IOVPayloadContainer_p1::ATTR_STRING) {
         const unsigned short iObj=idx.objIndex();
-        const std::string objKey=taginfo.second->m_payload.m_attrName[nameIdx];
-        const std::string objValue=taginfo.second->m_payload.m_string[iObj];
+        const std::string &objKey=taginfo.second->m_payload.m_attrName[nameIdx];
+        const std::string &objValue=taginfo.second->m_payload.m_string[iObj];
         if (vbs) std::cout << "Taginfo: " << objKey << " : " <<  objValue << std::endl;
         if (objKey=="IOVDbGlobalTag") {
           m_fmd.m_condTag=objValue;
@@ -199,7 +199,7 @@ PoolFilePeeker::PoolFilePeeker(const char* filename, const bool vbs) {
           m_fmd.m_beamEnergy=atoi(objValue.c_str());
         }
         if (objKey=="beam_type") {
-          m_fmd.m_beamType=std::move(objValue);
+          m_fmd.m_beamType=objValue;
         }
 
       }
