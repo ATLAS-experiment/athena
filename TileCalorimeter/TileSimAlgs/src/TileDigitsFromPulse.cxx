@@ -50,8 +50,7 @@
 
 #include <cstdlib>
 
-//C++ STL includes
-#include <vector>
+
 using CLHEP::RandGaussQ;
 using CLHEP::RandFlat;
 
@@ -429,8 +428,7 @@ StatusCode TileDigitsFromPulse::execute() {
 						ATH_MSG_VERBOSE("New ADC " << ros << "/" << drawer << "/" << channel << "/   saving gain  " << gain);
 
 						TileDigits * digit = tileDigitsPool.nextElementPtr();
-						*digit = TileDigits (m_tileHWID->adc_id(ros, drawer, channel, gain),
-								     std::move(samples));
+						*digit = TileDigits (m_tileHWID->adc_id(ros, drawer, channel, gain), samples);
 
 						ATH_CHECK( digitsContainer->push_back(digit) );
 						  
@@ -445,11 +443,10 @@ StatusCode TileDigitsFromPulse::execute() {
 					}
 
 					if(!m_bigain){
-					        ATH_MSG_VERBOSE("New ADC " << ros << "/" << drawer << "/" << channel << "/   saving gain  " << gain);
+					  ATH_MSG_VERBOSE("New ADC " << ros << "/" << drawer << "/" << channel << "/   saving gain  " << gain);
 
 						TileDigits * digit = tileDigitsPool.nextElementPtr();
-						*digit = TileDigits (m_tileHWID->adc_id(ros, drawer, channel, gain),
-								     std::move(samples));
+						*digit = TileDigits (m_tileHWID->adc_id(ros, drawer, channel, gain), std::move(samples));
 
 						ATH_CHECK( digitsContainer->push_back(digit) );
 
