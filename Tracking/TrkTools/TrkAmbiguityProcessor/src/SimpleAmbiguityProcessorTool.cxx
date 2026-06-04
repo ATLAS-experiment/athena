@@ -105,7 +105,7 @@ void Trk::SimpleAmbiguityProcessorTool::statistics(){
 
 const TrackCollection*  
 Trk::SimpleAmbiguityProcessorTool::process(const TrackCollection* trackCol, Trk::PRDtoTrackMap *prdToTrackMap) const {
-  return processVector(*trackCol, prdToTrackMap);
+  return processVector(Gaudi::Hive::currentContext(), *trackCol, prdToTrackMap);
 }
 
 
@@ -116,12 +116,12 @@ Trk::SimpleAmbiguityProcessorTool::process(const TracksScores* tracksScores) con
   for(const std::pair<const Trk::Track *, float>& e: *tracksScores){
     tracks.push_back(e.first);
   }
-  const TrackCollection* re_tracks = processVector(*tracks.asDataVector(),nullptr /* no external PRD-to-track map*/);
+  const TrackCollection* re_tracks = processVector(Gaudi::Hive::currentContext(),*tracks.asDataVector(),nullptr /* no external PRD-to-track map*/);
   return re_tracks;
 }
 
 const TrackCollection*  
-Trk::SimpleAmbiguityProcessorTool::processVector(const TrackCollection &tracks, Trk::PRDtoTrackMap *prdToTrackMap) const{
+Trk::SimpleAmbiguityProcessorTool::processVector(const EventContext& ctx, const TrackCollection &tracks, Trk::PRDtoTrackMap *prdToTrackMap) const{
   TrackScoreMap trackScoreTrackMap;
   std::unique_ptr<Trk::PRDtoTrackMap> prdToTrackMap_cleanup;
   if (!prdToTrackMap) {
@@ -139,7 +139,7 @@ Trk::SimpleAmbiguityProcessorTool::processVector(const TrackCollection &tracks, 
   // - take next highest scoring tracks, and repeat
   ATH_MSG_DEBUG ("Solving Tracks");
   std::vector<std::unique_ptr<const Trk::Track> > trackDustbin;
-  const TrackCollection* finalTracks = solveTracks(trackScoreTrackMap, *prdToTrackMap,trackDustbin, stat);
+  const TrackCollection* finalTracks = solveTracks(ctx, trackScoreTrackMap, *prdToTrackMap,trackDustbin, stat);
   {
      std::lock_guard<std::mutex> lock(m_statMutex);
      m_stat += stat;
@@ -189,11 +189,11 @@ void Trk::SimpleAmbiguityProcessorTool::addNewTracks(const TrackCollection &trac
 //==================================================================================================
 
 const TrackCollection *
-Trk::SimpleAmbiguityProcessorTool::solveTracks(TrackScoreMap& trackScoreTrackMap,
-                                                                Trk::PRDtoTrackMap &prdToTrackMap,
-                                                                std::vector<std::unique_ptr<const Trk::Track> >& trackDustbin,
-                                                                Counter &stat) const{
-  const EventContext& ctx = Gaudi::Hive::currentContext();
+Trk::SimpleAmbiguityProcessorTool::solveTracks(const EventContext& ctx,
+                                               TrackScoreMap& trackScoreTrackMap,
+                                               Trk::PRDtoTrackMap &prdToTrackMap,
+                                               std::vector<std::unique_ptr<const Trk::Track> >& trackDustbin,
+                                               Counter &stat) const{
   UniqueClusterSplitProbabilityContainerPtr splitProbContainer(createAndRecordClusterSplitProbContainer(ctx));
 
   std::unique_ptr<ConstDataVector<TrackCollection> > finalTracks(std::make_unique<ConstDataVector<TrackCollection> >());
@@ -226,7 +226,7 @@ Trk::SimpleAmbiguityProcessorTool::solveTracks(TrackScoreMap& trackScoreTrackMap
       // don't forget to drop track from map
       // track can be kept as is, but is not yet fitted
       ATH_MSG_DEBUG ("Good track, but need to fit this track first, score, add it into map again and retry !");
-      auto *pRefittedTrack = refitTrack(atrack.track(), prdToTrackMap, stat, -1, -1);
+      auto *pRefittedTrack = refitTrack(ctx, atrack.track(), prdToTrackMap, stat, -1, -1);
       if(pRefittedTrack) {
         addTrack(ctx, pRefittedTrack, true , trackScoreTrackMap, trackDustbin, stat, -1);
       }
@@ -265,7 +265,8 @@ Trk::SimpleAmbiguityProcessorTool::solveTracks(TrackScoreMap& trackScoreTrackMap
 //==================================================================================================
 
 Trk::Track* 
-Trk::SimpleAmbiguityProcessorTool::refitPrds( const Trk::Track* track,
+Trk::SimpleAmbiguityProcessorTool::refitPrds( const EventContext& ctx,
+                                              const Trk::Track* track,
                                               Trk::PRDtoTrackMap &prdToTrackMap,
                                               Counter &stat) const{
   // get vector of PRDs
@@ -281,15 +282,15 @@ Trk::SimpleAmbiguityProcessorTool::refitPrds( const Trk::Track* track,
   if (m_tryBremFit && track->info().trackProperties(Trk::TrackInfo::BremFit)){
     stat.incrementCounterByRegion(CounterIndex::kNbremFits,track);
     ATH_MSG_VERBOSE ("Brem track, refit with electron brem fit");
-    newTrack = m_fitterTool->fit(Gaudi::Hive::currentContext(),prds, *par, true, Trk::electron).release();
+    newTrack = m_fitterTool->fit(ctx, prds, *par, true, Trk::electron).release();
   } else {
     stat.incrementCounterByRegion(CounterIndex::kNfits,track);
     ATH_MSG_VERBOSE ("Normal track, refit");
-    newTrack = m_fitterTool->fit(Gaudi::Hive::currentContext(),prds, *par, true, m_particleHypothesis).release();
+    newTrack = m_fitterTool->fit(ctx, prds, *par, true, m_particleHypothesis).release();
     if ((not newTrack) and shouldTryBremRecovery(*track, par)){
       stat.incrementCounterByRegion(CounterIndex::kNrecoveryBremFits,track);
       ATH_MSG_VERBOSE ("Normal fit failed, try brem recovery");
-      newTrack = m_fitterTool->fit(Gaudi::Hive::currentContext(),prds, *par, true, Trk::electron).release();
+      newTrack = m_fitterTool->fit(ctx, prds, *par, true, Trk::electron).release();
     }
   }
   if(newTrack){
@@ -379,13 +380,13 @@ Trk::SimpleAmbiguityProcessorTool::dumpStat(MsgStream &out) const {
 
 
 std::unique_ptr<Trk::Track>
-Trk::SimpleAmbiguityProcessorTool::doBremRefit(const Trk::Track & track) const{
-  return m_fitterTool->fit(Gaudi::Hive::currentContext(),track,true,Trk::electron);
+Trk::SimpleAmbiguityProcessorTool::doBremRefit(const EventContext& ctx, const Trk::Track & track) const{
+  return m_fitterTool->fit(ctx,track,true,Trk::electron);
 }
 
 std::unique_ptr<Trk::Track>
-Trk::SimpleAmbiguityProcessorTool::fit(const Track &track, bool flag, Trk::ParticleHypothesis hypo) const{
-  return m_fitterTool->fit(Gaudi::Hive::currentContext(),track,flag,hypo);
+Trk::SimpleAmbiguityProcessorTool::fit(const EventContext& ctx, const Track &track, bool flag, Trk::ParticleHypothesis hypo) const{
+  return m_fitterTool->fit(ctx,track,flag,hypo);
 }
 
 

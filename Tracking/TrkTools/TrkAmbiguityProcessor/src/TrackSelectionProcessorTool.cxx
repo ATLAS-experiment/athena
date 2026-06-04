@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrackSelectionProcessorTool.h"
@@ -88,7 +88,7 @@ Trk::TrackSelectionProcessorTool::process(const TrackCollection* tracksCol,
   // - remove shared hits from all other tracks
   // - take next highest scoring tracks, and repeat 
   std::unique_ptr<ConstDataVector<TrackCollection> > result(std::make_unique<ConstDataVector<TrackCollection> >(SG::VIEW_ELEMENTS)); //TODO, old or new
-  solveTracks(trackScoreTrackMap, *pPrdToTrackMap, *result);
+  solveTracks(Gaudi::Hive::currentContext(), trackScoreTrackMap, *pPrdToTrackMap, *result);
   if (msgLvl(MSG::DEBUG)) dumpTracks(*result->asDataVector());
   return result.release()->asDataVector();
 }
@@ -140,13 +140,13 @@ Trk::TrackSelectionProcessorTool::addNewTracks(TrackScoreMap &trackScoreTrackMap
 }
 
 void
-Trk::TrackSelectionProcessorTool::solveTracks(TrackScoreMap &trackScoreTrackMap,
+Trk::TrackSelectionProcessorTool::solveTracks(const EventContext& ctx,
+                                              TrackScoreMap &trackScoreTrackMap,
                                               Trk::PRDtoTrackMap &prdToTrackMap,
                                               ConstDataVector<TrackCollection> &result) const
 {
   using namespace std;
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::ReadHandle<Trk::ClusterSplitProbabilityContainer> splitProbContainerIn;
   if (!m_clusterSplitProbContainerIn.key().empty()) {
      splitProbContainerIn = SG::ReadHandle( m_clusterSplitProbContainerIn, ctx);

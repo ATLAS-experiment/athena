@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DenseEnvironmentsAmbiguityProcessorTool_H
@@ -54,7 +54,8 @@ namespace Trk {
   virtual void statistics() override;
 
   private:
-    void solveTracks(const TracksScores& trackScoreTrackMap,
+    void solveTracks(const EventContext& ctx,
+                     const TracksScores& trackScoreTrackMap,
                      Trk::PRDtoTrackMap &prd_to_track_map,
                      TrackCollection &finalTracks,
                      std::vector<std::unique_ptr<const Trk::Track> >& trackDustbin,
@@ -63,23 +64,23 @@ namespace Trk {
 
     /** refit PRDs */
     virtual Track*
-    refitPrds( const Track* track, Trk::PRDtoTrackMap &prd_to_track_map,
+    refitPrds(const EventContext& ctx, const Track* track, Trk::PRDtoTrackMap &prd_to_track_map,
     Counter &stat) const override final;
 
     virtual std::unique_ptr<Trk::Track>
-    doBremRefit(const Trk::Track & track) const override final;
+    doBremRefit(const EventContext& ctx, const Trk::Track & track) const override final;
 
 
     std::unique_ptr<Trk::Track>
-    fit(const std::vector<const Trk::PrepRawData*> &raw,
-          const TrackParameters &param, bool flag, Trk::ParticleHypothesis hypo) const;
+    fit(const EventContext& ctx, const std::vector<const Trk::PrepRawData*> &raw,
+        const TrackParameters &param, bool flag, Trk::ParticleHypothesis hypo) const;
 
     std::unique_ptr<Trk::Track>
-    fit(const std::vector<const Trk::MeasurementBase*> &measurements,
-          const TrackParameters &param, bool flag, Trk::ParticleHypothesis hypo) const;
+    fit(const EventContext& ctx, const std::vector<const Trk::MeasurementBase*> &measurements,
+        const TrackParameters &param, bool flag, Trk::ParticleHypothesis hypo) const;
 
-    std::unique_ptr<Trk::Track>
-    fit(const Track &track, bool flag, Trk::ParticleHypothesis hypo) const override final;
+    virtual std::unique_ptr<Trk::Track>
+    fit(const EventContext& ctx, const Track &track, bool flag, Trk::ParticleHypothesis hypo) const override final;
     bool
     checkTrack(const Trk::Track *) const;
 
@@ -110,12 +111,13 @@ namespace Trk {
   };
 
   inline std::unique_ptr<Trk::Track>
-  DenseEnvironmentsAmbiguityProcessorTool::fit(const std::vector<const Trk::PrepRawData*> &raw,
-                                                           const TrackParameters &param, bool flag,
-                                                           Trk::ParticleHypothesis hypo) const {
+  DenseEnvironmentsAmbiguityProcessorTool::fit(const EventContext& ctx,
+                                               const std::vector<const Trk::PrepRawData*> &raw,
+                                               const TrackParameters &param, bool flag,
+                                               Trk::ParticleHypothesis hypo) const {
      std::unique_ptr<Trk::Track> newTrack;
      for ( const ToolHandle<ITrackFitter> &thisFitter : m_fitterTool) {
-          newTrack=(thisFitter->fit(Gaudi::Hive::currentContext(),raw, param, flag,hypo));
+          newTrack=(thisFitter->fit(ctx, raw, param, flag,hypo));
           if (Trk::DenseEnvironmentsAmbiguityProcessorTool::checkTrack(newTrack.get())) {
                       return newTrack;
           }
@@ -129,13 +131,14 @@ namespace Trk {
   }
 
   inline std::unique_ptr<Trk::Track>
-  DenseEnvironmentsAmbiguityProcessorTool::fit(const std::vector<const Trk::MeasurementBase*> &measurements,
-                                                           const TrackParameters &param,
-                                                           bool flag,
-                                                           Trk::ParticleHypothesis hypo) const{
+  DenseEnvironmentsAmbiguityProcessorTool::fit(const EventContext& ctx,
+                                               const std::vector<const Trk::MeasurementBase*> &measurements,
+                                               const TrackParameters &param,
+                                               bool flag,
+                                               Trk::ParticleHypothesis hypo) const{
     std::unique_ptr<Trk::Track> newTrack;
     for ( const ToolHandle<ITrackFitter> &thisFitter : m_fitterTool) {
-      newTrack=thisFitter->fit(Gaudi::Hive::currentContext(),measurements, param, flag, hypo);
+      newTrack=thisFitter->fit(ctx, measurements, param, flag, hypo);
       if (Trk::DenseEnvironmentsAmbiguityProcessorTool::checkTrack(newTrack.get())) {
         return newTrack;
       }
@@ -149,10 +152,10 @@ namespace Trk {
   }
 
   inline std::unique_ptr<Trk::Track>
-  DenseEnvironmentsAmbiguityProcessorTool::fit(const Track &track, bool flag, Trk::ParticleHypothesis hypo) const{
+  DenseEnvironmentsAmbiguityProcessorTool::fit(const EventContext& ctx, const Track &track, bool flag, Trk::ParticleHypothesis hypo) const{
     std::unique_ptr<Trk::Track> newTrack;
     for ( const ToolHandle<ITrackFitter> &thisFitter : m_fitterTool) { //note: there is only ever one fitter anyway
-      newTrack=(thisFitter->fit(Gaudi::Hive::currentContext(),track,flag, hypo));
+      newTrack=(thisFitter->fit(ctx,track,flag, hypo));
       if (Trk::DenseEnvironmentsAmbiguityProcessorTool::checkTrack(newTrack.get())) {
          return newTrack;
       }

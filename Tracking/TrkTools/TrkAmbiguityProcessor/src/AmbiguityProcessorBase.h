@@ -74,23 +74,24 @@ class AmbiguityProcessorBase : public AthAlgTool,
                              const TrackParameters* pPar) const;
 
   // do a brem refit; implemented in the derived classes
-  virtual std::unique_ptr<Trk::Track> doBremRefit(
+  virtual std::unique_ptr<Trk::Track> doBremRefit(const EventContext& ctx,
       const Trk::Track& track) const = 0;
 
   /** refit track */
-  Track* refitTrack(const Trk::Track* track, Trk::PRDtoTrackMap& prdToTrackMap,
+  Track* refitTrack(const EventContext& ctx, const Trk::Track* track, Trk::PRDtoTrackMap& prdToTrackMap,
                     Counter& stat, int trackId, int subtrackId) const;
 
   // refit PRD
-  virtual Trk::Track* refitPrds(const Trk::Track* track,
+  virtual Trk::Track* refitPrds(const EventContext& ctx,
+                                const Trk::Track* track,
                                 Trk::PRDtoTrackMap& prdToTrackMap,
                                 Counter& stat) const = 0;
 
   // refit ROTs
-  virtual Trk::Track* refitRots(const Trk::Track* track, Counter& stat) const;
+  virtual Trk::Track* refitRots(const EventContext& ctx, const Trk::Track* track, Counter& stat) const;
 
   // generic normal fit
-  virtual std::unique_ptr<Trk::Track> fit(
+  virtual std::unique_ptr<Trk::Track> fit(const EventContext& ctx,
       const Track& track, bool flag, Trk::ParticleHypothesis hypo) const = 0;
 
   void addTrack(const EventContext& ctx,
