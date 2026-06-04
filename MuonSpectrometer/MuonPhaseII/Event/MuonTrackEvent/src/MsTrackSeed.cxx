@@ -7,8 +7,10 @@
 #include "MuonPatternEvent/SegmentFitterEventData.h"
 
 #include "Acts/Utilities/MathHelpers.hpp"
+#include "MuonTruthHelpers/MuonSimHitHelpers.h"
 
 #include <format>
+
 
 
 namespace MuonR4 {
@@ -26,7 +28,15 @@ namespace MuonR4 {
             <<", chi2: "<<(seg->chiSquared() / std::max(seg->numberDoF(), 1.f))
             <<", nPrec: "<<seg->nPrecisionHits()
             <<", nPhi: "<<seg->nPhiLayers()
-            <<", nTrigEta: "<<seg->nTrigEtaLayers()<<std::endl;
+            <<", nTrigEta: "<<seg->nTrigEtaLayers();
+
+            const xAOD::MuonSegment* truthSeg{getMatchedTruthSegment(*seg)};
+            if(truthSeg){
+                  ostr << " truth theta " << (truthSeg->direction().theta() / Gaudi::Units::degree)
+                       << " truth phi " << (truthSeg->direction().phi() / Gaudi::Units::degree);
+            }
+             
+            ostr <<std::endl;
       }
       return ostr;
     }
