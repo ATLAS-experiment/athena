@@ -7,20 +7,19 @@
 
 #include "TrkValHistUtils/PlotBase.h"
 #include "TrkValHistUtils/RecoInfoPlots.h"
-
 #include "xAODMuon/Muon.h"
 
-namespace Muon{
+namespace Muon {
 
-class RecoInfoPlots: public PlotBase {
-  public:
-    RecoInfoPlots(PlotBase *pParent, const std::string& sDir);
+class RecoInfoPlots : public PlotBase {
+   public:
+    RecoInfoPlots(PlotBase* pParent, const std::string& sDir);
 
-    void fill(const xAOD::Muon& mu, float weight=1.0);
+    void fill(const xAOD::Muon& mu, float weight = 1.0);
 
-    Trk::RecoInfoPlots m_oTrkRecoInfoPlots; //ID trk chi^2, ndf
-    Trk::RecoInfoPlots m_oMSTrkRecoInfoPlots; //MS trk chi^2, ndf
-    Trk::RecoInfoPlots m_oRecoInfoPlots; //primary trk chi^2, ndf
+    Trk::RecoInfoPlots m_oTrkRecoInfoPlots;    // ID trk chi^2, ndf
+    Trk::RecoInfoPlots m_oMSTrkRecoInfoPlots;  // MS trk chi^2, ndf
+    Trk::RecoInfoPlots m_oRecoInfoPlots;       // primary trk chi^2, ndf
 
     TH1* author{nullptr};
     TH1* all_authors{nullptr};
@@ -28,12 +27,10 @@ class RecoInfoPlots: public PlotBase {
     TH1* quality_cutflow{nullptr};
     TH1* muonType{nullptr};
 
-  
-  private:
+   private:
     void initializePlots();
-
 };
 
-}
+}  // namespace Muon
 
 #endif

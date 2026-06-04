@@ -8,13 +8,13 @@
 #include "TrkValHistUtils/PlotBase.h"
 #include "xAODMuon/Muon.h"
 
-namespace Muon{
+namespace Muon {
 
-class MomentumPullPlots: public PlotBase {
-  public:
-    MomentumPullPlots(PlotBase *pParent, const std::string& sDir) :
-      PlotBase(pParent, sDir){}
-      void fill(const xAOD::Muon& mu, float weight=1.0);
+class MomentumPullPlots : public PlotBase {
+   public:
+    MomentumPullPlots(PlotBase* pParent, const std::string& sDir)
+        : PlotBase(pParent, sDir) {}
+    void fill(const xAOD::Muon& mu, float weight = 1.0);
 
     TH1* dpt_idme{nullptr};
     TH1* ddpt_idme{nullptr};
@@ -30,12 +30,10 @@ class MomentumPullPlots: public PlotBase {
     TH2* pt_cbid{nullptr};
     TH2* pt_meid{nullptr};
 
-  private:
+   private:
     void initializePlots();
-
 };
 
-}
+}  // namespace Muon
 
 #endif
-

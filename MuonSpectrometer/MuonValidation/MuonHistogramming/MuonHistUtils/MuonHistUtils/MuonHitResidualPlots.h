@@ -7,33 +7,34 @@
 #define MUONHISTUTILS_MUONHITRESIDUALPLOTS_H
 
 #include <string>
+
 #include "TrkValHistUtils/HitResidualPlots.h"
 #include "TrkValHistUtils/PlotBase.h"
 
-//forward declarations
+// forward declarations
 class TH2;
 class TProfile;
-namespace Trk
-{ 
-  class ResidualPull;
+namespace Trk {
+class ResidualPull;
 }
 
-namespace Muon{
- 
-class MuonHitResidualPlots: public PlotBase {
-    public:
-      MuonHitResidualPlots(PlotBase *pParent, const std::string& sDir, std::string sType="");
-      void fill(const Trk::ResidualPull& resPull, int stationPhi );
-      
-      Trk::HitResidualPlots m_oResidualPlots;      
-      TH2* pulls_vs_sectorPhi{nullptr};
-      TProfile* pullsRMS_vs_sectorPhi{nullptr};
-      
-    private:
-      void init();
-  };
+namespace Muon {
 
-}
+class MuonHitResidualPlots : public PlotBase {
+   public:
+    MuonHitResidualPlots(PlotBase* pParent, const std::string& sDir,
+                         std::string sType = "");
+    void fill(const Trk::ResidualPull& resPull, int stationPhi);
+
+    Trk::HitResidualPlots m_oResidualPlots;
+    TH2* pulls_vs_sectorPhi{nullptr};
+    TProfile* pullsRMS_vs_sectorPhi{nullptr};
+
+   private:
+    void init();
+};
+
+}  // namespace Muon
 
 #endif
-#endif // not XAOD_ANALYSIS
+#endif  // not XAOD_ANALYSIS
