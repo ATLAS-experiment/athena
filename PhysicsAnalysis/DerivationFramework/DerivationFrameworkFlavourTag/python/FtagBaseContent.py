@@ -340,9 +340,6 @@ def add_common_augmentation(
         return
 
     acc.merge(trackTruthDecorator(flags))
- 
-    # PFlow-based parent decorators are incompatible with heavy-ion reconstruction;
-    # skip for all HION derivations (same guard as FtagLargeRJetTruthLabelCfg below).
     if not flags.HeavyIon.isDerivation:
         acc.merge(
             ParentDecoratorCfg(
