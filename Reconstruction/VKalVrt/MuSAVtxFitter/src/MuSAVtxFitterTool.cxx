@@ -75,6 +75,8 @@ StatusCode MuSAVtxFitterTool::doMuSAVtxFit(std::vector<MuSAVtxFitterTool::WrkVrt
 
     // first gather all SA muons that pass basic checks
     // also recover Staco-authored Combined muons with large MS-ID mismatch if configured
+    // this is done to create parity between mc20 and mc23 reconstruction, where in mc20 STACO matching was much looser
+    // erroneously reducing the number of available SA muons compared to mc23
     std::vector<const xAOD::Muon*> candidateSAmuons;
     for (const auto muon : muonContainer) {
 
@@ -83,6 +85,17 @@ StatusCode MuSAVtxFitterTool::doMuSAVtxFit(std::vector<MuSAVtxFitterTool::WrkVrt
         if (m_doStacoRecovery && 
             muon->muonType() == xAOD::Muon::MuonType::Combined && 
             muon->author() == xAOD::Muon::Author::STACO) {
+            
+            //we do not try to recover LRT Stacos to avoid more likely situations where we 
+            //mistakenly "recover" an MS track with a real displaced ID track
+            static const SG::AuxElement::Accessor<char> acc_isLRT("isLRT");
+            if (acc_isLRT.isAvailable(*muon) && acc_isLRT(*muon)) {
+                ATH_MSG_DEBUG("Skipping recovering LRT Staco muon!");
+                continue;
+            }
+
+            // Check the deltaR between the MS and ID tracks to see if they are likely to be a mismatched pair that could be recovered as a SA muon
+            // the default thresholds reflect the criteria used in mc23 reconstruction but can be configured as needed
             const xAOD::TrackParticle* msTrk = muon->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);
             const xAOD::TrackParticle* idTrk = muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
             if (msTrk && idTrk) {
