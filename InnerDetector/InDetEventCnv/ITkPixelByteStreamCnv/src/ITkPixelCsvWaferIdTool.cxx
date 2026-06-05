@@ -9,17 +9,38 @@ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
+#include <string>
 
 ITkPixelCsvWaferIdTool::ITkPixelCsvWaferIdTool(const std::string& type,
                                                const std::string& name,
                                                const IInterface* parent)
   : AthAlgTool(type, name, parent)
 {
+    ATH_MSG_INFO("Building CsvWaferId tool");
 }
 
 StatusCode ITkPixelCsvWaferIdTool::initialize() {
+    ATH_MSG_INFO("Initializing CsvWaferId tool");
     ATH_CHECK(detStore()->retrieve(m_pixIdHelper, "PixelID"));
     ATH_CHECK(loadCsv());
+
+    std::ofstream output(m_outputFile.value());
+    if (!output.good()) {
+        ATH_MSG_FATAL("Could not open wafer ID output file: " << m_outputFile.value());
+        return StatusCode::FAILURE;
+    }
+
+    for (const CsvRow& row : m_rows) {
+        const Identifier id = waferId(row);
+        const auto compactId = id.get_identifier32().get_compact();
+        output << compactId << "\n";
+    }
+
+    ATH_MSG_INFO("Wrote " << m_rows.size() << " wafer IDs to " << m_outputFile.value());
+    return StatusCode::SUCCESS;
+}
+
+StatusCode ITkPixelCsvWaferIdTool::execute() const {
     return StatusCode::SUCCESS;
 }
 
@@ -69,9 +90,8 @@ StatusCode ITkPixelCsvWaferIdTool::loadCsv() {
 }
 
 Identifier ITkPixelCsvWaferIdTool::waferId(const CsvRow& row) const {
-    ATH_MSG_WARNING("waferId lookup for SP chain " << row.spChain
-                    << ", module " << row.md << ", FE " << row.fe
-                    << " is not implemented yet.");
+    ATH_MSG_DEBUG("waferId lookup for SP chain " << row.spChain
+                    << ", module " << row.md << ", FE " << row.fe);
 
     // Placeholder: the concrete mapping from SP chain/module/FE to a PixelID
     // should be implemented here using the PixelID helper.
@@ -79,12 +99,12 @@ Identifier ITkPixelCsvWaferIdTool::waferId(const CsvRow& row) const {
     //SP chain is like G-IS-L05-R05-A-SP2
     std::vector<std::string> spChain_cur = parseSPChain(row.spChain);
     //
-    barrelLayer
+    int bec = barrel_ec(spChain_cur);
+    int ld = layer_disk(spChain_cur);
+    int phi = phi_module(spChain_cur, row.md, row.fe );
+    int eta = eta_module(spChain_cur, row.md, row.fe );
 
-        return m_pixIdHelper->wafer_id(barrelLayer, layerDisk, phiModule, etaModule);
-    }
-
-    return Identifier();
+    return m_pixIdHelper->wafer_id(bec, ld, phi, eta);
 }
 
 std::string ITkPixelCsvWaferIdTool::trim(const std::string& input) {
@@ -122,13 +142,12 @@ std::vector<std::string> ITkPixelCsvWaferIdTool::parseSPChain(const std::string&
 }
 
 
-int ITkPixelCsvWaferIdTool::barrel_ec(std::vector<std::string> spchain){
+int ITkPixelCsvWaferIdTool::barrel_ec(const std::vector<std::string>& spchain) const {
     int side = (spchain[4] == "A") ? 1 : -1; // A for side pos, C for side neg
-    if(spchain[1] == "IS" && (spchain[2] == "L0" ||  spchain[2] == "L1"){ //inner flat barrel
+    if(spchain[1] == "IS" && (spchain[2] == "L0" ||  spchain[2] == "L1")){ //inner flat barrel
         return side*1;
     }
-    // Outer flat barrel has 3 layers
-    else if(spchain[1] == "OB" && (spchain[2] == "L2" ||  spchain[2] == "L3" || spchain[2] == "L4") && (spchain.at(3)[0] == "B" ){
+    else if(spchain[1] == "OB" && (spchain[2] == "L2" ||  spchain[2] == "L3" || spchain[2] == "L4") && (spchain.at(3)[0] == 'B' )){ // Outer flat barrel has 3 layers
         return side*1;
     }
     else{
@@ -136,59 +155,160 @@ int ITkPixelCsvWaferIdTool::barrel_ec(std::vector<std::string> spchain){
     }
 }
 
-int ITkPixelCsvWaferIdTool::layer_disk(std::vector<std::string> spchain){
+int ITkPixelCsvWaferIdTool::layer_disk(const std::vector<std::string>& spchain) const {
     int b_ec = barrel_ec(spchain);
     if( fabs(b_ec) == 1 ){ // flat barrel
-        return spchain.at(2)[1];
+        return spchain.at(2)[1] - '0';
     }
-    else{ // endcap and barrel rings - all considered as disks
-        if(spchain[2] == "L01" && spchain.at(5)){ // barrel rings, first layer (disk 0) - TODO some are disk 1 in fact, need to split the cases
+    else{ // endcap and barrel rings - all considered as 'endcap' disks
+        if(spchain[2] == "L01" && (spchain.at(5) == "SP1" || spchain.at(5) == "SP3") ){ // barrel vertical small combined rings, disk 0
             return 0;
+        }
+        else if(spchain[2] == "L01" && (spchain.at(5) == "SP2" || spchain.at(5) == "SP4") ){ // barrel vertical large combined rings, disk 2
+            return 2;
         }
         else if(spchain[1] == "OB" && (spchain[2] == "L2" || //OB inclined rings, disks 3, 5, 7
             spchain[2] == "L3" ||
             spchain[2] == "L4") ){
-            return (2* std::stoi(spchain.at(2)[1]) - 1);
+            return (2* ((spchain.at(2))[1] -'0') - 1);
         }
         else if(spchain[1] == "IS" && spchain[2] == "L05"){
-            return 1; // end-cap rings, inner system, layer 1
+            return 1; // end-cap rings, inner system, disk 1
         } 
         else if(spchain[1] == "IS" && spchain[2] == "L1"){
             return 2; // end-cap rings, inner system, layer 2
         }
         else if(spchain[1] == "EC"){ //outer end-cap
-            return (2* std::stoi(spchain.at(2)[1])); // disks 4, 6, 8
+            return 2* (spchain.at(2)[1]-'0'); // disks 4, 6, 8
         }
-
-
+        else{
+            ATH_MSG_WARNING("Bad values in layer_disk function, return -9999");
+            return -9999;
+        }
     }
 }
 
-int ITkPixelCsvWaferIdTool::phi_module(std::vector<std::string> spchain, std::string mod ){
+int ITkPixelCsvWaferIdTool::phi_module(const std::vector<std::string>& spchain, const std::string& mod, int fe ) const {
+
     int b_ec = barrel_ec(spchain);
     int ld = layer_disk(spchain);
+    
     if( fabs(b_ec) == 1 ){ // flat barrel
         std::string phi_str = (spchain.at(3)).substr(1,2);
-        return std::stoi(phi_str);
+        return std::stoi(phi_str) - 1;
     }
-    //barrel rings and end caps
-    else if(ld == 3 || ld == 5 || ld ==7){ //OB inclined rings, disks 3, 5, 7
-
+    else{ // endcap and barrel rings - all considered as disks
+        if(spchain[2] == "L01" && (spchain.at(5) == "SP1" || spchain.at(5) == "SP3") ){ // barrel vertical small combined rings, disk 0
+            std::string sp_str(1, (spchain.at(5)[2])); // SP=1 and SP=3 alternate in phi
+            if(sp_str == "1"){
+                return 6 * (stoi(mod) - 1 ) + 2 * (fe - 1); // probably wrong offset, TODO need to revisit
+            }
+            else if(sp_str == "3"){
+                return 6 * (stoi(mod) - 1 ) + 2 * (fe - 1) + 1; // probably wrong offset, TODO need to revisit
+            }
+            else{
+                ATH_MSG_WARNING("Bad input for phi_module,return -9999 ");
+                return -9999;
+            }
+        }
+        else if(spchain[2] == "L01" &&
+            (spchain.at(5) == "SP2" || spchain.at(5) == "SP4") ){ // barrel vertical large combined rings (quad modules), disk 2
+            std::string sp_str(1, spchain.at(5)[2]); // SP=2 and SP=4 alternate in phi
+             if(sp_str == "2"){
+                return 2 * (stoi(mod) - 1 ) ; // probably wrong offset, TODO need to revisit
+            }
+            else if(sp_str == "4"){
+                return 2 * (stoi(mod) - 1 ) + 1; // probably wrong offset, TODO need to revisit
+            }
+            else{
+                ATH_MSG_WARNING("Bad input for phi_module,return -9999 ");
+                return -9999;
+            }
+        }
+        //barrel inclined rings
+        else if(ld == 3 || ld == 5 || ld ==7){ //OB inclined rings, disks 3, 5, 7
+            std::string phi_str = mod.substr(3,2); 
+            int phi = std::stoi(phi_str);
+            return phi;
+        }
+        else if(ld == 1){  //end-cap intermediate rings, inner system, disk 1 - triplets: one module per FE /!\ 0-17
+            return 6 * (stoi(mod) - 1 ) + 2 * (fe - 1); // probably wrong offset, TODO need to revisit
+        }
+        else if(ld == 2){  // end-cap rings, inner system, layer 2 // 0-19
+            std::string sp_str(1, spchain.at(5)[2]); // SP=1 and SP=2 alternate in phi
+            if(sp_str == "1"){
+                return 2 * (stoi(mod) - 1 ) ; // probably wrong offset, TODO need to revisit
+            }
+            else if(sp_str == "2"){
+                return 2 * (stoi(mod) - 1 ) + 1; // probably wrong offset, TODO need to revisit
+            }
+            //return stoi(mod) * fe; 
+        }
+        else if(ld == 4 || ld == 6 || ld ==8){ //Outer EC disks 4, 6, 8
+            std::string phi_str = mod.substr(2,2); 
+            int phi = std::stoi(phi_str);
+            return phi;
+        }
+        else{
+            ATH_MSG_WARNING("Bad input for phi_module,return -9999 ");
+            return -9999;
+        }
     }
+    return -9999;
 }
 
 
-int ITkPixelCsvWaferIdTool::eta_module(std::vector<std::string> spchain, std::string mod){
+int ITkPixelCsvWaferIdTool::eta_module(const std::vector<std::string>& spchain, const std::string& mod, int fe) const {
     int b_ec = barrel_ec(spchain);
     int ld = layer_disk(spchain);
+    int side = (spchain[4] == "A") ? 1 : -1; // A for side pos, C for side neg
+
     if( fabs(b_ec) == 1 ){ // flat barrel
-        if()
-        return mod;
+        if(ld ==0){ //triplets, one front-end is considered as one module
+            return side * (3 * (std::stoi(mod) -1) + fe );
+        }
+        else if(ld == 1){
+            return side * std::stoi(mod);
+        }
+        else if(ld < 5){
+            std::string eta_str(1, mod[4]);
+            int eta = std::stoi(eta_str);
+            eta = (mod[2] == 'T') ? 2*eta + 1 : 2*eta; //starts with Bottom
+            return side * eta;
+        }
+        else{
+            ATH_MSG_WARNING("Bad layer for flat barrel: " << ld);
+            return -9999;
+        }
     }
-    //barrel rings and end caps
-    else if(ld == 3 || ld == 5 || ld ==7){ //OB inclined rings, disks 3, 5, 7
-        
+    //barrel rings and end caps - all considered as disks
+    else{
+        if(spchain[2] == "L01"){ // barrel vertical small and large combined rings, disk 0
+            std::string eta_str = (spchain.at(3)).substr(1,2);
+            return std::stoi(eta_str);
+        }
+        else if(ld == 3 || ld == 5 || ld ==7){ //OB inclined rings, disks 3, 5, 7
+            std::string eta_str = (spchain.at(3)).substr(1,2);
+            return std::stoi(eta_str) - 1 ;
+        }
+        else if(ld == 1){  //end-cap rings, inner system, disk 1 (L05) - triplets: one module per FE
+            std::string eta_str = (spchain.at(3)).substr(1,2);
+            return std::stoi(eta_str) - 1;
+        }
+        else if(ld == 2){  // end-cap rings, inner system, disk 2 - eta from 15 to 22
+            std::string eta_str = (spchain.at(3)).substr(1,2);
+            return std::stoi(eta_str) + 14 ;
+        }
+        else if(ld == 4 || ld == 6 || ld ==8){ //Outer EC disks 4, 6, 8
+            std::string eta_str = (spchain.at(3)).substr(1,2);
+            return std::stoi(eta_str) - 1 ;
+        }
+        else{
+            ATH_MSG_WARNING("Bad input for eta_module,return -9999 ");
+            return -9999;
+        }
     }
-
-
+    return -9999;
 }
+
+

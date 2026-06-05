@@ -26,6 +26,11 @@ parser.add_argument(
     default="AT2-IP-ES-0016_v1.41_INCOMPLETE-ModuleA.csv",
     help="CSV file to load. The default is resolved through DATAPATH.",
 )
+parser.add_argument(
+    "--output-file",
+    default="ITkPixelWaferIds.txt",
+    help="Output text file for one 32-bit waferID identifier per line.",
+)
 #parser.add_argument("--sp-chain", required=True, help="SP chain identifier from the CSV.")
 #parser.add_argument("--module", type=int, required=True, help="Module number from the CSV.")
 #parser.add_argument("--fe", type=int, required=True, help="Front-end number from the CSV.")
@@ -52,15 +57,19 @@ flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
 flags.lock()
 
 cfg = MainServicesCfg(flags)
-cfg.merge(ITkPixelReadoutGeometryCfg(flags))
-cfg.merge(ITkPixelCsvWaferIdToolCfg(flags, CsvFile=args.csv_file))
+#cfg.merge(ITkPixelReadoutGeometryCfg(flags))
+cfg.merge(ITkPixelCsvWaferIdToolCfg(flags,
+                                       CsvFile=args.csv_file,
+                                       OutputFile=args.output_file))
 
 if args.verbose:
     cfg.printConfig(withDetails=True, summariseProps=True, printDefaults=True)
 
-cfg.run(0)
+# Run the application to initialize and execute
+cfg.run(1)
 
 print("Configured ITkPixelCsvWaferIdTool")
 print(f"  CSV file: {args.csv_file}")
+print(f"  Output file: {args.output_file}")
 #print(f"  Lookup request: spChain={args.sp_chain}, module={args.module}, fe={args.fe}")
-print("  Note: waferId() is still a placeholder and returns an invalid Identifier.")
+print("  Note: the tool initialization writes one 32-bit waferID per line to the output file.")

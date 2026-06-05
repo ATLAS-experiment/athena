@@ -30,6 +30,7 @@ public:
 
     const std::vector<CsvRow>& rows() const { return m_rows; }
 
+    StatusCode execute() const;
     StatusCode loadCsv();
     Identifier waferId(const CsvRow& row) const;
 
@@ -39,14 +40,18 @@ private:
     static std::vector<std::string> parseSPChain(const std::string& spChain);
 
     // Helper functions implemented in the .cxx file
-    int barrel_ec(std::vector<std::string> spchain);
-    int layer_disk(std::vector<std::string> spchain);
-    int phi_module(std::vector<std::string> spchain, int mod);
-    int eta_module(std::vector<std::string> spchain, int mod);
+    int barrel_ec(const std::vector<std::string>& spchain) const;
+    int layer_disk(const std::vector<std::string>& spchain) const;
+    int phi_module(const std::vector<std::string>& spchain, const std::string& mod, int fe) const;
+    int eta_module(const std::vector<std::string>& spchain, const std::string& mod, int fe) const;
     Gaudi::Property<std::string> m_csvFile{this,
                                            "CsvFile",
                                            "AT2-IP-ES-0016_v1.41_INCOMPLETE-ModuleA.csv",
                                            "CSV file containing SP chain, Module and FE columns"};
+    Gaudi::Property<std::string> m_outputFile{this,
+                                              "OutputFile",
+                                              "ITkPixelWaferIds.txt",
+                                              "Output text file for one 32-bit waferID per line"};
 
     const PixelID* m_pixIdHelper = nullptr;
     std::vector<CsvRow> m_rows;
