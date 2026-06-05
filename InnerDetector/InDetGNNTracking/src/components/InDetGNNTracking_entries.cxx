@@ -18,4 +18,7 @@ DECLARE_COMPONENT( DumpObjects )
 DECLARE_COMPONENT( GNNSeedingTrackMaker )
 DECLARE_COMPONENT( SpacepointFeatureTool )
 DECLARE_COMPONENT( GNNTrackFinderTritonTool )
+
+#ifdef ACTS_GNN_WITH_MODULEMAP
 DECLARE_COMPONENT( ActsGnnModuleMapFinderTool )
+#endif
