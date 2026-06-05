@@ -16,4 +16,6 @@
 #include <AsgAnalysisAlgorithms/BootstrapGeneratorAlg.h>
 #include <AsgAnalysisAlgorithms/SysTruthWeightAlg.h>
 
+#include <Math/Vector4D.h>
+
 #endif

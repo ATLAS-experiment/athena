@@ -428,6 +428,14 @@ namespace CP
           SG::ConstAccessor<std::vector<PxPyPzEVector>> {nominalAuxName};
         else if (typeName == "vector_PxPyPzMVector")
           SG::ConstAccessor<std::vector<PxPyPzMVector>> {nominalAuxName};
+        else if (typeName == "vector_vector_PtEtaPhiEVector")
+          SG::ConstAccessor<std::vector<std::vector<PtEtaPhiEVector>>> {nominalAuxName};
+        else if (typeName == "vector_vector_PtEtaPhiMVector")
+          SG::ConstAccessor<std::vector<std::vector<PtEtaPhiMVector>>> {nominalAuxName};
+        else if (typeName == "vector_vector_PxPyPzEVector")
+          SG::ConstAccessor<std::vector<std::vector<PxPyPzEVector>>> {nominalAuxName};
+        else if (typeName == "vector_vector_PxPyPzMVector")
+          SG::ConstAccessor<std::vector<std::vector<PxPyPzMVector>>> {nominalAuxName};
         else
         {
           unsigned line = __LINE__ - 2;
