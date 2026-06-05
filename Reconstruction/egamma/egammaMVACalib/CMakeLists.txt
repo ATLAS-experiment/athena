@@ -5,8 +5,10 @@ atlas_subdir( egammaMVACalib )
 
 # Extra dependencies for Athena capable builds:
 set( extra_libs )
-if( NOT XAOD_STANDALONE )
+set(extra_plibs)
+if( NOT XAOD_ANALYSIS )
    set( extra_libs PRIVATE_LINK_LIBRARIES GaudiKernel )
+   set ( extra_plibs Identifier egammaInterfacesLib egammaLayerRecalibTool FlavorTagInference egammaCaloUtils )
 endif()
 
 # External dependencies:
@@ -19,16 +21,21 @@ atlas_add_library( egammaMVACalibLib
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools AsgServicesLib AsgMessagingLib 
    xAODCaloEvent xAODEgamma  xAODTracking MVAUtils PathResolver EgammaAnalysisInterfacesLib CxxUtils
+   ${extra_plibs}
    ${extra_libs} )
 
+if (XAOD_STANDALONE)
 atlas_add_dictionary( egammaMVACalibDict
 	egammaMVACalib/egammaMVACalibDict.h
 	egammaMVACalib/selection.xml
 	LINK_LIBRARIES egammaMVACalibLib )
+endif()
 
+if (NOT XAOD_STANDALONE)
 atlas_add_component( egammaMVACalib
-	src/*.cxx src/components/*.cxx
+	src/components/*.cxx
 	LINK_LIBRARIES egammaMVACalibLib)
+endif()
 
 if( NOT XAOD_ANALYSIS)
 atlas_add_test(egammaMVASvcConfigTest

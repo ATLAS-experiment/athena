@@ -1,10 +1,12 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-#include "egammaTransformerCalib/egammaTransformerCalibTool.h"
-
+#ifndef XAOD_ANALYSIS
+#include "egammaMVACalib/egammaTransformerCalibTool.h"
 #include "egammaMVACalib/egammaMVAFunctions.h"
+#include "Identifier/Identifier.h"
+
+#include "egammaCaloUtils/findMaxECell.h"
 
 #include "xAODEgamma/Egamma.h"
 #include "xAODEgamma/Photon.h"
@@ -24,12 +26,8 @@
 #include <cmath>
 #include <format>
 
-#ifndef XAOD_ANALYSIS
 #include "GaudiKernel/SystemOfUnits.h"
 using Gaudi::Units::GeV;
-#else
-#define GeV 1000
-#endif
 
 egammaTransformerCalibTool::egammaTransformerCalibTool(const std::string& name) :
   asg::AsgTool(name)
@@ -55,6 +53,14 @@ StatusCode egammaTransformerCalibTool::initialize()
     ATH_MSG_DEBUG("Input is MC");
   } else {
     ATH_MSG_DEBUG("Input is data");
+  }
+
+  if (!m_egammaCellRecoveryTool.empty()) {
+    ATH_MSG_DEBUG("Retrieving cell recovery tool");
+    ATH_CHECK(m_egammaCellRecoveryTool.retrieve());
+  } else {
+    ATH_MSG_DEBUG("Disabling cell recovery tool");
+    m_egammaCellRecoveryTool.disable();
   }
 
   if (!m_isMC && m_useLayerCorrected) {
@@ -90,15 +96,6 @@ StatusCode egammaTransformerCalibTool::initialize()
       m_num_cluster_features = 15;
       m_num_cell_features = 7;
       ATH_CHECK(setupTransformerModel(PathResolverFindCalibFile(m_folder + "/" + m_convertedPhotonModelFile)));
-    }
-    break;
-  case xAOD::EgammaParameters::forwardelectron:
-    {
-      m_num_cluster_features = 11;
-      m_num_cell_features = 7;
-      // Forward electron is not implemented, will use model for electron
-      ATH_MSG_WARNING("Forward electron Transformer model is not implemented, will use electron model instead");
-      ATH_CHECK(setupTransformerModel(PathResolverFindCalibFile(m_folder + "/" + m_electronModelFile)));
     }
     break;
     
@@ -183,60 +180,34 @@ float egammaTransformerCalibTool::getEnergy(const xAOD::CaloCluster& clus,
 
     // --- 1. Cell Recovery (Timing Cut Fix) ---
     IegammaCellRecoveryTool::Info recoveryInfo;
-    bool recoverySucceeded = false;
+    bool recoverySucceeded = true;
     if (!m_egammaCellRecoveryTool.empty()) {
-        if (m_egammaCellRecoveryTool->execute(clus, recoveryInfo).isFailure()) {
-             ATH_MSG_WARNING("Cell Recovery Tool failed. Proceeding without recovered cells.");
-        } else {
-            recoverySucceeded = true;
-        }
+      egammaCellUtils::MaxECell maxECell(&clus);
+      if (maxECell.sc == StatusCode::FAILURE) {
+	ATH_MSG_WARNING("Issues in finding maximum energy cell.");
+	recoverySucceeded = false;
+      } else {
+	recoveryInfo.etamax = maxECell.etaCell;
+	recoveryInfo.phimax = maxECell.phiCell;
+	if (m_egammaCellRecoveryTool->execute(clus, recoveryInfo).isFailure()) {
+	  ATH_MSG_WARNING("Cell Recovery Tool failed. Proceeding without recovered cells.");
+	  recoverySucceeded = false;
+	}
+      }
     }
 
     // --- 2. Apply Layer Calibration if needed ---
-    const xAOD::CaloCluster* clusterForTransformer = eg->caloCluster();
-    std::unique_ptr<xAOD::Egamma> temp_eg; // Manages the lifetime of the temporary object
-
     bool isForward = (m_particleType == xAOD::EgammaParameters::forwardelectron);
     auto array_layer_scales = std::array<double, 4>{1.0, 1.0, 1.0, 1.0}; // default scales
 
     if (m_layerRecalibTool && !m_isMC && !isForward) {
-        ATH_MSG_DEBUG("Applying layer recalibration for GNN on data.");
-        
-        // A. Create a new object of the correct concrete type (Electron or Photon)
-        // We use a switch based on the configured particle type.
-        switch (m_particleType) {
-            case xAOD::EgammaParameters::electron: {
-                temp_eg = std::make_unique<xAOD::Electron>();
-                temp_eg->makePrivateStore(*eg); // B. Copy data from the original object
-                break;
-            }
-            case xAOD::EgammaParameters::unconvertedPhoton:
-            case xAOD::EgammaParameters::convertedPhoton: {
-                temp_eg = std::make_unique<xAOD::Photon>();
-                temp_eg->makePrivateStore(*eg);   // B. Copy data from the original object
-                break;
-            }
-            default:
-                ATH_MSG_WARNING("Unknown particle type set in tool for layer calibration: " << m_particleType);
-                temp_eg = nullptr;
-                break;
-        }
-        
-        // D. Apply correction to the new, non-const object
-        if (temp_eg) {
-            const xAOD::EventInfo* eventInfo = gei.eventInfo;
-            array_layer_scales = m_layerRecalibTool->getLayerCorrections(*temp_eg, *eventInfo);
-            // E. Get the calibrated cluster from the temporary object
-            clusterForTransformer = temp_eg->caloCluster();
-        }
+      ATH_MSG_DEBUG("Applying layer recalibration for GNN on data.");
+
+      // Apply correction to the new, non-const object
+      const xAOD::EventInfo* eventInfo = gei.eventInfo;
+      array_layer_scales = m_layerRecalibTool->getLayerCorrections(*eg, *eventInfo);
     } 
-    else
-    {
-        // Get the cluster from the (possibly calibrated) local object, if not using layer corrections, this will just be the original cluster
-        clusterForTransformer = eg->caloCluster();
-        ATH_MSG_DEBUG("Not using layer tool, Using raw layer energies as input to Transformer");
-    }
-    
+
     if ( m_useExtraLayerScales ) {
         ATH_MSG_DEBUG("Applying extra layer scales for systematic studies, normally this is for MC events.");
         if ( !m_isMC ) {
@@ -324,7 +295,7 @@ float egammaTransformerCalibTool::getEnergy(const xAOD::CaloCluster& clus,
         
         // Skip if this cell is already in the cluster
         if (std::find(included_cells.begin(), included_cells.end(), cell->ID()) != included_cells.end()) {
-            ATH_MSG_DEBUG("Recovered cell " << cell->ID() << " already included in cluster. Skipping to avoid double counting.");
+            ATH_MSG_WARNING("Recovered cell " << cell->ID() << " already included in cluster. Skipping to avoid double counting.");
             continue;
         }
         else {
@@ -441,7 +412,7 @@ float egammaTransformerCalibTool::getEnergy(const xAOD::CaloCluster& clus,
            float eacc = (m_useLayerCorrected ? 
                         (raw_Es1 * array_layer_scales[1] + raw_Es2 * array_layer_scales[2] + raw_Es3 * array_layer_scales[3]) :
                         (raw_Es1 + raw_Es2 + raw_Es3));
-           float cl_eta = egammaMVAFunctions::compute_cl_eta(*clusterForTransformer);
+           float cl_eta = eg->caloCluster()->eta();
            convEtOverPt = std::max(0.0f, eacc / (std::cosh(cl_eta) * ptconv));
         }
         convEtOverPt = std::min(convEtOverPt, 2.0f);
@@ -505,3 +476,4 @@ float egammaTransformerCalibTool::getEnergy(const xAOD::CaloCluster& clus,
 
     return el_gnn_score * static_cast<float>(sum_cell_E_total);
 }
+#endif
