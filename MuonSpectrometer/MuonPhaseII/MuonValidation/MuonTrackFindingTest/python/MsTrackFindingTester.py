@@ -51,7 +51,10 @@ if __name__=="__main__":
     flags = initConfigFlags()
     flags.PerfMon.doFullMonMT = not args.noPerfMon
     flags.Trigger.Muon.useNewRegionSelector = False
+    flags.Muon.includePileUpTruth = True
     flags, cfg = setupGeoR4TestCfg(args,flags)
+
+    cfg.getService("MessageSvc").setVerbose= []
 
     cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
                                     outStream="MuonTrackTester"))

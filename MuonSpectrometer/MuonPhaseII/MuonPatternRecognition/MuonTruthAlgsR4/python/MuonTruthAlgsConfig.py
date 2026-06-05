@@ -148,6 +148,14 @@ def TrackToTruthPartAssocCfg(flags, **kwargs):
     result.addEventAlgo(the_alg, primary = True)
     return result
 
+
+def MuonTruthSegConnectorAlgCfg(flags, name="MuonTruthSegConnector",**kwargs):
+    result = ComponentAccumulator()
+    the_alg = CompFactory.MuonR4.TruthSegConnectionAlg(name=name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
+
+
 # Fragment for algs producing (and decorating) truth objects
 def MuonTruthObjCreatorsCfg(flags, useSDO=True):
     result = ComponentAccumulator()
@@ -160,6 +168,10 @@ def MuonTruthObjCreatorsCfg(flags, useSDO=True):
     result.merge(TruthSegmentMakerCfg(flags, useSDO = useSDO))
     result.merge(TruthSegmentToTruthPartAssocCfg(flags))
     result.merge(TruthHitSummaryAlgCfg(flags))
+
+    if flags.Muon.includePileUpTruth:
+        result.merge(MuonTruthSegConnectorAlgCfg(flags))
+
     return result
 
 @AccumulatorCache
