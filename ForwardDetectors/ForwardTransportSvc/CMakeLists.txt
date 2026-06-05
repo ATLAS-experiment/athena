@@ -4,7 +4,6 @@
 atlas_subdir( ForwardTransportSvc )
 
 # External dependencies:
-find_package( CLHEP )   # for Geant4
 find_package( Geant4 )
 find_package( ROOT COMPONENTS Tree )
 
@@ -12,8 +11,8 @@ atlas_add_library( ForwardTransportSvcLib
                    ForwardTransportSvc/*.h
                    INTERFACE
                    PUBLIC_HEADERS ForwardTransportSvc
-                   INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${GEANT4_LIBRARIES} ${CLHEP_LIBRARIES} AtlasHepMCLib ForwardTracker GaudiKernel )
+                   INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS}
+                   LINK_LIBRARIES ${GEANT4_LIBRARIES} AtlasHepMCLib ForwardTracker GaudiKernel )
 set_target_properties( ForwardTransportSvcLib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 # Component(s) in the package:
