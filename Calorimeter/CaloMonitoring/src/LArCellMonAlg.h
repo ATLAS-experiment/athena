@@ -188,7 +188,7 @@ private:
     std::string m_threshTitleTemplate;               /// Histogram title template
     std::array<float,MAXLYRNS> m_threshValue{{}};    /// The actual threshold (per layer)
     std::array<std::string,MAXLYRNS> m_threshTitles; /// Part of the histogram title (containing the threshold value, so per-layer)
-    size_t m_thrIndex;                                  ///for filling in the eventCount plot 
+    size_t m_thrIndex{};                                  ///for filling in the eventCount plot 
 
     bool m_inSigNoise=false;                         /// Absolute threshold or in sigma noise?
     Direction m_threshDirection=OVER;

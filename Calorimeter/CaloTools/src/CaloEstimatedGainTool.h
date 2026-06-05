@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 /**
  * @file CaloTools/src/CaloEstimatedGain.h
@@ -85,7 +85,7 @@ private:
   float m_HighGainThresh[m_nCalos] = {0};
 
   const LArEM_ID*    m_lar_em_id = nullptr;
-  const TileInfo* m_tileInfo;
+  const TileInfo* m_tileInfo{};
 
   ToolHandle<TileCondIdTransforms> m_tileIdTransforms
     { this, "TileCondIdTransforms", "TileCondIdTransforms",
