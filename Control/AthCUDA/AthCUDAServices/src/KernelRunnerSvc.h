@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef ATHCUDASERVICES_KERNELRUNNERSVC_H
 #define ATHCUDASERVICES_KERNELRUNNERSVC_H
@@ -89,12 +89,12 @@ namespace AthCUDA {
       /// @}
 
       /// The current number of kernels being executed
-      std::atomic_int m_kernelsInFlight;
+      std::atomic_int m_kernelsInFlight{};
 
       /// The number of tasks executed during the job in total
-      std::atomic_uint m_totalTasks;
+      std::atomic_uint m_totalTasks{};
       /// The number of tasks sent to the GPU during the job
-      std::atomic_uint m_gpuTasks;
+      std::atomic_uint m_gpuTasks{};
 
       /// Implementation helper object
       std::unique_ptr< KernelRunnerSvcImpl > m_impl;
