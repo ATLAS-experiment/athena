@@ -136,10 +136,9 @@ namespace FlavorTagDiscriminants {
         Truth::Type muTruthOriginType = static_cast<Truth::Type>(muTruthOrigin);
 
         // Get the track associated to the muon
-        auto track_link = muon->inDetTrackParticleLink();
-        if ( !track_link.isValid() ) { continue; }
-        auto track = *track_link;
-
+        auto track = muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
+        if ( !track ) { continue; }
+ 
         // Get the truth particle associated to the track
         const auto truth = m_trackTruthOriginTool->getTruth(track);
         if ( !truth ) { continue; }
