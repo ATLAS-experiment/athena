@@ -139,7 +139,6 @@ namespace Prompt
 
     std::map<std::string, TH1*>                       m_hists;
 
-    std::unique_ptr<SG::AuxElement::ConstAccessor<unsigned char> > m_accessQuality;
 
     SG::WriteDecorHandleKeyArray<xAOD::IParticleContainer> m_decorHandleKeys
       { this, "DecorHandleKeys", {} };

@@ -216,8 +216,8 @@ StatusCode Prompt::NonPromptLeptonVertexingAlg::execute()
       }
     }
     else if(muon) {
-      if(passMuonCand(*muon) && muon->inDetTrackParticleLink().isValid()) {
-        tracklep = *(muon->inDetTrackParticleLink());
+      if(passMuonCand(*muon)) {
+        tracklep = muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
       }
     }
     else {
@@ -230,7 +230,7 @@ StatusCode Prompt::NonPromptLeptonVertexingAlg::execute()
       indexVectorDec                (*lepton).clear();
       indexVectorDecDeepMerge       (*lepton).clear();
 
-      ATH_MSG_DEBUG("NonPromptLeptonVertexingAlg::execute - cannot find muon->inDetTrackParticleLink() nor electron->trackParticle()");
+      ATH_MSG_DEBUG("NonPromptLeptonVertexingAlg::execute - cannot find muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle) nor electron->trackParticle()");
       continue;
     }
 
@@ -350,15 +350,12 @@ bool Prompt::NonPromptLeptonVertexingAlg::passMuonCand(const xAOD::Muon &muon) c
   //
   // Check whether muon candidate is a combined muon
   //
-  const bool combined = (muon.muonType() == xAOD::Muon::Combined);
-
   ATH_MSG_DEBUG("NonPromptLeptonVertexingAlg::passMuonCand - "
     << "pT=" << muon.pt() << ", eta=" << muon.eta() << ", phi=" << muon.phi() << std::endl
     << "   Type     = " << muon.muonType() << std::endl
-    << "   Combined = " << combined        << std::endl
     << "   " << truthAsStr(muon));
 
-  return combined;
+  return muon.muonType() == xAOD::Muon::MuonType::Combined;
 }
 
 //=============================================================================

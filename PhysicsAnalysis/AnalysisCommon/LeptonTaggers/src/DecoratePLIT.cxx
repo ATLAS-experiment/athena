@@ -235,7 +235,7 @@ namespace Prompt {
     const xAOD::CaloCluster* cluster = muon.cluster();
     if (cluster) {
       float energyloss = 0;
-      if (!muon.parameter(energyloss,xAOD::Muon::EnergyLoss)) {
+      if (!muon.parameter(energyloss,xAOD::Muon::ParamDef::EnergyLoss)) {
         ATH_MSG_WARNING("DecoratePLIT::execute - failed to retrieve energy loss");
         return StatusCode::FAILURE;
       }
@@ -791,8 +791,9 @@ namespace Prompt {
     if (const auto* elec = dynamic_cast<const xAOD::Electron*>(&lepton)) {
         tracksUsedForElectron = xAOD::EgammaHelpers::getTrackParticles(elec, true); // useBremAssoc = true
     } else if (const auto* muon = dynamic_cast<const xAOD::Muon*>(&lepton)) {
-        if (muon->muonType() == xAOD::Muon::Combined && muon->inDetTrackParticleLink().isValid()) {
-            tracksUsedForMuon.insert(*(muon->inDetTrackParticleLink())); // even if the primary track should be a combined track, we still use the id for the match
+        if (muon->muonType() == xAOD::Muon::MuonType::Combined && 
+            muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle)) {
+            tracksUsedForMuon.insert(muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle)); // even if the primary track should be a combined track, we still use the id for the match
         }
     }
 

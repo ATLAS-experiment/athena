@@ -217,17 +217,11 @@ StatusCode PrimaryVertexReFitter::execute()
             tracklep = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF(bestmatchedGSFElTrack);
         }
         else if(muon) {
-            if(muon->inDetTrackParticleLink().isValid()) {
-                tracklep = *(muon->inDetTrackParticleLink());
-            }
-            else {
-                ATH_MSG_DEBUG("PrimaryVertexReFitter::execute - skip muon without valid inDetTrackParticleLink()");
-                continue;
-            }
+            tracklep = muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
         }
 
         if(!tracklep) {
-            ATH_MSG_WARNING("PrimaryVertexReFitter::execute - cannot find muon->inDetTrackParticleLink() nor electron->trackParticle()");
+            ATH_MSG_WARNING("PrimaryVertexReFitter::execute - cannot find muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle) nor electron->trackParticle()");
             continue;
         }
 
