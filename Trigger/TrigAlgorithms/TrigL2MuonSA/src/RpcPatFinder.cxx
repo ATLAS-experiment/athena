@@ -3,16 +3,12 @@
 */
 
 #include "RpcPatFinder.h"
-
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include <GaudiKernel/IMessageSvc.h>
-#include <array>
 #include <cstddef>
-#include <functional>
-#include <math.h>
+#include <cmath>
 #include <bitset>
 #include <iostream>
-
-#include "AthenaBaseComps/AthMsgStreamMacros.h"
 
 // Original author: Massimo Corradi
 
@@ -366,16 +362,16 @@ void TrigL2MuonSA::RpcPatFinder::abcal(const std::bitset<8>& result_pat,
         return (l%2==0) ? l+1 : l-1;
     };
 
-    auto getAvgRZ= [&rpc_R, &rpc_Z, &result_pat, &index]
-                    (double& R, double& Z, const int& l, const int& companion) -> void {
-    
+    auto getAvgRZ= [&rpc_R, &rpc_Z, &result_pat, &index](double& R, double& Z, int l, int companion) -> void {
+        const auto idxAtl = index.at(l);
+        const auto idxAtComp = index.at(companion);
         if (result_pat.test(companion)){
-            R = (rpc_R.at(l).at(index[l]) + rpc_R.at(companion).at(index[companion])) / 2.0;
-            Z = (rpc_Z.at(l).at(index[l]) + rpc_Z.at(companion).at(index[companion])) / 2.0;
+            R = (rpc_R.at(l).at(idxAtl) + rpc_R.at(companion).at(idxAtComp)) / 2.0;
+            Z = (rpc_Z.at(l).at(idxAtl) + rpc_Z.at(companion).at(idxAtComp)) / 2.0;
             return;
         }
-        R = rpc_R.at(l).at(index[l]);
-        Z = rpc_Z.at(l).at(index[l]);
+        R = rpc_R.at(l).at(idxAtl);
+        Z = rpc_Z.at(l).at(idxAtl);
     };
 
     /// Calculate inner and middle coefficients

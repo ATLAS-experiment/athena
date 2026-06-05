@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PtEndcapLUT.h"
@@ -325,7 +325,7 @@ double TrigL2MuonSA::PtEndcapLUT::ptcombined(int iEta, int iPhi, double ApT, dou
     return 0.0;
   }
 
-  const float ZERO_LIMIT = 1e-5;
+  constexpr double ZERO_LIMIT = 1e-5;
   int iphibin=iPhi;
   int ietabin=iEta/6;
   if(iPhi==5||iPhi==6)iphibin=5;
@@ -350,13 +350,13 @@ double TrigL2MuonSA::PtEndcapLUT::ptcombined(int iEta, int iPhi, double ApT, dou
   double Bsigmab = m_sigmab[ietabin][iphibin][1];
   double Bsigmac = m_sigmac[ietabin][iphibin][1];
 
-  
-  double MeanAP  = ( std::abs(ApT) > ZERO_LIMIT)? (Ameana + Ameanb * std::exp( Ameanc / ApT)) : 1.0;
-  double MeanBP  = ( std::abs(BpT) > ZERO_LIMIT)? (Bmeana + Bmeanb * std::exp( Bmeanc / BpT)) : 1.0;
-  double ApT_tmp = ( std::abs(1-MeanAP) > ZERO_LIMIT)? (std::abs(ApT) / (1-MeanAP)) : 1.0;
+  auto notZero =[](double v){ return (std::abs(v) > ZERO_LIMIT);};
+  double MeanAP  = notZero(ApT) ? (Ameana + Ameanb * std::exp( Ameanc / ApT)) : 1.0;
+  double MeanBP  = notZero(BpT) ? (Bmeana + Bmeanb * std::exp( Bmeanc / BpT)) : 1.0;
+  double ApT_tmp = notZero(1-MeanAP) ? (std::abs(ApT) / (1-MeanAP)) : 1.0;
   ApT_tmp = std::abs(ApT_tmp);
   if(ApT_tmp >= 500) ApT_tmp = 500;
-  double BpT_tmp = ( std::abs(1-MeanBP) > ZERO_LIMIT)? (std::abs(BpT) / (1-MeanBP)) : 1.0;
+  double BpT_tmp = notZero(1-MeanBP) ? (std::abs(BpT) / (1-MeanBP)) : 1.0;
   BpT_tmp = std::abs(BpT_tmp);
   if(BpT_tmp >= 500) BpT_tmp = 500;
 
@@ -365,17 +365,17 @@ double TrigL2MuonSA::PtEndcapLUT::ptcombined(int iEta, int iPhi, double ApT, dou
   
   if(ApT == 0. ) CApT = 0.;
   if(BpT == 0. ) CBpT = 0.;
-  double NSigmaA= Asigmaa * std::abs(ApT_tmp) * std::abs(ApT_tmp) + Asigmab * std::abs(ApT_tmp) + Asigmac;
-  double NSigmaB= Bsigmaa * std::abs(BpT_tmp) * std::abs(BpT_tmp) + Bsigmab * std::abs(BpT_tmp) + Bsigmac;
+  double NSigmaA= Asigmaa * ApT_tmp * ApT_tmp + Asigmab * ApT_tmp + Asigmac;
+  double NSigmaB= Bsigmaa * BpT_tmp * BpT_tmp + Bsigmab * BpT_tmp + Bsigmac;
 
-  double NVsigpTA =(std::abs(ApT_tmp) > ZERO_LIMIT&& std::abs(NSigmaA) > ZERO_LIMIT)? (1/(NSigmaA * ApT_tmp) ): 1.0; 
-  double NVsigpTB =(std::abs(BpT_tmp) > ZERO_LIMIT&& std::abs(NSigmaB) > ZERO_LIMIT)? (1/(NSigmaB * BpT_tmp) ): 1.0; 
-  double NVsigAsq =(std::abs(NSigmaA) > ZERO_LIMIT)? (1/(NSigmaA * NSigmaA))  : 1.0; 
-  double NVsigBsq =(std::abs(NSigmaB) > ZERO_LIMIT)? (1/(NSigmaB * NSigmaB))  : 1.0; 
+  double NVsigpTA = notZero(NSigmaA * ApT_tmp) ? (1./(NSigmaA * ApT_tmp) ): 1.0; 
+  double NVsigpTB = notZero(NSigmaB * BpT_tmp) ? (1./(NSigmaB * BpT_tmp) ): 1.0; 
+  double NVsigAsq = notZero(NSigmaA * NSigmaA) ? (1./(NSigmaA * NSigmaA))  : 1.0; //should check the multiple, not individually
+  double NVsigBsq = notZero(NSigmaB * NSigmaB) ? (1./(NSigmaB * NSigmaB))  : 1.0;  //should check the multiple, not individually
 
   double NVsigpTAsq = NVsigpTA * NVsigpTA;
   double NVsigpTBsq = NVsigpTB * NVsigpTB;
-  double pt = (std::abs(NVsigAsq + NVsigBsq) > ZERO_LIMIT)? (1/std::sqrt((NVsigpTAsq + NVsigpTBsq)/(NVsigAsq + NVsigBsq))) : 0.;
+  double pt = notZero(NVsigAsq + NVsigBsq)? (1./std::sqrt((NVsigpTAsq + NVsigpTBsq)/(NVsigAsq + NVsigBsq))) : 0.;//mad 
   if(pt>500) pt = 500.;
   return pt;
 }
@@ -397,9 +397,9 @@ StatusCode TrigL2MuonSA::PtEndcapLUT::readLUTSigmaMean(const std::string& lut_me
 
   std::string line;
 
-  for(int ei=0; ei < ETAS1; ei++){
-    for(int pi=0; pi < PHIS1; pi++){
-      for(int pti=0; pti < PTS1; pti++){
+  for(std::size_t ei=0; ei < ETAS1; ei++){
+    for(std::size_t pi=0; pi < PHIS1; pi++){
+      for(std::size_t pti=0; pti < PTS1; pti++){
         m_meana[ei][pi][pti] =0.;
         m_meanb[ei][pi][pti] =0.;
         m_meanc[ei][pi][pti] =0.;
