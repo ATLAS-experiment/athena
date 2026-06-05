@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGL2MUONSA_PTENDCAPLUT_H
@@ -11,16 +11,19 @@
 #include "GaudiKernel/IInterface.h"
 
 #include <map>
-#include <cstring>
-#define ETAS1  5
-#define PHIS1  6
-#define PTS1   3
+#include <string>
+
 
 namespace TrigL2MuonSA {
 
 class PtEndcapLUT: public AthAlgTool
 {
   public:
+  //mean, sigma array dimensions
+  static constexpr std::size_t ETAS1=5;
+  static constexpr std::size_t PHIS1=6;
+  static constexpr std::size_t PTS1=3;
+
   enum DataType { INVALID, ALPHAPOL2, BETAPOL2, TGCALPHAPOL2, INVRADIUSPOL2, CSCPOL2 };
     
   public:
@@ -60,13 +63,8 @@ private:
     
     struct TableType
     {
-      double m_xcepts[ETAS][PHISEE];
-      double m_slopes[ETAS][PHISEE];
-      TableType()
-      {
-	memset(m_xcepts, 0, sizeof(m_xcepts));
-	memset(m_slopes, 0, sizeof(m_slopes));
-      }
+      double m_xcepts[ETAS][PHISEE]{};
+      double m_slopes[ETAS][PHISEE]{};
     };
 
     typedef std::map<KeyType, TableType*> TableMap;
