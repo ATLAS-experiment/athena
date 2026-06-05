@@ -147,8 +147,6 @@ def insituStep(flags, **configDic):
     configDic['HistoReaderEtaInter'] = [HistoInputCfg(flags, "HistToolEtaInter"+str(j), **etaDic) for j, etaDic in enumerate(histoReaderEta_vec)]
     configDic['HistoReaderAbs'] = [HistoInputCfg(flags, "HistToolAbs"+str(j), **absDic) for j, absDic in enumerate(histoReaderAbs_vec)]
 
-    configDic['vartool1'] = VarToolCfg(flags, var=histEtaInterCalib['varX'], Tname="VarTool")
-    configDic['vartool2'] = VarToolCfg(flags, var=histEtaInterCalib['varY'], Tname="VarTool")
     configDic['isMC'] = flags.Input.isMC
 
     insituSteps = [CompFactory.InSituCalibStep("insitucalibstep", **configDic)]
