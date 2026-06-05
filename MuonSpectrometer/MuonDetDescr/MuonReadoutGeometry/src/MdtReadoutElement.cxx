@@ -92,7 +92,6 @@ namespace MuonGM {
 
     void MdtReadoutElement::geoInitDone() {
         m_tubeGeo.resize(m_nlayers * m_ntubesperlayer);
-        m_deformTransf.resize(m_nlayers * m_ntubesperlayer);
         m_tubeSurfaces.resize(m_nlayers * m_ntubesperlayer);
 
         int ntot_steps = m_nsteps;
@@ -171,7 +170,7 @@ namespace MuonGM {
                     tlength = 2. * theTube->getZHalfLength();
                 else
                     ATH_MSG_WARNING( "PhysChild with index " << ii
-                        << " out of (tubeLayer-1)*m_ntubesperlayer+tube with tl=" << tubeLayer << " tubes/lay=" << m_ntubesperlayer
+                        << " out of (tubeLayer-1)*m_ntubesperlayer+tube with tubeLayer=" << tubeLayer << " tubes/lay=" << m_ntubesperlayer
                         << " t=" << tube << " for  MdtReadoutElement " << idHelperSvc()->toStringDetEl(identify()) );
             }
             if (std::abs(tlength - nominalTubeLength) > 0.1) {
@@ -278,6 +277,30 @@ namespace MuonGM {
 
         return amdb_plus_minus1 * getWireLength(tubeLayer, tube) / 2.;
     }
+    unsigned MdtReadoutElement::boundHash(const int tubeLayer, const int tube) const{
+        int istep = 0;
+        int ntot_steps = m_nsteps;
+
+        if (hasCutouts() && manager()->MinimalGeoFlag() == 0) {
+            ntot_steps = m_nlayers * m_ntubesperlayer;
+            istep = (tubeLayer - 1) * m_ntubesperlayer + tube - 1;
+        } else {
+            if (endcap()) istep = int((tube - 1) / m_ntubesinastep);
+
+            if (istep < 0 || istep >= ntot_steps) {
+                ATH_MSG_WARNING( "bounds for Element named "<< " with tech. " << getTechnologyType()
+                    << " DEid = " << idHelperSvc()->toStringDetEl(identify()) << " called with: tubeL, tube " << tubeLayer << " " << tube
+                    << "; step " << istep << " out of range 0-" << m_nsteps - 1 << " m_ntubesinastep " << m_ntubesinastep );
+                ATH_MSG_WARNING( "Please run in DEBUG mode to get extra diagnostic; setting istep = 0" );
+            }
+        }
+        if ((unsigned int)istep >= m_tubeBounds.size()) {
+            THROW_EXCEPTION(__func__<<"("<<tubeLayer<<","<<tube<<") but m_tubeBounds.size()="<<m_tubeBounds.size()<<" for "<<
+                             idHelperSvc()->toStringDetEl(identify()));
+        }
+
+        return istep;
+    }
 
     Amg::Vector3D MdtReadoutElement::tubeFrame_localROPos(const int tubeLayer, const int tube) const {
         return signedRODistanceFromTubeCentre(tubeLayer, tube) * Amg::Vector3D::UnitZ();
@@ -349,7 +372,7 @@ namespace MuonGM {
                 }
                 if (tubeTrans(1, 3) > maxtol) {
 
-                    ATH_MSG_DEBUG( "This a tube with cutout stName/Eta/Phi/ml/tl/t = " << idHelperSvc()->toStringDetEl(identify())
+                    ATH_MSG_DEBUG( "This a tube with cutout stName/Eta/Phi/ml/tubeLayer/t = " << idHelperSvc()->toStringDetEl(identify())
                                          << "/" << tubeLayer << "/" << tube);
                     // check only for tubes actually shifted
                     if (std::abs(m_cutoutShift - tubeTrans(1, 3)) > maxtol) {
@@ -432,21 +455,16 @@ namespace MuonGM {
 
     const Amg::Transform3D& MdtReadoutElement::fromIdealToDeformed(const int tubeLayer, const int tube) const {
         size_t itube = (tubeLayer - 1) * m_ntubesperlayer + tube - 1;
-        if (itube >= m_deformTransf.size()) {
+        if (itube >= m_tubeGeo.size()) {
             ATH_MSG_WARNING(__func__<<"() :"<<__LINE__<< " called with tubeLayer or tube out of range in chamber "
                 << idHelperSvc()->toStringDetEl(identify()) << " : layer " << tubeLayer << " max " << m_nlayers << " tube " << tube
                 << " max " << m_ntubesperlayer << " will compute deformation for first tube in this chamber" );
             ATH_MSG_WARNING( "Please run in DEBUG mode to get extra diagnostic" );
             itube = 0;
         }
-
-        const CxxUtils::CachedUniquePtr<Amg::Transform3D>& ptr = m_deformTransf.at(itube);
-        if (!ptr) {
-            Amg::Transform3D trans = deformedTransform(tubeLayer, tube);
-            ptr.set(std::make_unique<Amg::Transform3D>(std::move(trans)));
-            if (!m_haveDeformTransf) m_haveDeformTransf = true;
-        }
-        return *ptr;
+        static const Amg::Transform3D ident{Amg::Transform3D::Identity()};
+        const GeoInfo& geo = m_tubeGeo.at(itube);
+        return geo.deformedTrf ? *geo.deformedTrf : ident;
     }
 
 #if defined(FLATTEN)
@@ -799,9 +817,11 @@ namespace MuonGM {
                 locAMDBWireEndN = ret;
         }
     }
-    std::unique_ptr<MdtReadoutElement::GeoInfo> MdtReadoutElement::makeGeoInfo(const int tubeLayer, const int tube) const {
-        Amg::Transform3D transform = globalTransform(nodeform_localTubePos(tubeLayer, tube), fromIdealToDeformed(tubeLayer, tube));
-        return std::make_unique<GeoInfo>(std::move(transform));
+   MdtReadoutElement::GeoInfo MdtReadoutElement::makeGeoInfo(const int tubeLayer, const int tube) const {
+        Amg::Transform3D deformedTrf = deformedTransform(tubeLayer, tube);
+        GeoInfo info{globalTransform(nodeform_localTubePos(tubeLayer, tube), deformedTrf)};
+        info.deformedTrf = std::make_unique<Amg::Transform3D>(std::move(deformedTrf));
+        return info;
     }
 
     const MdtReadoutElement::GeoInfo& MdtReadoutElement::geoInfo(const int tubeLayer, const int tube) const {
@@ -813,21 +833,19 @@ namespace MuonGM {
             ATH_MSG_WARNING( "Please run in DEBUG mode to get extra diagnostic" );
             itube = 0;
         }
-
-        const CxxUtils::CachedUniquePtr<GeoInfo>& ptr = m_tubeGeo.at(itube);
-        if (!ptr) {
-            ptr.set(makeGeoInfo(tubeLayer, tube));
-            if (!m_haveTubeGeo) m_haveTubeGeo = true;
-        }
-        return *ptr;
+        return m_tubeGeo.at(itube);
     }
 
     const Amg::Transform3D& MdtReadoutElement::transform(const int tubeLayer, const int tube) const {
-        return geoInfo(tubeLayer, tube).m_transform;
+        const GeoInfo& info{geoInfo(tubeLayer, tube)};
+        if (!info.isValid) {
+            THROW_EXCEPTION("There is no transform cached for tubeLayer: "<<tubeLayer
+                <<", tube: "<<tube<<" in "<<idHelperSvc()->toStringDetEl(identify()));
+        }
+        return info.m_transform;
     }
 
     const Trk::StraightLineSurface& MdtReadoutElement::surface(const int tubeLayer, const int tube) const {
-
         int ntot_tubes = m_nlayers * m_ntubesperlayer;
         int itube = (tubeLayer - 1) * m_ntubesperlayer + tube - 1;
         // consistency checks
@@ -838,43 +856,13 @@ namespace MuonGM {
             ATH_MSG_WARNING( "Please run in DEBUG mode to get extra diagnostic" );
             itube = 0;
         }
-
-        const CxxUtils::CachedUniquePtr<Trk::StraightLineSurface>& ptr = m_tubeSurfaces.at(itube);
-        if (!ptr) {
-            Identifier id = m_idHelper.channelID(identify(), getMultilayer(), tubeLayer, tube);
-            ptr.set(std::make_unique<Trk::StraightLineSurface>(*this, id));
-            if (!m_haveTubeSurfaces) m_haveTubeSurfaces = true;
-        }
-        return *ptr;
+        assert(m_tubeSurfaces.at(itube) != nullptr);
+        return *m_tubeSurfaces.at(itube);
     }
     const Trk::CylinderBounds& MdtReadoutElement::bounds(const int tubeLayer, const int tube) const {
-        int istep = 0;
-        int ntot_steps = m_nsteps;
-
-        if (hasCutouts() && manager()->MinimalGeoFlag() == 0) {
-            ntot_steps = m_nlayers * m_ntubesperlayer;
-            istep = (tubeLayer - 1) * m_ntubesperlayer + tube - 1;
-        } else {
-            if (endcap()) istep = int((tube - 1) / m_ntubesinastep);
-
-            if (istep < 0 || istep >= ntot_steps) {
-                ATH_MSG_WARNING( "bounds for Element named "<< " with tech. " << getTechnologyType()
-                    << " DEid = " << idHelperSvc()->toStringDetEl(identify()) << " called with: tubeL, tube " << tubeLayer << " " << tube
-                    << "; step " << istep << " out of range 0-" << m_nsteps - 1 << " m_ntubesinastep " << m_ntubesinastep );
-                ATH_MSG_WARNING( "Please run in DEBUG mode to get extra diagnostic; setting istep = 0" );
-            }
-        }
-        if ((unsigned int)istep >= m_tubeBounds.size()) {
-            THROW_EXCEPTION(__func__<<"("<<tubeLayer<<","<<tube<<") but m_tubeBounds.size()="<<m_tubeBounds.size()<<" for "<<
-                             idHelperSvc()->toStringDetEl(identify()));
-        }
-        const CxxUtils::CachedUniquePtr<Trk::CylinderBounds>& ptr = m_tubeBounds.at(istep);
-        if (!ptr) {
-            double tubelength = getTubeLengthForCaching(tubeLayer, tube);
-            ptr.set(std::make_unique<Trk::CylinderBounds>(innerTubeRadius(), 0.5 * tubelength - m_deadlength));
-            if (!m_haveTubeBounds) m_haveTubeBounds = true;
-        }
-        return *ptr;
+        const auto& bounds = m_tubeBounds.at(boundHash(tubeLayer, tube));
+        assert(bounds!= nullptr);
+        return *bounds;
     }
     const Amg::Vector3D& MdtReadoutElement::center(const int tubeLayer, const int tube) const { return geoInfo(tubeLayer, tube).m_center; }
     const Amg::Vector3D& MdtReadoutElement::normal() const {
@@ -883,70 +871,16 @@ namespace MuonGM {
     }
 
     const Trk::Surface& MdtReadoutElement::surface() const {
-        if (!m_associatedSurface) {
-            Amg::RotationMatrix3D muonTRotation(transform().rotation());
-            Amg::RotationMatrix3D surfaceTRotation;
-            surfaceTRotation.col(0) = muonTRotation.col(1);
-            surfaceTRotation.col(1) = muonTRotation.col(2);
-            surfaceTRotation.col(2) = muonTRotation.col(0);
-
-            Amg::Transform3D trans3D(surfaceTRotation);
-            trans3D.pretranslate(transform().translation());
-
-            if (barrel()) {
-                m_associatedSurface.set(std::make_unique<Trk::PlaneSurface>(Amg::Transform3D(trans3D), getSsize() * 0.5,
-                                                                            getZsize() * 0.5));
-            } else {
-                m_associatedSurface.set(std::make_unique<Trk::PlaneSurface>(Amg::Transform3D(trans3D), getSsize() * 0.5,
-                                                                            getLongSsize() * 0.5,
-                                                                            getRsize() * 0.5));
-            }
-        }
+        assert(m_associatedSurface != nullptr);
         return *m_associatedSurface;
     }
 
     const Amg::Vector3D& MdtReadoutElement::center() const { return surface().center(); }
 
-    const Trk::SurfaceBounds& MdtReadoutElement::bounds() const {
-        if (!m_associatedBounds) {
-            if (barrel()) {
-                m_associatedBounds.set(
-                    std::make_unique<Trk::RectangleBounds>(getSsize() / 2., getZsize() / 2.));
-            } else {
-                m_associatedBounds.set(std::make_unique<Trk::TrapezoidBounds>(
-                    getSsize() / 2., getLongSsize() / 2., getRsize() / 2.));
-            }
-        }
-        return *m_associatedBounds;
-    }
+    const Trk::SurfaceBounds& MdtReadoutElement::bounds() const { return *m_associatedBounds; }
     void MdtReadoutElement::clearCache() {
         ATH_MSG_DEBUG( "Clearing cache for ReadoutElement " << idHelperSvc()->toStringDetEl(identify()) );
-        if (m_associatedSurface) {
-            m_associatedSurface.release();
-        }
-        else  ATH_MSG_VERBOSE( "no associated surface to be deleted" );
-
-        if (m_associatedBounds) {
-            m_associatedBounds.release();
-        } ATH_MSG_VERBOSE( "no associated bounds to be deleted" );
         m_elemNormal.reset();
-        if (m_haveTubeSurfaces) {
-            m_haveTubeSurfaces = false;
-            for (auto& s : m_tubeSurfaces) { s.release(); }
-        }
-        if (m_haveTubeGeo) {
-            m_haveTubeGeo = false;
-            for (auto& g : m_tubeGeo) { g.release(); }
-        }
-        if (m_haveTubeBounds) {
-            m_haveTubeBounds = false;
-            for (auto& b : m_tubeBounds) { b.release(); }
-        }
-        // reset here the deform-related transforms        
-        if (m_haveDeformTransf) {
-            m_haveDeformTransf = false;
-            for (auto& d : m_deformTransf) { d.release(); }
-        }
     }
 
     void MdtReadoutElement::setBLinePar(const BLinePar* bLine) {
@@ -959,65 +893,70 @@ namespace MuonGM {
     }
 
     void MdtReadoutElement::fillCache() {
-        ATH_MSG_DEBUG( "Filling cache for ReadoutElement " << idHelperSvc()->toStringDetEl(identify()));
+        ATH_MSG_DEBUG( "Filling cache for ReadoutElement " << idHelperSvc()->toStringDetEl(identify())
+                    <<", nlayers: "<<getNLayers()<<", tubes per lay: "<<getNtubesperlayer());
+      
+        if (!m_associatedBounds) {
+            if (barrel()) {
+                m_associatedBounds = std::make_unique<Trk::RectangleBounds>(getSsize() / 2., getZsize() / 2.);
+            } else {
+                m_associatedBounds = std::make_unique<Trk::TrapezoidBounds>(getSsize() / 2., 
+                                                                            getLongSsize() / 2., 
+                                                                            getRsize() / 2.);
+            }
+        }
+        ATH_MSG_VERBOSE( "global Normal " << Amg::toString(normal()) );
 
-        const Trk::PlaneSurface* tmpSurface = dynamic_cast<const Trk::PlaneSurface*>(&surface());  //<! filling m_associatedSurface
-        const Trk::SurfaceBounds* tmpBounds = nullptr;                         //<! filling m_associatedBounds
-        if (barrel())
-            tmpBounds = dynamic_cast<const Trk::RectangleBounds*>(&bounds());
-        else
-            tmpBounds = dynamic_cast<const Trk::TrapezoidBounds*>(&bounds());
-        ATH_MSG_VERBOSE( "global Surface / Bounds pointers " << tmpSurface << " " << tmpBounds );
-        ATH_MSG_VERBOSE( "global Normal " << normal() );
-
-        const Trk::CylinderBounds* tmpCil = nullptr;
-        const Trk::StraightLineSurface* tmpSaggL = nullptr;
-        Amg::Vector3D myPoint{Amg::Vector3D::Zero()};
-        Amg::Transform3D myTransform{Amg::Transform3D::Identity()};
-        for (int tl = 1; tl <= getNLayers(); ++tl) {
+        for (int tubeLayer = 1; tubeLayer <= getNLayers(); ++tubeLayer) {
             for (int tube = 1; tube <= getNtubesperlayer(); ++tube) {
                 // in case of BMG chambers, do not check the 'dead' tubes
                 // (the tubes are numbered from 1-54 for each however there are cutouts for the
                 // alignment system where no tubes are built-in, meaning, those tubes do not exist/are 'dead')
-                if (manager()->mdtIdHelper()->isBMG(identify())) {
-                    PVConstLink cv = getMaterialGeom();
+                bool addTrf{false};
+
+                if (!m_builtFromCnv && manager()->mdtIdHelper()->isBMG(identify())) {
                     // usually the tube number corresponds to the child number, however for
                     // BMG chambers full tubes are skipped during the building process
                     // therefore the matching needs to be done via the volume ID
-                    int packed_id = tube + maxNTubesPerLayer * tl;
-                    bool found = false;
+                    int packed_id = tube + maxNTubesPerLayer * tubeLayer;                   
                     geoGetIds(
                         [&](int id) {
-                            if (!found && id == packed_id) {
-                                myTransform = transform(tl, tube);                                           //<! filling m_tubeTransf
-                                myPoint = center(tl, tube);                                                  //<! filling m_tubeCenter
-                                tmpCil = dynamic_cast<const Trk::CylinderBounds*>(&bounds(tl, tube));        //<! filling m_tubeBounds
-                                tmpSaggL = dynamic_cast<const Trk::StraightLineSurface*>(&surface(tl, tube));  //<! filling m_tubeSurfaces
-                                found = true;
+                            if (id == packed_id) {
+                                 addTrf = true;
                             }
-                        },
-                        &*cv);
-                    if (found) {
-                        ATH_MSG_VERBOSE( "tubeLayer/tube " << tl << " " << tube << " transform at origin  "
-                            << Amg::toString(myTransform.linear()) );
-                        ATH_MSG_VERBOSE( "tubeLayer/tube " << tl << " " << tube << " tube center          " << myPoint );
-                        ATH_MSG_VERBOSE( "tubeLayer/tube " << tl << " " << tube << " tube bounds pointer  " << tmpCil );
-                        ATH_MSG_VERBOSE( "tubeLayer/tube " << tl << " " << tube << " tube surface pointer " << tmpSaggL );
-                    }
-                } else {
-                    // print in order to compute !!!
-                    myTransform = transform(tl, tube);                                           //<! filling m_tubeTransf
-                    myPoint = center(tl, tube);                                                  //<! filling m_tubeCenter
-                    tmpCil = dynamic_cast<const Trk::CylinderBounds*>(&bounds(tl, tube));        //<! filling m_tubeBounds
-                    tmpSaggL = dynamic_cast<const Trk::StraightLineSurface*>(&surface(tl, tube));  //<! filling m_tubeSurfaces
-                    ATH_MSG_VERBOSE( "tubeLayer/tube " << tl << " " << tube << " transform at origin  "
-                                    << Amg::toString(myTransform.translation()) );
-                    ATH_MSG_VERBOSE( "tubeLayer/tube " << tl << " " << tube << " tube center          " << myPoint );
-                    ATH_MSG_VERBOSE( "tubeLayer/tube " << tl << " " << tube << " tube bounds pointer  " << tmpCil );
-                    ATH_MSG_VERBOSE( "tubeLayer/tube " << tl << " " << tube << " tube surface pointer " << tmpSaggL );
+                           
+                        }, getMaterialGeom());
+                }  else {
+                    addTrf = true;
+                }
+                if (!addTrf) {
+                    continue;
+                }
+                size_t itube = (tubeLayer - 1) * m_ntubesperlayer + tube - 1;
+                m_tubeGeo.at(itube) = makeGeoInfo(tubeLayer, tube);
+                auto& surface = m_tubeSurfaces.at(itube);
+                if (!surface) {
+                    Identifier id = m_idHelper.channelID(identify(), getMultilayer(), tubeLayer, tube);
+                    surface = std::make_unique<Trk::StraightLineSurface>(*this, id);
+                }
+                std::unique_ptr<Trk::CylinderBounds>& ptr = m_tubeBounds.at(boundHash(tubeLayer, tube));
+                if (!ptr) {
+                    double tubelength = getTubeLengthForCaching(tubeLayer, tube);
+                    ptr = std::make_unique<Trk::CylinderBounds>(innerTubeRadius(), 0.5 * tubelength - m_deadlength);
                 }
             }
         }
+        /// Redo the central surface otherwise Frozen Tier0 changes..
+        Amg::RotationMatrix3D muonTRotation(transform().rotation());
+        Amg::RotationMatrix3D surfaceTRotation;
+        surfaceTRotation.col(0) = muonTRotation.col(1);
+        surfaceTRotation.col(1) = muonTRotation.col(2);
+        surfaceTRotation.col(2) = muonTRotation.col(0);
+
+        Amg::Transform3D trans3D(surfaceTRotation);
+        trans3D.pretranslate(transform().translation());
+
+        m_associatedSurface = std::make_unique<Trk::PlaneSurface>(Amg::Transform3D(trans3D), m_associatedBounds);
     }
 
     bool MdtReadoutElement::containsId(const Identifier& id) const {
