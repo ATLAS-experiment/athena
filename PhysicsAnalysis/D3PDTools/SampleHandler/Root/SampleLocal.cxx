@@ -18,7 +18,6 @@
 #include <SampleHandler/SampleLocal.h>
 
 #include <RootCoreUtils/Assert.h>
-#include <SampleHandler/SamplePtr.h>
 #include <TSystem.h>
 
 //
@@ -98,11 +97,11 @@ namespace SH
 
 
 
-  SamplePtr SampleLocal ::
+  std::unique_ptr<SampleLocal> SampleLocal ::
   doMakeLocal () const
   {
     RCU_READ_INVARIANT (this);
-    return SamplePtr (const_cast<SampleLocal*>(this));
+    return std::make_unique<SampleLocal>(*this);
   }
 
 

@@ -25,7 +25,6 @@
 #include <SampleHandler/Sample.h>
 #include <SampleHandler/SampleHandler.h>
 #include <SampleHandler/SampleLocal.h>
-#include <SampleHandler/SamplePtr.h>
 
 //
 // method implementations
@@ -78,7 +77,7 @@ namespace EL
                end = data.job->sampleHandler().end(); sample != end; ++ sample)
         {
           Worker worker;
-          ANA_CHECK (worker.directExecute (*sample, *data.job, data.submitDir, data.options));
+          ANA_CHECK (worker.directExecute (**sample, *data.job, data.submitDir, data.options));
         }
         data.submitted = true;
       }

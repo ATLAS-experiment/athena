@@ -25,11 +25,12 @@
 #include <SampleHandler/MetaObject.h>
 #include <SampleHandler/SampleGrid.h>
 #include <SampleHandler/SampleHandler.h>
-#include <SampleHandler/SamplePtr.h>
+#include <SampleHandler/SampleLocal.h>
 #include <TChain.h>
 #include <TFile.h>
 #include <memory>
 #include <iostream>
+#include <stdexcept>
 
 //
 // method implementations
@@ -98,11 +99,23 @@ namespace SH
   name (std::string val_name)
   {
     RCU_CHANGE_INVARIANT (this);
-    if (m_references > 0)
-      RCU_THROW_MSG ("Sample already owned by SampleHandler");
+    if (m_lockedName)
+      throw std::logic_error
+        ("SH::Sample::name: cannot change name of sample \""
+         + m_name + "\" after it has been registered in a SampleHandler"
+         " (or otherwise locked via lockName)");
     m_meta->setString (MetaNames::sampleName(), val_name);
     m_name = std::move (val_name);
-    
+
+  }
+
+
+
+  void Sample ::
+  lockName ()
+  {
+    RCU_CHANGE_INVARIANT (this);
+    m_lockedName = true;
   }
 
 
@@ -130,7 +143,7 @@ namespace SH
 
 
 
-  SamplePtr Sample ::
+  std::unique_ptr<SampleLocal> Sample ::
   makeLocal () const
   {
     RCU_READ_INVARIANT (this);
@@ -250,10 +263,11 @@ namespace SH
 
 
   void Sample ::
-  addSamples (SampleHandler& result)
+  addSamples (SampleHandler& result, const std::shared_ptr<Sample>& self)
   {
     RCU_READ_INVARIANT (this);
-    doAddSamples (result);
+    RCU_REQUIRE (self.get() == this);
+    doAddSamples (result, self);
   }
 
 
@@ -405,11 +419,20 @@ namespace SH
 
   Sample ::
   Sample (const std::string& name)
-    : m_name (name), m_meta (new MetaObject),
-      m_references (0)
+    : m_name (name), m_meta (new MetaObject)
   {
     m_meta->setString (MetaNames::sampleName(), name);
 
+    RCU_NEW_INVARIANT (this);
+  }
+
+
+
+  Sample ::
+  Sample (const Sample& that)
+    : TObject (that), m_name (that.m_name),
+      m_tags (that.m_tags), m_meta (new MetaObject (*that.m_meta))
+  {
     RCU_NEW_INVARIANT (this);
   }
 
@@ -446,31 +469,9 @@ namespace SH
 
 
   void Sample ::
-  doAddSamples (SampleHandler& result)
+  doAddSamples (SampleHandler& result, const std::shared_ptr<Sample>& self)
   {
     RCU_READ_INVARIANT (this);
-    result.add (this);
-  }
-
-
-
-  void Sample ::
-  alloc () const
-  {
-    RCU_CHANGE_INVARIANT (this);
-    ++ m_references;
-  }
-
-
-
-  void Sample ::
-  release () const
-  {
-    RCU_READ_INVARIANT (this);
-    RCU_REQUIRE2 (m_references > 0, "reference count > 0");
-
-    unsigned refs = -- m_references;
-    if (refs == 0)
-      delete this;
+    result.add (self);
   }
 }

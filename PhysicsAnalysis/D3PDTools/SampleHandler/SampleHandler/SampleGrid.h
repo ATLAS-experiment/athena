@@ -40,7 +40,7 @@ namespace SH
   /// addGrid()
   ///
   /// \sa https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/SampleHandler#Grid_Data_Discovery_Using_DQ2
-  class SampleGrid : public Sample
+  class SampleGrid final : public Sample
   {
     //
     // public interface
@@ -84,19 +84,19 @@ namespace SH
 
     /// \copydoc Sample::getNumFiles
   protected:
-    virtual std::size_t getNumFiles () const;
+    virtual std::size_t getNumFiles () const override;
 
     /// \copydoc Sample::getFileName
   protected:
-    virtual std::string getFileName (std::size_t index) const;
+    virtual std::string getFileName (std::size_t index) const override;
 
     /// \copydoc Sample::doMakeLocal
   protected:
-    virtual SamplePtr doMakeLocal () const;
+    virtual std::unique_ptr<SampleLocal> doMakeLocal () const override;
 
     /// \copydoc Sample::doMakeFileList
   protected:
-    virtual std::vector<std::string> doMakeFileList () const;
+    virtual std::vector<std::string> doMakeFileList () const override;
 
 
 

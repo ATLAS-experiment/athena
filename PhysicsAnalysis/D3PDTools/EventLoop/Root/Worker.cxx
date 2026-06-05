@@ -33,7 +33,6 @@
 #include <SampleHandler/MetaFields.h>
 #include <SampleHandler/MetaObject.h>
 #include <SampleHandler/Sample.h>
-#include <SampleHandler/SamplePtr.h>
 #include <SampleHandler/ToolsOther.h>
 #include <xAODRootAccess/Event.h>
 #include <TFile.h>
@@ -817,20 +816,20 @@ namespace EL
 
 
   ::StatusCode Worker ::
-  directExecute (const SH::SamplePtr& sample, const Job& job,
+  directExecute (const SH::Sample& sample, const Job& job,
                  const std::string& location, const SH::MetaObject& options)
   {
     using namespace msgEventLoop;
     RCU_CHANGE_INVARIANT (this);
 
-    SH::MetaObject meta (*sample->meta());
+    SH::MetaObject meta (*sample.meta());
     meta.fetchDefaults (options);
 
     setMetaData (&meta);
     setOutputHist (location);
-    setSegmentName (sample->name());
+    setSegmentName (sample.name());
 
-    ANA_MSG_INFO ("Running sample: " << sample->name());
+    ANA_MSG_INFO ("Running sample: " << sample.name());
 
     setJobConfig (JobConfig (job.jobConfig()));
 
@@ -838,13 +837,13 @@ namespace EL
            end = job.outputEnd(); out != end; ++ out)
     {
       Detail::OutputStreamData data {
-        out->output()->makeWriter (sample->name(), "", ".root")};
+        out->output()->makeWriter (sample.name(), "", ".root")};
       ANA_CHECK (addOutputStream (out->label(), std::move (data)));
     }
 
     {
       m_moduleConfig.emplace_back ("EL::Detail::DirectInputModule/DirectInputModule");
-      ANA_CHECK (m_moduleConfig.back().setProperty ("fileList", sample->makeFileList()));
+      ANA_CHECK (m_moduleConfig.back().setProperty ("fileList", sample.makeFileList()));
       Long64_t maxEvents = metaData()->castDouble (Job::optMaxEvents, -1);
       if (maxEvents != -1)
         ANA_CHECK (m_moduleConfig.back().setProperty ("maxEvents", maxEvents));

@@ -22,12 +22,12 @@
 #include <SampleHandler/MetaFields.h>
 #include <SampleHandler/SampleHandler.h>
 #include <SampleHandler/SampleLocal.h>
-#include <SampleHandler/SamplePtr.h>
 #include <TChain.h>
 #include <TFile.h>
 #include <TH1.h>
 #include <TTree.h>
 #include <TSystem.h>
+#include <mutex>
 
 //
 // method implementations
@@ -72,49 +72,49 @@ namespace EL
 
   std::map<std::shared_ptr<Driver>,std::string> UnitTestFixture::m_jobs;
 
-  SH::SamplePtr UnitTestFixture ::
+  std::shared_ptr<SH::Sample> UnitTestFixture ::
   getSample (const std::string& sampleName)
   {
     if (sampleName == "empty")
     {
-      static SH::SamplePtr result;
-      if (result.empty())
-      {
-	std::unique_ptr<SH::SampleLocal> myresult (new SH::SampleLocal ("empty"));
-	myresult->add (makeFile ({}));
-	result = myresult.release();
-      }
+      static std::shared_ptr<SH::Sample> result;
+      static std::once_flag flag;
+      std::call_once (flag, [this]() {
+        auto myresult = std::make_shared<SH::SampleLocal> ("empty");
+      	myresult->add (makeFile ({}));
+        result = std::move (myresult);
+      });
       return result;
     }
     if (sampleName == "single")
     {
-      static SH::SamplePtr result;
-      if (result.empty())
-      {
-	std::unique_ptr<SH::SampleLocal> myresult (new SH::SampleLocal ("single"));
-	std::vector<unsigned> entries;
-	for (unsigned iter = 0; iter != 10000; ++ iter)
-	  entries.push_back (iter % 10);
-	myresult->add (makeFile (entries));
-	result = myresult.release();
-      }
+      static std::shared_ptr<SH::Sample> result;
+      static std::once_flag flag;
+      std::call_once (flag, [this]() {
+        auto myresult = std::make_shared<SH::SampleLocal> ("single");
+        std::vector<unsigned> entries;
+        for (unsigned iter = 0; iter != 10000; ++ iter)
+          entries.push_back (iter % 10);
+        myresult->add (makeFile (entries));
+        result = std::move (myresult);
+      });
       return result;
     }
     if (sampleName == "multi")
     {
-      static SH::SamplePtr result;
-      if (result.empty())
-      {
-	std::unique_ptr<SH::SampleLocal> myresult (new SH::SampleLocal ("multi"));
-	for (unsigned jter = 0; jter != 10; ++ jter)
-	{
-	  std::vector<unsigned> entries;
-	  for (unsigned iter = 0; iter != 10000; ++ iter)
-	    entries.push_back (iter % 10);
-	  myresult->add (makeFile (entries));
-	}
-	result = myresult.release();
-      }
+      static std::shared_ptr<SH::Sample> result;
+      static std::once_flag flag;
+      std::call_once (flag, [this]() {
+        auto myresult = std::make_shared<SH::SampleLocal> ("multi");
+        for (unsigned jter = 0; jter != 10; ++ jter)
+        {
+          std::vector<unsigned> entries;
+          for (unsigned iter = 0; iter != 10000; ++ iter)
+            entries.push_back (iter % 10);
+          myresult->add (makeFile (entries));
+        }
+        result = std::move (myresult);
+      });
       return result;
     }
     RCU_THROW_MSG ("unknown sample: " + sampleName);

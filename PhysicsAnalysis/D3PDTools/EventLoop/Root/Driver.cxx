@@ -254,7 +254,7 @@ namespace EL
 	std::unique_ptr<SH::SampleLocal> mysample
 	  (new SH::SampleLocal ((*sample)->name()));
 	mysample->add (name2);
-	sh.add (mysample.release());
+	sh.add (std::move (mysample));
       }
       sh.fetch (data.job->sampleHandler());
       sh.save (data.submitDir + "/output-" + out->label());
@@ -292,7 +292,7 @@ namespace EL
 	  }
 	}
 	mysample->meta()->fetch (*out->options());
-	sh.add (mysample.release());
+	sh.add (std::move (mysample));
       }
       sh.fetch (data.job->sampleHandler());
       sh.save (data.submitDir + "/output-" + out->label());

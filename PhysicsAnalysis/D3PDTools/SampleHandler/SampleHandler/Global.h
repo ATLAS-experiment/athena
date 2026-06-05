@@ -47,7 +47,6 @@ namespace SH
   class SampleHist;
   class SampleLocal;
   class SampleMeta;
-  class SamplePtr;
   struct ScanDir;
   class TagList;
 }

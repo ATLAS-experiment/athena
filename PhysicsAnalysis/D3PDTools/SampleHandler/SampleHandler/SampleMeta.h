@@ -27,7 +27,7 @@ namespace SH
   /// SampleHandler with just Meta-Information and then pull the data
   /// for the samples you are actually using into your local sample
   /// via SampleHandler::fetchDefaults().
-  class SampleMeta : public Sample
+  class SampleMeta final : public Sample
   {
     //
     // public interface
@@ -70,19 +70,19 @@ namespace SH
 
     /// \copydoc Sample::getNumFiles
   private:
-    virtual std::size_t getNumFiles () const;
+    virtual std::size_t getNumFiles () const override;
 
     /// \copydoc Sample::getFileName
   private:
-    virtual std::string getFileName (std::size_t index) const;
+    virtual std::string getFileName (std::size_t index) const override;
 
     /// \copydoc Sample::doMakeLocal
   private:
-    virtual SamplePtr doMakeLocal () const;
+    virtual std::unique_ptr<SampleLocal> doMakeLocal () const override;
 
     /// \copydoc Sample::doMakeFileList
   protected:
-    virtual std::vector<std::string> doMakeFileList () const;
+    virtual std::vector<std::string> doMakeFileList () const override;
 
 
 

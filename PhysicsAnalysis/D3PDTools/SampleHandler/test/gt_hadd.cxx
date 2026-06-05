@@ -13,10 +13,10 @@
 #include <RootCoreUtils/Assert.h>
 #include <SampleHandler/SampleHandler.h>
 #include <SampleHandler/SampleLocal.h>
-#include <SampleHandler/SamplePtr.h>
 #include <SampleHandler/ToolsOther.h>
 #include <TFile.h>
 #include <TH1.h>
+#include <memory>
 
 using namespace SH;
 using namespace testing;
@@ -27,9 +27,9 @@ using namespace testing;
 
 struct MergeTest : public Test
 {
-  static SamplePtr getSample ()
+  static std::shared_ptr<Sample> getSample ()
   {
-    std::unique_ptr<SampleLocal> mysample (new SampleLocal ("test"));
+    auto mysample = std::make_shared<SampleLocal> ("test");
     {
       mysample->add ("file1.root");
       TFile file ("file1.root", "RECREATE");
@@ -44,7 +44,7 @@ struct MergeTest : public Test
       hist->SetBinContent (3, 1);
       file.Write ();
     }
-    return SamplePtr (std::move (mysample));
+    return mysample;
   }
 
   void checkMerger (const Sample& sample,
@@ -63,7 +63,7 @@ struct MergeTest : public Test
 
 TEST_F (MergeTest, SLOW_sample)
 {
-  SamplePtr input = getSample ();
+  std::shared_ptr<Sample> input = getSample ();
   std::unique_ptr<SH::SampleLocal> output
     = mergeFiles (*input, "output.root", false);
   checkMerger (*output, "output.root");
@@ -75,8 +75,8 @@ TEST_F (MergeTest, SLOW_sh)
   input.add (getSample ());
   SH::SampleHandler output
     = mergeFiles (input, "sh_output-", false);
-  SamplePtr myoutput = output.get("test");
-  ASSERT_TRUE (myoutput.get() != nullptr);
+  Sample *myoutput = output.get("test");
+  ASSERT_TRUE (myoutput != nullptr);
   checkMerger (*myoutput, "sh_output-test.root");
 }
 

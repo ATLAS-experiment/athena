@@ -20,7 +20,7 @@
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/RootUtils.h>
 #include <RootCoreUtils/ThrowMsg.h>
-#include <SampleHandler/SamplePtr.h>
+#include <SampleHandler/SampleLocal.h>
 #include <TFile.h>
 #include <memory>
 
@@ -82,12 +82,12 @@ namespace SH
 
 
 
-  SamplePtr SampleHist ::
+  std::unique_ptr<SampleLocal> SampleHist ::
   doMakeLocal () const
   {
     RCU_READ_INVARIANT (this);
     RCU_THROW_MSG ("Sample::makeLocal not supported for SampleHist");
-    return SamplePtr (); // compiler dummy
+    return {}; // compiler dummy
   }
 
 

@@ -21,7 +21,6 @@
 #include <SampleHandler/SampleHist.h>
 #include <SampleHandler/SampleLocal.h>
 #include <SampleHandler/SampleMeta.h>
-#include <SampleHandler/SamplePtr.h>
 #include <SampleHandler/ScanDir.h>
 #include <SampleHandler/TagList.h>
 #include <SampleHandler/ToolsDiscovery.h>

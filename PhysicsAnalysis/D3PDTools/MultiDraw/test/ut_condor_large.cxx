@@ -34,7 +34,6 @@
 #include <SampleHandler/MetaObject.h>
 #include <SampleHandler/SampleHandler.h>
 #include <SampleHandler/SampleLocal.h>
-#include <SampleHandler/SamplePtr.h>
 #include <SampleHandler/ScanDir.h>
 #include <SampleHandler/ToolsDiscovery.h>
 

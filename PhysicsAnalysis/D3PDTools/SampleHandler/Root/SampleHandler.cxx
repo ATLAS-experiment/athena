@@ -30,7 +30,6 @@
 #include <SampleHandler/MetaFields.h>
 #include <SampleHandler/MetaObject.h>
 #include <SampleHandler/Sample.h>
-#include <SampleHandler/SamplePtr.h>
 
 //
 // method implementations
@@ -129,32 +128,21 @@ namespace SH
 
 
   void SampleHandler ::
-  add (Sample *sample)
-  {
-    SamplePtr mysample (sample);
-
-    // invariant not used
-    RCU_REQUIRE_SOFT (sample != 0);
-
-    add (mysample);
-  }
-
-
-
-  void SampleHandler ::
-  add (std::unique_ptr<Sample> sample)
+  add (const Sample& sample)
   {
     // no invariant used
-    add (SamplePtr (std::move (sample)));
+    std::unique_ptr<Sample> copy (dynamic_cast<Sample*> (sample.Clone()));
+    RCU_ASSERT (copy != nullptr);
+    add (std::move (copy));
   }
 
 
 
   void SampleHandler ::
-  add (SamplePtr& sample)
+  add (std::shared_ptr<Sample> sample)
   {
     RCU_CHANGE_INVARIANT (this);
-    RCU_REQUIRE_SOFT (!sample.empty());
+    RCU_REQUIRE_SOFT (sample != nullptr);
     RCU_REQUIRE_SOFT (!sample->name().empty());
 
     if (!sample->name().empty() && m_named.find (sample->name()) != m_named.end())
@@ -162,22 +150,18 @@ namespace SH
 
     try
     {
-      m_samples.push_back (sample.get());
+      m_samples.push_back (sample);
       if (!sample->name().empty())
-	m_named[sample->name()] = sample;
+      {
+        sample->lockName ();
+        m_named[sample->name()] = std::move (sample);
+      }
     } catch (...)
     {
-      if (m_samples.back() == sample.get())
-	m_samples.pop_back();
-    };
-  }
-
-
-
-  void SampleHandler ::
-  add (SamplePtr&& sample)
-  {
-    add (sample);
+      if (!m_samples.empty() && m_samples.back().get() == sample.get())
+        m_samples.pop_back();
+      throw;
+    }
   }
 
 
@@ -188,10 +172,9 @@ namespace SH
     // invariant not used
     RCU_REQUIRE_SOFT (this != &sh);
 
-    for (iterator iter = sh.begin(), end2 = sh.end();
-	 iter != end2; ++ iter)
+    for (auto& sample : sh.m_samples)
     {
-      add (*iter);
+      add (sample);
     };
   }
 
@@ -209,7 +192,7 @@ namespace SH
       std::unique_ptr<Sample> sample (dynamic_cast<Sample*>((*iter)->Clone ()));
       RCU_ASSERT (sample != nullptr);
       sample->name (prefix + (*iter)->name());
-      add (sample.release());
+      add (std::move (sample));
     };
   }
 
@@ -233,12 +216,12 @@ namespace SH
     RCU_CHANGE_INVARIANT (this);
     RCU_REQUIRE_SOFT (sample != 0);
 
-    NamedMIter nameIter = m_named.find (sample->name());
+    auto nameIter = m_named.find (sample->name());
     if (nameIter == m_named.end())
       RCU_THROW_MSG ("sample " + sample->name() + " not found in SampleHandler");
     if (nameIter->second.get() != sample)
       RCU_THROW_MSG ("different sample of name " + sample->name() + " found in SampleHandler");
-    std::erase (m_samples, sample);
+    std::erase_if (m_samples, [sample] (const std::shared_ptr<Sample>& p) { return p.get() == sample; });
     m_named.erase (nameIter);
   }
 
@@ -249,7 +232,7 @@ namespace SH
   {
     RCU_READ_INVARIANT (this);
 
-    NamedIter iter = m_named.find (name);
+    auto iter = m_named.find (name);
     if (iter != m_named.end())
       return iter->second.get();
     return 0;
@@ -285,15 +268,14 @@ namespace SH
 
     SampleHandler result;
 
-    for (SamplesIter sample = m_samples.begin(),
-	   end = m_samples.end(); sample != end; ++ sample)
+    for (auto& sample : m_samples)
     {
       bool use = false;
-      for (TagList::iterator iter = tags.begin(),
-	     end = tags.end(); !use && iter != end; ++ iter)
-	use = (*sample)->tags().has (*iter);
+      for (auto iter = tags.begin(),
+          end = tags.end(); !use && iter != end; ++ iter)
+        use = sample->tags().has (*iter);
       if (use)
-	result.add (*sample);
+        result.add (sample);
     };
     return result;
   }
@@ -334,10 +316,10 @@ namespace SH
     RCU_READ_INVARIANT (this);
     SampleHandler result;
     std::regex expr (pattern);
-    for (iterator iter = begin(), end = this->end(); iter != end; ++ iter)
+    for (auto& sample : m_samples)
     {
-      if (RCU::match_expr (expr, (*iter)->name()))
-	result.add (*iter);
+      if (RCU::match_expr (expr, sample->name()))
+        result.add (sample);
     }
     return result;
   }
@@ -394,9 +376,9 @@ namespace SH
 	  file.rfind (".root") == file.size() - 5)
       {
 	TFile myfile (mydir.path().c_str(), "READ");
-	Sample *const sample = dynamic_cast<Sample*>(myfile.Get ("sample"));
+	std::unique_ptr<Sample> sample {dynamic_cast<Sample*>(myfile.Get ("sample"))};
 	if (sample != 0)
-	  add (sample);
+	  add (std::move(sample));
       };
     };    
   }
@@ -539,11 +521,20 @@ namespace SH
 
 
 
+  Sample *SampleHandler::SamplePtrToRawSample ::
+  operator () (const std::shared_ptr<Sample>& p) const
+  {
+    return p.get();
+  }
+
+
+
   SampleHandler::iterator SampleHandler ::
   begin () const
   {
     RCU_READ_INVARIANT (this);
-    return m_samples.begin();
+    return boost::make_transform_iterator
+      (m_samples.begin(), SamplePtrToRawSample{});
   }
 
 
@@ -552,7 +543,8 @@ namespace SH
   end () const
   {
     RCU_READ_INVARIANT (this);
-    return m_samples.end();
+    return boost::make_transform_iterator
+      (m_samples.end(), SamplePtrToRawSample{});
   }
 
 
@@ -580,7 +572,16 @@ namespace SH
   {
     RCU_READ_INVARIANT (this);
     RCU_REQUIRE_SOFT (index < size());
-    return m_samples[index];
+    return m_samples[index].get();
+  }
+
+
+
+  std::span<std::shared_ptr<Sample>> SampleHandler ::
+  samples ()
+  {
+    RCU_READ_INVARIANT (this);
+    return std::span<std::shared_ptr<Sample>> (m_samples.data(), m_samples.size());
   }
 
 
@@ -598,7 +599,7 @@ namespace SH
       {
 	Sample *sample = 0;
 	b >> sample;
-	sh.add (sample);
+	sh.add (std::shared_ptr<Sample>(sample));
       }
       swap (*this, sh);
     } else
@@ -606,10 +607,10 @@ namespace SH
       RCU_READ_INVARIANT (this);
       ULong_t count = m_samples.size();
       b.WriteULong (count);
-      for (SamplesIter iter = m_samples.begin(),
+      for (auto iter = m_samples.begin(),
 	     end = m_samples.end(); iter != end; ++ iter)
       {
-	Sample *sample = *iter;
+	Sample *sample = iter->get();
 	b << sample;
       }
     };

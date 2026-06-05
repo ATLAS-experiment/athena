@@ -27,7 +27,7 @@ namespace SH
   /// This sample is kind of unusual, the main purpose for having it
   /// is to describe the histogram files produced by EventLoop
   /// together with all their meta-data.
-  class SampleHist : public Sample
+  class SampleHist final : public Sample
   {
     //
     // public interface
@@ -71,28 +71,28 @@ namespace SH
 
     /// \copydoc Sample::getNumFiles
   protected:
-    virtual std::size_t getNumFiles () const;
+    virtual std::size_t getNumFiles () const override;
 
     /// \copydoc Sample::getFileName
   protected:
-    virtual std::string getFileName (std::size_t index) const;
+    virtual std::string getFileName (std::size_t index) const override;
 
     /// \copydoc Sample::doMakeLocal
   protected:
-    virtual SamplePtr doMakeLocal () const;
+    virtual std::unique_ptr<SampleLocal> doMakeLocal () const override;
 
     /// \copydoc Sample::doMakeFileList
   protected:
-    virtual std::vector<std::string> doMakeFileList () const;
+    virtual std::vector<std::string> doMakeFileList () const override;
 
     /// \copydoc Sample::doUpdateLocation
   protected:
     virtual void
-    doUpdateLocation (const std::string& from, const std::string& to);
+    doUpdateLocation (const std::string& from, const std::string& to) override;
 
     /// \copydoc Sample::doReadHist
   protected:
-    virtual TObject *doReadHist (const std::string& name) const;
+    virtual TObject *doReadHist (const std::string& name) const override;
 
 
 

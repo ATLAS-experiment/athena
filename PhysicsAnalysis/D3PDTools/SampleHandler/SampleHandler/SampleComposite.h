@@ -17,6 +17,7 @@
 
 #include <SampleHandler/Global.h>
 
+#include <memory>
 #include <string>
 #include <vector>
 #include <SampleHandler/Sample.h>
@@ -27,7 +28,7 @@ namespace SH
   /// contains composite samples.
   /// \warning This class hasn't been maintained in a long time and
   /// probably has never been fully functional in the first place.
-  class SampleComposite : public Sample
+  class SampleComposite final : public Sample
   {
     //
     // public interface
@@ -70,9 +71,9 @@ namespace SH
     /// \par Failures
     ///   low level errors II\n
     ///   sample contains this sample
-    /// \pre !sample.empty()
+    /// \pre sample != nullptr
   public:
-    void add (const SamplePtr& sample);
+    void add (std::shared_ptr<Sample> sample);
 
 
 
@@ -82,32 +83,33 @@ namespace SH
 
     /// \copydoc Sample::getNumFiles
   protected:
-    virtual std::size_t getNumFiles () const;
+    virtual std::size_t getNumFiles () const override;
 
     /// \copydoc Sample::getFileName
   protected:
-    virtual std::string getFileName (std::size_t index) const;
+    virtual std::string getFileName (std::size_t index) const override;
 
     /// \copydoc Sample::doMakeLocal
   protected:
-    virtual SamplePtr doMakeLocal () const;
+    virtual std::unique_ptr<SampleLocal> doMakeLocal () const override;
 
     /// \copydoc Sample::doMakeFileList
   protected:
-    virtual std::vector<std::string> doMakeFileList () const;
+    virtual std::vector<std::string> doMakeFileList () const override;
 
     /// \copydoc Sample::doUpdateLocation
   protected:
     virtual void
-    doUpdateLocation (const std::string& from, const std::string& to);
+    doUpdateLocation (const std::string& from, const std::string& to) override;
 
     /// \copydoc Sample::getContains
   protected:
-    virtual bool getContains (const std::string& name) const;
+    virtual bool getContains (const std::string& name) const override;
 
     /// \copydoc Sample::doAddSamples
   protected:
-    virtual void doAddSamples (SampleHandler& result);
+    virtual void doAddSamples (SampleHandler& result,
+                               const std::shared_ptr<Sample>& self) override;
 
 
 
@@ -117,11 +119,11 @@ namespace SH
 
     /// \brief the list of samples we use
   private:
-    std::vector<SamplePtr> m_samples;
+    std::vector<std::shared_ptr<Sample>> m_samples;
 
     /// \brief the iterator for \ref m_samples
   private:
-    typedef std::vector<SamplePtr>::const_iterator SamplesIter;
+    typedef std::vector<std::shared_ptr<Sample>>::const_iterator SamplesIter;
 
     ClassDef (SampleComposite, 1);
   };

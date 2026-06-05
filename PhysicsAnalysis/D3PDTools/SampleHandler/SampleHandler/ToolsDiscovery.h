@@ -24,6 +24,7 @@
 //protect
 #include <SampleHandler/Global.h>
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -156,7 +157,7 @@ namespace SH
   /// guarantee: strong
   /// failures: out of memory III
   /// failures: i/o errors
-  void scanForTrees (SampleHandler& sh, Sample& sample,
+  void scanForTrees (SampleHandler& sh, std::shared_ptr<Sample>& sample,
 		     const std::string& pattern = ".*");
   void scanForTrees (SampleHandler& sh, const std::string& pattern = ".*");
 
