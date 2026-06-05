@@ -6,7 +6,6 @@
 
 // InSituCalibStep.h 
 // Header file for class InSituCalibStep
-// Author: Fabrice Balli <fabrice.balli@cern.ch>
 /////////////////////////////////////////////////////////////////// 
 #ifndef JETCALIBTOOLS_INSITUCALIBSTEP_H
 #define JETCALIBTOOLS_INSITUCALIBSTEP_H 1

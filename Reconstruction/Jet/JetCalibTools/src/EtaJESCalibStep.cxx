@@ -6,7 +6,6 @@
 
 // EtaJESCalibStep.cxx 
 // Implementation file for class EtaJESCalibStep
-// Author: Max Swiatlowski <mswiatlo@cern.ch>
 /////////////////////////////////////////////////////////////////// 
 
 #include "JetCalibTools/EtaJESCalibStep.h"

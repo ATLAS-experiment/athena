@@ -3,8 +3,6 @@
 /*
 JetCalibrationStep
 A base class for individual pieces of the jet calibration sequence
-
-Author: Bill Balunas (balunas@cern.ch)
 */
 
 #ifndef JETCALIBTOOLS_JETCALIBRATIONSTEP_H
