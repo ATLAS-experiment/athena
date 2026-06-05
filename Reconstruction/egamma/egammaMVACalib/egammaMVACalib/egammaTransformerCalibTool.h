@@ -1,6 +1,7 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+#ifndef XAOD_ANALYSIS
 
 #ifndef EGAMMATRANSFORMERCALIB_EGAMMATRANSFORMERCALIBTOOL_H
 #define EGAMMATRANSFORMERCALIB_EGAMMATRANSFORMERCALIBTOOL_H
@@ -124,7 +125,7 @@ class egammaTransformerCalibTool : public asg::AsgTool,
   ToolHandle<IegammaCellRecoveryTool> m_egammaCellRecoveryTool{
     this,
     "egammaCellRecoveryTool",
-    "",
+    "egammaCellRecoveryTool/egammaCellRecoveryTool",
     "Optional tool that adds cells in L2 or L3 "
     "that could have been rejected by timing cut"
   };
@@ -134,5 +135,7 @@ class egammaTransformerCalibTool : public asg::AsgTool,
   StatusCode setupTransformerModel(const std::string& fileName);
 
 };
+
+#endif
 
 #endif
