@@ -105,7 +105,7 @@ namespace SH
     {
       if (num > 0 && num + nentries->value[file] > nevt)
       {
-	result.add (res.release());
+	result.add (std::move (res));
 	num = 0;
       }
       if (res.get() == 0)
@@ -124,7 +124,7 @@ namespace SH
       num += nentries->value[file];
     }
     if (num > 0)
-      result.add (res.release());
+      result.add (std::move (res));
     return result;
   }
 }

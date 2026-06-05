@@ -13,6 +13,7 @@
 
 #include <RootCoreUtils/StringUtil.h>
 #include <map>
+#include <memory>
 #include <vector>
 
 namespace SH
@@ -222,7 +223,8 @@ namespace SH
     ///   out of memory III\n
     ///   i/o errors
   private:
-    void recurse (std::map<std::string,SamplePtr>& samples, DiskList& list,
+    void recurse (std::map<std::string,std::shared_ptr<Sample>>& samples,
+		  DiskList& list,
 		  const std::vector<std::string>& hierarchy) const;
 
 
@@ -233,7 +235,7 @@ namespace SH
     /// \par Failures
     ///   out of memory II
   private:
-    void addSampleFile (std::map<std::string,SamplePtr>& samples,
+    void addSampleFile (std::map<std::string,std::shared_ptr<Sample>>& samples,
 			const std::vector<std::string>& hierarchy,
 			const std::string& path) const;
 

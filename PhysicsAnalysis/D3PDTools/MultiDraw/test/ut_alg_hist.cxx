@@ -31,8 +31,9 @@
 #include <MultiDraw/FormulaSvc.h>
 #include <RootCoreUtils/ThrowMsg.h>
 #include <RootCoreUtils/UnitTestDir.h>
+#include <SampleHandler/Sample.h>
 #include <SampleHandler/SampleLocal.h>
-#include <SampleHandler/SamplePtr.h>
+#include <memory>
 
 //
 // main program
@@ -52,10 +53,9 @@ int main ()
     std::string tree ("physics");
 
     EL::DirectDriver driver;
-    std::unique_ptr<SH::SampleLocal> mysample (new SH::SampleLocal ("dataset"));
-    mysample->add (input.Data());
-    mysample->meta()->setString ("nc_tree", tree);
-    SH::SamplePtr sample = mysample.release();
+    auto sample = std::make_shared<SH::SampleLocal> ("dataset");
+    sample->add (input.Data());
+    sample->meta()->setString ("nc_tree", tree);
 
     EL::Job job;
     {

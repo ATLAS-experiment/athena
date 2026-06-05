@@ -22,7 +22,6 @@
 #include <SampleHandler/MetaObject.h>
 #include <SampleHandler/SampleGrid.h>
 #include <SampleHandler/SampleLocal.h>
-#include <SampleHandler/SamplePtr.h>
 #include <SampleHandler/ToolsSplit.h>
 #include <TFile.h>
 #include <TH1.h>
@@ -109,7 +108,7 @@ namespace EL
       mysamples[1]->meta()->addReplace (hist);
     }
     for (auto& mysample : mysamples)
-      samples.add (mysample.release());
+      samples.add (std::move (mysample));
 
     samples.setMetaString (SH::MetaFields::treeName, tree);
 
@@ -171,8 +170,8 @@ namespace EL
 	{
 	  SH::SampleHandler sh;
 	  sh.load ((output + "/hist").c_str());
-	  SH::SamplePtr sample = sh.get (samples[iter]->name());
-	  if (sample.empty())
+	  SH::Sample *sample = sh.get (samples[iter]->name());
+	  if (sample == nullptr)
 	    RCU_THROW_MSG ("could not find histogram sample " + samples[iter]->name());
 
 	  if (testFileExecute)

@@ -21,6 +21,7 @@
 #include <TSystem.h>
 #include <cstdlib>
 #include <fstream>
+#include <stdexcept>
 #include <gtest/gtest.h>
 
 //
@@ -33,21 +34,21 @@ TEST (SampleHandlerTest, add_single)
 {
   SampleHandler sh;
   ASSERT_TRUE (sh.get ("sample") == nullptr);
-  sh.add (new SampleMeta ("sample"));
+  sh.add (std::make_unique<SampleMeta> ("sample"));
   ASSERT_TRUE (sh.get ("sample") != nullptr);
 }
 
 TEST (SampleHandlerTest, add_duplicate)
 {
   SampleHandler sh;
-  sh.add (new SampleMeta ("sample"));
-  ASSERT_ANY_THROW (sh.add (new SampleMeta ("sample")));
+  sh.add (std::make_unique<SampleMeta> ("sample"));
+  ASSERT_ANY_THROW (sh.add (std::make_unique<SampleMeta> ("sample")));
 }
 
 TEST (SampleHandlerTest, addWithPrefix_single)
 {
   SampleHandler target, source;
-  source.add (new SampleMeta ("sample"));
+  source.add (std::make_unique<SampleMeta> ("sample"));
   target.addWithPrefix (source, "prefix_");
   ASSERT_TRUE (target.get ("prefix_sample") != nullptr);
 }
@@ -55,9 +56,19 @@ TEST (SampleHandlerTest, addWithPrefix_single)
 TEST (SampleHandlerTest, addWithPrefix_duplicate)
 {
   SampleHandler target, source;
-  source.add (new SampleMeta ("sample"));
-  target.add (new SampleMeta ("prefix_sample"));
+  source.add (std::make_unique<SampleMeta> ("sample"));
+  target.add (std::make_unique<SampleMeta> ("prefix_sample"));
   EXPECT_ANY_THROW (target.addWithPrefix (source, "prefix_"));
+}
+
+TEST (SampleHandlerTest, name_locked_after_add)
+{
+  SampleHandler sh;
+  auto sample = std::make_shared<SampleMeta> ("sample");
+  sh.add (sample);
+  ASSERT_THROW (sample->name ("renamed"), std::logic_error);
+  ASSERT_TRUE (sh.get ("sample") != nullptr);
+  ASSERT_TRUE (sh.get ("renamed") == nullptr);
 }
 
 int main (int argc, char **argv)

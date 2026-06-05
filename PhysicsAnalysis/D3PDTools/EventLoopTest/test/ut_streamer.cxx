@@ -34,7 +34,7 @@ int main ()
 {
   {
     SH::SampleHandler sh;
-    sh.add (new SH::SampleLocal ("test1"));
+    sh.add (std::make_unique<SH::SampleLocal> ("test1"));
     Job job;
     job.sampleHandler (sh);
     std::unique_ptr<BatchJob> batch_job (new BatchJob);

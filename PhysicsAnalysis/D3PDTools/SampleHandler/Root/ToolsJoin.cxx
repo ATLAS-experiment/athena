@@ -32,25 +32,24 @@ namespace SH
 		     const std::string& pattern)
   {
     SampleHandler mysh;
-    std::unique_ptr<SampleLocal> mysample (new SampleLocal (sampleName));
+    auto mysample = std::make_shared<SampleLocal> (sampleName);
 
     std::regex mypattern (pattern.c_str());
-    for (SampleHandler::iterator sample = sh.begin(),
-	   end = sh.end(); sample != end; ++ sample)
+    for (auto& sample : sh.samples())
     {
-      if (RCU::match_expr (mypattern, (*sample)->name()))
+      if (RCU::match_expr (mypattern, sample->name()))
       {
-	for (unsigned file = 0, end = (*sample)->numFiles();
-	     file != end; ++ file)
-	{
-	  mysample->add ((*sample)->fileName (file));
-	}
+        for (unsigned file = 0, end = sample->numFiles();
+            file != end; ++ file)
+        {
+          mysample->add (sample->fileName (file));
+        }
       } else
       {
-	mysh.add (*sample);
+        mysh.add (sample);
       }
     }
-    mysh.add (mysample.release());
+    mysh.add (mysample);
     swap (mysh, sh);
   }
 }

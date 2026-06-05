@@ -171,7 +171,7 @@ TEST (DuplicateCheckerTest, all_tests)
   sample->add (prefix + "test2.root");
   sample->add (prefix + "test3.root");
   SH::SampleHandler sh;
-  sh.add (sample.release());
+  sh.add (std::move(sample));
 
   {
     Job job;

@@ -58,7 +58,7 @@ int main ()
       mysample->add (input.Data());
     }
     mysample->meta()->setString ("nc_tree", "physics");
-    sh.add (mysample.release());
+    sh.add (std::move(mysample));
 
     EL::Job job;
     job.sampleHandler (sh);

@@ -34,7 +34,7 @@ namespace SH
   /// discovery methods to create the samples for you.
   ///
   /// \sa https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/SampleHandler#Data_Discovery
-  class SampleLocal : public Sample
+  class SampleLocal final : public Sample
   {
     //
     // public interface
@@ -87,24 +87,24 @@ namespace SH
 
     /// \copydoc Sample::getNumFiles
   protected:
-    virtual std::size_t getNumFiles () const;
+    virtual std::size_t getNumFiles () const override;
 
     /// \copydoc Sample::getFileName
   protected:
-    virtual std::string getFileName (std::size_t index) const;
+    virtual std::string getFileName (std::size_t index) const override;
 
     /// \copydoc Sample::doMakeLocal
   protected:
-    virtual SamplePtr doMakeLocal () const;
+    virtual std::unique_ptr<SampleLocal> doMakeLocal () const override;
 
     /// \copydoc Sample::doMakeFileList
   protected:
-    virtual std::vector<std::string> doMakeFileList () const;
+    virtual std::vector<std::string> doMakeFileList () const override;
 
     /// \copydoc Sample::doUpdateLocation
   protected:
     virtual void
-    doUpdateLocation (const std::string& from, const std::string& to);
+    doUpdateLocation (const std::string& from, const std::string& to) override;
 
 
 

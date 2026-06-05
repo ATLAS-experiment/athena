@@ -121,7 +121,7 @@ namespace EL
 	if (sampleReprocess != nullptr)
 	{
 	  RCU_ASSERT (sampleReprocess->makeFileList().size() + filesUsed.size() == filesInput.size());
-	  shReprocess.add (sampleReprocess.release());
+	  shReprocess.add (std::move (sampleReprocess));
 	}
       }
       return shReprocess;
@@ -133,7 +133,7 @@ namespace EL
 		     const std::string& extraDir,
 		     const SH::SampleHandler& samples)
     {
-      for (auto& sample : samples)
+      for (auto sample : samples)
       {
 	std::string tmp = extraDir + "/hist2-" + sample->name() + ".root";
 	std::string target = mainDir + "/hist-" + sample->name() + ".root";
@@ -166,10 +166,10 @@ namespace EL
 	  newSample->add (file);
 	for (auto& file : extraSample->makeFileList())
 	  newSample->add (file);
-	newSH.add (newSample.release());
+	newSH.add (std::move (newSample));
       }
 
-      for (SH::Sample *mainSample : mainSH)
+      for (auto& mainSample : mainSH.samples())
       {
 	if (newSH.get (mainSample->name()) == nullptr)
 	  newSH.add (mainSample);

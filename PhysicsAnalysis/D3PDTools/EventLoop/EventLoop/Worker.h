@@ -239,7 +239,7 @@ namespace EL
     /// \par Guarantee
     ///   basic
   public:
-    ::StatusCode directExecute (const SH::SamplePtr& sample, const Job& job,
+    ::StatusCode directExecute (const SH::Sample& sample, const Job& job,
                                const std::string& location, const SH::MetaObject& options);
 
 

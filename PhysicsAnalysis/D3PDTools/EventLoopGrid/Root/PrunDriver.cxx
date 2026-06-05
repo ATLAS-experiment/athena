@@ -486,11 +486,11 @@ static SH::SampleHandler outputSH(const SH::SampleHandler& in,
   const std::string outputFile = "*" + outputLabel + ".root*";
   const std::string outDSSuffix = '_' + outputLabel + ".root/"; 
   for (SH::SampleHandler::iterator s = in.begin(); s != in.end(); ++s) {
-    SH::SampleGrid* outSample = new SH::SampleGrid((*s)->name());
+    auto outSample = std::make_unique<SH::SampleGrid>((*s)->name());
     const std::string outputDS = (*s)->meta()->castString("nc_outDS", "", SH::MetaObject::CAST_NOCAST_DEFAULT) + outDSSuffix;
     outSample->meta()->setString("nc_grid", outputDS);
     outSample->meta()->setString("nc_grid_filter", outputFile);
-    out.add(outSample);
+    out.add(std::move(outSample));
   }
   out.fetch(in);
   return out;
