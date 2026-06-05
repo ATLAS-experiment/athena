@@ -54,7 +54,8 @@ run () {
     if [[ "${name}" =~ "_skipRC" ]]; then
       return 0
     fi
-    if [ $rc != 0 ]; then
+    # don't exit only for ERRORs detected in reco logfile (rc=68)
+    if [ $rc != 0 -a $rc != 68 ]; then
         exit $rc
     fi
     return $rc
