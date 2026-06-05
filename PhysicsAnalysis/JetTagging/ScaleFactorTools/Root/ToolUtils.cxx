@@ -32,11 +32,17 @@ ToolUtils::VariableFunc ToolUtils::variableFactory(const json& cfg) {
 
     auto num_func = buildTerm(cfg.at("numerator"));
     auto den_func = buildTerm(cfg.at("denominator"));
+    const std::string mode = cfg.value("mode", "log_ratio");
 
     return [num_func, den_func] (const SG::AuxElement& el) -> float {
       float num = num_func(el);
       float den = den_func(el);
-      return (den != 0.0f ) ? num / den : 0.0f;
+      if (mode == "log_ratio" ) {
+        return (den > 0.0f && num > 0.0f) ? std::log(num / den) : 0.0f;
+      }
+      else {
+        throw std::runtime_error("Unknown variable mode: " + mode);
+      }
     };
   }
 
@@ -48,8 +54,11 @@ ToolUtils::QuantileFunc ToolUtils::makeEnumerate(const json& cfg) {
   ToolUtils::VariableFunc var = ToolUtils::variableFactory(cfg.at("variable"));
   std::vector<float> edges = cfg.at("edges").get<std::vector<float>>();
 
-  return [var, edges] (const SG::AuxElement& el) -> int {
+  const bool useAbs = cfg.value("abs", false);
+
+  return [var, edges, useAbs] (const SG::AuxElement& el) -> int {
     float v = var(el);
+    if (useAbs) = std::abs(v);
 
     int bin = 0;
     while (bin < (int)edges.size() && v > edges[bin]){
@@ -58,7 +67,6 @@ ToolUtils::QuantileFunc ToolUtils::makeEnumerate(const json& cfg) {
     return bin;
   };
 }
-
 
 ToolUtils::QuantileFunc ToolUtils::makeNodes(const json& cfg) {
   ToolUtils::VariableFunc var = ToolUtils::variableFactory(cfg.at("variable"));

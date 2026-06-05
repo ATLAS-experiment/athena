@@ -7,9 +7,9 @@
 #include "FTagAnalysisInterfaces/IScaleFactorTool.h"
 #include "AsgTools/AsgTool.h"
 #include <AsgTools/PropertyWrapper.h>
-#include <nlohmann/json.hpp>
-#include "ScaleFactorTools/ToolUtils.h"
 #include "xAODBase/IParticle.h"
+#include "ScaleFactorTools/ToolUtils.h"
+#include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
 class ScaleFactorTool: public asg::AsgTool,
