@@ -29,6 +29,12 @@ cellTowerTool.OutputLevel = DEBUG
 
 alg.globalsim_algs += [cellTowerTool]
 
+# Attach the gFexRho AlgTool (Currently output is unused)
+gFexRhoCvtrTool =  CompFactory.GlobalSim.gFexRhoCvtrAlgTool('gFexRhoCvtrAlgTool')
+gFexRhoCvtrTool.OutputLevel = DEBUG
+
+alg.globalsim_algs += [gFexRhoCvtrTool]
+
 # Attach the WTAConeJet AlgTool
 jet1Tool =  CompFactory.GlobalSim.GlobalJet1AlgTool('GlobalJet1AlgTool')
 jet1Tool.GlobalCellTowersKey = "GlobalCellTowers"
