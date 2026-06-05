@@ -34,7 +34,6 @@ class Hw7Config(object):
     self.set_printout_commands            = False
     self.set_physics_parameter_commands   = False
     self.set_technical_parameter_commands = False
-    self.use_PDGparams = False
 
     self.default_commands = hw7Utils.ConfigurationCommands()
     self.commands         = hw7Utils.ConfigurationCommands()
@@ -137,40 +136,6 @@ set /Herwig/Samplers/Sampler:Verbose Yes
     ## Now the PDG API is used to set the parameters via the python file Generators/EvgenProdTools/python/physics_parameters.py that generates the dictionary offline_dict.py with the parameters
 
   def physics_parameter_commands(self):
-    if self.use_PDGparams:
-       paramlist = []
-       self.physics_parameter_commands = True
-    
-       paramlist.append("## Masses and widths: PDG 2019 values")
-    
-    ## Load the dictionary and extract the values of the variables that were defined here before (top quark, W and Z boson)
-       from EvgenProdTools.offline_dict import parameters
-       for k,v in parameters.items():
-         if k == 'particles':
-           for key,value in v.items():
-             if int(key) == 24:
-               paramlist.append("set /Herwig/Particles/"+value['name']+"+:NominalMass "+value['mass'])
-               paramlist.append("set /Herwig/Particles/"+value['name']+"+:Width "+value['width'])
-               paramlist.append("set /Herwig/Particles/"+value['name']+"-:NominalMass "+value['mass'])
-               paramlist.append("set /Herwig/Particles/"+value['name']+"-:Width "+value['width'])
-             if int(key) == 23:
-               paramlist.append("set /Herwig/Particles/"+value['name']+"0:NominalMass "+value['mass'])
-               paramlist.append("set /Herwig/Particles/"+value['name']+"0:Width "+value['width'])
-             if int(key) == 6:
-               paramlist.append("set /Herwig/Particles/"+value['name']+"bar:NominalMass "+value['mass'])
-               paramlist.append("set /Herwig/Particles/"+value['name']+"bar:Width "+value['width'])         
-               paramlist.append("set /Herwig/Particles/"+value['name']+":NominalMass "+value['mass'])
-               paramlist.append("set /Herwig/Particles/"+value['name']+":Width "+value['width'])
-   
-    ## Take the value of sin2thetaW from the EW_parameters dictionary      
-         if k == 'EW_parameters':
-           for key,value in v.items():
-             if key[2] == "Sin2ThetaW":
-               paramlist.append("set /Herwig/Model:EW/"+str(key[2])+" "+str(value))
-       paramstring = '\n'.join(paramlist)
-       return(paramstring)
-
-    else:
        self.physics_parameter_commands = True
 
        return("""

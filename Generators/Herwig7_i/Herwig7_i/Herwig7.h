@@ -64,6 +64,7 @@ public:
 
   /// Directories from which Herwig reads input files,  will be prepended to the search path.
   virtual const std::vector<std::string> & prependReadDirectories() const { return(m_prependReadDirectories); }
+  void prependReadDirectory(const std::string& prependReadDirectory) { m_prependReadDirectories.push_back(prependReadDirectory); }
 
   /// Directories from which Herwig reads input files,  will be appended to the search path.
   virtual const std::vector<std::string> & appendReadDirectories() const { return(m_appendReadDirectories); }
@@ -145,6 +146,9 @@ public:
   /// Close down the generator.
   StatusCode genFinalize();
 
+  /// Write the CA input text into a real Herwig runfile.
+  StatusCode writeRunFileFromText(const std::string& share_path);
+
 
 private:
 
@@ -166,6 +170,10 @@ private:
 
   /// Name of run file
   std::string m_runfile;
+
+  /// In-memory run settings provided by CA fragments.
+  /// These are written to m_runfile. 
+  std::string m_runSettings;
 
   /// Name of setup file
   std::string m_setupfile;
