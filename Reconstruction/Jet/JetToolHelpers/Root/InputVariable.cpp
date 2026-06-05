@@ -1,6 +1,5 @@
 /**
  * @file InputVariable.cpp
- * @author A. Freeman, S. Schramm (swissarthurfreeman@gmail.com, steven.schramm@cern.ch)
  * @date 2022-06-01
  *
  * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration

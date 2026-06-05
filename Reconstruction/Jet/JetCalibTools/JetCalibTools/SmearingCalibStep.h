@@ -6,7 +6,6 @@
 
 // SmearingCalibStep.h 
 // Header file for class SmearingCalibStep
-// Author: Ben Hodkinson <ben.hodkinson@cern.ch>
 /////////////////////////////////////////////////////////////////// 
 
 #ifndef JETCALIBTOOLS_SMEARINGCALIBSTEP_H
