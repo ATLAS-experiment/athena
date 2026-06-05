@@ -2,12 +2,12 @@
 
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
-"""Configure and initialize ITkPixelCsvWaferIdTool.
+"""Configure and initialize ITkPixelCsvWaferIdAlg.
 
 This script is a lightweight AthenaConfiguration entry point for the CSV-based
-wafer identifier tool. It currently validates that the tool can be configured
-and initialized, and prints the lookup request that would be passed to the
-underlying waferId() implementation.
+wafer identifier algorithm. It currently validates that the algorithm can be
+configured and executed, and prints the lookup request that would be passed to
+its waferId() implementation.
 """
 
 from argparse import ArgumentParser
@@ -18,9 +18,9 @@ from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
 
-from ITkPixelByteStreamCnv.ITkPixelByteStreamCnvConfig import ITkPixelCsvWaferIdToolCfg
+from ITkPixelByteStreamCnv.ITkPixelByteStreamCnvConfig import ITkPixelCsvWaferIdAlgCfg
 
-parser = ArgumentParser("RunITkPixelCsvWaferIdTool.py")
+parser = ArgumentParser("RunITkPixelCsvWaferIdAlg.py")
 parser.add_argument(
     "--csv-file",
     default="AT2-IP-ES-0016_v1.41_INCOMPLETE-ModuleA.csv",
@@ -57,8 +57,8 @@ flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
 flags.lock()
 
 cfg = MainServicesCfg(flags)
-#cfg.merge(ITkPixelReadoutGeometryCfg(flags))
-cfg.merge(ITkPixelCsvWaferIdToolCfg(flags,
+cfg.merge(ITkPixelReadoutGeometryCfg(flags))
+cfg.merge(ITkPixelCsvWaferIdAlgCfg(flags,
                                        CsvFile=args.csv_file,
                                        OutputFile=args.output_file))
 
@@ -68,8 +68,8 @@ if args.verbose:
 # Run the application to initialize and execute
 cfg.run(1)
 
-print("Configured ITkPixelCsvWaferIdTool")
+print("Configured ITkPixelCsvWaferIdAlg")
 print(f"  CSV file: {args.csv_file}")
 print(f"  Output file: {args.output_file}")
 #print(f"  Lookup request: spChain={args.sp_chain}, module={args.module}, fe={args.fe}")
-print("  Note: the tool initialization writes one 32-bit waferID per line to the output file.")
+print("  Note: the algorithm execution writes one 32-bit waferID per line to the output file.")

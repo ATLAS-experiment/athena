@@ -2,20 +2,22 @@
 Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ITKPIXELBYTESTREAMCNV_ITKPIXELCSVWAFERIDTOOL_H
-#define ITKPIXELBYTESTREAMCNV_ITKPIXELCSVWAFERIDTOOL_H
+#ifndef ITKPIXELBYTESTREAMCNV_ITKPIXELCSVWAFERIDALG_H
+#define ITKPIXELBYTESTREAMCNV_ITKPIXELCSVWAFERIDALG_H
 
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/ServiceHandle.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "GaudiKernel/EventContext.h"
+#include "GaudiKernel/ISvcLocator.h"
 #include "Identifier/Identifier.h"
 #include "InDetIdentifier/PixelID.h"
 
+#include <atomic>
 #include <string>
 #include <vector>
 
 class PixelID;
 
-class ITkPixelCsvWaferIdTool : public AthAlgTool {
+class ITkPixelCsvWaferIdAlg : public AthReentrantAlgorithm {
 public:
     struct CsvRow {
         std::string spChain;
@@ -23,14 +25,14 @@ public:
         int fe = -1;
     };
 
-    ITkPixelCsvWaferIdTool(const std::string& type, const std::string& name, const IInterface* parent);
-    virtual ~ITkPixelCsvWaferIdTool() = default;
+    ITkPixelCsvWaferIdAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    virtual ~ITkPixelCsvWaferIdAlg() = default;
 
     virtual StatusCode initialize() override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
 
     const std::vector<CsvRow>& rows() const { return m_rows; }
 
-    StatusCode execute() const;
     StatusCode loadCsv();
     Identifier waferId(const CsvRow& row) const;
 
@@ -55,6 +57,7 @@ private:
 
     const PixelID* m_pixIdHelper = nullptr;
     std::vector<CsvRow> m_rows;
+    mutable std::atomic<bool> m_done{false};
 };
 
-#endif // ITKPIXELBYTESTREAMCNV_ITKPIXELCSVWAFERIDTOOL_H
+#endif // ITKPIXELBYTESTREAMCNV_ITKPIXELCSVWAFERIDALG_H

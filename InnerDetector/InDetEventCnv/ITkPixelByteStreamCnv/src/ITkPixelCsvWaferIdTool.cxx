@@ -4,6 +4,7 @@ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #include "ITkPixelCsvWaferIdTool.h"
 
+#include "GaudiKernel/EventContext.h"
 #include "PathResolver/PathResolver.h"
 
 #include <fstream>
@@ -11,18 +12,32 @@ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #include <stdexcept>
 #include <string>
 
-ITkPixelCsvWaferIdTool::ITkPixelCsvWaferIdTool(const std::string& type,
-                                               const std::string& name,
-                                               const IInterface* parent)
-  : AthAlgTool(type, name, parent)
+ITkPixelCsvWaferIdAlg::ITkPixelCsvWaferIdAlg(const std::string& name,
+                                               ISvcLocator* pSvcLocator)
+  : AthReentrantAlgorithm(name, pSvcLocator)
 {
-    ATH_MSG_INFO("Building CsvWaferId tool");
 }
 
-StatusCode ITkPixelCsvWaferIdTool::initialize() {
-    ATH_MSG_INFO("Initializing CsvWaferId tool");
+StatusCode ITkPixelCsvWaferIdAlg::initialize() {
+    ATH_MSG_INFO("Initializing CsvWaferId algorithm");
     ATH_CHECK(detStore()->retrieve(m_pixIdHelper, "PixelID"));
+    ATH_MSG_INFO("Retrieved PixelID helper");
     ATH_CHECK(loadCsv());
+    ATH_MSG_INFO("Loaded CSV file");
+    return StatusCode::SUCCESS;
+}
+
+StatusCode ITkPixelCsvWaferIdAlg::execute(const EventContext& ctx) const {
+    if (m_done.load(std::memory_order_acquire)) {
+        return StatusCode::SUCCESS;
+    }
+
+    bool expected = false;
+    if (!m_done.compare_exchange_strong(expected, true, std::memory_order_acq_rel)) {
+        return StatusCode::SUCCESS;
+    }
+
+    ATH_MSG_INFO("Executing CsvWaferId algorithm");
 
     std::ofstream output(m_outputFile.value());
     if (!output.good()) {
@@ -40,16 +55,13 @@ StatusCode ITkPixelCsvWaferIdTool::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode ITkPixelCsvWaferIdTool::execute() const {
-    return StatusCode::SUCCESS;
-}
-
-StatusCode ITkPixelCsvWaferIdTool::loadCsv() {
+StatusCode ITkPixelCsvWaferIdAlg::loadCsv() {
     const std::string resolvedCsv = PathResolver::find_file(m_csvFile.value(), "DATAPATH");
     if (resolvedCsv.empty()) {
         ATH_MSG_FATAL("Could not resolve CSV file: " << m_csvFile.value());
         return StatusCode::FAILURE;
     }
+
 
     std::ifstream input(resolvedCsv);
     if (!input.good()) {
@@ -59,6 +71,7 @@ StatusCode ITkPixelCsvWaferIdTool::loadCsv() {
 
     m_rows.clear();
 
+    ATH_MSG_INFO("Loading CSV");
     std::string line;
     bool firstLine = true;
     while (std::getline(input, line)) {
@@ -70,7 +83,6 @@ StatusCode ITkPixelCsvWaferIdTool::loadCsv() {
             firstLine = false;
             continue;
         }
-
         const std::vector<std::string> fields = splitCsvLine(line);
         if (fields.size() < 5) {
             ATH_MSG_WARNING("Skipping malformed CSV line: " << line);
@@ -89,7 +101,7 @@ StatusCode ITkPixelCsvWaferIdTool::loadCsv() {
     return StatusCode::SUCCESS;
 }
 
-Identifier ITkPixelCsvWaferIdTool::waferId(const CsvRow& row) const {
+Identifier ITkPixelCsvWaferIdAlg::waferId(const CsvRow& row) const {
     ATH_MSG_DEBUG("waferId lookup for SP chain " << row.spChain
                     << ", module " << row.md << ", FE " << row.fe);
 
@@ -107,9 +119,12 @@ Identifier ITkPixelCsvWaferIdTool::waferId(const CsvRow& row) const {
     return m_pixIdHelper->wafer_id(bec, ld, phi, eta);
 }
 
-std::string ITkPixelCsvWaferIdTool::trim(const std::string& input) {
+std::string ITkPixelCsvWaferIdAlg::trim(const std::string& input) {
     const auto begin = input.find_first_not_of(" \t\r\n");
     if (begin == std::string::npos) {
+        //std::cout <<  "TRIM: bad input " << std::endl;
+        //ATH_MSG_INFO( "TOTO ");
+        //std::cout << input << std::endl;
         return "";
     }
 
@@ -117,7 +132,7 @@ std::string ITkPixelCsvWaferIdTool::trim(const std::string& input) {
     return input.substr(begin, end - begin + 1);
 }
 
-std::vector<std::string> ITkPixelCsvWaferIdTool::splitCsvLine(const std::string& line) {
+std::vector<std::string> ITkPixelCsvWaferIdAlg::splitCsvLine(const std::string& line) {
     std::vector<std::string> fields;
     std::stringstream ss(line);
     std::string field;
@@ -129,7 +144,7 @@ std::vector<std::string> ITkPixelCsvWaferIdTool::splitCsvLine(const std::string&
     return fields;
 }
 
-std::vector<std::string> ITkPixelCsvWaferIdTool::parseSPChain(const std::string& spChain) {
+std::vector<std::string> ITkPixelCsvWaferIdAlg::parseSPChain(const std::string& spChain) {
     std::vector<std::string> elements;
     std::stringstream ss(spChain);
     std::string element;
@@ -142,7 +157,7 @@ std::vector<std::string> ITkPixelCsvWaferIdTool::parseSPChain(const std::string&
 }
 
 
-int ITkPixelCsvWaferIdTool::barrel_ec(const std::vector<std::string>& spchain) const {
+int ITkPixelCsvWaferIdAlg::barrel_ec(const std::vector<std::string>& spchain) const {
     int side = (spchain[4] == "A") ? 1 : -1; // A for side pos, C for side neg
     if(spchain[1] == "IS" && (spchain[2] == "L0" ||  spchain[2] == "L1")){ //inner flat barrel
         return side*1;
@@ -155,7 +170,7 @@ int ITkPixelCsvWaferIdTool::barrel_ec(const std::vector<std::string>& spchain) c
     }
 }
 
-int ITkPixelCsvWaferIdTool::layer_disk(const std::vector<std::string>& spchain) const {
+int ITkPixelCsvWaferIdAlg::layer_disk(const std::vector<std::string>& spchain) const {
     int b_ec = barrel_ec(spchain);
     if( fabs(b_ec) == 1 ){ // flat barrel
         return spchain.at(2)[1] - '0';
@@ -188,7 +203,7 @@ int ITkPixelCsvWaferIdTool::layer_disk(const std::vector<std::string>& spchain) 
     }
 }
 
-int ITkPixelCsvWaferIdTool::phi_module(const std::vector<std::string>& spchain, const std::string& mod, int fe ) const {
+int ITkPixelCsvWaferIdAlg::phi_module(const std::vector<std::string>& spchain, const std::string& mod, int fe ) const {
 
     int b_ec = barrel_ec(spchain);
     int ld = layer_disk(spchain);
@@ -258,7 +273,7 @@ int ITkPixelCsvWaferIdTool::phi_module(const std::vector<std::string>& spchain, 
 }
 
 
-int ITkPixelCsvWaferIdTool::eta_module(const std::vector<std::string>& spchain, const std::string& mod, int fe) const {
+int ITkPixelCsvWaferIdAlg::eta_module(const std::vector<std::string>& spchain, const std::string& mod, int fe) const {
     int b_ec = barrel_ec(spchain);
     int ld = layer_disk(spchain);
     int side = (spchain[4] == "A") ? 1 : -1; // A for side pos, C for side neg
