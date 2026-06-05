@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -62,8 +62,8 @@ class VP1GraphicsView::Imp {
 public:
 
   void init(VP1GraphicsView*);
-  QGraphicsScene * scene;
-  VP1GraphicsView * view;
+  QGraphicsScene * scene{};
+  VP1GraphicsView * view{};
 
   Mode mode;
   Mode lastmajormode;//To go back to the previous major mode when exiting a seek.
@@ -78,10 +78,10 @@ public:
 
   QRectF home;
 
-  QTimer * zoomanim_timer;
-  int zoomanim_nsteps;
-  double zoomanim_totaltime;
-  double zoomfactoronseek;
+  QTimer * zoomanim_timer{};
+  int zoomanim_nsteps{};
+  double zoomanim_totaltime{};
+  double zoomfactoronseek{};
   QQueue<QRectF> zoomanim_queue;
   QPainter::RenderHints savedrenderhints;
 
@@ -92,27 +92,27 @@ public:
 
 //   QList<QGraphicsItem*> selecteditems;//Fixme more than one item!!
 //   QList<QGraphicsPathItem*> selectionoutlines;
-  VP1GraphicsItemCollection * ic_multiselection;//Holds the ic when a multiselection is taking place.
+  VP1GraphicsItemCollection * ic_multiselection{};//Holds the ic when a multiselection is taking place.
   void locateActiveItemAtPoint(QGraphicsItem*&,VP1GraphicsItemCollection*& ic,
 			       const QPoint& pos,
 			       VP1GraphicsItemCollection * searchic=0);
   void select(QGraphicsItem*item);
   void deselect(QGraphicsItem*item);
   void HighLightItemBeingDeleted(HighLightItem*);
-  bool clearselectionsemitsignals;
+  bool clearselectionsemitsignals{};
   QList<QGraphicsItem*> lastemittedselecteditems;
 
 
   QString currentsaveimagefile;
   void paintDescription(QPainter *painter);
   QTextDocument helptext;
-  QImage *helptextimage;
+  QImage *helptextimage{};
   void createNewHelptextImage(const QRect& imrect);
-  bool showhelptext;
+  bool showhelptext{};
 
   //transformation:
-  IVP12DViewTransformation * transform;
-  bool transformactive;
+  IVP12DViewTransformation * transform{};
+  bool transformactive{};
 };
 
 //We make a slightly modified pathitem for highlight item - because we

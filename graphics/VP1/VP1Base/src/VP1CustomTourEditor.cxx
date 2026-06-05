@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -38,10 +38,10 @@
 //____________________________________________________________________
 class VP1CustomTourEditor::Imp {
 public:
-  VP1CustomTourEditor * theclass;
+  VP1CustomTourEditor * theclass{};
   Ui::VP1CustomTourEditorForm ui;
-  VP1ExaminerViewer* viewer;
-  QWidget * frameHolderWidget;
+  VP1ExaminerViewer* viewer{};
+  QWidget * frameHolderWidget{};
   QList<VP1CustomTourFrameWidget*> frames;
   QList<QObject*> objectsToDisableWhenTourUnavailable;
   void updateFrameListVisuals();
