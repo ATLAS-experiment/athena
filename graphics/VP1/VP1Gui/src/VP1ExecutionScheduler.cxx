@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -129,51 +129,51 @@ std::vector<std::string> qstringlistToVecString(const QStringList& list)
 class VP1ExecutionScheduler::Imp {
 public:
 	class GlobalEventFilter;//Used to animate mouse clicks (for screencasts);
-	GlobalEventFilter * globalEventFilter;
+	GlobalEventFilter * globalEventFilter{};
 
-	VP1ExecutionScheduler * scheduler;
-	VP1Prioritiser * prioritiser;
-	VP1MainWindow* mainwindow;
+	VP1ExecutionScheduler * scheduler{};
+	VP1Prioritiser * prioritiser{};
+	VP1MainWindow* mainwindow{};
 
-	long int eventsProcessed;
+	long int eventsProcessed{};
 
-	bool batchMode;
-	bool batchModeAllEvents;
-	int batchModeNEvents;
-	bool batchModeRandomConfig;
-	VP1BatchUtilities* batchUtilities;
+	bool batchMode{};
+	bool batchModeAllEvents{};
+	int batchModeNEvents{};
+	bool batchModeRandomConfig{};
+	VP1BatchUtilities* batchUtilities{};
 
-	VP1AvailEvents * availEvents;
+	VP1AvailEvents * availEvents{};
 
-	QTimer * refreshtimer;
-	IVP1System* currentsystemrefreshing;
-	bool allSystemsRefreshed;
-	bool goingtonextevent;
+	QTimer * refreshtimer{};
+	IVP1System* currentsystemrefreshing{};
+	bool allSystemsRefreshed{};
+	bool goingtonextevent{};
 
 	//Statusbar:
-	QProgressBar * pb;
-	double calctimethisevent;
-	double currentrefreshsystemestimate;
+	QProgressBar * pb{};
+	double calctimethisevent{};
+	double currentrefreshsystemestimate{};
 	void updateProgressBar();
-	QTimer * pbtimer;
+	QTimer * pbtimer{};
 
 	//When receiving erase requests for a system that is currently refreshing, we use this:
-	bool eraseJustAfterRefresh;
-	IVP1ChannelWidget* postponedUncreateAndDeleteCW;
+	bool eraseJustAfterRefresh{};
+	IVP1ChannelWidget* postponedUncreateAndDeleteCW{};
 
 	CruiseMode cruisemode;
-	QTimer * cruisetimer;
+	QTimer * cruisetimer{};
 	bool allVisibleRefreshed() const;
 	bool allSoonVisibleRefreshed() const;
 	void initCruise();
 	void performPostRefreshCruiseActions(IVP1ChannelWidget*cw);
-	bool cruisetab_waitingtoproceed;
+	bool cruisetab_waitingtoproceed{};
 
 	static void warnIfWidgetsAlive();
 
 	QString nextRequestedEvent;
 
-	bool skipEvent;
+	bool skipEvent{};
 };
 
 //___________________________________________________________________

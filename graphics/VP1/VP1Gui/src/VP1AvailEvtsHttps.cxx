@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1Gui/VP1AvailEvtsHttps.h"
@@ -42,19 +42,19 @@ class VP1AvailEvtsHttps::Imp {
   // Connect signals of the QNetworkReply to slots of the VP1AvailEvtsHttps
   void connectNetworkSignalsToSlots();
 
-  VP1AvailEvtsHttps* m_theclass;
+  VP1AvailEvtsHttps* m_theclass{};
   QString m_fileInfoUrl;
   QString m_baseUrl;
-  int m_updateInterval;
+  int m_updateInterval{};
 
-  QNetworkAccessManager* m_netmanager;
-  QNetworkReply* m_netreply;
+  QNetworkAccessManager* m_netmanager{};
+  QNetworkReply* m_netreply{};
   QString m_evtToGet;
-  int m_stage;
+  int m_stage{};
   QString m_urlLastMod;
   QString m_expectedMD5Sum;
   qint64 m_bytesReceived;
-  unsigned m_lastChangeTime;
+  unsigned m_lastChangeTime{};
 
   QTimer m_stallTimer;
 };
