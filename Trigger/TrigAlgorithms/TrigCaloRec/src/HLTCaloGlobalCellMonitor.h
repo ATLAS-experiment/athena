@@ -11,6 +11,8 @@
 #include <StoreGate/WriteHandleKey.h>
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 #include <string>
+#include <vector>
+#include <cstdint>
 
 class CaloCell_ID;
 class LArOnlineID; 
