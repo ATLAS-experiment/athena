@@ -8,6 +8,10 @@ def main(args):
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.PerfMon.doFullMonMT = False
+    includeG4TrackTruth = bool(getattr(args, "includeG4TrackTruth", False))
+    if includeG4TrackTruth:
+        # MR88449 schedules the G4/pile-up truth segment association from this flag.
+        flags.Muon.includePileUpTruth = True
 
     from AthOnnxComps.OnnxRuntimeFlags import OnnxRuntimeType
     use_gpu_requested = getattr(args, "use_gpu", True)
@@ -28,13 +32,12 @@ def main(args):
 
     flags, cfg = setupGeoR4TestCfg(args)
 
-    cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
-                                    outStream="MuonSegmentDump"))
+    cfg.merge(setupHistSvcCfg(flags, outFile=args.outRootFile, outStream="MuonSegmentDump"))
 
     from MuonConfig.MuonDataPrepConfig import xAODUncalibMeasPrepCfg
     cfg.merge(xAODUncalibMeasPrepCfg(flags))
 
-    from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg 
+    from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg
     cfg.merge(MuonSpacePointFormationCfg(flags))
 
     from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
@@ -74,17 +77,21 @@ def main(args):
         cfg.merge(MuonTruthAlgsCfg(flags))
 
     from MuonBucketDump.MuonBucketDumpConfig import MuonSegmentDumpCfg
+    dumper_kwargs = {"IncludeG4TrackTruth": includeG4TrackTruth}
+    
     if do_ml_bucket_filter:
-        cfg.merge(MuonSegmentDumpCfg(flags, SpacePointKeys=["FilteredMlBuckets"]))
+        cfg.merge(MuonSegmentDumpCfg(flags, SpacePointKeys=["FilteredMlBuckets"],
+                                     **dumper_kwargs))
     else:
-        cfg.merge(MuonSegmentDumpCfg(flags))
+        cfg.merge(MuonSegmentDumpCfg(flags, **dumper_kwargs))
 
     executeTest(cfg)
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     from MuonGeoModelTestR4.testGeoModel import SetupArgParser, MuonPhaseIITestDefaults
     parser = SetupArgParser()
-    parser.set_defaults(nEvents = -1)
+    parser.set_defaults(nEvents=-1)
     parser.set_defaults(outRootFile="MuonSegmentDump_R3SimHits.root")
 
     parser.set_defaults(inputFile=MuonPhaseIITestDefaults.HITS_PG_R3)
@@ -98,8 +105,8 @@ if __name__=="__main__":
                         help="Use GPU for ONNX inference when available (default: True)")
     parser.add_argument("--use-cpu", dest="use_gpu", action="store_false",
                         help="Force CPU for ONNX inference")
+    parser.add_argument("--includeG4TrackTruth", action="store_true", default=False,
+                        help="Use sim-hit HepMC/G4 track identifiers for unmatched segment labels.")
 
     args = parser.parse_args()
     main(args)
-
-    
