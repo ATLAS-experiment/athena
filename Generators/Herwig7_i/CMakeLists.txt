@@ -95,4 +95,3 @@ find_package( Herwig7Environment )
 set( TheP8IEnvironment_DIR ${CMAKE_CURRENT_SOURCE_DIR}
    CACHE PATH "Location of TheP8IEnvironment.cmake" )
 find_package( TheP8IEnvironment )
-

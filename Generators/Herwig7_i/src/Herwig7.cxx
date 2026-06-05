@@ -27,6 +27,7 @@
 
 #include "PathResolver/PathResolver.h"
 
+#include <fstream>
 #include <thread>
 #include <chrono>
 #include <filesystem>
@@ -43,6 +44,7 @@ Herwig7::Herwig7(const std::string& name, ISvcLocator* pSvcLocator) :
   m_pdfname_me("UNKNOWN"), m_pdfname_mpi("UNKNOWN") // m_pdfname_ps("UNKONWN"),
 {
   declareProperty("RunFile", m_runfile="Herwig7");
+  declareProperty("RunSettings", m_runSettings="");
   declareProperty("SetupFile", m_setupfile="");
 
   declareProperty("UseRandomSeedFromGeneratetf", m_use_seed_from_generatetf);
@@ -126,6 +128,12 @@ StatusCode Herwig7::genInitialize() {
   ThePEG::Repository::load(std::move(repopath));
   ATH_MSG_DEBUG("Successfully loaded Herwig default repository");
 
+  const std::string share_path = std::filesystem::path(repopath).parent_path().string();
+
+  if (!m_runSettings.empty()) {
+    ATH_CHECK(writeRunFileFromText(share_path));
+  }
+
   ATH_MSG_INFO("Setting runfile name '"+m_runfile+"'");
   m_api.inputfile(m_runfile);
 
@@ -141,6 +149,44 @@ StatusCode Herwig7::genInitialize() {
   m_gen = Herwig::API::prepareRun(m_api);
   ATH_MSG_DEBUG("preparing the run...");
 
+  return StatusCode::SUCCESS;
+}
+
+
+StatusCode Herwig7::writeRunFileFromText(const std::string& share_path) {
+  if (m_runSettings.empty()) {
+    return StatusCode::SUCCESS;
+  }
+
+  std::string inputfile_name = m_runfile;
+  const std::string runfile_suffix = ".run";
+  const auto suffix_pos = inputfile_name.rfind(runfile_suffix);
+  if (suffix_pos != std::string::npos) {
+    inputfile_name.replace(suffix_pos, runfile_suffix.size(), ".in");
+  } else {
+    std::filesystem::path inputfile_path(m_runfile);
+    inputfile_path.replace_extension(".in");
+    inputfile_name = inputfile_path.string();
+  }
+
+  ATH_MSG_INFO("Writing CA infile text to '"+inputfile_name+"'");
+  std::ofstream infile_stream(inputfile_name);
+  infile_stream << m_runSettings;
+  if (!infile_stream) {
+    ATH_MSG_ERROR("Failed to write CA infile text to '"+inputfile_name+"'");
+    return StatusCode::FAILURE;
+  }
+
+  if (share_path.empty()) {
+    ATH_MSG_ERROR("Could not determine the Herwig share path for CA infile materialisation");
+    return StatusCode::FAILURE;
+  }
+
+  ATH_MSG_INFO("Preparing Herwig runfile from CA infile '"+inputfile_name+"'");
+  m_api.prependReadDirectory(share_path);
+  m_api.inputfile(inputfile_name);
+  Herwig::API::read(m_api);
+  ATH_MSG_INFO("Finished materialising runfile '"+m_runfile+"'");
   return StatusCode::SUCCESS;
 }
 
@@ -268,4 +314,3 @@ StatusCode Herwig7::genFinalize() {
 
   return StatusCode::SUCCESS;
 }
-

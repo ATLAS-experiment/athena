@@ -50,43 +50,16 @@ def Pythia8BaseCfg(flags, name="Pythia8_i", **kwargs):
     if "CollisionEnergy" not in kwargs:
         kwargs["CollisionEnergy"] = flags.Beam.Energy * 2 / GeV
 
-    # Extended settings
-    if flags.Generator.PDGparams:
-        ## Load parameters by including parameter dictionary 'parameters' in 'offline_dict'
-        from EvgenProdTools.offline_dict import parameters
-
-        ## Particle masses and widths
-        particle_params = parameters.get("particles")
-        if particle_params:
-            for pdg_str, vals in particle_params.items():
-                ## Only the top quark, the leptons and the bosons are applied
-                pdg = int(pdg_str)
-                if 6 <= pdg < 26:
-                    base_cmds.append(f"{pdg}:m0 = {vals['mass']}")
-                    base_cmds.append(f"{pdg}:mWidth = {vals['width']}")
-        else:
-            log.warning("Could not retrieve standard ATLAS particle parameters")
-
-        ## SM electroweak parameters
-        ew_params = parameters.get("EW_parameters")
-        if ew_params:
-            ## Only the parameters sin2thetaW and sin2thetaWbar are applied
-            for key, val in ew_params.items():
-                if key[1] in ('sin2thetaW', 'sin2thetaWbar'):
-                    base_cmds.append(f"StandardModel:{key[1]} = {val}")
-        else:
-            log.warning("Could not retrieve standard ATLAS EW parameters")
-    else:
-        ## Load basic parameters
-        base_cmds.extend([
-            "6:m0 = 172.5",
-            "23:m0 = 91.1876",
-            "23:mWidth = 2.4952",
-            "24:m0 = 80.399",
-            "24:mWidth = 2.085",
-            "StandardModel:sin2thetaW = 0.23113",
-            "StandardModel:sin2thetaWbar = 0.23146",
-        ])
+    # Load basic parameters
+    base_cmds.extend([
+        "6:m0 = 172.5",
+        "23:m0 = 91.1876",
+        "23:mWidth = 2.4952",
+        "24:m0 = 80.399",
+        "24:mWidth = 2.085",
+        "StandardModel:sin2thetaW = 0.23113",
+        "StandardModel:sin2thetaWbar = 0.23146",
+    ])
 
     user_cmds = kwargs.pop("Commands", None)
     kwargs["Commands"] = GeneratorSettingsLayer(
