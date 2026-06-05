@@ -191,6 +191,9 @@ namespace MuonGM {
         // Called from MuonChamber
         void geoInitDone();
 
+        /// Return the hash for the bounds
+        unsigned boundHash(const int tubeLayer, const int tube) const;
+
         
         double getTubeLengthForCaching(const int tubeLayer, const int tube) const;
         double getNominalTubeLengthWoCutouts(const int tubeLayer, const int tube) const;
@@ -237,39 +240,36 @@ namespace MuonGM {
         
         
         static Amg::Transform3D tubeToMultilayerTransf(const Amg::Vector3D& tubePos, 
-                                                const Amg::Transform3D& toDeform) ;
+                                                       const Amg::Transform3D& toDeform) ;
        
        
         struct GeoInfo {
-            GeoInfo(const Amg::Transform3D& transform) : m_transform(transform), m_center(transform.translation()) {}
+            GeoInfo() = default;
+            GeoInfo(Amg::Transform3D&& transform) : 
+                m_transform{std::move(transform)},
+                isValid{true} {}
             Amg::Transform3D m_transform{Amg::Transform3D::Identity()};
-            Amg::Vector3D m_center{Amg::Vector3D::Zero()};
+            Amg::Vector3D m_center{m_transform.translation()};
+            
+            std::unique_ptr<Amg::Transform3D> deformedTrf{};
+            bool isValid{false};
         };
-        std::unique_ptr<GeoInfo> makeGeoInfo(const int tubelayer, const int tube) const;
+        GeoInfo makeGeoInfo(const int tubelayer, const int tube) const;
         const GeoInfo& geoInfo(const int tubeLayer, const int tube) const;
         Amg::Transform3D deformedTransform(const int tubelayer, const int tube) const;
 
-        std::vector<CxxUtils::CachedUniquePtr<GeoInfo> > m_tubeGeo{};                      // one per tube
-        std::vector<CxxUtils::CachedUniquePtr<GeoInfo> > m_backupTubeGeo{};                // one per tube
-        std::vector<CxxUtils::CachedUniquePtr<Amg::Transform3D> > m_deformTransf{};        // one per tube
+        std::vector<GeoInfo> m_tubeGeo{};                      // one per tube
 
         const BLinePar* m_BLinePar{nullptr};
         CxxUtils::CachedValue<Amg::Vector3D> m_elemNormal{};                               // one
-        std::vector<CxxUtils::CachedUniquePtr<Trk::StraightLineSurface> > m_tubeSurfaces{};  // one per tube
-        std::vector<CxxUtils::CachedUniquePtr<Trk::CylinderBounds> > m_tubeBounds{};       // one per step in tube-length
-
-        /// Flag whether any elements have been inserted
-        /// into the corresponding vectors.
-        /// Used to speed up the clear-cache operations for the case where
-        /// the vectors are empty.
-        mutable std::atomic<bool> m_haveTubeSurfaces{false};
-        mutable std::atomic<bool> m_haveTubeGeo{false};
-        mutable std::atomic<bool> m_haveTubeBounds{false};
-        mutable std::atomic<bool> m_haveDeformTransf{false};
+        std::vector<std::unique_ptr<Trk::StraightLineSurface>> m_tubeSurfaces{};  // one per tube
+        std::vector<std::unique_ptr<Trk::CylinderBounds> > m_tubeBounds{};       // one per step in tube-length
 
         // the single surface information representing the DetElement
-        CxxUtils::CachedUniquePtr<Trk::Surface> m_associatedSurface{};
-        CxxUtils::CachedUniquePtr<Trk::SurfaceBounds> m_associatedBounds{};
+        std::unique_ptr<Trk::Surface> m_associatedSurface{};
+        std::shared_ptr<Trk::SurfaceBounds> m_associatedBounds{};
+        /// Flag indicating whether the RE is built by the ReadoutGeomCnvAlg
+        bool m_builtFromCnv{false};
     };
 
 }  // namespace MuonGM
