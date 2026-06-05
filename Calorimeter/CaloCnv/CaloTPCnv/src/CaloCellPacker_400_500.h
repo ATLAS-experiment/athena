@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: CaloCellPacker_400_500.h,v 1.3 2009-03-19 01:42:14 ssnyder Exp $
@@ -194,52 +194,52 @@ private:
    * don't rearrange fields!
    */
   struct header400 {
-    int m_length;                      // Header length, in units of int.
+    int m_length{};                      // Header length, in units of int.
 
-    int m_version;                     // Version code (ICaloCompactCellTool).
+    int m_version{};                     // Version code (ICaloCompactCellTool).
 
     /// Counters of number of cells in each subcalo.
-    int m_ncells_larem;
-    int m_ncells_larhec;
-    int m_ncells_larfcal;
-    int m_ncells_tile;
+    int m_ncells_larem{};
+    int m_ncells_larhec{};
+    int m_ncells_larfcal{};
+    int m_ncells_tile{};
 
     /// Masks defining the bit positions used for various quantities.
     /// These should all contain a single consecutive string of 1'.s
-    unsigned int m_qualy_mask;        // Quality.
-    unsigned int m_egain_mask;        // LAr gain.
-    unsigned int m_esign_mask;        // LAr energy sign bit.
-    unsigned int m_crtae_mask;        // LAr cbrt(energy).
-    unsigned int m_egain_tile_mask;   // Tile gain.
-    unsigned int m_esign_tile_mask;   // Tile energy sign bit.
-    unsigned int m_crtae_tile_mask;   // Tile cbrt(energy).
-    unsigned int m_tsign_mask;        // Time sign bit.
-    unsigned int m_logat_mask;        // log(time).
+    unsigned int m_qualy_mask{};        // Quality.
+    unsigned int m_egain_mask{};        // LAr gain.
+    unsigned int m_esign_mask{};        // LAr energy sign bit.
+    unsigned int m_crtae_mask{};        // LAr cbrt(energy).
+    unsigned int m_egain_tile_mask{};   // Tile gain.
+    unsigned int m_esign_tile_mask{};   // Tile energy sign bit.
+    unsigned int m_crtae_tile_mask{};   // Tile cbrt(energy).
+    unsigned int m_tsign_mask{};        // Time sign bit.
+    unsigned int m_logat_mask{};        // log(time).
 
     /// Various enumeration constants.
-    int m_qabad;                      // Bad quality flag.
-    int m_enlow;                      // LAr low gain.
-    int m_enmed;                      // LAr medium gain.
-    int m_enhig;                      // LAr high gain.
-    int m_ehhig;                      // LAr high gain with 50 GeV range.
-    int m_glow;                       // Tile low range.
-    int m_ghigh;                      // Tile high range.
+    int m_qabad{};                      // Bad quality flag.
+    int m_enlow{};                      // LAr low gain.
+    int m_enmed{};                      // LAr medium gain.
+    int m_enhig{};                      // LAr high gain.
+    int m_ehhig{};                      // LAr high gain with 50 GeV range.
+    int m_glow{};                       // Tile low range.
+    int m_ghigh{};                      // Tile high range.
 
     /// Counts of number of sequences in each subcalo.
     /// Note: in early versions of the v400 packer, these words would
     /// be left uninitialized if there were no cells.
-    int m_seq_larem;
-    int m_seq_larhec;
-    int m_seq_larfcal;
-    int m_seq_tile;
+    int m_seq_larem{};
+    int m_seq_larhec{};
+    int m_seq_larfcal{};
+    int m_seq_tile{};
 
     /// Packing ranges for floats.
-    float m_e1_norm_res;              // Normal LAr energy range.
-    float m_e1_high_res;              // High gain LAr energy range.
-    float m_high_tile;                // High gain tile energy range.
-    float m_low_tile;                 // Low gain tile energy range.
-    float m_t0;                       // Lower time range.
-    float m_t1;                       // Upper time range.
+    float m_e1_norm_res{};              // Normal LAr energy range.
+    float m_e1_high_res{};              // High gain LAr energy range.
+    float m_high_tile{};                // High gain tile energy range.
+    float m_low_tile{};                 // Low gain tile energy range.
+    float m_t0{};                       // Lower time range.
+    float m_t1{};                       // Upper time range.
   };
 
 
@@ -253,7 +253,7 @@ private:
   {
     // The number of provenance entries (in 16-bit units).
     // In order to know from where to start reading provenance.
-    unsigned int m_lengthProvenance;
+    unsigned int m_lengthProvenance{};
   };
 
 
@@ -269,7 +269,7 @@ private:
   {
     // A bitmask for additional status information.
     // Added for version 501.
-    unsigned int m_status;
+    unsigned int m_status{};
 
     enum {
       // Set if the cells are not in subcalo order.
@@ -297,48 +297,48 @@ private:
     : public header
   {
     /// Good quality flag.
-    int m_qgood;
+    int m_qgood{};
 
     /// Maximum number of cells in a sequence.
-    unsigned int m_nseq_max;
-    unsigned int m_prov_max;
-    unsigned int m_prov_max_tile;
+    unsigned int m_nseq_max{};
+    unsigned int m_prov_max{};
+    unsigned int m_prov_max_tile{};
 
     /// Transformed packing ranges for floats.
-    double m_cbrt_e1_norm_res;       // cbrt(e1_norm_res)
-    double m_cbrt_e1_high_res;       // cbrt(e1_high_res)
-    double m_cbrt_low_tile;          // cbrt(low_tile)
-    double m_cbrt_high_tile;         // cbrt(high_tile)
-    double m_log_t0;                 // log(t0)
-    double m_log_t1;                 // log(t1)
+    double m_cbrt_e1_norm_res{};       // cbrt(e1_norm_res)
+    double m_cbrt_e1_high_res{};       // cbrt(e1_high_res)
+    double m_cbrt_low_tile{};          // cbrt(low_tile)
+    double m_cbrt_high_tile{};         // cbrt(high_tile)
+    double m_log_t0{};                 // log(t0)
+    double m_log_t1{};                 // log(t1)
 
     /// Bitfields for various quantities.
-    CaloCellPackerUtils::Bitfield m_hash_field;
-    CaloCellPackerUtils::Bitfield m_nseq_field;
-    CaloCellPackerUtils::Bitfield m_prov_field;
+    CaloCellPackerUtils::Bitfield m_hash_field{};
+    CaloCellPackerUtils::Bitfield m_nseq_field{};
+    CaloCellPackerUtils::Bitfield m_prov_field{};
 
-    CaloCellPackerUtils::Bitfield m_egain_field;
-    CaloCellPackerUtils::Bitfield m_qualy_field;
-    CaloCellPackerUtils::Floatfield m_logat_field;
-    CaloCellPackerUtils::Floatfield2 m_crtae_norm_field;
-    CaloCellPackerUtils::Floatfield2 m_crtae_high_field;
-    CaloCellPackerUtils::Floatfield2 m_crtae_tile_low_field;
-    CaloCellPackerUtils::Floatfield2 m_crtae_tile_high_field;
-    CaloCellPackerUtils::Bitfield m_egain_tile_field;
+    CaloCellPackerUtils::Bitfield m_egain_field{};
+    CaloCellPackerUtils::Bitfield m_qualy_field{};
+    CaloCellPackerUtils::Floatfield m_logat_field{};
+    CaloCellPackerUtils::Floatfield2 m_crtae_norm_field{};
+    CaloCellPackerUtils::Floatfield2 m_crtae_high_field{};
+    CaloCellPackerUtils::Floatfield2 m_crtae_tile_low_field{};
+    CaloCellPackerUtils::Floatfield2 m_crtae_tile_high_field{};
+    CaloCellPackerUtils::Bitfield m_egain_tile_field{};
 
-    CaloCellPackerUtils::Bitfield m_tile_qual1_field;
-    CaloCellPackerUtils::Bitfield m_tile_qual2_field;
+    CaloCellPackerUtils::Bitfield m_tile_qual1_field{};
+    CaloCellPackerUtils::Bitfield m_tile_qual2_field{};
 
-    // Some errors are flagged by setting all bits on; the resulting packed
+    // Some errors are flagged by setting all bits on{}; the resulting packed
     // values are stored in @c m_lar_dummy and @c m_tile_dummy.
     // These are, however, still valid encodings.  If we would legitimately
     // pack a value that gives the dummy word, we replace it with @c subst,
     // which has the low bit of the energy cleared.  This effectively reduces
     // the range on the low side slightly.
-    CaloCompactCell::value_type m_lar_dummy;
-    CaloCompactCell::value_type m_lar_dummy_subst;
-    CaloCompactCell::value_type m_tile_dummy;
-    CaloCompactCell::value_type m_tile_dummy_subst;
+    CaloCompactCell::value_type m_lar_dummy{};
+    CaloCompactCell::value_type m_lar_dummy_subst{};
+    CaloCompactCell::value_type m_tile_dummy{};
+    CaloCompactCell::value_type m_tile_dummy_subst{};
   };
 
 
