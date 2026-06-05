@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthAlgorithm.cxx 
@@ -14,10 +14,7 @@
 #include "AthAlgorithmDHUpdate.h"
 #include "GaudiKernel/ICondSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
-
-/////////////////////////////////////////////////////////////////// 
-// Public methods: 
-/////////////////////////////////////////////////////////////////// 
+#include "GaudiKernel/ThreadLocalContext.h"
 
 // Constructors
 ////////////////
@@ -25,6 +22,9 @@ AthAlgorithm::AthAlgorithm( const std::string& name,
                             ISvcLocator* pSvcLocator ) :
   ::AthCommonDataStore<AthCommonMsg<Algorithm>>   ( name, pSvcLocator )
 {
+  // default cardinality for non-reentrant algorithms
+  setProperty( "Cardinality", 1 ).orThrow("Unable to set property 'Cardinality'", name);
+
   // Set up to run AthAlgorithmDHUpdate in sysInitialize before
   // merging dependency lists.  This extends the output dependency
   // list with any symlinks implied by inheritance relations.
@@ -85,4 +85,16 @@ StatusCode AthAlgorithm::sysInitialize() {
     }
   }
   return sc;
+}
+
+const EventContext& AthAlgorithm::getContext() const {
+  return Gaudi::Hive::currentContext();
+}
+
+bool AthAlgorithm::filterPassed() const {
+  return execState( Gaudi::Hive::currentContext() ).filterPassed();
+}
+
+void AthAlgorithm::setFilterPassed( bool state ) const {
+  execState( Gaudi::Hive::currentContext() ).setFilterPassed(state);
 }

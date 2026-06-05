@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthAlgorithm.h 
@@ -18,12 +18,18 @@
 #include "AthenaBaseComps/AthCommonDataStore.h"
 #include "AthenaBaseComps/AthCommonMsg.h"
 #include "AthenaBaseComps/AthMemMacros.h"
-#include "GaudiKernel/Algorithm.h"
+#include "CxxUtils/checker_macros.h"
+#include "Gaudi/Algorithm.h"
+
+class EventContext;
 
 /** @class AthAlgorithm AthAlgorithm.h AthenaBaseComps/AthAlgorithm.h
  *
- *  Base class from which all concrete Athena algorithm classes should 
- *  be derived. 
+ *  Base class from which non-reentrant (not thread-safe)
+ *  Athena algorithm classes should be derived.
+ *
+ *  For thread-safe Algorithms use @c AthReentrantAlgorithm.
+ *
  *  In order for a concrete algorithm class to do anything
  *  useful the methods initialize(), execute() and finalize() 
  *  should be overridden.
@@ -43,7 +49,7 @@
  */ 
 
 class AthAlgorithm 
-  : public AthCommonDataStore<AthCommonMsg< Algorithm >>
+  : public AthCommonDataStore<AthCommonMsg< Gaudi::Algorithm >>
 { 
  public: 
 
@@ -56,10 +62,42 @@ class AthAlgorithm
   /** @brief Override sysInitialize
    *
    * Loop through all output handles, and if they're WriteCondHandles,
-   * automatically register them and this Algorithm with the CondSvc
+   * automatically register them and this Algorithm with the CondSvc.
    */
   virtual StatusCode sysInitialize() override;
-  
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
+  /** @brief Execute method without EventContext (deprecated)
+   *
+   * Override this method if the EventContext is not needed.
+   */
+  virtual StatusCode execute() {
+    throw GaudiException( "execute() or execute(const EventContext&) needs to be implemented", name(),
+                          StatusCode::FAILURE );
+  }
+
+  /** @brief Execute method with EventContext
+   *
+   * Override this method if acccess to the EventContext is needed.
+   */
+  virtual StatusCode execute(const EventContext& /*ctx*/) {
+    return execute();
+  }
+
+ private:
+  // This is the base-class execute method that gets called by the scheduler.
+  virtual StatusCode execute ( const EventContext& ctx ) const override final {
+    // "Thread-safe" because scheduler ensures algorithm never gets called concurrently.
+    auto nc_this ATLAS_THREAD_SAFE = const_cast<AthAlgorithm*>( this );
+    return nc_this->execute( ctx );
+  }
+
+#pragma GCC diagnostic pop
+
+ public:
+
   /**
    * @brief Return the list of extra output dependencies.
    *
@@ -68,14 +106,18 @@ class AthAlgorithm
    */
   virtual const DataObjIDColl& extraOutputDeps() const override;
 
-  
- private: 
+  ///@{
+  /** Deprecated methods (use the ones with EventContext) */
+  const EventContext& getContext() const;
+  bool filterPassed() const;
+  void setFilterPassed(bool state) const;
+  ///@}
 
-  /// Default constructor: 
-  AthAlgorithm(); //> not implemented
-  AthAlgorithm (const AthAlgorithm& ); //> not implemented
-  AthAlgorithm& operator= (const AthAlgorithm&); //> not implemented
+ protected:
+  /// Legacy algorithms are not thread-safe
+  virtual bool isReEntrant() const override final { return false; }
 
+ private:
   DataObjIDColl m_extendedExtraObjects;
 
 }; 
