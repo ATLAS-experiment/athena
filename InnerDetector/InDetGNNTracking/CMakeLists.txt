@@ -7,12 +7,29 @@ atlas_subdir( InDetGNNTracking )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
 find_package( HepPDT )
 find_package(Boost REQUIRED COMPONENTS graph)
-find_package( Acts COMPONENTS Core PluginGnn )
+find_package( Acts COMPONENTS Core OPTIONAL_COMPONENTS PluginGnn )
 
 # Component(s) in the package:
+set(_sources
+    src/DumpObjects.cxx
+    src/ExaTrkXUtils.cxx
+    src/GNNSeedingTrackMaker.cxx
+    src/GNNTrackFinderTritonTool.cxx
+    src/GNNTrackReaderTool.cxx
+    src/SeedFitterTool.cxx
+    src/SiGNNTrackFinderTool.cxx
+    src/SiSPGNNTrackMaker.cxx
+    src/SpacepointFeatureTool.cxx
+    src/components/*.cxx)
+set(_extraLibs)
+
+if(TARGET Acts::PluginGnn)
+    list(APPEND _sources src/ActsGnnModuleMapFinderTool.cxx)
+    list(APPEND _extraLibs Acts::PluginGnn)
+endif()
+
 atlas_add_component( InDetGNNTracking
-    src/*.cxx
-    src/components/*.cxx
+    ${_sources}
     INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${HEPPDT_INCLUDE_DIRS}
     LINK_LIBRARIES ${HEPPDT_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps GaudiKernel InDetRecToolInterfaces
     PathResolver AthOnnxInterfaces AthOnnxUtilsLib
@@ -21,7 +38,8 @@ atlas_add_component( InDetGNNTracking
     InDetPrepRawData TrkTrack TrkRIO_OnTrack InDetSimEvent
     AtlasHepMCLib InDetRIO_OnTrack InDetRawData TrkTruthData
     SiSPSeededTrackFinderData Boost::graph CxxUtils
-    Acts::Core Acts::PluginGnn ActsInteropLib InDetIdentifier
+    Acts::Core ActsInteropLib InDetIdentifier
+    ${_extraLibs}
 )
 
 atlas_install_python_modules( python/*.py )
