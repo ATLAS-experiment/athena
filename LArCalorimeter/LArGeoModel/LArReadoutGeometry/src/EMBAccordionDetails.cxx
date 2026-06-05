@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArReadoutGeometry/EMBAccordionDetails.h"
@@ -46,30 +46,30 @@ public:
   double Distance_Abs(const double &x, const double &y, 
                      const int &nabs, const int &Num_Straight, const int &Num_Coude);
 
-  double gam0;
-  double Rmin;
-  double Rmax;
-  double dR;
-  double Rphi[5000];
-  int    NRphi;
-  int    Nbrt;
-  int    Nbrt1;
-  double rint_eleFib ; //2.78
-  double delta[15];    // zig-zag angles
-  double rc[15] ;      // R and
-  double phic[15] ;    // phi positions of center of fold for first absorber 
-  double xc[15];     // corresponding x,y values
-  double yc[15];
-  double rMinAccordion;
-  double rMaxAccordion;
-  double zMinBarrel;
-  double zMaxBarrel;
-  double etaMaxBarrel;
-  int    NCellTot;    // either 64 or 1024 for TestBeam or Atlas
-  int    NCellMax;    // 1024 
+  double gam0{};
+  double Rmin{};
+  double Rmax{};
+  double dR{};
+  double Rphi[5000]{};
+  int    NRphi{};
+  int    Nbrt{};
+  int    Nbrt1{};
+  double rint_eleFib {}; //2.78
+  double delta[15]{};    // zig-zag angles
+  double rc[15] {};      // R and
+  double phic[15] {};    // phi positions of center of fold for first absorber 
+  double xc[15]{};     // corresponding x,y values
+  double yc[15]{};
+  double rMinAccordion{};
+  double rMaxAccordion{};
+  double zMinBarrel{};
+  double zMaxBarrel{};
+  double etaMaxBarrel{};
+  int    NCellTot{};    // either 64 or 1024 for TestBeam or Atlas
+  int    NCellMax{};    // 1024 
 
-  const GeoStraightAccSection *electrodeStraightSection;
-  const GeoStraightAccSection *absorberStraightSection;
+  const GeoStraightAccSection *electrodeStraightSection{};
+  const GeoStraightAccSection *absorberStraightSection{};
 
   ServiceHandle<StoreGateSvc> detStore{"DetectorStore","DetectorStore"};
 };
