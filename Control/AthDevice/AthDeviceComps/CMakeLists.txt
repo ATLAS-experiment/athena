@@ -10,3 +10,6 @@ find_package(vecmem)
 atlas_add_component(AthDeviceComps
    src/*.h src/*.cxx src/components/*.cxx
    LINK_LIBRARIES AthenaBaseComps AthDeviceInterfacesLib vecmem::core)
+
+# Install files from the package.
+atlas_install_python_modules(python/*.py)

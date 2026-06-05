@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.SystemOfUnits import GeV, TeV
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags, isGaudiEnv
@@ -140,7 +140,7 @@ def initConfigFlags():
     acf.addFlag('Scheduler.DataDepsGraphFile', '', help='file name containing the data dependency graph [.dot or .md]')
     acf.addFlag('Scheduler.DataDepsGraphAlgPattern', '.*', help='regex pattern for selecting algorithms to be drawn in the data dependency graph')
     acf.addFlag('Scheduler.DataDepsGraphObjectPattern', '.*', help='regex pattern for selecting I/O to be drawn in the data dependency graph')
-    
+
     acf.addFlag('MP.WorkerTopDir', 'athenaMP_workers', help='work directory for MP workers')
     acf.addFlag('MP.OutputReportFile', 'AthenaMPOutputs', help='name of MP report file')
     acf.addFlag('MP.Strategy', 'SharedQueue', help='event assignment strategy')
@@ -266,7 +266,7 @@ def initConfigFlags():
     acf.addFlag('Output.ESDFileName',  '', help='ESD output file name')
     acf.addFlag('Output.AODFileName',  '', help='AOD output file name')
     acf.addFlag('Output.HISTFileName', '', help='HIST output file name')
-    
+
     acf.addFlag('Output.doWriteEVNT', lambda prevFlags: bool(prevFlags.Output.EVNTFileName), help='write EVNT file')
     acf.addFlag('Output.doWriteTXT', lambda prevFlags: bool(prevFlags.Output.TXTFileName), help='write LHE file')
     acf.addFlag('Output.doWriteEVNT_TR', lambda prevFlags: bool(prevFlags.Output.EVNT_TRFileName), help='write EVNT_TR file')
@@ -461,11 +461,11 @@ def initConfigFlags():
         from JetRecConfig.JetConfigFlags import createJetConfigFlags
         return createJetConfigFlags()
     _addFlagsCategory(acf,"Jet",__jet, 'JetRecConfig')
-    
+
     def __ufo():
         from TrackCaloClusterRecTools.UFOConfigFlags import createUFOConfigFlags
         return createUFOConfigFlags()
-    _addFlagsCategory(acf,"UFO",__ufo, 'TrackCaloClusterRecTools') 
+    _addFlagsCategory(acf,"UFO",__ufo, 'TrackCaloClusterRecTools')
 
     def __tau():
         from tauRec.TauConfigFlags import createTauConfigFlags
@@ -476,7 +476,7 @@ def initConfigFlags():
         from DiTauRec.DiTauConfigFlags import createDiTauConfigFlags
         return createDiTauConfigFlags()
     _addFlagsCategory(acf, "DiTau",__ditau, 'DiTauRec')
- 
+
     def __pflow():
         from eflowRec.PFConfigFlags import createPFConfigFlags
         return createPFConfigFlags()
@@ -496,7 +496,7 @@ def initConfigFlags():
         from EventDisplaysOnline.EventDisplaysOnlineFlags import createOnlineEventDisplayFlags
         return createOnlineEventDisplayFlags()
     _addFlagsCategory(acf, "OnlineEventDisplays", __onlineED, 'EventDisplaysOnline' )
-    
+
     def __dq():
         from AthenaMonitoring.DQConfigFlags import createDQConfigFlags
         dqf = createDQConfigFlags()
@@ -553,13 +553,19 @@ def initConfigFlags():
         return createOnnxRuntimeFlags()
     _addFlagsCategory(acf, "AthOnnx", __onnxruntime, 'AthOnnxComps')
 
+    # (Accelerator) Device flags.
+    def __device():
+        from AthDeviceComps.DeviceConfigFlags import createDeviceConfigFlags
+        return createDeviceConfigFlags()
+    _addFlagsCategory(acf, "Device", __device, 'AthDeviceComps')
+
     #EFTracking fpga data prep (F100)
     def _eftracking_f100():
         from EFTrackingFPGAPipeline.IntegrationConfigFlag import addFPGADataPrepFlags
         return addFPGADataPrepFlags()
-    
+
     _addFlagsCategory(acf, "FPGADataPrep", _eftracking_f100, "EFTrackingFPGAPipeline")
-    
+
     def __fpga():
         from AthXRTServices.FPGAConfigFlags import createFPGAMgmtFlags
         return createFPGAMgmtFlags()
