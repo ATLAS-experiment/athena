@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CaloRec/src/CaloThinCellsBySamplingAlg.h
@@ -71,7 +71,7 @@ private:
   std::vector<IdentifierHash> m_cellHashes;
 
   /// Calo ID helper.
-  const CaloCell_ID* m_caloID;
+  const CaloCell_ID* m_caloID{};
 };
 
 
