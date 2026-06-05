@@ -147,7 +147,7 @@ TCS::inputType(const std::string& input) {
       return TCS::GESPRESSO;
       
    if ( input == "gRISTRETTO" ||  input == "gRistretto" )
-      return TCS::GESPRESSO;
+      return TCS::GRISTRETTO;
       
    TCS_EXCEPTION("L1TopoCommon: unknown input type " + input);
    
