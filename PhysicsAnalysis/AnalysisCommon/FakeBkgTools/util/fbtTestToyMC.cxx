@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //----------------------------------------------------------------------
@@ -44,25 +44,25 @@ ANA_MSG_SOURCE(Test, "fbtTestToyMC")
 using namespace Test;
 
 struct fbtTestToyMC_config {
-  unsigned nevents;
-  unsigned ncases;
-  unsigned minnbaseline;
-  unsigned maxnbaseline;
-  float realeff_mean;
-  float fakeeff_mean;
-  float eff_spread;
-  float eff_delta_with_pt;
-  std::string selection;
-  std::string process;
-  bool test_save;
-  bool test_merge;
-  std::string saveFileNameBase;
-  std::string mergeFileNameBase;
-  std::string outputdirname;
-  bool verbose;
-  bool test_histo;
-  bool test_systematics;
-  bool poisson_fluctuations;
+  unsigned nevents{};
+  unsigned ncases{};
+  unsigned minnbaseline{};
+  unsigned maxnbaseline{};
+  float realeff_mean{};
+  float fakeeff_mean{};
+  float eff_spread{};
+  float eff_delta_with_pt{};
+  std::string selection{};
+  std::string process{};
+  bool test_save{};
+  bool test_merge{};
+  std::string saveFileNameBase{};
+  std::string mergeFileNameBase{};
+  std::string outputdirname{};
+  bool verbose{};
+  bool test_histo{};
+  bool test_systematics{};
+  bool poisson_fluctuations{};
 };
 
 using namespace FakeBkgTools;
