@@ -28,6 +28,7 @@ cmd cd G-200
 cmd mkdir build
 cmd cd build
 
+# nvcc ($CUDACXX) not needed since we have -DATLAS_USE_SYSTEM_TRACCC=ON (Athena,main,r2026-05-29T2100)
 if [ -n "$CUDACXX" ]; then
   cmd "$CUDACXX" --version
   # hack for when we have a local CUDA installation
