@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1Base/AnimationSequencer.h"
@@ -23,19 +23,19 @@ class AnimationSequencer::Clockwork {
 public:
 
   AnimationSequence          animationSequence;
-  mutable unsigned int       animationFrameNumber;
-  VP1ExaminerViewer         *viewer;
-  SoSphere                  *sphere;
+  mutable unsigned int       animationFrameNumber{};
+  VP1ExaminerViewer         *viewer{};
+  SoSphere                  *sphere{};
 
   SoSphere * getRegionSphere(AnimationSequence::REGION, bool perspective);
 
-  bool movieEnabled;
-  int movieFPS;
-  int movieWidth;
-  int movieHeight;
+  bool movieEnabled{};
+  int movieFPS{};
+  int movieWidth{};
+  int movieHeight{};
   QString movieOutdir;
   QString frameFileNamePrefix;
-  double last_clipVolPercent;
+  double last_clipVolPercent{};
 };
 
 void AnimationSequencer::setMovie(bool b)

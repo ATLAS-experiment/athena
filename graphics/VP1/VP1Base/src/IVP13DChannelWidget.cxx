@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -36,6 +36,7 @@ public:
 	//	typedef std::vector<SoQtRenderArea*> RenderAreaList;
 	//	std::vector<SoQtRenderArea*>::iterator it, itE;
 	typedef std::vector<VP1ExaminerViewer*> RenderAreaList;
+	// cppcheck-suppress uninitMemberVarNoCtor
 	std::vector<VP1ExaminerViewer*>::iterator it, itE;
 
 	RenderAreaList renderareas;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -36,9 +36,9 @@
 
 class IVP12DStandardChannelWidget::Imp {
 public:
-  IVP12DStandardChannelWidget*channel;
-  VP1GraphicsView * view;
-  bool first;
+  IVP12DStandardChannelWidget* channel{};
+  VP1GraphicsView * view{};
+  bool first{};
   QMap<IVP12DSystem*,QSet<VP1GraphicsItemCollection*> > system2itemcols;
 
   QMap<QCheckBox*,IVP1System*> checkbox2system;
@@ -49,9 +49,9 @@ public:
   void updateSystemState(QCheckBox*);
 
   QMap<IVP1System*,QWidget*> sys2tabpage;
-  VP1TabWidget*tabwidget;
+  VP1TabWidget* tabwidget{};
 
-  VP1ColorSelectButton * colorselectbutton;
+  VP1ColorSelectButton * colorselectbutton{};
 
 };
 
