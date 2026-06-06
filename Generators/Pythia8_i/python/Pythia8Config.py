@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -287,4 +287,49 @@ def Pythia8_MadGraph_Cfg(flags, ShowerCfg=Pythia8BaseCfg, **kwargs):
     from GeneratorConfig.GeneratorInfoSvcConfig import GeneratorInfoSvcCfg
     ca.merge(GeneratorInfoSvcCfg(flags, Generators=["MadGraph"]), sequenceName=EvgenSequence.Generator.value)
 
+    return ca
+
+
+def Pythia8_Powheg_Main31_Cfg(
+    flags,
+    ShowerCfg=Pythia8BaseCfg,
+    name="Pythia8_i",
+    **kwargs,
+):
+    """Configure Pythia8 to shower Powheg LHE input with the Main31 veto."""
+    user_commands = list(kwargs.pop("Commands", []))
+    user_hooks = list(kwargs.pop("UserHooks", []))
+    if "PowhegMain31" not in user_hooks:
+        user_hooks.append("PowhegMain31")
+
+    kwargs.setdefault("LHEFile", "PowhegOTF._1.events")
+    ca = ShowerCfg(flags, name=name, UserHooks=user_hooks, **kwargs)
+
+    matching_commands = [
+        "SpaceShower:pTmaxMatch = 2",
+        "TimeShower:pTmaxMatch = 2",
+        "Powheg:veto = 1",
+    ]
+    ca.merge(Pythia8CommandsCfg(
+        flags,
+        source="powheg_main31_matching",
+        commands=matching_commands,
+        precedence=GeneratorSettingsPrecedence.MATCHING,
+        name=name,
+    ))
+
+    if user_commands:
+        ca.merge(Pythia8CommandsCfg(
+            flags,
+            source="powheg_user_commands",
+            commands=user_commands,
+            precedence=GeneratorSettingsPrecedence.USER,
+            name=name,
+        ))
+
+    from GeneratorConfig.GeneratorInfoSvcConfig import GeneratorInfoSvcCfg
+    ca.merge(
+        GeneratorInfoSvcCfg(flags, Generators=["Powheg"]),
+        sequenceName=EvgenSequence.Generator.value,
+    )
     return ca

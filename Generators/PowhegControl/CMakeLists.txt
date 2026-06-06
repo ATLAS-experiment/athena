@@ -12,6 +12,18 @@ atlas_install_python_modules( python/*.py
    POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_joboptions( share/common/*.py share/control/*.py )
 
+if(NOT XAOD_STANDALONE)
+  atlas_add_component( PowhegControl
+    src/*.cxx
+    src/components/*.cxx
+    NO_PUBLIC_HEADERS
+    LINK_LIBRARIES AthenaBaseComps GaudiKernel )
+
+  atlas_add_test( PowhegConfig
+    SCRIPT test/PowhegConfigTest.py
+    POST_EXEC_SCRIPT noerror.sh )
+endif()
+
 # Set up the runtime environment for Powheg.
 configure_file(
    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/PowhegEnvironmentConfig.cmake.in
@@ -34,5 +46,4 @@ find_package( nlox )
 find_package( Lhapdf )
 find_package( Recola )
 find_package( OpenLoops )
-
 
