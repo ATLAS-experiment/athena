@@ -12,6 +12,7 @@ using grpc::Status;
 
 class TestServiceImpl final : public TestService::Service {
 public:
+    int increment=0;
     Status doComputation(ServerContext* context,
                    const TestInputData* request,
                    TestOutputData* response) override {
@@ -26,8 +27,9 @@ public:
 
         // Process data
         for (int v : request->data()) {
-            response->add_data(v * 2);
+            response->add_data(v * 2+increment);
         }
+        increment++;
         std::cout << "... TestServiceImpl::Returing response with: " << response->id() << "\n";
 
         return Status::OK;

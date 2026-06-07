@@ -4,34 +4,33 @@
 
 #include "TestReciever.h"
 
-TestReciever::TestReciever(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthReentrantAlgorithm(name, pSvcLocator)
-{
-}
+TestReciever::TestReciever(const std::string& name, ISvcLocator* pSvcLocator)
+    : AthReentrantAlgorithm(name, pSvcLocator) {}
 
-TestReciever::~TestReciever()
-{
-}
+TestReciever::~TestReciever() {}
 
-StatusCode TestReciever::initialize()
-{
+StatusCode TestReciever::initialize() {
   ATH_CHECK(m_inputKey.initialize());
   return StatusCode::SUCCESS;
 }
 
-StatusCode TestReciever::finalize()
-{
+StatusCode TestReciever::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode TestReciever::execute(const EventContext& context) const
-{
+StatusCode TestReciever::execute(const EventContext& context) const {
   auto handle = SG::makeHandle(m_inputKey, context);
   ATH_MSG_DEBUG("Waiting for response");
   handle->waitForResponse();
   ATH_MSG_DEBUG("Ready");
 
-  ATH_MSG_DEBUG("Response id " << handle->response()->id() << " , event number " << handle->response()->eventinfo().eventnumber());
+  ATH_MSG_DEBUG("Response id "
+                << handle->response()->id() << " , event number "
+                << handle->response()->eventinfo().eventnumber());
+  ATH_MSG_DEBUG("Response data size " << handle->response()->data_size());
+  for (int i = 0; i < std::min(3, handle->response()->data_size()); ++i) {
+    ATH_MSG_DEBUG("Response data " << i << " : "
+                                   << handle->response()->data(i));
+  }
   return StatusCode::SUCCESS;
 }
-
