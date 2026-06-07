@@ -23,7 +23,7 @@ public:
         *response->mutable_eventinfo() = request->eventinfo();
 
         // Copy ID
-        response->set_id("TestServiceImpl");
+        response->set_id("TestServiceImpl back to "+request->id());
 
         // Process data
         for (int v : request->data()) {

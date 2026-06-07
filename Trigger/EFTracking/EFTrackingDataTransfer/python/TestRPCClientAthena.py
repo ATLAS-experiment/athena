@@ -22,10 +22,28 @@ acc.addEventAlgo(CompFactory.TestSender("Sender1",
     OutputKey="Data1"
 ))
 
+acc.addEventAlgo(CompFactory.TestSender("Sender2",
+    OutputLevel=DEBUG,
+    ValueToSend=-20, 
+    SizeToSend=2, 
+    OutputKey="Data2"
+))
+
+
+
 acc.addEventAlgo(CompFactory.TestReciever("Reciever1",
     OutputLevel=DEBUG,
-    InputKey="Data1" # this is the synchronisation mechanism between the Sender1 and this
+    InputKey="Data1" # this is the synchronisation mechanism between the Sender1 and this alg
 ))
+
+
+acc.addEventAlgo(CompFactory.TestReciever("Reciever2",
+    OutputLevel=DEBUG,
+    InputKey="Data2" # this is the synchronisation mechanism between the Sender2 and this alg
+))
+
+
+
 
 
 
