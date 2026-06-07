@@ -10,6 +10,7 @@ from AthenaCommon.Constants import DEBUG
 flags = initConfigFlags()
 flags.Input.Files = defaultTestFiles.RDO_RUN4 # this is completely dummy input to get event loop going
 flags.Exec.MaxEvents = 10
+flags.Concurrency.NumThreads=3
 flags.lock()
 acc = MainServicesCfg(flags)
 
