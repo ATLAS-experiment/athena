@@ -29,12 +29,12 @@ StatusCode JetCalibTool::initialize() {
     ATH_CHECK( m_smearingTool.retrieve());
   }
 
-  ATH_MSG_INFO("Jet calibration sequence :");
+  ATH_MSG_DEBUG("Jet calibration sequence :");
   for(const ToolHandle<IJetCalibStep> &t : m_calibSteps){
-    ATH_MSG_INFO("  - "<< t->name() );
+    ATH_MSG_DEBUG("  - "<< t->name() );
   }
   if(!m_smearingTool.empty() ){
-    ATH_MSG_INFO("  - "<< m_smearingTool->name() );
+    ATH_MSG_DEBUG("  - "<< m_smearingTool->name() );
   }
   
   return StatusCode::SUCCESS;
