@@ -182,7 +182,8 @@ bool TrigEgammaMonitorTagAndProbeAlgorithm::executeTandP( const EventContext& ct
         if ( !minimalTriggerRequirement() ) 
           return false;
       }
-      fillLabel(monGroup, "CutCounter", "PassTrigger");
+      fillLabel(monGroup, "CutCounter", "PassMinimalTrigger");
+
  
     }else{
       ATH_MSG_DEBUG("Disable trigger tags because trigger tags list is empty.");
@@ -277,8 +278,10 @@ bool TrigEgammaMonitorTagAndProbeAlgorithm::minimalTriggerRequirement() const {
     ATH_MSG_DEBUG("Apply Minimal trigger requirements");
     for(unsigned int ilist = 0; ilist != m_tagTrigList.size(); ilist++) {
         std::string tag = m_tagTrigList[ilist];
-        if ( tdt()->isPassed(tag) )
-            return true;
+    	//ATH_MSG_INFO("Standard Tag and Probe tag is: "<< tag);
+        if ( tdt()->isPassed(tag) ){
+	    //ATH_MSG_INFO("Standard Trigger tag requirement returned True: " << tag);
+            return true;}
     }
 
     return false;
