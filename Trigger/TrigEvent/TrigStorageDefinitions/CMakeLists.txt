@@ -12,14 +12,14 @@ atlas_add_library( TrigStorageDefinitions
 atlas_add_test( ListMap_test
                 SOURCES test/ListMap_test.cxx
                 LINK_LIBRARIES TrigStorageDefinitions
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( EDMMap_test
                 SOURCES test/EDMMap_test.cxx
                 LINK_LIBRARIES TrigStorageDefinitions
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( Basic_test
                 SOURCES test/Basic_test.cxx
                 LINK_LIBRARIES TrigStorageDefinitions
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
