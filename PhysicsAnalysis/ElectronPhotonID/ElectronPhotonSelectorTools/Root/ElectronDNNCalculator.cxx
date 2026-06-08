@@ -34,8 +34,11 @@ ElectronDNNCalculator::ElectronDNNCalculator(AsgElectronSelectorTool* owner,
                                             m_variables(variables),
                                             m_var_size(variables.size())
 {
-  ATH_MSG_INFO("Initializing ElectronDNNCalculator...");
 
+  ATH_MSG_INFO("Initializing ElectronDNNCalculator...");
+  for (const auto& var : m_variables) {
+    std::cout << "VARIABLE: " << var << std::endl;
+  }
   if (modelFileName.empty()){
     throw std::runtime_error("No file found at '" + modelFileName + "'");
   }
@@ -55,7 +58,7 @@ ElectronDNNCalculator::ElectronDNNCalculator(AsgElectronSelectorTool* owner,
   auto parsedGraph = lwt::parse_json_graph(inputFile);
   // Test whether the number of outputs of the given network corresponds to the expected number
   size_t nOutputs = parsedGraph.outputs.begin()->second.labels.size();
-  if (nOutputs != 6 && nOutputs != 1){
+  if (nOutputs != 4 && nOutputs != 1){
     throw std::runtime_error("Given model does not have 1 or 6 outputs. Something seems to be wrong with the model file.");
   }
   else if (nOutputs == 1 && m_multiClass){

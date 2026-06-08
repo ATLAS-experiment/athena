@@ -91,8 +91,8 @@ namespace AllowedVariables
 AsgElectronSelectorTool::AsgElectronSelectorTool( const std::string& myname ) :
   AsgTool(myname),
   m_configFile{""},
-  m_mvaTool_binary(nullptr),
-  m_mvaTool_multi(nullptr)
+  m_mvaTool(nullptr),
+  m_mvaTool_secondSelection(nullptr)
 {
 
   // Declare the needed properties
@@ -123,10 +123,6 @@ AsgElectronSelectorTool::~AsgElectronSelectorTool()
 //=============================================================================
 StatusCode AsgElectronSelectorTool::initialize()
 {
-//  if (!m_workingPoint.empty()){
-//    m_configFile = AsgConfigHelper::findConfigFile(m_workingPoint, EgammaSelectors::ElectronDNNPointToConfFile);
-//    ATH_MSG_INFO("operating point : " << this->getOperatingPointName());
-//  }
   
 if (m_configFile.empty()) {
   if (!m_workingPoint.empty()){
@@ -155,8 +151,13 @@ else {
   ATH_MSG_DEBUG("Configfile to use: " << m_configFile);
   TEnv env;
   env.ReadFile(configFile.c_str(), kEnvLocal);
+
+  // Model is multiclass or not, default is binary model
+  m_multiClass = env.GetValue("multiClass", false);
+  m_multiClass_secondSelection = env.GetValue("multiClass.SecondSelection", false);
+  m_useMultiStepDNN = env.GetValue("useMultiStepDNN", false);
+
   {
-    ATH_MSG_INFO("Initializing BINARY DNN");
 
   std::string modelFilename("");
   std::string quantileFilename("");
@@ -169,9 +170,8 @@ else {
     modelFilename = m_modelFileName;
   }
   else {
-  //  modelFilename = env.GetValue("inputModelFileName", "ElectronPhotonSelectorTools/offline/mc16_20210204/ElectronDNNNetwork.json");
    modelFilename = env.GetValue( "inputModelFileName", ""); 
-   ATH_MSG_DEBUG("Getting the input Binary Model from: " << modelFilename );
+   ATH_MSG_DEBUG("Getting the input Model File from: " << modelFilename );
   }
   std::string filename = PathResolverFindCalibFile(modelFilename);
   if (filename.empty()){
@@ -187,7 +187,6 @@ else {
     quantileFilename = m_quantileFileName;
   }
   else {
-  //  quantileFilename = env.GetValue("inputQuantileFileName", "ElectronPhotonSelectorTools/offline/mc16_20210204/ElectronDNNQuantileTransformer.root");
     quantileFilename = env.GetValue("inputQuantileFileName", "");
     ATH_MSG_DEBUG("Getting the input QuantileTransformer from: " << quantileFilename);
   }
@@ -203,25 +202,25 @@ else {
   while(vars.good()){
     std::string substr;
     std::getline(vars, substr, ',');
-    m_variables_binary.push_back( substr );
+    m_variables.push_back( substr );
     if(!AllowedVariables::variableMap.contains(substr)){
       ATH_MSG_ERROR("Unsupported variable " << substr << " found in the config.");
       return StatusCode::FAILURE;
     }
-    m_enum_variables_binary.push_back(AllowedVariables::variableMap.at(substr));
+    m_enum_variables.push_back(AllowedVariables::variableMap.at(substr));
   }
-   ATH_MSG_INFO("Initializing 2-class DNN");
-   m_mvaTool_binary = std::make_unique<ElectronDNNCalculator>(
+
+   m_mvaTool = std::make_unique<ElectronDNNCalculator>(
     this,
     filename.c_str(),
     qfilename.c_str(),
-    m_variables_binary,
-    false   // binary
+    m_variables,
+    m_multiClass 
    );
 }
 
- {
-    ATH_MSG_INFO("Initializing MULTI-CLASS DNN");
+  
+  if(m_useMultiStepDNN){
 
     std::string modelFile =
       env.GetValue("SecondSelection.inputModelFileName", "");
@@ -243,8 +242,8 @@ else {
     }
 
     // ---- variables ----
-    m_variables_multi.clear();
-    m_enum_variables_multi.clear();
+    m_variables_secondSelection.clear();
+    m_enum_variables_secondSelection.clear();
 
     std::stringstream vars(env.GetValue("SecondSelection.Variables", ""));
 
@@ -259,28 +258,26 @@ else {
         return StatusCode::FAILURE;
       }
 
-      m_variables_multi.push_back(v);
-      m_enum_variables_multi.push_back(AllowedVariables::variableMap.at(v));
+      m_variables_secondSelection.push_back(v);
+      m_enum_variables_secondSelection.push_back(AllowedVariables::variableMap.at(v));
     }
 
-    if (m_variables_multi.empty()){
+    if (m_variables_secondSelection.empty()){
       ATH_MSG_ERROR("No variables defined for Second Selection Multiclass network");
       return StatusCode::FAILURE;
     }
 
     // ---- tool ----
-    m_mvaTool_multi = std::make_unique<ElectronDNNCalculator>(
+    m_mvaTool_secondSelection = std::make_unique<ElectronDNNCalculator>(
         this,
         modelPath.c_str(),
         quantilePath.c_str(),
-        m_variables_multi,
-        true   // multiclass
+        m_variables_secondSelection,
+        m_multiClass_secondSelection
     );
   }
 
-  // Model is multiclass or not, default is binary model
-  m_multiClass = env.GetValue("multiClass", false);
-  m_useMultiStepDNN = env.GetValue("useMultiStepDNN", false);
+
   // Include cf node in numerator or denominator when combining different outputs
   m_cfSignal = env.GetValue("cfSignal", false);
   // Fractions to multiply different outputs with before combining
@@ -303,10 +300,10 @@ else {
 
   // Second Selection 
   if (m_useMultiStepDNN) {
-      m_cutSCT2 = AsgConfigHelper::HelperInt("SecondSelection.CutSCT", env);
-      m_cutPi2  = AsgConfigHelper::HelperInt("SecondSelection.CutPi", env);
-      m_cutAmbiguity2 = AsgConfigHelper::HelperInt("SecondSelection.CutAmbiguity", env);
-      m_cutSelector2 = AsgConfigHelper::HelperDouble("SecondSelection.CutSelector", env);
+      m_cutSCTSecondSelection = AsgConfigHelper::HelperInt("SecondSelection.CutSCT", env);
+      m_cutPiSecondSelection  = AsgConfigHelper::HelperInt("SecondSelection.CutPi", env);
+      m_cutAmbiguitySecondSelection = AsgConfigHelper::HelperInt("SecondSelection.CutAmbiguity", env);
+      m_cutSelectorSecondSelection = AsgConfigHelper::HelperDouble("SecondSelection.CutSelector", env);
   }
 
   unsigned int numberOfExpectedBinCombinedMVA ;
@@ -326,7 +323,7 @@ else {
                     " input size " << m_cutSelectorCF.size());
       return StatusCode::FAILURE;
     }
-    if(!m_multiClass){
+    if(!m_multiClass || !m_multiClass_secondSelection){
       ATH_MSG_ERROR("Configuration issue :  CF rejection is only defined "
                     "for multiClass: TRUE");
       return StatusCode::FAILURE;
@@ -336,7 +333,7 @@ else {
     m_CFReject = false;
   }
 
-  if (m_multiClass){
+  if (m_multiClass || m_multiClass_secondSelection){
     // Fractions are only needed if multiclass model is used
     // There are three fractions for the combination, the signal fraction is either one (cfSignal == false) or 1 - cf fraction (cfSignal == true)
     if (m_fractions.size() != numberOfExpectedEtaBins * 3){
@@ -386,26 +383,21 @@ else {
   // define a default vector to return in the calculateMultipleOutputs methods
   // depending on the number of expected outputs
   if (!m_multiClass && !m_useMultiStepDNN) {
-    m_defaultOutputs.binary = {-999.};
+    m_defaultOutputs.firstSelection = {-999.};
   }
   else if (m_multiClass && !m_useMultiStepDNN) {  
-    m_defaultOutputs.multi = {-999., -999., -999., -999.};
+    m_defaultOutputs.firstSelection = {-999., -999., -999., -999.};
   }
-  else if (m_multiClass && m_useMultiStepDNN) {
-    m_defaultOutputs.binary = {-999.};
-    m_defaultOutputs.multi  = {-999., -999., -999., -999.};
+  else if (m_useMultiStepDNN) {
+    m_defaultOutputs.firstSelection = {-999.};
+    m_defaultOutputs.secondSelection  = {-999., -999., -999., -999.};
   }
   else {
-    ATH_MSG_ERROR("Invalid DNN configuration");
+    ATH_MSG_ERROR("Invalid Output dimension");
     return StatusCode::FAILURE;
  }
- // if (m_multiClass){
- //   m_defaultVector = {-999., -999., -999., -999.};
- // }
-//  else{
- //   m_defaultVector = {-999.};
- // }
-  ATH_MSG_INFO("Initialization SUCCESS with Binary + Multi DNN");
+
+  ATH_MSG_INFO("Initialization SUCCESS");
   return StatusCode::SUCCESS;
 }
 
@@ -487,18 +479,18 @@ asg::AcceptData AsgElectronSelectorTool::accept( const EventContext& ctx, const 
   passBLayerRequirement = ElectronSelectorHelpers::passBLayerRequirement(*track);
 
   // calculate the output of the selector tool
-  DNNOutputs mvaOutputs = runDNNs(ctx, eg, mu);
+  SelectorOutputs mvaOutputs = runSelections(ctx, eg, mu);
 
-  auto [disc_binary, disc_multi] = getDiscriminant(mvaOutputs, eg);
+  auto [disc_firstSelection, disc_secondSelection] = getDiscriminant(mvaOutputs, eg);
 
   ATH_MSG_VERBOSE(Form("PassVars: MVA_Bin=%8.5f, MVA_Multi=%8.5f, eta=%8.5f, et=%8.5f, nSiHitsPlusDeadSensors=%i, nHitsPlusPixDeadSensors=%i, passBLayerRequirement=%i, ambiguityBit=%i, mu=%8.5f",
-                       disc_binary,disc_multi, eta, et,
+                       disc_firstSelection,disc_secondSelection, eta, et,
                        nSiHitsPlusDeadSensors, nPixHitsPlusDeadSensors,
                        passBLayerRequirement,
                        ambiguityBit, mu));
   double mvaScoreCF = 0;
   if (m_CFReject){
-    mvaScoreCF = combineOutputsCF(mvaOutputs.multi);
+    mvaScoreCF = combineOutputsCF(mvaOutputs.firstSelection);
     ATH_MSG_VERBOSE(Form("PassVars: MVA=%8.5f, eta=%8.5f, et=%8.5f, nSiHitsPlusDeadSensors=%i, nHitsPlusPixDeadSensors=%i, passBLayerRequirement=%i, ambiguityBit=%i, mu=%8.5f",
                         mvaScoreCF, eta, et,
                         nSiHitsPlusDeadSensors, nPixHitsPlusDeadSensors,
@@ -506,9 +498,9 @@ asg::AcceptData AsgElectronSelectorTool::accept( const EventContext& ctx, const 
                         ambiguityBit, mu));
   }
 
-//  if (!allFound){
-//    throw std::runtime_error("AsgElectronSelectorTool: Not all variables needed for the decision are found. The following variables are missing: " + notFoundList );
-//  }
+  if (!allFound){
+    throw std::runtime_error("AsgElectronSelectorTool: Not all variables needed for the decision are found. The following variables are missing: " + notFoundList );
+  }
 
   // Set up the individual cuts
   bool passKine(true);
@@ -590,8 +582,6 @@ asg::AcceptData AsgElectronSelectorTool::accept( const EventContext& ctx, const 
   }
   // (Second) cut on prompt discriminant
   // Cut on Score MVA First Selection
-  double mvaScore = (m_useMultiStepDNN || !m_multiClass) ? disc_binary : disc_multi;
-
   if (!m_cutSelector.empty()) {
     double cutDiscriminant;
     // To protect against a binning mismatch, which should never happen
@@ -606,7 +596,7 @@ asg::AcceptData AsgElectronSelectorTool::accept( const EventContext& ctx, const 
     }
     // Determine if the calculated mva score value passes the combined cut
     ATH_MSG_DEBUG("MVA macro: Prompt Discriminant: ");
-    if (mvaScore < cutDiscriminant){
+    if (disc_firstSelection < cutDiscriminant){
       ATH_MSG_DEBUG("MVA macro: Prompt cut failed.");
       passMVA = false;
     }
@@ -618,15 +608,15 @@ asg::AcceptData AsgElectronSelectorTool::accept( const EventContext& ctx, const 
   if (m_useMultiStepDNN) {
       
       // A) Cuts Hits Phase 2
-      if (!m_cutAmbiguity2.empty() && !ElectronSelectorHelpers::passAmbiguity((xAOD::AmbiguityTool::AmbiguityType)ambiguityBit, m_cutAmbiguity2[etaBin])) passAmbiguity = false;
-      if (!m_cutBL2.empty() && m_cutBL2[etaBin] == 1 && !passBLayerRequirement) passNBlayer = false;
-      if (!m_cutPi2.empty() && nPixHitsPlusDeadSensors < m_cutPi2[etaBin]) passNPixel = false;
-      if (!m_cutSCT2.empty() && nSiHitsPlusDeadSensors < m_cutSCT2[etaBin]) passNSilicon = false;
+      if (!m_cutAmbiguitySecondSelection.empty() && !ElectronSelectorHelpers::passAmbiguity((xAOD::AmbiguityTool::AmbiguityType)ambiguityBit, m_cutAmbiguitySecondSelection[etaBin])) passAmbiguity = false;
+      if (!m_cutBLSecondSelection.empty() && m_cutBLSecondSelection[etaBin] == 1 && !passBLayerRequirement) passNBlayer = false;
+      if (!m_cutPiSecondSelection.empty() && nPixHitsPlusDeadSensors < m_cutPiSecondSelection[etaBin]) passNPixel = false;
+      if (!m_cutSCTSecondSelection.empty() && nSiHitsPlusDeadSensors < m_cutSCTSecondSelection[etaBin]) passNSilicon = false;
 
       // B) Cuts on  MVA Score Second Selection
-      if (!m_cutSelector2.empty()) {
-          double cutdiscriminant2 = m_doSmoothBinInterpolation ? interpolateCuts(m_cutSelector2, et, eta) : m_cutSelector2.at(ibin_combinedMVA);
-          if (disc_multi < cutdiscriminant2) passMVA = false;
+      if (!m_cutSelectorSecondSelection.empty()) {
+          double cutdiscriminant_SecondSelection = m_doSmoothBinInterpolation ? interpolateCuts(m_cutSelectorSecondSelection, et, eta) : m_cutSelectorSecondSelection.at(ibin_combinedMVA);
+          if (disc_secondSelection < cutdiscriminant_SecondSelection) passMVA = false;
       }
   }
 
@@ -648,41 +638,49 @@ asg::AcceptData AsgElectronSelectorTool::accept( const EventContext& ctx, const 
 double AsgElectronSelectorTool::calculate( const EventContext& ctx, const xAOD::Electron* eg, double mu ) const
 {
   // Get all outputs of the mva tool
-  DNNOutputs mvaOutputs = runDNNs(ctx, eg, mu);
-  auto [disc_binary, disc_multi] = getDiscriminant(mvaOutputs, eg);
+  SelectorOutputs mvaOutputs = runSelections(ctx, eg, mu);
+  auto [disc_firstSelection, disc_secondSelection] = getDiscriminant(mvaOutputs, eg);
 
-  // Binary DNN only 
   if (!m_multiClass && !m_useMultiStepDNN) {
-    return disc_binary;
+    return disc_firstSelection;
   }
-  // Multiclass DNN only
+
   if (m_multiClass && !m_useMultiStepDNN) {
-    return disc_multi;
+    return disc_firstSelection;
   }
-  // Multi-step DNNs
+  // Multi-Step Selection
   if (m_multiClass && m_useMultiStepDNN) {
-    return disc_multi;
+    return disc_secondSelection;
   }
   return -999.;
 }
 
-std::pair<double, double> AsgElectronSelectorTool::getDiscriminant(const DNNOutputs& mvaOutputs, const xAOD::Electron* eg ) const
+std::pair<double, double> AsgElectronSelectorTool::getDiscriminant(const SelectorOutputs& mvaOutputs, const xAOD::Electron* eg ) const
 {
-  double discriminant_binary = 0;
-  double discriminant_multi = 0;
-  // If a binary model is used, vector will have one entry, if multiclass is used vector will have six entries
-  if (!mvaOutputs.binary.empty()){
-    discriminant_binary = transformMLOutput(mvaOutputs.binary.at(0));
-  //  std::cout << "Discriminant = " << discriminant << std::endl;
-  }
-  if (!mvaOutputs.multi.empty()) {
-    const xAOD::CaloCluster* cluster = eg->caloCluster();
-    const float eta = cluster->etaBE(2);
-    // combine the six output nodes into one discriminant to cut on, any necessary transformation is applied within combineOutputs()
-    discriminant_multi  = combineOutputs(mvaOutputs.multi, eta);
+  double discriminant_firstSelection = 0;
+  double discriminant_secondSelection = 0;
+  const xAOD::CaloCluster* cluster = eg->caloCluster();
+  const float eta = cluster->etaBE(2);
+  // If a binary model is used, vector will have one entry
+  if (!mvaOutputs.firstSelection.empty()){
+
+    if (m_multiClass) { 
+      discriminant_firstSelection = combineOutputs(mvaOutputs.firstSelection, eta);
+    } else {
+      discriminant_firstSelection = transformMLOutput(mvaOutputs.firstSelection.at(0));
+    }
   }
 
-  return {discriminant_binary, discriminant_multi};
+  if (!mvaOutputs.secondSelection.empty()) {
+
+    if (m_multiClass_secondSelection && m_useMultiStepDNN) { 
+      discriminant_secondSelection = combineOutputs(mvaOutputs.secondSelection, eta);
+    } else {
+      discriminant_secondSelection = transformMLOutput(mvaOutputs.secondSelection.at(0));
+    }
+  }
+
+  return {discriminant_firstSelection, discriminant_secondSelection};
 }
 
 std::vector<double> AsgElectronSelectorTool::buildInputVector(
@@ -736,18 +734,18 @@ std::vector<double> AsgElectronSelectorTool::buildInputVector(
 
 std::vector<float> AsgElectronSelectorTool::calculateMultipleOutputs(const EventContext &ctx, const xAOD::Electron *eg, double mu) const
 {
-  // Llamamos a la función "trabajadora"
-  DNNOutputs mvaOutputs = runDNNs(ctx, eg, mu);
 
-  if (!mvaOutputs.multi.empty()) {
-    return mvaOutputs.multi;
+  SelectorOutputs mvaOutputs = runSelections(ctx, eg, mu);
+
+  if (!mvaOutputs.secondSelection.empty()) {
+    return mvaOutputs.secondSelection;
   }
-  return mvaOutputs.binary;
+  return mvaOutputs.firstSelection;
 }
-AsgElectronSelectorTool::DNNOutputs AsgElectronSelectorTool::runDNNs(const EventContext &ctx, const xAOD::Electron *eg, double mu) const
+AsgElectronSelectorTool::SelectorOutputs AsgElectronSelectorTool::runSelections(const EventContext &ctx, const xAOD::Electron *eg, double mu) const
 {
   
-  DNNOutputs mvaOutputs;
+  SelectorOutputs mvaOutputs;
   ATH_MSG_VERBOSE("\t AsgElectronSelectorTool::calculateMultipleOutputs( &ctx, *eg, mu= "<<(&ctx)<<", "<<eg<<", "<<mu<<" )");
   if (!eg){
     throw std::runtime_error("AsgElectronSelectorTool: Failed, no electron object was passed" );
@@ -957,12 +955,12 @@ AsgElectronSelectorTool::DNNOutputs AsgElectronSelectorTool::runDNNs(const Event
                        mu,
                        wtots1, EoverP, int(nPixHitsPlusDeadSensors), int(nSCTHitsPlusDeadSensors), SCTWeightedCharge));
 
-//  if (!allFound){
-//    throw std::runtime_error("AsgElectronSelectorTool: Not all variables needed for MVA calculation are found. The following variables are missing: " + notFoundList );
-//  }
+  if (!allFound){
+    throw std::runtime_error("AsgElectronSelectorTool: Not all variables needed for MVA calculation are found. The following variables are missing: " + notFoundList );
+  }
 
-  auto vars_binary = buildInputVector(
-      m_enum_variables_binary,
+  auto vars_firstSelection = buildInputVector(
+      m_enum_variables,
       eta, et, f3, Rhad, Rhad1, Reta, w2, f1, Eratio,
       deltaEta1, d0, qd0, d0significance,
       Rphi, dPOverP, deltaPhiRescaled2,
@@ -972,8 +970,8 @@ AsgElectronSelectorTool::DNNOutputs AsgElectronSelectorTool::runDNNs(const Event
       SCTWeightedCharge
   );
 
-  auto vars_multi = buildInputVector(
-      m_enum_variables_multi,
+  auto vars_secondSelection = buildInputVector(
+      m_enum_variables_secondSelection,
       eta, et, f3, Rhad, Rhad1, Reta, w2, f1, Eratio,
       deltaEta1, d0, qd0, d0significance,
       Rphi, dPOverP, deltaPhiRescaled2,
@@ -983,46 +981,23 @@ AsgElectronSelectorTool::DNNOutputs AsgElectronSelectorTool::runDNNs(const Event
       SCTWeightedCharge
   );
 
-  if (!m_multiClass && !m_useMultiStepDNN) {
+  if (m_mvaTool){
+    auto mvaScores_firstSelection = m_mvaTool->calculate(vars_firstSelection);
     
-     auto mvaScores_binary = m_mvaTool_binary->calculate(vars_binary);
-     mvaOutputs.binary.resize(mvaScores_binary.rows());
-    
-     for (int i = 0; i < mvaScores_binary.rows(); i++) { 
-         mvaOutputs.binary[i]=(mvaScores_binary(i, 0));
+     mvaOutputs.firstSelection.resize(mvaScores_firstSelection.rows());
+     for (int i = 0; i < mvaScores_firstSelection.rows(); i++) { 
+         mvaOutputs.firstSelection[i]=(mvaScores_firstSelection(i, 0));
       }
-  } 
-  else if (m_multiClass && !m_useMultiStepDNN) {
-
-     auto mvaScores_multi  = m_mvaTool_multi->calculate(vars_multi);
-     mvaOutputs.multi.resize(mvaScores_multi.rows());
-
-     for (int i = 0; i < mvaScores_multi.rows(); i++) {
-         mvaOutputs.multi[i] = (mvaScores_multi(i, 0));
-     }
   }
 
-  else if (m_multiClass && m_useMultiStepDNN) {
+  if ((m_mvaTool_secondSelection)){
+    
+    auto mvaScores_secondSelection = m_mvaTool_secondSelection->calculate(vars_secondSelection);
 
-    auto mvaScores_binary = m_mvaTool_binary->calculate(vars_binary);
-    mvaOutputs.binary.resize(mvaScores_binary.rows());
-
-    for (int i = 0; i < mvaScores_binary.rows(); i++) {
-      mvaOutputs.binary[i] = (mvaScores_binary(i,0));
+    mvaOutputs.secondSelection.resize(mvaScores_secondSelection.rows());
+    for (int i = 0; i < mvaScores_secondSelection.rows(); i++){
+      mvaOutputs.secondSelection[i] = (mvaScores_secondSelection(i,0));
     }
-
-    auto mvaScores_multi = m_mvaTool_multi->calculate(vars_multi);
-
-    mvaOutputs.multi.resize(mvaScores_multi.rows());
-
-    for (int i = 0; i < mvaScores_multi.rows(); i++) {
-      mvaOutputs.multi[i] = (mvaScores_multi(i,0));
-    }
-  }
-
-  else {
-
-    ATH_MSG_ERROR("Invalid DNN configuration");
   }
 
 return mvaOutputs;
@@ -1142,7 +1117,7 @@ double AsgElectronSelectorTool::transformMLOutput( float score ) const
 }
 
 
-double AsgElectronSelectorTool::combineOutputs( const std::vector<float>& mvaScores_multi, double eta ) const
+double AsgElectronSelectorTool::combineOutputs( const std::vector<float>& mvaScores, double eta ) const
 {
   unsigned int etaBin = getDiscEtaBin(eta);
   double disc = 0;
@@ -1150,27 +1125,28 @@ double AsgElectronSelectorTool::combineOutputs( const std::vector<float>& mvaSco
   if (m_cfSignal){
     // Put cf node into numerator
 
-    disc = (mvaScores_multi.at(0) * (1 - m_fractions.at(3 * etaBin + 0)) +
-            (mvaScores_multi.at(1) * m_fractions.at(3 * etaBin + 0))) /
-           ((mvaScores_multi.at(2) * m_fractions.at(3 * etaBin + 1)) +
-            (mvaScores_multi.at(3) * m_fractions.at(3 * etaBin + 2)));
+    disc = (mvaScores.at(0) * (1 - m_fractions.at(3 * etaBin + 0)) +
+            (mvaScores.at(1) * m_fractions.at(3 * etaBin + 0))) /
+           ((mvaScores.at(2) * m_fractions.at(3 * etaBin + 1)) +
+            (mvaScores.at(3) * m_fractions.at(3 * etaBin + 2)));
   }
   else{
     // Put cf node in denominator
-    disc = mvaScores_multi.at(0) /
-           ((mvaScores_multi.at(1) * m_fractions.at(3 * etaBin + 0)) +
-            (mvaScores_multi.at(2) * m_fractions.at(3 * etaBin + 1)) +
-            (mvaScores_multi.at(3) * m_fractions.at(3 * etaBin + 2)));
-  }
 
+      disc = mvaScores.at(0) /
+           ((mvaScores.at(1) * m_fractions.at(3 * etaBin + 0)) +
+            (mvaScores.at(2) * m_fractions.at(3 * etaBin + 1)) +
+            (mvaScores.at(3) * m_fractions.at(3 * etaBin + 2)));
+  
+  }
   // Log transform to have values in reasonable range
   return std::log(disc);
 }
 
-double AsgElectronSelectorTool::combineOutputsCF( const std::vector<float>& mvaScores_multi )
+double AsgElectronSelectorTool::combineOutputsCF( const std::vector<float>& mvaScores)
 {
   double disc = 0;
-  disc = mvaScores_multi.at(0) / mvaScores_multi.at(1);
+  disc = mvaScores.at(0) / mvaScores.at(1);
 
   return std::log(disc);
 }
