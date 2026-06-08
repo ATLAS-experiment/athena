@@ -117,8 +117,10 @@ void test1 (ISvcLocator* svcloc, TestCnvSvc& testsvc)
   assert (cnv.createObj (&taddr, pObj).isSuccess());
   auto* trans2 = SG::Storable_cast<DataVector<Y_v2> > (pObj);
   assert (trans2->size() == 10);
-  for (size_t i = 0; i < 10; i++)
+  for (size_t i = 0; i < 10; i++) {
     assert ((*trans2)[i]->m_a == (int)i);
+    assert ((*trans2)[i]->m_yy == 1234);
+  }
   assert (trans2->getConstStoreLink().dataID() == "keyAux.");
   delete pObj;
   delete pers1;
@@ -135,8 +137,10 @@ void test1 (ISvcLocator* svcloc, TestCnvSvc& testsvc)
   assert (cnv.createObj (&taddr, pObj).isSuccess());
   auto* trans3 = SG::Storable_cast<DataVector<Y_v2> > (pObj);
   assert (trans3->size() == 10);
-  for (size_t i = 0; i < 10; i++)
+  for (size_t i = 0; i < 10; i++) {
     assert ((*trans3)[i]->m_a == (int)i*3);
+    assert ((*trans3)[i]->m_yy == 1234);
+  }
   assert (trans3->getConstStoreLink().dataID() == "keyAux.");
   delete pObj;
 
