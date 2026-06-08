@@ -16,17 +16,16 @@ class MuonPhaseIITestDefaults:
     ### Hits parsed through the R4 MS-only ATLAS layout
     HITS_PG_R4_MSOnly = []
     ### BS file taken in MD3 2025 with a pile-up of >120
-    DATA_BS = [
-        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-11._0001.data",
-        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-12._0001.data",
-        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-13._0001.data",
-        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-14._0001.data",
-        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-15._0001.data",
-        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-16._0001.data",
-        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-17._0001.data",
-        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-18._0001.data",
-        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-19._0001.data",
-        "root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/data-art/large-input/MuonRecRTT/data26_13p6TeV.00519268.physics_Main.daq.RAW._lb0178._SFO-11._0001.data"]
+
+    DATA_BS = [f"root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/data-art/large-input/MuonRecRTT/{fileName}" for fileName in [
+                            "data26_13p6TeV.00519268.physics_Main.daq.RAW._lb0178._SFO-11._0001.data",
+                            "data26_13p6TeV.00519268.physics_Main.daq.RAW._lb0178._SFO-11._0002.data",
+                            "data26_13p6TeV.00519268.physics_Main.daq.RAW._lb0178._SFO-12._0001.data",
+                            "data26_13p6TeV.00519268.physics_Main.daq.RAW._lb0178._SFO-12._0002.data",
+                            "data26_13p6TeV.00519268.physics_Main.daq.RAW._lb0178._SFO-20._0001.data",
+                            "data26_13p6TeV.00519268.physics_Main.daq.RAW._lb0178._SFO-20._0002.data",
+                        ]
+    ]
     ###
     RDO_R3 = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/myRDO.R3.pool.root"]
     ###
@@ -39,6 +38,9 @@ class MuonPhaseIITestDefaults:
     GEODB_R3 = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-R3S-2021-03-02-00.db"
     ### R3 MS only layout
     GEODB_R3MSOnly = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-R3S-2021-03-02-00_MSOnly.db"
+    ### R3 MTech format - This file format will trigger the setup of the legacy MuonGeoModel and
+    ###                   not of the Phase II software    
+    GEODB_MTECH = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-R3S-2021-03-02-00_MTech.db"
     ### R4 ATLAS layout
     GEODB_R4 = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-P2-RUN4-01-00-00.db"
     ### R4 MS only layout
