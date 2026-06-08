@@ -44,7 +44,7 @@ StatusCode xAODMETFilter::filterEvent() {
       if (!(*mec)[i]) continue;
     
       //for test filterHT->filterWeight
-      (*mec)[i]->add_attribute(filterMetStr, std::make_shared<HepMC3::DoubleAttribute>(met/1000.));
+      (*mec)[i]->add_attribute(HepMC::Str::filterMET, std::make_shared<HepMC3::DoubleAttribute>(met/1000.));
   }
  
   setFilterPassed(met >= m_METmin || keepAll());

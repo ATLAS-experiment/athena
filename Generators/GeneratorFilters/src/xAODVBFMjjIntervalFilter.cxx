@@ -195,8 +195,7 @@ StatusCode xAODVBFMjjIntervalFilter::filterEvent()
             }
 
 #ifdef HEPMC3
-      static const std::string filterWeightStr{"filterWeight"};
-      (*mec)[i]->add_attribute(filterWeightStr, std::make_shared<HepMC3::DoubleAttribute>(eventWeight*m_norm));
+      (*mec)[i]->add_attribute(HepMC::Str::filterWeight, std::make_shared<HepMC3::DoubleAttribute>(eventWeight*m_norm));
 #endif
 
         }

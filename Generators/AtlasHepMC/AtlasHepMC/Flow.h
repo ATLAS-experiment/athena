@@ -8,20 +8,21 @@
 #ifdef HEPMC3
 #include "HepMC3/Attribute.h"
 #include "HepMC3/GenParticle.h"
+#include "AtlasHepMC/AttributeNames.h"
 namespace HepMC {
 typedef std::shared_ptr<HepMC3::VectorIntAttribute> Flow;
 inline int flow(const HepMC3::GenParticlePtr& p, int i) {
     std::shared_ptr<HepMC3::IntAttribute> f=p->attribute<HepMC3::IntAttribute>("flow"+std::to_string(i));  if (f) return f->value();
-    std::shared_ptr<HepMC3::VectorIntAttribute> vf=p->attribute<HepMC3::VectorIntAttribute>("flow");  if (vf) if (0<i&&i<(int)(vf->value().size())) return vf->value().at(i);
+    std::shared_ptr<HepMC3::VectorIntAttribute> vf=p->attribute<HepMC3::VectorIntAttribute>(HepMC::Str::flow);  if (vf) if (0<i&&i<(int)(vf->value().size())) return vf->value().at(i);
     return 0;
 }
 inline int flow(const HepMC3::ConstGenParticlePtr& p, int i) {
     std::shared_ptr<HepMC3::IntAttribute> f=p->attribute<HepMC3::IntAttribute>("flow"+std::to_string(i));  if (f) return f->value();
-    std::shared_ptr<HepMC3::VectorIntAttribute> vf=p->attribute<HepMC3::VectorIntAttribute>("flow");  if (vf) if (0<i&&i<(int)(vf->value().size())) return vf->value().at(i);
+    std::shared_ptr<HepMC3::VectorIntAttribute> vf=p->attribute<HepMC3::VectorIntAttribute>(HepMC::Str::flow);  if (vf) if (0<i&&i<(int)(vf->value().size())) return vf->value().at(i);
     return 0;
 }
 inline Flow flow(const HepMC3::GenParticlePtr& p) {
-    std::shared_ptr<HepMC3::VectorIntAttribute> vf=p->attribute<HepMC3::VectorIntAttribute>("flow");
+    std::shared_ptr<HepMC3::VectorIntAttribute> vf=p->attribute<HepMC3::VectorIntAttribute>(HepMC::Str::flow);
     if (vf)  return vf;
 
     std::vector<int> fl;
@@ -31,7 +32,7 @@ inline Flow flow(const HepMC3::GenParticlePtr& p) {
     return std::make_shared<HepMC3::VectorIntAttribute>(fl);
 }
 inline Flow flow(const HepMC3::ConstGenParticlePtr& p) {
-    std::shared_ptr<HepMC3::VectorIntAttribute> vf=p->attribute<HepMC3::VectorIntAttribute>("flow");
+    std::shared_ptr<HepMC3::VectorIntAttribute> vf=p->attribute<HepMC3::VectorIntAttribute>(HepMC::Str::flow);
     if (vf)  return vf;
 
     std::vector<int> fl;
@@ -41,7 +42,7 @@ inline Flow flow(const HepMC3::ConstGenParticlePtr& p) {
     return std::make_shared<HepMC3::VectorIntAttribute>(fl);
 }
 template<class T> void  set_flow( T& a,  Flow fl) {
-    if(fl) a->add_attribute("flow",std::make_shared<HepMC3::VectorIntAttribute>(*fl));
+    if(fl) a->add_attribute(HepMC::Str::flow,std::make_shared<HepMC3::VectorIntAttribute>(*fl));
 }
 
 }

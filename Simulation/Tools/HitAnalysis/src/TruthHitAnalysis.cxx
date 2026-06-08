@@ -235,7 +235,7 @@ StatusCode TruthHitAnalysis::execute() {
 
       const auto &procVtx = HepMC::signal_process_vertex(*currentGenEventIter);
 #ifdef HEPMC3
-    const auto &barcodes = (*currentGenEventIter)->attribute<HepMC::GenEventBarcodes> ("barcodes");
+    const auto &barcodes = (*currentGenEventIter)->attribute<HepMC::GenEventBarcodes> (HepMC::Str::barcodes);
     std::map<int,int> id_to_barcode_map;
     if (barcodes) id_to_barcode_map = barcodes->id_to_barcode_map();
     for (const auto& vtx: (*currentGenEventIter)->vertices()) {

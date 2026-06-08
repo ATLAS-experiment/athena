@@ -154,7 +154,7 @@ TruthParticleTest* makeTestData()
 
 #ifdef HEPMC3
 // This is how the attribute can be set. But in HepMC3 meaningless attributes should be avoided.
-//  evt->add_attribute("alphaQCD",std::make_shared<HepMC3::DoubleAttribute>(-1));
+//  evt->add_attribute(HepMC::Str::alphaQCD,std::make_shared<HepMC3::DoubleAttribute>(-1));
 
   std::vector<double> weights(3);
   weights[0] = 1;
@@ -164,7 +164,7 @@ TruthParticleTest* makeTestData()
   rdmStates[0] = 85909879;
   rdmStates[1] = 9707499;
   evt->weights() = std::move(weights);
-  evt->add_attribute("random_states",std::make_shared<HepMC3::VectorLongIntAttribute>(rdmStates));
+  evt->add_attribute(HepMC::Str::random_states,std::make_shared<HepMC3::VectorLongIntAttribute>(rdmStates));
 #else
   evt->set_event_scale( -1 );
   evt->set_alphaQCD( -1 );

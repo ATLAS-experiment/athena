@@ -145,7 +145,7 @@ StatusCode xAODHTFilter::filterEvent()
     for (unsigned int i = 0; i < mec->size(); ++i) {
       if (!(*mec)[i]) continue;
    
-      (*mec)[i]->add_attribute("filterHT", std::make_shared<HepMC3::DoubleAttribute>(HT));
+      (*mec)[i]->add_attribute(HepMC::Str::filterHT, std::make_shared<HepMC3::DoubleAttribute>(HT));
     }
 
   if ((HT < m_MinHT || HT >= m_MaxHT) && (!keepAll()))
