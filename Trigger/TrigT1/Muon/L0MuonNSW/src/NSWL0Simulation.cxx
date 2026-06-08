@@ -2,16 +2,16 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "NSWL1Simulation.h"
+#include "NSWL0Simulation.h"
 
-namespace NSWL1 {
-  NSWL1Simulation::NSWL1Simulation( const std::string& name, ISvcLocator* pSvcLocator )
+namespace NSWL0 {
+  NSWL0Simulation::NSWL0Simulation( const std::string& name, ISvcLocator* pSvcLocator )
     : AthReentrantAlgorithm( name, pSvcLocator ),
       m_histSvc( "THistSvc/THistSvc", name )
   {}
 
 
-  StatusCode NSWL1Simulation::initialize() {
+  StatusCode NSWL0Simulation::initialize() {
     ATH_MSG_DEBUG( "initialize " << name() );
     ATH_CHECK( m_trigRdoContainer.initialize() );
 
@@ -44,7 +44,7 @@ namespace NSWL1 {
   }
 
 
-  StatusCode NSWL1Simulation::execute(const EventContext& ctx) const {
+  StatusCode NSWL0Simulation::execute(const EventContext& ctx) const {
     auto padTriggerContainer = std::make_unique<Muon::NSW_PadTriggerDataContainer>();
     auto stripTriggerContainer = std::make_unique<Muon::NSW_TrigRawDataContainer>();
     auto MMTriggerContainer = std::make_unique<Muon::NSW_TrigRawDataContainer>();
@@ -76,7 +76,7 @@ namespace NSWL1 {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode NSWL1Simulation::finalize() {
+  StatusCode NSWL0Simulation::finalize() {
     if(m_doNtuple) ATH_CHECK(m_altree.write());
     return StatusCode::SUCCESS;
   }
