@@ -80,26 +80,26 @@ endif()
 atlas_add_test( Enums_test
    SOURCES test/Enums_test.cxx
    LINK_LIBRARIES TrigSteeringEvent
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( TrigPassBits_test
    SOURCES test/TrigPassBits_test.cxx
    LINK_LIBRARIES TrigSteeringEvent
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 
 if( NOT XAOD_STANDALONE AND NOT XAOD_ANALYSIS )
    atlas_add_test( Operators_test
       SOURCES test/Operators_test.cxx
       LINK_LIBRARIES AthenaKernel GaudiKernel TrigSteeringEvent
-      POST_EXEC_SCRIPT nopost.sh )
+      POST_EXEC_SCRIPT noerror.sh )
 
    atlas_add_test( Truncation_test
       SOURCES test/Truncation_test.cxx
       LINK_LIBRARIES AthenaKernel GaudiKernel TrigSteeringEvent
-      POST_EXEC_SCRIPT nopost.sh )
+      POST_EXEC_SCRIPT noerror.sh )
 
    atlas_add_test( HLTExtraData_test
       SOURCES test/HLTExtraData_test.cxx
       LINK_LIBRARIES TrigSteeringEvent
-      POST_EXEC_SCRIPT nopost.sh )
+      POST_EXEC_SCRIPT noerror.sh )
 endif()
