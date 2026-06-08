@@ -3,14 +3,19 @@ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ITkPixelCsvWaferIdTool.h"
+#include "InDetIdentifier/PixelID.h"
+
 
 #include "GaudiKernel/EventContext.h"
 #include "PathResolver/PathResolver.h"
 
+#include <arpa/inet.h>
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <bitset>
+
 
 ITkPixelCsvWaferIdAlg::ITkPixelCsvWaferIdAlg(const std::string& name,
                                                ISvcLocator* pSvcLocator)
@@ -46,9 +51,32 @@ StatusCode ITkPixelCsvWaferIdAlg::execute(const EventContext& ctx) const {
     }
 
     for (const CsvRow& row : m_rows) {
-        const Identifier id = waferId(row);
-        const auto compactId = id.get_identifier32().get_compact();
-        output << compactId << "\n";
+        const std::pair< Identifier, int> w_and_fe_id =  waferId(row);
+        const Identifier id = w_and_fe_id.first;
+        const uint32_t compactId = id.get_identifier32().get_compact();
+        const std::string compactId_str = id.get_identifier32().getString();
+        const auto bec = m_pixIdHelper->barrel_ec(id);
+        const auto ld = m_pixIdHelper->layer_disk(id);
+        const auto phi = m_pixIdHelper->phi_module(id);
+        const auto eta = m_pixIdHelper->eta_module(id);
+
+        std::string x = compactId_str.substr(0, compactId_str.length() - 2 );
+        std::stringstream ss;
+        ss << std::hex << x;
+        unsigned n;
+        ss >> n;
+        std::bitset<32> b(n);
+        b <<= 2; //shift left by two bits, to add FE bits
+        int fe = w_and_fe_id.second;
+        std::bitset<32> febits = std::bitset<32>(fe);
+        b |= febits;
+
+        output << compactId_str << "\t" << x << "\t" << b.to_string() << "\t"  << febits.to_string() << "\t" << bec << "\t" << ld << "\t" << phi << "\t" << eta << "\t";
+        //convert back to hex
+        std::stringstream res;
+        res << std::hex << std::uppercase << b.to_ulong();
+        output << res.str() << "\n";
+
     }
 
     ATH_MSG_INFO("Wrote " << m_rows.size() << " wafer IDs to " << m_outputFile.value());
@@ -101,7 +129,7 @@ StatusCode ITkPixelCsvWaferIdAlg::loadCsv() {
     return StatusCode::SUCCESS;
 }
 
-Identifier ITkPixelCsvWaferIdAlg::waferId(const CsvRow& row) const {
+std::pair < Identifier, int > ITkPixelCsvWaferIdAlg::waferId(const CsvRow& row) const {
     ATH_MSG_DEBUG("waferId lookup for SP chain " << row.spChain
                     << ", module " << row.md << ", FE " << row.fe);
 
@@ -115,16 +143,14 @@ Identifier ITkPixelCsvWaferIdAlg::waferId(const CsvRow& row) const {
     int ld = layer_disk(spChain_cur);
     int phi = phi_module(spChain_cur, row.md, row.fe );
     int eta = eta_module(spChain_cur, row.md, row.fe );
-
-    return m_pixIdHelper->wafer_id(bec, ld, phi, eta);
+    int fe_n = feID(spChain_cur, row.fe );
+    
+    return std::pair< Identifier, int > (m_pixIdHelper->wafer_id(bec, ld, phi, eta), fe_n);
 }
 
 std::string ITkPixelCsvWaferIdAlg::trim(const std::string& input) {
     const auto begin = input.find_first_not_of(" \t\r\n");
     if (begin == std::string::npos) {
-        //std::cout <<  "TRIM: bad input " << std::endl;
-        //ATH_MSG_INFO( "TOTO ");
-        //std::cout << input << std::endl;
         return "";
     }
 
@@ -158,21 +184,27 @@ std::vector<std::string> ITkPixelCsvWaferIdAlg::parseSPChain(const std::string& 
 
 
 int ITkPixelCsvWaferIdAlg::barrel_ec(const std::vector<std::string>& spchain) const {
-    int side = (spchain[4] == "A") ? 1 : -1; // A for side pos, C for side neg
-    if(spchain[1] == "IS" && (spchain[2] == "L0" ||  spchain[2] == "L1")){ //inner flat barrel
-        return side*1;
+     
+    if(spchain[1] == "IS" && (spchain[2] == "L0" ||  spchain[2] == "L1") && spchain.at(3)[0]!= 'R' ){ //inner flat barrel
+        return 0;
     }
     else if(spchain[1] == "OB" && (spchain[2] == "L2" ||  spchain[2] == "L3" || spchain[2] == "L4") && (spchain.at(3)[0] == 'B' )){ // Outer flat barrel has 3 layers
-        return side*1;
+        return 0;
     }
     else{
+        //Need to calculat the side signknnjuh because eta is always positive.
+        std::string sideAC = spchain[4];
+        if(sideAC != "A" && sideAC != "C"){
+            sideAC = spchain[5];
+        }
+        int side = (sideAC == "A")? 1 : -1; // A for side pos, C for side neg
         return side*2; // endcap is +2 or -2 - this includes barrel rings, in offline they are treated as endcap
     }
 }
 
 int ITkPixelCsvWaferIdAlg::layer_disk(const std::vector<std::string>& spchain) const {
     int b_ec = barrel_ec(spchain);
-    if( fabs(b_ec) == 1 ){ // flat barrel
+    if( fabs(b_ec) == 0 ){ // flat barrel
         return spchain.at(2)[1] - '0';
     }
     else{ // endcap and barrel rings - all considered as 'endcap' disks
@@ -208,7 +240,7 @@ int ITkPixelCsvWaferIdAlg::phi_module(const std::vector<std::string>& spchain, c
     int b_ec = barrel_ec(spchain);
     int ld = layer_disk(spchain);
     
-    if( fabs(b_ec) == 1 ){ // flat barrel
+    if( fabs(b_ec) == 0 ){ // flat barrel
         std::string phi_str = (spchain.at(3)).substr(1,2);
         return std::stoi(phi_str) - 1;
     }
@@ -278,7 +310,7 @@ int ITkPixelCsvWaferIdAlg::eta_module(const std::vector<std::string>& spchain, c
     int ld = layer_disk(spchain);
     int side = (spchain[4] == "A") ? 1 : -1; // A for side pos, C for side neg
 
-    if( fabs(b_ec) == 1 ){ // flat barrel
+    if( fabs(b_ec) == 0 ){ // flat barrel
         if(ld ==0){ //triplets, one front-end is considered as one module
             return side * (3 * (std::stoi(mod) -1) + fe );
         }
@@ -327,3 +359,14 @@ int ITkPixelCsvWaferIdAlg::eta_module(const std::vector<std::string>& spchain, c
 }
 
 
+int ITkPixelCsvWaferIdAlg::feID(const std::vector<std::string>& spchain, int fe) const {
+    int fe_n = -1;
+    int ld = layer_disk(spchain);
+    if(ld < 2){ //triplets
+        return 0;
+    }
+    else{ // quads: need to calculate properly
+        return fe-1;
+    }
+    
+}

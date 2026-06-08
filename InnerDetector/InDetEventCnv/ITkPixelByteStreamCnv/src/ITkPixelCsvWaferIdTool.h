@@ -14,6 +14,7 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #include <atomic>
 #include <string>
 #include <vector>
+#include <utility>
 
 class PixelID;
 
@@ -34,7 +35,7 @@ public:
     const std::vector<CsvRow>& rows() const { return m_rows; }
 
     StatusCode loadCsv();
-    Identifier waferId(const CsvRow& row) const;
+    std::pair<Identifier,int> waferId(const CsvRow& row) const;
 
 private:
     static std::string trim(const std::string& input);
@@ -46,6 +47,7 @@ private:
     int layer_disk(const std::vector<std::string>& spchain) const;
     int phi_module(const std::vector<std::string>& spchain, const std::string& mod, int fe) const;
     int eta_module(const std::vector<std::string>& spchain, const std::string& mod, int fe) const;
+    int feID(const std::vector<std::string>& spchain, int fe) const;
     Gaudi::Property<std::string> m_csvFile{this,
                                            "CsvFile",
                                            "AT2-IP-ES-0016_v1.41_INCOMPLETE-ModuleA.csv",
@@ -57,6 +59,13 @@ private:
 
     const PixelID* m_pixIdHelper = nullptr;
     std::vector<CsvRow> m_rows;
+
+    /*
+    uint32_t htonl(const std::string &x) {
+        unsigned char *s = (unsigned char *)x.c_str();
+        return (uint32_t)(s[0] << 24 | s[1] << 16 | s[2] << 8 | s[3]);
+    };
+    */
     mutable std::atomic<bool> m_done{false};
 };
 
