@@ -13,24 +13,20 @@ if __name__=="__main__":
     
     parser.add_argument("--monitorPlots", action='store_true', default=False, 
                         help="Setup monitoring plots of the pattern recognition")
-    parser.add_argument("--runVtune", 
-                        help="runs VTune profiler service for the muon hough alg", action='store_true', default = False)
-    parser.add_argument("--noPerfMon", help="If set to true, full perfmonMT is enabled",
-                        default=False, action='store_true')
-    parser.add_argument("--houghR4", help="Schedules the R4 pattern -> legacy segment -> legacy track chain",
-                        action="store_true", default = False)
-    parser.add_argument("--use-gpu", action="store_true", dest="use_gpu", default=True,
-                       help="Use GPU for ONNX inference (default: True)")
-    parser.add_argument("--use-cpu", dest="use_gpu", action="store_false",
-                       help="Use CPU for ONNX inference")
-    parser.add_argument("--skip-onnx", action="store_true", default=False,
-                       help="Skip ONNX inference step")
+    parser.add_argument("--runVtune", action='store_true', default = False,
+                        help="runs VTune profiler service for the muon hough alg")
+    parser.add_argument("--noPerfMon", default=False, action='store_true', help="If set to true, full perfmonMT is enabled")
+    parser.add_argument("--houghR4", action="store_true", default = False, 
+                        help="Schedules the R4 pattern -> legacy segment -> legacy track chain")
+    parser.add_argument("--use-cpu", action="store_true", default=False, help="Use CPU for ONNX inference")
+    parser.add_argument("--skip-onnx", action="store_true", default=False, help="Skip ONNX inference step")
     parser.add_argument("--bucket-model-path",
                         default="/eos/project-f/fcc-ml/ddicroce/ATLAS_MuonSpectrometer/KubeFlow/Inference_EdgeClassifier/athena/MuonSpectrometer/MuonPhaseII/MuonLearning/MuonInference/models/edgecnn_bucket_sparse_best.onnx",
                         dest="bucket_model_path")
     parser.add_argument("--score-threshold", type=float, default=0.0, dest="score_threshold")
     parser.add_argument("--output-name", default="logits", dest="output_name")
-  
+    parser.add_argument("--is-logit", dest="is_logit", default=False, action="store_true", help="Interpret the single output directly and do not apply sigmoid")
+
     args = parser.parse_args()
     
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -39,13 +35,11 @@ if __name__=="__main__":
     flags.PerfMon.OutputJSON="perfmonmt_MuonR4Reco.json"
 
     from AthOnnxComps.OnnxRuntimeFlags import OnnxRuntimeType
-    # Honor the explicit CLI choice for Athena ONNX provider.
-    # Python package provider discovery can differ from Athena's C++ runtime.
-    use_gpu_requested = args.use_gpu if args.use_gpu is not None else True
-    if use_gpu_requested:
-        flags.AthOnnx.ExecutionProvider = OnnxRuntimeType.CUDA
-    else:
+
+    if args.use_cpu:
         flags.AthOnnx.ExecutionProvider = OnnxRuntimeType.CPU
+    else:
+        flags.AthOnnx.ExecutionProvider = OnnxRuntimeType.CUDA
 
     flags, cfg = setupGeoR4TestCfg(args,flags)
     
@@ -71,6 +65,7 @@ if __name__=="__main__":
                 ModelPath=args.bucket_model_path,
                 ScoreThreshold=args.score_threshold,
                 OutputName=args.output_name,
+                SingleOutputIsLogit=args.is_logit if hasattr(args, "is_logit") else False,
             )
         )
         cfg.merge(
