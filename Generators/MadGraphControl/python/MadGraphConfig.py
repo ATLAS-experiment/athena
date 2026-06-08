@@ -30,6 +30,55 @@ def _get_nevents(flags, safety):
     return int(base_events * sf)
 
 
+def _prepare_lhe_for_shower(produced_output, lhe_file):
+    primary_output = None
+    if produced_output:
+        if produced_output.endswith(".tar.gz"):
+            root = produced_output[:-7]
+        elif produced_output.endswith(".tgz"):
+            root = produced_output[:-4]
+        elif produced_output.endswith(".gz"):
+            root = produced_output[:-3]
+        else:
+            root, _ = os.path.splitext(produced_output)
+        primary_output = f"{root}.events"
+
+    # If the transform requested a specific TXT output name, symlink the 
+    # produced output to the filename that the transform expects
+    candidates = [candidate 
+                  for candidate in (primary_output, 
+                                    "tmp_LHE_events.events", 
+                                    "events.events") 
+                  if candidate]
+    if _symlink_first_existing(lhe_file, candidates, overwrite=True):
+        return
+
+    raise RuntimeError(
+        "Could not prepare LHE file for showering. "
+        f"Expected one of: {', '.join(candidates)}"
+    )
+
+
+def _symlink_first_existing(link_name, candidates, overwrite=False):
+    """
+    Helper function to symlink the first existing file in candidates to link_name.
+    """
+    if os.path.exists(link_name) and not overwrite:
+        return True
+
+    for candidate in candidates:
+        if not candidate or not os.path.exists(candidate):
+            continue
+        if os.path.abspath(candidate) == os.path.abspath(link_name):
+            return True
+        if os.path.lexists(link_name):
+            os.remove(link_name)
+        os.symlink(os.path.abspath(candidate), link_name)
+        return True
+
+    return False
+
+
 def MadGraphBaseCfg(flags, **kwargs):
     """Base MadGraph CA fragment. It returns a CA object 
     that contains the generator metadata and registers 
@@ -68,7 +117,7 @@ def MadGraphBaseCfg(flags, **kwargs):
     return ca, cfg
 
 
-def MadGraph_LHE_Cfg(
+def MadGraphCfg(
     flags,
     process_definition,
     *,
@@ -82,17 +131,26 @@ def MadGraph_LHE_Cfg(
     plugin=None,
     keepJpegs=None,
     usePMGSettings=None,
+    prepare_lhe_for_shower=False,
+    lhe_file="events.lhe",
 ):
-    """Fragment for configuring a standalone (LHE-only) generation step.
+    """
+    Fragment for configuring a LHE generation step.
 
-    This creates starts from MadGraphBaseCfg and creates a MGC instance
-    that is later used to call the MadGraphUtil functions that steer
+    This starts from MadGraphBaseCfg and creates a MGC instance
+    that is later used to call the MadGraphUtils functions that steer
     the event generation.
 
     All arguments after * are keyword-only to avoid confusion 
     between MadGraphControl settings and CA configuration options.
+    Set prepare_lhe_for_shower=True when the same job should feed the
+    produced LHE file into a shower generator.
 
     process_definition is required, the rest is optional.
+
+    If prepare_lhe_for_shower is True, the produced LHE file will be 
+    symlinked to lhe_file (default: events.lhe) 
+    for later use in the showering step.
     """
 
     from MadGraphControl.MGC import MGControl
@@ -101,6 +159,7 @@ def MadGraph_LHE_Cfg(
     if isinstance(pdf_setting, MadGraphPDFSets):
         pdf_setting = get_pdf_set(pdf_setting)
 
+    # TODO: implement deduplication of settings as done in Pythia8Config
     ca, cfg = MadGraphBaseCfg(
         flags,
         safety=safety,
@@ -154,20 +213,19 @@ def MadGraph_LHE_Cfg(
         pdf_setting=cfg["pdf_setting"],
     )
 
-    # Create a symlink to the produced output with the name 
-    # requested by the user.
+    # If requested, prepare the produced LHE file for showering
+    # by symlinking it to the filename that pythia expects, 
+    # by default "events.lhe".
+    if prepare_lhe_for_shower:
+        _prepare_lhe_for_shower(produced_output, lhe_file)
+
+    # If the transform requested a specific TXT output name, symlink the 
+    # produced output to the filename that the transform expects
+    # (only if the file does not exist).
     requested_output = flags.Output.TXTFileName
     if requested_output and not os.path.exists(requested_output):
-        if os.path.lexists(requested_output):
-            os.remove(requested_output)
-        candidates = []
-        if produced_output:
-            candidates.append(produced_output)
         root, _ = os.path.splitext(requested_output)
-        candidates.extend([f"{root}.events", "events.events"])
-        for candidate in candidates:
-            if candidate and os.path.exists(candidate) and candidate != requested_output:
-                os.symlink(os.path.abspath(candidate), requested_output)
-                break
+        candidates = [candidate for candidate in (produced_output, f"{root}.events", "events.events") if candidate]
+        _symlink_first_existing(requested_output, candidates, overwrite=True)
 
     return ca
