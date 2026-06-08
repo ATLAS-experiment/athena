@@ -25,7 +25,7 @@ class FCtest: public CppUnit::TestFixture
   CPPUNIT_TEST_SUITE_END();
 
 public:
-  IFileCatalog* mycatalog, *source, *dest;
+  IFileCatalog* mycatalog{}, *source{}, *dest{};
   std::string sourcecatalogurl;
   std::string destcatalogurl;
   std::string mycatalogurl;
