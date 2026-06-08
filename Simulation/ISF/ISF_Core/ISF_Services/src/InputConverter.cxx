@@ -206,14 +206,14 @@ ISF::InputConverter::getSelectedParticles(HepMC::GenEvent& evnt, bool legacyOrde
         std::copy_if (vtx->particles_out().begin(),
                       vtx->particles_out().end(),
                       std::back_inserter(passedGenParticles),
-                      [](HepMC::GenParticlePtr p){return p->attribute<HepMC3::IntAttribute>("ShadowParticleId");});
+                      [](HepMC::GenParticlePtr p){return p->attribute<HepMC3::IntAttribute>(HepMC::Str::ShadowParticleId);});
       }
     }
     else {
       std::copy_if (allGenPartBegin,
                     allGenPartEnd,
                     std::back_inserter(passedGenParticles),
-                    [](HepMC::GenParticlePtr p){return p->attribute<HepMC3::IntAttribute>("ShadowParticleId");});
+                    [](HepMC::GenParticlePtr p){return p->attribute<HepMC3::IntAttribute>(HepMC::Str::ShadowParticleId);});
     }
   }
   else {
@@ -810,7 +810,7 @@ HepMC::GenParticlePtr ISF::InputConverter::findShadowParticle(const HepMC::Const
   }
 #ifdef HEPMC3
   // TODO in the future switch to using an Attribute which stores the shadow GenParticlePtr directly.
-  const int shadowId = genParticle->attribute<HepMC3::IntAttribute>("ShadowParticleId")->value();
+  const int shadowId = genParticle->attribute<HepMC3::IntAttribute>(HepMC::Str::ShadowParticleId)->value();
   for (auto& shadowParticle : shadowGenEvent->particles()) {
     if (shadowParticle->id() == shadowId && matchedGenParticles(genParticle, shadowParticle) ) { return shadowParticle; }
   }
@@ -1058,7 +1058,7 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
       // New approach - predefined decays taken from shadow GenEvent
       // Find the matching particle in the shadowGenEvent
 #ifdef HEPMC3
-      auto A_part = currentGenPart->attribute<HepMC::ShadowParticle>("ShadowParticle");
+      auto A_part = currentGenPart->attribute<HepMC::ShadowParticle>(HepMC::Str::ShadowParticle);
       HepMC::ConstGenParticlePtr shadowPart = (A_part) ? A_part->value() : findShadowParticle(currentGenPart, shadowGenEvent);
 #else
       HepMC::GenParticlePtr shadowPart = findShadowParticle(currentGenPart, shadowGenEvent);

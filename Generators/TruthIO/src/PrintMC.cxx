@@ -124,9 +124,9 @@ StatusCode PrintMC::execute() {
       for ( auto wgt = evt->weights().begin();
             wgt != evt->weights().end(); wgt++ ) { std::cout << *wgt << " "; }
       std::cout << "\n";
-      std::cout << " EventScale " << (evt->attribute<HepMC3::DoubleAttribute>("event_scale")? evt->attribute<HepMC3::DoubleAttribute>("event_scale")->value():0.0)
-                << " [energy] \t alphaQCD=" << (evt->attribute<HepMC3::DoubleAttribute>("alphaQCD")? evt->attribute<HepMC3::DoubleAttribute>("alphaQCD")->value():0.0)
-                << "\t alphaQED=" << (evt->attribute<HepMC3::DoubleAttribute>("alphaQED")? evt->attribute<HepMC3::DoubleAttribute>("alphaQED")->value():0.0) << std::endl;
+      std::cout << " EventScale " << (evt->attribute<HepMC3::DoubleAttribute>(HepMC::Str::event_scale)? evt->attribute<HepMC3::DoubleAttribute>(HepMC::Str::event_scale)->value():0.0)
+                << " [energy] \t alphaQCD=" << (evt->attribute<HepMC3::DoubleAttribute>(HepMC::Str::alphaQCD)? evt->attribute<HepMC3::DoubleAttribute>(HepMC::Str::alphaQCD)->value():0.0)
+                << "\t alphaQED=" << (evt->attribute<HepMC3::DoubleAttribute>(HepMC::Str::alphaQED)? evt->attribute<HepMC3::DoubleAttribute>(HepMC::Str::alphaQED)->value():0.0) << std::endl;
 
       if (evt->pdf_info()) {
         std::cout << "PdfInfo: id1=" << evt->pdf_info()->parton_id[0]

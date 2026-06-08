@@ -9,6 +9,7 @@
 #include "HepMC3/GenVertex.h"
 #include "HepMC3/PrintStreams.h"
 #include "AtlasHepMC/Barcode.h"
+#include "AtlasHepMC/AttributeNames.h"
 namespace HepMC3 {
 inline std::vector<HepMC3::ConstGenParticlePtr>::const_iterator  begin(const HepMC3::GenVertex& v) { return v.particles_out().begin(); }
 inline std::vector<HepMC3::ConstGenParticlePtr>::const_iterator  end(const HepMC3::GenVertex& v) { return v.particles_out().end(); }
@@ -32,7 +33,7 @@ inline int barcode(const GenVertexPtr& p) {
     if (!p) return 0;
     auto e = p->parent_event();
     if (!e) return 0;
-    std::shared_ptr<HepMC3::IntAttribute> barcode=e->attribute<HepMC3::IntAttribute>("barcode",p->id());
+    std::shared_ptr<HepMC3::IntAttribute> barcode=e->attribute<HepMC3::IntAttribute>(HepMC::Str::barcode,p->id());
     return barcode?(barcode->value()):p->id();
 }
 inline int barcode_or_id(const ConstGenVertexPtr& p) { return p->id();}
@@ -40,13 +41,13 @@ inline int barcode(const ConstGenVertexPtr& p) {
     if (!p) return 0;
     auto e = p->parent_event();
     if (!e) return 0;
-    std::shared_ptr<HepMC3::IntAttribute> barcode=e->attribute<HepMC3::IntAttribute>("barcode",p->id());
+    std::shared_ptr<HepMC3::IntAttribute> barcode=e->attribute<HepMC3::IntAttribute>(HepMC::Str::barcode,p->id());
     return barcode?(barcode->value()):p->id();
 }
 inline int barcode(const HepMC3::GenVertex& p) {
     auto e = p.parent_event();
     if (!e) return 0;
-    std::shared_ptr<HepMC3::IntAttribute> barcode=e->attribute<HepMC3::IntAttribute>("barcode",p.id());
+    std::shared_ptr<HepMC3::IntAttribute> barcode=e->attribute<HepMC3::IntAttribute>(HepMC::Str::barcode,p.id());
     return barcode?(barcode->value()):p.id();
 }
 

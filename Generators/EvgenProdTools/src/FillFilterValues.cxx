@@ -38,15 +38,15 @@ StatusCode FillFilterValues::execute() {
   // write filter values into xAOD::EventInfo
   
   SG::WriteDecorHandle<xAOD::EventInfo,float> dec_filtHT(m_mcFilterHTKey);
-  if (event_const()->attribute<HepMC3::DoubleAttribute>("filterHT") != NULL){
-     std::shared_ptr<HepMC3::DoubleAttribute>  fHT =   event_const()->attribute<HepMC3::DoubleAttribute>("filterHT"); 
+  if (event_const()->attribute<HepMC3::DoubleAttribute>(HepMC::Str::filterHT) != NULL){
+     std::shared_ptr<HepMC3::DoubleAttribute>  fHT =   event_const()->attribute<HepMC3::DoubleAttribute>(HepMC::Str::filterHT); 
      double fHT_double = fHT->value();
      dec_filtHT(0) = fHT_double;
   }
 
   SG::WriteDecorHandle<xAOD::EventInfo,float> dec_filtMET(m_mcFilterMETKey);
-  if (event_const()->attribute<HepMC3::DoubleAttribute>("filterMET") != NULL){
-    std::shared_ptr<HepMC3::DoubleAttribute>  fMET =   event_const()->attribute<HepMC3::DoubleAttribute>("filterMET");
+  if (event_const()->attribute<HepMC3::DoubleAttribute>(HepMC::Str::filterMET) != NULL){
+    std::shared_ptr<HepMC3::DoubleAttribute>  fMET =   event_const()->attribute<HepMC3::DoubleAttribute>(HepMC::Str::filterMET);
     double fMET_double = fMET->value();
     dec_filtMET(0) = fMET_double;
   }

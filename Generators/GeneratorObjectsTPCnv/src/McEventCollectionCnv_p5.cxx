@@ -16,13 +16,11 @@
 
 // GeneratorObjectsTPCnv includes
 #include "GeneratorObjectsTPCnv/McEventCollectionCnv_p5.h"
-#include "HepMC3AccessStrings.h"
 #include "HepMcDataPool.h"
 #include "GenInterfaces/IHepMCWeightSvc.h"
 #include "McEventCollectionCnv_utils.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 #include "TruthUtils/MagicNumbers.h"
-using namespace GeneratorObjectsTPCnv;
 
 
 ///////////////////////////////////////////////////////////////////
@@ -91,15 +89,15 @@ void McEventCollectionCnv_p5::persToTrans( const McEventCollection_p5* persObj,
       genEvt        =  datapools.getGenEvent();
     }
 #ifdef HEPMC3
-    genEvt->add_attribute (barcodesStr, std::make_shared<HepMC::GenEventBarcodes>());
-    genEvt->add_attribute(signalProcessIdStr, std::make_shared<HepMC3::IntAttribute>(persEvt.m_signalProcessId));
+    genEvt->add_attribute (HepMC::Str::barcodes, std::make_shared<HepMC::GenEventBarcodes>());
+    genEvt->add_attribute(HepMC::Str::signal_process_id, std::make_shared<HepMC3::IntAttribute>(persEvt.m_signalProcessId));
     genEvt->set_event_number(persEvt.m_eventNbr);
-    genEvt->add_attribute(mpiStr, std::make_shared<HepMC3::IntAttribute>(persEvt.m_mpi));
-    genEvt->add_attribute(eventScaleStr, std::make_shared<HepMC3::DoubleAttribute>(persEvt.m_eventScale));
-    genEvt->add_attribute(alphaQcdStr, std::make_shared<HepMC3::DoubleAttribute>(persEvt.m_alphaQCD));
-    genEvt->add_attribute(alphaQedStr, std::make_shared<HepMC3::DoubleAttribute>(persEvt.m_alphaQED));
+    genEvt->add_attribute(HepMC::Str::mpi, std::make_shared<HepMC3::IntAttribute>(persEvt.m_mpi));
+    genEvt->add_attribute(HepMC::Str::event_scale, std::make_shared<HepMC3::DoubleAttribute>(persEvt.m_eventScale));
+    genEvt->add_attribute(HepMC::Str::alphaQCD, std::make_shared<HepMC3::DoubleAttribute>(persEvt.m_alphaQCD));
+    genEvt->add_attribute(HepMC::Str::alphaQED, std::make_shared<HepMC3::DoubleAttribute>(persEvt.m_alphaQED));
     genEvt->weights()= persEvt.m_weights;
-    genEvt->add_attribute(randomStatesStr, std::make_shared<HepMC3::VectorLongIntAttribute>(persEvt.m_randomStates));
+    genEvt->add_attribute(HepMC::Str::random_states, std::make_shared<HepMC3::VectorLongIntAttribute>(persEvt.m_randomStates));
 
     genEvt->set_units(static_cast<HepMC3::Units::MomentumUnit>(persEvt.m_momentumUnit),
                       static_cast<HepMC3::Units::LengthUnit>(persEvt.m_lengthUnit));
@@ -365,13 +363,13 @@ void McEventCollectionCnv_p5::transToPers( const McEventCollection* transObj,
         }
       }
 
-      auto A_mpi=genEvt->attribute<HepMC3::IntAttribute>(mpiStr);
-      auto A_signal_process_id=genEvt->attribute<HepMC3::IntAttribute>(signalProcessIdStr);
-      auto A_event_scale=genEvt->attribute<HepMC3::DoubleAttribute>(eventScaleStr);
-      auto A_alphaQCD=genEvt->attribute<HepMC3::DoubleAttribute>(alphaQcdStr);
-      auto A_alphaQED=genEvt->attribute<HepMC3::DoubleAttribute>(alphaQedStr);
+      auto A_mpi=genEvt->attribute<HepMC3::IntAttribute>(HepMC::Str::mpi);
+      auto A_signal_process_id=genEvt->attribute<HepMC3::IntAttribute>(HepMC::Str::signal_process_id);
+      auto A_event_scale=genEvt->attribute<HepMC3::DoubleAttribute>(HepMC::Str::event_scale);
+      auto A_alphaQCD=genEvt->attribute<HepMC3::DoubleAttribute>(HepMC::Str::alphaQCD);
+      auto A_alphaQED=genEvt->attribute<HepMC3::DoubleAttribute>(HepMC::Str::alphaQED);
       auto signal_process_vertex = HepMC::signal_process_vertex(genEvt);
-      auto A_random_states=genEvt->attribute<HepMC3::VectorLongIntAttribute>(randomStatesStr);
+      auto A_random_states=genEvt->attribute<HepMC3::VectorLongIntAttribute>(HepMC::Str::random_states);
       auto beams=genEvt->beams();
       persObj->m_genEvents.
       emplace_back(A_signal_process_id?(A_signal_process_id->value()):-1,
@@ -587,7 +585,7 @@ McEventCollectionCnv_p5::createGenVertex( const McEventCollection_p5& persEvt,
   vtx->set_status(HepMC::new_vertex_status_from_old(persVtxStatus, persVtx.m_barcode)); // UPDATED STATUS VALUE TO NEW SCHEME
   // cast from std::vector<float> to std::vector<double>
   std::vector<double> weights( persVtx.m_weights.begin(), persVtx.m_weights.end() );
-  vtx->add_attribute("weights",std::make_shared<HepMC3::VectorDoubleAttribute>(weights));
+  vtx->add_attribute(HepMC::Str::weights,std::make_shared<HepMC3::VectorDoubleAttribute>(weights));
   HepMC::suggest_barcode(vtx,persVtx.m_barcode);
   // handle the in-going (orphans) particles
   const unsigned int nPartsIn = persVtx.m_particlesIn.size();
@@ -661,8 +659,8 @@ McEventCollectionCnv_p5::createGenParticle( const GenParticle_p5& persPart,
 #ifdef HEPMC3
   p->set_pdg_id(              persPart.m_pdgId);
   p->set_status(HepMC::new_particle_status_from_old(persPart.m_status, persPart.m_barcode)); // UPDATED STATUS VALUE TO NEW SCHEME
-  p->add_attribute("phi",std::make_shared<HepMC3::DoubleAttribute>(persPart.m_phiPolarization));
-  p->add_attribute("theta",std::make_shared<HepMC3::DoubleAttribute>(persPart.m_thetaPolarization));
+  p->add_attribute(HepMC::Str::phi,std::make_shared<HepMC3::DoubleAttribute>(persPart.m_phiPolarization));
+  p->add_attribute(HepMC::Str::theta,std::make_shared<HepMC3::DoubleAttribute>(persPart.m_thetaPolarization));
   HepMC::suggest_barcode(p,persPart.m_barcode);
   p->set_generated_mass(persPart.m_generated_mass);
 
@@ -698,7 +696,7 @@ McEventCollectionCnv_p5::createGenParticle( const GenParticle_p5& persPart,
   flows.push_back(persPart.m_flow[iFlow].second );
   }
   //We construct it here as vector w/o gaps.
-  p->add_attribute("flows", std::make_shared<HepMC3::VectorIntAttribute>(flows));
+  p->add_attribute(HepMC::Str::flows, std::make_shared<HepMC3::VectorIntAttribute>(flows));
 #else
   p->m_pdg_id              = persPart.m_pdgId;
   p->m_status              = HepMC::new_particle_status_from_old(persPart.m_status, persPart.m_barcode); // UPDATED STATUS VALUE TO NEW SCHEME
@@ -759,8 +757,8 @@ void McEventCollectionCnv_p5::writeGenVertex( const HepMC::ConstGenVertexPtr& vt
                                               McEventCollection_p5& persEvt )
 {
   const HepMC::FourVector& position = vtx->position();
-  auto A_weights=vtx->attribute<HepMC3::VectorDoubleAttribute>("weights");
-  auto A_barcode=vtx->attribute<HepMC3::IntAttribute>("barcode");
+  auto A_weights=vtx->attribute<HepMC3::VectorDoubleAttribute>(HepMC::Str::weights);
+  auto A_barcode=vtx->attribute<HepMC3::IntAttribute>(HepMC::Str::barcode);
   std::vector<float> weights;
   if (A_weights) {
     auto weights_d = A_weights->value();
@@ -841,9 +839,9 @@ int McEventCollectionCnv_p5::writeGenParticle( const HepMC::ConstGenParticlePtr&
   const bool useP2M2 = !(m2 > 0) &&   // !isTimelike
     (m2 < 0) &&   //  isSpacelike
     !(std::abs(m2) < 2.0*DBL_EPSILON*ene*ene); // !isLightlike
-    auto A_flows=p->attribute<HepMC3::VectorIntAttribute>("flows");
-    auto A_phi=p->attribute<HepMC3::DoubleAttribute>("phi");
-    auto A_theta=p->attribute<HepMC3::DoubleAttribute>("theta");
+    auto A_flows=p->attribute<HepMC3::VectorIntAttribute>(HepMC::Str::flows);
+    auto A_phi=p->attribute<HepMC3::DoubleAttribute>(HepMC::Str::phi);
+    auto A_theta=p->attribute<HepMC3::DoubleAttribute>(HepMC::Str::theta);
 
   const short recoMethod = ( !useP2M2 ? 0: ( ene >= 0.? 1: 2 ) );
   persEvt.m_genParticles.
