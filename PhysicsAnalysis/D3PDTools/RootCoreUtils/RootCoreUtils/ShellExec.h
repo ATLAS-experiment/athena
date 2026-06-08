@@ -1,20 +1,11 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+
+/// @author Nils Krumnack
+
 #ifndef ROOT_CORE_UTILS__SHELL_EXEC_H
 #define ROOT_CORE_UTILS__SHELL_EXEC_H
-
-//          
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
-// Please feel free to contact me (krumnack@iastate.edu) for bug
-// reports, feature suggestions, praise and complaints.
-
-
-// This module still needs to be documented.  The interface provided
-// in this module is intended for experts only.  The module is
-// considered to be in the pre-alpha stage.
-
-
 
 #include <RootCoreUtils/Global.h>
 
