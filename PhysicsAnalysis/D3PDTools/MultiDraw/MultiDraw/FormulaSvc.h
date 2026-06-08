@@ -2,22 +2,13 @@
   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
 */
 
+/// @author Nils Krumnack
+
 #ifndef MULTI_DRAW_FORMULA_SVC_H
 #define MULTI_DRAW_FORMULA_SVC_H
 
-//          
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
-// Please feel free to contact me (krumnack@iastate.edu) for bug
-// reports, feature suggestions, praise and complaints.
-
-
 /// This module defines a class that manages a list of formulas and
-/// their application to the data.  The interface provided in this
-/// module is intended for experts only.  The module is considered to
-/// be in the pre-alpha stage.
+/// their application to the data.
 
 
 
