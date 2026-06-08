@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaPoolCnvSvc/T_AthenaPoolAuxContainerCnv.h
@@ -32,6 +32,8 @@
  * On writing, the container is copied (and thinned if required).
  * For reading, we read the object either directly
  * or using one of the TP converters, depending on the saved GUID.
+ * We also call toTransient() on the object that was read (using the
+ * current EventContext).
  */
 template <class AUXSTORE, class ... TPCNVS>
 class T_AthenaPoolAuxContainerCnv
