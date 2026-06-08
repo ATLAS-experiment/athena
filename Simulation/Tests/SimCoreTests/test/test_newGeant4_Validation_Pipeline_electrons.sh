@@ -10,7 +10,7 @@
 # art-output: *.xml
 # art-output: dcube*
 # art-html: dcube_last
-
+# art-output: log.*
 
 set -e
 echo "$ArtInFile"
