@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -37,7 +37,7 @@ void reportMessageStandalone (const std::string& context,
   std::string source (context);
   static constexpr std::size_t CONTEXT_WIDTH = 18;
   if (source.size() > CONTEXT_WIDTH) {
-    source = source.substr(0, CONTEXT_WIDTH - 3);
+    source.resize(CONTEXT_WIDTH - 3);
     source += "...";
   }
 
