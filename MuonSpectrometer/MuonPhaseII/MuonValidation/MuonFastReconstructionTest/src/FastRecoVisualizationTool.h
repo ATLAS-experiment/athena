@@ -240,7 +240,7 @@ namespace MuonValR4 {
             /** @brief pointer to the Detector manager */
             const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
             /** @brief Geometry context key to retrieve the alignment */ 
-            SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+            ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
             /** @brief Service Handle to the IMuonIdHelperSvc */
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
             /** @brief Flag toggling whether all Canvases have been exhausted */

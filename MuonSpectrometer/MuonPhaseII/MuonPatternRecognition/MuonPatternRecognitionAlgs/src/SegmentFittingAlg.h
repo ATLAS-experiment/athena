@@ -67,7 +67,7 @@ namespace MuonR4 {
             // write handle key for the output segment seeds 
             SG::WriteHandleKey<SegmentContainer> m_outSegments{this, "OutSegmentContainer", "R4MuonSegments"};
             // access to the ACTS geometry context 
-            SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+            ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
             /// IdHelperSvc
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
             /// Handle to the space point calibrator

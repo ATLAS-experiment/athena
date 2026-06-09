@@ -35,7 +35,7 @@ namespace MuonValR4{
             //Retrieve the xAODMdtCircles container
             SG::ReadHandleKey<xAOD::MdtDriftCircleContainer> m_MdtKey{this, "MdtKey", "xMdtDriftCircles",
                                                                       "Key to the uncalibrated Drift circle measurements"};
-            SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+            ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
             /** pointer to MdtCalibSvc */
             ToolHandle<IMdtCalibrationTool> m_calibrationTool{this, "CalibrationTool", "MdtCalibrationTool"};
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};            MuonVal::MuonTesterTree m_tree{"MdtCalibDbAlg", "MdtCalibDbAlgTest"};

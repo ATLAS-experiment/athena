@@ -77,7 +77,7 @@ protected:
                                const std::vector<const char*>& outputNames) const;
 
   SG::ReadHandleKey<MuonR4::SpacePointContainer> m_readKey{this, "ReadSpacePoints", "MuonSpacePoints"};
-  SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+  ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
   // ONNX I/O name for the GNN output tensor (model-dependent)
   Gaudi::Property<std::string> m_outputName{this, "OutputName", "logits"};

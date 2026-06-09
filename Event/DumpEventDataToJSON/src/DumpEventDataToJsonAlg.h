@@ -114,7 +114,7 @@ protected:
 
   ToolHandle<Trk::IExtrapolationEngine> m_extrapolator{this, "Extrapolator", "Trk::ExtrapolationEngine/AtlasExtrapolation"};
 
-  SG::ReadHandleKey<ActsTrk::GeometryContext> m_geometryContextKey {
+  ActsTrk::GeoContextReadKey_t m_geometryContextKey {
       this, "ActsAlignmentKey", "ActsAlignment", "cond read key for the alignment"};
 
   Gaudi::Property<std::string> m_outputJSON_Name{this, "OutputLocation", "EventData.json", "Default filename for "};

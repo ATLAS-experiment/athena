@@ -36,10 +36,13 @@ StatusCode MdtCalibDbAlgTest::finalize() {
 
 StatusCode MdtCalibDbAlgTest::execute() {
     const EventContext& ctx = Gaudi::Hive::currentContext();
-    SG::ReadHandle mdtContainer{m_MdtKey, ctx};
-    SG::ReadHandle geoCtx{m_geoCtxKey, ctx};
-    ATH_CHECK(mdtContainer.isPresent());
-    ATH_CHECK(geoCtx.isPresent());
+    
+    const xAOD::MdtDriftCircleContainer* mdtContainer{nullptr};
+    const ActsTrk::GeometryContext* geoCtx{nullptr};
+
+    ATH_CHECK(SG::get(geoCtx, m_geoCtxKey, ctx));
+    ATH_CHECK(SG::get(mdtContainer, m_MdtKey, ctx));
+    
     constexpr double inversePropSpeed = 1. / Gaudi::Units::c_light;
     for(const xAOD::MdtDriftCircle* mdt : *mdtContainer) {
         if (mdt->status() != Muon::MdtDriftCircleStatus::MdtStatusDriftTime){

@@ -110,7 +110,7 @@ namespace MuonValR4{
     /** @brief List of the space point containers in the event legacy + NSW containers */
     SG::ReadHandleKeyArray<MuonR4::SpacePointContainer> m_spKeys{this, "SpacePointKeys", {"MuonSpacePoints"}};
     /** @brief Tracking geometry context */
-    SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+    ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
     
