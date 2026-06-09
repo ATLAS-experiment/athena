@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetTagTools/IPTag.h"
@@ -27,16 +27,16 @@ namespace Analysis {
 
   struct myIPxDinfo {
     ElementLink<xAOD::TrackParticleContainer> trk;
-    double d0;
-    double d0sig;
-    double z0;
-    double z0sig;
-    TrackGrade grade;
-    const xAOD::TrackParticle* trkP;
-    bool fromV0;
-    float wB;
-    float wC;
-    float wU;
+    double d0{};
+    double d0sig{};
+    double z0{};
+    double z0sig{};
+    TrackGrade grade{};
+    const xAOD::TrackParticle* trkP{};
+    bool fromV0{};
+    float wB{};
+    float wC{};
+    float wU{};
   } ;
   
   bool StructPTsorting( const myIPxDinfo & objA, const myIPxDinfo & objB) {
