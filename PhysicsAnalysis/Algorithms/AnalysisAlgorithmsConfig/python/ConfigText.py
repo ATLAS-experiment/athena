@@ -295,7 +295,7 @@ class TextConfig(ConfigFactory):
             # propagate special extra options to subalgs
             extraOptionsForAlg = extraOptions.copy() if extraOptions is not None else None
             if extraOptionsForAlg is None:
-                extraOptionsList = ["skipOnData", "skipOnMC", "onlyForDSIDs"]
+                extraOptionsList = ["skipOnData", "skipOnMC", "skipWithSystematics", "onlyForDSIDs"]
                 for i in algOpts:
                     if i['name'] in extraOptionsList and i['defaultValue'] != i['value']:
                         if extraOptionsForAlg is None:
