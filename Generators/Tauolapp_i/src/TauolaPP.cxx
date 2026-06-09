@@ -112,10 +112,9 @@ CLHEP::HepRandomEngine* TauolaPP::getRandomEngineDuringInitialize(const std::str
 }
 
 
-StatusCode TauolaPP::execute() {
+StatusCode TauolaPP::execute(const EventContext& ctx) {
 
   //Re-seed the random number stream
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   reseedRandomEngine("TAUOLAPP", ctx);
 
   // Load HepMC info

@@ -40,7 +40,7 @@ class AddFlowByShifting:public AthAlgorithm {
 public:
   AddFlowByShifting(const std::string& name, ISvcLocator* pSvcLocator);
   StatusCode initialize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   StatusCode finalize();
 
   //functions used for root finding when using the "exact"(and not the "approximate")  method

@@ -13,7 +13,7 @@ class PrintHijingPars:public GenBase {
 public:
         PrintHijingPars(const std::string& name, ISvcLocator* pSvcLocator);
         StatusCode initialize();
-        StatusCode execute();
+        StatusCode execute(const EventContext& ctx);
         StatusCode finalize();
 
 private:

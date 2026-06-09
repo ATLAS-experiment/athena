@@ -21,7 +21,7 @@ StatusCode CopyEventWeight::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode CopyEventWeight::execute() {
+StatusCode CopyEventWeight::execute(const EventContext& ctx) {
   // Check that the collection isn't empty
   /// @odo What is the best thing to do if it is?!
   const size_t nEvents = events_const()->size();
@@ -46,7 +46,7 @@ StatusCode CopyEventWeight::execute() {
     weights.push_back(event_const()->weights()[iw]);
   }
 
-  SG::WriteDecorHandle<xAOD::EventInfo,std::vector<float>> mcWeights(m_mcWeightsKey);
+  SG::WriteDecorHandle<xAOD::EventInfo,std::vector<float>> mcWeights(m_mcWeightsKey, ctx);
   mcWeights(0) = std::move(weights);
 
   // Post-hoc debug printouts

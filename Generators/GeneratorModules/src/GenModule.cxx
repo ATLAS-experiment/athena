@@ -67,7 +67,7 @@ CLHEP::HepRandomEngine* GenModule::getRandomEngineDuringInitialize(const std::st
 }
 
 
-StatusCode GenModule::execute() {
+StatusCode GenModule::execute(const EventContext& /*ctx*/) {
   // Examples of how to retrieve the random number engine for a given
   // stream.
   // NB getRandomEngine should only be called once per event for a
@@ -75,11 +75,9 @@ StatusCode GenModule::execute() {
   // it is called.
 
   // Example 1 - seeded based on the current event number (+ slot, run, streamName)
-  //const EventContext& ctx = Gaudi::Hive::currentContext();
   //CLHEP::HepRandomEngine* rndmEngine = this->getRandomEngine("MyStream", ctx);
 
   // Example 2 - seeded based on the m_randomSeed property (+ slot, run, streamName)
-  //const EventContext& ctx = Gaudi::Hive::currentContext();
   //CLHEP::HepRandomEngine* rndmEngine = this->getRandomEngine("MyStream", m_randomSeed.value(), ctx);
 
   // Call the code that generates an event

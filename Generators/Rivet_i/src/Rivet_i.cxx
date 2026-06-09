@@ -138,10 +138,9 @@ StatusCode Rivet_i::initialize ATLAS_NOT_THREAD_SAFE () {
 }
 
 
-StatusCode Rivet_i::execute() {
+StatusCode Rivet_i::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG("Rivet_i execute");
 
-  const EventContext& ctx = getContext();
 
   m_needsConversion = !evtStore()->contains<McEventCollection>(m_genEventKey);
   ATH_MSG_DEBUG("Rivet_i needs xAOD::Truth to HepMC::GenEvent conversion? " << m_needsConversion);

@@ -61,7 +61,7 @@ StatusCode CountHepMC::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode CountHepMC::execute() {
+StatusCode CountHepMC::execute(const EventContext& ctx) {
 
   /// @todo Replace the old event ?
   m_nPass++;
@@ -110,8 +110,8 @@ StatusCode CountHepMC::execute() {
   xAOD::EventInfo* outputEvtInfo{nullptr};
   int inpRunNumber{-1};
   if(m_corEvtID||m_corRunNumber||m_copyRunNumber) {
-    SG::ReadHandle<xAOD::EventInfo> inputEvtInfoHandle(m_inputEvtInfoKey);
-    SG::WriteHandle<xAOD::EventInfo> outputEvtInfoHandle(m_outputEvtInfoKey);
+    SG::ReadHandle<xAOD::EventInfo> inputEvtInfoHandle(m_inputEvtInfoKey, ctx);
+    SG::WriteHandle<xAOD::EventInfo> outputEvtInfoHandle(m_outputEvtInfoKey, ctx);
     ATH_CHECK(outputEvtInfoHandle.record(std::make_unique<xAOD::EventInfo>(), std::make_unique<xAOD::EventAuxInfo>()));
 
     outputEvtInfo = outputEvtInfoHandle.ptr();
@@ -124,7 +124,7 @@ StatusCode CountHepMC::execute() {
 
     inpRunNumber = inputEvtInfoHandle->runNumber();
     if(!m_mcWeightsKey.empty()) {
-      SG::ReadDecorHandle<xAOD::EventInfo,std::vector<float>> mcWeights(m_mcWeightsKey);
+      SG::ReadDecorHandle<xAOD::EventInfo,std::vector<float>> mcWeights(m_mcWeightsKey, ctx);
       outputEvtInfo->setMCEventWeights(mcWeights(0));
     }
   }

@@ -62,7 +62,7 @@ public:
   /// @name Event loop algorithm methods
   //@{
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override { return StatusCode::SUCCESS; }
+  virtual StatusCode execute(const EventContext&) override { return StatusCode::SUCCESS; }
   //@}
 
 

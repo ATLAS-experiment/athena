@@ -37,7 +37,7 @@ StatusCode HepMCReadFromFile::initialize() {
 }
 
 
-StatusCode HepMCReadFromFile::execute() {
+StatusCode HepMCReadFromFile::execute(const EventContext& /*ctx*/) {
 
   McEventCollection* mcEvtColl = nullptr;
 
