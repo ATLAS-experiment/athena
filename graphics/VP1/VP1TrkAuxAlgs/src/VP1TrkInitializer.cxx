@@ -53,7 +53,7 @@ StatusCode VP1TrkInitializer::initialize()
 }
 
 //____________________________________________________________________
-StatusCode VP1TrkInitializer::execute()
+StatusCode VP1TrkInitializer::execute(const EventContext& /*ctx*/)
 {
   msg(MSG::DEBUG) <<" in execute() " << endmsg;
   return StatusCode::SUCCESS;
