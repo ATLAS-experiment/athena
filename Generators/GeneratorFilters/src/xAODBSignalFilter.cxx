@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // -----------------------------------------------------------------------------------------------
@@ -23,8 +23,11 @@
 // -----------------------------------------------------------------------------------------------
 
 #include "GeneratorFilters/xAODBSignalFilter.h"
+#include "xAODTruth/TruthVertex.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "CLHEP/Vector/LorentzVector.h"
+#include "TLorentzVector.h"
+
 #include "TruthUtils/MagicNumbers.h"
 
 #include <sstream>
@@ -233,8 +236,7 @@ if (LVL1Passed && (m_localLVL2MuonCutOn || m_localLVL2ElectronCutOn))
                                 ATH_MSG_DEBUG("");
                                 ATH_MSG_DEBUG(" *** INVARIANT MASS CUTS ON PARTICLES ACTIVATED! *** ");
                                 ATH_MSG_DEBUG("");
-                                if (m_InvMass_switch)
-                                    ATH_MSG_DEBUG("     -- Mass cuts -->>  " << m_InvMassMin << " < mass < " << m_InvMassMax << " MeV");
+                                ATH_MSG_DEBUG("     -- Mass cuts -->>  " << m_InvMassMin << " < mass < " << m_InvMassMax << " MeV");
                                 //
                                 double invMass = (CandPart1 + CandPart2).M();
                                 double invMass_total = total_4mom.M();

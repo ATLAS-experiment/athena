@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ----------------------------------------------
@@ -16,14 +16,9 @@
 #define GENERATORFILTERSBSIGNALFILTER_H
 
 #include "GeneratorModules/GenFilter.h"
-#include "GaudiKernel/NTuple.h"
-#include <vector>
 
-#include "AtlasHepMC/GenEvent.h"
-#include "AtlasHepMC/GenParticle.h"
-#include "AtlasHepMC/GenVertex.h"
-#include "TTree.h"
-#include "TLorentzVector.h"
+
+class TLorentzVector;
 
 class BSignalFilter : public GenFilter
 {
