@@ -28,8 +28,6 @@ def BPHY4Cfg(flags):
             etaCut                      = 2.5,
             muonCollectionKey           = "Muons",
             TrackParticleCollection     = "InDetTrackParticles",
-            V0VertexFitterTool          = None,             # V0 vertex fitter
-            useV0Fitter                 = False,                   # if False a TrkVertexFitterTool will be used
             TrkVertexFitterTool         = vkalvrt,        # VKalVrt vertex fitter
             TrackSelectorTool           = trackselect)
     BPHY4_Reco_4mu = CompFactory.DerivationFramework.Reco_4mu(

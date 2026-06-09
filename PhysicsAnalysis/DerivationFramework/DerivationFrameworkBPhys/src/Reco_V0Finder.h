@@ -31,7 +31,7 @@ namespace DerivationFramework {
       
       std::vector<std::string> m_CollectionsToCheck;
       ToolHandle <InDet::InDetV0FinderTool> m_v0FinderTool;
-
+      SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo_key{this, "EventInfo", "EventInfo", "Input event information"};
       SG::ReadHandleKey<xAOD::VertexContainer>        m_vertexKey { this, "VxPrimaryCandidateName", "PrimaryVertices", 
                                                                   "key for retrieving vertices" };
 

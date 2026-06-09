@@ -158,11 +158,9 @@ namespace DerivationFramework {
   private:
     Gaudi::Property<double> m_ptCut{this, "ptCut", 0.0};
     Gaudi::Property<double> m_etaCut{this, "etaCut", 0.0};
-    Gaudi::Property<bool> m_useV0Fitter{this, "useV0Fitter", false};
     SG::ReadHandleKey<xAOD::MuonContainer> m_muonCollectionKey{this, "muonCollectionKey", "Muons"};
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrkParticleCollection{this, "TrackParticleCollection", "TrackParticleCandidate"};
     PublicToolHandle < Trk::IVertexFitter > m_iVertexFitter{this, "TrkVertexFitterTool", "Trk::TrkVKalVrtFitter"};
-    PublicToolHandle < Trk::IVertexFitter > m_iV0VertexFitter{this, "V0VertexFitterTool", "Trk::V0VertexFitter"};
     PublicToolHandle < Trk::ITrackSelectorTool > m_trkSelector{this, "TrackSelectorTool", "InDet::TrackSelectorTool"};
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo_key{this, "EventInfo", "EventInfo", "Input event information"};
     SG::WriteDecorHandleKey<xAOD::MuonContainer> m_muonIndex{this, "muonIndexDec", m_muonCollectionKey, "BPHY4MuonIndex"};
