@@ -437,6 +437,7 @@ namespace Analysis {
             
         } // End of loop over J/psis
         ATH_MSG_DEBUG("bContainer size " << bContainer->size());
+        if( bContainer->size() > 200 ) ATH_MSG_WARNING("bContainer size is high! size " << bContainer->size());
         return StatusCode::SUCCESS;
         
     }
