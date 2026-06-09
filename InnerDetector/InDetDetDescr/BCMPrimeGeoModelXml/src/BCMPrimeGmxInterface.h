@@ -9,18 +9,35 @@
 #include <GeoModelXml/GmxInterface.h>
 
 #include <map>
+#include <InDetReadoutGeometry/SiDetectorDesign.h>
+#include <InDetReadoutGeometry/SiDetectorElement.h>
 
 namespace InDetDD
 {
 
+class BCMPrimeDetectorManager;
+
 class BCMPrimeGmxInterface: public GmxInterface, public AthMessaging
 {
 public:
-  BCMPrimeGmxInterface();
+  BCMPrimeGmxInterface(BCMPrimeDetectorManager* detectorManager = nullptr);
 
   virtual int sensorId(std::map<std::string, int> &index) const override final;
+  virtual void addSensorType(const std::string& clas,
+                             const std::string& typeName,
+                             const std::map<std::string, std::string>& parameters) override final;
+
+  void addSensor(const std::string& typeName,
+                 std::map<std::string, int>& index,
+                 int sensitiveId,
+                 GeoVFullPhysVol* fpv);
+
+  void makeBCMPrimeDiamondDesign(const std::string& typeName,
+                                  const std::map<std::string, std::string>& parameters);
 
 private:
+  std::map<std::string, InDetDD::SiDetectorDesign*> m_geometryMap;
+  BCMPrimeDetectorManager* m_detectorManager;
 };
 
 } // namespace InDetDD

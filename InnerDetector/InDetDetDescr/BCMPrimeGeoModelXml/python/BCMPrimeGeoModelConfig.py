@@ -10,9 +10,11 @@ def BCMPrimeGeometryCfg(flags):
 
     bcmPrimeDetectorTool = CompFactory.BCMPrimeDetectorTool()
     bcmPrimeDetectorTool.DetectorName = "BCMPrime"
+## PEDRO CHANGED THE FOLLOWING LINES
     if flags.ITk.Geometry.BCMPrimeLocal:
-      # Setting this filename triggers reading from local file rather than DB
+##      # Setting this filename triggers reading from local file rather than DB
       bcmPrimeDetectorTool.GmxFilename = flags.ITk.Geometry.BCMPrimeFilename
+##    bcmPrimeDetectorTool.GmxFilename = "/home/purrejol/Documents/itk/ITKLayouts/ITKLayouts/data/BCM/BCMPrime.gmx"
     if flags.ITk.Geometry.BCMPrimeClobOutputName:
         bcmPrimeDetectorTool.ClobOutputName = flags.ITk.Geometry.BCMPrimeClobOutputName
     geoModelSvc.DetectorTools += [ bcmPrimeDetectorTool ]

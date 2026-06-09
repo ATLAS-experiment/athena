@@ -24,4 +24,21 @@ namespace InDetDD {
         m_volume.push_back(vol);
     }
 
+    void BCMPrimeDetectorManager::addDetectorElement(SiDetectorElement* element) {
+        if (element) {
+            m_elements.push_back(element);
+        }
+    }
+
+    SiDetectorElement* BCMPrimeDetectorManager::getDetectorElement(unsigned int index) const {
+        if (index < m_elements.size()) {
+            return m_elements[index];
+        }
+        return nullptr;
+    }
+
+    unsigned int BCMPrimeDetectorManager::getNumDetectorElements() const {
+        return m_elements.size();
+    }
+
 } // namespace InDetDD

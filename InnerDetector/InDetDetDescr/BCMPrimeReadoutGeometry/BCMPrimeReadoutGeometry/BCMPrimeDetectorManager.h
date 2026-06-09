@@ -10,6 +10,8 @@
 #include "GeoModelKernel/GeoVPhysVol.h"
 #include "GeoModelKernel/GeoVDetectorManager.h"
 
+#include <vector>
+
 /** @class BCMPrimeDetectorManager
 
     The Detector manager registers the call backs and infrastructure to
@@ -21,6 +23,8 @@
     */
 
 namespace InDetDD {
+
+    class SiDetectorElement;
 
     class BCMPrimeDetectorManager : public GeoVDetectorManager {
     public:
@@ -35,6 +39,15 @@ namespace InDetDD {
         /** Add a Tree top: */
         void addTreeTop (const PVConstLink& treeTop);
 
+        /** Add a detector element: */
+        void addDetectorElement(SiDetectorElement* element);
+
+        /** Get detector element by index: */
+        SiDetectorElement* getDetectorElement(unsigned int index) const;
+
+        /** Get number of detector elements: */
+        unsigned int getNumDetectorElements() const;
+
     private:
 
         /** Prevent copy and assignment */
@@ -43,6 +56,7 @@ namespace InDetDD {
 
         /** Private member data */
         std::vector<PVConstLink>              m_volume;
+        std::vector<SiDetectorElement*>       m_elements;
     };
 
 } // namespace InDetDD
