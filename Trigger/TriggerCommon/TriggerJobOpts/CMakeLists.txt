@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TriggerJobOpts )
@@ -9,7 +9,7 @@ atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 atlas_add_test( TriggerConfigFlagsTest
    SCRIPT python -m TriggerJobOpts.TriggerConfigFlags --verbose
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 
 if (NOT XAOD_ANALYSIS)
 

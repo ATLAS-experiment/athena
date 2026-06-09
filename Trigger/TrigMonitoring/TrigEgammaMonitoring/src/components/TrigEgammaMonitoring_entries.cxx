@@ -8,6 +8,7 @@
 #include "../TrigEgammaMonitorElectronAlgorithm.h"
 #include "../TrigEgammaMonitorPhotonAlgorithm.h"
 #include "../TrigEgammaMonitorTagAndProbeAlgorithm.h"
+#include "../TrigEgammaMonitorTagAndProbeAlgorithmZeeg.h"
 #include "../TrigEgammaMonitorTopoAlgorithm.h"
 // online monitoring
 #include "../egammaMonitorElectronAlgorithm.h"
@@ -20,11 +21,13 @@ DECLARE_COMPONENT(TrigEgammaMonitorAnalysisAlgorithm)
 DECLARE_COMPONENT(TrigEgammaMonitorElectronAlgorithm)
 DECLARE_COMPONENT(TrigEgammaMonitorPhotonAlgorithm)
 DECLARE_COMPONENT(TrigEgammaMonitorTagAndProbeAlgorithm)
+DECLARE_COMPONENT(TrigEgammaMonitorTagAndProbeAlgorithmZeeg)
 DECLARE_COMPONENT(TrigEgammaMonitorTopoAlgorithm)
 
 DECLARE_COMPONENT(egammaMonitorElectronAlgorithm)
 DECLARE_COMPONENT(egammaMonitorPhotonAlgorithm)
 DECLARE_COMPONENT(egammaMonitorSuperClusterAlgorithm)
 DECLARE_COMPONENT(egammaMonitorBaseAlgorithm)
+
 
 

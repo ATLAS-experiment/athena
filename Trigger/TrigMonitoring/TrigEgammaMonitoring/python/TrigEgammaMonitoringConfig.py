@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 '''@file TrigEgammaMonitoringConfigRun3.py
 @author D. Maximov (histograms), Joao victor Pinto (core)
@@ -7,6 +7,8 @@
 '''
 
 from ElectronPhotonSelectorTools.TrigEGammaPIDdefs import SelectionDefPhoton
+from ROOT.ChainNameParser import HLTChainInfo
+
 import cppyy
 import functools
  
@@ -37,6 +39,7 @@ class TrigEgammaMonAlgBuilder:
   activate_electron = False
   activate_photon = False
   activate_zee = False
+  activate_zeeg = False
   activate_jpsiee = False
   activate_topo = False
   activate_onlineMonHypos = False
@@ -52,7 +55,6 @@ class TrigEgammaMonAlgBuilder:
   lhnames   = ["lhtight", "lhmedium", "lhloose","lhvloose"]
   dnnnames   = ["dnntight", "dnnmedium", "dnnloose"]
 
- 
 
 
   def __init__(self, helper, runflag, moniAccess, emulator=None, 
@@ -93,9 +95,11 @@ class TrigEgammaMonAlgBuilder:
     if self.mc_mode or self.pp_mode:
       if(self.derivation):
         self.activate_zee = True
+        self.activate_zeeg = True
       else:
         self.activate_zee=True
-        self.activate_jpsiee=True 
+        self.activate_zeeg=True
+        self.activate_jpsiee=True
         self.activate_electron=True
         self.activate_photon=True
         self.activate_topo= False
@@ -164,43 +168,57 @@ class TrigEgammaMonAlgBuilder:
 
 
     self.__logger.info('Configuring TP electron chains %s',self.tpList)
+    self.__logger.info('Configuring TP Zeeg tag trigger chains %s',self.tpZeegTagList)
+    self.__logger.info('Configuring TP Zeeg probe trigger chains %s',self.tpZeegProbeList)
     self.__logger.info('Configuring electron chains %s',self.electronList)
     self.__logger.info('Configuring photon chains %s',self.photonList)
-
+    self.__logger.info('Configuring minimal trigger matching to probe trigger', self.tpMatchingMap)
 
 
   def setDefaultProperties(self):
    
     from TrigEgammaMonitoring.TrigEgammaMonitCategory import mongroupsCfg
     mongroups = mongroupsCfg(self.moniAccess,self.data_type)
-    
+   #monitoringTP_tag 
     if self.pp_mode:
         self.electronList = mongroups['monitoring_electron']
         self.photonList   = mongroups['monitoring_photon']
         self.bootstrapMap = mongroups['monitoring_bootstrap']
+        self.tpMatchingMap= mongroups['monitoringTP_Matching']
         self.tpList       = mongroups['monitoringTP_electron'] 
-        self.tagItems     = mongroups['monitoring_tags'] 
+        self.tpZeegProbeList   = mongroups['monitoringTP_probe']
+        self.tpZeegTagList   = mongroups['monitoringTP_tag']
+        self.tagItems     = mongroups['monitoringTP_tag'] 
         self.topoList     = mongroups['monitoring_topo']
     elif self.mc_mode:
         self.electronList = mongroups['validation_electron'] 
         self.photonList   = mongroups['validation_photon']
         self.bootstrapMap = mongroups['monitoring_bootstrap']
+        self.tpMatchingMap= mongroups['monitoringTP_Matching']
         self.tpList       = mongroups['monitoringTP_electron'] + mongroups['validationTP_electron_DNN']
+        self.tpZeegProbeList   = mongroups['monitoringTP_probe']
+        self.tpZeegTagList   = mongroups['monitoringTP_tag']
         self.jpsiList     = mongroups['validation_jpsi']
         self.jpsitagItems = mongroups['validationTP_jpsiee']
-        self.tagItems     = mongroups['monitoring_tags']
+        self.tagItems     = mongroups['monitoringTP_tag']
         self.topoList     = mongroups['monitoring_topo']
     elif self.cosmic_mode:
         self.electronList = mongroups['monitoring_electron_cosmic'] 
         self.photonList   = mongroups['monitoring_photon_cosmic']
         self.bootstrapMap = mongroups['monitoring_bootstrap_cosmic']
+        self.tpMatchingMap= mongroups['monitoringTP_Matching']
+        self.tpZeegProbeList   = mongroups['monitoringTP_probe']
+        self.tpZeegTagList   = mongroups['monitoringTP_tag']
     else:
         self.electronList = mongroups['monitoring_electron']
         self.photonList   = mongroups['monitoring_photon']
         self.bootstrapMap = mongroups['monitoring_bootstrap']
+        self.tpMatchingMap= mongroups['monitoringTP_Matching']
         self.tpList       = mongroups['monitoringTP_electron'] 
-        self.tagItems     = mongroups['monitoring_tags'] 
+        self.tagItems     = mongroups['monitoringTP_tag'] 
         self.topoList     = mongroups['monitoring_topo']
+        self.tpZeegProbeList   = mongroups['monitoringTP_probe']
+        self.tpZeegTagList   = mongroups['monitoringTP_tag']
 
 
   #
@@ -298,7 +316,7 @@ class TrigEgammaMonAlgBuilder:
     else:
       # raise since the configuration its not defined
       raise RuntimeError( 'Wrong run flag configuration' )
-    
+
 
 
     if self.activate_zee:
@@ -365,7 +383,48 @@ class TrigEgammaMonAlgBuilder:
         self.zeeMonAlg_dnn.DoEmulation = True
         self.zeeMonAlg_dnn.EmulationTool = self.emulator.core()
 
+    if self.activate_zeeg:
+      probeList= treat_list_of_chains_by_name(self.tpZeegProbeList,) 
+      tagList= treat_list_of_chains_by_name(self.tpZeegTagList,) 
+      self.__logger.info( "Creating the Zeegamma monitor algorithm")
+      self.zeegMonAlg = self.helper.addAlgorithm( CompFactory.TrigEgammaMonitorTagAndProbeAlgorithmZeeg, "TrigEgammaMonitorTagAndProbeZeeg" )
+      self.__logger.info( "HELP HERE 1")
+      self.zeegMonAlg.Analysis='Zeeg'
+      self.zeegMonAlg.MatchTool = EgammaMatchTool
+      self.zeegMonAlg.TPTrigger=False
+      self.zeegMonAlg.ElectronKey = 'Electrons'
+      self.zeegMonAlg.PhotonKey = 'Photons'
+      self.zeegMonAlg.PhotonIsolationKeys = ["Photons.topoetcone20", "Photons.topoetcone40"]
 
+      self.__logger.info( "HELP HERE 2")
+      self.zeegMonAlg.isEMResultNames=self.isemnames
+      self.zeegMonAlg.LHResultNames=self.lhnames
+      self.zeegMonAlg.DNNResultNames=self.dnnnames
+      self.zeegMonAlg.PhotonIsEMSelector =[TightPhotonSelector,MediumPhotonSelector,LoosePhotonSelector]
+      self.zeegMonAlg.ElectronIsEMSelector =[TightElectronSelector,MediumElectronSelector,LooseElectronSelector]
+      self.zeegMonAlg.ElectronLikelihoodTool =[TightLHSelector,MediumLHSelector,LooseLHSelector,VeryLooseLHSelector]
+      self.zeegMonAlg.ElectronDNNSelectorTool =[TightDNNElectronSelector,MediumDNNElectronSelector,LooseDNNElectronSelector]
+      self.zeegMonAlg.ZeeLowerMass=80
+      self.zeegMonAlg.ZeeUpperMass=100
+      self.zeegMonAlg.OfflineTagMinEt=25
+      self.zeegMonAlg.OfflineTagSelector='lhvloose'
+      self.zeegMonAlg.OfflineProbeSelector='loose'
+      self.zeegMonAlg.OppositeCharge=True
+      self.zeegMonAlg.RemoveCrack=False
+      self.zeegMonAlg.TPMatchingMap = self.tpMatchingMap
+      self.zeegMonAlg.TagTriggerList=tagList # Tag triggers
+      self.zeegMonAlg.ProbeTriggerList=probeList #Probe Triggers
+      self.zeegMonAlg.DetailedHistograms=self.detailedHistograms
+      self.zeegMonAlg.DoEmulation = False
+      self.zeegMonAlg.ApplyJetNearProbeSelection = False
+      self.__logger.info( "HELP HERE 3")
+
+      if self.emulator: # turn on emulator
+        self.emulator.TriggerList += tpList
+        self.zeegMonAlg.DoEmulation = True
+        self.zeegMonAlg.EmulationTool = self.emulator.core()
+        self.zeegMonAlg.DoEmulation = True
+        self.zeegMonAlg.EmulationTool = self.emulator.core()
 
 
     if self.activate_jpsiee:
@@ -466,9 +525,10 @@ class TrigEgammaMonAlgBuilder:
 
   
   def configureHistograms(self):
-    
+    self.__logger.warning("line 512") 
     self.setBinning()
 
+    self.__logger.warning("line 514") 
     if self.activate_zee:
 
       # LH plots
@@ -486,9 +546,42 @@ class TrigEgammaMonAlgBuilder:
       self.bookEvent( self.jpsieeMonAlg, self.jpsieeMonAlg.Analysis, True )
       triggers = self.jpsieeMonAlg.TriggerList; triggers.extend( self.jpsieeMonAlg.TagTriggerList )
       self.bookExpertHistograms( self.jpsieeMonAlg, triggers )
-    
+
     # back to default bin configuration
     self.setBinning()
+  
+    if self.activate_zeeg:
+      self.__logger.warning("line 540")
+      self.__logger.warning("ZEEG TriggerList = %s", self.zeegMonAlg.ProbeTriggerList)
+      self.__logger.warning("ZEEG TagTriggerList = %s", self.zeegMonAlg.TagTriggerList) 
+      self.bookEvent( self.zeegMonAlg, self.zeegMonAlg.Analysis , True)
+
+      #self.zeegMonAlg.TagTriggerList=tagList # Tag triggers
+      #self.zeegMonAlg.ProbeTriggerList=probeList #Probe Triggers
+      #Saving list of Triggers (tag)
+      #triggers = self.zeegMonAlg.TagTriggerList;
+      #triggers = self.zeegMonAlg.TagTriggerList
+      #triggers = self.zeegMonAlg.ProbeTriggerList; triggers.extend( self.zeegMonAlg.TagTriggerList )
+      triggers = self.zeegMonAlg.ProbeTriggerList[:]
+      triggers.extend( self.zeegMonAlg.TagTriggerList )
+      print("QQQQQQQQQQQQQ")
+      print(triggers)
+
+      print()
+      print()
+      print()
+      print()
+      print()
+      print()
+      print()
+
+
+      self.bookExpertHistograms( self.zeegMonAlg, triggers )
+
+
+
+      #self.bookExpertHistograms( self.zeegMonAlg, triggers )
+
     if self.activate_electron:
       self.bookExpertHistograms( self.elMonAlg, self.elMonAlg.TriggerList )
     if self.activate_photon:
@@ -506,6 +599,12 @@ class TrigEgammaMonAlgBuilder:
     return self.helper.addGroup( monAlg, name, path )
 
   def addHistogram(self, monGroup, hist):
+      if monGroup is None:
+          self.__logger.error("monGroup is None for hist %s", hist.name)
+          return
+      self.__logger.warning("BOOKING HIST %s in group %s",
+                          hist.name, monGroup.name)
+      self.__logger.warning("kwargs = %s", hist.kwargs)
       monGroup.defineHistogram(hist.name, **hist.kwargs)
 
 
@@ -518,73 +617,84 @@ class TrigEgammaMonAlgBuilder:
 
 
     for trigger in triggers:
-   
+  
       info = self.getTrigInfo(trigger)
+      self.__logger.info( "Trigger info: %s", info )
 
-      if info.isL1Item():
-        self.bookL1CaloDistributions( monAlg, trigger )
-        self.bookEfficiencies( monAlg, trigger, "L1Calo" )
-        self.bookL1CaloResolutions( monAlg, trigger )
-        self.bookL1CaloAbsResolutions( monAlg, trigger )
+      #Booking histograms
+      #
+      # Distributions
+      #
+      self.bookL1CaloDistributions( monAlg, trigger )
+      self.bookL2CaloDistributions( monAlg, trigger )
+      self.bookEFCaloDistributions( monAlg, trigger )
 
-      else:
-        #
-        # Distributions
-        #
-        self.bookL1CaloDistributions( monAlg, trigger )
-        self.bookL2CaloDistributions( monAlg, trigger )
-        self.bookEFCaloDistributions( monAlg, trigger )
+      self.bookL1CaloResolutions( monAlg, trigger )
+      self.bookL1CaloAbsResolutions( monAlg, trigger )
+      self.bookL2CaloResolutions( monAlg, trigger )
+     
+      # Checking the trigger (tag)
+      if info.isTagAndProbeZeeg():
+        self.bookL2PhotonDistributions( monAlg, trigger )
+        self.bookShowerShapesDistributions( monAlg, trigger, "HLT", online=True )
+        self.bookShowerShapesDistributions( monAlg, trigger, "HLT", online=False)
+        self.bookHLTPhotonResolutions( monAlg, trigger, info.isIsolated() )
 
-        self.bookL1CaloResolutions( monAlg, trigger )
-        self.bookL1CaloAbsResolutions( monAlg, trigger )
-        self.bookL2CaloResolutions( monAlg, trigger )
-        
+      if info.isElectron():
+        self.bookL2ElectronDistributions( monAlg, trigger )
+        # Offline and HLT
+        self.bookShowerShapesDistributions( monAlg, trigger, "HLT" ,online=True)
+        self.bookShowerShapesDistributions( monAlg, trigger, "HLT" ,online=False)
+        self.bookTrackingDistributions( monAlg, trigger, online=True )
+        self.bookTrackingDistributions( monAlg, trigger, online=False )
+        self.bookHLTResolutions( monAlg, trigger,"HLT" )
+        self.bookHLTElectronResolutions( monAlg, trigger, info.isIsolated() )
+
+      elif info.isPhoton():
+        self.bookL2PhotonDistributions( monAlg, trigger )
+        self.bookShowerShapesDistributions( monAlg, trigger, "HLT", online=True )
+        self.bookShowerShapesDistributions( monAlg, trigger, "HLT", online=False)
+        self.bookHLTPhotonResolutions( monAlg, trigger, info.isIsolated() )
+      
+      
+      #
+      # Efficiencies
+      #
+
+      self.bookEfficiencies( monAlg, trigger, "L1Calo" )
+      self.bookEfficiencies( monAlg, trigger, "FastCalo" )
+      if info.isTagAndProbeZeeg():
+        self.bookEfficiencies( monAlg, trigger, "FastPhoton")             
+      if info.isPhoton():
+        self.bookEfficiencies( monAlg, trigger, "FastPhoton")             
+      if info.isElectron():
+        self.bookEfficiencies( monAlg, trigger, "FastElectron")             
+
+      self.bookEfficiencies( monAlg, trigger, "PrecisionCalo" )
+      self.bookEfficiencies( monAlg, trigger, "HLT")
+      if self.detailedHistograms:
+        for pid in self.isemnames + self.lhnames:
+          self.bookEfficiencies( monAlg, trigger, "HLT", pid )
+          self.bookEfficiencies( monAlg, trigger, "HLT", pid+"Iso" )
+
+      #
+      # Emulation
+      #
+      if self.emulator:
+        self.bookEfficiencies( monAlg, trigger, "L1Calo" , doEmulation=True)
+        self.bookEfficiencies( monAlg, trigger, "FastCalo" , doEmulation=True)
+        self.bookEfficiencies( monAlg, trigger, "PrecisionCalo" , doEmulation=True)
+        if info.isTagAndProbeZeeg():
+          self.bookEfficiencies( monAlg, trigger, "FastPhoton")             
+        if info.isPhoton():
+          self.bookEfficiencies( monAlg, trigger, "FastPhoton")             
         if info.isElectron():
-          self.bookL2ElectronDistributions( monAlg, trigger )
-          # Offline and HLT
-          self.bookShowerShapesDistributions( monAlg, trigger, "HLT" ,online=True)
-          self.bookShowerShapesDistributions( monAlg, trigger, "HLT" ,online=False)
-          self.bookTrackingDistributions( monAlg, trigger, online=True )
-          self.bookTrackingDistributions( monAlg, trigger, online=False )
-          self.bookHLTResolutions( monAlg, trigger,"HLT" )
-          self.bookHLTElectronResolutions( monAlg, trigger, info.isIsolated() )
-
-        elif info.isPhoton():
-          self.bookL2PhotonDistributions( monAlg, trigger )
-          self.bookShowerShapesDistributions( monAlg, trigger, "HLT", online=True )
-          self.bookShowerShapesDistributions( monAlg, trigger, "HLT", online=False)
-          self.bookHLTResolutions( monAlg, trigger,"HLT" )
-          self.bookHLTPhotonResolutions( monAlg, trigger, info.isIsolated() )
-
-        
-        #
-        # Efficiencies
-        #
-
-        self.bookEfficiencies( monAlg, trigger, "L1Calo" )
-        self.bookEfficiencies( monAlg, trigger, "FastCalo" )
-        self.bookEfficiencies( monAlg, trigger, "FastPhoton" if info.isPhoton() else "FastElectron")             
-        self.bookEfficiencies( monAlg, trigger, "PrecisionCalo" )
-        self.bookEfficiencies( monAlg, trigger, "HLT")
-        if self.detailedHistograms:
-          for pid in self.isemnames + self.lhnames:
-            self.bookEfficiencies( monAlg, trigger, "HLT", pid )
-            self.bookEfficiencies( monAlg, trigger, "HLT", pid+"Iso" )
-
-        #
-        # Emulation
-        #
-        if self.emulator:
-          self.bookEfficiencies( monAlg, trigger, "L1Calo" , doEmulation=True)
-          self.bookEfficiencies( monAlg, trigger, "FastCalo" , doEmulation=True)
-          self.bookEfficiencies( monAlg, trigger, "PrecisionCalo" , doEmulation=True)
-          self.bookEfficiencies( monAlg, trigger, "FastPhoton" if info.isPhoton() else "FastElectron", doEmulation=True)         
+          self.bookEfficiencies( monAlg, trigger, "FastElectron")             
           self.bookEfficiencies( monAlg, trigger, "HLT" , doEmulation=True)
 
-        # Inefficiencies
-        self.bookInefficiencies(monAlg, trigger)
-
-
+      # Inefficiencies
+      self.bookInefficiencies(monAlg, trigger)
+    
 
   def bookEvent(self, monAlg, analysis, tap=False):
 
@@ -592,13 +702,15 @@ class TrigEgammaMonAlgBuilder:
     monGroup = self.addGroup( monAlg, analysis, self.basePath+'/Expert/Event/'+analysis )
 
     if tap:
-      cutLabels = ["Events","LAr","RetrieveElectrons","TwoElectrons","PassTrigger","EventWise","Success"]
-      probeLabels=["Electrons","NotTag","OS","SS","ZMass","HasTrack","HasCluster","Eta","Et","IsGoodOQ","GoodPid","NearbyJet","Isolated","GoodProbe"]
-      tagLabels=["Electrons","HasTrack","HasCluster","GoodPid","Et","Eta","IsGoodOQ","PassTrigger","MatchTrigger"]
+      cutLabels = ["Events","LAr","RetrieveElectrons","TwoElectrons","PassMinimalTrigger", "PassFullTrigger"]
+      tagLabels=["Electrons","NotTag","OS","SS","ZMass","HasTrack","HasCluster","Eta","Et","IsGoodOQ","GoodPid","NearbyJet","Isolated","GoodProbe","PassTrigger","MatchTrigger"]
+      probeLabels=["Photons","HasCluster","EtCut","Eta","IsGoodOQ","NearbyJet","ZMass","GoodProbe","","PassTrigger","Et22","Et25","Et35","Et50"]
+      #We need to add in the photons for the probe 
+      #We also need to add in the photon selection (Is it a good photon)
 
       monGroup.defineHistogram("CutCounter", type='TH1I', path='', title="Event Selection; Cut ; Count",
           xbins=len(cutLabels), xmin=0, xmax=len(cutLabels), xlabels=cutLabels)
-      monGroup.defineHistogram("TagCutCounter", type='TH1F', path='', title="Number of Probes; Cut ; Count",
+      monGroup.defineHistogram("TagCutCounter", type='TH1F', path='', title="Number of Tags; Cut ; Count",
           xbins=len(tagLabels), xmin=0, xmax=len(tagLabels), xlabels=tagLabels)
       monGroup.defineHistogram("ProbeCutCounter", type='TH1F', path='', title="Number of Probes; Cut ; Count",
           xbins=len(probeLabels), xmin=0, xmax=len(probeLabels), xlabels=probeLabels)
@@ -614,22 +726,22 @@ class TrigEgammaMonAlgBuilder:
     from TrigEgammaMonitoring.TrigEgammaMonitorHelper import TH1F
     monGroup = self.addGroup( monAlg, trigger+'_Distributions_L1Calo', self.basePath+'/Shifter/'+trigger+'/Distributions/L1Calo' )
     
-    if 'L1eEM' in trigger:
+    #if 'L1eEM' in trigger:
 
-      self.addHistogram(monGroup, TH1F("et"     , "Et; Et [GeV] ; Count", 100, 0., 800.))
-      self.addHistogram(monGroup, TH1F("eta"    , "eta; eta ; Count"    , 50, -2.5, 2.5))
-      self.addHistogram(monGroup, TH1F("phi"    , "phi; phi ; Count"    , 20, -3.2, 3.2))
-      self.addHistogram(monGroup, TH1F("Rhad"   , "Rhad; Rhad ; Count"  , 40, 0, 1))
-      self.addHistogram(monGroup, TH1F("Reta"   , "Reta; Reta ; Count"  , 40, 0, 1 ))
-      self.addHistogram(monGroup, TH1F("Wstot"  , "Wstot; Wstot ; Count", 40, 0, 4 ))
+    self.addHistogram(monGroup, TH1F("et"     , "Et; Et [GeV] ; Count", 100, 0., 800.))
+    self.addHistogram(monGroup, TH1F("eta"    , "eta; eta ; Count"    , 50, -2.5, 2.5))
+    self.addHistogram(monGroup, TH1F("phi"    , "phi; phi ; Count"    , 20, -3.2, 3.2))
+    self.addHistogram(monGroup, TH1F("Rhad"   , "Rhad; Rhad ; Count"  , 40, 0, 1))
+    self.addHistogram(monGroup, TH1F("Reta"   , "Reta; Reta ; Count"  , 40, 0, 1 ))
+    self.addHistogram(monGroup, TH1F("Wstot"  , "Wstot; Wstot ; Count", 40, 0, 4 ))
 
-    else: # L1Calo Legacy
-      self.addHistogram(monGroup, TH1F("energy", "Cluster Energy; E [GeV] ; Count", 100, 0., 800.))
-      self.addHistogram(monGroup, TH1F("roi_et", "RoI word Cluster Energy; E [GeV] ; Count", 100, 0, 200))
-      self.addHistogram(monGroup, TH1F("emIso", "EM Isolation; E [GeV] ; Count", 50, -1., 20.))
-      self.addHistogram(monGroup, TH1F("hadCore", "HAD Isolation; E [GeV] ; Count", 50, -1., 20.))
-      self.addHistogram(monGroup, TH1F("eta", "eta; eta ; Count", 50, -2.5, 2.5))
-      self.addHistogram(monGroup, TH1F("phi", "phi; phi ; Count", 20, -3.2, 3.2))
+   # else: # L1Calo Legacy
+   #   self.addHistogram(monGroup, TH1F("energy", "Cluster Energy; E [GeV] ; Count", 100, 0., 800.))
+   #   self.addHistogram(monGroup, TH1F("roi_et", "RoI word Cluster Energy; E [GeV] ; Count", 100, 0, 200))
+   #   self.addHistogram(monGroup, TH1F("emIso", "EM Isolation; E [GeV] ; Count", 50, -1., 20.))
+   #   self.addHistogram(monGroup, TH1F("hadCore", "HAD Isolation; E [GeV] ; Count", 50, -1., 20.))
+   #   self.addHistogram(monGroup, TH1F("eta", "eta; eta ; Count", 50, -2.5, 2.5))
+   #   self.addHistogram(monGroup, TH1F("phi", "phi; phi ; Count", 20, -3.2, 3.2))
 
 
 
@@ -779,15 +891,18 @@ class TrigEgammaMonAlgBuilder:
   # Book efficiencies
   #
   def bookEfficiencies(self, monAlg, trigger, level, subgroup=None, doEmulation=False ):
-
+    self.__logger.warning("booking trigger named = %s", trigger) 
+    self.__logger.warning("booking in dir named =  %s", self.basePath)
     from TrigEgammaMonitoring.TrigEgammaMonitorHelper import TH1F, TH2F, TProfile
 
     dirname = 'Emulation' if doEmulation else 'Efficiency'
+    self.__logger.warning("Histogram path = %s", self.basePath+'/Shifter/'+trigger+'/'+dirname+'/'+level) 
     if subgroup:
       monGroup = self.addGroup( monAlg, trigger+'_'+dirname+'_'+level+'_'+subgroup, self.basePath+'/Shifter/'+trigger+'/'+dirname+'/'+level+'/'+subgroup )
     else:
       monGroup = self.addGroup( monAlg, trigger+'_'+dirname+'_'+level, self.basePath+'/Shifter/'+trigger+'/'+dirname+'/'+level )
 
+    self.__logger.warning("Created monGroup = %s", monGroup)
     # Numerator
     self.addHistogram(monGroup, TH1F("match_pt", "Trigger Matched Offline p_{T}; p_{T} [GeV] ; Count", self._nEtbins, self._etbins))
     self.addHistogram(monGroup, TH1F("match_et", "Trigger Matched Offline E_{T}; E_{T} [GeV]; Count", self._nEtbins, self._etbins))
@@ -970,7 +1085,8 @@ class TrigEgammaMonAlgBuilder:
     
     from TrigEgammaMonitoring.TrigEgammaMonitorHelper import TH1F, TH2F
     monGroup = self.addGroup( monAlg, trigger+'_Resolutions_HLT', self.basePath+'/Shifter/'+trigger+'/Resolutions/'+level )
-     
+    self.__logger.warning("inside the bookHLTResolutions def = %s", monGroup) 
+
     # online values used to fill all 2d histograms
     self.addHistogram(monGroup, TH1F("et", "E_{T}; E_{T}[GeV] ; Count", 50, 0.0, 100.))
     self.addHistogram(monGroup, TH1F("eta", "#eta; #eta ; Count", 50, -2.47, 2.47))
@@ -1201,36 +1317,88 @@ class TrigEgammaMonAlgBuilder:
     self._coarseEtbins = coarse_et_bins[0:self._ncoarseEtbins+1]
     self._coarseEtabins = coarse_eta_bins[0:self._ncoarseEtabins+1]
 
-
-
   def getTrigInfo( self, trigger ):
-
     class TrigEgammaInfo(object):
+    
+        EM = {"e", "electron"}
+        GAMMA = {"g", "photon"}
+    
+    
+        def __init__(self, trigger):
+            self.__chain = trigger
+            self.__legs = HLTChainInfo(trigger)
+            self.__sigs = {leg.signature for leg in self.__legs}
 
-      def __init__(self, trigger):
-        self.__chain = trigger
+        for legInfo in HLTChainInfo(trigger):
+            print(legInfo.multiplicity)
+            print(legInfo.signature)
+            print(legInfo.threshold)
+            print(legInfo.legParts)
 
-      def chain(self):
-        return self.__chain
-      
-      def isL1Item(self):
-        return True if self.chain().startswith('L1') else False
+        def chain(self):
+            return self.__chain
+    
+        def legs(self):
+            return self.__legs
+    
+        def signatures(self):
+            return self.__sigs
+    
+        def isElectron(self):
+            for leg in HLTChainInfo(trigger):
+                if leg.signature == "e" and "probe" not in self.__chain:
+                    return True
+            return False
+    
+        def isPhoton(self):
+            for leg in HLTChainInfo(trigger):
+                if leg.signature == "g" and "probe" not in self.__chain:
+                    return True
+            return False
+    
+        def isTagAndProbeZeeg(self):
+            if "probe" in self.__chain:
+                return True
+            return False
+    
+        def threshold(self):
+            #if self.isElectron() or self.isPhoton():
+            #    for leg in HLTChainInfo(trigger):
+            #        thresholdValue  = leg.threshold
+            #        thresholdString = str(thresholdValue)
+            #        return thresholdString
+    
+            if self.isTagAndProbeZeeg():
+                for leg in HLTChainInfo(trigger):
+                    if leg.signature != "g":
+                        continue
 
-      def isElectron(self):
-        return True if (self.isL1Item() or self.chain().startswith('HLT_e')) else False
-      
-      def isPhoton(self):
-        return True if (self.chain().startswith('HLT_g')) else False
+                        thresholdValue  = leg.threshold
+                        thresholdString = str(thresholdValue)
+                        return thresholdString
+            return "Invalid Threshold"
+    
+        def pidname(self):
+            #if self.isElectron() or self.isPhoton():
+            #    for leg in HLTChainInfo(trigger):
+            #        pidValue  = leg.legParts[0]
+            #        return pidValue
+    
+            if self.isTagAndProbeZeeg():
+                for leg in HLTChainInfo(trigger):
+                    if leg.signature != "g":
+                        continue
 
-      def pidname(self):
-        return self.chain().split('_')[2]
+                    pidValue  = leg.legParts[0]
+                    return pidValue
+            return "Invalid Threshold"
 
-      def isIsolated(self):
-        for part_name in ['iloose', 'ivarloose', 'icaloloose', 'icalovloose', 'icalotight']:
-          if part_name in self.chain():
-            return True
-        return False
-
+        def isIsolated(self):
+          for part_name in ['iloose', 'ivarloose', 'icaloloose', 'icalovloose', 'icalotight']:
+            if part_name in self.chain():
+              return True
+          return False
 
 
     return TrigEgammaInfo(trigger)
+

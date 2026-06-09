@@ -6,9 +6,10 @@
 #define TrigEgammaMonitorBaseAlgorithm_h 
 
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
-#include "TrigEgammaMatchingTool/TrigEgammaMatchingToolMT.h"
-#include "TrigEgammaEmulationTool/TrigEgammaEmulationToolMT.h"
+#include "TriggerMatchingTool/IMatchingTool.h"
+#include "TrigCompositeUtils/ChainNameParser.h"
 
+#include "TrigEgammaEmulationTool/TrigEgammaEmulationToolMT.h"
 
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 #include "TrigDecisionTool/TrigDecisionTool.h"
@@ -61,8 +62,6 @@ typedef struct _triginfo
 } TrigInfo;
 
 
-
-
 class TrigEgammaMonitorBaseAlgorithm : public AthMonitorAlgorithm {
 
   public:
@@ -76,18 +75,27 @@ class TrigEgammaMonitorBaseAlgorithm : public AthMonitorAlgorithm {
 
     virtual StatusCode fillHistograms(const EventContext& /*ctx*/) const override {return StatusCode::SUCCESS;};
 
+
+    std::vector<ChainNameParser::LegInfo> 
+    getProbeTriggerLeg(const std::string& triggerName) const;
+
+    std::string  getProbeInformation(const std::vector<ChainNameParser::LegInfo>& LegParts, const std::string& signature) const;
+
   private:
 
     /*! Trigger decision tool */
     ToolHandle<Trig::TrigDecisionTool> m_trigdec;
     /*! creates map of trigger name and TrigInfo struct */
     std::map<std::string,TrigInfo> m_trigInfo;
+    std::map<std::string,TrigInfo> m_trigInfoR3;
  
 
   protected:
 
     /* Trigger e/g matching tool */
     ToolHandle<TrigEgammaMatchingToolMT> m_matchTool;
+    ToolHandle<Trig::IMatchingTool> m_matchTool_R3;
+
     /* Trigger e/g emulation tool */
     ToolHandle<Trig::TrigEgammaEmulationToolMT> m_emulatorTool;
     /*! Offline isEM Selectors */
@@ -127,19 +135,26 @@ class TrigEgammaMonitorBaseAlgorithm : public AthMonitorAlgorithm {
     /** Helper methods **/
 
     /*! Get the trig info map */
-    const std::map<std::string,TrigInfo>& getTrigInfoMap() { return m_trigInfo; } 
+    const std::map<std::string,TrigInfo>& getTrigInfoMap() const { return m_trigInfo; }
+    const std::map<std::string,TrigInfo>& getTrigInfoMapR3() const { return m_trigInfoR3; }
     /*! Get offline electron decision */
     bool ApplyElectronPid(const EventContext& ctx, const xAOD::Electron *eg,const std::string&) const;
     /*! Get offline electron decision */
     bool ApplyPhotonPid(const EventContext& ctx, const xAOD::Photon *eg,const std::string&) const;
     /*! Get the TDT  */
     const ToolHandle<Trig::TrigDecisionTool>& tdt() const {return m_trigdec;};
+
     /*! Get the e/g match tool */
     const ToolHandle<TrigEgammaMatchingToolMT>& match() const {return m_matchTool;}
+    const ToolHandle<Trig::IMatchingTool>& matchR3() const {return m_matchTool_R3;}
+
+
+
     /*! Set the accept object for all trigger levels */
     asg::AcceptData setAccept(const TrigCompositeUtils::Decision*, const TrigInfo&, const bool) const;
     /*! Get the trigger info parsed from the chain name (only single lepton triggers) */
     TrigInfo getTrigInfo(const std::string&) const;
+    TrigInfo getTrigInfoR3(const std::string&) const;
     /*! Get delta R */
     float dR(const float, const float, const float, const float) const;
     /*! Creates static map to return L1 item from trigger name */
@@ -150,6 +165,7 @@ class TrigEgammaMonitorBaseAlgorithm : public AthMonitorAlgorithm {
     bool isPrescaled(const std::string&) const;
     /*! Set the trigger info parsed from the chain name */
     void setTrigInfo(const std::string&);
+    void setTrigInfoR3(const std::string&);
     /*! */
     bool isHLTTruncated() const;
    
