@@ -38,7 +38,6 @@ StatusCode xAODMETFilter::filterEvent() {
       ATH_MSG_ERROR("Could not retrieve MC Event Collection - might not work");
       return StatusCode::SUCCESS;
     }
-  static const std::string filterMetStr{"filterMET"};
   McEventCollection* mec = const_cast<McEventCollection*> (&(*mecc));
   for (unsigned int i = 0; i < mec->size(); ++i) {
       if (!(*mec)[i]) continue;
