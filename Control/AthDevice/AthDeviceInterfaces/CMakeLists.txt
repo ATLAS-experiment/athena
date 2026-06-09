@@ -3,9 +3,12 @@
 # Set the name of the package.
 atlas_subdir(AthDeviceInterfaces)
 
+# External dependencies.
+find_package(vecmem)
+
 # Component(s) in the package.
 atlas_add_library(AthDeviceInterfacesLib
    AthDeviceInterfaces/*.h
    INTERFACE
    PUBLIC_HEADERS AthDeviceInterfaces
-   LINK_LIBRARIES GaudiKernel)
+   LINK_LIBRARIES GaudiKernel vecmem::core)

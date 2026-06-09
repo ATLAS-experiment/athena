@@ -11,11 +11,6 @@
 #include "StoreGate/WriteHandle.h"
 #include "xAODCore/AuxContainerBase.h"
 
-// VecMem include(s).
-#include <vecmem/memory/cuda/device_memory_resource.hpp>
-#include <vecmem/memory/host_memory_resource.hpp>
-#include <vecmem/utils/cuda/copy.hpp>
-
 // System include(s).
 #include <cstring>
 
@@ -30,6 +25,8 @@ StatusCode TrackParticleCalibratorExampleAlg::initialize() {
   // Initialize the tools.
   ATH_CHECK(m_hostMR.retrieve());
   ATH_CHECK(m_deviceMR.retrieve());
+  ATH_CHECK(m_hostCopyTool.retrieve());
+  ATH_CHECK(m_deviceCopyTool.retrieve());
 
   // Print some information about the configuration:
   ATH_MSG_INFO("Input container key: " << m_inputKey);
@@ -64,9 +61,9 @@ StatusCode TrackParticleCalibratorExampleAlg::execute(
   }
 
   // The object managing host memory copies.
-  vecmem::copy hostCopy;
+  auto hostCopy = m_hostCopyTool->copy(ctx);
   // The object managing device memory copies.
-  vecmem::cuda::copy deviceCopy;
+  auto deviceCopy = m_deviceCopyTool->copy(ctx);
 
   // Construct input buffer(s).
   traccc::edm::track_collection<traccc::default_algebra>::buffer
@@ -75,8 +72,8 @@ StatusCode TrackParticleCalibratorExampleAlg::execute(
   traccc::edm::track_collection<traccc::default_algebra>::buffer
       inputDeviceBuffer(std::vector<unsigned int>(input->size(), 0u),
                         m_deviceMR->mr(), &(m_hostMR->mr()));
-  hostCopy.setup(inputHostBuffer)->wait();
-  deviceCopy.setup(inputDeviceBuffer)->wait();
+  hostCopy->setup(inputHostBuffer)->wait();
+  deviceCopy->setup(inputDeviceBuffer)->wait();
 
   // Copy the relevant data into the input buffer.
   traccc::edm::track_collection<traccc::default_algebra>::device inputHost{
@@ -88,13 +85,13 @@ StatusCode TrackParticleCalibratorExampleAlg::execute(
   }
 
   // Copy the input buffer to the device.
-  deviceCopy(inputHostBuffer, inputDeviceBuffer)->wait();
+  (*deviceCopy)(inputHostBuffer, inputDeviceBuffer)->wait();
 
   // Construct output buffer(s).
   traccc::edm::track_collection<traccc::default_algebra>::buffer
       outputDeviceBuffer(std::vector<unsigned int>(input->size(), 0u),
                          m_deviceMR->mr(), &(m_hostMR->mr()));
-  deviceCopy.setup(outputDeviceBuffer)->wait();
+  deviceCopy->setup(outputDeviceBuffer)->wait();
   traccc::edm::track_collection<traccc::default_algebra>::host
       outputHostCollection(m_hostMR->mr());
 
@@ -102,7 +99,7 @@ StatusCode TrackParticleCalibratorExampleAlg::execute(
   ATH_CHECK(calibrateOnGPU(inputDeviceBuffer, outputDeviceBuffer));
 
   // Get the output back to the host.
-  deviceCopy(outputDeviceBuffer, outputHostCollection)->wait();
+  (*deviceCopy)(outputDeviceBuffer, outputHostCollection)->wait();
 
   // Construct the output container.
   auto outputAux = std::make_unique<xAOD::AuxContainerBase>();

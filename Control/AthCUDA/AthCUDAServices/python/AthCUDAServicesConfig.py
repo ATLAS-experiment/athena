@@ -133,3 +133,31 @@ def ManagedMemoryResourceToolCfg(flags, **kwargs):
 
     # Return the CA.
     return result
+
+
+def CopyToolCfg(flags, **kwargs):
+    '''Synchronous copy object provider tool
+    '''
+
+    # Create an accumulator to hold the configuration.
+    result = ComponentAccumulator()
+
+    # Create the tool in a simple way.
+    result.setPrivateTools(CompFactory.AthCUDA.CopyTool(**kwargs))
+
+    # Return the CA.
+    return result
+
+
+def AsyncCopyToolCfg(flags, **kwargs):
+    '''Asynchronous copy object provider tool
+    '''
+
+    # Create an accumulator to hold the configuration.
+    result = ComponentAccumulator()
+
+    # Create the tool in a simple way.
+    result.setPrivateTools(CompFactory.AthCUDA.AsyncCopyTool(**kwargs))
+
+    # Return the CA.
+    return result
