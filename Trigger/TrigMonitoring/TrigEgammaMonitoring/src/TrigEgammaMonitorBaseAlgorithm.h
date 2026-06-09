@@ -135,8 +135,8 @@ class TrigEgammaMonitorBaseAlgorithm : public AthMonitorAlgorithm {
     /** Helper methods **/
 
     /*! Get the trig info map */
-    std::map<std::string,TrigInfo> getTrigInfoMap() { return m_trigInfo; } 
-    std::map<std::string,TrigInfo> getTrigInfoMapR3() { return m_trigInfoR3; } 
+    const std::map<std::string,TrigInfo>& getTrigInfoMap() const { return m_trigInfo; }
+    const std::map<std::string,TrigInfo>& getTrigInfoMapR3() const { return m_trigInfoR3; }
     /*! Get offline electron decision */
     bool ApplyElectronPid(const EventContext& ctx, const xAOD::Electron *eg,const std::string&) const;
     /*! Get offline electron decision */

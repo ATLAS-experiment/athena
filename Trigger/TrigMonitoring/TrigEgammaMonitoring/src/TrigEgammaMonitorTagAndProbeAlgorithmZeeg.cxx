@@ -247,9 +247,9 @@ StatusCode TrigEgammaMonitorTagAndProbeAlgorithmZeeg::fillHistograms( const Even
 			ATH_MSG_DEBUG("Number of trigger matched photons: " << nMatched);
 
      		   	// Include fill here
-     		   	fillDistributions( pairObjs, info );
-     		   	fillEfficiencies( pairObjs, info, false);
-     		   	fillResolutions( pairObjs,  info );
+     		   	fillDistributions(ctx, pairObjs, info );
+     		   	fillEfficiencies(ctx, pairObjs, info, false);
+     		   	fillResolutions(ctx, pairObjs,  info );
 
      		  // }// if pass probe trigger
 
