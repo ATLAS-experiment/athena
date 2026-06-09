@@ -43,7 +43,7 @@ StatusCode TBDMContainerSplitter::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode TBDMContainerSplitter::execute()
+StatusCode TBDMContainerSplitter::execute(const EventContext& /*ctx*/)
 {
   ATH_MSG_DEBUG ( "Executing TBDMContainerSplitter " );
 

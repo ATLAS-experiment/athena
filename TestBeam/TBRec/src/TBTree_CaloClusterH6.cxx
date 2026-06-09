@@ -347,7 +347,7 @@ void TBTree_CaloClusterH6::clear()
   }
 }
 
-StatusCode TBTree_CaloClusterH6::execute()
+StatusCode TBTree_CaloClusterH6::execute(const EventContext& ctx)
 {
   const int lastScintInLayer[] = {11, 23, 29, 35, 41, 47};
   m_nEvent++;
@@ -430,7 +430,7 @@ StatusCode TBTree_CaloClusterH6::execute()
 
   // Do first event initialization (run header filling)
   if (m_first) {
-    SG::ReadCondHandle<CaloNoise> elecNoise (m_elecNoiseKey);
+    SG::ReadCondHandle<CaloNoise> elecNoise (m_elecNoiseKey, ctx);
 
     m_first = false;
     // Fill run header

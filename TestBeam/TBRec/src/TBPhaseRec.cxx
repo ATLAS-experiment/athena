@@ -127,10 +127,9 @@ TBPhaseRec::initialize()
   return StatusCode::SUCCESS ;
 }
 
-StatusCode TBPhaseRec::execute()
+StatusCode TBPhaseRec::execute(const EventContext& ctx)
 {
   ATH_MSG_VERBOSE ( "In execute()" );
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // Get run number...
   unsigned int thisrun=ctx.eventID().run_number();

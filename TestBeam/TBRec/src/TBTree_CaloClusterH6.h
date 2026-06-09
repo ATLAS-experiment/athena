@@ -29,7 +29,7 @@ class TBTree_CaloClusterH6: public AthAlgorithm {
   TBTree_CaloClusterH6(const std::string& name, ISvcLocator* pSvcLocator);
   virtual ~TBTree_CaloClusterH6();
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
   virtual StatusCode finalize() override;
   
  private: 
