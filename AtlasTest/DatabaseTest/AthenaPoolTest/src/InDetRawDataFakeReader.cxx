@@ -68,7 +68,7 @@ StatusCode InDetRawDataFakeReader::initialize()
 }
 
 // Execute method:
-StatusCode InDetRawDataFakeReader::execute() 
+StatusCode InDetRawDataFakeReader::execute(const EventContext& /*ctx*/) 
 {
     ATH_MSG_DEBUG("InDetRawDataFakeReader::execute()" );
 

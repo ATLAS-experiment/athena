@@ -65,7 +65,7 @@ StatusCode TrkTrackFakeReader::initialize()
 }
 
 // Execute method:
-StatusCode TrkTrackFakeReader::execute() 
+StatusCode TrkTrackFakeReader::execute(const EventContext& ctx) 
 {
   ATH_MSG_DEBUG( "TrkTrackFakeReader::execute()"  );
 
@@ -76,7 +76,7 @@ StatusCode TrkTrackFakeReader::execute()
   const TrackCollection* tracks = nullptr;
   ATH_CHECK( evtStore()->retrieve(tracks,"Tracks") );
 
-  SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleHandle(m_pixelDetEleCollKey);
+  SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleHandle(m_pixelDetEleCollKey, ctx);
   const InDetDD::SiDetectorElementCollection* elements = *pixelDetEleHandle;
   if (not pixelDetEleHandle.isValid() or elements==nullptr) {
     ATH_MSG_WARNING(m_pixelDetEleCollKey.fullKey() << " is not available.");

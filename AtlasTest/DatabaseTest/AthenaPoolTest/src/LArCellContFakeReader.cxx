@@ -41,11 +41,11 @@ StatusCode LArCellContFakeReader::initialize()
 }
 
 // Execute method:
-StatusCode LArCellContFakeReader::execute() 
+StatusCode LArCellContFakeReader::execute(const EventContext& ctx) 
 {
     ATH_MSG_DEBUG("LArCellContFakeReader::execute()" );
 
-    SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
+    SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey, ctx};
     ATH_CHECK(caloMgrHandle.isValid());
 
     // Retrieve container
