@@ -228,10 +228,9 @@ CLHEP::HepRandomEngine* AddFlowByShifting::getRandomEngine(const std::string& st
 }
 
 
-StatusCode AddFlowByShifting::execute() {
+StatusCode AddFlowByShifting::execute(const EventContext& ctx) {
   ATH_MSG_INFO(">>> AddFlowByShifting from execute");
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   CLHEP::HepRandomEngine *rndmEngine = getRandomEngine("FLOW", ctx);
   // Get hijing event parameters
   const HijingEventParams *hijing_pars;

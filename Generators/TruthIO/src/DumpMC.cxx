@@ -29,7 +29,7 @@ StatusCode DumpMC::initialize() {
 }
 
 
-StatusCode DumpMC::execute() {
+StatusCode DumpMC::execute(const EventContext& /*ctx*/) {
   if (m_DeepCopy) {
     McEventCollection* mcCollptra = new McEventCollection();
     // Fill the new McEventCollection with a copy of the initial HepMC::GenEvent

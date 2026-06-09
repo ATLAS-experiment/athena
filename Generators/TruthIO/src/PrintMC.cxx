@@ -50,7 +50,7 @@ StatusCode PrintMC::initialize() {
 
 
 /// @todo Avoid use of unprotected std::cout: stringstream + MsgStream would be better
-StatusCode PrintMC::execute() {
+StatusCode PrintMC::execute(const EventContext& ctx) {
   // If output already turned off by passing last dumped event, just return
   /// @todo I get the feeling VerboseOutput is being abused here...
   if (!m_VerboseOutput) return StatusCode::SUCCESS;
@@ -63,7 +63,7 @@ StatusCode PrintMC::execute() {
     uint64_t evtnum = std::max(0,evt->event_number());
     // Override with evtnum from Athena if enabled and functional
     if (!m_trustHepMC) {
-      SG::ReadHandle<xAOD::EventInfo> evtInfo(m_evtInfoKey);
+      SG::ReadHandle<xAOD::EventInfo> evtInfo(m_evtInfoKey, ctx);
       evtnum = evtInfo->eventNumber();
     }
 

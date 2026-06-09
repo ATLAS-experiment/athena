@@ -12,7 +12,7 @@ SimTimeEstimate::SimTimeEstimate(const std::string& name, ISvcLocator* pSvcLocat
 {
 }
 
-StatusCode SimTimeEstimate::execute() 
+StatusCode SimTimeEstimate::execute(const EventContext& /*ctx*/) 
 {
     // Loop over all events in McEventCollection
     /// @todo Use C++ for(:)

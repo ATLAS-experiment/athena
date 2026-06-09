@@ -28,7 +28,7 @@ StatusCode CheckCloningFactor::initialize(){
 }
 
 
-StatusCode CheckCloningFactor::execute() {
+StatusCode CheckCloningFactor::execute(const EventContext& /*ctx*/) {
     
     ++m_eventCount;
     

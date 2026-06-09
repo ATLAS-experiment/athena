@@ -12,7 +12,7 @@ class BoostEvent : public AthAlgorithm
 public:
   BoostEvent(const std::string& name, ISvcLocator* pSvcLocator);
   StatusCode initialize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   StatusCode finalize();
   
 private:

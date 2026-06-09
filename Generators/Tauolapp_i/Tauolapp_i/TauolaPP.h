@@ -30,7 +30,7 @@ public:
   virtual StatusCode initialize() override;
 
   /// Pass each event in the McEventCollection to Tauola to (re)decay the taus
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
   static CLHEP::HepRandomEngine* p_rndmEngine;
 

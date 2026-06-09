@@ -29,7 +29,7 @@ StatusCode PrintHijingPars::initialize(){
   return StatusCode::SUCCESS;
 }
 
-StatusCode PrintHijingPars::execute() 
+StatusCode PrintHijingPars::execute(const EventContext& /*ctx*/) 
 {
   
   const HijingEventParams *hijing_pars = nullptr;

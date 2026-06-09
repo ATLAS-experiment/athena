@@ -37,7 +37,7 @@ StatusCode xAODTruthParticleSlimmerMET::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode xAODTruthParticleSlimmerMET::execute()
+StatusCode xAODTruthParticleSlimmerMET::execute(const EventContext& ctx)
 {
   // If the containers already exists then assume that nothing needs to be done
   if (evtStore()->contains<xAOD::TruthParticleContainer>(m_xaodTruthParticleContainerNameMET.key()))
@@ -47,12 +47,12 @@ StatusCode xAODTruthParticleSlimmerMET::execute()
     }
 
   // Create new output container
-  SG::WriteHandle<xAOD::TruthParticleContainer> xTruthParticleContainerMET(m_xaodTruthParticleContainerNameMET);
+  SG::WriteHandle<xAOD::TruthParticleContainer> xTruthParticleContainerMET(m_xaodTruthParticleContainerNameMET, ctx);
   ATH_CHECK(xTruthParticleContainerMET.record(std::make_unique<xAOD::TruthParticleContainer>(), std::make_unique<xAOD::TruthParticleAuxContainer>()));
   ATH_MSG_INFO("Recorded TruthParticleContainerMET with key: " << m_xaodTruthParticleContainerNameMET.key());
 
   // Retrieve full TruthEventContainer container
-  SG::ReadHandle<xAOD::TruthEventContainer> xTruthEventContainer{m_xaodTruthEventContainerName};
+  SG::ReadHandle<xAOD::TruthEventContainer> xTruthEventContainer{m_xaodTruthEventContainerName, ctx};
   if ( !xTruthEventContainer.isValid() )
     {
       ATH_MSG_ERROR("No TruthEvent collection with name " << m_xaodTruthEventContainerName.key() << " found in StoreGate!");

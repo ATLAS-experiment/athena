@@ -32,7 +32,7 @@ StatusCode xAODTruthParticleSlimmerPhoton::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode xAODTruthParticleSlimmerPhoton::execute()
+StatusCode xAODTruthParticleSlimmerPhoton::execute(const EventContext& ctx)
 {
   // If the containers already exists then assume that nothing needs to be done
   if (evtStore()->contains<xAOD::TruthParticleContainer>(m_xaodTruthParticleContainerNamePhoton.key()))
@@ -42,12 +42,12 @@ StatusCode xAODTruthParticleSlimmerPhoton::execute()
     }
 
   // Create new output container
-  SG::WriteHandle<xAOD::TruthParticleContainer> xTruthParticleContainerPhoton(m_xaodTruthParticleContainerNamePhoton);
+  SG::WriteHandle<xAOD::TruthParticleContainer> xTruthParticleContainerPhoton(m_xaodTruthParticleContainerNamePhoton, ctx);
   ATH_CHECK(xTruthParticleContainerPhoton.record(std::make_unique<xAOD::TruthParticleContainer>(), std::make_unique<xAOD::TruthParticleAuxContainer>()));
   ATH_MSG_INFO("Recorded TruthParticleContainerPhoton with key: " << m_xaodTruthParticleContainerNamePhoton.key());
 
   // Retrieve full TruthEventContainer container
-  SG::ReadHandle<xAOD::TruthEventContainer> xTruthEventContainer{m_xaodTruthEventContainerName};
+  SG::ReadHandle<xAOD::TruthEventContainer> xTruthEventContainer{m_xaodTruthEventContainerName, ctx};
   if ( !xTruthEventContainer.isValid() )
     {
       ATH_MSG_ERROR("No TruthEvent collection with name " << m_xaodTruthEventContainerName.key() << " found in StoreGate!");

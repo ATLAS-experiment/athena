@@ -34,7 +34,7 @@ class CheckFlow_New_Minbias:public AthAlgorithm {
 public:
   CheckFlow_New_Minbias(const std::string& name, ISvcLocator* pSvcLocator);
   StatusCode initialize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   StatusCode finalize();
 
 private:

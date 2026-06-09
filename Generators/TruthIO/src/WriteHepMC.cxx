@@ -50,7 +50,7 @@ StatusCode WriteHepMC::initialize() {
 }
 
 
-StatusCode WriteHepMC::execute() {
+StatusCode WriteHepMC::execute(const EventContext& ctx) {
   // Just write out the first (i.e. signal) event in the collection
 #ifdef HEPMC3
   HepMC3::GenEvent ev (*event_const());
@@ -58,13 +58,11 @@ StatusCode WriteHepMC::execute() {
   if (ev.event_number()==1){
     // Get the event number. Full fall back - just set it to 1.
     int event_number = 1;
-    // Grab the contact for the current thread so we can use ReadHandles nicely
-    const EventContext& context = Gaudi::Hive::currentContext();
     // First attempt: xAOD::EventInfo (new-style EVNT)
-    SG::ReadHandle<xAOD::EventInfo> mc_ei{"McEventInfo", context};
+    SG::ReadHandle<xAOD::EventInfo> mc_ei{"McEventInfo", ctx};
     if (!mc_ei.isValid()){
       // Second attempt: old-style EventInfo
-      SG::ReadHandle<EventInfo> og_mc_ei{"McEventInfo", context};
+      SG::ReadHandle<EventInfo> og_mc_ei{"McEventInfo", ctx};
       if (!og_mc_ei.isValid()){
         // Give up and let people know that we fell through
         ATH_MSG_WARNING("No McEventInfo found in SG - no event numbers available");
@@ -85,13 +83,11 @@ StatusCode WriteHepMC::execute() {
   if (ev.event_number()==1){
     // Get the event number. Full fall back - just set it to 1.
     int event_number = 1;
-    // Grab the contact for the current thread so we can use ReadHandles nicely
-    const EventContext& context = Gaudi::Hive::currentContext();
     // First attempt: xAOD::EventInfo (new-style EVNT)
-    SG::ReadHandle<xAOD::EventInfo> mc_ei{"McEventInfo", context};
+    SG::ReadHandle<xAOD::EventInfo> mc_ei{"McEventInfo", ctx};
     if (!mc_ei.isValid()){
       // Second attempt: old-style EventInfo
-      SG::ReadHandle<EventInfo> og_mc_ei{"McEventInfo", context};
+      SG::ReadHandle<EventInfo> og_mc_ei{"McEventInfo", ctx};
       if (!og_mc_ei.isValid()){
         // Give up and let people know that we fell through
         ATH_MSG_WARNING("No McEventInfo found in SG - no event numbers available");

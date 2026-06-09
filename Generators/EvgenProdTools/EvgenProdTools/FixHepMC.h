@@ -32,7 +32,7 @@ class FixHepMC : public GenBase {
 public:
 
   FixHepMC(const std::string& name, ISvcLocator* pSvcLocator);
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   StatusCode finalize();
 
 
