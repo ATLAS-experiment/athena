@@ -142,6 +142,15 @@ StatusCode GepEtaSoftKillerAlg::execute(const EventContext& ctx) const {
                 out->setEta(cluster->eta());
                 out->setPhi(cluster->phi());
                 out->setM(cluster->m());
+                out->setRawE(cluster->rawE() * weight);
+                out->setRawEta(cluster->rawEta());
+                out->setRawPhi(cluster->rawPhi());
+                out->setRawM(cluster->rawM());
+                out->setSamplingPattern(cluster->samplingPattern());
+                for(int i=0;i<(int)CaloSampling::Unknown;i++) {
+                    CaloSampling::CaloSample sampling_i = static_cast<CaloSampling::CaloSample>(i);
+                    if (cluster->eSample(sampling_i)!=0) out->setEnergy(sampling_i, cluster->eSample(sampling_i) * weight);
+                }
             }
         }
     }
