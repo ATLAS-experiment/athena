@@ -402,8 +402,10 @@ namespace CP {
 
         // Passes quality requirements
         xAOD::Muon::Quality thisMu_quality = getQuality(mu);
-        bool thisMu_highpt = passedHighPtCuts(mu);
-        bool thisMu_lowptE = passedLowPtEfficiencyCuts(mu, thisMu_quality, event);
+        bool thisMu_highpt = false;
+        thisMu_highpt = passedHighPtCuts(mu);
+        bool thisMu_lowptE = false;
+        thisMu_lowptE = passedLowPtEfficiencyCuts(mu, thisMu_quality, event);
         ATH_MSG_VERBOSE("Summary of quality information for this muon: ");
         ATH_MSG_VERBOSE("Muon quality: " << thisMu_quality << " passes HighPt: " << thisMu_highpt
                                          << " passes LowPtEfficiency: " << thisMu_lowptE);
@@ -424,7 +426,7 @@ namespace CP {
     }
 
     void MuonSelectionTool::IdMsPt(columnar::MuonId mu, float& idPt, float& mePt) const {
-        auto idtrack = columnar::OptObjectId<columnar::MuonTrackDef>(mu(m_idTrackLinkAcc).opt_value());
+        auto idtrack = mu(m_idTrackLinkAcc).opt_value();
         auto metrack = columnar::OptObjectId<columnar::MuonTrackDef>(mu(m_meTrackLinkAcc));
         if (!idtrack || !metrack) { idPt = mePt = -1.; return; }
         if (m_turnOffMomCorr) {
@@ -455,7 +457,7 @@ namespace CP {
                                      << " Momentum dependent cuts are disabled. Return 0.");
             return 0.;
         }
-        auto idtrack = columnar::OptObjectId<columnar::MuonTrackDef>(mu(m_idTrackLinkAcc).opt_value());
+        auto idtrack = mu(m_idTrackLinkAcc).opt_value();
         auto metrack = columnar::OptObjectId<columnar::MuonTrackDef>(mu(m_meTrackLinkAcc));
         if (!idtrack || !metrack) {
             ATH_MSG_VERBOSE("No ID / MS track. Return dummy large value of 1 mio");
@@ -537,7 +539,7 @@ namespace CP {
             }
 
             // LOOSE / MEDIUM / TIGHT WP
-            auto idtrack = columnar::OptObjectId<columnar::MuonTrackDef>(mu(m_idTrackLinkAcc).opt_value());
+            auto idtrack = mu(m_idTrackLinkAcc).opt_value();
             auto metrack = columnar::OptObjectId<columnar::MuonTrackDef>(mu(m_meTrackLinkAcc));
             if (idtrack && metrack && m_trkCovAcc(*metrack)(4, 4) > 0) {
                 const float qOverPsignif = qOverPsignificance(mu);
@@ -559,21 +561,26 @@ namespace CP {
                         return xAOD::Muon::Tight;
                     }
                 }
+
                 ATH_MSG_VERBOSE("Muon did not pass requirements for tight combined muon");
 
                 // MEDIUM WP
                 if ((std::abs(qOverPsignif) < 7 || m_toroidOff) &&
-                    (summary.nprecisionLayers > 1 ||
-                     (summary.nprecisionLayers == 1 && summary.nprecisionHoleLayers < 2 && std::abs(eta) < 0.1))) {
+                    (summary.nprecisionLayers > 1 ||(summary.nprecisionLayers == 1 && summary.nprecisionHoleLayers < 2 && std::abs(eta) < 0.1))
+
+                   ) {
                     ATH_MSG_VERBOSE("Muon is medium");
                     return xAOD::Muon::Medium;
                 }
+
                 ATH_MSG_VERBOSE("Muon did not pass requirements for medium combined muon");
+
             } else {
-                // CB muons with missing ID or ME track
                 ATH_MSG_VERBOSE("Muon is missing the ID and/or ME tracks...");
-                if (summary.nprecisionLayers > 1 ||
-                    (summary.nprecisionLayers == 1 && summary.nprecisionHoleLayers < 2 && std::abs(eta) < 0.1)) {
+
+                // CB muons with missing ID or ME track
+                if ((summary.nprecisionLayers > 1 ||
+                     (summary.nprecisionLayers == 1 && summary.nprecisionHoleLayers < 2 && std::abs(eta) < 0.1))) {
                     // In toroid-off data ME/MS tracks often missing - need special treatment  => flagging as "Medium"
                     // In toroid-on data ME/MS tracks missing only for <1% of CB muons, mostly MuGirl (to be fixed) => flagging as "Loose"
                     if (m_toroidOff) {
@@ -699,7 +706,7 @@ namespace CP {
         // InDetTrackParticles (central) or InDetForwardTrackParticles (forward).
         // SiliconAssociatedForwardMuon and out-of-acceptance MuidSA cases already
         // returned above, so all remaining muons carry a valid central ID-track link.
-        auto idtrack = columnar::OptObjectId<columnar::MuonTrackDef>(mu(m_idTrackLinkAcc).opt_value());
+        auto idtrack = mu(m_idTrackLinkAcc).opt_value();
         if (!idtrack) return false;
         return passedIDCuts(*idtrack);
     }
@@ -711,7 +718,7 @@ namespace CP {
     bool MuonSelectionTool::isBadMuon(columnar::MuonId mu) const {
         if (m_muonTypeAcc(mu) != xAOD::Muon::Combined) return false;
         // ::
-        const auto idtrack = columnar::OptObjectId<columnar::MuonTrackDef>(mu(m_idTrackLinkAcc).opt_value());
+        const auto idtrack = mu(m_idTrackLinkAcc).opt_value();
         const auto metrack = columnar::OptObjectId<columnar::MuonTrackDef>(mu(m_meTrackLinkAcc));
         const auto cbLink  = mu(m_cbTrackLinkAcc);
         const auto cbtrack = columnar::OptObjectId<columnar::MuonTrackDef>(cbLink);
@@ -950,7 +957,7 @@ namespace CP {
         float seg1ChamberIdx{-9.f}, seg2ChamberIdx{-9.f};
         float seg1NPrecisionHits{-1.f}, seg1GlobalR{0.f}, seg1Chi2OverDoF{-1.f};
 
-        if constexpr (columnar::ColumnarModeDefault::isXAOD) {
+        if (!m_noTrackSegments) {
             const xAOD::Muon& xmu = mu.getXAODObject();
             const std::vector<const xAOD::MuonSegment*> muonSegments = getSegmentsSorted(xmu);
             using namespace Muon::MuonStationIndex;
@@ -1037,7 +1044,7 @@ namespace CP {
 
         auto cbLink  = mu(m_cbTrackLinkAcc);
         auto cbtrack = columnar::OptObjectId<columnar::MuonTrackDef>(cbLink);
-        auto idtrack = columnar::OptObjectId<columnar::MuonTrackDef>(mu(m_idTrackLinkAcc).opt_value());
+        auto idtrack = mu(m_idTrackLinkAcc).opt_value();
         auto metrack = columnar::OptObjectId<columnar::MuonTrackDef>(mu(m_meTrackLinkAcc));
 
         if (!cbtrack || !idtrack || !metrack) {
@@ -1071,9 +1078,7 @@ namespace CP {
             etaBalanceSig = std::abs(m_trkMomentumAcc.eta(*idtrack, 0.) - m_trkMomentumAcc.eta(*metrack, 0.));
             phiBalanceSig = std::abs(m_trkMomentumAcc.phi(*idtrack, 0.) - m_trkMomentumAcc.phi(*metrack, 0.));
 
-            // Segment objects are thinned in PHYSLITE; getSegmentsSorted() returns empty there.
-            // In columnar mode (PHYSLITE only) the default -9 is used.
-            if constexpr (columnar::ColumnarModeDefault::isXAOD) {
+            if (!m_noTrackSegments) {
                 const xAOD::Muon& xmu = mu.getXAODObject();
                 const std::vector<const xAOD::MuonSegment*> muonSegments = getSegmentsSorted(xmu);
                 using namespace Muon::MuonStationIndex;
@@ -1156,9 +1161,7 @@ namespace CP {
             etaPrime      = std::abs((m_trkMomentumAcc.eta(*idtrack, 0.) - m_trkMomentumAcc.eta(*metrack, 0.)) / m_etaAcc(mu));
             phiBalanceSig = std::abs(m_trkMomentumAcc.phi(*idtrack, 0.) - m_trkMomentumAcc.phi(*metrack, 0.));
 
-            // Segment objects are thinned in PHYSLITE; getSegmentsSorted() returns empty there.
-            // In columnar mode (PHYSLITE only) the default -9 is used.
-            if constexpr (columnar::ColumnarModeDefault::isXAOD) {
+            if (!m_noTrackSegments) {
                 const xAOD::Muon& xmu = mu.getXAODObject();
                 const std::vector<const xAOD::MuonSegment*> muonSegments = getSegmentsSorted(xmu);
                 using namespace Muon::MuonStationIndex;
@@ -1324,7 +1327,7 @@ namespace CP {
         }
 
         //::: Apply 1/p significance cut
-        auto idtrack = columnar::OptObjectId<columnar::MuonTrackDef>(mu(m_idTrackLinkAcc).opt_value());
+        auto idtrack = mu(m_idTrackLinkAcc).opt_value();
         auto metrack = columnar::OptObjectId<columnar::MuonTrackDef>(mu(m_meTrackLinkAcc));
         if (idtrack && metrack && m_trkCovAcc(*metrack)(4, 4) > 0) {
             const float qOverPsignif = qOverPsignificance(mu);
@@ -1399,23 +1402,51 @@ namespace CP {
         // ::
         if (m_muonTypeAcc(mu) != xAOD::Muon::Combined) return false;
         // ::
-        const double abs_eta = std::abs(m_etaAcc(mu));
-        double start_cut = 3.0, end_cut = 1.6;
+        double start_cut = 3.0;
+        double end_cut = 1.6;
+        double abs_eta = std::abs(m_etaAcc(mu));
 
         // parametrization of expected q/p error as function of pT
-        double p0 = 8.0, p1 = 0., p2 = 0.;
-        if (isRun3()) { // MC21 optimization
-            if      (abs_eta <= 1.05)                         { p1 = 0.046; p2 = 0.00005; }
-            else if (abs_eta > 1.05 && abs_eta <= 1.3)        { p1 = 0.052; p2 = 0.00008; }
-            else if (abs_eta > 1.3  && abs_eta <= 1.7)        { p1 = 0.068; p2 = 0.00006; }
-            else if (abs_eta > 1.7  && abs_eta <= 2.0)        { p1 = 0.048; p2 = 0.00006; }
-            else if (abs_eta > 2.0)                           { p1 = 0.037; p2 = 0.00006; }
-        } else {
-            if      (abs_eta <= 1.05)                         { p1 = 0.039; p2 = 0.00006; }
-            else if (abs_eta > 1.05 && abs_eta <= 1.3)        { p1 = 0.040; p2 = 0.00009; }
-            else if (abs_eta > 1.3  && abs_eta <= 1.7)        { p1 = 0.056; p2 = 0.00008; }
-            else if (abs_eta > 1.7  && abs_eta <= 2.0)        { p1 = 0.041; p2 = 0.00006; }
-            else if (abs_eta > 2.0)                           { p1 = 0.031; p2 = 0.00006; }
+        double p0(8.0), p1(0.), p2(0.);
+        if(isRun3()) //MC21 optimization
+        {
+          if(abs_eta<=1.05){
+              p1=0.046;
+              p2=0.00005;
+          }
+          else if (abs_eta > 1.05 && abs_eta <= 1.3) {
+              p1 = 0.052;
+              p2 = 0.00008;
+          } else if (abs_eta > 1.3 && abs_eta <= 1.7) {
+              p1 = 0.068;
+              p2 = 0.00006;
+          } else if (abs_eta > 1.7 && abs_eta <= 2.0) {
+              p1 = 0.048;
+              p2 = 0.00006;
+          } else if (abs_eta > 2.0) {
+              p1 = 0.037;
+              p2 = 0.00006;
+          }
+        }
+        else
+        {
+          if(abs_eta<=1.05){
+              p1=0.039;
+              p2=0.00006;
+          }
+          else if (abs_eta > 1.05 && abs_eta <= 1.3) {
+              p1 = 0.040;
+              p2 = 0.00009;
+          } else if (abs_eta > 1.3 && abs_eta <= 1.7) {
+              p1 = 0.056;
+              p2 = 0.00008;
+          } else if (abs_eta > 1.7 && abs_eta <= 2.0) {
+              p1 = 0.041;
+              p2 = 0.00006;
+          } else if (abs_eta > 2.0) {
+              p1 = 0.031;
+              p2 = 0.00006;
+          }
         }
         // ::
         hitSummary summary{};
@@ -1423,12 +1454,23 @@ namespace CP {
 
         // independent parametrization for 2-station muons
         if (m_use2stationMuonsHighPt && summary.nprecisionLayers == 2) {
-            start_cut = 1.1; end_cut = 0.7;
-            p1 = 0.0739568; p2 = 0.00012443;
-            if      (abs_eta > 1.05 && abs_eta < 1.3)  { p1 = 0.0674484; p2 = 0.000119879; }
-            else if (abs_eta >= 1.3 && abs_eta < 1.7)  { p1 = 0.041669;  p2 = 0.000178349; }
-            else if (abs_eta >= 1.7 && abs_eta < 2.0)  { p1 = 0.0488664; p2 = 0.000137648; }
-            else if (abs_eta >= 2.0)                    { p1 = 0.028077;  p2 = 0.000152707; }
+            start_cut = 1.1;
+            end_cut=0.7;
+            p1 = 0.0739568;
+            p2 = 0.00012443;
+            if (abs_eta > 1.05 && abs_eta < 1.3) {
+                p1 = 0.0674484;
+                p2 = 0.000119879;
+            } else if (abs_eta >= 1.3 && abs_eta < 1.7) {
+                p1 = 0.041669;
+                p2 = 0.000178349;
+            } else if (abs_eta >= 1.7 && abs_eta < 2.0) {
+                p1 = 0.0488664;
+                p2 = 0.000137648;
+            } else if (abs_eta >= 2.0) {
+                p1 = 0.028077;
+                p2 = 0.000152707;
+            }
         }
         // ::
         bool passErrorCutCB = false;
@@ -1436,27 +1478,27 @@ namespace CP {
         if (cbLink) {
             // ::
             const auto cbtrack = columnar::OptObjectId<columnar::MuonTrackDef>(cbLink);
-            const double pt_CB = std::min(m_trkMomentumAcc.pt(*cbtrack, 0.) * MeVtoGeV, 5000.);
-            const double qOverP_CB    = m_qOverPCBTrackAcc(*cbLink);
-            const double qOverPerr_CB = std::sqrt(m_trkCovAcc(*cbtrack)(4, 4));
+            double pt_CB = (m_trkMomentumAcc.pt(*cbtrack, 0.) * MeVtoGeV < 5000.) ? m_trkMomentumAcc.pt(*cbtrack, 0.) * MeVtoGeV : 5000.;  // GeV
+            double qOverP_CB = m_qOverPCBTrackAcc(*cbLink);
+            double qOverPerr_CB = std::sqrt(m_trkCovAcc(*cbtrack)(4, 4));
             // sigma represents the average expected error at the muon's pt/eta
-            const double sigma       = std::sqrt(std::pow(p0 / pt_CB, 2) + std::pow(p1, 2) + std::pow(p2 * pt_CB, 2));
+            double sigma = std::sqrt(std::pow(p0 / pt_CB, 2) + std::pow(p1, 2) + std::pow(p2 * pt_CB, 2));
             // cutting at start_cut*sigma for pt <=1 TeV depending on eta region,
             // then linearly tightening until end_cut*sigma is reached at pt >= 5TeV.
-            const double a           = (end_cut - start_cut) / 4000.0;
-            const double b           = end_cut - a * 5000.0;
-            const double coefficient = (pt_CB > 1000.) ? (a * pt_CB + b) : start_cut;
-            if (std::abs(qOverPerr_CB / qOverP_CB) < coefficient * sigma) passErrorCutCB = true;
+            double a = (end_cut - start_cut) / 4000.0;
+            double b = end_cut - a * 5000.0;
+            double coefficient = (pt_CB > 1000.) ? (a * pt_CB + b) : start_cut;
+            if (std::abs(qOverPerr_CB / qOverP_CB) < coefficient * sigma) { passErrorCutCB = true; }
         }
         // ::
         if (m_use2stationMuonsHighPt && m_doBadMuonVetoMimic && summary.nprecisionLayers == 2) {
             bool isSim = false;
-            if constexpr (columnar::ColumnarModeDefault::isXAOD) {
+            if (!m_noTrackSegments) {
                 ATH_MSG_DEBUG("passedErrorCutCB: reading IS_SIMULATION flag via xAOD bridge");
                 SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfo);
                 isSim = eventInfo->eventType(xAOD::EventInfo::IS_SIMULATION);
             } else {
-                ATH_MSG_DEBUG("passedErrorCutCB: IS_SIMULATION unavailable in columnar mode; BMV mimic cut skipped");
+                ATH_MSG_DEBUG("passedErrorCutCB: IS_SIMULATION unavailable; BMV mimic cut skipped");
             }
             if (isSim) {
                 ATH_MSG_DEBUG("The current event is a MC event. Use bad muon veto mimic.");
