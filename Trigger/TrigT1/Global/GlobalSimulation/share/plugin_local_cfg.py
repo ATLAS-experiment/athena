@@ -15,12 +15,24 @@ cfg.merge(LArCellPreparationAlgCfg(flags,
                                    GlobalLArCellsKey = gblLArCellContainerKey,
                                    OutputLevel=DEBUG))
 
-# add in the Algortihm to build a  LArStrip Neighborhood container
+# Add algorithm to simulate MUX input/output for LAr cells
+from  GlobalSimulation.LArCellMuxAlgConfig import LArCellMuxAlgCfg
+cfg.merge(LArCellMuxAlgCfg(flags,
+                           GlobalLArCellsKey = gblLArCellContainerKey,
+                           WriteMuxInputBitstreamToFile = True,
+                           WriteMuxOutputBitstreamToFile = True,
+                           OutputLevel=DEBUG))
+
+# add in the Algorithm to build a  LArStrip Neighborhood container
 from  GlobalSimulation.Egamma1_OnlineMapNbhoodConfig import Egamma1_OnlineMapNbhoodCfg
 cfg.merge(Egamma1_OnlineMapNbhoodCfg(flags,
-                                     OutputLevel=INFO,
-                                     dump=True,
+                                     OutputLevel=DEBUG,
+                                     dump=False,
                                      dumpTerse=False))
+
+cfg.getEventAlgo("Egamma1_OnlineMapNbhood").roiAlgTool.etMin = 5000.
+cfg.getEventAlgo("Egamma1_OnlineMapNbhood").roiAlgTool.etaMin = 0.0
+cfg.getEventAlgo("Egamma1_OnlineMapNbhood").roiAlgTool.etaMax = 5.0
 
 from GlobalSimulation.GlobalSimAlgCfg_local import GlobalSimulationAlgCfg
 cfg.merge(GlobalSimulationAlgCfg(flags, dump=True, OutputLevel=DEBUG))

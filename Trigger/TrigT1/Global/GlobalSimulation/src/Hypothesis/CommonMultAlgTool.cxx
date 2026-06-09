@@ -21,12 +21,12 @@ namespace GlobalSim {
 
     CHECK(m_CommonTOBContainerKey.initialize());
 
-    if (m_n_multbits < 0) {
+    if (m_TIP_width < 0) {
       ATH_MSG_ERROR("number of bits to write to TIP is negative");
       return StatusCode::FAILURE;
     }
     
-    int max_tip_pos = s_nbits_TIP - m_n_multbits;
+    int max_tip_pos = s_nbits_TIP - m_TIP_width;
 
     if (m_TIP_position < 0 or m_TIP_position > max_tip_pos) {
       ATH_MSG_ERROR("TIP word out of bounds " << m_TIP_position);
@@ -42,11 +42,11 @@ namespace GlobalSim {
 						    m_phi_high_str
 						    );
 
-    if (m_n_multbits == 0){
+    if (m_TIP_width == 0){
       m_maxtob = 0;
     } else {
       ulong maxtob = 1;
-      for (ulong i = m_n_multbits; i != 0; --i) { maxtob *= 2;}
+      for (ulong i = m_TIP_width; i != 0; --i) { maxtob *= 2;}
       m_maxtob = maxtob - 1;
     }
 
@@ -84,7 +84,7 @@ namespace GlobalSim {
     int p0{0};
     int p1{m_TIP_position};
     
-    const int& mxb = m_n_multbits;
+    const int& mxb = m_TIP_width;
     
     for (; p0 != mxb; ++p0, ++p1) {
       if (count_bits.test(p0)) {word.set(p1);}
@@ -116,7 +116,7 @@ namespace GlobalSim {
     ss <<name () << ": " <<m_menu_name << ' '
        << "CommonMultAlgTool read, select, count and report number of related CommonTOBS\n"
        << m_c_selector->to_string() << '\n'
-       << m_TIP_position << ' ' << m_n_multbits;
+       << m_TIP_position << ' ' << m_TIP_width;
 
     return ss.str();
   }
