@@ -111,7 +111,7 @@ namespace JiveXML{
    * - call data retrievers
    * - pass formatted events to streamers
    */
-  StatusCode AlgoJiveXML::execute() {
+  StatusCode AlgoJiveXML::execute(const EventContext& /*ctx*/) {
 
     if(m_onlineMode){
       bool isR4PinThisEvent = false;
