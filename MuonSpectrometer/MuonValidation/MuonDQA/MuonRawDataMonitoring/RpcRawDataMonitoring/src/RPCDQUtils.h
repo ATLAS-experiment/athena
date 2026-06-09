@@ -1,20 +1,29 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // -*- c++ -*-
 #ifndef RPCRAWDATAMONITORING_RPCDQUtils_H
 #define RPCRAWDATAMONITORING_RPCDQUtils_H
 
-// ROOT
-#include "TH1.h"
-#include "TH1F.h"
+
 
 // Athena
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "TrkEventPrimitives/PropDirection.h"
 #include "TrkExInterfaces/IExtrapolator.h"
 #include "xAODMuon/MuonContainer.h"
+#include "TString.h"
+#include <utility>
+#include <set>
+#include <memory>
+#include <string>
+
+
+
+namespace MuonGM{
+ class RpcReadoutElement;
+}
 
 //================================================================================================
 struct RpcPanel {
@@ -65,7 +74,7 @@ struct TagDef {
 
 //================================================================================================
 struct MyMuon {
-    const xAOD::Muon *muon;
+    const xAOD::Muon *muon{};
     TLorentzVector fourvec;
 
     bool tagged{false};

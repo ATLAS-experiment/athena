@@ -1,20 +1,22 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// C/C++
-#include <math.h>
 
-#include <fstream>
+
+// Local
+
+#include "RPCDQUtils.h"
 
 // Athena
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "MuonIdHelpers/RpcIdHelper.h"
 #include "MuonPrepRawData/RpcPrepDataContainer.h"
 #include "MuonReadoutGeometry/RpcReadoutElement.h"
-// Local
 
-#include "RPCDQUtils.h"
+// C/C++
+#include <cmath>
+#include <sstream>
 
 //========================================================================================================
 // struct RpcPanel
