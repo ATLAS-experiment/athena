@@ -89,7 +89,7 @@ StatusCode ClusterCreator::initialize() {
    return StatusCode::SUCCESS;
 }
 
-StatusCode ClusterCreator::execute() {
+StatusCode ClusterCreator::execute(const EventContext& /*ctx*/) {
 
    //
    // If no StoreGate keys were set, convert everything:

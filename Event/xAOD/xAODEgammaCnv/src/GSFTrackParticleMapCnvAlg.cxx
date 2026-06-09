@@ -43,7 +43,7 @@ namespace xAODMaker {
 
     /////////////////////////////////////////////////////////////////////////////////////////
 
-  StatusCode GSFTrackParticleMapCnvAlg::execute() {
+  StatusCode GSFTrackParticleMapCnvAlg::execute(const EventContext& /*ctx*/) {
 
     // Retrieve the  track particles from AOD
     const Rec::TrackParticleContainer*  aodContainer = evtStore()->tryConstRetrieve<Rec::TrackParticleContainer>(m_aodContainerName );

@@ -44,7 +44,7 @@ namespace xAODMaker {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode IsoMuonFeatureCnvAlg::execute() {
+    StatusCode IsoMuonFeatureCnvAlg::execute(const EventContext& /*ctx*/) {
         
         // Retrieve the AOD container:
         const IsoMuonFeatureContainer* aod = nullptr;

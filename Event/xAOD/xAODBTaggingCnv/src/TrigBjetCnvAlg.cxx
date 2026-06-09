@@ -43,7 +43,7 @@ namespace xAODMaker {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode TrigBjetCnvAlg::execute() {
+   StatusCode TrigBjetCnvAlg::execute(const EventContext& /*ctx*/) {
 
       // Retrieve the AOD container:
      const TrigEFBjetContainer* aod = nullptr;

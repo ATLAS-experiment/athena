@@ -41,7 +41,7 @@ namespace xAODMaker {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode TrigT2MbtsBitsCnvAlg::execute() {
+   StatusCode TrigT2MbtsBitsCnvAlg::execute(const EventContext& /*ctx*/) {
 
       // Retrieve the AOD container:
       const TrigT2MbtsBitsContainer* aod = nullptr;

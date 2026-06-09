@@ -42,7 +42,7 @@ namespace xAODMaker {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode MissingETCnvAlg::execute() {
+   StatusCode MissingETCnvAlg::execute(const EventContext& /*ctx*/) {
 
       // Create the xAOD containers:
       xAOD::MissingETContainer* xaod = new xAOD::MissingETContainer();

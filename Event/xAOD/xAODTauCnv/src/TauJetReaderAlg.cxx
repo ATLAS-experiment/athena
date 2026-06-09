@@ -27,7 +27,7 @@ namespace xAODMaker {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode TauJetReaderAlg::execute() {
+   StatusCode TauJetReaderAlg::execute(const EventContext& /*ctx*/) {
 
       // Retrieve the tau container:
       const xAOD::TauJetContainer* taus = nullptr;
