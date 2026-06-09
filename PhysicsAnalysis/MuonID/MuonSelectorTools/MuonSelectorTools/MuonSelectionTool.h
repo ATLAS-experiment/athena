@@ -378,6 +378,10 @@ namespace CP {
         Gaudi::Property<bool> m_calculateTightNNScore{this, "CalculateTightNNScore", false};
         ToolHandle< AthInfer::IAthInferenceTool >  m_onnxTool{this, "ORTInferenceTool", "AthOnnx::OnnxRuntimeInferenceTool"};
 
+        Gaudi::Property<bool> m_noTrackSegments{this, "NoTrackSegments", false,
+            "Set true for inputs where MuonSegment links are absent (e.g. PHYSLITE). "
+            "Also disables IS_SIMULATION-dependent cuts that require full EventInfo."};
+
         // ── Columnar accessors ────────────────────────────────────────────────
         // Object-column handle: maps an EventContextId to a MuonRange
         columnar::MuonAccessor<columnar::ObjectColumn> m_muonsHandle {*this, "Muons"};
