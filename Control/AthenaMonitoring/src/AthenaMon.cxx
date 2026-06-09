@@ -93,9 +93,8 @@ StatusCode AthenaMon::initialize()
 }
 
 /*---------------------------------------------------------------*/
-StatusCode AthenaMon::execute()
+StatusCode AthenaMon::execute(const EventContext& ctx)
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   MsgStream log(msgSvc(), name());
   
