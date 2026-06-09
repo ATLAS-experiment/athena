@@ -17,3 +17,9 @@ atlas_add_library( ActsGeometryInterfacesLib
                    PUBLIC_HEADERS ActsGeometryInterfaces
                    LINK_LIBRARIES ${extra_libs} AthenaBaseComps AthenaKernel GaudiKernel GeoModelUtilities GeoPrimitives 
                                   Identifier TrkEventPrimitives)
+
+
+atlas_add_dictionary( ActsGeometryInterfacesDict
+                      ActsGeometryInterfaces/GeometryDefs.h
+                      ActsGeometryInterfaces/selection.xml 
+                      LINK_LIBRARIES ActsGeometryInterfacesLib)
