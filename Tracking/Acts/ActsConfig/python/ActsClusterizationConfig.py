@@ -2,7 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import BeamType
+from AthenaConfiguration.Enums import BeamType,Format
 from ActsConfig.ActsUtilities import extractChildKwargs
 from HGTD_Calibration.HGTD_CalibrationConfig import HGTD_TdcCalibrationToolCfg
 
@@ -373,10 +373,21 @@ def ActsMainClusterizationCfg(flags,
     # Step (2)
     if kwargs['runReconstruction']:
         if kwargs['processPixels']:
+            if flags.Input.Format is Format.BS:
+                from ITkPixelByteStreamCnv.ITkPixelByteStreamCnvConfig import ITkPixelDecodingAlgCfg
+                # @TODO handle RoIs
+                acc.merge( ITkPixelDecodingAlgCfg(flags) )
+
             acc.merge(ActsPixelClusterizationAlgCfg(flags,
                                                     RoIs=RoIs,
                                                     **extractChildKwargs(prefix='PixelClusterizationAlg.', **kwargs)))
         if kwargs['processStrips']:
+            if flags.Input.Format is Format.BS:
+                from ITkStripsByteStreamCnv.ITkStripByteStreamCnvConfig import ITkStripRawDataProviderCfg
+                # @TODO handle RoIs, need to toggle flag isRoI_Seeded, when ?
+                acc.merge(ITkStripRawDataProviderCfg(flags,
+                                                     RoIs=RoIs))
+
             acc.merge(ActsStripClusterizationAlgCfg(flags,
                                                     RoIs=RoIs,
                                                     **extractChildKwargs(prefix='StripClusterizationAlg.', **kwargs)))
