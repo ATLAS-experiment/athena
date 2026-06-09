@@ -34,8 +34,8 @@ references_map = {
     # Derivations
     "data_PHYS_Run2": "v87",
     "data_PHYSLITE_Run2": "v51",
-    "data_PHYS_Run3": "v99",
-    "data_PHYSLITE_Run3": "v62",
+    "data_PHYS_Run3": "v100",
+    "data_PHYSLITE_Run3": "v63",
     "mc_PHYS_Run2": "v121",
     "mc_PHYSLITE_Run2": "v61",
     "mc_PHYS_Run3": "v128",
