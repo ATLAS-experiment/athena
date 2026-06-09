@@ -92,6 +92,8 @@ private:
   Gaudi::Property<bool> m_useSectors{this, "UseSectors", false}; 
   /** @brief Flag to control if the volumes should be alignable or not */
   Gaudi::Property<bool> m_alignableVolumes{this, "AlignableVolumes", true};
+  /** @brief Flag to control if we use run4 geometry or not */
+  Gaudi::Property<bool> m_isRun4{this, "run4Layout", false};
   /** @brief Flag to assign active material on the chambers */
   Gaudi::Property<bool> m_assignActiveMaterial{this, "AssignActiveMaterial", false};
   /** @brief Flag to construct the passive material surfaces */

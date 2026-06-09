@@ -461,10 +461,14 @@ MuonBlueprintNodeBuilder::BluePrintSurfPairs_t
 }
 
 
-bool MuonBlueprintNodeBuilder::isBIS78(const MuonGMR4::MuonReadoutElement* element) const {    
-      return element->detectorType() == ActsTrk::DetectorType::Mdt && 
-             element->chamberIndex() == ChIndex::BIS && 
-             element->stationEta()>=7;
+bool MuonBlueprintNodeBuilder::isBIS78(const MuonGMR4::MuonReadoutElement* element) const {   
+  int stEta = element->stationEta();
+  if(m_isRun4){
+    stEta = std::abs(element->stationEta());
+  }
+  return  element->detectorType() == ActsTrk::DetectorType::Mdt && 
+          element->chamberIndex() == ChIndex::BIS && 
+          stEta >= 7;
   }
 
 template<typename ElementSet_t>
@@ -491,19 +495,26 @@ MuonBlueprintNodeBuilder::getPassiveMaterialSurfaces(
   //otherwise they create overlap with the NSW sectors - stop a little bit before the cylinder of the passive surface
   const auto rejectBIS78 = [&](const MuonGMR4::MuonReadoutElement* readoutEle) {
     bool reject{false};
+    if(readoutEle->chamberIndex() != ChIdx::BIS){ 
+      return reject;
+    }
+    int stEta = readoutEle->stationEta();
+    if(m_isRun4){
+      stEta = std::abs(readoutEle->stationEta());
+    }
     switch (readoutEle->detectorType()) {
       case DetectorType::Mdt: {
         const auto* techEle =
           static_cast<const MuonGMR4::MdtReadoutElement*>(readoutEle);
-        if (techEle->multilayer() == 2) {
+        if (techEle->multilayer() == 2 && stEta >= 7) {
           reject = true;
         }
         break;
       }
       case DetectorType::Rpc: {
         const auto* techEle =
-          static_cast<const MuonGMR4::RpcReadoutElement*>(readoutEle);
-        if (techEle->doubletZ() == 2) {
+        static_cast<const MuonGMR4::RpcReadoutElement*>(readoutEle);
+        if (techEle->doubletZ() == 2 && stEta >= 7) {
           reject = true;
         }
         break;
@@ -511,7 +522,7 @@ MuonBlueprintNodeBuilder::getPassiveMaterialSurfaces(
       default:
         break;
     }
-    return isBIS78(readoutEle) && reject;
+    return reject;
   };
  
   for(const auto& [hash, elements] : elementsPerStation){
@@ -581,7 +592,12 @@ MuonBlueprintNodeBuilder::getPassiveMaterialSurfaces(
       } case ChIdx::BIS :
         case ChIdx::BML :
         case ChIdx::BOL : {
-        trf = Amg::getTranslateZ3D(halfZ + minZ);
+        //hack for run3 because of overlaps with eta = -7 BIS chambers
+      
+        if(!m_isRun4 && testCh->chamberIndex() == ChIdx::BIS){
+          halfZ -= 130.;
+          
+        }
         auto surface = Acts::Surface::makeShared<Acts::CylinderSurface>(trf, 
                              std::make_shared<Acts::CylinderBounds>(rMin - margin, halfZ));
         const auto [nBins1, nBins2] = getMaterialBins(testCh->chamberIndex());
