@@ -454,6 +454,7 @@ namespace Analysis {
             }
         }
         ATH_MSG_DEBUG("vxContainer size " << vxContainer->size());
+        if( vxContainer->size() > 100 ) ATH_MSG_WARNING("JpsiFinder_ee candidate size is high! size " << vxContainer->size());
         return StatusCode::SUCCESS;;
     }
     
@@ -659,7 +660,7 @@ namespace Analysis {
                     }
                     pair.trackParticle2 = *trkItr;
                     bool addToPairs(true);
-                    const xAOD::TrackParticle* elTP1Compare;
+                    const xAOD::TrackParticle* elTP1Compare=nullptr;
                     if ( avoidSelfVertexing && ( tagAndProbe || fakeVertexing ) ) { // Otherwise automatically avoided!
                         if ( m_TrkParticleCollection == "InDetTrackParticles" ) {
                             elTP1Compare = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF( (*elItr)->trackParticle(0) );

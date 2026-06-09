@@ -213,13 +213,22 @@ namespace DerivationFramework {
     // retrieve the relevant container
     m_muons = NULL;
     if ( 
-      ( m_muonContainerName != "" ) && 
+      ( m_muonContainerName.empty() == false ) && 
       ( m_isoTargetLegTypes == 0  )
     ) {
       CHECK(evtStore()->retrieve(m_muons, m_muonContainerName));
       ATH_MSG_DEBUG("Found muon collection with key " << m_muonContainerName);
     }
     
+    // (Assuming access to the secondary vertex container size)
+    size_t numCandidates = m_svtxContainer ? m_svtxContainer->size() : 0;
+
+    // Warning (Memory may be over-allocating but job can try to proceed)
+    if (numCandidates > 30) {
+        ATH_MSG_WARNING("Over-allocation Risk: Event contains " << numCandidates 
+                        << " vertex candidates.");
+    }
+
     ATH_MSG_DEBUG("BMuonTrackIsoTool::addBranchesSVLoopHook(): "
 		  "calculate muon track isolation ...");
     CHECK(calculateValues(vtx));

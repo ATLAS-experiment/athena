@@ -444,6 +444,7 @@ namespace Analysis {
             } // End of outer loop over tracks
         } // End of loop over J/spi
         ATH_MSG_DEBUG("bContainer size " << bContainer->size());
+        if( bContainer->size() > 200 ) ATH_MSG_WARNING("bContainer size is high! size " << bContainer->size());
         return StatusCode::SUCCESS;
         
     }
@@ -585,7 +586,7 @@ namespace Analysis {
         
     }
     
-    bool  JpsiPlus2Tracks::passCuts(xAOD::BPhysHelper &bHelper, const std::vector<double> &masses, const std::string &str) const{
+    bool  JpsiPlus2Tracks::passCuts(xAOD::BPhysHelper &bHelper, const std::vector<double> &masses, const char *str) const{
        
         TLorentzVector bMomentum = bHelper.totalP(masses);
 //      ATH_MSG_DEBUG(bMomentum.X() << " " << bMomentum.Y()<< " " << bMomentum.Z() << " " << bMomentum.E());

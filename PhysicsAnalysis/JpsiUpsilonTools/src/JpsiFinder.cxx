@@ -498,7 +498,7 @@ namespace Analysis {
             }
         }
         ATH_MSG_DEBUG("vxContainer size " << vxContainer->size());
-        
+        if( vxContainer->size() > 100 ) ATH_MSG_WARNING("JpsiFinder_ee candidate size is high! size " << vxContainer->size());
         return StatusCode::SUCCESS;;
     }
     
