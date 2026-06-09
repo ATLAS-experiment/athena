@@ -85,9 +85,9 @@ StatusCode HLTResultReader::initialize ATLAS_NOT_THREAD_SAFE()
 /**
  * @brief Algorithm event processing.
  */
-StatusCode HLTResultReader::execute()
+StatusCode HLTResultReader::execute(const EventContext& ctx)
 {
-  SG::ReadHandle<HLT::HLTResult> result (m_resultKey);
+  SG::ReadHandle<HLT::HLTResult> result (m_resultKey, ctx);
   m_nav->prepare();
   if (!m_nav->deserialize (result->getNavigationResult()))
     return StatusCode::FAILURE;
