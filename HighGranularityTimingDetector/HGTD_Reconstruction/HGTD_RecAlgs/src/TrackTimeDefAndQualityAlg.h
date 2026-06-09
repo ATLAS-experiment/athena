@@ -48,6 +48,12 @@
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/TrackParticleContainer.h"
 
+#include <array>
+#include <cstdint>
+#include <utility>
+#include <vector>
+#include <cmath>
+
 namespace {
 static constexpr unsigned short s_hgtd_layers = 4; // two double sided layers
 } // namespace
@@ -115,11 +121,11 @@ private:
   };
 
   struct CleaningResult {
-    std::array<Hit, s_hgtd_layers> m_hits;
+    std::array<Hit, s_hgtd_layers> m_hits{};
     uint32_t m_field = 0x0;
-    float m_time;
-    float m_resolution;
-    uint8_t m_hasValidTime;
+    float m_time{};
+    float m_resolution{};
+    uint8_t m_hasValidTime{};
   };
 
   FloatProperty m_chi2_threshold{

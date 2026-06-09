@@ -20,6 +20,7 @@
 
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometry/ATLASSourceLink.h"
+#include <algorithm>
 
 namespace HGTD {
 
