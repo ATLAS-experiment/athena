@@ -73,7 +73,7 @@ StatusCode SgStressConsumer::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode SgStressConsumer::execute()
+StatusCode SgStressConsumer::execute(const EventContext& /*ctx*/)
 {  
   ATH_MSG_DEBUG ( "Executing " << name() << "..." );
   return readData();
