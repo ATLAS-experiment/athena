@@ -6,7 +6,6 @@ atlas_subdir( MuonSelectorTools )
 # External dependencies:
 find_package( ROOT COMPONENTS Core Hist RIO TMVA )
 find_package( onnxruntime )
-find_package( GSL COMPONENTS CBLAS )
 
 # Libraries in the package:
 atlas_add_library( MuonSelectorToolsLib
