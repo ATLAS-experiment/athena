@@ -49,7 +49,7 @@ namespace MuonR4 {
         m_msTrack = msTrack;
     }
 
-    void MuonTag::setSegments(const std::span<const xAOD::MuonSegment*> segs){
+    void MuonTag::setSegments(const std::span<const xAOD::MuonSegment* const> segs){
         m_segments.insert(m_segments.end(), segs.begin(), segs.end());
     }
       

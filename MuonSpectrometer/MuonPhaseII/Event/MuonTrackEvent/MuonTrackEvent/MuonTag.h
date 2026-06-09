@@ -62,7 +62,7 @@ namespace MuonR4 {
          *  @param msTrack Pointer to the MS track particle */
         void setMsTrack(const xAOD::TrackParticle* msTrack);
         /** @brief Sets the segments associated with this tag */
-        void setSegments(const std::span<const xAOD::MuonSegment*> segs);
+        void setSegments(const std::span<const xAOD::MuonSegment* const> segs);
         /** @brief Set a parameter to be decorated to the final muon
          *  @param par: Enum encoding which quantity is represented by the data
          *  @param data: The actual data held */
