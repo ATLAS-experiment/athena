@@ -71,7 +71,7 @@ int ScaleFactorTool::inferPCBTBins(const json& cfg)
   if (cfg.at("type") == "nodes"){
     int total = 0;
     for (const auto& node : cfg.at("nodes")) {
-      total += node.at("edges").size() + 1;
+      total += node.at("edges").size() - 1;
     }
     return total;
   }

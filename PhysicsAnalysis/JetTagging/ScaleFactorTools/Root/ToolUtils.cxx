@@ -4,22 +4,14 @@
 #include "ScaleFactorTools/ToolUtils.h"
 #include "PathResolver/PathResolver.h"
 
-ToolUtils::VariableFunc ToolUtils::variableFactory(const json& cfg) {
+ToolUtils::FloatFunc ToolUtils::floatVariableFactory(const json& cfg) {
 
   // for simple variables
   if (cfg.is_string()) {
     std::string name = cfg.get<std::string>();
-    std::string type = cfg.contains("data_type") ? cfg.at("mode").get<std::string>() : "float";
-    if (type == "int") {
-      return [name](const SG::AuxElement& el) -> int {
-        return el.auxdata<int>(name);
-      };
-    } if (type == "float") {
-      return [name](const SG::AuxElement& el) -> float {
-        return el.auxdata<float>(name);
-      };
-    }
-    throw std::runtime_error("Unknown type");
+    return [name](const SG::AuxElement& el) -> float {
+      return el.auxdata<float>(name);
+    };
   }
 
   // structured variables
@@ -56,8 +48,18 @@ ToolUtils::VariableFunc ToolUtils::variableFactory(const json& cfg) {
 
 }
 
+ToolUtils::IntFunc ToolUtils::intVariableFactory(const json& cfg) {
+  if (cfg.is_string()) {
+    std::string name = cfg.get<std::string>();
+    return [name](const SG::AuxElement& el) -> int {
+      return el.auxdata<int>(name);
+    };
+  }
+  throw std::runtime_error("Invalid variable config");
+}
+
 ToolUtils::QuantileFunc ToolUtils::makeCategory(const json& cfg) {
-  ToolUtils::VariableFunc var = ToolUtils::variableFactory(cfg.at("variable"));
+  ToolUtils::IntFunc var = ToolUtils::intVariableFactory(cfg.at("variable"));
   std::vector<int> values = cfg.at("values").get<std::vector<int>>();
 
   std::unordered_map<int,int> mapping;
@@ -78,7 +80,7 @@ ToolUtils::QuantileFunc ToolUtils::makeCategory(const json& cfg) {
 }
 
 ToolUtils::QuantileFunc ToolUtils::makeEnumerate(const json& cfg) {
-  ToolUtils::VariableFunc var = ToolUtils::variableFactory(cfg.at("variable"));
+  ToolUtils::FloatFunc var = ToolUtils::floatVariableFactory(cfg.at("variable"));
   std::vector<float> edges = cfg.at("edges").get<std::vector<float>>();
 
   const bool useAbs = cfg.value("abs", false);
@@ -104,7 +106,7 @@ ToolUtils::QuantileFunc ToolUtils::makeEnumerate(const json& cfg) {
 }
 
 ToolUtils::QuantileFunc ToolUtils::makeNodes(const json& cfg) {
-  ToolUtils::VariableFunc var = ToolUtils::variableFactory(cfg.at("variable"));
+  ToolUtils::FloatFunc var = ToolUtils::floatVariableFactory(cfg.at("variable"));
   std::vector<float> edges = cfg.at("edges");
 
   std::vector<ToolUtils::QuantileFunc> sub_nodes;

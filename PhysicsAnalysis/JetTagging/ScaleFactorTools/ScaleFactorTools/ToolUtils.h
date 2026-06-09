@@ -13,9 +13,11 @@ class ToolUtils {
 
   public:
   using QuantileFunc = std::function<int(const SG::AuxElement&)>;
-  using VariableFunc = std::function<float(const SG::AuxElement&)>;
+  using FloatFunc = std::function<float(const SG::AuxElement&)>;
+  using IntFunc   = std::function<int(const SG::AuxElement&)>;
 
-  static VariableFunc variableFactory(const json& cfg);
+  static FloatFunc floatVariableFactory(const json& cfg);
+  static IntFunc intVariableFactory(const json& cfg);
   static QuantileFunc quantileFactory(const json& cfg);
 
   private:
