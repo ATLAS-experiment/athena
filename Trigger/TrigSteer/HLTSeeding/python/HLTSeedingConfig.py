@@ -255,7 +255,12 @@ def L1TriggerResultMakerCfg(flags):
         gFexLRJetRoIKeys = [],
         cTauRoIKey = "",
         cjTauLinkKey = "",
+        CTPKey = "",
         ThresholdPatternTools = [] )
+
+    # CTPResult
+    if flags.Trigger.L1.doCTP and flags.Trigger.CTP.UseEDMxAOD:
+        l1trMaker.CTPKey = "CTPResult"
 
     # Muon RoIs
     if flags.Trigger.L1.doMuon and flags.Trigger.enableL1MuonPhase1:
@@ -302,7 +307,6 @@ def L1TriggerResultMakerCfg(flags):
             ]
 
     # Placeholder for other L1 xAOD outputs:
-    # - CTP result
     # - L1Topo result
 
     acc.addEventAlgo(l1trMaker, primary=True)
@@ -371,7 +375,7 @@ def HLTSeedingCfg(flags, seqName = None):
         acc.merge( L1TriggerByteStreamDecoderCfg(flags), sequenceName = seqName )
 
     # Add the algorithm creating L1TriggerResult which is the input to HLTSeeding (Run-3 L1)
-    if flags.Trigger.enableL1MuonPhase1 or flags.Trigger.enableL1CaloPhase1:
+    if flags.Trigger.enableL1MuonPhase1 or flags.Trigger.enableL1CaloPhase1 or flags.Trigger.CTP.UseEDMxAOD:
         acc.merge( L1TriggerResultMakerCfg(flags), sequenceName = seqName )
 
     acc.addEventAlgo( decoderAlg, sequenceName = seqName )
