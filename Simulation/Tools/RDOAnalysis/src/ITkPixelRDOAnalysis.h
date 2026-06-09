@@ -39,7 +39,7 @@ public:
   using AthHistogramAlgorithm::AthHistogramAlgorithm;
   ~PixelRDOAnalysis() = default;
   virtual StatusCode initialize() override final;
-  virtual StatusCode execute() override final;
+  virtual StatusCode execute(const EventContext& ctx) override final;
 
 private:
   SG::ReadHandleKey<PixelRDO_Container> m_inputKey {this, "CollectionName", "ITkPixelRDOs", "Input ITk Pixel RDO collection name"};

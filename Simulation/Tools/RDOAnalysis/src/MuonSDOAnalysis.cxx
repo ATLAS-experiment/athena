@@ -154,8 +154,7 @@ namespace MuonVal{
         return StatusCode::SUCCESS;
     }
 
-    StatusCode MuonSDOAnalysis::execute() {
-        const EventContext& ctx{Gaudi::Hive::currentContext()};
+    StatusCode MuonSDOAnalysis::execute(const EventContext& ctx) {
         const MuonSimDataCollection* sdoCont{nullptr};
         ATH_CHECK(SG::get(sdoCont, m_inputKey, ctx));
 

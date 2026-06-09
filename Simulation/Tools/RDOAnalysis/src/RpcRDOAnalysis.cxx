@@ -97,8 +97,7 @@ namespace MuonVal{
         return StatusCode::SUCCESS;
     }
 
-    StatusCode RpcRDOAnalysis::execute() {
-        const EventContext& ctx{Gaudi::Hive::currentContext()};
+    StatusCode RpcRDOAnalysis::execute(const EventContext& ctx) {
         const RpcPadContainer* rpcPads{nullptr};
         const xAOD::NRPCRDOContainer* rpcRdos{nullptr};
         ATH_CHECK(SG::get(rpcPads, m_inputKeyPad, ctx));

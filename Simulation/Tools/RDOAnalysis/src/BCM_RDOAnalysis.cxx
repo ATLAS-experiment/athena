@@ -93,7 +93,7 @@ StatusCode BCM_RDOAnalysis::initialize() {
 
 }
 
-StatusCode BCM_RDOAnalysis::execute() {
+StatusCode BCM_RDOAnalysis::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG( "In BCM_RDOAnalysis::execute()" );
 
   m_word1->clear();
@@ -117,7 +117,6 @@ StatusCode BCM_RDOAnalysis::execute() {
   m_charge_vec->clear();
 
   // RDO
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
   const BCM_RDO_Container* p_BCM_RDO_cont{nullptr};
 
   ATH_CHECK(SG::get(p_BCM_RDO_cont, m_inputKey, ctx));

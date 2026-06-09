@@ -310,7 +310,7 @@ StatusCode TRT_RDOAnalysis::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode TRT_RDOAnalysis::execute() {
+StatusCode TRT_RDOAnalysis::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG( "In TRT_RDOAnalysis::execute()" );
 
   m_rdoID->clear();
@@ -346,7 +346,7 @@ StatusCode TRT_RDOAnalysis::execute() {
   m_charge_vec->clear();
 
   // RawData
-  SG::ReadHandle<TRT_RDO_Container> p_TRT_RDO_cont (m_inputKey);
+  SG::ReadHandle<TRT_RDO_Container> p_TRT_RDO_cont (m_inputKey, ctx);
   if(p_TRT_RDO_cont.isValid()) {
     // loop over RDO container
     TRT_RDO_Container::const_iterator rdoCont_itr(p_TRT_RDO_cont->begin());
@@ -430,7 +430,7 @@ StatusCode TRT_RDOAnalysis::execute() {
   }
 
   // SimData
-  SG::ReadHandle<InDetSimDataCollection> simDataMapTRT (m_inputTruthKey);
+  SG::ReadHandle<InDetSimDataCollection> simDataMapTRT (m_inputTruthKey, ctx);
   if(simDataMapTRT.isValid()) {
     // loop over SDO container
     InDetSimDataCollection::const_iterator sdo_itr(simDataMapTRT->begin());

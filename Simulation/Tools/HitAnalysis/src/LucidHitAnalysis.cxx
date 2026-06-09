@@ -91,7 +91,7 @@ StatusCode LucidHitAnalysis::initialize() {
 }		 
   
 
-StatusCode LucidHitAnalysis::execute() {
+StatusCode LucidHitAnalysis::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG( "In LucidHitAnalysis::execute()" );
 
   m_hit_x->clear();
@@ -107,7 +107,6 @@ StatusCode LucidHitAnalysis::execute() {
   m_gen_volume->clear();
   m_wavelength->clear();
 
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
   const LUCID_SimHitCollection* iter{nullptr};
   ATH_CHECK(SG::get(iter, m_readKey, ctx));
     for (LUCID_SimHitCollection::const_iterator i_hit = (*iter).begin(); i_hit != (*iter).end(); ++i_hit) {
