@@ -26,6 +26,7 @@ namespace Str {
  inline const std::string flow2{"flow2"};
  inline const std::string flow3{"flow3"};
  inline const std::string flows{"flows"};
+ inline const std::string long_long_event_number{"long_long_event_number"};
  inline const std::string mpi{"mpi"};
  inline const std::string phi{"phi"};
  inline const std::string random_states{"random_states"};
