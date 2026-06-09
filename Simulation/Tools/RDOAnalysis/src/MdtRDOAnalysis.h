@@ -21,7 +21,7 @@ namespace MuonVal{
         public:
             using AthHistogramAlgorithm::AthHistogramAlgorithm;
             virtual StatusCode initialize() override final;
-            virtual StatusCode execute() override final;
+            virtual StatusCode execute(const EventContext& ctx) override final;
         private:
             /** @brief Input read handle key */
             SG::ReadHandleKey<MdtCsmContainer> m_inputKey{this, "InputKey", "MDTCSM"};

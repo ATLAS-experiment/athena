@@ -320,7 +320,7 @@ StatusCode SCT_FastRDOAnalysis::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode SCT_FastRDOAnalysis::execute() {
+StatusCode SCT_FastRDOAnalysis::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG( "In SCT_FastRDOAnalysis::execute()" );
 
   // clear branches
@@ -366,7 +366,7 @@ StatusCode SCT_FastRDOAnalysis::execute() {
   m_rdoID_prd->clear();
 
   // get containers -- fill branches + histos
-  SG::ReadHandle<InDet::SCT_ClusterContainer> p_sctClus_cont (m_inputKey);
+  SG::ReadHandle<InDet::SCT_ClusterContainer> p_sctClus_cont (m_inputKey, ctx);
   if(p_sctClus_cont.isValid()) {
     // loop over cluster container
     InDet::SCT_ClusterContainer::const_iterator clusCont_itr(p_sctClus_cont->begin());

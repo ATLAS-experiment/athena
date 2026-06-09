@@ -83,10 +83,9 @@ StatusCode RPCHitAnalysis::initialize() {
 }
 
 
-StatusCode RPCHitAnalysis::execute() {
+StatusCode RPCHitAnalysis::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG( "In RPCHitAnalysis::execute()" );
 
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
   const RPCSimHitCollection* rpc_container{nullptr};
   ATH_CHECK(SG::get(rpc_container, m_readKey, ctx));
   for (RPCSimHitCollection::const_iterator i_hit = rpc_container->begin(); i_hit != rpc_container->end(); ++i_hit) {

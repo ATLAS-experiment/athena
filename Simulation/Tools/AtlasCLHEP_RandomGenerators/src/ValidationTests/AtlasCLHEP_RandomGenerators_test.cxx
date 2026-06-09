@@ -143,7 +143,7 @@ namespace AtlasCLHEP_RandomGenerators {
   }
   
   //_________________________________________________________________________
-  StatusCode AtlasCLHEP_RandomGenerators_test::execute()
+  StatusCode AtlasCLHEP_RandomGenerators_test::execute(const EventContext& /*ctx*/)
   {
     int ntest=m_ntest;
     

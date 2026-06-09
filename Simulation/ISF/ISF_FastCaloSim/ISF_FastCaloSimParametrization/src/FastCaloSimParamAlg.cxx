@@ -86,10 +86,10 @@ StatusCode FastCaloSimParamAlg::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode FastCaloSimParamAlg::execute()
+StatusCode FastCaloSimParamAlg::execute(const EventContext& ctx)
 {
-  SG::ReadHandle<ISF_FCS_Parametrization::FCS_StepInfoCollection> inputHandle{m_inputCollectionKey};
-  SG::WriteHandle<ISF_FCS_Parametrization::FCS_StepInfoCollection> outputHandle{m_outputCollectionKey};
+  SG::ReadHandle<ISF_FCS_Parametrization::FCS_StepInfoCollection> inputHandle{m_inputCollectionKey, ctx};
+  SG::WriteHandle<ISF_FCS_Parametrization::FCS_StepInfoCollection> outputHandle{m_outputCollectionKey, ctx};
   ATH_CHECK(outputHandle.record(std::make_unique<ISF_FCS_Parametrization::FCS_StepInfoCollection>()));
 
   // TODO would be more efficient to directly write the truncated

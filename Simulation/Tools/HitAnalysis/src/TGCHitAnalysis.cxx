@@ -104,10 +104,9 @@ StatusCode TGCHitAnalysis::initialize() {
 }		 
 
 
-StatusCode TGCHitAnalysis::execute() {
+StatusCode TGCHitAnalysis::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG( "In TGCHitAnalysis::execute()" );
 
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
   const TGCSimHitCollection* tgc_container{nullptr};
   ATH_CHECK(SG::get(tgc_container, m_readKey, ctx));
   for (TGCSimHitCollection::const_iterator i_hit = tgc_container->begin(); i_hit != tgc_container->end(); ++i_hit) {

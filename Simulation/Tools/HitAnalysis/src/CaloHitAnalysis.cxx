@@ -183,7 +183,7 @@ StatusCode CaloHitAnalysis::initialize() {
 }
 
 
-StatusCode CaloHitAnalysis::execute() {
+StatusCode CaloHitAnalysis::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG( "In CaloHitAnalysis::execute()" );
 
   m_cell_eta->clear();
@@ -206,7 +206,6 @@ StatusCode CaloHitAnalysis::execute() {
   m_calib_eTot->clear();
   m_calib_partID->clear();
 
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
   const TileHitVector* hitVec{nullptr};
   ATH_CHECK(SG::get(hitVec, m_tileKey, ctx));
 

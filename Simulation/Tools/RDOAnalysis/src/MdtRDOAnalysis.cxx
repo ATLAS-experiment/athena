@@ -59,8 +59,7 @@ namespace MuonVal{
       return StatusCode::SUCCESS;
     }
 
-    StatusCode MdtRDOAnalysis::execute() {
-        const EventContext& ctx{Gaudi::Hive::currentContext()};
+    StatusCode MdtRDOAnalysis::execute(const EventContext& ctx) {
         const MdtCsmContainer* csmCont{nullptr};
         ATH_CHECK(SG::get(csmCont, m_inputKey, ctx));
  

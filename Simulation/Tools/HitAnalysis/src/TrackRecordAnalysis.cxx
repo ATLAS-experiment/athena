@@ -135,7 +135,7 @@ StatusCode TrackRecordAnalysis::initialize() {
 }		 
 
 
-StatusCode TrackRecordAnalysis::execute() {
+StatusCode TrackRecordAnalysis::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG( "In TrackRecordAnalysis::execute()" );
 
   m_x->clear();
@@ -152,7 +152,6 @@ StatusCode TrackRecordAnalysis::execute() {
   m_edep->clear();
   m_pdg->clear();
   
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
   const TrackRecordCollection* TRcoll{nullptr};
   ATH_CHECK(SG::get(TRcoll,m_readKey ,ctx));
   for (TrackRecordCollection::const_iterator track = TRcoll->begin(); track != TRcoll->end(); ++track) {
