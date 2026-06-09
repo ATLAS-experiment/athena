@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EGAMMAALGS_EGAMMATRUTHASSOCIATIONALG_H
@@ -61,7 +61,7 @@ private:
   {
     MCTruthPartClassifier::ParticleType first;
     MCTruthPartClassifier::ParticleOrigin second;
-    const xAOD::TruthParticle* genPart;
+    const xAOD::TruthParticle* genPart{};
   };
 
   /// A function that initializes the decor handles, but also checks the naming
