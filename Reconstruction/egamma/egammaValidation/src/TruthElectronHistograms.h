@@ -1,13 +1,15 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EGAMMAVALIDATION_TRUTHELECTRONHISTOGRAMS_H
 #define EGAMMAVALIDATION_TRUTHELECTRONHISTOGRAMS_H
 
-#include "xAODTruth/TruthParticle.h"
-#include "xAODEgamma/Electron.h"
+#include "xAODTruth/TruthParticleFwd.h"
+#include "xAODEgamma/ElectronFwd.h"
 #include "ParticleHistograms.h"
+#include <map>
+#include <string>
 
 class TH2D;
 
@@ -32,7 +34,7 @@ namespace egammaMonitoring {
 
   private:    
 
-    bool m_reducedHistSet;
+    bool m_reducedHistSet{};
 
   };
 

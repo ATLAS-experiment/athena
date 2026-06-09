@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetVoronoiDiagramHelpers.h
@@ -23,8 +23,7 @@
 
 // boost polygon
 #include <boost/polygon/voronoi.hpp>
-//using boost::polygon::voronoi_builder;
-//using boost::polygon::voronoi_diagram;
+
 typedef boost::polygon::voronoi_diagram<double>              VoronoiBoost;
 typedef boost::polygon::voronoi_diagram<double>::vertex_type VoronoiVtxBoost;
 typedef boost::polygon::voronoi_diagram<double>::cell_type   VoronoiCellBoost;
@@ -34,8 +33,7 @@ typedef boost::polygon::voronoi_diagram<double>::edge_type   VoronoiEdgeBoost;
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/point_xy.hpp>
 #include <boost/geometry/geometries/polygon.hpp>
-//using boost::geometry::area;
-//using boost::geometry::intersection;
+
 typedef boost::geometry::model::d2::point_xy<double> VoronoiPointBoost;
 typedef boost::geometry::model::polygon<VoronoiPointBoost> VoronoiPolygonBoost;
 
@@ -137,17 +135,17 @@ namespace JetVoronoiDiagramHelpers {
         double intersectionAndArea(JetVoronoiDiagramHelpers::Polygon const & geo1, JetVoronoiDiagramHelpers::Polygon const & geo2, JetVoronoiDiagramHelpers::Polygon &out);
 
         // Data members
-        double m_x_min;
-        double m_x_max;
-        double m_y_min;
-        double m_y_max;
-        double m_scaleIntFloat;
+        double m_x_min{};
+        double m_x_max{};
+        double m_y_min{};
+        double m_y_max{};
+        double m_scaleIntFloat{};
         Polygon m_borders;
         Polygon m_voro_vtx;
         std::vector<double> m_area_cells;
-        double m_area_borders;
+        double m_area_borders{};
         // Polygon m_voro_cells; //!< needed for future implementation of "within"
-        size_t m_N_points;
+        size_t m_N_points{};
     };
 } // JetVoronoiDiagramHelpers
 
