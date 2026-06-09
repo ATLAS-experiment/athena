@@ -320,7 +320,7 @@ StatusCode ISF::SimKernel::initSimSvcs( SimSelectorToolArray &simSelectorTools)
 }
 
 
-StatusCode ISF::SimKernel::execute()
+StatusCode ISF::SimKernel::execute(const EventContext& /*ctx*/)
 {
 
   ATH_MSG_DEBUG ("Executing ...");

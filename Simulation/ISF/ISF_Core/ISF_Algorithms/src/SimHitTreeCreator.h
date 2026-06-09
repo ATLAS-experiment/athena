@@ -36,7 +36,7 @@ namespace ISF {
     /** Athena algorithm's interface method initialize() */
     virtual StatusCode  initialize() override final;
     /** Athena algorithm's interface method execute() */
-    virtual StatusCode  execute() override final;
+    virtual StatusCode  execute(const EventContext& ctx) override final;
 
   private:
 
