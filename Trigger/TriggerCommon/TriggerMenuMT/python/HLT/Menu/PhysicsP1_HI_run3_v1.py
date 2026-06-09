@@ -783,6 +783,10 @@ def getPhysicsHISignatures():
         ChainProp(name='HLT_noalg_L1AFP_A_OR_C_EMPTY',           l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup),
         ChainProp(name='HLT_noalg_L1AFP_A_OR_C_UNPAIRED_ISO',    l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup),
         ChainProp(name='HLT_noalg_L1AFP_A_OR_C_UNPAIRED_NONISO', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup),
+
+        # For 25/50 ns MD
+        ChainProp(name='HLT_noalg_mb_L1jJ55',   l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportPhIGroup),
+        ChainProp(name='HLT_noalg_mb_L1jTE600', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportPhIGroup),
     ]
 
     #---- heavy ion EB chains
