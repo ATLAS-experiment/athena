@@ -47,7 +47,7 @@ def main(args):
 
 
     #add algorithm
-    res = subprocess.getstatusoutput('cd %s;acmd cmake new-analysisalg --newJobo %sAlg' % (full_pkg_name,full_pkg_name))
+    res = subprocess.getstatusoutput('cd %s;acmd cmake new-analysisalg %sAlg' % (full_pkg_name,full_pkg_name))
     if res[0]!=0:
         print(":::  ERROR could not create new alg")
         return -1
