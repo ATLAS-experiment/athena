@@ -49,7 +49,7 @@ private:
       this, "IncludeG4TrackTruth", false,
       "Use sim-hit HepMC/G4 track identifiers for reco segment truth labels"};
 
-  SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{
+  ActsTrk::GeoContextReadKey_t m_geoCtxKey{
       this, "AlignmentKey", "ActsAlignment", "Geometry alignment context"};
 
   /// Output tree

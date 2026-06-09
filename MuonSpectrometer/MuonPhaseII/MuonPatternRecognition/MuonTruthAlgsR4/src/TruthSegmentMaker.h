@@ -129,7 +129,7 @@ namespace MuonR4{
           /** @brief List of sim hit containers from which the truth segments shall be retrieved */
           SG::ReadHandleKeyArray<xAOD::MuonSimHitContainer> m_readKeys{this, "SimHitKeys", {}};
           /** @brief Key to the geometry context. Needed to align the hits inside ATLAS */
-          SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+          ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
           /** @brief Key under which the segment Container will be recorded in StoreGate */
           SG::WriteHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "WriteKey", "MuonTruthSegments"};
           /** @brief Decoration key of the associated sim hit links */

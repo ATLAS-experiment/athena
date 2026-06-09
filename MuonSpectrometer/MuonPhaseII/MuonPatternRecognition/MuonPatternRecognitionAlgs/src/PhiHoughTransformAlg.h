@@ -101,7 +101,7 @@ namespace MuonR4{
             // write handle key for the output segment seeds 
             SG::WriteHandleKey<SegmentSeedContainer> m_segmentSeeds{this, "WriteKey", "MuonHoughStationSegmentSeeds"};
             // access to the ACTS geometry context 
-            SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+            ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
             /// Pattern visualization tool
             ToolHandle<MuonValR4::IPatternVisualizationTool> m_visionTool{this, "VisualizationTool", ""};
             // steers the target resolution in tan(phi) 

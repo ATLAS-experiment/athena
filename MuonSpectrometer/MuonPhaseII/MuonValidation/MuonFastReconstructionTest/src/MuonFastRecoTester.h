@@ -109,7 +109,7 @@ namespace MuonValR4{
     // HLT seeding RoIs
     SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiCollectionKey{this, "MuRoIs", "EFMuMSReco_RoI", "Name of the input data from HLTSeeding"};
     
-    SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+    ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
     
     BooleanProperty m_isMC{this, "isMC", false, "Toggle whether the job is ran on MC or not"};
