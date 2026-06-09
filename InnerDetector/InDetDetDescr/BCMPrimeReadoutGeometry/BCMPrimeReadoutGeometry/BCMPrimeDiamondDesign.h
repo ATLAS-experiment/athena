@@ -19,8 +19,6 @@ namespace InDetDD
  * BCMPrime uses simple diamond pad sensors with minimal readout structure:
  * - Two pad sizes: 10x10 mm and 5x5 mm (defined in ITKLayouts)
  * - Fixed thickness: ~0.5 mm (diamond pad thickness)
- * - No internal circuit/diode hierarchy (unlike Pixel)
- * 
  * Inherits from SiDetectorDesign to integrate with the digitization framework.
  */
 class BCMPrimeDiamondDesign : public SiDetectorDesign
@@ -28,9 +26,7 @@ class BCMPrimeDiamondDesign : public SiDetectorDesign
 public:
   /**
    * Constructor for BCMPrime diamond sensor design.
-   * @param sizeX Pad size in X direction (mm) - typically 10.0 or 5.0
-   * @param sizeY Pad size in Y direction (mm) - typically 10.0 or 5.0
-   * @param thickness Diamond sensor thickness (mm) - typically 0.5
+   * @param sizeX Pad size in X dnd Y (in mm) - typically 10.0 or 5.0
    */
   BCMPrimeDiamondDesign(double sizeX, double sizeY, double thickness);
 

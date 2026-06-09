@@ -20,8 +20,6 @@ BCMPrimeDiamondDesign::BCMPrimeDiamondDesign(double sizeX, double sizeY, double 
     m_sizeY(sizeY),
     m_thickness(thickness)
 {
-  // BCMPrime diamond sensors are simple pads with no internal structure
-  // The pad dimensions are defined by sizeX and sizeY from ITKLayouts
 }
 
 const Trk::SurfaceBounds& BCMPrimeDiamondDesign::bounds() const

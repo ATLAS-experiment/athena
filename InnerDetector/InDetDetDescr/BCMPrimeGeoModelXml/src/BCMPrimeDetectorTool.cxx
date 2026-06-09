@@ -17,7 +17,6 @@ BCMPrimeDetectorTool::BCMPrimeDetectorTool(const std::string &type,
                                            const IInterface *parent)
   : GeoModelXmlTool(type, name, parent)
 {
- ATH_MSG_INFO("HELLO BCM TEST HELLO BCM TEST HELLO BCM TEST HELLO BCM TEST HELLO BCM TEST HELLO BCM TEST HELLO BCM TEST ");
 }
 
 
@@ -46,13 +45,8 @@ StatusCode BCMPrimeDetectorTool::create()
 //        return StatusCode::FAILURE;
 //      }
 //  }
-//
-// PEDRO PEDRO
-//
 
-  //
   // Create the detector manager
-  //
   // The * converts a ConstPVLink to a ref to a GeoVPhysVol
   // The & takes the address of the GeoVPhysVol
   GeoPhysVol *world = &*theExpt->getPhysVol();
@@ -60,24 +54,10 @@ StatusCode BCMPrimeDetectorTool::create()
   InDetDD::BCMPrimeGmxInterface gmxInterface(manager);
 
 
-// PEDRO Add hardcoded BCM' FOLDER with XML
-//  const std::string gmxFilename = "/home/purrejol/Documents/itk/ITKLayouts/ITKLayouts/data/BCM/BCMPrime.gmx";
-
-
-  // Load the geometry, create the volume, 
-  // node,table are the location in the DB to look for the clob
-  // empty strings are the (optional) containing detector and envelope names
-  // allowed to pass a null sqlreader ptr - it will be used to steer the source of the geometry
-  // PEDRO START COMMENT AND ADD NEXT two LINES const GeoVPhysVol* topVolume = createTopVolume(world, gmxInterface, node, table,"ITkPixel","ITkPixelDetector",sqlreader); / PEDRO
-  //ATH_MSG_INFO("PEDRO TOPVOLUME("<<world<<", "<<gmxInterface<<", InnerDetector, BCMPrimeXDD, "<<gmxFilename<<", , nullptr)");
-  //topVolume = createTopVolume(world, gmxInterface, "InnerDetector", "BCMPrimeXDD", gmxFilename, "", nullptr);
   const GeoVPhysVol* topVolume = createTopVolume(world, gmxInterface,
                             "InnerDetector",
                             "BCMPrimeXDD");
-//                            "ITkPixel",
-//                            "ITkPixelDetector",
-//                            nullptr);
-  // PEDRO END
+
   if (topVolume) { //see that a valid pointer is returned
     manager->addTreeTop(topVolume);
     ATH_MSG_INFO("BCMPrime topVolume ptr = " << topVolume);
