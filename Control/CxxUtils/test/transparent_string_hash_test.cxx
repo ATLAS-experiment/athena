@@ -4,6 +4,7 @@
 
 #undef NDEBUG
 
+#define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE CxxUtils
 #include <boost/test/unit_test.hpp>
 
