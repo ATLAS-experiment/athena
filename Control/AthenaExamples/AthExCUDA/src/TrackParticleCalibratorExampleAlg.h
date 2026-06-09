@@ -12,6 +12,7 @@
 #include "StoreGate/WriteHandleKey.h"
 
 // Device include(s).
+#include "AthDeviceInterfaces/ICopyTool.h"
 #include "AthDeviceInterfaces/IMemoryResourceTool.h"
 
 // xAOD include(s).
@@ -67,6 +68,13 @@ class TrackParticleCalibratorExampleAlg : public AthReentrantAlgorithm {
   /// Device memory resource tool to use
   ToolHandle<AthDevice::IMemoryResourceTool> m_deviceMR{
       this, "DeviceMR", "", "The device memory resource tool to use"};
+
+  /// Host copy tool to use
+  ToolHandle<AthDevice::ICopyTool> m_hostCopyTool{this, "HostCopyTool", "",
+                                                  "The host copy tool to use"};
+  /// Device copy tool to use
+  ToolHandle<AthDevice::ICopyTool> m_deviceCopyTool{
+      this, "DeviceCopyTool", "", "The device copy tool to use"};
 
   /// @}
 
