@@ -252,16 +252,23 @@ RootTreeContainer::loadObject(void** obj_p, ShapeH /*shape*/, Token::OID_t& oid)
      bool hasRead(false);
      for( auto& dsc : m_branches ) {
         const int typ = dsc.column->typeID();
-        // cout << "LOAD object, typ=" << typ << ",  col offset=" << dsc.column->offset() << endl;
+        // cout << "LOAD object, column: " << dsc.column->toString() << ",  col offset=" << dsc.column->offset() << endl;
+        // cout << "   branch: " << dsc.branch->GetName() << ", leaf: " << (dsc.leaf ? dsc.leaf->GetName() : "null") << endl;
         // associate branch with an object
         switch ( typ )    {
          case DbColumn::STRING:
          case DbColumn::LONG_STRING:
+         case DbColumn::TOKEN:
             // For these types we copy to destination without TBranch::SetAddress
             break;
-         default:
-            // For other types we simply set the branch address
+         case DbColumn::POINTER:
+         case DbColumn::ANY:
+            // For objects one needs to use a pointer to a pointer
             dsc.branch->SetAddress( obj_p );
+            break;
+         default:
+            // For built-in types we use a direct pointer
+            dsc.branch->SetAddress( *obj_p );
             break;
         }
         // read the object
@@ -280,6 +287,7 @@ RootTreeContainer::loadObject(void** obj_p, ShapeH /*shape*/, Token::OID_t& oid)
            switch ( typ ) {
             case DbColumn::STRING:
             case DbColumn::LONG_STRING:
+            case DbColumn::TOKEN:
                {
                   // copy as std::string
                   auto* ptr = std::launder(reinterpret_cast<std::string*>(static_cast<char*>(*obj_p) + dsc.column->offset()));
@@ -408,8 +416,8 @@ StatusCode RootTreeContainer::open( DbDatabase& dbH,
                const DbColumn* c = *i;
                BranchDesc& dsc = m_branches[count];
                TClass* cl = nullptr;
-               TLeaf* leaf = pBranch->GetLeaf( (*i)->name().c_str() );
-               switch ( (*i)->typeID() )    {
+               TLeaf* leaf = pBranch->GetLeaf( c->name().c_str() );
+               switch ( c->typeID() )    {
                 case DbColumn::POINTER:
                    cl = TClass::GetClass(pBranch->GetClassName());
                    if ( nullptr == cl )  {

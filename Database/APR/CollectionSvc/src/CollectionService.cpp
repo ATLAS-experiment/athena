@@ -5,8 +5,7 @@
 #include "CollectionSvc/CollectionService.h"
 #include "CollectionSvc/CollectionDescription.h"
 #include "ImplicitCollection.h"
-
-#include "Gaudi/PluginService.h"
+#include "RootCollection.h"
 
 #include "AthenaKernel/getMessageSvc.h"
 
@@ -51,13 +50,8 @@ pool::CollectionService::plugin( const CollectionDescription& description,
                                  ISession* session )
 {
    if( description.type().majorType() == pool::ROOT_StorageType.type() ) {
-      using Factory_t = Gaudi::PluginService::Factory<ICollection*( const CollectionDescription*, ICollection::OpenMode, ISession*)>; 
-      ICollection *coll = Factory_t::create( "RootCollection", &description, openMode, session ).release();
-      if( !coll ) {
-         std::string errorMsg = "FAILED to load RootCollection plugin for collection '" + description.name() + "'";
-         throw std::runtime_error( "APR::CollectionService: " + errorMsg );
-      }
-      return coll;
+      return new RootCollection( &description, openMode, session );
+   } else {
+      return new ImplicitCollection( &description, openMode, session );
    }
-   return new ImplicitCollection( &description, openMode, session );
 }
