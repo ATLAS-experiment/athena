@@ -25,7 +25,7 @@ namespace pool  {
   class FileDescriptor;
   class DbOption;
 
-  typedef const class Shape        *ShapeH;
+  typedef const class Shape*  ShapeH;
 
   /** @class IStorageSvc IStorageSvc.h StorageSvc/IStorageSvc.h
     *
@@ -37,22 +37,20 @@ namespace pool  {
     *
     * The activity of the storage manager includes the Transaction handling and
     * hence the management of
-    *     - Database connections: A connection is equivalent to the triple
-    *       (OCISession, OCIServer, OCISvcCtx) in ORACLE, a login to a 
-    *       datasource using ODBC, or a single federation for Objectivity.
-    *       For file based technologies, such as root, MS Access, 
-    *       ODBC/Text etc., this is involves the opening of the file.
+    *     - Database connections: 
+    *       For file based technologies, such as ROOT, this is involves the opening of the file.
     *     - Database Transactions: Start and end a Transaction.
     *
     * @author  Markus Frank
     * @version 1.0
     */
-  class IStorageSvc   {
-  protected:
-    /// Destructor (called only by sub-classes)
-    virtual ~IStorageSvc()   {     }
 
+  class IStorageSvc   {
   public:
+    /// Destructor - not protected for now because we create multipile instnces of 
+    /// this object by hand and want to be able to use auto_ptr
+    virtual ~IStorageSvc()   { }
+
     /// IInterface implementation: Reference Interface instance               
     virtual unsigned int addRef() = 0;
 

@@ -2,47 +2,43 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef RNTUPLECOLLECTIONCURSOR_H
-#define RNTUPLECOLLECTIONCURSOR_H
+#ifndef COLLECTIONCURSOR_H
+#define COLLECTIONCURSOR_H
 
 #include "PersistentDataModel/Token.h"
 
 #include "CollectionSvc/CollectionRowBuffer.h"
 #include "CollectionSvc/CollectionDescription.h"
 #include "CollectionSvc/ICollectionCursor.h"
+#include "StorageSvc/DbContainer.h"
 
 #include <memory>
+#include <map>
 
-#include "RVersion.h"
-
-namespace ROOT {
-   class REntry;
-   class RNTupleReader;
-}
 
 namespace pool {
-   namespace RootCollection {
+
+    using ContainerMap = std::map< std::string, DbContainer >;
 
       /**
-       * @class RNTupleCollectionCursor RNTupleCollectionCursor.h Rootcollection/RNTupleCollectionCursor.h
+       * @class CollectionCursor CollectionCursor.h 
        *
-       * An interface used to navigate
-       * stored in RNTuple
+       * Reader object for Collections
        */
-      class RNTupleCollectionCursor : public ICollectionCursor
+      class CollectionCursor : public ICollectionCursor
       {
       public:
 
-         RNTupleCollectionCursor(
-            const pool::CollectionDescription& description,
-            const pool::CollectionRowBuffer& collectionRowBuffer,
-            ROOT::RNTupleReader* reader );
+         CollectionCursor(
+            const CollectionDescription& description,
+            const CollectionRowBuffer& collectionRowBuffer,
+            ContainerMap& attrContainers );
 
          /// Advances the cursor to the next row of the result set.
          virtual bool next() override;
 
          /// Returns the selected Tokens and Attributes for the current row of the result set.
-         virtual const pool::CollectionRowBuffer& currentRow() const override;
+         virtual const CollectionRowBuffer& currentRow() const override;
 
          /// Return the size of the collection.
          virtual std::size_t size() override;
@@ -56,26 +52,25 @@ namespace pool {
          /// Cleanup.
          virtual void close() override;
 
-         virtual ~RNTupleCollectionCursor();
+         virtual ~CollectionCursor();
 
       protected:
-
          const CollectionDescription&        m_description;
 
-         ROOT::RNTupleReader*                m_RNTReader;
+         /// Row buffer containing the Token and Attributes
+         CollectionRowBuffer                 m_collectionRowBuffer;
 
-         /// RNtuple row with Field addresses set to collectionRowBuffer attributes
-         std::unique_ptr< ROOT::REntry >     m_RNTEntry;
+         ContainerMap&                       m_attrContainers;
 
-         /// Row buffer containing Tokens and Attributes
-         pool::CollectionRowBuffer           m_collectionRowBuffer;
+         /// Container for the event reference
+         DbContainer&                        m_tokenContainer;
 
          /// Temporary storage for Event Reference in string format as it is in RNTuple
          std::string                         m_tokenStr;
 
 	      std::size_t                         m_idx;
       };
-   }
+
 }
 
 #endif
