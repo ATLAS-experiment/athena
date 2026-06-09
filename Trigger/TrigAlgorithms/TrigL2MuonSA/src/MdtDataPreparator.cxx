@@ -216,6 +216,7 @@ StatusCode TrigL2MuonSA::MdtDataPreparator::collectMdtHitsFromPrepData(const Eve
         std::string chamberType = mdtReadout->getStationType();
         std::copy_n(chamberType.begin(), std::min<size_t>(4, chamberType.size()), tmp.cType.begin());
         tmp.readEle = mdtReadout;
+        tmp.prepDataPtr = mdt;
 
         int& chamber {tmp.Chamber};
         char st = chamberType[1];

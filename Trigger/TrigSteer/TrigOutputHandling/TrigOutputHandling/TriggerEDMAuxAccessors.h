@@ -10,6 +10,7 @@
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTrigger/jFexTauRoIContainer.h"
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
+#include "MuonPrepRawData/MuonPrepDataContainer.h"
 
 #include "AthContainers/AuxElement.h"
 
@@ -272,6 +273,9 @@ auto vushortAccessors = initAccessors<std::vector<unsigned short>>("robs_status"
 auto vuintAccessors = initAccessors<std::vector<unsigned>>("robs_history");
 
 auto vuint32Accessors = initAccessors<std::vector<uint32_t>>("robs_id", "robs_size", "PEBROBList", "PEBSubDetList", "muCalibDS");
+auto vprdAccessorsMDT = initAccessors<std::vector<Muon::MdtPrepData> >("muCalibDS_MDT");
+auto vprdAccessorsRPC = initAccessors<std::vector<Muon::RpcPrepData> >("muCalibDS_RPC");
+auto vprdAccessorsTGC = initAccessors<std::vector<Muon::TgcPrepData> >("muCalibDS_TGC");
 
 auto vuint8Accessors = initAccessors<std::vector<uint8_t>>("parameterPosition");
 

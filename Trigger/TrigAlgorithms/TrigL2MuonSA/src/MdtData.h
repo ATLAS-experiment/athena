@@ -8,6 +8,7 @@
 #include <array>
 #include "Identifier/Identifier.h"
 #include "MuonReadoutGeometry/MdtReadoutElement.h"
+#include "MuonPrepRawData/MuonPrepDataContainer.h"
 
 namespace TrigL2MuonSA {
 
@@ -48,6 +49,7 @@ namespace TrigL2MuonSA {
     int    isOutlier{0};
     Identifier Id{};
     const MuonGM::MdtReadoutElement* readEle{nullptr};
+    const Muon::MdtPrepData* prepDataPtr{nullptr};
 };
   
 // --------------------------------------------------------------------------------

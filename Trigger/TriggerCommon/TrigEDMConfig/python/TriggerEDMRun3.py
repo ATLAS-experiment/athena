@@ -599,9 +599,9 @@ TriggerHLTListRun3 = [
 
     #Muon DS calibration
     ('xAOD::TrigCompositeContainer#HLT_MuonCalibrationStream',                    'MuonDS', 'Muon', [InViews('L2MuFastCalibRecoViews')]),
-    ('xAOD::TrigCompositeAuxContainer#HLT_MuonCalibrationStreamAux.muCalibDS',    'MuonDS', 'Muon'),
+    ('xAOD::TrigCompositeAuxContainer#HLT_MuonCalibrationStreamAux.muCalibDS.muCalibDS_MDT.muCalibDS_RPC.muCalibDS_TGC', 'MuonDS', 'Muon'),
 
-    
+
 
 # These extra muon collections have all be removed now, as they all have identical
 # reconstruction as the standard Muon collections so unique collections names should

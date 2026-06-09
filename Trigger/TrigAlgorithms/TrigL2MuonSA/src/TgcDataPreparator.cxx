@@ -147,6 +147,7 @@ StatusCode TrigL2MuonSA::TgcDataPreparator::prepareData(const EventContext& ctx,
 
        TrigL2MuonSA::TgcHitData lutDigit;
 
+       lutDigit.prepDataPtr = cit;
        lutDigit.eta = prepData.globalPosition().eta();
        lutDigit.phi = prepData.globalPosition().phi();
        lutDigit.r = prepData.globalPosition().perp();
