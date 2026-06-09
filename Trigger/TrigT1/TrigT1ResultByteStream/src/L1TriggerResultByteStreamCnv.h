@@ -71,9 +71,6 @@ private:
   // Placeholder for other L1 xAOD outputs:
   // - L1Topo result
 
-  // Read handle key needed for CTPResult to update the RawEventWrite with L1 trigger bits
-  SG::ReadHandleKey<xAOD::CTPResult> m_inKeyCTPResult { "CTPResult" };
-
 };
 
 #endif // TRIGT1RESULTBYTESTREAM_L1TRIGGERRESULTBYTESTREAMCNV_H
