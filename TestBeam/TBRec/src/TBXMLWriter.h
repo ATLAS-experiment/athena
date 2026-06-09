@@ -37,7 +37,7 @@ class TBXMLWriter : public AthAlgorithm
   ///////////////////////
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
   virtual StatusCode finalize() override;
 
   // tool support

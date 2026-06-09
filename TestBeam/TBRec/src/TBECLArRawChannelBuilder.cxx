@@ -178,9 +178,8 @@ StatusCode TBECLArRawChannelBuilder::initialize(){
 
 
 
-StatusCode TBECLArRawChannelBuilder::execute() 
+StatusCode TBECLArRawChannelBuilder::execute(const EventContext& ctx) 
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   //Counters for errors & warnings per event
   int noEnergy   = 0; // Number of completly failed channels in a given event

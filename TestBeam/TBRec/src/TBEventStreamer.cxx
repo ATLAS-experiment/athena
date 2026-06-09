@@ -60,7 +60,7 @@ StatusCode TBEventStreamer::initialize()
 
 }
 
-StatusCode TBEventStreamer::execute()
+StatusCode TBEventStreamer::execute(const EventContext& /*ctx*/)
 {
   bool successFlag = true;
   for (ToolHandle<TBEventStreamerTool>& tool : m_tools)
