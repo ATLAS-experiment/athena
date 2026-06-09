@@ -22,4 +22,9 @@ atlas_add_component( ScaleFactorTools
    LINK_LIBRARIES ScaleFactorToolsLib
 )
 
+atlas_add_executable(
+  ScaleFactorToolTester
+  util/ScaleFactorToolTester.cxx
+  LINK_LIBRARIES xAODRootAccess AsgTools ScaleFactorToolsLib
+)
 
