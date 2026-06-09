@@ -16,7 +16,7 @@
 #include <complex>
 #include <cmath>
 #include <algorithm> //for std::max, std::clamp
-
+#include <limits> 
 #include "CLHEP/Units/SystemOfUnits.h"
 
 //____________________________________________________________________________
@@ -108,7 +108,7 @@ TRT_PAI_effectiveGas::TRT_PAI_effectiveGas(TRT_PAI_gasMixture * gm,
   // create array of effective cross sections (Fosc).
 
   for ( int i=0; i<NLvls; i++ ) {
-    double fosc = 0.;
+    double fosc = std::numeric_limits<double>::min();
     // all atoms with an absorbtion energylevel low enough contribute.
     for ( int k=0; k<Nelem; k++ ) {
       pe = gm->getElement(k);
