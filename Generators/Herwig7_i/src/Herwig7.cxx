@@ -1,6 +1,6 @@
 // -*- C++ -*-
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -125,10 +125,10 @@ StatusCode Herwig7::genInitialize() {
   // Use PathResolver to find default Hw7 ThePEG repository file.
   const std::string repopath = PathResolver::find_file_from_list("HerwigDefaults.rpo", datapath);
   ATH_MSG_DEBUG("Loading Herwig default repo from " << repopath);
-  ThePEG::Repository::load(std::move(repopath));
+  ThePEG::Repository::load(repopath);
   ATH_MSG_DEBUG("Successfully loaded Herwig default repository");
 
-  const std::string share_path = std::filesystem::path(repopath).parent_path().string();
+  const std::string share_path = std::filesystem::path(std::move(repopath)).parent_path().string();
 
   if (!m_runSettings.empty()) {
     ATH_CHECK(writeRunFileFromText(share_path));
