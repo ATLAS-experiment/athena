@@ -315,7 +315,7 @@ void G4AtlasAlg::finalizeOnce()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-StatusCode G4AtlasAlg::execute()
+StatusCode G4AtlasAlg::execute(const EventContext& ctx)
 {
   static std::atomic<unsigned int> n_Event=0;
   ATH_MSG_DEBUG("++++++++++++  G4AtlasAlg execute  ++++++++++++");
@@ -337,7 +337,6 @@ StatusCode G4AtlasAlg::execute()
     }
   }
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   // Set the RNG to use for this event. We need to reset it for MT jobs
   // because of the mismatch between Gaudi slot-local and G4 thread-local RNG.
   ATHRNG::RNGWrapper* rngWrapper = m_rndmGenSvc->getEngine(this, m_randomStreamName);
@@ -354,14 +353,14 @@ StatusCode G4AtlasAlg::execute()
   ATH_CHECK(m_userActionSvc->BeginOfAthenaEvent(*hitCollections));
   ATH_CHECK(m_fastSimTool->BeginOfAthenaEvent(*hitCollections));
 
-  SG::ReadHandle<McEventCollection> inputTruthCollection(m_inputTruthCollectionKey);
+  SG::ReadHandle<McEventCollection> inputTruthCollection(m_inputTruthCollectionKey, ctx);
   if (!inputTruthCollection.isValid()) {
     ATH_MSG_FATAL("Unable to read input GenEvent collection " << inputTruthCollection.name() << " in store " << inputTruthCollection.store());
     return StatusCode::FAILURE;
   }
   ATH_MSG_DEBUG("Found input GenEvent collection " << inputTruthCollection.name() << " in store " << inputTruthCollection.store());
   // create the output Truth collection
-  SG::WriteHandle<McEventCollection> outputTruthCollection(m_outputTruthCollectionKey);
+  SG::WriteHandle<McEventCollection> outputTruthCollection(m_outputTruthCollectionKey, ctx);
   std::unique_ptr<McEventCollection> shadowTruth{};
   if (m_useShadowEvent) {
     outputTruthCollection = std::make_unique<McEventCollection>();

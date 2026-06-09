@@ -66,7 +66,7 @@ public:
   virtual StatusCode initialize ATLAS_NOT_THREAD_SAFE () override;
 
   /// @brief Simulate one Athena event.
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
 private:
   /// Releases the GeoModel geometry from memory once it has been used

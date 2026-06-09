@@ -41,7 +41,7 @@ StatusCode CalibHitValidate::initialize()
 
 //###############################################################################
 
-StatusCode CalibHitValidate::execute()
+StatusCode CalibHitValidate::execute(const EventContext& /*ctx*/)
 {
   // get truth containers
   const McEventCollection* truthEvent=0;
