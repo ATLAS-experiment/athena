@@ -19,7 +19,7 @@
 using namespace PerfMonTest;
 
 
-StatusCode ErroneousAlg::execute()
+StatusCode ErroneousAlg::execute(const EventContext& /*ctx*/)
 {  
   ATH_MSG_DEBUG ( "Executing " << name() << "..." ) ;
   

@@ -37,7 +37,7 @@ StatusCode CpuCruncherAlg::initialize()
 }
 
 
-StatusCode CpuCruncherAlg::execute()
+StatusCode CpuCruncherAlg::execute(const EventContext& /*ctx*/)
 {  
   ATH_MSG_DEBUG ( "Executing " << name() << "..." ) ;
 

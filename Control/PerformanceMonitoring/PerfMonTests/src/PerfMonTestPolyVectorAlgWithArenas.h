@@ -23,7 +23,7 @@ class PolyVectorAlgWithArenas : public AthAlgorithm
  public: 
   using AthAlgorithm::AthAlgorithm;
 
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
  private: 
   /// Property to setup the size of the Hit container
