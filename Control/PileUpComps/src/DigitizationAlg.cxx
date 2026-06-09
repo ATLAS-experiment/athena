@@ -23,14 +23,14 @@ StatusCode DigitizationAlg::initialize()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-StatusCode DigitizationAlg::execute()
+StatusCode DigitizationAlg::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG ("in execute()");
   for(auto& puToolHandle : m_puTools)
     {
       // Reset the filter first
       puToolHandle->resetFilter();
-      ATH_CHECK(puToolHandle->processAllSubEvents(Gaudi::Hive::currentContext()));
+      ATH_CHECK(puToolHandle->processAllSubEvents(ctx));
       // Check if the event was filtered out by the current PileUpTool.
       if (!puToolHandle->filterPassed())
         {

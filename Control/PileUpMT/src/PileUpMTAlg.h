@@ -80,7 +80,7 @@ class PileUpMTAlg : public AthAlgorithm {
 
   // IS EXECUTED:
   virtual StatusCode initialize() override;  // once, before any input is loaded
-  virtual StatusCode execute() override;     // per event
+  virtual StatusCode execute(const EventContext& ctx) override;     // per event
   virtual StatusCode finalize() override;    // once, after all events processed
 
   // Make this algorithm clonable
