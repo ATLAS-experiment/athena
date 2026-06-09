@@ -19,6 +19,7 @@ class ToolUtils {
   static QuantileFunc quantileFactory(const json& cfg);
 
   private:
+  static QuantileFunc makeCategory(const json& cfg);
   static QuantileFunc makeEnumerate(const json& cfg);
   static QuantileFunc makeNodes(const json& cfg);
   static QuantileFunc makeDense(const json& cfg);

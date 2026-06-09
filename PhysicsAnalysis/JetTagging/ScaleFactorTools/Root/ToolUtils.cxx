@@ -1,19 +1,25 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
 #include "ScaleFactorTools/ToolUtils.h"
 #include "PathResolver/PathResolver.h"
-
 
 ToolUtils::VariableFunc ToolUtils::variableFactory(const json& cfg) {
 
   // for simple variables
   if (cfg.is_string()) {
     std::string name = cfg.get<std::string>();
-    return [name](const SG::AuxElement& el) -> float {
-      return el.auxdata<float>(name);
-    };
+    std::string type = cfg.contains("data_type") ? cfg.at("mode").get<std::string>() : "float";
+    if (type == "int") {
+      return [name](const SG::AuxElement& el) -> int {
+        return el.auxdata<int>(name);
+      };
+    } if (type == "float") {
+      return [name](const SG::AuxElement& el) -> float {
+        return el.auxdata<float>(name);
+      };
+    }
+    throw std::runtime_error("Unknown type");
   }
 
   // structured variables
@@ -32,9 +38,9 @@ ToolUtils::VariableFunc ToolUtils::variableFactory(const json& cfg) {
 
     auto num_func = buildTerm(cfg.at("numerator"));
     auto den_func = buildTerm(cfg.at("denominator"));
-    const std::string mode = cfg.value("mode", "log_ratio");
+    std::string mode = cfg.contains("mode") ? cfg.at("mode").get<std::string>() : "log_ratio";
 
-    return [num_func, den_func] (const SG::AuxElement& el) -> float {
+    return [num_func, den_func, mode] (const SG::AuxElement& el) -> float {
       float num = num_func(el);
       float den = den_func(el);
       if (mode == "log_ratio" ) {
@@ -50,6 +56,27 @@ ToolUtils::VariableFunc ToolUtils::variableFactory(const json& cfg) {
 
 }
 
+ToolUtils::QuantileFunc ToolUtils::makeCategory(const json& cfg) {
+  ToolUtils::VariableFunc var = ToolUtils::variableFactory(cfg.at("variable"));
+  std::vector<int> values = cfg.at("values").get<std::vector<int>>();
+
+  std::unordered_map<int,int> mapping;
+  for (int i = 0; i < (int)values.size(); ++i) {
+    mapping[values[i]] = i;
+  }
+
+  return [var, mapping](const SG::AuxElement& el) -> int {
+    int v = static_cast<int>(var(el));
+    auto it = mapping.find(v);
+    if (it != mapping.end()) {
+      return it->second;
+    }
+    // need to decide what values to return here
+    return 0;
+  };
+
+}
+
 ToolUtils::QuantileFunc ToolUtils::makeEnumerate(const json& cfg) {
   ToolUtils::VariableFunc var = ToolUtils::variableFactory(cfg.at("variable"));
   std::vector<float> edges = cfg.at("edges").get<std::vector<float>>();
@@ -58,10 +85,18 @@ ToolUtils::QuantileFunc ToolUtils::makeEnumerate(const json& cfg) {
 
   return [var, edges, useAbs] (const SG::AuxElement& el) -> int {
     float v = var(el);
-    if (useAbs) = std::abs(v);
+    if (useAbs)  v = std::abs(v);
+
+    // TODO: need to decide what to do here for out-of-range jets
+    if (v < edges.front()) {
+      throw std::runtime_error("enumerate: value below minimum edge");
+    }
+    if (v >= edges.back()) {
+      throw std::runtime_error("enumerate: value above maximum edge");
+    }
 
     int bin = 0;
-    while (bin < (int)edges.size() && v > edges[bin]){
+    while (bin < (int) edges.size() && v > edges[bin]){
       bin++;
     }
     return bin;
@@ -102,6 +137,7 @@ ToolUtils::QuantileFunc ToolUtils::makeNodes(const json& cfg) {
     };
 }
 
+// turn the already computed per-axis bin indices into a flattened index
 ToolUtils::QuantileFunc ToolUtils::makeDense (const json& cfg) {
   std::vector<ToolUtils::QuantileFunc> axes;
 
@@ -111,8 +147,33 @@ ToolUtils::QuantileFunc ToolUtils::makeDense (const json& cfg) {
 
   std::vector<int> strides(axes.size(), 1);
 
+  auto getSize = [](const json& axis) -> int {
+    std::string type = axis.at("type");
+    if (type == "enumerate") {
+    return axis.at("edges").size() - 1;
+    }
+    if (type == "category") {
+      return axis.at("values").size();
+    }
+
+    if (type == "nodes") {
+      int total = 0;
+      for (const auto& sub : axis.at("nodes")) {
+        std::string subType = sub.at("type");
+        if (subType == "enumerate")
+          total += sub.at("edges").size() - 1;
+        else if (subType == "category")
+          total += sub.at("values").size();
+        else
+          throw std::runtime_error("Unsupported node subtype");
+      }
+      return total;
+    }
+    throw std::runtime_error("Unsupported axis type in dense: " + type);
+  };
+
   for (int i = (int)axes.size() - 2; i >= 0; --i) {
-    int size = cfg.at("axes")[i+1].at("edges").size() + 1;
+    int size = getSize(cfg.at("axes")[i+1]);
     strides[i] = strides[i+1] * size;
   }
 
@@ -132,6 +193,7 @@ ToolUtils::QuantileFunc ToolUtils::quantileFactory(const json& cfg) {
 
   std::string type = cfg.at("type");
 
+  if (type == "category")  return ToolUtils::makeCategory(cfg);
   if (type == "enumerate") return ToolUtils::makeEnumerate(cfg);
   if (type == "nodes")     return ToolUtils::makeNodes(cfg);
   if (type == "dense")     return ToolUtils::makeDense(cfg);
