@@ -114,6 +114,12 @@ namespace DerivationFramework {
         }else if (!m_refitPV && vtxContainer->size()){
             ATH_CHECK(helper.FillCandExistingVertices(vtxContainer.get(), pvContainer.cptr(), m_DoVertexType));
         }
+        if(vtxContainer->size() > 500){
+           ATH_MSG_WARNING("Event Run: " << evt->runNumber() << " Event: " << evt->eventNumber() << " vtxContainer container size " << vtxContainer->size());
+        }
+        if(refPvContainer->size() > 500){
+           ATH_MSG_WARNING("Event Run: " << evt->runNumber() << " Event: " << evt->eventNumber() << " refPvContainer container size " << refPvContainer->size());
+        }
     }    
     //----------------------------------------------------
     // save in the StoreGate
