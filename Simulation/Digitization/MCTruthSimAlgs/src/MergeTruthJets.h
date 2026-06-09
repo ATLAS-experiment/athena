@@ -18,7 +18,7 @@ public:
   MergeTruthJets(const std::string& name, ISvcLocator* svcLoc);
   virtual ~MergeTruthJets() = default;
   virtual StatusCode initialize() override final;
-  virtual StatusCode execute() override final;
+  virtual StatusCode execute(const EventContext& ctx) override final;
   virtual bool isClonable() const override final { return true; }
 private:
   ToolHandle<IPileUpTool> m_mergeTool{this, "MergeTruthJetsTool", "MergeTruthJetsTool", ""};
