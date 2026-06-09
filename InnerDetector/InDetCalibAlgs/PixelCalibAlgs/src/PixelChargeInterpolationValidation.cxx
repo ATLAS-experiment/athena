@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PixelChargeInterpolationValidation_C
@@ -255,11 +255,13 @@ for(int i  = 0; i < ntot+1; i++){
 		std::ostringstream titlecs;		
 		namecs << "Eta_Clustersize" << i+1;
 		titlecs << "#eta_{i} distribution - Clustersize " << i+1 ;
-		m_etaClustersize.push_back(
-				new TH1F(namecs.str().c_str(), titlecs.str().c_str(),
-					etabins_Layer.size(), etabins_Layer[0],
-					etabins_Layer[etabins_Layer.size()-1])
-					);
+		if (! etabins_Layer.empty()){
+      m_etaClustersize.push_back(
+          new TH1F(namecs.str().c_str(), titlecs.str().c_str(),
+            etabins_Layer.size(), etabins_Layer.front(),
+            etabins_Layer.back())
+            );
+    }
 	}
 
 
