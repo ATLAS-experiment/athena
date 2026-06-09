@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -24,7 +24,7 @@ namespace D3PD {
 struct EventFlagNames
 {
   xAOD::EventInfo::EventFlagSubDet m_flag;
-  const char* m_name;
+  const char* m_name{};
 };
 
 

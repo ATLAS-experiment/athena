@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -73,14 +73,14 @@ private:
   struct Var
   {
     std::string key;
-    bool* val;
+    bool* val{};
   };
 
   /// List of variables being written.
   std::vector<Var> m_vars;
 
   /// Variable: Set to true if any of the specified flags passed.
-  bool* m_passed;
+  bool* m_passed{};
 };
 
 

@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TREE_COPY_OPTS_HH
@@ -18,10 +18,10 @@ namespace H5Utils {
   {
     std::string branch_regex;
     std::vector<size_t> vector_lengths;
-    size_t chunk_size;
-    size_t n_entries;
-    bool verbose;
-    int print_interval;
+    size_t chunk_size{};
+    size_t n_entries{};
+    bool verbose{};
+    int print_interval{};
     std::string selection;
   };
 
@@ -34,7 +34,7 @@ namespace H5Utils {
 
   struct AppOpts
   {
-    TreeCopyOpts tree;
+    TreeCopyOpts tree{};
     IOOpts file;
     int exit_code{0};
   };

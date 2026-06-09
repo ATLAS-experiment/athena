@@ -74,7 +74,7 @@ std::vector<std::string> read_string_categories(const H5::DataSet& ds)
   // is safe.
   struct VlGuard {
     hid_t tid, sid;
-    void* buf;
+    void* buf{};
     ~VlGuard() { H5Treclaim(tid, sid, H5P_DEFAULT, buf); }
   } guard{strtype.getId(), sp.getId(), ptrs.data()};
   ds.read(ptrs.data(), strtype);
