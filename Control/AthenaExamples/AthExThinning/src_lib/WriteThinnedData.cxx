@@ -98,9 +98,8 @@ StatusCode WriteThinnedData::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode WriteThinnedData::execute()
+StatusCode WriteThinnedData::execute(const EventContext& ctx)
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   ATH_MSG_DEBUG("Executing " << name() << "...");
 
   bool allGood = true;

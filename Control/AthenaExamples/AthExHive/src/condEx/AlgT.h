@@ -25,7 +25,7 @@ public:
   virtual bool isClonable() const override { return true; }
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
   
 private:
 
