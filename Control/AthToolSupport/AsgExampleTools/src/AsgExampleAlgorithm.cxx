@@ -66,7 +66,7 @@ StatusCode AsgExampleAlgorithm::finalize() {
 
 //**********************************************************************
 
-StatusCode AsgExampleAlgorithm::execute() {  
+StatusCode AsgExampleAlgorithm::execute(const EventContext& /*ctx*/) {  
   ATH_MSG_INFO ("Executing " << name() << "...");
   // Loop over hello tools.
   ATH_MSG_INFO("Looping over ASG tools.");
