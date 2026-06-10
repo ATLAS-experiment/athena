@@ -325,14 +325,15 @@ def fromRunArgsITk(runArgs, flags):
     ## Accumulate step
     if runArgs.accumulate and not runArgs.solve:
         os.makedirs(f"{flags.ITk.Align.baseDir}/Accumulate", exist_ok = True)
-        os.chdir("Accumulate")
+        os.chdir(f"{flags.ITk.Align.baseDir}/Accumulate")
         from InDetAlignConfig.AccumulateITkConfig import ITkAccumulateCfg
         cfg.merge(ITkAccumulateCfg(flags))
+
 
     ## Solve step
     elif runArgs.solve and not runArgs.accumulate:
         os.makedirs(f"{flags.ITk.Align.baseDir}/Solve", exist_ok = True)
-        os.chdir("Solve")
+        os.chdir(f"{flags.ITk.Align.baseDir}/Solve")
         from InDetAlignConfig.SolveITkConfig import ITkSolveCfg
         cfg.merge(ITkSolveCfg(flags))
         

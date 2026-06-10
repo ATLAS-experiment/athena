@@ -10,6 +10,7 @@ def ITkStripGeoModelCfg(flags):
     # ITkStripDetectorTool.useDynamicAlignFolders = flags.GeoModel.Align.Dynamic #Will we need to do dynamic alignment for ITk?
     ITkStripDetectorTool.Alignable = flags.ITk.Geometry.stripAlignable
     ITkStripDetectorTool.AlignmentFolderName = flags.ITk.Geometry.alignmentFolder
+    print("ITkStripDetectorTool.AlignmentFolderName: ", ITkStripDetectorTool.AlignmentFolderName)
     ITkStripDetectorTool.DetectorName = "ITkStrip"
     if flags.ITk.Geometry.StripLocal:
         # Setting this filename triggers reading from local file rather than DB

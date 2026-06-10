@@ -22,7 +22,7 @@ def parser():
     parser.add_argument("-i", "--input", default = defaultTestFiles.RDO_RUN4, nargs = "+", help='Input file(s)')
     parser.add_argument("--maxEvents", default = -1, type = int, help='Number of maximal processed events')
     parser.add_argument("-t", "--inputTracksCollection", default = "CombinedITkTracks", type = str, help='Name of the track collection to use')
-    parser.add_argument("--inputTFiles", default = "AlignmentTFile.root", type = str, help='ROOT file produced in MatrixTool in the accumulation step')
+    parser.add_argument("--inputTFile", default = "AlignmentTFile.root", type = str, help='ROOT file produced in MatrixTool in the accumulation step')
     
     parser.add_argument("--alignmentConstants", default = [], nargs = "+", help='Local alignment constants to use')
     
@@ -70,7 +70,7 @@ flags.ITk.Align.alignITkStrip = kwargs["alignITkStrip"]  or flags.ITk.Align.alig
 
 flags.ITk.Align.writeSilicon = False #Issues with folders ATM - should be flags.ITk.Align.alignITkPixel or flags.ITk.Align.alignITkStrip
 
-flags.ITk.Align.inputTFiles = kwargs["inputTFiles"]
+flags.ITk.Align.inputTFiles = kwargs["inputTFile"]
 
 flags.Input.Files = kwargs["input"]
 flags.Exec.MaxEvents = kwargs["maxEvents"] if not kwargs["solve"] else 1
@@ -120,6 +120,8 @@ if kwargs["localDB"]:
     DBFile = kwargs["localDB"]
     flags.IOVDb.DBConnection ="sqlite://;schema="+DBFile+";dbname="+DBName
     flags.ITk.Geometry.alignmentFolder = "/Indet/AlignITk"
+
+print("flags.ITk.Geometry.alignmentFolder: ", flags.ITk.Geometry.alignmentFolder)
 
 if flags.ITk.Align.alignITkPixel:
     flags.ITk.Geometry.pixelAlignable = True
