@@ -34,4 +34,4 @@ atlas_add_test( RatesAnalysis_test
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_data(share/triggers.json)
-atlas_install_scripts(share/L1TopoRatesCalculator_submatrix_plotter.py share/runL1TopoRates.py python/RatesAnalysisFullMenu.py python/RatesEmulationExample.py python/RatesAnalysisPostProcessing.py python/RatesAnalysisOnlineProcessing.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+atlas_install_scripts(share/L1TopoRatesCalculator_submatrix_plotter.py share/runL1TopoRates.py python/RatesAnalysisFullMenu.py python/RatesEmulationExample.py python/RatesAnalysisPostProcessing.py python/RatesAnalysisOnlineProcessing.py share/RatesAnalysisProcessingWrapper.py share/RatesOverlapAnalysis.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

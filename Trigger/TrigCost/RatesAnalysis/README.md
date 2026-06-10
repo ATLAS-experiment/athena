@@ -1,7 +1,7 @@
 # Tools for rates calculations 
 Description of the RatesAnalysis package.
 
-November 2024
+July 2025
 
 ---
 
@@ -25,6 +25,87 @@ November 2024
 
 ---
 ## RatesAnalysis
+
+### Rates analysis script
+The script `share/RatesOverlapAnalysis.py` is an all-in-one script to analyse the Trigger Menu. The four functionalities are:
+- calculating the overlap of two different streams
+- calculating the overlap between a chain and a stream
+- calculating the overlap between two chains
+- calculating the unique rate of a set of chosen chains
+
+The naming convention of the arguments is similar to other Trigger scripts, but new flags are introduced.
+
+**Stepping through each flag**
+
+These flags are used to identify the input Menu and Prescale files:
+- `--HLTMenu`:          needed to select/enable the correct chains based on what streams and chains are being compared
+- `--hlt_in`:           the HLT prescale file obtained from the Rulebook with the prescales already made
+
+The following flags are used to identify or name the output prescale files.  These prescale files have a default setting and do not need to be included in the command if the default name is sufficient:
+- `--hlt_ps_stream0`:    the prescale file created for the stream0 (default: Main) stream
+- `--hlt_ps_stream`:     the prescale file created for the stream being compared to stream0
+- `--hlt_ps_chain`:      the prescale file created for the chain selection and comparison to a stream
+- `--hlt_ps_chain_ref`:  the prescale file created for the reference chain in the comparison to a chain
+- `--hlt_ps_chain_comp`: the prescale file created for the comparison chain in the comparison to a chain
+- `--hlt_ps_chain_set`:  the prescale file created for the set of chains chosen when finding the unique rate
+
+The following flags are used in the rates analysis part of the code:
+- `--l1_ps`:             L1 prescale file
+- `--targetlumi`:        target luminosity
+- `--maxEvents`:         max events, take 50000 or more for reasonable statistics
+- `--workdir`:           working directory
+
+The following flags are used to select the chains or streams being analysed:
+- `--stream0`:        the stream the chain and selected stream are being compared to.  DEFAULT = Main
+- `--stream`:         a list of streams that need to be analysed
+- `--chain`:          a list of chains that need to be analysed
+- `--chain_set`:      a list of chains that will be used in finding the unique rate of the set
+- `--chain_comp`:     a list of chains to find the overlap between single chains, chains in the list are compared to the first chain in the list.  
+
+The following flags are used to specify the output file name of the different analyses:
+- `--stream_out`:     default is streamRates.txt
+- `--chain_out`:       default is chainRates.txt
+- `--chain_comp_out`: defualt is chainCompRates.txt
+
+Note that if --chain is not entered, then the script only performs the stream analysis.  The same goes for `--stream` and `--chain_comp`. If the argument _regex_ is passed for `--chain`, `--chain_set` or `--chain_comp`, chains can be searched for by using regular expressions and are then added to the list.  When using regex, the terminal will go into interactive mode, where you then enter your regular expression.  A list of chains in the set is then printed out, and you will need to confirm that you want to proceed with these chains with 'y/n'.
+
+Also note that if the development menu is being used, you need to use AODs that have been reprocessed using the dev menu.
+
+Example commands for each case are given below.
+
+**Comparing two streams**
+```
+RatesOverlapAnalysis.py /eos/atlas/atlascerngroupdisk/trig-rates/rate_aod/24.0.94_PhysP1_ATR-31329/ --HLTMenu HLTMenu_471.json --hlt_in HLTPrescale_1188.json --l1_ps L1Prescale_14423.json --targetlumi 2e34 --maxEvents 1000 --workdir streamComp --stream0 Main --stream VBFDelayed BphysDelayed TLA
+```
+
+**Comparing chains with a stream**
+```
+RatesOverlapAnalysis.py /eos/atlas/atlascerngroupdisk/trig-rates/rate_aod/24.0.94_PhysP1_ATR-31329/ --HLTMenu HLTMenu_471.json --hlt_in HLTPrescale_1188.json --l1_ps L1Prescale_14423.json --targetlumi 2e34 --maxEvents 1000 --workdir chainStreamComp --stream0 Main --chain HLT_6j35c_020jvt_pf_ftf_presel6c25_L14jJ40 HLT_j460_pf_ftf_preselj225_L1jJ160 HLT_j480_pf_ftf_preselj225_L1jJ160 HLT_j460_a10sd_cssk_pf_jes_ftf_preselj225_L1jJ160
+```
+
+```
+RatesOverlapAnalysis.py /eos/atlas/atlascerngroupdisk/trig-rates/rate_aod/24.0.94_PhysP1_ATR-31329/ --HLTMenu HLTMenu_471.json --hlt_in HLTPrescale_1188.json --l1_ps L1Prescale_14423.json --targetlumi 2e34 --maxEvents 1000 --workdir chainStreamComp --stream0 Main --chain regex
+```
+
+Note that in this case, the chains are being compared to **stream0**, which is set to Main as a default. The chains need to be in the Main stream to get the overlap.
+
+**Comparing two chains**
+```
+RatesOverlapAnalysis.py /eos/atlas/atlascerngroupdisk/trig-rates/rate_aod/24.0.94_PhysP1_ATR-31329/ --HLTMenu HLTMenu_471.json --hlt_in HLTPrescale_1188.json --l1_ps L1Prescale_14423.json --targetlumi 2e34 --maxEvents 50000 --workdir chainsComp --chain_comp HLT_j460_pf_ftf_preselj225_L1jJ160 HLT_j480_pf_ftf_preselj225_L1jJ160 HLT_j460_a10sd_cssk_pf_jes_ftf_preselj225_L1jJ160 
+```
+
+```
+RatesOverlapAnalysis.py /eos/atlas/atlascerngroupdisk/trig-rates/rate_aod/24.0.94_PhysP1_ATR-31329/ --HLTMenu HLTMenu_471.json --hlt_in HLTPrescale_1188.json --l1_ps L1Prescale_14423.json --targetlumi 2e34 --maxEvents 500000 --workdir chainsComp --chain_comp regex
+```
+
+**Finding the unique rate of a set of chains**
+```
+RatesOverlapAnalysis.py /eos/atlas/atlascerngroupdisk/trig-rates/rate_aod/24.0.94_PhysP1_ATR-31329/ --HLTMenu HLTMenu_471.json --hlt_in HLTPrescale_1188.json --l1_ps L1Prescale_14423.json --targetlumi 2e34 --maxEvents 1000 --workdir chainSet --chain_set HLT_j460_pf_ftf_preselj225_L1jJ160 HLT_j480_pf_ftf_preselj225_L1jJ160 HLT_j460_a10sd_cssk_pf_jes_ftf_preselj225_L1jJ160 
+```
+
+```
+RatesOverlapAnalysis.py /eos/atlas/atlascerngroupdisk/trig-rates/rate_aod/24.0.94_PhysP1_ATR-31329/ --HLTMenu HLTMenu_471.json --hlt_in HLTPrescale_1188.json --l1_ps L1Prescale_14423.json --targetlumi 2e34 --workdir chainSet --chain_set regex
+``` 
 
 ### L1TopoRatesCalculator
 
