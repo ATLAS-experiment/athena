@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -98,8 +98,8 @@ public:
 
   /**This method checks if a GlobalPosition is inside the Cylinder - not an interface method,
         assumes that GlobalPosition is in the right frame*/
-  virtual bool inside(const Amg::Vector3D& gp, double tol1 = 0., double tol2 = 0.) const final;
-  virtual bool inside(const Amg::Vector3D& locpo, const BoundaryCheck& bchk) const final;
+  bool inside(const Amg::Vector3D& gp, double tol1 = 0., double tol2 = 0.) const;
+  bool inside(const Amg::Vector3D& locpo, const BoundaryCheck& bchk) const;
 
   /** This method checks inside bounds in loc1
       - loc1/loc2 correspond to the natural coordinates of the surface */
