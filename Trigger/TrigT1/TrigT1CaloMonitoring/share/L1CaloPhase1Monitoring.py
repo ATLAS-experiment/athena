@@ -687,7 +687,10 @@ if flags.Output.BSFileName != "":
                                               jFexSRJetRoIKeys = [], jFexLRJetRoIKeys = [],
                                               gFexSRJetRoIKeys = [], gFexLRJetRoIKeys = [],
                                               cTauRoIKey = "", cjTauLinkKey = "", ThresholdPatternTools= [],
+                                              CTPKey = "",
                                               L1TriggerResultWHKey = "OutputBSTCC")
+  # since we dont create TrigDecision objects, dont set those trigger bits in the bytestream                                                                                                                                 
+  cfg.getService("ByteStreamCnvSvc").FillTriggerBits=False
   if flags.Trigger.L1.doeFex:
     algo.eFexEMRoIKeys = ["L1_eEMRoI","L1_eEMxRoI"]  # will write these containers
     algo.eFexTauRoIKeys = ["L1_eTauRoI","L1_eTauxRoI"]
