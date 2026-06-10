@@ -84,8 +84,8 @@ namespace Trk {
       "tool for storing and inverting matrix"};
 
     /** Pointer to AlignModuleTool*/
-    ToolHandle<Trk::IAlignModuleTool> m_alignModuleTool{this, "AlignModuleTool",
-      "Trk::AlignModuleTool/AlignModuleTool"};
+    PublicToolHandle<Trk::IAlignModuleTool> m_alignModuleTool{this,
+      "AlignModuleTool", "Trk::AlignModuleTool/AlignModuleTool"};
     
     std::string m_pathbin;            //!< path binary files (in/out)
     std::string m_pathtxt;            //!< path ascii files (in/out)
