@@ -25,43 +25,52 @@
 
 #include <Acts/Definitions/TrackParametrization.hpp>
 #include <Acts/Utilities/Helpers.hpp>
+#include <Acts/Utilities/MathHelpers.hpp>
+#include <Acts/Definitions/Tolerance.hpp>
 #include <tuple>
 
 namespace {
+   constexpr float toFloat(const double x) {
 
-   template <typename T, class T_SquareMatrix>
-   inline void lowerTriangleToVector(const T_SquareMatrix& covMatrix,
-                                     std::vector<T>& vec, unsigned int n_rows_max) {
+      if (Acts::abs(x) < Acts::s_epsilon) {
+         return 0.f;
+      }
+      const double clampedX = std::copysign(std::clamp(x, 3.*static_cast<double>(std::numeric_limits<float>::min()),
+                                            static_cast<double>(std::numeric_limits<float>::max())), x);
+      return static_cast<float>(clampedX);
+   }
+    template <int nRowsMax, int nMatSize>
+   inline void lowerTriangleToVector(const Acts::SquareMatrix<nMatSize>& covMatrix,
+                                     std::vector<float>& vec) {
       assert( covMatrix.rows() == covMatrix.cols());
+      static_assert(nRowsMax > 0);
+      static_assert(nMatSize > 0);
+      constexpr int nRows = std::min(nRowsMax, nMatSize);
       vec.clear();
-      unsigned int n_rows = std::min(n_rows_max, static_cast<unsigned int>(covMatrix.rows()));
-      vec.reserve((n_rows+1)*n_rows/2);
-      for (unsigned int i = 0; i < n_rows; ++i) {
-         for (unsigned int j = 0; j <= i; ++j) {
-            vec.emplace_back(covMatrix(i, j));
+      vec.reserve(Acts::sumUpToN(nRows));
+      for (int i = 0; i < nRows; ++i) {
+         for (int j = 0; j <= i; ++j) {
+            vec.emplace_back(toFloat(covMatrix(i, j)));
          }
       }
    }
 
-   template <typename T, class T_SquareMatrix>
-   inline void lowerTriangleToVectorScaleLastRow(const T_SquareMatrix& covMatrix,
-                                                 std::vector<T>& vec, unsigned int n_rows_max,
-                                                 typename T_SquareMatrix::Scalar last_element_scale) {
-      assert( covMatrix.rows() == covMatrix.cols());
+   template <int nRowsMax, int nMatSize>
+   inline void lowerTriangleToVectorScaleLastRow(const Acts::SquareMatrix<nMatSize>& covMatrix,
+                                                 std::vector<float>& vec,
+                                                 const double last_element_scale) {
       vec.clear();
-      unsigned int n_rows = std::min(n_rows_max, static_cast<unsigned int>(covMatrix.rows()));
-      vec.reserve((n_rows+1)*n_rows/2);
-      for (unsigned int i = 0; i < n_rows; ++i) {
-         for (unsigned int j = 0; j <= i; ++j) {
-            vec.emplace_back(covMatrix(i, j));
+      static_assert(nRowsMax > 0);
+      static_assert(nMatSize > 0);
+      constexpr int nRows = std::min(nRowsMax, nMatSize);
+      vec.reserve(Acts::sumUpToN(nRows));
+      for (int i = 0; i < nRows; ++i) {
+         for (int j = 0; j <= i; ++j) {
+            const double covVal = covMatrix(i,j) * 
+               ( i == Acts::eBoundQOverP || j == Acts::eBoundQOverP ? 
+                              last_element_scale : 1.);
+            vec.emplace_back(toFloat(covVal));
          }
-      }
-      typename std::vector<T>::iterator cov_iter = vec.end();
-      --cov_iter;
-      *cov_iter *= last_element_scale;
-      for (unsigned int i=0; i<n_rows_max; ++i) {
-         *cov_iter *= last_element_scale;
-         --cov_iter;
       }
    }
 
@@ -152,7 +161,7 @@ namespace ActsTrk {
                                            boundParams[Acts::eBoundQOverP] * 1_MeV);
 
       if (perigeeParam.covariance().has_value()) {
-         lowerTriangleToVectorScaleLastRow(perigeeParam.covariance().value(), tmp_cov_vector, 5, 1_MeV);
+         lowerTriangleToVectorScaleLastRow<5>(perigeeParam.covariance().value(), tmp_cov_vector, 1_MeV);
          track_particle.setDefiningParametersCovMatrixVec(tmp_cov_vector);
       }
 
@@ -367,7 +376,7 @@ namespace ActsTrk {
 
                std::size_t param_idx = parametersVec.size();
                // only use the 5x5 sub-matrix of the full covariance matrix
-               lowerTriangleToVector(curvilinear_cov, tmp_cov_vector, 5);
+               lowerTriangleToVector<5>(curvilinear_cov, tmp_cov_vector);
                if (tmp_cov_vector.size() != 15) {
                   ATH_MSG_ERROR("Invalid size of lower triangle cov " << tmp_cov_vector.size() << " != 15"
                                 << " input matrix : " << curvilinear_cov.rows() << " x " << curvilinear_cov.cols());
