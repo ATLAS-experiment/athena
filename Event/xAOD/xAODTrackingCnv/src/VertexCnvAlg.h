@@ -34,7 +34,7 @@ namespace xAODMaker {
       /// Function initialising the algorithm
       virtual StatusCode initialize();
       /// Function executing the algorithm
-      virtual StatusCode execute();
+      virtual StatusCode execute(const EventContext& ctx);
 
    private:
       /// The key of the input Container

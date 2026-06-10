@@ -41,7 +41,7 @@ namespace xAODMaker {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode ElementLinkResetAlg::execute() {
+   StatusCode ElementLinkResetAlg::execute(const EventContext& /*ctx*/) {
 
       // Collect all the container(s):
       std::vector< std::pair< const SG::IConstAuxStore*, std::string > > stores;

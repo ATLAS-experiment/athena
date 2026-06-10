@@ -57,7 +57,7 @@ namespace xAODReader {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode EventInfoReaderAlg::execute() {
+   StatusCode EventInfoReaderAlg::execute(const EventContext& /*ctx*/) {
 
       // Get the EventInfo object:
       const xAOD::EventInfo* ei = nullptr;

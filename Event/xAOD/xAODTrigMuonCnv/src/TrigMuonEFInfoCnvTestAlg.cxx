@@ -35,7 +35,7 @@ StatusCode TrigMuonEFInfoCnvTestAlg::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode TrigMuonEFInfoCnvTestAlg::execute() {
+StatusCode TrigMuonEFInfoCnvTestAlg::execute(const EventContext& /*ctx*/) {
 
   // Retrieve the TrigMuonEFInfoContainer
   const TrigMuonEFInfoContainer* infocont = evtStore()->tryConstRetrieve<TrigMuonEFInfoContainer>(m_aodContainerName);

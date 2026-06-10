@@ -35,7 +35,7 @@ namespace xAODMaker {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode BTaggingCnvAlg::execute() {
+  StatusCode BTaggingCnvAlg::execute(const EventContext& /*ctx*/) {
 
     //// Retrieve the AOD particles:
     //const BTaggingContainer* aod = evtStore()->tryConstRetrieve<BTaggingContainer>(m_aodContainerName); 

@@ -41,7 +41,7 @@ namespace xAODMaker {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode JetEtRoICnvAlg::execute() {
+   StatusCode JetEtRoICnvAlg::execute(const EventContext& /*ctx*/) {
 
       // Retrieve the AOD container:
       const LVL1_ROI* aod = nullptr;
