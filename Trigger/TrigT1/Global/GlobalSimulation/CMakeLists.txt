@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( GlobalSimulation )
@@ -52,7 +52,7 @@ atlas_add_test(testEgamma1BDT_tv
                INCLUDE_DIRS ${APTYPES_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                LINK_LIBRARIES ${APTYPES_LIBRARIES} ${GTEST_LIBRARIES} ${ROOT_LIBRARIES} CxxUtils
 	       		      PathResolver
-	       POST_EXEC_SCRIPT nopost.sh
+	       POST_EXEC_SCRIPT noerror.sh
    )
 
 
