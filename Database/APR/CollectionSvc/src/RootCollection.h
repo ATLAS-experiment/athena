@@ -42,8 +42,7 @@ namespace pool {
         /// @param mode The open mode of the collection
         /// @param session If you want to access the referenced objects you have to provide an ISession
         RootCollection( const pool::CollectionDescription* description,
-                        pool::ICollection::OpenMode mode,
-                        pool::ISession* session );
+                        pool::ICollection::OpenMode mode );
 
         /// Destructor
         ~RootCollection();
@@ -84,7 +83,6 @@ namespace pool {
         std::string                          m_containerPrefix;
         ICollection::OpenMode                m_mode;
 
-        ISession*                            m_session;
         bool                                 m_open;
 
         std::unique_ptr<IStorageSvc>         m_storageSvc;
