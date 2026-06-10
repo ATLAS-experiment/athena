@@ -1,0 +1,110 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+
+#include "PFUnifiedLCCalibTool.h"
+#include "PFData.h"
+#include "eflowCaloObject.h"
+#include "eflowRecCluster.h"
+
+#include "xAODCaloEvent/CaloCluster.h"
+#include "xAODCaloEvent/CaloClusterContainer.h"
+#include "xAODCaloEvent/CaloClusterKineHelper.h"
+#include "CaloUtils/CaloClusterProcessor.h"
+
+#include "CaloDetDescr/CaloDetDescrManager.h"
+#include "CaloIdentifier/CaloCell_ID.h"
+#include "CaloUtils/CaloClusterStoreHelper.h"
+
+PFUnifiedLCCalibTool::PFUnifiedLCCalibTool(const std::string& type, const std::string& name, const IInterface* parent) :
+  base_class(type, name, parent)
+{
+}
+
+StatusCode PFUnifiedLCCalibTool::initialize() {
+
+  /* Retrieve the cluster collection tool */
+  ATH_CHECK(m_clusterCollectionTool.retrieve());
+
+  /* Retrieve basic local-hadron calibration tool */
+  ATH_CHECK(m_clusterLocalCalibTool.retrieve());
+
+  /* Retrieve tools for out-of-cluster corrections */
+  ATH_CHECK(m_clusterLocalCalibOOCCTool.retrieve());
+
+  ATH_CHECK(m_clusterLocalCalibOOCCPi0Tool.retrieve());
+
+  /* Retrieve tool for DM corrections */
+  ATH_CHECK(m_clusterLocalCalibDMTool.retrieve());
+
+  /* Retrieve calorimeter detector manager */
+  ATH_CHECK(m_caloMgrKey.initialize());
+
+  return StatusCode::SUCCESS;
+
+}
+
+StatusCode PFUnifiedLCCalibTool::processPFlowData(const EventContext& ctx, PFData &thePFData) const {
+
+  if (!thePFData.caloObjects) {
+    ATH_MSG_ERROR("PFData::caloObjects is null; caller must set it before invoking the LC calib tool");
+    return StatusCode::FAILURE;
+  }
+
+  eflowCaloObjectContainer *theEflowCaloObjectContainer = thePFData.caloObjects;
+
+  if (m_useLocalWeight) {
+    std::unique_ptr<eflowRecClusterContainer> theEFRecClusterContainer = m_clusterCollectionTool->retrieve(*theEflowCaloObjectContainer, true);
+    /* Calibrate each cluster */
+    SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey, ctx};
+    if (caloMgrHandle.isValid()){
+      for (auto thisEFlowRecCluster : *theEFRecClusterContainer) applyLocalWeight(thisEFlowRecCluster,**caloMgrHandle);
+    }
+    else ATH_MSG_WARNING("Invalid pointer to CaloDetDescrManage: Did NOT calibrate any topoclusters.");
+  } else {
+    /* Collect all the clusters in a temporary container (with VIEW_ELEMENTS!) */
+    std::unique_ptr<xAOD::CaloClusterContainer> tempClusterContainer = m_clusterCollectionTool->execute(*theEflowCaloObjectContainer, true);
+    /* Calibrate each cluster */
+    for (auto thisCaloCluster : *tempClusterContainer){
+      /* Subsequently apply all ClusterLocalCalibTools, print debug output at each stage, if DEBUG it set */
+      ATH_CHECK(apply(ctx,m_clusterLocalCalibTool, thisCaloCluster));
+
+      ATH_CHECK(apply(ctx,m_clusterLocalCalibOOCCTool, thisCaloCluster));
+
+      ATH_CHECK(apply(ctx,m_clusterLocalCalibOOCCPi0Tool, thisCaloCluster));
+
+      ATH_CHECK(apply(ctx,m_clusterLocalCalibDMTool, thisCaloCluster));
+
+    }//loop on CaloCluster
+  }//if not use local weight scheme
+  return StatusCode::SUCCESS;
+}
+
+StatusCode PFUnifiedLCCalibTool::apply(const EventContext& ctx, const ToolHandle<CaloClusterProcessor>& calibTool, xAOD::CaloCluster* cluster) const {
+  if (m_useLocalWeight) ATH_MSG_WARNING("Applying recalculated weights, when configuration requested to use original weights");
+  ATH_CHECK(calibTool->execute(ctx,cluster));
+  return StatusCode::SUCCESS;  
+}
+
+void PFUnifiedLCCalibTool::applyLocalWeight(eflowRecCluster* theEFRecClusters, const CaloDetDescrManager& calo_dd_man) {
+  xAOD::CaloCluster* theCluster = theEFRecClusters->getCluster();
+
+  /* Iterate over cells of old cluster and replicate them with energy weighted by -1 if negative and add it to the new cluster */
+  const std::map<IdentifierHash, double> weightMap = theEFRecClusters->getCellsWeight();
+
+  const CaloCell_ID* calo_id = calo_dd_man.getCaloCell_ID();
+  xAOD::CaloCluster::cell_iterator cellIter = theCluster->cell_begin();
+
+  for (;cellIter != theCluster->cell_end(); ++cellIter) {
+    const CaloCell* pCell = *cellIter;
+    IdentifierHash myHashId = calo_id->calo_cell_hash(pCell->ID());
+    if (const auto pWeight = weightMap.find(myHashId); pWeight!=weightMap.end()){
+      const double weight = pWeight->second;
+      theCluster->reweightCell(cellIter, weight);
+    }
+  }
+
+  CaloClusterKineHelper::calculateKine(theCluster, true, false);
+
+  theCluster->recoStatus().setStatus(CaloRecoStatus::CALIBRATEDLHC);
+}
