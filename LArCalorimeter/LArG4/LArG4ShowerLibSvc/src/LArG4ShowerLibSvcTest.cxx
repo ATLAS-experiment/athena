@@ -22,7 +22,7 @@ StatusCode LArG4ShowerLibSvcTest::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode LArG4ShowerLibSvcTest::execute()
+StatusCode LArG4ShowerLibSvcTest::execute(const EventContext& /*ctx*/)
 {
   ATH_MSG_INFO("execute: stub");
   return StatusCode::SUCCESS;
