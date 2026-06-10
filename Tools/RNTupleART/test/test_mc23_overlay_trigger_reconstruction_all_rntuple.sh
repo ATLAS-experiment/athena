@@ -17,7 +17,7 @@ conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultCond
 HITSMerge_tf.py \
   --inputHITSFile="${HITS_File}" \
   --outputHITS_MRGFile="hits.rntuple.root" \
-  --preExec="flags.PoolSvc.DefaultContainerType=\"ROOTRNTUPLE\";";
+  --preExec="flags.Output.DefaultContainerType=\"ROOTRNTUPLE\";";
 
 echo "art-result: $? hits-conversion";
 
@@ -25,7 +25,7 @@ RDOMerge_tf.py \
   --PileUpPresampling="True" \
   --inputRDOFile="${RDO_BKG_File}" \
   --outputRDO_MRGFile="rdo_bkg.rntuple.root" \
-  --preExec="flags.PoolSvc.DefaultContainerType=\"ROOTRNTUPLE\";";
+  --preExec="flags.Output.DefaultContainerType=\"ROOTRNTUPLE\";";
 
 echo "art-result: $? rdobkg-conversion";
 
@@ -50,6 +50,6 @@ Reco_tf.py \
   --digiSeedOffset2="232" \
   --AMITag="r14799" \
   --steering "doOverlay" "doRDO_TRIG" "doTRIGtoALL" \
-  --preExec="flags.PoolSvc.DefaultContainerType=\"ROOTRNTUPLE\";";
+  --preExec="flags.Output.DefaultContainerType=\"ROOTRNTUPLE\";";
  
 echo "art-result: $? full-chain";

@@ -41,7 +41,7 @@ Derivation_tf.py \
   --inputAODFile="$inputAODFile" \
   --outputDAODFile="rntuple.pool.root" \
   --formats "PHYS" "PHYSLITE" \
-  --preExec="flags.PoolSvc.DefaultContainerType=\"ROOTRNTUPLE\";" \
+  --preExec="flags.Output.DefaultContainerType=\"ROOTRNTUPLE\";" \
   --parallelFileValidation
 
 echo "art-result: $? rntuple"
@@ -87,7 +87,7 @@ timeout 64800 \
 Merge_tf.py \
   --inputAODFile="DAOD_PHYS.ttree.pool.root" \
   --outputAOD_MRGFile="DAOD_PHYS.ttree-to-rntuple.pool.root" \
-  --preExec='flags.PoolSvc.DefaultContainerType="ROOTRNTUPLE";' \
+  --preExec='flags.Output.DefaultContainerType="ROOTRNTUPLE";' \
   --parallelFileValidation \
   --inputFileValidation False
 
@@ -97,7 +97,7 @@ timeout 64800 \
 Merge_tf.py \
   --inputAODFile="DAOD_PHYSLITE.ttree.pool.root" \
   --outputAOD_MRGFile="DAOD_PHYSLITE.ttree-to-rntuple.pool.root" \
-  --preExec='flags.PoolSvc.DefaultContainerType="ROOTRNTUPLE";' \
+  --preExec='flags.Output.DefaultContainerType="ROOTRNTUPLE";' \
   --parallelFileValidation \
   --inputFileValidation False
 

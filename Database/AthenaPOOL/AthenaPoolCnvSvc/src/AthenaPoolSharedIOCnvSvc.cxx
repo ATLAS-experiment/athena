@@ -528,13 +528,16 @@ Token* AthenaPoolSharedIOCnvSvc::registerForWrite(Placement* placement, const vo
          tempToken->setClassID(pool::DbReflex::guid(classDesc));
          token = tempToken; tempToken = nullptr;
       } else if (!m_outputStreamingTool.empty() && !m_outputStreamingTool->isClient() && !m_streamServerActive) {
+         if(placement->technology() == 0) { // No technology specified, use the default
+            placement->setTechnology(pool::DbType::getType(m_defaultContainerType).type());
+         }
          ATH_MSG_DEBUG("Requested write object for: " << placement->toString());
          token = getPoolSvc()->registerForWrite(placement, obj, classDesc);
       } else {
          if (!m_outputStreamingTool.empty() && m_outputStreamingTool->isClient() && m_parallelCompression) {
             placement->setFileName(placement->fileName() + m_streamPortString.value());
          }
-	 token = AthenaPoolCnvSvc::registerForWrite(placement, obj, classDesc);
+         token = AthenaPoolCnvSvc::registerForWrite(placement, obj, classDesc);
       }
    }
    return(token);

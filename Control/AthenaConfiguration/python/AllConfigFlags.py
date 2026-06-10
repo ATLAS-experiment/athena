@@ -284,6 +284,9 @@ def initConfigFlags():
     acf.addFlag('Output.TreeAutoFlush', {}, help="dict with auto-flush settings for stream e.g. {'STREAM': 123}")
     acf.addFlag('Output.TemporaryStreams', [], help='list of output streams that are marked temporary')
 
+    # Eventually this should be stream specific, similar to TreeAutoFlush, but that needs some changes first
+    acf.addFlag('Output.DefaultContainerType', 'ROOTTREEINDEX', help='set the underlying storage technology for the default container type')
+
     # Might move this elsewhere in the future.
     # Some flags from https://gitlab.cern.ch/atlas/athena/blob/master/Tracking/TrkDetDescr/TrkDetDescrSvc/python/TrkDetDescrJobProperties.py
     # (many, e.g. those that set properties of one tool are not needed)
@@ -367,7 +370,6 @@ def initConfigFlags():
 
 #PoolSvc Flags:
     acf.addFlag("PoolSvc.MaxFilesOpen", lambda prevFlags : 2 if prevFlags.MP.UseSharedReader else 0, help='maximum number of open files')
-    acf.addFlag('PoolSvc.DefaultContainerType', 'ROOTTREEINDEX', help='set the underlying POOL storage technology for the default container type')
     acf.addFlag("PoolSvc.PersSvcPerInputType", False, help='enable separate persistency service for each input type')
 
 

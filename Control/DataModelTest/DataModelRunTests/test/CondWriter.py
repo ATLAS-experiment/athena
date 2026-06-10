@@ -59,7 +59,7 @@ flags = DataModelTestFlags()
 flags.Exec.MaxEvents = 30
 # Configure conditions DB output to local sqlite file.
 flags.IOVDb.DBConnection = 'sqlite://;schema=condtest.db;dbname=OFLP200'
-flags.PoolSvc.DefaultContainerType = 'ROOTTREE'
+flags.Output.DefaultContainerType = 'ROOTTREE'
 flags.fillFromArgs()
 flags.lock()
 

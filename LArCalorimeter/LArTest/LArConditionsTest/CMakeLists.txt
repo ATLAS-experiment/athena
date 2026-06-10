@@ -28,7 +28,7 @@ atlas_add_test( LArConditionsTestReadNoReg
 	    	DEPENDS LArConditionsTestWriteNoReg)
 
 atlas_add_test( LArConditionsTestWriteNoReg_RNTuple
-		SCRIPT  python -m LArConditionsTest.LArConditionsTestConfig LArCondTest.Step=1 LArCondTest.FileName="LarCondTestNoReg_RNTuple.root" PoolSvc.DefaultContainerType="ROOTRNTUPLE"
+		SCRIPT  python -m LArConditionsTest.LArConditionsTestConfig LArCondTest.Step=1 LArCondTest.FileName="LarCondTestNoReg_RNTuple.root" Output.DefaultContainerType="ROOTRNTUPLE"
 		PROPERTIES TIMEOUT 1200
 		LOG_SELECT_PATTERN "DEBUG|ERROR" )
 

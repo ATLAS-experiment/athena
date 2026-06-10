@@ -326,14 +326,17 @@ Token* AthenaPoolCnvSvc::registerForWrite(Placement* placement, const void* obj,
    // StopWatch listens from here until the end of this current scope
    PMonUtils::BasicStopWatch stopWatch("cRepR_ALL", m_chronoMap);
    Token* token = nullptr;
-         if (m_persSvcPerOutput) { // Use separate PersistencySvc for each output stream/file
-            char text[32];
-            const std::string contextStr = std::format("[CTXT={:08X}]", m_poolSvc->getOutputContext(placement->fileName()));
-            std::strncpy(text, contextStr.c_str(), sizeof(text) - 1);
-            text[sizeof(text) - 1] = '\0';
-            placement->setAuxString(text);
-         }
-         token = m_poolSvc->registerForWrite(placement, obj, classDesc);
+   if (m_persSvcPerOutput) { // Use separate PersistencySvc for each output stream/file
+      char text[32];
+      const std::string contextStr = std::format("[CTXT={:08X}]", m_poolSvc->getOutputContext(placement->fileName()));
+      std::strncpy(text, contextStr.c_str(), sizeof(text) - 1);
+      text[sizeof(text) - 1] = '\0';
+      placement->setAuxString(text);
+   }
+   if(placement->technology() == 0) { // No technology specified, use the default
+      placement->setTechnology(pool::DbType::getType(m_defaultContainerType).type());
+   }
+   token = m_poolSvc->registerForWrite(placement, obj, classDesc);
    return(token);
 }
 //______________________________________________________________________________

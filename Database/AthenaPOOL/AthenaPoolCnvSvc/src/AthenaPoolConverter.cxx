@@ -33,14 +33,6 @@ StatusCode AthenaPoolConverter::initialize() {
    // Retrieve AthenaPoolCnvSvc
    ATH_CHECK( m_athenaPoolCnvSvc.retrieve() );
 
-   // Retrieve PoolSvc
-   ATH_CHECK(m_poolSvc.retrieve());
-   StringProperty defContainerType("DefaultContainerType", "ROOTTREEINDEX");
-   if(IProperty* propertyServer = dynamic_cast<IProperty*>(m_poolSvc.get())) {
-      propertyServer->getProperty(&defContainerType).ignore();
-   }
-   m_defContainerType = pool::DbType::getType(defContainerType).type();
-
    return StatusCode::SUCCESS;
 }
 //__________________________________________________________________________
@@ -145,9 +137,7 @@ AthenaPoolConverter::AthenaPoolConverter(const CLID& myCLID, ISvcLocator* pSvcLo
     ::AthMessaging((pSvcLocator != nullptr ? msgSvc() : nullptr),
                                name ? name : "AthenaPoolConverter"),
   m_detStore("DetectorStore", name ? name : "AthenaPoolConverter"),
-  m_athenaPoolCnvSvc(pSvcLocator && pSvcLocator->existsService("AthenaPoolSharedIOCnvSvc") ? "AthenaPoolSharedIOCnvSvc" : "AthenaPoolCnvSvc", name ? name : "AthenaPoolConverter"),
-  m_poolSvc("PoolSvc", name ? name : "AthenaPoolConverter"),
-  m_defContainerType(0) {
+  m_athenaPoolCnvSvc(pSvcLocator && pSvcLocator->existsService("AthenaPoolSharedIOCnvSvc") ? "AthenaPoolSharedIOCnvSvc" : "AthenaPoolCnvSvc", name ? name : "AthenaPoolConverter"){
 }
 //__________________________________________________________________________
 Placement AthenaPoolConverter::setPlacementWithType(const std::string& tname, const std::string& key, const std::string& output) {
@@ -186,9 +176,8 @@ Placement AthenaPoolConverter::setPlacementWithType(const std::string& tname, co
    }
 
    // Extract the technology from the container prefix (if available)
-   int tech = m_defContainerType;
    if (auto colonPost = containerPrefix.find(':'); colonPost != std::string::npos) {
-      tech = pool::DbType::getType(containerPrefix.substr(0, colonPost)).type();
+      placement.setTechnology(pool::DbType::getType(containerPrefix.substr(0, colonPost)).type());
       containerPrefix.erase(0, colonPost + 1); // Note that DataHeader and EventTag bypass this...
    }
 
@@ -222,9 +211,8 @@ Placement AthenaPoolConverter::setPlacementWithType(const std::string& tname, co
       }
    }
 
-   // Set the container name and technology
+   // Set the container name
    placement.setContainerName(containerName);
-   placement.setTechnology(tech);
    return(placement);
 }
 //__________________________________________________________________________
