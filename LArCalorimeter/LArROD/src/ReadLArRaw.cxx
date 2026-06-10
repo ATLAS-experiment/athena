@@ -83,7 +83,7 @@ StatusCode ReadLArRaw::initialize()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 
-StatusCode ReadLArRaw::execute() {
+StatusCode ReadLArRaw::execute(const EventContext& ctx) {
 
   ATH_MSG_DEBUG( "in execute()"  );
   const LArRawChannelContainer* LArRaw ;
@@ -93,7 +93,7 @@ StatusCode ReadLArRaw::execute() {
  int emax= 0; 
  HWIdentifier maxId;
 
- SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey};
+ SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, ctx};
  const LArOnOffIdMapping* cabling{*cablingHdl};
  if(!cabling) {
     ATH_MSG_ERROR("Do not have mapping object " << m_cablingKey.key());
