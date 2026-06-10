@@ -58,7 +58,7 @@ namespace MuonR4 {
             (*this) = ExpandedSector{static_cast<unsigned>(sectors[0]), SectorProjector::center};
         } else {
             const int dS = (sectors[1] - sectors[0]) % numberOfSectors();
-            assert(std::abs(ds) == 1);
+            assert(std::abs(dS) == 1);
             (*this) = ExpandedSector{static_cast<unsigned>(sectors[0]), 
                                      static_cast<SectorProjector>(dS)};
         }
