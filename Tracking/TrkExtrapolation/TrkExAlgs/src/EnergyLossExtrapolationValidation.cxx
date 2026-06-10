@@ -186,9 +186,8 @@ StatusCode Trk::EnergyLossExtrapolationValidation::finalize()
 
 //================ Execution ====================================================
 
-StatusCode Trk::EnergyLossExtrapolationValidation::execute()
+StatusCode Trk::EnergyLossExtrapolationValidation::execute(const EventContext& ctx)
 {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     // get the overall dimensions
     if (!m_highestVolume){
         // get TrackingGeometry and highest volume

@@ -70,10 +70,9 @@ StatusCode Trk::CETmaterial::finalize()
 
 //================ Execution ====================================================
 
-StatusCode Trk::CETmaterial::execute()
+StatusCode Trk::CETmaterial::execute(const EventContext& ctx)
 {
   ATH_MSG_INFO( "execute()" );
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   // retrieve outer boundary cylinder surface
   if (!m_outerBoundary) {
     m_trackingGeometry = m_extrapolator->trackingGeometry();
