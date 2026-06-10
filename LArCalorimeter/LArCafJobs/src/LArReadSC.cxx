@@ -89,9 +89,8 @@ StatusCode LArReadSC::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode LArReadSC::execute() {  
+StatusCode LArReadSC::execute(const EventContext& ctx) {  
   ATH_MSG_DEBUG ("Executing " << name() << "...");
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, ctx};
   const LArOnOffIdMapping* cabling=*cablingHdl;
