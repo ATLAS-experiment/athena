@@ -44,8 +44,8 @@ atlas_add_test( L1CaloPhase1_Data_oneFex
         POST_EXEC_SCRIPT noerror.sh )
 
 # Test eFEX BS Encoding
-atlas_add_test( L1CaloPhase1_Data_eFEXBSEncode
-        SCRIPT "python -m TrigT1CaloMonitoring.test_eFEX_BSEncoding"
+atlas_add_test( L1CaloPhase1_Data_FEXBSEncode
+        SCRIPT "python -m TrigT1CaloMonitoring.test_FEX_BSEncoding"
         PROPERTIES TIMEOUT 600
         PRIVATE_WORKING_DIRECTORY
         POST_EXEC_SCRIPT noerror.sh )

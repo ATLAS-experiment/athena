@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -44,7 +44,7 @@ namespace pool    {
     /// Physical file name
     std::string       m_PFN;
     /// Handle to the Database connection
-    DbConnection*       m_DBC;
+    DbConnection*     m_DBC;
 
   public:
     /// Standard Constructor
@@ -53,30 +53,37 @@ namespace pool    {
     FileDescriptor(const FileID& fid, const std::string& pfn)
       : m_FID(fid), m_PFN(pfn), m_DBC(0)    {
       if (!m_FID.empty() && !Guid::isGuid(m_FID)) {
-        MD5 checkSum((unsigned char*)m_FID.c_str(), m_FID.size());
+         // MN: TODO: review this constructor usage 
+         initFromFilename(m_FID);
+      }
+    }
+
+    /// Generate new FID from the filename
+    void initFromFilename(const std::string& filename) {
+      m_PFN = filename;
+      MD5 checkSum((unsigned char*)filename.c_str(), filename.size());
         uuid_t checkSumUuid;
         checkSum.raw_digest((unsigned char*)(&checkSumUuid));
         char text[37];
         uuid_unparse_upper(checkSumUuid, text);
         m_FID = text;
-      }
     }
 
-    /// Access to physical file name (READ)
-    const std::string& PFN()  const         { return m_PFN;       }
-    /// Access to physical file name (WRITE)
-    void setPFN(const std::string& val)     { m_PFN = val;        }
+     /// Access to physical file name (READ)
+     const std::string& PFN()  const         { return m_PFN;       }
+     /// Access to physical file name (WRITE)
+     void setPFN(const std::string& val)     { m_PFN = val;        }
 
-    /// Access to file identifier (READ)
-    const FileID& FID()  const              { return m_FID;       }
-    /// Access to file identifier (WRITE)
-    void setFID(const FileID& val)          { m_FID = val;        }
+     /// Access to file identifier (READ)
+     const FileID& FID()  const              { return m_FID;       }
+     /// Access to file identifier (WRITE)
+     void setFID(const FileID& val)          { m_FID = val;        }
     
-    /// Access to file descriptor (READ)
-    DbConnection* dbc()                     { return m_DBC;       }
-    const DbConnection* dbc()  const        { return m_DBC;       }
-    /// Access to file descriptor (WRITE)
-    void setDbc(DbConnection* val)          { m_DBC = val;        }
+     /// Access to file descriptor (READ)
+     DbConnection* dbc()                     { return m_DBC;       }
+     const DbConnection* dbc()  const        { return m_DBC;       }
+     /// Access to file descriptor (WRITE)
+     void setDbc(DbConnection* val)          { m_DBC = val;        }
   };
 }       // End namespace pool
 #endif  // POOL_FILEDESCRIPTOR_H

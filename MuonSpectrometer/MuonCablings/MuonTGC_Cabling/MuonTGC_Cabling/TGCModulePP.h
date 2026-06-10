@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCMODULEPP_HH
@@ -11,9 +11,11 @@ namespace MuonTGC_Cabling {
 
 class TGCModulePP : public TGCModuleId {
    public:
-    // Constructor & Destructor
     TGCModulePP(TGCId::SideType side, TGCId::ModuleType module,
                 TGCId::RegionType region, int sector, int id);
+    TGCModulePP(TGCId::SideType side, TGCId::StationType station,
+                TGCId::ModuleType module, TGCId::RegionType region,
+                int sector, int id);
 
     virtual ~TGCModulePP() = default;
 

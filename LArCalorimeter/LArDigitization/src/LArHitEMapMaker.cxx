@@ -41,10 +41,10 @@ StatusCode LArHitEMapMaker::initialize()
 
 // -------------------------------------------------------------------------------------
 
-StatusCode LArHitEMapMaker::execute()
+StatusCode LArHitEMapMaker::execute(const EventContext& ctx)
 {
 
-  if (m_LArPileUpTool->processAllSubEvents(Gaudi::Hive::currentContext()).isFailure()) {
+  if (m_LArPileUpTool->processAllSubEvents(ctx).isFailure()) {
        ATH_MSG_ERROR(" error in LArPileupTool::processAllSubEvents");
        return StatusCode::FAILURE;
   }

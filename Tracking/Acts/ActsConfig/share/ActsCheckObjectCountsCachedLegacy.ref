@@ -215,48 +215,48 @@ ActsConversionPrdAssociationAlg                                   INFO Prd Map s
 | N. Strip Measurements |          8 |
 | N. Hgtd Measurements  |          0 |
 |-----------------------|------------|
-ActsLargeRadiusPixelClusterizationAlg                             INFO Clusterization statistics
+LargeD0PixelClusterizationAlg                                     INFO Clusterization statistics
 |----------|------------|
 | RDOs     |          0 |
 | Clusters |          0 |
 |----------|------------|
-ActsLargeRadiusStripClusterizationAlg                             INFO Clusterization statistics
+LargeD0StripClusterizationAlg                                     INFO Clusterization statistics
 |----------|------------|
 | RDOs     |          0 |
 | Clusters |          0 |
 |----------|------------|
-ActsLargeRadiusPixelClusterPreparationAlg                         INFO Data Prep statistics
+LargeD0PixelClusterPreparationAlg                                 INFO Data Prep statistics
 |---------|------------|
 | Inputs  |    1164869 |
 | Outputs |    1062500 |
 |---------|------------|
-ActsLargeRadiusStripClusterPreparationAlg                         INFO Data Prep statistics
+LargeD0StripClusterPreparationAlg                                 INFO Data Prep statistics
 |---------|------------|
 | Inputs  |    1116636 |
 | Outputs |    1078870 |
 |---------|------------|
-ActsLargeRadiusStripSpacePointFormationAlg                        INFO Space Point Formation statistics
+LargeD0StripSpacePointFormationAlg                                INFO Space Point Formation statistics
 |----------------------|------------|
 | Clusters             |    1078870 |
 | Space Points         |          0 |
 | Overlap Space Points |          0 |
 |----------------------|------------|
-ActsLargeRadiusStripSpacePointPreparationAlg                      INFO Data Prep statistics
+LargeD0StripSpacePointPreparationAlg                              INFO Data Prep statistics
 |---------|------------|
 | Inputs  |     326791 |
 | Outputs |     306887 |
 |---------|------------|
-ActsLargeRadiusStripOv...pSpacePointPreparationAlg                INFO Data Prep statistics
+LargeD0StripOverlapSpacePointPreparationAlg                       INFO Data Prep statistics
 |---------|------------|
 | Inputs  |     105805 |
 | Outputs |     100295 |
 |---------|------------|
-ActsLargeRadiusStripSeedingAlg                                    INFO Seed statistics
+LargeD0StripSeedingAlg                                            INFO Seed statistics
 |-------------|------------|
 | Spacepoints |     407182 |
 | Seeds       |      24804 |
 |-------------|------------|
-ActsLargeRadiusTrackFindingAlg                                    INFO statistics
+LargeD0TrackFindingAlg                                            INFO statistics
 |-----------------------------------|------------|------------|
 |                           All eta | SSS        | ALL        |
 |-----------------------------------|------------|------------|
@@ -278,7 +278,7 @@ ActsLargeRadiusTrackFindingAlg                                    INFO statistic
 | Total forced measurements         |          0 |          0 |
 | resolved tracks                   |          0 |          0 |
 |-----------------------------------|------------|------------|
-ActsLargeRadiusTrackFindingAlg                                    INFO Ratios
+LargeD0TrackFindingAlg                                            INFO Ratios
 |-------------------------------------------|------------|------------|
 |                                           | SSS        | ALL        |
 |-------------------------------------------|------------|------------|
@@ -303,13 +303,13 @@ ActsLargeRadiusTrackFindingAlg                                    INFO Ratios
 |                                  3.0- 3.5 |          0 |          0 |
 |                                  3.5-+inf |          0 |          0 |
 |-------------------------------------------|------------|------------|
-ActsLargeRadiusAmbiguityResolutionAlg                             INFO Ambiguity Resolution statistics
+LargeD0AmbiguityResolutionAlg                                     INFO Ambiguity Resolution statistics
 |-------------------|------------|
 | Input tracks      |        877 |
 | Resolved tracks   |        792 |
 | Total shared hits |         36 |
 |-------------------|------------|
-ActsLargeRadiusPrdAssociationAlg                                  INFO Prd Map statistics
+LargeD0PrdAssociationAlg                                          INFO Prd Map statistics
 |-----------------------|------------|
 | N. Tracks             |        792 |
 | N. Pixel Measurements |       2280 |

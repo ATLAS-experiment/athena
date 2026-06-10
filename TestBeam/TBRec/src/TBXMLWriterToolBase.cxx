@@ -1,13 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "TBXMLWriterToolBase.h"
 
 #include <iostream>
-#include <string>
-#include <vector>
 
 ///////////////////////////////
 // XML writer implementation //
@@ -106,13 +104,13 @@ TBXMLWriterToolBase::addAttributes(std::ostream& outStream,
 // template <typename DATA>
 void
 TBXMLWriterToolBase::openElement(std::ostream& outStream,
-				 const std::string& theElement,
+				 std::string_view theElement,
 				 const std::vector<std::string>&
 				 listOfAttr,
 				 const std::vector<std::string>&
 				 listOfValues)
 {
-  m_elementList.push_back(theElement);
+  m_elementList.emplace_back(theElement);
   outStream << "<" << theElement;
   if ( listOfAttr.size() > 0 && listOfValues.size() == listOfAttr.size() )
     {

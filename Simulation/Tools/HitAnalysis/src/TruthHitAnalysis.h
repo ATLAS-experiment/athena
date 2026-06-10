@@ -17,7 +17,7 @@ class TruthHitAnalysis : public AthHistogramAlgorithm {
 
   using AthHistogramAlgorithm::AthHistogramAlgorithm;
   ~TruthHitAnalysis() = default;
-  virtual StatusCode execute() override final;
+  virtual StatusCode execute(const EventContext& ctx) override final;
   virtual StatusCode initialize() override final;
 
  private:

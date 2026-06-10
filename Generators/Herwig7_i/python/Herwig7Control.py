@@ -143,6 +143,91 @@ def do_abort():
   sys.exit(0)
 
 
+def render_infile(gen_config):
+  """
+  Render the full Herwig infile as a single string.
+  This is needed to avoid writing a file to disk (old workflow)
+  so that we avoid side effects in the CA fragments.
+  """
+
+  gen_config.default_commands.lock()
+  gen_config.commands.lock()
+
+  commands = \
+    gen_config.global_pre_commands().splitlines() \
+    + gen_config.local_pre_commands().splitlines() \
+    + ["",
+       "## ================",
+       "## Default Commands",
+       "## ================"] \
+    + str(gen_config.default_commands.commands).splitlines() \
+    + ["",
+       "## ========================",
+       "## Commands from jobOptions",
+       "## ========================"] \
+    + str(gen_config.commands.commands).splitlines() \
+    + gen_config.local_post_commands().splitlines()
+
+  return('\n'.join(commands) + '\n')
+
+
+def configure_algorithm(alg, 
+                        runfile_name, 
+                        random_seed=None, 
+                        me_pdf_name=None, 
+                        mpi_pdf_name=None, 
+                        cleanup_herwig_scratch=None, 
+                        run_settings=None, 
+                        decode_runfile=False):
+  """Apply the Herwig7 algorithm settings"""
+
+  alg.RunFile = runfile_name
+
+  # Pass CA-supplied run settings to the C++ algorithm. This is materialised
+  # as a Herwig infile only during run time.
+  if run_settings is not None:  
+    alg.RunSettings = run_settings
+
+  if decode_runfile:
+    ConfigDecoder.DecodeRunCard(input_file=alg.RunFile)
+
+  # Overwrite athena's seed for the random number generator.
+  if random_seed is None:
+    alg.UseRandomSeedFromGeneratetf = False
+  else:
+    alg.UseRandomSeedFromGeneratetf = True
+    alg.RandomSeedFromGeneratetf = random_seed
+
+  # Set matrix element PDF name in the Herwig7 C++ class.
+  if me_pdf_name is not None:
+    alg.PDFNameME = me_pdf_name
+
+  # Set underlying event PDF name in the Herwig7 C++ class.
+  if mpi_pdf_name is not None:
+    alg.PDFNameMPI = mpi_pdf_name
+
+  # Delete Herwig-scratch folder after finishing the event generation.
+  if cleanup_herwig_scratch is not None:
+    alg.CleanupHerwigScratch = cleanup_herwig_scratch
+
+
+# Configure the legacy Herwig7 algorithm from a gen_config object
+def _configure_run_algorithm(gen_config, 
+                             runfile_name, 
+                             cleanup_herwig_scratch=None, 
+                             decode_runfile=False):
+
+  configure_algorithm(
+    gen_config.genSeq.Herwig7,
+    runfile_name,
+    gen_config.runArgs.randomSeed,
+    gen_config.me_pdf_name,
+    gen_config.mpi_pdf_name,
+    cleanup_herwig_scratch=cleanup_herwig_scratch,
+    decode_runfile=decode_runfile,
+  )
+
+
 # Do the read step
 def do_read(gen_config):
 
@@ -267,29 +352,18 @@ def do_uncompress_gridpack(gridpack_name):
 def do_run(gen_config, cleanup_herwig_scratch=True):
 
   # this is necessary to make Herwig aware of the name of the run file
-  gen_config.genSeq.Herwig7.RunFile = get_runfile_name(gen_config.run_name)
+  runfile_name = get_runfile_name(gen_config.run_name)
+  gen_config.genSeq.Herwig7.RunFile = runfile_name
 
   # check the options in the .in file
   JOChecker.check_file()
-  
-  # decode the run file to get list of all parameters
-  ConfigDecoder.DecodeRunCard(input_file = gen_config.genSeq.Herwig7.RunFile)
 
-  # overwrite athena's seed for the random number generator
-  if gen_config.runArgs.randomSeed is None:
-    gen_config.genSeq.Herwig7.UseRandomSeedFromGeneratetf = False
-  else:
-    gen_config.genSeq.Herwig7.UseRandomSeedFromGeneratetf = True
-    gen_config.genSeq.Herwig7.RandomSeedFromGeneratetf = gen_config.runArgs.randomSeed
-
-  # set matrix element PDF name in the Herwig7 C++ class
-  gen_config.genSeq.Herwig7.PDFNameME = gen_config.me_pdf_name
-
-  # set underlying event PDF name in the Herwig7 C++ class
-  gen_config.genSeq.Herwig7.PDFNameMPI = gen_config.mpi_pdf_name
-
-  # possibly delete Herwig-scratch folder after finishing the event generation
-  gen_config.genSeq.Herwig7.CleanupHerwigScratch = cleanup_herwig_scratch
+  _configure_run_algorithm(
+    gen_config,
+    runfile_name,
+    cleanup_herwig_scratch=cleanup_herwig_scratch,
+    decode_runfile=True,
+  )
 
   # don't break out here so that the job options can be finished and the C++
   # part of the interface can take over and generate the events
@@ -300,14 +374,10 @@ def do_run(gen_config, cleanup_herwig_scratch=True):
 def do_run_existing_runfile(gen_config):
 
   # this is necessary to make Herwig aware of the name of the run file
-  gen_config.genSeq.Herwig7.RunFile = gen_config.runfile_name
-
-  # overwrite athena's seed for the random number generator
-  if gen_config.runArgs.randomSeed is None:
-    gen_config.genSeq.Herwig7.UseRandomSeedFromGeneratetf = False
-  else:
-    gen_config.genSeq.Herwig7.UseRandomSeedFromGeneratetf = True
-    gen_config.genSeq.Herwig7.RandomSeedFromGeneratetf = gen_config.runArgs.randomSeed
+  _configure_run_algorithm(
+    gen_config,
+    gen_config.runfile_name,
+  )
 
   # don't break out here so that the job options can be finished and the C++
   # part of the interface can take over and generate the events
@@ -321,6 +391,12 @@ def herwig_version():
 
   versions = get_software_versions()
   return(' '.join(versions[0].split()[1:]))
+
+
+def default_tune_name():
+
+  return("H"+herwig_version()+"-Default")
+
 
 def thepeg_version():
 
@@ -370,27 +446,11 @@ def get_runfile_name(run_name="Herwig-Matchbox"):
 
 def write_infile(gen_config, print_infile=True):
 
-  # lock settings to prevent modification from within the job options after infile was written to disk
-  gen_config.default_commands.lock()
-  gen_config.commands.lock()
-
   infile_name = get_infile_name(gen_config.run_name)
   if print_infile: athMsgLog.info("")
   athMsgLog.info(hw7Utils.ansi_format_info("Writing infile '{}'".format(infile_name)))
-  commands = \
-    gen_config.global_pre_commands().splitlines() \
-    + gen_config.local_pre_commands().splitlines() \
-    + ["",
-       "## ================",
-       "## Default Commands",
-       "## ================"] \
-    + str(gen_config.default_commands.commands).splitlines() \
-    + ["",
-       "## ========================",
-       "## Commands from jobOptions",
-       "## ========================"] \
-    + str(gen_config.commands.commands).splitlines() \
-    + gen_config.local_post_commands().splitlines()
+  infile_text = render_infile(gen_config)
+  commands = infile_text.splitlines()
   try:
     with open(infile_name, 'w') as infile:
         for command in commands:
@@ -478,4 +538,3 @@ def exit_banner(gridpack, cross_section, cross_section_error):
   banner += "##                                                                                      ##\n"
   banner += "##########################################################################################\n"
   return(banner)
-

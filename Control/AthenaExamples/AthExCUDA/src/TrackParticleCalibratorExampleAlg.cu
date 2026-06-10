@@ -2,12 +2,12 @@
 // Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 
-// Local include(s).
-#include "TrackParticleContainer.h"
-
 // Framework include(s).
 #include "AthenaKernel/errorcheck.h"
 #include "GaudiKernel/StatusCode.h"
+
+// Traccc include(s).
+#include <traccc/edm/track_collection.hpp>
 
 /// Helper macro used for checking @c cudaError_t type return values.
 #define CUDA_ERROR_CHECK(EXP)                                      \
@@ -32,28 +32,31 @@ namespace kernels {
 /// Dummy kernel performing a trivial transformation on the track particle
 /// parameters.
 __global__ void trackParticleCalibrate(
-    const TrackParticleContainer::const_view input_view,
-    TrackParticleContainer::view output_view) {
+    const traccc::edm::track_collection<traccc::default_algebra>::const_view
+        input_view,
+    traccc::edm::track_collection<traccc::default_algebra>::view output_view) {
 
   // Get the current thread's index.
   const unsigned int index = blockIdx.x * blockDim.x + threadIdx.x;
 
   // Create the device containers.
-  TrackParticleContainer::const_device input(input_view);
-  TrackParticleContainer::device output(output_view);
+  traccc::edm::track_collection<traccc::default_algebra>::const_device input(
+      input_view);
+  traccc::edm::track_collection<traccc::default_algebra>::device output(
+      output_view);
   assert(input.size() == output.size());
 
   // Check that the index is in range.
   if (index < input.size()) {
     // Copy the angle parameters as they are.
-    output.theta()[index] = input.theta()[index];
-    output.phi()[index] = input.phi()[index];
+    output[index].params().set_theta(input.params()[index].theta());
+    output.at(index).params().set_phi(input.params().at(index).phi());
 
     // Transform the momentum in some silly way.
-    output.qOverP()[index] =
-        input.qOverP()[index] *
-        std::abs((input.theta()[index] - input.phi()[index]) /
-                 input.phi()[index]);
+    output[index].params().set_qop(
+        input[index].params().qop() *
+        std::abs((input[index].params().theta() - input[index].params().phi()) /
+                 input[index].params().phi()));
   }
 
   return;
@@ -61,8 +64,10 @@ __global__ void trackParticleCalibrate(
 
 }  // namespace kernels
 
-StatusCode calibrateOnGPU(const TrackParticleContainer::const_view& input,
-                          TrackParticleContainer::view& output) {
+StatusCode calibrateOnGPU(
+    const traccc::edm::track_collection<traccc::default_algebra>::const_view&
+        input,
+    traccc::edm::track_collection<traccc::default_algebra>::view& output) {
 
   // Launch the kernel.
   static const unsigned int block_size = 256;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagInference/SaltModelTriton.h"
@@ -210,8 +210,7 @@ namespace FlavorTagInference {
   }
 
 
-  InferenceOutput SaltModelTriton::runInference(
-    std::map<std::string, Inputs>& gnn_inputs) const {
+  InferenceOutput SaltModelTriton::runInference(InputMap & gnn_inputs) const {
 
     // Create tensor for the input data
     std::vector<std::shared_ptr<tc::InferInput> > inputs_;

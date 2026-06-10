@@ -15,7 +15,6 @@
 #include <SystematicsHandles/SysListHandle.h>
 #include <xAODJet/JetContainer.h>
 #include <AsgTools/PropertyWrapper.h>
-#include <memory>
 
 namespace CP
 {

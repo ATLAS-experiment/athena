@@ -215,10 +215,9 @@ for (const std::string& name : m_triggerNames) {
 }
 
 
-StatusCode LArShapeDumper::execute()
+StatusCode LArShapeDumper::execute(const EventContext& ctx)
 {    
   m_count++;
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   if ((m_prescale > 1 && m_random.Rndm() > 1.0/m_prescale) || m_prescale <= 0) {
     ATH_MSG_VERBOSE ( "======== prescaling event "<< m_count << " ========" );
     m_nPrescaledAway++;
@@ -250,7 +249,7 @@ StatusCode LArShapeDumper::execute()
     return StatusCode::FAILURE;
   }
 
-  SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
+  SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey, ctx};
   ATH_CHECK(caloMgrHandle.isValid());
   const CaloDetDescrManager* caloMgr = *caloMgrHandle;  
 
@@ -300,7 +299,7 @@ StatusCode LArShapeDumper::execute()
 
   
   
-  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey};
+  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, ctx};
   const LArOnOffIdMapping* cabling=*cablingHdl;
   if(!cabling) {
      ATH_MSG_ERROR( "Do not have cabling object LArOnOffIdMapping" );
@@ -331,7 +330,7 @@ StatusCode LArShapeDumper::execute()
      }
   }
 
-  SG::ReadCondHandle<LArBadChannelCont> readHandle{m_BCKey};
+  SG::ReadCondHandle<LArBadChannelCont> readHandle{m_BCKey, ctx};
   const LArBadChannelCont *bcCont {*readHandle};
   if(!bcCont) {
      ATH_MSG_ERROR( "Do not have Bad chan container " << m_BCKey.key() );
@@ -390,7 +389,7 @@ StatusCode LArShapeDumper::execute()
                  << " " << (ofIterResult ? ofIterResult->size() : 0) << " " 
                  << rawChannelContainer->size() << " " << channelsToKeep.size() );
   }
-  SG::ReadCondHandle<CaloNoise> noiseHdl{m_noiseCDOKey};
+  SG::ReadCondHandle<CaloNoise> noiseHdl{m_noiseCDOKey, ctx};
   const CaloNoise* noiseCDO=*noiseHdl;
   
   for (LArDigitContainer::const_iterator digit = larDigitContainer->begin();
@@ -536,7 +535,7 @@ StatusCode LArShapeDumper::execute()
        return StatusCode::FAILURE;
     }
 
-    SG::ReadCondHandle<CaloSuperCellDetDescrManager> caloMgrHandle{m_caloSuperCellMgrKey};
+    SG::ReadCondHandle<CaloSuperCellDetDescrManager> caloMgrHandle{m_caloSuperCellMgrKey, ctx};
     ATH_CHECK(caloMgrHandle.isValid());
     const CaloSuperCellDetDescrManager* caloMgrSC = *caloMgrHandle;  
 

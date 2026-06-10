@@ -9,10 +9,11 @@
 #include "CaloG4Sim/EscapedEnergyRegistry.h"
 #include "G4RunManager.hh"
 #include "G4Step.hh"
+#include "HitManagement/HitCollectionMap.h"
 #include "MCTruth/AtlasG4EventUserInfo.h"
 
 ZDC_G4CalibSD::ZDC_G4CalibSD(const G4String &a_name, const G4String& hitCollectionName, bool doPID)
-    : G4VSensitiveDetector(a_name), m_HitColl(hitCollectionName), m_numberInvalidHits(0), m_doPID(doPID)
+    : G4VSensitiveDetector(a_name), m_hitCollectionName(hitCollectionName), m_numberInvalidHits(0), m_doPID(doPID)
 {
   m_simulationEnergies = new CaloG4::SimulationEnergies();
 }
@@ -58,6 +59,12 @@ G4bool ZDC_G4CalibSD::ProcessHits(G4Step *a_step, G4TouchableHistory *)
 
 G4bool ZDC_G4CalibSD::SimpleHit(const Identifier& id, const std::vector<double>& energies )
 {
+  if (!m_HitColl) {
+    m_HitColl = getHitCollection();
+    if (!m_HitColl) {
+      return false;
+    }
+  }
 
   // retreive particle ID
   int particleID = HepMC::UNDEFINED_ID;
@@ -81,27 +88,14 @@ G4bool ZDC_G4CalibSD::SimpleHit(const Identifier& id, const std::vector<double>&
   }
 
   // Build the hit.
-  CaloCalibrationHit *hit = new CaloCalibrationHit(id,
-                                                   energies[0],
-                                                   energies[1],
-                                                   energies[2],
-                                                   energies[3],
-                                                   particleID,
-                                                   particleUID);
-
-  //Get the hash for this volume to keep track of hits
-  uint32_t hash = id.get_identifier32().get_compact();
-
-  std::map<uint32_t,CaloCalibrationHit*>::iterator it = m_hitMap.find(hash);
-
-  if(it == m_hitMap.end()){
-    //This is a new hit, insert it
-    m_hitMap.insert(std::pair<uint32_t,CaloCalibrationHit*>(hash,hit));
-  }else{
-    //Add this hit to the existing one for this volume
-    it->second->Add(hit);
-    delete hit;
-  }
+  auto hit = std::make_unique<CaloCalibrationHit>(id,
+                                                  energies[0],
+                                                  energies[1],
+                                                  energies[2],
+                                                  energies[3],
+                                                  particleID,
+                                                  particleUID);
+  m_HitColl->MergeHit(std::move(hit));
   
   return true;
 }
@@ -122,19 +116,12 @@ G4bool ZDC_G4CalibSD::SpecialHit(G4Step *a_step,
   return SimpleHit(id, a_energies);
 }
 
-void ZDC_G4CalibSD::EndOfAthenaEvent()
+ZDC_CalibrationHitContainerBuilder* ZDC_G4CalibSD::getHitCollection() const
 {
-
-  //Move the hits from the hit set to the hit container
-  if (!m_HitColl.isValid())
-    m_HitColl = std::make_unique<CaloCalibrationHitContainer>(m_HitColl.name());
-
-  // Loop through the hits...
-  for (auto hit : m_hitMap)
-  {
-    m_HitColl->push_back(hit.second);
-  } // End of loop over hits
-
-  // Clean up
-  m_hitMap.clear();
+  auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo();
+  if (!eventInfo) {
+    return nullptr;
+  }
+  auto hitCollections = eventInfo->GetHitCollectionMap();
+  return hitCollections ? hitCollections->Find<ZDC_CalibrationHitContainerBuilder>(m_hitCollectionName) : nullptr;
 }

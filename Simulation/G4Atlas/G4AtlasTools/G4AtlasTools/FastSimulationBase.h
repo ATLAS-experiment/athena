@@ -8,6 +8,7 @@
 // Base classes
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "G4AtlasInterfaces/IFastSimulation.h"
+#include "HitManagement/HitCollectionMap.h"
 
 // Members
 #include <G4Region.hh>
@@ -39,10 +40,10 @@ class FastSimulationBase : public extends<AthAlgTool, IFastSimulation> {
   StatusCode initializeFastSim() override;
 
   /** Begin of an athena event - do anything that needs to be done at the beginning of each *athena* event. */
-  virtual StatusCode BeginOfAthenaEvent() override { return StatusCode::SUCCESS; }
+  virtual StatusCode BeginOfAthenaEvent(HitCollectionMap&) override { return StatusCode::SUCCESS; }
 
   /** End of an athena event - do any tidying up required at the end of each *athena* event. */
-  virtual StatusCode EndOfAthenaEvent() override { return StatusCode::SUCCESS; }
+  virtual StatusCode EndOfAthenaEvent(HitCollectionMap&) override { return StatusCode::SUCCESS; }
 
  protected:
   // Helper to retrieve the region to which this fast simulation is assigned from the region store.

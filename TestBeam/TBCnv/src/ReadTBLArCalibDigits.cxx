@@ -40,7 +40,7 @@ StatusCode ReadTBLArCalibDigits::initialize()
 }
 
 
-StatusCode ReadTBLArCalibDigits::execute() {
+StatusCode ReadTBLArCalibDigits::execute(const EventContext& /*ctx*/) {
   MsgStream log(msgSvc(), name());
   
   m_count++;

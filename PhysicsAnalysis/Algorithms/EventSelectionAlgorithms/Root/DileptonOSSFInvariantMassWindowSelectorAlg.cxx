@@ -1,8 +1,9 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Binbin Dong
+/// @author Baptiste Ravina <baptiste.ravina@cern.ch>
 
 #include "EventSelectionAlgorithms/DileptonOSSFInvariantMassWindowSelectorAlg.h"
 
@@ -10,171 +11,130 @@ using ROOT::Math::PtEtaPhiEVector;
 
 namespace CP {
 
-    DileptonOSSFInvariantMassWindowSelectorAlg::DileptonOSSFInvariantMassWindowSelectorAlg(const std::string &name, ISvcLocator *pSvcLocator)
-  : EL::AnaAlgorithm(name, pSvcLocator)
-  {}
-
   StatusCode DileptonOSSFInvariantMassWindowSelectorAlg::initialize() {
     ANA_CHECK(m_electronsHandle.initialize(m_systematicsList, SG::AllowEmpty));
     ANA_CHECK(m_electronSelection.initialize(m_systematicsList, m_electronsHandle, SG::AllowEmpty));
     ANA_CHECK(m_muonsHandle.initialize(m_systematicsList, SG::AllowEmpty));
     ANA_CHECK(m_muonSelection.initialize(m_systematicsList, m_muonsHandle, SG::AllowEmpty));
     ANA_CHECK(m_electronsTruthHandle.initialize(m_systematicsList, SG::AllowEmpty));
-    ANA_CHECK(m_electronTruthSelection.initialize(m_systematicsList, m_electronsHandle, SG::AllowEmpty));
+    ANA_CHECK(m_electronTruthSelection.initialize(m_systematicsList, m_electronsTruthHandle, SG::AllowEmpty));
     ANA_CHECK(m_muonsTruthHandle.initialize(m_systematicsList, SG::AllowEmpty));
-    ANA_CHECK(m_muonTruthSelection.initialize(m_systematicsList, m_muonsHandle, SG::AllowEmpty));
+    ANA_CHECK(m_muonTruthSelection.initialize(m_systematicsList, m_muonsTruthHandle, SG::AllowEmpty));
     ANA_CHECK(m_eventInfoHandle.initialize(m_systematicsList));
-
     ANA_CHECK(m_preselection.initialize(m_systematicsList, m_eventInfoHandle, SG::AllowEmpty));
     ANA_CHECK(m_decoration.initialize(m_systematicsList, m_eventInfoHandle));
     ANA_CHECK(m_systematicsList.initialize());
-
     return StatusCode::SUCCESS;
   }
 
+  // Compute invariant mass of two reco leptons
+  template <typename T>
+  static float mll_reco(const T* lep0, const T* lep1) {
+    return (lep0->p4() + lep1->p4()).M();
+  }
+
+  // Compute invariant mass of two truth particles, optionally using dressed kinematics
+  static float mll_truth(const xAOD::TruthParticle* lep0,
+                          const xAOD::TruthParticle* lep1,
+                          bool useDressed) {
+    if (!useDressed)
+      return (lep0->p4() + lep1->p4()).M();
+
+    static const SG::ConstAccessor<float> acc_pt ("pt_dressed");
+    static const SG::ConstAccessor<float> acc_eta("eta_dressed");
+    static const SG::ConstAccessor<float> acc_phi("phi_dressed");
+    static const SG::ConstAccessor<float> acc_e  ("e_dressed");
+
+    PtEtaPhiEVector v0, v1;
+    v0.SetCoordinates(acc_pt(*lep0), acc_eta(*lep0), acc_phi(*lep0), acc_e(*lep0));
+    v1.SetCoordinates(acc_pt(*lep1), acc_eta(*lep1), acc_phi(*lep1), acc_e(*lep1));
+    return (v0 + v1).M();
+  }
+
+  // Check whether mll falls inside the window
+  bool DileptonOSSFInvariantMassWindowSelectorAlg::inWindow(float mll) const {
+    return mll > m_mll_lower && mll < m_mll_upper;
+  }
+
   StatusCode DileptonOSSFInvariantMassWindowSelectorAlg::execute() {
-    // accessors
-    static const SG::ConstAccessor<float> acc_pt_dressed("pt_dressed");
-    static const SG::ConstAccessor<float> acc_eta_dressed("eta_dressed");
-    static const SG::ConstAccessor<float> acc_phi_dressed("phi_dressed");
-    static const SG::ConstAccessor<float> acc_e_dressed("e_dressed");
 
     for (const auto &sys : m_systematicsList.systematicsVector()) {
-      // retrieve the EventInfo
+
       const xAOD::EventInfo *evtInfo = nullptr;
       ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys));
 
-      // default-decorate EventInfo
-      m_decoration.setBool(*evtInfo, 0, sys);
+      m_decoration.setBool(*evtInfo, false, sys);
 
-      // check the preselection
       if (m_preselection && !m_preselection.getBool(*evtInfo, sys))
         continue;
 
-      // retrieve the electron container
-      const xAOD::ElectronContainer *electrons = nullptr;
-      if (m_electronsHandle)
-        ANA_CHECK(m_electronsHandle.retrieve(electrons, sys));
-      // retrieve the muon container
-      const xAOD::MuonContainer *muons = nullptr;
-      if (m_muonsHandle)
-        ANA_CHECK(m_muonsHandle.retrieve(muons, sys));
-      // retrieve the truth electron container
-      const xAOD::TruthParticleContainer *truthElectrons = nullptr;
-      if (m_electronsTruthHandle)
-	ANA_CHECK(m_electronsTruthHandle.retrieve(truthElectrons, sys));
-      // retrieve the truth muon container
-      const xAOD::TruthParticleContainer *truthMuons = nullptr;
-      if (m_muonsTruthHandle)
-	ANA_CHECK(m_muonsTruthHandle.retrieve(truthMuons, sys));
-
       bool decision = false;
 
-      if (m_electronsHandle || m_muonsHandle) {
-	if (electrons->size() >= 2) {
-	  for (size_t i = 0; i < electrons->size() - 1 && !decision; ++i) {
-	    const xAOD::Electron* firstElectron = (*electrons)[i];
-	    if (!m_electronSelection || m_electronSelection.getBool(*firstElectron, sys)) {
-	      for (size_t j = i + 1; j < electrons->size() && !decision; ++j) {
-		const xAOD::Electron* secondElectron = (*electrons)[j];
-		if (!m_electronSelection || m_electronSelection.getBool(*secondElectron, sys)) {
-		  if (firstElectron->charge() != secondElectron->charge()){
-		    float mll = (firstElectron->p4() + secondElectron->p4()).M();
-		    decision |= (mll < m_mll_upper && mll > m_mll_lower);
-		  }
-		}
-	      }
-	    }
-	  }
-	}
-
-	// If a pair of electrons satisfies the mass requirements, there is no need to loop over muon pairs. The event is either kept or vetoed hereafter.
-	if (!decision && muons->size() >= 2) {
-	  for (size_t i = 0; i < muons->size() - 1 && !decision; ++i) {
-	    const xAOD::Muon* firstMuon = (*muons)[i];
-	    if (!m_muonSelection || m_muonSelection.getBool(*firstMuon, sys)) {
-	      for (size_t j = i + 1; j < muons->size() && !decision; ++j) {
-		const xAOD::Muon* secondMuon = (*muons)[j];
-		if (!m_muonSelection || m_muonSelection.getBool(*secondMuon, sys)) {
-		  if (firstMuon->charge() != secondMuon->charge()){
-		    float mll = (firstMuon->p4() + secondMuon->p4()).M();
-		    decision |= (mll < m_mll_upper && mll > m_mll_lower);
-		  }
-		}
-	      }
-	    }
-	  }
-	}
+      if (m_electronsHandle && !decision) {
+        const xAOD::ElectronContainer *electrons = nullptr;
+        ANA_CHECK(m_electronsHandle.retrieve(electrons, sys));
+        for (size_t i = 0; i < electrons->size() && !decision; ++i) {
+          const xAOD::Electron* e0 = (*electrons)[i];
+          if (m_electronSelection && !m_electronSelection.getBool(*e0, sys)) continue;
+          for (size_t j = i + 1; j < electrons->size() && !decision; ++j) {
+            const xAOD::Electron* e1 = (*electrons)[j];
+            if (m_electronSelection && !m_electronSelection.getBool(*e1, sys)) continue;
+            if (e0->charge() == e1->charge()) continue;
+            decision = inWindow(mll_reco(e0, e1));
+          }
+        }
       }
-      else {
-	if (truthElectrons->size() >= 2) {
-	  for (size_t i = 0; i < truthElectrons->size() - 1 && !decision; ++i) {
-	    const xAOD::TruthParticle* firstElectron = (*truthElectrons)[i];
-	    if (!m_electronTruthSelection || m_electronTruthSelection.getBool(*firstElectron, sys)) {
-	      for (size_t j = i + 1; j < truthElectrons->size() && !decision; ++j) {
-		const xAOD::TruthParticle* secondElectron = (*truthElectrons)[j];
-		if (!m_electronTruthSelection || m_electronTruthSelection.getBool(*secondElectron, sys)) {
-		  if (firstElectron->charge() != secondElectron->charge()){
-		    float mll = -1.;
-            if (m_useDressedProperties) {
-              PtEtaPhiEVector el0, el1;
-              el0.SetCoordinates(acc_pt_dressed(*firstElectron),
-                                 acc_eta_dressed(*firstElectron),
-                                 acc_phi_dressed(*firstElectron),
-                                 acc_e_dressed(*firstElectron));
-              el1.SetCoordinates(acc_pt_dressed(*secondElectron),
-                                 acc_eta_dressed(*secondElectron),
-                                 acc_phi_dressed(*secondElectron),
-                                 acc_e_dressed(*secondElectron));
-              mll = (el0+el1).M();
-            } else {
-              mll = (firstElectron->p4() + secondElectron->p4()).M();
-            }
-		    decision |= (mll < m_mll_upper && mll > m_mll_lower);
-		  }
-		}
-	      }
-	    }
-	  }
-	}
 
-	// If a pair of electrons satisfies the mass requirements, there is no need to loop over muon pairs. The event is either kept or vetoed hereafter.
-	if (!decision && truthMuons->size() >= 2) {
-	  for (size_t i = 0; i < truthMuons->size() - 1 && !decision; ++i) {
-	    const xAOD::TruthParticle* firstMuon = (*truthMuons)[i];
-	    if (!m_muonTruthSelection || m_muonTruthSelection.getBool(*firstMuon, sys)) {
-	      for (size_t j = i + 1; j < truthMuons->size() && !decision; ++j) {
-		const xAOD::TruthParticle* secondMuon = (*truthMuons)[j];
-		if (!m_muonTruthSelection || m_muonTruthSelection.getBool(*secondMuon, sys)) {
-		  if (firstMuon->charge() != secondMuon->charge()){
-            float mll = -1.;
-            if (m_useDressedProperties) {
-              PtEtaPhiEVector mu0, mu1;
-              mu0.SetCoordinates(acc_pt_dressed(*firstMuon),
-                                 acc_eta_dressed(*firstMuon),
-                                 acc_phi_dressed(*firstMuon),
-                                 acc_e_dressed(*firstMuon));
-              mu1.SetCoordinates(acc_pt_dressed(*secondMuon),
-                                 acc_eta_dressed(*secondMuon),
-                                 acc_phi_dressed(*secondMuon),
-                                 acc_e_dressed(*secondMuon));
-              mll = (mu0+mu1).M();
-            } else {
-              mll = (firstMuon->p4() + secondMuon->p4()).M();
-            }
-		    decision |= (mll < m_mll_upper && mll > m_mll_lower);
-		  }
-		}
-	      }
-	    }
-	  }
-	}
+      if (m_muonsHandle && !decision) {
+        const xAOD::MuonContainer *muons = nullptr;
+        ANA_CHECK(m_muonsHandle.retrieve(muons, sys));
+        for (size_t i = 0; i < muons->size() && !decision; ++i) {
+          const xAOD::Muon* m0 = (*muons)[i];
+          if (m_muonSelection && !m_muonSelection.getBool(*m0, sys)) continue;
+          for (size_t j = i + 1; j < muons->size() && !decision; ++j) {
+            const xAOD::Muon* m1 = (*muons)[j];
+            if (m_muonSelection && !m_muonSelection.getBool(*m1, sys)) continue;
+            if (m0->charge() == m1->charge()) continue;
+            decision = inWindow(mll_reco(m0, m1));
+          }
+        }
+      }
+
+      if (m_electronsTruthHandle && !decision) {
+        const xAOD::TruthParticleContainer *truthElectrons = nullptr;
+        ANA_CHECK(m_electronsTruthHandle.retrieve(truthElectrons, sys));
+        for (size_t i = 0; i < truthElectrons->size() && !decision; ++i) {
+          const xAOD::TruthParticle* e0 = (*truthElectrons)[i];
+          if (m_electronTruthSelection && !m_electronTruthSelection.getBool(*e0, sys)) continue;
+          for (size_t j = i + 1; j < truthElectrons->size() && !decision; ++j) {
+            const xAOD::TruthParticle* e1 = (*truthElectrons)[j];
+            if (m_electronTruthSelection && !m_electronTruthSelection.getBool(*e1, sys)) continue;
+            if (e0->charge() == e1->charge()) continue;
+            decision = inWindow(mll_truth(e0, e1, m_useDressedProperties));
+          }
+        }
+      }
+
+      if (m_muonsTruthHandle && !decision) {
+        const xAOD::TruthParticleContainer *truthMuons = nullptr;
+        ANA_CHECK(m_muonsTruthHandle.retrieve(truthMuons, sys));
+        for (size_t i = 0; i < truthMuons->size() && !decision; ++i) {
+          const xAOD::TruthParticle* m0 = (*truthMuons)[i];
+          if (m_muonTruthSelection && !m_muonTruthSelection.getBool(*m0, sys)) continue;
+          for (size_t j = i + 1; j < truthMuons->size() && !decision; ++j) {
+            const xAOD::TruthParticle* m1 = (*truthMuons)[j];
+            if (m_muonTruthSelection && !m_muonTruthSelection.getBool(*m1, sys)) continue;
+            if (m0->charge() == m1->charge()) continue;
+            decision = inWindow(mll_truth(m0, m1, m_useDressedProperties));
+          }
+        }
       }
 
       if (m_veto) decision = !decision;
       m_decoration.setBool(*evtInfo, decision, sys);
-
     }
+
     return StatusCode::SUCCESS;
   }
-}
+
+} // namespace CP

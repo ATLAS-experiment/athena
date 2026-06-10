@@ -109,7 +109,7 @@ StatusCode LArDigits2NtupleEB::initialize()
 
 }
 
-StatusCode LArDigits2NtupleEB::execute()
+StatusCode LArDigits2NtupleEB::execute(const EventContext& ctx)
 {
 
   StatusCode	sc;
@@ -120,12 +120,12 @@ StatusCode LArDigits2NtupleEB::execute()
   unsigned long	thisbcid	   = 0;
   unsigned long	thisELVL1Id	   = 0;
 
-  SG::ReadHandle<xAOD::EventInfo>evt (m_evtInfoKey);
+  SG::ReadHandle<xAOD::EventInfo>evt (m_evtInfoKey, ctx);
   thisevent	   = evt->eventNumber();
 
   // Get BCID from FEB header
   if ( !m_isSC ){ // we are not processing SC data, Feb header could be accessed
-    SG::ReadHandle<LArFebHeaderContainer> hdrCont(m_LArFebHeaderContainerKey);
+    SG::ReadHandle<LArFebHeaderContainer> hdrCont(m_LArFebHeaderContainerKey, ctx);
     if (! hdrCont.isValid()) {
       ATH_MSG_WARNING( "No LArFEB container found in TDS" );
     }
@@ -142,7 +142,7 @@ StatusCode LArDigits2NtupleEB::execute()
   }
 
   m_contKey="SC";
-  SG::ReadHandle<LArDigitContainer> hdlDigit(m_contKey);
+  SG::ReadHandle<LArDigitContainer> hdlDigit(m_contKey, ctx);
 
   if(!hdlDigit.isValid()) {
     ATH_MSG_WARNING( "Unable to retrieve LArDigitContainer with key " << m_contKey << " from DetectorStore. " );

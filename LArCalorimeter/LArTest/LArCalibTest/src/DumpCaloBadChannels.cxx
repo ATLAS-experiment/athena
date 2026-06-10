@@ -59,7 +59,7 @@ StatusCode  DumpCaloBadChannels::finalize() {
       outfile.close();
   return StatusCode::SUCCESS;
 }
-StatusCode  DumpCaloBadChannels::execute() { 
+StatusCode  DumpCaloBadChannels::execute(const EventContext& /*ctx*/) { 
   return StatusCode::SUCCESS;
 }
 

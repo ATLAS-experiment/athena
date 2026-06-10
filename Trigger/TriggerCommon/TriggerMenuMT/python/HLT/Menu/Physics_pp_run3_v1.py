@@ -1425,7 +1425,7 @@ def setupMenu():
     ]
 
     chains['Bjet'] += [
-        # Legacy L1Calo primaries with gn1
+        # Legacy L1Calo primaries with gn2
         #  Single b-jet
 
         # HH4b primaries
@@ -1442,7 +1442,7 @@ def setupMenu():
         ChainProp(name='HLT_5j35c_nnJvtv1_j25c_nnJvtv1_SHARED_j25c_nnJvtv1_boffperf_pf_ftf_presel6c25_L14jJ40', l1SeedThresholds=['FSNOSEED']*3, stream=['VBFDelayed'], groups=SupportPhIGroup+MultiBjetGroup),
         ChainProp(name='HLT_5j35c_020jvt_j25c_020jvt_SHARED_j25c_020jvt_boffperf_pf_ftf_presel6c25_L14jJ40', l1SeedThresholds=['FSNOSEED']*3, stream=[PhysicsStream], groups=SupportPhIGroup+MultiBjetGroup),
 
-        # Phase I inputs GN1
+        # Phase I inputs GN2
         #  Single b-jet
 
         # support chains
@@ -2948,7 +2948,7 @@ def setupMenu():
         ChainProp(name='HLT_g35_tight_icaloloose_j35_0eta290_020jvt_bgn277_3j35a_j0_DJMASS700j35_pf_ftf_presela20bgtwo85XX3a20_L1eEM26M',l1SeedThresholds=['eEM26M','FSNOSEED','FSNOSEED','FSNOSEED'],stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaBjetGroup),
         ChainProp(name='HLT_g35_tight_icaloloose_j35_0eta290_020jvt_bgn277_3j35a_j0_DJMASS700j35_pf_ftf_presela20bgtwo85XX3a20_L1eEM28M',l1SeedThresholds=['eEM28M','FSNOSEED','FSNOSEED','FSNOSEED'],stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaBjetGroup),
 
-        # photon + VBF Hbb (ATR-23293) GN1
+        # photon + VBF Hbb (ATR-23293) GN2
         # B-jet preselection
         ChainProp(name='HLT_g25_tight_icaloloose_2j35_0eta290_nnJvtv1_bgn277_2j35a_pf_ftf_presel2a20bgtwo90XX2a20_L1eEM26M',l1SeedThresholds=['eEM26M','FSNOSEED','FSNOSEED'],stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaBjetGroup),
         ChainProp(name='HLT_g25_tight_icaloloose_j35_0eta290_nnJvtv1_bgn277_3j35a_j0_DJMASS700j35_pf_ftf_presela20bgtwo85XX3a20_L1eEM26M',l1SeedThresholds=['eEM26M','FSNOSEED','FSNOSEED','FSNOSEED'],stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaBjetGroup),

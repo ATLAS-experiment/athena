@@ -35,7 +35,7 @@ namespace xAODMaker {
         return StatusCode::SUCCESS;
     }
     
-    StatusCode TrigxAODBphysReaderAlg::execute() {
+    StatusCode TrigxAODBphysReaderAlg::execute(const EventContext& /*ctx*/) {
         
         xAOD::TrigBphysContainer * trigContainer(nullptr);
         // Retrieve the AOD container:

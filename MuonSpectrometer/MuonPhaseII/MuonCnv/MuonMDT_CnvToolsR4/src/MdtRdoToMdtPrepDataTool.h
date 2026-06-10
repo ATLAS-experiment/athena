@@ -108,7 +108,7 @@ namespace MuonR4 {
         const MuonGMR4::MuonDetectorManager* m_detMgrR4{nullptr};
 
         // read handles
-        SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "Stored alignment"};
+        ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "Stored alignment"};
         SG::ReadHandleKey<MdtCsmContainer> m_rdoContainerKey{this, "RDOContainer", "MDTCSM"};
         
         // read condition handle keys

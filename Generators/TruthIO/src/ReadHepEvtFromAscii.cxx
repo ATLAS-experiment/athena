@@ -101,7 +101,7 @@ StatusCode ReadHepEvtFromAscii::initialize(){
   // Initialization terminated
   return StatusCode::SUCCESS;
 }
-StatusCode ReadHepEvtFromAscii::execute() {
+StatusCode ReadHepEvtFromAscii::execute(const EventContext& ctx) {
 
   msg(MSG::INFO) << ">>> ReadHepEvtFromAscii from execute" << endmsg;
   

@@ -13,7 +13,10 @@
 //************************************************************
 
 #include "MuonWallSDTool.h"
+
+#include "HitManagement/HitCollectionMap.h"
 #include "MuonWallSD.h"
+#include "TileSimEvent/TileHitVector.h"
 
 MuonWallSDTool::MuonWallSDTool(const std::string& type, const std::string& name, const IInterface* parent)
     : SensitiveDetectorBase(type, name, parent) {
@@ -27,38 +30,19 @@ MuonWallSDTool::~MuonWallSDTool() {
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-StatusCode MuonWallSDTool::SetupEvent() {
+StatusCode MuonWallSDTool::SetupEvent(HitCollectionMap& hitCollections) {
   ATH_MSG_VERBOSE("MuonWallSDTool::SetupEvent()");
-  if (!getSD()) {
-    ATH_MSG_ERROR("SetupEvent: MuonWallSD never created!");
-    return StatusCode::FAILURE;
-  } else {
-    MuonWallSD *localSD = dynamic_cast<MuonWallSD*>(getSD());
-    if (!localSD) {
-      ATH_MSG_ERROR("SetupEvent: Failed to cast m_SD into MuonWallSD.");
-      return StatusCode::FAILURE;
-    }
-    localSD->StartOfAthenaEvent();
-  }
+  hitCollections.Emplace<MuonWallSD::HitVectorBuilder>(m_outputCollectionNames[0], m_outputCollectionNames[0]);
   return StatusCode::SUCCESS;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-StatusCode MuonWallSDTool::Gather() {
+StatusCode MuonWallSDTool::Gather(HitCollectionMap& hitCollections) {
   ATH_MSG_VERBOSE("MuonWallSDTool::Gather()");
-  if (!getSD()) {
-    ATH_MSG_ERROR("Gather: MuonWallSD never created!");
-    return StatusCode::FAILURE;
-  } else {
-    MuonWallSD *localSD = dynamic_cast<MuonWallSD*>(getSD());
-    if (!localSD) {
-      ATH_MSG_ERROR("Gather: Failed to cast m_SD into MuonWallSD.");
-      return StatusCode::FAILURE;
-    }
-    localSD->EndOfAthenaEvent();
-  }
-  return StatusCode::SUCCESS;
+  return hitCollections.TransformAndRecord<TileHitVector>(m_outputCollectionNames[0], [](TileHitVector& hits) {
+    static_cast<MuonWallSD::HitVectorBuilder&>(hits).Finalize();
+  });
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

@@ -345,7 +345,7 @@ InDetVKalVxInJetTool::getVrtSecMulti(workVectorArrxAOD* xAODwrk,
 
   std::vector< std::vector<float> > trkScore(0);
   if(xAODwrk && m_useTrackClassificator){
-    for(auto &trk : xAODwrk->listJetTracks) trkScore.push_back(m_trackClassificator->trkTypeWgts(trk, primVrt, jetDir));
+    for(auto &trk : xAODwrk->listJetTracks) trkScore.push_back(m_trackClassificator->trkTypeWgts(ctx, trk, primVrt, jetDir));
   }
 
   for(auto &tmpV : (*wrkVrtSet) ) tmpV.projectedVrt=jetProjDist(tmpV.vertex, primVrt, jetDir);  //Setup ProjectedVrt

@@ -96,9 +96,9 @@ namespace met {
                    << ", E "   << muclus->calE()
                    << " formed of " << muclus->size() << " cells.");
       ATH_MSG_VERBOSE("Muon Eloss type: " << mu->energyLossType()
-                   << " Eloss: " << mu->floatParameter(xAOD::Muon::EnergyLoss)
-                   << " MeasuredEloss: " << mu->floatParameter(xAOD::Muon::MeasEnergyLoss)
-                   << " FSR E: " << mu->floatParameter(xAOD::Muon::FSR_CandidateEnergy) );
+                   << " Eloss: " << mu->floatParameter(xAOD::Muon::ParamDef::EnergyLoss)
+                   << " MeasuredEloss: " << mu->floatParameter(xAOD::Muon::ParamDef::MeasEnergyLoss)
+                   << " FSR E: " << mu->floatParameter(xAOD::Muon::ParamDef::FSR_CandidateEnergy) );
       
       SG::ReadDecorHandle<CaloClusterContainer, std::vector<ElementLink<CaloClusterContainer> > > tcLinkAcc(m_elementLinkName, ctx); 
       for(const auto& matchel : tcLinkAcc(*muclus)) {
@@ -153,9 +153,9 @@ namespace met {
                       << " formed of " << muclus->size() << " cells.");
     }
     ATH_MSG_VERBOSE("Muon Eloss type: " << mu->energyLossType()
-                    << " Eloss: " << mu->floatParameter(xAOD::Muon::EnergyLoss)
-                    << " MeasuredEloss: " << mu->floatParameter(xAOD::Muon::MeasEnergyLoss)
-                    << " FSR E: " << mu->floatParameter(xAOD::Muon::FSR_CandidateEnergy) );
+                    << " Eloss: " << mu->floatParameter(xAOD::Muon::ParamDef::EnergyLoss)
+                    << " MeasuredEloss: " << mu->floatParameter(xAOD::Muon::ParamDef::MeasEnergyLoss)
+                    << " FSR E: " << mu->floatParameter(xAOD::Muon::ParamDef::FSR_CandidateEnergy) );
 
     // One loop over PFOs
     for(const auto *const pfo : *constits.pfoCont) {
@@ -274,9 +274,9 @@ namespace met {
                       << " formed of " << muclus->size() << " cells.");
     }
     ATH_MSG_VERBOSE("Muon Eloss type: " << mu->energyLossType()
-                    << " Eloss: " << mu->floatParameter(xAOD::Muon::EnergyLoss)
-                    << " MeasuredEloss: " << mu->floatParameter(xAOD::Muon::MeasEnergyLoss)
-                    << " FSR E: " << mu->floatParameter(xAOD::Muon::FSR_CandidateEnergy) );
+                    << " Eloss: " << mu->floatParameter(xAOD::Muon::ParamDef::EnergyLoss)
+                    << " MeasuredEloss: " << mu->floatParameter(xAOD::Muon::ParamDef::MeasEnergyLoss)
+                    << " FSR E: " << mu->floatParameter(xAOD::Muon::ParamDef::FSR_CandidateEnergy) );
 
     // One loop over PFOs
     for(const xAOD::FlowElement* fe : *constits.feCont) {

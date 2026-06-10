@@ -10,8 +10,6 @@
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <SystematicsHandles/SysReadHandle.h>
 #include <SelectionHelpers/SysReadSelectionHandle.h>
-#include <SystematicsHandles/SysWriteHandle.h>
-#include <SystematicsHandles/SysReadDecorHandle.h>
 #include <SystematicsHandles/SysWriteDecorHandle.h>
 #include "FTagAnalysisInterfaces/IBTaggingSelectionTool.h"
 

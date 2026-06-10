@@ -8,12 +8,6 @@
 #ifndef ROOT_CORE_UTILS__CHECK_ROOT_VERSION_H
 #define ROOT_CORE_UTILS__CHECK_ROOT_VERSION_H
 
-// This module still needs to be documented.  The interface provided
-// in this module is intended for experts only.  The module is
-// considered to be in the pre-alpha stage.
-
-
-
 #include <RootCoreUtils/Global.h>
 
 namespace RCU

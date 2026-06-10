@@ -16,7 +16,7 @@ atlas_add_library( JetCalibToolsLib
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
    LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ${LWTNN_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} AsgTools AsgServicesLib xAODEventInfo xAODEventShape xAODMetaData
    xAODJet xAODTracking PATInterfaces JetInterface AsgDataHandlesLib AthOnnxInterfaces AsgServicesLib JetToolHelpersLib MuonAnalysisInterfacesLib JetAnalysisInterfacesLib
-   PRIVATE_LINK_LIBRARIES xAODMuon PathResolver )
+   PRIVATE_LINK_LIBRARIES xAODMuon PathResolver AthContainers FourMomUtils)
 
 atlas_add_component( JetCalibTools
    src/components/*.cxx

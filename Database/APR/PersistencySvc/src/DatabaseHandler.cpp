@@ -21,7 +21,7 @@ pool::DatabaseHandler::DatabaseHandler( pool::IStorageSvc& storageSvc,
                                                         long technology,
                                                         const std::string& fid,
                                                         const std::string& pfn,
-                                                        long accessmode ):
+                                                        Io::IoFlag accessmode ):
   m_storageSvc( storageSvc ),
   m_fileDescriptor( fid, pfn ),
   m_technology( technology ),
@@ -34,7 +34,7 @@ pool::DatabaseHandler::DatabaseHandler( pool::IStorageSvc& storageSvc,
 
 pool::DatabaseHandler::~DatabaseHandler()
 {
-   int mode = 0;
+   Io::IoFlag mode = Io::INVALID;
    if( m_storageSvc.openMode(m_fileDescriptor, mode).isSuccess() ) {
      m_storageSvc.disconnect( m_fileDescriptor ).ignore();
    }
@@ -118,7 +118,7 @@ pool::DatabaseHandler::technology() const
 }
 
 
-long
+Io::IoFlag
 pool::DatabaseHandler::accessMode() const
 {
   return m_accessMode;

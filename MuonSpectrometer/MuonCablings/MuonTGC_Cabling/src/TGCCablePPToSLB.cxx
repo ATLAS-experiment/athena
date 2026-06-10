@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCCablePPToSLB.h"
@@ -15,29 +15,29 @@ namespace MuonTGC_Cabling {
 // Constructor & Destructor
 TGCCablePPToSLB::TGCCablePPToSLB(const std::string& filename)
     : TGCCable(TGCCable::PPToSLB), m_database{{{nullptr}}} {
-    m_database.at(TGCId::Endcap).at(TGCId::WT) =
+    m_database.at(+TGCId::RegionType::Endcap).at(+TGCId::ModuleType::WT) =
         std::make_unique<TGCDatabasePPToSL>(filename, "PP EWT");
-    m_database.at(TGCId::Endcap).at(TGCId::WD) =
+    m_database.at(+TGCId::RegionType::Endcap).at(+TGCId::ModuleType::WD) =
         std::make_unique<TGCDatabasePPToSL>(filename, "PP EWD");
-    m_database.at(TGCId::Endcap).at(TGCId::ST) =
+    m_database.at(+TGCId::RegionType::Endcap).at(+TGCId::ModuleType::ST) =
         std::make_unique<TGCDatabasePPToSL>(filename, "PP EST");
-    m_database.at(TGCId::Endcap).at(TGCId::SD) =
+    m_database.at(+TGCId::RegionType::Endcap).at(+TGCId::ModuleType::SD) =
         std::make_unique<TGCDatabasePPToSL>(filename, "PP ESD");
-    m_database.at(TGCId::Endcap).at(TGCId::WI) =
+    m_database.at(+TGCId::RegionType::Endcap).at(+TGCId::ModuleType::WI) =
         std::make_unique<TGCDatabasePPToSL>(filename, "PP EWI");
-    m_database.at(TGCId::Endcap).at(TGCId::SI) =
+    m_database.at(+TGCId::RegionType::Endcap).at(+TGCId::ModuleType::SI) =
         std::make_unique<TGCDatabasePPToSL>(filename, "PP ESI");
-    m_database.at(TGCId::Forward).at(TGCId::WT) =
+    m_database.at(+TGCId::RegionType::Forward).at(+TGCId::ModuleType::WT) =
         std::make_unique<TGCDatabasePPToSL>(filename, "PP FWT");
-    m_database.at(TGCId::Forward).at(TGCId::WD) =
+    m_database.at(+TGCId::RegionType::Forward).at(+TGCId::ModuleType::WD) =
         std::make_unique<TGCDatabasePPToSL>(filename, "PP FWD");
-    m_database.at(TGCId::Forward).at(TGCId::ST) =
+    m_database.at(+TGCId::RegionType::Forward).at(+TGCId::ModuleType::ST) =
         std::make_unique<TGCDatabasePPToSL>(filename, "PP FST");
-    m_database.at(TGCId::Forward).at(TGCId::SD) =
+    m_database.at(+TGCId::RegionType::Forward).at(+TGCId::ModuleType::SD) =
         std::make_unique<TGCDatabasePPToSL>(filename, "PP FSD");
-    m_database.at(TGCId::Forward).at(TGCId::WI) =
+    m_database.at(+TGCId::RegionType::Forward).at(+TGCId::ModuleType::WI) =
         std::make_unique<TGCDatabasePPToSL>(filename, "PP FWI");
-    m_database.at(TGCId::Forward).at(TGCId::SI) =
+    m_database.at(+TGCId::RegionType::Forward).at(+TGCId::ModuleType::SI) =
         std::make_unique<TGCDatabasePPToSL>(filename, "PP FSI");
 }
 
@@ -128,7 +128,8 @@ std::unique_ptr<TGCChannelId> TGCCablePPToSLB::getChannelIn(
         channel = slbIn->getChannelInSLB();
     }
     return std::make_unique<TGCChannelPPOut>(
-        pp->getSideType(), pp->getModuleType(), pp->getRegionType(),
+        pp->getSideType(), pp->getStation(),
+        pp->getModuleType(), pp->getRegionType(),
         pp->getSector(), pp->getId(), block, channel);
 }
 
@@ -199,14 +200,15 @@ TGCModuleMap TGCCablePPToSLB::getModuleIn(const TGCModuleId& slb) const {
     const int slbId = slb.getId();
 
     TGCDatabase* databaseP =
-        m_database.at(slb.getRegionType()).at(slb.getModuleType()).get();
+        m_database.at(+slb.getRegionType()).at(+slb.getModuleType()).get();
     TGCModuleMap mapId{};
     const int MaxEntry = databaseP->getMaxEntry();
     for (int i = 0; i < MaxEntry; i++) {
         if (databaseP->getEntry(i, 1) == slbId) {
             int id = databaseP->getEntry(i, 0);
             auto pp = std::make_unique<TGCModulePP>(
-                slb.getSideType(), slb.getModuleType(), slb.getRegionType(),
+                slb.getSideType(), slb.getStation(),
+                slb.getModuleType(), slb.getRegionType(),
                 slb.getSector(), id);
 
             mapId.insert(0, std::move(pp));
@@ -215,7 +217,8 @@ TGCModuleMap TGCCablePPToSLB::getModuleIn(const TGCModuleId& slb) const {
         if (databaseP->getEntry(i, 2) == slbId) {
             int id = databaseP->getEntry(i, 0);
             auto pp = std::make_unique<TGCModulePP>(
-                slb.getSideType(), slb.getModuleType(), slb.getRegionType(),
+                slb.getSideType(), slb.getStation(),
+                slb.getModuleType(), slb.getRegionType(),
                 slb.getSector(), id);
 
             mapId.insert(1, std::move(pp));
@@ -234,7 +237,7 @@ TGCModuleMap TGCCablePPToSLB::getModuleOut(const TGCModuleId& pp) const {
     const int ppId = pp.getId();
 
     TGCDatabase* databaseP =
-        m_database.at(pp.getRegionType()).at(pp.getModuleType()).get();
+        m_database.at(+pp.getRegionType()).at(+pp.getModuleType()).get();
     TGCModuleMap mapId{};
     const int MaxEntry = databaseP->getMaxEntry();
     for (int i = 0; i < MaxEntry; i++) {

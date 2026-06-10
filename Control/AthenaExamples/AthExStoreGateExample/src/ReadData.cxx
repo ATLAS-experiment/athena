@@ -40,7 +40,7 @@ StatusCode ReadData::initialize() {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 
-StatusCode ReadData::execute() {
+StatusCode ReadData::execute(const EventContext& ctx) {
 
   ATH_MSG_INFO ("in execute()");
 
@@ -209,7 +209,7 @@ StatusCode ReadData::execute() {
   /////////////////////////////////////////////////////////////////////
   // Part 4: Get the event header, print out event and run number
 
-  SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfo);
+  SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfo, ctx);
   if(eventInfo.isValid()) {
     int event = eventInfo->eventNumber();
     int run = eventInfo->runNumber();

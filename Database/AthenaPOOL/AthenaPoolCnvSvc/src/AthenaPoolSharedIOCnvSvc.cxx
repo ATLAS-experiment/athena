@@ -87,8 +87,8 @@ StatusCode AthenaPoolSharedIOCnvSvc::finalize() {
 }
 //______________________________________________________________________________
 StatusCode AthenaPoolSharedIOCnvSvc::connectOutput(const std::string& outputConnectionSpec,
-               const std::string& /*openMode*/) {
-   return(connectOutput(outputConnectionSpec));
+                                                   const std::string& openMode) {
+   return AthenaPoolCnvSvc::connectOutput(outputConnectionSpec, openMode);
 }
 //______________________________________________________________________________
 StatusCode AthenaPoolSharedIOCnvSvc::connectOutput(const std::string& outputConnectionSpec) {
@@ -120,6 +120,9 @@ StatusCode AthenaPoolSharedIOCnvSvc::connectOutput(const std::string& outputConn
    std::size_t apend = outputConnectionSpec.find('[');
    if (apend != std::string::npos) {
       outputConnection += outputConnectionSpec.substr(apend);
+   }
+   if (outputConnectionSpec.find("[PoolContainerPrefix=" + m_metadataContainerProp.value() + "]") != std::string::npos) {
+      return AthenaPoolCnvSvc::connectOutput(outputConnection, "APPEND");
    }
    return AthenaPoolCnvSvc::connectOutput(outputConnection);
 }

@@ -180,11 +180,21 @@ StatusCode CTPResultByteStreamTool::convertFromBS(const std::vector<const ROBF*>
 // xAOD->BS conversion
 // -----------------------------------------------------------------------------
 StatusCode CTPResultByteStreamTool::convertToBS(std::vector<WROBF*>& vrobf,
-                                                const xAOD::TrigCompositeContainer* /*tc*/,
+                                                const xAOD::TrigCompositeContainer* tc,
                                                 const EventContext& eventContext) {
 
-  // Retrieve the xAOD::CTPResult object
-  SG::ReadHandle<xAOD::CTPResult> result = SG::makeHandle<xAOD::CTPResult>(m_inKeyCTPResult, eventContext);
+  // Skip if TrigCompositeContainer is not provided or empty
+  if (!tc || tc->empty()) {
+    return StatusCode::SUCCESS;
+  }
+
+  // Extract the CTPResult SG key stored as a detail of the TrigComposite
+  const xAOD::TrigComposite* l1tr = tc->at(0);
+  std::string ctpKey;
+  l1tr->getDetail<std::string>("CTPResultKey", ctpKey);
+
+  // Use the retrieved key to read the CTPResult from the event store
+  SG::ReadHandle<xAOD::CTPResult> result(ctpKey, eventContext);
   ATH_CHECK(result.isValid());
 
   // Get CTP version

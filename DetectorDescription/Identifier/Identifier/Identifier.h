@@ -8,6 +8,7 @@
 
 #include "Identifier/Identifier32.h"
 #include <string>
+#include <string_view>
 #include <iosfwd>
 
 class MsgStream;
@@ -66,7 +67,7 @@ private:
 public:
 
     /// build from a string form - hexadecimal
-    void set (const std::string& id);
+    void set (std::string_view id);
 
     /// Reset to invalid state
     void clear ();

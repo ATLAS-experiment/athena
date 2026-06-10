@@ -24,7 +24,7 @@ namespace EL
   public:
     std::string getJob ();
 
-    SH::SamplePtr getSample (const std::string& sameName);
+    std::shared_ptr<SH::Sample> getSample (const std::string& sameName);
 
     SH::SampleHandler getSH ();
 

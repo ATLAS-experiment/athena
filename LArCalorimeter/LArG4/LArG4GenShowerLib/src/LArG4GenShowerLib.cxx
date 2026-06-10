@@ -122,7 +122,7 @@ StatusCode LArG4GenShowerLib::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode LArG4GenShowerLib::execute()
+StatusCode LArG4GenShowerLib::execute(const EventContext& /*ctx*/)
 {
   const ShowerLib::StepInfoCollection* eventStepsES = getStepInfo();
 

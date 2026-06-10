@@ -16,8 +16,10 @@
 #include "xAODTrigger/jFexSRJetRoIContainer.h"
 #include "xAODTrigger/jFexLRJetRoIContainer.h"
 #include "xAODTrigger/gFexJetRoIContainer.h"
+#include "xAODTrigger/gFexGlobalRoIContainer.h"
 #include "xAODTrigger/MuonRoIContainer.h"
 #include "xAODTrigger/TrigCompositeContainer.h"
+#include "xAODTrigger/CTPResult.h"
 
 // Athena includes
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -87,6 +89,19 @@ private:
     this, "gFexLRJetRoIKeys", {"L1_gFexLRJetRoI"},
     "Keys of the gFex large-R Jet RoI container to be linked to L1 Trigger Result"};
 
+  // gFex Scalar E (JwoJ) RoIs -- carries gFex SumET (Y component); MET (X)
+  // is overwritten by the decoder from sqrt(METx^2 + METy^2) computed from
+  // m_gMETComponentsJwojKeys, so both keys must be linked together for the
+  // h_gFexMet round-trip histogram to reproduce.
+  SG::ReadHandleKeyArray<xAOD::gFexGlobalRoIContainer> m_gScalarEJwojKeys {
+    this, "gScalarEJwojKeys", {},
+    "Keys of the gFex Scalar E (JwoJ) RoI container to be linked to L1 Trigger Result"};
+
+  // gFex MET Components (JwoJ) RoIs -- carries METx / METy partials
+  SG::ReadHandleKeyArray<xAOD::gFexGlobalRoIContainer> m_gMETComponentsJwojKeys {
+    this, "gMETComponentsJwojKeys", {},
+    "Keys of the gFex MET Components (JwoJ) RoI container to be linked to L1 Trigger Result"};
+
   // Key of the cTau container to create (if empty, cTau creation is disabled)
   SG::WriteHandleKey<xAOD::eFexTauRoIContainer> m_cTauRoIKey {
     this, "cTauRoIKey", "L1_cTauRoI",
@@ -103,8 +118,12 @@ private:
     "Tools decorating RoI containers with threshold patterns"
   };
 
+  // CTP result
+  SG::ReadHandleKey<xAOD::CTPResult> m_CTPKey {
+    this, "CTPKey", "CTPResult",
+    "Key of the CTP result to be linked to L1 Trigger Result"};
+
   // Placeholder for other L1 xAOD outputs:
-  // - CTP result
   // - L1Topo result
   // - the remaining Run-3 L1Calo RoIs
 

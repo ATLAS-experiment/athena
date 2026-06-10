@@ -5,6 +5,7 @@
 #ifndef ITKPIXEL_DECODINGPHASEIIRDOALG_H
 #define ITKPIXEL_DECODINGPHASEIIRDOALG_H
 
+
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthenaBaseComps/AthMessaging.h"
 #include "GaudiKernel/MsgStream.h"
@@ -18,6 +19,7 @@
 #include "ITkPixelCabling/ITkPixelCablingData.h"
 #include "itksw/pix/endec/DecCore.hpp"
 #include <chrono>
+#include <limits>
 #include <cstdint> //for uint8_t etc.
 
 //class PixelID;
@@ -78,28 +80,33 @@ namespace PixelCallbacksPhaseIIRDO{
 
         public:
             explicit PhaseIIRDOCallback(PhaseIIPixelRawDataContainerMT* cont_coll,
-                    PhaseIIPixelRawDataContainerMT::ContainerPtr rdo_container_dest, const PixelID* idHelper) :
+                    PhaseIIPixelRawDataContainerMT::ContainerPtr rdo_container_dest, const PixelID* idHelper, MsgStream& msg_source) :
                 m_rdo_container_dest(rdo_container_dest),
                 m_cont_coll(cont_coll),
                 m_dest_range_guard(rdo_container_dest),
                 m_currentIdentifierHash(0),
-                m_idHelper(idHelper)
+                m_idHelper(idHelper),
+                m_msg_source(msg_source)
                 {};
 
             ~PhaseIIRDOCallback() = default;
 
             //Obligatory members for the interface
             inline void evt_init([[maybe_unused]] uint8_t tag) {
-                registerLastModule();
+
                 m_identifier = Identifier(m_offlineID);
                 const auto waferHash = m_idHelper->wafer_hash(m_identifier);
-                m_currentIdentifierHash = waferHash;
-                m_dest_range_guard=PhaseII::ContainerRangeGuard<PhaseII::DataRange, PhaseIIPixelRawDataContainerMT::ContainerPtr>(m_rdo_container_dest);
+                if(waferHash != m_currentIdentifierHash){
+                    registerLastModule();
+                    m_currentIdentifierHash = waferHash;
+                    m_dest_range_guard=PhaseII::ContainerRangeGuard<PhaseII::DataRange, PhaseIIPixelRawDataContainerMT::ContainerPtr>(m_rdo_container_dest);
+                }
             };
 
             inline void evt_next([[maybe_unused]] uint8_t tag) {};
 
-            inline void evt_done() {};
+            inline void evt_done() {
+            };
 
             inline void add_hit(uint16_t col, uint16_t row, uint16_t tot){
                 //Translate the col, row into module coordinates
@@ -110,6 +117,10 @@ namespace PixelCallbacksPhaseIIRDO{
                 int bcid = 0;
                 int lvl0a = 0;
                 int lvl0d = 0;
+                if(col >= 400 || row >= 400) {
+                    //This check is needed because the decoder can call add_hit with invalid col and row to signal an error
+                    m_msg_source << MSG::WARNING << "Decoded hit with col and row >= 400, skipping. col=" << col << " row=" << row << endmsg;
+                }
                 PhaseII::addDataForModule(*m_cont_coll,
                         m_dest_range_guard,
                         std::array<std::int16_t,2>{static_cast<std::int16_t>(row), static_cast<std::int16_t>(col)},
@@ -173,7 +184,7 @@ namespace PixelCallbacksPhaseIIRDO{
             PhaseII::ContainerRangeGuard<PhaseII::DataRange, PhaseIIPixelRawDataContainerMT::ContainerPtr> m_dest_range_guard;
 
             // current offline ID hash
-            unsigned int m_currentIdentifierHash{};
+            unsigned int m_currentIdentifierHash{std::numeric_limits<unsigned int>::max()};
 
             // statistics 
             unsigned int m_n_rejected_work{};
@@ -195,6 +206,9 @@ namespace PixelCallbacksPhaseIIRDO{
 
             // Identifier helper
             const PixelID* m_idHelper{};
+            
+            // Athena message stream for debug output
+            MsgStream& m_msg_source;
     };
 
     //This prints the decoded hits on the screen,

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_TBXMLWRITERTOOLBASE_H
@@ -9,9 +9,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include <iostream>
+#include <iosfwd>
 #include <vector>
 #include <string>
+#include <string_view>
 
 class TBXMLWriterToolBase : public AthAlgTool
 {
@@ -43,7 +44,7 @@ class TBXMLWriterToolBase : public AthAlgTool
 
   //  template<typename DATA>
   virtual StatusCode writeOut( std::ostream& outStream, 
-			       const std::string& entryTag = " " )
+			       std::string_view entryTag = " " )
     {
       return this->writeEvent(outStream,entryTag);
     }
@@ -68,7 +69,7 @@ class TBXMLWriterToolBase : public AthAlgTool
   virtual StatusCode writeRunFiles(const std::string& fileDir,
 				   unsigned int runNumber) = 0;
   virtual StatusCode writeEvent(std::ostream& theFile,
-				const std::string& entryTag) = 0;
+				std::string_view entryTag) = 0;
 
   /////////////
   // Helpers //
@@ -91,7 +92,7 @@ class TBXMLWriterToolBase : public AthAlgTool
 
   // element handling
   virtual void openElement(std::ostream& outStream,
-			   const std::string& theElement,
+			   std::string_view theElement,
 			   const std::vector<std::string>& listOfAttr,
 			   const std::vector<std::string>& listOfValues);
   virtual void closeElement(std::ostream& outStream,

@@ -41,7 +41,7 @@ namespace xAODMaker {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode TrigT2ZdcSignalsCnvAlg::execute() {
+   StatusCode TrigT2ZdcSignalsCnvAlg::execute(const EventContext& /*ctx*/) {
 
       // Retrieve the AOD container:
       const TrigT2ZdcSignalsContainer* aod = nullptr;

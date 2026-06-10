@@ -22,7 +22,7 @@ StatusCode G4TestAlg::initialize()
 }
 
 
-StatusCode G4TestAlg::execute() 
+StatusCode G4TestAlg::execute(const EventContext& /*ctx*/) 
 {
   ToolHandleArray<ISimTestTool>::iterator simTestTool(m_testTools.begin());
   const ToolHandleArray<ISimTestTool>::iterator endOfSimTestTools(m_testTools.end());

@@ -29,11 +29,6 @@ import re
 partition = ispy.IPCPartition(os.getenv("TDAQ_PARTITION","ATLAS"))
 
 flags = initConfigFlags()
-# remove unused flag categories. Note Calo and Tile are only needed if running on CaloCells
-neededCats = ["GeoModel","DQ","Trigger","PerfMon","Detector","Muon","Overlay","LAr","Reco","Calo","Tile"]
-if partition.isValid(): neededCats += ["BField"] # online auto flag config also wants to set BField flags
-for cat in list(flags._dynaflags.keys()):
-  if cat not in neededCats: del flags._dynaflags[cat]
 flags.Input.Files = [] # so that when no files given we can detect that
 
 # Note: The order in which all these flag defaults get set is very fragile
@@ -74,6 +69,13 @@ else:
   flags.Trigger.doLVL1 = True # set this just so that IOBDb.GlobalTag is autoconfigured based on release setup if running on RAW (autoconfig will take it from POOL file if running on that)
 #flags.IOVDb.GlobalTag = lambda s: "OFLCOND-MC23-SDR-RUN3-02" if s.Input.isMC else "CONDBR2-ES1PA-2022-07" #"CONDBR2-HLTP-2022-02"
 
+import sys
+if "--help" in sys.argv:
+  # remove unused flag categories to clean up help printout.
+  neededCats = ["DQ","Trigger","PerfMon"]
+  for cat in list(flags._dynaflags.keys()):
+    if cat not in neededCats: del flags._dynaflags[cat]
+
 # now parse
 
 parser = flags.getArgumentParser(epilog="""
@@ -96,7 +98,11 @@ Note: If you do not specify any flags, then all the flags that are marked with a
 
 E.g. to run just the jFex monitoring, without offline simulation, you can do:
 
-athena TrigT1CaloMonitoring/L1CalPhase1Monitoring.py .... -- Trigger.enableL1CaloPhase1=False Trigger.L1.doCaloInputs=False Trigger.L1.doeFex=False Trigger.L1.dogFex=False
+l1calo-ath-mon .... -- Trigger.enableL1CaloPhase1=False Trigger.L1.doCaloInputs=False Trigger.L1.doeFex=False Trigger.L1.dogFex=False
+
+To run with a plugin you can do e.g:
+
+l1calo-ath-mon PluginPackage/plugin.py --evtMax 10 ...
 
 Further notes: Run with "--evtMax 0" to print flags and ca config, and generate a hanConfig file.
                Run with "--evtMax 1" to dump StoreGate contents after the first event
@@ -115,6 +121,24 @@ parser.add_argument('--postConfig',default=[],nargs="+",type=str,help="specify c
 parser.add_argument('--postInclude',default=[],nargs="+",type=str,help="specify python files to call before configuration completes")
 parser.add_argument('--postHelp',default=None,nargs="*",help="Displays configurables and their properties")
 args,unknown_args = flags.fillFromArgs(parser=parser,return_unknown=True)
+# check for files in unknown_args list ... will assume are plugins
+# this is copied from Include.py ... seems if I try import it, I get CA behaviour blockage
+try:
+  optionsPathEnv = os.environ[ 'JOBOPTSEARCHPATH' ]
+except Exception:
+  optionsPathEnv = os.curdir
+optionsPath = re.split( ',|' + os.pathsep, optionsPathEnv )
+if '' in optionsPath:
+  optionsPath[ optionsPath.index( '' ) ] = str(os.curdir)
+for fn in unknown_args:
+  from AthenaCommon.Utils.unixtools import FindFile
+  name = FindFile( os.path.expanduser( os.path.expandvars( fn ) ), optionsPath, os.R_OK )
+  if not name: name = FindFile( os.path.basename( fn ), optionsPath, os.R_OK )
+  if name:
+    args.postInclude += [fn]
+    unknown_args.remove(fn)
+
+
 args.postConfig += [x[4:] for x in unknown_args if x.startswith("cfg.")]
 if any([not x.startswith("cfg.") for x in unknown_args]):
   raise KeyError("Unknown flags: " + " ".join([x for x in unknown_args if not x.startswith("cfg.")]))
@@ -250,6 +274,37 @@ cfg = MainServicesCfg(flags)
 
 log.setLevel(logging.INFO)
 
+if len(args.postInclude):
+  # call setup methods if any exist in the postIncludes
+  from AthenaCommon.Configurable import ConfigurableCABehavior
+  with ConfigurableCABehavior():
+    from AthenaCommon.Utils.unixtools import FindFile
+    import ast
+
+    def load_function(file_path, function_name):
+      with open(file_path, "r", encoding="utf-8") as f:
+        source = f.read()
+      tree = ast.parse(source, filename=file_path)
+      for node in tree.body:
+        if isinstance(node, ast.FunctionDef) and node.name == function_name:
+          # Create a module containing only this function
+          mod = ast.Module(body=[node], type_ignores=[])
+          # Compile it
+          code = compile(mod, filename=file_path, mode="exec")
+          namespace = {}
+          # Execute only the function definition
+          exec(code, namespace)
+          return namespace[function_name]
+    for fn in args.postInclude:
+      name = FindFile( os.path.expanduser( os.path.expandvars( fn ) ), optionsPath, os.R_OK )
+      if not name:
+        name = FindFile( os.path.basename( fn ), optionsPath, os.R_OK )
+        if not name: raise RuntimeError( 'plugin file %s can not be found' % fn )
+      func = load_function(name,"setup")
+      if func:
+        func(flags)
+
+
 flags.lock()
 if flags.Exec.MaxEvents == 0: flags.dump(evaluate=True)
 
@@ -379,6 +434,11 @@ if flags.Trigger.enableL1CaloPhase1:
   if flags.Trigger.L1.doTopo:
     from L1TopoSimulation.L1TopoSimulationConfig import L1TopoSimulationCfg
     cfg.merge(L1TopoSimulationCfg(flags,readMuCTPI=True,doMonitoring=False),sequenceName="L1Sim") # monitoring scheduled separately below
+  # check there aren't any duplicates in L1sim that are already in the main sequence
+  for alg in cfg.getSequence("L1Sim").Members:
+    if alg.name in [a.name for a in cfg.getSequence("AthAlgSeq").Members]:
+      cfg.getSequence("L1Sim").Members.remove(alg)
+
 
   # Phase II Global simulation...
   if "doGlobal" in flags.Trigger.L1 and flags.Trigger.L1.doGlobal:
@@ -627,7 +687,10 @@ if flags.Output.BSFileName != "":
                                               jFexSRJetRoIKeys = [], jFexLRJetRoIKeys = [],
                                               gFexSRJetRoIKeys = [], gFexLRJetRoIKeys = [],
                                               cTauRoIKey = "", cjTauLinkKey = "", ThresholdPatternTools= [],
+                                              CTPKey = "",
                                               L1TriggerResultWHKey = "OutputBSTCC")
+  # since we dont create TrigDecision objects, dont set those trigger bits in the bytestream                                                                                                                                 
+  cfg.getService("ByteStreamCnvSvc").FillTriggerBits=False
   if flags.Trigger.L1.doeFex:
     algo.eFexEMRoIKeys = ["L1_eEMRoI","L1_eEMxRoI"]  # will write these containers
     algo.eFexTauRoIKeys = ["L1_eTauRoI","L1_eTauxRoI"]
@@ -637,6 +700,12 @@ if flags.Output.BSFileName != "":
     algo.jFexLRJetRoIKeys = ["L1_jFexLRJetRoI"]
     algo.jFexTauRoIKeys   = ["L1_jFexTauRoI"]
     algo.jFexFwdElRoIKeys = ["L1_jFexFwdElRoI"]
+
+  if flags.Trigger.L1.dogFex:
+    algo.gFexSRJetRoIKeys = ["L1_gFexSRJetRoI"]
+    algo.gFexLRJetRoIKeys = ["L1_gFexLRJetRoI"]
+    algo.gScalarEJwojKeys = ["L1_gScalarEJwoj"]
+    algo.gMETComponentsJwojKeys = ["L1_gMETComponentsJwoj"]
 
   cfg.addEventAlgo(algo)
   from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamWriteCfg

@@ -42,7 +42,7 @@ namespace xAODMaker {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode EnergySumRoICnvAlg::execute() {
+   StatusCode EnergySumRoICnvAlg::execute(const EventContext& /*ctx*/) {
 
       // Retrieve the AOD container:
       const LVL1_ROI* aod = nullptr;

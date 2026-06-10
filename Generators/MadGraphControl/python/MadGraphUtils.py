@@ -15,7 +15,7 @@ from MCJobOptionUtils.LHAPDFsupport import get_lhapdf_id_and_name # noqa: F401
 from MCJobOptionUtils.LHAPDFsupport import get_LHAPDF_PATHS # noqa: F401
 from MCJobOptionUtils.JOsupport import get_physics_short 
 from AthenaCommon import Logging
-from MadGraphControl.MGC import MGControl
+from MadGraphControl.MGC import MGControl,MADGRAPH_PDFSETTING
 mglog = Logging.logging.getLogger('MadGraphUtils')
 my_MGC_instance = None
 
@@ -30,8 +30,6 @@ MADGRAPH_GRIDPACK_LOCATION='madevent'
 MADGRAPH_RUN_NAME='run_01'
 # For error handling
 MADGRAPH_CATCH_ERRORS=True
-# PDF setting (legacy module-level setting)
-MADGRAPH_PDFSETTING=None
 MADGRAPH_COMMAND_STACK = []
 
 
@@ -169,7 +167,6 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
 
     # Setup PDF and systematics
     setup_pdf_and_systematic_weights(get_pdf_setting(pdf_setting),my_MGC_instance.runCardDict,isNLO)
-
 
     # temporary fix of makefile, needed for 3.3.1., remove in future
     if isNLO:
@@ -1869,11 +1866,6 @@ def setup_pdf_and_systematic_weights(the_base_fragment,extras,isNLO):
     ### Check compatibility of user setting and base fragment inclusion
     if my_MGC_instance.base_fragment_setup_check(the_base_fragment,extras,isNLO):
         return
-    # if something is set that contradicts the base fragment: bad!
-    for o in systematics_run_card_options(isNLO):
-        if o in extras:
-            mglog.warning('You tried to set "'+str(o)+'" by hand, but you should trust the base fragment with the following options: '+', '.join(systematics_run_card_options(isNLO)))
-            mglog.info('We will update "'+str(o))
 
     new_settings=get_pdf_and_systematic_settings(the_base_fragment,isNLO)
     ### backup extras (user set parameters for run_card)

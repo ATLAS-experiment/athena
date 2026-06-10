@@ -19,25 +19,36 @@ StatusCode PFOClusterMLCorrectionAlgorithm::initialize()
 
 StatusCode PFOClusterMLCorrectionAlgorithm::execute(const EventContext &ctx) const
 {
+  try {
+    ATH_MSG_DEBUG("Executing");
 
-  ATH_MSG_DEBUG("Executing");
+    // Read charged container
+    SG::ReadHandle<xAOD::FlowElementContainer> chargedFEContainerReadHandle(m_chargedFEContainerReadHandleKey, ctx);
+    auto [chargedFEMLContainer, chargedFEMLContainerAux] = xAOD::shallowCopy(*chargedFEContainerReadHandle);
+    
+    // Read neutral container
+    SG::ReadHandle<xAOD::FlowElementContainer> neutralFEContainerReadHandle(m_neutralFEContainerReadHandleKey, ctx);
+    auto [neutralFEMLContainer, neutralFEMLContainerAux] = xAOD::shallowCopy(*neutralFEContainerReadHandle);
+    
+    // Modification step
+    m_correctionTool->correctContainer(*neutralFEMLContainer, *chargedFEMLContainer, ctx);
 
-  // Read charged container
-  SG::ReadHandle<xAOD::FlowElementContainer> chargedFEContainerReadHandle(m_chargedFEContainerReadHandleKey, ctx);
-  auto [chargedFEMLContainer, chargedFEMLContainerAux] = xAOD::shallowCopy(*chargedFEContainerReadHandle);
+    // Writing containers
+    SG::WriteHandle<xAOD::FlowElementContainer> chargedFEMLContainerWriteHandle(m_chargedFEMLContainerWriteHandleKey, ctx);
+    ATH_CHECK(chargedFEMLContainerWriteHandle.record(std::move(chargedFEMLContainer), std::move(chargedFEMLContainerAux)));
+    SG::WriteHandle<xAOD::FlowElementContainer> neutralFEMLContainerWriteHandle(m_neutralFEMLContainerWriteHandleKey, ctx);
+    ATH_CHECK(neutralFEMLContainerWriteHandle.record(std::move(neutralFEMLContainer), std::move(neutralFEMLContainerAux)));
+
+    return StatusCode::SUCCESS;
   
-  // Read neutral container
-  SG::ReadHandle<xAOD::FlowElementContainer> neutralFEContainerReadHandle(m_neutralFEContainerReadHandleKey, ctx);
-  auto [neutralFEMLContainer, neutralFEMLContainerAux] = xAOD::shallowCopy(*neutralFEContainerReadHandle);
-  
-  // Modification step
-  m_correctionTool->correctContainer(*neutralFEMLContainer, *chargedFEMLContainer);
-
-  // Writing containers
-  SG::WriteHandle<xAOD::FlowElementContainer> chargedFEMLContainerWriteHandle(m_chargedFEMLContainerWriteHandleKey, ctx);
-  ATH_CHECK(chargedFEMLContainerWriteHandle.record(std::move(chargedFEMLContainer), std::move(chargedFEMLContainerAux)));
-  SG::WriteHandle<xAOD::FlowElementContainer> neutralFEMLContainerWriteHandle(m_neutralFEMLContainerWriteHandleKey, ctx);
-  ATH_CHECK(neutralFEMLContainerWriteHandle.record(std::move(neutralFEMLContainer), std::move(neutralFEMLContainerAux)));
-
-  return StatusCode::SUCCESS;
+  } 
+  catch (const std::exception& e) {
+    ATH_MSG_ERROR("Standard std::exception caught: " << e.what());
+    return StatusCode::FAILURE;
+  }
+  catch (...) {
+    ATH_MSG_ERROR("Unknown exception caught");
+    return StatusCode::FAILURE;
+  }
+ 
 }

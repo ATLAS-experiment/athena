@@ -30,7 +30,7 @@ StatusCode CheckLArFebHeader::initialize()
 }
 
 
-StatusCode CheckLArFebHeader::execute()
+StatusCode CheckLArFebHeader::execute(const EventContext& /*ctx*/)
 {
   m_count++; 
   const LArFebHeaderContainer *larFebHeaderContainer = nullptr;

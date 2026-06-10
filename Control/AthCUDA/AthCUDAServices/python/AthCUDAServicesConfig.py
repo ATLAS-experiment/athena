@@ -24,15 +24,30 @@ def HostMemoryResourceToolCfg(flags, **kwargs):
 
     # Create the components that would collaborate to provide thread-safe
     # caching to the "bare" memory resource.
-    hostTool = CompFactory.AthCUDA.HostMemoryResourceTool(**kwargs)
-    cacheSvc = CompFactory.AthDevice.BinaryPageMemoryResourceSvc(
-        'CUDAHostCachedMemoryResourceSvc',
-        MRTool=hostTool)
-    result.addService(cacheSvc)
-    finalTool = CompFactory.AthDevice.MemoryResourceSvcAdaptorTool(
-        'CUDAHostCachedMemoryResourceTool',
-        MRSvc=cacheSvc)
-    result.setPrivateTools(finalTool)
+    tool = CompFactory.AthCUDA.HostMemoryResourceTool(**kwargs)
+    if flags.Device.Memory.Debug:
+        debugTool = CompFactory.AthDevice.DebugMemoryResourceTool(
+            'CUDAHostMemoryResourceDebugTool',
+            MRTool=tool)
+        tool = debugTool
+        pass
+    if flags.Device.Memory.Cache:
+        cacheSvc = CompFactory.AthDevice.BinaryPageMemoryResourceSvc(
+            'CUDAHostCachedMemoryResourceSvc',
+            MRTool=tool)
+        result.addService(cacheSvc)
+        cacheTool = CompFactory.AthDevice.MemoryResourceSvcAdaptorTool(
+            'CUDAHostCachedMemoryResourceTool',
+            MRSvc=cacheSvc)
+        tool = cacheTool
+        if flags.Device.Memory.Debug:
+            debugTool = CompFactory.AthDevice.DebugMemoryResourceTool(
+                'CUDAHostCachedMemoryResourceDebugTool',
+                MRTool=tool)
+            tool = debugTool
+            pass
+        pass
+    result.setPrivateTools(tool)
 
     # Return the CA.
     return result
@@ -50,15 +65,30 @@ def DeviceMemoryResourceToolCfg(flags, **kwargs):
 
     # Create the components that would collaborate to provide thread-safe
     # caching to the "bare" memory resource.
-    deviceTool = CompFactory.AthCUDA.DeviceMemoryResourceTool(**kwargs)
-    cacheSvc = CompFactory.AthDevice.BinaryPageMemoryResourceSvc(
-        'CUDADeviceCachedMemoryResourceSvc',
-        MRTool=deviceTool)
-    result.addService(cacheSvc)
-    finalTool = CompFactory.AthDevice.MemoryResourceSvcAdaptorTool(
-        'CUDADeviceCachedMemoryResourceTool',
-        MRSvc=cacheSvc)
-    result.setPrivateTools(finalTool)
+    tool = CompFactory.AthCUDA.DeviceMemoryResourceTool(**kwargs)
+    if flags.Device.Memory.Debug:
+        debugTool = CompFactory.AthDevice.DebugMemoryResourceTool(
+            'CUDADeviceMemoryResourceDebugTool',
+            MRTool=tool)
+        tool = debugTool
+        pass
+    if flags.Device.Memory.Cache:
+        cacheSvc = CompFactory.AthDevice.BinaryPageMemoryResourceSvc(
+            'CUDADeviceCachedMemoryResourceSvc',
+            MRTool=tool)
+        result.addService(cacheSvc)
+        cacheTool = CompFactory.AthDevice.MemoryResourceSvcAdaptorTool(
+            'CUDADeviceCachedMemoryResourceTool',
+            MRSvc=cacheSvc)
+        tool = cacheTool
+        if flags.Device.Memory.Debug:
+            debugTool = CompFactory.AthDevice.DebugMemoryResourceTool(
+                'CUDADeviceCachedMemoryResourceDebugTool',
+                MRTool=tool)
+            tool = debugTool
+            pass
+        pass
+    result.setPrivateTools(tool)
 
     # Return the CA.
     return result
@@ -76,15 +106,58 @@ def ManagedMemoryResourceToolCfg(flags, **kwargs):
 
     # Create the components that would collaborate to provide thread-safe
     # caching to the "bare" memory resource.
-    managedTool = CompFactory.AthCUDA.ManagedMemoryResourceTool(**kwargs)
-    cacheSvc = CompFactory.AthDevice.BinaryPageMemoryResourceSvc(
-        'CUDAManagedCachedMemoryResourceSvc',
-        MRTool=managedTool)
-    result.addService(cacheSvc)
-    finalTool = CompFactory.AthDevice.MemoryResourceSvcAdaptorTool(
-        'CUDAManagedCachedMemoryResourceTool',
-        MRSvc=cacheSvc)
-    result.setPrivateTools(finalTool)
+    tool = CompFactory.AthCUDA.ManagedMemoryResourceTool(**kwargs)
+    if flags.Device.Memory.Debug:
+        debugTool = CompFactory.AthDevice.DebugMemoryResourceTool(
+            'CUDAManagedMemoryResourceDebugTool',
+            MRTool=tool)
+        tool = debugTool
+        pass
+    if flags.Device.Memory.Cache:
+        cacheSvc = CompFactory.AthDevice.BinaryPageMemoryResourceSvc(
+            'CUDAManagedCachedMemoryResourceSvc',
+            MRTool=tool)
+        result.addService(cacheSvc)
+        cacheTool = CompFactory.AthDevice.MemoryResourceSvcAdaptorTool(
+            'CUDAManagedCachedMemoryResourceTool',
+            MRSvc=cacheSvc)
+        tool = cacheTool
+        if flags.Device.Memory.Debug:
+            debugTool = CompFactory.AthDevice.DebugMemoryResourceTool(
+                'CUDAManagedCachedMemoryResourceDebugTool',
+                MRTool=tool)
+            tool = debugTool
+            pass
+        pass
+    result.setPrivateTools(tool)
+
+    # Return the CA.
+    return result
+
+
+def CopyToolCfg(flags, **kwargs):
+    '''Synchronous copy object provider tool
+    '''
+
+    # Create an accumulator to hold the configuration.
+    result = ComponentAccumulator()
+
+    # Create the tool in a simple way.
+    result.setPrivateTools(CompFactory.AthCUDA.CopyTool(**kwargs))
+
+    # Return the CA.
+    return result
+
+
+def AsyncCopyToolCfg(flags, **kwargs):
+    '''Asynchronous copy object provider tool
+    '''
+
+    # Create an accumulator to hold the configuration.
+    result = ComponentAccumulator()
+
+    # Create the tool in a simple way.
+    result.setPrivateTools(CompFactory.AthCUDA.AsyncCopyTool(**kwargs))
 
     # Return the CA.
     return result

@@ -88,7 +88,7 @@ def createActsHeavyIonTrackingPassFlags():
 # Secondary ACTS Tracking pass for Large Radius Tracking
 def createActsLargeRadiusTrackingPassFlags():
     icf = createITkLargeD0TrackingPassFlags()
-    icf.extension = "ActsLargeRadius"
+    icf.extension = "LargeD0"
     deactivateAthenaComponents(icf)
     activateActsComponents(icf)
     setActsDefaultTunings(icf)

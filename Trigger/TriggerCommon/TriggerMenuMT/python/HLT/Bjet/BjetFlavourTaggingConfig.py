@@ -28,13 +28,10 @@ def flavourTaggingCfg( flags, inputJets, inputVertex, inputTracks,
         PrimaryVertexCollectionName=inputVertex
     ))
 
-    #Run new Run3 taggers, i.e. DL1, RNNIP, DL1r
+    #Run Run3 taggers, i.e. GN2
     nnList = [
 
         # These are trigger-specific trainings
-        #
-        # Trigger GN1 training
-        'BTagging/20220813trig/gn1/antikt4empflow/network.onnx',
         #Trigger GN2 training
         'BTagging/20240122trig/gn2/antikt4empflow/SmallPrec.onnx'
     ]
@@ -156,20 +153,13 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
                         'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
                     },
                 ],
-
                 [
-                    'BTagging/20230331trig/gn1/antikt4empflow/network.onnx',
-                    {
-                        'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
-                    },
-                ],
-                                [
                  'BTagging/20240122trig/gn2/antikt4empflow/Small.onnx',
                 {
                     'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
                     **{f'p{x}': f'tlaGN220240122_p{x}' for x in 'cub'},
                 }
-                ],   
+                ],
             ]
     else:
         dl2_configs=[
@@ -178,14 +168,6 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
                 {
                     'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
                     **{f'fastDIPSnoPV20220211_p{x}': f'fastDips_p{x}' for x in 'cub'},
-                    'btagIp_': trackIpPrefix,
-                }
-            ],
-            [
-                'BTagging/20230327trig/gn1/antikt4emtopo/network.onnx',
-                {
-                    'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
-                    **{f'GN120230327_p{x}': f'fastGN120230327_p{x}' for x in 'cub'},
                     'btagIp_': trackIpPrefix,
                 }
             ],
@@ -200,13 +182,6 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
         ]
         if inputVertex: 
             dl2_configs += [
-                [
-                 'BTagging/20230331trig/gn1/antikt4empflow/network.onnx',
-                {
-                    'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
-                    **{f'GN120230331_p{x}': f'fastGN120230331_p{x}' for x in 'cub'}
-                },   
-                ],
                 [
                  'BTagging/20240122trig/gn2/antikt4empflow/Small.onnx',
                 {
@@ -229,7 +204,7 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
                     , 'FastGNTau_pc'   : 'fastUHT120250605_pc'
                     , 'FastGNTau_pb'   : 'fastUHT120250605_pb'
                     }
-                ]   
+                ]
             ]
 
     # not all the keys that the NN requests are declaired. This will
@@ -343,27 +318,12 @@ def _triggerDefaultsFromPath(nn_path):
     we'd normally get out of the GNN in this case.
     """
 
-    if '20230331trig' in nn_path:
-        # pflow GN1
-        return {
-            'GN120230331_pu': 1.0,
-        }
-    elif '20240122trig' in nn_path:
+    if '20240122trig' in nn_path:
         # pflow and emtopo GN2
         return {
             'pb': 0.0973031148314476,
             'pc': 0.21328286826610565,
             'pu': 0.6894140243530273,
-        }
-    elif '20230327trig' in nn_path:
-        # emtopo GN1
-        return {
-            'GN120230327_pu': 1.0
-        }
-    elif '20230331trig' in nn_path:
-        # emtopo GN1, with input vertex
-        return {
-            'GN120230331_pu': 1.0
         }
     elif '20240216trig' in nn_path:
         # emtopo GNtau

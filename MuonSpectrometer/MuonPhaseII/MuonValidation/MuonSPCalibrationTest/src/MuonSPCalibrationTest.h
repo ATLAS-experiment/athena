@@ -34,7 +34,7 @@ namespace MuonValR4{
         private:
             //Retrieve the xAODMdtCircles container
             SG::ReadHandleKeyArray<MuonR4::SpacePointContainer> m_spKeyArray{this, "SpacePointKeyArray", {"NswSpacePoints"}};
-            SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+            ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
             /** pointer to MdtCalibSvc */
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
            

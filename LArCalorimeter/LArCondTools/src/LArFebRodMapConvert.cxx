@@ -38,7 +38,7 @@ StatusCode LArFebRodMapConvert::finalize()
 }
 
 
-StatusCode LArFebRodMapConvert::execute() {  
+StatusCode LArFebRodMapConvert::execute(const EventContext& ctx) {  
 
   const uint32_t onlHashMax=m_onlineID-> febHashMax();
 
@@ -65,7 +65,7 @@ StatusCode LArFebRodMapConvert::execute() {
 
   outfile << "hash id rodid" << std::endl;
 
-  SG::ReadCondHandle<LArFebRodMapping> cablingHdl{m_cablingKey};
+  SG::ReadCondHandle<LArFebRodMapping> cablingHdl{m_cablingKey, ctx};
   const LArFebRodMapping* cabling{*cablingHdl};
   if(!cabling) {
       ATH_MSG_ERROR( "Do not have cabling mapping from key " << m_cablingKey.key() );

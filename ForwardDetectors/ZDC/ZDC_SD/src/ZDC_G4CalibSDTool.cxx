@@ -4,6 +4,8 @@
 #include "ZDC_G4CalibSDTool.h"
 #include "ZDC_G4CalibSD.h"
 #include "CaloG4Sim/EscapedEnergyRegistry.h"
+#include "HitManagement/HitCollectionMap.h"
+#include "ZDC_HitCollectionBuilders.h"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -16,24 +18,22 @@ ZDC_G4CalibSDTool::ZDC_G4CalibSDTool(const std::string &type, const std::string 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-StatusCode ZDC_G4CalibSDTool::Gather()
+StatusCode ZDC_G4CalibSDTool::SetupEvent(HitCollectionMap& hitCollections)
+{
+  hitCollections.Emplace<ZDC_CalibrationHitContainerBuilder>(m_outputCollectionNames[0],
+                                                             m_outputCollectionNames[0]);
+  return StatusCode::SUCCESS;
+}
+
+StatusCode ZDC_G4CalibSDTool::Gather(HitCollectionMap& hitCollections)
 {
   ATH_MSG_VERBOSE( "ZDC_G4CalibSDTool::Gather()" );
-  if(!getSD())
-    {
-      ATH_MSG_ERROR ("Gather: ZDC_G4CalibSD never created!");
-      return StatusCode::FAILURE;
-    }
-  else
-    {
-      ZDC_G4CalibSD *localSD = dynamic_cast<ZDC_G4CalibSD*>(getSD());
-      if(!localSD)
-        {
-          ATH_MSG_ERROR ("Gather: Failed to cast m_SD into ZDC_G4CalibSD.");
-          return StatusCode::FAILURE;
-        }
-      localSD->EndOfAthenaEvent();
-    }
+  auto* hitCollection = hitCollections.Find<ZDC_CalibrationHitContainerBuilder>(m_outputCollectionNames[0]);
+  if (!hitCollection) {
+    return StatusCode::FAILURE;
+  }
+  hitCollection->Finalize();
+  CHECK(hitCollections.Record<CaloCalibrationHitContainer>(m_outputCollectionNames[0]));
   return StatusCode::SUCCESS;
 }
 

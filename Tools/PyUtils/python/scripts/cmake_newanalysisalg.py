@@ -19,7 +19,7 @@ import PyUtils.acmdlib as acmdlib
 class Templates:
 
     script_template = """\
-#!/usr/bin/env python
+#!/usr/bin/env athena
 
 # Run this application/script like this:
 # run%(klass)s.py --filesInput file.root --evtMax 100
@@ -382,6 +382,9 @@ DECLARE_COMPONENT( %(klass)s )
         o_hdr.flush()
         o_hdr.close()
         os.chmod(fname, 0o755)
+
+    # symlink the script as a joboption
+    os.symlink('../scripts/%s.py' % full_script_name,'share/%sJobOptions.py' % full_alg_name)
 
     #need to reconfigure cmake so it knows about the new files
     #rely on the WorkDir_DIR env var for this

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetGNNHardScatterSelection/GNN.h"
@@ -14,6 +14,7 @@
 #include "InDetGNNHardScatterSelection/ElectronsLoader.h"
 #include "InDetGNNHardScatterSelection/MuonsLoader.h"
 #include "InDetGNNHardScatterSelection/IParticlesLoader.h"
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
 
 #include <algorithm>
 #include <cfenv>
@@ -102,13 +103,13 @@ namespace InDetGNNHardScatterSelection {
 
   GNN::~GNN() = default;
 
-  void GNN::decorate(const xAOD::Vertex& vertex) const {
+  float GNN::decorate(const xAOD::Vertex& vertex) const {
     /* Main function for decorating a vertex with GNN outputs. */
     using namespace internal;
 
     // prepare input
     // -------------
-    std::map<std::string, FlavorTagInference::Inputs> gnn_input;
+    FlavorTagInference::InputMap gnn_input;
 
     std::vector<float> vertex_feat;
     vertex_feat.reserve(m_varsFromVertex.size());
@@ -144,18 +145,30 @@ namespace InDetGNNHardScatterSelection {
 
     // run inference
     // -------------
-    // Clear sticky flags around inference so they do not propagate to FPEAuditor.
+    // FPE warning are hidden but should be resolved.
+    // Related JIRA Ticket : https://its.cern.ch/jira/browse/ATLASRECTS-8386
     std::feclearexcept(FE_ALL_EXCEPT);
+
     const FlavorTagInference::InferenceOutput inference_output =
       m_saltModel->runInference(gnn_input);
     const auto& out_f = inference_output.singleFloat;
 
-    // decorate outputs
+    // Get HSGNN score
     // ----------------
-    for (const auto& dec: m_decorators.vertexFloat) {
-      dec.second(vertex) = out_f.at(dec.first);
+    float score = -999;
+    FlavorTagInference::OutputConfig gnn_output_config = m_saltModel->getOutputConfig();
+
+    for (const auto& outNode : gnn_output_config) {
+      std::string score_name = outNode.name;
+
+      if (outNode.name.find("_phsvertex") != std::string::npos) {
+        score = out_f.at(score_name);
+      }
     }
     std::feclearexcept(FE_ALL_EXCEPT);
+
+    return score;
+    
   } // end of decorate()
 
 } // end of namespace InDetGNNHardScatterSelection

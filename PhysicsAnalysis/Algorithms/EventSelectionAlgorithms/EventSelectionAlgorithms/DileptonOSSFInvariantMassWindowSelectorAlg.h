@@ -1,8 +1,9 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Binbin Dong
+/// @author Baptiste Ravina <baptiste.ravina@cern.ch>
 
 #ifndef EVENT_SELECTOR_DILEPTONOSSFINVARIANTMASSWINDOWSELECTORALG_H
 #define EVENT_SELECTOR_DILEPTONOSSFINVARIANTMASSWINDOWSELECTORALG_H
@@ -27,11 +28,12 @@ namespace CP {
 
     /// \brief the standard constructor
     public:
-      DileptonOSSFInvariantMassWindowSelectorAlg(const std::string &name, ISvcLocator *pSvcLocator);
+      using EL::AnaAlgorithm::AnaAlgorithm;
       virtual StatusCode initialize() override;
       virtual StatusCode execute() override;
 
     private:
+      bool inWindow(float mll) const;
       Gaudi::Property<float> m_mll_lower {this, "lowMll", 0., "MLL > LOW (in MeV)"};
       Gaudi::Property<float> m_mll_upper {this, "highMll", 0., "MLL < High (in MeV)"};
       /// whether to veto events instead of selecting them

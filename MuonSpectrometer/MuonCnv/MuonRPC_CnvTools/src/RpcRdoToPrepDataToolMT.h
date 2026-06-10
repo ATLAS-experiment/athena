@@ -5,7 +5,7 @@
 #ifndef MUONRDOTOPREPDATA_RPCRDOTOPREPDATATOOLMT_H
 #define MUONRDOTOPREPDATA_RPCRDOTOPREPDATATOOLMT_H
 
-#include <set>
+
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "MuonCablingData/RpcCablingMap.h"
@@ -23,6 +23,13 @@
 #include "RPC_CondCabling/RpcCablingCondData.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "xAODMuonRDO/NRPCRDOContainer.h"
+
+#include <set>
+#include <unordered_set>
+#include <atomic>
+#include <vector>
+#include <cstdint>
+
 namespace Muon {
 
 /////////////////////////////////////////////////////////////////////////////
@@ -180,7 +187,7 @@ class RpcRdoToPrepDataToolMT
     "Estimated time resolution of the strip readout"};
 
  private:
-  mutable std::atomic_int m_spuriousHitCounter;
+  mutable std::atomic_int m_spuriousHitCounter{};
 };
 }  // namespace Muon
 

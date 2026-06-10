@@ -88,9 +88,8 @@ StatusCode ReadTBLArDigits::initialize()
 }
 
 
-StatusCode ReadTBLArDigits::execute()
+StatusCode ReadTBLArDigits::execute(const EventContext& ctx)
 {
- const EventContext& ctx = Gaudi::Hive::currentContext();
 
  MsgStream log(msgSvc(), name());
  m_count++; 

@@ -41,7 +41,7 @@ namespace xAODMaker {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode TrigSpacePointCountsCnvAlg::execute() {
+   StatusCode TrigSpacePointCountsCnvAlg::execute(const EventContext& /*ctx*/) {
 
       // Retrieve the AOD container:
       const TrigSpacePointCountsCollection* aod = nullptr;

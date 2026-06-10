@@ -1056,7 +1056,7 @@ namespace MuonCombined {
             resolvedInDetCandidates.clear();
 
             // Resolve ambiguity between muon tracks
-            resolvedTracks.reset(m_ambiguityProcessor->process(to_resolve.asDataVector()));
+            resolvedTracks.reset(m_ambiguityProcessor->process(ctx, to_resolve.asDataVector()));
 
             // link back to InDet candidates and fill the resolved container
             for (const Trk::Track* track : *resolvedTracks) {
@@ -1132,7 +1132,7 @@ namespace MuonCombined {
         }
 
         // solve ambiguity
-        resolvedTracks.reset(m_ambiguityProcessor->process(resolvedTracks2.asDataVector()));
+        resolvedTracks.reset(m_ambiguityProcessor->process(ctx, resolvedTracks2.asDataVector()));
 
         // loop over resolved tracks and fill resolved muon candidates
         for (const Trk::Track* track : *resolvedTracks) {

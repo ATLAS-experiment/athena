@@ -44,11 +44,11 @@ namespace xAODMaker {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode DynVarFixerAlg::execute() {
+   StatusCode DynVarFixerAlg::execute(const EventContext& ctx) {
 
       // Construct the SG::IConstAuxStore and SG::IAuxStoreIO read handles.
-      auto constHandles = m_constKeys.makeHandles();
-      auto ioHandles = m_ioKeys.makeHandles();
+      auto constHandles = m_constKeys.makeHandles(ctx);
+      auto ioHandles = m_ioKeys.makeHandles(ctx);
       assert( constHandles.size() == ioHandles.size() );
 
       // Loop over the specified containers:

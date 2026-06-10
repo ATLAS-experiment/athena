@@ -91,7 +91,7 @@ namespace SH
 	      bool overwrite)
   {
     SampleHandler result;
-    for (auto& sample : sh)
+    for (auto sample : sh)
     {
       std::string sublocation = location + sample->name() + ".root";
       result.add (mergeFiles (*sample, sublocation, overwrite));

@@ -225,6 +225,9 @@ def MuonReconstructionCfg(flags):
     # Setup output
     if flags.Output.doWriteESD or flags.Output.doWriteAOD:
         result.merge(StandaloneMuonOutputCfg(flags))
+    if flags.Muon.scheduleActsReco:
+        from MuonConfig.ReconstructionConfigR4 import MuonReconstructionConfig
+        result.merge(MuonReconstructionConfig(flags))
     return result
 
 # Run with python -m MuonConfig.MuonReconstructionConfig

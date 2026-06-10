@@ -1,14 +1,15 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  TRIGL2MUONSA_RPAPATFINDER_H
 #define  TRIGL2MUONSA_RPAPATFINDER_H
 
-#include <string> 
-#include <list> 
-
 #include "AthenaBaseComps/AthAlgTool.h"
+#include <string> 
+#include <array>
+#include <functional> //std::reference_wrapper
+
 
 // Original author: Massimo Corradi
 

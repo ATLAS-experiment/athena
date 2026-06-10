@@ -95,7 +95,7 @@ namespace EL
             std::unique_ptr<SH::SampleHist> hist
               (new SH::SampleHist ((*sample)->name(), histfile));
             hist->meta()->fetch (*(*sample)->meta());
-            sh_hist.add (hist.release());
+            sh_hist.add (std::move (hist));
           }
           sh_hist.save (data.submitDir + "/hist");
         }

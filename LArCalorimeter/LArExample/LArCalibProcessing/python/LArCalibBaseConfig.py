@@ -1,6 +1,7 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+import os
 
 def LArCalibBaseCfg(flags):  
     result=ComponentAccumulator()
@@ -24,6 +25,12 @@ def LArCalibBaseCfg(flags):
     from LArCalibProcessing.LArCalib_BadChannelConfig import LArCalibBadChannelCfg
 
     result.merge(LArCalibBadChannelCfg(flags))
+    if "FRONTIER_SERVER" not in os.environ:
+        # when running offline job at P1,
+        # point to the location where PoolCat_oflcond.xml can be found
+        p = ":/det/lar/project/databases/jobsDatabase/"
+        if p not in os.environ["DATAPATH"]:
+            os.environ["DATAPATH"] += p
     return result
 
 

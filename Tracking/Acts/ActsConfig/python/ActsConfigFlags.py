@@ -87,7 +87,7 @@ def createActsConfigFlags():
     from InDetConfig.ITkActsHelpers import primaryPassUsesActs
     actscf.addFlag('Acts.doITkConversion', lambda pcf: (
         pcf.Detector.EnableCalo and primaryPassUsesActs(pcf)))
-    actscf.addFlag('Acts.doLargeRadius', False)
+    actscf.addFlag('Acts.doLargeRadius', True)
     actscf.addFlag('Acts.doLowPt', False)
     
     # Geometry Flags

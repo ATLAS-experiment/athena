@@ -25,9 +25,9 @@ StatusCode LArIdCablingTest::initialize() {
 }
 
 
-StatusCode LArIdCablingTest::execute() {
+StatusCode LArIdCablingTest::execute(const EventContext& ctx) {
 
-  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey};
+  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, ctx};
   const LArOnOffIdMapping* cabling=(*cablingHdl);
 
   const LArOnlineID_Base* larOnlineID = nullptr;

@@ -95,9 +95,8 @@ StatusCode TBXMLWriter::initialize()
 // Execute //
 /////////////
 
-StatusCode TBXMLWriter::execute()
+StatusCode TBXMLWriter::execute(const EventContext& ctx)
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   /////////////////
   // Check Tools //

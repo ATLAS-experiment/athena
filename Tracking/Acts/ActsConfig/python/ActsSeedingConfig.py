@@ -19,7 +19,7 @@ def ActsGbtsFtfSeedingTrigToolCfg(flags,name: str = "GbtsFtfActsSeedingTool", **
   kwargs.setdefault("DoPhiFiltering", False) #no phi-filtering for full-scan tracking
   kwargs.setdefault("UseBeamTilt", False)
 
-  isLargeD0 = flags.Tracking.ActiveConfig.extension in ["LargeD0", "ActsLargeRadius"]
+  isLargeD0 = flags.Tracking.ActiveConfig.isLargeD0
   
   kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minPTSeed)
   kwargs.setdefault("MaxGraphEdges", 3000000)
@@ -288,9 +288,15 @@ def ActsStripGbtsSeedingToolCfg(flags,
     kwargs.setdefault("useML", False)
     kwargs.setdefault("connectorInputFile", find_datafile("binTables_ITK_RUN4_LRT.txt"))
     kwargs.setdefault("minPt", flags.Tracking.ActiveConfig.minPTSeed / GaudiUnits.GeV * ActsUnits.GeV)
-    kwargs.setdefault("d0_max", 300. * ActsUnits.mm)
-    kwargs.setdefault("max_z0", 500. * ActsUnits.mm)
-
+    kwargs.setdefault("d0Max", 300. * ActsUnits.mm)
+    kwargs.setdefault("filterMaxZ0", 500. * ActsUnits.mm)
+    kwargs.setdefault("cutDPhiMax", 0.07)
+    kwargs.setdefault("cutDCurvMax", 0.015)
+    kwargs.setdefault("tauRatioCut", 0.015)
+    kwargs.setdefault("minZ0", -600.0)
+    kwargs.setdefault("maxZ0", 600.0)
+    kwargs.setdefault("minDeltaPhi", 0.01)
+    kwargs.setdefault("maxOuterRadius", 1050.0)
     acc.setPrivateTools(CompFactory.ActsTrk.GbtsSeedingTool(name=name, **kwargs))
     return acc
 
@@ -418,7 +424,7 @@ def ActsSeedingCfg(flags,**kwargs) -> ComponentAccumulator:
 
     # For conversion pass we do not process pixels
     from InDetConfig.ITkActsHelpers import isFastPrimaryPass
-    if flags.Tracking.ActiveConfig.extension in ["ActsConversion", "ActsLargeRadius", "ActsValidateLargeRadiusStandalone"]:
+    if flags.Tracking.ActiveConfig.extension == "ActsConversion" or flags.Tracking.ActiveConfig.isLargeD0:
         processPixels = False
     # For main pass disable strips if fast tracking configuration
     elif isFastPrimaryPass(flags):
@@ -480,10 +486,11 @@ def ActsSeedingCfg(flags,**kwargs) -> ComponentAccumulator:
         # Space Point naming is not yet fully connected to tracking passes - this will change
         if flags.Tracking.ActiveConfig.extension == 'ActsConversion':
             kwargs.setdefault('StripSeedingAlg.InputSpacePoints', ['ITkConversionStripSpacePoints_Cached'] if flags.Acts.useCache else ['ITkConversionStripSpacePoints'])
-        elif flags.Tracking.ActiveConfig.extension == 'ActsLargeRadius':
-            kwargs.setdefault('StripSeedingAlg.InputSpacePoints', ['ITkLargeRadiusStripSpacePoints_Cached',
-                                                                   'ITkLargeRadiusStripOverlapSpacePoints_Cached'] if flags.Acts.useCache else ['ITkLargeRadiusStripSpacePoints',
-                                                                                                                                                'ITkLargeRadiusStripOverlapSpacePoints'])
+        elif flags.Tracking.ActiveConfig.isLargeD0 and flags.Tracking.ActiveConfig.isSecondaryPass:
+            ext_suffix = flags.Tracking.ActiveConfig.extension.replace("Acts", "")
+            kwargs.setdefault('StripSeedingAlg.InputSpacePoints', [f'ITk{ext_suffix}StripSpacePoints_Cached',
+                                                                   f'ITk{ext_suffix}StripOverlapSpacePoints_Cached'] if flags.Acts.useCache else [f'ITk{ext_suffix}StripSpacePoints',
+                                                                                                                                                   f'ITk{ext_suffix}StripOverlapSpacePoints'])
         elif flags.Tracking.ActiveConfig.extension == 'ActsLowPt':
             kwargs.setdefault('StripSeedingAlg.InputSpacePoints', ['ITkLowPtStripSpacePoints_Cached',
                                                                    'ITkLowPtStripOverlapSpacePoints_Cached'] if flags.Acts.useCache else ['ITkLowPtStripSpacePoints',

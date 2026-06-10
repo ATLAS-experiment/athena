@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArG4TBSimEvent/LArG4H6FrontHit.h"
@@ -43,7 +43,6 @@ int LArG4H6FrontHit::operator==(const LArG4H6FrontHit &right)
  if(m_y != right.m_y) return 0;
  if(m_pcode != right.m_pcode) return 0;
  if(m_track_id != right.m_track_id) return 0;
- if(m_pos != right.m_pos) return 0;
  return 1;
 }
 

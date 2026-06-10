@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileCalibBlobObjs/TileCalibDrawerBase.h"
 #include "TileCalibBlobObjs/TileCalibType.h"
 #include <time.h>
 #include <algorithm>
+#include <iostream>
 
 //
 //_____________________________________________________________
@@ -214,4 +215,8 @@ TileCalibDrawerBase::dumpHeader(std::ostream& stm) const
     stm << "Date           : " << getDate() << " ("<< getTimeStamp() << ")" << std::endl;
     stm << "Comment:       : " << getComment()     << std::endl;
   }  
+}
+
+void TileCalibDrawerBase::dump() const {
+ dumpHeader(std::cout); 
 }

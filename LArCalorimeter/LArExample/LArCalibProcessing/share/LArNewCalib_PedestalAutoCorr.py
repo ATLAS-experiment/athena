@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 if __name__=='__main__':
@@ -178,30 +178,49 @@ if __name__=='__main__':
    flags.dump(evaluate=True) 
     
    # create bad chan sqlite file
-   cmdlinerm = (['/bin/rm', '-f', flags.LArCalib.BadChannelDB])
-   if not flags.LArCalib.isSC:
-      cmdline = (['AtlCoolCopy', 'COOLOFL_LAR/CONDBR2', 'sqlite://;schema='+flags.LArCalib.BadChannelDB+';dbname=CONDBR2', '-f', '/LAR/BadChannelsOfl/BadChannels',  '-f', '/LAR/BadChannelsOfl/MissingFEBs', '-t', flags.IOVDb.GlobalTag, '-c', '-a',  '-hitag'])
-   else:   
-      cmdline = (['AtlCoolCopy', 'COOLOFL_LAR/CONDBR2', 'sqlite://;schema='+flags.LArCalib.BadChannelDB+';dbname=CONDBR2', '-f', '/LAR/BadChannelsOfl/BadChannelsSC',  '-t', 'LARBadChannelsOflBadChannelsSC'+flags.LArCalib.BadChannelTagSC, '-c', '-a',  '-hitag', '-ch', '0'])
+   for p in ["/afs/cern.ch/user/l/larcalib/LArDBTools/python/BuildTagHierarchy.py",
+             "/det/lar/project/athena/BuildTagHierarchy.py"]:
+      if os.path.isfile(p):
+         buildTagHierarchy = p
+         break
+   else:
+      print("ERROR: BuildTagHierarchy.py cannot be found")
+      sys.exit(-1)
 
+   cmdline=[['/bin/rm', '-f', flags.LArCalib.BadChannelDB]]
+   dest = f"sqlite://;schema={flags.LArCalib.BadChannelDB};dbname=CONDBR2"
+   if 'FRONTIER_SERVER' in os.environ:
+      src = "COOLOFL_LAR/CONDBR2"  
+      if not flags.LArCalib.isSC:
+         cmdline.append(['AtlCoolCopy', src, dest, '-f', '/LAR/BadChannelsOfl/BadChannels',  '-f', '/LAR/BadChannelsOfl/MissingFEBs', '-t', flags.IOVDb.GlobalTag, '-c', '-a',  '-hitag'])
+      else:   
+         cmdline.append(['AtlCoolCopy', src, dest, '-f', '/LAR/BadChannelsOfl/BadChannelsSC',  '-t', 'LARBadChannelsOflBadChannelsSC'+flags.LArCalib.BadChannelTagSC, '-c', '-a',  '-hitag', '-ch', '0'])
+   else:
+      src = "COOLONL_LAR/CONDBR2"
+      if not flags.LArCalib.isSC:
+         cmdline.append(['AtlCoolCopy', src, dest, '-f', '/LAR/BadChannels/BadChannels',  '-of', '/LAR/BadChannelsOfl/BadChannels', '-t', flags.IOVDb.GlobalTag, '-c', '-a'])
+         cmdline.append(['AtlCoolCopy', src, dest, '-f', '/LAR/BadChannels/MissingFEBs', '-of', '/LAR/BadChannelsOfl/MissingFEBs', '-t', flags.IOVDb.GlobalTag, '-a'])
+      else:
+         cmdline.append(['AtlCoolCopy', src, dest, '-f', '/LAR/BadChannels/BadChannelsSC',  '-of', '/LAR/BadChannelsOfl/BadChannelsSC', '-t', flags.IOVDb.GlobalTag, '-c', '-a', '-ch', '0'])
+      cmdline.append([buildTagHierarchy, flags.LArCalib.BadChannelDB, flags.IOVDb.GlobalTag])
    try:
-      cp = subprocess.run(cmdlinerm, check=True, capture_output=True )
+      cp = subprocess.run(cmdline[0], check=True, capture_output=True)
    except Exception as e:
       print((" ").join(cmdlinerm))
       log.info('not existing BadChan sqlite file, fine')
       sys.exit(-1)
-   print((" ").join(cmdlinerm))
-   print(cp.stdout)
+   print((" ").join(cmdline[0]))
+   print(cp.stdout.decode())
    try:
-      cp = subprocess.run(cmdline, check=True, capture_output=True )
+      for cmd in cmdline[1:]:
+         cp = subprocess.run(cmd, check=True, capture_output=True)
+         print((" ").join(cmd))
+         print(cp.stdout.decode())
    except Exception as e:
-      print(e)
-      print((" ").join(cmdline))
-      log.error('Could not create BadChan sqlite file !!!!')
-      sys.exit(-1)
-   print((" ").join(cmdline))
-   print(cp.stdout)
-   
+       print(e)
+       print((" ").join(cmd))
+       log.error('Could not create BadChan sqlite file and/or tag hierarchy !!!!')
+       sys.exit(-1)
 
    cfg=MainServicesCfg(flags)
 
@@ -232,19 +251,19 @@ if __name__=='__main__':
           if 'Align' in fldrs[i]: fldrs[i] += '<forceRunNumber>9999999</forceRunNumber>'
           if 'LatomeMapping' in fldrs[i]: fldrs[i] += '<tag>LARIdentifierLatomeMapping-EMF</tag>'   
 
-
    #run the application
    cfg.run() 
 
    #build tag hierarchy in output sqlite file
    if args.outsql.startswith("/"):
-      cmdline = (['/afs/cern.ch/user/l/larcalib/LArDBTools/python/BuildTagHierarchy.py', args.outsql , flags.IOVDb.GlobalTag])
+      cmdline = ([buildTagHierarchy, args.outsql , flags.IOVDb.GlobalTag])
    else:   
-      cmdline = (['/afs/cern.ch/user/l/larcalib/LArDBTools/python/BuildTagHierarchy.py',args.outpdir + "/" + args.outsql , flags.IOVDb.GlobalTag])
+      cmdline = ([buildTagHierarchy, args.outpdir + "/" + args.outsql , flags.IOVDb.GlobalTag])
    log.debug(cmdline)
    try:
       subprocess.run(cmdline, check=True)
    except Exception as e:
       log.error('Could not create tag hierarchy in output sqlite file !!!!')
       sys.exit(-1)
+
 

@@ -2,18 +2,10 @@
   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
 */
 
+/// @author Nils Krumnack
+
 #ifndef SAMPLE_HANDLER_SAMPLE_GRID_HH
 #define SAMPLE_HANDLER_SAMPLE_GRID_HH
-
-//          
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
-// Please feel free to contact me (krumnack@iastate.edu) for bug
-// reports, feature suggestions, praise and complaints.
-
-
 
 #include <SampleHandler/Global.h>
 
@@ -40,7 +32,7 @@ namespace SH
   /// addGrid()
   ///
   /// \sa https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/SampleHandler#Grid_Data_Discovery_Using_DQ2
-  class SampleGrid : public Sample
+  class SampleGrid final : public Sample
   {
     //
     // public interface
@@ -84,19 +76,19 @@ namespace SH
 
     /// \copydoc Sample::getNumFiles
   protected:
-    virtual std::size_t getNumFiles () const;
+    virtual std::size_t getNumFiles () const override;
 
     /// \copydoc Sample::getFileName
   protected:
-    virtual std::string getFileName (std::size_t index) const;
+    virtual std::string getFileName (std::size_t index) const override;
 
     /// \copydoc Sample::doMakeLocal
   protected:
-    virtual SamplePtr doMakeLocal () const;
+    virtual std::unique_ptr<SampleLocal> doMakeLocal () const override;
 
     /// \copydoc Sample::doMakeFileList
   protected:
-    virtual std::vector<std::string> doMakeFileList () const;
+    virtual std::vector<std::string> doMakeFileList () const override;
 
 
 

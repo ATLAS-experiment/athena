@@ -303,7 +303,7 @@ StatusCode StripRDOAnalysis::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode StripRDOAnalysis::execute() {
+StatusCode StripRDOAnalysis::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG( "In StripRDOAnalysis::execute()" );
 
   m_rdoID->clear();
@@ -347,10 +347,10 @@ StatusCode StripRDOAnalysis::execute() {
   m_charge_vec->clear();
 
   // RawData
-  SG::ReadHandle<SCT_RDO_Container> p_SCT_RDO_cont (m_inputKey);
+  SG::ReadHandle<SCT_RDO_Container> p_SCT_RDO_cont (m_inputKey, ctx);
   //Adding SimMap and McEvent here for added truthMatching checks
-  SG::ReadHandle<InDetSimDataCollection> simDataMapSCT (m_inputTruthKey);
-  SG::ReadHandle<McEventCollection> mcEventCollection (m_inputMcEventCollectionKey);
+  SG::ReadHandle<InDetSimDataCollection> simDataMapSCT (m_inputTruthKey, ctx);
+  SG::ReadHandle<McEventCollection> mcEventCollection (m_inputMcEventCollectionKey, ctx);
 
   const HepMC::GenEvent* hardScatterEvent(nullptr);
   bool doTruthMatching = true;

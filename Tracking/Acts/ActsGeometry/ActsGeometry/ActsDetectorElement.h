@@ -73,7 +73,7 @@ public:
   /// Identifier hash
   IdentifierHash identifyHash() const { return m_idHash; }
 
-  virtual unsigned int storeAlignedTransforms(const ActsTrk::DetectorAlignStore& alignStore) const override;
+  virtual unsigned int storeAlignedTransforms(ActsTrk::DetectorAlignStore& alignStore) const override;
   
   virtual const Acts::Transform3 &
   localToGlobalTransform(const Acts::GeometryContext &gctx) const final override;
@@ -111,6 +111,7 @@ private:
   IdentifierHash m_idHash {};
   DetectorType m_type{DetectorType::UnDefined};
   ActsTrk::TransformCacheDetEle<ActsDetectorElement> m_trfCache{0, this};
+
   /// Detector element as variant
   const GeoVDetectorElement *m_detElement{nullptr};
   /// Boundaries of the detector element

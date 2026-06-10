@@ -91,15 +91,15 @@ namespace PFO {
 	      const xAOD::Muon* muon = *MuonLink;
 	      TLorentzVector muon_fourvec=muon->p4();
 	      double deltaR=muon_fourvec.DeltaR(FE_fourvec);
-	      if(muon->muonType()==4) // skip forward muons, as have tracklets which mis-link to FE.
+	      if(muon->muonType()==xAOD::Muon::MuonType::SiliconAssociatedForwardMuon) // skip forward muons, as have tracklets which mis-link to FE.
 	      continue;
 	      if(m_doNeutralFE)
 	        m_NFE_muon_dR->Fill(deltaR,eventInfo.beamSpotWeight());
 	      else{
 	        m_CFE_muon_dR->Fill(deltaR,eventInfo.beamSpotWeight());
   	    if(deltaR>1){// should never happen, but catch for extreme cases
-		      int auth=muon->author();
-		      int type=muon->muonType();
+		      int auth=static_cast<int>(muon->author());
+		      int type=static_cast<int>(muon->muonType());
 		      m_CFE_muon_largeDR_debug_author->Fill(auth,eventInfo.beamSpotWeight());
 		      m_CFE_muon_largeDR_debug_type->Fill(type,eventInfo.beamSpotWeight());
 	      } 

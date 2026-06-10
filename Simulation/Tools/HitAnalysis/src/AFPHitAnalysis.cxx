@@ -89,7 +89,7 @@ StatusCode AFPHitAnalysis::initialize() {
 }		 
   
 
-StatusCode AFPHitAnalysis::execute() {
+StatusCode AFPHitAnalysis::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG( "In AFPHitAnalysis::execute()" );
 
   m_hitID->clear();
@@ -110,7 +110,6 @@ StatusCode AFPHitAnalysis::execute() {
 
   AFP_SIDSimHitConstIter hi;
 
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
   const AFP_SIDSimHitCollection* iter{nullptr};
   ATH_CHECK(SG::get(iter, m_readKey, ctx));
   

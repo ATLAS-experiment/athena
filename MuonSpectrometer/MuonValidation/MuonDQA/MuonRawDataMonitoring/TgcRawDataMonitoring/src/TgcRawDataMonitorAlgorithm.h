@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGCRAWDATAMONITORING_TGCRAWDATAMONITORALGORITHM_H
@@ -30,7 +30,7 @@
 
 class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
  public:
-  TgcRawDataMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator );
+  using AthMonitorAlgorithm::AthMonitorAlgorithm;
   virtual ~TgcRawDataMonitorAlgorithm()=default;
   virtual StatusCode initialize() override;
   virtual StatusCode fillHistograms( const EventContext& ctx ) const override;

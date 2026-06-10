@@ -57,12 +57,11 @@ void makeKey(const Token* tok, Guid& guid)  {
 DbDatabaseObj::DbDatabaseObj( DbDomain&       dom,
                               const std::string&   pfn,
                               const std::string&   fid,
-                              DbAccessMode    mod)
+                              Io::IoFlag    mod)
 : Base(fid, mod, dom.type(), dom.db()),
   APRMessaging( pfn ),
-  m_dom(dom), m_info(0), m_string_t(0), m_fileAge(0)
+  m_dom(dom), m_info(0), m_string_t(0), m_logon(pfn), m_fileAge(0)
 {
-  m_logon = pfn;
   std::unique_ptr<Token> tok(new Token());
   tok->setTechnology(dom.type().type());
   tok->setClassID(Guid::null());
@@ -146,7 +145,7 @@ StatusCode DbDatabaseObj::makeLink(Token* pTok, Token::OID_t& refLnk) {
       refLnk.second = pTok->oid().second;
       return StatusCode::SUCCESS;
     }
-    else if ( mode() != pool::READ ) {
+    else if ( mode() != Io::READ ) {
       const Guid& dbn = pTok->dbID();
       std::unique_ptr<Token> link(new Token());
       link->fromString(pTok->toString());
@@ -227,7 +226,7 @@ StatusCode DbDatabaseObj::addShape(const DbTypeInfo* pShape) {
     else if ( m_string_t and (id == m_string_t->shapeID()) )  {
       return StatusCode::SUCCESS;
     }
-    else if ( mode() != pool::READ )  {
+    else if ( mode() != Io::READ )  {
       const std::string& dsc = pShape->toString();
       // Add the persistent entry to the links container
       if ( 0 != m_string_t )   {
@@ -281,7 +280,7 @@ StatusCode DbDatabaseObj::open()   {
       // is applied, because it is assumed, that objects
       // with pending connections may still be written.
       setAge(0);
-      if ( 0==(mode()&pool::CREATE) && 0==(mode()&pool::UPDATE) )  {
+      if ( mode() == Io::READ )  {
         m_dom.ageOpenDbs().ignore();
         setAge(0);
         m_dom.closeAgedDbs().ignore();
@@ -292,7 +291,7 @@ StatusCode DbDatabaseObj::open()   {
 
         // If we're reading, try to deduce the correct type of the POOL internal containers
         auto containerType = type();
-        if (mode() == pool::READ) {
+        if (mode() == Io::READ) {
           DbContainer testCont;
           int majorTypeValue = containerType.majorType() >> 8;
           for(int minorTypeValue = 0; minorTypeValue < pool::DbType::MINOR_MASK; ++minorTypeValue) {
@@ -439,7 +438,7 @@ StatusCode DbDatabaseObj::open()   {
             }
           }
           // Now set the DataHeader and EventTag container names if we're in read mode
-          if ( mode()&pool::READ )  {
+          if ( mode() == Io::READ )  {
             ParamMap::const_iterator it = m_paramMap.find(APRDefaults::ParamsKeyDataHeader);
             if ( it != m_paramMap.end() )  {
               APRDefaults::ReadConfig::setDataHeaderName(name(), (*it).second);
@@ -452,7 +451,7 @@ StatusCode DbDatabaseObj::open()   {
             }
           }
         }
-        if ( mode()&pool::CREATE || mode()&pool::UPDATE)  {
+        if ( mode() == Io::WRITE  || mode() == Io::APPEND )  {
           std::string par_val;
           if ( !param("FID", par_val).isSuccess() )  {
             if ( !addParam("FID", name()).isSuccess() )  {
@@ -674,7 +673,7 @@ const Token* DbDatabaseObj::cntToken(const std::string& cntName)  {
 
 /// Execute Database Transaction action
 StatusCode DbDatabaseObj::transAct(Transaction::Action action)  {
-  bool upda = (0 != (mode()&pool::CREATE) || 0 != (mode()&pool::UPDATE));
+  bool upda = (0 != (mode() == Io::WRITE || mode() == Io::APPEND));
   if ( 0 != m_info )  {
     StatusCode iret, status = StatusCode::SUCCESS;
     for (iterator i=begin(); i != end(); ++i )    {

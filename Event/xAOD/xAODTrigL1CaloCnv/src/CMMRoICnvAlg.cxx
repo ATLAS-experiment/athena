@@ -41,7 +41,7 @@ namespace xAODMaker {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode CMMRoICnvAlg::execute() {
+   StatusCode CMMRoICnvAlg::execute(const EventContext& /*ctx*/) {
       
       // Retrieve the ESD container:
       const LVL1::CMMRoI* esd = nullptr;

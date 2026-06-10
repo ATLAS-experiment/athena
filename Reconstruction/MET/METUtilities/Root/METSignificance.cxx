@@ -440,18 +440,14 @@ namespace met {
         return StatusCode::FAILURE;
       }
       const xAOD::Muon* muon(static_cast<const xAOD::Muon*>(obj));
-      if(muon->muonType()==0){//Combined
+      if(muon->muonType()==xAOD::Muon::MuonType::Combined){
         dettype=3;//CB
       }
-      else if(muon->muonType()==1){//MuonStandAlone
+      else if(muon->muonType()==xAOD::Muon::MuonType::MuonStandAlone){
         dettype=1;//MS
       }
-      else if(muon->muonType()>1){//Segment, Calo, Silicon
+      else {//Segment, Calo, Silicon
         dettype=2;//ID
-      }
-      else{
-        ATH_MSG_VERBOSE("This muon had none of the normal muon types (ID,MS,CB) - check this in detail");
-        return StatusCode::FAILURE;
       }
 
       pt_reso=m_muonCalibrationAndSmearingTool->expectedResolution(dettype,*muon,!m_isDataMuon);

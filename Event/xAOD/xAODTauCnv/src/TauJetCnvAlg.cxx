@@ -65,7 +65,7 @@ StatusCode TauJetCnvAlg::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode TauJetCnvAlg::execute()
+StatusCode TauJetCnvAlg::execute(const EventContext& /*ctx*/)
 {  
   ATH_MSG_DEBUG ("Executing " << name() << "...");
   ATH_MSG_DEBUG( "Converting " << m_inputTauJetContainerName << "  into "<< m_xaodTauJetContainerName );

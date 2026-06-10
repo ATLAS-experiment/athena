@@ -46,7 +46,7 @@ class LArHV2Ntuple : public AthAlgorithm {
     /** standard Athena-Algorithm method */
     virtual StatusCode          initialize() override;
     /** standard Athena-Algorithm method */
-    virtual StatusCode          execute() override;
+    virtual StatusCode          execute(const EventContext& ctx) override;
     
   private:
 

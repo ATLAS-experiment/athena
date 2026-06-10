@@ -32,7 +32,7 @@ namespace MuonR4{
             SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_truthSegKey{this, "TruthSegmentKey", "MuonTruthSegments"};
             
             SG::ReadDecorHandleKey<xAOD::MuonSegmentContainer> m_truthLinkKey{this, "TruthLinkKey", m_truthSegKey, "truthParticleLink"};
-            SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+            ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
             MuonVal::MuonTesterTree m_tree{"MuonHitDump","MuonHitDump"};
 

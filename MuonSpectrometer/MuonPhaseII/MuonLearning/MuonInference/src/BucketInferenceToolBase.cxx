@@ -195,7 +195,7 @@ StatusCode BucketInferenceToolBase::buildTransformerInputs(const EventContext& c
 
 StatusCode BucketInferenceToolBase::buildGraph(const EventContext& ctx,
                                                GraphRawData& graphData) const {
-  ATH_CHECK(buildFeaturesOnly(ctx, graphData));
+  graphData = GraphRawData{};
 
   const MuonR4::SpacePointContainer* buckets{nullptr};
   ATH_CHECK(SG::get(buckets, m_readKey, ctx));
@@ -204,15 +204,32 @@ StatusCode BucketInferenceToolBase::buildGraph(const EventContext& ctx,
   ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
 
   std::vector<BucketGraphUtils::NodeAux> nodes;
-  std::vector<float> throwawayFeatures;
-  std::vector<int64_t> throwawaySp;  // int64_t
-  BucketGraphUtils::buildNodesAndFeatures(*buckets, *gctx, nodes, throwawayFeatures, throwawaySp);
+
+  BucketGraphUtils::buildNodesAndFeatures(*buckets, *gctx, nodes,
+                                          graphData.featureLeaves,
+                                          graphData.spacePointsInBucket);
 
   const int64_t numNodes = static_cast<int64_t>(nodes.size());
   if (numNodes == 0) {
     ATH_MSG_WARNING("No valid buckets found (all have size 0.0). Skipping graph building.");
     return StatusCode::SUCCESS;
   }
+
+  const int64_t nFeatPerNode = static_cast<int64_t>(kBucketFeatureCount);
+  if (numNodes * nFeatPerNode != static_cast<int64_t>(graphData.featureLeaves.size())) {
+    ATH_MSG_ERROR("Feature size mismatch: expected " << (numNodes * nFeatPerNode)
+                  << " got " << graphData.featureLeaves.size());
+    return StatusCode::FAILURE;
+  }
+
+  Ort::MemoryInfo memInfo = Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
+  std::vector<int64_t> featShape{numNodes, nFeatPerNode};
+  graphData.graph->dataTensor.emplace_back(
+      Ort::Value::CreateTensor<float>(memInfo,
+                                      graphData.featureLeaves.data(),
+                                      graphData.featureLeaves.size(),
+                                      featShape.data(),
+                                      featShape.size()));
 
   std::vector<int64_t> srcEdges, dstEdges;
   BucketGraphUtils::buildSparseEdges(nodes,
@@ -249,6 +266,8 @@ StatusCode BucketInferenceToolBase::buildGraph(const EventContext& ctx,
       dstEdges.swap(newDst);
     }
   }
+
+  nodes = {};
 
   const size_t E = srcEdges.size();
 
@@ -305,7 +324,6 @@ StatusCode BucketInferenceToolBase::buildGraph(const EventContext& ctx,
   graphData.edgeIndexPacked.clear();
   const size_t Efinal = BucketGraphUtils::packEdgeIndex(srcEdges, dstEdges, graphData.edgeIndexPacked);
 
-  Ort::MemoryInfo memInfo = Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
   std::vector<int64_t> edgeShape{2, static_cast<int64_t>(Efinal)};
   graphData.graph->dataTensor.emplace_back(
       Ort::Value::CreateTensor<int64_t>(memInfo,
@@ -453,7 +471,7 @@ StatusCode BucketInferenceToolBase::runNamedInference(
       model().Run(run_options,
                   inputNames.data(),
                   graphData.graph->dataTensor.data(),
-                  graphData.graph->dataTensor.size(),
+                  inputNames.size(),
                   outputNames.data(),
                   outputNames.size());
 

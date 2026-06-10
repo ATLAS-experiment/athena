@@ -2,14 +2,7 @@
   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
 */
 
-//          
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
-// Please feel free to contact me (krumnack@iastate.edu) for bug
-// reports, feature suggestions, praise and complaints.
-
+/// @author Nils Krumnack
 
 //
 // includes
@@ -20,7 +13,7 @@
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/RootUtils.h>
 #include <RootCoreUtils/ThrowMsg.h>
-#include <SampleHandler/SamplePtr.h>
+#include <SampleHandler/SampleLocal.h>
 #include <TFile.h>
 #include <memory>
 
@@ -82,12 +75,12 @@ namespace SH
 
 
 
-  SamplePtr SampleHist ::
+  std::unique_ptr<SampleLocal> SampleHist ::
   doMakeLocal () const
   {
     RCU_READ_INVARIANT (this);
     RCU_THROW_MSG ("Sample::makeLocal not supported for SampleHist");
-    return SamplePtr (); // compiler dummy
+    return {}; // compiler dummy
   }
 
 

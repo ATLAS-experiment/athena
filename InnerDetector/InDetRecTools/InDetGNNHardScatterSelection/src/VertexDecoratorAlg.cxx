@@ -50,6 +50,11 @@ namespace InDetGNNHardScatterSelection
     m_mDecor_photon_deltaPhi = baseName + "." + m_mDecor_photon_deltaPhi.key();
     m_mDecor_actualInterPerXing = baseName + "." + m_mDecor_actualInterPerXing.key();
     m_multiPhotonLinksKey = baseName + ".multiPhotonLinks";
+    m_mDecor_gnnScore = baseName + "." + m_mDecor_gnnScore.key();
+    m_mDecor_nElectrons = baseName + "." + m_mDecor_nElectrons.key();
+    m_mDecor_nMuons = baseName + "." + m_mDecor_nMuons.key();
+    m_mDecor_nPhotons = baseName + "." + m_mDecor_nPhotons.key();
+    m_mDecor_nJets = baseName + "." + m_mDecor_nJets.key();
 
     ATH_CHECK(m_multiPhotonLinksKey.initialize());
     ATH_CHECK(m_photonLinksKey.initialize());
@@ -66,6 +71,11 @@ namespace InDetGNNHardScatterSelection
     ATH_CHECK(m_mDecor_photon_deltaz.initialize());
     ATH_CHECK(m_mDecor_photon_deltaPhi.initialize());
     ATH_CHECK(m_mDecor_actualInterPerXing.initialize());
+    ATH_CHECK(m_mDecor_gnnScore.initialize());
+    ATH_CHECK(m_mDecor_nElectrons.initialize());
+    ATH_CHECK(m_mDecor_nMuons.initialize());
+    ATH_CHECK(m_mDecor_nJets.initialize());
+    ATH_CHECK(m_mDecor_nPhotons.initialize());
 
     // ReadHandleKeys
     m_deltaZKey = baseName + ".deltaZ";
@@ -121,6 +131,8 @@ namespace InDetGNNHardScatterSelection
     SG::ReadDecorHandle<xAOD::PhotonContainer, float> acc_zCommon(m_zCommonKey, ctx);
     SG::ReadDecorHandle<xAOD::PhotonContainer, float> acc_zCommonError(m_zCommonErrorKey, ctx);
 
+    SG::WriteDecorHandle<xAOD::VertexContainer, float> dec_gnnScore(m_mDecor_gnnScore,ctx);
+    
     // Decorations needed by the GNNTool
     SG::WriteDecorHandle<xAOD::VertexContainer, int> dec_ntrk(m_mDecor_ntrk, ctx);
     SG::WriteDecorHandle<xAOD::VertexContainer, float> dec_sumPt(m_mDecor_sumPt,ctx);
@@ -132,6 +144,10 @@ namespace InDetGNNHardScatterSelection
     SG::WriteDecorHandle<xAOD::VertexContainer, float> dec_photon_deltaz(m_mDecor_photon_deltaz,ctx);
     SG::WriteDecorHandle<xAOD::VertexContainer, float> dec_photon_deltaPhi(m_mDecor_photon_deltaPhi,ctx);
     SG::WriteDecorHandle<xAOD::VertexContainer, float> dec_actualInterPerXing(m_mDecor_actualInterPerXing,ctx);
+    SG::WriteDecorHandle<xAOD::VertexContainer, int> dec_nElectrons(m_mDecor_nElectrons,ctx);
+    SG::WriteDecorHandle<xAOD::VertexContainer, int> dec_nMuons(m_mDecor_nMuons,ctx);
+    SG::WriteDecorHandle<xAOD::VertexContainer, int> dec_nJets(m_mDecor_nJets,ctx);
+    SG::WriteDecorHandle<xAOD::VertexContainer, int> dec_nPhotons(m_mDecor_nPhotons,ctx);
     SG::WriteHandle<xAOD::CompositeParticleContainer> mpHandle(m_multiPhotonsOutKey, ctx);
 
     auto mpCont = std::make_unique<xAOD::CompositeParticleContainer>();
@@ -411,6 +427,12 @@ namespace InDetGNNHardScatterSelection
       }
 
       // associate objects to vertices
+      auto countValid = [](const auto& links) -> int {
+        int n = 0;
+        for (const auto& l : links) if (l.isValid()) ++n;
+        return n;
+      };
+
       std::vector<ElementLink<xAOD::ElectronContainer>> electronLinks;
       for(const xAOD::Electron* electron : *electronsIn){
         const auto *id_trk = xAOD::EgammaHelpers::getOriginalTrackParticle(electron);
@@ -425,6 +447,7 @@ namespace InDetGNNHardScatterSelection
         }
       }
       dec_electronLinks(*vertex) = electronLinks;
+      dec_nElectrons(*vertex) = countValid(electronLinks);
 
       std::vector<ElementLink<xAOD::PhotonContainer>> photonLinks;
       for(const xAOD::Photon* photon : *photonsIn){
@@ -434,6 +457,7 @@ namespace InDetGNNHardScatterSelection
         photonLinks.push_back(phLink);
       }
       dec_photonLinks(*vertex) = photonLinks;
+      dec_nPhotons(*vertex) = countValid(photonLinks);
       
       // multi-photon link 
       std::vector<ElementLink<xAOD::CompositeParticleContainer>> mpLinks;
@@ -445,6 +469,7 @@ namespace InDetGNNHardScatterSelection
 
       // for jets, use prefilled map
       dec_jetLinks(*vertex) = jetsInVertex[vertex];
+      dec_nJets(*vertex) = countValid(jetsInVertex[vertex]);
 
       std::vector<ElementLink<xAOD::MuonContainer>> muonLinks;
       for(const xAOD::Muon* muon : *muonsIn){
@@ -466,9 +491,12 @@ namespace InDetGNNHardScatterSelection
 
       }
       dec_muonLinks(*vertex) = muonLinks;
+      dec_nMuons(*vertex) = countValid(muonLinks);
 
       // Finally, decorate the vertices with the GNN score
-      m_gnnTool->decorate(*vertex);
+      float score_phsvertex = m_gnnTool->decorate(*vertex);
+
+      dec_gnnScore(*vertex) = score_phsvertex;
     }
 
     return StatusCode::SUCCESS;

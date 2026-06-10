@@ -2,14 +2,7 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-//          
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
-// Please feel free to contact me (krumnack@iastate.edu) for bug
-// reports, feature suggestions, praise and complaints.
-
+/// @author Nils Krumnack
 
 //
 // includes
@@ -27,7 +20,6 @@
 #include <SampleHandler/SampleGrid.h>
 #include <SampleHandler/SampleHandler.h>
 #include <SampleHandler/SampleLocal.h>
-#include <SampleHandler/SamplePtr.h>
 #include <SampleHandler/ScanDir.h>
 #include <TChain.h>
 #include <TChainElement.h>
@@ -185,7 +177,7 @@ namespace SH
     auto sample = std::make_unique<SampleGrid> (name);
     sample->meta()->setString (MetaFields::gridName, ds);
     sample->meta()->setString (MetaFields::gridFilter, MetaFields::gridFilter_default);
-    sh.add (sample.release());
+    sh.add (std::move (sample));
   }
 
 
@@ -210,7 +202,7 @@ namespace SH
     auto sample = std::make_unique<SampleGrid> (dsName);
     sample->meta()->setString (MetaFields::gridName, name);
     sample->meta()->setString (MetaFields::gridFilter, MetaFields::gridFilter_default);
-    sh.add (sample.release());
+    sh.add (std::move (sample));
   }
   void addGridCombinedFromFile (SampleHandler& sh, const std::string& dsName,
                                 const std::string& dsFile)
@@ -242,7 +234,7 @@ namespace SH
     auto sample = std::make_unique<SampleGrid> (dsName);
     sample->meta()->setString (MetaFields::gridName, name);
     sample->meta()->setString (MetaFields::gridFilter, MetaFields::gridFilter_default);
-    sh.add (sample.release());
+    sh.add (std::move (sample));
   }
 
 
@@ -252,21 +244,20 @@ namespace SH
   {
     SampleHandler mysh;
 
-    for (SampleHandler::iterator sample = sh.begin(),
-	   end = sh.end(); sample != end; ++ sample)
+    for (auto sample : sh.samples())
     {
-      SampleGrid *grid = dynamic_cast<SampleGrid*>(*sample);
+      SampleGrid *grid = dynamic_cast<SampleGrid*>(sample.get());
 
       if (grid == 0)
       {
-	mysh.add (*sample);
+        mysh.add (sample);
       } else
       {
-	const std::string ds = grid->meta()->castString (MetaFields::gridName);
-	if (ds.empty())
-	  RCU_THROW_MSG ("no dataset configured for grid dataset " + ds);
+        const std::string ds = grid->meta()->castString (MetaFields::gridName);
+        if (ds.empty())
+          RCU_THROW_MSG ("no dataset configured for grid dataset " + ds);
 
-	std::regex pattern (RCU::glob_to_regexp (grid->meta()->castString (MetaFields::gridFilter, MetaFields::gridFilter_default)));
+        std::regex pattern (RCU::glob_to_regexp (grid->meta()->castString (MetaFields::gridFilter, MetaFields::gridFilter_default)));
 
         std::set<std::string> knownFiles;
         std::map<std::string,std::string> usedFiles;
@@ -289,7 +280,7 @@ namespace SH
         if (usedFiles.empty())
         {
           if (allow_partial)
-	    RCU_WARN_MSG ("dataset " + ds + " not at " + disk + ", skipped");
+            RCU_WARN_MSG ("dataset " + ds + " not at " + disk + ", skipped");
         } else if (knownFiles.size() != usedFiles.size())
         {
           if (allow_partial)
@@ -303,19 +294,18 @@ namespace SH
 
         if (usedFiles.size() == 0)
         {
-	  sh.add (*sample);
+          sh.add (sample);
         } else
-	{
-	  std::unique_ptr<SampleLocal> mysample
-	    (new SampleLocal (grid->name()));
-	  *mysample->meta() = *grid->meta();
+        {
+          auto mysample = std::make_unique<SampleLocal> (grid->name());
+          *mysample->meta() = *grid->meta();
 
-	  for (const auto& file : usedFiles)
-	  {
+          for (const auto& file : usedFiles)
+          {
             mysample->add (file.second);
-	  }
-	  mysh.add (mysample.release());
-	}
+          }
+          mysh.add (std::move (mysample));
+        }
       }
     }
     swap (sh, mysh);
@@ -323,13 +313,13 @@ namespace SH
 
 
 
-  void scanForTrees (SampleHandler& sh, Sample& sample,
+  void scanForTrees (SampleHandler& sh, std::shared_ptr<Sample>& sample,
 		     const std::string& pattern)
   {
-    SamplePtr mysample = sample.makeLocal();
+    auto mysample = sample->makeLocal();
     if (mysample->numFiles() == 0)
     {
-      sh.add (&sample);
+      sh.add (sample);
       return;
     }
     std::unique_ptr<TFile> file (TFile::Open (mysample->fileName(0).c_str()));
@@ -342,12 +332,12 @@ namespace SH
       if (RCU::match_expr (mypattern, object->GetName()) &&
 	  dynamic_cast<TTree*>(file->Get(object->GetName())))
       {
-	std::string newName = sample.name() + "_" + object->GetName();
+	std::string newName = sample->name() + "_" + object->GetName();
         std::unique_ptr<Sample> newSample
-	  (dynamic_cast<Sample*>(sample.Clone (newName.c_str())));
+	  (dynamic_cast<Sample*>(sample->Clone (newName.c_str())));
         newSample->name (newName);
         newSample->meta()->setString (MetaFields::treeName, object->GetName());
-	sh.add (newSample.release());
+	sh.add (std::move (newSample));
       }
     }
   }
@@ -358,10 +348,9 @@ namespace SH
   {
     SH::SampleHandler sh_new;
 
-    for (SampleHandler::iterator sample = sh.begin(),
-	   end = sh.end(); sample != end; ++ sample)
+    for (auto sample : sh.samples())
     {
-      scanForTrees (sh_new, **sample, pattern);
+      scanForTrees (sh_new, sample, pattern);
     }
     swap (sh, sh_new);
   }
@@ -386,6 +375,6 @@ namespace SH
     }
     if (!myfile.eof())
       RCU_THROW_MSG ("failed to read file: " + file);
-    sh.add (sample.release());
+    sh.add (std::move (sample));
   }
 }

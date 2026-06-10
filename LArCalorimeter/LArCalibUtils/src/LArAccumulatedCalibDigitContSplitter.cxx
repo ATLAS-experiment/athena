@@ -46,7 +46,7 @@ StatusCode LArAccumulatedCalibDigitContSplitter::initialize()
 }
 
 
-StatusCode LArAccumulatedCalibDigitContSplitter::execute() 
+StatusCode LArAccumulatedCalibDigitContSplitter::execute(const EventContext& /*ctx*/) 
 {
  if ( m_event_counter < 100 || ( m_event_counter < 1000 && m_event_counter%100==0 ) || m_event_counter%1000==0 ) 
    ATH_MSG_INFO ( "Processing event " << m_event_counter );

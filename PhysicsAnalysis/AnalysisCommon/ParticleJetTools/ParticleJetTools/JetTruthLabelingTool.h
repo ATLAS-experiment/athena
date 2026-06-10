@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PARTICLEJETTOOLS_JETTRUTHLABELINGTOOL_H
@@ -16,6 +16,7 @@
 #include "xAODJet/JetContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODEventInfo/EventInfo.h"
+#include "AthLinks/ElementLink.h"
 #include "JetInterface/IJetDecorator.h"
 #include "ParticleJetTools/LargeRJetLabelEnum.h"
 #include <optional>
@@ -49,24 +50,22 @@ protected:
   Gaudi::Property<std::string> m_truthLabelName{this, "TruthLabelName", "R10TruthLabel_R22v1", "Truth label name"};
 
   Gaudi::Property<bool> m_isTruthJetCol{this, "IsTruthJetCollection", false, "Flag indicating whether input collection is a truth jet container"};
+  Gaudi::Property<bool> m_forceDeltaRMatch{this, "ForceDeltaRMatch", false, "Whether to force dR matching e.g. if GhostTruth is not available"};
 
   SG::ReadHandleKey<xAOD::EventInfo> m_evtInfoKey{this, "EventInfoKey", "EventInfo", "Name of EventInfo object"};
 
   /// parameters for truth labeling
-  SG::ReadHandleKey<xAOD::JetContainer> m_truthJetCollectionName{this, "TruthJetContainer", "", "Do not configure manually!"};
-  SG::ReadHandleKey<xAOD::JetContainer> m_truthGroomedJetCollectionName{this, "TruthGroomedJetContainer", "", "Do not configure manually!"};
-  bool m_useWZMassHigh{}; /// Use upper mass cut for W/Z labels
+  SG::ReadHandleKey<xAOD::JetContainer> m_truthJetCollectionKey{this, "TruthJetContainer", "", "Do not configure manually!"};
+  SG::ReadHandleKey<xAOD::JetContainer> m_truthGroomedJetCollectionKey{this, "TruthGroomedJetContainer", "", "Do not configure manually!"};
   bool m_useGhostJetMatch{}; /// Use ghost association to match reco to truth jets, dR otherwise
   bool m_matchUngroomedParent{}; /// Use the ungroomed reco jet parent to match to truth jet
   bool m_getTruthGroomedJetValues{}; /// When truth jet matching to ungroomed truth, allow saving properties of groomed truth jets
   double m_dRTruthJet{}; /// dR to match truth jet to reco jet
   double m_recoGhostFrac{}; /// Ghost pT fraction to match truth jet to reco jet
-  double m_dRTruthPart{}; /// dR to match truth particles to truth jet
   double m_mLowTop{}; /// Lower mass cut for top label
   double m_mLowW{}; /// Lower mass cut for W label
-  double m_mHighW{}; /// Upper mass cut for W label
   double m_mLowZ{}; /// Lower mass cut for Z label
-  double m_mHighZ{}; /// Upper mass cut for Z label
+  bool m_doLargeRLabels{true}; /// Track internally if the W,Z,Top labels should be done (for large-R)
 
   struct DecorHandles {
     DecorHandles (const JetTruthLabelingTool& tool, const EventContext& ctx);
@@ -81,6 +80,9 @@ protected:
     using FloatHandleOp_t = std::optional<FloatHandle_t>;
     FloatHandleOp_t split23Handle;
     FloatHandleOp_t split12Handle;
+    using ELHandle_t = SG::WriteDecorHandle<xAOD::JetContainer, ElementLink<xAOD::JetContainer> >;
+    using ELHandleOp_t = std::optional<ELHandle_t>;
+    ELHandleOp_t matchedTruthJetHandle;
     FloatHandleOp_t matchedTruthJetMassHandle;
     FloatHandleOp_t matchedTruthJetPtHandle;
     FloatHandleOp_t matchedTruthJetEtaHandle;
@@ -121,13 +123,15 @@ protected:
   float getTopSplit23Cut( float pt ) const;
 
   /// Get number of ghost associated particles
-  int getNGhostParticles( const xAOD::Jet &jet, std::string collection ) const;
+  int getNGhostParticles( const xAOD::Jet &jet, const std::string & collection ) const;
 
   enum class TruthLabelConfiguration {
       R21Precision_2022v1,
       R10TruthLabel_R22v1,
       R10WZTruthLabel_R22v1,
       R4TruthLabel,
+      R4TruthDressedWZLabel,
+      R4InTimeTruthLabel,
       Unknown
   };
 
@@ -144,6 +148,7 @@ protected:
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_truthSplit12_recoKey{this, "TruthSplit12_RecoKey", "", "Do not configure manually!"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_truthSplit23_recoKey{this, "TruthSplit23_RecoKey", "", "Do not configure manually!"};
 
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_matchedTruthJet_recoKey{this, "MatchedTruthJet_RecoKey", "", "Do not configure manually!"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_matchedTruthJetMass_recoKey{this, "MatchedTruthJetMass_RecoKey", "", "Do not configure manually!"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_matchedTruthJetPt_recoKey{this, "MatchedTruthJetPt_RecoKey", "", "Do not configure manually!"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_matchedTruthJetEta_recoKey{ this, "MatchedTruthJetEta_RecoKey", "", "Do not configure manually!" };

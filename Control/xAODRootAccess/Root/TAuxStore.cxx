@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 // Local include(s).
 #include "xAODRootAccess/TAuxStore.h"
@@ -788,6 +788,7 @@ struct TAuxStore::impl {
   }
 
   /// Variables coming from @c AuxStoreBase
+  // cppcheck-suppress uninitMemberVarNoCtor
   Members& m_data;
 
   /// The basket size for the output branches

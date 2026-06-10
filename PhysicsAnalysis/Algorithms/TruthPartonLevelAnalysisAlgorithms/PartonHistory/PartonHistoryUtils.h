@@ -8,10 +8,6 @@
 #ifndef PARTONS_TOPPARTONUTILS_H
 #define PARTONS_TOPPARTONUTILS_H
 
-#include <xAODEventInfo/EventInfo.h>
-
-#include <string>
-
 #include "xAODTruth/TruthParticleContainer.h"
 
 namespace CP {

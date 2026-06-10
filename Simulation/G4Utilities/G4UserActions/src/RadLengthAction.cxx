@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RadLengthAction.h"
@@ -139,8 +139,8 @@ namespace G4UA
     // using already initialized treeMap to register the trees with volname
     // and branches which are REFERENCED to the components of the corresponding
     // entry in variables map
+    const std::string filename= "/RadLengthAction/";
     for (auto& p : treeMap) {
-      std::string filename= "/RadLengthAction/";
       std::string treepath= filename+p.first;
       m_hSvc->regTree(treepath.c_str(), treeMap[p.first]).ignore();
       //if (!hSvc) log()<< MSG::ERROR << "Cannot register Tree!" << p.first << endreq;

@@ -9,12 +9,10 @@
 #include "G4VSensitiveDetector.hh"
 
 // use of the hits
-#include "ZDC_SimEvent/ZDC_SimFiberHit_Collection.h"
-#include "StoreGate/WriteHandle.h"
+#include "ZDC_HitCollectionBuilders.h"
 
 // STL header
 #include <string>
-#include <map>
 #include <gtest/gtest_prod.h>
 
 // G4 needed classes
@@ -24,24 +22,21 @@ class G4HCofThisEvent;
 class ZDC_FiberSD : public G4VSensitiveDetector
 {
  FRIEND_TEST( ZDC_FiberSDtest, ProcessHits );
- FRIEND_TEST( ZDC_FiberSDtest, Initialize );
- FRIEND_TEST( ZDC_FiberSDtest, StartOfAthenaEvent );
- FRIEND_TEST( ZDC_FiberSDtest, EndOfAthenaEvent );
  public:
 
   ZDC_FiberSD(const G4String& name, const G4String& hitCollectionName, const float &readoutPos);
-  ~ZDC_FiberSD();
 
   // Initialize from G4
   void Initialize(G4HCofThisEvent *) override final;
   G4bool ProcessHits(G4Step*, G4TouchableHistory*) override final;
-  // Called from ZDC_FiberSDTool::Gather
-  void EndOfAthenaEvent();
 
 
  private:
-  SG::WriteHandle<ZDC_SimFiberHit_Collection> m_HitColl;
-  std::map< uint32_t, ZDC_SimFiberHit* > m_hitMap;
+  ZDC_SimFiberHitCollectionBuilder* getHitCollection() const;
+
+  std::string m_hitCollectionName;
+  // Non-owning cache set by Initialize; HitCollectionMap owns the collection.
+  ZDC_SimFiberHitCollectionBuilder* m_HitColl{};
   float m_readoutPos;
 };
 

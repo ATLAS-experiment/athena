@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKVERTEXFITTERINTERFACES_IIMPACTPOINT3DESTIMATOR_H
@@ -27,6 +27,8 @@
  *   EDM Migration to xAOD - move Trk::Vertex to Amg::Vector3D
  */
 
+class EventContext;
+
 namespace Trk
 {
   class PlaneSurface;
@@ -41,14 +43,14 @@ namespace Trk
     * method calculating the surface (returned), distance and point of closest approach
     */
     virtual std::unique_ptr<PlaneSurface>
-    Estimate3dIP(const Trk::TrackParameters* trackPerigee, const Amg::Vector3D* theVertex, double& distance) const = 0;
+    Estimate3dIP(const EventContext& ctx, const Trk::TrackParameters* trackPerigee, const Amg::Vector3D* theVertex, double& distance) const = 0;
     virtual std::unique_ptr<PlaneSurface>
-    Estimate3dIP(const Trk::NeutralParameters* neutralPerigee, const Amg::Vector3D* theVertex, double& distance) const = 0;
+    Estimate3dIP(const EventContext& ctx, const Trk::NeutralParameters* neutralPerigee, const Amg::Vector3D* theVertex, double& distance) const = 0;
 
     /**
       * Actual estimate method, changing the state of Trk::VxTrackAtVertex
       */
-    virtual bool addIP3dAtaPlane(VxTrackAtVertex &,const Amg::Vector3D & vertex) const = 0;
+    virtual bool addIP3dAtaPlane(const EventContext& ctx, VxTrackAtVertex &,const Amg::Vector3D & vertex) const = 0;
 
     /**
       *
@@ -57,9 +59,9 @@ namespace Trk
       * intersecting the track at point of closest approach, with track ortogonal to the plane and center 
       * of the plane defined as the given vertex.
       */
-    virtual const Trk::AtaPlane * IP3dAtaPlane(VxTrackAtVertex & vtxTrack,const Amg::Vector3D & vertex) const = 0;
+    virtual const Trk::AtaPlane * IP3dAtaPlane(const EventContext& ctx,VxTrackAtVertex & vtxTrack,const Amg::Vector3D & vertex) const = 0;
     //Same for neutrals
-    virtual const Trk::NeutralAtaPlane * IP3dNeutralAtaPlane(const NeutralParameters * initNeutPerigee,const Amg::Vector3D & vertex) const = 0;
+    virtual const Trk::NeutralAtaPlane * IP3dNeutralAtaPlane(const EventContext& ctx, const NeutralParameters * initNeutPerigee,const Amg::Vector3D & vertex) const = 0;
 
 
  };//end of class definition

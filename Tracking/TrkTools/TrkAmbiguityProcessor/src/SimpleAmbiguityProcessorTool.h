@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SIMPLEAMBIGUITYPROCESSORTOOL_H
@@ -59,15 +59,15 @@ namespace Trk {
 
       If no prd-to-track map is given the processor will create
       one internally (exported to storegate).*/
-      virtual const TrackCollection*  process(const TrackCollection*, Trk::PRDtoTrackMap *prdToTrackMap) const override;
-      virtual const TrackCollection*  process(const TracksScores* scoredTracks) const override;
+      virtual const TrackCollection*  process(const EventContext& ctx, const TrackCollection*, Trk::PRDtoTrackMap *prdToTrackMap) const override;
+      virtual const TrackCollection*  process(const EventContext& ctx, const TracksScores* scoredTracks) const override;
 
       /** statistics output to be called by algorithm during finalize. */
       virtual void statistics() override;
     private:
 
       const TrackCollection*
-      processVector(const TrackCollection &tracks, Trk::PRDtoTrackMap *prdToTrackMap) const;
+      processVector(const EventContext& ctx, const TrackCollection &tracks, Trk::PRDtoTrackMap *prdToTrackMap) const;
 
       /**Add passed TrackCollection, and Trk::PrepRawData from tracks to caches
       @param tracks the TrackCollection is looped over,
@@ -79,10 +79,11 @@ namespace Trk {
                   Trk::PRDtoTrackMap &prdToTrackMap) const;
 
       const TrackCollection *
-      solveTracks(TrackScoreMap &trackScoreTrackMap,
-                 Trk::PRDtoTrackMap &prdToTrackMap,
-                 std::vector<std::unique_ptr<const Trk::Track> > &trackDustbin,
-                 Counter &stat) const;
+      solveTracks(const EventContext& ctx,
+                  TrackScoreMap &trackScoreTrackMap,
+                  Trk::PRDtoTrackMap &prdToTrackMap,
+                  std::vector<std::unique_ptr<const Trk::Track> > &trackDustbin,
+                  Counter &stat) const;
 
       /** add subtrack to map */
       void
@@ -90,11 +91,11 @@ namespace Trk {
 
       /** do a refit assuming electron hypothesis **/
       virtual std::unique_ptr<Trk::Track>
-      doBremRefit(const Trk::Track & track) const override final;
+      doBremRefit(const EventContext& ctx, const Trk::Track & track) const override final;
 
       /** refit PRDs */
       Track*
-      refitPrds( const Track* track, Trk::PRDtoTrackMap &prdToTrackMap, Counter &stat) const override final;
+      refitPrds(const EventContext& ctx, const Track* track, Trk::PRDtoTrackMap &prdToTrackMap, Counter &stat) const override final;
 
       /** print out tracks and their scores for debugging*/
       void
@@ -104,8 +105,8 @@ namespace Trk {
       void
       dumpStat(MsgStream &out) const;
 
-      std::unique_ptr<Trk::Track>
-      fit(const Track &track, bool flag, Trk::ParticleHypothesis hypo) const override final;
+      virtual std::unique_ptr<Trk::Track>
+      fit(const EventContext& ctx, const Track &track, bool flag, Trk::ParticleHypothesis hypo) const override final;
 
       // private data members
       /** by default drop double tracks before refit*/

@@ -9,7 +9,7 @@
 #include <set>
 
 #include "PersistencySvc/ITechnologySpecificAttributes.h"
-#include "PersistencySvc/ITransaction.h"
+#include "StorageSvc/pool.h"
 
 namespace pool {
 
@@ -36,13 +36,12 @@ namespace pool {
     virtual ~MicroSessionManager();
 
     /// Connects to the storage service
-    bool connect( ITransaction::Type transType, int ageLimit );
+    bool connect( Io::IoFlag transType, int ageLimit );
 
     /// Connects to a database.
-    DatabaseHandler* connect( ITransaction::Type transType,
+    DatabaseHandler* connect( Io::IoFlag transType,
                               const std::string& fid,
-                              const std::string& pfn,
-                              long accessMode );
+                              const std::string& pfn );
 
     /// Disconnects from a database.
     void disconnect( DatabaseHandler* database );

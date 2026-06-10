@@ -71,13 +71,20 @@ from collections import defaultdict
 
 read_handles = {
     'eFexCvtrAlgTool': {'in0': 'eFexEMRoIKey'},
+    'gFexRhoCvtrAlgTool': {'in0': 'gFexJetRoIKey'},
     'Egamma1BDTAlgTool': {'in0': 'LArNeighborhoodTOBContainerReadKey'},
+    'GlobalCellTowerAlgTool': {'in0': 'GlobalLArCellsKey'},
+    'GlobalJet1AlgTool': {'in0': 'GlobalCellTowersKey'},
     'eEmMultAlgTool': {'in0': 'eEmTOBs'},
+    'CommonMultAlgTool': {'in0': 'CommonTOBsKey'},
     }
 
 write_handles = {
     'eFexCvtrAlgTool': 'eEmTOBs',
+    'gFexRhoCvtrAlgTool': 'gFexRhoTOBs',
     'Egamma1BDTAlgTool': 'eEmEg1BDTTOBContainerKey',
+    'GlobalCellTowerAlgTool': 'GlobalCellTowersKey',
+    'GlobalJet1AlgTool': 'GlobalJet1JetsKey',
 }
 
 def GlobalSimulationAlgCfg(flags,

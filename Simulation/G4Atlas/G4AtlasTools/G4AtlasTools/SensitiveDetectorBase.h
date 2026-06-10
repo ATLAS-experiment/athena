@@ -5,14 +5,6 @@
 #ifndef G4ATLASTOOLS_SENSITIVEDETECTORBASE_H
 #define G4ATLASTOOLS_SENSITIVEDETECTORBASE_H
 
-#pragma GCC diagnostic push
-// SDtools that have not yet been migrated to the new SD interface will trigger
-// this warning because SetupEvent(AtlasG4EventUserInfo&) and
-// Gather(AtlasG4EventUserInfo&) are hidden. this is fine, as these methods are
-// not used in the old-style SDs, but should be migrated. Remove this when all
-// SDs are migrated.
-#pragma GCC diagnostic ignored "-Woverloaded-virtual"
-
 // Base classes
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "G4AtlasInterfaces/ISensitiveDetector.h"
@@ -20,14 +12,11 @@
 // Members
 #include "G4VSensitiveDetector.hh"
 #include "G4Types.hh"
-#ifdef G4MULTITHREADED
-#  include "tbb/concurrent_unordered_map.h"
-#endif
+#include <GaudiKernel/StatusCode.h>
 
 // STL library
 #include <string>
 #include <vector>
-#include <thread>
 
 // Forward declarations
 class G4LogicalVolume;
@@ -55,7 +44,7 @@ class SensitiveDetectorBase : public extends<AthAlgTool, ISensitiveDetector>
   SensitiveDetectorBase(const std::string& type, const std::string& name,
                         const IInterface *parent);
   /// Empty virtual destructor
-  virtual ~SensitiveDetectorBase() {}
+  virtual ~SensitiveDetectorBase() = default;
 
   /// @brief Setup an SD in the current thread.
   ///
@@ -67,17 +56,15 @@ class SensitiveDetectorBase : public extends<AthAlgTool, ISensitiveDetector>
   /// @brief Beginning of an athena event.
   /** This is where collection initialization should happen.
       If we are using a WriteHandle, then this could be empty.  */
-  virtual StatusCode SetupEvent() override { return StatusCode::SUCCESS; }
   virtual StatusCode SetupEvent(HitCollectionMap&) override {
-    return SetupEvent();
+    return StatusCode::SUCCESS;
   }
 
   /// @brief End of an athena event.
   /** Store the output collection in SG at this point.
   If we are using a WriteHandle, then this can be empty! */
-  virtual StatusCode Gather() override { return StatusCode::SUCCESS; }
   virtual StatusCode Gather(HitCollectionMap&) override {
-    return Gather();
+    return StatusCode::SUCCESS;
   };
 
  protected:
@@ -86,11 +73,6 @@ class SensitiveDetectorBase : public extends<AthAlgTool, ISensitiveDetector>
   /** This method supports wild card matching */
   StatusCode assignSD(std::unique_ptr<G4VSensitiveDetector> sd,
                       const std::vector<std::string>& volumes) const;
-  
-  /// @brief Retrieve the current SD.
-  /** In AthenaMT, this means the thread-local SD.
-      Otherwise, it is simply the single SD. */
-  G4VSensitiveDetector* getSD();
 
   /// All the volumes to which this SD is assigned
   Gaudi::Property<std::vector<std::string> > m_volumeNames{this, "LogicalVolumeNames", {}};
@@ -104,29 +86,11 @@ class SensitiveDetectorBase : public extends<AthAlgTool, ISensitiveDetector>
   void SetSensitiveDetector(G4LogicalVolume*, G4VSensitiveDetector*) const;
 
  private:
-
-  /// @brief Set the current SD.
-  /** In hive, this gets assigned as the thread-local SD. */
-  void setSD(G4VSensitiveDetector*);
-  
   /// @brief Match two strings with wildcard support
   /** Compares two strings character by character 
       with optional * wildcard in the first argument*/
   static bool matchStrings(const char *first, const char * second);
 
-#ifdef G4MULTITHREADED
-  /// Thread-to-SD concurrent map type
-  using SDThreadMap_t = tbb::concurrent_unordered_map
-    < std::thread::id, G4VSensitiveDetector*, std::hash<std::thread::id> >;
-  /// Concurrent map of SDs, one for each thread
-  SDThreadMap_t m_sdThreadMap;
-#else
-  /// The sensitive detector to which this thing corresponds
-  G4VSensitiveDetector* m_SD{};
-#endif
-
 }; // class SensitiveDetectorBase
-
-#pragma GCC diagnostic pop
 
 #endif

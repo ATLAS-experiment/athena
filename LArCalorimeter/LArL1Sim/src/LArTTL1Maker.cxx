@@ -197,7 +197,7 @@ void LArTTL1Maker::handle(const Incident& /* inc*/) {
   return;
 }
 
-StatusCode LArTTL1Maker::execute() {
+StatusCode LArTTL1Maker::execute(const EventContext& ctx) {
   // +======================================================================+
   // +                                                                      +
   // + Author: F. Ledroit                                                   +
@@ -214,9 +214,9 @@ StatusCode LArTTL1Maker::execute() {
   ATHRNG::RNGWrapper::SeedingOptionType seedingmode =
       m_useLegacyRandomSeeds ? ATHRNG::RNGWrapper::MC16Seeding
                              : ATHRNG::RNGWrapper::SeedingDefault;
-  rngWrapper->setSeedLegacy(m_randomStreamName, Gaudi::Hive::currentContext(),
+  rngWrapper->setSeedLegacy(m_randomStreamName, ctx,
                             m_randomSeedOffset, seedingmode);
-  CLHEP::HepRandomEngine* rndmEngine = *rngWrapper;
+  CLHEP::HepRandomEngine* rndmEngine = rngWrapper->getEngine(ctx);
 
   //
   // ....... fill the LArHitEMap
@@ -225,10 +225,10 @@ StatusCode LArTTL1Maker::execute() {
     m_chronSvc->chronoStart("fill LArHitEMap ");
   }
 
-  SG::ReadCondHandle<ILArfSampl> fSamplhdl(m_fSamplKey);
+  SG::ReadCondHandle<ILArfSampl> fSamplhdl(m_fSamplKey, ctx);
   const ILArfSampl* fSampl = *fSamplhdl;
 
-  SG::ReadHandle<LArHitEMap> hitmap(m_hitMapKey);
+  SG::ReadHandle<LArHitEMap> hitmap(m_hitMapKey, ctx);
 
   if (m_chronoTest) {
     m_chronSvc->chronoStop("fill LArHitEMap ");
@@ -248,10 +248,10 @@ StatusCode LArTTL1Maker::execute() {
   // ....... create the LAr TTL1 Containers
   //
 
-  SG::WriteHandle<LArTTL1Container> ttL1ContainerEm(m_EmTTL1ContainerName);
+  SG::WriteHandle<LArTTL1Container> ttL1ContainerEm(m_EmTTL1ContainerName, ctx);
   ATH_CHECK(ttL1ContainerEm.record(std::make_unique<LArTTL1Container>()));
 
-  SG::WriteHandle<LArTTL1Container> ttL1ContainerHad(m_HadTTL1ContainerName);
+  SG::WriteHandle<LArTTL1Container> ttL1ContainerHad(m_HadTTL1ContainerName, ctx);
   ATH_CHECK(ttL1ContainerHad.record(std::make_unique<LArTTL1Container>()));
 
   std::unique_ptr<LArTTL1Container> truth_ttL1ContainerEm;

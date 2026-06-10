@@ -29,15 +29,17 @@ StatusCode HLTCaloGlobalCellMonitor::initialize() {
   if (!m_moniTool.empty()) {
      ATH_CHECK(m_moniTool.retrieve());
   }
+  m_layerNames.reserve(25);
   for(size_t i=0;i<25; i++) {
     std::string number("layer");
     number+=std::to_string(i);
-    m_layerNames.push_back(number);
+    m_layerNames.push_back(std::move(number));
   }
+  m_layerNamesIW.reserve(2);
   for(size_t i=0;i<2; i++) {
     std::string number("layerIW");
     number+=std::to_string(i+1);
-    m_layerNamesIW.push_back(number);
+    m_layerNamesIW.push_back(std::move(number));
   }
 
   return StatusCode::SUCCESS;

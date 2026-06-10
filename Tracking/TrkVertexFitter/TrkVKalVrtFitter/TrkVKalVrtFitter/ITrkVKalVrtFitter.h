@@ -151,13 +151,15 @@ class Track;
                                    std::vector<double>& ImpactError,
                                    IVKalState& istate) const = 0;
 
-      virtual double VKalGetImpact(const xAOD::TrackParticle*,
+      virtual double VKalGetImpact(const EventContext& ctx,
+                                   const xAOD::TrackParticle*,
                                    const Amg::Vector3D& Vertex,
                                    const long int Charge,
                                    std::vector<double>& Impact,
                                    std::vector<double>& ImpactError) const = 0;
 
-      virtual double VKalGetImpact(const Perigee*,
+      virtual double VKalGetImpact(const EventContext& ctx,
+                                   const Perigee*,
                                    const Amg::Vector3D& Vertex,
                                    const long int Charge,
                                    std::vector<double>& Impact,

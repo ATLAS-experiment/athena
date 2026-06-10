@@ -18,7 +18,7 @@ class LArFebTimeOffset2Ntuple: public LArCond2NtupleBase {
   virtual ~LArFebTimeOffset2Ntuple();
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override {return StatusCode::SUCCESS;}
+  virtual StatusCode execute(const EventContext&) override {return StatusCode::SUCCESS;}
   virtual StatusCode stop ATLAS_NOT_THREAD_SAFE() override; //<< Do the work here
 
 

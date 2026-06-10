@@ -113,7 +113,8 @@ bool AmbiguityProcessorBase::shouldTryBremRecovery(
           track.info().patternRecoInfo(Trk::TrackInfo::TrackInCaloROI));
 }
 //
-Track* AmbiguityProcessorBase::refitTrack(const Trk::Track* track,
+Track* AmbiguityProcessorBase::refitTrack(const EventContext& ctx,
+                                          const Trk::Track* track,
                                           Trk::PRDtoTrackMap& prdToTrackMap,
                                           Counter& stat, int trackId,
                                           int subtrackId) const {
@@ -122,11 +123,11 @@ Track* AmbiguityProcessorBase::refitTrack(const Trk::Track* track,
     if (m_refitPrds) {
       // simple case, fit PRD directly
       ATH_MSG_VERBOSE("Refit track " << track << " from PRDs");
-      newTrack.reset(refitPrds(track, prdToTrackMap, stat));
+      newTrack.reset(refitPrds(ctx, track, prdToTrackMap, stat));
     } else {
       // ok, we fit ROTs
       ATH_MSG_VERBOSE("Refit track " << track << " from ROTs");
-      newTrack.reset(refitRots(track, stat));
+      newTrack.reset(refitRots(ctx, track, stat));
     }
   } else {
     newTrack = AmbiguityProcessor::createNewFitQualityTrack(*track);
@@ -191,7 +192,7 @@ void AmbiguityProcessorBase::addTrack(
   if (fitted and shouldTryBremRecovery(*atrack)) {
     ATH_MSG_DEBUG("Track score is zero, try to recover it via brem fit");
     // run track fit using electron hypothesis
-    auto bremTrack(doBremRefit(*atrack));
+    auto bremTrack(doBremRefit(ctx, *atrack));
     if (!bremTrack) {
       ATH_MSG_DEBUG("Brem refit failed, drop track");
       if (m_observerTool.isEnabled()) {
@@ -287,7 +288,8 @@ const TrackParameters* AmbiguityProcessorBase::getTrackParameters(
 
 //==================================================================================================
 
-Trk::Track* AmbiguityProcessorBase::refitRots(const Trk::Track* track,
+Trk::Track* AmbiguityProcessorBase::refitRots(const EventContext& ctx,
+                                              const Trk::Track* track,
                                               Counter& stat) const {
   ATH_MSG_VERBOSE("Refit track " << track);
   // refit using first parameter, do outliers
@@ -295,15 +297,15 @@ Trk::Track* AmbiguityProcessorBase::refitRots(const Trk::Track* track,
   if (m_tryBremFit and track->info().trackProperties(Trk::TrackInfo::BremFit)) {
     stat.incrementCounterByRegion(CounterIndex::kNbremFits, track);
     ATH_MSG_VERBOSE("Brem track, refit with electron brem fit");
-    newTrack = doBremRefit(*track);
+    newTrack = doBremRefit(ctx, *track);
   } else {
     stat.incrementCounterByRegion(CounterIndex::kNfits, track);
     ATH_MSG_VERBOSE("Normal track, refit");
-    newTrack = fit(*track, true, m_particleHypothesis);
+    newTrack = fit(ctx, *track, true, m_particleHypothesis);
     if ((not newTrack) and shouldTryBremRecovery(*track)) {
       stat.incrementCounterByRegion(CounterIndex::kNrecoveryBremFits, track);
       ATH_MSG_VERBOSE("Normal fit failed, try brem recovery");
-      newTrack = doBremRefit(*track);
+      newTrack = doBremRefit(ctx, *track);
     }
   }
 

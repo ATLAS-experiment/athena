@@ -263,7 +263,7 @@ TruthParticleCnvTool::convert( const McEventCollection * mcCollection,
   
 #ifdef HEPMC3
   // Process particles in barcode order.
-  auto bcmapatt = evt->attribute<HepMC::GenEventBarcodes>("barcodes");
+  auto bcmapatt = evt->attribute<HepMC::GenEventBarcodes>(HepMC::Str::barcodes);
   if (!bcmapatt){
     ATH_MSG_ERROR("TruthParticleCnvTool.cxx: Event does not contain barcodes attribute");
     return StatusCode::FAILURE;

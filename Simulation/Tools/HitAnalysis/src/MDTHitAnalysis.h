@@ -19,7 +19,7 @@ class MDTHitAnalysis : public AthHistogramAlgorithm {
    ~MDTHitAnalysis() = default;
 
    virtual StatusCode initialize() override final;
-   virtual StatusCode execute() override final;
+   virtual StatusCode execute(const EventContext& ctx) override final;
 
  private:
 

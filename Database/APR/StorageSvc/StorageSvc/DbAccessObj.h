@@ -55,7 +55,7 @@ namespace pool    {
     /// Reference counter
     mutable std::atomic<int> m_refCount;
     /// Access mode
-    DbAccessMode          m_mode;
+    Io::IoFlag          m_mode;
     /// Name of the instance
     std::string           m_name;
     /// Database type
@@ -67,7 +67,7 @@ namespace pool    {
 
   public:
     /// Constructor with initializing arguments
-    DbAccessObj(const std::string& n, DbAccessMode m, const DbType& t, IOODatabase* s=0)
+    DbAccessObj(const std::string& n, Io::IoFlag m, const DbType& t, IOODatabase* s=0)
     : m_refCount(0), m_mode(m), m_name(n), m_type(t), m_pool(s)
     { if( m_pool )  m_pool->addRef(); }
     /// Standard destructor
@@ -77,9 +77,9 @@ namespace pool    {
     /// Access the instance name
     void setName(const std::string& n){      m_name = n;              }
     /// Access mode
-    DbAccessMode mode()   const       {      return m_mode;           }
+    Io::IoFlag mode()   const       {      return m_mode;           }
     /// Set Access mode
-    void setMode(DbAccessMode m)      {      m_mode = m;              }
+    void setMode(Io::IoFlag m)      {      m_mode = m;              }
     // Inline functions
     const DbType& type()  const       {      return m_type;           }
     /// Allow access to the Database implementation

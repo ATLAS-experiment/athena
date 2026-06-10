@@ -65,13 +65,11 @@ private:
   ToolHandle<IL1TriggerByteStreamTool> m_efexEncoderTool{"eFexByteStreamTool/eFexBSEncoderTool"};
   /// jFEX tool
   ToolHandle<IL1TriggerByteStreamTool> m_jfexEncoderTool{"jFexRoiByteStreamTool/jFexBSEncoderTool"};
+  /// gFEX tool
+  ToolHandle<IL1TriggerByteStreamTool> m_gfexEncoderTool{"gFexByteStreamTool/gFexBSEncoderTool"};
 
   // Placeholder for other L1 xAOD outputs:
   // - L1Topo result
-  // - L1Calo (Run3) RoIs (gFEX)
-
-  // Read handle key needed for CTPResult to update the RawEventWrite with L1 trigger bits
-  SG::ReadHandleKey<xAOD::CTPResult> m_inKeyCTPResult { "CTPResult" };
 
 };
 

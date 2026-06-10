@@ -10,7 +10,6 @@
 ///////////////////////////////////////////////////////////////////
 
 #include "EgammaAnalysisAlgorithms/ElectronSiHitDecAlg.h"
-#include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/TrackParticlexAODHelpers.h"
 #include <SelectionHelpers/SelectionHelpers.h>
 

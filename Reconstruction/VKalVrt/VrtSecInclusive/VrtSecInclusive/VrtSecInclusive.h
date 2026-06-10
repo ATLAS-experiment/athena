@@ -431,7 +431,7 @@ namespace VKalVrtAthena {
     StatusCode refitAndSelectGoodQualityVertices( const EventContext& ctx, std::vector<WrkVrt>* );
 
     /** get secondary vertex impact parameters **/
-    bool getSVImpactParameters(const xAOD::TrackParticle* trk, const Amg::Vector3D& vertex, std::vector<double>& impactParameters, std::vector<double>& impactParErrors);
+    bool getSVImpactParameters(const EventContext& ctx, const xAOD::TrackParticle* trk, const Amg::Vector3D& vertex, std::vector<double>& impactParameters, std::vector<double>& impactParErrors);
 
     enum TrkParameter    { k_d0=0, k_z0=1, k_theta=2, k_phi=3, k_qOverP=4 ,k_nTP=5 };
     enum TrkParameterUnc { k_d0d0=0, k_z0z0=1, k_nTPU=2 };
@@ -573,7 +573,7 @@ namespace VKalVrtAthena {
     //
 
     template<class LeptonFlavor>
-    StatusCode augmentDVimpactParametersToLeptons( const std::string& containerName );
+    StatusCode augmentDVimpactParametersToLeptons( const EventContext& ctx, const std::string& containerName );
 
     /** lock decorations at the end of the algorithm */
     void lockTrackDecorations( const xAOD::TrackParticle* trk, bool onlySelection ) const;

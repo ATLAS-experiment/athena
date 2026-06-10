@@ -6,7 +6,6 @@
 
 // InSituJMSCalibStep.h 
 // Header file for class InSituJMSCalibStep
-// Author: Ben Hodkinson <ben.hodkinson@cern.ch>
 /////////////////////////////////////////////////////////////////// 
 
 #ifndef JETCALIBTOOLS_INSITUJMSCALIBSTEP_H

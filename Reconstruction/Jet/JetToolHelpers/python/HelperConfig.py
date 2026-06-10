@@ -56,10 +56,3 @@ def HistoInputCfg(flags, Tname, inputFile, histName, varX, **kwargs):
     else:
         return CompFactory.JetHelper.HistoInput1D(tname, **kwargs)
  
-
-def MCJESToolCfg(flags, Tname, inFile, corrKey, **kwargs):
-    """Provides Text reader for MCJES type"""
-    tname = Tname+"_"+corrKey
-    kwargs.setdefault("inputfile",inFile)
-    kwargs.setdefault("corrName",corrKey)
-    return CompFactory.JetHelper.TextInputMCJES(tname,**kwargs)

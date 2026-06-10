@@ -6,9 +6,6 @@
 #include "MuonSensitiveDetectorsR4/Utils.h"
 #include "G4ThreeVector.hh"
 
-#include <MCTruth/TrackHelper.h>
-#include <MCTruth/AtlasG4EventUserInfo.h>
-
 #include <sstream>
 
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
@@ -33,11 +30,7 @@ G4bool MmSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
     return true;
   }
   
-  auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo();
-  if (!eventInfo) {
-    THROW_EXCEPTION("No AtlasG4EventUserInfo available");
-  }
-  const ActsTrk::GeometryContext gctx{getGeoContext(eventInfo->GetEventContext())};
+  const ActsTrk::GeometryContext gctx{getGeoContext()};
 
   const G4TouchableHistory* touchHist = static_cast<const G4TouchableHistory*>(aStep->GetPreStepPoint()->GetTouchable());
   const MuonGMR4::MmReadoutElement* readOutEle = getReadoutElement(gctx, touchHist);

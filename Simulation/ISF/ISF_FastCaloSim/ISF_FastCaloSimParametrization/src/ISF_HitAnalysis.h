@@ -70,7 +70,7 @@ public:
 
   virtual StatusCode initialize ATLAS_NOT_THREAD_SAFE () override;
   virtual StatusCode finalize ATLAS_NOT_THREAD_SAFE () override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
   const static int MAX_LAYER = 25;
 

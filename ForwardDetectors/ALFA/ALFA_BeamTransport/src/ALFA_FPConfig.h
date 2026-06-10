@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ALFA_BeamTrack_FPCONFIG_H
@@ -9,23 +9,23 @@
  
      struct FPConfig {
      
-	  bool UseALFA;
+	  bool UseALFA{};
 	  std::string ConfDir;
 	  
 	  
 	  //configuration parameters for FPTracker
-	  int    IP;
+	  int    IP{};
 	//  float  xinner0;
-	  bool   useaper; //user appature true false
-	  double apermb; // MB aperture constant in mm (0 = nominal 22.02 mm)
-	  double xcol1;//colimator settings
-	  double xcol2;
-	  double pbeam0; //beam energy
+	  bool   useaper{}; //user appature true false
+	  double apermb{}; // MB aperture constant in mm (0 = nominal 22.02 mm)
+	  double xcol1{};//colimator settings
+	  double xcol2{};
+	  double pbeam0{}; //beam energy
 		
-	  float RPDistance;
+	  float RPDistance{};
 	  
-	  //float  endMarker; //RP Position
-	  float  absZMagMax; //dont read magnets after this value
+	  //float  endMarker{}; //RP Position
+	  float  absZMagMax{}; //dont read magnets after this value
 	  
 	  
      

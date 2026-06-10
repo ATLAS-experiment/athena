@@ -62,8 +62,7 @@ StatusCode DumpEventDataToJsonAlg::initialize() {
     ATH_MSG_INFO("Extrapolator found. Will be able to extrapolate tracks.");
   }
 
-  if (!m_geometryContextKey.empty())
-    ATH_CHECK(m_geometryContextKey.initialize());
+  ATH_CHECK(m_geometryContextKey.initialize(SG::AllowEmpty));
 
   return StatusCode::SUCCESS;
 }
@@ -156,7 +155,8 @@ StatusCode DumpEventDataToJsonAlg::execute() {
   // ACTS
   if (!m_geometryContextKey.empty()){
   auto tcHandles = m_trackContainerKeys.makeHandles();
-  SG::ReadHandle gcx(m_geometryContextKey, Gaudi::Hive::currentContext());
+  const ActsTrk::GeometryContext* gctx{};
+  ATH_CHECK(SG::get(gctx, m_geometryContextKey, Gaudi::Hive::currentContext()));
 
   for ( SG::ReadHandle<ActsTrk::TrackContainer>& tcHandle: tcHandles ) {
     // Temporary debugging information
@@ -165,7 +165,7 @@ StatusCode DumpEventDataToJsonAlg::execute() {
     ATH_MSG_VERBOSE("Trying to load " << tcHandle.key() << " with " << tcHandle->size() << " tracks");
     const ActsTrk::TrackContainer* tc = tcHandle.get();
     for (auto track : *tc) {
-      nlohmann::json tmp = getActsData(track, gcx->context());
+      nlohmann::json tmp = getActsData(track, gctx->context());
       j["TrackContainers"][tcHandle.key()].push_back(tmp);
     }
   }
@@ -425,9 +425,22 @@ nlohmann::json DumpEventDataToJsonAlg::getData(const xAOD::Muon &muon) {
   data["Type"] = type[static_cast<unsigned int>(muon.muonType())];
 
   addLink(muon.clusterLink(), data["LinkedClusters"]);
-  addLink(muon.inDetTrackParticleLink(), data["LinkedTracks"]);
-  addLink(muon.muonSpectrometerTrackParticleLink(), data["LinkedTracks"]);
-  addLink(muon.extrapolatedMuonSpectrometerTrackParticleLink(),
+  
+  using Track_t = xAOD::Muon::TrackParticleType;
+  using Link_t = ElementLink<xAOD::TrackParticleContainer>;
+  auto makeMuonLink = [&muon](const Track_t tType) -> Link_t {
+    const xAOD::TrackParticle* trk = muon.trackParticle(tType);
+    if (!trk) {
+      return Link_t{};
+    }
+    return Link_t{static_cast<const xAOD::TrackParticleContainer&>(*trk->container()),
+                  trk->index()};
+  };
+
+
+  addLink(makeMuonLink(Track_t::InnerDetectorTrackParticle), data["LinkedTracks"]);
+  addLink(makeMuonLink(Track_t::MuonSpectrometerTrackParticle), data["LinkedTracks"]);
+  addLink(makeMuonLink(Track_t::ExtrapolatedMuonSpectrometerTrackParticle),
           data["LinkedTracks"]);
 
   return data;

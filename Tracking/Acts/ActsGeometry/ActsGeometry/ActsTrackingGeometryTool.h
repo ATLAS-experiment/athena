@@ -44,7 +44,7 @@ class ActsTrackingGeometryTool : public extends<AthAlgTool, ActsTrk::ITrackingGe
      
       ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
 
-      SG::ReadHandleKey<ActsTrk::GeometryContext> m_rchk{this, "ActsAlignmentKey", "ActsAlignment", "cond read key for the alignment"};
+      ActsTrk::GeoContextReadKey_t m_rchk{this, "ActsAlignmentKey", "ActsAlignment", "cond read key for the alignment"};
 
       std::unique_ptr<const ActsTrk::DetectorElementToActsGeometryIdMap> m_detIdMap{};
 };

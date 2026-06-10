@@ -36,7 +36,7 @@ namespace xAODMakerTest {
       /// Initialise the algorithm
       virtual StatusCode initialize() override;
       /// Execute the algorithm for one event
-      virtual StatusCode execute() override;
+      virtual StatusCode execute(const EventContext& ctx) override;
 
       /// @}
 

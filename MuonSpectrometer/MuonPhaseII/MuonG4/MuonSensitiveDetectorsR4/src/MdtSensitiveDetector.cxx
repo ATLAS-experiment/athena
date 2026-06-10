@@ -6,8 +6,7 @@
 
 #include "MdtSensitiveDetector.h"
 
-#include <MCTruth/TrackHelper.h>
-#include <MCTruth/AtlasG4EventUserInfo.h>
+#include <GeneratorObjects/HepMcParticleLink.h>
 
 #include <limits>
 #include <iostream>
@@ -57,11 +56,7 @@ G4bool MdtSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROH
     const G4TouchableHistory* touchHist = static_cast<const G4TouchableHistory*>(preStep->GetTouchable());
     const MdtReadoutElement* reEle{getReadoutElement(touchHist)};
 
-    auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo();
-    if (!eventInfo) {
-        THROW_EXCEPTION("No AtlasG4EventUserInfo available");
-    }
-    const ActsTrk::GeometryContext gctx{getGeoContext(eventInfo->GetEventContext())};
+    const ActsTrk::GeometryContext gctx{getGeoContext()};
 
     const Identifier HitID = getIdentifier(gctx, reEle, touchHist);
     if (!HitID.is_valid()) {
@@ -101,10 +96,8 @@ G4bool MdtSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROH
         }
     }
   
-    TrackHelper trkHelp{currentTrack};
-
     ATH_MSG_VERBOSE(" Dumping of hit "<<m_detMgr->idHelperSvc()->toString(HitID)
-                  <<", barcode: "<<trkHelp.GenerateParticleLink().barcode()
+                  <<", barcode: "<<genParticleLink(currentTrack).barcode()
                   <<", "<<(*currentTrack) <<", driftCircle: "<<Amg::toString(driftHit, 4)
                   <<", direction "<<Amg::toString(trackLocDir, 4) <<" to SimHit container ahead. ");
     saveHit(HitID, driftHit, trackLocDir, globalTime, aStep);

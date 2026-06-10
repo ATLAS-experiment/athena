@@ -29,7 +29,7 @@ StatusCode MuonFeatureCnvTestAlg::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode MuonFeatureCnvTestAlg::execute() {
+StatusCode MuonFeatureCnvTestAlg::execute(const EventContext& /*ctx*/) {
 
   // Retrieve MuonFeatureContainer
   const MuonFeatureContainer* mf = evtStore()->tryConstRetrieve<MuonFeatureContainer>(m_aodMuonFeatureContainerName);

@@ -19,7 +19,7 @@ class TRTHitAnalysis : public AthHistogramAlgorithm {
 
     using AthHistogramAlgorithm::AthHistogramAlgorithm;  
    virtual StatusCode initialize() override;
-   virtual StatusCode execute() override;
+   virtual StatusCode execute(const EventContext& ctx) override;
 
  private:
 

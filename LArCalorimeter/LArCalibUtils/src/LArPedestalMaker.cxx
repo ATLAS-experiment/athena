@@ -71,7 +71,7 @@ StatusCode LArPedestalMaker::initialize()
 
 
 //---------------------------------------------------------------------------
-StatusCode LArPedestalMaker::execute()
+StatusCode LArPedestalMaker::execute(const EventContext& /*ctx*/)
 //---------------------------------------------------------------------------
 {
   if (m_keylist.empty()) {

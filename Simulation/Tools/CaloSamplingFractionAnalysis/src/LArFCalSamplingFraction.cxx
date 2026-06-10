@@ -959,7 +959,7 @@ void LArFCalSamplingFraction::FillCellInfo(const CaloDetDescrElement* caloDDE, d
 //////////////////////////////////////////////////////////////////////////////////
 /// Execute (event by event)
 
-StatusCode LArFCalSamplingFraction::execute()
+StatusCode LArFCalSamplingFraction::execute(const EventContext& /*ctx*/)
 {
     ATH_MSG_DEBUG(" in execute()");
 

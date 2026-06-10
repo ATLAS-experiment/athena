@@ -37,7 +37,7 @@ class VP1EventProd: public AthAlgorithm,
   ~VP1EventProd();
 
   StatusCode initialize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   StatusCode finalize();
 
   void handle(const Incident& inc);

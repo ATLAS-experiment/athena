@@ -1,17 +1,21 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //  ParameterSpace.h
 //  TopoCore
 //  Created by Joerg Stelzer on 11/18/12.
 
-#ifndef __TopoCore__ParameterSpace__
-#define __TopoCore__ParameterSpace__
-
-#include <iostream>
-#include <vector>
-
+#ifndef TopoCore__ParameterSpace
+#define TopoCore__ParameterSpace
 #include "Parameter.h"
+
+#include <iosfwd>
+#include <vector>
+#include <string>
+#include <string_view>
+
+
+
 
 namespace TCS {
 
@@ -38,26 +42,26 @@ namespace TCS {
       // adds a new Parameter, throws TCS::Exception if parameter exists
       // isDefault flag will be set to true
       ParameterSpace & addParameter(const Parameter & p);
-      ParameterSpace & addParameter(const std::string & name, TCS::parType_t value);
-      ParameterSpace & addParameter(const std::string & name, TCS::parType_t value, unsigned int selection);
+      ParameterSpace & addParameter(std::string_view name, TCS::parType_t value);
+      ParameterSpace & addParameter(std::string_view name, TCS::parType_t value, unsigned int selection);
       
       // sets a parameter value, throws TCS::Exception if parameter doesn't exist
       // sets isDefault flag to false
       ParameterSpace & setParameter(const Parameter & p);
-      ParameterSpace & setParameter(const std::string & name, TCS::parType_t value);
-      ParameterSpace & setParameter(const std::string & name, TCS::parType_t value, unsigned int selection);
+      ParameterSpace & setParameter(std::string_view name, TCS::parType_t value);
+      ParameterSpace & setParameter(std::string_view name, TCS::parType_t value, unsigned int selection);
 
       // access to single parameter
-      const Parameter & parameter(const std::string & parameterName) const;
+      const Parameter & parameter(std::string_view parameterName) const;
       
       // access to a multi-selection parameter by index
-      const Parameter & parameter(const std::string & parameterName, unsigned int selection) const;
+      const Parameter & parameter(std::string_view parameterName, unsigned int selection) const;
 
       // access to all parameters
       const std::vector<TCS::Parameter> & parameters() const { return m_parameters; }
 
       // checks and returns true if a parameter of name parameterName already exists
-      bool contains(const std::string & parameterName, unsigned int selection) const;
+      bool contains(std::string_view parameterName, unsigned int selection) const;
       
       void clear() { m_parameters.clear(); }
 
@@ -75,7 +79,7 @@ namespace TCS {
 
    private:
       data_t m_parameters;
-      unsigned int m_index;
+      unsigned int m_index{};
 
       // name of the algorithm that owns these parameters
       std::string m_algName;

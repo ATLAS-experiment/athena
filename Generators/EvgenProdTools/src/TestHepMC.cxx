@@ -267,7 +267,7 @@ StatusCode TestHepMC::initialize() {
 }
 
 
-StatusCode TestHepMC::execute() {
+StatusCode TestHepMC::execute(const EventContext& /*ctx*/) {
 
   // Holder for filter outcome; allows us to check all filters on each event and diagnose multiple problems at once
   bool filter_pass = true;

@@ -16,7 +16,7 @@ using namespace PerfMonTest;
 typedef DataVector<IHit> HitPtrContainer;
 
 
-StatusCode PolyVectorAlg::execute()
+StatusCode PolyVectorAlg::execute(const EventContext& /*ctx*/)
 {  
   ATH_MSG_DEBUG("Executing ");
   HitPtrContainer vptr;

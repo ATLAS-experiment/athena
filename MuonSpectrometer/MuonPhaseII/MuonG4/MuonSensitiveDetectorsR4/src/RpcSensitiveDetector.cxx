@@ -7,9 +7,6 @@
 #include "G4ThreeVector.hh"
 #include "G4Trd.hh"
 
-#include <MCTruth/TrackHelper.h>
-#include <MCTruth/AtlasG4EventUserInfo.h>
-
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "GeoModelKernel/throwExcept.h"
@@ -33,11 +30,7 @@ G4bool RpcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
       return false;
   }
 
-  auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo();
-  if (!eventInfo) {
-      THROW_EXCEPTION("No AtlasG4EventUserInfo available");
-  }
-  const ActsTrk::GeometryContext gctx{getGeoContext(eventInfo->GetEventContext())};
+  const ActsTrk::GeometryContext gctx{getGeoContext()};
 
 
   const Amg::Transform3D localToGlobal = getTransform(touchHist, 0);

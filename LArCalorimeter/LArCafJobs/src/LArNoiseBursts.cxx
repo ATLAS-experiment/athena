@@ -508,7 +508,7 @@ StatusCode LArNoiseBursts::clear() {
 //////////////////////////////////////////////////////////////////////////////////
 /// Execute - on event by event
 
-StatusCode LArNoiseBursts::execute() {
+StatusCode LArNoiseBursts::execute(const EventContext& /*ctx*/) {
   ATH_MSG_DEBUG ( "in execute()" );
 
   StatusCode sc = clear();

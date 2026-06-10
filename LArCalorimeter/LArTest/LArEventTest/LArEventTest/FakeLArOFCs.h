@@ -14,7 +14,7 @@ class FakeLArOFCs : public AthAlgorithm {
   ~FakeLArOFCs();
 
   StatusCode initialize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   StatusCode finalize();
  private:
   short m_maxSample, m_NSample;

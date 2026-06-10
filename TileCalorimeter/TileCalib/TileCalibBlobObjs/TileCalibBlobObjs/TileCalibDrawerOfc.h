@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECALIBDRAWEROFC_H
@@ -27,13 +27,12 @@
 #include "TileCalibBlobObjs/TileCalibType.h"
 #include "TileCalibBlobObjs/TileCalibUtils.h"
 #include "CoralBase/Blob.h"
-#include <stdint.h>
-#include <iostream>
+#include <iosfwd>
 #include <vector>
-#include <cstdlib>
-#include <algorithm>
-#include <cstring>
+#include <cstdint>
 #include <cmath>
+#include <string>
+#include <cstring> //std::memcpy, std::memset
 
 #define PHASE_PRECISION 0.1
 
@@ -119,7 +118,7 @@ class TileCalibDrawerOfc : public TileCalibDrawerBase {
 
 
   /** @brief Prints out the object content to std::cout */
-  virtual void dump() const { dump(std::cout); } 
+  virtual void dump() const;
   /** @brief Prints out the object content 
       @param stm The stream to print to */
   virtual void dump(std::ostream& stm) const;
@@ -273,18 +272,18 @@ inline void TileCalibDrawerOfc::fillOfc (unsigned int channel,unsigned int adc, 
   size_t allSamplesSize = getNSamples() * sizeof(float); 
   size_t fieldSize = getObjSizeUint32() * getNSamples();
 
-  memcpy(w_a, startAddress, allSamplesSize);
+  std::memcpy(w_a, startAddress, allSamplesSize);
   startAddress += fieldSize;
-  memcpy(w_b, startAddress, allSamplesSize);
+  std::memcpy(w_b, startAddress, allSamplesSize);
   startAddress += fieldSize;
-  memcpy(g, startAddress, allSamplesSize);
+  std::memcpy(g, startAddress, allSamplesSize);
   startAddress += fieldSize;
-  memcpy(w_c, startAddress, allSamplesSize);
+  std::memcpy(w_c, startAddress, allSamplesSize);
   if (getNFields() > 4) {
     startAddress += fieldSize;
-    memcpy(dg, startAddress, allSamplesSize);
+    std::memcpy(dg, startAddress, allSamplesSize);
   } else {
-    memset(dg, 0, allSamplesSize);
+    std::memset(dg, 0, allSamplesSize);
   }
 }
 

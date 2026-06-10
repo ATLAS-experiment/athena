@@ -14,8 +14,16 @@ namespace ActsTrk {
           m_hash{hash}, m_type{type} {}
 
     void TransformCacheBase::releaseNominalCache() const {
-        std::unique_lock guard{m_mutex};
         m_nomCache.release();
+    }
+
+    bool TransformCacheBase::storeTransform(DetectorAlignStore& store) const {
+        if (store.detType != detectorType() || 
+            store.trackingAlignment->getTransform(m_clientNo) != nullptr){
+            return false;
+        }
+        store.trackingAlignment->setTransform(m_clientNo, fetchTransform(&store));
+        return true;
     }
     DetectorType TransformCacheBase::detectorType() const { return m_type; }
 

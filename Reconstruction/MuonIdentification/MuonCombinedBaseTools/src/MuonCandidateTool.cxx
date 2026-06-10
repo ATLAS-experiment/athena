@@ -132,7 +132,7 @@ namespace MuonCombined {
         ATH_MSG_DEBUG("Finished back-tracking, total number of successfull fits " << ntracks);
 
         // Resolve ambiguity between extrapolated tracks (where available)
-        std::unique_ptr<const TrackCollection> resolvedTracks(m_ambiguityProcessor->process(extrapTracks.get()));
+        std::unique_ptr<const TrackCollection> resolvedTracks(m_ambiguityProcessor->process(ctx, extrapTracks.get()));
 
         ATH_MSG_DEBUG("Finished ambiguity solving: " << extrapTracks->size() << " track(s) in -> " << resolvedTracks->size()
                                                      << " track(s) out");

@@ -26,7 +26,7 @@ StatusCode GenFilter::initialize() {
 }
 
 
-StatusCode GenFilter::execute() {
+StatusCode GenFilter::execute(const EventContext& /*ctx*/) {
   if (events_const()->empty()) {
     ATH_MSG_ERROR("No events found in McEventCollection");
     return StatusCode::FAILURE;

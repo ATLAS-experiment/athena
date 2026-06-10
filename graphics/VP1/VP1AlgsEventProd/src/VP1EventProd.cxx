@@ -70,7 +70,7 @@ StatusCode VP1EventProd::initialize()
   return result;
 }
 
-StatusCode VP1EventProd::execute()
+StatusCode VP1EventProd::execute(const EventContext& /*ctx*/)
 {
   ATH_MSG_DEBUG(" in execute(). Nothing to do here...");
 

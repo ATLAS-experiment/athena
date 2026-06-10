@@ -43,7 +43,7 @@ namespace xAODMaker {
 
     // Athena algorithm's Hooks
     virtual StatusCode  initialize();
-    virtual StatusCode  execute();
+    virtual StatusCode  execute(const EventContext& ctx);
     virtual StatusCode  finalize();
 
     /////////////////////////////////////////////////////////////////// 

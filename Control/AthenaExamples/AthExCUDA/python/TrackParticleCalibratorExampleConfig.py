@@ -19,8 +19,10 @@ from AthenaCommon.Constants import DEBUG
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 
 # Device/Accelerator import(s).
+from AthDeviceComps.AthDeviceCompsConfig import HostCopyToolCfg
 from AthCUDAServices.AthCUDAServicesConfig import \
    HostMemoryResourceToolCfg, DeviceMemoryResourceToolCfg
+from AthCUDAServices.AthCUDAServicesConfig import CopyToolCfg as DeviceCopyToolCfg
 
 # System import(s).
 import sys
@@ -38,6 +40,13 @@ def TrackParticleCalibratorExampleAlgCfg(flags, **kwargs):
    deviceMR = DeviceMemoryResourceToolCfg(flags, **kwargs)
    alg.DeviceMR = deviceMR.getPrimary()
    result.merge(deviceMR)
+   hostCopyTool = HostCopyToolCfg(flags, **kwargs)
+   alg.HostCopyTool = hostCopyTool.getPrimary()
+   result.merge(hostCopyTool)
+   deviceCopyTool = DeviceCopyToolCfg(flags, **kwargs)
+   alg.DeviceCopyTool = deviceCopyTool.getPrimary()
+   result.merge(deviceCopyTool)
+
    # Add the algorithm to the accumulator, so that it would eventually be
    # scheduled to run.
    result.addEventAlgo(alg)

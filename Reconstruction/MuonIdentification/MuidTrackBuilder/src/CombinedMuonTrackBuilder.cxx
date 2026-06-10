@@ -1398,7 +1398,7 @@ namespace Rec {
         momentumUpdate(perigee_owner, pInner, true, deltaPhi, deltaTheta);
 
         std::unique_ptr<Trk::RecVertex> mbeamAxis = std::make_unique<Trk::RecVertex>(*m_beamAxis);
-        /// Create the vertex element before the perigee_owner looses ownership
+        /// Create the vertex element before the perigee_owner loses ownership
         std::unique_ptr<Trk::PseudoMeasurementOnTrack> vertexInFit{vertexOnTrack(*perigee_owner, vertex.get(), mbeamAxis.get())};
 
         // create perigee TSOS

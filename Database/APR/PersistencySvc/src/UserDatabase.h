@@ -9,10 +9,10 @@
 #include "PersistencySvc/ISession.h"
 #include "PersistencySvc/ITechnologySpecificAttributes.h"
 #include "StorageSvc/DbPrint.h"
+#include "StorageSvc/pool.h"
 
 namespace pool {
   // forward declarations
-  class DatabaseConnectionPolicy;
   class IFileCatalog;
    
   // forward declarations
@@ -51,7 +51,7 @@ namespace pool {
     virtual void disconnect() override;
 
     /// Returns the opening mode. It can be used to check whether the database is connected.
-    virtual IDatabase::OpenMode openMode() const override;
+    virtual Io::IoFlag openMode() const override;
 
     /// Returns the file identifier of this database
     virtual const std::string& fid() override;
@@ -93,12 +93,10 @@ namespace pool {
   private:
     /// Reference to the session
     UserSession&                            m_session;
-    /// Reference to the policy
-    const DatabaseConnectionPolicy&         m_policy;
     /// Reference to the file catalog
     IFileCatalog&                           m_catalog;
     /// Transaction type (read/update)
-    ITransaction::Type                      m_transactionType;
+    Io::IoFlag                        m_transactionType;
     /// Reference to the database registry
     DatabaseRegistry&                       m_registry;
     /// The database name
@@ -112,7 +110,7 @@ namespace pool {
     /// The underlying database handler
     DatabaseHandler*                        m_databaseHandler;
     /// Current open mode
-    IDatabase::OpenMode                     m_openMode;
+    Io::IoFlag                              m_openMode;
     /// Flag indicating whether a connection has been already made once
     bool                                    m_alreadyConnected;
     /// Other names used.

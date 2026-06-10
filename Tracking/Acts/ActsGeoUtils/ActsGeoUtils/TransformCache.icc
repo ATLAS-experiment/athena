@@ -13,7 +13,9 @@ namespace ActsTrk {
         /// Valid alignment store is given -> Take the transformation from the cache there
         if (alignStore) {
             const Amg::Transform3D* cache = alignStore->trackingAlignment->getTransform(m_clientNo);
-            if (cache) return *cache;
+            if (cache) {
+                return *cache;
+            }
             const Amg::Transform3D& trf{alignStore->trackingAlignment->setTransform(m_clientNo, fetchTransform(alignStore))};
             /// If an external alignment store is presented release the nominal transformation
             releaseNominalCache();
@@ -21,11 +23,8 @@ namespace ActsTrk {
         }
         /// Fall back solution to go onto the nominal cache    
         if (!m_nomCache) {
-            std::unique_lock guard{m_mutex};
             m_nomCache.set(std::make_unique<Amg::Transform3D>(fetchTransform(alignStore)));
-            return (*m_nomCache);
         }
-        std::shared_lock guard{m_mutex};
         return (*m_nomCache);
     }
     inline IdentifierHash TransformCacheBase::hash() const { return m_hash; }

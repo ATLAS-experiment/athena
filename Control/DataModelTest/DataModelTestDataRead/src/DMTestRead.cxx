@@ -152,7 +152,7 @@ StatusCode remap_test (MsgStream& log, StoreGateSvc* sg)
 /**
  * @brief Algorithm event processing.
  */
-StatusCode DMTestRead::execute()
+StatusCode DMTestRead::execute(const EventContext& /*ctx*/)
 {
   StoreGateSvc* sg = &*evtStore();
 

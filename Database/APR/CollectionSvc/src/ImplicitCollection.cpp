@@ -76,7 +76,7 @@ namespace pool {
          throw std::runtime_error( "Could not retrieve a database handle (APR: \" ImplicitCollection::ImplicitCollection \" from \" ImplicitCollection \")" );
       }
 
-      if ( database->openMode() == IDatabase::CLOSED ) {
+      if ( database->openMode() == Io::INVALID ) {
          // The following fix was added to allow the reading of an implicit 
          // collection in the absence of a POOL file catalog. For now, it assumes 
          // a ROOT persistency storage type if no other type can be found. 

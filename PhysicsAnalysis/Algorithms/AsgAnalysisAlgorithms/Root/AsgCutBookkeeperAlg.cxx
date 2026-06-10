@@ -16,7 +16,6 @@
 #include <xAODCutFlow/CutBookkeeper.h>
 #include <xAODCutFlow/CutBookkeeperContainer.h>
 #include <xAODMetaData/FileMetaData.h>
-#include <xAODTruth/TruthMetaData.h>
 #include <xAODTruth/TruthMetaDataContainer.h>
 
 #include <regex>
@@ -214,7 +213,7 @@ namespace CP
     static const std::string runSignature{"%RUN%"};
     for (const CP::SystematicSet &sys : systematics)
     {
-      std::string name = RCU::substitute(m_histPattern, idSignature, std::to_string(m_mcChannelNumber));
+      std::string name = RCU::substitute(m_histPattern.value(), idSignature, std::to_string(m_mcChannelNumber));
       name = RCU::substitute(name, runSignature, std::to_string(m_runNumber));
       ANA_CHECK (m_systematics->makeSystematicsName (name, name, sys));
 

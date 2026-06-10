@@ -273,7 +273,7 @@ def ActsSpacePointFormationCfg(flags,
     # For conversion and LRT pass we do not process pixels since we assume
     # they have been processed on the primary pass.
     from InDetConfig.ITkActsHelpers import isPrimaryPass
-    if flags.Tracking.ActiveConfig.extension in ["ActsConversion", "ActsLargeRadius", "ActsValidateLargeRadiusStandalone"]:
+    if flags.Tracking.ActiveConfig.extension == "ActsConversion" or flags.Tracking.ActiveConfig.isLargeD0:
         processPixels = False
     elif isPrimaryPass(flags) and flags.Tracking.doITkFastTracking:
         processStrips = reconstructStripSpacePointsInPrimaryPass(flags)
@@ -321,7 +321,7 @@ def ActsSpacePointFormationCfg(flags,
     # Name of the RoI to be used
     roisName = f'{flags.Tracking.ActiveConfig.extension}RegionOfInterest'
     # Large Radius pass uses the same roi as the primary pass (FS roi)
-    if flags.Tracking.ActiveConfig.extension == 'ActsLargeRadius':
+    if flags.Tracking.ActiveConfig.isLargeD0 and flags.Tracking.ActiveConfig.isSecondaryPass:
         from InDetConfig.ITkActsHelpers import primaryPassExtension
         roisName = f'{primaryPassExtension(flags)}RegionOfInterest'
     

@@ -46,22 +46,22 @@ VP1CustomTourEditor* VP1Controller::m_customTourEditor=0;
 class VP1Controller::Imp {
 public:
 
-  const char * lastUpdateSlot;
-  VP1CollectionWidget* collWidget;
+  const char * lastUpdateSlot{};
+  VP1CollectionWidget* collWidget{};
   class DialogInfo {
   public:
     DialogInfo(QPushButton * lb,std::unique_ptr<QWidget> dw,QAbstractButton * ec)
       : enabledButton(ec), dialogWidget(std::move(dw)), launchButton(lb), neverShown(true) {}
     ~DialogInfo() { }
-    QAbstractButton * enabledButton;
+    QAbstractButton * enabledButton{};
     std::unique_ptr<QWidget> dialogWidget;
-    QPushButton * launchButton;
-    bool neverShown;
+    QPushButton * launchButton{};
+    bool neverShown{};
   };
 
   QList<DialogInfo *> dialogs;
 
-  SoMaterial * fallBackMaterial;
+  SoMaterial * fallBackMaterial{};
 };
 
 //____________________________________________________________________

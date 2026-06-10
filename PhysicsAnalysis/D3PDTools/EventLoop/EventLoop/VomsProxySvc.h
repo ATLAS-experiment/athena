@@ -2,17 +2,10 @@
   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
 */
 
+/// @author Nils Krumnack
+
 #ifndef EVENT_LOOP_VOMS_PROXY_SVC_H
 #define EVENT_LOOP_VOMS_PROXY_SVC_H
-
-//          
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
-// Please feel free to contact me (krumnack@iastate.edu) for bug
-// reports, feature suggestions, praise and complaints.
-
 
 #include <EventLoop/Global.h>
 

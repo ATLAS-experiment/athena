@@ -676,7 +676,7 @@ namespace Muon {
         std::unique_ptr<TrackCollection> trkColl(selectTracks(ctx, tracks, false));
         if (!trkColl || trkColl->empty()) { return; }
 
-        std::unique_ptr<const TrackCollection> resolvedTracks(m_ambiTool->process(trkColl.get()));
+        std::unique_ptr<const TrackCollection> resolvedTracks(m_ambiTool->process(ctx, trkColl.get()));
         if (!resolvedTracks) { return; }
 
         ATH_MSG_DEBUG("   resolved track candidates: old size " << trkColl->size() << " new size " << resolvedTracks->size());

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file InDetVKalVxInJetTool/test/InDetTrkInJetType_test.cxx
@@ -86,7 +86,7 @@ xAOD::TrackParticle makeTP()
 }
 
 
-void test1 (InDet::IInDetTrkInJetType& tool)
+void test1 (const EventContext& ctx, InDet::IInDetTrkInJetType& tool)
 {
   std::cout << "test1\n";
 
@@ -98,7 +98,7 @@ void test1 (InDet::IInDetTrkInJetType& tool)
 
   TLorentzVector j (70*GeV, 1*GeV, 10*GeV, 100*GeV);
 
-  std::vector<float> out = tool.trkTypeWgts (&tp, pv, j);
+  std::vector<float> out = tool.trkTypeWgts (ctx, &tp, pv, j);
   assert( out.size() == 3 );
   assert( Athena_test::isEqual (out[0], 0.107339, 1e-5) );
   assert( Athena_test::isEqual (out[1], 0.851263, 1e-5) );
@@ -166,7 +166,7 @@ int main()
   std::cout << "InDetVKalVxInJetTool/InDetTrkInJetType_test retrieve tool \n";
 
 
-  test1 (*tool);
+  test1 (ctx, *tool);
 
   return 0;
 }

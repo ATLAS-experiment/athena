@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetMomentTools/JetGroomMRatio.h"
@@ -33,9 +33,9 @@ StatusCode JetGroomMRatio::initialize() {
 
 StatusCode JetGroomMRatio::decorate(const xAOD::JetContainer& jets) const {
   ATH_MSG_VERBOSE("Begin decorating jets.");
+  const SG::AuxElement::ConstAccessor< ElementLink<xAOD::JetContainer> > parentAcc("Parent");
+  const std::string uncalP4Str{"JetConstitScaleMomentum"};
   for(const xAOD::Jet* jet : jets) {
-
-    static const SG::AuxElement::ConstAccessor< ElementLink<xAOD::JetContainer> > parentAcc("Parent");
     const xAOD::Jet* parent = *parentAcc(*jet);
 
     if (parent==nullptr) {
@@ -47,7 +47,7 @@ StatusCode JetGroomMRatio::decorate(const xAOD::JetContainer& jets) const {
 
     // Get jet p4 at constituent scale to compute ratio
     xAOD::JetFourMom_t uncalP4;
-    jet->getAttribute<xAOD::JetFourMom_t>("JetConstitScaleMomentum",uncalP4);
+    jet->getAttribute<xAOD::JetFourMom_t>(uncalP4Str,uncalP4);
 
     groomMRatioHandle(*jet) = uncalP4.M()/parent->m();
 

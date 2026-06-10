@@ -41,7 +41,7 @@ namespace xAODMaker {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode JetElementCnvAlg::execute() {
+   StatusCode JetElementCnvAlg::execute(const EventContext& /*ctx*/) {
       
       // Retrieve the ESD container:
       const JetElementCollection* esd = nullptr;

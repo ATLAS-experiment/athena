@@ -24,17 +24,17 @@ namespace MuonTGC_Cabling {
 
 // Constructor & Destructor
 TGCCabling::TGCCabling(const Config& cfg)
-    : m_cableInASD{std::make_unique<TGCCableInASD>(cfg.fileNameASDtoPP)},
-      m_cableASDToPP{std::make_unique<TGCCableASDToPP>(
-          cfg.fileNameASDtoPP, cfg.fileNameASDtoPPdiff)},
-      m_cableInPP{std::make_unique<TGCCableInPP>(cfg.fileNameInPP)},
-      m_cablePPToSLB{std::make_unique<TGCCablePPToSLB>(cfg.fileNamePPtoSL)},
-      m_cableInSLB{std::make_unique<TGCCableInSLB>()},
-      m_cableSLBToHPB{std::make_unique<TGCCableSLBToHPB>(cfg.fileNamePPtoSL)},
-      m_cableHPBToSL{std::make_unique<TGCCableHPBToSL>(cfg.fileNamePPtoSL)},
-      m_cableSLBToSSW{std::make_unique<TGCCableSLBToSSW>(cfg.fileNameSLBtoROD)},
-      m_cableSSWToROD{
-          std::make_unique<TGCCableSSWToROD>(cfg.fileNameSLBtoROD)} {}
+  : m_cableInASD{std::make_unique<TGCCableInASD>(cfg.fileNameASDtoPP)},
+    m_cableASDToPP{std::make_unique<TGCCableASDToPP>(
+        cfg.fileNameASDtoPP, cfg.fileNameASDtoPPdiff)},
+    m_cableInPP{std::make_unique<TGCCableInPP>(cfg.fileNameInPP)},
+    m_cablePPToSLB{std::make_unique<TGCCablePPToSLB>(cfg.fileNamePPtoSL)},
+    m_cableInSLB{std::make_unique<TGCCableInSLB>()},
+    m_cableSLBToHPB{std::make_unique<TGCCableSLBToHPB>(cfg.fileNamePPtoSL)},
+    m_cableHPBToSL{std::make_unique<TGCCableHPBToSL>(cfg.fileNamePPtoSL)},
+    m_cableSLBToSSW{std::make_unique<TGCCableSLBToSSW>(cfg.fileNameSLBtoROD)},
+    m_cableSSWToROD{std::make_unique<TGCCableSSWToROD>(cfg.fileNameSLBtoROD)} {
+}
 
 TGCCabling::~TGCCabling() = default;
 // slbIn --> AsdOut
@@ -146,7 +146,7 @@ bool TGCCabling::getReadoutFromSLB(const TGCModuleSLB& slb,
                                    TGCId::SideType& side, int& rodId,
                                    int& sswId, int& sbLoc) const {
     // initialize
-    side = TGCId::NoSideType;
+    side = TGCId::SideType::Undefined;
     rodId = -1;
     sswId = -1;
     sbLoc = -1;
@@ -191,8 +191,8 @@ bool TGCCabling::getReadoutFromSLB(const TGCModuleSLB& slb,
                     break;
                 }
                 // SI is connected to the SLB corrsponding WI
-                if (slb.getModuleType() == TGCId::SI &&
-                    pSlb->getModuleType() == TGCId::WI) {
+                if (slb.getModuleType() == TGCId::ModuleType::SI &&
+                    pSlb->getModuleType() == TGCId::ModuleType::WI) {
                     sbLoc = pSlb->getSBLoc();
 
                     break;
@@ -233,7 +233,7 @@ bool TGCCabling::getReadoutFromHighPtID(
     int readoutSector = (rodId - 1);
     int sector = sectorInReadout;
     if (rodId < 13) {
-        if (region == TGCId::Forward) {
+        if (region == TGCId::RegionType::Forward) {
             sector +=
                 readoutSector * (TGCId::NUM_FORWARD_SECTOR / TGCId::N_RODS);
         } else {
@@ -242,7 +242,7 @@ bool TGCCabling::getReadoutFromHighPtID(
         }
     } else if (rodId < 20) {
         readoutSector -= 16;
-        if (region == TGCId::Forward) {
+        if (region == TGCId::RegionType::Forward) {
             sector += readoutSector * (TGCId::NUM_FORWARD_SECTOR /
                                        TGCModuleId::NumberOfSReadoutSector);
         } else {
@@ -260,7 +260,7 @@ bool TGCCabling::getReadoutFromHighPtID(
     std::unique_ptr<TGCChannelId> slbout =
         m_cableSLBToHPB->getChannelInforHPB(hpbin, moduleType, false);
     if (!slbout || !slbout->isValid()) {
-        return 0;
+        return false;
     }
     std::unique_ptr<TGCChannelId> slbin =
         m_cableInSLB->getChannel(*slbout, orChannel);
@@ -278,7 +278,7 @@ bool TGCCabling::getReadoutFromHighPtID(
     // SLB Module -> readout ID
     TGCId::SideType sideType;
     int rodid;  // dummy
-    bool status = getReadoutFromSLB(*dynamic_cast<TGCModuleSLB*>(slb.get()),
+    bool status = getReadoutFromSLB(*static_cast<TGCModuleSLB*>(slb.get()),
                                     sideType, rodid, sswId, sbLoc);
 
     return status;
@@ -289,8 +289,8 @@ bool TGCCabling::getHighPtIDFromReadout(
     TGCId::SideType side, int rodId, int sswId, int sbLoc, int channel,
     TGCId::SignalType& signal, TGCId::RegionType& region, int& sectorInReadout,
     int& hpbId, int& block, int& hitId, int& pos) const {
-    signal = TGCId::NoSignalType;
-    region = TGCId::NoRegionType;
+    signal = TGCId::SignalType::Undefined;
+    region = TGCId::RegionType::Undefined;
     sectorInReadout = -1;
     hpbId = -1;
     block = -1;
@@ -299,7 +299,7 @@ bool TGCCabling::getHighPtIDFromReadout(
 
     const TGCModuleId* slb = getSLBFromReadout(side, rodId, sswId, sbLoc);
     if (!slb) {
-        return 0;
+        return false;
     }
 
     TGCChannelSLBIn slbin(slb->getSideType(), slb->getModuleType(),
@@ -331,7 +331,7 @@ bool TGCCabling::getReadoutFromLowPtCoincidence(TGCId::SideType side, int rodId,
 
     const TGCModuleId* slb = getSLBFromReadout(side, rodId, sswId, sbLoc);
     if (!slb) {
-        return 0;
+        return false;
     }
 
     TGCChannelSLBOut slbout(slb->getSideType(), slb->getModuleType(),
@@ -354,14 +354,14 @@ bool TGCCabling::getReadoutFromLowPtCoincidence(TGCId::SideType side, int rodId,
 std::unique_ptr<TGCChannelId> TGCCabling::getASDOutFromReadout(
     TGCId::SideType side, int rodId, int sswId, int sbLoc, int channel,
     bool orChannel) const {
-    const TGCModuleId* slb = getSLBFromReadout(side, rodId, sswId, sbLoc);
+    const TGCModuleSLB* slb = dynamic_cast<const TGCModuleSLB*>(getSLBFromReadout(side, rodId, sswId, sbLoc));
     if (!slb) {
         return nullptr;
     }
 
-    TGCChannelSLBIn slbin(slb->getSideType(), slb->getModuleType(),
-                          slb->getRegionType(), slb->getSector(), slb->getId(),
-                          channel);
+    TGCChannelSLBIn slbin(slb->getSideType(), slb->getStation(),
+                          slb->getModuleType(), slb->getRegionType(),
+                          slb->getSector(), slb->getId(), channel);
     if (!slbin.isValid()) {
         return nullptr;
     }
@@ -375,7 +375,7 @@ bool TGCCabling::getReadoutFromASDOut(const TGCChannelASDOut& asdout,
                                       int& sswId, int& sbLoc, int& channel,
                                       bool orChannel) const {
     // initialize
-    side = TGCId::NoSideType;
+    side = TGCId::SideType::Undefined;
     rodId = -1;
     sswId = -1;
     sbLoc = -1;
@@ -599,7 +599,7 @@ int TGCCabling::getIndexFromReadoutWithoutChannel(const TGCId::SideType side,
                                                   const int rodId,
                                                   const int sswId,
                                                   const int sbLoc) const {
-    return ((((side - TGCId::Aside) * (MAXRODID - MINRODID + 1) + rodId -
+    return ((((+side - +TGCId::SideType::Aside) * (MAXRODID - MINRODID + 1) + rodId -
               MINRODID) *
                  (MAXSSWID - MINSSWID + 1) +
              sswId - MINSSWID) *

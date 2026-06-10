@@ -81,7 +81,7 @@ namespace Athena_test {
       EXPECT_TRUE( algMgr->createAlgorithm( "AthAsgExUnittestAlg", "AthAsgExUnittestAlg",
                                             alg ).isSuccess() );
       EXPECT_TRUE( alg != nullptr );
-      myAlg = dynamic_cast< Algorithm* >( alg );
+      myAlg = dynamic_cast< Gaudi::Algorithm* >( alg );
       EXPECT_TRUE( myAlg != nullptr );
     }
 
@@ -94,7 +94,7 @@ namespace Athena_test {
       return mpt;
     }
 
-    Algorithm* myAlg = nullptr;
+    Gaudi::Algorithm* myAlg = nullptr;
 
   };
 

@@ -13,8 +13,6 @@
 #include <SystematicsHandles/SysReadHandle.h>
 #include <SelectionHelpers/SysReadSelectionHandle.h>
 #include <SelectionHelpers/SysWriteSelectionHandle.h>
-#include <SystematicsHandles/SysReadDecorHandle.h>
-#include <SystematicsHandles/SysWriteDecorHandle.h>
 
 // Framework includes
 #include <xAODBase/IParticleContainer.h>

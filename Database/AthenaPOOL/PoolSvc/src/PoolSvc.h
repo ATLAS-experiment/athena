@@ -134,7 +134,7 @@ public: // Non-static members
 
    /// Connect to a logical database unit; PersistencySvc is chosen according to transaction type (accessmode).
    virtual
-   StatusCode connect(pool::ITransaction::Type type,
+   StatusCode connect(Io::IoFlag type,
 	   unsigned int contextId = IPoolSvc::kInputStream) override;
 
    /// Commit data for a given contextId and flush buffer.
@@ -230,8 +230,6 @@ private: // data
    mutable std::map<unsigned int, std::list<Guid> >  m_guidLists ATLAS_THREAD_SAFE;
 
 private: // properties
-   /// FileOpen, the open mode for the file ("append" or "overwrite").
-   Gaudi::Property<std::string> m_fileOpen{this,"FileOpen","overwrite"};
    /// MaxFilesOpen, option to have PoolSvc limit the number of open Input Files: default = 0
    ///  (No files are closed automatically)
    Gaudi::Property<int> m_dbAgeLimit{this,"MaxFilesOpen",0};

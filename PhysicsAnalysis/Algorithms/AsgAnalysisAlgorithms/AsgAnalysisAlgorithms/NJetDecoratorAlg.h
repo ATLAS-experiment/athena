@@ -15,8 +15,6 @@
 #include <SelectionHelpers/SysReadSelectionHandle.h>
 #include <SystematicsHandles/SysWriteDecorHandle.h>
 #include <AsgTools/PropertyWrapper.h>
-#include <map>
-#include <functional>
 
 namespace CP
 {

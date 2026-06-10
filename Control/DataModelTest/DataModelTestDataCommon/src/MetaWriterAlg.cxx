@@ -55,7 +55,7 @@ StatusCode MetaWriterAlg::initialize()
 /**
  * @brief Algorithm execute method.
  */
-StatusCode MetaWriterAlg::execute()
+StatusCode MetaWriterAlg::execute(const EventContext& /*ctx*/)
 {
   return StatusCode::SUCCESS;
 }

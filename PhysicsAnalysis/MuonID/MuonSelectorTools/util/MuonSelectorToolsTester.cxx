@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// a simple testing macro for the MuonSelectorTools_xAOD package
@@ -326,16 +326,16 @@ int main(int argc, char* argv[]) {
             {
                 std::stringstream sstr{};
                 sstr<<"Muon muonType:        "<<(*mu_itr)->muonType();
-                Info(APP_NAME, sstr.str().c_str());
+                Info(APP_NAME, "%s", sstr.str().c_str());
             }
             {
                 std::stringstream sstr{};
                 sstr<<"Muon primary author:  "<<(*mu_itr)->author();
-                Info(APP_NAME, sstr.str().c_str());
+                Info(APP_NAME, "%s", sstr.str().c_str());
             }{
                 std::stringstream sstr{};
                 sstr<<"Muon quality (from tool, from xAOD):      "<<my_quality<<", "<<(*mu_itr)->quality();
-                Info(APP_NAME, sstr.str().c_str());
+                Info(APP_NAME, "%s", sstr.str().c_str());
             }
             Info(APP_NAME, "Muon passes cuts (ID hits, preselection): %d, %d", passesIDRequirements, passesPreselectionCuts);
 
@@ -346,11 +346,12 @@ int main(int argc, char* argv[]) {
             std::string badMuonResults = "Bad muon flag:              ";
 
             for (int wp = 0; wp < Nwp; wp++) {
+                using namespace Muon::MuonStationIndex;
                 if (selectorTools[wp]->accept(*mu_itr)) {
                     selectedMuons[wp]++;
                     selectedMuonsEvent[wp]++;
-                    selectedMuonsType[(*mu_itr)->muonType()][wp]++;
-                    selectedMuonsAuthor[(*mu_itr)->author()][wp]++;
+                    selectedMuonsType[toInt((*mu_itr)->muonType())][wp]++;
+                    selectedMuonsAuthor[toInt((*mu_itr)->author())][wp]++;
                     selectedMuonsTruthType[truthType][wp]++;
                     selectedMuonsEta[etaIndex][wp]++;
                     selectionResults += "pass     ";
@@ -358,8 +359,8 @@ int main(int argc, char* argv[]) {
                     if (!selectorTools[wp]->isBadMuon(**mu_itr)) {
                         selectedMuonsNotBad[wp]++;
                         selectedMuonsEventNotBad[wp]++;
-                        selectedMuonsTypeNotBad[(*mu_itr)->muonType()][wp]++;
-                        selectedMuonsAuthorNotBad[(*mu_itr)->author()][wp]++;
+                        selectedMuonsTypeNotBad[toInt((*mu_itr)->muonType())][wp]++;
+                        selectedMuonsAuthorNotBad[toInt((*mu_itr)->author())][wp]++;
                         selectedMuonsTruthTypeNotBad[truthType][wp]++;
                         selectedMuonsEtaNotBad[etaIndex][wp]++;
                     }

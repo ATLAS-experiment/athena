@@ -18,8 +18,8 @@
 #include <SampleHandler/DiskListLocal.h>
 #include <SampleHandler/MessageCheck.h>
 #include <SampleHandler/SampleHandler.h>
+#include <SampleHandler/Sample.h>
 #include <SampleHandler/SampleLocal.h>
-#include <SampleHandler/SamplePtr.h>
 #include <TString.h>
 #include <memory>
 
@@ -190,13 +190,12 @@ namespace SH
     std::vector<std::string> hierarchy;
     hierarchy.push_back (list.dirname());
 
-    std::map<std::string,SamplePtr> samples;
-    typedef std::map<std::string,SamplePtr>::iterator samplesIter;
+    std::map<std::string,std::shared_ptr<Sample>> samples;
     recurse (samples, list, hierarchy);
-    for (samplesIter sample = samples.begin(), end = samples.end();
+    for (auto sample = samples.begin(), end = samples.end();
 	 sample != end; ++ sample)
     {
-      if (sample->second.get() != 0)
+      if (sample->second != nullptr)
       {
 	sh.add (sample->second);
       }
@@ -207,7 +206,8 @@ namespace SH
 
 
   void ScanDir ::
-  recurse (std::map<std::string,SamplePtr>& samples, DiskList& list,
+  recurse (std::map<std::string,std::shared_ptr<Sample>>& samples,
+	   DiskList& list,
 	   const std::vector<std::string>& hierarchy) const
   {
     using namespace msgScanDir;
@@ -252,7 +252,7 @@ namespace SH
 
 
   void ScanDir ::
-  addSampleFile (std::map<std::string,SamplePtr>& samples,
+  addSampleFile (std::map<std::string,std::shared_ptr<Sample>>& samples,
 		 const std::vector<std::string>& hierarchy,
 		 const std::string& path) const
   {
@@ -310,11 +310,10 @@ namespace SH
       }
     }
 
-    std::map<std::string,SamplePtr>::iterator iter
-      = samples.find (sampleName);
+    auto iter = samples.find (sampleName);
     if (iter == samples.end())
     {
-      SamplePtr sample (new SampleLocal (sampleName));
+      auto sample = std::make_shared<SampleLocal> (sampleName);
       samples[sampleName] = sample;
       iter = samples.find (sampleName);
     }

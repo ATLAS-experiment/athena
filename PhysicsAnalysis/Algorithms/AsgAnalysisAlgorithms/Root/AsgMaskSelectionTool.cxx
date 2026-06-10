@@ -12,8 +12,6 @@
 
 #include <AsgAnalysisAlgorithms/AsgMaskSelectionTool.h>
 
-#include <cmath>
-
 //
 // method implementations
 //

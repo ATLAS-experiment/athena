@@ -2,7 +2,7 @@
 # Package: TrigGpuTest
 ################################################################################
 
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 link_libraries(stdc++fs)
 
@@ -24,4 +24,4 @@ atlas_add_executable( trigGpuTest
 atlas_add_test( TrigValSteeringUT
                 SCRIPT trigvalsteering-unit-tester.py ${CMAKE_CURRENT_SOURCE_DIR}/test
                 PROPERTIES TIMEOUT 300
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )

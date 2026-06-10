@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef POOLSVC_IPOOLSVC_H
@@ -11,9 +11,11 @@
  **/
 
 #include "GaudiKernel/IService.h"
+#include "GaudiKernel/IFileMgr.h"
+
 #include "CollectionSvc/ICollection.h"
-#include "PersistencySvc/ITransaction.h"
 #include "StorageSvc/DbType.h"
+
 #include "DataModelRoot/RootType.h"
 
 #include <string>
@@ -26,12 +28,11 @@ namespace coral {
    class Context;
 }
 class Placement;
-class StatusCode;
 class Token;
 
 
 /** @class IPoolSvc
- *  @brief This class provides the interface to the LCG POOL persistency software.
+ *  @brief This class provides the interface to the APR persistency software.
  **/
 class IPoolSvc : virtual public IService {
 
@@ -115,7 +116,7 @@ public: // Non-static members
 	   const unsigned long ientry) const = 0;
 
    /// Connect to a logical database unit; PersistencySvc is chosen according to transaction type (accessmode).
-   virtual StatusCode connect(pool::ITransaction::Type type,
+   virtual StatusCode connect(Io::IoFlag type,
 	   unsigned int contextId = IPoolSvc::kInputStream) = 0;
 
    /// Commit data for a given stream and flush buffer.

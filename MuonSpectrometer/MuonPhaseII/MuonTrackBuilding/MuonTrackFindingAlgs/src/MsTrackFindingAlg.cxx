@@ -29,6 +29,13 @@
 using namespace Acts::UnitLiterals;
 using namespace Acts::PlanarHelper;
 
+namespace {
+    bool isNswSegment(const xAOD::MuonSegment& seg) {
+        return seg.technology() == Muon::MuonStationIndex::TechnologyIndex::STGC || 
+               seg.technology() == Muon::MuonStationIndex::TechnologyIndex::MM;
+    }
+}
+
 namespace MuonR4{
     StatusCode MsTrackFindingAlg::initialize() {
         ATH_CHECK(m_segmentKey.initialize());
@@ -140,16 +147,29 @@ std::pair<MsTrackFindingAlg::OptBoundPars_t,
                         <<", "<<surf.geometryId()<<" @ "<<Amg::toString(surf.localToGlobalTransform(tgContext))<<std::endl;
                 }
                 ATH_MSG_VERBOSE("Fetch measurements from segment: "<<Amg::toString(segment->position())
-                         <<", direction: "<<Amg::toString(segment->direction())<<"\n"<<sstr.str());
+                         <<", direction: "<<Amg::toString(segment->direction()) << " eta " << segment->direction().eta() << " phi " << segment->direction().phi() <<"\n"<<sstr.str());
             }
             measurements.insert(measurements.end(), 
                                 std::make_move_iterator(segMeasurements.begin()),
                                 std::make_move_iterator(segMeasurements.end()));
 
-            if (!refSeg && m_segSelector->passSeedingQuality(ctx, *detailedSegment(*segment))) {
+            // Ususally we would like to take the first segment with a sufficient amount of phi hits to set the initial position and direction of the track fit. However in some cases the segment from the NSW has a missreconstructed phi direction which causes the track fit to loose all BW and OW hits in the first iteration. Therefore if the first segment is a NSW segment we first try use a non-NSW segments with enough phi hits. If we don't find any segment with enough phi hits we will use the NSW segment as reference as long as it passes the seeding quality criteria.   
+            if (!refSeg &&  !isNswSegment(*segment) &&  m_segSelector->passSeedingQuality(ctx, *detailedSegment(*segment))) {
                 refSeg = segment;
+                ATH_MSG_VERBOSE("Set reference segment");
             }
         }
+        //if we did not find a reference segment let's try the NSW one before we give up on the track
+        if(!refSeg){
+            for (const xAOD::MuonSegment* segment : seed.segments()) {
+                if (isNswSegment(*segment) && m_segSelector->passSeedingQuality(ctx, *detailedSegment(*segment))) {
+                    refSeg = segment;
+                    ATH_MSG_VERBOSE("Set reference segment from NSW");
+                    break;
+                }
+            }
+        }
+
         if (!refSeg || measurements.empty()) {
             ATH_MSG_WARNING(__func__<<"() "<<__LINE__
                             <<" - No reference segment passing seeding quality "<<
@@ -160,6 +180,8 @@ std::pair<MsTrackFindingAlg::OptBoundPars_t,
         ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - "<<measurements.size()<<" measurements");
         Amg::Vector3D seedPos{refSeg->position()};
         Amg::Vector3D seedDir{refSeg->direction()};
+        ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Initial seed pos: "<<Amg::toString(seedPos)
+                        <<", dir: "<<Amg::toString(seedDir) << " eta " << seedDir.eta() << " phi " << seedDir.phi() /Gaudi::Units::degree );
         /// The middle or outer segment provide the phi information. Not so easy becasue we want to
         /// Take the y0 & precision direction from the inner segment but the phi & x0 from a straight
         /// line extrapolation onto the plane
@@ -265,6 +287,33 @@ std::pair<MsTrackFindingAlg::OptBoundPars_t,
             }
             return false;
         }
+
+        auto track = fitTraject->getTrack(0);
+        const Amg::Vector3D trkP4 = ActsTrk::convertMomFromActs(track.fourMomentum()).first;
+        double pt = trkP4.perp() / 1000; //in GeV
+        if(pt < 2 ) {
+            double chi2PerDoF = track.chi2() / (std::max(track.nDoF(), 1u));
+            ATH_MSG_DEBUG(" ===cat dog: found low pt track candidate with pt "<<pt<<" GeV chi2/ndof "<< chi2PerDoF <<  " chi2 "<< track.chi2() << " nDOF "<< track.nDoF() <<"eta: "<<trkP4.eta());
+
+        track.container().trackStateContainer().visitBackwards(track.tipIndex(), [&](const auto& state) {
+            if(state.hasUncalibratedSourceLink()){
+                const auto* uncalib = dynamic_cast<const xAOD::MuonMeasurement*>(ActsTrk::detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink()));
+                if(uncalib){
+                    ATH_MSG_DEBUG("    has meas: "<<m_idHelperSvc->toString(xAOD::identify(uncalib)) << " state " << state.typeFlags());
+                }
+            }
+        }
+        );
+
+        }
+        /** Add the links to the segments making up this track as an extra
+         *  column. Use the indices of the segment objects which can later
+         *  be transformed into a full ElementLink as there is only one
+         *  SegmentContainer from which the seeds are built */
+        {
+            fitTraject->addColumn<std::vector<const xAOD::MuonSegment*>>("muonSegLinks");
+            fitTraject->getTrack(0).component<std::vector<const xAOD::MuonSegment*>>("muonSegLinks") = seed.segments();
+        }
         outContainer.ensureDynamicColumns(*fitTraject);
         auto destProxy = outContainer.getTrack(outContainer.addTrack());
         destProxy.copyFrom(fitTraject->getTrack(0));
@@ -272,14 +321,6 @@ std::pair<MsTrackFindingAlg::OptBoundPars_t,
         if (m_visualizationTool.isEnabled()) {
             m_visualizationTool->displayTrackSeedObj(ctx, seed, 
                 destProxy.createParametersAtReference(), "GoodFit");
-        }
-        for (const auto state : destProxy.trackStates()) {
-            if (!state.hasUncalibratedSourceLink()){
-                continue;
-            }
-            auto meas = ActsTrk::detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());
-            ATH_MSG_DEBUG("Accepted measurement "<<m_idHelperSvc->toString(xAOD::identify(meas))
-                              <<", "<<xAOD::muonSurface(meas).geometryId()); 
         }
         return true;
     }

@@ -26,11 +26,11 @@ StatusCode PFLCNeutralFlowElementCreatorAlgorithm::execute(const EventContext& c
 
   SG::WriteHandle<xAOD::FlowElementContainer> neutralFELCContainerWriteHandle(m_neutralFELCContainerWriteHandleKey,ctx);
   ATH_CHECK( neutralFELCContainerWriteHandle.record(std::move(shallowCopyPair.first),std::move(shallowCopyPair.second)));
-
+  const std::string clusterLinkStr{"FEShowerSubtractedClusterLink"};
   for( unsigned int counter = 0; counter < (*neutralFEContainerReadHandle).size(); counter++){
     const xAOD::FlowElement* thisFE = (*neutralFEContainerReadHandle)[counter];
 
-    const static SG::Accessor<ElementLink<xAOD::CaloClusterContainer> > accShowerSubtractedClusterLink("FEShowerSubtractedClusterLink");
+    const static SG::Accessor<ElementLink<xAOD::CaloClusterContainer> > accShowerSubtractedClusterLink(clusterLinkStr);
     const ElementLink<xAOD::CaloClusterContainer>& clusElementLink = accShowerSubtractedClusterLink(*thisFE);
 
     xAOD::FlowElement* theCopiedFE = (*neutralFELCContainerWriteHandle)[counter];

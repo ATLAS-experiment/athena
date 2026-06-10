@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_RodDecoder.h"
+#include "InDetIdentifier/TRT_ID.h"
 
 #include "CoralBase/Attribute.h"
 // COOL API include files (CoolKernel)
@@ -16,14 +17,13 @@
 #include "CoolKernel/IObjectIterator.h"
 #include "CoolKernel/Record.h"
 #include "CoolKernel/RecordSpecification.h"
-// COOL API include files (CoolApplication)
-#include <fstream>
-
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
 #include "CoolApplication/Application.h"
 #include "InDetByteStreamErrors/TRT_BSErrContainer.h"
 #include "PathResolver/PathResolver.h"
 #include "StoreGate/ReadCondHandle.h"
+
+#include <fstream>
 
 using OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
 

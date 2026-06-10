@@ -20,6 +20,9 @@ def JetCalibrationDecoratorCfg(
     calibArea: str,
     calibrationScale: str,
     isData: bool = False,
+    calibJetCollection: str | None = None,
+    rhoKey: str | None = None,
+    originScale: str | None = None,
 ) -> ComponentAccumulator:
     """Decorate jets with calibrated four-momentum components."""
 
@@ -35,13 +38,23 @@ def JetCalibrationDecoratorCfg(
     safe_collection = _sanitize(jet_collection_nosuffix)
     safe_scale = _sanitize(calibrationScale)
 
-    jet_calib_tool = CompFactory.JetCalibrationTool(
-        f"JetCalibrationTool_{safe_collection}_{safe_scale}",
-        JetCollection=jet_collection_nosuffix,
+    calib_collection = calibJetCollection if calibJetCollection is not None else jet_collection_nosuffix
+
+    tool_kwargs = dict(
+        JetCollection=calib_collection,
         ConfigFile=configFile,
         CalibSequence=calibSequence,
         CalibArea=calibArea,
         IsData=isData,
+    )
+    if rhoKey is not None:
+        tool_kwargs['RhoKey'] = rhoKey
+    if originScale is not None:
+        tool_kwargs['OriginScale'] = originScale
+
+    jet_calib_tool = CompFactory.JetCalibrationTool(
+        f"JetCalibrationTool_{safe_collection}_{safe_scale}",
+        **tool_kwargs,
     )
 
     acc = ComponentAccumulator()

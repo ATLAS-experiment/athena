@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -50,7 +50,7 @@ public:
   QSet<SoCooperativeSelection *> selectionsWithDisabledNotifications;
 
   std::map<SoCooperativeSelection*,SoPathList> selection2lastpathlist;
-  bool clickedoutsideScheduled;
+  bool clickedoutsideScheduled{};
 };
 
 std::map<SoCooperativeSelection*,IVP13DSystem*> IVP13DSystem::Imp::selection2system;

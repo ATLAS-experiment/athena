@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -24,8 +24,6 @@
 #include "TrkAlignEvent/AlignPar.h"
 #include "TrkAlignEvent/AlignVertex.h"
 
-#include "TrkAlignInterfaces/IAlignModuleTool.h"
-
 #include "TrkGlobalChi2AlignTools/GlobalChi2AlignTool.h"
 #include "xAODEventInfo/EventInfo.h"
 
@@ -35,58 +33,12 @@
 
 namespace Trk {
 
-  constexpr int MAXNCHAMBERS=50;
-  constexpr int MAXNINDICES =50*6;
-
   //_______________________________________________________________________
   GlobalChi2AlignTool::GlobalChi2AlignTool(const std::string& type, const std::string& name,
 					   const IInterface* parent)
     : AthAlgTool(type,name,parent)
-    , m_matrixTool("Trk::MatrixTool",this)
-    , m_alignModuleTool("Trk::AlignModuleTool/AlignModuleTool")
-    , m_ntracks(0)
-    , m_nmeas(0)
-    , m_nhits(0)
-    , m_chi2(0.)
-    , m_nDoF(0)
-    , m_ntuple(nullptr)
-    , m_tree(nullptr)
-    , m_run{}
-    , m_event{}
-    , m_materialOnTrack{}
-    , m_momentum{}
-    , m_nChambers(0)
-    , m_chamberIds(new int[MAXNCHAMBERS])
-    , m_nMatrixIndices(0)
-    , m_matrixIndices(new int[MAXNINDICES])
-    , m_nSecndDeriv(0)
-    , m_secndDeriv(new double[MAXNINDICES*MAXNINDICES])
-    , m_firstDeriv(new double[MAXNINDICES])
-    , m_actualSecndDeriv(new double[MAXNINDICES])
-    , m_eta{}
-    , m_phi{}
-    , m_perigee_x{}, m_perigee_y{}, m_perigee_z{}
-    , m_trackInfo{}
-    , m_bremFit{}
-    , m_bremFitSuccessful{}
-    , m_straightTrack{}
-    , m_slimmedTrack{}
-    , m_hardScatterOrKink{}
-    , m_lowPtTrack{}
-    , m_fromFiles(false)
   {      
     declareInterface<IAlignTool>(this);
-
-    declareProperty("MatrixTool", m_matrixTool, "tool for storing and inverting matrix");
-    declareProperty("AlignModuleTool", m_alignModuleTool);
-
-    declareProperty("SecondDerivativeCut", m_secondDerivativeCut = -1e5);
-
-    declareProperty("DoTree",              m_doTree = false);
-    declareProperty("WriteActualSecDeriv", m_writeActualSecDeriv = false);
-
-    declareProperty("StoreLocalDerivOnly", m_storeLocalDerivOnly = false);
-
     m_logStream = nullptr;
   }
 

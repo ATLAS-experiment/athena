@@ -41,7 +41,7 @@ namespace xAODMaker {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode CMMCPHitsCnvAlg::execute() {
+   StatusCode CMMCPHitsCnvAlg::execute(const EventContext& /*ctx*/) {
       
       // Retrieve the ESD container:
       const CMMCPHitsCollection* esd = nullptr;

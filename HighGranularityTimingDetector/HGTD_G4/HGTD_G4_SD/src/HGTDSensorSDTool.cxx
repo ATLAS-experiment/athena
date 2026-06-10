@@ -14,6 +14,8 @@
 #include "HGTDSensorGmxSD.h"
 
 #include <GeoModelRead/ReadGeoModel.h>
+#include "HitManagement/HitCollectionMap.h"
+#include "InDetSimEvent/SiHitCollection.h"
 
 // STL includes
 #include <exception>
@@ -21,6 +23,19 @@
 HGTDSensorSDTool::HGTDSensorSDTool(const std::string& type, const std::string& name, const IInterface* parent)
   : SensitiveDetectorBase( type , name , parent )
 {
+}
+
+StatusCode HGTDSensorSDTool::SetupEvent(HitCollectionMap& hitCollections)
+{
+  hitCollections.Emplace<SiHitCollection>(m_outputCollectionNames[0],
+                                          m_outputCollectionNames[0]);
+  return StatusCode::SUCCESS;
+}
+
+StatusCode HGTDSensorSDTool::Gather(HitCollectionMap& hitCollections)
+{
+  CHECK(hitCollections.Record<SiHitCollection>(m_outputCollectionNames[0]));
+  return StatusCode::SUCCESS;
 }
 
 G4VSensitiveDetector* HGTDSensorSDTool::makeSD() const

@@ -110,7 +110,7 @@ namespace MuonValR4{
     /** @brief List of the space point containers in the event legacy + NSW containers */
     SG::ReadHandleKeyArray<MuonR4::SpacePointContainer> m_spKeys{this, "SpacePointKeys", {"MuonSpacePoints"}};
     /** @brief Tracking geometry context */
-    SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+    ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
     
@@ -131,7 +131,7 @@ namespace MuonValR4{
 
     MuonVal::ScalarBranch<float>& m_out_bucketStart{m_tree.newScalar<float>("bucketStart", 1)};
     MuonVal::ScalarBranch<float>& m_out_bucketEnd{m_tree.newScalar<float>("bucketEnd", -1)};
-    MuonVal::ScalarBranch<float>& m_out_bucketHitGap{m_tree.newScalar<float>("bucketHiGap", 0.)};
+    MuonVal::ScalarBranch<float>& m_out_bucketEtaHitGap{m_tree.newScalar<float>("bucketEtaHitGap", 0.)};
 
     /// @brief Branch dumping all the space points from the difference buckets
     std::shared_ptr<SpacePointTesterModule> m_spTester{};

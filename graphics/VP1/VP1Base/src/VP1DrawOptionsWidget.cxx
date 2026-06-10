@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -27,15 +27,15 @@
 class VP1DrawOptionsWidget::Imp {
 public:
   Ui::DrawOptionsForm ui;
-  SoGroup * group;
-  SoComplexity * complexity;
-  SoLightModel * baseLightModel;
-  SoDrawStyle * drawStyle;
-  bool linewidthsDisabled;
-  bool pointsizesDisabled;
-  bool complexityDisabled;
-  bool baselightingDisabled;
-  double lastEmittedComplexity;
+  SoGroup * group{};
+  SoComplexity * complexity{};
+  SoLightModel * baseLightModel{};
+  SoDrawStyle * drawStyle{};
+  bool linewidthsDisabled{};
+  bool pointsizesDisabled{};
+  bool complexityDisabled{};
+  bool baselightingDisabled{};
+  double lastEmittedComplexity{};
 };
 
 

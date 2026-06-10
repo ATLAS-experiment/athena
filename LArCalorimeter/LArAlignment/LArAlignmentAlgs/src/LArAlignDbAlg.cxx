@@ -48,7 +48,7 @@ StatusCode LArAlignDbAlg::initialize()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 
-StatusCode LArAlignDbAlg::execute() 
+StatusCode LArAlignDbAlg::execute(const EventContext& /*ctx*/) 
 {
   ATH_MSG_DEBUG(" in execute() "  );
 

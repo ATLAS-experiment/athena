@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////
@@ -17,7 +17,7 @@
 //____________________________________________________________________
 class VP1SoMaterialMixer::Imp {
 public:
-  VP1SoMaterialMixer * theclass;
+  VP1SoMaterialMixer * theclass{};
   void setMaterialFieldsAsAverageOfMatList(SoMaterial*mat, const std::set<SoMaterial*>& matlist );
   void setMaterialFieldsAsAverageOfMatList(SoMaterial*mat, const std::map<SoMaterial*,double>& matlist );
   static float norm(const float& x) { return (x<0.0f?0.0f:(x>1.0f?1.0f:x));}
@@ -30,7 +30,7 @@ public:
 
   //For dealing with invalid input materials:
   static bool inputMaterialValid(SoMaterial*);
-  SoMaterial *defmat;
+  SoMaterial *defmat{};
   SoMaterial * defaultMaterial()
   {
     if (!defmat) {

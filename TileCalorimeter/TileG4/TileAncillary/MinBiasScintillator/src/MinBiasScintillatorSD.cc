@@ -19,8 +19,11 @@
 #include "CaloDetDescr/MbtsDetDescrManager.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/Bootstrap.h"
+#include "HitManagement/HitCollectionMap.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "StoreGate/StoreGateSvc.h"
 
+#include "G4EventManager.hh"
 #include "G4HCofThisEvent.hh"
 #include "G4VPhysicalVolume.hh"
 #include "G4Step.hh"
@@ -40,9 +43,8 @@
 MinBiasScintillatorSD::MinBiasScintillatorSD(const G4String& name, const std::string& hitCollectionName,
                                              const MinBiasScintSDOptions& opts)
     : G4VSensitiveDetector(name),
-      m_HitColl(hitCollectionName),
-      m_numberOfHitsInCell(N_CELLS, 0),
-      m_tempSimHit(N_CELLS, nullptr)
+      m_options(opts),
+      m_hitCollectionName(hitCollectionName)
 {
   SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
   if ( !detStore ) {
@@ -166,13 +168,28 @@ MinBiasScintillatorSD::MinBiasScintillatorSD(const G4String& name, const std::st
   return;
 }
 
+MinBiasScintillatorSD::HitVectorBuilder* MinBiasScintillatorSD::GetHitCollection()
+{
+  auto* eventManager = G4EventManager::GetEventManager();
+  if (!eventManager) {
+    return nullptr;
+  }
+
+  auto* eventInfo = dynamic_cast<AtlasG4EventUserInfo*>(eventManager->GetUserInformation());
+  if (!eventInfo) {
+    return nullptr;
+  }
+
+  auto hitCollections = eventInfo->GetHitCollectionMap();
+  return hitCollections ? hitCollections->Find<HitVectorBuilder>(m_hitCollectionName) : nullptr;
+}
+
 void MinBiasScintillatorSD::Initialize(G4HCofThisEvent* /* HCE */) {
   if (verboseLevel > 10) {
     G4cout << "MinBiasScintillatorSD::Initialize()" << G4endl;
   }
 
-  if (!m_HitColl.isValid())
-    m_HitColl = std::make_unique<TileHitVector>(m_HitColl.name());
+  m_hitCollection = GetHitCollection();
 }
 
 G4bool MinBiasScintillatorSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /* ROhist */) {
@@ -209,10 +226,10 @@ G4bool MinBiasScintillatorSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /* 
   //    << " Z = " << preStepPointPosition.z()
   //    << " eta = " << eta << G4endl; }
 
-  if (ind >= N_CELLS || ind < 0) {
+  if (ind >= NCells || ind < 0) {
     G4cout << "MinBiasScintillatorSD::ProcessHits ERROR Hit in "
     << side << "/" << phi << "/" << eta
-    << " index=" << ind << " is outside range [0," << N_CELLS - 1 << "]" << G4endl;
+    << " index=" << ind << " is outside range [0," << NCells - 1 << "]" << G4endl;
     return false;
   }
 
@@ -233,16 +250,24 @@ G4bool MinBiasScintillatorSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /* 
   // find deltaT for given time
   m_deltaT = deltaT(time);
 
+  HitVectorBuilder* hitCollection = m_hitCollection ? m_hitCollection : GetHitCollection();
+  if (!hitCollection) {
+    if (verboseLevel > 5) {
+      G4cout << "MinBiasScintillatorSD::ProcessHits WARNING hit collection is not available" << G4endl;
+    }
+    return false;
+  }
+  m_hitCollection = hitCollection;
+
   //  if(logiVol.find("MBTS") !=G4String::npos) // not clear which name to use, but it's not needed
   {
-    if ( m_tempSimHit[ind] ) {
+    if (hitCollection->HasHit(ind)) {
       // hit already exists
       if (verboseLevel > 10) {
         G4cout << "MinBiasScintillatorSD::ProcessHits VERBOSE Additional hit in "
         << side << "/" << phi << "/" << eta
         << " energy=" << edep << " time=" << time << G4endl;
       }
-      m_tempSimHit[ind]->add(edep, time, m_deltaT);
     } else {
       // First hit in a cell
       if (verboseLevel > 10) {
@@ -250,38 +275,10 @@ G4bool MinBiasScintillatorSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /* 
         << side << "/" << phi << "/" << eta
         << " energy=" << edep << " time=" << time << G4endl;
       }
-      m_tempSimHit[ind] = new TileSimHit(m_channelID[ind], edep, time, m_deltaT);
-      m_numberOfHitsInCell[ind] = 0;
     }
-    ++m_numberOfHitsInCell[ind];
+    hitCollection->AddHit(ind, m_channelID[ind], edep, time, m_deltaT);
   }
   return true;
-}
-
-void MinBiasScintillatorSD::EndOfAthenaEvent() {
-  //Convert TileSimHits to TileHits and insert into output collection
-  for (int ind = 0; ind < N_CELLS; ++ind) {
-    if (m_tempSimHit[ind]) {
-      if (verboseLevel > 5) {
-        G4cout << "MinBiasScintillatorSD::EndOfAthenaEvent DEBUG Cell id=" << m_tileTBID->to_string(m_channelID[ind])
-               << " nhit=" << m_numberOfHitsInCell[ind] << " energy=" << m_tempSimHit[ind]->energy() << G4endl;
-      }
-      m_HitColl->Insert(TileHit(m_tempSimHit[ind]));
-      //Clean up as we go through.
-      delete m_tempSimHit[ind];
-      m_tempSimHit[ind] = nullptr;
-    } else {
-      if (verboseLevel > 10) {
-        G4cout << "MinBiasScintillatorSD::EndOfAthenaEvent VERBOSE Cell id=" << m_tileTBID->to_string(m_channelID[ind])
-               << " nhit=0" << G4endl;
-      }
-    }
-  }
-  std::vector<int> t1(N_CELLS, 0);
-  m_numberOfHitsInCell.swap(t1);
-  if (verboseLevel > 5) {
-    G4cout << "MinBiasScintillatorSD::EndOfAthenaEvent DEBUG Total number of hits is " << m_HitColl->size() << G4endl;
-  }
 }
 
 G4double MinBiasScintillatorSD::BirkLaw(const G4Step* aStep) const {

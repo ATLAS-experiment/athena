@@ -47,7 +47,7 @@ StatusCode LArShapeCorrector::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode LArShapeCorrector::execute()
+StatusCode LArShapeCorrector::execute(const EventContext& /*ctx*/)
 {
   return StatusCode::SUCCESS;
 }

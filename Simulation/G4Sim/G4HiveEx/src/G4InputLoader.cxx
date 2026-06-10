@@ -22,7 +22,7 @@ G4InputLoader::G4InputLoader( const std::string& name,
 }
 
 
-StatusCode G4InputLoader::execute()
+StatusCode G4InputLoader::execute(const EventContext& /*ctx*/)
 {  
   ATH_MSG_DEBUG ("Executing " << name() << "...");
 

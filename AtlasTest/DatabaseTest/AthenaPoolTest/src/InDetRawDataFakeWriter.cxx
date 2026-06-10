@@ -90,7 +90,7 @@ StatusCode InDetRawDataFakeWriter::initialize()
 }
 
 // Execute method:
-StatusCode InDetRawDataFakeWriter::execute() 
+StatusCode InDetRawDataFakeWriter::execute(const EventContext& /*ctx*/) 
 {
     // Get the messaging service, print where you are
     ATH_MSG_DEBUG( "InDetRawDataFakeWriter::execute()"  );

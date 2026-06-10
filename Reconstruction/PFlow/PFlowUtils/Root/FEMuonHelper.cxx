@@ -13,13 +13,13 @@ bool FEMuonHelper::checkMuonLinks(const std::vector < ElementLink< xAOD::MuonCon
         //Details of muon working points are here:
         //https://twiki.cern.ch/twiki/bin/view/Atlas/MuonSelectionTool
         const xAOD::Muon* muon = *MuonLink;
-        xAOD::Muon::Quality quality = xAOD::Muon::VeryLoose;
+        xAOD::Muon::Quality quality = xAOD::Muon::Quality::VeryLoose;
 
-        if (qualityString == "Loose")  quality = xAOD::Muon::Loose;
-        else if (qualityString == "Medium") quality = xAOD::Muon::Medium;
-        else if (qualityString == "Tight")  quality = xAOD::Muon::Tight;
+        if (qualityString == "Loose")  quality = xAOD::Muon::Quality::Loose;
+        else if (qualityString == "Medium") quality = xAOD::Muon::Quality::Medium;
+        else if (qualityString == "Tight")  quality = xAOD::Muon::Quality::Tight;
 
-        if ( muon->quality() <= quality && muon->muonType() == xAOD::Muon::Combined ){
+        if ( muon->quality() <= quality && muon->muonType() == xAOD::Muon::MuonType::Combined ){
           return true;
         }    
       }

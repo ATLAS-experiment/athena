@@ -119,6 +119,10 @@ class ElectronMomentumCalibrationConfig (ConfigBlock) :
         alg.egammas = config.readName (self.containerName)
         alg.egammasOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
+
+        config.setContainerMeta (self.containerName, 'ESModel', alg.calibrationAndSmearingTool.ESModel)
+        config.setContainerMeta (self.containerName, 'decorrelationModel', alg.calibrationAndSmearingTool.decorrelationModel)
+
         return alg
 
 

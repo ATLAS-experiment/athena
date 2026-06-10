@@ -34,7 +34,7 @@ public:
   /// Function initialising the algorithm
   virtual StatusCode initialize();
   /// Function executing the algorithm
-  virtual StatusCode execute();
+  virtual StatusCode execute(const EventContext& ctx);
 
   CLHEP::HepLorentzVector sumDaughterNeutrinos( const xAOD::TruthParticle* tau );
 

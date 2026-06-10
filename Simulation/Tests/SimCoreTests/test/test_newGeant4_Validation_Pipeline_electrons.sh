@@ -1,14 +1,16 @@
 #!/bin/bash
-# art-description: Test running pipeliene
+# art-description: Test running pipeline
 # art-type: grid
 # art-include: main/Athena
 # art-memory: 8192
+# art-cores: 8
+# art-runtime: 86400
 # art-output: *.txt
 # art-output: *.root
 # art-output: *.xml
 # art-output: dcube*
 # art-html: dcube_last
-
+# art-output: log.*
 
 set -e
 echo "$ArtInFile"

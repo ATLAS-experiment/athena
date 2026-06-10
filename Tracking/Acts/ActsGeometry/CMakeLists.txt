@@ -92,8 +92,3 @@ atlas_add_component( ActsGeometry
 # Install files from the package:
 atlas_install_joboptions( scripts/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-
-atlas_add_dictionary( ActsGeometryDict
-                      ActsGeometry/ActsGeometryDict.h
-                      ActsGeometry/selection.xml 
-                      LINK_LIBRARIES ActsGeometryLib)

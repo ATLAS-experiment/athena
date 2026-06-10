@@ -22,6 +22,10 @@ public:
   ~LUCID_SensitiveDetectorTool() {}
 
 protected:
+  /** Beginning of an athena event.  This is where collection initialization should happen.*/
+  StatusCode SetupEvent(HitCollectionMap&) override final;
+  /** End of an athena event */
+  StatusCode Gather(HitCollectionMap&) override final;
   // Make me an SD!
   G4VSensitiveDetector* makeSD() const override final;
 

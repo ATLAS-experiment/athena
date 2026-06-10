@@ -24,7 +24,6 @@ EtaJES:
   LowPtJESExtrapolationMethod: 1
   MinPtForETAJES: 15
   UseSpline: True
-  OutputLevel: 3
   InScale: "JetPileupScaleMomentum" # do not include in analysis-facing YAML
   OutScale: "JetEtaJESScaleMomentum" # do not include in analysis-facing YAML
   prereqs:
@@ -118,7 +117,6 @@ Insitu:
     varX: 'pt'
   RunNumbers: [251102, 314199, 999999]
   CalibrateMC: False
-  useOriginalHistCombination: False
   InScale: "JetPtResidualScaleMomentum" # should be JetGSCScaleMomentum in case no PtResidual (see step 6) was derived
   OutScale: "JetInsituScaleMomentum"
   prereqs:

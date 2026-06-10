@@ -50,7 +50,7 @@ StatusCode PrintMC::initialize() {
 
 
 /// @todo Avoid use of unprotected std::cout: stringstream + MsgStream would be better
-StatusCode PrintMC::execute() {
+StatusCode PrintMC::execute(const EventContext& ctx) {
   // If output already turned off by passing last dumped event, just return
   /// @todo I get the feeling VerboseOutput is being abused here...
   if (!m_VerboseOutput) return StatusCode::SUCCESS;
@@ -63,7 +63,7 @@ StatusCode PrintMC::execute() {
     uint64_t evtnum = std::max(0,evt->event_number());
     // Override with evtnum from Athena if enabled and functional
     if (!m_trustHepMC) {
-      SG::ReadHandle<xAOD::EventInfo> evtInfo(m_evtInfoKey);
+      SG::ReadHandle<xAOD::EventInfo> evtInfo(m_evtInfoKey, ctx);
       evtnum = evtInfo->eventNumber();
     }
 
@@ -124,9 +124,9 @@ StatusCode PrintMC::execute() {
       for ( auto wgt = evt->weights().begin();
             wgt != evt->weights().end(); wgt++ ) { std::cout << *wgt << " "; }
       std::cout << "\n";
-      std::cout << " EventScale " << (evt->attribute<HepMC3::DoubleAttribute>("event_scale")? evt->attribute<HepMC3::DoubleAttribute>("event_scale")->value():0.0)
-                << " [energy] \t alphaQCD=" << (evt->attribute<HepMC3::DoubleAttribute>("alphaQCD")? evt->attribute<HepMC3::DoubleAttribute>("alphaQCD")->value():0.0)
-                << "\t alphaQED=" << (evt->attribute<HepMC3::DoubleAttribute>("alphaQED")? evt->attribute<HepMC3::DoubleAttribute>("alphaQED")->value():0.0) << std::endl;
+      std::cout << " EventScale " << (evt->attribute<HepMC3::DoubleAttribute>(HepMC::Str::event_scale)? evt->attribute<HepMC3::DoubleAttribute>(HepMC::Str::event_scale)->value():0.0)
+                << " [energy] \t alphaQCD=" << (evt->attribute<HepMC3::DoubleAttribute>(HepMC::Str::alphaQCD)? evt->attribute<HepMC3::DoubleAttribute>(HepMC::Str::alphaQCD)->value():0.0)
+                << "\t alphaQED=" << (evt->attribute<HepMC3::DoubleAttribute>(HepMC::Str::alphaQED)? evt->attribute<HepMC3::DoubleAttribute>(HepMC::Str::alphaQED)->value():0.0) << std::endl;
 
       if (evt->pdf_info()) {
         std::cout << "PdfInfo: id1=" << evt->pdf_info()->parton_id[0]

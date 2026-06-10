@@ -409,7 +409,7 @@ namespace met {
   void METTrackFilterTool::selectMuons(const xAOD::MuonContainer &muCont, std::vector<const xAOD::Muon*>& muons) 
   {
     for(const auto *mu : muCont) {
-      if( (mu->muonType()==xAOD::Muon::Combined)
+      if( (mu->muonType()==xAOD::Muon::MuonType::Combined)
 	  && (mu->pt()>6000.)
 	  && fabs(mu->eta())<2.5
 	  ) {

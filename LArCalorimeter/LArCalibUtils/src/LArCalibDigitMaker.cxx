@@ -113,20 +113,19 @@ StatusCode LArCalibDigitMaker::initialize()
 }
 
 
-StatusCode LArCalibDigitMaker::execute() {
+StatusCode LArCalibDigitMaker::execute(const EventContext& ctx) {
 
  if (m_dontRun) return StatusCode::SUCCESS;
 
- const EventContext& ctx = Gaudi::Hive::currentContext();
 
 
  const LArCalibLineMapping *clcabling=nullptr;
  if(m_isSC) {
    ATH_MSG_DEBUG ( "======== LArCalibDigitMaker: using SC calib line map" );
-   SG::ReadCondHandle<LArCalibLineMapping> clHdl{m_calibMapSCKey};
+   SG::ReadCondHandle<LArCalibLineMapping> clHdl{m_calibMapSCKey, ctx};
    clcabling=*clHdl;
  } else {
-   SG::ReadCondHandle<LArCalibLineMapping> clHdl{m_calibMapKey};
+   SG::ReadCondHandle<LArCalibLineMapping> clHdl{m_calibMapKey, ctx};
    clcabling=*clHdl;
  }
  

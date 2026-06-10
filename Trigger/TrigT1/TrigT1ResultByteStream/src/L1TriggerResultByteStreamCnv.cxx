@@ -42,9 +42,6 @@ StatusCode L1TriggerResultByteStreamCnv::initialize() {
   ATH_MSG_VERBOSE("start of " << __FUNCTION__);
   ATH_CHECK(m_ByteStreamEventAccess.retrieve());
 
-  // Initialise ReadHandleKey for CTPResult used to encode L1 trigger bits for RawEventWrite
-  ATH_CHECK(m_inKeyCTPResult.initialize());
-
   // Check one property of the encoder tools to determine if the tools are configured in the job
   const bool doMuon = not serviceLocator()->getOptsSvc().get("ToolSvc.L1MuonBSEncoderTool.ROBIDs").empty();
   ATH_MSG_DEBUG("MUCTPI BS encoding is " << (doMuon ? "enabled" : "disabled"));
@@ -65,6 +62,10 @@ StatusCode L1TriggerResultByteStreamCnv::initialize() {
   const bool doJfex = not serviceLocator()->getOptsSvc().get("ToolSvc.jFexBSEncoderTool.ROBIDs").empty();
   ATH_MSG_DEBUG("jFex BS encoding is " << (doJfex ? "enabled" : "disabled"));
   ATH_CHECK(m_jfexEncoderTool.retrieve(EnableTool(doJfex)));
+
+  const bool doGfex = not serviceLocator()->getOptsSvc().get("ToolSvc.gFexBSEncoderTool.ROBIDs").empty();
+  ATH_MSG_DEBUG("gFex BS encoding is " << (doGfex ? "enabled" : "disabled"));
+  ATH_CHECK(m_gfexEncoderTool.retrieve(EnableTool(doGfex)));
 
   ATH_MSG_VERBOSE("end of " << __FUNCTION__);
   return StatusCode::SUCCESS;
@@ -87,6 +88,8 @@ StatusCode L1TriggerResultByteStreamCnv::finalize() {
     ATH_MSG_WARNING("Failed to release tool " << m_efexEncoderTool.typeAndName());
   if (m_jfexEncoderTool.isEnabled() && m_jfexEncoderTool.release().isFailure())
     ATH_MSG_WARNING("Failed to release tool " << m_jfexEncoderTool.typeAndName());
+  if (m_gfexEncoderTool.isEnabled() && m_gfexEncoderTool.release().isFailure())
+    ATH_MSG_WARNING("Failed to release tool " << m_gfexEncoderTool.typeAndName());
   ATH_MSG_VERBOSE("end of " << __FUNCTION__);
   return StatusCode::SUCCESS;
 }
@@ -129,10 +132,14 @@ StatusCode L1TriggerResultByteStreamCnv::createRep(DataObject* pObj, IOpaqueAddr
   // Only perform encoding if tool was enabled, hence only when xAOD::CTPResult is used instead of ROIB::CTPResult (as part of ROIB::RoIBResult)
   if (m_ctpResultEncoderTool.isEnabled()) {
 
-    // Update RawEventWrite with L1 trigger bits from xAOD::CTPResult
-    SG::ReadHandle<xAOD::CTPResult> ctpResultHandle(m_inKeyCTPResult, ctx);
-    ATH_CHECK(ctpResultHandle.isValid());
-    const xAOD::CTPResult* result = ctpResultHandle.get();
+    // Extract the CTPResult SG key stored as a detail of the TrigComposite
+    const xAOD::TrigComposite* l1tr = l1TriggerResult->at(0);
+    std::string ctpKey;
+    l1tr->getDetail<std::string>("CTPResultKey", ctpKey);
+
+    // Use the retrieved key to read the CTPResult from the event store
+    SG::ReadHandle<xAOD::CTPResult> result(ctpKey, ctx);
+    ATH_CHECK(result.isValid());
 
     // Helpful lambda function to convert from vectors of 32-bit words to bitsets
     auto wordsToBitset = [](const std::vector<uint32_t>& words) {
@@ -177,26 +184,19 @@ StatusCode L1TriggerResultByteStreamCnv::createRep(DataObject* pObj, IOpaqueAddr
     // Update RawEventWrite
     re->lvl1_trigger_info(l1BitsData.size(), l1BitsData.data());
     re->lvl1_trigger_type(static_cast<uint8_t>(triggerType & 0xFF));
-    
-    // Encode payload trigger information of xAOD::CTPResult
-    std::vector<WROBF*> ctpResultROBs; // Will just be one ROB in the vector
-    ATH_CHECK(m_ctpResultEncoderTool->convertToBS(ctpResultROBs, l1TriggerResult, ctx)); // TODO: find a way to avoid ThreadLocalContext
-    ATH_MSG_DEBUG(m_ctpResultEncoderTool->name() << " created " << ctpResultROBs.size() << " CTP ROB Fragments");
-    for (WROBF* rob : ctpResultROBs) {
-      printRob(*rob);
-      // Set LVL1 Trigger Type from the full event
-      rob->rod_lvl1_type(re->lvl1_trigger_type());
-      // Set LVL1 ID from the full event
-      rob->rod_lvl1_id(re->lvl1_id());
-      // Add the ROBFragment to the full event
-      re->append(rob);
-      ATH_MSG_DEBUG("Added ROB fragment 0x" << MSG::hex << rob->source_id() << MSG::dec << " to the output raw event");
+
+  // Check there is no CTPResult ReadHandleKey in the L1TriggerResult when CTP bytestream encoding tool is not enabled
+  } else {
+    const xAOD::TrigComposite* l1tr = l1TriggerResult->at(0);
+    std::string ctpKey;
+    if (l1tr->getDetail<std::string>("CTPResultKey", ctpKey)) {
+      ATH_MSG_WARNING("L1TriggerResult contains CTPResult ReadHandleKey but CTP bytestream encoding tool is not enabled");
     }
   }
 
   //  ===== MuonRoI + eFex encoding =================
 
-  for (ToolHandle<IL1TriggerByteStreamTool>& tool : {std::reference_wrapper(m_muonEncoderTool), std::reference_wrapper(m_muonEncoderToolDaq), std::reference_wrapper(m_efexEncoderTool), std::reference_wrapper(m_jfexEncoderTool)}) {
+  for (ToolHandle<IL1TriggerByteStreamTool>& tool : {std::reference_wrapper(m_muonEncoderTool), std::reference_wrapper(m_muonEncoderToolDaq), std::reference_wrapper(m_efexEncoderTool), std::reference_wrapper(m_jfexEncoderTool), std::reference_wrapper(m_gfexEncoderTool), std::reference_wrapper(m_ctpResultEncoderTool)}) {
     if (not tool.isEnabled()) {continue;}
     std::vector<WROBF*> muon_robs;
     ATH_CHECK(tool->convertToBS(muon_robs, l1TriggerResult, ctx)); // TODO: find a way to avoid ThreadLocalContext

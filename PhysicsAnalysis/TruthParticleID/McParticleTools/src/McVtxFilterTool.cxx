@@ -281,7 +281,7 @@ void McVtxFilterTool::addVertex( const HepMC::ConstGenVertexPtr& srcVtx,
     vtx->set_position( srcVtx->position() );
     vtx->set_status( srcVtx->status() );
     HepMC::suggest_barcode(vtx, HepMC::barcode(srcVtx) );
-    vtx->add_attribute("weights",srcVtx->attribute<HepMC3::VectorDoubleAttribute> ("weights"));
+    vtx->add_attribute(HepMC::Str::weights,srcVtx->attribute<HepMC3::VectorDoubleAttribute> (HepMC::Str::weights));
   }
   if (isSignal)  HepMC::set_signal_process_vertex(evt, vtx );
   /// Fill the parent branch

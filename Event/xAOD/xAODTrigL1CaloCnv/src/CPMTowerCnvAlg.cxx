@@ -41,7 +41,7 @@ namespace xAODMaker {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode CPMTowerCnvAlg::execute() {
+   StatusCode CPMTowerCnvAlg::execute(const EventContext& /*ctx*/) {
       
       // Retrieve the ESD container:
       const CPMTowerCollection* esd = nullptr;

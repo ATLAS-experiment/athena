@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -106,20 +106,20 @@ private:
     IdentifierHash m_sc_reg;
 
     /// Number of offline cells per supercell, in eta/phi.
-    int m_etadiv;
-    int m_phidiv;
+    int m_etadiv{};
+    int m_phidiv{};
 
     /// Offline minimum and maximum (inclusive) eta indices for this entry.
     /// Normally just the min/max of the region, but may be smaller
     /// if there is only a partial overlap with a supercell region.
-    int m_cell_ietamin;
-    int m_cell_ietamax;
+    int m_cell_ietamin{};
+    int m_cell_ietamax{};
 
     /// Supercell minimum and maximum (inclusive) eta indices for this entry.
     /// Normally just the min/max of the region, but may be smaller
     /// if there is only a partial overlap with an offline region.
-    int m_sc_ietamin;
-    int m_sc_ietamax;
+    int m_sc_ietamin{};
+    int m_sc_ietamax{};
 
     /// Offset between the first defined cell in the region and the point
     /// were offline and supercells are aligned.  This matters, for examine,
@@ -127,8 +127,8 @@ private:
     /// doesn't exist, and the minimum eta for the region is 1.  However,
     /// at (the low edge) of the eta=1 cell, the offline cells and supercells
     /// don't align, so one needs to subtract one.
-    int m_cell_ieta_adj;
-    int m_sc_ieta_adj;
+    int m_cell_ieta_adj{};
+    int m_sc_ieta_adj{};
   };
 
   /// Add an entry to the region mapping table.

@@ -12,7 +12,8 @@
 #include "fastjet/PseudoJet.hh"
 
 #include "AthenaKernel/errorcheck.h"
-
+#include "TLorentzVector.h"
+#include <cmath> //std::abs
 
 namespace DerivationFramework { 
     // ============================
@@ -62,7 +63,7 @@ namespace DerivationFramework {
             int pdg = p->pdgId();
             
             // Only consider W bosons and b quarks
-            if(abs(pdg) != 5 && abs(pdg) != 24)
+            if(std::abs(pdg) != 5 && std::abs(pdg) != 24)
                 continue;
 
             bool fromTop = false;
@@ -155,7 +156,7 @@ namespace DerivationFramework {
     const xAOD::TruthParticleContainer* truthParticles,
     TLorentzVector& lj,
     TLorentzVector& slj,
-    TLorentzVector& tlj,
+    TLorentzVector& /*tlj unused*/,
     const std::vector<TLorentzVector>& ttbarDecayProducts,
     const std::vector<int>& decayProduct_pdgID,
     double Rparam,
@@ -230,13 +231,13 @@ namespace DerivationFramework {
             {
                 for (long unsigned int  j = 0; j < sortedPertJet62.size(); ++j)
                 {
-                    if (sortedPertJet62[j].delta_R(ttbarDecayProducts[i]) <= 0.4
-                        && abs(decayProduct_pdgID[i]) != 11 // electron 
-                        && abs(decayProduct_pdgID[i]) != 12 // electron neutrino
-                        && abs(decayProduct_pdgID[i]) != 13 // muon
-                        && abs(decayProduct_pdgID[i]) != 14 // muon neutrino
+                    if (sortedPertJet62.at(j).delta_R(ttbarDecayProducts[i]) <= 0.4
+                        && std::abs(decayProduct_pdgID[i]) != 11 // electron 
+                        && std::abs(decayProduct_pdgID[i]) != 12 // electron neutrino
+                        && std::abs(decayProduct_pdgID[i]) != 13 // muon
+                        && std::abs(decayProduct_pdgID[i]) != 14 // muon neutrino
                         // do not veto tau leptons since they also decay hadronically
-                        && abs(decayProduct_pdgID[i]) != 16 // tau neutrino
+                        && std::abs(decayProduct_pdgID[i]) != 16 // tau neutrino
                         )
                     {
                         
@@ -249,8 +250,12 @@ namespace DerivationFramework {
             }//for
 
             bool leading_jet_found = false;
-            bool subleading_jet_found = false;
-            bool third_jet_found = false;
+            
+            
+            /* The following variables are now unused, left for review
+              bool third_jet_found = false;
+              bool subleading_jet_found = false;
+            */
 
             for (std::vector<fastjet::PseudoJet>::iterator jet = sortedPertJet62.begin(); jet != sortedPertJet62.end(); ++jet)
             {
@@ -258,16 +263,20 @@ namespace DerivationFramework {
                         lj.SetPxPyPzE(jet->px(),jet->py(),jet->pz(),jet->e());  //only saves leading jet
                         leading_jet_found = true;
                     }
-                    else if(leading_jet_found && !subleading_jet_found){
+                    else { //leading_jet_found is 'true' and subleading_jet_found is 'false'
                         slj.SetPxPyPzE(jet->px(),jet->py(),jet->pz(),jet->e());  //only saves leading jet
-                        subleading_jet_found = true;
-                        break;
+                        /* the following is set but then never used
+                          subleading_jet_found = true; 
+                        */
+                        break;//exits loop if leading_jet_found
                     }
+                    /** The following code is unreachable in the loop but left commented for further review
                     else if(leading_jet_found && subleading_jet_found && !third_jet_found){
                         tlj.SetPxPyPzE(jet->px(),jet->py(),jet->pz(),jet->e());  //only saves leading jet
                         third_jet_found = true;
                         break;
-                    }   
+                    }
+                    **/
             } //for 
         }
     

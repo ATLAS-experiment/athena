@@ -48,7 +48,7 @@ public:
   /** 
    * @brief Standard Gaudi execute method.
    */
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
 
 private:
@@ -57,7 +57,7 @@ private:
                           const CaloTowerSeg::SubSeg& subseg,
                           const CaloCellContainer* cells,
                           const CaloTowerContainer* tow0);
-  StatusCode test1();
+  StatusCode test1(const EventContext& ctx);
 
   ToolHandle<ICaloTowerBuilderToolBase> m_builder;
   std::vector<CaloCell_ID::SUBCALO> m_calos;

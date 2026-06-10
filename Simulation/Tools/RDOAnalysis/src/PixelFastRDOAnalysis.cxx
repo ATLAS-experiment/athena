@@ -420,7 +420,7 @@ StatusCode PixelFastRDOAnalysis::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode PixelFastRDOAnalysis::execute() {
+StatusCode PixelFastRDOAnalysis::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG( "In PixelFastRDOAnalysis::execute()" );
 
   // clear branches
@@ -480,7 +480,7 @@ StatusCode PixelFastRDOAnalysis::execute() {
 
 
   // get containers -- fill branches + histos
-  SG::ReadHandle<InDet::PixelClusterContainer> p_pixelClus_cont (m_inputKey);
+  SG::ReadHandle<InDet::PixelClusterContainer> p_pixelClus_cont (m_inputKey, ctx);
   if(p_pixelClus_cont.isValid()) {
     // loop over cluster container
     InDet::PixelClusterContainer::const_iterator clusCont_itr(p_pixelClus_cont->begin());

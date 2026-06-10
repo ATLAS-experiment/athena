@@ -199,13 +199,13 @@ StatusCode CheckFlow_New::initialize(){
 
 
 
-StatusCode CheckFlow_New::execute() {
+StatusCode CheckFlow_New::execute(const EventContext& ctx) {
   msg(MSG::INFO) << ">>> CheckFlow_New from execute" << endmsg;
 
   float pt_binvals[n_ptbin+1]={0.0,0.25,0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,6.0,8.0,12.0,16.0,20.0,30.0,40.0};
   float eta_bin_max = 4.0;
 
-  SG::ReadHandle<HijingEventParams> hijing_pars{m_hijingKey};
+  SG::ReadHandle<HijingEventParams> hijing_pars{m_hijingKey, ctx};
   float b = hijing_pars->get_b();
   float Psi_n[6],Psi_n_reco[6];
   float Psi_n_reco_pos[6],Psi_n_reco_neg[6];

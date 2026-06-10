@@ -27,7 +27,6 @@ EtaJES:
   LowPtJESExtrapolationMethod: 1
   MinPtForETAJES: 50
   UseSpline: True
-  OutputLevel: 3
   InScale: "JetConstitScaleMomentum" # do not include in analysis-facing YAML
   OutScale: "JetEtaJESScaleMomentum" # do not include in analysis-facing YAML
   prereqs:
@@ -66,7 +65,6 @@ Insitu:
   histAbsCalib:
     histName: 'AntiKt10UFOCSSKSoftDropBeta100Zcut10_InsituCalib'
     varX: 'pt'
-  useOriginalHistCombination: false
   RunNumbers: [251102, 314199, 341649, 999999]
   CalibrateMC: True
   InScale: "JetConstitScaleMomentum" 

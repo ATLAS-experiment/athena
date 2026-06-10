@@ -90,9 +90,8 @@
 
   }
   //__________________________________________________________________________
-  StatusCode LArHV2Ntuple::execute()
+  StatusCode LArHV2Ntuple::execute(const EventContext& ctx)
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     //.............................................
 

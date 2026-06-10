@@ -5,9 +5,6 @@
 #ifndef ATHEXCUDA_TRACKPARTICLECALIBRATOREXAMPLEALG_H
 #define ATHEXCUDA_TRACKPARTICLECALIBRATOREXAMPLEALG_H
 
-// Local include(s).
-#include "TrackParticleContainer.h"
-
 // Framework include(s).
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -15,10 +12,14 @@
 #include "StoreGate/WriteHandleKey.h"
 
 // Device include(s).
+#include "AthDeviceInterfaces/ICopyTool.h"
 #include "AthDeviceInterfaces/IMemoryResourceTool.h"
 
 // xAOD include(s).
 #include "xAODTracking/TrackParticleContainer.h"
+
+// Traccc include(s).
+#include <traccc/edm/track_collection.hpp>
 
 namespace AthCUDAExamples {
 
@@ -68,13 +69,22 @@ class TrackParticleCalibratorExampleAlg : public AthReentrantAlgorithm {
   ToolHandle<AthDevice::IMemoryResourceTool> m_deviceMR{
       this, "DeviceMR", "", "The device memory resource tool to use"};
 
+  /// Host copy tool to use
+  ToolHandle<AthDevice::ICopyTool> m_hostCopyTool{this, "HostCopyTool", "",
+                                                  "The host copy tool to use"};
+  /// Device copy tool to use
+  ToolHandle<AthDevice::ICopyTool> m_deviceCopyTool{
+      this, "DeviceCopyTool", "", "The device copy tool to use"};
+
   /// @}
 
 };  // class LinearTransformTaskExampleAlg
 
 /// Perform the transformation on an NVIDIA GPU
-StatusCode calibrateOnGPU(const TrackParticleContainer::const_view& input,
-                          TrackParticleContainer::view& output);
+StatusCode calibrateOnGPU(
+    const traccc::edm::track_collection<traccc::default_algebra>::const_view&
+        input,
+    traccc::edm::track_collection<traccc::default_algebra>::view& output);
 
 }  // namespace AthCUDAExamples
 

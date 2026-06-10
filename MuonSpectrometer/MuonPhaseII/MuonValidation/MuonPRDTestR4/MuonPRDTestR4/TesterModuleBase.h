@@ -31,7 +31,7 @@ namespace MuonValR4 {
       private:
           const MuonGMR4::MuonDetectorManager* m_detMgr{};
           ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{"Muon::MuonIdHelperSvc/MuonIdHelperSvc", name()};
-          SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{"ActsAlignment"};
+          ActsTrk::GeoContextReadKey_t m_geoCtxKey{"ActsAlignment"};
 
 
     };

@@ -10,7 +10,10 @@
 //************************************************************
 
 #include "CombinedScintillatorSDTool.hh"
+
 #include "CombinedScintillatorSD.hh"
+#include "HitManagement/HitCollectionMap.h"
+#include "TileSimEvent/TileHitVector.h"
 
 CombinedScintillatorSDTool::CombinedScintillatorSDTool(const std::string& type, const std::string& name,
                                                        const IInterface* parent)
@@ -26,38 +29,19 @@ CombinedScintillatorSDTool::~CombinedScintillatorSDTool() {
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-StatusCode CombinedScintillatorSDTool::SetupEvent() {
+StatusCode CombinedScintillatorSDTool::SetupEvent(HitCollectionMap& hitCollections) {
   ATH_MSG_VERBOSE("CombinedScintillatorSDTool::SetupEvent()");
-  if (!getSD()) {
-    ATH_MSG_ERROR("SetupEvent: CombinedScintillatorSD never created!");
-    return StatusCode::FAILURE;
-  } else {
-    CombinedScintillatorSD *localSD = dynamic_cast<CombinedScintillatorSD*>(getSD());
-    if (!localSD) {
-      ATH_MSG_ERROR("SetupEvent: Failed to cast m_SD into CombinedScintillatorSD.");
-      return StatusCode::FAILURE;
-    }
-    localSD->StartOfAthenaEvent();
-  }
+  hitCollections.Emplace<CombinedScintillatorSD::HitVectorBuilder>(m_outputCollectionNames[0], m_outputCollectionNames[0]);
   return StatusCode::SUCCESS;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-StatusCode CombinedScintillatorSDTool::Gather() {
+StatusCode CombinedScintillatorSDTool::Gather(HitCollectionMap& hitCollections) {
   ATH_MSG_VERBOSE("CombinedScintillatorSDTool::Gather()");
-  if (!getSD()) {
-    ATH_MSG_ERROR("Gather: CombinedScintillatorSD never created!");
-    return StatusCode::FAILURE;
-  } else {
-    CombinedScintillatorSD *localSD = dynamic_cast<CombinedScintillatorSD*>(getSD());
-    if (!localSD) {
-      ATH_MSG_ERROR("Gather: Failed to cast m_SD into CombinedScintillatorSD.");
-      return StatusCode::FAILURE;
-    }
-    localSD->EndOfAthenaEvent();
-  }
-  return StatusCode::SUCCESS;
+  return hitCollections.TransformAndRecord<TileHitVector>(m_outputCollectionNames[0], [](TileHitVector& hits) {
+    static_cast<CombinedScintillatorSD::HitVectorBuilder&>(hits).Finalize();
+  });
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

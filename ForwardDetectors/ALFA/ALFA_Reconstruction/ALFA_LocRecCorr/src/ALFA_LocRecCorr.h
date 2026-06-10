@@ -1,15 +1,11 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ALFA_LOCRECCORR_h
 #define ALFA_LOCRECCORR_h
 
-#include <iostream>
-#include <string>
-#include <list>
-#include <map>
-#include <vector>
+
 
 #include "Riostream.h"
 #include "TROOT.h"
@@ -34,13 +30,16 @@
 #include "ALFA_LocRecCorrEv/ALFA_LocRecCorrEvCollection.h"
 #include "ALFA_LocRecCorrEv/ALFA_LocRecCorrODEvCollection.h"
 #include "ALFA_UserObjects.h"
+#include <string>
+#include <list>
+#include <vector>
 
 #define MAXNUMTRACKS 100
 
 typedef struct _USERTRANSFORM
 {
-	int iRPot;
-	double fAngle;
+	int iRPot{};
+	double fAngle{};
 	CLHEP::Hep3Vector vecRotation;
 	CLHEP::Hep3Vector vecTranslation;
 

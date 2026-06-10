@@ -117,7 +117,7 @@ StatusCode SuperCellVsCaloCellTestAlg::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode SuperCellVsCaloCellTestAlg::execute() {  
+StatusCode SuperCellVsCaloCellTestAlg::execute(const EventContext& ctx) {  
    //get the supercells, calocells
    const CaloCellContainer* scells=nullptr;CHECK( evtStore()->retrieve(scells, m_scKey) );
 
@@ -125,7 +125,7 @@ StatusCode SuperCellVsCaloCellTestAlg::execute() {
 
    const CaloCellContainer* tscells=nullptr;if(!m_tscKey.empty()) CHECK( evtStore()->retrieve(tscells,m_tscKey) );
 
-   SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey}; 
+   SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, ctx}; 
    const LArOnOffIdMapping* cabling{*cablingHdl};
    if(!cabling) {
       ATH_MSG_ERROR("Do not have SC mapping object " << m_cablingKey.key() );

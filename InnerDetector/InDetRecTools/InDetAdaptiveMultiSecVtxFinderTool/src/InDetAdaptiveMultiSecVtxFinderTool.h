@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2019-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2019-2026 CERN for the benefit of the ATLAS collaboration
 */
 // Author: Neza Ribaric <neza.ribaric@cern.ch>
 
@@ -77,11 +77,11 @@ namespace InDet {
 
     private:
         std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*> doVertexing(const std::vector<Trk::ITrackLink*>& trackVector);
-        float findCompatibleTracks(Amg::Vector3D& seedVertex, Trk::ITrackLink* trkIter) const;
+        float findCompatibleTracks(const EventContext& ctx, Amg::Vector3D& seedVertex, Trk::ITrackLink* trkIter) const;
         void countTracksAndNdf(xAOD::Vertex* myxAODVertex, float& ndf, int& ntracks) const;
         bool checkFit(xAOD::Vertex* actualCandidate) const;
         int removeTracksFromSeeds(xAOD::Vertex* actualCandidate, std::vector<Trk::ITrackLink*>& seedTracks) const;
-        void removeClosestTrack(Amg::Vector3D& seedVertex, std::vector<Trk::ITrackLink*>& seedTracks, int& nFound) const;
+        void removeClosestTrack(const EventContext& ctx, Amg::Vector3D& seedVertex, std::vector<Trk::ITrackLink*>& seedTracks, int& nFound) const;
 
         bool V0check(const std::vector<Amg::Vector3D>& momenta, const Amg::Vector3D& posi) const;
         const std::vector<Amg::Vector3D> getVertexMomenta(xAOD::Vertex* myxAODVertex) const;

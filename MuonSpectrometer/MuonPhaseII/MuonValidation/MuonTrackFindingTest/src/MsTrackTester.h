@@ -73,7 +73,7 @@ namespace MuonValR4{
         /** @brief Temporary container write handle to push the seeds to store gate for later efficiency analysis */
         SG::ReadHandleKey<MuonR4::MsTrackSeedContainer> m_msTrkSeedKey{this, "MsTrkSeedKey", "MsTrackSeeds"};
         /** @brief Dependency on the geometry alignment */
-        SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+        ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
         /** @brief Dependency on the magnetic field */
         SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheKey{this, "MagFieldKey", "fieldCondObj", "Name of the Magnetic Field conditions object key"};
         /** @brief Segment selection tool to pick the good quality segments */

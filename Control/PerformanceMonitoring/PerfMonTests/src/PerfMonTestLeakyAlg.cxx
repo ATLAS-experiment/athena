@@ -45,7 +45,7 @@ StatusCode LeakyAlg::initialize()
 }
 
 
-StatusCode LeakyAlg::execute()
+StatusCode LeakyAlg::execute(const EventContext& /*ctx*/)
 {  
   ATH_MSG_DEBUG ( "Executing " << name() << "..." ) ;
 

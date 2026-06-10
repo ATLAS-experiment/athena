@@ -23,7 +23,7 @@ class ALFAHitAnalysis : public AthHistogramAlgorithm {
    ~ALFAHitAnalysis() = default;
 
    virtual StatusCode initialize();
-   virtual StatusCode execute();
+   virtual StatusCode execute(const EventContext& ctx);
 
  private:
 

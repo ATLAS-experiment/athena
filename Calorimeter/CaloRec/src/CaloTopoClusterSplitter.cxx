@@ -1297,7 +1297,6 @@ StatusCode CaloTopoClusterSplitter::execute(const EventContext& ctx,
   for (; clusCollIter != clusCollIterEnd; ++clusCollIter,++iClusterNumber){
     const xAOD::CaloCluster* parentCluster = (*clusCollIter);
     if ( !hasLocalMaxVector[iClusterNumber] ) {
-      //xAOD::CaloCluster *myClone = new xAOD::CaloCluster(*parentCluster);
       myCaloClusters.push_back(std::make_unique<CaloProtoCluster>(parentCluster->getCellLinks()));
       ATH_MSG_DEBUG("[CaloProtoCluster@" << myCaloClusters.back().get() << "] with " 
 		    << myCaloClusters.back()->size() << "cells cloned from " 
@@ -1331,8 +1330,8 @@ StatusCode CaloTopoClusterSplitter::execute(const EventContext& ctx,
   float eMax(0.);
   // add to cluster container.
   for(const auto& protoCluster : myCaloClusters) {
-    xAOD::CaloCluster* xAODCluster=new xAOD::CaloCluster();
-    clusColl->push_back(xAODCluster);
+    auto xAODClusterUP = std::make_unique<xAOD::CaloCluster>();
+    xAOD::CaloCluster* xAODCluster=clusColl->push_back(std::move(xAODClusterUP));
     xAODCluster->addCellLink(protoCluster->releaseCellLinks());//Hand over ownership to xAOD::CaloCluster
     xAODCluster->setClusterSize(clusterSize);
     CaloClusterKineHelper::calculateKine(xAODCluster, true, true, m_useGPUCriteria);

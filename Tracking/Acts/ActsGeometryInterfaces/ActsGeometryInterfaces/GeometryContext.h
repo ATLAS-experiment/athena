@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRYINTERFACES_GEOMETRYCONTEXT_H
@@ -18,6 +18,9 @@
 #include "GeoModelUtilities/TransientConstSharedPtr.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/CondCont.h"
+
+#include "StoreGate/ReadHandleKey.h"
+
 /** @brief ActsGeometry context carries all information related to the aboslute positions of the Readout geometry
  *         Per detector technology (e.g. Mdt), it contains an ActsTrk::DetectorAlignmentStore which carries pointers
  *         to the rigid alignment transfomrations of each FullPhysical volume representing the detector sensor envelope.
@@ -54,5 +57,13 @@ private:
 
 CLASS_DEF( ActsTrk::GeometryContext , 184998957 , 1 );
 CONDCONT_DEF( ActsTrk::GeometryContext , 186862071 );
+
+
+namespace ActsTrk {
+    /** @brief Abrivate the ReadHandleKey to declare the data dependency on the
+     *         Geometry context */
+    using GeoContextReadKey_t = SG::ReadHandleKey<GeometryContext>;
+}
+
 
 #endif

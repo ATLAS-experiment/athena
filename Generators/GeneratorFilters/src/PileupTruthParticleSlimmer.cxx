@@ -44,7 +44,7 @@ StatusCode PileupTruthParticleSlimmer::initialize() {
 }
 
 
-StatusCode PileupTruthParticleSlimmer::execute() {
+StatusCode PileupTruthParticleSlimmer::execute(const EventContext& /*ctx*/) {
     
     
     // If the containers already exist then assume that nothing needs to be done

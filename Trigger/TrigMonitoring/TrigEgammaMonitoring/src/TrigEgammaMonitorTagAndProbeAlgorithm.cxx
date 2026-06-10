@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************
@@ -118,9 +118,9 @@ StatusCode TrigEgammaMonitorTagAndProbeAlgorithm::fillHistograms( const EventCon
         ATH_MSG_DEBUG("Probes " << probes.size() << " Pairs " << pairObjs.size() );
 
         // Include fill here
-        fillDistributions( pairObjs, info );
-        fillEfficiencies( pairObjs, info, false);
-        fillResolutions( pairObjs, info );
+        fillDistributions( ctx, pairObjs, info );
+        fillEfficiencies( ctx, pairObjs, info, false);
+        fillResolutions( ctx, pairObjs, info );
 
     } // End loop over trigger list
 
@@ -184,7 +184,8 @@ bool TrigEgammaMonitorTagAndProbeAlgorithm::executeTandP( const EventContext& ct
         if ( !minimalTriggerRequirement() ) 
           return false;
       }
-      fillLabel(monGroup, "CutCounter", "PassTrigger");
+      fillLabel(monGroup, "CutCounter", "PassMinimalTrigger");
+
  
     }else{
       ATH_MSG_DEBUG("Disable trigger tags because trigger tags list is empty.");
@@ -202,7 +203,7 @@ bool TrigEgammaMonitorTagAndProbeAlgorithm::executeTandP( const EventContext& ct
     ATH_MSG_DEBUG("Execute TandP BaseTool " << offElectrons->size());
     for(const auto *const elTag : *offElectrons)
     {
-        if( ! isTagElectron( monGroup, elTag) ) continue;
+        if( ! isTagElectron(ctx, monGroup, elTag) ) continue;
         
         for(const auto *const elProbe : *offElectrons)
         {  // Dress the probes with updated Pid decision
@@ -255,7 +256,7 @@ bool TrigEgammaMonitorTagAndProbeAlgorithm::executeTandP( const EventContext& ct
                 //fill( monGroup, m_anatype+"_ProbeCutCounter", "GoodProbe");
                 
                 auto selProbe = std::make_shared<const xAOD::Electron>(*elProbe);
-                dressPid(selProbe.get());
+                dressPid(ctx, selProbe.get());
                 
                 probeElectrons.emplace_back(std::move(selProbe));
 
@@ -279,8 +280,10 @@ bool TrigEgammaMonitorTagAndProbeAlgorithm::minimalTriggerRequirement() const {
     ATH_MSG_DEBUG("Apply Minimal trigger requirements");
     for(unsigned int ilist = 0; ilist != m_tagTrigList.size(); ilist++) {
         std::string tag = m_tagTrigList[ilist];
-        if ( tdt()->isPassed(tag) )
-            return true;
+    	//ATH_MSG_INFO("Standard Tag and Probe tag is: "<< tag);
+        if ( tdt()->isPassed(tag) ){
+	    //ATH_MSG_INFO("Standard Trigger tag requirement returned True: " << tag);
+            return true;}
     }
 
     return false;
@@ -303,7 +306,7 @@ void TrigEgammaMonitorTagAndProbeAlgorithm::matchObjects(const std::string& prob
 
 
 
-bool TrigEgammaMonitorTagAndProbeAlgorithm::isTagElectron( const ToolHandle<GenericMonitoringTool>& monGroup, 
+bool TrigEgammaMonitorTagAndProbeAlgorithm::isTagElectron(const EventContext& ctx, const ToolHandle<GenericMonitoringTool>& monGroup,
                                                const xAOD::Electron *el) const 
 {
     fillLabel(monGroup, "TagCutCounter", "Electrons");
@@ -333,7 +336,7 @@ bool TrigEgammaMonitorTagAndProbeAlgorithm::isTagElectron( const ToolHandle<Gene
 
     ATH_MSG_DEBUG("Cluster E "<<clus->e());
     ATH_MSG_DEBUG("Selecting Tag Electron PID");
-    if (!ApplyElectronPid(el, m_offTagTightness)) return false;
+    if (!ApplyElectronPid(ctx, el, m_offTagTightness)) return false;
     fillLabel(monGroup, "TagCutCounter", "GoodPid");
 
     ATH_MSG_DEBUG("Selecting Tag Electron Et");
@@ -462,9 +465,8 @@ bool TrigEgammaMonitorTagAndProbeAlgorithm::isGoodProbeElectron( const ToolHandl
 
 
 
-void TrigEgammaMonitorTagAndProbeAlgorithm::dressPid(const xAOD::Electron *eg) const
+void TrigEgammaMonitorTagAndProbeAlgorithm::dressPid(const EventContext& ctx, const xAOD::Electron *eg) const
 {    
-    const auto& ctx = Gaudi::Hive::currentContext() ;
     for(int ipid=0;ipid<3;ipid++){
         bool accept = (bool) this->m_electronIsEMTool[ipid]->accept(ctx,eg);
         const std::string pidname="is"+m_isemname[ipid];

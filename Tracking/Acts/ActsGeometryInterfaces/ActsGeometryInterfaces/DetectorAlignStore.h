@@ -5,7 +5,7 @@
 #define ACTSGEOMETRYINTERFACES_RawGeomAlignStore_H
 
 /// Put first the GeoPrimitives
-#include "ActsGeometryInterfaces/GeometryDefs.h"
+#include "ActsGeometryInterfaces/TransformStore.h"
 ///
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/CondCont.h"
@@ -37,55 +37,23 @@ namespace ActsTrk {
 
     class DetectorAlignStore {
       public:
-        
+        using Mode = detail::TransformStore::Mode;
         /** @brief Copy constructor  */
         DetectorAlignStore(const DetectorAlignStore& other) = default;
         /** @brief Default constructor  */
-        explicit DetectorAlignStore(const DetectorType _type);
+        explicit DetectorAlignStore(const DetectorType type, const Mode mode): 
+               detType{type}, 
+               trackingAlignment{std::make_unique<detail::TransformStore>(detType, mode)} {}
       
         /** @brief Default virtual destructor */
         virtual ~DetectorAlignStore() = default;
         /** @brief Store containing the aligned GeoModel nodes  */
         std::shared_ptr<GeoAlignmentStore> geoModelAlignment{std::make_shared<GeoAlignmentStore>()};
-       /** @brief Store holding the transfomations used by the Acts algorithms  */
-        class TrackingAlignStore{
-           public:
-               explicit TrackingAlignStore(const DetectorType detType);
-               /** @brief Returns a unique ID to the client under which the client can store its transformation 
-                *         inside the container.*/
-               static unsigned int drawTicket(const DetectorType detType);
-               /** @brief Returns the number of all distributed tickets */
-               static unsigned int distributedTickets(const DetectorType detType);
-               /** @brief Return back a ticket for the specified detector type such that
-                *         its slot can be used by another instance
-                *  @param detType: The ATLAS sub detector type for which the ticket is returned
-                *  @param ticketNo: The number of the drawn ticket to return */
-               static void giveBackTicket(const DetectorType detType, unsigned int ticketNo);
-               /** @brief Returns the transformation associated with the ticket number */
-               const Amg::Transform3D* getTransform(unsigned int ticketNo) const {
-                  return m_transforms[ticketNo].get();
-               }
-               /** @brief Caches for the given ticket number the transformation in the store and returns the 
-                *         const reference to it */
-               const Amg::Transform3D& setTransform(unsigned int ticketNo, Amg::Transform3D && trf) const {
-                  return (*m_transforms.at(ticketNo).set(std::make_unique<Amg::Transform3D>(std::move(trf))));
-               }
-        
-               static constexpr unsigned s_techs{static_cast<unsigned>(DetectorType::UnDefined)};
-               using TicketCounterArr =  std::array<std::atomic<unsigned>, s_techs>;
-               using ReturnedTicketArr = std::array<std::vector<bool>, s_techs>;
-               using ReturnedHintArr = std::array<int, s_techs>;
-            private:
-                static TicketCounterArr s_clientCounter ATLAS_THREAD_SAFE;
-                static ReturnedTicketArr s_returnedTickets ATLAS_THREAD_SAFE;
-                static ReturnedHintArr s_returnedHints ATLAS_THREAD_SAFE;
-                std::vector<CxxUtils::CachedUniquePtr<Amg::Transform3D>> m_transforms{};
-        };
         /** @brief The aligned detector element type  */
         DetectorType detType{DetectorType::UnDefined};
         /** @brief Pointer to the store caching the final tracking transformations  */
-        using TrackingAlignStorePtr = GeoModel::TransientConstSharedPtr<TrackingAlignStore>;
-        TrackingAlignStorePtr trackingAlignment{std::make_unique<TrackingAlignStore>(detType)};        
+        using TrackingAlignStorePtr = GeoModel::TransientConstSharedPtr<detail::TransformStore>;
+        TrackingAlignStorePtr trackingAlignment{};        
         /** @brief The muon system contains additional parameters such as B-lines, as-built, passivation */
         struct InternalAlignStore{};
         using InternalAlignPtr = GeoModel::TransientConstSharedPtr<InternalAlignStore>;

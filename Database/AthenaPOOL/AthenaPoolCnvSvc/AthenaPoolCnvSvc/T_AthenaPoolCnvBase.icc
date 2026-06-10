@@ -23,6 +23,7 @@
 #include "AthenaKernel/ClassName.h"
 #include "AthenaKernel/StorableConversions.h"
 #include "AthenaPoolCnvSvc/exceptions.h"
+#include "AthContainersInterfaces/ToTransient.h"
 
 //__________________________________________________________________________
 template <class T>
@@ -96,6 +97,8 @@ StatusCode T_AthenaPoolCnvBase<T>::PoolToDataObject(DataObject*& pObj,
                                                 key);
    }
    T* obj = reinterpret_cast<T*>(voidPtr);
+   // Call toTransient on the object we just read.
+   SG::ToTransient<T>::toTransient (*obj);
    pObj = SG::asStorable(obj);
    return(StatusCode::SUCCESS);
 }

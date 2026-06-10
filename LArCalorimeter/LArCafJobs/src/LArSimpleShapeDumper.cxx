@@ -29,7 +29,7 @@ StatusCode LArSimpleShapeDumper::initialize()
 }
 
 
-StatusCode LArSimpleShapeDumper::execute()
+StatusCode LArSimpleShapeDumper::execute(const EventContext& /*ctx*/)
 {
   static bool first = true;
   if (first) {

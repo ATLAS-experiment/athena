@@ -98,13 +98,19 @@ def MuonGeoModelCfg(flags):
 
 def MuonAlignStoreCfg(flags):
     result = ComponentAccumulator()
-    if not flags.Muon.usePhaseIIGeoSetup: return result
+    if not flags.Muon.usePhaseIIGeoSetup: 
+        return result
+    from AthenaConfiguration.Enums import ProductionStep
+    if flags.Common.ProductionStep == ProductionStep.Simulation:
+        from MuonG4TrfCache.MuonTrfCacheConfig import MuonTransformCacheCfg
+        result.merge(MuonTransformCacheCfg(flags))
+        return result
+    
     from MuonCondAlgR4.ConditionsConfig import MuonGeoAlignCondAlgCfg
     result.merge(MuonGeoAlignCondAlgCfg(flags))
     from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsAlignStoreProviderAlgCfg
     
-    from MuonG4TrfCache.MuonTrfCacheConfig import MuonTransformCacheCfg
-    result.merge(MuonTransformCacheCfg(flags))
+
 
     setCondDep = flags.Muon.enableAlignment or flags.Sim.ReleaseGeoModel
     from MuonConfig.MuonConfigFlags import GeoTrfCacheMode

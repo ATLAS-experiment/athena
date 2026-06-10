@@ -9,6 +9,8 @@
 #include <GeoModelKernel/GeoClearAbsPosAction.h>
 #include <AthenaKernel/IOVInfiniteRange.h>
 
+#include "MuonReadoutGeometryR4/SpectrometerSector.h"
+
 
 #include "Acts/Utilities/Helpers.hpp"
 using namespace MuonGMR4;
@@ -42,7 +44,7 @@ StatusCode GeomAlignCondAlg::initialize() {
    
 
     for (const ActsTrk::DetectorType det : m_techs) {
-        m_writeKeys.emplace_back(ActsTrk::to_string(det) + m_keyToken);
+        m_writeKeys.emplace_back(std::format("{:}{:}", det, m_keyToken.value()));
         ATH_MSG_INFO("Register new alignment container "<<m_writeKeys.back().fullKey());
     }
     ATH_MSG_INFO("Switched options "<<m_fillAlignStoreCache<<", "<<", "<<m_applyALines<<", "
@@ -242,13 +244,15 @@ StatusCode GeomAlignCondAlg::execute(const EventContext& ctx) const {
         const SG::WriteCondHandleKey<ActsTrk::DetectorAlignStore>& key = m_writeKeys[det];
         const ActsTrk::DetectorType subDet = m_techs[det];
 
-        SG::WriteCondHandle<ActsTrk::DetectorAlignStore> writeHandle{key, ctx};
+        ActsTrk::DetectorAlignStore::Mode mode {m_fillAlignStoreCache ?
+                                                ActsTrk::DetectorAlignStore::Mode::Block  :
+                                                ActsTrk::DetectorAlignStore::Mode::LazyFill};
+        SG::WriteCondHandle writeHandle{key, ctx};
         if (writeHandle.isValid()) {
-            ATH_MSG_VERBOSE("The alignment constants for "<<ActsTrk::to_string(subDet)
-                          <<" are still valid.");
+            ATH_MSG_DEBUG("The alignment constants for "<<subDet <<" are still valid.");
             continue;
         }
-        auto writeCdo = std::make_unique<ActsTrk::DetectorAlignStore>(subDet);
+        auto writeCdo = std::make_unique<ActsTrk::DetectorAlignStore>(subDet, mode);
 
         const std::set<const GeoAlignableTransform*>& toStore =  techTransforms[subDet];
         /// Append the alignable transformations to the conditions object
@@ -274,9 +278,22 @@ StatusCode GeomAlignCondAlg::execute(const EventContext& ctx) const {
                 [&](const MuonGMR4::MuonReadoutElement* re) {
                     numAligned += re->storeAlignedTransforms(*writeCdo);
                 });
+            std::ranges::for_each(m_detMgr->getAllChambers(),
+                [&](const MuonGMR4::Chamber* chamber){
+                    const auto& placement = chamber->parameters().placement;
+                    if (placement) {
+                        numAligned+= placement->storeAlignedTransforms(*writeCdo);
+                    }
+                });
             /// The geoModel constants are no longer needed.
             writeCdo->geoModelAlignment.reset();
-            ATH_MSG_DEBUG("Populated the alignment store "<<to_string(subDet)<<" with "<<numAligned<<" transforms");
+            ATH_MSG_DEBUG("Populated the alignment store "<<subDet<<" with "<<numAligned<<" transforms");
+            if (writeCdo->trackingAlignment->filled() != writeCdo->trackingAlignment->size()) {
+                ATH_MSG_ERROR("The number of aligned transforms "<<(*writeCdo->trackingAlignment)
+                    <<" does not match what's reported from the readout geometry "
+                    <<writeCdo->trackingAlignment->filled());
+                return StatusCode::FAILURE;
+            }
         } else if (m_fillGeoAlignStore) {
             /// Ensure that the rigid transformations of the detector elements are applied 
             std::ranges::for_each(m_detMgr->getAllReadoutElements(subDet),

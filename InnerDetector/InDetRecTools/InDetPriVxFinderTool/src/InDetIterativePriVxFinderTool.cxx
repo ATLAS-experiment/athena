@@ -363,7 +363,7 @@ InDetIterativePriVxFinderTool::findVertex(
         try {
           std::unique_ptr<Trk::PlaneSurface> mySurface =
             m_ImpactPoint3dEstimator->Estimate3dIP(
-              *perigeeListIter, &actualVertex, distance);
+              ctx, *perigeeListIter, &actualVertex, distance);
         } catch (error::ImpactPoint3dEstimatorProblem err) {
           msg(MSG::WARNING) << " ImpactPoint3dEstimator failed to find minimum "
                                "distance between track and vertex seed: "

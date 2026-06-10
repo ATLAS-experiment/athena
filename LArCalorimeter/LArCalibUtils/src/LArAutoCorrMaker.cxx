@@ -86,7 +86,7 @@ StatusCode LArAutoCorrMaker::initialize() {
 
 
 //---------------------------------------------------------------------------
-StatusCode LArAutoCorrMaker::execute()
+StatusCode LArAutoCorrMaker::execute(const EventContext& ctx)
   //---------------------------------------------------------------------------
 {
   StatusCode sc;
@@ -94,7 +94,7 @@ StatusCode LArAutoCorrMaker::execute()
     const xAOD::EventInfo* eventInfo = nullptr;
     ATH_CHECK( evtStore()->retrieve( eventInfo ) );
 
-    SG::ReadCondHandle<BunchCrossingCondData> bccd (m_bcDataKey);
+    SG::ReadCondHandle<BunchCrossingCondData> bccd (m_bcDataKey, ctx);
     const BunchCrossingCondData* bunchCrossing=*bccd;
     if (!bunchCrossing) {
       ATH_MSG_ERROR("Failed to retrieve Bunch Crossing obj");

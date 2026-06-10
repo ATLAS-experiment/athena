@@ -112,9 +112,8 @@ StatusCode ISF::SimKernelMT::initialize() {
 }
 
 
-StatusCode ISF::SimKernelMT::execute() {
+StatusCode ISF::SimKernelMT::execute(const EventContext& ctx) {
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   auto hitCollections = std::make_shared<HitCollectionMap>();
   // Call setupEvent for all simulators (TODO: make the tools do this)
   for (auto& curSimTool: m_simulationTools) {
@@ -129,7 +128,7 @@ StatusCode ISF::SimKernelMT::execute() {
     }
   }
 
-  SG::ReadHandle<McEventCollection> inputEvgen(m_inputEvgenKey);
+  SG::ReadHandle<McEventCollection> inputEvgen(m_inputEvgenKey, ctx);
   if (!inputEvgen.isValid()) {
     ATH_MSG_FATAL("Unable to read input GenEvent collection '" << inputEvgen.key() << "'");
     return StatusCode::FAILURE;

@@ -23,7 +23,7 @@ StatusCode CondWriterExtAlg::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode CondWriterExtAlg::execute()
+StatusCode CondWriterExtAlg::execute(const EventContext& /*ctx*/)
 {
   const EventContext& context = getContext();
   ATH_MSG_INFO ("Event " << context.eventID().event_number() <<

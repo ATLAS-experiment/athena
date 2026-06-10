@@ -136,7 +136,7 @@ StatusCode HGTDTrackExtensionAlg::execute(const EventContext& ctx) const
   ATH_MSG_DEBUG("Size of trackParticles collection " << trackParticles->size());
   
   // Create WriteDecorHandles for all decorations
-  SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<bool>> layerHasExtensionHandle(m_layerHasExtensionKey, ctx);
+  SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<char>> layerHasExtensionHandle(m_layerHasExtensionKey, ctx);
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> layerExtensionChi2Handle(m_layerExtensionChi2Key, ctx);
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> layerClusterRawTimeHandle(m_layerClusterRawTimeKey, ctx);
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> layerClusterTimeHandle(m_layerClusterTimeKey, ctx);
@@ -402,15 +402,10 @@ HGTDTrackExtensionAlg::TrackExtensionData HGTDTrackExtensionAlg::processTrackExt
     std::size_t nOutliers = 0;
     std::size_t nHGTDHits = 0;
     
-    std::vector<bool> hasHitInLayer = {false, false, false, false};
+    std::vector<char> hasHitInLayer = {false, false, false, false};
     std::vector<float> chi2PerLayer = {0.0, 0.0, 0.0, 0.0};
     std::vector<float> timePerLayer = {0.0, 0.0, 0.0, 0.0};
     std::vector<float> rawTimePerLayer = {0.0, 0.0, 0.0, 0.0};
-
-    std::vector<int> truthClassPerLayer = {-1, -1, -1, -1};
-    std::vector<bool> isShadowedPerLayer = {false, false, false, false};
-    std::vector<bool> isMergedPerLayer = {false, false, false, false};
-    std::vector<bool> primaryExpectedPerLayer = {false, false, false, false};
     
     // Extrapolated position - get the position at the first HGTD surface encountered
     float extrapX = 0.0;

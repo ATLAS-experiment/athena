@@ -110,7 +110,6 @@ def HION5KernelCfg(flags, name="HION5Kernel", **kwargs):
     # Schedule extra jets collections
     from JetRecConfig.StandardSmallRJets import AntiKt4PV0Track
     from JetRecConfig.JetRecConfig import JetRecCfg
-
     jetList = [AntiKt4PV0Track]
     for jd in jetList:
         acc.merge(JetRecCfg(flags, jd))
@@ -119,6 +118,21 @@ def HION5KernelCfg(flags, name="HION5Kernel", **kwargs):
     # (same pattern as HION15, which imports PhysAugmentationsHION7Cfg from HION7)
     from DerivationFrameworkHI.HION7 import PhysAugmentationsHION7Cfg
     acc.merge(PhysAugmentationsHION7Cfg(flags))
+
+    # HIJetRec configuration with DF-prefixed jet collection names
+    # moved here from HION5Cfg to mirror getDFJets pattern in HION7KernelCfg
+    from HIJetRec.HIJetRecConfigCA import HIJetRecCfg
+    acc.merge(HIJetRecCfg(flags))
+
+    # B-Tagging for HI jets — must be after HIJetRecCfg so DFAntiKt4HIJets exists
+    if flags.HeavyIon.doHIBTagging:
+        from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
+        acc.merge(FlavorTaggingCfg(flags, JetColl+"AntiKt4HIJets"))
+        from BTagging.TrackLeptonConfig import TrackLeptonDecorationCfg
+        acc.merge(TrackLeptonDecorationCfg(flags))
+
+    # skimming -- must come BEFORE algOR so HION5Sequence is created first
+    skimmingTool = acc.getPrimaryAndMerge(HION5SkimmingToolCfg(flags))
 
     # jet cleaning
     # Decorate if jet passes OR and save decoration DFCommonJets_passOR
@@ -143,13 +157,10 @@ def HION5KernelCfg(flags, name="HION5Kernel", **kwargs):
         TauLabel=tauLabel,
         BJetLabel=bJetLabel,
     )
-    acc.addEventAlgo(algOR)
+    acc.addEventAlgo(algOR, sequenceName="HION5Sequence")
 
-    # skimming
-    skimmingTool = acc.getPrimaryAndMerge(HION5SkimmingToolCfg(flags))
-    
     # Thinning
-    thinningTool= acc.getPrimaryAndMerge(HION5Thinning(flags))
+    thinningTool = acc.getPrimaryAndMerge(HION5Thinning(flags))
 
     # setup the kernel
     acc.addEventAlgo(
@@ -158,25 +169,15 @@ def HION5KernelCfg(flags, name="HION5Kernel", **kwargs):
             SkimmingTools = [skimmingTool],
             ThinningTools = [thinningTool],
             AugmentationTools = [],
-            ))
+            ),
+        sequenceName="HION5Sequence")
 
     return acc
 
 def HION5Cfg(flags):
     acc = ComponentAccumulator()
 
-
-    # HIJetRec configuration with DF-prefixed jet collection names
     JetColl = flags.HeavyIon.HIJetPrefix
-    from HIJetRec.HIJetRecConfigCA import HIJetRecCfg
-    acc.merge(HIJetRecCfg(flags))
-
-    # B-Tagging for HI jets — must be here after HIJetRecCfg so DFAntiKt4HIJets exists
-    if flags.HeavyIon.doHIBTagging:
-        from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
-        acc.merge(FlavorTaggingCfg(flags, JetColl+"AntiKt4HIJets"))
-        from BTagging.TrackLeptonConfig import TrackLeptonDecorationCfg
-        acc.merge(TrackLeptonDecorationCfg(flags))
 
     from DerivationFrameworkEGamma.PhotonsCPDetailedContent import PhotonsCPDetailedContent
     from DerivationFrameworkEGamma.ElectronsCPDetailedContent import ExtraElectronShowerShapes,ExtraElectronGSFVar

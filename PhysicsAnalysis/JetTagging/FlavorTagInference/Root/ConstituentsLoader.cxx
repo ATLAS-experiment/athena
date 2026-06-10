@@ -3,7 +3,9 @@ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagInference/ConstituentsLoader.h"
+#include "FlavorTagInference/StringUtils.h"
 #include <regex>
+#include <utility> //std::pair
 
 namespace {
   using namespace FlavorTagInference;
@@ -30,6 +32,7 @@ namespace {
     ConstituentsInputConfig config;
     config.name = name;
     config.order = ConstituentsSortOrder::PT_DESCENDING;
+    const std::string typeMatchStr{"iparticle type matching"};
     for (const auto& varname: input_variables) {
       InputVariableConfig input;
       size_t pos = varname.find("flow_");
@@ -40,8 +43,7 @@ namespace {
         input.name = varname;
       }
       input.flip_sign = false;
-      input.type = str::match_first(type_regexes, input.name,
-                                "iparticle type matching");
+      input.type = str::match_first(type_regexes, input.name, typeMatchStr);
       config.inputs.push_back(std::move(input));
     }
     return config;
@@ -57,16 +59,13 @@ namespace {
     const FlipTagConfig& flip_config) {
     ConstituentsInputConfig config = {};
     config.name = name;
-    config.order = str::match_first(sort_regexes, name,
-                              "track order matching");
-    config.selection = str::match_first(select_regexes, name,
-                                  "track selection matching");
+    config.order = str::match_first(sort_regexes, name, "track order matching");
+    config.selection = str::match_first(select_regexes, name, "track selection matching");
+    const std::string typeMatchStr{"track type matching"};
     for (const auto& varname: input_variables) {
       InputVariableConfig input;
       input.name = varname;
-      input.type = str::match_first(type_regexes, varname,
-                                "track type matching");
-
+      input.type = str::match_first(type_regexes, varname,typeMatchStr);
       input.flip_sign=false;
       if ((flip_config != FlipTagConfig::STANDARD) && std::regex_match(varname, re)){
         input.flip_sign=true;
@@ -81,11 +80,11 @@ namespace {
     const TypeRegexes& type_regexes) {
     ConstituentsInputConfig config;
     config.name = name;
+    const std::string typeMatchStr{"hits type matching"};
     for (const auto& varname: input_variables) {
       InputVariableConfig input;      
       input.name = varname;
-      input.type = str::match_first(type_regexes, input.name,
-                                "hits type matching");
+      input.type = str::match_first(type_regexes, input.name, typeMatchStr);
       input.flip_sign = false;
       config.inputs.push_back(std::move(input));
     }
@@ -101,13 +100,13 @@ namespace {
     ConstituentsInputConfig config;
     config.name = name;
     config.order = ConstituentsSortOrder::PT_DESCENDING;
+    const std::string typeMatchStr{"lepton type matching"};
     config.selection = str::match_first(select_regexes, name,
                                   "lepton selection matching");
     for (const auto& varname: input_variables) {
       InputVariableConfig input;
       input.name = varname;
-      input.type = str::match_first(type_regexes, input.name,
-                                "lepton type matching");
+      input.type = str::match_first(type_regexes, input.name, typeMatchStr);
       input.flip_sign = false;
       config.inputs.push_back(std::move(input));
     }

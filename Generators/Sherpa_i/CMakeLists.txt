@@ -58,8 +58,8 @@ atlas_add_component( Sherpa_i
 
 # Install file(s) from the package.
 atlas_install_joboptions( share/common/*.py )
-atlas_install_python_modules( python/sherpaTarCreator)
-atlas_install_scripts( python/*.py )
+atlas_install_python_modules( python/*.py )
+atlas_install_scripts( share/sherpaTarCreator.py )
 
 # Set (a) Sherpa specific environment variable(s).
 set( SherpaEnvironment_DIR ${CMAKE_CURRENT_SOURCE_DIR}
@@ -70,4 +70,3 @@ find_package( SherpaEnvironment )
 set( OpenLoopsEnvironment_DIR ${CMAKE_CURRENT_SOURCE_DIR}
    CACHE PATH "Location of OpenLoopsEnvironment.cmake" )
 find_package( OpenLoopsEnvironment )
-

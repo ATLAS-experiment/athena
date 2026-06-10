@@ -258,7 +258,7 @@ def ActsIDClusterizationCfg(flags,
     # Name of the RoI to be used
     roisName = f'{flags.Tracking.ActiveConfig.extension}RegionOfInterest'
     # Large Radius Tracking uses full scan RoI created in the primary pass
-    if flags.Tracking.ActiveConfig.extension == 'ActsLargeRadius':
+    if flags.Tracking.ActiveConfig.isLargeD0 and flags.Tracking.ActiveConfig.isSecondaryPass:
         roisName = 'ActsRegionOfInterest'
         
     # Name of the Cluster container -> ITk + extension without "Acts" + Pixel or Strip + Clusters

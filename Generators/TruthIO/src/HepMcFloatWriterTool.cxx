@@ -134,13 +134,13 @@ StatusCode HepMcFloatWriterTool::write( const HepMC::GenEvent* evt )
 
 #ifdef HEPMC3
   long evt_vertices_size=evt->vertices().size();
-  std::shared_ptr<HepMC3::DoubleAttribute> A_alphaQCD=evt->attribute<HepMC3::DoubleAttribute>("alphaQCD");
+  std::shared_ptr<HepMC3::DoubleAttribute> A_alphaQCD=evt->attribute<HepMC3::DoubleAttribute>(HepMC::Str::alphaQCD);
   double  evt_alphaQCD=(A_alphaQCD?(A_alphaQCD->value()):0.0);
-  std::shared_ptr<HepMC3::DoubleAttribute> A_alphaQED=evt->attribute<HepMC3::DoubleAttribute>("alphaQED");
+  std::shared_ptr<HepMC3::DoubleAttribute> A_alphaQED=evt->attribute<HepMC3::DoubleAttribute>(HepMC::Str::alphaQED);
   double  evt_alphaQED=(A_alphaQED?(A_alphaQED->value()):0.0);
-  std::shared_ptr<HepMC3::DoubleAttribute> A_event_scale=evt->attribute<HepMC3::DoubleAttribute>("event_scale");
+  std::shared_ptr<HepMC3::DoubleAttribute> A_event_scale=evt->attribute<HepMC3::DoubleAttribute>(HepMC::Str::event_scale);
   double  evt_event_scale=(A_event_scale?(A_event_scale->value()):0.0);
-  std::shared_ptr<HepMC3::VectorLongIntAttribute> A_random_states=evt->attribute<HepMC3::VectorLongIntAttribute>("random_states");
+  std::shared_ptr<HepMC3::VectorLongIntAttribute> A_random_states=evt->attribute<HepMC3::VectorLongIntAttribute>(HepMC::Str::random_states);
   std::vector<long int> random_states=(A_random_states?(A_random_states->value()):std::vector<long int>());
   long random_states_size=random_states.size();
 #else 
@@ -214,7 +214,7 @@ StatusCode HepMcFloatWriterTool::write( const HepMC::GenEvent* evt )
       out << buf.str();
       out << "#";
       std::string svertexeights("1.0"); 
-      auto vertexeights=v->attribute<HepMC3::VectorDoubleAttribute>("weights");
+      auto vertexeights=v->attribute<HepMC3::VectorDoubleAttribute>(HepMC::Str::weights);
       if (vertexeights) vertexeights->to_string(svertexeights);
       out << svertexeights;
       out << '\n';

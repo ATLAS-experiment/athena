@@ -113,23 +113,21 @@ namespace FlavorTagDiscriminants {
         continue;
       }
       // get associated InDet track
-      auto track_link = muon->inDetTrackParticleLink();
-      if ( !track_link.isValid() ) { continue; }
-      auto track = *track_link;
-
+      auto track = muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
+      if ( !track) { continue; }
+    
       // get associated muon spectrometer track
-      auto ms_track_link = muon->extrapolatedMuonSpectrometerTrackParticleLink();
-      if ( !ms_track_link.isValid() ) { continue; }
-      auto ms_track = *ms_track_link;
-
+      auto ms_track = muon->trackParticle(xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle);
+      if (!ms_track) { continue; }
+    
       float momBalSig = 0.;
       float scatNeighSig = 0.;
-      muon->parameter(momBalSig, xAOD::Muon::momentumBalanceSignificance);
-      muon->parameter(scatNeighSig, xAOD::Muon::scatteringNeighbourSignificance);
+      muon->parameter(momBalSig, xAOD::Muon::ParamDef::momentumBalanceSignificance);
+      muon->parameter(scatNeighSig, xAOD::Muon::ParamDef::scatteringNeighbourSignificance);
 
       // decorate the track
       decor_lepton_id(*track) = -13 * muon->charge();
-      decor_muon_quality(*track) = m_muonID_tool->getQuality(*muon);
+      decor_muon_quality(*track) = static_cast<int>(m_muonID_tool->getQuality(*muon));
       decor_muon_qOverPratio(*track) = track->qOverP() / ms_track->qOverP();
       decor_muon_momentumBalanceSignificance(*track) = momBalSig;
       decor_muon_scatteringNeighbourSignificance(*track) = scatNeighSig;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CBNTAA_TBInfo.h"
@@ -24,47 +24,19 @@ CBNT_TBRecBase(name, pSvcLocator)
   declareProperty("BeamType",   m_beamtype);
   declareProperty("ComputeBeamEnergy", m_computeBeamEnergy=false);
   declareProperty("DumpBeamLine",      m_dumpBeamLine=true);
-  m_quad_file = NULL;
-  m_quad_equip = NULL;
-  m_bend_file = NULL;
-  m_bend_equip = NULL;
-  m_trim_file = NULL;
-  m_trim_equip = NULL;
-  m_coll_file = NULL;
-  m_coll_equip = NULL;  
-  m_B8_Bdl = 0;
-  m_energy = 0;
-  m_errAbsEnergy = 0;
-  m_errCollimators = 0;
-  m_errCurrents = 0;
-  m_errSycLoss = 0;
-  m_is_VLE = 0;
-  m_prevB3 = 0;
-  m_prevB4 = 0;
-  m_prevB8 = 0;
-  m_prevEnergy = 0;
-  m_preverrAbsEnergy = 0;
-  m_preverrCollimators = 0;
-  m_preverrCurrents = 0;
-  m_preverrSycLoss = 0;
-  m_prevrunNum = 0;
-  m_prevsycLoss = 0;
-  m_runEnergy_nt = 0;
-  m_runEta_nt = 0;
-  m_runParticleType_nt = 0;
-  m_sycLoss = 0;
+
 }
 
 CBNTAA_TBInfo::~CBNTAA_TBInfo()
 {
-   if(m_quad_file) delete m_quad_file;
-   if(m_quad_equip) delete m_quad_equip;
-   if(m_bend_file) delete m_bend_file;
-   if(m_bend_equip) delete m_bend_equip;
-   if(m_trim_file) delete m_trim_file;
-   if(m_trim_equip) delete m_trim_equip;
-   if(m_coll_file) delete m_coll_file;
-   if(m_coll_equip) delete m_coll_equip;   
+   delete m_quad_file;
+   delete m_quad_equip;
+   delete m_bend_file;
+   delete m_bend_equip;
+   delete m_trim_file;
+   delete m_trim_equip;
+   delete m_coll_file;
+   delete m_coll_equip;   
 }
 
 StatusCode CBNTAA_TBInfo::CBNT_initialize(){
@@ -344,7 +316,7 @@ void CBNTAA_TBInfo::calculateAll(int runNumber,int eventNumber) {
   int nc_trim = 10;
   int nc_coll = 24;
 
-  const char* folder;
+  std::string folder;
   if (m_dumpBeamLine == true)
     {
 //      const GenericDbTable* dcstbl_quad_file[22] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};

@@ -328,7 +328,7 @@ int main(int argc, char* argv[]) {
                         std::stringstream sstr{};
                         sstr<<"Missing primary track particle link for --> CB "<<ptCB<<", author: "<<muon->author()
                             <<"type: "<<muon->muonType();
-                        Info(APP_NAME,sstr.str().c_str());    
+                        Info(APP_NAME, "%s", sstr.str().c_str());
                     }
                 }
                 float ptID = 0;
@@ -344,7 +344,7 @@ int main(int argc, char* argv[]) {
                     std::stringstream sstr{};
                     sstr<<"--> CB "<<(ptCB / 1e3)<<", ID "<<(ptID / 1e3)
                          <<", ME "<<(ptME / 1e3)<<", author: "<<muon->author()<<", type:"<<muon->muonType();
-                    Info(APP_NAME, sstr.str().c_str());
+                    Info(APP_NAME, "%s", sstr.str().c_str());
                 }
                 // either use the correctedCopy call or correct the muon object itself
                 static const SG::ConstAccessor<float> InnerDetectorPtAcc ("InnerDetectorPt");

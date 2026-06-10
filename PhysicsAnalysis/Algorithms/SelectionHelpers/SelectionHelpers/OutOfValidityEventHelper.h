@@ -14,7 +14,6 @@
 #include <SelectionHelpers/ISelectionWriteAccessor.h>
 #include <SelectionHelpers/OutOfValidityHelper.h>
 #include <xAODBase/IParticle.h>
-#include <memory>
 
 class StatusCode;
 

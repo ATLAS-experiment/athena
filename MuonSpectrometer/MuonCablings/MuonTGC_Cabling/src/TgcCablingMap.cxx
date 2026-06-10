@@ -81,10 +81,10 @@ bool TgcCablingMap::getOfflineIDfromReadoutID(Identifier& offlineID,
                                               const int sbLoc,
                                               const int channelID,
                                               bool orChannel) const {
+    // Readout ID -> Online ID
     int subsystemNumber{0}, octantNumber{0}, moduleNumber{0}, layerNumber{0},
         rNumber{0}, wireOrStrip{0}, channelNumber{0};
 
-    // ReadoutID -> OnlineID
     bool status = getOnlineIDfromReadoutID(
         subDetectorID, rodID, sswID, sbLoc, channelID, subsystemNumber,
         octantNumber, moduleNumber, layerNumber, rNumber, wireOrStrip,
@@ -334,30 +334,30 @@ bool TgcCablingMap::getOnlineIDfromOfflineID(
         }
     }
     // SideType
-    TGCId::SideType sideType = TGCId::NoSideType;
+    TGCId::SideType sideType = TGCId::SideType::Undefined;
     if (subSystemNumber == 1) {
-        sideType = TGCId::Aside;
+        sideType = TGCId::SideType::Aside;
     }
     if (subSystemNumber == -1) {
-        sideType = TGCId::Cside;
+        sideType = TGCId::SideType::Cside;
     }
 
     // SignalType
-    TGCId::SignalType signalType = TGCId::NoSignalType;
+    TGCId::SignalType signalType = TGCId::SignalType::Undefined;
     if (wireOrStrip == 0) {
-        signalType = TGCId::Wire;
+        signalType = TGCId::SignalType::Wire;
     }
     if (wireOrStrip == 1) {
-        signalType = TGCId::Strip;
+        signalType = TGCId::SignalType::Strip;
     }
 
     // RegionType
-    TGCId::RegionType region = TGCId::NoRegionType;
+    TGCId::RegionType region = TGCId::RegionType::Undefined;
     if (regionType == FORWARD) {
-        region = TGCId::Forward;
+        region = TGCId::RegionType::Forward;
     }
     if (regionType == ENDCAP) {
-        region = TGCId::Endcap;
+        region = TGCId::RegionType::Endcap;
     }
 
     // ASDIn
@@ -385,21 +385,20 @@ bool TgcCablingMap::getOfflineIDfromOnlineID(
     const int moduleNumber, const int layerNumber, const int rNumber,
     const int wireOrStrip, const int channelNumber) const {
     // SideType
-    TGCId::SideType sideType = TGCId::NoSideType;
+    TGCId::SideType sideType = TGCId::SideType::Undefined;
     if (subSystemNumber == 1) {
-        sideType = TGCId::Aside;
-    }
-    if (subSystemNumber == -1) {
-        sideType = TGCId::Cside;
+        sideType = TGCId::SideType::Aside;
+    } else if (subSystemNumber == -1) {
+        sideType = TGCId::SideType::Cside;
     }
 
     // SignalType
-    TGCId::SignalType signalType = TGCId::NoSignalType;
+    TGCId::SignalType signalType = TGCId::SignalType::Undefined;
     if (wireOrStrip == 0) {
-        signalType = TGCId::Wire;
+        signalType = TGCId::SignalType::Wire;
     }
     if (wireOrStrip == 1) {
-        signalType = TGCId::Strip;
+        signalType = TGCId::SignalType::Strip;
     }
 
     ATH_MSG_VERBOSE("getOfflineIDfromOnlineID for "
@@ -425,8 +424,7 @@ bool TgcCablingMap::getOfflineIDfromOnlineID(
     std::unique_ptr<TGCChannelId> asdin =
         getChannel(asdout, TGCChannelId::ChannelIdType::ASDIn, false);
     if (!asdin || !asdin->isValid()) {
-        ATH_MSG_WARNING(" getOfflineIDfromOnlineID :"
-                        << " Illegal AsdIn for "
+        ATH_MSG_WARNING(" getOfflineIDfromOnlineID : Illegal AsdIn for "
                         << " side=" << sideType << " octant=" << octantNumber
                         << " module=" << moduleNumber
                         << " layer=" << layerNumber << " chamber=" << rNumber
@@ -454,7 +452,7 @@ bool TgcCablingMap::getOfflineIDfromOnlineID(
             return false;
     }
     int stationEta = asdin->getChamber();
-    if (asdin->getSideType() == TGCId::Cside) {
+    if (asdin->getSideType() == TGCId::SideType::Cside) {
         stationEta *= -1;
     }
     int stationPhi = asdin->getSector();
@@ -517,12 +515,11 @@ bool TgcCablingMap::getOnlineIDfromReadoutID(
     int& moduleNumber, int& layerNumber, int& rNumber, int& wireOrStrip,
     int& channelNumber, bool orChannel) const {
     // SideType
-    TGCId::SideType sideType = TGCId::NoSideType;
+    TGCId::SideType sideType = TGCId::SideType::Undefined;
     if (subDetectorID == m_AsideId) {
-        sideType = TGCId::Aside;
-    }
-    if (subDetectorID == m_CsideId) {
-        sideType = TGCId::Cside;
+        sideType = TGCId::SideType::Aside;
+    } else if (subDetectorID == m_CsideId) {
+        sideType = TGCId::SideType::Cside;
     }
 
     // readout channel -> chamber channel
@@ -580,21 +577,21 @@ bool TgcCablingMap::getReadoutIDfromOnlineID(
     const int layerNumber, const int rNumber, const int wireOrStrip,
     const int channelNumber, bool adChannel) const {
     // SideType
-    TGCId::SideType sideType = TGCId::NoSideType;
+    TGCId::SideType sideType = TGCId::SideType::Undefined;
     if (subsystemNumber == 1) {
-        sideType = TGCId::Aside;
+        sideType = TGCId::SideType::Aside;
     }
     if (subsystemNumber == -1) {
-        sideType = TGCId::Cside;
+        sideType = TGCId::SideType::Cside;
     }
 
     // SignalType
-    TGCId::SignalType signalType = TGCId::NoSignalType;
+    TGCId::SignalType signalType = TGCId::SignalType::Undefined;
     if (wireOrStrip == 0) {
-        signalType = TGCId::Wire;
+        signalType = TGCId::SignalType::Wire;
     }
     if (wireOrStrip == 1) {
-        signalType = TGCId::Strip;
+        signalType = TGCId::SignalType::Strip;
     }
 
     // ASDOut
@@ -633,10 +630,10 @@ bool TgcCablingMap::getReadoutIDfromOnlineID(
     }
 
     // SubDetectorID
-    if (sideType == TGCId::Aside) {
+    if (sideType == TGCId::SideType::Aside) {
         subDetectorID = m_AsideId;
     }
-    if (sideType == TGCId::Cside) {
+    if (sideType == TGCId::SideType::Cside) {
         subDetectorID = m_CsideId;
     }
 
@@ -728,7 +725,7 @@ bool TgcCablingMap::getSLBIDfromReadoutID(int& phi, bool& isAside,
                                           const int sbLoc) const {
     isAside = (subsectorID == m_AsideId);
 
-    TGCId::SideType side = isAside ? TGCId::Aside : TGCId::Cside;
+    TGCId::SideType side = isAside ? TGCId::SideType::Aside : TGCId::SideType::Cside;
 
     const TGCModuleId* slb = getSLBFromReadout(side, rodID, sswID, sbLoc);
     if (!slb) {
@@ -739,9 +736,9 @@ bool TgcCablingMap::getSLBIDfromReadoutID(int& phi, bool& isAside,
         return false;
     }
 
-    isEndcap = (slb->getRegionType() == TGCId::Endcap);
+    isEndcap = (slb->getRegionType() == TGCId::RegionType::Endcap);
     moduleType = (int)slb->getModuleType();
-    bool isInner = (moduleType == TGCId::WI || moduleType == TGCId::SI);
+    bool isInner = (moduleType == +TGCId::ModuleType::WI || moduleType == +TGCId::ModuleType::SI);
     int offset, numOfSector;
     if (isInner) {
         numOfSector = TGCId::NUM_INNER_SECTOR;
@@ -769,7 +766,7 @@ bool TgcCablingMap::getSLBAddressfromReadoutID(int& slbAddr,
 
     bool isAside = (subsectorID == m_AsideId);
 
-    TGCId::SideType side = isAside ? TGCId::Aside : TGCId::Cside;
+    TGCId::SideType side = isAside ? TGCId::SideType::Aside : TGCId::SideType::Cside;
 
     const TGCModuleId* slb = getSLBFromReadout(side, rodID, sswID, sbLoc);
     if (!slb) {
@@ -799,7 +796,7 @@ bool TgcCablingMap::getSLBIDfromRxID(int& phi, bool& isAside, bool& isEndcap,
                                      const int subsectorID, const int rodID,
                                      const int sswID, const int rxId) const {
     isAside = (subsectorID == m_AsideId);
-    TGCId::SideType side = isAside ? TGCId::Aside : TGCId::Cside;
+    TGCId::SideType side = isAside ? TGCId::SideType::Aside : TGCId::SideType::Cside;
 
     std::unique_ptr<TGCModuleId> slb = getSLBFromRxId(side, rodID, sswID, rxId);
     if (!slb) {
@@ -810,9 +807,9 @@ bool TgcCablingMap::getSLBIDfromRxID(int& phi, bool& isAside, bool& isEndcap,
         return false;
     }
 
-    isEndcap = (slb->getRegionType() == TGCId::Endcap);
+    isEndcap = (slb->getRegionType() == TGCId::RegionType::Endcap);
     moduleType = (int)slb->getModuleType();
-    bool isInner = (moduleType == TGCId::WI || moduleType == TGCId::SI);
+    bool isInner = (moduleType == +TGCId::ModuleType::WI || moduleType == +TGCId::ModuleType::SI);
     int offset, numOfSector;
     if (isInner) {
         numOfSector = TGCId::NUM_INNER_SECTOR;
@@ -837,8 +834,8 @@ bool TgcCablingMap::getReadoutIDfromSLBID(const int phi, const bool isAside,
                                           int& subsectorID, int& rodID,
                                           int& sswID, int& sbLoc) const {
     TGCId::ModuleType module = static_cast<TGCId::ModuleType>(moduleType);
-    TGCId::RegionType region = isEndcap ? TGCId::Endcap : TGCId::Forward;
-    bool isInner = (module == TGCId::WI || module == TGCId::SI);
+    TGCId::RegionType region = isEndcap ? TGCId::RegionType::Endcap : TGCId::RegionType::Forward;
+    bool isInner = (module == TGCId::ModuleType::WI || module == TGCId::ModuleType::SI);
     int sector = -1;  // sector=0-47(EC), 0-23(FWD), 0-23(INNER)
     if (isInner) {
         sector = phi % TGCId::NUM_INNER_SECTOR;
@@ -847,7 +844,7 @@ bool TgcCablingMap::getReadoutIDfromSLBID(const int phi, const bool isAside,
     } else {
         sector = phi % TGCId::NUM_FORWARD_SECTOR;
     }
-    TGCId::SideType side = isAside ? TGCId::Aside : TGCId::Cside;
+    TGCId::SideType side = isAside ? TGCId::SideType::Aside : TGCId::SideType::Cside;
 
     TGCModuleSLB slb(side, module, region, sector, id);
 
@@ -1639,24 +1636,24 @@ bool TgcCablingMap::getOfflineIDfromHighPtID(
     int channelID = -1;
 
     // SideType
-    TGCId::SideType sideType = TGCId::NoSideType;
+    TGCId::SideType sideType = TGCId::SideType::Undefined;
     if (subDetectorID == m_AsideId) {
-        sideType = TGCId::Aside;
+        sideType = TGCId::SideType::Aside;
     }
     if (subDetectorID == m_CsideId) {
-        sideType = TGCId::Cside;
+        sideType = TGCId::SideType::Cside;
     }
 
     // SignalType, RegionType
-    TGCId::SignalType signalType = (isStrip) ? TGCId::Strip : TGCId::Wire;
-    TGCId::RegionType regionType = (isForward) ? TGCId::Forward : TGCId::Endcap;
+    TGCId::SignalType signalType = (isStrip) ? TGCId::SignalType::Strip : TGCId::SignalType::Wire;
+    TGCId::RegionType regionType = (isForward) ? TGCId::RegionType::Forward : TGCId::RegionType::Endcap;
 
     // ModuleType
-    TGCId::ModuleType moduleType = TGCId::NoModuleType;
-    if (signalType == TGCId::Wire) {
-        moduleType = TGCId::WD;
+    TGCId::ModuleType moduleType = TGCId::ModuleType::Undefined;
+    if (signalType == TGCId::SignalType::Wire) {
+        moduleType = TGCId::ModuleType::WD;
     } else {
-        moduleType = TGCId::SD;
+        moduleType = TGCId::ModuleType::SD;
     }
 
     // Get ReadoutID for pivot plane
@@ -1692,12 +1689,12 @@ bool TgcCablingMap::getHighPtIDfromOfflineID(const Identifier& offlineID,
     }
 
     // SideType
-    TGCId::SideType sideType = TGCId::NoSideType;
+    TGCId::SideType sideType = TGCId::SideType::Undefined;
     if (subDetectorID == m_AsideId) {
-        sideType = TGCId::Aside;
+        sideType = TGCId::SideType::Aside;
     }
     if (subDetectorID == m_CsideId) {
-        sideType = TGCId::Cside;
+        sideType = TGCId::SideType::Cside;
     }
 
     TGCId::SignalType signalType;
@@ -1710,8 +1707,8 @@ bool TgcCablingMap::getHighPtIDfromOfflineID(const Identifier& offlineID,
         return false;
     }
 
-    isStrip = (signalType == TGCId::Strip);
-    isForward = (regionType == TGCId::Forward);
+    isStrip = (signalType == TGCId::SignalType::Strip);
+    isForward = (regionType == TGCId::RegionType::Forward);
 
     return true;
 }
@@ -1725,12 +1722,12 @@ bool TgcCablingMap::getOfflineIDfromLowPtCoincidenceID(
     int channelID = -1;
 
     // SideType
-    TGCId::SideType sideType = TGCId::NoSideType;
+    TGCId::SideType sideType = TGCId::SideType::Undefined;
     if (subDetectorID == m_AsideId) {
-        sideType = TGCId::Aside;
+        sideType = TGCId::SideType::Aside;
     }
     if (subDetectorID == m_CsideId) {
-        sideType = TGCId::Cside;
+        sideType = TGCId::SideType::Cside;
     }
 
     bool status = getReadoutFromLowPtCoincidence(sideType, rodID, sswID, sbLoc,

@@ -3,6 +3,8 @@
 //
 
 // Local include(s).
+#include "../AsyncCopyTool.h"
+#include "../CopyTool.h"
 #include "../KernelRunnerSvc.h"
 #include "../StreamPoolSvc.h"
 #include "../GPUSystemInfoSvc.h"
@@ -11,6 +13,8 @@
 #include "../ManagedMemoryResourceTool.h"
 
 // Declare the component(s) to Gaudi.
+DECLARE_COMPONENT( AthCUDA::AsyncCopyTool )
+DECLARE_COMPONENT( AthCUDA::CopyTool )
 DECLARE_COMPONENT( AthCUDA::KernelRunnerSvc )
 DECLARE_COMPONENT( AthCUDA::StreamPoolSvc )
 DECLARE_COMPONENT( AthCUDA::GPUSystemInfoSvc )

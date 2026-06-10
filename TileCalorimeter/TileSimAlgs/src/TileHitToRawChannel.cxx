@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -169,6 +169,7 @@ StatusCode TileHitToRawChannel::execute() {
 
   ATHRNG::RNGWrapper* rngWrapper = m_atRndmGenSvc->getEngine(this, m_randomStreamName);
   rngWrapper->setSeed( m_randomStreamName, ctx );
+  CLHEP::HepRandomEngine* rndmEngine = rngWrapper->getEngine(ctx);
 
   SG::ReadCondHandle<TileSamplingFraction> samplingFraction(m_samplingFractionKey, ctx);
   ATH_CHECK( samplingFraction.isValid() );
@@ -233,7 +234,7 @@ StatusCode TileHitToRawChannel::execute() {
     // If tileNoise is requested, generate random numbers to give noise
     if (m_tileNoise) {
 
-      RandGaussQ::shootArray(*rngWrapper, nChMax, random, 0.0, 1.0);
+      RandGaussQ::shootArray(rndmEngine, nChMax, random, 0.0, 1.0);
 
       for (ch = 0; ch < nChMax; ++ch) {
         adc_gain[ch] = TileID::HIGHGAIN;

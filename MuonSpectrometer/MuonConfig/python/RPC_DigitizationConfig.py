@@ -67,7 +67,10 @@ def RPC_DigitizationToolCommonCfg(flags, name="RpcDigitizationTool", **kwargs):
         kwargs.setdefault("StreamName", "RpcSimForklift")
         kwargs.setdefault("SimHitKey", "xRpcSimHits")
         kwargs.setdefault("EffiDataKey", "")
-        the_tool = CompFactory.MuonR4.RpcFastDigiTool(name="RpcDigitizationTool", **kwargs)
+        if flags.Muon.doFastRpcDigitization:
+            the_tool = CompFactory.MuonR4.RpcFastDigiTool(name="RpcDigitizationTool", **kwargs)
+        else:
+            the_tool = CompFactory.MuonR4.RpcDigiTool(name="RpcDigitizationTool", **kwargs)
         acc.setPrivateTools(the_tool)       
         return acc
     

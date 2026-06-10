@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -10,8 +10,6 @@
 #include "GaudiKernel/IAlgTool.h"
 #include "TrkTrack/TrackCollection.h" // typedef
 #include "AthenaKernel/CLASS_DEF.h"
-
-static const InterfaceID IID_ITrackAmbiguityProcessorTool("Trk::ITrackAmbiguityProcessorTool", 1, 0);
 
 namespace Trk {
 
@@ -29,8 +27,8 @@ Currently it only implements the 'fallback' or O(n^2) algorithm. Eventually it w
 class ITrackAmbiguityProcessorTool : virtual public IAlgTool
 {
 	public:
+    DeclareInterfaceID(ITrackAmbiguityProcessorTool, 1, 0);
 
-	static const InterfaceID& interfaceID( ) ;
 	/** (in concrete object) Returns a processed TrackCollection from the passed 'tracks'
 	@param tracks collection of tracks which will have ambiguities resolved. Will not be modified.
         @param prd_to_track_map on optional prd-to-track map being filled by the processor.
@@ -40,19 +38,14 @@ class ITrackAmbiguityProcessorTool : virtual public IAlgTool
         If no prd-to-track map is given the processor might create one internally (for internal
         use only, or exported to storegate).
         */
-        virtual const TrackCollection*  process(const TrackCollection *, Trk::PRDtoTrackMap *prd_to_track_map=nullptr) const = 0;
-        virtual const TrackCollection*  process(const TracksScores *) const = 0 ;
+        virtual const TrackCollection*  process(const EventContext& ctx, const TrackCollection *, Trk::PRDtoTrackMap *prd_to_track_map=nullptr) const = 0;
+        virtual const TrackCollection*  process(const EventContext& ctx, const TracksScores *) const = 0 ;
 
         /** Print statistics at the end of the processing.
         */
         virtual void statistics() = 0;
 
 };
-
-inline const InterfaceID& Trk::ITrackAmbiguityProcessorTool::interfaceID()
-{
-  return IID_ITrackAmbiguityProcessorTool;
-}
 
 } //end ns
 

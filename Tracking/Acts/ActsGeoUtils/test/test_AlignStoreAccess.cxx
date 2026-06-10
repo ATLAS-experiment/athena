@@ -27,6 +27,9 @@
 #include <unordered_map>
 
 
+using Mode = ActsTrk::DetectorAlignStore::Mode;
+constexpr auto detType = ActsTrk::DetectorType::Csc;
+
 class TestDetElement : public ActsTrk::IDetectorElement, public GeoVDetectorElement{
     public:
         TestDetElement(GeoIntrusivePtr<GeoVFullPhysVol> detVol):
@@ -36,11 +39,10 @@ class TestDetElement : public ActsTrk::IDetectorElement, public GeoVDetectorElem
             return Identifier{};
         }
         ActsTrk::DetectorType detectorType() const  override final { 
-            return ActsTrk::DetectorType::Csc; 
+            return detType; 
         }        
-        unsigned int storeAlignedTransforms(const ActsTrk::DetectorAlignStore& store) const override final {
-            m_cache.getTransform(&store);
-            return 1;
+        unsigned storeAlignedTransforms(ActsTrk::DetectorAlignStore& store) const override final {
+            return m_cache.storeTransform(store);
         }
         const Amg::Transform3D& localToGlobalTransform(const Acts::GeometryContext& gctx) const override final {
             return m_cache.getTransform(gctx);
@@ -69,8 +71,9 @@ template<> Amg::Transform3D
     return m_parent->getMaterialGeom()->getAbsoluteTransform(store->geoModelAlignment.get()) * Amg::getRotateX3D(M_PI);
 }
 
-std::unique_ptr<ActsTrk::DetectorAlignStore> makeAlignedStore(const std::shared_ptr<GeoAlignmentStore>& condAlign) {
-    auto store = std::make_unique<ActsTrk::DetectorAlignStore>(ActsTrk::DetectorType::Csc);
+std::unique_ptr<ActsTrk::DetectorAlignStore> makeAlignedStore(const std::shared_ptr<GeoAlignmentStore>& condAlign,
+                                                              const Mode m = Mode::LazyFill) {
+    auto store = std::make_unique<ActsTrk::DetectorAlignStore>(detType, m);
     store->geoModelAlignment = std::make_unique<GeoAlignmentStore>(*condAlign);
     store->geoModelAlignment->clearPosCache();
     return store;
@@ -126,7 +129,7 @@ int main() {
     
     
     auto& pool = GeoThreading::ThreadPool::getPool(-1);
-    constexpr unsigned int numTrials = 666;
+    constexpr unsigned numTrials = 666;
 
     constexpr unsigned nAlign = 250;
     constexpr unsigned nDetPerAlign = 55;
@@ -138,14 +141,14 @@ int main() {
    
     std::vector<std::shared_ptr<TestDetElement>> detElements{};
 
-    for (unsigned int k =0 ; k < nAlign; ++k) {
+    for (unsigned k =0; k < nAlign; ++k) {
         GeoIntrusivePtr<GeoAlignableTransform> alignTrf = make_intrusive<GeoAlignableTransform>(Amg::getTranslateX3D(k+1));
         condAlignment->setDelta(alignTrf, Amg::getTranslateY3D(k+1) * Amg::getRotateX3D(M_PI_2));
         world->add(alignTrf);
         
         GeoIntrusivePtr<GeoPhysVol> alignBox = make_intrusive<GeoPhysVol>(world->getLogVol());
         world->add(alignBox);
-        for (unsigned int d = 0 ; d < nDetPerAlign; ++d) {
+        for (unsigned d = 0 ; d < nDetPerAlign; ++d) {
             alignBox->add(make_intrusive<GeoTransform>(Amg::getTranslateZ3D(d+6)));
             GeoIntrusivePtr<GeoFullPhysVol> detVol{make_intrusive<GeoFullPhysVol>(world->getLogVol())};
             alignBox->add(detVol);
@@ -164,13 +167,13 @@ int main() {
     {
         ActsTrk::GeometryContext uGctx{};
         ActsTrk::GeometryContext aGctx{};
-        uGctx.setStore(std::make_unique<ActsTrk::DetectorAlignStore>(ActsTrk::DetectorType::Csc));
+        uGctx.setStore(std::make_unique<ActsTrk::DetectorAlignStore>(detType, Mode::LazyFill));
         aGctx.setStore(makeAlignedStore(condAlignment));
-        for (unsigned int k =0 ; k < nAlign ; ++k) {
+        for (unsigned k =0 ; k < nAlign ; ++k) {
             const Amg::Transform3D baseTrf{Amg::getTranslateX3D(k+1)};
             const Amg::Transform3D baseAlTrf{baseTrf * Amg::getTranslateY3D(k+1) * Amg::getRotateX3D(M_PI_2)};
 
-            for (unsigned int d = 0; d< nDetPerAlign; ++d) {
+            for (unsigned d = 0; d< nDetPerAlign; ++d) {
                 const Amg::Transform3D uExpTrf = baseTrf * 
                                                  Amg::getTranslateZ3D(d+6)* 
                                                  Amg::getRotateX3D(M_PI);
@@ -188,17 +191,16 @@ int main() {
                                                  Amg::getRotateX3D(M_PI);
                 const Amg::Transform3D& aDetTrf{detEle->localToGlobalTransform(aGctx.context())};
                 if (!Amg::isIdentity(aExpTrf * detEle->localToGlobalTransform(aGctx.context()).inverse())){
-                    std::cerr<<"Aligned detector  element is not where it's expected: "<<std::endl
+                    std::cerr<<"Aligned detector element is not where it's expected: "<<std::endl
                              <<" ** expect: "<<Amg::toString(aExpTrf)<<std::endl
                              <<" **  found: "<<Amg::toString(aDetTrf)<<std::endl;
                     return EXIT_FAILURE;
                 }
                 alignedTrfs.insert(std::make_pair(detEle, aExpTrf));
-
             }
         }
     }
-        std::cout<<"Detector element positioning test passed. "<<std::endl;
+    std::cout<<"Detector element positioning test passed. "<<std::endl;
     if (detElements.size() != alignedTrfs.size()) {
         std::cerr<<"Aligned expectation map is too small detEle: "<<detElements.size()<<" vs. map: "<<alignedTrfs.size()<<std::endl;
         return EXIT_FAILURE;
@@ -209,9 +211,8 @@ int main() {
     }
 
 
-    unsigned int executedAttempts{0};
+    unsigned executedAttempts{0};
     while (executedAttempts < numTrials) {
-        
         if(numTrials % 3 == 0) {
             pool.appendTask(std::make_unique<WorkerTask>(detElements, std::make_shared<GeoAlignmentStore>(), unalignedTrfs));
         } else{
@@ -220,6 +221,28 @@ int main() {
         ++executedAttempts;
     }
     pool.drainQueue();
+
+    /// Finally setup a store with the block filling mode
+    ActsTrk::GeometryContext aGctx{};
+    aGctx.setStore(makeAlignedStore(condAlignment, Mode::Block));
+    auto blockStore = aGctx.getStore(detType);
+    for (const auto& detEl : detElements) {
+        detEl->storeAlignedTransforms(*blockStore);
+
+        const auto find_itr = alignedTrfs.find(detEl.get());
+        if (find_itr == alignedTrfs.end()) {
+            std::cerr<<"Detector element not in reference transform map"<<std::endl;
+            return EXIT_FAILURE;
+        }
+        const Amg::Transform3D& trf{detEl->localToGlobalTransform(aGctx.context())};
+        if (!Amg::isIdentity(trf.inverse() * find_itr->second)){
+            std::cerr<<"Different alignment detected "<<std::endl
+                <<" ***    found: "<<Amg::toString(trf)<<std::endl
+                <<" *** expected: "<<Amg::toString(find_itr->second)<<std::endl;
+            return EXIT_FAILURE;
+        }
+    }
+
     return EXIT_SUCCESS;
 }
 

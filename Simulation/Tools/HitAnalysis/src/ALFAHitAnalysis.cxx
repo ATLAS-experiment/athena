@@ -57,7 +57,7 @@ StatusCode ALFAHitAnalysis::initialize() {
 }		 
 
 
-StatusCode ALFAHitAnalysis::execute() {
+StatusCode ALFAHitAnalysis::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG( "In ALFAHitAnalysis::execute()" );
   
   m_station->clear();
@@ -72,7 +72,6 @@ StatusCode ALFAHitAnalysis::execute() {
   //coverity[STACK_USE]
   double E_fiber_sum[8][10][64][2]{}, E_full_sum[8]{}, E_layer_sum[8][20]{};
   ALFA_HitConstIter iter;
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
   const ALFA_HitCollection* col_alfa{nullptr};
   ATH_CHECK(SG::get(col_alfa, m_readKey, ctx));
   for (iter = (*col_alfa).begin(); iter != (*col_alfa).end(); ++iter) {

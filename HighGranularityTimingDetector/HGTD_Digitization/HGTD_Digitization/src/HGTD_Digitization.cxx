@@ -21,8 +21,8 @@ StatusCode HGTD_Digitization::initialize()
 }
 
 
-StatusCode HGTD_Digitization::execute()
+StatusCode HGTD_Digitization::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG("execute()");
-  return m_HGTD_DigitizationTool->processAllSubEvents(Gaudi::Hive::currentContext());
+  return m_HGTD_DigitizationTool->processAllSubEvents(ctx);
 }

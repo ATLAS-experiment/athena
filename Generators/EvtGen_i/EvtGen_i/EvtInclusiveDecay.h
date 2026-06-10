@@ -59,7 +59,7 @@ public:
   virtual ~EvtInclusiveDecay();
 
   StatusCode initialize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   StatusCode finalize();
   std::string xmlpath(void);
   struct ParticleIdCompare {bool operator()(const HepMC::GenParticlePtr& a,const HepMC::GenParticlePtr& b) const {return (a)&&(b)&&(a->momentum().e() < b->momentum().e());}};

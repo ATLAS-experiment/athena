@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 ///
 ///  @author  Vadim Kostyukhin <vadim.kostyukhin@cern.ch>
@@ -74,18 +74,20 @@ TwoTrackVrtBDTSelector::TwoTrackVrtBDTSelector(const std::string& type,
   }
 
 
-  bool TwoTrackVrtBDTSelector::isgood( const std::pair<const xAOD::TrackParticle*,const xAOD::TrackParticle*> iTrks,
+  bool TwoTrackVrtBDTSelector::isgood( const EventContext& ctx,
+                                       const std::pair<const xAOD::TrackParticle*,const xAOD::TrackParticle*> iTrks,
                                        const xAOD::Vertex & candV,
-                                             std::pair<ROOT::Math::XYZTVector,ROOT::Math::XYZTVector> moms,
+                                       std::pair<ROOT::Math::XYZTVector,ROOT::Math::XYZTVector> moms,
                                        const xAOD::Vertex & tPV) const
   {
       float quality;
-      return isgood(iTrks, candV, moms,tPV,quality);
+      return isgood(ctx, iTrks, candV, moms,tPV,quality);
   }
 
-  bool TwoTrackVrtBDTSelector::isgood( const std::pair<const xAOD::TrackParticle*,const xAOD::TrackParticle*> iTrks,
+  bool TwoTrackVrtBDTSelector::isgood( const EventContext& ctx,
+                                       const std::pair<const xAOD::TrackParticle*,const xAOD::TrackParticle*> iTrks,
                                        const xAOD::Vertex & candV,
-                                             std::pair<ROOT::Math::XYZTVector,ROOT::Math::XYZTVector> moms,
+                                       std::pair<ROOT::Math::XYZTVector,ROOT::Math::XYZTVector> moms,
                                        const xAOD::Vertex & tPV,
                                        float & quality) const
   {
@@ -133,9 +135,9 @@ TwoTrackVrtBDTSelector::TwoTrackVrtBDTSelector(const std::string& type,
       }
 //-------------------BDT based rejection
       std::vector<double> impact,impactError;
-      m_fitSvc->VKalGetImpact( iTrks.first, tPV.position(), 1, impact, impactError);
+      m_fitSvc->VKalGetImpact( ctx, iTrks.first, tPV.position(), 1, impact, impactError);
       float trk1Signif = sqrt( impact[0]*impact[0]/impactError[0] + impact[1]*impact[1]/impactError[2]);
-      m_fitSvc->VKalGetImpact( iTrks.second, tPV.position(), 1, impact, impactError);
+      m_fitSvc->VKalGetImpact( ctx, iTrks.second, tPV.position(), 1, impact, impactError);
       float trk2Signif = sqrt( impact[0]*impact[0]/impactError[0] + impact[1]*impact[1]/impactError[2]);
       float minPtT = std::min(iTrks.first->pt(),iTrks.second->pt());
       std::vector<float> VARS(10);

@@ -33,7 +33,7 @@ public:
   /**
    * @brief Algorithm event processing.
    */
-  virtual StatusCode execute(); 
+  virtual StatusCode execute(const EventContext& ctx); 
 
 
 private:

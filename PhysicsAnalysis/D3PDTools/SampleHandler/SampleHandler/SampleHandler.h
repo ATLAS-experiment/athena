@@ -2,25 +2,18 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
+/// @author Nils Krumnack
+
 #ifndef SAMPLE_HANDLER_SAMPLE_HANDLER_HH
 #define SAMPLE_HANDLER_SAMPLE_HANDLER_HH
 
-//
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
-// Please feel free to contact me (krumnack@iastate.edu) for bug
-// reports, feature suggestions, praise and complaints.
-
-
-
 #include <SampleHandler/Global.h>
-#include <SampleHandler/SamplePtr.h>
 
+#include <boost/iterator/transform_iterator.hpp>
 #include <memory>
 #include <iosfwd>
 #include <map>
+#include <span>
 #include <vector>
 #include <TObject.h>
 
@@ -108,7 +101,7 @@ namespace SH
     SampleHandler& operator = (const SampleHandler& that);
 
 
-    /// \brief add a sample to the handler
+    /// \brief add a copy of the sample to the handler
     ///
     /// \par Guarantee
     ///   basic, sample is released if this is the last copy
@@ -117,20 +110,7 @@ namespace SH
     ///   sample of same name already in use
     /// \pre sample != 0
   public:
-    void add (Sample *sample);
-
-
-    /// \brief add a sample to the handler
-    ///
-    /// \par Guarantee
-    ///   basic, sample is released
-    /// \par Failures
-    ///   out of memory I\n
-    ///   sample of same name already in use
-    /// \pre !sample.empty()
-    /// \pre !sample->name().empty()
-  public:
-    void add (std::unique_ptr<Sample> sample);
+    void add (const Sample& sample);
 
 
     /// \brief add a sample to the handler
@@ -140,23 +120,10 @@ namespace SH
     /// \par Failures
     ///   out of memory I\n
     ///   sample of same name already in use
-    /// \pre !sample.empty()
+    /// \pre sample != nullptr
     /// \pre !sample->name().empty()
   public:
-    void add (SamplePtr& sample);
-
-
-    /// \brief add a sample to the handler
-    ///
-    /// \par Guarantee
-    ///   basic, sample is released if this is the last copy
-    /// \par Failures
-    ///   out of memory I\n
-    ///   sample of same name already in use
-    /// \pre !sample.empty()
-    /// \pre !sample->name().empty()
-  public:
-    void add (SamplePtr&& sample);
+    void add (std::shared_ptr<Sample> sample);
 
 
     /// \brief add all samples from the given SampleHandler to this one
@@ -470,9 +437,24 @@ namespace SH
 			const std::string& value);
 
 
+    /// \brief functor mapping a shared_ptr<Sample> to the raw Sample*
+    ///   it points to.
+    ///
+    /// Used by the public iterator so that callers continue to see
+    /// `*it` evaluate to `Sample*` even though `m_samples` stores
+    /// shared_ptr objects.
+  private:
+    struct SamplePtrToRawSample
+    {
+      Sample *operator () (const std::shared_ptr<Sample>& p) const;
+    };
+
+
     /// \brief the iterator to use
   public:
-    typedef std::vector<Sample*>::const_iterator iterator;
+    typedef boost::transform_iterator<
+      SamplePtrToRawSample,
+      std::vector<std::shared_ptr<Sample>>::const_iterator> iterator;
 
 
     /// \brief the begin iterator to use
@@ -517,6 +499,11 @@ namespace SH
     Sample *at (std::size_t index) const;
 
 
+    /// \brief the samples accessed via smart pointer
+  public:
+    std::span<std::shared_ptr<Sample>> samples ();
+
+
 
     //
     // private interface
@@ -526,27 +513,11 @@ namespace SH
 
     /// \brief the list of samples managed
   private:
-    std::vector<SH::Sample*> m_samples;
-
-    /// \brief the iterator for \ref m_samples
-  private:
-    typedef std::vector<SH::Sample*>::const_iterator SamplesIter;
-
-    /// \brief the mutable iterator for \ref m_samples
-  private:
-    typedef std::vector<SH::Sample*>::iterator SamplesMIter;
+    std::vector<std::shared_ptr<Sample>> m_samples;
 
     /// \brief the list of samples by name
   private:
-    std::map<std::string,SH::SamplePtr> m_named;
-
-    /// \brief the iterator for \ref m_named
-  private:
-    typedef std::map<std::string,SH::SamplePtr>::iterator NamedIter;
-
-    /// \brief the mutable iterator for \ref m_named
-  private:
-    typedef std::map<std::string,SH::SamplePtr>::iterator NamedMIter;
+    std::map<std::string,std::shared_ptr<Sample>> m_named;
 
     ClassDef (SampleHandler, 1)
   };

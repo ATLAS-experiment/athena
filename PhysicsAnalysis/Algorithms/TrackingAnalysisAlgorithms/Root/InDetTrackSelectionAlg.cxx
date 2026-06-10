@@ -13,7 +13,6 @@
 #include <TrackingAnalysisAlgorithms/InDetTrackSelectionAlg.h>
 
 #include <InDetTrackSystematicsTools/InDetTrackSystematics.h>
-#include <PATInterfaces/ISystematicsTool.h>
 
 //
 // method implementations

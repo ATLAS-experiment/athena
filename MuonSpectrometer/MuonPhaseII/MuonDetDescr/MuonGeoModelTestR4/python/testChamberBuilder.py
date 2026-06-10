@@ -11,7 +11,8 @@ def MuonChamberToolTestCfg(flags, name="MuonChamberToolTest", **kwargs):
     return result
 
 if __name__=="__main__":
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser
+    from MuonConfig.MuonConfigUtils import executeTest
     parser = SetupArgParser()
 
     args = parser.parse_args()
@@ -20,7 +21,9 @@ if __name__=="__main__":
     flags = initConfigFlags()
     flags.Acts.TrackingGeometry.UseBlueprint=True
     flags.Acts.TrackingGeometry.ObjDebugOutput = False
+    flags.Muon.trackGeometryPassiveMaterial= True
     flags, cfg = setupGeoR4TestCfg(args,flags)    
+   
     ###
     cfg.merge(MuonChamberToolTestCfg(flags))
     executeTest(cfg)

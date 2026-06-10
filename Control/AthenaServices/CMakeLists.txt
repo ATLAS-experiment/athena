@@ -12,12 +12,14 @@ find_package( ROOT COMPONENTS Core )
 find_package( TBB )
 find_package( UUID )
 find_package( yampl )
+find_package( valgrind ) # Note that there is no VALGRIND_LIBRARIES variable.
 
 # Component(s) in the package:
 atlas_add_component( AthenaServices
    src/*.h src/*.cxx src/components/*.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${Python_INCLUDE_DIRS}
    ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS} ${UUID_INCLUDE_DIRS} ${YAMPL_INCLUDE_DIRS}
+   ${VALGRIND_INCLUDE_DIRS}
    LINK_LIBRARIES ${Boost_LIBRARIES} ${Python_LIBRARIES} ${ROOT_LIBRARIES} ${TBB_LIBRARIES} ${UUID_LIBRARIES}
    ${YAMPL_LIBRARIES} bmpi3::bmpi3 ${CLHEP_LIBRARIES}
    AthenaBaseComps AthenaKernel RootUtilsPyROOT CxxUtils SQLiteDBSvcLib

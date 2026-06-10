@@ -9,14 +9,12 @@
 #define PARTONS_CALCPARTONHISTORY_H
 
 // system include(s):
-#include <memory>
 #include <vector>
 
 // Framework include(s):
 #include <xAODEventInfo/EventInfo.h>
 
 #include "AsgTools/AsgTool.h"
-#include "AthContainers/DataVector.h"
 #include "PartonHistory/PartonHistoryUtils.h"
 #include "PartonHistory/PartonSchemeConfig.h"
 #include "VectorHelpers/DecoratorHelpers.h"

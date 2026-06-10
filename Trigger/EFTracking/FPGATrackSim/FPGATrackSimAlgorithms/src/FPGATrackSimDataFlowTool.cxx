@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #include "FPGATrackSimDataFlowTool.h"
 
@@ -13,6 +13,31 @@
 #include "FPGATrackSimConfTools/IFPGATrackSimEventSelectionSvc.h"
 #include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
 #include <bit>
+#include <cmath>
+
+namespace{
+  template<typename Map, typename Value>
+  void
+  updateMin(Map& map, std::string_view key, Value value){
+    const auto it = map.find(key);
+    if (it == map.end()) {
+      map.emplace(std::string{key}, value);
+    } else if (value < it->second) {
+      it->second = value;
+    }
+  }
+
+  template<typename Map, typename Value>
+  void
+  updateMax(Map& map, std::string_view key, Value value){
+    const auto it = map.find(key);
+    if (it == map.end()) {
+      map.emplace(std::string{key}, value);
+    } else if (value > it->second) {
+      it->second = value;
+    }
+  }
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 FPGATrackSimDataFlowTool::FPGATrackSimDataFlowTool(std::string const & algname, std::string const & name, IInterface const * ifc) :
@@ -329,79 +354,63 @@ StatusCode FPGATrackSimDataFlowTool::finalize()
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-StatusCode FPGATrackSimDataFlowTool::addDataFlow(float const n, std::string const & key, bool const isInt)
+StatusCode
+FPGATrackSimDataFlowTool::addDataFlow(float const n, std::string_view key, bool const isInt)
 {
+  if (isInt) {
+    const int value = static_cast<int>(n);
+    updateMin(m_dataFlowDataI_min, key, value);
+    updateMax(m_dataFlowDataI_max, key, value);
+  } else {
+    updateMin(m_dataFlowDataF_min, key, n);
+    updateMax(m_dataFlowDataF_max, key, n);
+  }
+
+  if ((isInt && m_dataFlowHistsI.find(key) == m_dataFlowHistsI.end()) ||
+      (!isInt && m_dataFlowHistsF.find(key) == m_dataFlowHistsF.end())) {
+    const std::string keyStr{key};
+    std::string hname = "h_dataflow_" + keyStr;
+    if (!m_outputtag.value().empty()) {
+      hname += "_";
+      hname += m_outputtag.value();
+    }
+    findAndReplaceAll(hname, "/", "_over_");
+    setHistDir("/DataFlowHist/");
+    TH1* h = nullptr;
     if (isInt) {
-        if (m_dataFlowDataI_min.find(key) == m_dataFlowDataI_min.end()) {
-            m_dataFlowDataI_min.insert({key, n});
-        }
-        else if (n < m_dataFlowDataI_min.find(key)->second) {
-            m_dataFlowDataI_min.find(key)->second = n;
-        }
-
-        if (m_dataFlowDataI_max.find(key) == m_dataFlowDataI_max.end()) {
-            m_dataFlowDataI_max.insert({key, n});
-        }
-        else if (n > m_dataFlowDataI_max.find(key)->second) {
-            m_dataFlowDataI_max.find(key)->second = n;
-        }
+      h = new TH1I(hname.c_str(), keyStr.c_str(), n + 1, -0.5, n + 0.5);
+    } else {
+      h = new TH1F(hname.c_str(), keyStr.c_str(), (std::round(n) + 1) * 100, -0.5, std::round(n) + 0.5);
     }
-    else {
-        if (m_dataFlowDataF_min.find(key) == m_dataFlowDataF_min.end()) {
-            m_dataFlowDataF_min.insert({key, n});
-        }
-        else if (n < m_dataFlowDataF_min.find(key)->second) {
-            m_dataFlowDataF_min.find(key)->second = n;
-        }
-
-        if (m_dataFlowDataF_max.find(key) == m_dataFlowDataF_max.end()) {
-            m_dataFlowDataF_max.insert({key, n});
-        }
-        else if (n > m_dataFlowDataF_max.find(key)->second) {
-            m_dataFlowDataF_max.find(key)->second = n;
-        }
+    ATH_CHECK(regHist(getHistDir(), h));
+    clearHistDir();
+    h->Fill(n);
+    if (isInt) {
+      m_dataFlowHistsI.emplace(keyStr, static_cast<TH1I*>(h));
+    } else {
+      m_dataFlowHistsF.emplace(keyStr, static_cast<TH1F*>(h));
     }
-    
-    if ((isInt && m_dataFlowHistsI.find(key) == m_dataFlowHistsI.end()) ||
-        (!isInt && m_dataFlowHistsF.find(key) == m_dataFlowHistsF.end())) {
-        std::string hname = "h_dataflow_" + key;
-        if (!m_outputtag.value().empty()) hname += ("_" + m_outputtag.value());
-        findAndReplaceAll(hname, "/", "_over_");
+  } else {
+    if (isInt) {
+      const auto maxIt = m_dataFlowDataI_max.find(key);
+      const auto histIt = m_dataFlowHistsI.find(key);
+      const int max = maxIt->second;
+      TH1I* h = histIt->second;
+      h->SetBins(max + 1, -0.5, max + 0.5);
+      h->Fill(n);
+    } else {
+      const auto maxIt = m_dataFlowDataF_max.find(key);
+      const auto histIt = m_dataFlowHistsF.find(key);
 
-        setHistDir("/DataFlowHist/");
-        TH1* h;
-        if (isInt)
-            h = new TH1I(hname.c_str(), key.c_str(), n + 1, -0.5, n + 0.5);
-        else
-            h = new TH1F(hname.c_str(), key.c_str(), (round(n) + 1) * 100, -0.5, round(n) + 0.5);
-        ATH_CHECK(regHist(getHistDir(), h));
-        clearHistDir();
-
-        h->Fill(n);
-
-        if (isInt)
-            m_dataFlowHistsI.insert({key, dynamic_cast<TH1I*>(h)});
-        else
-            m_dataFlowHistsF.insert({key, dynamic_cast<TH1F*>(h)});
+      const float max = maxIt->second;
+      TH1F* h = histIt->second;
+      h->SetBins((std::round(max) + 1) * 100, -0.5, std::round(max) + 0.5);
+      h->Fill(n);
     }
-    else {
-        if (m_dataFlowDataI_max.find(key) != m_dataFlowDataI_max.end()) {
-            int max = m_dataFlowDataI_max.find(key)->second;
-            TH1I* h = m_dataFlowHistsI.find(key)->second;
-            h->SetBins(max + 1, -0.5, max + 0.5);
-            h->Fill(n);
-        }
-        else if (m_dataFlowDataF_max.find(key) != m_dataFlowDataF_max.end()) {
-            float max = m_dataFlowDataF_max.find(key)->second;
-            TH1F* h = m_dataFlowHistsF.find(key)->second;
-            h->SetBins((round(max) + 1) * 100, -0.5, round(max) + 0.5);
-            h->Fill(n);
-        }
-    }
+  }
 
-    return StatusCode::SUCCESS;
+  return StatusCode::SUCCESS;
 }
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 StatusCode FPGATrackSimDataFlowTool::printDataFlow(std::string const & key, int const div)

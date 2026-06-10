@@ -95,7 +95,7 @@ static  inline void reduce(HepMC::GenEvent* ge, HepMC::GenParticle* gp) {
 //<----//This is copied from MCUtils
 #endif
 
-StatusCode FixHepMC::execute() {
+StatusCode FixHepMC::execute(const EventContext& /*ctx*/) {
   for (McEventCollection::const_iterator ievt = events()->begin(); ievt != events()->end(); ++ievt) {
     // FIXME: const_cast
     HepMC::GenEvent* evt = const_cast<HepMC::GenEvent*>(*ievt);

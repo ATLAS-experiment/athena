@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -23,17 +23,17 @@
 //____________________________________________________________________
 class VP1PluginDialog::Imp {
 public:
-  VP1PluginDialog*pd;
-  VP1ChannelManager* channelmanager;
-  VP1ExecutionScheduler* scheduler;
+  VP1PluginDialog* pd{};
+  VP1ChannelManager* channelmanager{};
+  VP1ExecutionScheduler* scheduler{};
   void setInfo();
-  QLabel * label_selectplugin;
-  QComboBox * comboBox_plugins;
-  QLabel * label_fullpathtitle;
-  QLabel * label_fullpath;
-  QLabel * label_channels;
-  QPushButton * pushButton_unload;
-  QTextBrowser * textBrowser_channels;
+  QLabel * label_selectplugin{};
+  QComboBox * comboBox_plugins{};
+  QLabel * label_fullpathtitle{};
+  QLabel * label_fullpath{};
+  QLabel * label_channels{};
+  QPushButton * pushButton_unload{};
+  QTextBrowser * textBrowser_channels{};
   QMap<int,QString> index_2_fullpath;
   QString unloadfile;
 };

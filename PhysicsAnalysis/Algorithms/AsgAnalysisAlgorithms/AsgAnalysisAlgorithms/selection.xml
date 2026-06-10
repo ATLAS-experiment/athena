@@ -8,4 +8,9 @@
    <class name="CP::BootstrapGenerator" />
    <class name="CP::SysTruthWeightAlg" />
 
+   <class name="std::vector<std::vector<ROOT::Math::PtEtaPhiMVector>>" />
+   <class name="std::vector<std::vector<ROOT::Math::PtEtaPhiEVector>>" />
+   <class name="std::vector<std::vector<ROOT::Math::PxPyPzMVector>>" />
+   <class name="std::vector<std::vector<ROOT::Math::PxPyPzEVector>>" />
+
 </lcgdict>
