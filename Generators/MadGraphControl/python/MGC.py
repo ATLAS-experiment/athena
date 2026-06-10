@@ -651,9 +651,8 @@ class MGControl:
         if the_base_fragment is None:
             mglog.warning('!!! No pdf base fragment was included in your job options. PDFs should be set with an include file. You might be unable to follow the PDF4LHC uncertainty prescription. Let\'s hope you know what you doing !!!')
             if not extras.get('pdlabel', None) == 'lhapdf'  or 'lhaid' not in extras:
-                mglog.warning('!!! No pdf base fragment was included in your job options and you did not specify a LHAPDF yourself -- in the future, this will cause an error !!!')
-                #TODO: in the future this should be an error
-                #raise RuntimeError('No pdf base fragment was included in your job options and you did not specify a LHAPDF yourself')
+                mglog.error('!!! No pdf base fragment was included in your job options and you did not specify a LHAPDF yourself')
+                raise RuntimeError('No pdf base fragment was included in your job options and you did not specify a LHAPDF yourself')
             return True
         else:
             # if setting is already exactly as it should be -- great!
