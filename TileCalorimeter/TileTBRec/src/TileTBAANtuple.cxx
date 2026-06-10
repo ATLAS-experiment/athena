@@ -359,9 +359,8 @@ StatusCode TileTBAANtuple::ntuple_initialize(const EventContext& ctx) {
   return StatusCode::SUCCESS;
 }
 
-StatusCode TileTBAANtuple::execute() {
+StatusCode TileTBAANtuple::execute(const EventContext& ctx) {
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   const TileDQstatus* dqStatus = (!m_dqStatusKey.empty()) ? SG::makeHandle(m_dqStatusKey, ctx).get() : nullptr;
 
   if (m_evtNr < 0) {
