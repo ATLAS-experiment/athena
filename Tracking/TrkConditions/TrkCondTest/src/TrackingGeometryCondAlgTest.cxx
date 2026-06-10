@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/ISvcLocator.h"
@@ -9,14 +9,6 @@
 #include "TrkCondTest/TrackingGeometryCondAlgTest.h"
 #include "TrkGeometry/Layer.h"
 
-
-Trk::TrackingGeometryCondAlgTest::TrackingGeometryCondAlgTest(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthCondAlgorithm(name, pSvcLocator),
-  m_trackingGeometrySvc("AtlasTrackingGeometrySvc", name),
-  m_trackingGeometryProcessors()
-{
-  declareProperty("GeometryProcessors", m_trackingGeometryProcessors);
-}
 
 StatusCode Trk::TrackingGeometryCondAlgTest::initialize()
 {
