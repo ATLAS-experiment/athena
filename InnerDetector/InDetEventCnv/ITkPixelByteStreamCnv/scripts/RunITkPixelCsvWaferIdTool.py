@@ -13,6 +13,7 @@ its waferId() implementation.
 from argparse import ArgumentParser
 
 from AthenaCommon.Constants import INFO
+from AthenaCommon.Constants import DEBUG
 from AthenaCommon.Logging import log
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -31,9 +32,7 @@ parser.add_argument(
     default="ITkPixelWaferIds.txt",
     help="Output text file for one 32-bit waferID identifier per line.",
 )
-#parser.add_argument("--sp-chain", required=True, help="SP chain identifier from the CSV.")
-#parser.add_argument("--module", type=int, required=True, help="Module number from the CSV.")
-#parser.add_argument("--fe", type=int, required=True, help="Front-end number from the CSV.")
+
 parser.add_argument(
     "--verbose",
     action="store_true",
@@ -46,6 +45,8 @@ log.setLevel(INFO)
 flags = initConfigFlags()
 flags.Input.isMC = True
 flags.Input.Files = []  # No input files needed for this test
+
+#flags.Exec.OutputLevel=DEBUG
 
 from AthenaConfiguration.TestDefaults import defaultGeometryTags
 flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
@@ -71,5 +72,4 @@ cfg.run(1)
 print("Configured ITkPixelCsvWaferIdAlg")
 print(f"  CSV file: {args.csv_file}")
 print(f"  Output file: {args.output_file}")
-#print(f"  Lookup request: spChain={args.sp_chain}, module={args.module}, fe={args.fe}")
-print("  Note: the algorithm execution writes one 32-bit waferID per line to the output file.")
+print("  Note: the algorithm execution writes one 32-bit waferID+feID per line to the output file.")

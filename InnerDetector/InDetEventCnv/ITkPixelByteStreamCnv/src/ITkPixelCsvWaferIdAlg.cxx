@@ -2,7 +2,7 @@
 Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "ITkPixelCsvWaferIdTool.h"
+#include "ITkPixelCsvWaferIdAlg.h"
 #include "InDetIdentifier/PixelID.h"
 
 
@@ -33,6 +33,9 @@ StatusCode ITkPixelCsvWaferIdAlg::initialize() {
 }
 
 StatusCode ITkPixelCsvWaferIdAlg::execute(const EventContext& ctx) const {
+
+    ATH_CHECK ( ctx.valid() );
+
     if (m_done.load(std::memory_order_acquire)) {
         return StatusCode::SUCCESS;
     }
@@ -49,18 +52,19 @@ StatusCode ITkPixelCsvWaferIdAlg::execute(const EventContext& ctx) const {
         ATH_MSG_FATAL("Could not open wafer ID output file: " << m_outputFile.value());
         return StatusCode::FAILURE;
     }
+    int nrow = 0;
 
     for (const CsvRow& row : m_rows) {
+        nrow++;
         const std::pair< Identifier, int> w_and_fe_id =  waferId(row);
         const Identifier id = w_and_fe_id.first;
-        const uint32_t compactId = id.get_identifier32().get_compact();
-        const std::string compactId_str = id.get_identifier32().getString();
+        const std::string waferId_str = id.get_identifier32().getString();
         const auto bec = m_pixIdHelper->barrel_ec(id);
         const auto ld = m_pixIdHelper->layer_disk(id);
         const auto phi = m_pixIdHelper->phi_module(id);
         const auto eta = m_pixIdHelper->eta_module(id);
 
-        std::string x = compactId_str.substr(0, compactId_str.length() - 2 );
+        std::string x = waferId_str.substr(0, waferId_str.length() - 2 );
         std::stringstream ss;
         ss << std::hex << x;
         unsigned n;
@@ -71,11 +75,22 @@ StatusCode ITkPixelCsvWaferIdAlg::execute(const EventContext& ctx) const {
         std::bitset<32> febits = std::bitset<32>(fe);
         b |= febits;
 
-        output << compactId_str << "\t" << x << "\t" << b.to_string() << "\t"  << febits.to_string() << "\t" << bec << "\t" << ld << "\t" << phi << "\t" << eta << "\t";
+        if (msgLvl(MSG::DEBUG)) {
+            output << waferId_str << "\t"
+                   << x << "\t"
+                   << b.to_string() << "\t"
+                   << febits.to_string() << "\t"
+                   << bec << "\t"
+                   << ld << "\t"
+                   << phi << "\t"
+                   << eta << "\t";
+        }
         //convert back to hex
         std::stringstream res;
         res << std::hex << std::uppercase << b.to_ulong();
-        output << res.str() << "\n";
+        // keep this, might be useful later
+        //output << res.str() << "\n";
+        output << b.to_ulong() << "\n";
 
     }
 
@@ -133,12 +148,9 @@ std::pair < Identifier, int > ITkPixelCsvWaferIdAlg::waferId(const CsvRow& row) 
     ATH_MSG_DEBUG("waferId lookup for SP chain " << row.spChain
                     << ", module " << row.md << ", FE " << row.fe);
 
-    // Placeholder: the concrete mapping from SP chain/module/FE to a PixelID
-    // should be implemented here using the PixelID helper.
-
     //SP chain is like G-IS-L05-R05-A-SP2
     std::vector<std::string> spChain_cur = parseSPChain(row.spChain);
-    //
+    
     int bec = barrel_ec(spChain_cur);
     int ld = layer_disk(spChain_cur);
     int phi = phi_module(spChain_cur, row.md, row.fe );
@@ -185,14 +197,19 @@ std::vector<std::string> ITkPixelCsvWaferIdAlg::parseSPChain(const std::string& 
 
 int ITkPixelCsvWaferIdAlg::barrel_ec(const std::vector<std::string>& spchain) const {
      
-    if(spchain[1] == "IS" && (spchain[2] == "L0" ||  spchain[2] == "L1") && spchain.at(3)[0]!= 'R' ){ //inner flat barrel
+    if (spchain[1] == "IS" &&
+        (spchain[2] == "L0" || spchain[2] == "L1") &&
+        spchain.at(3)[0] != 'R') { // inner flat barrel
         return 0;
     }
-    else if(spchain[1] == "OB" && (spchain[2] == "L2" ||  spchain[2] == "L3" || spchain[2] == "L4") && (spchain.at(3)[0] == 'B' )){ // Outer flat barrel has 3 layers
+    else if (spchain[1] == "OB" &&
+             (spchain[2] == "L2" || spchain[2] == "L3" ||
+              spchain[2] == "L4") &&
+             (spchain.at(3)[0] == 'B')) { // Outer flat barrel has 3 layers
         return 0;
     }
     else{
-        //Need to calculat the side signknnjuh because eta is always positive.
+        //Need to calculat the side sign because eta is always positive.
         std::string sideAC = spchain[4];
         if(sideAC != "A" && sideAC != "C"){
             sideAC = spchain[5];
@@ -208,10 +225,12 @@ int ITkPixelCsvWaferIdAlg::layer_disk(const std::vector<std::string>& spchain) c
         return spchain.at(2)[1] - '0';
     }
     else{ // endcap and barrel rings - all considered as 'endcap' disks
-        if(spchain[2] == "L01" && (spchain.at(5) == "SP1" || spchain.at(5) == "SP3") ){ // barrel vertical small combined rings, disk 0
+        if (spchain[2] == "L01" &&
+            (spchain.at(5) == "SP1" || spchain.at(5) == "SP3")) { // barrel vertical small combined rings, disk 0
             return 0;
         }
-        else if(spchain[2] == "L01" && (spchain.at(5) == "SP2" || spchain.at(5) == "SP4") ){ // barrel vertical large combined rings, disk 2
+        else if (spchain[2] == "L01" &&
+                 (spchain.at(5) == "SP2" || spchain.at(5) == "SP4")) { // barrel vertical large combined rings, disk 2
             return 2;
         }
         else if(spchain[1] == "OB" && (spchain[2] == "L2" || //OB inclined rings, disks 3, 5, 7
@@ -242,24 +261,33 @@ int ITkPixelCsvWaferIdAlg::phi_module(const std::vector<std::string>& spchain, c
     
     if( fabs(b_ec) == 0 ){ // flat barrel
         std::string phi_str = (spchain.at(3)).substr(1,2);
-        return std::stoi(phi_str) - 1;
+        if(ld == 0 || ld ==1 ){ //inner system flat barrel
+            return std::stoi(phi_str) - 1;
+        }
+        else{ //outer flat barrel
+            int phi = std::stoi(phi_str) - 1 ;
+            phi = (mod[2] == 'T') ? 2*phi + 1 : 2*phi; //(TOCHECK)
+            return phi;
+        }
     }
     else{ // endcap and barrel rings - all considered as disks
-        if(spchain[2] == "L01" && (spchain.at(5) == "SP1" || spchain.at(5) == "SP3") ){ // barrel vertical small combined rings, disk 0
+        if (spchain[2] == "L01" &&
+            (spchain.at(5) == "SP1" || spchain.at(5) == "SP3")) { // barrel vertical small combined rings, disk 0
             std::string sp_str(1, (spchain.at(5)[2])); // SP=1 and SP=3 alternate in phi
             if(sp_str == "1"){
-                return 6 * (stoi(mod) - 1 ) + 2 * (fe - 1); // probably wrong offset, TODO need to revisit
+                return 6 * (stoi(mod) - 1 ) + 2 * (fe - 1); // probably wrong offset, TOCHECK
             }
             else if(sp_str == "3"){
-                return 6 * (stoi(mod) - 1 ) + 2 * (fe - 1) + 1; // probably wrong offset, TODO need to revisit
+                return 6 * (stoi(mod) - 1 ) + 2 * (fe - 1) + 1; // probably wrong offset, TOCHECK
             }
             else{
                 ATH_MSG_WARNING("Bad input for phi_module,return -9999 ");
                 return -9999;
             }
         }
-        else if(spchain[2] == "L01" &&
-            (spchain.at(5) == "SP2" || spchain.at(5) == "SP4") ){ // barrel vertical large combined rings (quad modules), disk 2
+        else if (spchain[2] == "L01" &&
+                 (spchain.at(5) == "SP2" || spchain.at(5) == "SP4")) {
+            // barrel vertical large combined rings (quad modules), disk 2
             std::string sp_str(1, spchain.at(5)[2]); // SP=2 and SP=4 alternate in phi
              if(sp_str == "2"){
                 return 2 * (stoi(mod) - 1 ) ; // probably wrong offset, TODO need to revisit
@@ -320,7 +348,6 @@ int ITkPixelCsvWaferIdAlg::eta_module(const std::vector<std::string>& spchain, c
         else if(ld < 5){
             std::string eta_str(1, mod[4]);
             int eta = std::stoi(eta_str);
-            eta = (mod[2] == 'T') ? 2*eta + 1 : 2*eta; //starts with Bottom
             return side * eta;
         }
         else{
@@ -360,7 +387,6 @@ int ITkPixelCsvWaferIdAlg::eta_module(const std::vector<std::string>& spchain, c
 
 
 int ITkPixelCsvWaferIdAlg::feID(const std::vector<std::string>& spchain, int fe) const {
-    int fe_n = -1;
     int ld = layer_disk(spchain);
     if(ld < 2){ //triplets
         return 0;

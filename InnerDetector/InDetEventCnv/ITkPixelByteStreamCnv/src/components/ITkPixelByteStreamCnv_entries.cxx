@@ -11,7 +11,7 @@
 #include "src/ITkPixelTranslatorAlg.h"
 #include "src/ITkPixelCnvTool.h"
 #include "src/ITkPixelDataRateMonTool.h"
-#include "src/ITkPixelCsvWaferIdTool.h"
+#include "src/ITkPixelCsvWaferIdAlg.h"
 
 //This is a converter - needs special macro
 DECLARE_CONVERTER( ITkPixelRawContByteStreamCnv )
