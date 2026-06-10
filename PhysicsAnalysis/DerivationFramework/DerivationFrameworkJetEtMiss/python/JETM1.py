@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_JETM1.py
 #====================================================================
@@ -288,7 +288,7 @@ def JETM1Cfg(flags):
     # Output stream    
     JETM1ItemList = JETM1SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, "DAOD_JETM1", ItemList=JETM1ItemList, AcceptAlgs=["JETM1Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_JETM1", AcceptAlgs=["JETM1Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_JETM1", AcceptAlgs=["JETM1Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData,MetadataCategory.TruthMetaData]))
 
     return acc
 
