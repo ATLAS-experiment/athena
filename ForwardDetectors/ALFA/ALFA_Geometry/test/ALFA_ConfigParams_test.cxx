@@ -2,6 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
+#define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE ALFA_ConfigParams_test
 #include <boost/test/unit_test.hpp>
 
