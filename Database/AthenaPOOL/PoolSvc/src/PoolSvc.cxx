@@ -195,10 +195,6 @@ StatusCode PoolSvc::setupPersistencySvc() {
    }
    m_dbSessionVec.push_back(pool::createSession(*m_catalog).release()); // Write Service
    m_pers_mut.push_back(new CallMutex);
-   if (!m_dbSessionVec[IPoolSvc::kOutputStream]->technologySpecificAttributes(pool::ROOT_StorageType.type()).setAttribute<int>("DEFAULT_CONTAINER_TYPE", pool::DbType::getType(m_defaultContainerType).type())) {
-      ATH_MSG_FATAL("Failed to set ROOT default container type via PersistencySvc.");
-      return(StatusCode::FAILURE);
-   }
 
    return(StatusCode::SUCCESS);
 }
@@ -333,10 +329,6 @@ unsigned int PoolSvc::getOutputContext(const std::string& label) {
    const unsigned int id = m_dbSessionVec.size();
    m_dbSessionVec.push_back(pool::createSession(*m_catalog).release());
    m_pers_mut.push_back(new CallMutex);
-   if (!m_dbSessionVec[id]->technologySpecificAttributes(pool::ROOT_StorageType.type()).setAttribute<int>("DEFAULT_CONTAINER_TYPE", pool::DbType::getType(m_defaultContainerType).type())) {
-      ATH_MSG_WARNING("Failed to set ROOT default container type via PersistencySvc for id " << id);
-      return(IPoolSvc::kOutputStream);
-   }
    m_outputContextLabel.insert(std::pair<std::string, unsigned int>(label, id));
    return(id);
 }

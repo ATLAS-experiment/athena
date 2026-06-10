@@ -36,6 +36,6 @@ Reco_tf.py \
   --digiSeedOffset2="232" \
   --AMITag="r14799" \
   --steering "doOverlay" "doRDO_TRIG" "doTRIGtoALL" \
-  --preExec="flags.PoolSvc.DefaultContainerType=\"ROOTRNTUPLE\";";
+  --preExec="flags.Output.DefaultContainerType=\"ROOTRNTUPLE\";";
  
 echo "art-result: $? full-chain";

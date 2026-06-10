@@ -18,7 +18,7 @@ def IOVDbTestAlgFlags():
    flags.IOVDb.DBConnection = "sqlite://;schema=mytest.db;dbname=TESTCOOL"
    flags.IOVDb.DatabaseInstance = ""
    flags.IOVDb.GlobalTag = ""
-   flags.PoolSvc.DefaultContainerType = "ROOTTREE"
+   flags.Output.DefaultContainerType = "ROOTTREE"
 
    return flags
 

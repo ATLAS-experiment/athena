@@ -25,6 +25,6 @@ Reco_tf.py \
   --conditionsTag="all:${conditionsTag}" \
   --geometryVersion="all:ATLAS-R3S-2021-03-02-00" \
   --steering="doRAWtoALL" \
-  --preExec="flags.PoolSvc.DefaultContainerType=\"ROOTRNTUPLE\";";
+  --preExec="flags.Output.DefaultContainerType=\"ROOTRNTUPLE\";";
 
 echo "art-result: $? reconstruction";
