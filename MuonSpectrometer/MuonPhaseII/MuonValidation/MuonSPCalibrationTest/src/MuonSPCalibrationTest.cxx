@@ -18,9 +18,8 @@ StatusCode MuonSPCalibrationTest::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode MuonSPCalibrationTest::execute() {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
-
+StatusCode MuonSPCalibrationTest::execute(const EventContext& ctx) {
+    
     const ActsTrk::GeometryContext* geoCtx{nullptr};
     ATH_CHECK(SG::get(geoCtx, m_geoCtxKey, ctx));
 

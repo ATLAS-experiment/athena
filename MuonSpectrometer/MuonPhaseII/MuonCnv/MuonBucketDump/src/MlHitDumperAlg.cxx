@@ -32,9 +32,8 @@ namespace MuonR4{
         ATH_CHECK(m_tree.init(this));
         return StatusCode::SUCCESS;
     }
-    StatusCode MlHitDumperAlg::execute() {
-        const EventContext& ctx{Gaudi::Hive::currentContext()};
-        const ActsTrk::GeometryContext* gctx{};
+    StatusCode MlHitDumperAlg::execute(const EventContext& ctx) {
+                const ActsTrk::GeometryContext* gctx{};
         ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
 
         std::unordered_map<const xAOD::MuonSimHit*, const xAOD::TruthParticle*> hitPartMap{};

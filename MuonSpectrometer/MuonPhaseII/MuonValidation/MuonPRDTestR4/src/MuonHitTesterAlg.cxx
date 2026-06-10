@@ -175,8 +175,7 @@ namespace MuonValR4 {
         ATH_CHECK(m_tree.write());
         return StatusCode::SUCCESS;
     }
-    StatusCode MuonHitTesterAlg::execute(){
-        const EventContext& ctx{Gaudi::Hive::currentContext()};
-        return m_tree.fill(ctx) ? StatusCode::SUCCESS : StatusCode::FAILURE;
+    StatusCode MuonHitTesterAlg::execute(const EventContext& ctx) {
+                return m_tree.fill(ctx) ? StatusCode::SUCCESS : StatusCode::FAILURE;
     }
 }

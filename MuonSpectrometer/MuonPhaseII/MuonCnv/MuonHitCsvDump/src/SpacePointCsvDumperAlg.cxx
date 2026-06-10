@@ -29,10 +29,9 @@ StatusCode SpacePointCsvDumperAlg::initialize() {
    return StatusCode::SUCCESS;
  }
 
-StatusCode SpacePointCsvDumperAlg::execute(){
+StatusCode SpacePointCsvDumperAlg::execute(const EventContext& ctx) {
 
-   const EventContext& ctx{Gaudi::Hive::currentContext()};
- 
+    
    constexpr std::string_view delim = ",";
    std::ofstream file{std::string(Form("event%09zu-",++m_event))+"SpacePoints.csv"};
    

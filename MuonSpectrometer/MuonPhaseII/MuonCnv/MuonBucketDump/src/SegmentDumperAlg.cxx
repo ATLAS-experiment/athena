@@ -167,9 +167,8 @@ StatusCode SegmentDumperAlg::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode SegmentDumperAlg::execute() {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-
+StatusCode SegmentDumperAlg::execute(const EventContext& ctx) {
+  
   using SegmentsPerBucket_t =
       std::unordered_map<const SpacePointBucket*,
                          std::set<const xAOD::MuonSegment*, LocalSegSorter>>;

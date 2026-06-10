@@ -22,7 +22,7 @@ class GeoModelMmTest : public AthHistogramAlgorithm{
 
         ~GeoModelMmTest() = default;
 
-        StatusCode execute() override; 
+        StatusCode execute(const EventContext& ctx) override; 
         StatusCode initialize() override;        
         StatusCode finalize() override;
 

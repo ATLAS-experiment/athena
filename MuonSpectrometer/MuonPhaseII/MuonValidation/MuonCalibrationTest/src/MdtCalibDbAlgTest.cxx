@@ -34,9 +34,8 @@ StatusCode MdtCalibDbAlgTest::finalize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode MdtCalibDbAlgTest::execute() {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
-    
+StatusCode MdtCalibDbAlgTest::execute(const EventContext& ctx) {
+        
     const xAOD::MdtDriftCircleContainer* mdtContainer{nullptr};
     const ActsTrk::GeometryContext* geoCtx{nullptr};
 
