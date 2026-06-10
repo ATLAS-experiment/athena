@@ -178,10 +178,11 @@ class Configured:
         this call will configure the AnaAlgorithmConfig 'anaAlg' so
         its ToolHandle property 'handlename' is configured with self
         """
+        if handlename in anaAlg._props:
+            return
         props = {handlename:self,  }
         klass=type('TmpConf', (Configured,), dict(_allowed=self._allowed+[handlename], _propTypes={},
                                                               type=anaAlg.getType(),_cppclass='none') )
-
         c=klass(anaAlg.name(), **props)
         c.assignAllProperties(anaAlg)
         
