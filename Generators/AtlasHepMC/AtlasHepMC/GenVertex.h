@@ -28,29 +28,7 @@ inline GenVertexPtr newGenVertexPtr(const HepMC3::FourVector& pos = HepMC3::Four
     v->set_status(i);
     return v;
 }
-
-inline int barcode(const GenVertexPtr& p) {
-    if (!p) return 0;
-    auto e = p->parent_event();
-    if (!e) return 0;
-    std::shared_ptr<HepMC3::IntAttribute> barcode = e->attribute<HepMC3::IntAttribute>(HepMC::Str::barcode, p->id());
-    return barcode ? (barcode->value()) : p->id();
-}
 inline int barcode_or_id(const ConstGenVertexPtr& p) { return p->id();}
-inline int barcode(const ConstGenVertexPtr& p) {
-    if (!p) return 0;
-    auto e = p->parent_event();
-    if (!e) return 0;
-    std::shared_ptr<HepMC3::IntAttribute> barcode = e->attribute<HepMC3::IntAttribute>(HepMC::Str::barcode, p->id());
-    return barcode ? (barcode->value()) : p->id();
-}
-inline int barcode(const HepMC3::GenVertex& p) {
-    auto e = p.parent_event();
-    if (!e) return 0;
-    std::shared_ptr<HepMC3::IntAttribute> barcode = e->attribute<HepMC3::IntAttribute>(HepMC::Str::barcode, p.id());
-    return barcode ? (barcode->value()) : p.id();
-}
-
 using HepMC3::GenVertex;
 }
 #else
