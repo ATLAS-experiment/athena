@@ -15,6 +15,8 @@
 #include "MuonRIO_OnTrack/MdtDriftCircleOnTrack.h"
 #include "MuonPrepRawData/MdtPrepData.h"
 
+#include "CxxUtils/FPControl.h"
+
 #include "Minuit2/Minuit2Minimizer.h"
 #include "Math/Functor.h"
 #include "TMath.h"
@@ -481,13 +483,22 @@ namespace TrkDriftCircleMath {
     
     minimum.SetFunction(minFunct);
 
+    
+    // Suppress the FPE
+    {
+
+      CxxUtils::FPControl ctl;
+      ctl.disable (CxxUtils::FPControl::Exc::divbyzero);
+
     // do the minimization
-    const bool minuit_succedded = minimum.Minimize();
-    const int minuitStatus = minimum.Status();
-    if (!minuit_succedded || minuitStatus != 0) {
-      ATH_MSG_DEBUG("Minuit fit failed with status " << minuitStatus);
-      return false;
-    }
+      const bool minuit_succedded = minimum.Minimize();
+      const int minuitStatus = minimum.Status();
+      if (!minuit_succedded || minuitStatus != 0) {
+        ATH_MSG_DEBUG("Minuit fit failed with status " << minuitStatus);
+        return false;
+      }
+
+   }
 
     const double *results = minimum.X();
     const double *errors = minimum.Errors();
