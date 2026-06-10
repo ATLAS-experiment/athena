@@ -22,7 +22,7 @@ class DigitizationAlg: public AthAlgorithm {
 public:
   DigitizationAlg(const std::string& name, ISvcLocator* pSvcLocator);
   StatusCode initialize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   StatusCode finalize();
 
 private:

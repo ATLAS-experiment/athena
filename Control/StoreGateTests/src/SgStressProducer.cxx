@@ -85,7 +85,7 @@ StatusCode SgStressProducer::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode SgStressProducer::execute()
+StatusCode SgStressProducer::execute(const EventContext& /*ctx*/)
 {  
   ATH_MSG_DEBUG ( "Executing " << name() << "..." );
   

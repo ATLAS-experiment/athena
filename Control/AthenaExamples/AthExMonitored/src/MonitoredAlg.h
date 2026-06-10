@@ -16,7 +16,7 @@ class MonitoredAlg : public AthAlgorithm {
 public:
   MonitoredAlg( const std::string& name, ISvcLocator* pSvcLocator );
   StatusCode initialize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
 
 private:
   ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool","","Monitoring tool"};

@@ -2,7 +2,7 @@
 
 #include "AthExAlgWithFPE.h"
 
-StatusCode AthExAlgWithFPE::execute() {
+StatusCode AthExAlgWithFPE::execute(const EventContext& /*ctx*/) {
 
   float value = 42;
   float byZero=divide (value, 0);

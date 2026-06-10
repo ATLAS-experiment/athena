@@ -17,7 +17,7 @@ using namespace::std;
 typedef vector<DHit> HitContainer;
 
 
-StatusCode VectorAlg::execute()
+StatusCode VectorAlg::execute(const EventContext& /*ctx*/)
 {  
   ATH_MSG_DEBUG("Executing ");
   HitContainer vhit;

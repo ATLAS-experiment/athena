@@ -85,9 +85,9 @@ StatusCode HLTResultWriter::initialize ATLAS_NOT_THREAD_SAFE()
 /**
  * @brief Algorithm event processing.
  */
-StatusCode HLTResultWriter::execute()
+StatusCode HLTResultWriter::execute(const EventContext& ctx)
 {
-  SG::WriteHandle<HLT::HLTResult> result (m_resultKey);
+  SG::WriteHandle<HLT::HLTResult> result (m_resultKey, ctx);
   ATH_CHECK( result.record (std::make_unique<HLT::HLTResult>()) );
 
   m_nav->prepare();

@@ -16,7 +16,7 @@ class FortranAlgorithm:public AthAlgorithm {
  public:
   FortranAlgorithm (const std::string& name, ISvcLocator* pSvcLocator);
   StatusCode initialize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   StatusCode finalize();
  private:
   int m_lun;

@@ -23,10 +23,10 @@ StatusCode AlgB::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode AlgB::execute() {
+StatusCode AlgB::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG("execute " << name());
 
-  SG::ReadHandle<HiveDataObj> rh1(m_rdh1);
+  SG::ReadHandle<HiveDataObj> rh1(m_rdh1, ctx);
   if (!rh1.isValid()) {
     ATH_MSG_ERROR ("Could not retrieve HiveDataObj with key " << m_rdh1.key());
     return StatusCode::FAILURE;
@@ -34,7 +34,7 @@ StatusCode AlgB::execute() {
 
   ATH_MSG_INFO("  read: " << rh1.key() << " = " << rh1->val() );
 
-  SG::WriteHandle<HiveDataObj> wh1(m_wrh1);
+  SG::WriteHandle<HiveDataObj> wh1(m_wrh1, ctx);
   ATH_CHECK( wh1.record( std::make_unique< HiveDataObj >
                          ( 3300 + rh1->val() ) ) );
 

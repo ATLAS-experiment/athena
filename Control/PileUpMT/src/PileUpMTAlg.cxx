@@ -182,12 +182,11 @@ StatusCode PileUpMTAlg::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode PileUpMTAlg::execute() {
+StatusCode PileUpMTAlg::execute(const EventContext& ctx) {
   using PUType = xAOD::EventInfo::PileUpType;
   std::string trace_buf{};  // Hold trace of events.
   auto trace = std::back_inserter(trace_buf);
   ATH_MSG_DEBUG("Executing " << name() << "...");
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   const auto& evtID = ctx.eventID();
 
   ATH_CHECK(evtStore().retrieve());

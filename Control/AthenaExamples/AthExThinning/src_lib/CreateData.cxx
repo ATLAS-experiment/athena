@@ -92,7 +92,7 @@ StatusCode CreateData::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode CreateData::execute()
+StatusCode CreateData::execute(const EventContext& /*ctx*/)
 {  
   ATH_MSG_DEBUG ("Executing " << name() << "...");
 
