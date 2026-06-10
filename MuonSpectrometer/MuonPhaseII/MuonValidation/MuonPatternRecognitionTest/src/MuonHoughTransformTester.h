@@ -131,7 +131,7 @@ namespace MuonValR4{
 
     MuonVal::ScalarBranch<float>& m_out_bucketStart{m_tree.newScalar<float>("bucketStart", 1)};
     MuonVal::ScalarBranch<float>& m_out_bucketEnd{m_tree.newScalar<float>("bucketEnd", -1)};
-    MuonVal::ScalarBranch<float>& m_out_bucketHitGap{m_tree.newScalar<float>("bucketHiGap", 0.)};
+    MuonVal::ScalarBranch<float>& m_out_bucketEtaHitGap{m_tree.newScalar<float>("bucketEtaHitGap", 0.)};
 
     /// @brief Branch dumping all the space points from the difference buckets
     std::shared_ptr<SpacePointTesterModule> m_spTester{};
