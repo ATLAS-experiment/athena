@@ -24,7 +24,7 @@ from ITkPixelByteStreamCnv.ITkPixelByteStreamCnvConfig import ITkPixelCsvWaferId
 parser = ArgumentParser("RunITkPixelCsvWaferIdAlg.py")
 parser.add_argument(
     "--csv-file",
-    default="AT2-IP-ES-0016_v1.41_INCOMPLETE-ModuleA.csv",
+    default="/eos/atlas/atlascerngroupdisk/det-itk/general/pixels/identifiers/AT2-IP-ES-0016_v1.41_INCOMPLETE-ModuleA_slim.csv",
     help="CSV file to load. The default is resolved through DATAPATH.",
 )
 parser.add_argument(

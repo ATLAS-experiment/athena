@@ -50,7 +50,7 @@ private:
     int feID(const std::vector<std::string>& spchain, int fe) const;
     Gaudi::Property<std::string> m_csvFile{this,
                                            "CsvFile",
-                                           "AT2-IP-ES-0016_v1.41_INCOMPLETE-ModuleA.csv",
+                                           "AT2-IP-ES-0016_v1.41_INCOMPLETE-ModuleA_slim.csv",
                                            "CSV file containing SP chain, Module and FE columns"};
     Gaudi::Property<std::string> m_outputFile{this,
                                               "OutputFile",
