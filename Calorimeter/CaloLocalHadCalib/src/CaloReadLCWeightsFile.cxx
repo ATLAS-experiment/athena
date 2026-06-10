@@ -183,7 +183,7 @@ StatusCode CaloReadLCWeightsFile::initialize() {
 }
 
 
-StatusCode  CaloReadLCWeightsFile::execute() 
+StatusCode  CaloReadLCWeightsFile::execute(const EventContext& /*ctx*/) 
 { 
   return StatusCode::SUCCESS;
 }

@@ -651,9 +651,8 @@ StatusCode GetLCSinglePionsPerf::finalize()
 /* ****************************************************************************
 
 **************************************************************************** */
-StatusCode GetLCSinglePionsPerf::execute()
+StatusCode GetLCSinglePionsPerf::execute(const EventContext& ctx)
 {
-  const EventContext& ctx = getContext();
 
   /* ********************************************
   reading particles

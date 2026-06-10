@@ -46,7 +46,7 @@ class GetLCWeights : public AthAlgorithm
   GetLCWeights(const std::string& name, ISvcLocator* pSvcLocator);
   virtual ~GetLCWeights();
   virtual StatusCode initialize();
-  virtual StatusCode execute();
+  virtual StatusCode execute(const EventContext& ctx);
   virtual StatusCode finalize();
 
  private:
