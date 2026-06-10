@@ -19,6 +19,7 @@
 #include "HepMcDataPool.h"
 #include "GenInterfaces/IHepMCWeightSvc.h"
 #include "McEventCollectionCnv_utils.h"
+#include "AtlasHepMC/AttributeNames.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 
 
