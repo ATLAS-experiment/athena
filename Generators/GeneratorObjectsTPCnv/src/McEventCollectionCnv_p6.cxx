@@ -19,8 +19,9 @@
 #include "HepMcDataPool.h"
 #include "GenInterfaces/IHepMCWeightSvc.h"
 #include "McEventCollectionCnv_utils.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "TruthUtils/MagicNumbers.h"
+#include "AtlasHepMC/AttributeNames.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 
 
 static const std::set<std::string> attributes_to_ignore {
