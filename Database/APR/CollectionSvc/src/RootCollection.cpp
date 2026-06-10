@@ -30,14 +30,12 @@
 namespace pool {
 
    RootCollection::RootCollection( const pool::CollectionDescription* description,
-                                   pool::ICollection::OpenMode mode,
-                                   pool::ISession* session )
+                                   pool::ICollection::OpenMode mode )
       : APRMessaging( "RootCollection"),
         m_description( *description ),
         m_name( description->name() ),
         m_fileName( description->connection() ),
         m_mode( mode ),
-        m_session( session ),
         m_open( false )
       {
          RootCollection::open();
