@@ -81,6 +81,8 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.EDM.PersistifyClusters', lambda pcf: pcf.Acts.EDM.PersistifySpacePoints)
     actscf.addFlag('Acts.EDM.PersistifySpacePoints', False)
     actscf.addFlag('Acts.EDM.PersistifyTracks', False)
+    # set to True to use the PhaseII pixel and strip RAW data EDM
+    actscf.addFlag('Acts.EDM.PhaseII', False)
     actscf.addFlag('Acts.useCache', False)
     
     # Scheduling

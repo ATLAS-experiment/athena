@@ -5,6 +5,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType,Format
 from ActsConfig.ActsUtilities import extractChildKwargs
 from HGTD_Calibration.HGTD_CalibrationConfig import HGTD_TdcCalibrationToolCfg
+from ActsConfig.ActsPhaseIIRawDataEdmConfig import PhaseIIPixelRawDataContainerCfg
 
 def ActsHgtdClusteringToolCfg(flags,
                               name: str = "ActsHgtdClusteringTool",
@@ -87,7 +88,10 @@ def ActsPixelClusteringToolCfg(flags,
     #Always use broad errors if cosmics
     kwargs.setdefault('UseBroadErrors', flags.Acts.Clusters.UsePixelBroadErrors or flags.Beam.Type is BeamType.Cosmics)
 
-    acc.setPrivateTools(CompFactory.ActsTrk.PixelClusteringTool(name, **kwargs))
+    if flags.Acts.EDM.PhaseII :
+        acc.setPrivateTools(CompFactory.ActsTrk.PhaseIIPixelClusteringTool(name, **kwargs))
+    else :
+        acc.setPrivateTools(CompFactory.ActsTrk.PixelClusteringTool(name, **kwargs))
     return acc
 
 
@@ -113,7 +117,10 @@ def ActsPLRClusteringToolCfg(flags,
     kwargs.setdefault("UseBroadErrors",
                       flags.Acts.Clusters.UsePixelBroadErrors or flags.Beam.Type is BeamType.Cosmics)
 
-    acc.setPrivateTools(CompFactory.ActsTrk.PixelClusteringTool(name, **kwargs))
+    if flags.Acts.EDM.PhaseII :
+        acc.setPrivateTools(CompFactory.ActsTrk.PhaseIIPixelClusteringTool(name, **kwargs))
+    else :
+        acc.setPrivateTools(CompFactory.ActsTrk.PixelClusteringTool(name, **kwargs))
     return acc
 
 
@@ -154,6 +161,9 @@ def ActsPixelClusterizationAlgCfg(flags,
     acc = ComponentAccumulator()
 
     kwargs.setdefault("IDHelper", "PixelID")
+    if flags.Acts.EDM.PhaseII and flags.Input.Format is not Format.BS:
+        # convert persistent to PhaseIIPixelRawDataContainer instead
+        acc.merge(PhaseIIPixelRawDataContainerCfg(flags, RDOKey="ITkPixelRDOs"))
     kwargs.setdefault("RDOContainerKey", "ITkPixelRDOs")
     kwargs.setdefault("ClustersKey", "ITkPixelClusters")
     kwargs.setdefault("DetEleCollKey", "ITkPixelDetectorElementCollection")
@@ -179,10 +189,16 @@ def ActsPixelClusterizationAlgCfg(flags,
         from ActsConfig.ActsMonitoringConfig import ActsITkPixelClusterizationMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsITkPixelClusterizationMonitoringToolCfg(flags)))
 
-    if not useCache:
-        acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterizationAlg(name, **kwargs))
-    else:
-        acc.addEventAlgo(CompFactory.ActsTrk.PixelCacheClusterizationAlg(name, **kwargs))
+    if flags.Acts.EDM.PhaseII :
+        if not useCache:
+            acc.addEventAlgo(CompFactory.ActsTrk.PhaseIIPixelClusterizationAlg(name, **kwargs))
+        else:
+            acc.addEventAlgo(CompFactory.ActsTrk.PhaseIIPixelCacheClusterizationAlg(name, **kwargs))
+    else :
+        if not useCache:
+            acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterizationAlg(name, **kwargs))
+        else:
+            acc.addEventAlgo(CompFactory.ActsTrk.PixelCacheClusterizationAlg(name, **kwargs))
     return acc
 
 
@@ -194,6 +210,9 @@ def ActsPLRClusterizationAlgCfg(flags,
     acc = ComponentAccumulator()
 
     kwargs.setdefault("IDHelper", "PLR_ID")
+    if flags.Acts.EDM.PhaseII and flags.Input.Format is not Format.BS:
+        # convert persistent to PhaseIIPixelRawDataContainer instead
+        acc.merge(PhaseIIPixelRawDataContainerCfg(flags,RDOKey="PLR_RDOs"))
     kwargs.setdefault("RDOContainerKey", "PLR_RDOs")
     kwargs.setdefault("ClustersKey", "PLR_Clusters")
     kwargs.setdefault("DetEleCollKey", "PLR_DetectorElementCollection")
@@ -221,10 +240,17 @@ def ActsPLRClusterizationAlgCfg(flags,
                 flags,
                 name="ActsPLRClusterizationMonitoringTool")))
 
-    if not useCache:
-        acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterizationAlg(name, **kwargs))
-    else:
-        acc.addEventAlgo(CompFactory.ActsTrk.PixelCacheClusterizationAlg(name, **kwargs))
+    # @TODO just call ActsPixelClusterizationAlgCfg ?
+    if flags.Acts.EDM.PhaseII :
+        if not useCache:
+            acc.addEventAlgo(CompFactory.ActsTrk.PhaseIIPixelClusterizationAlg(name, **kwargs))
+        else:
+            acc.addEventAlgo(CompFactory.ActsTrk.PhaseIIPixelCacheClusterizationAlg(name, **kwargs))
+    else :
+        if not useCache:
+            acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterizationAlg(name, **kwargs))
+        else:
+            acc.addEventAlgo(CompFactory.ActsTrk.PixelCacheClusterizationAlg(name, **kwargs))
     return acc
 
 def ActsStripClusterizationAlgCfg(flags, 
@@ -374,9 +400,14 @@ def ActsMainClusterizationCfg(flags,
     if kwargs['runReconstruction']:
         if kwargs['processPixels']:
             if flags.Input.Format is Format.BS:
-                from ITkPixelByteStreamCnv.ITkPixelByteStreamCnvConfig import ITkPixelDecodingAlgCfg
-                # @TODO handle RoIs
-                acc.merge( ITkPixelDecodingAlgCfg(flags) )
+                if flags.Acts.EDM.PhaseII :
+                    from ITkPixelByteStreamCnv.ITkPixelByteStreamCnvConfig import ITkPixelDecodingPhaseIIRDOAlgCfg
+                    # @TODO nRDO estimation needs to be refined.
+                    acc.merge( ITkPixelDecodingPhaseIIRDOAlgCfg(flags, nRDOs = 1200000, pixelRDOKey='ITkPixelRDOs') )
+                else :
+                    from ITkPixelByteStreamCnv.ITkPixelByteStreamCnvConfig import ITkPixelDecodingAlgCfg
+                    # @TODO handle RoIs
+                    acc.merge( ITkPixelDecodingAlgCfg(flags) )
 
             acc.merge(ActsPixelClusterizationAlgCfg(flags,
                                                     RoIs=RoIs,
