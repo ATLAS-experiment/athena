@@ -102,7 +102,7 @@ StatusCode AODReader::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode AODReader::execute()
+StatusCode AODReader::execute(const EventContext& /*ctx*/)
 {
   StatusCode sc = StatusCode::SUCCESS;
 
