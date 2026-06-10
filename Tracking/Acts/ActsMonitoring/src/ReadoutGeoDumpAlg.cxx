@@ -26,11 +26,10 @@ namespace ActsTrk {
         ATH_CHECK(m_tree.write());
          return StatusCode::SUCCESS;
     }
-    StatusCode ReadoutGeoDumpAlg::execute() {
+    StatusCode ReadoutGeoDumpAlg::execute(const EventContext& ctx) {
         if (m_executed) {
             return StatusCode::SUCCESS;
         }
-        const EventContext& ctx{Gaudi::Hive::currentContext()};
 
         const GeometryContext& gctx{m_trackingGeoTool->getGeometryContext(ctx)};
 
