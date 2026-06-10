@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONREADOUTGEOMETRY_MDTREADOUTELEMENT_H
@@ -164,10 +164,10 @@ namespace MuonGM {
 
         virtual const Trk::Surface& surface() const override final;
         virtual const Trk::StraightLineSurface& surface(const Identifier& id) const override final;
-        virtual const Trk::StraightLineSurface& surface(const int tubeLayer, const int tube) const;
+                const Trk::StraightLineSurface& surface(const int tubeLayer, const int tube) const;
         virtual const Trk::SurfaceBounds& bounds() const override final;
         virtual const Trk::CylinderBounds& bounds(const Identifier& id) const override final;
-        virtual const Trk::CylinderBounds& bounds(const int tubeLayer, const int tube) const;
+                const Trk::CylinderBounds& bounds(const int tubeLayer, const int tube) const;
 
         virtual const Amg::Transform3D& transform(const Identifier& id) const override final;
         virtual const Amg::Transform3D& transform() const override final;
