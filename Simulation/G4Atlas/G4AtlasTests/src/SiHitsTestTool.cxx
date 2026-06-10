@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SiHitsTestTool.h"
@@ -57,31 +57,31 @@ StatusCode SiHitsTestTool::initialize()
     return StatusCode::FAILURE;
   }
   m_path+=detpathName+"/";
-  _TH2D(m_hits_xy,(detName+"_xy").c_str(),100,-1200.,1200.,100,-1200.,1200.);
+  _TH2D(m_hits_xy,detName+"_xy",100,-1200.,1200.,100,-1200.,1200.);
   _SET_TITLE(m_hits_xy, "hit distribution","x [mm]","y [mm]");
-  _TH2D(m_hits_zr,(detName+"_zr").c_str(),100,-3200.,3200.,100,0.,1200.);
+  _TH2D(m_hits_zr,detName+"_zr",100,-3200.,3200.,100,0.,1200.);
   _SET_TITLE(m_hits_zr, "hit distribution","z [mm]","r [mm]");
-  _TH1D_WEIGHTED(m_hits_time,(detName+"_edep_time").c_str(),100,0, 25);
+  _TH1D_WEIGHTED(m_hits_time,detName+"_edep_time",100,0, 25);
   _SET_TITLE(m_hits_time, "energy weighted hit distribution","t [ns]","dE/dt");
-  _TH1D(m_hits_edep,(detName+"_edep").c_str(),100,0.,1.);
+  _TH1D(m_hits_edep,detName+"_edep",100,0.,1.);
   _SET_TITLE(m_hits_edep, "hit distribution","edep [MeV]","dN/dE [1/MeV]");
-  _TH1D(m_hits_log_edep,(detName+"_log_edep").c_str(),100,-15.,2.);
+  _TH1D(m_hits_log_edep,detName+"_log_edep",100,-15.,2.);
   _SET_TITLE(m_hits_log_edep, "log hit distribution","log(edep [MeV])","dN/dlog(E) [1/log(MeV)]");
 
-  _TH2D_WEIGHTED(m_hits_edep_zr,(detName+"_edep_zr").c_str(),100,-3200.,3200.,100,0.,1200.);
+  _TH2D_WEIGHTED(m_hits_edep_zr,detName+"_edep_zr",100,-3200.,3200.,100,0.,1200.);
   _SET_TITLE(m_hits_edep_zr, "energy weighted indet hit distribution","z [mm]","r [mm]");
 
-  _TH1D_WEIGHTED(m_hits_edep_z,(detName+"_edep_z").c_str(),100,-3200.,3200.);
+  _TH1D_WEIGHTED(m_hits_edep_z,detName+"_edep_z",100,-3200.,3200.);
   _SET_TITLE(m_hits_edep_z, "energy weighted indet hit distribution (barrel only)","z [mm]","dE/dz [MeV/mm]");
-  _TH1D_WEIGHTED(m_hits_edep_r,(detName+"_edep_r").c_str(),100,0.,1200.);
+  _TH1D_WEIGHTED(m_hits_edep_r,detName+"_edep_r",100,0.,1200.);
   _SET_TITLE(m_hits_edep_r, "energy weighted indet hit distribution (endcap only)","r [mm]","dE/dr [MeV/mm]");
 
-  _TH1D(m_hits_log_barcode,(detName+"_log_barcode").c_str(),50,0.,16.);
+  _TH1D(m_hits_log_barcode,detName+"_log_barcode",50,0.,16.);
   _SET_TITLE(m_hits_log_barcode, "log(barcode)","log(barcode)","dN/dlog(barcode)");
 
-  _TH1D(m_hits_step_length,(detName+"_step_length").c_str(),100,0.,2.);
+  _TH1D(m_hits_step_length,detName+"_step_length",100,0.,2.);
   _SET_TITLE(m_hits_step_length, "Step Length","Step Length l","dN/dl");
-  _TH1D(m_hits_log_step_length,(detName+"_log_step_length").c_str(), 100, -13, 2.);
+  _TH1D(m_hits_log_step_length,detName+"_log_step_length", 100, -13, 2.);
   _SET_TITLE(m_hits_log_step_length, "Logarithm of Step Length","log(l [mm])","dN/dlog(l)");
 
   return StatusCode::SUCCESS;

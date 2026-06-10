@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_SimHitsTestTool.h"
@@ -45,13 +45,13 @@ StatusCode ALFA_SimHitsTestTool::initialize()
     s.str("");
     s << j+1;
 
-    _TH1D(m_E_full_sum_h[j],("edep_full_in_det_no."+s.str()).c_str(), 100, 0., 5.);
+    _TH1D(m_E_full_sum_h[j],("edep_full_in_det_no."+s.str()), 100, 0., 5.);
     _SET_TITLE(m_E_full_sum_h[j], "Energy deposit in full detector","E (MeV)","N");
 
-    _TH2D(m_E_layer_sum_h[j],("edep_per_layer_detector_no."+s.str()).c_str(), 100, 0., 0.5, 22, 0., 21.);
+    _TH2D(m_E_layer_sum_h[j],("edep_per_layer_detector_no."+s.str()), 100, 0., 0.5, 22, 0., 21.);
     _SET_TITLE(m_E_layer_sum_h[j], "Energy deposit in layers","E (MeV)","layer");
 
-    _TH2D(m_hit_map_h[j],("hitmap_det_no."+s.str()).c_str(), 22, 0., 21., 66, 0., 65.);
+    _TH2D(m_hit_map_h[j],("hitmap_det_no."+s.str()), 22, 0., 21., 66, 0., 65.);
     _SET_TITLE(m_hit_map_h[j], "hit map - layer vs fiber","layer","fiber");
   }
 
