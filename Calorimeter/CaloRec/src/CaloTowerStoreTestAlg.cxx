@@ -134,7 +134,7 @@ void CaloTowerStoreTestAlg::test1()
 /** 
  * @brief Standard Gaudi execute method.
  */
-StatusCode CaloTowerStoreTestAlg::execute()
+StatusCode CaloTowerStoreTestAlg::execute(const EventContext& /*ctx*/)
 {
   test1();
   return StatusCode::SUCCESS;
