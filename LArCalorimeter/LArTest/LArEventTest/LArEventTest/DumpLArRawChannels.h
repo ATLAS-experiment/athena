@@ -27,7 +27,7 @@ class DumpLArRawChannels : public AthAlgorithm
 
   //standart algorithm methods
   StatusCode initialize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   StatusCode finalize();
  private:
   SG::ReadCondHandleKey<LArOnOffIdMapping>  m_cablingKey {this,"keyCabling", "LArOnOffIdMap", "Input key for Id mapping"};
