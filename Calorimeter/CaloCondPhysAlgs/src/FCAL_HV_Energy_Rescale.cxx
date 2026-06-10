@@ -39,7 +39,7 @@ StatusCode FCAL_HV_Energy_Rescale::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode FCAL_HV_Energy_Rescale::execute()
+StatusCode FCAL_HV_Energy_Rescale::execute(const EventContext& /*ctx*/)
 {  
   return StatusCode::SUCCESS;
 }
