@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4ATLASTESTS_SIMTESTHISTO_H
@@ -36,22 +36,32 @@ protected:
 };
 
 // note: var should be of type "TH1*" even if it is filled with a TProfile*
-#define _TPROFILE(var,name,nbin,xmin,xmax)		       \
-  if (!m_histSvc->exists(m_path+name)) {		       \
-    var = new TProfile(name,name,nbin,xmin,xmax);	       \
-    CHECK(m_histSvc->regHist(m_path+name,var));		   \
-  } else {						       \
-    CHECK(m_histSvc->getHist(m_path+name, var));	       \
+#define _TPROFILE(var,name,nbin,xmin,xmax)		      \
+  {                                                 \
+    const std::string histName{name};                 \
+    const std::string histPath{m_path + histName};    \
+    if (!m_histSvc->exists(histPath)) {		            \
+      var = new TProfile(histName.c_str(), histName.c_str(),nbin,xmin,xmax);	       \
+      CHECK(m_histSvc->regHist(histPath,var));		    \
+    } else {						                              \
+      CHECK(m_histSvc->getHist(histPath, var));	      \
+    } \
   }
+  
 
-#define _TH1D(var,name,nbin,xmin,xmax)			       \
-  if (!m_histSvc->exists(m_path+name)) {		       \
-    var = new TH1D(name,name,nbin,xmin,xmax);		       \
-    var->StatOverflows();				       \
-    CHECK(m_histSvc->regHist(m_path+name,var));		       \
-  } else {						       \
-    CHECK(m_histSvc->getHist(m_path+name,var));	       \
-  }
+#define _TH1D(var,name,nbin,xmin,xmax)                         \
+  { \
+    const std::string histName{name};                           \
+    const std::string histPath{m_path + histName};              \
+    if (!m_histSvc->exists(histPath)) {                         \
+      var = new TH1D(histName.c_str(), histName.c_str(),nbin, xmin, xmax);  \
+      var->StatOverflows();                                     \
+      CHECK(m_histSvc->regHist(histPath, var));                 \
+    } else {                                                    \
+      CHECK(m_histSvc->getHist(histPath, var));                 \
+    }                                                           \
+  } 
+  
 
 #define _TH1D_NOCHECK(var,name,nbin,xmin,xmax)			       \
   if (!m_histSvc->exists(m_path+name)) {		       \
@@ -76,15 +86,19 @@ protected:
   } else {						       \
     if(m_histSvc->getHist(m_path+name,var).isFailure())       \
       std::cout<<"Cannot get histogram "<<name<<std::endl;     \
-  }
+  } 
 
 #define _TH2D(var,name,nbinx,xmin,xmax,nbiny,ymin,ymax)	       \
-  if (!m_histSvc->exists(m_path+name)) {		       \
-    var = new TH2D(name,name,nbinx,xmin,xmax,nbiny,ymin,ymax); \
-    CHECK(m_histSvc->regHist(m_path+name,var));	               \
-  } else {						       \
-    CHECK(m_histSvc->getHist(m_path+name,var));	       \
-  }
+  { \
+    const std::string histName{name};                           \
+    const std::string histPath{m_path + histName};              \
+    if (!m_histSvc->exists(histPath)) {		       \
+      var = new TH2D(histName.c_str(),histName.c_str(),nbinx,xmin,xmax,nbiny,ymin,ymax); \
+      CHECK(m_histSvc->regHist(histPath,var));	               \
+    } else {						       \
+      CHECK(m_histSvc->getHist(histPath,var));	       \
+    } \
+  } 
 
 #define _TH2D_WEIGHTED(var,name,nbinx,xmin,xmax,nbiny,ymin,ymax)	\
   _TH2D(var,name,nbinx,xmin,xmax,nbiny,ymin,ymax);			\
