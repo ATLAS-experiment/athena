@@ -25,7 +25,7 @@ class LArHitMerger : public AthAlgorithm
   LArHitMerger(const std::string& name, ISvcLocator* pSvcLocator);
   ~LArHitMerger() = default;
   virtual StatusCode initialize();
-  virtual StatusCode execute();
+  virtual StatusCode execute(const EventContext& ctx);
   virtual StatusCode finalize();
 
  private:

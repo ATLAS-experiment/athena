@@ -54,7 +54,7 @@ StatusCode LArShapeToSCShape::initialize()
 }
 
 
-StatusCode LArShapeToSCShape::execute()
+StatusCode LArShapeToSCShape::execute(const EventContext& ctx)
 {  
   ATH_MSG_DEBUG ("Executing " << name() << "...");
 
@@ -71,7 +71,6 @@ StatusCode LArShapeToSCShape::execute()
   const LArOnline_SuperCellID* onlSCID = nullptr;
   CHECK(detStore()->retrieve(onlSCID));
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, ctx};
   const LArOnOffIdMapping* cabling{*cablingHdl};

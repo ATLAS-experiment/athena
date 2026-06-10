@@ -68,7 +68,7 @@ StatusCode FixLArElecSCCalib::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode FixLArElecSCCalib::execute() {
+StatusCode FixLArElecSCCalib::execute(const EventContext& /*ctx*/) {
 
   ATH_MSG_INFO ( " in execute  " );
   return StatusCode::SUCCESS;

@@ -107,10 +107,9 @@ StatusCode EventReaderAlg::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode EventReaderAlg::execute(){  
+StatusCode EventReaderAlg::execute(const EventContext& ctx){  
   ATH_MSG_DEBUG ("Executing " << name() << "...");
   ATH_MSG_DEBUG("Cleanning of event variables...");
-  const EventContext& ctx = getContext();
   clear();  // clear all variables selected to dump to the output NTuple.
 
   // Conditions

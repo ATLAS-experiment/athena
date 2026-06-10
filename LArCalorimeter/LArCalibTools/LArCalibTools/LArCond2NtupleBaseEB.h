@@ -37,7 +37,7 @@ class LArCond2NtupleBaseEB : public AthAlgorithm {
 
   //Standard algo methods
   StatusCode initialize();
-  StatusCode execute()    {return StatusCode::SUCCESS;}
+  StatusCode execute(const EventContext&)    {return StatusCode::SUCCESS;}
 
   bool fillFromIdentifier(const HWIdentifier& id, int C); //returns true if connected
 

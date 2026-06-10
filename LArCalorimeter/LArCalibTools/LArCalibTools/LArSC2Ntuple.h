@@ -22,7 +22,7 @@ class LArSC2Ntuple : public LArDigits2Ntuple
 
   // Standard algorithm methods
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
  protected:
 
   typedef std::map<HWIdentifier, const LArRawChannel*> rawChanMap_t;

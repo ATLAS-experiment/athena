@@ -72,7 +72,7 @@ class ATLAS_NOT_THREAD_SAFE LArShapeDumper : public AthAlgorithm
   //standart algorithm methods
   virtual StatusCode initialize() override;
   virtual StatusCode start() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
   virtual StatusCode stop() override;
   virtual StatusCode finalize() override;
 

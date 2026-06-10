@@ -42,7 +42,7 @@ StatusCode FakeLArOFCs::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode FakeLArOFCs::execute()
+StatusCode FakeLArOFCs::execute(const EventContext& /*ctx*/)
 {return StatusCode::SUCCESS;}
   
 StatusCode FakeLArOFCs::finalize()

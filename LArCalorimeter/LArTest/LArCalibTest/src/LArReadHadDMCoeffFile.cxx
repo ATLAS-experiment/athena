@@ -34,7 +34,7 @@ StatusCode LArReadHadDMCoeffFile::initialize() {
 }
 
 
-StatusCode  LArReadHadDMCoeffFile::execute() 
+StatusCode  LArReadHadDMCoeffFile::execute(const EventContext& /*ctx*/) 
 { 
   return StatusCode::SUCCESS;
 }

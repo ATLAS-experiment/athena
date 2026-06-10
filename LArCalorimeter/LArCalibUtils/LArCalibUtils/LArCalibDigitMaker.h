@@ -18,7 +18,7 @@ class LArCalibDigitMaker : public AthAlgorithm
 
   //standart algorithm methods
   StatusCode initialize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   StatusCode finalize(){return StatusCode::SUCCESS;}
  private:
   SG::ReadCondHandleKey<LArCalibLineMapping> m_calibMapKey{this,"CalibMapKey","LArCalibLineMap","SG Key of calib line mapping object"};

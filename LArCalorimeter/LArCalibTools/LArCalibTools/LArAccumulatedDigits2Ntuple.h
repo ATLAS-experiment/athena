@@ -28,7 +28,7 @@ class LArAccumulatedDigits2Ntuple : public LArCond2NtupleBase
 
   //standard algorithm methods
   virtual StatusCode initialize() override final;
-  virtual StatusCode execute() override final;
+  virtual StatusCode execute(const EventContext& ctx) override final;
  private:
 
    Gaudi::Property< int > m_normalize{this, "Normalize", 1, "Normalisation factor for covr"};

@@ -45,7 +45,7 @@ public:
   StatusCode initialize(); 
 
   // Algorithm execution
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
 
   // Algorithm finalization
   StatusCode finalize(){return StatusCode::SUCCESS;}

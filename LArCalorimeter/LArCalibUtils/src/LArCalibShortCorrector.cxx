@@ -116,7 +116,7 @@ StatusCode LArCalibShortCorrector::findShortedNeighbors() {
 
 
 
-StatusCode LArCalibShortCorrector::execute(){
+StatusCode LArCalibShortCorrector::execute(const EventContext& /*ctx*/){
   if (!m_shortsCached){
     ATH_CHECK( findShortedNeighbors() );
     m_shortsCached=true;

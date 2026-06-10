@@ -144,9 +144,7 @@ StatusCode FixLArElecCalib::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode FixLArElecCalib::execute() {
-
-  const EventContext& ctx = Gaudi::Hive::currentContext();  
+StatusCode FixLArElecCalib::execute(const EventContext& ctx) {
 
   SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, ctx};
   const LArOnOffIdMapping* cabling{*cablingHdl};

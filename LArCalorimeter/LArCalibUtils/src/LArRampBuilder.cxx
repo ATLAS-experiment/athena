@@ -119,7 +119,7 @@ void LArRampBuilder::chooseRecoMode()  {
 }
 
 // ********************** EXECUTE ****************************
-StatusCode LArRampBuilder::execute()
+StatusCode LArRampBuilder::execute(const EventContext& ctx)
 { 
 
   StatusCode sc;
@@ -146,14 +146,14 @@ StatusCode LArRampBuilder::execute()
  
   const LArOnOffIdMapping* cabling(nullptr);
   if( m_isSC ){
-    SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKeySC};
+    SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKeySC, ctx};
     cabling = {*cablingHdl};
     if(!cabling) {
 	ATH_MSG_ERROR("Do not have mapping object " << m_cablingKeySC.key());
         return StatusCode::FAILURE;
     }
   }else{
-    SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey};
+    SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, ctx};
     cabling = {*cablingHdl};
     if(!cabling) {
        ATH_MSG_ERROR("Do not have mapping object " << m_cablingKey.key());

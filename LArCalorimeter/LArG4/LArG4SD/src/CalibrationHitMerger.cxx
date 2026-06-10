@@ -19,7 +19,7 @@ StatusCode LArG4::CalibrationHitMerger::initialize()
 
 
 /** Athena Algorithm execute */
-StatusCode LArG4::CalibrationHitMerger::execute()
+StatusCode LArG4::CalibrationHitMerger::execute(const EventContext& ctx)
 {
   // skip if not input collection
   if ( m_inputHits.empty() ) {
@@ -27,12 +27,12 @@ StatusCode LArG4::CalibrationHitMerger::execute()
   }
   // TODO: is there a way to conveniently get the total number of hits in all m_inputHits
   //       and reserve the corresponding size in the outputHandle
-  SG::WriteHandle<CaloCalibrationHitContainer> outputHandle{m_outputHits};
+  SG::WriteHandle<CaloCalibrationHitContainer> outputHandle{m_outputHits, ctx};
   ATH_CHECK( outputHandle.record(std::make_unique<CaloCalibrationHitContainer>()) );
   calibrationHits_t calibrationHits;
   unsigned int nHitsMerged(0);
   for ( const auto& collKey: m_inputHits ) {
-    SG::ReadHandle<CaloCalibrationHitContainer> inputHandle{collKey};
+    SG::ReadHandle<CaloCalibrationHitContainer> inputHandle{collKey, ctx};
     ATH_MSG_DEBUG(inputHandle.name() << " has " << inputHandle->size() << " hits.");
     for ( const CaloCalibrationHit* hit: *inputHandle ) {
       // If we haven't had a hit in this cell before, create one and add

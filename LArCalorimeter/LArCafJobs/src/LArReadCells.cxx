@@ -90,21 +90,21 @@ StatusCode LArReadCells::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode LArReadCells::execute() {  
+StatusCode LArReadCells::execute(const EventContext& ctx) {  
   ATH_MSG_DEBUG ("Executing " << name() << "...");
 
-  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey};
+  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, ctx};
   const LArOnOffIdMapping* cabling=*cablingHdl;
   if(!cabling) {
      ATH_MSG_ERROR( "Do not have cabling object LArOnOffIdMapping" );
      return StatusCode::FAILURE;
   }
 
-  SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey}; 
+  SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey, ctx}; 
   const CaloDetDescrManager* caloDDMgr = *caloMgrHandle;
 
   //Get Conditions input
-  SG::ReadCondHandle<ILArPedestal> pedHdl{m_pedestalKey};
+  SG::ReadCondHandle<ILArPedestal> pedHdl{m_pedestalKey, ctx};
   const ILArPedestal* larPedestal=*pedHdl;
 
 

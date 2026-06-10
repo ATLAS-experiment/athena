@@ -22,7 +22,7 @@ class LArSC2NtupleEB : public LArCond2NtupleBaseEB
 
   // Standard algorithm methods
   virtual StatusCode initialize()  override;
-  virtual StatusCode execute()  override;
+  virtual StatusCode execute(const EventContext& ctx)  override;
 
  protected:
 

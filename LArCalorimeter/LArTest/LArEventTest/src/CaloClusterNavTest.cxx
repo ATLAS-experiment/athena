@@ -42,7 +42,7 @@ StatusCode CaloClusterNavTest::finalize()
 
 //###############################################################################
 
-StatusCode CaloClusterNavTest::execute() {
+StatusCode CaloClusterNavTest::execute(const EventContext& /*ctx*/) {
   
   std::vector<std::string>::const_iterator it =
 	m_clusterContainerNames.begin();

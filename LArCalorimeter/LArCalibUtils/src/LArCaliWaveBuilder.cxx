@@ -116,10 +116,9 @@ StatusCode LArCaliWaveBuilder::initialize()
 }
 
 
-StatusCode LArCaliWaveBuilder::execute() 
+StatusCode LArCaliWaveBuilder::execute(const EventContext& ctx) 
 {
  // using EvtId
- const EventContext& ctx = getContext();
  m_event_counter=ctx.eventID().event_number()+1;// evt. starts from 0
 
  const LArCalibParams* calibParams = nullptr;

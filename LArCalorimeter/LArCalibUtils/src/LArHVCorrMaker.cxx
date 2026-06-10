@@ -34,7 +34,7 @@ StatusCode LArHVCorrMaker::initialize()
 
 
 //---------------------------------------------------------------------------
-StatusCode LArHVCorrMaker::execute()
+StatusCode LArHVCorrMaker::execute(const EventContext& /*ctx*/)
 {
   return StatusCode::SUCCESS;
 }

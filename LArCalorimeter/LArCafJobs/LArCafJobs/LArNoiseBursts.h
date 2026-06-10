@@ -62,7 +62,7 @@ class ATLAS_NOT_THREAD_SAFE LArNoiseBursts : public AthAlgorithm  {
 
    virtual StatusCode initialize() override;
    virtual StatusCode finalize() override;
-   virtual StatusCode execute() override;
+   virtual StatusCode execute(const EventContext& ctx) override;
    virtual StatusCode clear();
 
  private:

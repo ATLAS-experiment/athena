@@ -70,7 +70,7 @@ StatusCode LArCalibDigitsAccumulator::initialize(){
 
 
 
-StatusCode LArCalibDigitsAccumulator::execute() 
+StatusCode LArCalibDigitsAccumulator::execute(const EventContext& ctx) 
 {
   
   StatusCode sc;
@@ -80,7 +80,7 @@ StatusCode LArCalibDigitsAccumulator::execute()
   ++m_event_counter;
   
   const LArCalibLineMapping *clcabling = nullptr;
-  SG::ReadCondHandle<LArCalibLineMapping> clHdl{m_calibMapKey};
+  SG::ReadCondHandle<LArCalibLineMapping> clHdl{m_calibMapKey, ctx};
   clcabling =*clHdl;
   if(!clcabling) {
     ATH_MSG_WARNING( "Do not have calib line mapping from key " << m_calibMapKey.key() );
@@ -89,7 +89,7 @@ StatusCode LArCalibDigitsAccumulator::execute()
 
   const LArCalibLineMapping *clcablingSC = nullptr;
   if(m_isSC) {
-     SG::ReadCondHandle<LArCalibLineMapping> clHdl{m_calibMapSCKey};
+     SG::ReadCondHandle<LArCalibLineMapping> clHdl{m_calibMapSCKey, ctx};
      clcablingSC =*clHdl;
      if(!clcablingSC) {
          ATH_MSG_WARNING( "Do not have calib line mapping from key " << m_calibMapSCKey.key() );
@@ -101,14 +101,14 @@ StatusCode LArCalibDigitsAccumulator::execute()
   const LArOnOffIdMapping* cabling(nullptr);
   const LArOnOffIdMapping* cablingLeg(nullptr);
   if( m_isSC ){
-    SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKeySC};
+    SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKeySC, ctx};
     cabling = {*cablingHdl};
     if(!cabling) {
       ATH_MSG_ERROR("Do not have mapping object " << m_cablingKeySC.key());
       return StatusCode::FAILURE;
     }
     
-    SG::ReadCondHandle<LArOnOffIdMapping> cablingHdlLeg{m_cablingKey};
+    SG::ReadCondHandle<LArOnOffIdMapping> cablingHdlLeg{m_cablingKey, ctx};
     cablingLeg = {*cablingHdlLeg};
     if(!cablingLeg) {
       ATH_MSG_ERROR("Do not have mapping object " << m_cablingKey.key());
