@@ -63,7 +63,7 @@ StatusCode Trk::MaterialOnTrackValidation::finalize()
 
 //================ Execution ====================================================
 
-StatusCode Trk::MaterialOnTrackValidation::execute()
+StatusCode Trk::MaterialOnTrackValidation::execute(const EventContext& /*ctx*/)
 {
   // Code entered here will be executed once per event
 

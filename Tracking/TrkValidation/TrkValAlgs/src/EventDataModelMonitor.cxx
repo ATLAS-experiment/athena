@@ -57,7 +57,7 @@ StatusCode Trk::EventDataModelMonitor::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode Trk::EventDataModelMonitor::execute() {
+StatusCode Trk::EventDataModelMonitor::execute(const EventContext& /*ctx*/) {
 #ifndef NDEBUG
     ATH_MSG_INFO( "EventDataModelMonitor at start of event (dbg only):" );
     ATH_MSG_INFO( "number of all Surfaces    (about const) : \t"<<Trk::Surface::numberOfInstantiations() ); 
