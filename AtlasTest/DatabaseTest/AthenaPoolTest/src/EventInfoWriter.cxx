@@ -61,7 +61,7 @@ StatusCode EventInfoWriter::initialize()
 }
 
 // Execute method:
-StatusCode EventInfoWriter::execute() 
+StatusCode EventInfoWriter::execute(const EventContext& /*ctx*/) 
 {
     // Get the messaging service, print where you are
     ATH_MSG_DEBUG("EventInfoWriter::execute()");

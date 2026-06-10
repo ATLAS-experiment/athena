@@ -46,7 +46,7 @@ StatusCode AthenaPoolTestDataReader::initialize()
     return StatusCode::SUCCESS; 
 }
 
-StatusCode AthenaPoolTestDataReader::execute()
+StatusCode AthenaPoolTestDataReader::execute(const EventContext& /*ctx*/)
 { 
 
     ATH_MSG_DEBUG("Executing AthenaPoolTestDataReader" );
