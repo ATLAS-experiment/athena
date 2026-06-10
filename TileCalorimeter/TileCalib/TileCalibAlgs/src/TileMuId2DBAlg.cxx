@@ -57,7 +57,7 @@ StatusCode TileMuId2DBAlg::initialize()
 
 
 
-StatusCode TileMuId2DBAlg::execute()
+StatusCode TileMuId2DBAlg::execute(const EventContext& ctx)
 {
   // Open ASCII file
   string TileMuIdFile = "TileMuId_thresholds.dat";
@@ -92,7 +92,7 @@ StatusCode TileMuId2DBAlg::execute()
   ATH_MSG_INFO ( "caloCellMax: " << caloCellMax );
   ATH_MSG_INFO ( "Start loop over TileCal cells " << caloCellMax-caloCellMin );
 
-  SG::ReadCondHandle<CaloNoise> totalNoise (m_totalNoiseKey);
+  SG::ReadCondHandle<CaloNoise> totalNoise (m_totalNoiseKey, ctx);
 
   for (unsigned int i=caloCellMin;i<caloCellMax;i++) {
 
