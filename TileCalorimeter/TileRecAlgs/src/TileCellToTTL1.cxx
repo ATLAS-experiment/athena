@@ -72,7 +72,7 @@ StatusCode TileCellToTTL1::initialize() {
 //
 // Begin Execution Phase.
 //
-StatusCode TileCellToTTL1::execute() {
+StatusCode TileCellToTTL1::execute(const EventContext& ctx) {
 
   ATH_MSG_DEBUG( "Executing TileCellToTTL1");
 
@@ -80,13 +80,13 @@ StatusCode TileCellToTTL1::execute() {
   // Load the TileCell container
   // -------------------------------------------------
 
-  SG::ReadHandle<CaloCellContainer> cellContainer(m_cellContainerKey);
+  SG::ReadHandle<CaloCellContainer> cellContainer(m_cellContainerKey, ctx);
   ATH_CHECK( cellContainer.isValid() );
 
   // -------------------------------------------------
   // Create TTL1 container and other arrays
   // -------------------------------------------------
-  SG::WriteHandle<TileTTL1CellContainer> ttl1CellContainer(m_ttl1CellContainerKey);
+  SG::WriteHandle<TileTTL1CellContainer> ttl1CellContainer(m_ttl1CellContainerKey, ctx);
 
   // Register the TTL1 container in the TES
   ATH_CHECK( ttl1CellContainer.record(std::make_unique<TileTTL1CellContainer>()) );

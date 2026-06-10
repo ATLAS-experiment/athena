@@ -305,14 +305,14 @@ StatusCode TileCosmicsTrigger::initialize() {
 //* Execution
 //****************************************************************************
 
-StatusCode TileCosmicsTrigger::execute() {
+StatusCode TileCosmicsTrigger::execute(const EventContext& ctx) {
 
   // step1: read TileTTL1s from TDS
   SG::ReadHandle<TileTTL1Container> ttl1Container;
   ATH_CHECK( ttl1Container.isValid() );
   ATH_MSG_DEBUG( "Loaded TileTTL1Container: " <<  ttl1Container.key() );
 
-  SG::WriteHandle<TileTriggerContainer> triggerContainer (m_triggerContainerKey);
+  SG::WriteHandle<TileTriggerContainer> triggerContainer (m_triggerContainerKey, ctx);
   ATH_CHECK( triggerContainer.record(std::make_unique<TileTriggerContainer>()) );
 
   // step2: reset towers 

@@ -161,11 +161,10 @@ StatusCode TileHitToRawChannel::initialize() {
 //
 // Alg standard execute function
 //
-StatusCode TileHitToRawChannel::execute() {
+StatusCode TileHitToRawChannel::execute(const EventContext& ctx) {
 
   ATH_MSG_DEBUG( "Executing TileHitToRawChannel" );
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   ATHRNG::RNGWrapper* rngWrapper = m_atRndmGenSvc->getEngine(this, m_randomStreamName);
   rngWrapper->setSeed( m_randomStreamName, ctx );

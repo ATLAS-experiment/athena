@@ -32,7 +32,7 @@ class TileMuId2DBAlg: public AthAlgorithm {
 
   virtual ~TileMuId2DBAlg() = default;
   virtual StatusCode initialize() override;  
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
   virtual StatusCode finalize() override;
 
  private:

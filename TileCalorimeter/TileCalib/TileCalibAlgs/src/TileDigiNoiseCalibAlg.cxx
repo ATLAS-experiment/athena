@@ -193,9 +193,8 @@ StatusCode TileDigiNoiseCalibAlg::FirstEvt_initialize() {
 }
 
 /// Main method
-StatusCode TileDigiNoiseCalibAlg::execute() {
+StatusCode TileDigiNoiseCalibAlg::execute(const EventContext& ctx) {
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   const TileDQstatus * dqStatus = SG::makeHandle (m_dqStatusKey, ctx).get();
 
   StatusCode sc;

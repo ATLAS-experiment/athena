@@ -63,7 +63,7 @@ StatusCode TileTopCalibAlg::initialize()
 /**
  * Execute
  */
-StatusCode TileTopCalibAlg::execute()
+StatusCode TileTopCalibAlg::execute(const EventContext& /*ctx*/)
 {
   ATH_MSG_DEBUG ( "in execute()" );
 

@@ -193,9 +193,8 @@ StatusCode TileTBStat::initialize() {
   return StatusCode::SUCCESS;
 } 
 
-StatusCode TileTBStat::execute() {
+StatusCode TileTBStat::execute(const EventContext& ctx) {
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   const TileDQstatus* dqStatus = SG::makeHandle (m_dqStatusKey, ctx).get();
 
   static std::atomic<bool> first=true;

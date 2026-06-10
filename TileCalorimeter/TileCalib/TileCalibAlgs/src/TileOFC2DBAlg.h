@@ -39,7 +39,7 @@ class TileOFC2DBAlg: public AthAlgorithm {
     ~TileOFC2DBAlg();
 
     StatusCode initialize();
-    StatusCode execute();
+    StatusCode execute(const EventContext& ctx);
     StatusCode finalize();
 
   private:

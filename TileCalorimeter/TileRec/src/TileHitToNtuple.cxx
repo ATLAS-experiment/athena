@@ -110,7 +110,7 @@ StatusCode TileHitToNtuple::initialize()
 //* Execution
 //****************************************************************************
 
-StatusCode TileHitToNtuple::execute()
+StatusCode TileHitToNtuple::execute(const EventContext& /*ctx*/)
 {
 
   // step1: read TileHits from TDS

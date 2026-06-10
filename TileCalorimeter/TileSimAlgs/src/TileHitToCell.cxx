@@ -70,15 +70,15 @@ StatusCode TileHitToCell::initialize() {
 //
 // Alg standard execute function
 //
-StatusCode TileHitToCell::execute() {
+StatusCode TileHitToCell::execute(const EventContext& ctx) {
 
   ATH_MSG_DEBUG( "Executing TileHitToCell" );
 
-  SG::ReadCondHandle<TileSamplingFraction> samplingFraction(m_samplingFractionKey);
+  SG::ReadCondHandle<TileSamplingFraction> samplingFraction(m_samplingFractionKey, ctx);
   ATH_CHECK( samplingFraction.isValid() );
 
   // step1: read hits from TES
-  SG::ReadHandle<TileHitContainer> hitContainer(m_hitContainerKey);
+  SG::ReadHandle<TileHitContainer> hitContainer(m_hitContainerKey, ctx);
   ATH_CHECK( hitContainer.isValid() );
 
   //Zero sums for monitoring.
@@ -148,7 +148,7 @@ StatusCode TileHitToCell::execute() {
 
   // step3: form cells, and put them in container
 
-  SG::WriteHandle<CaloCellContainer> cellContainer(m_cellContainerKey);
+  SG::WriteHandle<CaloCellContainer> cellContainer(m_cellContainerKey, ctx);
   ATH_CHECK( cellContainer.record(std::make_unique<CaloCellContainer>()) );
   ATH_MSG_VERBOSE( "TileCell container registered to the TES with name" << m_cellContainerKey.key() );
 

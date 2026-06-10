@@ -188,7 +188,7 @@ StatusCode TilePulseForTileMuonReceiver::initialize() {
 
 // execute
 //
-StatusCode TilePulseForTileMuonReceiver::execute() {
+StatusCode TilePulseForTileMuonReceiver::execute(const EventContext& ctx) {
 
   if (m_runPeriod==0)  {
     ATH_MSG_VERBOSE( "ATT: RUN1 settings TilePulseForTileMuonReceiver will end now" );
@@ -197,7 +197,6 @@ StatusCode TilePulseForTileMuonReceiver::execute() {
     ATH_MSG_DEBUG( "Executing TilePulseForTileMuonReceiver" );
   }
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // Conversion from TMDB channel number to channel number in a drawer: EB (0-3) LB (0-8)
   // Including the cells used in the "The potential of using the ATLAS Tile calorimeter in Phase-II for the
