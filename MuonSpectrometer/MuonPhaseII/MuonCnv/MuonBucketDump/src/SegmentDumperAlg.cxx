@@ -182,6 +182,7 @@ StatusCode SegmentDumperAlg::execute() {
 
   std::map<const xAOD::MuonSegment*, const xAOD::TruthParticle*> directTruth{};
   std::map<const xAOD::MuonSegment*, G4KeyCounts_t> segmentG4Keys{};
+  std::map<G4Key, unsigned int> g4SegmentMultiplicity{};
   std::map<G4Key, LabelSupport_t> g4TruthSupport{};
   std::map<G4Key, int32_t> g4PseudoLabels{};
   int32_t nextG4PseudoLabel = firstG4PseudoLabel();
@@ -195,6 +196,9 @@ StatusCode SegmentDumperAlg::execute() {
     }
 
     G4KeyCounts_t g4Keys = collectG4Keys(*seg);
+    for (const auto& keyCount : g4Keys) {
+      ++g4SegmentMultiplicity[keyCount.first];
+    }
     if (tp) {
       const int32_t truthIdx = static_cast<int32_t>(tp->index());
       for (const auto& [key, count] : g4Keys) {
@@ -203,6 +207,15 @@ StatusCode SegmentDumperAlg::execute() {
     }
     segmentG4Keys.emplace(seg, std::move(g4Keys));
   }
+
+  auto hasEnoughG4SegmentSupport = [&](const G4Key& key) {
+    const unsigned int minSegments = m_minG4TrackTruthSegments.value();
+    if (minSegments <= 1) {
+      return true;
+    }
+    const auto multItr = g4SegmentMultiplicity.find(key);
+    return multItr != g4SegmentMultiplicity.end() && multItr->second >= minSegments;
+  };
 
   auto g4PseudoLabel = [&](const G4Key& key) {
     auto [itr, inserted] = g4PseudoLabels.try_emplace(key, nextG4PseudoLabel);
@@ -223,6 +236,9 @@ StatusCode SegmentDumperAlg::execute() {
     LabelSupport_t propagatedSupport{};
     unsigned int totalPropagatedSupport{0};
     for (const auto& [key, count] : g4Keys) {
+      if (!hasEnoughG4SegmentSupport(key)) {
+        continue;
+      }
       const auto supportItr = g4TruthSupport.find(key);
       if (supportItr == g4TruthSupport.end()) {
         continue;
@@ -237,17 +253,23 @@ StatusCode SegmentDumperAlg::execute() {
       return labelFromSupport(propagatedSupport, totalPropagatedSupport, g4TruthSource());
     }
 
-    const auto bestKey = std::max_element(g4Keys.begin(), g4Keys.end(),
+    G4KeyCounts_t eligibleG4Keys{};
+    for (const auto& [key, count] : g4Keys) {
+      if (hasEnoughG4SegmentSupport(key)) {
+        eligibleG4Keys[key] = count;
+      }
+    }
+    const auto bestKey = std::max_element(eligibleG4Keys.begin(), eligibleG4Keys.end(),
                                           [](const auto& a, const auto& b) {
       if (a.second != b.second) return a.second < b.second;
       return b.first < a.first;
     });
-    if (bestKey == g4Keys.end()) {
+    if (bestKey == eligibleG4Keys.end()) {
       return label;
     }
 
     unsigned int totalKeys{0};
-    for (const auto& [key, count] : g4Keys) {
+    for (const auto& [key, count] : eligibleG4Keys) {
       totalKeys += count;
     }
 
@@ -257,8 +279,9 @@ StatusCode SegmentDumperAlg::execute() {
     label.weight = totalKeys > 0
                        ? static_cast<float>(bestKey->second) / static_cast<float>(totalKeys)
                        : 0.f;
-    label.ambiguous = g4Keys.size() > 1 ? 1 : 0;
-    for (const auto& [key, count] : g4Keys) {
+    label.ambiguous = eligibleG4Keys.size() > 1 ? 1 : 0;
+    for (const auto& keyCount : eligibleG4Keys) {
+      const G4Key& key = keyCount.first;
       if (key.type == bestKey->first.type && key.id == bestKey->first.id) {
         continue;
       }

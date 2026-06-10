@@ -49,6 +49,11 @@ private:
       this, "IncludeG4TrackTruth", false,
       "Use sim-hit HepMC/G4 track identifiers for reco segment truth labels"};
 
+  /// Minimum number of reco segments that must share the same G4/HepMC id 
+  Gaudi::Property<unsigned int> m_minG4TrackTruthSegments{
+      this, "MinG4TrackTruthSegments", 2,
+      "Require a G4/HepMC track id to appear in at least this many reco segments"};
+
   ActsTrk::GeoContextReadKey_t m_geoCtxKey{
       this, "AlignmentKey", "ActsAlignment", "Geometry alignment context"};
 
