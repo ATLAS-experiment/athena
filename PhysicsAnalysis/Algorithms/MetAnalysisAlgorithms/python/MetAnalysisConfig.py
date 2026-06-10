@@ -1,9 +1,8 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
-from AthenaConfiguration.Enums import LHCPeriod
 
 
 class MetAnalysisConfig (ConfigBlock):
@@ -62,7 +61,7 @@ class MetAnalysisConfig (ConfigBlock):
             info="name of the CalibArea used in jet calibration (for MET significance).")
         self.addOption ('egammaESModel', "", type=str,
             info="ESModel for EGamma calibration (for MET significance).")
-        self.addOption ('egammaDecorrelationModel', "1NP_v1", type=str,
+        self.addOption ('egammaDecorrelationModel', "", type=str,
             info="decorrelation model for EGamma calibration (for MET significance).")
         self.addOption ('tauTESConfig', "CombinedTES_R22_Round2.5_v2.root", type=str,
             info="config file for tau energy scale calibration (for MET significance).")
@@ -176,10 +175,11 @@ class MetAnalysisConfig (ConfigBlock):
 
             # Standard e/gamma calibration. Must be kept in agreement with ElectronAnalysisConfig.py
             if self.egammaESModel == "":
-                if config.geometry() is LHCPeriod.Run2:
-                    self.egammaESModel = 'es2023_R22_Run2_v1'
-                elif config.geometry() is LHCPeriod.Run3:
-                    self.egammaESModel = 'es2024_Run3_v0'
+                self.egammaESModel = (
+                    config.getContainerMeta(self.electrons.split(".")[0], 'ESModel', failOnMiss=True))
+            if self.egammaDecorrelationModel == "":
+                self.egammaDecorrelationModel = (
+                    config.getContainerMeta(self.electrons.split(".")[0], 'decorrelationModel', failOnMiss=True))
 
             alg.significanceTool.SoftTermParam = 0
             if self.softTermResolution > 0:
