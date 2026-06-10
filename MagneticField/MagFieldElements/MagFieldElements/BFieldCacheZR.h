@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -42,7 +42,7 @@ private:
   double m_zmin{0}, m_zmax{-1};   // bin range in z
   double m_rmin{0}, m_rmax{-1};   // bin range in r
   double m_invz{-1}, m_invr{-1};  // 1/(bin size) in z, r
-  double m_field[2][4];   // (Bz,Br) at 4 corners of the bin
+  double m_field[2][4] = {{0}};   // (Bz,Br) at 4 corners of the bin
 };
 #include "MagFieldElements/BFieldCacheZR.icc"
 #endif
