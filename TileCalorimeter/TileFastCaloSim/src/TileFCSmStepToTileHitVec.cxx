@@ -113,7 +113,7 @@ int TileFCSmStepToTileHitVec::getUshapeFromGM() const {
 //****************************************************************************
 //* Execution
 //****************************************************************************
-StatusCode TileFCSmStepToTileHitVec::execute()
+StatusCode TileFCSmStepToTileHitVec::execute(const EventContext& /*ctx*/)
 {
   ATH_MSG_DEBUG( "Execution beginning" );
 
