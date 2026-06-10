@@ -30,7 +30,7 @@ class FixLArElecSCCalib : public AthAlgorithm
   virtual ~FixLArElecSCCalib();
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
   virtual StatusCode finalize() override {return StatusCode::SUCCESS;}  
   virtual StatusCode stop() override;  
 
