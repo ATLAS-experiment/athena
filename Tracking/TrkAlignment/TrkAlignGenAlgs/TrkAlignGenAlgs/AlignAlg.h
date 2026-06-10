@@ -54,7 +54,7 @@ namespace Trk {
     virtual StatusCode start();
 
     /** loops over tracks in event, and accumulates information necessary for alignmnet */
-    virtual StatusCode execute();
+    virtual StatusCode execute(const EventContext& ctx);
 
     /** processes information accumulated in execute method to determine alignment parameters */
     virtual StatusCode stop();

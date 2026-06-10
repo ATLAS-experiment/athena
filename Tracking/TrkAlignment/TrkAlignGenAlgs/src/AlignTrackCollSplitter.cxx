@@ -38,7 +38,7 @@ StatusCode AlignTrackCollSplitter::initialize()
 }
 
 //___________________________________________________________________________
-StatusCode AlignTrackCollSplitter::execute() 
+StatusCode AlignTrackCollSplitter::execute(const EventContext& /*ctx*/) 
 {
   ATH_MSG_DEBUG("AlignTrackCollSplitter::execute()");
 
