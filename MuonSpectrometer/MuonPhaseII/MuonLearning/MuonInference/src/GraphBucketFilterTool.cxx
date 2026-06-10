@@ -281,16 +281,25 @@ StatusCode GraphBucketFilterTool::runGraphInference(const EventContext& ctx,
     ATH_CHECK(buildSegmentCountMap(ctx, segmentCounts));
   }
 
+  const bool doDebugDump =
+      !m_debugDumpFile.value().empty() &&
+      (m_debugDumpMaxEvents.value() == 0 ||
+       m_debugDumpEvents.load(std::memory_order_relaxed) < m_debugDumpMaxEvents.value());
+
   std::vector<int> selectedClasses;
   std::vector<int> keepFlags;
   std::vector<int> labels;
   std::vector<int> hasTruthFlags;
   std::vector<int> hasSegmentFlags;
-  selectedClasses.reserve(numPred);
-  keepFlags.reserve(numPred);
-  labels.reserve(numPred);
-  hasTruthFlags.reserve(numPred);
-  hasSegmentFlags.reserve(numPred);
+  if (doDebugDump) {
+    selectedClasses.reserve(numPred);
+    keepFlags.reserve(numPred);
+    if (m_printLabels.value()) {
+      labels.reserve(numPred);
+      hasTruthFlags.reserve(numPred);
+      hasSegmentFlags.reserve(numPred);
+    }
+  }
 
   size_t labelledGoodBuckets = 0;
   size_t labelledGoodKept = 0;
@@ -361,14 +370,18 @@ StatusCode GraphBucketFilterTool::runGraphInference(const EventContext& ctx,
                     << " -> keep=" << (keepBucket ? "yes" : "no"));
     }
 
-    selectedClasses.push_back(selectedClass); 
-    keepFlags.push_back(keepBucket);
+    if (doDebugDump) {
+      selectedClasses.push_back(selectedClass);
+      keepFlags.push_back(keepBucket);
+    }
 
     if (m_printLabels.value()) {
       const BucketLabelInfo labelInfo = computeBucketLabel(*bucket, segmentCounts);
-      labels.push_back(labelInfo.label);
-      hasTruthFlags.push_back(labelInfo.hasTruth);
-      hasSegmentFlags.push_back(labelInfo.hasSegment);
+      if (doDebugDump) {
+        labels.push_back(labelInfo.label);
+        hasTruthFlags.push_back(labelInfo.hasTruth);
+        hasSegmentFlags.push_back(labelInfo.hasSegment);
+      }
 
       if (labelInfo.label == 1) {
         ++labelledGoodBuckets;
@@ -434,7 +447,7 @@ StatusCode GraphBucketFilterTool::runGraphInference(const EventContext& ctx,
                  << " unknown_label=" << labelledUnknownBuckets);
   }
 
-  if (!m_debugDumpFile.value().empty()) {
+  if (doDebugDump) {
     DebugDumpEventData eventData;
     eventData.outputMode =
         (outputMode == OutputMode::MultiClass3) ? "multiclass3" : "single_output";

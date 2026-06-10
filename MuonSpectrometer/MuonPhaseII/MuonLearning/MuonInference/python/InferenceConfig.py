@@ -45,9 +45,12 @@ def GraphBucketFilterToolCfg(flags, name ="GraphBucketFilterTool", **kwargs):
     kwargs.setdefault("ModelSession", result.popToolsAndMerge(
         OnnxRuntimeSessionToolCfg(flags, model_fname=model_path,
                                   OnnxRuntimeSvc=result.getService("OnnxRuntimeSvc"))))
+    kwargs.setdefault("ScoreThreshold", 0.160)
+    kwargs.setdefault("OutputName", "logits")
     # BiasClass0: Working point selection bias for multi-class comparison
     # Higher values make class 0 (reject) less likely, accepting more buckets
     kwargs.setdefault("BiasClass0", 1.0)
+    kwargs.setdefault("SingleOutputIsLogit", False)
     kwargs.setdefault("OutputLevel", 3)  # INFO level (1=VERBOSE, 2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL)
     
     the_tool = CompFactory.MuonML.GraphBucketFilterTool(name, **kwargs)
