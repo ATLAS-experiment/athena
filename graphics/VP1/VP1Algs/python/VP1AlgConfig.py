@@ -263,6 +263,12 @@ def SetupVP1():
     # with input data files 
     # (such as ESD, HITS, RDO, or any other pool.root file)
     else:
+
+        if args.phaseII:
+            _logger.error("VP1: The use of the `--phaseII` flag with input data file is not supported. When you run VP1 on input data file, metadata are taken from the data file itself. However, if needed, you can still steer Athena, by using the standard Athena flags and options. Exiting...")
+            import sys
+            sys.exit(2)
+
         # Now just check file exists, or fail gracefully
         from os import path
 
@@ -272,7 +278,7 @@ def SetupVP1():
                 import sys
                 sys.exit(1)
     
-        # Set the online flag if we are running at P1
+    # Set the online flag if we are running at P1
     if args.online:
         flags.Common.isOnline = args.online
     elif "HLTP" in flags.IOVDb.GlobalTag:
