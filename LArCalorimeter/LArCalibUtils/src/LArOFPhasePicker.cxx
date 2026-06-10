@@ -85,7 +85,7 @@ StatusCode LArOFPhasePicker::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode LArOFPhasePicker::execute()
+StatusCode LArOFPhasePicker::execute(const EventContext& /*ctx*/)
 {
   return StatusCode::SUCCESS;
 }

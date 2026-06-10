@@ -67,7 +67,7 @@ public:
 
   //standard algorithm methods
   StatusCode initialize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   virtual StatusCode stop();
   StatusCode finalize(){return StatusCode::SUCCESS;}
 

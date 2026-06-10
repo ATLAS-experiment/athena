@@ -32,7 +32,7 @@ class LArOFPhasePicker : public AthAlgorithm
   ~LArOFPhasePicker();
 
   StatusCode initialize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   StatusCode stop();
   StatusCode finalize(){return StatusCode::SUCCESS;}
 

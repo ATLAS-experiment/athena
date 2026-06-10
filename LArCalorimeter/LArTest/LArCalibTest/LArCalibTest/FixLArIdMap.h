@@ -17,7 +17,7 @@ class FixLArIdMap : public AthAlgorithm
   virtual ~FixLArIdMap();
 
   StatusCode initialize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   StatusCode finalize();  
 
   StatusCode fix1();  

@@ -38,7 +38,7 @@ class LArCond2NtupleBase : public AthAlgorithm {
 
   //Standard algo methods
   StatusCode initialize();
-  StatusCode execute()    {return StatusCode::SUCCESS;}
+  StatusCode execute(const EventContext&)    {return StatusCode::SUCCESS;}
   //Finalize needs to be implemented by the deriving class
 
 

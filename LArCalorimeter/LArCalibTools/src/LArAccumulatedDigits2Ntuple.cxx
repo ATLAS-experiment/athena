@@ -96,7 +96,7 @@ StatusCode LArAccumulatedDigits2Ntuple::initialize()
 
 }
 
-StatusCode LArAccumulatedDigits2Ntuple::execute()
+StatusCode LArAccumulatedDigits2Ntuple::execute(const EventContext& ctx)
 {
 
   ATH_MSG_DEBUG( "in execute" ); 
@@ -104,7 +104,6 @@ StatusCode LArAccumulatedDigits2Ntuple::execute()
   
   if (m_contKey.key().empty()) return StatusCode::SUCCESS;
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   m_event++;
   

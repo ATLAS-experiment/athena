@@ -26,7 +26,7 @@ StatusCode LArPhysCaliTDiffAlg::initialize() {
   return LArCond2NtupleBase::initialize();
 }
 
-StatusCode LArPhysCaliTDiffAlg::execute() {
+StatusCode LArPhysCaliTDiffAlg::execute(const EventContext& /*ctx*/) {
 
 
   NTuple::Item<float> ntold, ntnew, ntoffset, ntcorr;

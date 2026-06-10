@@ -73,8 +73,7 @@ StatusCode LArCablingChecker::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode LArCablingChecker::execute() {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
+StatusCode LArCablingChecker::execute(const EventContext& ctx) {
   unsigned eventNb = ctx.eventID().event_number();
 
   ATH_MSG_INFO ( "======== executing event "<< eventNb << " ========" );

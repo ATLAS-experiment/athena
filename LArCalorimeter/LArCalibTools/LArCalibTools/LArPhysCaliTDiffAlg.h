@@ -18,7 +18,7 @@ class LArPhysCaliTDiffAlg: public LArCond2NtupleBase {
   virtual ~LArPhysCaliTDiffAlg();
 
   StatusCode initialize();
-  StatusCode execute();// {return StatusCode::SUCCESS;}
+  StatusCode execute(const EventContext& ctx);// {return StatusCode::SUCCESS;}
   //  StatusCode stop(); //<< Do the work here
   StatusCode finalize() {return StatusCode::SUCCESS;}
 

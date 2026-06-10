@@ -43,7 +43,7 @@ class LArPulseShape : public AthAlgorithm {
 
   //Standard algo methods
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override; 
+  virtual StatusCode execute(const EventContext& ctx) override; 
   //Finalize needs to be implemented by the deriving class
   virtual StatusCode stop() override;
 

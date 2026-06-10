@@ -127,12 +127,11 @@ StatusCode LArSC2NtupleEB::initialize()
 
 }
 
-StatusCode LArSC2NtupleEB::execute()
+StatusCode LArSC2NtupleEB::execute(const EventContext& ctx)
 {
 
   StatusCode        sc;
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   ATH_MSG_DEBUG( "LArSC2NtupleEB in execute" );
   unsigned long long thisevent;
@@ -145,7 +144,7 @@ StatusCode LArSC2NtupleEB::execute()
 
   const LArRawSCContainer* etcontainer  = nullptr;
   if (!m_sccontKey.empty()) {
-     SG::ReadHandle<LArRawSCContainer> hdlSc(m_sccontKey);
+     SG::ReadHandle<LArRawSCContainer> hdlSc(m_sccontKey, ctx);
 
      if(!hdlSc.isValid()) {
        ATH_MSG_WARNING( "Unable to retrieve LArRawSCContainer with key " << m_sccontKey << " from DetectorStore. " );
@@ -158,7 +157,7 @@ StatusCode LArSC2NtupleEB::execute()
 
   const LArRawSCContainer* recocontainer   = nullptr;
   if (!m_reccontKey.empty()) {
-     SG::ReadHandle<LArRawSCContainer> hdlReco(m_reccontKey);
+     SG::ReadHandle<LArRawSCContainer> hdlReco(m_reccontKey, ctx);
 
      if(!hdlReco.isValid()) {
        ATH_MSG_WARNING( "Unable to retrieve LArRawSCContainer with key " << m_reccontKey << " from DetectorStore. " );
@@ -177,7 +176,7 @@ StatusCode LArSC2NtupleEB::execute()
 
   const LArRawChannelContainer* rawcontainer   = nullptr;
   if (!m_rawcontKey.empty()) {
-     SG::ReadHandle<LArRawChannelContainer> hdlRaw(m_rawcontKey);
+     SG::ReadHandle<LArRawChannelContainer> hdlRaw(m_rawcontKey, ctx);
 
      if(!hdlRaw.isValid()) {
        ATH_MSG_WARNING( "Unable to retrieve LArRawChannelContainer with key " << m_rawcontKey << " from DetectorStore. " );
@@ -206,13 +205,13 @@ StatusCode LArSC2NtupleEB::execute()
   const LArOnOffIdMapping* cabling=nullptr;
   const LArOnOffIdMapping* cablingROD=nullptr;
   if(rawcontainer){
-     SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{cablingKey()};
+     SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{cablingKey(), ctx};
      cabling=*cablingHdl;
      if(!cabling) {
         ATH_MSG_ERROR( "Do not have cabling for SC!" );
         return StatusCode::FAILURE;
      }
-     SG::ReadCondHandle<LArOnOffIdMapping> cablingHdlROD{m_cablingKeyAdditional};
+     SG::ReadCondHandle<LArOnOffIdMapping> cablingHdlROD{m_cablingKeyAdditional, ctx};
      cablingROD=*cablingHdlROD;
      if(!cablingROD) {
         ATH_MSG_ERROR( "Do not have cabling for ROD!" );

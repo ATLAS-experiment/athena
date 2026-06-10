@@ -142,10 +142,9 @@ StatusCode LArDigits2Ntuple::initialize()
   
 }
 
-StatusCode LArDigits2Ntuple::execute()
+StatusCode LArDigits2Ntuple::execute(const EventContext& ctx)
 {
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   if(!m_contKey.key().size() && !m_accContKey.key().size() && !m_accCalibContKey.key().size()) return StatusCode::SUCCESS;
 
   StatusCode	sc;
