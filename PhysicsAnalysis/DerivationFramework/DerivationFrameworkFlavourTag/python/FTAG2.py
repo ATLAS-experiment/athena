@@ -33,7 +33,7 @@ if TYPE_CHECKING:
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
 
-def _get_lepton_skimming_expression() -> str:
+def _get_two_lepton_skimming_expression() -> str:
     """Return the FTAG2 dilepton skimming expression."""
     muon_quality = "(0 == Muons.muonType || 1 == Muons.muonType || 4 == Muons.muonType)"
     electron_quality = "((Electrons.Loose) || (Electrons.DFCommonElectronsLHLoose))"
@@ -44,6 +44,19 @@ def _get_lepton_skimming_expression() -> str:
         "&& "
         f"count( (Muons.pt > 25*GeV) && {muon_quality} ) "
         f"+ count(( Electrons.pt > 25*GeV) && {electron_quality}) >= 1"
+    )
+
+
+def _get_one_lepton_and_jets_skimming_expression() -> str:
+    """Return the FTAG2 single lepton + jets skimming expression."""
+    muon_quality = "(0 == Muons.muonType || 1 == Muons.muonType || 4 == Muons.muonType)"
+    electron_quality = "((Electrons.Loose) || (Electrons.DFCommonElectronsLHLoose))"
+
+    return (
+        f"count( (Muons.pt > 25*GeV) && {muon_quality} ) "
+        f"+ count(( Electrons.pt > 25*GeV) && {electron_quality}) >= 1"
+        " && "
+        f"count(AntiKt4EMPFlowJets.pt > 20*GeV) >= 4"
     )
 
 
@@ -176,7 +189,11 @@ def FTAG2KernelCfg(
         xAODStringSkimmingToolCfg(
             flags=flags,
             name="FTAG2SkimmingTool",
-            expression=_get_lepton_skimming_expression(),
+            expression=(
+                f"({_get_two_lepton_skimming_expression()})"
+                " || "
+                f"({_get_one_lepton_and_jets_skimming_expression()})"
+            ),
         )
     )
 
