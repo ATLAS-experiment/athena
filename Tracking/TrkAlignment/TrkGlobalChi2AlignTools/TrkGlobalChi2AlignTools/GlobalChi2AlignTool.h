@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKGLOBALCHI2ALIGNTOOLS_GLOBALCHI2ALIGNTOOL_H
@@ -10,6 +10,7 @@
 
 #include "TrkAlignInterfaces/IAlignTool.h"
 #include "TrkAlignInterfaces/IMatrixTool.h"
+#include "TrkAlignInterfaces/IAlignModuleTool.h"
 
 //#include "TMatrixD.h"
 
@@ -33,8 +34,6 @@ class TTree;
 
 namespace Trk {
   class Track;
-  class IMatrixTool;
-  class IAlignModuleTool;
 
   class GlobalChi2AlignTool : virtual public IAlignTool, public AthAlgTool {    
   public:
@@ -81,55 +80,60 @@ namespace Trk {
     double getMaterialOnTrack(const Trk::Track* track);
   
     /** Pointer to MatrixTool, used to write to and solve matrix*/
-    ToolHandle <Trk::IMatrixTool>      m_matrixTool;
+    ToolHandle<Trk::IMatrixTool> m_matrixTool{this, "MatrixTool", "Trk::MatrixTool",
+      "tool for storing and inverting matrix"};
 
     /** Pointer to AlignModuleTool*/
-    ToolHandle <Trk::IAlignModuleTool> m_alignModuleTool;
+    ToolHandle<Trk::IAlignModuleTool> m_alignModuleTool{this, "AlignModuleTool",
+      "Trk::AlignModuleTool/AlignModuleTool"};
     
     std::string m_pathbin;            //!< path binary files (in/out)
     std::string m_pathtxt;            //!< path ascii files (in/out)
     std::string m_prefixName;         //!< prefix string to filenames
 
-    unsigned int m_ntracks; //!< number of accumulated tracks
-    unsigned int m_nmeas;   //!< number of accumulated measurements
-    unsigned int m_nhits;   //!< number of accumulated hits
-    double m_chi2;          //!< total chi2
-    unsigned int m_nDoF;    //!< number of degrees of freedom
+    unsigned int m_ntracks = 0; //!< number of accumulated tracks
+    unsigned int m_nmeas = 0;   //!< number of accumulated measurements
+    unsigned int m_nhits = 0;   //!< number of accumulated hits
+    double m_chi2 = 0.;          //!< total chi2
+    unsigned int m_nDoF = 0;    //!< number of degrees of freedom
 
-    double m_secondDerivativeCut;
-    bool   m_doTree;
-    bool   m_writeActualSecDeriv;
-    bool   m_storeLocalDerivOnly;
+    Gaudi::Property<double> m_secondDerivativeCut{this, "SecondDerivativeCut", -1e5};
+    Gaudi::Property<bool>   m_doTree{this, "DoTree", false};
+    Gaudi::Property<bool>   m_writeActualSecDeriv{this, "WriteActualSecDeriv", false};
+    Gaudi::Property<bool>   m_storeLocalDerivOnly{this, "StoreLocalDerivOnly", false};
+
+    static constexpr int MAXNCHAMBERS=50;
+    static constexpr int MAXNINDICES =50*6;
 
     /** output ntuple */
-    TFile*   m_ntuple;
-    TTree*   m_tree;   
-    int      m_run;
-    int      m_event;
-    double   m_materialOnTrack;
-    double   m_momentum;
-    int      m_nChambers;
-    int*     m_chamberIds;
-    int      m_nMatrixIndices;
-    int*     m_matrixIndices;
-    int      m_nSecndDeriv;
-    double*  m_secndDeriv;
-    double*  m_firstDeriv;
-    double*  m_actualSecndDeriv;
-    double   m_eta;
-    double   m_phi;
-    double   m_perigee_x;
-    double   m_perigee_y;
-    double   m_perigee_z;
-    int      m_trackInfo;
-    int      m_bremFit;             
-    int      m_bremFitSuccessful; 
-    int      m_straightTrack;       
-    int      m_slimmedTrack;            
-    int      m_hardScatterOrKink; 
-    int      m_lowPtTrack;      
+    TFile*   m_ntuple = nullptr;
+    TTree*   m_tree = nullptr;
+    int      m_run{};
+    int      m_event{};
+    double   m_materialOnTrack{};
+    double   m_momentum{};
+    int      m_nChambers = 0;
+    int*     m_chamberIds = new int[MAXNCHAMBERS];
+    int      m_nMatrixIndices = 0;
+    int*     m_matrixIndices = new int[MAXNINDICES];
+    int      m_nSecndDeriv = 0;
+    double*  m_secndDeriv = new double[MAXNINDICES*MAXNINDICES];
+    double*  m_firstDeriv = new double[MAXNINDICES];
+    double*  m_actualSecndDeriv = new double[MAXNINDICES];
+    double   m_eta{};
+    double   m_phi{};
+    double   m_perigee_x{};
+    double   m_perigee_y{};
+    double   m_perigee_z{};
+    int      m_trackInfo{};
+    int      m_bremFit{};
+    int      m_bremFitSuccessful{};
+    int      m_straightTrack{};
+    int      m_slimmedTrack{};
+    int      m_hardScatterOrKink{};
+    int      m_lowPtTrack{};
               
-    bool     m_fromFiles;
+    bool     m_fromFiles = false;
 
   }; // end of class
 
