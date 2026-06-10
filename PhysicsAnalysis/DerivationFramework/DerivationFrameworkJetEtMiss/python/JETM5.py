@@ -162,7 +162,7 @@ def JETM5Cfg(flags):
     # Output stream    
     JETM5ItemList = JETM5SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, "DAOD_JETM5", ItemList=JETM5ItemList, AcceptAlgs=["JETM5Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_JETM5", AcceptAlgs=["JETM5Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_JETM5", AcceptAlgs=["JETM5Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData,MetadataCategory.TruthMetaData]))
 
     return acc
 
