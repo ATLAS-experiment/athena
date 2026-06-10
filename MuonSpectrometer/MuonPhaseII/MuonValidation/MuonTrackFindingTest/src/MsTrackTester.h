@@ -34,7 +34,7 @@ namespace MuonValR4{
           using AthHistogramAlgorithm::AthHistogramAlgorithm;
 
           StatusCode initialize() override final;
-          StatusCode execute() override final;
+          StatusCode execute(const EventContext& ctx) override final;
           StatusCode finalize() override final;
       private:
           using Location = MuonR4::MsTrackSeed::Location;

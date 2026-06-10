@@ -219,10 +219,8 @@ namespace MuonValR4 {
         ATH_CHECK(m_tree.write());
         return StatusCode::SUCCESS;
     }
-    StatusCode MuonHoughTransformTester::execute()  {
+    StatusCode MuonHoughTransformTester::execute(const EventContext& ctx) {
         
-        const EventContext & ctx = Gaudi::Hive::currentContext();
-
         const ActsTrk::GeometryContext* gctxPtr{nullptr};
         ATH_CHECK(SG::get(gctxPtr, m_geoCtxKey, ctx));
         const ActsTrk::GeometryContext& gctx{*gctxPtr};

@@ -10,7 +10,7 @@ StatusCode MuonDigitizer::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode MuonDigitizer::execute() {
+StatusCode MuonDigitizer::execute(const EventContext& ctx) {
     ATH_MSG_DEBUG("in execute()");
-    return m_digTool->processAllSubEvents(Gaudi::Hive::currentContext());
+    return m_digTool->processAllSubEvents(ctx);
 }

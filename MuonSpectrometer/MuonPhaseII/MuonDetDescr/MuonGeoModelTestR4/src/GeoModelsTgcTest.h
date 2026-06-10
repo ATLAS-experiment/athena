@@ -21,7 +21,7 @@ class GeoModelsTgcTest : public AthHistogramAlgorithm{
     public:
         using AthHistogramAlgorithm::AthHistogramAlgorithm;
 
-        StatusCode execute() override;
+        StatusCode execute(const EventContext& ctx) override;
         
         StatusCode initialize() override;
         

@@ -24,7 +24,7 @@ namespace MuonValR4 {
             virtual ~MuonHitTesterAlg();
             StatusCode initialize() override final;
             StatusCode finalize() override final;
-            StatusCode execute() override final;
+            StatusCode execute(const EventContext& ctx) override final;
             unsigned int cardinality() const override final { return 1; }
         
         private:

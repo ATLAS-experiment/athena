@@ -28,9 +28,8 @@ namespace MuonR4 {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode SPIdDumperAlg::execute() {
-        const EventContext& ctx{Gaudi::Hive::currentContext()};
-
+    StatusCode SPIdDumperAlg::execute(const EventContext& ctx) {
+        
         SG::ReadHandle<SpacePointContainer> readHandle{m_readKey, ctx};
         if (!readHandle.isValid()) {
             ATH_MSG_ERROR("Failed to retrieve SpacePointContainer from StoreGate.");

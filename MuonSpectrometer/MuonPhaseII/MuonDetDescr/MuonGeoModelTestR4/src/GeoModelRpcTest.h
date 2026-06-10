@@ -25,7 +25,7 @@ class GeoModelRpcTest : public AthHistogramAlgorithm{
 
         ~GeoModelRpcTest() = default;
 
-        StatusCode execute() override;        
+        StatusCode execute(const EventContext& ctx) override;        
         StatusCode initialize() override;        
         StatusCode finalize() override;
 

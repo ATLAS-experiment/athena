@@ -250,9 +250,8 @@ namespace MuonValR4 {
         ATH_CHECK(m_tree.init(this));
         return StatusCode::SUCCESS;
     }
-    StatusCode MsTrackTester::execute() {
-        const EventContext& ctx{Gaudi::Hive::currentContext()};
-
+    StatusCode MsTrackTester::execute(const EventContext& ctx) {
+        
         const xAOD::TrackParticleContainer* legacyTrks{nullptr};
         ATH_CHECK(SG::get(legacyTrks, m_legacyTrackKey, ctx));
 

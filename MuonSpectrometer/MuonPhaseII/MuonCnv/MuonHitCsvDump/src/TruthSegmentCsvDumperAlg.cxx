@@ -51,8 +51,8 @@ const MuonGMR4::SpectrometerSector* TruthSegmentCsvDumperAlg::msSector(const xAO
   return nullptr;
 }
 
-StatusCode TruthSegmentCsvDumperAlg::execute(){
-  const EventContext & ctx = Gaudi::Hive::currentContext();
+StatusCode TruthSegmentCsvDumperAlg::execute(const EventContext& ctx) {
+
   std::ofstream file{std::format("event-{:09}-MuonTruthSegment.csv", ++m_event)};
   constexpr std::string_view delim = ",";
   file<<"sectorId"<<delim;

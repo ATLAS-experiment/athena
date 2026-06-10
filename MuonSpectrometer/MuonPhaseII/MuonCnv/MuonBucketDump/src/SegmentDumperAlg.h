@@ -27,7 +27,7 @@ public:
   ~SegmentDumperAlg() override = default;
 
   StatusCode initialize() override final;
-  StatusCode execute() override final;
+  StatusCode execute(const EventContext& ctx) override final;
   StatusCode finalize() override final;
 
 private:
