@@ -127,15 +127,15 @@ StatusCode ITkPixelCsvWaferIdAlg::loadCsv() {
             continue;
         }
         const std::vector<std::string> fields = splitCsvLine(line);
-        if (fields.size() < 5) {
+        if (fields.size() < 3) {
             ATH_MSG_WARNING("Skipping malformed CSV line: " << line);
             continue;
         }
 
         CsvRow row;
         row.spChain = trim(fields[0]);
-        row.md = trim(fields[3]);
-        row.fe = std::stoi(trim(fields[4]));
+        row.md = trim(fields[1]);
+        row.fe = std::stoi(trim(fields[2]));
 
         m_rows.push_back(row);
     }
