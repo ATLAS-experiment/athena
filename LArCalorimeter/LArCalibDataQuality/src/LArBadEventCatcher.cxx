@@ -62,7 +62,7 @@ StatusCode LArBadEventCatcher::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode LArBadEventCatcher::execute() {
+StatusCode LArBadEventCatcher::execute(const EventContext& /*ctx*/) {
 
   if (m_checkDigits || m_checkAccCalibDigits || m_checkFebHeaders)
     m_thisSize=0;
