@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -12,7 +12,6 @@
  * 
  */
 
-//<<<<<< INCLUDES                                                       >>>>>>
 
 #include "IOVRegistrationSvc.h"
 
@@ -34,14 +33,12 @@
 #include "AthenaPoolUtilities/CondAttrListCollAddress.h"
 
 // COOL includes
-//#include "AttributeList/AttributeList.h"
 #include "CoolKernel/IDatabase.h"
 #include "CoolKernel/IFolder.h"
 #include "CoolKernel/RecordSpecification.h"
 #include "CoolKernel/FolderSpecification.h"
 #include "CoolKernel/Record.h"
 
-//<<<<<< METHOD DEFINITIONS
 
 //--------------------------------------------------------------------------
 
@@ -148,7 +145,7 @@ StatusCode IOVRegistrationSvc::finalize()
 
 //--------------------------------------------------------------------------
 
-StatusCode IOVRegistrationSvc::registerIOV( const std::string& typeName ) const
+StatusCode IOVRegistrationSvc::registerIOV( std::string_view typeName ) const
 {
   std::string key = "";
   
@@ -182,7 +179,7 @@ StatusCode IOVRegistrationSvc::registerIOV( const std::string& typeName ) const
 
 //--------------------------------------------------------------------------
 
-StatusCode IOVRegistrationSvc::registerIOV( const std::string& typeName, const std::string& tag ) const
+StatusCode IOVRegistrationSvc::registerIOV( std::string_view typeName, std::string_view tag ) const
 {
   std::string key = "";
   
@@ -216,8 +213,8 @@ StatusCode IOVRegistrationSvc::registerIOV( const std::string& typeName, const s
 
 //--------------------------------------------------------------------------
 
-StatusCode IOVRegistrationSvc::registerIOV( const std::string& typeName, const std::string& key,
-				 const std::string& tag ) const
+StatusCode IOVRegistrationSvc::registerIOV( std::string_view typeName, std::string_view key,
+				 std::string_view tag ) const
 {
   if (m_timeStamp)
     {
@@ -249,8 +246,8 @@ StatusCode IOVRegistrationSvc::registerIOV( const std::string& typeName, const s
 
 //--------------------------------------------------------------------------
 
-StatusCode IOVRegistrationSvc::registerIOV( const std::string& typeName, 
-				 const std::string& tag,
+StatusCode IOVRegistrationSvc::registerIOV( std::string_view typeName, 
+				 std::string_view tag,
 				 unsigned int beginRun, 
 				 unsigned int endRun, 
 				 unsigned int beginLB, 
@@ -271,8 +268,8 @@ StatusCode IOVRegistrationSvc::registerIOV( const std::string& typeName,
 
 //--------------------------------------------------------------------------
 
-StatusCode IOVRegistrationSvc::registerIOV( const std::string& typeName, 
-					    const std::string& tag,
+StatusCode IOVRegistrationSvc::registerIOV( std::string_view typeName, 
+					    std::string_view tag,
 					    uint64_t beginTime, 
 					    uint64_t endTime ) const
 {
@@ -292,9 +289,9 @@ StatusCode IOVRegistrationSvc::registerIOV( const std::string& typeName,
 
 //--------------------------------------------------------------------------
 
-StatusCode IOVRegistrationSvc::registerIOV( const std::string& typeName, 
-				 const std::string& key,
-				 const std::string& tag,
+StatusCode IOVRegistrationSvc::registerIOV( std::string_view typeName, 
+				 std::string_view key,
+				 std::string_view tag,
 				 unsigned int beginRun, 
 				 unsigned int endRun, 
 				 unsigned int beginLB, 
@@ -314,9 +311,9 @@ StatusCode IOVRegistrationSvc::registerIOV( const std::string& typeName,
 
 //--------------------------------------------------------------------------
 
-StatusCode IOVRegistrationSvc::registerIOV( const std::string& typeName, 
-					    const std::string& key,
-					    const std::string& tag,
+StatusCode IOVRegistrationSvc::registerIOV( std::string_view typeName, 
+					    std::string_view key,
+					    std::string_view tag,
 					    uint64_t beginTime, 
 					    uint64_t endTime ) const
 {
@@ -334,10 +331,10 @@ StatusCode IOVRegistrationSvc::registerIOV( const std::string& typeName,
 
 //--------------------------------------------------------------------------
 
-StatusCode IOVRegistrationSvc::registerIOV( const std::string& typeName, 
-				 const std::string& key,
-			         const std::string& folder,
-				 const std::string& tag,
+StatusCode IOVRegistrationSvc::registerIOV( std::string_view typeName, 
+				 std::string_view key,
+			   std::string_view folder,
+				 std::string_view tag,
 				 unsigned int beginRun, 
 				 unsigned int endRun, 
 				 unsigned int beginLB, 
@@ -358,10 +355,10 @@ StatusCode IOVRegistrationSvc::registerIOV( const std::string& typeName,
 
 //--------------------------------------------------------------------------
 
-StatusCode IOVRegistrationSvc::registerIOV( const std::string& typeName, 
-					    const std::string& key,
-					    const std::string& folder,
-					    const std::string& tag,
+StatusCode IOVRegistrationSvc::registerIOV( std::string_view typeName, 
+					    std::string_view key,
+					    std::string_view folder,
+					    std::string_view tag,
 					    uint64_t beginTime, 
 					    uint64_t endTime ) const
 {
@@ -384,10 +381,10 @@ StatusCode IOVRegistrationSvc::registerIOV( const std::string& typeName,
 
 //--------------------------------------------------------------------------
 
-StatusCode IOVRegistrationSvc::registerIOV( const std::string& typeName,
-				 const std::string& spec_key,
-				 const std::string& folder,
-				 const std::string& tag,
+StatusCode IOVRegistrationSvc::registerIOV( std::string_view typeName,
+				 std::string_view spec_key,
+				 std::string_view folder,
+				 std::string_view tag,
 				 const IOVTime&     start, 
 				 const IOVTime&     stop ) const
 {
@@ -432,23 +429,24 @@ StatusCode IOVRegistrationSvc::registerIOV( const std::string& typeName,
 
 //--------------------------------------------------------------------------
 
-StatusCode IOVRegistrationSvc::registerIOVCOOL( const std::string& typeName,
-						const std::string& spec_key,
-						const std::string& folderName,
-						const std::string& tag,
+StatusCode IOVRegistrationSvc::registerIOVCOOL( std::string_view typeName,
+						std::string_view spec_key,
+						std::string_view folderName,
+						std::string_view tag,
 						const IOVTime&     start, 
 						const IOVTime&     stop ) const
 {
     // Register the conditions objects in the IOV database with
     // start/stop as the time interval
 
-
+    std::string tagStr{tag}; //for cool interfaces
     ATH_MSG_DEBUG (" in registerIOVCOOL()" );
   
 
     // Find the clid for type name from the CLIDSvc
     CLID clid;
-    StatusCode sc = m_clidSvc->getIDOfTypeName(typeName, clid);
+    //goes to GaudiKernel ClassIDSvc, interface is std::string
+    StatusCode sc = m_clidSvc->getIDOfTypeName(std::string{typeName}, clid);
     if (sc.isFailure()) {
         ATH_MSG_ERROR ("Could not get clid for typeName " << typeName);
 	return( StatusCode::FAILURE);
@@ -487,7 +485,7 @@ StatusCode IOVRegistrationSvc::registerIOVCOOL( const std::string& typeName,
 	// Get IOpaqueAddress, key and symlinks for each data object
 	// from StoreGate
 	IOpaqueAddress* addr=0;
-	std::string key = spec_key; 
+	std::string key{spec_key}; 
 	std::vector<CLID> symlinks;
 	SG::DataProxy* proxy;
 	if (key.empty()) {
@@ -981,10 +979,7 @@ StatusCode IOVRegistrationSvc::registerIOVCOOL( const std::string& typeName,
 		cool::Record record(rspec,payload);
 		if (m_userTags && tag!="") {
   	          ATH_MSG_DEBUG ("Object stored with user tag " << tag );
-  		  folder->storeObject( ivStart1, 
-                                       ivStop1,
-                                       record,
-                                       chanNum,tag,!m_userTagsUH);
+  		  folder->storeObject( ivStart1, ivStop1, record, chanNum, tagStr,!m_userTagsUH);
 		} else {
   		  folder->storeObject( ivStart1, 
                                        ivStop1,
@@ -1006,11 +1001,11 @@ StatusCode IOVRegistrationSvc::registerIOVCOOL( const std::string& typeName,
 	    }
 
 	    // Store address in folder with interval
-	    if (m_userTags && tag!="") {
+	    if (m_userTags && !tag.empty()) {
 	      ATH_MSG_DEBUG ("Object stored with user tag " << tag );
   	      folder->storeObject( ivStart, 
                                    ivStop,
-                                   record,0,tag,!m_userTagsUH);
+                                   record,0,tagStr,!m_userTagsUH);
 	    } else {
   	      folder->storeObject( ivStart, 
                                    ivStop,
@@ -1033,7 +1028,7 @@ StatusCode IOVRegistrationSvc::registerIOVCOOL( const std::string& typeName,
             ATH_MSG_INFO (" Tagging HEAD of folder " << local_folder << 
                           " with tag " << tag);
 	    try { 
-  	      folder->tagCurrentHead(tag,m_tagDescription);
+  	      folder->tagCurrentHead(tagStr,m_tagDescription);
 	    }
 	    catch ( cool::TagExists& e) {
               ATH_MSG_INFO ("Tag " << tag << 
@@ -1043,15 +1038,15 @@ StatusCode IOVRegistrationSvc::registerIOVCOOL( const std::string& typeName,
 	      if (find(taglist.begin(),taglist.end(),tag)==
 		  taglist.end()) {
                   ATH_MSG_ERROR ("Tag is defined in another folder - tag names must be global");
-	      } else if (folder->existsUserTag(tag)) {
+	      } else if (folder->existsUserTag(tagStr)) {
 		// this is a COOL user tag, in which case user
  	        // is trying to mix user and HEAD tags, not allowed in COOL1.3
 		ATH_MSG_ERROR ("Tag " << tag << 
                                " is already USER tag - cannot mix tagging modes");
 	      } else {
 	        try {
-	          folder->deleteTag(tag);
-    	          folder->tagCurrentHead(tag,m_tagDescription);
+	          folder->deleteTag(tagStr);
+    	          folder->tagCurrentHead(tagStr,m_tagDescription);
 	          ATH_MSG_INFO ("Delete and retag succeeded");
 	        }
 	        catch ( cool::TagNotFound& e) {
@@ -1126,16 +1121,26 @@ uint64_t IOVRegistrationSvc::timeToNano(const unsigned long int timesec) const
   }
 }
 
-StatusCode IOVRegistrationSvc::buildDescription(const std::string&  identifier,
-                                       const std::string&  value,
-                                       std::string&        description) const {
+StatusCode IOVRegistrationSvc::buildDescription(std::string_view   identifier,
+                                       std::string_view   value,
+                                       std::string &   description) const {
   // this routine was originally in IOVDbSvc, moved here as only client
   // buids an XML fragment of form <identifier>value</identifier>
   if (identifier.empty() || value.empty()) {
     ATH_MSG_ERROR ("Identifier or value is null.");
     return StatusCode::FAILURE;
   }
-  description = "<"+identifier+">"+value+"</"+identifier+">"+description;
+  //note: appending instead of prepending would have been more efficient (to be explored)
+  std::string fragment;
+  fragment.reserve(identifier.size() * 2 + value.size() + 5);
+  fragment.append("<");
+  fragment.append(identifier);
+  fragment.append(">");
+  fragment.append(value);
+  fragment.append("</");
+  fragment.append(identifier);
+  fragment.append(">");
+  description.insert(0, fragment);
   return StatusCode::SUCCESS;
 }
 

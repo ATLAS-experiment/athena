@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -16,7 +16,6 @@
 #ifndef REGISTRATIONSERVICES_IOVREGISTRATIONSVC_H
 # define REGISTRATIONSERVICES_IOVREGISTRATIONSVC_H
 
-//<<<<<< INCLUDES                                                       >>>>>>
 
 #include "RegistrationServices/IIOVRegistrationSvc.h"
 #include "AthenaBaseComps/AthService.h"
@@ -25,15 +24,12 @@
 #include "GaudiKernel/ClassID.h"
 #include "CoolKernel/StorageType.h"
 
-//<<<<<< FORWARD DECLARATIONS                                             >>>>>>
 
 class IIOVCondDbSvc;
 class StoreGateSvc;
 class IAddressCreator;   
 class IClassIDSvc;   
 
-
-//<<<<<< CLASS DECLARATIONS                                             >>>>>>
 
 /**
  ** @class IOVRegistrationSvc 
@@ -65,25 +61,25 @@ public:
     /// Register IOV DB for an object given its typeName - run/LB numbers
     ///   interval or times interval  and tag are taken from JobOptions
     ///   Choice between run/LB and timestamp given in JobOptions
-    virtual StatusCode registerIOV( const std::string& typeName ) const;
+    virtual StatusCode registerIOV( std::string_view typeName ) const;
     
     /// Register IOV DB for an object given its typeName - run/LB numbers
     ///   interval or times interval taken from JobOptions
     ///   tag is specified
     ///   Choice between run/LB and timestamp given in JobOptions
-    virtual StatusCode registerIOV( const std::string& typeName, const std::string& tag ) const;
+    virtual StatusCode registerIOV( std::string_view typeName, std::string_view tag ) const;
     
     /// Register IOV DB for an object given its typeName and its key
     ///   run/LB numbers interval or times interval  and tag are taken
     ///   from JobOptions
     ///   Choice between run/LB and timestamp given in JobOptions
-    virtual StatusCode registerIOV( const std::string& typeName, const std::string& key,
-				    const std::string& tag ) const;
+    virtual StatusCode registerIOV( std::string_view typeName, std::string_view key,
+				    std::string_view tag ) const;
     
     /// Register IOV DB for an object given its typeName, tag and run/LB
     /// numbers interval
-    virtual StatusCode registerIOV( const std::string& typeName, 
-				    const std::string& tag,
+    virtual StatusCode registerIOV( std::string_view typeName, 
+				    std::string_view tag,
 				    unsigned int beginRun, 
 				    unsigned int endRun, 
 				    unsigned int beginLB, 
@@ -92,16 +88,16 @@ public:
 
     /// Register IOV DB for an object given its typeName, tag and
     /// times interval
-    virtual StatusCode registerIOV( const std::string& typeName, 
-				    const std::string& tag,
+    virtual StatusCode registerIOV( std::string_view typeName, 
+				    std::string_view tag,
 				    uint64_t beginTime, 
 				    uint64_t endTime ) const;
 
     /// Register IOV DB for an object given its typeName, key, tag and run/LB
     /// numbers interval
-    virtual StatusCode registerIOV( const std::string& typeName,
-				    const std::string& key,
-				    const std::string& tag,
+    virtual StatusCode registerIOV( std::string_view typeName,
+				    std::string_view key,
+				    std::string_view tag,
 				    unsigned int beginRun, 
 				    unsigned int endRun, 
 				    unsigned int beginLB, 
@@ -109,18 +105,18 @@ public:
     
     /// Register IOV DB for an object given its typeName, key, tag and
     /// times interval
-    virtual StatusCode registerIOV( const std::string& typeName,
-				    const std::string& key,
-				    const std::string& tag,
+    virtual StatusCode registerIOV( std::string_view typeName,
+				    std::string_view key,
+				    std::string_view tag,
 				    uint64_t beginTime, 
 				    uint64_t endTime ) const;
 
     /// Register IOV DB for an object given its typeName, key, folder, 
     /// tag and run/LB  numbers interval
-    virtual StatusCode registerIOV( const std::string& typeName,
-				    const std::string& key,
-				    const std::string& folder,
-				    const std::string& tag,
+    virtual StatusCode registerIOV( std::string_view typeName,
+				    std::string_view key,
+				    std::string_view folder,
+				    std::string_view tag,
 				    unsigned int beginRun, 
 				    unsigned int endRun, 
 				    unsigned int beginLB, 
@@ -128,10 +124,10 @@ public:
 
     /// Register IOV DB for an object given its typeName, key, folder, tag and
     /// times interval
-    virtual StatusCode registerIOV( const std::string& typeName,
-				    const std::string& key,
-				    const std::string& folder,
-				    const std::string& tag,
+    virtual StatusCode registerIOV( std::string_view typeName,
+				    std::string_view key,
+				    std::string_view folder,
+				    std::string_view tag,
 				    uint64_t beginTime, 
 				    uint64_t endTime ) const;
 
@@ -147,17 +143,17 @@ private:
     // Allow SvcFactory to instantiate the service.
     friend class SvcFactory<IOVRegistrationSvc>;
 
-    StatusCode registerIOV(const std::string& typeName,
-			   const std::string& key,
-			   const std::string& folder,
-			   const std::string& tag,
+    StatusCode registerIOV(std::string_view typeName,
+			   std::string_view key,
+			   std::string_view folder,
+			   std::string_view tag,
 			   const IOVTime&     begin,
 			   const IOVTime&     end) const;
     
-    StatusCode registerIOVCOOL(const std::string& typeName,
-			       const std::string& key,
-			       const std::string& folderName,
-			       const std::string& tag,
+    StatusCode registerIOVCOOL(std::string_view typeName,
+			       std::string_view key,
+			       std::string_view folderName,
+			       std::string_view tag,
 			       const IOVTime&     begin,
 			       const IOVTime&     end) const;
 
@@ -172,9 +168,9 @@ private:
 
     /// Build the folder description field
     ///  add in front of the description the value with identifier-markups
-    virtual StatusCode buildDescription(const std::string&  identifier,
-					const std::string&  value,
-					std::string& description) const;
+    virtual StatusCode buildDescription(std::string_view  identifier,
+					std::string_view   value,
+					std::string &  description) const;
 
     /// Split address in its header and data parts
     StatusCode splitAddress(const std::string& address,
@@ -208,9 +204,5 @@ private:
     ServiceHandle<IClassIDSvc>     m_clidSvc;   
     
 };
-
-
-//<<<<<< INLINE PUBLIC FUNCTIONS                                        >>>>>>
-//<<<<<< INLINE MEMBER FUNCTIONS                                        >>>>>>
 
 #endif //  REGISTRATIONSERVICES_IOVREGISTRATIONSVC_H
