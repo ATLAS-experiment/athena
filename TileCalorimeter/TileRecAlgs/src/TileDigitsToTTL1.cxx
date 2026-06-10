@@ -90,7 +90,7 @@ StatusCode TileDigitsToTTL1::initialize() {
 //
 // Begin Execution Phase.
 //
-StatusCode TileDigitsToTTL1::execute() {
+StatusCode TileDigitsToTTL1::execute(const EventContext& ctx) {
 
   ATH_MSG_DEBUG( "Executing TileDigitsToTTL1" );
 
@@ -116,10 +116,10 @@ StatusCode TileDigitsToTTL1::execute() {
   // step 3:  Get digit container from TES and create TTL1 container
   /* Note that digit container has 256 collections (one for each drawer),
    but TTL1 container has no collections and no structure. */
-  SG::ReadHandle<TileDigitsContainer> digitsContainer(m_digitsContainerKey);
+  SG::ReadHandle<TileDigitsContainer> digitsContainer(m_digitsContainerKey, ctx);
   ATH_CHECK( digitsContainer.isValid() );
 
-  SG::WriteHandle<TileTTL1Container> ttl1Container(m_ttl1ContainerKey);
+  SG::WriteHandle<TileTTL1Container> ttl1Container(m_ttl1ContainerKey, ctx);
   ATH_CHECK( ttl1Container.record(std::make_unique<TileTTL1Container>()) );
   ATH_MSG_DEBUG( "TileTTL1Container registered successfully (" << m_ttl1ContainerKey.key() << ")" );
 

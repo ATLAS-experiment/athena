@@ -97,11 +97,11 @@ StatusCode TileRawChannelToNtuple::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode TileRawChannelToNtuple::execute()
+StatusCode TileRawChannelToNtuple::execute(const EventContext& ctx)
 {
 
   // step1: read RCs from TDS
-  SG::ReadHandle<TileRawChannelContainer> rawChannelContainer(m_rawChannelContainerKey);
+  SG::ReadHandle<TileRawChannelContainer> rawChannelContainer(m_rawChannelContainerKey, ctx);
   ATH_CHECK( rawChannelContainer.isValid() );
 
   // step2: to fill items in ntuple

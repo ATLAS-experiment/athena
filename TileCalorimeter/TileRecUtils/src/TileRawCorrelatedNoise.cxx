@@ -291,10 +291,8 @@ StatusCode TileRawCorrelatedNoise::initialize() {
 }
 
 // #############################################################################
-StatusCode TileRawCorrelatedNoise::execute() {
+StatusCode TileRawCorrelatedNoise::execute(const EventContext& ctx) {
 // #############################################################################
-
-  const EventContext &ctx = Gaudi::Hive::currentContext();
 
   // get named TileDigitsContaner from TES
   SG::ReadHandle<TileDigitsContainer> inputDigitsContainer(m_inputDigitsContainerKey, ctx);

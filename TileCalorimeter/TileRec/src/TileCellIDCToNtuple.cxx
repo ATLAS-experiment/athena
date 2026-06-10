@@ -94,7 +94,7 @@ StatusCode TileCellIDCToNtuple::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode TileCellIDCToNtuple::execute()
+StatusCode TileCellIDCToNtuple::execute(const EventContext& /*ctx*/)
 {
   // step1: read Cells from TDS
   const TileCellIDC* CellCnt;
