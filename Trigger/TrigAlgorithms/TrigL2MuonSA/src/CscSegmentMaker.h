@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGL2MUONSA_CSCSEGMENTMAKER_H
@@ -34,25 +34,25 @@ namespace TrigL2MuonSA{
 
 
     typedef struct{
-      double loc_x;
-      double loc_y;
-      double loc_z;
-      double error;
-      double residual;
-      int measphi;
-      bool enabled;
-      int stationname;
-      bool isIP;
+      double loc_x{};
+      double loc_y{};
+      double loc_z{};
+      double error{};
+      double residual{};
+      int measphi{};
+      bool enabled{};
+      int stationname{};
+      bool isIP{};
     } localCscHit;
 
     typedef struct{
-      double a;
-      double b;
-      double zshift;
-      double chi2;
-      int nhit;
-      int stationname;
-      double residual;
+      double a{};
+      double b{};
+      double zshift{};
+      double chi2{};
+      int nhit{};
+      int stationname{};
+      double residual{};
       std::vector<localCscHit> localHits;
     }local2dSegment;
 

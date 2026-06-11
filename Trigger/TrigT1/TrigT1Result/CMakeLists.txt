@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigT1Result )
@@ -23,4 +23,4 @@ atlas_add_dictionary( TrigT1ResultDict
 atlas_add_test( TrigT1Result_test
                 SOURCES test/type_trait_tests.cxx
                 LINK_LIBRARIES TrigT1Result
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
