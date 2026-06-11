@@ -15,8 +15,7 @@ StatusCode MuonABLineJsonDumpAlg::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
     return StatusCode::SUCCESS;
   }
-StatusCode MuonABLineJsonDumpAlg::execute(){
-  const EventContext& ctx = Gaudi::Hive::currentContext();
+StatusCode MuonABLineJsonDumpAlg::execute(const EventContext& ctx){
   SG::ReadCondHandle<ALineContainer> aLineContainer{m_readALineKey, ctx};
   if (!aLineContainer.isValid()){
     ATH_MSG_FATAL("Failed to load ALine container "<<m_readALineKey.fullKey());

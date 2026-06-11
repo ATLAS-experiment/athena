@@ -17,8 +17,7 @@ StatusCode MdtCondJsonDumpAlg::initialize() {
     ATH_CHECK(m_readKey.initialize());
     return StatusCode::SUCCESS;
 }
-StatusCode MdtCondJsonDumpAlg::execute() {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
+StatusCode MdtCondJsonDumpAlg::execute(const EventContext& ctx) {
   SG::ReadCondHandle<MdtCondDbData> readCondHandle{m_readKey, ctx};
   if (!readCondHandle.isValid()) {
       ATH_MSG_FATAL("Failed to open chamber load conditions "<<m_readKey.fullKey());

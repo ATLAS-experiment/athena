@@ -77,8 +77,7 @@ namespace Muon {
         ATH_CHECK(m_t0DumpTree.write());
         return StatusCode::SUCCESS;
     }
-    StatusCode MdtCalibJsonDumpAlg::execute() {
-        const EventContext &ctx{Gaudi::Hive::currentContext()};
+    StatusCode MdtCalibJsonDumpAlg::execute(const EventContext& ctx) {
         SG::ReadCondHandle calibHandle{m_readKey, ctx};
         ATH_CHECK(calibHandle.isValid());
         
