@@ -785,10 +785,11 @@ namespace MissingEtDQA
         ATH_MSG_WARNING("Building MET FinalClus sum failed.");
       }
 
+
       ///////
       //Testing Particles
       //doing METMaker particles
-
+      std::string str_ele = "RefEle"; 
       // This will be the output MET.
       auto met_MetMaker = std::make_unique<xAOD::MissingETContainer>();
       auto aux = std::make_unique<xAOD::MissingETAuxContainer>();
@@ -801,15 +802,20 @@ namespace MissingEtDQA
       //ATH_CHECK((*m_metmaker)->rebuildMET("Muons", xAOD::Type::Muon, met_MetMaker.get(), metMuons.asDataVector(), metHelper));
       //ATH_CHECK((*m_metmaker)->rebuildJetMET("RefJet", "SoftClus", "PVSoftTrk", met_MetMaker, jets, coreMet, metHelper, true));
 
+      for (const xAOD::MissingET* met : *met_MetMaker) {
+        std::cout << "_W_W_W_W_W_W_W_W_W_W_W_W_W_W" << std::endl;
+        std::cout << met->name() << std::endl;
+      }
+
       // If the specific object interfaces are needed
-      std::vector<const xAOD::Electron*> el_elems = met::getMETElements<xAOD::Electron>(met_MetMaker["RefEle"]:);
+      std::vector<const xAOD::Electron*> el_elems = met::getMETElements<xAOD::Electron>(*met_MetMaker["RefEle"]);
       //std::vector<const xAOD::Photon*> ph_elems = met::getMETElements<xAOD::Photon>(met_MetMaker["RefGamma"]);
       //std::vector<const xAOD::Tau*> ta_elems = met::getMETElements<xAOD::Tau>(met_MetMaker["RefTau"]);
       //std::vector<const xAOD::Muon*> mu_elems = met::getMETElements<xAOD::Muon>(met_MetMaker["Muons"]);
       //std::vector<const xAOD::JetContainer*> jet_elems = met::getMETElements<xAOD::JetContainer>(met_MetMaker["RefJet"]);
 
       std::cout << "Comparing particle numbers" << std::endl;
-      std::cout << "Electrons - METMaker: " << el_elems.size() << " Current: " << metElectrons.size() << std::endl;
+      //std::cout << "Electrons - METMaker: " << el_elems.size() << " Current: " << metElectrons.size() << std::endl;
       //std::cout << "Gamma - METMaker: " << ph_elems.size() << " Current: " << metPhotonsOR.size() << std::endl;
       //std::cout << "Tau - METMaker: " << ta_elems.size() << " Current: " << metTausOR.size() << std::endl;
       //std::cout << "Muon - METMaker: " << mu_elems.size() << " Current: " << metMuons.size() << std::endl;
