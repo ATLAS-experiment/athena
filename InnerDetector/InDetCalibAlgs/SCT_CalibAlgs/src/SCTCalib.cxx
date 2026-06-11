@@ -291,14 +291,13 @@ SCTCalib::notEnoughStatistics(const int required, const int obtained, const std:
 //////////////////////////////////////////////////////////////////////////////////
 // Execute - on event by event
 //////////////////////////////////////////////////////////////////////////////////
-StatusCode SCTCalib::execute() {
+StatusCode SCTCalib::execute(const EventContext& ctx) {
 
    ATH_MSG_DEBUG("----- in execute() ----- ");
 
    const bool majorityIsGoodOrUnused{(m_useMajority and m_MajorityConditionsTool->isGood()) or !m_useMajority};
    if (m_readBS) {
       //--- TimeStamp/LB range analyzed
-      const EventContext& ctx = Gaudi::Hive::currentContext();
       const int timeStamp{static_cast<int>(ctx.eventID().time_stamp())};
       const int lumiBlock{static_cast<int>(ctx.eventID().lumi_block())};
       int timeStampBeginOld;

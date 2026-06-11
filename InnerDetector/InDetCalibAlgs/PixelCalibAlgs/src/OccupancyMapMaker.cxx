@@ -296,10 +296,9 @@ StatusCode OccupancyMapMaker::registerHistograms(){
 // execute
 //
 //=========================================================
-StatusCode OccupancyMapMaker::execute(){
+StatusCode OccupancyMapMaker::execute(const EventContext& ctx){
   ATH_MSG_DEBUG( "Executing OccupancyMapMaker" );
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // check LB is in allowed range
   unsigned int LB =  ctx.eventID().lumi_block();

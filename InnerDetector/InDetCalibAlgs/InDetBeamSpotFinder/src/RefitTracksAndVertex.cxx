@@ -120,9 +120,8 @@ StatusCode RefitTracksAndVertex::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode RefitTracksAndVertex::execute() {
+StatusCode RefitTracksAndVertex::execute(const EventContext& ctx) {
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   TrackCollection* outputtracks = new TrackCollection() ;
 
   //---------------------------

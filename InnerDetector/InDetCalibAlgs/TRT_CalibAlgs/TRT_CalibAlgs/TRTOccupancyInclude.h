@@ -41,7 +41,7 @@ public:
   ~TRTOccupancyInclude(void);
 
   StatusCode initialize(void);    
-  StatusCode execute(void);
+  StatusCode execute(const EventContext& ctx);
   StatusCode finalize(void);  
 
 private:
