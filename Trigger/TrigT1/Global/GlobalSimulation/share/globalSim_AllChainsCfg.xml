@@ -15,28 +15,21 @@
   <TIPWriters>
     <AlgTool class="eEmMultAlgTool" name="eEmMultAlgTool_0">
       <!-- rhad-->
-      <property name="rhad" value="0"/>
+      <property name="rhad" value="1"/>
       <property name="rhad_op" value="&gt;="/>
       <!-- reta-->
-      <property name="reta" value="0"/>
+      <property name="reta" value="1"/>
       <property name="reta_op" value="&gt;="/>
       <!-- wstot-->
-      <property name="wstot" value="0"/>
+      <property name="wstot" value="1"/>
       <property name="wstot_op" value="&gt;="/>
       <property name="TIPposition" value="0" type="int"/>
       <property name="TIPwidth" value="3" type="int"/>
       <child class="eFexCvtrAlgTool" name="eFexCvtrAlgTool" slot="in0"/>
     </AlgTool>
-    <AlgTool class="eEmMultAlgTool" name="eEmMultAlgTool_1">
-      <!-- rhad-->
-      <property name="rhad" value="0"/>
-      <property name="rhad_op" value="&gt;="/>
-      <!-- reta-->
-      <property name="reta" value="0"/>
-      <property name="reta_op" value="&gt;="/>
-      <!-- wstot-->
-      <property name="wstot" value="0"/>
-      <property name="wstot_op" value="&gt;="/>
+    <AlgTool class="eEmEg1BDTMultAlgTool" name="eEmEg1BDTMultAlgTool_0">
+      <property name="Eg1BDT" value='128'/>
+      <property name="Eg1BDT_op" value="&gt;="/>
       <property name="TIPposition" value="3" type="int" />
       <property name="TIPwidth" value="3" type="int" />
       <child class="Egamma1BDTAlgTool" name="Egamma1BDTAlgTool" slot="in0"/>

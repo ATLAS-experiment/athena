@@ -108,9 +108,9 @@ namespace GlobalSim {
       "start position to write into the TIP"};
 
     
-    Gaudi::Property<int> m_n_multbits {
+    Gaudi::Property<int> m_TIP_width {
       this,
-      "n_multbits",
+      "TIPwidth",
       3,
       "number of bits to write into the TIP"};
 
