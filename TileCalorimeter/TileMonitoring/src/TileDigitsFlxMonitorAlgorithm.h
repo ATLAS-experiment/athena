@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEMONITORING_TILEDIGITSFLXALGORITHM_H
@@ -11,7 +11,7 @@
 
 // Atlas includes
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
-#include "AthenaMonitoringKernel/Monitored.h"
+
 #include "StoreGate/ReadHandleKey.h"
 
 class TileHWID;
@@ -42,8 +42,8 @@ class TileDigitsFlxMonitorAlgorithm : public AthMonitorAlgorithm {
     Gaudi::Property<unsigned int> m_felixOffset{this, "FelixOffset", 0, "Offset for comparison of Felix samples w.r.t. Legacy samples"};
     Gaudi::Property<unsigned int> m_felixScale{this,  "FelixScale",  1, "Scale factor between Felix and Legacy ADC counts"}; // 1 for pedestal run or 4 for physics run
 
-    unsigned int m_firstFelix;
-    unsigned int m_nSamples;
+    unsigned int m_firstFelix{};
+    unsigned int m_nSamples{};
 
 };
 #endif // TILEMONITORING_TILEDIGITSFLXALGORITHM_H

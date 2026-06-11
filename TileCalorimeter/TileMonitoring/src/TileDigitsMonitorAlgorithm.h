@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEMONITORING_TILEDIGITSMONITORALGORITHM_H
@@ -91,7 +91,7 @@ class TileDigitsMonitorAlgorithm : public TileCalibMonitorAlgorithm {
 
     static const int MAX_DMU{16};
     bool m_is12bit{false};
-    float m_ADCmaxMinusEpsilon;
+    float m_ADCmaxMinusEpsilon{};
 };
 
 
