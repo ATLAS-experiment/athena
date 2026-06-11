@@ -280,7 +280,7 @@ StatusCode xAODRingSetConfWriter::fillConfigurations()
 
 
 // =================================================================================
-StatusCode xAODRingSetConfWriter::execute() 
+StatusCode xAODRingSetConfWriter::execute(const EventContext& /*ctx*/) 
 {
   // Our execute don't do anything... we don't have any assyncronous change of
   // configuration, so we don't need to keep track of what happens here.
