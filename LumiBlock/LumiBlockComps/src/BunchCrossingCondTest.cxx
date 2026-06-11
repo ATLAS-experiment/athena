@@ -28,15 +28,14 @@ StatusCode BunchCrossingCondTest::initialize() {
 }
 
 
-StatusCode BunchCrossingCondTest::execute() {
+StatusCode BunchCrossingCondTest::execute(const EventContext& ctx) {
 
   // Retrieve the object holding the BCID of the current event:
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
 
   std::ostream& out = m_fileOut.good() ? m_fileOut : std::cout;
 
-  SG::ReadCondHandle<BunchCrossingCondData> readHdl(m_inputKey);
+  SG::ReadCondHandle<BunchCrossingCondData> readHdl(m_inputKey, ctx);
   const BunchCrossingCondData* bccd=*readHdl;
 
   out << "\nTimestamp:" << ctx.eventID().time_stamp() << " ns:" << ctx.eventID().time_stamp_ns_offset() << std::endl; 

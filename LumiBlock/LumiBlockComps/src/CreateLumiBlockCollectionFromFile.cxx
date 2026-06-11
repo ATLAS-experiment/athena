@@ -58,13 +58,13 @@ StatusCode CreateLumiBlockCollectionFromFile::initialize()
 }
 
 
-StatusCode CreateLumiBlockCollectionFromFile::execute()
+StatusCode CreateLumiBlockCollectionFromFile::execute(const EventContext& ctx)
 //*******************************************************
 {
   ATH_MSG_VERBOSE( "execute()" );
 
   // Check for event header
-  SG::ReadHandle<xAOD::EventInfo> evt(m_eventInfoKey);
+  SG::ReadHandle<xAOD::EventInfo> evt(m_eventInfoKey, ctx);
 
   // check is only useful for serial running; remove when MT scheduler used
   if(!evt.isValid()) {
