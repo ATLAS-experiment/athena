@@ -15,7 +15,7 @@ StatusCode TestRandomSeqAlg::initialize() {
 }
 
 
-StatusCode TestRandomSeqAlg::execute() {
+StatusCode TestRandomSeqAlg::execute(const EventContext& /*ctx*/) {
   msg() << MSG::DEBUG << "execute: random sequence: ";
   for (int i=0; i<m_noOfNo.value(); ++i) msg() << m_pEng->flat() << " ";
   msg() << endmsg;
