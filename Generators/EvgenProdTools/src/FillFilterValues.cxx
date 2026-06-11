@@ -22,8 +22,8 @@ StatusCode FillFilterValues::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode FillFilterValues::execute(const EventContext& ctx) {
 #ifdef HEPMC3
+StatusCode FillFilterValues::execute(const EventContext& ctx) {
   // Check that the collection isn't empty
   const size_t nEvents = events_const()->size();
   if (nEvents == 0) {
@@ -54,9 +54,13 @@ StatusCode FillFilterValues::execute(const EventContext& ctx) {
   // Post-hoc debug printouts
   ATH_MSG_DEBUG("Copied HepMC filter values to EventInfo");
 
-#endif
   return StatusCode::SUCCESS;
 }
+#else
+StatusCode FillFilterValues::execute(const EventContext& /*ctx*/) {
+  return StatusCode::SUCCESS;
+}
+#endif
 
 #endif
 
