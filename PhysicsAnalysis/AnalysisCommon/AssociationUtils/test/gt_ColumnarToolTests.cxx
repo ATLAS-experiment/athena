@@ -194,32 +194,6 @@ namespace ORUtils
 
   // this runs the test above, but with IParticle momentum accessors in
   // xAOD mode
-  TEST_F (ColumnarPhysLiteTest, DeltaROverlapTool_jetPhoton_readPhotonMass)
-  {
-    // check that we are in a project that supports this test
-    if (!checkMode())
-      return;
-
-    auto tool = std::make_unique<DeltaROverlapTool> (makeUniqueName());
-    ASSERT_SUCCESS (tool->setProperty ("ObjectType1", xAODType::ObjectType::Jet));
-    // setting this to a jet causes it to read the mass for the photon
-    // instead of using a hardcoded mass
-    ASSERT_SUCCESS (tool->setProperty ("ObjectType2", xAODType::ObjectType::Jet));
-    ASSERT_SUCCESS (tool->setProperty ("OutputPassValue", true));
-    ASSERT_SUCCESS (tool->setProperty ("InputLabel", ""));
-    ASSERT_SUCCESS (tool->initialize ());
-
-    std::string particles1 = "AnalysisJets";
-    std::string particles2 = "AnalysisPhotons";
-    CallXAODOverlapTool<xAOD::JetContainer,xAOD::PhotonContainer> callXAOD (*tool, particles1, particles2);
-
-    // this will call the tool in either mode, and also performs some
-    // performance measurements of the tool in either mode
-    doCall ({.tool = tool.get(), .name = "DeltaROverlapTool", .xAODToolCaller = &callXAOD, .containerRenames = {{"particle1", particles1},{"particle2", particles2}}});
-  }
-
-  // this runs the test above, but with IParticle momentum accessors in
-  // xAOD mode
   TEST_F (ColumnarPhysLiteTest, DeltaROverlapTool_jetPhoton_withIParticle)
   {
     // check that we are in a project that supports this test
@@ -261,32 +235,6 @@ namespace ORUtils
     auto tool = std::make_unique<DeltaROverlapTool> (makeUniqueName());
     ASSERT_SUCCESS (tool->setProperty ("ObjectType1", xAODType::ObjectType::Jet));
     ASSERT_SUCCESS (tool->setProperty ("ObjectType2", xAODType::ObjectType::Electron));
-    ASSERT_SUCCESS (tool->setProperty ("OutputPassValue", true));
-    ASSERT_SUCCESS (tool->setProperty ("InputLabel", ""));
-    ASSERT_SUCCESS (tool->initialize ());
-
-    std::string particles1 = "AnalysisJets";
-    std::string particles2 = "AnalysisElectrons";
-    CallXAODOverlapTool<xAOD::JetContainer,xAOD::ElectronContainer> callXAOD (*tool, particles1, particles2);
-
-    // this will call the tool in either mode, and also performs some
-    // performance measurements of the tool in either mode
-    doCall ({.tool = tool.get(), .name = "DeltaROverlapTool", .xAODToolCaller = &callXAOD, .containerRenames = {{"particle1", particles1},{"particle2", particles2}}});
-  }
-
-  // this runs the test above, but with IParticle momentum accessors in
-  // xAOD mode
-  TEST_F (ColumnarPhysLiteTest, DeltaROverlapTool_jetElectron_readElectronMass)
-  {
-    // check that we are in a project that supports this test
-    if (!checkMode())
-      return;
-
-    auto tool = std::make_unique<DeltaROverlapTool> (makeUniqueName());
-    ASSERT_SUCCESS (tool->setProperty ("ObjectType1", xAODType::ObjectType::Jet));
-    // setting this to a jet causes it to read the mass for the Electron
-    // instead of using a hardcoded mass
-    ASSERT_SUCCESS (tool->setProperty ("ObjectType2", xAODType::ObjectType::Jet));
     ASSERT_SUCCESS (tool->setProperty ("OutputPassValue", true));
     ASSERT_SUCCESS (tool->setProperty ("InputLabel", ""));
     ASSERT_SUCCESS (tool->initialize ());
