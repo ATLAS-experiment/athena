@@ -6,8 +6,7 @@
 #ifndef ATLASHEPMC_ATTRIBUTENAMES_H
 #define ATLASHEPMC_ATTRIBUTENAMES_H
 #include <string>
-namespace HepMC {
-namespace Str {
+namespace HepMCStr {
  inline const std::string BunchCrossingTime{"BunchCrossingTime"};
  inline const std::string LHERecord{"LHERecord"};
  inline const std::string PileUpType{"PileUpType"};
@@ -35,6 +34,5 @@ namespace Str {
  inline const std::string signal_vertex_id{"signal_vertex_id"};
  inline const std::string theta{"theta"};
  inline const std::string weights{"weights"};
-}
 }
 #endif

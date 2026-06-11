@@ -89,7 +89,7 @@ namespace JiveXML {
 
       //Loop over particles in the event
 #ifdef HEPMC3
-      const auto &barcodes = (*McEvtCollItr)->attribute<HepMC::GenEventBarcodes> (HepMC::Str::barcodes);
+      const auto &barcodes = (*McEvtCollItr)->attribute<HepMC::GenEventBarcodes> (HepMCStr::barcodes);
       std::map<int,int> id_to_barcode_map;
       if (barcodes) id_to_barcode_map = barcodes->id_to_barcode_map();
 #endif      

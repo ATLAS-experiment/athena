@@ -38,7 +38,7 @@ inline int barcode(const T& p) {
     if (!p) return 0;
     const HepMC3::GenEvent* e = p->parent_event();
     if (!e) return 0;
-    std::shared_ptr<HepMC3::IntAttribute> barcode = e->attribute<HepMC3::IntAttribute>(HepMC::Str::barcode, p->id());
+    std::shared_ptr<HepMC3::IntAttribute> barcode = e->attribute<HepMC3::IntAttribute>(HepMCStr::barcode, p->id());
     return barcode ? (barcode->value()) : p->id();
 }
 
@@ -49,7 +49,7 @@ template <class T, std::enable_if_t<
 inline int barcode(const T& p) {
     const HepMC3::GenEvent* e = p.parent_event();
     if (!e) return 0;
-    std::shared_ptr<HepMC3::IntAttribute> barcode = e->attribute<HepMC3::IntAttribute>(HepMC::Str::barcode, p.id());
+    std::shared_ptr<HepMC3::IntAttribute> barcode = e->attribute<HepMC3::IntAttribute>(HepMCStr::barcode, p.id());
     return barcode ? (barcode->value()) : p.id();
 }
 #else

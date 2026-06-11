@@ -358,7 +358,7 @@ HepMC::GenVertexPtr  ISF::TruthSvc::createGenVertexFromTruthIncident( ISF::ITrut
 #ifdef HEPMC3
     mcEvent->add_vertex(newVtx);
     HepMC::suggest_barcode( newVtx, vtxbcode );
-    newVtx->add_attribute(HepMC::Str::weights,std::make_shared<HepMC3::VectorDoubleAttribute>(weights));
+    newVtx->add_attribute(HepMCStr::weights,std::make_shared<HepMC3::VectorDoubleAttribute>(weights));
 #else
     mcEvent->add_vertex( newVtx.release() );
 #endif

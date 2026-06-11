@@ -456,7 +456,7 @@ StatusCode Pythia8_i::fillEvt(HepMC::GenEvent *evt){
     auto evtlhe = std::make_shared<HepMC::GenEvent>();
     m_pythiaToHepMC.fill_next_event(m_pythia->process, evtlhe.get(), m_internal_event_number, &m_pythia->info, &m_pythia->settings);
     auto extra = std::make_shared<HepMC::ShortEventAttribute>(evtlhe.get());
-    evt->add_attribute(HepMC::Str::LHERecord, extra);
+    evt->add_attribute(HepMCStr::LHERecord, extra);
 #else
     ATH_MSG_WARNING("LHE record saving requested, but not implemented with HEPMC2 functionality.");
 #endif

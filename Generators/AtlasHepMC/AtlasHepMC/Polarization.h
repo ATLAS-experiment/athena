@@ -27,16 +27,16 @@ private:
 };
 template <class T, std::enable_if_t<std::is_same<T, HepMC3::GenParticlePtr>::value || std::is_same<T, HepMC3::ConstGenParticlePtr>::value, bool > = true> 
 inline Polarization polarization(const T& a) {
-    std::shared_ptr<HepMC3::DoubleAttribute> phi_A = a->template attribute<HepMC3::DoubleAttribute>(HepMC::Str::phi);
-    std::shared_ptr<HepMC3::DoubleAttribute> theta_A = a->template attribute<HepMC3::DoubleAttribute>(HepMC::Str::theta);
+    std::shared_ptr<HepMC3::DoubleAttribute> phi_A = a->template attribute<HepMC3::DoubleAttribute>(HepMCStr::phi);
+    std::shared_ptr<HepMC3::DoubleAttribute> theta_A = a->template attribute<HepMC3::DoubleAttribute>(HepMCStr::theta);
     const double phi = (phi_A ? phi_A->value() : 0.0);
     const double theta = (theta_A ? theta_A->value() : 0.0);
     const bool is_defined = phi_A && theta_A;
     return Polarization(theta, phi, is_defined);
 }
 template<class T> inline void  set_polarization(T& a, const Polarization& b) {
-    a->add_attribute(HepMC::Str::phi, std::make_shared<HepMC3::DoubleAttribute>(b.phi()));
-    a->add_attribute(HepMC::Str::theta, std::make_shared<HepMC3::DoubleAttribute>(b.theta()));
+    a->add_attribute(HepMCStr::phi, std::make_shared<HepMC3::DoubleAttribute>(b.phi()));
+    a->add_attribute(HepMCStr::theta, std::make_shared<HepMC3::DoubleAttribute>(b.theta()));
 }
 }
 #else
