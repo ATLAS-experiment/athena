@@ -43,7 +43,7 @@ class ALFA_RawDataProvider_charge : public AthAlgorithm
   virtual StatusCode initialize();
 
   //! Execute
-  virtual StatusCode execute();
+  virtual StatusCode execute(const EventContext& ctx);
 
   //! Finalize
   virtual StatusCode finalize()

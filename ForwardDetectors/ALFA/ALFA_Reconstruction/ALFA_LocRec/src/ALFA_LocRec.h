@@ -97,7 +97,7 @@ class ALFA_LocRec : public AthAlgorithm
 
 	public:
 		StatusCode initialize();
-		StatusCode execute();
+		StatusCode execute(const EventContext& ctx);
 		StatusCode finalize();
 		
 	private:

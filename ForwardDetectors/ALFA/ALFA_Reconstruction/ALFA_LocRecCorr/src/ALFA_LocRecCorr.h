@@ -117,7 +117,7 @@ private:
 
 public:
 	StatusCode initialize();
-	StatusCode execute();
+	StatusCode execute(const EventContext& ctx);
 
 private:
 	bool UpdateGeometryAtlas();

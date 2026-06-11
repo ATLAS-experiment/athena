@@ -208,7 +208,7 @@ StatusCode ALFA_LocRec::initialize()
 	return StatusCode::SUCCESS;
 }
 
-StatusCode ALFA_LocRec::execute()
+StatusCode ALFA_LocRec::execute(const EventContext& /*ctx*/)
 {
 	ATH_MSG_DEBUG("begin ALFA_LocRec::execute()");
 
