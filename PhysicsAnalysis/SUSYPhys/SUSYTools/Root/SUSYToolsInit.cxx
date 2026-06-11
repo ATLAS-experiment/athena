@@ -1450,7 +1450,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         ATH_MSG_WARNING( "No Photon efficiency available for " << m_photonId << ", using Tight instead..." );
       }
 
-      ATH_CHECK( m_photonEfficiencySFTool.setProperty("MapFilePath", "PhotonEfficiencyCorrection/2015_2025/rel22.2/2024_FinalRun2_Recommendation_v1/map1.txt") );
+      ATH_CHECK( m_photonEfficiencySFTool.setProperty("MapFilePath", "PhotonEfficiencyCorrection/2015_2025/rel22.2/2026_Run3Consolidated_Recommendation_v1/map0.txt") );
       ATH_CHECK( m_photonEfficiencySFTool.setProperty("ForceDataType", isAtlfast()? (m_isRun3? 1: 3) : 1) ); // Set data type: 1 for FULLSIM, 3 for AtlFast. For Run3 pre-rec only FullSim SFs are available
       ATH_CHECK( m_photonEfficiencySFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_photonEfficiencySFTool.retrieve() );
