@@ -41,7 +41,7 @@ public:
   virtual ~TRTCondStoreText() override = default;
 
   virtual StatusCode  initialize(void) override;    
-  virtual StatusCode  execute(void) override;
+  virtual StatusCode  execute(const EventContext& ctx) override;
   virtual StatusCode  finalize(void) override;
 
   /// create an TRTCond::ExpandedIdentifier from a TRTID identifier
