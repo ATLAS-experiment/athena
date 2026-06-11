@@ -13,12 +13,13 @@
 ## Table of Contents
 
 1. [Quick Start](#quick-start)
-2. [Calibration Steps](#calibration-steps)
-3. [Example: Integrating into an Athena algorithm](#example-integrating-into-an-analysis-algorithm)
-4. [For Developers:](#for-developers)
+2. [YAML configuration](#yaml-configuration-file)
+3. [Calibration Steps](#calibration-steps)
+4. [Example: Integrating into an Athena algorithm](#example-integrating-into-an-analysis-algorithm)
+5. [For Developers:](#for-developers)
     - [How JetCalibTools Works](#how-jetcalibtools-works)
     - [Adding a New Calibration Step](#adding-a-new-calibration-step)
-5. [Package Structure](#package-structure)
+6. [Package Structure](#package-structure)
 
 ---
 
@@ -51,6 +52,54 @@ When you provide a relative path, `PathResolver.FindCalibFile` locates the file 
 
 ---
 
+## YAML configuration file
+
+A single YAML file defines the full calibration for a given jet collection and data-taking period. 
+In addition to the central config files on CMVFS, examples can be found in `data/calibConfigExample.yaml` (for Small-R jets) and `data/calibConfigExample_largeR.yaml` (for Large-R jets). 
+
+Each top-level block (except for `Sequence` and `Global`) corresponds to a calibration step.
+See [Calibration Steps](#calibration-steps) for details of the name and options available for each step.
+
+<details>
+<summary>The ordering of the calibration steps for different sample types is determined by the Sequence block</summary>
+
+```yaml
+Sequence:
+  Run2: 
+    FullSim: [Residual, EtaJES, GSC, Smear, PtResidual, MC2MC]
+    AF3: [Residual, EtaJES, GSC, Smear, AF3, PtResidual, MC2MC]
+    Data: [Residual, EtaJES, GSC, Insitu]
+  Run3: 
+    FullSim: [Residual, EtaJES, GSC, Smear, PtResidual, MC2MC]
+    AF3: [Residual, EtaJES, GSC, Smear, AF3, PtResidual, MC2MC]
+    Data: [Residual, EtaJES, GSC, Insitu]
+```
+</details>
+<br/>
+<details>
+<summary>
+Run-specific settings can optionally be supplied using the Run2, Run3, Run4 sub-blocks. Any settings provided by such a sub-block will only be applied to samples for the corresponding run. 
+</summary>
+
+```yaml
+EtaJES:
+  ParametrizedVars:
+    varE: "e"
+    varEta: "DetectorEta"
+  CalibConstantFile: JetCalibTools/CalibArea-00-04-82/CalibrationFactors/MC16a_MCJES_4EMPFlow_Oct2017.config
+  Run2:
+    UseSpline: False
+  Run3:
+    UseSpline: True # Note this is just an example, not a recommendation!
+```
+</details>
+
+<br/>
+
+Additionally, a top-level block `Global` can be used to set properties applied directly to the `JetCalibTool`. Note that no such properties currently exist.
+
+---
+
 ## Calibration Steps
 
 The following table lists all registered step names and their corresponding C++ classes. Further details on each step and the YAML options are available are also provided below.
@@ -67,7 +116,9 @@ The following table lists all registered step names and their corresponding C++ 
 | `AF3` | `Generic4VecCorrectionStep` | ATLFAST3 fast-sim correction; skipped for data and full sim |
 | `PtResidual` | `Generic4VecCorrectionStep` | Generic 4-vector correction |
 | `MC2MC` | `Generic4VecCorrectionStep` | MC-generator-dependent correction; skipped for data and Pythia8 |
- 
+
+**Further details on each calibration step**
+
 <details>
 <summary>EtaJES — Absolute JES + η Calibration</summary>
 
@@ -87,7 +138,6 @@ frozen to avoid unphysical extrapolation.
  
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `InScale` | string | `JetPileupScaleMomentum` | Input jet moment name |
 | `OutScale` | string | `JetEtaJESScaleMomentum` | Output jet moment name |
 | `ParametrizedVars.varE` | string | — | Variable used for the energy axis (e.g. `e`) |
 | `ParametrizedVars.varEta` | string | — | Variable used for the η axis (e.g. `DetectorEta`) |
@@ -115,7 +165,6 @@ frozen to avoid unphysical extrapolation.
  
 ```yaml
 EtaJES:
-  InScale:  JetPileupScaleMomentum
   OutScale: JetEtaJESScaleMomentum
   ParametrizedVars:
     varE:   "e"
@@ -145,7 +194,6 @@ the correction is applied.
  
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `InScale` | string | `JetConstitScaleMomentum` | Input jet moment name |
 | `OutScale` | string | `JetAreaSubtractScaleMomentum` | Output jet moment name |
 | `RhoKey` | string | `auto` | StoreGate key of the `xAOD::EventShape` containing ρ |
  
@@ -159,7 +207,6 @@ the correction is applied.
  
 ```yaml
 JetArea:
-  InScale:  JetConstitScaleMomentum
   OutScale: JetAreaSubtractScaleMomentum
   RhoKey:   Kt4EMPFlowEventShape
 ```
@@ -185,7 +232,6 @@ of as a separate `JetArea` step.
  
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `InScale` | string | `JetConstitScaleMomentum` | Input jet moment name |
 | `OutScale` | string | `JetPileupScaleMomentum` | Output jet moment name |
 | `RhoKey` | string | `auto` | StoreGate key of the `xAOD::EventShape` containing ρ (used when `DoJetArea: true`) |
 | `DefaultMuRef` | float | — | Reference μ value |
@@ -219,7 +265,6 @@ of as a separate `JetArea` step.
  
 ```yaml
 Residual:
-  InScale:  JetConstitScaleMomentum
   OutScale: JetPileupScaleMomentum
   RhoKey:   Kt4EMPFlowNeutEventShape
   DefaultMuRef:  0
@@ -257,7 +302,6 @@ needed (see expert options).
  
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `InScale` | string | `JetEtaJESScaleMomentum` | Input jet moment name |
 | `OutScale` | string | `JetGSCScaleMomentum` | Output jet moment name |
 | `fileGSC` | string | — | Calibration ROOT file (resolved via PathResolver) |
 | `histTool_EM3` | dict | (auto) | Override config for the EM3 histogram readers; accepts `N_hist` + `histNameBase`, or a full list of reader configs |
@@ -281,7 +325,6 @@ needed (see expert options).
  
 ```yaml
 GSC:
-  InScale:  JetEtaJESScaleMomentum
   OutScale: JetGSCScaleMomentum
   fileGSC:  JetCalibTools/CalibArea-00-04-83/CalibrationFactors/[PLACEHOLDER]_GSC_calibrationFactors.root
   histTool_EM3:
@@ -307,7 +350,6 @@ GSC:
  ```yaml
 GSC:
   fileGSC: 'JetCalibTools/CalibArea-00-04-83/CalibrationFactors/AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_GSC_calibrationFactors_240306.root'
-  InScale: "JetEtaJESScaleMomentum"
   OutScale: "JetGSCScaleMomentum"
 ```
 </details>
@@ -318,7 +360,6 @@ GSC:
 ```yaml
 GSC_custom_vars:
   noRun: True
-  InScale: "JetConstitScaleMomentum" #JetEtaJESScaleMomentum"
   fileGSC: 'JetCalibTools/CalibArea-00-04-83/CalibrationFactors/AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_GSC_calibrationFactors_240306.root'
   histTool_EM3:
     N_hist: 35
@@ -341,7 +382,6 @@ GSC_custom_vars:
 ```yaml
 GSC:
   noRun: True
-  InScale: "JetConstitScaleMomentum"
   fileGSC: 'JetCalibTools/CalibArea-00-04-83/CalibrationFactors/AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_GSC_calibrationFactors_240306.root'
   histTool_EM3:
     N_hist: 35
@@ -505,7 +545,6 @@ jet mass while keeping the pT fixed.
  
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `InScale` | string | `JetGSCScaleMomentum` | Input jet moment name |
 | `OutScale` | string | `JetInsituScaleMomentum` | Output jet moment name |
 | `fileInsitu` | list of strings | — | One calibration ROOT file per run period, resolved via PathResolver |
 | `RunNumbers` | list of int | — | Run number boundaries between periods; must have `len(fileInsitu) + 1` entries |
@@ -525,7 +564,6 @@ jet mass while keeping the pT fixed.
  
 ```yaml
 Insitu:
-  InScale:  JetGSCScaleMomentum
   OutScale: JetInsituScaleMomentum
   fileInsitu:
     - 'JetCalibTools/CalibArea-00-04-82/InsituCalibration/InsituCalibration_80ifb_1516_Nov_2018_4PF_Consolidated.root'
@@ -565,7 +603,6 @@ and `varZ` within the η range of the histogram.
  
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `InScale` | string | `JetEtaJESScaleMomentum` | Input jet moment name |
 | `OutScale` | string | `JetJMSScaleMomentum` | Output jet moment name |
 | `HistoFile` | string | — | Calibration ROOT file (resolved via PathResolver) |
 | `histoParams.histName` | string | — | Name of the 3D histogram in the ROOT file |
@@ -584,7 +621,6 @@ and `varZ` within the η range of the histogram.
  
 ```yaml
 JMS:
-  InScale:  JetEtaJESScaleMomentum
   OutScale: JetJMSScaleMomentum
   HistoFile: JetCalibTools/CalibArea-00-04-83/CalibrationFactors/AntiKt10UFOCSSKSoftDropBeta100Zcut10_JMSmCalo_calibFactors.root
   histoParams:
@@ -616,7 +652,6 @@ externally via `JetCalibTool::getNominalResolutionData` and `getNominalResolutio
  
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `InScale` | string | `JetGSCScaleMomentum` | Input jet moment name |
 | `OutScale` | string | `JetSmearedMomentum` | Output jet moment name |
 | `SmearType` | string | `FourVec` | Smearing mode: `pt`, `mass`, or `FourVec` |
 | `HistoReader` | dict | — | Convenience block combining `HistoReaderMC` and `HistoReaderData`; requires `histNameMC`, `histNameData`, plus common `HistoInput` parameters |
@@ -627,7 +662,6 @@ externally via `JetCalibTool::getNominalResolutionData` and `getNominalResolutio
  
 ```yaml
 Smear:
-  InScale: "JetConstitScaleMomentum" 
   OutScale: "JetSmearedMomentum" 
   SmearType: "FourVec"
   HistoReader:
@@ -671,7 +705,6 @@ SmearLong:
       Scale: 1.0
       Type: "float"
       isJetVar: True
-  InScale: "JetGSCScaleMomentum"
   OutScale: "JetSmearedMomentum"
   SmearType: "FourVec"
   noRun: True
@@ -692,7 +725,6 @@ is identical in structure to `PtResidual`.
  
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `InScale` | string | `JetGSCScaleMomentum` | Input jet moment name |
 | `OutScale` | string | — | Output jet moment name |
 | `CalibConstantFile` | string | — | Calibration ROOT file (resolved via PathResolver) |
 | `histoParams.histName` | string | — | Histogram name in the ROOT file |
@@ -703,7 +735,6 @@ is identical in structure to `PtResidual`.
  
 ```yaml
 AF3:
-  InScale:  JetGSCScaleMomentum
   OutScale: JetFastSimScaleMomentum
   CalibConstantFile: "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/AF3_MC20_AntiKt4EMPFlow_R22ConsolidatedApril25.root"
   histoParams:
@@ -727,7 +758,6 @@ lookup, which avoids interpolation across η bin boundaries.
  
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `InScale` | string | `JetGSCScaleMomentum` | Input jet moment name |
 | `OutScale` | string | — | Output jet moment name |
 | `CalibConstantFile` | string | — | Calibration ROOT file (resolved via PathResolver) |
 | `histoParams.histName` | string | — | Histogram name in the ROOT file |
@@ -745,7 +775,6 @@ lookup, which avoids interpolation across η bin boundaries.
  
 ```yaml
 PtResidual:
-  InScale:  JetGSCScaleMomentum
   OutScale: JetPtResidualScaleMomentum
   CalibConstantFile: 'JetCalibTools/CalibArea-00-04-83/CalibrationFactors/PtResidual_MC20_AntiKt4EMPFlow_R22ConsolidatedApril25.root'
   useBinCenter: true
@@ -775,7 +804,6 @@ for Pythia8 samples (which define the reference).
  
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `InScale` | string | — | Input jet moment name |
 | `OutScale` | string | — | Output jet moment name |
 | `CalibConstantFileName` | string | — | Base path of the ROOT file; the shower model string and `.root` extension are appended automatically |
 | `flavours` | list | — | Parton flavour labels to configure; subset of `['q', 'g', 'c', 'b']` |
@@ -788,7 +816,6 @@ for Pythia8 samples (which define the reference).
  
 ```yaml
 MC2MC:
-  InScale:  JetPtResidualScaleMomentum
   OutScale: JetMC2MCScaleMomentum
   CalibConstantFileName: JetCalibTools/CalibArea-00-04-83/CalibrationFactors/MC2MC_MC20_AntiKt4EMPFlow_R22ConsolidatedApril25
   flavours: ['q', 'c', 'b', 'g']
@@ -920,8 +947,8 @@ for(const auto jet: jets){
 The calibration is organised as an **ordered sequence of independent steps**. Each step is a
 self-contained Athena component (`asg::AsgTool`) implementing the `IJetCalibStep` interface, with the source file in `src/`.
 A step reads the jet four-momentum as a named *input scale*, applies a correction, and writes the
-updated four-momentum to a named *output scale*. The steps to be run and all their parameters
-are specified entirely through a **YAML configuration file**, so the calibration sequence can
+updated four-momentum to a named *output scale*. The steps to be run, their parameters, and the step sequence ordering, 
+are specified entirely through a **YAML configuration file**. The calibration sequence can therefore
 be composed, reordered, or extended without touching C++.
 
 
@@ -931,17 +958,17 @@ The top-level tool (`JetCalibTool`) holds an ordered `ToolHandleArray` of `IJetC
 tools. On each call to `JetCalibTool::calibrate(jets)` it simply loops over the steps and
 calls `step->calibrate(jets)` in order.
 
+The ordering is determined by the `Sequence` block in the YAML configuration file, as described below.
 Each step has two mandatory properties — `InScale` and `OutScale` — that name the
-`xAOD::JetFourMom_t` moment read and written on the jet object. The chain is connected by
-ensuring that each step's `InScale` matches the previous step's `OutScale`. The ordering is
-determined automatically at configuration time by following the chain of scales starting from
-`JetConstitScaleMomentum`. 
+`xAOD::JetFourMom_t` moment read and written on the jet object. Note that the python configuration in `JetCalibStepsConfig.py` 
+automatically sets `InScale` for each step to the `OutScale` of the previous step, following the ordering supplied in the `Sequence` block of the YAML config file. The first step uses `InScale = JetConstitScaleMomentum`. 
+The `OutScale` is also automatically set to the conventional default for each step if it not provided in the YAML config file. 
 
 <details>
 <summary>Example for Small-R jets</summary>
 
 ```
-JetConstitScaleMomentum  (starting point — must be covered by at least one step)
+JetConstitScaleMomentum  (starting point)
         │
         ▼  PileupArea (PileupAreaCalibStep)
 JetPileupScaleMomentum
@@ -967,15 +994,56 @@ Note that the `SmearingCalibStep` tool (optionally applied to MC only) can be qu
 
 A single YAML file defines the full calibration for a given jet collection and data-taking period. An example can be found in `data/calibConfigExample.yaml` (for Small-R jets) and `data/calibConfigExample_largeR.yaml` (for Large-R jets). 
 
-Each top-level block corresponds to a calibration step, keyed by the step name as registered in `JetCalibStepsConfig.calibStepDic` (see table in
-  [Calibration Steps](#calibration-steps)).
-Each step block must specify `InScale` and `OutScale`, plus any step-specific options.
+Each top-level block corresponds to a calibration step, keyed by the step name as registered in `JetCalibStepsConfig.calibStepDic`.
+See [Calibration Steps](#calibration-steps) for details of the name and options available for each step.
+
+The ordering of the calibration steps is determined by a `Sequence` block, for example:
+```yaml
+Sequence:
+  Run2: 
+    FullSim: [Residual, EtaJES, GSC, Smear, PtResidual, MC2MC]
+    AF3: [Residual, EtaJES, GSC, Smear, AF3, PtResidual, MC2MC]
+    Data: [Residual, EtaJES, GSC, Insitu]
+  Run3: 
+    FullSim: [Residual, EtaJES, GSC, Smear, PtResidual, MC2MC]
+    AF3: [Residual, EtaJES, GSC, Smear, AF3, PtResidual, MC2MC]
+    Data: [Residual, EtaJES, GSC, Insitu]
+```
+The ordering of the individual step blocks in the YAML file does not matter, the steps are always run in the order specified by the `Sequence` block.
+
+Run-specific settings can optionally be supplied using the `Run2`, `Run3`, `Run4` sub-blocks. 
+<details>
+<summary>Any settings provided by such a sub-block will only be applied to samples for the corresponding run. For example: </summary>
+
+```yaml
+EtaJES:
+  ParametrizedVars:
+    varE: "e"
+    varEta: "DetectorEta"
+  CalibConstantFile: JetCalibTools/CalibArea-00-04-82/CalibrationFactors/MC16a_MCJES_4EMPFlow_Oct2017.config
+  Run2:
+    UseSpline: False
+  Run3:
+    UseSpline: True # Note this is just an example, not a recommendation!
+```
+</details>
+<details>
+<summary>This can also be used to override a setting only for specific runs:</summary>
+
+```yaml
+EtaJES:
+  ParametrizedVars:
+    varE: "e"
+    varEta: "DetectorEta"
+  CalibConstantFile: JetCalibTools/CalibArea-00-04-82/CalibrationFactors/MC16a_MCJES_4EMPFlow_Oct2017.config
+  UseSpline: False
+  Run4:
+    UseSpline: True # Only set UseSpline: True for Run 4 samples
+```
+</details>
+</br>
 
 Additionally, a top-level block `Global` can be used to set properties applied directly to the `JetCalibTool`. Note that no such properties currently exist.
-
-The ordering of steps in the YAML file does not matter, as the Python configuration layer
-(`JetCalibStepsConfig.calibConfigToToolList()`) resolves the correct order at initialisation by following the
-`InScale` → `OutScale` chain.
 
 #### Python configuration
 
@@ -993,6 +1061,10 @@ Each step has a corresponding Python function (e.g. `etajesStep`, `gscStep`, …
 - `Insitu` is skipped for MC unless the property `CalibrateMC: true` is set.
 - `MC2MC` is skipped for data and for Pythia8 samples.
 - `AF3` is skipped for data and for full-simulation MC.
+
+Note that the step sequence order supplied by the YAML config can be optionally overriden with the `calibSeqOverride` input argument
+to `calibConfigToToolList`, which can be set to a `_`-separated sequence of steps, e.g. `"EtaJES_JMS"`. 
+This is used to supply T0-specific step sequences in `JetCalibToolsCfg.py`.
 
 ---
 
@@ -1168,7 +1240,6 @@ MyStep:
     varY: "abseta"
   VarKey: pt
   MyProperty: "Test"
-  InScale: JetConstitScaleMomentum
   OutScale: JetMyScaleMomentum
 ```
 
