@@ -78,7 +78,7 @@ StatusCode TRTStrawEfficiency::initialize() {
 
 
 //____________________________________________________________________________
-StatusCode TRTStrawEfficiency::execute() {
+StatusCode TRTStrawEfficiency::execute(const EventContext& ctx) {
 	ATH_MSG_DEBUG( "TRTStrawEfficiency::execute()  event: " << m_num_events );
 
 	//    ATH_MSG_DEUBG( "getListOfTriggers: " << m_trigDec->getListOfTriggers() );
@@ -95,14 +95,14 @@ StatusCode TRTStrawEfficiency::execute() {
 	}
 
 	// retrieve tracks
-	SG::ReadHandle<TrackCollection> tracks(m_tracksKey);
+	SG::ReadHandle<TrackCollection> tracks(m_tracksKey, ctx);
 	if (!tracks.isValid()) {
 		ATH_MSG_FATAL( "Failed to retrieve " << m_tracksKey.key() );
 		return StatusCode::FAILURE;
 	}
 
 	// retrieve event info
-	SG::ReadHandle<xAOD::EventInfo> event_info(m_eventInfoKey);
+	SG::ReadHandle<xAOD::EventInfo> event_info(m_eventInfoKey, ctx);
 	if (!event_info.isValid()) {
 		ATH_MSG_FATAL( "Failed to retrieve " << m_eventInfoKey.key() );
 		return StatusCode::FAILURE;
@@ -224,7 +224,7 @@ StatusCode TRTStrawEfficiency::execute() {
 
 		//------- added by dan -------
 
-		SG::ReadHandle<xAOD::VertexContainer> vxContainer(m_vertexContainerKey);
+		SG::ReadHandle<xAOD::VertexContainer> vxContainer(m_vertexContainerKey, ctx);
 
 		if (!vxContainer.isValid()) {
 			ATH_MSG_ERROR("  Failed to retrieve VxContainer: " << m_vertexContainerKey.key());

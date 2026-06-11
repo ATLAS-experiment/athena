@@ -101,9 +101,8 @@ namespace InDetGNNHardScatterSelection
     return StatusCode::SUCCESS;
   }
 
-  StatusCode VertexDecoratorAlg ::execute() 
+  StatusCode VertexDecoratorAlg ::execute(const EventContext& ctx) 
   {
-    const EventContext &ctx = Gaudi::Hive::currentContext();
     SG::ReadHandle<xAOD::VertexContainer> vertices(m_vertexInKey, ctx);
     ATH_CHECK(vertices.isValid());
 
