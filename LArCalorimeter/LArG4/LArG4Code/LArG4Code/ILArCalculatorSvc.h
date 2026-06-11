@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ILArCalculatorSvc.h
@@ -20,7 +20,7 @@ class G4Step;
 class StatusCode;
 
 // struct to pass the hit info
-struct LArHitData { LArG4Identifier id; G4double time; G4double energy; };
+struct LArHitData { LArG4Identifier id; G4double time=0; G4double energy=0; };
 
 class ILArCalculatorSvc: virtual public IService {
 public:
