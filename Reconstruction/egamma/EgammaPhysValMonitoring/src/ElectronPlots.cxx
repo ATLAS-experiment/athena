@@ -17,10 +17,12 @@ ElectronPlots::ElectronPlots(PlotBase* pParent, const std::string& sDir,
 			     const std::string& sParticleType):PlotBase(pParent, sDir),
 							m_oKinAllRecoPlots(this, "All/KinPlots/", "All Reco "+ sParticleType +" Electron"),
 							m_oShowerShapesAllRecoPlots(this, "All/ShowerShapesPlots/","All Reco "+ sParticleType +" Electron"  ),
+							m_oShowerShapesAll10GeVRecoPlots(this, "All/ShowerShapes10GeVPlots/","All Reco "+ sParticleType +" Electron"  ),
 							m_oIsolationAllRecoPlots(this, "All/IsolationPlots/", "All Reco "+ sParticleType +"  Electron" ),
 							m_oTrackAllRecoPlots(this, "All/TrackPlots/", "All Reco "+ sParticleType +"  Electron"  ),
 							m_oKinIsoRecoPlots(this, "Iso/KinPlots/", "Iso Reco "+ sParticleType +"  Electron"),
 							m_oShowerShapesIsoRecoPlots(this, "Iso/ShowerShapesPlots/","Iso Reco "+ sParticleType +"  Electron" ),
+							m_oShowerShapesIso10GeVRecoPlots(this, "Iso/ShowerShapes10GeVPlots/","Iso Reco "+ sParticleType +"  Electron" ),
 							m_oIsolationIsoRecoPlots(this, "Iso/IsolationPlots/", "Iso Reco "+ sParticleType +"  Electron" ),
 							m_oTrackIsoRecoPlots(this, "Iso/TrackPlots/", "Iso Reco "+ sParticleType +"  Electron" ),
 							
@@ -65,9 +67,12 @@ void ElectronPlots::initializePlots(){
  }
 
   void ElectronPlots::fill(const xAOD::Electron& electron, const xAOD::EventInfo& eventInfo, bool isPrompt) {
-
+    
   m_oKinAllRecoPlots.fill(electron,eventInfo);
   m_oShowerShapesAllRecoPlots.fill(electron,eventInfo);
+  if (electron.pt() > 10 * Gaudi::Units::GeV) {
+    m_oShowerShapesAll10GeVRecoPlots.fill(electron,eventInfo);
+  }
   m_oIsolationAllRecoPlots.fill(electron,eventInfo);
   m_oTrackAllRecoPlots.fill(electron,eventInfo);
  
@@ -80,6 +85,9 @@ void ElectronPlots::initializePlots(){
 
   m_oKinIsoRecoPlots.fill(electron,eventInfo);
   m_oShowerShapesIsoRecoPlots.fill(electron,eventInfo);
+  if (electron.pt() > 10 * Gaudi::Units::GeV) {
+    m_oShowerShapesIso10GeVRecoPlots.fill(electron,eventInfo);
+  }
   m_oIsolationIsoRecoPlots.fill(electron,eventInfo);
   m_oTrackIsoRecoPlots.fill(electron,eventInfo);
 
