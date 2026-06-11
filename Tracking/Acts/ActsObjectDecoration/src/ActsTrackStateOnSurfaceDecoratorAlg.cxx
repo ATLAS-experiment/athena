@@ -1,12 +1,13 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/ActsTrackStateOnSurfaceDecoratorAlg.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include "TrkEventPrimitives/TrackStateDefs.h"
-#include "ActsGeometry/ATLASSourceLink.h"
+#include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
+
 #include "ActsEvent/Decoration.h"
 
 namespace ActsTrk {
@@ -129,15 +130,15 @@ namespace ActsTrk {
     
     auto flags = state.typeFlags();
     if (not flags.isHole() ) {
-      auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
-      ATH_CHECK( sl != nullptr );
-      const xAOD::UncalibratedMeasurement &cluster = getUncalibratedMeasurement(sl);
+      auto cluster = detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());
+      ATH_CHECK( cluster != nullptr );
 
-      if (not decorator_measurement_link.isAvailable(cluster)) {
-	ATH_MSG_ERROR("xAOD Cluster does not have a link to TrackMeasurementValidation element");
-	return StatusCode::FAILURE;
+
+      if (not decorator_measurement_link.isAvailable(*cluster)) {
+	        ATH_MSG_ERROR("xAOD Cluster does not have a link to TrackMeasurementValidation element");
+	        return StatusCode::FAILURE;
       }
-      const auto& el = decorator_measurement_link(cluster);
+      const auto& el = decorator_measurement_link(*cluster);
       ATH_CHECK( el.isValid() );
       const xAOD::TrackMeasurementValidation *measurement = *el;
 

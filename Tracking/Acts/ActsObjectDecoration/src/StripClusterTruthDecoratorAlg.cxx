@@ -7,15 +7,11 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include "ActsEvent/TrackContainer.h"
-#include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsEvent/Decoration.h"
 
-namespace ActsTrk {
+#include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 
-  StripClusterTruthDecoratorAlg::StripClusterTruthDecoratorAlg(const std::string& name,
-							       ISvcLocator *pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator)
-  {}
+namespace ActsTrk {
 
   
   StatusCode StripClusterTruthDecoratorAlg::initialize() {
@@ -245,13 +241,9 @@ StatusCode StripClusterTruthDecoratorAlg::labelMeasurementToKeep(const EventCont
 			{
 			  auto flags = state.typeFlags();
 			  if (not flags.hasMeasurement()) return;
-			  
-			  auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
-			  if (sl == nullptr) return;
-			  
-			  const xAOD::UncalibratedMeasurement &cluster = getUncalibratedMeasurement(sl);
-			  if (cluster.type() != xAOD::UncalibMeasType::StripClusterType) return;
-			  labels.at(cluster.index()) = true;
+			  const xAOD::UncalibratedMeasurement* cluster = detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());
+			  if (!cluster || cluster->type() != xAOD::UncalibMeasType::StripClusterType) return;
+			  labels.at(cluster->index()) = true;
 			});    
     } // loop on tracks
   } // loop on read handle keys

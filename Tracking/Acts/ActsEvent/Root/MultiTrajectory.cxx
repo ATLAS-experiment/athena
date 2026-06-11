@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "ActsEvent/MultiTrajectory.h"
 #include <Acts/Geometry/GeometryIdentifier.hpp>
@@ -9,6 +9,8 @@
 #include "xAODTracking/TrackState.h"
 #include "xAODTracking/TrackParameters.h"
 #include "xAODTracking/TrackJacobian.h"
+#include "ActsCalibBase/MeasurementCalibratorBase.h"
+
 
 constexpr uint64_t InvalidGeoID = std::numeric_limits<uint64_t>::max();
 
@@ -537,11 +539,21 @@ void ActsTrk::MutableMultiTrajectory::setUncalibratedSourceLink_impl(ActsTrk::In
   //       Currently there is no possibility to check whether the source link contains a certain payload
   //       so can only catch the bad any cast
   try {
-     uncalibratedMeasurements.at(istate) = sourceLink.get<ATLASUncalibSourceLink>();
-  }
-  catch  (std::bad_any_cast &err) {
-     assert( istate < m_uncalibratedSourceLinks.size());
-     m_uncalibratedSourceLinks[istate] = sourceLink;
+    if (detail::MeasurementCalibratorBase::getType(sourceLink) == detail::SourceLinkType::xAODUnCalibMeas) {
+        auto unpacked = detail::MeasurementCalibratorBase::unpackBase(sourceLink);
+        uncalibratedMeasurements.at(istate) = std::get<const xAOD::UncalibratedMeasurement*>(unpacked);
+    } else {
+        assert( istate < m_uncalibratedSourceLinks.size());
+        m_uncalibratedSourceLinks[istate] = sourceLink;
+    }
+  } catch (const std::bad_any_cast &err) {
+    try {
+        auto unpacked = sourceLink.get<const xAOD::UncalibratedMeasurement*>();
+        uncalibratedMeasurements.at(istate) = unpacked;
+    } catch (const std::bad_any_cast &err1) {
+      assert( istate < m_uncalibratedSourceLinks.size());
+      m_uncalibratedSourceLinks[istate] = sourceLink;
+    }
   }
 }
 
@@ -801,7 +813,7 @@ ActsTrk::MutableMultiTrajectory::getUncalibratedSourceLink_impl(
   static const SG::ConstAccessor<const xAOD::UncalibratedMeasurement*> acc{"uncalibratedMeasurement"};
   if (const xAOD::UncalibratedMeasurement* ptr = acc.withDefault(m_trackStatesIface, istate, nullptr))
   {
-    return Acts::SourceLink( ptr );
+    return detail::MeasurementCalibratorBase::pack( ptr );
   }
   return m_uncalibratedSourceLinks[istate].value();
 }
@@ -818,7 +830,7 @@ ActsTrk::MultiTrajectory::getUncalibratedSourceLink_impl(
   static const SG::ConstAccessor<const xAOD::UncalibratedMeasurement*> acc{"uncalibratedMeasurement"};
   if (const xAOD::UncalibratedMeasurement* ptr = acc.withDefault(m_trackStatesIface, istate, nullptr))
   {
-    return Acts::SourceLink( ptr );
+    return detail::MeasurementCalibratorBase::pack( ptr );
   }
   return m_uncalibratedSourceLinks[istate].value();
 }

@@ -35,10 +35,6 @@ class Surface;
 class SourceLink;
 }
 
-namespace ActsTrk::detail {
-    enum class SourceLinkType;
-}
-
 
 namespace ActsTrk {
 /** @brief Conversion tool interface to translate surfaces & track parameters between the
@@ -101,14 +97,11 @@ class IActsToTrkConverterTool : virtual public IAlgTool {
    *         a nullptr is returned.
    * @param ctx: EventContext to construct the Geometry & calibration context inside
    * @param fitResult: Outcome from the Acts fitter
-   * @param fitAuthor: Author flag to be put into the Trk::Track meta data
-   * @param slType: Source link type steering how the uncalibrated Acts::SourceLinks are 
-   *                turned into Trk::MeasurementBase objects */
+   * @param fitAuthor: Author flag to be put into the Trk::Track meta data */
   using TrackFitResult_t = Acts::Result<ActsTrk::MutableTrackContainer::TrackProxy, std::error_code>;
   virtual std::unique_ptr<Trk::Track> convertFitResult(const EventContext& ctx,
                                                        TrackFitResult_t& fitResult,
-                                                       const Trk::TrackInfo::TrackFitter fitAuthor,
-                                                       const detail::SourceLinkType slType) const = 0;
+                                                       const Trk::TrackInfo::TrackFitter fitAuthor) const = 0;
 
   virtual void trkTrackCollectionToActsTrackContainer(
       ActsTrk::MutableTrackContainer &tc,

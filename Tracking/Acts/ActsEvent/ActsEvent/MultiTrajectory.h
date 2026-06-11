@@ -24,7 +24,6 @@
 #include "xAODTracking/TrackStateAuxContainer.h"
 #include "xAODTracking/TrackSurfaceAuxContainer.h"
 #include "xAODTracking/TrackSurfaceContainer.h"
-#include "ActsGeometry/ATLASSourceLink.h"
 // #define DEBUG_MTJ
 #ifdef DEBUG_MTJ
 #define INSPECTCALL(_INFO) {std::cout << __FILE__ <<":"<<__LINE__<<" "<<__PRETTY_FUNCTION__<<" "<<_INFO<<std::endl; }

@@ -64,7 +64,7 @@ namespace ActsTrk::detail {
           assert(pixelCalibrator.connected());
           auto [pos, cov] = pixelCalibrator(geoctx, cctx,
                                             static_cast<const xAOD::PixelCluster&>(measurement), state);
-          setState<2, traj_t>(e2DimNoTime, pos, cov, link, state);
+          setState<2>(e2DimNoTime, pos, cov, link, state);
           break;
         } case StripClusterType: {
           assert(stripCalibrator.connected());
@@ -74,14 +74,14 @@ namespace ActsTrk::detail {
           if (!surface) {
             throw std::runtime_error("OnTrackCalibrator<traj_t>::calibrate() -- No surface for measurement.");
           }
-          setState<1, traj_t>(surface->bounds().type() == Acts::SurfaceBounds::eAnnulus ? e1DimRotNoTime : e1DimNoTime,
+          setState<1>(surface->bounds().type() == Acts::SurfaceBounds::eAnnulus ? e1DimRotNoTime : e1DimNoTime,
                               pos, cov, link, state);
           break;
         } case HGTDClusterType: {
           assert(hgtdCalibrator.connected());
           auto [pos, cov] = hgtdCalibrator(geoctx, cctx,
                                            static_cast<const xAOD::HGTDCluster&>(measurement), state);
-          setState<3, traj_t>(e2DimWithTime, pos, cov, link, state);
+          setState<3>(e2DimWithTime, pos, cov, link, state);
           break;
         } default:
             throw std::domain_error("OnTrackCalibrator can only handle Pixel or Strip measurements");

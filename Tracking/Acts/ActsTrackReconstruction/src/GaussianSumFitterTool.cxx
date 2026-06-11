@@ -32,13 +32,12 @@
 // PACKAGE
 #include "ActsCalibBase/CalibrationContext.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
-#include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsInterop/Logger.h"
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
 #include "Acts/Propagator/DirectNavigator.hpp"
 #include "src/detail/RefittingCalibrator.h"
-
+#include "src/detail/OnTrackCalibrator.h"
 // STL
 #include <vector>
 #include <bitset>
@@ -47,11 +46,6 @@
 
 namespace ActsTrk {
 
-GaussianSumFitterTool::GaussianSumFitterTool(const std::string& t,
-					     const std::string& n,
-					     const IInterface* p) :
-  base_class(t,n,p)
-{}
 
 StatusCode GaussianSumFitterTool::initialize() {
   ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
@@ -59,11 +53,11 @@ StatusCode GaussianSumFitterTool::initialize() {
   ATH_CHECK(m_trackingGeometryTool.retrieve());
   ATH_CHECK(m_extrapolationTool.retrieve());
   ATH_CHECK(m_ATLASConverterTool.retrieve());
-  if (!m_refitOnly) {
-    ATH_CHECK(m_trkSummaryTool.retrieve());
-  }else{
+  ATH_CHECK(m_trkSummaryTool.retrieve(EnableTool{!m_refitOnly}));
+  if (m_refitOnly) {
     ATH_MSG_INFO("Running GSF without track summary");
   }
+  ATH_CHECK(m_ROTcreator.retrieve(EnableTool{!m_ROTcreator.empty()}));
 
   m_logger = makeActsAthenaLogger(this, "Acts Gaussian Sum Refit");
 
@@ -94,7 +88,7 @@ StatusCode GaussianSumFitterTool::initialize() {
 
   m_gsfExtensions.updater.connect<&ActsTrk::detail::FitterHelperFunctions::gainMatrixUpdate<ActsTrk::MutableTrackStateBackend>>();
   m_calibrator = std::make_unique<ActsTrk::detail::TrkMeasurementCalibrator>();
-  m_gsfExtensions.calibrator.connect<&ActsTrk::detail::TrkMeasurementCalibrator::calibrate<ActsTrk::MutableTrackStateBackend>>(m_calibrator.get());
+  m_gsfExtensions.calibrator.connect<&ActsTrk::detail::TrkMeasurementCalibrator::calibrate<TrackState_t>>(m_calibrator.get());
 
   m_surfaceAccessor = detail::TrkMeasSurfaceAccessor{m_ATLASConverterTool.get()};
   m_gsfExtensions.surfaceAccessor.connect<&detail::TrkMeasSurfaceAccessor::operator()>(&m_surfaceAccessor);
@@ -393,7 +387,7 @@ GaussianSumFitterTool::fit(const ActsTrk::Seed & /*seed*/,
 }
 
 std::unique_ptr< ActsTrk::MutableTrackContainer >
-GaussianSumFitterTool::fit(const std::vector< ActsTrk::ATLASUncalibSourceLink> & /*clusterList*/,
+GaussianSumFitterTool::fit(const std::vector< const xAOD::UncalibratedMeasurement*> & /*clusterList*/,
          const Acts::BoundTrackParameters& /*initialParams*/,
          const Acts::GeometryContext& /*tgContext*/,
          const Acts::MagneticFieldContext& /*mfContext*/,
@@ -423,7 +417,7 @@ StatusCode GaussianSumFitterTool::fit(
     }
     
     if (ts.typeFlags().hasMeasurement()) {
-      sourceLinks.push_back(Acts::SourceLink{detail::RefittingCalibrator::RefittingSourceLink(ts)});
+      sourceLinks.push_back(ts.getUncalibratedSourceLink());
     }
   }
 
@@ -434,21 +428,23 @@ StatusCode GaussianSumFitterTool::fit(
 
   Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
   Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
-  Acts::CalibrationContext calContext{};
+  Acts::CalibrationContext calContext{getCalibrationContext(ctx)};
 
   Acts::GsfOptions<ActsTrk::MutableTrackStateBackend> gsfOptions = prepareOptions(tgContext, mfContext, calContext, pSurface);
-  const Acts::TrackingGeometry* actsTrackingGeometry = m_trackingGeometryTool->trackingGeometry().get();
 
-  if (!actsTrackingGeometry) {
-    ATH_MSG_ERROR("No Acts tracking geometry.");
-    return StatusCode::FAILURE;
-  }
+  detail::RefittingCalibrator calibrator{m_ATLASConverterTool.get(), m_ROTcreator.get()};
+  using xAODUnCalibrator_t = detail::OnTrackCalibrator<ActsTrk::MutableTrackStateBackend>;
+  auto xODCalibrator = xAODUnCalibrator_t::NoCalibration(m_trackingGeometryTool.get());
+  calibrator.connect<&xAODUnCalibrator_t::calibrate>(xAOD::UncalibMeasType::PixelClusterType, &xODCalibrator);
+  calibrator.connect<&xAODUnCalibrator_t::calibrate>(xAOD::UncalibMeasType::StripClusterType, &xODCalibrator);
+  
 
-  detail::RefittingCalibrator calibrator;
+  detail::RefittingSurfaceAccesor surfaceAcc{m_ATLASConverterTool.get(),
+                                             m_trackingGeometryTool.get()};
 
   auto gsfExtensions = m_gsfExtensions;
   gsfExtensions.calibrator.connect<&detail::RefittingCalibrator::calibrate>(&calibrator);
-  gsfExtensions.surfaceAccessor.connect<&detail::RefittingCalibrator::accessSurface>();
+  gsfExtensions.surfaceAccessor.connect<&detail::RefittingSurfaceAccesor::operator()>(&surfaceAcc);
   gsfOptions.extensions = gsfExtensions;
   gsfOptions.abortOnError = false;
 
@@ -569,7 +565,7 @@ GaussianSumFitterTool::makeTrack(const EventContext& ctx,
 
     std::unique_ptr<Trk::MeasurementBase> measState;
     if (state.hasUncalibratedSourceLink()){
-      auto sl = state.getUncalibratedSourceLink().template get<ATLASSourceLink>();
+      auto sl = detail::TrkMeasurementCalibrator::unpack(state.getUncalibratedSourceLink());
       assert(sl);
       measState = sl->uniqueClone();
     }

@@ -25,9 +25,9 @@ template <size_t dim>
 
 
 
-template <std::size_t dim,  typename trajectory_t>
+template <std::size_t dim,  Acts::TrackStateProxyConcept proxy_t>
 void checkList(const DummyMeasurement<dim>& refMeas,
-               const typename Acts::MultiTrajectory<trajectory_t>::TrackStateProxy &trackState,
+               const proxy_t &trackState,
                const Acts::BoundSubspaceIndices& expectedBoundSpaceIndices) {
  
   auto sourceLink = trackState.getUncalibratedSourceLink().template get<DummyMeasurement<dim>*>();
@@ -72,9 +72,9 @@ int main() {
     assert(not simpleStripState.hasCalibrated());
 
     DummyMeasurement<1> meas{1, Acts::Vector<1>{10.}, 20.*Acts::SquareMatrix<1>::Identity()};
-    calibrator.setState<1, Backend_t>(ProjectorType::e1DimNoTime, meas.m_pos, meas.m_cov, 
-                                      Acts::SourceLink{&meas}, simpleStripState);
-    checkList<1, Backend_t>(meas, simpleStripState, Acts::BoundSubspaceIndices{Acts::eBoundLoc0});
+    calibrator.setState<1>(ProjectorType::e1DimNoTime, meas.m_pos, meas.m_cov, 
+                           Acts::SourceLink{&meas}, simpleStripState);
+    checkList<1>(meas, simpleStripState, Acts::BoundSubspaceIndices{Acts::eBoundLoc0});
   }
   /// Check 1 dimensional track state - rotated version
   {
@@ -82,9 +82,9 @@ int main() {
     assert(not rotated.hasCalibrated());
 
     DummyMeasurement<1> meas{1, Acts::Vector<1>{35.}, 66.*Acts::SquareMatrix<1>::Identity()};
-    calibrator.setState<1, Backend_t>(ProjectorType::e1DimRotNoTime, meas.m_pos, meas.m_cov, 
+    calibrator.setState<1>(ProjectorType::e1DimRotNoTime, meas.m_pos, meas.m_cov, 
                                     Acts::SourceLink{&meas}, rotated);
-    checkList<1, Backend_t>(meas, rotated, Acts::BoundSubspaceIndices{Acts::eBoundLoc1});
+    checkList<1>(meas, rotated, Acts::BoundSubspaceIndices{Acts::eBoundLoc1});
   }
   /// Check 1 dimensional track state - time version
   {
@@ -95,9 +95,9 @@ int main() {
     cov(0,0) = 63;
     cov(1,1) = 683;
     DummyMeasurement<2> meas{3, Acts::Vector<2>{35., 74.}, cov};
-    calibrator.setState<2, Backend_t>(ProjectorType::e1DimWithTime, meas.m_pos, meas.m_cov, 
+    calibrator.setState<2>(ProjectorType::e1DimWithTime, meas.m_pos, meas.m_cov, 
                                       Acts::SourceLink{&meas}, oneDimTime);
-    checkList<2, Backend_t>(meas, oneDimTime, Acts::BoundSubspaceIndices{Acts::eBoundLoc0, Acts::eBoundTime});
+    checkList<2>(meas, oneDimTime, Acts::BoundSubspaceIndices{Acts::eBoundLoc0, Acts::eBoundTime});
 
   }
   /// Check 2 dimensional track state  - no time version
@@ -105,9 +105,9 @@ int main() {
     TrackState_t twoDim = trackStateBackend.getTrackState(3);
     assert( not twoDim.hasCalibrated());
     DummyMeasurement<2> meas{4, Amg::Vector2D{52,-72}, AmgSymMatrix(2){Eigen::Rotation2D{0.2*M_PI}}};
-    calibrator.setState<2, Backend_t>(ProjectorType::e2DimNoTime, meas.m_pos, meas.m_cov, 
+    calibrator.setState<2>(ProjectorType::e2DimNoTime, meas.m_pos, meas.m_cov, 
                                       Acts::SourceLink{&meas}, twoDim);
-    checkList<2, Backend_t>(meas, twoDim, Acts::BoundSubspaceIndices{Acts::eBoundLoc0, Acts::eBoundLoc1});
+    checkList<2>(meas, twoDim, Acts::BoundSubspaceIndices{Acts::eBoundLoc0, Acts::eBoundLoc1});
   }
   /// Check 2 dimensional track state  - with time version
   {
@@ -115,9 +115,9 @@ int main() {
     assert( not twoDimWithT.hasCalibrated());
   
     DummyMeasurement<3> meas{4, Amg::Vector3D{52,-72, 82}, Amg::getRotateZ3D(0.2*M_PI).linear()};
-    calibrator.setState<3, Backend_t>(ProjectorType::e2DimWithTime, meas.m_pos, meas.m_cov, 
+    calibrator.setState<3>(ProjectorType::e2DimWithTime, meas.m_pos, meas.m_cov, 
                                       Acts::SourceLink{&meas}, twoDimWithT);
-    checkList<3, Backend_t>(meas, twoDimWithT, Acts::BoundSubspaceIndices{Acts::eBoundLoc0, Acts::eBoundLoc1, Acts::eBoundTime});
+    checkList<3>(meas, twoDimWithT, Acts::BoundSubspaceIndices{Acts::eBoundLoc0, Acts::eBoundLoc1, Acts::eBoundTime});
   }
   /// Check 1 dimensional complementary track state  - with time version
   {
@@ -128,9 +128,9 @@ int main() {
     cov(1,1) = -27;
     cov(1,0) = 270;
     DummyMeasurement<2> meas{4, Amg::Vector2D{25, 0.92}, cov};
-    calibrator.setState<2, Backend_t>(ProjectorType::e1DimRotWithTime, meas.m_pos, meas.m_cov, 
+    calibrator.setState<2>(ProjectorType::e1DimRotWithTime, meas.m_pos, meas.m_cov, 
                                       Acts::SourceLink{&meas}, rotOneDimWithT);
-    checkList<2, Backend_t>(meas, rotOneDimWithT, Acts::BoundSubspaceIndices{Acts::eBoundLoc1, Acts::eBoundTime});
+    checkList<2>(meas, rotOneDimWithT, Acts::BoundSubspaceIndices{Acts::eBoundLoc1, Acts::eBoundTime});
   }
 
   return EXIT_SUCCESS;

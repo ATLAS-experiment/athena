@@ -62,7 +62,7 @@ namespace ActsTrk {
   private:
     ToolHandle< ActsTrk::ITrackParamsEstimationTool > m_paramEstimationTool {this, "TrackParamsEstimationTool", "", "Track Param Estimation from Seeds"};
     PublicToolHandle< ActsTrk::ITrackingGeometryTool > m_trackingGeometryTool {this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
-    ToolHandle< ActsTrk::IActsToTrkConverterTool > m_ATLASConverterTool{this, "ATLASConverterTool", "ActsToTrkConverterTool", "Acts to ATLAS converter tool"};
+    PublicToolHandle<IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", "", "Acts to ATLAS converter tool"};
 
     SG::ReadHandleKey< ActsTrk::SeedContainer > m_inputSeedColletionKey {this,  "InputSeedCollection", "", ""}; 
 

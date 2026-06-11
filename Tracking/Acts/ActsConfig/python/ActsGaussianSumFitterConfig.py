@@ -15,6 +15,13 @@ def ActsGaussianSumFitterToolCfg(flags,
     kwargs.setdefault("MaxComponents", flags.Acts.GsfMaxComponents)
     kwargs.setdefault("OutlierChi2Cut", flags.Acts.GsfOutlierChi2Cut)
 
+    if flags.Detector.GeometryITk:
+        from TrkConfig.TrkRIO_OnTrackCreatorConfig import ITkRotCreatorCfg
+        kwargs.setdefault('RotCreatorTool', acc.popToolsAndMerge(ITkRotCreatorCfg(flags)))
+    elif flags.Detector.GeometryID:
+        from TrkConfig.TrkRIO_OnTrackCreatorConfig import InDetRotCreatorCfg
+        kwargs.setdefault('RotCreatorTool', acc.popToolsAndMerge(InDetRotCreatorCfg(flags)))
+
     if "TrackingGeometryTool" not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
         kwargs["TrackingGeometryTool"] = acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))
@@ -27,7 +34,7 @@ def ActsGaussianSumFitterToolCfg(flags,
 
     if 'ATLASConverterTool' not in kwargs:
         from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
-        kwargs["ATLASConverterTool"] = acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags))
+        kwargs["ATLASConverterTool"] = acc.getPrimaryAndMerge(ActsToTrkConverterToolCfg(flags))
 
     if 'BoundaryCheckTool' not in kwargs:    
         if flags.Detector.GeometryITk:

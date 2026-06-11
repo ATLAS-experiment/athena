@@ -74,8 +74,7 @@ public:
 
   virtual std::unique_ptr<Trk::Track> convertFitResult(const EventContext& ctx,
                                                        TrackFitResult_t& fitResult,
-                                                       const Trk::TrackInfo::TrackFitter fitAuthor,
-                                                       const detail::SourceLinkType slType) const override final;
+                                                       const Trk::TrackInfo::TrackFitter fitAuthor) const override final;
   /// Create Acts TrackParameter from ATLAS one.
   /// Take care of unit conversion between the two.  
   virtual
@@ -102,13 +101,11 @@ private:
    *         into a Trk::Track
    * @param ctx: The EventContext to access the current calibration constants
    * @param track: Reference to the track state proxy for translation
-   * @param fitAuthor: Author that is written in the track summary info
-   * @param slType: Source link type to deduct which ATLAS EDM to be used */
+   * @param fitAuthor: Author that is written in the track summary info */
   template <typename Proxy_t>
   std::unique_ptr<Trk::Track> convertActsTrack(const EventContext& ctx,
                                                const Proxy_t& track,
-                                               const Trk::TrackInfo::TrackFitter fitAuthor,
-                                               const detail::SourceLinkType slType) const;
+                                               const Trk::TrackInfo::TrackFitter fitAuthor) const;
 
   /*** @brief Translate the Acts surface bounds to its equivalent in the Trk realm.
    *          @note Not all bounds are implemented
@@ -170,10 +167,6 @@ private:
 
   Gaudi::Property<bool> m_extractMuonSurfaces{this, "ExtractMuonSurfaces", false,
      "If True, use the MuonDetectorManager to extract the Muon surfaces"};
-  /** @brief Source link sepcification used when the ActTrk container -> Trk container
-   *         conversion is called */
-  Gaudi::Property<int> m_sourceLinkType{this, "SourceLinkType", 
-                                        Acts::toUnderlying(detail::SourceLinkType::nTypes) };
   /** @brief Flag to convert the hole states */
   Gaudi::Property<bool> m_convertHoles{this, "convertHoles", true };
   /** @brief Flag to convert the outlier states */
@@ -194,8 +187,6 @@ private:
 
   /** @brief Detector manager to fetch the legacy Trk surfaces */
   SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_muonMgrKey{this, "MuonManagerKey", "MuonDetectorManager"};
-
-  detail::SourceLinkType m_slType{detail::SourceLinkType::nTypes};
 
   detail::TrkMeasurementCalibrator m_measCalib{};
   detail::TrkPrepRawDataCalibrator m_prdCalib{};

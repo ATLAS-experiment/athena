@@ -8,7 +8,7 @@ find_package( Acts COMPONENTS Core PluginJson )
 find_package( Boost )
 
 atlas_add_component( ActsTrackReconstruction
-                     src/*.h src/*.cxx src/detail/*.h src/detail/*.cxx
+                     src/*.cxx  src/detail/*.cxx
                      src/components/*.cxx
              INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
             LINK_LIBRARIES ${Boost_LIBRARIES}
@@ -59,12 +59,12 @@ atlas_add_component( ActsTrackReconstruction
              
 atlas_add_test ( TrackFindingMeasurementsTest
   SOURCES test/TrackFindingMeasurementsTest.cxx src/detail/TrackFindingMeasurements.cxx
-  LINK_LIBRARIES ActsEventLib xAODInDetMeasurement
+  LINK_LIBRARIES ActsEventLib xAODInDetMeasurement ActsCalibratorsLib
   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test ( DuplicateSeedDetectorTest
   SOURCES test/DuplicateSeedDetectorTest.cxx
-  LINK_LIBRARIES ActsEventLib xAODInDetMeasurement
+  LINK_LIBRARIES ActsEventLib xAODInDetMeasurement ActsCalibratorsLib
   POST_EXEC_SCRIPT noerror.sh)
 
 

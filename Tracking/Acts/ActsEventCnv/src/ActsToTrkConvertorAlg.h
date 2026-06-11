@@ -25,8 +25,8 @@ namespace ActsTrk
     virtual StatusCode execute(const EventContext &ctx) const override;
 
   private:
-    ToolHandle<ActsTrk::IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
-    SG::ReadHandleKey<ActsTrk::TrackContainer> m_tracksContainerKey{this, "ACTSTracksLocation", "",  "Output track collection (ActsTrk variant)"};
+    PublicToolHandle<IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
+    SG::ReadHandleKey<TrackContainer> m_tracksContainerKey{this, "ACTSTracksLocation", "",  "Output track collection (ActsTrk variant)"};
     SG::WriteHandleKey<::TrackCollection> m_tracksKey{this, "TracksLocation", "", "Output track collection"};
 
   };

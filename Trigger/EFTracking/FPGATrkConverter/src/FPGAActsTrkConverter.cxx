@@ -3,7 +3,6 @@
 #include "FPGAActsTrkConverter.h"
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
-#include "ActsGeometry/ATLASSourceLink.h"
 #include "Identifier/IdentifierHash.h"
 
 #include <format>
@@ -47,7 +46,7 @@ StatusCode FPGAActsTrkConverter::findProtoTracks(const EventContext& ctx,
       
       }
       for (const FPGATrackSimRoad& road : roads) { 
-        std::vector<ActsTrk::ATLASUncalibSourceLink> points;
+        std::vector<const xAOD::UncalibratedMeasurement* > points;
         
         // Process measurements directly from road's shared_ptr hits
         for (size_t l = 0; l < road.getNLayers(); ++l) {
@@ -105,7 +104,7 @@ StatusCode FPGAActsTrkConverter::findProtoTracks(const EventContext& ctx,
   }
   for (const FPGATrackSimTrack& track : tracks) {
     if (not track.passedOR()) continue;
-    std::vector<ActsTrk::ATLASUncalibSourceLink> points;
+    std::vector<const xAOD::UncalibratedMeasurement* > points;
     const auto& hits = track.getFPGATrackSimHitPtrs();
     for (const auto& hit : hits) {
       if (!hit->isReal()) continue;
@@ -141,10 +140,10 @@ StatusCode FPGAActsTrkConverter::findProtoTracks(const EventContext& ctx,
 
 
 template <typename XAOD_CLUSTER>
-StatusCode FPGAActsTrkConverter::matchTrackMeasurements(const EventContext& ctx,
+StatusCode FPGAActsTrkConverter::matchTrackMeasurements(const EventContext& /*ctx*/,
                                                         const XAOD_CLUSTER& cluster,
                                                         const FPGATrackSimHit & trackHit,
-                                                        std::vector<ActsTrk::ATLASUncalibSourceLink>& measurements,
+                                                        std::vector<const xAOD::UncalibratedMeasurement* >& measurements,
                                                         const DataVector<XAOD_CLUSTER>& clusterContainer) const
 {
   const Identifier::value_type trackId = (trackHit.getHitType() == HitType::spacepoint) 
@@ -152,7 +151,7 @@ StatusCode FPGAActsTrkConverter::matchTrackMeasurements(const EventContext& ctx,
                                           : trackHit.getRdoIdentifier();
 
   if(cluster.identifier() == trackId) {
-    measurements.emplace_back(ActsTrk::makeATLASUncalibSourceLink(&clusterContainer, cluster.index(), ctx));
+    measurements.emplace_back(clusterContainer.at(cluster.index()));
     ATH_MSG_DEBUG("Matched FPGATrackSimHit to xAOD cluster");
   }
 

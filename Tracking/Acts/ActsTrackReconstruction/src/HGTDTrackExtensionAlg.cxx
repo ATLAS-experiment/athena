@@ -803,14 +803,13 @@ std::pair<float, float> HGTDTrackExtensionAlg::correctTOF(
 
 const xAOD::HGTDCluster* HGTDTrackExtensionAlg::getHGTDClusterFromState(const EventContext& ctx, const ActsTrk::detail::RecoConstTrackStateContainerProxy& state) const {
   if (state.hasUncalibratedSourceLink()) {
-    auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
-    assert( sl != nullptr);
-    const xAOD::UncalibratedMeasurement &uncalib_cluster = getUncalibratedMeasurement(sl);
-    xAOD::UncalibMeasType clusterType = uncalib_cluster.type();
+    auto uncalib_cluster = detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());
+    assert( uncalib_cluster != nullptr);   
+    xAOD::UncalibMeasType clusterType = uncalib_cluster->type();
 
     if (clusterType == xAOD::UncalibMeasType::HGTDClusterType) {
       ATH_MSG_DEBUG("Found HGTD cluster in source link");
-      auto hgtdCluster = static_cast<const xAOD::HGTDCluster *>(&uncalib_cluster);
+      auto hgtdCluster = static_cast<const xAOD::HGTDCluster *>(uncalib_cluster);
       return hgtdCluster;
     } else {
       ATH_MSG_DEBUG("Source link contains non-HGTD measurement type: " << static_cast<int>(clusterType));
