@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LengthIntegrator.h"
@@ -323,10 +323,6 @@ namespace G4UA
     if(name.find("CFoam") != std::string::npos) return "SupportStructure";
     if(name.find("K13D2U") != std::string::npos) return "SupportStructure";
     if(name.find("BoratedPolyethylene") != std::string::npos) return "Moderator";
-
-
-    if(name.find("TiMetal") != std::string::npos) return "Titanium";
-    if(name.find("CuMetal") != std::string::npos) return "Copper";
       
     if(name.find("Alpine") != std::string::npos) return "SupportStructure";
     
@@ -348,8 +344,6 @@ namespace G4UA
     if(name.find("pix::Hybrid") != std::string::npos) return "PixelChips";
     if(name.find("PP0") != std::string::npos) return "PP0";
     if(name.find("PP1") != std::string::npos) return "PP1";
-
-    if(name.find("PP0") != std::string::npos) return "PP1"; //Grouping PP0 and PP1
     
     if(name.find("PST") != std::string::npos) return "SupportStructure";
     if(name.find("IST") != std::string::npos) return "SupportStructure";
