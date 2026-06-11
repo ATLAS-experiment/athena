@@ -27,13 +27,12 @@ StatusCode BunchCrossingAverageCondTest::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode BunchCrossingAverageCondTest::execute() {
+StatusCode BunchCrossingAverageCondTest::execute(const EventContext& ctx) {
 
   // Retrieve the object holding the BCID of the current event:
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   std::ostream& out = m_fileOut.good() ? m_fileOut : std::cout;
-  SG::ReadCondHandle<BunchCrossingAverageCondData> readHdl(m_inputKey);
+  SG::ReadCondHandle<BunchCrossingAverageCondData> readHdl(m_inputKey, ctx);
   const BunchCrossingAverageCondData* bccd=*readHdl;
   out << "\nTimestamp:" << ctx.eventID().time_stamp() << " ns:" << ctx.eventID().time_stamp_ns_offset() << std::endl; 
   for (unsigned channel=0;channel<2;++channel) 
