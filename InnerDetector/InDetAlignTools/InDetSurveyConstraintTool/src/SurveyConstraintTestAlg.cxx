@@ -142,7 +142,7 @@ return StatusCode::SUCCESS;
   
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-StatusCode SurveyConstraintTestAlg::execute() {
+StatusCode SurveyConstraintTestAlg::execute(const EventContext& /*ctx*/) {
 
 // Part 1: Get the messaging service, print where you are
 ATH_MSG_INFO( "execute()" );
