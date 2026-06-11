@@ -41,7 +41,7 @@ namespace InDet {
       SegmentDriftCircleAssValidation(const std::string &name, ISvcLocator *pSvcLocator);
       virtual ~SegmentDriftCircleAssValidation() {}
       StatusCode initialize();
-      StatusCode execute();
+      StatusCode execute(const EventContext& ctx);
       StatusCode finalize();
 
       ///////////////////////////////////////////////////////////////////
