@@ -81,7 +81,7 @@ class IDPerfMonZmumu : public AthAlgorithm
 
   // Overriden class functions.
   virtual StatusCode initialize();
-  virtual StatusCode execute();
+  virtual StatusCode execute(const EventContext& ctx);
   virtual StatusCode finalize();
 
  protected:

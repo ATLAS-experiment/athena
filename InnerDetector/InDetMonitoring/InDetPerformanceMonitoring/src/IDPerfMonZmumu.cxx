@@ -931,12 +931,12 @@ void IDPerfMonZmumu::RegisterHistograms()
 
 
 //==================================================================================
-StatusCode IDPerfMonZmumu::execute()
+StatusCode IDPerfMonZmumu::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG("** IDPerfMonZmumu::execute ** START **");
   
-  SG::ReadHandle<xAOD::EventInfo> eventInfo (m_EventInfoKey, getContext());
-  SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandleRec { m_beamSpotKey, getContext() };
+  SG::ReadHandle<xAOD::EventInfo> eventInfo (m_EventInfoKey, ctx);
+  SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandleRec { m_beamSpotKey, ctx };
 
   if(eventInfo.isValid()) {
     m_runNumber  = eventInfo->runNumber();
@@ -956,7 +956,7 @@ StatusCode IDPerfMonZmumu::execute()
   }
   else {
     ATH_MSG_DEBUG(" IDPerfMonZmumu::execute evtStore->retrieve (eventInfo) failed ..  trying another strategy.. ");
-    SG::ReadHandle<xAOD::EventInfo> eventInfo2(m_EventInfoKey);
+    SG::ReadHandle<xAOD::EventInfo> eventInfo2(m_EventInfoKey, ctx);
     if (eventInfo2.isValid()) {
       m_runNumber = eventInfo2->runNumber();
       m_evtNumber = eventInfo2->eventNumber();
@@ -1064,7 +1064,6 @@ StatusCode IDPerfMonZmumu::execute()
 
 
     // vertex
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     SG::ReadHandle<xAOD::VertexContainer> vertices { m_vertexKey, ctx };
     for (const auto V : *vertices) {
       if (V->vertexType() == xAOD::VxType::VertexType::PriVtx) {
@@ -1316,7 +1315,6 @@ StatusCode IDPerfMonZmumu::execute()
       
       StatusCode fitStatus;
       //save default and refit track parameters
-      const EventContext& ctx = Gaudi::Hive::currentContext();
       if( ppos_comb->track() ) {
 	defaultMuonTrk1 = new Trk::Track(*ppos_comb->track());
 	
