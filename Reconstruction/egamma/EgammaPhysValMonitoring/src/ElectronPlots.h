@@ -29,11 +29,13 @@ class ElectronPlots:public PlotBase {
 
       Egamma::KinematicsPlots     m_oKinAllRecoPlots;
       Egamma::ShowerShapesPlots   m_oShowerShapesAllRecoPlots;
+      Egamma::ShowerShapesPlots   m_oShowerShapesAll10GeVRecoPlots;
       Egamma::IsolationPlots      m_oIsolationAllRecoPlots;
       Egamma::TrackPlots          m_oTrackAllRecoPlots;
     
       Egamma::KinematicsPlots     m_oKinIsoRecoPlots;
       Egamma::ShowerShapesPlots   m_oShowerShapesIsoRecoPlots;
+      Egamma::ShowerShapesPlots   m_oShowerShapesIso10GeVRecoPlots;
       Egamma::IsolationPlots      m_oIsolationIsoRecoPlots;
       Egamma::TrackPlots          m_oTrackIsoRecoPlots;
   
