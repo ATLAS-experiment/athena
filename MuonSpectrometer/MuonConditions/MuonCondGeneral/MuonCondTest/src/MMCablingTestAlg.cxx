@@ -17,8 +17,7 @@ StatusCode MMCablingTestAlg::initialize(){
   return StatusCode::SUCCESS;
 } 
 
-StatusCode MMCablingTestAlg::execute(){
-  const EventContext& ctx = Gaudi::Hive::currentContext();
+StatusCode MMCablingTestAlg::execute(const EventContext& ctx){
   std::unique_ptr<std::fstream> f_dump = !m_dumpFile.value().empty() ? 
                                          std::make_unique<std::fstream>(m_dumpFile, std::fstream::out) : nullptr;
   ATH_MSG_INFO("Start validation of the MM cabling. Dump complete mapping into "<<m_dumpFile);

@@ -26,8 +26,7 @@ StatusCode TgcDigtJitterTestAlg::initialize() {
 }
 
 // Execute
-StatusCode TgcDigtJitterTestAlg::execute() {  
-    const EventContext& ctx{Gaudi::Hive::currentContext()};
+StatusCode TgcDigtJitterTestAlg::execute(const EventContext& ctx) {  
     ATH_MSG_INFO("Calling execute");   
     SG::ReadCondHandle<TgcDigitJitterData> readHandle{m_readKey, ctx};
     if (!readHandle.isValid()) {

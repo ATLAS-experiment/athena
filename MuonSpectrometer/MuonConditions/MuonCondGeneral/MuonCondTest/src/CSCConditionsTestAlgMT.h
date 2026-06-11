@@ -30,7 +30,7 @@ public:
     virtual ~CSCConditionsTestAlgMT();
 
     StatusCode initialize() override;
-    StatusCode execute() override;
+    StatusCode execute(const EventContext& ctx) override;
 
 private:
     SG::ReadCondHandleKey<CscCondDbData> m_readKey{this, "ReadKey", "CscCondDbData", "Key of CscCondDbData"};
