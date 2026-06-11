@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // File:  Generators/FlowAfterburner/CheckFlow.h
@@ -17,7 +17,6 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GeneratorObjects/HijingEventParams.h"
-#include "GaudiKernel/ITHistSvc.h"
 #include <string>
 
 namespace TruthHelper{
