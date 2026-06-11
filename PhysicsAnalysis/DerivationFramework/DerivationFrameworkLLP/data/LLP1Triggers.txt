@@ -1,0 +1,496 @@
+# Lines beginning with "#" are comments and will be ignored, as will empty lines.
+# Section names are identified by lines of the form:
+#   # trig_section_name   #
+# (i.e. the first word after the leading "#" must start with "trig_").
+#
+# tapis-derived categories (el, mu, g, xe, elmu, mug, exotics, gxe) are NOT
+# in this file; they are queried dynamically 
+
+
+################################################################
+# trig_bib                                                     #
+# BIB / beam-induced background (EMPTY and UNPAIRED_ISO seeds) #
+################################################################
+HLT_2g22_tight_L1EM7_EMPTY
+HLT_2g22_tight_L1EM7_UNPAIRED_ISO
+HLT_2g22_tight_L1eEM15_EMPTY
+HLT_2g22_tight_L1eEM9_EMPTY
+HLT_2g22_tight_L1eEM9_UNPAIRED_ISO
+HLT_2g50_tight_L1EM7_EMPTY
+HLT_2g50_tight_L1EM7_UNPAIRED_ISO
+HLT_2g50_tight_L1eEM15_EMPTY
+HLT_2g50_tight_L1eEM9_EMPTY
+HLT_2g50_tight_L1eEM9_UNPAIRED_ISO
+HLT_3mu6_msonly_L12MU5VF_EMPTY
+HLT_3mu6_msonly_L1MU3V_UNPAIRED_ISO
+HLT_3mu6_msonly_L1MU5VF_EMPTY
+HLT_cosmic_id_L1MU8VF_EMPTY
+HLT_g15_loose_2mu10_msonly_L1MU3V_UNPAIRED_ISO
+HLT_g15_loose_2mu10_msonly_L1MU5VF_EMPTY
+HLT_g15_loose_L1eEM10L_2mu10_msonly_L12MU5VF_EMPTY
+HLT_g15_loose_L1eEM10L_2mu10_msonly_L1MU3V_UNPAIRED_ISO
+HLT_g35_medium_g25_medium_L1EM7_EMPTY
+HLT_g35_medium_g25_medium_L1EM7_UNPAIRED_ISO
+HLT_g35_medium_g25_medium_L1eEM15_EMPTY
+HLT_g35_medium_g25_medium_L1eEM9_EMPTY
+HLT_g35_medium_g25_medium_L1eEM9_UNPAIRED_ISO
+HLT_j55c_xe50_cell_L1J30_EMPTY
+HLT_j55c_xe50_cell_L1jJ60_EMPTY
+HLT_larpsall_L1J12_FIRSTEMPTY
+HLT_larpsall_L1J30_FIRSTEMPTY
+HLT_larpsall_L1jJ30_FIRSTEMPTY
+HLT_larpsall_L1jJ60_EMPTY
+HLT_larpsall_L1jJ60_FIRSTEMPTY
+HLT_larpsall_L1jJ60p30ETA49_EMPTY
+HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan40_L1MU14FCH_EMPTY
+HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan40_L1MU14FCH_UNPAIRED_ISO
+
+
+###################################################
+# trig_hitdvjet_Run3                              #
+# MET + hit-based displaced-vertex-in-jet (Run 3) #
+###################################################
+HLT_xe80_tcpufit_hitdvjet200_medium_L1XE50
+HLT_xe80_tcpufit_hitdvjet200_tight_L1gXEJWOJ100
+HLT_xe80_tcpufit_hitdvjet200_tight_L1gXEJWOJ110
+HLT_xe80_tcpufit_hitdvjet200_tight_L1jXE100
+HLT_xe80_tcpufit_hitdvjet200_tight_L1jXE110
+
+###############################################################################
+# trig_gjet_llp_Run3                                                          #
+# Photon + LLP jet signatures: DJMASS, emergingPTF, PhysicsTLA, b-tag (Run 3) #
+###############################################################################
+HLT_g20_tight_j35_0eta290_020jvt_bgn277_3j35a_j0_DJMASS500j35_pf_ftf_L1eEM22M_jMJJ-300
+HLT_g25_medium_4j35a_j0_DJMASS1000j35_L1eEM26M
+HLT_g25_tight_2j35_0eta290_020jvt_bgn177_2j35a_pf_ftf_presel2a20b90XX2a20_L1eEM26M
+HLT_g25_tight_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo90XX2a20_L1eEM26M
+HLT_g25_tight_j35_0eta290_020jvt_bgn177_3j35a_j0_DJMASS700j35_pf_ftf_presela20b85XX3a20_L1EM22VHI
+HLT_g25_tight_j35_0eta290_020jvt_bgn177_3j35a_j0_DJMASS700j35_pf_ftf_presela20b85XX3a20_L1eEM26M
+HLT_g25_tight_j35_0eta290_020jvt_bgn277_3j35a_j0_DJMASS700j35_pf_ftf_presela20bgtwo85XX3a20_L1eEM26M
+HLT_g35_medium_4j35a_j0_DJMASS1000j35_L1eEM26M
+HLT_g35_tight_3j25_pf_ftf_PhysicsTLA_L1eEM26M
+HLT_g35_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM26M
+HLT_g45_loose_6j45c_L14J15p0ETA25
+HLT_g45_loose_6j45c_L14jJ40p0ETA25
+HLT_g45_tight_2j50_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM26M
+HLT_g50_loose_xe40_cell_xe70_pfopufit_80mTAC_L1eEM26M
+HLT_g50_tight_xe40_cell_xe50_pfopufit_80mTAC_L1eEM26M
+HLT_g50_tight_xe40_cell_xe60_pfopufit_80mTAC_L1eEM26M
+HLT_g85_tight_3j50_L1eEM26M
+HLT_g85_tight_3j50_pf_ftf_L1eEM26M
+
+
+#######################################################
+# trig_lrt_nscan_Run3                                 #
+# LRT electron / displaced muon / narrow-scan (Run 3) #
+#######################################################
+HLT_e35_lhloose_nopix_lrtmedium_L1eEM26M
+HLT_e30_lhloose_nopix_lrtmedium_L1eEM26M
+
+
+###########################################
+# trig_emu_djmass_Run3                    #
+# Electron or muon + VBF + DJMASS (Run 3) #
+###########################################
+HLT_2e5_lhmedium_j70_j50a_j0_DJMASS900j50_L1MJJ-500-NFF
+HLT_2e5_lhmedium_j70_j50a_j0_DJMASS900j50_L1jMJJ-500-NFF
+HLT_2mu6_2j50a_j0_DJMASS900j50_L1MJJ-500-NFF
+HLT_2mu6_2j50a_j0_DJMASS900j50_L1jMJJ-500-NFF
+HLT_e10_lhmedium_ivarloose_j70_j50a_j0_DJMASS900j50_L1MJJ-500-NFF
+HLT_e10_lhmedium_ivarloose_j70_j50a_j0_DJMASS900j50_L1jMJJ-500-NFF
+HLT_e5_lhvloose_j70_j50a_j0_DJMASS1000j50_xe50_tcpufit_L1jMJJ-500-NFF
+HLT_mu10_ivarmedium_j70_j50a_j0_DJMASS900j50_L1MJJ-500-NFF
+HLT_mu10_ivarmedium_j70_j50a_j0_DJMASS900j50_L1jMJJ-500-NFF
+HLT_mu4_j70_j50a_j0_DJMASS1000j50_xe50_tcpufit_L1MJJ-500-NFF
+HLT_mu4_j70_j50a_j0_DJMASS1000j50_xe50_tcpufit_L1jMJJ-500-NFF
+
+
+#######################################################
+# trig_diphoton_Run3                                  #
+# Di-photon triggers: 2g and g+g combinations (Run 3) #
+#######################################################
+HLT_2g10_loose_L1eEM9_mu20_L1MU14FCH
+HLT_2g10_loose_mu20_L1MU14FCH
+HLT_2g15_tight_25dphiAA_invmAA80_L1DPHI-M70-2eEM15M
+HLT_2g20_tight_L12EM15VHI
+HLT_2g20_tight_icaloloose_L12eEM18M
+HLT_2g22_tight_L12EM15VHI
+HLT_2g22_tight_L12eEM18M
+HLT_2g22_tight_noringer_L12eEM18M
+HLT_2g25_loose_g15_loose_L12EM20VH
+HLT_2g25_loose_g15_loose_L12eEM24L
+HLT_2g50_loose_L12EM20VH
+HLT_2g50_loose_L12eEM24L
+HLT_g35_medium_g25_medium_L12EM20VH
+HLT_g35_medium_g25_medium_L12eEM24L
+HLT_g45_medium_g20_medium_L1eEM40L_2eEM18L
+
+
+######################################################
+# trig_highpt_el_Run3                                #
+# High-pT electrons, e+xe, e+gamma resonance (Run 3) #
+######################################################
+HLT_e100_lhvloose_L1eEM26M
+HLT_e120_lhvloose_L1eEM26M
+HLT_e24_lhmedium_g12_loose_g12_loose_02dRAB_02dRAC_02dRBC_L1eEM24L_3eEM12L
+HLT_e24_lhmedium_g25_medium_02dRAB_L12eEM24L
+HLT_e25_mergedtight_g35_medium_90invmAB_02dRAB_L12eEM24L
+HLT_e30_lhvloose_L1eEM26M
+HLT_e40_lhvloose_L1eEM26M
+HLT_e60_lhvloose_L1eEM26M
+HLT_e70_lhloose_xe70_cell_L1eEM26M
+HLT_e80_lhvloose_L1eEM26M
+
+
+#############################################################################
+# trig_run3_legacy                                                          #
+# Run-3 legacy: L1EM/L1MU-seeded, dimuon, LRT muon, prescaled chains        #
+# this is a bit of a catchall category for max redundancy; to be sorted     #
+#############################################################################
+HLT_2e12_lhloose_mu10_L12EM8VH_MU8F
+HLT_2e17_lhvloose_L12EM15VHI
+HLT_2e24_lhvloose_L12EM20VH
+HLT_2mu10_l2mt_L1MU10BOM
+HLT_2mu14_L12MU8F
+HLT_2mu4_L12MU3V
+HLT_2mu4_l2io_invmDimu_L12MU3V
+HLT_2mu50_msonly_L1MU14FCH
+HLT_e100_lhvloose_L1EM22VHI
+HLT_e10_lhvloose_L1EM7
+HLT_e10_lhvloose_L1eEM9
+HLT_e120_lhvloose_L1EM22VHI
+HLT_e12_lhloose_2mu10_L12MU8F
+HLT_e12_lhloose_L1eEM10L_2mu10_L12MU8F
+HLT_e140_lhloose_L1EM22VHI
+HLT_e140_lhloose_noringer_L1EM22VHI
+HLT_e17_lhloose_mu14_L1EM15VH_MU8F
+HLT_e20_lhvloose_L1EM15VH
+HLT_e20_lhvloose_L1eEM18L
+HLT_e24_lhmedium_g12_loose_g12_loose_02dRAB_02dRAC_02dRBC_L1EM20VH_3EM10VH
+HLT_e24_lhmedium_g25_medium_02dRAB_L12EM20VH
+HLT_e24_lhvloose_2e12_lhvloose_L1EM20VH_3EM10VH
+HLT_e25_mergedtight_g35_medium_90invmAB_02dRAB_L12EM20VH
+HLT_e26_lhmedium_mu8noL1_L1EM22VHI
+HLT_e26_lhtight_ivarloose_2j20_roiftf_preselj20_L1EM22VHI
+HLT_e26_lhtight_ivarloose_2j20_roiftf_preselj20_L1eEM26M
+HLT_e26_lhtight_ivarloose_L1EM22VHI
+HLT_e26_lhtight_ivarloose_j20_pf_ftf_L1EM22VHI
+HLT_e26_lhtight_ivarloose_j20_pf_ftf_L1eEM26M
+HLT_e300_etcut_L1EM22VHI
+HLT_e30_lhloose_nopix_lrtmedium_L1EM22VHI
+HLT_e30_lhvloose_L1EM22VHI
+HLT_e40_lhvloose_L1EM22VHI
+HLT_e60_lhmedium_L1EM22VHI
+HLT_e60_lhvloose_L1EM22VHI
+HLT_e70_lhloose_xe70_cell_L1EM22VHI
+HLT_e7_lhmedium_L1eEM5_mu24_L1MU14FCH
+HLT_e7_lhmedium_mu24_L1MU14FCH
+HLT_e80_lhvloose_L1EM22VHI
+HLT_e9_lhvloose_L1eEM5_mu20_mu8noL1_L1MU14FCH
+HLT_e9_lhvloose_mu20_mu8noL1_L1MU14FCH
+HLT_g140_loose_L1EM22VHI
+HLT_g15_loose_2mu10_msonly_L12MU8F
+HLT_g15_loose_L1eEM10L_2mu10_msonly_L12MU8F
+HLT_g20_tight_icaloloose_j35_0eta290_020jvt_bdl1d77_3j35a_j0_DJMASS500j35_pf_ftf_L1EM18VHI_MJJ-300
+HLT_g20_tight_j35_0eta290_020jvt_bgn177_3j35a_j0_DJMASS500j35_pf_ftf_L1EM18VHI_MJJ-300
+HLT_g25_medium_4j35a_j0_DJMASS1000j35_L1EM22VHI
+HLT_g25_medium_L1eEM18L_mu24_L1MU14FCH
+HLT_g25_medium_L1eEM26M_mu24_ivarmedium_L1MU14FCH
+HLT_g25_medium_mu24_L1MU14FCH
+HLT_g25_medium_mu24_ivarmedium_L1MU14FCH
+HLT_g25_tight_2j35_0eta290_020jvt_bgn177_2j35a_pf_ftf_presel2a20b90XX2a20_L1EM22VHI
+HLT_g25_tight_icaloloose_2j35_0eta290_020jvt_bdl1d77_2j35a_pf_ftf_L1EM22VHI
+HLT_g25_tight_icaloloose_2j35_0eta290_020jvt_bdl1d77_2j35a_pf_ftf_presel2a20b90XX2a20_L1EM22VHI
+HLT_g25_tight_icaloloose_j35_0eta290_020jvt_bdl1d77_3j35a_j0_DJMASS700j35_pf_ftf_L1EM22VHI
+HLT_g25_tight_icaloloose_j35_0eta290_020jvt_bdl1d77_3j35a_j0_DJMASS700j35_pf_ftf_presela20b85XX3a20_L1EM22VHI
+HLT_g300_etcut_L1EM22VHI
+HLT_g35_loose_mu15_mu2noL1_L1EM24VHI
+HLT_g35_loose_mu18_L1EM24VHI
+HLT_g35_tight_3j25_pf_ftf_PhysicsTLA_L1EM22VHI
+HLT_g35_tight_mu15noL1_mu2noL1_L1EM24VHI
+HLT_g35_tight_mu18noL1_L1EM24VHI
+HLT_g35_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1EM22VHI
+HLT_g40_loose_L1eEM24L_mu40_msonly_L1MU14FCH
+HLT_g40_loose_mu40_msonly_L1MU14FCH
+HLT_g45_tight_2j50_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1EM22VHI
+HLT_g45_tight_2j55_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1EM22VHI
+HLT_g50_loose_xe40_cell_xe70_pfopufit_80mTAC_L1EM22VHI
+HLT_g50_loose_xe40_cell_xe70_pfopufit_L1EM22VHI
+HLT_g50_tight_xe40_cell_xe50_pfopufit_80mTAC_L1EM22VHI
+HLT_g85_tight_3j50_L1EM22VHI
+HLT_g85_tight_3j50_pf_ftf_L1EM22VHI
+HLT_g90_loose_xe90_cell_L1EM22VHI
+HLT_mu10_L1MU8F
+HLT_mu10_ivarmedium_mu10_10invmAB70_L12MU8F
+HLT_mu10_l2mt_L1MU10BO
+HLT_mu10_l2mt_L1MU10BOM
+HLT_mu14_mu14_idtp_idZmumu_L12MU8F
+HLT_mu20_2mu4noL1_L1MU14FCH
+HLT_mu20_LRT_d0loose_L1MU14FCH
+HLT_mu20_LRT_d0tight_L1MU14FCH
+HLT_mu20_ivarmedium_mu4noL1_10invmAB70_L1MU14FCH
+HLT_mu20_ivarmedium_mu8noL1_L1MU14FCH
+HLT_mu10_msonly_L1jMJJ-500-NFF
+HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan40_L110DR-MU14FCH-MU5VF
+HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan40_L1MU14FCH_jJ90
+HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan40_L1MU14FCH_jXE80
+HLT_mu6_msonly_iloosems_mu6noL1_msonly_nscan40_L1jMJJ-500-NFF
+HLT_mu22_L1MU14FCH
+HLT_mu22_mu8noL1_L1MU14FCH
+HLT_mu24_L1MU14FCH
+HLT_mu24_ivarmedium_2j20_roiftf_preselj20_L1MU14FCH
+HLT_mu24_ivarmedium_L1MU14FCH
+HLT_mu24_ivarmedium_j20_pf_ftf_L1MU14FCH
+HLT_mu24_ivarmedium_mu14_idtp_idZmumu_L1MU14FCH
+HLT_mu26_L1MU14FCH
+HLT_mu3vtx_L12MU8F
+HLT_mu3vtx_j30_L12MU8F
+HLT_mu4_LRT_d0loose_L1MU3V
+HLT_mu4_ivarloose_mu4_11invmAB60_L12MU3V
+HLT_mu4_ivarloose_mu4_7invmAB9_L12MU3V
+HLT_mu4_ivarloose_mu4_b11invmAB60vtx20_L12MU3V
+HLT_mu4_ivarloose_mu4_b7invmAB9vtx20_L12MU3V
+HLT_mu4_j40_L1MU3V_jJ50
+HLT_mu4_j40_dRAB05_L1MU3V_jJ50
+HLT_mu50_L1MU14FCH
+HLT_mu60_0eta105_msonly_L1MU14FCH
+HLT_mu6_ivarloose_mu6_11invmAB24_L12MU5VF
+HLT_mu6_ivarloose_mu6_24invmAB60_L12MU5VF
+HLT_mu6_ivarloose_mu6_b11invmAB24vtx20_L12MU5VF
+HLT_mu6_ivarloose_mu6_b24invmAB60vtx20_L12MU5VF
+HLT_mu80_msonly_3layersEC_L1MU14FCH
+HLT_mu8_L1MU5VF
+HLT_mu60_L1MU14FCH
+HLT_e20_lhtight_ivarloose_L1ZAFB-25DPHI-eEM18M
+HLT_e26_lhtight_ivartight_L1eEM26M
+HLT_mu24_ivarmedium_L1MU14FCH_OR_HLT_mu50_L1MU14FCH
+HLT_e300_etcut_L1eEM26M
+HLT_e140_lhloose_L1eEM26M
+HLT_e250_etcut_L1EM22VHI
+HLT_e17_lhvloose_L1EM15VHI
+HLT_e140_lhloose_noringer_L1eEM26M
+HLT_e26_lhtight_ivarloose_L1eEM26M
+HLT_e26_lhtight_ivarloose_L1eEM26T
+HLT_mu60_0eta105_msonly_L1MU14FCH_OR_HLT_mu80_msonly_3layersEC_L1MU14FCH
+HLT_e26_lhtight_ivarmedium_L1eEM26M
+HLT_g140_loose_L1eEM26M
+HLT_g300_etcut_L1eEM26M
+HLT_e60_lhmedium_L1eEM26M
+HLT_2e17_lhvloose_L12eEM18M
+HLT_2e24_lhvloose_L12eEM24L
+HLT_e24_lhvloose_2e12_lhvloose_L1eEM24L_3eEM12L
+
+#########################
+# trig_EJ_Run3          #
+# Emerging jets (Run 3) #
+#########################
+HLT_j200_0eta180_emergingPTF0p08dR1p2_a10sd_cssk_pf_jes_ftf_preselj200_L1J100
+HLT_j200_0eta180_emergingPTF0p08dR1p2_a10sd_cssk_pf_jes_ftf_preselj200_L1SC111-CjJ40
+HLT_j200_0eta180_emergingPTF0p08dR1p2_a10sd_cssk_pf_jes_ftf_preselj200_L1SC175-SCjJ10
+HLT_j200_0eta180_emergingPTF0p08dR1p2_a10sd_cssk_pf_jes_ftf_preselj200_L1gLJ140p0ETA25
+HLT_j200_0eta180_emergingPTF0p08dR1p2_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160
+HLT_j460_a10r_L1J100
+HLT_j460_a10r_L1jJ160
+
+
+############################################
+# trig_VBF_2018                            #
+# VBF multi-jet + b-tagging (2018 / Run 2) #
+############################################
+HLT_ht300_2j40_0eta490_invm700_L1HT150-J20s5.ETA31_MJJ-400-CF_AND_2j35_gsc45_bmv2c1070_split
+HLT_j45_gsc55_bmv2c1070_split_2j45_320eta490_L1J25.0ETA23_2J15.31ETA49
+HLT_j55_gsc80_bmv2c1070_split_j45_gsc60_bmv2c1085_split_j45_320eta490
+HLT_j70_j50_0eta490_invm1100j70_dphi20_deta40_L1MJJ-500-NFF
+HLT_j80_0eta240_j60_j45_320eta490_AND_2j35_gsc45_bmv2c1070_split
+
+
+######################
+# trig_VBF_Run3      #
+# VBF DJMASS (Run 3) #
+######################
+HLT_j70_j50a_j0_DJMASS1000j50dphi200x400deta_L1MJJ-500-NFF
+HLT_j70_j50a_j0_DJMASS1000j50dphi200x400deta_L1jMJJ-500-NFF
+
+
+###########################################
+# trig_dispjet_Run3                       #
+# Displaced jets: hit-DV, dispjet (Run 3) #
+###########################################
+HLT_j180_2dispjet50_2p_L1J100
+HLT_j180_2dispjet50_2p_L1jJ160
+HLT_j180_2dispjet50_3d2p_L1J100
+HLT_j180_2dispjet50_3d2p_L1jJ160
+HLT_j180_dispjet100_x3d1p_L1J100
+HLT_j180_dispjet100_x3d1p_L1jJ160
+HLT_j180_dispjet50_3d2p_dispjet50_1p_L1J100
+HLT_j180_dispjet50_3d2p_dispjet50_1p_L1jJ160
+HLT_j180_dispjet90_x3d1p_L1J100
+HLT_j180_dispjet90_x3d1p_L1jJ160
+HLT_j180_hitdvjet260_tight_L1J100
+
+
+##################################
+# trig_dedx_Run3                 #
+# MET + high-dE/dx track (Run 3) #
+##################################
+HLT_xe80_tcpufit_dedxtrk25_medium_L1XE50
+HLT_xe80_tcpufit_dedxtrk25_medium_L1XE55
+HLT_xe80_tcpufit_dedxtrk50_medium_L1XE50
+HLT_xe80_tcpufit_dedxtrk50_medium_L1XE55
+HLT_xe80_tcpufit_dedxtrk50_medium_L1jXE100
+HLT_xe80_tcpufit_isotrk140_medium_iaggrmedium_L1jXE100
+
+
+
+#################################
+# trig_dt_Run3                  #
+# disappearing track #
+#################################
+HLT_xe80_tcpufit_distrk20_medium_L1XE50
+HLT_xe80_tcpufit_distrk20_medium_L1XE55
+HLT_xe80_tcpufit_distrk20_tight_L1XE50
+HLT_xe80_tcpufit_distrk20_tight_L1XE55
+HLT_xe80_tcpufit_distrk20_tight_L1jXE100
+HLT_xe80_tcpufit_distrk20_medium_L1jXE100
+HLT_distrk20_tight_L1XE50
+
+
+########################################
+# trig_isohighpt_Run3                  #
+# MET + isolated high-pT track (Run 3) #
+########################################
+HLT_xe50_tcpufit_isotrk120_medium_iaggrmedium_L1jXE100
+HLT_xe80_tcpufit_isotrk100_medium_iaggrmedium_L1XE50
+HLT_xe80_tcpufit_isotrk120_medium_iaggrloose_L1XE50
+HLT_xe80_tcpufit_isotrk120_medium_iaggrmedium_L1XE50
+HLT_xe80_tcpufit_isotrk120_medium_iaggrmedium_L1jXE100
+HLT_xe80_tcpufit_isotrk140_medium_iaggrmedium_L1XE50
+
+
+#####################
+# trig_latemu       #
+# Late muon (Run 3) #
+#####################
+HLT_mu10_lateMu_L1LATE-MU8F_jJ90
+HLT_mu10_lateMu_L1LATE-MU8F_jXE70
+HLT_mu10_mgonly_L1LATE-MU10_XE40
+HLT_mu10_mgonly_L1LATEMU10_J50
+HLT_mu10_mgonly_L1LATEMU10_XE50
+
+
+##################################
+# trig_tau_standard              #
+# Standard tau triggers          #
+##################################
+HLT_tau160_mediumRNN_tracktwoMVA_L1TAU100
+HLT_tau160_mediumRNN_tracktwoMVA_L1eTAU140
+HLT_tau35_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_03dRAB30_L1DR-TAU20ITAU12I-J25
+HLT_tau35_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_03dRAB_L1TAU20IM_2TAU12IM_4J12p0ETA25
+HLT_tau35_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_03dRAB30_L1cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55
+HLT_tau35_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_03dRAB_L1cTAU30M_2cTAU20M_4jJ30p0ETA25
+HLT_tau40_mediumRNN_tracktwoMVA_tau35_mediumRNN_tracktwoMVA_03dRAB_L1TAU25IM_2TAU20IM_2J25_3J20
+HLT_tau40_mediumRNN_tracktwoMVA_tau35_mediumRNN_tracktwoMVA_03dRAB_L1cTAU35M_2cTAU30M_2jJ55_3jJ50
+HLT_tau50_mediumRNN_tracktwoMVA_xe80_tcpufit_xe50_cell_L1XE50
+HLT_tau50_mediumRNN_tracktwoMVA_xe80_pfopufit_xe50_cell_L1XE50
+HLT_tau50_mediumRNN_tracktwoMVA_xe80_tcpufit_xe50_cell_L1jXE110
+HLT_tau50_mediumRNN_tracktwoMVA_xe80_pfopufit_xe50_cell_L1jXE110
+HLT_tau60_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_xe50_cell_03dRAB_L1TAU40_2TAU12IM_XE40
+HLT_tau60_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_xe50_cell_03dRAB_L1eTAU60_2eTAU20M_jXE80
+HLT_tau60_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_xe50_cell_03dRAB_L1eTAU60_2cTAU20M_jXE80
+HLT_tau80_mediumRNN_tracktwoMVA_tau35_mediumRNN_tracktwoMVA_03dRAB30_L1TAU60_DR-TAU20ITAU12I
+HLT_tau80_mediumRNN_tracktwoMVA_tau35_mediumRNN_tracktwoMVA_03dRAB30_L1eTAU80_2cTAU30M_DR-eTAU30eTAU20
+HLT_tau80_mediumRNN_tracktwoMVA_tau60_mediumRNN_tracktwoMVA_03dRAB_L1TAU60_2TAU40
+HLT_tau80_mediumRNN_tracktwoMVA_tau60_mediumRNN_tracktwoMVA_03dRAB_L1eTAU80_2eTAU60
+HLT_tau80_mediumRNN_tracktwoMVA_L1TAU60_tau60_mediumRNN_tracktwoMVA_L1TAU40
+HLT_tau35_mediumRNN_tracktwoMVA_xe70_L1XE45 
+HLT_tau60_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_xe50
+
+
+###################################
+# trig_calratio_dispjet_run3      #
+# Cal-ratio displaced jet (Run 3) #
+###################################
+HLT_j30_CLEANllp_calratio_L1LLP-NOMATCH
+HLT_j30_CLEANllp_calratiormbib_L1LLP-NOMATCH
+HLT_j30_CLEANllp_calratio_L1TAU60
+HLT_j30_CLEANllp_calratio_L1TAU100
+HLT_j30_CLEANllp_calratio_L1eTAU60_EMPTY
+HLT_j30_CLEANllp_calratio_L1eTAU60_UNPAIRED_ISO
+HLT_j30_CLEANllp_calratiormbib_L1TAU60
+HLT_j30_CLEANllp_calratiormbib_L1TAU100
+HLT_j30_CLEANllp_calratiormbib_L1eTAU60_EMPTY
+HLT_j30_CLEANllp_calratiormbib_L1eTAU60_UNPAIRED_ISO
+HLT_j30_CLEANllp_momemfrac006_calratio_L1eTAU140
+HLT_j30_CLEANllp_momemfrac006_calratio_L1eTAU60_EMPTY
+HLT_j30_CLEANllp_momemfrac006_calratio_L1eTAU60_UNPAIRED_ISO
+HLT_j30_CLEANllp_momemfrac006_calratio_L1eTAU80
+HLT_j30_CLEANllp_momemfrac006_calratio_L1jJ160
+HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1eTAU140
+HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1eTAU60_EMPTY
+HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1eTAU60_UNPAIRED_ISO
+HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1eTAU80
+HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1jJ160
+HLT_j30_CLEANllp_momemfrac012_calratiovar_roiftf_preselj20emf12_L1jJ160
+
+
+##############################################
+# trig_multijet_ht_data22_23                 #
+# Multi-jet / HT triggers for 2022-2023 data #
+##############################################
+HLT_10j35_pf_ftf_presel7j30_L14J15
+HLT_10j35_pf_ftf_presel7j30_L14jJ40
+HLT_10j40_pf_ftf_presel7j30_L14J15
+HLT_2j250c_j120c_pf_ftf_presel2j180XXj80_L1J100
+HLT_3j200_pf_ftf_L1J100
+HLT_4j110_pf_ftf_presel4j85_L13J50
+HLT_4j115_pf_ftf_presel4j85_L13J50
+HLT_4j120_L13J50
+HLT_5j65c_pf_ftf_presel5c55_L14J15
+HLT_5j70c_pf_ftf_presel5c50_L14J15
+HLT_5j80_pf_ftf_presel5j50_L14J15
+HLT_5j80_pf_ftf_presel5j55_L14J15
+HLT_5j85_pf_ftf_presel5j50_L14J15
+HLT_6j35c_020jvt_pf_ftf_presel6c25_L14J15
+HLT_6j55c_pf_ftf_presel6j40_L14J15
+HLT_6j70_pf_ftf_presel6j40_L14J15
+HLT_7j45_pf_ftf_presel7j30_L14J15
+HLT_j0_HT1000_L1HT190-J15s5pETA21
+HLT_j0_HT1000_L1J100
+HLT_j0_HT1000_pf_ftf_preselcHT450_L1HT190-J15s5pETA21
+HLT_j0_HT1000_pf_ftf_preselj180_L1HT190-J15s5pETA21
+HLT_j0_HT1000_pf_ftf_preselj180_L1J100
+HLT_j0_HT940_pf_ftf_preselcHT450_L1HT190-J15s5pETA21
+HLT_j0_HT940_pf_ftf_preselj180_L1HT190-J15s5pETA21
+HLT_j0_HT650XX0eta240_pf_ftf_­preselcHT450_­L1HT190-jJ40s5pETA21 
+HLT_j0_HT650XX0eta240_pf_ftf_­preselcHT450_­L1HT190-J15s5pETA21
+
+
+#########################
+# trig_delayedjets_Run3 #
+# Delayed jets (Run 3)  #
+#########################
+HLT_2j100_2timeSig15_L1jJ90
+HLT_2j45_2j55_3timeSig15_L14jJ40
+HLT_j200_2timing15_L1jJ160
+HLT_j200_3timeSig15_L1jJ160
+HLT_j220_j150_2timing15_L1jJ160
+HLT_j250_2timing15_L1jJ160
+HLT_j250_3timeSig15_L1jJ160
+
+############################
+# trig_hip                 #
+# heavy ionizing particles #
+############################
+HLT_g0_hiptrt_L1EM22VHI
+HLT_g0_hiptrt_L1eEM26M
+HLT_g0_hiptrt_L1eEM28M
+
+############################
+# trig_displaced_taus      #
+# displaced tau signatures #
+############################
+HLT_tau180_mediumRNN_tracktwoLLP_L1TAU100
+HLT_tau80_mediumRNN_tracktwoLLP_tau60_mediumRNN_tracktwoLLP_03dRAB_L1TAU60_2TAU40
+HLT_tau180_mediumRNN_tracktwoLLP_L1eTAU140
+HLT_tau80_mediumRNN_tracktwoLLP_tau60_mediumRNN_tracktwoLLP_03dRAB_L1eTAU80_2eTAU60
+HLT_tau25_mediumGNTau_tau20_mediumGNTau_03dRAB_j70_j50a_j0_DJMASS900j50_L1jMJJ-500-NFF
