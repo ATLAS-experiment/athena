@@ -684,10 +684,11 @@ def triggerRunCfg( flags, menu=None ):
         from HLTSeeding.HLTSeedingConfig import HLTSeedingCfg
         hltSeedingAcc = HLTSeedingCfg( flags )
         
-        from AthenaConfiguration.Enums import LHCPeriod
-        if flags.GeoModel.Run > LHCPeriod.Run3:
-            from InDetConfig.TrackRecoConfig import SiDetectorElementStatusCfg
-            acc.merge(SiDetectorElementStatusCfg( flags), sequenceName="HLTBeginSeq")
+        if flags.Input.isMC:
+            from AthenaConfiguration.Enums import LHCPeriod
+            if flags.GeoModel.Run > LHCPeriod.Run3:
+                from InDetConfig.TrackRecoConfig import SiDetectorElementStatusCfg
+                acc.merge(SiDetectorElementStatusCfg( flags), sequenceName="HLTBeginSeq")
 
     # TODO, once moved to newJO the algorithm can be added to hltSeedingAcc and merging will be sufficient here
     acc.merge( hltSeedingAcc,  sequenceName="HLTBeginSeq" )
