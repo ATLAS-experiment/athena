@@ -224,12 +224,12 @@ StatusCode InDetAlignCog::initialize(){
 //===================================================
 // execute
 //===================================================
-StatusCode InDetAlignCog::execute() {
+StatusCode InDetAlignCog::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG( "execute()" );
 
   const InDetDD::SiDetectorElementCollection* pixelElements(nullptr);
   if (m_det==99 || m_det==1 || m_det==12) {
-    SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleHandle(m_pixelDetEleCollKey);
+    SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleHandle(m_pixelDetEleCollKey, ctx);
     pixelElements = *pixelDetEleHandle;
     if (not pixelDetEleHandle.isValid() or pixelElements==nullptr) {
       ATH_MSG_FATAL(m_pixelDetEleCollKey.fullKey() << " is not available.");
@@ -239,7 +239,7 @@ StatusCode InDetAlignCog::execute() {
 
   const InDetDD::SiDetectorElementCollection* sctElements(nullptr);
   if (m_det==99 || m_det==2 || m_det==12) {
-    SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> sctDetEleHandle(m_SCTDetEleCollKey);
+    SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> sctDetEleHandle(m_SCTDetEleCollKey, ctx);
     sctElements = *sctDetEleHandle;
     if (not sctDetEleHandle.isValid() or sctElements==nullptr) {
       ATH_MSG_FATAL(m_SCTDetEleCollKey.fullKey() << " is not available.");
@@ -249,7 +249,7 @@ StatusCode InDetAlignCog::execute() {
 
   const InDetDD::TRT_DetElementCollection* trtElements(nullptr);
   if (m_det==99 || m_det==3) {
-    SG::ReadCondHandle<InDetDD::TRT_DetElementContainer> trtDetEleHandle(m_trtDetEleContKey);
+    SG::ReadCondHandle<InDetDD::TRT_DetElementContainer> trtDetEleHandle(m_trtDetEleContKey, ctx);
     trtElements = trtDetEleHandle->getElements();
     if (not trtDetEleHandle.isValid() or trtElements==nullptr) {
       ATH_MSG_FATAL(m_trtDetEleContKey.fullKey() << " is not available.");
