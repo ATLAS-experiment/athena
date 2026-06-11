@@ -35,7 +35,7 @@ namespace BJT{
             /// configs
             virtual StatusCode initialize() override;
             /// \brief Execute method, for actions to be taken in the event loop
-            virtual StatusCode execute() override;
+            virtual StatusCode execute(const EventContext& ctx) override;
             /// We use default finalize() -- this is for cleanup, and we don't do any
 
         private:

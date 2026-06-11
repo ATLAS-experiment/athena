@@ -20,7 +20,7 @@ namespace CP{
     
     virtual StatusCode  initialize();
     virtual StatusCode  firstExecute();
-    virtual StatusCode  execute();
+    virtual StatusCode  execute(const EventContext& ctx);
     virtual StatusCode  finalize();
     
   private: 
