@@ -72,7 +72,7 @@ StatusCode IsolationTool_AthTest::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode IsolationTool_AthTest::execute() {  
+StatusCode IsolationTool_AthTest::execute(const EventContext& /*ctx*/) {  
   ATH_MSG_DEBUG ("Executing " << name() << "...");
 
   // retrieve tag (muon) container
