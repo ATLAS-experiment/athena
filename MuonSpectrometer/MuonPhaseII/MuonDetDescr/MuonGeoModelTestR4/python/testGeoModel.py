@@ -254,9 +254,10 @@ def setupGeoR4TestCfg(args,  flags = None):
         flags.Detector.GeometryRPC = False    
     if args.noMdt:
         flags.Detector.GeometryMDT = False
-
-    flags.Acts.TrackingGeometry.UseBlueprint = True
-
+    #### Flags from ACTS are not defined in AthSimulation.
+    try:
+        flags.Acts.TrackingGeometry.UseBlueprint = True
+    except AttributeError: pass
     flags.Scheduler.CheckDependencies = True
     flags.Scheduler.ShowDataDeps = True
     flags.Scheduler.ShowDataFlow = True
