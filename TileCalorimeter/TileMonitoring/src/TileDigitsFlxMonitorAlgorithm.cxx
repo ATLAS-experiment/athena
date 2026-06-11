@@ -6,7 +6,7 @@
 #include "TileDigitsFlxMonitorAlgorithm.h"
 #include "TileIdentifier/TileHWID.h"
 #include "TileCalibBlobObjs/TileCalibUtils.h"
-
+#include "AthenaMonitoringKernel/Monitored.h"
 // Athena includes
 #include "StoreGate/ReadHandle.h"
 
