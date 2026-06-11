@@ -18,7 +18,7 @@ class CaloReadLCOutOfClusterFile : public AthAlgorithm
   ~CaloReadLCOutOfClusterFile();
 
   StatusCode initialize(); 
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   StatusCode finalize();
   StatusCode initDataFromFile(const std::string& theLCOutOfClusterFileName,
                               CaloLocalHadCoeff& data);

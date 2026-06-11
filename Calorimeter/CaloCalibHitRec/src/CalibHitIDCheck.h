@@ -31,7 +31,7 @@ class CalibHitIDCheck : public AthAlgorithm {
   virtual ~CalibHitIDCheck();
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
   void check(int);
   void show_all();

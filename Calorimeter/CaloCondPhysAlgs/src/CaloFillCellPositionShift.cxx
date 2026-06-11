@@ -38,7 +38,7 @@ StatusCode CaloFillCellPositionShift::initialize()
 
 }
 //__________________________________________________________________________
-StatusCode CaloFillCellPositionShift::execute()
+StatusCode CaloFillCellPositionShift::execute(const EventContext& /*ctx*/)
 {
   ATH_MSG_DEBUG ("CaloFillCellPositionShift execute()" );
   return StatusCode::SUCCESS; 
